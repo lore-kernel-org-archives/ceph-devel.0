@@ -1,67 +1,51 @@
-From: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
-Subject: [PATCH 09/12] ceph: remove call to bdi_unregister
-Date: Wed, 14 Jan 2015 10:42:38 +0100
-Message-ID: <1421228561-16857-10-git-send-email-hch@lst.de>
+From: Christoph Hellwig <hch@lst.de>
+Subject: [PATCH 06/12] nilfs2: set up s_bdi like the generic mount_bdev code
+Date: Wed, 14 Jan 2015 10:42:35 +0100
+Message-ID: <1421228561-16857-7-git-send-email-hch@lst.de>
 References: <1421228561-16857-1-git-send-email-hch@lst.de>
-Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1421228561-16857-1-git-send-email-hch-jcswGhMUV9g@public.gmane.org>
-Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jens Axboe <axboe-b10kYP2dOMg@public.gmane.org>
-Cc: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Tejun Heo <tj-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <1421228561-16857-1-git-send-email-hch@lst.de>
+Sender: owner-linux-mm@kvack.org
+To: Jens Axboe <axboe@fb.com>
+Cc: David Howells <dhowells@redhat.com>, Tejun Heo <tj@kernel.org>, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, linux-mtd@lists.infradead.org, linux-nfs@vger.kernel.org, ceph-devel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-bdi_destroy already does all the work, and if we delay freeing the
-anon bdev we can get away with just that single call.
+mapping->backing_dev_info will go away, so don't rely on it.
 
-Signed-off-by: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+Acked-by: Ryusuke Konishi <konishi.ryusuke@lab.ntt.co.jp>
+Reviewed-by: Tejun Heo <tj@kernel.org>
 ---
- fs/ceph/super.c | 18 ++++++------------
- 1 file changed, 6 insertions(+), 12 deletions(-)
+ fs/nilfs2/super.c | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
 
-diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index 50f06cd..e350cc1 100644
---- a/fs/ceph/super.c
-+++ b/fs/ceph/super.c
-@@ -40,17 +40,6 @@ static void ceph_put_super(struct super_block *s)
- 
- 	dout("put_super\n");
- 	ceph_mdsc_close_sessions(fsc->mdsc);
--
--	/*
--	 * ensure we release the bdi before put_anon_super releases
--	 * the device name.
--	 */
--	if (s->s_bdi == &fsc->backing_dev_info) {
--		bdi_unregister(&fsc->backing_dev_info);
--		s->s_bdi = NULL;
--	}
--
--	return;
- }
- 
- static int ceph_statfs(struct dentry *dentry, struct kstatfs *buf)
-@@ -1002,11 +991,16 @@ out_final:
- static void ceph_kill_sb(struct super_block *s)
+diff --git a/fs/nilfs2/super.c b/fs/nilfs2/super.c
+index 2e5b3ec..3d4bbac 100644
+--- a/fs/nilfs2/super.c
++++ b/fs/nilfs2/super.c
+@@ -1057,7 +1057,6 @@ nilfs_fill_super(struct super_block *sb, void *data, int silent)
  {
- 	struct ceph_fs_client *fsc = ceph_sb_to_client(s);
-+	dev_t dev = s->s_dev;
-+
- 	dout("kill_sb %p\n", s);
-+
- 	ceph_mdsc_pre_umount(fsc->mdsc);
--	kill_anon_super(s);    /* will call put_super after sb is r/o */
-+	generic_shutdown_super(s);
- 	ceph_mdsc_destroy(fsc);
-+
- 	destroy_fs_client(fsc);
-+	free_anon_bdev(dev);
- }
+ 	struct the_nilfs *nilfs;
+ 	struct nilfs_root *fsroot;
+-	struct backing_dev_info *bdi;
+ 	__u64 cno;
+ 	int err;
  
- static struct file_system_type ceph_fs_type = {
+@@ -1077,8 +1076,7 @@ nilfs_fill_super(struct super_block *sb, void *data, int silent)
+ 	sb->s_time_gran = 1;
+ 	sb->s_max_links = NILFS_LINK_MAX;
+ 
+-	bdi = sb->s_bdev->bd_inode->i_mapping->backing_dev_info;
+-	sb->s_bdi = bdi ? : &default_backing_dev_info;
++	sb->s_bdi = &bdev_get_queue(sb->s_bdev)->backing_dev_info;
+ 
+ 	err = load_nilfs(nilfs, sb);
+ 	if (err)
 -- 
 1.9.1
 
 --
-To unsubscribe from this list: send the line "unsubscribe linux-nfs" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
