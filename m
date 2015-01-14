@@ -1,147 +1,151 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: v0.91 released
-Date: Wed, 14 Jan 2015 15:13:12 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1501141513050.12077@cobra.newdream.net>
+From: Loic Dachary <loic@dachary.org>
+Subject: v0.91 contributors credits
+Date: Thu, 15 Jan 2015 00:28:47 +0100
+Message-ID: <54B6FBAF.40500@dachary.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="dCRui6fjl2irRaXV8jnIFEdt6TiaNDt6H"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:43407 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751008AbbANXNO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 14 Jan 2015 18:13:14 -0500
+Received: from mail2.dachary.org ([91.121.57.175]:40167 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751410AbbANX2u (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Jan 2015 18:28:50 -0500
+Received: from [10.9.0.6] (unknown [10.0.2.28])
+	by smtp.dmail.dachary.org (Postfix) with ESMTP id 6503042BA2
+	for <ceph-devel@vger.kernel.org>; Thu, 15 Jan 2015 00:28:47 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-announce@ceph.com
-Cc: ceph-users@ceph.com, ceph-devel@vger.kernel.org, ceph-maintainers@ceph.com
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-We are quickly approaching the Hammer feature freeze but have a few more 
-dev releases to go before we get there.  The headline items are 
-subtree-based quota support in CephFS (ceph-fuse/libcephfs client support 
-only for now), a rewrite of the watch/notify librados API used by RBD and 
-RGW, OSDMap checksums to ensure that maps are always consistent inside the 
-cluster, new API calls in librados and librbd for IO hinting modeled after 
-posix_fadvise, and improved storage of per-PG state.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--dCRui6fjl2irRaXV8jnIFEdt6TiaNDt6H
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: quoted-printable
 
-We expect two more releases before the Hammer feature freeze (v0.93).
+Hi Ceph,
 
-Upgrading
----------
+Here is a sorted list of authors and organizations who contributed to v0.=
+91, by number of commits or reviews back to v0.90. The affiliation of aut=
+hors to organizations can be updated by submitting a patch to https://git=
+hub.com/ceph/ceph/blob/master/.organizationmap
 
-* The 'category' field for objects has been removed.  This was originally 
-  added to track PG stat summations over different categories of objects 
-  for use by radosgw.  It is no longer has any known users and is prone to 
-  abuse because it can lead to a pg_stat_t structure that is unbounded.  
-  The librados API calls that accept this field now ignore it, and the OSD 
-  no longers tracks the per-category summations.
+All commits are reviewed but the number of reviews is a fraction of the n=
+umber of commits. More often than not, the reviewer(s) is only mentioned =
+in the message of the merge although it means that all associated commits=
+ have been reviewed. If you are curious about how it is done, the details=
+ are at https://wiki.ceph.com/Community/Ceph_contributors_list_maintenanc=
+e_guide .=20
 
-* The output for 'rados df' has changed.  The 'category' level has been
-  eliminated, so there is now a single stat object per pool.  The 
-  structure of the JSON output is different, and the plaintext output has 
-  one less column.
+Commits by authors
+     1	    214 Sage Weil <sweil@redhat.com>
+     2	     32 Yunchuan Wen <yunchuanwen@ubuntukylin.com>
+     3	     31 Loic Dachary <ldachary@redhat.com>
+     4	     28 Haomai Wang <haomaiwang@gmail.com>
+     5	     27 Ma Jianpeng <jianpeng.ma@intel.com>
+     6	     22 Yan, Zheng <zyan@redhat.com>
+     7	     22 John Spray <jspray@redhat.com>
+     8	     14 Nilamdyuti Goswami <ngoswami@redhat.com>
+     9	     14 David Zafman <dzafman@redhat.com>
+    10	     13 Abhishek Lekshmanan <abhishek.lekshmanan@ril.com>
+    11	      9 Yehuda Sadeh <ysadehwe@redhat.com>
+    12	      7 Samuel Just <sjust@redhat.com>
+    13	      6 Dan Mick <dmick@redhat.com>
+    14	      5 Matt Benjamin <matt@cohortfs.com>
+    15	      5 Janne Grunau <j@jannau.net>
+    16	      4 Wido den Hollander <wido@42on.com>
+    17	      4 David Anderson <dave@natulte.net>
+    18	      3 Xinze Chi <xmdxcxz@gmail.com>
+    19	      3 Noah Watkins <nwatkins@redhat.com>
+    20	      3 Ken Dreyer <kdreyer@redhat.com>
+    21	      3 Jason Dillaman <dillaman@redhat.com>
+    22	      3 Greg Farnum <gfarnum@redhat.com>
+    23	      3 Dan van der Ster <daniel.vanderster@cern.ch>
+    24	      2 Kefu Chai <tchaikov@gmail.com>
+    25	      2 Jo=E3o Eduardo Lu=EDs <joao@redhat.com>
+    26	      2 Dong Yuan <yuandong1222@gmail.com>
+    27	      1 Zhiqiang Wang <zhiqiang.wang@intel.com>
+    28	      1 Xiaoxi Chen <xiaoxi.chen@intel.com>
+    29	      1 Warren Usui <wusui@redhat.com>
+    30	      1 VRan Liu <gliuwr@gmail.com>
+    31	      1 Shu, Xinxin <xinxin.shu@intel.com>
+    32	      1 shishir gowda <shishir.gowda@sandisk.com>
+    33	      1 Sebastien Han <sebastien.han@enovance.com>
+    34	      1 Ray Lv <xiangyulv@gmail.com>
+    35	      1 Patrick McGarry <pmcgarry@redhat.com>
+    36	      1 Ning Yao <zay11022@gmail.com>
+    37	      1 Mehdi Abaakouk <sileht@sileht.net>
+    38	      1 Ilya Dryomov <idryomov@redhat.com>
+    39	      1 Dongmao Zhang <deanraccoon@gmail.com>
+    40	      1 Christos Stavrakakis <stavr.chris@gmail.com>
+    41	      1 Chris Holcombe <chris.holcombe@nebula.com>
+    42	      1 Alfredo Deza <adeza@redhat.com>
+Commits by organizations
+     1	    355 Red Hat <contact@redhat.com>
+     2	     32 Ubuntu Kylin <contact@ubuntukylin.com>
+     3	     30 UnitedStack <contact@unitedstack.com>
+     4	     30 Intel <contact@intel.com>
+     5	     19 Unaffiliated <no@organization.net>
+     6	     13 Reliance Jio Infocomm Ltd. <contact@ril.com>
+     7	      5 CohortFS, LLC <contact@cohortfs.com>
+     8	      4 Wido 42on <contact@42on.com>
+     9	      3 CERN <contact@cern.ch>
+    10	      2 Inktank <contact@inktank.com>
+    11	      1 Yahoo! <contact@yahoo-inc.com>
+    12	      1 SanDisk <contact@sandisk.com>
+    13	      1 Nebula <info@nebula.com>
+    14	      1 eNovance <contact@enovance.com>
+Reviews by authors (one review spans multiple commits)
+     1	     37 Sage Weil <sweil@redhat.com>
+     2	     25 Loic Dachary <ldachary@redhat.com>
+     3	     18 Samuel Just <sjust@redhat.com>
+     4	     11 Josh Durgin <jdurgin@redhat.com>
+     5	      9 Greg Farnum <gfarnum@redhat.com>
+     6	      3 Yan, Zheng <zyan@redhat.com>
+     7	      3 John Wilkins <jwilkins@redhat.com>
+     8	      2 John Spray <jspray@redhat.com>
+     9	      2 Jo=E3o Eduardo Lu=EDs <joao@redhat.com>
+    10	      1 Yehuda Sadeh <ysadehwe@redhat.com>
+    11	      1 Sahid Orentino Ferdjaoui <sahid.ferdjaoui@redhat.com>
+    12	      1 Haomai Wang <haomaiwang@gmail.com>
+    13	      1 David Zhang <david.z1003@yahoo.com>
+    14	      1 David Zafman <dzafman@redhat.com>
+Reviews by organizations (one review spans multiple commits)
+     1	    112 Red Hat <contact@redhat.com>
+     2	      1 UnitedStack <contact@unitedstack.com>
+     3	      1 Unaffiliated <no@organization.net>
+     4	      1 Intel <contact@intel.com>
 
-* The 'rados create <objectname> [category]' optional category argument is 
-  no longer supported or recognized.
+Cheers
 
-* rados.py's Rados class no longer has a __del__ method; it was causing
-  problems on interpreter shutdown and use of threads.  If your code has
-  Rados objects with limited lifetimes and you're concerned about locked
-  resources, call Rados.shutdown() explicitly.
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
 
-* There is a new version of the librados watch/notify API with vastly
-  improved semantics.  Any applications using this interface are
-  encouraged to migrate to the new API.  The old API calls are marked
-  as deprecated and will eventually be removed.
 
-* The librados rados_unwatch() call used to be safe to call on an
-  invalid handle.  The new version has undefined behavior when passed
-  a bogus value (for example, when rados_watch() returns an error and
-  handle is not defined).
 
-* The structure of the formatted 'pg stat' command is changed for the
-  portion that counts states by name to avoid using the '+' character
-  (which appears in state names) as part of the XML token (it is not
-  legal).
 
-Notable Changes
----------------
 
-* asyncmsgr: misc fixes (Haomai Wang)
-* buffer: add 'shareable' construct (Matt Benjamin)
-* build: aarch64 build fixes (Noah Watkins, Haomai Wang)
-* build: support for jemalloc (Shishir Gowda)
-* ceph-disk: allow journal partition re-use (#10146 Loic Dachary, Dav van 
-  der Ster)
-* ceph-disk: misc fixes (Christos Stavrakakis)
-* ceph-fuse: fix kernel cache trimming (#10277 Yan, Zheng)
-* ceph-objectstore-tool: many many improvements (David Zafman)
-* common: support new gperftools header locations (Key Dreyer)
-* crush: straw bucket weight calculation fixes (#9998 Sage Weil)
-* doc: misc improvements (Nilamdyuti Goswami, John Wilkins, Chris 
-  Holcombe)
-* libcephfs,ceph-fuse: add 'status' asok (John Spray)
-* librados, osd: new watch/notify implementation (Sage Weil)
-* librados: drop 'category' feature (Sage Weil)
-* librados: fix pool deletion handling (#10372 Sage Weil)
-* librados: new fadvise API (Ma Jianpeng)
-* libradosstriper: fix remove() (Dongmao Zhang)
-* librbd: complete pending ops before closing image (#10299 Josh Durgin)
-* librbd: fadvise API (Ma Jianpeng)
-* mds: ENOSPC and OSDMap epoch barriers (#7317 John Spray)
-* mds: dirfrag buf fix (Yan, Zheng)
-* mds: disallow most commands on inactive MDS's (Greg Farnum)
-* mds: drop dentries, leases on deleted directories (#10164 Yan, Zheng)
-* mds: handle zero-size xattr (#10335 Yan, Zheng)
-* mds: subtree quota support (Yunchuan Wen)
-* memstore: free space tracking (John Spray)
-* misc cleanup (Danny Al-Gaaf, David Anderson)
-* mon: 'osd crush reweight-all' command (Sage Weil)
-* mon: allow full flag to be manually cleared (#9323 Sage Weil)
-* mon: delay failure injection (Joao Eduardo Luis)
-* mon: fix paxos timeouts (#10220 Joao Eduardo Luis)
-* mon: get canonical OSDMap from leader (#10422 Sage Weil)
-* msgr: fix RESETSESSION bug (#10080 Greg Farnum)
-* objectstore: deprecate collection attrs (Sage Weil)
-* osd, mon: add checksums to all OSDMaps (Sage Weil)
-* osd: allow deletion of objects with watcher (#2339 Sage Weil)
-* osd: allow sparse read for Push/Pull (Haomai Wang)
-* osd: cache reverse_nibbles hash value (Dong Yuan)
-* osd: drop upgrade support for pre-dumpling (Sage Weil)
-* osd: enable and use posix_fadvise (Sage Weil)
-* osd: erasure-code: enforce chunk size alignment (#10211 Loic Dachary)
-* osd: erasure-code: jerasure support for NEON (Loic Dachary)
-* osd: erasure-code: relax cauchy w restrictions (#10325 David Zhang, Loic 
-  Dachary)
-* osd: erasure-code: update gf-complete to latest upstream (Loic Dachary)
-* osd: fix WBTHrottle perf counters (Haomai Wang)
-* osd: fix backfill bug (#10150 Samuel Just)
-* osd: fix occasional peering stalls (#10431 Sage Weil)
-* osd: fix scrub vs try-flush bug (#8011 Samuel Just)
-* osd: fix stderr with -f or -d (Dan Mick)
-* osd: misc FIEMAP fixes (Ma Jianpeng)
-* osd: optimize Finisher (Xinze Chi)
-* osd: store PG metadata in per-collection objects for better concurrency 
-  (Sage Weil)
-* pyrados: add object lock support (#6114 Mehdi Abaakouk)
-* pyrados: fix misnamed wait_* routings (#10104 Dan Mick)
-* pyrados: misc cleanups (Kefu Chai)
-* qa: add large auth ticket tests (Ilya Dryomov)
-* qa: many 'make check' improvements (Loic Dachary)
-* qa: misc tests (Loic Dachary, Yan, Zheng)
-* rgw: conditional PUT on ETag (#8562 Ray Lv)
-* rgw: fix error codes (#10334 #10329 Yehuda Sadeh)
-* rgw: index swift keys appropriately (#10471 Yehuda Sadeh)
-* rgw: prevent illegal bucket policy that doesn't match placement rule 
-  (Yehuda Sadeh)
-* rgw: run radosgw as apache with systemd (#10125 Loic Dachary)
-* rgw: support X-Storage-Policy header for Swift storage policy compat 
-  (Yehuda Sadeh)
-* rgw: use \r\n for http headers (#9254 Yehuda Sadeh)
-* rpm: misc fixes (Key Dreyer)
 
-Getting Ceph
-------------
 
-* Git at git://github.com/ceph/ceph.git
-* Tarball at http://ceph.com/download/ceph-0.91.tar.gz
-* For packages, see http://ceph.com/docs/master/install/get-packages
-* For ceph-deploy, see http://ceph.com/docs/master/install/install-ceph-deploy
+
+
+
+
+
+
+
+
+--dCRui6fjl2irRaXV8jnIFEdt6TiaNDt6H
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlS2+68ACgkQ8dLMyEl6F21/sQCfW3yAg5Umb7sFt/TojvzYD9wE
+/xAAnjelkVWcXsa7L/A4bnaPrxmRftxY
+=OZ2L
+-----END PGP SIGNATURE-----
+
+--dCRui6fjl2irRaXV8jnIFEdt6TiaNDt6H--
