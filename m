@@ -1,70 +1,80 @@
-From: "Blinick, Stephen L" <stephen.l.blinick@intel.com>
-Subject: Memstore performance improvements v0.90 vs v0.87
-Date: Wed, 14 Jan 2015 07:05:43 +0000
-Message-ID: <3649A15A2562B54294DE14BCE5AC79120AB30A5D@FMSMSX106.amr.corp.intel.com>
+From: Pavan Rallabhandi <Pavan.Rallabhandi@sandisk.com>
+Subject: RE: Cache pool latency impact
+Date: Wed, 14 Jan 2015 08:45:48 +0000
+Message-ID: <68A06213B74F1742A2C48216AE1BB6B808722384@SACMBXIP02.sdcorp.global.sandisk.com>
+References: <68A06213B74F1742A2C48216AE1BB6B808720E8A@SACMBXIP02.sdcorp.global.sandisk.com>
+ <alpine.DEB.2.00.1501130553270.26676@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:39244 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750975AbbANHFp convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Jan 2015 02:05:45 -0500
+Received: from mail-bn1on0099.outbound.protection.outlook.com ([157.56.110.99]:42590
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1754394AbbANJAj convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Jan 2015 04:00:39 -0500
+In-Reply-To: <alpine.DEB.2.00.1501130553270.26676@cobra.newdream.net>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-In the process of moving to a new cluster (RHEL7 based) I grabbed v0.90, compiled RPM's and re-ran the simple local-node memstore test I've run on .80 - .87.  It's a single Memstore OSD and a single Rados Bench client locally on the same node.  Increasing queue depth and measuring latency /IOPS.  So far, the measurements have been consistent across different hardware and code releases (with about a 30% improvement with the OpWQ Sharding changes that came in after Firefly). 
+Thanks for the reply Sage; please ignore the same subject mails on ceph-users, they seem to have got delivered today.
 
-These are just very early results, but I'm seeing a very large improvement in latency and throughput with v90 on RHEL7.   Next  I'm working to get lttng installed and working in RHEL7 to determine where the improvement is.   On previous levels, these measurements have been roughly the same using a real (fast) backend (i.e. NVMe flash), and I will verify here as well.   Just wondering if anyone else has measured similar improvements?
+> Hmm, we could have a 'noagent' option (similar to noout, nobackfill, noscrub, etc.) that lets the admin tell the system to stop tiering movements, but I'm not sure that's wht you're asking for...
 
+Was not aware of 'notieragent' flag but I was hinting at a flow control type of mechanism that would help throttling the client IOs versus the service time of the tiering agent to flush/evict.
 
-100% Reads or Writes, 4K Objects, Rados Bench
+Thanks,
+-Pavan.
 
-========================
-V0.87: Ubuntu 14.04LTS
+-----Original Message-----
+From: Sage Weil [mailto:sage@newdream.net]
+Sent: Tuesday, January 13, 2015 7:31 PM
+To: Pavan Rallabhandi
+Cc: Ceph Development
+Subject: Re: Cache pool latency impact
 
-*Writes*
-#Thr	IOPS	Latency(ms)
-1	618.80		1.61
-2	1401.70		1.42
-4	3962.73		1.00
-8	7354.37		1.10
-16	7654.67		2.10
-32	7320.33		4.37
-64	7424.27		8.62
+On Tue, 13 Jan 2015, Pavan Rallabhandi wrote:
+> Hi,
+>
+> This is regarding cache pools and the impact of the flush/evict on the
+> client IO latencies.
+>
+> Am seeing a direct impact on the client IO latencies (making them
+> worse) when flush/evict is triggered on the cache pool. In a constant
+> ingress of IOs on the cache pool, the write performance is no better
+> than without cache pool, because it is limited to the speed at which
+> objects can be flushed/evicted to the backend pool.
 
-*Reads*
-#thr	IOPS	Latency(ms)
-1	837.57		1.19
-2	1950.00		1.02
-4	6494.03		0.61
-8	7243.53		1.10
-16	7473.73		2.14
-32	7682.80		4.16
-64	7727.10		8.28
+Yeah, this is always going to be true in general.  It is a lot for work to write into the cache, read it back, write it again into the base pool, and then delete it from the cache than it is to write directly to the base pool.
 
+> > The questions I have are:
+>
+> 1) When the flush/evict is in progress, are the writes on the cache
+> pool blocked, either at the PG or at object granularity? Though I see
+> a blocking flag honored per object context in
+> ReplicatedPG::start_flush() and most of the callers seem to set the flag to be false.
 
-========================
-V0.90:  RHEL7
+Normally they are not blocked.  The agent starts working (finding objects to flush or evict) long before we hit the cut cutoff where it starts blocking.  Once it does hit that threshold, though, things can get slow, because new cache creates aren't allowed until some eviction completes.  You don't want to be in this situation.  :)
 
-*Writes*
-#Thr	IOPS	Latency(ms)
-1	2558.53		0.39
-2	6014.67		0.33
-4	10061.33	0.40
-8	14169.60	0.56
-16	14355.63	1.11
-32	14150.30	2.26
-64	15283.33	4.19
+In general, if you have a lot of data inject, caching (at least in
+firefly) isn't a terribly good idea.  The exception would probably be when you have a high skew toward recent data (say you are injecting market data, and do tons of analytics on the last 24 hours, but then the data gets colder).
 
-*Reads*
-#Thr	IOPS	Latency(ms)
-1	4535.63		0.22
-2	9969.73		0.20
-4	17049.43	0.23
-8	19909.70	0.40
-16	20320.80	0.79
-32	19827.93	1.61
-64	22371.17	2.86
+I can't tell if you're in the situation where the cache pool is full and the agent is flushing/evicing anything and everything and writes are crawling (you should see a message in 'ceph health' when this happens) or that the agent is alive but working with low effort and the impact is still high.  If it's the latter I'm not sure yet what is going wrong..
+perhaps you can capture a few minutes of log from one of your OSDs?
+(debug ms = 1, debug osd = 20).
+
+> 2) Is there any mechanism (that I might have overlooked) to avoid this
+> situation, by throttling the flush/evict operations on the fly? If
+> not, shouldn't there be one?
+
+Hmm, we could have a 'noagent' option (similar to noout, nobackfill, noscrub, etc.) that lets the admin tell the system to stop tiering movements, but I'm not sure that's wht you're asking for...
+
+sage
+
+________________________________
+
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+
