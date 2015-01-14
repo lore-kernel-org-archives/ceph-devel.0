@@ -1,151 +1,169 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: v0.91 contributors credits
-Date: Thu, 15 Jan 2015 00:28:47 +0100
-Message-ID: <54B6FBAF.40500@dachary.org>
+From: "Blinick, Stephen L" <stephen.l.blinick@intel.com>
+Subject: RE: Memstore performance improvements v0.90 vs v0.87
+Date: Wed, 14 Jan 2015 23:37:47 +0000
+Message-ID: <3649A15A2562B54294DE14BCE5AC79120AB30FFF@FMSMSX106.amr.corp.intel.com>
+References: <3649A15A2562B54294DE14BCE5AC79120AB30A5D@FMSMSX106.amr.corp.intel.com>
+ <3649A15A2562B54294DE14BCE5AC79120AB30EEA@FMSMSX106.amr.corp.intel.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F2827792D@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="dCRui6fjl2irRaXV8jnIFEdt6TiaNDt6H"
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:40167 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751410AbbANX2u (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Jan 2015 18:28:50 -0500
-Received: from [10.9.0.6] (unknown [10.0.2.28])
-	by smtp.dmail.dachary.org (Postfix) with ESMTP id 6503042BA2
-	for <ceph-devel@vger.kernel.org>; Thu, 15 Jan 2015 00:28:47 +0100 (CET)
+Received: from mga03.intel.com ([134.134.136.65]:31211 "EHLO mga03.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752045AbbANXht convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Jan 2015 18:37:49 -0500
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2827792D@SACMBXIP02.sdcorp.global.sandisk.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---dCRui6fjl2irRaXV8jnIFEdt6TiaNDt6H
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: quoted-printable
+Somnath -- thanks for the info. . I held out for a while but eventually settled on running without debug as you've specified below..   I am not currently disabling crc & signatures on messages, however.  I can see if that makes an improvement.  
 
-Hi Ceph,
+The latency reduction for single-client single-stream IO is what seems to be the most different, so I'm very interested to figure out what that is (and hoping it's not something I've simply got wrong)..
 
-Here is a sorted list of authors and organizations who contributed to v0.=
-91, by number of commits or reviews back to v0.90. The affiliation of aut=
-hors to organizations can be updated by submitting a patch to https://git=
-hub.com/ceph/ceph/blob/master/.organizationmap
+As far as scaling goes, we did previously replicate your earlier results using 4 client systems, 2 smalliobench threads per system, even with higher latency so I am interested to see how things scale here.
 
-All commits are reviewed but the number of reviews is a fraction of the n=
-umber of commits. More often than not, the reviewer(s) is only mentioned =
-in the message of the merge although it means that all associated commits=
- have been reviewed. If you are curious about how it is done, the details=
- are at https://wiki.ceph.com/Community/Ceph_contributors_list_maintenanc=
-e_guide .=20
+Thanks,
 
-Commits by authors
-     1	    214 Sage Weil <sweil@redhat.com>
-     2	     32 Yunchuan Wen <yunchuanwen@ubuntukylin.com>
-     3	     31 Loic Dachary <ldachary@redhat.com>
-     4	     28 Haomai Wang <haomaiwang@gmail.com>
-     5	     27 Ma Jianpeng <jianpeng.ma@intel.com>
-     6	     22 Yan, Zheng <zyan@redhat.com>
-     7	     22 John Spray <jspray@redhat.com>
-     8	     14 Nilamdyuti Goswami <ngoswami@redhat.com>
-     9	     14 David Zafman <dzafman@redhat.com>
-    10	     13 Abhishek Lekshmanan <abhishek.lekshmanan@ril.com>
-    11	      9 Yehuda Sadeh <ysadehwe@redhat.com>
-    12	      7 Samuel Just <sjust@redhat.com>
-    13	      6 Dan Mick <dmick@redhat.com>
-    14	      5 Matt Benjamin <matt@cohortfs.com>
-    15	      5 Janne Grunau <j@jannau.net>
-    16	      4 Wido den Hollander <wido@42on.com>
-    17	      4 David Anderson <dave@natulte.net>
-    18	      3 Xinze Chi <xmdxcxz@gmail.com>
-    19	      3 Noah Watkins <nwatkins@redhat.com>
-    20	      3 Ken Dreyer <kdreyer@redhat.com>
-    21	      3 Jason Dillaman <dillaman@redhat.com>
-    22	      3 Greg Farnum <gfarnum@redhat.com>
-    23	      3 Dan van der Ster <daniel.vanderster@cern.ch>
-    24	      2 Kefu Chai <tchaikov@gmail.com>
-    25	      2 Jo=E3o Eduardo Lu=EDs <joao@redhat.com>
-    26	      2 Dong Yuan <yuandong1222@gmail.com>
-    27	      1 Zhiqiang Wang <zhiqiang.wang@intel.com>
-    28	      1 Xiaoxi Chen <xiaoxi.chen@intel.com>
-    29	      1 Warren Usui <wusui@redhat.com>
-    30	      1 VRan Liu <gliuwr@gmail.com>
-    31	      1 Shu, Xinxin <xinxin.shu@intel.com>
-    32	      1 shishir gowda <shishir.gowda@sandisk.com>
-    33	      1 Sebastien Han <sebastien.han@enovance.com>
-    34	      1 Ray Lv <xiangyulv@gmail.com>
-    35	      1 Patrick McGarry <pmcgarry@redhat.com>
-    36	      1 Ning Yao <zay11022@gmail.com>
-    37	      1 Mehdi Abaakouk <sileht@sileht.net>
-    38	      1 Ilya Dryomov <idryomov@redhat.com>
-    39	      1 Dongmao Zhang <deanraccoon@gmail.com>
-    40	      1 Christos Stavrakakis <stavr.chris@gmail.com>
-    41	      1 Chris Holcombe <chris.holcombe@nebula.com>
-    42	      1 Alfredo Deza <adeza@redhat.com>
-Commits by organizations
-     1	    355 Red Hat <contact@redhat.com>
-     2	     32 Ubuntu Kylin <contact@ubuntukylin.com>
-     3	     30 UnitedStack <contact@unitedstack.com>
-     4	     30 Intel <contact@intel.com>
-     5	     19 Unaffiliated <no@organization.net>
-     6	     13 Reliance Jio Infocomm Ltd. <contact@ril.com>
-     7	      5 CohortFS, LLC <contact@cohortfs.com>
-     8	      4 Wido 42on <contact@42on.com>
-     9	      3 CERN <contact@cern.ch>
-    10	      2 Inktank <contact@inktank.com>
-    11	      1 Yahoo! <contact@yahoo-inc.com>
-    12	      1 SanDisk <contact@sandisk.com>
-    13	      1 Nebula <info@nebula.com>
-    14	      1 eNovance <contact@enovance.com>
-Reviews by authors (one review spans multiple commits)
-     1	     37 Sage Weil <sweil@redhat.com>
-     2	     25 Loic Dachary <ldachary@redhat.com>
-     3	     18 Samuel Just <sjust@redhat.com>
-     4	     11 Josh Durgin <jdurgin@redhat.com>
-     5	      9 Greg Farnum <gfarnum@redhat.com>
-     6	      3 Yan, Zheng <zyan@redhat.com>
-     7	      3 John Wilkins <jwilkins@redhat.com>
-     8	      2 John Spray <jspray@redhat.com>
-     9	      2 Jo=E3o Eduardo Lu=EDs <joao@redhat.com>
-    10	      1 Yehuda Sadeh <ysadehwe@redhat.com>
-    11	      1 Sahid Orentino Ferdjaoui <sahid.ferdjaoui@redhat.com>
-    12	      1 Haomai Wang <haomaiwang@gmail.com>
-    13	      1 David Zhang <david.z1003@yahoo.com>
-    14	      1 David Zafman <dzafman@redhat.com>
-Reviews by organizations (one review spans multiple commits)
-     1	    112 Red Hat <contact@redhat.com>
-     2	      1 UnitedStack <contact@unitedstack.com>
-     3	      1 Unaffiliated <no@organization.net>
-     4	      1 Intel <contact@intel.com>
-
-Cheers
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
+Stephen
 
 
+-----Original Message-----
+From: Somnath Roy [mailto:Somnath.Roy@sandisk.com] 
+Sent: Wednesday, January 14, 2015 3:44 PM
+To: Blinick, Stephen L; Ceph Development
+Subject: RE: Memstore performance improvements v0.90 vs v0.87
+
+Stephen,
+You may want to tweak the following parameter(s) in your ceph.conf file and see if it is further improving your performance or not.
+
+debug_lockdep = 0/0
+debug_context = 0/0
+debug_crush = 0/0
+debug_buffer = 0/0
+debug_timer = 0/0
+debug_filer = 0/0
+debug_objecter = 0/0
+debug_rados = 0/0
+debug_rbd = 0/0
+debug_journaler = 0/0
+debug_objectcatcher = 0/0
+debug_client = 0/0
+debug_osd = 0/0
+debug_optracker = 0/0
+debug_objclass = 0/0
+debug_filestore = 0/0
+debug_journal = 0/0
+debug_ms = 0/0
+debug_monc = 0/0
+debug_tp = 0/0
+debug_auth = 0/0
+debug_finisher = 0/0
+debug_heartbeatmap = 0/0
+debug_perfcounter = 0/0
+debug_asok = 0/0
+debug_throttle = 0/0
+debug_mon = 0/0
+debug_paxos = 0/0
+debug_rgw = 0/0
+osd_op_num_threads_per_shard = 2 //You may want to try with 1 as well
+osd_op_num_shards = 10    //Depends on your cpu util
+ms_nocrc = true
+cephx_sign_messages = false
+cephx_require_signatures = false
+ms_dispatch_throttle_bytes = 0
+throttler_perf_counter = false
+
+[osd]
+osd_client_message_size_cap = 0
+osd_client_message_cap = 0
+osd_enable_op_tracker = false
+
+Also, run more clients (in your case rados bench) and see if it is scaling or not (it should, till it saturates your cpu).
+
+But, your observation on RHEL7 vs UBUNTU 14.04 LTS is interesting !
+
+Thanks & Regards
+Somnath
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Blinick, Stephen L
+Sent: Wednesday, January 14, 2015 2:32 PM
+To: Ceph Development
+Subject: RE: Memstore performance improvements v0.90 vs v0.87
+
+I went back and grabbed 87 and built it on RHEL7 as well, and performance is also similar (much better).  I've also run it on a few systems (Dual socket 10-core E5v2,  Dual socket 6-core E5v3).  So, it's related to my switch to RHEL7, and not to the code changes between v0.90 and v0.87.     Will post when I get more data.
+
+Thanks,
+
+Stephen
+
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Blinick, Stephen L
+Sent: Wednesday, January 14, 2015 12:06 AM
+To: Ceph Development
+Subject: Memstore performance improvements v0.90 vs v0.87
+
+In the process of moving to a new cluster (RHEL7 based) I grabbed v0.90, compiled RPM's and re-ran the simple local-node memstore test I've run on .80 - .87.  It's a single Memstore OSD and a single Rados Bench client locally on the same node.  Increasing queue depth and measuring latency /IOPS.  So far, the measurements have been consistent across different hardware and code releases (with about a 30% improvement with the OpWQ Sharding changes that came in after Firefly).
+
+These are just very early results, but I'm seeing a very large improvement in latency and throughput with v90 on RHEL7.   Next  I'm working to get lttng installed and working in RHEL7 to determine where the improvement is.   On previous levels, these measurements have been roughly the same using a real (fast) backend (i.e. NVMe flash), and I will verify here as well.   Just wondering if anyone else has measured similar improvements?
 
 
+100% Reads or Writes, 4K Objects, Rados Bench
+
+========================
+V0.87: Ubuntu 14.04LTS
+
+*Writes*
+#Thr    IOPS    Latency(ms)
+1       618.80          1.61
+2       1401.70         1.42
+4       3962.73         1.00
+8       7354.37         1.10
+16      7654.67         2.10
+32      7320.33         4.37
+64      7424.27         8.62
+
+*Reads*
+#thr    IOPS    Latency(ms)
+1       837.57          1.19
+2       1950.00         1.02
+4       6494.03         0.61
+8       7243.53         1.10
+16      7473.73         2.14
+32      7682.80         4.16
+64      7727.10         8.28
 
 
+========================
+V0.90:  RHEL7
 
+*Writes*
+#Thr    IOPS    Latency(ms)
+1       2558.53         0.39
+2       6014.67         0.33
+4       10061.33        0.40
+8       14169.60        0.56
+16      14355.63        1.11
+32      14150.30        2.26
+64      15283.33        4.19
 
+*Reads*
+#Thr    IOPS    Latency(ms)
+1       4535.63         0.22
+2       9969.73         0.20
+4       17049.43        0.23
+8       19909.70        0.40
+16      20320.80        0.79
+32      19827.93        1.61
+64      22371.17        2.86
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
+________________________________
 
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
 
-
-
-
-
---dCRui6fjl2irRaXV8jnIFEdt6TiaNDt6H
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlS2+68ACgkQ8dLMyEl6F21/sQCfW3yAg5Umb7sFt/TojvzYD9wE
-/xAAnjelkVWcXsa7L/A4bnaPrxmRftxY
-=OZ2L
------END PGP SIGNATURE-----
-
---dCRui6fjl2irRaXV8jnIFEdt6TiaNDt6H--
