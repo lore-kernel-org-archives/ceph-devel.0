@@ -1,118 +1,119 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Some gitbuilders not working
-Date: Wed, 14 Jan 2015 09:30:08 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1501140927510.26676@cobra.newdream.net>
-References: <54AF7B4C.6010305@inktank.com> <54AFAE7D.5070402@dachary.org> <54AFDA69.2080002@redhat.com> <alpine.DEB.2.00.1501090710500.10525@cobra.newdream.net> <54B69FAB.3020504@redhat.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: v0.80.8 Firefly released
+Date: Wed, 14 Jan 2015 13:54:46 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1501141353100.8500@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:37440 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754169AbbANRaJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Jan 2015 12:30:09 -0500
-In-Reply-To: <54B69FAB.3020504@redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:56129 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752382AbbANVyu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 14 Jan 2015 16:54:50 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ken Dreyer <kdreyer@redhat.com>
-Cc: Loic Dachary <loic@dachary.org>, David Zafman <david.zafman@inktank.com>, ceph-devel@vger.kernel.org
+To: ceph-announce@ceph.com
+Cc: ceph-users@ceph.com, ceph-devel@vger.kernel.org, ceph-maintainers@ceph.com
 
-On Wed, 14 Jan 2015, Ken Dreyer wrote:
-> On 01/09/2015 08:16 AM, Sage Weil wrote:
-> > On Fri, 9 Jan 2015, Ken Dreyer wrote:
-> >> On 01/09/2015 03:33 AM, Loic Dachary wrote:
-> >>> On 09/01/2015 07:55, David Zafman wrote:
-> >>>>
-> >>>> We are seeing gitbuilder failures.  This is what I saw on one.
-> >>>>
-> >>>> error: Failed build dependencies:
-> >>>> xmlstarlet is needed by ceph-1:0.90-821.g680fe3c.el7.x86_64
-> >>>
-> >>> This is because https://github.com/ceph/ceph/pull/3036 was recently merged.
-> >>> However, https://github.com/ceph/autobuild-ceph/pull/19 added xmlstarlet
-> >>> about a month ago. Maybe some gitbuilder machines were not updated
-> >>> accordingly. If I'm not mistaken this is a manual process but I'm not sure
-> >>> exactly how to do it myself.
-> >>
-> >> I'm not entirely sure of the SOP to apply fabfile changes across our
-> >> infrastructure, either. Is there a simple "push this fabfile change
-> >> everywhere" command for gitbuilder?
-> > 
-> > Not really, but it is high time we established one.
-> > 
-> > At the top of the fabfile all of the targets are defined, so that if you 
-> > run bin/fab w/o arguments it should run on *all* of them. Unfortunately 
-> > IIRC it's a bit disruptive as it restarts the autobuild service which will 
-> > interrupt and restart the current build.
-> > 
-> > But, that list isn't well-maintained, so it doesn't map to the current set 
-> > of gitbuilders.  That's probably pretty easy to fix.  Even if we 
-> > do, though, I think fab isn't super great about skipping targets that are 
-> > down?  Not sure.
-> > 
-> > In any case, the way I've run it in practice is on specific targets taht 
-> > need updating, like so
-> > 
-> >  bin/fab gitbuilder_auto:host=user@foo
-> > 
-> > (or something like that, I forget the exact syntax).  Often on a 
-> > host that isn't in the master list.
-> > 
-> > More frequently the procedure has been:
-> > 
-> >  - add a dependency to the fabfile for future builders
-> >  - manually install the package on the existing ones to avoid the above 
-> > pain
-> > 
-> > which mostly works but doesn't regularly verify that the fabfile is 
-> > sufficient and correct.
-> >  
-> >> In the long term we'll want to get to a point where we're building
-> >> Ceph's RPM packages using mock [1] instead of rpmbuild so that mock can
-> >> resolve these sort of things automatically without having to deal with
-> >> installing new BuildRequires by hand.
-> > 
-> > That sounds great, although I wonder if it is slow?  We used to do 
-> > all of our debian builds with pbuilder which does a similar thing, 
-> > but it is way slow because it reinstalls deps on every run.  We moved 
-> > to doing native dpkg builds because time is of the essence for test 
-> > builds and use pbuilder only for releases...
-> 
-> It sounds like we should research exactly how much time mock and
-> pbuilder would add. Mock implements caching at a lot of levels, though
-> it's true that it won't be as fast as just running plain rpmbuild. We
-> should get some hard numbers so we know how painful the speed hit would be.
-> 
-> I'm weighing the time that mock would slow down the builds against the
-> time and energy that it takes to
->  - Duplicate the BuildRequires in autobuild-ceph.git
->  - Review the change for correctness and merge the autobuild-ceph.git
->    pull request
->  - Deploy the autobuild-ceph.git changes out to the appropriate
->    gitbuilders
-> 
-> And then there's the "people stuff", like comprehending that all of the
-> above is even necessary, or communicating about this on mailing lists
-> like this thread, etc.
-> 
-> The fact that pbuilders are introduced very late (only during releases)
-> means that we encounter errors during a release day when Alfredo or I
-> have tried to get a release out the door. The pbuilder stuff isn't
-> touched until we try to do a release, and in the mean time, it breaks
-> because it's not getting continually tested. We're paying the "slow"
-> penalty in other areas down the road.
-> 
-> I'm not looking to purposefully slow down other people's work, so I'll
-> continue to mull over how we can balance speed with correctness.
+This is a long-awaited bugfix release for firefly.  It has several 
+imporant (but relatively rare) OSD peering fixes, performance issues when 
+snapshots are trimmed, several RGW fixes, a paxos corner case fix, and 
+some packaging updates.
 
-I agree this woudl vastly simplify things.  Let's see what the performancd 
-delta is on the new build boxes (which have lots of modern cores, RAM, and 
-SSDs).
+We recommend that all users for v0.80.x firefly upgrade when it is 
+convenient to do so.
 
-Also/alternatively, a step that installs all the BuildRequires on the host 
-(even during each run) should be quick in the usual case but similarly 
-avoid breakage... Even just making make an install-deps.sh that will Do 
-The Right Thing might do the trick?  (Also usefulf or devs checking out 
-the source who want to get their environment going quickly.)
+Notable Changes
+---------------
 
-sag
+* build: remove stack-execute bit from assembled code sections (#10114 Dan 
+  Mick)
+* ceph-disk: fix dmcrypt key permissions (#9785 Loic Dachary)
+* ceph-disk: fix keyring location (#9653 Loic Dachary)
+* ceph-disk: make partition checks more robust (#9721 #9665 Loic Dachary)
+* ceph: cleanly shut down librados context on shutdown (#8797 Dan Mick)
+* common: add $cctid config metavariable (#6228 Adam Crume)
+* crush: align rule and ruleset ids (#9675 Xiaoxi Chen)
+* crush: fix negative weight bug during create_or_move_item (#9998 Pawel 
+  Sadowski)
+* crush: fix potential buffer overflow in erasure rules (#9492 Johnu 
+  George)
+* debian: fix python-ceph -> ceph file movement (Sage Weil)
+* libcephfs,ceph-fuse: fix flush tid wraparound bug (#9869 Greg Farnum, 
+  Yan, Zheng)
+* libcephfs: close fd befure umount (#10415 Yan, Zheng)
+* librados: fix crash from C API when read timeout is enabled (#9582 Sage 
+  Weil)
+* librados: handle reply race with pool deletion (#10372 Sage Weil)
+* librbd: cap memory utilization for read requests (Jason Dillaman)
+* librbd: do not close a closed parent image on failure (#10030 Jason 
+  Dillaman)
+* librbd: fix diff tests (#10002 Josh Durgin)
+* librbd: protect list_children from invalid pools (#10123 Jason Dillaman)
+* make check improvemens (Loic Dachary)
+* mds: fix ctime updates (#9514 Greg Farnum)
+* mds: fix journal import tool (#10025 John Spray)
+* mds: fix rare NULL deref in cap flush handler (Greg Farnum)
+* mds: handle unknown lock messages (Yan, Zheng)
+* mds: store backtrace for straydir (Yan, Zheng)
+* mon: abort startup if disk is full (#9502 Joao Eduardo Luis)
+* mon: add paxos instrumentation (Sage Weil)
+* mon: fix double-free in rare OSD startup path (Sage Weil)
+* mon: fix osdmap trimming (#9987 Sage Weil)
+* mon: fix paxos corner cases (#9301 #9053 Sage Weil)
+* osd: cancel callback on blacklisted watchers (#8315 Samuel Just)
+* osd: cleanly abort set-alloc-hint operations during upgrade (#9419 David 
+  Zafman)
+* osd: clear rollback PG metadata on PG deletion (#9293 Samuel Just)
+* osd: do not abort deep scrub if hinfo is missing (#10018 Loic Dachary)
+* osd: erasure-code regression tests (Loic Dachary)
+* osd: fix distro metadata reporting for SUSE (#8654 Danny Al-Gaaf)
+* osd: fix full OSD checks during backfill (#9574 Samuel Just)
+* osd: fix ioprio parsing (#9677 Loic Dachary)
+* osd: fix journal direct-io shutdown (#9073 Mark Kirkwood, Ma Jianpeng, 
+  Somnath Roy)
+* osd: fix journal dump (Ma Jianpeng)
+* osd: fix occasional stall during peering or activation (Sage Weil)
+* osd: fix past_interval display bug (#9752 Loic Dachary)
+* osd: fix rare crash triggered by admin socket dump_ops_in_filght (#9916 
+  Dong Lei)
+* osd: fix snap trimming performance issues (#9487 #9113 Samuel Just, Sage 
+  Weil, Dan van der Ster, Florian Haas)
+* osd: fix snapdir handling on cache eviction (#8629 Sage Weil)
+* osd: handle map gaps in map advance code (Sage Weil)
+* osd: handle undefined CRUSH results in interval check (#9718 Samuel 
+  Just)
+* osd: include shard in JSON dump of ghobject (#10063 Loic Dachary)
+* osd: make backfill reservation denial handling more robust (#9626 Samuel 
+  Just)
+* osd: make misdirected op checks handle EC + primary affinity (#9835 
+  Samuel Just, Sage Weil)
+* osd: mount XFS with inode64 by default (Sage Weil)
+* osd: other misc bugs (#9821 #9875 Samuel Just)
+* rgw: add .log to default log path (#9353 Alexandre Marangone)
+* rgw: clean up fcgi request context (#10194 Yehuda Sadeh)
+* rgw: convet header underscores to dashes (#9206 Yehuda Sadeh)
+* rgw: copy object data if copy target is in different pool (#9039 Yehuda 
+  Sadeh)
+* rgw: don't try to authenticate CORS peflight request (#8718 Robert 
+  Hubbard, Yehuda Sadeh)
+* rgw: fix civetweb URL decoding (#8621 Yehuda Sadeh)
+* rgw: fix hash calculation during PUT (Yehuda Sadeh)
+* rgw: fix misc bugs (#9089 #9201 Yehuda Sadeh)
+* rgw: fix object tail test (#9226 Sylvain Munaut, Yehuda Sadeh)
+* rgw: make sysvinit script run rgw under systemd context as needed 
+  (#10125 Loic Dachary)
+* rgw: separate civetweb log from rgw log (Yehuda Sadeh)
+* rgw: set length for keystone token validations (#7796 Mark Kirkwood, 
+  Yehuda Sadeh)
+* rgw: subuser creation fixes (#8587 Yehuda Sadeh)
+* rpm: misc packaging improvements (Sandon Van Ness, Dan Mick, Erik 
+  Logthenberg, Boris Ranto)
+* rpm: use standard udev rules for CentOS7/RHEL7 (#9747 Loic Dachary)
 
+Getting Ceph
+------------
+
+* Git at git://github.com/ceph/ceph.git
+* Tarball at http://ceph.com/download/ceph-0.80.8.tar.gz
+* For packages, see http://ceph.com/docs/master/install/get-packages
+* For ceph-deploy, see http://ceph.com/docs/master/install/install-ceph-deploy
