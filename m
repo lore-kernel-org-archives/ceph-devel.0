@@ -1,36 +1,23 @@
 From: Sage Weil <sage@newdream.net>
 Subject: Re: Memstore performance improvements v0.90 vs v0.87
-Date: Thu, 15 Jan 2015 09:09:31 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1501150908490.13707@cobra.newdream.net>
+Date: Thu, 15 Jan 2015 09:15:32 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1501150913400.26676@cobra.newdream.net>
 References: <3649A15A2562B54294DE14BCE5AC79120AB30A5D@FMSMSX106.amr.corp.intel.com> <3649A15A2562B54294DE14BCE5AC79120AB30EEA@FMSMSX106.amr.corp.intel.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F2827792D@SACMBXIP02.sdcorp.global.sandisk.com>
  <20150115114325.50a69138@doppio>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:45706 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:45767 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752921AbbAORJc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Jan 2015 12:09:32 -0500
+	with ESMTP id S1753203AbbAORPc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Jan 2015 12:15:32 -0500
 In-Reply-To: <20150115114325.50a69138@doppio>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Andreas Bluemle <andreas.bluemle@itxperts.de>
 Cc: Somnath Roy <Somnath.Roy@sandisk.com>, "Blinick, Stephen L" <stephen.l.blinick@intel.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hey,
-
-The 0.91 release includes the 'pgmeta' changes that split out the PG 
-metadata (info and logs) across collections and should avoid some lock 
-contention in the FileStore.
-
-Do you mind repeating this experiment with that version?
-
-Thanks!
-sage
-
-
 On Thu, 15 Jan 2015, Andreas Bluemle wrote:
-
 > Hi,
 > 
 > I went from using v0.88 to v0.90 and can confirm the
@@ -65,12 +52,29 @@ On Thu, 15 Jan 2015, Andreas Bluemle wrote:
 > of approx. 35 seconds. All of the hits of the message count throttle 
 > happen on a single osd; there is no hit of the message count throttle
 > on any of the other 11 osds. 
-> 
+
+The difference between rbd and rbd3 is pretty surprising.. it makes me 
+think that the rbd distribution is just a bit unlucky.  Can you try this?
+
+ ceph osd reweight-by-pg 110
+
+or possibly 105 and see if that changes things?
+
 > Sage: yesterday, you had been asking for a value of the message
 > count throttle where my tests start to run smoothly - and I can't
 > give an answer. It depends on the distribution of I/O requests
 > achieved by the specific set of pg's - and vice versa, a different
 > pattern of I/O requests will change the behavior again.
+
+Understood.  This is actually good news, I think.. it's not the throttle 
+itself that's problematic but that the rbd distrbution is too inbalanced.
+
+Thanks!
+sage
+
+
+
+
 > 
 > 
 > 
@@ -260,5 +264,9 @@ On Thu, 15 Jan 2015, Andreas Bluemle wrote:
 > D-81541 Muenchen (Germany)          Fax:   (+49) 89 89044910
 > 
 > Company details: http://www.itxperts.de/imprint.htm
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
 > 
