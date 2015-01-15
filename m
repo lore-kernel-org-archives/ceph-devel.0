@@ -1,272 +1,87 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: Memstore performance improvements v0.90 vs v0.87
-Date: Thu, 15 Jan 2015 09:15:32 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1501150913400.26676@cobra.newdream.net>
-References: <3649A15A2562B54294DE14BCE5AC79120AB30A5D@FMSMSX106.amr.corp.intel.com> <3649A15A2562B54294DE14BCE5AC79120AB30EEA@FMSMSX106.amr.corp.intel.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F2827792D@SACMBXIP02.sdcorp.global.sandisk.com>
- <20150115114325.50a69138@doppio>
+Subject: Re: 'Immutable bit' on pools to prevent deletion
+Date: Thu, 15 Jan 2015 09:24:20 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1501150918110.26676@cobra.newdream.net>
+References: <54B7D2D6.4020503@42on.com> <CABBk=J9BVNzKHfSxdxmRjrZoasAWUz8_e9Juzc4vYnNXo0wHFA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:45767 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:45825 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753203AbbAORPc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Jan 2015 12:15:32 -0500
-In-Reply-To: <20150115114325.50a69138@doppio>
+	with ESMTP id S932132AbbAORYV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Jan 2015 12:24:21 -0500
+In-Reply-To: <CABBk=J9BVNzKHfSxdxmRjrZoasAWUz8_e9Juzc4vYnNXo0wHFA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andreas Bluemle <andreas.bluemle@itxperts.de>
-Cc: Somnath Roy <Somnath.Roy@sandisk.com>, "Blinick, Stephen L" <stephen.l.blinick@intel.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Yehuda Sadeh <yehuda@redhat.com>
+Cc: Wido den Hollander <wido@42on.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, 15 Jan 2015, Andreas Bluemle wrote:
-> Hi,
+On Thu, 15 Jan 2015, Yehuda Sadeh wrote:
+> On Thu, Jan 15, 2015 at 6:46 AM, Wido den Hollander <wido@42on.com> wrote:
+> > Hi,
+> >
+> > Although the userland tools like 'ceph' and 'rados' have a safeguard
+> > against fat fingers when it comes to removing a pool there is no such
+> > safeguard when using native librados.
+> >
+> > The danger still exists that by accident you remove a pool which is then
+> > completely gone, no way to restore it.
+> >
+> > This is still something I find quite dangerous, so I was thinking about
+> > a additional 'Immutable bit' which could be set on a pool before
+> > rados_pool_delete() allows this pool to be removed.
+> >
+> > Is it a sane thing to look at 'features' which pools could have? Other
+> > features which might be set on a pool:
+> >
+> > - Read Only (all write operations return -EPERM)
+> > - Delete Protected
+> >
+> > It's just that looking at a 20TB RBD pool and thinking that just one API
+> > call could remove this pool make me a bit scared.
+> >
+> > Am I the only one or is this something worth looking in to?
 > 
-> I went from using v0.88 to v0.90 and can confirm the
-> that performance is similar between these two versions.
+> I completely agree. A while back I opened an issue for that, #9792,
+> with some suggestions:
 > 
-> I am using config settings similar to the values given by
-> Somnath.
-> 
-> There is one difference in my settings: where Somanth has disabled
-> message throttling both for the number of messages and the amount
-> of message data, I am using the settiings:
-> 
->   "osd_client_message_size_cap": "524288000"   (default)
->   "osd_client_message_cap": "3000"             (default is 100)
-> 
-> With my test profile (small, i.e. 4k, random writes), the message
-> size throttle is no problem - but the message count throttle
-> is worth to look at:
-> 
-> with my test profile I hit this throttle - but this seems to depend
-> on the number of placement groups (or the distribution achieved
-> by different placement group set).
-> 
-> I have configured my cluster (3 nodes, 12 osds) with 3 rbd pools:
->    rbd with 768 pgs (default)
->    rbd2 with 3000 pgs
->    rbd3 with 769 pgs
-> 
-> I don't see any hits of message count throttle on rbd2 and rbd3 - but
-> on rbd, I see the message throttle hits about 3.750 times during a
-> test with a total of 262.144 client write request within a period
-> of approx. 35 seconds. All of the hits of the message count throttle 
-> happen on a single osd; there is no hit of the message count throttle
-> on any of the other 11 osds. 
+> - require a special key for this command
 
-The difference between rbd and rbd3 is pretty surprising.. it makes me 
-think that the rbd distribution is just a bit unlucky.  Can you try this?
+The original version of the --yes-i-really-really-mean-it patch actually 
+did something like this, but it was complicated and a huge pain to script 
+all of the tests so we went with the simpler path (specify pool name twice 
+and a scary option).
 
- ceph osd reweight-by-pg 110
+> - pool removal doesn't apply immediately, but rather first switches
+> pool to 'pending removal'
+> - pending removal state reflected in the cluster status
+> - operation can be cancelled when pending
 
-or possibly 105 and see if that changes things?
+This amounts of a two stage process, which I think makes a lot of sense.  
+I see two reasonably simple options:
 
-> Sage: yesterday, you had been asking for a value of the message
-> count throttle where my tests start to run smoothly - and I can't
-> give an answer. It depends on the distribution of I/O requests
-> achieved by the specific set of pg's - and vice versa, a different
-> pattern of I/O requests will change the behavior again.
+1) Add a 'nodelete' pool flag, so that you have to do
 
-Understood.  This is actually good news, I think.. it's not the throttle 
-itself that's problematic but that the rbd distrbution is too inbalanced.
+ ceph osd pool set foo nodelete false
+ ceph osd pool delete foo foo --yes-i-swear-i-etc
 
-Thanks!
+Then the question is whether we implicitly set this flag on all existing 
+pools.. meh.  But we won't break any current users of the API that create 
+and destroy pools.
+
+2) Add a 'allow-delete' flag as Yehuda suggests, so you have
+
+ ceph osd pool set foo allow-delete true
+ ceph osd pool delete foo ...
+
+Then secondary question is whether the cluster should implicitly clear the 
+allow-delete after some time period (maybe 'pending-delete' would make 
+more sense in that case), or whether we deny IO during that period.  Seems 
+perhaps too complicated.
+
+The downside here is that there will be huge patchset that fixes all the
+tests to do this.  Probably worth it though if it avoids a very bad day 
+for some poor admin...
+
 sage
 
-
-
-
-> 
-> 
-> 
-> Regards
-> 
-> Andreas Bluemle
-> 
-> On Wed, 14 Jan 2015 22:44:01 +0000
-> Somnath Roy <Somnath.Roy@sandisk.com> wrote:
-> 
-> > Stephen,
-> > You may want to tweak the following parameter(s) in your ceph.conf
-> > file and see if it is further improving your performance or not.
-> > 
-> > debug_lockdep = 0/0
-> > debug_context = 0/0
-> > debug_crush = 0/0
-> > debug_buffer = 0/0
-> > debug_timer = 0/0
-> > debug_filer = 0/0
-> > debug_objecter = 0/0
-> > debug_rados = 0/0
-> > debug_rbd = 0/0
-> > debug_journaler = 0/0
-> > debug_objectcatcher = 0/0
-> > debug_client = 0/0
-> > debug_osd = 0/0
-> > debug_optracker = 0/0
-> > debug_objclass = 0/0
-> > debug_filestore = 0/0
-> > debug_journal = 0/0
-> > debug_ms = 0/0
-> > debug_monc = 0/0
-> > debug_tp = 0/0
-> > debug_auth = 0/0
-> > debug_finisher = 0/0
-> > debug_heartbeatmap = 0/0
-> > debug_perfcounter = 0/0
-> > debug_asok = 0/0
-> > debug_throttle = 0/0
-> > debug_mon = 0/0
-> > debug_paxos = 0/0
-> > debug_rgw = 0/0
-> > osd_op_num_threads_per_shard = 2 //You may want to try with 1 as well
-> > osd_op_num_shards = 10    //Depends on your cpu util
-> > ms_nocrc = true
-> > cephx_sign_messages = false
-> > cephx_require_signatures = false
-> > ms_dispatch_throttle_bytes = 0
-> > throttler_perf_counter = false
-> > 
-> > [osd]
-> > osd_client_message_size_cap = 0
-> > osd_client_message_cap = 0
-> > osd_enable_op_tracker = false
-> > 
-> > Also, run more clients (in your case rados bench) and see if it is
-> > scaling or not (it should, till it saturates your cpu).
-> > 
-> > But, your observation on RHEL7 vs UBUNTU 14.04 LTS is interesting !
-> > 
-> > Thanks & Regards
-> > Somnath
-> > -----Original Message-----
-> > From: ceph-devel-owner@vger.kernel.org
-> > [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Blinick,
-> > Stephen L Sent: Wednesday, January 14, 2015 2:32 PM To: Ceph
-> > Development Subject: RE: Memstore performance improvements v0.90 vs
-> > v0.87
-> > 
-> > I went back and grabbed 87 and built it on RHEL7 as well, and
-> > performance is also similar (much better).  I've also run it on a few
-> > systems (Dual socket 10-core E5v2,  Dual socket 6-core E5v3).  So,
-> > it's related to my switch to RHEL7, and not to the code changes
-> > between v0.90 and v0.87.     Will post when I get more data.
-> > 
-> > Thanks,
-> > 
-> > Stephen
-> > 
-> > -----Original Message-----
-> > From: ceph-devel-owner@vger.kernel.org
-> > [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Blinick,
-> > Stephen L Sent: Wednesday, January 14, 2015 12:06 AM To: Ceph
-> > Development Subject: Memstore performance improvements v0.90 vs v0.87
-> > 
-> > In the process of moving to a new cluster (RHEL7 based) I grabbed
-> > v0.90, compiled RPM's and re-ran the simple local-node memstore test
-> > I've run on .80 - .87.  It's a single Memstore OSD and a single Rados
-> > Bench client locally on the same node.  Increasing queue depth and
-> > measuring latency /IOPS.  So far, the measurements have been
-> > consistent across different hardware and code releases (with about a
-> > 30% improvement with the OpWQ Sharding changes that came in after
-> > Firefly).
-> > 
-> > These are just very early results, but I'm seeing a very large
-> > improvement in latency and throughput with v90 on RHEL7.   Next  I'm
-> > working to get lttng installed and working in RHEL7 to determine
-> > where the improvement is.   On previous levels, these measurements
-> > have been roughly the same using a real (fast) backend (i.e. NVMe
-> > flash), and I will verify here as well.   Just wondering if anyone
-> > else has measured similar improvements?
-> > 
-> > 
-> > 100% Reads or Writes, 4K Objects, Rados Bench
-> > 
-> > ========================
-> > V0.87: Ubuntu 14.04LTS
-> > 
-> > *Writes*
-> > #Thr    IOPS    Latency(ms)
-> > 1       618.80          1.61
-> > 2       1401.70         1.42
-> > 4       3962.73         1.00
-> > 8       7354.37         1.10
-> > 16      7654.67         2.10
-> > 32      7320.33         4.37
-> > 64      7424.27         8.62
-> > 
-> > *Reads*
-> > #thr    IOPS    Latency(ms)
-> > 1       837.57          1.19
-> > 2       1950.00         1.02
-> > 4       6494.03         0.61
-> > 8       7243.53         1.10
-> > 16      7473.73         2.14
-> > 32      7682.80         4.16
-> > 64      7727.10         8.28
-> > 
-> > 
-> > ========================
-> > V0.90:  RHEL7
-> > 
-> > *Writes*
-> > #Thr    IOPS    Latency(ms)
-> > 1       2558.53         0.39
-> > 2       6014.67         0.33
-> > 4       10061.33        0.40
-> > 8       14169.60        0.56
-> > 16      14355.63        1.11
-> > 32      14150.30        2.26
-> > 64      15283.33        4.19
-> > 
-> > *Reads*
-> > #Thr    IOPS    Latency(ms)
-> > 1       4535.63         0.22
-> > 2       9969.73         0.20
-> > 4       17049.43        0.23
-> > 8       19909.70        0.40
-> > 16      20320.80        0.79
-> > 32      19827.93        1.61
-> > 64      22371.17        2.86
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> > in the body of a message to majordomo@vger.kernel.org More majordomo
-> > info at  http://vger.kernel.org/majordomo-info.html -- To unsubscribe
-> > from this list: send the line "unsubscribe ceph-devel" in the body of
-> > a message to majordomo@vger.kernel.org More majordomo info at
-> > http://vger.kernel.org/majordomo-info.html
-> > 
-> > ________________________________
-> > 
-> > PLEASE NOTE: The information contained in this electronic mail
-> > message is intended only for the use of the designated recipient(s)
-> > named above. If the reader of this message is not the intended
-> > recipient, you are hereby notified that you have received this
-> > message in error and that any review, dissemination, distribution, or
-> > copying of this message is strictly prohibited. If you have received
-> > this communication in error, please notify the sender by telephone or
-> > e-mail (as shown above) immediately and destroy any and all copies of
-> > this message in your possession (whether hard copies or
-> > electronically stored copies).
-> > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> > in the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> > 
-> 
-> 
-> 
-> -- 
-> Andreas Bluemle                     mailto:Andreas.Bluemle@itxperts.de
-> ITXperts GmbH                       http://www.itxperts.de
-> Balanstrasse 73, Geb. 08            Phone: (+49) 89 89044917
-> D-81541 Muenchen (Germany)          Fax:   (+49) 89 89044910
-> 
-> Company details: http://www.itxperts.de/imprint.htm
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
