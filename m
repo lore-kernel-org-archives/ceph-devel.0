@@ -1,64 +1,51 @@
-From: Dan Van Der Ster <daniel.vanderster@cern.ch>
+From: Mike Dawson <mike.dawson@cloudapt.com>
 Subject: Re: 'Immutable bit' on pools to prevent deletion
-Date: Thu, 15 Jan 2015 15:39:07 +0000
-Message-ID: <3BFFC9C1-0253-4218-9065-3E203027D46A@cern.ch>
+Date: Thu, 15 Jan 2015 10:45:50 -0500
+Message-ID: <54B7E0AE.2050102@cloudapt.com>
 References: <54B7D2D6.4020503@42on.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cernmx13.cern.ch ([188.184.36.46]:36301 "EHLO CERNMX13.cern.ch"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751385AbbAOPjL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 15 Jan 2015 10:39:11 -0500
+Received: from mail-ig0-f181.google.com ([209.85.213.181]:52437 "EHLO
+	mail-ig0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752198AbbAOPq7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Jan 2015 10:46:59 -0500
+Received: by mail-ig0-f181.google.com with SMTP id r2so13270797igi.2
+        for <ceph-devel@vger.kernel.org>; Thu, 15 Jan 2015 07:46:58 -0800 (PST)
 In-Reply-To: <54B7D2D6.4020503@42on.com>
-Content-Language: en-US
-Content-ID: <12FAB10682BB34409B5911DD6CF2C6AB@cern.ch>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Wido den Hollander <wido@42on.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-SGkgV2lkbywNCg0KKzEgZm9yIHNhZmVndWFyZHMuDQoNClllYWggdGhhdCBpcyBzY2FyeTogaXQn
-cyBvbmUgYXBpIGNhbGwgdG8gZGVsZXRlIGEgcG9vbCwgYW5kIHBlcmhhcHMgZXZlbiBhIGNsaWVu
-dCB3aXRoIHcgY2FwYWJpbGl0eSBvbiBhIHBvb2wgY2FuIGRlbGV0ZSBpdD8/IChJIGRpZG7igJl0
-IHRyeS4uLikNCg0KSSBjYW4gdGhpbmsgb2YgbWFueSB3YXlzIHRoYXQgZmF0IGZpbmdlcnMgY2Fu
-IGNyZWF0ZSBjcmF6eSBsb2FkcywgZGVueSBjbGllbnQgYWNjZXNzLCAuLi4NCg0KIDEuIGNoYW5n
-aW5nIHBvb2wgc2l6ZQ0KIDIuIHNldHRpbmcgcG9vbCBxdW90YXMNCiAzLiB1bnBsYW5uZWQgUEcg
-c3BsaXR0aW5nDQogNC4gY3JlYXRpbmcgYW4gRUMgcG9vbCBvbiBhIGNsdXN0ZXIgd2l0aCBkdW1w
-bGluZyBjbGllbnRzDQogNS4gcmV3ZWlnaHQtYnktdXRpbGl6YXRpb24NCiA2LiBjaGFuZ2luZyBj
-cnVzaCBydWxlcy90dW5hYmxlcw0KDQrigJR5ZXMtaS1yZWFsbHktcmVhbGx5LW1lYW4taXQgaXMg
-bmljZSB3aGVuIGl04oCZcyB0aGVyZS4gQnV0IHJlZ2FyZGxlc3MgaXQgaXMgcHJvYmFibHkgbm90
-IGEgZ29vZCBwcmFjdGljZSB0byB3b3JrIGRhaWx5IChvciBydW4gbGlicmFkb3MgY3JvbiBqb2Jz
-KSBpbiBhIHNoZWxsIHRoYXQgaGFzIGFjY2VzcyB0byB0aGUgY2xpZW50LmFkbWluIGtleXJpbmcu
-IEnigJl2ZSB0aG91Z2h0IG9mIHVzaW5nIHN1ZG8gdG8gcmVzdHJpY3Qgb3VyIGFkbWluIHNoZWxs
-IHRvIHN1YnNldCBvZiBjZXBoIGFkbWluIGNvbW1hbmRzLiBCdXQgZXZlbiBiZXR0ZXIgd291bGQg
-YmUgYSBpbnRlcm5hbCBiaXQgd2hpY2ggbG9ja3Mgb3V0IHRoZSBBUEkgYmVuZWF0aCDigJxjZXBo
-IG9zZCBwb29sIOKApuKAnSBhbmQg4oCcY2VwaCBvc2QgY3J1c2gg4oCm4oCdLCBldmVuIGZvciBj
-bGllbnQuYWRtaW4uDQoNCk1heWJlIHRoaXMgaXMgYWxyZWFkeSBwb3NzaWJsZSBieSBjcmVhdGlu
-ZyBhIGNsaWVudC5hZG1pbi1yZWFkb25seSBhY2NvdW50IGZvciBkYWlseSB3b3JrIGFuZCBjcm9u
-cywgYW5kIGxpbWl0IGFjY2VzcyB0byBjbGllbnQuYWRtaW4gZXhjZXB0IHdoZW4gYWJzb2x1dGVs
-eSBuZWNlc3NhcnkgPw0KDQpDaGVlcnMsIERhbg0KDQoNCj4gT24gMTUgSmFuIDIwMTUsIGF0IDE1
-OjQ2LCBXaWRvIGRlbiBIb2xsYW5kZXIgPHdpZG9ANDJvbi5jb20+IHdyb3RlOg0KPiANCj4gSGks
-DQo+IA0KPiBBbHRob3VnaCB0aGUgdXNlcmxhbmQgdG9vbHMgbGlrZSAnY2VwaCcgYW5kICdyYWRv
-cycgaGF2ZSBhIHNhZmVndWFyZA0KPiBhZ2FpbnN0IGZhdCBmaW5nZXJzIHdoZW4gaXQgY29tZXMg
-dG8gcmVtb3ZpbmcgYSBwb29sIHRoZXJlIGlzIG5vIHN1Y2gNCj4gc2FmZWd1YXJkIHdoZW4gdXNp
-bmcgbmF0aXZlIGxpYnJhZG9zLg0KPiANCj4gVGhlIGRhbmdlciBzdGlsbCBleGlzdHMgdGhhdCBi
-eSBhY2NpZGVudCB5b3UgcmVtb3ZlIGEgcG9vbCB3aGljaCBpcyB0aGVuDQo+IGNvbXBsZXRlbHkg
-Z29uZSwgbm8gd2F5IHRvIHJlc3RvcmUgaXQuDQo+IA0KPiBUaGlzIGlzIHN0aWxsIHNvbWV0aGlu
-ZyBJIGZpbmQgcXVpdGUgZGFuZ2Vyb3VzLCBzbyBJIHdhcyB0aGlua2luZyBhYm91dA0KPiBhIGFk
-ZGl0aW9uYWwgJ0ltbXV0YWJsZSBiaXQnIHdoaWNoIGNvdWxkIGJlIHNldCBvbiBhIHBvb2wgYmVm
-b3JlDQo+IHJhZG9zX3Bvb2xfZGVsZXRlKCkgYWxsb3dzIHRoaXMgcG9vbCB0byBiZSByZW1vdmVk
-Lg0KPiANCj4gSXMgaXQgYSBzYW5lIHRoaW5nIHRvIGxvb2sgYXQgJ2ZlYXR1cmVzJyB3aGljaCBw
-b29scyBjb3VsZCBoYXZlPyBPdGhlcg0KPiBmZWF0dXJlcyB3aGljaCBtaWdodCBiZSBzZXQgb24g
-YSBwb29sOg0KPiANCj4gLSBSZWFkIE9ubHkgKGFsbCB3cml0ZSBvcGVyYXRpb25zIHJldHVybiAt
-RVBFUk0pDQo+IC0gRGVsZXRlIFByb3RlY3RlZA0KPiANCj4gSXQncyBqdXN0IHRoYXQgbG9va2lu
-ZyBhdCBhIDIwVEIgUkJEIHBvb2wgYW5kIHRoaW5raW5nIHRoYXQganVzdCBvbmUgQVBJDQo+IGNh
-bGwgY291bGQgcmVtb3ZlIHRoaXMgcG9vbCBtYWtlIG1lIGEgYml0IHNjYXJlZC4NCj4gDQo+IEFt
-IEkgdGhlIG9ubHkgb25lIG9yIGlzIHRoaXMgc29tZXRoaW5nIHdvcnRoIGxvb2tpbmcgaW4gdG8/
-DQo+IA0KPiAtLSANCj4gV2lkbyBkZW4gSG9sbGFuZGVyDQo+IDQyb24gQi5WLg0KPiBDZXBoIHRy
-YWluZXIgYW5kIGNvbnN1bHRhbnQNCj4gDQo+IFBob25lOiArMzEgKDApMjAgNzAwIDk5MDINCj4g
-U2t5cGU6IGNvbnRhY3Q0Mm9uDQo+IC0tDQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0
-OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbg0KPiB0aGUgYm9keSBv
-ZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZw0KPiBNb3JlIG1ham9yZG9t
-byBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg0K
++1
+
+Thanks,
+Mike Dawson
+
+
+On 1/15/2015 9:46 AM, Wido den Hollander wrote:
+> Hi,
+>
+> Although the userland tools like 'ceph' and 'rados' have a safeguard
+> against fat fingers when it comes to removing a pool there is no such
+> safeguard when using native librados.
+>
+> The danger still exists that by accident you remove a pool which is then
+> completely gone, no way to restore it.
+>
+> This is still something I find quite dangerous, so I was thinking about
+> a additional 'Immutable bit' which could be set on a pool before
+> rados_pool_delete() allows this pool to be removed.
+>
+> Is it a sane thing to look at 'features' which pools could have? Other
+> features which might be set on a pool:
+>
+> - Read Only (all write operations return -EPERM)
+> - Delete Protected
+>
+> It's just that looking at a 20TB RBD pool and thinking that just one API
+> call could remove this pool make me a bit scared.
+>
+> Am I the only one or is this something worth looking in to?
+>
