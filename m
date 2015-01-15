@@ -1,46 +1,140 @@
-From: John Spray <john.spray@redhat.com>
-Subject: Re: 'Immutable bit' on pools to prevent deletion
-Date: Thu, 15 Jan 2015 22:02:46 +0000
-Message-ID: <CAGd4Wr2wkDYcYyU5Q3G0ZABELNx6jAkpWSNPoVm_Otr5oQdB_g@mail.gmail.com>
-References: <54B7D2D6.4020503@42on.com>
-	<CABBk=J9BVNzKHfSxdxmRjrZoasAWUz8_e9Juzc4vYnNXo0wHFA@mail.gmail.com>
-	<alpine.DEB.2.00.1501150918110.26676@cobra.newdream.net>
-	<alpine.DEB.2.00.1501150942450.26676@cobra.newdream.net>
-	<CAC6JEv-r2a6UOWOd8XKsn4armJU4iR76eYtG3kR4eGmKW6k++w@mail.gmail.com>
-	<alpine.DEB.2.00.1501151004540.15918@cobra.newdream.net>
-	<CAGd4Wr055nGU8D+pzN_bFhOkNVrNBZA1xZdfo80+Mu5Bddx+pg@mail.gmail.com>
-	<alpine.DEB.2.00.1501151105050.15918@cobra.newdream.net>
+From: Michael Sevilla <mikesevilla3@gmail.com>
+Subject: Re: MDS has inconsistent performance
+Date: Thu, 15 Jan 2015 14:44:19 -0800
+Message-ID: <CAD=PzHJFT4QUeer7A-EawAQ=AskEu44pLPqHo4BLpk11zA1UQw@mail.gmail.com>
+References: <CAD=PzH+UxcrF-0=fpAWrXsv-CB=q1nbAxbBHSn9A_P-hS1-fGg@mail.gmail.com>
+	<CAC6JEv9fXSm+xEcFPiJ90kQNKjoWdFZCs02ZHKD4kJGd4_2Q8w@mail.gmail.com>
+	<CAD=PzHLahg1TPu3-zjFk6hO4cXeYg+-TjdR5cw0XNSoVA+_Ebw@mail.gmail.com>
+	<CAC6JEv_1Gx3pnmutej7UmABC+eyB+VvoBo6X1OZhHFu+==6fjA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f45.google.com ([209.85.215.45]:43711 "EHLO
-	mail-la0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932072AbbAOWCr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Jan 2015 17:02:47 -0500
-Received: by mail-la0-f45.google.com with SMTP id gq15so16069289lab.4
-        for <ceph-devel@vger.kernel.org>; Thu, 15 Jan 2015 14:02:46 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1501151105050.15918@cobra.newdream.net>
+Received: from mail-la0-f43.google.com ([209.85.215.43]:41716 "EHLO
+	mail-la0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753173AbbAOWoV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Jan 2015 17:44:21 -0500
+Received: by mail-la0-f43.google.com with SMTP id q1so800896lam.2
+        for <ceph-devel@vger.kernel.org>; Thu, 15 Jan 2015 14:44:19 -0800 (PST)
+In-Reply-To: <CAC6JEv_1Gx3pnmutej7UmABC+eyB+VvoBo6X1OZhHFu+==6fjA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Gregory Farnum <greg@gregs42.com>, Yehuda Sadeh <yehuda@redhat.com>, Wido den Hollander <wido@42on.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <greg@gregs42.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, Jan 15, 2015 at 7:07 PM, Sage Weil <sweil@redhat.com> wrote:
->> The trouble with this is admin socket part is that any tool that
->> manages Ceph must use the admin socket interface as well as the normal
->> over-the-network command interface, and by extension must be able to
->> execute locally on a mon.  We would no longer have a comprehensive
->> remote management interface for the mon: management tools would have
->> to run some code locally too.
+Let me know if this works and/or you need anything else:
+
+https://www.dropbox.com/s/fq47w6jebnyluu0/lookup-logs.tar.gz?dl=0
+
+Beware - the clients were on debug=10. Also, I tried this with the
+kernel client and it is more consistent; it does the 2 lookups per
+create on 1 client every single time.
+
+On Thu, Jan 15, 2015 at 11:28 AM, Gregory Farnum <greg@gregs42.com> wrote:
+> Can you post the full logs somewhere to look at? These bits aren't
+> very helpful on their own (except to say, yes, the client cleared its
+> I_COMPLETE for some reason).
 >
-> True.. if we make that option enabled by default.  If we it's off by
-> default them it's an opt-in layer of protection.  Most clusters don't have
-> ephemeral pools so I think lots of people would want this.
-
-+1, the problem goes away if it's opt-in, should be easy enough for
-API consumers to inspect the conf setting and give a nice informative
-error if the safety catch is engaged.  I can imagine wanting to engage
-this ahead of plugging in a GUI or some config management recipes that
-you didn't quite trust yet.
-
-John
+> On Tue, Jan 13, 2015 at 3:45 PM, Michael Sevilla <mikesevilla3@gmail.com> wrote:
+>> On Tue, Jan 13, 2015 at 11:13 AM, Gregory Farnum <greg@gregs42.com> wrote:
+>>> On Mon, Jan 12, 2015 at 10:17 PM, Michael Sevilla
+>>> <mikesevilla3@gmail.com> wrote:
+>>>> I can't get consistent performance with 1 MDS. I have 2 clients create
+>>>> 100,000 files (separate directories) in a CephFS mount. I ran the
+>>>> experiment 5 times (deleting the pools/fs and restarting the MDS in
+>>>> between each run). I graphed the metadata throughput (requests per
+>>>> second): https://github.com/michaelsevilla/mds/blob/master/graphs/thruput.png
+>>>
+>>> So that top line is ~20,000 processed requests/second, as measured at
+>>> the MDS? (Looking at perfcounters?) And the fast run is doing 10k
+>>> create requests/second? (This number is much higher than I expected!)
+>>
+>> Yes - top line was 20K req/s from perf counter dump and the fast run
+>> does about 13K creates/s. We were surprised, too... In fact, the
+>> performance of 1 client per MDS gives us similar performance to
+>> IndexFS - a system that came out in a paper at Supercomputing this
+>> year. Here is a throughput graph, normalized to the # of clients, that
+>> shows how powerful one MDS can actually be:
+>> https://github.com/michaelsevilla/mds/blob/master/graphs/thruput-norm.png
+>>
+>> Keep in mind that runs with more than 1 client aren't creates/s, but ops/sec. ;)
+>>
+>>>
+>>>> Sometimes (run0, run3), both clients issue 2 lookups per create to the
+>>>> MDS - this makes throughput high but the runtime long since the MDS
+>>>> processes many more requests.
+>>>> Sometimes (run2, run4), 1 client does 2 lookups per create and the
+>>>> other doesn't do any lookups.
+>>>> Sometimes (run1), neither client does any lookups - this has the
+>>>> fastest runtime.
+>>>>
+>>>> Does anyone know why the client behaves differently for the same exact
+>>>> experiment? Reading the client logs, it looks like sometimes the
+>>>> client enters add_update_cap() and clears the inode->flags in
+>>>> check_cap_issue(), then when a lookup occurs (in _lookup()), the
+>>>> client can't return ENOENT locally -- forcing it ask the MDS to do the
+>>>> lookup. But this only happens sometimes (e.g., run0 and run3).
+>>>
+>>> If you provide the logs I can check more carefully, but my guess is
+>>> that you've got another client mounting it, or are looking at both
+>>> directories from one of the clients, and this is inadvertently causing
+>>> them to go into shared rather than exclusive mode.
+>>
+>> I think you are right! Here is a subset of the client log:
+>> https://github.com/michaelsevilla/mds/blob/master/scratch/client0.log
+>>
+>> These snippets are zoomed into when the client stops sending "create,
+>> create, create, create..." and starts sending "lookup, lookup, create,
+>> lookup, lookup, create..."
+>>
+>> $ cat client0.log | grep "send_request client"
+>> create ...file.2098
+>> create ...file.2099
+>> create ...file.2100
+>> create ...file.2101
+>> lookup ...file.2102
+>> lookup ...file.2102
+>> create ...file.2102
+>> lookup ...file.2103
+>> lookup ...file.2103
+>> create ...file.2103
+>> lookup ...file.2104
+>> lookup ...file.2104
+>> create ...file.2104
+>>
+>> I think what you are looking for is on line 687:
+>> ... clearing (I_COMPLETE|I_DIR_ORDERED)
+>> ... add_update_cap issued pAsLsXs -> pAsLsXsFsx
+>>
+>> It looks like we lose the exclusive mode on the file... but I don't
+>> understand why the MDS revokes it for 1 client but not the other. The
+>> MDS log is here:
+>> https://raw.githubusercontent.com/michaelsevilla/mds/master/scratch/mds.log
+>>
+>>
+>>>
+>>> How are you trying to keep the directories private during the
+>>> workload? Some of the more naive solutions won't stand up to
+>>> repetitive testing given how various components of the system
+>>> currently behave.
+>> Is there a way to keep the directories private (i.e. keep the always
+>> in exclusive mode? That'd be perfect... In my runs, one client does
+>> mkdir /mnt/cephfs/dir0 and there other does mdkir /mnt/cephfs/dir1...
+>>
+>>>
+>>>>
+>>>> Details of the experiment:
+>>>> Workload: 2 clients, 100,000 creates in separate directories, using
+>>>> the FUSE client
+>>>> MDS config: client_cache_size = 100000000, mds_cache_size = 16384000
+>>>
+>>> That client_cache_size only has any effect if it's applied to the
+>>> client-side config. ;)
+>> Yes - I copy the ceph.conf to the client, too. I think it works
+>> because the 1 client, 1 MDS test caches all the inodes, according the
+>> perf counters.
+>>
+>> Thanks so much, Greg!
+>>
+>> Mike
+>>
+>>> -Greg
