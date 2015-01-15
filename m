@@ -1,7 +1,7 @@
-From: Gregory Farnum <greg@gregs42.com>
+From: John Spray <john.spray@redhat.com>
 Subject: Re: 'Immutable bit' on pools to prevent deletion
-Date: Thu, 15 Jan 2015 10:45:44 -0800
-Message-ID: <CAC6JEv__Dz+8MNHDZ8nJf-OYBRo01nTkqy35=HemS49CiymCbw@mail.gmail.com>
+Date: Thu, 15 Jan 2015 19:02:09 +0000
+Message-ID: <CAGd4Wr055nGU8D+pzN_bFhOkNVrNBZA1xZdfo80+Mu5Bddx+pg@mail.gmail.com>
 References: <54B7D2D6.4020503@42on.com>
 	<CABBk=J9BVNzKHfSxdxmRjrZoasAWUz8_e9Juzc4vYnNXo0wHFA@mail.gmail.com>
 	<alpine.DEB.2.00.1501150918110.26676@cobra.newdream.net>
@@ -11,46 +11,19 @@ References: <54B7D2D6.4020503@42on.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f179.google.com ([209.85.223.179]:48869 "EHLO
-	mail-ie0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752425AbbAOSpq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Jan 2015 13:45:46 -0500
-Received: by mail-ie0-f179.google.com with SMTP id rp18so16503745iec.10
-        for <ceph-devel@vger.kernel.org>; Thu, 15 Jan 2015 10:45:45 -0800 (PST)
-Received: from mail-ig0-f181.google.com (mail-ig0-f181.google.com. [209.85.213.181])
-        by mx.google.com with ESMTPSA id r12sm1417044ioe.43.2015.01.15.10.45.45
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
-        Thu, 15 Jan 2015 10:45:45 -0800 (PST)
-Received: by mail-ig0-f181.google.com with SMTP id r2so14260176igi.2
-        for <ceph-devel@vger.kernel.org>; Thu, 15 Jan 2015 10:45:45 -0800 (PST)
+Received: from mail-lb0-f182.google.com ([209.85.217.182]:40379 "EHLO
+	mail-lb0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751489AbbAOTCL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Jan 2015 14:02:11 -0500
+Received: by mail-lb0-f182.google.com with SMTP id u10so14795962lbd.13
+        for <ceph-devel@vger.kernel.org>; Thu, 15 Jan 2015 11:02:09 -0800 (PST)
 In-Reply-To: <alpine.DEB.2.00.1501151004540.15918@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sweil@redhat.com>
-Cc: Yehuda Sadeh <yehuda@redhat.com>, Wido den Hollander <wido@42on.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Cc: Gregory Farnum <greg@gregs42.com>, Yehuda Sadeh <yehuda@redhat.com>, Wido den Hollander <wido@42on.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Oh, I think it might be fine to require setting a config option before
-you delete stuff; I just don't want to prevent the option from being
-injectable. :)
-
-On Thu, Jan 15, 2015 at 10:07 AM, Sage Weil <sweil@redhat.com> wrote:
-> On Thu, 15 Jan 2015, Gregory Farnum wrote:
->> On Thu, Jan 15, 2015 at 9:44 AM, Sage Weil <sweil@redhat.com> wrote:
->> > In addition (or instead of) making the API harder to fat-finger, we could
->> > also add a mon config option like
->> >
->> >  mon allow pool deletion = false
->> >
->> > that defaults off.  Then, to delete any pool, you need to update ceph.conf
->> > and restart mons or inject the config option change (ceph daemon
->> > mon.`hostname` conig set ... on the leader) or the API will give you
->> > EPERM.
->> >
->> > This offers some protection even for client.admin key users if we prevent
->> > injectargs for that option (maybe feasible) and they don't have access to
->> > the actual mon machine.
->>
+On Thu, Jan 15, 2015 at 6:07 PM, Sage Weil <sweil@redhat.com> wrote:
 >> What would that buy us? Preventing injectargs on it would require mon
 >> restarts, which is unfortunate ? and makes it sounds more like a
 >> security feature than a safety blanket.
@@ -63,6 +36,17 @@ On Thu, Jan 15, 2015 at 10:07 AM, Sage Weil <sweil@redhat.com> wrote:
 > But whether it may also useful for security doesn't change whether it is a
 > good safety blanket.  I like it because it's simple, easy to implement,
 > and easy to disable for testing... :)
->
-> sage
->
+
+The trouble with this is admin socket part is that any tool that
+manages Ceph must use the admin socket interface as well as the normal
+over-the-network command interface, and by extension must be able to
+execute locally on a mon.  We would no longer have a comprehensive
+remote management interface for the mon: management tools would have
+to run some code locally too.
+
+I think it's sufficient to require two API calls (set the flag or
+config option, then do the delete) within the remote API, rather than
+requiring that anyone driving the interface knows how to speak two
+network protocols (usual mon remote command + SSH-to-asok).
+
+John
