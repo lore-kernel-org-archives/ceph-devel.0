@@ -1,13 +1,11 @@
-From: Mohd Bazli Ab Karim <bazli.abkarim-YhiXQ1Q1pWA@public.gmane.org>
+From: Bazli Karim <bazli.karim-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Subject: MDS aborted after recovery and active,
 	FAILED assert (r >=0)
-Date: Thu, 15 Jan 2015 06:35:21 +0000
-Message-ID: <20DBB415DF55354C8FC7AF12F4AE770024D30FFF@MBX02-TPM.mimos.local>
+Date: Thu, 15 Jan 2015 17:16:58 +0800
+Message-ID: <CA+9xv=NKGmKgYOGRbpi3gJLiS_iz4Qk6i5Jdb2E7vx2arbOuGA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed;
-	boundary="_002_20DBB415DF55354C8FC7AF12F4AE770024D30FFFMBX02TPMmimoslo_"
+Content-Type: multipart/mixed; boundary=bcaec53d5b4b703cbc050cad512d
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Content-Language: en-US
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -17,116 +15,236 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Cc: Wong Ming Tat <mt.wong-YhiXQ1Q1pWA@public.gmane.org>
+To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
---_002_20DBB415DF55354C8FC7AF12F4AE770024D30FFFMBX02TPMmimoslo_
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+--bcaec53d5b4b703cbc050cad512d
+Content-Type: multipart/alternative; boundary=bcaec53d5b4b703cb4050cad512b
+
+--bcaec53d5b4b703cb4050cad512b
+Content-Type: text/plain; charset=UTF-8
 
 Dear Ceph-Users, Ceph-Devel,
 
-I am running a ceph cluster version 0.72.2 and am running one MDS (in fact,=
- it's 3, 2 down and only 1 up) at the moment.
+
+
+I am running a ceph cluster version 0.72.2 and have one MDS (in fact, it's
+3, 2 down and only 1 up) at the moment.
+
 Plus I have one CephFS client mounted to it.
 
+
+
 Now, the MDS always get aborted after recovery and active for 4 secs.
+
 Some parts of the log are as below:
 
-    -3> 2015-01-15 14:10:28.464706 7fbcc8226700  1 -- 10.4.118.21:6800/5390=
- <=3D=3D osd.19 10.4.118.32:6821/243161 73 =3D=3D=3D=3D osd_op_re
-ply(3742 1000240c57e.00000000 [create 0~0,setxattr (99)] v56640'1871414 uv1=
-871414 ondisk =3D 0) v6 =3D=3D=3D=3D 221+0+0 (261801329 0 0) 0x
+
+
+    -3> 2015-01-15 14:10:28.464706 7fbcc8226700  1 -- 10.4.118.21:6800/5390
+<== osd.19 10.4.118.32:6821/243161 73 ==== osd_op_re
+
+ply(3742 1000240c57e.00000000 [create 0~0,setxattr (99)] v56640'1871414
+uv1871414 ondisk = 0) v6 ==== 221+0+0 (261801329 0 0) 0x
+
 7770bc80 con 0x69c7dc0
-    -2> 2015-01-15 14:10:28.464730 7fbcc8226700  1 -- 10.4.118.21:6800/5390=
- <=3D=3D osd.18 10.4.118.32:6818/243072 67 =3D=3D=3D=3D osd_op_re
-ply(3645 1000007941c.00000000 [tmapup 0~0] v56640'1769567 uv1769567 ondisk =
-=3D 0) v6 =3D=3D=3D=3D 179+0+0 (3759887079 0 0) 0x7757ec80 con
+
+    -2> 2015-01-15 14:10:28.464730 7fbcc8226700  1 -- 10.4.118.21:6800/5390
+<== osd.18 10.4.118.32:6818/243072 67 ==== osd_op_re
+
+ply(3645 1000007941c.00000000 [tmapup 0~0] v56640'1769567 uv1769567 ondisk
+= 0) v6 ==== 179+0+0 (3759887079 0 0) 0x7757ec80 con
+
 0x1c6bb00
-    -1> 2015-01-15 14:10:28.464754 7fbcc8226700  1 -- 10.4.118.21:6800/5390=
- <=3D=3D osd.47 10.4.118.35:6809/8290 79 =3D=3D=3D=3D osd_op_repl
-y(3419 mds_anchortable [writefull 0~94394932] v0'0 uv0 ondisk =3D -90 (Mess=
-age too long)) v6 =3D=3D=3D=3D 174+0+0 (3942056372 0 0) 0x69f94
+
+    -1> 2015-01-15 14:10:28.464754 7fbcc8226700  1 -- 10.4.118.21:6800/5390
+<== osd.47 10.4.118.35:6809/8290 79 ==== osd_op_repl
+
+y(3419 mds_anchortable [writefull 0~94394932] v0'0 uv0 ondisk = -90
+(Message too long)) v6 ==== 174+0+0 (3942056372 0 0) 0x69f94
+
 a00 con 0x1c6b9a0
-     0> 2015-01-15 14:10:28.471684 7fbcc8226700 -1 mds/MDSTable.cc: In func=
-tion 'void MDSTable::save_2(int, version_t)' thread 7
+
+     0> 2015-01-15 14:10:28.471684 7fbcc8226700 -1 mds/MDSTable.cc: In
+function 'void MDSTable::save_2(int, version_t)' thread 7
+
 fbcc8226700 time 2015-01-15 14:10:28.469999
-mds/MDSTable.cc: 83: FAILED assert(r >=3D 0)
+
+mds/MDSTable.cc: 83: FAILED assert(r >= 0)
+
+
 
  ceph version  ()
- 1: (MDSTable::save_2(int, unsigned long)+0x325) [0x769e25]
- 2: (Context::complete(int)+0x9) [0x568d29]
- 3: (Objecter::handle_osd_op_reply(MOSDOpReply*)+0x1097) [0x7c15d7]
- 4: (MDS::handle_core_message(Message*)+0x5a0) [0x588900]
- 5: (MDS::_dispatch(Message*)+0x2f) [0x58908f]
- 6: (MDS::ms_dispatch(Message*)+0x1e3) [0x58ab93]
- 7: (DispatchQueue::entry()+0x549) [0x975739]
- 8: (DispatchQueue::DispatchThread::entry()+0xd) [0x8902dd]
- 9: (()+0x7e9a) [0x7fbcccb0de9a]
- 10: (clone()+0x6d) [0x7fbccb4ba3fd]
- NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed t=
-o interpret this.
 
-Is there any workaround/patch to fix this issue? Let me know if need to see=
- the log with debug-mds of certain level as well.
+ 1: (MDSTable::save_2(int, unsigned long)+0x325) [0x769e25]
+
+ 2: (Context::complete(int)+0x9) [0x568d29]
+
+ 3: (Objecter::handle_osd_op_reply(MOSDOpReply*)+0x1097) [0x7c15d7]
+
+ 4: (MDS::handle_core_message(Message*)+0x5a0) [0x588900]
+
+ 5: (MDS::_dispatch(Message*)+0x2f) [0x58908f]
+
+ 6: (MDS::ms_dispatch(Message*)+0x1e3) [0x58ab93]
+
+ 7: (DispatchQueue::entry()+0x549) [0x975739]
+
+ 8: (DispatchQueue::DispatchThread::entry()+0xd) [0x8902dd]
+
+ 9: (()+0x7e9a) [0x7fbcccb0de9a]
+
+ 10: (clone()+0x6d) [0x7fbccb4ba3fd]
+
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed
+to interpret this.
+
+
+
+Is there any workaround/patch to fix this issue? Let me know if need to see
+the log with debug-mds of certain level as well.
+
 Any helps would be very much appreciated.
 
+
+
 Thanks.
+
 Bazli
 
-________________________________
-DISCLAIMER:
+--bcaec53d5b4b703cb4050cad512b
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 
+<div dir=3D"ltr">
 
-This e-mail (including any attachments) is for the addressee(s) only and ma=
-y be confidential, especially as regards personal data. If you are not the =
-intended recipient, please note that any dealing, review, distribution, pri=
-nting, copying or use of this e-mail is strictly prohibited. If you have re=
-ceived this email in error, please notify the sender immediately and delete=
- the original message (including any attachments).
+<p class=3D"">Dear Ceph-Users, Ceph-Devel,</p>
 
+<p class=3D"">=C2=A0</p>
 
-MIMOS Berhad is a research and development institution under the purview of=
- the Malaysian Ministry of Science, Technology and Innovation. Opinions, co=
-nclusions and other information in this e-mail that do not relate to the of=
-ficial business of MIMOS Berhad and/or its subsidiaries shall be understood=
- as neither given nor endorsed by MIMOS Berhad and/or its subsidiaries and =
-neither MIMOS Berhad nor its subsidiaries accepts responsibility for the sa=
-me. All liability arising from or in connection with computer viruses and/o=
-r corrupted e-mails is excluded to the fullest extent permitted by law.
+<p class=3D"">I am running a ceph cluster version 0.72.2 and have
+one MDS (in fact, it&#39;s 3, 2 down and only 1 up) at the moment.</p>
 
+<p class=3D"">Plus I have one CephFS client mounted to it.</p>
 
-------------------------------------------------------------------
--
--
-DISCLAIMER: 
+<p class=3D"">=C2=A0</p>
 
-This e-mail (including any attachments) is for the addressee(s) 
-only and may contain confidential information. If you are not the 
-intended recipient, please note that any dealing, review, 
-distribution, printing, copying or use of this e-mail is strictly 
-prohibited. If you have received this email in error, please notify 
-the sender  immediately and delete the original message. 
-MIMOS Berhad is a research and development institution under 
-the purview of the Malaysian Ministry of Science, Technology and 
-Innovation. Opinions, conclusions and other information in this e-
-mail that do not relate to the official business of MIMOS Berhad 
-and/or its subsidiaries shall be understood as neither given nor 
-endorsed by MIMOS Berhad and/or its subsidiaries and neither 
-MIMOS Berhad nor its subsidiaries accepts responsibility for the 
-same. All liability arising from or in connection with computer 
-viruses and/or corrupted e-mails is excluded to the fullest extent 
-permitted by law.
+<p class=3D"">Now, the MDS always get aborted after recovery and active
+for 4 secs.</p>
 
+<p class=3D"">Some parts of the log are as below:</p>
 
---_002_20DBB415DF55354C8FC7AF12F4AE770024D30FFFMBX02TPMmimoslo_
+<p class=3D"">=C2=A0</p>
+
+<p class=3D""><span style>=C2=A0=C2=A0=C2=A0 </span>-3&gt;
+2015-01-15 14:10:28.464706 7fbcc8226700<span style>=C2=A0
+</span>1 -- <a href=3D"http://10.4.118.21:6800/5390">10.4.118.21:6800/5390<=
+/a> &lt;=3D=3D osd.19 <a href=3D"http://10.4.118.32:6821/243161">10.4.118.3=
+2:6821/243161</a> 73 =3D=3D=3D=3D
+osd_op_re</p>
+
+<p class=3D"">ply(3742 1000240c57e.00000000 [create 0~0,setxattr (99)]
+v56640&#39;1871414 uv1871414 ondisk =3D 0) v6 =3D=3D=3D=3D 221+0+0 (2618013=
+29 0 0) 0x</p>
+
+<p class=3D"">7770bc80 con 0x69c7dc0</p>
+
+<p class=3D""><span style>=C2=A0=C2=A0=C2=A0 </span>-2&gt;
+2015-01-15 14:10:28.464730 7fbcc8226700<span style>=C2=A0
+</span>1 -- <a href=3D"http://10.4.118.21:6800/5390">10.4.118.21:6800/5390<=
+/a> &lt;=3D=3D osd.18 <a href=3D"http://10.4.118.32:6818/243072">10.4.118.3=
+2:6818/243072</a> 67 =3D=3D=3D=3D
+osd_op_re</p>
+
+<p class=3D"">ply(3645 1000007941c.00000000 [tmapup 0~0] v56640&#39;1769567
+uv1769567 ondisk =3D 0) v6 =3D=3D=3D=3D 179+0+0 (3759887079 0 0) 0x7757ec80=
+ con </p>
+
+<p class=3D"">0x1c6bb00</p>
+
+<p class=3D""><span style>=C2=A0=C2=A0=C2=A0 </span>-1&gt;
+2015-01-15 14:10:28.464754 7fbcc8226700<span style>=C2=A0
+</span>1 -- <a href=3D"http://10.4.118.21:6800/5390">10.4.118.21:6800/5390<=
+/a> &lt;=3D=3D osd.47 <a href=3D"http://10.4.118.35:6809/8290">10.4.118.35:=
+6809/8290</a> 79 =3D=3D=3D=3D osd_op_repl</p>
+
+<p class=3D"">y(3419 mds_anchortable [writefull 0~94394932] v0&#39;0 uv0
+ondisk =3D -90 (Message too long)) v6 =3D=3D=3D=3D 174+0+0 (3942056372 0 0)=
+ 0x69f94</p>
+
+<p class=3D"">a00 con 0x1c6b9a0</p>
+
+<p class=3D""><span style>=C2=A0=C2=A0=C2=A0=C2=A0 </span>0&gt;
+2015-01-15 14:10:28.471684 7fbcc8226700 -1 mds/MDSTable.cc: In function &#3=
+9;void
+MDSTable::save_2(int, version_t)&#39; thread 7</p>
+
+<p class=3D"">fbcc8226700 time 2015-01-15 14:10:28.469999</p>
+
+<p class=3D"">mds/MDSTable.cc: 83: FAILED assert(r &gt;=3D 0)</p>
+
+<p class=3D"">=C2=A0</p>
+
+<p class=3D""><span style>=C2=A0</span>ceph version<span style>=C2=A0 </spa=
+n>()</p>
+
+<p class=3D""><span style>=C2=A0</span>1:
+(MDSTable::save_2(int, unsigned long)+0x325) [0x769e25]</p>
+
+<p class=3D""><span style>=C2=A0</span>2:
+(Context::complete(int)+0x9) [0x568d29]</p>
+
+<p class=3D""><span style>=C2=A0</span>3: (Objecter::handle_osd_op_reply(MO=
+SDOpReply*)+0x1097)
+[0x7c15d7]</p>
+
+<p class=3D""><span style>=C2=A0</span>4:
+(MDS::handle_core_message(Message*)+0x5a0) [0x588900]</p>
+
+<p class=3D""><span style>=C2=A0</span>5:
+(MDS::_dispatch(Message*)+0x2f) [0x58908f]</p>
+
+<p class=3D""><span style>=C2=A0</span>6:
+(MDS::ms_dispatch(Message*)+0x1e3) [0x58ab93]</p>
+
+<p class=3D""><span style>=C2=A0</span>7:
+(DispatchQueue::entry()+0x549) [0x975739]</p>
+
+<p class=3D""><span style>=C2=A0</span>8:
+(DispatchQueue::DispatchThread::entry()+0xd) [0x8902dd]</p>
+
+<p class=3D""><span style>=C2=A0</span>9: (()+0x7e9a)
+[0x7fbcccb0de9a]</p>
+
+<p class=3D""><span style>=C2=A0</span>10: (clone()+0x6d)
+[0x7fbccb4ba3fd]</p>
+
+<p class=3D""><span style>=C2=A0</span>NOTE: a copy of
+the executable, or `objdump -rdS &lt;executable&gt;` is needed to interpret
+this.</p>
+
+<p class=3D"">=C2=A0</p>
+
+<p class=3D"">Is there any workaround/patch to fix this issue? Let me
+know if need to see the log with debug-mds of certain level as well.</p>
+
+<p class=3D"">Any helps would be very much appreciated.</p>
+
+<p class=3D"">=C2=A0</p>
+
+<p class=3D"">Thanks.</p>
+
+<p class=3D"">Bazli</p>
+
+</div>
+
+--bcaec53d5b4b703cb4050cad512b--
+
+--bcaec53d5b4b703cbc050cad512d
 Content-Type: application/octet-stream; name="mds-error.log"
-Content-Description: mds-error.log
-Content-Disposition: attachment; filename="mds-error.log"; size=2087989;
-	creation-date="Thu, 15 Jan 2015 06:12:44 GMT";
-	modification-date="Thu, 15 Jan 2015 06:10:28 GMT"
+Content-Disposition: attachment; filename="mds-error.log"
 Content-Transfer-Encoding: base64
+X-Attachment-Id: f_i4xx9mt30
 
 MjAxNS0wMS0xNSAxNDowODozNC4wNDM3ODUgN2ZiY2NkMWEwNzgwICAwIGNlcGggdmVyc2lvbiAg
 KCksIHByb2Nlc3MgY2VwaC1tZHMsIHBpZCA1MzkwCnN0YXJ0aW5nIG1kcy5tb24wMSBhdCA6LzAK
@@ -36760,8 +36878,7 @@ IDEvIDUgamF2YWNsaWVudAogICAxLyA1IGFzb2sKICAgMS8gMSB0aHJvdHRsZQogIC0yLy0yIChz
 eXNsb2cgdGhyZXNob2xkKQogIDk5Lzk5IChzdGRlcnIgdGhyZXNob2xkKQogIG1heF9yZWNlbnQg
 ICAgIDEwMDAwCiAgbWF4X25ldyAgICAgICAgIDEwMDAKICBsb2dfZmlsZSAKLS0tIGVuZCBkdW1w
 IG9mIHJlY2VudCBldmVudHMgLS0tCg==
-
---_002_20DBB415DF55354C8FC7AF12F4AE770024D30FFFMBX02TPMmimoslo_
+--bcaec53d5b4b703cbc050cad512d
 Content-Type: text/plain; charset="us-ascii"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
@@ -36772,4 +36889,4 @@ ceph-users mailing list
 ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
---_002_20DBB415DF55354C8FC7AF12F4AE770024D30FFFMBX02TPMmimoslo_--
+--bcaec53d5b4b703cbc050cad512d--
