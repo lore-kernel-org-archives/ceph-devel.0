@@ -1,35 +1,36 @@
-From: Cheng Cheng <ccheng.leo@gmail.com>
+From: Haomai Wang <haomaiwang@gmail.com>
 Subject: Re: QoS Control for RBD I/Os?
-Date: Thu, 15 Jan 2015 13:06:50 -0500
-Message-ID: <CAC13JXacRyj9RoBcYu6E8dR5S8k3M+nL1XciiZC5Y8nY0zbUFA@mail.gmail.com>
-References: <E5173F87-4790-4151-9B2A-3FE6E8F11E96@gmail.com> <CACJqLyZyGxY82caFT01iCoV7u4+RUDk3JMdW6rUYL=96A3WDbQ@mail.gmail.com>
+Date: Fri, 16 Jan 2015 02:08:38 +0800
+Message-ID: <CACJqLybtHnYLfqRL3FJvxcdWSGxox4pngn6ZN4sD5jD5wDvGKQ@mail.gmail.com>
+References: <E5173F87-4790-4151-9B2A-3FE6E8F11E96@gmail.com>
+	<CACJqLyZyGxY82caFT01iCoV7u4+RUDk3JMdW6rUYL=96A3WDbQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f43.google.com ([209.85.215.43]:39872 "EHLO
-	mail-la0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752763AbbAOSHM convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Jan 2015 13:07:12 -0500
-Received: by mail-la0-f43.google.com with SMTP id s18so15047386lam.2
-        for <ceph-devel@vger.kernel.org>; Thu, 15 Jan 2015 10:07:10 -0800 (PST)
+Received: from mail-wi0-f182.google.com ([209.85.212.182]:51847 "EHLO
+	mail-wi0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751147AbbAOSIs convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Jan 2015 13:08:48 -0500
+Received: by mail-wi0-f182.google.com with SMTP id h11so19569592wiw.3
+        for <ceph-devel@vger.kernel.org>; Thu, 15 Jan 2015 10:08:46 -0800 (PST)
 In-Reply-To: <CACJqLyZyGxY82caFT01iCoV7u4+RUDk3JMdW6rUYL=96A3WDbQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomaiwang@gmail.com>
+To: Cheng Cheng <ccheng.leo@gmail.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Haomai,
+Sorry, I don't understand your meaning previously.
 
-Yes, let take a look into it and see what we can do.
+If you want to make normal client IO which doesn't affected by
+"flatten" or other management ops, this bp may not met it.
 
-Cheng
-Cheng
+Actually, this bp mainly want to implement a io-limit mechanism which
+is much like qemu. And if we use rbd in iscsi or related cases, we
+can't make use of qemu and we need librbd's qos.
 
-
-
-On Thu, Jan 15, 2015 at 12:57 PM, Haomai Wang <haomaiwang@gmail.com> wr=
-ote:
+On Fri, Jan 16, 2015 at 1:57 AM, Haomai Wang <haomaiwang@gmail.com> wro=
+te:
 > Hi Cheng cheng,
 >
 > There already exists a
@@ -74,6 +75,13 @@ ing normal I/Os are still competing with concurrent management ops.
 > Best Regards,
 >
 > Wheat
+
+
+
+--=20
+Best Regards,
+
+Wheat
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
