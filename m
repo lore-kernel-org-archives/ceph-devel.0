@@ -1,111 +1,42 @@
-From: "Blinick, Stephen L" <stephen.l.blinick@intel.com>
-Subject: RE: Memstore performance improvements v0.90 vs v0.87
-Date: Wed, 14 Jan 2015 23:39:11 +0000
-Message-ID: <3649A15A2562B54294DE14BCE5AC79120AB31012@FMSMSX106.amr.corp.intel.com>
-References: <3649A15A2562B54294DE14BCE5AC79120AB30A5D@FMSMSX106.amr.corp.intel.com>
- <3649A15A2562B54294DE14BCE5AC79120AB30EEA@FMSMSX106.amr.corp.intel.com>
- <54B6F103.9000708@redhat.com>
+From: Ken Dreyer <kdreyer@redhat.com>
+Subject: Re: RGW's apache and mod_fastcgi
+Date: Wed, 14 Jan 2015 18:40:21 -0700
+Message-ID: <54B71A85.8080807@redhat.com>
+References: <54AC3429.2030104@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:56258 "EHLO mga02.intel.com"
+Received: from mx1.redhat.com ([209.132.183.28]:51133 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753441AbbANXjN convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Jan 2015 18:39:13 -0500
-In-Reply-To: <54B6F103.9000708@redhat.com>
-Content-Language: en-US
+	id S1750826AbbAOBkX (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 14 Jan 2015 20:40:23 -0500
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t0F1eNaQ025647
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
+	for <ceph-devel@vger.kernel.org>; Wed, 14 Jan 2015 20:40:23 -0500
+Received: from mbp.ktdreyer.com (vpn-55-158.rdu2.redhat.com [10.10.55.158])
+	by int-mx11.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t0F1eMos011130
+	for <ceph-devel@vger.kernel.org>; Wed, 14 Jan 2015 20:40:22 -0500
+In-Reply-To: <54AC3429.2030104@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "mnelson@redhat.com" <mnelson@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Haha :)  Well, my intuition is still pointing to something I've configured wrong (or had wrong).. but it will be interesting to see what it is.
+On 01/06/2015 12:14 PM, Ken Dreyer wrote:
+> There's the question of Unix Domain Sockets support. In Yehuda's testing
+> with mod_proxy_fcgi, Unix Domain Sockets (UDS) provide a lot better
+> performance in comparison to TCP sockets. Apache's UDS support shipped
+> in Apache upstream version 2.4.9, but both RHEL and Ubuntu have versions
+> older than this. RHEL 7 has httpd 2.4.6, and Trusty has 2.4.7. My
+> intention is to request that the Ubuntu apache2 maintainers to backport
+> UDS to their Trusty package, similarly to what Red Hat intends to ship
+> in RHEL 7.1.
 
------Original Message-----
-From: Mark Nelson [mailto:mark.nelson@inktank.com] 
-Sent: Wednesday, January 14, 2015 3:43 PM
-To: Blinick, Stephen L; Ceph Development
-Subject: Re: Memstore performance improvements v0.90 vs v0.87
+To follow up on this: Apache's mod_proxy UDS support is now present in
+the httpd-2.4.6-19 package in RHEL and CentOS. I've opened
+https://bugs.launchpad.net/ubuntu/+source/apache2/+bug/1411030 to
+request the Ubuntu package maintainers backport UDS support for Trusty's
+Apache 2.4.7 package.
 
-On 01/14/2015 04:32 PM, Blinick, Stephen L wrote:
-> I went back and grabbed 87 and built it on RHEL7 as well, and performance is also similar (much better).  I've also run it on a few systems (Dual socket 10-core E5v2,  Dual socket 6-core E5v3).  So, it's related to my switch to RHEL7, and not to the code changes between v0.90 and v0.87.     Will post when I get more data.
-
-Stephen, you are practically writing press releases for the RHEL guys here! ;)
-
-Mark
-
->
-> Thanks,
->
-> Stephen
->
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org 
-> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Blinick, 
-> Stephen L
-> Sent: Wednesday, January 14, 2015 12:06 AM
-> To: Ceph Development
-> Subject: Memstore performance improvements v0.90 vs v0.87
->
-> In the process of moving to a new cluster (RHEL7 based) I grabbed v0.90, compiled RPM's and re-ran the simple local-node memstore test I've run on .80 - .87.  It's a single Memstore OSD and a single Rados Bench client locally on the same node.  Increasing queue depth and measuring latency /IOPS.  So far, the measurements have been consistent across different hardware and code releases (with about a 30% improvement with the OpWQ Sharding changes that came in after Firefly).
->
-> These are just very early results, but I'm seeing a very large improvement in latency and throughput with v90 on RHEL7.   Next  I'm working to get lttng installed and working in RHEL7 to determine where the improvement is.   On previous levels, these measurements have been roughly the same using a real (fast) backend (i.e. NVMe flash), and I will verify here as well.   Just wondering if anyone else has measured similar improvements?
->
->
-> 100% Reads or Writes, 4K Objects, Rados Bench
->
-> ========================
-> V0.87: Ubuntu 14.04LTS
->
-> *Writes*
-> #Thr	IOPS	Latency(ms)
-> 1	618.80		1.61
-> 2	1401.70		1.42
-> 4	3962.73		1.00
-> 8	7354.37		1.10
-> 16	7654.67		2.10
-> 32	7320.33		4.37
-> 64	7424.27		8.62
->
-> *Reads*
-> #thr	IOPS	Latency(ms)
-> 1	837.57		1.19
-> 2	1950.00		1.02
-> 4	6494.03		0.61
-> 8	7243.53		1.10
-> 16	7473.73		2.14
-> 32	7682.80		4.16
-> 64	7727.10		8.28
->
->
-> ========================
-> V0.90:  RHEL7
->
-> *Writes*
-> #Thr	IOPS	Latency(ms)
-> 1	2558.53		0.39
-> 2	6014.67		0.33
-> 4	10061.33	0.40
-> 8	14169.60	0.56
-> 16	14355.63	1.11
-> 32	14150.30	2.26
-> 64	15283.33	4.19
->
-> *Reads*
-> #Thr	IOPS	Latency(ms)
-> 1	4535.63		0.22
-> 2	9969.73		0.20
-> 4	17049.43	0.23
-> 8	19909.70	0.40
-> 16	20320.80	0.79
-> 32	19827.93	1.61
-> 64	22371.17	2.86
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> in the body of a message to majordomo@vger.kernel.org More majordomo 
-> info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> in the body of a message to majordomo@vger.kernel.org More majordomo 
-> info at  http://vger.kernel.org/majordomo-info.html
->
+- Ken
