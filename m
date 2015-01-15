@@ -1,55 +1,78 @@
-From: Yehuda Sadeh <yehuda@redhat.com>
-Subject: Re: 'Immutable bit' on pools to prevent deletion
-Date: Thu, 15 Jan 2015 07:58:31 -0800
-Message-ID: <CABBk=J9BVNzKHfSxdxmRjrZoasAWUz8_e9Juzc4vYnNXo0wHFA@mail.gmail.com>
-References: <54B7D2D6.4020503@42on.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: upcoming release giant v0.87.1 : leads feedback needed
+Date: Thu, 15 Jan 2015 17:12:12 +0100
+Message-ID: <54B7E6DC.8010905@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="4xLF5XfOlBDFwkbesbdqIKP5BeMh7DFdA"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f181.google.com ([209.85.213.181]:46736 "EHLO
-	mail-ig0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753745AbbAOP6b (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Jan 2015 10:58:31 -0500
-Received: by mail-ig0-f181.google.com with SMTP id r2so13337126igi.2
-        for <ceph-devel@vger.kernel.org>; Thu, 15 Jan 2015 07:58:31 -0800 (PST)
-In-Reply-To: <54B7D2D6.4020503@42on.com>
+Received: from mail2.dachary.org ([91.121.57.175]:41082 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1754248AbbAOQMP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Jan 2015 11:12:15 -0500
+Received: from [10.9.0.6] (unknown [10.0.2.28])
+	by smtp.dmail.dachary.org (Postfix) with ESMTP id 0273842AF2
+	for <ceph-devel@vger.kernel.org>; Thu, 15 Jan 2015 17:12:12 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Thu, Jan 15, 2015 at 6:46 AM, Wido den Hollander <wido@42on.com> wrote:
-> Hi,
->
-> Although the userland tools like 'ceph' and 'rados' have a safeguard
-> against fat fingers when it comes to removing a pool there is no such
-> safeguard when using native librados.
->
-> The danger still exists that by accident you remove a pool which is then
-> completely gone, no way to restore it.
->
-> This is still something I find quite dangerous, so I was thinking about
-> a additional 'Immutable bit' which could be set on a pool before
-> rados_pool_delete() allows this pool to be removed.
->
-> Is it a sane thing to look at 'features' which pools could have? Other
-> features which might be set on a pool:
->
-> - Read Only (all write operations return -EPERM)
-> - Delete Protected
->
-> It's just that looking at a 20TB RBD pool and thinking that just one API
-> call could remove this pool make me a bit scared.
->
-> Am I the only one or is this something worth looking in to?
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--4xLF5XfOlBDFwkbesbdqIKP5BeMh7DFdA
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-I completely agree. A while back I opened an issue for that, #9792,
-with some suggestions:
+Hi Ceph,
 
-- require a special key for this command
-- pool removal doesn't apply immediately, but rather first switches
-pool to 'pending removal'
-- pending removal state reflected in the cluster status
-- operation can be cancelled when pending
+The https://github.com/ceph/ceph/tree/giant-backports branch was tested w=
+ith the rgw, rados and rbd suites. The results of each suite have been an=
+alyzed and summarized in http://tracker.ceph.com/issues/10501. The next s=
+teps are either:
 
-Yehuda
+a) Yehuda for rgw, Josh for rbd and Sam for rados all agree that the erro=
+rs are unrelated to the backports
+b) The https://github.com/ceph/ceph/tree/giant-backports branch is given =
+to QE for final tests and merge into giant
+
+OR
+
+a) At least of the lead thinks more work is needed to stabilize the giant=
+ branch
+b) A new set of tests will be run and analyzed after adding/removing one =
+or more backports to/from the https://github.com/ceph/ceph/tree/giant-bac=
+kports branch
+
+The description of http://tracker.ceph.com/issues/10501 shows a detailed =
+list of all commits / issues that are in the giant backport branch. To ge=
+t a global view of what the next giant point release will be, the descrip=
+tion also includes the commits that have already been merged in the giant=
+ branch. The list of pull requests that are candidate for inclusion in th=
+e giant release but have not been included in the integration branch are =
+also listed: maybe one of them could contribute to resolve a problem foun=
+d during the tests. And finally all redmine issues that have been marked =
+to be backported to giant but do not yet have a candidate pull request ar=
+e listed: this is the backport backlog so to speak ;-)
+
+Cheers
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+
+
+--4xLF5XfOlBDFwkbesbdqIKP5BeMh7DFdA
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlS35twACgkQ8dLMyEl6F23zXwCfRwEaLRwEStfGr61gQKCuDX1h
+fTsAoK75pL8hjDENHX1dxQwLdi7TBTkT
+=VQVa
+-----END PGP SIGNATURE-----
+
+--4xLF5XfOlBDFwkbesbdqIKP5BeMh7DFdA--
