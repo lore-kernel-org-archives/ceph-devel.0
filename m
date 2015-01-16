@@ -1,72 +1,57 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: MDS has inconsistent performance
-Date: Sat, 17 Jan 2015 00:27:47 +0800
-Message-ID: <CAAM7YA=QqCfo0AREmCt+=yaDUOzAxqemkjWxKJRxw_TcA_429A@mail.gmail.com>
-References: <CAD=PzH+UxcrF-0=fpAWrXsv-CB=q1nbAxbBHSn9A_P-hS1-fGg@mail.gmail.com>
-	<CAC6JEv9fXSm+xEcFPiJ90kQNKjoWdFZCs02ZHKD4kJGd4_2Q8w@mail.gmail.com>
-	<CAD=PzHLahg1TPu3-zjFk6hO4cXeYg+-TjdR5cw0XNSoVA+_Ebw@mail.gmail.com>
-	<CAC6JEv_1Gx3pnmutej7UmABC+eyB+VvoBo6X1OZhHFu+==6fjA@mail.gmail.com>
-	<CAD=PzHJFT4QUeer7A-EawAQ=AskEu44pLPqHo4BLpk11zA1UQw@mail.gmail.com>
-	<CAC6JEv826RqkkTCt3224LLv_BdS9394yucXf7_qaKwsYHmC-+A@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: FAILED assert(peer_missing.count(fromshard))
+Date: Fri, 16 Jan 2015 17:39:09 +0100
+Message-ID: <54B93EAD.2040200@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="wWeUhGxe85ecNx1cRVwl0rbQpCk7WVL9W"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f181.google.com ([209.85.217.181]:62015 "EHLO
-	mail-lb0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751736AbbAPQ1t (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Jan 2015 11:27:49 -0500
-Received: by mail-lb0-f181.google.com with SMTP id u14so9825967lbd.12
-        for <ceph-devel@vger.kernel.org>; Fri, 16 Jan 2015 08:27:48 -0800 (PST)
-In-Reply-To: <CAC6JEv826RqkkTCt3224LLv_BdS9394yucXf7_qaKwsYHmC-+A@mail.gmail.com>
+Received: from mail2.dachary.org ([91.121.57.175]:41924 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1753039AbbAPQjM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Jan 2015 11:39:12 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@gregs42.com>
-Cc: Michael Sevilla <mikesevilla3@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, =?UTF-8?B?5Lil5q2j?= <zyan@redhat.com>
+To: Samuel Just <sam.just@inktank.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, Jan 16, 2015 at 2:37 PM, Gregory Farnum <greg@gregs42.com> wrote:
-> On Thu, Jan 15, 2015 at 2:44 PM, Michael Sevilla <mikesevilla3@gmail.com> wrote:
->> Let me know if this works and/or you need anything else:
->>
->> https://www.dropbox.com/s/fq47w6jebnyluu0/lookup-logs.tar.gz?dl=0
->>
->> Beware - the clients were on debug=10. Also, I tried this with the
->> kernel client and it is more consistent; it does the 2 lookups per
->> create on 1 client every single time.
->
-> Mmmm, there are no mds logs of note here. :(
->
-> I did look enough to see that:
-> 1) The MDS is for some reason revoking caps on the file create
-> prompting the switch to double-lookups, which it was not before. The
-> client doesn't really have any visibility into why that would be the
-> case; the best guess I can come up with is that maybe the MDS split up
-> the directory into multiple frags at this point -- do you have that
-> enabled?
-> 2) The only way we set the I_COMPLETE flag is when we create an empty
-> directory, or when we do a complete listdir on one. That makes it
-> pretty difficult to get the flag back (and so do the optimal create
-> path) once you lose it. :( I'd love a better way to do so, but we'll
-> have to look at what's involved in a bit of depth.
->
-> I'm not sure why the kernel client is so much more cautious, but I
-> think there were a number of troubles with the directory listing
-> orders and things which were harder to solve there - I don't remember
-> if we introduced the I_DIR_ORDERED flag in it or not. Zheng can talk
-> more about that. What kernel client version are you using?
->
-> And for a vanity data point, what kind of hardware is your MDS running on? :)
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--wWeUhGxe85ecNx1cRVwl0rbQpCk7WVL9W
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-For kernel before 3.18, the I_COMPLETE get cleared once directory is modified.
-I_DIR_ORDERED is introduced by 3.18 kernel. I just tried 3.18 kernel,
-unfortunately
-there still is a bug that prevent new directory from having I_COMPLETE flag
+Hi Sam,
 
-Regards
-Yan, Zheng
+In the context of http://tracker.ceph.com/issues/10524 FAILED assert(peer=
+_missing.count(fromshard)) I propose to add some information for when it =
+happens:
 
->
-> -Greg
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+https://github.com/ceph/ceph/pull/3389
+
+If what happens really is that a bad peer ends up being added with in mis=
+sing_loc.add_location, that will be a useful information. I tried a numbe=
+r of scenarios and could not find the right conditions to reproduce the p=
+roblem locally. Hopefully this additional information will show me where =
+to go :-)
+
+Cheers
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--wWeUhGxe85ecNx1cRVwl0rbQpCk7WVL9W
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlS5Pq0ACgkQ8dLMyEl6F203AwCfTLBrI9qXxlBW27WT+79jWjnD
+w/kAoJmRYmWk7QIJnEm+SM+2waXmu+ih
+=Su3L
+-----END PGP SIGNATURE-----
+
+--wWeUhGxe85ecNx1cRVwl0rbQpCk7WVL9W--
