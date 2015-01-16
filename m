@@ -1,182 +1,119 @@
-From: scan-admin@coverity.com
-Subject: New Defects reported by Coverity Scan for ceph
-Date: Fri, 16 Jan 2015 06:39:43 -0800
-Message-ID: <54b922af592d5_4b8dd69318255c1@scan.coverity.com.mail>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: 'Immutable bit' on pools to prevent deletion
+Date: Fri, 16 Jan 2015 06:46:31 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1501160643370.8527@cobra.newdream.net>
+References: <54B7D2D6.4020503@42on.com> <CABBk=J9BVNzKHfSxdxmRjrZoasAWUz8_e9Juzc4vYnNXo0wHFA@mail.gmail.com> <alpine.DEB.2.00.1501150918110.26676@cobra.newdream.net> <101AEAEE-F428-4425-87CE-A20B3030FF55@enovance.com> <54B8EE3B.70506@42on.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from scanrelay.coverity.com ([209.249.196.67]:56274 "EHLO
-	scanrelay.coverity.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751795AbbAPOjo (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Jan 2015 09:39:44 -0500
+Received: from cobra.newdream.net ([66.33.216.30]:54017 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754201AbbAPOqb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Jan 2015 09:46:31 -0500
+In-Reply-To: <54B8EE3B.70506@42on.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Wido den Hollander <wido@42on.com>
+Cc: Sebastien Han <sebastien.han@enovance.com>, Yehuda Sadeh <yehuda@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+On Fri, 16 Jan 2015, Wido den Hollander wrote:
+> On 01/16/2015 10:50 AM, Sebastien Han wrote:
+> > Hum if I understand correctly you?re all more in favour of a conf setting in the ceph.conf;
+> > The problem for me is that this will apply to all the pools by default and I?ll have to inject an arg to change this.
+> > Injecting the arg will remove this ?lock" and then all of the sudden all the pools become deletable through the lib again (who knows what users can do simultaneously)
+> > 
+> 
+> No, from what I understand it's easier to implement, not the better way.
+
+I'd like to do both, actually.  :)
+
+> > I?m more in favour of a new flag to set to the pool, something like:
+> > 
+> > ceph osd pool set foo protect true
+> > ceph osd pool delete foo foo ?yes?.
+> > ERROR: pool foo is protected against deletion
+> > 
+> > ceph osd pool delete foo protect false
+> > ceph osd pool delete foo foo ?yes?.
+> > Pool successfully deleted
+> >
+> 
+> Something like that per pool seems better to me as well. But I'd then
+> opt for a 'feature' which can be set on a pool.
+> 
+> ceph osd pool set foo nodelete
+> ceph osd pool set foo nopgchange
+> ceph osd pool set foo nosizechange
+
+I like this since it fits into the current flags nicely.  The downside is 
+we don't grandfather existing pools on upgrade.  Not sure if people think 
+that's a good idea.
+
+> > The good thing with that is that owners of the pool (or admin), will be able to set this flag or remove it.
+> > We stick with the "ceph osd pool delete foo foo ?yes?.? command as well, so we don?t change too much things.
+> > 
+> > Moreover we can also make use of a config option to protect all new created pools by default:
+> > 
+> > mon protect pool default = true
+> > 
+> > This automatically set the protected flag to a new pool.
+> > 
+> > What do you think?
+> > 
+> 
+> Setting a nodelete flag or something like that by default is fine with
+> me. Like Sage mentioned earlier, almost nobody will have ephemeral pools
+> in their cluster. You don't want to loose data because you accidentally
+> removed a pool.
+
+We should mirror this option:
+
+OPTION(osd_pool_default_flag_hashpspool, OPT_BOOL, true)   // use new pg 
+hashing to prevent pool/pg overlap
+
+So,
+
+osd_pool_default_flag_nodelete = true
+osd_pool_default_flag_nopgchange = true
+osd_pool_default_flag_nosizechange = true
+
+The big question for me is should we enable these by default in hammer?
+
+sage
 
 
-Hi,
 
-Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
-
-4 new defect(s) introduced to ceph found with Coverity Scan.
-19 defect(s), reported by Coverity Scan earlier, were marked fixed in the recent build analyzed by Coverity Scan.
-
-New defect(s) Reported-by: Coverity Scan
-Showing 4 of 4 defect(s)
-
-
-** CID 1264457:  Uncaught exception  (UNCAUGHT_EXCEPT)
-/tools/cephfs/cephfs-table-tool.cc: 11 in main()
-/tools/cephfs/cephfs-table-tool.cc: 11 in main()
-/tools/cephfs/cephfs-table-tool.cc: 11 in main()
-/tools/cephfs/cephfs-table-tool.cc: 11 in main()
-/tools/cephfs/cephfs-table-tool.cc: 11 in main()
-
-** CID 1264458:  Uninitialized scalar field  (UNINIT_CTOR)
-/test/librbd/test_ImageWatcher.cc: 47 in TestImageWatcher::WatchCtx::WatchCtx(TestImageWatcher&)()
-
-** CID 1264459:  Uninitialized scalar field  (UNINIT_CTOR)
-/test/librbd/test_fixture.cc: 44 in TestFixture::TestFixture()()
-
-** CID 1264460:  Structurally dead code  (UNREACHABLE)
-/common/sync_filesystem.h: 51 in sync_filesystem(int)()
-
-
-________________________________________________________________________________________________________
-*** CID 1264457:  Uncaught exception  (UNCAUGHT_EXCEPT)
-/tools/cephfs/cephfs-table-tool.cc: 11 in main()
-5     #include "common/errno.h"
-6     #include "global/global_init.h"
-7     
-8     #include "TableTool.h"
-9     
-10     
->>>     CID 1264457:  Uncaught exception  (UNCAUGHT_EXCEPT)
->>>     In function "main(int, char const **)" an exception of type "ceph::FailedAssertion" is thrown and never caught.
-11     int main(int argc, const char **argv)
-12     {
-13       vector<const char*> args;
-14       argv_to_vec(argc, argv, args);
-15       env_to_vec(args);
-16     
-/tools/cephfs/cephfs-table-tool.cc: 11 in main()
-5     #include "common/errno.h"
-6     #include "global/global_init.h"
-7     
-8     #include "TableTool.h"
-9     
-10     
->>>     CID 1264457:  Uncaught exception  (UNCAUGHT_EXCEPT)
->>>     In function "main(int, char const **)" an exception of type "ceph::FailedAssertion" is thrown and never caught.
-11     int main(int argc, const char **argv)
-12     {
-13       vector<const char*> args;
-14       argv_to_vec(argc, argv, args);
-15       env_to_vec(args);
-16     
-/tools/cephfs/cephfs-table-tool.cc: 11 in main()
-5     #include "common/errno.h"
-6     #include "global/global_init.h"
-7     
-8     #include "TableTool.h"
-9     
-10     
->>>     CID 1264457:  Uncaught exception  (UNCAUGHT_EXCEPT)
->>>     In function "main(int, char const **)" an exception of type "ceph::FailedAssertion" is thrown and never caught.
-11     int main(int argc, const char **argv)
-12     {
-13       vector<const char*> args;
-14       argv_to_vec(argc, argv, args);
-15       env_to_vec(args);
-16     
-/tools/cephfs/cephfs-table-tool.cc: 11 in main()
-5     #include "common/errno.h"
-6     #include "global/global_init.h"
-7     
-8     #include "TableTool.h"
-9     
-10     
->>>     CID 1264457:  Uncaught exception  (UNCAUGHT_EXCEPT)
->>>     In function "main(int, char const **)" an exception of type "ceph::FailedAssertion" is thrown and never caught.
-11     int main(int argc, const char **argv)
-12     {
-13       vector<const char*> args;
-14       argv_to_vec(argc, argv, args);
-15       env_to_vec(args);
-16     
-/tools/cephfs/cephfs-table-tool.cc: 11 in main()
-5     #include "common/errno.h"
-6     #include "global/global_init.h"
-7     
-8     #include "TableTool.h"
-9     
-10     
->>>     CID 1264457:  Uncaught exception  (UNCAUGHT_EXCEPT)
->>>     In function "main(int, char const **)" an exception of type "ceph::FailedAssertion" is thrown and never caught.
-11     int main(int argc, const char **argv)
-12     {
-13       vector<const char*> args;
-14       argv_to_vec(argc, argv, args);
-15       env_to_vec(args);
-16     
-
-________________________________________________________________________________________________________
-*** CID 1264458:  Uninitialized scalar field  (UNINIT_CTOR)
-/test/librbd/test_ImageWatcher.cc: 47 in TestImageWatcher::WatchCtx::WatchCtx(TestImageWatcher&)()
-41         NOTIFY_OP_REQUEST_LOCK  = 2,
-42         NOTIFY_OP_HEADER_UPDATE = 3
-43       };
-44     
-45       class WatchCtx : public librados::WatchCtx2 {
-46       public:
->>>     CID 1264458:  Uninitialized scalar field  (UNINIT_CTOR)
->>>     Non-static class member "m_handle" is not initialized in this constructor nor in any functions that it calls.
-47         WatchCtx(TestImageWatcher &parent) : m_parent(parent) {}
-48     
-49         int watch(const librbd::ImageCtx &ictx) {
-50           m_header_oid = ictx.header_oid;
-51           return m_parent.m_ioctx.watch2(m_header_oid, &m_handle, this);
-52         }
-
-________________________________________________________________________________________________________
-*** CID 1264459:  Uninitialized scalar field  (UNINIT_CTOR)
-/test/librbd/test_fixture.cc: 44 in TestFixture::TestFixture()()
-38     
-39     std::string TestFixture::_pool_name;
-40     librados::Rados TestFixture::_rados;
-41     uint64_t TestFixture::_image_number = 0;
-42     
-43     TestFixture::TestFixture() {
->>>     CID 1264459:  Uninitialized scalar field  (UNINIT_CTOR)
->>>     Non-static class member "m_image_size" is not initialized in this constructor nor in any functions that it calls.
-44     }
-45     
-46     void TestFixture::SetUpTestCase() {
-47       _pool_name = get_temp_pool_name();
-48       ASSERT_EQ("", create_one_pool_pp(_pool_name, _rados));
-49     }
-
-________________________________________________________________________________________________________
-*** CID 1264460:  Structurally dead code  (UNREACHABLE)
-/common/sync_filesystem.h: 51 in sync_filesystem(int)()
-45       if (syscall(__NR_syncfs, fd) == 0)
-46         return 0;
-47       else
-48         return -errno;
-49     #endif
-50     
->>>     CID 1264460:  Structurally dead code  (UNREACHABLE)
->>>     This code cannot be reached: "sync();".
-51       sync();
-52       return 0;
-53     }
-54     
-
-
-________________________________________________________________________________________________________
-To view the defects in Coverity Scan visit, http://scan.coverity.com/projects/25?tab=overview
-
-To manage Coverity Scan email notifications for "ceph-devel@vger.kernel.org", click http://scan.coverity.com/subscriptions/edit?email=ceph-devel%40vger.kernel.org&token=018084d671e3cc89d00dd2ccb7eb849c .
-
+> 
+> Wido
+> 
+> >> On 15 Jan 2015, at 18:24, Sage Weil <sage@newdream.net> wrote:
+> >>
+> >> Then secondary question is whether the cluster should implicitly clear the 
+> >> allow-delete after some time period (maybe 'pending-delete' would make 
+> >> more sense in that case), or whether we deny IO during that period.  Seems 
+> >> perhaps too complicated.
+> > 
+> > 
+> > Cheers.
+> > ???? 
+> > S?bastien Han 
+> > Cloud Architect 
+> > 
+> > "Always give 100%. Unless you're giving blood."
+> > 
+> > Phone: +33 (0)1 49 70 99 72 
+> > Mail: sebastien.han@enovance.com 
+> > Address : 11 bis, rue Roqu?pine - 75008 Paris
+> > Web : www.enovance.com - Twitter : @enovance 
+> > 
+> 
+> 
+> -- 
+> Wido den Hollander
+> 42on B.V.
+> Ceph trainer and consultant
+> 
+> Phone: +31 (0)20 700 9902
+> Skype: contact42on
+> 
+> 
