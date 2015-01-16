@@ -1,169 +1,149 @@
-From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Subject: RE: straw2 and ln calculation
-Date: Fri, 16 Jan 2015 08:32:20 +0000
-Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC0212F2AB@shsmsx102.ccr.corp.intel.com>
-References: <alpine.DEB.2.00.1501151728200.2501@cobra.newdream.net>
+From: Mohd Bazli Ab Karim <bazli.abkarim@mimos.my>
+Subject: RE: MDS aborted after recovery and active, FAILED assert (r >=0)
+Date: Fri, 16 Jan 2015 08:36:08 +0000
+Message-ID: <20DBB415DF55354C8FC7AF12F4AE770024D32379@MBX02-TPM.mimos.local>
+References: <20DBB415DF55354C8FC7AF12F4AE770024D3233A@MBX02-TPM.mimos.local>
+ <54B8C256.3060706@42on.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:17828 "EHLO mga14.intel.com"
+Received: from dexter.mimos.my ([202.45.138.110]:61296 "EHLO dexter.mimos.my"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752345AbbAPIc1 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Jan 2015 03:32:27 -0500
-In-Reply-To: <alpine.DEB.2.00.1501151728200.2501@cobra.newdream.net>
+	id S1752096AbbAPIfO convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Jan 2015 03:35:14 -0500
+In-Reply-To: <54B8C256.3060706@42on.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, "Blinick, Stephen L" <stephen.l.blinick@intel.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Wido den Hollander <wido@42on.com>
+Cc: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Sage,
-       I have created a new pull request (https://github.com/ceph/ceph/pull/3386) , which changed the crush_ln to give more 32 digits, thus we don't need to do left shift now.
-        You win the bet :), the distribution is much better now,  originally the std_dev is 88~121, but now with 32 more digits, we can reduce it to 12.4895(even lower than expected?????).
+Agree. I was about to upgrade to 0.90, but has postponed it due to this error.
+Any chance for me to recover it first before upgrading it?
 
-        Also note that 8 more digits and 32 more digits show almost the same result.
+Thanks Wido.
 
-For 32 more digits:
-
-expect                  169.664
-osd     weight  count   adjusted
-0       1       179     179
-1       1.75    291     166
-2       3.062   507     165
-3       5.359   937     174
-4       9.379   1581    168
-5       16.41   2771    168
-6       28.72   4847    168
-7       50.27   8690    172
-8       87.96   14924   169
-9       153.9   26069   169
-10      269.4   45706   169
-11      471.4   79754   169
-12      825     139847  169
-13      1444    245707  170
-14      2527    428190  169
-std dev 12.4895
-     vs 12.6005 (expected)
-
-For 8 more digits
-
-expect                  169.664
-osd     weight  count   adjusted
-0       1       179     179
-1       1.75    290     165
-2       3.062   507     165
-3       5.359   936     174
-4       9.379   1580    168
-5       16.41   2771    168
-6       28.72   4846    168
-7       50.27   8690    172
-8       87.96   14923   169
-9       153.9   26068   169
-10      269.4   45706   169
-11      471.4   79754   169
-12      825     139847  169
-13      1444    245710  170
-14      2527    428193  169
-std dev 12.5935
-     vs 12.5983 (expected).
-
-
-
-												Xiaoxi
-
+Regards,
+Bazli
 
 -----Original Message-----
-From: Sage Weil [mailto:sweil@redhat.com] 
-Sent: Friday, January 16, 2015 10:22 AM
-To: Chen, Xiaoxi; Blinick, Stephen L
-Cc: ceph-devel@vger.kernel.org
-Subject: straw2 and ln calculation
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Wido den Hollander
+Sent: Friday, January 16, 2015 3:50 PM
+To: Mohd Bazli Ab Karim; ceph-users@lists.ceph.com; ceph-devel@vger.kernel.org
+Subject: Re: MDS aborted after recovery and active, FAILED assert (r >=0)
 
-Hi everyone,
+On 01/16/2015 08:37 AM, Mohd Bazli Ab Karim wrote:
+> Dear Ceph-Users, Ceph-Devel,
+>
+> Apologize me if you get double post of this email.
+>
+> I am running a ceph cluster version 0.72.2 and one MDS (in fact, it's 3, 2 down and only 1 up) at the moment.
+> Plus I have one CephFS client mounted to it.
+>
 
-I took at look at the optimized straw2 code today.  There was one typo
-(s/i/u/) and it looks like it works as well as the previous version.  I've pushed the latest code and some additional tests to the wip-crush-straw2 branch.
+In Ceph world 0.72.2 is ancient en pretty old. If you want to play with CephFS I recommend you upgrade to 0.90 and also use at least kernel 3.18
 
-I went on to do some tests of the variance in the resulting distribution when the weights are all identical vs somewhat variable vs very skewed. I found that for a more 'typical' distribution of weights (e.g, .5 - 3) the std deviation stays flat.  However, for very large skews, there are interesting effects that emerge based on very small differences in the ln value.  For example, here we adjust the table value into a negative integer in mapper.c:
+> Now, the MDS always get aborted after recovery and active for 4 secs.
+> Some parts of the log are as below:
+>
+>     -3> 2015-01-15 14:10:28.464706 7fbcc8226700  1 --
+> 10.4.118.21:6800/5390 <== osd.19 10.4.118.32:6821/243161 73 ====
+> osd_op_re
+> ply(3742 1000240c57e.00000000 [create 0~0,setxattr (99)]
+> v56640'1871414 uv1871414 ondisk = 0) v6 ==== 221+0+0 (261801329 0 0)
+> 0x
+> 7770bc80 con 0x69c7dc0
+>     -2> 2015-01-15 14:10:28.464730 7fbcc8226700  1 --
+> 10.4.118.21:6800/5390 <== osd.18 10.4.118.32:6818/243072 67 ====
+> osd_op_re
+> ply(3645 1000007941c.00000000 [tmapup 0~0] v56640'1769567 uv1769567
+> ondisk = 0) v6 ==== 179+0+0 (3759887079 0 0) 0x7757ec80 con
+> 0x1c6bb00
+>     -1> 2015-01-15 14:10:28.464754 7fbcc8226700  1 --
+> 10.4.118.21:6800/5390 <== osd.47 10.4.118.35:6809/8290 79 ====
+> osd_op_repl
+> y(3419 mds_anchortable [writefull 0~94394932] v0'0 uv0 ondisk = -90
+> (Message too long)) v6 ==== 174+0+0 (3942056372 0 0) 0x69f94
+> a00 con 0x1c6b9a0
+>      0> 2015-01-15 14:10:28.471684 7fbcc8226700 -1 mds/MDSTable.cc: In
+> function 'void MDSTable::save_2(int, version_t)' thread 7
+> fbcc8226700 time 2015-01-15 14:10:28.469999
+> mds/MDSTable.cc: 83: FAILED assert(r >= 0)
+>
+>  ceph version  ()
+>  1: (MDSTable::save_2(int, unsigned long)+0x325) [0x769e25]
+>  2: (Context::complete(int)+0x9) [0x568d29]
+>  3: (Objecter::handle_osd_op_reply(MOSDOpReply*)+0x1097) [0x7c15d7]
+>  4: (MDS::handle_core_message(Message*)+0x5a0) [0x588900]
+>  5: (MDS::_dispatch(Message*)+0x2f) [0x58908f]
+>  6: (MDS::ms_dispatch(Message*)+0x1e3) [0x58ab93]
+>  7: (DispatchQueue::entry()+0x549) [0x975739]
+>  8: (DispatchQueue::DispatchThread::entry()+0xd) [0x8902dd]
+>  9: (()+0x7e9a) [0x7fbcccb0de9a]
+>  10: (clone()+0x6d) [0x7fbccb4ba3fd]
+>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
+>
+> Is there any workaround/patch to fix this issue? Let me know if need to see the log with debug-mds of certain level as well.
+> Any helps would be very much appreciated.
+>
+> Thanks.
+> Bazli
+>
+> ________________________________
+> DISCLAIMER:
+>
+>
+> This e-mail (including any attachments) is for the addressee(s) only and may be confidential, especially as regards personal data. If you are not the intended recipient, please note that any dealing, review, distribution, printing, copying or use of this e-mail is strictly prohibited. If you have received this email in error, please notify the sender immediately and delete the original message (including any attachments).
+>
+>
+> MIMOS Berhad is a research and development institution under the purview of the Malaysian Ministry of Science, Technology and Innovation. Opinions, conclusions and other information in this e-mail that do not relate to the official business of MIMOS Berhad and/or its subsidiaries shall be understood as neither given nor endorsed by MIMOS Berhad and/or its subsidiaries and neither MIMOS Berhad nor its subsidiaries accepts responsibility for the same. All liability arising from or in connection with computer viruses and/or corrupted e-mails is excluded to the fullest extent permitted by law.
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+> in the body of a message to majordomo@vger.kernel.org More majordomo
+> info at  http://vger.kernel.org/majordomo-info.html
+>
 
-		ln = crush_ln(u) - 0x10000;
 
-If I adjust that 0x10000 value only slightly, and generate a distribution across a set of scaled weights (e.g., 1, 2, 4, 8, 16, 32), I will see the low weights either more heavily or less heavily weighted than they should be.  0x10000 skews them a bit low, 0xffff skews them a bit high.  e.g., for 0x10000 I get
+--
+Wido den Hollander
+42on B.V.
+Ceph trainer and consultant
 
-expect			169.664
-osd	weight	count	adjusted
-0	1	102	102    <-- here
-1	1.75	212	121
-2	3.062	442	144
-3	5.359	858	160
-4	9.379	1483	158
-5	16.41	2673	162
-6	28.72	4756	165
-7	50.27	8620	171
-8	87.96	14851	168
-9	153.9	26019	169
-10	269.4	45674	169
-11	471.4	79768	169
-12	825	139949	169
-13	1444	245958	170
-14	2527	428635	169
-std dev 88.6993
-     vs 12.1484	(expected)
+Phone: +31 (0)20 700 9902
+Skype: contact42on
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-While for 0xffff I get:
+________________________________
+DISCLAIMER:
 
-expect			169.664
-osd	weight	count	adjusted
-0	1	272	272
-1	1.75	395	225
-2	3.062	596	194
-3	5.359	1009	188
-4	9.379	1665	177
-5	16.41	2869	174
-6	28.72	4936	171
-7	50.27	8769	174
-8	87.96	14981	170
-9	153.9	26102	169
-10	269.4	45729	169
-11	471.4	79737	169
-12	825	139719	169
-13	1444	245486	170
-14	2527	427735	169
-std dev 121.243
-     vs 13.1205	(expected)
 
-This could be written off to chance, but I see the same effect amplified for 0xfffe and 0x10001.
+This e-mail (including any attachments) is for the addressee(s) only and may be confidential, especially as regards personal data. If you are not the intended recipient, please note that any dealing, review, distribution, printing, copying or use of this e-mail is strictly prohibited. If you have received this email in error, please notify the sender immediately and delete the original message (including any attachments).
 
-I suppose if we have to choose I think skewing high makes more sense since it means the high weight items won't skew high and overfill (although in practice that doesn't seem to be happening.. it's only on the low end that things get wonky.. the high end looks quite good).
 
-In any case, two things:
+MIMOS Berhad is a research and development institution under the purview of the Malaysian Ministry of Science, Technology and Innovation. Opinions, conclusions and other information in this e-mail that do not relate to the official business of MIMOS Berhad and/or its subsidiaries shall be understood as neither given nor endorsed by MIMOS Berhad and/or its subsidiaries and neither MIMOS Berhad nor its subsidiaries accepts responsibility for the same. All liability arising from or in connection with computer viruses and/or corrupted e-mails is excluded to the fullest extent permitted by law.
 
-1) Maybe someone can check my math on the stddev calculation.  I'm scaling the actual placement count by the weight (adj = count/weight) and then doing the stddev of the adjusted values.  But the expected value is always about 1/3 or 1/4 of that.  I can't tell if that's because the hash is weak or because I'm doing something wrong with the calculation.  Notably, if I plug in rand() with equal weights for a sanity check, I still get a stddev of 953 vs expected 249... about what I see from straw2.  Strangely when I use straw I get a bit better than taht, 476.  Am I crazy?  See:
+------------------------------------------------------------------
+-
+-
+DISCLAIMER: 
 
- ./unittest_crush_wrapper --gtest_filter=CrushWrapper.straw2
+This e-mail (including any attachments) is for the addressee(s) 
+only and may contain confidential information. If you are not the 
+intended recipient, please note that any dealing, review, 
+distribution, printing, copying or use of this e-mail is strictly 
+prohibited. If you have received this email in error, please notify 
+the sender  immediately and delete the original message. 
+MIMOS Berhad is a research and development institution under 
+the purview of the Malaysian Ministry of Science, Technology and 
+Innovation. Opinions, conclusions and other information in this e-
+mail that do not relate to the official business of MIMOS Berhad 
+and/or its subsidiaries shall be understood as neither given nor 
+endorsed by MIMOS Berhad and/or its subsidiaries and neither 
+MIMOS Berhad nor its subsidiaries accepts responsibility for the 
+same. All liability arising from or in connection with computer 
+viruses and/or corrupted e-mails is excluded to the fullest extent 
+permitted by law.
 
-2) Given how sensitive the ln value is to 0xffff vs 0x10000, I'm highly suspicious that slightly better precision will help us out.  Notably, we do
-
-		ln = crush_ln(u) - 0x10000;
-
-		/*
-		 * divide by 16.16 fixed-point weight
-		 */
-		draw = (ln << 32) / bucket->item_weights[i];
-
-...so some extra bits of precision (instead of having the lower 32 zeroed) would probably help a lot.
-
-Can crush_ln() be modifed to provide more bits of precision without increasing the size of the tables?  I don't really understand the math it's based on, but it looks like the same curve is being added in with different precision or something.. and a lot of bits in LH are being thrown out here
-
-    LH >>= (48-12);
-
-If there were 8 more bits returned from crush_ln and we shifted by 8 fewer bits in bucket_straw2_choose, for example, I bet we could eliminate some of the low-weight effect I'm seeing.
-
-To see what I'm seeing, you can run
-
- ./unittest_crush_wrapper --gtest_filter=CrushWrapper.straw2_stddev
-
-Any input would be helpful, thanks!
-sage
 
