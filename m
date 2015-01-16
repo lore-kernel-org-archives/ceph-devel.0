@@ -1,87 +1,182 @@
-From: John Spray <john.spray@redhat.com>
-Subject: Re: MDS aborted after recovery and active, FAILED assert (r >=0)
-Date: Fri, 16 Jan 2015 10:57:39 +0000
-Message-ID: <CAGd4Wr3eKTMuMJqi_yAv8EMWEpObfQuX0FqAP22htDKK5p3SZA@mail.gmail.com>
-References: <20DBB415DF55354C8FC7AF12F4AE770024D3233A@MBX02-TPM.mimos.local>
+From: scan-admin@coverity.com
+Subject: New Defects reported by Coverity Scan for ceph
+Date: Fri, 16 Jan 2015 06:39:43 -0800
+Message-ID: <54b922af592d5_4b8dd69318255c1@scan.coverity.com.mail>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain;
+ charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f169.google.com ([209.85.217.169]:64248 "EHLO
-	mail-lb0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754185AbbAPK5l convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Jan 2015 05:57:41 -0500
-Received: by mail-lb0-f169.google.com with SMTP id p9so17867842lbv.0
-        for <ceph-devel@vger.kernel.org>; Fri, 16 Jan 2015 02:57:40 -0800 (PST)
-In-Reply-To: <20DBB415DF55354C8FC7AF12F4AE770024D3233A@MBX02-TPM.mimos.local>
+Received: from scanrelay.coverity.com ([209.249.196.67]:56274 "EHLO
+	scanrelay.coverity.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751795AbbAPOjo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Jan 2015 09:39:44 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mohd Bazli Ab Karim <bazli.abkarim@mimos.my>
-Cc: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hmm, upgrading should help here, as the problematic data structure
-(anchortable) no longer exists in the latest version.  I haven't
-checked, but hopefully we don't try to write it during upgrades.
 
-The bug you're hitting is more or less the same as a similar one we
-have with the sessiontable in the latest ceph, but you won't hit it
-there unless you're very unlucky!
+Hi,
 
-John
+Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
 
-On Fri, Jan 16, 2015 at 7:37 AM, Mohd Bazli Ab Karim
-<bazli.abkarim@mimos.my> wrote:
-> Dear Ceph-Users, Ceph-Devel,
->
-> Apologize me if you get double post of this email.
->
-> I am running a ceph cluster version 0.72.2 and one MDS (in fact, it's 3, 2 down and only 1 up) at the moment.
-> Plus I have one CephFS client mounted to it.
->
-> Now, the MDS always get aborted after recovery and active for 4 secs.
-> Some parts of the log are as below:
->
->     -3> 2015-01-15 14:10:28.464706 7fbcc8226700  1 -- 10.4.118.21:6800/5390 <== osd.19 10.4.118.32:6821/243161 73 ==== osd_op_re
-> ply(3742 1000240c57e.00000000 [create 0~0,setxattr (99)] v56640'1871414 uv1871414 ondisk = 0) v6 ==== 221+0+0 (261801329 0 0) 0x
-> 7770bc80 con 0x69c7dc0
->     -2> 2015-01-15 14:10:28.464730 7fbcc8226700  1 -- 10.4.118.21:6800/5390 <== osd.18 10.4.118.32:6818/243072 67 ==== osd_op_re
-> ply(3645 1000007941c.00000000 [tmapup 0~0] v56640'1769567 uv1769567 ondisk = 0) v6 ==== 179+0+0 (3759887079 0 0) 0x7757ec80 con
-> 0x1c6bb00
->     -1> 2015-01-15 14:10:28.464754 7fbcc8226700  1 -- 10.4.118.21:6800/5390 <== osd.47 10.4.118.35:6809/8290 79 ==== osd_op_repl
-> y(3419 mds_anchortable [writefull 0~94394932] v0'0 uv0 ondisk = -90 (Message too long)) v6 ==== 174+0+0 (3942056372 0 0) 0x69f94
-> a00 con 0x1c6b9a0
->      0> 2015-01-15 14:10:28.471684 7fbcc8226700 -1 mds/MDSTable.cc: In function 'void MDSTable::save_2(int, version_t)' thread 7
-> fbcc8226700 time 2015-01-15 14:10:28.469999
-> mds/MDSTable.cc: 83: FAILED assert(r >= 0)
->
->  ceph version  ()
->  1: (MDSTable::save_2(int, unsigned long)+0x325) [0x769e25]
->  2: (Context::complete(int)+0x9) [0x568d29]
->  3: (Objecter::handle_osd_op_reply(MOSDOpReply*)+0x1097) [0x7c15d7]
->  4: (MDS::handle_core_message(Message*)+0x5a0) [0x588900]
->  5: (MDS::_dispatch(Message*)+0x2f) [0x58908f]
->  6: (MDS::ms_dispatch(Message*)+0x1e3) [0x58ab93]
->  7: (DispatchQueue::entry()+0x549) [0x975739]
->  8: (DispatchQueue::DispatchThread::entry()+0xd) [0x8902dd]
->  9: (()+0x7e9a) [0x7fbcccb0de9a]
->  10: (clone()+0x6d) [0x7fbccb4ba3fd]
->  NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
->
-> Is there any workaround/patch to fix this issue? Let me know if need to see the log with debug-mds of certain level as well.
-> Any helps would be very much appreciated.
->
-> Thanks.
-> Bazli
->
-> ________________________________
-> DISCLAIMER:
->
->
-> This e-mail (including any attachments) is for the addressee(s) only and may be confidential, especially as regards personal data. If you are not the intended recipient, please note that any dealing, review, distribution, printing, copying or use of this e-mail is strictly prohibited. If you have received this email in error, please notify the sender immediately and delete the original message (including any attachments).
->
->
-> MIMOS Berhad is a research and development institution under the purview of the Malaysian Ministry of Science, Technology and Innovation. Opinions, conclusions and other information in this e-mail that do not relate to the official business of MIMOS Berhad and/or its subsidiaries shall be understood as neither given nor endorsed by MIMOS Berhad and/or its subsidiaries and neither MIMOS Berhad nor its subsidiaries accepts responsibility for the same. All liability arising from or in connection with computer viruses and/or corrupted e-mails is excluded to the fullest extent permitted by law.
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+4 new defect(s) introduced to ceph found with Coverity Scan.
+19 defect(s), reported by Coverity Scan earlier, were marked fixed in the recent build analyzed by Coverity Scan.
+
+New defect(s) Reported-by: Coverity Scan
+Showing 4 of 4 defect(s)
+
+
+** CID 1264457:  Uncaught exception  (UNCAUGHT_EXCEPT)
+/tools/cephfs/cephfs-table-tool.cc: 11 in main()
+/tools/cephfs/cephfs-table-tool.cc: 11 in main()
+/tools/cephfs/cephfs-table-tool.cc: 11 in main()
+/tools/cephfs/cephfs-table-tool.cc: 11 in main()
+/tools/cephfs/cephfs-table-tool.cc: 11 in main()
+
+** CID 1264458:  Uninitialized scalar field  (UNINIT_CTOR)
+/test/librbd/test_ImageWatcher.cc: 47 in TestImageWatcher::WatchCtx::WatchCtx(TestImageWatcher&)()
+
+** CID 1264459:  Uninitialized scalar field  (UNINIT_CTOR)
+/test/librbd/test_fixture.cc: 44 in TestFixture::TestFixture()()
+
+** CID 1264460:  Structurally dead code  (UNREACHABLE)
+/common/sync_filesystem.h: 51 in sync_filesystem(int)()
+
+
+________________________________________________________________________________________________________
+*** CID 1264457:  Uncaught exception  (UNCAUGHT_EXCEPT)
+/tools/cephfs/cephfs-table-tool.cc: 11 in main()
+5     #include "common/errno.h"
+6     #include "global/global_init.h"
+7     
+8     #include "TableTool.h"
+9     
+10     
+>>>     CID 1264457:  Uncaught exception  (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char const **)" an exception of type "ceph::FailedAssertion" is thrown and never caught.
+11     int main(int argc, const char **argv)
+12     {
+13       vector<const char*> args;
+14       argv_to_vec(argc, argv, args);
+15       env_to_vec(args);
+16     
+/tools/cephfs/cephfs-table-tool.cc: 11 in main()
+5     #include "common/errno.h"
+6     #include "global/global_init.h"
+7     
+8     #include "TableTool.h"
+9     
+10     
+>>>     CID 1264457:  Uncaught exception  (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char const **)" an exception of type "ceph::FailedAssertion" is thrown and never caught.
+11     int main(int argc, const char **argv)
+12     {
+13       vector<const char*> args;
+14       argv_to_vec(argc, argv, args);
+15       env_to_vec(args);
+16     
+/tools/cephfs/cephfs-table-tool.cc: 11 in main()
+5     #include "common/errno.h"
+6     #include "global/global_init.h"
+7     
+8     #include "TableTool.h"
+9     
+10     
+>>>     CID 1264457:  Uncaught exception  (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char const **)" an exception of type "ceph::FailedAssertion" is thrown and never caught.
+11     int main(int argc, const char **argv)
+12     {
+13       vector<const char*> args;
+14       argv_to_vec(argc, argv, args);
+15       env_to_vec(args);
+16     
+/tools/cephfs/cephfs-table-tool.cc: 11 in main()
+5     #include "common/errno.h"
+6     #include "global/global_init.h"
+7     
+8     #include "TableTool.h"
+9     
+10     
+>>>     CID 1264457:  Uncaught exception  (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char const **)" an exception of type "ceph::FailedAssertion" is thrown and never caught.
+11     int main(int argc, const char **argv)
+12     {
+13       vector<const char*> args;
+14       argv_to_vec(argc, argv, args);
+15       env_to_vec(args);
+16     
+/tools/cephfs/cephfs-table-tool.cc: 11 in main()
+5     #include "common/errno.h"
+6     #include "global/global_init.h"
+7     
+8     #include "TableTool.h"
+9     
+10     
+>>>     CID 1264457:  Uncaught exception  (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char const **)" an exception of type "ceph::FailedAssertion" is thrown and never caught.
+11     int main(int argc, const char **argv)
+12     {
+13       vector<const char*> args;
+14       argv_to_vec(argc, argv, args);
+15       env_to_vec(args);
+16     
+
+________________________________________________________________________________________________________
+*** CID 1264458:  Uninitialized scalar field  (UNINIT_CTOR)
+/test/librbd/test_ImageWatcher.cc: 47 in TestImageWatcher::WatchCtx::WatchCtx(TestImageWatcher&)()
+41         NOTIFY_OP_REQUEST_LOCK  = 2,
+42         NOTIFY_OP_HEADER_UPDATE = 3
+43       };
+44     
+45       class WatchCtx : public librados::WatchCtx2 {
+46       public:
+>>>     CID 1264458:  Uninitialized scalar field  (UNINIT_CTOR)
+>>>     Non-static class member "m_handle" is not initialized in this constructor nor in any functions that it calls.
+47         WatchCtx(TestImageWatcher &parent) : m_parent(parent) {}
+48     
+49         int watch(const librbd::ImageCtx &ictx) {
+50           m_header_oid = ictx.header_oid;
+51           return m_parent.m_ioctx.watch2(m_header_oid, &m_handle, this);
+52         }
+
+________________________________________________________________________________________________________
+*** CID 1264459:  Uninitialized scalar field  (UNINIT_CTOR)
+/test/librbd/test_fixture.cc: 44 in TestFixture::TestFixture()()
+38     
+39     std::string TestFixture::_pool_name;
+40     librados::Rados TestFixture::_rados;
+41     uint64_t TestFixture::_image_number = 0;
+42     
+43     TestFixture::TestFixture() {
+>>>     CID 1264459:  Uninitialized scalar field  (UNINIT_CTOR)
+>>>     Non-static class member "m_image_size" is not initialized in this constructor nor in any functions that it calls.
+44     }
+45     
+46     void TestFixture::SetUpTestCase() {
+47       _pool_name = get_temp_pool_name();
+48       ASSERT_EQ("", create_one_pool_pp(_pool_name, _rados));
+49     }
+
+________________________________________________________________________________________________________
+*** CID 1264460:  Structurally dead code  (UNREACHABLE)
+/common/sync_filesystem.h: 51 in sync_filesystem(int)()
+45       if (syscall(__NR_syncfs, fd) == 0)
+46         return 0;
+47       else
+48         return -errno;
+49     #endif
+50     
+>>>     CID 1264460:  Structurally dead code  (UNREACHABLE)
+>>>     This code cannot be reached: "sync();".
+51       sync();
+52       return 0;
+53     }
+54     
+
+
+________________________________________________________________________________________________________
+To view the defects in Coverity Scan visit, http://scan.coverity.com/projects/25?tab=overview
+
+To manage Coverity Scan email notifications for "ceph-devel@vger.kernel.org", click http://scan.coverity.com/subscriptions/edit?email=ceph-devel%40vger.kernel.org&token=018084d671e3cc89d00dd2ccb7eb849c .
+
