@@ -1,113 +1,87 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: 'Immutable bit' on pools to prevent deletion
-Date: Fri, 16 Jan 2015 11:55:55 +0100
-Message-ID: <54B8EE3B.70506@42on.com>
-References: <54B7D2D6.4020503@42on.com> <CABBk=J9BVNzKHfSxdxmRjrZoasAWUz8_e9Juzc4vYnNXo0wHFA@mail.gmail.com> <alpine.DEB.2.00.1501150918110.26676@cobra.newdream.net> <101AEAEE-F428-4425-87CE-A20B3030FF55@enovance.com>
+From: John Spray <john.spray@redhat.com>
+Subject: Re: MDS aborted after recovery and active, FAILED assert (r >=0)
+Date: Fri, 16 Jan 2015 10:57:39 +0000
+Message-ID: <CAGd4Wr3eKTMuMJqi_yAv8EMWEpObfQuX0FqAP22htDKK5p3SZA@mail.gmail.com>
+References: <20DBB415DF55354C8FC7AF12F4AE770024D3233A@MBX02-TPM.mimos.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from websrv.42on.com ([31.25.102.167]:41410 "EHLO websrv.42on.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754001AbbAPKz6 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 16 Jan 2015 05:55:58 -0500
-In-Reply-To: <101AEAEE-F428-4425-87CE-A20B3030FF55@enovance.com>
+Received: from mail-lb0-f169.google.com ([209.85.217.169]:64248 "EHLO
+	mail-lb0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754185AbbAPK5l convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Jan 2015 05:57:41 -0500
+Received: by mail-lb0-f169.google.com with SMTP id p9so17867842lbv.0
+        for <ceph-devel@vger.kernel.org>; Fri, 16 Jan 2015 02:57:40 -0800 (PST)
+In-Reply-To: <20DBB415DF55354C8FC7AF12F4AE770024D3233A@MBX02-TPM.mimos.local>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sebastien Han <sebastien.han@enovance.com>, Sage Weil <sage@newdream.net>
-Cc: Yehuda Sadeh <yehuda@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Mohd Bazli Ab Karim <bazli.abkarim@mimos.my>
+Cc: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 01/16/2015 10:50 AM, Sebastien Han wrote:
-> Hum if I understand correctly you=E2=80=99re all more in favour of a =
-conf setting in the ceph.conf;
-> The problem for me is that this will apply to all the pools by defaul=
-t and I=E2=80=99ll have to inject an arg to change this.
-> Injecting the arg will remove this =E2=80=9Clock" and then all of the=
- sudden all the pools become deletable through the lib again (who knows=
- what users can do simultaneously)
->=20
+Hmm, upgrading should help here, as the problematic data structure
+(anchortable) no longer exists in the latest version.  I haven't
+checked, but hopefully we don't try to write it during upgrades.
 
-No, from what I understand it's easier to implement, not the better way=
-=2E
+The bug you're hitting is more or less the same as a similar one we
+have with the sessiontable in the latest ceph, but you won't hit it
+there unless you're very unlucky!
 
-> I=E2=80=99m more in favour of a new flag to set to the pool, somethin=
-g like:
->=20
-> ceph osd pool set foo protect true
-> ceph osd pool delete foo foo =E2=80=94yes=E2=80=A6.
-> ERROR: pool foo is protected against deletion
->=20
-> ceph osd pool delete foo protect false
-> ceph osd pool delete foo foo =E2=80=94yes=E2=80=A6.
-> Pool successfully deleted
+John
+
+On Fri, Jan 16, 2015 at 7:37 AM, Mohd Bazli Ab Karim
+<bazli.abkarim@mimos.my> wrote:
+> Dear Ceph-Users, Ceph-Devel,
 >
-
-Something like that per pool seems better to me as well. But I'd then
-opt for a 'feature' which can be set on a pool.
-
-ceph osd pool set foo nodelete
-ceph osd pool set foo nopgchange
-ceph osd pool set foo nosizechange
-
-
-> The good thing with that is that owners of the pool (or admin), will =
-be able to set this flag or remove it.
-> We stick with the "ceph osd pool delete foo foo =E2=80=94yes=E2=80=A6=
-=2E=E2=80=9D command as well, so we don=E2=80=99t change too much thing=
-s.
->=20
-> Moreover we can also make use of a config option to protect all new c=
-reated pools by default:
->=20
-> mon protect pool default =3D true
->=20
-> This automatically set the protected flag to a new pool.
->=20
-> What do you think?
->=20
-
-Setting a nodelete flag or something like that by default is fine with
-me. Like Sage mentioned earlier, almost nobody will have ephemeral pool=
-s
-in their cluster. You don't want to loose data because you accidentally
-removed a pool.
-
-Wido
-
->> On 15 Jan 2015, at 18:24, Sage Weil <sage@newdream.net> wrote:
->>
->> Then secondary question is whether the cluster should implicitly cle=
-ar the=20
->> allow-delete after some time period (maybe 'pending-delete' would ma=
-ke=20
->> more sense in that case), or whether we deny IO during that period. =
- Seems=20
->> perhaps too complicated.
->=20
->=20
-> Cheers.
-> =E2=80=93=E2=80=93=E2=80=93=E2=80=93=20
-> S=C3=A9bastien Han=20
-> Cloud Architect=20
->=20
-> "Always give 100%. Unless you're giving blood."
->=20
-> Phone: +33 (0)1 49 70 99 72=20
-> Mail: sebastien.han@enovance.com=20
-> Address : 11 bis, rue Roqu=C3=A9pine - 75008 Paris
-> Web : www.enovance.com - Twitter : @enovance=20
->=20
-
-
---=20
-Wido den Hollander
-42on B.V.
-Ceph trainer and consultant
-
-Phone: +31 (0)20 700 9902
-Skype: contact42on
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Apologize me if you get double post of this email.
+>
+> I am running a ceph cluster version 0.72.2 and one MDS (in fact, it's 3, 2 down and only 1 up) at the moment.
+> Plus I have one CephFS client mounted to it.
+>
+> Now, the MDS always get aborted after recovery and active for 4 secs.
+> Some parts of the log are as below:
+>
+>     -3> 2015-01-15 14:10:28.464706 7fbcc8226700  1 -- 10.4.118.21:6800/5390 <== osd.19 10.4.118.32:6821/243161 73 ==== osd_op_re
+> ply(3742 1000240c57e.00000000 [create 0~0,setxattr (99)] v56640'1871414 uv1871414 ondisk = 0) v6 ==== 221+0+0 (261801329 0 0) 0x
+> 7770bc80 con 0x69c7dc0
+>     -2> 2015-01-15 14:10:28.464730 7fbcc8226700  1 -- 10.4.118.21:6800/5390 <== osd.18 10.4.118.32:6818/243072 67 ==== osd_op_re
+> ply(3645 1000007941c.00000000 [tmapup 0~0] v56640'1769567 uv1769567 ondisk = 0) v6 ==== 179+0+0 (3759887079 0 0) 0x7757ec80 con
+> 0x1c6bb00
+>     -1> 2015-01-15 14:10:28.464754 7fbcc8226700  1 -- 10.4.118.21:6800/5390 <== osd.47 10.4.118.35:6809/8290 79 ==== osd_op_repl
+> y(3419 mds_anchortable [writefull 0~94394932] v0'0 uv0 ondisk = -90 (Message too long)) v6 ==== 174+0+0 (3942056372 0 0) 0x69f94
+> a00 con 0x1c6b9a0
+>      0> 2015-01-15 14:10:28.471684 7fbcc8226700 -1 mds/MDSTable.cc: In function 'void MDSTable::save_2(int, version_t)' thread 7
+> fbcc8226700 time 2015-01-15 14:10:28.469999
+> mds/MDSTable.cc: 83: FAILED assert(r >= 0)
+>
+>  ceph version  ()
+>  1: (MDSTable::save_2(int, unsigned long)+0x325) [0x769e25]
+>  2: (Context::complete(int)+0x9) [0x568d29]
+>  3: (Objecter::handle_osd_op_reply(MOSDOpReply*)+0x1097) [0x7c15d7]
+>  4: (MDS::handle_core_message(Message*)+0x5a0) [0x588900]
+>  5: (MDS::_dispatch(Message*)+0x2f) [0x58908f]
+>  6: (MDS::ms_dispatch(Message*)+0x1e3) [0x58ab93]
+>  7: (DispatchQueue::entry()+0x549) [0x975739]
+>  8: (DispatchQueue::DispatchThread::entry()+0xd) [0x8902dd]
+>  9: (()+0x7e9a) [0x7fbcccb0de9a]
+>  10: (clone()+0x6d) [0x7fbccb4ba3fd]
+>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
+>
+> Is there any workaround/patch to fix this issue? Let me know if need to see the log with debug-mds of certain level as well.
+> Any helps would be very much appreciated.
+>
+> Thanks.
+> Bazli
+>
+> ________________________________
+> DISCLAIMER:
+>
+>
+> This e-mail (including any attachments) is for the addressee(s) only and may be confidential, especially as regards personal data. If you are not the intended recipient, please note that any dealing, review, distribution, printing, copying or use of this e-mail is strictly prohibited. If you have received this email in error, please notify the sender immediately and delete the original message (including any attachments).
+>
+>
+> MIMOS Berhad is a research and development institution under the purview of the Malaysian Ministry of Science, Technology and Innovation. Opinions, conclusions and other information in this e-mail that do not relate to the official business of MIMOS Berhad and/or its subsidiaries shall be understood as neither given nor endorsed by MIMOS Berhad and/or its subsidiaries and neither MIMOS Berhad nor its subsidiaries accepts responsibility for the same. All liability arising from or in connection with computer viruses and/or corrupted e-mails is excluded to the fullest extent permitted by law.
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
