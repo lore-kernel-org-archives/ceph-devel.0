@@ -1,90 +1,67 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: Re: upcoming release giant v0.87.1 : leads feedback needed
-Date: Fri, 16 Jan 2015 07:46:25 +0100 (CET)
-Message-ID: <1922521912.4341991.1421390785245.JavaMail.zimbra@oxygem.tv>
-References: <54B7E6DC.8010905@dachary.org> <54B7F2DF.9060003@dachary.org>
+From: Mohd Bazli Ab Karim <bazli.abkarim@mimos.my>
+Subject: MDS aborted after recovery and active, FAILED assert (r >=0)
+Date: Fri, 16 Jan 2015 07:37:01 +0000
+Message-ID: <20DBB415DF55354C8FC7AF12F4AE770024D3233A@MBX02-TPM.mimos.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:40473 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750997AbbAPGq1 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Jan 2015 01:46:27 -0500
-In-Reply-To: <461708302.4341990.1421390777959.JavaMail.zimbra@oxygem.tv>
+Received: from hydrobot.mimos.my ([202.45.136.101]:29271 "EHLO
+	hydrobot.mimos.my" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751893AbbAPHmM convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Jan 2015 02:42:12 -0500
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Loic,
+Dear Ceph-Users, Ceph-Devel,
 
->>Well, this is a little embarassing but here it is : there won't be a =
-point release for giant. I'll update the redmine tickets to remove the =
-"giant" backport targets as well as the github milestone list according=
-ly.=20
+Apologize me if you get double post of this email.
 
-Is the planned to update only "longterm" support releases ? (dumpling,f=
-irefly,hammer,...) ?
+I am running a ceph cluster version 0.72.2 and one MDS (in fact, it's 3, 2 down and only 1 up) at the moment.
+Plus I have one CephFS client mounted to it.
+
+Now, the MDS always get aborted after recovery and active for 4 secs.
+Some parts of the log are as below:
+
+    -3> 2015-01-15 14:10:28.464706 7fbcc8226700  1 -- 10.4.118.21:6800/5390 <== osd.19 10.4.118.32:6821/243161 73 ==== osd_op_re
+ply(3742 1000240c57e.00000000 [create 0~0,setxattr (99)] v56640'1871414 uv1871414 ondisk = 0) v6 ==== 221+0+0 (261801329 0 0) 0x
+7770bc80 con 0x69c7dc0
+    -2> 2015-01-15 14:10:28.464730 7fbcc8226700  1 -- 10.4.118.21:6800/5390 <== osd.18 10.4.118.32:6818/243072 67 ==== osd_op_re
+ply(3645 1000007941c.00000000 [tmapup 0~0] v56640'1769567 uv1769567 ondisk = 0) v6 ==== 179+0+0 (3759887079 0 0) 0x7757ec80 con
+0x1c6bb00
+    -1> 2015-01-15 14:10:28.464754 7fbcc8226700  1 -- 10.4.118.21:6800/5390 <== osd.47 10.4.118.35:6809/8290 79 ==== osd_op_repl
+y(3419 mds_anchortable [writefull 0~94394932] v0'0 uv0 ondisk = -90 (Message too long)) v6 ==== 174+0+0 (3942056372 0 0) 0x69f94
+a00 con 0x1c6b9a0
+     0> 2015-01-15 14:10:28.471684 7fbcc8226700 -1 mds/MDSTable.cc: In function 'void MDSTable::save_2(int, version_t)' thread 7
+fbcc8226700 time 2015-01-15 14:10:28.469999
+mds/MDSTable.cc: 83: FAILED assert(r >= 0)
+
+ ceph version  ()
+ 1: (MDSTable::save_2(int, unsigned long)+0x325) [0x769e25]
+ 2: (Context::complete(int)+0x9) [0x568d29]
+ 3: (Objecter::handle_osd_op_reply(MOSDOpReply*)+0x1097) [0x7c15d7]
+ 4: (MDS::handle_core_message(Message*)+0x5a0) [0x588900]
+ 5: (MDS::_dispatch(Message*)+0x2f) [0x58908f]
+ 6: (MDS::ms_dispatch(Message*)+0x1e3) [0x58ab93]
+ 7: (DispatchQueue::entry()+0x549) [0x975739]
+ 8: (DispatchQueue::DispatchThread::entry()+0xd) [0x8902dd]
+ 9: (()+0x7e9a) [0x7fbcccb0de9a]
+ 10: (clone()+0x6d) [0x7fbccb4ba3fd]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
+
+Is there any workaround/patch to fix this issue? Let me know if need to see the log with debug-mds of certain level as well.
+Any helps would be very much appreciated.
+
+Thanks.
+Bazli
+
+________________________________
+DISCLAIMER:
 
 
+This e-mail (including any attachments) is for the addressee(s) only and may be confidential, especially as regards personal data. If you are not the intended recipient, please note that any dealing, review, distribution, printing, copying or use of this e-mail is strictly prohibited. If you have received this email in error, please notify the sender immediately and delete the original message (including any attachments).
 
------ Mail original -----
-De: "Loic Dachary" <loic@dachary.org>
-=C3=80: "ceph-devel" <ceph-devel@vger.kernel.org>
-Envoy=C3=A9: Jeudi 15 Janvier 2015 18:03:27
-Objet: Re: upcoming release giant v0.87.1 : leads feedback needed
 
-Hi Again,=20
-
-Well, this is a little embarassing but here it is : there won't be a po=
-int release for giant. I'll update the redmine tickets to remove the "g=
-iant" backport targets as well as the github milestone list accordingly=
-=2E=20
-
-Sorry for the noise.=20
-
-On 15/01/2015 17:12, Loic Dachary wrote:=20
-> Hi Ceph,=20
->=20
-> The https://github.com/ceph/ceph/tree/giant-backports branch was test=
-ed with the rgw, rados and rbd suites. The results of each suite have b=
-een analyzed and summarized in http://tracker.ceph.com/issues/10501. Th=
-e next steps are either:=20
->=20
-> a) Yehuda for rgw, Josh for rbd and Sam for rados all agree that the =
-errors are unrelated to the backports=20
-> b) The https://github.com/ceph/ceph/tree/giant-backports branch is gi=
-ven to QE for final tests and merge into giant=20
->=20
-> OR=20
->=20
-> a) At least of the lead thinks more work is needed to stabilize the g=
-iant branch=20
-> b) A new set of tests will be run and analyzed after adding/removing =
-one or more backports to/from the https://github.com/ceph/ceph/tree/gia=
-nt-backports branch=20
->=20
-> The description of http://tracker.ceph.com/issues/10501 shows a detai=
-led list of all commits / issues that are in the giant backport branch.=
- To get a global view of what the next giant point release will be, the=
- description also includes the commits that have already been merged in=
- the giant branch. The list of pull requests that are candidate for inc=
-lusion in the giant release but have not been included in the integrati=
-on branch are also listed: maybe one of them could contribute to resolv=
-e a problem found during the tests. And finally all redmine issues that=
- have been marked to be backported to giant but do not yet have a candi=
-date pull request are listed: this is the backport backlog so to speak =
-;-)=20
->=20
-> Cheers=20
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre=20
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+MIMOS Berhad is a research and development institution under the purview of the Malaysian Ministry of Science, Technology and Innovation. Opinions, conclusions and other information in this e-mail that do not relate to the official business of MIMOS Berhad and/or its subsidiaries shall be understood as neither given nor endorsed by MIMOS Berhad and/or its subsidiaries and neither MIMOS Berhad nor its subsidiaries accepts responsibility for the same. All liability arising from or in connection with computer viruses and/or corrupted e-mails is excluded to the fullest extent permitted by law.
