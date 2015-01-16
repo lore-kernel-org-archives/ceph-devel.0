@@ -1,209 +1,72 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: New Defects reported by Coverity Scan for ceph
-Date: Fri, 16 Jan 2015 08:08:47 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1501160807590.26676@cobra.newdream.net>
-References: <54b922af592d5_4b8dd69318255c1@scan.coverity.com.mail> <CAC6JEv9+HkQr2GbLHWQwV2ENcwg2wBciMn-akhGmDEtK+K3LqA@mail.gmail.com>
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: MDS has inconsistent performance
+Date: Sat, 17 Jan 2015 00:27:47 +0800
+Message-ID: <CAAM7YA=QqCfo0AREmCt+=yaDUOzAxqemkjWxKJRxw_TcA_429A@mail.gmail.com>
+References: <CAD=PzH+UxcrF-0=fpAWrXsv-CB=q1nbAxbBHSn9A_P-hS1-fGg@mail.gmail.com>
+	<CAC6JEv9fXSm+xEcFPiJ90kQNKjoWdFZCs02ZHKD4kJGd4_2Q8w@mail.gmail.com>
+	<CAD=PzHLahg1TPu3-zjFk6hO4cXeYg+-TjdR5cw0XNSoVA+_Ebw@mail.gmail.com>
+	<CAC6JEv_1Gx3pnmutej7UmABC+eyB+VvoBo6X1OZhHFu+==6fjA@mail.gmail.com>
+	<CAD=PzHJFT4QUeer7A-EawAQ=AskEu44pLPqHo4BLpk11zA1UQw@mail.gmail.com>
+	<CAC6JEv826RqkkTCt3224LLv_BdS9394yucXf7_qaKwsYHmC-+A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:58923 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754150AbbAPQIu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 16 Jan 2015 11:08:50 -0500
-In-Reply-To: <CAC6JEv9+HkQr2GbLHWQwV2ENcwg2wBciMn-akhGmDEtK+K3LqA@mail.gmail.com>
+Received: from mail-lb0-f181.google.com ([209.85.217.181]:62015 "EHLO
+	mail-lb0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751736AbbAPQ1t (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Jan 2015 11:27:49 -0500
+Received: by mail-lb0-f181.google.com with SMTP id u14so9825967lbd.12
+        for <ceph-devel@vger.kernel.org>; Fri, 16 Jan 2015 08:27:48 -0800 (PST)
+In-Reply-To: <CAC6JEv826RqkkTCt3224LLv_BdS9394yucXf7_qaKwsYHmC-+A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Gregory Farnum <greg@gregs42.com>
-Cc: John Spray <john.spray@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: Michael Sevilla <mikesevilla3@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, =?UTF-8?B?5Lil5q2j?= <zyan@redhat.com>
 
-Yeah, there's a pile of these warnings for most/all of the binaries we 
-build.  Not sure if they are worth fixing or whether there is a coverity 
-annotation we can add to suppress them..
+On Fri, Jan 16, 2015 at 2:37 PM, Gregory Farnum <greg@gregs42.com> wrote:
+> On Thu, Jan 15, 2015 at 2:44 PM, Michael Sevilla <mikesevilla3@gmail.com> wrote:
+>> Let me know if this works and/or you need anything else:
+>>
+>> https://www.dropbox.com/s/fq47w6jebnyluu0/lookup-logs.tar.gz?dl=0
+>>
+>> Beware - the clients were on debug=10. Also, I tried this with the
+>> kernel client and it is more consistent; it does the 2 lookups per
+>> create on 1 client every single time.
+>
+> Mmmm, there are no mds logs of note here. :(
+>
+> I did look enough to see that:
+> 1) The MDS is for some reason revoking caps on the file create
+> prompting the switch to double-lookups, which it was not before. The
+> client doesn't really have any visibility into why that would be the
+> case; the best guess I can come up with is that maybe the MDS split up
+> the directory into multiple frags at this point -- do you have that
+> enabled?
+> 2) The only way we set the I_COMPLETE flag is when we create an empty
+> directory, or when we do a complete listdir on one. That makes it
+> pretty difficult to get the flag back (and so do the optimal create
+> path) once you lose it. :( I'd love a better way to do so, but we'll
+> have to look at what's involved in a bit of depth.
+>
+> I'm not sure why the kernel client is so much more cautious, but I
+> think there were a number of troubles with the directory listing
+> orders and things which were harder to solve there - I don't remember
+> if we introduced the I_DIR_ORDERED flag in it or not. Zheng can talk
+> more about that. What kernel client version are you using?
+>
+> And for a vanity data point, what kind of hardware is your MDS running on? :)
 
-s
+For kernel before 3.18, the I_COMPLETE get cleared once directory is modified.
+I_DIR_ORDERED is introduced by 3.18 kernel. I just tried 3.18 kernel,
+unfortunately
+there still is a bug that prevent new directory from having I_COMPLETE flag
 
+Regards
+Yan, Zheng
 
-On Fri, 16 Jan 2015, Gregory Farnum wrote:
-
-> Sage, are these uncaught assertion errors something we normally
-> ignore? I'm not familiar with any code that tries to catch errors in
-> our standard init patterns, which is what looks to be the problem on
-> these new coverity issues in cephfs-table-tool.
+>
 > -Greg
-> 
-> On Fri, Jan 16, 2015 at 6:39 AM,  <scan-admin@coverity.com> wrote:
-> >
-> > Hi,
-> >
-> > Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
-> >
-> > 4 new defect(s) introduced to ceph found with Coverity Scan.
-> > 19 defect(s), reported by Coverity Scan earlier, were marked fixed in the recent build analyzed by Coverity Scan.
-> >
-> > New defect(s) Reported-by: Coverity Scan
-> > Showing 4 of 4 defect(s)
-> >
-> >
-> > ** CID 1264457:  Uncaught exception  (UNCAUGHT_EXCEPT)
-> > /tools/cephfs/cephfs-table-tool.cc: 11 in main()
-> > /tools/cephfs/cephfs-table-tool.cc: 11 in main()
-> > /tools/cephfs/cephfs-table-tool.cc: 11 in main()
-> > /tools/cephfs/cephfs-table-tool.cc: 11 in main()
-> > /tools/cephfs/cephfs-table-tool.cc: 11 in main()
-> >
-> > ** CID 1264458:  Uninitialized scalar field  (UNINIT_CTOR)
-> > /test/librbd/test_ImageWatcher.cc: 47 in TestImageWatcher::WatchCtx::WatchCtx(TestImageWatcher&)()
-> >
-> > ** CID 1264459:  Uninitialized scalar field  (UNINIT_CTOR)
-> > /test/librbd/test_fixture.cc: 44 in TestFixture::TestFixture()()
-> >
-> > ** CID 1264460:  Structurally dead code  (UNREACHABLE)
-> > /common/sync_filesystem.h: 51 in sync_filesystem(int)()
-> >
-> >
-> > ________________________________________________________________________________________________________
-> > *** CID 1264457:  Uncaught exception  (UNCAUGHT_EXCEPT)
-> > /tools/cephfs/cephfs-table-tool.cc: 11 in main()
-> > 5     #include "common/errno.h"
-> > 6     #include "global/global_init.h"
-> > 7
-> > 8     #include "TableTool.h"
-> > 9
-> > 10
-> >>>>     CID 1264457:  Uncaught exception  (UNCAUGHT_EXCEPT)
-> >>>>     In function "main(int, char const **)" an exception of type "ceph::FailedAssertion" is thrown and never caught.
-> > 11     int main(int argc, const char **argv)
-> > 12     {
-> > 13       vector<const char*> args;
-> > 14       argv_to_vec(argc, argv, args);
-> > 15       env_to_vec(args);
-> > 16
-> > /tools/cephfs/cephfs-table-tool.cc: 11 in main()
-> > 5     #include "common/errno.h"
-> > 6     #include "global/global_init.h"
-> > 7
-> > 8     #include "TableTool.h"
-> > 9
-> > 10
-> >>>>     CID 1264457:  Uncaught exception  (UNCAUGHT_EXCEPT)
-> >>>>     In function "main(int, char const **)" an exception of type "ceph::FailedAssertion" is thrown and never caught.
-> > 11     int main(int argc, const char **argv)
-> > 12     {
-> > 13       vector<const char*> args;
-> > 14       argv_to_vec(argc, argv, args);
-> > 15       env_to_vec(args);
-> > 16
-> > /tools/cephfs/cephfs-table-tool.cc: 11 in main()
-> > 5     #include "common/errno.h"
-> > 6     #include "global/global_init.h"
-> > 7
-> > 8     #include "TableTool.h"
-> > 9
-> > 10
-> >>>>     CID 1264457:  Uncaught exception  (UNCAUGHT_EXCEPT)
-> >>>>     In function "main(int, char const **)" an exception of type "ceph::FailedAssertion" is thrown and never caught.
-> > 11     int main(int argc, const char **argv)
-> > 12     {
-> > 13       vector<const char*> args;
-> > 14       argv_to_vec(argc, argv, args);
-> > 15       env_to_vec(args);
-> > 16
-> > /tools/cephfs/cephfs-table-tool.cc: 11 in main()
-> > 5     #include "common/errno.h"
-> > 6     #include "global/global_init.h"
-> > 7
-> > 8     #include "TableTool.h"
-> > 9
-> > 10
-> >>>>     CID 1264457:  Uncaught exception  (UNCAUGHT_EXCEPT)
-> >>>>     In function "main(int, char const **)" an exception of type "ceph::FailedAssertion" is thrown and never caught.
-> > 11     int main(int argc, const char **argv)
-> > 12     {
-> > 13       vector<const char*> args;
-> > 14       argv_to_vec(argc, argv, args);
-> > 15       env_to_vec(args);
-> > 16
-> > /tools/cephfs/cephfs-table-tool.cc: 11 in main()
-> > 5     #include "common/errno.h"
-> > 6     #include "global/global_init.h"
-> > 7
-> > 8     #include "TableTool.h"
-> > 9
-> > 10
-> >>>>     CID 1264457:  Uncaught exception  (UNCAUGHT_EXCEPT)
-> >>>>     In function "main(int, char const **)" an exception of type "ceph::FailedAssertion" is thrown and never caught.
-> > 11     int main(int argc, const char **argv)
-> > 12     {
-> > 13       vector<const char*> args;
-> > 14       argv_to_vec(argc, argv, args);
-> > 15       env_to_vec(args);
-> > 16
-> >
-> > ________________________________________________________________________________________________________
-> > *** CID 1264458:  Uninitialized scalar field  (UNINIT_CTOR)
-> > /test/librbd/test_ImageWatcher.cc: 47 in TestImageWatcher::WatchCtx::WatchCtx(TestImageWatcher&)()
-> > 41         NOTIFY_OP_REQUEST_LOCK  = 2,
-> > 42         NOTIFY_OP_HEADER_UPDATE = 3
-> > 43       };
-> > 44
-> > 45       class WatchCtx : public librados::WatchCtx2 {
-> > 46       public:
-> >>>>     CID 1264458:  Uninitialized scalar field  (UNINIT_CTOR)
-> >>>>     Non-static class member "m_handle" is not initialized in this constructor nor in any functions that it calls.
-> > 47         WatchCtx(TestImageWatcher &parent) : m_parent(parent) {}
-> > 48
-> > 49         int watch(const librbd::ImageCtx &ictx) {
-> > 50           m_header_oid = ictx.header_oid;
-> > 51           return m_parent.m_ioctx.watch2(m_header_oid, &m_handle, this);
-> > 52         }
-> >
-> > ________________________________________________________________________________________________________
-> > *** CID 1264459:  Uninitialized scalar field  (UNINIT_CTOR)
-> > /test/librbd/test_fixture.cc: 44 in TestFixture::TestFixture()()
-> > 38
-> > 39     std::string TestFixture::_pool_name;
-> > 40     librados::Rados TestFixture::_rados;
-> > 41     uint64_t TestFixture::_image_number = 0;
-> > 42
-> > 43     TestFixture::TestFixture() {
-> >>>>     CID 1264459:  Uninitialized scalar field  (UNINIT_CTOR)
-> >>>>     Non-static class member "m_image_size" is not initialized in this constructor nor in any functions that it calls.
-> > 44     }
-> > 45
-> > 46     void TestFixture::SetUpTestCase() {
-> > 47       _pool_name = get_temp_pool_name();
-> > 48       ASSERT_EQ("", create_one_pool_pp(_pool_name, _rados));
-> > 49     }
-> >
-> > ________________________________________________________________________________________________________
-> > *** CID 1264460:  Structurally dead code  (UNREACHABLE)
-> > /common/sync_filesystem.h: 51 in sync_filesystem(int)()
-> > 45       if (syscall(__NR_syncfs, fd) == 0)
-> > 46         return 0;
-> > 47       else
-> > 48         return -errno;
-> > 49     #endif
-> > 50
-> >>>>     CID 1264460:  Structurally dead code  (UNREACHABLE)
-> >>>>     This code cannot be reached: "sync();".
-> > 51       sync();
-> > 52       return 0;
-> > 53     }
-> > 54
-> >
-> >
-> > ________________________________________________________________________________________________________
-> > To view the defects in Coverity Scan visit, http://scan.coverity.com/projects/25?tab=overview
-> >
-> > To manage Coverity Scan email notifications for "ceph-devel@vger.kernel.org", click http://scan.coverity.com/subscriptions/edit?email=ceph-devel%40vger.kernel.org&token=018084d671e3cc89d00dd2ccb7eb849c .
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
