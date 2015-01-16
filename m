@@ -1,70 +1,169 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: 'Immutable bit' on pools to prevent deletion
-Date: Fri, 16 Jan 2015 08:55:46 +0100
-Message-ID: <54B8C402.9020301@42on.com>
-References: <54B7D2D6.4020503@42on.com> <CABBk=J9BVNzKHfSxdxmRjrZoasAWUz8_e9Juzc4vYnNXo0wHFA@mail.gmail.com> <alpine.DEB.2.00.1501150918110.26676@cobra.newdream.net> <alpine.DEB.2.00.1501150942450.26676@cobra.newdream.net> <CAC6JEv-r2a6UOWOd8XKsn4armJU4iR76eYtG3kR4eGmKW6k++w@mail.gmail.com> <alpine.DEB.2.00.1501151004540.15918@cobra.newdream.net> <CAGd4Wr055nGU8D+pzN_bFhOkNVrNBZA1xZdfo80+Mu5Bddx+pg@mail.gmail.com> <alpine.DEB.2.00.1501151105050.15918@cobra.newdream.net>
+From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Subject: RE: straw2 and ln calculation
+Date: Fri, 16 Jan 2015 08:32:20 +0000
+Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC0212F2AB@shsmsx102.ccr.corp.intel.com>
+References: <alpine.DEB.2.00.1501151728200.2501@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from websrv.42on.com ([31.25.102.167]:41253 "EHLO websrv.42on.com"
+Received: from mga14.intel.com ([192.55.52.115]:17828 "EHLO mga14.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751893AbbAPHzs (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 16 Jan 2015 02:55:48 -0500
-In-Reply-To: <alpine.DEB.2.00.1501151105050.15918@cobra.newdream.net>
+	id S1752345AbbAPIc1 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Jan 2015 03:32:27 -0500
+In-Reply-To: <alpine.DEB.2.00.1501151728200.2501@cobra.newdream.net>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, John Spray <john.spray@redhat.com>
-Cc: Gregory Farnum <greg@gregs42.com>, Yehuda Sadeh <yehuda@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, "Blinick, Stephen L" <stephen.l.blinick@intel.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 01/15/2015 08:07 PM, Sage Weil wrote:
-> On Thu, 15 Jan 2015, John Spray wrote:
->> On Thu, Jan 15, 2015 at 6:07 PM, Sage Weil <sweil@redhat.com> wrote:
->>>> What would that buy us? Preventing injectargs on it would require mon
->>>> restarts, which is unfortunate ? and makes it sounds more like a
->>>> security feature than a safety blanket.
->>>
->>> I meant 'ceph tell mon.* injectargs ...' as distinct from 'ceph daemon ...
->>> config set', which requires access to the host.  But yeah, if we went to
->>> the effort to limit injectargs (maybe a blanket option that disables
->>> injectargs on mons?), it could double as a security feature.
->>>
->>> But whether it may also useful for security doesn't change whether it is a
->>> good safety blanket.  I like it because it's simple, easy to implement,
->>> and easy to disable for testing... :)
->>
->> The trouble with this is admin socket part is that any tool that
->> manages Ceph must use the admin socket interface as well as the normal
->> over-the-network command interface, and by extension must be able to
->> execute locally on a mon.  We would no longer have a comprehensive
->> remote management interface for the mon: management tools would have
->> to run some code locally too.
-> 
-> True.. if we make that option enabled by default.  If we it's off by 
-> default them it's an opt-in layer of protection.  Most clusters don't have 
-> ephemeral pools so I think lots of people would want this.
->  
+Hi Sage,
+       I have created a new pull request (https://github.com/ceph/ceph/pull/3386) , which changed the crush_ln to give more 32 digits, thus we don't need to do left shift now.
+        You win the bet :), the distribution is much better now,  originally the std_dev is 88~121, but now with 32 more digits, we can reduce it to 12.4895(even lower than expected?????).
 
-If this is the easiest route I'm +1 for that way.
+        Also note that 8 more digits and 32 more digits show almost the same result.
 
-I'd turn it off right away on the clusters I manage. Pools don't change
-that often and I simply want another safeguard against deleting them.
+For 32 more digits:
 
->> I think it's sufficient to require two API calls (set the flag or
->> config option, then do the delete) within the remote API, rather than
->> requiring that anyone driving the interface knows how to speak two
->> network protocols (usual mon remote command + SSH-to-asok).
-> 
-> Yeah...
-> 
-> sage
-> 
+expect                  169.664
+osd     weight  count   adjusted
+0       1       179     179
+1       1.75    291     166
+2       3.062   507     165
+3       5.359   937     174
+4       9.379   1581    168
+5       16.41   2771    168
+6       28.72   4847    168
+7       50.27   8690    172
+8       87.96   14924   169
+9       153.9   26069   169
+10      269.4   45706   169
+11      471.4   79754   169
+12      825     139847  169
+13      1444    245707  170
+14      2527    428190  169
+std dev 12.4895
+     vs 12.6005 (expected)
+
+For 8 more digits
+
+expect                  169.664
+osd     weight  count   adjusted
+0       1       179     179
+1       1.75    290     165
+2       3.062   507     165
+3       5.359   936     174
+4       9.379   1580    168
+5       16.41   2771    168
+6       28.72   4846    168
+7       50.27   8690    172
+8       87.96   14923   169
+9       153.9   26068   169
+10      269.4   45706   169
+11      471.4   79754   169
+12      825     139847  169
+13      1444    245710  170
+14      2527    428193  169
+std dev 12.5935
+     vs 12.5983 (expected).
 
 
--- 
-Wido den Hollander
-42on B.V.
-Ceph trainer and consultant
 
-Phone: +31 (0)20 700 9902
-Skype: contact42on
+												Xiaoxi
+
+
+-----Original Message-----
+From: Sage Weil [mailto:sweil@redhat.com] 
+Sent: Friday, January 16, 2015 10:22 AM
+To: Chen, Xiaoxi; Blinick, Stephen L
+Cc: ceph-devel@vger.kernel.org
+Subject: straw2 and ln calculation
+
+Hi everyone,
+
+I took at look at the optimized straw2 code today.  There was one typo
+(s/i/u/) and it looks like it works as well as the previous version.  I've pushed the latest code and some additional tests to the wip-crush-straw2 branch.
+
+I went on to do some tests of the variance in the resulting distribution when the weights are all identical vs somewhat variable vs very skewed. I found that for a more 'typical' distribution of weights (e.g, .5 - 3) the std deviation stays flat.  However, for very large skews, there are interesting effects that emerge based on very small differences in the ln value.  For example, here we adjust the table value into a negative integer in mapper.c:
+
+		ln = crush_ln(u) - 0x10000;
+
+If I adjust that 0x10000 value only slightly, and generate a distribution across a set of scaled weights (e.g., 1, 2, 4, 8, 16, 32), I will see the low weights either more heavily or less heavily weighted than they should be.  0x10000 skews them a bit low, 0xffff skews them a bit high.  e.g., for 0x10000 I get
+
+expect			169.664
+osd	weight	count	adjusted
+0	1	102	102    <-- here
+1	1.75	212	121
+2	3.062	442	144
+3	5.359	858	160
+4	9.379	1483	158
+5	16.41	2673	162
+6	28.72	4756	165
+7	50.27	8620	171
+8	87.96	14851	168
+9	153.9	26019	169
+10	269.4	45674	169
+11	471.4	79768	169
+12	825	139949	169
+13	1444	245958	170
+14	2527	428635	169
+std dev 88.6993
+     vs 12.1484	(expected)
+
+While for 0xffff I get:
+
+expect			169.664
+osd	weight	count	adjusted
+0	1	272	272
+1	1.75	395	225
+2	3.062	596	194
+3	5.359	1009	188
+4	9.379	1665	177
+5	16.41	2869	174
+6	28.72	4936	171
+7	50.27	8769	174
+8	87.96	14981	170
+9	153.9	26102	169
+10	269.4	45729	169
+11	471.4	79737	169
+12	825	139719	169
+13	1444	245486	170
+14	2527	427735	169
+std dev 121.243
+     vs 13.1205	(expected)
+
+This could be written off to chance, but I see the same effect amplified for 0xfffe and 0x10001.
+
+I suppose if we have to choose I think skewing high makes more sense since it means the high weight items won't skew high and overfill (although in practice that doesn't seem to be happening.. it's only on the low end that things get wonky.. the high end looks quite good).
+
+In any case, two things:
+
+1) Maybe someone can check my math on the stddev calculation.  I'm scaling the actual placement count by the weight (adj = count/weight) and then doing the stddev of the adjusted values.  But the expected value is always about 1/3 or 1/4 of that.  I can't tell if that's because the hash is weak or because I'm doing something wrong with the calculation.  Notably, if I plug in rand() with equal weights for a sanity check, I still get a stddev of 953 vs expected 249... about what I see from straw2.  Strangely when I use straw I get a bit better than taht, 476.  Am I crazy?  See:
+
+ ./unittest_crush_wrapper --gtest_filter=CrushWrapper.straw2
+
+2) Given how sensitive the ln value is to 0xffff vs 0x10000, I'm highly suspicious that slightly better precision will help us out.  Notably, we do
+
+		ln = crush_ln(u) - 0x10000;
+
+		/*
+		 * divide by 16.16 fixed-point weight
+		 */
+		draw = (ln << 32) / bucket->item_weights[i];
+
+...so some extra bits of precision (instead of having the lower 32 zeroed) would probably help a lot.
+
+Can crush_ln() be modifed to provide more bits of precision without increasing the size of the tables?  I don't really understand the math it's based on, but it looks like the same curve is being added in with different precision or something.. and a lot of bits in LH are being thrown out here
+
+    LH >>= (48-12);
+
+If there were 8 more bits returned from crush_ln and we shifted by 8 fewer bits in bucket_straw2_choose, for example, I bet we could eliminate some of the low-weight effect I'm seeing.
+
+To see what I'm seeing, you can run
+
+ ./unittest_crush_wrapper --gtest_filter=CrushWrapper.straw2_stddev
+
+Any input would be helpful, thanks!
+sage
+
