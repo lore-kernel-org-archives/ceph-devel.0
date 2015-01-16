@@ -1,199 +1,190 @@
 From: Sage Weil <sweil@redhat.com>
-Subject: RE: straw2 and ln calculation
-Date: Fri, 16 Jan 2015 09:18:10 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1501160913370.15918@cobra.newdream.net>
-References: <alpine.DEB.2.00.1501151728200.2501@cobra.newdream.net> <6F3FA899187F0043BA1827A69DA2F7CC0212F2AB@shsmsx102.ccr.corp.intel.com>
+Subject: crush_location hook vs calamari
+Date: Fri, 16 Jan 2015 09:39:31 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1501160924050.15918@cobra.newdream.net>
+References: <CAOWd=nBExJbD72ereRmn_mv_u=cODRnvDif8RcUiLejcQqKoOg@mail.gmail.com> <CAGd4Wr2+AD2J690cdcSwknLhUX16SR+WRQDVpn=+UB9mnO0-Yg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:46724 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:55279 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752791AbbAPRSM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 16 Jan 2015 12:18:12 -0500
-In-Reply-To: <6F3FA899187F0043BA1827A69DA2F7CC0212F2AB@shsmsx102.ccr.corp.intel.com>
+	id S1753328AbbAPRjh (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 16 Jan 2015 12:39:37 -0500
+In-Reply-To: <CAGd4Wr2+AD2J690cdcSwknLhUX16SR+WRQDVpn=+UB9mnO0-Yg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Cc: "Blinick, Stephen L" <stephen.l.blinick@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: John Spray <john.spray@redhat.com>
+Cc: Gregory Meno <gmeno@redhat.com>, Dan Mick <dmick@redhat.com>, John Spray <jspray@redhat.com>, ceph-devel@vger.kernel.org, ceph-calamari@ceph.com
 
-On Fri, 16 Jan 2015, Chen, Xiaoxi wrote:
-> Hi Sage,
->        I have created a new pull request 
-> (https://github.com/ceph/ceph/pull/3386) , which changed the crush_ln to 
-> give more 32 digits, thus we don't need to do left shift now.
->         You win the bet :), the distribution is much better now, 
-> originally the std_dev is 88~121, but now with 32 more digits, we can 
-> reduce it to 12.4895(even lower than expected?????).
+[adding ceph-devel, ceph-calamari]
 
-I had the stddev calculation wrong (missing a divide by n), now it looks 
-more realistic.  The deviation does still increase with highly skewed 
-weights, but I think that is inevitable because the low-weight items have 
-a smaller number of placements.  I think a standard deviation probably 
-isn't quite the right tool to measure this anyway (at least not the way 
-I'm doing it, where I normalize the counts to the average weight).
+On Fri, 16 Jan 2015, John Spray wrote:
+> Ideally we would have a solution that preserved the OSD hot-plugging
+> ability (it's a neat feature).
+> 
+> Perhaps the crush location logic should be:
+> * If nobody ever overrode me, default behaviour
+> * If someone (calamari) set an explicit location, preserve that
+> * UNLESS I am on a different hostname than I was when the explicit
+> location was set, in which case kick in the hotplug behaviour
 
-In any case, this looks great now!  I pushed this and a few other cleanups 
-to the wip-crush-straw2 branch, which I think should be in a final form 
-now.
+This would be nice...
 
-Can people please do a final review before we merge?
+> The hotplug path might just be to reset my location in the existing
+> way, or if calamari was really clever it could define how to handle a
+> hostname change within a different root (typically the 'ssd' root
+> people create) such that if I unplugged ssd_root->myhost_ssd and
+> plugged it into foohost, then it would reset its crush location to
+> ssd_root->foohost_ssd instead of root->foohost.
+> 
+> We might want to consider adding a flag into the crush map itself so
+> that nodes can be "locked" to indicate that their location was set by
+> human intent rather than the crush-location script.
 
-The final step will be to push this into the kernel client as well.
+Perhaps a per-osd flag in the OSDMap?  We have a field for this right now, 
+although none of the fields are user-modifiable (they are things up up and 
+exists).  I think that makes the most sense.
 
-Thanks, everyone!
+We may also be able to avoid the pain in some cases if we bite the bullet 
+and standardize how to handle parallel hdd vs ssd vs whatever trees.  Two 
+approaches have come up that come to mind:
+
+1) Make a tree like
+
+ root ssd
+     host host1:ssd
+         osd.0
+         osd.1
+     host host2:ssd
+         osd.2
+         osd.3
+ root sata
+     host host1:sata
+         osd.4
+         osd.5
+     host host2:sata
+         osd.6
+         osd.7
+
+where we 'standardize' (by convention) : as a separator between name and 
+device type.  Then we could modify the crush location process to take a 
+'host=host1' location and current host of host1:ssd as a match and make no 
+change.
+
+2) Make the per-type tree generation programatic.  So you would build a 
+single tree like this:
+
+ root default
+     host host1
+         devicetype ssd
+             osd.0
+             osd.1
+         devicetype hdd
+             osd.4
+             osd.5
+     host host2
+         devicetype ssd
+             osd.2
+             osd.3
+         devicetype hdd
+             osd.6
+             osd.7
+
+and then on any map change a function in the monitor would programatically 
+create a set of per-type trees in the same map:
+
+ root default
+     host host1
+         devicetype ssd
+             osd.0
+             osd.1
+         devicetype hdd
+             osd.4
+             osd.5
+     host host2
+         devicetype ssd
+             osd.2
+             osd.3
+         devicetype hdd
+             osd.6
+             osd.7
+ root default-devicetype:ssd
+     host host1-devicetype:ssd
+         osd.0
+         osd.1
+     host host2-devicetype:ssd
+         osd.2
+         osd.3
+ root default-devicetype:hdd
+     host host1-devicetype:hdd
+         osd.4
+         osd.5
+     host host2-devicetype:hdd
+         osd.6
+         osd.7
+
+The nice thing about this is the crush location script goes on specifying 
+the same thing it does now, like host=host1 rack=rack1 etc.  The only 
+thing we add is a devicetype=ssd or hdd, perhaps based on was we glean 
+from the /sys/block/* (e.g., there is a 'rotating' flag in there to help 
+identify SSDs).  Rules that use 'default' will see no change.  But if this 
+feature is enabled and we start generating trees based on the 'devicetype' 
+crush type we'll get a new set of automagic roots that rules can use 
+instead.
+
+This doesn't really address the Calamari problem, though... but it would 
+solve one of the main use-cases for customizing the map, I think?
+
 sage
 
 
 
- > 
->         Also note that 8 more digits and 32 more digits show almost the same result.
+
+
+
+
 > 
-> For 32 more digits:
+> John
 > 
-> expect                  169.664
-> osd     weight  count   adjusted
-> 0       1       179     179
-> 1       1.75    291     166
-> 2       3.062   507     165
-> 3       5.359   937     174
-> 4       9.379   1581    168
-> 5       16.41   2771    168
-> 6       28.72   4847    168
-> 7       50.27   8690    172
-> 8       87.96   14924   169
-> 9       153.9   26069   169
-> 10      269.4   45706   169
-> 11      471.4   79754   169
-> 12      825     139847  169
-> 13      1444    245707  170
-> 14      2527    428190  169
-> std dev 12.4895
->      vs 12.6005 (expected)
-> 
-> For 8 more digits
-> 
-> expect                  169.664
-> osd     weight  count   adjusted
-> 0       1       179     179
-> 1       1.75    290     165
-> 2       3.062   507     165
-> 3       5.359   936     174
-> 4       9.379   1580    168
-> 5       16.41   2771    168
-> 6       28.72   4846    168
-> 7       50.27   8690    172
-> 8       87.96   14923   169
-> 9       153.9   26068   169
-> 10      269.4   45706   169
-> 11      471.4   79754   169
-> 12      825     139847  169
-> 13      1444    245710  170
-> 14      2527    428193  169
-> std dev 12.5935
->      vs 12.5983 (expected).
-> 
-> 
-> 
-> 												Xiaoxi
-> 
-> 
-> -----Original Message-----
-> From: Sage Weil [mailto:sweil@redhat.com] 
-> Sent: Friday, January 16, 2015 10:22 AM
-> To: Chen, Xiaoxi; Blinick, Stephen L
-> Cc: ceph-devel@vger.kernel.org
-> Subject: straw2 and ln calculation
-> 
-> Hi everyone,
-> 
-> I took at look at the optimized straw2 code today.  There was one typo
-> (s/i/u/) and it looks like it works as well as the previous version.  I've pushed the latest code and some additional tests to the wip-crush-straw2 branch.
-> 
-> I went on to do some tests of the variance in the resulting distribution when the weights are all identical vs somewhat variable vs very skewed. I found that for a more 'typical' distribution of weights (e.g, .5 - 3) the std deviation stays flat.  However, for very large skews, there are interesting effects that emerge based on very small differences in the ln value.  For example, here we adjust the table value into a negative integer in mapper.c:
-> 
-> 		ln = crush_ln(u) - 0x10000;
-> 
-> If I adjust that 0x10000 value only slightly, and generate a distribution across a set of scaled weights (e.g., 1, 2, 4, 8, 16, 32), I will see the low weights either more heavily or less heavily weighted than they should be.  0x10000 skews them a bit low, 0xffff skews them a bit high.  e.g., for 0x10000 I get
-> 
-> expect			169.664
-> osd	weight	count	adjusted
-> 0	1	102	102    <-- here
-> 1	1.75	212	121
-> 2	3.062	442	144
-> 3	5.359	858	160
-> 4	9.379	1483	158
-> 5	16.41	2673	162
-> 6	28.72	4756	165
-> 7	50.27	8620	171
-> 8	87.96	14851	168
-> 9	153.9	26019	169
-> 10	269.4	45674	169
-> 11	471.4	79768	169
-> 12	825	139949	169
-> 13	1444	245958	170
-> 14	2527	428635	169
-> std dev 88.6993
->      vs 12.1484	(expected)
-> 
-> While for 0xffff I get:
-> 
-> expect			169.664
-> osd	weight	count	adjusted
-> 0	1	272	272
-> 1	1.75	395	225
-> 2	3.062	596	194
-> 3	5.359	1009	188
-> 4	9.379	1665	177
-> 5	16.41	2869	174
-> 6	28.72	4936	171
-> 7	50.27	8769	174
-> 8	87.96	14981	170
-> 9	153.9	26102	169
-> 10	269.4	45729	169
-> 11	471.4	79737	169
-> 12	825	139719	169
-> 13	1444	245486	170
-> 14	2527	427735	169
-> std dev 121.243
->      vs 13.1205	(expected)
-> 
-> This could be written off to chance, but I see the same effect amplified for 0xfffe and 0x10001.
-> 
-> I suppose if we have to choose I think skewing high makes more sense since it means the high weight items won't skew high and overfill (although in practice that doesn't seem to be happening.. it's only on the low end that things get wonky.. the high end looks quite good).
-> 
-> In any case, two things:
-> 
-> 1) Maybe someone can check my math on the stddev calculation.  I'm scaling the actual placement count by the weight (adj = count/weight) and then doing the stddev of the adjusted values.  But the expected value is always about 1/3 or 1/4 of that.  I can't tell if that's because the hash is weak or because I'm doing something wrong with the calculation.  Notably, if I plug in rand() with equal weights for a sanity check, I still get a stddev of 953 vs expected 249... about what I see from straw2.  Strangely when I use straw I get a bit better than taht, 476.  Am I crazy?  See:
-> 
->  ./unittest_crush_wrapper --gtest_filter=CrushWrapper.straw2
-> 
-> 2) Given how sensitive the ln value is to 0xffff vs 0x10000, I'm highly suspicious that slightly better precision will help us out.  Notably, we do
-> 
-> 		ln = crush_ln(u) - 0x10000;
-> 
-> 		/*
-> 		 * divide by 16.16 fixed-point weight
-> 		 */
-> 		draw = (ln << 32) / bucket->item_weights[i];
-> 
-> ...so some extra bits of precision (instead of having the lower 32 zeroed) would probably help a lot.
-> 
-> Can crush_ln() be modifed to provide more bits of precision without increasing the size of the tables?  I don't really understand the math it's based on, but it looks like the same curve is being added in with different precision or something.. and a lot of bits in LH are being thrown out here
-> 
->     LH >>= (48-12);
-> 
-> If there were 8 more bits returned from crush_ln and we shifted by 8 fewer bits in bucket_straw2_choose, for example, I bet we could eliminate some of the low-weight effect I'm seeing.
-> 
-> To see what I'm seeing, you can run
-> 
->  ./unittest_crush_wrapper --gtest_filter=CrushWrapper.straw2_stddev
-> 
-> Any input would be helpful, thanks!
-> sage
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> On Fri, Jan 16, 2015 at 2:14 PM, Gregory Meno <gmeno@redhat.com> wrote:
+> > The problem I am trying to solve is:
+> > Calamari now has the ability to manage the crush map and for that to be
+> > useful I need to prevent the default behavior of OSDs set update on start.
+> >
+> > The config surrounding crush_location seems complicated enough that I want
+> > some help deciding on the best approach.
+> >
+> > http://tracker.ceph.com/issues/8667 contains the background info
+> >
+> > options:
+> > - Calamari sets "osd update on start to false" on all OSDs it manages.
+> >
+> > - Calamari sets "osd crush location hook" on all OSDs it manages
+> >
+> > criteria:
+> >
+> > - don't piss off admins with existing clusters and configs
+> >
+> > - solution applies after life-cycle requires addition of new OSDs
+> >
+> > - ??? am I missing more
+> >
+> > comparison:
+> >  TBD
+> >
+> > recommendation:
+> >
+> > after talking to Dan the solution that seems best is:
+> >
+> > Have calamari set "osd crush location hook" to a script that asks either
+> > calamari or the cluster for the OSDs last known location in the CRUSH map if
+> > this is a new OSD fallback to a sensible default e.g. the behavior as it
+> > "osd update on start" were true
+> >
+> > The thing I like most about this approach is that we edit the config file
+> > one time.
+> >
+> > regards,
+> > Gregory
 > 
 > 
