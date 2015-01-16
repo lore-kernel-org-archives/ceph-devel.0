@@ -1,85 +1,74 @@
-From: Brian Norris <computersforpeace-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH 03/12] fs: introduce f_op->mmap_capabilities for nommu
- mmap support
-Date: Thu, 15 Jan 2015 20:06:28 -0800
-Message-ID: <20150116040628.GG9759@ld-irv-0074>
-References: <1421228561-16857-1-git-send-email-hch@lst.de>
- <1421228561-16857-4-git-send-email-hch@lst.de>
+From: Gregory Farnum <greg@gregs42.com>
+Subject: Re: MDS has inconsistent performance
+Date: Thu, 15 Jan 2015 22:37:55 -0800
+Message-ID: <CAC6JEv826RqkkTCt3224LLv_BdS9394yucXf7_qaKwsYHmC-+A@mail.gmail.com>
+References: <CAD=PzH+UxcrF-0=fpAWrXsv-CB=q1nbAxbBHSn9A_P-hS1-fGg@mail.gmail.com>
+	<CAC6JEv9fXSm+xEcFPiJ90kQNKjoWdFZCs02ZHKD4kJGd4_2Q8w@mail.gmail.com>
+	<CAD=PzHLahg1TPu3-zjFk6hO4cXeYg+-TjdR5cw0XNSoVA+_Ebw@mail.gmail.com>
+	<CAC6JEv_1Gx3pnmutej7UmABC+eyB+VvoBo6X1OZhHFu+==6fjA@mail.gmail.com>
+	<CAD=PzHJFT4QUeer7A-EawAQ=AskEu44pLPqHo4BLpk11zA1UQw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1421228561-16857-4-git-send-email-hch-jcswGhMUV9g@public.gmane.org>
-Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
-Cc: Jens Axboe <axboe-b10kYP2dOMg@public.gmane.org>, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Tejun Heo <tj-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ig0-f172.google.com ([209.85.213.172]:63502 "EHLO
+	mail-ig0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753653AbbAPGh5 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Jan 2015 01:37:57 -0500
+Received: by mail-ig0-f172.google.com with SMTP id l13so1958275iga.5
+        for <ceph-devel@vger.kernel.org>; Thu, 15 Jan 2015 22:37:56 -0800 (PST)
+Received: from mail-ig0-f170.google.com (mail-ig0-f170.google.com. [209.85.213.170])
+        by mx.google.com with ESMTPSA id f198sm2367163ioe.11.2015.01.15.22.37.55
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 15 Jan 2015 22:37:55 -0800 (PST)
+Received: by mail-ig0-f170.google.com with SMTP id l13so2414801iga.1
+        for <ceph-devel@vger.kernel.org>; Thu, 15 Jan 2015 22:37:55 -0800 (PST)
+In-Reply-To: <CAD=PzHJFT4QUeer7A-EawAQ=AskEu44pLPqHo4BLpk11zA1UQw@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Michael Sevilla <mikesevilla3@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, =?UTF-8?B?5Lil5q2j?= <zyan@redhat.com>
 
-+ dwmw2
+On Thu, Jan 15, 2015 at 2:44 PM, Michael Sevilla <mikesevilla3@gmail.co=
+m> wrote:
+> Let me know if this works and/or you need anything else:
+>
+> https://www.dropbox.com/s/fq47w6jebnyluu0/lookup-logs.tar.gz?dl=3D0
+>
+> Beware - the clients were on debug=3D10. Also, I tried this with the
+> kernel client and it is more consistent; it does the 2 lookups per
+> create on 1 client every single time.
 
-On Wed, Jan 14, 2015 at 10:42:32AM +0100, Christoph Hellwig wrote:
-> Since "BDI: Provide backing device capability information [try #3]" the
-> backing_dev_info structure also provides flags for the kind of mmap
-> operation available in a nommu environment, which is entirely unrelated
-> to it's original purpose.
-> 
-> Introduce a new nommu-only file operation to provide this information to
-> the nommu mmap code instead.  Splitting this from the backing_dev_info
-> structure allows to remove lots of backing_dev_info instance that aren't
-> otherwise needed, and entirely gets rid of the concept of providing a
-> backing_dev_info for a character device.  It also removes the need for
-> the mtd_inodefs filesystem.
-> 
-> Signed-off-by: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
-> Reviewed-by: Tejun Heo <tj-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-> ---
->  Documentation/nommu-mmap.txt                    |  8 +--
->  block/blk-core.c                                |  2 +-
->  drivers/char/mem.c                              | 64 ++++++++++----------
->  drivers/mtd/mtdchar.c                           | 72 ++++------------------
->  drivers/mtd/mtdconcat.c                         | 10 ----
->  drivers/mtd/mtdcore.c                           | 80 +++++++------------------
->  drivers/mtd/mtdpart.c                           |  1 -
+Mmmm, there are no mds logs of note here. :(
 
-There's a small conflict in mtdcore.c with some stuff I have queued up
-for MTD in linux-next. Should be trivial to resolve later.
+I did look enough to see that:
+1) The MDS is for some reason revoking caps on the file create
+prompting the switch to double-lookups, which it was not before. The
+client doesn't really have any visibility into why that would be the
+case; the best guess I can come up with is that maybe the MDS split up
+the directory into multiple frags at this point =E2=80=94 do you have t=
+hat
+enabled?
+2) The only way we set the I_COMPLETE flag is when we create an empty
+directory, or when we do a complete listdir on one. That makes it
+pretty difficult to get the flag back (and so do the optimal create
+path) once you lose it. :( I'd love a better way to do so, but we'll
+have to look at what's involved in a bit of depth.
 
-I don't have a test platform for nommu, and I'll admit I'm not too
-familiar with this code, but it looks OK to me. So FWIW, for the MTD
-parts:
+I'm not sure why the kernel client is so much more cautious, but I
+think there were a number of troubles with the directory listing
+orders and things which were harder to solve there =E2=80=93 I don't re=
+member
+if we introduced the I_DIR_ORDERED flag in it or not. Zheng can talk
+more about that. What kernel client version are you using?
 
-Acked-by: Brian Norris <computersforpeace-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+And for a vanity data point, what kind of hardware is your MDS running =
+on? :)
 
->  drivers/staging/lustre/lustre/llite/llite_lib.c |  2 +-
->  fs/9p/v9fs.c                                    |  2 +-
->  fs/afs/volume.c                                 |  2 +-
->  fs/aio.c                                        | 14 +----
->  fs/btrfs/disk-io.c                              |  3 +-
->  fs/char_dev.c                                   | 24 --------
->  fs/cifs/connect.c                               |  2 +-
->  fs/coda/inode.c                                 |  2 +-
->  fs/configfs/configfs_internal.h                 |  2 -
->  fs/configfs/inode.c                             | 18 +-----
->  fs/configfs/mount.c                             | 11 +---
->  fs/ecryptfs/main.c                              |  2 +-
->  fs/exofs/super.c                                |  2 +-
->  fs/ncpfs/inode.c                                |  2 +-
->  fs/ramfs/file-nommu.c                           |  7 +++
->  fs/ramfs/inode.c                                | 22 +------
->  fs/romfs/mmap-nommu.c                           | 10 ++++
->  fs/ubifs/super.c                                |  2 +-
->  include/linux/backing-dev.h                     | 33 ++--------
->  include/linux/cdev.h                            |  2 -
->  include/linux/fs.h                              | 23 +++++++
->  include/linux/mtd/mtd.h                         |  2 +
->  mm/backing-dev.c                                |  7 +--
->  mm/nommu.c                                      | 69 ++++++++++-----------
->  security/security.c                             | 13 ++--
->  32 files changed, 169 insertions(+), 346 deletions(-)
-[...]
-
-Brian
+-Greg
 --
-To unsubscribe from this list: send the line "unsubscribe linux-nfs" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
 More majordomo info at  http://vger.kernel.org/majordomo-info.html
