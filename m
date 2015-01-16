@@ -1,140 +1,135 @@
-From: Michael Sevilla <mikesevilla3@gmail.com>
-Subject: Re: MDS has inconsistent performance
-Date: Thu, 15 Jan 2015 14:44:19 -0800
-Message-ID: <CAD=PzHJFT4QUeer7A-EawAQ=AskEu44pLPqHo4BLpk11zA1UQw@mail.gmail.com>
-References: <CAD=PzH+UxcrF-0=fpAWrXsv-CB=q1nbAxbBHSn9A_P-hS1-fGg@mail.gmail.com>
-	<CAC6JEv9fXSm+xEcFPiJ90kQNKjoWdFZCs02ZHKD4kJGd4_2Q8w@mail.gmail.com>
-	<CAD=PzHLahg1TPu3-zjFk6hO4cXeYg+-TjdR5cw0XNSoVA+_Ebw@mail.gmail.com>
-	<CAC6JEv_1Gx3pnmutej7UmABC+eyB+VvoBo6X1OZhHFu+==6fjA@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: straw2 and ln calculation
+Date: Thu, 15 Jan 2015 18:21:59 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1501151728200.2501@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f43.google.com ([209.85.215.43]:41716 "EHLO
-	mail-la0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753173AbbAOWoV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Jan 2015 17:44:21 -0500
-Received: by mail-la0-f43.google.com with SMTP id q1so800896lam.2
-        for <ceph-devel@vger.kernel.org>; Thu, 15 Jan 2015 14:44:19 -0800 (PST)
-In-Reply-To: <CAC6JEv_1Gx3pnmutej7UmABC+eyB+VvoBo6X1OZhHFu+==6fjA@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:34027 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753948AbbAPCWC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 15 Jan 2015 21:22:02 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@gregs42.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: xiaoxi.chen@intel.com, stephen.l.blinick@intel.com
+Cc: ceph-devel@vger.kernel.org
 
-Let me know if this works and/or you need anything else:
+Hi everyone,
 
-https://www.dropbox.com/s/fq47w6jebnyluu0/lookup-logs.tar.gz?dl=0
+I took at look at the optimized straw2 code today.  There was one typo 
+(s/i/u/) and it looks like it works as well as the previous version.  I've 
+pushed the latest code and some additional tests to the wip-crush-straw2 
+branch.
 
-Beware - the clients were on debug=10. Also, I tried this with the
-kernel client and it is more consistent; it does the 2 lookups per
-create on 1 client every single time.
+I went on to do some tests of the variance in the resulting distribution 
+when the weights are all identical vs somewhat variable vs very skewed. I 
+found that for a more 'typical' distribution of weights (e.g, .5 - 3) the 
+std deviation stays flat.  However, for very large skews, there are 
+interesting effects that emerge based on very small differences in the ln 
+value.  For example, here we adjust the table value into a negative 
+integer in mapper.c:
 
-On Thu, Jan 15, 2015 at 11:28 AM, Gregory Farnum <greg@gregs42.com> wrote:
-> Can you post the full logs somewhere to look at? These bits aren't
-> very helpful on their own (except to say, yes, the client cleared its
-> I_COMPLETE for some reason).
->
-> On Tue, Jan 13, 2015 at 3:45 PM, Michael Sevilla <mikesevilla3@gmail.com> wrote:
->> On Tue, Jan 13, 2015 at 11:13 AM, Gregory Farnum <greg@gregs42.com> wrote:
->>> On Mon, Jan 12, 2015 at 10:17 PM, Michael Sevilla
->>> <mikesevilla3@gmail.com> wrote:
->>>> I can't get consistent performance with 1 MDS. I have 2 clients create
->>>> 100,000 files (separate directories) in a CephFS mount. I ran the
->>>> experiment 5 times (deleting the pools/fs and restarting the MDS in
->>>> between each run). I graphed the metadata throughput (requests per
->>>> second): https://github.com/michaelsevilla/mds/blob/master/graphs/thruput.png
->>>
->>> So that top line is ~20,000 processed requests/second, as measured at
->>> the MDS? (Looking at perfcounters?) And the fast run is doing 10k
->>> create requests/second? (This number is much higher than I expected!)
->>
->> Yes - top line was 20K req/s from perf counter dump and the fast run
->> does about 13K creates/s. We were surprised, too... In fact, the
->> performance of 1 client per MDS gives us similar performance to
->> IndexFS - a system that came out in a paper at Supercomputing this
->> year. Here is a throughput graph, normalized to the # of clients, that
->> shows how powerful one MDS can actually be:
->> https://github.com/michaelsevilla/mds/blob/master/graphs/thruput-norm.png
->>
->> Keep in mind that runs with more than 1 client aren't creates/s, but ops/sec. ;)
->>
->>>
->>>> Sometimes (run0, run3), both clients issue 2 lookups per create to the
->>>> MDS - this makes throughput high but the runtime long since the MDS
->>>> processes many more requests.
->>>> Sometimes (run2, run4), 1 client does 2 lookups per create and the
->>>> other doesn't do any lookups.
->>>> Sometimes (run1), neither client does any lookups - this has the
->>>> fastest runtime.
->>>>
->>>> Does anyone know why the client behaves differently for the same exact
->>>> experiment? Reading the client logs, it looks like sometimes the
->>>> client enters add_update_cap() and clears the inode->flags in
->>>> check_cap_issue(), then when a lookup occurs (in _lookup()), the
->>>> client can't return ENOENT locally -- forcing it ask the MDS to do the
->>>> lookup. But this only happens sometimes (e.g., run0 and run3).
->>>
->>> If you provide the logs I can check more carefully, but my guess is
->>> that you've got another client mounting it, or are looking at both
->>> directories from one of the clients, and this is inadvertently causing
->>> them to go into shared rather than exclusive mode.
->>
->> I think you are right! Here is a subset of the client log:
->> https://github.com/michaelsevilla/mds/blob/master/scratch/client0.log
->>
->> These snippets are zoomed into when the client stops sending "create,
->> create, create, create..." and starts sending "lookup, lookup, create,
->> lookup, lookup, create..."
->>
->> $ cat client0.log | grep "send_request client"
->> create ...file.2098
->> create ...file.2099
->> create ...file.2100
->> create ...file.2101
->> lookup ...file.2102
->> lookup ...file.2102
->> create ...file.2102
->> lookup ...file.2103
->> lookup ...file.2103
->> create ...file.2103
->> lookup ...file.2104
->> lookup ...file.2104
->> create ...file.2104
->>
->> I think what you are looking for is on line 687:
->> ... clearing (I_COMPLETE|I_DIR_ORDERED)
->> ... add_update_cap issued pAsLsXs -> pAsLsXsFsx
->>
->> It looks like we lose the exclusive mode on the file... but I don't
->> understand why the MDS revokes it for 1 client but not the other. The
->> MDS log is here:
->> https://raw.githubusercontent.com/michaelsevilla/mds/master/scratch/mds.log
->>
->>
->>>
->>> How are you trying to keep the directories private during the
->>> workload? Some of the more naive solutions won't stand up to
->>> repetitive testing given how various components of the system
->>> currently behave.
->> Is there a way to keep the directories private (i.e. keep the always
->> in exclusive mode? That'd be perfect... In my runs, one client does
->> mkdir /mnt/cephfs/dir0 and there other does mdkir /mnt/cephfs/dir1...
->>
->>>
->>>>
->>>> Details of the experiment:
->>>> Workload: 2 clients, 100,000 creates in separate directories, using
->>>> the FUSE client
->>>> MDS config: client_cache_size = 100000000, mds_cache_size = 16384000
->>>
->>> That client_cache_size only has any effect if it's applied to the
->>> client-side config. ;)
->> Yes - I copy the ceph.conf to the client, too. I think it works
->> because the 1 client, 1 MDS test caches all the inodes, according the
->> perf counters.
->>
->> Thanks so much, Greg!
->>
->> Mike
->>
->>> -Greg
+		ln = crush_ln(u) - 0x10000;
+
+If I adjust that 0x10000 value only slightly, and generate a distribution 
+across a set of scaled weights (e.g., 1, 2, 4, 8, 16, 32), I will see the 
+low weights either more heavily or less heavily weighted than they should 
+be.  0x10000 skews them a bit low, 0xffff skews them a bit high.  e.g., 
+for 0x10000 I get
+
+expect			169.664
+osd	weight	count	adjusted
+0	1	102	102    <-- here
+1	1.75	212	121
+2	3.062	442	144
+3	5.359	858	160
+4	9.379	1483	158
+5	16.41	2673	162
+6	28.72	4756	165
+7	50.27	8620	171
+8	87.96	14851	168
+9	153.9	26019	169
+10	269.4	45674	169
+11	471.4	79768	169
+12	825	139949	169
+13	1444	245958	170
+14	2527	428635	169
+std dev 88.6993
+     vs 12.1484	(expected)
+
+While for 0xffff I get:
+
+expect			169.664
+osd	weight	count	adjusted
+0	1	272	272
+1	1.75	395	225
+2	3.062	596	194
+3	5.359	1009	188
+4	9.379	1665	177
+5	16.41	2869	174
+6	28.72	4936	171
+7	50.27	8769	174
+8	87.96	14981	170
+9	153.9	26102	169
+10	269.4	45729	169
+11	471.4	79737	169
+12	825	139719	169
+13	1444	245486	170
+14	2527	427735	169
+std dev 121.243
+     vs 13.1205	(expected)
+
+This could be written off to chance, but I see the same effect amplified 
+for 0xfffe and 0x10001.
+
+I suppose if we have to choose I think skewing high makes more sense since 
+it means the high weight items won't skew high and overfill (although in 
+practice that doesn't seem to be happening.. it's only on the low end that 
+things get wonky.. the high end looks quite good).
+
+In any case, two things:
+
+1) Maybe someone can check my math on the stddev calculation.  I'm scaling 
+the actual placement count by the weight (adj = count/weight) and then 
+doing the stddev of the adjusted values.  But the expected value is always 
+about 1/3 or 1/4 of that.  I can't tell if that's because the hash is weak 
+or because I'm doing something wrong with the calculation.  Notably, if I 
+plug in rand() with equal weights for a sanity check, I still get a stddev 
+of 953 vs expected 249... about what I see from straw2.  Strangely when 
+I use straw I get a bit better than taht, 476.  Am I crazy?  See:
+
+ ./unittest_crush_wrapper --gtest_filter=CrushWrapper.straw2
+
+2) Given how sensitive the ln value is to 0xffff vs 0x10000, I'm highly 
+suspicious that slightly better precision will help us out.  Notably, we 
+do
+
+		ln = crush_ln(u) - 0x10000;
+
+		/*
+		 * divide by 16.16 fixed-point weight
+		 */
+		draw = (ln << 32) / bucket->item_weights[i];
+
+...so some extra bits of precision (instead of having the lower 32 zeroed) 
+would probably help a lot.
+
+Can crush_ln() be modifed to provide more bits of precision without 
+increasing the size of the tables?  I don't really understand the math 
+it's based on, but it looks like the same curve is being added in with 
+different precision or something.. and a lot of bits in LH are being 
+thrown out here
+
+    LH >>= (48-12);
+
+If there were 8 more bits returned from crush_ln and we shifted by 8 fewer 
+bits in bucket_straw2_choose, for example, I bet we could eliminate some 
+of the low-weight effect I'm seeing.
+
+To see what I'm seeing, you can run
+
+ ./unittest_crush_wrapper --gtest_filter=CrushWrapper.straw2_stddev
+
+Any input would be helpful, thanks!
+sage
+
