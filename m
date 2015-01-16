@@ -1,136 +1,129 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: 'Immutable bit' on pools to prevent deletion
-Date: Fri, 16 Jan 2015 21:45:01 +0100
-Message-ID: <173298809.14343.1421441101815.open-xchange@websrv.42on.com>
-References: <54B7D2D6.4020503@42on.com> <CABBk=J9BVNzKHfSxdxmRjrZoasAWUz8_e9Juzc4vYnNXo0wHFA@mail.gmail.com> <alpine.DEB.2.00.1501150918110.26676@cobra.newdream.net> <101AEAEE-F428-4425-87CE-A20B3030FF55@enovance.com> <54B8EE3B.70506@42on.com> <597309080.14312.1421421468640.open-xchange@websrv>
+From: Michael Sevilla <mikesevilla3@gmail.com>
+Subject: Re: MDS has inconsistent performance
+Date: Fri, 16 Jan 2015 13:13:04 -0800
+Message-ID: <CAD=PzHJPFPMoetp0yMRiDJAtd1Aj-BXwXbR94gghwh+4TNbgqw@mail.gmail.com>
+References: <CAD=PzH+UxcrF-0=fpAWrXsv-CB=q1nbAxbBHSn9A_P-hS1-fGg@mail.gmail.com>
+	<CAC6JEv9fXSm+xEcFPiJ90kQNKjoWdFZCs02ZHKD4kJGd4_2Q8w@mail.gmail.com>
+	<CAD=PzHLahg1TPu3-zjFk6hO4cXeYg+-TjdR5cw0XNSoVA+_Ebw@mail.gmail.com>
+	<CAC6JEv_1Gx3pnmutej7UmABC+eyB+VvoBo6X1OZhHFu+==6fjA@mail.gmail.com>
+	<CAD=PzHJFT4QUeer7A-EawAQ=AskEu44pLPqHo4BLpk11zA1UQw@mail.gmail.com>
+	<CAC6JEv826RqkkTCt3224LLv_BdS9394yucXf7_qaKwsYHmC-+A@mail.gmail.com>
+	<CAD=PzH+N91wHudqOZawwQ9XoX-GQZdX7Sqin7hJfnwBbjE0Pmw@mail.gmail.com>
+	<CAC6JEv_n2Sp8o+0_AjKdBsNAmVWtv6pqegCyS3cNjNGSNfpwTQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from websrv.42on.com ([31.25.102.167]:42492 "EHLO websrv.42on.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753185AbbAPUpE convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Jan 2015 15:45:04 -0500
-In-Reply-To: <597309080.14312.1421421468640.open-xchange@websrv>
+Received: from mail-la0-f52.google.com ([209.85.215.52]:64048 "EHLO
+	mail-la0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751581AbbAPVNH convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Jan 2015 16:13:07 -0500
+Received: by mail-la0-f52.google.com with SMTP id hs14so21041860lab.11
+        for <ceph-devel@vger.kernel.org>; Fri, 16 Jan 2015 13:13:04 -0800 (PST)
+In-Reply-To: <CAC6JEv_n2Sp8o+0_AjKdBsNAmVWtv6pqegCyS3cNjNGSNfpwTQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Sebastien Han <sebastien.han@enovance.com>, Yehuda Sadeh <yehuda@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <greg@gregs42.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, =?UTF-8?B?5Lil5q2j?= <zyan@redhat.com>
 
+If you feel like perusing... log=3D20 on client, mds messenger, and mds=
+:
 
+https://www.dropbox.com/s/uvmexh9impd3f3c/forgreg.tar.gz?dl=3D0
 
+In this run, only client 1 starts doing the extra lookups.
 
-
-> Op 16 jan. 2015 om 15:47 heeft Sage Weil <sage@newdream.net> het volgende geschreven:
-> 
->> On Fri, 16 Jan 2015, Wido den Hollander wrote:
->>> On 01/16/2015 10:50 AM, Sebastien Han wrote:
->>> Hum if I understand correctly you?re all more in favour of a conf setting in the ceph.conf;
->>> The problem for me is that this will apply to all the pools by default and I?ll have to inject an arg to change this.
->>> Injecting the arg will remove this ?lock" and then all of the sudden all the pools become deletable through the lib again (who knows what users can do simultaneously)
->> 
->> No, from what I understand it's easier to implement, not the better way.
-> 
-> I'd like to do both, actually.  :)
-> 
-
-Sounds good!
-
->>> I?m more in favour of a new flag to set to the pool, something like:
->>> 
->>> ceph osd pool set foo protect true
->>> ceph osd pool delete foo foo ?yes?.
->>> ERROR: pool foo is protected against deletion
->>> 
->>> ceph osd pool delete foo protect false
->>> ceph osd pool delete foo foo ?yes?.
->>> Pool successfully deleted
->> 
->> Something like that per pool seems better to me as well. But I'd then
->> opt for a 'feature' which can be set on a pool.
->> 
->> ceph osd pool set foo nodelete
->> ceph osd pool set foo nopgchange
->> ceph osd pool set foo nosizechange
-> 
-> I like this since it fits into the current flags nicely.  The downside is 
-> we don't grandfather existing pools on upgrade.  Not sure if people think 
-> that's a good idea.
-> 
->>> The good thing with that is that owners of the pool (or admin), will be able to set this flag or remove it.
->>> We stick with the "ceph osd pool delete foo foo ?yes?.? command as well, so we don?t change too much things.
->>> 
->>> Moreover we can also make use of a config option to protect all new created pools by default:
->>> 
->>> mon protect pool default = true
->>> 
->>> This automatically set the protected flag to a new pool.
->>> 
->>> What do you think?
->> 
->> Setting a nodelete flag or something like that by default is fine with
->> me. Like Sage mentioned earlier, almost nobody will have ephemeral pools
->> in their cluster. You don't want to loose data because you accidentally
->> removed a pool.
-> 
-> We should mirror this option:
-> 
-> OPTION(osd_pool_default_flag_hashpspool, OPT_BOOL, true)   // use new pg 
-> hashing to prevent pool/pg overlap
-> 
-> So,
-> 
-> osd_pool_default_flag_nodelete = true
-> osd_pool_default_flag_nopgchange = true
-> osd_pool_default_flag_nosizechange = true
-> 
-> The big question for me is should we enable these by default in hammer?
-> 
-
-I would say yes. We should probably protect users against something stupid which makes them loose data.
-
-Data safety is prio #1
-
-Wido
-
-
-> sage
-> 
-> 
-> 
->> 
->> Wido
->> 
->>>> On 15 Jan 2015, at 18:24, Sage Weil <sage@newdream.net> wrote:
->>>> 
->>>> Then secondary question is whether the cluster should implicitly clear the 
->>>> allow-delete after some time period (maybe 'pending-delete' would make 
->>>> more sense in that case), or whether we deny IO during that period.  Seems 
->>>> perhaps too complicated.
->>> 
->>> 
->>> Cheers.
->>> ???? 
->>> S?bastien Han 
->>> Cloud Architect 
->>> 
->>> "Always give 100%. Unless you're giving blood."
->>> 
->>> Phone: +33 (0)1 49 70 99 72 
->>> Mail: sebastien.han@enovance.com 
->>> Address : 11 bis, rue Roqu?pine - 75008 Paris
->>> Web : www.enovance.com - Twitter : @enovance
->> 
->> 
->> -- 
->> Wido den Hollander
->> 42on B.V.
->> Ceph trainer and consultant
->> 
->> Phone: +31 (0)20 700 9902
->> Skype: contact42on
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On Fri, Jan 16, 2015 at 10:43 AM, Gregory Farnum <greg@gregs42.com> wro=
+te:
+> On Fri, Jan 16, 2015 at 10:34 AM, Michael Sevilla
+> <mikesevilla3@gmail.com> wrote:
+>> On Thu, Jan 15, 2015 at 10:37 PM, Gregory Farnum <greg@gregs42.com> =
+wrote:
+>>> On Thu, Jan 15, 2015 at 2:44 PM, Michael Sevilla <mikesevilla3@gmai=
+l.com> wrote:
+>>>> Let me know if this works and/or you need anything else:
+>>>>
+>>>> https://www.dropbox.com/s/fq47w6jebnyluu0/lookup-logs.tar.gz?dl=3D=
+0
+>>>>
+>>>> Beware - the clients were on debug=3D10. Also, I tried this with t=
+he
+>>>> kernel client and it is more consistent; it does the 2 lookups per
+>>>> create on 1 client every single time.
+>>>
+>>> Mmmm, there are no mds logs of note here. :(
+>>>
+>>
+>> Meaning you couldn't find mds.issdm-15.log? Or that that log didn't
+>> show anything interesting...
+>
+> It's not interesting. Caps are not logged at a very high level so I
+> think we'd actually want debug 20 on the mds, the messenger, and the
+> client subsystems.
+>
+>>
+>>> I did look enough to see that:
+>>> 1) The MDS is for some reason revoking caps on the file create
+>>> prompting the switch to double-lookups, which it was not before. Th=
+e
+>>> client doesn't really have any visibility into why that would be th=
+e
+>>> case; the best guess I can come up with is that maybe the MDS split=
+ up
+>>> the directory into multiple frags at this point =E2=80=94 do you ha=
+ve that
+>>> enabled?
+>>
+>> Nope, unless any of these make a difference:
+>> $ ceph --admin-daemon... config show | grep frag
+>>   "mds_bal_frag": "false",
+>>   "mds_bal_fragment_interval": "5",
+>>   "mds_thrash_fragments": "0",
+>>   "mds_debug_frag": "false",
+>>
+>>> 2) The only way we set the I_COMPLETE flag is when we create an emp=
+ty
+>>> directory, or when we do a complete listdir on one. That makes it
+>>> pretty difficult to get the flag back (and so do the optimal create
+>>> path) once you lose it. :( I'd love a better way to do so, but we'l=
+l
+>>> have to look at what's involved in a bit of depth.
+>>
+>> No need - with that reasoning it looks more like this is part of the
+>> design rather than a bug. I'll just have to accept the fact that the
+>> system is very complicated and clients touching stuff at certain tim=
+es
+>> can make things less predictable... I just wanted to make sure I
+>> wasn't doing anything wrong. :)  I'll stick with the kernel client
+>> (it's almost twice as fast, anyways!)
+>
+> Well, sort of =E2=80=94 an isolated client with their own directory i=
+s
+> something we definitely want to have exclusive caps, but our
+> heuristics aren't sophisticated enough yet.
+>
+>>
+>>> I'm not sure why the kernel client is so much more cautious, but I
+>>> think there were a number of troubles with the directory listing
+>>> orders and things which were harder to solve there =E2=80=93 I don'=
+t remember
+>>> if we introduced the I_DIR_ORDERED flag in it or not. Zheng can tal=
+k
+>>> more about that. What kernel client version are you using?
+>>>
+>>> And for a vanity data point, what kind of hardware is your MDS runn=
+ing on? :)
+>>
+>> Really, really old hardware from 2006: 2 dual-core CPUs, 8GB RAM,
+>> connected with 1Gbit. Kernel 3.4. We actually just installed beefier
+>> nodes so I'll keep you posted if we get other cool results.
+>
+> Awesome! That's much faster than previously, although Zheng did some
+> work recently to split the journaling code into a separate thread
+> which I guess must have made a big difference.
+> -Greg
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
