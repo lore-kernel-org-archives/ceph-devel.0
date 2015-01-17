@@ -1,108 +1,81 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: ceph-qa analysis output
-Date: Sun, 18 Jan 2015 00:27:27 +0100
-Message-ID: <54BAEFDF.50106@dachary.org>
-References: <54BA5E8D.30508@dachary.org> <CAJBxG-tjfWt+=HGJF0sZBFRFnYuCs_VdVpQzO8XAXs3ooE4e1g@mail.gmail.com>
+From: David Zafman <dzafman@redhat.com>
+Subject: Re: 'Immutable bit' on pools to prevent deletion
+Date: Sat, 17 Jan 2015 15:28:59 -0800
+Message-ID: <54BAF03B.2000400@redhat.com>
+References: <54B7D2D6.4020503@42on.com> <m9chio$3lp$1@ger.gmane.org> <alpine.DEB.2.00.1501170822460.26676@cobra.newdream.net> <m9ec1p$kts$1@ger.gmane.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="B1qD7R072heauwvIQhBDIfjm6L7LbvvXK"
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:42579 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751562AbbAQX13 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 17 Jan 2015 18:27:29 -0500
-In-Reply-To: <CAJBxG-tjfWt+=HGJF0sZBFRFnYuCs_VdVpQzO8XAXs3ooE4e1g@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:51902 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751562AbbAQX3C (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 17 Jan 2015 18:29:02 -0500
+In-Reply-To: <m9ec1p$kts$1@ger.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yuri Weinstein <yuri.weinstein@inktank.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
-
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---B1qD7R072heauwvIQhBDIfjm6L7LbvvXK
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+To: Alex Elsayed <eternaleye@gmail.com>, ceph-devel@vger.kernel.org
 
 
+The most secure way would be one in which you can only create pools with 
+WORM set and can't ever change the WORM state of a pool.  I like this 
+simple/secure approach as a first cut.
 
-On 17/01/2015 23:08, Yuri Weinstein wrote:
-> Hi Loic,
->=20
-> I'd love to.
->=20
-> Let's chat on Monday to finalize format.
->=20
-> (
-> PS:  I think format would be easier to maintain like new lines enforced=
-, e,g.
->=20
-> '701575', '701576', '701582', '701590'
->  ttp://tracker.ceph.com/issues/10543
-> FAILED assert(m_seed < old_pg_num
+David
 
-Yes, as long as it's consistent enough to be machine readable, that works=
- :-)
-
->=20
-> PPS: Again this ticket http://tracker.ceph.com/issues/10455 would be
-> helpful in what we are discussing here.
->=20
-
-I'm not sure where the output of such a parsing would go. The update redm=
-ine API is currently broken (the read API works ok) but if it was fixed t=
-he tickets could be updated indeed.
-
-Cheers
-
-> Thx
-> YuriW
->=20
-> On Sat, Jan 17, 2015 at 5:07 AM, Loic Dachary <loic@dachary.org> wrote:=
-
->> Hi Yuri,
+On 1/17/15 11:09 AM, Alex Elsayed wrote:
+> Sage Weil wrote:
+>
+>> On Fri, 16 Jan 2015, Alex Elsayed wrote:
+>>> Wido den Hollander wrote:
+>>>
+>>> <snip>
+>>>> Is it a sane thing to look at 'features' which pools could have? Other
+>>>> features which might be set on a pool:
+>>>>
+>>>> - Read Only (all write operations return -EPERM)
+>>>> - Delete Protected
+>>> There's another pool feature I'd find very useful: a WORM flag, that
+>>> permits only create & append (at the RADOS level, not the RBD level as
+>>> was an Emperor blueprint).
+>>>
+>>> In particular, I'd _love_ being able to make something that takes
+>>> Postgres WAL logs and puts them in such a pool, providing real guarantees
+>>> re: consistency. Similarly, audit logs and such for compliance.
+>> How would you want this to work?
 >>
->> It would be great if the analysis you compile daily was machine readab=
-le. For instance, in a mail you sent to ceph-qa I read
+>> - If the bit is set, object creates are allowed, but not deletes?  What
+>> about append?
 >>
->> '701575', '701576', '701582', '701590' - known issue
->> http://tracker.ceph.com/issues/10543
->>
->> "FAILED assert(m_seed < old_pg_num)"
->>
->> (duplicate of http://tracker.ceph.com/issues/10430)
->>
->> which could be something like:
->>
->> '701575', '701576', '701582', '701590': http://tracker.ceph.com/issues=
-/10543 FAILED assert(m_seed < old_pg_num)
->>
->> or any other format you find easier to use consistently.
->>
->> The reason I ask is because it would help me write a script that assoc=
-iates redmine tickets to your findings, in the context of backporting. It=
-'s just an idea, not a request ;-)
->>
->> Cheers
->>
->> --
->> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->>
+>> - Are you allowed to clear the bit with something like 'ceph osd pool set
+>> <pool> worm false' ?
+> I'd say that a WORM pool would allow 'create' and 'append' only - that fits
+> well with the classic notions of WORM media, and would allow natural
+> implementations of virtualized WORM tape libraries and such for people who
+> need compatibility (if only object creation was supported, you get issues
+> where either you have absurd tiny objects or risk data loss on failure to
+> write a larger buffered chunk). Similarly, audit records (like selinux logs,
+> that might be written by log daemons) don't really come in nice object-sized
+> chunks. You want to always have the newest in the archive, so you really
+> don't want to buffer up to that.
+>
+> I'd also figure that WORM's main purpose is assurance/compliance - you want
+> to _know_ that nobody could have turned the bit off, futzed with the data,
+> and then turned it back on. Otherwise, you'd just write your clients to only
+> use create/append, and have no need for WORM at the pool level. Because of
+> that, if the flag can be cleared via commands, it should be possible for the
+> admins to forbid it (by flat denying it in config, via some keying system,
+> via the bits being a ratchet, whatever - I'm not especially concerned by how
+> the guarantee is provided, so long as it can be).
+>
+> Setting it should probably also be privileged, since it'd be trivial to
+> cause a DOS by setting it on (say) a CephFS pool - although handling that
+> concern is likely out-of-scope for now, since there are easier ways to ruin
+> someone's day at the RADOS level.
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---B1qD7R072heauwvIQhBDIfjm6L7LbvvXK
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlS6798ACgkQ8dLMyEl6F22cwgCgvojHHEbV/DJP8El3OHSMZJ3c
-2NEAn0QHwdaIXuIHWmuF8wGyM8weJ2b8
-=yv0f
------END PGP SIGNATURE-----
-
---B1qD7R072heauwvIQhBDIfjm6L7LbvvXK--
