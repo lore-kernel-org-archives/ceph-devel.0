@@ -1,45 +1,66 @@
-From: Alex Elsayed <eternaleye@gmail.com>
-Subject: Re: 'Immutable bit' on pools to prevent deletion
-Date: Fri, 16 Jan 2015 18:31:46 -0800
-Message-ID: <m9chio$3lp$1@ger.gmane.org>
-References: <54B7D2D6.4020503@42on.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: ceph-qa analysis output
+Date: Sat, 17 Jan 2015 14:07:25 +0100
+Message-ID: <54BA5E8D.30508@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7Bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="uDoTBFEnCgvc3wlx2xVW6hccmo4mxT2EF"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:53731 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751678AbbAQCcA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 16 Jan 2015 21:32:00 -0500
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1YCJB7-0007eg-Vl
-	for ceph-devel@vger.kernel.org; Sat, 17 Jan 2015 03:31:58 +0100
-Received: from 50.245.141.77 ([50.245.141.77])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Sat, 17 Jan 2015 03:31:57 +0100
-Received: from eternaleye by 50.245.141.77 with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Sat, 17 Jan 2015 03:31:57 +0100
+Received: from mail2.dachary.org ([91.121.57.175]:42413 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752229AbbAQNH1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 17 Jan 2015 08:07:27 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Yuri Weinstein <yuri.weinstein@inktank.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Wido den Hollander wrote:
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--uDoTBFEnCgvc3wlx2xVW6hccmo4mxT2EF
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-<snip>
-> Is it a sane thing to look at 'features' which pools could have? Other
-> features which might be set on a pool:
-> 
-> - Read Only (all write operations return -EPERM)
-> - Delete Protected
+Hi Yuri,
 
-There's another pool feature I'd find very useful: a WORM flag, that permits 
-only create & append (at the RADOS level, not the RBD level as was an 
-Emperor blueprint).
+It would be great if the analysis you compile daily was machine readable.=
+ For instance, in a mail you sent to ceph-qa I read
 
-In particular, I'd _love_ being able to make something that takes Postgres 
-WAL logs and puts them in such a pool, providing real guarantees re: 
-consistency. Similarly, audit logs and such for compliance.
+'701575', '701576', '701582', '701590' - known issue
+http://tracker.ceph.com/issues/10543
 
+"FAILED assert(m_seed < old_pg_num)"
+
+(duplicate of http://tracker.ceph.com/issues/10430)
+
+which could be something like:
+
+'701575', '701576', '701582', '701590': http://tracker.ceph.com/issues/10=
+543 FAILED assert(m_seed < old_pg_num)
+
+or any other format you find easier to use consistently.=20
+
+The reason I ask is because it would help me write a script that associat=
+es redmine tickets to your findings, in the context of backporting. It's =
+just an idea, not a request ;-)
+
+Cheers
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--uDoTBFEnCgvc3wlx2xVW6hccmo4mxT2EF
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlS6Xo0ACgkQ8dLMyEl6F22UzACfdvfqRcmcMWimectawABTT8iK
+Ew4An1+0DTz6s2Nd+CtUds9iVjDbIlt4
+=EpaO
+-----END PGP SIGNATURE-----
+
+--uDoTBFEnCgvc3wlx2xVW6hccmo4mxT2EF--
