@@ -1,204 +1,139 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: ceph-0.91 with KVstore rocksdb as objectstore backend
-Date: Tue, 20 Jan 2015 18:29:26 +0800
-Message-ID: <CACJqLybLOA-NN1mByAnd34Q_vPu=ydtnahMSra59+=2M_RQVUg@mail.gmail.com>
-References: <CAMc8nAU7tu6f8nAXGiKT2iMBuH9qs5SUE30sN5458D4aB_3+iQ@mail.gmail.com>
-	<CACJqLyYfHakm7k0s+6Gr7sT8yY0ju256h2KjAGNnjJDz46fBBA@mail.gmail.com>
-	<CAMc8nAXYUr8oNa0TRw76Ppo6KNs7u5iRf3APsy14u9ora0SWYA@mail.gmail.com>
-	<CACJqLyaVyGEykKm5KrLn86D_sUfmtFeQ73-q_2EGEBWa=MYdjg@mail.gmail.com>
-	<CAMc8nAV1WmdK+LgP-cjPi-r+XY4d-=-sO322NqJY-w0zdyYwdQ@mail.gmail.com>
+From: Dong Yuan <yuandong1222@gmail.com>
+Subject: Re: ./os/ObjectStore.h: 598: FAILED assert(op->oid < om.size())
+Date: Tue, 20 Jan 2015 19:09:32 +0800
+Message-ID: <CAMm-wc+T9wsMb454LR1juJQ8isir+gvErjJ=8Dm4FB168G5ZTg@mail.gmail.com>
+References: <alpine.DEB.2.00.1501190739500.26676@cobra.newdream.net>
+	<CAMm-wcLbqVoFZD81R=Sn7b0Q65U56bt1nxeot3VVr1QTV66uPw@mail.gmail.com>
+	<CA+4uBUbLkOSZHL_QUVNTxenkQ_Xrn_es87JRdcr_ZXY-oC8i+w@mail.gmail.com>
+	<CAMm-wcKcnHyGQoocC8mLXPU0+CzBZEZfEBRoqXK5+M7vR_G66g@mail.gmail.com>
+	<alpine.DEB.2.00.1501191741320.26676@cobra.newdream.net>
+	<CAMm-wc+OyY6z6XWO1m9A_gxZsECOc6uQD=4+MQ8oU=KP8v-NjQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f175.google.com ([209.85.212.175]:35919 "EHLO
-	mail-wi0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752805AbbATK32 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Jan 2015 05:29:28 -0500
-Received: by mail-wi0-f175.google.com with SMTP id fb4so15456801wid.2
-        for <ceph-devel@vger.kernel.org>; Tue, 20 Jan 2015 02:29:27 -0800 (PST)
-In-Reply-To: <CAMc8nAV1WmdK+LgP-cjPi-r+XY4d-=-sO322NqJY-w0zdyYwdQ@mail.gmail.com>
+Received: from mail-vc0-f178.google.com ([209.85.220.178]:51764 "EHLO
+	mail-vc0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752361AbbATLJd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Jan 2015 06:09:33 -0500
+Received: by mail-vc0-f178.google.com with SMTP id im6so3434930vcb.9
+        for <ceph-devel@vger.kernel.org>; Tue, 20 Jan 2015 03:09:32 -0800 (PST)
+In-Reply-To: <CAMm-wc+OyY6z6XWO1m9A_gxZsECOc6uQD=4+MQ8oU=KP8v-NjQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: pushpesh sharma <pushpesh.eck@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: sjust <sjust@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Yeah, thankyou.
+I pull a new request: https://github.com/ceph/ceph/pull/3413
 
-I think your cluster is failed to read/write from rocksdb. But your
-config disable rocksdb log file, so you can change
-"rocksdb_info_log_level=debug"
-"rocksdb_log=/var/log/ceph/ceph-osd-rocksdb.log"
+In this PR, I use an additional buffer to avoid modifying other.op_bl
+when append, so msg can works fine with the new transaction now. But
+an additional memcpy is needed which may hurt the performance.
 
-This log should explain the details I hope.
+I also revert the commit  d427ca3 to fix http://tracker.ceph.com/issues/10534.
 
-On Tue, Jan 20, 2015 at 6:09 PM, pushpesh sharma <pushpesh.eck@gmail.com> wrote:
-> Haomai,
+Is there any better solution?
+
+On 20 January 2015 at 10:19, Dong Yuan <yuandong1222@gmail.com> wrote:
+> On 20 January 2015 at 09:43, Sage Weil <sweil@redhat.com> wrote:
+>> When I first looked at the append() function I started working on a branch
+>> that would avoid the need for it entirely.  ObjectStore already
+>> operates on a list of Transactions, and IIRC the appending is only needed
+>> for local operations, not for what is sent over the wire.  It was
+>> nontrivial because of various annoying reasons (pointer ownership,
+>> lifecycle, etc.) so I didn't get very far.
 >
-> PFA logs with debug_keyvaluestore=20/20, and perf dump output.
+> I totally agree with you.
 >
-> On Tue, Jan 20, 2015 at 2:28 PM, Haomai Wang <haomaiwang@gmail.com> wrote:
->> Sorry, could you add debug_keyvaluestore=20/20 to your config.conf and
->> run again to capture the dump logs?
+> Actually I tried to avoid all append at first, but it seems too
+> complex to refact transaction and remove append in a single BP, so I
+> give up and focus on the transaction.
+>
 >>
+>> If this is going to be a significant amount of work to fix with the
+>> current approach it might make sense to bite the bullet and go down that
+>> path..?
+>
+> I want to spend sometime (maybe one or two days) on the current
+> approach first,  if it doesn't make sense. I will go down that path.
+> Is that OK?
+>
 >>
->> And simply view the log, it seemed that keyvaluestore failed to submit
->> transaction to rocksdb.
+>> sage
 >>
->> Additionally, run "ceph --admin-daemon=/var/run/ceph/[ceph-osd.*.pid]
->> perf dump" is help to verify the assumption.
+>> On Tue, 20 Jan 2015, Dong Yuan wrote:
 >>
->> Thanks!
->>
->> On Tue, Jan 20, 2015 at 4:53 PM, pushpesh sharma <pushpesh.eck@gmail.com> wrote:
->>> Haomai,
+>>> If we must keep the order of local_t and op_t, I think the current
+>>> impl of append is not appropriate.
 >>>
->>> PFA for the complete logs of one of the OSD daemon. In an attempt to
->>> start all osd daemon, I captured logs of one of the OSD daemon is
->>> pasted here:  http://pastebin.com/SRBJknCM .
+>>> Maybe I must provide something like clone_append to avoid the modify
+>>> of existing data in the op_buffer, so the msg should be happy with the
+>>> new transaction format.
 >>>
+>>> I will try this solution and give a patch as soon as possible.
 >>>
->>>
->>> On Tue, Jan 20, 2015 at 12:34 PM, Haomai Wang <haomaiwang@gmail.com> wrote:
->>>> I think you can find related infos from log: /var/log/ceph/osd/ceph-osd*
->>>>
->>>> It should help us to figure out.
->>>>
->>>> On Tue, Jan 20, 2015 at 2:48 PM, pushpesh sharma <pushpesh.eck@gmail.com> wrote:
->>>>> Hi All,
->>>>>
->>>>> I am trying to configure rocksdb as objectstore backend on a cluster
->>>>> with ceph version 0.91-375-g2a4cbfc. I built ceph using' make-debs.sh'
->>>>> which builds the source with  --with-rocksdb option. I was able to get
->>>>> the cluster up and running with rockdbs as a backend, however as soon
->>>>> as I started dumping data on cluster using radosbench , cluster become
->>>>> miserable just after 10 sec of write I/Os. Some OSD daemons marked
->>>>> down randomly for no apparent reason. Even if  I make all daemons
->>>>> start/up again , after some time some daemons marked down again
->>>>> randomly.Recovery i/o does the job this time , that external i/o done
->>>>> before. What could be the possible problem and solution for this
->>>>> behaviour?
->>>>>
->>>>> Some more details:
->>>>>
->>>>> 1. Setup is 3 OSD nodes with 10 SanDisk Optimus Eco (400GB)
->>>>> each.Drives were working fine with filestore backend.
->>>>> 2. 3 Monitors and 1 client from which I am running RadosBench.
->>>>> 3. Ubuntu14.04 on each node. (3.13.0-24-generic)
->>>>> 4. I create OSDs on each nodes using below script(of course with
->>>>> different osd numbers):-
->>>>> ##################################
->>>>> #!/bin/bash
->>>>> sudo stop ceph-osd-all
->>>>> ps -eaf|grep osd |awk '{print $2}'|xargs sudo kill -9
->>>>> osd_num=(0 1 2 3 4 5 6 7 8 9)
->>>>> drives=(sdb1 sdc1 sdd1 sde1 sdf1 sdg1 sdh1 sdi1 sdj1 sdk1)
->>>>> node="rack6-storage-1"
->>>>> for ((i=0;i<10;i++))
->>>>> do
->>>>>         sudo ceph osd rm ${osd_num[i]}
->>>>>         sudo ceph osd crush rm osd.${osd_num[i]}
->>>>>         sudo ceph auth del osd.${osd_num[i]}
->>>>>         sudo umount -f /var/lib/ceph/osd/ceph-${osd_num[i]}
->>>>>         ceph osd create
->>>>>         sudo rm -rf /var/lib/ceph/osd/ceph-${osd_num[i]}
->>>>>         sudo mkdir -p /var/lib/ceph/osd/ceph-${osd_num[i]}
->>>>>         sudo mkfs.xfs -f -i size=2048 /dev/${drives[i]}
->>>>>         sudo mount -o rw,noatime,inode64,logbsize=256k,delaylog
->>>>> /dev/${drives[i]} /var/lib/ceph/osd/ceph-${osd_num[i]}
->>>>>         sudo ceph osd crush add osd.${osd_num[i]} 1 root=default host=$node
->>>>>         sudo sudo ceph-osd --id ${osd_num[i]} -d --mkkey --mkfs
->>>>> --osd-data /var/lib/ceph/osd/ceph-${osd_num[i]}
->>>>>         ceph auth add osd.${osd_num[i]} osd 'allow *' mon 'allow
->>>>> profile osd' -i /var/lib/ceph/osd/ceph-${osd_num[i]}/keyring
->>>>>         sudo sudo ceph-osd -i ${osd_num[i]}
->>>>> done
->>>>> ###################################
->>>>>
->>>>> 5. Some configs that might be relevant are as follows:-
->>>>> #########
->>>>> enable_experimental_unrecoverable_data_corrupting_features = keyvaluestore
->>>>> osd_objectstore = keyvaluestore
->>>>> keyvaluestore_backend = rocksdb
->>>>> keyvaluestore queue max ops = 500
->>>>> keyvaluestore queue max bytes = 100
->>>>> keyvaluestore header cache size = 2048
->>>>> keyvaluestore op threads = 10
->>>>> keyvaluestore_max_expected_write_size = 4096000
->>>>> leveldb_write_buffer_size = 33554432
->>>>> leveldb_cache_size = 536870912
->>>>> leveldb_bloom_size = 0
->>>>> leveldb_max_open_files = 10240
->>>>> leveldb_compression = false
->>>>> leveldb_paranoid = false
->>>>> leveldb_log = /dev/null
->>>>> leveldb_compact_on_mount = false
->>>>> rocksdb_write_buffer_size = 33554432
->>>>> rocksdb_cache_size = 536870912
->>>>> rocksdb_bloom_size = 0
->>>>> rocksdb_max_open_files = 10240
->>>>> rocksdb_compression = false
->>>>> rocksdb_paranoid = false
->>>>> rocksdb_log = /dev/null
->>>>> rocksdb_compact_on_mount = false
->>>>> #########
->>>>>
->>>>> 6. Objects get stored in *.sst files, seems rocksbd is configured correctly:-
->>>>>
->>>>> ls -l /var/lib/ceph/osd/ceph-20/current/ |more
->>>>> total 3169352
->>>>> -rw-r--r-- 1 root root  2128430 Jan 20 00:04 000031.sst
->>>>> -rw-r--r-- 1 root root  2128430 Jan 20 00:04 000033.sst
->>>>> -rw-r--r-- 1 root root  2128431 Jan 20 00:04 000035.sst
->>>>> ............
->>>>> 7. This is current state of cluster:-
->>>>> ################
->>>>> monmap e1: 3 mons at
->>>>> {rack6-ramp-1=10.x.x.x:6789/0,rack6-ramp-2=10.x.x.x:6789/0,rack6-ramp-3=10.x.x.x:6789/0}
->>>>> election epoch 16, quorum 0,1,2 rack6-ramp-1,rack6-ramp-2,rack6-ramp-3
->>>>> osdmap e547: 30 osds: 8 up, 8 in
->>>>>       pgmap v1059: 512 pgs, 1 pools, 18252 MB data, 4563 objects
->>>>>             22856 MB used, 2912 GB / 2934 GB avail
->>>>>             1587/13689 objects degraded (11.593%)
->>>>>             419/13689 objects misplaced (3.061%)
->>>>>             26/4563 unfound (0.570%)
->>>>> #################
->>>>>
->>>>> I would be happy to provide any other information that is needed.
->>>>>
->>>>> --
->>>>> -Pushpesh
->>>>> --
->>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>>> the body of a message to majordomo@vger.kernel.org
->>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>
->>>>
->>>>
->>>> --
->>>> Best Regards,
->>>>
->>>> Wheat
+>>> On 20 January 2015 at 02:44, Samuel Just <sam.just@inktank.com> wrote:
+>>> > We actually found another problem with this series as well.
+>>> >
+>>> > http://tracker.ceph.com/issues/10534
+>>> >
+>>> > Looks like d427ca35404a30e1f428859c3274e030f2f83ef6 reversed the order
+>>> > of localt (which contains the create_collection) and op_t (which
+>>> > contains all of the operations on the object in the temp collection).
+>>> > We need the operations in localt to precede the operations in op_t.
+>>> > How do we do this?
+>>> > -Sam
+>>> >
+>>> > On Mon, Jan 19, 2015 at 8:07 AM, Dong Yuan <yuandong1222@gmail.com> wrote:
+>>> >> Yes, I am working on it since last week.
+>>> >>
+>>> >> This seems the same problem which I fix in the ReplicatedPG. So I try
+>>> >> to fix it following the same way which I did in the ReplicatedPG, but
+>>> >> it break the make_check test_erasure_code.sh.
+>>> >>
+>>> >> Now I am working on the test case, but unfortunately I am not familiar
+>>> >> with the impl of EC, so it will take me more time.
+>>> >>
+>>> >> On 19 January 2015 at 23:41, Sage Weil <sweil@redhat.com> wrote:
+>>> >>> Hi,
+>>> >>>
+>>> >>> This has come up a couple times in QA since we merged the fast transaction
+>>> >>> code.  Can you take a look?
+>>> >>>
+>>> >>>         http://tracker.ceph.com/issues/10517
+>>> >>>
+>>> >>> Ping me if it will help to get access to the test cluster.  Haomai has
+>>> >>> access, and you can get the logs via http (linked from pulpito.ceph.com),
+>>> >>> but it is less convenient.
+>>> >>>
+>>> >>> Thanks!
+>>> >>> sage
+>>> >>
+>>> >>
+>>> >>
+>>> >> --
+>>> >> Dong Yuan
+>>> >> Email:yuandong1222@gmail.com
+>>> >> --
+>>> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> >> the body of a message to majordomo@vger.kernel.org
+>>> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >>>
 >>>
 >>>
 >>> --
->>> -Pushpesh
->>
->>
->>
->> --
->> Best Regards,
->>
->> Wheat
+>>> Dong Yuan
+>>> Email:yuandong1222@gmail.com
+>>>
+>>>
 >
 >
 >
 > --
-> -Pushpesh
+> Dong Yuan
+> Email:yuandong1222@gmail.com
 
 
 
 -- 
-Best Regards,
-
-Wheat
+Dong Yuan
+Email:yuandong1222@gmail.com
