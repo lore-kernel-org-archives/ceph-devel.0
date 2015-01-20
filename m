@@ -1,175 +1,251 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: ceph-0.91 with KVstore rocksdb as objectstore backend
-Date: Tue, 20 Jan 2015 16:58:15 +0800
-Message-ID: <CACJqLyaVyGEykKm5KrLn86D_sUfmtFeQ73-q_2EGEBWa=MYdjg@mail.gmail.com>
-References: <CAMc8nAU7tu6f8nAXGiKT2iMBuH9qs5SUE30sN5458D4aB_3+iQ@mail.gmail.com>
-	<CACJqLyYfHakm7k0s+6Gr7sT8yY0ju256h2KjAGNnjJDz46fBBA@mail.gmail.com>
-	<CAMc8nAXYUr8oNa0TRw76Ppo6KNs7u5iRf3APsy14u9ora0SWYA@mail.gmail.com>
+From: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>
+Subject: RE: Deadline of Github pull request for Hammer release (question)
+Date: Tue, 20 Jan 2015 09:07:52 +0000
+Message-ID: <870DE8DBB716524BAE51B2D499EC81E40AA5D363@g01jpexmbyt24>
+References: <870DE8DBB716524BAE51B2D499EC81E40AA3F9AB@g01jpexmbyt24>
+ <54AC048E.9040200@dachary.org>
+ <870DE8DBB716524BAE51B2D499EC81E40AA40849@g01jpexmbyt24>
+ <54B4F2C0.2040805@dachary.org>
+ <870DE8DBB716524BAE51B2D499EC81E40AA40872@g01jpexmbyt24>
+ <54B5137F.7090902@dachary.org>
+ <870DE8DBB716524BAE51B2D499EC81E40AA40983@g01jpexmbyt24>
+ <54B55DE8.6010003@dachary.org>
+ <870DE8DBB716524BAE51B2D499EC81E40AA5B1F2@g01jpexmbyt24>
+ <54BE0243.60301@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f178.google.com ([209.85.212.178]:64189 "EHLO
-	mail-wi0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751335AbbATI6R (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Jan 2015 03:58:17 -0500
-Received: by mail-wi0-f178.google.com with SMTP id em10so10906605wid.5
-        for <ceph-devel@vger.kernel.org>; Tue, 20 Jan 2015 00:58:15 -0800 (PST)
-In-Reply-To: <CAMc8nAXYUr8oNa0TRw76Ppo6KNs7u5iRf3APsy14u9ora0SWYA@mail.gmail.com>
+Received: from fgwmail5.fujitsu.co.jp ([192.51.44.35]:34881 "EHLO
+	fgwmail5.fujitsu.co.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751997AbbATJH5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Jan 2015 04:07:57 -0500
+Received: from kw-mxoi2.gw.nic.fujitsu.com (unknown [10.0.237.143])
+	by fgwmail5.fujitsu.co.jp (Postfix) with ESMTP id E03053EE2A6
+	for <ceph-devel@vger.kernel.org>; Tue, 20 Jan 2015 18:07:55 +0900 (JST)
+Received: from s3.gw.fujitsu.co.jp (s3.gw.fujitsu.co.jp [10.0.50.93])
+	by kw-mxoi2.gw.nic.fujitsu.com (Postfix) with ESMTP id 21F14AC019B
+	for <ceph-devel@vger.kernel.org>; Tue, 20 Jan 2015 18:07:55 +0900 (JST)
+Received: from g01jpfmpwyt02.exch.g01.fujitsu.local (g01jpfmpwyt02.exch.g01.fujitsu.local [10.128.193.56])
+	by s3.gw.fujitsu.co.jp (Postfix) with ESMTP id 9F67CE08004
+	for <ceph-devel@vger.kernel.org>; Tue, 20 Jan 2015 18:07:54 +0900 (JST)
+In-Reply-To: <54BE0243.60301@dachary.org>
+Content-Language: ja-JP
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: pushpesh sharma <pushpesh.eck@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, "Shiozawa, Kensuke" <shiozawa.kennsu@jp.fujitsu.com>, "Nakao, Takanori" <nakao.takanori@jp.fujitsu.com>, "Paul Von-Stamwitz (PVonStamwitz@us.fujitsu.com)" <PVonStamwitz@us.fujitsu.com>
 
-Sorry, could you add debug_keyvaluestore=20/20 to your config.conf and
-run again to capture the dump logs?
-
-
-And simply view the log, it seemed that keyvaluestore failed to submit
-transaction to rocksdb.
-
-Additionally, run "ceph --admin-daemon=/var/run/ceph/[ceph-osd.*.pid]
-perf dump" is help to verify the assumption.
-
-Thanks!
-
-On Tue, Jan 20, 2015 at 4:53 PM, pushpesh sharma <pushpesh.eck@gmail.com> wrote:
-> Haomai,
->
-> PFA for the complete logs of one of the OSD daemon. In an attempt to
-> start all osd daemon, I captured logs of one of the OSD daemon is
-> pasted here:  http://pastebin.com/SRBJknCM .
->
->
->
-> On Tue, Jan 20, 2015 at 12:34 PM, Haomai Wang <haomaiwang@gmail.com> wrote:
->> I think you can find related infos from log: /var/log/ceph/osd/ceph-osd*
->>
->> It should help us to figure out.
->>
->> On Tue, Jan 20, 2015 at 2:48 PM, pushpesh sharma <pushpesh.eck@gmail.com> wrote:
->>> Hi All,
->>>
->>> I am trying to configure rocksdb as objectstore backend on a cluster
->>> with ceph version 0.91-375-g2a4cbfc. I built ceph using' make-debs.sh'
->>> which builds the source with  --with-rocksdb option. I was able to get
->>> the cluster up and running with rockdbs as a backend, however as soon
->>> as I started dumping data on cluster using radosbench , cluster become
->>> miserable just after 10 sec of write I/Os. Some OSD daemons marked
->>> down randomly for no apparent reason. Even if  I make all daemons
->>> start/up again , after some time some daemons marked down again
->>> randomly.Recovery i/o does the job this time , that external i/o done
->>> before. What could be the possible problem and solution for this
->>> behaviour?
->>>
->>> Some more details:
->>>
->>> 1. Setup is 3 OSD nodes with 10 SanDisk Optimus Eco (400GB)
->>> each.Drives were working fine with filestore backend.
->>> 2. 3 Monitors and 1 client from which I am running RadosBench.
->>> 3. Ubuntu14.04 on each node. (3.13.0-24-generic)
->>> 4. I create OSDs on each nodes using below script(of course with
->>> different osd numbers):-
->>> ##################################
->>> #!/bin/bash
->>> sudo stop ceph-osd-all
->>> ps -eaf|grep osd |awk '{print $2}'|xargs sudo kill -9
->>> osd_num=(0 1 2 3 4 5 6 7 8 9)
->>> drives=(sdb1 sdc1 sdd1 sde1 sdf1 sdg1 sdh1 sdi1 sdj1 sdk1)
->>> node="rack6-storage-1"
->>> for ((i=0;i<10;i++))
->>> do
->>>         sudo ceph osd rm ${osd_num[i]}
->>>         sudo ceph osd crush rm osd.${osd_num[i]}
->>>         sudo ceph auth del osd.${osd_num[i]}
->>>         sudo umount -f /var/lib/ceph/osd/ceph-${osd_num[i]}
->>>         ceph osd create
->>>         sudo rm -rf /var/lib/ceph/osd/ceph-${osd_num[i]}
->>>         sudo mkdir -p /var/lib/ceph/osd/ceph-${osd_num[i]}
->>>         sudo mkfs.xfs -f -i size=2048 /dev/${drives[i]}
->>>         sudo mount -o rw,noatime,inode64,logbsize=256k,delaylog
->>> /dev/${drives[i]} /var/lib/ceph/osd/ceph-${osd_num[i]}
->>>         sudo ceph osd crush add osd.${osd_num[i]} 1 root=default host=$node
->>>         sudo sudo ceph-osd --id ${osd_num[i]} -d --mkkey --mkfs
->>> --osd-data /var/lib/ceph/osd/ceph-${osd_num[i]}
->>>         ceph auth add osd.${osd_num[i]} osd 'allow *' mon 'allow
->>> profile osd' -i /var/lib/ceph/osd/ceph-${osd_num[i]}/keyring
->>>         sudo sudo ceph-osd -i ${osd_num[i]}
->>> done
->>> ###################################
->>>
->>> 5. Some configs that might be relevant are as follows:-
->>> #########
->>> enable_experimental_unrecoverable_data_corrupting_features = keyvaluestore
->>> osd_objectstore = keyvaluestore
->>> keyvaluestore_backend = rocksdb
->>> keyvaluestore queue max ops = 500
->>> keyvaluestore queue max bytes = 100
->>> keyvaluestore header cache size = 2048
->>> keyvaluestore op threads = 10
->>> keyvaluestore_max_expected_write_size = 4096000
->>> leveldb_write_buffer_size = 33554432
->>> leveldb_cache_size = 536870912
->>> leveldb_bloom_size = 0
->>> leveldb_max_open_files = 10240
->>> leveldb_compression = false
->>> leveldb_paranoid = false
->>> leveldb_log = /dev/null
->>> leveldb_compact_on_mount = false
->>> rocksdb_write_buffer_size = 33554432
->>> rocksdb_cache_size = 536870912
->>> rocksdb_bloom_size = 0
->>> rocksdb_max_open_files = 10240
->>> rocksdb_compression = false
->>> rocksdb_paranoid = false
->>> rocksdb_log = /dev/null
->>> rocksdb_compact_on_mount = false
->>> #########
->>>
->>> 6. Objects get stored in *.sst files, seems rocksbd is configured correctly:-
->>>
->>> ls -l /var/lib/ceph/osd/ceph-20/current/ |more
->>> total 3169352
->>> -rw-r--r-- 1 root root  2128430 Jan 20 00:04 000031.sst
->>> -rw-r--r-- 1 root root  2128430 Jan 20 00:04 000033.sst
->>> -rw-r--r-- 1 root root  2128431 Jan 20 00:04 000035.sst
->>> ............
->>> 7. This is current state of cluster:-
->>> ################
->>> monmap e1: 3 mons at
->>> {rack6-ramp-1=10.x.x.x:6789/0,rack6-ramp-2=10.x.x.x:6789/0,rack6-ramp-3=10.x.x.x:6789/0}
->>> election epoch 16, quorum 0,1,2 rack6-ramp-1,rack6-ramp-2,rack6-ramp-3
->>> osdmap e547: 30 osds: 8 up, 8 in
->>>       pgmap v1059: 512 pgs, 1 pools, 18252 MB data, 4563 objects
->>>             22856 MB used, 2912 GB / 2934 GB avail
->>>             1587/13689 objects degraded (11.593%)
->>>             419/13689 objects misplaced (3.061%)
->>>             26/4563 unfound (0.570%)
->>> #################
->>>
->>> I would be happy to provide any other information that is needed.
->>>
->>> --
->>> -Pushpesh
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
->>
->> --
->> Best Regards,
->>
->> Wheat
->
->
->
-> --
-> -Pushpesh
-
-
-
--- 
-Best Regards,
-
-Wheat
+SGkgTG9pYywNCg0KSSdkIGFwcHJlY2lhdGVkIHlvdXIgaGVscCB2ZXJ5IG11
+Y2guDQpJIGhhdmUganVzdCB1cGxvYWRlZCAyIHRlc3QgZmlsZXMgaW50byB0
+aGUgZm9yayByZXBvc2l0b3J5Lg0KDQpodHRwczovL2dpdGh1Yi5jb20vdC1t
+aXlhbWFlL2NlcGgNCmZpbGVzOg0KICBzcmMvdGVzdC9lcmFzdXJlLWNvZGUv
+VGVzdEVyYXN1cmVDb2RlU2hlYy5jYw0KICBzcmMvdGVzdC9lcmFzdXJlLWNv
+ZGUvVGVzdEVyYXN1cmVDb2RlU2hlYzM2NC5jYw0KDQpJJ20gc29ycnkgdGhh
+dCB0ZXN0cyBmb3IgdGhlIHRocmVhZCBzYWZldHkgY29kZXMgaGFzIG5vdCBi
+ZWVuIGluY2x1ZGVkIHlldC4NCg0KVGhhbmsgeW91IGluIGFkdmFuY2UsDQpU
+YWtlc2hpIE1peWFtYWUNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0N
+CkZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIFttYWls
+dG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFs
+ZiBPZiBMb2ljIERhY2hhcnkNClNlbnQ6IFR1ZXNkYXksIEphbnVhcnkgMjAs
+IDIwMTUgNDoyMyBQTQ0KVG86IE1peWFtYWUsIFRha2VzaGkv5a6u5YmNIOWJ
+mw0KQ2M6IENlcGggRGV2ZWxvcG1lbnQ7IFNoaW96YXdhLCBLZW5zdWtlL+Wh
+qeayoiDos6LovJQ7IE5ha2FvLCBUYWthbm9yaS/kuK3lsL4g6be56KmUOyBQ
+YXVsIFZvbi1TdGFtd2l0eiAoUFZvblN0YW13aXR6QHVzLmZ1aml0c3UuY29t
+KQ0KU3ViamVjdDogUmU6IERlYWRsaW5lIG9mIEdpdGh1YiBwdWxsIHJlcXVl
+c3QgZm9yIEhhbW1lciByZWxlYXNlIChxdWVzdGlvbikNCg0KSGksDQoNClRo
+YW5rcyBmb3IgdGhlIHVwZGF0ZS4gVG8gc3BlZWQgdXAgdGhpbmdzLCBJIGNv
+dWxkIHJldmlldyB3aGF0J3MgYWxyZWFkeSBwdWJsaXNoZWQuIERpZCB5b3Ug
+YWRkIHRoZSB0ZXN0cyBhbHJlYWR5ID8NCg0KQ2hlZXJzDQoNCk9uIDIwLzAx
+LzIwMTUgMDE6NDgsIE1peWFtYWUsIFRha2VzaGkgd3JvdGU6DQo+IEhpIExv
+aWMsDQo+IA0KPiBUaGFuayB5b3UgZm9yIHlvdXIgYWR2aWNlIHdoaWNoIHN1
+Z2dlc3RlZCBwcm92aWRpbmcgU0hFQyBhcyBhbiBleHRyYS1wYWNrYWdlLg0K
+PiBXZSBiZWxpZXZlIGl0J3MgZ2VuZXJhbGx5IGEgZ29vZCBpZGVhLCBidXQg
+d2UgYXJlIGhvcGluZyBTSEVDIHdvdWxkIGJlIA0KPiBtZXJnZWQgaW50byBI
+YW1tZXIgYmVjYXVzZSB0aGF0IHdvdWxkIGhhdmUgYW4gYXBwYXJlbnQgYWR2
+YW50YWdlIGZyb20gDQo+IGEgdmlld3BvaW50IG9mIG1haW50ZW5hbmNlIHN1
+cHBvcnQuDQo+IA0KPiBBcyBmb3IgdGhlIHRocmVhZCBzYWZldHkgaXNzdWUs
+IHdlIHRvdGFsbHkgYWdyZWUgd2l0aCB5b3UgYW5kIHdlIGFyZSB0cnlpbmcg
+dG8gc29sdmUgaXQuDQo+IFdlIHdpbGwgY29tcGxldGUgaXQgaW4gYSBmZXcg
+ZGF5cyBhbmQgd2UnZCBsaWtlIHRvIGFzayB5b3UgdG8gcmV2aWV3IA0KPiBp
+dCBhZ2FpbiBzbyB0aGF0IGl0IG1pZ2h0IGJlIGluIHRpbWUgZm9yIEhhbW1l
+cidzIGZlYXR1cmUgZnJlZXplICh2MC45MykuDQo+IA0KPiBCZXN0IHJlZ2Fy
+ZHMsDQo+IFRha2VzaGkgTWl5YW1hZQ0KPiANCj4gLS0tLS1PcmlnaW5hbCBN
+ZXNzYWdlLS0tLS0NCj4gRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtl
+cm5lbC5vcmcgDQo+IFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtl
+cm5lbC5vcmddIE9uIEJlaGFsZiBPZiBMb2ljIERhY2hhcnkNCj4gU2VudDog
+V2VkbmVzZGF5LCBKYW51YXJ5IDE0LCAyMDE1IDM6MDMgQU0NCj4gVG86IE1p
+eWFtYWUsIFRha2VzaGkv5a6u5YmNIOWJmw0KPiBDYzogQ2VwaCBEZXZlbG9w
+bWVudDsgU2hpb3phd2EsIEtlbnN1a2Uv5aGp5rKiIOizoui8lDsgTmFrYW8s
+IFRha2Fub3JpL+S4reWwviDpt7noqZQ7IA0KPiBQYXVsIFZvbi1TdGFtd2l0
+eiAoUFZvblN0YW13aXR6QHVzLmZ1aml0c3UuY29tKQ0KPiBTdWJqZWN0OiBS
+ZTogRGVhZGxpbmUgb2YgR2l0aHViIHB1bGwgcmVxdWVzdCBmb3IgSGFtbWVy
+IHJlbGVhc2UgDQo+IChxdWVzdGlvbikNCj4gDQo+IEhpLA0KPiANCj4gT24g
+MTMvMDEvMjAxNSAxODowNSwgTWl5YW1hZSwgVGFrZXNoaSB3cm90ZToNCj4+
+IEhpIExvaWMsDQo+Pg0KPj4gVGhhbmsgeW91IGZvciB5b3VyIHF1aWNrIHJl
+dmlldy4NCj4+DQo+Pj4gQ291bGQgeW91IHJlZmVyZW5jZSB0aGUgamVyYXN1
+cmUgZmlsZXMgKHRoZXkgYXJlIGluIHRoZSBqZXJhc3VyZSANCj4+PiBwbHVn
+aW4gYWxyZWFkeSkgaW5zdGVhZCBvZiBpbmNsdWRpbmcgdGhlbSBpbiB5b3Vy
+IHBhdGNoID8NCj4+DQo+PiBXZSBoYWQgdXNlZCB0aGUgcmVmZXJlbmNlIG9m
+IGplcmFzdXJlIHYyLjAgZmlsZXMgYmVmb3JlLCBidXQgY2hhbmdlZCANCj4+
+IHRvIGluY2x1ZGluZyB2MS4yIGZpbGVzIGFmdGVyIHRoZSBwYXRlbnQgaXNz
+dWUuDQo+IA0KPiBJZiB5b3UgYXJlIHJlZmVyaW5nIHRvIGh0dHA6Ly9lcmFz
+dXJlLWNvZGUtcGF0ZW50cy54eXovLCBpdCBjYW4gc2FmZWx5IGJlIGlnbm9y
+ZWQuDQo+IA0KPj4gSG93ZXZlciwgd2UgY2FuIHJlc3RvcmUgdGhlIHJlZmVy
+ZW5jZSByaWdodCBhd2F5IGlmIHdlIGFyZSBuZWVkZWQuDQo+Pg0KPj4+IElu
+IDo6cHJlcGFyZSB5b3UgcmV1c2UgdGhlIG1hdHJpeCwgaWYgcG9zc2libGUu
+IElmIHlvdXIgaW50ZW50aW9uIGlzIA0KPj4+IHRvIGltcHJvdmUgcGVyZm9y
+bWFuY2VzLCB5b3Ugc2hvdWxkIGNvbnNpZGVyIHVzaW5nIHRoZSBzYW1lIGFw
+cHJvYWNoIGFzIHRoZSBpc2EgcGx1Z2luLg0KPj4NCj4+IFdlIGhhdmUgZm91
+bmQgYSBwZXJmb3JtYW5jZSBpc3N1ZSBjYXVzZWQgYnkgcmVkdW5kYW50IGlu
+aXRpYWxpemF0aW9ucyANCj4+IG9mIHRoZSBtb2R1bGUsIGFuZCBzb2x2ZWQg
+aXQgYnkgY2FjaGluZyB0aGUgaW5pdGlhbGl6ZWQgdmFyaWFibGVzIGluIG1l
+bW9yeS4NCj4+IElmIHRoYXQgaXMgdGhlIHNhbWUgYXBwcm9hY2ggYXMgaXNh
+LXBsdWdpbiB5b3UgbWVudGlvbmVkLCB3ZSBhbHNvIGRvIA0KPj4gbm90IGhh
+dmUgdGhlIHNhbWUgaXNzdWUgYW55IG1vcmUuDQo+IA0KPiBUaGUgSVNBIHBs
+dWdpbiBhcHByb2FjaCBpcyB0aHJlYWQgc2FmZSwgdGhhdCdzIHRoZSBpbXBv
+cnRhbnQgcGFydC4NCj4gDQo+Pj4gSSdsbCBoYXZlIG1vcmUgY29tbWVudHMg
+b25jZSB5b3UgaGF2ZSB1bml0IC8gZnVuY3Rpb25hbCB0ZXN0cw0KPj4NCj4+
+IFdlIGRvIGhhdmUgdGhlIHRob3NlIHVuaXQvZnVuY3Rpb25hbCB0ZXN0cywg
+YnV0IHRoZSBzZXJ2ZXIgaXMgdW5yZWFjaGFibGUgYXQgdGhpcyBtb21lbnQu
+DQo+PiBQbGVhc2UgbGV0IHVzIHVwbG9hZCB0aGVtIHRvIHRoZSByZXBvc2l0
+b3J5IHRvbW9ycm93Lg0KPiANCj4gR3JlYXQuDQo+IA0KPj4+IFJlZ2FyZGlu
+ZyB5b3VyIGluaXRpYWwgcXVlc3Rpb246IEkgdGhpbmsgaXQgaXMgdG9vIGxh
+dGUgZm9yIHRoZSBIYW1tZXIgcmVsZWFzZS4NCj4+DQo+PiBXZSBhcmUgc28g
+ZGlzYXBwb2ludGVkIHRvIGhlYXIgdGhhdCwgYnV0IHdlIG11c3QgYXBvbG9n
+aXplIGZvciB0aGUgbGF0ZSByZXF1ZXN0Lg0KPj4gSWYgdGhlcmUgd291bGQg
+YmUgYW55IGNoYW5jZSB0aGF0IFNIRUMgYmUgcHVsbGVkIGludG8gaGFtbWVy
+LCB3ZSBhcmUgDQo+PiB2ZXJ5IGhhcHB5IHRvIGNvbmR1Y3QgYWxsIHRoZSBu
+ZWNlc3NhcnkgdGVzdHMgYnkgb3Vyc2VsdmVzLg0KPj4gUGxlYXNlIGxldCB1
+cyBrbm93IHRoZSBkZXRhaWxlZCBzY2hlZHVsZSBpZiB0aGlzIGlzIGEgZmVh
+c2libGUgb3B0aW9uLg0KPiANCj4gTm90ZSB0aGF0IHNpbmNlIHRoaXMgaXMg
+YSBwbHVnaW4gaXQgd2lsbCBiZSBlYXN5IGZvciBzb21lb25lIHRvIGluc3Rh
+bGwgaXQgb24gYSBIYW1tZXIgY2x1c3Rlciwgc2ltcGx5IGJ5IGNvcHlpbmcg
+dGhlIHBsdWdpbiBmaWxlcyB0byBlYWNoIE9TRCAvIE1PTiBhbmQgcmVzdGFy
+dGluZyB0aGVtLiBJZiB0aGVyZSBpcyBzb21lIGtpbmQgb2YgdXJnZW5jeSBm
+b3IgeW91IHRvIGJlIGFibGUgdG8gaW5zdGFsbCB0aGlzIG5ldyBwbHVnaW4s
+IEkgd291bGQgYWR2aXNlIG1ha2luZyBhIHBhY2thZ2UgdGhhdCBjb250YWlu
+cyBqdXN0IHRoaXMgZmlsZSwgcmVzdGFydCB0aGUgT1NEIG9uY2UgaW5zdGFs
+bGVkIGFuZCByZWNvbW1lbmQgdGhhdCB0aGUgaW5zdGFsbGF0aW9uIGlzIGRv
+bmUgb24gYWxsIG1hY2hpbmVzIG9mIHRoZSBjbHVzdGVyIChiZWNhdXNlIGV2
+ZXJ5IE9TRCAvIE1PTiBuZWVkIHRvIGtub3cgYWJvdXQgdGhlIHBsdWdpbiku
+IA0KPiANCj4gQ2hlZXJzDQo+IA0KPj4gQmVzdCByZWdhcmRzLA0KPj4gVGFr
+ZXNoaSBNaXlhbWFlDQo+Pg0KPj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0t
+LS0NCj4+IEZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3Jn
+IA0KPj4gW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9y
+Z10gT24gQmVoYWxmIE9mIExvaWMgRGFjaGFyeQ0KPj4gU2VudDogVHVlc2Rh
+eSwgSmFudWFyeSAxMywgMjAxNSA5OjQ2IFBNDQo+PiBUbzogTWl5YW1hZSwg
+VGFrZXNoaS/lrq7liY0g5YmbDQo+PiBDYzogQ2VwaCBEZXZlbG9wbWVudDsg
+U2hpb3phd2EsIEtlbnN1a2Uv5aGp5rKiIOizoui8lDsgTmFrYW8sIFRha2Fu
+b3JpL+S4reWwviDpt7noqZQ7DQo+PiBQYXVsIFZvbi1TdGFtd2l0eiAoUFZv
+blN0YW13aXR6QHVzLmZ1aml0c3UuY29tKQ0KPj4gU3ViamVjdDogUmU6IERl
+YWRsaW5lIG9mIEdpdGh1YiBwdWxsIHJlcXVlc3QgZm9yIEhhbW1lciByZWxl
+YXNlDQo+PiAocXVlc3Rpb24pDQo+Pg0KPj4gSGksDQo+Pg0KPj4gSXQncyBh
+IGdyZWF0IHN0YXJ0IDotKSBBIGZldyBjb21tZW50czoNCj4+DQo+PiBDb3Vs
+ZCB5b3UgcmVmZXJlbmNlIHRoZSBqZXJhc3VyZSBmaWxlcyAodGhleSBhcmUg
+aW4gdGhlIGplcmFzdXJlIHBsdWdpbiBhbHJlYWR5KSBpbnN0ZWFkIG9mIGlu
+Y2x1ZGluZyB0aGVtIGluIHlvdXIgcGF0Y2ggPw0KPj4NCj4+IEluIDo6cHJl
+cGFyZSB5b3UgcmV1c2UgdGhlIG1hdHJpeCwgaWYgcG9zc2libGUuIElmIHlv
+dXIgaW50ZW50aW9uIGlzIA0KPj4gdG8gaW1wcm92ZSBwZXJmb3JtYW5jZXMs
+IHlvdSBzaG91bGQgY29uc2lkZXIgdXNpbmcgdGhlIHNhbWUgYXBwcm9hY2gg
+DQo+PiBhcyB0aGUgaXNhIHBsdWdpbi4gU2VlIA0KPj4gaHR0cDovL3dvcmti
+ZW5jaC5kYWNoYXJ5Lm9yZy9jZXBoL2NlcGgvYmxvYi9naWFudC9zcmMvZXJh
+c3VyZS1jb2RlL2lzDQo+PiBhDQo+PiAvRXJhc3VyZUNvZGVQbHVnaW5Jc2Eu
+Y2MjTDM2IHdoaWNoIGlzIGFuZCBpbmRlcGVuZGVudCB0eXBlIA0KPj4gaHR0
+cDovL3dvcmtiZW5jaC5kYWNoYXJ5Lm9yZy9jZXBoL2NlcGgvYmxvYi9naWFu
+dC9zcmMvZXJhc3VyZS1jb2RlL2lzDQo+PiBhIC9FcmFzdXJlQ29kZUlzYVRh
+YmxlQ2FjaGUuaCB3aXRoIG9ubHkgb25lIGluc3RhbmNlIGFuZCBpcyBwb3B1
+bGF0ZWQgDQo+PiBhcyBuZWVkZWQgYW5kIHByb3RlY3RlZCBieSBhIGxvY2sg
+dG8gbWFrZSBpdCB0aHJlYWQgc2FmZSA6DQo+PiBodHRwOi8vd29ya2JlbmNo
+LmRhY2hhcnkub3JnL2NlcGgvY2VwaC9ibG9iL2dpYW50L3NyYy9lcmFzdXJl
+LWNvZGUvaXMNCj4+IGENCj4+IC9FcmFzdXJlQ29kZUlzYVRhYmxlQ2FjaGUu
+aCNMMTAxDQo+Pg0KPj4gSSdsbCBoYXZlIG1vcmUgY29tbWVudHMgb25jZSB5
+b3UgaGF2ZSB1bml0IC8gZnVuY3Rpb25hbCB0ZXN0cyAoIHNpbWlsYXIgdG8g
+aHR0cDovL3dvcmtiZW5jaC5kYWNoYXJ5Lm9yZy9jZXBoL2NlcGgvYmxvYi9n
+aWFudC9zcmMvdGVzdC9lcmFzdXJlLWNvZGUvVGVzdEVyYXN1cmVDb2RlSmVy
+YXN1cmUuY2MgKS4gDQo+Pg0KPj4gUmVnYXJkaW5nIHlvdXIgaW5pdGlhbCBx
+dWVzdGlvbjogSSB0aGluayBpdCBpcyB0b28gbGF0ZSBmb3IgdGhlIEhhbW1l
+ciByZWxlYXNlLiBCdXQgZnJvbSB3aGF0IEkgcmVhZCBpdCBsb29rcyBsaWtl
+IHdlJ2xsIGJlIGFibGUgdG8gbWVyZ2UgaW4gdGhlIGVhcmx5IHN0YWdlcyBv
+ZiB0aGUgbmV4dCByZWxlYXNlIGFuZCB0aGF0IHdpbGwgZ2l2ZSB1cyB0aW1l
+IHRvIHByb3Blcmx5IHRlc3QgaXQuDQo+Pg0KPj4gQ2hlZXJzDQo+Pg0KPj4g
+T24gMTMvMDEvMjAxNSAxMTozNCwgTWl5YW1hZSwgVGFrZXNoaSB3cm90ZToN
+Cj4+PiBIaSBMb2ljLA0KPj4+DQo+Pj4gSSdtIHNvIHNvcnJ5LiBUaGUgZm9s
+bG93aW5nIGlzIHRoZSBjb3JyZWN0IHJlcG9zaXRvcnkuDQo+Pj4NCj4+PiBo
+dHRwczovL2dpdGh1Yi5jb20vdC1taXlhbWFlL2NlcGgNCj4+Pg0KPj4+IEJl
+c3QgcmVnYXJkcywNCj4+PiBUYWtlc2hpIE1peWFtYWUNCj4+Pg0KPj4+IC0t
+LS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+Pj4gRnJvbTogTG9pYyBEYWNo
+YXJ5IFttYWlsdG86bG9pY0BkYWNoYXJ5Lm9yZ10NCj4+PiBTZW50OiBUdWVz
+ZGF5LCBKYW51YXJ5IDEzLCAyMDE1IDc6MjYgUE0NCj4+PiBUbzogTWl5YW1h
+ZSwgVGFrZXNoaS/lrq7liY0g5YmbDQo+Pj4gQ2M6IENlcGggRGV2ZWxvcG1l
+bnQ7IFNoaW96YXdhLCBLZW5zdWtlL+WhqeayoiDos6LovJQ7IE5ha2FvLCBU
+YWthbm9yaS/kuK3lsL4gDQo+Pj4g6be56KmUOw0KPj4+IFBhdWwgVm9uLVN0
+YW13aXR6IChQVm9uU3RhbXdpdHpAdXMuZnVqaXRzdS5jb20pDQo+Pj4gU3Vi
+amVjdDogUmU6IERlYWRsaW5lIG9mIEdpdGh1YiBwdWxsIHJlcXVlc3QgZm9y
+IEhhbW1lciByZWxlYXNlDQo+Pj4gKHF1ZXN0aW9uKQ0KPj4+DQo+Pj4gSGks
+DQo+Pj4NCj4+PiBPbiAxMy8wMS8yMDE1IDExOjI0LCBNaXlhbWFlLCBUYWtl
+c2hpIHdyb3RlOg0KPj4+PiBIaSBMb2ljLA0KPj4+Pg0KPj4+Pj4gQWx0aG91
+Z2ggd2UncmUgbGF0ZSBpbiB0aGUgSGFtbWVyIHJvYWRtYXAsIGl0J3MgYSBn
+b29kIHRpbWUgZm9yIGFuIGVhcmx5IHByZXZpZXcuIEl0IHdpbGwgaGVscCBz
+aG93IHdoYXQgbmVlZHMgdG8gYmUgY2hhbmdlZCB0byBhY2NvbW9kYXRlIHRo
+ZSBTSEVDIHBsdWdpbi4NCj4+Pj4NCj4+Pj4gVGhhbmsgeW91IGZvciB5b3Vy
+IGFkdmljZXMuDQo+Pj4+IFdlIGhhdmUgdXBsb2FkZWQgb3VyIGxhdGVzdCBj
+b2RlcyB0byB0aGUgZm9sbG93aW5nIGZvbGsgcmVwb3NpdG9yeSBmb3IgYW4g
+ZWFybHkgcmV2aWV3Lg0KPj4+Pg0KPj4+PiBodHRwczovL2dpdGh1Yi5jb20v
+bWl5YW1hZS10YWtlc2hpL211bHRpcGxlLXNoZWMNCj4+Pg0KPj4+IEl0J3Mg
+NDA0ID8gSXMgaXQgYSBwcml2YXRlIHJlcG9zaXRvcnkgbWF5YmUgPw0KPj4+
+DQo+Pj4+DQo+Pj4+IFNIRUMgaXMgbG9jYXRlZCBpbiBzcmMvZXJhc3VyZS1j
+b2RlL3NoZWMgZGlyZWN0b3J5Lg0KPj4+Pg0KPj4+PiBXZSBhcmUgdmVyaWZ5
+aW5nIFNIRUMncyBhZHZhbnRhZ2VzIG9uIG91ciBDZXBoIGNsdXN0ZXIuIEl0
+IHRha2VzIGEgbGl0dGxlIGJpdCBtb3JlLg0KPj4+PiBXb3VsZCB5b3UgcGxl
+YXNlIHN0YXJ0IHRoZSByZXZpZXcgYmVmb3JlIHRoYXQ/DQo+Pj4+DQo+Pj4+
+IEJlc3QgcmVnYXJkcywNCj4+Pj4gVGFrZXNoaSBNaXlhbWFlDQo+Pj4+DQo+
+Pj4+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+Pj4+IEZyb206IGNl
+cGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIA0KPj4+PiBbbWFpbHRv
+OmNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYg
+T2YgTG9pYyBEYWNoYXJ5DQo+Pj4+IFNlbnQ6IFdlZG5lc2RheSwgSmFudWFy
+eSA3LCAyMDE1IDEyOjUyIEFNDQo+Pj4+IFRvOiBNaXlhbWFlLCBUYWtlc2hp
+L+WuruWJjSDliZsNCj4+Pj4gQ2M6IENlcGggRGV2ZWxvcG1lbnQ7IFNoaW96
+YXdhLCBLZW5zdWtlL+WhqeayoiDos6LovJQ7IE5ha2FvLCBUYWthbm9yaS/k
+uK3lsL4gDQo+Pj4+IOm3ueiplA0KPj4+PiBTdWJqZWN0OiBSZTogRGVhZGxp
+bmUgb2YgR2l0aHViIHB1bGwgcmVxdWVzdCBmb3IgSGFtbWVyIHJlbGVhc2UN
+Cj4+Pj4gKHF1ZXN0aW9uKQ0KPj4+Pg0KPj4+PiBIaSwNCj4+Pj4NCj4+Pj4g
+T24gMDYvMDEvMjAxNSAxMjo0OSwgTWl5YW1hZSwgVGFrZXNoaSB3cm90ZToN
+Cj4+Pj4+IERlYXIgTG9pYywNCj4+Pj4+DQo+Pj4+PiBJJ20gVGFrZXNoaSBN
+aXlhbWFlLCBvbmUgb2YgdGhlIGF1dGhvcnMgb2YgU0hFQydzIGJsdWVwcmlu
+dC4NCj4+Pj4+DQo+Pj4+PiBTaGluZ2xlZCBFcmFzdXJlIENvZGUgKFNIRUMp
+DQo+Pj4+PiBodHRwczovL3dpa2kuY2VwaC5jb20vUGxhbm5pbmcvQmx1ZXBy
+aW50cy9IYW1tZXIvU2hpbmdsZWRfRXJhc3VyZV8NCj4+Pj4+IEMNCj4+Pj4+
+IG8NCj4+Pj4+IGQNCj4+Pj4+IGUNCj4+Pj4+IF8oU0hFQykNCj4+Pj4NCj4+
+Pj4gVGhlIHdvcmsgeW91IGhhdmUgZG9uZSBpcyBxdWl0ZSBpbXByZXNzaXZl
+IDotKQ0KPj4+Pg0KPj4+Pj4gV2UgaGF2ZSByZXZpc2VkIG91ciBibHVlcHJp
+bnQgc2hvd24gaW4gdGhlIGxhc3QgQ0RTIHRvIGV4dGVuZCBvdXIgDQo+Pj4+
+PiBlcmFzdXJlIGNvZGUgbGF5b3V0cyBhbmQgZGVzY3JpYmUgdGhlIGd1aWRl
+bGluZSBmb3IgY2hvb3NpbmcgU0hFQyBhbW9uZyB2YXJpb3VzIEVDIHBsdWdp
+bnMuDQo+Pj4+PiBXZSBiZWxpZXZlIHRoZSBibHVlcHJpbnQgbm93IGFuc3dl
+cnMgYWxsIHRoZSBjb21tZW50cyBnaXZlbiBhdCB0aGUgQ0RTLg0KPj4+Pg0K
+Pj4+PiBHcmVhdC4NCj4+Pj4NCj4+Pj4+IEluIGFkZGl0aW9uLCB3ZSB3b3Vs
+ZCBsaWtlIHRvIGFzayBmb3IgeW91ciBhZHZpY2Ugb24gdGhlIHNjaGVkdWxl
+IA0KPj4+Pj4gb2Ygb3VyIGdpdGh1YiBwdWxsIHJlcXVlc3QuIE1vcmUgc3Bl
+Y2lmaWNhbGx5LCB3ZSB3b3VsZCBsaWtlIHRvIA0KPj4+Pj4ga25vdyBpdHMg
+ZGVhZGxpbmUgZm9yIEhhbW1lciByZWxlYXNlLg0KPj4+Pj4gKEFzIHdlIGhh
+dmUgbm90IHJlYWxseSBjb21wbGV0ZWQgb3VyIHZlcmlmaWNhdGlvbiBvZiBT
+SEVDLCB3ZSBhcmUgDQo+Pj4+PiB3b25kZXJpbmcgaWYgd2Ugc2hvdWxkIG1h
+a2UgaXQgb3BlbiBmb3IgZWFybHkgcHJldmlldy4pDQo+Pj4+DQo+Pj4+IEFs
+dGhvdWdoIHdlJ3JlIGxhdGUgaW4gdGhlIEhhbW1lciByb2FkbWFwLCBpdCdz
+IGEgZ29vZCB0aW1lIGZvciBhbiBlYXJseSBwcmV2aWV3LiBJdCB3aWxsIGhl
+bHAgc2hvdyB3aGF0IG5lZWRzIHRvIGJlIGNoYW5nZWQgdG8gYWNjb21vZGF0
+ZSB0aGUgU0hFQyBwbHVnaW4uDQo+Pj4+DQo+Pj4+IENoZWVycw0KPj4+Pg0K
+Pj4+Pj4gVGhhbmsgeW91IGluIGFkdmFuY2UsDQo+Pj4+PiBUYWtlc2hpIE1p
+eWFtYWUNCj4+Pj4+DQo+Pj4+PiAtLQ0KPj4+Pj4gVG8gdW5zdWJzY3JpYmUg
+ZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNl
+cGgtZGV2ZWwiIA0KPj4+Pj4gaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRv
+IG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSANCj4+Pj4+IG1ham9y
+ZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9t
+by1pbmZvLmh0bWwNCj4+Pj4+DQo+Pj4+DQo+Pj4+IC0tDQo+Pj4+IExvw69j
+IERhY2hhcnksIEFydGlzYW4gTG9naWNpZWwgTGlicmUNCj4+Pj4NCj4+Pg0K
+Pj4+IC0tDQo+Pj4gTG/Dr2MgRGFjaGFyeSwgQXJ0aXNhbiBMb2dpY2llbCBM
+aWJyZQ0KPj4+DQo+Pg0KPj4gLS0NCj4+IExvw69jIERhY2hhcnksIEFydGlz
+YW4gTG9naWNpZWwgTGlicmUNCj4+DQo+IA0KPiAtLQ0KPiBMb8OvYyBEYWNo
+YXJ5LCBBcnRpc2FuIExvZ2ljaWVsIExpYnJlDQo+IA0KDQotLQ0KTG/Dr2Mg
+RGFjaGFyeSwgQXJ0aXNhbiBMb2dpY2llbCBMaWJyZQ0KDQo=
