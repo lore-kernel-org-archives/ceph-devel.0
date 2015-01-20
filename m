@@ -1,141 +1,97 @@
-From: Mohd Bazli Ab Karim <bazli.abkarim@mimos.my>
-Subject: RE: MDS aborted after recovery and active, FAILED assert (r >=0)
-Date: Tue, 20 Jan 2015 01:13:04 +0000
-Message-ID: <20DBB415DF55354C8FC7AF12F4AE770024D326FC@MBX02-TPM.mimos.local>
-References: <20DBB415DF55354C8FC7AF12F4AE770024D3233A@MBX02-TPM.mimos.local>
-	<CAGd4Wr3eKTMuMJqi_yAv8EMWEpObfQuX0FqAP22htDKK5p3SZA@mail.gmail.com>
- <CAGd4Wr031GrZ0Z8o+vJjfRo7mHBLK0g_yLPwzr5wNU_wkg8YXQ@mail.gmail.com>
- <20DBB415DF55354C8FC7AF12F4AE770024D32578@MBX02-TPM.mimos.local>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: ./os/ObjectStore.h: 598: FAILED assert(op->oid < om.size())
+Date: Mon, 19 Jan 2015 17:43:37 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1501191741320.26676@cobra.newdream.net>
+References: <alpine.DEB.2.00.1501190739500.26676@cobra.newdream.net> <CAMm-wcLbqVoFZD81R=Sn7b0Q65U56bt1nxeot3VVr1QTV66uPw@mail.gmail.com> <CA+4uBUbLkOSZHL_QUVNTxenkQ_Xrn_es87JRdcr_ZXY-oC8i+w@mail.gmail.com>
+ <CAMm-wcKcnHyGQoocC8mLXPU0+CzBZEZfEBRoqXK5+M7vR_G66g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from imperial.mimos.my ([202.45.138.109]:52698 "EHLO
-	IMPERIAL.MIMOS.MY" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750824AbbATBUo (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Jan 2015 20:20:44 -0500
-In-Reply-To: <20DBB415DF55354C8FC7AF12F4AE770024D32578@MBX02-TPM.mimos.local>
-Content-Language: en-US
+Received: from mx1.redhat.com ([209.132.183.28]:46706 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751751AbbATBnk (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 19 Jan 2015 20:43:40 -0500
+In-Reply-To: <CAMm-wcKcnHyGQoocC8mLXPU0+CzBZEZfEBRoqXK5+M7vR_G66g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <john.spray@redhat.com>
-Cc: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Dong Yuan <yuandong1222@gmail.com>
+Cc: sjust@redhat.com, ceph-devel <ceph-devel@vger.kernel.org>
 
-SGkgYWxsLA0KDQpPdXIgTURTIHN0aWxsIGZpbmUgdG9kYXkuIFRoYW5rcyBldmVyeW9uZSENCg0K
-UmVnYXJkcywNCkJhemxpDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBjZXBo
-LWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdl
-ci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgTW9oZCBCYXpsaSBBYiBLYXJpbQ0KU2VudDogTW9u
-ZGF5LCBKYW51YXJ5IDE5LCAyMDE1IDExOjM4IEFNDQpUbzogSm9obiBTcHJheQ0KQ2M6IGNlcGgt
-dXNlcnNAbGlzdHMuY2VwaC5jb207IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0
-OiBSRTogTURTIGFib3J0ZWQgYWZ0ZXIgcmVjb3ZlcnkgYW5kIGFjdGl2ZSwgRkFJTEVEIGFzc2Vy
-dCAociA+PTApDQoNCkhpIEpvaG4sDQoNCkdvb2Qgc2hvdCENCkkndmUgaW5jcmVhc2VkIHRoZSBv
-c2RfbWF4X3dyaXRlX3NpemUgdG8gMUdCIChzdGlsbCBzbWFsbGVyIHRoYW4gb3NkIGpvdXJuYWwg
-c2l6ZSkgYW5kIG5vdyB0aGUgbWRzIHN0aWxsIHJ1bm5pbmcgZmluZSBhZnRlciBhbiBob3VyLg0K
-Tm93IGNoZWNraW5nIGlmIGZzIHN0aWxsIGFjY2Vzc2libGUgb3Igbm90LiBXaWxsIHVwZGF0ZSBm
-cm9tIHRpbWUgdG8gdGltZS4NCg0KVGhhbmtzIGFnYWluIEpvaG4uDQoNClJlZ2FyZHMsDQpCYXps
-aQ0KDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBqb2huLnNwcmF5QGlua3Rh
-bmsuY29tIFttYWlsdG86am9obi5zcHJheUBpbmt0YW5rLmNvbV0gT24gQmVoYWxmIE9mIEpvaG4g
-U3ByYXkNClNlbnQ6IEZyaWRheSwgSmFudWFyeSAxNiwgMjAxNSAxMTo1OCBQTQ0KVG86IE1vaGQg
-QmF6bGkgQWIgS2FyaW0NCkNjOiBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tOyBjZXBoLWRldmVs
-QHZnZXIua2VybmVsLm9yZw0KU3ViamVjdDogUmU6IE1EUyBhYm9ydGVkIGFmdGVyIHJlY292ZXJ5
-IGFuZCBhY3RpdmUsIEZBSUxFRCBhc3NlcnQgKHIgPj0wKQ0KDQpJdCBoYXMganVzdCBiZWVuIHBv
-aW50ZWQgb3V0IHRvIG1lIHRoYXQgeW91IGNhbiBhbHNvIHdvcmthcm91bmQgdGhpcyBpc3N1ZSBv
-biB5b3VyIGV4aXN0aW5nIHN5c3RlbSBieSBpbmNyZWFzaW5nIHRoZSBvc2RfbWF4X3dyaXRlX3Np
-emUgc2V0dGluZyBvbiB5b3VyIE9TRHMgKGRlZmF1bHQgOTBNQikgdG8gc29tZXRoaW5nIGhpZ2hl
-ciwgYnV0IHN0aWxsIHNtYWxsZXIgdGhhbiB5b3VyIG9zZCBqb3VybmFsIHNpemUuICBUaGF0IG1p
-Z2h0IGdldCB5b3Ugb24gYSBwYXRoIHRvIGhhdmluZyBhbiBhY2Nlc3NpYmxlIGZpbGVzeXN0ZW0g
-YmVmb3JlIHlvdSBjb25zaWRlciBhbiB1cGdyYWRlLg0KDQpKb2huDQoNCk9uIEZyaSwgSmFuIDE2
-LCAyMDE1IGF0IDEwOjU3IEFNLCBKb2huIFNwcmF5IDxqb2huLnNwcmF5QHJlZGhhdC5jb20+IHdy
-b3RlOg0KPiBIbW0sIHVwZ3JhZGluZyBzaG91bGQgaGVscCBoZXJlLCBhcyB0aGUgcHJvYmxlbWF0
-aWMgZGF0YSBzdHJ1Y3R1cmUNCj4gKGFuY2hvcnRhYmxlKSBubyBsb25nZXIgZXhpc3RzIGluIHRo
-ZSBsYXRlc3QgdmVyc2lvbi4gIEkgaGF2ZW4ndA0KPiBjaGVja2VkLCBidXQgaG9wZWZ1bGx5IHdl
-IGRvbid0IHRyeSB0byB3cml0ZSBpdCBkdXJpbmcgdXBncmFkZXMuDQo+DQo+IFRoZSBidWcgeW91
-J3JlIGhpdHRpbmcgaXMgbW9yZSBvciBsZXNzIHRoZSBzYW1lIGFzIGEgc2ltaWxhciBvbmUgd2UN
-Cj4gaGF2ZSB3aXRoIHRoZSBzZXNzaW9udGFibGUgaW4gdGhlIGxhdGVzdCBjZXBoLCBidXQgeW91
-IHdvbid0IGhpdCBpdA0KPiB0aGVyZSB1bmxlc3MgeW91J3JlIHZlcnkgdW5sdWNreSENCj4NCj4g
-Sm9obg0KPg0KPiBPbiBGcmksIEphbiAxNiwgMjAxNSBhdCA3OjM3IEFNLCBNb2hkIEJhemxpIEFi
-IEthcmltDQo+IDxiYXpsaS5hYmthcmltQG1pbW9zLm15PiB3cm90ZToNCj4+IERlYXIgQ2VwaC1V
-c2VycywgQ2VwaC1EZXZlbCwNCj4+DQo+PiBBcG9sb2dpemUgbWUgaWYgeW91IGdldCBkb3VibGUg
-cG9zdCBvZiB0aGlzIGVtYWlsLg0KPj4NCj4+IEkgYW0gcnVubmluZyBhIGNlcGggY2x1c3RlciB2
-ZXJzaW9uIDAuNzIuMiBhbmQgb25lIE1EUyAoaW4gZmFjdCwgaXQncyAzLCAyIGRvd24gYW5kIG9u
-bHkgMSB1cCkgYXQgdGhlIG1vbWVudC4NCj4+IFBsdXMgSSBoYXZlIG9uZSBDZXBoRlMgY2xpZW50
-IG1vdW50ZWQgdG8gaXQuDQo+Pg0KPj4gTm93LCB0aGUgTURTIGFsd2F5cyBnZXQgYWJvcnRlZCBh
-ZnRlciByZWNvdmVyeSBhbmQgYWN0aXZlIGZvciA0IHNlY3MuDQo+PiBTb21lIHBhcnRzIG9mIHRo
-ZSBsb2cgYXJlIGFzIGJlbG93Og0KPj4NCj4+ICAgICAtMz4gMjAxNS0wMS0xNSAxNDoxMDoyOC40
-NjQ3MDYgN2ZiY2M4MjI2NzAwICAxIC0tDQo+PiAxMC40LjExOC4yMTo2ODAwLzUzOTAgPD09IG9z
-ZC4xOSAxMC40LjExOC4zMjo2ODIxLzI0MzE2MSA3MyA9PT09DQo+PiBvc2Rfb3BfcmUNCj4+IHBs
-eSgzNzQyIDEwMDAyNDBjNTdlLjAwMDAwMDAwIFtjcmVhdGUgMH4wLHNldHhhdHRyICg5OSldDQo+
-PiB2NTY2NDAnMTg3MTQxNCB1djE4NzE0MTQgb25kaXNrID0gMCkgdjYgPT09PSAyMjErMCswICgy
-NjE4MDEzMjkgMCAwKQ0KPj4gMHgNCj4+IDc3NzBiYzgwIGNvbiAweDY5YzdkYzANCj4+ICAgICAt
-Mj4gMjAxNS0wMS0xNSAxNDoxMDoyOC40NjQ3MzAgN2ZiY2M4MjI2NzAwICAxIC0tDQo+PiAxMC40
-LjExOC4yMTo2ODAwLzUzOTAgPD09IG9zZC4xOCAxMC40LjExOC4zMjo2ODE4LzI0MzA3MiA2NyA9
-PT09DQo+PiBvc2Rfb3BfcmUNCj4+IHBseSgzNjQ1IDEwMDAwMDc5NDFjLjAwMDAwMDAwIFt0bWFw
-dXAgMH4wXSB2NTY2NDAnMTc2OTU2NyB1djE3Njk1NjcNCj4+IG9uZGlzayA9IDApIHY2ID09PT0g
-MTc5KzArMCAoMzc1OTg4NzA3OSAwIDApIDB4Nzc1N2VjODAgY29uDQo+PiAweDFjNmJiMDANCj4+
-ICAgICAtMT4gMjAxNS0wMS0xNSAxNDoxMDoyOC40NjQ3NTQgN2ZiY2M4MjI2NzAwICAxIC0tDQo+
-PiAxMC40LjExOC4yMTo2ODAwLzUzOTAgPD09IG9zZC40NyAxMC40LjExOC4zNTo2ODA5LzgyOTAg
-NzkgPT09PQ0KPj4gb3NkX29wX3JlcGwNCj4+IHkoMzQxOSBtZHNfYW5jaG9ydGFibGUgW3dyaXRl
-ZnVsbCAwfjk0Mzk0OTMyXSB2MCcwIHV2MCBvbmRpc2sgPSAtOTANCj4+IChNZXNzYWdlIHRvbyBs
-b25nKSkgdjYgPT09PSAxNzQrMCswICgzOTQyMDU2MzcyIDAgMCkgMHg2OWY5NA0KPj4gYTAwIGNv
-biAweDFjNmI5YTANCj4+ICAgICAgMD4gMjAxNS0wMS0xNSAxNDoxMDoyOC40NzE2ODQgN2ZiY2M4
-MjI2NzAwIC0xIG1kcy9NRFNUYWJsZS5jYzoNCj4+IEluIGZ1bmN0aW9uICd2b2lkIE1EU1RhYmxl
-OjpzYXZlXzIoaW50LCB2ZXJzaW9uX3QpJyB0aHJlYWQgNw0KPj4gZmJjYzgyMjY3MDAgdGltZSAy
-MDE1LTAxLTE1IDE0OjEwOjI4LjQ2OTk5OQ0KPj4gbWRzL01EU1RhYmxlLmNjOiA4MzogRkFJTEVE
-IGFzc2VydChyID49IDApDQo+Pg0KPj4gIGNlcGggdmVyc2lvbiAgKCkNCj4+ICAxOiAoTURTVGFi
-bGU6OnNhdmVfMihpbnQsIHVuc2lnbmVkIGxvbmcpKzB4MzI1KSBbMHg3NjllMjVdDQo+PiAgMjog
-KENvbnRleHQ6OmNvbXBsZXRlKGludCkrMHg5KSBbMHg1NjhkMjldDQo+PiAgMzogKE9iamVjdGVy
-OjpoYW5kbGVfb3NkX29wX3JlcGx5KE1PU0RPcFJlcGx5KikrMHgxMDk3KSBbMHg3YzE1ZDddDQo+
-PiAgNDogKE1EUzo6aGFuZGxlX2NvcmVfbWVzc2FnZShNZXNzYWdlKikrMHg1YTApIFsweDU4ODkw
-MF0NCj4+ICA1OiAoTURTOjpfZGlzcGF0Y2goTWVzc2FnZSopKzB4MmYpIFsweDU4OTA4Zl0NCj4+
-ICA2OiAoTURTOjptc19kaXNwYXRjaChNZXNzYWdlKikrMHgxZTMpIFsweDU4YWI5M10NCj4+ICA3
-OiAoRGlzcGF0Y2hRdWV1ZTo6ZW50cnkoKSsweDU0OSkgWzB4OTc1NzM5XQ0KPj4gIDg6IChEaXNw
-YXRjaFF1ZXVlOjpEaXNwYXRjaFRocmVhZDo6ZW50cnkoKSsweGQpIFsweDg5MDJkZF0NCj4+ICA5
-OiAoKCkrMHg3ZTlhKSBbMHg3ZmJjY2NiMGRlOWFdDQo+PiAgMTA6IChjbG9uZSgpKzB4NmQpIFsw
-eDdmYmNjYjRiYTNmZF0NCj4+ICBOT1RFOiBhIGNvcHkgb2YgdGhlIGV4ZWN1dGFibGUsIG9yIGBv
-YmpkdW1wIC1yZFMgPGV4ZWN1dGFibGU+YCBpcyBuZWVkZWQgdG8gaW50ZXJwcmV0IHRoaXMuDQo+
-Pg0KPj4gSXMgdGhlcmUgYW55IHdvcmthcm91bmQvcGF0Y2ggdG8gZml4IHRoaXMgaXNzdWU/IExl
-dCBtZSBrbm93IGlmIG5lZWQgdG8gc2VlIHRoZSBsb2cgd2l0aCBkZWJ1Zy1tZHMgb2YgY2VydGFp
-biBsZXZlbCBhcyB3ZWxsLg0KPj4gQW55IGhlbHBzIHdvdWxkIGJlIHZlcnkgbXVjaCBhcHByZWNp
-YXRlZC4NCj4+DQo+PiBUaGFua3MuDQo+PiBCYXpsaQ0KPj4gLS0NCj4+IFRvIHVuc3Vic2NyaWJl
-IGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIg0K
-Pj4gaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcg
-TW9yZSBtYWpvcmRvbW8NCj4+IGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jk
-b21vLWluZm8uaHRtbA0KDQpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXw0KRElTQ0xB
-SU1FUjoNCg0KDQpUaGlzIGUtbWFpbCAoaW5jbHVkaW5nIGFueSBhdHRhY2htZW50cykgaXMgZm9y
-IHRoZSBhZGRyZXNzZWUocykgb25seSBhbmQgbWF5IGJlIGNvbmZpZGVudGlhbCwgZXNwZWNpYWxs
-eSBhcyByZWdhcmRzIHBlcnNvbmFsIGRhdGEuIElmIHlvdSBhcmUgbm90IHRoZSBpbnRlbmRlZCBy
-ZWNpcGllbnQsIHBsZWFzZSBub3RlIHRoYXQgYW55IGRlYWxpbmcsIHJldmlldywgZGlzdHJpYnV0
-aW9uLCBwcmludGluZywgY29weWluZyBvciB1c2Ugb2YgdGhpcyBlLW1haWwgaXMgc3RyaWN0bHkg
-cHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBlbWFpbCBpbiBlcnJvciwgcGxl
-YXNlIG5vdGlmeSB0aGUgc2VuZGVyIGltbWVkaWF0ZWx5IGFuZCBkZWxldGUgdGhlIG9yaWdpbmFs
-IG1lc3NhZ2UgKGluY2x1ZGluZyBhbnkgYXR0YWNobWVudHMpLg0KDQoNCk1JTU9TIEJlcmhhZCBp
-cyBhIHJlc2VhcmNoIGFuZCBkZXZlbG9wbWVudCBpbnN0aXR1dGlvbiB1bmRlciB0aGUgcHVydmll
-dyBvZiB0aGUgTWFsYXlzaWFuIE1pbmlzdHJ5IG9mIFNjaWVuY2UsIFRlY2hub2xvZ3kgYW5kIElu
-bm92YXRpb24uIE9waW5pb25zLCBjb25jbHVzaW9ucyBhbmQgb3RoZXIgaW5mb3JtYXRpb24gaW4g
-dGhpcyBlLW1haWwgdGhhdCBkbyBub3QgcmVsYXRlIHRvIHRoZSBvZmZpY2lhbCBidXNpbmVzcyBv
-ZiBNSU1PUyBCZXJoYWQgYW5kL29yIGl0cyBzdWJzaWRpYXJpZXMgc2hhbGwgYmUgdW5kZXJzdG9v
-ZCBhcyBuZWl0aGVyIGdpdmVuIG5vciBlbmRvcnNlZCBieSBNSU1PUyBCZXJoYWQgYW5kL29yIGl0
-cyBzdWJzaWRpYXJpZXMgYW5kIG5laXRoZXIgTUlNT1MgQmVyaGFkIG5vciBpdHMgc3Vic2lkaWFy
-aWVzIGFjY2VwdHMgcmVzcG9uc2liaWxpdHkgZm9yIHRoZSBzYW1lLiBBbGwgbGlhYmlsaXR5IGFy
-aXNpbmcgZnJvbSBvciBpbiBjb25uZWN0aW9uIHdpdGggY29tcHV0ZXIgdmlydXNlcyBhbmQvb3Ig
-Y29ycnVwdGVkIGUtbWFpbHMgaXMgZXhjbHVkZWQgdG8gdGhlIGZ1bGxlc3QgZXh0ZW50IHBlcm1p
-dHRlZCBieSBsYXcuDQotLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KLQotCkRJU0NMQUlNRVI6IAoKVGhpcyBlLW1haWwgKGlu
-Y2x1ZGluZyBhbnkgYXR0YWNobWVudHMpIGlzIGZvciB0aGUgYWRkcmVzc2VlKHMpIApvbmx5IGFu
-ZCBtYXkgY29udGFpbiBjb25maWRlbnRpYWwgaW5mb3JtYXRpb24uIElmIHlvdSBhcmUgbm90IHRo
-ZSAKaW50ZW5kZWQgcmVjaXBpZW50LCBwbGVhc2Ugbm90ZSB0aGF0IGFueSBkZWFsaW5nLCByZXZp
-ZXcsIApkaXN0cmlidXRpb24sIHByaW50aW5nLCBjb3B5aW5nIG9yIHVzZSBvZiB0aGlzIGUtbWFp
-bCBpcyBzdHJpY3RseSAKcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBlbWFp
-bCBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSAKdGhlIHNlbmRlciAgaW1tZWRpYXRlbHkgYW5kIGRl
-bGV0ZSB0aGUgb3JpZ2luYWwgbWVzc2FnZS4gCk1JTU9TIEJlcmhhZCBpcyBhIHJlc2VhcmNoIGFu
-ZCBkZXZlbG9wbWVudCBpbnN0aXR1dGlvbiB1bmRlciAKdGhlIHB1cnZpZXcgb2YgdGhlIE1hbGF5
-c2lhbiBNaW5pc3RyeSBvZiBTY2llbmNlLCBUZWNobm9sb2d5IGFuZCAKSW5ub3ZhdGlvbi4gT3Bp
-bmlvbnMsIGNvbmNsdXNpb25zIGFuZCBvdGhlciBpbmZvcm1hdGlvbiBpbiB0aGlzIGUtCm1haWwg
-dGhhdCBkbyBub3QgcmVsYXRlIHRvIHRoZSBvZmZpY2lhbCBidXNpbmVzcyBvZiBNSU1PUyBCZXJo
-YWQgCmFuZC9vciBpdHMgc3Vic2lkaWFyaWVzIHNoYWxsIGJlIHVuZGVyc3Rvb2QgYXMgbmVpdGhl
-ciBnaXZlbiBub3IgCmVuZG9yc2VkIGJ5IE1JTU9TIEJlcmhhZCBhbmQvb3IgaXRzIHN1YnNpZGlh
-cmllcyBhbmQgbmVpdGhlciAKTUlNT1MgQmVyaGFkIG5vciBpdHMgc3Vic2lkaWFyaWVzIGFjY2Vw
-dHMgcmVzcG9uc2liaWxpdHkgZm9yIHRoZSAKc2FtZS4gQWxsIGxpYWJpbGl0eSBhcmlzaW5nIGZy
-b20gb3IgaW4gY29ubmVjdGlvbiB3aXRoIGNvbXB1dGVyIAp2aXJ1c2VzIGFuZC9vciBjb3JydXB0
-ZWQgZS1tYWlscyBpcyBleGNsdWRlZCB0byB0aGUgZnVsbGVzdCBleHRlbnQgCnBlcm1pdHRlZCBi
-eSBsYXcuCgoK
+When I first looked at the append() function I started working on a branch 
+that would avoid the need for it entirely.  ObjectStore already 
+operates on a list of Transactions, and IIRC the appending is only needed 
+for local operations, not for what is sent over the wire.  It was 
+nontrivial because of various annoying reasons (pointer ownership, 
+lifecycle, etc.) so I didn't get very far.
+
+If this is going to be a significant amount of work to fix with the 
+current approach it might make sense to bite the bullet and go down that 
+path..?
+
+sage
+
+On Tue, 20 Jan 2015, Dong Yuan wrote:
+
+> If we must keep the order of local_t and op_t, I think the current
+> impl of append is not appropriate.
+> 
+> Maybe I must provide something like clone_append to avoid the modify
+> of existing data in the op_buffer, so the msg should be happy with the
+> new transaction format.
+> 
+> I will try this solution and give a patch as soon as possible.
+> 
+> On 20 January 2015 at 02:44, Samuel Just <sam.just@inktank.com> wrote:
+> > We actually found another problem with this series as well.
+> >
+> > http://tracker.ceph.com/issues/10534
+> >
+> > Looks like d427ca35404a30e1f428859c3274e030f2f83ef6 reversed the order
+> > of localt (which contains the create_collection) and op_t (which
+> > contains all of the operations on the object in the temp collection).
+> > We need the operations in localt to precede the operations in op_t.
+> > How do we do this?
+> > -Sam
+> >
+> > On Mon, Jan 19, 2015 at 8:07 AM, Dong Yuan <yuandong1222@gmail.com> wrote:
+> >> Yes, I am working on it since last week.
+> >>
+> >> This seems the same problem which I fix in the ReplicatedPG. So I try
+> >> to fix it following the same way which I did in the ReplicatedPG, but
+> >> it break the make_check test_erasure_code.sh.
+> >>
+> >> Now I am working on the test case, but unfortunately I am not familiar
+> >> with the impl of EC, so it will take me more time.
+> >>
+> >> On 19 January 2015 at 23:41, Sage Weil <sweil@redhat.com> wrote:
+> >>> Hi,
+> >>>
+> >>> This has come up a couple times in QA since we merged the fast transaction
+> >>> code.  Can you take a look?
+> >>>
+> >>>         http://tracker.ceph.com/issues/10517
+> >>>
+> >>> Ping me if it will help to get access to the test cluster.  Haomai has
+> >>> access, and you can get the logs via http (linked from pulpito.ceph.com),
+> >>> but it is less convenient.
+> >>>
+> >>> Thanks!
+> >>> sage
+> >>
+> >>
+> >>
+> >> --
+> >> Dong Yuan
+> >> Email:yuandong1222@gmail.com
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >> the body of a message to majordomo@vger.kernel.org
+> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+> 
+> -- 
+> Dong Yuan
+> Email:yuandong1222@gmail.com
+> 
+> 
