@@ -1,7 +1,7 @@
 From: Haomai Wang <haomaiwang@gmail.com>
 Subject: Re: ceph-0.91 with KVstore rocksdb as objectstore backend
-Date: Tue, 20 Jan 2015 23:54:08 +0800
-Message-ID: <CACJqLyaSDxoU8WK-_SfQu0zEiPmdKr1kb08Q81gn7QD2_oJ27w@mail.gmail.com>
+Date: Tue, 20 Jan 2015 23:55:09 +0800
+Message-ID: <CACJqLyb256_PV3TfUgmB04kh0x2JP7-YnxEYRwzBpYMr+Rd=7w@mail.gmail.com>
 References: <CAMc8nAU7tu6f8nAXGiKT2iMBuH9qs5SUE30sN5458D4aB_3+iQ@mail.gmail.com>
 	<CACJqLyYfHakm7k0s+6Gr7sT8yY0ju256h2KjAGNnjJDz46fBBA@mail.gmail.com>
 	<CAMc8nAXYUr8oNa0TRw76Ppo6KNs7u5iRf3APsy14u9ora0SWYA@mail.gmail.com>
@@ -9,264 +9,277 @@ References: <CAMc8nAU7tu6f8nAXGiKT2iMBuH9qs5SUE30sN5458D4aB_3+iQ@mail.gmail.com>
 	<CAMc8nAV1WmdK+LgP-cjPi-r+XY4d-=-sO322NqJY-w0zdyYwdQ@mail.gmail.com>
 	<CACJqLybLOA-NN1mByAnd34Q_vPu=ydtnahMSra59+=2M_RQVUg@mail.gmail.com>
 	<CAMc8nAWyi90nMLhQHSBKr-Bz0Z-i9_hwhe1BL9E8VVXnVAfL8Q@mail.gmail.com>
+	<CACJqLyaSDxoU8WK-_SfQu0zEiPmdKr1kb08Q81gn7QD2_oJ27w@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f169.google.com ([209.85.212.169]:60818 "EHLO
-	mail-wi0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752877AbbATPyK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Jan 2015 10:54:10 -0500
-Received: by mail-wi0-f169.google.com with SMTP id bs8so25176793wib.0
-        for <ceph-devel@vger.kernel.org>; Tue, 20 Jan 2015 07:54:09 -0800 (PST)
-In-Reply-To: <CAMc8nAWyi90nMLhQHSBKr-Bz0Z-i9_hwhe1BL9E8VVXnVAfL8Q@mail.gmail.com>
+Received: from mail-we0-f171.google.com ([74.125.82.171]:47283 "EHLO
+	mail-we0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753207AbbATQCI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Jan 2015 11:02:08 -0500
+Received: by mail-we0-f171.google.com with SMTP id u56so38509964wes.2
+        for <ceph-devel@vger.kernel.org>; Tue, 20 Jan 2015 08:02:06 -0800 (PST)
+In-Reply-To: <CACJqLyaSDxoU8WK-_SfQu0zEiPmdKr1kb08Q81gn7QD2_oJ27w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: pushpesh sharma <pushpesh.eck@gmail.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi,
+I have registered a related
+issue(http://tracker.ceph.com/issues/10583), we need to make db
+backend error promote to ceph's log.
 
-Obviously, we can find lots of IO error in your rocksdb's log:
-
-2015/01/20-19:08:13.452758 7f3a94b63700 (Original Log Time
-2015/01/20-19:08:13.449529) [default] compacted to: files[5 6 50 492
-361 0 0 ], 10822321443458.2 MB/sec, level 1, files in(4, 6) out(28526)
-MB in(135.9, 9.1) out(3803360014280.2),
-read-write-amplify(27979046152.7) write-amplify(27979046151.6) IO
-error: /var/lib/ceph/osd/ceph-0/current/059210.sst: Too many open
-files
-2015/01/20-19:08:13.452760 7f3a94b63700 Waiting after background
-compaction error: IO error:
-/var/lib/ceph/osd/ceph-0/current/059210.sst: Too many open files,
-Accumulated background error counts: 2
-2015/01/20-19:08:14.946634 7f3a94b63700 [WARN] Compaction error: IO
-error: /var/lib/ceph/osd/ceph-0/current/105226.sst: Too many open
-files
-2015/01/20-19:08:14.946643 7f3a94b63700 (Original Log Time
-2015/01/20-19:08:14.941764) [default] compacted to: files[6 6 50 492
-361 0 0 ], 13401580825960.6 MB/sec, level 1, files in(6, 6) out(46014)
-MB in(205.9, 9.1) out(6136418344252.7),
-read-write-amplify(29808966236.2) write-amplify(29808966235.2) IO
-error: /var/lib/ceph/osd/ceph-0/current/105226.sst: Too many open
-files
-2015/01/20-19:08:14.946646 7f3a94b63700 Waiting after background
-compaction error: IO error:
-/var/lib/ceph/osd/ceph-0/current/105226.sst: Too many open files,
-Accumulated background error counts: 3
-2015/01/20-19:08:16.459162 7f3a94b63700 [WARN] Compaction error: IO
-error: /var/lib/ceph/osd/ceph-0/current/149702.sst: Too many open
-files
-
-Because you set "rocksdb_max_open_files = 10240" in your ceph.conf,
-you will let rocksdb open 10240 files. So if ceph-osd has OS fd limit
-and rocksdb will failed to open more files and raise exception.
-
-So you need to increase os fd limit to
-"rocksdb_max_open_files"+"estimated network socket in
-osd"+"filestore_fd_cache_size" at least.
-
-I'm not sure this is the only cause of your problem because of limited
-infos, but I hope it's the root cause. :-)
-
-
-Thanks for your patient, !
-
-On Tue, Jan 20, 2015 at 9:42 PM, pushpesh sharma <pushpesh.eck@gmail.com> wrote:
-> Haomai,
+On Tue, Jan 20, 2015 at 11:54 PM, Haomai Wang <haomaiwang@gmail.com> wrote:
+> Hi,
 >
-> PFA logs on fresh setup, with all the debug settings.
+> Obviously, we can find lots of IO error in your rocksdb's log:
 >
-> This is what I used to dump some data:-
+> 2015/01/20-19:08:13.452758 7f3a94b63700 (Original Log Time
+> 2015/01/20-19:08:13.449529) [default] compacted to: files[5 6 50 492
+> 361 0 0 ], 10822321443458.2 MB/sec, level 1, files in(4, 6) out(28526)
+> MB in(135.9, 9.1) out(3803360014280.2),
+> read-write-amplify(27979046152.7) write-amplify(27979046151.6) IO
+> error: /var/lib/ceph/osd/ceph-0/current/059210.sst: Too many open
+> files
+> 2015/01/20-19:08:13.452760 7f3a94b63700 Waiting after background
+> compaction error: IO error:
+> /var/lib/ceph/osd/ceph-0/current/059210.sst: Too many open files,
+> Accumulated background error counts: 2
+> 2015/01/20-19:08:14.946634 7f3a94b63700 [WARN] Compaction error: IO
+> error: /var/lib/ceph/osd/ceph-0/current/105226.sst: Too many open
+> files
+> 2015/01/20-19:08:14.946643 7f3a94b63700 (Original Log Time
+> 2015/01/20-19:08:14.941764) [default] compacted to: files[6 6 50 492
+> 361 0 0 ], 13401580825960.6 MB/sec, level 1, files in(6, 6) out(46014)
+> MB in(205.9, 9.1) out(6136418344252.7),
+> read-write-amplify(29808966236.2) write-amplify(29808966235.2) IO
+> error: /var/lib/ceph/osd/ceph-0/current/105226.sst: Too many open
+> files
+> 2015/01/20-19:08:14.946646 7f3a94b63700 Waiting after background
+> compaction error: IO error:
+> /var/lib/ceph/osd/ceph-0/current/105226.sst: Too many open files,
+> Accumulated background error counts: 3
+> 2015/01/20-19:08:16.459162 7f3a94b63700 [WARN] Compaction error: IO
+> error: /var/lib/ceph/osd/ceph-0/current/149702.sst: Too many open
+> files
 >
-> rados -p benchpool1 bench 300 write  -b 4194304 -t 8 --no-cleanup
+> Because you set "rocksdb_max_open_files = 10240" in your ceph.conf,
+> you will let rocksdb open 10240 files. So if ceph-osd has OS fd limit
+> and rocksdb will failed to open more files and raise exception.
+>
+> So you need to increase os fd limit to
+> "rocksdb_max_open_files"+"estimated network socket in
+> osd"+"filestore_fd_cache_size" at least.
+>
+> I'm not sure this is the only cause of your problem because of limited
+> infos, but I hope it's the root cause. :-)
 >
 >
-> On Tue, Jan 20, 2015 at 3:59 PM, Haomai Wang <haomaiwang@gmail.com> wrote:
->> Yeah, thankyou.
+> Thanks for your patient, !
+>
+> On Tue, Jan 20, 2015 at 9:42 PM, pushpesh sharma <pushpesh.eck@gmail.com> wrote:
+>> Haomai,
 >>
->> I think your cluster is failed to read/write from rocksdb. But your
->> config disable rocksdb log file, so you can change
->> "rocksdb_info_log_level=debug"
->> "rocksdb_log=/var/log/ceph/ceph-osd-rocksdb.log"
+>> PFA logs on fresh setup, with all the debug settings.
 >>
->> This log should explain the details I hope.
+>> This is what I used to dump some data:-
 >>
->> On Tue, Jan 20, 2015 at 6:09 PM, pushpesh sharma <pushpesh.eck@gmail.com> wrote:
->>> Haomai,
+>> rados -p benchpool1 bench 300 write  -b 4194304 -t 8 --no-cleanup
+>>
+>>
+>> On Tue, Jan 20, 2015 at 3:59 PM, Haomai Wang <haomaiwang@gmail.com> wrote:
+>>> Yeah, thankyou.
 >>>
->>> PFA logs with debug_keyvaluestore=20/20, and perf dump output.
+>>> I think your cluster is failed to read/write from rocksdb. But your
+>>> config disable rocksdb log file, so you can change
+>>> "rocksdb_info_log_level=debug"
+>>> "rocksdb_log=/var/log/ceph/ceph-osd-rocksdb.log"
 >>>
->>> On Tue, Jan 20, 2015 at 2:28 PM, Haomai Wang <haomaiwang@gmail.com> wrote:
->>>> Sorry, could you add debug_keyvaluestore=20/20 to your config.conf and
->>>> run again to capture the dump logs?
+>>> This log should explain the details I hope.
+>>>
+>>> On Tue, Jan 20, 2015 at 6:09 PM, pushpesh sharma <pushpesh.eck@gmail.com> wrote:
+>>>> Haomai,
 >>>>
+>>>> PFA logs with debug_keyvaluestore=20/20, and perf dump output.
 >>>>
->>>> And simply view the log, it seemed that keyvaluestore failed to submit
->>>> transaction to rocksdb.
->>>>
->>>> Additionally, run "ceph --admin-daemon=/var/run/ceph/[ceph-osd.*.pid]
->>>> perf dump" is help to verify the assumption.
->>>>
->>>> Thanks!
->>>>
->>>> On Tue, Jan 20, 2015 at 4:53 PM, pushpesh sharma <pushpesh.eck@gmail.com> wrote:
->>>>> Haomai,
->>>>>
->>>>> PFA for the complete logs of one of the OSD daemon. In an attempt to
->>>>> start all osd daemon, I captured logs of one of the OSD daemon is
->>>>> pasted here:  http://pastebin.com/SRBJknCM .
+>>>> On Tue, Jan 20, 2015 at 2:28 PM, Haomai Wang <haomaiwang@gmail.com> wrote:
+>>>>> Sorry, could you add debug_keyvaluestore=20/20 to your config.conf and
+>>>>> run again to capture the dump logs?
 >>>>>
 >>>>>
+>>>>> And simply view the log, it seemed that keyvaluestore failed to submit
+>>>>> transaction to rocksdb.
 >>>>>
->>>>> On Tue, Jan 20, 2015 at 12:34 PM, Haomai Wang <haomaiwang@gmail.com> wrote:
->>>>>> I think you can find related infos from log: /var/log/ceph/osd/ceph-osd*
+>>>>> Additionally, run "ceph --admin-daemon=/var/run/ceph/[ceph-osd.*.pid]
+>>>>> perf dump" is help to verify the assumption.
+>>>>>
+>>>>> Thanks!
+>>>>>
+>>>>> On Tue, Jan 20, 2015 at 4:53 PM, pushpesh sharma <pushpesh.eck@gmail.com> wrote:
+>>>>>> Haomai,
 >>>>>>
->>>>>> It should help us to figure out.
+>>>>>> PFA for the complete logs of one of the OSD daemon. In an attempt to
+>>>>>> start all osd daemon, I captured logs of one of the OSD daemon is
+>>>>>> pasted here:  http://pastebin.com/SRBJknCM .
 >>>>>>
->>>>>> On Tue, Jan 20, 2015 at 2:48 PM, pushpesh sharma <pushpesh.eck@gmail.com> wrote:
->>>>>>> Hi All,
+>>>>>>
+>>>>>>
+>>>>>> On Tue, Jan 20, 2015 at 12:34 PM, Haomai Wang <haomaiwang@gmail.com> wrote:
+>>>>>>> I think you can find related infos from log: /var/log/ceph/osd/ceph-osd*
 >>>>>>>
->>>>>>> I am trying to configure rocksdb as objectstore backend on a cluster
->>>>>>> with ceph version 0.91-375-g2a4cbfc. I built ceph using' make-debs.sh'
->>>>>>> which builds the source with  --with-rocksdb option. I was able to get
->>>>>>> the cluster up and running with rockdbs as a backend, however as soon
->>>>>>> as I started dumping data on cluster using radosbench , cluster become
->>>>>>> miserable just after 10 sec of write I/Os. Some OSD daemons marked
->>>>>>> down randomly for no apparent reason. Even if  I make all daemons
->>>>>>> start/up again , after some time some daemons marked down again
->>>>>>> randomly.Recovery i/o does the job this time , that external i/o done
->>>>>>> before. What could be the possible problem and solution for this
->>>>>>> behaviour?
+>>>>>>> It should help us to figure out.
 >>>>>>>
->>>>>>> Some more details:
+>>>>>>> On Tue, Jan 20, 2015 at 2:48 PM, pushpesh sharma <pushpesh.eck@gmail.com> wrote:
+>>>>>>>> Hi All,
+>>>>>>>>
+>>>>>>>> I am trying to configure rocksdb as objectstore backend on a cluster
+>>>>>>>> with ceph version 0.91-375-g2a4cbfc. I built ceph using' make-debs.sh'
+>>>>>>>> which builds the source with  --with-rocksdb option. I was able to get
+>>>>>>>> the cluster up and running with rockdbs as a backend, however as soon
+>>>>>>>> as I started dumping data on cluster using radosbench , cluster become
+>>>>>>>> miserable just after 10 sec of write I/Os. Some OSD daemons marked
+>>>>>>>> down randomly for no apparent reason. Even if  I make all daemons
+>>>>>>>> start/up again , after some time some daemons marked down again
+>>>>>>>> randomly.Recovery i/o does the job this time , that external i/o done
+>>>>>>>> before. What could be the possible problem and solution for this
+>>>>>>>> behaviour?
+>>>>>>>>
+>>>>>>>> Some more details:
+>>>>>>>>
+>>>>>>>> 1. Setup is 3 OSD nodes with 10 SanDisk Optimus Eco (400GB)
+>>>>>>>> each.Drives were working fine with filestore backend.
+>>>>>>>> 2. 3 Monitors and 1 client from which I am running RadosBench.
+>>>>>>>> 3. Ubuntu14.04 on each node. (3.13.0-24-generic)
+>>>>>>>> 4. I create OSDs on each nodes using below script(of course with
+>>>>>>>> different osd numbers):-
+>>>>>>>> ##################################
+>>>>>>>> #!/bin/bash
+>>>>>>>> sudo stop ceph-osd-all
+>>>>>>>> ps -eaf|grep osd |awk '{print $2}'|xargs sudo kill -9
+>>>>>>>> osd_num=(0 1 2 3 4 5 6 7 8 9)
+>>>>>>>> drives=(sdb1 sdc1 sdd1 sde1 sdf1 sdg1 sdh1 sdi1 sdj1 sdk1)
+>>>>>>>> node="rack6-storage-1"
+>>>>>>>> for ((i=0;i<10;i++))
+>>>>>>>> do
+>>>>>>>>         sudo ceph osd rm ${osd_num[i]}
+>>>>>>>>         sudo ceph osd crush rm osd.${osd_num[i]}
+>>>>>>>>         sudo ceph auth del osd.${osd_num[i]}
+>>>>>>>>         sudo umount -f /var/lib/ceph/osd/ceph-${osd_num[i]}
+>>>>>>>>         ceph osd create
+>>>>>>>>         sudo rm -rf /var/lib/ceph/osd/ceph-${osd_num[i]}
+>>>>>>>>         sudo mkdir -p /var/lib/ceph/osd/ceph-${osd_num[i]}
+>>>>>>>>         sudo mkfs.xfs -f -i size=2048 /dev/${drives[i]}
+>>>>>>>>         sudo mount -o rw,noatime,inode64,logbsize=256k,delaylog
+>>>>>>>> /dev/${drives[i]} /var/lib/ceph/osd/ceph-${osd_num[i]}
+>>>>>>>>         sudo ceph osd crush add osd.${osd_num[i]} 1 root=default host=$node
+>>>>>>>>         sudo sudo ceph-osd --id ${osd_num[i]} -d --mkkey --mkfs
+>>>>>>>> --osd-data /var/lib/ceph/osd/ceph-${osd_num[i]}
+>>>>>>>>         ceph auth add osd.${osd_num[i]} osd 'allow *' mon 'allow
+>>>>>>>> profile osd' -i /var/lib/ceph/osd/ceph-${osd_num[i]}/keyring
+>>>>>>>>         sudo sudo ceph-osd -i ${osd_num[i]}
+>>>>>>>> done
+>>>>>>>> ###################################
+>>>>>>>>
+>>>>>>>> 5. Some configs that might be relevant are as follows:-
+>>>>>>>> #########
+>>>>>>>> enable_experimental_unrecoverable_data_corrupting_features = keyvaluestore
+>>>>>>>> osd_objectstore = keyvaluestore
+>>>>>>>> keyvaluestore_backend = rocksdb
+>>>>>>>> keyvaluestore queue max ops = 500
+>>>>>>>> keyvaluestore queue max bytes = 100
+>>>>>>>> keyvaluestore header cache size = 2048
+>>>>>>>> keyvaluestore op threads = 10
+>>>>>>>> keyvaluestore_max_expected_write_size = 4096000
+>>>>>>>> leveldb_write_buffer_size = 33554432
+>>>>>>>> leveldb_cache_size = 536870912
+>>>>>>>> leveldb_bloom_size = 0
+>>>>>>>> leveldb_max_open_files = 10240
+>>>>>>>> leveldb_compression = false
+>>>>>>>> leveldb_paranoid = false
+>>>>>>>> leveldb_log = /dev/null
+>>>>>>>> leveldb_compact_on_mount = false
+>>>>>>>> rocksdb_write_buffer_size = 33554432
+>>>>>>>> rocksdb_cache_size = 536870912
+>>>>>>>> rocksdb_bloom_size = 0
+>>>>>>>> rocksdb_max_open_files = 10240
+>>>>>>>> rocksdb_compression = false
+>>>>>>>> rocksdb_paranoid = false
+>>>>>>>> rocksdb_log = /dev/null
+>>>>>>>> rocksdb_compact_on_mount = false
+>>>>>>>> #########
+>>>>>>>>
+>>>>>>>> 6. Objects get stored in *.sst files, seems rocksbd is configured correctly:-
+>>>>>>>>
+>>>>>>>> ls -l /var/lib/ceph/osd/ceph-20/current/ |more
+>>>>>>>> total 3169352
+>>>>>>>> -rw-r--r-- 1 root root  2128430 Jan 20 00:04 000031.sst
+>>>>>>>> -rw-r--r-- 1 root root  2128430 Jan 20 00:04 000033.sst
+>>>>>>>> -rw-r--r-- 1 root root  2128431 Jan 20 00:04 000035.sst
+>>>>>>>> ............
+>>>>>>>> 7. This is current state of cluster:-
+>>>>>>>> ################
+>>>>>>>> monmap e1: 3 mons at
+>>>>>>>> {rack6-ramp-1=10.x.x.x:6789/0,rack6-ramp-2=10.x.x.x:6789/0,rack6-ramp-3=10.x.x.x:6789/0}
+>>>>>>>> election epoch 16, quorum 0,1,2 rack6-ramp-1,rack6-ramp-2,rack6-ramp-3
+>>>>>>>> osdmap e547: 30 osds: 8 up, 8 in
+>>>>>>>>       pgmap v1059: 512 pgs, 1 pools, 18252 MB data, 4563 objects
+>>>>>>>>             22856 MB used, 2912 GB / 2934 GB avail
+>>>>>>>>             1587/13689 objects degraded (11.593%)
+>>>>>>>>             419/13689 objects misplaced (3.061%)
+>>>>>>>>             26/4563 unfound (0.570%)
+>>>>>>>> #################
+>>>>>>>>
+>>>>>>>> I would be happy to provide any other information that is needed.
+>>>>>>>>
+>>>>>>>> --
+>>>>>>>> -Pushpesh
+>>>>>>>> --
+>>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >>>>>>>
->>>>>>> 1. Setup is 3 OSD nodes with 10 SanDisk Optimus Eco (400GB)
->>>>>>> each.Drives were working fine with filestore backend.
->>>>>>> 2. 3 Monitors and 1 client from which I am running RadosBench.
->>>>>>> 3. Ubuntu14.04 on each node. (3.13.0-24-generic)
->>>>>>> 4. I create OSDs on each nodes using below script(of course with
->>>>>>> different osd numbers):-
->>>>>>> ##################################
->>>>>>> #!/bin/bash
->>>>>>> sudo stop ceph-osd-all
->>>>>>> ps -eaf|grep osd |awk '{print $2}'|xargs sudo kill -9
->>>>>>> osd_num=(0 1 2 3 4 5 6 7 8 9)
->>>>>>> drives=(sdb1 sdc1 sdd1 sde1 sdf1 sdg1 sdh1 sdi1 sdj1 sdk1)
->>>>>>> node="rack6-storage-1"
->>>>>>> for ((i=0;i<10;i++))
->>>>>>> do
->>>>>>>         sudo ceph osd rm ${osd_num[i]}
->>>>>>>         sudo ceph osd crush rm osd.${osd_num[i]}
->>>>>>>         sudo ceph auth del osd.${osd_num[i]}
->>>>>>>         sudo umount -f /var/lib/ceph/osd/ceph-${osd_num[i]}
->>>>>>>         ceph osd create
->>>>>>>         sudo rm -rf /var/lib/ceph/osd/ceph-${osd_num[i]}
->>>>>>>         sudo mkdir -p /var/lib/ceph/osd/ceph-${osd_num[i]}
->>>>>>>         sudo mkfs.xfs -f -i size=2048 /dev/${drives[i]}
->>>>>>>         sudo mount -o rw,noatime,inode64,logbsize=256k,delaylog
->>>>>>> /dev/${drives[i]} /var/lib/ceph/osd/ceph-${osd_num[i]}
->>>>>>>         sudo ceph osd crush add osd.${osd_num[i]} 1 root=default host=$node
->>>>>>>         sudo sudo ceph-osd --id ${osd_num[i]} -d --mkkey --mkfs
->>>>>>> --osd-data /var/lib/ceph/osd/ceph-${osd_num[i]}
->>>>>>>         ceph auth add osd.${osd_num[i]} osd 'allow *' mon 'allow
->>>>>>> profile osd' -i /var/lib/ceph/osd/ceph-${osd_num[i]}/keyring
->>>>>>>         sudo sudo ceph-osd -i ${osd_num[i]}
->>>>>>> done
->>>>>>> ###################################
 >>>>>>>
->>>>>>> 5. Some configs that might be relevant are as follows:-
->>>>>>> #########
->>>>>>> enable_experimental_unrecoverable_data_corrupting_features = keyvaluestore
->>>>>>> osd_objectstore = keyvaluestore
->>>>>>> keyvaluestore_backend = rocksdb
->>>>>>> keyvaluestore queue max ops = 500
->>>>>>> keyvaluestore queue max bytes = 100
->>>>>>> keyvaluestore header cache size = 2048
->>>>>>> keyvaluestore op threads = 10
->>>>>>> keyvaluestore_max_expected_write_size = 4096000
->>>>>>> leveldb_write_buffer_size = 33554432
->>>>>>> leveldb_cache_size = 536870912
->>>>>>> leveldb_bloom_size = 0
->>>>>>> leveldb_max_open_files = 10240
->>>>>>> leveldb_compression = false
->>>>>>> leveldb_paranoid = false
->>>>>>> leveldb_log = /dev/null
->>>>>>> leveldb_compact_on_mount = false
->>>>>>> rocksdb_write_buffer_size = 33554432
->>>>>>> rocksdb_cache_size = 536870912
->>>>>>> rocksdb_bloom_size = 0
->>>>>>> rocksdb_max_open_files = 10240
->>>>>>> rocksdb_compression = false
->>>>>>> rocksdb_paranoid = false
->>>>>>> rocksdb_log = /dev/null
->>>>>>> rocksdb_compact_on_mount = false
->>>>>>> #########
->>>>>>>
->>>>>>> 6. Objects get stored in *.sst files, seems rocksbd is configured correctly:-
->>>>>>>
->>>>>>> ls -l /var/lib/ceph/osd/ceph-20/current/ |more
->>>>>>> total 3169352
->>>>>>> -rw-r--r-- 1 root root  2128430 Jan 20 00:04 000031.sst
->>>>>>> -rw-r--r-- 1 root root  2128430 Jan 20 00:04 000033.sst
->>>>>>> -rw-r--r-- 1 root root  2128431 Jan 20 00:04 000035.sst
->>>>>>> ............
->>>>>>> 7. This is current state of cluster:-
->>>>>>> ################
->>>>>>> monmap e1: 3 mons at
->>>>>>> {rack6-ramp-1=10.x.x.x:6789/0,rack6-ramp-2=10.x.x.x:6789/0,rack6-ramp-3=10.x.x.x:6789/0}
->>>>>>> election epoch 16, quorum 0,1,2 rack6-ramp-1,rack6-ramp-2,rack6-ramp-3
->>>>>>> osdmap e547: 30 osds: 8 up, 8 in
->>>>>>>       pgmap v1059: 512 pgs, 1 pools, 18252 MB data, 4563 objects
->>>>>>>             22856 MB used, 2912 GB / 2934 GB avail
->>>>>>>             1587/13689 objects degraded (11.593%)
->>>>>>>             419/13689 objects misplaced (3.061%)
->>>>>>>             26/4563 unfound (0.570%)
->>>>>>> #################
->>>>>>>
->>>>>>> I would be happy to provide any other information that is needed.
 >>>>>>>
 >>>>>>> --
->>>>>>> -Pushpesh
->>>>>>> --
->>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>>>>> the body of a message to majordomo@vger.kernel.org
->>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>>>> Best Regards,
+>>>>>>>
+>>>>>>> Wheat
 >>>>>>
 >>>>>>
 >>>>>>
 >>>>>> --
->>>>>> Best Regards,
->>>>>>
->>>>>> Wheat
+>>>>>> -Pushpesh
 >>>>>
 >>>>>
 >>>>>
 >>>>> --
->>>>> -Pushpesh
+>>>>> Best Regards,
+>>>>>
+>>>>> Wheat
 >>>>
 >>>>
 >>>>
 >>>> --
->>>> Best Regards,
->>>>
->>>> Wheat
+>>>> -Pushpesh
 >>>
 >>>
 >>>
 >>> --
->>> -Pushpesh
+>>> Best Regards,
+>>>
+>>> Wheat
 >>
 >>
 >>
 >> --
->> Best Regards,
->>
->> Wheat
+>> -Pushpesh
 >
 >
 >
 > --
-> -Pushpesh
+> Best Regards,
+>
+> Wheat
 
 
 
