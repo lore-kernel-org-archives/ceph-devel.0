@@ -1,139 +1,308 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: ceph-0.91 with KVstore rocksdb as objectstore backend
-Date: Tue, 20 Jan 2015 15:04:38 +0800
-Message-ID: <CACJqLyYfHakm7k0s+6Gr7sT8yY0ju256h2KjAGNnjJDz46fBBA@mail.gmail.com>
-References: <CAMc8nAU7tu6f8nAXGiKT2iMBuH9qs5SUE30sN5458D4aB_3+iQ@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Deadline of Github pull request for Hammer release (question)
+Date: Tue, 20 Jan 2015 08:22:43 +0100
+Message-ID: <54BE0243.60301@dachary.org>
+References: <870DE8DBB716524BAE51B2D499EC81E40AA3F9AB@g01jpexmbyt24> <54AC048E.9040200@dachary.org> <870DE8DBB716524BAE51B2D499EC81E40AA40849@g01jpexmbyt24> <54B4F2C0.2040805@dachary.org> <870DE8DBB716524BAE51B2D499EC81E40AA40872@g01jpexmbyt24> <54B5137F.7090902@dachary.org> <870DE8DBB716524BAE51B2D499EC81E40AA40983@g01jpexmbyt24> <54B55DE8.6010003@dachary.org> <870DE8DBB716524BAE51B2D499EC81E40AA5B1F2@g01jpexmbyt24>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="tUk6hgMgNuoAaiPvmF2wxiPSuUG8eipN3"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f171.google.com ([209.85.212.171]:64302 "EHLO
-	mail-wi0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752404AbbATHEj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Jan 2015 02:04:39 -0500
-Received: by mail-wi0-f171.google.com with SMTP id l15so12366852wiw.4
-        for <ceph-devel@vger.kernel.org>; Mon, 19 Jan 2015 23:04:38 -0800 (PST)
-In-Reply-To: <CAMc8nAU7tu6f8nAXGiKT2iMBuH9qs5SUE30sN5458D4aB_3+iQ@mail.gmail.com>
+Received: from mail2.dachary.org ([91.121.57.175]:43630 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752039AbbATHWp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Jan 2015 02:22:45 -0500
+In-Reply-To: <870DE8DBB716524BAE51B2D499EC81E40AA5B1F2@g01jpexmbyt24>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: pushpesh sharma <pushpesh.eck@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, "Shiozawa, Kensuke" <shiozawa.kennsu@jp.fujitsu.com>, "Nakao, Takanori" <nakao.takanori@jp.fujitsu.com>, "Paul Von-Stamwitz (PVonStamwitz@us.fujitsu.com)" <PVonStamwitz@us.fujitsu.com>
 
-I think you can find related infos from log: /var/log/ceph/osd/ceph-osd*
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--tUk6hgMgNuoAaiPvmF2wxiPSuUG8eipN3
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-It should help us to figure out.
+Hi,
 
-On Tue, Jan 20, 2015 at 2:48 PM, pushpesh sharma <pushpesh.eck@gmail.com> wrote:
-> Hi All,
->
-> I am trying to configure rocksdb as objectstore backend on a cluster
-> with ceph version 0.91-375-g2a4cbfc. I built ceph using' make-debs.sh'
-> which builds the source with  --with-rocksdb option. I was able to get
-> the cluster up and running with rockdbs as a backend, however as soon
-> as I started dumping data on cluster using radosbench , cluster become
-> miserable just after 10 sec of write I/Os. Some OSD daemons marked
-> down randomly for no apparent reason. Even if  I make all daemons
-> start/up again , after some time some daemons marked down again
-> randomly.Recovery i/o does the job this time , that external i/o done
-> before. What could be the possible problem and solution for this
-> behaviour?
->
-> Some more details:
->
-> 1. Setup is 3 OSD nodes with 10 SanDisk Optimus Eco (400GB)
-> each.Drives were working fine with filestore backend.
-> 2. 3 Monitors and 1 client from which I am running RadosBench.
-> 3. Ubuntu14.04 on each node. (3.13.0-24-generic)
-> 4. I create OSDs on each nodes using below script(of course with
-> different osd numbers):-
-> ##################################
-> #!/bin/bash
-> sudo stop ceph-osd-all
-> ps -eaf|grep osd |awk '{print $2}'|xargs sudo kill -9
-> osd_num=(0 1 2 3 4 5 6 7 8 9)
-> drives=(sdb1 sdc1 sdd1 sde1 sdf1 sdg1 sdh1 sdi1 sdj1 sdk1)
-> node="rack6-storage-1"
-> for ((i=0;i<10;i++))
-> do
->         sudo ceph osd rm ${osd_num[i]}
->         sudo ceph osd crush rm osd.${osd_num[i]}
->         sudo ceph auth del osd.${osd_num[i]}
->         sudo umount -f /var/lib/ceph/osd/ceph-${osd_num[i]}
->         ceph osd create
->         sudo rm -rf /var/lib/ceph/osd/ceph-${osd_num[i]}
->         sudo mkdir -p /var/lib/ceph/osd/ceph-${osd_num[i]}
->         sudo mkfs.xfs -f -i size=2048 /dev/${drives[i]}
->         sudo mount -o rw,noatime,inode64,logbsize=256k,delaylog
-> /dev/${drives[i]} /var/lib/ceph/osd/ceph-${osd_num[i]}
->         sudo ceph osd crush add osd.${osd_num[i]} 1 root=default host=$node
->         sudo sudo ceph-osd --id ${osd_num[i]} -d --mkkey --mkfs
-> --osd-data /var/lib/ceph/osd/ceph-${osd_num[i]}
->         ceph auth add osd.${osd_num[i]} osd 'allow *' mon 'allow
-> profile osd' -i /var/lib/ceph/osd/ceph-${osd_num[i]}/keyring
->         sudo sudo ceph-osd -i ${osd_num[i]}
-> done
-> ###################################
->
-> 5. Some configs that might be relevant are as follows:-
-> #########
-> enable_experimental_unrecoverable_data_corrupting_features = keyvaluestore
-> osd_objectstore = keyvaluestore
-> keyvaluestore_backend = rocksdb
-> keyvaluestore queue max ops = 500
-> keyvaluestore queue max bytes = 100
-> keyvaluestore header cache size = 2048
-> keyvaluestore op threads = 10
-> keyvaluestore_max_expected_write_size = 4096000
-> leveldb_write_buffer_size = 33554432
-> leveldb_cache_size = 536870912
-> leveldb_bloom_size = 0
-> leveldb_max_open_files = 10240
-> leveldb_compression = false
-> leveldb_paranoid = false
-> leveldb_log = /dev/null
-> leveldb_compact_on_mount = false
-> rocksdb_write_buffer_size = 33554432
-> rocksdb_cache_size = 536870912
-> rocksdb_bloom_size = 0
-> rocksdb_max_open_files = 10240
-> rocksdb_compression = false
-> rocksdb_paranoid = false
-> rocksdb_log = /dev/null
-> rocksdb_compact_on_mount = false
-> #########
->
-> 6. Objects get stored in *.sst files, seems rocksbd is configured correctly:-
->
-> ls -l /var/lib/ceph/osd/ceph-20/current/ |more
-> total 3169352
-> -rw-r--r-- 1 root root  2128430 Jan 20 00:04 000031.sst
-> -rw-r--r-- 1 root root  2128430 Jan 20 00:04 000033.sst
-> -rw-r--r-- 1 root root  2128431 Jan 20 00:04 000035.sst
-> ............
-> 7. This is current state of cluster:-
-> ################
-> monmap e1: 3 mons at
-> {rack6-ramp-1=10.x.x.x:6789/0,rack6-ramp-2=10.x.x.x:6789/0,rack6-ramp-3=10.x.x.x:6789/0}
-> election epoch 16, quorum 0,1,2 rack6-ramp-1,rack6-ramp-2,rack6-ramp-3
-> osdmap e547: 30 osds: 8 up, 8 in
->       pgmap v1059: 512 pgs, 1 pools, 18252 MB data, 4563 objects
->             22856 MB used, 2912 GB / 2934 GB avail
->             1587/13689 objects degraded (11.593%)
->             419/13689 objects misplaced (3.061%)
->             26/4563 unfound (0.570%)
-> #################
->
-> I would be happy to provide any other information that is needed.
->
+Thanks for the update. To speed up things, I could review what's already =
+published. Did you add the tests already ?
+
+Cheers
+
+On 20/01/2015 01:48, Miyamae, Takeshi wrote:
+> Hi Loic,
+>=20
+> Thank you for your advice which suggested providing SHEC as an extra-pa=
+ckage.
+> We believe it's generally a good idea, but we are hoping SHEC would be =
+merged
+> into Hammer because that would have an apparent advantage from a viewpo=
+int of
+> maintenance support.
+>=20
+> As for the thread safety issue, we totally agree with you and we are tr=
+ying to solve it.
+> We will complete it in a few days and we'd like to ask you to review it=
+ again so that
+> it might be in time for Hammer's feature freeze (v0.93).
+>=20
+> Best regards,
+> Takeshi Miyamae
+>=20
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.ke=
+rnel.org] On Behalf Of Loic Dachary
+> Sent: Wednesday, January 14, 2015 3:03 AM
+> To: Miyamae, Takeshi/=E5=AE=AE=E5=89=8D =E5=89=9B
+> Cc: Ceph Development; Shiozawa, Kensuke/=E5=A1=A9=E6=B2=A2 =E8=B3=A2=E8=
+=BC=94; Nakao, Takanori/=E4=B8=AD=E5=B0=BE =E9=B7=B9=E8=A9=94; Paul Von-S=
+tamwitz (PVonStamwitz@us.fujitsu.com)
+> Subject: Re: Deadline of Github pull request for Hammer release (questi=
+on)
+>=20
+> Hi,
+>=20
+> On 13/01/2015 18:05, Miyamae, Takeshi wrote:
+>> Hi Loic,
+>>
+>> Thank you for your quick review.
+>>
+>>> Could you reference the jerasure files (they are in the jerasure=20
+>>> plugin already) instead of including them in your patch ?
+>>
+>> We had used the reference of jerasure v2.0 files before, but changed=20
+>> to including v1.2 files after the patent issue.
+>=20
+> If you are refering to http://erasure-code-patents.xyz/, it can safely =
+be ignored.
+>=20
+>> However, we can restore the reference right away if we are needed.
+>>
+>>> In ::prepare you reuse the matrix, if possible. If your intention is =
+
+>>> to improve performances, you should consider using the same approach =
+as the isa plugin.
+>>
+>> We have found a performance issue caused by redundant initializations =
+
+>> of the module, and solved it by caching the initialized variables in m=
+emory.
+>> If that is the same approach as isa-plugin you mentioned, we also do=20
+>> not have the same issue any more.
+>=20
+> The ISA plugin approach is thread safe, that's the important part.
+>=20
+>>> I'll have more comments once you have unit / functional tests
+>>
+>> We do have the those unit/functional tests, but the server is unreacha=
+ble at this moment.
+>> Please let us upload them to the repository tomorrow.
+>=20
+> Great.
+>=20
+>>> Regarding your initial question: I think it is too late for the Hamme=
+r release.
+>>
+>> We are so disappointed to hear that, but we must apologize for the lat=
+e request.
+>> If there would be any chance that SHEC be pulled into hammer, we are=20
+>> very happy to conduct all the necessary tests by ourselves.
+>> Please let us know the detailed schedule if this is a feasible option.=
+
+>=20
+> Note that since this is a plugin it will be easy for someone to install=
+ it on a Hammer cluster, simply by copying the plugin files to each OSD /=
+ MON and restarting them. If there is some kind of urgency for you to be =
+able to install this new plugin, I would advise making a package that con=
+tains just this file, restart the OSD once installed and recommend that t=
+he installation is done on all machines of the cluster (because every OSD=
+ / MON need to know about the plugin).=20
+>=20
+> Cheers
+>=20
+>> Best regards,
+>> Takeshi Miyamae
+>>
+>> -----Original Message-----
+>> From: ceph-devel-owner@vger.kernel.org=20
+>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Loic Dachary
+>> Sent: Tuesday, January 13, 2015 9:46 PM
+>> To: Miyamae, Takeshi/=E5=AE=AE=E5=89=8D =E5=89=9B
+>> Cc: Ceph Development; Shiozawa, Kensuke/=E5=A1=A9=E6=B2=A2 =E8=B3=A2=E8=
+=BC=94; Nakao, Takanori/=E4=B8=AD=E5=B0=BE =E9=B7=B9=E8=A9=94;=20
+>> Paul Von-Stamwitz (PVonStamwitz@us.fujitsu.com)
+>> Subject: Re: Deadline of Github pull request for Hammer release=20
+>> (question)
+>>
+>> Hi,
+>>
+>> It's a great start :-) A few comments:
+>>
+>> Could you reference the jerasure files (they are in the jerasure plugi=
+n already) instead of including them in your patch ?
+>>
+>> In ::prepare you reuse the matrix, if possible. If your intention is=20
+>> to improve performances, you should consider using the same approach=20
+>> as the isa plugin. See=20
+>> http://workbench.dachary.org/ceph/ceph/blob/giant/src/erasure-code/isa=
+
+>> /ErasureCodePluginIsa.cc#L36 which is and independent type=20
+>> http://workbench.dachary.org/ceph/ceph/blob/giant/src/erasure-code/isa=
+
+>> /ErasureCodeIsaTableCache.h with only one instance and is populated as=
+=20
+>> needed and protected by a lock to make it thread safe :=20
+>> http://workbench.dachary.org/ceph/ceph/blob/giant/src/erasure-code/isa=
+
+>> /ErasureCodeIsaTableCache.h#L101
+>>
+>> I'll have more comments once you have unit / functional tests ( simila=
+r to http://workbench.dachary.org/ceph/ceph/blob/giant/src/test/erasure-c=
+ode/TestErasureCodeJerasure.cc ).=20
+>>
+>> Regarding your initial question: I think it is too late for the Hammer=
+ release. But from what I read it looks like we'll be able to merge in th=
+e early stages of the next release and that will give us time to properly=
+ test it.
+>>
+>> Cheers
+>>
+>> On 13/01/2015 11:34, Miyamae, Takeshi wrote:
+>>> Hi Loic,
+>>>
+>>> I'm so sorry. The following is the correct repository.
+>>>
+>>> https://github.com/t-miyamae/ceph
+>>>
+>>> Best regards,
+>>> Takeshi Miyamae
+>>>
+>>> -----Original Message-----
+>>> From: Loic Dachary [mailto:loic@dachary.org]
+>>> Sent: Tuesday, January 13, 2015 7:26 PM
+>>> To: Miyamae, Takeshi/=E5=AE=AE=E5=89=8D =E5=89=9B
+>>> Cc: Ceph Development; Shiozawa, Kensuke/=E5=A1=A9=E6=B2=A2 =E8=B3=A2=E8=
+=BC=94; Nakao, Takanori/=E4=B8=AD=E5=B0=BE =E9=B7=B9=E8=A9=94;
+>>> Paul Von-Stamwitz (PVonStamwitz@us.fujitsu.com)
+>>> Subject: Re: Deadline of Github pull request for Hammer release
+>>> (question)
+>>>
+>>> Hi,
+>>>
+>>> On 13/01/2015 11:24, Miyamae, Takeshi wrote:
+>>>> Hi Loic,
+>>>>
+>>>>> Although we're late in the Hammer roadmap, it's a good time for an =
+early preview. It will help show what needs to be changed to accomodate t=
+he SHEC plugin.
+>>>>
+>>>> Thank you for your advices.
+>>>> We have uploaded our latest codes to the following folk repository f=
+or an early review.
+>>>>
+>>>> https://github.com/miyamae-takeshi/multiple-shec
+>>>
+>>> It's 404 ? Is it a private repository maybe ?
+>>>
+>>>>
+>>>> SHEC is located in src/erasure-code/shec directory.
+>>>>
+>>>> We are verifying SHEC's advantages on our Ceph cluster. It takes a l=
+ittle bit more.
+>>>> Would you please start the review before that?
+>>>>
+>>>> Best regards,
+>>>> Takeshi Miyamae
+>>>>
+>>>> -----Original Message-----
+>>>> From: ceph-devel-owner@vger.kernel.org=20
+>>>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Loic Dachary
+>>>> Sent: Wednesday, January 7, 2015 12:52 AM
+>>>> To: Miyamae, Takeshi/=E5=AE=AE=E5=89=8D =E5=89=9B
+>>>> Cc: Ceph Development; Shiozawa, Kensuke/=E5=A1=A9=E6=B2=A2 =E8=B3=A2=
+=E8=BC=94; Nakao, Takanori/=E4=B8=AD=E5=B0=BE =E9=B7=B9=E8=A9=94
+>>>> Subject: Re: Deadline of Github pull request for Hammer release
+>>>> (question)
+>>>>
+>>>> Hi,
+>>>>
+>>>> On 06/01/2015 12:49, Miyamae, Takeshi wrote:
+>>>>> Dear Loic,
+>>>>>
+>>>>> I'm Takeshi Miyamae, one of the authors of SHEC's blueprint.
+>>>>>
+>>>>> Shingled Erasure Code (SHEC)
+>>>>> https://wiki.ceph.com/Planning/Blueprints/Hammer/Shingled_Erasure_C=
+
+>>>>> o
+>>>>> d
+>>>>> e
+>>>>> _(SHEC)
+>>>>
+>>>> The work you have done is quite impressive :-)
+>>>>
+>>>>> We have revised our blueprint shown in the last CDS to extend our=20
+>>>>> erasure code layouts and describe the guideline for choosing SHEC a=
+mong various EC plugins.
+>>>>> We believe the blueprint now answers all the comments given at the =
+CDS.
+>>>>
+>>>> Great.
+>>>>
+>>>>> In addition, we would like to ask for your advice on the schedule=20
+>>>>> of our github pull request. More specifically, we would like to=20
+>>>>> know its deadline for Hammer release.
+>>>>> (As we have not really completed our verification of SHEC, we are=20
+>>>>> wondering if we should make it open for early preview.)
+>>>>
+>>>> Although we're late in the Hammer roadmap, it's a good time for an e=
+arly preview. It will help show what needs to be changed to accomodate th=
+e SHEC plugin.
+>>>>
+>>>> Cheers
+>>>>
+>>>>> Thank you in advance,
+>>>>> Takeshi Miyamae
+>>>>>
+>>>>> --
+>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
+l"=20
+>>>>> in the body of a message to majordomo@vger.kernel.org More=20
+>>>>> majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>>
+>>>>
+>>>> --
+>>>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>>>>
+>>>
+>>> --
+>>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>>>
+>>
+>> --
+>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>>
+>=20
 > --
-> -Pushpesh
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
 
+--tUk6hgMgNuoAaiPvmF2wxiPSuUG8eipN3
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
--- 
-Best Regards,
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
 
-Wheat
+iEYEARECAAYFAlS+AkMACgkQ8dLMyEl6F20a6wCfaRUnJZml0OJLv6nvkRBdtOMm
+b7QAnjLuuso5LMEqpYGg946S/yz7A5PE
+=7nfA
+-----END PGP SIGNATURE-----
+
+--tUk6hgMgNuoAaiPvmF2wxiPSuUG8eipN3--
