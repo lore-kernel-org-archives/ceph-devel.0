@@ -1,139 +1,105 @@
-From: Dong Yuan <yuandong1222@gmail.com>
-Subject: Re: ./os/ObjectStore.h: 598: FAILED assert(op->oid < om.size())
-Date: Tue, 20 Jan 2015 19:09:32 +0800
-Message-ID: <CAMm-wc+T9wsMb454LR1juJQ8isir+gvErjJ=8Dm4FB168G5ZTg@mail.gmail.com>
-References: <alpine.DEB.2.00.1501190739500.26676@cobra.newdream.net>
-	<CAMm-wcLbqVoFZD81R=Sn7b0Q65U56bt1nxeot3VVr1QTV66uPw@mail.gmail.com>
-	<CA+4uBUbLkOSZHL_QUVNTxenkQ_Xrn_es87JRdcr_ZXY-oC8i+w@mail.gmail.com>
-	<CAMm-wcKcnHyGQoocC8mLXPU0+CzBZEZfEBRoqXK5+M7vR_G66g@mail.gmail.com>
-	<alpine.DEB.2.00.1501191741320.26676@cobra.newdream.net>
-	<CAMm-wc+OyY6z6XWO1m9A_gxZsECOc6uQD=4+MQ8oU=KP8v-NjQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Ilya Dryomov <idryomov@redhat.com>
+Subject: [PATCH 1/3] rbd: fix rbd_dev_parent_get() when parent_overlap == 0
+Date: Tue, 20 Jan 2015 15:41:07 +0300
+Message-ID: <1421757669-38796-2-git-send-email-idryomov@redhat.com>
+References: <1421757669-38796-1-git-send-email-idryomov@redhat.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f178.google.com ([209.85.220.178]:51764 "EHLO
-	mail-vc0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752361AbbATLJd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Jan 2015 06:09:33 -0500
-Received: by mail-vc0-f178.google.com with SMTP id im6so3434930vcb.9
-        for <ceph-devel@vger.kernel.org>; Tue, 20 Jan 2015 03:09:32 -0800 (PST)
-In-Reply-To: <CAMm-wc+OyY6z6XWO1m9A_gxZsECOc6uQD=4+MQ8oU=KP8v-NjQ@mail.gmail.com>
+Received: from mail-wi0-f176.google.com ([209.85.212.176]:53976 "EHLO
+	mail-wi0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751241AbbATMlr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Jan 2015 07:41:47 -0500
+Received: by mail-wi0-f176.google.com with SMTP id em10so5153584wid.3
+        for <ceph-devel@vger.kernel.org>; Tue, 20 Jan 2015 04:41:46 -0800 (PST)
+In-Reply-To: <1421757669-38796-1-git-send-email-idryomov@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: sjust <sjust@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: Alex Elder <elder@linaro.org>
 
-I pull a new request: https://github.com/ceph/ceph/pull/3413
+The comment for rbd_dev_parent_get() said
 
-In this PR, I use an additional buffer to avoid modifying other.op_bl
-when append, so msg can works fine with the new transaction now. But
-an additional memcpy is needed which may hurt the performance.
+    * We must get the reference before checking for the overlap to
+    * coordinate properly with zeroing the parent overlap in
+    * rbd_dev_v2_parent_info() when an image gets flattened.  We
+    * drop it again if there is no overlap.
 
-I also revert the commit  d427ca3 to fix http://tracker.ceph.com/issues/10534.
+but the "drop it again if there is no overlap" part was missing from
+the implementation.  This lead to absurd parent_ref values for images
+with parent_overlap == 0, as parent_ref was incremented for each
+img_request and virtually never decremented.
 
-Is there any better solution?
+Fix this by leveraging the fact that refresh path calls
+rbd_dev_v2_parent_info() under header_rwsem and use it for read in
+rbd_dev_parent_get(), instead of messing around with atomics.  Get rid
+of barriers in rbd_dev_v2_parent_info() while at it - I don't see what
+they'd pair with now and I suspect we are in a pretty miserable
+situation as far as proper locking goes regardless.
 
-On 20 January 2015 at 10:19, Dong Yuan <yuandong1222@gmail.com> wrote:
-> On 20 January 2015 at 09:43, Sage Weil <sweil@redhat.com> wrote:
->> When I first looked at the append() function I started working on a branch
->> that would avoid the need for it entirely.  ObjectStore already
->> operates on a list of Transactions, and IIRC the appending is only needed
->> for local operations, not for what is sent over the wire.  It was
->> nontrivial because of various annoying reasons (pointer ownership,
->> lifecycle, etc.) so I didn't get very far.
->
-> I totally agree with you.
->
-> Actually I tried to avoid all append at first, but it seems too
-> complex to refact transaction and remove append in a single BP, so I
-> give up and focus on the transaction.
->
->>
->> If this is going to be a significant amount of work to fix with the
->> current approach it might make sense to bite the bullet and go down that
->> path..?
->
-> I want to spend sometime (maybe one or two days) on the current
-> approach first,  if it doesn't make sense. I will go down that path.
-> Is that OK?
->
->>
->> sage
->>
->> On Tue, 20 Jan 2015, Dong Yuan wrote:
->>
->>> If we must keep the order of local_t and op_t, I think the current
->>> impl of append is not appropriate.
->>>
->>> Maybe I must provide something like clone_append to avoid the modify
->>> of existing data in the op_buffer, so the msg should be happy with the
->>> new transaction format.
->>>
->>> I will try this solution and give a patch as soon as possible.
->>>
->>> On 20 January 2015 at 02:44, Samuel Just <sam.just@inktank.com> wrote:
->>> > We actually found another problem with this series as well.
->>> >
->>> > http://tracker.ceph.com/issues/10534
->>> >
->>> > Looks like d427ca35404a30e1f428859c3274e030f2f83ef6 reversed the order
->>> > of localt (which contains the create_collection) and op_t (which
->>> > contains all of the operations on the object in the temp collection).
->>> > We need the operations in localt to precede the operations in op_t.
->>> > How do we do this?
->>> > -Sam
->>> >
->>> > On Mon, Jan 19, 2015 at 8:07 AM, Dong Yuan <yuandong1222@gmail.com> wrote:
->>> >> Yes, I am working on it since last week.
->>> >>
->>> >> This seems the same problem which I fix in the ReplicatedPG. So I try
->>> >> to fix it following the same way which I did in the ReplicatedPG, but
->>> >> it break the make_check test_erasure_code.sh.
->>> >>
->>> >> Now I am working on the test case, but unfortunately I am not familiar
->>> >> with the impl of EC, so it will take me more time.
->>> >>
->>> >> On 19 January 2015 at 23:41, Sage Weil <sweil@redhat.com> wrote:
->>> >>> Hi,
->>> >>>
->>> >>> This has come up a couple times in QA since we merged the fast transaction
->>> >>> code.  Can you take a look?
->>> >>>
->>> >>>         http://tracker.ceph.com/issues/10517
->>> >>>
->>> >>> Ping me if it will help to get access to the test cluster.  Haomai has
->>> >>> access, and you can get the logs via http (linked from pulpito.ceph.com),
->>> >>> but it is less convenient.
->>> >>>
->>> >>> Thanks!
->>> >>> sage
->>> >>
->>> >>
->>> >>
->>> >> --
->>> >> Dong Yuan
->>> >> Email:yuandong1222@gmail.com
->>> >> --
->>> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> >> the body of a message to majordomo@vger.kernel.org
->>> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>>
->>>
->>> --
->>> Dong Yuan
->>> Email:yuandong1222@gmail.com
->>>
->>>
->
->
->
-> --
-> Dong Yuan
-> Email:yuandong1222@gmail.com
+Cc: stable@vger.kernel.org # 3.11+
+Signed-off-by: Ilya Dryomov <idryomov@redhat.com>
+---
+ drivers/block/rbd.c | 20 ++++++--------------
+ 1 file changed, 6 insertions(+), 14 deletions(-)
 
-
-
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 31fa00f0d707..2990a1c75159 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -2098,32 +2098,26 @@ static void rbd_dev_parent_put(struct rbd_device *rbd_dev)
+  * If an image has a non-zero parent overlap, get a reference to its
+  * parent.
+  *
+- * We must get the reference before checking for the overlap to
+- * coordinate properly with zeroing the parent overlap in
+- * rbd_dev_v2_parent_info() when an image gets flattened.  We
+- * drop it again if there is no overlap.
+- *
+  * Returns true if the rbd device has a parent with a non-zero
+  * overlap and a reference for it was successfully taken, or
+  * false otherwise.
+  */
+ static bool rbd_dev_parent_get(struct rbd_device *rbd_dev)
+ {
+-	int counter;
++	int counter = 0;
+ 
+ 	if (!rbd_dev->parent_spec)
+ 		return false;
+ 
+-	counter = atomic_inc_return_safe(&rbd_dev->parent_ref);
+-	if (counter > 0 && rbd_dev->parent_overlap)
+-		return true;
+-
+-	/* Image was flattened, but parent is not yet torn down */
++	down_read(&rbd_dev->header_rwsem);
++	if (rbd_dev->parent_overlap)
++		counter = atomic_inc_return_safe(&rbd_dev->parent_ref);
++	up_read(&rbd_dev->header_rwsem);
+ 
+ 	if (counter < 0)
+ 		rbd_warn(rbd_dev, "parent reference overflow");
+ 
+-	return false;
++	return counter > 0;
+ }
+ 
+ /*
+@@ -4238,7 +4232,6 @@ static int rbd_dev_v2_parent_info(struct rbd_device *rbd_dev)
+ 		 */
+ 		if (rbd_dev->parent_overlap) {
+ 			rbd_dev->parent_overlap = 0;
+-			smp_mb();
+ 			rbd_dev_parent_put(rbd_dev);
+ 			pr_info("%s: clone image has been flattened\n",
+ 				rbd_dev->disk->disk_name);
+@@ -4284,7 +4277,6 @@ static int rbd_dev_v2_parent_info(struct rbd_device *rbd_dev)
+ 	 * treat it specially.
+ 	 */
+ 	rbd_dev->parent_overlap = overlap;
+-	smp_mb();
+ 	if (!overlap) {
+ 
+ 		/* A null parent_spec indicates it's the initial probe */
 -- 
-Dong Yuan
-Email:yuandong1222@gmail.com
+1.9.3
+
