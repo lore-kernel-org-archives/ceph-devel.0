@@ -1,44 +1,56 @@
-From: Jens Axboe <axboe@fb.com>
-Subject: Re: backing_dev_info cleanups & lifetime rule fixes V2
-Date: Tue, 20 Jan 2015 14:08:18 -0700
-Message-ID: <54BEC3C2.7080906@fb.com>
-References: <1421228561-16857-1-git-send-email-hch@lst.de>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: [PATCH 3/3] rbd: do not treat standalone as flatten
+Date: Tue, 20 Jan 2015 17:25:56 -0800
+Message-ID: <54BF0024.2040006@inktank.com>
+References: <1421757669-38796-1-git-send-email-idryomov@redhat.com> <1421757669-38796-4-git-send-email-idryomov@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"; format=flowed
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <1421228561-16857-1-git-send-email-hch@lst.de>
-Sender: owner-linux-mm@kvack.org
-To: Christoph Hellwig <hch@lst.de>
-Cc: David Howells <dhowells@redhat.com>, Tejun Heo <tj@kernel.org>, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, linux-mtd@lists.infradead.org, linux-nfs@vger.kernel.org, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail.hq.newdream.net ([66.33.206.127]:57419 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753245AbbAUBay (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Jan 2015 20:30:54 -0500
+In-Reply-To: <1421757669-38796-4-git-send-email-idryomov@redhat.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ilya Dryomov <idryomov@redhat.com>, ceph-devel@vger.kernel.org
+Cc: Alex Elder <elder@linaro.org>
 
-On 01/14/2015 02:42 AM, Christoph Hellwig wrote:
-> The first 8 patches are unchanged from the series posted a week ago and
-> cleans up how we use the backing_dev_info structure in preparation for
-> fixing the life time rules for it.  The most important change is to
-> split the unrelated nommu mmap flags from it, but it also remove a
-> backing_dev_info pointer from the address_space (and thus the inode)
-> and cleans up various other minor bits.
+On 01/20/2015 04:41 AM, Ilya Dryomov wrote:
+> If the clone is resized down to 0, it becomes standalone.  If such
+> resize is carried over while an image is mapped we would detect this
+> and call rbd_dev_parent_put() which means "let go of all parent state,
+> including the spec(s) of parent images(s)".  This leads to a mismatch
+> between "rbd info" and sysfs parent fields, so a fix is in order.
 >
-> The remaining patches sort out the issues around bdi_unlink and now
-> let the bdi life until it's embedding structure is freed, which must
-> be equal or longer than the superblock using the bdi for writeback,
-> and thus gets rid of the whole mess around reassining inodes to new
-> bdis.
+>      # rbd create --image-format 2 --size 1 foo
+>      # rbd snap create foo@snap
+>      # rbd snap protect foo@snap
+>      # rbd clone foo@snap bar
+>      # DEV=$(rbd map bar)
+>      # rbd resize --allow-shrink --size 0 bar
+>      # rbd resize --size 1 bar
+>      # rbd info bar | grep parent
+>              parent: rbd/foo@snap
 >
-> Changes since V1:
->   - various minor documentation updates based on Feedback from Tejun
+> Before:
+>
+>      # cat /sys/bus/rbd/devices/0/parent
+>      (no parent image)
+>
+> After:
+>
+>      # cat /sys/bus/rbd/devices/0/parent
+>      pool_id 0
+>      pool_name rbd
+>      image_id 10056b8b4567
+>      image_name foo
+>      snap_id 2
+>      snap_name snap
+>      overlap 0
+>
+> Signed-off-by: Ilya Dryomov <idryomov@redhat.com>
 
-I applied this to for-3.20/bdi, only making the change (noticed by Jan) 
-to kill the extra WARN_ON() in patch #11.
+Reviewed-by: Josh Durgin <jdurgin@redhat.com>
 
-
--- 
-Jens Axboe
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
