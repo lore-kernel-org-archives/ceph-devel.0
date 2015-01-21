@@ -1,55 +1,40 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: 01/21/2015 Weekly Ceph Performance Meeting IS ON!
-Date: Tue, 20 Jan 2015 20:54:06 -0600
-Message-ID: <54BF14CE.1020409@redhat.com>
-Reply-To: mnelson@redhat.com
+From: Sage Weil <sweil@redhat.com>
+Subject: prime pg_temp
+Date: Tue, 20 Jan 2015 20:02:01 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1501201958150.3895@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f179.google.com ([209.85.223.179]:37881 "EHLO
-	mail-ie0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751691AbbAUCyJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Jan 2015 21:54:09 -0500
-Received: by mail-ie0-f179.google.com with SMTP id x19so6106233ier.10
-        for <ceph-devel@vger.kernel.org>; Tue, 20 Jan 2015 18:54:08 -0800 (PST)
-Received: from [192.168.1.103] (65-128-165-174.mpls.qwest.net. [65.128.165.174])
-        by mx.google.com with ESMTPSA id b7sm4513159igx.15.2015.01.20.18.54.06
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 20 Jan 2015 18:54:07 -0800 (PST)
+Received: from mx1.redhat.com ([209.132.183.28]:41030 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751691AbbAUECC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 20 Jan 2015 23:02:02 -0500
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t0L422vL006969
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
+	for <ceph-devel@vger.kernel.org>; Tue, 20 Jan 2015 23:02:02 -0500
+Received: from redhat.com (ovpn-112-29.phx2.redhat.com [10.3.112.29])
+	by int-mx09.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t0L421HZ013586
+	for <ceph-devel@vger.kernel.org>; Tue, 20 Jan 2015 23:02:01 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-8AM PST as usual!  Please add an agenda item if there is something you 
-want to talk about!
+We discussed this forever ago during the Giant CDS.  I put together a 
+patch set tonight that implements it in a pretty basic form.  See
 
-Here's the links:
+	https://github.com/ceph/ceph/pull/3429
 
-Etherpad URL:
-http://pad.ceph.com/p/performance_weekly
+There's no fancy threading do to this in the background or any of the 
+other more crazy stuff we discussed before.  Instead, there's just a 
+simple limit that bounds the amount of time the primary is allowed to 
+spend calculating mappings (default 500ms).  It also tries to be 
+reasonably smart about limiting the amount of work, mainly by keeping a 
+mapping of osds to pgs so that we can limit our checks when osds go down 
+or out.
 
-To join the Meeting:
-https://bluejeans.com/268261044
+My main concern is whether the pg_by_osd map will consume much CPU or 
+memory to maintain.  Anybody interested in testing that out?
 
-To join via Browser:
-https://bluejeans.com/268261044/browser
+sage
 
-To join with Lync:
-https://bluejeans.com/268261044/lync
-
-
-To join via Room System:
-Video Conferencing System: bjn.vc -or- 199.48.152.152
-Meeting ID: 268261044
-
-To join via Phone:
-1) Dial:
-           +1 408 740 7256
-           +1 888 240 2560(US Toll Free)
-           +1 408 317 9253(Alternate Number)
-           (see all numbers - http://bluejeans.com/numbers)
-2) Enter Conference ID: 268261044
-
-Mark
