@@ -1,65 +1,62 @@
-From: Cheng Cheng <ccheng.leo@gmail.com>
-Subject: Re: Enable Data Compression when Requesting Data from OSD over WAN
-Date: Wed, 21 Jan 2015 11:27:51 -0500
-Message-ID: <79F29B04-1793-4BE9-AEE3-8F5877BA48F8@gmail.com>
-References: <83069610-11CB-4E06-8B56-7583E4FC4A37@gmail.com> <CACJqLybJf+y2T-sF2gA1tesy544wgCEVHXSUS7D7ZdvsSS259A@mail.gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 8.1 \(1993\))
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: [PATCH] Rbd: add listwatchers command
+Date: Wed, 21 Jan 2015 08:58:11 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1501210856200.3895@cobra.newdream.net>
+References: <cover.1421849230.git.liwang@ubuntukylin.com>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f171.google.com ([209.85.213.171]:65224 "EHLO
-	mail-ig0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752235AbbAUQ1z convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Jan 2015 11:27:55 -0500
-Received: by mail-ig0-f171.google.com with SMTP id h15so15143637igd.4
-        for <ceph-devel@vger.kernel.org>; Wed, 21 Jan 2015 08:27:54 -0800 (PST)
-In-Reply-To: <CACJqLybJf+y2T-sF2gA1tesy544wgCEVHXSUS7D7ZdvsSS259A@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:42356 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754291AbbAUQ61 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 21 Jan 2015 11:58:27 -0500
+In-Reply-To: <cover.1421849230.git.liwang@ubuntukylin.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomaiwang@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Li Wang <liwang@ubuntukylin.com>
+Cc: Josh Durgin <josh.durgin@inktank.com>, ceph-devel@vger.kernel.org, Yunchuan Wen <yunchuanwen@ubuntukylin.com>
 
-Hi Haomai,
+On Wed, 21 Jan 2015, Li Wang wrote:
+> Currently, RBD does not provide an easy way to 
+> consult who opened a specied image, this complicates
+> the cloud maintenance, sometimes the administrator 
+> found that a RBD image could not be deleted with 
+> an error 'image has watchers', but no further 
+> information available. The RADOS has a command to 
+> show the watchers of an object, but the commands 
+> at RADOS level are not supposed to be exposed to a 
+> cloud administrator, and it is not clear for a 
+> non-expert administrator to how to associate an 
+> opened RBD with a corresponding watched object. 
+> This motivates us to add an RBD command to list the 
+> information of the clients who opened a RBD image to 
+> facilitate the cloud maintenance.
 
-Thanks for the valuable information! I will take a look and think about=
- how to make a genetic approach for data compression.
+Perhaps this should just be rolled into the existing 'rbd info' command.  
+More people will see it and there's no additional cost over what info is 
+already doing...
 
-Cheng
+sage
 
-> On Jan 20, 2015, at 9:12 PM, Haomai Wang <haomaiwang@gmail.com> wrote=
-:
->=20
-> Yeah, we just have a alike PR(https://github.com/ceph/ceph/pull/3303)
-> a few days ago. Short discuss is presented there.
->=20
-> On Wed, Jan 21, 2015 at 1:43 AM, Cheng Cheng <ccheng.leo@gmail.com> w=
-rote:
->> Hi Ceph,
->>=20
->> I am thinking of passing an extra =E2=80=9Ccompression=E2=80=9D flag=
- to OSD when client requesting data. When seeing such flag, OSD send co=
-mpressed  data to client and client decompress it transparently. It wou=
-ld be beneficial it OSD and client are connected over WAN.
->>=20
->> Can anyone share some hints on how should start to plan/implement th=
-is feature?
->>=20
->> Thanks in advance!
->> Cheng--
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
->=20
->=20
-> --=20
-> Best Regards,
->=20
-> Wheat
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+> 
+> The patches are at:
+> https://github.com/ceph/ceph/pull/3435
+> 
+> Yunchuan Wen (3):
+>   rbd: add listwatchers command to list the watchers of an image
+>   test: add rbd listwatchers to src/test/cli/rbd/help.t
+>   man: add rbd listwatchers to doc/man/8/rbd.rst
+> 
+>  doc/man/8/rbd.rst       |  3 +++
+>  src/rbd.cc              | 63 +++++++++++++++++++++++++++++++++++++++++++++++--
+>  src/test/cli/rbd/help.t |  1 +
+>  3 files changed, 65 insertions(+), 2 deletions(-)
+> 
+> -- 
+> 1.9.1
+> 
+> 
