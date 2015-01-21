@@ -1,99 +1,54 @@
-From: scan-admin@coverity.com
-Subject: New Defects reported by Coverity Scan for ceph
-Date: Tue, 20 Jan 2015 17:41:35 -0800
-Message-ID: <54bf03cfedbc0_102fd073342267f@scan.coverity.com.mail>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: Enable Data Compression when Requesting Data from OSD over WAN
+Date: Wed, 21 Jan 2015 10:12:29 +0800
+Message-ID: <CACJqLybJf+y2T-sF2gA1tesy544wgCEVHXSUS7D7ZdvsSS259A@mail.gmail.com>
+References: <83069610-11CB-4E06-8B56-7583E4FC4A37@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from scanrelay.coverity.com ([209.249.196.67]:55966 "EHLO
-	scanrelay.coverity.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751396AbbAUBlg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Jan 2015 20:41:36 -0500
+Received: from mail-wi0-f170.google.com ([209.85.212.170]:63750 "EHLO
+	mail-wi0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751293AbbAUCMb convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Jan 2015 21:12:31 -0500
+Received: by mail-wi0-f170.google.com with SMTP id em10so10280503wid.1
+        for <ceph-devel@vger.kernel.org>; Tue, 20 Jan 2015 18:12:29 -0800 (PST)
+In-Reply-To: <83069610-11CB-4E06-8B56-7583E4FC4A37@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Cheng Cheng <ccheng.leo@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+Yeah, we just have a alike PR(https://github.com/ceph/ceph/pull/3303)
+a few days ago. Short discuss is presented there.
+
+On Wed, Jan 21, 2015 at 1:43 AM, Cheng Cheng <ccheng.leo@gmail.com> wro=
+te:
+> Hi Ceph,
+>
+> I am thinking of passing an extra =E2=80=9Ccompression=E2=80=9D flag =
+to OSD when client requesting data. When seeing such flag, OSD send com=
+pressed  data to client and client decompress it transparently. It woul=
+d be beneficial it OSD and client are connected over WAN.
+>
+> Can anyone share some hints on how should start to plan/implement thi=
+s feature?
+>
+> Thanks in advance!
+> Cheng--
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 
-Hi,
 
-Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
+--=20
+Best Regards,
 
-3 new defect(s) introduced to ceph found with Coverity Scan.
-2 defect(s), reported by Coverity Scan earlier, were marked fixed in the recent build analyzed by Coverity Scan.
-
-New defect(s) Reported-by: Coverity Scan
-Showing 3 of 3 defect(s)
-
-
-** CID 1265561:  Resource leak  (RESOURCE_LEAK)
-/rbd.cc: 2062 in do_merge_diff(const char *, const char *, const char *)()
-
-** CID 1265562:  Resource leak  (RESOURCE_LEAK)
-/rbd.cc: 2062 in do_merge_diff(const char *, const char *, const char *)()
-
-** CID 1265563:  Resource leak  (RESOURCE_LEAK)
-/rbd.cc: 2062 in do_merge_diff(const char *, const char *, const char *)()
-
-
-________________________________________________________________________________________________________
-*** CID 1265561:  Resource leak  (RESOURCE_LEAK)
-/rbd.cc: 2062 in do_merge_diff(const char *, const char *, const char *)()
-2056         pc.fail();
-2057         if (pd > 2)
-2058           unlink(path);
-2059       } else
-2060         pc.finish();
-2061     
->>>     CID 1265561:  Resource leak  (RESOURCE_LEAK)
->>>     Handle variable "fd" going out of scope leaks the handle.
-2062       return r;
-2063     }
-2064     
-2065     static int do_copy(librbd::Image &src, librados::IoCtx& dest_pp,
-2066     		   const char *destname)
-2067     {
-
-________________________________________________________________________________________________________
-*** CID 1265562:  Resource leak  (RESOURCE_LEAK)
-/rbd.cc: 2062 in do_merge_diff(const char *, const char *, const char *)()
-2056         pc.fail();
-2057         if (pd > 2)
-2058           unlink(path);
-2059       } else
-2060         pc.finish();
-2061     
->>>     CID 1265562:  Resource leak  (RESOURCE_LEAK)
->>>     Handle variable "sd" going out of scope leaks the handle.
-2062       return r;
-2063     }
-2064     
-2065     static int do_copy(librbd::Image &src, librados::IoCtx& dest_pp,
-2066     		   const char *destname)
-2067     {
-
-________________________________________________________________________________________________________
-*** CID 1265563:  Resource leak  (RESOURCE_LEAK)
-/rbd.cc: 2062 in do_merge_diff(const char *, const char *, const char *)()
-2056         pc.fail();
-2057         if (pd > 2)
-2058           unlink(path);
-2059       } else
-2060         pc.finish();
-2061     
->>>     CID 1265563:  Resource leak  (RESOURCE_LEAK)
->>>     Handle variable "pd" going out of scope leaks the handle.
-2062       return r;
-2063     }
-2064     
-2065     static int do_copy(librbd::Image &src, librados::IoCtx& dest_pp,
-2066     		   const char *destname)
-2067     {
-
-
-________________________________________________________________________________________________________
-To view the defects in Coverity Scan visit, http://scan.coverity.com/projects/25?tab=overview
-
-To manage Coverity Scan email notifications for "ceph-devel@vger.kernel.org", click http://scan.coverity.com/subscriptions/edit?email=ceph-devel%40vger.kernel.org&token=018084d671e3cc89d00dd2ccb7eb849c .
-
+Wheat
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
