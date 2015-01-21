@@ -1,57 +1,99 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 2/3] rbd: drop parent_ref in rbd_dev_unprobe() unconditionally
-Date: Tue, 20 Jan 2015 17:24:29 -0800
-Message-ID: <54BEFFCD.70707@inktank.com>
-References: <1421757669-38796-1-git-send-email-idryomov@redhat.com> <1421757669-38796-3-git-send-email-idryomov@redhat.com>
+From: scan-admin@coverity.com
+Subject: New Defects reported by Coverity Scan for ceph
+Date: Tue, 20 Jan 2015 17:41:35 -0800
+Message-ID: <54bf03cfedbc0_102fd073342267f@scan.coverity.com.mail>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Type: text/plain;
+ charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:57420 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753337AbbAUBay (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Jan 2015 20:30:54 -0500
-In-Reply-To: <1421757669-38796-3-git-send-email-idryomov@redhat.com>
+Received: from scanrelay.coverity.com ([209.249.196.67]:55966 "EHLO
+	scanrelay.coverity.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751396AbbAUBlg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Jan 2015 20:41:36 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@redhat.com>, ceph-devel@vger.kernel.org
-Cc: Alex Elder <elder@linaro.org>
+To: ceph-devel@vger.kernel.org
 
-On 01/20/2015 04:41 AM, Ilya Dryomov wrote:
-> This effectively reverts the last hunk of 392a9dad7e77 ("rbd: detect
-> when clone image is flattened").
->
-> The problem with parent_overlap != 0 condition is that it's possible
-> and completely valid to have an image with parent_overlap == 0 whose
-> parent state needs to be cleaned up on unmap.  The next commit, which
-> drops the "clone image now standalone" logic, opens up another window
-> of opportunity to hit this, but even without it
->
->      # cat parent-ref.sh
->      #!/bin/bash
->      rbd create --image-format 2 --size 1 foo
->      rbd snap create foo@snap
->      rbd snap protect foo@snap
->      rbd clone foo@snap bar
->      rbd resize --allow-shrink --size 0 bar
->      rbd resize --size 1 bar
->      DEV=$(rbd map bar)
->      rbd unmap $DEV
->
-> leaves rbd_device/rbd_spec/etc and rbd_client along with ceph_client
-> hanging around.
->
-> My thinking behind calling rbd_dev_parent_put() unconditionally is that
-> there shouldn't be any requests in flight at that point in time as we
-> are deep into unmap sequence.  Hence, even if rbd_dev_unparent() caused
-> by flatten is delayed by in-flight requests, it will have finished by
-> the time we reach rbd_dev_unprobe() caused by unmap, thus turning
-> unconditional rbd_dev_parent_put() into a no-op.
->
-> Fixes: http://tracker.ceph.com/issues/10352
->
-> Cc: stable@vger.kernel.org # 3.11+
-> Signed-off-by: Ilya Dryomov <idryomov@redhat.com>
 
-Reviewed-by: Josh Durgin <jdurgin@redhat.com>
+Hi,
+
+Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
+
+3 new defect(s) introduced to ceph found with Coverity Scan.
+2 defect(s), reported by Coverity Scan earlier, were marked fixed in the recent build analyzed by Coverity Scan.
+
+New defect(s) Reported-by: Coverity Scan
+Showing 3 of 3 defect(s)
+
+
+** CID 1265561:  Resource leak  (RESOURCE_LEAK)
+/rbd.cc: 2062 in do_merge_diff(const char *, const char *, const char *)()
+
+** CID 1265562:  Resource leak  (RESOURCE_LEAK)
+/rbd.cc: 2062 in do_merge_diff(const char *, const char *, const char *)()
+
+** CID 1265563:  Resource leak  (RESOURCE_LEAK)
+/rbd.cc: 2062 in do_merge_diff(const char *, const char *, const char *)()
+
+
+________________________________________________________________________________________________________
+*** CID 1265561:  Resource leak  (RESOURCE_LEAK)
+/rbd.cc: 2062 in do_merge_diff(const char *, const char *, const char *)()
+2056         pc.fail();
+2057         if (pd > 2)
+2058           unlink(path);
+2059       } else
+2060         pc.finish();
+2061     
+>>>     CID 1265561:  Resource leak  (RESOURCE_LEAK)
+>>>     Handle variable "fd" going out of scope leaks the handle.
+2062       return r;
+2063     }
+2064     
+2065     static int do_copy(librbd::Image &src, librados::IoCtx& dest_pp,
+2066     		   const char *destname)
+2067     {
+
+________________________________________________________________________________________________________
+*** CID 1265562:  Resource leak  (RESOURCE_LEAK)
+/rbd.cc: 2062 in do_merge_diff(const char *, const char *, const char *)()
+2056         pc.fail();
+2057         if (pd > 2)
+2058           unlink(path);
+2059       } else
+2060         pc.finish();
+2061     
+>>>     CID 1265562:  Resource leak  (RESOURCE_LEAK)
+>>>     Handle variable "sd" going out of scope leaks the handle.
+2062       return r;
+2063     }
+2064     
+2065     static int do_copy(librbd::Image &src, librados::IoCtx& dest_pp,
+2066     		   const char *destname)
+2067     {
+
+________________________________________________________________________________________________________
+*** CID 1265563:  Resource leak  (RESOURCE_LEAK)
+/rbd.cc: 2062 in do_merge_diff(const char *, const char *, const char *)()
+2056         pc.fail();
+2057         if (pd > 2)
+2058           unlink(path);
+2059       } else
+2060         pc.finish();
+2061     
+>>>     CID 1265563:  Resource leak  (RESOURCE_LEAK)
+>>>     Handle variable "pd" going out of scope leaks the handle.
+2062       return r;
+2063     }
+2064     
+2065     static int do_copy(librbd::Image &src, librados::IoCtx& dest_pp,
+2066     		   const char *destname)
+2067     {
+
+
+________________________________________________________________________________________________________
+To view the defects in Coverity Scan visit, http://scan.coverity.com/projects/25?tab=overview
+
+To manage Coverity Scan email notifications for "ceph-devel@vger.kernel.org", click http://scan.coverity.com/subscriptions/edit?email=ceph-devel%40vger.kernel.org&token=018084d671e3cc89d00dd2ccb7eb849c .
 
