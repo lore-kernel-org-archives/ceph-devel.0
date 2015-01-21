@@ -1,37 +1,37 @@
 From: Chaitanya Huilgol <Chaitanya.Huilgol@sandisk.com>
-Subject: [PATCH] ceph: rbd option listing and tcp_nodelay support
-Date: Wed, 21 Jan 2015 18:32:38 +0000
-Message-ID: <9E914F5BD7F48A4782456CEB550A42280A75F959@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <9E914F5BD7F48A4782456CEB550A42280A75F93C@SACMBXIP01.sdcorp.global.sandisk.com>
+Subject: RE: [PATCH] ceph: rbd option listing and tcp_nodelay support
+ --ignore
+Date: Wed, 21 Jan 2015 18:59:13 +0000
+Message-ID: <9E914F5BD7F48A4782456CEB550A42280A75F9A2@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0079.outbound.protection.outlook.com ([65.55.169.79]:39390
+Received: from mail-bl2on0066.outbound.protection.outlook.com ([65.55.169.66]:3743
 	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751758AbbAUScn convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Jan 2015 13:32:43 -0500
-In-Reply-To: <9E914F5BD7F48A4782456CEB550A42280A75F93C@SACMBXIP01.sdcorp.global.sandisk.com>
+	id S1752165AbbAUS7T convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Jan 2015 13:59:19 -0500
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
+Looks like the email client mangled the tabs.. sorry about that. Will resend 
+
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Chaitanya Huilgol
+Sent: Thursday, January 22, 2015 12:03 AM
+To: ceph-devel@vger.kernel.org
+Subject: [PATCH] ceph: rbd option listing and tcp_nodelay support
+
 From: Chaitanya Huilgol <chaitanya.huilgol@sandisk.com>
 
 ceph: rbd option listing and tcp_nodelay support
 
-Option keys supported by libceph and rbd modules is readable
-as a comma separated string via /sys/bus/rbd/options read-only
-interface. This will allow user app (rbd cli) to check for
-supported option keys before passing options to the kernel and
-remain compatible with older kernels which do not support a
-particular feature.
+Option keys supported by libceph and rbd modules is readable as a comma separated string via /sys/bus/rbd/options read-only interface. This will allow user app (rbd cli) to check for supported option keys before passing options to the kernel and remain compatible with older kernels which do not support a particular feature.
 Messenger specific options moved to messenger layer.
-tcp_nodelay(default)/no_tcp_nodelay option added for setting
-TCP_NODELAY on messenger socket connections. Covers both rbd
-and cephfs
+tcp_nodelay(default)/no_tcp_nodelay option added for setting TCP_NODELAY on messenger socket connections. Covers both rbd and cephfs
 
 Signed-off-by: Chaitanya Huilgol <chaitanya.huilgol@sandisk.com>
 ---
@@ -43,22 +43,16 @@ Signed-off-by: Chaitanya Huilgol <chaitanya.huilgol@sandisk.com>
  net/ceph/messenger.c           | 33 ++++++++++++++++++++++-----
  6 files changed, 126 insertions(+), 16 deletions(-)
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index e818c2a..507fd16 100644
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c index e818c2a..507fd16 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
 @@ -423,6 +423,7 @@ static ssize_t rbd_add_single_major(struct bus_type *bus, const char *buf,
-                                    size_t count);
- static ssize_t rbd_remove_single_major(struct bus_type *bus, const char *buf,
+                                    size_t count);  static ssize_t rbd_remove_single_major(struct bus_type *bus, const char *buf,
                                        size_t count);
 +static ssize_t rbd_enumerate_options(struct bus_type *bus, char *buf);
- static int rbd_dev_image_probe(struct rbd_device *rbd_dev, bool mapping);
- static void rbd_spec_put(struct rbd_spec *spec);
+ static int rbd_dev_image_probe(struct rbd_device *rbd_dev, bool mapping);  static void rbd_spec_put(struct rbd_spec *spec);
 
-@@ -440,12 +441,14 @@ static BUS_ATTR(add, S_IWUSR, NULL, rbd_add);
- static BUS_ATTR(remove, S_IWUSR, NULL, rbd_remove);
- static BUS_ATTR(add_single_major, S_IWUSR, NULL, rbd_add_single_major);
- static BUS_ATTR(remove_single_major, S_IWUSR, NULL, rbd_remove_single_major);
+@@ -440,12 +441,14 @@ static BUS_ATTR(add, S_IWUSR, NULL, rbd_add);  static BUS_ATTR(remove, S_IWUSR, NULL, rbd_remove);  static BUS_ATTR(add_single_major, S_IWUSR, NULL, rbd_add_single_major);  static BUS_ATTR(remove_single_major, S_IWUSR, NULL, rbd_remove_single_major);
 +static BUS_ATTR(options, S_IRUSR, rbd_enumerate_options, NULL);
 
  static struct attribute *rbd_bus_attrs[] = {
@@ -75,7 +69,8 @@ index e818c2a..507fd16 100644
  };
 
 +/*
-+ * Supported options comma separated string. Readable by the rbd cli, so that
++ * Supported options comma separated string. Readable by the rbd cli, 
++so that
 + * an informed decision can be made on passing options to the kernel modules.
 + */
 +static const char *rbd_supported_option_keys = "rw";
@@ -84,8 +79,7 @@ index e818c2a..507fd16 100644
         bool    read_only;
  };
 @@ -5569,6 +5578,18 @@ static ssize_t rbd_remove_single_major(struct bus_type *bus,
-        return do_rbd_remove(bus, buf, count);
- }
+        return do_rbd_remove(bus, buf, count);  }
 
 +static ssize_t rbd_enumerate_options(struct bus_type *bus,
 +               char *buf)
@@ -102,8 +96,7 @@ index e818c2a..507fd16 100644
  /*
   * create control files in sysfs
   * /sys/bus/rbd/...
-diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index 50f06cd..4632ae4 100644
+diff --git a/fs/ceph/super.c b/fs/ceph/super.c index 50f06cd..4632ae4 100644
 --- a/fs/ceph/super.c
 +++ b/fs/ceph/super.c
 @@ -423,7 +423,10 @@ static int ceph_show_options(struct seq_file *m, struct dentry *root)
@@ -118,8 +111,7 @@ index 50f06cd..4632ae4 100644
                 seq_puts(m, ",nocrc");
 
         if (opt->name)
-diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
-index 8b11a79..9306a47 100644
+diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h index 8b11a79..9306a47 100644
 --- a/include/linux/ceph/libceph.h
 +++ b/include/linux/ceph/libceph.h
 @@ -28,8 +28,7 @@
@@ -145,11 +137,8 @@ index 8b11a79..9306a47 100644
                               int (*parse_extra_token)(char *c, void *private),
                               void *private);
 +extern const char* ceph_get_supported_options(void);
- extern void ceph_destroy_options(struct ceph_options *opt);
- extern int ceph_compare_options(struct ceph_options *new_opt,
-                                struct ceph_client *client);
-diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
-index d9d396c..471f622 100644
+ extern void ceph_destroy_options(struct ceph_options *opt);  extern int ceph_compare_options(struct ceph_options *new_opt,
+                                struct ceph_client *client); diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h index d9d396c..471f622 100644
 --- a/include/linux/ceph/messenger.h
 +++ b/include/linux/ceph/messenger.h
 @@ -51,12 +51,34 @@ struct ceph_connection_operations {
@@ -173,8 +162,8 @@ index d9d396c..471f622 100644
 +#define ceph_set_msgr_opt(_msgr_opts, _opt) \
 +       ((_msgr_opts)->flags |= _opt)
 +#define ceph_clr_msgr_opt(_msgr_opts, _opt) \
-+       ((_msgr_opts)->flags &= ~(_opt))
-+#define ceph_test_msgr_opt(_msgr_opts, _opt) \
++       ((_msgr_opts)->flags &= ~(_opt)) #define 
++ceph_test_msgr_opt(_msgr_opts, _opt) \
 +       (!!((_msgr_opts)->flags & (_opt)))
 +
 +
@@ -187,8 +176,7 @@ index d9d396c..471f622 100644
 +       struct ceph_messenger_options *options;
 
         /*
-         * the global_seq counts connections i (attempt to) initiate
-@@ -264,7 +286,7 @@ extern void ceph_messenger_init(struct ceph_messenger *msgr,
+         * the global_seq counts connections i (attempt to) initiate @@ -264,7 +286,7 @@ extern void ceph_messenger_init(struct ceph_messenger *msgr,
                         struct ceph_entity_addr *myaddr,
                         u64 supported_features,
                         u64 required_features,
@@ -196,9 +184,7 @@ index d9d396c..471f622 100644
 +                       struct ceph_messenger_options *msgr_options);
 
  extern void ceph_con_init(struct ceph_connection *con, void *private,
-                        const struct ceph_connection_operations *ops,
-diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
-index 5d5ab67..25f1515 100644
+                        const struct ceph_connection_operations *ops, diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c index 5d5ab67..25f1515 100644
 --- a/net/ceph/ceph_common.c
 +++ b/net/ceph/ceph_common.c
 @@ -239,6 +239,8 @@ enum {
@@ -237,15 +223,14 @@ index 5d5ab67..25f1515 100644
 +       "cephx_require_signatures,"
 +       "tcp_nodelay";
 
- void ceph_destroy_options(struct ceph_options *opt)
- {
-@@ -320,8 +342,7 @@ out:
+ void ceph_destroy_options(struct ceph_options *opt)  { @@ -320,8 +342,7 @@ out:
         return err;
  }
 
 -struct ceph_options *
 -ceph_parse_options(char *options, const char *dev_name,
-+struct ceph_options * ceph_parse_options(char *options, const char *dev_name,
++struct ceph_options * ceph_parse_options(char *options, const char 
++*dev_name,
                         const char *dev_name_end,
                         int (*parse_extra_token)(char *c, void *private),
                         void *private)
@@ -256,8 +241,7 @@ index 5d5ab67..25f1515 100644
 +       ceph_messenger_options_init(&opt->msgr_options);
 
         /* get mon ip(s) */
-        /* ip1[:port1][,ip2[:port2]...] */
-@@ -452,11 +474,14 @@ ceph_parse_options(char *options, const char *dev_name,
+        /* ip1[:port1][,ip2[:port2]...] */ @@ -452,11 +474,14 @@ ceph_parse_options(char *options, const char *dev_name,
                         break;
 
                 case Opt_crc:
@@ -295,17 +279,13 @@ index 5d5ab67..25f1515 100644
  EXPORT_SYMBOL(ceph_parse_options);
 
 +
-+const char* ceph_get_supported_options(void)
-+{
-+    return  libceph_supported_options_keys;
-+}
++const char* ceph_get_supported_options(void) {
++    return  libceph_supported_options_keys; } 
 +EXPORT_SYMBOL(ceph_get_supported_options);
 +
 +
- u64 ceph_client_id(struct ceph_client *client)
- {
-        return client->monc.auth->global_id;
-@@ -521,7 +563,7 @@ struct ceph_client *ceph_create_client(struct ceph_options *opt, void *private,
+ u64 ceph_client_id(struct ceph_client *client)  {
+        return client->monc.auth->global_id; @@ -521,7 +563,7 @@ struct ceph_client *ceph_create_client(struct ceph_options *opt, void *private,
         ceph_messenger_init(&client->msgr, myaddr,
                 client->supported_features,
                 client->required_features,
@@ -313,17 +293,14 @@ index 5d5ab67..25f1515 100644
 +               &opt->msgr_options);
 
         /* subsystems */
-        err = ceph_monc_init(&client->monc, client);
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index 33a2f20..9a056fe 100644
+        err = ceph_monc_init(&client->monc, client); diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c index 33a2f20..9a056fe 100644
 --- a/net/ceph/messenger.c
 +++ b/net/ceph/messenger.c
 @@ -469,6 +469,21 @@ static void set_sock_callbacks(struct socket *sock,
  /*
   * socket helpers
   */
-+static void ceph_tcp_set_sock_options(struct ceph_connection *con)
-+{
++static void ceph_tcp_set_sock_options(struct ceph_connection *con) {
 +       int rc;
 +
 +       if (!ceph_test_msgr_opt(con->msgr->options,
@@ -350,16 +327,13 @@ index 33a2f20..9a056fe 100644
         return 0;
  }
 
-@@ -749,7 +767,6 @@ void ceph_con_init(struct ceph_connection *con, void *private,
- }
- EXPORT_SYMBOL(ceph_con_init);
+@@ -749,7 +767,6 @@ void ceph_con_init(struct ceph_connection *con, void *private,  }  EXPORT_SYMBOL(ceph_con_init);
 
 -
  /*
   * We maintain a global counter to order connection attempts.  Get
   * a unique seq greater than @gt.
-@@ -1511,7 +1528,8 @@ static int write_partial_message_data(struct ceph_connection *con)
- {
+@@ -1511,7 +1528,8 @@ static int write_partial_message_data(struct ceph_connection *con)  {
         struct ceph_msg *msg = con->out_msg;
         struct ceph_msg_data_cursor *cursor = &msg->cursor;
 -       bool do_datacrc = !con->msgr->nocrc;
@@ -367,9 +341,7 @@ index 33a2f20..9a056fe 100644
 +                               CEPH_MSGR_OPT_NOCRC);
         u32 crc;
 
-        dout("%s %p msg %p\n", __func__, con, msg);
-@@ -2212,7 +2230,8 @@ static int read_partial_msg_data(struct ceph_connection *con)
- {
+        dout("%s %p msg %p\n", __func__, con, msg); @@ -2212,7 +2230,8 @@ static int read_partial_msg_data(struct ceph_connection *con)  {
         struct ceph_msg *msg = con->in_msg;
         struct ceph_msg_data_cursor *cursor = &msg->cursor;
 -       const bool do_datacrc = !con->msgr->nocrc;
@@ -396,8 +368,7 @@ index 33a2f20..9a056fe 100644
 +                       struct ceph_messenger_options *msgr_options)
  {
         msgr->supported_features = supported_features;
-        msgr->required_features = required_features;
-@@ -2936,7 +2956,8 @@ void ceph_messenger_init(struct ceph_messenger *msgr,
+        msgr->required_features = required_features; @@ -2936,7 +2956,8 @@ void ceph_messenger_init(struct ceph_messenger *msgr,
         msgr->inst.addr.type = 0;
         get_random_bytes(&msgr->inst.addr.nonce, sizeof(msgr->inst.addr.nonce));
         encode_my_addr(msgr);
@@ -415,3 +386,5 @@ ________________________________
 
 PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
 
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
