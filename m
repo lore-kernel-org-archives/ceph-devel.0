@@ -1,79 +1,50 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: [PATCH] ceph: rbd option listing and tcp_nodelay support
-Date: Wed, 21 Jan 2015 19:29:43 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2827C9AA@SACMBXIP02.sdcorp.global.sandisk.com>
+From: Ilya Dryomov <ilya.dryomov@inktank.com>
+Subject: Re: [PATCH] ceph: rbd option listing and tcp_nodelay support
+Date: Wed, 21 Jan 2015 22:46:48 +0300
+Message-ID: <CALFYKtAJ5RiwkEiUGD=oVFzC+Rtor9pF7R4_L9Di9Zg4THCviA@mail.gmail.com>
 References: <alpine.DEB.2.10.1501220029310.28090@Ubuntu-VirtualBox>
- <CALFYKtCn-gGfjZ0qnjRoiS_ksX2KC4PJMcLO0gW5znXgbVAQgg@mail.gmail.com>
+	<CALFYKtCn-gGfjZ0qnjRoiS_ksX2KC4PJMcLO0gW5znXgbVAQgg@mail.gmail.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F2827C9AA@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1bon0066.outbound.protection.outlook.com ([157.56.111.66]:59235
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750929AbbAUToa (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 21 Jan 2015 14:44:30 -0500
-In-Reply-To: <CALFYKtCn-gGfjZ0qnjRoiS_ksX2KC4PJMcLO0gW5znXgbVAQgg@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-qc0-f182.google.com ([209.85.216.182]:55906 "EHLO
+	mail-qc0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751484AbbAUTqt convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Jan 2015 14:46:49 -0500
+Received: by mail-qc0-f182.google.com with SMTP id l6so33742961qcy.13
+        for <ceph-devel@vger.kernel.org>; Wed, 21 Jan 2015 11:46:48 -0800 (PST)
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2827C9AA@SACMBXIP02.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <ilya.dryomov@inktank.com>, Chaitanya Huilgol <chaitanya.huilgol@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: Chaitanya Huilgol <chaitanya.huilgol@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-SWx5YSwNClJlZ2FyZGluZyBzdXBwb3J0ZWQgYXR0cmlidXRlIGxpc3QsICBJIHRoaW5rIGl0IGNv
-dWxkIGJlIGEgc3RlcCB0b3dhcmRzIGJldHRlciB1c2FiaWxpdHkgZXhwZXJpZW5jZSBkdXJpbmcg
-cmJkIG1hcCBjb21tYW5kLiBQcmVzZW50bHksIGlmIHVzZXIgZ2l2ZXMgd3Jvbmcgb3B0aW9uIG9y
-IHVuc3VwcG9ydGVkIG9wdGlvbiBpdCBqdXN0IGVycm9ycyBvdXQgc2F5aW5nICdzeXNmcyB3cml0
-ZSBmYWlsZWQnIG9yIHNvLiBVc2VyIGhhcyBubyBpZGVhIHdoYXQgd2VudCB3cm9uZy4NCldlIGNh
-biB1c2UgdGhpcyBzdXBwb3J0ZWQgbGlzdCBmcm9tIGtlcm5lbCBtb2R1bGUgZnJvbSByYmQgY2xp
-IHRvIHNob3cgcHJvcGVyIGVycm9yIG1lc3NhZ2UgdG8gdGhlIHVzZXIuDQpBbm90aGVyIGZlYXR1
-cmUgdGhhdCB3ZSBoYXZlIGltcGxlbWVudGVkIGlzIHJiZCBjbGkgdG8gY29uc3VsdCB0aGUgL2V0
-Yy9jZXBoL2NlcGguY29uZiBhbmQgdGFrZSB0aGUgcmJkIGtlcm5lbCBzdXBwb3J0ZWQgb3B0aW9u
-cyBmcm9tIHRoZXJlIGF1dG9tYXRpY2FsbHkgaWYgdXNlciBoYXMgbm90IHByb3ZpZGVkIGFueSBv
-cHRpb24gZHVyaW5nIHJiZCBtYXAuIFVzZXIgcHJvdmlkZWQgb3B0aW9uIGR1cmluZyByYmQgbWFw
-IHdpbGwgYWx3YXlzIGdldCBwcmlvcml0eSB0aG91Z2guDQpMZXQgbWUga25vdyB5b3VyIHRob3Vn
-aHQgb24gdGhpcy4NCg0KVGhhbmtzICYgUmVnYXJkcw0KU29tbmF0aA0KDQotLS0tLU9yaWdpbmFs
-IE1lc3NhZ2UtLS0tLQ0KRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21h
-aWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIElseWEg
-RHJ5b21vdg0KU2VudDogV2VkbmVzZGF5LCBKYW51YXJ5IDIxLCAyMDE1IDExOjE5IEFNDQpUbzog
-Q2hhaXRhbnlhIEh1aWxnb2wNCkNjOiBDZXBoIERldmVsb3BtZW50DQpTdWJqZWN0OiBSZTogW1BB
-VENIXSBjZXBoOiByYmQgb3B0aW9uIGxpc3RpbmcgYW5kIHRjcF9ub2RlbGF5IHN1cHBvcnQNCg0K
-T24gV2VkLCBKYW4gMjEsIDIwMTUgYXQgMTA6MDAgUE0sIENoYWl0YW55YSBIdWlsZ29sIDxjaGFp
-dGFueWEuaHVpbGdvbEBnbWFpbC5jb20+IHdyb3RlOg0KPiBGcm9tOiBDaGFpdGFueWEgSHVpbGdv
-bCA8Y2hhaXRhbnlhLmh1aWxnb2xAc2FuZGlzay5jb20+DQo+DQo+IE9wdGlvbiBrZXlzIHN1cHBv
-cnRlZCBieSBsaWJjZXBoIGFuZCByYmQgbW9kdWxlcyBpcyByZWFkYWJsZSBhcyBhDQo+IGNvbW1h
-IHNlcGFyYXRlZCBzdHJpbmcgdmlhIC9zeXMvYnVzL3JiZC9vcHRpb25zIHJlYWQtb25seSBpbnRl
-cmZhY2UuDQo+IFRoaXMgd2lsbCBhbGxvdyB1c2VyIGFwcCAocmJkIGNsaSkgdG8gY2hlY2sgZm9y
-IHN1cHBvcnRlZCBvcHRpb24ga2V5cw0KPiBiZWZvcmUgcGFzc2luZyBvcHRpb25zIHRvIHRoZSBr
-ZXJuZWwgYW5kIHJlbWFpbiBjb21wYXRpYmxlIHdpdGggb2xkZXINCj4ga2VybmVscyB3aGljaCBk
-byBub3Qgc3VwcG9ydCBhIHBhcnRpY3VsYXIgZmVhdHVyZS4NCj4gTWVzc2VuZ2VyIHNwZWNpZmlj
-IG9wdGlvbnMgbW92ZWQgdG8gbWVzc2VuZ2VyIGxheWVyLg0KPiB0Y3Bfbm9kZWxheShkZWZhdWx0
-KS9ub190Y3Bfbm9kZWxheSBvcHRpb24gYWRkZWQgZm9yIHNldHRpbmcNCj4gVENQX05PREVMQVkg
-b24gbWVzc2VuZ2VyIHNvY2tldCBjb25uZWN0aW9ucy4gQ292ZXJzIGJvdGggcmJkIGFuZA0KPiBj
-ZXBoZnMNCg0KSGkgQ2hhaXRhbnlhLA0KDQpKdXN0IGNvdXBsZSBoaWdoIGxldmVsIGNvbW1lbnRz
-IC0gSSdsbCB0YWtlIGEgY2xvc2VyIGxvb2sgdG9tb3Jyb3cuDQoNCk9wdGlvbiBsaXN0aW5nIGFu
-ZCB0Y3Bfbm9kZWxheSBzaG91bGQgYmUgdHdvIHNlcGFyYXRlIHBhdGNoZXMNCg0KcmJkOiBhZGQg
-b3B0aW9uIHN5c2ZzIGF0dGlyaWJ1dGUNCmxpYmNlcGg6IGFkZCB0Y3Bfbm9kZWxheSBvcHRpb24N
-Cg0Kb3Igc29tZXRoaW5nIGxpa2UgdGhhdC4gIFRoZSAiTWVzc2VuZ2VyIHNwZWNpZmljIG9wdGlv
-bnMgbW92ZWQgdG8gbWVzc2VuZ2VyIGxheWVyIiBwYXJ0IHNob3VsZCBwcm9iYWJseSBiZSBhIHNl
-cGFyYXRlIHBhdGNoIGFzIHdlbGwuDQoNCk1vcmUgaW1wb3J0YW50bHksIEknbSBtaXNzaW5nIHRo
-ZSB3aG9sZSBwb2ludCBvZiBleHBvcnRpbmcgc3VwcG9ydGVkIHJiZCBvcHRpb25zLiAgQWRkaW5n
-IGEgbmV3IGxpYmNlcGggb3B0aW9uIGRvZXMgbm90IGJyZWFrIGNvbXBhdGliaWxpdHkgaW4gZWl0
-aGVyIHdheSwgYXMgb2xkIGtlcm5lbHMgd2lsbCBzaW1wbHkgZmFpbCB0byBtYXAvbW91bnQgaWYg
-YSBiYWQgKHVua25vd24sIGxldCB0aHJvdWdoIGJ5IG5ldyByYmQgY2xpKSBvcHRpb24gaXMgZW5j
-b3VudGVyZWQuDQoNClRoYW5rcywNCg0KICAgICAgICAgICAgICAgIElseWENCi0tDQpUbyB1bnN1
-YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1k
-ZXZlbCIgaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5v
-cmcgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRv
-bW8taW5mby5odG1sDQoNCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQoNClBMRUFT
-RSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWls
-IG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCBy
-ZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlz
-IG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0
-IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkgcmV2
-aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNz
-YWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgY29t
-bXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9u
-ZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkg
-YW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hldGhl
-ciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCg0K
+On Wed, Jan 21, 2015 at 10:29 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
+> Ilya,
+> Regarding supported attribute list,  I think it could be a step towards better usability experience during rbd map command. Presently, if user gives wrong option or unsupported option it just errors out saying 'sysfs write failed' or so. User has no idea what went wrong.
+
+# rbd map -o foobar test
+rbd: unknown map option 'foobar'
+rbd: couldn't parse map options
+
+# rbd map -o fsid=foobar test
+rbd: invalid fsid value 'foobar'
+rbd: couldn't parse map options
+
+Since about a year ago, rbd cli would try to parse supplied options.
+Of course, the list of options it knows about is static, but your
+attribute wouldn't solve that problem (or rather it will, but only for
+simple boolean yes/no options, like crc or tcp_nodelay) because we also
+try to sanity check the value, as the above fsid example shows.
+
+> We can use this supported list from kernel module from rbd cli to show proper error message to the user.
+> Another feature that we have implemented is rbd cli to consult the /etc/ceph/ceph.conf and take the rbd kernel supported options from there automatically if user has not provided any option during rbd map. User provided option during rbd map will always get priority though.
+
+Did you mean "and take rbd kernel map options", i.e. take default
+map options from ceph.conf?  I think that's a good idea.
+
+Thanks,
+
+                Ilya
