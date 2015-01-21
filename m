@@ -1,55 +1,79 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: Re: [PATCH] ceph: rbd option listing and tcp_nodelay support
-Date: Wed, 21 Jan 2015 22:18:30 +0300
-Message-ID: <CALFYKtCn-gGfjZ0qnjRoiS_ksX2KC4PJMcLO0gW5znXgbVAQgg@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: [PATCH] ceph: rbd option listing and tcp_nodelay support
+Date: Wed, 21 Jan 2015 19:29:43 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2827C9AA@SACMBXIP02.sdcorp.global.sandisk.com>
 References: <alpine.DEB.2.10.1501220029310.28090@Ubuntu-VirtualBox>
+ <CALFYKtCn-gGfjZ0qnjRoiS_ksX2KC4PJMcLO0gW5znXgbVAQgg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qg0-f52.google.com ([209.85.192.52]:44718 "EHLO
-	mail-qg0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753686AbbAUTSb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Jan 2015 14:18:31 -0500
-Received: by mail-qg0-f52.google.com with SMTP id z107so14646573qgd.11
-        for <ceph-devel@vger.kernel.org>; Wed, 21 Jan 2015 11:18:30 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.10.1501220029310.28090@Ubuntu-VirtualBox>
+Received: from mail-bn1bon0066.outbound.protection.outlook.com ([157.56.111.66]:59235
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750929AbbAUToa (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 21 Jan 2015 14:44:30 -0500
+In-Reply-To: <CALFYKtCn-gGfjZ0qnjRoiS_ksX2KC4PJMcLO0gW5znXgbVAQgg@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Chaitanya Huilgol <chaitanya.huilgol@gmail.com>
+To: Ilya Dryomov <ilya.dryomov@inktank.com>, Chaitanya Huilgol <chaitanya.huilgol@gmail.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, Jan 21, 2015 at 10:00 PM, Chaitanya Huilgol
-<chaitanya.huilgol@gmail.com> wrote:
-> From: Chaitanya Huilgol <chaitanya.huilgol@sandisk.com>
->
-> Option keys supported by libceph and rbd modules is readable
-> as a comma separated string via /sys/bus/rbd/options read-only
-> interface. This will allow user app (rbd cli) to check for
-> supported option keys before passing options to the kernel and
-> remain compatible with older kernels which do not support a
-> particular feature.
-> Messenger specific options moved to messenger layer.
-> tcp_nodelay(default)/no_tcp_nodelay option added for setting
-> TCP_NODELAY on messenger socket connections. Covers both rbd
-> and cephfs
-
-Hi Chaitanya,
-
-Just couple high level comments - I'll take a closer look tomorrow.
-
-Option listing and tcp_nodelay should be two separate patches
-
-rbd: add option sysfs attiribute
-libceph: add tcp_nodelay option
-
-or something like that.  The "Messenger specific options moved to
-messenger layer" part should probably be a separate patch as well.
-
-More importantly, I'm missing the whole point of exporting supported
-rbd options.  Adding a new libceph option does not break compatibility
-in either way, as old kernels will simply fail to map/mount if a bad
-(unknown, let through by new rbd cli) option is encountered.
-
-Thanks,
-
-                Ilya
+SWx5YSwNClJlZ2FyZGluZyBzdXBwb3J0ZWQgYXR0cmlidXRlIGxpc3QsICBJIHRoaW5rIGl0IGNv
+dWxkIGJlIGEgc3RlcCB0b3dhcmRzIGJldHRlciB1c2FiaWxpdHkgZXhwZXJpZW5jZSBkdXJpbmcg
+cmJkIG1hcCBjb21tYW5kLiBQcmVzZW50bHksIGlmIHVzZXIgZ2l2ZXMgd3Jvbmcgb3B0aW9uIG9y
+IHVuc3VwcG9ydGVkIG9wdGlvbiBpdCBqdXN0IGVycm9ycyBvdXQgc2F5aW5nICdzeXNmcyB3cml0
+ZSBmYWlsZWQnIG9yIHNvLiBVc2VyIGhhcyBubyBpZGVhIHdoYXQgd2VudCB3cm9uZy4NCldlIGNh
+biB1c2UgdGhpcyBzdXBwb3J0ZWQgbGlzdCBmcm9tIGtlcm5lbCBtb2R1bGUgZnJvbSByYmQgY2xp
+IHRvIHNob3cgcHJvcGVyIGVycm9yIG1lc3NhZ2UgdG8gdGhlIHVzZXIuDQpBbm90aGVyIGZlYXR1
+cmUgdGhhdCB3ZSBoYXZlIGltcGxlbWVudGVkIGlzIHJiZCBjbGkgdG8gY29uc3VsdCB0aGUgL2V0
+Yy9jZXBoL2NlcGguY29uZiBhbmQgdGFrZSB0aGUgcmJkIGtlcm5lbCBzdXBwb3J0ZWQgb3B0aW9u
+cyBmcm9tIHRoZXJlIGF1dG9tYXRpY2FsbHkgaWYgdXNlciBoYXMgbm90IHByb3ZpZGVkIGFueSBv
+cHRpb24gZHVyaW5nIHJiZCBtYXAuIFVzZXIgcHJvdmlkZWQgb3B0aW9uIGR1cmluZyByYmQgbWFw
+IHdpbGwgYWx3YXlzIGdldCBwcmlvcml0eSB0aG91Z2guDQpMZXQgbWUga25vdyB5b3VyIHRob3Vn
+aHQgb24gdGhpcy4NCg0KVGhhbmtzICYgUmVnYXJkcw0KU29tbmF0aA0KDQotLS0tLU9yaWdpbmFs
+IE1lc3NhZ2UtLS0tLQ0KRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21h
+aWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIElseWEg
+RHJ5b21vdg0KU2VudDogV2VkbmVzZGF5LCBKYW51YXJ5IDIxLCAyMDE1IDExOjE5IEFNDQpUbzog
+Q2hhaXRhbnlhIEh1aWxnb2wNCkNjOiBDZXBoIERldmVsb3BtZW50DQpTdWJqZWN0OiBSZTogW1BB
+VENIXSBjZXBoOiByYmQgb3B0aW9uIGxpc3RpbmcgYW5kIHRjcF9ub2RlbGF5IHN1cHBvcnQNCg0K
+T24gV2VkLCBKYW4gMjEsIDIwMTUgYXQgMTA6MDAgUE0sIENoYWl0YW55YSBIdWlsZ29sIDxjaGFp
+dGFueWEuaHVpbGdvbEBnbWFpbC5jb20+IHdyb3RlOg0KPiBGcm9tOiBDaGFpdGFueWEgSHVpbGdv
+bCA8Y2hhaXRhbnlhLmh1aWxnb2xAc2FuZGlzay5jb20+DQo+DQo+IE9wdGlvbiBrZXlzIHN1cHBv
+cnRlZCBieSBsaWJjZXBoIGFuZCByYmQgbW9kdWxlcyBpcyByZWFkYWJsZSBhcyBhDQo+IGNvbW1h
+IHNlcGFyYXRlZCBzdHJpbmcgdmlhIC9zeXMvYnVzL3JiZC9vcHRpb25zIHJlYWQtb25seSBpbnRl
+cmZhY2UuDQo+IFRoaXMgd2lsbCBhbGxvdyB1c2VyIGFwcCAocmJkIGNsaSkgdG8gY2hlY2sgZm9y
+IHN1cHBvcnRlZCBvcHRpb24ga2V5cw0KPiBiZWZvcmUgcGFzc2luZyBvcHRpb25zIHRvIHRoZSBr
+ZXJuZWwgYW5kIHJlbWFpbiBjb21wYXRpYmxlIHdpdGggb2xkZXINCj4ga2VybmVscyB3aGljaCBk
+byBub3Qgc3VwcG9ydCBhIHBhcnRpY3VsYXIgZmVhdHVyZS4NCj4gTWVzc2VuZ2VyIHNwZWNpZmlj
+IG9wdGlvbnMgbW92ZWQgdG8gbWVzc2VuZ2VyIGxheWVyLg0KPiB0Y3Bfbm9kZWxheShkZWZhdWx0
+KS9ub190Y3Bfbm9kZWxheSBvcHRpb24gYWRkZWQgZm9yIHNldHRpbmcNCj4gVENQX05PREVMQVkg
+b24gbWVzc2VuZ2VyIHNvY2tldCBjb25uZWN0aW9ucy4gQ292ZXJzIGJvdGggcmJkIGFuZA0KPiBj
+ZXBoZnMNCg0KSGkgQ2hhaXRhbnlhLA0KDQpKdXN0IGNvdXBsZSBoaWdoIGxldmVsIGNvbW1lbnRz
+IC0gSSdsbCB0YWtlIGEgY2xvc2VyIGxvb2sgdG9tb3Jyb3cuDQoNCk9wdGlvbiBsaXN0aW5nIGFu
+ZCB0Y3Bfbm9kZWxheSBzaG91bGQgYmUgdHdvIHNlcGFyYXRlIHBhdGNoZXMNCg0KcmJkOiBhZGQg
+b3B0aW9uIHN5c2ZzIGF0dGlyaWJ1dGUNCmxpYmNlcGg6IGFkZCB0Y3Bfbm9kZWxheSBvcHRpb24N
+Cg0Kb3Igc29tZXRoaW5nIGxpa2UgdGhhdC4gIFRoZSAiTWVzc2VuZ2VyIHNwZWNpZmljIG9wdGlv
+bnMgbW92ZWQgdG8gbWVzc2VuZ2VyIGxheWVyIiBwYXJ0IHNob3VsZCBwcm9iYWJseSBiZSBhIHNl
+cGFyYXRlIHBhdGNoIGFzIHdlbGwuDQoNCk1vcmUgaW1wb3J0YW50bHksIEknbSBtaXNzaW5nIHRo
+ZSB3aG9sZSBwb2ludCBvZiBleHBvcnRpbmcgc3VwcG9ydGVkIHJiZCBvcHRpb25zLiAgQWRkaW5n
+IGEgbmV3IGxpYmNlcGggb3B0aW9uIGRvZXMgbm90IGJyZWFrIGNvbXBhdGliaWxpdHkgaW4gZWl0
+aGVyIHdheSwgYXMgb2xkIGtlcm5lbHMgd2lsbCBzaW1wbHkgZmFpbCB0byBtYXAvbW91bnQgaWYg
+YSBiYWQgKHVua25vd24sIGxldCB0aHJvdWdoIGJ5IG5ldyByYmQgY2xpKSBvcHRpb24gaXMgZW5j
+b3VudGVyZWQuDQoNClRoYW5rcywNCg0KICAgICAgICAgICAgICAgIElseWENCi0tDQpUbyB1bnN1
+YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1k
+ZXZlbCIgaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5v
+cmcgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRv
+bW8taW5mby5odG1sDQoNCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQoNClBMRUFT
+RSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWls
+IG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCBy
+ZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlz
+IG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0
+IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkgcmV2
+aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNz
+YWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgY29t
+bXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9u
+ZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkg
+YW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hldGhl
+ciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCg0K
