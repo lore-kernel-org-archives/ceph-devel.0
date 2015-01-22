@@ -1,80 +1,101 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: 01/21/2015 Weekly Ceph Performance Meeting IS ON!
-Date: Wed, 21 Jan 2015 20:18:53 -0600
-Message-ID: <54C05E0D.50802@redhat.com>
-References: <D0E678E3.16F44%bigzhao@cisco.com>
-Reply-To: mnelson@redhat.com
+From: Chaitanya Huilgol <Chaitanya.Huilgol@sandisk.com>
+Subject: RE: [PATCH] ceph: rbd option listing and tcp_nodelay support
+Date: Thu, 22 Jan 2015 02:33:58 +0000
+Message-ID: <9E914F5BD7F48A4782456CEB550A42280A75FB78@SACMBXIP01.sdcorp.global.sandisk.com>
+References: <alpine.DEB.2.10.1501220029310.28090@Ubuntu-VirtualBox>
+	<CALFYKtCn-gGfjZ0qnjRoiS_ksX2KC4PJMcLO0gW5znXgbVAQgg@mail.gmail.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F2827C9AA@SACMBXIP02.sdcorp.global.sandisk.com>
+ <CALFYKtAJ5RiwkEiUGD=oVFzC+Rtor9pF7R4_L9Di9Zg4THCviA@mail.gmail.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F2827C9E0@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qg0-f41.google.com ([209.85.192.41]:64916 "EHLO
-	mail-qg0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752848AbbAVCS6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Jan 2015 21:18:58 -0500
-Received: by mail-qg0-f41.google.com with SMTP id q108so19639677qgd.0
-        for <ceph-devel@vger.kernel.org>; Wed, 21 Jan 2015 18:18:56 -0800 (PST)
-In-Reply-To: <D0E678E3.16F44%bigzhao@cisco.com>
+Received: from mail-bl2on0100.outbound.protection.outlook.com ([65.55.169.100]:24056
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751894AbbAVCuD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 21 Jan 2015 21:50:03 -0500
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2827C9E0@SACMBXIP02.sdcorp.global.sandisk.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Accela Zhao (bigzhao)" <bigzhao@cisco.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>, Ilya Dryomov <ilya.dryomov@inktank.com>
+Cc: Chaitanya Huilgol <chaitanya.huilgol@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Accela,
-
-Just one hour. I'm not sure I could handle an all day meeting once a 
-week. :)
-
-Mark
-
-On 01/21/2015 07:54 PM, Accela Zhao (bigzhao) wrote:
-> Hi Mark,
->
-> Thank you for publishing the meeting info. On what time is the meeting
-> hold within a day? Is it an all day event?
->
-> Thanks & Regards,
-> --
-> Accela Zhao
->
->
->
->
-> On 1/21/15, 10:54 AM, "Mark Nelson" <mark.nelson@inktank.com> wrote:
->
->> 8AM PST as usual!  Please add an agenda item if there is something you
->> want to talk about!
->>
->> Here's the links:
->>
->> Etherpad URL:
->> http://pad.ceph.com/p/performance_weekly
->>
->> To join the Meeting:
->> https://bluejeans.com/268261044
->>
->> To join via Browser:
->> https://bluejeans.com/268261044/browser
->>
->> To join with Lync:
->> https://bluejeans.com/268261044/lync
->>
->>
->> To join via Room System:
->> Video Conferencing System: bjn.vc -or- 199.48.152.152
->> Meeting ID: 268261044
->>
->> To join via Phone:
->> 1) Dial:
->>            +1 408 740 7256
->>            +1 888 240 2560(US Toll Free)
->>            +1 408 317 9253(Alternate Number)
->>            (see all numbers - http://bluejeans.com/numbers)
->> 2) Enter Conference ID: 268261044
->>
->> Mark
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+SGkgSWx5YSwNCg0KVGhhbmtzIGZvciB0aGUgaW5pdGlhbCByZXZpZXcsIEkgd2lsbCBzZW5kIHRo
+cmVlIHNlcGFyYXRlIHBhdGNoZXMgZm9yIHRoaXMuDQpUaGUgcHJpbWFyeSByZWFzb24gZm9yIHRo
+ZSBvcHRpb25zIGxpc3RpbmcgaXMgdG8gYWRkIGF1dG9tYXRpYyBvcHRpb24gc2V0dGluZyBmcm9t
+IGNlcGguY29uZiB3aXRob3V0IHVzZXIgaW50ZXJ2ZW50aW9uLiBXaXRob3V0IHRoaXMgdGhlIHJi
+ZCBjbGkgY2Fubm90IG1ha2UgYW4gaW5mb3JtZWQgZGVjaXNpb24gb24gcGFzc2luZyBhbiBvcHRp
+b24gYXV0b21hdGljYWxseSB0byB0aGUga2VybmVsLiBUaGUgY2hhbmdlcyBmb3IgdGhlc2UgaW4g
+dGhlIHJiZCBjbGkgYXJlIGNvbXBsZXRlZCBhbmQgdGVzdGVkIGFuZCB3ZSB3aWxsIHNvb24gYmUg
+c2VuZGluZyBhIHB1bGwgcmVxdWVzdCBmb3IgdGhhdCwgY3VycmVudGx5IHRjcF9ub2RlbGF5IGlz
+IHRoZSBvbmx5IGF1dG8gb3B0aW9uIGJlaW5nIGFkZGVkLCBidXQgdGhlIGNoYW5nZXMgYXJlIGdl
+bmVyaWMgZW5vdWdoIGZvciBvdGhlciBvcHRpb25zIHRvIGJlIGFkZGVkIGFzIHdlbGwuDQpOb3Rl
+IHRoYXQgdGhlIG9wdGlvbiBsaXN0aW5nIGlzIG9ubHkgZm9yIHRoZSBvcHRpb24ga2V5cyBpbmRp
+Y2F0aW5nIGlmIGFuIG9wdGlvbiBpcyBzdXBwb3J0ZWQgZm9yIGVnLCBjcmMgJiBub2NyYyBvcHRp
+b25zIGFyZSByZXByZXNlbnRlZCBieSAiY3JjIiBvcHRpb24ga2V5LiBMZXQgbWUga25vdyBpZiB3
+ZSB3YW50IHRvIGNoYW5nZSB0aGlzIHRvIGxpc3Qgb3V0IGFsbCB0aGUgb3B0aW9ucyBhcy1pcy4N
+ClVzZXIgcHJvdmlkZWQgb3B0aW9ucyBvdmVycmlkZSB0aGUgYXV0byBvcHRpb25zICBhbmQgYXJl
+IG5vdCB2ZXJpZmllZCBmb3IgY29tcGF0aWJpbGl0eSB3aXRoIHRoZSBrZXJuZWwuDQogQWxzbywg
+d2UgYXJlIGV4cGVjdGluZyBmZXcgbW9yZSBvcHRpb25zIHRvIGNvbWUgd2l0aCB0aGUgUkRNQSBz
+dXBwb3J0IGFuZCBoZW5jZSBuZWVkZWQgYSBzZXBhcmF0ZSBvcHRpb25zIHBsYWNlaG9sZGVyIGZv
+ciB0aGUgbWVzc2VuZ2VyIGxheWVyIChGb3IgZWcgdHlwZSBvZiBjb25uZWN0aW9uIHRvIGJlIGlu
+aXRpYXRlZCAoUkRNQSB2cyBUQ1AvSVApLg0KSWYgeW91IGhhdmUgYW55IG90aGVyIHByZWxpbWlu
+YXJ5IGNvbW1lbnRzLCBwbGVhc2UgZG8gc2VuZCB0aGVtIGFuZCBJIHdpbGwgaW5jb3Jwb3JhdGUg
+dGhlbSBpbiB0aGUgcmV2aXNlZCBzZXBhcmF0ZSBwYXRjaGVzLg0KDQpSZWdhcmRzLA0KQ2hhaXRh
+bnlhDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBjZXBoLWRldmVsLW93bmVy
+QHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3Jn
+XSBPbiBCZWhhbGYgT2YgU29tbmF0aCBSb3kNClNlbnQ6IFRodXJzZGF5LCBKYW51YXJ5IDIyLCAy
+MDE1IDE6MzIgQU0NClRvOiBJbHlhIERyeW9tb3YNCkNjOiBDaGFpdGFueWEgSHVpbGdvbDsgQ2Vw
+aCBEZXZlbG9wbWVudA0KU3ViamVjdDogUkU6IFtQQVRDSF0gY2VwaDogcmJkIG9wdGlvbiBsaXN0
+aW5nIGFuZCB0Y3Bfbm9kZWxheSBzdXBwb3J0DQoNCjw8aW5saW5lDQoNCi0tLS0tT3JpZ2luYWwg
+TWVzc2FnZS0tLS0tDQpGcm9tOiBJbHlhIERyeW9tb3YgW21haWx0bzppbHlhLmRyeW9tb3ZAaW5r
+dGFuay5jb21dDQpTZW50OiBXZWRuZXNkYXksIEphbnVhcnkgMjEsIDIwMTUgMTE6NDcgQU0NClRv
+OiBTb21uYXRoIFJveQ0KQ2M6IENoYWl0YW55YSBIdWlsZ29sOyBDZXBoIERldmVsb3BtZW50DQpT
+dWJqZWN0OiBSZTogW1BBVENIXSBjZXBoOiByYmQgb3B0aW9uIGxpc3RpbmcgYW5kIHRjcF9ub2Rl
+bGF5IHN1cHBvcnQNCg0KT24gV2VkLCBKYW4gMjEsIDIwMTUgYXQgMTA6MjkgUE0sIFNvbW5hdGgg
+Um95IDxTb21uYXRoLlJveUBzYW5kaXNrLmNvbT4gd3JvdGU6DQo+IElseWEsDQo+IFJlZ2FyZGlu
+ZyBzdXBwb3J0ZWQgYXR0cmlidXRlIGxpc3QsICBJIHRoaW5rIGl0IGNvdWxkIGJlIGEgc3RlcCB0
+b3dhcmRzIGJldHRlciB1c2FiaWxpdHkgZXhwZXJpZW5jZSBkdXJpbmcgcmJkIG1hcCBjb21tYW5k
+LiBQcmVzZW50bHksIGlmIHVzZXIgZ2l2ZXMgd3Jvbmcgb3B0aW9uIG9yIHVuc3VwcG9ydGVkIG9w
+dGlvbiBpdCBqdXN0IGVycm9ycyBvdXQgc2F5aW5nICdzeXNmcyB3cml0ZSBmYWlsZWQnIG9yIHNv
+LiBVc2VyIGhhcyBubyBpZGVhIHdoYXQgd2VudCB3cm9uZy4NCg0KIyByYmQgbWFwIC1vIGZvb2Jh
+ciB0ZXN0DQpyYmQ6IHVua25vd24gbWFwIG9wdGlvbiAnZm9vYmFyJw0KcmJkOiBjb3VsZG4ndCBw
+YXJzZSBtYXAgb3B0aW9ucw0KDQojIHJiZCBtYXAgLW8gZnNpZD1mb29iYXIgdGVzdA0KcmJkOiBp
+bnZhbGlkIGZzaWQgdmFsdWUgJ2Zvb2JhcicNCnJiZDogY291bGRuJ3QgcGFyc2UgbWFwIG9wdGlv
+bnMNCg0KU2luY2UgYWJvdXQgYSB5ZWFyIGFnbywgcmJkIGNsaSB3b3VsZCB0cnkgdG8gcGFyc2Ug
+c3VwcGxpZWQgb3B0aW9ucy4NCk9mIGNvdXJzZSwgdGhlIGxpc3Qgb2Ygb3B0aW9ucyBpdCBrbm93
+cyBhYm91dCBpcyBzdGF0aWMsIGJ1dCB5b3VyIGF0dHJpYnV0ZSB3b3VsZG4ndCBzb2x2ZSB0aGF0
+IHByb2JsZW0gKG9yIHJhdGhlciBpdCB3aWxsLCBidXQgb25seSBmb3Igc2ltcGxlIGJvb2xlYW4g
+eWVzL25vIG9wdGlvbnMsIGxpa2UgY3JjIG9yIHRjcF9ub2RlbGF5KSBiZWNhdXNlIHdlIGFsc28g
+dHJ5IHRvIHNhbml0eSBjaGVjayB0aGUgdmFsdWUsIGFzIHRoZSBhYm92ZSBmc2lkIGV4YW1wbGUg
+c2hvd3MuDQoNCltTb21uYXRoXSBIbW0uLkkgbWlzc2VkIHRoYXQgaXQgc2VlbXMuICBZZXMsIGZv
+ciBCb29sZWFuIGF0dHJpYnV0ZXMga2VybmVsIGNvbXBhdGliaWxpdHkgY2hlY2sgc2hvdWxkIGJl
+IGFibGUgdG8gZmxhZyB0aGF0Lg0KDQo+IFdlIGNhbiB1c2UgdGhpcyBzdXBwb3J0ZWQgbGlzdCBm
+cm9tIGtlcm5lbCBtb2R1bGUgZnJvbSByYmQgY2xpIHRvIHNob3cgcHJvcGVyIGVycm9yIG1lc3Nh
+Z2UgdG8gdGhlIHVzZXIuDQo+IEFub3RoZXIgZmVhdHVyZSB0aGF0IHdlIGhhdmUgaW1wbGVtZW50
+ZWQgaXMgcmJkIGNsaSB0byBjb25zdWx0IHRoZSAvZXRjL2NlcGgvY2VwaC5jb25mIGFuZCB0YWtl
+IHRoZSByYmQga2VybmVsIHN1cHBvcnRlZCBvcHRpb25zIGZyb20gdGhlcmUgYXV0b21hdGljYWxs
+eSBpZiB1c2VyIGhhcyBub3QgcHJvdmlkZWQgYW55IG9wdGlvbiBkdXJpbmcgcmJkIG1hcC4gVXNl
+ciBwcm92aWRlZCBvcHRpb24gZHVyaW5nIHJiZCBtYXAgd2lsbCBhbHdheXMgZ2V0IHByaW9yaXR5
+IHRob3VnaC4NCg0KRGlkIHlvdSBtZWFuICJhbmQgdGFrZSByYmQga2VybmVsIG1hcCBvcHRpb25z
+IiwgaS5lLiB0YWtlIGRlZmF1bHQgbWFwIG9wdGlvbnMgZnJvbSBjZXBoLmNvbmY/ICBJIHRoaW5r
+IHRoYXQncyBhIGdvb2QgaWRlYS4NCltTb21uYXRoXSBZZXMsIHdoYXRldmVyIGlzIGNvbW1vbiwg
+bGlrZSBjcmMgKG1zX25vY3JjIGluIGNlcGguY29uZikgLCB0Y3Bfbm9kZWxheSAobXNfdGNwX25v
+ZGVsYXkgaW4gY2VwaC5jb25mKSBUaGFua3MsDQoNCiAgICAgICAgICAgICAgICBJbHlhDQoNCl9f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQoNClBMRUFTRSBOT1RFOiBUaGUgaW5mb3Jt
+YXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5k
+ZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQg
+YWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQg
+cmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVk
+IHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9u
+LCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHBy
+b2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJv
+ciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNo
+b3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2Yg
+dGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBl
+bGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCg0KTiAgICAgciAgeSAgIGIgWCAgx6d2IF4g
+Kd66ey5uICsgICB6IF16ICAge2F5IB3Kh9qZICxqICAgZiAgIGggICB6IB4gdyAgICAgICBqOit2
+ICAgdyBqIG0gICAgICAgICB6WisgICAgIN2iaiIgICEgaQ0K
