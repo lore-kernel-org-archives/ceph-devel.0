@@ -1,7 +1,7 @@
-From: Ilya Dryomov <ilya.dryomov@inktank.com>
-Subject: Re: [PATCH] ceph: rbd option listing and tcp_nodelay support
-Date: Thu, 22 Jan 2015 15:50:15 +0300
-Message-ID: <CALFYKtDT2Eka6j6dKL-ev3mhVQcT+S7GC79eHac1S7r8nMUEcg@mail.gmail.com>
+From: Chaitanya Huilgol <Chaitanya.Huilgol@sandisk.com>
+Subject: RE: [PATCH] ceph: rbd option listing and tcp_nodelay support
+Date: Thu, 22 Jan 2015 13:33:10 +0000
+Message-ID: <9E914F5BD7F48A4782456CEB550A42280A75FE4C@SACMBXIP01.sdcorp.global.sandisk.com>
 References: <alpine.DEB.2.10.1501220029310.28090@Ubuntu-VirtualBox>
 	<CALFYKtCn-gGfjZ0qnjRoiS_ksX2KC4PJMcLO0gW5znXgbVAQgg@mail.gmail.com>
 	<755F6B91B3BE364F9BCA11EA3F9E0C6F2827C9AA@SACMBXIP02.sdcorp.global.sandisk.com>
@@ -9,43 +9,67 @@ References: <alpine.DEB.2.10.1501220029310.28090@Ubuntu-VirtualBox>
 	<755F6B91B3BE364F9BCA11EA3F9E0C6F2827C9E0@SACMBXIP02.sdcorp.global.sandisk.com>
 	<CALFYKtDazJJ6mXHu26qBe=ygXuX3VQGVmxs5pJ90hnu2ns+10Q@mail.gmail.com>
 	<9E914F5BD7F48A4782456CEB550A42280A75FDDB@SACMBXIP01.sdcorp.global.sandisk.com>
+ <CALFYKtDT2Eka6j6dKL-ev3mhVQcT+S7GC79eHac1S7r8nMUEcg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f50.google.com ([209.85.216.50]:40574 "EHLO
-	mail-qa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750803AbbAVMuQ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Jan 2015 07:50:16 -0500
-Received: by mail-qa0-f50.google.com with SMTP id k15so908620qaq.9
-        for <ceph-devel@vger.kernel.org>; Thu, 22 Jan 2015 04:50:15 -0800 (PST)
-In-Reply-To: <9E914F5BD7F48A4782456CEB550A42280A75FDDB@SACMBXIP01.sdcorp.global.sandisk.com>
+Received: from mail-bn1on0068.outbound.protection.outlook.com ([157.56.110.68]:27869
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750803AbbAVNdP (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 22 Jan 2015 08:33:15 -0500
+In-Reply-To: <CALFYKtDT2Eka6j6dKL-ev3mhVQcT+S7GC79eHac1S7r8nMUEcg@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Chaitanya Huilgol <Chaitanya.Huilgol@sandisk.com>
+To: Ilya Dryomov <ilya.dryomov@inktank.com>
 Cc: Somnath Roy <Somnath.Roy@sandisk.com>, Sage Weil <sage@inktank.com>, Chaitanya Huilgol <chaitanya.huilgol@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Thu, Jan 22, 2015 at 12:54 PM, Chaitanya Huilgol
-<Chaitanya.Huilgol@sandisk.com> wrote:
-> Hi Ilya,
->
-> We have two options here,
-> (1) Have kernel export supported options and pass on supported options from ceph.conf automatically if user has not specified the same via rbd -o - this is what is done in the current patch
-> Or
-> (2) As suggested by you, Have a default map options in ceph.conf  and pass all options which have not be overridden by rbd -o
->
-> As I understand, there is no need to do both - we need to choose between the two.
-> After your suggestion, I am leaning towards option-2 as it give more krbd specific control. However, the onus now rests on the user to add default options based on what the kernel supports (for this we can still provide the options listing via the sysbus interface, say with 'rbd map supported_options' cli)
-
-And the question then is: do we really need this supported_options cli?
-rbd map options are treated very much like filesystem mount options -
-the set of supported options is determined by the kernel version and is
-documented in rbd(8) man page.
-
-(There aren't any kernel version details in there currently, but that's
-simply because all existing options have been added in bulk a long time
-ago, and we can fix that omission with the addition of tcp_nodelay.)
-
-Thanks,
-
-                Ilya
+T2ssIEkgdGhpbmsgZm9yIG5vdyB3ZSBzaG91bGQgZmlyc3QgZ2V0IHRoZSBjb3JlIGZlYXR1cmUg
+c3VwcG9ydCBpbiwgaWYgdGhlIGNoYW5nZXMgaW4gdGhlIG1lc3NlbmdlciBsYXllciBsb29rIGZp
+bmUsIHRoZW4gSSB3aWxsIGdlbmVyYXRlIHR3byBwYXRjaGVzDQotICBtZXNzZW5nZXIgc3BlY2lm
+aWMgb3B0aW9ucw0KLSB0Y3Bfbm9kZWxheSBzdXBwb3J0DQoNCkFzIGEgbmV4dCBzZXQgd2UgY2Fu
+IGltcGxlbWVudCB0aGUgIGtyYmRfZGVmYXVsdF9tYXBfb3B0aW9ucyBpbiB0aGUgY2VwaC5jb25m
+IGFuZCBwYXNzIGl0IGRvd24uDQoNCkxldCBtZSBrbm93Lg0KDQpSZWdhcmRzLA0KQ2hhaXRhbnlh
+DQoNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IElseWEgRHJ5b21vdiBbbWFp
+bHRvOmlseWEuZHJ5b21vdkBpbmt0YW5rLmNvbV0NClNlbnQ6IFRodXJzZGF5LCBKYW51YXJ5IDIy
+LCAyMDE1IDY6MjAgUE0NClRvOiBDaGFpdGFueWEgSHVpbGdvbA0KQ2M6IFNvbW5hdGggUm95OyBT
+YWdlIFdlaWw7IENoYWl0YW55YSBIdWlsZ29sOyBDZXBoIERldmVsb3BtZW50DQpTdWJqZWN0OiBS
+ZTogW1BBVENIXSBjZXBoOiByYmQgb3B0aW9uIGxpc3RpbmcgYW5kIHRjcF9ub2RlbGF5IHN1cHBv
+cnQNCg0KT24gVGh1LCBKYW4gMjIsIDIwMTUgYXQgMTI6NTQgUE0sIENoYWl0YW55YSBIdWlsZ29s
+IDxDaGFpdGFueWEuSHVpbGdvbEBzYW5kaXNrLmNvbT4gd3JvdGU6DQo+IEhpIElseWEsDQo+DQo+
+IFdlIGhhdmUgdHdvIG9wdGlvbnMgaGVyZSwNCj4gKDEpIEhhdmUga2VybmVsIGV4cG9ydCBzdXBw
+b3J0ZWQgb3B0aW9ucyBhbmQgcGFzcyBvbiBzdXBwb3J0ZWQgb3B0aW9ucw0KPiBmcm9tIGNlcGgu
+Y29uZiBhdXRvbWF0aWNhbGx5IGlmIHVzZXIgaGFzIG5vdCBzcGVjaWZpZWQgdGhlIHNhbWUgdmlh
+DQo+IHJiZCAtbyAtIHRoaXMgaXMgd2hhdCBpcyBkb25lIGluIHRoZSBjdXJyZW50IHBhdGNoIE9y
+DQo+ICgyKSBBcyBzdWdnZXN0ZWQgYnkgeW91LCBIYXZlIGEgZGVmYXVsdCBtYXAgb3B0aW9ucyBp
+biBjZXBoLmNvbmYgIGFuZA0KPiBwYXNzIGFsbCBvcHRpb25zIHdoaWNoIGhhdmUgbm90IGJlIG92
+ZXJyaWRkZW4gYnkgcmJkIC1vDQo+DQo+IEFzIEkgdW5kZXJzdGFuZCwgdGhlcmUgaXMgbm8gbmVl
+ZCB0byBkbyBib3RoIC0gd2UgbmVlZCB0byBjaG9vc2UgYmV0d2VlbiB0aGUgdHdvLg0KPiBBZnRl
+ciB5b3VyIHN1Z2dlc3Rpb24sIEkgYW0gbGVhbmluZyB0b3dhcmRzIG9wdGlvbi0yIGFzIGl0IGdp
+dmUgbW9yZQ0KPiBrcmJkIHNwZWNpZmljIGNvbnRyb2wuIEhvd2V2ZXIsIHRoZSBvbnVzIG5vdyBy
+ZXN0cyBvbiB0aGUgdXNlciB0byBhZGQNCj4gZGVmYXVsdCBvcHRpb25zIGJhc2VkIG9uIHdoYXQg
+dGhlIGtlcm5lbCBzdXBwb3J0cyAoZm9yIHRoaXMgd2UgY2FuDQo+IHN0aWxsIHByb3ZpZGUgdGhl
+IG9wdGlvbnMgbGlzdGluZyB2aWEgdGhlIHN5c2J1cyBpbnRlcmZhY2UsIHNheSB3aXRoDQo+ICdy
+YmQgbWFwIHN1cHBvcnRlZF9vcHRpb25zJyBjbGkpDQoNCkFuZCB0aGUgcXVlc3Rpb24gdGhlbiBp
+czogZG8gd2UgcmVhbGx5IG5lZWQgdGhpcyBzdXBwb3J0ZWRfb3B0aW9ucyBjbGk/DQpyYmQgbWFw
+IG9wdGlvbnMgYXJlIHRyZWF0ZWQgdmVyeSBtdWNoIGxpa2UgZmlsZXN5c3RlbSBtb3VudCBvcHRp
+b25zIC0gdGhlIHNldCBvZiBzdXBwb3J0ZWQgb3B0aW9ucyBpcyBkZXRlcm1pbmVkIGJ5IHRoZSBr
+ZXJuZWwgdmVyc2lvbiBhbmQgaXMgZG9jdW1lbnRlZCBpbiByYmQoOCkgbWFuIHBhZ2UuDQoNCihU
+aGVyZSBhcmVuJ3QgYW55IGtlcm5lbCB2ZXJzaW9uIGRldGFpbHMgaW4gdGhlcmUgY3VycmVudGx5
+LCBidXQgdGhhdCdzIHNpbXBseSBiZWNhdXNlIGFsbCBleGlzdGluZyBvcHRpb25zIGhhdmUgYmVl
+biBhZGRlZCBpbiBidWxrIGEgbG9uZyB0aW1lIGFnbywgYW5kIHdlIGNhbiBmaXggdGhhdCBvbWlz
+c2lvbiB3aXRoIHRoZSBhZGRpdGlvbiBvZiB0Y3Bfbm9kZWxheS4pDQoNClRoYW5rcywNCg0KICAg
+ICAgICAgICAgICAgIElseWENCg0KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCg0K
+UExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmlj
+IG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25h
+dGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3Nh
+Z2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVk
+IHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFu
+eSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlz
+IG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhp
+cyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVs
+ZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95
+IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3
+aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KDQo=
