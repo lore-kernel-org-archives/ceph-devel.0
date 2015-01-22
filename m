@@ -1,83 +1,50 @@
-From: Jeff Layton <jeff.layton-7I+n7zu2hftEKMMhf/gKZA@public.gmane.org>
-Subject: [PATCH v3 13/13] locks: update comments that refer to inode->i_flock
-Date: Thu, 22 Jan 2015 09:27:57 -0500
-Message-ID: <1421936877-27529-14-git-send-email-jeff.layton@primarydata.com>
-References: <1421936877-27529-1-git-send-email-jeff.layton@primarydata.com>
-Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1421936877-27529-1-git-send-email-jeff.layton-7I+n7zu2hftEKMMhf/gKZA@public.gmane.org>
-Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Christoph Hellwig <hch-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Sasha Levin <sasha.levin-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+From: Ilya Dryomov <ilya.dryomov@inktank.com>
+Subject: Re: [PATCH] ceph: rbd option listing and tcp_nodelay support
+Date: Thu, 22 Jan 2015 17:28:47 +0300
+Message-ID: <CALFYKtAu-h86KL6A5o9tLyKo7UW=K_3Tv0aC4=hyhhR0Qd7X9w@mail.gmail.com>
+References: <alpine.DEB.2.10.1501220029310.28090@Ubuntu-VirtualBox>
+	<CALFYKtCn-gGfjZ0qnjRoiS_ksX2KC4PJMcLO0gW5znXgbVAQgg@mail.gmail.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F2827C9AA@SACMBXIP02.sdcorp.global.sandisk.com>
+	<CALFYKtAJ5RiwkEiUGD=oVFzC+Rtor9pF7R4_L9Di9Zg4THCviA@mail.gmail.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F2827C9E0@SACMBXIP02.sdcorp.global.sandisk.com>
+	<CALFYKtDazJJ6mXHu26qBe=ygXuX3VQGVmxs5pJ90hnu2ns+10Q@mail.gmail.com>
+	<9E914F5BD7F48A4782456CEB550A42280A75FDDB@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CALFYKtDT2Eka6j6dKL-ev3mhVQcT+S7GC79eHac1S7r8nMUEcg@mail.gmail.com>
+	<9E914F5BD7F48A4782456CEB550A42280A75FE4C@SACMBXIP01.sdcorp.global.sandisk.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-qg0-f43.google.com ([209.85.192.43]:54522 "EHLO
+	mail-qg0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752667AbbAVO2s (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Jan 2015 09:28:48 -0500
+Received: by mail-qg0-f43.google.com with SMTP id e89so1373566qgf.2
+        for <ceph-devel@vger.kernel.org>; Thu, 22 Jan 2015 06:28:47 -0800 (PST)
+In-Reply-To: <9E914F5BD7F48A4782456CEB550A42280A75FE4C@SACMBXIP01.sdcorp.global.sandisk.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Chaitanya Huilgol <Chaitanya.Huilgol@sandisk.com>
+Cc: Somnath Roy <Somnath.Roy@sandisk.com>, Sage Weil <sage@inktank.com>, Chaitanya Huilgol <chaitanya.huilgol@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Signed-off-by: Jeff Layton <jlayton-7I+n7zu2hftEKMMhf/gKZA@public.gmane.org>
----
- fs/locks.c         |  2 +-
- include/linux/fs.h | 19 ++++++++++---------
- 2 files changed, 11 insertions(+), 10 deletions(-)
+On Thu, Jan 22, 2015 at 4:33 PM, Chaitanya Huilgol
+<Chaitanya.Huilgol@sandisk.com> wrote:
+> Ok, I think for now we should first get the core feature support in, if the changes in the messenger layer look fine, then I will generate two patches
+> -  messenger specific options
+> - tcp_nodelay support
+>
+> As a next set we can implement the  krbd_default_map_options in the ceph.conf and pass it down.
+>
+> Let me know.
 
-diff --git a/fs/locks.c b/fs/locks.c
-index 2fc36b3772a0..4d0d41163a50 100644
---- a/fs/locks.c
-+++ b/fs/locks.c
-@@ -2212,7 +2212,7 @@ again:
- 	 */
- 	/*
- 	 * we need that spin_lock here - it prevents reordering between
--	 * update of inode->i_flock and check for it done in close().
-+	 * update of i_flctx->flc_posix and check for it done in close().
- 	 * rcu_read_lock() wouldn't do.
- 	 */
- 	spin_lock(&current->files->file_lock);
-diff --git a/include/linux/fs.h b/include/linux/fs.h
-index f87cb2f03103..ddd2fa7cefd3 100644
---- a/include/linux/fs.h
-+++ b/include/linux/fs.h
-@@ -925,12 +925,11 @@ int locks_in_grace(struct net *);
-  * FIXME: should we create a separate "struct lock_request" to help distinguish
-  * these two uses?
-  *
-- * The i_flock list is ordered by:
-+ * The varous i_flctx lists are ordered by:
-  *
-- * 1) lock type -- FL_LEASEs first, then FL_FLOCK, and finally FL_POSIX
-- * 2) lock owner
-- * 3) lock range start
-- * 4) lock range end
-+ * 1) lock owner
-+ * 2) lock range start
-+ * 3) lock range end
-  *
-  * Obviously, the last two criteria only matter for POSIX locks.
-  */
-@@ -1992,8 +1991,9 @@ static inline int break_lease(struct inode *inode, unsigned int mode)
- {
- 	/*
- 	 * Since this check is lockless, we must ensure that any refcounts
--	 * taken are done before checking inode->i_flock. Otherwise, we could
--	 * end up racing with tasks trying to set a new lease on this file.
-+	 * taken are done before checking i_flctx->flc_lease. Otherwise, we
-+	 * could end up racing with tasks trying to set a new lease on this
-+	 * file.
- 	 */
- 	smp_mb();
- 	if (inode->i_flctx && !list_empty_careful(&inode->i_flctx->flc_lease))
-@@ -2005,8 +2005,9 @@ static inline int break_deleg(struct inode *inode, unsigned int mode)
- {
- 	/*
- 	 * Since this check is lockless, we must ensure that any refcounts
--	 * taken are done before checking inode->i_flock. Otherwise, we could
--	 * end up racing with tasks trying to set a new lease on this file.
-+	 * taken are done before checking i_flctx->flc_lease. Otherwise, we
-+	 * could end up racing with tasks trying to set a new lease on this
-+	 * file.
- 	 */
- 	smp_mb();
- 	if (inode->i_flctx && !list_empty_careful(&inode->i_flctx->flc_lease))
--- 
-2.1.0
+Honestly, I don't see the point of splitting options the way you did
+either.  There is just too much boilerplate for something as simple as
+couple of flags: a struct with a single field to which ceph_messenger
+then has a pointer, all the msgr opt macros (why?), the fact that
+libceph options are now split between libceph.h and messenger.h, etc.
 
---
-To unsubscribe from this list: send the line "unsubscribe linux-nfs" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I'd just pass struct ceph_options * to ceph_messenger_init() and be
+done with it.
+
+Thanks,
+
+                Ilya
