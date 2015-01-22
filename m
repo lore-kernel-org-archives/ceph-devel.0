@@ -1,77 +1,73 @@
-From: Jeff Layton <jeff.layton@primarydata.com>
-Subject: [PATCH v3 12/13] locks: consolidate NULL i_flctx checks in locks_remove_file
-Date: Thu, 22 Jan 2015 09:27:56 -0500
-Message-ID: <1421936877-27529-13-git-send-email-jeff.layton@primarydata.com>
-References: <1421936877-27529-1-git-send-email-jeff.layton@primarydata.com>
+From: Chaitanya Huilgol <Chaitanya.Huilgol@sandisk.com>
+Subject: RE: [PATCH] ceph: rbd option listing and tcp_nodelay support
+Date: Thu, 22 Jan 2015 14:39:51 +0000
+Message-ID: <9E914F5BD7F48A4782456CEB550A42280A75FEDC@SACMBXIP01.sdcorp.global.sandisk.com>
+References: <alpine.DEB.2.10.1501220029310.28090@Ubuntu-VirtualBox>
+	<CALFYKtCn-gGfjZ0qnjRoiS_ksX2KC4PJMcLO0gW5znXgbVAQgg@mail.gmail.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F2827C9AA@SACMBXIP02.sdcorp.global.sandisk.com>
+	<CALFYKtAJ5RiwkEiUGD=oVFzC+Rtor9pF7R4_L9Di9Zg4THCviA@mail.gmail.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F2827C9E0@SACMBXIP02.sdcorp.global.sandisk.com>
+	<CALFYKtDazJJ6mXHu26qBe=ygXuX3VQGVmxs5pJ90hnu2ns+10Q@mail.gmail.com>
+	<9E914F5BD7F48A4782456CEB550A42280A75FDDB@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CALFYKtDT2Eka6j6dKL-ev3mhVQcT+S7GC79eHac1S7r8nMUEcg@mail.gmail.com>
+	<9E914F5BD7F48A4782456CEB550A42280A75FE4C@SACMBXIP01.sdcorp.global.sandisk.com>
+ <CALFYKtAu-h86KL6A5o9tLyKo7UW=K_3Tv0aC4=hyhhR0Qd7X9w@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cdptpa-outbound-snat.email.rr.com ([107.14.166.231]:19325 "EHLO
-	cdptpa-oedge-vip.email.rr.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1753255AbbAVOft (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 22 Jan 2015 09:35:49 -0500
-In-Reply-To: <1421936877-27529-1-git-send-email-jeff.layton@primarydata.com>
+Received: from mail-by2on0078.outbound.protection.outlook.com ([207.46.100.78]:28576
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752008AbbAVOjz (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 22 Jan 2015 09:39:55 -0500
+In-Reply-To: <CALFYKtAu-h86KL6A5o9tLyKo7UW=K_3Tv0aC4=hyhhR0Qd7X9w@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: linux-fsdevel@vger.kernel.org
-Cc: Christoph Hellwig <hch@infradead.org>, Sasha Levin <sasha.levin@oracle.com>, David Howells <dhowells@redhat.com>, linux-kernel@vger.kernel.org, linux-cifs@vger.kernel.org, linux-nfs@vger.kernel.org, ceph-devel@vger.kernel.org
+To: Ilya Dryomov <ilya.dryomov@inktank.com>
+Cc: Somnath Roy <Somnath.Roy@sandisk.com>, Sage Weil <sage@inktank.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-We have each of the locks_remove_* variants doing this individually.
-Have the caller do it instead, and have locks_remove_flock and
-locks_remove_lease just assume that it's a valid pointer.
-
-Signed-off-by: Jeff Layton <jlayton@primarydata.com>
----
- fs/locks.c | 9 +++++++--
- 1 file changed, 7 insertions(+), 2 deletions(-)
-
-diff --git a/fs/locks.c b/fs/locks.c
-index bd578700342d..2fc36b3772a0 100644
---- a/fs/locks.c
-+++ b/fs/locks.c
-@@ -2400,6 +2400,7 @@ void locks_remove_posix(struct file *filp, fl_owner_t owner)
- 
- EXPORT_SYMBOL(locks_remove_posix);
- 
-+/* The i_flctx must be valid when calling into here */
- static void
- locks_remove_flock(struct file *filp)
- {
-@@ -2413,7 +2414,7 @@ locks_remove_flock(struct file *filp)
- 	};
- 	struct file_lock_context *flctx = file_inode(filp)->i_flctx;
- 
--	if (!flctx || list_empty(&flctx->flc_flock))
-+	if (list_empty(&flctx->flc_flock))
- 		return;
- 
- 	if (filp->f_op->flock)
-@@ -2425,6 +2426,7 @@ locks_remove_flock(struct file *filp)
- 		fl.fl_ops->fl_release_private(&fl);
- }
- 
-+/* The i_flctx must be valid when calling into here */
- static void
- locks_remove_lease(struct file *filp)
- {
-@@ -2433,7 +2435,7 @@ locks_remove_lease(struct file *filp)
- 	struct file_lock *fl, *tmp;
- 	LIST_HEAD(dispose);
- 
--	if (!ctx || list_empty(&ctx->flc_lease))
-+	if (list_empty(&ctx->flc_lease))
- 		return;
- 
- 	spin_lock(&ctx->flc_lock);
-@@ -2448,6 +2450,9 @@ locks_remove_lease(struct file *filp)
-  */
- void locks_remove_file(struct file *filp)
- {
-+	if (!file_inode(filp)->i_flctx)
-+		return;
-+
- 	/* remove any OFD locks */
- 	locks_remove_posix(filp, filp);
- 
--- 
-2.1.0
-
+V2VsbCwgdGhlcmUgd2FzIG5vIGNlcGhfb3B0aW9ucyBwb2ludGVyIGluIHRoZSBtZXNzZW5nZXIg
+bGF5ZXIgYW5kIG5vX2NyYyBmbGFnIHdhcyBiZWluZyBwYXNzZWQgaW50byB0aGUgbWVzc2VuZ2Vy
+IGFzIGFuIGFkZGl0aW9uYWwgZmxhZyBhbmQgbWFpbnRhaW5lZCB3aXRoaW4gdGhlIG1lc3Nlbmdl
+ciBhZ2FpbiBhcyBib29sIG5vX2NyYywgSSBpbmZlcnJlZCB0aGF0IGl0IHdhcyBpbnRlbnRpb25h
+bCBhbmQgd2UgZGlkIG5vdCB3YW50IHRoZSBnZW5lcmljIG9wdGlvbnMgaW4gdGhlIG1lc3Nlbmdl
+ciBsYXllci4gIElmIGl0IGlzIGZpbmUgdG8gaGF2ZSBtZXNzZW5nZXIgcG9pbnQgYmFjayB0byB0
+aGUgY2VwaF9vcHRpb25zLCB0aGVuIHRoYXTigJlzIHRoZSBlYXNpZXN0IHdheSB0byBkbyBpdC4N
+CkFsc28sIHdlIHdvdWxkIGhhdmUgc29tZSBhZGRpdGlvbmFsIG9wdGlvbiBjb21pbmcgaW4gd2l0
+aCBSRE1BIHN1cHBvcnQgKHhpbyBtZXNzZW5nZXIpIHdoaWNoIHdvdWxkIGJlIHZlcnkgbWVzc2Vu
+Z2VyIHNwZWNpZmljLCBzbyBoYXZpbmcgYSBtZXNzZW5nZXIgb3B0aW9ucyBoYWQgbWFkZSBzZW5z
+ZS4NCg0KUmVnYXJkcywNCkNoYWl0YW55YQ0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0K
+RnJvbTogSWx5YSBEcnlvbW92IFttYWlsdG86aWx5YS5kcnlvbW92QGlua3RhbmsuY29tXQ0KU2Vu
+dDogVGh1cnNkYXksIEphbnVhcnkgMjIsIDIwMTUgNzo1OSBQTQ0KVG86IENoYWl0YW55YSBIdWls
+Z29sDQpDYzogU29tbmF0aCBSb3k7IFNhZ2UgV2VpbDsgQ2hhaXRhbnlhIEh1aWxnb2w7IENlcGgg
+RGV2ZWxvcG1lbnQNClN1YmplY3Q6IFJlOiBbUEFUQ0hdIGNlcGg6IHJiZCBvcHRpb24gbGlzdGlu
+ZyBhbmQgdGNwX25vZGVsYXkgc3VwcG9ydA0KDQpPbiBUaHUsIEphbiAyMiwgMjAxNSBhdCA0OjMz
+IFBNLCBDaGFpdGFueWEgSHVpbGdvbCA8Q2hhaXRhbnlhLkh1aWxnb2xAc2FuZGlzay5jb20+IHdy
+b3RlOg0KPiBPaywgSSB0aGluayBmb3Igbm93IHdlIHNob3VsZCBmaXJzdCBnZXQgdGhlIGNvcmUg
+ZmVhdHVyZSBzdXBwb3J0IGluLA0KPiBpZiB0aGUgY2hhbmdlcyBpbiB0aGUgbWVzc2VuZ2VyIGxh
+eWVyIGxvb2sgZmluZSwgdGhlbiBJIHdpbGwgZ2VuZXJhdGUNCj4gdHdvIHBhdGNoZXMNCj4gLSAg
+bWVzc2VuZ2VyIHNwZWNpZmljIG9wdGlvbnMNCj4gLSB0Y3Bfbm9kZWxheSBzdXBwb3J0DQo+DQo+
+IEFzIGEgbmV4dCBzZXQgd2UgY2FuIGltcGxlbWVudCB0aGUgIGtyYmRfZGVmYXVsdF9tYXBfb3B0
+aW9ucyBpbiB0aGUgY2VwaC5jb25mIGFuZCBwYXNzIGl0IGRvd24uDQo+DQo+IExldCBtZSBrbm93
+Lg0KDQpIb25lc3RseSwgSSBkb24ndCBzZWUgdGhlIHBvaW50IG9mIHNwbGl0dGluZyBvcHRpb25z
+IHRoZSB3YXkgeW91IGRpZCBlaXRoZXIuICBUaGVyZSBpcyBqdXN0IHRvbyBtdWNoIGJvaWxlcnBs
+YXRlIGZvciBzb21ldGhpbmcgYXMgc2ltcGxlIGFzIGNvdXBsZSBvZiBmbGFnczogYSBzdHJ1Y3Qg
+d2l0aCBhIHNpbmdsZSBmaWVsZCB0byB3aGljaCBjZXBoX21lc3NlbmdlciB0aGVuIGhhcyBhIHBv
+aW50ZXIsIGFsbCB0aGUgbXNnciBvcHQgbWFjcm9zICh3aHk/KSwgdGhlIGZhY3QgdGhhdCBsaWJj
+ZXBoIG9wdGlvbnMgYXJlIG5vdyBzcGxpdCBiZXR3ZWVuIGxpYmNlcGguaCBhbmQgbWVzc2VuZ2Vy
+LmgsIGV0Yy4NCg0KSSdkIGp1c3QgcGFzcyBzdHJ1Y3QgY2VwaF9vcHRpb25zICogdG8gY2VwaF9t
+ZXNzZW5nZXJfaW5pdCgpIGFuZCBiZSBkb25lIHdpdGggaXQuDQoNClRoYW5rcywNCg0KICAgICAg
+ICAgICAgICAgIElseWENCg0KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCg0KUExF
+QVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1h
+aWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVk
+IHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2Ug
+aXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRo
+YXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSBy
+ZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1l
+c3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBj
+b21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBo
+b25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFu
+eSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0
+aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KDQo=
