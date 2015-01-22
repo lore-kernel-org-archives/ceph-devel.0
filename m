@@ -1,71 +1,71 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: [PATCH] ceph: rbd option listing and tcp_nodelay support
-Date: Wed, 21 Jan 2015 20:02:04 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2827C9E0@SACMBXIP02.sdcorp.global.sandisk.com>
-References: <alpine.DEB.2.10.1501220029310.28090@Ubuntu-VirtualBox>
-	<CALFYKtCn-gGfjZ0qnjRoiS_ksX2KC4PJMcLO0gW5znXgbVAQgg@mail.gmail.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F2827C9AA@SACMBXIP02.sdcorp.global.sandisk.com>
- <CALFYKtAJ5RiwkEiUGD=oVFzC+Rtor9pF7R4_L9Di9Zg4THCviA@mail.gmail.com>
+From: "Accela Zhao (bigzhao)" <bigzhao@cisco.com>
+Subject: Re: 01/21/2015 Weekly Ceph Performance Meeting IS ON!
+Date: Thu, 22 Jan 2015 01:54:33 +0000
+Message-ID: <D0E678E3.16F44%bigzhao@cisco.com>
+References: <54BF14CE.1020409@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1bon0097.outbound.protection.outlook.com ([157.56.111.97]:34273
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750768AbbAUUCL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 21 Jan 2015 15:02:11 -0500
-In-Reply-To: <CALFYKtAJ5RiwkEiUGD=oVFzC+Rtor9pF7R4_L9Di9Zg4THCviA@mail.gmail.com>
+Received: from alln-iport-4.cisco.com ([173.37.142.91]:26284 "EHLO
+	alln-iport-4.cisco.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751880AbbAVCEK convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Jan 2015 21:04:10 -0500
+In-Reply-To: <54BF14CE.1020409@redhat.com>
 Content-Language: en-US
+Content-ID: <9408BD28C2081E499AA6FAC6E4D6CA81@emea.cisco.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <ilya.dryomov@inktank.com>
-Cc: Chaitanya Huilgol <chaitanya.huilgol@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: "mnelson@redhat.com" <mnelson@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-PDxpbmxpbmUNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IElseWEgRHJ5b21v
-diBbbWFpbHRvOmlseWEuZHJ5b21vdkBpbmt0YW5rLmNvbV0NClNlbnQ6IFdlZG5lc2RheSwgSmFu
-dWFyeSAyMSwgMjAxNSAxMTo0NyBBTQ0KVG86IFNvbW5hdGggUm95DQpDYzogQ2hhaXRhbnlhIEh1
-aWxnb2w7IENlcGggRGV2ZWxvcG1lbnQNClN1YmplY3Q6IFJlOiBbUEFUQ0hdIGNlcGg6IHJiZCBv
-cHRpb24gbGlzdGluZyBhbmQgdGNwX25vZGVsYXkgc3VwcG9ydA0KDQpPbiBXZWQsIEphbiAyMSwg
-MjAxNSBhdCAxMDoyOSBQTSwgU29tbmF0aCBSb3kgPFNvbW5hdGguUm95QHNhbmRpc2suY29tPiB3
-cm90ZToNCj4gSWx5YSwNCj4gUmVnYXJkaW5nIHN1cHBvcnRlZCBhdHRyaWJ1dGUgbGlzdCwgIEkg
-dGhpbmsgaXQgY291bGQgYmUgYSBzdGVwIHRvd2FyZHMgYmV0dGVyIHVzYWJpbGl0eSBleHBlcmll
-bmNlIGR1cmluZyByYmQgbWFwIGNvbW1hbmQuIFByZXNlbnRseSwgaWYgdXNlciBnaXZlcyB3cm9u
-ZyBvcHRpb24gb3IgdW5zdXBwb3J0ZWQgb3B0aW9uIGl0IGp1c3QgZXJyb3JzIG91dCBzYXlpbmcg
-J3N5c2ZzIHdyaXRlIGZhaWxlZCcgb3Igc28uIFVzZXIgaGFzIG5vIGlkZWEgd2hhdCB3ZW50IHdy
-b25nLg0KDQojIHJiZCBtYXAgLW8gZm9vYmFyIHRlc3QNCnJiZDogdW5rbm93biBtYXAgb3B0aW9u
-ICdmb29iYXInDQpyYmQ6IGNvdWxkbid0IHBhcnNlIG1hcCBvcHRpb25zDQoNCiMgcmJkIG1hcCAt
-byBmc2lkPWZvb2JhciB0ZXN0DQpyYmQ6IGludmFsaWQgZnNpZCB2YWx1ZSAnZm9vYmFyJw0KcmJk
-OiBjb3VsZG4ndCBwYXJzZSBtYXAgb3B0aW9ucw0KDQpTaW5jZSBhYm91dCBhIHllYXIgYWdvLCBy
-YmQgY2xpIHdvdWxkIHRyeSB0byBwYXJzZSBzdXBwbGllZCBvcHRpb25zLg0KT2YgY291cnNlLCB0
-aGUgbGlzdCBvZiBvcHRpb25zIGl0IGtub3dzIGFib3V0IGlzIHN0YXRpYywgYnV0IHlvdXIgYXR0
-cmlidXRlIHdvdWxkbid0IHNvbHZlIHRoYXQgcHJvYmxlbSAob3IgcmF0aGVyIGl0IHdpbGwsIGJ1
-dCBvbmx5IGZvciBzaW1wbGUgYm9vbGVhbiB5ZXMvbm8gb3B0aW9ucywgbGlrZSBjcmMgb3IgdGNw
-X25vZGVsYXkpIGJlY2F1c2Ugd2UgYWxzbyB0cnkgdG8gc2FuaXR5IGNoZWNrIHRoZSB2YWx1ZSwg
-YXMgdGhlIGFib3ZlIGZzaWQgZXhhbXBsZSBzaG93cy4NCg0KW1NvbW5hdGhdIEhtbS4uSSBtaXNz
-ZWQgdGhhdCBpdCBzZWVtcy4gIFllcywgZm9yIEJvb2xlYW4gYXR0cmlidXRlcyBrZXJuZWwgY29t
-cGF0aWJpbGl0eSBjaGVjayBzaG91bGQgYmUgYWJsZSB0byBmbGFnIHRoYXQuDQoNCj4gV2UgY2Fu
-IHVzZSB0aGlzIHN1cHBvcnRlZCBsaXN0IGZyb20ga2VybmVsIG1vZHVsZSBmcm9tIHJiZCBjbGkg
-dG8gc2hvdyBwcm9wZXIgZXJyb3IgbWVzc2FnZSB0byB0aGUgdXNlci4NCj4gQW5vdGhlciBmZWF0
-dXJlIHRoYXQgd2UgaGF2ZSBpbXBsZW1lbnRlZCBpcyByYmQgY2xpIHRvIGNvbnN1bHQgdGhlIC9l
-dGMvY2VwaC9jZXBoLmNvbmYgYW5kIHRha2UgdGhlIHJiZCBrZXJuZWwgc3VwcG9ydGVkIG9wdGlv
-bnMgZnJvbSB0aGVyZSBhdXRvbWF0aWNhbGx5IGlmIHVzZXIgaGFzIG5vdCBwcm92aWRlZCBhbnkg
-b3B0aW9uIGR1cmluZyByYmQgbWFwLiBVc2VyIHByb3ZpZGVkIG9wdGlvbiBkdXJpbmcgcmJkIG1h
-cCB3aWxsIGFsd2F5cyBnZXQgcHJpb3JpdHkgdGhvdWdoLg0KDQpEaWQgeW91IG1lYW4gImFuZCB0
-YWtlIHJiZCBrZXJuZWwgbWFwIG9wdGlvbnMiLCBpLmUuIHRha2UgZGVmYXVsdCBtYXAgb3B0aW9u
-cyBmcm9tIGNlcGguY29uZj8gIEkgdGhpbmsgdGhhdCdzIGEgZ29vZCBpZGVhLg0KW1NvbW5hdGhd
-IFllcywgd2hhdGV2ZXIgaXMgY29tbW9uLCBsaWtlIGNyYyAobXNfbm9jcmMgaW4gY2VwaC5jb25m
-KSAsIHRjcF9ub2RlbGF5IChtc190Y3Bfbm9kZWxheSBpbiBjZXBoLmNvbmYpDQpUaGFua3MsDQoN
-CiAgICAgICAgICAgICAgICBJbHlhDQoNCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-DQoNClBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ry
-b25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVz
-aWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBt
-ZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3Rp
-ZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhh
-dCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2Yg
-dGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVk
-IHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5
-IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVz
-dHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lv
-biAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4N
-Cg0K
+Hi Mark,
+
+Thank you for publishing the meeting info. On what time is the meeting
+hold within a day? Is it an all day event?
+
+Thanks & Regards,
+--
+Accela Zhao
+
+
+
+
+On 1/21/15, 10:54 AM, "Mark Nelson" <mark.nelson@inktank.com> wrote:
+
+>8AM PST as usual!  Please add an agenda item if there is something you
+>want to talk about!
+>
+>Here's the links:
+>
+>Etherpad URL:
+>http://pad.ceph.com/p/performance_weekly
+>
+>To join the Meeting:
+>https://bluejeans.com/268261044
+>
+>To join via Browser:
+>https://bluejeans.com/268261044/browser
+>
+>To join with Lync:
+>https://bluejeans.com/268261044/lync
+>
+>
+>To join via Room System:
+>Video Conferencing System: bjn.vc -or- 199.48.152.152
+>Meeting ID: 268261044
+>
+>To join via Phone:
+>1) Dial:
+>           +1 408 740 7256
+>           +1 888 240 2560(US Toll Free)
+>           +1 408 317 9253(Alternate Number)
+>           (see all numbers - http://bluejeans.com/numbers)
+>2) Enter Conference ID: 268261044
+>
+>Mark
+>--
+>To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>the body of a message to majordomo@vger.kernel.org
+>More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
