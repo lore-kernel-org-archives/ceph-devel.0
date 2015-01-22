@@ -1,93 +1,85 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: [PATCH] ceph: rbd option listing and tcp_nodelay support
-Date: Thu, 22 Jan 2015 17:42:52 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2827D18B@SACMBXIP02.sdcorp.global.sandisk.com>
-References: <alpine.DEB.2.10.1501220029310.28090@Ubuntu-VirtualBox>
-	<CALFYKtCn-gGfjZ0qnjRoiS_ksX2KC4PJMcLO0gW5znXgbVAQgg@mail.gmail.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F2827C9AA@SACMBXIP02.sdcorp.global.sandisk.com>
-	<CALFYKtAJ5RiwkEiUGD=oVFzC+Rtor9pF7R4_L9Di9Zg4THCviA@mail.gmail.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F2827C9E0@SACMBXIP02.sdcorp.global.sandisk.com>
- <CALFYKtDazJJ6mXHu26qBe=ygXuX3VQGVmxs5pJ90hnu2ns+10Q@mail.gmail.com>
+From: "Blinick, Stephen L" <stephen.l.blinick@intel.com>
+Subject: RE: Memstore issue on v0.91
+Date: Thu, 22 Jan 2015 23:25:01 +0000
+Message-ID: <3649A15A2562B54294DE14BCE5AC79120AB3E6B3@FMSMSX106.amr.corp.intel.com>
+References: <3649A15A2562B54294DE14BCE5AC79120AB3CD9F@FMSMSX106.amr.corp.intel.com>
+ <54BFB3EF.1030800@redhat.com>
+ <6F3FA899187F0043BA1827A69DA2F7CC02133938@shsmsx102.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1on0058.outbound.protection.outlook.com ([157.56.110.58]:40662
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752522AbbAVRm7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 22 Jan 2015 12:42:59 -0500
-In-Reply-To: <CALFYKtDazJJ6mXHu26qBe=ygXuX3VQGVmxs5pJ90hnu2ns+10Q@mail.gmail.com>
+Received: from mga14.intel.com ([192.55.52.115]:48427 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752568AbbAVXZU convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Jan 2015 18:25:20 -0500
+In-Reply-To: <6F3FA899187F0043BA1827A69DA2F7CC02133938@shsmsx102.ccr.corp.intel.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <ilya.dryomov@inktank.com>, Sage Weil <sage@inktank.com>
-Cc: Chaitanya Huilgol <chaitanya.huilgol@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>, "mnelson@redhat.com" <mnelson@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-WWVzLCBJIGFncmVlIHdpdGggeW91IG9uIHRoaXMgSWx5YS4gVGhhdCB3aWxsIGJlIGxlc3MgY29u
-ZnVzaW5nIHRvIHRoZSB1c2VyLg0KDQpUaGFua3MgJiBSZWdhcmRzDQpTb21uYXRoDQoNCi0tLS0t
-T3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBJbHlhIERyeW9tb3YgW21haWx0bzppbHlhLmRy
-eW9tb3ZAaW5rdGFuay5jb21dDQpTZW50OiBUaHVyc2RheSwgSmFudWFyeSAyMiwgMjAxNSAxMjo1
-NCBBTQ0KVG86IFNvbW5hdGggUm95OyBTYWdlIFdlaWwNCkNjOiBDaGFpdGFueWEgSHVpbGdvbDsg
-Q2VwaCBEZXZlbG9wbWVudA0KU3ViamVjdDogUmU6IFtQQVRDSF0gY2VwaDogcmJkIG9wdGlvbiBs
-aXN0aW5nIGFuZCB0Y3Bfbm9kZWxheSBzdXBwb3J0DQoNCk9uIFdlZCwgSmFuIDIxLCAyMDE1IGF0
-IDExOjAyIFBNLCBTb21uYXRoIFJveSA8U29tbmF0aC5Sb3lAc2FuZGlzay5jb20+IHdyb3RlOg0K
-PiA8PGlubGluZQ0KPg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBJbHlh
-IERyeW9tb3YgW21haWx0bzppbHlhLmRyeW9tb3ZAaW5rdGFuay5jb21dDQo+IFNlbnQ6IFdlZG5l
-c2RheSwgSmFudWFyeSAyMSwgMjAxNSAxMTo0NyBBTQ0KPiBUbzogU29tbmF0aCBSb3kNCj4gQ2M6
-IENoYWl0YW55YSBIdWlsZ29sOyBDZXBoIERldmVsb3BtZW50DQo+IFN1YmplY3Q6IFJlOiBbUEFU
-Q0hdIGNlcGg6IHJiZCBvcHRpb24gbGlzdGluZyBhbmQgdGNwX25vZGVsYXkgc3VwcG9ydA0KPg0K
-PiBPbiBXZWQsIEphbiAyMSwgMjAxNSBhdCAxMDoyOSBQTSwgU29tbmF0aCBSb3kgPFNvbW5hdGgu
-Um95QHNhbmRpc2suY29tPiB3cm90ZToNCj4+IElseWEsDQo+PiBSZWdhcmRpbmcgc3VwcG9ydGVk
-IGF0dHJpYnV0ZSBsaXN0LCAgSSB0aGluayBpdCBjb3VsZCBiZSBhIHN0ZXAgdG93YXJkcyBiZXR0
-ZXIgdXNhYmlsaXR5IGV4cGVyaWVuY2UgZHVyaW5nIHJiZCBtYXAgY29tbWFuZC4gUHJlc2VudGx5
-LCBpZiB1c2VyIGdpdmVzIHdyb25nIG9wdGlvbiBvciB1bnN1cHBvcnRlZCBvcHRpb24gaXQganVz
-dCBlcnJvcnMgb3V0IHNheWluZyAnc3lzZnMgd3JpdGUgZmFpbGVkJyBvciBzby4gVXNlciBoYXMg
-bm8gaWRlYSB3aGF0IHdlbnQgd3JvbmcuDQo+DQo+ICMgcmJkIG1hcCAtbyBmb29iYXIgdGVzdA0K
-PiByYmQ6IHVua25vd24gbWFwIG9wdGlvbiAnZm9vYmFyJw0KPiByYmQ6IGNvdWxkbid0IHBhcnNl
-IG1hcCBvcHRpb25zDQo+DQo+ICMgcmJkIG1hcCAtbyBmc2lkPWZvb2JhciB0ZXN0DQo+IHJiZDog
-aW52YWxpZCBmc2lkIHZhbHVlICdmb29iYXInDQo+IHJiZDogY291bGRuJ3QgcGFyc2UgbWFwIG9w
-dGlvbnMNCj4NCj4gU2luY2UgYWJvdXQgYSB5ZWFyIGFnbywgcmJkIGNsaSB3b3VsZCB0cnkgdG8g
-cGFyc2Ugc3VwcGxpZWQgb3B0aW9ucy4NCj4gT2YgY291cnNlLCB0aGUgbGlzdCBvZiBvcHRpb25z
-IGl0IGtub3dzIGFib3V0IGlzIHN0YXRpYywgYnV0IHlvdXIgYXR0cmlidXRlIHdvdWxkbid0IHNv
-bHZlIHRoYXQgcHJvYmxlbSAob3IgcmF0aGVyIGl0IHdpbGwsIGJ1dCBvbmx5IGZvciBzaW1wbGUg
-Ym9vbGVhbiB5ZXMvbm8gb3B0aW9ucywgbGlrZSBjcmMgb3IgdGNwX25vZGVsYXkpIGJlY2F1c2Ug
-d2UgYWxzbyB0cnkgdG8gc2FuaXR5IGNoZWNrIHRoZSB2YWx1ZSwgYXMgdGhlIGFib3ZlIGZzaWQg
-ZXhhbXBsZSBzaG93cy4NCj4NCj4gW1NvbW5hdGhdIEhtbS4uSSBtaXNzZWQgdGhhdCBpdCBzZWVt
-cy4gIFllcywgZm9yIEJvb2xlYW4gYXR0cmlidXRlcyBrZXJuZWwgY29tcGF0aWJpbGl0eSBjaGVj
-ayBzaG91bGQgYmUgYWJsZSB0byBmbGFnIHRoYXQuDQo+DQo+PiBXZSBjYW4gdXNlIHRoaXMgc3Vw
-cG9ydGVkIGxpc3QgZnJvbSBrZXJuZWwgbW9kdWxlIGZyb20gcmJkIGNsaSB0byBzaG93IHByb3Bl
-ciBlcnJvciBtZXNzYWdlIHRvIHRoZSB1c2VyLg0KPj4gQW5vdGhlciBmZWF0dXJlIHRoYXQgd2Ug
-aGF2ZSBpbXBsZW1lbnRlZCBpcyByYmQgY2xpIHRvIGNvbnN1bHQgdGhlIC9ldGMvY2VwaC9jZXBo
-LmNvbmYgYW5kIHRha2UgdGhlIHJiZCBrZXJuZWwgc3VwcG9ydGVkIG9wdGlvbnMgZnJvbSB0aGVy
-ZSBhdXRvbWF0aWNhbGx5IGlmIHVzZXIgaGFzIG5vdCBwcm92aWRlZCBhbnkgb3B0aW9uIGR1cmlu
-ZyByYmQgbWFwLiBVc2VyIHByb3ZpZGVkIG9wdGlvbiBkdXJpbmcgcmJkIG1hcCB3aWxsIGFsd2F5
-cyBnZXQgcHJpb3JpdHkgdGhvdWdoLg0KPg0KPiBEaWQgeW91IG1lYW4gImFuZCB0YWtlIHJiZCBr
-ZXJuZWwgbWFwIG9wdGlvbnMiLCBpLmUuIHRha2UgZGVmYXVsdCBtYXAgb3B0aW9ucyBmcm9tIGNl
-cGguY29uZj8gIEkgdGhpbmsgdGhhdCdzIGEgZ29vZCBpZGVhLg0KPiBbU29tbmF0aF0gWWVzLCB3
-aGF0ZXZlciBpcyBjb21tb24sIGxpa2UgY3JjIChtc19ub2NyYyBpbiBjZXBoLmNvbmYpICwNCj4g
-dGNwX25vZGVsYXkgKG1zX3RjcF9ub2RlbGF5IGluIGNlcGguY29uZikNCg0KSSB3YXMgdGhpbmtp
-bmcgbW9yZSBhbG9uZyB0aGUgbGluZXMgb2YgYSBzdGF0aWMgInJiZCBkZWZhdWx0IG1hcCBvcHRp
-b25zIiBmaWVsZCBpbiBjZXBoLmNvbmYsIGUuZy4NCg0KcmJkIGRlZmF1bHQgbWFwIG9wdGlvbnMg
-PSAibm9jcmMsdGNwX25vZGVsYXkiDQoNCndoaWNoIGNhbiB0aGVuIGJlIG92ZXJ3cml0dGVuIGJ5
-IHJiZCBtYXAgLW8uDQoNClRoZSB0aGluZyBpcywga2VybmVsIG1zZ3Igd2lsbCBhbHdheXMgYmUg
-YSBzdHJpcHBlZCBkb3duIHZlcnNpb24gb2YgdXNlcnNwYWNlIG1zZ3IsIGFuZCBvbiB0b3Agb2Yg
-dGhhdCB3ZSBhcmUgYm91bmQgdG8gaGF2ZSBzb21lIGtlcm5lbCBjbGllbnQgc3BlY2lmaWMgb3B0
-aW9ucy4gIEhhdmluZyBib3RoICJyYmQgZGVmYXVsdCBtYXAgb3B0aW9ucyIgYW5kIHB1bGxpbmcg
-b3V0IHZhbHVlcyBmb3Igd2hhdGV2ZXIgb3B0aW9ucyBhcmUgY29tbW9uIHNvdW5kcyBsaWtlIGl0
-IGNhbiBiZSBhIGJpdCBjb25mdXNpbmcgLSB3ZSB3aWxsIGhhdmUgdGhyZWUgbGF5ZXJzIG9mIG9w
-dGlvbnMgc2V0dGluZ3MgdG8gZGVhbCB3aXRoIChjb21tb24gb3B0aW9ucywgcmJkX2RlZmF1bHRf
-bWFwX29wdGlvbnMsIHJiZCBtYXAgLW8pLg0KU2FnZSwgZG8geW91IHRoaW5rIGl0J3Mgd29ydGgg
-aXQ/DQoNClRoYW5rcywNCg0KICAgICAgICAgICAgICAgIElseWENCg0KX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX18NCg0KUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWlu
-ZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0
-aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhl
-IHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlv
-dSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdl
-IGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlv
-biwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYg
-eW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90
-aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGlt
-bWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2Ug
-aW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5
-IHN0b3JlZCBjb3BpZXMpLg0KDQo=
+That fix looks good and I also verified it works.   When I found that bug originally I fixed it, but it didn't work and I debugged a bit further.    The reason was rpmbuild untar's the /SOURCES archive and builds from that -- and so my change didn't get picked up.   Too much automation :)
+
+Mark -- if you're doing the Memstore testing still, you can use this fix but also need to make sure to specify a large enough memstore "device".. i.e. over 4GB if you're going to be writing for 60 seconds with 4K objects at 20K IOPS.     
+
+Thanks,
+
+Stephen
+
+
+-----Original Message-----
+From: Chen, Xiaoxi 
+Sent: Thursday, January 22, 2015 1:39 AM
+To: mnelson@redhat.com; Blinick, Stephen L; Ceph Development
+Subject: RE: Memstore issue on v0.91
+
+This is due to the implicit type cast in the compiler,  when
+                st->f_blocks     <    (used_bytes/st->f_bsize),
+   the minus should be a negative ,but the compiler take it as an unsigned value
+
+
+Fix is proposed in https://github.com/ceph/ceph/pull/3451
+
+				Xiaoxi
+
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
+Sent: Wednesday, January 21, 2015 10:13 PM
+To: Blinick, Stephen L; Ceph Development
+Subject: Re: Memstore issue on v0.91
+
+On 01/21/2015 01:48 AM, Blinick, Stephen L wrote:
+> Moved to 0.91 yesterday and ran into some issues, with a Memstore OSD of default size.  After a few hundred K OPS client gets a FULL message and the avail space looks like:
+>
+> [root@cephtestnode0 bmpa]# rados df
+> pool name                 KB      objects       clones     degraded     unfound           rd        rd KB           wr        wr KB
+> rbd                        0            0            0            0          0            0            0            0            0
+> testmemstore         1505052       376263            0            0          0            0            0       376263      1505052
+>    total used         1494247       376263
+>    total avail   18014398508987737
+>    total space        1000000
+>
+> I was looking at pull request #2836 and found a case where there could be an unsigned int underflow in MemStore.cc:statfs:
+>
+>     st->f_bfree = st->f_bavail = MAX((st->f_blocks - used_bytes /
+> st->f_bsize), 0);
+>
+> But that wasn't the final issue.. I put some asserts where used_bytes could underflow as well and didn't catch anything.  I will keep digging but wanted to find out if anyone else was seeing the issue as well.
+
+FWIW, I hit this yesterday too.  I hadn't started debugging it yet though.  Looks like you are farther along than I am, thanks Stephen! :)
+
+>
+> Thanks,
+>
+> Stephen
+>
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> in the body of a message to majordomo@vger.kernel.org More majordomo 
+> info at  http://vger.kernel.org/majordomo-info.html
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
