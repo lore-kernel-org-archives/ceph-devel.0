@@ -1,7 +1,7 @@
-From: Chaitanya Huilgol <Chaitanya.Huilgol@sandisk.com>
-Subject: RE: [PATCH] ceph: rbd option listing and tcp_nodelay support
-Date: Thu, 22 Jan 2015 16:48:08 +0000
-Message-ID: <9E914F5BD7F48A4782456CEB550A42280A75FF3B@SACMBXIP01.sdcorp.global.sandisk.com>
+From: Ilya Dryomov <ilya.dryomov@inktank.com>
+Subject: Re: [PATCH] ceph: rbd option listing and tcp_nodelay support
+Date: Thu, 22 Jan 2015 19:52:57 +0300
+Message-ID: <CALFYKtAKkN+3QWH=RODBdoTXiV1eUaTk4_yF1nE6wrczTcovFQ@mail.gmail.com>
 References: <alpine.DEB.2.10.1501220029310.28090@Ubuntu-VirtualBox>
 	<CALFYKtCn-gGfjZ0qnjRoiS_ksX2KC4PJMcLO0gW5znXgbVAQgg@mail.gmail.com>
 	<755F6B91B3BE364F9BCA11EA3F9E0C6F2827C9AA@SACMBXIP02.sdcorp.global.sandisk.com>
@@ -13,58 +13,29 @@ References: <alpine.DEB.2.10.1501220029310.28090@Ubuntu-VirtualBox>
 	<9E914F5BD7F48A4782456CEB550A42280A75FE4C@SACMBXIP01.sdcorp.global.sandisk.com>
 	<CALFYKtAu-h86KL6A5o9tLyKo7UW=K_3Tv0aC4=hyhhR0Qd7X9w@mail.gmail.com>
 	<9E914F5BD7F48A4782456CEB550A42280A75FEDC@SACMBXIP01.sdcorp.global.sandisk.com>
- <CALFYKtAeiAta3iEeraBkOTu7bfnXcaoFhweVqL=+ZiEeSukQ-A@mail.gmail.com>
+	<CALFYKtAeiAta3iEeraBkOTu7bfnXcaoFhweVqL=+ZiEeSukQ-A@mail.gmail.com>
+	<9E914F5BD7F48A4782456CEB550A42280A75FF3B@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1on0094.outbound.protection.outlook.com ([157.56.110.94]:54816
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752975AbbAVQsO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 22 Jan 2015 11:48:14 -0500
-In-Reply-To: <CALFYKtAeiAta3iEeraBkOTu7bfnXcaoFhweVqL=+ZiEeSukQ-A@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-qc0-f178.google.com ([209.85.216.178]:43089 "EHLO
+	mail-qc0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753339AbbAVQw5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Jan 2015 11:52:57 -0500
+Received: by mail-qc0-f178.google.com with SMTP id b13so2170942qcw.9
+        for <ceph-devel@vger.kernel.org>; Thu, 22 Jan 2015 08:52:57 -0800 (PST)
+In-Reply-To: <9E914F5BD7F48A4782456CEB550A42280A75FF3B@SACMBXIP01.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <ilya.dryomov@inktank.com>
+To: Chaitanya Huilgol <Chaitanya.Huilgol@sandisk.com>
 Cc: Somnath Roy <Somnath.Roy@sandisk.com>, Sage Weil <sage@inktank.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-T2ssIHdpbGwgbWFrZSB0aGUgY2hhbmdlcyBhbmQgc2VuZCBpdCBhcyBhIHNpbmdsZSB0Y3Bfbm9k
-ZWxheSBwYXRjaC4gT25lIGZpbmFsIGNsYXJpZmljYXRpb24sIGRvIHdlIHdhbnQgdGhlIFRDUF9O
-T0RFTEFZIHNldCBieSBkZWZhdWx0IG9yIG9ubHkgd2hlbiByZXF1ZXN0ZWQ/DQoNCi0tLS0tT3Jp
-Z2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBJbHlhIERyeW9tb3YgW21haWx0bzppbHlhLmRyeW9t
-b3ZAaW5rdGFuay5jb21dDQpTZW50OiBUaHVyc2RheSwgSmFudWFyeSAyMiwgMjAxNSA4OjM4IFBN
-DQpUbzogQ2hhaXRhbnlhIEh1aWxnb2wNCkNjOiBTb21uYXRoIFJveTsgU2FnZSBXZWlsOyBDZXBo
-IERldmVsb3BtZW50DQpTdWJqZWN0OiBSZTogW1BBVENIXSBjZXBoOiByYmQgb3B0aW9uIGxpc3Rp
-bmcgYW5kIHRjcF9ub2RlbGF5IHN1cHBvcnQNCg0KT24gVGh1LCBKYW4gMjIsIDIwMTUgYXQgNToz
-OSBQTSwgQ2hhaXRhbnlhIEh1aWxnb2wgPENoYWl0YW55YS5IdWlsZ29sQHNhbmRpc2suY29tPiB3
-cm90ZToNCj4gV2VsbCwgdGhlcmUgd2FzIG5vIGNlcGhfb3B0aW9ucyBwb2ludGVyIGluIHRoZSBt
-ZXNzZW5nZXIgbGF5ZXIgYW5kIG5vX2NyYyBmbGFnIHdhcyBiZWluZyBwYXNzZWQgaW50byB0aGUg
-bWVzc2VuZ2VyIGFzIGFuIGFkZGl0aW9uYWwgZmxhZyBhbmQgbWFpbnRhaW5lZCB3aXRoaW4gdGhl
-IG1lc3NlbmdlciBhZ2FpbiBhcyBib29sIG5vX2NyYywgSSBpbmZlcnJlZCB0aGF0IGl0IHdhcyBp
-bnRlbnRpb25hbCBhbmQgd2UgZGlkIG5vdCB3YW50IHRoZSBnZW5lcmljIG9wdGlvbnMgaW4gdGhl
-IG1lc3NlbmdlciBsYXllci4gIElmIGl0IGlzIGZpbmUgdG8gaGF2ZSBtZXNzZW5nZXIgcG9pbnQg
-YmFjayB0byB0aGUgY2VwaF9vcHRpb25zLCB0aGVuIHRoYXTigJlzIHRoZSBlYXNpZXN0IHdheSB0
-byBkbyBpdC4NCj4gQWxzbywgd2Ugd291bGQgaGF2ZSBzb21lIGFkZGl0aW9uYWwgb3B0aW9uIGNv
-bWluZyBpbiB3aXRoIFJETUEgc3VwcG9ydCAoeGlvIG1lc3Nlbmdlcikgd2hpY2ggd291bGQgYmUg
-dmVyeSBtZXNzZW5nZXIgc3BlY2lmaWMsIHNvIGhhdmluZyBhIG1lc3NlbmdlciBvcHRpb25zIGhh
-ZCBtYWRlIHNlbnNlLg0KDQpPSywgd2UnbGwgc2VlIGhvdyB0byByZWZhY3RvciBpdCBuaWNlbHkg
-dGhlbi4NCg0KR2l2ZW4gdGhhdCB0Y3Bfbm9kZWxheSBpcyBqdXN0IGEgYm9vbCwgZm9yIG5vdyBJ
-J2Qgc3VnZ2VzdCB0aGUgc2ltcGxlc3QgYW5kIGxlYXN0IGludmFzaXZlIHBhdGNoOg0KDQotIGFk
-ZCBib29sIHRjcF9ub2RlbGF5IGZpZWxkIHRvIGNlcGhfbWVzc2VuZ2VyDQotIGFkZCBib29sIHRj
-cF9ub2RlbGF5IHBhcmFtZXRlciB0byBjZXBoX21lc3Nlbmdlcl9pbml0KCkNCi0gY2FsbCBjZXBo
-X21lc3Nlbmdlcl9pbml0KCkgd2l0aCBjZXBoX3Rlc3Rfb3B0KGNsaWVudCwgVENQX05PREVMQVkp
-DQoNCg0KVGhhbmtzLA0KDQogICAgICAgICAgICAgICAgSWx5YQ0KDQpfX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fXw0KDQpQTEVBU0UgTk9URTogVGhlIGluZm9ybWF0aW9uIGNvbnRhaW5l
-ZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNzYWdlIGlzIGludGVuZGVkIG9ubHkgZm9yIHRo
-ZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpIG5hbWVkIGFib3ZlLiBJZiB0aGUg
-cmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVuZGVkIHJlY2lwaWVudCwgeW91
-IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2Ug
-aW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywgZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9u
-LCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5
-b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFzZSBub3Rp
-ZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3IgZS1tYWlsIChhcyBzaG93biBhYm92ZSkgaW1t
-ZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVzIG9mIHRoaXMgbWVzc2FnZSBp
-biB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkg
-c3RvcmVkIGNvcGllcykuDQoNCg==
+On Thu, Jan 22, 2015 at 7:48 PM, Chaitanya Huilgol
+<Chaitanya.Huilgol@sandisk.com> wrote:
+> Ok, will make the changes and send it as a single tcp_nodelay patch. One final clarification, do we want the TCP_NODELAY set by default or only when requested?
+
+On by default I think.
+
+Thanks,
+
+                Ilya
