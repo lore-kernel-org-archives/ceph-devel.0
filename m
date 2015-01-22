@@ -1,75 +1,128 @@
-From: Chaitanya Huilgol <Chaitanya.Huilgol@sandisk.com>
-Subject: RE: [PATCH] ceph: rbd option listing and tcp_nodelay support
-Date: Thu, 22 Jan 2015 13:33:10 +0000
-Message-ID: <9E914F5BD7F48A4782456CEB550A42280A75FE4C@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <alpine.DEB.2.10.1501220029310.28090@Ubuntu-VirtualBox>
-	<CALFYKtCn-gGfjZ0qnjRoiS_ksX2KC4PJMcLO0gW5znXgbVAQgg@mail.gmail.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F2827C9AA@SACMBXIP02.sdcorp.global.sandisk.com>
-	<CALFYKtAJ5RiwkEiUGD=oVFzC+Rtor9pF7R4_L9Di9Zg4THCviA@mail.gmail.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F2827C9E0@SACMBXIP02.sdcorp.global.sandisk.com>
-	<CALFYKtDazJJ6mXHu26qBe=ygXuX3VQGVmxs5pJ90hnu2ns+10Q@mail.gmail.com>
-	<9E914F5BD7F48A4782456CEB550A42280A75FDDB@SACMBXIP01.sdcorp.global.sandisk.com>
- <CALFYKtDT2Eka6j6dKL-ev3mhVQcT+S7GC79eHac1S7r8nMUEcg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1on0068.outbound.protection.outlook.com ([157.56.110.68]:27869
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750803AbbAVNdP (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 22 Jan 2015 08:33:15 -0500
-In-Reply-To: <CALFYKtDT2Eka6j6dKL-ev3mhVQcT+S7GC79eHac1S7r8nMUEcg@mail.gmail.com>
-Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <ilya.dryomov@inktank.com>
-Cc: Somnath Roy <Somnath.Roy@sandisk.com>, Sage Weil <sage@inktank.com>, Chaitanya Huilgol <chaitanya.huilgol@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
+From: Jeff Layton <jeff.layton@primarydata.com>
+Subject: [PATCH v3 00/13] locks: saner method for managing file locks
+Date: Thu, 22 Jan 2015 09:27:44 -0500
+Message-ID: <1421936877-27529-1-git-send-email-jeff.layton@primarydata.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-fsdevel@vger.kernel.org
+Cc: Christoph Hellwig <hch@infradead.org>, Sasha Levin <sasha.levin@oracle.com>, David Howells <dhowells@redhat.com>, linux-kernel@vger.kernel.org, linux-cifs@vger.kernel.org, linux-nfs@vger.kernel.org, ceph-devel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-T2ssIEkgdGhpbmsgZm9yIG5vdyB3ZSBzaG91bGQgZmlyc3QgZ2V0IHRoZSBjb3JlIGZlYXR1cmUg
-c3VwcG9ydCBpbiwgaWYgdGhlIGNoYW5nZXMgaW4gdGhlIG1lc3NlbmdlciBsYXllciBsb29rIGZp
-bmUsIHRoZW4gSSB3aWxsIGdlbmVyYXRlIHR3byBwYXRjaGVzDQotICBtZXNzZW5nZXIgc3BlY2lm
-aWMgb3B0aW9ucw0KLSB0Y3Bfbm9kZWxheSBzdXBwb3J0DQoNCkFzIGEgbmV4dCBzZXQgd2UgY2Fu
-IGltcGxlbWVudCB0aGUgIGtyYmRfZGVmYXVsdF9tYXBfb3B0aW9ucyBpbiB0aGUgY2VwaC5jb25m
-IGFuZCBwYXNzIGl0IGRvd24uDQoNCkxldCBtZSBrbm93Lg0KDQpSZWdhcmRzLA0KQ2hhaXRhbnlh
-DQoNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IElseWEgRHJ5b21vdiBbbWFp
-bHRvOmlseWEuZHJ5b21vdkBpbmt0YW5rLmNvbV0NClNlbnQ6IFRodXJzZGF5LCBKYW51YXJ5IDIy
-LCAyMDE1IDY6MjAgUE0NClRvOiBDaGFpdGFueWEgSHVpbGdvbA0KQ2M6IFNvbW5hdGggUm95OyBT
-YWdlIFdlaWw7IENoYWl0YW55YSBIdWlsZ29sOyBDZXBoIERldmVsb3BtZW50DQpTdWJqZWN0OiBS
-ZTogW1BBVENIXSBjZXBoOiByYmQgb3B0aW9uIGxpc3RpbmcgYW5kIHRjcF9ub2RlbGF5IHN1cHBv
-cnQNCg0KT24gVGh1LCBKYW4gMjIsIDIwMTUgYXQgMTI6NTQgUE0sIENoYWl0YW55YSBIdWlsZ29s
-IDxDaGFpdGFueWEuSHVpbGdvbEBzYW5kaXNrLmNvbT4gd3JvdGU6DQo+IEhpIElseWEsDQo+DQo+
-IFdlIGhhdmUgdHdvIG9wdGlvbnMgaGVyZSwNCj4gKDEpIEhhdmUga2VybmVsIGV4cG9ydCBzdXBw
-b3J0ZWQgb3B0aW9ucyBhbmQgcGFzcyBvbiBzdXBwb3J0ZWQgb3B0aW9ucw0KPiBmcm9tIGNlcGgu
-Y29uZiBhdXRvbWF0aWNhbGx5IGlmIHVzZXIgaGFzIG5vdCBzcGVjaWZpZWQgdGhlIHNhbWUgdmlh
-DQo+IHJiZCAtbyAtIHRoaXMgaXMgd2hhdCBpcyBkb25lIGluIHRoZSBjdXJyZW50IHBhdGNoIE9y
-DQo+ICgyKSBBcyBzdWdnZXN0ZWQgYnkgeW91LCBIYXZlIGEgZGVmYXVsdCBtYXAgb3B0aW9ucyBp
-biBjZXBoLmNvbmYgIGFuZA0KPiBwYXNzIGFsbCBvcHRpb25zIHdoaWNoIGhhdmUgbm90IGJlIG92
-ZXJyaWRkZW4gYnkgcmJkIC1vDQo+DQo+IEFzIEkgdW5kZXJzdGFuZCwgdGhlcmUgaXMgbm8gbmVl
-ZCB0byBkbyBib3RoIC0gd2UgbmVlZCB0byBjaG9vc2UgYmV0d2VlbiB0aGUgdHdvLg0KPiBBZnRl
-ciB5b3VyIHN1Z2dlc3Rpb24sIEkgYW0gbGVhbmluZyB0b3dhcmRzIG9wdGlvbi0yIGFzIGl0IGdp
-dmUgbW9yZQ0KPiBrcmJkIHNwZWNpZmljIGNvbnRyb2wuIEhvd2V2ZXIsIHRoZSBvbnVzIG5vdyBy
-ZXN0cyBvbiB0aGUgdXNlciB0byBhZGQNCj4gZGVmYXVsdCBvcHRpb25zIGJhc2VkIG9uIHdoYXQg
-dGhlIGtlcm5lbCBzdXBwb3J0cyAoZm9yIHRoaXMgd2UgY2FuDQo+IHN0aWxsIHByb3ZpZGUgdGhl
-IG9wdGlvbnMgbGlzdGluZyB2aWEgdGhlIHN5c2J1cyBpbnRlcmZhY2UsIHNheSB3aXRoDQo+ICdy
-YmQgbWFwIHN1cHBvcnRlZF9vcHRpb25zJyBjbGkpDQoNCkFuZCB0aGUgcXVlc3Rpb24gdGhlbiBp
-czogZG8gd2UgcmVhbGx5IG5lZWQgdGhpcyBzdXBwb3J0ZWRfb3B0aW9ucyBjbGk/DQpyYmQgbWFw
-IG9wdGlvbnMgYXJlIHRyZWF0ZWQgdmVyeSBtdWNoIGxpa2UgZmlsZXN5c3RlbSBtb3VudCBvcHRp
-b25zIC0gdGhlIHNldCBvZiBzdXBwb3J0ZWQgb3B0aW9ucyBpcyBkZXRlcm1pbmVkIGJ5IHRoZSBr
-ZXJuZWwgdmVyc2lvbiBhbmQgaXMgZG9jdW1lbnRlZCBpbiByYmQoOCkgbWFuIHBhZ2UuDQoNCihU
-aGVyZSBhcmVuJ3QgYW55IGtlcm5lbCB2ZXJzaW9uIGRldGFpbHMgaW4gdGhlcmUgY3VycmVudGx5
-LCBidXQgdGhhdCdzIHNpbXBseSBiZWNhdXNlIGFsbCBleGlzdGluZyBvcHRpb25zIGhhdmUgYmVl
-biBhZGRlZCBpbiBidWxrIGEgbG9uZyB0aW1lIGFnbywgYW5kIHdlIGNhbiBmaXggdGhhdCBvbWlz
-c2lvbiB3aXRoIHRoZSBhZGRpdGlvbiBvZiB0Y3Bfbm9kZWxheS4pDQoNClRoYW5rcywNCg0KICAg
-ICAgICAgICAgICAgIElseWENCg0KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCg0K
-UExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmlj
-IG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25h
-dGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3Nh
-Z2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVk
-IHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFu
-eSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlz
-IG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhp
-cyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVs
-ZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95
-IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3
-aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KDQo=
+v3:
+- break out a ceph locking cleanup patch into a separate one earlier
+  in the series
+- switch back to using the i_lock to protect assignment of i_flctx.
+  Using cmpxchg() was subject to races that I couldn't quite get a
+  grip on. Eventually I may switch it back, but it probably doesn't
+  provide much benefit.
+- add a patch to clean up some comments that refer to i_flock
+- use list_empty_careful in lockless checks rather than list_empty
+
+v2:
+- bugfix to the flc_posix list ordering that broke the split/merge code
+- don't use i_lock to manage the i_flctx pointer. Do so locklessly
+  via cmpxchg().
+- reordering of the patches to make the set bisectable. As a result
+  the new spinlock is not introduced until near the end of the set
+- some cleanup of the lm_change operation was added, made possible
+  by the move to standard list_heads for tracking locks
+- it takes greater pains to avoid spinlocking by checking when the
+  lists are empty in addition to whether the i_flctx pointer is NULL
+- a patch was added to keep count of the number of locks, so we can
+  avoid having to do count/alloc/populate in ceph and cifs
+
+This is the third iteration of this patchset. The second was posted
+on January 8th, under the cover letter entitled:
+
+    [PATCH v2 00/10] locks: saner method for managing file locks
+
+The big change here is that it once again uses the i_lock to protect the
+i_flctx pointer assignment. In principle we should be able to use
+cmpxchg instead, but that seems leave open a race that causes
+locks_remove_file to miss recently-added locks. Given that is not a
+super latency-sensitive codepath, an extra spinlock shouldn't make much
+difference.
+
+Many thanks to Sasha Levin who helped me nail a race that would leave
+leftover locks on the i_flock list, and David Howells who convinced
+me to just go ahead back to using the i_lock to protect that field.
+
+There are some other minor changes, but overall it's pretty similar
+to the last set. I still plan to merge this for v3.20.
+
+------------------------[snip]-------------------------
+
+We currently manage all file_locks via a singly-linked list. This is
+problematic for a number of reasons:
+
+- we have to protect all file locks with the same spinlock (or
+  equivalent). Currently that uses the i_lock, but Christoph has voiced
+  objections due to the potential for contention with other i_lock
+  users. He'd like to see us move to using a different lock.
+
+- we have to walk through irrelevant file locks in order to get to the
+  ones we're interested in. For instance, POSIX locks are at the end
+  of the list, so we have to skip over all of the flock locks and
+  leases before we can work with them.
+
+- the singly-linked list is primitive and difficult to work with. We
+  have to keep track of the "before" pointer and it's easy to get that
+  wrong.
+
+Cleaning all of this up is complicated by the fact that no one really
+wants to grow struct inode in order to do so. We have a single pointer
+in the inode now and I don't think we want to use any more.
+
+One possibility that Trond raised was to move this to an hlist, but
+that doesn't do anything about the desire for a new spinlock.
+
+This patchset takes the approach of replacing the i_flock list with a
+new struct file_lock_context that is allocated when we intend to add a
+new file lock to an inode. The file_lock_context is only freed when we
+destroy the inode.
+
+Within that, we have separate (and standard!) lists for each lock type,
+and a dedicated spinlock for managing those lists. In principle we could
+even consider adding separate locks for each, but I didn't bother with
+that for now.
+
+For now, the code is still pretty "raw" and isn't bisectable. This is
+just a RFC for the basic approach. This is probably v3.19 material at
+best.
+
+Anyone have thoughts or comments on the basic approach?
+
+Jeff Layton (13):
+  locks: add new struct list_head to struct file_lock
+  locks: have locks_release_file use flock_lock_file to release generic
+    flock locks
+  locks: add a new struct file_locking_context pointer to struct inode
+  ceph: move spinlocking into ceph_encode_locks_to_buffer and
+    ceph_count_locks
+  locks: move flock locks to file_lock_context
+  locks: convert posix locks to file_lock_context
+  locks: convert lease handling to file_lock_context
+  locks: remove i_flock field from struct inode
+  locks: add a dedicated spinlock to protect i_flctx lists
+  locks: clean up the lm_change prototype
+  locks: keep a count of locks on the flctx lists
+  locks: consolidate NULL i_flctx checks in locks_remove_file
+  locks: update comments that refer to inode->i_flock
+
+ fs/ceph/locks.c      |  64 +++---
+ fs/ceph/mds_client.c |   4 -
+ fs/cifs/file.c       |  34 +--
+ fs/inode.c           |   3 +-
+ fs/lockd/svcsubs.c   |  26 ++-
+ fs/locks.c           | 569 +++++++++++++++++++++++++++------------------------
+ fs/nfs/delegation.c  |  23 ++-
+ fs/nfs/nfs4state.c   |  70 ++++---
+ fs/nfs/pagelist.c    |   6 +-
+ fs/nfs/write.c       |  41 +++-
+ fs/nfsd/nfs4state.c  |  21 +-
+ fs/read_write.c      |   2 +-
+ include/linux/fs.h   |  52 +++--
+ 13 files changed, 510 insertions(+), 405 deletions(-)
+
+-- 
+2.1.0
