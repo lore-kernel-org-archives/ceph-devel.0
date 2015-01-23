@@ -1,35 +1,79 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: wip-auth
-Date: Thu, 22 Jan 2015 15:55:37 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1501221512580.19192@cobra.newdream.net>
+From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Subject: =?utf-8?B?5Zue5aSNOiBSRTogTWVtc3RvcmUgaXNzdWUgb24gdjAuOTE=?=
+Date: Fri, 23 Jan 2015 00:41:00 +0000
+Message-ID: <v28sdy2mit7k1brol0j46avb.1421973658354@email.android.com>
+References: <3649A15A2562B54294DE14BCE5AC79120AB3CD9F@FMSMSX106.amr.corp.intel.com>
+ <54BFB3EF.1030800@redhat.com>
+ <6F3FA899187F0043BA1827A69DA2F7CC02133938@shsmsx102.ccr.corp.intel.com>,<3649A15A2562B54294DE14BCE5AC79120AB3E6B3@FMSMSX106.amr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:51471 "EHLO mx1.redhat.com"
+Received: from mga11.intel.com ([192.55.52.93]:14046 "EHLO mga11.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752421AbbAVXzl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 22 Jan 2015 18:55:41 -0500
+	id S1752527AbbAWAlk (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 22 Jan 2015 19:41:40 -0500
+In-Reply-To: <3649A15A2562B54294DE14BCE5AC79120AB3E6B3@FMSMSX106.amr.corp.intel.com>
+Content-Language: zh-CN
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: andreas.bluemle@itxperts.de
-Cc: ceph-devel@vger.kernel.org
+To: "mnelson@redhat.com" <mnelson@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "Blinick, Stephen L" <stephen.l.blinick@intel.com>
 
-Hi Andreas,
-
-I took a look at the wip-auth I mentioned in the security call last 
-week... and the patch didn't work at all.  Sorry if you wasted any 
-time trying it.
-
-Anyway, I fixed it up so that it actually worked and made one other 
-optimization.  It would be great to hear what latencies you measure with 
-the changes in place.
-
-Also, it might be worth trying --with-cryptopp (or --with-nss if you built 
-cryptopp by default) to see if there is a difference.  There is a ton of 
-boilerplate setting up encryption contexts and key structures and so on 
-that I suspect could be cached (perhaps stashed in the CryptoKey struct?) 
-with a bit of effort.  See
-
-	https://github.com/ceph/ceph/blob/master/src/auth/Crypto.cc#L99-L213
-
-sage
+SSB3b3VsZC5wcmVmZXIganVzdCBzZXQgdGhlIG1lbXN0b3JlX2RldmljZV9zaXplIHRvIGEgaHVn
+ZSBjb25zdGFudCwgc2F5IDEwMDBHLiBTbyBpdCB3aWxsIG5vdCBtYWtlIGFueSB0cm91Ymxl8J+Y
+ig0KDQoNCg0KLS0tLSBCbGluaWNrLCBTdGVwaGVuIEznvJblhpkgLS0tLQ0KDQoNClRoYXQgZml4
+IGxvb2tzIGdvb2QgYW5kIEkgYWxzbyB2ZXJpZmllZCBpdCB3b3Jrcy4gICBXaGVuIEkgZm91bmQg
+dGhhdCBidWcgb3JpZ2luYWxseSBJIGZpeGVkIGl0LCBidXQgaXQgZGlkbid0IHdvcmsgYW5kIEkg
+ZGVidWdnZWQgYSBiaXQgZnVydGhlci4gICAgVGhlIHJlYXNvbiB3YXMgcnBtYnVpbGQgdW50YXIn
+cyB0aGUgL1NPVVJDRVMgYXJjaGl2ZSBhbmQgYnVpbGRzIGZyb20gdGhhdCAtLSBhbmQgc28gbXkg
+Y2hhbmdlIGRpZG4ndCBnZXQgcGlja2VkIHVwLiAgIFRvbyBtdWNoIGF1dG9tYXRpb24gOikNCg0K
+TWFyayAtLSBpZiB5b3UncmUgZG9pbmcgdGhlIE1lbXN0b3JlIHRlc3Rpbmcgc3RpbGwsIHlvdSBj
+YW4gdXNlIHRoaXMgZml4IGJ1dCBhbHNvIG5lZWQgdG8gbWFrZSBzdXJlIHRvIHNwZWNpZnkgYSBs
+YXJnZSBlbm91Z2ggbWVtc3RvcmUgImRldmljZSIuLiBpLmUuIG92ZXIgNEdCIGlmIHlvdSdyZSBn
+b2luZyB0byBiZSB3cml0aW5nIGZvciA2MCBzZWNvbmRzIHdpdGggNEsgb2JqZWN0cyBhdCAyMEsg
+SU9QUy4NCg0KVGhhbmtzLA0KDQpTdGVwaGVuDQoNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0t
+LS0NCkZyb206IENoZW4sIFhpYW94aQ0KU2VudDogVGh1cnNkYXksIEphbnVhcnkgMjIsIDIwMTUg
+MTozOSBBTQ0KVG86IG1uZWxzb25AcmVkaGF0LmNvbTsgQmxpbmljaywgU3RlcGhlbiBMOyBDZXBo
+IERldmVsb3BtZW50DQpTdWJqZWN0OiBSRTogTWVtc3RvcmUgaXNzdWUgb24gdjAuOTENCg0KVGhp
+cyBpcyBkdWUgdG8gdGhlIGltcGxpY2l0IHR5cGUgY2FzdCBpbiB0aGUgY29tcGlsZXIsICB3aGVu
+DQogICAgICAgICAgICAgICAgc3QtPmZfYmxvY2tzICAgICA8ICAgICh1c2VkX2J5dGVzL3N0LT5m
+X2JzaXplKSwNCiAgIHRoZSBtaW51cyBzaG91bGQgYmUgYSBuZWdhdGl2ZSAsYnV0IHRoZSBjb21w
+aWxlciB0YWtlIGl0IGFzIGFuIHVuc2lnbmVkIHZhbHVlDQoNCg0KRml4IGlzIHByb3Bvc2VkIGlu
+IGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgvcHVsbC8zNDUxDQoNCiAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgWGlhb3hpDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpG
+cm9tOiBjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwt
+b3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgTWFyayBOZWxzb24NClNlbnQ6IFdl
+ZG5lc2RheSwgSmFudWFyeSAyMSwgMjAxNSAxMDoxMyBQTQ0KVG86IEJsaW5pY2ssIFN0ZXBoZW4g
+TDsgQ2VwaCBEZXZlbG9wbWVudA0KU3ViamVjdDogUmU6IE1lbXN0b3JlIGlzc3VlIG9uIHYwLjkx
+DQoNCk9uIDAxLzIxLzIwMTUgMDE6NDggQU0sIEJsaW5pY2ssIFN0ZXBoZW4gTCB3cm90ZToNCj4g
+TW92ZWQgdG8gMC45MSB5ZXN0ZXJkYXkgYW5kIHJhbiBpbnRvIHNvbWUgaXNzdWVzLCB3aXRoIGEg
+TWVtc3RvcmUgT1NEIG9mIGRlZmF1bHQgc2l6ZS4gIEFmdGVyIGEgZmV3IGh1bmRyZWQgSyBPUFMg
+Y2xpZW50IGdldHMgYSBGVUxMIG1lc3NhZ2UgYW5kIHRoZSBhdmFpbCBzcGFjZSBsb29rcyBsaWtl
+Og0KPg0KPiBbcm9vdEBjZXBodGVzdG5vZGUwIGJtcGFdIyByYWRvcyBkZg0KPiBwb29sIG5hbWUg
+ICAgICAgICAgICAgICAgIEtCICAgICAgb2JqZWN0cyAgICAgICBjbG9uZXMgICAgIGRlZ3JhZGVk
+ICAgICB1bmZvdW5kICAgICAgICAgICByZCAgICAgICAgcmQgS0IgICAgICAgICAgIHdyICAgICAg
+ICB3ciBLQg0KPiByYmQgICAgICAgICAgICAgICAgICAgICAgICAwICAgICAgICAgICAgMCAgICAg
+ICAgICAgIDAgICAgICAgICAgICAwICAgICAgICAgIDAgICAgICAgICAgICAwICAgICAgICAgICAg
+MCAgICAgICAgICAgIDAgICAgICAgICAgICAwDQo+IHRlc3RtZW1zdG9yZSAgICAgICAgIDE1MDUw
+NTIgICAgICAgMzc2MjYzICAgICAgICAgICAgMCAgICAgICAgICAgIDAgICAgICAgICAgMCAgICAg
+ICAgICAgIDAgICAgICAgICAgICAwICAgICAgIDM3NjI2MyAgICAgIDE1MDUwNTINCj4gICAgdG90
+YWwgdXNlZCAgICAgICAgIDE0OTQyNDcgICAgICAgMzc2MjYzDQo+ICAgIHRvdGFsIGF2YWlsICAg
+MTgwMTQzOTg1MDg5ODc3MzcNCj4gICAgdG90YWwgc3BhY2UgICAgICAgIDEwMDAwMDANCj4NCj4g
+SSB3YXMgbG9va2luZyBhdCBwdWxsIHJlcXVlc3QgIzI4MzYgYW5kIGZvdW5kIGEgY2FzZSB3aGVy
+ZSB0aGVyZSBjb3VsZCBiZSBhbiB1bnNpZ25lZCBpbnQgdW5kZXJmbG93IGluIE1lbVN0b3JlLmNj
+OnN0YXRmczoNCj4NCj4gICAgIHN0LT5mX2JmcmVlID0gc3QtPmZfYmF2YWlsID0gTUFYKChzdC0+
+Zl9ibG9ja3MgLSB1c2VkX2J5dGVzIC8NCj4gc3QtPmZfYnNpemUpLCAwKTsNCj4NCj4gQnV0IHRo
+YXQgd2Fzbid0IHRoZSBmaW5hbCBpc3N1ZS4uIEkgcHV0IHNvbWUgYXNzZXJ0cyB3aGVyZSB1c2Vk
+X2J5dGVzIGNvdWxkIHVuZGVyZmxvdyBhcyB3ZWxsIGFuZCBkaWRuJ3QgY2F0Y2ggYW55dGhpbmcu
+ICBJIHdpbGwga2VlcCBkaWdnaW5nIGJ1dCB3YW50ZWQgdG8gZmluZCBvdXQgaWYgYW55b25lIGVs
+c2Ugd2FzIHNlZWluZyB0aGUgaXNzdWUgYXMgd2VsbC4NCg0KRldJVywgSSBoaXQgdGhpcyB5ZXN0
+ZXJkYXkgdG9vLiAgSSBoYWRuJ3Qgc3RhcnRlZCBkZWJ1Z2dpbmcgaXQgeWV0IHRob3VnaC4gIExv
+b2tzIGxpa2UgeW91IGFyZSBmYXJ0aGVyIGFsb25nIHRoYW4gSSBhbSwgdGhhbmtzIFN0ZXBoZW4h
+IDopDQoNCj4NCj4gVGhhbmtzLA0KPg0KPiBTdGVwaGVuDQo+DQo+DQo+DQo+IC0tDQo+IFRvIHVu
+c3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBo
+LWRldmVsIg0KPiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2Vy
+bmVsLm9yZyBNb3JlIG1ham9yZG9tbw0KPiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3Jn
+L21ham9yZG9tby1pbmZvLmh0bWwNCj4NCi0tDQpUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlz
+dDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4gdGhlIGJvZHkgb2Yg
+YSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gaW5m
+byBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo=
