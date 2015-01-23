@@ -1,93 +1,39 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Deadline of Github pull request for Hammer release (question)
-Date: Fri, 23 Jan 2015 14:46:41 +0100
-Message-ID: <54C250C1.2010703@dachary.org>
-References: <870DE8DBB716524BAE51B2D499EC81E40AA3F9AB@g01jpexmbyt24>
+From: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>
+Subject: mSHEC r33 release
+Date: Fri, 23 Jan 2015 14:30:52 +0000
+Message-ID: <870DE8DBB716524BAE51B2D499EC81E40AA64D91@g01jpexmbyt24>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="JMmlmBkcHQ9464VCDLeWS25AniwQReX8U"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:45986 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752249AbbAWNqn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Jan 2015 08:46:43 -0500
-In-Reply-To: <870DE8DBB716524BAE51B2D499EC81E40AA3F9AB@g01jpexmbyt24>
+Received: from fgwmail5.fujitsu.co.jp ([192.51.44.35]:43591 "EHLO
+	fgwmail5.fujitsu.co.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755223AbbAWOa4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Jan 2015 09:30:56 -0500
+Received: from kw-mxauth.gw.nic.fujitsu.com (unknown [10.0.237.134])
+	by fgwmail5.fujitsu.co.jp (Postfix) with ESMTP id 668DA3EE2B7
+	for <ceph-devel@vger.kernel.org>; Fri, 23 Jan 2015 23:30:55 +0900 (JST)
+Received: from s3.gw.fujitsu.co.jp (s3.gw.fujitsu.co.jp [10.0.50.93])
+	by kw-mxauth.gw.nic.fujitsu.com (Postfix) with ESMTP id 79E8DAC0AA6
+	for <ceph-devel@vger.kernel.org>; Fri, 23 Jan 2015 23:30:54 +0900 (JST)
+Received: from g01jpfmpwyt01.exch.g01.fujitsu.local (g01jpfmpwyt01.exch.g01.fujitsu.local [10.128.193.38])
+	by s3.gw.fujitsu.co.jp (Postfix) with ESMTP id 21EA1E08003
+	for <ceph-devel@vger.kernel.org>; Fri, 23 Jan 2015 23:30:54 +0900 (JST)
+Content-Language: ja-JP
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, "Shiozawa, Kensuke" <shiozawa.kennsu@jp.fujitsu.com>, "Nakao, Takanori" <nakao.takanori@jp.fujitsu.com>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, "Shiozawa, Kensuke" <shiozawa.kennsu@jp.fujitsu.com>, "Nakao, Takanori" <nakao.takanori@jp.fujitsu.com>, "Paul Von-Stamwitz (PVonStamwitz@us.fujitsu.com)" <PVonStamwitz@us.fujitsu.com>, "Kaga, Yoshihiro" <y-kaga@jp.fujitsu.com>, "Kawaguchi, Shotaro" <kawaguchi.s@jp.fujitsu.com>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---JMmlmBkcHQ9464VCDLeWS25AniwQReX8U
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-Hi,
-
-Note that you also need to update=20
-
-https://github.com/dachary/ceph-erasure-code-corpus/blob/master/v0.85-764=
--gf3a1532/non-regression.sh
-
-to include non regression tests for the most common cases of the SHEC plu=
-gin encoding / decoding. This is run by make check (this repository is a =
-submodule of Ceph). It helps make sure that content encoded / decoded wit=
-h a given version of the plugin can be encoded / decoded exactly in the s=
-ame way by all future versions.
-
-Cheers
-
-On 06/01/2015 12:49, Miyamae, Takeshi wrote:
-> Dear Loic,
->=20
-> I'm Takeshi Miyamae, one of the authors of SHEC's blueprint.
->=20
-> Shingled Erasure Code (SHEC)
-> https://wiki.ceph.com/Planning/Blueprints/Hammer/Shingled_Erasure_Code_=
-(SHEC)
->=20
-> We have revised our blueprint shown in the last CDS to extend our erasu=
-re code
-> layouts and describe the guideline for choosing SHEC among various EC p=
-lugins.
-> We believe the blueprint now answers all the comments given at the CDS.=
-
->=20
-> In addition, we would like to ask for your advice on the schedule of ou=
-r github
-> pull request. More specifically, we would like to know its deadline for=
- Hammer
-> release.
-> (As we have not really completed our verification of SHEC, we are wonde=
-ring if
-> we should make it open for early preview.)
->=20
-> Thank you in advance,
-> Takeshi Miyamae
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---JMmlmBkcHQ9464VCDLeWS25AniwQReX8U
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlTCUMEACgkQ8dLMyEl6F213VwCgicCLQPYIbnTQ61Q/e+KuFJBW
-os8AoJQFQwqsfeW30NGw0kbCrHohHxXa
-=9a99
------END PGP SIGNATURE-----
-
---JMmlmBkcHQ9464VCDLeWS25AniwQReX8U--
+SGkgTG9pYywNCg0KV2UgaGF2ZSByZWxlYXNlZCBtU0hFQyByMzMganVzdCBu
+b3cuDQoNCmh0dHBzOi8vZ2l0aHViLmNvbS90LW1peWFtYWUvY2VwaA0KDQpO
+T1RBQkxFIENIQU5HRVMNCiAgLSBlbnN1cmUgdGhyZWFkIHNhZmV0eQ0KICAt
+IHN1cHBvcnQgZ2VuZXJhdG9yIG1hdHJpeCBjYWNoZSAoYWRkZWQgRXJhc3Vy
+ZUNvZGVTaGVjVGFibGVDYWNoZS5jYykNCiAgLSByZWZlciB0byB0aGUgc2hh
+cmVkIGplcmFzdXJlIDIuMCBsaWJyYXJ5DQogIC0gaW1wcm92ZSB2ZXJpZmlj
+YXRpb24gb2YgcmV0dXJuIGNvZGUgaW4gdGVzdCBjb2Rlcw0KICAtIGFkZCB0
+ZXN0IGNvZGUgZm9yIHZlcmlmeWluZyB0aHJlYWQgc2FmZXR5IChhZGRlZCBU
+ZXN0RXJhc3VyZUNvZGVTaGVjX3RocmVhZC5jYykNCg0KTElNSVRBVElPTg0K
+ICAtIFRoZXJlIGFyZSBzdGlsbCBsb3RzIG9mIG1pbm9yIHByb2JsZW1zIGlu
+IHRlc3QgY29kZXMuDQogICAgV2Ugd2lsbCBmaXggaXQgYnkgMS8yNihtb24p
+Lg0KDQpCZXN0IHJlZ2FyZHMsDQpUYWtlc2hpIE1peWFtYWUNCg0K
