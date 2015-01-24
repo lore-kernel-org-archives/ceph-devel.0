@@ -1,84 +1,93 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: mSHEC r33 release
-Date: Sat, 24 Jan 2015 00:59:45 +0100
-Message-ID: <54C2E071.40909@dachary.org>
-References: <870DE8DBB716524BAE51B2D499EC81E40AA64D91@g01jpexmbyt24>
+From: "Accela Zhao (bigzhao)" <bigzhao@cisco.com>
+Subject: Re: 01/21/2015 Weekly Ceph Performance Meeting IS ON!
+Date: Sat, 24 Jan 2015 00:20:42 +0000
+Message-ID: <D0E90616.1755F%bigzhao@cisco.com>
+References: <54C05E0D.50802@redhat.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="9Cd1N8mQi6grpVq4Qovq9PlSN2wmusnJn"
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:46322 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751744AbbAWX7s (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Jan 2015 18:59:48 -0500
-In-Reply-To: <870DE8DBB716524BAE51B2D499EC81E40AA64D91@g01jpexmbyt24>
+Received: from alln-iport-8.cisco.com ([173.37.142.95]:46770 "EHLO
+	alln-iport-8.cisco.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756544AbbAXAUp convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Jan 2015 19:20:45 -0500
+In-Reply-To: <54C05E0D.50802@redhat.com>
+Content-Language: en-US
+Content-ID: <951CFFA8EEC2DF4FA814B486C5FD9143@emea.cisco.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, "Shiozawa, Kensuke" <shiozawa.kennsu@jp.fujitsu.com>, "Nakao, Takanori" <nakao.takanori@jp.fujitsu.com>, "Paul Von-Stamwitz (PVonStamwitz@us.fujitsu.com)" <PVonStamwitz@us.fujitsu.com>, "Kaga, Yoshihiro" <y-kaga@jp.fujitsu.com>, "Kawaguchi, Shotaro" <kawaguchi.s@jp.fujitsu.com>
-
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---9Cd1N8mQi6grpVq4Qovq9PlSN2wmusnJn
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-Hi,
-
-I see the following error when running make check http://paste2.org/dNChV=
-pL1 . Does it ring a bell ?
-
-Cheers
-
-On 23/01/2015 15:30, Miyamae, Takeshi wrote:
-> Hi Loic,
->=20
-> We have released mSHEC r33 just now.
->=20
-> https://github.com/t-miyamae/ceph
->=20
-> NOTABLE CHANGES
->   - ensure thread safety
->   - support generator matrix cache (added ErasureCodeShecTableCache.cc)=
-
->   - refer to the shared jerasure 2.0 library
->   - improve verification of return code in test codes
->   - add test code for verifying thread safety (added TestErasureCodeShe=
-c_thread.cc)
->=20
-> LIMITATION
->   - There are still lots of minor problems in test codes.
->     We will fix it by 1/26(mon).
->=20
-> Best regards,
-> Takeshi Miyamae
->=20
-> N=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDr=EF=BF=BD=EF=BF=BDy=EF=BF=
-=BD=EF=BF=BD=EF=BF=BDb=EF=BF=BDX=EF=BF=BD=EF=BF=BD=C7=A7v=EF=BF=BD^=EF=BF=
-=BD)=DE=BA{.n=EF=BF=BD+=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD]z=EF=BF=BD=EF=
-=BF=BD=EF=BF=BD{ay=EF=BF=BD=1D=CA=87=DA=99=EF=BF=BD,j=07=EF=BF=BD=EF=BF=BD=
-f=EF=BF=BD=EF=BF=BD=EF=BF=BDh=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD=1E=EF=BF=
-=BDw=EF=BF=BD=EF=BF=BD=EF=BF=BD=0C=EF=BF=BD=EF=BF=BD=EF=BF=BDj:+v=EF=BF=BD=
-=EF=BF=BD=EF=BF=BDw=EF=BF=BDj=EF=BF=BDm=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=
-=07=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDzZ+=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=
-=BD=EF=BF=BD=DD=A2j"=EF=BF=BD=EF=BF=BD!tml=3D
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+To: "mnelson@redhat.com" <mnelson@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
 
---9Cd1N8mQi6grpVq4Qovq9PlSN2wmusnJn
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+At which clock within the day? I didn't find it at the meeting info page.
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
+Thanks & Regards,
+--
+Accela Zhao
 
-iEYEARECAAYFAlTC4HEACgkQ8dLMyEl6F23XoACffEmSYBDepeOii6nc4pf+eLag
-oPIAn1pYSjGP8ZnTbRfudIt2NJ01Ch7b
-=D6V/
------END PGP SIGNATURE-----
 
---9Cd1N8mQi6grpVq4Qovq9PlSN2wmusnJn--
+
+
+On 1/22/15, 10:18 AM, "Mark Nelson" <mark.nelson@inktank.com> wrote:
+
+>Hi Accela,
+>
+>Just one hour. I'm not sure I could handle an all day meeting once a
+>week. :)
+>
+>Mark
+>
+>On 01/21/2015 07:54 PM, Accela Zhao (bigzhao) wrote:
+>> Hi Mark,
+>>
+>> Thank you for publishing the meeting info. On what time is the meeting
+>> hold within a day? Is it an all day event?
+>>
+>> Thanks & Regards,
+>> --
+>> Accela Zhao
+>>
+>>
+>>
+>>
+>> On 1/21/15, 10:54 AM, "Mark Nelson" <mark.nelson@inktank.com> wrote:
+>>
+>>> 8AM PST as usual!  Please add an agenda item if there is something you
+>>> want to talk about!
+>>>
+>>> Here's the links:
+>>>
+>>> Etherpad URL:
+>>> http://pad.ceph.com/p/performance_weekly
+>>>
+>>> To join the Meeting:
+>>> https://bluejeans.com/268261044
+>>>
+>>> To join via Browser:
+>>> https://bluejeans.com/268261044/browser
+>>>
+>>> To join with Lync:
+>>> https://bluejeans.com/268261044/lync
+>>>
+>>>
+>>> To join via Room System:
+>>> Video Conferencing System: bjn.vc -or- 199.48.152.152
+>>> Meeting ID: 268261044
+>>>
+>>> To join via Phone:
+>>> 1) Dial:
+>>>            +1 408 740 7256
+>>>            +1 888 240 2560(US Toll Free)
+>>>            +1 408 317 9253(Alternate Number)
+>>>            (see all numbers - http://bluejeans.com/numbers)
+>>> 2) Enter Conference ID: 268261044
+>>>
+>>> Mark
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>>>in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+
