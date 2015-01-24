@@ -1,93 +1,44 @@
-From: "Accela Zhao (bigzhao)" <bigzhao@cisco.com>
-Subject: Re: 01/21/2015 Weekly Ceph Performance Meeting IS ON!
-Date: Sat, 24 Jan 2015 00:20:42 +0000
-Message-ID: <D0E90616.1755F%bigzhao@cisco.com>
-References: <54C05E0D.50802@redhat.com>
+From: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>
+Subject: mSHEC r35 release
+Date: Sat, 24 Jan 2015 05:45:28 +0000
+Message-ID: <870DE8DBB716524BAE51B2D499EC81E40AA64E5A@g01jpexmbyt24>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="iso-2022-jp"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from alln-iport-8.cisco.com ([173.37.142.95]:46770 "EHLO
-	alln-iport-8.cisco.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756544AbbAXAUp convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Jan 2015 19:20:45 -0500
-In-Reply-To: <54C05E0D.50802@redhat.com>
-Content-Language: en-US
-Content-ID: <951CFFA8EEC2DF4FA814B486C5FD9143@emea.cisco.com>
+Received: from fgwmail6.fujitsu.co.jp ([192.51.44.36]:47423 "EHLO
+	fgwmail6.fujitsu.co.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751070AbbAXFpc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 24 Jan 2015 00:45:32 -0500
+Received: from kw-mxq.gw.nic.fujitsu.com (unknown [10.0.237.131])
+	by fgwmail6.fujitsu.co.jp (Postfix) with ESMTP id 7D43E3EE0B6
+	for <ceph-devel@vger.kernel.org>; Sat, 24 Jan 2015 14:45:31 +0900 (JST)
+Received: from s3.gw.fujitsu.co.jp (s3.gw.fujitsu.co.jp [10.0.50.93])
+	by kw-mxq.gw.nic.fujitsu.com (Postfix) with ESMTP id 932C1AC0721
+	for <ceph-devel@vger.kernel.org>; Sat, 24 Jan 2015 14:45:30 +0900 (JST)
+Received: from g01jpfmpwyt03.exch.g01.fujitsu.local (g01jpfmpwyt03.exch.g01.fujitsu.local [10.128.193.57])
+	by s3.gw.fujitsu.co.jp (Postfix) with ESMTP id 3A3C4E08004
+	for <ceph-devel@vger.kernel.org>; Sat, 24 Jan 2015 14:45:30 +0900 (JST)
+Content-Language: ja-JP
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "mnelson@redhat.com" <mnelson@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, "Shiozawa, Kensuke" <shiozawa.kennsu@jp.fujitsu.com>, "Nakao, Takanori" <nakao.takanori@jp.fujitsu.com>, "Paul Von-Stamwitz (PVonStamwitz@us.fujitsu.com)" <PVonStamwitz@us.fujitsu.com>, "Kaga, Yoshihiro" <y-kaga@jp.fujitsu.com>, "Kawaguchi, Shotaro" <kawaguchi.s@jp.fujitsu.com>
 
+Hi Loic,
 
-At which clock within the day? I didn't find it at the meeting info page.
+We are sorry that test errors bothered you.
+We have released mSHEC r35 just now.
 
-Thanks & Regards,
---
-Accela Zhao
+https://github.com/t-miyamae/ceph
 
+NOTABLE CHANGES
+  - remove test errors
+  - remove compile warnings
 
+LIMITATION
+  - only TestErasureCodeShec364.cc is still not available.
+    We will fix it by 1/26(mon)
 
-
-On 1/22/15, 10:18 AM, "Mark Nelson" <mark.nelson@inktank.com> wrote:
-
->Hi Accela,
->
->Just one hour. I'm not sure I could handle an all day meeting once a
->week. :)
->
->Mark
->
->On 01/21/2015 07:54 PM, Accela Zhao (bigzhao) wrote:
->> Hi Mark,
->>
->> Thank you for publishing the meeting info. On what time is the meeting
->> hold within a day? Is it an all day event?
->>
->> Thanks & Regards,
->> --
->> Accela Zhao
->>
->>
->>
->>
->> On 1/21/15, 10:54 AM, "Mark Nelson" <mark.nelson@inktank.com> wrote:
->>
->>> 8AM PST as usual!  Please add an agenda item if there is something you
->>> want to talk about!
->>>
->>> Here's the links:
->>>
->>> Etherpad URL:
->>> http://pad.ceph.com/p/performance_weekly
->>>
->>> To join the Meeting:
->>> https://bluejeans.com/268261044
->>>
->>> To join via Browser:
->>> https://bluejeans.com/268261044/browser
->>>
->>> To join with Lync:
->>> https://bluejeans.com/268261044/lync
->>>
->>>
->>> To join via Room System:
->>> Video Conferencing System: bjn.vc -or- 199.48.152.152
->>> Meeting ID: 268261044
->>>
->>> To join via Phone:
->>> 1) Dial:
->>>            +1 408 740 7256
->>>            +1 888 240 2560(US Toll Free)
->>>            +1 408 317 9253(Alternate Number)
->>>            (see all numbers - http://bluejeans.com/numbers)
->>> 2) Enter Conference ID: 268261044
->>>
->>> Mark
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->>>in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
+Best regards,
+Takeshi Miyamae
 
