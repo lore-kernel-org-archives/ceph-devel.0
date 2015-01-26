@@ -1,118 +1,126 @@
-From: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
-Subject: RE: idempotent op (esp delete)
-Date: Mon, 26 Jan 2015 02:35:10 +0000
-Message-ID: <06E7D85B3BA36C4DB207FEDE871C5348979944@SHSMSX101.ccr.corp.intel.com>
-References: <alpine.DEB.2.00.1501231327570.10173@cobra.newdream.net>
- <CAC6JEv8iKG=uBcojtZ-KwWVGjd75SdYm05YOwdtm_H2TZi1-2g@mail.gmail.com>
- <alpine.DEB.2.00.1501231415040.19192@cobra.newdream.net>
+From: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>
+Subject: RE: mSHEC r33 release
+Date: Mon, 26 Jan 2015 02:43:33 +0000
+Message-ID: <870DE8DBB716524BAE51B2D499EC81E40AA660A5@g01jpexmbyt24>
+References: <870DE8DBB716524BAE51B2D499EC81E40AA64D91@g01jpexmbyt24>
+ <54C25D3E.3080202@dachary.org>
+ <870DE8DBB716524BAE51B2D499EC81E40AA64EC2@g01jpexmbyt24>
+ <54C3C64B.4080804@dachary.org>
+ <870DE8DBB716524BAE51B2D499EC81E40AA66058@g01jpexmbyt24>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:59647 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751401AbbAZCih convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 25 Jan 2015 21:38:37 -0500
-In-Reply-To: <alpine.DEB.2.00.1501231415040.19192@cobra.newdream.net>
-Content-Language: en-US
+Received: from fgwmail6.fujitsu.co.jp ([192.51.44.36]:40910 "EHLO
+	fgwmail6.fujitsu.co.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751092AbbAZCni (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 25 Jan 2015 21:43:38 -0500
+Received: from kw-mxq.gw.nic.fujitsu.com (unknown [10.0.237.131])
+	by fgwmail6.fujitsu.co.jp (Postfix) with ESMTP id E17E53EE0B6
+	for <ceph-devel@vger.kernel.org>; Mon, 26 Jan 2015 11:43:36 +0900 (JST)
+Received: from s1.gw.fujitsu.co.jp (s1.gw.fujitsu.co.jp [10.0.50.91])
+	by kw-mxq.gw.nic.fujitsu.com (Postfix) with ESMTP id E346CAC0211
+	for <ceph-devel@vger.kernel.org>; Mon, 26 Jan 2015 11:43:35 +0900 (JST)
+Received: from g01jpfmpwyt03.exch.g01.fujitsu.local (g01jpfmpwyt03.exch.g01.fujitsu.local [10.128.193.57])
+	by s1.gw.fujitsu.co.jp (Postfix) with ESMTP id 89A7DE38001
+	for <ceph-devel@vger.kernel.org>; Mon, 26 Jan 2015 11:43:35 +0900 (JST)
+In-Reply-To: <870DE8DBB716524BAE51B2D499EC81E40AA66058@g01jpexmbyt24>
+Content-Language: ja-JP
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, Gregory Farnum <greg@gregs42.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>, Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, "Shiozawa, Kensuke" <shiozawa.kennsu@jp.fujitsu.com>, "Nakao, Takanori" <nakao.takanori@jp.fujitsu.com>, "Paul Von-Stamwitz (PVonStamwitz@us.fujitsu.com)" <PVonStamwitz@us.fujitsu.com>, "Kaga, Yoshihiro" <y-kaga@jp.fujitsu.com>, "Kawaguchi, Shotaro" <kawaguchi.s@jp.fujitsu.com>
 
-This method puts the reqid list in the pg_log instead of the object_info_t, so that it's preserved even in the delete case, which sounds more reasonable.
-
------Original Message-----
-From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
-Sent: Saturday, January 24, 2015 6:19 AM
-To: Gregory Farnum
-Cc: ceph-devel@vger.kernel.org
-Subject: Re: idempotent op (esp delete)
-
-On Fri, 23 Jan 2015, Gregory Farnum wrote:
-> On Fri, Jan 23, 2015 at 1:43 PM, Sage Weil <sweil@redhat.com> wrote:
-> > Background:
-> >
-> > 1) Way back when we made a task that would thrash the cache modes by 
-> > adding and removing the cache tier while ceph_test_rados was running.
-> > This mostly worked, but would occasionally fail because we would
-> >
-> >  - delete an object from the cache tier
-> >  - a network failure injection would lose the reply
-> >  - we'd disable the cache
-> >  - the delete would resend to the base tier, not get recognized as a 
-> > dup (different pool, different pg log)
-> >    -> -ENOENT instead of 0
-> >
-> > 2) The proxy write code hits a similar problem:
-> >
-> >  - delete gets proxied
-> >  - we initiate async promote
-> >  - a network failure injection loses the delete reply
-> >  - delete resends and blocks on promote (or arrives after it 
-> > finishes)
-> >  - promote finishes
-> >  - delete is handled
-> >   -> -ENOENT instead of 0
-> >
-> > The ticket is http://tracker.ceph.com/issues/8935
-> >
-> > The problem is partially addressed by
-> >
-> >         https://github.com/ceph/ceph/pull/3447
-> >
-> > by logging a few request ids on every object_info_t and preserving 
-> > that on promote and flush.
-> >
-> > However, it doesn't solve the problem for delete because we throw 
-> > out object_info_t so that reqid_t is lost.
-> >
-> > I think we have two options, not necessarily mutually exclusive:
-> >
-> > 1) When promoting an object that doesn't exist (to create a 
-> > whiteout), pull reqids out of the base tier's pg log so that the 
-> > whiteout is primed with request ids.
-> >
-> > 1.5) When flushing... well, that is harder because we have nowhere 
-> > to put the reqids.  Unless we make a way to cram a list of reqid's 
-> > into a single PG log entry...?  In that case, we wouldn't strictly 
-> > need the per-object list since we could pile the base tier's reqids 
-> > into the promote log entry in the cache tier.
-> >
-> > 2) Make delete idempotent (0 instead of ENOENT if the object doesn't 
-> > exist).  This will require a delicate compat transition (let's 
-> > ignore that a moment) but you can preserve the old behavior for 
-> > callers that care by preceding the delete with an assert_exists op.  
-> > Most callers don't care, but a handful do.  This simplifies the 
-> > semantics we need to support going forward.
-> >
-> > Of course, it's all a bit delicate.  The idempotent op semantics 
-> > have a time horizon so it's all a bit wishy-washy... :/
-> >
-> > Thoughts?
-> 
-> Do we have other cases that we're worried about which would be 
-> improved by maintaining reqids across pool cache transitions? I'm not 
-> a big fan of maintaining those per-op lists (they sound really 
-> expensive?), but if we need them for something else that's a point in 
-> their favor.
-
-I don't think they're *too* expensive (say, vector of 20 per object_info_t?).  But the only thing I can think of beyond the cache tiering stuff would be cases where the pg log isnt long enough for a very laggy client.  In general ops will be distributed across ops so it will be catch the dup from another angle.
-
-However.. I just hacked up a patch that lets us cram lots of reqids into a single pg_log_entry_t and I think that may be a simpler solution.  We can cram all reqids (for the last N of them) for promote and flush into the single log entry and the delete is no longer special.. it'd work equally well for other dups and for class methods that do who knows what.  The patch is here:
-
-	https://github.com/liewegas/ceph/commit/wip-pg-reqids
-
-What do you think?
-
-> We could make delete idempotent instead and that's what I initially 
-> favor, but it also seems a bit scary (it's not like our operations can 
-> be made idempotent; lots of them invoke classes that will differ or
-> whatever!) and I can't think of which callers might care so I'm having 
-> trouble formulating the bounds of this solution.
-
-Yeah, it seems like an easier endpoint but a dangerous path to get there...
-
-sage
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGkgTG9pYw0KDQo+IFdlIHJlY3JlYXRlZCB0aGUgcHVsbCByZXF1ZXN0IGZy
+b20gd2lwLW1TSEVDIGJyYW5jaC4NCg0KSSdtIHNvcnJ5LiBJIGhhZCB0aG91
+Z2h0IHR3aWNlIGFuZCBqdWRnZWQgaXQgd291bGQgbm90IGJlIGJldHRlciB0
+byBjaGFuZ2UgdGhlIGJyYW5jaC4NCkknZCBjbG9zZSBvdXIgMm5kIHB1bGwg
+cmVxdWVzdCBhbmQgZGVsZXRlIHdpcC1tU0hFQyBicmFuY2guDQoNCk9ubHkg
+IzM0ODQgaXMgYWxpdmUgYXMgb3VyIG1TSEVDIHB1bGwgcmVxdWVzdCBhdCB0
+aGlzIG1vbWVudC4NCg0Kd2lwLW1TSEVDIDogbXVsdGlwbGUgU2hpbmdsZWQg
+RXJhc3VyZSBDb2RlICMzNDg0DQpodHRwczovL2dpdGh1Yi5jb20vY2VwaC9j
+ZXBoL3B1bGwvMzQ4NA0KDQpCZXN0IHJlZ2FyZWRzLA0KVGFrZXNoaSBNaXlh
+bWFlDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBjZXBo
+LWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2
+ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgTWl5YW1h
+ZSwgVGFrZXNoaQ0KU2VudDogTW9uZGF5LCBKYW51YXJ5IDI2LCAyMDE1IDEx
+OjIyIEFNDQpUbzogTG9pYyBEYWNoYXJ5DQpDYzogQ2VwaCBEZXZlbG9wbWVu
+dDsgU2hpb3phd2EsIEtlbnN1a2Uv5aGp5rKiIOizoui8lDsgTmFrYW8sIFRh
+a2Fub3JpL+S4reWwviDpt7noqZQ7IFBhdWwgVm9uLVN0YW13aXR6IChQVm9u
+U3RhbXdpdHpAdXMuZnVqaXRzdS5jb20pOyBLYWdhLCBZb3NoaWhpcm8v5Yqg
+6LOAIOiKs+WujzsgS2F3YWd1Y2hpLCBTaG90YXJvL+W3neWPoyDnv5TlpKrm
+nJcNClN1YmplY3Q6IFJFOiBtU0hFQyByMzMgcmVsZWFzZQ0KDQpIaSBMb2lj
+LA0KDQo+IEl0IGxvb2tzIGxpa2UgdGhlIGJyYW5jaCBmcm9tIHdoaWNoIHlv
+dSBjcmVhdGVkIHRoZSBwdWxsIHJlcXVlc3Qgc3RpbGwgaXMgbWFzdGVyIGFu
+ZCBub3Qgd2lwLW1TSEVDLiANCj4gVGhhdCdzIG5vdCBhIHByb2JsZW0uIEl0
+IG9ubHkgcmVhbGx5IGJlY29tZXMgYSBwcm9ibGVtIGlmIHlvdSBoYXZlIG1v
+cmUgdGhhbiBvbmUgcHVsbCByZXF1ZXN0IGdvaW5nIG9uLg0KDQpJJ20gc29y
+cnkgdGhhdCBJIGRpZG4ndCBoYXZlIHN1Y2ggYSBjb21tb24gc2Vuc2UuDQpX
+ZSByZWNyZWF0ZWQgdGhlIHB1bGwgcmVxdWVzdCBmcm9tIHdpcC1tU0hFQyBi
+cmFuY2guDQoNCndpcC1tU0hFQyA6IG11bHRpcGxlIFNoaW5nbGVkIEVyYXN1
+cmUgQ29kZSAjMzQ4OA0KaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC9w
+dWxsLzM0ODgNCg0KQ291bGQgeW91IGNoYW5nZSB0aGUgYnJhbmNoIHlvdSB3
+aWxsIHB1bGwgZnJvbT8NCklmIGl0IHdlcmUgZGlmZmljdWx0IG9yIG5vdCBn
+b29kIGZvciB0aGUgcmVhc29uIG9mIGxvZ2dpbmcgY29tbWVudCBhbHJlYWR5
+IHdyaXR0ZW4sIHB1bGxpbmcgZnJvbSBtYXN0ZXIgYnJhbmNoIHdvdWxkIGFs
+c28gYmUgT0sgZm9yIHVzIGFuZCBJIHdvdWxkIHJlbW92ZSB0aGUgbGF0dGVy
+IHB1bGwgcmVxdWVzdC4NCg0KQmVzdCByZWdhcmRzLA0KVGFrZXNoaSBNaXlh
+bWFlDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBMb2lj
+IERhY2hhcnkgW21haWx0bzpsb2ljQGRhY2hhcnkub3JnXSANClNlbnQ6IFN1
+bmRheSwgSmFudWFyeSAyNSwgMjAxNSAxOjIwIEFNDQpUbzogTWl5YW1hZSwg
+VGFrZXNoaS/lrq7liY0g5YmbDQpDYzogQ2VwaCBEZXZlbG9wbWVudDsgU2hp
+b3phd2EsIEtlbnN1a2Uv5aGp5rKiIOizoui8lDsgTmFrYW8sIFRha2Fub3Jp
+L+S4reWwviDpt7noqZQ7IFBhdWwgVm9uLVN0YW13aXR6IChQVm9uU3RhbXdp
+dHpAdXMuZnVqaXRzdS5jb20pOyBLYWdhLCBZb3NoaWhpcm8v5Yqg6LOAIOiK
+s+WujzsgS2F3YWd1Y2hpLCBTaG90YXJvL+W3neWPoyDnv5TlpKrmnJcNClN1
+YmplY3Q6IFJlOiBtU0hFQyByMzMgcmVsZWFzZQ0KDQpIaSwNCg0KT24gMjQv
+MDEvMjAxNSAxMDowOSwgTWl5YW1hZSwgVGFrZXNoaSB3cm90ZToNCj4gSGkg
+TG9pYywNCj4gDQo+IEkgaGF2ZSBjcmVhdGVkIGEgcHVsbCByZXF1ZXN0IG9m
+IHdpcC1tU0hFQy4NCj4gDQo+IHdpcC1tU0hFQyBwdWxsIHJlcXVlc3QgIzM0
+ODQNCj4gaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC9wdWxsLzM0ODQN
+Cj4gDQo+IEJlc2lkZXMsIHdlIGNoYW5nZWQgdGhlIG5hbWUgb2Ygb3VyIGZv
+cmsgcmVwb3NpdG9yeS4NCj4gaHR0cHM6Ly9naXRodWIuY29tL3QtbWl5YW1h
+ZS93aXAtbVNIRUMNCj4gDQo+IEknbSBub3Qgc3VyZSB0aGF0IGl0IHdhcyBk
+b25lIGNvcnJlY3RseSBiZWNhdXNlIEkgYW0gYSBiZWdpbm5lci4NCj4gV291
+bGQgeW91IGNoZWNrIGl0LCBwbGVhc2U/DQoNCkl0IGxvb2tzIGxpa2UgdGhl
+IGJyYW5jaCBmcm9tIHdoaWNoIHlvdSBjcmVhdGVkIHRoZSBwdWxsIHJlcXVl
+c3Qgc3RpbGwgaXMgbWFzdGVyIGFuZCBub3Qgd2lwLW1TSEVDLiBUaGF0J3Mg
+bm90IGEgcHJvYmxlbS4gSXQgb25seSByZWFsbHkgYmVjb21lcyBhIHByb2Js
+ZW0gaWYgeW91IGhhdmUgbW9yZSB0aGFuIG9uZSBwdWxsIHJlcXVlc3QgZ29p
+bmcgb24uDQoNCkNoZWVycw0KDQo+IA0KPiBCZXN0IHJlZ2FyZHMsDQo+IFRh
+a2VzaGkgTWl5YW1hZQ0KPiANCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0t
+LS0NCj4gRnJvbTogTG9pYyBEYWNoYXJ5IFttYWlsdG86bG9pY0BkYWNoYXJ5
+Lm9yZ10gDQo+IFNlbnQ6IEZyaWRheSwgSmFudWFyeSAyMywgMjAxNSAxMTo0
+MCBQTQ0KPiBUbzogTWl5YW1hZSwgVGFrZXNoaS/lrq7liY0g5YmbDQo+IENj
+OiBDZXBoIERldmVsb3BtZW50OyBTaGlvemF3YSwgS2Vuc3VrZS/loanmsqIg
+6LOi6LyUOyBOYWthbywgVGFrYW5vcmkv5Lit5bC+IOm3ueiplDsgUGF1bCBW
+b24tU3RhbXdpdHogKFBWb25TdGFtd2l0ekB1cy5mdWppdHN1LmNvbSk7IEth
+Z2EsIFlvc2hpaGlyby/liqDos4Ag6Iqz5a6POyBLYXdhZ3VjaGksIFNob3Rh
+cm8v5bed5Y+jIOe/lOWkquaclw0KPiBTdWJqZWN0OiBSZTogbVNIRUMgcjMz
+IHJlbGVhc2UNCj4gDQo+IFRoYW5rcywgSSdsbCB0YWtlIGEgbG9vay4gQ291
+bGQgeW91IHBsZWFzZSBjcmVhdGUgYSBwdWxsIHJlcXVlc3QgYWdhaW5zdCB0
+aGUgbWFzdGVyIGJyYW5jaCA/IFdoZW4geW91IGRvIHNvLCBpdCB3aWxsIGJl
+IGNvbnZlbmllbnQgaWYgeW91IHN1Ym1pdCBmcm9tIGEgYnJhbmNoIHRoYXQg
+aGFzIGEgZGVzY3JpcHRpdmUgbmFtZSBzdWNoIGFzIHdpcC1tU0hFQyBvciBz
+b21ldGhpbmcgc2ltaWxhci4NCj4gDQo+IENoZWVycw0KPiANCj4gT24gMjMv
+MDEvMjAxNSAxNTozMCwgTWl5YW1hZSwgVGFrZXNoaSB3cm90ZToNCj4+IEhp
+IExvaWMsDQo+Pg0KPj4gV2UgaGF2ZSByZWxlYXNlZCBtU0hFQyByMzMganVz
+dCBub3cuDQo+Pg0KPj4gaHR0cHM6Ly9naXRodWIuY29tL3QtbWl5YW1hZS9j
+ZXBoDQo+Pg0KPj4gTk9UQUJMRSBDSEFOR0VTDQo+PiAgIC0gZW5zdXJlIHRo
+cmVhZCBzYWZldHkNCj4+ICAgLSBzdXBwb3J0IGdlbmVyYXRvciBtYXRyaXgg
+Y2FjaGUgKGFkZGVkIEVyYXN1cmVDb2RlU2hlY1RhYmxlQ2FjaGUuY2MpDQo+
+PiAgIC0gcmVmZXIgdG8gdGhlIHNoYXJlZCBqZXJhc3VyZSAyLjAgbGlicmFy
+eQ0KPj4gICAtIGltcHJvdmUgdmVyaWZpY2F0aW9uIG9mIHJldHVybiBjb2Rl
+IGluIHRlc3QgY29kZXMNCj4+ICAgLSBhZGQgdGVzdCBjb2RlIGZvciB2ZXJp
+ZnlpbmcgdGhyZWFkIHNhZmV0eSAoYWRkZWQgVGVzdEVyYXN1cmVDb2RlU2hl
+Y190aHJlYWQuY2MpDQo+Pg0KPj4gTElNSVRBVElPTg0KPj4gICAtIFRoZXJl
+IGFyZSBzdGlsbCBsb3RzIG9mIG1pbm9yIHByb2JsZW1zIGluIHRlc3QgY29k
+ZXMuDQo+PiAgICAgV2Ugd2lsbCBmaXggaXQgYnkgMS8yNihtb24pLg0KPj4N
+Cj4+IEJlc3QgcmVnYXJkcywNCj4+IFRha2VzaGkgTWl5YW1hZQ0KPj4NCj4g
+DQo+IA0KDQotLSANCkxvw69jIERhY2hhcnksIEFydGlzYW4gTG9naWNpZWwg
+TGlicmUNCg0KBO+/vXsubu+/vSvvv73vv73vv73vv73vv73vv73vv70rJe+/
+ve+/vWx6d23vv73vv71i77+966ey77+977+9cu+/ve+/vXnHqe+/vdeveljv
+v73vv70X77+977+93Kh977+977+977+9xqB677+9Jmo6K3bvv73vv73vv70N
+77+977+977+977+9elor77+977+9K3pm77+977+977+9aO+/ve+/ve+/vX7v
+v73vv73vv73vv71p77+977+977+9eu+/vR7vv71377+977+977+9P++/ve+/
+ve+/ve+/vSbvv70p36IbZg0K
