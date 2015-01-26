@@ -1,101 +1,118 @@
-From: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>
-Subject: RE: mSHEC r33 release
-Date: Mon, 26 Jan 2015 02:21:44 +0000
-Message-ID: <870DE8DBB716524BAE51B2D499EC81E40AA66058@g01jpexmbyt24>
-References: <870DE8DBB716524BAE51B2D499EC81E40AA64D91@g01jpexmbyt24>
- <54C25D3E.3080202@dachary.org>
- <870DE8DBB716524BAE51B2D499EC81E40AA64EC2@g01jpexmbyt24>
- <54C3C64B.4080804@dachary.org>
+From: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
+Subject: RE: idempotent op (esp delete)
+Date: Mon, 26 Jan 2015 02:35:10 +0000
+Message-ID: <06E7D85B3BA36C4DB207FEDE871C5348979944@SHSMSX101.ccr.corp.intel.com>
+References: <alpine.DEB.2.00.1501231327570.10173@cobra.newdream.net>
+ <CAC6JEv8iKG=uBcojtZ-KwWVGjd75SdYm05YOwdtm_H2TZi1-2g@mail.gmail.com>
+ <alpine.DEB.2.00.1501231415040.19192@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from fgwmail5.fujitsu.co.jp ([192.51.44.35]:51797 "EHLO
-	fgwmail5.fujitsu.co.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750789AbbAZCWG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 25 Jan 2015 21:22:06 -0500
-Received: from kw-mxq.gw.nic.fujitsu.com (unknown [10.0.237.131])
-	by fgwmail5.fujitsu.co.jp (Postfix) with ESMTP id 6BC243EE2A6
-	for <ceph-devel@vger.kernel.org>; Mon, 26 Jan 2015 11:22:03 +0900 (JST)
-Received: from s4.gw.fujitsu.co.jp (s4.gw.fujitsu.co.jp [10.0.50.94])
-	by kw-mxq.gw.nic.fujitsu.com (Postfix) with ESMTP id EDD41AC026E
-	for <ceph-devel@vger.kernel.org>; Mon, 26 Jan 2015 11:21:46 +0900 (JST)
-Received: from g01jpfmpwyt03.exch.g01.fujitsu.local (g01jpfmpwyt03.exch.g01.fujitsu.local [10.128.193.57])
-	by s4.gw.fujitsu.co.jp (Postfix) with ESMTP id 8B687E08002
-	for <ceph-devel@vger.kernel.org>; Mon, 26 Jan 2015 11:21:46 +0900 (JST)
-In-Reply-To: <54C3C64B.4080804@dachary.org>
-Content-Language: ja-JP
+Received: from mga09.intel.com ([134.134.136.24]:59647 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751401AbbAZCih convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 25 Jan 2015 21:38:37 -0500
+In-Reply-To: <alpine.DEB.2.00.1501231415040.19192@cobra.newdream.net>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, "Shiozawa, Kensuke" <shiozawa.kennsu@jp.fujitsu.com>, "Nakao, Takanori" <nakao.takanori@jp.fujitsu.com>, "Paul Von-Stamwitz (PVonStamwitz@us.fujitsu.com)" <PVonStamwitz@us.fujitsu.com>, "Kaga, Yoshihiro" <y-kaga@jp.fujitsu.com>, "Kawaguchi, Shotaro" <kawaguchi.s@jp.fujitsu.com>
+To: Sage Weil <sweil@redhat.com>, Gregory Farnum <greg@gregs42.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SGkgTG9pYywNCg0KPiBJdCBsb29rcyBsaWtlIHRoZSBicmFuY2ggZnJvbSB3
-aGljaCB5b3UgY3JlYXRlZCB0aGUgcHVsbCByZXF1ZXN0IHN0aWxsIGlzIG1h
-c3RlciBhbmQgbm90IHdpcC1tU0hFQy4gDQo+IFRoYXQncyBub3QgYSBwcm9i
-bGVtLiBJdCBvbmx5IHJlYWxseSBiZWNvbWVzIGEgcHJvYmxlbSBpZiB5b3Ug
-aGF2ZSBtb3JlIHRoYW4gb25lIHB1bGwgcmVxdWVzdCBnb2luZyBvbi4NCg0K
-SSdtIHNvcnJ5IHRoYXQgSSBkaWRuJ3QgaGF2ZSBzdWNoIGEgY29tbW9uIHNl
-bnNlLg0KV2UgcmVjcmVhdGVkIHRoZSBwdWxsIHJlcXVlc3QgZnJvbSB3aXAt
-bVNIRUMgYnJhbmNoLg0KDQp3aXAtbVNIRUMgOiBtdWx0aXBsZSBTaGluZ2xl
-ZCBFcmFzdXJlIENvZGUgIzM0ODgNCmh0dHBzOi8vZ2l0aHViLmNvbS9jZXBo
-L2NlcGgvcHVsbC8zNDg4DQoNCkNvdWxkIHlvdSBjaGFuZ2UgdGhlIGJyYW5j
-aCB5b3Ugd2lsbCBwdWxsIGZyb20/DQpJZiBpdCB3ZXJlIGRpZmZpY3VsdCBv
-ciBub3QgZ29vZCBmb3IgdGhlIHJlYXNvbiBvZiBsb2dnaW5nIGNvbW1lbnQg
-YWxyZWFkeSB3cml0dGVuLCBwdWxsaW5nIGZyb20gbWFzdGVyIGJyYW5jaCB3
-b3VsZCBhbHNvIGJlIE9LIGZvciB1cyBhbmQgSSB3b3VsZCByZW1vdmUgdGhl
-IGxhdHRlciBwdWxsIHJlcXVlc3QuDQoNCkJlc3QgcmVnYXJkcywNClRha2Vz
-aGkgTWl5YW1hZQ0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJv
-bTogTG9pYyBEYWNoYXJ5IFttYWlsdG86bG9pY0BkYWNoYXJ5Lm9yZ10gDQpT
-ZW50OiBTdW5kYXksIEphbnVhcnkgMjUsIDIwMTUgMToyMCBBTQ0KVG86IE1p
-eWFtYWUsIFRha2VzaGkv5a6u5YmNIOWJmw0KQ2M6IENlcGggRGV2ZWxvcG1l
-bnQ7IFNoaW96YXdhLCBLZW5zdWtlL+WhqeayoiDos6LovJQ7IE5ha2FvLCBU
-YWthbm9yaS/kuK3lsL4g6be56KmUOyBQYXVsIFZvbi1TdGFtd2l0eiAoUFZv
-blN0YW13aXR6QHVzLmZ1aml0c3UuY29tKTsgS2FnYSwgWW9zaGloaXJvL+WK
-oOizgCDoirPlro87IEthd2FndWNoaSwgU2hvdGFyby/lt53lj6Mg57+U5aSq
-5pyXDQpTdWJqZWN0OiBSZTogbVNIRUMgcjMzIHJlbGVhc2UNCg0KSGksDQoN
-Ck9uIDI0LzAxLzIwMTUgMTA6MDksIE1peWFtYWUsIFRha2VzaGkgd3JvdGU6
-DQo+IEhpIExvaWMsDQo+IA0KPiBJIGhhdmUgY3JlYXRlZCBhIHB1bGwgcmVx
-dWVzdCBvZiB3aXAtbVNIRUMuDQo+IA0KPiB3aXAtbVNIRUMgcHVsbCByZXF1
-ZXN0ICMzNDg0DQo+IGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgvcHVs
-bC8zNDg0DQo+IA0KPiBCZXNpZGVzLCB3ZSBjaGFuZ2VkIHRoZSBuYW1lIG9m
-IG91ciBmb3JrIHJlcG9zaXRvcnkuDQo+IGh0dHBzOi8vZ2l0aHViLmNvbS90
-LW1peWFtYWUvd2lwLW1TSEVDDQo+IA0KPiBJJ20gbm90IHN1cmUgdGhhdCBp
-dCB3YXMgZG9uZSBjb3JyZWN0bHkgYmVjYXVzZSBJIGFtIGEgYmVnaW5uZXIu
-DQo+IFdvdWxkIHlvdSBjaGVjayBpdCwgcGxlYXNlPw0KDQpJdCBsb29rcyBs
-aWtlIHRoZSBicmFuY2ggZnJvbSB3aGljaCB5b3UgY3JlYXRlZCB0aGUgcHVs
-bCByZXF1ZXN0IHN0aWxsIGlzIG1hc3RlciBhbmQgbm90IHdpcC1tU0hFQy4g
-VGhhdCdzIG5vdCBhIHByb2JsZW0uIEl0IG9ubHkgcmVhbGx5IGJlY29tZXMg
-YSBwcm9ibGVtIGlmIHlvdSBoYXZlIG1vcmUgdGhhbiBvbmUgcHVsbCByZXF1
-ZXN0IGdvaW5nIG9uLg0KDQpDaGVlcnMNCg0KPiANCj4gQmVzdCByZWdhcmRz
-LA0KPiBUYWtlc2hpIE1peWFtYWUNCj4gDQo+IC0tLS0tT3JpZ2luYWwgTWVz
-c2FnZS0tLS0tDQo+IEZyb206IExvaWMgRGFjaGFyeSBbbWFpbHRvOmxvaWNA
-ZGFjaGFyeS5vcmddIA0KPiBTZW50OiBGcmlkYXksIEphbnVhcnkgMjMsIDIw
-MTUgMTE6NDAgUE0NCj4gVG86IE1peWFtYWUsIFRha2VzaGkv5a6u5YmNIOWJ
-mw0KPiBDYzogQ2VwaCBEZXZlbG9wbWVudDsgU2hpb3phd2EsIEtlbnN1a2Uv
-5aGp5rKiIOizoui8lDsgTmFrYW8sIFRha2Fub3JpL+S4reWwviDpt7noqZQ7
-IFBhdWwgVm9uLVN0YW13aXR6IChQVm9uU3RhbXdpdHpAdXMuZnVqaXRzdS5j
-b20pOyBLYWdhLCBZb3NoaWhpcm8v5Yqg6LOAIOiKs+WujzsgS2F3YWd1Y2hp
-LCBTaG90YXJvL+W3neWPoyDnv5TlpKrmnJcNCj4gU3ViamVjdDogUmU6IG1T
-SEVDIHIzMyByZWxlYXNlDQo+IA0KPiBUaGFua3MsIEknbGwgdGFrZSBhIGxv
-b2suIENvdWxkIHlvdSBwbGVhc2UgY3JlYXRlIGEgcHVsbCByZXF1ZXN0IGFn
-YWluc3QgdGhlIG1hc3RlciBicmFuY2ggPyBXaGVuIHlvdSBkbyBzbywgaXQg
-d2lsbCBiZSBjb252ZW5pZW50IGlmIHlvdSBzdWJtaXQgZnJvbSBhIGJyYW5j
-aCB0aGF0IGhhcyBhIGRlc2NyaXB0aXZlIG5hbWUgc3VjaCBhcyB3aXAtbVNI
-RUMgb3Igc29tZXRoaW5nIHNpbWlsYXIuDQo+IA0KPiBDaGVlcnMNCj4gDQo+
-IE9uIDIzLzAxLzIwMTUgMTU6MzAsIE1peWFtYWUsIFRha2VzaGkgd3JvdGU6
-DQo+PiBIaSBMb2ljLA0KPj4NCj4+IFdlIGhhdmUgcmVsZWFzZWQgbVNIRUMg
-cjMzIGp1c3Qgbm93Lg0KPj4NCj4+IGh0dHBzOi8vZ2l0aHViLmNvbS90LW1p
-eWFtYWUvY2VwaA0KPj4NCj4+IE5PVEFCTEUgQ0hBTkdFUw0KPj4gICAtIGVu
-c3VyZSB0aHJlYWQgc2FmZXR5DQo+PiAgIC0gc3VwcG9ydCBnZW5lcmF0b3Ig
-bWF0cml4IGNhY2hlIChhZGRlZCBFcmFzdXJlQ29kZVNoZWNUYWJsZUNhY2hl
-LmNjKQ0KPj4gICAtIHJlZmVyIHRvIHRoZSBzaGFyZWQgamVyYXN1cmUgMi4w
-IGxpYnJhcnkNCj4+ICAgLSBpbXByb3ZlIHZlcmlmaWNhdGlvbiBvZiByZXR1
-cm4gY29kZSBpbiB0ZXN0IGNvZGVzDQo+PiAgIC0gYWRkIHRlc3QgY29kZSBm
-b3IgdmVyaWZ5aW5nIHRocmVhZCBzYWZldHkgKGFkZGVkIFRlc3RFcmFzdXJl
-Q29kZVNoZWNfdGhyZWFkLmNjKQ0KPj4NCj4+IExJTUlUQVRJT04NCj4+ICAg
-LSBUaGVyZSBhcmUgc3RpbGwgbG90cyBvZiBtaW5vciBwcm9ibGVtcyBpbiB0
-ZXN0IGNvZGVzLg0KPj4gICAgIFdlIHdpbGwgZml4IGl0IGJ5IDEvMjYobW9u
-KS4NCj4+DQo+PiBCZXN0IHJlZ2FyZHMsDQo+PiBUYWtlc2hpIE1peWFtYWUN
-Cj4+DQo+IA0KPiANCg0KLS0gDQpMb8OvYyBEYWNoYXJ5LCBBcnRpc2FuIExv
-Z2ljaWVsIExpYnJlDQoNCg==
+This method puts the reqid list in the pg_log instead of the object_info_t, so that it's preserved even in the delete case, which sounds more reasonable.
+
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
+Sent: Saturday, January 24, 2015 6:19 AM
+To: Gregory Farnum
+Cc: ceph-devel@vger.kernel.org
+Subject: Re: idempotent op (esp delete)
+
+On Fri, 23 Jan 2015, Gregory Farnum wrote:
+> On Fri, Jan 23, 2015 at 1:43 PM, Sage Weil <sweil@redhat.com> wrote:
+> > Background:
+> >
+> > 1) Way back when we made a task that would thrash the cache modes by 
+> > adding and removing the cache tier while ceph_test_rados was running.
+> > This mostly worked, but would occasionally fail because we would
+> >
+> >  - delete an object from the cache tier
+> >  - a network failure injection would lose the reply
+> >  - we'd disable the cache
+> >  - the delete would resend to the base tier, not get recognized as a 
+> > dup (different pool, different pg log)
+> >    -> -ENOENT instead of 0
+> >
+> > 2) The proxy write code hits a similar problem:
+> >
+> >  - delete gets proxied
+> >  - we initiate async promote
+> >  - a network failure injection loses the delete reply
+> >  - delete resends and blocks on promote (or arrives after it 
+> > finishes)
+> >  - promote finishes
+> >  - delete is handled
+> >   -> -ENOENT instead of 0
+> >
+> > The ticket is http://tracker.ceph.com/issues/8935
+> >
+> > The problem is partially addressed by
+> >
+> >         https://github.com/ceph/ceph/pull/3447
+> >
+> > by logging a few request ids on every object_info_t and preserving 
+> > that on promote and flush.
+> >
+> > However, it doesn't solve the problem for delete because we throw 
+> > out object_info_t so that reqid_t is lost.
+> >
+> > I think we have two options, not necessarily mutually exclusive:
+> >
+> > 1) When promoting an object that doesn't exist (to create a 
+> > whiteout), pull reqids out of the base tier's pg log so that the 
+> > whiteout is primed with request ids.
+> >
+> > 1.5) When flushing... well, that is harder because we have nowhere 
+> > to put the reqids.  Unless we make a way to cram a list of reqid's 
+> > into a single PG log entry...?  In that case, we wouldn't strictly 
+> > need the per-object list since we could pile the base tier's reqids 
+> > into the promote log entry in the cache tier.
+> >
+> > 2) Make delete idempotent (0 instead of ENOENT if the object doesn't 
+> > exist).  This will require a delicate compat transition (let's 
+> > ignore that a moment) but you can preserve the old behavior for 
+> > callers that care by preceding the delete with an assert_exists op.  
+> > Most callers don't care, but a handful do.  This simplifies the 
+> > semantics we need to support going forward.
+> >
+> > Of course, it's all a bit delicate.  The idempotent op semantics 
+> > have a time horizon so it's all a bit wishy-washy... :/
+> >
+> > Thoughts?
+> 
+> Do we have other cases that we're worried about which would be 
+> improved by maintaining reqids across pool cache transitions? I'm not 
+> a big fan of maintaining those per-op lists (they sound really 
+> expensive?), but if we need them for something else that's a point in 
+> their favor.
+
+I don't think they're *too* expensive (say, vector of 20 per object_info_t?).  But the only thing I can think of beyond the cache tiering stuff would be cases where the pg log isnt long enough for a very laggy client.  In general ops will be distributed across ops so it will be catch the dup from another angle.
+
+However.. I just hacked up a patch that lets us cram lots of reqids into a single pg_log_entry_t and I think that may be a simpler solution.  We can cram all reqids (for the last N of them) for promote and flush into the single log entry and the delete is no longer special.. it'd work equally well for other dups and for class methods that do who knows what.  The patch is here:
+
+	https://github.com/liewegas/ceph/commit/wip-pg-reqids
+
+What do you think?
+
+> We could make delete idempotent instead and that's what I initially 
+> favor, but it also seems a bit scary (it's not like our operations can 
+> be made idempotent; lots of them invoke classes that will differ or
+> whatever!) and I can't think of which callers might care so I'm having 
+> trouble formulating the bounds of this solution.
+
+Yeah, it seems like an easier endpoint but a dangerous path to get there...
+
+sage
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
