@@ -1,60 +1,101 @@
-From: "Blinick, Stephen L" <stephen.l.blinick@intel.com>
-Subject: RE: wip-auth
-Date: Mon, 26 Jan 2015 06:20:50 +0000
-Message-ID: <3649A15A2562B54294DE14BCE5AC79120AB43257@ORSMSX152.amr.corp.intel.com>
-References: <alpine.DEB.2.00.1501221512580.19192@cobra.newdream.net>
+From: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>
+Subject: RE: Deadline of Github pull request for Hammer release (question)
+Date: Mon, 26 Jan 2015 08:00:02 +0000
+Message-ID: <870DE8DBB716524BAE51B2D499EC81E40AA67209@g01jpexmbyt24>
+References: <870DE8DBB716524BAE51B2D499EC81E40AA3F9AB@g01jpexmbyt24>
+ <54C250C1.2010703@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:6012 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752752AbbAZGUy convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 26 Jan 2015 01:20:54 -0500
-In-Reply-To: <alpine.DEB.2.00.1501221512580.19192@cobra.newdream.net>
-Content-Language: en-US
+Received: from fgwmail6.fujitsu.co.jp ([192.51.44.36]:36544 "EHLO
+	fgwmail6.fujitsu.co.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750830AbbAZIAI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 26 Jan 2015 03:00:08 -0500
+Received: from kw-mxq.gw.nic.fujitsu.com (unknown [10.0.237.131])
+	by fgwmail6.fujitsu.co.jp (Postfix) with ESMTP id DDA643EE0C5
+	for <ceph-devel@vger.kernel.org>; Mon, 26 Jan 2015 17:00:06 +0900 (JST)
+Received: from s4.gw.fujitsu.co.jp (s4.gw.fujitsu.co.jp [10.0.50.94])
+	by kw-mxq.gw.nic.fujitsu.com (Postfix) with ESMTP id 21F24AC055E
+	for <ceph-devel@vger.kernel.org>; Mon, 26 Jan 2015 17:00:05 +0900 (JST)
+Received: from g01jpfmpwyt03.exch.g01.fujitsu.local (g01jpfmpwyt03.exch.g01.fujitsu.local [10.128.193.57])
+	by s4.gw.fujitsu.co.jp (Postfix) with ESMTP id AF99CE08001
+	for <ceph-devel@vger.kernel.org>; Mon, 26 Jan 2015 17:00:04 +0900 (JST)
+Content-Language: ja-JP
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, "andreas.bluemle@itxperts.de" <andreas.bluemle@itxperts.de>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, "Shiozawa, Kensuke" <shiozawa.kennsu@jp.fujitsu.com>, "Nakao, Takanori" <nakao.takanori@jp.fujitsu.com>
 
-I noticed that the spec file for building RPM's defaults to building with libnss, instead of libcrypto++.  Since the measurements I'd done so far were from those RPM's I rebuilt with libcrypto++.. so FWIW here is the difference between those two on my system, memstore backend with a single OSD, and single client.    
-
-Dual socket Xeon E5 2620v3, 64GB Memory,  RHEL7 
-Kernel: 3.10.0-123.13.2.el7
-
-100% 4K Writes, 1xOSD w/ Rados Bench
-	libnss		            |    Cryptopp		
-# QD	IOPS	Latency(ms)   |	IOPS	Latency(ms)	IOPS Improvement %
-16	14432.57	1.11    |	18896.60	0.85	30.93%
-	                                     
-100% 4K Reads, 1xOSD w/ Rados Bench				
-	libnss	                            |    Cryptopp		
-# QD	IOPS	Latency(ms)   |	IOPS	Latency(ms)	IOPS Improvement %
-16	19532.53	0.82    |	25708.70	0.62	31.62%
-
-
-Thanks,
-
-Stephen
-
------Original Message-----
-From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
-Sent: Thursday, January 22, 2015 4:56 PM
-To: andreas.bluemle@itxperts.de
-Cc: ceph-devel@vger.kernel.org
-Subject: wip-auth
-
-Hi Andreas,
-
-I took a look at the wip-auth I mentioned in the security call last week... and the patch didn't work at all.  Sorry if you wasted any time trying it.
-
-Anyway, I fixed it up so that it actually worked and made one other optimization.  It would be great to hear what latencies you measure with the changes in place.
-
-Also, it might be worth trying --with-cryptopp (or --with-nss if you built cryptopp by default) to see if there is a difference.  There is a ton of boilerplate setting up encryption contexts and key structures and so on that I suspect could be cached (perhaps stashed in the CryptoKey struct?) with a bit of effort.  See
-
-	https://github.com/ceph/ceph/blob/master/src/auth/Crypto.cc#L99-L213
-
-sage
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGkgTG9pYywNCg0KSSBoYXZlIG5vdGljZWQgdGhhdCB5b3VyIHJlcG9zaXRv
+cnkgY2VwaC1lcmFzdXJlLWNvZGUtY29ycHVzIGlzIGZvcmtlZCBmb3IgdXMs
+DQpzbyBJIGNyZWF0ZWQgYSBuZXcgcHVsbCByZXF1ZXN0Lg0KDQpVcGRhdGUg
+bm9uLXJlZ3Jlc3Npb24uc2ggIzENCmh0dHBzOi8vZ2l0aHViLmNvbS90LW1p
+eWFtYWUvY2VwaC1lcmFzdXJlLWNvZGUtY29ycHVzL3B1bGwvMQ0KDQpCZXN0
+IHJlZ2FyZHMsDQpUYWtlc2hpIE1peWFtYWUNCg0KLS0tLS1PcmlnaW5hbCBN
+ZXNzYWdlLS0tLS0NCkZyb206IE1peWFtYWUsIFRha2VzaGkv5a6u5YmNIOWJ
+myANClNlbnQ6IE1vbmRheSwgSmFudWFyeSAyNiwgMjAxNSAyOjQ0IFBNDQpU
+bzogJ0xvaWMgRGFjaGFyeScNCkNjOiBDZXBoIERldmVsb3BtZW50OyBTaGlv
+emF3YSwgS2Vuc3VrZS/loanmsqIg6LOi6LyUOyBOYWthbywgVGFrYW5vcmkv
+5Lit5bC+IOm3ueiplA0KU3ViamVjdDogUkU6IERlYWRsaW5lIG9mIEdpdGh1
+YiBwdWxsIHJlcXVlc3QgZm9yIEhhbW1lciByZWxlYXNlIChxdWVzdGlvbikN
+Cg0KSGkgTG9pYywNCg0KPiBOb3RlIHRoYXQgeW91IGFsc28gbmVlZCB0byB1
+cGRhdGUNCg0KV2UgaGF2ZSBwcmVwYXJlZCBtU0hFQydzIHBhcmFtZXRlciBz
+ZXRzIHdoaWNoIHdlIHRoaW5rIHdpbGwgYmUgY29tbW9ubHkgdXNlZC4NCkJl
+Y2F1c2UgSSdtIG5vdCBzdXJlIGhvdyB0byB1cGRhdGUgYW5vdGhlciBwZXJz
+b24ncyByZXBvc2l0b3J5LCB3ZSB3aWxsIHdyaXRlIGRvd24gdGhvc2UgcGFy
+YW1ldGVyIHNldHMgaW4gdGhpcyBtYWlsLg0KSWYgd2UgYXJlIHJlcXVpcmVk
+IHRvIGRvIHNvbWV0aGluZywgcGxlYXNlIGxldCB1cyBrbm93Lg0KDQp3aGls
+ZSByZWFkIGsgbSBjIDsgZG8NCiAgICBmb3Igc3RyaXBlX3dpZHRoIGluICRT
+VFJJUEVfV0lEVEhTIDsgZG8NCiAgICAgICAgY2VwaF9lcmFzdXJlX2NvZGVf
+bm9uX3JlZ3Jlc3Npb24gLS1zdHJpcGUtd2lkdGggJHN0cmlwZV93aWR0aCAt
+LXBsdWdpbiBzaGVjIC0tcGFyYW1ldGVyIHRlY2huaXF1ZT1tdWx0aXBsZSAt
+LXBhcmFtZXRlciBrPSRrIC0tcGFyYW1ldGVyIG09JG0gLS1wYXJhbWV0ZXIg
+Yz0kYyAkQUNUSU9OICRWRVJCT1NFICRNWURJUg0KICAgIGRvbmUNCmRvbmUg
+PDxFT0YNCjEgMSAxDQoyIDEgMQ0KMyAyIDENCjMgMiAyDQozIDMgMg0KNCAx
+IDENCjQgMiAyDQo0IDMgMg0KNSAyIDENCjYgMyAyDQo2IDQgMg0KNiA0IDMN
+CjcgMiAxDQo4IDMgMg0KOCA0IDINCjggNCAzDQo5IDQgMg0KOSA1IDMNCjEy
+IDcgNA0KRU9GDQoNCkJlc3QgcmVnYXJkcywNClRha2VzaGkgTWl5YW1hZQ0K
+DQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogTG9pYyBEYWNo
+YXJ5IFttYWlsdG86bG9pY0BkYWNoYXJ5Lm9yZ10NClNlbnQ6IEZyaWRheSwg
+SmFudWFyeSAyMywgMjAxNSAxMDo0NyBQTQ0KVG86IE1peWFtYWUsIFRha2Vz
+aGkv5a6u5YmNIOWJmw0KQ2M6IENlcGggRGV2ZWxvcG1lbnQ7IFNoaW96YXdh
+LCBLZW5zdWtlL+WhqeayoiDos6LovJQ7IE5ha2FvLCBUYWthbm9yaS/kuK3l
+sL4g6be56KmUDQpTdWJqZWN0OiBSZTogRGVhZGxpbmUgb2YgR2l0aHViIHB1
+bGwgcmVxdWVzdCBmb3IgSGFtbWVyIHJlbGVhc2UgKHF1ZXN0aW9uKQ0KDQpI
+aSwNCg0KTm90ZSB0aGF0IHlvdSBhbHNvIG5lZWQgdG8gdXBkYXRlIA0KDQpo
+dHRwczovL2dpdGh1Yi5jb20vZGFjaGFyeS9jZXBoLWVyYXN1cmUtY29kZS1j
+b3JwdXMvYmxvYi9tYXN0ZXIvdjAuODUtNzY0LWdmM2ExNTMyL25vbi1yZWdy
+ZXNzaW9uLnNoDQoNCnRvIGluY2x1ZGUgbm9uIHJlZ3Jlc3Npb24gdGVzdHMg
+Zm9yIHRoZSBtb3N0IGNvbW1vbiBjYXNlcyBvZiB0aGUgU0hFQyBwbHVnaW4g
+ZW5jb2RpbmcgLyBkZWNvZGluZy4gVGhpcyBpcyBydW4gYnkgbWFrZSBjaGVj
+ayAodGhpcyByZXBvc2l0b3J5IGlzIGEgc3VibW9kdWxlIG9mIENlcGgpLiBJ
+dCBoZWxwcyBtYWtlIHN1cmUgdGhhdCBjb250ZW50IGVuY29kZWQgLyBkZWNv
+ZGVkIHdpdGggYSBnaXZlbiB2ZXJzaW9uIG9mIHRoZSBwbHVnaW4gY2FuIGJl
+IGVuY29kZWQgLyBkZWNvZGVkIGV4YWN0bHkgaW4gdGhlIHNhbWUgd2F5IGJ5
+IGFsbCBmdXR1cmUgdmVyc2lvbnMuDQoNCkNoZWVycw0KDQpPbiAwNi8wMS8y
+MDE1IDEyOjQ5LCBNaXlhbWFlLCBUYWtlc2hpIHdyb3RlOg0KPiBEZWFyIExv
+aWMsDQo+IA0KPiBJJ20gVGFrZXNoaSBNaXlhbWFlLCBvbmUgb2YgdGhlIGF1
+dGhvcnMgb2YgU0hFQydzIGJsdWVwcmludC4NCj4gDQo+IFNoaW5nbGVkIEVy
+YXN1cmUgQ29kZSAoU0hFQykNCj4gaHR0cHM6Ly93aWtpLmNlcGguY29tL1Bs
+YW5uaW5nL0JsdWVwcmludHMvSGFtbWVyL1NoaW5nbGVkX0VyYXN1cmVfQ29k
+ZQ0KPiBfKFNIRUMpDQo+IA0KPiBXZSBoYXZlIHJldmlzZWQgb3VyIGJsdWVw
+cmludCBzaG93biBpbiB0aGUgbGFzdCBDRFMgdG8gZXh0ZW5kIG91ciANCj4g
+ZXJhc3VyZSBjb2RlIGxheW91dHMgYW5kIGRlc2NyaWJlIHRoZSBndWlkZWxp
+bmUgZm9yIGNob29zaW5nIFNIRUMgYW1vbmcgdmFyaW91cyBFQyBwbHVnaW5z
+Lg0KPiBXZSBiZWxpZXZlIHRoZSBibHVlcHJpbnQgbm93IGFuc3dlcnMgYWxs
+IHRoZSBjb21tZW50cyBnaXZlbiBhdCB0aGUgQ0RTLg0KPiANCj4gSW4gYWRk
+aXRpb24sIHdlIHdvdWxkIGxpa2UgdG8gYXNrIGZvciB5b3VyIGFkdmljZSBv
+biB0aGUgc2NoZWR1bGUgb2YgDQo+IG91ciBnaXRodWIgcHVsbCByZXF1ZXN0
+LiBNb3JlIHNwZWNpZmljYWxseSwgd2Ugd291bGQgbGlrZSB0byBrbm93IGl0
+cyANCj4gZGVhZGxpbmUgZm9yIEhhbW1lciByZWxlYXNlLg0KPiAoQXMgd2Ug
+aGF2ZSBub3QgcmVhbGx5IGNvbXBsZXRlZCBvdXIgdmVyaWZpY2F0aW9uIG9m
+IFNIRUMsIHdlIGFyZSANCj4gd29uZGVyaW5nIGlmIHdlIHNob3VsZCBtYWtl
+IGl0IG9wZW4gZm9yIGVhcmx5IHByZXZpZXcuKQ0KPiANCj4gVGhhbmsgeW91
+IGluIGFkdmFuY2UsDQo+IFRha2VzaGkgTWl5YW1hZQ0KPiANCj4gLS0NCj4g
+VG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUg
+InVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIA0KPiBpbiB0aGUgYm9keSBvZiBh
+IG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1h
+am9yZG9tbyANCj4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9t
+YWpvcmRvbW8taW5mby5odG1sDQo+IA0KDQotLQ0KTG/Dr2MgRGFjaGFyeSwg
+QXJ0aXNhbiBMb2dpY2llbCBMaWJyZQ0KDQo=
