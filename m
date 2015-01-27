@@ -1,127 +1,171 @@
-From: Alex Elder <elder@ieee.org>
-Subject: Re: [PATCH 3/3] rbd: do not treat standalone as flatten
-Date: Mon, 26 Jan 2015 21:55:19 -0600
-Message-ID: <54C70C27.6000301@ieee.org>
-References: <1421757669-38796-1-git-send-email-idryomov@redhat.com> <1421757669-38796-4-git-send-email-idryomov@redhat.com>
+From: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
+Subject: RE: idempotent op (esp delete)
+Date: Tue, 27 Jan 2015 06:11:18 +0000
+Message-ID: <06E7D85B3BA36C4DB207FEDE871C5348979B27@SHSMSX101.ccr.corp.intel.com>
+References: <alpine.DEB.2.00.1501231327570.10173@cobra.newdream.net>
+ <CAC6JEv8iKG=uBcojtZ-KwWVGjd75SdYm05YOwdtm_H2TZi1-2g@mail.gmail.com>
+ <alpine.DEB.2.00.1501231415040.19192@cobra.newdream.net>
+ <06E7D85B3BA36C4DB207FEDE871C5348979944@SHSMSX101.ccr.corp.intel.com>
+ <06E7D85B3BA36C4DB207FEDE871C5348979991@SHSMSX101.ccr.corp.intel.com>
+ <alpine.DEB.2.00.1501260917541.3895@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f172.google.com ([209.85.223.172]:63618 "EHLO
-	mail-ie0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751236AbbA0DzV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 26 Jan 2015 22:55:21 -0500
-Received: by mail-ie0-f172.google.com with SMTP id rd18so12882383iec.3
-        for <ceph-devel@vger.kernel.org>; Mon, 26 Jan 2015 19:55:20 -0800 (PST)
-In-Reply-To: <1421757669-38796-4-git-send-email-idryomov@redhat.com>
+Received: from mga09.intel.com ([134.134.136.24]:22861 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750917AbbA0GL1 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Jan 2015 01:11:27 -0500
+In-Reply-To: <alpine.DEB.2.00.1501260917541.3895@cobra.newdream.net>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@redhat.com>, ceph-devel@vger.kernel.org
-Cc: Alex Elder <elder@linaro.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Gregory Farnum <greg@gregs42.com>
 
-On 01/20/2015 06:41 AM, Ilya Dryomov wrote:
-> If the clone is resized down to 0, it becomes standalone.  If such
-> resize is carried over while an image is mapped we would detect this
-> and call rbd_dev_parent_put() which means "let go of all parent state,
-> including the spec(s) of parent images(s)".  This leads to a mismatch
-> between "rbd info" and sysfs parent fields, so a fix is in order.
-> 
->     # rbd create --image-format 2 --size 1 foo
->     # rbd snap create foo@snap
->     # rbd snap protect foo@snap
->     # rbd clone foo@snap bar
->     # DEV=$(rbd map bar)
->     # rbd resize --allow-shrink --size 0 bar
->     # rbd resize --size 1 bar
->     # rbd info bar | grep parent
->             parent: rbd/foo@snap
-> 
-> Before:
-> 
->     # cat /sys/bus/rbd/devices/0/parent
->     (no parent image)
-> 
-> After:
-> 
->     # cat /sys/bus/rbd/devices/0/parent
->     pool_id 0
->     pool_name rbd
->     image_id 10056b8b4567
->     image_name foo
->     snap_id 2
->     snap_name snap
->     overlap 0
-> 
-> Signed-off-by: Ilya Dryomov <idryomov@redhat.com>
+Not sure if it is correct, but below is my understanding. Correct me if I'm wrong.
 
-Hmm.  Interesting.
+Yes, in the current code, a hash lookup on each IO is used to check dup op. But when adding extra_reqids as a log entry in the pg_log, 2 hash lookups may be not sufficient. The extra_reqids is organized by object id as in your code. We may have other ops on an object just promoted. If a dup op comes in after these ops, then we have to search for log entries of this object in pg_log.
 
-I think that a parent with an overlap of 0 is of no
-real use.  So in the last patch I was suggesting it
-should just go away.
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
+Sent: Tuesday, January 27, 2015 1:21 AM
+To: Wang, Zhiqiang
+Cc: ceph-devel@vger.kernel.org; Gregory Farnum
+Subject: RE: idempotent op (esp delete)
 
-But now, looking at it from this perspective, the fact
-that an image *came from* a particular parent, but which
-has no more overlap, could be useful information.  The
-parent shouldn't simply go away without the user requesting
-that.
+On Mon, 26 Jan 2015, Wang, Zhiqiang wrote:
+> The downside of this approach is that we may need to search the pg_log 
+> for a specific object in every write io?
 
-I haven't completely followed through the logic of keeping
-the reference around but I understand what you're doing and
-it looks OK to me.
+Not quite.  IndexedLog maintains a hash_map of all of the request ids in the log, so it's just a hash lookup on each IO.  (Well, now 2 hash lookups, because I put the additional request IDs in a second auxilliary map to handle dups properly.  I think we can avoid that lookup if we use the request flags carefully, though.. the RETRY and REDIRECTED flags I think?  Need to check carefully.)
 
-Reviewed-by: Alex Elder <elder@linaro.org>
+> Maybe we can combine this
+> approach and the changes in PR 3447. For the flush case when the 
+> object is deleted in the base, we search the pg_log for dup op. This 
+> should be rare cases. Otherwise the object exists, we check the reqid 
+> list in the object_info_t for dup op.
 
-> ---
->  drivers/block/rbd.c | 30 ++++++++++--------------------
->  1 file changed, 10 insertions(+), 20 deletions(-)
+We could do a hybrid approach, but there is some cost to the per-object
+tracking: a tiny bit more memory, and an O(n) search of the items in that list (~10 or 20?) for the dup check.  I suspect the hash lookup is cheaper?  And simpler.
+
+sage
+
+
 > 
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index b85d52005a21..e818c2a6ffb1 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -4273,32 +4273,22 @@ static int rbd_dev_v2_parent_info(struct rbd_device *rbd_dev)
->  	}
->  
->  	/*
-> -	 * We always update the parent overlap.  If it's zero we
-> -	 * treat it specially.
-> +	 * We always update the parent overlap.  If it's zero we issue
-> +	 * a warning, as we will proceed as if there was no parent.
->  	 */
-> -	rbd_dev->parent_overlap = overlap;
->  	if (!overlap) {
-> -
-> -		/* A null parent_spec indicates it's the initial probe */
-> -
->  		if (parent_spec) {
-> -			/*
-> -			 * The overlap has become zero, so the clone
-> -			 * must have been resized down to 0 at some
-> -			 * point.  Treat this the same as a flatten.
-> -			 */
-> -			rbd_dev_parent_put(rbd_dev);
-> -			pr_info("%s: clone image now standalone\n",
-> -				rbd_dev->disk->disk_name);
-> +			/* refresh, careful to warn just once */
-> +			if (rbd_dev->parent_overlap)
-> +				rbd_warn(rbd_dev,
-> +				    "clone now standalone (overlap became 0)");
->  		} else {
-> -			/*
-> -			 * For the initial probe, if we find the
-> -			 * overlap is zero we just pretend there was
-> -			 * no parent image.
-> -			 */
-> -			rbd_warn(rbd_dev, "ignoring parent with overlap 0");
-> +			/* initial probe */
-> +			rbd_warn(rbd_dev, "clone is standalone (overlap 0)");
->  		}
->  	}
-> +	rbd_dev->parent_overlap = overlap;
-> +
->  out:
->  	ret = 0;
->  out_err:
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org 
+> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Wang, Zhiqiang
+> Sent: Monday, January 26, 2015 10:35 AM
+> To: Sage Weil; Gregory Farnum
+> Cc: ceph-devel@vger.kernel.org
+> Subject: RE: idempotent op (esp delete)
 > 
-
+> This method puts the reqid list in the pg_log instead of the object_info_t, so that it's preserved even in the delete case, which sounds more reasonable.
+> 
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org 
+> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
+> Sent: Saturday, January 24, 2015 6:19 AM
+> To: Gregory Farnum
+> Cc: ceph-devel@vger.kernel.org
+> Subject: Re: idempotent op (esp delete)
+> 
+> On Fri, 23 Jan 2015, Gregory Farnum wrote:
+> > On Fri, Jan 23, 2015 at 1:43 PM, Sage Weil <sweil@redhat.com> wrote:
+> > > Background:
+> > >
+> > > 1) Way back when we made a task that would thrash the cache modes 
+> > > by adding and removing the cache tier while ceph_test_rados was running.
+> > > This mostly worked, but would occasionally fail because we would
+> > >
+> > >  - delete an object from the cache tier
+> > >  - a network failure injection would lose the reply
+> > >  - we'd disable the cache
+> > >  - the delete would resend to the base tier, not get recognized as 
+> > > a dup (different pool, different pg log)
+> > >    -> -ENOENT instead of 0
+> > >
+> > > 2) The proxy write code hits a similar problem:
+> > >
+> > >  - delete gets proxied
+> > >  - we initiate async promote
+> > >  - a network failure injection loses the delete reply
+> > >  - delete resends and blocks on promote (or arrives after it
+> > > finishes)
+> > >  - promote finishes
+> > >  - delete is handled
+> > >   -> -ENOENT instead of 0
+> > >
+> > > The ticket is http://tracker.ceph.com/issues/8935
+> > >
+> > > The problem is partially addressed by
+> > >
+> > >         https://github.com/ceph/ceph/pull/3447
+> > >
+> > > by logging a few request ids on every object_info_t and preserving 
+> > > that on promote and flush.
+> > >
+> > > However, it doesn't solve the problem for delete because we throw 
+> > > out object_info_t so that reqid_t is lost.
+> > >
+> > > I think we have two options, not necessarily mutually exclusive:
+> > >
+> > > 1) When promoting an object that doesn't exist (to create a 
+> > > whiteout), pull reqids out of the base tier's pg log so that the 
+> > > whiteout is primed with request ids.
+> > >
+> > > 1.5) When flushing... well, that is harder because we have nowhere 
+> > > to put the reqids.  Unless we make a way to cram a list of reqid's 
+> > > into a single PG log entry...?  In that case, we wouldn't strictly 
+> > > need the per-object list since we could pile the base tier's 
+> > > reqids into the promote log entry in the cache tier.
+> > >
+> > > 2) Make delete idempotent (0 instead of ENOENT if the object 
+> > > doesn't exist).  This will require a delicate compat transition 
+> > > (let's ignore that a moment) but you can preserve the old behavior 
+> > > for callers that care by preceding the delete with an assert_exists op.
+> > > Most callers don't care, but a handful do.  This simplifies the 
+> > > semantics we need to support going forward.
+> > >
+> > > Of course, it's all a bit delicate.  The idempotent op semantics 
+> > > have a time horizon so it's all a bit wishy-washy... :/
+> > >
+> > > Thoughts?
+> > 
+> > Do we have other cases that we're worried about which would be 
+> > improved by maintaining reqids across pool cache transitions? I'm 
+> > not a big fan of maintaining those per-op lists (they sound really 
+> > expensive?), but if we need them for something else that's a point 
+> > in their favor.
+> 
+> I don't think they're *too* expensive (say, vector of 20 per object_info_t?).  But the only thing I can think of beyond the cache tiering stuff would be cases where the pg log isnt long enough for a very laggy client.  In general ops will be distributed across ops so it will be catch the dup from another angle.
+> 
+> However.. I just hacked up a patch that lets us cram lots of reqids into a single pg_log_entry_t and I think that may be a simpler solution.  We can cram all reqids (for the last N of them) for promote and flush into the single log entry and the delete is no longer special.. it'd work equally well for other dups and for class methods that do who knows what.  The patch is here:
+> 
+> 	https://github.com/liewegas/ceph/commit/wip-pg-reqids
+> 
+> What do you think?
+> 
+> > We could make delete idempotent instead and that's what I initially 
+> > favor, but it also seems a bit scary (it's not like our operations 
+> > can be made idempotent; lots of them invoke classes that will differ 
+> > or
+> > whatever!) and I can't think of which callers might care so I'm 
+> > having trouble formulating the bounds of this solution.
+> 
+> Yeah, it seems like an easier endpoint but a dangerous path to get there...
+> 
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> in the body of a message to majordomo@vger.kernel.org More majordomo 
+> info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> in the body of a message to majordomo@vger.kernel.org More majordomo 
+> info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
