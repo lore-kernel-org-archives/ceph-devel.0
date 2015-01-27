@@ -1,152 +1,92 @@
 From: Alex Elder <elder@ieee.org>
-Subject: Re: [PATCH 1/3] rbd: fix rbd_dev_parent_get() when parent_overlap
- == 0
-Date: Mon, 26 Jan 2015 21:14:44 -0600
-Message-ID: <54C702A4.9030900@ieee.org>
-References: <1421757669-38796-1-git-send-email-idryomov@redhat.com> <1421757669-38796-2-git-send-email-idryomov@redhat.com>
+Subject: Re: [PATCH 2/3] rbd: drop parent_ref in rbd_dev_unprobe() unconditionally
+Date: Mon, 26 Jan 2015 21:40:36 -0600
+Message-ID: <54C708B4.1070804@ieee.org>
+References: <1421757669-38796-1-git-send-email-idryomov@redhat.com> <1421757669-38796-3-git-send-email-idryomov@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f171.google.com ([209.85.223.171]:33155 "EHLO
-	mail-ie0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757583AbbA0DOr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 26 Jan 2015 22:14:47 -0500
-Received: by mail-ie0-f171.google.com with SMTP id tr6so12818238ieb.2
-        for <ceph-devel@vger.kernel.org>; Mon, 26 Jan 2015 19:14:46 -0800 (PST)
-In-Reply-To: <1421757669-38796-2-git-send-email-idryomov@redhat.com>
+Received: from mail-ig0-f180.google.com ([209.85.213.180]:53047 "EHLO
+	mail-ig0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750917AbbA0Dki (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 26 Jan 2015 22:40:38 -0500
+Received: by mail-ig0-f180.google.com with SMTP id b16so2487628igk.1
+        for <ceph-devel@vger.kernel.org>; Mon, 26 Jan 2015 19:40:38 -0800 (PST)
+In-Reply-To: <1421757669-38796-3-git-send-email-idryomov@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Ilya Dryomov <idryomov@redhat.com>, ceph-devel@vger.kernel.org
 Cc: Alex Elder <elder@linaro.org>
 
 On 01/20/2015 06:41 AM, Ilya Dryomov wrote:
-> The comment for rbd_dev_parent_get() said
+> This effectively reverts the last hunk of 392a9dad7e77 ("rbd: detect
+> when clone image is flattened").
 > 
->     * We must get the reference before checking for the overlap to
->     * coordinate properly with zeroing the parent overlap in
->     * rbd_dev_v2_parent_info() when an image gets flattened.  We
->     * drop it again if there is no overlap.
+> The problem with parent_overlap != 0 condition is that it's possible
+> and completely valid to have an image with parent_overlap == 0 whose
+> parent state needs to be cleaned up on unmap.  The next commit, which
+> drops the "clone image now standalone" logic, opens up another window
+> of opportunity to hit this, but even without it
 > 
-> but the "drop it again if there is no overlap" part was missing from
-> the implementation.  This lead to absurd parent_ref values for images
-> with parent_overlap == 0, as parent_ref was incremented for each
-> img_request and virtually never decremented.
+>     # cat parent-ref.sh
+>     #!/bin/bash
+>     rbd create --image-format 2 --size 1 foo
+>     rbd snap create foo@snap
+>     rbd snap protect foo@snap
+>     rbd clone foo@snap bar
+>     rbd resize --allow-shrink --size 0 bar
+>     rbd resize --size 1 bar
+>     DEV=$(rbd map bar)
+>     rbd unmap $DEV
+> 
+> leaves rbd_device/rbd_spec/etc and rbd_client along with ceph_client
+> hanging around.
 
-You're right about this.  If the image had a parent with no
-overlap this would leak a reference to the parent image.  The
-code should have said:
+I'm not sure why the last reference to the parent
+doesn't get dropped (and state cleaned up) as soon
+as the overlap becomes 0.  I suspect it's the original
+reference taken when there's a parent, we don't get
+rid of it until it's torn down.  (I think we should.)
 
-	counter = atomic_inc_return_safe(&rbd_dev->parent_ref);
-	if (counter > 0) {
-		if (rbd_dev->parent_overlap)
-			return true;
-		atomic_dec(&rbd_dev->parent_ref);
-	} else if (counter < 0) {
- 		rbd_warn(rbd_dev, "parent reference overflow");
-	}
-
-> Fix this by leveraging the fact that refresh path calls
-> rbd_dev_v2_parent_info() under header_rwsem and use it for read in
-> rbd_dev_parent_get(), instead of messing around with atomics.  Get rid
-> of barriers in rbd_dev_v2_parent_info() while at it - I don't see what
-> they'd pair with now and I suspect we are in a pretty miserable
-> situation as far as proper locking goes regardless.
-
-The point of the memory barrier was to ensure that when parent_overlap
-gets zeroed, this code sees the zero rather than the old non-zero
-value.  The atomic_inc_return_safe() call has an implicit memory
-barrier to match the smp_mb() call.  It allowed the synchronization
-to occur without the use of a lock.
-
-We're trying to atomically determine whether an image request needs
-to be marked as layered, to know how to handle ENOENT on parent reads.
-If it is a write to an image with a parent having a non-zero overlap,
-it's layered, otherwise we can treat it as a simple request.
-
-I think in this particular case, this is just an optimization,
-trying very hard to avoid having to do layered image handling
-if the parent has become flattened.  I think that even if it
-got old information (suggesting non-zero overlap) things would
-behave correctly, just less efficiently.
-
-Using the semaphore adds a lock to this path and therefore
-implements whatever barriers are being removed.  I'm not
-sure how often this is hit--maybe the optimization isn't
-buying much after all.
-
-I am getting a little rusty on some of details of what
-precisely happens when a layered image gets flattened.
-But I think this looks OK.  Maybe just watch for small
-(perhaps insignificant) performance regressions with
-this change in place...
+It seems to me the test here should be for a non-null
+parent_spec pointer rather than non-zero parent_overlap.
+And that's done inside rbd_dev_parent_put(), so your
+change looks reasonable to me.
 
 Reviewed-by: Alex Elder <elder@linaro.org>
 
+> 
+> My thinking behind calling rbd_dev_parent_put() unconditionally is that
+> there shouldn't be any requests in flight at that point in time as we
+> are deep into unmap sequence.  Hence, even if rbd_dev_unparent() caused
+> by flatten is delayed by in-flight requests, it will have finished by
+> the time we reach rbd_dev_unprobe() caused by unmap, thus turning
+> unconditional rbd_dev_parent_put() into a no-op.
+> 
+> Fixes: http://tracker.ceph.com/issues/10352
+> 
 > Cc: stable@vger.kernel.org # 3.11+
 > Signed-off-by: Ilya Dryomov <idryomov@redhat.com>
 > ---
->  drivers/block/rbd.c | 20 ++++++--------------
->  1 file changed, 6 insertions(+), 14 deletions(-)
+>  drivers/block/rbd.c | 5 +----
+>  1 file changed, 1 insertion(+), 4 deletions(-)
 > 
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 31fa00f0d707..2990a1c75159 100644
+> index 2990a1c75159..b85d52005a21 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -2098,32 +2098,26 @@ static void rbd_dev_parent_put(struct rbd_device *rbd_dev)
->   * If an image has a non-zero parent overlap, get a reference to its
->   * parent.
->   *
-> - * We must get the reference before checking for the overlap to
-> - * coordinate properly with zeroing the parent overlap in
-> - * rbd_dev_v2_parent_info() when an image gets flattened.  We
-> - * drop it again if there is no overlap.
-> - *
->   * Returns true if the rbd device has a parent with a non-zero
->   * overlap and a reference for it was successfully taken, or
->   * false otherwise.
->   */
->  static bool rbd_dev_parent_get(struct rbd_device *rbd_dev)
+> @@ -5075,10 +5075,7 @@ static void rbd_dev_unprobe(struct rbd_device *rbd_dev)
 >  {
-> -	int counter;
-> +	int counter = 0;
+>  	struct rbd_image_header	*header;
 >  
->  	if (!rbd_dev->parent_spec)
->  		return false;
->  
-> -	counter = atomic_inc_return_safe(&rbd_dev->parent_ref);
-> -	if (counter > 0 && rbd_dev->parent_overlap)
-> -		return true;
+> -	/* Drop parent reference unless it's already been done (or none) */
 > -
-> -	/* Image was flattened, but parent is not yet torn down */
-> +	down_read(&rbd_dev->header_rwsem);
-> +	if (rbd_dev->parent_overlap)
-> +		counter = atomic_inc_return_safe(&rbd_dev->parent_ref);
-> +	up_read(&rbd_dev->header_rwsem);
+> -	if (rbd_dev->parent_overlap)
+> -		rbd_dev_parent_put(rbd_dev);
+> +	rbd_dev_parent_put(rbd_dev);
 >  
->  	if (counter < 0)
->  		rbd_warn(rbd_dev, "parent reference overflow");
+>  	/* Free dynamic fields from the header, then zero it out */
 >  
-> -	return false;
-> +	return counter > 0;
->  }
->  
->  /*
-> @@ -4238,7 +4232,6 @@ static int rbd_dev_v2_parent_info(struct rbd_device *rbd_dev)
->  		 */
->  		if (rbd_dev->parent_overlap) {
->  			rbd_dev->parent_overlap = 0;
-> -			smp_mb();
->  			rbd_dev_parent_put(rbd_dev);
->  			pr_info("%s: clone image has been flattened\n",
->  				rbd_dev->disk->disk_name);
-> @@ -4284,7 +4277,6 @@ static int rbd_dev_v2_parent_info(struct rbd_device *rbd_dev)
->  	 * treat it specially.
->  	 */
->  	rbd_dev->parent_overlap = overlap;
-> -	smp_mb();
->  	if (!overlap) {
->  
->  		/* A null parent_spec indicates it's the initial probe */
 > 
 
