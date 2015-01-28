@@ -1,12 +1,12 @@
-From: Eric Eastman <eric.eastman-yfee5r9JHcEqDJ6do+/SaQ@public.gmane.org>
+From: Gregory Farnum <greg-3KCAGdo1P2hBDgjK7y7TUQ@public.gmane.org>
 Subject: Re: chattr +i not working with cephfs
-Date: Wed, 28 Jan 2015 08:38:37 -0700
-Message-ID: <CA+9C14ZU-oUg9mqjJe1PaXTNcyUnuBnYXYjd5zFuDaG8MXs_Eg@mail.gmail.com>
+Date: Wed, 28 Jan 2015 09:23:43 -0800
+Message-ID: <CAC6JEv_cNro4iNZSxX=n+T6Zp60mEXY+0iJzh4HT-p9+6bizGA@mail.gmail.com>
 References: <CA+9C14YA03rUAWs8N9kyPNJWyC3hBmo6SPwoLdOAe4CGA4HY9w@mail.gmail.com>
 	<CAGd4Wr3f5+w4Aqv8RAcPHeJWhWwTF-yXpfQGnjkQ9fF6D7dPgw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 In-Reply-To: <CAGd4Wr3f5+w4Aqv8RAcPHeJWhWwTF-yXpfQGnjkQ9fF6D7dPgw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
@@ -22,55 +22,45 @@ To: John Spray <john.spray-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Cc: Ceph Users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-Thank you for the reply.  This is a feature that we would like to see.
-Should I write a cephfs tracker report on this as a possible future
-enhancement?
-
-On Wed, Jan 28, 2015 at 6:24 AM, John Spray <john.spray-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> We don't implement the GETFLAGS and SETFLAGS ioctls used for +i.
->
-> Adding the ioctls is pretty easy, but then we need somewhere to put
-> the flags.  Currently we don't store a "flags" attribute on inodes,
-> but maybe we could borrow the high bits of the mode attribute for this
-> if we wanted to implement it?
->
-> CCing ceph-devel to see if Sage/Greg can offer any more background.
->
-> John
->
-> On Wed, Jan 28, 2015 at 1:24 AM, Eric Eastman
-> <eric.eastman-yfee5r9JHcEqDJ6do+/SaQ@public.gmane.org> wrote:
->> Should chattr +i  work with cephfs?
->>
->> Using ceph v0.91 and a 3.18 kernel on the CephFS client, I tried this:
->>
->> # mount | grep ceph
->> 172.16.30.10:/ on /cephfs/test01 type ceph (name=cephfs,key=client.cephfs)
->> # echo 1 > /cephfs/test01/test.1
->> # ls -l /cephfs/test01/test.1
->> -rw-r--r-- 1 root root 2 Jan 27 19:09 /cephfs/test01/test.1
->> # chattr +i /cephfs/test01/test.1
->> chattr: Inappropriate ioctl for device while reading flags on
->> /cephfs/test01/test.1
->>
->> I also tried it using the FUSE interface:
->>
->> # ceph-fuse -m 172.16.30.10 /cephfs/fuse01/
->> ceph-fuse[5326]: starting ceph client
->> 2015-01-27 19:54:59.002563 7f6f8fbcb7c0 -1 init, newargv = 0x2ec2be0
->> newargc=11
->> ceph-fuse[5326]: starting fuse
->> # mount | grep ceph
->> ceph-fuse on /cephfs/fuse01 type fuse.ceph-fuse
->> (rw,nosuid,nodev,allow_other,default_permissions)
->> # echo 1 > /cephfs/fuse01/test02.dat
->> # chattr +i   /cephfs/fuse01/test02.dat
->> chattr: Invalid argument while reading flags on /cephfs/fuse01/test02.dat
->>
->> Eric
->>
->> _______________________________________________
->> ceph-users mailing list
->> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
->> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>
+T24gV2VkLCBKYW4gMjgsIDIwMTUgYXQgNToyNCBBTSwgSm9obiBTcHJheSA8am9obi5zcHJheUBy
+ZWRoYXQuY29tPiB3cm90ZToKPiBXZSBkb24ndCBpbXBsZW1lbnQgdGhlIEdFVEZMQUdTIGFuZCBT
+RVRGTEFHUyBpb2N0bHMgdXNlZCBmb3IgK2kuCj4KPiBBZGRpbmcgdGhlIGlvY3RscyBpcyBwcmV0
+dHkgZWFzeSwgYnV0IHRoZW4gd2UgbmVlZCBzb21ld2hlcmUgdG8gcHV0Cj4gdGhlIGZsYWdzLiAg
+Q3VycmVudGx5IHdlIGRvbid0IHN0b3JlIGEgImZsYWdzIiBhdHRyaWJ1dGUgb24gaW5vZGVzLAo+
+IGJ1dCBtYXliZSB3ZSBjb3VsZCBib3Jyb3cgdGhlIGhpZ2ggYml0cyBvZiB0aGUgbW9kZSBhdHRy
+aWJ1dGUgZm9yIHRoaXMKPiBpZiB3ZSB3YW50ZWQgdG8gaW1wbGVtZW50IGl0Pwo+Cj4gQ0Npbmcg
+Y2VwaC1kZXZlbCB0byBzZWUgaWYgU2FnZS9HcmVnIGNhbiBvZmZlciBhbnkgbW9yZSBiYWNrZ3Jv
+dW5kLgoKQXMgZGlzY3Vzc2VkIGluIG91ciBtb3JuaW5nIHN0YW5kdXAsIHRoYXQgc2hvdWxkbid0
+IGNhdXNlIGFueSBpc3N1ZXMKdGhhdCB3ZSBjYW4gdGhpbmsgb2YuCgpNeSBjb25jZXJuIGlzIHdo
+ZXRoZXIgd2UgYXMgdGhlIEZTIGFyZSByZXNwb25zaWJsZSBmb3IgZG9pbmcgYW55dGhpbmcKbW9y
+ZSB0aGFuIHN0b3JpbmcgYW5kIHJldHVybmluZyB0aGF0IGltbXV0YWJsZSBmbGFnIOKAlCBhcmUg
+d2Ugc3VwcG9zZWQKdG8gYmxvY2sgd3JpdGVzIHRvIGFueXRoaW5nIHRoYXQgaGFzIGl0IHNldD8g
+VGhhdCBjb3VsZCBiZSBtdWNoCnRyaWNraWVyLi4uCgo+IEpvaG4KPgo+IE9uIFdlZCwgSmFuIDI4
+LCAyMDE1IGF0IDE6MjQgQU0sIEVyaWMgRWFzdG1hbgo+IDxlcmljLmVhc3RtYW5Aa2VlcGVydGVj
+aC5jb20+IHdyb3RlOgo+PiBTaG91bGQgY2hhdHRyICtpICB3b3JrIHdpdGggY2VwaGZzPwo+Pgo+
+PiBVc2luZyBjZXBoIHYwLjkxIGFuZCBhIDMuMTgga2VybmVsIG9uIHRoZSBDZXBoRlMgY2xpZW50
+LCBJIHRyaWVkIHRoaXM6Cj4+Cj4+ICMgbW91bnQgfCBncmVwIGNlcGgKPj4gMTcyLjE2LjMwLjEw
+Oi8gb24gL2NlcGhmcy90ZXN0MDEgdHlwZSBjZXBoIChuYW1lPWNlcGhmcyxrZXk9Y2xpZW50LmNl
+cGhmcykKPj4gIyBlY2hvIDEgPiAvY2VwaGZzL3Rlc3QwMS90ZXN0LjEKPj4gIyBscyAtbCAvY2Vw
+aGZzL3Rlc3QwMS90ZXN0LjEKPj4gLXJ3LXLigJRyLS0gMSByb290IHJvb3QgMiBKYW4gMjcgMTk6
+MDkgL2NlcGhmcy90ZXN0MDEvdGVzdC4xCj4+ICMgY2hhdHRyICtpIC9jZXBoZnMvdGVzdDAxL3Rl
+c3QuMQo+PiBjaGF0dHI6IEluYXBwcm9wcmlhdGUgaW9jdGwgZm9yIGRldmljZSB3aGlsZSByZWFk
+aW5nIGZsYWdzIG9uCj4+IC9jZXBoZnMvdGVzdDAxL3Rlc3QuMQo+Pgo+PiBJIGFsc28gdHJpZWQg
+aXQgdXNpbmcgdGhlIEZVU0UgaW50ZXJmYWNlOgo+Pgo+PiAjIGNlcGgtZnVzZSAtbSAxNzIuMTYu
+MzAuMTAgL2NlcGhmcy9mdXNlMDEvCj4+IGNlcGgtZnVzZVs1MzI2XTogc3RhcnRpbmcgY2VwaCBj
+bGllbnQKPj4gMjAxNS0wMS0yNyAxOTo1NDo1OS4wMDI1NjMgN2Y2ZjhmYmNiN2MwIC0xIGluaXQs
+IG5ld2FyZ3YgPSAweDJlYzJiZTAKPj4gbmV3YXJnYz0xMQo+PiBjZXBoLWZ1c2VbNTMyNl06IHN0
+YXJ0aW5nIGZ1c2UKPj4gIyBtb3VudCB8IGdyZXAgY2VwaAo+PiBjZXBoLWZ1c2Ugb24gL2NlcGhm
+cy9mdXNlMDEgdHlwZSBmdXNlLmNlcGgtZnVzZQo+PiAocncsbm9zdWlkLG5vZGV2LGFsbG93X290
+aGVyLGRlZmF1bHRfcGVybWlzc2lvbnMpCj4+ICMgZWNobyAxID4gL2NlcGhmcy9mdXNlMDEvdGVz
+dDAyLmRhdAo+PiAjIGNoYXR0ciAraSAgIC9jZXBoZnMvZnVzZTAxL3Rlc3QwMi5kYXQKPj4gY2hh
+dHRyOiBJbnZhbGlkIGFyZ3VtZW50IHdoaWxlIHJlYWRpbmcgZmxhZ3Mgb24gL2NlcGhmcy9mdXNl
+MDEvdGVzdDAyLmRhdAo+Pgo+PiBFcmljCj4+Cj4+IF9fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fCj4+IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0Cj4+IGNlcGgt
+dXNlcnNAbGlzdHMuY2VwaC5jb20KPj4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNn
+aS9jZXBoLXVzZXJzLWNlcGguY29tCj4+Cj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX18KPiBjZXBoLXVzZXJzIG1haWxpbmcgbGlzdAo+IGNlcGgtdXNlcnNA
+bGlzdHMuY2VwaC5jb20KPiBodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgt
+dXNlcnMtY2VwaC5jb20KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpo
+dHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
