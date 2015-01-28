@@ -1,94 +1,116 @@
 From: "Blinick, Stephen L" <stephen.l.blinick@intel.com>
-Subject: RE: wip-auth
-Date: Wed, 28 Jan 2015 01:10:33 +0000
-Message-ID: <3649A15A2562B54294DE14BCE5AC79120AB4EF7A@FMSMSX106.amr.corp.intel.com>
-References: <alpine.DEB.2.00.1501221512580.19192@cobra.newdream.net>
- <3649A15A2562B54294DE14BCE5AC79120AB43257@ORSMSX152.amr.corp.intel.com>
- <alpine.DEB.2.00.1501260921250.3895@cobra.newdream.net>
- <3649A15A2562B54294DE14BCE5AC79120AB4E6A6@FMSMSX106.amr.corp.intel.com>
- <54C6847D.4080300@redhat.com>
+Subject: RE: Memstore performance improvements v0.90 vs v0.87
+Date: Wed, 28 Jan 2015 01:23:40 +0000
+Message-ID: <3649A15A2562B54294DE14BCE5AC79120AB4EF94@FMSMSX106.amr.corp.intel.com>
+References: <3649A15A2562B54294DE14BCE5AC79120AB30A5D@FMSMSX106.amr.corp.intel.com>
+ <3649A15A2562B54294DE14BCE5AC79120AB30EEA@FMSMSX106.amr.corp.intel.com>
+ <54B6F103.9000708@redhat.com>
+ <3649A15A2562B54294DE14BCE5AC79120AB31012@FMSMSX106.amr.corp.intel.com>
+ <54C7FD1C.40406@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:55811 "EHLO mga03.intel.com"
+Received: from mga11.intel.com ([192.55.52.93]:39391 "EHLO mga11.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753514AbbA1BKg convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Jan 2015 20:10:36 -0500
-In-Reply-To: <54C6847D.4080300@redhat.com>
+	id S1751856AbbA1BXn convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Jan 2015 20:23:43 -0500
+In-Reply-To: <54C7FD1C.40406@redhat.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "mnelson@redhat.com" <mnelson@redhat.com>, Sage Weil <sweil@redhat.com>
-Cc: "andreas.bluemle@itxperts.de" <andreas.bluemle@itxperts.de>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "mnelson@redhat.com" <mnelson@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Mark --  it doesn't, but it helps explain why there's some variance in all the various measurements.  I've only been running with the various debug settings off, but message signing, crc, authentication, etc at defaults.     I know some of the other results are with everything off, and that seems to have a large impact. 
+Hi Mark --thanks for the detailed description!  Here's my latency #'s (local ping) on identical hardware 
 
-Somewhere when switching versions, libnss became default, and so I was comparing RHEL7 w/ libnss to Ubuntu w/ Cryptopp.   When I switched to Cryptopp with RHEL7 below the numbers in my environment improved again. 
+Ubuntu 14.04LTS:  rtt min/avg/max/mdev    0.025/0.026/0.030/0.005 ms
+RHEL7:                        rtt min/avg/max/mdev    0.008/0.009/0.022/0.003ms
 
-However, since libnss is the direction, I'll stick to that (and hopefully make back those improvements and more in the latest wip-auth commits).
+So I am seeing a similar network stack latency difference.   Also, all the tests I did were with 'debug off' (but with other things such as message signing, crc. ) .  Maybe we could have a quick discussion on what settings are best to use when trying to get comparable numbers with memstore or all-flash setups.
 
-Seems complex enough it's worth talking through verbally :)
+As far as the high concurrency test goes, that peak # of IOPS will be reached at lower concurrency (something around like t=8 probably), and at that point (the 'knee' of the latency/throughput curve), there's a pretty substantial latency difference.     Once it gets to t=256 I imagine the latency was 10+ms for both platforms.  
+
+Since the last direct comparison was on older code, and the mixing of libnss/cryptopp in the builds, I think I need to rerun the comparison(at least one last time!) between the two distro's on a more recent version of code.
 
 Thanks,
-
 
 Stephen
 
 
+
 -----Original Message-----
 From: Mark Nelson [mailto:mark.nelson@inktank.com] 
-Sent: Monday, January 26, 2015 11:16 AM
-To: Blinick, Stephen L; Sage Weil
-Cc: andreas.bluemle@itxperts.de; ceph-devel@vger.kernel.org
-Subject: Re: wip-auth
+Sent: Tuesday, January 27, 2015 2:03 PM
+To: Blinick, Stephen L; Ceph Development
+Subject: Re: Memstore performance improvements v0.90 vs v0.87
 
 Hi Stephen,
 
-Does this explain the results you were seeing earlier with the memstore testing?
+Took a little longer than I wanted it to, but I finally got some results looking at RHEL7 and Ubuntu 14.04 in our test lab.  This is with a recent master pull.
+
+Tests are with rados bench to a single memstore OSD on localhost.
+
+Single Op Avg Write Latency:
+
+Ubuntu 14.04:            0.91ms
+Ubuntu 14.04 (no debug): 0.67ms
+RHEL 7:                  0.49ms
+RHEL 7 (no debug):       0.31ms
+
+Single Op Avg read Latency:
+
+Ubuntu 14.04:            0.58ms
+Ubuntu 14.04 (no debug): 0.33ms
+RHEL 7:                  0.32ms
+RHEL 7 (no debug):       0.17ms
+
+I then checked avg network latency to localhost using ping for 120s:
+
+Ubuntu 14.04: 0.025ms
+RHEL 7:       0.015ms
+
+So looking at your results, I see similar latency numbers, though not quite as dramatic (ie  Ubuntu isn't quite so bad).  I wanted to know if the latency would be hidden if enough IOs were thrown at the problem so I increased concurrent IOs to 256:
+
+256 concurrent op Write IOPS:
+
+Ubuntu 14.04:             7199 IOPS
+Ubuntu 14.04 (no debug): 14613 IOPS
+RHEL 7:                   7784 IOPS
+REHL 7 (no debug):       17907 IOPS
+
+256 concurrent op Read IOPS:
+
+Ubuntu 14.04:             9887 IOPS
+Ubuntu 14.04 (no debug): 20489 IOPS
+RHEL 7:                  10832 IOPS
+REHL 7 (no debug):       21257 IOPS
+
+So on one hand I'm seeing an effect similar to what you saw, but once I throw enough concurrency at the problem it seems like other things take over as the bottleneck.  With default debug logging levels the latency difference is mostly masked, but with debugging off we see at least for writes a fairly substantial difference.
+
+I collected some system utilization data during the tests and will go back and see if I can discover anything more with perf as well.  I think the two big takeaways at this point are:
+
+1) There is definitely something interesting going on with Ubuntu vs RHEL (Maybe network related).
+2) Our debug logging has become a major bottleneck in high IOPS scenarios (though we already kind of knew this).
 
 Mark
 
-On 01/26/2015 12:00 PM, Blinick, Stephen L wrote:
-> Good to know, I was wondering why the spec file defaulted to lib-nss.. the dpkg-build for debian packages just uses whatever configuration you had built, and I believe that will use libcryptopp if the dependency is installed on the build machine (last I looked).
->
-> I forgot to mention the numbers below were based on v.91.
->
-> Thanks,
->
-> Stephen
+On 01/14/2015 05:39 PM, Blinick, Stephen L wrote:
+> Haha :)  Well, my intuition is still pointing to something I've configured wrong (or had wrong).. but it will be interesting to see what it is.
 >
 > -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org 
-> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
-> Sent: Monday, January 26, 2015 10:24 AM
-> To: Blinick, Stephen L
-> Cc: andreas.bluemle@itxperts.de; ceph-devel@vger.kernel.org
-> Subject: RE: wip-auth
+> From: Mark Nelson [mailto:mark.nelson@inktank.com]
+> Sent: Wednesday, January 14, 2015 3:43 PM
+> To: Blinick, Stephen L; Ceph Development
+> Subject: Re: Memstore performance improvements v0.90 vs v0.87
 >
-> On Mon, 26 Jan 2015, Blinick, Stephen L wrote:
->> I noticed that the spec file for building RPM's defaults to building with libnss, instead of libcrypto++.  Since the measurements I'd done so far were from those RPM's I rebuilt with libcrypto++.. so FWIW here is the difference between those two on my system, memstore backend with a single OSD, and single client.
->>
->> Dual socket Xeon E5 2620v3, 64GB Memory,  RHEL7
->> Kernel: 3.10.0-123.13.2.el7
->>
->> 100% 4K Writes, 1xOSD w/ Rados Bench
->> 	libnss		            |    Cryptopp		
->> # QD	IOPS	Latency(ms)   |	IOPS	Latency(ms)	IOPS Improvement %
->> 16	14432.57	1.11    |	18896.60	0.85	30.93%
->> 	
->> 100% 4K Reads, 1xOSD w/ Rados Bench				
->> 	libnss | Cryptopp # QD IOPS Latency(ms)  | IOPS Latency(ms) IOPS 
->> Improvement % 16 19532.53 0.82 | 25708.70 0.62 31.62%
+> On 01/14/2015 04:32 PM, Blinick, Stephen L wrote:
+>> I went back and grabbed 87 and built it on RHEL7 as well, and performance is also similar (much better).  I've also run it on a few systems (Dual socket 10-core E5v2,  Dual socket 6-core E5v3).  So, it's related to my switch to RHEL7, and not to the code changes between v0.90 and v0.87.     Will post when I get more data.
 >
-> Yikes, 30%!  I think this definitely worth some effort.  We switched to libnss because it has the weird government certfiications that everyone wants and is more prevalent.  crypto++ is also not packaged for Red Hat distros at all (presumably for that reason).
+> Stephen, you are practically writing press releases for the RHEL guys 
+> here! ;)
 >
-> I suspect that most of the overhead is in the encryption context setup and can be avoided with a bit of effort..
+> Mark
 >
-> sage
->
->
->>
 >>
 >> Thanks,
 >>
@@ -96,39 +118,71 @@ On 01/26/2015 12:00 PM, Blinick, Stephen L wrote:
 >>
 >> -----Original Message-----
 >> From: ceph-devel-owner@vger.kernel.org 
->> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
->> Sent: Thursday, January 22, 2015 4:56 PM
->> To: andreas.bluemle@itxperts.de
->> Cc: ceph-devel@vger.kernel.org
->> Subject: wip-auth
+>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Blinick, 
+>> Stephen L
+>> Sent: Wednesday, January 14, 2015 12:06 AM
+>> To: Ceph Development
+>> Subject: Memstore performance improvements v0.90 vs v0.87
 >>
->> Hi Andreas,
+>> In the process of moving to a new cluster (RHEL7 based) I grabbed v0.90, compiled RPM's and re-ran the simple local-node memstore test I've run on .80 - .87.  It's a single Memstore OSD and a single Rados Bench client locally on the same node.  Increasing queue depth and measuring latency /IOPS.  So far, the measurements have been consistent across different hardware and code releases (with about a 30% improvement with the OpWQ Sharding changes that came in after Firefly).
 >>
->> I took a look at the wip-auth I mentioned in the security call last week... and the patch didn't work at all.  Sorry if you wasted any time trying it.
+>> These are just very early results, but I'm seeing a very large improvement in latency and throughput with v90 on RHEL7.   Next  I'm working to get lttng installed and working in RHEL7 to determine where the improvement is.   On previous levels, these measurements have been roughly the same using a real (fast) backend (i.e. NVMe flash), and I will verify here as well.   Just wondering if anyone else has measured similar improvements?
 >>
->> Anyway, I fixed it up so that it actually worked and made one other optimization.  It would be great to hear what latencies you measure with the changes in place.
 >>
->> Also, it might be worth trying --with-cryptopp (or --with-nss if you 
->> built cryptopp by default) to see if there is a difference.  There is 
->> a ton of boilerplate setting up encryption contexts and key 
->> structures and so on that I suspect could be cached (perhaps stashed 
->> in the CryptoKey struct?) with a bit of effort.  See
+>> 100% Reads or Writes, 4K Objects, Rados Bench
 >>
->> 	https://github.com/ceph/ceph/blob/master/src/auth/Crypto.cc#L99-L213
+>> ========================
+>> V0.87: Ubuntu 14.04LTS
 >>
->> sage
+>> *Writes*
+>> #Thr	IOPS	Latency(ms)
+>> 1	618.80		1.61
+>> 2	1401.70		1.42
+>> 4	3962.73		1.00
+>> 8	7354.37		1.10
+>> 16	7654.67		2.10
+>> 32	7320.33		4.37
+>> 64	7424.27		8.62
+>>
+>> *Reads*
+>> #thr	IOPS	Latency(ms)
+>> 1	837.57		1.19
+>> 2	1950.00		1.02
+>> 4	6494.03		0.61
+>> 8	7243.53		1.10
+>> 16	7473.73		2.14
+>> 32	7682.80		4.16
+>> 64	7727.10		8.28
+>>
+>>
+>> ========================
+>> V0.90:  RHEL7
+>>
+>> *Writes*
+>> #Thr	IOPS	Latency(ms)
+>> 1	2558.53		0.39
+>> 2	6014.67		0.33
+>> 4	10061.33	0.40
+>> 8	14169.60	0.56
+>> 16	14355.63	1.11
+>> 32	14150.30	2.26
+>> 64	15283.33	4.19
+>>
+>> *Reads*
+>> #Thr	IOPS	Latency(ms)
+>> 1	4535.63		0.22
+>> 2	9969.73		0.20
+>> 4	17049.43	0.23
+>> 8	19909.70	0.40
+>> 16	20320.80	0.79
+>> 32	19827.93	1.61
+>> 64	22371.17	2.86
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>> in the body of a message to majordomo@vger.kernel.org More majordomo 
+>> info at  http://vger.kernel.org/majordomo-info.html
 >> --
 >> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
 >> in the body of a message to majordomo@vger.kernel.org More majordomo 
 >> info at  http://vger.kernel.org/majordomo-info.html
 >>
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> in the body of a message to majordomo@vger.kernel.org More majordomo 
-> info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> in the body of a message to majordomo@vger.kernel.org More majordomo 
-> info at  http://vger.kernel.org/majordomo-info.html
->
