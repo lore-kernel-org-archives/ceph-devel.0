@@ -1,61 +1,56 @@
-From: Gregory Farnum <greg-3KCAGdo1P2hBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: chattr +i not working with cephfs
-Date: Wed, 28 Jan 2015 10:43:32 -0800
-Message-ID: <CAC6JEv_vW4aiCN3rff8Qy0qM5zFdHpt-ZDTHpu-zOdDHd9aiBQ@mail.gmail.com>
-References: <CA+9C14YA03rUAWs8N9kyPNJWyC3hBmo6SPwoLdOAe4CGA4HY9w@mail.gmail.com>
-	<CAGd4Wr3f5+w4Aqv8RAcPHeJWhWwTF-yXpfQGnjkQ9fF6D7dPgw@mail.gmail.com>
-	<CAC6JEv_cNro4iNZSxX=n+T6Zp60mEXY+0iJzh4HT-p9+6bizGA@mail.gmail.com>
-	<CAGd4Wr14SQz_0V597ZwBDxEtYrcQuPXUheH9pEZX1SB_3nxEuA@mail.gmail.com>
-	<alpine.DEB.2.00.1501281003420.19192@cobra.newdream.net>
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: 01/28/2015 Weekly Ceph Performance Meeting IS ON!
+Date: Wed, 28 Jan 2015 09:12:38 -0600
+Message-ID: <54C8FC66.3030808@redhat.com>
+Reply-To: mnelson@redhat.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.00.1501281003420.19192-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-Cc: John Spray <john.spray-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph Users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ie0-f181.google.com ([209.85.223.181]:48862 "EHLO
+	mail-ie0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754977AbbA1UWB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 28 Jan 2015 15:22:01 -0500
+Received: by mail-ie0-f181.google.com with SMTP id rp18so24530661iec.12
+        for <ceph-devel@vger.kernel.org>; Wed, 28 Jan 2015 12:22:00 -0800 (PST)
+Received: from [192.168.1.103] (65-128-165-174.mpls.qwest.net. [65.128.165.174])
+        by mx.google.com with ESMTPSA id ii3sm2876385igb.13.2015.01.28.07.12.38
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 28 Jan 2015 07:12:39 -0800 (PST)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, Jan 28, 2015 at 10:06 AM, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> wrote:
-> On Wed, 28 Jan 2015, John Spray wrote:
->> On Wed, Jan 28, 2015 at 5:23 PM, Gregory Farnum <greg-3KCAGdo1P2hBDgjK7y7TUQ@public.gmane.org> wrote:
->> > My concern is whether we as the FS are responsible for doing anything
->> > more than storing and returning that immutable flag ? are we supposed
->> > to block writes to anything that has it set? That could be much
->> > trickier...
->>
->> The VFS layer is checking the flag for us, but some filesystems do
->> have paths where they need to do their own too (e.g. XFS has various
->> ioctls that do explicit checks too).  It's also up to us to publish
->> the S_IMMUTABLE bit to the i_flags attribute of the generic inode,
->> based on wherever/however we store the flag ourselves.
->>
->> Fuse doesn't seem to have a path for us to update i_flags though, so
->> it might be that we either have to extend that interface or do the
->> checking ourselves in userspace in order to support it there.
->
-> It seems like we should be checking S_IMMUTABLE in the MDS and,
-> when set, refusing to issue write caps.  We probably also need a check in
-> the clients so that they return EROFS (I assume?) instead of waiting for
-> said caps...
->
-> In any case, I don't think relying on clients to cooperate is quite the
-> level protection S_IMMUTABLE users are looking for?
+Sorry, got this out a little late.  8AM PST as usual. (IE 50 minutes 
+from now!)  Please add an agenda item if there is something you want to 
+talk about!
 
-Indeed. On the other hand, it's not like an S_IMMUTABLE user on a
-local FS couldn't bypass it by mounting with a hacked filesystem, and
-that's sort of analogous to the protection you'd get by not offering
-up write caps to anybody.
-Anything more extreme would require OSD-side protections, which is a
-research topic I'm interested in but not anything we have a near-term
-solution for.... ;)
--Greg
+Here's the links:
+
+Etherpad URL:
+http://pad.ceph.com/p/performance_weekly
+
+To join the Meeting:
+https://bluejeans.com/268261044
+
+To join via Browser:
+https://bluejeans.com/268261044/browser
+
+To join with Lync:
+https://bluejeans.com/268261044/lync
+
+
+To join via Room System:
+Video Conferencing System: bjn.vc -or- 199.48.152.152
+Meeting ID: 268261044
+
+To join via Phone:
+1) Dial:
+           +1 408 740 7256
+           +1 888 240 2560(US Toll Free)
+           +1 408 317 9253(Alternate Number)
+           (see all numbers - http://bluejeans.com/numbers)
+2) Enter Conference ID: 268261044
+
+Mark
