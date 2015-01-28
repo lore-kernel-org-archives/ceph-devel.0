@@ -1,35 +1,70 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: [GIT PULL] Ceph fixes for -rc7
-Date: Wed, 28 Jan 2015 10:55:23 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1501281052170.19195@cobra.newdream.net>
+From: Eric Eastman <eric.eastman-yfee5r9JHcEqDJ6do+/SaQ@public.gmane.org>
+Subject: Re: chattr +i not working with cephfs
+Date: Wed, 28 Jan 2015 14:06:17 -0700
+Message-ID: <CA+9C14aDB=or9F8Via4CXOJrONfSCAPJDjqhuz1iiYKg8o624w@mail.gmail.com>
+References: <CA+9C14YA03rUAWs8N9kyPNJWyC3hBmo6SPwoLdOAe4CGA4HY9w@mail.gmail.com>
+	<CAGd4Wr3f5+w4Aqv8RAcPHeJWhWwTF-yXpfQGnjkQ9fF6D7dPgw@mail.gmail.com>
+	<CAC6JEv_cNro4iNZSxX=n+T6Zp60mEXY+0iJzh4HT-p9+6bizGA@mail.gmail.com>
+	<CAGd4Wr14SQz_0V597ZwBDxEtYrcQuPXUheH9pEZX1SB_3nxEuA@mail.gmail.com>
+	<alpine.DEB.2.00.1501281003420.19192@cobra.newdream.net>
+	<CAC6JEv_vW4aiCN3rff8Qy0qM5zFdHpt-ZDTHpu-zOdDHd9aiBQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:53892 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755309AbbA1U5y (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 28 Jan 2015 15:57:54 -0500
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: torvalds@linux-foundation.org
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAC6JEv_vW4aiCN3rff8Qy0qM5zFdHpt-ZDTHpu-zOdDHd9aiBQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Gregory Farnum <greg-3KCAGdo1P2hBDgjK7y7TUQ@public.gmane.org>
+Cc: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>, John Spray <john.spray-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph Users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi Linus,
+On Wed, Jan 28, 2015 at 11:43 AM, Gregory Farnum <greg-3KCAGdo1P2hBDgjK7y7TUQ@public.gmane.org> wrote:
+>
+> On Wed, Jan 28, 2015 at 10:06 AM, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> wrote:
+> > On Wed, 28 Jan 2015, John Spray wrote:
+> >> On Wed, Jan 28, 2015 at 5:23 PM, Gregory Farnum <greg-3KCAGdo1P2hBDgjK7y7TUQ@public.gmane.org> wrote:
+> >> > My concern is whether we as the FS are responsible for doing anything
+> >> > more than storing and returning that immutable flag ? are we supposed
+> >> > to block writes to anything that has it set? That could be much
+> >> > trickier...
+> >>
+> >> The VFS layer is checking the flag for us, but some filesystems do
+> >> have paths where they need to do their own too (e.g. XFS has various
+> >> ioctls that do explicit checks too).  It's also up to us to publish
+> >> the S_IMMUTABLE bit to the i_flags attribute of the generic inode,
+> >> based on wherever/however we store the flag ourselves.
+> >>
+> >> Fuse doesn't seem to have a path for us to update i_flags though, so
+> >> it might be that we either have to extend that interface or do the
+> >> checking ourselves in userspace in order to support it there.
+> >
+> > It seems like we should be checking S_IMMUTABLE in the MDS and,
+> > when set, refusing to issue write caps.  We probably also need a check in
+> > the clients so that they return EROFS (I assume?) instead of waiting for
+> > said caps...
+> >
+> > In any case, I don't think relying on clients to cooperate is quite the
+> > level protection S_IMMUTABLE users are looking for?
+>
+> Indeed. On the other hand, it's not like an S_IMMUTABLE user on a
+> local FS couldn't bypass it by mounting with a hacked filesystem, and
+> that's sort of analogous to the protection you'd get by not offering
+> up write caps to anybody.
+> Anything more extreme would require OSD-side protections, which is a
+> research topic I'm interested in but not anything we have a near-term
+> solution for.... ;)
+> -Greg
 
-Please pull the following two patches from
+I created a feature request to add support for chattr +i to cephfs
+http://tracker.ceph.com/issues/10679
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
-
-These paches from Ilya finally squash a race condition with layered images 
-that he's been chasing for a while.
-
-Thanks!
-sage
-
-----------------------------------------------------------------
-Ilya Dryomov (2):
-      rbd: fix rbd_dev_parent_get() when parent_overlap == 0
-      rbd: drop parent_ref in rbd_dev_unprobe() unconditionally
-
- drivers/block/rbd.c | 25 +++++++------------------
- 1 file changed, 7 insertions(+), 18 deletions(-)
+Thanks
+Eric
