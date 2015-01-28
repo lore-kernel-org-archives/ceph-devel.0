@@ -1,54 +1,55 @@
-From: Jojy Varghese <jojy.varghese@gmail.com>
-Subject: [PATCH] build: Fixed install-deps
-Date: Tue, 27 Jan 2015 17:42:59 -0800
-Message-ID: <CAJD3hpWT4mvEAkYm5byJ8sf0XDv=rM-ULYGnetwQQ8fq-LjOwA@mail.gmail.com>
+From: John Spray <john.spray-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: chattr +i not working with cephfs
+Date: Wed, 28 Jan 2015 13:24:54 +0000
+Message-ID: <CAGd4Wr3f5+w4Aqv8RAcPHeJWhWwTF-yXpfQGnjkQ9fF6D7dPgw@mail.gmail.com>
+References: <CA+9C14YA03rUAWs8N9kyPNJWyC3hBmo6SPwoLdOAe4CGA4HY9w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=001a113ffd40cc1da7050dac7d96
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f171.google.com ([209.85.223.171]:43694 "EHLO
-	mail-ie0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933642AbbA1BnA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Jan 2015 20:43:00 -0500
-Received: by mail-ie0-f171.google.com with SMTP id tr6so18957784ieb.2
-        for <ceph-devel@vger.kernel.org>; Tue, 27 Jan 2015 17:42:59 -0800 (PST)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
-
---001a113ffd40cc1da7050dac7d96
-Content-Type: text/plain; charset=ISO-8859-1
-
-    Running install-deps causes LC_ALL to be set to C#. This is unintentional
-    behaviour due to the comment being joined with the bash statement.
-
-    Change:
-    Added the missing newline before comment.
-
-
-Jojy G Varghese
-
---001a113ffd40cc1da7050dac7d96
-Content-Type: text/x-patch; charset=US-ASCII; name="0001-build-Fixed-install-deps.patch"
-Content-Disposition: attachment;
-	filename="0001-build-Fixed-install-deps.patch"
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: base64
-X-Attachment-Id: f_i5g1te4p0
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CA+9C14YA03rUAWs8N9kyPNJWyC3hBmo6SPwoLdOAe4CGA4HY9w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Eric Eastman <eric.eastman-yfee5r9JHcEqDJ6do+/SaQ@public.gmane.org>
+Cc: Ceph Users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-RnJvbSBiODg5ZDhlY2FjNDNjNzBkNDMxNDcxMDhmYjlkOGVhODRiZDYyYzExIE1vbiBTZXAgMTcg
-MDA6MDA6MDAgMjAwMQpGcm9tOiBKb2p5IEcgVmFyZ2hlc2UgPGpvankudmFyZ2hlc2VAZ21haWwu
-Y29tPgpEYXRlOiBUdWUsIDI3IEphbiAyMDE1IDE3OjA3OjM2IC0wODAwClN1YmplY3Q6IFtQQVRD
-SF0gYnVpbGQ6IEZpeGVkIGluc3RhbGwtZGVwcwoKCVJ1bm5pbmcgaW5zdGFsbC1kZXBzIGNhdXNl
-cyBMQ19BTEwgdG8gYmUgc2V0IHRvIEMjLiBUaGlzIGlzIHVuaW50ZW50aW9uYWwKICAgIGJlaGF2
-aW91ciBkdWUgdG8gdGhlIGNvbW1lbnQgYmVpbmcgam9pbmVkIHdpdGggdGhlIGJhc2ggc3RhdGVt
-ZW50LgoKICAgIENoYW5nZToKICAgIEFkZGVkIHRoZSBtaXNzaW5nIG5ld2xpbmUgYmVmb3JlIGNv
-bW1lbnQuCgpTaWduZWQtb2ZmLWJ5OiBKb2p5IEcgVmFyZ2hlc2UgPGpvankudmFyZ2hlc2VAZ21h
-aWwuY29tPgotLS0KIGluc3RhbGwtZGVwcy5zaCB8ICAgIDMgKystCiAxIGZpbGUgY2hhbmdlZCwg
-MiBpbnNlcnRpb25zKCspLCAxIGRlbGV0aW9uKC0pCgpkaWZmIC0tZ2l0IGEvaW5zdGFsbC1kZXBz
-LnNoIGIvaW5zdGFsbC1kZXBzLnNoCmluZGV4IDdlYWIwMjkuLjA2ZTkyZmYgMTAwNzU1Ci0tLSBh
-L2luc3RhbGwtZGVwcy5zaAorKysgYi9pbnN0YWxsLWRlcHMuc2gKQEAgLTE3LDcgKzE3LDggQEAg
-bWtkaXIgLXAgJERJUgogaWYgdGVzdCAkKGlkIC11KSAhPSAwIDsgdGhlbgogICAgIFNVRE89c3Vk
-bwogZmkKLWV4cG9ydCBMQ19BTEw9QyMgdGhlIGZvbGxvd2luZyBpcyB2dWxuZXJhYmxlIHRvIGkx
-OG4KK2V4cG9ydCBMQ19BTEw9QworIyB0aGUgZm9sbG93aW5nIGlzIHZ1bG5lcmFibGUgdG8gaTE4
-bgogY2FzZSAkKGxzYl9yZWxlYXNlIC1zaSkgaW4KIFVidW50dXxEZWJpYW58RGV2dWFuKQogICAg
-ICAgICAkU1VETyBhcHQtZ2V0IGluc3RhbGwgLXkgZHBrZy1kZXYKLS0gCjEuNy45LjUKCg==
---001a113ffd40cc1da7050dac7d96--
+V2UgZG9uJ3QgaW1wbGVtZW50IHRoZSBHRVRGTEFHUyBhbmQgU0VURkxBR1MgaW9jdGxzIHVzZWQg
+Zm9yICtpLgoKQWRkaW5nIHRoZSBpb2N0bHMgaXMgcHJldHR5IGVhc3ksIGJ1dCB0aGVuIHdlIG5l
+ZWQgc29tZXdoZXJlIHRvIHB1dAp0aGUgZmxhZ3MuICBDdXJyZW50bHkgd2UgZG9uJ3Qgc3RvcmUg
+YSAiZmxhZ3MiIGF0dHJpYnV0ZSBvbiBpbm9kZXMsCmJ1dCBtYXliZSB3ZSBjb3VsZCBib3Jyb3cg
+dGhlIGhpZ2ggYml0cyBvZiB0aGUgbW9kZSBhdHRyaWJ1dGUgZm9yIHRoaXMKaWYgd2Ugd2FudGVk
+IHRvIGltcGxlbWVudCBpdD8KCkNDaW5nIGNlcGgtZGV2ZWwgdG8gc2VlIGlmIFNhZ2UvR3JlZyBj
+YW4gb2ZmZXIgYW55IG1vcmUgYmFja2dyb3VuZC4KCkpvaG4KCk9uIFdlZCwgSmFuIDI4LCAyMDE1
+IGF0IDE6MjQgQU0sIEVyaWMgRWFzdG1hbgo8ZXJpYy5lYXN0bWFuQGtlZXBlcnRlY2guY29tPiB3
+cm90ZToKPiBTaG91bGQgY2hhdHRyICtpICB3b3JrIHdpdGggY2VwaGZzPwo+Cj4gVXNpbmcgY2Vw
+aCB2MC45MSBhbmQgYSAzLjE4IGtlcm5lbCBvbiB0aGUgQ2VwaEZTIGNsaWVudCwgSSB0cmllZCB0
+aGlzOgo+Cj4gIyBtb3VudCB8IGdyZXAgY2VwaAo+IDE3Mi4xNi4zMC4xMDovIG9uIC9jZXBoZnMv
+dGVzdDAxIHR5cGUgY2VwaCAobmFtZT1jZXBoZnMsa2V5PWNsaWVudC5jZXBoZnMpCj4gIyBlY2hv
+IDEgPiAvY2VwaGZzL3Rlc3QwMS90ZXN0LjEKPiAjIGxzIC1sIC9jZXBoZnMvdGVzdDAxL3Rlc3Qu
+MQo+IC1ydy1y4oCUci0tIDEgcm9vdCByb290IDIgSmFuIDI3IDE5OjA5IC9jZXBoZnMvdGVzdDAx
+L3Rlc3QuMQo+ICMgY2hhdHRyICtpIC9jZXBoZnMvdGVzdDAxL3Rlc3QuMQo+IGNoYXR0cjogSW5h
+cHByb3ByaWF0ZSBpb2N0bCBmb3IgZGV2aWNlIHdoaWxlIHJlYWRpbmcgZmxhZ3Mgb24KPiAvY2Vw
+aGZzL3Rlc3QwMS90ZXN0LjEKPgo+IEkgYWxzbyB0cmllZCBpdCB1c2luZyB0aGUgRlVTRSBpbnRl
+cmZhY2U6Cj4KPiAjIGNlcGgtZnVzZSAtbSAxNzIuMTYuMzAuMTAgL2NlcGhmcy9mdXNlMDEvCj4g
+Y2VwaC1mdXNlWzUzMjZdOiBzdGFydGluZyBjZXBoIGNsaWVudAo+IDIwMTUtMDEtMjcgMTk6NTQ6
+NTkuMDAyNTYzIDdmNmY4ZmJjYjdjMCAtMSBpbml0LCBuZXdhcmd2ID0gMHgyZWMyYmUwCj4gbmV3
+YXJnYz0xMQo+IGNlcGgtZnVzZVs1MzI2XTogc3RhcnRpbmcgZnVzZQo+ICMgbW91bnQgfCBncmVw
+IGNlcGgKPiBjZXBoLWZ1c2Ugb24gL2NlcGhmcy9mdXNlMDEgdHlwZSBmdXNlLmNlcGgtZnVzZQo+
+IChydyxub3N1aWQsbm9kZXYsYWxsb3dfb3RoZXIsZGVmYXVsdF9wZXJtaXNzaW9ucykKPiAjIGVj
+aG8gMSA+IC9jZXBoZnMvZnVzZTAxL3Rlc3QwMi5kYXQKPiAjIGNoYXR0ciAraSAgIC9jZXBoZnMv
+ZnVzZTAxL3Rlc3QwMi5kYXQKPiBjaGF0dHI6IEludmFsaWQgYXJndW1lbnQgd2hpbGUgcmVhZGlu
+ZyBmbGFncyBvbiAvY2VwaGZzL2Z1c2UwMS90ZXN0MDIuZGF0Cj4KPiBFcmljCj4KPiBfX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwo+IGNlcGgtdXNlcnMgbWFp
+bGluZyBsaXN0Cj4gY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQo+IGh0dHA6Ly9saXN0cy5jZXBo
+LmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo+Cl9fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNl
+cGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNn
+aS9jZXBoLXVzZXJzLWNlcGguY29tCg==
