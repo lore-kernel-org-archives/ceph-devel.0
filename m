@@ -1,80 +1,73 @@
-From: Imran Khan <khan.imran2591-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Deploying ceph using Dell equallogic storage arrays
-Date: Wed, 21 Jan 2015 12:02:30 +0500
-Message-ID: <CACbsoAAepyLz2HrCLR6KjtvLRb+M703pn7TG5aXYCgS1Xc3ubg@mail.gmail.com>
+From: Marcel Lauhoff <ml@irq0.org>
+Subject: Re: Article about Object Store API
+Date: Fri, 30 Jan 2015 00:22:44 +0100
+Message-ID: <87d25xnpdn.fsf@simstim.irq0.org>
+References: <871tmgvtje.fsf@irq0.org> <CA+U0gViEieTP0vL+NYSBL7iHkOgBR1jnu_SsbZtQv8-Ci+BBgg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0704835892=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cpu0.net ([37.187.2.217]:53257 "EHLO cpu0.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751946AbbA2XWr (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 29 Jan 2015 18:22:47 -0500
+Received: from simstim.irq0.org (hackerspace.c3pb.de [94.79.177.226])
+	by ks3366964.kimsufi.com (Postfix) with ESMTPSA id 43A8B800BF
+	for <ceph-devel@vger.kernel.org>; Thu, 29 Jan 2015 23:22:45 +0000 (UTC)
+In-reply-to: <CA+U0gViEieTP0vL+NYSBL7iHkOgBR1jnu_SsbZtQv8-Ci+BBgg@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Dennis Chen <kernel.org.gnu@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
---===============0704835892==
-Content-Type: multipart/alternative; boundary=001a1134930e96d151050d242389
 
---001a1134930e96d151050d242389
-Content-Type: text/plain; charset=UTF-8
+Hello Dennis,
 
-Dear concerned,
+I haven't dived into librados code yet, but as far as I can see it is a
+couple of layers above what I wrote about. :/
 
-Can I use Dell's equallogic storage arrays (model PS-4110) to configure
-different OSDs on these storage arrays (maybe by creating different
-volumes). If this is possible, then how can should I set about deploying
-Ceph in my system (some user guide or introductory document will be nice).
+Can you please concretize your question a bit?
 
-I am deploying my OpenStack cloud and currently these storage blades can be
-configured as Cinder Volumes, I have iSCSI access to my storage arrays from
-all my blades.
+~marcel
 
-I don't have any real experience with Ceph but I know that normal blade
-servers can easily be configured as Ceph storage clusters in HA mode with
-monitors et al.
+Dennis Chen <kernel.org.gnu@gmail.com> writes:
 
-What I want is to use my storage arrays as Ceph Storage Clusters.
+> Hello marcel,
+>
+> Very good article though I am still reading it. Do you have a clear
+> picture of the relationship between class and
+> librados API - rados_exec()?
+>
+> On Wed, Jan 28, 2015 at 4:48 AM, Marcel Lauhoff <ml@irq0.org> wrote:
+>>
+>> Hi,
+>>
+>> I wrote an article about the object store API - How it works and looks
+>> like with a focus on how to add something new.
+>>
+>> http://irq0.org/articles/ceph/objectstore
+>>
+>> Maybe its useful for somebody.. Feedback is greatly appreciated!
+>>
+>>
+>>
+>> [ I'm working on a Master's Thesis about Cold Storage / Archives using Ceph
+>> and will probably write something more about other parts of Ceph
+>> crossing my way in the near future :) ]
+>>
+>>
+>> ~marcel
+>>
+>>
+>> --
+>> Marcel Lauhoff
+>> Mail/XMPP: ml@irq0.org
+>> http://irq0.org
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-Warm regards,
-Khan, Imran
-
---001a1134930e96d151050d242389
-Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr">Dear concerned,<div><br></div><div>Can I use Dell&#39;s eq=
-uallogic storage arrays (model PS-4110) to configure different OSDs on thes=
-e storage arrays (maybe by creating different volumes). If this is possible=
-, then how can should I set about deploying Ceph in my system (some user gu=
-ide or introductory document will be nice).=C2=A0</div><div><br></div><div>=
-I am deploying my OpenStack cloud and currently these storage blades can be=
- configured as Cinder Volumes, I have iSCSI access to my storage arrays fro=
-m all my blades.=C2=A0</div><div><br></div><div>I don&#39;t have any real e=
-xperience with Ceph but I know that normal blade servers can easily be conf=
-igured as Ceph storage clusters in HA mode with monitors et al.=C2=A0</div>=
-<div><br></div><div>What I want is to use my storage arrays as Ceph Storage=
- Clusters.</div><div><br></div><div>Warm regards,<br clear=3D"all"><div><di=
-v class=3D"gmail_signature"><div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"l=
-tr"><div dir=3D"ltr">Khan, Imran</div><div dir=3D"ltr"><br></div></div></di=
-v></div></div></div>
-</div></div>
-
---001a1134930e96d151050d242389--
-
---===============0704835892==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============0704835892==--
+--
+Marcel Lauhoff
+Mail/XMPP: ml@irq0.org
+http://irq0.org etq
