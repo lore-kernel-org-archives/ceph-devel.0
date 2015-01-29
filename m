@@ -1,38 +1,72 @@
-From: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>
-Subject: mSHEC pull request (2nd challenge)
-Date: Thu, 29 Jan 2015 14:24:42 +0000
-Message-ID: <870DE8DBB716524BAE51B2D499EC81E40AA68A90@g01jpexmbyt24>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: mSHEC pull request (2nd challenge)
+Date: Thu, 29 Jan 2015 15:37:39 +0100
+Message-ID: <54CA45B3.7030309@dachary.org>
+References: <870DE8DBB716524BAE51B2D499EC81E40AA68A90@g01jpexmbyt24>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="6UnRNGxHE9hKgXkB4ThqiAeptjT8V1Va0"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from fgwmail5.fujitsu.co.jp ([192.51.44.35]:57077 "EHLO
-	fgwmail5.fujitsu.co.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755177AbbA2OYr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Jan 2015 09:24:47 -0500
-Received: from kw-mxoi1.gw.nic.fujitsu.com (unknown [10.0.237.133])
-	by fgwmail5.fujitsu.co.jp (Postfix) with ESMTP id 93CCB3EE210
-	for <ceph-devel@vger.kernel.org>; Thu, 29 Jan 2015 23:24:45 +0900 (JST)
-Received: from s4.gw.fujitsu.co.jp (s4.gw.fujitsu.co.jp [10.0.50.94])
-	by kw-mxoi1.gw.nic.fujitsu.com (Postfix) with ESMTP id 9F1E1AC07C3
-	for <ceph-devel@vger.kernel.org>; Thu, 29 Jan 2015 23:24:44 +0900 (JST)
-Received: from g01jpfmpwyt02.exch.g01.fujitsu.local (g01jpfmpwyt02.exch.g01.fujitsu.local [10.128.193.56])
-	by s4.gw.fujitsu.co.jp (Postfix) with ESMTP id 4AD86E08001
-	for <ceph-devel@vger.kernel.org>; Thu, 29 Jan 2015 23:24:44 +0900 (JST)
-Content-Language: ja-JP
+Received: from mail2.dachary.org ([91.121.57.175]:49145 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751334AbbA2Ohm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Jan 2015 09:37:42 -0500
+In-Reply-To: <870DE8DBB716524BAE51B2D499EC81E40AA68A90@g01jpexmbyt24>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
+To: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>, "Shiozawa, Kensuke" <shiozawa.kennsu@jp.fujitsu.com>, "Nakao, Takanori" <nakao.takanori@jp.fujitsu.com>, "Kawaguchi, Shotaro" <kawaguchi.s@jp.fujitsu.com>, "Kaga, Yoshihiro" <y-kaga@jp.fujitsu.com>, "Paul Von-Stamwitz (PVonStamwitz@us.fujitsu.com)" <PVonStamwitz@us.fujitsu.com>
 
-SGkgTG9pYywNCg0KV2hlbiBJIHJlc2V0IG91ciBjb21taXRzIG9uIG91ciBm
-b3JrIHJlcG9zaXRvcnksIHRoZSAxc3QgcHVsbCByZXF1ZXN0IHdhcyBhdXRv
-bWF0aWNhbGx5IGNsb3NlZC4NClNvLCBJIGhhdmUgaXNzdWVkIGFub3RoZXIg
-cHVsbCByZXF1ZXN0IG9mIG1TSEVDLg0KDQptU0hFQyA6IG11bHRpcGxlIFNo
-aW5nbGVkIEVyYXN1cmUgQ29kZSAjMzUzNA0KaHR0cHM6Ly9naXRodWIuY29t
-L2NlcGgvY2VwaC9wdWxsLzM1MzQNCg0KQXMgYSByZXN1bHQsIEkgYmVsaWV2
-ZSBJIGhhdmUgc3F1YXNoZWQgb3VyIGNvbW1pdHMgaW50byBvbmUuDQpJJ20g
-Z3JhZCBpZiB5b3UgY291bGQgcmVzdGFydCB0aGUgcmV2aWV3Lg0KDQooWW91
-IGFscmVhZHkgbm90aWNlZCB0aGF0IGFuZCBnYXZlIHVzIGxhYmVscywgdGhh
-bmsgeW91ISkNCg0KQmVzdCByZWdhcmRzLA0KVGFrZXNoaSBNaXlhbWFlDQoN
-Cg==
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--6UnRNGxHE9hKgXkB4ThqiAeptjT8V1Va0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+Hi,
+
+It looks good and ready for integration testing :-) I just created http:/=
+/tracker.ceph.com/issues/10686 to track this feature. Since we are late i=
+n development cycle and unless someone has a different opinion, I will ma=
+rk the SHEC plugin as experimental so people know it's new. I will howeve=
+r do that after it is merged in master.
+
+Cheers
+
+On 29/01/2015 15:24, Miyamae, Takeshi wrote:
+> Hi Loic,
+>=20
+> When I reset our commits on our fork repository, the 1st pull request w=
+as automatically closed.
+> So, I have issued another pull request of mSHEC.
+>=20
+> mSHEC : multiple Shingled Erasure Code #3534
+> https://github.com/ceph/ceph/pull/3534
+>=20
+> As a result, I believe I have squashed our commits into one.
+> I'm grad if you could restart the review.
+>=20
+> (You already noticed that and gave us labels, thank you!)
+>=20
+> Best regards,
+> Takeshi Miyamae
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--6UnRNGxHE9hKgXkB4ThqiAeptjT8V1Va0
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlTKRbMACgkQ8dLMyEl6F22jMACfUim5FUw4xG/0ym98cupljOeG
+vmEAnidT5IeiEcfgBC9zS2hvPpHsfa1q
+=l/7c
+-----END PGP SIGNATURE-----
+
+--6UnRNGxHE9hKgXkB4ThqiAeptjT8V1Va0--
