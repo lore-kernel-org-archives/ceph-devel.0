@@ -1,70 +1,89 @@
-From: Eric Eastman <eric.eastman-yfee5r9JHcEqDJ6do+/SaQ@public.gmane.org>
-Subject: Re: chattr +i not working with cephfs
-Date: Wed, 28 Jan 2015 14:06:17 -0700
-Message-ID: <CA+9C14aDB=or9F8Via4CXOJrONfSCAPJDjqhuz1iiYKg8o624w@mail.gmail.com>
-References: <CA+9C14YA03rUAWs8N9kyPNJWyC3hBmo6SPwoLdOAe4CGA4HY9w@mail.gmail.com>
-	<CAGd4Wr3f5+w4Aqv8RAcPHeJWhWwTF-yXpfQGnjkQ9fF6D7dPgw@mail.gmail.com>
-	<CAC6JEv_cNro4iNZSxX=n+T6Zp60mEXY+0iJzh4HT-p9+6bizGA@mail.gmail.com>
-	<CAGd4Wr14SQz_0V597ZwBDxEtYrcQuPXUheH9pEZX1SB_3nxEuA@mail.gmail.com>
-	<alpine.DEB.2.00.1501281003420.19192@cobra.newdream.net>
-	<CAC6JEv_vW4aiCN3rff8Qy0qM5zFdHpt-ZDTHpu-zOdDHd9aiBQ@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: Performance drop on Ubuntu 14.04 LTS for 4K/8K workload
+Date: Thu, 29 Jan 2015 01:19:28 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F28280B95@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAC6JEv_vW4aiCN3rff8Qy0qM5zFdHpt-ZDTHpu-zOdDHd9aiBQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Gregory Farnum <greg-3KCAGdo1P2hBDgjK7y7TUQ@public.gmane.org>
-Cc: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>, John Spray <john.spray-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph Users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-bl2on0063.outbound.protection.outlook.com ([65.55.169.63]:60410
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753586AbbA2BTe (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 28 Jan 2015 20:19:34 -0500
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, Jan 28, 2015 at 11:43 AM, Gregory Farnum <greg-3KCAGdo1P2hBDgjK7y7TUQ@public.gmane.org> wrote:
->
-> On Wed, Jan 28, 2015 at 10:06 AM, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> wrote:
-> > On Wed, 28 Jan 2015, John Spray wrote:
-> >> On Wed, Jan 28, 2015 at 5:23 PM, Gregory Farnum <greg-3KCAGdo1P2hBDgjK7y7TUQ@public.gmane.org> wrote:
-> >> > My concern is whether we as the FS are responsible for doing anything
-> >> > more than storing and returning that immutable flag ? are we supposed
-> >> > to block writes to anything that has it set? That could be much
-> >> > trickier...
-> >>
-> >> The VFS layer is checking the flag for us, but some filesystems do
-> >> have paths where they need to do their own too (e.g. XFS has various
-> >> ioctls that do explicit checks too).  It's also up to us to publish
-> >> the S_IMMUTABLE bit to the i_flags attribute of the generic inode,
-> >> based on wherever/however we store the flag ourselves.
-> >>
-> >> Fuse doesn't seem to have a path for us to update i_flags though, so
-> >> it might be that we either have to extend that interface or do the
-> >> checking ourselves in userspace in order to support it there.
-> >
-> > It seems like we should be checking S_IMMUTABLE in the MDS and,
-> > when set, refusing to issue write caps.  We probably also need a check in
-> > the clients so that they return EROFS (I assume?) instead of waiting for
-> > said caps...
-> >
-> > In any case, I don't think relying on clients to cooperate is quite the
-> > level protection S_IMMUTABLE users are looking for?
->
-> Indeed. On the other hand, it's not like an S_IMMUTABLE user on a
-> local FS couldn't bypass it by mounting with a hacked filesystem, and
-> that's sort of analogous to the protection you'd get by not offering
-> up write caps to anybody.
-> Anything more extreme would require OSD-side protections, which is a
-> research topic I'm interested in but not anything we have a near-term
-> solution for.... ;)
-> -Greg
-
-I created a feature request to add support for chattr +i to cephfs
-http://tracker.ceph.com/issues/10679
-
-Thanks
-Eric
+DQpIaSwNCkkgaGF2ZSBhIHR3byBub2RlIGNsdXN0ZXIgd2l0aCAzMiBPU0RzICBvbiBlYWNoIChv
+bmUgcGVyIGRyaXZlKS4gSXQgd2FzIHdvcmtpbmcgZmluZSB0aWxsIHdlIHNwb3QgYSBzZXZlcmUg
+cGVyZm9ybWFuY2UgZGVncmFkYXRpb24gZm9yIDRLLzhLIHdvcmtsb2FkLg0KSSBzYXcgb25lIG5v
+ZGUgaXMgY29uc3VtaW5nIH41IHRpbWVzIG1vcmUgY3B1IHRoYW4gb3RoZXIgbm9kZSBmb3Igc2Vy
+dmluZyB0aGUgc2FtZSBhbW91bnQgb2YgaW5ib3VuZCByZXF1ZXN0LiBUaGlzIGlzIG5vdCByZWxh
+dGVkIHRvIGRpc2tzIHNpbmNlIHRoaXMgaXMgaGFwcGVuaW5nIGZvciBzbWFsbGVyIHdvcmtsb2Fk
+IHNlcnZpbmcgb3V0IG9mIG1lbW9yeSBhcyB3ZWxsLiBSdW5uaW5nIHBlcmYgdG9wIG9uIGJvdGgg
+dGhlIHNlcnZlciByZXZlYWxzIHRoZSBmb2xsb3dpbmcuDQoNClNlcnZlciBBIChjb25zdW1pbmcg
+bW9yZSBjcHUpOg0KLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCg0KMTYu
+MDYlICBba2VybmVsXSAgICAgICAgICAgICAgW2tdIHJlYWRfaHBldA0KICA1Ljg1JSAgW3Zkc29d
+ICAgICAgICAgICAgICAgIFsuXSAweDAwMDAwMDAwMDAwMDBkZDcNCiAgMy42MiUgIFtrZXJuZWxd
+ICAgICAgICAgICAgICBba10gX3Jhd19zcGluX2xvY2sNCiAgMi43NiUgIGNlcGgtb3NkICAgICAg
+ICAgICAgICBbLl0gY3J1c2hfaGFzaDMyXzMNCiAgMS45NyUgIGxpYnRjbWFsbG9jLnNvLjQuMS4y
+ICBbLl0gb3BlcmF0b3IgbmV3KHVuc2lnbmVkIGxvbmcpDQogIDEuODclICBsaWJjLTIuMTkuc28g
+ICAgICAgICAgWy5dIDB4MDAwMDAwMDAwMDE2MWYwYg0KICAxLjM0JSAgW2tlcm5lbF0gICAgICAg
+ICAgICAgIFtrXSBfcmF3X3NwaW5fbG9ja19pcnFzYXZlDQogIDEuMTQlICBsaWJ0Y21hbGxvYy5z
+by40LjEuMiAgWy5dIG9wZXJhdG9yIGRlbGV0ZSh2b2lkKikNCiAgMS4wNiUgIGNlcGgtb3NkICAg
+ICAgICAgICAgICBbLl0gMHgwMDAwMDAwMDAwN2YzYjI2DQogIDAuOTklICBwZXJmICAgICAgICAg
+ICAgICAgICAgWy5dIDB4MDAwMDAwMDAwMDA1NjU4NA0KICAwLjk2JSAgbGlic3RkYysrLnNvLjYu
+MC4xOSAgIFsuXSBzdGQ6OmJhc2ljX3N0cmluZzxjaGFyLCBzdGQ6OmNoYXJfdHJhaXRzPGNoYXI+
+LCBzdGQ6OmFsbG9jYXRvcjxjaGFyPiA+OjpiYXNpY19zdHJpbmcoc3RkOjpzdHJpbmcgY29uc3Qm
+KQ0KICAwLjc3JSAgW2tlcm5lbF0gICAgICAgICAgICAgIFtrXSBmdXRleF93YWtlDQogIDAuNjkl
+ICBsaWJzdGRjKysuc28uNi4wLjE5ICAgWy5dIDB4MDAwMDAwMDAwMDA1YjY0NA0KDQoNClNlcnZl
+ciBCICh0aGUgZ29vZCBvbmUpOg0KLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KDQozLjQ3
+JSAgY2VwaC1vc2QgICAgICAgICAgICAgIFsuXSBjcnVzaF9oYXNoMzJfMw0KICAyLjczJSAgW2tl
+cm5lbF0gICAgICAgICAgICAgIFtrXSBfcmF3X3NwaW5fbG9jaw0KICAyLjMwJSAgbGlidGNtYWxs
+b2Muc28uNC4xLjIgIFsuXSBvcGVyYXRvciBuZXcodW5zaWduZWQgbG9uZykNCiAgMi4yNCUgIGxp
+YmMtMi4xOS5zbyAgICAgICAgICBbLl0gMHgwMDAwMDAwMDAwMDk4ZTEzDQogIDEuMzMlICBsaWJ0
+Y21hbGxvYy5zby40LjEuMiAgWy5dIG9wZXJhdG9yIGRlbGV0ZSh2b2lkKikNCiAgMS4zMiUgIFtr
+ZXJuZWxdICAgICAgICAgICAgICBba10gZnV0ZXhfd2FrZQ0KICAxLjIxJSAgW2tlcm5lbF0gICAg
+ICAgICAgICAgIFtrXSBfX3NjaGVkdWxlDQogIDEuMjAlICBsaWJzdGRjKysuc28uNi4wLjE5ICAg
+Wy5dIHN0ZDo6YmFzaWNfc3RyaW5nPGNoYXIsIHN0ZDo6Y2hhcl90cmFpdHM8Y2hhcj4sIHN0ZDo6
+YWxsb2NhdG9yPGNoYXI+ID46OmJhc2ljX3N0cmluZyhzdGQ6OnN0cmluZyBjb25zdCYpDQogIDEu
+MTQlICBjZXBoLW9zZCAgICAgICAgICAgICAgWy5dIDB4MDAwMDAwMDAwMDdmM2U1Zg0KICAxLjEz
+JSAgW2tlcm5lbF0gICAgICAgICAgICAgIFtrXSBfcmF3X3NwaW5fbG9ja19pcnFzYXZlDQogIDAu
+OTclICBsaWJzdGRjKysuc28uNi4wLjE5ICAgWy5dIDB4MDAwMDAwMDAwMDA1YjY1MQ0KICAwLjg3
+JSAgW2tlcm5lbF0gICAgICAgICAgICAgIFtrXSBmdXRleF9yZXF1ZXVlDQogIDAuODclICBba2Vy
+bmVsXSAgICAgICAgICAgICAgW2tdIF9fY29weV91c2VyX25vY2FjaGUNCiAgMC44MCUgIHBlcmYg
+ICAgICAgICAgICAgICAgICBbLl0gMHgwMDAwMDAwMDAwMDU2NTllDQogIDAuNzIlICBba2VybmVs
+XSAgICAgICAgICAgICAgW2tdIF9fZF9sb29rdXBfcmN1DQogIDAuNjklICBsaWJwdGhyZWFkLTIu
+MTkuc28gICAgWy5dIHB0aHJlYWRfbXV0ZXhfdHJ5bG9jaw0KICAwLjY4JSAgW2tlcm5lbF0gICAg
+ICAgICAgICAgIFtrXSBmdXRleF93YWtlX29wDQogIDAuNjclICBsaWJzdGRjKysuc28uNi4wLjE5
+ICAgWy5dIHN0ZDo6c3RyaW5nOjpfUmVwOjpfTV9kaXNwb3NlKHN0ZDo6YWxsb2NhdG9yPGNoYXI+
+IGNvbnN0JikNCiAgMC42NiUgIGxpYmMtMi4xOS5zbyAgICAgICAgICBbLl0gdmZwcmludGYNCiAg
+MC42MiUgIGxpYnRjbWFsbG9jLnNvLjQuMS4yICBbLl0gdGNtYWxsb2M6OlRocmVhZENhY2hlOjpS
+ZWxlYXNlVG9DZW50cmFsQ2FjaGUodGNtYWxsb2M6OlRocmVhZENhY2hlOjpGcmVlTGlzdCosIHVu
+c2lnbmVkIGxvbmcsIGludCkNCiAgMC42MSUgIGNlcGgtb3NkICAgICAgICAgICAgICBbLl0gTXV0
+ZXg6OkxvY2soYm9vbCkNCiAgMC41NyUgIFtrZXJuZWxdICAgICAgICAgICAgICBba10gdGNwX3Nl
+bmRtc2cNCg0KU28sIGl0IHNlZW1zIHRoZSBnZXR0aW1lb2ZkYXkgKyBWRFNPICsgcmVhZF9ocGV0
+ICgpIGlzIHRoZSBwcmltYXJ5IHJlYXNvbiBmb3IgbW9yZSBjcHUgdXNhZ2UuIEJvdGggdGhlIHNl
+cnZlcnMgYXJlIGlkZW50aWNhbCBhbmQgSSBjb3VsZG7igJl0IGZpZ3VyZSBvdXQgd2h5IHJlYWRf
+aHBldCgpIGlzIGNvbnN1bWluZyB3YXkgbW9yZSBjcHUgb24gU2VydmVyIEEuIFJlc3RhcnRpbmcg
+Y2VwaC1zZXJ2aWNlcyBkaWRu4oCZdCBoZWxwLiBDb3VsZG7igJl0IGZpbmQgYW55IGFibm9ybWFs
+IG1lc3NhZ2UgaW4gc3lzbG9nIGVpdGhlci4NCk15IGxhc3QgcmVzb3J0IHdhcyB0byByZWJvb3Qg
+YW5kIGFzIGFsd2F5cyB0aGF0IGhlbHBlZCDimLrigKZOb3csIGJvdGggdGhlIG5vZGVzIGFyZSBi
+ZWhhdmluZyBzaW1pbGFybHkuDQoNCkFueWJvZHkgaGFzIHNpbWlsYXIgZXhwZXJpZW5jZSA/IEFt
+IEkgaGl0dGluZyBhbnkgVWJ1bnR1ICgxNC4wNC5MVFMgLCAzLjEzLjAtMzItZ2VuZXJpYykgYnVn
+IGhlcmUgPw0KDQpBbnkgaGVscC9zdWdnZXN0aW9uIHdvdWxkIGJlIHZlcnkgaGVscGZ1bC4NCg0K
+VGhhbmtzICYgUmVnYXJkcw0KU29tbmF0aA0KDQoNCg0KDQpfX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fXw0KDQpQTEVBU0UgTk9URTogVGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBpbiB0
+aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNzYWdlIGlzIGludGVuZGVkIG9ubHkgZm9yIHRoZSB1c2Ug
+b2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpIG5hbWVkIGFib3ZlLiBJZiB0aGUgcmVhZGVy
+IG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVuZGVkIHJlY2lwaWVudCwgeW91IGFyZSBo
+ZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2UgaW4gZXJy
+b3IgYW5kIHRoYXQgYW55IHJldmlldywgZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9uLCBvciBj
+b3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5b3UgaGF2
+ZSByZWNlaXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhl
+IHNlbmRlciBieSB0ZWxlcGhvbmUgb3IgZS1tYWlsIChhcyBzaG93biBhYm92ZSkgaW1tZWRpYXRl
+bHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVzIG9mIHRoaXMgbWVzc2FnZSBpbiB5b3Vy
+IHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkgc3RvcmVk
+IGNvcGllcykuDQoNCg==
