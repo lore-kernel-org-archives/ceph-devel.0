@@ -1,216 +1,112 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: wip-auth
-Date: Fri, 30 Jan 2015 13:08:10 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1501300831300.25803@cobra.newdream.net>
-References: <alpine.DEB.2.00.1501221512580.19192@cobra.newdream.net> <3649A15A2562B54294DE14BCE5AC79120AB43257@ORSMSX152.amr.corp.intel.com> <alpine.DEB.2.00.1501260921250.3895@cobra.newdream.net> <3649A15A2562B54294DE14BCE5AC79120AB4E6A6@FMSMSX106.amr.corp.intel.com>
- <alpine.DEB.2.00.1501261554360.18846@cobra.newdream.net> <20150130081013.3f615803@doppio>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: rgw backports to giant update
+Date: Sat, 31 Jan 2015 00:10:54 +0100
+Message-ID: <54CC0F7E.3060007@dachary.org>
+References: <54C98379.7030100@dachary.org> <CABBk=J837H7WnZYBAa=SP0_CcDrRcVzY3_2dB-S_zMk6OHB7XQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="qEwnkNqmRr99v3dEDQt5EAEwi9BnRhPBN"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:34711 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1758886AbbA3VIR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 30 Jan 2015 16:08:17 -0500
-In-Reply-To: <20150130081013.3f615803@doppio>
+Received: from mail2.dachary.org ([91.121.57.175]:50059 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752697AbbA3XK4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 30 Jan 2015 18:10:56 -0500
+In-Reply-To: <CABBk=J837H7WnZYBAa=SP0_CcDrRcVzY3_2dB-S_zMk6OHB7XQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andreas Bluemle <andreas.bluemle@itxperts.de>
-Cc: "Blinick, Stephen L" <stephen.l.blinick@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Yehuda Sadeh <yehuda@inktank.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Andreas,
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--qEwnkNqmRr99v3dEDQt5EAEwi9BnRhPBN
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-It looks like that was a stale sha1, but the newer one was also 
-broken.  I've retested and it's working for me now.  See latest wip-auth, 
-sha1 0c21a7875059bef80842756dfb003f47cc2d66a6.
+Hi Yehuda,
 
-Thanks!
-sage
+Thanks a lot for this inventory. I updated the tickets to make sure all o=
+f them have the "giant" string in the backport field. I'll try backportin=
+g myself which will help when it's trivial. If I hit a conflict I'll get =
+back to you :-)
 
-On Fri, 30 Jan 2015, Andreas Bluemle wrote:
+Greetings from Brussels !
 
-> Hi Sage,
-> 
-> I tried to integrate wip-auth into my 0.91 build environment.
-> 
-> I had not been able to start the cluster successfully: ceph-mon
-> crashes with a segmentation fault in CryptoKey::encrypt()
-> (see attachment).
-> 
-> This happens when linking with libnss or libcryptopp (version 5.6.2).
-> 
-> I created the patch to add wip-auth based on github
-> pull request 3523 and was able to use this patch directly 
-> with 0.91 with only a minor adaptation for common/ceph_context.h:
-> the 0.91 version of ceph_context.h did not know anything about
-> the experimental "class CephContextObs".
-> 
-> wip-auth commit ID is 1a0507a2940f6edcc2bf9533cfa6c210b0b41933.
-> 
-> As my build environment is rpm, I had to modify the invocation
-> of the configure script in the spec file instead of the do_autogen.sh
-> script.
-> 
-> 
-> Best Regards
-> 
-> Andreas Bluemle
-> 
-> 
-> On Tue, 27 Jan 2015 09:18:45 -0800 (PST)
-> Sage Weil <sweil@redhat.com> wrote:
-> 
-> > I spent some time focusing on just CryptoKey::encrypt().  I
-> > benchmarked 100,000 encrypts of 128 bytes and got, at baseline,
-> > 
-> >  cryptopp: 100000 encoded in 0.655651
-> >  libnss  : 100000 encoded in 1.288786
-> > 
-> > Ouch!  With a (fixed) version of my earlier patch that avoids
-> > uselessly copying the input buffer:
-> > 
-> >  100000 encoded in 1.231977
-> > 
-> > With a patch that puts the key structures in CryptoKey instead of 
-> > recreating them each time:
-> > 
-> >  100000 encoded in 0.396208  -- ~70% improvement over original
-> > 
-> > This is pushed to wip-auth.  There's also a patch that caches key
-> > structs for crypopp.. it now takes
-> > 
-> >  100000 encoded in 0.440758  -- ~33% improvement over original
-> > 
-> > (Not that almost anybody will ever care; we use libnss by default for
-> > both rpm and deb distros.)
-> > 
-> > So, yay, nss is now a bit faster.  What I'm not completely certain
-> > about is whether the structures I've preserved are truly stateless
-> > (and can be shared across threads, etc.).  They encrypt/decrypt
-> > methods are const so, if the libraries are const-correct, it should
-> > be fine... but perhaps someone familiar with nss and/or crypto++ can
-> > review this?
-> > 
-> > This is pushed to the latest wip-auth branch:
-> > 
-> > 	https://github.com/ceph/ceph/commits/wip-auth
-> > 
-> > Andreas and Stephen, what effect does this have on your numbers?
-> > 
-> > Thanks!
-> > sage
-> > 
-> > 
-> > On Mon, 26 Jan 2015, Blinick, Stephen L wrote:
-> > 
-> > > Good to know, I was wondering why the spec file defaulted to
-> > > lib-nss.. the dpkg-build for debian packages just uses whatever
-> > > configuration you had built, and I believe that will use
-> > > libcryptopp if the dependency is installed on the build machine
-> > > (last I looked).
-> > > 
-> > > I forgot to mention the numbers below were based on v.91.
-> > > 
-> > > Thanks,
-> > > 
-> > > Stephen
-> > > 
-> > > -----Original Message-----
-> > > From: ceph-devel-owner@vger.kernel.org
-> > > [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
-> > > Sent: Monday, January 26, 2015 10:24 AM To: Blinick, Stephen L
-> > > Cc: andreas.bluemle@itxperts.de; ceph-devel@vger.kernel.org
-> > > Subject: RE: wip-auth
-> > > 
-> > > On Mon, 26 Jan 2015, Blinick, Stephen L wrote:
-> > > > I noticed that the spec file for building RPM's defaults to
-> > > > building with libnss, instead of libcrypto++.  Since the
-> > > > measurements I'd done so far were from those RPM's I rebuilt with
-> > > > libcrypto++.. so FWIW here is the difference between those two on
-> > > > my system, memstore backend with a single OSD, and single
-> > > > client.    
-> > > > 
-> > > > Dual socket Xeon E5 2620v3, 64GB Memory,  RHEL7
-> > > > Kernel: 3.10.0-123.13.2.el7
-> > > > 
-> > > > 100% 4K Writes, 1xOSD w/ Rados Bench
-> > > > 	libnss		            |
-> > > > Cryptopp # QD	IOPS	Latency(ms)   |
-> > > > IOPS	Latency(ms)	IOPS Improvement % 16
-> > > > 14432.57	1.11    |	18896.60	0.85
-> > > > 30.93% 100% 4K Reads, 1xOSD w/ Rados
-> > > > Bench libnss | Cryptopp # QD IOPS Latency(ms)  | IOPS Latency(ms)
-> > > > IOPS Improvement % 16 19532.53 0.82 | 25708.70 0.62 31.62%
-> > > 
-> > > Yikes, 30%!  I think this definitely worth some effort.  We
-> > > switched to libnss because it has the weird government
-> > > certfiications that everyone wants and is more prevalent.  crypto++
-> > > is also not packaged for Red Hat distros at all (presumably for
-> > > that reason).
-> > > 
-> > > I suspect that most of the overhead is in the encryption context
-> > > setup and can be avoided with a bit of effort..
-> > > 
-> > > sage
-> > > 
-> > > 
-> > > > 
-> > > > 
-> > > > Thanks,
-> > > > 
-> > > > Stephen
-> > > > 
-> > > > -----Original Message-----
-> > > > From: ceph-devel-owner@vger.kernel.org 
-> > > > [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
-> > > > Sent: Thursday, January 22, 2015 4:56 PM
-> > > > To: andreas.bluemle@itxperts.de
-> > > > Cc: ceph-devel@vger.kernel.org
-> > > > Subject: wip-auth
-> > > > 
-> > > > Hi Andreas,
-> > > > 
-> > > > I took a look at the wip-auth I mentioned in the security call
-> > > > last week... and the patch didn't work at all.  Sorry if you
-> > > > wasted any time trying it.
-> > > > 
-> > > > Anyway, I fixed it up so that it actually worked and made one
-> > > > other optimization.  It would be great to hear what latencies you
-> > > > measure with the changes in place.
-> > > > 
-> > > > Also, it might be worth trying --with-cryptopp (or --with-nss if
-> > > > you built cryptopp by default) to see if there is a difference.
-> > > > There is a ton of boilerplate setting up encryption contexts and
-> > > > key structures and so on that I suspect could be cached (perhaps
-> > > > stashed in the CryptoKey struct?) with a bit of effort.  See
-> > > > 
-> > > > 	https://github.com/ceph/ceph/blob/master/src/auth/Crypto.cc#L99-L213
-> > > > 
-> > > > sage
-> > > > --
-> > > > To unsubscribe from this list: send the line "unsubscribe
-> > > > ceph-devel" in the body of a message to majordomo@vger.kernel.org
-> > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > > > 
-> > > > 
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe
-> > > ceph-devel" in the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > > -- To unsubscribe from this list: send the line "unsubscribe
-> > > ceph-devel" in the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > > 
-> > > 
-> > 
-> > 
-> 
-> 
-> 
-> -- 
-> Andreas Bluemle                     mailto:Andreas.Bluemle@itxperts.de
-> ITXperts GmbH                       http://www.itxperts.de
-> Balanstrasse 73, Geb. 08            Phone: (+49) 89 89044917
-> D-81541 Muenchen (Germany)          Fax:   (+49) 89 89044910
-> 
-> Company details: http://www.itxperts.de/imprint.htm
-> 
+On 30/01/2015 20:05, Yehuda Sadeh wrote:
+> Hi,
+>=20
+> these are the actual issues that I backported:
+>=20
+>  - 9878  rhel7 s3-tests fail due to missing reason
+>  - 9918  RGW-Swift: SubUser access permissions, does not seems to workm=
+inor
+>  - 10103 swift tests failing
+>  - 10354 Failed s3 tests in
+> upgrade:dumpling-firefly-x:parallel-next-distro-basic-multi run
+>  - 10471 rgw: metadata sync doesn't create subusers correctly
+>  - 9254  rgw: civetweb requires explicit \r\n for http headers
+>  - 9478  Incorrect content type in response header
+>  - 9479  ETag is not included in the XML response to put object copy
+> operationminor
+>  - 9877  In some cases it's possible for rgw to segfault on http COPY
+>  - 10329 rgw: s3 need to return SignatureDoesNotMatch instead of
+> AccessDenied- minor
+>  - 5595  object has a Content-Type, but its content_type property is
+> not shown in Swift object enumeration
+>  - 9907  Normal    radosgw-admin: can't disable max_size quota
+>  - 9973  Validation of Swift DLO manifest object ETag doesn't match
+> OpenStack Swift behavior
+>  - 10307 rgw: setting bucket attributes (swift POST on bucket)
+> sometimes failminor
+>  - 10334 rgw: s3 need to return InvalidAccessKeyId instead of AccessDen=
+ied
+>  - 9587  ceph-radosgw sysvinit script on EL6 cannot set ulimit
+>=20
+>=20
+> On Wed, Jan 28, 2015 at 4:48 PM, Loic Dachary <loic@dachary.org> wrote:=
+
+>> Hi Yehuda,
+>>
+>> Unless I'm mistaken there currently are no rgw issues scheduled to be =
+backported to giant (i.e. with the giant word in the backport field of th=
+e issue)[1] that have already been backported to firefly, as part of the =
+v0.80.8[2] release or after[3]. You mentionned that about 18 patches back=
+ported to firefly should also be backported to giant and I was hoping to =
+find which one exactly thanks to the backport field.
+>>
+>> I'll go thru the rgw backports found in v0.80.8 to figure out which on=
+e should be in giant. I don't need anything righ now, this is just an upd=
+ate to let you know things are making progress.
+>>
+>> Cheers
+>>
+>> [1] inventory of the pending giant v0.87.1 release http://tracker.ceph=
+=2Ecom/issues/10501
+>> [2] inventory of the firefly v0.80.8 commits http://tracker.ceph.com/i=
+ssues/10639
+>> [3] inventory of the pending firefly v0.80.9 release http://tracker.ce=
+ph.com/issues/10641
+>>
+>> --
+>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>>
+>>
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--qEwnkNqmRr99v3dEDQt5EAEwi9BnRhPBN
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlTMD34ACgkQ8dLMyEl6F22beQCgpJVzyPVkOOyU7R0KSpOAiIm1
+jjMAnAkSVo7uxSFWPR3dbwMVe8+h5g27
+=jHer
+-----END PGP SIGNATURE-----
+
+--qEwnkNqmRr99v3dEDQt5EAEwi9BnRhPBN--
