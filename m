@@ -1,89 +1,81 @@
-From: Bassam Tabbara <bassamtabbara@hotmail.com>
-Subject: Re: Supporting partial writes for EC backend
-Date: Fri, 30 Jan 2015 10:58:39 -0800
-Message-ID: <BLU436-SMTP48BAFD96E02F69EE6BDE18A7310@phx.gbl>
-References: <BLU436-SMTP14889EB55A90A7C338308A9A7310@phx.gbl> <CA+4uBUZWqWqy=gddVB=sWT7PsLsvq4mYVMn8_-tjM3sUL50Qsw@mail.gmail.com> <BLU436-SMTP163B80C7054F010E6535A1EA7310@phx.gbl> <CA+4uBUbzpHKF0ATmgUztZ4hzGm3XhkR1caB8Cd=k73FZeNLNnw@mail.gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 8.1 \(1993\))
-Content-Type: text/plain; charset=utf-8
+From: Yehuda Sadeh <yehuda@inktank.com>
+Subject: Re: rgw backports to giant update
+Date: Fri, 30 Jan 2015 11:05:21 -0800
+Message-ID: <CABBk=J837H7WnZYBAa=SP0_CcDrRcVzY3_2dB-S_zMk6OHB7XQ@mail.gmail.com>
+References: <54C98379.7030100@dachary.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from blu004-omc4s12.hotmail.com ([65.55.111.151]:60073 "EHLO
-	BLU004-OMC4S12.hotmail.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752604AbbA3S6p convert rfc822-to-8bit
-	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 30 Jan 2015 13:58:45 -0500
-In-Reply-To: <CA+4uBUbzpHKF0ATmgUztZ4hzGm3XhkR1caB8Cd=k73FZeNLNnw@mail.gmail.com>
+Received: from mail-pa0-f41.google.com ([209.85.220.41]:36276 "EHLO
+	mail-pa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753562AbbA3TFW convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 30 Jan 2015 14:05:22 -0500
+Received: by mail-pa0-f41.google.com with SMTP id kq14so55693772pab.0
+        for <ceph-devel@vger.kernel.org>; Fri, 30 Jan 2015 11:05:21 -0800 (PST)
+In-Reply-To: <54C98379.7030100@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: sjust@redhat.com
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Thanks, I=E2=80=99ll take a look at osd_internals.=20
+Hi,
 
-Are you saying that a cache tier =E2=80=94> EC Pool is good enough? Wha=
-t if any is the downside to using a cache tier ontop of an EC pool? I a=
-ssume that the size of cache is going to be important, and so is the mi=
-gration algorithm between the cache tier and the backing tier.=09
+these are the actual issues that I backported:
 
-> On Jan 30, 2015, at 10:49 AM, Samuel Just <sam.just@inktank.com> wrot=
-e:
->=20
-> This would need to be a new backend, and it's going to be a massive
-> amount of work.  You want to start by reading and understanding all o=
-f
-> the docs in osd_internals.  I also suspect you'll get a lot of what
-> you need from using a replicated cache in front of an EC pool.
-> -Sam
->=20
-> On Fri, Jan 30, 2015 at 10:00 AM, Bassam Tabbara
-> <bassamtabbara@hotmail.com> wrote:
->> I=E2=80=99d like to explore adding a new EC pool type as you suggest=
-=2E The idea is to have RBD sit on-top of a fully functional EC backend=
-=2E Just as with RAID6 arrays today some applications are aware of the =
-read-modify-write penalty and they could optimize for it.
->>=20
->> I=E2=80=99m new to ceph, so if you can point me in the right directi=
-on I would appreciate it. Do you think this is something that could be =
-implemented as a modification to the existing ECBackend or is this a ne=
-w backend. I=E2=80=99m happy to jump on a quick call if it makes things=
- easier.
->>=20
->>> On Jan 30, 2015, at 8:59 AM, Samuel Just <sam.just@inktank.com> wro=
-te:
->>>=20
->>> Basically, it's an architectural choice:
->>>=20
->>> https://github.com/ceph/ceph/blob/master/doc/dev/osd_internals/eras=
-ure_coding/pgbackend.rst#client-writes
->>>=20
->>> If we wanted to support partial writes, we'd probably want to
->>> introduce a second EC pool type with different tradeoffs.  Note, yo=
-u
->>> can get slow partial writes on an EC pool by placing a replicated
->>> cache in front.
->>> -Sam
->>>=20
->>> On Fri, Jan 30, 2015 at 8:36 AM, Bassam Tabbara
->>> <bassamtabbara@hotmail.com> wrote:
->>>> Hello,
->>>>=20
->>>> I realize that the EC Backend does not support all operations like=
- partial writes, truncate, and others. I=E2=80=99d like to understand w=
-hether adding the missing operations is something that is architectural=
-ly possible, or if this is a limitation of the architecture / approach.=
- Can someone shed some light on this?
->>>>=20
->>>> I realize that partial writes are going to be slow/inefficient on =
-an EC backend compared to a replicated backend.
->>>>=20
->>>> Thanks!
->>>> Bassam--
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-dev=
-el" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>=20
+ - 9878  rhel7 s3-tests fail due to missing reason
+ - 9918  RGW-Swift: SubUser access permissions, does not seems to workm=
+inor
+ - 10103 swift tests failing
+ - 10354 Failed s3 tests in
+upgrade:dumpling-firefly-x:parallel-next-distro-basic-multi run
+ - 10471 rgw: metadata sync doesn't create subusers correctly
+ - 9254  rgw: civetweb requires explicit \r\n for http headers
+ - 9478  Incorrect content type in response header
+ - 9479  ETag is not included in the XML response to put object copy
+operationminor
+ - 9877  In some cases it's possible for rgw to segfault on http COPY
+ - 10329 rgw: s3 need to return SignatureDoesNotMatch instead of
+AccessDenied- minor
+ - 5595  object has a Content-Type, but its content_type property is
+not shown in Swift object enumeration
+ - 9907  Normal    radosgw-admin: can't disable max_size quota
+ - 9973  Validation of Swift DLO manifest object ETag doesn't match
+OpenStack Swift behavior
+ - 10307 rgw: setting bucket attributes (swift POST on bucket)
+sometimes failminor
+ - 10334 rgw: s3 need to return InvalidAccessKeyId instead of AccessDen=
+ied
+ - 9587  ceph-radosgw sysvinit script on EL6 cannot set ulimit
 
+
+On Wed, Jan 28, 2015 at 4:48 PM, Loic Dachary <loic@dachary.org> wrote:
+> Hi Yehuda,
+>
+> Unless I'm mistaken there currently are no rgw issues scheduled to be=
+ backported to giant (i.e. with the giant word in the backport field of=
+ the issue)[1] that have already been backported to firefly, as part of=
+ the v0.80.8[2] release or after[3]. You mentionned that about 18 patch=
+es backported to firefly should also be backported to giant and I was h=
+oping to find which one exactly thanks to the backport field.
+>
+> I'll go thru the rgw backports found in v0.80.8 to figure out which o=
+ne should be in giant. I don't need anything righ now, this is just an =
+update to let you know things are making progress.
+>
+> Cheers
+>
+> [1] inventory of the pending giant v0.87.1 release http://tracker.cep=
+h.com/issues/10501
+> [2] inventory of the firefly v0.80.8 commits http://tracker.ceph.com/=
+issues/10639
+> [3] inventory of the pending firefly v0.80.9 release http://tracker.c=
+eph.com/issues/10641
+>
+> --
+> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>
+>
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
