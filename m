@@ -1,78 +1,238 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: Re: 01/28/2015 Weekly Ceph Performance Meeting IS ON!
-Date: Fri, 30 Jan 2015 07:56:26 +0100 (CET)
-Message-ID: <1109185204.5921374.1422600986866.JavaMail.zimbra@oxygem.tv>
-References: <54C8FC66.3030808@redhat.com>
+From: Andreas Bluemle <andreas.bluemle@itxperts.de>
+Subject: Re: wip-auth
+Date: Fri, 30 Jan 2015 08:10:13 +0100
+Message-ID: <20150130081013.3f615803@doppio>
+References: <alpine.DEB.2.00.1501221512580.19192@cobra.newdream.net>
+ <3649A15A2562B54294DE14BCE5AC79120AB43257@ORSMSX152.amr.corp.intel.com>
+ <alpine.DEB.2.00.1501260921250.3895@cobra.newdream.net>
+ <3649A15A2562B54294DE14BCE5AC79120AB4E6A6@FMSMSX106.amr.corp.intel.com>
+ <alpine.DEB.2.00.1501261554360.18846@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/mixed; boundary="MP_/SIlZo=mFScjkHf9kLgKYL_A"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:41086 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751798AbbA3G43 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 30 Jan 2015 01:56:29 -0500
-In-Reply-To: <1007584690.5921373.1422600972353.JavaMail.zimbra@oxygem.tv>
+Received: from mail.itxperts.de ([212.202.108.166]:12197 "EHLO
+	mail.itxperts.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753418AbbA3HKd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 30 Jan 2015 02:10:33 -0500
+In-Reply-To: <alpine.DEB.2.00.1501261554360.18846@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: "Blinick, Stephen L" <stephen.l.blinick@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Mark,
+--MP_/SIlZo=mFScjkHf9kLgKYL_A
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
 
-do you have a recorded video of the meeting ?
+Hi Sage,
 
-I'm seeing some discussions about ssd benchmark in etherpad,
-as I'm going to do some big benchs next month, I'm interested ;)
+I tried to integrate wip-auth into my 0.91 build environment.
 
+I had not been able to start the cluster successfully: ceph-mon
+crashes with a segmentation fault in CryptoKey::encrypt()
+(see attachment).
 
+This happens when linking with libnss or libcryptopp (version 5.6.2).
 
+I created the patch to add wip-auth based on github
+pull request 3523 and was able to use this patch directly 
+with 0.91 with only a minor adaptation for common/ceph_context.h:
+the 0.91 version of ceph_context.h did not know anything about
+the experimental "class CephContextObs".
 
------ Mail original -----
-De: "Mark Nelson" <mark.nelson@inktank.com>
-=C3=80: "ceph-devel" <ceph-devel@vger.kernel.org>
-Envoy=C3=A9: Mercredi 28 Janvier 2015 16:12:38
-Objet: 01/28/2015 Weekly Ceph Performance Meeting IS ON!
+wip-auth commit ID is 1a0507a2940f6edcc2bf9533cfa6c210b0b41933.
 
-Sorry, got this out a little late. 8AM PST as usual. (IE 50 minutes=20
-from now!) Please add an agenda item if there is something you want to=20
-talk about!=20
-
-Here's the links:=20
-
-Etherpad URL:=20
-http://pad.ceph.com/p/performance_weekly=20
-
-To join the Meeting:=20
-https://bluejeans.com/268261044=20
-
-To join via Browser:=20
-https://bluejeans.com/268261044/browser=20
-
-To join with Lync:=20
-https://bluejeans.com/268261044/lync=20
+As my build environment is rpm, I had to modify the invocation
+of the configure script in the spec file instead of the do_autogen.sh
+script.
 
 
-To join via Room System:=20
-Video Conferencing System: bjn.vc -or- 199.48.152.152=20
-Meeting ID: 268261044=20
+Best Regards
 
-To join via Phone:=20
-1) Dial:=20
-+1 408 740 7256=20
-+1 888 240 2560(US Toll Free)=20
-+1 408 317 9253(Alternate Number)=20
-(see all numbers - http://bluejeans.com/numbers)=20
-2) Enter Conference ID: 268261044=20
+Andreas Bluemle
 
-Mark=20
---=20
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n=20
-the body of a message to majordomo@vger.kernel.org=20
-More majordomo info at http://vger.kernel.org/majordomo-info.html=20
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On Tue, 27 Jan 2015 09:18:45 -0800 (PST)
+Sage Weil <sweil@redhat.com> wrote:
+
+> I spent some time focusing on just CryptoKey::encrypt().  I
+> benchmarked 100,000 encrypts of 128 bytes and got, at baseline,
+> 
+>  cryptopp: 100000 encoded in 0.655651
+>  libnss  : 100000 encoded in 1.288786
+> 
+> Ouch!  With a (fixed) version of my earlier patch that avoids
+> uselessly copying the input buffer:
+> 
+>  100000 encoded in 1.231977
+> 
+> With a patch that puts the key structures in CryptoKey instead of 
+> recreating them each time:
+> 
+>  100000 encoded in 0.396208  -- ~70% improvement over original
+> 
+> This is pushed to wip-auth.  There's also a patch that caches key
+> structs for crypopp.. it now takes
+> 
+>  100000 encoded in 0.440758  -- ~33% improvement over original
+> 
+> (Not that almost anybody will ever care; we use libnss by default for
+> both rpm and deb distros.)
+> 
+> So, yay, nss is now a bit faster.  What I'm not completely certain
+> about is whether the structures I've preserved are truly stateless
+> (and can be shared across threads, etc.).  They encrypt/decrypt
+> methods are const so, if the libraries are const-correct, it should
+> be fine... but perhaps someone familiar with nss and/or crypto++ can
+> review this?
+> 
+> This is pushed to the latest wip-auth branch:
+> 
+> 	https://github.com/ceph/ceph/commits/wip-auth
+> 
+> Andreas and Stephen, what effect does this have on your numbers?
+> 
+> Thanks!
+> sage
+> 
+> 
+> On Mon, 26 Jan 2015, Blinick, Stephen L wrote:
+> 
+> > Good to know, I was wondering why the spec file defaulted to
+> > lib-nss.. the dpkg-build for debian packages just uses whatever
+> > configuration you had built, and I believe that will use
+> > libcryptopp if the dependency is installed on the build machine
+> > (last I looked).
+> > 
+> > I forgot to mention the numbers below were based on v.91.
+> > 
+> > Thanks,
+> > 
+> > Stephen
+> > 
+> > -----Original Message-----
+> > From: ceph-devel-owner@vger.kernel.org
+> > [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
+> > Sent: Monday, January 26, 2015 10:24 AM To: Blinick, Stephen L
+> > Cc: andreas.bluemle@itxperts.de; ceph-devel@vger.kernel.org
+> > Subject: RE: wip-auth
+> > 
+> > On Mon, 26 Jan 2015, Blinick, Stephen L wrote:
+> > > I noticed that the spec file for building RPM's defaults to
+> > > building with libnss, instead of libcrypto++.  Since the
+> > > measurements I'd done so far were from those RPM's I rebuilt with
+> > > libcrypto++.. so FWIW here is the difference between those two on
+> > > my system, memstore backend with a single OSD, and single
+> > > client.    
+> > > 
+> > > Dual socket Xeon E5 2620v3, 64GB Memory,  RHEL7
+> > > Kernel: 3.10.0-123.13.2.el7
+> > > 
+> > > 100% 4K Writes, 1xOSD w/ Rados Bench
+> > > 	libnss		            |
+> > > Cryptopp # QD	IOPS	Latency(ms)   |
+> > > IOPS	Latency(ms)	IOPS Improvement % 16
+> > > 14432.57	1.11    |	18896.60	0.85
+> > > 30.93% 100% 4K Reads, 1xOSD w/ Rados
+> > > Bench libnss | Cryptopp # QD IOPS Latency(ms)  | IOPS Latency(ms)
+> > > IOPS Improvement % 16 19532.53 0.82 | 25708.70 0.62 31.62%
+> > 
+> > Yikes, 30%!  I think this definitely worth some effort.  We
+> > switched to libnss because it has the weird government
+> > certfiications that everyone wants and is more prevalent.  crypto++
+> > is also not packaged for Red Hat distros at all (presumably for
+> > that reason).
+> > 
+> > I suspect that most of the overhead is in the encryption context
+> > setup and can be avoided with a bit of effort..
+> > 
+> > sage
+> > 
+> > 
+> > > 
+> > > 
+> > > Thanks,
+> > > 
+> > > Stephen
+> > > 
+> > > -----Original Message-----
+> > > From: ceph-devel-owner@vger.kernel.org 
+> > > [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
+> > > Sent: Thursday, January 22, 2015 4:56 PM
+> > > To: andreas.bluemle@itxperts.de
+> > > Cc: ceph-devel@vger.kernel.org
+> > > Subject: wip-auth
+> > > 
+> > > Hi Andreas,
+> > > 
+> > > I took a look at the wip-auth I mentioned in the security call
+> > > last week... and the patch didn't work at all.  Sorry if you
+> > > wasted any time trying it.
+> > > 
+> > > Anyway, I fixed it up so that it actually worked and made one
+> > > other optimization.  It would be great to hear what latencies you
+> > > measure with the changes in place.
+> > > 
+> > > Also, it might be worth trying --with-cryptopp (or --with-nss if
+> > > you built cryptopp by default) to see if there is a difference.
+> > > There is a ton of boilerplate setting up encryption contexts and
+> > > key structures and so on that I suspect could be cached (perhaps
+> > > stashed in the CryptoKey struct?) with a bit of effort.  See
+> > > 
+> > > 	https://github.com/ceph/ceph/blob/master/src/auth/Crypto.cc#L99-L213
+> > > 
+> > > sage
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe
+> > > ceph-devel" in the body of a message to majordomo@vger.kernel.org
+> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > > 
+> > > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe
+> > ceph-devel" in the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > -- To unsubscribe from this list: send the line "unsubscribe
+> > ceph-devel" in the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> > 
+> 
+> 
+
+
+
+-- 
+Andreas Bluemle                     mailto:Andreas.Bluemle@itxperts.de
+ITXperts GmbH                       http://www.itxperts.de
+Balanstrasse 73, Geb. 08            Phone: (+49) 89 89044917
+D-81541 Muenchen (Germany)          Fax:   (+49) 89 89044910
+
+Company details: http://www.itxperts.de/imprint.htm
+
+--MP_/SIlZo=mFScjkHf9kLgKYL_A
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment; filename=ceph-mon-0.91-wip-auth-backtrace.txt
+
+0> 2015-01-30 08:00:15.644464 7f3229507700 -1 *** Caught signal (Segmentation fault) **
+ in thread 7f3229507700
+
+ ceph version 0.91 (725d66098c98c2008b5fa07538325cc6816ca4a1)
+ 1: /usr/bin/ceph-mon() [0x8ea1a5]
+ 2: /lib64/libc.so.6() [0x316e4329a0]
+ 3: (CryptoKey::encrypt(CephContext*, ceph::buffer::list const&, ceph::buffer::list&, std::string&) const+0x41) [0x6c2c51]
+ 4: (void encode_encrypt_enc_bl<CephXServiceTicketInfo>(CephContext*, CephXServiceTicketInfo const&, CryptoKey const&, ceph::buffer::list&, std::string&)+0x26a) [0x6bf8ea]
+ 5: (cephx_build_service_ticket_blob(CephContext*, CephXSessionAuthInfo&, CephXTicketBlob&)+0x2b2) [0x6bb002]
+ 6: (Monitor::ms_get_authorizer(int, AuthAuthorizer**, bool)+0x39d) [0x57755d]
+ 7: (SimpleMessenger::get_authorizer(int, bool)+0x4b) [0x8b3e5b]
+ 8: (Pipe::connect()+0x1975) [0x8d8625]
+ 9: (Pipe::writer()+0x9f3) [0x8db713]
+ 10: (Pipe::Writer::entry()+0xd) [0x8de4ed]
+ 11: /lib64/libpthread.so.0() [0x316ec079d1]
+ 12: (clone()+0x6d) [0x316e4e8b7d]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
+
+
+--MP_/SIlZo=mFScjkHf9kLgKYL_A--
