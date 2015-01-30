@@ -1,52 +1,50 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: [ceph-users] keyvaluestore backend metadata overhead
-Date: Sat, 31 Jan 2015 00:18:11 +0800
-Message-ID: <CACJqLyZegga=U2gJ+bQWjG_AY7OhsWXhgrT=Og-ahO3btyd7fQ@mail.gmail.com>
-References: <CAC8iE5iHTEfSQL978paWpu9hSfUbE65OVT_dKi2P=yvWSQ5JhA@mail.gmail.com>
-	<alpine.DEB.2.00.1501291447290.3895@cobra.newdream.net>
-	<CACJqLya-SNwudLTOqu2RPgr3_MZKzFWi9gXYH_xCg1WjxAx59w@mail.gmail.com>
-	<CAC8iE5jrYquoQ+n+uwiiZ5uevXfipGsab9a_CgjtZoW9h1L0SQ@mail.gmail.com>
-	<CACJqLyZnx28QEDU-Jy3KjzS6sumMG_ivqJQ9Ye_cg++Cj8WWQg@mail.gmail.com>
-	<CAC8iE5hSDg-nY+7g+N2FF6M8ijGe-s3+Dmg1PkGP7KqJOduyqQ@mail.gmail.com>
+From: Axel Dunkel <ad@dunkel.de>
+Subject: radosgw: bad content length
+Date: Fri, 30 Jan 2015 16:22:43 +0000 (UTC)
+Message-ID: <loom.20150130T152219-712@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f176.google.com ([209.85.212.176]:48966 "EHLO
-	mail-wi0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759167AbbA3QSM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 30 Jan 2015 11:18:12 -0500
-Received: by mail-wi0-f176.google.com with SMTP id bs8so4199607wib.3
-        for <ceph-devel@vger.kernel.org>; Fri, 30 Jan 2015 08:18:11 -0800 (PST)
-In-Reply-To: <CAC8iE5hSDg-nY+7g+N2FF6M8ijGe-s3+Dmg1PkGP7KqJOduyqQ@mail.gmail.com>
+Received: from plane.gmane.org ([80.91.229.3]:49643 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752643AbbA3QZH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 30 Jan 2015 11:25:07 -0500
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1YHENU-00034G-BX
+	for ceph-devel@vger.kernel.org; Fri, 30 Jan 2015 17:25:04 +0100
+Received: from soc.dunkel.de ([soc.dunkel.de])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Fri, 30 Jan 2015 17:25:04 +0100
+Received: from ad by soc.dunkel.de with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Fri, 30 Jan 2015 17:25:04 +0100
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Chris Pacejo <cpacejo@clearskydata.com>
-Cc: Sage Weil <sage@newdream.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Although I still have some confusing, it's glad to see more attempts.
-More test results  are welcomed!
+Hi,
 
-On Sat, Jan 31, 2015 at 12:08 AM, Chris Pacejo <cpacejo@clearskydata.com> wrote:
-> On Fri, Jan 30, 2015 at 10:52 AM, Haomai Wang <haomaiwang@gmail.com> wrote:
->> It's really a surprise that you impl a MySQL backend. Could I know the
->> purpose? Because it may not fit with keyvaluestore I think.
->
-> We've found it to perform better (in isolation) than LevelDB.  We were
-> able to map KeyValueDB's interface to it fairly painlessly, and I
-> believe correctly.  (The only major catch was that we needed to buffer
-> operations within a transaction and execute them all at once on
-> submit, to prevent MySQL unnecessarily holding locks for the duration
-> of long-lived transactions.)
->
->
->> You can simply calculate the sum of submit_transaction_sync consuming
->> time, it would be the multiple of the op thread number.
->
-> I will try this, thanks.
+there are issues with radosgw and large file transfers without using 
+multiparts (like with "s3cmd --disable-multipart put") which seem to be 
+somehow known, but unsolved. 
+
+Things run fine if the request takes no longer than 180sec. If it takes 
+longer, rgw_rest.cc (line 1236) gives the error "bad content length, 
+aborting" AFTER the request has been fully completed (so no timeout 
+issue). If the s3cmd runs less than 180sec things go through fine, if it 
+takes longer, the same command fails. 
+
+This error is given if the variable Content-Length can not be parsed - is 
+it possible that some timer causes this variable to get corrupted? I did 
+not find any 180sec timer, though...
+
+This is with ceph version 0.87 (c51c8f9d80fa4e0168aa52685b8de40e42758578), 
+Ubuntu 14.04.
+
+Best regards
+Axel Dunkel
 
 
-
--- 
-Best Regards,
-
-Wheat
