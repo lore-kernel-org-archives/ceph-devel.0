@@ -1,89 +1,113 @@
-From: Axel Dunkel <ad@dunkel.de>
-Subject: AW: radosgw: bad content length
-Date: Fri, 30 Jan 2015 17:58:57 +0100 (CET)
-Message-ID: <02c301d03cae$090b3590$1b21a0b0$@dunkel.de>
-References: <loom.20150130T152219-712@post.gmane.org> <CABBk=J9G-pQauPiaiixmbZ6U=aLgb16i99WS5Ck0QcZ7ZcGdig@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: dumpling integration : valgrind leak
+Date: Fri, 30 Jan 2015 18:56:28 +0100
+Message-ID: <54CBC5CC.5050706@dachary.org>
+References: <54CB9C78.5070504@dachary.org> <CA+4uBUZR3Dvy5gszM2pOVuLsjDGAKdhRo8YLnzaWg-HOEWgcbw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="pJaQwq1NupUFwqnraCTlm5jBxK5knC22S"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay.rod.mail.dunkel.de ([88.215.200.254]:53316 "EHLO
-	relay.rod.mail.dunkel.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758757AbbA3RFq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 30 Jan 2015 12:05:46 -0500
-In-Reply-To: <CABBk=J9G-pQauPiaiixmbZ6U=aLgb16i99WS5Ck0QcZ7ZcGdig@mail.gmail.com>
-Content-Language: de
+Received: from mail2.dachary.org ([91.121.57.175]:49930 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1753970AbbA3R4b (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 30 Jan 2015 12:56:31 -0500
+In-Reply-To: <CA+4uBUZR3Dvy5gszM2pOVuLsjDGAKdhRo8YLnzaWg-HOEWgcbw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: sjust@redhat.com
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi,
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--pJaQwq1NupUFwqnraCTlm5jBxK5knC22S
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-the connection is not being shut down, also not idle (constantly=20
-transferring with more than 100 Mbit/s). It (really :-) ) is the specia=
-l=20
-modified libapache2-mod-fastcgi, 2.4.7~0910052141-ceph1.
+After a little digging I found https://github.com/ceph/ceph/commit/02fae9=
+fc54c10b5a932102bac43f32199d4cb612 which seems to be a plausible fix in d=
+umpling also https://github.com/ceph/ceph/pull/3552. What do you think ?
 
-Telling from the source code the issue seems not to be that the content=
-=20
-lengths do not match, rather that the http-header Content-Length is not=
-=20
-parseable (allthough the header is displayed fine in the debug output).=
- If=20
-strict_strtol returns an error, to be exact - ?
+On 30/01/2015 16:35, Samuel Just wrote:
+> Yeah, that's probably new.
+> -Sam
+>=20
+> On Fri, Jan 30, 2015 at 7:00 AM, Loic Dachary <loic@dachary.org> wrote:=
 
-Best regards
-Axel Dunkel
+>> Hi Sam,
+>>
+>> I stumbled upon what seems to be a leak at http://pulpito.ceph.com/loi=
+c-2015-01-29_15:41:06-rados-dumpling-backports---basic-multi/730305/ and =
+the valgrind xml file is at http://tracker.ceph.com/attachments/download/=
+1610/v.txt
+>>
+>>     <text>612 (584 direct, 28 indirect) bytes in 1 blocks are definite=
+ly lost in loss record 268 of 287</text>
+>>       <fn>operator new(unsigned long)</fn>
+>>       <fn>ReplicatedPG::get_object_context(hobject_t const&amp;, bool)=
+</fn>
+>>       <line>4585</line>
+>>       <fn>ReplicatedPG::find_object_context(hobject_t const&amp;, Obje=
+ctContext**, bool, snapid_t*)</fn>
+>>       <line>4658</line>
+>>       <fn>ReplicatedPG::do_op(std::tr1::shared_ptr&lt;OpRequest&gt;)</=
+fn>
+>>       <line>835</line>
+>>       <fn>PG::do_request(std::tr1::shared_ptr&lt;OpRequest&gt;, Thread=
+Pool::TPHandle&amp;)</fn>
+>>       <line>1455</line>
+>>       <fn>OSD::dequeue_op(boost::intrusive_ptr&lt;PG&gt;, std::tr1::sh=
+ared_ptr&lt;OpRequest&gt;, ThreadPool::TPHandle&amp;)</fn>
+>>       <line>7169</line>
+>>       <fn>OSD::OpWQ::_process(boost::intrusive_ptr&lt;PG&gt;, ThreadPo=
+ol::TPHandle&amp;)</fn>
+>>       <line>7141</line>
+>>       <fn>ThreadPool::WorkQueueVal&lt;std::pair&lt;boost::intrusive_pt=
+r&lt;PG&gt;, std::tr1::shared_ptr&lt;OpRequest&gt; &gt;, boost::intrusive=
+_ptr&lt;PG&gt; &gt;::_void_process(void*, ThreadPool::TPHandle&amp;)</fn>=
 
------Urspr=C3=BCngliche Nachricht-----
-Von: yehuda@inktank.com [mailto:yehuda@inktank.com] Im Auftrag von Yehu=
-da=20
-Sadeh
-Gesendet: Freitag, 30. Januar 2015 17:39
-An: Axel Dunkel
-Cc: ceph-devel
-Betreff: Re: radosgw: bad content length
-
-On Fri, Jan 30, 2015 at 8:22 AM, Axel Dunkel <ad@dunkel.de> wrote:
-> Hi,
->
-> there are issues with radosgw and large file transfers without using
-> multiparts (like with "s3cmd --disable-multipart put") which seem to
-> be somehow known, but unsolved.
->
-> Things run fine if the request takes no longer than 180sec. If it
-> takes longer, rgw_rest.cc (line 1236) gives the error "bad content
-> length, aborting" AFTER the request has been fully completed (so no
-> timeout issue). If the s3cmd runs less than 180sec things go through
-> fine, if it takes longer, the same command fails.
->
-> This error is given if the variable Content-Length can not be parsed =
--
-> is it possible that some timer causes this variable to get corrupted?
-> I did not find any 180sec timer, though...
->
-> This is with ceph version 0.87
-> (c51c8f9d80fa4e0168aa52685b8de40e42758578),
-> Ubuntu 14.04.
->
-That would happen if the connection is shut down for some reason (eithe=
-r=20
-client to apache tcp connection, or apache module to radosgw connection=
-).=20
-This may very well be due to inactivity. At that point, rgw will get so=
-me=20
-kind of EOF status, and will verify that total received content is equa=
-l to=20
-the Content-Length field. If it's not equal you'd get that response. Ar=
-e=20
-you, by any chance, using mod_fcgid as the fastcgi module (as opposed t=
-o=20
-mod_fastcgi, or mod_proxy_fcgi)?
-
-Yehuda
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+>>       <line>191</line>
+>>       <fn>ThreadPool::worker(ThreadPool::WorkThread*)</fn>
+>>       <line>128</line>
+>>       <fn>ThreadPool::WorkThread::entry()</fn>
+>>       <line>318</line>
+>>       <fn>start_thread</fn>
+>>       <line>312</line>
+>>       <fn>clone</fn>
+>>       <line>111</line>
+>>
+>> A quick grep of get_object_context in redmine does not hit. Does it ri=
+ng a bell ?
+>>
+>> Cheers
+>>
+>> dumpling backport inventory: http://tracker.ceph.com/issues/10560
+>> ticket: http://tracker.ceph.com/issues/10697
+>>
+>> --
+>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--pJaQwq1NupUFwqnraCTlm5jBxK5knC22S
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlTLxcwACgkQ8dLMyEl6F23ZXACdFxNPi9VHVNvZzo55zXp3oh9M
+soUAoKid/WXmlGSGA4sV/QGANfr4I3an
+=HK+W
+-----END PGP SIGNATURE-----
+
+--pJaQwq1NupUFwqnraCTlm5jBxK5knC22S--
