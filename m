@@ -1,94 +1,74 @@
-From: Dennis Chen <kernel.org.gnu@gmail.com>
-Subject: Re: Article about Object Store API
-Date: Fri, 30 Jan 2015 09:33:56 +0800
-Message-ID: <CA+U0gVg7RWsJNHW+qKa0NLZzePiBOUQ8uu3=hqaP_-dc04thNA@mail.gmail.com>
-References: <871tmgvtje.fsf@irq0.org> <CA+U0gViEieTP0vL+NYSBL7iHkOgBR1jnu_SsbZtQv8-Ci+BBgg@mail.gmail.com>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: [ceph-users] keyvaluestore backend metadata overhead
+Date: Fri, 30 Jan 2015 10:46:06 +0800
+Message-ID: <CACJqLya-SNwudLTOqu2RPgr3_MZKzFWi9gXYH_xCg1WjxAx59w@mail.gmail.com>
+References: <CAC8iE5iHTEfSQL978paWpu9hSfUbE65OVT_dKi2P=yvWSQ5JhA@mail.gmail.com>
+	<alpine.DEB.2.00.1501291447290.3895@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f49.google.com ([209.85.220.49]:41434 "EHLO
-	mail-pa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753153AbbA3BeR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Jan 2015 20:34:17 -0500
-Received: by mail-pa0-f49.google.com with SMTP id fa1so45719388pad.8
-        for <ceph-devel@vger.kernel.org>; Thu, 29 Jan 2015 17:34:16 -0800 (PST)
-In-Reply-To: <CA+U0gViEieTP0vL+NYSBL7iHkOgBR1jnu_SsbZtQv8-Ci+BBgg@mail.gmail.com>
+Received: from mail-we0-f170.google.com ([74.125.82.170]:41682 "EHLO
+	mail-we0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751554AbbA3CqI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Jan 2015 21:46:08 -0500
+Received: by mail-we0-f170.google.com with SMTP id w55so19326689wes.1
+        for <ceph-devel@vger.kernel.org>; Thu, 29 Jan 2015 18:46:07 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1501291447290.3895@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Marcel Lauhoff <ml@irq0.org>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Chris Pacejo <cpacejo@clearskydata.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hello, marcel,
+Hi Chris,
 
-Below is the email sent to the ceph-users mail list regarding ceph
-class question, but seems it's in pending state since I am not the
-member of that list.
->>
-Hello,
+For metadata overhead, we need to resolve it at upper level,
+keyvaluestore won't add extra metadata in normal io except rarely
+header save which only update when header changed.
 
-I found the document of ceph class usage is very few, below is the
-only one which can almost address my needs--
-http://ceph.com/rados/dynamic-object-interfaces-with-lua/
+As for active write, why do you think it there only one active write
+in keyvaluestore threads? I just check runtime perf data again, it
+looks fine that multi write can do concurrently submit transaction.
 
-But still some questions confusing me left there:
-
-1. How to make the OSD to load the class lib? or what's the process
-for an OSD deamon to load a customized class lib?
-I checked my OSD log file(/var/log/ceph/ceph-osd.2.
-log), I can't find
-the log message "loading cls_hello", does that mean the "hello" class
-lib hasn't been loaded by the osd deamon yet? But I can see the
-'libcls_hello.so' is really under /usr/lib64/rados-classes folder of
-that OSD.
-
-2. Suppose I have an object named "testobj" stored into OSD0 and OSD1,
-what will happen if I call the rados_exec(..., "testobj", "hello",
-"say_hello",...) in client side? Will the say_hello() function be
-called twice in OSD0 and OSD1 respectively?
-
-On Thu, Jan 29, 2015 at 4:14 PM, Dennis Chen <kernel.org.gnu@gmail.com> wrote:
-> Hello marcel,
+On Fri, Jan 30, 2015 at 6:51 AM, Sage Weil <sage@newdream.net> wrote:
+> Hi Chris,
 >
-> Very good article though I am still reading it. Do you have a clear
-> picture of the relationship between class and
-> librados API - rados_exec()?
+> [Moving this thread to ceph-devel, which is probably a bit more
+> appropriate.]
 >
-> On Wed, Jan 28, 2015 at 4:48 AM, Marcel Lauhoff <ml@irq0.org> wrote:
+> On Thu, 29 Jan 2015, Chris Pacejo wrote:
+>> Hi, we've been experimenting with the keyvaluestore backend, and have found
+>> that, on every object write (e.g. with `rados put`), a single transaction is
+>> issued containing an additional 9 KeyValueDB writes, beyond those which
+>> constitute the object data.  Given the key names, these are clearly all
+>> metadata of some sort, but this poses a problem when the objects themselves
+>> are very small.  Given the default strip block size of 4 KiB, with objects
+>> of size 36 KiB or less, half or more of all key-value store writes are
+>> metadata writes.  With objects of size 4 KiB or less, the metadata overhead
+>> grows to 90%+.
 >>
->> Hi,
->>
->> I wrote an article about the object store API - How it works and looks
->> like with a focus on how to add something new.
->>
->> http://irq0.org/articles/ceph/objectstore
->>
->> Maybe its useful for somebody.. Feedback is greatly appreciated!
->>
->>
->>
->> [ I'm working on a Master's Thesis about Cold Storage / Archives using Ceph
->> and will probably write something more about other parts of Ceph
->> crossing my way in the near future :) ]
->>
->>
->> ~marcel
->>
->>
->> --
->> Marcel Lauhoff
->> Mail/XMPP: ml@irq0.org
->> http://irq0.org
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> Is there any way to reduce the number of metadata rows which must be written
+>> with each object?
 >
+> There is a level (or two) of indirection in KeyValueStore's
+> GenericObjectMap that is there to allow object cloning.  I wonder if we
+> will want to facilitate a backend that doesn't implement clone and can
+> only be used for pools that disallow clone and snap operations.
 >
+> There is also some key consolidation in the OSD layer we talked about in
+> the wednesday performance call that will cut this down some!
 >
-> --
-> Den
+>> (Alternatively, if there is a way to convince the OSD to issue multiple
+>> concurrent write transactions, that would also help.  But even with
+>> "keyvaluestore op threads" set as high as 64, and `rados bench` issuing 64
+>> concurrent writes, we never see more than a single active write transaction
+>> on the (multithread-capable) backend.  Is there some other option we're
+>> missing?)
+>
+> sage
 
 
 
 -- 
-Den
+Best Regards,
+
+Wheat
