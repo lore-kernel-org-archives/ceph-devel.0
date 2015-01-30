@@ -1,36 +1,52 @@
-From: Marcel Lauhoff <ml@irq0.org>
+From: Dennis Chen <kernel.org.gnu@gmail.com>
 Subject: Re: Article about Object Store API
-Date: Fri, 30 Jan 2015 00:22:44 +0100
-Message-ID: <87d25xnpdn.fsf@simstim.irq0.org>
+Date: Fri, 30 Jan 2015 09:33:56 +0800
+Message-ID: <CA+U0gVg7RWsJNHW+qKa0NLZzePiBOUQ8uu3=hqaP_-dc04thNA@mail.gmail.com>
 References: <871tmgvtje.fsf@irq0.org> <CA+U0gViEieTP0vL+NYSBL7iHkOgBR1jnu_SsbZtQv8-Ci+BBgg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cpu0.net ([37.187.2.217]:53257 "EHLO cpu0.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751946AbbA2XWr (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 29 Jan 2015 18:22:47 -0500
-Received: from simstim.irq0.org (hackerspace.c3pb.de [94.79.177.226])
-	by ks3366964.kimsufi.com (Postfix) with ESMTPSA id 43A8B800BF
-	for <ceph-devel@vger.kernel.org>; Thu, 29 Jan 2015 23:22:45 +0000 (UTC)
-In-reply-to: <CA+U0gViEieTP0vL+NYSBL7iHkOgBR1jnu_SsbZtQv8-Ci+BBgg@mail.gmail.com>
+Received: from mail-pa0-f49.google.com ([209.85.220.49]:41434 "EHLO
+	mail-pa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753153AbbA3BeR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Jan 2015 20:34:17 -0500
+Received: by mail-pa0-f49.google.com with SMTP id fa1so45719388pad.8
+        for <ceph-devel@vger.kernel.org>; Thu, 29 Jan 2015 17:34:16 -0800 (PST)
+In-Reply-To: <CA+U0gViEieTP0vL+NYSBL7iHkOgBR1jnu_SsbZtQv8-Ci+BBgg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dennis Chen <kernel.org.gnu@gmail.com>
+To: Marcel Lauhoff <ml@irq0.org>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
+Hello, marcel,
 
-Hello Dennis,
+Below is the email sent to the ceph-users mail list regarding ceph
+class question, but seems it's in pending state since I am not the
+member of that list.
+>>
+Hello,
 
-I haven't dived into librados code yet, but as far as I can see it is a
-couple of layers above what I wrote about. :/
+I found the document of ceph class usage is very few, below is the
+only one which can almost address my needs--
+http://ceph.com/rados/dynamic-object-interfaces-with-lua/
 
-Can you please concretize your question a bit?
+But still some questions confusing me left there:
 
-~marcel
+1. How to make the OSD to load the class lib? or what's the process
+for an OSD deamon to load a customized class lib?
+I checked my OSD log file(/var/log/ceph/ceph-osd.2.
+log), I can't find
+the log message "loading cls_hello", does that mean the "hello" class
+lib hasn't been loaded by the osd deamon yet? But I can see the
+'libcls_hello.so' is really under /usr/lib64/rados-classes folder of
+that OSD.
 
-Dennis Chen <kernel.org.gnu@gmail.com> writes:
+2. Suppose I have an object named "testobj" stored into OSD0 and OSD1,
+what will happen if I call the rados_exec(..., "testobj", "hello",
+"say_hello",...) in client side? Will the say_hello() function be
+called twice in OSD0 and OSD1 respectively?
 
+On Thu, Jan 29, 2015 at 4:14 PM, Dennis Chen <kernel.org.gnu@gmail.com> wrote:
 > Hello marcel,
 >
 > Very good article though I am still reading it. Do you have a clear
@@ -66,8 +82,13 @@ Dennis Chen <kernel.org.gnu@gmail.com> writes:
 >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 >> the body of a message to majordomo@vger.kernel.org
 >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+>
+> --
+> Den
 
---
-Marcel Lauhoff
-Mail/XMPP: ml@irq0.org
-http://irq0.org etq
+
+
+-- 
+Den
