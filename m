@@ -1,112 +1,82 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: rgw backports to giant update
-Date: Sat, 31 Jan 2015 00:10:54 +0100
-Message-ID: <54CC0F7E.3060007@dachary.org>
-References: <54C98379.7030100@dachary.org> <CABBk=J837H7WnZYBAa=SP0_CcDrRcVzY3_2dB-S_zMk6OHB7XQ@mail.gmail.com>
+From: Al Viro <viro@ZenIV.linux.org.uk>
+Subject: Re: backing_dev_info cleanups & lifetime rule fixes V2
+Date: Sun, 1 Feb 2015 06:31:16 +0000
+Message-ID: <20150201063116.GP29656@ZenIV.linux.org.uk>
+References: <1421228561-16857-1-git-send-email-hch@lst.de>
+ <54BEC3C2.7080906@fb.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="qEwnkNqmRr99v3dEDQt5EAEwi9BnRhPBN"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:50059 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752697AbbA3XK4 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 30 Jan 2015 18:10:56 -0500
-In-Reply-To: <CABBk=J837H7WnZYBAa=SP0_CcDrRcVzY3_2dB-S_zMk6OHB7XQ@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@inktank.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <54BEC3C2.7080906@fb.com>
+Sender: owner-linux-mm@kvack.org
+To: Jens Axboe <axboe@fb.com>
+Cc: Christoph Hellwig <hch@lst.de>, David Howells <dhowells@redhat.com>, Tejun Heo <tj@kernel.org>, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, linux-mtd@lists.infradead.org, linux-nfs@vger.kernel.org, ceph-devel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---qEwnkNqmRr99v3dEDQt5EAEwi9BnRhPBN
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+On Tue, Jan 20, 2015 at 02:08:18PM -0700, Jens Axboe wrote:
+> On 01/14/2015 02:42 AM, Christoph Hellwig wrote:
+> >The first 8 patches are unchanged from the series posted a week ago and
+> >cleans up how we use the backing_dev_info structure in preparation for
+> >fixing the life time rules for it.  The most important change is to
+> >split the unrelated nommu mmap flags from it, but it also remove a
+> >backing_dev_info pointer from the address_space (and thus the inode)
+> >and cleans up various other minor bits.
+> >
+> >The remaining patches sort out the issues around bdi_unlink and now
+> >let the bdi life until it's embedding structure is freed, which must
+> >be equal or longer than the superblock using the bdi for writeback,
+> >and thus gets rid of the whole mess around reassining inodes to new
+> >bdis.
+> >
+> >Changes since V1:
+> >  - various minor documentation updates based on Feedback from Tejun
+> 
+> I applied this to for-3.20/bdi, only making the change (noticed by
+> Jan) to kill the extra WARN_ON() in patch #11.
 
-Hi Yehuda,
+And at that point we finally can make sb_lock and super_blocks static in
+fs/super.c.  Do you want that in your tree, or would you rather have it
+done via vfs.git during the merge window after your tree goes in?  It's
+as trivial as this:
 
-Thanks a lot for this inventory. I updated the tickets to make sure all o=
-f them have the "giant" string in the backport field. I'll try backportin=
-g myself which will help when it's trivial. If I hit a conflict I'll get =
-back to you :-)
+Make super_blocks and sb_lock static
 
-Greetings from Brussels !
+The only user outside of fs/super.c is gone now
 
-On 30/01/2015 20:05, Yehuda Sadeh wrote:
-> Hi,
->=20
-> these are the actual issues that I backported:
->=20
->  - 9878  rhel7 s3-tests fail due to missing reason
->  - 9918  RGW-Swift: SubUser access permissions, does not seems to workm=
-inor
->  - 10103 swift tests failing
->  - 10354 Failed s3 tests in
-> upgrade:dumpling-firefly-x:parallel-next-distro-basic-multi run
->  - 10471 rgw: metadata sync doesn't create subusers correctly
->  - 9254  rgw: civetweb requires explicit \r\n for http headers
->  - 9478  Incorrect content type in response header
->  - 9479  ETag is not included in the XML response to put object copy
-> operationminor
->  - 9877  In some cases it's possible for rgw to segfault on http COPY
->  - 10329 rgw: s3 need to return SignatureDoesNotMatch instead of
-> AccessDenied- minor
->  - 5595  object has a Content-Type, but its content_type property is
-> not shown in Swift object enumeration
->  - 9907  Normal    radosgw-admin: can't disable max_size quota
->  - 9973  Validation of Swift DLO manifest object ETag doesn't match
-> OpenStack Swift behavior
->  - 10307 rgw: setting bucket attributes (swift POST on bucket)
-> sometimes failminor
->  - 10334 rgw: s3 need to return InvalidAccessKeyId instead of AccessDen=
-ied
->  - 9587  ceph-radosgw sysvinit script on EL6 cannot set ulimit
->=20
->=20
-> On Wed, Jan 28, 2015 at 4:48 PM, Loic Dachary <loic@dachary.org> wrote:=
+Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+---
+diff --git a/fs/super.c b/fs/super.c
+index eae088f..91badbb 100644
+--- a/fs/super.c
++++ b/fs/super.c
+@@ -36,8 +36,8 @@
+ #include "internal.h"
+ 
+ 
+-LIST_HEAD(super_blocks);
+-DEFINE_SPINLOCK(sb_lock);
++static LIST_HEAD(super_blocks);
++static DEFINE_SPINLOCK(sb_lock);
+ 
+ static char *sb_writers_name[SB_FREEZE_LEVELS] = {
+ 	"sb_writers",
+diff --git a/include/linux/fs.h b/include/linux/fs.h
+index 1f3c439..efc384e 100644
+--- a/include/linux/fs.h
++++ b/include/linux/fs.h
+@@ -1184,8 +1184,6 @@ struct mm_struct;
+ #define UMOUNT_NOFOLLOW	0x00000008	/* Don't follow symlink on umount */
+ #define UMOUNT_UNUSED	0x80000000	/* Flag guaranteed to be unused */
+ 
+-extern struct list_head super_blocks;
+-extern spinlock_t sb_lock;
+ 
+ /* Possible states of 'frozen' field */
+ enum {
 
->> Hi Yehuda,
->>
->> Unless I'm mistaken there currently are no rgw issues scheduled to be =
-backported to giant (i.e. with the giant word in the backport field of th=
-e issue)[1] that have already been backported to firefly, as part of the =
-v0.80.8[2] release or after[3]. You mentionned that about 18 patches back=
-ported to firefly should also be backported to giant and I was hoping to =
-find which one exactly thanks to the backport field.
->>
->> I'll go thru the rgw backports found in v0.80.8 to figure out which on=
-e should be in giant. I don't need anything righ now, this is just an upd=
-ate to let you know things are making progress.
->>
->> Cheers
->>
->> [1] inventory of the pending giant v0.87.1 release http://tracker.ceph=
-=2Ecom/issues/10501
->> [2] inventory of the firefly v0.80.8 commits http://tracker.ceph.com/i=
-ssues/10639
->> [3] inventory of the pending firefly v0.80.9 release http://tracker.ce=
-ph.com/issues/10641
->>
->> --
->> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->>
->>
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---qEwnkNqmRr99v3dEDQt5EAEwi9BnRhPBN
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlTMD34ACgkQ8dLMyEl6F22beQCgpJVzyPVkOOyU7R0KSpOAiIm1
-jjMAnAkSVo7uxSFWPR3dbwMVe8+h5g27
-=jHer
------END PGP SIGNATURE-----
-
---qEwnkNqmRr99v3dEDQt5EAEwi9BnRhPBN--
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
