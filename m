@@ -1,61 +1,52 @@
-From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Subject: RE: [ceph-users] keyvaluestore backend metadata overhead
-Date: Sun, 1 Feb 2015 14:50:34 +0000
-Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC0214CCFA@shsmsx102.ccr.corp.intel.com>
-References: <CAC8iE5iHTEfSQL978paWpu9hSfUbE65OVT_dKi2P=yvWSQ5JhA@mail.gmail.com>
-	<alpine.DEB.2.00.1501291447290.3895@cobra.newdream.net>
-	<CACJqLya-SNwudLTOqu2RPgr3_MZKzFWi9gXYH_xCg1WjxAx59w@mail.gmail.com>
-	<CAC8iE5jrYquoQ+n+uwiiZ5uevXfipGsab9a_CgjtZoW9h1L0SQ@mail.gmail.com>
-	<CACJqLyZnx28QEDU-Jy3KjzS6sumMG_ivqJQ9Ye_cg++Cj8WWQg@mail.gmail.com>
-	<CAC8iE5hSDg-nY+7g+N2FF6M8ijGe-s3+Dmg1PkGP7KqJOduyqQ@mail.gmail.com>
- <CACJqLyZegga=U2gJ+bQWjG_AY7OhsWXhgrT=Og-ahO3btyd7fQ@mail.gmail.com>
+From: instagram <obchod@ski-sport.sk>
+Subject: --  www.instagram.com Herzlichen =?UTF-8?Q?Gl=C3=BCckwunsch=20an?=
+ =?UTF-8?Q?=20Sie=2C?=
+Date: Sun, 01 Feb 2015 18:58:07 +0000
+Message-ID: <463a7d0b34e5a76e48d971414420dc3e@ski-sport.sk>
+Reply-To: <costumerserviceupdate@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:36105 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750841AbbBAOui (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 1 Feb 2015 09:50:38 -0500
-In-Reply-To: <CACJqLyZegga=U2gJ+bQWjG_AY7OhsWXhgrT=Og-ahO3btyd7fQ@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-proxyout-mua-9.websupport.sk ([37.9.172.159]:22751 "EHLO
+	mail-proxyout-mua-9.websupport.sk" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752284AbbBATJr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 1 Feb 2015 14:09:47 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomaiwang@gmail.com>, Chris Pacejo <cpacejo@clearskydata.com>
-Cc: Sage Weil <sage@newdream.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-V2UgY2FuIGFsd2F5cyB1c2UgYSBzdHJ1Y3R1cmUgZGF0YWJhc2UgaW4gYW4gdW5zdHJ1Y3R1cmVk
-IHdheSwgSSB0aGluayBpdCdzIHdvcmthYmxlIGluIHRoZW9yeSwgYnV0ICB3aHkgY2hvb3NlIE15
-U1FMPyANCg0KQXMgZGlzY3Vzc2VkIHNvbWUgd2hpbGUgYWdvLCAgYW55IExTTSBzdHJ1Y3R1cmVk
-IGRhdGFiYXNlIGRlc2lnbiB3aWxsIHN1ZmZlciBpbiBwZXJmb3JtYW5jZSBkdWUgdG8gd3JpdGUg
-YW1wbGlmaWNhdGlvbiwgaXMgdGhhdCB0aGUgcmVhc29uIGdvZXMgdG8gTXlTUUwgb25seSBhYm91
-dCBwcmV2ZW50IExTTT8gT3IgdHJ5IHNvbWUgQi10cmVlIGxpa2Ugc3RydWN0dXJlPyAgSWYgc28g
-LG1heWJlIExNREIgaXMgYSBiZXR0ZXIgY2hvaWNlPyhhbHRob3VnaCBpdCdzIG5vdCB5ZWV0IHNl
-bGYtcHJvdmVuIGFzIHByb2R1Y3Rpb24gcmVhZHkgKQ0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2Ut
-LS0tLQ0KRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBo
-LWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIEhhb21haSBXYW5nDQpT
-ZW50OiBTYXR1cmRheSwgSmFudWFyeSAzMSwgMjAxNSAxMjoxOCBBTQ0KVG86IENocmlzIFBhY2Vq
-bw0KQ2M6IFNhZ2UgV2VpbDsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNClN1YmplY3Q6IFJl
-OiBbY2VwaC11c2Vyc10ga2V5dmFsdWVzdG9yZSBiYWNrZW5kIG1ldGFkYXRhIG92ZXJoZWFkDQoN
-CkFsdGhvdWdoIEkgc3RpbGwgaGF2ZSBzb21lIGNvbmZ1c2luZywgaXQncyBnbGFkIHRvIHNlZSBt
-b3JlIGF0dGVtcHRzLg0KTW9yZSB0ZXN0IHJlc3VsdHMgIGFyZSB3ZWxjb21lZCENCg0KT24gU2F0
-LCBKYW4gMzEsIDIwMTUgYXQgMTI6MDggQU0sIENocmlzIFBhY2VqbyA8Y3BhY2Vqb0BjbGVhcnNr
-eWRhdGEuY29tPiB3cm90ZToNCj4gT24gRnJpLCBKYW4gMzAsIDIwMTUgYXQgMTA6NTIgQU0sIEhh
-b21haSBXYW5nIDxoYW9tYWl3YW5nQGdtYWlsLmNvbT4gd3JvdGU6DQo+PiBJdCdzIHJlYWxseSBh
-IHN1cnByaXNlIHRoYXQgeW91IGltcGwgYSBNeVNRTCBiYWNrZW5kLiBDb3VsZCBJIGtub3cgDQo+
-PiB0aGUgcHVycG9zZT8gQmVjYXVzZSBpdCBtYXkgbm90IGZpdCB3aXRoIGtleXZhbHVlc3RvcmUg
-SSB0aGluay4NCj4NCj4gV2UndmUgZm91bmQgaXQgdG8gcGVyZm9ybSBiZXR0ZXIgKGluIGlzb2xh
-dGlvbikgdGhhbiBMZXZlbERCLiAgV2Ugd2VyZSANCj4gYWJsZSB0byBtYXAgS2V5VmFsdWVEQidz
-IGludGVyZmFjZSB0byBpdCBmYWlybHkgcGFpbmxlc3NseSwgYW5kIEkgDQo+IGJlbGlldmUgY29y
-cmVjdGx5LiAgKFRoZSBvbmx5IG1ham9yIGNhdGNoIHdhcyB0aGF0IHdlIG5lZWRlZCB0byBidWZm
-ZXIgDQo+IG9wZXJhdGlvbnMgd2l0aGluIGEgdHJhbnNhY3Rpb24gYW5kIGV4ZWN1dGUgdGhlbSBh
-bGwgYXQgb25jZSBvbiANCj4gc3VibWl0LCB0byBwcmV2ZW50IE15U1FMIHVubmVjZXNzYXJpbHkg
-aG9sZGluZyBsb2NrcyBmb3IgdGhlIGR1cmF0aW9uIA0KPiBvZiBsb25nLWxpdmVkIHRyYW5zYWN0
-aW9ucy4pDQo+DQo+DQo+PiBZb3UgY2FuIHNpbXBseSBjYWxjdWxhdGUgdGhlIHN1bSBvZiBzdWJt
-aXRfdHJhbnNhY3Rpb25fc3luYyBjb25zdW1pbmcgDQo+PiB0aW1lLCBpdCB3b3VsZCBiZSB0aGUg
-bXVsdGlwbGUgb2YgdGhlIG9wIHRocmVhZCBudW1iZXIuDQo+DQo+IEkgd2lsbCB0cnkgdGhpcywg
-dGhhbmtzLg0KDQoNCg0KLS0NCkJlc3QgUmVnYXJkcywNCg0KV2hlYXQNCi0tDQpUbyB1bnN1YnNj
-cmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZl
-bCIgaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcg
-TW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8t
-aW5mby5odG1sDQo=
+
+
+--=20
+www.instagram.com
+Herzlichen Gl=C3=BCckwunsch an Sie,
+
+=C2=A0
+Wir wollen Ihnen offiziell verk=C3=BCnden und gratuliere Ihnen f=C3=BCr=
+ Schwellen=20
+als einer unserer gl=C3=BCcklichen Gewinner auf unserer los F=C3=B6rder=
+ung=20
+Instagram Mega Millionen von New York Lottery Abteilung 2015.
+=C2=A0=C2=A0
+BATCH NO: J8302MD / W90
+REF NO: 2015/3883920/290
+Trns Code: 00984
+
+an unseren Agenten f=C3=BCr mehr Briefing
+
+Name: James Harry
+E-MAIL: instagramupdate@outlook.com
+
+
+Dank
+Entwickler (s)
+=46acebook, Inc.
+aus Sicherheitsgr=C3=BCnden nicht offenbaren Ihre Gewinn an einen Dritt=
+en,=20
+bis Sie Ihren Gewinn erhalten haben.
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
