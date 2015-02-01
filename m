@@ -1,82 +1,61 @@
-From: Al Viro <viro@ZenIV.linux.org.uk>
-Subject: Re: backing_dev_info cleanups & lifetime rule fixes V2
-Date: Sun, 1 Feb 2015 06:31:16 +0000
-Message-ID: <20150201063116.GP29656@ZenIV.linux.org.uk>
-References: <1421228561-16857-1-git-send-email-hch@lst.de>
- <54BEC3C2.7080906@fb.com>
+From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Subject: RE: [ceph-users] keyvaluestore backend metadata overhead
+Date: Sun, 1 Feb 2015 14:50:34 +0000
+Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC0214CCFA@shsmsx102.ccr.corp.intel.com>
+References: <CAC8iE5iHTEfSQL978paWpu9hSfUbE65OVT_dKi2P=yvWSQ5JhA@mail.gmail.com>
+	<alpine.DEB.2.00.1501291447290.3895@cobra.newdream.net>
+	<CACJqLya-SNwudLTOqu2RPgr3_MZKzFWi9gXYH_xCg1WjxAx59w@mail.gmail.com>
+	<CAC8iE5jrYquoQ+n+uwiiZ5uevXfipGsab9a_CgjtZoW9h1L0SQ@mail.gmail.com>
+	<CACJqLyZnx28QEDU-Jy3KjzS6sumMG_ivqJQ9Ye_cg++Cj8WWQg@mail.gmail.com>
+	<CAC8iE5hSDg-nY+7g+N2FF6M8ijGe-s3+Dmg1PkGP7KqJOduyqQ@mail.gmail.com>
+ <CACJqLyZegga=U2gJ+bQWjG_AY7OhsWXhgrT=Og-ahO3btyd7fQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <54BEC3C2.7080906@fb.com>
-Sender: owner-linux-mm@kvack.org
-To: Jens Axboe <axboe@fb.com>
-Cc: Christoph Hellwig <hch@lst.de>, David Howells <dhowells@redhat.com>, Tejun Heo <tj@kernel.org>, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, linux-mtd@lists.infradead.org, linux-nfs@vger.kernel.org, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mga11.intel.com ([192.55.52.93]:36105 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750841AbbBAOui (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 1 Feb 2015 09:50:38 -0500
+In-Reply-To: <CACJqLyZegga=U2gJ+bQWjG_AY7OhsWXhgrT=Og-ahO3btyd7fQ@mail.gmail.com>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Haomai Wang <haomaiwang@gmail.com>, Chris Pacejo <cpacejo@clearskydata.com>
+Cc: Sage Weil <sage@newdream.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, Jan 20, 2015 at 02:08:18PM -0700, Jens Axboe wrote:
-> On 01/14/2015 02:42 AM, Christoph Hellwig wrote:
-> >The first 8 patches are unchanged from the series posted a week ago and
-> >cleans up how we use the backing_dev_info structure in preparation for
-> >fixing the life time rules for it.  The most important change is to
-> >split the unrelated nommu mmap flags from it, but it also remove a
-> >backing_dev_info pointer from the address_space (and thus the inode)
-> >and cleans up various other minor bits.
-> >
-> >The remaining patches sort out the issues around bdi_unlink and now
-> >let the bdi life until it's embedding structure is freed, which must
-> >be equal or longer than the superblock using the bdi for writeback,
-> >and thus gets rid of the whole mess around reassining inodes to new
-> >bdis.
-> >
-> >Changes since V1:
-> >  - various minor documentation updates based on Feedback from Tejun
-> 
-> I applied this to for-3.20/bdi, only making the change (noticed by
-> Jan) to kill the extra WARN_ON() in patch #11.
-
-And at that point we finally can make sb_lock and super_blocks static in
-fs/super.c.  Do you want that in your tree, or would you rather have it
-done via vfs.git during the merge window after your tree goes in?  It's
-as trivial as this:
-
-Make super_blocks and sb_lock static
-
-The only user outside of fs/super.c is gone now
-
-Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
----
-diff --git a/fs/super.c b/fs/super.c
-index eae088f..91badbb 100644
---- a/fs/super.c
-+++ b/fs/super.c
-@@ -36,8 +36,8 @@
- #include "internal.h"
- 
- 
--LIST_HEAD(super_blocks);
--DEFINE_SPINLOCK(sb_lock);
-+static LIST_HEAD(super_blocks);
-+static DEFINE_SPINLOCK(sb_lock);
- 
- static char *sb_writers_name[SB_FREEZE_LEVELS] = {
- 	"sb_writers",
-diff --git a/include/linux/fs.h b/include/linux/fs.h
-index 1f3c439..efc384e 100644
---- a/include/linux/fs.h
-+++ b/include/linux/fs.h
-@@ -1184,8 +1184,6 @@ struct mm_struct;
- #define UMOUNT_NOFOLLOW	0x00000008	/* Don't follow symlink on umount */
- #define UMOUNT_UNUSED	0x80000000	/* Flag guaranteed to be unused */
- 
--extern struct list_head super_blocks;
--extern spinlock_t sb_lock;
- 
- /* Possible states of 'frozen' field */
- enum {
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+V2UgY2FuIGFsd2F5cyB1c2UgYSBzdHJ1Y3R1cmUgZGF0YWJhc2UgaW4gYW4gdW5zdHJ1Y3R1cmVk
+IHdheSwgSSB0aGluayBpdCdzIHdvcmthYmxlIGluIHRoZW9yeSwgYnV0ICB3aHkgY2hvb3NlIE15
+U1FMPyANCg0KQXMgZGlzY3Vzc2VkIHNvbWUgd2hpbGUgYWdvLCAgYW55IExTTSBzdHJ1Y3R1cmVk
+IGRhdGFiYXNlIGRlc2lnbiB3aWxsIHN1ZmZlciBpbiBwZXJmb3JtYW5jZSBkdWUgdG8gd3JpdGUg
+YW1wbGlmaWNhdGlvbiwgaXMgdGhhdCB0aGUgcmVhc29uIGdvZXMgdG8gTXlTUUwgb25seSBhYm91
+dCBwcmV2ZW50IExTTT8gT3IgdHJ5IHNvbWUgQi10cmVlIGxpa2Ugc3RydWN0dXJlPyAgSWYgc28g
+LG1heWJlIExNREIgaXMgYSBiZXR0ZXIgY2hvaWNlPyhhbHRob3VnaCBpdCdzIG5vdCB5ZWV0IHNl
+bGYtcHJvdmVuIGFzIHByb2R1Y3Rpb24gcmVhZHkgKQ0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2Ut
+LS0tLQ0KRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBo
+LWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIEhhb21haSBXYW5nDQpT
+ZW50OiBTYXR1cmRheSwgSmFudWFyeSAzMSwgMjAxNSAxMjoxOCBBTQ0KVG86IENocmlzIFBhY2Vq
+bw0KQ2M6IFNhZ2UgV2VpbDsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNClN1YmplY3Q6IFJl
+OiBbY2VwaC11c2Vyc10ga2V5dmFsdWVzdG9yZSBiYWNrZW5kIG1ldGFkYXRhIG92ZXJoZWFkDQoN
+CkFsdGhvdWdoIEkgc3RpbGwgaGF2ZSBzb21lIGNvbmZ1c2luZywgaXQncyBnbGFkIHRvIHNlZSBt
+b3JlIGF0dGVtcHRzLg0KTW9yZSB0ZXN0IHJlc3VsdHMgIGFyZSB3ZWxjb21lZCENCg0KT24gU2F0
+LCBKYW4gMzEsIDIwMTUgYXQgMTI6MDggQU0sIENocmlzIFBhY2VqbyA8Y3BhY2Vqb0BjbGVhcnNr
+eWRhdGEuY29tPiB3cm90ZToNCj4gT24gRnJpLCBKYW4gMzAsIDIwMTUgYXQgMTA6NTIgQU0sIEhh
+b21haSBXYW5nIDxoYW9tYWl3YW5nQGdtYWlsLmNvbT4gd3JvdGU6DQo+PiBJdCdzIHJlYWxseSBh
+IHN1cnByaXNlIHRoYXQgeW91IGltcGwgYSBNeVNRTCBiYWNrZW5kLiBDb3VsZCBJIGtub3cgDQo+
+PiB0aGUgcHVycG9zZT8gQmVjYXVzZSBpdCBtYXkgbm90IGZpdCB3aXRoIGtleXZhbHVlc3RvcmUg
+SSB0aGluay4NCj4NCj4gV2UndmUgZm91bmQgaXQgdG8gcGVyZm9ybSBiZXR0ZXIgKGluIGlzb2xh
+dGlvbikgdGhhbiBMZXZlbERCLiAgV2Ugd2VyZSANCj4gYWJsZSB0byBtYXAgS2V5VmFsdWVEQidz
+IGludGVyZmFjZSB0byBpdCBmYWlybHkgcGFpbmxlc3NseSwgYW5kIEkgDQo+IGJlbGlldmUgY29y
+cmVjdGx5LiAgKFRoZSBvbmx5IG1ham9yIGNhdGNoIHdhcyB0aGF0IHdlIG5lZWRlZCB0byBidWZm
+ZXIgDQo+IG9wZXJhdGlvbnMgd2l0aGluIGEgdHJhbnNhY3Rpb24gYW5kIGV4ZWN1dGUgdGhlbSBh
+bGwgYXQgb25jZSBvbiANCj4gc3VibWl0LCB0byBwcmV2ZW50IE15U1FMIHVubmVjZXNzYXJpbHkg
+aG9sZGluZyBsb2NrcyBmb3IgdGhlIGR1cmF0aW9uIA0KPiBvZiBsb25nLWxpdmVkIHRyYW5zYWN0
+aW9ucy4pDQo+DQo+DQo+PiBZb3UgY2FuIHNpbXBseSBjYWxjdWxhdGUgdGhlIHN1bSBvZiBzdWJt
+aXRfdHJhbnNhY3Rpb25fc3luYyBjb25zdW1pbmcgDQo+PiB0aW1lLCBpdCB3b3VsZCBiZSB0aGUg
+bXVsdGlwbGUgb2YgdGhlIG9wIHRocmVhZCBudW1iZXIuDQo+DQo+IEkgd2lsbCB0cnkgdGhpcywg
+dGhhbmtzLg0KDQoNCg0KLS0NCkJlc3QgUmVnYXJkcywNCg0KV2hlYXQNCi0tDQpUbyB1bnN1YnNj
+cmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZl
+bCIgaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcg
+TW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8t
+aW5mby5odG1sDQo=
