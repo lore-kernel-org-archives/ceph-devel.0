@@ -1,88 +1,94 @@
-From: <ghislain.chevalier@orange.com>
-Subject: RE: radosgw-agent failed to parse
-Date: Mon, 2 Feb 2015 14:53:06 +0000
-Message-ID: <3704_1422888787_54CF8F53_3704_2219_1_B9C8EFBF13B1354DB5FA000660D66DD00C1F80ED@PEXCVZYM14.corporate.adroot.infra.ftgroup>
-References: <31740_1422885416_54CF8227_31740_2351_1_B9C8EFBF13B1354DB5FA000660D66DD00C1F804F@PEXCVZYM14.corporate.adroot.infra.ftgroup>
- <CANtztVx9RZs1h-vqLUNMWhq+PrWcAigzh7qb0dpzUeFXf6+Fgw@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: workloads/rbd_fsx_cache_writethrough.yaml hangs on dumpling
+Date: Mon, 02 Feb 2015 16:00:48 +0100
+Message-ID: <54CF9120.30509@dachary.org>
+References: <54CF7927.7010908@dachary.org> <CAAM7YAmrh_DeJgPY-QECbiZqO4w0R=ummQBug=5B8dyoZrkjWw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="n8CUwQRWhO9IojMnsIxMqPMVr57Em474G"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relais-ias92.francetelecom.com ([193.251.215.92]:26024 "EHLO
-	relais-inet.francetelecom.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751300AbbBBOxJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Feb 2015 09:53:09 -0500
-In-Reply-To: <CANtztVx9RZs1h-vqLUNMWhq+PrWcAigzh7qb0dpzUeFXf6+Fgw@mail.gmail.com>
-Content-Language: fr-FR
+Received: from mail2.dachary.org ([91.121.57.175]:51287 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752529AbbBBPAv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Feb 2015 10:00:51 -0500
+In-Reply-To: <CAAM7YAmrh_DeJgPY-QECbiZqO4w0R=ummQBug=5B8dyoZrkjWw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alfredo Deza <adeza@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Yan, Zheng" <ukernel@gmail.com>
+Cc: Jason Dillaman <dillaman@redhat.com>, Josh Durgin <jdurgin@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-SEksDQoNClRoeCBmb3IgcmVwbHlpbmcNCg0KQWNjb3JkaW5nIHRvIGRwa2cgLWwsIGl0J3MgMS4y
-LjEuDQoNCkkgbm90aWNlZCB0aGF0IHRoZSBVUkwgaXMgbWFsZm9ybWVkIHdoZW4gbGF1bmNoaW5n
-IHVzaW5nIGRpcmVjdGx5IHJhZG9zZ3ctYWdlbnQgLWMgPHN5bmNmaWxlPiANCmJ1dCB3ZWxsIGZv
-cm1lZCB3aGVuIGxhdW5jaGluZyB1c2luZyBzZXJ2aWNlIHJhZG9zZ3ctYWdlbnQgc3RhcnQgPHN5
-bmNmaWxlPg0KDQpiZXN0IHJlZ2FyZHMNCg0KLS0tLS1NZXNzYWdlIGQnb3JpZ2luZS0tLS0tDQpE
-ZcKgOiBhbGZyZWRvLmRlemFAaW5rdGFuay5jb20gW21haWx0bzphbGZyZWRvLmRlemFAaW5rdGFu
-ay5jb21dIERlIGxhIHBhcnQgZGUgQWxmcmVkbyBEZXphDQpFbnZvecOpwqA6IGx1bmRpIDIgZsOp
-dnJpZXIgMjAxNSAxNToxOA0Kw4DCoDogQ0hFVkFMSUVSIEdoaXNsYWluIElNVC9PTFBTDQpDY8Kg
-OiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KT2JqZXTCoDogUmU6IFtDZXBoLWRldmVsXSBy
-YWRvc2d3LWFnZW50IGZhaWxlZCB0byBwYXJzZQ0KDQpXaGF0IHZlcnNpb24gb2YgdGhlIGFnZW50
-IGFyZSB5b3UgdXNpbmc/IEFuZCB3aGVuIGl0IGZhaWxzLCBob3cgZG9lcyB0aGUgbG9nIG91dHB1
-dCBsb29rPw0KDQpPbiBNb24sIEZlYiAyLCAyMDE1IGF0IDg6NTYgQU0sICA8Z2hpc2xhaW4uY2hl
-dmFsaWVyQG9yYW5nZS5jb20+IHdyb3RlOg0KPiBIaSBhbGwsDQo+DQo+IENvbnRleHQgOiBVYnVu
-dHUgMTQuMDQgVExTIGZpcmVmbHkgMC44MC44DQo+DQo+IEkgc2VudCB0aGlzIHBvc3QgaW4gY2Vw
-aC11c2VycyAoaWRlbnRpY2FsIHN1YmplY3QpIGJlY2F1c2UgSSByZWNlbnRseSBlbmNvdW50ZXJl
-ZCB0aGUgc2FtZSBpc3N1ZS4NCj4gTWF5YmUgSSBtaXNzZWQgc29tZXRoaW5nIGJldHdlZW4gSnVs
-eSBhbmQgSmFudWFyeS4uLg0KPg0KPiBJIGZvdW5kIHRoYXQgdGhlIGh0dHAgcmVxdWVzdCB3YXNu
-J3QgY29ycmVjdGx5IGZvcm1lZCBieSANCj4gL3Vzci9saWIvcHl0aG9uMi43L2Rpc3QtcGFja2Fn
-ZXMvcmFkb3Nnd19hZ2VudC9jbGllbnQucHkNCj4NCj4gSSBkaWQgdGhlIGNoYW5nZXMgYmVsb3cN
-Cj4gIyAgICB1cmwgPSAne3Byb3RvY29sfTovL3tob3N0fXtwYXRofScuZm9ybWF0KHByb3RvY29s
-PXJlcXVlc3QucHJvdG9jb2wsDQo+ICMgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICBob3N0PXJlcXVlc3QuaG9zdCwNCj4gIyAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgIHBhdGg9cmVxdWVzdC5wYXRoKQ0KPiAgICAgIHVybCA9ICd7
-cGF0aH0nLmZvcm1hdChwcm90b2NvbD0iIiwgaG9zdD0iIiwgcGF0aD1yZXF1ZXN0LnBhdGgpDQo+
-DQo+IFRoZSByZXF1ZXN0IGlzIHRoZW4gY29ycmVjdGx5IGZvcm1lZCBhbmQgc2VudC4NCj4NCj4g
-SSBzdGlsbCBoYXZlIHByb2JsZW1zIHNldHRpbmcgdGhlIGZlZGVyYXRpb24gYmV0d2VlbiAyIHpv
-bmVzIG9mIDIgY2VwaCBjbHVzdGVycyBpbiAyIHJlZ2lvbnMuDQo+DQo+IEkgZ28gb24gaW52ZXN0
-aWdhdGluZy4NCj4NCj4gQmVzdCByZWdhcmRzDQo+DQo+DQo+IF9fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCj4gX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQo+DQo+IENl
-IG1lc3NhZ2UgZXQgc2VzIHBpZWNlcyBqb2ludGVzIHBldXZlbnQgY29udGVuaXIgZGVzIGluZm9y
-bWF0aW9ucyANCj4gY29uZmlkZW50aWVsbGVzIG91IHByaXZpbGVnaWVlcyBldCBuZSBkb2l2ZW50
-IGRvbmMgcGFzIGV0cmUgZGlmZnVzZXMsIA0KPiBleHBsb2l0ZXMgb3UgY29waWVzIHNhbnMgYXV0
-b3Jpc2F0aW9uLiBTaSB2b3VzIGF2ZXogcmVjdSBjZSBtZXNzYWdlIA0KPiBwYXIgZXJyZXVyLCB2
-ZXVpbGxleiBsZSBzaWduYWxlciBhIGwnZXhwZWRpdGV1ciBldCBsZSBkZXRydWlyZSBhaW5zaSBx
-dWUgbGVzIHBpZWNlcyBqb2ludGVzLiBMZXMgbWVzc2FnZXMgZWxlY3Ryb25pcXVlcyBldGFudCBz
-dXNjZXB0aWJsZXMgZCdhbHRlcmF0aW9uLCBPcmFuZ2UgZGVjbGluZSB0b3V0ZSByZXNwb25zYWJp
-bGl0ZSBzaSBjZSBtZXNzYWdlIGEgZXRlIGFsdGVyZSwgZGVmb3JtZSBvdSBmYWxzaWZpZS4gTWVy
-Y2kuDQo+DQo+IFRoaXMgbWVzc2FnZSBhbmQgaXRzIGF0dGFjaG1lbnRzIG1heSBjb250YWluIGNv
-bmZpZGVudGlhbCBvciANCj4gcHJpdmlsZWdlZCBpbmZvcm1hdGlvbiB0aGF0IG1heSBiZSBwcm90
-ZWN0ZWQgYnkgbGF3OyB0aGV5IHNob3VsZCBub3QgYmUgZGlzdHJpYnV0ZWQsIHVzZWQgb3IgY29w
-aWVkIHdpdGhvdXQgYXV0aG9yaXNhdGlvbi4NCj4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBl
-bWFpbCBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGFuZCBkZWxldGUgdGhpcyBt
-ZXNzYWdlIGFuZCBpdHMgYXR0YWNobWVudHMuDQo+IEFzIGVtYWlscyBtYXkgYmUgYWx0ZXJlZCwg
-T3JhbmdlIGlzIG5vdCBsaWFibGUgZm9yIG1lc3NhZ2VzIHRoYXQgaGF2ZSBiZWVuIG1vZGlmaWVk
-LCBjaGFuZ2VkIG9yIGZhbHNpZmllZC4NCj4gVGhhbmsgeW91Lg0KPg0KPiAtLQ0KPiBUbyB1bnN1
-YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1k
-ZXZlbCIgDQo+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJu
-ZWwub3JnIE1vcmUgbWFqb3Jkb21vIA0KPiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3Jn
-L21ham9yZG9tby1pbmZvLmh0bWwNCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCgpDZSBtZXNzYWdlIGV0IHNlcyBwaWVjZXMg
-am9pbnRlcyBwZXV2ZW50IGNvbnRlbmlyIGRlcyBpbmZvcm1hdGlvbnMgY29uZmlkZW50aWVsbGVz
-IG91IHByaXZpbGVnaWVlcyBldCBuZSBkb2l2ZW50IGRvbmMKcGFzIGV0cmUgZGlmZnVzZXMsIGV4
-cGxvaXRlcyBvdSBjb3BpZXMgc2FucyBhdXRvcmlzYXRpb24uIFNpIHZvdXMgYXZleiByZWN1IGNl
-IG1lc3NhZ2UgcGFyIGVycmV1ciwgdmV1aWxsZXogbGUgc2lnbmFsZXIKYSBsJ2V4cGVkaXRldXIg
-ZXQgbGUgZGV0cnVpcmUgYWluc2kgcXVlIGxlcyBwaWVjZXMgam9pbnRlcy4gTGVzIG1lc3NhZ2Vz
-IGVsZWN0cm9uaXF1ZXMgZXRhbnQgc3VzY2VwdGlibGVzIGQnYWx0ZXJhdGlvbiwKT3JhbmdlIGRl
-Y2xpbmUgdG91dGUgcmVzcG9uc2FiaWxpdGUgc2kgY2UgbWVzc2FnZSBhIGV0ZSBhbHRlcmUsIGRl
-Zm9ybWUgb3UgZmFsc2lmaWUuIE1lcmNpLgoKVGhpcyBtZXNzYWdlIGFuZCBpdHMgYXR0YWNobWVu
-dHMgbWF5IGNvbnRhaW4gY29uZmlkZW50aWFsIG9yIHByaXZpbGVnZWQgaW5mb3JtYXRpb24gdGhh
-dCBtYXkgYmUgcHJvdGVjdGVkIGJ5IGxhdzsKdGhleSBzaG91bGQgbm90IGJlIGRpc3RyaWJ1dGVk
-LCB1c2VkIG9yIGNvcGllZCB3aXRob3V0IGF1dGhvcmlzYXRpb24uCklmIHlvdSBoYXZlIHJlY2Vp
-dmVkIHRoaXMgZW1haWwgaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBhbmQgZGVs
-ZXRlIHRoaXMgbWVzc2FnZSBhbmQgaXRzIGF0dGFjaG1lbnRzLgpBcyBlbWFpbHMgbWF5IGJlIGFs
-dGVyZWQsIE9yYW5nZSBpcyBub3QgbGlhYmxlIGZvciBtZXNzYWdlcyB0aGF0IGhhdmUgYmVlbiBt
-b2RpZmllZCwgY2hhbmdlZCBvciBmYWxzaWZpZWQuClRoYW5rIHlvdS4KCg==
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--n8CUwQRWhO9IojMnsIxMqPMVr57Em474G
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: quoted-printable
+
+
+
+On 02/02/2015 14:48, Yan, Zheng wrote:
+> On Mon, Feb 2, 2015 at 9:18 PM, Loic Dachary <loic@dachary.org> wrote:
+>> Hi,
+>>
+>> http://pulpito.ceph.com/loic-2015-01-29_15:39:38-rbd-dumpling-backport=
+s---basic-multi/730029/ hangs on dumpling and got killed after two days.
+>>
+>> Although workloads/rbd_fsx_cache_writethrough.yaml  was running with t=
+he thrasher, it does not seem to be related to http://tracker.ceph.com/is=
+sues/10513 : it was running on a mira070 (16GB RAM) and plana78 (8GB RAM)=
+=2E
+>>
+>> I don't see anything in https://github.com/ceph/ceph-qa-suite/blob/mas=
+ter/tasks/rbd_fsx.py that would suggest it needs backporting a fix to the=
+ ceph-qa-suite branch of dumpling.
+>>
+>> I browsed the commits related to RBD that are in the dumpling-backport=
+s branch ( see here for the list I used http://tracker.ceph.com/issues/10=
+560 ). I don't see anything in the issues that need backporting to dumpli=
+ng either.
+>>
+>> Another run of this specific test has been scheduled to check if it al=
+ways happens at http://pulpito.ceph.com/loic-2015-02-02_13:58:32-rbd:thra=
+sh:workloads:rbd_fsx_cache_writethrough.yaml-dumpling-backports---basic-m=
+ulti/
+>>
+>> Does that ring a bell by any chance ?
+>>
+>=20
+> maybe it's the same as http://tracker.ceph.com/issues/10498
+>=20
+
+I hoped it would be but from what I read the bug crashes and creates a co=
+re dump, right ? What I'm seeing is the test hanging indefinitely and no =
+core.
+
+Cheers
+
+>>
+>> --
+>> Lo=EFc Dachary, Artisan Logiciel Libre
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+--n8CUwQRWhO9IojMnsIxMqPMVr57Em474G
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlTPkSAACgkQ8dLMyEl6F23+MACfb/+lGKAcv9q5M80JaOmrtJQT
+IKYAniFiomZjOvzEg66AZl/rWcIGeaKb
+=xkfN
+-----END PGP SIGNATURE-----
+
+--n8CUwQRWhO9IojMnsIxMqPMVr57Em474G--
