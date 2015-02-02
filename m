@@ -1,59 +1,43 @@
-From: Gregory Farnum <greg@gregs42.com>
-Subject: Re: workloads/rbd_fsx_cache_writethrough.yaml hangs on dumpling
-Date: Mon, 2 Feb 2015 08:46:45 -0800
-Message-ID: <CAC6JEv9y=2A3Q80bGbTtWam7ESf8_pGBG6L_VSs2B1Z=n--rDA@mail.gmail.com>
-References: <54CF7927.7010908@dachary.org>
-	<CAAM7YAmrh_DeJgPY-QECbiZqO4w0R=ummQBug=5B8dyoZrkjWw@mail.gmail.com>
-	<54CF9120.30509@dachary.org>
+From: Jens Axboe <axboe@fb.com>
+Subject: Re: backing_dev_info cleanups & lifetime rule fixes V2
+Date: Mon, 2 Feb 2015 10:08:44 -0700
+Message-ID: <54CFAF1C.4050104@fb.com>
+References: <1421228561-16857-1-git-send-email-hch@lst.de> <54BEC3C2.7080906@fb.com> <20150201063116.GP29656@ZenIV.linux.org.uk> <20150202080635.GB9851@lst.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f181.google.com ([209.85.223.181]:48931 "EHLO
-	mail-ie0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932524AbbBBQqr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Feb 2015 11:46:47 -0500
-Received: by mail-ie0-f181.google.com with SMTP id rd18so9569481iec.12
-        for <ceph-devel@vger.kernel.org>; Mon, 02 Feb 2015 08:46:46 -0800 (PST)
-Received: from mail-ig0-f176.google.com (mail-ig0-f176.google.com. [209.85.213.176])
-        by mx.google.com with ESMTPSA id qs3sm6316020igb.8.2015.02.02.08.46.45
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 02 Feb 2015 08:46:46 -0800 (PST)
-Received: by mail-ig0-f176.google.com with SMTP id hl2so19661620igb.3
-        for <ceph-devel@vger.kernel.org>; Mon, 02 Feb 2015 08:46:45 -0800 (PST)
-In-Reply-To: <54CF9120.30509@dachary.org>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: "Yan, Zheng" <ukernel@gmail.com>, Jason Dillaman <dillaman@redhat.com>, Josh Durgin <jdurgin@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="windows-1252"
+Content-Transfer-Encoding: 7bit
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20150202080635.GB9851@lst.de>
+Sender: owner-linux-mm@kvack.org
+To: Christoph Hellwig <hch@lst.de>, Al Viro <viro@ZenIV.linux.org.uk>
+Cc: David Howells <dhowells@redhat.com>, Tejun Heo <tj@kernel.org>, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, linux-mtd@lists.infradead.org, linux-nfs@vger.kernel.org, ceph-devel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Mon, Feb 2, 2015 at 7:00 AM, Loic Dachary <loic@dachary.org> wrote:
->
->
-> On 02/02/2015 14:48, Yan, Zheng wrote:
->> On Mon, Feb 2, 2015 at 9:18 PM, Loic Dachary <loic@dachary.org> wrote:
->>> Hi,
->>>
->>> http://pulpito.ceph.com/loic-2015-01-29_15:39:38-rbd-dumpling-backports---basic-multi/730029/ hangs on dumpling and got killed after two days.
->>>
->>> Although workloads/rbd_fsx_cache_writethrough.yaml  was running with the thrasher, it does not seem to be related to http://tracker.ceph.com/issues/10513 : it was running on a mira070 (16GB RAM) and plana78 (8GB RAM).
->>>
->>> I don't see anything in https://github.com/ceph/ceph-qa-suite/blob/master/tasks/rbd_fsx.py that would suggest it needs backporting a fix to the ceph-qa-suite branch of dumpling.
->>>
->>> I browsed the commits related to RBD that are in the dumpling-backports branch ( see here for the list I used http://tracker.ceph.com/issues/10560 ). I don't see anything in the issues that need backporting to dumpling either.
->>>
->>> Another run of this specific test has been scheduled to check if it always happens at http://pulpito.ceph.com/loic-2015-02-02_13:58:32-rbd:thrash:workloads:rbd_fsx_cache_writethrough.yaml-dumpling-backports---basic-multi/
->>>
->>> Does that ring a bell by any chance ?
->>>
+On 02/02/2015 01:06 AM, Christoph Hellwig wrote:
+> On Sun, Feb 01, 2015 at 06:31:16AM +0000, Al Viro wrote:
+>> And at that point we finally can make sb_lock and super_blocks static in
+>> fs/super.c.  Do you want that in your tree, or would you rather have it
+>> done via vfs.git during the merge window after your tree goes in?  It's
+>> as trivial as this:
 >>
->> maybe it's the same as http://tracker.ceph.com/issues/10498
+>> Make super_blocks and sb_lock static
 >>
->
-> I hoped it would be but from what I read the bug crashes and creates a core dump, right ? What I'm seeing is the test hanging indefinitely and no core.
+>> The only user outside of fs/super.c is gone now
+>>
+>> Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+> 
+> I'd say merge it through the block tree..
+> 
+> Acked-by: Christoph Hellwig <hch@lst.de>
 
-Whether it's crashing or not depends on the nature of the test. The
-root cause is just a hang; some things might crash on timeouts but
-others won't. (I don't think I recall seeing a crash on that bug
-report anyway, though.)
--Greg
+Added to for-3.20/bdi
+
+
+-- 
+Jens Axboe
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
