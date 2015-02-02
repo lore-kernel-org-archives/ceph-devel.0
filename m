@@ -1,65 +1,88 @@
-From: Alfredo Deza <adeza@redhat.com>
-Subject: Re: radosgw-agent failed to parse
-Date: Mon, 2 Feb 2015 09:17:53 -0500
-Message-ID: <CANtztVx9RZs1h-vqLUNMWhq+PrWcAigzh7qb0dpzUeFXf6+Fgw@mail.gmail.com>
+From: <ghislain.chevalier@orange.com>
+Subject: RE: radosgw-agent failed to parse
+Date: Mon, 2 Feb 2015 14:53:06 +0000
+Message-ID: <3704_1422888787_54CF8F53_3704_2219_1_B9C8EFBF13B1354DB5FA000660D66DD00C1F80ED@PEXCVZYM14.corporate.adroot.infra.ftgroup>
 References: <31740_1422885416_54CF8227_31740_2351_1_B9C8EFBF13B1354DB5FA000660D66DD00C1F804F@PEXCVZYM14.corporate.adroot.infra.ftgroup>
+ <CANtztVx9RZs1h-vqLUNMWhq+PrWcAigzh7qb0dpzUeFXf6+Fgw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yh0-f47.google.com ([209.85.213.47]:32786 "EHLO
-	mail-yh0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753098AbbBBORy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Feb 2015 09:17:54 -0500
-Received: by mail-yh0-f47.google.com with SMTP id z6so15986389yhz.6
-        for <ceph-devel@vger.kernel.org>; Mon, 02 Feb 2015 06:17:53 -0800 (PST)
-In-Reply-To: <31740_1422885416_54CF8227_31740_2351_1_B9C8EFBF13B1354DB5FA000660D66DD00C1F804F@PEXCVZYM14.corporate.adroot.infra.ftgroup>
+Received: from relais-ias92.francetelecom.com ([193.251.215.92]:26024 "EHLO
+	relais-inet.francetelecom.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751300AbbBBOxJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Feb 2015 09:53:09 -0500
+In-Reply-To: <CANtztVx9RZs1h-vqLUNMWhq+PrWcAigzh7qb0dpzUeFXf6+Fgw@mail.gmail.com>
+Content-Language: fr-FR
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ghislain.chevalier@orange.com
+To: Alfredo Deza <adeza@redhat.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-What version of the agent are you using? And when it fails, how does
-the log output look?
-
-On Mon, Feb 2, 2015 at 8:56 AM,  <ghislain.chevalier@orange.com> wrote:
-> Hi all,
->
-> Context : Ubuntu 14.04 TLS firefly 0.80.8
->
-> I sent this post in ceph-users (identical subject) because I recently encountered the same issue.
-> Maybe I missed something between July and January...
->
-> I found that the http request wasn't correctly formed by /usr/lib/python2.7/dist-packages/radosgw_agent/client.py
->
-> I did the changes below
-> #    url = '{protocol}://{host}{path}'.format(protocol=request.protocol,
-> #                                             host=request.host,
-> #                                             path=request.path)
->      url = '{path}'.format(protocol="", host="", path=request.path)
->
-> The request is then correctly formed and sent.
->
-> I still have problems setting the federation between 2 zones of 2 ceph clusters in 2 regions.
->
-> I go on investigating.
->
-> Best regards
->
->
-> _________________________________________________________________________________________________________________________
->
-> Ce message et ses pieces jointes peuvent contenir des informations confidentielles ou privilegiees et ne doivent donc
-> pas etre diffuses, exploites ou copies sans autorisation. Si vous avez recu ce message par erreur, veuillez le signaler
-> a l'expediteur et le detruire ainsi que les pieces jointes. Les messages electroniques etant susceptibles d'alteration,
-> Orange decline toute responsabilite si ce message a ete altere, deforme ou falsifie. Merci.
->
-> This message and its attachments may contain confidential or privileged information that may be protected by law;
-> they should not be distributed, used or copied without authorisation.
-> If you have received this email in error, please notify the sender and delete this message and its attachments.
-> As emails may be altered, Orange is not liable for messages that have been modified, changed or falsified.
-> Thank you.
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SEksDQoNClRoeCBmb3IgcmVwbHlpbmcNCg0KQWNjb3JkaW5nIHRvIGRwa2cgLWwsIGl0J3MgMS4y
+LjEuDQoNCkkgbm90aWNlZCB0aGF0IHRoZSBVUkwgaXMgbWFsZm9ybWVkIHdoZW4gbGF1bmNoaW5n
+IHVzaW5nIGRpcmVjdGx5IHJhZG9zZ3ctYWdlbnQgLWMgPHN5bmNmaWxlPiANCmJ1dCB3ZWxsIGZv
+cm1lZCB3aGVuIGxhdW5jaGluZyB1c2luZyBzZXJ2aWNlIHJhZG9zZ3ctYWdlbnQgc3RhcnQgPHN5
+bmNmaWxlPg0KDQpiZXN0IHJlZ2FyZHMNCg0KLS0tLS1NZXNzYWdlIGQnb3JpZ2luZS0tLS0tDQpE
+ZcKgOiBhbGZyZWRvLmRlemFAaW5rdGFuay5jb20gW21haWx0bzphbGZyZWRvLmRlemFAaW5rdGFu
+ay5jb21dIERlIGxhIHBhcnQgZGUgQWxmcmVkbyBEZXphDQpFbnZvecOpwqA6IGx1bmRpIDIgZsOp
+dnJpZXIgMjAxNSAxNToxOA0Kw4DCoDogQ0hFVkFMSUVSIEdoaXNsYWluIElNVC9PTFBTDQpDY8Kg
+OiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KT2JqZXTCoDogUmU6IFtDZXBoLWRldmVsXSBy
+YWRvc2d3LWFnZW50IGZhaWxlZCB0byBwYXJzZQ0KDQpXaGF0IHZlcnNpb24gb2YgdGhlIGFnZW50
+IGFyZSB5b3UgdXNpbmc/IEFuZCB3aGVuIGl0IGZhaWxzLCBob3cgZG9lcyB0aGUgbG9nIG91dHB1
+dCBsb29rPw0KDQpPbiBNb24sIEZlYiAyLCAyMDE1IGF0IDg6NTYgQU0sICA8Z2hpc2xhaW4uY2hl
+dmFsaWVyQG9yYW5nZS5jb20+IHdyb3RlOg0KPiBIaSBhbGwsDQo+DQo+IENvbnRleHQgOiBVYnVu
+dHUgMTQuMDQgVExTIGZpcmVmbHkgMC44MC44DQo+DQo+IEkgc2VudCB0aGlzIHBvc3QgaW4gY2Vw
+aC11c2VycyAoaWRlbnRpY2FsIHN1YmplY3QpIGJlY2F1c2UgSSByZWNlbnRseSBlbmNvdW50ZXJl
+ZCB0aGUgc2FtZSBpc3N1ZS4NCj4gTWF5YmUgSSBtaXNzZWQgc29tZXRoaW5nIGJldHdlZW4gSnVs
+eSBhbmQgSmFudWFyeS4uLg0KPg0KPiBJIGZvdW5kIHRoYXQgdGhlIGh0dHAgcmVxdWVzdCB3YXNu
+J3QgY29ycmVjdGx5IGZvcm1lZCBieSANCj4gL3Vzci9saWIvcHl0aG9uMi43L2Rpc3QtcGFja2Fn
+ZXMvcmFkb3Nnd19hZ2VudC9jbGllbnQucHkNCj4NCj4gSSBkaWQgdGhlIGNoYW5nZXMgYmVsb3cN
+Cj4gIyAgICB1cmwgPSAne3Byb3RvY29sfTovL3tob3N0fXtwYXRofScuZm9ybWF0KHByb3RvY29s
+PXJlcXVlc3QucHJvdG9jb2wsDQo+ICMgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICBob3N0PXJlcXVlc3QuaG9zdCwNCj4gIyAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgIHBhdGg9cmVxdWVzdC5wYXRoKQ0KPiAgICAgIHVybCA9ICd7
+cGF0aH0nLmZvcm1hdChwcm90b2NvbD0iIiwgaG9zdD0iIiwgcGF0aD1yZXF1ZXN0LnBhdGgpDQo+
+DQo+IFRoZSByZXF1ZXN0IGlzIHRoZW4gY29ycmVjdGx5IGZvcm1lZCBhbmQgc2VudC4NCj4NCj4g
+SSBzdGlsbCBoYXZlIHByb2JsZW1zIHNldHRpbmcgdGhlIGZlZGVyYXRpb24gYmV0d2VlbiAyIHpv
+bmVzIG9mIDIgY2VwaCBjbHVzdGVycyBpbiAyIHJlZ2lvbnMuDQo+DQo+IEkgZ28gb24gaW52ZXN0
+aWdhdGluZy4NCj4NCj4gQmVzdCByZWdhcmRzDQo+DQo+DQo+IF9fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCj4gX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQo+DQo+IENl
+IG1lc3NhZ2UgZXQgc2VzIHBpZWNlcyBqb2ludGVzIHBldXZlbnQgY29udGVuaXIgZGVzIGluZm9y
+bWF0aW9ucyANCj4gY29uZmlkZW50aWVsbGVzIG91IHByaXZpbGVnaWVlcyBldCBuZSBkb2l2ZW50
+IGRvbmMgcGFzIGV0cmUgZGlmZnVzZXMsIA0KPiBleHBsb2l0ZXMgb3UgY29waWVzIHNhbnMgYXV0
+b3Jpc2F0aW9uLiBTaSB2b3VzIGF2ZXogcmVjdSBjZSBtZXNzYWdlIA0KPiBwYXIgZXJyZXVyLCB2
+ZXVpbGxleiBsZSBzaWduYWxlciBhIGwnZXhwZWRpdGV1ciBldCBsZSBkZXRydWlyZSBhaW5zaSBx
+dWUgbGVzIHBpZWNlcyBqb2ludGVzLiBMZXMgbWVzc2FnZXMgZWxlY3Ryb25pcXVlcyBldGFudCBz
+dXNjZXB0aWJsZXMgZCdhbHRlcmF0aW9uLCBPcmFuZ2UgZGVjbGluZSB0b3V0ZSByZXNwb25zYWJp
+bGl0ZSBzaSBjZSBtZXNzYWdlIGEgZXRlIGFsdGVyZSwgZGVmb3JtZSBvdSBmYWxzaWZpZS4gTWVy
+Y2kuDQo+DQo+IFRoaXMgbWVzc2FnZSBhbmQgaXRzIGF0dGFjaG1lbnRzIG1heSBjb250YWluIGNv
+bmZpZGVudGlhbCBvciANCj4gcHJpdmlsZWdlZCBpbmZvcm1hdGlvbiB0aGF0IG1heSBiZSBwcm90
+ZWN0ZWQgYnkgbGF3OyB0aGV5IHNob3VsZCBub3QgYmUgZGlzdHJpYnV0ZWQsIHVzZWQgb3IgY29w
+aWVkIHdpdGhvdXQgYXV0aG9yaXNhdGlvbi4NCj4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBl
+bWFpbCBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGFuZCBkZWxldGUgdGhpcyBt
+ZXNzYWdlIGFuZCBpdHMgYXR0YWNobWVudHMuDQo+IEFzIGVtYWlscyBtYXkgYmUgYWx0ZXJlZCwg
+T3JhbmdlIGlzIG5vdCBsaWFibGUgZm9yIG1lc3NhZ2VzIHRoYXQgaGF2ZSBiZWVuIG1vZGlmaWVk
+LCBjaGFuZ2VkIG9yIGZhbHNpZmllZC4NCj4gVGhhbmsgeW91Lg0KPg0KPiAtLQ0KPiBUbyB1bnN1
+YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1k
+ZXZlbCIgDQo+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJu
+ZWwub3JnIE1vcmUgbWFqb3Jkb21vIA0KPiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3Jn
+L21ham9yZG9tby1pbmZvLmh0bWwNCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCgpDZSBtZXNzYWdlIGV0IHNlcyBwaWVjZXMg
+am9pbnRlcyBwZXV2ZW50IGNvbnRlbmlyIGRlcyBpbmZvcm1hdGlvbnMgY29uZmlkZW50aWVsbGVz
+IG91IHByaXZpbGVnaWVlcyBldCBuZSBkb2l2ZW50IGRvbmMKcGFzIGV0cmUgZGlmZnVzZXMsIGV4
+cGxvaXRlcyBvdSBjb3BpZXMgc2FucyBhdXRvcmlzYXRpb24uIFNpIHZvdXMgYXZleiByZWN1IGNl
+IG1lc3NhZ2UgcGFyIGVycmV1ciwgdmV1aWxsZXogbGUgc2lnbmFsZXIKYSBsJ2V4cGVkaXRldXIg
+ZXQgbGUgZGV0cnVpcmUgYWluc2kgcXVlIGxlcyBwaWVjZXMgam9pbnRlcy4gTGVzIG1lc3NhZ2Vz
+IGVsZWN0cm9uaXF1ZXMgZXRhbnQgc3VzY2VwdGlibGVzIGQnYWx0ZXJhdGlvbiwKT3JhbmdlIGRl
+Y2xpbmUgdG91dGUgcmVzcG9uc2FiaWxpdGUgc2kgY2UgbWVzc2FnZSBhIGV0ZSBhbHRlcmUsIGRl
+Zm9ybWUgb3UgZmFsc2lmaWUuIE1lcmNpLgoKVGhpcyBtZXNzYWdlIGFuZCBpdHMgYXR0YWNobWVu
+dHMgbWF5IGNvbnRhaW4gY29uZmlkZW50aWFsIG9yIHByaXZpbGVnZWQgaW5mb3JtYXRpb24gdGhh
+dCBtYXkgYmUgcHJvdGVjdGVkIGJ5IGxhdzsKdGhleSBzaG91bGQgbm90IGJlIGRpc3RyaWJ1dGVk
+LCB1c2VkIG9yIGNvcGllZCB3aXRob3V0IGF1dGhvcmlzYXRpb24uCklmIHlvdSBoYXZlIHJlY2Vp
+dmVkIHRoaXMgZW1haWwgaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBhbmQgZGVs
+ZXRlIHRoaXMgbWVzc2FnZSBhbmQgaXRzIGF0dGFjaG1lbnRzLgpBcyBlbWFpbHMgbWF5IGJlIGFs
+dGVyZWQsIE9yYW5nZSBpcyBub3QgbGlhYmxlIGZvciBtZXNzYWdlcyB0aGF0IGhhdmUgYmVlbiBt
+b2RpZmllZCwgY2hhbmdlZCBvciBmYWxzaWZpZWQuClRoYW5rIHlvdS4KCg==
