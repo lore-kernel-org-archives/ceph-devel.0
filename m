@@ -1,106 +1,122 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: workloads/rbd_fsx_cache_writethrough.yaml hangs on dumpling
-Date: Mon, 02 Feb 2015 18:10:49 +0100
-Message-ID: <54CFAF99.9020903@dachary.org>
-References: <54CF7927.7010908@dachary.org>	<CAAM7YAmrh_DeJgPY-QECbiZqO4w0R=ummQBug=5B8dyoZrkjWw@mail.gmail.com>	<54CF9120.30509@dachary.org> <CAC6JEv9y=2A3Q80bGbTtWam7ESf8_pGBG6L_VSs2B1Z=n--rDA@mail.gmail.com>
+From: <ghislain.chevalier@orange.com>
+Subject: RE: radosgw-agent failed to parse
+Date: Mon, 2 Feb 2015 17:12:26 +0000
+Message-ID: <27334_1422897147_54CFAFFB_27334_10829_1_B9C8EFBF13B1354DB5FA000660D66DD00C1F830B@PEXCVZYM14.corporate.adroot.infra.ftgroup>
+References: <31740_1422885416_54CF8227_31740_2351_1_B9C8EFBF13B1354DB5FA000660D66DD00C1F804F@PEXCVZYM14.corporate.adroot.infra.ftgroup>
+	<CANtztVx9RZs1h-vqLUNMWhq+PrWcAigzh7qb0dpzUeFXf6+Fgw@mail.gmail.com>
+	<3704_1422888787_54CF8F53_3704_2219_1_B9C8EFBF13B1354DB5FA000660D66DD00C1F80ED@PEXCVZYM14.corporate.adroot.infra.ftgroup>
+ <CANtztVyC40R1-os=cuqOnk+L7RdyxwQrPcTLHRXMftakxGyX-A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="8hstdmRwlDb4fUs9UU3OtHRls8beh8ptL"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:51375 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751662AbbBBRKw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Feb 2015 12:10:52 -0500
-In-Reply-To: <CAC6JEv9y=2A3Q80bGbTtWam7ESf8_pGBG6L_VSs2B1Z=n--rDA@mail.gmail.com>
+Received: from relais-ias243.francetelecom.com ([80.12.204.243]:36983 "EHLO
+	relais-inet.francetelecom.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751663AbbBBRV4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Feb 2015 12:21:56 -0500
+In-Reply-To: <CANtztVyC40R1-os=cuqOnk+L7RdyxwQrPcTLHRXMftakxGyX-A@mail.gmail.com>
+Content-Language: fr-FR
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@gregs42.com>
-Cc: "Yan, Zheng" <ukernel@gmail.com>, Jason Dillaman <dillaman@redhat.com>, Josh Durgin <jdurgin@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Alfredo Deza <adeza@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---8hstdmRwlDb4fUs9UU3OtHRls8beh8ptL
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-
-
-On 02/02/2015 17:46, Gregory Farnum wrote:
-> On Mon, Feb 2, 2015 at 7:00 AM, Loic Dachary <loic@dachary.org> wrote:
->>
->>
->> On 02/02/2015 14:48, Yan, Zheng wrote:
->>> On Mon, Feb 2, 2015 at 9:18 PM, Loic Dachary <loic@dachary.org> wrote=
-:
->>>> Hi,
->>>>
->>>> http://pulpito.ceph.com/loic-2015-01-29_15:39:38-rbd-dumpling-backpo=
-rts---basic-multi/730029/ hangs on dumpling and got killed after two days=
-=2E
->>>>
->>>> Although workloads/rbd_fsx_cache_writethrough.yaml  was running with=
- the thrasher, it does not seem to be related to http://tracker.ceph.com/=
-issues/10513 : it was running on a mira070 (16GB RAM) and plana78 (8GB RA=
-M).
->>>>
->>>> I don't see anything in https://github.com/ceph/ceph-qa-suite/blob/m=
-aster/tasks/rbd_fsx.py that would suggest it needs backporting a fix to t=
-he ceph-qa-suite branch of dumpling.
->>>>
->>>> I browsed the commits related to RBD that are in the dumpling-backpo=
-rts branch ( see here for the list I used http://tracker.ceph.com/issues/=
-10560 ). I don't see anything in the issues that need backporting to dump=
-ling either.
->>>>
->>>> Another run of this specific test has been scheduled to check if it =
-always happens at http://pulpito.ceph.com/loic-2015-02-02_13:58:32-rbd:th=
-rash:workloads:rbd_fsx_cache_writethrough.yaml-dumpling-backports---basic=
--multi/
->>>>
->>>> Does that ring a bell by any chance ?
->>>>
->>>
->>> maybe it's the same as http://tracker.ceph.com/issues/10498
->>>
->>
->> I hoped it would be but from what I read the bug crashes and creates a=
- core dump, right ? What I'm seeing is the test hanging indefinitely and =
-no core.
->=20
-> Whether it's crashing or not depends on the nature of the test. The
-> root cause is just a hang; some things might crash on timeouts but
-> others won't. (I don't think I recall seeing a crash on that bug
-> report anyway, though.)
-
-Ah, you are correct, thanks for correcting me. I got confused by another =
-livelock bug http://tracker.ceph.com/issues/9854 and wrongly assumed just=
- by the keyword that they were the same.
-
-Cheers
-
-> -Greg
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---8hstdmRwlDb4fUs9UU3OtHRls8beh8ptL
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlTPr5kACgkQ8dLMyEl6F203wwCglxWd26js8WgyFx5mbD3B7Y14
-cVoAoLHtnOTggZtowTXyqzUZcq6ZrJtL
-=3bGf
------END PGP SIGNATURE-----
-
---8hstdmRwlDb4fUs9UU3OtHRls8beh8ptL--
+T0sgSSB3aWxsIHNlbmQgdGhlbSBhc2FwDQoNCkxvZ3MgYXJlIG5vdCB2ZXJ5IHZlcmJvc2UuLiBD
+YW4gSSBzZXQgYSBkZWJ1ZyBtb2RlPw0KDQotLS0tLU1lc3NhZ2UgZCdvcmlnaW5lLS0tLS0NCkRl
+wqA6IGFsZnJlZG8uZGV6YUBpbmt0YW5rLmNvbSBbbWFpbHRvOmFsZnJlZG8uZGV6YUBpbmt0YW5r
+LmNvbV0gRGUgbGEgcGFydCBkZSBBbGZyZWRvIERlemENCkVudm95w6nCoDogbHVuZGkgMiBmw6l2
+cmllciAyMDE1IDE2OjU5DQrDgMKgOiBDSEVWQUxJRVIgR2hpc2xhaW4gSU1UL09MUFMNCkNjwqA6
+IA0KT2JqZXTCoDogUmU6IFtDZXBoLWRldmVsXSByYWRvc2d3LWFnZW50IGZhaWxlZCB0byBwYXJz
+ZQ0KDQpUaGF0IHNvdW5kcyBzdXNwaWNpb3VzIGJlY2F1c2Ugd2UgaGF2ZW4ndCBwYWNrYWdlZCBh
+IDEuMi4xIHJlbGVhc2UuDQoNClRoZSBsYXRlc3Qgb24gUHlQSSBpcyAxLjIsIHdoaWNoIGlzIHRo
+ZSBzYW1lIGluIHRoZSBtYXN0ZXIgYnJhbmNoLg0KDQpXb3VsZCB5b3UgbWluZCBzZW5kaW5nIGxv
+Z3MgdGhhdCBzaG93ICpob3cqIHRoZSB1cmwgaXMgbWFsZm9ybWVkIChib3RoIHdoZW4gaXQgaXMg
+T0sgYW5kIHdoZW4gaXQgaXMgbm90KSA/DQoNCk9uIE1vbiwgRmViIDIsIDIwMTUgYXQgOTo1MyBB
+TSwgIDxnaGlzbGFpbi5jaGV2YWxpZXJAb3JhbmdlLmNvbT4gd3JvdGU6DQo+IEhJLA0KPg0KPiBU
+aHggZm9yIHJlcGx5aW5nDQo+DQo+IEFjY29yZGluZyB0byBkcGtnIC1sLCBpdCdzIDEuMi4xLg0K
+Pg0KPiBJIG5vdGljZWQgdGhhdCB0aGUgVVJMIGlzIG1hbGZvcm1lZCB3aGVuIGxhdW5jaGluZyB1
+c2luZyBkaXJlY3RseSANCj4gcmFkb3Nndy1hZ2VudCAtYyA8c3luY2ZpbGU+IGJ1dCB3ZWxsIGZv
+cm1lZCB3aGVuIGxhdW5jaGluZyB1c2luZyANCj4gc2VydmljZSByYWRvc2d3LWFnZW50IHN0YXJ0
+IDxzeW5jZmlsZT4NCj4NCj4gYmVzdCByZWdhcmRzDQo+DQo+IC0tLS0tTWVzc2FnZSBkJ29yaWdp
+bmUtLS0tLQ0KPiBEZSA6IGFsZnJlZG8uZGV6YUBpbmt0YW5rLmNvbSBbbWFpbHRvOmFsZnJlZG8u
+ZGV6YUBpbmt0YW5rLmNvbV0gRGUgbGEgDQo+IHBhcnQgZGUgQWxmcmVkbyBEZXphIEVudm95w6kg
+OiBsdW5kaSAyIGbDqXZyaWVyIDIwMTUgMTU6MTggw4AgOiBDSEVWQUxJRVIgDQo+IEdoaXNsYWlu
+IElNVC9PTFBTIENjIDogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcgT2JqZXQgOiBSZTogDQo+
+IFtDZXBoLWRldmVsXSByYWRvc2d3LWFnZW50IGZhaWxlZCB0byBwYXJzZQ0KPg0KPiBXaGF0IHZl
+cnNpb24gb2YgdGhlIGFnZW50IGFyZSB5b3UgdXNpbmc/IEFuZCB3aGVuIGl0IGZhaWxzLCBob3cg
+ZG9lcyB0aGUgbG9nIG91dHB1dCBsb29rPw0KPg0KPiBPbiBNb24sIEZlYiAyLCAyMDE1IGF0IDg6
+NTYgQU0sICA8Z2hpc2xhaW4uY2hldmFsaWVyQG9yYW5nZS5jb20+IHdyb3RlOg0KPj4gSGkgYWxs
+LA0KPj4NCj4+IENvbnRleHQgOiBVYnVudHUgMTQuMDQgVExTIGZpcmVmbHkgMC44MC44DQo+Pg0K
+Pj4gSSBzZW50IHRoaXMgcG9zdCBpbiBjZXBoLXVzZXJzIChpZGVudGljYWwgc3ViamVjdCkgYmVj
+YXVzZSBJIHJlY2VudGx5IGVuY291bnRlcmVkIHRoZSBzYW1lIGlzc3VlLg0KPj4gTWF5YmUgSSBt
+aXNzZWQgc29tZXRoaW5nIGJldHdlZW4gSnVseSBhbmQgSmFudWFyeS4uLg0KPj4NCj4+IEkgZm91
+bmQgdGhhdCB0aGUgaHR0cCByZXF1ZXN0IHdhc24ndCBjb3JyZWN0bHkgZm9ybWVkIGJ5IA0KPj4g
+L3Vzci9saWIvcHl0aG9uMi43L2Rpc3QtcGFja2FnZXMvcmFkb3Nnd19hZ2VudC9jbGllbnQucHkN
+Cj4+DQo+PiBJIGRpZCB0aGUgY2hhbmdlcyBiZWxvdw0KPj4gIyAgICB1cmwgPSAne3Byb3RvY29s
+fTovL3tob3N0fXtwYXRofScuZm9ybWF0KHByb3RvY29sPXJlcXVlc3QucHJvdG9jb2wsDQo+PiAj
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaG9zdD1yZXF1ZXN0
+Lmhvc3QsDQo+PiAjICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+cGF0aD1yZXF1ZXN0LnBhdGgpDQo+PiAgICAgIHVybCA9ICd7cGF0aH0nLmZvcm1hdChwcm90b2Nv
+bD0iIiwgaG9zdD0iIiwgcGF0aD1yZXF1ZXN0LnBhdGgpDQo+Pg0KPj4gVGhlIHJlcXVlc3QgaXMg
+dGhlbiBjb3JyZWN0bHkgZm9ybWVkIGFuZCBzZW50Lg0KPj4NCj4+IEkgc3RpbGwgaGF2ZSBwcm9i
+bGVtcyBzZXR0aW5nIHRoZSBmZWRlcmF0aW9uIGJldHdlZW4gMiB6b25lcyBvZiAyIGNlcGggY2x1
+c3RlcnMgaW4gMiByZWdpb25zLg0KPj4NCj4+IEkgZ28gb24gaW52ZXN0aWdhdGluZy4NCj4+DQo+
+PiBCZXN0IHJlZ2FyZHMNCj4+DQo+Pg0KPj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQo+PiBfIF9fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXw0KPj4NCj4+IENlIG1lc3Nh
+Z2UgZXQgc2VzIHBpZWNlcyBqb2ludGVzIHBldXZlbnQgY29udGVuaXIgZGVzIGluZm9ybWF0aW9u
+cyANCj4+IGNvbmZpZGVudGllbGxlcyBvdSBwcml2aWxlZ2llZXMgZXQgbmUgZG9pdmVudCBkb25j
+IHBhcyBldHJlIGRpZmZ1c2VzLCANCj4+IGV4cGxvaXRlcyBvdSBjb3BpZXMgc2FucyBhdXRvcmlz
+YXRpb24uIFNpIHZvdXMgYXZleiByZWN1IGNlIG1lc3NhZ2UgDQo+PiBwYXIgZXJyZXVyLCB2ZXVp
+bGxleiBsZSBzaWduYWxlciBhIGwnZXhwZWRpdGV1ciBldCBsZSBkZXRydWlyZSBhaW5zaSBxdWUg
+bGVzIHBpZWNlcyBqb2ludGVzLiBMZXMgbWVzc2FnZXMgZWxlY3Ryb25pcXVlcyBldGFudCBzdXNj
+ZXB0aWJsZXMgZCdhbHRlcmF0aW9uLCBPcmFuZ2UgZGVjbGluZSB0b3V0ZSByZXNwb25zYWJpbGl0
+ZSBzaSBjZSBtZXNzYWdlIGEgZXRlIGFsdGVyZSwgZGVmb3JtZSBvdSBmYWxzaWZpZS4gTWVyY2ku
+DQo+Pg0KPj4gVGhpcyBtZXNzYWdlIGFuZCBpdHMgYXR0YWNobWVudHMgbWF5IGNvbnRhaW4gY29u
+ZmlkZW50aWFsIG9yIA0KPj4gcHJpdmlsZWdlZCBpbmZvcm1hdGlvbiB0aGF0IG1heSBiZSBwcm90
+ZWN0ZWQgYnkgbGF3OyB0aGV5IHNob3VsZCBub3QgYmUgZGlzdHJpYnV0ZWQsIHVzZWQgb3IgY29w
+aWVkIHdpdGhvdXQgYXV0aG9yaXNhdGlvbi4NCj4+IElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMg
+ZW1haWwgaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBhbmQgZGVsZXRlIHRoaXMg
+bWVzc2FnZSBhbmQgaXRzIGF0dGFjaG1lbnRzLg0KPj4gQXMgZW1haWxzIG1heSBiZSBhbHRlcmVk
+LCBPcmFuZ2UgaXMgbm90IGxpYWJsZSBmb3IgbWVzc2FnZXMgdGhhdCBoYXZlIGJlZW4gbW9kaWZp
+ZWQsIGNoYW5nZWQgb3IgZmFsc2lmaWVkLg0KPj4gVGhhbmsgeW91Lg0KPj4NCj4+IC0tDQo+PiBU
+byB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUg
+Y2VwaC1kZXZlbCINCj4+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdl
+ci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIA0KPj4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2Vy
+bmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+DQo+IF9fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCj4gX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQo+DQo+IENlIG1l
+c3NhZ2UgZXQgc2VzIHBpZWNlcyBqb2ludGVzIHBldXZlbnQgY29udGVuaXIgZGVzIGluZm9ybWF0
+aW9ucyANCj4gY29uZmlkZW50aWVsbGVzIG91IHByaXZpbGVnaWVlcyBldCBuZSBkb2l2ZW50IGRv
+bmMgcGFzIGV0cmUgZGlmZnVzZXMsIA0KPiBleHBsb2l0ZXMgb3UgY29waWVzIHNhbnMgYXV0b3Jp
+c2F0aW9uLiBTaSB2b3VzIGF2ZXogcmVjdSBjZSBtZXNzYWdlIA0KPiBwYXIgZXJyZXVyLCB2ZXVp
+bGxleiBsZSBzaWduYWxlciBhIGwnZXhwZWRpdGV1ciBldCBsZSBkZXRydWlyZSBhaW5zaSBxdWUg
+bGVzIHBpZWNlcyBqb2ludGVzLiBMZXMgbWVzc2FnZXMgZWxlY3Ryb25pcXVlcyBldGFudCBzdXNj
+ZXB0aWJsZXMgZCdhbHRlcmF0aW9uLCBPcmFuZ2UgZGVjbGluZSB0b3V0ZSByZXNwb25zYWJpbGl0
+ZSBzaSBjZSBtZXNzYWdlIGEgZXRlIGFsdGVyZSwgZGVmb3JtZSBvdSBmYWxzaWZpZS4gTWVyY2ku
+DQo+DQo+IFRoaXMgbWVzc2FnZSBhbmQgaXRzIGF0dGFjaG1lbnRzIG1heSBjb250YWluIGNvbmZp
+ZGVudGlhbCBvciANCj4gcHJpdmlsZWdlZCBpbmZvcm1hdGlvbiB0aGF0IG1heSBiZSBwcm90ZWN0
+ZWQgYnkgbGF3OyB0aGV5IHNob3VsZCBub3QgYmUgZGlzdHJpYnV0ZWQsIHVzZWQgb3IgY29waWVk
+IHdpdGhvdXQgYXV0aG9yaXNhdGlvbi4NCj4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBlbWFp
+bCBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGFuZCBkZWxldGUgdGhpcyBtZXNz
+YWdlIGFuZCBpdHMgYXR0YWNobWVudHMuDQo+IEFzIGVtYWlscyBtYXkgYmUgYWx0ZXJlZCwgT3Jh
+bmdlIGlzIG5vdCBsaWFibGUgZm9yIG1lc3NhZ2VzIHRoYXQgaGF2ZSBiZWVuIG1vZGlmaWVkLCBj
+aGFuZ2VkIG9yIGZhbHNpZmllZC4NCj4gVGhhbmsgeW91Lg0KPg0KCl9fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KCkNlIG1lc3Nh
+Z2UgZXQgc2VzIHBpZWNlcyBqb2ludGVzIHBldXZlbnQgY29udGVuaXIgZGVzIGluZm9ybWF0aW9u
+cyBjb25maWRlbnRpZWxsZXMgb3UgcHJpdmlsZWdpZWVzIGV0IG5lIGRvaXZlbnQgZG9uYwpwYXMg
+ZXRyZSBkaWZmdXNlcywgZXhwbG9pdGVzIG91IGNvcGllcyBzYW5zIGF1dG9yaXNhdGlvbi4gU2kg
+dm91cyBhdmV6IHJlY3UgY2UgbWVzc2FnZSBwYXIgZXJyZXVyLCB2ZXVpbGxleiBsZSBzaWduYWxl
+cgphIGwnZXhwZWRpdGV1ciBldCBsZSBkZXRydWlyZSBhaW5zaSBxdWUgbGVzIHBpZWNlcyBqb2lu
+dGVzLiBMZXMgbWVzc2FnZXMgZWxlY3Ryb25pcXVlcyBldGFudCBzdXNjZXB0aWJsZXMgZCdhbHRl
+cmF0aW9uLApPcmFuZ2UgZGVjbGluZSB0b3V0ZSByZXNwb25zYWJpbGl0ZSBzaSBjZSBtZXNzYWdl
+IGEgZXRlIGFsdGVyZSwgZGVmb3JtZSBvdSBmYWxzaWZpZS4gTWVyY2kuCgpUaGlzIG1lc3NhZ2Ug
+YW5kIGl0cyBhdHRhY2htZW50cyBtYXkgY29udGFpbiBjb25maWRlbnRpYWwgb3IgcHJpdmlsZWdl
+ZCBpbmZvcm1hdGlvbiB0aGF0IG1heSBiZSBwcm90ZWN0ZWQgYnkgbGF3Owp0aGV5IHNob3VsZCBu
+b3QgYmUgZGlzdHJpYnV0ZWQsIHVzZWQgb3IgY29waWVkIHdpdGhvdXQgYXV0aG9yaXNhdGlvbi4K
+SWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBlbWFpbCBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0
+aGUgc2VuZGVyIGFuZCBkZWxldGUgdGhpcyBtZXNzYWdlIGFuZCBpdHMgYXR0YWNobWVudHMuCkFz
+IGVtYWlscyBtYXkgYmUgYWx0ZXJlZCwgT3JhbmdlIGlzIG5vdCBsaWFibGUgZm9yIG1lc3NhZ2Vz
+IHRoYXQgaGF2ZSBiZWVuIG1vZGlmaWVkLCBjaGFuZ2VkIG9yIGZhbHNpZmllZC4KVGhhbmsgeW91
+LgoK
