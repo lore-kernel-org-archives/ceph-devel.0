@@ -1,52 +1,42 @@
-From: instagram <obchod@ski-sport.sk>
-Subject: --  www.instagram.com Herzlichen =?UTF-8?Q?Gl=C3=BCckwunsch=20an?=
- =?UTF-8?Q?=20Sie=2C?=
-Date: Sun, 01 Feb 2015 18:58:07 +0000
-Message-ID: <463a7d0b34e5a76e48d971414420dc3e@ski-sport.sk>
-Reply-To: <costumerserviceupdate@gmail.com>
+From: Al Viro <viro@ZenIV.linux.org.uk>
+Subject: [RFC] several ceph dentry leaks
+Date: Mon, 2 Feb 2015 00:31:24 +0000
+Message-ID: <20150202003124.GQ29656@ZenIV.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-proxyout-mua-9.websupport.sk ([37.9.172.159]:22751 "EHLO
-	mail-proxyout-mua-9.websupport.sk" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752284AbbBATJr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 1 Feb 2015 14:09:47 -0500
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+Content-Disposition: inline
+Sender: linux-fsdevel-owner@vger.kernel.org
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
+	What do you expect to happen when if () is taken in
+int ceph_handle_notrace_create(struct inode *dir, struct dentry *dentry)
+{
+        struct dentry *result = ceph_lookup(dir, dentry, 0);
 
+        if (result && !IS_ERR(result)) {
 
---=20
-www.instagram.com
-Herzlichen Gl=C3=BCckwunsch an Sie,
+If result is non-NULL, it means that we have just acquired a new reference
+to preexisting dentry (in ceph_finish_lookup()); where do you expect that
+reference to be dropped?
 
-=C2=A0
-Wir wollen Ihnen offiziell verk=C3=BCnden und gratuliere Ihnen f=C3=BCr=
- Schwellen=20
-als einer unserer gl=C3=BCcklichen Gewinner auf unserer los F=C3=B6rder=
-ung=20
-Instagram Mega Millionen von New York Lottery Abteilung 2015.
-=C2=A0=C2=A0
-BATCH NO: J8302MD / W90
-REF NO: 2015/3883920/290
-Trns Code: 00984
-
-an unseren Agenten f=C3=BCr mehr Briefing
-
-Name: James Harry
-E-MAIL: instagramupdate@outlook.com
-
-
-Dank
-Entwickler (s)
-=46acebook, Inc.
-aus Sicherheitsgr=C3=BCnden nicht offenbaren Ihre Gewinn an einen Dritt=
-en,=20
-bis Sie Ihren Gewinn erhalten haben.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Another thing: in ceph_readdir_prepopulate()
+                if (!dn->d_inode) {  
+                        dn = splice_dentry(dn, in, NULL); 
+                        if (IS_ERR(dn)) {
+                                err = PTR_ERR(dn);
+                                dn = NULL;
+                                goto next_item;
+                        }
+                }
+you leak dn if that IS_ERR() ever gets hit - d_splice_alias(d, i) does *not*
+drop reference to d in any cases, so splice_dentry() leaves the sum total
+of all dentry refcounts unchanged.  And in case when return value is
+ERR_PTR(...), this assignment results in a leak.  That one is trival to
+fix, but ceph_handle_notrace_create() looks very confusing - if nothing else,
+we should _never_ create multiple dentries pointing to directory inode, so
+d_instantiate() in there isn't mitigating anything - it's actively breaking
+things as far as the rest of the kernel is concerned...  What are you
+trying to do there?
