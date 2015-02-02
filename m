@@ -1,72 +1,34 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: [RFC] several ceph dentry leaks
-Date: Mon, 2 Feb 2015 14:19:20 +0800
-Message-ID: <CAAM7YA=PEL2=j=+iMVvWhBonZGtfRv95V8+KYQnz6yf18d28tw@mail.gmail.com>
-References: <20150202003124.GQ29656@ZenIV.linux.org.uk>
-	<CAAM7YAm_ZRtEG3iOGsgY8wYNXYBJhKMQLk=3knqmtef4N8nKKA@mail.gmail.com>
-	<20150202044135.GR29656@ZenIV.linux.org.uk>
+From: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
+Subject: Re: backing_dev_info cleanups & lifetime rule fixes V2
+Date: Mon, 2 Feb 2015 09:06:35 +0100
+Message-ID: <20150202080635.GB9851@lst.de>
+References: <1421228561-16857-1-git-send-email-hch@lst.de> <54BEC3C2.7080906@fb.com> <20150201063116.GP29656@ZenIV.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-In-Reply-To: <20150202044135.GR29656@ZenIV.linux.org.uk>
-Sender: linux-fsdevel-owner@vger.kernel.org
-To: Al Viro <viro@zeniv.linux.org.uk>
-Cc: Sage Weil <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>, linux-fsdevel@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20150201063116.GP29656-3bDd1+5oDREiFSDQTTA3OLVCufUGDwFn@public.gmane.org>
+Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Al Viro <viro-3bDd1+5oDREiFSDQTTA3OLVCufUGDwFn@public.gmane.org>
+Cc: Jens Axboe <axboe-b10kYP2dOMg@public.gmane.org>, Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Tejun Heo <tj-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Mon, Feb 2, 2015 at 12:41 PM, Al Viro <viro@zeniv.linux.org.uk> wrote:
->
-> On Mon, Feb 02, 2015 at 11:23:58AM +0800, Yan, Zheng wrote:
-> > > we should _never_ create multiple dentries pointing to directory inode, so
-> > > d_instantiate() in there isn't mitigating anything - it's actively breaking
-> > > things as far as the rest of the kernel is concerned...  What are you
-> > > trying to do there?
-> >
-> > ceph_handle_notrace_create() is for case: Ceph Metadata server restarted,
-> > client re-sent a request. Ceph MDS found the request has already completed,
-> > so it sent a traceless reply to client. (traceless reply contains no information
-> > for the dentry and the newly created inode). It's hard to handle this case
-> > elegantly, because MDS may have done other operation, which moved the
-> > newly created file/directory to other place.
-> >
-> > For multiple dentries pointing to directory inode, maybe we can return an error
-> > (-ENOENT or -ESTALE).
->
-> IDGI...  Suppose we got non-NULL from ceph_lookup() there.  So we'd sent either
-> CEPH_MDS_OP_LOOKUP or CEPH_MDS_OP_LOOKUPSNAP and got ->r_dentry changed
-> (presumably in ceph_fill_trace(), after it got the sucker from splice_dentry(),
-> i.e. ultimately d_splice_alias()).  Right?
+On Sun, Feb 01, 2015 at 06:31:16AM +0000, Al Viro wrote:
+> And at that point we finally can make sb_lock and super_blocks static in
+> fs/super.c.  Do you want that in your tree, or would you rather have it
+> done via vfs.git during the merge window after your tree goes in?  It's
+> as trivial as this:
+> 
+> Make super_blocks and sb_lock static
+> 
+> The only user outside of fs/super.c is gone now
+> 
+> Signed-off-by: Al Viro <viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org>
 
-In theory, yes. But I think it never happens in reality. Because
-parent directory of the newly created
-file/directory is locked, client has no other way to lookup the newly
-created file/directory.
+I'd say merge it through the block tree..
 
-
-Now, we have acquired a reference
-> to it (in ceph_finish_lookup()).  So far, so good; for one thing, we definitely
-> do *NOT* want to forget about that reference.  For another, we've got
-> a good and valid dentry; so why are we playing with the originally passed
-> one?  Just unhash the original and be done with that...
->
-
-I think the reason is that VFS still uses the original dentry. (for
-example, after calling
-filesystem's mkdir callback, vfs_mkdir() calls fsnotify_mkdir() and
-passing the original
-dentry to it)
-
-
-> Looking at the code downstream from the calls of ceph_handle_notrace_create(),
-> ceph_mkdir() looks very dubious - we do ceph_init_inode_acls(dentry->d_inode,
-> &acls); there, after having set ->d_inode to that of a preexisting alias.
-> Is that really correct in the case when such an alias used to exist?
-
-you are right, it's incorrect.
-
-how about make ceph_handle_notrace_create()  return an error when it
-gets an non-NULL
-from ceph_lookup() ? this method is not perfect but should work in most case.
-
-Regards
-Yan, Zheng
+Acked-by: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
+--
+To unsubscribe from this list: send the line "unsubscribe linux-nfs" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
