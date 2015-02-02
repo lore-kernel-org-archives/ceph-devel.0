@@ -1,182 +1,187 @@
-From: Alfredo Deza <adeza@redhat.com>
-Subject: Re: radosgw-agent failed to parse
-Date: Mon, 2 Feb 2015 13:41:37 -0500
-Message-ID: <CANtztVw_eiHicsdF=_ed=BH3Gnnvy+m2zGG5YeBheiq5Ln4Zgw@mail.gmail.com>
-References: <31740_1422885416_54CF8227_31740_2351_1_B9C8EFBF13B1354DB5FA000660D66DD00C1F804F@PEXCVZYM14.corporate.adroot.infra.ftgroup>
-	<CANtztVx9RZs1h-vqLUNMWhq+PrWcAigzh7qb0dpzUeFXf6+Fgw@mail.gmail.com>
-	<3704_1422888787_54CF8F53_3704_2219_1_B9C8EFBF13B1354DB5FA000660D66DD00C1F80ED@PEXCVZYM14.corporate.adroot.infra.ftgroup>
-	<CANtztVyC40R1-os=cuqOnk+L7RdyxwQrPcTLHRXMftakxGyX-A@mail.gmail.com>
-	<27334_1422897147_54CFAFFB_27334_10829_1_B9C8EFBF13B1354DB5FA000660D66DD00C1F830B@PEXCVZYM14.corporate.adroot.infra.ftgroup>
+From: Mike Marshall <hubcap-gqc3UtWaqJ5Wk0Htik3J/w@public.gmane.org>
+Subject: Re: [PATCH v3 00/13] locks: saner method for managing file locks
+Date: Mon, 2 Feb 2015 15:29:33 -0500
+Message-ID: <CAOg9mSQSW68-aCh529BdJJ-G3xeWGY3NsNoizPu5wNdrZz88vA@mail.gmail.com>
+References: <1421936877-27529-1-git-send-email-jeff.layton@primarydata.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yk0-f180.google.com ([209.85.160.180]:63764 "EHLO
-	mail-yk0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754414AbbBBSli convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Feb 2015 13:41:38 -0500
-Received: by mail-yk0-f180.google.com with SMTP id 131so22573645ykp.11
-        for <ceph-devel@vger.kernel.org>; Mon, 02 Feb 2015 10:41:37 -0800 (PST)
-In-Reply-To: <27334_1422897147_54CFAFFB_27334_10829_1_B9C8EFBF13B1354DB5FA000660D66DD00C1F830B@PEXCVZYM14.corporate.adroot.infra.ftgroup>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ghislain.chevalier@orange.com
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1421936877-27529-1-git-send-email-jeff.layton-7I+n7zu2hftEKMMhf/gKZA@public.gmane.org>
+Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Jeff Layton <jeff.layton-7I+n7zu2hftEKMMhf/gKZA@public.gmane.org>
+Cc: linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Christoph Hellwig <hch-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Sasha Levin <sasha.levin-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-If you use the `-v` flag you will get very verbose output.
+I applied Jeff's patch to my orangefs-3.19-rc5 tree. Orangefs
+doesn't yet support the lock callout for file_operations, but
+we have been experimenting with some ideas that would allow
+Orangefs to honor locks in our distributed environment: basically
+posix locks for each kernel client plus meta data in our userspace
+servers.
 
-On Mon, Feb 2, 2015 at 12:12 PM,  <ghislain.chevalier@orange.com> wrote=
-:
-> OK I will send them asap
+Anyhow, the lock callout in the Orangefs patch I've posted
+just returns ENOSYS. I have added posix locks in a current
+test, so now I have:
+
+int pvfs2_lock(struct file *filp, int cmd, struct file_lock *fl)
+{
+        int rc;
+
+        rc = posix_lock_file(filp, fl, NULL);
+
+        return rc;
+}
+
+So... while this isn't safe for our real world distributed environment,
+it makes the kernel with this version of the Orangefs kernel client
+loaded on it think that locks work.
+
+Besides observing that locks seem to work by running some programs
+that need locks (like svn/sqlite) I also ran xfstest generic/131.
+
+Without Jeff's patch, xfstest generic/131 fails:
+
+  29:Verify that F_GETLK for F_WRLCK doesn't require that file be
+     opened for write
+
+Same with Jeff's patch.
+
+Jeff's patch applied painlessly, and my simple tests didn't uncover
+any problems with Jeff's implementation of separate lists for different
+lock types, so that's good.
+
+What surprised me, though, is that the posix lock code failed
+to get all the way through xfstest generic/131... maybe you
+all knew that already?
+
+-Mike
+
+On Thu, Jan 22, 2015 at 9:27 AM, Jeff Layton
+<jeff.layton-7I+n7zu2hftEKMMhf/gKZA@public.gmane.org> wrote:
+> v3:
+> - break out a ceph locking cleanup patch into a separate one earlier
+>   in the series
+> - switch back to using the i_lock to protect assignment of i_flctx.
+>   Using cmpxchg() was subject to races that I couldn't quite get a
+>   grip on. Eventually I may switch it back, but it probably doesn't
+>   provide much benefit.
+> - add a patch to clean up some comments that refer to i_flock
+> - use list_empty_careful in lockless checks rather than list_empty
 >
-> Logs are not very verbose.. Can I set a debug mode?
+> v2:
+> - bugfix to the flc_posix list ordering that broke the split/merge code
+> - don't use i_lock to manage the i_flctx pointer. Do so locklessly
+>   via cmpxchg().
+> - reordering of the patches to make the set bisectable. As a result
+>   the new spinlock is not introduced until near the end of the set
+> - some cleanup of the lm_change operation was added, made possible
+>   by the move to standard list_heads for tracking locks
+> - it takes greater pains to avoid spinlocking by checking when the
+>   lists are empty in addition to whether the i_flctx pointer is NULL
+> - a patch was added to keep count of the number of locks, so we can
+>   avoid having to do count/alloc/populate in ceph and cifs
 >
-> -----Message d'origine-----
-> De : alfredo.deza@inktank.com [mailto:alfredo.deza@inktank.com] De la=
- part de Alfredo Deza
-> Envoy=C3=A9 : lundi 2 f=C3=A9vrier 2015 16:59
-> =C3=80 : CHEVALIER Ghislain IMT/OLPS
-> Cc :
-> Objet : Re: [Ceph-devel] radosgw-agent failed to parse
+> This is the third iteration of this patchset. The second was posted
+> on January 8th, under the cover letter entitled:
 >
-> That sounds suspicious because we haven't packaged a 1.2.1 release.
+>     [PATCH v2 00/10] locks: saner method for managing file locks
 >
-> The latest on PyPI is 1.2, which is the same in the master branch.
+> The big change here is that it once again uses the i_lock to protect the
+> i_flctx pointer assignment. In principle we should be able to use
+> cmpxchg instead, but that seems leave open a race that causes
+> locks_remove_file to miss recently-added locks. Given that is not a
+> super latency-sensitive codepath, an extra spinlock shouldn't make much
+> difference.
 >
-> Would you mind sending logs that show *how* the url is malformed (bot=
-h when it is OK and when it is not) ?
+> Many thanks to Sasha Levin who helped me nail a race that would leave
+> leftover locks on the i_flock list, and David Howells who convinced
+> me to just go ahead back to using the i_lock to protect that field.
 >
-> On Mon, Feb 2, 2015 at 9:53 AM,  <ghislain.chevalier@orange.com> wrot=
-e:
->> HI,
->>
->> Thx for replying
->>
->> According to dpkg -l, it's 1.2.1.
->>
->> I noticed that the URL is malformed when launching using directly
->> radosgw-agent -c <syncfile> but well formed when launching using
->> service radosgw-agent start <syncfile>
->>
->> best regards
->>
->> -----Message d'origine-----
->> De : alfredo.deza@inktank.com [mailto:alfredo.deza@inktank.com] De l=
-a
->> part de Alfredo Deza Envoy=C3=A9 : lundi 2 f=C3=A9vrier 2015 15:18 =C3=
-=80 : CHEVALIER
->> Ghislain IMT/OLPS Cc : ceph-devel@vger.kernel.org Objet : Re:
->> [Ceph-devel] radosgw-agent failed to parse
->>
->> What version of the agent are you using? And when it fails, how does=
- the log output look?
->>
->> On Mon, Feb 2, 2015 at 8:56 AM,  <ghislain.chevalier@orange.com> wro=
-te:
->>> Hi all,
->>>
->>> Context : Ubuntu 14.04 TLS firefly 0.80.8
->>>
->>> I sent this post in ceph-users (identical subject) because I recent=
-ly encountered the same issue.
->>> Maybe I missed something between July and January...
->>>
->>> I found that the http request wasn't correctly formed by
->>> /usr/lib/python2.7/dist-packages/radosgw_agent/client.py
->>>
->>> I did the changes below
->>> #    url =3D '{protocol}://{host}{path}'.format(protocol=3Drequest.=
-protocol,
->>> #                                             host=3Drequest.host,
->>> #                                             path=3Drequest.path)
->>>      url =3D '{path}'.format(protocol=3D"", host=3D"", path=3Dreque=
-st.path)
->>>
->>> The request is then correctly formed and sent.
->>>
->>> I still have problems setting the federation between 2 zones of 2 c=
-eph clusters in 2 regions.
->>>
->>> I go on investigating.
->>>
->>> Best regards
->>>
->>>
->>> ___________________________________________________________________=
-__
->>> _ ___________________________________________________
->>>
->>> Ce message et ses pieces jointes peuvent contenir des informations
->>> confidentielles ou privilegiees et ne doivent donc pas etre diffuse=
-s,
->>> exploites ou copies sans autorisation. Si vous avez recu ce message
->>> par erreur, veuillez le signaler a l'expediteur et le detruire ains=
-i que les pieces jointes. Les messages electroniques etant susceptibles=
- d'alteration, Orange decline toute responsabilite si ce message a ete =
-altere, deforme ou falsifie. Merci.
->>>
->>> This message and its attachments may contain confidential or
->>> privileged information that may be protected by law; they should no=
-t be distributed, used or copied without authorisation.
->>> If you have received this email in error, please notify the sender =
-and delete this message and its attachments.
->>> As emails may be altered, Orange is not liable for messages that ha=
-ve been modified, changed or falsified.
->>> Thank you.
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
-l"
->>> in the body of a message to majordomo@vger.kernel.org More majordom=
-o
->>> info at  http://vger.kernel.org/majordomo-info.html
->>
->> ____________________________________________________________________=
-__
->> ___________________________________________________
->>
->> Ce message et ses pieces jointes peuvent contenir des informations
->> confidentielles ou privilegiees et ne doivent donc pas etre diffuses=
-,
->> exploites ou copies sans autorisation. Si vous avez recu ce message
->> par erreur, veuillez le signaler a l'expediteur et le detruire ainsi=
- que les pieces jointes. Les messages electroniques etant susceptibles =
-d'alteration, Orange decline toute responsabilite si ce message a ete a=
-ltere, deforme ou falsifie. Merci.
->>
->> This message and its attachments may contain confidential or
->> privileged information that may be protected by law; they should not=
- be distributed, used or copied without authorisation.
->> If you have received this email in error, please notify the sender a=
-nd delete this message and its attachments.
->> As emails may be altered, Orange is not liable for messages that hav=
-e been modified, changed or falsified.
->> Thank you.
->>
+> There are some other minor changes, but overall it's pretty similar
+> to the last set. I still plan to merge this for v3.20.
 >
-> _____________________________________________________________________=
-____________________________________________________
+> ------------------------[snip]-------------------------
 >
-> Ce message et ses pieces jointes peuvent contenir des informations co=
-nfidentielles ou privilegiees et ne doivent donc
-> pas etre diffuses, exploites ou copies sans autorisation. Si vous ave=
-z recu ce message par erreur, veuillez le signaler
-> a l'expediteur et le detruire ainsi que les pieces jointes. Les messa=
-ges electroniques etant susceptibles d'alteration,
-> Orange decline toute responsabilite si ce message a ete altere, defor=
-me ou falsifie. Merci.
+> We currently manage all file_locks via a singly-linked list. This is
+> problematic for a number of reasons:
 >
-> This message and its attachments may contain confidential or privileg=
-ed information that may be protected by law;
-> they should not be distributed, used or copied without authorisation.
-> If you have received this email in error, please notify the sender an=
-d delete this message and its attachments.
-> As emails may be altered, Orange is not liable for messages that have=
- been modified, changed or falsified.
-> Thank you.
+> - we have to protect all file locks with the same spinlock (or
+>   equivalent). Currently that uses the i_lock, but Christoph has voiced
+>   objections due to the potential for contention with other i_lock
+>   users. He'd like to see us move to using a different lock.
 >
+> - we have to walk through irrelevant file locks in order to get to the
+>   ones we're interested in. For instance, POSIX locks are at the end
+>   of the list, so we have to skip over all of the flock locks and
+>   leases before we can work with them.
+>
+> - the singly-linked list is primitive and difficult to work with. We
+>   have to keep track of the "before" pointer and it's easy to get that
+>   wrong.
+>
+> Cleaning all of this up is complicated by the fact that no one really
+> wants to grow struct inode in order to do so. We have a single pointer
+> in the inode now and I don't think we want to use any more.
+>
+> One possibility that Trond raised was to move this to an hlist, but
+> that doesn't do anything about the desire for a new spinlock.
+>
+> This patchset takes the approach of replacing the i_flock list with a
+> new struct file_lock_context that is allocated when we intend to add a
+> new file lock to an inode. The file_lock_context is only freed when we
+> destroy the inode.
+>
+> Within that, we have separate (and standard!) lists for each lock type,
+> and a dedicated spinlock for managing those lists. In principle we could
+> even consider adding separate locks for each, but I didn't bother with
+> that for now.
+>
+> For now, the code is still pretty "raw" and isn't bisectable. This is
+> just a RFC for the basic approach. This is probably v3.19 material at
+> best.
+>
+> Anyone have thoughts or comments on the basic approach?
+>
+> Jeff Layton (13):
+>   locks: add new struct list_head to struct file_lock
+>   locks: have locks_release_file use flock_lock_file to release generic
+>     flock locks
+>   locks: add a new struct file_locking_context pointer to struct inode
+>   ceph: move spinlocking into ceph_encode_locks_to_buffer and
+>     ceph_count_locks
+>   locks: move flock locks to file_lock_context
+>   locks: convert posix locks to file_lock_context
+>   locks: convert lease handling to file_lock_context
+>   locks: remove i_flock field from struct inode
+>   locks: add a dedicated spinlock to protect i_flctx lists
+>   locks: clean up the lm_change prototype
+>   locks: keep a count of locks on the flctx lists
+>   locks: consolidate NULL i_flctx checks in locks_remove_file
+>   locks: update comments that refer to inode->i_flock
+>
+>  fs/ceph/locks.c      |  64 +++---
+>  fs/ceph/mds_client.c |   4 -
+>  fs/cifs/file.c       |  34 +--
+>  fs/inode.c           |   3 +-
+>  fs/lockd/svcsubs.c   |  26 ++-
+>  fs/locks.c           | 569 +++++++++++++++++++++++++++------------------------
+>  fs/nfs/delegation.c  |  23 ++-
+>  fs/nfs/nfs4state.c   |  70 ++++---
+>  fs/nfs/pagelist.c    |   6 +-
+>  fs/nfs/write.c       |  41 +++-
+>  fs/nfsd/nfs4state.c  |  21 +-
+>  fs/read_write.c      |   2 +-
+>  include/linux/fs.h   |  52 +++--
+>  13 files changed, 510 insertions(+), 405 deletions(-)
+>
+> --
+> 2.1.0
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-fsdevel" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 --
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
+To unsubscribe from this list: send the line "unsubscribe linux-nfs" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 More majordomo info at  http://vger.kernel.org/majordomo-info.html
