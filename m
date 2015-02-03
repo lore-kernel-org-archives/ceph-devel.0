@@ -1,365 +1,163 @@
-From: Yazen Ghannam <yazen.ghannam@linaro.org>
-Subject: Re: [PATCH] crc32c: add aarch64 optimized crc32c implementation
-Date: Tue, 3 Feb 2015 14:37:01 -0600
-Message-ID: <CA+dbMpuBs+XzsnZ69yHgFcnhfF03Vevd8ZqiMAoiArVA1EjgpQ@mail.gmail.com>
-References: <1422282035-30121-1-git-send-email-yazen.ghannam@linaro.org>
-	<CA+dbMpsSqY2f9GzLz34xOgwaSb7yBuFaO8kg+QHmbRkOMYhZxw@mail.gmail.com>
-	<CAC6JEv-wg23EHEBVaHg+t5RCFLwTqUeCC1LOg=9i=Eo0+FsRGQ@mail.gmail.com>
+From: Samuel Just <sam.just-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: v0.92 released
+Date: Tue, 3 Feb 2015 13:33:17 -0800
+Message-ID: <CA+4uBUZTPTs3NPi7pJss19Y=1QGddQbNqQAV7hrxh1wEV0-YQQ@mail.gmail.com>
+References: <alpine.DEB.2.00.1502030738070.31320@cobra.newdream.net>
+Reply-To: sjust-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f171.google.com ([209.85.214.171]:64865 "EHLO
-	mail-ob0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S966392AbbBCUhC (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Feb 2015 15:37:02 -0500
-Received: by mail-ob0-f171.google.com with SMTP id gq1so15738501obb.2
-        for <ceph-devel@vger.kernel.org>; Tue, 03 Feb 2015 12:37:02 -0800 (PST)
-In-Reply-To: <CAC6JEv-wg23EHEBVaHg+t5RCFLwTqUeCC1LOg=9i=Eo0+FsRGQ@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@gregs42.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.00.1502030738070.31320-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org, ceph-announce-Qp0mS5GaXlQ@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-No problem. I figured people might be busy with FOSDEM or other
-things. I'll check out Github pull requests too.
+There seems to be a bug with the transaction encoding when upgrading
+from v0.91 to v0.92.  Users probably want to hold off on upgrading to
+v0.92 until http://tracker.ceph.com/issues/10734 is resolved.
+-Sam
 
-Thanks,
-Yazen
-
-On Tue, Feb 3, 2015 at 2:05 PM, Gregory Farnum <greg@gregs42.com> wrote:
-> The guys who would normally handle this have been traveling lately, so
-> they're probably behind on such things.
+On Tue, Feb 3, 2015 at 7:40 AM, Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+> This is the second-to-last chunk of new stuff before Hammer.  Big items
+> include additional checksums on OSD objects, proxied reads in the
+> cache tier, image locking in RBD, optimized OSD Transaction and
+> replication messages, and a big pile of RGW and MDS bug fixes.
 >
-> That said, Github pull requests are probably a more reliable
-> transmission channel than the mailing list. :)
-> -Greg
+> Upgrading
+> ---------
 >
-> On Tue, Feb 3, 2015 at 11:31 AM, Yazen Ghannam <yazen.ghannam@linaro.org> wrote:
->> Hi All,
->>
->> I just want to check on the status of this submission. Is there
->> anything I can do to assist in having this patch accepted? I have
->> access to ARMv8 hardware in the Linaro Austin Colocation Lab and I
->> have my own personal AMD Seattle development board. I can do further
->> testing and performance profiling if that is needed.
->>
->> Thanks,
->> Yazen
->>
->> On Mon, Jan 26, 2015 at 8:20 AM, Yazen Ghannam <yazen.ghannam@linaro.org> wrote:
->>> ARMv8 defines a set of optional CRC32/CRC32C instructions.
->>> This patch defines an optimized function that uses these
->>> instructions when available rather than table-based lookup.
->>> Optimized function based on a Hadoop patch by Ed Nevill.
->>>
->>> Autotools updated to check for compiler support.
->>> Optimized function is selected at runtime based on HWCAP_CRC32.
->>> Added crc32c "performance" unit test and arch unit test.
->>>
->>> Tested on AMD Seattle.
->>> Passes all crc32c unit tests.
->>> Unit test shows ~4x performance increase versus sctp.
->>>
->>> Signed-off-by: Yazen Ghannam <yazen.ghannam@linaro.org>
->>> Reviewed-by: Steve Capper <steve.capper@linaro.org>
->>> ---
->>>  configure.ac                   |  1 +
->>>  m4/ax_arm.m4                   | 18 ++++++++++++++--
->>>  src/arch/arm.c                 |  2 ++
->>>  src/arch/arm.h                 |  1 +
->>>  src/common/Makefile.am         | 10 ++++++++-
->>>  src/common/crc32c.cc           |  6 ++++++
->>>  src/common/crc32c_aarch64.c    | 47 ++++++++++++++++++++++++++++++++++++++++++
->>>  src/common/crc32c_aarch64.h    | 27 ++++++++++++++++++++++++
->>>  src/test/common/test_crc32c.cc | 10 +++++++++
->>>  src/test/test_arch.cc          | 14 +++++++++++++
->>>  10 files changed, 133 insertions(+), 3 deletions(-)
->>>  create mode 100644 src/common/crc32c_aarch64.c
->>>  create mode 100644 src/common/crc32c_aarch64.h
->>>
->>> diff --git a/configure.ac b/configure.ac
->>> index d836b02..60e4feb 100644
->>> --- a/configure.ac
->>> +++ b/configure.ac
->>> @@ -575,6 +575,7 @@ AC_LANG_POP([C++])
->>>  # Find supported SIMD / NEON / SSE extensions supported by the compiler
->>>  AX_ARM_FEATURES()
->>>  AM_CONDITIONAL(HAVE_NEON, [ test "x$ax_cv_support_neon_ext" = "xyes"])
->>> +AM_CONDITIONAL(HAVE_ARMV8_CRC, [ test "x$ax_cv_support_crc_ext" = "xyes"])
->>>  AX_INTEL_FEATURES()
->>>  AM_CONDITIONAL(HAVE_SSSE3, [ test "x$ax_cv_support_ssse3_ext" = "xyes"])
->>>  AM_CONDITIONAL(HAVE_SSE4_PCLMUL, [ test "x$ax_cv_support_pclmuldq_ext" = "xyes"])
->>> diff --git a/m4/ax_arm.m4 b/m4/ax_arm.m4
->>> index 2ccc9a9..37ea0aa 100644
->>> --- a/m4/ax_arm.m4
->>> +++ b/m4/ax_arm.m4
->>> @@ -13,13 +13,27 @@ AC_DEFUN([AX_ARM_FEATURES],
->>>        fi
->>>      ;;
->>>      aarch64*)
->>> +      AX_CHECK_COMPILE_FLAG(-march=armv8-a, ax_cv_support_armv8=yes, [])
->>> +      if test x"$ax_cv_support_armv8" = x"yes"; then
->>> +        ARM_ARCH_FLAGS="-march=armv8-a"
->>> +        ARM_DEFINE_FLAGS="-DARCH_AARCH64"
->>> +      fi
->>>        AX_CHECK_COMPILE_FLAG(-march=armv8-a+simd, ax_cv_support_neon_ext=yes, [])
->>>        if test x"$ax_cv_support_neon_ext" = x"yes"; then
->>> +        ARM_ARCH_FLAGS="$ARM_ARCH_FLAGS+simd"
->>> +        ARM_DEFINE_FLAGS="$ARM_DEFINE_FLAGS -DARM_NEON"
->>>          ARM_NEON_FLAGS="-march=armv8-a+simd -DARCH_AARCH64 -DARM_NEON"
->>> -        AC_SUBST(ARM_NEON_FLAGS)
->>> -        ARM_FLAGS="$ARM_FLAGS $ARM_NEON_FLAGS"
->>>          AC_DEFINE(HAVE_NEON,,[Support NEON instructions])
->>> +        AC_SUBST(ARM_NEON_FLAGS)
->>> +      fi
->>> +      AX_CHECK_COMPILE_FLAG(-march=armv8-a+crc, ax_cv_support_crc_ext=yes, [])
->>> +      if test x"$ax_cv_support_crc_ext" = x"yes"; then
->>> +        ARM_ARCH_FLAGS="$ARM_ARCH_FLAGS+crc"
->>> +        ARM_CRC_FLAGS="-march=armv8-a+crc -DARCH_AARCH64"
->>> +        AC_DEFINE(HAVE_ARMV8_CRC,,[Support ARMv8 CRC instructions])
->>> +        AC_SUBST(ARM_CRC_FLAGS)
->>>        fi
->>> +        ARM_FLAGS="$ARM_ARCH_FLAGS $ARM_DEFINE_FLAGS"
->>>      ;;
->>>    esac
->>>
->>> diff --git a/src/arch/arm.c b/src/arch/arm.c
->>> index 93d079a..5a47e33 100644
->>> --- a/src/arch/arm.c
->>> +++ b/src/arch/arm.c
->>> @@ -2,6 +2,7 @@
->>>
->>>  /* flags we export */
->>>  int ceph_arch_neon = 0;
->>> +int ceph_arch_aarch64_crc32 = 0;
->>>
->>>  #include <stdio.h>
->>>
->>> @@ -47,6 +48,7 @@ int ceph_arch_arm_probe(void)
->>>         ceph_arch_neon = (get_hwcap() & HWCAP_NEON) == HWCAP_NEON;
->>>  #elif __aarch64__ && __linux__
->>>         ceph_arch_neon = (get_hwcap() & HWCAP_ASIMD) == HWCAP_ASIMD;
->>> +       ceph_arch_aarch64_crc32 = (get_hwcap() & HWCAP_CRC32) == HWCAP_CRC32;
->>>  #else
->>>         if (0)
->>>                 get_hwcap();  // make compiler shut up
->>> diff --git a/src/arch/arm.h b/src/arch/arm.h
->>> index f613438..1659b2e 100644
->>> --- a/src/arch/arm.h
->>> +++ b/src/arch/arm.h
->>> @@ -6,6 +6,7 @@ extern "C" {
->>>  #endif
->>>
->>>  extern int ceph_arch_neon;  /* true if we have ARM NEON or ASIMD abilities */
->>> +extern int ceph_arch_aarch64_crc32;  /* true if we have AArch64 CRC32/CRC32C abilities */
->>>
->>>  extern int ceph_arch_arm_probe(void);
->>>
->>> diff --git a/src/common/Makefile.am b/src/common/Makefile.am
->>> index 2888194..37d1404 100644
->>> --- a/src/common/Makefile.am
->>> +++ b/src/common/Makefile.am
->>> @@ -112,11 +112,19 @@ endif
->>>  LIBCOMMON_DEPS += libcommon_crc.la
->>>  noinst_LTLIBRARIES += libcommon_crc.la
->>>
->>> +if HAVE_ARMV8_CRC
->>> +libcommon_crc_aarch64_la_SOURCES = common/crc32c_aarch64.c
->>> +libcommon_crc_aarch64_la_CFLAGS = $(AM_CFLAGS) $(ARM_CRC_FLAGS)
->>> +LIBCOMMON_DEPS += libcommon_crc_aarch64.la
->>> +noinst_LTLIBRARIES += libcommon_crc_aarch64.la
->>> +endif
->>> +
->>>  noinst_HEADERS += \
->>>         common/bloom_filter.hpp \
->>>         common/sctp_crc32.h \
->>>         common/crc32c_intel_baseline.h \
->>> -       common/crc32c_intel_fast.h
->>> +       common/crc32c_intel_fast.h \
->>> +       common/crc32c_aarch64.h
->>>
->>>
->>>  # important; libmsg before libauth!
->>> diff --git a/src/common/crc32c.cc b/src/common/crc32c.cc
->>> index e2e81a4..45432f5 100644
->>> --- a/src/common/crc32c.cc
->>> +++ b/src/common/crc32c.cc
->>> @@ -5,9 +5,11 @@
->>>
->>>  #include "arch/probe.h"
->>>  #include "arch/intel.h"
->>> +#include "arch/arm.h"
->>>  #include "common/sctp_crc32.h"
->>>  #include "common/crc32c_intel_baseline.h"
->>>  #include "common/crc32c_intel_fast.h"
->>> +#include "common/crc32c_aarch64.h"
->>>
->>>  /*
->>>   * choose best implementation based on the CPU architecture.
->>> @@ -24,6 +26,10 @@ ceph_crc32c_func_t ceph_choose_crc32(void)
->>>      return ceph_crc32c_intel_fast;
->>>    }
->>>
->>> +  if (ceph_arch_aarch64_crc32){
->>> +    return ceph_crc32c_aarch64;
->>> +  }
->>> +
->>>    // default
->>>    return ceph_crc32c_sctp;
->>>  }
->>> diff --git a/src/common/crc32c_aarch64.c b/src/common/crc32c_aarch64.c
->>> new file mode 100644
->>> index 0000000..d33827d
->>> --- /dev/null
->>> +++ b/src/common/crc32c_aarch64.c
->>> @@ -0,0 +1,47 @@
->>> +#include "acconfig.h"
->>> +#include "include/int_types.h"
->>> +#include "common/crc32c_aarch64.h"
->>> +
->>> +#define CRC32CX(crc, value) __asm__("crc32cx %w[c], %w[c], %x[v]":[c]"+r"(crc):[v]"r"(value))
->>> +#define CRC32CW(crc, value) __asm__("crc32cw %w[c], %w[c], %w[v]":[c]"+r"(crc):[v]"r"(value))
->>> +#define CRC32CH(crc, value) __asm__("crc32ch %w[c], %w[c], %w[v]":[c]"+r"(crc):[v]"r"(value))
->>> +#define CRC32CB(crc, value) __asm__("crc32cb %w[c], %w[c], %w[v]":[c]"+r"(crc):[v]"r"(value))
->>> +
->>> +uint32_t ceph_crc32c_aarch64(uint32_t crc, unsigned char const *buffer, unsigned len)
->>> +{
->>> +       int64_t length = len;
->>> +
->>> +       if (!buffer) {
->>> +
->>> +               while ((length -= sizeof(uint64_t)) >= 0)
->>> +                       CRC32CX(crc, 0);
->>> +
->>> +               /* The following is more efficient than the straight loop */
->>> +               if (length & sizeof(uint32_t))
->>> +                       CRC32CW(crc, 0);
->>> +
->>> +               if (length & sizeof(uint16_t))
->>> +                       CRC32CH(crc, 0);
->>> +
->>> +               if (length & sizeof(uint8_t))
->>> +                       CRC32CB(crc, 0);
->>> +       } else {
->>> +               while ((length -= sizeof(uint64_t)) >= 0) {
->>> +                       CRC32CX(crc, *(uint64_t *)buffer);
->>> +                       buffer += sizeof(uint64_t);
->>> +               }
->>> +
->>> +               /* The following is more efficient than the straight loop */
->>> +               if (length & sizeof(uint32_t)) {
->>> +                       CRC32CW(crc, *(uint32_t *)buffer);
->>> +                       buffer += sizeof(uint32_t);
->>> +               }
->>> +               if (length & sizeof(uint16_t)) {
->>> +                       CRC32CH(crc, *(uint16_t *)buffer);
->>> +                       buffer += sizeof(uint16_t);
->>> +               }
->>> +               if (length & sizeof(uint8_t))
->>> +                       CRC32CB(crc, *buffer);
->>> +       }
->>> +       return crc;
->>> +}
->>> diff --git a/src/common/crc32c_aarch64.h b/src/common/crc32c_aarch64.h
->>> new file mode 100644
->>> index 0000000..3727f54
->>> --- /dev/null
->>> +++ b/src/common/crc32c_aarch64.h
->>> @@ -0,0 +1,27 @@
->>> +#ifndef CEPH_COMMON_CRC32C_AARCH64_H
->>> +#define CEPH_COMMON_CRC32C_AARCH64_H
->>> +
->>> +#include "arch/arm.h"
->>> +
->>> +#ifdef __cplusplus
->>> +extern "C" {
->>> +#endif
->>> +
->>> +#ifdef HAVE_ARMV8_CRC
->>> +
->>> +extern uint32_t ceph_crc32c_aarch64(uint32_t crc, unsigned char const *buffer, unsigned len);
->>> +
->>> +#else
->>> +
->>> +static inline uint32_t ceph_crc32c_aarch64(uint32_t crc, unsigned char const *buffer, unsigned len)
->>> +{
->>> +       return 0;
->>> +}
->>> +
->>> +#endif
->>> +
->>> +#ifdef __cplusplus
->>> +}
->>> +#endif
->>> +
->>> +#endif
->>> diff --git a/src/test/common/test_crc32c.cc b/src/test/common/test_crc32c.cc
->>> index b4297c6..527f115 100644
->>> --- a/src/test/common/test_crc32c.cc
->>> +++ b/src/test/common/test_crc32c.cc
->>> @@ -13,6 +13,7 @@
->>>
->>>  #include "common/sctp_crc32.h"
->>>  #include "common/crc32c_intel_baseline.h"
->>> +#include "common/crc32c_aarch64.h"
->>>
->>>  TEST(Crc32c, Small) {
->>>    const char *a = "foo bar baz";
->>> @@ -80,6 +81,15 @@ TEST(Crc32c, Performance) {
->>>      std::cout << "intel baseline = " << rate << " MB/sec" << std::endl;
->>>      ASSERT_EQ(261108528u, val);
->>>    }
->>> +  if (ceph_arch_aarch64_crc32) // Skip if CRC32C instructions are not defined.
->>> +  {
->>> +    utime_t start = ceph_clock_now(NULL);
->>> +    unsigned val = ceph_crc32c_aarch64(0, (unsigned char *)a, len);
->>> +    utime_t end = ceph_clock_now(NULL);
->>> +    float rate = (float)len / (float)(1024*1024) / (float)(end - start);
->>> +    std::cout << "aarch64 baseline = " << rate << " MB/sec" << std::endl;
->>> +    ASSERT_EQ(261108528u, val);
->>> +  }
->>>
->>>  }
->>>
->>> diff --git a/src/test/test_arch.cc b/src/test/test_arch.cc
->>> index b129262..e2c225b 100644
->>> --- a/src/test/test_arch.cc
->>> +++ b/src/test/test_arch.cc
->>> @@ -47,9 +47,20 @@ TEST(Arch, all)
->>>
->>>    int expected;
->>>
->>> +#if (__arm__ || __aarch64__)
->>> +
->>>    expected = (strstr(flags, " neon ") || strstr(flags, " asimd ")) ? 1 : 0;
->>>    EXPECT_EQ(expected, ceph_arch_neon);
->>>
->>> +#endif
->>> +#if (__aarch64__)
->>> +
->>> +  expected = strstr(flags, " crc32 ") ? 1 : 0;
->>> +  EXPECT_EQ(expected, ceph_arch_aarch64_crc32);
->>> +
->>> +#endif
->>> +#if (__x86_64__)
->>> +
->>>    expected = strstr(flags, " pclmulqdq ") ? 1 : 0;
->>>    EXPECT_EQ(expected, ceph_arch_intel_pclmul);
->>>
->>> @@ -67,6 +78,9 @@ TEST(Arch, all)
->>>
->>>    expected = strstr(flags, " sse2 ") ? 1 : 0;
->>>    EXPECT_EQ(expected, ceph_arch_intel_sse2);
->>> +
->>> +#endif
->>> +
->>>  #endif
->>>  }
->>>
->>> --
->>> 2.1.0
->>>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> * The experimental 'keyvaluestore-dev' OSD backend has been renamed
+>   'keyvaluestore' (for simplicity) and marked as experimental.  To
+>   enable this untested feature and acknowledge that you understand
+>   that it is untested and may destroy data, you need to add the
+>   following to your ceph.conf::
+>
+>     enable experimental unrecoverable data corrupting featuers =
+> keyvaluestore
+>
+> * The following librados C API function calls take a 'flags' argument
+>   whose value is now correctly interpreted:
+>
+>      rados_write_op_operate()
+>      rados_aio_write_op_operate()
+>      rados_read_op_operate()
+>      rados_aio_read_op_operate()
+>
+>   The flags were not correctly being translated from the librados
+>   constants to the internal values.  Now they are.  Any code that is
+>   passing flags to these methods should be audited to ensure that they are
+>   using the correct LIBRADOS_OP_FLAG_* constants.
+>
+> * The 'rados' CLI 'copy' and 'cppool' commands now use the copy-from
+>   operation, which means the latest CLI cannot run these commands against
+>   pre-firefly OSDs.
+>
+> * The librados watch/notify API now includes a watch_flush() operation to
+>   flush the async queue of notify operations.  This should be called by
+>   any watch/notify user prior to rados_shutdown().
+>
+> Notable Changes
+> ---------------
+>
+> * add experimental features option (Sage Weil)
+> * build: fix 'make check' races (#10384 Loic Dachary)
+> * build: fix pkg names when libkeyutils is missing (Pankag Garg, Ken
+>   Dreyer)
+> * ceph: make 'ceph -s' show PG state counts in sorted order (Sage Weil)
+> * ceph: make 'ceph tell mon.* version' work (Mykola Golub)
+> * ceph-monstore-tool: fix/improve CLI (Joao Eduardo Luis)
+> * ceph: show primary-affinity in 'ceph osd tree' (Mykola Golub)
+> * common: add TableFormatter (Andreas Peters)
+> * common: check syncfs() return code (Jianpeng Ma)
+> * doc: do not suggest dangerous XFS nobarrier option (Dan van der Ster)
+> * doc: misc updates (Nilamdyuti Goswami, John Wilkins)
+> * install-deps.sh: do not require sudo when root (Loic Dachary)
+> * libcephfs: fix dirfrag trimming (#10387 Yan, Zheng)
+> * libcephfs: fix mount timeout (#10041 Yan, Zheng)
+> * libcephfs: fix test (#10415 Yan, Zheng)
+> * libcephfs: fix use-afer-free on umount (#10412 Yan, Zheng)
+> * libcephfs: include ceph and git version in client metadata (Sage Weil)
+> * librados: add watch_flush() operation (Sage Weil, Haomai Wang)
+> * librados: avoid memcpy on getxattr, read (Jianpeng Ma)
+> * librados: create ioctx by pool id (Jason Dillaman)
+> * librados: do notify completion in fast-dispatch (Sage Weil)
+> * librados: remove shadowed variable (Kefu Chain)
+> * librados: translate op flags from C APIs (Matthew Richards)
+> * librbd: differentiate between R/O vs R/W features (Jason Dillaman)
+> * librbd: exclusive image locking (Jason Dillaman)
+> * librbd: fix write vs import race (#10590 Jason Dillaman)
+> * librbd: gracefully handle deleted/renamed pools (#10270 Jason Dillaman)
+> * mds: asok command for fetching subtree map (John Spray)
+> * mds: constify MDSCacheObjects (John Spray)
+> * misc: various valgrind fixes and cleanups (Danny Al-Gaaf)
+> * mon: fix 'mds fail' for standby MDSs (John Spray)
+> * mon: fix stashed monmap encoding (#5203 Xie Rui)
+> * mon: implement 'fs reset' command (John Spray)
+> * mon: respect down flag when promoting standbys (John Spray)
+> * mount.ceph: fix suprious error message (#10351 Yan, Zheng)
+> * msgr: async: many fixes, unit tests (Haomai Wang)
+> * msgr: simple: retry binding to port on failure (#10029 Wido den
+>   Hollander)
+> * osd: add fadvise flags to ObjectStore API (Jianpeng Ma)
+> * osd: add get_latest_osdmap asok command (#9483 #9484 Mykola Golub)
+> * osd: EIO on whole-object reads when checksum is wrong (Sage Weil)
+> * osd: filejournal: don't cache journal when not using direct IO (Jianpeng
+>   Ma)
+> * osd: fix ioprio option (Mykola Golub)
+> * osd: fix scrub delay bug (#10693 Samuel Just)
+> * osd: fix watch reconnect race (#10441 Sage Weil)
+> * osd: handle no-op write with snapshot (#10262 Sage Weil)
+> * osd: journal: fix journal zeroing when direct IO is enabled (Xie Rui)
+> * osd: keyvaluestore: cleanup dead code (Ning Yao)
+> * osd, mds: 'ops' as shorthand for 'dump_ops_in_flight' on asok (Sage
+>   Weil)
+> * osd: memstore: fix size limit (Xiaoxi Chen)
+> * osd: misc scrub fixes (#10017 Loic Dachary)
+> * osd: new optimized encoding for ObjectStore::Transaction (Dong Yuan)
+> * osd: optimize filter_snapc (Ning Yao)
+> * osd: optimize WBThrottle map with unordered_map (Ning Yao)
+> * osd: proxy reads during cache promote (Zhiqiang Wang)
+> * osd: proxy read support (Zhiqiang Wang)
+> * osd: remove legacy classic scrub code (Sage Weil)
+> * osd: remove unused fields in MOSDSubOp (Xiaoxi Chen)
+> * osd: replace MOSDSubOp messages with simpler, optimized MOSDRepOp
+>   (Xiaoxi Chen)
+> * osd: store whole-object checksums on scrub, write_full (Sage Weil)
+> * osd: verify kernel is new enough before using XFS extsize ioctl, enable
+>   by default (#9956 Sage Weil)
+> * rados: use copy-from operation for copy, cppool (Sage Weil)
+> * rgw: change multipart upload id magic (#10271 Yehuda Sadeh)
+> * rgw: decode http query params correction (#10271 Yehuda Sadeh)
+> * rgw: fix content length check (#10701 Axel Dunkel, Yehuda Sadeh)
+> * rgw: fix partial GET in swift (#10553 Yehuda Sadeh)
+> * rgw: fix shutdown (#10472 Yehuda Sadeh)
+> * rgw: include XML ns on get ACL request (#10106 Yehuda Sadeh)
+> * rgw: misc fixes (#10307 Yehuda Sadeh)
+> * rgw: only track cleanup for objects we write (#10311 Yehuda Sadeh)
+> * rgw: tweak error codes (#10329 #10334 Yehuda Sadeh)
+> * rgw: use gc for multipart abort (#10445 Aaron Bassett, Yehuda Sadeh)
+> * sysvinit: fix race in 'stop' (#10389 Loic Dachary)
+> * test: fix bufferlist tests (Jianpeng Ma)
+> * tests: improve docker-based tests (Loic Dachary)
+>
+> Getting Ceph
+> ------------
+>
+> * Git at git://github.com/ceph/ceph.git
+> * Tarball at http://ceph.com/download/ceph-0.92.tar.gz
+> * For packages, see http://ceph.com/docs/master/install/get-packages
+> * For ceph-deploy, see http://ceph.com/docs/master/install/install-ceph-deploy
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
