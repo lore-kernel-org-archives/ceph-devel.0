@@ -1,227 +1,344 @@
-From: Mike Marshall <hubcap@omnibond.com>
-Subject: Re: [PATCH v3 00/13] locks: saner method for managing file locks
-Date: Tue, 3 Feb 2015 13:01:55 -0500
-Message-ID: <CAOg9mSTdtOdTgM5_ED59reRAXLhaPyaybxzbd3vYjwzn+tc5rw@mail.gmail.com>
-References: <1421936877-27529-1-git-send-email-jeff.layton@primarydata.com>
-	<CAOg9mSQSW68-aCh529BdJJ-G3xeWGY3NsNoizPu5wNdrZz88vA@mail.gmail.com>
-	<20150202154243.7023391f@tlielax.poochiereds.net>
+From: Yazen Ghannam <yazen.ghannam@linaro.org>
+Subject: Re: [PATCH] crc32c: add aarch64 optimized crc32c implementation
+Date: Tue, 3 Feb 2015 13:31:44 -0600
+Message-ID: <CA+dbMpsSqY2f9GzLz34xOgwaSb7yBuFaO8kg+QHmbRkOMYhZxw@mail.gmail.com>
+References: <1422282035-30121-1-git-send-email-yazen.ghannam@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20150202154243.7023391f@tlielax.poochiereds.net>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jeff Layton <jeff.layton@primarydata.com>
-Cc: linux-fsdevel@vger.kernel.org, Christoph Hellwig <hch@infradead.org>, Sasha Levin <sasha.levin@oracle.com>, David Howells <dhowells@redhat.com>, linux-kernel@vger.kernel.org, linux-cifs@vger.kernel.org, linux-nfs@vger.kernel.org, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ob0-f179.google.com ([209.85.214.179]:64413 "EHLO
+	mail-ob0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S966273AbbBCTbp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Feb 2015 14:31:45 -0500
+Received: by mail-ob0-f179.google.com with SMTP id wp4so10041777obc.10
+        for <ceph-devel@vger.kernel.org>; Tue, 03 Feb 2015 11:31:44 -0800 (PST)
+In-Reply-To: <1422282035-30121-1-git-send-email-yazen.ghannam@linaro.org>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: Yazen Ghannam <yazen.ghannam@linaro.org>, Sage Weil <sweil@redhat.com>, Loic Dachary <loic@dachary.org>
 
-Yes, 131 goes all the way through now... thanks for fixing my code in
-your thread <g>...
+Hi All,
 
-int pvfs2_lock(struct file *filp, int cmd, struct file_lock *fl)
-{
-        int rc = 0;
+I just want to check on the status of this submission. Is there
+anything I can do to assist in having this patch accepted? I have
+access to ARMv8 hardware in the Linaro Austin Colocation Lab and I
+have my own personal AMD Seattle development board. I can do further
+testing and performance profiling if that is needed.
 
-        if (cmd == F_GETLK)
-                posix_test_lock(filp, fl);
-        else
-                rc = posix_lock_file(filp, fl, NULL);
+Thanks,
+Yazen
 
-        return rc;
-}
-
--Mike
-
-On Mon, Feb 2, 2015 at 3:42 PM, Jeff Layton <jeff.layton@primarydata.com> wrote:
-> On Mon, 2 Feb 2015 15:29:33 -0500
-> Mike Marshall <hubcap@omnibond.com> wrote:
+On Mon, Jan 26, 2015 at 8:20 AM, Yazen Ghannam <yazen.ghannam@linaro.org> wrote:
+> ARMv8 defines a set of optional CRC32/CRC32C instructions.
+> This patch defines an optimized function that uses these
+> instructions when available rather than table-based lookup.
+> Optimized function based on a Hadoop patch by Ed Nevill.
 >
->> I applied Jeff's patch to my orangefs-3.19-rc5 tree. Orangefs
->> doesn't yet support the lock callout for file_operations, but
->> we have been experimenting with some ideas that would allow
->> Orangefs to honor locks in our distributed environment: basically
->> posix locks for each kernel client plus meta data in our userspace
->> servers.
->>
->> Anyhow, the lock callout in the Orangefs patch I've posted
->> just returns ENOSYS. I have added posix locks in a current
->> test, so now I have:
->>
->> int pvfs2_lock(struct file *filp, int cmd, struct file_lock *fl)
->> {
->>         int rc;
->>
->>         rc = posix_lock_file(filp, fl, NULL);
->>
->>         return rc;
->> }
->>
->> So... while this isn't safe for our real world distributed environment,
->> it makes the kernel with this version of the Orangefs kernel client
->> loaded on it think that locks work.
->>
->> Besides observing that locks seem to work by running some programs
->> that need locks (like svn/sqlite) I also ran xfstest generic/131.
->>
->> Without Jeff's patch, xfstest generic/131 fails:
->>
->>   29:Verify that F_GETLK for F_WRLCK doesn't require that file be
->>      opened for write
->>
->> Same with Jeff's patch.
->>
->> Jeff's patch applied painlessly, and my simple tests didn't uncover
->> any problems with Jeff's implementation of separate lists for different
->> lock types, so that's good.
->>
->> What surprised me, though, is that the posix lock code failed
->> to get all the way through xfstest generic/131... maybe you
->> all knew that already?
->>
->> -Mike
->>
+> Autotools updated to check for compiler support.
+> Optimized function is selected at runtime based on HWCAP_CRC32.
+> Added crc32c "performance" unit test and arch unit test.
 >
-> Hmm... I haven't seen 131 fail like this, but your code above looks
-> wrong. You're ignoring the "cmd" argument, so even F_GETLK requests are
-> setting a lock.
+> Tested on AMD Seattle.
+> Passes all crc32c unit tests.
+> Unit test shows ~4x performance increase versus sctp.
 >
-> I think you might want to do something like:
+> Signed-off-by: Yazen Ghannam <yazen.ghannam@linaro.org>
+> Reviewed-by: Steve Capper <steve.capper@linaro.org>
+> ---
+>  configure.ac                   |  1 +
+>  m4/ax_arm.m4                   | 18 ++++++++++++++--
+>  src/arch/arm.c                 |  2 ++
+>  src/arch/arm.h                 |  1 +
+>  src/common/Makefile.am         | 10 ++++++++-
+>  src/common/crc32c.cc           |  6 ++++++
+>  src/common/crc32c_aarch64.c    | 47 ++++++++++++++++++++++++++++++++++++++++++
+>  src/common/crc32c_aarch64.h    | 27 ++++++++++++++++++++++++
+>  src/test/common/test_crc32c.cc | 10 +++++++++
+>  src/test/test_arch.cc          | 14 +++++++++++++
+>  10 files changed, 133 insertions(+), 3 deletions(-)
+>  create mode 100644 src/common/crc32c_aarch64.c
+>  create mode 100644 src/common/crc32c_aarch64.h
 >
-> int pvfs2_lock(struct file *filp, int cmd, struct file_lock *fl)
-> {
->         if (cmd == F_GETLK)
->                 return posix_test_lock(filp, fl);
->         return posix_lock_file(filp, fl, fl);
-> }
+> diff --git a/configure.ac b/configure.ac
+> index d836b02..60e4feb 100644
+> --- a/configure.ac
+> +++ b/configure.ac
+> @@ -575,6 +575,7 @@ AC_LANG_POP([C++])
+>  # Find supported SIMD / NEON / SSE extensions supported by the compiler
+>  AX_ARM_FEATURES()
+>  AM_CONDITIONAL(HAVE_NEON, [ test "x$ax_cv_support_neon_ext" = "xyes"])
+> +AM_CONDITIONAL(HAVE_ARMV8_CRC, [ test "x$ax_cv_support_crc_ext" = "xyes"])
+>  AX_INTEL_FEATURES()
+>  AM_CONDITIONAL(HAVE_SSSE3, [ test "x$ax_cv_support_ssse3_ext" = "xyes"])
+>  AM_CONDITIONAL(HAVE_SSE4_PCLMUL, [ test "x$ax_cv_support_pclmuldq_ext" = "xyes"])
+> diff --git a/m4/ax_arm.m4 b/m4/ax_arm.m4
+> index 2ccc9a9..37ea0aa 100644
+> --- a/m4/ax_arm.m4
+> +++ b/m4/ax_arm.m4
+> @@ -13,13 +13,27 @@ AC_DEFUN([AX_ARM_FEATURES],
+>        fi
+>      ;;
+>      aarch64*)
+> +      AX_CHECK_COMPILE_FLAG(-march=armv8-a, ax_cv_support_armv8=yes, [])
+> +      if test x"$ax_cv_support_armv8" = x"yes"; then
+> +        ARM_ARCH_FLAGS="-march=armv8-a"
+> +        ARM_DEFINE_FLAGS="-DARCH_AARCH64"
+> +      fi
+>        AX_CHECK_COMPILE_FLAG(-march=armv8-a+simd, ax_cv_support_neon_ext=yes, [])
+>        if test x"$ax_cv_support_neon_ext" = x"yes"; then
+> +        ARM_ARCH_FLAGS="$ARM_ARCH_FLAGS+simd"
+> +        ARM_DEFINE_FLAGS="$ARM_DEFINE_FLAGS -DARM_NEON"
+>          ARM_NEON_FLAGS="-march=armv8-a+simd -DARCH_AARCH64 -DARM_NEON"
+> -        AC_SUBST(ARM_NEON_FLAGS)
+> -        ARM_FLAGS="$ARM_FLAGS $ARM_NEON_FLAGS"
+>          AC_DEFINE(HAVE_NEON,,[Support NEON instructions])
+> +        AC_SUBST(ARM_NEON_FLAGS)
+> +      fi
+> +      AX_CHECK_COMPILE_FLAG(-march=armv8-a+crc, ax_cv_support_crc_ext=yes, [])
+> +      if test x"$ax_cv_support_crc_ext" = x"yes"; then
+> +        ARM_ARCH_FLAGS="$ARM_ARCH_FLAGS+crc"
+> +        ARM_CRC_FLAGS="-march=armv8-a+crc -DARCH_AARCH64"
+> +        AC_DEFINE(HAVE_ARMV8_CRC,,[Support ARMv8 CRC instructions])
+> +        AC_SUBST(ARM_CRC_FLAGS)
+>        fi
+> +        ARM_FLAGS="$ARM_ARCH_FLAGS $ARM_DEFINE_FLAGS"
+>      ;;
+>    esac
 >
-> ...untested of course, but you get the idea.
+> diff --git a/src/arch/arm.c b/src/arch/arm.c
+> index 93d079a..5a47e33 100644
+> --- a/src/arch/arm.c
+> +++ b/src/arch/arm.c
+> @@ -2,6 +2,7 @@
+>
+>  /* flags we export */
+>  int ceph_arch_neon = 0;
+> +int ceph_arch_aarch64_crc32 = 0;
+>
+>  #include <stdio.h>
+>
+> @@ -47,6 +48,7 @@ int ceph_arch_arm_probe(void)
+>         ceph_arch_neon = (get_hwcap() & HWCAP_NEON) == HWCAP_NEON;
+>  #elif __aarch64__ && __linux__
+>         ceph_arch_neon = (get_hwcap() & HWCAP_ASIMD) == HWCAP_ASIMD;
+> +       ceph_arch_aarch64_crc32 = (get_hwcap() & HWCAP_CRC32) == HWCAP_CRC32;
+>  #else
+>         if (0)
+>                 get_hwcap();  // make compiler shut up
+> diff --git a/src/arch/arm.h b/src/arch/arm.h
+> index f613438..1659b2e 100644
+> --- a/src/arch/arm.h
+> +++ b/src/arch/arm.h
+> @@ -6,6 +6,7 @@ extern "C" {
+>  #endif
+>
+>  extern int ceph_arch_neon;  /* true if we have ARM NEON or ASIMD abilities */
+> +extern int ceph_arch_aarch64_crc32;  /* true if we have AArch64 CRC32/CRC32C abilities */
+>
+>  extern int ceph_arch_arm_probe(void);
+>
+> diff --git a/src/common/Makefile.am b/src/common/Makefile.am
+> index 2888194..37d1404 100644
+> --- a/src/common/Makefile.am
+> +++ b/src/common/Makefile.am
+> @@ -112,11 +112,19 @@ endif
+>  LIBCOMMON_DEPS += libcommon_crc.la
+>  noinst_LTLIBRARIES += libcommon_crc.la
+>
+> +if HAVE_ARMV8_CRC
+> +libcommon_crc_aarch64_la_SOURCES = common/crc32c_aarch64.c
+> +libcommon_crc_aarch64_la_CFLAGS = $(AM_CFLAGS) $(ARM_CRC_FLAGS)
+> +LIBCOMMON_DEPS += libcommon_crc_aarch64.la
+> +noinst_LTLIBRARIES += libcommon_crc_aarch64.la
+> +endif
+> +
+>  noinst_HEADERS += \
+>         common/bloom_filter.hpp \
+>         common/sctp_crc32.h \
+>         common/crc32c_intel_baseline.h \
+> -       common/crc32c_intel_fast.h
+> +       common/crc32c_intel_fast.h \
+> +       common/crc32c_aarch64.h
 >
 >
->> On Thu, Jan 22, 2015 at 9:27 AM, Jeff Layton
->> <jeff.layton@primarydata.com> wrote:
->> > v3:
->> > - break out a ceph locking cleanup patch into a separate one earlier
->> >   in the series
->> > - switch back to using the i_lock to protect assignment of i_flctx.
->> >   Using cmpxchg() was subject to races that I couldn't quite get a
->> >   grip on. Eventually I may switch it back, but it probably doesn't
->> >   provide much benefit.
->> > - add a patch to clean up some comments that refer to i_flock
->> > - use list_empty_careful in lockless checks rather than list_empty
->> >
->> > v2:
->> > - bugfix to the flc_posix list ordering that broke the split/merge code
->> > - don't use i_lock to manage the i_flctx pointer. Do so locklessly
->> >   via cmpxchg().
->> > - reordering of the patches to make the set bisectable. As a result
->> >   the new spinlock is not introduced until near the end of the set
->> > - some cleanup of the lm_change operation was added, made possible
->> >   by the move to standard list_heads for tracking locks
->> > - it takes greater pains to avoid spinlocking by checking when the
->> >   lists are empty in addition to whether the i_flctx pointer is NULL
->> > - a patch was added to keep count of the number of locks, so we can
->> >   avoid having to do count/alloc/populate in ceph and cifs
->> >
->> > This is the third iteration of this patchset. The second was posted
->> > on January 8th, under the cover letter entitled:
->> >
->> >     [PATCH v2 00/10] locks: saner method for managing file locks
->> >
->> > The big change here is that it once again uses the i_lock to protect the
->> > i_flctx pointer assignment. In principle we should be able to use
->> > cmpxchg instead, but that seems leave open a race that causes
->> > locks_remove_file to miss recently-added locks. Given that is not a
->> > super latency-sensitive codepath, an extra spinlock shouldn't make much
->> > difference.
->> >
->> > Many thanks to Sasha Levin who helped me nail a race that would leave
->> > leftover locks on the i_flock list, and David Howells who convinced
->> > me to just go ahead back to using the i_lock to protect that field.
->> >
->> > There are some other minor changes, but overall it's pretty similar
->> > to the last set. I still plan to merge this for v3.20.
->> >
->> > ------------------------[snip]-------------------------
->> >
->> > We currently manage all file_locks via a singly-linked list. This is
->> > problematic for a number of reasons:
->> >
->> > - we have to protect all file locks with the same spinlock (or
->> >   equivalent). Currently that uses the i_lock, but Christoph has voiced
->> >   objections due to the potential for contention with other i_lock
->> >   users. He'd like to see us move to using a different lock.
->> >
->> > - we have to walk through irrelevant file locks in order to get to the
->> >   ones we're interested in. For instance, POSIX locks are at the end
->> >   of the list, so we have to skip over all of the flock locks and
->> >   leases before we can work with them.
->> >
->> > - the singly-linked list is primitive and difficult to work with. We
->> >   have to keep track of the "before" pointer and it's easy to get that
->> >   wrong.
->> >
->> > Cleaning all of this up is complicated by the fact that no one really
->> > wants to grow struct inode in order to do so. We have a single pointer
->> > in the inode now and I don't think we want to use any more.
->> >
->> > One possibility that Trond raised was to move this to an hlist, but
->> > that doesn't do anything about the desire for a new spinlock.
->> >
->> > This patchset takes the approach of replacing the i_flock list with a
->> > new struct file_lock_context that is allocated when we intend to add a
->> > new file lock to an inode. The file_lock_context is only freed when we
->> > destroy the inode.
->> >
->> > Within that, we have separate (and standard!) lists for each lock type,
->> > and a dedicated spinlock for managing those lists. In principle we could
->> > even consider adding separate locks for each, but I didn't bother with
->> > that for now.
->> >
->> > For now, the code is still pretty "raw" and isn't bisectable. This is
->> > just a RFC for the basic approach. This is probably v3.19 material at
->> > best.
->> >
->> > Anyone have thoughts or comments on the basic approach?
->> >
->> > Jeff Layton (13):
->> >   locks: add new struct list_head to struct file_lock
->> >   locks: have locks_release_file use flock_lock_file to release generic
->> >     flock locks
->> >   locks: add a new struct file_locking_context pointer to struct inode
->> >   ceph: move spinlocking into ceph_encode_locks_to_buffer and
->> >     ceph_count_locks
->> >   locks: move flock locks to file_lock_context
->> >   locks: convert posix locks to file_lock_context
->> >   locks: convert lease handling to file_lock_context
->> >   locks: remove i_flock field from struct inode
->> >   locks: add a dedicated spinlock to protect i_flctx lists
->> >   locks: clean up the lm_change prototype
->> >   locks: keep a count of locks on the flctx lists
->> >   locks: consolidate NULL i_flctx checks in locks_remove_file
->> >   locks: update comments that refer to inode->i_flock
->> >
->> >  fs/ceph/locks.c      |  64 +++---
->> >  fs/ceph/mds_client.c |   4 -
->> >  fs/cifs/file.c       |  34 +--
->> >  fs/inode.c           |   3 +-
->> >  fs/lockd/svcsubs.c   |  26 ++-
->> >  fs/locks.c           | 569 +++++++++++++++++++++++++++------------------------
->> >  fs/nfs/delegation.c  |  23 ++-
->> >  fs/nfs/nfs4state.c   |  70 ++++---
->> >  fs/nfs/pagelist.c    |   6 +-
->> >  fs/nfs/write.c       |  41 +++-
->> >  fs/nfsd/nfs4state.c  |  21 +-
->> >  fs/read_write.c      |   2 +-
->> >  include/linux/fs.h   |  52 +++--
->> >  13 files changed, 510 insertions(+), 405 deletions(-)
->> >
->> > --
->> > 2.1.0
->> >
->> > --
->> > To unsubscribe from this list: send the line "unsubscribe linux-fsdevel" in
->> > the body of a message to majordomo@vger.kernel.org
->> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>  # important; libmsg before libauth!
+> diff --git a/src/common/crc32c.cc b/src/common/crc32c.cc
+> index e2e81a4..45432f5 100644
+> --- a/src/common/crc32c.cc
+> +++ b/src/common/crc32c.cc
+> @@ -5,9 +5,11 @@
 >
+>  #include "arch/probe.h"
+>  #include "arch/intel.h"
+> +#include "arch/arm.h"
+>  #include "common/sctp_crc32.h"
+>  #include "common/crc32c_intel_baseline.h"
+>  #include "common/crc32c_intel_fast.h"
+> +#include "common/crc32c_aarch64.h"
+>
+>  /*
+>   * choose best implementation based on the CPU architecture.
+> @@ -24,6 +26,10 @@ ceph_crc32c_func_t ceph_choose_crc32(void)
+>      return ceph_crc32c_intel_fast;
+>    }
+>
+> +  if (ceph_arch_aarch64_crc32){
+> +    return ceph_crc32c_aarch64;
+> +  }
+> +
+>    // default
+>    return ceph_crc32c_sctp;
+>  }
+> diff --git a/src/common/crc32c_aarch64.c b/src/common/crc32c_aarch64.c
+> new file mode 100644
+> index 0000000..d33827d
+> --- /dev/null
+> +++ b/src/common/crc32c_aarch64.c
+> @@ -0,0 +1,47 @@
+> +#include "acconfig.h"
+> +#include "include/int_types.h"
+> +#include "common/crc32c_aarch64.h"
+> +
+> +#define CRC32CX(crc, value) __asm__("crc32cx %w[c], %w[c], %x[v]":[c]"+r"(crc):[v]"r"(value))
+> +#define CRC32CW(crc, value) __asm__("crc32cw %w[c], %w[c], %w[v]":[c]"+r"(crc):[v]"r"(value))
+> +#define CRC32CH(crc, value) __asm__("crc32ch %w[c], %w[c], %w[v]":[c]"+r"(crc):[v]"r"(value))
+> +#define CRC32CB(crc, value) __asm__("crc32cb %w[c], %w[c], %w[v]":[c]"+r"(crc):[v]"r"(value))
+> +
+> +uint32_t ceph_crc32c_aarch64(uint32_t crc, unsigned char const *buffer, unsigned len)
+> +{
+> +       int64_t length = len;
+> +
+> +       if (!buffer) {
+> +
+> +               while ((length -= sizeof(uint64_t)) >= 0)
+> +                       CRC32CX(crc, 0);
+> +
+> +               /* The following is more efficient than the straight loop */
+> +               if (length & sizeof(uint32_t))
+> +                       CRC32CW(crc, 0);
+> +
+> +               if (length & sizeof(uint16_t))
+> +                       CRC32CH(crc, 0);
+> +
+> +               if (length & sizeof(uint8_t))
+> +                       CRC32CB(crc, 0);
+> +       } else {
+> +               while ((length -= sizeof(uint64_t)) >= 0) {
+> +                       CRC32CX(crc, *(uint64_t *)buffer);
+> +                       buffer += sizeof(uint64_t);
+> +               }
+> +
+> +               /* The following is more efficient than the straight loop */
+> +               if (length & sizeof(uint32_t)) {
+> +                       CRC32CW(crc, *(uint32_t *)buffer);
+> +                       buffer += sizeof(uint32_t);
+> +               }
+> +               if (length & sizeof(uint16_t)) {
+> +                       CRC32CH(crc, *(uint16_t *)buffer);
+> +                       buffer += sizeof(uint16_t);
+> +               }
+> +               if (length & sizeof(uint8_t))
+> +                       CRC32CB(crc, *buffer);
+> +       }
+> +       return crc;
+> +}
+> diff --git a/src/common/crc32c_aarch64.h b/src/common/crc32c_aarch64.h
+> new file mode 100644
+> index 0000000..3727f54
+> --- /dev/null
+> +++ b/src/common/crc32c_aarch64.h
+> @@ -0,0 +1,27 @@
+> +#ifndef CEPH_COMMON_CRC32C_AARCH64_H
+> +#define CEPH_COMMON_CRC32C_AARCH64_H
+> +
+> +#include "arch/arm.h"
+> +
+> +#ifdef __cplusplus
+> +extern "C" {
+> +#endif
+> +
+> +#ifdef HAVE_ARMV8_CRC
+> +
+> +extern uint32_t ceph_crc32c_aarch64(uint32_t crc, unsigned char const *buffer, unsigned len);
+> +
+> +#else
+> +
+> +static inline uint32_t ceph_crc32c_aarch64(uint32_t crc, unsigned char const *buffer, unsigned len)
+> +{
+> +       return 0;
+> +}
+> +
+> +#endif
+> +
+> +#ifdef __cplusplus
+> +}
+> +#endif
+> +
+> +#endif
+> diff --git a/src/test/common/test_crc32c.cc b/src/test/common/test_crc32c.cc
+> index b4297c6..527f115 100644
+> --- a/src/test/common/test_crc32c.cc
+> +++ b/src/test/common/test_crc32c.cc
+> @@ -13,6 +13,7 @@
+>
+>  #include "common/sctp_crc32.h"
+>  #include "common/crc32c_intel_baseline.h"
+> +#include "common/crc32c_aarch64.h"
+>
+>  TEST(Crc32c, Small) {
+>    const char *a = "foo bar baz";
+> @@ -80,6 +81,15 @@ TEST(Crc32c, Performance) {
+>      std::cout << "intel baseline = " << rate << " MB/sec" << std::endl;
+>      ASSERT_EQ(261108528u, val);
+>    }
+> +  if (ceph_arch_aarch64_crc32) // Skip if CRC32C instructions are not defined.
+> +  {
+> +    utime_t start = ceph_clock_now(NULL);
+> +    unsigned val = ceph_crc32c_aarch64(0, (unsigned char *)a, len);
+> +    utime_t end = ceph_clock_now(NULL);
+> +    float rate = (float)len / (float)(1024*1024) / (float)(end - start);
+> +    std::cout << "aarch64 baseline = " << rate << " MB/sec" << std::endl;
+> +    ASSERT_EQ(261108528u, val);
+> +  }
+>
+>  }
+>
+> diff --git a/src/test/test_arch.cc b/src/test/test_arch.cc
+> index b129262..e2c225b 100644
+> --- a/src/test/test_arch.cc
+> +++ b/src/test/test_arch.cc
+> @@ -47,9 +47,20 @@ TEST(Arch, all)
+>
+>    int expected;
+>
+> +#if (__arm__ || __aarch64__)
+> +
+>    expected = (strstr(flags, " neon ") || strstr(flags, " asimd ")) ? 1 : 0;
+>    EXPECT_EQ(expected, ceph_arch_neon);
+>
+> +#endif
+> +#if (__aarch64__)
+> +
+> +  expected = strstr(flags, " crc32 ") ? 1 : 0;
+> +  EXPECT_EQ(expected, ceph_arch_aarch64_crc32);
+> +
+> +#endif
+> +#if (__x86_64__)
+> +
+>    expected = strstr(flags, " pclmulqdq ") ? 1 : 0;
+>    EXPECT_EQ(expected, ceph_arch_intel_pclmul);
+>
+> @@ -67,6 +78,9 @@ TEST(Arch, all)
+>
+>    expected = strstr(flags, " sse2 ") ? 1 : 0;
+>    EXPECT_EQ(expected, ceph_arch_intel_sse2);
+> +
+> +#endif
+> +
+>  #endif
+>  }
 >
 > --
-> Jeff Layton <jeff.layton@primarydata.com>
+> 2.1.0
+>
