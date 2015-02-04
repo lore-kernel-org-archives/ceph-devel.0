@@ -1,31 +1,59 @@
-From: Paul Von-Stamwitz <PVonStamwitz@us.fujitsu.com>
-Subject: rgw: bytes sent/received excludes headers
-Date: Tue, 3 Feb 2015 17:40:03 -0800
-Message-ID: <622F4407872BA447A16110F65453358C037C20E05608@FMSAMAIL.fmsa.local>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: [ceph-users] keyvaluestore backend metadata overhead
+Date: Wed, 4 Feb 2015 10:31:39 +0800
+Message-ID: <CACJqLyZSDrCZKvC2REFzXvT+owV38de4ys+JmcENEL=zPtQGBg@mail.gmail.com>
+References: <CAC8iE5iHTEfSQL978paWpu9hSfUbE65OVT_dKi2P=yvWSQ5JhA@mail.gmail.com>
+	<alpine.DEB.2.00.1501291447290.3895@cobra.newdream.net>
+	<CACJqLya-SNwudLTOqu2RPgr3_MZKzFWi9gXYH_xCg1WjxAx59w@mail.gmail.com>
+	<CAC8iE5jrYquoQ+n+uwiiZ5uevXfipGsab9a_CgjtZoW9h1L0SQ@mail.gmail.com>
+	<CACJqLyZnx28QEDU-Jy3KjzS6sumMG_ivqJQ9Ye_cg++Cj8WWQg@mail.gmail.com>
+	<CAC8iE5gmiFFGikg0JatUs-7Jfv3sgFPd3ESx5+bOdkYSP6ByKg@mail.gmail.com>
+	<CAC8iE5ggZme9BKz7noCynEpjd2yhCnoK5yd79pM2g7-237ZxkA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from fujitsu24.fnanic.fujitsu.com ([192.240.6.14]:52146 "EHLO
-	fujitsu24.fnanic.fujitsu.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752544AbbBDCZm (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Feb 2015 21:25:42 -0500
-Received: from pps.filterd (fujitsu24 [127.0.0.1])
-	by fujitsu24.fnanic.fujitsu.com (8.14.4/8.14.4) with SMTP id t141QiGL022666
-	for <ceph-devel@vger.kernel.org>; Tue, 3 Feb 2015 17:40:05 -0800
-Received: from fujitsu7i.fnanic.fujitsu.com ([133.164.253.7])
-	by fujitsu24.fnanic.fujitsu.com with ESMTP id 1sb65784t1-1
-	for <ceph-devel@vger.kernel.org>; Tue, 03 Feb 2015 17:40:05 -0800
-Received: from FMSAHC1.fmsa.local (localhost [127.0.0.1])
-	by fujitsu7i.fnanic.fujitsu.com (8.13.8/8.13.8) with ESMTP id t141e4X0009764
-	for <ceph-devel@vger.kernel.org>; Tue, 3 Feb 2015 17:40:04 -0800 (PST)
-Content-Language: en-US
+Received: from mail-wi0-f182.google.com ([209.85.212.182]:63815 "EHLO
+	mail-wi0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752544AbbBDCbk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Feb 2015 21:31:40 -0500
+Received: by mail-wi0-f182.google.com with SMTP id n3so611042wiv.3
+        for <ceph-devel@vger.kernel.org>; Tue, 03 Feb 2015 18:31:39 -0800 (PST)
+In-Reply-To: <CAC8iE5ggZme9BKz7noCynEpjd2yhCnoK5yd79pM2g7-237ZxkA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Chris Pacejo <cpacejo@clearskydata.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
+On Wed, Feb 4, 2015 at 4:25 AM, Chris Pacejo <cpacejo@clearskydata.com> wrote:
+> The below observations (including high CPU usage by the OSDs) hold
+> true when we (roughly) double the performance of the MySQL backend by
+> pointing it to SSDs instead of rotary media.  This causes us to
+> suspect that our current bottleneck is not the extra load placed on
+> the backend by the metadata; but rather something in the OSD which
+> causes it to be unable to saturate the backend.  Any thoughts?
+>
 
-It is my impression that bytes_sent and bytes_received do not include headers. We got a request from a customer who wants to include them (I know... greedy.) Is there a way to calculate the amount of header information that was transferred?
+Maybe more detail number can help us a bit.
 
-Thanks,
-Paul
+>
+> On Tue, Feb 3, 2015 at 10:13 AM, Chris Pacejo <cpacejo@clearskydata.com> wrote:
+>> I've instrumented submit_transaction to tick up/down an atomic
+>> counter.  While in certain situations (resource-constrained VM; OSD
+>> startup), I do see up to "keyvaluestore op threads" number of
+>> concurrent transaction submits reported by this counter, on real
+>> hardware, during `rados bench` with 2700-byte objects, I never see
+>> more than 3 concurrent submits; on average, I see 2.  I don't know the
+>> OSD's internals well enough to speculate on the cause, but it's worth
+>> noting that the OSD processes consume a lot of CPU (170%+) during
+>> these benchmarks (compared to 14% for 1 MiB objects).
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+-- 
+Best Regards,
+
+Wheat
