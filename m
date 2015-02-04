@@ -1,44 +1,77 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: [ceph-users] keyvaluestore backend metadata overhead
-Date: Tue, 03 Feb 2015 21:15:38 -0600
-Message-ID: <54D18EDA.6020901@redhat.com>
-References: <CAC8iE5iHTEfSQL978paWpu9hSfUbE65OVT_dKi2P=yvWSQ5JhA@mail.gmail.com>	<alpine.DEB.2.00.1501291447290.3895@cobra.newdream.net>	<CACJqLya-SNwudLTOqu2RPgr3_MZKzFWi9gXYH_xCg1WjxAx59w@mail.gmail.com>	<CAC8iE5jrYquoQ+n+uwiiZ5uevXfipGsab9a_CgjtZoW9h1L0SQ@mail.gmail.com>	<CACJqLyZnx28QEDU-Jy3KjzS6sumMG_ivqJQ9Ye_cg++Cj8WWQg@mail.gmail.com>	<CAC8iE5hSDg-nY+7g+N2FF6M8ijGe-s3+Dmg1PkGP7KqJOduyqQ@mail.gmail.com>	<CACJqLyZegga=U2gJ+bQWjG_AY7OhsWXhgrT=Og-ahO3btyd7fQ@mail.gmail.com>	<6F3FA899187F0043BA1827A69DA2F7CC0214CCFA@shsmsx102.ccr.corp.intel.com> <CAC8iE5iLJ53AS4+AH-2F+NCVwf5h7oVcb79bTPMZQQY3VAu0fA@mail.gmail.com>
-Reply-To: mnelson@redhat.com
+From: Ding Dinghua <dingdinghua85@gmail.com>
+Subject: Re: Confused about SnapMapper::get_prefix
+Date: Wed, 4 Feb 2015 12:02:28 +0800
+Message-ID: <CANf+_k+unMa4NNEGnF1bjgg8VYHG=NYTJ-BhrP+qX2aGEODG-g@mail.gmail.com>
+References: <CANf+_kL0_tYtF+vDvLSTPP5LtP_4P6r9_M5qu7VeyP2GYfFw9Q@mail.gmail.com>
+	<CAC6JEv8zKQZ8JVQrfo3bu=AW-xuHfOAC_NN260ywzboFVLuryA@mail.gmail.com>
+	<CA+4uBUYP=eVxgQ0ur4x8kowfCf=uh+YETqL08WyY3an7QFfDZQ@mail.gmail.com>
+	<CA+4uBUbAAKEX9YL2ZcgxumvzCkOYcCnT6CAC59ZBSN2kb7ygOA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qg0-f49.google.com ([209.85.192.49]:57910 "EHLO
-	mail-qg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751753AbbBDDPm (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Feb 2015 22:15:42 -0500
-Received: by mail-qg0-f49.google.com with SMTP id e89so641167qgf.8
-        for <ceph-devel@vger.kernel.org>; Tue, 03 Feb 2015 19:15:41 -0800 (PST)
-In-Reply-To: <CAC8iE5iLJ53AS4+AH-2F+NCVwf5h7oVcb79bTPMZQQY3VAu0fA@mail.gmail.com>
+Received: from mail-lb0-f173.google.com ([209.85.217.173]:33789 "EHLO
+	mail-lb0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752875AbbBDECa (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Feb 2015 23:02:30 -0500
+Received: by mail-lb0-f173.google.com with SMTP id p9so42346935lbv.4
+        for <ceph-devel@vger.kernel.org>; Tue, 03 Feb 2015 20:02:28 -0800 (PST)
+In-Reply-To: <CA+4uBUbAAKEX9YL2ZcgxumvzCkOYcCnT6CAC59ZBSN2kb7ygOA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Chris Pacejo <cpacejo@clearskydata.com>, "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Cc: Haomai Wang <haomaiwang@gmail.com>, Sage Weil <sage@newdream.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: sjust@redhat.com
+Cc: Gregory Farnum <greg@gregs42.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 02/03/2015 09:03 AM, Chris Pacejo wrote:
-> Hi Xiaoxi,
->
-> On Sun, Feb 1, 2015 at 9:50 AM, Chen, Xiaoxi <xiaoxi.chen@intel.com> wrote:
->> We can always use a structure database in an unstructured way, I think it's workable in theory, but  why choose MySQL?
->
-> In our internal performance tests, it performed better than LevelDB
-> and some others, and it's well-proven.  It's not our first choice, nor
-> are we done investigating other options.  But we'll check out LMDB,
-> thanks for the pointer.
->
-> Regardless, the issues we're seeing are equally applicable to any
-> key-value backend.
+I think so, snap_id is defined and used as uint64_t in ceph, but here
+static_cast may introduce bug, since two snap_id may get the same
+prefix, then same key in snap_mapper.
 
-You may also wish to try the rocksdb backend with universal compaction 
-rather than leveled compaction.
+diff --git a/src/osd/SnapMapper.cc b/src/osd/SnapMapper.cc
+index 315e2e2..27cc2b7 100644
+--- a/src/osd/SnapMapper.cc
++++ b/src/osd/SnapMapper.cc
+@@ -72,8 +72,7 @@ string SnapMapper::get_prefix(snapid_
+t snap)
+   char buf[100];
+   int len = snprintf(
+     buf, sizeof(buf),
+-    "%.*X_", (int)(sizeof(snap)*2),
+-    static_cast<unsigned>(snap));
++    "%.*llX_", (int)(sizeof(snap)*2), snap);
 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+2015-02-04 1:25 GMT+08:00 Samuel Just <sam.just@inktank.com>:
+> Should probably be cast to long unsigned with lX conversion specifier?
+> -Sam
 >
+> On Tue, Feb 3, 2015 at 9:21 AM, Samuel Just <sam.just@inktank.com> wrote:
+>> It looks like snapid_t is a uint64_t, but snprintf expects an unsigned there.
+>> -Sam
+>>
+>> On Tue, Feb 3, 2015 at 9:15 AM, Gregory Farnum <greg@gregs42.com> wrote:
+>>> On Tue, Feb 3, 2015 at 4:12 AM, Ding Dinghua <dingdinghua85@gmail.com> wrote:
+>>>> Hi all:
+>>>>       I don't understand why SnapMapper::get_prefix   static_cast snap
+>>>> to unsigned:
+>>>>
+>>>> string SnapMapper::get_prefix(snapid_t snap)
+>>>> {
+>>>>   char buf[100];
+>>>>   int len = snprintf(
+>>>>     buf, sizeof(buf),
+>>>>     "%.*X_", (int)(sizeof(snap)*2),
+>>>>     static_cast<unsigned>(snap));
+>>>>   return MAPPING_PREFIX + string(buf, len);
+>>>> }
+>>>>
+>>>> Will this limit snapshot count in pool to 2^32 -1 ?
+>>>>
+>>>> Could anyone clarify ? Thanks
+>>>
+>>> I think the code base is a little confused about whether snaps should
+>>> be 32 or 64 bits in various places. :( That said, the size of unsigned
+>>> can vary across architectures, so this should probably be sized more
+>>> explicitly as whatever it's supposed to be on the disk...
+
+
+
+-- 
+Ding Dinghua
