@@ -1,59 +1,44 @@
-From: Haomai Wang <haomaiwang@gmail.com>
+From: Mark Nelson <mark.nelson@inktank.com>
 Subject: Re: [ceph-users] keyvaluestore backend metadata overhead
-Date: Wed, 4 Feb 2015 10:31:39 +0800
-Message-ID: <CACJqLyZSDrCZKvC2REFzXvT+owV38de4ys+JmcENEL=zPtQGBg@mail.gmail.com>
-References: <CAC8iE5iHTEfSQL978paWpu9hSfUbE65OVT_dKi2P=yvWSQ5JhA@mail.gmail.com>
-	<alpine.DEB.2.00.1501291447290.3895@cobra.newdream.net>
-	<CACJqLya-SNwudLTOqu2RPgr3_MZKzFWi9gXYH_xCg1WjxAx59w@mail.gmail.com>
-	<CAC8iE5jrYquoQ+n+uwiiZ5uevXfipGsab9a_CgjtZoW9h1L0SQ@mail.gmail.com>
-	<CACJqLyZnx28QEDU-Jy3KjzS6sumMG_ivqJQ9Ye_cg++Cj8WWQg@mail.gmail.com>
-	<CAC8iE5gmiFFGikg0JatUs-7Jfv3sgFPd3ESx5+bOdkYSP6ByKg@mail.gmail.com>
-	<CAC8iE5ggZme9BKz7noCynEpjd2yhCnoK5yd79pM2g7-237ZxkA@mail.gmail.com>
+Date: Tue, 03 Feb 2015 21:15:38 -0600
+Message-ID: <54D18EDA.6020901@redhat.com>
+References: <CAC8iE5iHTEfSQL978paWpu9hSfUbE65OVT_dKi2P=yvWSQ5JhA@mail.gmail.com>	<alpine.DEB.2.00.1501291447290.3895@cobra.newdream.net>	<CACJqLya-SNwudLTOqu2RPgr3_MZKzFWi9gXYH_xCg1WjxAx59w@mail.gmail.com>	<CAC8iE5jrYquoQ+n+uwiiZ5uevXfipGsab9a_CgjtZoW9h1L0SQ@mail.gmail.com>	<CACJqLyZnx28QEDU-Jy3KjzS6sumMG_ivqJQ9Ye_cg++Cj8WWQg@mail.gmail.com>	<CAC8iE5hSDg-nY+7g+N2FF6M8ijGe-s3+Dmg1PkGP7KqJOduyqQ@mail.gmail.com>	<CACJqLyZegga=U2gJ+bQWjG_AY7OhsWXhgrT=Og-ahO3btyd7fQ@mail.gmail.com>	<6F3FA899187F0043BA1827A69DA2F7CC0214CCFA@shsmsx102.ccr.corp.intel.com> <CAC8iE5iLJ53AS4+AH-2F+NCVwf5h7oVcb79bTPMZQQY3VAu0fA@mail.gmail.com>
+Reply-To: mnelson@redhat.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f182.google.com ([209.85.212.182]:63815 "EHLO
-	mail-wi0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752544AbbBDCbk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Feb 2015 21:31:40 -0500
-Received: by mail-wi0-f182.google.com with SMTP id n3so611042wiv.3
-        for <ceph-devel@vger.kernel.org>; Tue, 03 Feb 2015 18:31:39 -0800 (PST)
-In-Reply-To: <CAC8iE5ggZme9BKz7noCynEpjd2yhCnoK5yd79pM2g7-237ZxkA@mail.gmail.com>
+Received: from mail-qg0-f49.google.com ([209.85.192.49]:57910 "EHLO
+	mail-qg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751753AbbBDDPm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Feb 2015 22:15:42 -0500
+Received: by mail-qg0-f49.google.com with SMTP id e89so641167qgf.8
+        for <ceph-devel@vger.kernel.org>; Tue, 03 Feb 2015 19:15:41 -0800 (PST)
+In-Reply-To: <CAC8iE5iLJ53AS4+AH-2F+NCVwf5h7oVcb79bTPMZQQY3VAu0fA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Chris Pacejo <cpacejo@clearskydata.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Chris Pacejo <cpacejo@clearskydata.com>, "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Cc: Haomai Wang <haomaiwang@gmail.com>, Sage Weil <sage@newdream.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, Feb 4, 2015 at 4:25 AM, Chris Pacejo <cpacejo@clearskydata.com> wrote:
-> The below observations (including high CPU usage by the OSDs) hold
-> true when we (roughly) double the performance of the MySQL backend by
-> pointing it to SSDs instead of rotary media.  This causes us to
-> suspect that our current bottleneck is not the extra load placed on
-> the backend by the metadata; but rather something in the OSD which
-> causes it to be unable to saturate the backend.  Any thoughts?
+On 02/03/2015 09:03 AM, Chris Pacejo wrote:
+> Hi Xiaoxi,
 >
-
-Maybe more detail number can help us a bit.
-
+> On Sun, Feb 1, 2015 at 9:50 AM, Chen, Xiaoxi <xiaoxi.chen@intel.com> wrote:
+>> We can always use a structure database in an unstructured way, I think it's workable in theory, but  why choose MySQL?
 >
-> On Tue, Feb 3, 2015 at 10:13 AM, Chris Pacejo <cpacejo@clearskydata.com> wrote:
->> I've instrumented submit_transaction to tick up/down an atomic
->> counter.  While in certain situations (resource-constrained VM; OSD
->> startup), I do see up to "keyvaluestore op threads" number of
->> concurrent transaction submits reported by this counter, on real
->> hardware, during `rados bench` with 2700-byte objects, I never see
->> more than 3 concurrent submits; on average, I see 2.  I don't know the
->> OSD's internals well enough to speculate on the cause, but it's worth
->> noting that the OSD processes consume a lot of CPU (170%+) during
->> these benchmarks (compared to 14% for 1 MiB objects).
+> In our internal performance tests, it performed better than LevelDB
+> and some others, and it's well-proven.  It's not our first choice, nor
+> are we done investigating other options.  But we'll check out LMDB,
+> thanks for the pointer.
+>
+> Regardless, the issues we're seeing are equally applicable to any
+> key-value backend.
+
+You may also wish to try the rocksdb backend with universal compaction 
+rather than leveled compaction.
+
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
--- 
-Best Regards,
-
-Wheat
+>
