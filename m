@@ -1,38 +1,44 @@
-From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Subject: Re: rgw and the next dumpling release
-Date: Thu, 5 Feb 2015 17:59:14 -0500 (EST)
-Message-ID: <974116011.8222626.1423177154743.JavaMail.zimbra@redhat.com>
-References: <54D3F0E5.8060906@dachary.org>
+From: Samuel Just <sam.just@inktank.com>
+Subject: Re: rados and the next dumpling release
+Date: Thu, 5 Feb 2015 15:00:32 -0800
+Message-ID: <CA+4uBUYVwAXPg1fEus6i-iRvOmniaDZ-7G7p4xwAcuxH5FBy=g@mail.gmail.com>
+References: <54D3F080.1070808@dachary.org>
+Reply-To: sjust@redhat.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx4-phx2.redhat.com ([209.132.183.25]:56084 "EHLO
-	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750823AbbBEXAS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Feb 2015 18:00:18 -0500
-In-Reply-To: <54D3F0E5.8060906@dachary.org>
+Received: from mail-lb0-f180.google.com ([209.85.217.180]:34094 "EHLO
+	mail-lb0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750823AbbBEXAe convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Feb 2015 18:00:34 -0500
+Received: by mail-lb0-f180.google.com with SMTP id b6so12635102lbj.11
+        for <ceph-devel@vger.kernel.org>; Thu, 05 Feb 2015 15:00:32 -0800 (PST)
+In-Reply-To: <54D3F080.1070808@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Loic Dachary <loic@dachary.org>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
+Yeah, that's probably good.
+-Sam
 
------ Original Message -----
-> From: "Loic Dachary" <loic@dachary.org>
-> To: "Yehuda Sadeh" <yehuda@redhat.com>
-> Cc: "Ceph Development" <ceph-devel@vger.kernel.org>
-> Sent: Thursday, February 5, 2015 2:38:29 PM
-> Subject: rgw and the next dumpling release
-> 
-> Hi Yehuda,
-> 
-> The rados teuthology suite for the next dumpling release as found in
-> https://github.com/ceph/ceph/commits/dumpling-backports came back green
-> http://pulpito.ceph.com/loic-2015-02-03_14:46:09-rgw-dumpling-backports---basic-multi/.
-> Do you think it is ready for QE to start their own round of testing ?
-> 
-
-We should also backport a9dd4af401328e8f9071dee52470a0685ceb296b to dumpling. I think I saw a dumpling run failing due to the lack of this one, and since we now run on environments that use apache 2.4. Looking at this commit, it's not going to be applied trivially, so I'm preparing one for dumpling now.
-
-Yehuda
+On Thu, Feb 5, 2015 at 2:36 PM, Loic Dachary <loic@dachary.org> wrote:
+> Hi Sam,
+>
+> The rados teuthology suite for the next dumpling release as found in =
+https://github.com/ceph/ceph/commits/dumpling-backports came back green=
+ http://pulpito.ceph.com/loic-2015-02-03_14:41:24-rados-dumpling-backpo=
+rts---basic-multi/. Do you think it is ready for QE to start their own =
+round of testing ?
+>
+> Cheers
+>
+> --
+> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
