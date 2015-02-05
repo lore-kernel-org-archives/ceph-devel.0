@@ -1,52 +1,117 @@
-From: GuangYang <yguang11@outlook.com>
-Subject: Bucket index op - lock contention hang op threads
-Date: Thu, 5 Feb 2015 09:36:14 +0000
-Message-ID: <BLU175-W313E35FB584EA01A9D258CDF3B0@phx.gbl>
+From: Dennis Chen <kernel.org.gnu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: How to notify an object watched by client via ceph
+	class API
+Date: Thu, 5 Feb 2015 18:17:04 +0800
+Message-ID: <CA+U0gViptMjQkTvvweVGbpB8R9VNJn4-bS34tjjVc5+is=B0Jw@mail.gmail.com>
+References: <CA+U0gVi=kLnWGbb_Ea=xNGLaRdoxhxGW0HPFT9HUACnHZBM_wg@mail.gmail.com>
+	<alpine.DEB.2.00.1502050047370.27042@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from blu004-omc4s22.hotmail.com ([65.55.111.161]:54479 "EHLO
-	BLU004-OMC4S22.hotmail.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756925AbbBEJgP convert rfc822-to-8bit
-	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 5 Feb 2015 04:36:15 -0500
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Weil Sage <sweil@redhat.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.00.1502050047370.27042-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi ceph-devel,
-In our ceph cluster (with rgw), we came across a problem that all rgw p=
-rocess are stuck (all worker threads wait for the response from OSD, an=
-d start giving 500 to clients). objecter_requests dump showed the slow =
-in flight requests were caused by one OSD, which has 2 PGs doing backfi=
-lling and it has 2 bucket index objects.
+On Thu, Feb 5, 2015 at 4:51 PM, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> wrote:
+> On Thu, 5 Feb 2015, Dennis Chen wrote:
+>> Hello,
+>>
+>> Just as the subject indicated, how can I notify an object watcher
+>> within a class '.so' loaded into osd deamon. I checked the code and
+>> found the below op code defined already:CEPH_OSD_OP_NOTIFY, but this
+>> op code is not used by existing ceph class api, I guest there must be
+>> a simple solution to resolve this if I don't want to make the osd to
+>> play client role the same time.
+>>
+>> Anyone can help me out this?
+>>
+>
+> The watch/notify does not rely on rados classes, e.g.:
+>
+> rados -p rbd create foo
+> rados -p rbd watch foo &
+> rados -p rbd notify foo hello
+>
+> The notify is just a normal librados operation, and most of those can be
+> called from classes, but it normally blocks for some period until the
+> others acknowledge.  If it were wired up in objclass.h you could probably
+> initiate the async notify but there would be no way to check whether it
+> ever arrived, so I'm not sure it would be useful.
+>
+> What are you trying to accomplish?
+>
+> sage
 
-At OSD side, we configure 8 threads, it turned out when this problem oc=
-curred, several op threads took seconds (even tens of seconds) handling=
- bucket index op, with most of time waiting for the ondisk_read_lock. A=
-s a result, the throughput of the op threads drop (qlen increasing).
+What I am trying is to design a signaling control mechanism based on
+ceph, so the notify will not be in heavy load(just some event state
+needed to report to the client async). Below is the investigation for
+this question, initialy the result is good as expected except that the
+argement transfering between the client watcher callback function and
+the osd class function, the code snippet:
 
-I am wondering what options we can pursue to improve the situation, som=
-e general ideas on my mind:
-=A01> Similar to OpContext::rwstate, instead of make the op thread stuc=
-k, put this op to a waiting list and notify upon lock available. I am n=
-ot sure if this worth it or break anything.
-=A02> Differentiate the service class at filestore level for such OP - =
-somebody is waiting for its release of the lock. Does this break any as=
-sumption at filestore layer?
+Client side--
 
-As we are using EC (8+3), the fan out is more than replication pool, su=
-ch kind of slow from one OSD could be cascading to more OSDs easier.
+void notify_test(uint8_t opcode, uint64_t ver, void *arg)
+{
+    char *str = (char *)arg;
+    printf("get notify:%s\n", str);
+}
 
-BTW, I created a tracker for this - http://tracker.ceph.com/issues/1073=
-9
+int main(...)
+{
+   ...
+   strcpy(arg, "notify: from client");
+   err = rados_watch(io, objname, 0, &handle, notify_test, arg);
+   err = rados_exec(io, objname, "devctl", "devctl_op", in,
+strlen(in), out, 128);
+   ...
+}
 
-Look forward to your suggestions.
+OSD side (in the ceph class)--
+int test_class_ext(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
+{
+    int ret;
 
-Thanks,
-Guang 		 	   		  --
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+    CLS_LOG(0, "+test_class_ext");
+    in->append("input data");
+    out->append("output data");
+    ReplicatedPG::OpContext **pctx = (ReplicatedPG::OpContext **)hctx;
+    vector<OSDOp> ops(1);
+    ops[0].op.op = CEPH_OSD_OP_NOTIFY;
+    ops[0].indata = *in;
+    ops[0].outdata = *out;
+    ret = (*pctx)->pg->do_osd_ops(*pctx, ops);
+    in->claim(ops[0].indata);
+    out->claim(ops[0].outdata);
+    CLS_LOG(0, "ret = %d", ret);
+
+    return 0;
+}
+
+static int devctl_op(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
+{
+   ...
+   test_class_ext(hctx, in, out);
+   return 0;
+}
+
+
+The output in the client:
+get notify:notify: from client
+
+
+I can't pass the parameters to the client watcher currently :( , any hints?
+
+-- 
+Den
