@@ -1,40 +1,48 @@
-From: Vu Pham <vuhuong@mellanox.com>
-Subject: Re[2]: xio messenger prelim benchmark
-Date: Thu, 5 Feb 2015 18:15:21 +0000
-Message-ID: <em6177ec76-17b1-49c2-98e2-f90dcb485305@lt-vu-6500>
-References: <2030583197.7641592.1423111122013.JavaMail.zimbra@oxygem.tv>
-Reply-To: Vu Pham <vuhuong@mellanox.com>
+From: Samuel Just <sam.just@inktank.com>
+Subject: Re: Bucket index op - lock contention hang op threads
+Date: Thu, 5 Feb 2015 11:52:04 -0800
+Message-ID: <CA+4uBUbN_mW=M0oAW64CF=xWZFt6O4D3m45jPu2VTxMj2KykgA@mail.gmail.com>
+References: <BLU175-W313E35FB584EA01A9D258CDF3B0@phx.gbl>
+Reply-To: sjust@redhat.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-db3on0057.outbound.protection.outlook.com ([157.55.234.57]:40448
-	"EHLO emea01-db3-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751047AbbBESbP (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 5 Feb 2015 13:31:15 -0500
-In-Reply-To: <2030583197.7641592.1423111122013.JavaMail.zimbra@oxygem.tv>
-Content-Language: en-US
-Content-ID: <64EF152DE7DAD1489234B4675751E517@eurprd05.prod.outlook.com>
+Received: from mail-lb0-f181.google.com ([209.85.217.181]:51103 "EHLO
+	mail-lb0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751540AbbBETwG convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Feb 2015 14:52:06 -0500
+Received: by mail-lb0-f181.google.com with SMTP id u14so4550678lbd.12
+        for <ceph-devel@vger.kernel.org>; Thu, 05 Feb 2015 11:52:04 -0800 (PST)
+In-Reply-To: <BLU175-W313E35FB584EA01A9D258CDF3B0@phx.gbl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: GuangYang <yguang11@outlook.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Weil Sage <sweil@redhat.com>
 
-DQoNCj5IaSwNCj4NCj5JJ20gZ29pbmcgdG8gdXNlIHNhbWUgbWVsbGFub3ggc3dpdGNocyBpbiBw
-cm9kdWN0aW9uIG5leHQgbW9udGgsDQo+DQo+SXNuJ3QgdGhlbSBldGhlcm5ldCBzd2l0Y2hzID8N
-Cj5Ib3cgeGlvIG1lc3NlbmdlciBpcyB3b3JraW5nLCBpZiB0aGV5IGFyZSBub3QgaW5maWJhbmQg
-Pw0KPg0KPk1heWJlIHdpdGggUm9DRSA/DQo+DQoNClllcywgeGlvIG1lc3NlbmdlciB3aGljaCBp
-cyBpbXBsZW1lbnRlZCBvdmVyIEFjY2VsaW8gY2FuIHJ1biBvdmVyIHJkbWEgDQp0cmFuc3BvcnQg
-KEluZmluaWJhbmQsIFJvQ0UpIGFuZCBUQ1AuIFBsZWFzZSBub3RlIHRoYXQgd2UgaGF2ZSBub3Qg
-DQplbmFibGVkIHhpbyBtZXNzZW5nZXIgLyBBY2NlbGlvLXRjcCB5ZXQuDQoNCj4NCj5JJ2xsIHRy
-eSB0byBiZW5jaG1hcmsgeGlvIG1lc3NlbmdlciB0b28uDQo+DQpHcmVhdC4gTGV0IHVzIGtub3cu
-DQoNCj4NCj4NCj5CVFcsIGRvIHlvdSBoYXZlIHRyaWVkIHRvIGJlbmNoIHdpdGggZmlvICsga3Ji
-ZCBpbnN0ZWFkIGZpby1saWJyYmQgPw0KPkkgdGhpbmsgeW91IHNob3VsZCBoYXZlIGJldHRlciBy
-ZXN1bHRzIHdpdGggbnVtam9icz0xLg0KPg0KPg0KeGlvIG1lc3NlbmdlciBpcyBjdXJyZW50bHkg
-d29ya2luZyB3aXRoIHVzZXIgbW9kZSBjbGllbnRzLiBXZSBvbmx5IA0KdmFsaWRhdGVkL3Rlc3Rl
-ZCB1c2VyIG1vZGUgcmJkIGNsaWVudC4NClNhbmRpc2sgYXJlIHdvcmtpbmcgb24ga3JiZCBvdmVy
-IGtBY2NlbGlvIGltcGxlbWVudGF0aW9uLiBBcyBvZiBsYXN0IA0Kd2VlaywgU2FuRGlzayBoYXZl
-IGJhc2ljIEkvT3Mgd29ya2luZy4NCkhvcGVmdWxseSBrcmJkL2tBY2NlbGlvIHdpbGwgYmUgYXZh
-aWxhYmxlIHNvb24uDQoNCkBNYXJrLCBJJ2xsIHRyeSBvdXQgZGlzYWJsaW5nIGF1dGgsIGluLW1l
-bW9yeSBkZWJ1Z2dpbmcgJiBSSEVMLg0KDQotdnU=
+Recent changes already merged for hammer should prevent blocking the
+thread on the ondisk_read_lock by expanding the ObjectContext::rwstate
+lists mostly as you suggested.
+-Sam
+
+On Thu, Feb 5, 2015 at 1:36 AM, GuangYang <yguang11@outlook.com> wrote:
+> Hi ceph-devel,
+> In our ceph cluster (with rgw), we came across a problem that all rgw process are stuck (all worker threads wait for the response from OSD, and start giving 500 to clients). objecter_requests dump showed the slow in flight requests were caused by one OSD, which has 2 PGs doing backfilling and it has 2 bucket index objects.
+>
+> At OSD side, we configure 8 threads, it turned out when this problem occurred, several op threads took seconds (even tens of seconds) handling bucket index op, with most of time waiting for the ondisk_read_lock. As a result, the throughput of the op threads drop (qlen increasing).
+>
+> I am wondering what options we can pursue to improve the situation, some general ideas on my mind:
+>  1> Similar to OpContext::rwstate, instead of make the op thread stuck, put this op to a waiting list and notify upon lock available. I am not sure if this worth it or break anything.
+>  2> Differentiate the service class at filestore level for such OP - somebody is waiting for its release of the lock. Does this break any assumption at filestore layer?
+>
+> As we are using EC (8+3), the fan out is more than replication pool, such kind of slow from one OSD could be cascading to more OSDs easier.
+>
+> BTW, I created a tracker for this - http://tracker.ceph.com/issues/10739
+>
+> Look forward to your suggestions.
+>
+> Thanks,
+> Guang                                     --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
