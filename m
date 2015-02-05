@@ -1,46 +1,52 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: How to notify an object watched by client via ceph class API
-Date: Thu, 5 Feb 2015 00:51:00 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1502050047370.27042@cobra.newdream.net>
-References: <CA+U0gVi=kLnWGbb_Ea=xNGLaRdoxhxGW0HPFT9HUACnHZBM_wg@mail.gmail.com>
+From: GuangYang <yguang11@outlook.com>
+Subject: Bucket index op - lock contention hang op threads
+Date: Thu, 5 Feb 2015 09:36:14 +0000
+Message-ID: <BLU175-W313E35FB584EA01A9D258CDF3B0@phx.gbl>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:50614 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755746AbbBEIvA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Feb 2015 03:51:00 -0500
-In-Reply-To: <CA+U0gVi=kLnWGbb_Ea=xNGLaRdoxhxGW0HPFT9HUACnHZBM_wg@mail.gmail.com>
+Received: from blu004-omc4s22.hotmail.com ([65.55.111.161]:54479 "EHLO
+	BLU004-OMC4S22.hotmail.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756925AbbBEJgP convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 5 Feb 2015 04:36:15 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dennis Chen <kernel.org.gnu@gmail.com>
-Cc: ceph-users <ceph-users@ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>, Loic Dachary <loic@dachary.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Weil Sage <sweil@redhat.com>
 
-On Thu, 5 Feb 2015, Dennis Chen wrote:
-> Hello,
-> 
-> Just as the subject indicated, how can I notify an object watcher
-> within a class '.so' loaded into osd deamon. I checked the code and
-> found the below op code defined already:CEPH_OSD_OP_NOTIFY, but this
-> op code is not used by existing ceph class api, I guest there must be
-> a simple solution to resolve this if I don't want to make the osd to
-> play client role the same time.
-> 
-> Anyone can help me out this?
-> 
+Hi ceph-devel,
+In our ceph cluster (with rgw), we came across a problem that all rgw p=
+rocess are stuck (all worker threads wait for the response from OSD, an=
+d start giving 500 to clients). objecter_requests dump showed the slow =
+in flight requests were caused by one OSD, which has 2 PGs doing backfi=
+lling and it has 2 bucket index objects.
 
-The watch/notify does not rely on rados classes, e.g.:
+At OSD side, we configure 8 threads, it turned out when this problem oc=
+curred, several op threads took seconds (even tens of seconds) handling=
+ bucket index op, with most of time waiting for the ondisk_read_lock. A=
+s a result, the throughput of the op threads drop (qlen increasing).
 
-rados -p rbd create foo
-rados -p rbd watch foo &
-rados -p rbd notify foo hello
+I am wondering what options we can pursue to improve the situation, som=
+e general ideas on my mind:
+=A01> Similar to OpContext::rwstate, instead of make the op thread stuc=
+k, put this op to a waiting list and notify upon lock available. I am n=
+ot sure if this worth it or break anything.
+=A02> Differentiate the service class at filestore level for such OP - =
+somebody is waiting for its release of the lock. Does this break any as=
+sumption at filestore layer?
 
-The notify is just a normal librados operation, and most of those can be 
-called from classes, but it normally blocks for some period until the 
-others acknowledge.  If it were wired up in objclass.h you could probably 
-initiate the async notify but there would be no way to check whether it 
-ever arrived, so I'm not sure it would be useful.
+As we are using EC (8+3), the fan out is more than replication pool, su=
+ch kind of slow from one OSD could be cascading to more OSDs easier.
 
-What are you trying to accomplish?
+BTW, I created a tracker for this - http://tracker.ceph.com/issues/1073=
+9
 
-sage
+Look forward to your suggestions.
+
+Thanks,
+Guang 		 	   		  --
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
