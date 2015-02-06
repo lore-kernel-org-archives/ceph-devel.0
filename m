@@ -1,79 +1,159 @@
-From: GuangYang <yguang11@outlook.com>
-Subject: RE: Bucket index op - lock contention hang op threads
-Date: Fri, 6 Feb 2015 00:53:28 +0000
-Message-ID: <BLU175-W8F5D99216BD8DD2155A3EDF380@phx.gbl>
-References: <BLU175-W313E35FB584EA01A9D258CDF3B0@phx.gbl>,<CA+4uBUbN_mW=M0oAW64CF=xWZFt6O4D3m45jPu2VTxMj2KykgA@mail.gmail.com>,<BLU175-W1776AE5CA99C76AAE06468DF3B0@phx.gbl>,<CA+4uBUZkTa5F65gYLCmQOpOEC-jQ3VJU7vJ2wdg=EX1wHR8RZw@mail.gmail.com>
+From: Dennis Chen <kernel.org.gnu@gmail.com>
+Subject: Re: How to notify an object watched by client via ceph class API
+Date: Fri, 6 Feb 2015 11:04:48 +0800
+Message-ID: <CA+U0gVg15C=-M_puftpkTLtYCFuGcSMgG2ypkiYWdGF-8npLrQ@mail.gmail.com>
+References: <CA+U0gVi=kLnWGbb_Ea=xNGLaRdoxhxGW0HPFT9HUACnHZBM_wg@mail.gmail.com>
+ <alpine.DEB.2.00.1502050047370.27042@cobra.newdream.net> <CA+U0gViptMjQkTvvweVGbpB8R9VNJn4-bS34tjjVc5+is=B0Jw@mail.gmail.com>
+ <alpine.DEB.2.00.1502050223110.27042@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from blu004-omc4s18.hotmail.com ([65.55.111.157]:52813 "EHLO
-	BLU004-OMC4S18.hotmail.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752364AbbBFAx3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Feb 2015 19:53:29 -0500
-In-Reply-To: <CA+4uBUZkTa5F65gYLCmQOpOEC-jQ3VJU7vJ2wdg=EX1wHR8RZw@mail.gmail.com>
+Received: from mail-pd0-f171.google.com ([209.85.192.171]:37080 "EHLO
+	mail-pd0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751974AbbBFDFI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Feb 2015 22:05:08 -0500
+Received: by pdbfp1 with SMTP id fp1so11770411pdb.4
+        for <ceph-devel@vger.kernel.org>; Thu, 05 Feb 2015 19:05:08 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1502050223110.27042@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "sjust@redhat.com" <sjust@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Weil Sage <sweil@redhat.com>
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-users <ceph-users@ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>, Loic Dachary <loic@dachary.org>
 
-VGhhbmtzIFNhbSEgSnVzdCB0b29rIGEgbG9vayBhdCB0aGUgcGF0Y2gsIGl0IHNob3VsZCBiZSB2
-ZXJ5IG11Y2ggaGVscGZ1bCBmb3Igb3VyIHVzZSBjYXNlLgoKVGhhbmtzLApHdWFuZwoKCi0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KPiBEYXRlOiBUaHUsIDUgRmViIDIw
-MTUgMTM6NDI6MTMgLTA4MDAKPiBTdWJqZWN0OiBSZTogQnVja2V0IGluZGV4IG9wIC0gbG9jayBj
-b250ZW50aW9uIGhhbmcgb3AgdGhyZWFkcwo+IEZyb206IHNhbS5qdXN0QGlua3RhbmsuY29tCj4g
-VG86IHlndWFuZzExQG91dGxvb2suY29tCj4gQ0M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3Jn
-OyBzd2VpbEByZWRoYXQuY29tCj4KPiBTdXJlLCBhODFmM2U2ZTYxYWJmYzdlY2E3NzQzYTgzYmY0
-YWY4MTA3MDViNDQ5LiBUaGUgaW50ZW50aW9uIHdhcwo+IGFjdHVhbGx5IHRvIGFsbG93IHdyaXRl
-cyBvbiBkZWdyYWRlZCBvYmplY3RzIGZvciByZXBsaWNhdGVkIHBvb2xzICh0bwo+IGF2b2lkIGEg
-NGsgcmJkIHdyaXRlIGJsb2NraW5nIG9uIGEgNG1iIHJlY292ZXJ5KSwgYnV0IEkgdGhpbmsgaXQK
-PiBzb2x2ZXMgdGhpcyBpc3N1ZSBhcyB3ZWxsLgo+IC1TYW0KPgo+IE9uIFRodSwgRmViIDUsIDIw
-MTUgYXQgMTozOSBQTSwgR3VhbmdZYW5nIDx5Z3VhbmcxMUBvdXRsb29rLmNvbT4gd3JvdGU6Cj4+
-IFRoYW5rcyBTYW0hIERvIHlvdSBtaW5kIHNoYXJpbmcgdGhlIHB1bGwgcmVxdWVzdCAvIGNvbW1p
-dCBJZCBvZiB0aGUgY2hhbmdlPwo+Pgo+Pj4gRGF0ZTogVGh1LCA1IEZlYiAyMDE1IDExOjUyOjA0
-IC0wODAwCj4+PiBTdWJqZWN0OiBSZTogQnVja2V0IGluZGV4IG9wIC0gbG9jayBjb250ZW50aW9u
-IGhhbmcgb3AgdGhyZWFkcwo+Pj4gRnJvbTogc2FtLmp1c3RAaW5rdGFuay5jb20KPj4+IFRvOiB5
-Z3VhbmcxMUBvdXRsb29rLmNvbQo+Pj4gQ0M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnOyBz
-d2VpbEByZWRoYXQuY29tCj4+Cj4+Pgo+Pj4gUmVjZW50IGNoYW5nZXMgYWxyZWFkeSBtZXJnZWQg
-Zm9yIGhhbW1lciBzaG91bGQgcHJldmVudCBibG9ja2luZyB0aGUKPj4+IHRocmVhZCBvbiB0aGUg
-b25kaXNrX3JlYWRfbG9jayBieSBleHBhbmRpbmcgdGhlIE9iamVjdENvbnRleHQ6OnJ3c3RhdGUK
-Pj4+IGxpc3RzIG1vc3RseSBhcyB5b3Ugc3VnZ2VzdGVkLgo+Pj4gLVNhbQo+Pj4KPj4+IE9uIFRo
-dSwgRmViIDUsIDIwMTUgYXQgMTozNiBBTSwgR3VhbmdZYW5nIDx5Z3VhbmcxMUBvdXRsb29rLmNv
-bT4gd3JvdGU6Cj4+Pj4gSGkgY2VwaC1kZXZlbCwKPj4+PiBJbiBvdXIgY2VwaCBjbHVzdGVyICh3
-aXRoIHJndyksIHdlIGNhbWUgYWNyb3NzIGEgcHJvYmxlbSB0aGF0IGFsbCByZ3cKPj4+PiBwcm9j
-ZXNzIGFyZSBzdHVjayAoYWxsIHdvcmtlciB0aHJlYWRzIHdhaXQgZm9yIHRoZSByZXNwb25zZSBm
-cm9tIE9TRCwgYW5kCj4+Pj4gc3RhcnQgZ2l2aW5nIDUwMCB0byBjbGllbnRzKS4gb2JqZWN0ZXJf
-cmVxdWVzdHMgZHVtcCBzaG93ZWQgdGhlIHNsb3cgaW4KPj4+PiBmbGlnaHQgcmVxdWVzdHMgd2Vy
-ZSBjYXVzZWQgYnkgb25lIE9TRCwgd2hpY2ggaGFzIDIgUEdzIGRvaW5nIGJhY2tmaWxsaW5nCj4+
-Pj4gYW5kIGl0IGhhcyAyIGJ1Y2tldCBpbmRleCBvYmplY3RzLgo+Pj4+Cj4+Pj4gQXQgT1NEIHNp
-ZGUsIHdlIGNvbmZpZ3VyZSA4IHRocmVhZHMsIGl0IHR1cm5lZCBvdXQgd2hlbiB0aGlzIHByb2Js
-ZW0KPj4+PiBvY2N1cnJlZCwgc2V2ZXJhbCBvcCB0aHJlYWRzIHRvb2sgc2Vjb25kcyAoZXZlbiB0
-ZW5zIG9mIHNlY29uZHMpIGhhbmRsaW5nCj4+Pj4gYnVja2V0IGluZGV4IG9wLCB3aXRoIG1vc3Qg
-b2YgdGltZSB3YWl0aW5nIGZvciB0aGUgb25kaXNrX3JlYWRfbG9jay4gQXMgYQo+Pj4+IHJlc3Vs
-dCwgdGhlIHRocm91Z2hwdXQgb2YgdGhlIG9wIHRocmVhZHMgZHJvcCAocWxlbiBpbmNyZWFzaW5n
-KS4KPj4+Pgo+Pj4+IEkgYW0gd29uZGVyaW5nIHdoYXQgb3B0aW9ucyB3ZSBjYW4gcHVyc3VlIHRv
-IGltcHJvdmUgdGhlIHNpdHVhdGlvbiwgc29tZQo+Pj4+IGdlbmVyYWwgaWRlYXMgb24gbXkgbWlu
-ZDoKPj4+PiAxPiBTaW1pbGFyIHRvIE9wQ29udGV4dDo6cndzdGF0ZSwgaW5zdGVhZCBvZiBtYWtl
-IHRoZSBvcCB0aHJlYWQgc3R1Y2ssCj4+Pj4gcHV0IHRoaXMgb3AgdG8gYSB3YWl0aW5nIGxpc3Qg
-YW5kIG5vdGlmeSB1cG9uIGxvY2sgYXZhaWxhYmxlLiBJIGFtIG5vdCBzdXJlCj4+Pj4gaWYgdGhp
-cyB3b3J0aCBpdCBvciBicmVhayBhbnl0aGluZy4KPj4+PiAyPiBEaWZmZXJlbnRpYXRlIHRoZSBz
-ZXJ2aWNlIGNsYXNzIGF0IGZpbGVzdG9yZSBsZXZlbCBmb3Igc3VjaCBPUCAtCj4+Pj4gc29tZWJv
-ZHkgaXMgd2FpdGluZyBmb3IgaXRzIHJlbGVhc2Ugb2YgdGhlIGxvY2suIERvZXMgdGhpcyBicmVh
-ayBhbnkKPj4+PiBhc3N1bXB0aW9uIGF0IGZpbGVzdG9yZSBsYXllcj8KPj4+Pgo+Pj4+IEFzIHdl
-IGFyZSB1c2luZyBFQyAoOCszKSwgdGhlIGZhbiBvdXQgaXMgbW9yZSB0aGFuIHJlcGxpY2F0aW9u
-IHBvb2wsCj4+Pj4gc3VjaCBraW5kIG9mIHNsb3cgZnJvbSBvbmUgT1NEIGNvdWxkIGJlIGNhc2Nh
-ZGluZyB0byBtb3JlIE9TRHMgZWFzaWVyLgo+Pj4+Cj4+Pj4gQlRXLCBJIGNyZWF0ZWQgYSB0cmFj
-a2VyIGZvciB0aGlzIC0gaHR0cDovL3RyYWNrZXIuY2VwaC5jb20vaXNzdWVzLzEwNzM5Cj4+Pj4K
-Pj4+PiBMb29rIGZvcndhcmQgdG8geW91ciBzdWdnZXN0aW9ucy4KPj4+Pgo+Pj4+IFRoYW5rcywK
-Pj4+PiBHdWFuZyAtLQo+Pj4+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRo
-ZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbgo+Pj4+IHRoZSBib2R5IG9mIGEgbWVz
-c2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnCj4+Pj4gTW9yZSBtYWpvcmRvbW8gaW5m
-byBhdCBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwKPj4+IC0tCj4+
-PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3Jp
-YmUgY2VwaC1kZXZlbCIgaW4KPj4+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9A
-dmdlci5rZXJuZWwub3JnCj4+PiBNb3JlIG1ham9yZG9tbyBpbmZvIGF0IGh0dHA6Ly92Z2VyLmtl
-cm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbAo+IC0tCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0
-aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluCj4gdGhl
-IGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcKPiBNb3JlIG1h
-am9yZG9tbyBpbmZvIGF0IGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRt
-bAogCQkgCSAgIAkJICA=
+On Thu, Feb 5, 2015 at 6:26 PM, Sage Weil <sage@newdream.net> wrote:
+> On Thu, 5 Feb 2015, Dennis Chen wrote:
+>> On Thu, Feb 5, 2015 at 4:51 PM, Sage Weil <sage@newdream.net> wrote:
+>> > On Thu, 5 Feb 2015, Dennis Chen wrote:
+>> >> Hello,
+>> >>
+>> >> Just as the subject indicated, how can I notify an object watcher
+>> >> within a class '.so' loaded into osd deamon. I checked the code and
+>> >> found the below op code defined already:CEPH_OSD_OP_NOTIFY, but this
+>> >> op code is not used by existing ceph class api, I guest there must be
+>> >> a simple solution to resolve this if I don't want to make the osd to
+>> >> play client role the same time.
+>> >>
+>> >> Anyone can help me out this?
+>> >>
+>> >
+>> > The watch/notify does not rely on rados classes, e.g.:
+>> >
+>> > rados -p rbd create foo
+>> > rados -p rbd watch foo &
+>> > rados -p rbd notify foo hello
+>> >
+>> > The notify is just a normal librados operation, and most of those can be
+>> > called from classes, but it normally blocks for some period until the
+>> > others acknowledge.  If it were wired up in objclass.h you could probably
+>> > initiate the async notify but there would be no way to check whether it
+>> > ever arrived, so I'm not sure it would be useful.
+>> >
+>> > What are you trying to accomplish?
+>> >
+>> > sage
+>>
+>> What I am trying is to design a signaling control mechanism based on
+>> ceph, so the notify will not be in heavy load(just some event state
+>> needed to report to the client async). Below is the investigation for
+>> this question, initialy the result is good as expected except that the
+>> argement transfering between the client watcher callback function and
+>> the osd class function, the code snippet:
+>>
+>> Client side--
+>>
+>> void notify_test(uint8_t opcode, uint64_t ver, void *arg)
+>> {
+>>     char *str = (char *)arg;
+>>     printf("get notify:%s\n", str);
+>
+> You are using the v1 watch/notify API.  If you look at master you'll see
+> there is a new watch2 operation that gets more useful arguments, like the
+> data payload.  (Actually v1 has the data payload too, but I forget where
+> it appears.  You should still probably target v2 though!)
+
+I am working on the 0.87 downloaded from the ceph.com, I guest it's OK
+for this version since it
+has the void *arg.
+
+>> }
+>>
+>> int main(...)
+>> {
+>>    ...
+>>    strcpy(arg, "notify: from client");
+>>    err = rados_watch(io, objname, 0, &handle, notify_test, arg);
+>>    err = rados_exec(io, objname, "devctl", "devctl_op", in,
+>> strlen(in), out, 128);
+>>    ...
+>> }
+>>
+>> OSD side (in the ceph class)--
+>> int test_class_ext(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
+>> {
+>>     int ret;
+>>
+>>     CLS_LOG(0, "+test_class_ext");
+>>     in->append("input data");
+>>     out->append("output data");
+>
+> Note that out content is discarded.  Also, you will never get it, since
+> you aren't blocking (and can't inside a class) and won't wait for a reply.
+> The "input data" string should get fed to your notify callback on the
+> client, though!
+>
+>>     ReplicatedPG::OpContext **pctx = (ReplicatedPG::OpContext **)hctx;
+>>     vector<OSDOp> ops(1);
+>>     ops[0].op.op = CEPH_OSD_OP_NOTIFY;
+>>     ops[0].indata = *in;
+>>     ops[0].outdata = *out;
+>
+> can just leave outdata NULL.
+>
+>>     ret = (*pctx)->pg->do_osd_ops(*pctx, ops);
+>>     in->claim(ops[0].indata);
+>
+> This isn't needed, and might be eating your notify payload?
+>
+>>     out->claim(ops[0].outdata);
+>
+> not needed
+
+I updated the code according to your suggestion, but still can't pass
+any data from this function to the notify callback in the client via
+the *arg pointer, that's the problem now. Any one can help about this?
+
+
+> sage
+>
+>>     CLS_LOG(0, "ret = %d", ret);
+>>
+>>     return 0;
+>> }
+>>
+>> static int devctl_op(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
+>> {
+>>    ...
+>>    test_class_ext(hctx, in, out);
+>>    return 0;
+>> }
+>>
+>>
+>> The output in the client:
+>> get notify:notify: from client
+>>
+>>
+>> I can't pass the parameters to the client watcher currently :( , any hints?
+>>
+>> --
+>> Den
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
+
+
+
+-- 
+Den
