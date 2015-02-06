@@ -1,32 +1,38 @@
-From: Xavier Roche <roche+kml2@exalead.com>
-Subject: flock() on libcephfs ?
-Date: Fri, 06 Feb 2015 11:39:17 +0100
-Message-ID: <54D499D5.3060505@exalead.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mhx-mail-gw.exalead.com ([178.255.215.32]:49255 "EHLO
-	exalead.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752099AbbBFK7f (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 6 Feb 2015 05:59:35 -0500
-Received: from [192.168.204.216] (lenov011cem.paris.exalead.com [192.168.204.216])
-	by exalead.com (8.14.4/8.14.4) with ESMTP id t16AdHN8045113
-	for <ceph-devel@vger.kernel.org>; Fri, 6 Feb 2015 11:39:18 +0100
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+From: Nicholas Mc Guire <hofrat@osadl.org>
+Subject: [PATCH] ceph: use msecs_to_jiffies for time conversion
+Date: Fri,  6 Feb 2015 06:52:17 -0500
+Message-ID: <1423223537-23277-1-git-send-email-hofrat@osadl.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Nicholas Mc Guire <hofrat@osadl.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi folks!
+This is only an API consolidation and should make things more readable
+it replaces var * HZ / 1000 by msecs_to_jiffies(var).
 
-I'm not sure this is the right place to post, so do not hesitate to redirect me to a more appropriate list if necessary!
+Signed-off-by: Nicholas Mc Guire <hofrat@osadl.org>
+---
 
-New to ceph, I naively attempted to add a flock (int ceph_flock(struct ceph_mount_info *cmount, int fd, int operation)) function in libcephfs, but I could not find the proper way to figure out what was the owner identifier used by Client::ll_flock() (an uint64_t integer) - this is not the pid, I presume ?
+Patch was only compile tested with x86_64_defconfig + CONFIG_CEPH_FS=m
 
-(In a similar way, the opaque void* fuse_req pointer passed appears to be optional, but I was not able to figure out what it was either, even if it is obviously FUSE-related)
+Patch is against 3.19.0-rc7 (localversion-next is -next-20150204)
 
-Thanks in advance for any hints! By the way - would this new feature (flock()) make sense ?
+ fs/ceph/mds_client.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-
-Regards,
-Xavier
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index 5f62fb7..ced7503 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -3070,7 +3070,7 @@ static void handle_lease(struct ceph_mds_client *mdsc,
+ 		    di->lease_renew_from &&
+ 		    di->lease_renew_after == 0) {
+ 			unsigned long duration =
+-				le32_to_cpu(h->duration_ms) * HZ / 1000;
++				msecs_to_jiffies(le32_to_cpu(h->duration_ms));
+ 
+ 			di->lease_seq = seq;
+ 			dentry->d_time = di->lease_renew_from + duration;
+-- 
+1.7.10.4
