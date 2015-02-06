@@ -1,49 +1,45 @@
-From: John Spray <john.spray@redhat.com>
-Subject: Re: flock() on libcephfs ?
-Date: Fri, 6 Feb 2015 14:44:50 +0100
-Message-ID: <CAGd4Wr3Yu6OZ__QZAfrQH5zUrNoTgXfUfSyouJ6VX=Z4ma9HKg@mail.gmail.com>
-References: <54D499D5.3060505@exalead.com>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: new dev cluster - using giant or hammer git?
+Date: Fri, 06 Feb 2015 14:56:02 +0100
+Message-ID: <54D4C7F2.1090505@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f46.google.com ([209.85.215.46]:40691 "EHLO
-	mail-la0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751485AbbBFNow convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Feb 2015 08:44:52 -0500
-Received: by labpv20 with SMTP id pv20so1188745lab.7
-        for <ceph-devel@vger.kernel.org>; Fri, 06 Feb 2015 05:44:50 -0800 (PST)
-In-Reply-To: <54D499D5.3060505@exalead.com>
+Received: from mail-ph.de-nserver.de ([85.158.179.214]:20336 "EHLO
+	mail-ph.de-nserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751814AbbBFN4E (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Feb 2015 08:56:04 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Xavier Roche <roche+kml2@exalead.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Fri, Feb 6, 2015 at 11:39 AM, Xavier Roche <roche+kml2@exalead.com> wrote:
-> I'm not sure this is the right place to post, so do not hesitate to redirect me to a more appropriate list if necessary!
+Hi,
 
-You're in the right place!
+for deploying a new ceph dev cluster can anybody recommand which git
+branch to use? hammer or giant-backport?
 
-> New to ceph, I naively attempted to add a flock (int ceph_flock(struct ceph_mount_info *cmount, int fd, int operation)) function in libcephfs, but I could not find the proper way to figure out what was the owner identifier used by Client::ll_flock() (an uint64_t integer) - this is not the pid, I presume ?
+--=20
+Mit freundlichen Gr=C3=BC=C3=9Fen
+  Stefan Priebe
+Bachelor of Science in Computer Science (BSCS)
+Vorstand (CTO)
 
-You should let the caller pass in the owner ID.  For example, if you
-were using libcephfs to implement a filesystem interface, it would be
-up to that interface to work out the unique ID from the calling layer
-above it.  So you can pass it through libcephfs, no logic needed.
+-------------------------------
+Profihost AG
+Expo Plaza 1
+30539 Hannover
+Deutschland
 
-> Thanks in advance for any hints! By the way - would this new feature (flock()) make sense ?
+Tel.: +49 (511) 5151 8181     | Fax.: +49 (511) 5151 8282
+URL: http://www.profihost.com | E-Mail: info@profihost.com
 
-Definitely, the flock support in the userspace client is new, and the
-libcephfs bindings just didn't catch up yet: it was added in October:
-
-commit a1b2c8ff955b30807ac53ce6bdc97cf61a7262ca
-Author: Yan, Zheng <zyan@redhat.com>
-Date:   Thu Oct 2 19:07:41 2014 +0800
-
-    client: posix file lock support
-
-    Signed-off-by: Yan, Zheng <zyan@redhat.com>
-
-
-Cheers,
-John
+Sitz der Gesellschaft: Hannover, USt-IdNr. DE813460827
+Registergericht: Amtsgericht Hannover, Register-Nr.: HRB 202350
+Vorstand: Cristoph Bluhm, Sebastian Bluhm, Stefan Priebe
+Aufsichtsrat: Prof. Dr. iur. Winfried Huck (Vorsitzender)
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
