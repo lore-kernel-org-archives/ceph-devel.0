@@ -1,71 +1,62 @@
-From: Jason Dillaman <dillaman@redhat.com>
-Subject: Re: RBD tests on the next dumpling release
-Date: Fri, 6 Feb 2015 09:42:56 -0500 (EST)
-Message-ID: <408976183.7693525.1423233776228.JavaMail.zimbra@redhat.com>
-References: <54D3EEF6.1070701@dachary.org> <1050495133.7647881.1423231520223.JavaMail.zimbra@redhat.com> <54D4CD03.8000806@dachary.org>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: About in_seq, out_seq in Messenger
+Date: Fri, 6 Feb 2015 09:47:10 -0500 (EST)
+Message-ID: <425811556.75315.1423234030246.JavaMail.zimbra@redhat.com>
+References: <CACJqLyY_UoHO-JxNHcQcZFLpJT8awXb+aAtCG-dj26SdTZ-RgQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx3-phx2.redhat.com ([209.132.183.24]:49486 "EHLO
-	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754795AbbBFOn6 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Feb 2015 09:43:58 -0500
-In-Reply-To: <54D4CD03.8000806@dachary.org>
+Received: from mx4-phx2.redhat.com ([209.132.183.25]:55839 "EHLO
+	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752189AbbBFOrN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Feb 2015 09:47:13 -0500
+In-Reply-To: <CACJqLyY_UoHO-JxNHcQcZFLpJT8awXb+aAtCG-dj26SdTZ-RgQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Josh Durgin <jdurgin@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
-
-I would say #9854 is critical for this dumpling point release since it =
-fixes a regression that would otherwise be introduced by this point rel=
-ease.
-
---=20
-
-Jason Dillaman=20
-Red Hat=20
-dillaman@redhat.com=20
-http://www.redhat.com=20
-
+To: Haomai Wang <haomaiwang@gmail.com>
+Cc: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
 
 ----- Original Message -----
-=46rom: "Loic Dachary" <loic@dachary.org>
-To: "Jason Dillaman" <dillaman@redhat.com>
-Cc: "Josh Durgin" <jdurgin@redhat.com>, "Ceph Development" <ceph-devel@=
-vger.kernel.org>
-Sent: Friday, February 6, 2015 9:17:39 AM
-Subject: Re: RBD tests on the next dumpling release
+> From: "Haomai Wang" <haomaiwang@gmail.com>
+> To: "Sage Weil" <sweil@redhat.com>, "Gregory Farnum" <greg@inktank.com>
+> Cc: ceph-devel@vger.kernel.org
+> Sent: Friday, February 6, 2015 12:26:18 AM
+> Subject: About in_seq, out_seq in Messenger
+> 
+> Hi all,
+> 
+> Recently we enable a async messenger test job in test
+> lab(http://pulpito.ceph.com/sage-2015-02-03_01:15:10-rados-master-distro-basic-multi/#).
+> We hit many failed assert mostly are:
+>               assert(0 == "old msgs despite reconnect_seq feature");
+> 
+> And assert connection all are cluster messenger which mean it's OSD
+> internal connection. The policy associated this connection is
+> Messenger::Policy::lossless_peer.
+> 
+> So when I dive into this problem, I find something confusing about
+> this. Suppose these steps:
+> 1. "lossless_peer" policy is used by both two side connections.
+> 2. markdown one side(anyway), peer connection will try to reconnect
+> 3. then we restart failed side, a new connection is built but
+> initiator will think it's a old connection so sending in_seq(10)
+> 4. new started connection has no message in queue and it will receive
+> peer connection's in_seq(10) and call discard_requeued_up_to(10). But
+> because no message in queue, it won't modify anything
+> 5. now any side issue a message, it will trigger "assert(0 == "old
+> msgs despite reconnect_seq feature");"
+> 
+> I can replay these steps in unittest and actually it's hit in test lab
+> for async messenger which follows simple messenger's design.
+> 
+> Besides, if we enable reset_check here, "was_session_reset" will be
+> called and it will random out_seq, so it will certainly hit "assert(0
+> == "skipped incoming seq")".
+> 
+> Anything wrong above?
 
-Hi Jason,
+Sage covered most of this. I'll just add that the last time I checked it, I came to the conclusion that the code to use a random out_seq on initial connect was non-functional. So there definitely may be issues there.
 
-Thanks for taking time to check :-)=20
-
-http://tracker.ceph.com/issues/9854 is indeed in the list of issues tha=
-t need backporting for dumpling:
-
-http://workbench.dachary.org/ceph/ceph-backports/wikis/dumpling#issues-=
-that-need-backporting
-
-so is http://tracker.ceph.com/issues/10299. I'm happy to do another rou=
-nd of testing if you think these two need to be in the next release. Ot=
-herwise they will be in the next point release. I'm hopeful we'll be ab=
-le to do more frequent point releases in the future.
-
-On 06/02/2015 15:05, Jason Dillaman wrote:> I'll take a look at it toda=
-y, but my gut tells me it probably has something to do w/ a new version=
- of QEMU (assuming the binary isn't source controlled).  On a semi-rela=
-ted note, I just discovered that http://tracker.ceph.com/issues/9854 is=
- missing a dumpling backport request.  I'll get a dumpling pull request=
- for that issue ASAP.
->=20
-
-Cheers
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+In fact, we've fixed a couple (several?) bugs in this area since Firefly was initially released, so if you go over the point release SimpleMessenger patches you might gain some insight. :)
+-Greg
