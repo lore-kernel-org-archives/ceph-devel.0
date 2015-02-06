@@ -1,83 +1,32 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: About in_seq, out_seq in Messenger
-Date: Fri, 6 Feb 2015 01:40:59 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1502060134260.27042@cobra.newdream.net>
-References: <CACJqLyY_UoHO-JxNHcQcZFLpJT8awXb+aAtCG-dj26SdTZ-RgQ@mail.gmail.com>
+From: Xavier Roche <roche+kml2@exalead.com>
+Subject: flock() on libcephfs ?
+Date: Fri, 06 Feb 2015 11:39:17 +0100
+Message-ID: <54D499D5.3060505@exalead.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:52152 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751489AbbBFJlF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 6 Feb 2015 04:41:05 -0500
-In-Reply-To: <CACJqLyY_UoHO-JxNHcQcZFLpJT8awXb+aAtCG-dj26SdTZ-RgQ@mail.gmail.com>
+Received: from mhx-mail-gw.exalead.com ([178.255.215.32]:49255 "EHLO
+	exalead.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752099AbbBFK7f (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 6 Feb 2015 05:59:35 -0500
+Received: from [192.168.204.216] (lenov011cem.paris.exalead.com [192.168.204.216])
+	by exalead.com (8.14.4/8.14.4) with ESMTP id t16AdHN8045113
+	for <ceph-devel@vger.kernel.org>; Fri, 6 Feb 2015 11:39:18 +0100
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomaiwang@gmail.com>
-Cc: Gregory Farnum <greg@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Fri, 6 Feb 2015, Haomai Wang wrote:
-> Hi all,
-> 
-> Recently we enable a async messenger test job in test
-> lab(http://pulpito.ceph.com/sage-2015-02-03_01:15:10-rados-master-distro-basic-multi/#).
-> We hit many failed assert mostly are:
->               assert(0 == "old msgs despite reconnect_seq feature");
-> 
-> And assert connection all are cluster messenger which mean it's OSD
-> internal connection. The policy associated this connection is
-> Messenger::Policy::lossless_peer.
-> 
-> So when I dive into this problem, I find something confusing about
-> this. Suppose these steps:
-> 1. "lossless_peer" policy is used by both two side connections.
-> 2. markdown one side(anyway), peer connection will try to reconnect
-> 3. then we restart failed side, a new connection is built but
-> initiator will think it's a old connection so sending in_seq(10)
-> 4. new started connection has no message in queue and it will receive
-> peer connection's in_seq(10) and call discard_requeued_up_to(10). But
-> because no message in queue, it won't modify anything
+Hi folks!
 
-The way this case is normally handled is one layer up.  The messenger 
-doesn't know at that level whether it is seeing a bug or whether someone 
-it marked down and forgot about doesn't know it is dead and is trying to 
-reconnect.
+I'm not sure this is the right place to post, so do not hesitate to redirect me to a more appropriate list if necessary!
 
-In OSD.cc, we have a check in require_same_or_newer_map that will defer 
-the Message if the other end is newer than us.  If we are newer (as would 
-be the case if we marked down the peer and they don't realize they are 
-dead) then require_same_peer_instance() will catch it and mark_down(), 
-again throwing out all of our state about the old osd session.
+New to ceph, I naively attempted to add a flock (int ceph_flock(struct ceph_mount_info *cmount, int fd, int operation)) function in libcephfs, but I could not find the proper way to figure out what was the owner identifier used by Client::ll_flock() (an uint64_t integer) - this is not the pid, I presume ?
 
-> 5. now any side issue a message, it will trigger "assert(0 == "old
-> msgs despite reconnect_seq feature");"
+(In a similar way, the opaque void* fuse_req pointer passed appears to be optional, but I was not able to figure out what it was either, even if it is obviously FUSE-related)
 
-IIRC the above checks ensure that we mark_down the connection before we 
-send a message on the old session.  (Or, SimpleMessenger doesn't assert; I 
-forget which, sorry.)
-
-> I can replay these steps in unittest and actually it's hit in test lab
-> for async messenger which follows simple messenger's design.
-> 
-> Besides, if we enable reset_check here, "was_session_reset" will be
-> called and it will random out_seq, so it will certainly hit "assert(0
-> == "skipped incoming seq")".
-> 
-> Anything wrong above?
-
-What happens when you run the unit test against SimpleMessenger?
-
-sage
+Thanks in advance for any hints! By the way - would this new feature (flock()) make sense ?
 
 
-> 
-> -- 
-> Best Regards,
-> 
-> Wheat
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Regards,
+Xavier
