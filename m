@@ -1,73 +1,79 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: rgw and the next dumpling release
-Date: Fri, 06 Feb 2015 00:07:49 +0100
-Message-ID: <54D3F7C5.6030701@dachary.org>
-References: <54D3F0E5.8060906@dachary.org> <974116011.8222626.1423177154743.JavaMail.zimbra@redhat.com>
+From: GuangYang <yguang11@outlook.com>
+Subject: RE: Bucket index op - lock contention hang op threads
+Date: Fri, 6 Feb 2015 00:53:28 +0000
+Message-ID: <BLU175-W8F5D99216BD8DD2155A3EDF380@phx.gbl>
+References: <BLU175-W313E35FB584EA01A9D258CDF3B0@phx.gbl>,<CA+4uBUbN_mW=M0oAW64CF=xWZFt6O4D3m45jPu2VTxMj2KykgA@mail.gmail.com>,<BLU175-W1776AE5CA99C76AAE06468DF3B0@phx.gbl>,<CA+4uBUZkTa5F65gYLCmQOpOEC-jQ3VJU7vJ2wdg=EX1wHR8RZw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="0cLvCaVEu8kcUn16Uft2ntmXtRDPACKnP"
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:39527 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751091AbbBEXHv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Feb 2015 18:07:51 -0500
-In-Reply-To: <974116011.8222626.1423177154743.JavaMail.zimbra@redhat.com>
+Received: from blu004-omc4s18.hotmail.com ([65.55.111.157]:52813 "EHLO
+	BLU004-OMC4S18.hotmail.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752364AbbBFAx3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Feb 2015 19:53:29 -0500
+In-Reply-To: <CA+4uBUZkTa5F65gYLCmQOpOEC-jQ3VJU7vJ2wdg=EX1wHR8RZw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: "sjust@redhat.com" <sjust@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Weil Sage <sweil@redhat.com>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---0cLvCaVEu8kcUn16Uft2ntmXtRDPACKnP
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-Thanks !
-
-On 05/02/2015 23:59, Yehuda Sadeh-Weinraub wrote:
->=20
-> ----- Original Message -----
->> From: "Loic Dachary" <loic@dachary.org>
->> To: "Yehuda Sadeh" <yehuda@redhat.com>
->> Cc: "Ceph Development" <ceph-devel@vger.kernel.org>
->> Sent: Thursday, February 5, 2015 2:38:29 PM
->> Subject: rgw and the next dumpling release
->>
->> Hi Yehuda,
->>
->> The rados teuthology suite for the next dumpling release as found in
->> https://github.com/ceph/ceph/commits/dumpling-backports came back gree=
-n
->> http://pulpito.ceph.com/loic-2015-02-03_14:46:09-rgw-dumpling-backport=
-s---basic-multi/.
->> Do you think it is ready for QE to start their own round of testing ?
->>
->=20
-> We should also backport a9dd4af401328e8f9071dee52470a0685ceb296b to dum=
-pling. I think I saw a dumpling run failing due to the lack of this one, =
-and since we now run on environments that use apache 2.4. Looking at this=
- commit, it's not going to be applied trivially, so I'm preparing one for=
- dumpling now.
->=20
-> Yehuda
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---0cLvCaVEu8kcUn16Uft2ntmXtRDPACKnP
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlTT98UACgkQ8dLMyEl6F23dOQCfX+ogdomL1NfpKWwg27/eR+s3
-jKEAnjRtckQULQ34wHBXA61MjSaUg43A
-=ibCw
------END PGP SIGNATURE-----
-
---0cLvCaVEu8kcUn16Uft2ntmXtRDPACKnP--
+VGhhbmtzIFNhbSEgSnVzdCB0b29rIGEgbG9vayBhdCB0aGUgcGF0Y2gsIGl0IHNob3VsZCBiZSB2
+ZXJ5IG11Y2ggaGVscGZ1bCBmb3Igb3VyIHVzZSBjYXNlLgoKVGhhbmtzLApHdWFuZwoKCi0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KPiBEYXRlOiBUaHUsIDUgRmViIDIw
+MTUgMTM6NDI6MTMgLTA4MDAKPiBTdWJqZWN0OiBSZTogQnVja2V0IGluZGV4IG9wIC0gbG9jayBj
+b250ZW50aW9uIGhhbmcgb3AgdGhyZWFkcwo+IEZyb206IHNhbS5qdXN0QGlua3RhbmsuY29tCj4g
+VG86IHlndWFuZzExQG91dGxvb2suY29tCj4gQ0M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3Jn
+OyBzd2VpbEByZWRoYXQuY29tCj4KPiBTdXJlLCBhODFmM2U2ZTYxYWJmYzdlY2E3NzQzYTgzYmY0
+YWY4MTA3MDViNDQ5LiBUaGUgaW50ZW50aW9uIHdhcwo+IGFjdHVhbGx5IHRvIGFsbG93IHdyaXRl
+cyBvbiBkZWdyYWRlZCBvYmplY3RzIGZvciByZXBsaWNhdGVkIHBvb2xzICh0bwo+IGF2b2lkIGEg
+NGsgcmJkIHdyaXRlIGJsb2NraW5nIG9uIGEgNG1iIHJlY292ZXJ5KSwgYnV0IEkgdGhpbmsgaXQK
+PiBzb2x2ZXMgdGhpcyBpc3N1ZSBhcyB3ZWxsLgo+IC1TYW0KPgo+IE9uIFRodSwgRmViIDUsIDIw
+MTUgYXQgMTozOSBQTSwgR3VhbmdZYW5nIDx5Z3VhbmcxMUBvdXRsb29rLmNvbT4gd3JvdGU6Cj4+
+IFRoYW5rcyBTYW0hIERvIHlvdSBtaW5kIHNoYXJpbmcgdGhlIHB1bGwgcmVxdWVzdCAvIGNvbW1p
+dCBJZCBvZiB0aGUgY2hhbmdlPwo+Pgo+Pj4gRGF0ZTogVGh1LCA1IEZlYiAyMDE1IDExOjUyOjA0
+IC0wODAwCj4+PiBTdWJqZWN0OiBSZTogQnVja2V0IGluZGV4IG9wIC0gbG9jayBjb250ZW50aW9u
+IGhhbmcgb3AgdGhyZWFkcwo+Pj4gRnJvbTogc2FtLmp1c3RAaW5rdGFuay5jb20KPj4+IFRvOiB5
+Z3VhbmcxMUBvdXRsb29rLmNvbQo+Pj4gQ0M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnOyBz
+d2VpbEByZWRoYXQuY29tCj4+Cj4+Pgo+Pj4gUmVjZW50IGNoYW5nZXMgYWxyZWFkeSBtZXJnZWQg
+Zm9yIGhhbW1lciBzaG91bGQgcHJldmVudCBibG9ja2luZyB0aGUKPj4+IHRocmVhZCBvbiB0aGUg
+b25kaXNrX3JlYWRfbG9jayBieSBleHBhbmRpbmcgdGhlIE9iamVjdENvbnRleHQ6OnJ3c3RhdGUK
+Pj4+IGxpc3RzIG1vc3RseSBhcyB5b3Ugc3VnZ2VzdGVkLgo+Pj4gLVNhbQo+Pj4KPj4+IE9uIFRo
+dSwgRmViIDUsIDIwMTUgYXQgMTozNiBBTSwgR3VhbmdZYW5nIDx5Z3VhbmcxMUBvdXRsb29rLmNv
+bT4gd3JvdGU6Cj4+Pj4gSGkgY2VwaC1kZXZlbCwKPj4+PiBJbiBvdXIgY2VwaCBjbHVzdGVyICh3
+aXRoIHJndyksIHdlIGNhbWUgYWNyb3NzIGEgcHJvYmxlbSB0aGF0IGFsbCByZ3cKPj4+PiBwcm9j
+ZXNzIGFyZSBzdHVjayAoYWxsIHdvcmtlciB0aHJlYWRzIHdhaXQgZm9yIHRoZSByZXNwb25zZSBm
+cm9tIE9TRCwgYW5kCj4+Pj4gc3RhcnQgZ2l2aW5nIDUwMCB0byBjbGllbnRzKS4gb2JqZWN0ZXJf
+cmVxdWVzdHMgZHVtcCBzaG93ZWQgdGhlIHNsb3cgaW4KPj4+PiBmbGlnaHQgcmVxdWVzdHMgd2Vy
+ZSBjYXVzZWQgYnkgb25lIE9TRCwgd2hpY2ggaGFzIDIgUEdzIGRvaW5nIGJhY2tmaWxsaW5nCj4+
+Pj4gYW5kIGl0IGhhcyAyIGJ1Y2tldCBpbmRleCBvYmplY3RzLgo+Pj4+Cj4+Pj4gQXQgT1NEIHNp
+ZGUsIHdlIGNvbmZpZ3VyZSA4IHRocmVhZHMsIGl0IHR1cm5lZCBvdXQgd2hlbiB0aGlzIHByb2Js
+ZW0KPj4+PiBvY2N1cnJlZCwgc2V2ZXJhbCBvcCB0aHJlYWRzIHRvb2sgc2Vjb25kcyAoZXZlbiB0
+ZW5zIG9mIHNlY29uZHMpIGhhbmRsaW5nCj4+Pj4gYnVja2V0IGluZGV4IG9wLCB3aXRoIG1vc3Qg
+b2YgdGltZSB3YWl0aW5nIGZvciB0aGUgb25kaXNrX3JlYWRfbG9jay4gQXMgYQo+Pj4+IHJlc3Vs
+dCwgdGhlIHRocm91Z2hwdXQgb2YgdGhlIG9wIHRocmVhZHMgZHJvcCAocWxlbiBpbmNyZWFzaW5n
+KS4KPj4+Pgo+Pj4+IEkgYW0gd29uZGVyaW5nIHdoYXQgb3B0aW9ucyB3ZSBjYW4gcHVyc3VlIHRv
+IGltcHJvdmUgdGhlIHNpdHVhdGlvbiwgc29tZQo+Pj4+IGdlbmVyYWwgaWRlYXMgb24gbXkgbWlu
+ZDoKPj4+PiAxPiBTaW1pbGFyIHRvIE9wQ29udGV4dDo6cndzdGF0ZSwgaW5zdGVhZCBvZiBtYWtl
+IHRoZSBvcCB0aHJlYWQgc3R1Y2ssCj4+Pj4gcHV0IHRoaXMgb3AgdG8gYSB3YWl0aW5nIGxpc3Qg
+YW5kIG5vdGlmeSB1cG9uIGxvY2sgYXZhaWxhYmxlLiBJIGFtIG5vdCBzdXJlCj4+Pj4gaWYgdGhp
+cyB3b3J0aCBpdCBvciBicmVhayBhbnl0aGluZy4KPj4+PiAyPiBEaWZmZXJlbnRpYXRlIHRoZSBz
+ZXJ2aWNlIGNsYXNzIGF0IGZpbGVzdG9yZSBsZXZlbCBmb3Igc3VjaCBPUCAtCj4+Pj4gc29tZWJv
+ZHkgaXMgd2FpdGluZyBmb3IgaXRzIHJlbGVhc2Ugb2YgdGhlIGxvY2suIERvZXMgdGhpcyBicmVh
+ayBhbnkKPj4+PiBhc3N1bXB0aW9uIGF0IGZpbGVzdG9yZSBsYXllcj8KPj4+Pgo+Pj4+IEFzIHdl
+IGFyZSB1c2luZyBFQyAoOCszKSwgdGhlIGZhbiBvdXQgaXMgbW9yZSB0aGFuIHJlcGxpY2F0aW9u
+IHBvb2wsCj4+Pj4gc3VjaCBraW5kIG9mIHNsb3cgZnJvbSBvbmUgT1NEIGNvdWxkIGJlIGNhc2Nh
+ZGluZyB0byBtb3JlIE9TRHMgZWFzaWVyLgo+Pj4+Cj4+Pj4gQlRXLCBJIGNyZWF0ZWQgYSB0cmFj
+a2VyIGZvciB0aGlzIC0gaHR0cDovL3RyYWNrZXIuY2VwaC5jb20vaXNzdWVzLzEwNzM5Cj4+Pj4K
+Pj4+PiBMb29rIGZvcndhcmQgdG8geW91ciBzdWdnZXN0aW9ucy4KPj4+Pgo+Pj4+IFRoYW5rcywK
+Pj4+PiBHdWFuZyAtLQo+Pj4+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRo
+ZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbgo+Pj4+IHRoZSBib2R5IG9mIGEgbWVz
+c2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnCj4+Pj4gTW9yZSBtYWpvcmRvbW8gaW5m
+byBhdCBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwKPj4+IC0tCj4+
+PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3Jp
+YmUgY2VwaC1kZXZlbCIgaW4KPj4+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9A
+dmdlci5rZXJuZWwub3JnCj4+PiBNb3JlIG1ham9yZG9tbyBpbmZvIGF0IGh0dHA6Ly92Z2VyLmtl
+cm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbAo+IC0tCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0
+aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluCj4gdGhl
+IGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcKPiBNb3JlIG1h
+am9yZG9tbyBpbmZvIGF0IGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRt
+bAogCQkgCSAgIAkJICA=
