@@ -1,136 +1,49 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: hammer is frozen
-Date: Fri, 06 Feb 2015 14:06:30 +0100
-Message-ID: <54D4BC56.9070402@dachary.org>
-References: <alpine.DEB.2.00.1502041242400.27042@cobra.newdream.net> <870DE8DBB716524BAE51B2D499EC81E40AA6BE81@g01jpexmbyt24>
+From: John Spray <john.spray@redhat.com>
+Subject: Re: flock() on libcephfs ?
+Date: Fri, 6 Feb 2015 14:44:50 +0100
+Message-ID: <CAGd4Wr3Yu6OZ__QZAfrQH5zUrNoTgXfUfSyouJ6VX=Z4ma9HKg@mail.gmail.com>
+References: <54D499D5.3060505@exalead.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="DTGxlrO24niHHpq5M35IK0g8LQ4SAUI5j"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:39879 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752756AbbBFNGg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Feb 2015 08:06:36 -0500
-In-Reply-To: <870DE8DBB716524BAE51B2D499EC81E40AA6BE81@g01jpexmbyt24>
+Received: from mail-la0-f46.google.com ([209.85.215.46]:40691 "EHLO
+	mail-la0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751485AbbBFNow convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Feb 2015 08:44:52 -0500
+Received: by labpv20 with SMTP id pv20so1188745lab.7
+        for <ceph-devel@vger.kernel.org>; Fri, 06 Feb 2015 05:44:50 -0800 (PST)
+In-Reply-To: <54D499D5.3060505@exalead.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>, Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-Cc: "Paul Von-Stamwitz (PVonStamwitz@us.fujitsu.com)" <PVonStamwitz@us.fujitsu.com>, "Kaga, Yoshihiro" <y-kaga@jp.fujitsu.com>, "Kawaguchi, Shotaro" <kawaguchi.s@jp.fujitsu.com>, "Shiozawa, Kensuke" <shiozawa.kennsu@jp.fujitsu.com>, "Nakao, Takanori" <nakao.takanori@jp.fujitsu.com>
+To: Xavier Roche <roche+kml2@exalead.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---DTGxlrO24niHHpq5M35IK0g8LQ4SAUI5j
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+On Fri, Feb 6, 2015 at 11:39 AM, Xavier Roche <roche+kml2@exalead.com> wrote:
+> I'm not sure this is the right place to post, so do not hesitate to redirect me to a more appropriate list if necessary!
 
-Hi,
+You're in the right place!
 
-In my opinion this should have been merged: it was ready before the featu=
-re freeze.
+> New to ceph, I naively attempted to add a flock (int ceph_flock(struct ceph_mount_info *cmount, int fd, int operation)) function in libcephfs, but I could not find the proper way to figure out what was the owner identifier used by Client::ll_flock() (an uint64_t integer) - this is not the pid, I presume ?
 
-Cheers
+You should let the caller pass in the owner ID.  For example, if you
+were using libcephfs to implement a filesystem interface, it would be
+up to that interface to work out the unique ID from the calling layer
+above it.  So you can pass it through libcephfs, no logic needed.
 
-On 06/02/2015 13:25, Miyamae, Takeshi wrote:
-> Hi Sage,
->=20
->> If there is something exceptional that hasn't made it in yet and is lo=
-w-risk,
->> plea your case,
->=20
-> We would like to contribute our following code to the nearest stable re=
-lease
-> Hammer, and we believe that our code has sufficiently low risk.
->=20
->  mSHEC : multiple Shingled Erasure Code #3534
->  https://github.com/ceph/ceph/pull/3534
->=20
-> One of the reasons why we think it has low risk is that we have already=
+> Thanks in advance for any hints! By the way - would this new feature (flock()) make sense ?
 
-> finished extended tests shown below assuming a product use case.
->=20
->  Test items done:
->   * erasure code plugin I/F tests (TestErasureCodeShec.cc)
->   * exhaustive parity layouts tests (TestErasureCodeShec_all.cc)
->   * thread safety tests (TestErasureCodeShec_thread.cc)
->   * tests on a real ceph cluster
->      - pool creation/deletion
->      - read/write
->      - recovery (up to N multiple failures)
->=20
-> Another reason is that the code is just a plugin, which is completely
-> isolated from the core of Ceph and has no risks for users who do not
-> need to use it.
->=20
-> Best regards,
-> Takeshi Miyamae
->=20
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.ke=
-rnel.org] On Behalf Of Sage Weil
-> Sent: Thursday, February 5, 2015 5:51 AM
-> To: ceph-devel@vger.kernel.org
-> Subject: hammer is frozen
->=20
-> I created the branch on Monday, but am traveling and forgot to send an =
-email.  This means we're not merging new features until we have a handle =
-on the testing and the QA results are looking good.
->=20
-> Specifically:
->=20
-> - There is a 'hammer' ceph.git branch.  Please target any bug fixes at
->   this.
->=20
-> - The 'next' branch is deleted for the time being (see above)
->=20
-> - Do not merge any new features to master; not yet.  It's too confusing=
+Definitely, the flock support in the userspace client is new, and the
+libcephfs bindings just didn't catch up yet: it was added in October:
 
->   and we have enough work to do stabilizing things.
->=20
-> - There are still several pull requests open that are bug fixes and tar=
-get
->   master that should get merged once they are tested, so we will probab=
-ly
->   merge hammer and master together periodically to avoid doing all the
->   merged manually.  (Another reason not to merge any new code into mast=
-er
->   that does not target hammer.)
->=20
-> - We're using the 'hammer' milestone on github to track what to pay
->   attention to.  Please help keep it in sync with the open pull
->   requests that are hammer-bound vs future work for infernalis.
->=20
-> If there is something exceptional that hasn't made it in yet and is low=
--risk, plea your case, but no promises.  Bribery in the form of fixes for=
- open bugs can be effective.  :)
->=20
-> Thanks!
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n the body of a message to majordomo@vger.kernel.org More majordomo info =
-at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
+commit a1b2c8ff955b30807ac53ce6bdc97cf61a7262ca
+Author: Yan, Zheng <zyan@redhat.com>
+Date:   Thu Oct 2 19:07:41 2014 +0800
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+    client: posix file lock support
+
+    Signed-off-by: Yan, Zheng <zyan@redhat.com>
 
 
---DTGxlrO24niHHpq5M35IK0g8LQ4SAUI5j
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlTUvFYACgkQ8dLMyEl6F20qdgCdGfzCTiTCTzxgRmW/6OsgOlsA
-UF4An07RH42uri7tteqZrDorq/HFraIN
-=PKox
------END PGP SIGNATURE-----
-
---DTGxlrO24niHHpq5M35IK0g8LQ4SAUI5j--
+Cheers,
+John
