@@ -1,129 +1,52 @@
-From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Subject: Re: Bucket lifecycle (object expiration)
-Date: Fri, 6 Feb 2015 17:13:45 -0500 (EST)
-Message-ID: <1649887477.485245.1423260825116.JavaMail.zimbra@redhat.com>
-References: <313711066.475076.1423258498528.JavaMail.zimbra@redhat.com> <1033454365.478048.1423259167886.JavaMail.zimbra@redhat.com> <CAC6JEv8qVphsRf=_K9MhegU_uZq1XGb6_zdtvEX1wV-qL7K8Rw@mail.gmail.com>
+From: Vu Pham <vuhuong@mellanox.com>
+Subject: Re: xio messenger prelim benchmark
+Date: Fri, 6 Feb 2015 23:30:22 +0000
+Message-ID: <em213da5e9-5f20-46cc-b6bc-c2595f3489f9@lt-vu-6500>
+References: <ema269f94a-3522-49f6-ba9a-4af4fe48358d@lt-vu-6500>
+Reply-To: Vu Pham <vuhuong@mellanox.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx5-phx2.redhat.com ([209.132.183.37]:34127 "EHLO
-	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757462AbbBFWNq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Feb 2015 17:13:46 -0500
-In-Reply-To: <CAC6JEv8qVphsRf=_K9MhegU_uZq1XGb6_zdtvEX1wV-qL7K8Rw@mail.gmail.com>
+Received: from mail-db3on0064.outbound.protection.outlook.com ([157.55.234.64]:43887
+	"EHLO emea01-db3-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751566AbbBFXaZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 6 Feb 2015 18:30:25 -0500
+In-Reply-To: <ema269f94a-3522-49f6-ba9a-4af4fe48358d@lt-vu-6500>
+Content-Language: en-US
+Content-ID: <DC16C7B4C5B31A4FA84C100F719D2F5E@eurprd05.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@gregs42.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Vu Pham <vuhuong@mellanox.com>, Alexandre DERUMIER <aderumier@odiso.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-
-
------ Original Message -----
-> From: "Gregory Farnum" <greg@gregs42.com>
-> To: "Yehuda Sadeh-Weinraub" <yehuda@redhat.com>
-> Cc: "Ceph Development" <ceph-devel@vger.kernel.org>
-> Sent: Friday, February 6, 2015 2:02:41 PM
-> Subject: Re: Bucket lifecycle (object expiration)
-> 
-> On Fri, Feb 6, 2015 at 1:46 PM, Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-> wrote:
-> > I have been recently looking at implementing object expiration in rgw.
-> > First, a brief description of the feature:
-> >
-> > S3 provides mechanisms to expire objects, and/or to transition them into
-> > different storage class. The feature works at the bucket level. Rules can
-> > be set as to which objects will expire and/or transitioned , and when.
-> > Objects are specified by using prefixes, the configuration is not
-> > per-object. Time is set in days (since object creation), and events are
-> > always rounded to the start of the next day.
-> > The rules can also work in conjuction with object versioning. When a
-> > versioned object (a current object) expires, a delete marker is created.
-> > Non-current versioned objects can be set to be removed after a specific
-> > amount of time since the point where they became non-current.
-> > As mentioned before, objects can be configured to transition to a different
-> > storage class (e.g., Amazon Glacier). It is possible to configure an
-> > object to be transitioned after a specific period, and after another
-> > period to be completely removed.
-> > When reading object information, it will specify when it is scheduled for
-> > removal. It is not yet clear to me whether an object can be accessed after
-> > that time, or whether it appears as gone immediately (either when trying
-> > to access it, or when listing the bucket).
-> > Rules cannot intersect. Each object cannot be affected by more than one
-> > rule.
-> >
-> > Swift provides a completely different object expiration system. In swift
-> > the expiration is set per object, and with an explicit time for it to be
-> > removed.
-> >
-> > In accordance with previous work, I'll currently focus on an S3
-> > implementation. We do not yet support object transition to a different
-> > storage class, so either we implement that first, or out first lifecycle
-> > implementation will not include that.
-> >
-> > 1. Lifecycle rules will be configured on the bucket instance info
-> >
-> > We hold the bucket instance info whenever we read an object, and it is
-> > cached. Since rules are configured to affect specific object prefixes, it
-> > will be quick and easy to determine whether an object is affected by any
-> > lifecycle rule.
-> >
-> > 2. New bucket index objclass operation to list objects that need to be
-> > expired / transitioned
-> >
-> > The operation will get the existing rules as input, and will return the
-> > list of objects that need to be handled. The request will be paged. Note
-> > that number of rules is constrained, so we only need to limit the number
-> > of returned entries.
-> >
-> > 3. Maintain a (sharded) list of bucket instances that have had lifecycle
-> > set on them
-> >
-> > Whenever creating a new lifecycle rule on a bucket, update that list. It
-> > will be kept as omap on objects in the log pool
-> >
-> > 4. A new thread that will run daily to handle object expiration /
-> > transition
-> >
-> > The (potentially more than one) thread will go over the lifecycle objects
-> > in the log pool, try to set a lease on one, if successful then it'll start
-> > processing it:
-> >  - get list of buckets
-> >  - for each bucket:
-> >   - read rules
-> >   - get list of objects affected by rules
-> >   - for each object:
-> >     - expire / transition
-> >     - renew lease if needed
-> >  - unlock log object
-> >
-> > Note that this is racy. If a rule is removed after we read the rules, we're
-> > still going to apply it. Reading through the Amazon api, they have similar
-> > issues as far as I can tell. We can reduce the race window by verifying
-> > that the rule is still in effect before removing each object. This
-> > information should be cached, so there's not much overhead.
-> >
-> > 5. when reading object, check whether its bucket has a rule that affects
-> > it. If so reflect that in the response headers.
-> >
-> > 6. extend RESTful api to support rules creation, and removal, as well as
-> > reading the list of rules per bucket.
-> >
-> > 7. (optional) don't allow access to objects that have been expired.
-> >
-> > 8. (optional) don't list objects that have been expired.
-> >
-> > Not sure we need or want (7) and (8).
-> 
-> It sounds like we know whether rules apply to an object whenever the
-> object is created. Is there a reason to implement this as a pull model
-> (go look at the bucket) instead of a push model (give the object name
-> to a set of cleanup objects sorted by date)?
-> There might be some concurrency issues that make this infeasible, but
-> it seems like that would involve accessing less data and minimizing
-> how much time each bucket index spends (b)locked to service object
-> expiration.
-
-It's not going to work. New rules can be created after the objects were created, old rules can be removed. It can be very dynamic. You'd also add another write on each object creation, and it'll be a write across multiple objects, which is always an issue.
-
-Yehuda
+DQoNCk9uIDIvNi8yMDE1IDEwOjQxOjE1IEFNLCAiVnUgUGhhbSIgPHZ1aHVvbmdAbWVsbGFub3gu
+Y29tPiB3cm90ZToNCg0KPg0KPj4+PlllcywgeGlvIG1lc3NlbmdlciB3aGljaCBpcyBpbXBsZW1l
+bnRlZCBvdmVyIEFjY2VsaW8gY2FuIHJ1biBvdmVyDQo+Pj4+cmRtYQ0KPj4+PnRyYW5zcG9ydCAo
+SW5maW5pYmFuZCwgUm9DRSkgYW5kIFRDUC4gUGxlYXNlIG5vdGUgdGhhdCB3ZSBoYXZlIG5vdA0K
+Pj4+PmVuYWJsZWQgeGlvIG1lc3NlbmdlciAvIEFjY2VsaW8tdGNwIHlldC4NCj4+DQo+Pk9oLCBv
+aywgR3JlYXQgIQ0KPj4NCj4+DQo+Pj4+eGlvIG1lc3NlbmdlciBpcyBjdXJyZW50bHkgd29ya2lu
+ZyB3aXRoIHVzZXIgbW9kZSBjbGllbnRzLiBXZSBvbmx5DQo+Pj4+dmFsaWRhdGVkL3Rlc3RlZCB1
+c2VyIG1vZGUgcmJkIGNsaWVudC4NCj4+Pj5TYW5kaXNrIGFyZSB3b3JraW5nIG9uIGtyYmQgb3Zl
+ciBrQWNjZWxpbyBpbXBsZW1lbnRhdGlvbi4gQXMgb2YgbGFzdA0KPj4+PndlZWssIFNhbkRpc2sg
+aGF2ZSBiYXNpYyBJL09zIHdvcmtpbmcuDQo+Pj4+SG9wZWZ1bGx5IGtyYmQva0FjY2VsaW8gd2ls
+bCBiZSBhdmFpbGFibGUgc29vbi4NCj4+DQo+PkdyZWF0LCBzbyB3ZSBjYW4gZXhwZWN0IGV2ZW4g
+YmV0dGVyIHJlc3VsdHMgOikNCj4+DQo+Pg0KPj5CVFcsIGRvIHlvdSBoYXZlIHNvbWUgY2xpZW50
+IHNpZGUgY3B1IHVzYWdlIGJlbmNobWFyayA/DQo+Pg0KPj4NCj5Tb3JyeSwgSSBkaWQgbm90IGNv
+bGxlY3QgdGhlIGNwdSB1c2FnZSBAY2xpZW50DQo+DQo+QlRXIHNpbmNlIHlvdSB3aWxsIHVzZSBN
+ZWxsYW5veCBzeDEwMTIgRU4gc3dpdGNoIGZvciB5b3VyIGJlbmNobWFyaywgDQo+eW91DQo+Y2Fu
+IHRha2UgYWR2YW50YWdlIG9mIDU2R2JlL3Mgb3ZlciA0MEdiZS9zIHdpdGggYSBsaWNlbnNlIHVw
+Z3JhZGUuDQo+DQo+V2l0aCBteSBtaW5pbXVtIHNldHVwIG9mIHNpbmdsZSBub2RlIGNsdXN0ZXIg
+KHNpbmdsZSBPU0QsIDINCj5wb29scy9pbWFnZXMpICsgMSBjbGllbnQgbm9kZSB3aXRoIDE2IGZp
+b19yYmQgY2xpZW50IHN0cmVhbXMsIHdlIA0KPmFscmVhZHkNCj5zZWUgdGhlIGJlbmVmaXQgb2Yg
+YmlnIHBpcGUuDQo+DQo+ICAgICAgICAgICAgICBpYl9zZW5kX2J3IDY0ayByZWFkIChjZXBoKSAy
+NTZrIHJlYWQoY2VwaCkNCj4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCj40MEdiZTog
+NDM1MCBNQi9zIDQzMDAgTUIvcyA0MzUwIE1CL3MNCj41NkdiZTogNTEwMCBNQi9zIDQ4NTAgTUIv
+cyA1MDAwIE1CL3MNCj4NCg0KT24gcmF3IGRhdGEgKGliX3NlbmRfYncpLCBJIGdldCBvbmx5IDUx
+MDAgTUIvcyBvbiA1NkdiZS9zIGxpbmsgYmVjYXVzZSANCkknbSB1c2luZyBkZWZhdWx0IG10dT0x
+NTAwLg0KVGhlcmUgaXMgUm9DRSBoZWFkZXIgb3ZlcmhlYWQgcGVyIGZyYW1lIGFuZCB3aGljaCBS
+b0NFJ3MgbXR1IGlzIA0Kc2VsZWN0ZWQvdXNlZCAoUm9DRSdzIG10dSBpcyA1MTItYnl0ZXMgaW4g
+dGhpcyBjYXNlKQ0KDQpXaXRoIGp1bWJvIGZyYW1lcyAoUm9DRSdzIG10dSBjYW4gYmUgMksgb3Ig
+NEspLCB0aGUgcmF3IGJ3IGNhbiBnZXQgdG8gDQp+NTBHYi9zDQoNCi12dQ0KDQo=
