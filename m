@@ -1,30 +1,50 @@
-From: Ken Dreyer <kdreyer@redhat.com>
-Subject: civetweb upstream
-Date: Fri, 06 Feb 2015 08:28:46 -0700
-Message-ID: <54D4DDAE.50604@redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: Re: new dev cluster - using giant or hammer git?
+Date: Fri, 6 Feb 2015 16:52:44 +0100
+Message-ID: <7A196558-87C3-44B8-8019-5596112CCD81@profihost.ag>
+References: <54D4C7F2.1090505@profihost.ag> <alpine.DEB.2.00.1502060606281.27042@cobra.newdream.net>
+Mime-Version: 1.0 (1.0)
+Content-Type: text/plain;
+	charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:45679 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754447AbbBFP2s (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 6 Feb 2015 10:28:48 -0500
-Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
-	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t16FSlat009818
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
-	for <ceph-devel@vger.kernel.org>; Fri, 6 Feb 2015 10:28:47 -0500
-Received: from mbp.ktdreyer.com (vpn-62-164.rdu2.redhat.com [10.10.62.164])
-	by int-mx13.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t16FSlAY026340
-	for <ceph-devel@vger.kernel.org>; Fri, 6 Feb 2015 10:28:47 -0500
+Received: from mail-ph.de-nserver.de ([85.158.179.214]:48680 "EHLO
+	mail-ph.de-nserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752098AbbBFPwq convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Feb 2015 10:52:46 -0500
+In-Reply-To: <alpine.DEB.2.00.1502060606281.27042@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi folks,
 
-It looks like Ceph has its own fork of the upstream civetweb project.
-What was the reason for forking at the time? Has there been much effort
-to get our civetweb changes upstream?
+> Am 06.02.2015 um 15:06 schrieb Sage Weil <sage@newdream.net>:
+> 
+>> On Fri, 6 Feb 2015, Stefan Priebe - Profihost AG wrote:
+>> Hi,
+>> 
+>> for deploying a new ceph dev cluster can anybody recommand which git
+>> branch to use? hammer or giant-backport?
+> 
+> Hi Stefan!
+> 
+> If it's dev I'd recommend hammer.  If all of your clients will be new I'd 
+> also recommand 'ceph osd crush tunables hammer' as there is a new and 
+> improve crush bucket type.  
 
-- Ken
+Hi sage,
+
+thanks that's good for a test cluster too?
+
+What would you recommand for something which can Crash but i don't want to loose data?
+
+Stefan
+
+
+> 
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
