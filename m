@@ -1,37 +1,46 @@
-From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Subject: Re: civetweb upstream
-Date: Fri, 6 Feb 2015 12:02:53 -0500 (EST)
-Message-ID: <391658056.205926.1423242173510.JavaMail.zimbra@redhat.com>
-References: <54D4DDAE.50604@redhat.com>
+From: Vu Pham <vuhuong@mellanox.com>
+Subject: Re: xio messenger prelim benchmark
+Date: Fri, 6 Feb 2015 18:41:15 +0000
+Message-ID: <ema269f94a-3522-49f6-ba9a-4af4fe48358d@lt-vu-6500>
+References: <263943518.7885801.1423207485470.JavaMail.zimbra@oxygem.tv>
+Reply-To: Vu Pham <vuhuong@mellanox.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx5-phx2.redhat.com ([209.132.183.37]:46811 "EHLO
-	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755539AbbBFRCz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Feb 2015 12:02:55 -0500
-In-Reply-To: <54D4DDAE.50604@redhat.com>
+Received: from mail-db3on0099.outbound.protection.outlook.com ([157.55.234.99]:5856
+	"EHLO emea01-db3-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1758593AbbBFSlS (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 6 Feb 2015 13:41:18 -0500
+In-Reply-To: <263943518.7885801.1423207485470.JavaMail.zimbra@oxygem.tv>
+Content-Language: en-US
+Content-ID: <47BD49F01075A0428B783142F191E4EE@eurprd05.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ken Dreyer <kdreyer@redhat.com>
-Cc: ceph-devel@vger.kernel.org
+To: Alexandre DERUMIER <aderumier@odiso.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-
-
------ Original Message -----
-> From: "Ken Dreyer" <kdreyer@redhat.com>
-> To: ceph-devel@vger.kernel.org
-> Sent: Friday, February 6, 2015 7:28:46 AM
-> Subject: civetweb upstream
-> 
-> Hi folks,
-> 
-> It looks like Ceph has its own fork of the upstream civetweb project.
-> What was the reason for forking at the time? Has there been much effort
-> to get our civetweb changes upstream?
-> 
-
-The biggest motivation originally was to get it integrated into our automake system, as it was using weird suffixes for some include file. When civetweb was split out of mongoose, they made some changes to the code structure that made it harder to embed into our system. Later on there were some relatively minor changes and bug fixes. We might be able to push some upstream as is, and some might need to be reworked so that they'd make sense in that context.
-
-Yehuda
+DQo+Pj5ZZXMsIHhpbyBtZXNzZW5nZXIgd2hpY2ggaXMgaW1wbGVtZW50ZWQgb3ZlciBBY2NlbGlv
+IGNhbiBydW4gb3ZlciANCj4+PnJkbWENCj4+PnRyYW5zcG9ydCAoSW5maW5pYmFuZCwgUm9DRSkg
+YW5kIFRDUC4gUGxlYXNlIG5vdGUgdGhhdCB3ZSBoYXZlIG5vdA0KPj4+ZW5hYmxlZCB4aW8gbWVz
+c2VuZ2VyIC8gQWNjZWxpby10Y3AgeWV0Lg0KPg0KPk9oLCBvaywgR3JlYXQgIQ0KPg0KPg0KPj4+
+eGlvIG1lc3NlbmdlciBpcyBjdXJyZW50bHkgd29ya2luZyB3aXRoIHVzZXIgbW9kZSBjbGllbnRz
+LiBXZSBvbmx5DQo+Pj52YWxpZGF0ZWQvdGVzdGVkIHVzZXIgbW9kZSByYmQgY2xpZW50Lg0KPj4+
+U2FuZGlzayBhcmUgd29ya2luZyBvbiBrcmJkIG92ZXIga0FjY2VsaW8gaW1wbGVtZW50YXRpb24u
+IEFzIG9mIGxhc3QNCj4+PndlZWssIFNhbkRpc2sgaGF2ZSBiYXNpYyBJL09zIHdvcmtpbmcuDQo+
+Pj5Ib3BlZnVsbHkga3JiZC9rQWNjZWxpbyB3aWxsIGJlIGF2YWlsYWJsZSBzb29uLg0KPg0KPkdy
+ZWF0LCBzbyB3ZSBjYW4gZXhwZWN0IGV2ZW4gYmV0dGVyIHJlc3VsdHMgOikNCj4NCj4NCj5CVFcs
+IGRvIHlvdSBoYXZlIHNvbWUgY2xpZW50IHNpZGUgY3B1IHVzYWdlIGJlbmNobWFyayA/DQo+DQo+
+DQpTb3JyeSwgSSBkaWQgbm90IGNvbGxlY3QgdGhlIGNwdSB1c2FnZSBAY2xpZW50DQoNCkJUVyBz
+aW5jZSB5b3Ugd2lsbCB1c2UgTWVsbGFub3ggc3gxMDEyIEVOIHN3aXRjaCBmb3IgeW91ciBiZW5j
+aG1hcmssIHlvdSANCmNhbiB0YWtlIGFkdmFudGFnZSBvZiA1NkdiZS9zIG92ZXIgNDBHYmUvcyB3
+aXRoIGEgbGljZW5zZSB1cGdyYWRlLg0KDQpXaXRoIG15IG1pbmltdW0gc2V0dXAgb2Ygc2luZ2xl
+IG5vZGUgY2x1c3RlciAoc2luZ2xlIE9TRCwgMiANCnBvb2xzL2ltYWdlcykgKyAxIGNsaWVudCBu
+b2RlIHdpdGggMTYgZmlvX3JiZCBjbGllbnQgc3RyZWFtcywgd2UgYWxyZWFkeSANCnNlZSB0aGUg
+YmVuZWZpdCBvZiBiaWcgcGlwZS4NCg0KICAgICAgICAgICAgIGliX3NlbmRfYncgICAgIDY0ayBy
+ZWFkIChjZXBoKSAgICAgIDI1NmsgcmVhZChjZXBoKQ0KLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tDQo0MEdiZTogNDM1MCBNQi9zICAgICAgIDQzMDAgTUIvcyAgICAgICAgICAgICA0MzUw
+IE1CL3MNCjU2R2JlOiA1MTAwIE1CL3MgICAgICAgNDg1MCBNQi9zICAgICAgICAgICAgIDUwMDAg
+TUIvcw0KDQotdnU=
