@@ -1,128 +1,51 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: tracker.ceph.com API
-Date: Sat, 07 Feb 2015 10:06:58 +0100
-Message-ID: <54D5D5B2.8060203@dachary.org>
-References: <54ABC3E5.7040704@dachary.org>
+From: Mustafa Muhammad <mustafaa.alhamdaani@gmail.com>
+Subject: Re: civetweb upstream
+Date: Sun, 8 Feb 2015 10:54:44 +0300
+Message-ID: <CAMWPydQ00kDEq5ihVpa7iJ+Gb=zHWh_=Wr8cSZ08MK_UtwGbSQ@mail.gmail.com>
+References: <54D4DDAE.50604@redhat.com>
+	<391658056.205926.1423242173510.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="R0otRT8aeTg8CEIThm38ShtlBlH7GTXoB"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:40207 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751405AbbBGJHA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 7 Feb 2015 04:07:00 -0500
-Received: from [10.9.0.6] (unknown [10.0.2.28])
-	by smtp.dmail.dachary.org (Postfix) with ESMTP id 5481A420B5
-	for <ceph-devel@vger.kernel.org>; Sat,  7 Feb 2015 10:06:58 +0100 (CET)
-In-Reply-To: <54ABC3E5.7040704@dachary.org>
+Received: from mail-we0-f179.google.com ([74.125.82.179]:46687 "EHLO
+	mail-we0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751033AbbBHHyq convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 8 Feb 2015 02:54:46 -0500
+Received: by mail-we0-f179.google.com with SMTP id u56so15614106wes.10
+        for <ceph-devel@vger.kernel.org>; Sat, 07 Feb 2015 23:54:44 -0800 (PST)
+In-Reply-To: <391658056.205926.1423242173510.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---R0otRT8aeTg8CEIThm38ShtlBlH7GTXoB
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-
-
-On 06/01/2015 12:15, Loic Dachary wrote:
-> Hi,
->=20
-> I tried various things to update tracker.ceph.com from the command line=
- but failed. The best result I have is the following:
->=20
-> cat /tmp/a.xml
->=20
-> <issue>
->   <id>10281</id>
->   <subject>firefly: make check fails on fedora 20 (1)</subject>
->   <custom_fields type=3D"array">
->     <custom_field name=3D"Backport" id=3D"2">
->       <value>firefly</value>
->     </custom_field>
->   </custom_fields>
-> </issue>
->=20
-> curl --http1.0 --verbose -T /tmp/a.xml http://tracker.ceph.com/issues/1=
-0281.xml?key=3Dcd9a99820b4e7543a
-
-The content-type was missing:
-
-curl --http1.0 --verbose --header 'Content-type: application/xml' -T /tmp=
-/a.xml http://tracker.ceph.com/issues/10281.xml?key=3Dcd9a99820b4e7543a
-
-works :-)
-
->=20
-> * Hostname was NOT found in DNS cache
-> *   Trying 64.90.32.38...
-> * Connected to tracker.ceph.com (64.90.32.38) port 80 (#0)
->> PUT /issues/10281.xml?key=3Dcd9a99820b4e7543a3c HTTP/1.0
->> User-Agent: curl/7.35.0
->> Host: tracker.ceph.com
->> Accept: */*
->> Content-Length: 239
+On Fri, Feb 6, 2015 at 8:02 PM, Yehuda Sadeh-Weinraub <yehuda@redhat.com> wrote:
+>
+>
+> ----- Original Message -----
+>> From: "Ken Dreyer" <kdreyer@redhat.com>
+>> To: ceph-devel@vger.kernel.org
+>> Sent: Friday, February 6, 2015 7:28:46 AM
+>> Subject: civetweb upstream
 >>
-> * We are completely uploaded and fine
-> < HTTP/1.1 200 OK
-> < Date: Tue, 06 Jan 2015 11:05:55 GMT
-> * Server Apache/2.2.22 (Ubuntu) is not blacklisted
-> < Server: Apache/2.2.22 (Ubuntu)
-> < X-Powered-By: Phusion Passenger (mod_rails/mod_rack) 3.0.13
-> < X-UA-Compatible: IE=3DEdge,chrome=3D1
-> < Cache-Control: no-cache
-> < X-Request-Id: eb302e17961997bafade5739f48a7183
-> < X-Runtime: 1.375926
-> < X-Rack-Cache: invalidate, pass
-> < Set-Cookie: _redmine_session=3DBAh7BkkiD3Nlc3Npb25faWQGOgZFRkkZTIwY2Y=
-5NWYzYTE5BjsAVA%3D%3D--a2a2fd48f300f5c8c9; path=3D/; HttpOnly
-> < Set-Cookie: autologin=3D; path=3D/; expires=3DThu, 01-Jan-1970 00:00:=
-00 GMT
-> < Status: 200
-> < Content-Length: 0
-> < Connection: close
-> < Content-Type: application/xml; charset=3Dutf-8
-> <
-> * Closing connection 0
->=20
-> but most of the time I get:
->=20
-> * Hostname was NOT found in DNS cache
-> *   Trying 64.90.32.38...
-> * Connected to tracker.ceph.com (64.90.32.38) port 80 (#0)
->> PUT /issues/10281.xml?key=3Dcd9a99820b4e7543a3ce82febce4970b3dfb6b86 H=
-TTP/1.0
->> User-Agent: curl/7.35.0
->> Host: tracker.ceph.com
->> Accept: */*
->> Content-Length: 239
+>> Hi folks,
 >>
-> * We are completely uploaded and fine
-> * Empty reply from server
-> * Connection #0 to host tracker.ceph.com left intact
->=20
-> Am I doing something wrong ?
->=20
-> Cheers
->=20
+>> It looks like Ceph has its own fork of the upstream civetweb project.
+>> What was the reason for forking at the time? Has there been much effort
+>> to get our civetweb changes upstream?
+>>
+>
+> The biggest motivation originally was to get it integrated into our automake system, as it was using weird suffixes for some include file. When civetweb was split out of mongoose, they made some changes to the code structure that made it harder to embed into our system. Later on there were some relatively minor changes and bug fixes. We might be able to push some upstream as is, and some might need to be reworked so that they'd make sense in that context.
+>
+> Yehuda
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+I posted on another thread about changing the upstream before reading
+this, sorry about that, but I think this should be done before Hammer
+release.
 
-
---R0otRT8aeTg8CEIThm38ShtlBlH7GTXoB
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlTV1bIACgkQ8dLMyEl6F21vnwCgxWYZTS6mf+W62uL7G6OqQO6P
-ct4AoLqY0Gq32ONWr6nFUvu9Bj+Ud7v5
-=o2X0
------END PGP SIGNATURE-----
-
---R0otRT8aeTg8CEIThm38ShtlBlH7GTXoB--
+Regards
+Mustafa
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
