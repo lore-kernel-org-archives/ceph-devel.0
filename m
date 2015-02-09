@@ -1,146 +1,123 @@
-From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Subject: Re: Bucket lifecycle (object expiration)
-Date: Mon, 9 Feb 2015 10:33:39 -0500 (EST)
-Message-ID: <1478158629.1804470.1423496019494.JavaMail.zimbra@redhat.com>
-References: <1033454365.478048.1423259167886.JavaMail.zimbra@redhat.com> <alpine.DEB.2.00.1502090335140.5710@cobra.newdream.net>
+From: Gregory Farnum <greg@gregs42.com>
+Subject: Re: scrub scheduling
+Date: Mon, 9 Feb 2015 07:41:12 -0800
+Message-ID: <CAC6JEv_zpYhH9kBrNGwf3ij9oWZFB5GFQxrATr7jKGEQ8Ba2Fg@mail.gmail.com>
+References: <alpine.DEB.2.00.1502081318090.5713@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx3-phx2.redhat.com ([209.132.183.24]:60118 "EHLO
-	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760551AbbBIPdl (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Feb 2015 10:33:41 -0500
-In-Reply-To: <alpine.DEB.2.00.1502090335140.5710@cobra.newdream.net>
+Received: from mail-ig0-f173.google.com ([209.85.213.173]:33571 "EHLO
+	mail-ig0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933226AbbBIPlN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Feb 2015 10:41:13 -0500
+Received: by mail-ig0-f173.google.com with SMTP id a13so17143870igq.0
+        for <ceph-devel@vger.kernel.org>; Mon, 09 Feb 2015 07:41:12 -0800 (PST)
+Received: from mail-ig0-f179.google.com (mail-ig0-f179.google.com. [209.85.213.179])
+        by mx.google.com with ESMTPSA id d1sm5774073igr.20.2015.02.09.07.41.12
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Mon, 09 Feb 2015 07:41:12 -0800 (PST)
+Received: by mail-ig0-f179.google.com with SMTP id l13so17090922iga.0
+        for <ceph-devel@vger.kernel.org>; Mon, 09 Feb 2015 07:41:12 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1502081318090.5713@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, simon.leinen@gmail.com
 
+On Sun, Feb 8, 2015 at 1:38 PM, Sage Weil <sweil@redhat.com> wrote:
+> Simon Leinen at Switch did a greaet post recently about the impact of
+> scrub on their cluster(s):
+>
+>         http://blog.simon.leinen.ch/2015/02/ceph-deep-scrubbing-impact.html
+>
+> Basically the 2 week deep scrub interval kicks in on exactly a 2 week
+> cycle and the cluster goes crazy for a few hours and then does nothing
+> (but client IO) for the next two weeks.
+>
+> The options governing this are:
+>
+> OPTION(osd_scrub_min_interval, OPT_FLOAT, 60*60*24)    // if load is low
+> OPTION(osd_scrub_max_interval, OPT_FLOAT, 7*60*60*24)  // regardless of load
+> OPTION(osd_deep_scrub_interval, OPT_FLOAT, 60*60*24*7) // once a week
+> OPTION(osd_scrub_load_threshold, OPT_FLOAT, 0.5)
+>
+> That is, if the load is < .5 (probably almost never on a real cluster) it
+> will scrub every day, otherwise (regardless of load) it will scrub each PG
+> at least once a week.
+>
+> Several things we can do here:
+>
+> 1- Maybe the shallow scrub interval should be less than the deep scrub
+> interval?
+>
+> 2- There is a new feature for hammer that limits scrub to certain times of
+> day, contributed by Xinze Chi:
+>
+> OPTION(osd_scrub_begin_hour, OPT_INT, 0)
+> OPTION(osd_scrub_end_hour, OPT_INT, 24)
+>
+> That is, by default, scrubs can happen at any time.  You can use this to
+> limit to certain hour sof the night, or whatever is appropriate for your
+> cluster.  That only sort of helps, though; Simon's scrub frenzy will still
+> happen one day a week, all at once (or maybe spread over 2 nights).
+>
+> 3- We can spread them out during the allowed window.  But how to do that?
+> We could make the scrub interval randomly +/- a value of up to 50% of the
+> total interval.  Or we could somehow look at the current rate of scrubbing
+> (average time to completeion for the current pool, maybe).. any look at
+> the total number of items in the scrub queue?
+>
+> 4- Ric pointed out to me that even if we spread these out, scrubbing at
+> full speed has an impact.  Even if we do all the prioritization magic we
+> can there will still be a buch of large IOs in the queue.  What if we have
+> a hard throttle on the scrub rate, objects per second and/or bytes per
+> second?  In the end the same number of IOs traverse the queue and
+> potentially interfere with client IO, but they would be spread out over a
+> longer period of time and be less noticeable (i.e., slow down client IOs
+> from different workloads and not all the same workload).  I'm not totally
+> convinced this is an improvement over a strategy where we have only 1
+> scrub IO in flight at all times, but that isn't quite how scrub schedules
+> itself so it's hard to compare it that way, and in the end the user
+> experience and perceived impact should be lower...
+>
+> 5- Auto-adjust the above scrub rate based on the total amount of data,
+> scrub interval, and scrub hours so that we are scrubbing at the slowest
+> rate possible that meets the schedule.  We'd have to be slightly clever to
+> have the right feedback in place here...
 
+Right. Fundamentally what we're trying to do here is schedule N IOs
+against a cluster within time period T, ideally without impacting any
+of the client IOs issued against the cluster. Depending on how many
+client IOs there are, and when they come in, that might be easy or
+might be imposslble (because they're using up all the IO capacity in
+the cluster themselves).
 
------ Original Message -----
-> From: "Sage Weil" <sage@newdream.net>
-> To: "Yehuda Sadeh-Weinraub" <yehuda@redhat.com>
-> Cc: "Ceph Development" <ceph-devel@vger.kernel.org>
-> Sent: Monday, February 9, 2015 3:42:40 AM
-> Subject: Re: Bucket lifecycle (object expiration)
-> 
-> On Fri, 6 Feb 2015, Yehuda Sadeh-Weinraub wrote:
-> > I have been recently looking at implementing object expiration in rgw.
-> > First, a brief description of the feature:
-> > 
-> > S3 provides mechanisms to expire objects, and/or to transition them into
-> > different storage class. The feature works at the bucket level. Rules can
-> > be set as to which objects will expire and/or transitioned , and when.
-> > Objects are specified by using prefixes, the configuration is not
-> > per-object. Time is set in days (since object creation), and events are
-> > always rounded to the start of the next day.
-> > The rules can also work in conjuction with object versioning. When a
-> > versioned object (a current object) expires, a delete marker is created.
-> > Non-current versioned objects can be set to be removed after a specific
-> > amount of time since the point where they became non-current.
-> > As mentioned before, objects can be configured to transition to a different
-> > storage class (e.g., Amazon Glacier). It is possible to configure an
-> > object to be transitioned after a specific period, and after another
-> > period to be completely removed.
-> > When reading object information, it will specify when it is scheduled for
-> > removal. It is not yet clear to me whether an object can be accessed after
-> > that time, or whether it appears as gone immediately (either when trying
-> > to access it, or when listing the bucket).
-> > Rules cannot intersect. Each object cannot be affected by more than one
-> > rule.
-> > 
-> > Swift provides a completely different object expiration system. In swift
-> > the expiration is set per object, and with an explicit time for it to be
-> > removed.
-> > 
-> > In accordance with previous work, I'll currently focus on an S3
-> > implementation. We do not yet support object transition to a different
-> > storage class, so either we implement that first, or out first lifecycle
-> > implementation will not include that.
-> 
-> While the tier transition seems like the most interesting part to me, it
-> shares some overlap with the current cache tiering ("move older objects to
-> an EC backend").  it also quickly snowballs (migrate object to a different
-> rados pool, from the same set you can pick when creating the bucket?
-> migrate to different zone/region?  migrate to an external service like
-> glacier?)
-> 
-> Expiration sounds like a good first step...
+So scheduling options can help by directing the scrubbing to occur at
+times when we don't expect client IO (at night or whatever), but in
+the general case I don't think we can actually solve it. What we can
+do is:
+1) Try and figure out how much IO is required to do scrubbing, and
+alert users if their configuration won't succeed,
+2) Prioritize scrubbing traffic against client IO more effectively
+than we do right now.
 
-I agree. Thinking about migration, I don't think we're that far off. We'll add the ability to define new storage classes that will map to specified rados pools (or override existing placement targets -- storage policies?). The manifest will need to reflect where the object's data is located. We'll be able to copy the object into different storage classes, and it'll require a new service thread to do the migration. We might need to update the bucket index about the new object location.
+I think (2) been on Sam's list of things to do for a while now, by
+making scrub ops into normal operations that go through a shared work
+queue with priority attached: http://tracker.ceph.com/issues/8635
+There's not a lot of detail there unfortunately, but if scrubbing was
+a regular operation it would solve many of the conflicts:
+* low priority would mean that instead of being 1 IO at a time, it
+would get time roughly proportional to its priority
+* scheduling would make it less likely to hit conflicts, and mean that
+in future we could even get clever about avoiding or backing off scrub
+on something in use by clients
+* it more naturally spreads out the scrub workload and makes it
+quickly apparent if the requested scrub rate is unsustainable (just
+track the rate of scrub completions against what we'd need it to be
+for success)
 
-> 
-> > 1. Lifecycle rules will be configured on the bucket instance info
-> > 
-> > We hold the bucket instance info whenever we read an object, and it is
-> > cached. Since rules are configured to affect specific object prefixes, it
-> > will be quick and easy to determine whether an object is affected by any
-> > lifecycle rule.
-> > 
-> > 2. New bucket index objclass operation to list objects that need to be
-> > expired / transitioned
-> > 
-> > The operation will get the existing rules as input, and will return the
-> > list of objects that need to be handled. The request will be paged. Note
-> > that number of rules is constrained, so we only need to limit the number
-> > of returned entries.
-> 
-> Will this be an O(n) scan over the index keys, or would we add some
-> time-based keys or something to make it faster?
-
-It will be a scan over index keys that match the prefixes, for each rule. Not sure if time based keys can help in any way as we'd need to intersect time and prefixes in order to make it worthwhile, but the prefixes are created willy nilly.
-
-> 
-> sage
-> 
->  
-> > 3. Maintain a (sharded) list of bucket instances that have had lifecycle
-> > set on them
-> > 
-> > Whenever creating a new lifecycle rule on a bucket, update that list. It
-> > will be kept as omap on objects in the log pool
-> > 
-> > 4. A new thread that will run daily to handle object expiration /
-> > transition
-> > 
-> > The (potentially more than one) thread will go over the lifecycle objects
-> > in the log pool, try to set a lease on one, if successful then it'll start
-> > processing it:
-> >  - get list of buckets
-> >  - for each bucket:
-> >   - read rules
-> >   - get list of objects affected by rules
-> >   - for each object:
-> >     - expire / transition
-> >     - renew lease if needed
-> >  - unlock log object
-> > 
-> > Note that this is racy. If a rule is removed after we read the rules, we're
-> > still going to apply it. Reading through the Amazon api, they have similar
-> > issues as far as I can tell. We can reduce the race window by verifying
-> > that the rule is still in effect before removing each object. This
-> > information should be cached, so there's not much overhead.
-> > 
-> > 5. when reading object, check whether its bucket has a rule that affects
-> > it. If so reflect that in the response headers.
-> > 
-> > 6. extend RESTful api to support rules creation, and removal, as well as
-> > reading the list of rules per bucket.
-> > 
-> > 7. (optional) don't allow access to objects that have been expired.
-> > 
-> > 8. (optional) don't list objects that have been expired.
-> > 
-> > Not sure we need or want (7) and (8).
-> > 
-> > 
-> > Yehuda
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> > 
-> 
+I think that's probably a useful first step, and I'm pretty sure the
+general case doesn't have a closed-form solution so I'm leery of
+trying to build up a big system before it's in place.
+-Greg
