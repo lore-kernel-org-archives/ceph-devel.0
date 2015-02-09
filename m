@@ -1,114 +1,90 @@
-From: GuangYang <yguang11@outlook.com>
-Subject: RE: scrub scheduling
-Date: Mon, 9 Feb 2015 10:56:18 +0000
-Message-ID: <BLU175-W282160A4C7C0D96FC154DDF270@phx.gbl>
-References: <alpine.DEB.2.00.1502081318090.5713@cobra.newdream.net>
- <BLU175-W7A98B2231FED626F80689DF270@phx.gbl>,<alpine.DEB.2.00.1502090222120.5710@cobra.newdream.net>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Bucket lifecycle (object expiration)
+Date: Mon, 9 Feb 2015 03:42:40 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1502090335140.5710@cobra.newdream.net>
+References: <1033454365.478048.1423259167886.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from blu004-omc3s16.hotmail.com ([65.55.116.91]:56747 "EHLO
-	BLU004-OMC3S16.hotmail.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1760016AbbBIK4T (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Feb 2015 05:56:19 -0500
-In-Reply-To: <alpine.DEB.2.00.1502090222120.5710@cobra.newdream.net>
+Received: from cobra.newdream.net ([66.33.216.30]:47022 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759227AbbBILml (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Feb 2015 06:42:41 -0500
+In-Reply-To: <1033454365.478048.1423259167886.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Weil Sage <sweil@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "simon.leinen@gmail.com" <simon.leinen@gmail.com>
+To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-VGhhbmtzIFNhZ2UhCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KPiBE
-YXRlOiBNb24sIDkgRmViIDIwMTUgMDI6MjQ6MzMgLTA4MDAKPiBGcm9tOiBzd2VpbEByZWRoYXQu
-Y29tCj4gVG86IHlndWFuZzExQG91dGxvb2suY29tCj4gQ0M6IGNlcGgtZGV2ZWxAdmdlci5rZXJu
-ZWwub3JnOyBzaW1vbi5sZWluZW5AZ21haWwuY29tCj4gU3ViamVjdDogUkU6IHNjcnViIHNjaGVk
-dWxpbmcKPgo+IE9uIE1vbiwgOSBGZWIgMjAxNSwgR3VhbmdZYW5nIHdyb3RlOgo+PiBIaSBTYWdl
-LAo+PiBBbm90aGVyIHBvdGVudGlhbCBwcm9ibGVtIHdpdGggc2NydWIgc2NoZWR1bGluZywgYXMg
-b2JzZXJ2ZWQgaW4gb3VyCj4+IGRlcGxveW1lbnQgKDJQQiBjbHVzdGVyLCA3MCUgZnVsbCksIHdh
-cyB0aGF0IHNvbWUgUEdzIGhhZG4ndCBiZWVuCj4+IHNjcnViYmVkIGZvciAxLjUgbW9udGhzLCBl
-dmVuIHdlIGhhdmUgdGhlIGNvbmZpZ3VyYXRpb24gdG8gZG8gZGVlcAo+PiBzY3J1YmJpbmcgd2Vl
-a2x5Lgo+Pgo+PiBXaXRoIG91ciBkZXBsb3ltZW50IGFuZCBwZXJjZW50YWdlIG9mIGZ1bGwgb2Yg
-dGhlIGNsdXN0ZXIsIGFzIHdlbGwgYXMKPj4gdGhlIGNvbnNlcnZhdGl2ZSBzZXR0aW5nIGZvciBz
-Y3J1YmJpbmcgKG9zZF9tYXhfc2NydWJzID0gMSksIG9uZSByb3VuZAo+PiBvZiBzY3J1YmJpbmcg
-d291bGQgbm90IGZpbmlzaCBpbiAxIG9uZSB3ZWVrLCBzbyB0aGF0IHdlIHByb3Blcmx5IHNob3Vs
-ZAo+PiBzY2hlZHVsZSB0aGF0IG1vbnRobHkgKHdpdGggd2Vla2x5IHNoYWxsb3cgc2NydWJiaW5n
-KS4KPgo+IFRoaXMgaXMgc2ltcGx5IGEgZnVuY3Rpb24gb2YgdGhlIGFtb3VudCBvZiBkYXRhIGFu
-ZCBzcGVlZCBvZiB0aGUgYmFja2VuZCwKPiByaWdodD8gTm90aGluZyB3ZSBjYW4gZml4IGluIENl
-cGg/Clt5Z3VhbmddIFJpZ2h0LCBqdXN0IHdhbnRlZCB0byBwdXQgbW9yZSBjb250ZXh0IHRoZXJl
-LiBTb3JyeSBhYm91dCB0aGUgY29uZnVzaW9uLgo+Cj4+IEFub3RoZXIgcHJvYmxlbSwgaXMgdGhh
-dCBjdXJyZW50bHkgdGhlIHNjaGVkdWxpbmcgb2Ygc2NydWIgaXMgb3B0aW1pemVkCj4+IGxvY2Fs
-bHkgYXQgZWFjaCBPU0QsIHRoYXQgaXMsIGZvciBlYWNoIFBHIHRoaXMgT1NEIGFjdHMgYXMgdGhl
-IHByaW1hcnksCj4+IGl0IHNlbGVjdHMgdGhlIG9uZSB3aGljaCBoYXNuJ3QgYmVlbiBzY2hlZHVs
-ZWQgdG8gc2NydWJiaW5nIGxvbmdlc3QsIHB1dAo+PiBpdCBhcyB0aGUgY2FuZGlkYXRlIGFuZCBy
-ZXF1ZXN0IHNjcnViIHJlc2VydmVyIGZyb20gYWxsIHJlcGxpY2FzLiBTaW5jZQo+PiBlYWNoIE9T
-RCBjYW4gb25seSBoYXZlIDEgYWN0aXZlIHNjcnViYmluZywgdGhhdCBhY3RpdmUgc2xvdCBjb3Vs
-ZAo+PiBwb3RlbnRpYWxseSBhbHdheXMgb2NjdXBpZWQgYnkgYSByZXBsaWNhLCBhcyBhIHJlc3Vs
-dCwgdGhlIFBHIHdob3NlCj4+IHByaW1hcnkgaXMgdGhpcyBPU0QsIGZhaWwgdG8gc2NoZWR1bGUg
-YW5kIGxlZnQgYmVoaW5kLgo+Pgo+PiBJcyB0aGlzIGlzc3VlIHdvcnRoIGFuIGVuaGFuY2VtZW50
-Pwo+Cj4gR29vZCBwb2ludC4gWWVhaCwgSSB0aGluayBpdCdzIGRlZmluaXRlbHkgd29ydGggZml4
-aW5nIQpbeWd1YW5nXSBJIGp1c3Qgb3BlbmVkIGEgdGlja2V0IHRvIHRyYWNrIC0gaHR0cDovL3Ry
-YWNrZXIuY2VwaC5jb20vaXNzdWVzLzEwNzk2Cj4KPiBzYWdlCj4KPj4KPj4gVGhhbmtzLAo+PiBH
-dWFuZwo+Pgo+Pgo+PiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tCj4+
-PiBEYXRlOiBTdW4sIDggRmViIDIwMTUgMTM6Mzg6MjggLTA4MDAKPj4+IEZyb206IHN3ZWlsQHJl
-ZGhhdC5jb20KPj4+IFRvOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZwo+Pj4gQ0M6IHNpbW9u
-LmxlaW5lbkBnbWFpbC5jb20KPj4+IFN1YmplY3Q6IHNjcnViIHNjaGVkdWxpbmcKPj4+Cj4+PiBT
-aW1vbiBMZWluZW4gYXQgU3dpdGNoIGRpZCBhIGdyZWFldCBwb3N0IHJlY2VudGx5IGFib3V0IHRo
-ZSBpbXBhY3Qgb2YKPj4+IHNjcnViIG9uIHRoZWlyIGNsdXN0ZXIocyk6Cj4+Pgo+Pj4gaHR0cDov
-L2Jsb2cuc2ltb24ubGVpbmVuLmNoLzIwMTUvMDIvY2VwaC1kZWVwLXNjcnViYmluZy1pbXBhY3Qu
-aHRtbAo+Pj4KPj4+IEJhc2ljYWxseSB0aGUgMiB3ZWVrIGRlZXAgc2NydWIgaW50ZXJ2YWwga2lj
-a3MgaW4gb24gZXhhY3RseSBhIDIgd2Vlawo+Pj4gY3ljbGUgYW5kIHRoZSBjbHVzdGVyIGdvZXMg
-Y3JhenkgZm9yIGEgZmV3IGhvdXJzIGFuZCB0aGVuIGRvZXMgbm90aGluZwo+Pj4gKGJ1dCBjbGll
-bnQgSU8pIGZvciB0aGUgbmV4dCB0d28gd2Vla3MuCj4+Pgo+Pj4gVGhlIG9wdGlvbnMgZ292ZXJu
-aW5nIHRoaXMgYXJlOgo+Pj4KPj4+IE9QVElPTihvc2Rfc2NydWJfbWluX2ludGVydmFsLCBPUFRf
-RkxPQVQsIDYwKjYwKjI0KSAvLyBpZiBsb2FkIGlzIGxvdwo+Pj4gT1BUSU9OKG9zZF9zY3J1Yl9t
-YXhfaW50ZXJ2YWwsIE9QVF9GTE9BVCwgNyo2MCo2MCoyNCkgLy8gcmVnYXJkbGVzcyBvZiBsb2Fk
-Cj4+PiBPUFRJT04ob3NkX2RlZXBfc2NydWJfaW50ZXJ2YWwsIE9QVF9GTE9BVCwgNjAqNjAqMjQq
-NykgLy8gb25jZSBhIHdlZWsKPj4+IE9QVElPTihvc2Rfc2NydWJfbG9hZF90aHJlc2hvbGQsIE9Q
-VF9GTE9BVCwgMC41KQo+Pj4KPj4+IFRoYXQgaXMsIGlmIHRoZSBsb2FkIGlzIDwgLjUgKHByb2Jh
-Ymx5IGFsbW9zdCBuZXZlciBvbiBhIHJlYWwgY2x1c3RlcikgaXQKPj4+IHdpbGwgc2NydWIgZXZl
-cnkgZGF5LCBvdGhlcndpc2UgKHJlZ2FyZGxlc3Mgb2YgbG9hZCkgaXQgd2lsbCBzY3J1YiBlYWNo
-IFBHCj4+PiBhdCBsZWFzdCBvbmNlIGEgd2Vlay4KPj4+Cj4+PiBTZXZlcmFsIHRoaW5ncyB3ZSBj
-YW4gZG8gaGVyZToKPj4+Cj4+PiAxLSBNYXliZSB0aGUgc2hhbGxvdyBzY3J1YiBpbnRlcnZhbCBz
-aG91bGQgYmUgbGVzcyB0aGFuIHRoZSBkZWVwIHNjcnViCj4+PiBpbnRlcnZhbD8KPj4+Cj4+PiAy
-LSBUaGVyZSBpcyBhIG5ldyBmZWF0dXJlIGZvciBoYW1tZXIgdGhhdCBsaW1pdHMgc2NydWIgdG8g
-Y2VydGFpbiB0aW1lcyBvZgo+Pj4gZGF5LCBjb250cmlidXRlZCBieSBYaW56ZSBDaGk6Cj4+Pgo+
-Pj4gT1BUSU9OKG9zZF9zY3J1Yl9iZWdpbl9ob3VyLCBPUFRfSU5ULCAwKQo+Pj4gT1BUSU9OKG9z
-ZF9zY3J1Yl9lbmRfaG91ciwgT1BUX0lOVCwgMjQpCj4+Pgo+Pj4gVGhhdCBpcywgYnkgZGVmYXVs
-dCwgc2NydWJzIGNhbiBoYXBwZW4gYXQgYW55IHRpbWUuIFlvdSBjYW4gdXNlIHRoaXMgdG8KPj4+
-IGxpbWl0IHRvIGNlcnRhaW4gaG91ciBzb2YgdGhlIG5pZ2h0LCBvciB3aGF0ZXZlciBpcyBhcHBy
-b3ByaWF0ZSBmb3IgeW91cgo+Pj4gY2x1c3Rlci4gVGhhdCBvbmx5IHNvcnQgb2YgaGVscHMsIHRo
-b3VnaDsgU2ltb24ncyBzY3J1YiBmcmVuenkgd2lsbCBzdGlsbAo+Pj4gaGFwcGVuIG9uZSBkYXkg
-YSB3ZWVrLCBhbGwgYXQgb25jZSAob3IgbWF5YmUgc3ByZWFkIG92ZXIgMiBuaWdodHMpLgo+Pj4K
-Pj4+IDMtIFdlIGNhbiBzcHJlYWQgdGhlbSBvdXQgZHVyaW5nIHRoZSBhbGxvd2VkIHdpbmRvdy4g
-QnV0IGhvdyB0byBkbyB0aGF0Pwo+Pj4gV2UgY291bGQgbWFrZSB0aGUgc2NydWIgaW50ZXJ2YWwg
-cmFuZG9tbHkgKy8tIGEgdmFsdWUgb2YgdXAgdG8gNTAlIG9mIHRoZQo+Pj4gdG90YWwgaW50ZXJ2
-YWwuIE9yIHdlIGNvdWxkIHNvbWVob3cgbG9vayBhdCB0aGUgY3VycmVudCByYXRlIG9mIHNjcnVi
-YmluZwo+Pj4gKGF2ZXJhZ2UgdGltZSB0byBjb21wbGV0ZWlvbiBmb3IgdGhlIGN1cnJlbnQgcG9v
-bCwgbWF5YmUpLi4gYW55IGxvb2sgYXQKPj4+IHRoZSB0b3RhbCBudW1iZXIgb2YgaXRlbXMgaW4g
-dGhlIHNjcnViIHF1ZXVlPwo+Pj4KPj4+IDQtIFJpYyBwb2ludGVkIG91dCB0byBtZSB0aGF0IGV2
-ZW4gaWYgd2Ugc3ByZWFkIHRoZXNlIG91dCwgc2NydWJiaW5nIGF0Cj4+PiBmdWxsIHNwZWVkIGhh
-cyBhbiBpbXBhY3QuIEV2ZW4gaWYgd2UgZG8gYWxsIHRoZSBwcmlvcml0aXphdGlvbiBtYWdpYyB3
-ZQo+Pj4gY2FuIHRoZXJlIHdpbGwgc3RpbGwgYmUgYSBidWNoIG9mIGxhcmdlIElPcyBpbiB0aGUg
-cXVldWUuIFdoYXQgaWYgd2UgaGF2ZQo+Pj4gYSBoYXJkIHRocm90dGxlIG9uIHRoZSBzY3J1YiBy
-YXRlLCBvYmplY3RzIHBlciBzZWNvbmQgYW5kL29yIGJ5dGVzIHBlcgo+Pj4gc2Vjb25kPyBJbiB0
-aGUgZW5kIHRoZSBzYW1lIG51bWJlciBvZiBJT3MgdHJhdmVyc2UgdGhlIHF1ZXVlIGFuZAo+Pj4g
-cG90ZW50aWFsbHkgaW50ZXJmZXJlIHdpdGggY2xpZW50IElPLCBidXQgdGhleSB3b3VsZCBiZSBz
-cHJlYWQgb3V0IG92ZXIgYQo+Pj4gbG9uZ2VyIHBlcmlvZCBvZiB0aW1lIGFuZCBiZSBsZXNzIG5v
-dGljZWFibGUgKGkuZS4sIHNsb3cgZG93biBjbGllbnQgSU9zCj4+PiBmcm9tIGRpZmZlcmVudCB3
-b3JrbG9hZHMgYW5kIG5vdCBhbGwgdGhlIHNhbWUgd29ya2xvYWQpLiBJJ20gbm90IHRvdGFsbHkK
-Pj4+IGNvbnZpbmNlZCB0aGlzIGlzIGFuIGltcHJvdmVtZW50IG92ZXIgYSBzdHJhdGVneSB3aGVy
-ZSB3ZSBoYXZlIG9ubHkgMQo+Pj4gc2NydWIgSU8gaW4gZmxpZ2h0IGF0IGFsbCB0aW1lcywgYnV0
-IHRoYXQgaXNuJ3QgcXVpdGUgaG93IHNjcnViIHNjaGVkdWxlcwo+Pj4gaXRzZWxmIHNvIGl0J3Mg
-aGFyZCB0byBjb21wYXJlIGl0IHRoYXQgd2F5LCBhbmQgaW4gdGhlIGVuZCB0aGUgdXNlcgo+Pj4g
-ZXhwZXJpZW5jZSBhbmQgcGVyY2VpdmVkIGltcGFjdCBzaG91bGQgYmUgbG93ZXIuLi4KPj4+Cj4+
-PiA1LSBBdXRvLWFkanVzdCB0aGUgYWJvdmUgc2NydWIgcmF0ZSBiYXNlZCBvbiB0aGUgdG90YWwg
-YW1vdW50IG9mIGRhdGEsCj4+PiBzY3J1YiBpbnRlcnZhbCwgYW5kIHNjcnViIGhvdXJzIHNvIHRo
-YXQgd2UgYXJlIHNjcnViYmluZyBhdCB0aGUgc2xvd2VzdAo+Pj4gcmF0ZSBwb3NzaWJsZSB0aGF0
-IG1lZXRzIHRoZSBzY2hlZHVsZS4gV2UnZCBoYXZlIHRvIGJlIHNsaWdodGx5IGNsZXZlciB0bwo+
-Pj4gaGF2ZSB0aGUgcmlnaHQgZmVlZGJhY2sgaW4gcGxhY2UgaGVyZS4uLgo+Pj4KPj4+IFRob3Vn
-aHRzPwo+Pj4gc2FnZQo+Pj4gLS0KPj4+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBz
-ZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbgo+Pj4gdGhlIGJvZHkgb2Yg
-YSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcKPj4+IE1vcmUgbWFqb3Jkb21v
-IGluZm8gYXQgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sCj4+IE4/
-Pz8/eT8/Pz9iPz8/Pz92Pz8/Pz97Lm4/Pz8/Pz96Pz9heT8/Pz8/Pz8/agc/Pz9mPz8/Pz8/Pz8/
-Pz8/Pz8/Pzordj8/Pz8/Pz8/Bz8/elorPz8/Pz8/Ij8hPwogCQkgCSAgIAkJICA=
+On Fri, 6 Feb 2015, Yehuda Sadeh-Weinraub wrote:
+> I have been recently looking at implementing object expiration in rgw. First, a brief description of the feature:
+> 
+> S3 provides mechanisms to expire objects, and/or to transition them into different storage class. The feature works at the bucket level. Rules can be set as to which objects will expire and/or transitioned , and when. Objects are specified by using prefixes, the configuration is not per-object. Time is set in days (since object creation), and events are always rounded to the start of the next day.
+> The rules can also work in conjuction with object versioning. When a versioned object (a current object) expires, a delete marker is created. Non-current versioned objects can be set to be removed after a specific amount of time since the point where they became non-current.
+> As mentioned before, objects can be configured to transition to a different storage class (e.g., Amazon Glacier). It is possible to configure an object to be transitioned after a specific period, and after another period to be completely removed.
+> When reading object information, it will specify when it is scheduled for removal. It is not yet clear to me whether an object can be accessed after that time, or whether it appears as gone immediately (either when trying to access it, or when listing the bucket).
+> Rules cannot intersect. Each object cannot be affected by more than one rule.
+> 
+> Swift provides a completely different object expiration system. In swift the expiration is set per object, and with an explicit time for it to be removed.
+> 
+> In accordance with previous work, I'll currently focus on an S3 implementation. We do not yet support object transition to a different storage class, so either we implement that first, or out first lifecycle implementation will not include that.
+
+While the tier transition seems like the most interesting part to me, it 
+shares some overlap with the current cache tiering ("move older objects to 
+an EC backend").  it also quickly snowballs (migrate object to a different 
+rados pool, from the same set you can pick when creating the bucket?  
+migrate to different zone/region?  migrate to an external service like 
+glacier?)
+
+Expiration sounds like a good first step...
+
+> 1. Lifecycle rules will be configured on the bucket instance info
+> 
+> We hold the bucket instance info whenever we read an object, and it is cached. Since rules are configured to affect specific object prefixes, it will be quick and easy to determine whether an object is affected by any lifecycle rule.
+> 
+> 2. New bucket index objclass operation to list objects that need to be expired / transitioned
+> 
+> The operation will get the existing rules as input, and will return the list of objects that need to be handled. The request will be paged. Note that number of rules is constrained, so we only need to limit the number of returned entries.
+
+Will this be an O(n) scan over the index keys, or would we add some 
+time-based keys or something to make it faster?
+
+sage
+
+ 
+> 3. Maintain a (sharded) list of bucket instances that have had lifecycle set on them
+> 
+> Whenever creating a new lifecycle rule on a bucket, update that list. It will be kept as omap on objects in the log pool
+> 
+> 4. A new thread that will run daily to handle object expiration / transition
+> 
+> The (potentially more than one) thread will go over the lifecycle objects in the log pool, try to set a lease on one, if successful then it'll start processing it:
+>  - get list of buckets
+>  - for each bucket:
+>   - read rules
+>   - get list of objects affected by rules
+>   - for each object:
+>     - expire / transition
+>     - renew lease if needed
+>  - unlock log object
+> 
+> Note that this is racy. If a rule is removed after we read the rules, we're still going to apply it. Reading through the Amazon api, they have similar issues as far as I can tell. We can reduce the race window by verifying that the rule is still in effect before removing each object. This information should be cached, so there's not much overhead.
+> 
+> 5. when reading object, check whether its bucket has a rule that affects it. If so reflect that in the response headers.
+> 
+> 6. extend RESTful api to support rules creation, and removal, as well as reading the list of rules per bucket.
+> 
+> 7. (optional) don't allow access to objects that have been expired.
+> 
+> 8. (optional) don't list objects that have been expired.
+> 
+> Not sure we need or want (7) and (8).
+> 
+> 
+> Yehuda
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
