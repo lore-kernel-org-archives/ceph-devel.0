@@ -1,53 +1,85 @@
-From: Noah Watkins <nwatkins@redhat.com>
-Subject: Re: Ceph bindings for go & docker
-Date: Mon, 9 Feb 2015 13:23:45 -0500 (EST)
-Message-ID: <1220716523.14167671.1423506225216.JavaMail.zimbra@redhat.com>
-References: <54D8EB16.1090801@dachary.org>
+From: Chris Pacejo <cpacejo@clearskydata.com>
+Subject: Re: [ceph-users] keyvaluestore backend metadata overhead
+Date: Mon, 9 Feb 2015 13:29:42 -0500
+Message-ID: <CAC8iE5gK_bO9CMJTbnRzz3zzgOrDJ8vZOUX9hjjyQAQQQzR-hw@mail.gmail.com>
+References: <CAC8iE5iHTEfSQL978paWpu9hSfUbE65OVT_dKi2P=yvWSQ5JhA@mail.gmail.com>
+	<alpine.DEB.2.00.1501291447290.3895@cobra.newdream.net>
+	<CACJqLya-SNwudLTOqu2RPgr3_MZKzFWi9gXYH_xCg1WjxAx59w@mail.gmail.com>
+	<CAC8iE5jrYquoQ+n+uwiiZ5uevXfipGsab9a_CgjtZoW9h1L0SQ@mail.gmail.com>
+	<CACJqLyZnx28QEDU-Jy3KjzS6sumMG_ivqJQ9Ye_cg++Cj8WWQg@mail.gmail.com>
+	<CAC8iE5gmiFFGikg0JatUs-7Jfv3sgFPd3ESx5+bOdkYSP6ByKg@mail.gmail.com>
+	<CAC8iE5ggZme9BKz7noCynEpjd2yhCnoK5yd79pM2g7-237ZxkA@mail.gmail.com>
+	<CACJqLyZSDrCZKvC2REFzXvT+owV38de4ys+JmcENEL=zPtQGBg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx3-phx2.redhat.com ([209.132.183.24]:42050 "EHLO
-	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933560AbbBISYv convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Feb 2015 13:24:51 -0500
-In-Reply-To: <54D8EB16.1090801@dachary.org>
+Received: from mail-ig0-f177.google.com ([209.85.213.177]:40667 "EHLO
+	mail-ig0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933415AbbBIS3m (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Feb 2015 13:29:42 -0500
+Received: by mail-ig0-f177.google.com with SMTP id z20so18174318igj.4
+        for <ceph-devel@vger.kernel.org>; Mon, 09 Feb 2015 10:29:42 -0800 (PST)
+In-Reply-To: <CACJqLyZSDrCZKvC2REFzXvT+owV38de4ys+JmcENEL=zPtQGBg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Vincent Batts <vbatts@redhat.com>, Johan Euphrosine <proppy@google.com>
+To: Haomai Wang <haomaiwang@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Loic,
+On Tue, Feb 3, 2015 at 9:31 PM, Haomai Wang <haomaiwang@gmail.com> wrote:
+> Maybe more detail number can help us a bit.
 
-This sounds great. The librados bindings have good test converage, but =
-I merged a PR for RBD support a couple weeks ago and haven't had time t=
-o get it cleaned up and tests written. Do you need support for the AIO =
-interface in librbd?
+Here's what we're testing with and what we observe:
 
--Noah
+Hardware:
+ 2x6-core hyperthreaded Xeon E5-2620 v2 2.10GHz CPU
+ 8x8 GiB DDR3 RAM
+ 4x4 TB 7200 RPM 8 ms 183 MB/s SAS rotary disks
 
------ Original Message -----
-=46rom: "Loic Dachary" <loic@dachary.org>
-To: "Noah Watkins" <noah.watkins@inktank.com>
-Cc: "Ceph Development" <ceph-devel@vger.kernel.org>, "Vincent Batts" <v=
-batts@redhat.com>, "Johan Euphrosine" <proppy@google.com>
-Sent: Monday, February 9, 2015 9:15:02 AM
-Subject: Ceph bindings for go & docker
+Software:
+ CentOS 7
+ CEPH 0.91
+ 4 OSDs
+ osd pool default size = 1 (just for testing!)
+ keyvaluestore op threads = 16
+ keyvaluestore backend = mysql (our own backend)
+ one MySQL process per OSD, each writing to a separate disk
 
-Hi,
+Test setup:
+ rados bench on a fresh install
+ 256 concurrent writes
+ 360 seconds
+ 2700 byte objects, and 1 MiB objects
+ measure throughput with rados bench
+ measure CPU usage by observing top
+ measure max concurrent transaction submits by instrumenting the
+KeyValueDB interface
 
-I discovered https://github.com/noahdesu/go-ceph today :-) It would be =
-useful in the context of a Ceph volume driver for docker ( see https://=
-github.com/docker/docker/issues/10661 & https://github.com/docker/docke=
-r/pull/8484 ).=20
+With this setup, we observe that, with 2700 byte objects:
 
-Are you a docker user by any chance ?
+ 7.4 MiB/s (~2900 ops/s) throughput,
+ 170%/170%/60%/60% OSD CPU usage,
+ 200%/200%/65%/65% MySQL CPU usage, and
+ 3/3/1/1 maximum concurrent transaction submits;
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+and with 1 MiB objects:
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+ 50.7 MiB/s (~51 ops/s) throughput,
+ 14%/14%/4%/4% OSD CPU usage,
+ 50%/50%/15%/15% MySQL CPU usage, and
+ 3/3/1/1 maximum concurrent transaction submits.
+
+We know that our transaction concurrency measurement is not buggy, as
+it will consistently report up to `keyvaluestore op threads`
+concurrent submits both on OSD startup on this same hardware, and
+during benchmarking in a resource-constrained VM.  We are pretty sure
+MySQL is not the bottleneck, since we've been able to throw much more
+at it (concurrently); at least 10 kops/s per instance.  (Sequentially
+it is not so good; hence our fixation on the low transaction
+concurrency!)
+
+Let me know if there are any other figures which would be helpful in
+diagnosing why the OSDs are not issuing as many concurrent
+transactions as we'd like, or why they are using so much CPU.  Thanks
+for your help.
+
+- Chris
