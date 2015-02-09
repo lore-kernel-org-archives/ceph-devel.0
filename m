@@ -1,97 +1,380 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: rgw and the next dumpling release
-Date: Mon, 09 Feb 2015 14:10:25 +0100
-Message-ID: <54D8B1C1.6060106@dachary.org>
-References: <54D3F0E5.8060906@dachary.org> <974116011.8222626.1423177154743.JavaMail.zimbra@redhat.com> <54D3F7C5.6030701@dachary.org>
+From: Gregory Farnum <greg@gregs42.com>
+Subject: Re: Bounding OSD memory requirements during peering/recovery
+Date: Mon, 9 Feb 2015 07:31:22 -0800
+Message-ID: <CAC6JEv8NYw2qk9O7pcSmrVwd2p=7mfLDrA+1tBmFxf2-_f-tZw@mail.gmail.com>
+References: <54D78939.4000708@cam.ac.uk>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="HLmoX4530bsIkNqfBrOl48rOlRck8qQcc"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:41082 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1755759AbbBINK2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Feb 2015 08:10:28 -0500
-In-Reply-To: <54D3F7C5.6030701@dachary.org>
+Received: from mail-ie0-f172.google.com ([209.85.223.172]:40832 "EHLO
+	mail-ie0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932723AbbBIPbY convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Feb 2015 10:31:24 -0500
+Received: by iecrp18 with SMTP id rp18so10800908iec.7
+        for <ceph-devel@vger.kernel.org>; Mon, 09 Feb 2015 07:31:23 -0800 (PST)
+Received: from mail-ie0-f182.google.com (mail-ie0-f182.google.com. [209.85.223.182])
+        by mx.google.com with ESMTPSA id d9sm6517342ioe.43.2015.02.09.07.31.22
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Mon, 09 Feb 2015 07:31:22 -0800 (PST)
+Received: by iecrd18 with SMTP id rd18so5150612iec.8
+        for <ceph-devel@vger.kernel.org>; Mon, 09 Feb 2015 07:31:22 -0800 (PST)
+In-Reply-To: <54D78939.4000708@cam.ac.uk>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: David McBride <dwm37@cam.ac.uk>
+Cc: Ceph-devel <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---HLmoX4530bsIkNqfBrOl48rOlRck8qQcc
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Right.
 
-Hi Yehuda,
+So, memory usage of an OSD is usually linear in the number of PGs it
+hosts. However, that memory can also grow based on at least one other
+thing: the number of OSD Maps required to go through peering. It
+*looks* to me like this is what you're running in to, not growth on
+the number of state machines. In particular, those past_intervals you
+mentioned. ;)
 
-Your backport of https://github.com/ceph/ceph/commit/a9dd4af401328e8f9071=
-dee52470a0685ceb296b at https://github.com/ceph/ceph/pull/3645 was added =
-to the dumpling-backports branch and the RGW suite run came back green.
+Anyway, I'm afraid I don't have any magic cure-all for you. This kind
+of long-term dirtied Ceph cluster is something I've only seen once or
+twice and I've never led a recovery on them. But the effort usually
+involves, as you've done, limiting the number of OSDs per host that
+are doing recovery at once (which probably means starting one OSD at a
+time until stability, rather than one per host!), disabling recovery
+(as you've already done), ...and occasionally hacking up the map
+history. :/
 
-http://tracker.ceph.com/issues/10560#teuthology-runs-on-3944c77c404c4a058=
-86fe8276d5d0dd7e4f20410-6-february
+Good luck!
+-Greg
 
-I should add that because of environmental instability (IMHO) I ran the s=
-uite twice. That produced at least one successful run of each job. For th=
-e record the first run is:
-
-http://tracker.ceph.com/issues/10560#teuthology-runs-on-b5e871fe027db3b25=
-f9129ae3e5b2326a89467c5-6-february
-
-Do you think rgw is ready for the next dumpling point release ?
-
-Cheers
-
-
-On 06/02/2015 00:07, Loic Dachary wrote:
-> Thanks !
->=20
-> On 05/02/2015 23:59, Yehuda Sadeh-Weinraub wrote:
->>
->> ----- Original Message -----
->>> From: "Loic Dachary" <loic@dachary.org>
->>> To: "Yehuda Sadeh" <yehuda@redhat.com>
->>> Cc: "Ceph Development" <ceph-devel@vger.kernel.org>
->>> Sent: Thursday, February 5, 2015 2:38:29 PM
->>> Subject: rgw and the next dumpling release
->>>
->>> Hi Yehuda,
->>>
->>> The rados teuthology suite for the next dumpling release as found in
->>> https://github.com/ceph/ceph/commits/dumpling-backports came back gre=
-en
->>> http://pulpito.ceph.com/loic-2015-02-03_14:46:09-rgw-dumpling-backpor=
-ts---basic-multi/.
->>> Do you think it is ready for QE to start their own round of testing ?=
-
->>>
->>
->> We should also backport a9dd4af401328e8f9071dee52470a0685ceb296b to du=
-mpling. I think I saw a dumpling run failing due to the lack of this one,=
- and since we now run on environments that use apache 2.4. Looking at thi=
-s commit, it's not going to be applied trivially, so I'm preparing one fo=
-r dumpling now.
->>
->> Yehuda
->>
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---HLmoX4530bsIkNqfBrOl48rOlRck8qQcc
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlTYscEACgkQ8dLMyEl6F2244gCfbuQGAL6YPQXEC3pmuSC25i3+
-Te0An2zHUk9Bmjcx4yujWknA9BokvlU5
-=2G6E
------END PGP SIGNATURE-----
-
---HLmoX4530bsIkNqfBrOl48rOlRck8qQcc--
+On Sun, Feb 8, 2015 at 8:05 AM, David McBride <dwm37@cam.ac.uk> wrote:
+> Hello,
+>
+> I'm trying to understand the memory requirements for a Ceph node,
+> particularly when it is undergoing recovery.
+>
+> Comments, suggestions, pointers are all welcome.
+>
+> (This is my second attempt at sending this email; it appeared to get =
+eaten
+> the first time =E2=80=94 probably because it had a 1MB .heap file att=
+ached.)
+>
+>
+> Background:
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>
+> I've got a fairly tortured prototype Ceph cluster.  It was left
+> unattended for several months, as I'd been needed to work elsewhere =E2=
+=80=94
+> but now I'm returning to it, with an eye to continue to building
+> production services on it if I have sufficient confidence in its
+> capabilities.
+>
+> In the intervening time, several root filesystems on cluster nodes we=
+nt
+> full (because of poorly configured logging, as well as MONs being
+> co-located with OSDs for expediency) and several drives were also
+> unceremoniously pulled out for reuse elsewhere.
+>
+> A subsequent recovery is proving problematic: if all OSDs are started
+> concurrently, they are substantially exceeding the amount of RAM
+> available on the hosts during peering, and are being killed off by th=
+e
+> kernel OOM killer.
+>
+> (And then subsequently being restarted by Upstart, resulting in
+> thrashing for a while, up until something unknown goes awry and the
+> machine stops sending telemetry and no-longer responds to SSH.  That'=
+s a
+> separate problem.)
+>
+> Looking at tcmalloc-accounted heap statistics, I've seen individual O=
+SDs
+> using 9GB+ of RAM; looking at RSS sizes of individual machines, I've
+> seen process-images exceeding 16GB.  On 12-disk machines with 32GB of
+> RAM each, this is problematic.
+>
+> So, I've started looking at the data-structures and algorithms that
+> govern OSD recovery.  I've found the following references:
+>
+>  http://ceph.com/docs/master/dev/placement-group/
+>  http://ceph.com/docs/master/dev/peering/
+>  http://ceph.com/docs/master/rados/operations/monitoring-osd-pg/
+>  http://ceph.com/docs/master/dev/osd_internals/map_message_handling/
+>  http://dachary.org/?p=3D2061
+>
+> =E2=80=A6 and hope to develop an understanding of an upper bound on m=
+emory
+> utilization that an efficient implementation of the algorithms descri=
+bed
+> would require.
+>
+> I've also been trying to collect memory profiles for OSD processes as
+> they're operating, to compare theory with reality.
+>
+>
+> Memory profiling:
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>
+> For example, having found an OSD using ~6GB of memory, I turned on he=
+ap
+> profiling, and dumped its state using `ceph tell osd.N heap
+> start_profiler; ceph tell osd.N heap dump`:
+>
+>> ------------------------------------------------
+>> MALLOC:     6167528240 ( 5881.8 MiB) Bytes in use by application
+>> MALLOC: +     18309120 (   17.5 MiB) Bytes in page heap freelist
+>> MALLOC: +     39689152 (   37.9 MiB) Bytes in central cache freelist
+>> MALLOC: +      4750960 (    4.5 MiB) Bytes in transfer cache freelis=
+t
+>> MALLOC: +     25223840 (   24.1 MiB) Bytes in thread cache freelists
+>> MALLOC: +     27603096 (   26.3 MiB) Bytes in malloc metadata
+>> MALLOC:   ------------
+>> MALLOC: =3D   6283104408 ( 5992.0 MiB) Actual memory used (physical =
++ swap)
+>> MALLOC: +      2080768 (    2.0 MiB) Bytes released to OS (aka unmap=
+ped)
+>> MALLOC:   ------------
+>> MALLOC: =3D   6285185176 ( 5994.0 MiB) Virtual address space used
+>> MALLOC:
+>> MALLOC:         374907              Spans in use
+>> MALLOC:            335              Thread heaps in use
+>> MALLOC:           8192              Tcmalloc page size
+>> ------------------------------------------------
+>
+>
+> However, the heap dumps so generated only appear to show memory
+> allocations (made? touched?) since heap profiling was enabled:
+>
+>> google-pprof --text /usr/bin/ceph-osd osd.25.profile.0001.heap
+>> Using local file /usr/bin/ceph-osd.
+>> Using local file osd.25.profile.0001.heap.
+>> Total: 0.0 MB
+>>      0.0  46.7%  46.7%      0.0  59.0% SimpleMessenger::add_accept_p=
+ipe
+>> [...]
+>
+>
+> Note the "Total: 0.0MB", which differs wildly from the stats reported=
+ by
+> tcmalloc, and the RSS of the process reported by the kernel.
+>
+> So, for testing purposes, I selectively started up ~20% of the OSDs,
+> each invoked with the setting
+>
+>   CEPH_HEAP_PROFILER_INIT=3D1
+>
+> =E2=80=A6 defined in their environmentment to cause the heap profiler=
+ to be
+> started at OSD start-time.  This has a significant CPU and memory
+> overhead.
+>
+> Also set were the cluster flags:
+>
+>   noout,nobackfill,norecover,noscrub,nodeep-scrub
+>
+> =E2=80=A6 to avoid commingling memory requirements due to peering wit=
+h other
+> factors.
+>
+> I've produced a number of .heap files which show >=3D 1000MB of memor=
+y
+> allocated in an RB tree as a result of
+> PG::RecoveryState::RecoveryMachine::send_notify, PG::read_info and
+> MOSDPGNotify::decode_payload (or descendants).
+>
+> An example heapfile from a fairly typical OSD can currently be fetche=
+d from:
+>
+>   http://people.ds.cam.ac.uk/dwm37/tmp/osd.0.profile.0124.heap
+>
+> This was produced by the binaries from the Ceph 'trusty' repository; =
+`ceph
+> -v` returns:
+>
+>> ceph version 0.92 (00a3ac3b67d93860e7f0b6e07319f11b14d0fec0)
+>
+>
+> Running pprof in interactive mode and running `top30 --cum` on this h=
+eapfile
+> reports:
+>
+>> Total: 2172.3 MB
+>>   1705.9  78.5%  78.5%   1748.4  80.5% __gnu_cxx::new_allocator::con=
+struct
+>> (inline)
+>>      0.0   0.0%  78.5%   1600.7  73.7% std::_Rb_tree::_M_create_node
+>> (inline)
+>>      0.0   0.0%  78.5%   1367.9  63.0% start_thread
+>>      0.0   0.0%  78.5%   1367.6  63.0% ioperm
+>>      0.0   0.0%  78.5%    963.4  44.4% ThreadPool::worker
+>>      0.0   0.0%  78.5%    963.3  44.3% ThreadPool::WorkThread::entry
+>>      0.0   0.0%  78.5%    951.0  43.8% OSD::process_peering_events
+>>      0.0   0.0%  78.5%    950.9  43.8% OSD::PeeringWQ::_process
+>>      0.0   0.0%  78.5%    949.8  43.7% PG::RecoveryState::handle_eve=
+nt
+>> (inline)
+>>      0.0   0.0%  78.5%    949.8  43.7%
+>> boost::statechart::detail::send_function::operator (inline)
+>>      0.0   0.0%  78.5%    949.8  43.7%
+>> boost::statechart::simple_state::react_impl
+>>      0.0   0.0%  78.5%    949.8  43.7%
+>> boost::statechart::state_machine::process_event (inline)
+>>      0.0   0.0%  78.5%    949.8  43.7%
+>> boost::statechart::state_machine::send_event
+>>      0.0   0.0%  78.5%    949.8  43.7% local_react (inline)
+>>      0.0   0.0%  78.5%    949.8  43.7% local_react_impl (inline)
+>>      0.0   0.0%  78.5%    949.8  43.7% operator (inline)
+>>      0.0   0.0%  78.5%    949.8  43.7% react (inline)
+>>      0.0   0.0%  78.5%    948.5  43.7% std::vector::push_back (inlin=
+e)
+>>      0.0   0.0%  78.5%    948.3  43.7%
+>> PG::RecoveryState::RecoveryMachine::send_notify
+>>      0.0   0.0%  78.5%    947.1  43.6% std::vector::_M_insert_aux
+>>      0.0   0.0%  78.5%    947.0  43.6% _Rb_tree (inline)
+>>      0.0   0.0%  78.5%    947.0  43.6% map (inline)
+>>      0.0   0.0%  78.5%    947.0  43.6% std::_Rb_tree::_M_clone_node
+>> (inline)
+>>      0.0   0.0%  78.5%    947.0  43.6% std::_Rb_tree::_M_copy
+>>      0.0   0.0%  78.5%    809.8  37.3% construct (inline)
+>>      0.0   0.0%  78.5%    808.4  37.2% std::pair::pair
+>>      0.0   0.0%  78.5%    804.2  37.0% __libc_start_main
+>>      0.0   0.0%  78.5%    804.2  37.0% _start
+>>      0.0   0.0%  78.5%    804.2  37.0% main
+>>      0.0   0.0%  78.5%    803.6  37.0% OSD::init
+>
+>
+> This appears to show a large amount of memory =E2=80=94 nearly a giga=
+byte =E2=80=94
+> allocated by boost::statechart, which is slightly surprising as the F=
+AQ for
+> boost::statechart quotes a ~1KB memory footprint per state-machine:
+>
+>
+> http://www.boost.org/doc/libs/1_35_0/libs/statechart/doc/faq.html#Emb=
+eddedApplications
+>
+> Perhaps something unexpected is happening here?  I'm almost hoping th=
+at
+> perhaps statechart is perhaps being subtly misused or misconfigured i=
+n some
+> way that, if fixed, would result in a significant drop in memory
+> utilization=E2=80=A6!
+>
+>
+> Quantifying problem-size:
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D
+>
+> Given that it appears to be the log-merging stage of PG recovery that
+> seems to be expensive, I queried the statistics of those PGs which
+> seemed to be taking a long time to peer, via `ceph pg <pgid> query`.
+>
+> These showed that (at least a handful) of those PG's recovery_state
+> past_intervals list contained on the order of ~200-300 entries.
+>
+> (I have no feel as to whether this is excessive.)
+>
+>
+> Unused memory:
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>
+> One thing I note is that I still sometimes see OSDs with large fracti=
+ons of
+> their memory allocation sitting on the tcmalloc freelist, e.g.:
+>
+>> osd.0 tcmalloc heap stats:------------------------------------------=
+------
+>> MALLOC:     2226810584 ( 2123.7 MiB) Bytes in use by application
+>> MALLOC: +   1421361152 ( 1355.5 MiB) Bytes in page heap freelist
+>> MALLOC: +     41864920 (   39.9 MiB) Bytes in central cache freelist
+>> MALLOC: +      5215680 (    5.0 MiB) Bytes in transfer cache freelis=
+t
+>> MALLOC: +     18508944 (   17.7 MiB) Bytes in thread cache freelists
+>> MALLOC: +     16216216 (   15.5 MiB) Bytes in malloc metadata
+>> MALLOC:   ------------
+>> MALLOC: =3D   3729977496 ( 3557.2 MiB) Actual memory used (physical =
++ swap)
+>> MALLOC: +     32792576 (   31.3 MiB) Bytes released to OS (aka unmap=
+ped)
+>> MALLOC:   ------------
+>> MALLOC: =3D   3762770072 ( 3588.5 MiB) Virtual address space used
+>> MALLOC:
+>> MALLOC:         144565              Spans in use
+>> MALLOC:            225              Thread heaps in use
+>> MALLOC:           8192              Tcmalloc page size
+>> ------------------------------------------------
+>
+>
+> This is despite having:
+>
+>   TCMALLOC_RELEASE_RATE=3D10
+>
+> =E2=80=A6 set in the environment of each OSD process.  This doesn't h=
+elp with
+> contention for RAM between processes!
+>
+> (I have mentioned this before, though hadn't at that time yet tried r=
+unning
+> OSDs with TCMALLOC_RELEASE_RATE. See also:
+>
+>   http://www.spinics.net/lists/ceph-devel/msg18769.html
+>
+> =E2=80=A6 for history.
+>
+> Note for anyone intending to reproduce this experiment: Upstart overr=
+ides
+> should be written to a file named /etc/init/ceph-{osd,mon}.override, =
+not
+> ceph-{osd,mon}.conf.override as I incorrectly specified previously.)
+>
+>
+> Leak detection:
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>
+> Not yet being familiar with the the data-structures or algorithms tha=
+t
+> govern PG recovery, it's not clear to me whether this is memory usage
+> that is expected or not for a 120-OSD cluster with 2048 PGs =E2=80=94=
+ or
+> whether there might be some variety of leak (or inefficient memory-us=
+e
+> pattern.)
+>
+> It doesn't help that I'm not a C++ hacker. :-)
+>
+> Reading around the subject, I came across `leaksanitiser`, a clang/LL=
+VM:
+> facility:
+>
+>  https://code.google.com/p/address-sanitizer/wiki/LeakSanitizer
+>
+> =E2=80=A6 as well as ticket #9756, which suggests using Clang's other=
+ static
+> analysis capabilities to help flag potentially problematic code:
+>
+>  http://tracker.ceph.com/issues/9756
+>
+> I might spend some time this weekend to see if I can help advance tha=
+t
+> ticket.
+>
+> (I note that http://ceph.com/gitbuilders.cgi now returns 404; perhaps
+> that has been superceded by some RedHat-internal facility?)
+>
+> Cheers,
+> David
+> --
+> David McBride <dwm37@cam.ac.uk>
+> Unix Specialist, University Information Services
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
