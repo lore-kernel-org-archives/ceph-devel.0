@@ -1,97 +1,77 @@
-From: GuangYang <yguang11@outlook.com>
-Subject: RE: scrub scheduling
-Date: Mon, 9 Feb 2015 07:21:32 +0000
-Message-ID: <BLU175-W7A98B2231FED626F80689DF270@phx.gbl>
-References: <alpine.DEB.2.00.1502081318090.5713@cobra.newdream.net>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: RBD tests on the next dumpling release
+Date: Mon, 09 Feb 2015 11:12:58 +0100
+Message-ID: <54D8882A.6010804@dachary.org>
+References: <54D3EEF6.1070701@dachary.org> <1050495133.7647881.1423231520223.JavaMail.zimbra@redhat.com> <54D4CD03.8000806@dachary.org> <408976183.7693525.1423233776228.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="pGa2LbVfJrEKxaVwapO2sldB9ohG2e6RJ"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from blu004-omc3s27.hotmail.com ([65.55.116.102]:60006 "EHLO
-	BLU004-OMC3S27.hotmail.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751780AbbBIHVd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Feb 2015 02:21:33 -0500
-In-Reply-To: <alpine.DEB.2.00.1502081318090.5713@cobra.newdream.net>
+Received: from mail2.dachary.org ([91.121.57.175]:40987 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S932238AbbBIKNC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Feb 2015 05:13:02 -0500
+In-Reply-To: <408976183.7693525.1423233776228.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Weil Sage <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-Cc: "simon.leinen@gmail.com" <simon.leinen@gmail.com>
+To: Jason Dillaman <dillaman@redhat.com>
+Cc: Josh Durgin <jdurgin@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-SGkgU2FnZSwKQW5vdGhlciBwb3RlbnRpYWwgcHJvYmxlbSB3aXRoIHNjcnViIHNjaGVkdWxpbmcs
-IGFzIG9ic2VydmVkIGluIG91ciBkZXBsb3ltZW50ICgyUEIgY2x1c3RlciwgNzAlIGZ1bGwpLCB3
-YXMgdGhhdCBzb21lIFBHcyBoYWRuJ3QgYmVlbiBzY3J1YmJlZCBmb3IgMS41IG1vbnRocywgZXZl
-biB3ZSBoYXZlIHRoZSBjb25maWd1cmF0aW9uIHRvIGRvIGRlZXAgc2NydWJiaW5nIHdlZWtseS4K
-CldpdGggb3VyIGRlcGxveW1lbnQgYW5kIHBlcmNlbnRhZ2Ugb2YgZnVsbCBvZiB0aGUgY2x1c3Rl
-ciwgYXMgd2VsbCBhcyB0aGUgY29uc2VydmF0aXZlIHNldHRpbmcgZm9yIHNjcnViYmluZyAob3Nk
-X21heF9zY3J1YnMgPSAxKSwgb25lIHJvdW5kIG9mIHNjcnViYmluZyB3b3VsZCBub3QgZmluaXNo
-IGluIDEgb25lIHdlZWssIHNvIHRoYXQgd2UgcHJvcGVybHkgc2hvdWxkIHNjaGVkdWxlIHRoYXQg
-bW9udGhseSAod2l0aCB3ZWVrbHkgc2hhbGxvdyBzY3J1YmJpbmcpLgoKQW5vdGhlciBwcm9ibGVt
-LCBpcyB0aGF0IGN1cnJlbnRseSB0aGUgc2NoZWR1bGluZyBvZiBzY3J1YiBpcyBvcHRpbWl6ZWQg
-bG9jYWxseSBhdCBlYWNoIE9TRCwgdGhhdCBpcywgZm9yIGVhY2ggUEcgdGhpcyBPU0QgYWN0cyBh
-cyB0aGUgcHJpbWFyeSwgaXQgc2VsZWN0cyB0aGUgb25lIHdoaWNoIGhhc24ndCBiZWVuIHNjaGVk
-dWxlZCB0byBzY3J1YmJpbmcgbG9uZ2VzdCwgcHV0IGl0IGFzIHRoZSBjYW5kaWRhdGUgYW5kIHJl
-cXVlc3Qgc2NydWIgcmVzZXJ2ZXIgZnJvbSBhbGwgcmVwbGljYXMuIFNpbmNlIGVhY2ggT1NEIGNh
-biBvbmx5IGhhdmUgMSBhY3RpdmUgc2NydWJiaW5nLCB0aGF0IGFjdGl2ZSBzbG90IGNvdWxkIHBv
-dGVudGlhbGx5IGFsd2F5cyBvY2N1cGllZCBieSBhIHJlcGxpY2EsIGFzIGEgcmVzdWx0LCB0aGUg
-UEcgd2hvc2UgcHJpbWFyeSBpcyB0aGlzIE9TRCwgZmFpbCB0byBzY2hlZHVsZSBhbmQgbGVmdCBi
-ZWhpbmQuCgpJcyB0aGlzIGlzc3VlIHdvcnRoIGFuIGVuaGFuY2VtZW50PwoKVGhhbmtzLApHdWFu
-ZwoKCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KPiBEYXRlOiBTdW4s
-IDggRmViIDIwMTUgMTM6Mzg6MjggLTA4MDAKPiBGcm9tOiBzd2VpbEByZWRoYXQuY29tCj4gVG86
-IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnCj4gQ0M6IHNpbW9uLmxlaW5lbkBnbWFpbC5jb20K
-PiBTdWJqZWN0OiBzY3J1YiBzY2hlZHVsaW5nCj4KPiBTaW1vbiBMZWluZW4gYXQgU3dpdGNoIGRp
-ZCBhIGdyZWFldCBwb3N0IHJlY2VudGx5IGFib3V0IHRoZSBpbXBhY3Qgb2YKPiBzY3J1YiBvbiB0
-aGVpciBjbHVzdGVyKHMpOgo+Cj4gaHR0cDovL2Jsb2cuc2ltb24ubGVpbmVuLmNoLzIwMTUvMDIv
-Y2VwaC1kZWVwLXNjcnViYmluZy1pbXBhY3QuaHRtbAo+Cj4gQmFzaWNhbGx5IHRoZSAyIHdlZWsg
-ZGVlcCBzY3J1YiBpbnRlcnZhbCBraWNrcyBpbiBvbiBleGFjdGx5IGEgMiB3ZWVrCj4gY3ljbGUg
-YW5kIHRoZSBjbHVzdGVyIGdvZXMgY3JhenkgZm9yIGEgZmV3IGhvdXJzIGFuZCB0aGVuIGRvZXMg
-bm90aGluZwo+IChidXQgY2xpZW50IElPKSBmb3IgdGhlIG5leHQgdHdvIHdlZWtzLgo+Cj4gVGhl
-IG9wdGlvbnMgZ292ZXJuaW5nIHRoaXMgYXJlOgo+Cj4gT1BUSU9OKG9zZF9zY3J1Yl9taW5faW50
-ZXJ2YWwsIE9QVF9GTE9BVCwgNjAqNjAqMjQpIC8vIGlmIGxvYWQgaXMgbG93Cj4gT1BUSU9OKG9z
-ZF9zY3J1Yl9tYXhfaW50ZXJ2YWwsIE9QVF9GTE9BVCwgNyo2MCo2MCoyNCkgLy8gcmVnYXJkbGVz
-cyBvZiBsb2FkCj4gT1BUSU9OKG9zZF9kZWVwX3NjcnViX2ludGVydmFsLCBPUFRfRkxPQVQsIDYw
-KjYwKjI0KjcpIC8vIG9uY2UgYSB3ZWVrCj4gT1BUSU9OKG9zZF9zY3J1Yl9sb2FkX3RocmVzaG9s
-ZCwgT1BUX0ZMT0FULCAwLjUpCj4KPiBUaGF0IGlzLCBpZiB0aGUgbG9hZCBpcyA8IC41IChwcm9i
-YWJseSBhbG1vc3QgbmV2ZXIgb24gYSByZWFsIGNsdXN0ZXIpIGl0Cj4gd2lsbCBzY3J1YiBldmVy
-eSBkYXksIG90aGVyd2lzZSAocmVnYXJkbGVzcyBvZiBsb2FkKSBpdCB3aWxsIHNjcnViIGVhY2gg
-UEcKPiBhdCBsZWFzdCBvbmNlIGEgd2Vlay4KPgo+IFNldmVyYWwgdGhpbmdzIHdlIGNhbiBkbyBo
-ZXJlOgo+Cj4gMS0gTWF5YmUgdGhlIHNoYWxsb3cgc2NydWIgaW50ZXJ2YWwgc2hvdWxkIGJlIGxl
-c3MgdGhhbiB0aGUgZGVlcCBzY3J1Ygo+IGludGVydmFsPwo+Cj4gMi0gVGhlcmUgaXMgYSBuZXcg
-ZmVhdHVyZSBmb3IgaGFtbWVyIHRoYXQgbGltaXRzIHNjcnViIHRvIGNlcnRhaW4gdGltZXMgb2YK
-PiBkYXksIGNvbnRyaWJ1dGVkIGJ5IFhpbnplIENoaToKPgo+IE9QVElPTihvc2Rfc2NydWJfYmVn
-aW5faG91ciwgT1BUX0lOVCwgMCkKPiBPUFRJT04ob3NkX3NjcnViX2VuZF9ob3VyLCBPUFRfSU5U
-LCAyNCkKPgo+IFRoYXQgaXMsIGJ5IGRlZmF1bHQsIHNjcnVicyBjYW4gaGFwcGVuIGF0IGFueSB0
-aW1lLiBZb3UgY2FuIHVzZSB0aGlzIHRvCj4gbGltaXQgdG8gY2VydGFpbiBob3VyIHNvZiB0aGUg
-bmlnaHQsIG9yIHdoYXRldmVyIGlzIGFwcHJvcHJpYXRlIGZvciB5b3VyCj4gY2x1c3Rlci4gVGhh
-dCBvbmx5IHNvcnQgb2YgaGVscHMsIHRob3VnaDsgU2ltb24ncyBzY3J1YiBmcmVuenkgd2lsbCBz
-dGlsbAo+IGhhcHBlbiBvbmUgZGF5IGEgd2VlaywgYWxsIGF0IG9uY2UgKG9yIG1heWJlIHNwcmVh
-ZCBvdmVyIDIgbmlnaHRzKS4KPgo+IDMtIFdlIGNhbiBzcHJlYWQgdGhlbSBvdXQgZHVyaW5nIHRo
-ZSBhbGxvd2VkIHdpbmRvdy4gQnV0IGhvdyB0byBkbyB0aGF0Pwo+IFdlIGNvdWxkIG1ha2UgdGhl
-IHNjcnViIGludGVydmFsIHJhbmRvbWx5ICsvLSBhIHZhbHVlIG9mIHVwIHRvIDUwJSBvZiB0aGUK
-PiB0b3RhbCBpbnRlcnZhbC4gT3Igd2UgY291bGQgc29tZWhvdyBsb29rIGF0IHRoZSBjdXJyZW50
-IHJhdGUgb2Ygc2NydWJiaW5nCj4gKGF2ZXJhZ2UgdGltZSB0byBjb21wbGV0ZWlvbiBmb3IgdGhl
-IGN1cnJlbnQgcG9vbCwgbWF5YmUpLi4gYW55IGxvb2sgYXQKPiB0aGUgdG90YWwgbnVtYmVyIG9m
-IGl0ZW1zIGluIHRoZSBzY3J1YiBxdWV1ZT8KPgo+IDQtIFJpYyBwb2ludGVkIG91dCB0byBtZSB0
-aGF0IGV2ZW4gaWYgd2Ugc3ByZWFkIHRoZXNlIG91dCwgc2NydWJiaW5nIGF0Cj4gZnVsbCBzcGVl
-ZCBoYXMgYW4gaW1wYWN0LiBFdmVuIGlmIHdlIGRvIGFsbCB0aGUgcHJpb3JpdGl6YXRpb24gbWFn
-aWMgd2UKPiBjYW4gdGhlcmUgd2lsbCBzdGlsbCBiZSBhIGJ1Y2ggb2YgbGFyZ2UgSU9zIGluIHRo
-ZSBxdWV1ZS4gV2hhdCBpZiB3ZSBoYXZlCj4gYSBoYXJkIHRocm90dGxlIG9uIHRoZSBzY3J1YiBy
-YXRlLCBvYmplY3RzIHBlciBzZWNvbmQgYW5kL29yIGJ5dGVzIHBlcgo+IHNlY29uZD8gSW4gdGhl
-IGVuZCB0aGUgc2FtZSBudW1iZXIgb2YgSU9zIHRyYXZlcnNlIHRoZSBxdWV1ZSBhbmQKPiBwb3Rl
-bnRpYWxseSBpbnRlcmZlcmUgd2l0aCBjbGllbnQgSU8sIGJ1dCB0aGV5IHdvdWxkIGJlIHNwcmVh
-ZCBvdXQgb3ZlciBhCj4gbG9uZ2VyIHBlcmlvZCBvZiB0aW1lIGFuZCBiZSBsZXNzIG5vdGljZWFi
-bGUgKGkuZS4sIHNsb3cgZG93biBjbGllbnQgSU9zCj4gZnJvbSBkaWZmZXJlbnQgd29ya2xvYWRz
-IGFuZCBub3QgYWxsIHRoZSBzYW1lIHdvcmtsb2FkKS4gSSdtIG5vdCB0b3RhbGx5Cj4gY29udmlu
-Y2VkIHRoaXMgaXMgYW4gaW1wcm92ZW1lbnQgb3ZlciBhIHN0cmF0ZWd5IHdoZXJlIHdlIGhhdmUg
-b25seSAxCj4gc2NydWIgSU8gaW4gZmxpZ2h0IGF0IGFsbCB0aW1lcywgYnV0IHRoYXQgaXNuJ3Qg
-cXVpdGUgaG93IHNjcnViIHNjaGVkdWxlcwo+IGl0c2VsZiBzbyBpdCdzIGhhcmQgdG8gY29tcGFy
-ZSBpdCB0aGF0IHdheSwgYW5kIGluIHRoZSBlbmQgdGhlIHVzZXIKPiBleHBlcmllbmNlIGFuZCBw
-ZXJjZWl2ZWQgaW1wYWN0IHNob3VsZCBiZSBsb3dlci4uLgo+Cj4gNS0gQXV0by1hZGp1c3QgdGhl
-IGFib3ZlIHNjcnViIHJhdGUgYmFzZWQgb24gdGhlIHRvdGFsIGFtb3VudCBvZiBkYXRhLAo+IHNj
-cnViIGludGVydmFsLCBhbmQgc2NydWIgaG91cnMgc28gdGhhdCB3ZSBhcmUgc2NydWJiaW5nIGF0
-IHRoZSBzbG93ZXN0Cj4gcmF0ZSBwb3NzaWJsZSB0aGF0IG1lZXRzIHRoZSBzY2hlZHVsZS4gV2Un
-ZCBoYXZlIHRvIGJlIHNsaWdodGx5IGNsZXZlciB0bwo+IGhhdmUgdGhlIHJpZ2h0IGZlZWRiYWNr
-IGluIHBsYWNlIGhlcmUuLi4KPgo+IFRob3VnaHRzPwo+IHNhZ2UKPiAtLQo+IFRvIHVuc3Vic2Ny
-aWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVs
-IiBpbgo+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3Jn
-Cj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9t
-by1pbmZvLmh0bWwKIAkJIAkgICAJCSAg
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--pGa2LbVfJrEKxaVwapO2sldB9ohG2e6RJ
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+Hi Jason,
+
+Your backport of http://tracker.ceph.com/issues/9854 at https://github.co=
+m/ceph/ceph/pull/3655 was added to the dumpling-backports branch and the =
+RBD suite run came back with one error.
+
+http://tracker.ceph.com/issues/10560#teuthology-runs-on-3944c77c404c4a058=
+86fe8276d5d0dd7e4f20410-6-february
+
+I'm under the impression that this is unrelated. What do you think ?
+
+The error found in the previous run
+
+http://tracker.ceph.com/issues/10560#teuthology-runs-on-fd37e5a9749c5579a=
+592ebe926a3c576be0617cd-3-february
+
+could not be repeated by another run of the same test
+
+http://pulpito.ceph.com/loic-2015-02-05_21:41:04-rbd-dumpling-backports--=
+-basic-multi/
+
+and I closed the ticket as "Can't reproduce" since you did not reproduce =
+it locally either. Feel free to change the state of the ticket if, for in=
+stance, you would like it to remain open during a few weeks in case it sh=
+ows up again.
+
+Cheers
+
+On 06/02/2015 15:42, Jason Dillaman wrote:
+> I would say #9854 is critical for this dumpling point release since it =
+fixes a regression that would otherwise be introduced by this point relea=
+se.
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--pGa2LbVfJrEKxaVwapO2sldB9ohG2e6RJ
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlTYiCoACgkQ8dLMyEl6F21pzwCgvPVsaQ+cA+JFNm+3cOavIV6t
+4fsAoKjBwOXp6Sa69BYzHkH9r9xb5J+q
+=Wxcv
+-----END PGP SIGNATURE-----
+
+--pGa2LbVfJrEKxaVwapO2sldB9ohG2e6RJ--
