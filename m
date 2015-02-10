@@ -1,122 +1,83 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: K/V interface buffer transaction
-Date: Tue, 10 Feb 2015 18:23:07 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F282A63A6@SACMBXIP02.sdcorp.global.sandisk.com>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F282A62CE@SACMBXIP02.sdcorp.global.sandisk.com>
- <CA+4uBUa+XBKHkx32hmZAvn4JOLp=o2WJywnA7OWXzSphvEcgjw@mail.gmail.com>
+From: Gregory Farnum <greg@gregs42.com>
+Subject: Re: dumpling integration branch for v0.67.12 ready for QE
+Date: Tue, 10 Feb 2015 10:25:00 -0800
+Message-ID: <CAC6JEv-37ga5X0M4GG=fBmo-T9OWWgSTkMSgfVt1eXXmm9XhTg@mail.gmail.com>
+References: <54DA3A5B.5050509@dachary.org>
+	<54483038.14900677.1423588756901.JavaMail.zimbra@redhat.com>
+	<54DA3E72.9010600@dachary.org>
+	<867276671.14905190.1423589356764.JavaMail.zimbra@redhat.com>
+	<54DA4843.10901@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0067.outbound.protection.outlook.com ([207.46.100.67]:56156
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752198AbbBJSXV (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 10 Feb 2015 13:23:21 -0500
-In-Reply-To: <CA+4uBUa+XBKHkx32hmZAvn4JOLp=o2WJywnA7OWXzSphvEcgjw@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-ig0-f172.google.com ([209.85.213.172]:48356 "EHLO
+	mail-ig0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752550AbbBJSZD convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Feb 2015 13:25:03 -0500
+Received: by mail-ig0-f172.google.com with SMTP id l13so25461692iga.5
+        for <ceph-devel@vger.kernel.org>; Tue, 10 Feb 2015 10:25:01 -0800 (PST)
+Received: from mail-ie0-f169.google.com (mail-ie0-f169.google.com. [209.85.223.169])
+        by mx.google.com with ESMTPSA id 93sm9073661iop.4.2015.02.10.10.25.00
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 10 Feb 2015 10:25:01 -0800 (PST)
+Received: by iecat20 with SMTP id at20so18372088iec.12
+        for <ceph-devel@vger.kernel.org>; Tue, 10 Feb 2015 10:25:00 -0800 (PST)
+In-Reply-To: <54DA4843.10901@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "sjust@redhat.com" <sjust@redhat.com>
-Cc: "Sage Weil (sweil@redhat.com)" <sweil@redhat.com>, "Haomai Wang (haomaiwang@gmail.com)" <haomaiwang@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Yuri Weinstein <yweinste@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-VGhhbmtzIFNhbSAhDQpTbywgaXMgaXQgc2FmZSB0byBkbyBvcmRlcmluZyBpZiBpbiBhIHRyYW5z
-YWN0aW9uICpubyogcmVtb3ZlL3RydW5jYXRlL2NyZWF0ZS9hZGQgY2FsbCA/DQpGb3IgZXhhbXBs
-ZSwgZG8gd2UgbmVlZCB0byBwcmVzZXJ2ZSBvcmRlcmluZyBpbiBjYXNlIG9mIHRoZSBiZWxvdyB0
-cmFuc2FjdGlvbiA/DQpJdCB3aWxsIGJlIGhlbHBmdWwgaWYgeW91IGNhbiBnaXZlIHNvbWUgaW5z
-aWdodCBpbiB3aGF0IHNjZW5hcmlvIHByZXNlcnZpbmcgb3JkZXIgaXMgKm11c3QqLg0KDQpSZWdh
-cmRzDQpTb21uYXRoDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogU2FtdWVsIEp1
-c3QgW21haWx0bzpzYW0uanVzdEBpbmt0YW5rLmNvbV0gDQpTZW50OiBUdWVzZGF5LCBGZWJydWFy
-eSAxMCwgMjAxNSA5OjIyIEFNDQpUbzogU29tbmF0aCBSb3kNCkNjOiBTYWdlIFdlaWwgKHN3ZWls
-QHJlZGhhdC5jb20pOyBIYW9tYWkgV2FuZyAoaGFvbWFpd2FuZ0BnbWFpbC5jb20pOyBDZXBoIERl
-dmVsb3BtZW50DQpTdWJqZWN0OiBSZTogSy9WIGludGVyZmFjZSBidWZmZXIgdHJhbnNhY3Rpb24N
-Cg0KSW4gZ2VuZXJhbCwgeW91IGRvIG5lZWQgdG8gcHJlc2VydmUgdGhlIG9yZGVyLiAgWW91IGFy
-ZSBmcmVlIHRvIGRldGVybWluZSB3aGVuIHJlLW9yZGVyaW5nIGlzIHNhZmUgdGhvdWdoLg0KLVNh
-bQ0KDQpPbiBUdWUsIEZlYiAxMCwgMjAxNSBhdCA4OjU5IEFNLCBTb21uYXRoIFJveSA8U29tbmF0
-aC5Sb3lAc2FuZGlzay5jb20+IHdyb3RlOg0KPiBIaSBTYWdlL0hhb21haSwNCj4gT3VyIEsvViBz
-dG9yZSB3b3JrcyBiZXN0IGlmIHRoZSBrZXlzIG9mIHRoZSBvYmplY3RzIHdpdGhpbiBhIHRyYW5z
-YWN0aW9uIGFyZSBzb3J0ZWQuIFdlIGFyZSB3cml0aW5nIGEgbmV3IEsvViBEYiBpbnRlcmZhY2Ug
-YW5kIHBsYW5uaW5nIHRvIHNvcnQgdGhlIGtleXMgd2l0aGluIGEgdHJhbnNhY3Rpb24uIFNvLCB0
-aGlzIHJhaXNlcyBvbmUgcXVlc3Rpb24sIGRvIHdlIG5lZWQgdG8gcHJlc2VydmUgdGhlIG9yZGVy
-IG9mIHRoZSBvcGVyYXRpb24gd2l0aGluIGEgdHJhbnNhY3Rpb24gPw0KPiBXaXRoIHRoZSBsYXRl
-c3QgQ2VwaCBjb2RlLCB3ZSBhcmUgZ2V0dGluZyB0aGUgZm9sbG93aW5nIG9wZXJhdGlvbnMgd2l0
-aGluIGEgdHJhbnNhY3Rpb24uDQo+DQo+IDIwMTUtMDItMDkgMTk6MDA6MjEuODg1NjQ2IDdmZGUy
-YTU3MzcwMCAgMCBCZWZvcmUgWlNNUHV0IDo6IHBfbnVtX29iaiANCj4gPSAgOQ0KPiAyMDE1LTAy
-LTA5IDE5OjAwOjIxLjg4NTY1MyA3ZmRlMmE1NzM3MDAgIDAgcF9vYmpbcF9udW1fb2JqXS5mbGFn
-cyA9IDANCj4gMjAxNS0wMi0wOSAxOTowMDoyMS44ODU2NTYgN2ZkZTJhNTczNzAwICAwIHBfb2Jq
-W3BfbnVtX29ial0ua2V5X2xlbiA9IA0KPiA4Mw0KPiAyMDE1LTAyLTA5IDE5OjAwOjIxLjg4NTY1
-NyA3ZmRlMmE1NzM3MDAgIDAgcF9vYmpbcF9udW1fb2JqXS5kYXRhX2xlbiA9IA0KPiAyMjUNCj4g
-MjAxNS0wMi0wOSAxOTowMDoyMS44ODU2NjAgN2ZkZTJhNTczNzAwICAwIHBfb2JqW3BfbnVtX29i
-al0ua2V5ID0gDQo+IF9HSE9CSlRPU0VRX15BMSVlNmVfaGVhZCFFNjM3MzBBOSEhMSEhcmJkX2Rh
-dGElZTEwMDU3NGIwZGM1MSVlMDAwMDAwMDANCj4gMDAwMDA2ODkhaGVhZMO/DQo+IDIwMTUtMDIt
-MDkgMTk6MDA6MjEuODg1NjYzIDdmZGUyYTU3MzcwMCAgMCBwX29ialtwX251bV9vYmpdLmZsYWdz
-ID0gMA0KPiAyMDE1LTAyLTA5IDE5OjAwOjIxLjg4NTY2NCA3ZmRlMmE1NzM3MDAgIDAgcF9vYmpb
-cF9udW1fb2JqXS5rZXlfbGVuID0gDQo+IDY0DQo+IDIwMTUtMDItMDkgMTk6MDA6MjEuODg1NjY1
-IDdmZGUyYTU3MzcwMCAgMCBwX29ialtwX251bV9vYmpdLmRhdGFfbGVuID0gDQo+IDE3OA0KPiAy
-MDE1LTAyLTA5IDE5OjAwOjIxLjg4NTY2NiA3ZmRlMmE1NzM3MDAgIDAgcF9vYmpbcF9udW1fb2Jq
-XS5rZXkgPSANCj4gX1NFUV8wMDAwMDAwMDAwMDAwMzYxX19PQkpPTUFQX19eQTAwMDAwMDAwMTEu
-MDAwMDAwMDAwMDAwMDAwMDA1NTQNCj4gMjAxNS0wMi0wOSAxOTowMDoyMS44ODU2NjggN2ZkZTJh
-NTczNzAwICAwIHBfb2JqW3BfbnVtX29ial0uZmxhZ3MgPSAwDQo+IDIwMTUtMDItMDkgMTk6MDA6
-MjEuODg1NjY5IDdmZGUyYTU3MzcwMCAgMCBwX29ialtwX251bV9vYmpdLmtleV9sZW4gPSANCj4g
-MzkNCj4gMjAxNS0wMi0wOSAxOTowMDoyMS44ODU2NzEgN2ZkZTJhNTczNzAwICAwIHBfb2JqW3Bf
-bnVtX29ial0uZGF0YV9sZW4gPSANCj4gNA0KPiAyMDE1LTAyLTA5IDE5OjAwOjIxLjg4NTY3MiA3
-ZmRlMmE1NzM3MDAgIDAgcF9vYmpbcF9udW1fb2JqXS5rZXkgPSANCj4gX1NFUV8wMDAwMDAwMDAw
-MDAwMzYxX19PQkpPTUFQX19eQV9lcG9jaA0KPiAyMDE1LTAyLTA5IDE5OjAwOjIxLjg4NTY3MyA3
-ZmRlMmE1NzM3MDAgIDAgcF9vYmpbcF9udW1fb2JqXS5mbGFncyA9IDANCj4gMjAxNS0wMi0wOSAx
-OTowMDoyMS44ODU2NzQgN2ZkZTJhNTczNzAwICAwIHBfb2JqW3BfbnVtX29ial0ua2V5X2xlbiA9
-IA0KPiAzOA0KPiAyMDE1LTAyLTA5IDE5OjAwOjIxLjg4NTY3NSA3ZmRlMmE1NzM3MDAgIDAgcF9v
-YmpbcF9udW1fb2JqXS5kYXRhX2xlbiA9IA0KPiA3MTMNCj4gMjAxNS0wMi0wOSAxOTowMDoyMS44
-ODU2NzYgN2ZkZTJhNTczNzAwICAwIHBfb2JqW3BfbnVtX29ial0ua2V5ID0gDQo+IF9TRVFfMDAw
-MDAwMDAwMDAwMDM2MV9fT0JKT01BUF9fXkFfaW5mbw0KPiAyMDE1LTAyLTA5IDE5OjAwOjIxLjg4
-NTY3NyA3ZmRlMmE1NzM3MDAgIDAgcF9vYmpbcF9udW1fb2JqXS5mbGFncyA9IDANCj4gMjAxNS0w
-Mi0wOSAxOTowMDoyMS44ODU2NzkgN2ZkZTJhNTczNzAwICAwIHBfb2JqW3BfbnVtX29ial0ua2V5
-X2xlbiA9IA0KPiA0OA0KPiAyMDE1LTAyLTA5IDE5OjAwOjIxLjg4NTY4MCA3ZmRlMmE1NzM3MDAg
-IDAgcF9vYmpbcF9udW1fb2JqXS5kYXRhX2xlbiA9IA0KPiAxMg0KPiAyMDE1LTAyLTA5IDE5OjAw
-OjIxLjg4NTY4MSA3ZmRlMmE1NzM3MDAgIDAgcF9vYmpbcF9udW1fb2JqXS5rZXkgPSANCj4gX1NF
-UV8wMDAwMDAwMDAwMDAwMzYxX19PQkpPTUFQX19eQWNhbl9yb2xsYmFja190bw0KPiAyMDE1LTAy
-LTA5IDE5OjAwOjIxLjg4NTY4MiA3ZmRlMmE1NzM3MDAgIDAgcF9vYmpbcF9udW1fb2JqXS5mbGFn
-cyA9IDANCj4gMjAxNS0wMi0wOSAxOTowMDoyMS44ODU2ODMgN2ZkZTJhNTczNzAwICAwIHBfb2Jq
-W3BfbnVtX29ial0ua2V5X2xlbiA9IA0KPiA1Nw0KPiAyMDE1LTAyLTA5IDE5OjAwOjIxLjg4NTY4
-NCA3ZmRlMmE1NzM3MDAgIDAgcF9vYmpbcF9udW1fb2JqXS5kYXRhX2xlbiA9IA0KPiAxMg0KPiAy
-MDE1LTAyLTA5IDE5OjAwOjIxLjg4NTY4NSA3ZmRlMmE1NzM3MDAgIDAgcF9vYmpbcF9udW1fb2Jq
-XS5rZXkgPSANCj4gX1NFUV8wMDAwMDAwMDAwMDAwMzYxX19PQkpPTUFQX19eQXJvbGxiYWNrX2lu
-Zm9fdHJpbW1lZF90bw0KPiAyMDE1LTAyLTA5IDE5OjAwOjIxLjg4NTY4NiA3ZmRlMmE1NzM3MDAg
-IDAgcF9vYmpbcF9udW1fb2JqXS5mbGFncyA9IDANCj4gMjAxNS0wMi0wOSAxOTowMDoyMS44ODU2
-ODggN2ZkZTJhNTczNzAwICAwIHBfb2JqW3BfbnVtX29ial0ua2V5X2xlbiA9IA0KPiAzMQ0KPiAy
-MDE1LTAyLTA5IDE5OjAwOjIxLjg4NTY4OSA3ZmRlMmE1NzM3MDAgIDAgcF9vYmpbcF9udW1fb2Jq
-XS5kYXRhX2xlbiA9IA0KPiA2NTUzNg0KPiAyMDE1LTAyLTA5IDE5OjAwOjIxLjg4NTY5MCA3ZmRl
-MmE1NzM3MDAgIDAgcF9vYmpbcF9udW1fb2JqXS5rZXkgPSANCj4gX1NFUV8wMDAwMDAwMDAwMDAx
-MzQ1X1NUUklQX15BNTQNCj4gMjAxNS0wMi0wOSAxOTowMDoyMS44ODU2OTEgN2ZkZTJhNTczNzAw
-ICAwIHBfb2JqW3BfbnVtX29ial0uZmxhZ3MgPSAwDQo+IDIwMTUtMDItMDkgMTk6MDA6MjEuODg1
-NjkyIDdmZGUyYTU3MzcwMCAgMCBwX29ialtwX251bV9vYmpdLmtleV9sZW4gPSANCj4gMzQNCj4g
-MjAxNS0wMi0wOSAxOTowMDoyMS44ODU2OTMgN2ZkZTJhNTczNzAwICAwIHBfb2JqW3BfbnVtX29i
-al0uZGF0YV9sZW4gPSANCj4gMjczDQo+IDIwMTUtMDItMDkgMTk6MDA6MjEuODg1Njk1IDdmZGUy
-YTU3MzcwMCAgMCBwX29ialtwX251bV9vYmpdLmtleSA9IA0KPiBfU0VRXzAwMDAwMDAwMDAwMDEz
-NDVfX09CSkFUVFJfX15BXw0KPiAyMDE1LTAyLTA5IDE5OjAwOjIxLjg4NTY5NiA3ZmRlMmE1NzM3
-MDAgIDAgcF9vYmpbcF9udW1fb2JqXS5mbGFncyA9IDANCj4gMjAxNS0wMi0wOSAxOTowMDoyMS44
-ODU2OTcgN2ZkZTJhNTczNzAwICAwIHBfb2JqW3BfbnVtX29ial0ua2V5X2xlbiA9IA0KPiA0MA0K
-PiAyMDE1LTAyLTA5IDE5OjAwOjIxLjg4NTY5OCA3ZmRlMmE1NzM3MDAgIDAgcF9vYmpbcF9udW1f
-b2JqXS5kYXRhX2xlbiA9IA0KPiAzMQ0KPiAyMDE1LTAyLTA5IDE5OjAwOjIxLjg4NTY5OSA3ZmRl
-MmE1NzM3MDAgIDAgcF9vYmpbcF9udW1fb2JqXS5rZXkgPSANCj4gX1NFUV8wMDAwMDAwMDAwMDAx
-MzQ1X19PQkpBVFRSX19eQXNuYXBzZXQNCj4NCj4gTG9va2luZyBhdCB0aGlzIGl0IHNlZW1zIHdl
-IGRvbid0IG5lZWQgdG8gcHJlc2VydmUgdGhlIG9yZGVyLg0KPiBCdXQsIGlmIEkgY2FuIHJlbWVt
-YmVyIGNvcnJlY3RseSwgYXQgc29tZSBwb2ludCB0aGVyZSB3aWxsIGJlIHNvbWUgcGdsb2cgdHJp
-bSBvcGVyYXRpb24gd2lsbCBiZSBpc3N1ZWQgZnJvbSB1cHN0cmVhbSBhbmQgdGhhdCBtYXkgcmVx
-dWlyZSBzb21lIG9yZGVyaW5nLg0KPiBQbGVhc2Ugc2hhcmUgeW91ciB0aG91Z2h0IGFyb3VuZCB0
-aGlzLg0KPg0KPiBUaGFua3MgJiBSZWdhcmRzDQo+IFNvbW5hdGgNCj4NCj4gX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX18NCj4NCj4gUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBj
-b250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5
-IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4g
-SWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGll
-bnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBt
-ZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3Ry
-aWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRl
-ZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVh
-c2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJv
-dmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1l
-c3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9u
-aWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KPg0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRo
-aXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgDQo+IGluIHRo
-ZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFq
-b3Jkb21vIA0KPiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZv
-Lmh0bWwNCg==
+On Tue, Feb 10, 2015 at 10:04 AM, Loic Dachary <loic@dachary.org> wrote:
+>
+>
+> On 10/02/2015 18:29, Yuri Weinstein wrote:>
+>> On 10/02/2015 18:19, Yuri Weinstein wrote:>
+>>> Loic,
+>>>
+>>> The only difference between options if we run suits on merged dumpling vs dumpling-backports first - is time.
+>>> We will have to run suites on the final branch after the merge anyway.
+>>
+>> Could you explain why ? After merging dumpling and dumpling-backports will be exactly the same.
+>>
+>> Loic - I feel that finial QE validation should be done on the code that gets actually released to customers, e.g. dumpling branch after the merge.  I do see your point about branches being identical and ready to change my mind if you insist.  Does my reasoning make sense?  Please advice, how we should proceed.
+>
+> The dumpling-backports branch currently is at
+>
+> https://github.com/ceph/ceph/commit/3944c77c404c4a05886fe8276d5d0dd7e4f20410
+>
+> after a successful test run from QE and a merge into dumpling, the dumpling branch will be at
+>
+> https://github.com/ceph/ceph/commit/3944c77c404c4a05886fe8276d5d0dd7e4f20410
+>
+> as well. In other words they are identical and there is no point in running a test again. The only reason why they could be different is if a commit is inadvertently added to the dumpling branch while testing happens on the dumpling-backport branc. In this case the presence of this new commit would be reason enough to run another round of test indeed. So the process could be:
+>
+> If tests are ok and merge can fast forward, then release.
+> If tests are ok and merge cannot fast forward, send back to loic because a commit was added by accident and needs to be approved by the leads.
+>
+> If testing happens on the dumpling branch, adding a commit to the dumpling branch would have side effects that could taint the results of the tests or, even worse, go unnoticed. There is zero chance that someone adds a commit to the dumpling-backports branch and that gives us something stable. On the contrary, the odds that someone adds a commit to the dumpling branch are high, specially if the tests take a few weeks to complete.
+>
+> As Greg mentioned, merging in dumpling does not matter much for this round because it is what has been done in the past. And to be honest, I would not mind if an additional commit taints the process by accident. However, unless there is a reason not to, it would be good to establish a process that is solid if we can.
+>
+> I've witnessed Alfredo's pain on each release and an additional benefit of having a dumpling-backports branch that nobody tampers with just occured to me. When and if QE finds that dumpling-backports is fit for release, instead of merging it into dumpling it could be handed over to Alfredo for release. And he would be able to proceed knowing it is stable and won't be moving forward. Once the release is done and the tag set to the proper commit, the dumpling branch can be reset to dumpling-backports. If commits were added during the process, their authors could be notified that they were discarded and need to be merge again. That would not work for the master branch but it would definitely be possible for the stable branches because such "out of process" commits are rarely added.
+>
+> I've not thought this through, but the more I think about it the more I like the idea of using dumpling-backports as a staging area until the release is final.
+
+What's the purpose of even having a dumpling branch at that point?
+We're not using it for anything under your model.
+
+Now, as it happens there are some reasons to maintain a dumpling
+branch that isn't part of backports. We've been doing a lot of work
+lately to make the nightlies behave well under RHEL and in various
+other environments, which sometimes involve changing the tests
+themselves. That can mean updating the ceph.git/qa/workunits in our
+LTS branches, which I've done a few times over the last couple of
+months. Since they're used for testing they aren't suitable for going
+through a backports workflow, we just want them to get into the
+nightlies as fast as possible. Tossing out any such work every time a
+point release appears would be irritating, to say the least.
+(We could also pull the workunits out of ceph.git, but that's a
+different discussion.)
+-Greg
