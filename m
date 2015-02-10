@@ -1,62 +1,71 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: RBD tests on the next dumpling release
-Date: Tue, 10 Feb 2015 08:51:14 +0100
-Message-ID: <54D9B872.502@dachary.org>
-References: <54D3EEF6.1070701@dachary.org> <1050495133.7647881.1423231520223.JavaMail.zimbra@redhat.com> <54D4CD03.8000806@dachary.org> <408976183.7693525.1423233776228.JavaMail.zimbra@redhat.com> <54D8882A.6010804@dachary.org> <1749420664.9284413.1423513637594.JavaMail.zimbra@redhat.com> <54D94BF8.7080008@redhat.com>
+From: John Spray <john.spray@redhat.com>
+Subject: Re: Ceph bindings for go & docker
+Date: Tue, 10 Feb 2015 11:25:37 +0000
+Message-ID: <CAGd4Wr1QvyZZQ+ioymX_hirNzdRj__Yn8SLSuNrd03AQT3cy3w@mail.gmail.com>
+References: <54D8EB16.1090801@dachary.org>
+	<1220716523.14167671.1423506225216.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="voUlcP3JWHtscBiK0in5mXLaVlIUqkfOo"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:41539 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752421AbbBJHwY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Feb 2015 02:52:24 -0500
-In-Reply-To: <54D94BF8.7080008@redhat.com>
+Received: from mail-la0-f51.google.com ([209.85.215.51]:39620 "EHLO
+	mail-la0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750801AbbBJLZi convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Feb 2015 06:25:38 -0500
+Received: by labgq15 with SMTP id gq15so19489286lab.6
+        for <ceph-devel@vger.kernel.org>; Tue, 10 Feb 2015 03:25:37 -0800 (PST)
+In-Reply-To: <1220716523.14167671.1423506225216.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <jdurgin@redhat.com>, Jason Dillaman <dillaman@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Noah Watkins <nwatkins@redhat.com>
+Cc: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>, Vincent Batts <vbatts@redhat.com>, Johan Euphrosine <proppy@google.com>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---voUlcP3JWHtscBiK0in5mXLaVlIUqkfOo
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+It would also be pretty interesting to do a CephFS driver here using
+subdirs as volumes.  Just a thought, if anyone writes the RBD driver
+they could put "rbd" in the name so that we can disambiguate them in
+future?
 
-Thanks for the confirmation :-)
+Cheers,
+John
 
-On 10/02/2015 01:08, Josh Durgin wrote:
-> On 02/09/2015 12:27 PM, Jason Dillaman wrote:
->> I would agree with your assessment that http://tracker.ceph.com/issues=
-/10560#teuthology-runs-on-3944c77c404c4a05886fe8276d5d0dd7e4f20410-6-febr=
-uary sounds like a repeat of http://tracker.ceph.com/issues/4959.
->>
->> Josh, thoughts?
->>
->=20
-> Yeah, that looks the same. I think we can ignore it.
->=20
-> --=20
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
+On Mon, Feb 9, 2015 at 6:23 PM, Noah Watkins <nwatkins@redhat.com> wrot=
+e:
+> Hi Loic,
+>
+> This sounds great. The librados bindings have good test converage, bu=
+t I merged a PR for RBD support a couple weeks ago and haven't had time=
+ to get it cleaned up and tests written. Do you need support for the AI=
+O interface in librbd?
+>
+> -Noah
+>
+> ----- Original Message -----
+> From: "Loic Dachary" <loic@dachary.org>
+> To: "Noah Watkins" <noah.watkins@inktank.com>
+> Cc: "Ceph Development" <ceph-devel@vger.kernel.org>, "Vincent Batts" =
+<vbatts@redhat.com>, "Johan Euphrosine" <proppy@google.com>
+> Sent: Monday, February 9, 2015 9:15:02 AM
+> Subject: Ceph bindings for go & docker
+>
+> Hi,
+>
+> I discovered https://github.com/noahdesu/go-ceph today :-) It would b=
+e useful in the context of a Ceph volume driver for docker ( see https:=
+//github.com/docker/docker/issues/10661 & https://github.com/docker/doc=
+ker/pull/8484 ).
+>
+> Are you a docker user by any chance ?
+>
+> --
+> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---voUlcP3JWHtscBiK0in5mXLaVlIUqkfOo
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlTZuHIACgkQ8dLMyEl6F22w1QCeMnM1wfjvuAqQ0hCOA9kQ0PJ9
-HkAAnRb2Xya1AEE6Y9b5PmOHqU9kJ9GT
-=XmoP
------END PGP SIGNATURE-----
-
---voUlcP3JWHtscBiK0in5mXLaVlIUqkfOo--
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
