@@ -1,120 +1,64 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: K/V interface buffer transaction
-Date: Tue, 10 Feb 2015 16:59:59 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F282A62CE@SACMBXIP02.sdcorp.global.sandisk.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: dumpling integration branch for v0.67.12 ready for QE
+Date: Tue, 10 Feb 2015 18:05:31 +0100
+Message-ID: <54DA3A5B.5050509@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="15vTVUKJSPObIrHW9ec1HNF44KdvaqCoN"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1bon0096.outbound.protection.outlook.com ([157.56.111.96]:41888
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752587AbbBJRAR convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Feb 2015 12:00:17 -0500
-Content-Language: en-US
+Received: from mail2.dachary.org ([91.121.57.175]:41868 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1750726AbbBJRFf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Feb 2015 12:05:35 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Sage Weil (sweil@redhat.com)" <sweil@redhat.com>, "Haomai Wang (haomaiwang@gmail.com)" <haomaiwang@gmail.com>
+To: Yuri Weinstein <yweinste@redhat.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Sage/Haomai,
-Our K/V store works best if the keys of the objects within a transactio=
-n are sorted. We are writing a new K/V Db interface and planning to sor=
-t the keys within a transaction. So, this raises one question, do we ne=
-ed to preserve the order of the operation within a transaction ?
-With the latest Ceph code, we are getting the following operations with=
-in a transaction.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--15vTVUKJSPObIrHW9ec1HNF44KdvaqCoN
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-2015-02-09 19:00:21.885646 7fde2a573700  0 Before ZSMPut :: p_num_obj =3D=
-  9
-2015-02-09 19:00:21.885653 7fde2a573700  0 p_obj[p_num_obj].flags =3D 0
-2015-02-09 19:00:21.885656 7fde2a573700  0 p_obj[p_num_obj].key_len =3D=
- 83
-2015-02-09 19:00:21.885657 7fde2a573700  0 p_obj[p_num_obj].data_len =3D=
- 225
-2015-02-09 19:00:21.885660 7fde2a573700  0 p_obj[p_num_obj].key =3D _GH=
-OBJTOSEQ_^A1%e6e_head!E63730A9!!1!!rbd_data%e100574b0dc51%e000000000000=
-0689!head=C3=BF
-2015-02-09 19:00:21.885663 7fde2a573700  0 p_obj[p_num_obj].flags =3D 0
-2015-02-09 19:00:21.885664 7fde2a573700  0 p_obj[p_num_obj].key_len =3D=
- 64
-2015-02-09 19:00:21.885665 7fde2a573700  0 p_obj[p_num_obj].data_len =3D=
- 178
-2015-02-09 19:00:21.885666 7fde2a573700  0 p_obj[p_num_obj].key =3D _SE=
-Q_0000000000000361__OBJOMAP__^A0000000011.00000000000000000554
-2015-02-09 19:00:21.885668 7fde2a573700  0 p_obj[p_num_obj].flags =3D 0
-2015-02-09 19:00:21.885669 7fde2a573700  0 p_obj[p_num_obj].key_len =3D=
- 39
-2015-02-09 19:00:21.885671 7fde2a573700  0 p_obj[p_num_obj].data_len =3D=
- 4
-2015-02-09 19:00:21.885672 7fde2a573700  0 p_obj[p_num_obj].key =3D _SE=
-Q_0000000000000361__OBJOMAP__^A_epoch
-2015-02-09 19:00:21.885673 7fde2a573700  0 p_obj[p_num_obj].flags =3D 0
-2015-02-09 19:00:21.885674 7fde2a573700  0 p_obj[p_num_obj].key_len =3D=
- 38
-2015-02-09 19:00:21.885675 7fde2a573700  0 p_obj[p_num_obj].data_len =3D=
- 713
-2015-02-09 19:00:21.885676 7fde2a573700  0 p_obj[p_num_obj].key =3D _SE=
-Q_0000000000000361__OBJOMAP__^A_info
-2015-02-09 19:00:21.885677 7fde2a573700  0 p_obj[p_num_obj].flags =3D 0
-2015-02-09 19:00:21.885679 7fde2a573700  0 p_obj[p_num_obj].key_len =3D=
- 48
-2015-02-09 19:00:21.885680 7fde2a573700  0 p_obj[p_num_obj].data_len =3D=
- 12
-2015-02-09 19:00:21.885681 7fde2a573700  0 p_obj[p_num_obj].key =3D _SE=
-Q_0000000000000361__OBJOMAP__^Acan_rollback_to
-2015-02-09 19:00:21.885682 7fde2a573700  0 p_obj[p_num_obj].flags =3D 0
-2015-02-09 19:00:21.885683 7fde2a573700  0 p_obj[p_num_obj].key_len =3D=
- 57
-2015-02-09 19:00:21.885684 7fde2a573700  0 p_obj[p_num_obj].data_len =3D=
- 12
-2015-02-09 19:00:21.885685 7fde2a573700  0 p_obj[p_num_obj].key =3D _SE=
-Q_0000000000000361__OBJOMAP__^Arollback_info_trimmed_to
-2015-02-09 19:00:21.885686 7fde2a573700  0 p_obj[p_num_obj].flags =3D 0
-2015-02-09 19:00:21.885688 7fde2a573700  0 p_obj[p_num_obj].key_len =3D=
- 31
-2015-02-09 19:00:21.885689 7fde2a573700  0 p_obj[p_num_obj].data_len =3D=
- 65536
-2015-02-09 19:00:21.885690 7fde2a573700  0 p_obj[p_num_obj].key =3D _SE=
-Q_0000000000001345_STRIP_^A54
-2015-02-09 19:00:21.885691 7fde2a573700  0 p_obj[p_num_obj].flags =3D 0
-2015-02-09 19:00:21.885692 7fde2a573700  0 p_obj[p_num_obj].key_len =3D=
- 34
-2015-02-09 19:00:21.885693 7fde2a573700  0 p_obj[p_num_obj].data_len =3D=
- 273
-2015-02-09 19:00:21.885695 7fde2a573700  0 p_obj[p_num_obj].key =3D _SE=
-Q_0000000000001345__OBJATTR__^A_
-2015-02-09 19:00:21.885696 7fde2a573700  0 p_obj[p_num_obj].flags =3D 0
-2015-02-09 19:00:21.885697 7fde2a573700  0 p_obj[p_num_obj].key_len =3D=
- 40
-2015-02-09 19:00:21.885698 7fde2a573700  0 p_obj[p_num_obj].data_len =3D=
- 31
-2015-02-09 19:00:21.885699 7fde2a573700  0 p_obj[p_num_obj].key =3D _SE=
-Q_0000000000001345__OBJATTR__^Asnapset
+Hi Yuri,
 
-Looking at this it seems we don't need to preserve the order.
-But, if I can remember correctly, at some point there will be some pglo=
-g trim operation will be issued from upstream and that may require some=
- ordering.
-Please share your thought around this.
+The dumpling integration branch for v0.67.12 as found at https://github.c=
+om/ceph/ceph/commits/dumpling-backports has been approved by Yehuda, Josh=
+ and Sam and is ready for QE.=20
 
-Thanks & Regards
-Somnath
+For the record, the head is https://github.com/ceph/ceph/commit/3944c77c4=
+04c4a05886fe8276d5d0dd7e4f20410
 
-________________________________
+I think it would be best for the QE tests to use the dumpling-backports. =
+The alternative would be to merge dumpling-backports into dumpling. Howev=
+er, since testing may take a long time and require more patches, it proba=
+bly is better to not do that iterative process on the dumpling branch its=
+elf. As it is now, there already are a number of commits in the dumpling =
+branch that should really be in the dumpling-backports: they do not belon=
+g to v0.67.11 and are going to be released in v0.67.12. In the future tho=
+ugh, the dumpling branch will only receive commits that have been careful=
+ly tested and all the integration work will be on the dumpling-backports =
+branch exclusively. So that third parties do not have to worry that the d=
+umpling branch contains commits that have not been tested yet.
 
-PLEASE NOTE: The information contained in this electronic mail message =
-is intended only for the use of the designated recipient(s) named above=
-=2E If the reader of this message is not the intended recipient, you ar=
-e hereby notified that you have received this message in error and that=
- any review, dissemination, distribution, or copying of this message is=
- strictly prohibited. If you have received this communication in error,=
- please notify the sender by telephone or e-mail (as shown above) immed=
-iately and destroy any and all copies of this message in your possessio=
-n (whether hard copies or electronically stored copies).
+Cheers
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--15vTVUKJSPObIrHW9ec1HNF44KdvaqCoN
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlTaOlsACgkQ8dLMyEl6F20LLgCfY0sc6hkFeqK3sp6iD1yP5w0r
+UW4An2dAUzK2jRippTcjrEspszRWVGZt
+=dtBw
+-----END PGP SIGNATURE-----
+
+--15vTVUKJSPObIrHW9ec1HNF44KdvaqCoN--
