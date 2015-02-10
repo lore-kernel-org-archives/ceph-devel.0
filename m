@@ -1,160 +1,122 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: dumpling integration branch for v0.67.12 ready for QE
-Date: Tue, 10 Feb 2015 19:04:51 +0100
-Message-ID: <54DA4843.10901@dachary.org>
-References: <54DA3A5B.5050509@dachary.org> <54483038.14900677.1423588756901.JavaMail.zimbra@redhat.com> <54DA3E72.9010600@dachary.org> <867276671.14905190.1423589356764.JavaMail.zimbra@redhat.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: K/V interface buffer transaction
+Date: Tue, 10 Feb 2015 18:23:07 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F282A63A6@SACMBXIP02.sdcorp.global.sandisk.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F282A62CE@SACMBXIP02.sdcorp.global.sandisk.com>
+ <CA+4uBUa+XBKHkx32hmZAvn4JOLp=o2WJywnA7OWXzSphvEcgjw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="Tlji9tu2JqWP0HccNg4gm5x3gGwFalujO"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:41912 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753193AbbBJSEy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Feb 2015 13:04:54 -0500
-In-Reply-To: <867276671.14905190.1423589356764.JavaMail.zimbra@redhat.com>
+Received: from mail-by2on0067.outbound.protection.outlook.com ([207.46.100.67]:56156
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752198AbbBJSXV (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 10 Feb 2015 13:23:21 -0500
+In-Reply-To: <CA+4uBUa+XBKHkx32hmZAvn4JOLp=o2WJywnA7OWXzSphvEcgjw@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yuri Weinstein <yweinste@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: "sjust@redhat.com" <sjust@redhat.com>
+Cc: "Sage Weil (sweil@redhat.com)" <sweil@redhat.com>, "Haomai Wang (haomaiwang@gmail.com)" <haomaiwang@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---Tlji9tu2JqWP0HccNg4gm5x3gGwFalujO
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-
-
-On 10/02/2015 18:29, Yuri Weinstein wrote:>=20
-> On 10/02/2015 18:19, Yuri Weinstein wrote:>=20
->> Loic,
->>
->> The only difference between options if we run suits on merged dumpling=
- vs dumpling-backports first - is time.
->> We will have to run suites on the final branch after the merge anyway.=
-
->=20
-> Could you explain why ? After merging dumpling and dumpling-backports w=
-ill be exactly the same.
->=20
-> Loic - I feel that finial QE validation should be done on the code that=
- gets actually released to customers, e.g. dumpling branch after the merg=
-e.  I do see your point about branches being identical and ready to chang=
-e my mind if you insist.  Does my reasoning make sense?  Please advice, h=
-ow we should proceed.
-
-The dumpling-backports branch currently is at=20
-
-https://github.com/ceph/ceph/commit/3944c77c404c4a05886fe8276d5d0dd7e4f20=
-410
-
-after a successful test run from QE and a merge into dumpling, the dumpli=
-ng branch will be at
-
-https://github.com/ceph/ceph/commit/3944c77c404c4a05886fe8276d5d0dd7e4f20=
-410
-
-as well. In other words they are identical and there is no point in runni=
-ng a test again. The only reason why they could be different is if a comm=
-it is inadvertently added to the dumpling branch while testing happens on=
- the dumpling-backport branc. In this case the presence of this new commi=
-t would be reason enough to run another round of test indeed. So the proc=
-ess could be:
-
-If tests are ok and merge can fast forward, then release.
-If tests are ok and merge cannot fast forward, send back to loic because =
-a commit was added by accident and needs to be approved by the leads.=20
-
-If testing happens on the dumpling branch, adding a commit to the dumplin=
-g branch would have side effects that could taint the results of the test=
-s or, even worse, go unnoticed. There is zero chance that someone adds a =
-commit to the dumpling-backports branch and that gives us something stabl=
-e. On the contrary, the odds that someone adds a commit to the dumpling b=
-ranch are high, specially if the tests take a few weeks to complete.=20
-
-As Greg mentioned, merging in dumpling does not matter much for this roun=
-d because it is what has been done in the past. And to be honest, I would=
- not mind if an additional commit taints the process by accident. However=
-, unless there is a reason not to, it would be good to establish a proces=
-s that is solid if we can.=20
-
-I've witnessed Alfredo's pain on each release and an additional benefit o=
-f having a dumpling-backports branch that nobody tampers with just occure=
-d to me. When and if QE finds that dumpling-backports is fit for release,=
- instead of merging it into dumpling it could be handed over to Alfredo f=
-or release. And he would be able to proceed knowing it is stable and won'=
-t be moving forward. Once the release is done and the tag set to the prop=
-er commit, the dumpling branch can be reset to dumpling-backports. If com=
-mits were added during the process, their authors could be notified that =
-they were discarded and need to be merge again. That would not work for t=
-he master branch but it would definitely be possible for the stable branc=
-hes because such "out of process" commits are rarely added.
-
-I've not thought this through, but the more I think about it the more I l=
-ike the idea of using dumpling-backports as a staging area until the rele=
-ase is final.
-
-What do you think ?=20
-
->=20
->>
->> Unless I hear otherwise, I will schedule suites to run on dumpling-bac=
-kports first (as you are suggesting, with higher priority) and then assum=
-ing that we resolved all issues, we will run on the dumpling merged.=20
->>
->> Sage, pls correct if this is not what has to be done.
->>
->>
->> Thx
->> YuriW
->>
->> ----- Original Message -----
->> From: "Loic Dachary" <loic@dachary.org>
->> To: "Yuri Weinstein" <yweinste@redhat.com>
->> Cc: "Ceph Development" <ceph-devel@vger.kernel.org>
->> Sent: Tuesday, February 10, 2015 9:05:31 AM
->> Subject: dumpling integration branch for v0.67.12 ready for QE
->>
->> Hi Yuri,
->>
->> The dumpling integration branch for v0.67.12 as found at https://githu=
-b.com/ceph/ceph/commits/dumpling-backports has been approved by Yehuda, J=
-osh and Sam and is ready for QE.=20
->>
->> For the record, the head is https://github.com/ceph/ceph/commit/3944c7=
-7c404c4a05886fe8276d5d0dd7e4f20410
->>
->> I think it would be best for the QE tests to use the dumpling-backport=
-s. The alternative would be to merge dumpling-backports into dumpling. Ho=
-wever, since testing may take a long time and require more patches, it pr=
-obably is better to not do that iterative process on the dumpling branch =
-itself. As it is now, there already are a number of commits in the dumpli=
-ng branch that should really be in the dumpling-backports: they do not be=
-long to v0.67.11 and are going to be released in v0.67.12. In the future =
-though, the dumpling branch will only receive commits that have been care=
-fully tested and all the integration work will be on the dumpling-backpor=
-ts branch exclusively. So that third parties do not have to worry that th=
-e dumpling branch contains commits that have not been tested yet.
->>
->> Cheers
->>
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---Tlji9tu2JqWP0HccNg4gm5x3gGwFalujO
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlTaSEMACgkQ8dLMyEl6F20gJQCgtnECjWYztJfpbDxU8UMtCvCt
-peMAn1OpKQwokYijmid1Ll88hAAiw+NP
-=iD6e
------END PGP SIGNATURE-----
-
---Tlji9tu2JqWP0HccNg4gm5x3gGwFalujO--
+VGhhbmtzIFNhbSAhDQpTbywgaXMgaXQgc2FmZSB0byBkbyBvcmRlcmluZyBpZiBpbiBhIHRyYW5z
+YWN0aW9uICpubyogcmVtb3ZlL3RydW5jYXRlL2NyZWF0ZS9hZGQgY2FsbCA/DQpGb3IgZXhhbXBs
+ZSwgZG8gd2UgbmVlZCB0byBwcmVzZXJ2ZSBvcmRlcmluZyBpbiBjYXNlIG9mIHRoZSBiZWxvdyB0
+cmFuc2FjdGlvbiA/DQpJdCB3aWxsIGJlIGhlbHBmdWwgaWYgeW91IGNhbiBnaXZlIHNvbWUgaW5z
+aWdodCBpbiB3aGF0IHNjZW5hcmlvIHByZXNlcnZpbmcgb3JkZXIgaXMgKm11c3QqLg0KDQpSZWdh
+cmRzDQpTb21uYXRoDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogU2FtdWVsIEp1
+c3QgW21haWx0bzpzYW0uanVzdEBpbmt0YW5rLmNvbV0gDQpTZW50OiBUdWVzZGF5LCBGZWJydWFy
+eSAxMCwgMjAxNSA5OjIyIEFNDQpUbzogU29tbmF0aCBSb3kNCkNjOiBTYWdlIFdlaWwgKHN3ZWls
+QHJlZGhhdC5jb20pOyBIYW9tYWkgV2FuZyAoaGFvbWFpd2FuZ0BnbWFpbC5jb20pOyBDZXBoIERl
+dmVsb3BtZW50DQpTdWJqZWN0OiBSZTogSy9WIGludGVyZmFjZSBidWZmZXIgdHJhbnNhY3Rpb24N
+Cg0KSW4gZ2VuZXJhbCwgeW91IGRvIG5lZWQgdG8gcHJlc2VydmUgdGhlIG9yZGVyLiAgWW91IGFy
+ZSBmcmVlIHRvIGRldGVybWluZSB3aGVuIHJlLW9yZGVyaW5nIGlzIHNhZmUgdGhvdWdoLg0KLVNh
+bQ0KDQpPbiBUdWUsIEZlYiAxMCwgMjAxNSBhdCA4OjU5IEFNLCBTb21uYXRoIFJveSA8U29tbmF0
+aC5Sb3lAc2FuZGlzay5jb20+IHdyb3RlOg0KPiBIaSBTYWdlL0hhb21haSwNCj4gT3VyIEsvViBz
+dG9yZSB3b3JrcyBiZXN0IGlmIHRoZSBrZXlzIG9mIHRoZSBvYmplY3RzIHdpdGhpbiBhIHRyYW5z
+YWN0aW9uIGFyZSBzb3J0ZWQuIFdlIGFyZSB3cml0aW5nIGEgbmV3IEsvViBEYiBpbnRlcmZhY2Ug
+YW5kIHBsYW5uaW5nIHRvIHNvcnQgdGhlIGtleXMgd2l0aGluIGEgdHJhbnNhY3Rpb24uIFNvLCB0
+aGlzIHJhaXNlcyBvbmUgcXVlc3Rpb24sIGRvIHdlIG5lZWQgdG8gcHJlc2VydmUgdGhlIG9yZGVy
+IG9mIHRoZSBvcGVyYXRpb24gd2l0aGluIGEgdHJhbnNhY3Rpb24gPw0KPiBXaXRoIHRoZSBsYXRl
+c3QgQ2VwaCBjb2RlLCB3ZSBhcmUgZ2V0dGluZyB0aGUgZm9sbG93aW5nIG9wZXJhdGlvbnMgd2l0
+aGluIGEgdHJhbnNhY3Rpb24uDQo+DQo+IDIwMTUtMDItMDkgMTk6MDA6MjEuODg1NjQ2IDdmZGUy
+YTU3MzcwMCAgMCBCZWZvcmUgWlNNUHV0IDo6IHBfbnVtX29iaiANCj4gPSAgOQ0KPiAyMDE1LTAy
+LTA5IDE5OjAwOjIxLjg4NTY1MyA3ZmRlMmE1NzM3MDAgIDAgcF9vYmpbcF9udW1fb2JqXS5mbGFn
+cyA9IDANCj4gMjAxNS0wMi0wOSAxOTowMDoyMS44ODU2NTYgN2ZkZTJhNTczNzAwICAwIHBfb2Jq
+W3BfbnVtX29ial0ua2V5X2xlbiA9IA0KPiA4Mw0KPiAyMDE1LTAyLTA5IDE5OjAwOjIxLjg4NTY1
+NyA3ZmRlMmE1NzM3MDAgIDAgcF9vYmpbcF9udW1fb2JqXS5kYXRhX2xlbiA9IA0KPiAyMjUNCj4g
+MjAxNS0wMi0wOSAxOTowMDoyMS44ODU2NjAgN2ZkZTJhNTczNzAwICAwIHBfb2JqW3BfbnVtX29i
+al0ua2V5ID0gDQo+IF9HSE9CSlRPU0VRX15BMSVlNmVfaGVhZCFFNjM3MzBBOSEhMSEhcmJkX2Rh
+dGElZTEwMDU3NGIwZGM1MSVlMDAwMDAwMDANCj4gMDAwMDA2ODkhaGVhZMO/DQo+IDIwMTUtMDIt
+MDkgMTk6MDA6MjEuODg1NjYzIDdmZGUyYTU3MzcwMCAgMCBwX29ialtwX251bV9vYmpdLmZsYWdz
+ID0gMA0KPiAyMDE1LTAyLTA5IDE5OjAwOjIxLjg4NTY2NCA3ZmRlMmE1NzM3MDAgIDAgcF9vYmpb
+cF9udW1fb2JqXS5rZXlfbGVuID0gDQo+IDY0DQo+IDIwMTUtMDItMDkgMTk6MDA6MjEuODg1NjY1
+IDdmZGUyYTU3MzcwMCAgMCBwX29ialtwX251bV9vYmpdLmRhdGFfbGVuID0gDQo+IDE3OA0KPiAy
+MDE1LTAyLTA5IDE5OjAwOjIxLjg4NTY2NiA3ZmRlMmE1NzM3MDAgIDAgcF9vYmpbcF9udW1fb2Jq
+XS5rZXkgPSANCj4gX1NFUV8wMDAwMDAwMDAwMDAwMzYxX19PQkpPTUFQX19eQTAwMDAwMDAwMTEu
+MDAwMDAwMDAwMDAwMDAwMDA1NTQNCj4gMjAxNS0wMi0wOSAxOTowMDoyMS44ODU2NjggN2ZkZTJh
+NTczNzAwICAwIHBfb2JqW3BfbnVtX29ial0uZmxhZ3MgPSAwDQo+IDIwMTUtMDItMDkgMTk6MDA6
+MjEuODg1NjY5IDdmZGUyYTU3MzcwMCAgMCBwX29ialtwX251bV9vYmpdLmtleV9sZW4gPSANCj4g
+MzkNCj4gMjAxNS0wMi0wOSAxOTowMDoyMS44ODU2NzEgN2ZkZTJhNTczNzAwICAwIHBfb2JqW3Bf
+bnVtX29ial0uZGF0YV9sZW4gPSANCj4gNA0KPiAyMDE1LTAyLTA5IDE5OjAwOjIxLjg4NTY3MiA3
+ZmRlMmE1NzM3MDAgIDAgcF9vYmpbcF9udW1fb2JqXS5rZXkgPSANCj4gX1NFUV8wMDAwMDAwMDAw
+MDAwMzYxX19PQkpPTUFQX19eQV9lcG9jaA0KPiAyMDE1LTAyLTA5IDE5OjAwOjIxLjg4NTY3MyA3
+ZmRlMmE1NzM3MDAgIDAgcF9vYmpbcF9udW1fb2JqXS5mbGFncyA9IDANCj4gMjAxNS0wMi0wOSAx
+OTowMDoyMS44ODU2NzQgN2ZkZTJhNTczNzAwICAwIHBfb2JqW3BfbnVtX29ial0ua2V5X2xlbiA9
+IA0KPiAzOA0KPiAyMDE1LTAyLTA5IDE5OjAwOjIxLjg4NTY3NSA3ZmRlMmE1NzM3MDAgIDAgcF9v
+YmpbcF9udW1fb2JqXS5kYXRhX2xlbiA9IA0KPiA3MTMNCj4gMjAxNS0wMi0wOSAxOTowMDoyMS44
+ODU2NzYgN2ZkZTJhNTczNzAwICAwIHBfb2JqW3BfbnVtX29ial0ua2V5ID0gDQo+IF9TRVFfMDAw
+MDAwMDAwMDAwMDM2MV9fT0JKT01BUF9fXkFfaW5mbw0KPiAyMDE1LTAyLTA5IDE5OjAwOjIxLjg4
+NTY3NyA3ZmRlMmE1NzM3MDAgIDAgcF9vYmpbcF9udW1fb2JqXS5mbGFncyA9IDANCj4gMjAxNS0w
+Mi0wOSAxOTowMDoyMS44ODU2NzkgN2ZkZTJhNTczNzAwICAwIHBfb2JqW3BfbnVtX29ial0ua2V5
+X2xlbiA9IA0KPiA0OA0KPiAyMDE1LTAyLTA5IDE5OjAwOjIxLjg4NTY4MCA3ZmRlMmE1NzM3MDAg
+IDAgcF9vYmpbcF9udW1fb2JqXS5kYXRhX2xlbiA9IA0KPiAxMg0KPiAyMDE1LTAyLTA5IDE5OjAw
+OjIxLjg4NTY4MSA3ZmRlMmE1NzM3MDAgIDAgcF9vYmpbcF9udW1fb2JqXS5rZXkgPSANCj4gX1NF
+UV8wMDAwMDAwMDAwMDAwMzYxX19PQkpPTUFQX19eQWNhbl9yb2xsYmFja190bw0KPiAyMDE1LTAy
+LTA5IDE5OjAwOjIxLjg4NTY4MiA3ZmRlMmE1NzM3MDAgIDAgcF9vYmpbcF9udW1fb2JqXS5mbGFn
+cyA9IDANCj4gMjAxNS0wMi0wOSAxOTowMDoyMS44ODU2ODMgN2ZkZTJhNTczNzAwICAwIHBfb2Jq
+W3BfbnVtX29ial0ua2V5X2xlbiA9IA0KPiA1Nw0KPiAyMDE1LTAyLTA5IDE5OjAwOjIxLjg4NTY4
+NCA3ZmRlMmE1NzM3MDAgIDAgcF9vYmpbcF9udW1fb2JqXS5kYXRhX2xlbiA9IA0KPiAxMg0KPiAy
+MDE1LTAyLTA5IDE5OjAwOjIxLjg4NTY4NSA3ZmRlMmE1NzM3MDAgIDAgcF9vYmpbcF9udW1fb2Jq
+XS5rZXkgPSANCj4gX1NFUV8wMDAwMDAwMDAwMDAwMzYxX19PQkpPTUFQX19eQXJvbGxiYWNrX2lu
+Zm9fdHJpbW1lZF90bw0KPiAyMDE1LTAyLTA5IDE5OjAwOjIxLjg4NTY4NiA3ZmRlMmE1NzM3MDAg
+IDAgcF9vYmpbcF9udW1fb2JqXS5mbGFncyA9IDANCj4gMjAxNS0wMi0wOSAxOTowMDoyMS44ODU2
+ODggN2ZkZTJhNTczNzAwICAwIHBfb2JqW3BfbnVtX29ial0ua2V5X2xlbiA9IA0KPiAzMQ0KPiAy
+MDE1LTAyLTA5IDE5OjAwOjIxLjg4NTY4OSA3ZmRlMmE1NzM3MDAgIDAgcF9vYmpbcF9udW1fb2Jq
+XS5kYXRhX2xlbiA9IA0KPiA2NTUzNg0KPiAyMDE1LTAyLTA5IDE5OjAwOjIxLjg4NTY5MCA3ZmRl
+MmE1NzM3MDAgIDAgcF9vYmpbcF9udW1fb2JqXS5rZXkgPSANCj4gX1NFUV8wMDAwMDAwMDAwMDAx
+MzQ1X1NUUklQX15BNTQNCj4gMjAxNS0wMi0wOSAxOTowMDoyMS44ODU2OTEgN2ZkZTJhNTczNzAw
+ICAwIHBfb2JqW3BfbnVtX29ial0uZmxhZ3MgPSAwDQo+IDIwMTUtMDItMDkgMTk6MDA6MjEuODg1
+NjkyIDdmZGUyYTU3MzcwMCAgMCBwX29ialtwX251bV9vYmpdLmtleV9sZW4gPSANCj4gMzQNCj4g
+MjAxNS0wMi0wOSAxOTowMDoyMS44ODU2OTMgN2ZkZTJhNTczNzAwICAwIHBfb2JqW3BfbnVtX29i
+al0uZGF0YV9sZW4gPSANCj4gMjczDQo+IDIwMTUtMDItMDkgMTk6MDA6MjEuODg1Njk1IDdmZGUy
+YTU3MzcwMCAgMCBwX29ialtwX251bV9vYmpdLmtleSA9IA0KPiBfU0VRXzAwMDAwMDAwMDAwMDEz
+NDVfX09CSkFUVFJfX15BXw0KPiAyMDE1LTAyLTA5IDE5OjAwOjIxLjg4NTY5NiA3ZmRlMmE1NzM3
+MDAgIDAgcF9vYmpbcF9udW1fb2JqXS5mbGFncyA9IDANCj4gMjAxNS0wMi0wOSAxOTowMDoyMS44
+ODU2OTcgN2ZkZTJhNTczNzAwICAwIHBfb2JqW3BfbnVtX29ial0ua2V5X2xlbiA9IA0KPiA0MA0K
+PiAyMDE1LTAyLTA5IDE5OjAwOjIxLjg4NTY5OCA3ZmRlMmE1NzM3MDAgIDAgcF9vYmpbcF9udW1f
+b2JqXS5kYXRhX2xlbiA9IA0KPiAzMQ0KPiAyMDE1LTAyLTA5IDE5OjAwOjIxLjg4NTY5OSA3ZmRl
+MmE1NzM3MDAgIDAgcF9vYmpbcF9udW1fb2JqXS5rZXkgPSANCj4gX1NFUV8wMDAwMDAwMDAwMDAx
+MzQ1X19PQkpBVFRSX19eQXNuYXBzZXQNCj4NCj4gTG9va2luZyBhdCB0aGlzIGl0IHNlZW1zIHdl
+IGRvbid0IG5lZWQgdG8gcHJlc2VydmUgdGhlIG9yZGVyLg0KPiBCdXQsIGlmIEkgY2FuIHJlbWVt
+YmVyIGNvcnJlY3RseSwgYXQgc29tZSBwb2ludCB0aGVyZSB3aWxsIGJlIHNvbWUgcGdsb2cgdHJp
+bSBvcGVyYXRpb24gd2lsbCBiZSBpc3N1ZWQgZnJvbSB1cHN0cmVhbSBhbmQgdGhhdCBtYXkgcmVx
+dWlyZSBzb21lIG9yZGVyaW5nLg0KPiBQbGVhc2Ugc2hhcmUgeW91ciB0aG91Z2h0IGFyb3VuZCB0
+aGlzLg0KPg0KPiBUaGFua3MgJiBSZWdhcmRzDQo+IFNvbW5hdGgNCj4NCj4gX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX18NCj4NCj4gUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBj
+b250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5
+IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4g
+SWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGll
+bnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBt
+ZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3Ry
+aWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRl
+ZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVh
+c2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJv
+dmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1l
+c3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9u
+aWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KPg0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRo
+aXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgDQo+IGluIHRo
+ZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFq
+b3Jkb21vIA0KPiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZv
+Lmh0bWwNCg==
