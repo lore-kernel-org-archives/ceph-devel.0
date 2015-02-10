@@ -1,105 +1,62 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: [ceph-users] keyvaluestore backend metadata overhead
-Date: Tue, 10 Feb 2015 14:33:23 +0800
-Message-ID: <CACJqLybC77hydikKMXb5CT1Upv-fWrVZWdhbwvx7eXK4yMXKaw@mail.gmail.com>
-References: <CAC8iE5iHTEfSQL978paWpu9hSfUbE65OVT_dKi2P=yvWSQ5JhA@mail.gmail.com>
-	<alpine.DEB.2.00.1501291447290.3895@cobra.newdream.net>
-	<CACJqLya-SNwudLTOqu2RPgr3_MZKzFWi9gXYH_xCg1WjxAx59w@mail.gmail.com>
-	<CAC8iE5jrYquoQ+n+uwiiZ5uevXfipGsab9a_CgjtZoW9h1L0SQ@mail.gmail.com>
-	<CACJqLyZnx28QEDU-Jy3KjzS6sumMG_ivqJQ9Ye_cg++Cj8WWQg@mail.gmail.com>
-	<CAC8iE5gmiFFGikg0JatUs-7Jfv3sgFPd3ESx5+bOdkYSP6ByKg@mail.gmail.com>
-	<CAC8iE5ggZme9BKz7noCynEpjd2yhCnoK5yd79pM2g7-237ZxkA@mail.gmail.com>
-	<CACJqLyZSDrCZKvC2REFzXvT+owV38de4ys+JmcENEL=zPtQGBg@mail.gmail.com>
-	<CAC8iE5gK_bO9CMJTbnRzz3zzgOrDJ8vZOUX9hjjyQAQQQzR-hw@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: RBD tests on the next dumpling release
+Date: Tue, 10 Feb 2015 08:51:14 +0100
+Message-ID: <54D9B872.502@dachary.org>
+References: <54D3EEF6.1070701@dachary.org> <1050495133.7647881.1423231520223.JavaMail.zimbra@redhat.com> <54D4CD03.8000806@dachary.org> <408976183.7693525.1423233776228.JavaMail.zimbra@redhat.com> <54D8882A.6010804@dachary.org> <1749420664.9284413.1423513637594.JavaMail.zimbra@redhat.com> <54D94BF8.7080008@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="voUlcP3JWHtscBiK0in5mXLaVlIUqkfOo"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-we0-f173.google.com ([74.125.82.173]:38927 "EHLO
-	mail-we0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750973AbbBJGdZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Feb 2015 01:33:25 -0500
-Received: by mail-we0-f173.google.com with SMTP id w55so19969031wes.4
-        for <ceph-devel@vger.kernel.org>; Mon, 09 Feb 2015 22:33:24 -0800 (PST)
-In-Reply-To: <CAC8iE5gK_bO9CMJTbnRzz3zzgOrDJ8vZOUX9hjjyQAQQQzR-hw@mail.gmail.com>
+Received: from mail2.dachary.org ([91.121.57.175]:41539 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752421AbbBJHwY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Feb 2015 02:52:24 -0500
+In-Reply-To: <54D94BF8.7080008@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Chris Pacejo <cpacejo@clearskydata.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Josh Durgin <jdurgin@redhat.com>, Jason Dillaman <dillaman@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Tue, Feb 10, 2015 at 2:29 AM, Chris Pacejo <cpacejo@clearskydata.com> wrote:
-> On Tue, Feb 3, 2015 at 9:31 PM, Haomai Wang <haomaiwang@gmail.com> wrote:
->> Maybe more detail number can help us a bit.
->
-> Here's what we're testing with and what we observe:
->
-> Hardware:
->  2x6-core hyperthreaded Xeon E5-2620 v2 2.10GHz CPU
->  8x8 GiB DDR3 RAM
->  4x4 TB 7200 RPM 8 ms 183 MB/s SAS rotary disks
->
-> Software:
->  CentOS 7
->  CEPH 0.91
->  4 OSDs
->  osd pool default size = 1 (just for testing!)
->  keyvaluestore op threads = 16
->  keyvaluestore backend = mysql (our own backend)
->  one MySQL process per OSD, each writing to a separate disk
->
-> Test setup:
->  rados bench on a fresh install
->  256 concurrent writes
->  360 seconds
->  2700 byte objects, and 1 MiB objects
->  measure throughput with rados bench
->  measure CPU usage by observing top
->  measure max concurrent transaction submits by instrumenting the
-> KeyValueDB interface
->
-> With this setup, we observe that, with 2700 byte objects:
->
->  7.4 MiB/s (~2900 ops/s) throughput,
->  170%/170%/60%/60% OSD CPU usage,
->  200%/200%/65%/65% MySQL CPU usage, and
->  3/3/1/1 maximum concurrent transaction submits;
->
-> and with 1 MiB objects:
->
->  50.7 MiB/s (~51 ops/s) throughput,
->  14%/14%/4%/4% OSD CPU usage,
->  50%/50%/15%/15% MySQL CPU usage, and
->  3/3/1/1 maximum concurrent transaction submits.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--voUlcP3JWHtscBiK0in5mXLaVlIUqkfOo
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-It looks like that a little unbalance ops for four osds?
+Thanks for the confirmation :-)
 
->
-> We know that our transaction concurrency measurement is not buggy, as
-> it will consistently report up to `keyvaluestore op threads`
-> concurrent submits both on OSD startup on this same hardware, and
-> during benchmarking in a resource-constrained VM.  We are pretty sure
-> MySQL is not the bottleneck, since we've been able to throw much more
-> at it (concurrently); at least 10 kops/s per instance.  (Sequentially
-> it is not so good; hence our fixation on the low transaction
-> concurrency!)
->
-> Let me know if there are any other figures which would be helpful in
-> diagnosing why the OSDs are not issuing as many concurrent
-> transactions as we'd like, or why they are using so much CPU.  Thanks
-> for your help.
+On 10/02/2015 01:08, Josh Durgin wrote:
+> On 02/09/2015 12:27 PM, Jason Dillaman wrote:
+>> I would agree with your assessment that http://tracker.ceph.com/issues=
+/10560#teuthology-runs-on-3944c77c404c4a05886fe8276d5d0dd7e4f20410-6-febr=
+uary sounds like a repeat of http://tracker.ceph.com/issues/4959.
+>>
+>> Josh, thoughts?
+>>
+>=20
+> Yeah, that looks the same. I think we can ignore it.
+>=20
+> --=20
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-I think you can look at perf dump result to see whether exists full
-throttle queue, such as keyvaluestore queue.
-
-Sorry, I still can't think of anything may prevent concurrent level
-above objectstore backend, at most of cases, backend should be the
-bottleneck
-
->
-> - Chris
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
 
+--voUlcP3JWHtscBiK0in5mXLaVlIUqkfOo
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
--- 
-Best Regards,
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
 
-Wheat
+iEYEARECAAYFAlTZuHIACgkQ8dLMyEl6F22w1QCeMnM1wfjvuAqQ0hCOA9kQ0PJ9
+HkAAnRb2Xya1AEE6Y9b5PmOHqU9kJ9GT
+=XmoP
+-----END PGP SIGNATURE-----
+
+--voUlcP3JWHtscBiK0in5mXLaVlIUqkfOo--
