@@ -1,29 +1,77 @@
-From: Josh Durgin <jdurgin@redhat.com>
-Subject: Re: RBD tests on the next dumpling release
-Date: Mon, 09 Feb 2015 16:08:24 -0800
-Message-ID: <54D94BF8.7080008@redhat.com>
-References: <54D3EEF6.1070701@dachary.org> <1050495133.7647881.1423231520223.JavaMail.zimbra@redhat.com> <54D4CD03.8000806@dachary.org> <408976183.7693525.1423233776228.JavaMail.zimbra@redhat.com> <54D8882A.6010804@dachary.org> <1749420664.9284413.1423513637594.JavaMail.zimbra@redhat.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Bounding OSD memory requirements during peering/recovery
+Date: Mon, 9 Feb 2015 17:51:53 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1502091746100.3035@cobra.newdream.net>
+References: <54D78939.4000708@cam.ac.uk> <CAC6JEv8NYw2qk9O7pcSmrVwd2p=7mfLDrA+1tBmFxf2-_f-tZw@mail.gmail.com> <54D92850.5080409@cam.ac.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f41.google.com ([209.85.220.41]:43108 "EHLO
-	mail-pa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760105AbbBJAHs (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Feb 2015 19:07:48 -0500
-Received: by mail-pa0-f41.google.com with SMTP id kx10so12867081pab.0
-        for <ceph-devel@vger.kernel.org>; Mon, 09 Feb 2015 16:07:48 -0800 (PST)
-In-Reply-To: <1749420664.9284413.1423513637594.JavaMail.zimbra@redhat.com>
+Received: from cobra.newdream.net ([66.33.216.30]:51353 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753640AbbBJBvy (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Feb 2015 20:51:54 -0500
+In-Reply-To: <54D92850.5080409@cam.ac.uk>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jason Dillaman <dillaman@redhat.com>, Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: David McBride <dwm37@cam.ac.uk>
+Cc: Gregory Farnum <greg@gregs42.com>, Ceph-devel <ceph-devel@vger.kernel.org>
 
-On 02/09/2015 12:27 PM, Jason Dillaman wrote:
-> I would agree with your assessment that http://tracker.ceph.com/issues/10560#teuthology-runs-on-3944c77c404c4a05886fe8276d5d0dd7e4f20410-6-february sounds like a repeat of http://tracker.ceph.com/issues/4959.
->
-> Josh, thoughts?
->
+On Mon, 9 Feb 2015, David McBride wrote:
+> On 09/02/15 15:31, Gregory Farnum wrote:
+> 
+> > So, memory usage of an OSD is usually linear in the number of PGs it
+> > hosts. However, that memory can also grow based on at least one other
+> > thing: the number of OSD Maps required to go through peering. It
+> > *looks* to me like this is what you're running in to, not growth on
+> > the number of state machines. In particular, those past_intervals you
+> > mentioned. ;)
+> 
+> Hi Greg,
+> 
+> Right, that sounds entirely plausible, and is very helpful.
+> 
+> In practice, that means I'll need to be careful to avoid this situation
+> occurring in production ? but given that's unlikely to occur except in the
+> case of non-trivial neglect, I don't think I need be particularly concerned.
+> 
+> (Happily, I'm in the situation that my existing cluster is purely for testing
+> purposes; the data is expendable.)
+> 
+> That said, for my own peace of mind, it would be valuable to have a procedure
+> that can be used to recover from this state, even if it's unlikely to occur in
+> practice.
 
-Yeah, that looks the same. I think we can ignore it.
+The best luck I've had recovering from situations is something like:
+
+- stop all osds
+- osd set nodown
+- osd set nobackfill
+- osd set noup
+- set map cache size smaller to reduce memory footprint.  
+
+  osd map cache size = 50
+  osd map max advance = 25
+  osd map share max epochs = 25
+  osd pg epoch persisted max stale = 25
+
+(basically, keep most of those values in sync, and smaller than 
+the map cache)
+
+- start all osds, let them catch up on their maps.  (if they can't fit in 
+memory at this point then another creative solution will be needed)
+- unset noup so that everyone peers at once
+
+It may also help to try to match the in/out state with where the data 
+actually resides (i.e. mark an osd back in if it was marked out but the 
+cluster didn't rebalance).
+
+> I'm currently running an experiment where I augment the RAM of each OSD node
+> with 10GB swapfiles on each spinning OSD disk, so that there's a big-enough
+> backing-store to complete log reconstruction.
+
+Swap tends to not work very well.. make sure nodown is set if you have to 
+go this route or else osds will get marked down when they miss 
+heartbeats...
+
+sage
 
