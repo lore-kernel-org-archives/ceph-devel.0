@@ -1,38 +1,63 @@
-From: GuangYang <yguang11@outlook.com>
-Subject: Upgrade/rollback
-Date: Wed, 11 Feb 2015 12:09:24 +0000
-Message-ID: <BLU175-W8D101EDE23DCDD591ADF6DF250@phx.gbl>
+From: Loic Dachary <loic@dachary.org>
+Subject: SHEC updates to the erasure code non regression corpus
+Date: Wed, 11 Feb 2015 13:28:28 +0100
+Message-ID: <54DB4AEC.6000507@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="t2OpXDO1SO775MmTJwtnVqPqVNGMiPw6u"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from blu004-omc4s15.hotmail.com ([65.55.111.154]:58478 "EHLO
-	BLU004-OMC4S15.hotmail.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751645AbbBKMKA convert rfc822-to-8bit
-	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 11 Feb 2015 07:10:00 -0500
+Received: from mail2.dachary.org ([91.121.57.175]:42414 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752081AbbBKM2e (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Feb 2015 07:28:34 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi ceph-devel,
-Recently we are trying the upgrade from Firefly to Giant and it goes pr=
-etty smoothly, however, the problem is that it does not support rollbac=
-k and seems like that is by design. For example, there is new feature f=
-lag / metadata [1] added in the new version and they are persisted. As =
-a result, the old version of software does not recognize those values a=
-nd will crash themselves.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--t2OpXDO1SO775MmTJwtnVqPqVNGMiPw6u
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-Ideally we never rollback, but for unknown reasons we couldn't fix in a=
- timely manner, we might want to rollback first. Is that something we w=
-ill consider to handle?
+Hi,
 
-[1]=A0https://github.com/ceph/ceph/commit/1fe8b846641486cc294fe7e1d2450=
-132c38d2dba
+I've updated the erasure code corpus that verifies the encoding of erasur=
+e coded chunks do not change over time with a version that includes the S=
+HEC erasure code plugin.
 
-Thanks,
-Guang 		 	   		  --
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+https://github.com/ceph/ceph-erasure-code-corpus/commit/498b0102955b74781=
+3182734e13e75195f2a02a9
+
+=46rom now on it will run each time someone does "make check", but only i=
+f the sources are after
+
+$ git rev-parse v0.92-988-g7df0556
+7df0556210be3afdc02e2ca41b3a3b60569b753a
+
+I would be grateful if you could verify that it works as intended. The pr=
+ocess for updating the corpus has been documented at https://github.com/c=
+eph/ceph-erasure-code-corpus#ceph-erasure-code-corpus : it was difficult =
+to guess how it works ;-)
+
+Cheers
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--t2OpXDO1SO775MmTJwtnVqPqVNGMiPw6u
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlTbSuwACgkQ8dLMyEl6F21PYQCffckf8KS5JG63kXq/YZpMoRxz
+A3AAoJcGBIeSTsT9RGkcX2LDSR5VSqSk
+=BuO6
+-----END PGP SIGNATURE-----
+
+--t2OpXDO1SO775MmTJwtnVqPqVNGMiPw6u--
