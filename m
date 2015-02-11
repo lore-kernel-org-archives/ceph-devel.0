@@ -1,44 +1,79 @@
-From: "Cook, Nigel" <nigel.cook@intel.com>
-Subject: RE: maximum key size
-Date: Wed, 11 Feb 2015 14:46:35 +0000
-Message-ID: <88C3E003BB3649489ED4ECA6C8041047744D12@ORSMSX102.amr.corp.intel.com>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: maximum key size
+Date: Wed, 11 Feb 2015 22:49:52 +0800
+Message-ID: <CACJqLyYLBnj_R3vgNzFWq3d8qKMqkuJtY2GLYwg2gEe=ZqXW6g@mail.gmail.com>
 References: <88C3E003BB3649489ED4ECA6C8041047744801@ORSMSX102.amr.corp.intel.com>
- <CACJqLyZO4goqqPcqDFsHN5xPiOEV670zwzDcGkR-At1ALV-btw@mail.gmail.com>
+	<CACJqLyZO4goqqPcqDFsHN5xPiOEV670zwzDcGkR-At1ALV-btw@mail.gmail.com>
+	<88C3E003BB3649489ED4ECA6C8041047744D12@ORSMSX102.amr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:17815 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752766AbbBKOqi (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 11 Feb 2015 09:46:38 -0500
-In-Reply-To: <CACJqLyZO4goqqPcqDFsHN5xPiOEV670zwzDcGkR-At1ALV-btw@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-we0-f178.google.com ([74.125.82.178]:65217 "EHLO
+	mail-we0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752388AbbBKOtx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Feb 2015 09:49:53 -0500
+Received: by mail-we0-f178.google.com with SMTP id w62so3874073wes.9
+        for <ceph-devel@vger.kernel.org>; Wed, 11 Feb 2015 06:49:52 -0800 (PST)
+In-Reply-To: <88C3E003BB3649489ED4ECA6C8041047744D12@ORSMSX102.amr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomaiwang@gmail.com>
+To: "Cook, Nigel" <nigel.cook@intel.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SW4gUkJEIGFuZCBPYmplY3QgZ2F0ZXdheSB1c2UgY2FzZXMsIGNhbiB5b3UgdGVsbCBtZSB3aGF0
-IHRoZSB0eXBpY2FsIGtleSBsZW5ndGggaXM/DQoNCldoYXQgaXMgdGhlIG9iamVjdCBuYW1lIHVz
-ZWQgZm9yIHZzIHRoZSBvbWFwIGtleT8NCg0KUmVnYXJkcywNCk5pZ2VsIENvb2sNCkludGVsIEZl
-bGxvdyAmIENsb3VkIENoaWVmIEFyY2hpdGVjdCANCkNsb3VkIFBsYXRmb3JtcyBHcm91cA0KSW50
-ZWwgQ29ycG9yYXRpb24NCisxIDcyMCAzMTkgNzUwOA0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2Ut
-LS0tLQ0KRnJvbTogSGFvbWFpIFdhbmcgW21haWx0bzpoYW9tYWl3YW5nQGdtYWlsLmNvbV0gDQpT
-ZW50OiBUdWVzZGF5LCBGZWJydWFyeSAxMCwgMjAxNSAxMDoxNyBQTQ0KVG86IENvb2ssIE5pZ2Vs
-DQpDYzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNClN1YmplY3Q6IFJlOiBtYXhpbXVtIGtl
-eSBzaXplDQoNCkhtbSwgd2UgaGF2ZSBvYmplY3QgbmFtZSBsZW5ndGggbGltaXQob3NkX21heF9v
-YmplY3RfbmFtZV9sZW4pIGFuZCBhdHRyIG5hbWUgbGVuZ3RoIGxpbWl0KG9zZF9tYXhfYXR0cl9u
-YW1lX2xlbikgZm9yIGNvbmZpZyBhbmQgT2JqZWN0U3RvcmUgaW1wbCBzZXR0aW5nLCBidXQgd2Ug
-ZG9uJ3QgaGF2ZSBhbnkgbGltaXQgZm9yIG9tYXAga2V5IGxlbmd0aC4NCg0KDQpPbiBXZWQsIEZl
-YiAxMSwgMjAxNSBhdCAxMjo0NyBQTSwgQ29vaywgTmlnZWwgPG5pZ2VsLmNvb2tAaW50ZWwuY29t
-PiB3cm90ZToNCj4gRm9sa3MsDQo+DQo+IEEgcXVpY2sgcXVlc3Rpb24uLi4NCj4NCj4gSW4gYSBD
-RVBIIE9TRCBPYmplY3RTdG9yZSBpbXBsZW1lbnRhdGlvbiwgd2hhdCBpcyB0aGUgbWF4aW11bSBs
-ZW5ndGggb2YgdGhlICJrZXkiIGluIHRoZSBrZXkvdmFsdWUgc3RvcmU/DQo+DQo+IFJlZ2FyZHMs
-DQo+IE5pZ2VsIENvb2sNCj4gSW50ZWwgRmVsbG93ICYgQ2xvdWQgQ2hpZWYgQXJjaGl0ZWN0DQo+
-IENsb3VkIFBsYXRmb3JtcyBHcm91cA0KPiBJbnRlbCBDb3Jwb3JhdGlvbg0KPiArMSA3MjAgMzE5
-IDc1MDgNCj4NCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhl
-IGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIA0KPiBpbiB0aGUgYm9keSBvZiBhIG1lc3Nh
-Z2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyANCj4gaW5mbyBh
-dCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQoNCg0KDQotLQ0K
-QmVzdCBSZWdhcmRzLA0KDQpXaGVhdA0K
+Whatever RBD or object gateway, omap key always used by internal
+usage. So the typical key length should be within 100 bytes.
+
+On Wed, Feb 11, 2015 at 10:46 PM, Cook, Nigel <nigel.cook@intel.com> wrote:
+> In RBD and Object gateway use cases, can you tell me what the typical key length is?
+>
+> What is the object name used for vs the omap key?
+>
+> Regards,
+> Nigel Cook
+> Intel Fellow & Cloud Chief Architect
+> Cloud Platforms Group
+> Intel Corporation
+> +1 720 319 7508
+>
+> -----Original Message-----
+> From: Haomai Wang [mailto:haomaiwang@gmail.com]
+> Sent: Tuesday, February 10, 2015 10:17 PM
+> To: Cook, Nigel
+> Cc: ceph-devel@vger.kernel.org
+> Subject: Re: maximum key size
+>
+> Hmm, we have object name length limit(osd_max_object_name_len) and attr name length limit(osd_max_attr_name_len) for config and ObjectStore impl setting, but we don't have any limit for omap key length.
+>
+>
+> On Wed, Feb 11, 2015 at 12:47 PM, Cook, Nigel <nigel.cook@intel.com> wrote:
+>> Folks,
+>>
+>> A quick question...
+>>
+>> In a CEPH OSD ObjectStore implementation, what is the maximum length of the "key" in the key/value store?
+>>
+>> Regards,
+>> Nigel Cook
+>> Intel Fellow & Cloud Chief Architect
+>> Cloud Platforms Group
+>> Intel Corporation
+>> +1 720 319 7508
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>> in the body of a message to majordomo@vger.kernel.org More majordomo
+>> info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+>
+> --
+> Best Regards,
+>
+> Wheat
+
+
+
+-- 
+Best Regards,
+
+Wheat
