@@ -1,63 +1,44 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: SHEC updates to the erasure code non regression corpus
-Date: Wed, 11 Feb 2015 13:28:28 +0100
-Message-ID: <54DB4AEC.6000507@dachary.org>
+From: "Cook, Nigel" <nigel.cook@intel.com>
+Subject: RE: maximum key size
+Date: Wed, 11 Feb 2015 14:46:35 +0000
+Message-ID: <88C3E003BB3649489ED4ECA6C8041047744D12@ORSMSX102.amr.corp.intel.com>
+References: <88C3E003BB3649489ED4ECA6C8041047744801@ORSMSX102.amr.corp.intel.com>
+ <CACJqLyZO4goqqPcqDFsHN5xPiOEV670zwzDcGkR-At1ALV-btw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="t2OpXDO1SO775MmTJwtnVqPqVNGMiPw6u"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:42414 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752081AbbBKM2e (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Feb 2015 07:28:34 -0500
+Received: from mga02.intel.com ([134.134.136.20]:17815 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752766AbbBKOqi (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 11 Feb 2015 09:46:38 -0500
+In-Reply-To: <CACJqLyZO4goqqPcqDFsHN5xPiOEV670zwzDcGkR-At1ALV-btw@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Haomai Wang <haomaiwang@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---t2OpXDO1SO775MmTJwtnVqPqVNGMiPw6u
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-Hi,
-
-I've updated the erasure code corpus that verifies the encoding of erasur=
-e coded chunks do not change over time with a version that includes the S=
-HEC erasure code plugin.
-
-https://github.com/ceph/ceph-erasure-code-corpus/commit/498b0102955b74781=
-3182734e13e75195f2a02a9
-
-=46rom now on it will run each time someone does "make check", but only i=
-f the sources are after
-
-$ git rev-parse v0.92-988-g7df0556
-7df0556210be3afdc02e2ca41b3a3b60569b753a
-
-I would be grateful if you could verify that it works as intended. The pr=
-ocess for updating the corpus has been documented at https://github.com/c=
-eph/ceph-erasure-code-corpus#ceph-erasure-code-corpus : it was difficult =
-to guess how it works ;-)
-
-Cheers
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---t2OpXDO1SO775MmTJwtnVqPqVNGMiPw6u
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlTbSuwACgkQ8dLMyEl6F21PYQCffckf8KS5JG63kXq/YZpMoRxz
-A3AAoJcGBIeSTsT9RGkcX2LDSR5VSqSk
-=BuO6
------END PGP SIGNATURE-----
-
---t2OpXDO1SO775MmTJwtnVqPqVNGMiPw6u--
+SW4gUkJEIGFuZCBPYmplY3QgZ2F0ZXdheSB1c2UgY2FzZXMsIGNhbiB5b3UgdGVsbCBtZSB3aGF0
+IHRoZSB0eXBpY2FsIGtleSBsZW5ndGggaXM/DQoNCldoYXQgaXMgdGhlIG9iamVjdCBuYW1lIHVz
+ZWQgZm9yIHZzIHRoZSBvbWFwIGtleT8NCg0KUmVnYXJkcywNCk5pZ2VsIENvb2sNCkludGVsIEZl
+bGxvdyAmIENsb3VkIENoaWVmIEFyY2hpdGVjdCANCkNsb3VkIFBsYXRmb3JtcyBHcm91cA0KSW50
+ZWwgQ29ycG9yYXRpb24NCisxIDcyMCAzMTkgNzUwOA0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2Ut
+LS0tLQ0KRnJvbTogSGFvbWFpIFdhbmcgW21haWx0bzpoYW9tYWl3YW5nQGdtYWlsLmNvbV0gDQpT
+ZW50OiBUdWVzZGF5LCBGZWJydWFyeSAxMCwgMjAxNSAxMDoxNyBQTQ0KVG86IENvb2ssIE5pZ2Vs
+DQpDYzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNClN1YmplY3Q6IFJlOiBtYXhpbXVtIGtl
+eSBzaXplDQoNCkhtbSwgd2UgaGF2ZSBvYmplY3QgbmFtZSBsZW5ndGggbGltaXQob3NkX21heF9v
+YmplY3RfbmFtZV9sZW4pIGFuZCBhdHRyIG5hbWUgbGVuZ3RoIGxpbWl0KG9zZF9tYXhfYXR0cl9u
+YW1lX2xlbikgZm9yIGNvbmZpZyBhbmQgT2JqZWN0U3RvcmUgaW1wbCBzZXR0aW5nLCBidXQgd2Ug
+ZG9uJ3QgaGF2ZSBhbnkgbGltaXQgZm9yIG9tYXAga2V5IGxlbmd0aC4NCg0KDQpPbiBXZWQsIEZl
+YiAxMSwgMjAxNSBhdCAxMjo0NyBQTSwgQ29vaywgTmlnZWwgPG5pZ2VsLmNvb2tAaW50ZWwuY29t
+PiB3cm90ZToNCj4gRm9sa3MsDQo+DQo+IEEgcXVpY2sgcXVlc3Rpb24uLi4NCj4NCj4gSW4gYSBD
+RVBIIE9TRCBPYmplY3RTdG9yZSBpbXBsZW1lbnRhdGlvbiwgd2hhdCBpcyB0aGUgbWF4aW11bSBs
+ZW5ndGggb2YgdGhlICJrZXkiIGluIHRoZSBrZXkvdmFsdWUgc3RvcmU/DQo+DQo+IFJlZ2FyZHMs
+DQo+IE5pZ2VsIENvb2sNCj4gSW50ZWwgRmVsbG93ICYgQ2xvdWQgQ2hpZWYgQXJjaGl0ZWN0DQo+
+IENsb3VkIFBsYXRmb3JtcyBHcm91cA0KPiBJbnRlbCBDb3Jwb3JhdGlvbg0KPiArMSA3MjAgMzE5
+IDc1MDgNCj4NCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhl
+IGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIA0KPiBpbiB0aGUgYm9keSBvZiBhIG1lc3Nh
+Z2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyANCj4gaW5mbyBh
+dCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQoNCg0KDQotLQ0K
+QmVzdCBSZWdhcmRzLA0KDQpXaGVhdA0K
