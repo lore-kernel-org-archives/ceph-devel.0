@@ -1,122 +1,140 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: K/V interface buffer transaction
-Date: Wed, 11 Feb 2015 22:20:39 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F282A7D11@SACMBXIP02.sdcorp.global.sandisk.com>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F282A62CE@SACMBXIP02.sdcorp.global.sandisk.com>
- <CA+4uBUa+XBKHkx32hmZAvn4JOLp=o2WJywnA7OWXzSphvEcgjw@mail.gmail.com>
- <755F6B91B3BE364F9BCA11EA3F9E0C6F282A63A6@SACMBXIP02.sdcorp.global.sandisk.com>
- <alpine.DEB.2.00.1502101025100.1652@cobra.newdream.net>
- <CAC6JEv_zcReo1y4JktniD-gcrKRUPLuviHJAtpoEWJ9=aai6Tg@mail.gmail.com>
- <alpine.DEB.2.00.1502101043260.1652@cobra.newdream.net>
+From: Yuri Weinstein <yweinste@redhat.com>
+Subject: Re: dumpling integration branch for v0.67.12 ready for QE
+Date: Wed, 11 Feb 2015 17:24:33 -0500 (EST)
+Message-ID: <1520027977.15929683.1423693473209.JavaMail.zimbra@redhat.com>
+References: <54DA3A5B.5050509@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1bon0081.outbound.protection.outlook.com ([157.56.111.81]:55856
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753283AbbBKWUo convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Feb 2015 17:20:44 -0500
-Content-Language: en-US
+Received: from mx4-phx2.redhat.com ([209.132.183.25]:48374 "EHLO
+	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754744AbbBKWZj convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Feb 2015 17:25:39 -0500
+In-Reply-To: <54DA3A5B.5050509@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, Gregory Farnum <greg@gregs42.com>
-Cc: "sjust@redhat.com" <sjust@redhat.com>, "Haomai Wang (haomaiwang@gmail.com)" <haomaiwang@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, Tamil Muthamizhan <tmuthami@redhat.com>
 
-Hi,
-My code had a bug during printing log. I was using map to store the attribute keys in sorted order and that was discarding the duplicates :-)
+I replied to individual suites runs, but just wanted to summarize QE va=
+lidation status.
 
-This is what I found out coming during transaction.
+The following suites were executed in the Octo lab (we will use Sepia i=
+n the future if nobody objects).
 
-2015-02-05 15:58:12.311738 7f27b5429700  0 queue_transactions :: before _do_transactions
-2015-02-05 15:58:12.311754 7f27b5429700  0 _do_transactions::before _do_transaction
-2015-02-05 15:58:12.311770 7f27b5429700  0 Transaction::OP_WRITE::cid = 1.a3_head oid = 680256a3/rbd_data.100974b0dc51.0000000000000631/head//1 offset = 3997696 len = 65536
-2015-02-05 15:58:12.311800 7f27b5429700  0 Transaction::OP_SETATTR::cid = 1.a3_head oid = 680256a3/rbd_data.100974b0dc51.0000000000000631/head//1 attr_name = _ attr_value_len = 273
-2015-02-05 15:58:12.311822 7f27b5429700  0 Transaction::OP_SETATTR::cid = 1.a3_head oid = 680256a3/rbd_data.100974b0dc51.0000000000000631/head//1 attr_name = snapset attr_value_len = 31
-2015-02-05 15:58:12.311840 7f27b5429700  0 Transaction::OP_OMAP_SETKEYS::cid = 1.a3_head oid = a3//head//1
-2015-02-05 15:58:12.311845 7f27b5429700  0 OMAP_KEY = 0000000102.00000000000000001592 Value = buffer::list(len=178,
-        buffer::ptr(0~4 0x3efc21000 in raw 0x3efc21000 len 4096 nref 6),
-        buffer::ptr(0~170 0x3d74840 in raw 0x3d74840 len 688 nref 3),
-        buffer::ptr(4~4 0x3efc21004 in raw 0x3efc21000 len 4096 nref 6)
-)
-2015-02-05 15:58:12.311931 7f27b5429700  0 Transaction::OP_OMAP_SETKEYS::cid = 1.a3_head oid = a3//head//1
-2015-02-05 15:58:12.311938 7f27b5429700  0 OMAP_KEY = _epoch Value = buffer::list(len=4,
-        buffer::ptr(0~4 0x3efc1f000 in raw 0x3efc1f000 len 4096 nref 3)
-)
-2015-02-05 15:58:12.311943 7f27b5429700  0 OMAP_KEY = _info Value = buffer::list(len=713,
-        buffer::ptr(0~713 0x3efc1e000 in raw 0x3efc1e000 len 4096 nref 3)
-)
-2015-02-05 15:58:12.311965 7f27b5429700  0 Transaction::OP_OMAP_SETKEYS::cid = 1.a3_head oid = a3//head//1
-2015-02-05 15:58:12.311969 7f27b5429700  0 OMAP_KEY = 0000000102.00000000000000001592 Value = buffer::list(len=178,
-        buffer::ptr(0~4 0x3d75e40 in raw 0x3d75e40 len 688 nref 6),
-        buffer::ptr(0~170 0x3d75b80 in raw 0x3d75b80 len 688 nref 3),
-        buffer::ptr(4~4 0x3d75e44 in raw 0x3d75e40 len 688 nref 6)
-)
-2015-02-05 15:58:12.311980 7f27b5429700  0 OMAP_KEY = can_rollback_to Value = buffer::list(len=12,
-        buffer::ptr(0~12 0x3efc25000 in raw 0x3efc25000 len 4096 nref 3)
-)
-2015-02-05 15:58:12.311985 7f27b5429700  0 OMAP_KEY = rollback_info_trimmed_to Value = buffer::list(len=12,
-        buffer::ptr(0~12 0x3efc24000 in raw 0x3efc24000 len 4096 nref 3)
-)
+upgrade:dumpling
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+['45493']
+http://tracker.ceph.com/issues/10694 - Known "Won't fix"
+"Assertion: osd/Watch.cc: 290: FAILED assert(!cb)"
 
+*** Sam - pls confirm the "Won't fix" status.
 
+['45495', '45496', '45498', '45499', '45500']
+http://tracker.ceph.com/issues/10838
+"s3tests failed"
 
-So, the OMAP_KEY = 0000000102.00000000000000001592 is coming twice !
+*** Yehuda - need your verdict on s3tests.
 
-Is there any reason, why ? What is this attribute by the way ?
-Can we safely discard the first OP_OMAP_SETKEYS call for the same key ?
+fs
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+All green !
 
-Thanks & Regards
-Somnath
+rados
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+['45054']
+http://tracker.ceph.com/issues/10841
+"Issued certificate has expired"=20
+*** Sandon pls comment.
 
------Original Message-----
-From: Somnath Roy
-Sent: Tuesday, February 10, 2015 4:36 PM
-To: 'Sage Weil'; Gregory Farnum
-Cc: sjust@redhat.com; Haomai Wang (haomaiwang@gmail.com); Ceph Development
-Subject: RE: K/V interface buffer transaction
+['45168', '45169']
+http://tracker.ceph.com/issues/10840
+coredump "ceph_test_filestore_idempotent_sequence"
+*** Sam - pls comment
 
-Thanks Greg/Sam/Sage !
-For now, we will be doing our testing by sorting the keys and will keep an eye on the duplicates.
-Another point, why do we need the K/V store thread pool for processing transactions anymore ?
-I got rid of that and calling _do_transaction() directly from the ::queue_trasaction , this is giving me ~3X performance improvement.
+['45215']
+Missing packages - no ticket FYI
+"Failed to fetch http://apt-mirror.front.sepia.ceph.com/archive.ubuntu.=
+com/ubuntu/dists/trusty-updates/universe/binary-i386/Packages  Hash Sum=
+ mismatch"
 
-Regards
-Somnath
+*** Zack, Sandon ?
 
------Original Message-----
-From: Sage Weil [mailto:sweil@redhat.com]
-Sent: Tuesday, February 10, 2015 10:44 AM
-To: Gregory Farnum
-Cc: Somnath Roy; sjust@redhat.com; Haomai Wang (haomaiwang@gmail.com); Ceph Development
-Subject: Re: K/V interface buffer transaction
+ceph-deploy
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
 
-On Tue, 10 Feb 2015, Gregory Farnum wrote:
-> On Tue, Feb 10, 2015 at 10:26 AM, Sage Weil <sweil@redhat.com> wrote:
-> > On Tue, 10 Feb 2015, Somnath Roy wrote:
-> >> Thanks Sam !
-> >> So, is it safe to do ordering if in a transaction *no* remove/truncate/create/add call ?
-> >> For example, do we need to preserve ordering in case of the below transaction ?
-> >> It will be helpful if you can give some insight in what scenario preserving order is *must*.
-> >
-> > If I'm not mistaken teh only time ordering would matter at all in an
-> > transaction is when the same key is updated twice, right?  The whole
-> > thing is committed atomically.  If there *are* dups, then the order
-> > there obviously should be preserved.
-> >
-> > Maybe a first pass would be add an assert or something that there
-> > are no dup keys and see if anything every falls out of that...
-> > hopefully there are none!
->
-> I'm pretty sure some of the transaction analysis discussions people
-> have had say that we do double-updates at times. IIRC it might have
-> been the pglog head getting set twice in most transactions?
+Travis - pls suggest
+In general I am not sure if we needed to test this - Sage?
 
-Oh yeah, could be.  There was the snapset xattr update, but that was resetting it to an existing value (not the same value inside the same txn).  I forget if there were others.
+rbd
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+['45365', '45366', '45367']
+http://tracker.ceph.com/issues/10842
+"unable to connect to apt-mirror.front.sepia.ceph.com"
 
-sage
+['45349', '45350', '45351', '45355', '45356', '45357', '45363']
+http://tracker.ceph.com/issues/10802
+"error: image still has watchers"=20
+(duplicate of 10680)
 
-________________________________
+*** Zack, Sandon, Josh - all environment noise, pls comment.=20
 
-PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+rgw
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+['45382', '45390']
+http://tracker.ceph.com/issues/10843
+"s3tests failed" - could be related or duplicate of 10838
 
+*** Yehuda - same as issues in upgrades?
+
+I am standing by for you analysis/replies and recommendations for next =
+steps.
+
+Loic - let me know is you want to follow specific items in our backport=
+ testing process that I missed here.
+PS:  I would think that you could've wanted to assign the release ticke=
+t to QE (me) for validation and at this point I could've re-assigned it=
+ back to devel (you), a?
+
+Thx
+YuriW
+
+----- Original Message -----
+=46rom: "Loic Dachary" <loic@dachary.org>
+To: "Yuri Weinstein" <yweinste@redhat.com>
+Cc: "Ceph Development" <ceph-devel@vger.kernel.org>
+Sent: Tuesday, February 10, 2015 9:05:31 AM
+Subject: dumpling integration branch for v0.67.12 ready for QE
+
+Hi Yuri,
+
+The dumpling integration branch for v0.67.12 as found at https://github=
+=2Ecom/ceph/ceph/commits/dumpling-backports has been approved by Yehuda=
+, Josh and Sam and is ready for QE.=20
+
+=46or the record, the head is https://github.com/ceph/ceph/commit/3944c=
+77c404c4a05886fe8276d5d0dd7e4f20410
+
+I think it would be best for the QE tests to use the dumpling-backports=
+=2E The alternative would be to merge dumpling-backports into dumpling.=
+ However, since testing may take a long time and require more patches, =
+it probably is better to not do that iterative process on the dumpling =
+branch itself. As it is now, there already are a number of commits in t=
+he dumpling branch that should really be in the dumpling-backports: the=
+y do not belong to v0.67.11 and are going to be released in v0.67.12. I=
+n the future though, the dumpling branch will only receive commits that=
+ have been carefully tested and all the integration work will be on the=
+ dumpling-backports branch exclusively. So that third parties do not ha=
+ve to worry that the dumpling branch contains commits that have not bee=
+n tested yet.
+
+Cheers
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
