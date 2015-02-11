@@ -1,53 +1,90 @@
-From: Gregory Farnum <greg@gregs42.com>
-Subject: Re: Standardization of perf counters comments
-Date: Wed, 11 Feb 2015 10:02:49 -0800
-Message-ID: <CAC6JEv-YDNstmoGBFG0yNhgw5DOkTCDY2=2bKK1z-5Az4hqfKQ@mail.gmail.com>
-References: <loom.20150211T183150-492@post.gmane.org>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: giant integration branch for v0.87.1 ready for QE
+Date: Wed, 11 Feb 2015 19:03:36 +0100
+Message-ID: <54DB9978.4020309@dachary.org>
+References: <54DA3DD6.7070108@dachary.org> <54DB757E.2000009@dachary.org> <904500643.15741850.1423675321769.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="RMUdVDXxiJCb93Nt4Xm7s5631sCg2SOkV"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f177.google.com ([209.85.223.177]:35215 "EHLO
-	mail-ie0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753319AbbBKSCu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Feb 2015 13:02:50 -0500
-Received: by iecrl12 with SMTP id rl12so3506159iec.2
-        for <ceph-devel@vger.kernel.org>; Wed, 11 Feb 2015 10:02:50 -0800 (PST)
-Received: from mail-ig0-f180.google.com (mail-ig0-f180.google.com. [209.85.213.180])
-        by mx.google.com with ESMTPSA id w9sm6516564igl.0.2015.02.11.10.02.49
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 11 Feb 2015 10:02:49 -0800 (PST)
-Received: by mail-ig0-f180.google.com with SMTP id b16so6184219igk.1
-        for <ceph-devel@vger.kernel.org>; Wed, 11 Feb 2015 10:02:49 -0800 (PST)
-In-Reply-To: <loom.20150211T183150-492@post.gmane.org>
+Received: from mail2.dachary.org ([91.121.57.175]:42593 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1753150AbbBKSDi (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Feb 2015 13:03:38 -0500
+In-Reply-To: <904500643.15741850.1423675321769.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alyona Kiseleva <akiselyova@mirantis.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Yuri Weinstein <yweinste@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, Feb 11, 2015 at 9:33 AM, Alyona Kiseleva
-<akiselyova@mirantis.com> wrote:
-> Hi,
-> I would like to propose something.
->
-> There are a lot of perf counters in different places in code, but the most
-> of them are undocumented. I found only one commented counter in OSD.cc code,
-> but not for all metrics. Name of counter is not very clear as it's
-> description, sometimes isn't at all.
->
-> So, I have an idea, that it would be great, if perf schema would contain not
-> only the counter type, but some description too. It can be added in
-> PerfCountersBuilder methods - at first as optional parameter with empty
-> string by default, later, may be, as required parameter. This short
-> description could be saved in perf_counter_data_any_d struct together with
-> other counter properties and appear in perf schema as the second counter
-> property.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--RMUdVDXxiJCb93Nt4Xm7s5631sCg2SOkV
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-I actually suspect that we'll be more successful if the description is
-not optional. That way people are forced to provide a string of some
-kind, instead of not knowing that it's even an option to do so. It's
-more up-front work to provide a description for all the counters but
-should make everything a lot more accessible to users than saying
-"well, *some* of them have descriptions, if we were feeling
-conscientious that day and knew about doing so". ;)
--Greg
+
+
+On 11/02/2015 18:22, Yuri Weinstein wrote:
+> Loic
+>=20
+> Just to double check - giant is *ready* for testing?
+
+Yes, it is ready for testing ! Interesting typo ;-)
+
+>=20
+> (you said below "which is not ready for testing" maybe wanted o say *no=
+w*)
+>=20
+> Thx
+> YuriW
+>=20
+> ----- Original Message -----
+> From: "Loic Dachary" <loic@dachary.org>
+> To: "Yuri Weinstein" <yweinste@redhat.com>
+> Cc: "Ceph Development" <ceph-devel@vger.kernel.org>
+> Sent: Wednesday, February 11, 2015 7:30:06 AM
+> Subject: Re: giant integration branch for v0.87.1 ready for QE
+>=20
+> Hi Yuri,
+>=20
+> The giant-backports pull requests were merged into https://github.com/c=
+eph/ceph/tree/giant which is not ready for testing.
+>=20
+> For the record, the head is https://github.com/ceph/ceph/commit/78c71b9=
+200da5e7d832ec58765478404d31ae6b5
+>=20
+> Cheers
+>=20
+> On 10/02/2015 18:20, Loic Dachary wrote:
+>> Hi Yuri,
+>>
+>> The giant integration branch for v0.87.1 as found at https://github.co=
+m/ceph/ceph/commits/giant-backports has been approved by Yehuda, Josh and=
+ Sam and is ready for QE.=20
+>>
+>> For the record, the head is https://github.com/ceph/ceph/commit/6b08a7=
+29540c61f3c8b15c5a3ce9382634bf800c
+>>
+>> Cheers
+>>
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--RMUdVDXxiJCb93Nt4Xm7s5631sCg2SOkV
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlTbmXgACgkQ8dLMyEl6F23VnQCghqDwr9GW5ZzfmFQudWH8dEf9
+ezAAnjnxUEi8n+zS1RJP2dowIlv/qtd3
+=yaF7
+-----END PGP SIGNATURE-----
+
+--RMUdVDXxiJCb93Nt4Xm7s5631sCg2SOkV--
