@@ -1,46 +1,66 @@
-From: Gregory Farnum <greg@gregs42.com>
-Subject: Re: Upgrade/rollback
-Date: Wed, 11 Feb 2015 07:17:28 -0800
-Message-ID: <CAC6JEv_76meAsaRmCr9-qEiU0C0R4LGOx=ja9M5vxkW=6jSvcQ@mail.gmail.com>
-References: <BLU175-W8D101EDE23DCDD591ADF6DF250@phx.gbl>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: giant integration branch for v0.87.1 ready for QE
+Date: Wed, 11 Feb 2015 16:30:06 +0100
+Message-ID: <54DB757E.2000009@dachary.org>
+References: <54DA3DD6.7070108@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="TTcCXQwK8hIskQB04W8mABvuaAklIR9cF"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f181.google.com ([209.85.223.181]:36966 "EHLO
-	mail-ie0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752182AbbBKPR3 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Feb 2015 10:17:29 -0500
-Received: by iecrl12 with SMTP id rl12so2227590iec.4
-        for <ceph-devel@vger.kernel.org>; Wed, 11 Feb 2015 07:17:29 -0800 (PST)
-Received: from mail-ig0-f173.google.com (mail-ig0-f173.google.com. [209.85.213.173])
-        by mx.google.com with ESMTPSA id yq1sm1484107igb.21.2015.02.11.07.17.28
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 11 Feb 2015 07:17:28 -0800 (PST)
-Received: by mail-ig0-f173.google.com with SMTP id a13so31293672igq.0
-        for <ceph-devel@vger.kernel.org>; Wed, 11 Feb 2015 07:17:28 -0800 (PST)
-In-Reply-To: <BLU175-W8D101EDE23DCDD591ADF6DF250@phx.gbl>
+Received: from mail2.dachary.org ([91.121.57.175]:42512 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752317AbbBKPaK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Feb 2015 10:30:10 -0500
+In-Reply-To: <54DA3DD6.7070108@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: GuangYang <yguang11@outlook.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Yuri Weinstein <yweinste@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, Feb 11, 2015 at 4:09 AM, GuangYang <yguang11@outlook.com> wrote:
-> Hi ceph-devel,
-> Recently we are trying the upgrade from Firefly to Giant and it goes pretty smoothly, however, the problem is that it does not support rollback and seems like that is by design. For example, there is new feature flag / metadata [1] added in the new version and they are persisted. As a result, the old version of software does not recognize those values and will crash themselves.
->
-> Ideally we never rollback, but for unknown reasons we couldn't fix in a timely manner, we might want to rollback first. Is that something we will consider to handle?
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--TTcCXQwK8hIskQB04W8mABvuaAklIR9cF
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-We are unlikely to ever do this. We've talked about rollback options,
-but allowing rollback means either:
-1) never adding information to the disk format which matters,
-2) having a separate switchover point (besides the code upgrade) which
-enables all the disk change bits and which doesn't allow you to roll
-back.
+Hi Yuri,
 
-The first option is obviously infeasible. The second one dramatically
-increases the amount of code which can be buggy, increases the testing
-version, and doesn't really solve the problem since you still have a
-hard point of no return.
--Greg
+The giant-backports pull requests were merged into https://github.com/cep=
+h/ceph/tree/giant which is not ready for testing.
+
+For the record, the head is https://github.com/ceph/ceph/commit/78c71b920=
+0da5e7d832ec58765478404d31ae6b5
+
+Cheers
+
+On 10/02/2015 18:20, Loic Dachary wrote:
+> Hi Yuri,
+>=20
+> The giant integration branch for v0.87.1 as found at https://github.com=
+/ceph/ceph/commits/giant-backports has been approved by Yehuda, Josh and =
+Sam and is ready for QE.=20
+>=20
+> For the record, the head is https://github.com/ceph/ceph/commit/6b08a72=
+9540c61f3c8b15c5a3ce9382634bf800c
+>=20
+> Cheers
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--TTcCXQwK8hIskQB04W8mABvuaAklIR9cF
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlTbdX4ACgkQ8dLMyEl6F20hxQCeJLWyEdYsSt1DlFxaLT7ePph4
+YVQAoJp6oapJ0Rusrq/RutVaAaFaX6iV
+=hE5l
+-----END PGP SIGNATURE-----
+
+--TTcCXQwK8hIskQB04W8mABvuaAklIR9cF--
