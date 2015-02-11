@@ -1,128 +1,70 @@
-From: Stefan Priebe <s.priebe@profihost.ag>
-Subject: Re: speed decrease since firefly,giant,hammer the 2nd try
-Date: Tue, 10 Feb 2015 23:18:48 +0100
-Message-ID: <54DA83C8.9020207@profihost.ag>
-References: <54DA541E.9000608@profihost.ag> <54DA578F.3000900@redhat.com> <54DA5853.3070504@profihost.ag> <54DA5E9F.3060305@redhat.com> <54DA6904.6000305@profihost.ag> <54DA6BB9.7000306@redhat.com> <54DA7404.4060201@profihost.ag> <54DA7A3F.6070009@redhat.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: K/V interface buffer transaction
+Date: Wed, 11 Feb 2015 00:36:25 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F282A6C7D@SACMBXIP02.sdcorp.global.sandisk.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F282A62CE@SACMBXIP02.sdcorp.global.sandisk.com>
+ <CA+4uBUa+XBKHkx32hmZAvn4JOLp=o2WJywnA7OWXzSphvEcgjw@mail.gmail.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F282A63A6@SACMBXIP02.sdcorp.global.sandisk.com>
+ <alpine.DEB.2.00.1502101025100.1652@cobra.newdream.net>
+ <CAC6JEv_zcReo1y4JktniD-gcrKRUPLuviHJAtpoEWJ9=aai6Tg@mail.gmail.com>
+ <alpine.DEB.2.00.1502101043260.1652@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ph.de-nserver.de ([85.158.179.214]:61933 "EHLO
-	mail-ph.de-nserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754213AbbBJWSr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Feb 2015 17:18:47 -0500
-In-Reply-To: <54DA7A3F.6070009@redhat.com>
+Received: from mail-by2on0060.outbound.protection.outlook.com ([207.46.100.60]:22208
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750965AbbBKAga convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Feb 2015 19:36:30 -0500
+In-Reply-To: <alpine.DEB.2.00.1502101043260.1652@cobra.newdream.net>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, Gregory Farnum <greg@gregs42.com>
+Cc: "sjust@redhat.com" <sjust@redhat.com>, "Haomai Wang (haomaiwang@gmail.com)" <haomaiwang@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
+Thanks Greg/Sam/Sage !
+For now, we will be doing our testing by sorting the keys and will keep an eye on the duplicates.
+Another point, why do we need the K/V store thread pool for processing transactions anymore ?
+I got rid of that and calling _do_transaction() directly from the ::queue_trasaction , this is giving me ~3X performance improvement.
 
-Am 10.02.2015 um 22:38 schrieb Mark Nelson:
-> On 02/10/2015 03:11 PM, Stefan Priebe wrote:
->>
->> mhm i installed librbd1-dbg and librados2-dbg - but the output still
->> looks useless to me. Should i upload it somewhere?
+Regards
+Somnath
+
+-----Original Message-----
+From: Sage Weil [mailto:sweil@redhat.com]
+Sent: Tuesday, February 10, 2015 10:44 AM
+To: Gregory Farnum
+Cc: Somnath Roy; sjust@redhat.com; Haomai Wang (haomaiwang@gmail.com); Ceph Development
+Subject: Re: K/V interface buffer transaction
+
+On Tue, 10 Feb 2015, Gregory Farnum wrote:
+> On Tue, Feb 10, 2015 at 10:26 AM, Sage Weil <sweil@redhat.com> wrote:
+> > On Tue, 10 Feb 2015, Somnath Roy wrote:
+> >> Thanks Sam !
+> >> So, is it safe to do ordering if in a transaction *no* remove/truncate/create/add call ?
+> >> For example, do we need to preserve ordering in case of the below transaction ?
+> >> It will be helpful if you can give some insight in what scenario preserving order is *must*.
+> >
+> > If I'm not mistaken teh only time ordering would matter at all in an
+> > transaction is when the same key is updated twice, right?  The whole
+> > thing is committed atomically.  If there *are* dups, then the order
+> > there obviously should be preserved.
+> >
+> > Maybe a first pass would be add an assert or something that there
+> > are no dup keys and see if anything every falls out of that...
+> > hopefully there are none!
 >
-> Meh, if it's all just symbols it's probably not that helpful.
->
-> I've summarized your results here:
->
-> 1 concurrent 4k write (libaio, direct=1, iodepth=1)
->
->          IOPS        Latency
->          wb on    wb off    wb on    wb off
-> dumpling    10870    536    ~100us    ~2ms
-> firefly        10350    525    ~100us    ~2ms
->
-> So in single op tests dumpling and firefly are far closer.  Now let's
-> see each of these cases with iodepth=32 (still 1 thread for now).
+> I'm pretty sure some of the transaction analysis discussions people
+> have had say that we do double-updates at times. IIRC it might have
+> been the pglog head getting set twice in most transactions?
 
+Oh yeah, could be.  There was the snapset xattr update, but that was resetting it to an existing value (not the same value inside the same txn).  I forget if there were others.
 
-dumpling:
+sage
 
-file1: (g=0): rw=randwrite, bs=4K-4K/4K-4K, ioengine=libaio, iodepth=32
-2.0.8
-Starting 1 thread
-Jobs: 1 (f=1): [w] [100.0% done] [0K/72812K /s] [0 /18.3K iops] [eta 
-00m:00s]
-file1: (groupid=0, jobs=1): err= 0: pid=3011
-   write: io=2060.6MB, bw=70329KB/s, iops=17582 , runt= 30001msec
-     slat (usec): min=1 , max=3517 , avg= 3.42, stdev= 7.30
-     clat (usec): min=93 , max=7475 , avg=1815.72, stdev=233.43
-      lat (usec): min=219 , max=7477 , avg=1819.27, stdev=233.52
-     clat percentiles (usec):
-      |  1.00th=[ 1480],  5.00th=[ 1576], 10.00th=[ 1608], 20.00th=[ 1672],
-      | 30.00th=[ 1704], 40.00th=[ 1752], 50.00th=[ 1800], 60.00th=[ 1832],
-      | 70.00th=[ 1896], 80.00th=[ 1960], 90.00th=[ 2064], 95.00th=[ 2128],
-      | 99.00th=[ 2352], 99.50th=[ 2448], 99.90th=[ 4704], 99.95th=[ 5344],
-      | 99.99th=[ 7072]
-     bw (KB/s)  : min=59696, max=77840, per=100.00%, avg=70351.27, 
-stdev=4783.25
-     lat (usec) : 100=0.01%, 250=0.01%, 500=0.01%, 750=0.01%, 1000=0.53%
-     lat (msec) : 2=85.02%, 4=14.31%, 10=0.13%
-   cpu          : usr=1.96%, sys=6.71%, ctx=22791, majf=0, minf=133
-   IO depths    : 1=0.1%, 2=0.1%, 4=0.1%, 8=0.1%, 16=0.1%, 32=100.0%, 
- >=64=0.0%
-      submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, 
- >=64=0.0%
-      complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.1%, 64=0.0%, 
- >=64=0.0%
-      issued    : total=r=0/w=527487/d=0, short=r=0/w=0/d=0
+________________________________
 
-Run status group 0 (all jobs):
-   WRITE: io=2060.6MB, aggrb=70329KB/s, minb=70329KB/s, maxb=70329KB/s, 
-mint=30001msec, maxt=30001msec
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
 
-Disk stats (read/write):
-   sdb: ios=166/526079, merge=0/0, ticks=24/890120, in_queue=890064, 
-util=98.73%
-
-firefly:
-
-file1: (g=0): rw=randwrite, bs=4K-4K/4K-4K, ioengine=libaio, iodepth=32
-2.0.8
-Starting 1 thread
-Jobs: 1 (f=1): [w] [100.0% done] [0K/69096K /s] [0 /17.3K iops] [eta 
-00m:00s]
-file1: (groupid=0, jobs=1): err= 0: pid=2982
-   write: io=1784.9MB, bw=60918KB/s, iops=15229 , runt= 30002msec
-     slat (usec): min=1 , max=1389 , avg= 3.43, stdev= 5.32
-     clat (usec): min=117 , max=8235 , avg=2096.88, stdev=396.30
-      lat (usec): min=540 , max=8258 , avg=2100.43, stdev=396.61
-     clat percentiles (usec):
-      |  1.00th=[ 1608],  5.00th=[ 1720], 10.00th=[ 1768], 20.00th=[ 1832],
-      | 30.00th=[ 1896], 40.00th=[ 1944], 50.00th=[ 2008], 60.00th=[ 2064],
-      | 70.00th=[ 2160], 80.00th=[ 2256], 90.00th=[ 2512], 95.00th=[ 2896],
-      | 99.00th=[ 3600], 99.50th=[ 3792], 99.90th=[ 5088], 99.95th=[ 6304],
-      | 99.99th=[ 6752]
-     bw (KB/s)  : min=36717, max=73712, per=99.94%, avg=60879.92, 
-stdev=8302.27
-     lat (usec) : 250=0.01%, 750=0.01%
-     lat (msec) : 2=48.56%, 4=51.18%, 10=0.26%
-   cpu          : usr=2.03%, sys=5.48%, ctx=20440, majf=0, minf=133
-   IO depths    : 1=0.1%, 2=0.1%, 4=0.1%, 8=0.1%, 16=0.1%, 32=100.0%, 
- >=64=0.0%
-      submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, 
- >=64=0.0%
-      complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.1%, 64=0.0%, 
- >=64=0.0%
-      issued    : total=r=0/w=456918/d=0, short=r=0/w=0/d=0
-
-Run status group 0 (all jobs):
-   WRITE: io=1784.9MB, aggrb=60918KB/s, minb=60918KB/s, maxb=60918KB/s, 
-mint=30002msec, maxt=30002msec
-
-Disk stats (read/write):
-   sdb: ios=166/455574, merge=0/0, ticks=12/897748, in_queue=897696, 
-util=98.96%
-
-Stefan
-
-> Mark
->
->>
->> Stefan
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
