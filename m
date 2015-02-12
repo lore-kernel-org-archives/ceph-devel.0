@@ -1,7 +1,7 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: K/V interface buffer transaction
-Date: Thu, 12 Feb 2015 07:26:16 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F282A8201@SACMBXIP02.sdcorp.global.sandisk.com>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: K/V interface buffer transaction
+Date: Thu, 12 Feb 2015 15:35:14 +0800
+Message-ID: <CACJqLyZTtwRpK6K1sc6tQY24YtZ3nde_FYJW-xkjA7Zj+KxApA@mail.gmail.com>
 References: <755F6B91B3BE364F9BCA11EA3F9E0C6F282A62CE@SACMBXIP02.sdcorp.global.sandisk.com>
 	<CA+4uBUa+XBKHkx32hmZAvn4JOLp=o2WJywnA7OWXzSphvEcgjw@mail.gmail.com>
 	<755F6B91B3BE364F9BCA11EA3F9E0C6F282A63A6@SACMBXIP02.sdcorp.global.sandisk.com>
@@ -11,155 +11,207 @@ References: <755F6B91B3BE364F9BCA11EA3F9E0C6F282A62CE@SACMBXIP02.sdcorp.global.s
 	<755F6B91B3BE364F9BCA11EA3F9E0C6F282A7D11@SACMBXIP02.sdcorp.global.sandisk.com>
 	<CA+4uBUbJG9qVHS+0zk2YW3g7C3wemUm1fc5a18LtFQaCRtSnqw@mail.gmail.com>
 	<755F6B91B3BE364F9BCA11EA3F9E0C6F282A7DAE@SACMBXIP02.sdcorp.global.sandisk.com>
- <CACJqLybqBwRpZOnv_3yCrQ1JGPtwoB32wYZNHQJqQa8u1xTJeA@mail.gmail.com>
+	<CACJqLybqBwRpZOnv_3yCrQ1JGPtwoB32wYZNHQJqQa8u1xTJeA@mail.gmail.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F282A8201@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0098.outbound.protection.outlook.com ([207.46.100.98]:20640
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752026AbbBLH0V (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 12 Feb 2015 02:26:21 -0500
-In-Reply-To: <CACJqLybqBwRpZOnv_3yCrQ1JGPtwoB32wYZNHQJqQa8u1xTJeA@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-wg0-f48.google.com ([74.125.82.48]:41152 "EHLO
+	mail-wg0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932264AbbBLHfQ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Feb 2015 02:35:16 -0500
+Received: by mail-wg0-f48.google.com with SMTP id l18so5121813wgh.7
+        for <ceph-devel@vger.kernel.org>; Wed, 11 Feb 2015 23:35:14 -0800 (PST)
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F282A8201@SACMBXIP02.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomaiwang@gmail.com>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
 Cc: "sjust@redhat.com" <sjust@redhat.com>, Sage Weil <sweil@redhat.com>, Gregory Farnum <greg@gregs42.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-SGFvbWFpLA0KDQo8PCBLZXlWYWx1ZVN0b3JlIHdpbGwgb25seSB3cml0ZSBvbmUgZm9yIGR1cGxp
-Y2F0ZSBlbnRyeSBpbiBvcmRlcmluZw0KDQpJIHNhdyBLL3Ygc3RvcmUgKGtleXZhbHVlc3RvcmUu
-Y2MpIGl0c2VsZiBpcyBub3QgcmVtb3ZpbmcgdGhlIGR1cGxpY2F0ZXMgLCBhcmUgeW91IHNheWlu
-ZyB0aGUgc2hpbSBsYXllciBsaWtlIGxldmVsZGJzdG9yZS9yb2Nrc2Ric3RvcmUgaXMgcmVtb3Zp
-bmcgdGhlIGR1cGxpY2F0ZXMgb3IgdGhlIGxldmVsZGIvcm9ja3NkYiA/DQoNClRoYW5rcyAmIFJl
-Z2FyZHMNClNvbW5hdGgNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IEhhb21h
-aSBXYW5nIFttYWlsdG86aGFvbWFpd2FuZ0BnbWFpbC5jb21dIA0KU2VudDogV2VkbmVzZGF5LCBG
-ZWJydWFyeSAxMSwgMjAxNSA3OjM2IFBNDQpUbzogU29tbmF0aCBSb3kNCkNjOiBzanVzdEByZWRo
-YXQuY29tOyBTYWdlIFdlaWw7IEdyZWdvcnkgRmFybnVtOyBDZXBoIERldmVsb3BtZW50DQpTdWJq
-ZWN0OiBSZTogSy9WIGludGVyZmFjZSBidWZmZXIgdHJhbnNhY3Rpb24NCg0KT24gVGh1LCBGZWIg
-MTIsIDIwMTUgYXQgNjo1MyBBTSwgU29tbmF0aCBSb3kgPFNvbW5hdGguUm95QHNhbmRpc2suY29t
-PiB3cm90ZToNCj4gWWVhaCwgdGhhbmtzIQ0KPiBOb3Qgc3VyZSBpZiBsZXZlbC1kYiBpcyBoYW5k
-bGluZyBkdXBsaWNhdGUgZW50cmllcyB3aXRoaW4gYSB0cmFuc2FjdGlvbiBwcm9wZXJseSBvciBu
-b3QsIGlmIG5vdCwgaW4gY2FzZSBvZiBmaWxlc3RvcmUgKGFuZCBhbHNvIGZvciBLL1Ygc3RvcmVz
-KSB3ZSBhcmUgaGF2aW5nIGFuIGV4dHJhIChyZWR1bmRhbnQpIE9NQVAgd3JpdGUgaW4gdGhlIFdy
-aXRlLVBhdGguDQoNCktleVZhbHVlU3RvcmUgd2lsbCBvbmx5IHdyaXRlIG9uZSBmb3IgZHVwbGlj
-YXRlIGVudHJ5IGluIG9yZGVyaW5nLg0KDQpCdXQgRmlsZVN0b3JlIHdpbGwgd3JpdGUgcmVkdW5k
-YW50IG9tYXAuDQoNCkFuZCBmcm9tIGR1bXAgbG9nLCB0aGUgZHVwbGljYXRlIGVudHJ5IGxvb2tz
-IGxpa2UgZnJvbSBwZ2xvZw0KDQo+DQo+IFJlZ2FyZHMNCj4gU29tbmF0aA0KPg0KPiAtLS0tLU9y
-aWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBTYW11ZWwgSnVzdCBbbWFpbHRvOnNhbS5qdXN0
-QGlua3RhbmsuY29tXQ0KPiBTZW50OiBXZWRuZXNkYXksIEZlYnJ1YXJ5IDExLCAyMDE1IDI6MzYg
-UE0NCj4gVG86IFNvbW5hdGggUm95DQo+IENjOiBTYWdlIFdlaWw7IEdyZWdvcnkgRmFybnVtOyBI
-YW9tYWkgV2FuZyAoaGFvbWFpd2FuZ0BnbWFpbC5jb20pOyANCj4gQ2VwaCBEZXZlbG9wbWVudA0K
-PiBTdWJqZWN0OiBSZTogSy9WIGludGVyZmFjZSBidWZmZXIgdHJhbnNhY3Rpb24NCj4NCj4gV2Vs
-bCwgdGhlIHRyYW5zYWN0aW9uIGlzIGF0b21pYywgc28gaWYgdGhlIGtleSBpcyBzZXQgdHdpY2Us
-IHlvdSBjYW4gY2VydGFpbmx5IGlnbm9yZSB0aGUgZmlyc3Qgb25lLg0KPiAtU2FtDQo+DQo+IE9u
-IFdlZCwgRmViIDExLCAyMDE1IGF0IDI6MjAgUE0sIFNvbW5hdGggUm95IDxTb21uYXRoLlJveUBz
-YW5kaXNrLmNvbT4gd3JvdGU6DQo+PiBIaSwNCj4+IE15IGNvZGUgaGFkIGEgYnVnIGR1cmluZyBw
-cmludGluZyBsb2cuIEkgd2FzIHVzaW5nIG1hcCB0byBzdG9yZSB0aGUgDQo+PiBhdHRyaWJ1dGUg
-a2V5cyBpbiBzb3J0ZWQgb3JkZXIgYW5kIHRoYXQgd2FzIGRpc2NhcmRpbmcgdGhlIGR1cGxpY2F0
-ZXMNCj4+IDotKQ0KPj4NCj4+IFRoaXMgaXMgd2hhdCBJIGZvdW5kIG91dCBjb21pbmcgZHVyaW5n
-IHRyYW5zYWN0aW9uLg0KPj4NCj4+IDIwMTUtMDItMDUgMTU6NTg6MTIuMzExNzM4IDdmMjdiNTQy
-OTcwMCAgMCBxdWV1ZV90cmFuc2FjdGlvbnMgOjoNCj4+IGJlZm9yZSBfZG9fdHJhbnNhY3Rpb25z
-DQo+PiAyMDE1LTAyLTA1IDE1OjU4OjEyLjMxMTc1NCA3ZjI3YjU0Mjk3MDAgIDAgX2RvX3RyYW5z
-YWN0aW9uczo6YmVmb3JlIA0KPj4gX2RvX3RyYW5zYWN0aW9uDQo+PiAyMDE1LTAyLTA1IDE1OjU4
-OjEyLjMxMTc3MCA3ZjI3YjU0Mjk3MDAgIDAgVHJhbnNhY3Rpb246Ok9QX1dSSVRFOjpjaWQgDQo+
-PiA9IDEuYTNfaGVhZCBvaWQgPQ0KPj4gNjgwMjU2YTMvcmJkX2RhdGEuMTAwOTc0YjBkYzUxLjAw
-MDAwMDAwMDAwMDA2MzEvaGVhZC8vMSBvZmZzZXQgPQ0KPj4gMzk5NzY5NiBsZW4gPSA2NTUzNg0K
-Pj4gMjAxNS0wMi0wNSAxNTo1ODoxMi4zMTE4MDAgN2YyN2I1NDI5NzAwICAwIA0KPj4gVHJhbnNh
-Y3Rpb246Ok9QX1NFVEFUVFI6OmNpZCA9IDEuYTNfaGVhZCBvaWQgPQ0KPj4gNjgwMjU2YTMvcmJk
-X2RhdGEuMTAwOTc0YjBkYzUxLjAwMDAwMDAwMDAwMDA2MzEvaGVhZC8vMSBhdHRyX25hbWUgPSBf
-IA0KPj4gYXR0cl92YWx1ZV9sZW4gPSAyNzMNCj4+IDIwMTUtMDItMDUgMTU6NTg6MTIuMzExODIy
-IDdmMjdiNTQyOTcwMCAgMCANCj4+IFRyYW5zYWN0aW9uOjpPUF9TRVRBVFRSOjpjaWQgPSAxLmEz
-X2hlYWQgb2lkID0NCj4+IDY4MDI1NmEzL3JiZF9kYXRhLjEwMDk3NGIwZGM1MS4wMDAwMDAwMDAw
-MDAwNjMxL2hlYWQvLzEgYXR0cl9uYW1lID0gDQo+PiBzbmFwc2V0IGF0dHJfdmFsdWVfbGVuID0g
-MzENCj4+IDIwMTUtMDItMDUgMTU6NTg6MTIuMzExODQwIDdmMjdiNTQyOTcwMCAgMCANCj4+IFRy
-YW5zYWN0aW9uOjpPUF9PTUFQX1NFVEtFWVM6OmNpZCA9IDEuYTNfaGVhZCBvaWQgPSBhMy8vaGVh
-ZC8vMQ0KPj4gMjAxNS0wMi0wNSAxNTo1ODoxMi4zMTE4NDUgN2YyN2I1NDI5NzAwICAwIE9NQVBf
-S0VZID0gMDAwMDAwMDEwMi4wMDAwMDAwMDAwMDAwMDAwMTU5MiBWYWx1ZSA9IGJ1ZmZlcjo6bGlz
-dChsZW49MTc4LA0KPj4gICAgICAgICBidWZmZXI6OnB0cigwfjQgMHgzZWZjMjEwMDAgaW4gcmF3
-IDB4M2VmYzIxMDAwIGxlbiA0MDk2IG5yZWYgNiksDQo+PiAgICAgICAgIGJ1ZmZlcjo6cHRyKDB+
-MTcwIDB4M2Q3NDg0MCBpbiByYXcgMHgzZDc0ODQwIGxlbiA2ODggbnJlZiAzKSwNCj4+ICAgICAg
-ICAgYnVmZmVyOjpwdHIoNH40IDB4M2VmYzIxMDA0IGluIHJhdyAweDNlZmMyMTAwMCBsZW4gNDA5
-NiBucmVmDQo+PiA2KQ0KPj4gKQ0KPj4gMjAxNS0wMi0wNSAxNTo1ODoxMi4zMTE5MzEgN2YyN2I1
-NDI5NzAwICAwIA0KPj4gVHJhbnNhY3Rpb246Ok9QX09NQVBfU0VUS0VZUzo6Y2lkID0gMS5hM19o
-ZWFkIG9pZCA9IGEzLy9oZWFkLy8xDQo+PiAyMDE1LTAyLTA1IDE1OjU4OjEyLjMxMTkzOCA3ZjI3
-YjU0Mjk3MDAgIDAgT01BUF9LRVkgPSBfZXBvY2ggVmFsdWUgPSBidWZmZXI6Omxpc3QobGVuPTQs
-DQo+PiAgICAgICAgIGJ1ZmZlcjo6cHRyKDB+NCAweDNlZmMxZjAwMCBpbiByYXcgMHgzZWZjMWYw
-MDAgbGVuIDQwOTYgbnJlZg0KPj4gMykNCj4+ICkNCj4+IDIwMTUtMDItMDUgMTU6NTg6MTIuMzEx
-OTQzIDdmMjdiNTQyOTcwMCAgMCBPTUFQX0tFWSA9IF9pbmZvIFZhbHVlID0gYnVmZmVyOjpsaXN0
-KGxlbj03MTMsDQo+PiAgICAgICAgIGJ1ZmZlcjo6cHRyKDB+NzEzIDB4M2VmYzFlMDAwIGluIHJh
-dyAweDNlZmMxZTAwMCBsZW4gNDA5NiANCj4+IG5yZWYNCj4+IDMpDQo+PiApDQo+PiAyMDE1LTAy
-LTA1IDE1OjU4OjEyLjMxMTk2NSA3ZjI3YjU0Mjk3MDAgIDAgDQo+PiBUcmFuc2FjdGlvbjo6T1Bf
-T01BUF9TRVRLRVlTOjpjaWQgPSAxLmEzX2hlYWQgb2lkID0gYTMvL2hlYWQvLzENCj4+IDIwMTUt
-MDItMDUgMTU6NTg6MTIuMzExOTY5IDdmMjdiNTQyOTcwMCAgMCBPTUFQX0tFWSA9IDAwMDAwMDAx
-MDIuMDAwMDAwMDAwMDAwMDAwMDE1OTIgVmFsdWUgPSBidWZmZXI6Omxpc3QobGVuPTE3OCwNCj4+
-ICAgICAgICAgYnVmZmVyOjpwdHIoMH40IDB4M2Q3NWU0MCBpbiByYXcgMHgzZDc1ZTQwIGxlbiA2
-ODggbnJlZiA2KSwNCj4+ICAgICAgICAgYnVmZmVyOjpwdHIoMH4xNzAgMHgzZDc1YjgwIGluIHJh
-dyAweDNkNzViODAgbGVuIDY4OCBucmVmIDMpLA0KPj4gICAgICAgICBidWZmZXI6OnB0cig0fjQg
-MHgzZDc1ZTQ0IGluIHJhdyAweDNkNzVlNDAgbGVuIDY4OCBucmVmIDYpDQo+PiApDQo+PiAyMDE1
-LTAyLTA1IDE1OjU4OjEyLjMxMTk4MCA3ZjI3YjU0Mjk3MDAgIDAgT01BUF9LRVkgPSBjYW5fcm9s
-bGJhY2tfdG8gVmFsdWUgPSBidWZmZXI6Omxpc3QobGVuPTEyLA0KPj4gICAgICAgICBidWZmZXI6
-OnB0cigwfjEyIDB4M2VmYzI1MDAwIGluIHJhdyAweDNlZmMyNTAwMCBsZW4gNDA5NiBucmVmDQo+
-PiAzKQ0KPj4gKQ0KPj4gMjAxNS0wMi0wNSAxNTo1ODoxMi4zMTE5ODUgN2YyN2I1NDI5NzAwICAw
-IE9NQVBfS0VZID0gcm9sbGJhY2tfaW5mb190cmltbWVkX3RvIFZhbHVlID0gYnVmZmVyOjpsaXN0
-KGxlbj0xMiwNCj4+ICAgICAgICAgYnVmZmVyOjpwdHIoMH4xMiAweDNlZmMyNDAwMCBpbiByYXcg
-MHgzZWZjMjQwMDAgbGVuIDQwOTYgbnJlZg0KPj4gMykNCj4+ICkNCj4+DQo+Pg0KPj4NCj4+IFNv
-LCB0aGUgT01BUF9LRVkgPSAwMDAwMDAwMTAyLjAwMDAwMDAwMDAwMDAwMDAxNTkyIGlzIGNvbWlu
-ZyB0d2ljZSAhDQo+Pg0KPj4gSXMgdGhlcmUgYW55IHJlYXNvbiwgd2h5ID8gV2hhdCBpcyB0aGlz
-IGF0dHJpYnV0ZSBieSB0aGUgd2F5ID8NCj4+IENhbiB3ZSBzYWZlbHkgZGlzY2FyZCB0aGUgZmly
-c3QgT1BfT01BUF9TRVRLRVlTIGNhbGwgZm9yIHRoZSBzYW1lIGtleSA/DQo+Pg0KPj4gVGhhbmtz
-ICYgUmVnYXJkcw0KPj4gU29tbmF0aA0KPj4NCj4+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0t
-DQo+PiBGcm9tOiBTb21uYXRoIFJveQ0KPj4gU2VudDogVHVlc2RheSwgRmVicnVhcnkgMTAsIDIw
-MTUgNDozNiBQTQ0KPj4gVG86ICdTYWdlIFdlaWwnOyBHcmVnb3J5IEZhcm51bQ0KPj4gQ2M6IHNq
-dXN0QHJlZGhhdC5jb207IEhhb21haSBXYW5nIChoYW9tYWl3YW5nQGdtYWlsLmNvbSk7IENlcGgg
-DQo+PiBEZXZlbG9wbWVudA0KPj4gU3ViamVjdDogUkU6IEsvViBpbnRlcmZhY2UgYnVmZmVyIHRy
-YW5zYWN0aW9uDQo+Pg0KPj4gVGhhbmtzIEdyZWcvU2FtL1NhZ2UgIQ0KPj4gRm9yIG5vdywgd2Ug
-d2lsbCBiZSBkb2luZyBvdXIgdGVzdGluZyBieSBzb3J0aW5nIHRoZSBrZXlzIGFuZCB3aWxsIGtl
-ZXAgYW4gZXllIG9uIHRoZSBkdXBsaWNhdGVzLg0KPj4gQW5vdGhlciBwb2ludCwgd2h5IGRvIHdl
-IG5lZWQgdGhlIEsvViBzdG9yZSB0aHJlYWQgcG9vbCBmb3IgcHJvY2Vzc2luZyB0cmFuc2FjdGlv
-bnMgYW55bW9yZSA/DQo+PiBJIGdvdCByaWQgb2YgdGhhdCBhbmQgY2FsbGluZyBfZG9fdHJhbnNh
-Y3Rpb24oKSBkaXJlY3RseSBmcm9tIHRoZSA6OnF1ZXVlX3RyYXNhY3Rpb24gLCB0aGlzIGlzIGdp
-dmluZyBtZSB+M1ggcGVyZm9ybWFuY2UgaW1wcm92ZW1lbnQuDQo+Pg0KPj4gUmVnYXJkcw0KPj4g
-U29tbmF0aA0KPj4NCj4+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+PiBGcm9tOiBTYWdl
-IFdlaWwgW21haWx0bzpzd2VpbEByZWRoYXQuY29tXQ0KPj4gU2VudDogVHVlc2RheSwgRmVicnVh
-cnkgMTAsIDIwMTUgMTA6NDQgQU0NCj4+IFRvOiBHcmVnb3J5IEZhcm51bQ0KPj4gQ2M6IFNvbW5h
-dGggUm95OyBzanVzdEByZWRoYXQuY29tOyBIYW9tYWkgV2FuZyANCj4+IChoYW9tYWl3YW5nQGdt
-YWlsLmNvbSk7IENlcGggRGV2ZWxvcG1lbnQNCj4+IFN1YmplY3Q6IFJlOiBLL1YgaW50ZXJmYWNl
-IGJ1ZmZlciB0cmFuc2FjdGlvbg0KPj4NCj4+IE9uIFR1ZSwgMTAgRmViIDIwMTUsIEdyZWdvcnkg
-RmFybnVtIHdyb3RlOg0KPj4+IE9uIFR1ZSwgRmViIDEwLCAyMDE1IGF0IDEwOjI2IEFNLCBTYWdl
-IFdlaWwgPHN3ZWlsQHJlZGhhdC5jb20+IHdyb3RlOg0KPj4+ID4gT24gVHVlLCAxMCBGZWIgMjAx
-NSwgU29tbmF0aCBSb3kgd3JvdGU6DQo+Pj4gPj4gVGhhbmtzIFNhbSAhDQo+Pj4gPj4gU28sIGlz
-IGl0IHNhZmUgdG8gZG8gb3JkZXJpbmcgaWYgaW4gYSB0cmFuc2FjdGlvbiAqbm8qIHJlbW92ZS90
-cnVuY2F0ZS9jcmVhdGUvYWRkIGNhbGwgPw0KPj4+ID4+IEZvciBleGFtcGxlLCBkbyB3ZSBuZWVk
-IHRvIHByZXNlcnZlIG9yZGVyaW5nIGluIGNhc2Ugb2YgdGhlIGJlbG93IHRyYW5zYWN0aW9uID8N
-Cj4+PiA+PiBJdCB3aWxsIGJlIGhlbHBmdWwgaWYgeW91IGNhbiBnaXZlIHNvbWUgaW5zaWdodCBp
-biB3aGF0IHNjZW5hcmlvIHByZXNlcnZpbmcgb3JkZXIgaXMgKm11c3QqLg0KPj4+ID4NCj4+PiA+
-IElmIEknbSBub3QgbWlzdGFrZW4gdGVoIG9ubHkgdGltZSBvcmRlcmluZyB3b3VsZCBtYXR0ZXIg
-YXQgYWxsIGluIA0KPj4+ID4gYW4gdHJhbnNhY3Rpb24gaXMgd2hlbiB0aGUgc2FtZSBrZXkgaXMg
-dXBkYXRlZCB0d2ljZSwgcmlnaHQ/ICBUaGUgDQo+Pj4gPiB3aG9sZSB0aGluZyBpcyBjb21taXR0
-ZWQgYXRvbWljYWxseS4gIElmIHRoZXJlICphcmUqIGR1cHMsIHRoZW4gDQo+Pj4gPiB0aGUgb3Jk
-ZXIgdGhlcmUgb2J2aW91c2x5IHNob3VsZCBiZSBwcmVzZXJ2ZWQuDQo+Pj4gPg0KPj4+ID4gTWF5
-YmUgYSBmaXJzdCBwYXNzIHdvdWxkIGJlIGFkZCBhbiBhc3NlcnQgb3Igc29tZXRoaW5nIHRoYXQg
-dGhlcmUgDQo+Pj4gPiBhcmUgbm8gZHVwIGtleXMgYW5kIHNlZSBpZiBhbnl0aGluZyBldmVyeSBm
-YWxscyBvdXQgb2YgdGhhdC4uLg0KPj4+ID4gaG9wZWZ1bGx5IHRoZXJlIGFyZSBub25lIQ0KPj4+
-DQo+Pj4gSSdtIHByZXR0eSBzdXJlIHNvbWUgb2YgdGhlIHRyYW5zYWN0aW9uIGFuYWx5c2lzIGRp
-c2N1c3Npb25zIHBlb3BsZSANCj4+PiBoYXZlIGhhZCBzYXkgdGhhdCB3ZSBkbyBkb3VibGUtdXBk
-YXRlcyBhdCB0aW1lcy4gSUlSQyBpdCBtaWdodCBoYXZlIA0KPj4+IGJlZW4gdGhlIHBnbG9nIGhl
-YWQgZ2V0dGluZyBzZXQgdHdpY2UgaW4gbW9zdCB0cmFuc2FjdGlvbnM/DQo+Pg0KPj4gT2ggeWVh
-aCwgY291bGQgYmUuICBUaGVyZSB3YXMgdGhlIHNuYXBzZXQgeGF0dHIgdXBkYXRlLCBidXQgdGhh
-dCB3YXMgcmVzZXR0aW5nIGl0IHRvIGFuIGV4aXN0aW5nIHZhbHVlIChub3QgdGhlIHNhbWUgdmFs
-dWUgaW5zaWRlIHRoZSBzYW1lIHR4bikuICBJIGZvcmdldCBpZiB0aGVyZSB3ZXJlIG90aGVycy4N
-Cj4+DQo+PiBzYWdlDQo+Pg0KPj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCj4+
-DQo+PiBQTEVBU0UgTk9URTogVGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBpbiB0aGlzIGVsZWN0
-cm9uaWMgbWFpbCBtZXNzYWdlIGlzIGludGVuZGVkIG9ubHkgZm9yIHRoZSB1c2Ugb2YgdGhlIGRl
-c2lnbmF0ZWQgcmVjaXBpZW50KHMpIG5hbWVkIGFib3ZlLiBJZiB0aGUgcmVhZGVyIG9mIHRoaXMg
-bWVzc2FnZSBpcyBub3QgdGhlIGludGVuZGVkIHJlY2lwaWVudCwgeW91IGFyZSBoZXJlYnkgbm90
-aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2UgaW4gZXJyb3IgYW5kIHRo
-YXQgYW55IHJldmlldywgZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9uLCBvciBjb3B5aW5nIG9m
-IHRoaXMgbWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5b3UgaGF2ZSByZWNlaXZl
-ZCB0aGlzIGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBi
-eSB0ZWxlcGhvbmUgb3IgZS1tYWlsIChhcyBzaG93biBhYm92ZSkgaW1tZWRpYXRlbHkgYW5kIGRl
-c3Ryb3kgYW55IGFuZCBhbGwgY29waWVzIG9mIHRoaXMgbWVzc2FnZSBpbiB5b3VyIHBvc3Nlc3Np
-b24gKHdoZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkgc3RvcmVkIGNvcGllcyku
-DQo+Pg0KDQoNCg0KLS0NCkJlc3QgUmVnYXJkcywNCg0KV2hlYXQNCg==
+On Thu, Feb 12, 2015 at 3:26 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
+> Haomai,
+>
+> << KeyValueStore will only write one for duplicate entry in ordering
+>
+> I saw K/v store (keyvaluestore.cc) itself is not removing the duplicates , are you saying the shim layer like leveldbstore/rocksdbstore is removing the duplicates or the leveldb/rocksdb ?
+
+Oh no, sorry. That's just I want to do in mind. I forget I haven't impl it.
+
+Each ObjectStore::Transaction in KeyValueStore has corresponding
+BufferTransaction will store all kvs needed to store. We could let
+submit_transaction do it at last instead of calling backend each op.
+
+Yeah, we could resolve it in KeyValueStore clearly.
+>
+> Thanks & Regards
+> Somnath
+>
+> -----Original Message-----
+> From: Haomai Wang [mailto:haomaiwang@gmail.com]
+> Sent: Wednesday, February 11, 2015 7:36 PM
+> To: Somnath Roy
+> Cc: sjust@redhat.com; Sage Weil; Gregory Farnum; Ceph Development
+> Subject: Re: K/V interface buffer transaction
+>
+> On Thu, Feb 12, 2015 at 6:53 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
+>> Yeah, thanks!
+>> Not sure if level-db is handling duplicate entries within a transaction properly or not, if not, in case of filestore (and also for K/V stores) we are having an extra (redundant) OMAP write in the Write-Path.
+>
+> KeyValueStore will only write one for duplicate entry in ordering.
+>
+> But FileStore will write redundant omap.
+>
+> And from dump log, the duplicate entry looks like from pglog
+>
+>>
+>> Regards
+>> Somnath
+>>
+>> -----Original Message-----
+>> From: Samuel Just [mailto:sam.just@inktank.com]
+>> Sent: Wednesday, February 11, 2015 2:36 PM
+>> To: Somnath Roy
+>> Cc: Sage Weil; Gregory Farnum; Haomai Wang (haomaiwang@gmail.com);
+>> Ceph Development
+>> Subject: Re: K/V interface buffer transaction
+>>
+>> Well, the transaction is atomic, so if the key is set twice, you can certainly ignore the first one.
+>> -Sam
+>>
+>> On Wed, Feb 11, 2015 at 2:20 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
+>>> Hi,
+>>> My code had a bug during printing log. I was using map to store the
+>>> attribute keys in sorted order and that was discarding the duplicates
+>>> :-)
+>>>
+>>> This is what I found out coming during transaction.
+>>>
+>>> 2015-02-05 15:58:12.311738 7f27b5429700  0 queue_transactions ::
+>>> before _do_transactions
+>>> 2015-02-05 15:58:12.311754 7f27b5429700  0 _do_transactions::before
+>>> _do_transaction
+>>> 2015-02-05 15:58:12.311770 7f27b5429700  0 Transaction::OP_WRITE::cid
+>>> = 1.a3_head oid =
+>>> 680256a3/rbd_data.100974b0dc51.0000000000000631/head//1 offset =
+>>> 3997696 len = 65536
+>>> 2015-02-05 15:58:12.311800 7f27b5429700  0
+>>> Transaction::OP_SETATTR::cid = 1.a3_head oid =
+>>> 680256a3/rbd_data.100974b0dc51.0000000000000631/head//1 attr_name = _
+>>> attr_value_len = 273
+>>> 2015-02-05 15:58:12.311822 7f27b5429700  0
+>>> Transaction::OP_SETATTR::cid = 1.a3_head oid =
+>>> 680256a3/rbd_data.100974b0dc51.0000000000000631/head//1 attr_name =
+>>> snapset attr_value_len = 31
+>>> 2015-02-05 15:58:12.311840 7f27b5429700  0
+>>> Transaction::OP_OMAP_SETKEYS::cid = 1.a3_head oid = a3//head//1
+>>> 2015-02-05 15:58:12.311845 7f27b5429700  0 OMAP_KEY = 0000000102.00000000000000001592 Value = buffer::list(len=178,
+>>>         buffer::ptr(0~4 0x3efc21000 in raw 0x3efc21000 len 4096 nref 6),
+>>>         buffer::ptr(0~170 0x3d74840 in raw 0x3d74840 len 688 nref 3),
+>>>         buffer::ptr(4~4 0x3efc21004 in raw 0x3efc21000 len 4096 nref
+>>> 6)
+>>> )
+>>> 2015-02-05 15:58:12.311931 7f27b5429700  0
+>>> Transaction::OP_OMAP_SETKEYS::cid = 1.a3_head oid = a3//head//1
+>>> 2015-02-05 15:58:12.311938 7f27b5429700  0 OMAP_KEY = _epoch Value = buffer::list(len=4,
+>>>         buffer::ptr(0~4 0x3efc1f000 in raw 0x3efc1f000 len 4096 nref
+>>> 3)
+>>> )
+>>> 2015-02-05 15:58:12.311943 7f27b5429700  0 OMAP_KEY = _info Value = buffer::list(len=713,
+>>>         buffer::ptr(0~713 0x3efc1e000 in raw 0x3efc1e000 len 4096
+>>> nref
+>>> 3)
+>>> )
+>>> 2015-02-05 15:58:12.311965 7f27b5429700  0
+>>> Transaction::OP_OMAP_SETKEYS::cid = 1.a3_head oid = a3//head//1
+>>> 2015-02-05 15:58:12.311969 7f27b5429700  0 OMAP_KEY = 0000000102.00000000000000001592 Value = buffer::list(len=178,
+>>>         buffer::ptr(0~4 0x3d75e40 in raw 0x3d75e40 len 688 nref 6),
+>>>         buffer::ptr(0~170 0x3d75b80 in raw 0x3d75b80 len 688 nref 3),
+>>>         buffer::ptr(4~4 0x3d75e44 in raw 0x3d75e40 len 688 nref 6)
+>>> )
+>>> 2015-02-05 15:58:12.311980 7f27b5429700  0 OMAP_KEY = can_rollback_to Value = buffer::list(len=12,
+>>>         buffer::ptr(0~12 0x3efc25000 in raw 0x3efc25000 len 4096 nref
+>>> 3)
+>>> )
+>>> 2015-02-05 15:58:12.311985 7f27b5429700  0 OMAP_KEY = rollback_info_trimmed_to Value = buffer::list(len=12,
+>>>         buffer::ptr(0~12 0x3efc24000 in raw 0x3efc24000 len 4096 nref
+>>> 3)
+>>> )
+>>>
+>>>
+>>>
+>>> So, the OMAP_KEY = 0000000102.00000000000000001592 is coming twice !
+>>>
+>>> Is there any reason, why ? What is this attribute by the way ?
+>>> Can we safely discard the first OP_OMAP_SETKEYS call for the same key ?
+>>>
+>>> Thanks & Regards
+>>> Somnath
+>>>
+>>> -----Original Message-----
+>>> From: Somnath Roy
+>>> Sent: Tuesday, February 10, 2015 4:36 PM
+>>> To: 'Sage Weil'; Gregory Farnum
+>>> Cc: sjust@redhat.com; Haomai Wang (haomaiwang@gmail.com); Ceph
+>>> Development
+>>> Subject: RE: K/V interface buffer transaction
+>>>
+>>> Thanks Greg/Sam/Sage !
+>>> For now, we will be doing our testing by sorting the keys and will keep an eye on the duplicates.
+>>> Another point, why do we need the K/V store thread pool for processing transactions anymore ?
+>>> I got rid of that and calling _do_transaction() directly from the ::queue_trasaction , this is giving me ~3X performance improvement.
+>>>
+>>> Regards
+>>> Somnath
+>>>
+>>> -----Original Message-----
+>>> From: Sage Weil [mailto:sweil@redhat.com]
+>>> Sent: Tuesday, February 10, 2015 10:44 AM
+>>> To: Gregory Farnum
+>>> Cc: Somnath Roy; sjust@redhat.com; Haomai Wang
+>>> (haomaiwang@gmail.com); Ceph Development
+>>> Subject: Re: K/V interface buffer transaction
+>>>
+>>> On Tue, 10 Feb 2015, Gregory Farnum wrote:
+>>>> On Tue, Feb 10, 2015 at 10:26 AM, Sage Weil <sweil@redhat.com> wrote:
+>>>> > On Tue, 10 Feb 2015, Somnath Roy wrote:
+>>>> >> Thanks Sam !
+>>>> >> So, is it safe to do ordering if in a transaction *no* remove/truncate/create/add call ?
+>>>> >> For example, do we need to preserve ordering in case of the below transaction ?
+>>>> >> It will be helpful if you can give some insight in what scenario preserving order is *must*.
+>>>> >
+>>>> > If I'm not mistaken teh only time ordering would matter at all in
+>>>> > an transaction is when the same key is updated twice, right?  The
+>>>> > whole thing is committed atomically.  If there *are* dups, then
+>>>> > the order there obviously should be preserved.
+>>>> >
+>>>> > Maybe a first pass would be add an assert or something that there
+>>>> > are no dup keys and see if anything every falls out of that...
+>>>> > hopefully there are none!
+>>>>
+>>>> I'm pretty sure some of the transaction analysis discussions people
+>>>> have had say that we do double-updates at times. IIRC it might have
+>>>> been the pglog head getting set twice in most transactions?
+>>>
+>>> Oh yeah, could be.  There was the snapset xattr update, but that was resetting it to an existing value (not the same value inside the same txn).  I forget if there were others.
+>>>
+>>> sage
+>>>
+>>> ________________________________
+>>>
+>>> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+>>>
+>
+>
+>
+> --
+> Best Regards,
+>
+> Wheat
+
+
+
+-- 
+Best Regards,
+
+Wheat
