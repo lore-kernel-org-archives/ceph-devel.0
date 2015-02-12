@@ -1,54 +1,40 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: documenting the shec erasure code plugin
-Date: Thu, 12 Feb 2015 16:09:48 +0100
-Message-ID: <54DCC23C.7030102@dachary.org>
+From: Hannes Landeholm <hannes@jumpstarter.io>
+Subject: Re: RBD Kernel panic rbd_dev_refresh
+Date: Thu, 12 Feb 2015 16:24:59 +0100
+Message-ID: <CABt9es8smjGVa36NPJ4XHNthsesVg14sT0np5v0xpmWojkHDUA@mail.gmail.com>
+References: <CAPZO0-PBVXKoCu3N0USFSO=8NmTj9k2Ys82zJBnFVv2Q4xEFkA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="fR4HAINr3OVadNr3vLKBsbbN07de8N0xA"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:43178 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1755302AbbBLPJu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Feb 2015 10:09:50 -0500
+Received: from mail-la0-f54.google.com ([209.85.215.54]:44521 "EHLO
+	mail-la0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751969AbbBLPZB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Feb 2015 10:25:01 -0500
+Received: by lams18 with SMTP id s18so10713297lam.11
+        for <ceph-devel@vger.kernel.org>; Thu, 12 Feb 2015 07:25:00 -0800 (PST)
+In-Reply-To: <CAPZO0-PBVXKoCu3N0USFSO=8NmTj9k2Ys82zJBnFVv2Q4xEFkA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>
+To: Thorwald Lundqvist <thorwald@jumpstarter.io>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---fR4HAINr3OVadNr3vLKBsbbN07de8N0xA
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+We don't have any debug symbols but here is a dump of the .ko at this address:
 
-Hi,
+https://gist.github.com/hannes-landeholm/b4664e2e7e37ad13177c
 
-Would you have time to document the shec erasure code plugin ? A page sim=
-ilar to http://docs.ceph.com/docs/master/rados/operations/erasure-code-is=
-a/ for the shec erasure code plugin should be linked to http://docs.ceph.=
-com/docs/master/rados/operations/erasure-code/. The documentation is in t=
-he ceph sources ( see https://github.com/ceph/ceph/tree/master/doc/rados/=
-operations ).
+It's likely this line (rbd_dev_refresh+0xcb)
 
-http://tracker.ceph.com/issues/10860=20
+3d5b:       4c 89 60 50             mov    %r12,0x50(%rax)
 
-Cheers
+%rax here is null which causes the invalid write to address 0000000000000050.
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+I'm pretty sure it's the following line in rbd.c which is the offender
+if you look at the context (below spinlock and shr, above call to
+revalidate_disk).
 
+set_capacity(rbd_dev->disk, size);
 
---fR4HAINr3OVadNr3vLKBsbbN07de8N0xA
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+https://github.com/torvalds/linux/blob/e69b8d414f948c242ad9f3eb2b7e24fba783dbbd/drivers/block/rbd.c#L3682
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlTcwjwACgkQ8dLMyEl6F21+TwCglCpE3uqDZuEi6L8j9kf3NYMT
-2IgAoIA5/zuh2IXX2S1mIxKU6zZv4A4E
-=CEsN
------END PGP SIGNATURE-----
-
---fR4HAINr3OVadNr3vLKBsbbN07de8N0xA--
+--
+Hannes Landeholm
