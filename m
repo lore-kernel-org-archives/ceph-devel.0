@@ -1,17 +1,17 @@
 From: Loic Dachary <loic@dachary.org>
 Subject: Re: SHEC updates to the erasure code non regression corpus
-Date: Thu, 12 Feb 2015 10:13:59 +0100
-Message-ID: <54DC6ED7.8020900@dachary.org>
+Date: Thu, 12 Feb 2015 10:14:39 +0100
+Message-ID: <54DC6EFF.6080005@dachary.org>
 References: <54DB4AEC.6000507@dachary.org> <870DE8DBB716524BAE51B2D499EC81E40AA6C7F5@g01jpexmbyt24>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="nafVg0nKaLILGVQXUs72doVJ7jtsTkQj7"
+ boundary="ki5qAgX0RsVOX1V109tQoQBb2CjsH0uUP"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:43025 "EHLO
+Received: from mail2.dachary.org ([91.121.57.175]:43027 "EHLO
 	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751846AbbBLJOB (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Feb 2015 04:14:01 -0500
+	with ESMTP id S1752026AbbBLJOl (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Feb 2015 04:14:41 -0500
 In-Reply-To: <870DE8DBB716524BAE51B2D499EC81E40AA6C7F5@g01jpexmbyt24>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -19,23 +19,11 @@ To: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>, "Shiozawa, Kensuke" <shiozawa.kennsu@jp.fujitsu.com>, "Nakao, Takanori" <nakao.takanori@jp.fujitsu.com>
 
 This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---nafVg0nKaLILGVQXUs72doVJ7jtsTkQj7
+--ki5qAgX0RsVOX1V109tQoQBb2CjsH0uUP
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
 
-Hi,
 
-It turned out to be a problem with tests and uninitialized memory which I=
- was able to fix with
-
-https://github.com/ceph/ceph/commit/1a9d717d1661e1e9c9eda3749b7d9c8882a99=
-5d2
-
-What surprises me is that we did not catch that before. If I remember cor=
-rectly we ran valgrind and it was clean. Would you have time to review th=
-e tests once more to see if you can maybe catch another minor problem ?
-
-Cheers
 
 On 12/02/2015 09:43, Miyamae, Takeshi wrote:
 > Hi Loic,
@@ -45,6 +33,9 @@ On 12/02/2015 09:43, Miyamae, Takeshi wrote:
 > We have tried create and check actions once for each. It seems it works=
  well.
 > Is that enough for your job?
+
+Yes, thank you :-)
+
 >=20
 > Best regards,
 > Takeshi Miyamae
@@ -84,7 +75,7 @@ t to guess how it works ;-)
 Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
 
---nafVg0nKaLILGVQXUs72doVJ7jtsTkQj7
+--ki5qAgX0RsVOX1V109tQoQBb2CjsH0uUP
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -92,9 +83,9 @@ Content-Disposition: attachment; filename="signature.asc"
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2.0.22 (GNU/Linux)
 
-iEYEARECAAYFAlTcbtcACgkQ8dLMyEl6F20YGQCgweNpLllzw/ww203y8TO/8zSX
-M+oAoIyHfzV6F7hbG4AlS6urHAVf2vV6
-=TNTu
+iEYEARECAAYFAlTcbv8ACgkQ8dLMyEl6F2157ACfW2qvpnL+bhgAVQ/DgrZCYhSY
+cLwAoLIyCF6QAI7ljWjqfxXMULI76KLA
+=wgqr
 -----END PGP SIGNATURE-----
 
---nafVg0nKaLILGVQXUs72doVJ7jtsTkQj7--
+--ki5qAgX0RsVOX1V109tQoQBb2CjsH0uUP--
