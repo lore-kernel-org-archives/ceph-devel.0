@@ -1,62 +1,160 @@
-From: "Deneau, Tom" <tom.deneau@amd.com>
-Subject: RE: using radosgw with mod_proxy_fcgi
-Date: Thu, 12 Feb 2015 18:21:08 +0000
-Message-ID: <BC97738F8E7C8742BABED7F06FB9DF915554BCEC@SATLEXDAG01.amd.com>
-References: <BC97738F8E7C8742BABED7F06FB9DF915554B70A@SATLEXDAG01.amd.com>
- <54DCEBF7.9080708@redhat.com>
+From: Yuri Weinstein <yweinste@redhat.com>
+Subject: Re: dumpling integration branch for v0.67.12 ready for QE
+Date: Thu, 12 Feb 2015 17:06:17 -0500 (EST)
+Message-ID: <1586599856.17187011.1423778777774.JavaMail.zimbra@redhat.com>
+References: <54DA3A5B.5050509@dachary.org> <1520027977.15929683.1423693473209.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1bon0140.outbound.protection.outlook.com ([157.56.111.140]:33917
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750881AbbBLSVV convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Feb 2015 13:21:21 -0500
-In-Reply-To: <54DCEBF7.9080708@redhat.com>
-Content-Language: en-US
+Received: from mx4-phx2.redhat.com ([209.132.183.25]:52235 "EHLO
+	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750959AbbBLWHU convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Feb 2015 17:07:20 -0500
+In-Reply-To: <1520027977.15929683.1423693473209.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ken Dreyer <kdreyer@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, Tamil Muthamizhan <tmuthami@redhat.com>, Zack Cerza <zack@redhat.com>, Sandon Van Ness <svanness@redhat.com>
 
-Ken --
+I linked all issues related to this release testing to the ticket http:=
+//tracker.ceph.com/issues/10560
 
-I am running httpd-2.4.10-9
+After the team leads make a call of those, including environment issues=
+, I suggest re-running suites the failed again.
 
-I was able to get a conf set up to do a ProxyPass to a PHP-FPM with this command
-   ProxyPassMatch ^/(.*\.php(/.*)?)$ fcgi://127.0.0.1:9000/var/www/mysite/$1
+Loic, I'd re-run them in the Octo, since we already started there, if y=
+ou agree ?
 
-and that worked. (executing a phpinfo() script showed the Fastcgi connection)
-I'm still working on the radosgw setup.
+Thx
+YuriW
 
-By the way, the page that talked about setting things up for the PHP-FPM
-also had this Directory record in the conf file.  Do we need anything of that
-sort for radosgw?
+----- Original Message -----
+=46rom: "Yuri Weinstein" <yweinste@redhat.com>
+To: "Loic Dachary" <loic@dachary.org>
+Cc: "Ceph Development" <ceph-devel@vger.kernel.org>, "Sage Weil" <sage@=
+redhat.com>, "Tamil Muthamizhan" <tmuthami@redhat.com>
+Sent: Wednesday, February 11, 2015 2:24:33 PM
+Subject: Re: dumpling integration branch for v0.67.12 ready for QE
 
-    <Directory "/var/www/mysite">
-      Order allow,deny
-      Allow from all
-      AllowOverride FileInfo All
-      # New directive needed in Apache 2.4.3:
-      Require all granted
-    </Directory>
+I replied to individual suites runs, but just wanted to summarize QE va=
+lidation status.
 
--- Tom
+The following suites were executed in the Octo lab (we will use Sepia i=
+n the future if nobody objects).
 
------Original Message-----
-From: Ken Dreyer [mailto:kdreyer@redhat.com] 
-Sent: Thursday, February 12, 2015 12:08 PM
-To: Deneau, Tom; ceph-devel@vger.kernel.org
-Subject: Re: using radosgw with mod_proxy_fcgi
+upgrade:dumpling
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+['45493']
+http://tracker.ceph.com/issues/10694 - Known "Won't fix"
+"Assertion: osd/Watch.cc: 290: FAILED assert(!cb)"
 
-On 02/11/2015 05:21 PM, Deneau, Tom wrote:
-> I am running on a platform (aarch64) for which there are no pre-built 
-> binaries of the ceph patched apache and the ceph patched mod_fastcgi.
+*** Sam - pls confirm the "Won't fix" status.
 
-Hi Tom,
+['45495', '45496', '45498', '45499', '45500']
+http://tracker.ceph.com/issues/10838
+"s3tests failed"
 
-The ceph-patched Apache had numerous outstanding CVEs, and I discourage users from running it any more. The distro-supplied Apache should be suitable. We're still working to update our docs regarding this.
+*** Yehuda - need your verdict on s3tests.
 
-What distribution are you running on aarch64, by the way? Dan or I are probably the ones who are going to be packaging mod_proxy_fcgi for Apache 2.2, so I'm curious to know what users are running.
+fs
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+All green !
 
-- Ken
+rados
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+['45054']
+http://tracker.ceph.com/issues/10841
+"Issued certificate has expired"=20
+*** Sandon pls comment.
+
+['45168', '45169']
+http://tracker.ceph.com/issues/10840
+coredump "ceph_test_filestore_idempotent_sequence"
+*** Sam - pls comment
+
+['45215']
+Missing packages - no ticket FYI
+"Failed to fetch http://apt-mirror.front.sepia.ceph.com/archive.ubuntu.=
+com/ubuntu/dists/trusty-updates/universe/binary-i386/Packages  Hash Sum=
+ mismatch"
+
+*** Zack, Sandon ?
+
+ceph-deploy
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+
+Travis - pls suggest
+In general I am not sure if we needed to test this - Sage?
+
+rbd
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+['45365', '45366', '45367']
+http://tracker.ceph.com/issues/10842
+"unable to connect to apt-mirror.front.sepia.ceph.com"
+
+['45349', '45350', '45351', '45355', '45356', '45357', '45363']
+http://tracker.ceph.com/issues/10802
+"error: image still has watchers"=20
+(duplicate of 10680)
+
+*** Zack, Sandon, Josh - all environment noise, pls comment.=20
+
+rgw
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+['45382', '45390']
+http://tracker.ceph.com/issues/10843
+"s3tests failed" - could be related or duplicate of 10838
+
+*** Yehuda - same as issues in upgrades?
+
+I am standing by for you analysis/replies and recommendations for next =
+steps.
+
+Loic - let me know is you want to follow specific items in our backport=
+ testing process that I missed here.
+PS:  I would think that you could've wanted to assign the release ticke=
+t to QE (me) for validation and at this point I could've re-assigned it=
+ back to devel (you), a?
+
+Thx
+YuriW
+
+----- Original Message -----
+=46rom: "Loic Dachary" <loic@dachary.org>
+To: "Yuri Weinstein" <yweinste@redhat.com>
+Cc: "Ceph Development" <ceph-devel@vger.kernel.org>
+Sent: Tuesday, February 10, 2015 9:05:31 AM
+Subject: dumpling integration branch for v0.67.12 ready for QE
+
+Hi Yuri,
+
+The dumpling integration branch for v0.67.12 as found at https://github=
+=2Ecom/ceph/ceph/commits/dumpling-backports has been approved by Yehuda=
+, Josh and Sam and is ready for QE.=20
+
+=46or the record, the head is https://github.com/ceph/ceph/commit/3944c=
+77c404c4a05886fe8276d5d0dd7e4f20410
+
+I think it would be best for the QE tests to use the dumpling-backports=
+=2E The alternative would be to merge dumpling-backports into dumpling.=
+ However, since testing may take a long time and require more patches, =
+it probably is better to not do that iterative process on the dumpling =
+branch itself. As it is now, there already are a number of commits in t=
+he dumpling branch that should really be in the dumpling-backports: the=
+y do not belong to v0.67.11 and are going to be released in v0.67.12. I=
+n the future though, the dumpling branch will only receive commits that=
+ have been carefully tested and all the integration work will be on the=
+ dumpling-backports branch exclusively. So that third parties do not ha=
+ve to worry that the dumpling branch contains commits that have not bee=
+n tested yet.
+
+Cheers
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
