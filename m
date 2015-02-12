@@ -1,78 +1,54 @@
-From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Subject: Re: using radosgw with mod_proxy_fcgi
-Date: Wed, 11 Feb 2015 20:10:28 -0500 (EST)
-Message-ID: <211191187.4180548.1423703428235.JavaMail.zimbra@redhat.com>
-References: <BC97738F8E7C8742BABED7F06FB9DF915554B70A@SATLEXDAG01.amd.com>
+From: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>
+Subject: RE: unittest_erasure_code_shec  fails
+Date: Thu, 12 Feb 2015 03:26:44 +0000
+Message-ID: <870DE8DBB716524BAE51B2D499EC81E40AA6C73C@g01jpexmbyt24>
+References: <54DBAE9A.6030205@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx3-phx2.redhat.com ([209.132.183.24]:38899 "EHLO
-	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753741AbbBLBKc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Feb 2015 20:10:32 -0500
-In-Reply-To: <BC97738F8E7C8742BABED7F06FB9DF915554B70A@SATLEXDAG01.amd.com>
+Received: from fgwmail6.fujitsu.co.jp ([192.51.44.36]:48175 "EHLO
+	fgwmail6.fujitsu.co.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753939AbbBLD0s (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Feb 2015 22:26:48 -0500
+Received: from kw-mxoi2.gw.nic.fujitsu.com (unknown [10.0.237.143])
+	by fgwmail6.fujitsu.co.jp (Postfix) with ESMTP id 536B63EE0B6
+	for <ceph-devel@vger.kernel.org>; Thu, 12 Feb 2015 12:26:47 +0900 (JST)
+Received: from s2.gw.fujitsu.co.jp (s2.gw.fujitsu.co.jp [10.0.50.92])
+	by kw-mxoi2.gw.nic.fujitsu.com (Postfix) with ESMTP id 5A82AAC05C3
+	for <ceph-devel@vger.kernel.org>; Thu, 12 Feb 2015 12:26:46 +0900 (JST)
+Received: from g01jpfmpwyt03.exch.g01.fujitsu.local (g01jpfmpwyt03.exch.g01.fujitsu.local [10.128.193.57])
+	by s2.gw.fujitsu.co.jp (Postfix) with ESMTP id EE0701DB803A
+	for <ceph-devel@vger.kernel.org>; Thu, 12 Feb 2015 12:26:45 +0900 (JST)
+In-Reply-To: <54DBAE9A.6030205@dachary.org>
+Content-Language: ja-JP
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tom Deneau <tom.deneau@amd.com>
-Cc: ceph-devel@vger.kernel.org
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, "Shiozawa, Kensuke" <shiozawa.kennsu@jp.fujitsu.com>, "Nakao, Takanori" <nakao.takanori@jp.fujitsu.com>, "Kaga, Yoshihiro" <y-kaga@jp.fujitsu.com>, "Kawaguchi, Shotaro" <kawaguchi.s@jp.fujitsu.com>
 
-
-
------ Original Message -----
-> From: "Tom Deneau" <tom.deneau@amd.com>
-> To: ceph-devel@vger.kernel.org
-> Sent: Wednesday, February 11, 2015 4:21:46 PM
-> Subject: using radosgw with mod_proxy_fcgi
-> 
-> I am a Ceph novice and have the rados and rbd setups working and would like
-> to use the radosgw stack.
-> 
-> I am running on a platform (aarch64) for which there are no pre-built
-> binaries of the ceph patched apache and the ceph patched mod_fastcgi.  But
-> since I gather from the mail lists that the future is just to use
-> mod_proxy_fcgi and since my apache install has mod_proxy_fcgi build in
-> already that seems like the way to go.
-> 
-> I realize the documentation to explain exactly how to set things up with
-> mod_proxy_fcgi is still in the works but if there is any preliminary
-> documentation on this, I'd be glad to try it out.
-> 
-
-That's the apache site config that I was using:
-
-<VirtualHost *:80>
-    ServerName localhost
-    DocumentRoot /var/www/html
-
-    ErrorLog ${APACHE_LOG_DIR}/error.log
-    CustomLog ${APACHE_LOG_DIR}/access.log combined
-
-    LogLevel debug
-
-
-    RewriteEngine On
-
-    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization},L]
-
-    # RewriteRule ^/(.*) /?%{QUERY_STRING} [E=HTTP_AUTHORIZATION:%{HTTP:Authorization},L]
-
-    SetEnv proxy-nokeepalive 1
-
-    ProxyPass / fcgi://127.0.01:9000/
-    #ProxyPass / unix:///tmp/.radosgw.sock|fcgi://localhost:9000/
-</VirtualHost>
-
-Note that there are two options here, and it really depends your apache version. For vanilla apache 2.4.8+ (or maybe 2.4.7+) you can use the regular unix domain socket setup (as described in the docs), just modify the path appropriately. For older apaches (2.4.0+) you need to use tcp for fastcgi, and that requires somewhat different rgw configuration, e.g. have the following in your ceph.conf:
-
-        rgw frontends = fastcgi socket_port=9000 socket_host=0.0.0.0
-
-For apache 2.2 there's no mod-proxy-fcgi out of the box. I did backport that module, and you can find it here: https://github.com/ceph/mod-proxy-fcgi, but you'll need to compile it yourself at this point.
-
-Note that mod-proxy-fcgi does not support 100-continue, so you'll need to add the following to your ceph.conf:
-
-        rgw print continue = false
-
-Yehuda
-
-
+SGkgTG9pYywNCg0KV2UgYXJlIHNvcnJ5IGZvciB0aGUgZXJyb3JzIGluIHRo
+ZSB0ZXN0IHNjcmlwdCBhbmQgdGhhbmsgeW91IGZvciB5b3VyIHVyZ2VudCBo
+YW5kbGluZy4NClRvIGJlIGhvbmVzdCwgd2UgYWxzbyBoYWQgZm91bmQgdGhv
+c2UgZXJyb3JzIGxhc3Qgd2VlayBhbmQgd2UgdGhvdWdodCB0aGF0IHRob3Nl
+DQplcnJvcnMgZGVwZW5kIG9uIGV4ZWN1dGlvbiBlbnZpcm9ubWVudC4NCkJh
+c2ljYWxseSB0aG9zZSBhcmUgbm90IHJlcXVpcmVkIGFuZCB5b3VyIG1vZGlm
+aWNhdGlvbiB3YXMgZW5vdWdoLCBidXQgd2Ugd2lsbCBpc3N1ZQ0KYW5vdGhl
+ciBwdWxsIHJlcXVlc3QgbGF0ZXIgYmVjYXVzZSB3ZSB3b3VsZCBsaWtlIHRv
+IGVyYXNlIGFsbCB0aGUgc2FtZSBraW5kcyBvZiB0ZXN0cw0KYXMgdGhvc2Uu
+DQoNCkJlc3QgcmVnYXJkcywNClRha2VzaGkgTWl5YW1hZQ0KDQotLS0tLU9y
+aWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogY2VwaC1kZXZlbC1vd25lckB2
+Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIu
+a2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIExvaWMgRGFjaGFyeQ0KU2VudDog
+VGh1cnNkYXksIEZlYnJ1YXJ5IDEyLCAyMDE1IDQ6MzQgQU0NClRvOiBNaXlh
+bWFlLCBUYWtlc2hpL+WuruWJjSDliZsNCkNjOiBDZXBoIERldmVsb3BtZW50
+DQpTdWJqZWN0OiB1bml0dGVzdF9lcmFzdXJlX2NvZGVfc2hlYyBmYWlscw0K
+DQpIaSwNCg0KQXMgb2YgdG9kYXkgdGhlIFNIRUMgdW5pdCB0ZXN0IGZhaWwg
+YXMgZGVzY3JpYmVkIGF0IGh0dHA6Ly90cmFja2VyLmNlcGguY29tL2lzc3Vl
+cy8xMDgzOS4gQ2FuIHlvdSByZXByb2R1Y2UgdGhlIGZhaWx1cmUgbG9jYWxs
+eSA/IEknbSBub3Qgc3VyZSB3aHkgaXQgaGFwcGVucyBub3cgYW5kIG5vdCB5
+ZXN0ZXJkYXkuIEknbGwgYmlzZWN0IHRoZSBmYWlsdXJlIGRvd24gdG8gdGhl
+IGd1aWx0eSBjb21taXQgYnV0IGl0IHdvdWxkIGJlIGdyZWF0IGlmIHlvdSBj
+b3VsZCBjb25maXJtIHRoYXQgeW91IGFsc28gc2VlIGl0Lg0KDQpDaGVlcnMN
+Cg0KLS0gDQpMb8OvYyBEYWNoYXJ5LCBBcnRpc2FuIExvZ2ljaWVsIExpYnJl
+DQoNCg==
