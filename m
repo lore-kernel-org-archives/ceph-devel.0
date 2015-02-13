@@ -1,91 +1,53 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: Re: [ceph-users] Introducing "Learning Ceph" : The First ever Book
- on	Ceph
-Date: Fri, 13 Feb 2015 09:02:27 +0100 (CET)
-Message-ID: <1506126195.606121.1423814547049.JavaMail.zimbra@oxygem.tv>
-References: <30381A24-8B8C-4FB0-9C3B-A9B5A24C53FB@csc.fi>
+From: Sage Weil <sweil@redhat.com>
+Subject: cephfs root_squash, multitenancy
+Date: Fri, 13 Feb 2015 05:05:43 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1502130457540.3131@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:56051 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752137AbbBMIC3 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Feb 2015 03:02:29 -0500
-In-Reply-To: <1130814055.606114.1423814534128.JavaMail.zimbra@oxygem.tv>
+Received: from mx1.redhat.com ([209.132.183.28]:56120 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752466AbbBMNFo (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 13 Feb 2015 08:05:44 -0500
+Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t1DD5ikv005756
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
+	for <ceph-devel@vger.kernel.org>; Fri, 13 Feb 2015 08:05:44 -0500
+Received: from redhat.com (ovpn-112-33.phx2.redhat.com [10.3.112.33])
+	by int-mx13.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t1DD5hWD027123
+	for <ceph-devel@vger.kernel.org>; Fri, 13 Feb 2015 08:05:44 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Karan Singh <karan.singh@csc.fi>
-Cc: Ceph Community <ceph-community@lists.ceph.com>, ceph-users <ceph-users@lists.ceph.com>, ceph-maintainers@ceph.com, ceph-users <ceph-users@ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>, don <donald@thoughtstorm.net>
+To: ceph-devel@vger.kernel.org
 
-Just buy it.
+Got this from JJ:
 
-Nice book, I don't have read yet all the book, but it seem to cover all=
- ceph features.
+> The SA expanded on this by stating that there are basically three main 
+> scenarios here:
+>
+> 1) We trust the UID/GID in a controlled environment. In which case we 
+> can safely rely on the POSIX permissions. As long as root_squash is 
+> available this would be fine.
 
-Good job !
+I think adding a root_squash option to client/Client.cc and the ceph.ko 
+should be pretty easy...
 
+> 2) Multi-tenant systems. In these cases being able to create keyrings 
+> which limit access to specified directories would be ideal.
 
------ Mail original -----
-De: "Karan Singh" <karan.singh@csc.fi>
-=C3=80: "Ceph Community" <ceph-community@lists.ceph.com>, "ceph-users" =
-<ceph-users@lists.ceph.com>, ceph-maintainers@ceph.com, "ceph-users" <c=
-eph-users@ceph.com>, "ceph-devel" <ceph-devel@vger.kernel.org>
-Cc: "Sage Weil" <sweil@redhat.com>, "don" <donald@thoughtstorm.net>
-Envoy=C3=A9: Jeudi 5 F=C3=A9vrier 2015 23:53:11
-Objet: [ceph-users] Introducing "Learning Ceph" : The First ever Book o=
-n	Ceph
+This is mainly enforcing uid/gid and mount path in MDSAuthCap, and not 
+unlike what we'll need for OpenStack Manila.  I think it's something like
 
-Hello Community Members=20
+ 1- establish mount root inode ref when session is opened/authenticated
+ 2- verify in reply path that any inode we reference is beneath that point
+ 3- special case inodes in stray directory, hopefully in some secure-ish 
+way based on where they lived previously.  (not sure how this'll work...)
 
-I am happy to introduce the first book on Ceph with the title =E2=80=9C=
- Learning Ceph =E2=80=9D.=20
+> 3) Government and financial sectors, with more sensitive information. In 
+> these cases the same capabilities as 2 but also the ability to have an 
+> audit trail of what is accessed, when, and from where.
 
-Me and many folks from the publishing house together with technical rev=
-iewers spent several months to get this book compiled and published.=20
+This one I'm happy to ignore for now... :)
 
-=46inally the book is up for sale on , i hope you would like it and sur=
-ely will learn a lot from it.=20
+sage
 
-Amazon : http://www.amazon.com/Learning-Ceph-Karan-Singh/dp/1783985623/=
-ref=3Dsr_1_1?s=3Dbooks&ie=3DUTF8&qid=3D1423174441&sr=3D1-1&keywords=3Dc=
-eph=20
-Packtpub : https://www.packtpub.com/application-development/learning-ce=
-ph=20
-
-You can grab the sample copy from here : https://www.dropbox.com/s/ek76=
-r01r9prs6pb/Learning_Ceph_Packt.pdf?dl=3D0=20
-
-=46inally , I would like to express my sincere thanks to=20
-
-Sage Weil - For developing Ceph and everything around it as well as wri=
-ting foreword for =E2=80=9CLearning Ceph=E2=80=9D.=20
-Patrick McGarry - For his usual off the track support that too always.=20
-
-Last but not the least , to our great community members , who are also =
-reviewers of the book Don Talton , Julien Recurt , Sebastien Han and Zi=
-hong Chen , Thank you guys for your efforts.=20
-
-
-****************************************************************=20
-Karan Singh=20
-Systems Specialist , Storage Platforms=20
-CSC - IT Center for Science,=20
-Keilaranta 14, P. O. Box 405, FIN-02101 Espoo, Finland=20
-mobile: +358 503 812758=20
-tel. +358 9 4572001=20
-fax +358 9 4572302=20
-http://www.csc.fi/=20
-****************************************************************=20
-
-
-_______________________________________________=20
-ceph-users mailing list=20
-ceph-users@lists.ceph.com=20
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com=20
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
