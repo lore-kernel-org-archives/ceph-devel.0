@@ -1,63 +1,73 @@
-From: Alex Elder <elder@ieee.org>
-Subject: Re: RBD Kernel panic rbd_dev_refresh
-Date: Thu, 12 Feb 2015 17:34:10 -0600
-Message-ID: <54DD3872.4010500@ieee.org>
-References: <CAPZO0-PBVXKoCu3N0USFSO=8NmTj9k2Ys82zJBnFVv2Q4xEFkA@mail.gmail.com> <CABt9es8smjGVa36NPJ4XHNthsesVg14sT0np5v0xpmWojkHDUA@mail.gmail.com> <loom.20150212T171651-371@post.gmane.org>
+From: GuangYang <yguang11@outlook.com>
+Subject: RE: Upgrade/rollback
+Date: Fri, 13 Feb 2015 01:45:28 +0000
+Message-ID: <BLU175-W29B0DF73BEFDF61776114DDF230@phx.gbl>
+References: <BLU175-W8D101EDE23DCDD591ADF6DF250@phx.gbl>,<CAC6JEv_76meAsaRmCr9-qEiU0C0R4LGOx=ja9M5vxkW=6jSvcQ@mail.gmail.com>,<alpine.DEB.2.00.1502110923250.3035@cobra.newdream.net>,<BLU175-W18F0FC1C0DF61C25BEFCEDF220@phx.gbl>,<CAC6JEv9JAEw+JT5yrgiW_k74X4uatrTSttj1nMUPFRiQEbmeng@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f173.google.com ([209.85.192.173]:43887 "EHLO
-	mail-pd0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750810AbbBLXeR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Feb 2015 18:34:17 -0500
-Received: by pdev10 with SMTP id v10so15207747pde.10
-        for <ceph-devel@vger.kernel.org>; Thu, 12 Feb 2015 15:34:17 -0800 (PST)
-In-Reply-To: <loom.20150212T171651-371@post.gmane.org>
+Received: from blu004-omc2s1.hotmail.com ([65.55.111.76]:52078 "EHLO
+	BLU004-OMC2S1.hotmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751126AbbBMBp3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Feb 2015 20:45:29 -0500
+In-Reply-To: <CAC6JEv9JAEw+JT5yrgiW_k74X4uatrTSttj1nMUPFRiQEbmeng@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
+To: Gregory Farnum <greg@gregs42.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 02/12/2015 10:19 AM, Ilya Dryomov wrote:
-> On Thu, Feb 12, 2015 at 4:24 PM, Hannes Landeholm <hannes@jumpstarter.io> wrote:
->> We don't have any debug symbols but here is a dump of the .ko at this address:
->>
->> https://gist.github.com/hannes-landeholm/b4664e2e7e37ad13177c
->>
->> It's likely this line (rbd_dev_refresh+0xcb)
->>
->> 3d5b:       4c 89 60 50             mov    %r12,0x50(%rax)
->>
->> %rax here is null which causes the invalid write to address 0000000000000050.
->>
->> I'm pretty sure it's the following line in rbd.c which is the offender
->> if you look at the context (below spinlock and shr, above call to
->> revalidate_disk).
->>
->> set_capacity(rbd_dev->disk, size);
-
-I concur with Hannes.  rbd_dev->disk.part0.nr_sectors is at offset
-0x50 from the rbd_dev pointer.
-
-> I'll file a ticket and look into this.
-
-Looking at the code, there is a race between checking the REMOVING
-flag and the disk getting removed.  The cost of set_capacity is
-low and could be done inside the spinlock, but that doesn't help
-the revalidate_disk() call.  You probably need either to coordinate
-with a semaphore or another rbd_dev->flags bit.
-
-					-Alex
-
-
-> Thanks,
->
->                  Ilya
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQo+IERhdGU6IFRodSwgMTIg
+RmViIDIwMTUgMDY6NTc6MTkgLTA4MDAKPiBTdWJqZWN0OiBSZTogVXBncmFkZS9yb2xsYmFjawo+
+IEZyb206IGdyZWdAZ3JlZ3M0Mi5jb20KPiBUbzogeWd1YW5nMTFAb3V0bG9vay5jb20KPiBDQzog
+Y2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcKPgo+IE9uIFRodSwgRmViIDEyLCAyMDE1IGF0IDEy
+OjQ4IEFNLCBHdWFuZ1lhbmcgPHlndWFuZzExQG91dGxvb2suY29tPiB3cm90ZToKPj4gVGhhbmtz
+IFNhZ2UgYW5kIEdyZWcgZm9yIHRoZSByZXNwb25zZS4KPj4KPj4+IDIpIGhhdmluZyBhIHNlcGFy
+YXRlIHN3aXRjaG92ZXIgcG9pbnQgKGJlc2lkZXMgdGhlIGNvZGUgdXBncmFkZSkgd2hpY2gKPj4+
+IGVuYWJsZXMgYWxsIHRoZSBkaXNrIGNoYW5nZSBiaXRzIGFuZCB3aGljaCBkb2Vzbid0IGFsbG93
+IHlvdSB0byByb2xsCj4+PiBiYWNrLgo+PiBMZXQgbWUgZ2l2ZSB0d28gZXhhbXBsZXMgd2hpY2gg
+cHJldmVudCB1cyByb2xsYmFjayBmcm9tIEdpYW50IHRvIEZpcmVmbHkuCj4+Cj4+IEV4YW1wbGUg
+IzE6Cj4+IEluIEdpYW50LCB0aGVyZSBpcyBhIG5ldyBmZWF0dXJlIGZsYWcgJ0NFUEhfRkVBVFVS
+RV9FUkFTVVJFX0NPREVfUExVR0lOU19WMicgYWRkZWQvcGVyc2lzdGVkLCBhbmQgbW9uaXRvciB3
+b3VsZCBjaGVjayB0aGUgcGVyc2lzdGVkIGxpc3QgYWdhaW5zdCB0aGUgbGlzdCByZWxlYXNlZCBh
+bG9uZyB3aXRoIHRoZSBzb2Z0d2FyZSB2ZXJzaW9uIHVwb24gc3RhcnRpbmcsIGl0IHJlZnVzZSB0
+byBzdGFydCBpZiB0aGUgbGlzdCBtaXNtYXRjaC4gSG93ZXZlciwgYWx0aG91Z2ggdGhlIGZlYXR1
+cmUgaXMgYWRkZWQgaW4gR2lhbnQsIGl0IGlzIG5vdCBiZWluZyB1c2VkIHVudGlsIHdlIGNyZWF0
+ZSBhIG5ldyBwb29sIHdpdGggdGhlIHByb2ZpbGUsIHdoaWNoIGlzIHZlcnkgdW5saWtlbHkgdG8g
+aGFwcGVuLgo+PiAxKSBpcyBpdCBwb3NzaWJsZSB0byBwZXJzaXN0IHRoZSBuZXcgZmVhdHVyZSBi
+aXQgd2hlbiB0aGUgZmVhdHVyZSBpcyBiZWluZyB1c2VkICh0aGlzIGxvb2tzIGxpa2UgY29tcGxp
+Y2F0ZWQgdG8gaW1wbGVtZW50KS4gMikgV2hlbiBsb2FkaW5nIHRoZSBwZXJzaXN0ZWQgYml0LCBp
+cyBpdCBwb3NzaWJsZSB0byBjaGVjayBpZiBpdCBpcyBhY3R1YWxseSB1c2VkIGJ5IHNvbWVvbmU/
+Cj4+Cj4+IEV4YW1wbGUgIzI6Cj4+IFBhdGNoIFsxXSBhZGRlZCBhIG5ldyBrL3YgdG8gdGhlIFBH
+IGxvZyB3aGljaCBjYW5ub3QgYmUgcmVjb2duaXplZCBieSBvbGQgdmVyc2lvbiBvZiBiaW5hcnkg
+KFBHTG9nOjpyZWFkX2xvZyksIGFzIGEgcmVzdWx0LCBpdCB0YWtlcyB0aGUgbmV3bHkgYWRkZWQg
+ZW50cnkgYXMgYSBwZ19sb2dfZW50cnkuCj4+IElzIGl0IHBvc3NpYmxlIHRvIHJlY29nbml6ZSBw
+Z19sb2dfZW50cnkgd2l0aCBhIGNvbmNyZXRlIHBhdHRlcm4gYW5kIGp1c3QgaWdub3JlIHRob3Nl
+IHRoYXQgdGhlIGJpbmFyeSBjYW5ub3QgcmVjb2duaXplPwo+Pgo+Pgo+PiBGb3IgdGhlcmUgdHdv
+IGNhc2VzLCB3ZSBtYXkgYmUgYWJsZSB0byBlcmFzZSB0aGUgbmV3bHkgYWRkZWQgZW50cmllcyBh
+bmQgdGhlbiByb2xsIGJhY2sgKGNvcnJlY3QgbWUgaWYgSSBhbSB3cm9uZyBoZXJlKSwgYnV0IEkg
+dGhpbmsgdGhlcmUgbWlnaHQgYmUgbW9yZSBjb21wbGljYXRlZCBjYXNlcyB3aGljaCBtYWtlIHRo
+ZSByb2xsYmFjayBpbXBvc3NpYmxlLiBBbmQgYWNjZXB0IHRoYXQgcmlzayBmb3IgdXBncmFkaW5n
+Lgo+Cj4gRm9yIHRoZXNlIHR3byBzcGVjaWZpYyBjYXNlcywgbWF5YmUuIEJ1dCB5b3UncmUgbWlz
+c2luZyBtb3JlCj4gZnVuZGFtZW50YWwgdGhpbmdzOiBvZnRlbiBjaGFuZ2VzIHRvIGRhdGEgc3Ry
+dWN0dXJlcyBhcmUgYWJvdXQKPiBiZWhhdmlvciBjaGFuZ2VzIHRoYXQgdGhlIGRhZW1vbiBuZWVk
+cyB0byB1bmRlcnN0YW5kIGluIG9yZGVyIHRvIG1ha2UKPiBhbnkgc2Vuc2Ugb2YgdGhlIGRhdGEu
+IEZvciBpbnN0YW5jZSwgYW55IHVwZ3JhZGVzIHRvIENSVVNIIG5lZWQgdG8gYmUKPiB1bmRlcnN0
+b29kIGJ5IGV2ZXJ5Ym9keSBwYXJ0aWNpcGF0aW5nIGluIHRoZSBjbHVzdGVyLiBXZSBjb3VsZAo+
+IG5hcnJvd2x5IGhhdmUgdGhlIHBhcnNpbmcgY29kZSBpZ25vcmUgYW55dGhpbmcgaXQgZG9lc24n
+dCB1bmRlcnN0YW5kLAo+IGJ1dCB0aGVuIHdoZW4gaXQgZG9lcyBjYWxjdWxhdGlvbnMgYWJvdXQg
+cGFzdF9pbnRlcnZhbHMgb3IgY3VycmVudAo+IG1hcHBpbmdzIGl0IHdvdWxkIGJlIHdyb25nIQo+
+Cj4gT3IgaW4gdGhlIGV4YW1wbGUgIzIgeW91IGhhdmUsIHRoZSBleHRyYSBkYXRhIGlzIGEgYnVn
+IGZpeCB0aGF0Cj4gcHJldmVudHMgdGhlIE9TRCBkb2luZyBleHRyYSB3b3JrLiBCdXQgd2hhdCBp
+ZiBpdCB3YXMgYWN0dWFsbHkgYWJvdXQKPiBjaGFuZ2luZyB0aGUgc2hhcmVkIFBHIHN0YXRlPyBJ
+biB0aGF0IGNhc2UgeW91IG1pZ2h0IGhhdmUgT1NEcyB3aXRoCj4gdGhlaXIgUEcgaW4gZGlmZmVy
+ZW50IHN0YXRlcyBkZXBlbmRpbmcgb24gaG93IGZhciB0aGV5J2QgZ290dGVuIHdoZW4KPiByb2xs
+ZWQgYmFjayB0byB0aGUgb2xkIGNvZGUuCj4KPiBJdCdzIGp1c3Qgbm90IGEgZmVhc2libGUgcHJv
+YmxlbSwgYmVjYXVzZSB3aGlsZSB0aGVyZSBhcmUgcGxlbnR5IG9mCj4gdGhpbmdzIHRoYXQgd2Ug
+Y291bGQgcm91dGUgYXJvdW5kLCB3ZSBzdGlsbCBmYWNlIHRoZSBpbmV2aXRhYmxlCj4gY29sbGlz
+aW9uIHBvaW50IEkgZGVzY3JpYmVkIHdoZW4gd2UgZG8gYWRkIGRhdGEgb2Ygc2hhcmVkIGltcG9y
+dC4gOigKVGhhdCBtYWtlcyB0b3RhbCBzZW5zZS4gVGhhbmtzIEdyZWchCgo+IC1HcmVnCj4gLS0K
+PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3Jp
+YmUgY2VwaC1kZXZlbCIgaW4KPiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZn
+ZXIua2VybmVsLm9yZwo+IE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgaHR0cDovL3ZnZXIua2VybmVs
+Lm9yZy9tYWpvcmRvbW8taW5mby5odG1sCiAJCSAJICAgCQkgIA==
