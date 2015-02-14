@@ -1,135 +1,105 @@
-From: Gregory Farnum <greg@gregs42.com>
-Subject: Re: cephfs root_squash, multitenancy
-Date: Fri, 13 Feb 2015 15:57:47 -0800
-Message-ID: <CAC6JEv_dk=RKW_gF25MJHLeJ4BrKXAaep-omOZnq0WMdDH8aKg@mail.gmail.com>
-References: <alpine.DEB.2.00.1502130457540.3131@cobra.newdream.net>
-	<CAC6JEv8ACd+udEODdbBUEfAXv03w=OjFEVdrPHsp57Z8svSQ5w@mail.gmail.com>
-	<alpine.DEB.2.00.1502131141170.3035@cobra.newdream.net>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: [Ceph-qa] 1 hung, 11 passed in teuthology-2015-02-11_16:13:01-samba-giant-distro-basic-multi
+Date: Sat, 14 Feb 2015 07:34:04 +0100
+Message-ID: <54DEEC5C.4030605@dachary.org>
+References: <20150213035821.17712282150@teuthology.front.sepia.ceph.com> <CAC6JEv9pUeCtjs_SBeqr5N=4aSUUuUsbDW3eMipVsBTq5AkZkQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="FPL9Jlo46FB8HCSwECoHmNcU1MUgtol0S"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f173.google.com ([209.85.223.173]:43851 "EHLO
-	mail-ie0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752297AbbBMX5t convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Feb 2015 18:57:49 -0500
-Received: by iebtr6 with SMTP id tr6so12704230ieb.10
-        for <ceph-devel@vger.kernel.org>; Fri, 13 Feb 2015 15:57:48 -0800 (PST)
-Received: from mail-ie0-f171.google.com (mail-ie0-f171.google.com. [209.85.223.171])
-        by mx.google.com with ESMTPSA id s10sm4150107igr.2.2015.02.13.15.57.47
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 13 Feb 2015 15:57:47 -0800 (PST)
-Received: by iebtr6 with SMTP id tr6so12704194ieb.10
-        for <ceph-devel@vger.kernel.org>; Fri, 13 Feb 2015 15:57:47 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1502131141170.3035@cobra.newdream.net>
+Received: from mail2.dachary.org ([91.121.57.175]:43935 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1753781AbbBNHpA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 14 Feb 2015 02:45:00 -0500
+In-Reply-To: <CAC6JEv9pUeCtjs_SBeqr5N=4aSUUuUsbDW3eMipVsBTq5AkZkQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <greg@gregs42.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, Feb 13, 2015 at 3:35 PM, Sage Weil <sweil@redhat.com> wrote:
-> On Fri, 13 Feb 2015, Gregory Farnum wrote:
->> On Fri, Feb 13, 2015 at 5:05 AM, Sage Weil <sweil@redhat.com> wrote:
->> > Got this from JJ:
->> >
->> >> The SA expanded on this by stating that there are basically three=
- main
->> >> scenarios here:
->> >>
->> >> 1) We trust the UID/GID in a controlled environment. In which cas=
-e we
->> >> can safely rely on the POSIX permissions. As long as root_squash =
-is
->> >> available this would be fine.
->> >
->> > I think adding a root_squash option to client/Client.cc and the ce=
-ph.ko
->> > should be pretty easy...
->> >
->> >> 2) Multi-tenant systems. In these cases being able to create keyr=
-ings
->> >> which limit access to specified directories would be ideal.
->> >
->> > This is mainly enforcing uid/gid and mount path in MDSAuthCap, and=
- not
->> > unlike what we'll need for OpenStack Manila.  I think it's somethi=
-ng like
->> >
->> >  1- establish mount root inode ref when session is opened/authenti=
-cated
->> >  2- verify in reply path that any inode we reference is beneath th=
-at point
->> >  3- special case inodes in stray directory, hopefully in some secu=
-re-ish
->> > way based on where they lived previously.  (not sure how this'll w=
-ork...)
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--FPL9Jlo46FB8HCSwECoHmNcU1MUgtol0S
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: quoted-printable
+
+Hi Greg,
+
+I'm curious to know how you handle the flow of mails from QA runs. Here i=
+s a wild guess:
+
+* from time to time check that the nightlies run the suites that should b=
+e run
+* read the ceph-qa reports daily
+* for each failed job, either relate it to an issue or create one or decl=
+are it noise
+* if a job fails on an existing ticket store a link to the job if it's ra=
+re occurrence and the cause is not yet known
+* bi-weekly bug scrub makes sure no issue, old or new, is forgotten
+* at release time you decide that it is ready based on:
+** the list of urgent/immediate issues that you can browse to ensure no i=
+ssue is a blocker
+** the last run of each suite to ensure they are recent enough and enviro=
+nmental noise did not permanently shadow anything
+
+Cheers
+
+
+On 13/02/2015 20:29, Gregory Farnum wrote:
+> On Thu, Feb 12, 2015 at 7:58 PM,
+> <teuthworker@teuthology.front.sepia.ceph.com> wrote:
+>> Test Run: teuthology-2015-02-11_16:13:01-samba-giant-distro-basic-mult=
+i
+>> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>> info:   http://pulpito.ceph.com/teuthology-2015-02-11_16:13:01-samba-g=
+iant-distro-basic-multi/
+>> logs:   http://qa-proxy.ceph.com/teuthology/teuthology-2015-02-11_16:1=
+3:01-samba-giant-distro-basic-multi/
+>> failed: 0
+>> hung:   1
+>> passed: 11
 >>
->> This concerns me:
->> 1) We have nothing to control access to raw objects, so there is som=
-e
->> security against accidents here, but not against malicious code user=
-s.
->
-> Yeah.  There's no complete solution without both pieces, but one of t=
-hem
-> has to come first.
->
->> 2) Path verification is going to be tricky to handle with symlinks a=
-nd
->> things. Moving it into the reply path as you discuss makes one set o=
-f
->> decisions on that (I'm not sure how flexibly?)
->
-> Symlinks at least are easy: they are resolved on the client side in t=
-he
-> VFS (above ceph-fuse/libcephfs or ceph.ko).  As far as the file syste=
-m is
-> concerned symlinks are just a special type of file with a max size of
-> PATH_MAX.
+>> Hung
+>> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>> [752393] samba/{clusters/samba-basic.yaml debug/mds_client.yaml fs/btr=
+fs.yaml install/install.yaml mount/noceph.yaml workload/smbtorture.yaml}
+>> info:   http://pulpito.ceph.com/teuthology-2015-02-11_16:13:01-samba-g=
+iant-distro-basic-multi/752393/
+>=20
+> Looks like http://tracker.ceph.com/issues/10413, the upstream fix for
+> which should be trickling down soon.
+>=20
+>>
+>> Passed
+>> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> _______________________________________________
+> Ceph-qa mailing list
+> Ceph-qa@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-qa-ceph.com
+>=20
+>=20
 
-Whoops, right. I meant hard links. :)
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
 
->
-> Remote links will be the tricky ones.  It would be nice if this was a
-> simple check in the rdlock_* etc helpers in Server.cc but for hard li=
-nks
-> it would be one step past that.  On the other hand, it may make sense
-> that if there is a hard link you get to see the file... in which case=
- the
-> hard part will actually making sure that we allow it if the dentry is
-> inside the allowed subtree.
->
-> I said reply path before but now up-front checks in Server.cc seem mo=
-re
-> sensible.  :/ I need to spend some more time reading the code.
 
-Up-front checks have been how we've more often proposed this, yes. I'd
-just like a mechanism that isn't specialized for every op type =E2=80=94=
- for
-instance, probably if there's a hard link you should be able to see
-the file. But then we need code in the handle_client_link function to
-make sure clients don't create links to files they can't already
-access. (The target is just a filepath encoded by the client.)
+--FPL9Jlo46FB8HCSwECoHmNcU1MUgtol0S
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
-Hrm, actually, maybe that just happens automatically if we put the
-permission-checking code in Server::rdlock_path_pin_ref and/or
-MDCache::path_traverse. That sounds familiar...
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
 
-I think I've discussed this before in the context of external
-contributors or a blueprint:
-https://wiki.ceph.com/Planning/Sideboard/Client_Security_for_CephFS
-and https://wiki.ceph.com/Planning/CDS/Dumpling/Etherpad_Snapshots/1G%3=
-A_Client_Security_for_CephFS
-might be helpful to come up to speed on this topic, but I think
-there's a more extensive discussion somewhere from early last summer.
-:/
+iEYEARECAAYFAlTe7FwACgkQ8dLMyEl6F20IYACfUcxXQJ1DyRXuKIjePXSzFSJ5
+EPwAn3kgLOvU2iRKH89BZxrsCKXpYvJK
+=1Tyg
+-----END PGP SIGNATURE-----
 
-Up-front actually doesn't sound *too* hard to me, but that still
-leaves the testing, which honestly scares me more.
--Greg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--FPL9Jlo46FB8HCSwECoHmNcU1MUgtol0S--
