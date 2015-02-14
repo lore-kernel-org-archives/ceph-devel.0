@@ -1,105 +1,62 @@
-From: Loic Dachary <loic@dachary.org>
+From: Gregory Farnum <greg@gregs42.com>
 Subject: Re: [Ceph-qa] 1 hung, 11 passed in teuthology-2015-02-11_16:13:01-samba-giant-distro-basic-multi
-Date: Sat, 14 Feb 2015 07:34:04 +0100
-Message-ID: <54DEEC5C.4030605@dachary.org>
-References: <20150213035821.17712282150@teuthology.front.sepia.ceph.com> <CAC6JEv9pUeCtjs_SBeqr5N=4aSUUuUsbDW3eMipVsBTq5AkZkQ@mail.gmail.com>
+Date: Fri, 13 Feb 2015 23:56:18 -0800
+Message-ID: <CAC6JEv_7OEsLkj1vm65Jxqh4e7LBnTQUAp6r0_5Tbs0-Z=YZZQ@mail.gmail.com>
+References: <20150213035821.17712282150@teuthology.front.sepia.ceph.com>
+	<CAC6JEv9pUeCtjs_SBeqr5N=4aSUUuUsbDW3eMipVsBTq5AkZkQ@mail.gmail.com>
+	<54DEEC5C.4030605@dachary.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="FPL9Jlo46FB8HCSwECoHmNcU1MUgtol0S"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:43935 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753781AbbBNHpA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 14 Feb 2015 02:45:00 -0500
-In-Reply-To: <CAC6JEv9pUeCtjs_SBeqr5N=4aSUUuUsbDW3eMipVsBTq5AkZkQ@mail.gmail.com>
+Received: from mail-ie0-f181.google.com ([209.85.223.181]:43958 "EHLO
+	mail-ie0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753853AbbBNH4U (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 14 Feb 2015 02:56:20 -0500
+Received: by iebtr6 with SMTP id tr6so14024150ieb.10
+        for <ceph-devel@vger.kernel.org>; Fri, 13 Feb 2015 23:56:19 -0800 (PST)
+Received: from mail-ig0-f172.google.com (mail-ig0-f172.google.com. [209.85.213.172])
+        by mx.google.com with ESMTPSA id l6sm4687348igv.8.2015.02.13.23.56.18
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Fri, 13 Feb 2015 23:56:18 -0800 (PST)
+Received: by mail-ig0-f172.google.com with SMTP id l13so15006850iga.5
+        for <ceph-devel@vger.kernel.org>; Fri, 13 Feb 2015 23:56:18 -0800 (PST)
+In-Reply-To: <54DEEC5C.4030605@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@gregs42.com>
+To: Loic Dachary <loic@dachary.org>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---FPL9Jlo46FB8HCSwECoHmNcU1MUgtol0S
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: quoted-printable
+On Fri, Feb 13, 2015 at 10:34 PM, Loic Dachary <loic@dachary.org> wrote:
+> Hi Greg,
+>
+> I'm curious to know how you handle the flow of mails from QA runs. Here is a wild guess:
+>
+> * from time to time check that the nightlies run the suites that should be run
 
-Hi Greg,
+Uh, I guess?
 
-I'm curious to know how you handle the flow of mails from QA runs. Here i=
-s a wild guess:
+> * read the ceph-qa reports daily
 
-* from time to time check that the nightlies run the suites that should b=
-e run
-* read the ceph-qa reports daily
-* for each failed job, either relate it to an issue or create one or decl=
-are it noise
-* if a job fails on an existing ticket store a link to the job if it's ra=
-re occurrence and the cause is not yet known
-* bi-weekly bug scrub makes sure no issue, old or new, is forgotten
-* at release time you decide that it is ready based on:
-** the list of urgent/immediate issues that you can browse to ensure no i=
-ssue is a blocker
-** the last run of each suite to ensure they are recent enough and enviro=
-nmental noise did not permanently shadow anything
+Yeah
 
-Cheers
+> * for each failed job, either relate it to an issue or create one or declare it noise
 
+Yeah
 
-On 13/02/2015 20:29, Gregory Farnum wrote:
-> On Thu, Feb 12, 2015 at 7:58 PM,
-> <teuthworker@teuthology.front.sepia.ceph.com> wrote:
->> Test Run: teuthology-2015-02-11_16:13:01-samba-giant-distro-basic-mult=
-i
->> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->> info:   http://pulpito.ceph.com/teuthology-2015-02-11_16:13:01-samba-g=
-iant-distro-basic-multi/
->> logs:   http://qa-proxy.ceph.com/teuthology/teuthology-2015-02-11_16:1=
-3:01-samba-giant-distro-basic-multi/
->> failed: 0
->> hung:   1
->> passed: 11
->>
->> Hung
->> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->> [752393] samba/{clusters/samba-basic.yaml debug/mds_client.yaml fs/btr=
-fs.yaml install/install.yaml mount/noceph.yaml workload/smbtorture.yaml}
->> info:   http://pulpito.ceph.com/teuthology-2015-02-11_16:13:01-samba-g=
-iant-distro-basic-multi/752393/
->=20
-> Looks like http://tracker.ceph.com/issues/10413, the upstream fix for
-> which should be trickling down soon.
->=20
->>
->> Passed
->> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> _______________________________________________
-> Ceph-qa mailing list
-> Ceph-qa@lists.ceph.com
-> http://lists.ceph.com/listinfo.cgi/ceph-qa-ceph.com
->=20
->=20
+> * if a job fails on an existing ticket store a link to the job if it's rare occurrence and the cause is not yet known
 
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
+Yeah, or just to make clear it's still happening or whatever
 
+> * bi-weekly bug scrub makes sure no issue, old or new, is forgotten
 
---FPL9Jlo46FB8HCSwECoHmNcU1MUgtol0S
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+Hopefully!
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
+> * at release time you decide that it is ready based on:
+> ** the list of urgent/immediate issues that you can browse to ensure no issue is a blocker
+> ** the last run of each suite to ensure they are recent enough and environmental noise did not permanently shadow anything
 
-iEYEARECAAYFAlTe7FwACgkQ8dLMyEl6F20IYACfUcxXQJ1DyRXuKIjePXSzFSJ5
-EPwAn3kgLOvU2iRKH89BZxrsCKXpYvJK
-=1Tyg
------END PGP SIGNATURE-----
-
---FPL9Jlo46FB8HCSwECoHmNcU1MUgtol0S--
+Yeah. Well, the last run alone isn't so important; we want to see a
+string of clean runs because a lot of issues aren't reproduced in
+every run.
+-Greg
