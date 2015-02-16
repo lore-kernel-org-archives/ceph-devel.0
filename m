@@ -1,49 +1,71 @@
-From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+From: Alexandre DERUMIER <aderumier@odiso.com>
 Subject: Re: speed decrease since firefly,giant,hammer the 2nd try
-Date: Mon, 16 Feb 2015 23:08:37 +0100
-Message-ID: <9D75B238-1574-4D3C-870E-E584B24D956B@profihost.ag>
-References: <54DA541E.9000608@profihost.ag> <54DA7404.4060201@profihost.ag> <54DA7A3F.6070009@redhat.com> <54DA83C8.9020207@profihost.ag> <54DADE52.2010604@redhat.com> <54DAEBBD.30409@profihost.ag> <54E0E82D.20007@profihost.ag> <54E25F79.8030009@profihost.ag> <2047240648.1005007.1424124138866.JavaMail.zimbra@oxygem.tv>
-Mime-Version: 1.0 (1.0)
+Date: Mon, 16 Feb 2015 23:18:38 +0100 (CET)
+Message-ID: <459099286.1005550.1424125118983.JavaMail.zimbra@oxygem.tv>
+References: <54DA541E.9000608@profihost.ag> <54DA83C8.9020207@profihost.ag> <54DADE52.2010604@redhat.com> <54DAEBBD.30409@profihost.ag> <54E0E82D.20007@profihost.ag> <54E25F79.8030009@profihost.ag> <2047240648.1005007.1424124138866.JavaMail.zimbra@oxygem.tv> <9D75B238-1574-4D3C-870E-E584B24D956B@profihost.ag>
+Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ph.de-nserver.de ([85.158.179.214]:35613 "EHLO
-	mail-ph.de-nserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751300AbbBPWIl convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Feb 2015 17:08:41 -0500
-In-Reply-To: <2047240648.1005007.1424124138866.JavaMail.zimbra@oxygem.tv>
+Received: from mailpro.odiso.net ([89.248.209.98]:58570 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751470AbbBPWSl convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Feb 2015 17:18:41 -0500
+In-Reply-To: <1975903570.1005549.1424125095286.JavaMail.zimbra@oxygem.tv>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>
+To: Stefan Priebe <s.priebe@profihost.ag>
 Cc: Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
+>>Just tested write. This might be the result of higher CPU load of the=
+ ceph-osd processes under firefly.=20
+>>
+>>Dumpling 180% per process vs. firefly 220%
+
+Oh yes, indeed, that's what I think too. (and more cpu -> less ios in q=
+emu because of single iothread)
+
+
+I think that perf report should show the difference, this is strange th=
+at you have almost same result in your perf reports.
+
+=20
+
+
+----- Mail original -----
+De: "Stefan Priebe" <s.priebe@profihost.ag>
+=C3=80: "aderumier" <aderumier@odiso.com>
+Cc: "Mark Nelson" <mnelson@redhat.com>, "ceph-devel" <ceph-devel@vger.k=
+ernel.org>
+Envoy=C3=A9: Lundi 16 F=C3=A9vrier 2015 23:08:37
+Objet: Re: speed decrease since firefly,giant,hammer the 2nd try
 
 Am 16.02.2015 um 23:02 schrieb Alexandre DERUMIER <aderumier@odiso.com>=
-:
+:=20
 
 >>> This results in fio-rbd showing avg 26000 iop/s instead of 30500 io=
 p/s=20
->>> while running dumpling...
+>>> while running dumpling...=20
 >=20
-> Is it for write  only ?
-> or do you see same decrease for read too
+> Is it for write only ?=20
+> or do you see same decrease for read too=20
 
 Just tested write. This might be the result of higher CPU load of the c=
 eph-osd processes under firefly.=20
 
-Dumpling 180% per process vs. firefly 220%
+Dumpling 180% per process vs. firefly 220%=20
 
-Stefan
+Stefan=20
 
-> ?
+> ?=20
 >=20
 >=20
-> ----- Mail original -----
-> De: "Stefan Priebe" <s.priebe@profihost.ag>
+> ----- Mail original -----=20
+> De: "Stefan Priebe" <s.priebe@profihost.ag>=20
 > =C3=80: "Mark Nelson" <mnelson@redhat.com>, "ceph-devel" <ceph-devel@=
-vger.kernel.org>
-> Envoy=C3=A9: Lundi 16 F=C3=A9vrier 2015 22:22:01
-> Objet: Re: speed decrease since firefly,giant,hammer the 2nd try
+vger.kernel.org>=20
+> Envoy=C3=A9: Lundi 16 F=C3=A9vrier 2015 22:22:01=20
+> Objet: Re: speed decrease since firefly,giant,hammer the 2nd try=20
 >=20
 > I've now upgraded server side and client side to latest upstream/fire=
 fly.=20
@@ -123,7 +145,7 @@ s=20
 >>>>>>>=20
 >>>>>>> mhm i installed librbd1-dbg and librados2-dbg - but the output =
 still=20
->>>>>>> looks useless to me. Should i upload it somewhere?
+>>>>>>> looks useless to me. Should i upload it somewhere?=20
 >>>>>>=20
 >>>>>> Meh, if it's all just symbols it's probably not that helpful.=20
 >>>>>>=20
@@ -139,7 +161,7 @@ still=20
 >>>>>> So in single op tests dumpling and firefly are far closer. Now l=
 et's=20
 >>>>>> see each of these cases with iodepth=3D32 (still 1 thread for no=
-w).
+w).=20
 >>>>>=20
 >>>>>=20
 >>>>> dumpling:=20
@@ -183,13 +205,13 @@ h=3D[=20
 =20
 >>>>> IO depths : 1=3D0.1%, 2=3D0.1%, 4=3D0.1%, 8=3D0.1%, 16=3D0.1%, 32=
 =3D100.0%,=20
->>>>>> =3D64=3D0.0%
+>>>>>> =3D64=3D0.0%=20
 >>>>> submit : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, 64=
 =3D0.0%,=20
->>>>>> =3D64=3D0.0%
+>>>>>> =3D64=3D0.0%=20
 >>>>> complete : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.1%, =
 64=3D0.0%,=20
->>>>>> =3D64=3D0.0%
+>>>>>> =3D64=3D0.0%=20
 >>>>> issued : total=3Dr=3D0/w=3D527487/d=3D0, short=3Dr=3D0/w=3D0/d=3D=
 0=20
 >>>>>=20
@@ -243,13 +265,13 @@ h=3D[=20
 =20
 >>>>> IO depths : 1=3D0.1%, 2=3D0.1%, 4=3D0.1%, 8=3D0.1%, 16=3D0.1%, 32=
 =3D100.0%,=20
->>>>>> =3D64=3D0.0%
+>>>>>> =3D64=3D0.0%=20
 >>>>> submit : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, 64=
 =3D0.0%,=20
->>>>>> =3D64=3D0.0%
+>>>>>> =3D64=3D0.0%=20
 >>>>> complete : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.1%, =
 64=3D0.0%,=20
->>>>>> =3D64=3D0.0%
+>>>>>> =3D64=3D0.0%=20
 >>>>> issued : total=3Dr=3D0/w=3D456918/d=3D0, short=3Dr=3D0/w=3D0/d=3D=
 0=20
 >>>>>=20
@@ -261,12 +283,12 @@ h=3D[=20
 >>>>> Disk stats (read/write):=20
 >>>>> sdb: ios=3D166/455574, merge=3D0/0, ticks=3D12/897748, in_queue=3D=
 897696,=20
->>>>> util=3D98.96%
+>>>>> util=3D98.96%=20
 >>>>=20
 >>>> Ok, so it looks like as you increase concurrency the effect increa=
 ses=20
 >>>> (ie contention?). Does the same thing happen without cache enabled=
-?
+?=20
 >>>=20
 >>> here again without rbd cache:=20
 >>>=20
@@ -308,13 +330,13 @@ sec=20
 >>> cpu : usr=3D3.12%, sys=3D11.49%, ctx=3D74951, majf=3D0, minf=3D133=20
 >>> IO depths : 1=3D0.1%, 2=3D0.1%, 4=3D0.1%, 8=3D0.1%, 16=3D0.1%, 32=3D=
 100.0%,=20
->>>> =3D64=3D0.0%
+>>>> =3D64=3D0.0%=20
 >>> submit : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, 64=3D=
 0.0%,=20
->>>> =3D64=3D0.0%
+>>>> =3D64=3D0.0%=20
 >>> complete : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.1%, 64=
 =3D0.0%,=20
->>>> =3D64=3D0.0%
+>>>> =3D64=3D0.0%=20
 >>> issued : total=3Dr=3D0/w=3D626979/d=3D0, short=3Dr=3D0/w=3D0/d=3D0=20
 >>>=20
 >>> Run status group 0 (all jobs):=20
@@ -372,13 +394,13 @@ sec=20
 >>> cpu : usr=3D2.99%, sys=3D10.60%, ctx=3D66549, majf=3D0, minf=3D133=20
 >>> IO depths : 1=3D0.1%, 2=3D0.1%, 4=3D0.1%, 8=3D0.1%, 16=3D0.1%, 32=3D=
 100.0%,=20
->>>> =3D64=3D0.0%
+>>>> =3D64=3D0.0%=20
 >>> submit : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, 64=3D=
 0.0%,=20
->>>> =3D64=3D0.0%
+>>>> =3D64=3D0.0%=20
 >>> complete : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.1%, 64=
 =3D0.0%,=20
->>>> =3D64=3D0.0%
+>>>> =3D64=3D0.0%=20
 >>> issued : total=3Dr=3D0/w=3D607445/d=3D0, short=3Dr=3D0/w=3D0/d=3D0=20
 >>>=20
 >>> Run status group 0 (all jobs):=20
@@ -391,13 +413,14 @@ sec=20
 916560,=20
 >>> util=3D99.93%=20
 >>>=20
->>> Stefan
+>>> Stefan=20
 > --=20
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
  in=20
 > the body of a message to majordomo@vger.kernel.org=20
 > More majordomo info at http://vger.kernel.org/majordomo-info.html=20
 >=20
+
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
