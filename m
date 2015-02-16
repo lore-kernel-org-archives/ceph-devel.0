@@ -1,76 +1,72 @@
-From: Yuri Weinstein <yweinste@redhat.com>
-Subject: Re: giant integration branch for v0.87.1 ready for QE
-Date: Mon, 16 Feb 2015 12:33:44 -0500 (EST)
-Message-ID: <1387059957.19365485.1424108024488.JavaMail.zimbra@redhat.com>
-References: <54DA3DD6.7070108@dachary.org> <54DB757E.2000009@dachary.org>
+From: "Deneau, Tom" <tom.deneau@amd.com>
+Subject: RE: using radosgw with mod_proxy_fcgi
+Date: Mon, 16 Feb 2015 17:55:29 +0000
+Message-ID: <BC97738F8E7C8742BABED7F06FB9DF9155559C33@SATLEXDAG01.amd.com>
+References: <BC97738F8E7C8742BABED7F06FB9DF915554B70A@SATLEXDAG01.amd.com>
+ <211191187.4180548.1423703428235.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx5-phx2.redhat.com ([209.132.183.37]:34546 "EHLO
-	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752955AbbBPRet convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Feb 2015 12:34:49 -0500
-In-Reply-To: <54DB757E.2000009@dachary.org>
+Received: from mail-by2on0114.outbound.protection.outlook.com ([207.46.100.114]:47913
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753126AbbBPRzf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 16 Feb 2015 12:55:35 -0500
+In-Reply-To: <211191187.4180548.1423703428235.JavaMail.zimbra@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-I have completed suites execution on giant branch (v0.87.1 RC)
-
-All results are summarized in http://tracker.ceph.com/issues/10501 unde=
-r "QE VALIDATION" section.
-Some suites had to be run more then ones due to environment noise.
-
-Two suites are being re-run now - upgrade:firefly-x and powecycle.
-
-Next steps:
--  the team leads to review/confirm results
--  Loic - can you review and triage issues as needed.
--  two suites require results analysis:
-   multimds
-   rados (two known tickets, but need more checking) ## 10209, 9891
-   krbd (two new tickets, but need more checking) ## 10889, 10890
-
-
-Thx
-YuriW
-
------ Original Message -----
-=46rom: "Loic Dachary" <loic@dachary.org>
-To: "Yuri Weinstein" <yweinste@redhat.com>
-Cc: "Ceph Development" <ceph-devel@vger.kernel.org>
-Sent: Wednesday, February 11, 2015 7:30:06 AM
-Subject: Re: giant integration branch for v0.87.1 ready for QE
-
-Hi Yuri,
-
-The giant-backports pull requests were merged into https://github.com/c=
-eph/ceph/tree/giant which is not ready for testing.
-
-=46or the record, the head is https://github.com/ceph/ceph/commit/78c71=
-b9200da5e7d832ec58765478404d31ae6b5
-
-Cheers
-
-On 10/02/2015 18:20, Loic Dachary wrote:
-> Hi Yuri,
->=20
-> The giant integration branch for v0.87.1 as found at https://github.c=
-om/ceph/ceph/commits/giant-backports has been approved by Yehuda, Josh =
-and Sam and is ready for QE.=20
->=20
-> For the record, the head is https://github.com/ceph/ceph/commit/6b08a=
-729540c61f3c8b15c5a3ce9382634bf800c
->=20
-> Cheers
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+U28gaWYgSSBoYXZlIEFwYWNoZSAyLjQuOSssIHdvdWxkIEkgdXNlDQogICAgUHJveHlQYXNzIC8g
+dW5peDovLy90bXAvLnJhZG9zZ3cuc29ja3xmY2dpOi8vbG9jYWxob3N0OjkwMDAvDQphbmQgaW4g
+Y2VwaC5jb25mIHVzZQ0KICAgIHJndyBzb2NrZXQgcGF0aCA9IC90bXAvLnJhZG9zZ3cuc29jaw0K
+DQpJZiBzbywgaG93IGRvZXMgdGhlIHJhZG9zZ3cgcHJvY2VzcyBrbm93IGFib3V0IHBvcnQgOTAw
+MD8NCk9yIGRvIEkgbmVlZCBhICJyZ3cgZnJvbnRlbmRzIiBzdGF0ZW1lbnQgdG8gc3BlY2lmeSB0
+aGF0Pw0KDQotLSBUb20NCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IFllaHVk
+YSBTYWRlaC1XZWlucmF1YiBbbWFpbHRvOnllaHVkYUByZWRoYXQuY29tXSANClNlbnQ6IFdlZG5l
+c2RheSwgRmVicnVhcnkgMTEsIDIwMTUgNzoxMCBQTQ0KVG86IERlbmVhdSwgVG9tDQpDYzogY2Vw
+aC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNClN1YmplY3Q6IFJlOiB1c2luZyByYWRvc2d3IHdpdGgg
+bW9kX3Byb3h5X2ZjZ2kNCg0KDQoNCi0tLS0tIE9yaWdpbmFsIE1lc3NhZ2UgLS0tLS0NCj4gRnJv
+bTogIlRvbSBEZW5lYXUiIDx0b20uZGVuZWF1QGFtZC5jb20+DQo+IFRvOiBjZXBoLWRldmVsQHZn
+ZXIua2VybmVsLm9yZw0KPiBTZW50OiBXZWRuZXNkYXksIEZlYnJ1YXJ5IDExLCAyMDE1IDQ6MjE6
+NDYgUE0NCj4gU3ViamVjdDogdXNpbmcgcmFkb3NndyB3aXRoIG1vZF9wcm94eV9mY2dpDQo+IA0K
+PiBJIGFtIGEgQ2VwaCBub3ZpY2UgYW5kIGhhdmUgdGhlIHJhZG9zIGFuZCByYmQgc2V0dXBzIHdv
+cmtpbmcgYW5kIHdvdWxkIA0KPiBsaWtlIHRvIHVzZSB0aGUgcmFkb3NndyBzdGFjay4NCj4gDQo+
+IEkgYW0gcnVubmluZyBvbiBhIHBsYXRmb3JtIChhYXJjaDY0KSBmb3Igd2hpY2ggdGhlcmUgYXJl
+IG5vIHByZS1idWlsdCANCj4gYmluYXJpZXMgb2YgdGhlIGNlcGggcGF0Y2hlZCBhcGFjaGUgYW5k
+IHRoZSBjZXBoIHBhdGNoZWQgbW9kX2Zhc3RjZ2kuICANCj4gQnV0IHNpbmNlIEkgZ2F0aGVyIGZy
+b20gdGhlIG1haWwgbGlzdHMgdGhhdCB0aGUgZnV0dXJlIGlzIGp1c3QgdG8gdXNlIA0KPiBtb2Rf
+cHJveHlfZmNnaSBhbmQgc2luY2UgbXkgYXBhY2hlIGluc3RhbGwgaGFzIG1vZF9wcm94eV9mY2dp
+IGJ1aWxkIGluIA0KPiBhbHJlYWR5IHRoYXQgc2VlbXMgbGlrZSB0aGUgd2F5IHRvIGdvLg0KPiAN
+Cj4gSSByZWFsaXplIHRoZSBkb2N1bWVudGF0aW9uIHRvIGV4cGxhaW4gZXhhY3RseSBob3cgdG8g
+c2V0IHRoaW5ncyB1cCANCj4gd2l0aCBtb2RfcHJveHlfZmNnaSBpcyBzdGlsbCBpbiB0aGUgd29y
+a3MgYnV0IGlmIHRoZXJlIGlzIGFueSANCj4gcHJlbGltaW5hcnkgZG9jdW1lbnRhdGlvbiBvbiB0
+aGlzLCBJJ2QgYmUgZ2xhZCB0byB0cnkgaXQgb3V0Lg0KPiANCg0KVGhhdCdzIHRoZSBhcGFjaGUg
+c2l0ZSBjb25maWcgdGhhdCBJIHdhcyB1c2luZzoNCg0KPFZpcnR1YWxIb3N0ICo6ODA+DQogICAg
+U2VydmVyTmFtZSBsb2NhbGhvc3QNCiAgICBEb2N1bWVudFJvb3QgL3Zhci93d3cvaHRtbA0KDQog
+ICAgRXJyb3JMb2cgJHtBUEFDSEVfTE9HX0RJUn0vZXJyb3IubG9nDQogICAgQ3VzdG9tTG9nICR7
+QVBBQ0hFX0xPR19ESVJ9L2FjY2Vzcy5sb2cgY29tYmluZWQNCg0KICAgIExvZ0xldmVsIGRlYnVn
+DQoNCg0KICAgIFJld3JpdGVFbmdpbmUgT24NCg0KICAgIFJld3JpdGVSdWxlIC4qIC0gW0U9SFRU
+UF9BVVRIT1JJWkFUSU9OOiV7SFRUUDpBdXRob3JpemF0aW9ufSxMXQ0KDQogICAgIyBSZXdyaXRl
+UnVsZSBeLyguKikgLz8le1FVRVJZX1NUUklOR30gW0U9SFRUUF9BVVRIT1JJWkFUSU9OOiV7SFRU
+UDpBdXRob3JpemF0aW9ufSxMXQ0KDQogICAgU2V0RW52IHByb3h5LW5va2VlcGFsaXZlIDENCg0K
+ICAgIFByb3h5UGFzcyAvIGZjZ2k6Ly8xMjcuMC4wMTo5MDAwLw0KICAgICNQcm94eVBhc3MgLyB1
+bml4Oi8vL3RtcC8ucmFkb3Nndy5zb2NrfGZjZ2k6Ly9sb2NhbGhvc3Q6OTAwMC8NCjwvVmlydHVh
+bEhvc3Q+DQoNCk5vdGUgdGhhdCB0aGVyZSBhcmUgdHdvIG9wdGlvbnMgaGVyZSwgYW5kIGl0IHJl
+YWxseSBkZXBlbmRzIHlvdXIgYXBhY2hlIHZlcnNpb24uIEZvciB2YW5pbGxhIGFwYWNoZSAyLjQu
+OCsgKG9yIG1heWJlIDIuNC43KykgeW91IGNhbiB1c2UgdGhlIHJlZ3VsYXIgdW5peCBkb21haW4g
+c29ja2V0IHNldHVwIChhcyBkZXNjcmliZWQgaW4gdGhlIGRvY3MpLCBqdXN0IG1vZGlmeSB0aGUg
+cGF0aCBhcHByb3ByaWF0ZWx5LiBGb3Igb2xkZXIgYXBhY2hlcyAoMi40LjArKSB5b3UgbmVlZCB0
+byB1c2UgdGNwIGZvciBmYXN0Y2dpLCBhbmQgdGhhdCByZXF1aXJlcyBzb21ld2hhdCBkaWZmZXJl
+bnQgcmd3IGNvbmZpZ3VyYXRpb24sIGUuZy4gaGF2ZSB0aGUgZm9sbG93aW5nIGluIHlvdXIgY2Vw
+aC5jb25mOg0KDQogICAgICAgIHJndyBmcm9udGVuZHMgPSBmYXN0Y2dpIHNvY2tldF9wb3J0PTkw
+MDAgc29ja2V0X2hvc3Q9MC4wLjAuMA0KDQpGb3IgYXBhY2hlIDIuMiB0aGVyZSdzIG5vIG1vZC1w
+cm94eS1mY2dpIG91dCBvZiB0aGUgYm94LiBJIGRpZCBiYWNrcG9ydCB0aGF0IG1vZHVsZSwgYW5k
+IHlvdSBjYW4gZmluZCBpdCBoZXJlOiBodHRwczovL2dpdGh1Yi5jb20vY2VwaC9tb2QtcHJveHkt
+ZmNnaSwgYnV0IHlvdSdsbCBuZWVkIHRvIGNvbXBpbGUgaXQgeW91cnNlbGYgYXQgdGhpcyBwb2lu
+dC4NCg0KTm90ZSB0aGF0IG1vZC1wcm94eS1mY2dpIGRvZXMgbm90IHN1cHBvcnQgMTAwLWNvbnRp
+bnVlLCBzbyB5b3UnbGwgbmVlZCB0byBhZGQgdGhlIGZvbGxvd2luZyB0byB5b3VyIGNlcGguY29u
+ZjoNCg0KICAgICAgICByZ3cgcHJpbnQgY29udGludWUgPSBmYWxzZQ0KDQpZZWh1ZGENCg0KDQo=
