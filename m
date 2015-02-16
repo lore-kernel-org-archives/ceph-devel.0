@@ -1,41 +1,60 @@
 From: Stefan Priebe <s.priebe@profihost.ag>
 Subject: Re: speed decrease since firefly,giant,hammer the 2nd try
-Date: Mon, 16 Feb 2015 20:10:16 +0100
-Message-ID: <54E24098.3090002@profihost.ag>
-References: <54DA541E.9000608@profihost.ag> <54DA7A3F.6070009@redhat.com> <54DA83C8.9020207@profihost.ag> <54DADE52.2010604@redhat.com> <54DAEBBD.30409@profihost.ag> <54E0E82D.20007@profihost.ag> <1027587633.892803.1424077893919.JavaMail.zimbra@oxygem.tv> <54E203D0.2060209@profihost.ag> <1532913265.964210.1424100999395.JavaMail.zimbra@oxygem.tv>
+Date: Mon, 16 Feb 2015 20:40:59 +0100
+Message-ID: <54E247CB.3010901@profihost.ag>
+References: <54DA541E.9000608@profihost.ag> <54DA7A3F.6070009@redhat.com> <54DA83C8.9020207@profihost.ag> <54DADE52.2010604@redhat.com> <54DAEBBD.30409@profihost.ag> <54E0E82D.20007@profihost.ag> <1027587633.892803.1424077893919.JavaMail.zimbra@oxygem.tv> <54E203D0.2060209@profihost.ag> <517399356.981046.1424105116403.JavaMail.zimbra@oxygem.tv>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8;
 	format=flowed
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ph.de-nserver.de ([85.158.179.214]:42658 "EHLO
+Received: from mail-ph.de-nserver.de ([85.158.179.214]:36651 "EHLO
 	mail-ph.de-nserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753237AbbBPTKM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Feb 2015 14:10:12 -0500
-In-Reply-To: <1532913265.964210.1424100999395.JavaMail.zimbra@oxygem.tv>
+	with ESMTP id S1751276AbbBPTky (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Feb 2015 14:40:54 -0500
+In-Reply-To: <517399356.981046.1424105116403.JavaMail.zimbra@oxygem.tv>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alexandre DERUMIER <aderumier@odiso.com>
 Cc: Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
 
-Am 16.02.2015 um 16:36 schrieb Alexandre DERUMIER:
-> What is you fio command line ?
+Am 16.02.2015 um 17:45 schrieb Alexandre DERUMIER:
+> I also thinked about 1 thing
+>
+> fio-lirbd use the rbd_cache value from ceph.conf.
+>
+> and qemu change the value if cache=3Dnone or cache=3Dwriteback in qem=
+u conf.
+>
+> So, verify that too.
+>
+>
+>
+> I'm thinked of this old bug with cache
+>
+> http://tracker.ceph.com/issues/9513
+> It was a bug in giant, but tracker said also dumpling and firefly (bu=
+t no commit for them)
+>
+>
+> But the original bug was
+>
+> http://tracker.ceph.com/issues/9854
+> and I'm not sure it's already released
+>
 
-fio rbd or fio under qemu?
+No it's not in latest firefly nor in latest dumpling. But it's in lates=
+t=20
+git for both.
 
-> do you test with numjobs > 1 ?
-
-Both.
-
-> (I think under qemu, you can use any numjobs value, as it's use only =
-1 thread, is equal to numjobs=3D1)
-
-numjobs > 1 gives also under qemu better results.
+But it looks read related not write related - isn't it?
 
 Stefan
 
-
+>
+>
+>
 >
 > ----- Mail original -----
 > De: "Stefan Priebe" <s.priebe@profihost.ag>
@@ -410,13 +429,6 @@ sec
 >>>
 >>> Stefan
 >>>
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
