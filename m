@@ -1,100 +1,416 @@
-From: Yuri Weinstein <yweinste@redhat.com>
-Subject: Re: giant integration branch for v0.87.1 ready for QE
-Date: Mon, 16 Feb 2015 13:49:31 -0500 (EST)
-Message-ID: <2056497072.19411084.1424112571273.JavaMail.zimbra@redhat.com>
-References: <54DA3DD6.7070108@dachary.org> <54DB757E.2000009@dachary.org> <1387059957.19365485.1424108024488.JavaMail.zimbra@redhat.com> <CAC6JEv8LEV5bNaoW3__2hjfYNZRmXDScp-a_1V+AKiX_SwWQCQ@mail.gmail.com>
+From: Stefan Priebe <s.priebe@profihost.ag>
+Subject: Re: speed decrease since firefly,giant,hammer the 2nd try
+Date: Mon, 16 Feb 2015 20:10:16 +0100
+Message-ID: <54E24098.3090002@profihost.ag>
+References: <54DA541E.9000608@profihost.ag> <54DA7A3F.6070009@redhat.com> <54DA83C8.9020207@profihost.ag> <54DADE52.2010604@redhat.com> <54DAEBBD.30409@profihost.ag> <54E0E82D.20007@profihost.ag> <1027587633.892803.1424077893919.JavaMail.zimbra@oxygem.tv> <54E203D0.2060209@profihost.ag> <1532913265.964210.1424100999395.JavaMail.zimbra@oxygem.tv>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=utf-8;
+	format=flowed
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx3-phx2.redhat.com ([209.132.183.24]:39331 "EHLO
-	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753349AbbBPSuf convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Feb 2015 13:50:35 -0500
-In-Reply-To: <CAC6JEv8LEV5bNaoW3__2hjfYNZRmXDScp-a_1V+AKiX_SwWQCQ@mail.gmail.com>
+Received: from mail-ph.de-nserver.de ([85.158.179.214]:42658 "EHLO
+	mail-ph.de-nserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753237AbbBPTKM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Feb 2015 14:10:12 -0500
+In-Reply-To: <1532913265.964210.1424100999395.JavaMail.zimbra@oxygem.tv>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@gregs42.com>
-Cc: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Alexandre DERUMIER <aderumier@odiso.com>
+Cc: Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Greg, thx, so noted.
 
-Thx
-YuriW
+Am 16.02.2015 um 16:36 schrieb Alexandre DERUMIER:
+> What is you fio command line ?
 
------ Original Message -----
-=46rom: "Gregory Farnum" <greg@gregs42.com>
-To: "Yuri Weinstein" <yweinste@redhat.com>, "Loic Dachary" <loic@dachar=
-y.org>
-Cc: "Ceph Development" <ceph-devel@vger.kernel.org>
-Sent: Monday, February 16, 2015 10:44:35 AM
-Subject: Re: giant integration branch for v0.87.1 ready for QE
+fio rbd or fio under qemu?
 
-The multimds suite has never passed and is strictly informational at th=
-is
-point. You shouldn't worry about it. (We use it only to make sure we do=
-n't
-completely break multimds systems, but we don't expect it to pass. It's
-just nice to have a rough idea how far off we are.)
--Greg
-On Mon, Feb 16, 2015 at 9:34 AM Yuri Weinstein <yweinste@redhat.com> wr=
-ote:
+> do you test with numjobs > 1 ?
 
-> I have completed suites execution on giant branch (v0.87.1 RC)
+Both.
+
+> (I think under qemu, you can use any numjobs value, as it's use only =
+1 thread, is equal to numjobs=3D1)
+
+numjobs > 1 gives also under qemu better results.
+
+Stefan
+
+
 >
-> All results are summarized in http://tracker.ceph.com/issues/10501 un=
-der
-> "QE VALIDATION" section.
-> Some suites had to be run more then ones due to environment noise.
+> ----- Mail original -----
+> De: "Stefan Priebe" <s.priebe@profihost.ag>
+> =C3=80: "aderumier" <aderumier@odiso.com>
+> Cc: "Mark Nelson" <mnelson@redhat.com>, "ceph-devel" <ceph-devel@vger=
+=2Ekernel.org>
+> Envoy=C3=A9: Lundi 16 F=C3=A9vrier 2015 15:50:56
+> Objet: Re: speed decrease since firefly,giant,hammer the 2nd try
 >
-> Two suites are being re-run now - upgrade:firefly-x and powecycle.
+> Hi Mark,
+> Hi Alexandre,
 >
-> Next steps:
-> -  the team leads to review/confirm results
-> -  Loic - can you review and triage issues as needed.
-> -  two suites require results analysis:
->    multimds
->    rados (two known tickets, but need more checking) ## 10209, 9891
->    krbd (two new tickets, but need more checking) ## 10889, 10890
+> Am 16.02.2015 um 10:11 schrieb Alexandre DERUMIER:
+>> Hi Stefan,
+>>
+>> I could be interesting to see if you have the same speed decrease wi=
+th fio-librbd on the host,
+>> without the qemu layer.
+>>
+>> the perf reports don't seem to be too much different.
+>> do you have the same cpu usage ? (check qemu process usage)
 >
+> the idea to use fio-librbd was very good.
 >
-> Thx
-> YuriW
+> I cannot reproduce the behaviour using fio-rbd. I can just reproduce =
+it
+> with qemu.
 >
-> ----- Original Message -----
-> From: "Loic Dachary" <loic@dachary.org>
-> To: "Yuri Weinstein" <yweinste@redhat.com>
-> Cc: "Ceph Development" <ceph-devel@vger.kernel.org>
-> Sent: Wednesday, February 11, 2015 7:30:06 AM
-> Subject: Re: giant integration branch for v0.87.1 ready for QE
+> Very strange. So please ignore me for the moment. I'll try to dig dee=
+per
+> into it.
 >
-> Hi Yuri,
+> Greets,
+> Stefan
 >
-> The giant-backports pull requests were merged into
-> https://github.com/ceph/ceph/tree/giant which is not ready for testin=
-g.
+>> ----- Mail original -----
+>> De: "Stefan Priebe" <s.priebe@profihost.ag>
+>> =C3=80: "Mark Nelson" <mnelson@redhat.com>, "ceph-devel" <ceph-devel=
+@vger.kernel.org>
+>> Envoy=C3=A9: Dimanche 15 F=C3=A9vrier 2015 19:40:45
+>> Objet: Re: speed decrease since firefly,giant,hammer the 2nd try
+>>
+>> Hi Mark,
+>>
+>> what's next?
+>>
+>> I've this test cluster only for 2 more days.
+>>
+>> Here some perf Details:
+>>
+>> dumpling:
+>> 12,65% libc-2.13.so [.] 0x79000
+>> 2,86% libc-2.13.so [.] malloc
+>> 2,80% kvm [.] 0xb59c5
+>> 2,59% libc-2.13.so [.] free
+>> 2,35% [kernel] [k] __schedule
+>> 2,16% [kernel] [k] _raw_spin_lock
+>> 1,92% [kernel] [k] __switch_to
+>> 1,58% [kernel] [k] lapic_next_deadline
+>> 1,09% [kernel] [k] update_sd_lb_stats
+>> 1,08% [kernel] [k] _raw_spin_lock_irqsave
+>> 0,91% librados.so.2.0.0 [.] ceph_crc32c_le_intel
+>> 0,91% libpthread-2.13.so [.] pthread_mutex_trylock
+>> 0,87% [kernel] [k] resched_task
+>> 0,72% [kernel] [k] cpu_startup_entry
+>> 0,71% librados.so.2.0.0 [.] crush_hash32_3
+>> 0,66% [kernel] [k] leave_mm
+>> 0,65% librados.so.2.0.0 [.] Mutex::Lock(bool)
+>> 0,64% [kernel] [k] idle_cpu
+>> 0,62% libpthread-2.13.so [.] __pthread_mutex_unlock_usercnt
+>> 0,59% [kernel] [k] try_to_wake_up
+>> 0,56% [kernel] [k] wake_futex
+>> 0,50% librados.so.2.0.0 [.] ceph::buffer::ptr::release()
+>>
+>> firefly:
+>> 12,56% libc-2.13.so [.] 0x7905d
+>> 2,82% libc-2.13.so [.] malloc
+>> 2,64% libc-2.13.so [.] free
+>> 2,61% kvm [.] 0x34322f
+>> 2,33% [kernel] [k] __schedule
+>> 2,14% [kernel] [k] _raw_spin_lock
+>> 1,83% [kernel] [k] __switch_to
+>> 1,62% [kernel] [k] lapic_next_deadline
+>> 1,17% [kernel] [k] _raw_spin_lock_irqsave
+>> 1,09% [kernel] [k] update_sd_lb_stats
+>> 1,08% libpthread-2.13.so [.] pthread_mutex_trylock
+>> 0,85% libpthread-2.13.so [.] __pthread_mutex_unlock_usercnt
+>> 0,77% [kernel] [k] resched_task
+>> 0,74% librbd.so.1.0.0 [.] 0x71b73
+>> 0,72% librados.so.2.0.0 [.] Mutex::Lock(bool)
+>> 0,68% librados.so.2.0.0 [.] crush_hash32_3
+>> 0,67% [kernel] [k] idle_cpu
+>> 0,65% [kernel] [k] leave_mm
+>> 0,65% [kernel] [k] cpu_startup_entry
+>> 0,59% [kernel] [k] try_to_wake_up
+>> 0,51% librados.so.2.0.0 [.] ceph::buffer::ptr::release()
+>> 0,51% [kernel] [k] wake_futex
+>>
+>> Stefan
+>>
+>> Am 11.02.2015 um 06:42 schrieb Stefan Priebe:
+>>>
+>>> Am 11.02.2015 um 05:45 schrieb Mark Nelson:
+>>>> On 02/10/2015 04:18 PM, Stefan Priebe wrote:
+>>>>>
+>>>>> Am 10.02.2015 um 22:38 schrieb Mark Nelson:
+>>>>>> On 02/10/2015 03:11 PM, Stefan Priebe wrote:
+>>>>>>>
+>>>>>>> mhm i installed librbd1-dbg and librados2-dbg - but the output =
+still
+>>>>>>> looks useless to me. Should i upload it somewhere?
+>>>>>>
+>>>>>> Meh, if it's all just symbols it's probably not that helpful.
+>>>>>>
+>>>>>> I've summarized your results here:
+>>>>>>
+>>>>>> 1 concurrent 4k write (libaio, direct=3D1, iodepth=3D1)
+>>>>>>
+>>>>>> IOPS Latency
+>>>>>> wb on wb off wb on wb off
+>>>>>> dumpling 10870 536 ~100us ~2ms
+>>>>>> firefly 10350 525 ~100us ~2ms
+>>>>>>
+>>>>>> So in single op tests dumpling and firefly are far closer. Now l=
+et's
+>>>>>> see each of these cases with iodepth=3D32 (still 1 thread for no=
+w).
+>>>>>
+>>>>>
+>>>>> dumpling:
+>>>>>
+>>>>> file1: (g=3D0): rw=3Drandwrite, bs=3D4K-4K/4K-4K, ioengine=3Dliba=
+io, iodepth=3D32
+>>>>> 2.0.8
+>>>>> Starting 1 thread
+>>>>> Jobs: 1 (f=3D1): [w] [100.0% done] [0K/72812K /s] [0 /18.3K iops]=
+ [eta
+>>>>> 00m:00s]
+>>>>> file1: (groupid=3D0, jobs=3D1): err=3D 0: pid=3D3011
+>>>>> write: io=3D2060.6MB, bw=3D70329KB/s, iops=3D17582 , runt=3D 3000=
+1msec
+>>>>> slat (usec): min=3D1 , max=3D3517 , avg=3D 3.42, stdev=3D 7.30
+>>>>> clat (usec): min=3D93 , max=3D7475 , avg=3D1815.72, stdev=3D233.4=
+3
+>>>>> lat (usec): min=3D219 , max=3D7477 , avg=3D1819.27, stdev=3D233.5=
+2
+>>>>> clat percentiles (usec):
+>>>>> | 1.00th=3D[ 1480], 5.00th=3D[ 1576], 10.00th=3D[ 1608], 20.00th=3D=
+[
+>>>>> 1672],
+>>>>> | 30.00th=3D[ 1704], 40.00th=3D[ 1752], 50.00th=3D[ 1800], 60.00t=
+h=3D[
+>>>>> 1832],
+>>>>> | 70.00th=3D[ 1896], 80.00th=3D[ 1960], 90.00th=3D[ 2064], 95.00t=
+h=3D[
+>>>>> 2128],
+>>>>> | 99.00th=3D[ 2352], 99.50th=3D[ 2448], 99.90th=3D[ 4704], 99.95t=
+h=3D[
+>>>>> 5344],
+>>>>> | 99.99th=3D[ 7072]
+>>>>> bw (KB/s) : min=3D59696, max=3D77840, per=3D100.00%, avg=3D70351.=
+27,
+>>>>> stdev=3D4783.25
+>>>>> lat (usec) : 100=3D0.01%, 250=3D0.01%, 500=3D0.01%, 750=3D0.01%, =
+1000=3D0.53%
+>>>>> lat (msec) : 2=3D85.02%, 4=3D14.31%, 10=3D0.13%
+>>>>> cpu : usr=3D1.96%, sys=3D6.71%, ctx=3D22791, majf=3D0, minf=3D133
+>>>>> IO depths : 1=3D0.1%, 2=3D0.1%, 4=3D0.1%, 8=3D0.1%, 16=3D0.1%, 32=
+=3D100.0%,
+>>>>>> =3D64=3D0.0%
+>>>>> submit : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, 64=
+=3D0.0%,
+>>>>>> =3D64=3D0.0%
+>>>>> complete : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.1%, =
+64=3D0.0%,
+>>>>>> =3D64=3D0.0%
+>>>>> issued : total=3Dr=3D0/w=3D527487/d=3D0, short=3Dr=3D0/w=3D0/d=3D=
+0
+>>>>>
+>>>>> Run status group 0 (all jobs):
+>>>>> WRITE: io=3D2060.6MB, aggrb=3D70329KB/s, minb=3D70329KB/s, maxb=3D=
+70329KB/s,
+>>>>> mint=3D30001msec, maxt=3D30001msec
+>>>>>
+>>>>> Disk stats (read/write):
+>>>>> sdb: ios=3D166/526079, merge=3D0/0, ticks=3D24/890120, in_queue=3D=
+890064,
+>>>>> util=3D98.73%
+>>>>>
+>>>>> firefly:
+>>>>>
+>>>>> file1: (g=3D0): rw=3Drandwrite, bs=3D4K-4K/4K-4K, ioengine=3Dliba=
+io, iodepth=3D32
+>>>>> 2.0.8
+>>>>> Starting 1 thread
+>>>>> Jobs: 1 (f=3D1): [w] [100.0% done] [0K/69096K /s] [0 /17.3K iops]=
+ [eta
+>>>>> 00m:00s]
+>>>>> file1: (groupid=3D0, jobs=3D1): err=3D 0: pid=3D2982
+>>>>> write: io=3D1784.9MB, bw=3D60918KB/s, iops=3D15229 , runt=3D 3000=
+2msec
+>>>>> slat (usec): min=3D1 , max=3D1389 , avg=3D 3.43, stdev=3D 5.32
+>>>>> clat (usec): min=3D117 , max=3D8235 , avg=3D2096.88, stdev=3D396.=
+30
+>>>>> lat (usec): min=3D540 , max=3D8258 , avg=3D2100.43, stdev=3D396.6=
+1
+>>>>> clat percentiles (usec):
+>>>>> | 1.00th=3D[ 1608], 5.00th=3D[ 1720], 10.00th=3D[ 1768], 20.00th=3D=
+[
+>>>>> 1832],
+>>>>> | 30.00th=3D[ 1896], 40.00th=3D[ 1944], 50.00th=3D[ 2008], 60.00t=
+h=3D[
+>>>>> 2064],
+>>>>> | 70.00th=3D[ 2160], 80.00th=3D[ 2256], 90.00th=3D[ 2512], 95.00t=
+h=3D[
+>>>>> 2896],
+>>>>> | 99.00th=3D[ 3600], 99.50th=3D[ 3792], 99.90th=3D[ 5088], 99.95t=
+h=3D[
+>>>>> 6304],
+>>>>> | 99.99th=3D[ 6752]
+>>>>> bw (KB/s) : min=3D36717, max=3D73712, per=3D99.94%, avg=3D60879.9=
+2,
+>>>>> stdev=3D8302.27
+>>>>> lat (usec) : 250=3D0.01%, 750=3D0.01%
+>>>>> lat (msec) : 2=3D48.56%, 4=3D51.18%, 10=3D0.26%
+>>>>> cpu : usr=3D2.03%, sys=3D5.48%, ctx=3D20440, majf=3D0, minf=3D133
+>>>>> IO depths : 1=3D0.1%, 2=3D0.1%, 4=3D0.1%, 8=3D0.1%, 16=3D0.1%, 32=
+=3D100.0%,
+>>>>>> =3D64=3D0.0%
+>>>>> submit : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, 64=
+=3D0.0%,
+>>>>>> =3D64=3D0.0%
+>>>>> complete : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.1%, =
+64=3D0.0%,
+>>>>>> =3D64=3D0.0%
+>>>>> issued : total=3Dr=3D0/w=3D456918/d=3D0, short=3Dr=3D0/w=3D0/d=3D=
+0
+>>>>>
+>>>>> Run status group 0 (all jobs):
+>>>>> WRITE: io=3D1784.9MB, aggrb=3D60918KB/s, minb=3D60918KB/s, maxb=3D=
+60918KB/s,
+>>>>> mint=3D30002msec, maxt=3D30002msec
+>>>>>
+>>>>> Disk stats (read/write):
+>>>>> sdb: ios=3D166/455574, merge=3D0/0, ticks=3D12/897748, in_queue=3D=
+897696,
+>>>>> util=3D98.96%
+>>>>>
+>>>>
+>>>> Ok, so it looks like as you increase concurrency the effect increa=
+ses
+>>>> (ie contention?). Does the same thing happen without cache enabled=
+?
+>>>
+>>> here again without rbd cache:
+>>>
+>>> dumpling:
+>>> file1: (g=3D0): rw=3Drandwrite, bs=3D4K-4K/4K-4K, ioengine=3Dlibaio=
+, iodepth=3D32
+>>> 2.0.8
+>>> Starting 1 thread
+>>> Jobs: 1 (f=3D1): [w] [100.0% done] [0K/83488K /s] [0 /20.9K iops] [=
+eta
+>>> 00m:00s]
+>>> file1: (groupid=3D0, jobs=3D1): err=3D 0: pid=3D3000
+>>> write: io=3D2449.2MB, bw=3D83583KB/s, iops=3D20895 , runt=3D 30005m=
+sec
+>>> slat (usec): min=3D1 , max=3D975 , avg=3D 4.50, stdev=3D 5.25
+>>> clat (usec): min=3D364 , max=3D80566 , avg=3D1525.87, stdev=3D1194.=
+57
+>>> lat (usec): min=3D519 , max=3D80568 , avg=3D1530.51, stdev=3D1194.4=
+4
+>>> clat percentiles (usec):
+>>> | 1.00th=3D[ 660], 5.00th=3D[ 780], 10.00th=3D[ 876], 20.00th=3D[ 1=
+032],
+>>> | 30.00th=3D[ 1144], 40.00th=3D[ 1240], 50.00th=3D[ 1304], 60.00th=3D=
+[ 1384],
+>>> | 70.00th=3D[ 1480], 80.00th=3D[ 1640], 90.00th=3D[ 2096], 95.00th=3D=
+[ 2960],
+>>> | 99.00th=3D[ 6816], 99.50th=3D[ 7840], 99.90th=3D[11712], 99.95th=3D=
+[13888],
+>>> | 99.99th=3D[18816]
+>>> bw (KB/s) : min=3D47184, max=3D95432, per=3D100.00%, avg=3D83639.19=
+,
+>>> stdev=3D7973.92
+>>> lat (usec) : 500=3D0.01%, 750=3D3.82%, 1000=3D14.40%
+>>> lat (msec) : 2=3D70.57%, 4=3D7.91%, 10=3D3.11%, 20=3D0.17%, 50=3D0.=
+01%
+>>> lat (msec) : 100=3D0.01%
+>>> cpu : usr=3D3.12%, sys=3D11.49%, ctx=3D74951, majf=3D0, minf=3D133
+>>> IO depths : 1=3D0.1%, 2=3D0.1%, 4=3D0.1%, 8=3D0.1%, 16=3D0.1%, 32=3D=
+100.0%,
+>>>> =3D64=3D0.0%
+>>> submit : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, 64=3D=
+0.0%,
+>>>> =3D64=3D0.0%
+>>> complete : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.1%, 64=
+=3D0.0%,
+>>>> =3D64=3D0.0%
+>>> issued : total=3Dr=3D0/w=3D626979/d=3D0, short=3Dr=3D0/w=3D0/d=3D0
+>>>
+>>> Run status group 0 (all jobs):
+>>> WRITE: io=3D2449.2MB, aggrb=3D83583KB/s, minb=3D83583KB/s, maxb=3D8=
+3583KB/s,
+>>> mint=3D30005msec, maxt=3D30005msec
+>>>
+>>> Disk stats (read/write):
+>>> sdb: ios=3D168/625292, merge=3D0/0, ticks=3D144/916096, in_queue=3D=
+916128,
+>>> util=3D99.93%
+>>>
+>>>
+>>> firefly:
+>>>
+>>> fio --filename=3D/dev/sdb --direct=3D1 --rw=3Drandwrite --bs=3D4k -=
+-numjobs=3D1
+>>> --thread --iodepth=3D32 --ioengine=3Dlibaio --runtime=3D30 --group_=
+reporting
+>>> --name=3Dfile1
+>>> file1: (g=3D0): rw=3Drandwrite, bs=3D4K-4K/4K-4K, ioengine=3Dlibaio=
+, iodepth=3D32
+>>> 2.0.8
+>>> Starting 1 thread
+>>> Jobs: 1 (f=3D1): [w] [100.0% done] [0K/90044K /s] [0 /22.6K iops] [=
+eta
+>>> 00m:00s]
+>>> file1: (groupid=3D0, jobs=3D1): err=3D 0: pid=3D2970
+>>> write: io=3D2372.9MB, bw=3D80976KB/s, iops=3D20244 , runt=3D 30006m=
+sec
+>>> slat (usec): min=3D1 , max=3D4047 , avg=3D 4.36, stdev=3D 7.17
+>>> clat (usec): min=3D197 , max=3D76656 , avg=3D1575.29, stdev=3D1165.=
+74
+>>> lat (usec): min=3D523 , max=3D76660 , avg=3D1579.79, stdev=3D1165.5=
+9
+>>> clat percentiles (usec):
+>>> | 1.00th=3D[ 676], 5.00th=3D[ 804], 10.00th=3D[ 916], 20.00th=3D[ 1=
+096],
+>>> | 30.00th=3D[ 1224], 40.00th=3D[ 1304], 50.00th=3D[ 1384], 60.00th=3D=
+[ 1448],
+>>> | 70.00th=3D[ 1544], 80.00th=3D[ 1704], 90.00th=3D[ 2128], 95.00th=3D=
+[ 2736],
+>>> | 99.00th=3D[ 6752], 99.50th=3D[ 7904], 99.90th=3D[12096], 99.95th=3D=
+[14656],
+>>> | 99.99th=3D[18560]
+>>> bw (KB/s) : min=3D47800, max=3D91952, per=3D99.91%, avg=3D80900.88,
+>>> stdev=3D7234.98
+>>> lat (usec) : 250=3D0.01%, 500=3D0.01%, 750=3D2.95%, 1000=3D11.38%
+>>> lat (msec) : 2=3D73.81%, 4=3D8.81%, 10=3D2.85%, 20=3D0.19%, 50=3D0.=
+01%
+>>> lat (msec) : 100=3D0.01%
+>>> cpu : usr=3D2.99%, sys=3D10.60%, ctx=3D66549, majf=3D0, minf=3D133
+>>> IO depths : 1=3D0.1%, 2=3D0.1%, 4=3D0.1%, 8=3D0.1%, 16=3D0.1%, 32=3D=
+100.0%,
+>>>> =3D64=3D0.0%
+>>> submit : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, 64=3D=
+0.0%,
+>>>> =3D64=3D0.0%
+>>> complete : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.1%, 64=
+=3D0.0%,
+>>>> =3D64=3D0.0%
+>>> issued : total=3Dr=3D0/w=3D607445/d=3D0, short=3Dr=3D0/w=3D0/d=3D0
+>>>
+>>> Run status group 0 (all jobs):
+>>> WRITE: io=3D2372.9MB, aggrb=3D80976KB/s, minb=3D80976KB/s, maxb=3D8=
+0976KB/s,
+>>> mint=3D30006msec, maxt=3D30006msec
+>>>
+>>> Disk stats (read/write):
+>>> sdb: ios=3D170/605440, merge=3D0/0, ticks=3D156/916492, in_queue=3D=
+916560,
+>>> util=3D99.93%
+>>>
+>>> Stefan
+>>>
 >
-> For the record, the head is https://github.com/ceph/ceph/commit/
-> 78c71b9200da5e7d832ec58765478404d31ae6b5
->
-> Cheers
->
-> On 10/02/2015 18:20, Loic Dachary wrote:
-> > Hi Yuri,
-> >
-> > The giant integration branch for v0.87.1 as found at
-> https://github.com/ceph/ceph/commits/giant-backports has been approve=
-d by
-> Yehuda, Josh and Sam and is ready for QE.
-> >
-> > For the record, the head is https://github.com/ceph/ceph/commit/
-> 6b08a729540c61f3c8b15c5a3ce9382634bf800c
-> >
-> > Cheers
-> >
->
-> --
-> Lo=C3=AFc Dachary, Artisan Logiciel Libre
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
  in
