@@ -1,72 +1,107 @@
-From: "Deneau, Tom" <tom.deneau@amd.com>
-Subject: RE: using radosgw with mod_proxy_fcgi
-Date: Mon, 16 Feb 2015 17:55:29 +0000
-Message-ID: <BC97738F8E7C8742BABED7F06FB9DF9155559C33@SATLEXDAG01.amd.com>
-References: <BC97738F8E7C8742BABED7F06FB9DF915554B70A@SATLEXDAG01.amd.com>
- <211191187.4180548.1423703428235.JavaMail.zimbra@redhat.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: giant integration branch for v0.87.1 ready for QE
+Date: Mon, 16 Feb 2015 10:02:41 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1502160946480.30478@cobra.newdream.net>
+References: <54DA3DD6.7070108@dachary.org> <54DB757E.2000009@dachary.org> <1387059957.19365485.1424108024488.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0114.outbound.protection.outlook.com ([207.46.100.114]:47913
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753126AbbBPRzf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 16 Feb 2015 12:55:35 -0500
-In-Reply-To: <211191187.4180548.1423703428235.JavaMail.zimbra@redhat.com>
-Content-Language: en-US
+Received: from cobra.newdream.net ([66.33.216.30]:38533 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753436AbbBPSCl (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Feb 2015 13:02:41 -0500
+In-Reply-To: <1387059957.19365485.1424108024488.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Yuri Weinstein <yweinste@redhat.com>
+Cc: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
 
-U28gaWYgSSBoYXZlIEFwYWNoZSAyLjQuOSssIHdvdWxkIEkgdXNlDQogICAgUHJveHlQYXNzIC8g
-dW5peDovLy90bXAvLnJhZG9zZ3cuc29ja3xmY2dpOi8vbG9jYWxob3N0OjkwMDAvDQphbmQgaW4g
-Y2VwaC5jb25mIHVzZQ0KICAgIHJndyBzb2NrZXQgcGF0aCA9IC90bXAvLnJhZG9zZ3cuc29jaw0K
-DQpJZiBzbywgaG93IGRvZXMgdGhlIHJhZG9zZ3cgcHJvY2VzcyBrbm93IGFib3V0IHBvcnQgOTAw
-MD8NCk9yIGRvIEkgbmVlZCBhICJyZ3cgZnJvbnRlbmRzIiBzdGF0ZW1lbnQgdG8gc3BlY2lmeSB0
-aGF0Pw0KDQotLSBUb20NCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IFllaHVk
-YSBTYWRlaC1XZWlucmF1YiBbbWFpbHRvOnllaHVkYUByZWRoYXQuY29tXSANClNlbnQ6IFdlZG5l
-c2RheSwgRmVicnVhcnkgMTEsIDIwMTUgNzoxMCBQTQ0KVG86IERlbmVhdSwgVG9tDQpDYzogY2Vw
-aC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNClN1YmplY3Q6IFJlOiB1c2luZyByYWRvc2d3IHdpdGgg
-bW9kX3Byb3h5X2ZjZ2kNCg0KDQoNCi0tLS0tIE9yaWdpbmFsIE1lc3NhZ2UgLS0tLS0NCj4gRnJv
-bTogIlRvbSBEZW5lYXUiIDx0b20uZGVuZWF1QGFtZC5jb20+DQo+IFRvOiBjZXBoLWRldmVsQHZn
-ZXIua2VybmVsLm9yZw0KPiBTZW50OiBXZWRuZXNkYXksIEZlYnJ1YXJ5IDExLCAyMDE1IDQ6MjE6
-NDYgUE0NCj4gU3ViamVjdDogdXNpbmcgcmFkb3NndyB3aXRoIG1vZF9wcm94eV9mY2dpDQo+IA0K
-PiBJIGFtIGEgQ2VwaCBub3ZpY2UgYW5kIGhhdmUgdGhlIHJhZG9zIGFuZCByYmQgc2V0dXBzIHdv
-cmtpbmcgYW5kIHdvdWxkIA0KPiBsaWtlIHRvIHVzZSB0aGUgcmFkb3NndyBzdGFjay4NCj4gDQo+
-IEkgYW0gcnVubmluZyBvbiBhIHBsYXRmb3JtIChhYXJjaDY0KSBmb3Igd2hpY2ggdGhlcmUgYXJl
-IG5vIHByZS1idWlsdCANCj4gYmluYXJpZXMgb2YgdGhlIGNlcGggcGF0Y2hlZCBhcGFjaGUgYW5k
-IHRoZSBjZXBoIHBhdGNoZWQgbW9kX2Zhc3RjZ2kuICANCj4gQnV0IHNpbmNlIEkgZ2F0aGVyIGZy
-b20gdGhlIG1haWwgbGlzdHMgdGhhdCB0aGUgZnV0dXJlIGlzIGp1c3QgdG8gdXNlIA0KPiBtb2Rf
-cHJveHlfZmNnaSBhbmQgc2luY2UgbXkgYXBhY2hlIGluc3RhbGwgaGFzIG1vZF9wcm94eV9mY2dp
-IGJ1aWxkIGluIA0KPiBhbHJlYWR5IHRoYXQgc2VlbXMgbGlrZSB0aGUgd2F5IHRvIGdvLg0KPiAN
-Cj4gSSByZWFsaXplIHRoZSBkb2N1bWVudGF0aW9uIHRvIGV4cGxhaW4gZXhhY3RseSBob3cgdG8g
-c2V0IHRoaW5ncyB1cCANCj4gd2l0aCBtb2RfcHJveHlfZmNnaSBpcyBzdGlsbCBpbiB0aGUgd29y
-a3MgYnV0IGlmIHRoZXJlIGlzIGFueSANCj4gcHJlbGltaW5hcnkgZG9jdW1lbnRhdGlvbiBvbiB0
-aGlzLCBJJ2QgYmUgZ2xhZCB0byB0cnkgaXQgb3V0Lg0KPiANCg0KVGhhdCdzIHRoZSBhcGFjaGUg
-c2l0ZSBjb25maWcgdGhhdCBJIHdhcyB1c2luZzoNCg0KPFZpcnR1YWxIb3N0ICo6ODA+DQogICAg
-U2VydmVyTmFtZSBsb2NhbGhvc3QNCiAgICBEb2N1bWVudFJvb3QgL3Zhci93d3cvaHRtbA0KDQog
-ICAgRXJyb3JMb2cgJHtBUEFDSEVfTE9HX0RJUn0vZXJyb3IubG9nDQogICAgQ3VzdG9tTG9nICR7
-QVBBQ0hFX0xPR19ESVJ9L2FjY2Vzcy5sb2cgY29tYmluZWQNCg0KICAgIExvZ0xldmVsIGRlYnVn
-DQoNCg0KICAgIFJld3JpdGVFbmdpbmUgT24NCg0KICAgIFJld3JpdGVSdWxlIC4qIC0gW0U9SFRU
-UF9BVVRIT1JJWkFUSU9OOiV7SFRUUDpBdXRob3JpemF0aW9ufSxMXQ0KDQogICAgIyBSZXdyaXRl
-UnVsZSBeLyguKikgLz8le1FVRVJZX1NUUklOR30gW0U9SFRUUF9BVVRIT1JJWkFUSU9OOiV7SFRU
-UDpBdXRob3JpemF0aW9ufSxMXQ0KDQogICAgU2V0RW52IHByb3h5LW5va2VlcGFsaXZlIDENCg0K
-ICAgIFByb3h5UGFzcyAvIGZjZ2k6Ly8xMjcuMC4wMTo5MDAwLw0KICAgICNQcm94eVBhc3MgLyB1
-bml4Oi8vL3RtcC8ucmFkb3Nndy5zb2NrfGZjZ2k6Ly9sb2NhbGhvc3Q6OTAwMC8NCjwvVmlydHVh
-bEhvc3Q+DQoNCk5vdGUgdGhhdCB0aGVyZSBhcmUgdHdvIG9wdGlvbnMgaGVyZSwgYW5kIGl0IHJl
-YWxseSBkZXBlbmRzIHlvdXIgYXBhY2hlIHZlcnNpb24uIEZvciB2YW5pbGxhIGFwYWNoZSAyLjQu
-OCsgKG9yIG1heWJlIDIuNC43KykgeW91IGNhbiB1c2UgdGhlIHJlZ3VsYXIgdW5peCBkb21haW4g
-c29ja2V0IHNldHVwIChhcyBkZXNjcmliZWQgaW4gdGhlIGRvY3MpLCBqdXN0IG1vZGlmeSB0aGUg
-cGF0aCBhcHByb3ByaWF0ZWx5LiBGb3Igb2xkZXIgYXBhY2hlcyAoMi40LjArKSB5b3UgbmVlZCB0
-byB1c2UgdGNwIGZvciBmYXN0Y2dpLCBhbmQgdGhhdCByZXF1aXJlcyBzb21ld2hhdCBkaWZmZXJl
-bnQgcmd3IGNvbmZpZ3VyYXRpb24sIGUuZy4gaGF2ZSB0aGUgZm9sbG93aW5nIGluIHlvdXIgY2Vw
-aC5jb25mOg0KDQogICAgICAgIHJndyBmcm9udGVuZHMgPSBmYXN0Y2dpIHNvY2tldF9wb3J0PTkw
-MDAgc29ja2V0X2hvc3Q9MC4wLjAuMA0KDQpGb3IgYXBhY2hlIDIuMiB0aGVyZSdzIG5vIG1vZC1w
-cm94eS1mY2dpIG91dCBvZiB0aGUgYm94LiBJIGRpZCBiYWNrcG9ydCB0aGF0IG1vZHVsZSwgYW5k
-IHlvdSBjYW4gZmluZCBpdCBoZXJlOiBodHRwczovL2dpdGh1Yi5jb20vY2VwaC9tb2QtcHJveHkt
-ZmNnaSwgYnV0IHlvdSdsbCBuZWVkIHRvIGNvbXBpbGUgaXQgeW91cnNlbGYgYXQgdGhpcyBwb2lu
-dC4NCg0KTm90ZSB0aGF0IG1vZC1wcm94eS1mY2dpIGRvZXMgbm90IHN1cHBvcnQgMTAwLWNvbnRp
-bnVlLCBzbyB5b3UnbGwgbmVlZCB0byBhZGQgdGhlIGZvbGxvd2luZyB0byB5b3VyIGNlcGguY29u
-ZjoNCg0KICAgICAgICByZ3cgcHJpbnQgY29udGludWUgPSBmYWxzZQ0KDQpZZWh1ZGENCg0KDQo=
+On Mon, 16 Feb 2015, Yuri Weinstein wrote:
+> I have completed suites execution on giant branch (v0.87.1 RC)
+> 
+> All results are summarized in http://tracker.ceph.com/issues/10501 under "QE VALIDATION" section.
+> Some suites had to be run more then ones due to environment noise.
+> 
+> Two suites are being re-run now - upgrade:firefly-x and powecycle.
+> 
+> Next steps:
+> -  the team leads to review/confirm results
+> -  Loic - can you review and triage issues as needed.
+> -  two suites require results analysis:
+>    multimds
+>    rados (two known tickets, but need more checking) ## 10209, 9891
+
+10209: nothing has chnaged in os/ since 0.87, so i don't think this is 
+a regression.  there have been lots of changes since then in master.  it 
+is a bit strange that we haven't seen this on master...  could it be this?
+
+commit 456255b728b678b0490082e1df3b1fe89b16d3a1
+Author: Sage Weil <sage@redhat.com>
+Date:   Sun Nov 23 20:53:06 2014 -0800
+
+    os/DBObjectMap: include hash in header key for EC objects
+    
+    We were inadvertantly dropping the hash portion of the header key for EC
+    objects.  This is usually not noticeable, but turns up quite quickly with
+    the new pgmeta objects, which share the same name ('') across PGs with
+    different hash values
+    
+    Fixes: #10171
+    Signed-off-by: Sage Weil <sage@redhat.com>
+
+9891: this just needs to be cherry-picked... there is a commit here:
+
+734e9af5df4ae419ded108f5036bee068a9bc2b2
+https://github.com/ceph/ceph/pull/3731
+
+Loic, I think you said something about this the other day though?  I 
+don't see it in the current giant branch...
+
+>    krbd (two new tickets, but need more checking) ## 10889, 10890
+
+10889: client side bug, moved to kernel project.
+10890: i think these have been failing for a while?
+
+neither of these should block the giant point release, IMO
+
+sage
+
+
+> 
+> 
+> Thx
+> YuriW
+> 
+> ----- Original Message -----
+> From: "Loic Dachary" <loic@dachary.org>
+> To: "Yuri Weinstein" <yweinste@redhat.com>
+> Cc: "Ceph Development" <ceph-devel@vger.kernel.org>
+> Sent: Wednesday, February 11, 2015 7:30:06 AM
+> Subject: Re: giant integration branch for v0.87.1 ready for QE
+> 
+> Hi Yuri,
+> 
+> The giant-backports pull requests were merged into https://github.com/ceph/ceph/tree/giant which is not ready for testing.
+> 
+> For the record, the head is https://github.com/ceph/ceph/commit/78c71b9200da5e7d832ec58765478404d31ae6b5
+> 
+> Cheers
+> 
+> On 10/02/2015 18:20, Loic Dachary wrote:
+> > Hi Yuri,
+> > 
+> > The giant integration branch for v0.87.1 as found at https://github.com/ceph/ceph/commits/giant-backports has been approved by Yehuda, Josh and Sam and is ready for QE. 
+> > 
+> > For the record, the head is https://github.com/ceph/ceph/commit/6b08a729540c61f3c8b15c5a3ce9382634bf800c
+> > 
+> > Cheers
+> > 
+> 
+> -- 
+> Lo?c Dachary, Artisan Logiciel Libre
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
