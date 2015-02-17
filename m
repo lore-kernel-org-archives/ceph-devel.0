@@ -1,47 +1,40 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Having issues trying to get the OSD up on a MIPS64!!!
-Date: Tue, 17 Feb 2015 09:06:38 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1502170905520.22050@cobra.newdream.net>
-References: <loom.20141023T030922-990@post.gmane.org> <alpine.DEB.2.00.1410231749420.13498@cobra.newdream.net> <BC9BE980F12C4446A1CB0380E1C97DCD3390D99A@EXMAIL1.taec.toshiba.com> <alpine.DEB.2.00.1410241743490.13498@cobra.newdream.net>
- <71E1B92E73606A4ABC3D0EC55B2BF09834221AED@EXMAIL1.taec.toshiba.com> <alpine.DEB.2.00.1410241810300.13498@cobra.newdream.net> <BC9BE980F12C4446A1CB0380E1C97DCD3390DAEC@EXMAIL1.taec.toshiba.com> <loom.20150217T085627-77@post.gmane.org>
- <alpine.DEB.2.00.1502170603410.22050@cobra.newdream.net> <54B715FC-60FA-4787-83BF-A9761E1C5334@sbcglobal.net>
+From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Subject: Re: ceph:rgw issue #10698
+Date: Tue, 17 Feb 2015 12:08:32 -0500 (EST)
+Message-ID: <784895333.6829144.1424192912653.JavaMail.zimbra@redhat.com>
+References: <54E32EFE.4080209@switch.ch>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44053 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751686AbbBQRGi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Feb 2015 12:06:38 -0500
-In-Reply-To: <54B715FC-60FA-4787-83BF-A9761E1C5334@sbcglobal.net>
+Received: from mx4-phx2.redhat.com ([209.132.183.25]:44683 "EHLO
+	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751971AbbBQRIi (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Feb 2015 12:08:38 -0500
+In-Reply-To: <54E32EFE.4080209@switch.ch>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Bao Vu <vu_bao@sbcglobal.net>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Valery Tschopp <valery.tschopp@switch.ch>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, 17 Feb 2015, Bao Vu wrote:
-> >> ./.libs/libosd.a(libos_la-FileStore.o): In function 
-> >> `FileStoreBackend::create(long, FileStore*)':
-> >> FileStore.cc:(.text+0x8f1c): undefined reference to 
-> >> `BtrfsFileStoreBackend::BtrfsFileStoreBackend(FileStore*)'
-> >> FileStore.cc:(.text+0x8f24): undefined reference to 
-> >> `BtrfsFileStoreBackend::BtrfsFileStoreBackend(FileStore*)'
-> >> FileStore.cc:(.text+0x8f2c): undefined reference to 
-> >> `BtrfsFileStoreBackend::BtrfsFileStoreBackend(FileStore*)'
-> >> collect2: error: ld returned 1 exit status
-> > 
-> > It looks like maybe the BtrfsFileStoreBackend is not being linked in?  
-> > Perhaps there is some Makefile magic going on?  Which version/commit are 
-> > you on, and have you made any Makefile modifications?
-> > 
-> > Unfortunately we don't have a MPIS64 box in the community lab to play 
-> > with.
-> > 
-> > sage
+
+
+----- Original Message -----
+> From: "Valery Tschopp" <valery.tschopp@switch.ch>
+> To: yehuda@redhat.com, "ceph-devel" <ceph-devel@vger.kernel.org>
+> Sent: Tuesday, February 17, 2015 4:07:26 AM
+> Subject: ceph:rgw issue #10698
 > 
-> I am using 0.87. I do not change makefile . It is created by the configure. I try to build ceph for MIPS64. So far, I have no luck. 
+> Hello Yehuda,
+> 
+> The issue http://tracker.ceph.com/issues/10698 "rgw: not failing POST
+> requests if keystone not configured" is marked as resolved, but I don't
+> think it is backported in firefly.
+> 
+> Issue http://tracker.ceph.com/issues/10062 should already be backported,
+> if I'm not wrong...
+> 
 
-It is probably best to work from the latest git master to make sure you've 
-captured any recent changes.  MIPS64 support isn't something that would 
-have been backported.
+Neither made it in. The bug wasn't set to be backported to firefly. We can set it to get backported if there's a demand, however, I'm not sure that it's going to be a trivial backport.
 
-sage
+Yehuda
