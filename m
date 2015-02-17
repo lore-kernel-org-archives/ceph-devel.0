@@ -1,153 +1,178 @@
-From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+From: Alexandre DERUMIER <aderumier@odiso.com>
 Subject: Re: speed decrease since firefly,giant,hammer the 2nd try
-Date: Tue, 17 Feb 2015 10:15:09 +0100
-Message-ID: <54E3069D.90109@profihost.ag>
-References: <54DA541E.9000608@profihost.ag> <54DA83C8.9020207@profihost.ag> <54DADE52.2010604@redhat.com> <54DAEBBD.30409@profihost.ag> <54E0E82D.20007@profihost.ag> <54E25F79.8030009@profihost.ag> <2047240648.1005007.1424124138866.JavaMail.zimbra@oxygem.tv> <9D75B238-1574-4D3C-870E-E584B24D956B@profihost.ag> <459099286.1005550.1424125118983.JavaMail.zimbra@oxygem.tv>
+Date: Tue, 17 Feb 2015 10:31:47 +0100 (CET)
+Message-ID: <653250303.1036574.1424165507421.JavaMail.zimbra@oxygem.tv>
+References: <54DA541E.9000608@profihost.ag> <54DAEBBD.30409@profihost.ag> <54E0E82D.20007@profihost.ag> <54E25F79.8030009@profihost.ag> <2047240648.1005007.1424124138866.JavaMail.zimbra@oxygem.tv> <9D75B238-1574-4D3C-870E-E584B24D956B@profihost.ag> <459099286.1005550.1424125118983.JavaMail.zimbra@oxygem.tv> <54E3069D.90109@profihost.ag>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ph.de-nserver.de ([85.158.179.214]:34876 "EHLO
-	mail-ph.de-nserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755106AbbBQJPL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Feb 2015 04:15:11 -0500
-In-Reply-To: <459099286.1005550.1424125118983.JavaMail.zimbra@oxygem.tv>
+Received: from mailpro.odiso.net ([89.248.209.98]:36664 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933486AbbBQJbt convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Feb 2015 04:31:49 -0500
+In-Reply-To: <1999473015.1036573.1424165503094.JavaMail.zimbra@oxygem.tv>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>
+To: Stefan Priebe <s.priebe@profihost.ag>
 Cc: Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
+>>Not that easy as you can't downgrade from firefly to dumpling. Here i=
+s=20
+>>perf output of firefly vs giant. While they have a difference of abou=
+t=20
+>>6k iops i do not see any differences in the perf output.=20
+>>
+>>This is the perf output of the osd side with firefly (27k iops):=20
 
-Am 16.02.2015 um 23:18 schrieb Alexandre DERUMIER:
+I don't known for osd side (because they are a lot of optimisations in =
+giant for ssd).
+
+I'll try to redone big client side benchmark next month when my new ssd=
+ cluster will be ready.
+(I'll try dumpling,firefly,giant,hammer , fio-krbd,fio-librbd, qemu, vi=
+rtio,virtio-scsi,iothreads,....)
+
+I have planned to take 1month for benchmark, so I hope I'll help.
+
+
+
+----- Mail original -----
+De: "Stefan Priebe" <s.priebe@profihost.ag>
+=C3=80: "aderumier" <aderumier@odiso.com>
+Cc: "Mark Nelson" <mnelson@redhat.com>, "ceph-devel" <ceph-devel@vger.k=
+ernel.org>
+Envoy=C3=A9: Mardi 17 F=C3=A9vrier 2015 10:15:09
+Objet: Re: speed decrease since firefly,giant,hammer the 2nd try
+
+Am 16.02.2015 um 23:18 schrieb Alexandre DERUMIER:=20
 >>> Just tested write. This might be the result of higher CPU load of t=
 he ceph-osd processes under firefly.=20
->>>
->>> Dumpling 180% per process vs. firefly 220%
+>>>=20
+>>> Dumpling 180% per process vs. firefly 220%=20
 >=20
 > Oh yes, indeed, that's what I think too. (and more cpu -> less ios in=
- qemu because of single iothread)
+ qemu because of single iothread)=20
 >=20
 >=20
 > I think that perf report should show the difference, this is strange =
-that you have almost same result in your perf reports.
+that you have almost same result in your perf reports.=20
 
-Not that easy as you can't downgrade from firefly to dumpling. Here is
-perf output of firefly vs giant. While they have a difference of about
-6k iops i do not see any differences in the perf output.
+Not that easy as you can't downgrade from firefly to dumpling. Here is=20
+perf output of firefly vs giant. While they have a difference of about=20
+6k iops i do not see any differences in the perf output.=20
 
-This is the perf output of the osd side with firefly (27k iops):
+This is the perf output of the osd side with firefly (27k iops):=20
 
-  5,44%  libc-2.13.so          [.] 0x1370b0
-  4,02%  libtcmalloc.so.4.1.0  [.] operator new(unsigned long)
-  2,84%  libtcmalloc.so.4.1.0  [.] operator delete(void*)
-  2,50%  ceph-osd              [.] 0x5aed30
-  1,40%  libstdc++.so.6.0.17   [.] 0xbeacc
-  1,39%  [kernel]              [k] intel_idle
-  1,34%  libleveldb.so.1.12    [.] 0x24673
-  1,30%  libc-2.13.so          [.] vfprintf
-  1,20%  [kernel]              [k] __schedule
-  1,00%  [kernel]              [k] __switch_to
-  0,99%  libleveldb.so.1.12    [.] leveldb::SkipList<char const*,
-leveldb::MemTable::KeyComparator>::FindGreaterOrEqual(char const*
-  0,96%  libpthread-2.13.so    [.] pthread_mutex_trylock
-  0,86%  [kernel]              [k] _raw_spin_lock
-  0,83%  libstdc++.so.6.0.17   [.] std::basic_string<char,
+5,44% libc-2.13.so [.] 0x1370b0=20
+4,02% libtcmalloc.so.4.1.0 [.] operator new(unsigned long)=20
+2,84% libtcmalloc.so.4.1.0 [.] operator delete(void*)=20
+2,50% ceph-osd [.] 0x5aed30=20
+1,40% libstdc++.so.6.0.17 [.] 0xbeacc=20
+1,39% [kernel] [k] intel_idle=20
+1,34% libleveldb.so.1.12 [.] 0x24673=20
+1,30% libc-2.13.so [.] vfprintf=20
+1,20% [kernel] [k] __schedule=20
+1,00% [kernel] [k] __switch_to=20
+0,99% libleveldb.so.1.12 [.] leveldb::SkipList<char const*,=20
+leveldb::MemTable::KeyComparator>::FindGreaterOrEqual(char const*=20
+0,96% libpthread-2.13.so [.] pthread_mutex_trylock=20
+0,86% [kernel] [k] _raw_spin_lock=20
+0,83% libstdc++.so.6.0.17 [.] std::basic_string<char,=20
 std::char_traits<char>, std::allocator<char> >::basic_string(std::strin=
-g
-  0,82%  ceph-osd              [.] ceph::buffer::list::append(char
-const*, unsigned int)
-  0,81%  libsnappy.so.1.1.3    [.]
-snappy::internal::CompressFragment(char const*, unsigned long, char*,
-unsigned short*, int)
-  0,74%  libpthread-2.13.so    [.] __pthread_mutex_unlock_usercnt
-  0,73%  ceph-osd              [.] Mutex::Lock(bool)
-  0,72%  [kernel]              [k] __d_lookup_rcu
-  0,65%  libtcmalloc.so.4.1.0  [.]
+g=20
+0,82% ceph-osd [.] ceph::buffer::list::append(char=20
+const*, unsigned int)=20
+0,81% libsnappy.so.1.1.3 [.]=20
+snappy::internal::CompressFragment(char const*, unsigned long, char*,=20
+unsigned short*, int)=20
+0,74% libpthread-2.13.so [.] __pthread_mutex_unlock_usercnt=20
+0,73% ceph-osd [.] Mutex::Lock(bool)=20
+0,72% [kernel] [k] __d_lookup_rcu=20
+0,65% libtcmalloc.so.4.1.0 [.]=20
 tcmalloc::ThreadCache::ReleaseToCentralCache(tcmalloc::ThreadCache::Fre=
-eList*,
-unsigned long, int
-  0,65%  ceph-osd              [.] ceph::buffer::ptr::release()
-  0,64%  libleveldb.so.1.12    [.] leveldb::crc32c::Extend(unsigned int=
-,
-char const*, unsigned long)
-  0,62%  [kernel]              [k] page_fault
-  0,58%  ceph-osd              [.]
-ceph::buffer::list::iterator::copy(unsigned int, char*)
-  0,55%  [kernel]              [k] link_path_walk
-  0,53%  libstdc++.so.6.0.17   [.] std::string::append(char const*,
-unsigned long)
-  0,51%  ceph-osd              [.]
-ceph::buffer::list::iterator::advance(int)
-  0,46%  ceph-osd              [.] ceph::buffer::ptr::append(char
-const*, unsigned int)
-  0,45%  libpthread-2.13.so    [.] pthread_cond_wait@@GLIBC_2.3.2
-  0,43%  libsnappy.so.1.1.3    [.]
-snappy::RawUncompress(snappy::Source*, char*)
-  0,43%  libstdc++.so.6.0.17   [.] std::string::_M_mutate(unsigned long=
-,
-unsigned long, unsigned long)
-  0,43%  ceph-osd              [.]
-ceph::buffer::list::append(ceph::buffer::ptr const&, unsigned int,
-unsigned int)
-  0,42%  [kernel]              [k] copy_user_enhanced_fast_string
+eList*,=20
+unsigned long, int=20
+0,65% ceph-osd [.] ceph::buffer::ptr::release()=20
+0,64% libleveldb.so.1.12 [.] leveldb::crc32c::Extend(unsigned int,=20
+char const*, unsigned long)=20
+0,62% [kernel] [k] page_fault=20
+0,58% ceph-osd [.]=20
+ceph::buffer::list::iterator::copy(unsigned int, char*)=20
+0,55% [kernel] [k] link_path_walk=20
+0,53% libstdc++.so.6.0.17 [.] std::string::append(char const*,=20
+unsigned long)=20
+0,51% ceph-osd [.]=20
+ceph::buffer::list::iterator::advance(int)=20
+0,46% ceph-osd [.] ceph::buffer::ptr::append(char=20
+const*, unsigned int)=20
+0,45% libpthread-2.13.so [.] pthread_cond_wait@@GLIBC_2.3.2=20
+0,43% libsnappy.so.1.1.3 [.]=20
+snappy::RawUncompress(snappy::Source*, char*)=20
+0,43% libstdc++.so.6.0.17 [.] std::string::_M_mutate(unsigned long,=20
+unsigned long, unsigned long)=20
+0,43% ceph-osd [.]=20
+ceph::buffer::list::append(ceph::buffer::ptr const&, unsigned int,=20
+unsigned int)=20
+0,42% [kernel] [k] copy_user_enhanced_fast_string=20
 
-and this is giant having (33k iops):
+and this is giant having (33k iops):=20
 
-  5,65%  libc-2.13.so             [.] 0x1376a4
-  4,36%  libtcmalloc.so.4.1.0     [.] operator new(unsigned long)
-  2,74%  ceph-osd                 [.] 0x48011d
-  2,49%  libtcmalloc.so.4.1.0     [.] operator delete(void*)
-  1,42%  libleveldb.so.1.12       [.] 0x24673
-  1,27%  libleveldb.so.1.12       [.] leveldb::SkipList<char const*,
-leveldb::MemTable::KeyComparator>::FindGreaterOrEqual(char cons
-  1,19%  libstdc++.so.6.0.17      [.] 0xbfacb
-  0,99%  libc-2.13.so             [.] vfprintf
-  0,91%  libsnappy.so.1.1.3       [.]
-snappy::internal::CompressFragment(char const*, unsigned long, char*,
-unsigned short*, int)
-  0,88%  [kernel]                 [k] __schedule
-  0,88%  libpthread-2.13.so       [.] pthread_mutex_trylock
-  0,81%  ceph-osd                 [.] ceph::buffer::list::append(char
-const*, unsigned int)
-  0,76%  [kernel]                 [k] __d_lookup_rcu
-  0,76%  [kernel]                 [k] __switch_to
-  0,74%  ceph-osd                 [.] Mutex::Lock(bool)
-  0,74%  libtcmalloc.so.4.1.0     [.]
+5,65% libc-2.13.so [.] 0x1376a4=20
+4,36% libtcmalloc.so.4.1.0 [.] operator new(unsigned long)=20
+2,74% ceph-osd [.] 0x48011d=20
+2,49% libtcmalloc.so.4.1.0 [.] operator delete(void*)=20
+1,42% libleveldb.so.1.12 [.] 0x24673=20
+1,27% libleveldb.so.1.12 [.] leveldb::SkipList<char const*,=20
+leveldb::MemTable::KeyComparator>::FindGreaterOrEqual(char cons=20
+1,19% libstdc++.so.6.0.17 [.] 0xbfacb=20
+0,99% libc-2.13.so [.] vfprintf=20
+0,91% libsnappy.so.1.1.3 [.]=20
+snappy::internal::CompressFragment(char const*, unsigned long, char*,=20
+unsigned short*, int)=20
+0,88% [kernel] [k] __schedule=20
+0,88% libpthread-2.13.so [.] pthread_mutex_trylock=20
+0,81% ceph-osd [.] ceph::buffer::list::append(char=20
+const*, unsigned int)=20
+0,76% [kernel] [k] __d_lookup_rcu=20
+0,76% [kernel] [k] __switch_to=20
+0,74% ceph-osd [.] Mutex::Lock(bool)=20
+0,74% libtcmalloc.so.4.1.0 [.]=20
 tcmalloc::ThreadCache::ReleaseToCentralCache(tcmalloc::ThreadCache::Fre=
-eList*,
-unsigned long,
-  0,72%  [kernel]                 [k] intel_idle
-  0,72%  ceph-osd                 [.] ceph::buffer::ptr::release()
-  0,70%  [kernel]                 [k] _raw_spin_lock
-  0,66%  libleveldb.so.1.12       [.] leveldb::crc32c::Extend(unsigned
-int, char const*, unsigned long)
-  0,66%  ceph-osd                 [.]
-ceph::buffer::list::iterator::copy(unsigned int, char*)
-  0,64%  libstdc++.so.6.0.17      [.] std::basic_string<char,
-std::char_traits<char>, std::allocator<char> >::basic_string(std::stri
-  0,64%  [kernel]                 [k] page_fault
-  0,59%  [kernel]                 [k] link_path_walk
-  0,58%  libstdc++.so.6.0.17      [.] std::string::append(char const*,
-unsigned long)
-  0,57%  libpthread-2.13.so       [.] __pthread_mutex_unlock_usercnt
-  0,56%  ceph-osd                 [.]
-ceph::buffer::list::iterator::advance(int)
-  0,44%  ceph-osd                 [.] ceph::buffer::ptr::append(char
-const*, unsigned int)
+eList*,=20
+unsigned long,=20
+0,72% [kernel] [k] intel_idle=20
+0,72% ceph-osd [.] ceph::buffer::ptr::release()=20
+0,70% [kernel] [k] _raw_spin_lock=20
+0,66% libleveldb.so.1.12 [.] leveldb::crc32c::Extend(unsigned=20
+int, char const*, unsigned long)=20
+0,66% ceph-osd [.]=20
+ceph::buffer::list::iterator::copy(unsigned int, char*)=20
+0,64% libstdc++.so.6.0.17 [.] std::basic_string<char,=20
+std::char_traits<char>, std::allocator<char> >::basic_string(std::stri=20
+0,64% [kernel] [k] page_fault=20
+0,59% [kernel] [k] link_path_walk=20
+0,58% libstdc++.so.6.0.17 [.] std::string::append(char const*,=20
+unsigned long)=20
+0,57% libpthread-2.13.so [.] __pthread_mutex_unlock_usercnt=20
+0,56% ceph-osd [.]=20
+ceph::buffer::list::iterator::advance(int)=20
+0,44% ceph-osd [.] ceph::buffer::ptr::append(char=20
+const*, unsigned int)=20
 
-Stefan
+Stefan=20
 
 
-> =20
 >=20
 >=20
-> ----- Mail original -----
-> De: "Stefan Priebe" <s.priebe@profihost.ag>
-> =C3=80: "aderumier" <aderumier@odiso.com>
+>=20
+> ----- Mail original -----=20
+> De: "Stefan Priebe" <s.priebe@profihost.ag>=20
+> =C3=80: "aderumier" <aderumier@odiso.com>=20
 > Cc: "Mark Nelson" <mnelson@redhat.com>, "ceph-devel" <ceph-devel@vger=
-=2Ekernel.org>
-> Envoy=C3=A9: Lundi 16 F=C3=A9vrier 2015 23:08:37
-> Objet: Re: speed decrease since firefly,giant,hammer the 2nd try
+=2Ekernel.org>=20
+> Envoy=C3=A9: Lundi 16 F=C3=A9vrier 2015 23:08:37=20
+> Objet: Re: speed decrease since firefly,giant,hammer the 2nd try=20
 >=20
 > Am 16.02.2015 um 23:02 schrieb Alexandre DERUMIER <aderumier@odiso.co=
 m>:=20
@@ -155,7 +180,7 @@ m>:=20
 >>>> This results in fio-rbd showing avg 26000 iop/s instead of 30500 i=
 op/s=20
 >>>> while running dumpling...=20
->>
+>>=20
 >> Is it for write only ?=20
 >> or do you see same decrease for read too=20
 >=20
@@ -167,33 +192,33 @@ op/s=20
 > Stefan=20
 >=20
 >> ?=20
->>
->>
+>>=20
+>>=20
 >> ----- Mail original -----=20
 >> De: "Stefan Priebe" <s.priebe@profihost.ag>=20
 >> =C3=80: "Mark Nelson" <mnelson@redhat.com>, "ceph-devel" <ceph-devel=
 @vger.kernel.org>=20
 >> Envoy=C3=A9: Lundi 16 F=C3=A9vrier 2015 22:22:01=20
 >> Objet: Re: speed decrease since firefly,giant,hammer the 2nd try=20
->>
+>>=20
 >> I've now upgraded server side and client side to latest upstream/fir=
 efly.=20
->>
+>>=20
 >> This results in fio-rbd showing avg 26000 iop/s instead of 30500 iop=
 /s=20
 >> while running dumpling...=20
->>
+>>=20
 >> Greets,=20
 >> Stefan=20
 >>> Am 15.02.2015 um 19:40 schrieb Stefan Priebe:=20
 >>> Hi Mark,=20
->>>
+>>>=20
 >>> what's next?=20
->>>
+>>>=20
 >>> I've this test cluster only for 2 more days.=20
->>>
+>>>=20
 >>> Here some perf Details:=20
->>>
+>>>=20
 >>> dumpling:=20
 >>> 12,65% libc-2.13.so [.] 0x79000=20
 >>> 2,86% libc-2.13.so [.] malloc=20
@@ -217,7 +242,7 @@ efly.=20
 >>> 0,59% [kernel] [k] try_to_wake_up=20
 >>> 0,56% [kernel] [k] wake_futex=20
 >>> 0,50% librados.so.2.0.0 [.] ceph::buffer::ptr::release()=20
->>>
+>>>=20
 >>> firefly:=20
 >>> 12,56% libc-2.13.so [.] 0x7905d=20
 >>> 2,82% libc-2.13.so [.] malloc=20
@@ -241,40 +266,40 @@ efly.=20
 >>> 0,59% [kernel] [k] try_to_wake_up=20
 >>> 0,51% librados.so.2.0.0 [.] ceph::buffer::ptr::release()=20
 >>> 0,51% [kernel] [k] wake_futex=20
->>>
+>>>=20
 >>> Stefan=20
->>>
+>>>=20
 >>>> Am 11.02.2015 um 06:42 schrieb Stefan Priebe:=20
->>>>
+>>>>=20
 >>>>> Am 11.02.2015 um 05:45 schrieb Mark Nelson:=20
 >>>>>> On 02/10/2015 04:18 PM, Stefan Priebe wrote:=20
->>>>>>
+>>>>>>=20
 >>>>>>> Am 10.02.2015 um 22:38 schrieb Mark Nelson:=20
 >>>>>>>> On 02/10/2015 03:11 PM, Stefan Priebe wrote:=20
->>>>>>>>
+>>>>>>>>=20
 >>>>>>>> mhm i installed librbd1-dbg and librados2-dbg - but the output=
  still=20
 >>>>>>>> looks useless to me. Should i upload it somewhere?=20
->>>>>>>
+>>>>>>>=20
 >>>>>>> Meh, if it's all just symbols it's probably not that helpful.=20
->>>>>>>
+>>>>>>>=20
 >>>>>>> I've summarized your results here:=20
->>>>>>>
+>>>>>>>=20
 >>>>>>> 1 concurrent 4k write (libaio, direct=3D1, iodepth=3D1)=20
->>>>>>>
+>>>>>>>=20
 >>>>>>> IOPS Latency=20
 >>>>>>> wb on wb off wb on wb off=20
 >>>>>>> dumpling 10870 536 ~100us ~2ms=20
 >>>>>>> firefly 10350 525 ~100us ~2ms=20
->>>>>>>
+>>>>>>>=20
 >>>>>>> So in single op tests dumpling and firefly are far closer. Now =
 let's=20
 >>>>>>> see each of these cases with iodepth=3D32 (still 1 thread for n=
 ow).=20
->>>>>>
->>>>>>
+>>>>>>=20
+>>>>>>=20
 >>>>>> dumpling:=20
->>>>>>
+>>>>>>=20
 >>>>>> file1: (g=3D0): rw=3Drandwrite, bs=3D4K-4K/4K-4K, ioengine=3Dlib=
 aio, iodepth=3D32=20
 >>>>>> 2.0.8=20
@@ -324,19 +349,19 @@ th=3D[=20
 >>>>>>> =3D64=3D0.0%=20
 >>>>>> issued : total=3Dr=3D0/w=3D527487/d=3D0, short=3Dr=3D0/w=3D0/d=3D=
 0=20
->>>>>>
+>>>>>>=20
 >>>>>> Run status group 0 (all jobs):=20
 >>>>>> WRITE: io=3D2060.6MB, aggrb=3D70329KB/s, minb=3D70329KB/s, maxb=3D=
 70329KB/s,=20
 >>>>>> mint=3D30001msec, maxt=3D30001msec=20
->>>>>>
+>>>>>>=20
 >>>>>> Disk stats (read/write):=20
 >>>>>> sdb: ios=3D166/526079, merge=3D0/0, ticks=3D24/890120, in_queue=3D=
 890064,=20
 >>>>>> util=3D98.73%=20
->>>>>>
+>>>>>>=20
 >>>>>> firefly:=20
->>>>>>
+>>>>>>=20
 >>>>>> file1: (g=3D0): rw=3Drandwrite, bs=3D4K-4K/4K-4K, ioengine=3Dlib=
 aio, iodepth=3D32=20
 >>>>>> 2.0.8=20
@@ -384,24 +409,24 @@ th=3D[=20
 >>>>>>> =3D64=3D0.0%=20
 >>>>>> issued : total=3Dr=3D0/w=3D456918/d=3D0, short=3Dr=3D0/w=3D0/d=3D=
 0=20
->>>>>>
+>>>>>>=20
 >>>>>> Run status group 0 (all jobs):=20
 >>>>>> WRITE: io=3D1784.9MB, aggrb=3D60918KB/s, minb=3D60918KB/s, maxb=3D=
 60918KB/s,=20
 >>>>>> mint=3D30002msec, maxt=3D30002msec=20
->>>>>>
+>>>>>>=20
 >>>>>> Disk stats (read/write):=20
 >>>>>> sdb: ios=3D166/455574, merge=3D0/0, ticks=3D12/897748, in_queue=3D=
 897696,=20
 >>>>>> util=3D98.96%=20
->>>>>
+>>>>>=20
 >>>>> Ok, so it looks like as you increase concurrency the effect incre=
 ases=20
 >>>>> (ie contention?). Does the same thing happen without cache enable=
 d?=20
->>>>
+>>>>=20
 >>>> here again without rbd cache:=20
->>>>
+>>>>=20
 >>>> dumpling:=20
 >>>> file1: (g=3D0): rw=3Drandwrite, bs=3D4K-4K/4K-4K, ioengine=3Dlibai=
 o, iodepth=3D32=20
@@ -450,20 +475,20 @@ msec=20
 >>>>> =3D64=3D0.0%=20
 >>>> issued : total=3Dr=3D0/w=3D626979/d=3D0, short=3Dr=3D0/w=3D0/d=3D0=
 =20
->>>>
+>>>>=20
 >>>> Run status group 0 (all jobs):=20
 >>>> WRITE: io=3D2449.2MB, aggrb=3D83583KB/s, minb=3D83583KB/s, maxb=3D=
 83583KB/s,=20
 >>>> mint=3D30005msec, maxt=3D30005msec=20
->>>>
+>>>>=20
 >>>> Disk stats (read/write):=20
 >>>> sdb: ios=3D168/625292, merge=3D0/0, ticks=3D144/916096, in_queue=3D=
 916128,=20
 >>>> util=3D99.93%=20
->>>>
->>>>
+>>>>=20
+>>>>=20
 >>>> firefly:=20
->>>>
+>>>>=20
 >>>> fio --filename=3D/dev/sdb --direct=3D1 --rw=3Drandwrite --bs=3D4k =
 --numjobs=3D1=20
 >>>> --thread --iodepth=3D32 --ioengine=3Dlibaio --runtime=3D30 --group=
@@ -516,31 +541,32 @@ msec=20
 >>>>> =3D64=3D0.0%=20
 >>>> issued : total=3Dr=3D0/w=3D607445/d=3D0, short=3Dr=3D0/w=3D0/d=3D0=
 =20
->>>>
+>>>>=20
 >>>> Run status group 0 (all jobs):=20
 >>>> WRITE: io=3D2372.9MB, aggrb=3D80976KB/s, minb=3D80976KB/s, maxb=3D=
 80976KB/s,=20
 >>>> mint=3D30006msec, maxt=3D30006msec=20
->>>>
+>>>>=20
 >>>> Disk stats (read/write):=20
 >>>> sdb: ios=3D170/605440, merge=3D0/0, ticks=3D156/916492, in_queue=3D=
 916560,=20
 >>>> util=3D99.93%=20
->>>>
+>>>>=20
 >>>> Stefan=20
 >> --=20
 >> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
 " in=20
 >> the body of a message to majordomo@vger.kernel.org=20
 >> More majordomo info at http://vger.kernel.org/majordomo-info.html=20
->>
+>>=20
 >=20
-> --
+> --=20
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+ in=20
+> the body of a message to majordomo@vger.kernel.org=20
+> More majordomo info at http://vger.kernel.org/majordomo-info.html=20
 >=20
+
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
