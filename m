@@ -1,74 +1,87 @@
-From: David Zafman <dzafman@redhat.com>
-Subject: sage-2015-02-15_07:44:23-rados-hammer-distro-basic-multi failures
-Date: Mon, 16 Feb 2015 17:40:35 -0800
-Message-ID: <54E29C13.4000406@redhat.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: CDS process
+Date: Mon, 16 Feb 2015 17:42:10 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1502161739290.22050@cobra.newdream.net>
+References: <alpine.DEB.2.00.1502050540360.27042@cobra.newdream.net> <54D38E03.4030807@inktank.com> <CAAZbbf2dpsj1MuzRY1REvF1Ow=UhX9HZhtO7=Hro_E7uiWRVtw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-644123312-1424137330=:22050"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:50910 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751076AbbBQBkj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 16 Feb 2015 20:40:39 -0500
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t1H1ecvU012955
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
-	for <ceph-devel@vger.kernel.org>; Mon, 16 Feb 2015 20:40:38 -0500
-Received: from Davids-iMac.local (vpn-232-138.phx2.redhat.com [10.3.232.138])
-	by int-mx11.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t1H1eaKs018751
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES128-SHA bits=128 verify=NO)
-	for <ceph-devel@vger.kernel.org>; Mon, 16 Feb 2015 20:40:38 -0500
+Received: from cobra.newdream.net ([66.33.216.30]:40470 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751586AbbBQBmK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Feb 2015 20:42:10 -0500
+In-Reply-To: <CAAZbbf2dpsj1MuzRY1REvF1Ow=UhX9HZhtO7=Hro_E7uiWRVtw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Patrick McGarry <pmcgarry@redhat.com>
+Cc: Josh Durgin <josh.durgin@inktank.com>, Ceph Devel <ceph-devel@vger.kernel.org>
+
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
+
+--557981400-644123312-1424137330=:22050
+Content-Type: TEXT/PLAIN; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+On Mon, 16 Feb 2015, Patrick McGarry wrote:
+> I think I'm going to take this forward in baby steps. I'm going to coll=
+ect
+> blueprints via the normal pathway and then just manually capture the da=
+ta in
+> ether pads when I populate the schedule. For J I'll just direct people
+> directly to ether pads (assuming there is no major objection).=C2=A0
+
+Are you worried about the documented workflow and tooling in the wiki, or=
+=20
+just want to start with small changes to the process?  It's also the=20
+copying part and most-empty blueprints that I suspect we can avoid withou=
+t
+loss of value.  I'm curious if we go super-light on the tooling if we'll=20
+find that there are parts we miss or not.
+
+Any other thoughts?
+sage
 
 
-There were 24 failures before the run was killed.
-
-758289 757223
-=46AILED assert(weak_refs.empty()) "saw valgrind issues=E2=80=9D
-=46iled bug #10901
-
-757405
-failed to become clean before timeout expired
-osd.4 killed and never restarted, Thrasher may have died
-=46iled bug #10902
-
-758034:
-mira038 disk I/O error ceph-1 on /dev/sdf
-Sandon is aware
-
-757087 757162 758292 758300 758071
-already fixed bug #10784 Watch timeout
-
-757177 757385 757506
-No JSON object could be decoded bug #10630
-
-757185
-osd/ReplicatedPG.cc: 12991: FAILED assert(obc) bug #10820 (testing)
-
-757431 757365
-infrastructure - could not read lock status
-
-757601 757777 757952
-infrastructure - too many values to unpack (immediately after locking=20
-machines)
-
-757895
-=46AILED assert(0 =3D=3D "racing read got wrong version"): already fixe=
-d bug=20
-#10830
-
-758070 758244 757075 757251 757426
-infrastructure?    Immediate osd crash ERROR: osd init failed: (1)=20
-Operation not permitted
-
-David Zafman
-
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+> On Thu, Feb 5, 2015 at 10:36 AM, Josh Durgin <josh.durgin@inktank.com>
+> wrote:
+>       On 02/05/2015 02:50 PM, Sage Weil wrote:
+>             I wonder if we should simplify the cds workflow a
+>             bit to go straight to an
+>             etherpad outline of the blueprint instead of the
+>             wiki blueprint doc.=C2=A0 I
+>             find it a bit disorienting to be flipping between
+>             the two, and after the
+>             fact find it frustrating that there isn't a single
+>             reference to go back to
+>             for the outcome of the session (you have to look at
+>             both the pad and the
+>             bp).
+>=20
+>             Perhaps just using the pad from the get-go will
+>             streamline things a bit
+>             and make it a little more lightweight?=C2=A0 What does
+>             everyone think?
+>=20
+>=20
+> Sounds good to me. I've also wished there were a single location to
+> capture a session; searching through the wiki for etherpads that
+> aren't linked from the blueprint is a pain.
+>=20
+> Josh
+>=20
+>=20
+>=20
+>=20
+> --
+>=20
+> Best Regards,
+>=20
+> Patrick McGarry
+> Director Ceph Community || Red Hat
+> http://ceph.com =C2=A0|| =C2=A0http://community.redhat.com
+> @scuttlemonkey || @ceph
+>=20
+>=20
+--557981400-644123312-1424137330=:22050--
