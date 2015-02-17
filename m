@@ -1,111 +1,180 @@
-From: Vivek Varghese Cherian <vivekcherian-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: Introducing "Learning Ceph" : The First ever Book
-	on Ceph
-Date: Tue, 17 Feb 2015 18:56:59 +0530
-Message-ID: <CAOVWD3vKdq56KKhsHJf21oKqtXrQoCC+Bv15Vx5FfDGgC720GA@mail.gmail.com>
-References: <30381A24-8B8C-4FB0-9C3B-A9B5A24C53FB@csc.fi>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Having issues trying to get the OSD up on a MIPS64!!!
+Date: Tue, 17 Feb 2015 06:06:45 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1502170603410.22050@cobra.newdream.net>
+References: <loom.20141023T030922-990@post.gmane.org> <alpine.DEB.2.00.1410231749420.13498@cobra.newdream.net> <BC9BE980F12C4446A1CB0380E1C97DCD3390D99A@EXMAIL1.taec.toshiba.com> <alpine.DEB.2.00.1410241743490.13498@cobra.newdream.net>
+ <71E1B92E73606A4ABC3D0EC55B2BF09834221AED@EXMAIL1.taec.toshiba.com> <alpine.DEB.2.00.1410241810300.13498@cobra.newdream.net> <BC9BE980F12C4446A1CB0380E1C97DCD3390DAEC@EXMAIL1.taec.toshiba.com> <loom.20150217T085627-77@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============2051253921=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <30381A24-8B8C-4FB0-9C3B-A9B5A24C53FB-Gn+qtVAUx6s@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Karan Singh <karan.singh-Gn+qtVAUx6s@public.gmane.org>
-Cc: sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org, Ceph Community <ceph-community-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-Qp0mS5GaXlQ@public.gmane.org, don <donald-ioz8iAyT+8xYp81aNUMJFw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:43166 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756663AbbBQOGq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Feb 2015 09:06:46 -0500
+In-Reply-To: <loom.20150217T085627-77@post.gmane.org>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Bao Vu <vu_bao@sbcglobal.net>
+Cc: ceph-devel@vger.kernel.org
 
---===============2051253921==
-Content-Type: multipart/alternative; boundary=001a11408c6a5237ab050f48a8bf
+> When I run the link command manually, with additional "-ldl". I hit 
+> different errors:
+> 
+> /bin/sh ../libtool  --tag=CXX   --mode=link /usr/local/buildroot-2015.02-
+> rc1/output/host/usr/bin/mips64-linux-g++ -I/usr/local/buildroot-2015.02-
+> rc1/output/host/usr/mips64-buildroot-linux-gnu/sysroot/usr/include/nss 
+> -I/usr/local/buildroot-2015.02-rc1/output/host/usr/mips64-buildroot-linux-
+> gnu/sysroot/usr/include/nspr    -Wall -Wtype-limits -Wignored-qualifiers 
+> -Winit-self -Wpointer-arith -Werror=format-security -fno-strict-aliasing 
+> -fsigned-char -rdynamic -ftemplate-depth-1024 -Wnon-virtual-dtor -Wno-
+> invalid-offsetof    -Wstrict-null-sentinel -mxgot -mlong-calls 
+> -I/usr/local/buildroot-2015.02-rc1/output/host/usr/include 
+> -I/usr/local/mips64/include  -latomic_ops -L/usr/local/mips64/lib 
+> -L/usr/local/buildroot-2015.02-rc1/output/host/usr/lib 
+> -L/usr/local/buildroot-2015.02-rc1/output/host/usr/lib64 -o 
+> ceph_objectstore_tool tools/ceph_objectstore_tool.o libosd.la libosdc.la 
+> libos.la -laio   -lleveldb -lsnappy libperfglue.la  libos.la -laio   
+> -lleveldb -lsnappy libglobal.la libcommon.la -lpthread -lm -lnss3 
+> -lnssutil3 -lsmime3 -lssl3 -L/usr/local/buildroot-2015.02-
+> rc1/output/host/usr/mips64-buildroot-linux-gnu/sysroot/usr/lib -lplds4 
+> -lplc4 -lnspr4   -luuid -lm     -lboost_program_options  librados.la  
+> -lboost_system -ldl 
+> libtool: warning: library '/usr/local/buildroot-2015.02-
+> rc1/output/host/usr/mips64-buildroot-linux-
+> gnu/sysroot/usr/lib/../lib64/libsnappy.la' was moved.
+> libtool: warning: library '/usr/local/buildroot-2015.02-
+> rc1/output/host/usr/mips64-buildroot-linux-
+> gnu/sysroot/usr/lib/libsnappy.la' was moved.
+> libtool: warning: library '/usr/local/buildroot-2015.02-
+> rc1/output/host/usr/mips64-buildroot-linux-
+> gnu/sysroot/usr/lib/libatomic_ops.la' was moved.
+> libtool: warning: library '/usr/local/buildroot-2015.02-
+> rc1/output/host/usr/mips64-buildroot-linux-
+> gnu/sysroot/usr/lib/../lib64/libatomic_ops.la' was moved.
+> libtool: warning: library '/usr/local/buildroot-2015.02-
+> rc1/output/host/usr/lib/gcc/mips64-buildroot-linux-
+> gnu/4.9.2/../../../../mips64-buildroot-linux-gnu/lib/../lib64/libstdc++.la' 
+> was moved.
+> libtool: warning: library '/usr/local/mips64/lib/libuuid.la' was moved.
+> libtool: warning: library '/usr/local/buildroot-2015.02-
+> rc1/output/host/usr/mips64-buildroot-linux-
+> gnu/sysroot/usr/lib/../lib64/libsnappy.la' was moved.
+> libtool: warning: library '/usr/local/buildroot-2015.02-
+> rc1/output/host/usr/mips64-buildroot-linux-
+> gnu/sysroot/usr/lib/libsnappy.la' was moved.
+> libtool: warning: library '/usr/local/buildroot-2015.02-
+> rc1/output/host/usr/mips64-buildroot-linux-
+> gnu/sysroot/usr/lib/libatomic_ops.la' was moved.
+> libtool: warning: library '/usr/local/buildroot-2015.02-
+> rc1/output/host/usr/mips64-buildroot-linux-
+> gnu/sysroot/usr/lib/../lib64/libatomic_ops.la' was moved.
+> libtool: warning: library '/usr/local/buildroot-2015.02-
+> rc1/output/host/usr/lib/gcc/mips64-buildroot-linux-
+> gnu/4.9.2/../../../../mips64-buildroot-linux-gnu/lib/../lib64/libstdc++.la' 
+> was moved.
+> libtool: warning: library '/usr/local/mips64/lib/libuuid.la' was moved.
+> libtool: link: /usr/local/buildroot-2015.02-rc1/output/host/usr/bin/mips64-
+> linux-g++ -I/usr/local/buildroot-2015.02-rc1/output/host/usr/mips64-
+> buildroot-linux-gnu/sysroot/usr/include/nss -I/usr/local/buildroot-2015.02-
+> rc1/output/host/usr/mips64-buildroot-linux-gnu/sysroot/usr/include/nspr 
+> -Wall -Wtype-limits -Wignored-qualifiers -Winit-self -Wpointer-arith 
+> -Werror=format-security -fno-strict-aliasing -fsigned-char -rdynamic 
+> -ftemplate-depth-1024 -Wnon-virtual-dtor -Wno-invalid-offsetof -Wstrict-
+> null-sentinel -mxgot -mlong-calls -I/usr/local/buildroot-2015.02-
+> rc1/output/host/usr/include -I/usr/local/mips64/include -o 
+> ceph_objectstore_tool tools/ceph_objectstore_tool.o  
+> -L/usr/local/mips64/lib -L/usr/local/buildroot-2015.02-
+> rc1/output/host/usr/lib -L/usr/local/buildroot-2015.02-
+> rc1/output/host/usr/lib64 ./.libs/libosd.a /usr/local/buildroot-2015.02-
+> rc1/output/host/usr/mips64-buildroot-linux-
+> gnu/sysroot/usr/lib/../lib64/libsnappy.so ./.libs/libosdc.a ./.libs/libperfg
+> lue.a ./.libs/libos.a -laio -lleveldb /usr/local/buildroot-2015.02-
+> rc1/output/host/usr/mips64-buildroot-linux-
+> gnu/sysroot/usr/lib/libsnappy.so ./.libs/libglobal.a ./.libs/libcommon.a 
+> -L/usr/local/buildroot-2015.02-rc1/output/host/usr/mips64-buildroot-linux-
+> gnu/sysroot/usr/lib 
+> -lboost_program_options ./.libs/librados.a /usr/local/buildroot-2015.02-
+> rc1/output/host/usr/mips64-buildroot-linux-
+> gnu/sysroot/usr/lib/libatomic_ops.so -lboost_thread /usr/local/buildroot-
+> 2015.02-rc1/output/host/usr/mips64-buildroot-linux-
+> gnu/sysroot/usr/lib/../lib64/libatomic_ops.so /usr/local/buildroot-2015.02-
+> rc1/output/host/usr/lib/gcc/mips64-buildroot-linux-
+> gnu/4.9.2/../../../../mips64-buildroot-linux-gnu/lib/../lib64/libstdc++.so 
+> -lm -lpthread -lnss3 -lnssutil3 -lsmime3 -lssl3 -lplds4 -lplc4 
+> -lnspr4 /usr/local/mips64/lib/libuuid.a -lboost_system -ldl -Wl,-rpath 
+> -Wl,/usr/local/buildroot-2015.02-rc1/output/host/usr/mips64-buildroot-linux-
+> gnu/sysroot/usr/lib/../lib64 -Wl,-rpath -Wl,/usr/local/buildroot-2015.02-
+> rc1/output/host/usr/mips64-buildroot-linux-gnu/sysroot/usr/lib -Wl,-rpath 
+> -Wl,/usr/local/buildroot-2015.02-rc1/output/host/usr/lib/gcc/mips64-
+> buildroot-linux-gnu/4.9.2/../../../../mips64-buildroot-linux-
+> gnu/lib/../lib64 -Wl,-rpath -Wl,/usr/local/buildroot-2015.02-
+> rc1/output/host/usr/mips64-buildroot-linux-gnu/sysroot/usr/lib/../lib64 
+> -Wl,-rpath -Wl,/usr/local/buildroot-2015.02-rc1/output/host/usr/mips64-
+> buildroot-linux-gnu/sysroot/usr/lib -Wl,-rpath -Wl,/usr/local/buildroot-
+> 2015.02-rc1/output/host/usr/lib/gcc/mips64-buildroot-linux-
+> gnu/4.9.2/../../../../mips64-buildroot-linux-gnu/lib/../lib64
+> ./.libs/libosd.a(libosd_la-ReplicatedPG.o): In function `std::ostream& 
+> operator<< <boost::optional<unsigned long>, unsigned long>(std::ostream&, 
+> std::pair<boost::optional<unsigned long>, unsigned long> const&)':
+> ReplicatedPG.cc:(.text._ZlsIN5boost8optionalImEEmERSoS3_RKSt4pairIT_T0_E
+> [_ZlsIN5boost8optionalImEEmERSoS3_RKSt4pairIT_T0_E]+0x34): undefined 
+> reference to `std::basic_ostream<char, std::char_traits<char> >& 
+> boost::operator<< <char, std::char_traits<char>, unsigned long>
+> (std::basic_ostream<char, std::char_traits<char> >&, 
+> boost::optional<unsigned long> const&)'
+> ReplicatedPG.cc:(.text._ZlsIN5boost8optionalImEEmERSoS3_RKSt4pairIT_T0_E
+> [_ZlsIN5boost8optionalImEEmERSoS3_RKSt4pairIT_T0_E]+0x3c): undefined 
+> reference to `std::basic_ostream<char, std::char_traits<char> >& 
+> boost::operator<< <char, std::char_traits<char>, unsigned long>
+> (std::basic_ostream<char, std::char_traits<char> >&, 
+> boost::optional<unsigned long> const&)'
+> ReplicatedPG.cc:(.text._ZlsIN5boost8optionalImEEmERSoS3_RKSt4pairIT_T0_E
+> [_ZlsIN5boost8optionalImEEmERSoS3_RKSt4pairIT_T0_E]+0x44): undefined 
+> reference to `std::basic_ostream<char, std::char_traits<char> >& 
+> boost::operator<< <char, std::char_traits<char>, unsigned long>
+> (std::basic_ostream<char, std::char_traits<char> >&, 
+> boost::optional<unsigned long> const&)'
+> ./.libs/libosd.a(libosd_la-ECBackend.o): In function `operator<<
+> (std::ostream&, ECBackend::read_result_t const&)':
+> ECBackend.cc:(.text+0x10f0): undefined reference to 
+> `std::basic_ostream<char, std::char_traits<char> >& boost::operator<< 
+> <char, std::char_traits<char>, std::map<std::string, ceph::buffer::list, 
+> std::less<std::string>, std::allocator<std::pair<std::string const, 
+> ceph::buffer::list> > > >(std::basic_ostream<char, std::char_traits<char> 
+> >&, boost::optional<std::map<std::string, ceph::buffer::list, 
+> std::less<std::string>, std::allocator<std::pair<std::string const, 
+> ceph::buffer::list> > > > const&)'
+> ECBackend.cc:(.text+0x10f8): undefined reference to 
+> `std::basic_ostream<char, std::char_traits<char> >& boost::operator<< 
+> <char, std::char_traits<char>, std::map<std::string, ceph::buffer::list, 
+> std::less<std::string>, std::allocator<std::pair<std::string const, 
+> ceph::buffer::list> > > >(std::basic_ostream<char, std::char_traits<char> 
+> >&, boost::optional<std::map<std::string, ceph::buffer::list, 
+> std::less<std::string>, std::allocator<std::pair<std::string const, 
+> ceph::buffer::list> > > > const&)'
+> ECBackend.cc:(.text+0x1100): undefined reference to 
+> `std::basic_ostream<char, std::char_traits<char> >& boost::operator<< 
+> <char, std::char_traits<char>, std::map<std::string, ceph::buffer::list, 
+> std::less<std::string>, std::allocator<std::pair<std::string const, 
+> ceph::buffer::list> > > >(std::basic_ostream<char, std::char_traits<char> 
+> >&, boost::optional<std::map<std::string, ceph::buffer::list, 
+> std::less<std::string>, std::allocator<std::pair<std::string const, 
+> ceph::buffer::list> > > > const&)'
+> ./.libs/libosd.a(libos_la-FileStore.o): In function 
+> `FileStoreBackend::create(long, FileStore*)':
+> FileStore.cc:(.text+0x8f1c): undefined reference to 
+> `BtrfsFileStoreBackend::BtrfsFileStoreBackend(FileStore*)'
+> FileStore.cc:(.text+0x8f24): undefined reference to 
+> `BtrfsFileStoreBackend::BtrfsFileStoreBackend(FileStore*)'
+> FileStore.cc:(.text+0x8f2c): undefined reference to 
+> `BtrfsFileStoreBackend::BtrfsFileStoreBackend(FileStore*)'
+> collect2: error: ld returned 1 exit status
 
---001a11408c6a5237ab050f48a8bf
-Content-Type: text/plain; charset=ISO-8859-1
+It looks like maybe the BtrfsFileStoreBackend is not being linked in?  
+Perhaps there is some Makefile magic going on?  Which version/commit are 
+you on, and have you made any Makefile modifications?
 
-On Fri, Feb 6, 2015 at 4:23 AM, Karan Singh <karan.singh-Gn+qtVAUx6s@public.gmane.org> wrote:
+Unfortunately we don't have a MPIS64 box in the community lab to play 
+with.
 
-> Hello Community Members
->
-> I am happy to introduce the first book on Ceph with the title "*Learning
-> Ceph*".
->
-> Me and many folks from the publishing house together with technical
-> reviewers spent several months to get this book compiled and published.
->
-> Finally the book is up for sale on , i hope you would like it and surely
-> will learn a lot from it.
->
-> Amazon :
-> http://www.amazon.com/Learning-Ceph-Karan-Singh/dp/1783985623/ref=sr_1_1?s=books&ie=UTF8&qid=1423174441&sr=1-1&keywords=ceph
-> Packtpub : https://www.packtpub.com/application-development/learning-ceph
->
->
->
-Hi Karan,
-
-It would have been great if you could release the book under a creative
-commons, or any other free/open source license so that people like me can
-download it and read it.
-After all ceph is open source, I don't see why a book on ceph should not
-follow the same licensing pattern as ceph does.
-
-Regards,
--- 
-Vivek Varghese Cherian
-
---001a11408c6a5237ab050f48a8bf
-Content-Type: text/html; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr"><br><div class=3D"gmail_extra"><br><div class=3D"gmail_quo=
-te">On Fri, Feb 6, 2015 at 4:23 AM, Karan Singh <span dir=3D"ltr">&lt;<a hr=
-ef=3D"mailto:karan.singh-Gn+qtVAUx6s@public.gmane.org" target=3D"_blank">karan.singh-Gn+qtVAUx6s@public.gmane.org</a>&g=
-t;</span> wrote:<br><blockquote class=3D"gmail_quote" style=3D"margin:0 0 0=
- .8ex;border-left:1px #ccc solid;padding-left:1ex"><div style=3D"word-wrap:=
-break-word"><span style=3D"font-size:14px">Hello Community Members</span><d=
-iv style=3D"font-size:14px"><br></div><div style=3D"font-size:14px">I am ha=
-ppy to introduce the first book on Ceph with the title &ldquo;<b>Learning C=
-eph</b>&rdquo;.&nbsp;</div><div style=3D"font-size:14px"><br></div><div sty=
-le=3D"font-size:14px">Me and many folks from the publishing house together =
-with technical reviewers spent several months to get this book compiled and=
- published.</div><div style=3D"font-size:14px"><br></div><div style=3D"font=
--size:14px">Finally the book is up for sale on , i hope you would like it a=
-nd surely will learn a lot from it.</div><div style=3D"font-size:14px"><br>=
-</div><div style=3D"font-size:14px">Amazon : &nbsp;<a href=3D"http://www.am=
-azon.com/Learning-Ceph-Karan-Singh/dp/1783985623/ref=3Dsr_1_1?s=3Dbooks&amp=
-;ie=3DUTF8&amp;qid=3D1423174441&amp;sr=3D1-1&amp;keywords=3Dceph" target=3D=
-"_blank">http://www.amazon.com/Learning-Ceph-Karan-Singh/dp/1783985623/ref=
-=3Dsr_1_1?s=3Dbooks&amp;ie=3DUTF8&amp;qid=3D1423174441&amp;sr=3D1-1&amp;key=
-words=3Dceph</a></div><div style=3D"font-size:14px">Packtpub :&nbsp;<a href=
-=3D"https://www.packtpub.com/application-development/learning-ceph" target=
-=3D"_blank">https://www.packtpub.com/application-development/learning-ceph<=
-/a></div><div style=3D"font-size:14px"><br></div><br></div></blockquote><di=
-v><br></div><div>Hi Karan,<br></div><div><br></div><div>It would have been =
-great if you could release the book under a creative commons, or any other =
-free/open source license so that people like me can download it and read it=
-.<br></div><div>After all ceph is open source, I don&#39;t see why a book o=
-n ceph should not follow the same licensing pattern as ceph does. <br></div=
-></div><br clear=3D"all"></div><div class=3D"gmail_extra">Regards,<br></div=
-><div class=3D"gmail_extra">-- <br><div>Vivek Varghese Cherian <br><br></di=
-v>
-</div></div>
-
---001a11408c6a5237ab050f48a8bf--
-
---===============2051253921==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============2051253921==--
+sage
