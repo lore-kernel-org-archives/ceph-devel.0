@@ -1,117 +1,111 @@
-From: Valery Tschopp <valery.tschopp@switch.ch>
-Subject: ceph:rgw issue #10698
-Date: Tue, 17 Feb 2015 13:07:26 +0100
-Message-ID: <54E32EFE.4080209@switch.ch>
+From: Vivek Varghese Cherian <vivekcherian-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: Introducing "Learning Ceph" : The First ever Book
+	on Ceph
+Date: Tue, 17 Feb 2015 18:56:59 +0530
+Message-ID: <CAOVWD3vKdq56KKhsHJf21oKqtXrQoCC+Bv15Vx5FfDGgC720GA@mail.gmail.com>
+References: <30381A24-8B8C-4FB0-9C3B-A9B5A24C53FB@csc.fi>
 Mime-Version: 1.0
-Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg=sha1; boundary="------------ms040007050109060503010709"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from teruel.switch.ch ([130.59.138.63]:36521 "EHLO teruel.switch.ch"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753167AbbBQMVi (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 17 Feb 2015 07:21:38 -0500
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: yehuda@redhat.com, ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: multipart/mixed; boundary="===============2051253921=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <30381A24-8B8C-4FB0-9C3B-A9B5A24C53FB-Gn+qtVAUx6s@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Karan Singh <karan.singh-Gn+qtVAUx6s@public.gmane.org>
+Cc: sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org, Ceph Community <ceph-community-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-Qp0mS5GaXlQ@public.gmane.org, don <donald-ioz8iAyT+8xYp81aNUMJFw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-This is a cryptographically signed message in MIME format.
+--===============2051253921==
+Content-Type: multipart/alternative; boundary=001a11408c6a5237ab050f48a8bf
 
---------------ms040007050109060503010709
-Content-Type: text/plain; charset=utf-8; format=flowed
+--001a11408c6a5237ab050f48a8bf
+Content-Type: text/plain; charset=ISO-8859-1
+
+On Fri, Feb 6, 2015 at 4:23 AM, Karan Singh <karan.singh-Gn+qtVAUx6s@public.gmane.org> wrote:
+
+> Hello Community Members
+>
+> I am happy to introduce the first book on Ceph with the title "*Learning
+> Ceph*".
+>
+> Me and many folks from the publishing house together with technical
+> reviewers spent several months to get this book compiled and published.
+>
+> Finally the book is up for sale on , i hope you would like it and surely
+> will learn a lot from it.
+>
+> Amazon :
+> http://www.amazon.com/Learning-Ceph-Karan-Singh/dp/1783985623/ref=sr_1_1?s=books&ie=UTF8&qid=1423174441&sr=1-1&keywords=ceph
+> Packtpub : https://www.packtpub.com/application-development/learning-ceph
+>
+>
+>
+Hi Karan,
+
+It would have been great if you could release the book under a creative
+commons, or any other free/open source license so that people like me can
+download it and read it.
+After all ceph is open source, I don't see why a book on ceph should not
+follow the same licensing pattern as ceph does.
+
+Regards,
+-- 
+Vivek Varghese Cherian
+
+--001a11408c6a5237ab050f48a8bf
+Content-Type: text/html; charset=ISO-8859-1
 Content-Transfer-Encoding: quoted-printable
 
-Hello Yehuda,
+<div dir=3D"ltr"><br><div class=3D"gmail_extra"><br><div class=3D"gmail_quo=
+te">On Fri, Feb 6, 2015 at 4:23 AM, Karan Singh <span dir=3D"ltr">&lt;<a hr=
+ef=3D"mailto:karan.singh-Gn+qtVAUx6s@public.gmane.org" target=3D"_blank">karan.singh-Gn+qtVAUx6s@public.gmane.org</a>&g=
+t;</span> wrote:<br><blockquote class=3D"gmail_quote" style=3D"margin:0 0 0=
+ .8ex;border-left:1px #ccc solid;padding-left:1ex"><div style=3D"word-wrap:=
+break-word"><span style=3D"font-size:14px">Hello Community Members</span><d=
+iv style=3D"font-size:14px"><br></div><div style=3D"font-size:14px">I am ha=
+ppy to introduce the first book on Ceph with the title &ldquo;<b>Learning C=
+eph</b>&rdquo;.&nbsp;</div><div style=3D"font-size:14px"><br></div><div sty=
+le=3D"font-size:14px">Me and many folks from the publishing house together =
+with technical reviewers spent several months to get this book compiled and=
+ published.</div><div style=3D"font-size:14px"><br></div><div style=3D"font=
+-size:14px">Finally the book is up for sale on , i hope you would like it a=
+nd surely will learn a lot from it.</div><div style=3D"font-size:14px"><br>=
+</div><div style=3D"font-size:14px">Amazon : &nbsp;<a href=3D"http://www.am=
+azon.com/Learning-Ceph-Karan-Singh/dp/1783985623/ref=3Dsr_1_1?s=3Dbooks&amp=
+;ie=3DUTF8&amp;qid=3D1423174441&amp;sr=3D1-1&amp;keywords=3Dceph" target=3D=
+"_blank">http://www.amazon.com/Learning-Ceph-Karan-Singh/dp/1783985623/ref=
+=3Dsr_1_1?s=3Dbooks&amp;ie=3DUTF8&amp;qid=3D1423174441&amp;sr=3D1-1&amp;key=
+words=3Dceph</a></div><div style=3D"font-size:14px">Packtpub :&nbsp;<a href=
+=3D"https://www.packtpub.com/application-development/learning-ceph" target=
+=3D"_blank">https://www.packtpub.com/application-development/learning-ceph<=
+/a></div><div style=3D"font-size:14px"><br></div><br></div></blockquote><di=
+v><br></div><div>Hi Karan,<br></div><div><br></div><div>It would have been =
+great if you could release the book under a creative commons, or any other =
+free/open source license so that people like me can download it and read it=
+.<br></div><div>After all ceph is open source, I don&#39;t see why a book o=
+n ceph should not follow the same licensing pattern as ceph does. <br></div=
+></div><br clear=3D"all"></div><div class=3D"gmail_extra">Regards,<br></div=
+><div class=3D"gmail_extra">-- <br><div>Vivek Varghese Cherian <br><br></di=
+v>
+</div></div>
 
-The issue http://tracker.ceph.com/issues/10698 "rgw: not failing POST=20
-requests if keystone not configured" is marked as resolved, but I don't=20
-think it is backported in firefly.
+--001a11408c6a5237ab050f48a8bf--
 
-Issue http://tracker.ceph.com/issues/10062 should already be backported, =
+--===============2051253921==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
 
-if I'm not wrong...
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
-Cheers,
-Valery
---=20
-SWITCH
---------------------------
-Valery Tschopp, Software Engineer, Peta Solutions
-Werdstrasse 2, P.O. Box, 8021 Zurich, Switzerland
-email: valery.tschopp@switch.ch phone: +41 44 268 1544
-
-
-
---------------ms040007050109060503010709
-Content-Type: application/pkcs7-signature; name="smime.p7s"
-Content-Transfer-Encoding: base64
-Content-Disposition: attachment; filename="smime.p7s"
-Content-Description: S/MIME Cryptographic Signature
-
-MIAGCSqGSIb3DQEHAqCAMIACAQExCzAJBgUrDgMCGgUAMIAGCSqGSIb3DQEHAQAAoIILjTCC
-BZowggSCoAMCAQICFGooCvNGIygxyVtCwp0kxKgswzXjMA0GCSqGSIb3DQEBCwUAMH8xCzAJ
-BgNVBAYTAkJNMRkwFwYDVQQKExBRdW9WYWRpcyBMaW1pdGVkMSUwIwYDVQQLExxSb290IENl
-cnRpZmljYXRpb24gQXV0aG9yaXR5MS4wLAYDVQQDEyVRdW9WYWRpcyBSb290IENlcnRpZmlj
-YXRpb24gQXV0aG9yaXR5MB4XDTE0MDUzMDE4NTAxM1oXDTIxMDMxNzE4MzMzM1owYzELMAkG
-A1UEBhMCQ0gxLDAqBgNVBAoTI1F1b1ZhZGlzIFRydXN0bGluayBTd2l0emVybGFuZCBMdGQu
-MSYwJAYDVQQDEx1RdW9WYWRpcyBTd2lzcyBBZHZhbmNlZCBDQSBHMjCCAiIwDQYJKoZIhvcN
-AQEBBQADggIPADCCAgoCggIBALKB7kQHlk/9+eTjso+B0Sm6IF327uVx0tbF4Ys62u9hinnZ
-9rAp42CbehCiAriA9DEEwPZZrTzSc4+jfTtTOtBAB7fuUUImpeUulUGW5WqNB0+mT2CzK5xq
-U3Cy00EeaPXGheBR9NeFOtFaCQC7EaEYv2h2Pb71DFvBXLCOKSByJ2wPNWajbeZdzfEpaKTo
-EinfNsON9NPKK0hf40iUOJozHCrovlA+drOsTZ42xImsebDP8h7eCbxoNXLXj6ATWycTDoIr
-bH82dxFyX9Zx1oGNA3ffwMc3m78Ukjzg0y3nzLQFiIfdXfMXqq+e2bifRbbXqMddzLIMeZIg
-QMylsCm4A6H+OFGP4Fer0r9Webc+CFYkAdd6Zt5LgDHSxcxSusLyZBRb444Qs40TYv6h0bT7
-VzCecsPYIQmZcIhygIuxAvU6nvOYXxdc4TEtlS1Hveg2LWwizwhzeas6WfyyHPy1WQuUqZKy
-SveKVQpCfsznMpfsXpYqVsDdXLiHP4gzKMQwCDZwDE267owoSd6hSuUZSIQmfGO8WZax6DAV
-FVsFxl6lFX5xfR3dpWJWJ5R6S02NQaxetEF4ANKofuOPjYh2UDonQxy/oec+O5if6FTxfJHY
-SHJylV9bOwDcu4qZJ+pB+3LWo00TpOzFvtgIFsS36KOec0dAnVc1X+NHnCDfAgMBAAGjggEo
-MIIBJDASBgNVHRMBAf8ECDAGAQH/AgEAMBEGA1UdIAQKMAgwBgYEVR0gADBxBggrBgEFBQcB
-AQRlMGMwKgYIKwYBBQUHMAGGHmh0dHA6Ly9vY3NwLnF1b3ZhZGlzZ2xvYmFsLmNvbTA1Bggr
-BgEFBQcwAoYpaHR0cDovL3RydXN0LnF1b3ZhZGlzZ2xvYmFsLmNvbS9xdnJjYS5jcnQwDgYD
-VR0PAQH/BAQDAgEGMB8GA1UdIwQYMBaAFItLbe3TKbkGGew5Oanwl4Rqy+/fMDgGA1UdHwQx
-MC8wLaAroCmGJ2h0dHA6Ly9jcmwucXVvdmFkaXNnbG9iYWwuY29tL3F2cmNhLmNybDAdBgNV
-HQ4EFgQUoCBtbUldukqF03cgsnq4iw7t1Z0wDQYJKoZIhvcNAQELBQADggEBAK4xXrlQLdGS
-ttYCFU5Y3xUpLVqb7SxFMcLfv2i54ksC/dpaQ0v2QOVMLSb5w2IrX8hD+9XGk+2WioVupYvh
-W0iWpq7NIs5C5I0K5E9+0wOQd/kiBtwcR7IIyLnPtkzxDe2GUNJXq8L4XyWFDUI0HxgIcv30
-G0AbCFCzdmffcVCMKC6oBiwCRuY6RcxRIn1R+WsAuEjphc9SqfvgmllW7aU0npSBfOV31Clh
-XcTXfROPHWN1wIHKcMvuJtyjlVX0IEXFQZ2hGIEmv2WiZU/LObutknLmHH6qg2c0agNK0mSU
-sXt6iAophkbGDL0MkOZR692YGJJpRg2bMI6knCBeVyYwggXrMIID06ADAgECAhQRn7xkPrs0
-MUd4/0Px3JWxZJSUfzANBgkqhkiG9w0BAQsFADBjMQswCQYDVQQGEwJDSDEsMCoGA1UEChMj
-UXVvVmFkaXMgVHJ1c3RsaW5rIFN3aXR6ZXJsYW5kIEx0ZC4xJjAkBgNVBAMTHVF1b1ZhZGlz
-IFN3aXNzIEFkdmFuY2VkIENBIEcyMB4XDTE0MTIyMjEwMDIxM1oXDTE3MTIyMjEwMDIwOVow
-XDELMAkGA1UEBhMCQ0gxEDAOBgNVBAgTB1p1ZXJpY2gxEDAOBgNVBAcTB1p1ZXJpY2gxDzAN
-BgNVBAoTBlNXSVRDSDEYMBYGA1UEAwwPVmFsw6lyeSBUc2Nob3BwMIIBIjANBgkqhkiG9w0B
-AQEFAAOCAQ8AMIIBCgKCAQEAvD9VQFhasJg69t/6wX5sa5jYoo+Dce1nJ1mMF5DBSINc6PTh
-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
-4bL/lU2XLFB9DmwgZ33/vtXx0QAAAAAAAA==
---------------ms040007050109060503010709--
+--===============2051253921==--
