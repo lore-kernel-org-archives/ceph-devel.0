@@ -1,78 +1,122 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: full_ratios - please explain?
-Date: Wed, 18 Feb 2015 16:05:55 +0100
-Message-ID: <54E4AA53.2020900@42on.com>
-References: <CAGbvivJ89toPvbO8XOQ8ru_BDQJbJfZvbj2NhxFk1G5K=d-3Zw@mail.gmail.com>
+From: Andrei Mikhailovsky <andrei-930XJYlnu5nQT0dZR+AlfA@public.gmane.org>
+Subject: Re: Ceph Dumpling/Firefly/Hammer SSD/Memstore
+ performance	comparison
+Date: Wed, 18 Feb 2015 15:08:22 +0000 (GMT)
+Message-ID: <413428.1082.1424272098009.JavaMail.andrei@tuchka>
+References: <54E37C3D.5030702@redhat.com>
 Mime-Version: 1.0
+Content-Type: multipart/mixed; boundary="===============1476364152=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <54E37C3D.5030702-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Mark Nelson <mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
+
+--===============1476364152==
+Content-Type: multipart/alternative;
+	boundary="----=_Part_1081_31811550.1424272098008"
+
+------=_Part_1081_31811550.1424272098008
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from websrv.42on.com ([31.25.102.167]:47602 "EHLO websrv.42on.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752033AbbBRPF6 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 18 Feb 2015 10:05:58 -0500
-In-Reply-To: <CAGbvivJ89toPvbO8XOQ8ru_BDQJbJfZvbj2NhxFk1G5K=d-3Zw@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>, ceph-devel@vger.kernel.org
 
-On 18-02-15 15:39, Wyllys Ingersoll wrote:
-> Can someone explain the interaction and effects of all of these
-> "full_ratio" parameters?  I havent found any real good explanation of how
-> they affect the distribution of data once the cluster gets above the
-> "nearfull" and close to the "close" ratios.
-> 
+Mark, many thanks for your effort and ceph performance tests. This puts things in perspective. 
 
-When only ONE (1) OSD goes over the mon_osd_nearfull_ratio the cluster
-goes from HEALTH_OK into HEALTH_WARN state.
+Looking at the results, I was a bit concerned that the IOPs performance in niether releases come even marginally close to the capabilities of the underlying ssd device. Even the fastest PCI ssds have only managed to achieve about the 1/6th IOPs of the raw device. 
 
-> 
-> mon_osd_full_ratio
-> mon_osd_nearfull_ratio
-> 
-> osd_backfill_full_ratio
-> osd_failsafe_full_ratio
-> osd_failsafe_nearfull_ratio
-> 
-> We have a cluster with about 144 OSDs (518 TB) and trying to get it to a
-> 90% full rate for testing purposes.
-> 
-> We've found that when some of the OSDs get above the mon_osd_full_ratio
-> value (.95 in our system), then it stops accepting any new data, even
-> though there is plenty of space left on other OSDs that are not yet even up
-> to 90%.  Tweaking the osd_failsafe ratios enabled data to move again for a
-> bit, but eventually it becomes unbalanced and stops working again.
-> 
+I guess there is a great deal more optimisations to be done in the upcoming LTS releases to make the IOPs rate close to the raw device performance. 
 
-Yes, that is because with Ceph safety goes first. When only one OSD goes
-over the full ratio the whole cluster stops I/O.
+I have done some testing in the past and noticed that despite the server having a lot of unused resources (about 40-50% server idle and about 60-70% ssd idle) the ceph would not perform well when used with ssds. I was testing with Firefly + auth and my IOPs rate was around the 3K mark. Something is holding ceph back from performing well with ssds ((( 
 
-CRUSH does not take OSD utilization into account when placing data, so
-it's almost impossible to predict which I/O can continue.
+Andrei 
 
-Data safety and integrity is priority number 1. Full disks are a danger
-to those priorities, so I/O is stopped.
+----- Original Message -----
 
-> Is there a recommended combination of values to use that will allow the
-> cluster to continue accepting data and rebalancing correctly above 90%.
-> 
+> From: "Mark Nelson" <mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> To: "ceph-devel" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+> Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> Sent: Tuesday, 17 February, 2015 5:37:01 PM
+> Subject: [ceph-users] Ceph Dumpling/Firefly/Hammer SSD/Memstore
+> performance comparison
 
-No, not with those values. Monitor your filesystems that they stay below
-those values. If one OSD becomes to full you can weigh it down using
-CRUSH to have some data move away from it.
+> Hi All,
 
-> thanks,
->  Wyllys Ingersoll
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+> I wrote up a short document describing some tests I ran recently to
+> look
+> at how SSD backed OSD performance has changed across our LTS
+> releases.
+> This is just looking at RADOS performance and not RBD or RGW. It also
+> doesn't offer any real explanations regarding the results. It's just
+> a
+> first high level step toward understanding some of the behaviors
+> folks
+> on the mailing list have reported over the last couple of releases. I
+> hope you find it useful.
 
+> Mark
 
--- 
-Wido den Hollander
-42on B.V.
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
-Phone: +31 (0)20 700 9902
-Skype: contact42on
+------=_Part_1081_31811550.1424272098008
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+<html><head><style type=3D'text/css'>p { margin: 0; }</style></head><body><=
+div style=3D'font-family: arial,helvetica,sans-serif; font-size: 10pt; colo=
+r: #000000'><br><div><span name=3D"x"></span>Mark, many thanks for your eff=
+ort and ceph performance tests. This puts things in perspective.<br><br>Loo=
+king at the results, I was a bit concerned that the IOPs performance in nie=
+ther releases come even marginally close to the capabilities of the underly=
+ing ssd device. Even the fastest PCI ssds have only managed to achieve abou=
+t the 1/6th IOPs of the raw device. <br><br>I guess there is a great deal m=
+ore optimisations to be done in the upcoming LTS releases to make the IOPs =
+rate close to the raw device performance.<br><br>I have done some testing i=
+n the past and noticed that despite the server having a lot of unused resou=
+rces (about 40-50% server idle and about 60-70% ssd idle) the ceph would no=
+t perform well when used with ssds. I was testing with Firefly + auth and m=
+y IOPs rate was around the 3K mark. Something is holding ceph back from per=
+forming well with ssds (((<br><br>Andrei<br></div><br><hr id=3D"zwchr"><blo=
+ckquote style=3D"border-left: 2px solid rgb(16, 16, 255); margin-left: 5px;=
+ padding-left: 5px; color: rgb(0, 0, 0); font-weight: normal; font-style: n=
+ormal; text-decoration: none; font-family: Helvetica,Arial,sans-serif; font=
+-size: 12pt;"><b>From: </b>"Mark Nelson" &lt;mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org&gt;<br><b>T=
+o: </b>"ceph-devel" &lt;ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org&gt;<br><b>Cc: </b>ceph-u=
+sers-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org<br><b>Sent: </b>Tuesday, 17 February, 2015 5:37:01 PM<b=
+r><b>Subject: </b>[ceph-users] Ceph Dumpling/Firefly/Hammer SSD/Memstore pe=
+rformance&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;comparison<br><br>=
+Hi All,<br><br>I wrote up a short document describing some tests I ran rece=
+ntly to look <br>at how SSD backed OSD performance has changed across our L=
+TS releases. <br>This is just looking at RADOS performance and not RBD or R=
+GW. &nbsp;It also <br>doesn't offer any real explanations regarding the res=
+ults. &nbsp;It's just a <br>first high level step toward understanding some=
+ of the behaviors folks <br>on the mailing list have reported over the last=
+ couple of releases. &nbsp;I <br>hope you find it useful.<br><br>Mark<br><b=
+r>_______________________________________________<br>ceph-users mailing lis=
+t<br>ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org<br>http://lists.ceph.com/listinfo.cgi/ceph-u=
+sers-ceph.com<br></blockquote><br></div></body></html>
+------=_Part_1081_31811550.1424272098008--
+
+--===============1476364152==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============1476364152==--
