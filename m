@@ -1,14 +1,14 @@
 From: Ilya Dryomov <idryomov@gmail.com>
 Subject: [PATCH] libceph: kfree() in put_osd() shouldn't depend on authorizer
-Date: Wed, 18 Feb 2015 16:27:19 +0300
-Message-ID: <1424266039-40851-1-git-send-email-idryomov@gmail.com>
+Date: Wed, 18 Feb 2015 16:27:30 +0300
+Message-ID: <1424266050-40892-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f43.google.com ([209.85.215.43]:44058 "EHLO
-	mail-la0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750985AbbBRN13 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Feb 2015 08:27:29 -0500
-Received: by lams18 with SMTP id s18so1049945lam.11
-        for <ceph-devel@vger.kernel.org>; Wed, 18 Feb 2015 05:27:28 -0800 (PST)
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:38660 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751103AbbBRN1n (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Feb 2015 08:27:43 -0500
+Received: by lbiz11 with SMTP id z11so1057841lbi.5
+        for <ceph-devel@vger.kernel.org>; Wed, 18 Feb 2015 05:27:42 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
