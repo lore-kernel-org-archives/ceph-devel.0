@@ -1,88 +1,73 @@
-From: Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
-Subject: Re: Ceph Dumpling/Firefly/Hammer SSD/Memstore
- performance comparison
-Date: Wed, 18 Feb 2015 17:57:10 +0100 (CET)
-Message-ID: <969587995.1268132.1424278630509.JavaMail.zimbra@oxygem.tv>
-References: <54E37C3D.5030702@redhat.com>
-	<1298645585.1174612.1424248460594.JavaMail.zimbra@oxygem.tv>
-	<54E4A82C.4010303@redhat.com>
+From: <ghislain.chevalier@orange.com>
+Subject: [radosgw] unconsistency between bucket and bucket.instance metadata
+Date: Wed, 18 Feb 2015 16:58:36 +0000
+Message-ID: <18761_1424278717_54E4C4BD_18761_10576_1_B9C8EFBF13B1354DB5FA000660D66DD00C1FF5DC@PEXCVZYM14.corporate.adroot.infra.ftgroup>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <1106171324.1261740.1424278497950.JavaMail.zimbra-M8QNeUgB6UTyG1zEObXtfA@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Mark Nelson <mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from relais-ias244.francetelecom.com ([80.12.204.244]:59538 "EHLO
+	relais-inet.francetelecom.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751568AbbBRQ6k convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 18 Feb 2015 11:58:40 -0500
+Received: from omfeda08.si.francetelecom.fr (unknown [xx.xx.xx.201])
+	by omfeda14.si.francetelecom.fr (ESMTP service) with ESMTP id 81A1C2AC3D2
+	for <ceph-devel@vger.kernel.org>; Wed, 18 Feb 2015 17:58:37 +0100 (CET)
+Received: from Exchangemail-eme1.itn.ftgroup (unknown [10.114.1.186])
+	by omfeda08.si.francetelecom.fr (ESMTP service) with ESMTP id 68EEB38415F
+	for <ceph-devel@vger.kernel.org>; Wed, 18 Feb 2015 17:58:37 +0100 (CET)
+Content-Language: fr-FR
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Pj5JIGRvbid0IGhhdmUgcmVhbGx5IGdvb2QgaW5zaWdodCB5ZXQgaW50byBob3cgdHdlYWtpbmcg
-dGhlc2Ugd291bGQgCj4+YWZmZWN0IHNpbmdsZS1vc2QgcGVyZm9ybWFuY2UuIEkga25vdyB0aGUg
-UENJZSBTU0RzIGRvIGhhdmUgbXVsdGlwbGUgCj4+Y29udHJvbGxlcnMgb24tYm9hcmQgc28gcGVy
-aGFwcyBpbmNyZWFzaW5nIHRoZSBudW1iZXIgb2Ygc2hhcmRzIHdvdWxkIAo+PmltcHJvdmUgdGhp
-bmdzLCBidXQgSSBzdXNwZWN0IHRoYXQgZ29pbmcgdG9vIGhpZ2ggY291bGQgbWF5YmUgc3RhcnQg
-Cj4+aHVydGluZyBwZXJmb3JtYW5jZSBhcyB3ZWxsLiBIYXZlIHlvdSBkb25lIGFueSB0ZXN0aW5n
-IGhlcmU/IEl0IGNvdWxkIAo+PmJlIGFuIGludGVyZXN0aW5nIGZvbGxvdy11cCBwYXBlci4gCgpJ
-IHRoaW5rIGl0IHNob3VsZCBiZSB0dW5uZWQgcmVnYXJkaW5nIG51bWJlciBvZiBvc2RzIGFuZCBu
-dW1iZXIgb2YgY29yZXMgeW91IGhhdmUuCkkgaGF2ZSBkb25lIHRlc3QgaW4gcGFzdCB3aXRoIHNv
-bW1hdGggdmFsdWVzCgpvc2Rfb3BfbnVtX3RocmVhZHNfcGVyX3NoYXJkID0gMQpvc2Rfb3BfbnVt
-X3NoYXJkcyA9IDI1CmZpbGVzdG9yZV9mZF9jYWNoZV9zaXplID0gNjQKZmlsZXN0b3JlX2ZkX2Nh
-Y2hlX3NoYXJkcyA9IDMyCgpCdXQgZG9uJ3QgaGF2ZSB0YWtlIHRpbWUgdG8gdHJ5IGRpZmZlcmVu
-dHMgdmFsdWVzLgpCdXQgSSB3YXMgdG8gYmUgYWJsZSB0byByZWFjaCAxMjAwMDBpb3BzIDRrIHJl
-YWQgd2l0aCAzb3NkIGlmIEkgcmVtZW1iZXIuIChCdXQgSSB3YXMgbGltaXRlZCBieSBjbGllbnQg
-Y3B1KQoKSSdtIGdvaW5nIHRvIGRvIGJpZyBiZW5jaG1hcmsgbmV4dCBtb250aCAoMyBub2RlcyAo
-MjBjb3Jlcykgd2l0aCA2c3NkIGVhY2gpLApTbyBJJ2xsIHRyeSB0byB0ZXN0IGRpZmZlcmVudCBz
-aGFyZGluZyB2YWx1ZXMsIHdpdGggZGlmZmVyZW50IG51bWJlciBvZiBvc2QuCgoKLS0tLS0gTWFp
-bCBvcmlnaW5hbCAtLS0tLQpEZTogIk1hcmsgTmVsc29uIiA8bW5lbHNvbkByZWRoYXQuY29tPgrD
-gDogImFkZXJ1bWllciIgPGFkZXJ1bWllckBvZGlzby5jb20+CkNjOiAiY2VwaC1kZXZlbCIgPGNl
-cGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPiwgImNlcGgtdXNlcnMiIDxjZXBoLXVzZXJzQGxpc3Rz
-LmNlcGguY29tPgpFbnZvecOpOiBNZXJjcmVkaSAxOCBGw6l2cmllciAyMDE1IDE1OjU2OjQ0Ck9i
-amV0OiBSZTogW2NlcGgtdXNlcnNdIENlcGggRHVtcGxpbmcvRmlyZWZseS9IYW1tZXIgU1NEL01l
-bXN0b3JlIHBlcmZvcm1hbmNlIGNvbXBhcmlzb24KCkhpIEFsZXgsIAoKVGhhbmtzISBJIGRpZG4n
-dCB0d2VhayB0aGUgc2hhcmRpbmcgc2V0dGluZ3MgYXQgYWxsLCBzbyB0aGV5IGFyZSBqdXN0IAph
-dCB0aGUgZGVmYXVsdCB2YWx1ZXM6IAoKT1BUSU9OKG9zZF9vcF9udW1fdGhyZWFkc19wZXJfc2hh
-cmQsIE9QVF9JTlQsIDIpIApPUFRJT04ob3NkX29wX251bV9zaGFyZHMsIE9QVF9JTlQsIDUpIAoK
-SSBkb24ndCBoYXZlIHJlYWxseSBnb29kIGluc2lnaHQgeWV0IGludG8gaG93IHR3ZWFraW5nIHRo
-ZXNlIHdvdWxkIAphZmZlY3Qgc2luZ2xlLW9zZCBwZXJmb3JtYW5jZS4gSSBrbm93IHRoZSBQQ0ll
-IFNTRHMgZG8gaGF2ZSBtdWx0aXBsZSAKY29udHJvbGxlcnMgb24tYm9hcmQgc28gcGVyaGFwcyBp
-bmNyZWFzaW5nIHRoZSBudW1iZXIgb2Ygc2hhcmRzIHdvdWxkIAppbXByb3ZlIHRoaW5ncywgYnV0
-IEkgc3VzcGVjdCB0aGF0IGdvaW5nIHRvbyBoaWdoIGNvdWxkIG1heWJlIHN0YXJ0IApodXJ0aW5n
-IHBlcmZvcm1hbmNlIGFzIHdlbGwuIEhhdmUgeW91IGRvbmUgYW55IHRlc3RpbmcgaGVyZT8gSXQg
-Y291bGQgCmJlIGFuIGludGVyZXN0aW5nIGZvbGxvdy11cCBwYXBlci4gCgpNYXJrIAoKT24gMDIv
-MTgvMjAxNSAwMjozNCBBTSwgQWxleGFuZHJlIERFUlVNSUVSIHdyb3RlOiAKPiBOaWNlIFdvcmsg
-TWFyayAhIAo+IAo+IEkgZG9uJ3Qgc2VlIGFueSB0dW5pbmcgYWJvdXQgc2hhcmRpbmcgaW4gdGhl
-IGNvbmZpZyBmaWxlIHNhbXBsZSAKPiAKPiAob3NkX29wX251bV90aHJlYWRzX3Blcl9zaGFyZCxv
-c2Rfb3BfbnVtX3NoYXJkcywuLi4pIAo+IAo+IGFzIHlvdSBvbmx5IHVzZSAxIHNzZCBmb3IgdGhl
-IGJlbmNoLCBJIHRoaW5rIGl0IHNob3VsZCBpbXByb3ZlIHJlc3VsdHMgZm9yIGhhbW1lciA/IAo+
-IAo+IAo+IAo+IC0tLS0tIE1haWwgb3JpZ2luYWwgLS0tLS0gCj4gRGU6ICJNYXJrIE5lbHNvbiIg
-PG1uZWxzb25AcmVkaGF0LmNvbT4gCj4gw4A6ICJjZXBoLWRldmVsIiA8Y2VwaC1kZXZlbEB2Z2Vy
-Lmtlcm5lbC5vcmc+IAo+IENjOiAiY2VwaC11c2VycyIgPGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5j
-b20+IAo+IEVudm95w6k6IE1hcmRpIDE3IEbDqXZyaWVyIDIwMTUgMTg6Mzc6MDEgCj4gT2JqZXQ6
-IFtjZXBoLXVzZXJzXSBDZXBoIER1bXBsaW5nL0ZpcmVmbHkvSGFtbWVyIFNTRC9NZW1zdG9yZSBw
-ZXJmb3JtYW5jZSBjb21wYXJpc29uIAo+IAo+IEhpIEFsbCwgCj4gCj4gSSB3cm90ZSB1cCBhIHNo
-b3J0IGRvY3VtZW50IGRlc2NyaWJpbmcgc29tZSB0ZXN0cyBJIHJhbiByZWNlbnRseSB0byBsb29r
-IAo+IGF0IGhvdyBTU0QgYmFja2VkIE9TRCBwZXJmb3JtYW5jZSBoYXMgY2hhbmdlZCBhY3Jvc3Mg
-b3VyIExUUyByZWxlYXNlcy4gCj4gVGhpcyBpcyBqdXN0IGxvb2tpbmcgYXQgUkFET1MgcGVyZm9y
-bWFuY2UgYW5kIG5vdCBSQkQgb3IgUkdXLiBJdCBhbHNvIAo+IGRvZXNuJ3Qgb2ZmZXIgYW55IHJl
-YWwgZXhwbGFuYXRpb25zIHJlZ2FyZGluZyB0aGUgcmVzdWx0cy4gSXQncyBqdXN0IGEgCj4gZmly
-c3QgaGlnaCBsZXZlbCBzdGVwIHRvd2FyZCB1bmRlcnN0YW5kaW5nIHNvbWUgb2YgdGhlIGJlaGF2
-aW9ycyBmb2xrcyAKPiBvbiB0aGUgbWFpbGluZyBsaXN0IGhhdmUgcmVwb3J0ZWQgb3ZlciB0aGUg
-bGFzdCBjb3VwbGUgb2YgcmVsZWFzZXMuIEkgCj4gaG9wZSB5b3UgZmluZCBpdCB1c2VmdWwuIAo+
-IAo+IE1hcmsgCj4gCj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX18gCj4gY2VwaC11c2VycyBtYWlsaW5nIGxpc3QgCj4gY2VwaC11c2Vyc0BsaXN0cy5jZXBo
-LmNvbSAKPiBodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2Vw
-aC5jb20gCj4gLS0gCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxp
-bmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIAo+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0
-byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIAo+IE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgaHR0
-cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sIAo+IAoKX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxp
-c3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGlu
-Zm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
+Hi all,
+
+Context : Firefly 0.80.8, Ubuntu 14.04 LTS, Lab cluster
+
+
+Yesterday, I successfully deleted a s3 bucket "Bucket001ghis" after removing the contents that were in.
+
+ Today, as I was browsing the radosgw system metadata, I discovered an difference between the bucket metadata and the bucket.instance metadata as followed.
+radosgw-admin --name client.radosgw.fr-rennes-radosgw1 metadata list bucket
+[
+    "bucket001ghis",
+    "ghis",
+    "bucket001johndoe",
+    "bucket001transfert",
+    "myb1",
+    "mybucket"]
+
+
+radosgw-admin --name client.radosgw.fr-rennes-radosgw1 metadata list bucket.instance
+[
+    "bucket001ghis:fr-rennes-radosgw1.247011.1",
+    "Bucket001ghis:fr-rennes-radosgw1.244654.2",
+    "myb1:fr-rennes-radosgw1.246846.1",
+    "mybucket:fr-rennes-radosgw1.244748.1",
+    "bucket001transfert:fr-rennes-radosgw1.244654.1",
+    "bucket001johndoe:fr-rennes-radosgw1.244742.1",
+    "ghis:fr-rennes-radosgw1.246056.1"]
+
+Bucket001ghis:fr-rennes-radosgw1.244654.2 is still referenced in the bucket.instance metadata.
+
+What can be the defect?
+
+Best regards
+
+
+
+_________________________________________________________________________________________________________________________
+
+Ce message et ses pieces jointes peuvent contenir des informations confidentielles ou privilegiees et ne doivent donc
+pas etre diffuses, exploites ou copies sans autorisation. Si vous avez recu ce message par erreur, veuillez le signaler
+a l'expediteur et le detruire ainsi que les pieces jointes. Les messages electroniques etant susceptibles d'alteration,
+Orange decline toute responsabilite si ce message a ete altere, deforme ou falsifie. Merci.
+
+This message and its attachments may contain confidential or privileged information that may be protected by law;
+they should not be distributed, used or copied without authorisation.
+If you have received this email in error, please notify the sender and delete this message and its attachments.
+As emails may be altered, Orange is not liable for messages that have been modified, changed or falsified.
+Thank you.
+
