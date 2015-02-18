@@ -1,76 +1,77 @@
-From: Samuel Just <sam.just@inktank.com>
+From: Loic Dachary <loic@dachary.org>
 Subject: Re: dumpling integration branch for v0.67.12 ready for QE
-Date: Wed, 18 Feb 2015 09:54:13 -0800
-Message-ID: <CA+4uBUamg81RdzTtuaZUPcVoM+6_=6NC5EMCjk_31bnjjurOHw@mail.gmail.com>
-References: <54DA3A5B.5050509@dachary.org>
-	<1520027977.15929683.1423693473209.JavaMail.zimbra@redhat.com>
-	<1586599856.17187011.1423778777774.JavaMail.zimbra@redhat.com>
-	<54DD268D.7050904@dachary.org>
-	<2134758899.22244800.1424281099141.JavaMail.zimbra@redhat.com>
-Reply-To: sjust@redhat.com
+Date: Wed, 18 Feb 2015 18:56:14 +0100
+Message-ID: <54E4D23E.8050702@dachary.org>
+References: <54DA3A5B.5050509@dachary.org> <1520027977.15929683.1423693473209.JavaMail.zimbra@redhat.com> <1586599856.17187011.1423778777774.JavaMail.zimbra@redhat.com> <54DD268D.7050904@dachary.org> <2134758899.22244800.1424281099141.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="HcmMMvP4auR7nW3SQacL9Ala41H6t0fmt"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f180.google.com ([209.85.217.180]:34830 "EHLO
-	mail-lb0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753203AbbBRRyP convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Feb 2015 12:54:15 -0500
-Received: by lbjb6 with SMTP id b6so2728672lbj.2
-        for <ceph-devel@vger.kernel.org>; Wed, 18 Feb 2015 09:54:13 -0800 (PST)
+Received: from mail2.dachary.org ([91.121.57.175]:45902 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1753067AbbBRR4U (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Feb 2015 12:56:20 -0500
 In-Reply-To: <2134758899.22244800.1424281099141.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Yuri Weinstein <yweinste@redhat.com>
-Cc: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, Tamil Muthamizhan <tmuthami@redhat.com>, Zack Cerza <zack@redhat.com>, Sandon Van Ness <svanness@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Tamil Muthamizhan <tmuthami@redhat.com>
 
-Yup, 10694 is a known bug in dumpling which we probably don't want to
-fix.  The rados tests look ok to me I think.
--Sam
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--HcmMMvP4auR7nW3SQacL9Ala41H6t0fmt
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-On Wed, Feb 18, 2015 at 9:38 AM, Yuri Weinstein <yweinste@redhat.com> w=
-rote:
+
+
+On 18/02/2015 18:38, Yuri Weinstein wrote:
 > Hi all
->
+>=20
 > I updated all issues in http://tracker.ceph.com/issues/10560
->
-> Based on what is listed there, we have
+>=20
+> Based on what is listed there, we have=20
 > http://tracker.ceph.com/issues/10801 - Yehuda pls comment
 > http://tracker.ceph.com/issues/10694 - Sam pls re-confirm
->
+>=20
 > rbd - Josh, I understood that we are good to go, pls re-confirm.
->
-> I can re-run some suites if you'd like and we can make a call on this=
- release.
->
+>=20
+> I can re-run some suites if you'd like and we can make a call on this r=
+elease.
+>=20
 > Loic - back to you, let me know what you think.
->
+
+As long as you're satisfied with the test results, I have no further comm=
+ent :-)
+
+Cheers
+
 > Thx
 > YuriW
->
+>=20
 > ----- Original Message -----
 > From: "Loic Dachary" <loic@dachary.org>
 > To: "Yuri Weinstein" <yweinste@redhat.com>
-> Cc: "Ceph Development" <ceph-devel@vger.kernel.org>, "Sage Weil" <sag=
-e@redhat.com>, "Tamil Muthamizhan" <tmuthami@redhat.com>, "Zack Cerza" =
-<zack@redhat.com>, "Sandon Van Ness" <svanness@redhat.com>
+> Cc: "Ceph Development" <ceph-devel@vger.kernel.org>, "Sage Weil" <sage@=
+redhat.com>, "Tamil Muthamizhan" <tmuthami@redhat.com>, "Zack Cerza" <zac=
+k@redhat.com>, "Sandon Van Ness" <svanness@redhat.com>
 > Sent: Thursday, February 12, 2015 2:17:49 PM
 > Subject: Re: dumpling integration branch for v0.67.12 ready for QE
->
->
->
+>=20
+>=20
+>=20
 > On 12/02/2015 23:06, Yuri Weinstein wrote:
->> I linked all issues related to this release testing to the ticket ht=
-tp://tracker.ceph.com/issues/10560
+>> I linked all issues related to this release testing to the ticket http=
+://tracker.ceph.com/issues/10560
 >>
->> After the team leads make a call of those, including environment iss=
-ues, I suggest re-running suites the failed again.
+>> After the team leads make a call of those, including environment issue=
+s, I suggest re-running suites the failed again.
 >>
->> Loic, I'd re-run them in the Octo, since we already started there, i=
-f you agree ?
->
+>> Loic, I'd re-run them in the Octo, since we already started there, if =
+you agree ?
+>=20
 > Sure :-)
->
+>=20
 >>
 >> Thx
 >> YuriW
@@ -78,16 +79,16 @@ f you agree ?
 >> ----- Original Message -----
 >> From: "Yuri Weinstein" <yweinste@redhat.com>
 >> To: "Loic Dachary" <loic@dachary.org>
->> Cc: "Ceph Development" <ceph-devel@vger.kernel.org>, "Sage Weil" <sa=
-ge@redhat.com>, "Tamil Muthamizhan" <tmuthami@redhat.com>
+>> Cc: "Ceph Development" <ceph-devel@vger.kernel.org>, "Sage Weil" <sage=
+@redhat.com>, "Tamil Muthamizhan" <tmuthami@redhat.com>
 >> Sent: Wednesday, February 11, 2015 2:24:33 PM
 >> Subject: Re: dumpling integration branch for v0.67.12 ready for QE
 >>
->> I replied to individual suites runs, but just wanted to summarize QE=
- validation status.
+>> I replied to individual suites runs, but just wanted to summarize QE v=
+alidation status.
 >>
->> The following suites were executed in the Octo lab (we will use Sepi=
-a in the future if nobody objects).
+>> The following suites were executed in the Octo lab (we will use Sepia =
+in the future if nobody objects).
 >>
 >> upgrade:dumpling
 >> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
@@ -111,7 +112,7 @@ a in the future if nobody objects).
 >> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
 >> ['45054']
 >> http://tracker.ceph.com/issues/10841
->> "Issued certificate has expired"
+>> "Issued certificate has expired"=20
 >> *** Sandon pls comment.
 >>
 >> ['45168', '45169']
@@ -121,9 +122,9 @@ a in the future if nobody objects).
 >>
 >> ['45215']
 >> Missing packages - no ticket FYI
->> "Failed to fetch http://apt-mirror.front.sepia.ceph.com/archive.ubun=
-tu.com/ubuntu/dists/trusty-updates/universe/binary-i386/Packages  Hash =
-Sum mismatch"
+>> "Failed to fetch http://apt-mirror.front.sepia.ceph.com/archive.ubuntu=
+=2Ecom/ubuntu/dists/trusty-updates/universe/binary-i386/Packages  Hash Su=
+m mismatch"
 >>
 >> *** Zack, Sandon ?
 >>
@@ -141,10 +142,10 @@ Sum mismatch"
 >>
 >> ['45349', '45350', '45351', '45355', '45356', '45357', '45363']
 >> http://tracker.ceph.com/issues/10802
->> "error: image still has watchers"
+>> "error: image still has watchers"=20
 >> (duplicate of 10680)
 >>
->> *** Zack, Sandon, Josh - all environment noise, pls comment.
+>> *** Zack, Sandon, Josh - all environment noise, pls comment.=20
 >>
 >> rgw
 >> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
@@ -154,14 +155,14 @@ Sum mismatch"
 >>
 >> *** Yehuda - same as issues in upgrades?
 >>
->> I am standing by for you analysis/replies and recommendations for ne=
-xt steps.
+>> I am standing by for you analysis/replies and recommendations for next=
+ steps.
 >>
->> Loic - let me know is you want to follow specific items in our backp=
-ort testing process that I missed here.
->> PS:  I would think that you could've wanted to assign the release ti=
-cket to QE (me) for validation and at this point I could've re-assigned=
- it back to devel (you), a?
+>> Loic - let me know is you want to follow specific items in our backpor=
+t testing process that I missed here.
+>> PS:  I would think that you could've wanted to assign the release tick=
+et to QE (me) for validation and at this point I could've re-assigned it =
+back to devel (you), a?
 >>
 >> Thx
 >> YuriW
@@ -175,38 +176,44 @@ cket to QE (me) for validation and at this point I could've re-assigned=
 >>
 >> Hi Yuri,
 >>
->> The dumpling integration branch for v0.67.12 as found at https://git=
-hub.com/ceph/ceph/commits/dumpling-backports has been approved by Yehud=
-a, Josh and Sam and is ready for QE.
+>> The dumpling integration branch for v0.67.12 as found at https://githu=
+b.com/ceph/ceph/commits/dumpling-backports has been approved by Yehuda, J=
+osh and Sam and is ready for QE.=20
 >>
->> For the record, the head is https://github.com/ceph/ceph/commit/3944=
-c77c404c4a05886fe8276d5d0dd7e4f20410
+>> For the record, the head is https://github.com/ceph/ceph/commit/3944c7=
+7c404c4a05886fe8276d5d0dd7e4f20410
 >>
->> I think it would be best for the QE tests to use the dumpling-backpo=
-rts. The alternative would be to merge dumpling-backports into dumpling=
-=2E However, since testing may take a long time and require more patche=
-s, it probably is better to not do that iterative process on the dumpli=
-ng branch itself. As it is now, there already are a number of commits i=
-n the dumpling branch that should really be in the dumpling-backports: =
-they do not belong to v0.67.11 and are going to be released in v0.67.12=
-=2E In the future though, the dumpling branch will only receive commits=
- that have been carefully tested and all the integration work will be o=
-n the dumpling-backports branch exclusively. So that third parties do n=
-ot have to worry that the dumpling branch contains commits that have no=
-t been tested yet.
+>> I think it would be best for the QE tests to use the dumpling-backport=
+s. The alternative would be to merge dumpling-backports into dumpling. Ho=
+wever, since testing may take a long time and require more patches, it pr=
+obably is better to not do that iterative process on the dumpling branch =
+itself. As it is now, there already are a number of commits in the dumpli=
+ng branch that should really be in the dumpling-backports: they do not be=
+long to v0.67.11 and are going to be released in v0.67.12. In the future =
+though, the dumpling branch will only receive commits that have been care=
+fully tested and all the integration work will be on the dumpling-backpor=
+ts branch exclusively. So that third parties do not have to worry that th=
+e dumpling branch contains commits that have not been tested yet.
 >>
 >> Cheers
 >>
->
-> --
-> Lo=C3=AFc Dachary, Artisan Logiciel Libre
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--HcmMMvP4auR7nW3SQacL9Ala41H6t0fmt
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlTk0j4ACgkQ8dLMyEl6F23U1QCgh0BUQofSrGsTRISeqSI39j8g
+nfEAn3aoZm59SjVBwvQKnK6TKaWhqEo/
+=M3zO
+-----END PGP SIGNATURE-----
+
+--HcmMMvP4auR7nW3SQacL9Ala41H6t0fmt--
