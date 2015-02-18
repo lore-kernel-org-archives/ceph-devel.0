@@ -1,57 +1,116 @@
-From: Alex Elder <elder@linaro.org>
-Subject: Re: [PATCH] libceph: kfree() in put_osd() shouldn't depend on authorizer
-Date: Wed, 18 Feb 2015 09:47:51 -0600
-Message-ID: <54E4B427.9080002@linaro.org>
-References: <1424266039-40851-1-git-send-email-idryomov@gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: full_ratios - please explain?
+Date: Wed, 18 Feb 2015 07:52:31 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1502180726420.22050@cobra.newdream.net>
+References: <CAGbvivJ89toPvbO8XOQ8ru_BDQJbJfZvbj2NhxFk1G5K=d-3Zw@mail.gmail.com> <54E4AA53.2020900@42on.com> <CAGbvivKMg+BnbG2JcAAFMjDwO4u_WGb1q26MbvCa-08TUtPT-Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f170.google.com ([209.85.223.170]:42785 "EHLO
-	mail-ie0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751795AbbBRPrx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Feb 2015 10:47:53 -0500
-Received: by iecrp18 with SMTP id rp18so2152853iec.9
-        for <ceph-devel@vger.kernel.org>; Wed, 18 Feb 2015 07:47:52 -0800 (PST)
-In-Reply-To: <1424266039-40851-1-git-send-email-idryomov@gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:50684 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751568AbbBRPwc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Feb 2015 10:52:32 -0500
+In-Reply-To: <CAGbvivKMg+BnbG2JcAAFMjDwO4u_WGb1q26MbvCa-08TUtPT-Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
-Cc: Alex Elder <elder@linaro.org>
+To: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>
+Cc: Wido den Hollander <wido@42on.com>, ceph-devel@vger.kernel.org
 
-On 02/18/2015 07:27 AM, Ilya Dryomov wrote:
-> a255651d4cad ("ceph: ensure auth ops are defined before use") made
-> kfree() in put_osd() conditional on the authorizer.  A mechanical
-> mistake most likely - fix it.
-
-You are generous in suggesting it's a mechanical mistake.
-But it is a mistake nevertheless.  The fix looks good.
-
-Reviewed-by: Alex Elder <elder@linaro.org>
-
-> Cc: Alex Elder <elder@linaro.org>
-> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
-> ---
->  net/ceph/osd_client.c | 5 +++--
->  1 file changed, 3 insertions(+), 2 deletions(-)
+On Wed, 18 Feb 2015, Wyllys Ingersoll wrote:
+> Thanks!  More below inline...
 > 
-> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> index f693a2f8ac86..41a4abc7e98e 100644
-> --- a/net/ceph/osd_client.c
-> +++ b/net/ceph/osd_client.c
-> @@ -1035,10 +1035,11 @@ static void put_osd(struct ceph_osd *osd)
->  {
->  	dout("put_osd %p %d -> %d\n", osd, atomic_read(&osd->o_ref),
->  	     atomic_read(&osd->o_ref) - 1);
-> -	if (atomic_dec_and_test(&osd->o_ref) && osd->o_auth.authorizer) {
-> +	if (atomic_dec_and_test(&osd->o_ref)) {
->  		struct ceph_auth_client *ac = osd->o_osdc->client->monc.auth;
->  
-> -		ceph_auth_destroy_authorizer(ac, osd->o_auth.authorizer);
-> +		if (osd->o_auth.authorizer)
-> +			ceph_auth_destroy_authorizer(ac, osd->o_auth.authorizer);
->  		kfree(osd);
->  	}
->  }
+> On Wed, Feb 18, 2015 at 10:05 AM, Wido den Hollander <wido@42on.com> wrote:
+> > On 18-02-15 15:39, Wyllys Ingersoll wrote:
+> >> Can someone explain the interaction and effects of all of these
+> >> "full_ratio" parameters?  I havent found any real good explanation of how
+> >> they affect the distribution of data once the cluster gets above the
+> >> "nearfull" and close to the "close" ratios.
+> >>
+> >
+> > When only ONE (1) OSD goes over the mon_osd_nearfull_ratio the cluster
+> > goes from HEALTH_OK into HEALTH_WARN state.
+> >
+> >>
+> >> mon_osd_full_ratio
+> >> mon_osd_nearfull_ratio
+> >>
+> >> osd_backfill_full_ratio
+> >> osd_failsafe_full_ratio
+> >> osd_failsafe_nearfull_ratio
+> >>
+> >> We have a cluster with about 144 OSDs (518 TB) and trying to get it to a
+> >> 90% full rate for testing purposes.
+> >>
+> >> We've found that when some of the OSDs get above the mon_osd_full_ratio
+> >> value (.95 in our system), then it stops accepting any new data, even
+> >> though there is plenty of space left on other OSDs that are not yet even up
+> >> to 90%.  Tweaking the osd_failsafe ratios enabled data to move again for a
+> >> bit, but eventually it becomes unbalanced and stops working again.
+> >>
+> >
+> > Yes, that is because with Ceph safety goes first. When only one OSD goes
+> > over the full ratio the whole cluster stops I/O.
 > 
+> 
+> 
+> Which full_ratio?  The problem is that there are at least 3
+> "full_ratios" - mon_osd_full_ratio, osd_failsafe_full_ratio, and
+> osd_backfill_full_ratio - how do they interact? What is the
+> consequence of having one be higher than the others?
 
+mon_osd_full_ratio (.95) ... when any OSD reaches this threshold the 
+monitor marks the cluster as 'full' and client writes are not accepted.
+
+mon_osd_nearfull_ratio (.85) ... when any OSD reaches this threshold the 
+cluster goes HEALTH_WARN and calls out near-full OSDs.
+
+osd_backfill_full_ratio (.85) ... when an OSD locally reaches this 
+threshold it will refuse to migrate a PG to itself.  This prevents 
+rebalancing or repair from overfilling an OSD.  It should be lower than 
+the
+
+The osd_failsafe_full_ratio (.97) is a final sanity check that makes the 
+OSD throw out writes if it is really close to full.
+
+It's bad news if an OSD fills up completely so we do what we can to 
+prevent it.
+
+> Its seems extreme that 1 full osd out of potentially hundreds would
+> cause all IO into the cluster to stop when there are literally 10s or
+> 100s of terrabytes of space left on other, less-full OSDs.
+
+Yes, but the nature of hash-based distribution is that you don't know 
+where a write will go, so you don't want to let the cluster fill up.  85% 
+is pretty conservative; you could increase it if you're comfortable.  Just 
+be aware that file systems over 80% start to get very slow so it is a 
+bad idea to run them this full anyway.
+
+> The confusion for me (and probably for others) is the proliferation of
+> "full_ratio" parameters and a lack of clarity on how they all affect
+> the cluster health and ability to balance when things start to fill
+> up.
+> 
+> 
+> >
+> > CRUSH does not take OSD utilization into account when placing data, so
+> > it's almost impossible to predict which I/O can continue.
+> >
+> > Data safety and integrity is priority number 1. Full disks are a danger
+> > to those priorities, so I/O is stopped.
+> 
+> 
+> Understood, but 1 full disk out of hundreds should not cause the
+> entire system to stop accepting new data or even balancing out the
+> data that it already has especially when there is room to grow yet on
+> other OSDs.
+
+The "proper" response to this currently is that if an OSD reaches the 
+lower nearfull threshold the admin gets a warning and triggers some 
+rebalancing.  That's why it's 10% lower then the actual full cutoff--there 
+is plenty of time to adjust weights and/or expand the cluster.
+
+It's not an ideal approach, perhaps, but it's simple and works well 
+enough.  And it's not clear that there's is anything better we can do that 
+isn't also very complicated...
+
+sage
