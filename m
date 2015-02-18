@@ -1,90 +1,64 @@
-From: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>
-Subject: Re: full_ratios - please explain?
-Date: Wed, 18 Feb 2015 10:21:41 -0500
-Message-ID: <CAGbvivKMg+BnbG2JcAAFMjDwO4u_WGb1q26MbvCa-08TUtPT-Q@mail.gmail.com>
-References: <CAGbvivJ89toPvbO8XOQ8ru_BDQJbJfZvbj2NhxFk1G5K=d-3Zw@mail.gmail.com>
-	<54E4AA53.2020900@42on.com>
+From: Mark Nelson <mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: Ceph Dumpling/Firefly/Hammer SSD/Memstore
+ performance comparison
+Date: Wed, 18 Feb 2015 08:56:44 -0600
+Message-ID: <54E4A82C.4010303@redhat.com>
+References: <54E37C3D.5030702@redhat.com>
+	<1298645585.1174612.1424248460594.JavaMail.zimbra@oxygem.tv>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f169.google.com ([209.85.214.169]:58934 "EHLO
-	mail-ob0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752000AbbBRPVm (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Feb 2015 10:21:42 -0500
-Received: by mail-ob0-f169.google.com with SMTP id wp4so3110237obc.0
-        for <ceph-devel@vger.kernel.org>; Wed, 18 Feb 2015 07:21:41 -0800 (PST)
-In-Reply-To: <54E4AA53.2020900@42on.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>
-Cc: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <1298645585.1174612.1424248460594.JavaMail.zimbra-M8QNeUgB6UTyG1zEObXtfA@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Thanks!  More below inline...
-
-On Wed, Feb 18, 2015 at 10:05 AM, Wido den Hollander <wido@42on.com> wrote:
-> On 18-02-15 15:39, Wyllys Ingersoll wrote:
->> Can someone explain the interaction and effects of all of these
->> "full_ratio" parameters?  I havent found any real good explanation of how
->> they affect the distribution of data once the cluster gets above the
->> "nearfull" and close to the "close" ratios.
->>
->
-> When only ONE (1) OSD goes over the mon_osd_nearfull_ratio the cluster
-> goes from HEALTH_OK into HEALTH_WARN state.
->
->>
->> mon_osd_full_ratio
->> mon_osd_nearfull_ratio
->>
->> osd_backfill_full_ratio
->> osd_failsafe_full_ratio
->> osd_failsafe_nearfull_ratio
->>
->> We have a cluster with about 144 OSDs (518 TB) and trying to get it to a
->> 90% full rate for testing purposes.
->>
->> We've found that when some of the OSDs get above the mon_osd_full_ratio
->> value (.95 in our system), then it stops accepting any new data, even
->> though there is plenty of space left on other OSDs that are not yet even up
->> to 90%.  Tweaking the osd_failsafe ratios enabled data to move again for a
->> bit, but eventually it becomes unbalanced and stops working again.
->>
->
-> Yes, that is because with Ceph safety goes first. When only one OSD goes
-> over the full ratio the whole cluster stops I/O.
-
-
-
-Which full_ratio?  The problem is that there are at least 3
-"full_ratios" - mon_osd_full_ratio, osd_failsafe_full_ratio, and
-osd_backfill_full_ratio - how do they interact? What is the
-consequence of having one be higher than the others?
-
-
-Its seems extreme that 1 full osd out of potentially hundreds would
-cause all IO into the cluster to stop when there are literally 10s or
-100s of terrabytes of space left on other, less-full OSDs.
-
-The confusion for me (and probably for others) is the proliferation of
-"full_ratio" parameters and a lack of clarity on how they all affect
-the cluster health and ability to balance when things start to fill
-up.
-
-
->
-> CRUSH does not take OSD utilization into account when placing data, so
-> it's almost impossible to predict which I/O can continue.
->
-> Data safety and integrity is priority number 1. Full disks are a danger
-> to those priorities, so I/O is stopped.
-
-
-Understood, but 1 full disk out of hundreds should not cause the
-entire system to stop accepting new data or even balancing out the
-data that it already has especially when there is room to grow yet on
-other OSDs.
-
-If 1 disk reaches the "full_ratio", but 99 (or 999) others are still
-well below that value, why doesn't it get balanced out ( assuming the
-crush map considers all OSDs equal and all the pools have similar
-pg_num values) ?
+SGkgQWxleCwKClRoYW5rcyEgIEkgZGlkbid0IHR3ZWFrIHRoZSBzaGFyZGluZyBzZXR0aW5ncyBh
+dCBhbGwsIHNvIHRoZXkgYXJlIGp1c3QgCmF0IHRoZSBkZWZhdWx0IHZhbHVlczoKCk9QVElPTihv
+c2Rfb3BfbnVtX3RocmVhZHNfcGVyX3NoYXJkLCBPUFRfSU5ULCAyKQpPUFRJT04ob3NkX29wX251
+bV9zaGFyZHMsIE9QVF9JTlQsIDUpCgpJIGRvbid0IGhhdmUgcmVhbGx5IGdvb2QgaW5zaWdodCB5
+ZXQgaW50byBob3cgdHdlYWtpbmcgdGhlc2Ugd291bGQgCmFmZmVjdCBzaW5nbGUtb3NkIHBlcmZv
+cm1hbmNlLiAgSSBrbm93IHRoZSBQQ0llIFNTRHMgZG8gaGF2ZSBtdWx0aXBsZSAKY29udHJvbGxl
+cnMgb24tYm9hcmQgc28gcGVyaGFwcyBpbmNyZWFzaW5nIHRoZSBudW1iZXIgb2Ygc2hhcmRzIHdv
+dWxkIAppbXByb3ZlIHRoaW5ncywgYnV0IEkgc3VzcGVjdCB0aGF0IGdvaW5nIHRvbyBoaWdoIGNv
+dWxkIG1heWJlIHN0YXJ0IApodXJ0aW5nIHBlcmZvcm1hbmNlIGFzIHdlbGwuICBIYXZlIHlvdSBk
+b25lIGFueSB0ZXN0aW5nIGhlcmU/ICBJdCBjb3VsZCAKYmUgYW4gaW50ZXJlc3RpbmcgZm9sbG93
+LXVwIHBhcGVyLgoKTWFyawoKT24gMDIvMTgvMjAxNSAwMjozNCBBTSwgQWxleGFuZHJlIERFUlVN
+SUVSIHdyb3RlOgo+IE5pY2UgV29yayBNYXJrICEKPgo+IEkgZG9uJ3Qgc2VlIGFueSB0dW5pbmcg
+YWJvdXQgc2hhcmRpbmcgaW4gdGhlIGNvbmZpZyBmaWxlIHNhbXBsZQo+Cj4gKG9zZF9vcF9udW1f
+dGhyZWFkc19wZXJfc2hhcmQsb3NkX29wX251bV9zaGFyZHMsLi4uKQo+Cj4gYXMgeW91IG9ubHkg
+dXNlIDEgc3NkIGZvciB0aGUgYmVuY2gsIEkgdGhpbmsgaXQgc2hvdWxkIGltcHJvdmUgcmVzdWx0
+cyBmb3IgaGFtbWVyID8KPgo+Cj4KPiAtLS0tLSBNYWlsIG9yaWdpbmFsIC0tLS0tCj4gRGU6ICJN
+YXJrIE5lbHNvbiIgPG1uZWxzb25AcmVkaGF0LmNvbT4KPiDDgDogImNlcGgtZGV2ZWwiIDxjZXBo
+LWRldmVsQHZnZXIua2VybmVsLm9yZz4KPiBDYzogImNlcGgtdXNlcnMiIDxjZXBoLXVzZXJzQGxp
+c3RzLmNlcGguY29tPgo+IEVudm95w6k6IE1hcmRpIDE3IEbDqXZyaWVyIDIwMTUgMTg6Mzc6MDEK
+PiBPYmpldDogW2NlcGgtdXNlcnNdIENlcGggRHVtcGxpbmcvRmlyZWZseS9IYW1tZXIgU1NEL01l
+bXN0b3JlIHBlcmZvcm1hbmNlCWNvbXBhcmlzb24KPgo+IEhpIEFsbCwKPgo+IEkgd3JvdGUgdXAg
+YSBzaG9ydCBkb2N1bWVudCBkZXNjcmliaW5nIHNvbWUgdGVzdHMgSSByYW4gcmVjZW50bHkgdG8g
+bG9vawo+IGF0IGhvdyBTU0QgYmFja2VkIE9TRCBwZXJmb3JtYW5jZSBoYXMgY2hhbmdlZCBhY3Jv
+c3Mgb3VyIExUUyByZWxlYXNlcy4KPiBUaGlzIGlzIGp1c3QgbG9va2luZyBhdCBSQURPUyBwZXJm
+b3JtYW5jZSBhbmQgbm90IFJCRCBvciBSR1cuIEl0IGFsc28KPiBkb2Vzbid0IG9mZmVyIGFueSBy
+ZWFsIGV4cGxhbmF0aW9ucyByZWdhcmRpbmcgdGhlIHJlc3VsdHMuIEl0J3MganVzdCBhCj4gZmly
+c3QgaGlnaCBsZXZlbCBzdGVwIHRvd2FyZCB1bmRlcnN0YW5kaW5nIHNvbWUgb2YgdGhlIGJlaGF2
+aW9ycyBmb2xrcwo+IG9uIHRoZSBtYWlsaW5nIGxpc3QgaGF2ZSByZXBvcnRlZCBvdmVyIHRoZSBs
+YXN0IGNvdXBsZSBvZiByZWxlYXNlcy4gSQo+IGhvcGUgeW91IGZpbmQgaXQgdXNlZnVsLgo+Cj4g
+TWFyawo+Cj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18K
+PiBjZXBoLXVzZXJzIG1haWxpbmcgbGlzdAo+IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KPiBo
+dHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20KPiAt
+LQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNj
+cmliZSBjZXBoLWRldmVsIiBpbgo+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9A
+dmdlci5rZXJuZWwub3JnCj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2Vy
+bmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sCj4KX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0Bs
+aXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNl
+cnMtY2VwaC5jb20K
