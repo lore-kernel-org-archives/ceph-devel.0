@@ -1,144 +1,97 @@
-From: Alex Elder <elder@linaro.org>
-Subject: Re: [PATCH] libceph: fix double __remove_osd() problem
-Date: Wed, 18 Feb 2015 09:43:43 -0600
-Message-ID: <54E4B32F.1020407@linaro.org>
-References: <1424265940-40771-1-git-send-email-idryomov@gmail.com>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: Re: [ceph-users] Ceph Dumpling/Firefly/Hammer SSD/Memstore performance
+ comparison
+Date: Wed, 18 Feb 2015 09:44:57 -0600
+Message-ID: <54E4B379.3000205@redhat.com>
+References: <54E37C3D.5030702@redhat.com> <413428.1082.1424272098009.JavaMail.andrei@tuchka>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f180.google.com ([209.85.223.180]:38951 "EHLO
-	mail-ie0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751646AbbBRPnp (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Feb 2015 10:43:45 -0500
-Received: by iecvy18 with SMTP id vy18so2122536iec.6
-        for <ceph-devel@vger.kernel.org>; Wed, 18 Feb 2015 07:43:44 -0800 (PST)
-In-Reply-To: <1424265940-40771-1-git-send-email-idryomov@gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:52118 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751571AbbBRPpX (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 18 Feb 2015 10:45:23 -0500
+In-Reply-To: <413428.1082.1424272098009.JavaMail.andrei@tuchka>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
-Cc: Sage Weil <sweil@redhat.com>
+To: Andrei Mikhailovsky <andrei@arhont.com>
+Cc: ceph-users@lists.ceph.com, ceph-devel <ceph-devel@vger.kernel.org>
 
-On 02/18/2015 07:25 AM, Ilya Dryomov wrote:
-> It turns out it's possible to get __remove_osd() called twice on the
-> same OSD.  That doesn't sit well with rb_erase() - depending on the
-> shape of the tree we can get a NULL dereference, a soft lockup or
-> a random crash at some point in the future as we end up touching freed
-> memory.  One scenario that I was able to reproduce is as follows:
-> 
->             <osd3 is idle, on the osd lru list>
-> <con reset - osd3>
-> con_fault_finish()
->   osd_reset()
->                               <osdmap - osd3 down>
->                               ceph_osdc_handle_map()
->                                 <takes map_sem>
->                                 kick_requests()
->                                   <takes request_mutex>
->                                   reset_changed_osds()
->                                     __reset_osd()
->                                       __remove_osd()
->                                   <releases request_mutex>
->                                 <releases map_sem>
->     <takes map_sem>
->     <takes request_mutex>
->     __kick_osd_requests()
->       __reset_osd()
->         __remove_osd() <-- !!!
-> 
-> A case can be made that osd refcounting is imperfect and reworking it
-> would be a proper resolution, but for now Sage and I decided to fix
-> this by adding a safe guard around __remove_osd().
-> 
-> Fixes: http://tracker.ceph.com/issues/8087
+Hi Andrei,
 
-So now you rely on the RB node in the osd getting cleared
-as a signal that it has been removed already.  Yes, that
-sounds like refcounting isn't working as desired...
+On 02/18/2015 09:08 AM, Andrei Mikhailovsky wrote:
+>
+> Mark, many thanks for your effort and ceph performance tests. This puts
+> things in perspective.
+>
+> Looking at the results, I was a bit concerned that the IOPs performance
+> in niether releases come even marginally close to the capabilities of
+> the underlying ssd device. Even the fastest PCI ssds have only managed
+> to achieve about the 1/6th IOPs of the raw device.
 
-The mutex around all calls to (now) remove_osd() avoids
-races.  I like the RB_CLEAR_NODE() call anyway.
-OK, enough chit chat.  This looks OK to me.
+Perspective is definitely good!  Any time you are dealing with latency 
+sensitive workloads, there are a lot of bottlenecks that can limit your 
+performance.  There's a world of difference between streaming data to a 
+raw SSD as fast as possible and writing data out to a distributed 
+storage system that is calculating data placement, invoking the TCP 
+stack, doing CRC checks, journaling writes, invoking the VM layer to 
+cache data in case it's hot (which in this case it's not).
 
-Reviewed-by: Alex Elder <elder@linaro.org>
+>
+> I guess there is a great deal more optimisations to be done in the
+> upcoming LTS releases to make the IOPs rate close to the raw device
+> performance.
 
-> Cc: Sage Weil <sweil@redhat.com>
-> Cc: stable@vger.kernel.org # 3.9+: 7c6e6fc53e73: libceph: assert both regular and lingering lists in __remove_osd()
-> Cc: stable@vger.kernel.org # 3.9+: cc9f1f518cec: libceph: change from BUG to WARN for __remove_osd() asserts
-> Cc: stable@vger.kernel.org # 3.9+
-> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
-> ---
->  net/ceph/osd_client.c | 26 ++++++++++++++++++--------
->  1 file changed, 18 insertions(+), 8 deletions(-)
-> 
-> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> index 53299c7b0ca4..f693a2f8ac86 100644
-> --- a/net/ceph/osd_client.c
-> +++ b/net/ceph/osd_client.c
-> @@ -1048,14 +1048,24 @@ static void put_osd(struct ceph_osd *osd)
->   */
->  static void __remove_osd(struct ceph_osd_client *osdc, struct ceph_osd *osd)
->  {
-> -	dout("__remove_osd %p\n", osd);
-> +	dout("%s %p osd%d\n", __func__, osd, osd->o_osd);
->  	WARN_ON(!list_empty(&osd->o_requests));
->  	WARN_ON(!list_empty(&osd->o_linger_requests));
->  
-> -	rb_erase(&osd->o_node, &osdc->osds);
->  	list_del_init(&osd->o_osd_lru);
-> -	ceph_con_close(&osd->o_con);
-> -	put_osd(osd);
-> +	rb_erase(&osd->o_node, &osdc->osds);
-> +	RB_CLEAR_NODE(&osd->o_node);
-> +}
-> +
-> +static void remove_osd(struct ceph_osd_client *osdc, struct ceph_osd *osd)
-> +{
-> +	dout("%s %p osd%d\n", __func__, osd, osd->o_osd);
-> +
-> +	if (!RB_EMPTY_NODE(&osd->o_node)) {
-> +		ceph_con_close(&osd->o_con);
-> +		__remove_osd(osdc, osd);
-> +		put_osd(osd);
-> +	}
->  }
->  
->  static void remove_all_osds(struct ceph_osd_client *osdc)
-> @@ -1065,7 +1075,7 @@ static void remove_all_osds(struct ceph_osd_client *osdc)
->  	while (!RB_EMPTY_ROOT(&osdc->osds)) {
->  		struct ceph_osd *osd = rb_entry(rb_first(&osdc->osds),
->  						struct ceph_osd, o_node);
-> -		__remove_osd(osdc, osd);
-> +		remove_osd(osdc, osd);
->  	}
->  	mutex_unlock(&osdc->request_mutex);
->  }
-> @@ -1106,7 +1116,7 @@ static void remove_old_osds(struct ceph_osd_client *osdc)
->  	list_for_each_entry_safe(osd, nosd, &osdc->osd_lru, o_osd_lru) {
->  		if (time_before(jiffies, osd->lru_ttl))
->  			break;
-> -		__remove_osd(osdc, osd);
-> +		remove_osd(osdc, osd);
->  	}
->  	mutex_unlock(&osdc->request_mutex);
->  }
-> @@ -1121,8 +1131,7 @@ static int __reset_osd(struct ceph_osd_client *osdc, struct ceph_osd *osd)
->  	dout("__reset_osd %p osd%d\n", osd, osd->o_osd);
->  	if (list_empty(&osd->o_requests) &&
->  	    list_empty(&osd->o_linger_requests)) {
-> -		__remove_osd(osdc, osd);
-> -
-> +		remove_osd(osdc, osd);
->  		return -ENODEV;
->  	}
->  
-> @@ -1926,6 +1935,7 @@ static void reset_changed_osds(struct ceph_osd_client *osdc)
->  {
->  	struct rb_node *p, *n;
->  
-> +	dout("%s %p\n", __func__, osdc);
->  	for (p = rb_first(&osdc->osds); p; p = n) {
->  		struct ceph_osd *osd = rb_entry(p, struct ceph_osd, o_node);
->  
-> 
+There is definitely still room for improvement!  It's important to 
+remember though that there is always going to be a trade off between 
+flexibility, data integrity, and performance.  If low latency is your 
+number one need before anything else, you are probably best off 
+eliminating as much software as possible between you and the device 
+(except possibly if you can make clever use of caching).  While Ceph 
+itself is some times the bottleneck, in many cases we've found that 
+bottlenecks in the software that surrounds Ceph are just as big 
+obstacles (filesystem, VM layer, TCP stack, leveldb, etc).  If you need 
+a distributed storage system that can universally maintain native SSD 
+levels of performance, the entire stack has to be highly tuned.
 
+>
+> I have done some testing in the past and noticed that despite the server
+> having a lot of unused resources (about 40-50% server idle and about
+> 60-70% ssd idle) the ceph would not perform well when used with ssds. I
+> was testing with Firefly + auth and my IOPs rate was around the 3K mark.
+> Something is holding ceph back from performing well with ssds (((
+
+Out of curiosity, did you try the same tests directly on the SSD?
+
+>
+> Andrei
+>
+> ------------------------------------------------------------------------
+>
+>     *From: *"Mark Nelson" <mnelson@redhat.com>
+>     *To: *"ceph-devel" <ceph-devel@vger.kernel.org>
+>     *Cc: *ceph-users@lists.ceph.com
+>     *Sent: *Tuesday, 17 February, 2015 5:37:01 PM
+>     *Subject: *[ceph-users] Ceph Dumpling/Firefly/Hammer SSD/Memstore
+>     performance        comparison
+>
+>     Hi All,
+>
+>     I wrote up a short document describing some tests I ran recently to
+>     look
+>     at how SSD backed OSD performance has changed across our LTS releases.
+>     This is just looking at RADOS performance and not RBD or RGW.  It also
+>     doesn't offer any real explanations regarding the results.  It's just a
+>     first high level step toward understanding some of the behaviors folks
+>     on the mailing list have reported over the last couple of releases.  I
+>     hope you find it useful.
+>
+>     Mark
+>
+>     _______________________________________________
+>     ceph-users mailing list
+>     ceph-users@lists.ceph.com
+>     http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>
+>
