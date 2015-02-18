@@ -1,55 +1,44 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH] libceph: kfree() in put_osd() shouldn't depend on authorizer
-Date: Wed, 18 Feb 2015 16:34:15 +0300
-Message-ID: <CAOi1vP-==3Q-83_TNjPi6N7hLzgmHQKYJSt2==uG3rFWg7vU3g@mail.gmail.com>
-References: <1424266050-40892-1-git-send-email-idryomov@gmail.com>
+From: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>
+Subject: full_ratios - please explain?
+Date: Wed, 18 Feb 2015 09:39:36 -0500
+Message-ID: <CAGbvivJ89toPvbO8XOQ8ru_BDQJbJfZvbj2NhxFk1G5K=d-3Zw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-we0-f174.google.com ([74.125.82.174]:45701 "EHLO
-	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750985AbbBRNeR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Feb 2015 08:34:17 -0500
-Received: by wesw62 with SMTP id w62so1128621wes.12
-        for <ceph-devel@vger.kernel.org>; Wed, 18 Feb 2015 05:34:16 -0800 (PST)
-In-Reply-To: <1424266050-40892-1-git-send-email-idryomov@gmail.com>
+Received: from mail-ob0-f177.google.com ([209.85.214.177]:51517 "EHLO
+	mail-ob0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751767AbbBROjh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Feb 2015 09:39:37 -0500
+Received: by mail-ob0-f177.google.com with SMTP id wp18so2406160obc.8
+        for <ceph-devel@vger.kernel.org>; Wed, 18 Feb 2015 06:39:36 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
-Cc: Alex Elder <elder@linaro.org>
 
-On Wed, Feb 18, 2015 at 4:27 PM, Ilya Dryomov <idryomov@gmail.com> wrote:
-> a255651d4cad ("ceph: ensure auth ops are defined before use") made
-> kfree() in put_osd() conditional on the authorizer.  A mechanical
-> mistake most likely - fix it.
->
-> Cc: Alex Elder <elder@linaro.org>
-> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
-> ---
->  net/ceph/osd_client.c | 5 +++--
->  1 file changed, 3 insertions(+), 2 deletions(-)
->
-> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> index f693a2f8ac86..41a4abc7e98e 100644
-> --- a/net/ceph/osd_client.c
-> +++ b/net/ceph/osd_client.c
-> @@ -1035,10 +1035,11 @@ static void put_osd(struct ceph_osd *osd)
->  {
->         dout("put_osd %p %d -> %d\n", osd, atomic_read(&osd->o_ref),
->              atomic_read(&osd->o_ref) - 1);
-> -       if (atomic_dec_and_test(&osd->o_ref) && osd->o_auth.authorizer) {
-> +       if (atomic_dec_and_test(&osd->o_ref)) {
->                 struct ceph_auth_client *ac = osd->o_osdc->client->monc.auth;
->
-> -               ceph_auth_destroy_authorizer(ac, osd->o_auth.authorizer);
-> +               if (osd->o_auth.authorizer)
-> +                       ceph_auth_destroy_authorizer(ac, osd->o_auth.authorizer);
->                 kfree(osd);
->         }
->  }
+Can someone explain the interaction and effects of all of these
+"full_ratio" parameters?  I havent found any real good explanation of how
+they affect the distribution of data once the cluster gets above the
+"nearfull" and close to the "close" ratios.
 
-Sorry, this is a dup - ignore it.
 
-Thanks,
+mon_osd_full_ratio
+mon_osd_nearfull_ratio
 
-                Ilya
+osd_backfill_full_ratio
+osd_failsafe_full_ratio
+osd_failsafe_nearfull_ratio
+
+We have a cluster with about 144 OSDs (518 TB) and trying to get it to a
+90% full rate for testing purposes.
+
+We've found that when some of the OSDs get above the mon_osd_full_ratio
+value (.95 in our system), then it stops accepting any new data, even
+though there is plenty of space left on other OSDs that are not yet even up
+to 90%.  Tweaking the osd_failsafe ratios enabled data to move again for a
+bit, but eventually it becomes unbalanced and stops working again.
+
+Is there a recommended combination of values to use that will allow the
+cluster to continue accepting data and rebalancing correctly above 90%.
+
+thanks,
+ Wyllys Ingersoll
