@@ -1,64 +1,144 @@
-From: Mark Nelson <mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: Ceph Dumpling/Firefly/Hammer SSD/Memstore
- performance comparison
-Date: Wed, 18 Feb 2015 08:56:44 -0600
-Message-ID: <54E4A82C.4010303@redhat.com>
-References: <54E37C3D.5030702@redhat.com>
-	<1298645585.1174612.1424248460594.JavaMail.zimbra@oxygem.tv>
+From: Alex Elder <elder@linaro.org>
+Subject: Re: [PATCH] libceph: fix double __remove_osd() problem
+Date: Wed, 18 Feb 2015 09:43:43 -0600
+Message-ID: <54E4B32F.1020407@linaro.org>
+References: <1424265940-40771-1-git-send-email-idryomov@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <1298645585.1174612.1424248460594.JavaMail.zimbra-M8QNeUgB6UTyG1zEObXtfA@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 8bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ie0-f180.google.com ([209.85.223.180]:38951 "EHLO
+	mail-ie0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751646AbbBRPnp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Feb 2015 10:43:45 -0500
+Received: by iecvy18 with SMTP id vy18so2122536iec.6
+        for <ceph-devel@vger.kernel.org>; Wed, 18 Feb 2015 07:43:44 -0800 (PST)
+In-Reply-To: <1424265940-40771-1-git-send-email-idryomov@gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
+Cc: Sage Weil <sweil@redhat.com>
 
-SGkgQWxleCwKClRoYW5rcyEgIEkgZGlkbid0IHR3ZWFrIHRoZSBzaGFyZGluZyBzZXR0aW5ncyBh
-dCBhbGwsIHNvIHRoZXkgYXJlIGp1c3QgCmF0IHRoZSBkZWZhdWx0IHZhbHVlczoKCk9QVElPTihv
-c2Rfb3BfbnVtX3RocmVhZHNfcGVyX3NoYXJkLCBPUFRfSU5ULCAyKQpPUFRJT04ob3NkX29wX251
-bV9zaGFyZHMsIE9QVF9JTlQsIDUpCgpJIGRvbid0IGhhdmUgcmVhbGx5IGdvb2QgaW5zaWdodCB5
-ZXQgaW50byBob3cgdHdlYWtpbmcgdGhlc2Ugd291bGQgCmFmZmVjdCBzaW5nbGUtb3NkIHBlcmZv
-cm1hbmNlLiAgSSBrbm93IHRoZSBQQ0llIFNTRHMgZG8gaGF2ZSBtdWx0aXBsZSAKY29udHJvbGxl
-cnMgb24tYm9hcmQgc28gcGVyaGFwcyBpbmNyZWFzaW5nIHRoZSBudW1iZXIgb2Ygc2hhcmRzIHdv
-dWxkIAppbXByb3ZlIHRoaW5ncywgYnV0IEkgc3VzcGVjdCB0aGF0IGdvaW5nIHRvbyBoaWdoIGNv
-dWxkIG1heWJlIHN0YXJ0IApodXJ0aW5nIHBlcmZvcm1hbmNlIGFzIHdlbGwuICBIYXZlIHlvdSBk
-b25lIGFueSB0ZXN0aW5nIGhlcmU/ICBJdCBjb3VsZCAKYmUgYW4gaW50ZXJlc3RpbmcgZm9sbG93
-LXVwIHBhcGVyLgoKTWFyawoKT24gMDIvMTgvMjAxNSAwMjozNCBBTSwgQWxleGFuZHJlIERFUlVN
-SUVSIHdyb3RlOgo+IE5pY2UgV29yayBNYXJrICEKPgo+IEkgZG9uJ3Qgc2VlIGFueSB0dW5pbmcg
-YWJvdXQgc2hhcmRpbmcgaW4gdGhlIGNvbmZpZyBmaWxlIHNhbXBsZQo+Cj4gKG9zZF9vcF9udW1f
-dGhyZWFkc19wZXJfc2hhcmQsb3NkX29wX251bV9zaGFyZHMsLi4uKQo+Cj4gYXMgeW91IG9ubHkg
-dXNlIDEgc3NkIGZvciB0aGUgYmVuY2gsIEkgdGhpbmsgaXQgc2hvdWxkIGltcHJvdmUgcmVzdWx0
-cyBmb3IgaGFtbWVyID8KPgo+Cj4KPiAtLS0tLSBNYWlsIG9yaWdpbmFsIC0tLS0tCj4gRGU6ICJN
-YXJrIE5lbHNvbiIgPG1uZWxzb25AcmVkaGF0LmNvbT4KPiDDgDogImNlcGgtZGV2ZWwiIDxjZXBo
-LWRldmVsQHZnZXIua2VybmVsLm9yZz4KPiBDYzogImNlcGgtdXNlcnMiIDxjZXBoLXVzZXJzQGxp
-c3RzLmNlcGguY29tPgo+IEVudm95w6k6IE1hcmRpIDE3IEbDqXZyaWVyIDIwMTUgMTg6Mzc6MDEK
-PiBPYmpldDogW2NlcGgtdXNlcnNdIENlcGggRHVtcGxpbmcvRmlyZWZseS9IYW1tZXIgU1NEL01l
-bXN0b3JlIHBlcmZvcm1hbmNlCWNvbXBhcmlzb24KPgo+IEhpIEFsbCwKPgo+IEkgd3JvdGUgdXAg
-YSBzaG9ydCBkb2N1bWVudCBkZXNjcmliaW5nIHNvbWUgdGVzdHMgSSByYW4gcmVjZW50bHkgdG8g
-bG9vawo+IGF0IGhvdyBTU0QgYmFja2VkIE9TRCBwZXJmb3JtYW5jZSBoYXMgY2hhbmdlZCBhY3Jv
-c3Mgb3VyIExUUyByZWxlYXNlcy4KPiBUaGlzIGlzIGp1c3QgbG9va2luZyBhdCBSQURPUyBwZXJm
-b3JtYW5jZSBhbmQgbm90IFJCRCBvciBSR1cuIEl0IGFsc28KPiBkb2Vzbid0IG9mZmVyIGFueSBy
-ZWFsIGV4cGxhbmF0aW9ucyByZWdhcmRpbmcgdGhlIHJlc3VsdHMuIEl0J3MganVzdCBhCj4gZmly
-c3QgaGlnaCBsZXZlbCBzdGVwIHRvd2FyZCB1bmRlcnN0YW5kaW5nIHNvbWUgb2YgdGhlIGJlaGF2
-aW9ycyBmb2xrcwo+IG9uIHRoZSBtYWlsaW5nIGxpc3QgaGF2ZSByZXBvcnRlZCBvdmVyIHRoZSBs
-YXN0IGNvdXBsZSBvZiByZWxlYXNlcy4gSQo+IGhvcGUgeW91IGZpbmQgaXQgdXNlZnVsLgo+Cj4g
-TWFyawo+Cj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18K
-PiBjZXBoLXVzZXJzIG1haWxpbmcgbGlzdAo+IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KPiBo
-dHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20KPiAt
-LQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNj
-cmliZSBjZXBoLWRldmVsIiBpbgo+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9A
-dmdlci5rZXJuZWwub3JnCj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2Vy
-bmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sCj4KX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0Bs
-aXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNl
-cnMtY2VwaC5jb20K
+On 02/18/2015 07:25 AM, Ilya Dryomov wrote:
+> It turns out it's possible to get __remove_osd() called twice on the
+> same OSD.  That doesn't sit well with rb_erase() - depending on the
+> shape of the tree we can get a NULL dereference, a soft lockup or
+> a random crash at some point in the future as we end up touching freed
+> memory.  One scenario that I was able to reproduce is as follows:
+> 
+>             <osd3 is idle, on the osd lru list>
+> <con reset - osd3>
+> con_fault_finish()
+>   osd_reset()
+>                               <osdmap - osd3 down>
+>                               ceph_osdc_handle_map()
+>                                 <takes map_sem>
+>                                 kick_requests()
+>                                   <takes request_mutex>
+>                                   reset_changed_osds()
+>                                     __reset_osd()
+>                                       __remove_osd()
+>                                   <releases request_mutex>
+>                                 <releases map_sem>
+>     <takes map_sem>
+>     <takes request_mutex>
+>     __kick_osd_requests()
+>       __reset_osd()
+>         __remove_osd() <-- !!!
+> 
+> A case can be made that osd refcounting is imperfect and reworking it
+> would be a proper resolution, but for now Sage and I decided to fix
+> this by adding a safe guard around __remove_osd().
+> 
+> Fixes: http://tracker.ceph.com/issues/8087
+
+So now you rely on the RB node in the osd getting cleared
+as a signal that it has been removed already.  Yes, that
+sounds like refcounting isn't working as desired...
+
+The mutex around all calls to (now) remove_osd() avoids
+races.  I like the RB_CLEAR_NODE() call anyway.
+OK, enough chit chat.  This looks OK to me.
+
+Reviewed-by: Alex Elder <elder@linaro.org>
+
+> Cc: Sage Weil <sweil@redhat.com>
+> Cc: stable@vger.kernel.org # 3.9+: 7c6e6fc53e73: libceph: assert both regular and lingering lists in __remove_osd()
+> Cc: stable@vger.kernel.org # 3.9+: cc9f1f518cec: libceph: change from BUG to WARN for __remove_osd() asserts
+> Cc: stable@vger.kernel.org # 3.9+
+> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+> ---
+>  net/ceph/osd_client.c | 26 ++++++++++++++++++--------
+>  1 file changed, 18 insertions(+), 8 deletions(-)
+> 
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index 53299c7b0ca4..f693a2f8ac86 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -1048,14 +1048,24 @@ static void put_osd(struct ceph_osd *osd)
+>   */
+>  static void __remove_osd(struct ceph_osd_client *osdc, struct ceph_osd *osd)
+>  {
+> -	dout("__remove_osd %p\n", osd);
+> +	dout("%s %p osd%d\n", __func__, osd, osd->o_osd);
+>  	WARN_ON(!list_empty(&osd->o_requests));
+>  	WARN_ON(!list_empty(&osd->o_linger_requests));
+>  
+> -	rb_erase(&osd->o_node, &osdc->osds);
+>  	list_del_init(&osd->o_osd_lru);
+> -	ceph_con_close(&osd->o_con);
+> -	put_osd(osd);
+> +	rb_erase(&osd->o_node, &osdc->osds);
+> +	RB_CLEAR_NODE(&osd->o_node);
+> +}
+> +
+> +static void remove_osd(struct ceph_osd_client *osdc, struct ceph_osd *osd)
+> +{
+> +	dout("%s %p osd%d\n", __func__, osd, osd->o_osd);
+> +
+> +	if (!RB_EMPTY_NODE(&osd->o_node)) {
+> +		ceph_con_close(&osd->o_con);
+> +		__remove_osd(osdc, osd);
+> +		put_osd(osd);
+> +	}
+>  }
+>  
+>  static void remove_all_osds(struct ceph_osd_client *osdc)
+> @@ -1065,7 +1075,7 @@ static void remove_all_osds(struct ceph_osd_client *osdc)
+>  	while (!RB_EMPTY_ROOT(&osdc->osds)) {
+>  		struct ceph_osd *osd = rb_entry(rb_first(&osdc->osds),
+>  						struct ceph_osd, o_node);
+> -		__remove_osd(osdc, osd);
+> +		remove_osd(osdc, osd);
+>  	}
+>  	mutex_unlock(&osdc->request_mutex);
+>  }
+> @@ -1106,7 +1116,7 @@ static void remove_old_osds(struct ceph_osd_client *osdc)
+>  	list_for_each_entry_safe(osd, nosd, &osdc->osd_lru, o_osd_lru) {
+>  		if (time_before(jiffies, osd->lru_ttl))
+>  			break;
+> -		__remove_osd(osdc, osd);
+> +		remove_osd(osdc, osd);
+>  	}
+>  	mutex_unlock(&osdc->request_mutex);
+>  }
+> @@ -1121,8 +1131,7 @@ static int __reset_osd(struct ceph_osd_client *osdc, struct ceph_osd *osd)
+>  	dout("__reset_osd %p osd%d\n", osd, osd->o_osd);
+>  	if (list_empty(&osd->o_requests) &&
+>  	    list_empty(&osd->o_linger_requests)) {
+> -		__remove_osd(osdc, osd);
+> -
+> +		remove_osd(osdc, osd);
+>  		return -ENODEV;
+>  	}
+>  
+> @@ -1926,6 +1935,7 @@ static void reset_changed_osds(struct ceph_osd_client *osdc)
+>  {
+>  	struct rb_node *p, *n;
+>  
+> +	dout("%s %p\n", __func__, osdc);
+>  	for (p = rb_first(&osdc->osds); p; p = n) {
+>  		struct ceph_osd *osd = rb_entry(p, struct ceph_osd, o_node);
+>  
+> 
+
