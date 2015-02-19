@@ -1,50 +1,47 @@
-From: Pavan Rallabhandi <Pavan.Rallabhandi@sandisk.com>
-Subject: RGW GetObj interfaces
-Date: Thu, 19 Feb 2015 13:22:22 +0000
-Message-ID: <68A06213B74F1742A2C48216AE1BB6B808754433@SACMBXIP02.sdcorp.global.sandisk.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: [ceph-calamari] disk failure prediction
+Date: Thu, 19 Feb 2015 06:58:21 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1502190644490.3074@cobra.newdream.net>
+References: <alpine.DEB.2.00.1502181514400.24259@cobra.newdream.net> <54E5A539.1060803@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1bon0066.outbound.protection.outlook.com ([157.56.111.66]:26251
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S932495AbbBSNzT convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Feb 2015 08:55:19 -0500
-Content-Language: en-US
+Received: from mx1.redhat.com ([209.132.183.28]:60074 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751570AbbBSO60 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 19 Feb 2015 09:58:26 -0500
+In-Reply-To: <54E5A539.1060803@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
-Cc: "yehuda@redhat.com" <yehuda@redhat.com>
+To: John Spray <john.spray@redhat.com>
+Cc: ceph-devel@vger.kernel.org, ceph-calamari@ceph.com
 
-Was tracing the 'get object' path(s) in RGW and found that the interfaces have changed quite a bit between Giant and Master. Particularly in Giant, I reckon there is a potential leak of the 'handle' (which is the object state in question)
+On Thu, 19 Feb 2015, John Spray wrote:
+> 
+> On 18/02/2015 23:20, Sage Weil wrote:
+> > We wouldn't see
+> > quite the same results since our "raid sets" are effectively entire pools
+>
+> I think we could do better than pool-wide, e.g. if multiple drives in one
+> chassis are at risk (where PG stores at most one copy per chassis), we can
+> identify that as less severe than the general case where multiple at-risk
+> drives might be in the same PG.  Making it CRUSH-aware like this would be a
+> good hook for users to take advantage of the ceph/calamari SMART monitoring
+> rather than rolling their own.
 
-<snip>
+Yeah, sounds good.  The big question in my mind is whether we should try 
+to pull this into the osd/mon or have calamari do it.  It seems like a 
+good fit for calamari...
 
-  ret = store->prepare_get_obj(s->obj_ctx, obj, &new_ofs, &new_end, &attrs, mod_ptr,
-                               unmod_ptr, &lastmod, if_match, if_nomatch, &total_len, &s->obj_size, NULL, &handle, &s->err);
-  if (ret < 0)
-    goto done_err;
+BTW, a bit more color on the original paper (after talking to Paul): the 
+EMC workload in the paper was backup/archival with heavy heavy write, and 
+any time there was a read failure it triggered a rewrite and triggered a 
+relocated sector.  Other studies have shown some pretty different results.  
+For example, one showed that the best preditor was actually not SMART at 
+all but (carefully measured) read latency.
 
-  attr_iter = attrs.find(RGW_ATTR_USER_MANIFEST);
-  if (attr_iter != attrs.end()) {
-    ret = handle_user_manifest(attr_iter->second.c_str());
-    if (ret < 0) {
-      ldout(s->cct, 0) << "ERROR: failed to handle user manifest ret=" << ret << dendl;
-    }
-    return;               <----------- One should free the handle via finish_get_obj()
-  }
+In any case, it seems like the bits that are gathering and aggregating 
+SMART should be general, and we should make it easy to plug in various 
+policies (or delegate to an external agent) for responding to that data. 
 
-<\snip>
-
-And also, I see 'send_response_data()' being issued even for error paths, which need not be true always. I understand the pull request for rgw versioning #3526 has revamped this piece of code, but Giant has the inaccuracies(if true) I pointed above.
-
-Let me know if my understanding is correct, I will have couple of pull requests in pipeline for the same.
-
-Thanks,
--Pavan.
-
-________________________________
-
-PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-
+sage
