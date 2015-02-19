@@ -1,275 +1,46 @@
-From: Sage Weil <sage@newdream.net>
-Subject: RE: K/V interface buffer transaction
-Date: Thu, 19 Feb 2015 11:46:02 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1502191130270.3074@cobra.newdream.net>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F282A62CE@SACMBXIP02.sdcorp.global.sandisk.com> <CA+4uBUa+XBKHkx32hmZAvn4JOLp=o2WJywnA7OWXzSphvEcgjw@mail.gmail.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F282A63A6@SACMBXIP02.sdcorp.global.sandisk.com>
- <alpine.DEB.2.00.1502101025100.1652@cobra.newdream.net> <CAC6JEv_zcReo1y4JktniD-gcrKRUPLuviHJAtpoEWJ9=aai6Tg@mail.gmail.com> <alpine.DEB.2.00.1502101043260.1652@cobra.newdream.net> <755F6B91B3BE364F9BCA11EA3F9E0C6F282A7D11@SACMBXIP02.sdcorp.global.sandisk.com>
- <CA+4uBUbJG9qVHS+0zk2YW3g7C3wemUm1fc5a18LtFQaCRtSnqw@mail.gmail.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F282A7DAE@SACMBXIP02.sdcorp.global.sandisk.com> <CACJqLybqBwRpZOnv_3yCrQ1JGPtwoB32wYZNHQJqQa8u1xTJeA@mail.gmail.com>
- <755F6B91B3BE364F9BCA11EA3F9E0C6F282A8201@SACMBXIP02.sdcorp.global.sandisk.com> <CACJqLyZTtwRpK6K1sc6tQY24YtZ3nde_FYJW-xkjA7Zj+KxApA@mail.gmail.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F282ACCEE@SACMBXIP02.sdcorp.global.sandisk.com>
+From: John Spray <john.spray@redhat.com>
+Subject: ceph-fuse remount issues
+Date: Thu, 19 Feb 2015 22:23:21 +0000
+Message-ID: <54E66259.9040501@redhat.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:59434 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751840AbbBSTqE (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Feb 2015 14:46:04 -0500
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F282ACCEE@SACMBXIP02.sdcorp.global.sandisk.com>
+Received: from mx1.redhat.com ([209.132.183.28]:57954 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752343AbbBSWXX (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 19 Feb 2015 17:23:23 -0500
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t1JMNNxj021906
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
+	for <ceph-devel@vger.kernel.org>; Thu, 19 Feb 2015 17:23:23 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: Haomai Wang <haomaiwang@gmail.com>, "sjust@redhat.com" <sjust@redhat.com>, Gregory Farnum <greg@gregs42.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org, zyan@redhat.com, Gregory Farnum <gfarnum@redhat.com>
 
-On Thu, 19 Feb 2015, Somnath Roy wrote:
-> Sage/Haomai,
-> Some more questions.
-> 
-> 1. I am not able to figure out why the KeyValueDB interface is so 
-> dependent on iter based approach ? If a db supports range queries, can't 
-> we get rid of these iterator interfaces ?
-> 
-> 2. Also, the function like ::_generic_read() is calling 
-> StripObjectMap::get_values_with_header -> GenericObjectMap::scan(). Scan 
-> is just looping over the keys and still calling iter->lower_bound() , 
-> why not calling direct get call ? In case, the db supports range queries 
-> , we can handover the db these keys and it will return array of 
-> key/value pair itself. Why to bother about that from generic 
-> keyvaluestore interface ? If dbs are not supporting range queries, we 
-> can implement similar logic in the shim layer like 
-> leveldbstore/rocksdbstore, isn't it ?
 
-The KeyValueDB is the interface that seemed necessary when Sam was 
-implementing the original DBObjectMap a couple years ago.  It's based on 
-what leveldb was providing and what was needed at the time.  We are more 
-than happy to change it!
+Background: a while ago, we found (#10277) that existing cache 
+expiration mechanism wasn't working with latest kernels.  We used to 
+invalidate the top level dentries, which caused fuse to invalidate 
+everything, but an implementation detail in fuse caused it to start 
+ignoring our repeated invalidate calls, so this doesn't work any more.  
+To persuade fuse to dirty its entire metadata cache, Zheng added in a 
+system() call to "mount -o remount" after we expire things from our 
+client side cache.
 
-A few things:
+However, this was a bit of a hack and has created problems:
+  * You can't call mount -o remount unless you're root, so we are less 
+flexible than we used to be (#10542)
+  * While the remount is happening, unmounts sporadically fail and the 
+fuse process can become unresponsive to SIGKILL (#10916)
 
-1. Adding a call that returns multiple k/v pairs sounds fine as long as 
-there is a limmit so we don't get an unbounded result size.
+The first issue was maybe an acceptable compromise, but the second issue 
+is just painful, and it seems like we might not have seen the last of 
+the knock on effects -- upstream maintainers certainly aren't expecting 
+filesystems to remount themselves quite so frequently.
 
-2. I'm concerned (in general) about the efficiency of this interface.  
-Right now pretty much everything is fetched and returned in the form of an 
-STL structure and I'm worried that there will be a bunch of data copying 
-on the implementation to conform to that.  On the flip side, lots of 
-callers are currently rejiggering their requests into those maps too.  I'd 
-be very interested in hearing about how you think we can make this fit 
-more efficiently to whatever backend you're currently working with.  
-Leveldb and rocksdb will I think be the most common backends, but we want 
-to perform well with others too.
+We probably have an opportunity to get something upstream in fuse to 
+support a direct call to trigger the invalidation we want, if we can 
+work out what that should look like.  Thoughts?
 
-3. One simple example of this is there are several places where we have an 
-encoded bufferlist of map<string,bufferlist> that we are doing a set on 
-(or are pulling out).  Currently we end up decoding into an STL map and 
-feeding to the interface, but I suspect lots of callers could benefit from 
-a set of calls that go direct to/from such a buffer and skip the 
-map<>.
-
-4. There a trivial patch in my newstore wip branch that adds a get(prefix, 
-key, *value) so that you don't get to pass in a set<string> for a single 
-fetch.  It's somewhere in the pile at 
-
-	https://github.com/liewegas/ceph/commits/wip-newstore
-
-sage
-
-> 
-> Let me know if I am missing anything here.
-> 
-> Thanks & Regards
-> Somnath
-> 
-> -----Original Message-----
-> From: Haomai Wang [mailto:haomaiwang@gmail.com] 
-> Sent: Wednesday, February 11, 2015 11:35 PM
-> To: Somnath Roy
-> Cc: sjust@redhat.com; Sage Weil; Gregory Farnum; Ceph Development
-> Subject: Re: K/V interface buffer transaction
-> 
-> On Thu, Feb 12, 2015 at 3:26 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
-> > Haomai,
-> >
-> > << KeyValueStore will only write one for duplicate entry in ordering
-> >
-> > I saw K/v store (keyvaluestore.cc) itself is not removing the duplicates , are you saying the shim layer like leveldbstore/rocksdbstore is removing the duplicates or the leveldb/rocksdb ?
-> 
-> Oh no, sorry. That's just I want to do in mind. I forget I haven't impl it.
-> 
-> Each ObjectStore::Transaction in KeyValueStore has corresponding BufferTransaction will store all kvs needed to store. We could let submit_transaction do it at last instead of calling backend each op.
-> 
-> Yeah, we could resolve it in KeyValueStore clearly.
-> >
-> > Thanks & Regards
-> > Somnath
-> >
-> > -----Original Message-----
-> > From: Haomai Wang [mailto:haomaiwang@gmail.com]
-> > Sent: Wednesday, February 11, 2015 7:36 PM
-> > To: Somnath Roy
-> > Cc: sjust@redhat.com; Sage Weil; Gregory Farnum; Ceph Development
-> > Subject: Re: K/V interface buffer transaction
-> >
-> > On Thu, Feb 12, 2015 at 6:53 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
-> >> Yeah, thanks!
-> >> Not sure if level-db is handling duplicate entries within a transaction properly or not, if not, in case of filestore (and also for K/V stores) we are having an extra (redundant) OMAP write in the Write-Path.
-> >
-> > KeyValueStore will only write one for duplicate entry in ordering.
-> >
-> > But FileStore will write redundant omap.
-> >
-> > And from dump log, the duplicate entry looks like from pglog
-> >
-> >>
-> >> Regards
-> >> Somnath
-> >>
-> >> -----Original Message-----
-> >> From: Samuel Just [mailto:sam.just@inktank.com]
-> >> Sent: Wednesday, February 11, 2015 2:36 PM
-> >> To: Somnath Roy
-> >> Cc: Sage Weil; Gregory Farnum; Haomai Wang (haomaiwang@gmail.com); 
-> >> Ceph Development
-> >> Subject: Re: K/V interface buffer transaction
-> >>
-> >> Well, the transaction is atomic, so if the key is set twice, you can certainly ignore the first one.
-> >> -Sam
-> >>
-> >> On Wed, Feb 11, 2015 at 2:20 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
-> >>> Hi,
-> >>> My code had a bug during printing log. I was using map to store the 
-> >>> attribute keys in sorted order and that was discarding the 
-> >>> duplicates
-> >>> :-)
-> >>>
-> >>> This is what I found out coming during transaction.
-> >>>
-> >>> 2015-02-05 15:58:12.311738 7f27b5429700  0 queue_transactions ::
-> >>> before _do_transactions
-> >>> 2015-02-05 15:58:12.311754 7f27b5429700  0 _do_transactions::before 
-> >>> _do_transaction
-> >>> 2015-02-05 15:58:12.311770 7f27b5429700  0 
-> >>> Transaction::OP_WRITE::cid = 1.a3_head oid =
-> >>> 680256a3/rbd_data.100974b0dc51.0000000000000631/head//1 offset =
-> >>> 3997696 len = 65536
-> >>> 2015-02-05 15:58:12.311800 7f27b5429700  0 
-> >>> Transaction::OP_SETATTR::cid = 1.a3_head oid =
-> >>> 680256a3/rbd_data.100974b0dc51.0000000000000631/head//1 attr_name = 
-> >>> _ attr_value_len = 273
-> >>> 2015-02-05 15:58:12.311822 7f27b5429700  0 
-> >>> Transaction::OP_SETATTR::cid = 1.a3_head oid =
-> >>> 680256a3/rbd_data.100974b0dc51.0000000000000631/head//1 attr_name = 
-> >>> snapset attr_value_len = 31
-> >>> 2015-02-05 15:58:12.311840 7f27b5429700  0 
-> >>> Transaction::OP_OMAP_SETKEYS::cid = 1.a3_head oid = a3//head//1
-> >>> 2015-02-05 15:58:12.311845 7f27b5429700  0 OMAP_KEY = 0000000102.00000000000000001592 Value = buffer::list(len=178,
-> >>>         buffer::ptr(0~4 0x3efc21000 in raw 0x3efc21000 len 4096 nref 6),
-> >>>         buffer::ptr(0~170 0x3d74840 in raw 0x3d74840 len 688 nref 3),
-> >>>         buffer::ptr(4~4 0x3efc21004 in raw 0x3efc21000 len 4096 nref
-> >>> 6)
-> >>> )
-> >>> 2015-02-05 15:58:12.311931 7f27b5429700  0 
-> >>> Transaction::OP_OMAP_SETKEYS::cid = 1.a3_head oid = a3//head//1
-> >>> 2015-02-05 15:58:12.311938 7f27b5429700  0 OMAP_KEY = _epoch Value = buffer::list(len=4,
-> >>>         buffer::ptr(0~4 0x3efc1f000 in raw 0x3efc1f000 len 4096 nref
-> >>> 3)
-> >>> )
-> >>> 2015-02-05 15:58:12.311943 7f27b5429700  0 OMAP_KEY = _info Value = buffer::list(len=713,
-> >>>         buffer::ptr(0~713 0x3efc1e000 in raw 0x3efc1e000 len 4096 
-> >>> nref
-> >>> 3)
-> >>> )
-> >>> 2015-02-05 15:58:12.311965 7f27b5429700  0 
-> >>> Transaction::OP_OMAP_SETKEYS::cid = 1.a3_head oid = a3//head//1
-> >>> 2015-02-05 15:58:12.311969 7f27b5429700  0 OMAP_KEY = 0000000102.00000000000000001592 Value = buffer::list(len=178,
-> >>>         buffer::ptr(0~4 0x3d75e40 in raw 0x3d75e40 len 688 nref 6),
-> >>>         buffer::ptr(0~170 0x3d75b80 in raw 0x3d75b80 len 688 nref 3),
-> >>>         buffer::ptr(4~4 0x3d75e44 in raw 0x3d75e40 len 688 nref 6)
-> >>> )
-> >>> 2015-02-05 15:58:12.311980 7f27b5429700  0 OMAP_KEY = can_rollback_to Value = buffer::list(len=12,
-> >>>         buffer::ptr(0~12 0x3efc25000 in raw 0x3efc25000 len 4096 
-> >>> nref
-> >>> 3)
-> >>> )
-> >>> 2015-02-05 15:58:12.311985 7f27b5429700  0 OMAP_KEY = rollback_info_trimmed_to Value = buffer::list(len=12,
-> >>>         buffer::ptr(0~12 0x3efc24000 in raw 0x3efc24000 len 4096 
-> >>> nref
-> >>> 3)
-> >>> )
-> >>>
-> >>>
-> >>>
-> >>> So, the OMAP_KEY = 0000000102.00000000000000001592 is coming twice !
-> >>>
-> >>> Is there any reason, why ? What is this attribute by the way ?
-> >>> Can we safely discard the first OP_OMAP_SETKEYS call for the same key ?
-> >>>
-> >>> Thanks & Regards
-> >>> Somnath
-> >>>
-> >>> -----Original Message-----
-> >>> From: Somnath Roy
-> >>> Sent: Tuesday, February 10, 2015 4:36 PM
-> >>> To: 'Sage Weil'; Gregory Farnum
-> >>> Cc: sjust@redhat.com; Haomai Wang (haomaiwang@gmail.com); Ceph 
-> >>> Development
-> >>> Subject: RE: K/V interface buffer transaction
-> >>>
-> >>> Thanks Greg/Sam/Sage !
-> >>> For now, we will be doing our testing by sorting the keys and will keep an eye on the duplicates.
-> >>> Another point, why do we need the K/V store thread pool for processing transactions anymore ?
-> >>> I got rid of that and calling _do_transaction() directly from the ::queue_trasaction , this is giving me ~3X performance improvement.
-> >>>
-> >>> Regards
-> >>> Somnath
-> >>>
-> >>> -----Original Message-----
-> >>> From: Sage Weil [mailto:sweil@redhat.com]
-> >>> Sent: Tuesday, February 10, 2015 10:44 AM
-> >>> To: Gregory Farnum
-> >>> Cc: Somnath Roy; sjust@redhat.com; Haomai Wang 
-> >>> (haomaiwang@gmail.com); Ceph Development
-> >>> Subject: Re: K/V interface buffer transaction
-> >>>
-> >>> On Tue, 10 Feb 2015, Gregory Farnum wrote:
-> >>>> On Tue, Feb 10, 2015 at 10:26 AM, Sage Weil <sweil@redhat.com> wrote:
-> >>>> > On Tue, 10 Feb 2015, Somnath Roy wrote:
-> >>>> >> Thanks Sam !
-> >>>> >> So, is it safe to do ordering if in a transaction *no* remove/truncate/create/add call ?
-> >>>> >> For example, do we need to preserve ordering in case of the below transaction ?
-> >>>> >> It will be helpful if you can give some insight in what scenario preserving order is *must*.
-> >>>> >
-> >>>> > If I'm not mistaken teh only time ordering would matter at all in 
-> >>>> > an transaction is when the same key is updated twice, right?  The 
-> >>>> > whole thing is committed atomically.  If there *are* dups, then 
-> >>>> > the order there obviously should be preserved.
-> >>>> >
-> >>>> > Maybe a first pass would be add an assert or something that there 
-> >>>> > are no dup keys and see if anything every falls out of that...
-> >>>> > hopefully there are none!
-> >>>>
-> >>>> I'm pretty sure some of the transaction analysis discussions people 
-> >>>> have had say that we do double-updates at times. IIRC it might have 
-> >>>> been the pglog head getting set twice in most transactions?
-> >>>
-> >>> Oh yeah, could be.  There was the snapset xattr update, but that was resetting it to an existing value (not the same value inside the same txn).  I forget if there were others.
-> >>>
-> >>> sage
-> >>>
-> >>> ________________________________
-> >>>
-> >>> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-> >>>
-> >
-> >
-> >
-> > --
-> > Best Regards,
-> >
-> > Wheat
-> 
-> 
-> 
-> --
-> Best Regards,
-> 
-> Wheat
-> N?????r??y??????X???v???)?{.n?????z?]z????ay?????j??f???h??????w??????j:+v???w????????????zZ+???????j"????i
+John
