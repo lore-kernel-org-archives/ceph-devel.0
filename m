@@ -1,198 +1,275 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
+From: Sage Weil <sage@newdream.net>
 Subject: RE: K/V interface buffer transaction
-Date: Thu, 19 Feb 2015 19:25:05 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F282ACCEE@SACMBXIP02.sdcorp.global.sandisk.com>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F282A62CE@SACMBXIP02.sdcorp.global.sandisk.com>
-	<CA+4uBUa+XBKHkx32hmZAvn4JOLp=o2WJywnA7OWXzSphvEcgjw@mail.gmail.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F282A63A6@SACMBXIP02.sdcorp.global.sandisk.com>
-	<alpine.DEB.2.00.1502101025100.1652@cobra.newdream.net>
-	<CAC6JEv_zcReo1y4JktniD-gcrKRUPLuviHJAtpoEWJ9=aai6Tg@mail.gmail.com>
-	<alpine.DEB.2.00.1502101043260.1652@cobra.newdream.net>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F282A7D11@SACMBXIP02.sdcorp.global.sandisk.com>
-	<CA+4uBUbJG9qVHS+0zk2YW3g7C3wemUm1fc5a18LtFQaCRtSnqw@mail.gmail.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F282A7DAE@SACMBXIP02.sdcorp.global.sandisk.com>
-	<CACJqLybqBwRpZOnv_3yCrQ1JGPtwoB32wYZNHQJqQa8u1xTJeA@mail.gmail.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F282A8201@SACMBXIP02.sdcorp.global.sandisk.com>
- <CACJqLyZTtwRpK6K1sc6tQY24YtZ3nde_FYJW-xkjA7Zj+KxApA@mail.gmail.com>
+Date: Thu, 19 Feb 2015 11:46:02 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1502191130270.3074@cobra.newdream.net>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F282A62CE@SACMBXIP02.sdcorp.global.sandisk.com> <CA+4uBUa+XBKHkx32hmZAvn4JOLp=o2WJywnA7OWXzSphvEcgjw@mail.gmail.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F282A63A6@SACMBXIP02.sdcorp.global.sandisk.com>
+ <alpine.DEB.2.00.1502101025100.1652@cobra.newdream.net> <CAC6JEv_zcReo1y4JktniD-gcrKRUPLuviHJAtpoEWJ9=aai6Tg@mail.gmail.com> <alpine.DEB.2.00.1502101043260.1652@cobra.newdream.net> <755F6B91B3BE364F9BCA11EA3F9E0C6F282A7D11@SACMBXIP02.sdcorp.global.sandisk.com>
+ <CA+4uBUbJG9qVHS+0zk2YW3g7C3wemUm1fc5a18LtFQaCRtSnqw@mail.gmail.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F282A7DAE@SACMBXIP02.sdcorp.global.sandisk.com> <CACJqLybqBwRpZOnv_3yCrQ1JGPtwoB32wYZNHQJqQa8u1xTJeA@mail.gmail.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F282A8201@SACMBXIP02.sdcorp.global.sandisk.com> <CACJqLyZTtwRpK6K1sc6tQY24YtZ3nde_FYJW-xkjA7Zj+KxApA@mail.gmail.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F282ACCEE@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1on0075.outbound.protection.outlook.com ([157.56.110.75]:1120
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751801AbbBSTZL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 19 Feb 2015 14:25:11 -0500
-In-Reply-To: <CACJqLyZTtwRpK6K1sc6tQY24YtZ3nde_FYJW-xkjA7Zj+KxApA@mail.gmail.com>
-Content-Language: en-US
+Received: from cobra.newdream.net ([66.33.216.30]:59434 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751840AbbBSTqE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Feb 2015 14:46:04 -0500
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F282ACCEE@SACMBXIP02.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomaiwang@gmail.com>
-Cc: "sjust@redhat.com" <sjust@redhat.com>, Sage Weil <sweil@redhat.com>, Gregory Farnum <greg@gregs42.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: Haomai Wang <haomaiwang@gmail.com>, "sjust@redhat.com" <sjust@redhat.com>, Gregory Farnum <greg@gregs42.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-U2FnZS9IYW9tYWksDQpTb21lIG1vcmUgcXVlc3Rpb25zLg0KDQoxLiBJIGFtIG5vdCBhYmxlIHRv
-IGZpZ3VyZSBvdXQgd2h5IHRoZSBLZXlWYWx1ZURCIGludGVyZmFjZSBpcyBzbyBkZXBlbmRlbnQg
-b24gaXRlciBiYXNlZCBhcHByb2FjaCA/IElmIGEgZGIgc3VwcG9ydHMgcmFuZ2UgcXVlcmllcywg
-Y2FuJ3Qgd2UgZ2V0IHJpZCBvZiB0aGVzZSBpdGVyYXRvciBpbnRlcmZhY2VzID8NCg0KMi4gQWxz
-bywgdGhlIGZ1bmN0aW9uIGxpa2UgOjpfZ2VuZXJpY19yZWFkKCkgaXMgY2FsbGluZyBTdHJpcE9i
-amVjdE1hcDo6Z2V0X3ZhbHVlc193aXRoX2hlYWRlciAtPiBHZW5lcmljT2JqZWN0TWFwOjpzY2Fu
-KCkuIFNjYW4gaXMganVzdCBsb29waW5nIG92ZXIgdGhlIGtleXMgYW5kIHN0aWxsIGNhbGxpbmcg
-aXRlci0+bG93ZXJfYm91bmQoKSAsIHdoeSBub3QgY2FsbGluZyBkaXJlY3QgZ2V0IGNhbGwgPyBJ
-biBjYXNlLCB0aGUgZGIgc3VwcG9ydHMgcmFuZ2UgcXVlcmllcyAsIHdlIGNhbiBoYW5kb3ZlciB0
-aGUgZGIgdGhlc2Uga2V5cyBhbmQgaXQgd2lsbCByZXR1cm4gYXJyYXkgb2Yga2V5L3ZhbHVlIHBh
-aXIgaXRzZWxmLiBXaHkgdG8gYm90aGVyIGFib3V0IHRoYXQgZnJvbSBnZW5lcmljIGtleXZhbHVl
-c3RvcmUgaW50ZXJmYWNlID8gSWYgZGJzIGFyZSBub3Qgc3VwcG9ydGluZyByYW5nZSBxdWVyaWVz
-LCB3ZSBjYW4gaW1wbGVtZW50IHNpbWlsYXIgbG9naWMgaW4gdGhlIHNoaW0gbGF5ZXIgbGlrZSBs
-ZXZlbGRic3RvcmUvcm9ja3NkYnN0b3JlLCBpc24ndCBpdCA/DQoNCkxldCBtZSBrbm93IGlmIEkg
-YW0gbWlzc2luZyBhbnl0aGluZyBoZXJlLg0KDQpUaGFua3MgJiBSZWdhcmRzDQpTb21uYXRoDQoN
-Ci0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBIYW9tYWkgV2FuZyBbbWFpbHRvOmhh
-b21haXdhbmdAZ21haWwuY29tXSANClNlbnQ6IFdlZG5lc2RheSwgRmVicnVhcnkgMTEsIDIwMTUg
-MTE6MzUgUE0NClRvOiBTb21uYXRoIFJveQ0KQ2M6IHNqdXN0QHJlZGhhdC5jb207IFNhZ2UgV2Vp
-bDsgR3JlZ29yeSBGYXJudW07IENlcGggRGV2ZWxvcG1lbnQNClN1YmplY3Q6IFJlOiBLL1YgaW50
-ZXJmYWNlIGJ1ZmZlciB0cmFuc2FjdGlvbg0KDQpPbiBUaHUsIEZlYiAxMiwgMjAxNSBhdCAzOjI2
-IFBNLCBTb21uYXRoIFJveSA8U29tbmF0aC5Sb3lAc2FuZGlzay5jb20+IHdyb3RlOg0KPiBIYW9t
-YWksDQo+DQo+IDw8IEtleVZhbHVlU3RvcmUgd2lsbCBvbmx5IHdyaXRlIG9uZSBmb3IgZHVwbGlj
-YXRlIGVudHJ5IGluIG9yZGVyaW5nDQo+DQo+IEkgc2F3IEsvdiBzdG9yZSAoa2V5dmFsdWVzdG9y
-ZS5jYykgaXRzZWxmIGlzIG5vdCByZW1vdmluZyB0aGUgZHVwbGljYXRlcyAsIGFyZSB5b3Ugc2F5
-aW5nIHRoZSBzaGltIGxheWVyIGxpa2UgbGV2ZWxkYnN0b3JlL3JvY2tzZGJzdG9yZSBpcyByZW1v
-dmluZyB0aGUgZHVwbGljYXRlcyBvciB0aGUgbGV2ZWxkYi9yb2Nrc2RiID8NCg0KT2ggbm8sIHNv
-cnJ5LiBUaGF0J3MganVzdCBJIHdhbnQgdG8gZG8gaW4gbWluZC4gSSBmb3JnZXQgSSBoYXZlbid0
-IGltcGwgaXQuDQoNCkVhY2ggT2JqZWN0U3RvcmU6OlRyYW5zYWN0aW9uIGluIEtleVZhbHVlU3Rv
-cmUgaGFzIGNvcnJlc3BvbmRpbmcgQnVmZmVyVHJhbnNhY3Rpb24gd2lsbCBzdG9yZSBhbGwga3Zz
-IG5lZWRlZCB0byBzdG9yZS4gV2UgY291bGQgbGV0IHN1Ym1pdF90cmFuc2FjdGlvbiBkbyBpdCBh
-dCBsYXN0IGluc3RlYWQgb2YgY2FsbGluZyBiYWNrZW5kIGVhY2ggb3AuDQoNClllYWgsIHdlIGNv
-dWxkIHJlc29sdmUgaXQgaW4gS2V5VmFsdWVTdG9yZSBjbGVhcmx5Lg0KPg0KPiBUaGFua3MgJiBS
-ZWdhcmRzDQo+IFNvbW5hdGgNCj4NCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJv
-bTogSGFvbWFpIFdhbmcgW21haWx0bzpoYW9tYWl3YW5nQGdtYWlsLmNvbV0NCj4gU2VudDogV2Vk
-bmVzZGF5LCBGZWJydWFyeSAxMSwgMjAxNSA3OjM2IFBNDQo+IFRvOiBTb21uYXRoIFJveQ0KPiBD
-Yzogc2p1c3RAcmVkaGF0LmNvbTsgU2FnZSBXZWlsOyBHcmVnb3J5IEZhcm51bTsgQ2VwaCBEZXZl
-bG9wbWVudA0KPiBTdWJqZWN0OiBSZTogSy9WIGludGVyZmFjZSBidWZmZXIgdHJhbnNhY3Rpb24N
-Cj4NCj4gT24gVGh1LCBGZWIgMTIsIDIwMTUgYXQgNjo1MyBBTSwgU29tbmF0aCBSb3kgPFNvbW5h
-dGguUm95QHNhbmRpc2suY29tPiB3cm90ZToNCj4+IFllYWgsIHRoYW5rcyENCj4+IE5vdCBzdXJl
-IGlmIGxldmVsLWRiIGlzIGhhbmRsaW5nIGR1cGxpY2F0ZSBlbnRyaWVzIHdpdGhpbiBhIHRyYW5z
-YWN0aW9uIHByb3Blcmx5IG9yIG5vdCwgaWYgbm90LCBpbiBjYXNlIG9mIGZpbGVzdG9yZSAoYW5k
-IGFsc28gZm9yIEsvViBzdG9yZXMpIHdlIGFyZSBoYXZpbmcgYW4gZXh0cmEgKHJlZHVuZGFudCkg
-T01BUCB3cml0ZSBpbiB0aGUgV3JpdGUtUGF0aC4NCj4NCj4gS2V5VmFsdWVTdG9yZSB3aWxsIG9u
-bHkgd3JpdGUgb25lIGZvciBkdXBsaWNhdGUgZW50cnkgaW4gb3JkZXJpbmcuDQo+DQo+IEJ1dCBG
-aWxlU3RvcmUgd2lsbCB3cml0ZSByZWR1bmRhbnQgb21hcC4NCj4NCj4gQW5kIGZyb20gZHVtcCBs
-b2csIHRoZSBkdXBsaWNhdGUgZW50cnkgbG9va3MgbGlrZSBmcm9tIHBnbG9nDQo+DQo+Pg0KPj4g
-UmVnYXJkcw0KPj4gU29tbmF0aA0KPj4NCj4+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+
-PiBGcm9tOiBTYW11ZWwgSnVzdCBbbWFpbHRvOnNhbS5qdXN0QGlua3RhbmsuY29tXQ0KPj4gU2Vu
-dDogV2VkbmVzZGF5LCBGZWJydWFyeSAxMSwgMjAxNSAyOjM2IFBNDQo+PiBUbzogU29tbmF0aCBS
-b3kNCj4+IENjOiBTYWdlIFdlaWw7IEdyZWdvcnkgRmFybnVtOyBIYW9tYWkgV2FuZyAoaGFvbWFp
-d2FuZ0BnbWFpbC5jb20pOyANCj4+IENlcGggRGV2ZWxvcG1lbnQNCj4+IFN1YmplY3Q6IFJlOiBL
-L1YgaW50ZXJmYWNlIGJ1ZmZlciB0cmFuc2FjdGlvbg0KPj4NCj4+IFdlbGwsIHRoZSB0cmFuc2Fj
-dGlvbiBpcyBhdG9taWMsIHNvIGlmIHRoZSBrZXkgaXMgc2V0IHR3aWNlLCB5b3UgY2FuIGNlcnRh
-aW5seSBpZ25vcmUgdGhlIGZpcnN0IG9uZS4NCj4+IC1TYW0NCj4+DQo+PiBPbiBXZWQsIEZlYiAx
-MSwgMjAxNSBhdCAyOjIwIFBNLCBTb21uYXRoIFJveSA8U29tbmF0aC5Sb3lAc2FuZGlzay5jb20+
-IHdyb3RlOg0KPj4+IEhpLA0KPj4+IE15IGNvZGUgaGFkIGEgYnVnIGR1cmluZyBwcmludGluZyBs
-b2cuIEkgd2FzIHVzaW5nIG1hcCB0byBzdG9yZSB0aGUgDQo+Pj4gYXR0cmlidXRlIGtleXMgaW4g
-c29ydGVkIG9yZGVyIGFuZCB0aGF0IHdhcyBkaXNjYXJkaW5nIHRoZSANCj4+PiBkdXBsaWNhdGVz
-DQo+Pj4gOi0pDQo+Pj4NCj4+PiBUaGlzIGlzIHdoYXQgSSBmb3VuZCBvdXQgY29taW5nIGR1cmlu
-ZyB0cmFuc2FjdGlvbi4NCj4+Pg0KPj4+IDIwMTUtMDItMDUgMTU6NTg6MTIuMzExNzM4IDdmMjdi
-NTQyOTcwMCAgMCBxdWV1ZV90cmFuc2FjdGlvbnMgOjoNCj4+PiBiZWZvcmUgX2RvX3RyYW5zYWN0
-aW9ucw0KPj4+IDIwMTUtMDItMDUgMTU6NTg6MTIuMzExNzU0IDdmMjdiNTQyOTcwMCAgMCBfZG9f
-dHJhbnNhY3Rpb25zOjpiZWZvcmUgDQo+Pj4gX2RvX3RyYW5zYWN0aW9uDQo+Pj4gMjAxNS0wMi0w
-NSAxNTo1ODoxMi4zMTE3NzAgN2YyN2I1NDI5NzAwICAwIA0KPj4+IFRyYW5zYWN0aW9uOjpPUF9X
-UklURTo6Y2lkID0gMS5hM19oZWFkIG9pZCA9DQo+Pj4gNjgwMjU2YTMvcmJkX2RhdGEuMTAwOTc0
-YjBkYzUxLjAwMDAwMDAwMDAwMDA2MzEvaGVhZC8vMSBvZmZzZXQgPQ0KPj4+IDM5OTc2OTYgbGVu
-ID0gNjU1MzYNCj4+PiAyMDE1LTAyLTA1IDE1OjU4OjEyLjMxMTgwMCA3ZjI3YjU0Mjk3MDAgIDAg
-DQo+Pj4gVHJhbnNhY3Rpb246Ok9QX1NFVEFUVFI6OmNpZCA9IDEuYTNfaGVhZCBvaWQgPQ0KPj4+
-IDY4MDI1NmEzL3JiZF9kYXRhLjEwMDk3NGIwZGM1MS4wMDAwMDAwMDAwMDAwNjMxL2hlYWQvLzEg
-YXR0cl9uYW1lID0gDQo+Pj4gXyBhdHRyX3ZhbHVlX2xlbiA9IDI3Mw0KPj4+IDIwMTUtMDItMDUg
-MTU6NTg6MTIuMzExODIyIDdmMjdiNTQyOTcwMCAgMCANCj4+PiBUcmFuc2FjdGlvbjo6T1BfU0VU
-QVRUUjo6Y2lkID0gMS5hM19oZWFkIG9pZCA9DQo+Pj4gNjgwMjU2YTMvcmJkX2RhdGEuMTAwOTc0
-YjBkYzUxLjAwMDAwMDAwMDAwMDA2MzEvaGVhZC8vMSBhdHRyX25hbWUgPSANCj4+PiBzbmFwc2V0
-IGF0dHJfdmFsdWVfbGVuID0gMzENCj4+PiAyMDE1LTAyLTA1IDE1OjU4OjEyLjMxMTg0MCA3ZjI3
-YjU0Mjk3MDAgIDAgDQo+Pj4gVHJhbnNhY3Rpb246Ok9QX09NQVBfU0VUS0VZUzo6Y2lkID0gMS5h
-M19oZWFkIG9pZCA9IGEzLy9oZWFkLy8xDQo+Pj4gMjAxNS0wMi0wNSAxNTo1ODoxMi4zMTE4NDUg
-N2YyN2I1NDI5NzAwICAwIE9NQVBfS0VZID0gMDAwMDAwMDEwMi4wMDAwMDAwMDAwMDAwMDAwMTU5
-MiBWYWx1ZSA9IGJ1ZmZlcjo6bGlzdChsZW49MTc4LA0KPj4+ICAgICAgICAgYnVmZmVyOjpwdHIo
-MH40IDB4M2VmYzIxMDAwIGluIHJhdyAweDNlZmMyMTAwMCBsZW4gNDA5NiBucmVmIDYpLA0KPj4+
-ICAgICAgICAgYnVmZmVyOjpwdHIoMH4xNzAgMHgzZDc0ODQwIGluIHJhdyAweDNkNzQ4NDAgbGVu
-IDY4OCBucmVmIDMpLA0KPj4+ICAgICAgICAgYnVmZmVyOjpwdHIoNH40IDB4M2VmYzIxMDA0IGlu
-IHJhdyAweDNlZmMyMTAwMCBsZW4gNDA5NiBucmVmDQo+Pj4gNikNCj4+PiApDQo+Pj4gMjAxNS0w
-Mi0wNSAxNTo1ODoxMi4zMTE5MzEgN2YyN2I1NDI5NzAwICAwIA0KPj4+IFRyYW5zYWN0aW9uOjpP
-UF9PTUFQX1NFVEtFWVM6OmNpZCA9IDEuYTNfaGVhZCBvaWQgPSBhMy8vaGVhZC8vMQ0KPj4+IDIw
-MTUtMDItMDUgMTU6NTg6MTIuMzExOTM4IDdmMjdiNTQyOTcwMCAgMCBPTUFQX0tFWSA9IF9lcG9j
-aCBWYWx1ZSA9IGJ1ZmZlcjo6bGlzdChsZW49NCwNCj4+PiAgICAgICAgIGJ1ZmZlcjo6cHRyKDB+
-NCAweDNlZmMxZjAwMCBpbiByYXcgMHgzZWZjMWYwMDAgbGVuIDQwOTYgbnJlZg0KPj4+IDMpDQo+
-Pj4gKQ0KPj4+IDIwMTUtMDItMDUgMTU6NTg6MTIuMzExOTQzIDdmMjdiNTQyOTcwMCAgMCBPTUFQ
-X0tFWSA9IF9pbmZvIFZhbHVlID0gYnVmZmVyOjpsaXN0KGxlbj03MTMsDQo+Pj4gICAgICAgICBi
-dWZmZXI6OnB0cigwfjcxMyAweDNlZmMxZTAwMCBpbiByYXcgMHgzZWZjMWUwMDAgbGVuIDQwOTYg
-DQo+Pj4gbnJlZg0KPj4+IDMpDQo+Pj4gKQ0KPj4+IDIwMTUtMDItMDUgMTU6NTg6MTIuMzExOTY1
-IDdmMjdiNTQyOTcwMCAgMCANCj4+PiBUcmFuc2FjdGlvbjo6T1BfT01BUF9TRVRLRVlTOjpjaWQg
-PSAxLmEzX2hlYWQgb2lkID0gYTMvL2hlYWQvLzENCj4+PiAyMDE1LTAyLTA1IDE1OjU4OjEyLjMx
-MTk2OSA3ZjI3YjU0Mjk3MDAgIDAgT01BUF9LRVkgPSAwMDAwMDAwMTAyLjAwMDAwMDAwMDAwMDAw
-MDAxNTkyIFZhbHVlID0gYnVmZmVyOjpsaXN0KGxlbj0xNzgsDQo+Pj4gICAgICAgICBidWZmZXI6
-OnB0cigwfjQgMHgzZDc1ZTQwIGluIHJhdyAweDNkNzVlNDAgbGVuIDY4OCBucmVmIDYpLA0KPj4+
-ICAgICAgICAgYnVmZmVyOjpwdHIoMH4xNzAgMHgzZDc1YjgwIGluIHJhdyAweDNkNzViODAgbGVu
-IDY4OCBucmVmIDMpLA0KPj4+ICAgICAgICAgYnVmZmVyOjpwdHIoNH40IDB4M2Q3NWU0NCBpbiBy
-YXcgMHgzZDc1ZTQwIGxlbiA2ODggbnJlZiA2KQ0KPj4+ICkNCj4+PiAyMDE1LTAyLTA1IDE1OjU4
-OjEyLjMxMTk4MCA3ZjI3YjU0Mjk3MDAgIDAgT01BUF9LRVkgPSBjYW5fcm9sbGJhY2tfdG8gVmFs
-dWUgPSBidWZmZXI6Omxpc3QobGVuPTEyLA0KPj4+ICAgICAgICAgYnVmZmVyOjpwdHIoMH4xMiAw
-eDNlZmMyNTAwMCBpbiByYXcgMHgzZWZjMjUwMDAgbGVuIDQwOTYgDQo+Pj4gbnJlZg0KPj4+IDMp
-DQo+Pj4gKQ0KPj4+IDIwMTUtMDItMDUgMTU6NTg6MTIuMzExOTg1IDdmMjdiNTQyOTcwMCAgMCBP
-TUFQX0tFWSA9IHJvbGxiYWNrX2luZm9fdHJpbW1lZF90byBWYWx1ZSA9IGJ1ZmZlcjo6bGlzdChs
-ZW49MTIsDQo+Pj4gICAgICAgICBidWZmZXI6OnB0cigwfjEyIDB4M2VmYzI0MDAwIGluIHJhdyAw
-eDNlZmMyNDAwMCBsZW4gNDA5NiANCj4+PiBucmVmDQo+Pj4gMykNCj4+PiApDQo+Pj4NCj4+Pg0K
-Pj4+DQo+Pj4gU28sIHRoZSBPTUFQX0tFWSA9IDAwMDAwMDAxMDIuMDAwMDAwMDAwMDAwMDAwMDE1
-OTIgaXMgY29taW5nIHR3aWNlICENCj4+Pg0KPj4+IElzIHRoZXJlIGFueSByZWFzb24sIHdoeSA/
-IFdoYXQgaXMgdGhpcyBhdHRyaWJ1dGUgYnkgdGhlIHdheSA/DQo+Pj4gQ2FuIHdlIHNhZmVseSBk
-aXNjYXJkIHRoZSBmaXJzdCBPUF9PTUFQX1NFVEtFWVMgY2FsbCBmb3IgdGhlIHNhbWUga2V5ID8N
-Cj4+Pg0KPj4+IFRoYW5rcyAmIFJlZ2FyZHMNCj4+PiBTb21uYXRoDQo+Pj4NCj4+PiAtLS0tLU9y
-aWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPj4+IEZyb206IFNvbW5hdGggUm95DQo+Pj4gU2VudDogVHVl
-c2RheSwgRmVicnVhcnkgMTAsIDIwMTUgNDozNiBQTQ0KPj4+IFRvOiAnU2FnZSBXZWlsJzsgR3Jl
-Z29yeSBGYXJudW0NCj4+PiBDYzogc2p1c3RAcmVkaGF0LmNvbTsgSGFvbWFpIFdhbmcgKGhhb21h
-aXdhbmdAZ21haWwuY29tKTsgQ2VwaCANCj4+PiBEZXZlbG9wbWVudA0KPj4+IFN1YmplY3Q6IFJF
-OiBLL1YgaW50ZXJmYWNlIGJ1ZmZlciB0cmFuc2FjdGlvbg0KPj4+DQo+Pj4gVGhhbmtzIEdyZWcv
-U2FtL1NhZ2UgIQ0KPj4+IEZvciBub3csIHdlIHdpbGwgYmUgZG9pbmcgb3VyIHRlc3RpbmcgYnkg
-c29ydGluZyB0aGUga2V5cyBhbmQgd2lsbCBrZWVwIGFuIGV5ZSBvbiB0aGUgZHVwbGljYXRlcy4N
-Cj4+PiBBbm90aGVyIHBvaW50LCB3aHkgZG8gd2UgbmVlZCB0aGUgSy9WIHN0b3JlIHRocmVhZCBw
-b29sIGZvciBwcm9jZXNzaW5nIHRyYW5zYWN0aW9ucyBhbnltb3JlID8NCj4+PiBJIGdvdCByaWQg
-b2YgdGhhdCBhbmQgY2FsbGluZyBfZG9fdHJhbnNhY3Rpb24oKSBkaXJlY3RseSBmcm9tIHRoZSA6
-OnF1ZXVlX3RyYXNhY3Rpb24gLCB0aGlzIGlzIGdpdmluZyBtZSB+M1ggcGVyZm9ybWFuY2UgaW1w
-cm92ZW1lbnQuDQo+Pj4NCj4+PiBSZWdhcmRzDQo+Pj4gU29tbmF0aA0KPj4+DQo+Pj4gLS0tLS1P
-cmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4+PiBGcm9tOiBTYWdlIFdlaWwgW21haWx0bzpzd2VpbEBy
-ZWRoYXQuY29tXQ0KPj4+IFNlbnQ6IFR1ZXNkYXksIEZlYnJ1YXJ5IDEwLCAyMDE1IDEwOjQ0IEFN
-DQo+Pj4gVG86IEdyZWdvcnkgRmFybnVtDQo+Pj4gQ2M6IFNvbW5hdGggUm95OyBzanVzdEByZWRo
-YXQuY29tOyBIYW9tYWkgV2FuZyANCj4+PiAoaGFvbWFpd2FuZ0BnbWFpbC5jb20pOyBDZXBoIERl
-dmVsb3BtZW50DQo+Pj4gU3ViamVjdDogUmU6IEsvViBpbnRlcmZhY2UgYnVmZmVyIHRyYW5zYWN0
-aW9uDQo+Pj4NCj4+PiBPbiBUdWUsIDEwIEZlYiAyMDE1LCBHcmVnb3J5IEZhcm51bSB3cm90ZToN
-Cj4+Pj4gT24gVHVlLCBGZWIgMTAsIDIwMTUgYXQgMTA6MjYgQU0sIFNhZ2UgV2VpbCA8c3dlaWxA
-cmVkaGF0LmNvbT4gd3JvdGU6DQo+Pj4+ID4gT24gVHVlLCAxMCBGZWIgMjAxNSwgU29tbmF0aCBS
-b3kgd3JvdGU6DQo+Pj4+ID4+IFRoYW5rcyBTYW0gIQ0KPj4+PiA+PiBTbywgaXMgaXQgc2FmZSB0
-byBkbyBvcmRlcmluZyBpZiBpbiBhIHRyYW5zYWN0aW9uICpubyogcmVtb3ZlL3RydW5jYXRlL2Ny
-ZWF0ZS9hZGQgY2FsbCA/DQo+Pj4+ID4+IEZvciBleGFtcGxlLCBkbyB3ZSBuZWVkIHRvIHByZXNl
-cnZlIG9yZGVyaW5nIGluIGNhc2Ugb2YgdGhlIGJlbG93IHRyYW5zYWN0aW9uID8NCj4+Pj4gPj4g
-SXQgd2lsbCBiZSBoZWxwZnVsIGlmIHlvdSBjYW4gZ2l2ZSBzb21lIGluc2lnaHQgaW4gd2hhdCBz
-Y2VuYXJpbyBwcmVzZXJ2aW5nIG9yZGVyIGlzICptdXN0Ki4NCj4+Pj4gPg0KPj4+PiA+IElmIEkn
-bSBub3QgbWlzdGFrZW4gdGVoIG9ubHkgdGltZSBvcmRlcmluZyB3b3VsZCBtYXR0ZXIgYXQgYWxs
-IGluIA0KPj4+PiA+IGFuIHRyYW5zYWN0aW9uIGlzIHdoZW4gdGhlIHNhbWUga2V5IGlzIHVwZGF0
-ZWQgdHdpY2UsIHJpZ2h0PyAgVGhlIA0KPj4+PiA+IHdob2xlIHRoaW5nIGlzIGNvbW1pdHRlZCBh
-dG9taWNhbGx5LiAgSWYgdGhlcmUgKmFyZSogZHVwcywgdGhlbiANCj4+Pj4gPiB0aGUgb3JkZXIg
-dGhlcmUgb2J2aW91c2x5IHNob3VsZCBiZSBwcmVzZXJ2ZWQuDQo+Pj4+ID4NCj4+Pj4gPiBNYXli
-ZSBhIGZpcnN0IHBhc3Mgd291bGQgYmUgYWRkIGFuIGFzc2VydCBvciBzb21ldGhpbmcgdGhhdCB0
-aGVyZSANCj4+Pj4gPiBhcmUgbm8gZHVwIGtleXMgYW5kIHNlZSBpZiBhbnl0aGluZyBldmVyeSBm
-YWxscyBvdXQgb2YgdGhhdC4uLg0KPj4+PiA+IGhvcGVmdWxseSB0aGVyZSBhcmUgbm9uZSENCj4+
-Pj4NCj4+Pj4gSSdtIHByZXR0eSBzdXJlIHNvbWUgb2YgdGhlIHRyYW5zYWN0aW9uIGFuYWx5c2lz
-IGRpc2N1c3Npb25zIHBlb3BsZSANCj4+Pj4gaGF2ZSBoYWQgc2F5IHRoYXQgd2UgZG8gZG91Ymxl
-LXVwZGF0ZXMgYXQgdGltZXMuIElJUkMgaXQgbWlnaHQgaGF2ZSANCj4+Pj4gYmVlbiB0aGUgcGds
-b2cgaGVhZCBnZXR0aW5nIHNldCB0d2ljZSBpbiBtb3N0IHRyYW5zYWN0aW9ucz8NCj4+Pg0KPj4+
-IE9oIHllYWgsIGNvdWxkIGJlLiAgVGhlcmUgd2FzIHRoZSBzbmFwc2V0IHhhdHRyIHVwZGF0ZSwg
-YnV0IHRoYXQgd2FzIHJlc2V0dGluZyBpdCB0byBhbiBleGlzdGluZyB2YWx1ZSAobm90IHRoZSBz
-YW1lIHZhbHVlIGluc2lkZSB0aGUgc2FtZSB0eG4pLiAgSSBmb3JnZXQgaWYgdGhlcmUgd2VyZSBv
-dGhlcnMuDQo+Pj4NCj4+PiBzYWdlDQo+Pj4NCj4+PiBfX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fXw0KPj4+DQo+Pj4gUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQg
-aW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUg
-dXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJl
-YWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBh
-cmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGlu
-IGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwg
-b3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91
-IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5
-IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVk
-aWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4g
-eW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0
-b3JlZCBjb3BpZXMpLg0KPj4+DQo+DQo+DQo+DQo+IC0tDQo+IEJlc3QgUmVnYXJkcywNCj4NCj4g
-V2hlYXQNCg0KDQoNCi0tDQpCZXN0IFJlZ2FyZHMsDQoNCldoZWF0DQo=
+On Thu, 19 Feb 2015, Somnath Roy wrote:
+> Sage/Haomai,
+> Some more questions.
+> 
+> 1. I am not able to figure out why the KeyValueDB interface is so 
+> dependent on iter based approach ? If a db supports range queries, can't 
+> we get rid of these iterator interfaces ?
+> 
+> 2. Also, the function like ::_generic_read() is calling 
+> StripObjectMap::get_values_with_header -> GenericObjectMap::scan(). Scan 
+> is just looping over the keys and still calling iter->lower_bound() , 
+> why not calling direct get call ? In case, the db supports range queries 
+> , we can handover the db these keys and it will return array of 
+> key/value pair itself. Why to bother about that from generic 
+> keyvaluestore interface ? If dbs are not supporting range queries, we 
+> can implement similar logic in the shim layer like 
+> leveldbstore/rocksdbstore, isn't it ?
+
+The KeyValueDB is the interface that seemed necessary when Sam was 
+implementing the original DBObjectMap a couple years ago.  It's based on 
+what leveldb was providing and what was needed at the time.  We are more 
+than happy to change it!
+
+A few things:
+
+1. Adding a call that returns multiple k/v pairs sounds fine as long as 
+there is a limmit so we don't get an unbounded result size.
+
+2. I'm concerned (in general) about the efficiency of this interface.  
+Right now pretty much everything is fetched and returned in the form of an 
+STL structure and I'm worried that there will be a bunch of data copying 
+on the implementation to conform to that.  On the flip side, lots of 
+callers are currently rejiggering their requests into those maps too.  I'd 
+be very interested in hearing about how you think we can make this fit 
+more efficiently to whatever backend you're currently working with.  
+Leveldb and rocksdb will I think be the most common backends, but we want 
+to perform well with others too.
+
+3. One simple example of this is there are several places where we have an 
+encoded bufferlist of map<string,bufferlist> that we are doing a set on 
+(or are pulling out).  Currently we end up decoding into an STL map and 
+feeding to the interface, but I suspect lots of callers could benefit from 
+a set of calls that go direct to/from such a buffer and skip the 
+map<>.
+
+4. There a trivial patch in my newstore wip branch that adds a get(prefix, 
+key, *value) so that you don't get to pass in a set<string> for a single 
+fetch.  It's somewhere in the pile at 
+
+	https://github.com/liewegas/ceph/commits/wip-newstore
+
+sage
+
+> 
+> Let me know if I am missing anything here.
+> 
+> Thanks & Regards
+> Somnath
+> 
+> -----Original Message-----
+> From: Haomai Wang [mailto:haomaiwang@gmail.com] 
+> Sent: Wednesday, February 11, 2015 11:35 PM
+> To: Somnath Roy
+> Cc: sjust@redhat.com; Sage Weil; Gregory Farnum; Ceph Development
+> Subject: Re: K/V interface buffer transaction
+> 
+> On Thu, Feb 12, 2015 at 3:26 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
+> > Haomai,
+> >
+> > << KeyValueStore will only write one for duplicate entry in ordering
+> >
+> > I saw K/v store (keyvaluestore.cc) itself is not removing the duplicates , are you saying the shim layer like leveldbstore/rocksdbstore is removing the duplicates or the leveldb/rocksdb ?
+> 
+> Oh no, sorry. That's just I want to do in mind. I forget I haven't impl it.
+> 
+> Each ObjectStore::Transaction in KeyValueStore has corresponding BufferTransaction will store all kvs needed to store. We could let submit_transaction do it at last instead of calling backend each op.
+> 
+> Yeah, we could resolve it in KeyValueStore clearly.
+> >
+> > Thanks & Regards
+> > Somnath
+> >
+> > -----Original Message-----
+> > From: Haomai Wang [mailto:haomaiwang@gmail.com]
+> > Sent: Wednesday, February 11, 2015 7:36 PM
+> > To: Somnath Roy
+> > Cc: sjust@redhat.com; Sage Weil; Gregory Farnum; Ceph Development
+> > Subject: Re: K/V interface buffer transaction
+> >
+> > On Thu, Feb 12, 2015 at 6:53 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
+> >> Yeah, thanks!
+> >> Not sure if level-db is handling duplicate entries within a transaction properly or not, if not, in case of filestore (and also for K/V stores) we are having an extra (redundant) OMAP write in the Write-Path.
+> >
+> > KeyValueStore will only write one for duplicate entry in ordering.
+> >
+> > But FileStore will write redundant omap.
+> >
+> > And from dump log, the duplicate entry looks like from pglog
+> >
+> >>
+> >> Regards
+> >> Somnath
+> >>
+> >> -----Original Message-----
+> >> From: Samuel Just [mailto:sam.just@inktank.com]
+> >> Sent: Wednesday, February 11, 2015 2:36 PM
+> >> To: Somnath Roy
+> >> Cc: Sage Weil; Gregory Farnum; Haomai Wang (haomaiwang@gmail.com); 
+> >> Ceph Development
+> >> Subject: Re: K/V interface buffer transaction
+> >>
+> >> Well, the transaction is atomic, so if the key is set twice, you can certainly ignore the first one.
+> >> -Sam
+> >>
+> >> On Wed, Feb 11, 2015 at 2:20 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
+> >>> Hi,
+> >>> My code had a bug during printing log. I was using map to store the 
+> >>> attribute keys in sorted order and that was discarding the 
+> >>> duplicates
+> >>> :-)
+> >>>
+> >>> This is what I found out coming during transaction.
+> >>>
+> >>> 2015-02-05 15:58:12.311738 7f27b5429700  0 queue_transactions ::
+> >>> before _do_transactions
+> >>> 2015-02-05 15:58:12.311754 7f27b5429700  0 _do_transactions::before 
+> >>> _do_transaction
+> >>> 2015-02-05 15:58:12.311770 7f27b5429700  0 
+> >>> Transaction::OP_WRITE::cid = 1.a3_head oid =
+> >>> 680256a3/rbd_data.100974b0dc51.0000000000000631/head//1 offset =
+> >>> 3997696 len = 65536
+> >>> 2015-02-05 15:58:12.311800 7f27b5429700  0 
+> >>> Transaction::OP_SETATTR::cid = 1.a3_head oid =
+> >>> 680256a3/rbd_data.100974b0dc51.0000000000000631/head//1 attr_name = 
+> >>> _ attr_value_len = 273
+> >>> 2015-02-05 15:58:12.311822 7f27b5429700  0 
+> >>> Transaction::OP_SETATTR::cid = 1.a3_head oid =
+> >>> 680256a3/rbd_data.100974b0dc51.0000000000000631/head//1 attr_name = 
+> >>> snapset attr_value_len = 31
+> >>> 2015-02-05 15:58:12.311840 7f27b5429700  0 
+> >>> Transaction::OP_OMAP_SETKEYS::cid = 1.a3_head oid = a3//head//1
+> >>> 2015-02-05 15:58:12.311845 7f27b5429700  0 OMAP_KEY = 0000000102.00000000000000001592 Value = buffer::list(len=178,
+> >>>         buffer::ptr(0~4 0x3efc21000 in raw 0x3efc21000 len 4096 nref 6),
+> >>>         buffer::ptr(0~170 0x3d74840 in raw 0x3d74840 len 688 nref 3),
+> >>>         buffer::ptr(4~4 0x3efc21004 in raw 0x3efc21000 len 4096 nref
+> >>> 6)
+> >>> )
+> >>> 2015-02-05 15:58:12.311931 7f27b5429700  0 
+> >>> Transaction::OP_OMAP_SETKEYS::cid = 1.a3_head oid = a3//head//1
+> >>> 2015-02-05 15:58:12.311938 7f27b5429700  0 OMAP_KEY = _epoch Value = buffer::list(len=4,
+> >>>         buffer::ptr(0~4 0x3efc1f000 in raw 0x3efc1f000 len 4096 nref
+> >>> 3)
+> >>> )
+> >>> 2015-02-05 15:58:12.311943 7f27b5429700  0 OMAP_KEY = _info Value = buffer::list(len=713,
+> >>>         buffer::ptr(0~713 0x3efc1e000 in raw 0x3efc1e000 len 4096 
+> >>> nref
+> >>> 3)
+> >>> )
+> >>> 2015-02-05 15:58:12.311965 7f27b5429700  0 
+> >>> Transaction::OP_OMAP_SETKEYS::cid = 1.a3_head oid = a3//head//1
+> >>> 2015-02-05 15:58:12.311969 7f27b5429700  0 OMAP_KEY = 0000000102.00000000000000001592 Value = buffer::list(len=178,
+> >>>         buffer::ptr(0~4 0x3d75e40 in raw 0x3d75e40 len 688 nref 6),
+> >>>         buffer::ptr(0~170 0x3d75b80 in raw 0x3d75b80 len 688 nref 3),
+> >>>         buffer::ptr(4~4 0x3d75e44 in raw 0x3d75e40 len 688 nref 6)
+> >>> )
+> >>> 2015-02-05 15:58:12.311980 7f27b5429700  0 OMAP_KEY = can_rollback_to Value = buffer::list(len=12,
+> >>>         buffer::ptr(0~12 0x3efc25000 in raw 0x3efc25000 len 4096 
+> >>> nref
+> >>> 3)
+> >>> )
+> >>> 2015-02-05 15:58:12.311985 7f27b5429700  0 OMAP_KEY = rollback_info_trimmed_to Value = buffer::list(len=12,
+> >>>         buffer::ptr(0~12 0x3efc24000 in raw 0x3efc24000 len 4096 
+> >>> nref
+> >>> 3)
+> >>> )
+> >>>
+> >>>
+> >>>
+> >>> So, the OMAP_KEY = 0000000102.00000000000000001592 is coming twice !
+> >>>
+> >>> Is there any reason, why ? What is this attribute by the way ?
+> >>> Can we safely discard the first OP_OMAP_SETKEYS call for the same key ?
+> >>>
+> >>> Thanks & Regards
+> >>> Somnath
+> >>>
+> >>> -----Original Message-----
+> >>> From: Somnath Roy
+> >>> Sent: Tuesday, February 10, 2015 4:36 PM
+> >>> To: 'Sage Weil'; Gregory Farnum
+> >>> Cc: sjust@redhat.com; Haomai Wang (haomaiwang@gmail.com); Ceph 
+> >>> Development
+> >>> Subject: RE: K/V interface buffer transaction
+> >>>
+> >>> Thanks Greg/Sam/Sage !
+> >>> For now, we will be doing our testing by sorting the keys and will keep an eye on the duplicates.
+> >>> Another point, why do we need the K/V store thread pool for processing transactions anymore ?
+> >>> I got rid of that and calling _do_transaction() directly from the ::queue_trasaction , this is giving me ~3X performance improvement.
+> >>>
+> >>> Regards
+> >>> Somnath
+> >>>
+> >>> -----Original Message-----
+> >>> From: Sage Weil [mailto:sweil@redhat.com]
+> >>> Sent: Tuesday, February 10, 2015 10:44 AM
+> >>> To: Gregory Farnum
+> >>> Cc: Somnath Roy; sjust@redhat.com; Haomai Wang 
+> >>> (haomaiwang@gmail.com); Ceph Development
+> >>> Subject: Re: K/V interface buffer transaction
+> >>>
+> >>> On Tue, 10 Feb 2015, Gregory Farnum wrote:
+> >>>> On Tue, Feb 10, 2015 at 10:26 AM, Sage Weil <sweil@redhat.com> wrote:
+> >>>> > On Tue, 10 Feb 2015, Somnath Roy wrote:
+> >>>> >> Thanks Sam !
+> >>>> >> So, is it safe to do ordering if in a transaction *no* remove/truncate/create/add call ?
+> >>>> >> For example, do we need to preserve ordering in case of the below transaction ?
+> >>>> >> It will be helpful if you can give some insight in what scenario preserving order is *must*.
+> >>>> >
+> >>>> > If I'm not mistaken teh only time ordering would matter at all in 
+> >>>> > an transaction is when the same key is updated twice, right?  The 
+> >>>> > whole thing is committed atomically.  If there *are* dups, then 
+> >>>> > the order there obviously should be preserved.
+> >>>> >
+> >>>> > Maybe a first pass would be add an assert or something that there 
+> >>>> > are no dup keys and see if anything every falls out of that...
+> >>>> > hopefully there are none!
+> >>>>
+> >>>> I'm pretty sure some of the transaction analysis discussions people 
+> >>>> have had say that we do double-updates at times. IIRC it might have 
+> >>>> been the pglog head getting set twice in most transactions?
+> >>>
+> >>> Oh yeah, could be.  There was the snapset xattr update, but that was resetting it to an existing value (not the same value inside the same txn).  I forget if there were others.
+> >>>
+> >>> sage
+> >>>
+> >>> ________________________________
+> >>>
+> >>> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+> >>>
+> >
+> >
+> >
+> > --
+> > Best Regards,
+> >
+> > Wheat
+> 
+> 
+> 
+> --
+> Best Regards,
+> 
+> Wheat
+> N?????r??y??????X???v???)?{.n?????z?]z????ay?????j??f???h??????w??????j:+v???w????????????zZ+???????j"????i
