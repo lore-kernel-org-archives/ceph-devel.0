@@ -1,36 +1,53 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: Memstore performance improvements v0.90 vs v0.87
-Date: Fri, 20 Feb 2015 10:12:46 -0600
-Message-ID: <54E75CFE.70601@redhat.com>
-References: <3649A15A2562B54294DE14BCE5AC79120AB30A5D@FMSMSX106.amr.corp.intel.com> <3649A15A2562B54294DE14BCE5AC79120AB30EEA@FMSMSX106.amr.corp.intel.com> <54B6F103.9000708@redhat.com> <3649A15A2562B54294DE14BCE5AC79120AB31012@FMSMSX106.amr.corp.intel.com> <54C7FD1C.40406@redhat.com> <54E6F96B.9080202@ubuntu.com> <CA+z5DszfGOE3bE0M6ti-4GyRj2CXypsNRv1J=6Wx4b65NqE=Vg@mail.gmail.com> <54E754DA.6060703@redhat.com> <252858605.1545602.1424448205171.JavaMail.zimbra@oxygem.tv>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: disable pg_num warning?
+Date: Fri, 20 Feb 2015 08:15:02 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1502200812040.14643@cobra.newdream.net>
+References: <CAGbvivKMkar+cEhNeXATp76BzPtfxdERZ=6JoieD3k57e19PxA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:50627 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932066AbbBTQNB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 20 Feb 2015 11:13:01 -0500
-In-Reply-To: <252858605.1545602.1424448205171.JavaMail.zimbra@oxygem.tv>
+Received: from cobra.newdream.net ([66.33.216.30]:38677 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754246AbbBTQPC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Feb 2015 11:15:02 -0500
+In-Reply-To: <CAGbvivKMkar+cEhNeXATp76BzPtfxdERZ=6JoieD3k57e19PxA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>
-Cc: Blair Bethwaite <blair.bethwaite@gmail.com>, James Page <james.page@ubuntu.com>, ceph-devel <ceph-devel@vger.kernel.org>, Stephen L Blinick <stephen.l.blinick@intel.com>, Jay Vosburgh <jay.vosburgh@canonical.com>, Colin Ian King <colin.king@canonical.com>, Patricia Gaughen <patricia.gaughen@canonical.com>, Leann Ogasawara <leann.ogasawara@canonical.com>
+To: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>
+Cc: ceph-devel@vger.kernel.org
 
+On Fri, 20 Feb 2015, Wyllys Ingersoll wrote:
+> Is there a way to disable the warning (shown when doing "ceph -s", for
+> example) about the number of pgs ("too few pgs per osd") ?
 
+All of the PG-related warnings are tuanble:
 
-On 02/20/2015 10:03 AM, Alexandre DERUMIER wrote:
->>> http://rhelblog.redhat.com/2015/01/12/mysteries-of-numa-memory-management-revealed/
->>> It's possible that this could be having an effect on the results.
->
-> Isn't auto numa balancing enabled by default since kernel 3.8 ?
+OPTION(mon_pg_warn_min_per_osd, OPT_INT, 30)  // min # pgs per (in) osd before we warn the admin
+OPTION(mon_pg_warn_max_per_osd, OPT_INT, 300)  // max # pgs per (in) osd before we warn the admin
+OPTION(mon_pg_warn_max_object_skew, OPT_FLOAT, 10.0) // max skew few average in objects per pg
+OPTION(mon_pg_warn_min_objects, OPT_INT, 10000)  // do not warn below this object #
+OPTION(mon_pg_warn_min_pool_objects, OPT_INT, 1000)  // do not warn on pools below this object #
 
-No idea, I'm behind the times on what's been going on with numa tuning.
+> Would it be considered risky to disable it?
 
->
-> it can be checked with
->
-> cat /proc/sys/kernel/numa_balancing
+Go for it.  They are advisory only.  Just keep in mind you're outside of 
+the recommended range.
 
-At least at first glance it doesn't look like it's enabled on either our 
-RHEL7 or Ubuntu nodes.  No numad running either.
+> Consider when a cluster is initially created with just a single pool,
+> and you don't anticipate that this pool will ever be more than a very
+> small percentage of the total capacity (1%, for example).  The new
+> calculator (http://ceph.com/pgcalc) recommends a small pg_num like
+> 128.  However, for a cluster with 144 OSDs, this will trigger the
+> warning about the pg num being too small.
+> 
+> It seems that the calculation that triggers the warning is a little
+> bit too simplistic, and while it might be useful in some cases, it is
+> also a nuisance warning that can be ignored in some environments.  It
+> would be nice to tell ceph to ignore it and return a healthy status if
+> everything else is clean.
+
+Hmm, it will go away after the other pool(s) are created that will hold 
+the bulk of the data, right?  Unfortunately it's hard to make a helpful 
+warning that doesn't make noise during the initial cluster setup...
+
+sage
