@@ -1,31 +1,39 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: giant branch for v0.87.1 is ready for release
-Date: Fri, 20 Feb 2015 14:29:32 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1502201429080.27009@cobra.newdream.net>
-References: <54E7B0BA.8020909@dachary.org>
+From: David Zafman <dzafman@redhat.com>
+Subject: Clocks out of sync
+Date: Fri, 20 Feb 2015 15:08:29 -0800
+Message-ID: <54E7BE6D.5040503@redhat.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:40696 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754517AbbBTW3d (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Feb 2015 17:29:33 -0500
-In-Reply-To: <54E7B0BA.8020909@dachary.org>
+Received: from mx1.redhat.com ([209.132.183.28]:42452 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754737AbbBTXIc (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 20 Feb 2015 18:08:32 -0500
+Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t1KN8Wdx022814
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
+	for <ceph-devel@vger.kernel.org>; Fri, 20 Feb 2015 18:08:32 -0500
+Received: from David-Zs-MacBook-Pro.local (vpn-59-47.rdu2.redhat.com [10.10.59.47])
+	by int-mx13.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t1KN8UhR025694
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES128-SHA bits=128 verify=NO)
+	for <ceph-devel@vger.kernel.org>; Fri, 20 Feb 2015 18:08:31 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Fri, 20 Feb 2015, Loic Dachary wrote:
-> Hi,
-> 
-> QE approved https://github.com/ceph/ceph/commit/4178e32dd085adeead84fb168ab8a8a121256259 for release. The release notes should now be written based on the content of the issues and pull requests mentioned here http://workbench.dachary.org/ceph/ceph-backports/wikis/giant#already-merged
-> 
-> I'm not sure how it was done for the past releases. I suspect Sage wrote 
-> most of them, asking details to Josh, Greg, Yehuda and Sam when needed. 
-> How far am I from what really happened ?
 
-I look at git log v0.87..v0.87.1 (or whatever) and write up teh release 
-notes from that.  I'll do that shortly!
+On 2 of my rados thrash runs clocks out of sync.   Is this an occasional 
+issue or did we have an infrastructure problem?
 
-sage
+On burnupi19 and burnupi25:
+2015-02-20 12:52:52.636017 mon.1 10.214.134.14:6789/0 177 : cluster 
+[WRN] message from mon.0 was stamped 0.501458s in the future, clocks not 
+synchronized
+
+On plana62 and plana64:
+2015-02-20 10:00:56.842533 mon.0 10.214.132.14:6789/0 3 : cluster [WRN] 
+message from mon.1 was stamped 0.855106s in the future, clocks not 
+synchronized
+
+
