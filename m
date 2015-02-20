@@ -1,232 +1,230 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: Memstore performance improvements v0.90 vs v0.87
-Date: Fri, 20 Feb 2015 18:09:35 +0800
-Message-ID: <CACJqLyb+TT30qOxnMkfn4vimzjVQPJMzKObv602bd6v_SJWhEw@mail.gmail.com>
-References: <3649A15A2562B54294DE14BCE5AC79120AB30A5D@FMSMSX106.amr.corp.intel.com>
-	<3649A15A2562B54294DE14BCE5AC79120AB30EEA@FMSMSX106.amr.corp.intel.com>
-	<54B6F103.9000708@redhat.com>
-	<3649A15A2562B54294DE14BCE5AC79120AB31012@FMSMSX106.amr.corp.intel.com>
-	<54C7FD1C.40406@redhat.com>
-	<54E6F96B.9080202@ubuntu.com>
-	<CA+z5DszfGOE3bE0M6ti-4GyRj2CXypsNRv1J=6Wx4b65NqE=Vg@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: NewStore update
+Date: Fri, 20 Feb 2015 07:00:02 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1502200632420.14643@cobra.newdream.net>
+References: <alpine.DEB.2.00.1502191502030.14702@cobra.newdream.net> <CACJqLyaYOoMhWKnARwH6afYYCuwXMtK7Fw8W7kmo=rZ1Nn+fGg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f170.google.com ([209.85.192.170]:32779 "EHLO
-	mail-pd0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754257AbbBTKJg convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Feb 2015 05:09:36 -0500
-Received: by pdjz10 with SMTP id z10so6695949pdj.0
-        for <ceph-devel@vger.kernel.org>; Fri, 20 Feb 2015 02:09:35 -0800 (PST)
-In-Reply-To: <CA+z5DszfGOE3bE0M6ti-4GyRj2CXypsNRv1J=6Wx4b65NqE=Vg@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:43846 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754121AbbBTPAF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 20 Feb 2015 10:00:05 -0500
+In-Reply-To: <CACJqLyaYOoMhWKnARwH6afYYCuwXMtK7Fw8W7kmo=rZ1Nn+fGg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Blair Bethwaite <blair.bethwaite@gmail.com>
-Cc: James Page <james.page@ubuntu.com>, Ceph Development <ceph-devel@vger.kernel.org>, mnelson@redhat.com, "Blinick, Stephen L" <stephen.l.blinick@intel.com>, Jay Vosburgh <jay.vosburgh@canonical.com>, Colin Ian King <colin.king@canonical.com>, Patricia Gaughen <patricia.gaughen@canonical.com>, Leann Ogasawara <leann.ogasawara@canonical.com>
+To: Haomai Wang <haomaiwang@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Actually, I'm concerned about the correctness of benchmark using
-MemStore. AFAR it may cause lots of memory frag and cause performance
-degraded hugely. Maybe set "filestore_blackhole=3Dtrue" is more
-precious?
+On Fri, 20 Feb 2015, Haomai Wang wrote:
+> So cool!
+> 
+> A little notes:
+> 
+> 1. What about sync thread in NewStore?
+
+My thought right now is that there will be a WAL thread and (maybe) a 
+transaction commit completion thread.  What do you mean by sync thread?
+
+One thing I want to avoid is the current 'op' thread in FileStore.  
+Instead of queueing a transaction we will start all of the aio operations 
+synchronously.  This has the nice (?) side-effect that if there is memory 
+blackpressure it will block at submit time so we don't need to do our own 
+throttling.  (...though we may want to do it ourselves later anyway.)
+
+> 2. Could we consider skipping WAL for large overwrite(backfill, RGW)?
+
+We do (or will)... if there is a truncate to 0 it doesn't need to do WAL 
+at all.  The onode stores the size so we'll ignore any stray bytes after 
+that in the file; that let's us do the truncate async after the txn 
+commits.  (Slightly sloppy but the space leakage window is so small I 
+don't think it's worth worrying about.)
+
+> 3. Sorry, what means [aio_]fsync?
+
+aio_fsync is just an fsync that's submitted as an aio operation.  It'll 
+make fsync fit into the same bucket as the aio writes we queue up, and it 
+also means that if/when the experimental batched fsync stuff goes into XFS 
+we'll take advantage of it (lots of fsyncs will be merged into a single 
+XFS transaction and be much more efficient).
+
+sage
 
 
-On Fri, Feb 20, 2015 at 5:49 PM, Blair Bethwaite
-<blair.bethwaite@gmail.com> wrote:
-> Hi James,
->
-> Interesting results, but did you do any tests with a NUMA system? IIU=
-C
-> the original report was from a dual socket setup, and that'd
-> presumably be the standard setup for most folks (both OSD server and
-> client side).
->
-> Cheers,
->
-> On 20 February 2015 at 20:07, James Page <james.page@ubuntu.com> wrot=
-e:
->> -----BEGIN PGP SIGNED MESSAGE-----
->> Hash: SHA256
->>
->> Hi All
->>
->> The Ubuntu Kernel team have spent the last few weeks investigating t=
-he
->> apparent performance disparity between RHEL 7 and Ubuntu 14.04; we'v=
-e
->> focussed efforts in a few ways (see below).
->>
->> All testing has been done using the latest Firefly release.
->>
->> 1) Base network latency
->>
->> Jay Vosburgh looked at the base network latencies between RHEL 7 and
->> Ubuntu 14.04; under default install, RHEL actually had slightly wors=
-e
->> latency than Ubuntu due to the default enablement of a firewall;
->> disabling this brought latency back inline between the two distribut=
-ions:
->>
->> OS                      rtt min/avg/max/mdev
->> Ubuntu 14.04 (3.13)     0.013/0.016/0.018/0.005 ms
->> RHEL7 (3.10)            0.010/0.018/0.025/0.005 ms
->>
->> ...base network latency is pretty much the same.
->>
->> This testing was performed on a matched pair of Dell Poweredge R610'=
-s,
->> configured with a single 4 core CPU and 8G of RAM.
->>
->> 2) Latency and performance in Ceph using Rados bench
->>
->> Colin King spent a number of days testing and analysing results usin=
-g
->> rados bench against a single node ceph deployment, configured with a
->> single memory backed OSD, to see if we could reproduce the dispariti=
-es
->> reported.
->>
->> He ran 120 second OSD benchmarks on RHEL 7 as well as Ubuntu 14.04 L=
-TS
->> with a selection of kernels including 3.10 vanilla, 3.13.0-44 (relea=
-se
->> kernel), 3.16.0-30 (utopic HWE kernel), 3.18.0-12 (vivid HWE kernel)
->> and 3.19-rc6 with 1, 16 and 128 client threads.  The data collected =
-is
->> available at [0].
->>
->> Each round of tests consisted of 15 runs, from which we computed
->> average latency, latency deviation and latency distribution:
->>
->>> 120 second x 1 thread
->>
->> Results all seem to cluster around 0.04->0.05ms, with RHEL 7 averagi=
-ng
->> at 0.044 and recent Ubuntu kernels at 0.036-0.037ms.  The older 3.10
->> kernel in RHEL 7 does have some slightly higher average latency.
->>
->>> 120 second x 16 threads
->>
->> Results all seem to cluster around 0.6-0.7ms.  3.19.0-rc6 had a coup=
-le
->> of 1.4ms outliers which pushed it out to be worse than RHEL 7. On th=
-e
->> whole Ubuntu 3.10-3.18 kernels are better than RHEL 7 by ~0.1ms.  RH=
-EL
->> shows a far higher standard deviation, due to the bimodal latency
->> distribution, which from the casual observer may appear to be more
->> "jittery".
->>
->>> 120 second x 128 threads
->>
->> Later kernels show up to have less standard deviation than RHEL 7, s=
-o
->> that shows perhaps less jitter in the stats than RHEL 7's 3.10 kerne=
-l.
->> With this many threads pounding the test, we get a wider spread of
->> latencies and it is hard to tell any kind of latency distribution
->> patterns with just 15 rounds because of the large amount of latency
->> jitter.  All systems show a latency of ~ 5ms.  Taking into
->> consideration the amount of jitter, we think these results do not ma=
-ke
->> much sense unless we repeat these tests with say 100 samples.
->>
->> 3) Conclusion
->>
->> We=E2=80=99ve have not been able to show any major anomalies in Ceph=
- on Ubuntu
->> compared to RHEL 7 when using memstore.  Our current hypothesis is t=
-hat
->> one needs to run the OSD bench stressor many times to get a fair cap=
-ture
->> of system latency stats.  The reason for this is:
->>
->> * Latencies are very low with memstore, so any small jitter in
->> scheduling etc will show up as a large distortion (as shown by the l=
-arge
->> standard deviations in the samples).
->>
->> * When memstore is heavily utilized, memory pressure causes the syst=
-em
->> to page heavily and so we are subject to the nature of perhaps delay=
-s on
->> paging that cause some latency jitters.  Latency differences may be =
-just
->> down to where a random page is in memory or in swap, and with memsto=
-re
->> these may cause the large perturbations we see when running just a
->> single test.
->>
->> * We needed to make *many* tens of measurements to get a typical ide=
-a of
->> average latency and the latency distributions. Don't trust the resul=
-ts
->> from just one test
->>
->> * We ran the tests with a pool configured to 100 pgs and 100 pgps [1=
-].
->> One can get different results with different placement group configs=
-=2E
->>
->> I've CC'ed both Colin and Jay on this mail - so if anyone has any
->> specific questions about the testing they can chime in with response=
-s.
->>
->> Regards
->>
->> James
->>
->> [0] http://kernel.ubuntu.com/~cking/.ceph/ceph-benchmarks.ods
->> [1] http://ceph.com/docs/master/rados/configuration/pool-pg-config-r=
-ef/
->>
->> - --
->> James Page
->> Ubuntu and Debian Developer
->> james.page@ubuntu.com
->> jamespage@debian.org
->> -----BEGIN PGP SIGNATURE-----
->> Version: GnuPG v1
->>
->> iQIcBAEBCAAGBQJU5vlrAAoJEL/srsug59jDMvAQAIhSR4GFTXNc4RLpHtLT6h/X
->> K5uyauKZGtL+wqtPKRfsXqbbUw9I5AZDifQuOEJ0APccLIPbgqxEN3d2uht/qygH
->> G8q2Ax+M8OyZz07yqTitnD4JV3RmL8wNHUveWPLV0gs2TzBBYwP1ywExbRPed3PY
->> cfDrszgkQszA/JwT5W5YNf1LZc+5VpOEFrTiLIaRzUDoxg7mm6Hwr3XT8OFjZhjm
->> LSenKREHtrKKWoBh+OKTvuCUnHzEemK+CiwwRbNQ8l7xbp71wLyS08NpSB5C1y70
->> 7uft+kP6XOGE9AKLvsdEL1PIXHfeKNonBEN5mO6nsXIW+MQzou01zHgDtne7AxDA
->> 5OebQJfJtArmKt78WHuVg7h8gPcIRTRSW43LqJiADnIHL8fnZxj2v5yDiUQj7isw
->> nYWXEJ3rR7mlVgydN34KQ7gpVWmGjhrVb8N01+zYOMAaTBnekldHdueEAXR07eU0
->> PXiP9aOZiAxbEnDiJmreehjCuNFTagQqNeECRIHssSacfQXPxVljaImvuSfrxf8i
->> myQLzftiObINTIHSN4TVDKMyveYrU2hILCKfYuxnSJh29j35wsRSeftjntOEyHai
->> RDnrLD3fCPk4h3hCY6l60nqu9MQfbgdSB/FItvhiBGYqXvGb4+wuBeU9RT9SwG8N
->> XPih7nLNvqDNw38IkkDN
->> =3DqcvG
->> -----END PGP SIGNATURE-----
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
->
+> 
+> 
+> On Fri, Feb 20, 2015 at 7:50 AM, Sage Weil <sweil@redhat.com> wrote:
+> > Hi everyone,
+> >
+> > We talked a bit about the proposed "KeyFile" backend a couple months back.
+> > I've started putting together a basic implementation and wanted to give
+> > people and update about what things are currently looking like.  We're
+> > calling it NewStore for now unless/until someone comes up with a better
+> > name (KeyFileStore is way too confusing). (*)
+> >
+> > You can peruse the incomplete code at
+> >
+> >         https://github.com/liewegas/ceph/tree/wip-newstore/src/os/newstore
+> >
+> > This is a bit of a brain dump.  Please ask questions if anything isn't
+> > clear.  Also keep in mind I'm still at the stage where I'm trying to get
+> > it into a semi-working state as quickly as possible so the implementation
+> > is pretty rough.
+> >
+> > Basic design:
+> >
+> > We use a KeyValueDB (leveldb, rocksdb, ...) for all of our metadata.
+> > Object data is stored in files with simple names (%d) in a simple
+> > directory structure (one level deep, default 1M files per dir).  The main
+> > piece of metadata we store is a mapping from object name (ghobject_t) to
+> > onode_t, which looks like this:
+> >
+> >  struct onode_t {
+> >    uint64_t size;                       ///< object size
+> >    map<string, bufferptr> attrs;        ///< attrs
+> >    map<uint64_t, fragment_t> data_map;  ///< data (offset to fragment mapping)
+> >
+> > i.e., it's what we used to rely on xattrs on the inode for.  Here, we'll
+> > only lean on the file system for file data and it's block management.
+> >
+> > fragment_t looks like
+> >
+> >  struct fragment_t {
+> >    uint32_t offset;   ///< offset in file to first byte of this fragment
+> >    uint32_t length;   ///< length of fragment/extent
+> >    fid_t fid;         ///< file backing this fragment
+> >
+> > and fid_t is
+> >
+> >  struct fid_t {
+> >    uint32_t fset, fno;   // identify the file name: fragments/%d/%d
+> >
+> > To start we'll keep the mapping pretty simple (just one fragment_t) but
+> > later we can go for varying degrees of complexity.
+> >
+> > We lean on the kvdb for our transactions.
+> >
+> > If we are creating new objects, we write data into a new file/fid,
+> > [aio_]fsync, and then commit the transaction.
+> >
+> > If we are doing an overwrite, we include a write-ahead log (wal)
+> > item in our transaction, and then apply it afterwards.  For example, a 4k
+> > overwrite would make whatever metadata changes are included, and a wal
+> > item that says "then overwrite this 4k in this fid with this data".  i.e.,
+> > the worst case is more or less what FileStore is doing now with its
+> > journal, except here we're using the kvdb (and its journal) for that.  On
+> > restart we can queue up and apply any unapplied wal items.
+> >
+> > An alternative approach here that we discussed a bit yesterday would be to
+> > write the small overwrites into the kvdb adjacent to the onode.  Actually
+> > writing them back to the file could be deferred until later, maybe when
+> > there are many small writes to be done together.
+> >
+> > But right now the write behavior is very simple, and handles just 3 cases:
+> >
+> >         https://github.com/liewegas/ceph/blob/wip-newstore/src/os/newstore/NewStore.cc#L1339
+> >
+> > 1. New object: create a new file and write there.
+> >
+> > 2. Append: append to an existing fid.  We store the size in the onode so
+> > we can be a bit sloppy and in the failure case (where we write some
+> > extra data to the file but don't commit the onode) just ignore any
+> > trailing file data.
+> >
+> > 3. Anything else: generate a WAL item.
+> >
+> > 4. Maybe later, for some small [over]writes, we instead put the new data
+> > next to the onode.
+> >
+> > There is no omap yet.  I think we should do basically what DBObjectMap did
+> > (with a layer of indirection to allow clone etc), but we need to rejigger
+> > it so that the initial pointer into that structure is embedded in the
+> > onode.  We may want to do some other optimization to avoid extra
+> > indirection in the common case.  Leaving this for later, though...
+> >
+> > We are designing for the case where the workload is already sharded across
+> > collections.  Each collection gets an in-memory Collection, which has its
+> > own RWLock and its own onode_map (SharedLRU cache).  A split will
+> > basically amount to registering the new collection in the kvdb and
+> > clearing the in-memory onode cache.
+> >
+> > There is a TransContext structure that is used to track the progress of a
+> > transaction.  It'll list which fd's need to get synced pre-commit, which
+> > onodes need to get written back in the transaction, and any WAL items to
+> > include and queue up after the transaction commits.  Right now the
+> > queue_transaction path does most of the work synchronously just to get
+> > things working.  Looking ahead I think what it needs to do is:
+> >
+> >  - assemble the transaction
+> >  - start any aio writes (we could use O_DIRECT here if the new hints
+> > include WONTNEED?)
+> >  - start any aio fsync's
+> >  - queue kvdb transaction
+> >  - fire onreadable[_sync] notifications (I suspect we'll want to do this
+> > unconditionally; maybe we avoid using them entirely?)
+> >
+> > On transaction commit,
+> >  - fire commit notifications
+> >  - queue WAL operations to a finisher
+> >
+> > The WAL ops will be linked to the TransContext so that if you want to do a
+> > read on the onode you can block until it completes.  If we keep the
+> > (currently simple) locking then we can use the Collection rwlock to block
+> > new writes while we want for previous ones to apply.  Or we can get more
+> > granular with the read vs write locks, but I'm not sure it'll be any use
+> > until we make major changes in the OSD (like dispatching parallel reads
+> > within a PG).
+> >
+> > Clone is annoying; if the FS doesn't support it natively (anything not
+> > btrfs) I think we should just do a sync read and then write for
+> > simplicity.
+> >
+> > A few other thoughts:
+> >
+> > - For a fast kvdb, we may want to do the transaction commit synchronously.
+> > For disk backends I think we'll want it async, though, to avoid blocking
+> > the caller.
+> >
+> > - The fid_t has a inode number stashed in it.  The idea is to use
+> > open_by_handle to avoid traversing the (shallow) directory and go straight
+> > to the inode.  On XFS this means we traverse the inode btree to verify it
+> > is in fast a valid ino, which isn't totally ideal but probably what we
+> > have to live with.  Note that open_by_handle will work on any other
+> > (NFS-exportable) filesystem as well so this is in no way XFS-specific.
+> > This is implemented yet, but when we do, we'll probably want to verify we
+> > got the right file by putting some id in an xattr; that way you could
+> > safely copy the whole thing to another filesystem and it could gracefully
+> > fall back to opening using the file names.
+> >
+> > - I think we could build a variation on this implementation on top of an
+> > NVMe device instead of a file system. It could pretty trivially lay out
+> > writes in the address space as a linear sweep across the virutal address
+> > space.  If the NVMe address space is big enough, maybe we could even avoid
+> > thinking about reusing addresses for deleted object?  We'd just send a
+> > discard and then forget about it.  Not sure if the address space is really
+> > that big, though...  If not, we'd need to do make a simple allocator
+> > (blah).
+> >
+> > sage
+> >
+> >
+> > * This follows in the Messenger's naming footsteps, which went like this:
+> > MPIMessenger, NewMessenger, NewerMessenger, SimpleMessenger (which ended
+> > up being anything but simple).
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+> 
+> -- 
+> Best Regards,
+> 
+> Wheat
 > --
-> Cheers,
-> ~Blairo
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
---=20
-Best Regards,
-
-Wheat
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
