@@ -1,28 +1,31 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Recovery question
-Date: Mon, 23 Feb 2015 22:00:04 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F282B7398@SACMBXIP02.sdcorp.global.sandisk.com>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F282B72DE@SACMBXIP02.sdcorp.global.sandisk.com>
- <alpine.DEB.2.00.1502231258440.23553@cobra.newdream.net>
- <755F6B91B3BE364F9BCA11EA3F9E0C6F282B7320@SACMBXIP02.sdcorp.global.sandisk.com>
- <alpine.DEB.2.00.1502231325300.23553@cobra.newdream.net>
- <755F6B91B3BE364F9BCA11EA3F9E0C6F282B7364@SACMBXIP02.sdcorp.global.sandisk.com>
- <alpine.DEB.2.00.1502231339160.23553@cobra.newdream.net>
+From: Samuel Just <sjust@redhat.com>
+Subject: Re: Recovery question
+Date: Mon, 23 Feb 2015 17:03:24 -0500 (EST)
+Message-ID: <846486936.26134545.1424729004598.JavaMail.zimbra@redhat.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F282B72DE@SACMBXIP02.sdcorp.global.sandisk.com> <alpine.DEB.2.00.1502231258440.23553@cobra.newdream.net> <755F6B91B3BE364F9BCA11EA3F9E0C6F282B7320@SACMBXIP02.sdcorp.global.sandisk.com> <alpine.DEB.2.00.1502231325300.23553@cobra.newdream.net> <755F6B91B3BE364F9BCA11EA3F9E0C6F282B7364@SACMBXIP02.sdcorp.global.sandisk.com> <alpine.DEB.2.00.1502231339160.23553@cobra.newdream.net> <755F6B91B3BE364F9BCA11EA3F9E0C6F282B7398@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1on0091.outbound.protection.outlook.com ([157.56.110.91]:27168
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752370AbbBWWAJ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Feb 2015 17:00:09 -0500
-In-Reply-To: <alpine.DEB.2.00.1502231339160.23553@cobra.newdream.net>
-Content-Language: en-US
+Received: from mx5-phx2.redhat.com ([209.132.183.37]:59915 "EHLO
+	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752370AbbBWWD2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Feb 2015 17:03:28 -0500
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F282B7398@SACMBXIP02.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: Sage Weil <sweil@redhat.com>, "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>, Ceph Development <ceph-devel@vger.kernel.org>
+
+Actually, it was mapped to 1 the whole time, but 1 was filtered out due to being down.  More generally, even if you mark osd 1 out and then back in, it will end up on osd 1 because the osd tree will be back to the same configuration, and so CRUSH will give the same answer.
+-Sam
+
+----- Original Message -----
+From: "Somnath Roy" <Somnath.Roy@sandisk.com>
+To: "Sage Weil" <sweil@redhat.com>
+Cc: "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>, "Ceph Development" <ceph-devel@vger.kernel.org>
+Sent: Monday, February 23, 2015 2:00:04 PM
+Subject: RE: Recovery question
 
 Sage,
 I don't understand how osd.1 will be mapped to the same pg when it comes back ?
@@ -158,3 +161,7 @@ sage
 > info at  http://vger.kernel.org/majordomo-info.html
 > 
 > 
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
