@@ -1,21 +1,46 @@
-From: Sage Weil <sweil@redhat.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
 Subject: RE: Recovery question
-Date: Mon, 23 Feb 2015 13:42:32 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1502231339160.23553@cobra.newdream.net>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F282B72DE@SACMBXIP02.sdcorp.global.sandisk.com> <alpine.DEB.2.00.1502231258440.23553@cobra.newdream.net> <755F6B91B3BE364F9BCA11EA3F9E0C6F282B7320@SACMBXIP02.sdcorp.global.sandisk.com>
- <alpine.DEB.2.00.1502231325300.23553@cobra.newdream.net> <755F6B91B3BE364F9BCA11EA3F9E0C6F282B7364@SACMBXIP02.sdcorp.global.sandisk.com>
+Date: Mon, 23 Feb 2015 22:00:04 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F282B7398@SACMBXIP02.sdcorp.global.sandisk.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F282B72DE@SACMBXIP02.sdcorp.global.sandisk.com>
+ <alpine.DEB.2.00.1502231258440.23553@cobra.newdream.net>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F282B7320@SACMBXIP02.sdcorp.global.sandisk.com>
+ <alpine.DEB.2.00.1502231325300.23553@cobra.newdream.net>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F282B7364@SACMBXIP02.sdcorp.global.sandisk.com>
+ <alpine.DEB.2.00.1502231339160.23553@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:59926 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752331AbbBWVmg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 23 Feb 2015 16:42:36 -0500
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F282B7364@SACMBXIP02.sdcorp.global.sandisk.com>
+Received: from mail-bn1on0091.outbound.protection.outlook.com ([157.56.110.91]:27168
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752370AbbBWWAJ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Feb 2015 17:00:09 -0500
+In-Reply-To: <alpine.DEB.2.00.1502231339160.23553@cobra.newdream.net>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
+To: Sage Weil <sweil@redhat.com>
 Cc: "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>, Ceph Development <ceph-devel@vger.kernel.org>
+
+Sage,
+I don't understand how osd.1 will be mapped to the same pg when it comes back ?
+So, the peering process will get the old pg id from osd.1's pg log and map it accordingly ? Is this an optimization as if an osd mapped to the same pg we can start from the last_backfill position ?
+Only if a completely new osd joins the cluster the mapping will happen through CRUSH ?
+
+Sorry for bombarding with so many questions :-)
+
+Thanks & Regards
+Somnath
+
+
+-----Original Message-----
+From: Sage Weil [mailto:sweil@redhat.com] 
+Sent: Monday, February 23, 2015 1:43 PM
+To: Somnath Roy
+Cc: Samuel Just (sam.just@inktank.com); Ceph Development
+Subject: RE: Recovery question
 
 On Mon, 23 Feb 2015, Somnath Roy wrote:
 > Got it, thanks !
@@ -23,8 +48,7 @@ On Mon, 23 Feb 2015, Somnath Roy wrote:
 > << We'll serve reads and writes with just [2,3] and the pg will show up as 'degraded'
 > So, the moment osd.1 is down in the map [2,3] , 2 will be designated as primary ? As my understanding is, read/write won't be served from replica OSD, right ?
 
-The moment the mapping becomes [2,3], 2 is now the primary, and it can 
-serve IO.
+The moment the mapping becomes [2,3], 2 is now the primary, and it can serve IO.
 
 The slow part is here:
 
@@ -36,28 +60,23 @@ The slow part is here:
 > 
 >  5: [1,2,3]
 > 
-> osd will realize osd.1 cannot log recovery and will install a pg_temp so that
+> osd will realize osd.1 cannot log recovery and will install a pg_temp 
+> so that
 
-We can't serve IO with [1,2,3] because 1 is out of date, so there is 
-a lag until it installs the pg_temp record.  There is a pull request that 
-will preemptively calculate new mappings and set up pg_temp records that 
-should mitigate this issue, but it needs some testing, and I think 
-there is still room for improvement (for example, by serving IO with a 
-usable but non-optimal pg-temp record while we are waiting for it to be 
-removed).
+We can't serve IO with [1,2,3] because 1 is out of date, so there is a lag until it installs the pg_temp record.  There is a pull request that will preemptively calculate new mappings and set up pg_temp records that should mitigate this issue, but it needs some testing, and I think there is still room for improvement (for example, by serving IO with a usable but non-optimal pg-temp record while we are waiting for it to be removed).
 
 See
 	https://github.com/ceph/ceph/pull/3429
 
-There's like a bunch of similar stuff we can do to improve peering 
-latency that we'll want ot spend some time on for infernalis.
+There's like a bunch of similar stuff we can do to improve peering latency that we'll want ot spend some time on for infernalis.
 
 sage
 
 > 
 >  6: [2,3,4]
 > 
-> and PG will go active (serve IO).  when backfill completes, it will remove the pg_temp and 
+> and PG will go active (serve IO).  when backfill completes, it will 
+> remove the pg_temp and
 > 
 >  7: [1,2,3]
 > 
@@ -99,8 +118,8 @@ sage
 > > 
 > > > 3. Need to for backfill recovery for 4 and it started
 > > 
-> > If log recovery will work, we'll do that and it's nice and quick.  If 
-> > backfill is needed, we will do
+> > If log recovery will work, we'll do that and it's nice and quick.  
+> > If backfill is needed, we will do
 > > 
 > >  4: 3.5 -> [2,3]  (up=[2,3,4]) (pg_temp record added to map to 
 > > log-recoverable OSDs)
@@ -113,8 +132,8 @@ sage
 > > > log based ?
 > > 
 > > It will change immediately when osd.1 is back up, regardless of what 
-> > data is where.  If it's log recoverable, then no mapping changes will 
-> > be needed.  If it's not, then
+> > data is where.  If it's log recoverable, then no mapping changes 
+> > will be needed.  If it's not, then
 > > 
 > >  6: 3.5 -> [2,3,4]  (up=[1,2,3]) (add pg_temp mapping while we 
 > > backfill osd.1)
@@ -134,8 +153,8 @@ sage
 > > 
 > > 
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> in the body of a message to majordomo@vger.kernel.org More majordomo 
+> info at  http://vger.kernel.org/majordomo-info.html
 > 
 > 
