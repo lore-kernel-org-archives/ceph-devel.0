@@ -1,67 +1,79 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: -fno-omit-frame-pointer
-Date: Mon, 23 Feb 2015 10:30:19 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1502231028510.23553@cobra.newdream.net>
-References: <alpine.DEB.2.00.1502211252520.27009@cobra.newdream.net> <54E91449.4090000@redhat.com> <alpine.DEB.2.00.1502231021400.23553@cobra.newdream.net>
+From: Nick Fisk <Nick.Fisk-l6U37TL90dgqdlJmJB21zg@public.gmane.org>
+Subject: Re: Erasure Coding CPU Overhead Data
+Date: Mon, 23 Feb 2015 19:41:11 +0000
+Message-ID: <DB3PR06MB187C4908492F8EFC0578AA5E7290@DB3PR06MB187.eurprd06.prod.outlook.com>
+References: <54E8CD00.5050606@redhat.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:50411 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752625AbbBWSaV (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 23 Feb 2015 13:30:21 -0500
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t1NIUL3I002324
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
-	for <ceph-devel@vger.kernel.org>; Mon, 23 Feb 2015 13:30:21 -0500
-In-Reply-To: <alpine.DEB.2.00.1502231021400.23553@cobra.newdream.net>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>
-Cc: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <54E8CD00.5050606-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Mark Nelson <mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Mon, 23 Feb 2015, Sage Weil wrote:
-> I got Brendan's flamegraphs to work without any changes on the rex fedora 
-> dev nodes.  See
-> 
-> 	http://ceph.com/sage/foo.svg
+Hi Mark,
 
- cd ~/src
- git clone https://github.com/brendangregg/FlameGraph.git
- cd ~/src/ceph/src
- ./vstart -d -n -x -l
- ./rados -p rbd bench 30 write -b 123 &
- sudo perf record -g
- ^C
- sudo perf script | ~/src/FlameGraph/stackcollapse-perf.pl | ~/src/FlameGraph/flamegraph.pl > /tmp/foo.svg
+Thanks for publishing these results they are very interesting. I was wondering if you could spare a few minutes to answer a few questions
 
-...and view in firefox.
+1. Can you explain why in the read graphs the runs are for different lengths of time? At first I thought this was due to the different profiles running faster than others so completing earlier, but the runtimes seem to be inverse to the bandwidth figures.
 
-sage
+2. What queue depth were the benchmarks run at?
+
+3. Did you come across any OSD dropouts, particularly in the scenarios where the CPU was pegged at 100%
+
+4. During testing did you get a feel for how many OSD's the hardware could reasonably support without maxing out the CPU?
+
+Many thanks,
+Nick
+
+-----Original Message-----
+From: ceph-users [mailto:ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org] On Behalf Of Mark Nelson
+Sent: 21 February 2015 18:23
+To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Cc: ceph-devel
+Subject: [ceph-users] Erasure Coding CPU Overhead Data
+
+Hi All,
+
+Last spring at the tail end of Firefly development we ran tests looking at erasure coding performance both during simple RADOS read/write tests and also during an OSD recovery event.  Recently we were asked if we had any data on CPU usage overhead with erasure coding.  We had collected CPU utilization statistics when we ran our tests, so we went back and plotted the CPU utilization results and wrote up a short document based on those plots.  This data is fairly old at this point so it's probably not going to be relevant for Hammer and may not be relevant for more recent releases of Firefly.
+
+This system had 30 OSDs configured and 12 2.0GHz XEON cores which is likely slightly underpowered for EC.  Interestingly CPU usage for small object writes was not significantly higher than with replication though overall performance was quite a bit lower.  Let me know if you have any questions!
+
+Thanks,
+Mark
 
 
-> 
-> 
-> This is about 10 seconds of a rados bench on a vstart cluster, so nothing 
-> fancy.  It's a pretty easy way to visualize where the time is spent, 
-> though.
-> 
-> A few things I noticed:
-> 
->  - lots of time in DBObjectMap::set_keys (2%).  a surprising amount (>1%) 
-> in setxattr (kernel), too.  Hopefully NewStore can do better here.
-> 
->  - the ReplicatedPG::do_request view is interesting, too.. not 
-> surprisingly a fair bit of time spent with the PG logs.
-> 
->  - 1% spend on writing pg info and log (PG::write_if_dirty).  most of that 
-> in encode
-> 
-> sage
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Nick Fisk
+Technical Support Engineer
+
+System Professional Ltd
+tel: 01825 830000
+mob: 07711377522
+fax: 01825 830001
+mail: Nick.Fisk-l6U37TL90dgqdlJmJB21zg@public.gmane.org
+web: www.sys-pro.co.uk<http://www.sys-pro.co.uk>
+
+IT SUPPORT SERVICES | VIRTUALISATION | STORAGE | BACKUP AND DR | IT CONSULTING
+
+Registered Office:
+Wilderness Barns, Wilderness Lane, Hadlow Down, East Sussex, TN22 4HU
+Registered in England and Wales.
+Company Number: 04754200
+
+
+Confidentiality: This e-mail and its attachments are intended for the above named only and may be confidential. If they have come to you in error you must take no action based on them, nor must you copy or show them to anyone; please reply to this e-mail and highlight the error.
+
+Security Warning: Please note that this e-mail has been created in the knowledge that Internet e-mail is not a 100% secure communications medium. We advise that you understand and observe this lack of security when e-mailing us.
+
+Viruses: Although we have taken steps to ensure that this e-mail and attachments are free from any virus, we advise that in keeping with good computing practice the recipient should ensure they are actually virus free. Any views expressed in this e-mail message are those of the individual and not necessarily those of the company or any of its subsidiaries.
