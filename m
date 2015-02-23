@@ -1,56 +1,62 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: ceph-fuse remount issues
-Date: Mon, 23 Feb 2015 00:14:18 -0500 (EST)
-Message-ID: <133474621.9173173.1424668458008.JavaMail.zimbra@redhat.com>
-References: <54E66259.9040501@redhat.com>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: [ceph-users] Ceph Dumpling/Firefly/Hammer SSD/Memstore
+ performance comparison
+Date: Mon, 23 Feb 2015 13:34:51 +0800
+Message-ID: <CACJqLyZBKEcOxwcWEw631fUgEvVi6au1gh-7tu9BpDvqkQQF-Q@mail.gmail.com>
+References: <54E37C3D.5030702@redhat.com>
+	<CAC6JEv_WF9BANF_n7fPWmHFNYAKjizfV=0sHwJmKrP-uNGRfCQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx4-phx2.redhat.com ([209.132.183.25]:51177 "EHLO
-	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750893AbbBWFOS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Feb 2015 00:14:18 -0500
-In-Reply-To: <54E66259.9040501@redhat.com>
+Received: from mail-pd0-f173.google.com ([209.85.192.173]:34285 "EHLO
+	mail-pd0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751119AbbBWFew (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Feb 2015 00:34:52 -0500
+Received: by pdjg10 with SMTP id g10so22941029pdj.1
+        for <ceph-devel@vger.kernel.org>; Sun, 22 Feb 2015 21:34:52 -0800 (PST)
+In-Reply-To: <CAC6JEv_WF9BANF_n7fPWmHFNYAKjizfV=0sHwJmKrP-uNGRfCQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <john.spray@redhat.com>
-Cc: ceph-devel@vger.kernel.org, zyan@redhat.com, sage@redhat.com
+To: Gregory Farnum <greg@gregs42.com>
+Cc: Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
------ Original Message -----
-> From: "John Spray" <john.spray@redhat.com>
-> To: ceph-devel@vger.kernel.org, zyan@redhat.com, "Gregory Farnum" <gfarnum@redhat.com>
-> Sent: Thursday, February 19, 2015 2:23:21 PM
-> Subject: ceph-fuse remount issues
-> 
-> 
-> Background: a while ago, we found (#10277) that existing cache
-> expiration mechanism wasn't working with latest kernels.  We used to
-> invalidate the top level dentries, which caused fuse to invalidate
-> everything, but an implementation detail in fuse caused it to start
-> ignoring our repeated invalidate calls, so this doesn't work any more.
-> To persuade fuse to dirty its entire metadata cache, Zheng added in a
-> system() call to "mount -o remount" after we expire things from our
-> client side cache.
-> 
-> However, this was a bit of a hack and has created problems:
->   * You can't call mount -o remount unless you're root, so we are less
-> flexible than we used to be (#10542)
->   * While the remount is happening, unmounts sporadically fail and the
-> fuse process can become unresponsive to SIGKILL (#10916)
-> 
-> The first issue was maybe an acceptable compromise, but the second issue
-> is just painful, and it seems like we might not have seen the last of
-> the knock on effects -- upstream maintainers certainly aren't expecting
-> filesystems to remount themselves quite so frequently.
+I don't have detail perf number for sync io latency now.
 
-Yeah. I looked at this briefly and switching to a conditional behavior based on kernel version shouldn't be too difficult; the actual change in behavior is a very short patch: https://github.com/ceph/ceph/commit/0827bb79ea5127e6763f6e904dfa1a3266046ffb
+But a few days ago I did single OSD single io depth benchmark. In
+short, Firefly > Dumpling > Hammer per op latency.
 
-I'm going to try and integrate that in with my branch to warn on remount issues in the morning: https://github.com/ceph/ceph/pull/3681 (better version of that sitting on my computer now too)
+It's great to see Mark's benchmark result! As for pcie ssd, I think
+ceph can't make full use of it currently for one OSD. We may need to
+mainly focus on sata-ssd improvments.
 
-> We probably have an opportunity to get something upstream in fuse to
-> support a direct call to trigger the invalidation we want, if we can
-> work out what that should look like.  Thoughts?
+On Mon, Feb 23, 2015 at 1:09 PM, Gregory Farnum <greg@gregs42.com> wrote:
+> On Tue, Feb 17, 2015 at 9:37 AM, Mark Nelson <mnelson@redhat.com> wrote:
+>> Hi All,
+>>
+>> I wrote up a short document describing some tests I ran recently to look at
+>> how SSD backed OSD performance has changed across our LTS releases. This is
+>> just looking at RADOS performance and not RBD or RGW.  It also doesn't offer
+>> any real explanations regarding the results.  It's just a first high level
+>> step toward understanding some of the behaviors folks on the mailing list
+>> have reported over the last couple of releases.  I hope you find it useful.
+>
+> Do you have any work scheduled to examine the synchronous IO latency
+> changes across versions? I suspect those are involved with the loss of
+> performance some users have reported, and I've not heard any
+> believable theories as to the cause. Since this is the first set of
+> results pointing that way on hardware available for detailed tests I
+> hope we can dig into it. And those per-op latencies are the next thing
+> we'll need to cut down on, since they correspond pretty directly with
+> CPU costs that we want to scale down! :)
+> -Greg
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-Yes please. I don't really have the kernel VFS or FUSE interface experience here to offer up much off the top of my head, but I think this is something that FUSE ought to allow us to do. LSF/MM is coming up and Sage will be there, which is probably a good time to raise issues with people in the hallway or appropriate sessions.
--Greg
+
+
+-- 
+Best Regards,
+
+Wheat
