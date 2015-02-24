@@ -1,69 +1,117 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Issues wrongfully marked resolved
-Date: Tue, 24 Feb 2015 16:47:59 +0100
-Message-ID: <54EC9D2F.9070205@dachary.org>
+From: Alexandre DERUMIER <aderumier@odiso.com>
+Subject: Re: Tool for ceph performance analysis
+Date: Tue, 24 Feb 2015 16:51:45 +0100 (CET)
+Message-ID: <593379927.1852445.1424793105600.JavaMail.zimbra@oxygem.tv>
+References: <CAONhiy7Bu1aqML80D_7Xu42qS1ZTSMwa_W3mZ+t4ivXdwE1szQ@mail.gmail.com> <54EC6714.3090604@redhat.com> <54EC6BA9.3070405@redhat.com> <54EC8758.6050405@redhat.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="txngtK8IRffmWetqdv3OhBJ8s3Mnw8fMN"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:48205 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752630AbbBXPsB (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 24 Feb 2015 10:48:01 -0500
-Received: from [10.9.0.6] (unknown [10.0.2.28])
-	by smtp.dmail.dachary.org (Postfix) with ESMTP id BB6BE4210B
-	for <ceph-devel@vger.kernel.org>; Tue, 24 Feb 2015 16:47:59 +0100 (CET)
+Received: from mailpro.odiso.net ([89.248.209.98]:46164 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751175AbbBXPvr convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 24 Feb 2015 10:51:47 -0500
+In-Reply-To: <1780156480.1852442.1424793103509.JavaMail.zimbra@oxygem.tv>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mnelson@redhat.com>
+Cc: John Spray <john.spray@redhat.com>, Alyona Kiselyova <akiselyova@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>, ceph-calamari@lists.ceph.com
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---txngtK8IRffmWetqdv3OhBJ8s3Mnw8fMN
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+>>Perhaps part of this might be to just try to get a better idea of whi=
+ch=20
+>>tools folks are using to do performance monitoring on their existing=20
+>>clusters (ceph or otherwise).  I've heard zabbix come up quite a bit=20
+>>recently.
 
-Hi Ceph,
+Hi, we are using graphite here with collectd to retreive host stats.
 
-On february 10th I wrongfully marked some issues as "resolved" in the Cep=
-h issue tracker. Two of them were discovered later and people lost precio=
-us time before finding out they were incorrectly marked as resolved. Toda=
-y I went over all the issues and found one more:
+It's also eay to send custom stats to graphite. It's a simple write to =
+an udp socket.
+$conn =3D fsockopen("carbon.hostedgraphite.com", 2003);
+fwrite($conn, "YOUR-API-KEY.foo 1.2\n");
 
-    http://tracker.ceph.com/issues/8797 "ceph status" do not exit with py=
-thon_2.7.8
 
-which is yet to be backported to Firefly and I re-opened it. You can take=
- a quick look at the issues marked resolved that day [1] and if you find =
-one that looks suspicious please let me know and I'll investigate.
+And we use http://grafana.org/ , as frontend to manage graphs.
 
-Cheers
 
-[1] issues marked resolved february 10th http://tracker.ceph.com/projects=
-/ceph/issues?utf8=3D%E2%9C%93&set_filter=3D1&f%5B%5D=3Dstatus_id&op%5Bsta=
-tus_id%5D=3D%3D&v%5Bstatus_id%5D%5B%5D=3D3&f%5B%5D=3Dupdated_on&op%5Bupda=
-ted_on%5D=3D%3D&v%5Bupdated_on%5D%5B%5D=3D2015-02-10&f%5B%5D=3D&c%5B%5D=3D=
-project&c%5B%5D=3Dtracker&c%5B%5D=3Dstatus&c%5B%5D=3Dpriority&c%5B%5D=3Ds=
-ubject&c%5B%5D=3Dassigned_to&c%5B%5D=3Dupdated_on&c%5B%5D=3Dcategory&c%5B=
-%5D=3Dfixed_version&c%5B%5D=3Dstory_points&c%5B%5D=3Dcf_3&c%5B%5D=3Dcf_4&=
-group_by=3D
 
-Cheers
+----- Mail original -----
+De: "Mark Nelson" <mnelson@redhat.com>
+=C3=80: "John Spray" <john.spray@redhat.com>, "Alyona Kiselyova" <akise=
+lyova@mirantis.com>, "ceph-devel" <ceph-devel@vger.kernel.org>
+Cc: ceph-calamari@lists.ceph.com
+Envoy=C3=A9: Mardi 24 F=C3=A9vrier 2015 15:14:48
+Objet: Re: Tool for ceph performance analysis
+
+On 02/24/2015 06:16 AM, John Spray wrote:=20
+>=20
+> On 24/02/2015 11:57, John Spray wrote:=20
+>>> It would be great, if there will be internal possibility to collect=
+=20
+>>> info about whole cluster from one node. May be, something like=20
+>>> extension for "tell" command, which can call any node directly and=20
+>>> replace external network connections. Or improved version of "ceph =
+osd=20
+>>> perf" command, which would allow to get more info.=20
+>>>=20
+>> This pretty much already exists if someone chooses to deploy=20
+>> diamond+graphite. Perhaps we need to talk about what's wrong with=20
+>> that solution as it stands? I'm guessing the main problem is that=20
+>> it's less highly available than ceph mons, and comparatively=20
+>> heavyweight, especially if one is only interested in the latest valu=
+es.=20
+> Ah, I also forgot to mention: it is not very hard to make a cut-down=20
+> version of calamari that doesn't require lots of heavyweight=20
+> dependencies. I started building this a while back before switching=20
+> tasks, but there's an old branch here:=20
+> https://github.com/ceph/calamari/commits/wip-lite=20
+>=20
+> The key things there are that it doesn't require a postgres database,=
+=20
+> and the remote-execution is abstracted into a "Remote" interface so t=
+hat=20
+> you can implement alternatives to salt (e.g. SSH, or run locally on=20
+> mon). It's all free software so borrow what you wish ;-) The point is=
+=20
+> that it isn't necessary to start from scratch in order to get somethi=
+ng=20
+> lightweight.=20
+
+My personal vote is to try to get ourselves well integrated into a good=
+=20
+cross section of the existing tools that already do this kind of thing=20
+(zabbix, collectd, collectl, etc). I'm slightly guilty of rolling my=20
+own too since in cbt I gather up some of our daemon socket output from=20
+all the hosts via ssh and just dump it in the output directory. There's=
+=20
+tons of other systems out there that do this kind of thing way better=20
+though. I don't want to discourage anyone from making a new tool if=20
+that's their preference, but I think a lot of folks would benefit if=20
+they could just keep using their existing monitoring tools.=20
+
+Perhaps part of this might be to just try to get a better idea of which=
+=20
+tools folks are using to do performance monitoring on their existing=20
+clusters (ceph or otherwise). I've heard zabbix come up quite a bit=20
+recently.=20
+
+Mark=20
+
+>=20
+> Cheers,=20
+> John=20
+> --=20
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in=20
+> the body of a message to majordomo@vger.kernel.org=20
+> More majordomo info at http://vger.kernel.org/majordomo-info.html=20
 --=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---txngtK8IRffmWetqdv3OhBJ8s3Mnw8fMN
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlTsnS8ACgkQ8dLMyEl6F23EaQCdFq+hQGM6u4ymAcXp+ySXF24q
-LE8AoITyDrddpvD8xuEONqP0b2efyIs6
-=E6uO
------END PGP SIGNATURE-----
-
---txngtK8IRffmWetqdv3OhBJ8s3Mnw8fMN--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n=20
+the body of a message to majordomo@vger.kernel.org=20
+More majordomo info at http://vger.kernel.org/majordomo-info.html=20
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
