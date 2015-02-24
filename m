@@ -1,70 +1,119 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: Tool for ceph performance analysis
-Date: Tue, 24 Feb 2015 08:14:48 -0600
-Message-ID: <54EC8758.6050405@redhat.com>
-References: <CAONhiy7Bu1aqML80D_7Xu42qS1ZTSMwa_W3mZ+t4ivXdwE1szQ@mail.gmail.com> <54EC6714.3090604@redhat.com> <54EC6BA9.3070405@redhat.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Adding a proprietary key value store to CEPH
+Date: Tue, 24 Feb 2015 15:29:33 +0100
+Message-ID: <54EC8ACD.7020402@dachary.org>
+References: <C226B0AB34511445928D9882AA519F600A56972E@SACMBXIP03.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="4gDUX136LBvVPC0Ic90hm3OGoMBO58Jj2"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:42665 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751151AbbBXOOw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 24 Feb 2015 09:14:52 -0500
-In-Reply-To: <54EC6BA9.3070405@redhat.com>
+Received: from mail2.dachary.org ([91.121.57.175]:48181 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1753235AbbBXO3f (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 24 Feb 2015 09:29:35 -0500
+In-Reply-To: <C226B0AB34511445928D9882AA519F600A56972E@SACMBXIP03.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <john.spray@redhat.com>, Alyona Kiselyova <akiselyova@mirantis.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-Cc: "ceph-calamari@lists.ceph.com" <ceph-calamari@lists.ceph.com>
+To: Varada Kari <Varada.Kari@sandisk.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On 02/24/2015 06:16 AM, John Spray wrote:
->
-> On 24/02/2015 11:57, John Spray wrote:
->>> It would be great, if there will be internal possibility to collect
->>> info about whole cluster from one node. May be, something like
->>> extension for "tell" command, which can call any node directly and
->>> replace external network connections. Or improved version of "ceph osd
->>> perf" command, which would allow to get more info.
->>>
->> This pretty much already exists if someone chooses to deploy
->> diamond+graphite.  Perhaps we need to talk about what's wrong with
->> that solution as it stands?  I'm guessing the main problem is that
->> it's less highly available than ceph mons, and comparatively
->> heavyweight, especially if one is only interested in the latest values.
-> Ah, I also forgot to mention: it is not very hard to make a cut-down
-> version of calamari that doesn't require lots of heavyweight
-> dependencies.  I started building this a while back before switching
-> tasks, but there's an old branch here:
-> https://github.com/ceph/calamari/commits/wip-lite
->
-> The key things there are that it doesn't require a postgres database,
-> and the remote-execution is abstracted into a "Remote" interface so that
-> you can implement alternatives to salt (e.g. SSH, or run locally on
-> mon).  It's all free software so borrow what you wish ;-)  The point is
-> that it isn't necessary to start from scratch in order to get something
-> lightweight.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--4gDUX136LBvVPC0Ic90hm3OGoMBO58Jj2
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: quoted-printable
 
-My personal vote is to try to get ourselves well integrated into a good 
-cross section of the existing tools that already do this kind of thing 
-(zabbix, collectd, collectl, etc).  I'm slightly guilty of rolling my 
-own too since in cbt I gather up some of our daemon socket output from 
-all the hosts via ssh and just dump it in the output directory.  There's 
-tons of other systems out there that do this kind of thing way better 
-though.  I don't want to discourage anyone from making a new tool if 
-that's their preference, but I think a lot of folks would benefit if 
-they could just keep using their existing monitoring tools.
+Hi,
 
-Perhaps part of this might be to just try to get a better idea of which 
-tools folks are using to do performance monitoring on their existing 
-clusters (ceph or otherwise).  I've heard zabbix come up quite a bit 
-recently.
+I'm curious about the reasons why the key/value store you mention is not =
+published as Free Software. Is it because it implements a proprietary int=
+erface to a specific hardware ? Because it has additional functionalities=
+ comparied to rocksdb etc. ? Because it performs better under some worklo=
+ads ?
 
-Mark
+Cheers
 
->
-> Cheers,
-> John
+On 24/02/2015 14:20, Varada Kari wrote:
+> Hi Sage,
+>=20
+> We are trying to integrate a new proprietary key value store to CEPH. T=
+o integrate this KV-store, which is a closed source shared library, we pr=
+opose a new class to CEPH called PropDBStore which does a dlopen and impo=
+rts the required symbols. This framework will help in integrating vendor =
+specific extensions to CEPH.
+>=20
+> The gist of the implementation is as follows.
+>=20
+> 1. Implement a wrapper around the proprietary KVStore. Let us call it a=
+s KVExtension. This is a shared library which implements all interfaces r=
+equired by CEPH KeyValueStore.
+> 2. A new class is derived from KeyValueDB called PropDBStore, which hon=
+ors the semantics of KeyvalueStore and KeyValueDB. This class acts as med=
+iator between CEPH and KVExtension.  This class transforms bufferlist etc=
+=2E.. to const char pointers or strings for the extension to understand.
+> 3. PropDBStore, loads (dlopen) the KVExtension during OSD initializatio=
+n.  Path to the KVExtension can be mentioned in ceph.conf.
+> 4. Interfaces that needs to be implemented in KVExtension, which are im=
+ported by the PropDBStore are added in a new header called PropDBWrapper.=
+h.  This header contains the signatures for the necessary interfaces like=
+ init(), close(), submit_transaction(), get() and get_iterator(). Similar=
+ly for Iterator functionality, PropDBIterator.h, which specifies the sign=
+atures of seek_to_first (), seek_to_last(), lower_bound() and upper_bound=
+() etc...  PropDBStore includes these headers to import the symbols, usin=
+g dlsym().
+> 5. Choosing the proprietary DB as Backend to the OSD is controlled/mana=
+ged by config options of the ceph (/etc/ceph/ceph.conf) like rocksdb or l=
+eveldb.
+> 6. Rest of the existing functionality is not disturbed by this change. =
+Changing the osd backend option will change backend implementation. But t=
+his change is not dynamic. The type of the backend should be chosen at os=
+d creation time and osd will continue use that backend till that osd is r=
+eformatted again.
+> 7. The new KVStore we are trying to integrate works on a raw partition,=
+ so we divided the osd drive into two partitions. One partition is given =
+to osd Meta data (super block, fsid etc...), and the other is given to th=
+e new db to manage it. OSD partition is now not the entire disk, but 2-4G=
+B which needed for the metadata.
+>=20
+> Please share your thoughts around this.
+> Thanks,
+> Varada
+>=20
+>=20
+>=20
+> ________________________________
+>=20
+> PLEASE NOTE: The information contained in this electronic mail message =
+is intended only for the use of the designated recipient(s) named above. =
+If the reader of this message is not the intended recipient, you are here=
+by notified that you have received this message in error and that any rev=
+iew, dissemination, distribution, or copying of this message is strictly =
+prohibited. If you have received this communication in error, please noti=
+fy the sender by telephone or e-mail (as shown above) immediately and des=
+troy any and all copies of this message in your possession (whether hard =
+copies or electronically stored copies).
+>=20
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+--4gDUX136LBvVPC0Ic90hm3OGoMBO58Jj2
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlTsis0ACgkQ8dLMyEl6F214eACghMjBKtI30y8cJuV7UB+f05p0
+b4EAoL6RclwBI1vQIKltc/9T9ZsXiIC0
+=r7A7
+-----END PGP SIGNATURE-----
+
+--4gDUX136LBvVPC0Ic90hm3OGoMBO58Jj2--
