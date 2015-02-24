@@ -1,167 +1,53 @@
-From: Samuel Just <sjust@redhat.com>
-Subject: Re: Recovery question
-Date: Mon, 23 Feb 2015 17:03:24 -0500 (EST)
-Message-ID: <846486936.26134545.1424729004598.JavaMail.zimbra@redhat.com>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F282B72DE@SACMBXIP02.sdcorp.global.sandisk.com> <alpine.DEB.2.00.1502231258440.23553@cobra.newdream.net> <755F6B91B3BE364F9BCA11EA3F9E0C6F282B7320@SACMBXIP02.sdcorp.global.sandisk.com> <alpine.DEB.2.00.1502231325300.23553@cobra.newdream.net> <755F6B91B3BE364F9BCA11EA3F9E0C6F282B7364@SACMBXIP02.sdcorp.global.sandisk.com> <alpine.DEB.2.00.1502231339160.23553@cobra.newdream.net> <755F6B91B3BE364F9BCA11EA3F9E0C6F282B7398@SACMBXIP02.sdcorp.global.sandisk.com>
+From: Alyona Kiselyova <akiselyova@mirantis.com>
+Subject: Tool for ceph performance analysis
+Date: Tue, 24 Feb 2015 12:40:30 +0400
+Message-ID: <CAONhiy7Bu1aqML80D_7Xu42qS1ZTSMwa_W3mZ+t4ivXdwE1szQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx5-phx2.redhat.com ([209.132.183.37]:59915 "EHLO
-	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752370AbbBWWD2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Feb 2015 17:03:28 -0500
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F282B7398@SACMBXIP02.sdcorp.global.sandisk.com>
+Received: from mail-qa0-f54.google.com ([209.85.216.54]:43569 "EHLO
+	mail-qa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752234AbbBXIkb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 24 Feb 2015 03:40:31 -0500
+Received: by mail-qa0-f54.google.com with SMTP id x12so26089580qac.13
+        for <ceph-devel@vger.kernel.org>; Tue, 24 Feb 2015 00:40:30 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: Sage Weil <sweil@redhat.com>, "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Actually, it was mapped to 1 the whole time, but 1 was filtered out due to being down.  More generally, even if you mark osd 1 out and then back in, it will end up on osd 1 because the osd tree will be back to the same configuration, and so CRUSH will give the same answer.
--Sam
+Hi,
 
------ Original Message -----
-From: "Somnath Roy" <Somnath.Roy@sandisk.com>
-To: "Sage Weil" <sweil@redhat.com>
-Cc: "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>, "Ceph Development" <ceph-devel@vger.kernel.org>
-Sent: Monday, February 23, 2015 2:00:04 PM
-Subject: RE: Recovery question
+This topic was raised several times, but we since have no such thing.
 
-Sage,
-I don't understand how osd.1 will be mapped to the same pg when it comes back ?
-So, the peering process will get the old pg id from osd.1's pg log and map it accordingly ? Is this an optimization as if an osd mapped to the same pg we can start from the last_backfill position ?
-Only if a completely new osd joins the cluster the mapping will happen through CRUSH ?
+We are interested in some tool, which allow us to collect all or any
+counters from whole cluster. Now we have internal way to get counters
+via admin socket, but we need to do it directly on each node or use
+some external network commands.
 
-Sorry for bombarding with so many questions :-)
+There are similar message from Sage Weil in ceph-devel maillist some
+weeks ago. It was about perf-watch.py script, which is available from
+ceph repository, but it provides only per-node work too (and works on
+vbstart cluster, so to use it on working system some changes must be
+done).
 
-Thanks & Regards
-Somnath
+We are working now on tool, which has similar possibilities, but it
+can collect counters either from one node, or from all ceph nodes.
+Also tool provide possibility to check system resources usage by ceph
+processes.Now it uses ssh, so it doesn't work good, if you have no
+password-less access to all nodes.
 
+The first version of this tool is available on github
+(https://github.com/Ved-vampir/ceph-perf-tool). May be, after
+improvements, this tool will be useful for other people and it can
+appear in ceph in some way. It would be cose, if such utility will be
+in ceph "out of the box". May be, we can merge it?
 
------Original Message-----
-From: Sage Weil [mailto:sweil@redhat.com] 
-Sent: Monday, February 23, 2015 1:43 PM
-To: Somnath Roy
-Cc: Samuel Just (sam.just@inktank.com); Ceph Development
-Subject: RE: Recovery question
+It would be great, if there will be internal possibility to collect
+info about whole cluster from one node. May be, something like
+extension for "tell" command, which can call any node directly and
+replace external network connections. Or improved version of "ceph osd
+perf" command, which would allow to get more info.
 
-On Mon, 23 Feb 2015, Somnath Roy wrote:
-> Got it, thanks !
-> 
-> << We'll serve reads and writes with just [2,3] and the pg will show up as 'degraded'
-> So, the moment osd.1 is down in the map [2,3] , 2 will be designated as primary ? As my understanding is, read/write won't be served from replica OSD, right ?
-
-The moment the mapping becomes [2,3], 2 is now the primary, and it can serve IO.
-
-The slow part is here:
-
-> If we had say
-> 
->  4: [2,3,4]
-> 
-> then we'll get
-> 
->  5: [1,2,3]
-> 
-> osd will realize osd.1 cannot log recovery and will install a pg_temp 
-> so that
-
-We can't serve IO with [1,2,3] because 1 is out of date, so there is a lag until it installs the pg_temp record.  There is a pull request that will preemptively calculate new mappings and set up pg_temp records that should mitigate this issue, but it needs some testing, and I think there is still room for improvement (for example, by serving IO with a usable but non-optimal pg-temp record while we are waiting for it to be removed).
-
-See
-	https://github.com/ceph/ceph/pull/3429
-
-There's like a bunch of similar stuff we can do to improve peering latency that we'll want ot spend some time on for infernalis.
-
-sage
-
-> 
->  6: [2,3,4]
-> 
-> and PG will go active (serve IO).  when backfill completes, it will 
-> remove the pg_temp and
-> 
->  7: [1,2,3]
-> 
-> > 3. Will the flow be similar if one of the replica OSD goes down 
-> > instead of primary in the step '2' I mentioned earlier ?  Say, osd.2 
-> > went down instead of osd.1 ?
-> 
-> Yeah, basically the same.  Who is primary doesn't really matter.
-> 
-> sage
-> 
-> 
-> 
-> 
-> > 
-> > Regards
-> > Somnath
-> > 
-> > -----Original Message-----
-> > From: Sage Weil [mailto:sweil@redhat.com]
-> > Sent: Monday, February 23, 2015 1:03 PM
-> > To: Somnath Roy
-> > Cc: Samuel Just (sam.just@inktank.com); Ceph Development
-> > Subject: Re: Recovery question
-> > 
-> > On Mon, 23 Feb 2015, Somnath Roy wrote:
-> > > Hi,
-> > > Can anyone help me understand what will happen in the following scenarios ?
-> > >
-> > > 1. Current PG map : 3.5 -> OSD[1,2,3]
-> > >
-> > > 2. 1 is down and new map : 3.5 -> OSD[2,3,4]
-> > 
-> > More likely it's:
-> > 
-> >  1: 3.5 -> [1,2,3]
-> >  2: 3.5 -> [2,3]   (osd.1 is down)
-> >  3: 3.5 -> [2,3,4] (osd.1 is marked out)
-> > 
-> > > 3. Need to for backfill recovery for 4 and it started
-> > 
-> > If log recovery will work, we'll do that and it's nice and quick.  
-> > If backfill is needed, we will do
-> > 
-> >  4: 3.5 -> [2,3]  (up=[2,3,4]) (pg_temp record added to map to 
-> > log-recoverable OSDs)
-> > 
-> > > 4. Meanwhile OSD 1 came up , it was down for short amount of time
-> > 
-> >  5: 3.5 -> [1,2,3] (osd.1 is back up and in)
-> > 
-> > > 5. Will pg 3.5 mapping change considering OSD 1 recovery could be 
-> > > log based ?
-> > 
-> > It will change immediately when osd.1 is back up, regardless of what 
-> > data is where.  If it's log recoverable, then no mapping changes 
-> > will be needed.  If it's not, then
-> > 
-> >  6: 3.5 -> [2,3,4]  (up=[1,2,3]) (add pg_temp mapping while we 
-> > backfill osd.1)
-> >  7: 3.5 -> [1,2,3]  (pg_temp entry removed when backfill completes)
-> > 
-> > > 6. Also, if OSD 4 recovery could be log based, will there be any 
-> > > change in pg map if OSD 1 is up during the recovery ?
-> > 
-> > See above
-> > 
-> > Hope that helps!
-> > sage
-> > 
-> > ________________________________
-> > 
-> > PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-> > 
-> > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> in the body of a message to majordomo@vger.kernel.org More majordomo 
-> info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-------------------------------
+Best regards,
+Alyona Kiseleva
