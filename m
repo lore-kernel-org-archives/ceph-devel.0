@@ -1,64 +1,96 @@
-From: Tom Deneau <tom.deneau@amd.com>
-Subject: Re: [ceph-users] who is using radosgw with civetweb?
-Date: Wed, 25 Feb 2015 22:50:13 +0000 (UTC)
-Message-ID: <loom.20150225T233013-453@post.gmane.org>
-References: <alpine.DEB.2.00.1502251125180.25838@cobra.newdream.net> <CAANLjFpHND2uyUvdzJ-pz4QOXp6SpYK=sD1WQz=rT-Two6izqw@mail.gmail.com> <alpine.DEB.2.00.1502251348170.25838@cobra.newdream.net>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: librados2 and librbd1 dependency on libvirt-bin
+Date: Wed, 25 Feb 2015 23:08:30 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F282BAC5F@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:47519 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753012AbbBYWzH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 25 Feb 2015 17:55:07 -0500
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1YQkr9-0001lz-DO
-	for ceph-devel@vger.kernel.org; Wed, 25 Feb 2015 23:55:04 +0100
-Received: from 165.204.77.1 ([165.204.77.1])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Wed, 25 Feb 2015 23:55:03 +0100
-Received: from tom.deneau by 165.204.77.1 with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Wed, 25 Feb 2015 23:55:03 +0100
+Received: from mail-by2on0091.outbound.protection.outlook.com ([207.46.100.91]:44106
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753038AbbBYXIe convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Feb 2015 18:08:34 -0500
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-Sage Weil <sweil <at> redhat.com> writes:
+Hi,
+We are facing problem that ceph-deploy purge is uninstalling latest Mellanox ofed driver packages.
+Digging down more we found libvirt-bin is dependent on librados2/librbd1.
+So, here is what happening.
 
-> 
-> On Wed, 25 Feb 2015, Robert LeBlanc wrote:
-> > We tried to get radosgw working with Apache + mod_fastcgi, but due to
-> > the changes in radosgw, Apache, mode_*cgi, etc and the documentation
-> > lagging and not having a lot of time to devote to it, we abandoned it.
-> > Where it the documentation for civetweb? If it is appliance like and
-> > easy to set-up, we would like to try it to offer some feedback on your
-> > question.
-> 
-> In giant and hammer, it is enabled by default on port 7480.  On firefly, 
-> you need to add the line
-> 
->  rgw frontends = fastcgi, civetweb port=7480
-> 
-> to ceph.conf (you can of course adjust the port number if you like) and 
-> radosgw will run standalone w/ no apache or anything else.
-> 
-> sage
-> 
+1. Mellanox ofed driver has a dependency on the libvirt-bin*
 
-Like Robert, I have had trouble getting the gateway working with the Apache
-methods.  So civetweb is something we would like to try.
+2. purging librados2/librbd1 is removing libvirt-bin and resulting the removal of the Mellanox driver package as well.
 
-I am running 0.92 built from sources using rpmbuild.  (This is on arm64). 
-So I assume I do not need any rgw frontends line in ceph.conf.
+Here is what I found.
 
-It would be good to document what steps from
-http://docs.ceph.com/docs/master/radosgw/config/ are still required when
-using civetweb.
+http://packages.ubuntu.com/trusty/devel/libvirt-bin
 
--- Tom
+ubuntu@ip-10-15-16-211:~$ apt-cache rdepends librados2
+librados2
+Reverse Depends:
+  librbd1
+  ceph-common
+  radosgw
+  ceph
+  python-ceph
+  qemu-utils
+  qemu-system-x86
+  qemu-system-sparc
+  qemu-system-ppc
+  qemu-system-misc
+  qemu-system-mips
+  qemu-system-arm
+  libvirt-bin
+  ceph-test
+  rbd-fuse
+  radosgw
+  qemu-utils
+  qemu-system-x86
+  qemu-system-sparc
+  qemu-system-ppc
+  qemu-system-misc
+  qemu-system-mips
+  qemu-system-arm
+  python-ceph
+  libvirt-bin
+  librbd1
+  librados2-dbg
+  librados-dev
+  ceph-common
+  ceph
+  ceph-test
+  tgt
+  rbd-fuse
+  radosgw
+  qemu-utils
+  qemu-system-x86
+  qemu-system-sparc
+  qemu-system-ppc
+  qemu-system-misc
+  qemu-system-mips
+  qemu-system-arm
+  python-ceph
+  libvirt-bin
+  librbd1
+  librados2-dbg
+  librados-dev
+  ceph-common
+  ceph
+
+So, I am curious why libvirt-bin has a depencey on librados2/librbd1 ?
+
+Also, how come we get rid of this issue ?
+Ceph-deploy should not remove any package other than ceph's.
+
+Thanks & Regards
+Somnath
 
 
+________________________________
+
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
 
