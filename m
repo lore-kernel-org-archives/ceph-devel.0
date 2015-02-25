@@ -1,33 +1,46 @@
-From: Sage Weil <sage@newdream.net>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
 Subject: RE: Adding a proprietary key value store to CEPH
-Date: Wed, 25 Feb 2015 15:25:22 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1502251523310.25838@cobra.newdream.net>
-References: <C226B0AB34511445928D9882AA519F600A56972E@SACMBXIP03.sdcorp.global.sandisk.com> <alpine.DEB.2.00.1502240819320.25838@cobra.newdream.net> <C226B0AB34511445928D9882AA519F600A56A05B@SACMBXIP03.sdcorp.global.sandisk.com>
- <alpine.DEB.2.00.1502250644100.14643@cobra.newdream.net> <755F6B91B3BE364F9BCA11EA3F9E0C6F282BABB7@SACMBXIP02.sdcorp.global.sandisk.com>
+Date: Wed, 25 Feb 2015 23:30:04 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F282BACF8@SACMBXIP02.sdcorp.global.sandisk.com>
+References: <C226B0AB34511445928D9882AA519F600A56972E@SACMBXIP03.sdcorp.global.sandisk.com>
+ <alpine.DEB.2.00.1502240819320.25838@cobra.newdream.net>
+ <C226B0AB34511445928D9882AA519F600A56A05B@SACMBXIP03.sdcorp.global.sandisk.com>
+ <alpine.DEB.2.00.1502250644100.14643@cobra.newdream.net>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F282BABB7@SACMBXIP02.sdcorp.global.sandisk.com>
+ <alpine.DEB.2.00.1502251523310.25838@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:42217 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753012AbbBYXZX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Feb 2015 18:25:23 -0500
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F282BABB7@SACMBXIP02.sdcorp.global.sandisk.com>
+Received: from mail-bl2on0079.outbound.protection.outlook.com ([65.55.169.79]:5740
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753119AbbBYXaL convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Feb 2015 18:30:11 -0500
+In-Reply-To: <alpine.DEB.2.00.1502251523310.25838@cobra.newdream.net>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
+To: Sage Weil <sage@newdream.net>
 Cc: Varada Kari <Varada.Kari@sandisk.com>, Ceph Development <ceph-devel@vger.kernel.org>
+
+Yes, we will take care of both, thanks..
+
+-----Original Message-----
+From: Sage Weil [mailto:sage@newdream.net] 
+Sent: Wednesday, February 25, 2015 3:25 PM
+To: Somnath Roy
+Cc: Varada Kari; Ceph Development
+Subject: RE: Adding a proprietary key value store to CEPH
 
 On Wed, 25 Feb 2015, Somnath Roy wrote:
 > Sage,
 > Yes, agreed..
-> But, since k/v store is already added and we are planning to derive from 
-> that we didn't change that. Do you want us to implement entire k/vstore 
-> to be a dynamically loadable along with the k/vdb underneath ?
+> But, since k/v store is already added and we are planning to derive 
+> from that we didn't change that. Do you want us to implement entire 
+> k/vstore to be a dynamically loadable along with the k/vdb underneath ?
 
-Both would be nice.  I confess I haven't looked closely at the EC 
-backend implementation, but I expect that this is quite simple: it's just 
-a matter of exposing a function that instantiates an instance of the 
-ObjectStore or KeyValueDB class, right?
+Both would be nice.  I confess I haven't looked closely at the EC backend implementation, but I expect that this is quite simple: it's just a matter of exposing a function that instantiates an instance of the ObjectStore or KeyValueDB class, right?
 
 sage
 
@@ -37,7 +50,8 @@ sage
 > Somnath
 > 
 > -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
+> From: ceph-devel-owner@vger.kernel.org 
+> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
 > Sent: Wednesday, February 25, 2015 6:46 AM
 > To: Varada Kari
 > Cc: Ceph Development
@@ -100,10 +114,12 @@ sage
 > > 
 > > 
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> in the body of a message to majordomo@vger.kernel.org More majordomo 
+> info at  http://vger.kernel.org/majordomo-info.html
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> in the body of a message to majordomo@vger.kernel.org More majordomo 
+> info at  http://vger.kernel.org/majordomo-info.html
 > 
 > 
