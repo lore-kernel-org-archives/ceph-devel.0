@@ -1,730 +1,1140 @@
 From: Andrew Shewmaker <agshew@gmail.com>
-Subject: [PATCH 2/6] Initial support for blkin (LTTng + Zipkin) tracing
-Date: Wed, 25 Feb 2015 12:59:23 -0800
-Message-ID: <1424897967-879-3-git-send-email-agshew@gmail.com>
+Subject: [PATCH 4/6] OSD support for blkin (LTTng + Zipkin) tracing
+Date: Wed, 25 Feb 2015 12:59:25 -0800
+Message-ID: <1424897967-879-5-git-send-email-agshew@gmail.com>
 References: <1424897967-879-1-git-send-email-agshew@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f182.google.com ([209.85.192.182]:40116 "EHLO
-	mail-pd0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752699AbbBYU7f (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Feb 2015 15:59:35 -0500
-Received: by pdev10 with SMTP id v10so7547268pde.7
-        for <ceph-devel@vger.kernel.org>; Wed, 25 Feb 2015 12:59:34 -0800 (PST)
+Received: from mail-pa0-f53.google.com ([209.85.220.53]:42692 "EHLO
+	mail-pa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753516AbbBYU7h (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Feb 2015 15:59:37 -0500
+Received: by pablj1 with SMTP id lj1so5695876pab.9
+        for <ceph-devel@vger.kernel.org>; Wed, 25 Feb 2015 12:59:36 -0800 (PST)
 In-Reply-To: <1424897967-879-1-git-send-email-agshew@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: agshew@gmail.com, marioskogias@gmail.com, chendi.xue@intel.com
 
- * Adds conditional build support.
- * Adds BLKIN_* macro wrappers to reduce need for ifdef WITH_BLKIN.
- * Adds blkin header include.
- * Adds message infrastructure for blkin tracing.
- * Adds blkin trace events and keyvals to OpTracker.
- * Adds osd, pg, journal, and filestore blkin traces to OpTracker/OpRequest.
-
-These changes are Marios', with the following exceptions:
- * split out initial support for Marios' additional tracing changes
- * conditional build and BLKIN_* macro wrappers
- * blkin include path is "blkin/ztracer.hpp"
- * only Message.h includes blkin, as others include Message.h
- * commented code has been removed
- * unused lname var/code in SimpleMessenger has been removed
- * excluded messenger_trace because it appears not to be used
- * braces added to conditionals to match recommended coding style
-   note: did not change member variable names to use m_ prefix
-         since member vars in same class did not
- * Ref suffix added to TrackedOp shared_ptr vars to be consistent
-   note: did not add -Ref suffix to ZTrace*Ref vars in Message
- * TrackedOp trace creation methods are virtual, implemented in OpRequest
- * avoid faults due to non-existent traces
-   Check if osd_trace exists when creating a pg_trace, etc.
-   Return true only if trace creation was successful.
-   Use dout() if trace_osd, trace_pg, etc. fail, in order to ease debugging.
+ * Adds tracing for OSDs and Placement Groups, specifically:
+   messages for OSD operations, FileJournal, FileStore,
+   ECBackend, replication, and traced versions of Objecter
+   read/write (only basic read/write functions).
+ * Moves global_init_daemonize() earlier in ceph_osd.c:main
 
 Signed-off-by: Marios-Evaggelos Kogias <marioskogias@gmail.com>
 Signed-off-by: Filippos Giannakos <philipgian@grnet.gr>
 Signed-off-by: Andrew Shewmaker <agshew@gmail.com>
 Signed-off-by: Chendi.Xue <chendi.xue@intel.com>
 ---
- src/common/TrackedOp.cc           |  82 +++++++++++++++++
- src/common/TrackedOp.h            |  26 ++++++
- src/common/blkin_wrapper.h        | 180 ++++++++++++++++++++++++++++++++++++++
- src/msg/Message.cc                |  76 ++++++++++++++++
- src/msg/Message.h                 |  34 +++++++
- src/msg/msg_types.cc              |  23 ++++-
- src/msg/msg_types.h               |   1 +
- src/msg/simple/Pipe.cc            |  35 +++++++-
- src/msg/simple/Pipe.h             |   4 +
- src/msg/simple/SimpleMessenger.cc |   1 +
- 10 files changed, 458 insertions(+), 4 deletions(-)
- create mode 100644 src/common/blkin_wrapper.h
+ src/ceph_osd.cc               |  6 ++--
+ src/messages/MOSDOp.h         | 13 ++++++++
+ src/messages/MOSDOpReply.h    | 13 ++++++++
+ src/messages/MOSDSubOp.h      | 11 +++++++
+ src/messages/MOSDSubOpReply.h | 12 +++++++
+ src/os/FileJournal.cc         | 14 ++++++--
+ src/os/FileJournal.h          |  6 +++-
+ src/os/FileStore.cc           | 20 ++++++++++++
+ src/os/FileStore.h            |  1 +
+ src/osd/ECBackend.cc          |  8 +++--
+ src/osd/OSD.cc                | 21 ++++++++++++
+ src/osd/OSD.h                 |  1 +
+ src/osd/OpRequest.cc          | 74 +++++++++++++++++++++++++++++++++++++++++++
+ src/osd/OpRequest.h           |  9 ++++++
+ src/osd/PG.cc                 |  2 ++
+ src/osd/PG.h                  |  1 +
+ src/osd/ReplicatedBackend.cc  | 19 ++++++++---
+ src/osd/ReplicatedPG.cc       | 35 ++++++++++++++++++++
+ src/osdc/Objecter.cc          |  7 ++++
+ src/osdc/Objecter.h           | 63 +++++++++++++++++++++++++++++++++++-
+ 20 files changed, 323 insertions(+), 13 deletions(-)
 
-diff --git a/src/common/TrackedOp.cc b/src/common/TrackedOp.cc
-index 32dbc53..611911f 100644
---- a/src/common/TrackedOp.cc
-+++ b/src/common/TrackedOp.cc
-@@ -293,8 +293,22 @@ void OpTracker::_mark_event(TrackedOp *op, const string &evt,
-      
- }
- 
-+#ifdef WITH_BLKIN
-+void OpTracker::trace_event(TrackedOp *op, TrackedOpTraceRef t, const string &evt, TrackedOpEndpointRef ep)
-+{
-+  t->event(evt, ep);
-+}
-+
-+void OpTracker::trace_keyval(TrackedOp *op, TrackedOpTraceRef t, const string &key,
-+			     const string &val, TrackedOpEndpointRef ep)
-+{
-+  t->keyval(key, val, ep);
-+}
-+#endif
-+
- void OpTracker::RemoveOnDelete::operator()(TrackedOp *op) {
-   op->mark_event("done");
-+  BLKIN_OP_TRACE_EVENT(op, osd, "span_ended");
-   if (!tracker->tracking_enabled) {
-     op->_unregistered();
-     delete op;
-@@ -332,3 +346,71 @@ void TrackedOp::dump(utime_t now, Formatter *f) const
-     f->close_section();
+diff --git a/src/ceph_osd.cc b/src/ceph_osd.cc
+index 884b7ed..2774b5f 100644
+--- a/src/ceph_osd.cc
++++ b/src/ceph_osd.cc
+@@ -172,6 +172,9 @@ int main(int argc, const char **argv)
+     return 0;
    }
- }
+ 
++  global_init_daemonize(g_ceph_context, 0);
++  BLKIN_ZTRACE_INIT();
 +
-+#ifdef WITH_BLKIN
-+void TrackedOp::trace_osd(string event)
-+{
-+  if (!osd_trace) {
-+    dout(5) << "trace_osd failed, osd_trace doesn't exist, event: " << event << dendl;
-+    return;
-+  }
-+
-+  tracker->trace_event(this, osd_trace, event, osd_trace->get_endpoint());
-+}
-+
-+void TrackedOp::trace_osd(string key, string val)
-+{
-+  if (!osd_trace) {
-+    dout(5) << "trace_osd failed, osd_trace doesn't exist, key: " << key << " val: " << val << dendl;
-+    return;
-+  }
-+
-+  tracker->trace_keyval(this, osd_trace, key, val, osd_trace->get_endpoint());
-+}
-+
-+void TrackedOp::trace_pg(string event)
-+{
-+  if (!pg_trace) {
-+    dout(5) << "trace_pg failed, pg_trace doesn't exist, event: " << event << dendl;
-+    return;
-+  } else if (!osd_trace) {
-+    dout(5) << "trace_pg failed, osd_trace doesn't exist, event: " << event << dendl;
-+    return;
-+  }
-+
-+  tracker->trace_event(this, osd_trace, event, pg_trace->get_endpoint());
-+}
-+
-+void TrackedOp::get_pg_trace_info(struct blkin_trace_info *info)
-+{
-+  if (!pg_trace) {
-+    dout(5) << "get_pg_trace failed, pg_trace doesn't exist" << dendl;
-+    return;
-+  } else if (!osd_trace) {
-+    dout(5) << "get_pg_trace failed, osd_trace doesn't exist" << dendl;
-+    return;
-+  }
-+
-+  osd_trace->get_trace_info(info);
-+}
-+
-+void TrackedOp::trace_journal(string event)
-+{
-+  if (!journal_trace) {
-+    dout(5) << "trace_journal failed, journal_trace doesn't exist, event: " << event << dendl;
-+    return;
-+  }
-+
-+  tracker->trace_event(this, journal_trace, event, journal_trace->get_endpoint());
-+}
-+
-+void TrackedOp::trace_filestore(string event)
-+{
-+  if (!filestore_trace) {
-+    dout(5) << "trace_filestore failed, filestore_trace doesn't exist, event: " << event << dendl;
-+    return;
-+  }
-+
-+  tracker->trace_event(this, filestore_trace, event, filestore_trace->get_endpoint());
-+}
-+#endif // WITH_BLKIN
-diff --git a/src/common/TrackedOp.h b/src/common/TrackedOp.h
-index 42d1eaf..fc861f7 100644
---- a/src/common/TrackedOp.h
-+++ b/src/common/TrackedOp.h
-@@ -116,6 +116,11 @@ public:
-   void mark_event(TrackedOp *op, const string &evt,
-                           utime_t time = ceph_clock_now(g_ceph_context));
+   // whoami
+   char *end;
+   const char *id = g_conf->name.get_id().c_str();
+@@ -480,8 +483,7 @@ int main(int argc, const char **argv)
+   if (r < 0)
+     exit(1);
+ 
+-  // Set up crypto, daemonize, etc.
+-  global_init_daemonize(g_ceph_context, 0);
++  // Set up crypto, etc.
+   common_init_finish(g_ceph_context);
+ 
+   MonClient mc(g_ceph_context);
+diff --git a/src/messages/MOSDOp.h b/src/messages/MOSDOp.h
+index 581215f..1a96ee0 100644
+--- a/src/messages/MOSDOp.h
++++ b/src/messages/MOSDOp.h
+@@ -32,7 +32,11 @@ class OSD;
+ 
+ class MOSDOp : public Message {
  
 +#ifdef WITH_BLKIN
-+  void trace_event(TrackedOp *op, TrackedOpTraceRef t, const string &evt, TrackedOpEndpointRef ep);
-+  void trace_keyval(TrackedOp *op, TrackedOpTraceRef t, const string &key,
-+		    const string &val, TrackedOpEndpointRef ep);
++  static const int HEAD_VERSION = 5;
++#else
+   static const int HEAD_VERSION = 4;
 +#endif
-   void on_shutdown() {
-     history.on_shutdown();
-   }
-@@ -150,6 +155,13 @@ protected:
-   string current; /// the current state the event is in
-   uint64_t seq; /// a unique value set by the OpTracker
+   static const int COMPAT_VERSION = 3;
  
-+#ifdef WITH_BLKIN
-+  TrackedOpTraceRef osd_trace;
-+  TrackedOpTraceRef pg_trace;
-+  TrackedOpTraceRef journal_trace;
-+  TrackedOpTraceRef filestore_trace;
-+#endif
-+
-   uint32_t warn_interval_multiplier; // limits output of a given op warning
+ private:
+@@ -176,6 +180,7 @@ public:
  
-   TrackedOp(OpTracker *_tracker, const utime_t& initiated) :
-@@ -191,6 +203,20 @@ public:
-     return events.rbegin()->second.c_str();
-   }
-   void dump(utime_t now, Formatter *f) const;
+   // marshalling
+   virtual void encode_payload(uint64_t features) {
++    BLKIN_GET_MASTER(mt);
+ 
+     OSDOp::merge_osd_op_vector_in_data(ops, data);
+ 
+@@ -251,11 +256,14 @@ struct ceph_osd_request_head {
+       ::encode(snaps, payload);
+ 
+       ::encode(retry_attempt, payload);
 +
-+#ifdef WITH_BLKIN
-+  virtual bool create_osd_trace(TrackedOpEndpointRef ep) { return false; }
-+  virtual bool create_pg_trace(TrackedOpEndpointRef ep) { return false; }
-+  virtual bool create_journal_trace(TrackedOpEndpointRef ep) { return false; }
-+  virtual bool create_filestore_trace(TrackedOpEndpointRef ep) { return false; }
-+  void trace_osd(string event);
-+  void trace_osd(string key, string val);
-+  void trace_pg(string event);
-+  void get_pg_trace_info(struct blkin_trace_info *info);
-+  void trace_journal(string event);
-+  void trace_filestore(string event);
-+  TrackedOpTraceRef get_osd_trace() { return osd_trace; };
-+#endif // WITH_BLKIN
++      BLKIN_MSG_ENCODE_TRACE();
+     }
+   }
+ 
+   virtual void decode_payload() {
+     bufferlist::iterator p = payload.begin();
++    BLKIN_MSG_DO_INIT_TRACE();
+ 
+     if (header.version < 2) {
+       // old decode
+@@ -332,6 +340,8 @@ struct ceph_osd_request_head {
+ 	::decode(retry_attempt, p);
+       else
+ 	retry_attempt = -1;
++
++      BLKIN_MSG_DECODE_TRACE(5);
+     }
+ 
+     OSDOp::split_osd_op_vector_in_data(ops, data);
+@@ -374,6 +384,9 @@ struct ceph_osd_request_head {
+     out << " e" << osdmap_epoch;
+     out << ")";
+   }
++
++  BLKIN_MSG_INFO_DECL("MOSDOp")
++  BLKIN_MSG_END_DECL("MOSDOp")
  };
  
- #endif
-diff --git a/src/common/blkin_wrapper.h b/src/common/blkin_wrapper.h
-new file mode 100644
-index 0000000..aa3a79a
---- /dev/null
-+++ b/src/common/blkin_wrapper.h
-@@ -0,0 +1,180 @@
-+// -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
-+// vim: ts=8 sw=2 smarttab
-+#ifdef WITH_BLKIN
-+
-+// string helper
-+#define BLKIN_OSS(OSS, A) \
-+  ostringstream OSS; \
-+  OSS << A;
-+
-+// src/msg/Message.h
-+#define BLKIN_GET_MASTER(MT) \
-+  ZTracer::ZTraceRef MT = get_master_trace();
-+
-+#define BLKIN_MSG_GET_MASTER(MT, MSG) \
-+  ZTracer::ZTraceRef MT = MSG->get_master_trace();
-+
-+#define BLKIN_ZTRACE_INIT() do { ZTracer::ztrace_init(); } while(0)
-+
-+#define BLKIN_INIT_TRACE(T) do { init_trace_info(T); } while(0)
-+
-+#define BLKIN_MSG_INIT_TRACE(M, T) do { M->init_trace_info(T); } while(0)
-+
-+#define BLKIN_MSG_INIT_TRACE_IF(C, M, T) \
-+  do { if (C) M->init_trace_info(T); } while(0)
-+
-+#define BLKIN_MSG_DO_INIT_TRACE() \
-+  struct blkin_trace_info tinfo; \
-+  tinfo.trace_id = 0; \
-+  tinfo.span_id = 0; \
-+  tinfo.parent_span_id = 0;
-+
-+#define BLKIN_MSG_ENCODE_TRACE() \
-+  do { \
-+    if (mt) { \
-+      struct blkin_trace_info tinfo; \
-+      mt->get_trace_info(&tinfo); \
-+      ::encode(tinfo.trace_id, payload); \
-+      ::encode(tinfo.span_id, payload); \
-+      ::encode(tinfo.parent_span_id, payload); \
-+    } else { \
-+      int64_t zero = 0; \
-+      ::encode(zero, payload); \
-+      ::encode(zero, payload); \
-+      ::encode(zero, payload); \
-+    }; \
-+  } while(0)
-+
-+#define BLKIN_MSG_DECODE_TRACE(V) \
-+  do { \
-+    if (header.version >= V) { \
-+      ::decode(tinfo.trace_id, p); \
-+      ::decode(tinfo.span_id, p); \
-+      ::decode(tinfo.parent_span_id, p); \
-+    }; \
-+    init_trace_info(&tinfo); \
-+  } while(0)
-+
-+#define BLKIN_MSG_CHECK_SPAN() \
-+  do { \
-+    struct blkin_trace_info tinfo; \
-+    ZTracer::ZTraceRef mt = req->get_master_trace(); \
-+    if (!mt) { \
-+      return; \
-+    } \
-+    mt->get_trace_info(&tinfo); \
-+    if (!tinfo.parent_span_id) { \
-+      trace_end_after_span = false; \
-+    } \
-+  } while(0)
-+
-+#define BLKIN_MSG_INFO_DECL(TYPE) \
-+  void trace_msg_info() \
-+  { \
-+    if (!master_trace) { \
-+      return; \
-+    } \
-+    ostringstream oss; \
-+    oss << get_reqid(); \
-+    master_trace->keyval("Type", TYPE); \
-+    master_trace->keyval("Reqid", oss.str()); \
-+  }
-+
-+#define BLKIN_MSG_END_DECL(TYPE) \
-+  bool create_message_endpoint() \
-+  { \
-+    message_endpoint = ZTracer::create_ZTraceEndpoint("0.0.0.0", 0, TYPE); \
-+    if (!message_endpoint) { \
-+      return false; \
-+    } \
-+    return true; \
-+  }
-+
-+#define BLKIN_MSG_END(TYPE, IP, PORT, NAME) \
-+  do { \
-+    TYPE ## _endpoint = ZTracer::create_ZTraceEndpoint(IP, PORT, NAME); \
-+  } while(0)
-+
-+#define BLKIN_MSG_TRACE_EVENT(M, E) do { M->trace(E); } while(0)
-+
-+#define BLKIN_MSG_TRACE_EVENT_IF(C, M, E) do { if (C) M->trace(E); } while(0)
-+
-+#define BLKIN_MSG_TRACE_KEYVAL(M, K, V) do { M->trace(K, V); } while(0)
-+
-+// src/msg/Pipe.h
-+#define BLKIN_PIPE_ENDPOINT() do { set_endpoint(); } while(0)
-+
-+// src/common/TrackedOp.h
-+typedef ZTracer::ZTraceEndpointRef TrackedOpEndpointRef;
-+typedef ZTracer::ZTraceRef TrackedOpTraceRef;
-+
-+#define BLKIN_END_REF(X) TrackedOpEndpointRef X;
-+#define BLKIN_TRACE_REF(X) TrackedOpTraceRef X;
-+
-+#define BLKIN_CREATE_TRACE(REF, ...) \
-+  do { REF = ZTracer::create_ZTrace(__VA_ARGS__); } while(0)
-+
-+#define BLKIN_OP_CREATE_TRACE(OP, TYPE, EP) \
-+  do { OP->create_ ## TYPE ## _trace(EP); } while(0)
-+
-+#define BLKIN_OP_TRACE_EVENT(OP, TYPE, E) \
-+  do { OP->trace_ ## TYPE (E); } while(0)
-+
-+#define BLKIN_TYPE_TRACE_EVENT(TYPE, E) \
-+  do { trace_ ## TYPE (E); } while(0)
-+
-+#define BLKIN_OP_TRACE_KEYVAL(OP, TYPE, K, V) \
-+  do { OP->trace_ ## TYPE (K, V); } while(0)
-+
-+#define BLKIN_OP_EVENT(O, E) do { O->event(E); } while(0)
-+
-+#define BLKIN_OP_EVENT_IF(C, O, E) do { if (C) O->event(E); } while(0)
-+
-+#define BLKIN_OP_SET_TRACE_DECL() \
-+  void set_trace(TrackedOpTraceRef t) \
-+  { \
-+    trace = t; \
-+  }
-+
-+#define BLKIN_OP_SET_TRACE(O, T) do { O->set_trace(T); } while(0)
-+
-+#else // Not WITH_BLKIN
-+
-+// string helper
-+#define BLKIN_OSS(OSS, A) do { } while(0)
-+
-+// src/msg/Message.h
-+#define BLKIN_GET_MASTER(MT) do { } while(0)
-+#define BLKIN_MSG_GET_MASTER(MT, MSG) do { } while(0)
-+#define BLKIN_ZTRACE_INIT() do { } while(0)
-+#define BLKIN_INIT_TRACE(T) do { } while(0)
-+#define BLKIN_MSG_INIT_TRACE(M, T) do { } while(0)
-+#define BLKIN_MSG_INIT_TRACE_IF(C, M, T) do { } while(0)
-+#define BLKIN_MSG_DO_INIT_TRACE() do { } while(0)
-+#define BLKIN_MSG_ENCODE_TRACE() do { } while(0)
-+#define BLKIN_MSG_DECODE_TRACE(V) do { } while(0)
-+#define BLKIN_MSG_CHECK_SPAN() do { } while(0)
-+#define BLKIN_MSG_INFO_DECL(TYPE)
-+#define BLKIN_MSG_END_DECL(TYPE)
-+#define BLKIN_MSG_END(TYPE, IP, PORT, NAME) do { } while(0)
-+#define BLKIN_MSG_TRACE_EVENT(M, E) do { } while(0)
-+#define BLKIN_MSG_TRACE_EVENT_IF(C, M, E) do { } while(0)
-+#define BLKIN_MSG_TRACE_KEYVAL(M, K, V) do { } while(0)
-+
-+// src/msg/Pipe.h
-+#define BLKIN_PIPE_ENDPOINT() do { } while(0)
-+
-+// src/common/TrackedOp.h
-+#define BLKIN_END_REF(X)
-+#define BLKIN_TRACE_REF(X)
-+#define BLKIN_CREATE_TRACE(REF, ...) do { } while(0)
-+#define BLKIN_OP_CREATE_TRACE(OP, TYPE, EP) do { } while(0)
-+#define BLKIN_OP_TRACE_EVENT(OP, TYPE, E) do { } while(0)
-+#define BLKIN_TYPE_TRACE_EVENT(TYPE, E) do { } while(0)
-+#define BLKIN_OP_TRACE_KEYVAL(OP, TYPE, K, V) do { } while(0)
-+#define BLKIN_OP_EVENT(O, E) do { } while(0)
-+#define BLKIN_OP_EVENT_IF(C, O, E) do { } while(0)
-+#define BLKIN_OP_SET_TRACE_DECL()
-+#define BLKIN_OP_SET_TRACE(O, T) do { } while(0)
-+
-+#endif // WITH_BLKIN
-diff --git a/src/msg/Message.cc b/src/msg/Message.cc
-index 23f5179..968d368 100644
---- a/src/msg/Message.cc
-+++ b/src/msg/Message.cc
-@@ -817,3 +817,79 @@ Message *decode_message(CephContext *cct, int crcflags, bufferlist::iterator& p)
-   return decode_message(cct, crcflags, h, f, fr, mi, da);
- }
+ 
+diff --git a/src/messages/MOSDOpReply.h b/src/messages/MOSDOpReply.h
+index b2d5155..64f01c1 100644
+--- a/src/messages/MOSDOpReply.h
++++ b/src/messages/MOSDOpReply.h
+@@ -32,7 +32,11 @@
+ 
+ class MOSDOpReply : public Message {
  
 +#ifdef WITH_BLKIN
-+int Message::trace_basic_info()
++  static const int HEAD_VERSION = 7;
++#else
+   static const int HEAD_VERSION = 6;
++#endif
+   static const int COMPAT_VERSION = 2;
+ 
+   object_t oid;
+@@ -143,6 +147,7 @@ public:
+       if (ignore_out_data)
+ 	ops[i].outdata.clear();
+     }
++    BLKIN_MSG_CHECK_SPAN();
+   }
+ private:
+   ~MOSDOpReply() {}
+@@ -150,6 +155,8 @@ private:
+ public:
+   virtual void encode_payload(uint64_t features) {
+ 
++    BLKIN_GET_MASTER(mt);
++
+     OSDOp::merge_osd_op_vector_out_data(ops, data);
+ 
+     if ((features & CEPH_FEATURE_PGID64) == 0) {
+@@ -189,10 +196,13 @@ public:
+       ::encode(replay_version, payload);
+       ::encode(user_version, payload);
+       ::encode(redirect, payload);
++
++      BLKIN_MSG_ENCODE_TRACE();
+     }
+   }
+   virtual void decode_payload() {
+     bufferlist::iterator p = payload.begin();
++    BLKIN_MSG_DO_INIT_TRACE();
+     if (header.version < 2) {
+       ceph_osd_reply_head head;
+       ::decode(head, p);
+@@ -244,6 +254,8 @@ public:
+ 
+       if (header.version >= 6)
+ 	::decode(redirect, p);
++
++      BLKIN_MSG_DECODE_TRACE(7);
+     }
+   }
+ 
+@@ -270,6 +282,7 @@ public:
+     out << ")";
+   }
+ 
++  BLKIN_MSG_END_DECL("MOSDOpReply")
+ };
+ 
+ 
+diff --git a/src/messages/MOSDSubOp.h b/src/messages/MOSDSubOp.h
+index 544dfcf..96f48a9 100644
+--- a/src/messages/MOSDSubOp.h
++++ b/src/messages/MOSDSubOp.h
+@@ -25,8 +25,13 @@
+ 
+ class MOSDSubOp : public Message {
+ 
++#ifdef WITH_BLKIN
++  static const int HEAD_VERSION = 12;
++#else
+   static const int HEAD_VERSION = 11;
+   static const int COMPAT_VERSION = 7;
++#endif
++  static const int COMPAT_VERSION = 1;
+ 
+ public:
+   epoch_t map_epoch;
+@@ -103,6 +108,7 @@ public:
+     //version >=7
+     assert (header.version >= 7);
+     bufferlist::iterator p = payload.begin();
++    BLKIN_MSG_DO_INIT_TRACE();
+     ::decode(map_epoch, p);
+     ::decode(reqid, p);
+     ::decode(pgid.pgid, p);
+@@ -170,6 +176,7 @@ public:
+     } else {
+       pg_trim_rollback_to = pg_trim_to;
+     }
++    BLKIN_MSG_DECODE_TRACE(12);
+   }
+ 
+   virtual void encode_payload(uint64_t features) {
+@@ -177,6 +184,7 @@ public:
+     ::encode(reqid, payload);
+     ::encode(pgid.pgid, payload);
+     ::encode(poid, payload);
++    BLKIN_GET_MASTER(mt);
+ 
+     __u32 num_ops = ops.size();
+     ::encode(num_ops, payload);
+@@ -221,6 +229,7 @@ public:
+     ::encode(pgid.shard, payload);
+     ::encode(updated_hit_set_history, payload);
+     ::encode(pg_trim_rollback_to, payload);
++    BLKIN_MSG_ENCODE_TRACE();
+   }
+ 
+   MOSDSubOp()
+@@ -262,6 +271,8 @@ public:
+       out << ", has_updated_hit_set_history";
+     out << ")";
+   }
++
++  BLKIN_MSG_END_DECL("MOSDSubOp")
+ };
+ 
+ 
+diff --git a/src/messages/MOSDSubOpReply.h b/src/messages/MOSDSubOpReply.h
+index a084246..dfff58e 100644
+--- a/src/messages/MOSDSubOpReply.h
++++ b/src/messages/MOSDSubOpReply.h
+@@ -30,7 +30,11 @@
+  */
+ 
+ class MOSDSubOpReply : public Message {
++#ifdef WITH_BLKIN
++  static const int HEAD_VERSION = 3;
++#else
+   static const int HEAD_VERSION = 2;
++#endif
+   static const int COMPAT_VERSION = 1;
+ public:
+   epoch_t map_epoch;
+@@ -55,6 +59,7 @@ public:
+ 
+   virtual void decode_payload() {
+     bufferlist::iterator p = payload.begin();
++    BLKIN_MSG_DO_INIT_TRACE();
+     ::decode(map_epoch, p);
+     ::decode(reqid, p);
+     ::decode(pgid.pgid, p);
+@@ -84,8 +89,11 @@ public:
+ 	shard_id_t::NO_SHARD);
+       pgid.shard = shard_id_t::NO_SHARD;
+     }
++    BLKIN_MSG_DECODE_TRACE(3);
+   }
+   virtual void encode_payload(uint64_t features) {
++    BLKIN_GET_MASTER(mt);
++
+     ::encode(map_epoch, payload);
+     ::encode(reqid, payload);
+     ::encode(pgid.pgid, payload);
+@@ -102,6 +110,8 @@ public:
+     ::encode(attrset, payload);
+     ::encode(from, payload);
+     ::encode(pgid.shard, payload);
++
++    BLKIN_MSG_ENCODE_TRACE();
+   }
+ 
+   epoch_t get_map_epoch() { return map_epoch; }
+@@ -138,6 +148,7 @@ public:
+     result(result_) {
+     memset(&peer_stat, 0, sizeof(peer_stat));
+     set_tid(req->get_tid());
++    BLKIN_MSG_CHECK_SPAN();
+   }
+   MOSDSubOpReply() : Message(MSG_OSD_SUBOPREPLY) {}
+ private:
+@@ -160,6 +171,7 @@ public:
+     out << ")";
+   }
+ 
++  BLKIN_MSG_END_DECL("MOSDSubOpReply")
+ };
+ 
+ 
+diff --git a/src/os/FileJournal.cc b/src/os/FileJournal.cc
+index c6bb6f2..8e024d0 100644
+--- a/src/os/FileJournal.cc
++++ b/src/os/FileJournal.cc
+@@ -874,8 +874,11 @@ void FileJournal::queue_completions_thru(uint64_t seq)
+     }
+     if (next.finish)
+       finisher->queue(next.finish);
+-    if (next.tracked_op)
++    if (next.tracked_op) {
+       next.tracked_op->mark_event("journaled_completion_queued");
++      BLKIN_OP_TRACE_EVENT(next.tracked_op, journal, "journaled_completion_queued");
++      BLKIN_OP_TRACE_EVENT(next.tracked_op, journal, "span_ended");
++    }
+   }
+   finisher_cond.Signal();
+ }
+@@ -934,8 +937,10 @@ int FileJournal::prepare_single_write(bufferlist& bl, off64_t& queue_pos, uint64
+   }
+   bl.append((const char*)&h, sizeof(h));
+ 
+-  if (next_write.tracked_op)
++  if (next_write.tracked_op) {
+     next_write.tracked_op->mark_event("write_thread_in_journal_buffer");
++    BLKIN_OP_TRACE_EVENT(next_write.tracked_op, journal, "write_thread_in_journal_buffer");
++  }
+ 
+   // pop from writeq
+   pop_write();
+@@ -1498,8 +1503,11 @@ void FileJournal::submit_entry(uint64_t seq, bufferlist& e, int alignment,
+ 
+   throttle_ops.take(1);
+   throttle_bytes.take(e.length());
+-  if (osd_op)
++  if (osd_op) {
+     osd_op->mark_event("commit_queued_for_journal_write");
++    BLKIN_OP_CREATE_TRACE(osd_op, journal, journal_endpoint);
++    BLKIN_OP_TRACE_EVENT(osd_op, journal, "commit_queued_for_journal_write");
++  }
+   if (logger) {
+     logger->set(l_os_jq_max_ops, throttle_ops.get_max());
+     logger->set(l_os_jq_max_bytes, throttle_bytes.get_max());
+diff --git a/src/os/FileJournal.h b/src/os/FileJournal.h
+index 574c902..dfeab81 100644
+--- a/src/os/FileJournal.h
++++ b/src/os/FileJournal.h
+@@ -215,6 +215,7 @@ public:
+   } __attribute__((__packed__, aligned(4)));
+ 
+ private:
++  BLKIN_END_REF(journal_endpoint)
+   string fn;
+ 
+   char *zero_buf;
+@@ -385,7 +386,10 @@ private:
+     write_stop(false),
+     aio_stop(false),
+     write_thread(this),
+-    write_finish_thread(this) { }
++    write_finish_thread(this)
++  {
++    BLKIN_MSG_END(journal, "", 0, "Journal (" + fn + ")");
++  }
+   ~FileJournal() {
+     delete[] zero_buf;
+   }
+diff --git a/src/os/FileStore.cc b/src/os/FileStore.cc
+index f6c3bb8..a3a6859 100644
+--- a/src/os/FileStore.cc
++++ b/src/os/FileStore.cc
+@@ -563,6 +563,7 @@ FileStore::FileStore(const std::string &base, const std::string &jdev, osflagbit
+   m_filestore_max_inline_xattrs(0)
+ {
+   m_filestore_kill_at.set(g_conf->filestore_kill_at);
++  BLKIN_MSG_END(filestore, "", 0, "Filestore (" + basedir + "(" + name + ")" + ")");
+ 
+   ostringstream oss;
+   oss << basedir << "/current";
+@@ -1717,6 +1718,9 @@ void FileStore::queue_op(OpSequencer *osr, Op *o)
+   // so that regardless of which order the threads pick up the
+   // sequencer, the op order will be preserved.
+ 
++  if (o->osd_op) {
++    BLKIN_OP_TRACE_EVENT(o->osd_op, osd, "queueing_for_filestore");
++  }
+   osr->queue(o);
+ 
+   logger->inc(l_os_ops);
+@@ -1728,6 +1732,9 @@ void FileStore::queue_op(OpSequencer *osr, Op *o)
+ 	  << "   (queue has " << op_queue_len << " ops and " << op_queue_bytes << " bytes)"
+ 	  << dendl;
+   op_wq.queue(osr);
++  if (o->osd_op) {
++    BLKIN_OP_TRACE_EVENT(o->osd_op, osd, "queued_for_filestore");
++  }
+ }
+ 
+ void FileStore::op_queue_reserve_throttle(Op *o, ThreadPool::TPHandle *handle)
+@@ -1798,8 +1805,17 @@ void FileStore::_do_op(OpSequencer *osr, ThreadPool::TPHandle &handle)
+   osr->apply_lock.Lock();
+   Op *o = osr->peek_queue();
+   apply_manager.op_apply_start(o->op);
++
++  if (o->osd_op) {
++    BLKIN_OP_CREATE_TRACE(o->osd_op, filestore, filestore_endpoint);
++    BLKIN_OP_TRACE_EVENT(o->osd_op, filestore, "filestore_dequeued");
++  }
+   dout(5) << "_do_op " << o << " seq " << o->op << " " << *osr << "/" << osr->parent << " start" << dendl;
+   int r = _do_transactions(o->tls, o->op, &handle);
++
++  if (o->osd_op) {
++    BLKIN_OP_TRACE_EVENT(o->osd_op, filestore, "filestore_finished");
++  }
+   apply_manager.op_apply_finish(o->op);
+   dout(10) << "_do_op " << o << " seq " << o->op << " r = " << r
+ 	   << ", finisher " << o->onreadable << " " << o->onreadable_sync << dendl;
+@@ -1809,6 +1825,10 @@ void FileStore::_finish_op(OpSequencer *osr)
+ {
+   list<Context*> to_queue;
+   Op *o = osr->dequeue(&to_queue);
++  if (o->osd_op) {
++    BLKIN_OP_TRACE_EVENT(o->osd_op, filestore, "filestore_finishing_op");
++    BLKIN_OP_TRACE_EVENT(o->osd_op, filestore, "span_ended");
++  }
+   
+   dout(10) << "_finish_op " << o << " seq " << o->op << " " << *osr << "/" << osr->parent << dendl;
+   osr->apply_lock.Unlock();  // locked in _do_op
+diff --git a/src/os/FileStore.h b/src/os/FileStore.h
+index af1fb8d..6605a97 100644
+--- a/src/os/FileStore.h
++++ b/src/os/FileStore.h
+@@ -118,6 +118,7 @@ public:
+   }
+ 
+ private:
++  BLKIN_END_REF(filestore_endpoint)
+   string internal_name;         ///< internal name, used to name the perfcounter instance
+   string basedir, journalpath;
+   osflagbits_t generic_flags;
+diff --git a/src/osd/ECBackend.cc b/src/osd/ECBackend.cc
+index 951b249..8fc4459 100644
+--- a/src/osd/ECBackend.cc
++++ b/src/osd/ECBackend.cc
+@@ -727,8 +727,10 @@ struct SubWriteCommitted : public Context {
+     : pg(pg), msg(msg), tid(tid),
+       version(version), last_complete(last_complete) {}
+   void finish(int) {
+-    if (msg)
++    if (msg) {
+       msg->mark_event("sub_op_committed");
++      BLKIN_OP_TRACE_EVENT(msg, pg, "sub_op_committed");
++    }
+     pg->sub_write_committed(tid, version, last_complete);
+   }
+ };
+@@ -769,8 +771,10 @@ struct SubWriteApplied : public Context {
+     eversion_t version)
+     : pg(pg), msg(msg), tid(tid), version(version) {}
+   void finish(int) {
+-    if (msg)
++    if (msg) {
+       msg->mark_event("sub_op_applied");
++      BLKIN_OP_TRACE_EVENT(msg, pg, "sub_op_applied");
++    }
+     pg->sub_write_applied(tid, version);
+   }
+ };
+diff --git a/src/osd/OSD.cc b/src/osd/OSD.cc
+index 1119b87..e69ff13 100644
+--- a/src/osd/OSD.cc
++++ b/src/osd/OSD.cc
+@@ -21,6 +21,9 @@
+ #include <signal.h>
+ #include <ctype.h>
+ #include <boost/scoped_ptr.hpp>
++#ifdef WITH_BLKIN
++#include <boost/lexical_cast.hpp>
++#endif
+ 
+ #ifdef HAVE_SYS_PARAM_H
+ #include <sys/param.h>
+@@ -1572,6 +1575,8 @@ OSD::OSD(CephContext *cct_, ObjectStore *store_,
+                                          cct->_conf->osd_op_log_threshold);
+   op_tracker.set_history_size_and_duration(cct->_conf->osd_op_history_size,
+                                            cct->_conf->osd_op_history_duration);
++
++  BLKIN_MSG_END(osd, "", 0, "osd." + boost::lexical_cast<string>(whoami));
+ }
+ 
+ OSD::~OSD()
+@@ -5413,6 +5418,9 @@ void OSD::ms_fast_dispatch(Message *m)
+ #endif
+     tracepoint(osd, ms_fast_dispatch, reqid.name._type,
+         reqid.name._num, reqid.tid, reqid.inc);
++
++    BLKIN_OP_CREATE_TRACE(op, osd, osd_endpoint);
++    BLKIN_OP_TRACE_EVENT(op, osd, "waiting_on_osdmap");
+   }
+   OSDMapRef nextmap = service.get_nextmap_reserved();
+   Session *session = static_cast<Session*>(m->get_connection()->get_priv());
+@@ -5760,6 +5768,8 @@ void OSD::_dispatch(Message *m)
+     {
+       OpRequestRef op = op_tracker.create_request<OpRequest, Message*>(m);
+       op->mark_event("waiting_for_osdmap");
++      BLKIN_OP_CREATE_TRACE(op, osd, osd_endpoint);
++      BLKIN_OP_TRACE_EVENT(op, osd, "waiting_for_osdmap");
+       // no map?  starting up?
+       if (!osdmap) {
+         dout(7) << "no OSDMap, not booted" << dendl;
+@@ -7998,6 +8008,8 @@ void OSD::handle_op(OpRequestRef& op, OSDMapRef& osdmap)
+     return;
+   }
+ 
++  BLKIN_OP_TRACE_EVENT(op, osd, "handling_op");
++
+   // we don't need encoded payload anymore
+   m->clear_payload();
+ 
+@@ -8135,7 +8147,10 @@ void OSD::handle_op(OpRequestRef& op, OSDMapRef& osdmap)
+   if (pg) {
+     op->send_map_update = share_map.should_send;
+     op->sent_epoch = m->get_map_epoch();
++    BLKIN_OP_CREATE_TRACE(op, pg, pg->pg_endpoint);
++    BLKIN_OP_TRACE_EVENT(op, pg, "enqueuing_op");
+     enqueue_op(pg, op);
++    BLKIN_OP_TRACE_EVENT(op, pg, "enqueued_op");
+     share_map.should_send = false;
+   }
+ }
+@@ -8146,6 +8161,8 @@ void OSD::handle_replica_op(OpRequestRef& op, OSDMapRef& osdmap)
+   T *m = static_cast<T *>(op->get_req());
+   assert(m->get_type() == MSGTYPE);
+ 
++  BLKIN_OP_TRACE_EVENT(op, osd, "handling_replica_op");
++
+   dout(10) << __func__ << " " << *m << " epoch " << m->map_epoch << dendl;
+   if (!require_self_aliveness(op->get_req(), m->map_epoch))
+     return;
+@@ -8178,7 +8195,9 @@ void OSD::handle_replica_op(OpRequestRef& op, OSDMapRef& osdmap)
+   if (pg) {
+     op->send_map_update = should_share_map;
+     op->sent_epoch = m->map_epoch;
++    BLKIN_OP_CREATE_TRACE(op, pg, pg->pg_endpoint);
+     enqueue_op(pg, op);
++    BLKIN_OP_TRACE_EVENT(op, osd, "enqueued_replica_op");
+   } else if (should_share_map && m->get_connection()->is_connected()) {
+     C_SendMap *send_map = new C_SendMap(this, m->get_source(),
+ 					m->get_connection(),
+@@ -8269,7 +8288,9 @@ void OSD::ShardedOpWQ::_process(uint32_t thread_index, heartbeat_handle_d *hb )
+   delete f;
+   *_dout << dendl;
+ 
++  BLKIN_OP_TRACE_EVENT(op, pg, "dequeuing_op");
+   osd->dequeue_op(item.first, op, tp_handle);
++  BLKIN_OP_TRACE_EVENT(op, pg, "dequeued_op");
+ 
+   {
+ #ifdef WITH_LTTNG
+diff --git a/src/osd/OSD.h b/src/osd/OSD.h
+index a8e6990..1f0ad50 100644
+--- a/src/osd/OSD.h
++++ b/src/osd/OSD.h
+@@ -919,6 +919,7 @@ protected:
+   AuthAuthorizeHandlerRegistry *authorize_handler_cluster_registry;
+   AuthAuthorizeHandlerRegistry *authorize_handler_service_registry;
+ 
++  BLKIN_END_REF(osd_endpoint)
+   Messenger   *cluster_messenger;
+   Messenger   *client_messenger;
+   Messenger   *objecter_messenger;
+diff --git a/src/osd/OpRequest.cc b/src/osd/OpRequest.cc
+index 1296334..fb8f981 100644
+--- a/src/osd/OpRequest.cc
++++ b/src/osd/OpRequest.cc
+@@ -131,3 +131,77 @@ void OpRequest::mark_flag_point(uint8_t flag, const string& s) {
+ 	     reqid.name._num, reqid.tid, reqid.inc, rmw_flags,
+ 	     flag, s.c_str(), old_flags, hit_flag_points);
+ }
++
++#ifdef WITH_BLKIN
++bool OpRequest::create_osd_trace(TrackedOpEndpointRef ep)
 +{
-+  if (!master_trace) {
-+    return 0;
++  string name = "OSD Handling op";
++  if (!request) {
++    return false;
 +  }
 +
-+  master_trace->event("Message allocated");
-+  trace_msg_info();
-+  return 0;
++  TrackedOpTraceRef mt = request->get_master_trace();
++  if (!mt) {
++    return false;
++  }
++
++  osd_trace = ZTracer::create_ZTrace(name, mt, ep);
++  if(!osd_trace){
++    return false;
++  }
++
++  return true;
 +}
 +
-+int Message::init_trace_info()
++bool OpRequest::create_pg_trace(TrackedOpEndpointRef ep)
 +{
-+  create_message_endpoint();
-+  master_trace = ZTracer::create_ZTrace("Main", message_endpoint);
-+  if (!master_trace) {
-+    return -ENOMEM;
++  string name = "PG";
++  if (!request) {
++    return false;
 +  }
 +
-+  return trace_basic_info();
++  TrackedOpTraceRef mt = request->get_master_trace();
++  if (!mt) {
++    return false;
++  }
++
++  pg_trace = ZTracer::create_ZTrace(name, mt, ep);
++  if(!pg_trace){
++    return false;
++  }
++
++  return true;
 +}
 +
-+int Message::init_trace_info(ZTracer::ZTraceRef t)
++bool OpRequest::create_journal_trace(TrackedOpEndpointRef ep)
 +{
-+  if (!t) {
-+    return -EINVAL;
++  string name = "Journal access";
++
++  if (!osd_trace) {
++    return false;
 +  }
 +
-+  create_message_endpoint();
-+  master_trace = ZTracer::create_ZTrace("Main", t, message_endpoint);
-+  if (!master_trace) {
-+    return -ENOMEM;
++  journal_trace = ZTracer::create_ZTrace(name, osd_trace, ep);
++  if(!journal_trace){
++    return false;
 +  }
 +
-+  return trace_basic_info();
++  return true;
 +}
 +
-+int Message::init_trace_info(struct blkin_trace_info *tinfo)
++bool OpRequest::create_filestore_trace(TrackedOpEndpointRef ep)
 +{
-+  if (!(tinfo->trace_id == 0 && tinfo->span_id == 0 && tinfo->parent_span_id == 0)) {
-+    create_message_endpoint();
-+    master_trace = ZTracer::create_ZTrace("Main", message_endpoint, tinfo);
-+    return trace_basic_info();
-+  }
-+  return init_trace_info();
-+}
++  string name = "Filestore access";
 +
-+void Message::trace(string event)
-+{
-+  if (!master_trace) {
-+    return;
++  if (!osd_trace) {
++    return false;
 +  }
 +
-+  master_trace->event(event);
-+}
-+
-+void Message::trace(string key, string val)
-+{
-+  if (!master_trace) {
-+    return;
-+  }
-+
-+  master_trace->keyval(key, val);
-+}
-+
-+bool Message::create_message_endpoint()
-+{
-+  message_endpoint = ZTracer::create_ZTraceEndpoint("0.0.0.0", 0, "NaN");
-+  if (!message_endpoint) {
++  filestore_trace = ZTracer::create_ZTrace(name, osd_trace, ep);
++  if(!filestore_trace){
 +    return false;
 +  }
 +
 +  return true;
 +}
 +#endif // WITH_BLKIN
-diff --git a/src/msg/Message.h b/src/msg/Message.h
-index e1aa98d..b6c5dc9 100644
---- a/src/msg/Message.h
-+++ b/src/msg/Message.h
-@@ -18,6 +18,11 @@
- #include <stdlib.h>
- #include <ostream>
+diff --git a/src/osd/OpRequest.h b/src/osd/OpRequest.h
+index 88a2704..65b5bbc 100644
+--- a/src/osd/OpRequest.h
++++ b/src/osd/OpRequest.h
+@@ -76,6 +76,13 @@ struct OpRequest : public TrackedOp {
+ 
+   void _dump(utime_t now, Formatter *f) const;
  
 +#ifdef WITH_BLKIN
-+#include <ztracer.hpp>
-+#endif
-+#include "common/blkin_wrapper.h"
++  bool create_osd_trace(TrackedOpEndpointRef ep);
++  bool create_pg_trace(TrackedOpEndpointRef ep);
++  bool create_journal_trace(TrackedOpEndpointRef ep);
++  bool create_filestore_trace(TrackedOpEndpointRef ep);
++#endif // WITH_BLKIN
 +
- #include <boost/intrusive_ptr.hpp>
- #include <boost/intrusive/list.hpp>
- // Because intusive_ptr clobbers our assert...
-@@ -257,6 +262,10 @@ protected:
-   // currently throttled.
-   uint64_t dispatch_throttle_size;
+   bool has_feature(uint64_t f) const {
+     return request->get_connection()->has_feature(f);
+   }
+@@ -146,9 +153,11 @@ public:
+   }
+   void mark_sub_op_sent(const string& s) {
+     mark_flag_point(flag_sub_op_sent, s);
++    BLKIN_TYPE_TRACE_EVENT(pg, "sub_op_sent | " + s);
+   }
+   void mark_commit_sent() {
+     mark_flag_point(flag_commit_sent, "commit_sent");
++    BLKIN_TYPE_TRACE_EVENT(pg, "commit_sent");
+   }
  
-+#ifdef WITH_BLKIN
-+  ZTracer::ZTraceEndpointRef message_endpoint;
-+  ZTracer::ZTraceRef master_trace;
-+#endif
-   friend class Messenger;
+   utime_t get_dequeued_time() const {
+diff --git a/src/osd/PG.cc b/src/osd/PG.cc
+index 97e46dd..1413ad4 100644
+--- a/src/osd/PG.cc
++++ b/src/osd/PG.cc
+@@ -220,6 +220,8 @@ PG::PG(OSDService *o, OSDMapRef curmap,
+ #ifdef PG_DEBUG_REFS
+   osd->add_pgid(p, this);
+ #endif
++  BLKIN_OSS(oss, "PG " << info.pgid);
++  BLKIN_MSG_END(pg, "", 0, oss.str());
+ }
+ 
+ PG::~PG()
+diff --git a/src/osd/PG.h b/src/osd/PG.h
+index 870fdf2..2ab78f2 100644
+--- a/src/osd/PG.h
++++ b/src/osd/PG.h
+@@ -197,6 +197,7 @@ public:
+   void update_snap_mapper_bits(uint32_t bits) {
+     snap_mapper.update_bits(bits);
+   }
++  BLKIN_END_REF(pg_endpoint)
+ protected:
+   // Ops waiting for map, should be queued at back
+   Mutex map_lock;
+diff --git a/src/osd/ReplicatedBackend.cc b/src/osd/ReplicatedBackend.cc
+index 680c27a..afbd4c9 100644
+--- a/src/osd/ReplicatedBackend.cc
++++ b/src/osd/ReplicatedBackend.cc
+@@ -130,6 +130,7 @@ bool ReplicatedBackend::handle_message(
+   OpRequestRef op
+   )
+ {
++  BLKIN_OP_TRACE_EVENT(op, pg, "handling_message");
+   dout(10) << __func__ << ": " << op << dendl;
+   switch (op->get_req()->get_type()) {
+   case MSG_OSD_PG_PUSH:
+@@ -608,8 +609,10 @@ void ReplicatedBackend::op_applied(
+   InProgressOp *op)
+ {
+   dout(10) << __func__ << ": " << op->tid << dendl;
+-  if (op->op)
++  if (op->op) {
+     op->op->mark_event("op_applied");
++    BLKIN_OP_TRACE_EVENT(op->op, pg, "op_applied");
++  }
+ 
+   op->waiting_for_applied.erase(get_parent()->whoami_shard());
+   parent->op_applied(op->v);
+@@ -628,8 +631,10 @@ void ReplicatedBackend::op_commit(
+   InProgressOp *op)
+ {
+   dout(10) << __func__ << ": " << op->tid << dendl;
+-  if (op->op)
++  if (op->op) {
+     op->op->mark_event("op_commit");
++    BLKIN_OP_TRACE_EVENT(op->op, pg, "op_commit");
++  }
+ 
+   op->waiting_for_commit.erase(get_parent()->whoami_shard());
+ 
+@@ -680,12 +685,18 @@ void ReplicatedBackend::sub_op_modify_reply(OpRequestRef op)
+     if (r->ack_type & CEPH_OSD_FLAG_ONDISK) {
+       assert(ip_op.waiting_for_commit.count(from));
+       ip_op.waiting_for_commit.erase(from);
+-      if (ip_op.op)
++      if (ip_op.op) {
+ 	ip_op.op->mark_event("sub_op_commit_rec");
++	BLKIN_OP_TRACE_EVENT(ip_op.op, pg, "sub_op_commit_rec");
++	BLKIN_MSG_TRACE_EVENT(op->get_req(), "span_ended");
++      }
+     } else {
+       assert(ip_op.waiting_for_applied.count(from));
+-      if (ip_op.op)
++      if (ip_op.op) {
+ 	ip_op.op->mark_event("sub_op_applied_rec");
++	BLKIN_OP_TRACE_EVENT(ip_op.op, pg, "sub_op_applied_rec");
++	BLKIN_MSG_TRACE_EVENT(op->get_req(), "span_ended");
++      }
+     }
+     ip_op.waiting_for_applied.erase(from);
+ 
+diff --git a/src/osd/ReplicatedPG.cc b/src/osd/ReplicatedPG.cc
+index 136840b..7209077 100644
+--- a/src/osd/ReplicatedPG.cc
++++ b/src/osd/ReplicatedPG.cc
+@@ -1301,6 +1301,7 @@ void ReplicatedPG::do_request(
+   OpRequestRef& op,
+   ThreadPool::TPHandle &handle)
+ {
++  BLKIN_OP_TRACE_EVENT(op, pg, "starting_request");
+   if (!op_has_sufficient_caps(op)) {
+     osd->reply_op_error(op, -EPERM);
+     return;
+@@ -1422,6 +1423,7 @@ bool ReplicatedPG::check_src_targ(const hobject_t& soid, const hobject_t& toid)
+  */
+ void ReplicatedPG::do_op(OpRequestRef& op)
+ {
++  BLKIN_OP_TRACE_EVENT(op, pg, "do_op");
+   MOSDOp *m = static_cast<MOSDOp*>(op->get_req());
+   assert(m->get_type() == CEPH_MSG_OSD_OP);
+   if (op->includes_pg_op()) {
+@@ -1432,6 +1434,7 @@ void ReplicatedPG::do_op(OpRequestRef& op)
+     return do_pg_op(op);
+   }
+ 
++  BLKIN_OP_TRACE_KEYVAL(op, osd, "object", m->get_oid().name);
+   if (get_osdmap()->is_blacklisted(m->get_source_addr())) {
+     dout(10) << "do_op " << m->get_source_addr() << " is blacklisted" << dendl;
+     osd->reply_op_error(op, -EBLACKLISTED);
+@@ -1535,6 +1538,7 @@ void ReplicatedPG::do_op(OpRequestRef& op)
+ 	if (m->wants_ack()) {
+ 	  if (already_ack(replay_version)) {
+ 	    MOSDOpReply *reply = new MOSDOpReply(m, 0, get_osdmap()->get_epoch(), 0, false);
++	    BLKIN_MSG_INIT_TRACE(reply, op->get_osd_trace());
+ 	    reply->add_flags(CEPH_OSD_FLAG_ACK);
+ 	    reply->set_reply_versions(replay_version, user_version);
+ 	    osd->send_message_osd_client(reply, m->get_connection());
+@@ -2232,6 +2236,8 @@ void ReplicatedPG::execute_ctx(OpContext *ctx)
+   const hobject_t& soid = obc->obs.oi.soid;
+   map<hobject_t,ObjectContextRef>& src_obc = ctx->src_obc;
+ 
++  BLKIN_OP_TRACE_EVENT(op, pg, "executing_ctx");
++
+   // this method must be idempotent since we may call it several times
+   // before we finally apply the resulting transaction.
+   delete ctx->op_t;
+@@ -2337,6 +2343,7 @@ void ReplicatedPG::execute_ctx(OpContext *ctx)
+   // prepare the reply
+   ctx->reply = new MOSDOpReply(m, 0, get_osdmap()->get_epoch(), 0,
+ 			       successful_write);
++  BLKIN_MSG_INIT_TRACE(ctx->reply, op->get_osd_trace());
+ 
+   // Write operations aren't allowed to return a data payload because
+   // we can't do so reliably. If the client has to resend the request
+@@ -2486,6 +2493,8 @@ void ReplicatedPG::do_sub_op(OpRequestRef op)
+   assert(m->get_type() == MSG_OSD_SUBOP);
+   dout(15) << "do_sub_op " << *op->get_req() << dendl;
+ 
++  BLKIN_OP_TRACE_EVENT(op, pg, "do_sub_op");
++
+   OSDOp *first = NULL;
+   if (m->ops.size() >= 1) {
+     first = &m->ops[0];
+@@ -3575,6 +3584,13 @@ int ReplicatedPG::do_osd_ops(OpContext *ctx, vector<OSDOp>& ops)
+     case CEPH_OSD_OP_READ:
+       ++ctx->num_read;
+       {
++        BLKIN_OP_TRACE_KEYVAL(ctx->op, osd, "type", "read");
++        BLKIN_OSS(oss1, op.extent.offset);
++        BLKIN_OP_TRACE_KEYVAL(ctx->op, osd, "offset", oss1.str());
++        BLKIN_OSS(oss2, op.extent.length);
++        BLKIN_OP_TRACE_KEYVAL(ctx->op, osd, "length", oss2.str());
++      }
++      {
+ 	__u32 seq = oi.truncate_seq;
+ 	uint64_t size = oi.size;
+ 	tracepoint(osd, do_osd_op_pre_read, soid.oid.name.c_str(), soid.snap.val, size, seq, op.extent.offset, op.extent.length, op.extent.truncate_size, op.extent.truncate_seq);
+@@ -7484,12 +7500,14 @@ void ReplicatedPG::eval_repop(RepGather *repop)
+ 	repop->ctx->reply = NULL;
+       else {
+ 	reply = new MOSDOpReply(m, 0, get_osdmap()->get_epoch(), 0, true);
++	BLKIN_MSG_INIT_TRACE(reply, repop->ctx->op->get_osd_trace());
+ 	reply->set_reply_versions(repop->ctx->at_version,
+ 				  repop->ctx->user_at_version);
+       }
+       reply->add_flags(CEPH_OSD_FLAG_ACK | CEPH_OSD_FLAG_ONDISK);
+       dout(10) << " sending commit on " << *repop << " " << reply << dendl;
+       osd->send_message_osd_client(reply, m->get_connection());
++      BLKIN_MSG_TRACE_EVENT(m, "replied_commit");
+       repop->sent_disk = true;
+       repop->ctx->op->mark_commit_sent();
+     }
+@@ -7507,10 +7525,12 @@ void ReplicatedPG::eval_repop(RepGather *repop)
+ 	   ++i) {
+ 	MOSDOp *m = (MOSDOp*)i->first->get_req();
+ 	MOSDOpReply *reply = new MOSDOpReply(m, 0, get_osdmap()->get_epoch(), 0, true);
++	BLKIN_MSG_INIT_TRACE(reply, repop->ctx->op->get_osd_trace());
+ 	reply->set_reply_versions(repop->ctx->at_version,
+ 				  i->second);
+ 	reply->add_flags(CEPH_OSD_FLAG_ACK);
+ 	osd->send_message_osd_client(reply, m->get_connection());
++	BLKIN_MSG_TRACE_EVENT(m, "replied_ack");
+       }
+       waiting_for_ack.erase(repop->v);
+     }
+@@ -7564,6 +7584,8 @@ void ReplicatedPG::eval_repop(RepGather *repop)
+       dout(0) << "   q front is " << *repop_queue.front() << dendl; 
+       assert(repop_queue.front() == repop);
+     }
++    BLKIN_OP_TRACE_EVENT(repop->ctx->op, pg, "all_done");
++    BLKIN_MSG_TRACE_EVENT(m, "span_ended");
+     repop_queue.pop_front();
+     remove_repop(repop);
+   }
+@@ -7583,6 +7605,8 @@ void ReplicatedPG::issue_repop(RepGather *repop, utime_t now)
+           << " o " << soid
+           << dendl;
+ 
++  BLKIN_OP_TRACE_EVENT(ctx->op, pg, "issuing_repop");
++
+   repop->v = ctx->at_version;
+   if (ctx->at_version > eversion_t()) {
+     for (set<pg_shard_t>::iterator i = actingbackfill.begin();
+@@ -7747,6 +7771,7 @@ void ReplicatedBackend::issue_op(
+   InProgressOp *op,
+   ObjectStore::Transaction *op_t)
+ {
++  BLKIN_OP_TRACE_EVENT(op->op, pg, "issuing_replication");
+ 
+   if (parent->get_actingbackfill_shards().size() > 1) {
+     ostringstream ss;
+@@ -7783,6 +7808,8 @@ void ReplicatedBackend::issue_op(
+ 	    op_t,
+ 	    peer,
+ 	    pinfo);
++
++      BLKIN_MSG_INIT_TRACE_IF(op->op->get_req(), wr, op->op->get_osd_trace());
+     } else {
+       wr = generate_subop<MOSDRepOp, MSG_OSD_REPOP>(
+ 	    soid,
+@@ -8612,6 +8639,7 @@ void ReplicatedBackend::sub_op_modify_impl(OpRequestRef op)
+ void ReplicatedBackend::sub_op_modify_applied(RepModifyRef rm)
+ {
+   rm->op->mark_event("sub_op_applied");
++  BLKIN_OP_TRACE_EVENT(rm->op, pg, "sub_op_applied");
+   rm->applied = true;
+ 
+   dout(10) << "sub_op_modify_applied on " << rm << " op "
+@@ -8643,6 +8671,9 @@ void ReplicatedBackend::sub_op_modify_applied(RepModifyRef rm)
+   // send ack to acker only if we haven't sent a commit already
+   if (ack) {
+     ack->set_priority(CEPH_MSG_PRIO_HIGH); // this better match commit priority!
++    BLKIN_MSG_INIT_TRACE(ack, rm->op->get_osd_trace());
++    BLKIN_MSG_TRACE_EVENT(rm->op->get_req(), "replied_apply");
++    BLKIN_MSG_TRACE_EVENT(rm->op->get_req(), "span_ended");
+     get_parent()->send_message_osd_cluster(
+       rm->ackerosd, ack, get_osdmap()->get_epoch());
+   }
+@@ -8686,6 +8717,9 @@ void ReplicatedBackend::sub_op_modify_commit(RepModifyRef rm)
+   }
+ 
+   commit->set_priority(CEPH_MSG_PRIO_HIGH); // this better match ack priority!
++  BLKIN_MSG_INIT_TRACE(commit, rm->op->get_osd_trace());
++  BLKIN_MSG_TRACE_EVENT(rm->op->get_req(), "replied_commit");
++  BLKIN_MSG_TRACE_EVENT(rm->op->get_req(), "span_ended");
+   get_parent()->send_message_osd_cluster(
+     rm->ackerosd, commit, get_osdmap()->get_epoch());
+   
+@@ -9365,6 +9399,7 @@ struct C_OnPushCommit : public Context {
+   OpRequestRef op;
+   C_OnPushCommit(ReplicatedPG *pg, OpRequestRef op) : pg(pg), op(op) {}
+   void finish(int) {
++    BLKIN_OP_TRACE_EVENT(op, pg, "committed");
+     op->mark_event("committed");
+     log_subop_stats(pg->osd->logger, op, l_osd_sop_push);
+   }
+diff --git a/src/osdc/Objecter.cc b/src/osdc/Objecter.cc
+index d9e57ec..2684d9c 100644
+--- a/src/osdc/Objecter.cc
++++ b/src/osdc/Objecter.cc
+@@ -2721,6 +2721,7 @@ MOSDOp *Objecter::_prepare_osd_op(Op *op)
+   m->ops = op->ops;
+   m->set_mtime(op->mtime);
+   m->set_retry_attempt(op->attempts++);
++  BLKIN_MSG_INIT_TRACE_IF(op->trace, m, op->trace);
+ 
+   if (op->replay_version != eversion_t())
+     m->set_version(op->replay_version);  // we're replaying this op!
+@@ -2861,6 +2862,7 @@ void Objecter::handle_osd_op_reply(MOSDOpReply *m)
+ 	    << " ... stray" << dendl;
+     s->lock.unlock();
+     put_session(s);
++    BLKIN_MSG_TRACE_EVENT(m, "span_ended");
+     m->put();
+     return;
+   }
+@@ -2873,6 +2875,10 @@ void Objecter::handle_osd_op_reply(MOSDOpReply *m)
+ 		<< dendl;
+   Op *op = iter->second;
+ 
++  BLKIN_MSG_TRACE_EVENT_IF(op->oncommit, m, "oncommit_message");
++  BLKIN_MSG_TRACE_EVENT_IF(op->onack, m, "onack_message");
++  BLKIN_MSG_TRACE_EVENT(m, "span_ended");
++
+   if (m->get_retry_attempt() >= 0) {
+     if (m->get_retry_attempt() != (op->attempts - 1)) {
+       ldout(cct, 7) << " ignoring reply from attempt " << m->get_retry_attempt()
+@@ -2963,6 +2969,7 @@ void Objecter::handle_osd_op_reply(MOSDOpReply *m)
+   assert(op->out_bl.size() == op->out_rval.size());
+   assert(op->out_bl.size() == op->out_handler.size());
+   vector<OSDOp>::iterator p = out_ops.begin();
++  BLKIN_OP_EVENT_IF(op->trace, op->trace, "in_handle_osd_op_reply");
+   for (unsigned i = 0;
+        p != out_ops.end() && pb != op->out_bl.end();
+        ++i, ++p, ++pb, ++pr, ++ph) {
+diff --git a/src/osdc/Objecter.h b/src/osdc/Objecter.h
+index 581d99a..477e15c 100644
+--- a/src/osdc/Objecter.h
++++ b/src/osdc/Objecter.h
+@@ -54,6 +54,7 @@ struct ObjectOperation {
+   vector<OSDOp> ops;
+   int flags;
+   int priority;
++  BLKIN_TRACE_REF(trace);
+ 
+   vector<bufferlist*> out_bl;
+   vector<Context*> out_handler;
+@@ -71,6 +72,8 @@ struct ObjectOperation {
+     return ops.size();
+   }
+ 
++  BLKIN_OP_SET_TRACE_DECL()
++
+   void set_last_op_flags(int flags) {
+     assert(!ops.empty());
+     ops.rbegin()->op.flags = flags;
+@@ -1056,6 +1059,7 @@ private:
+   atomic_t global_op_flags; // flags which are applied to each IO op
+   bool keep_balanced_budget;
+   bool honor_osdmap_full;
++  BLKIN_END_REF(objecter_endpoint)
  
  public:
-@@ -269,7 +278,11 @@ public:
-       dispatch_throttle_size(0) {
-     memset(&header, 0, sizeof(header));
-     memset(&footer, 0, sizeof(footer));
-+#ifdef WITH_BLKIN
-+    trace_end_after_span = false;
-+#endif
-   }
-+
-   Message(int t, int version=1, int compat_version=0)
-     : connection(NULL),
-       magic(0),
-@@ -284,8 +297,14 @@ public:
-     header.priority = 0;  // undef
-     header.data_off = 0;
-     memset(&footer, 0, sizeof(footer));
-+#ifdef WITH_BLKIN
-+    trace_end_after_span = false;
-+#endif
-   }
+   void maybe_request_map();
+@@ -1174,6 +1178,7 @@ public:
+     epoch_t map_dne_bound;
  
-+#ifdef WITH_BLKIN
-+  bool trace_end_after_span;
-+#endif
-   Message *get() {
-     return static_cast<Message *>(RefCountedObject::get());
-   }
-@@ -324,6 +343,10 @@ public:
-   uint32_t get_magic() { return magic; }
-   void set_magic(int _magic) { magic = _magic; }
+     bool budgeted;
++    BLKIN_TRACE_REF(trace);
  
-+#ifdef WITH_BLKIN
-+  ZTracer::ZTraceRef get_master_trace() { return master_trace; }
-+#endif // WITH_BLKIN
-+
-   /*
-    * If you use get_[data, middle, payload] you shouldn't
-    * use it to change those bufferlists unless you KNOW
-@@ -455,6 +478,17 @@ public:
-   virtual void dump(Formatter *f) const;
- 
-   void encode(uint64_t features, int crcflags);
-+
-+#ifdef WITH_BLKIN
-+  int init_trace_info();
-+  int init_trace_info(struct blkin_trace_info *tinfo);
-+  int init_trace_info(ZTracer::ZTraceRef t);
-+  void trace(string event);
-+  void trace(string key, string val);
-+  int trace_basic_info();
-+  virtual void trace_msg_info() { };
-+  virtual bool create_message_endpoint();
-+#endif // WITH_BLKIN
- };
- typedef boost::intrusive_ptr<Message> MessageRef;
- 
-diff --git a/src/msg/msg_types.cc b/src/msg/msg_types.cc
-index b02db76..ba36b8d 100644
---- a/src/msg/msg_types.cc
-+++ b/src/msg/msg_types.cc
-@@ -132,7 +132,7 @@ bool entity_addr_t::parse(const char *s, const char **end)
- 
- 
- 
--ostream& operator<<(ostream& out, const sockaddr_storage &ss)
-+int ss_to_string(const sockaddr_storage &ss, string &host, int &port)
- {
-   char buf[NI_MAXHOST] = { 0 };
-   char serv[NI_MAXSERV] = { 0 };
-@@ -147,8 +147,25 @@ ostream& operator<<(ostream& out, const sockaddr_storage &ss)
-   getnameinfo((struct sockaddr *)&ss, hostlen, buf, sizeof(buf),
- 	      serv, sizeof(serv),
- 	      NI_NUMERICHOST | NI_NUMERICSERV);
-+  host = buf;
-+  port = atoi(serv);
-+  return 0;
-+}
-+
-+int entity_addr_t::to_string(string &host, int &port)
-+{
-+  return ss_to_string(addr, host, port);
-+}
-+
-+
-+ostream& operator<<(ostream& out, const sockaddr_storage &ss)
-+{
-+  string host;
-+  int port;
-+
-+  ss_to_string(ss, host, port);
-   if (ss.ss_family == AF_INET6)
--    return out << '[' << buf << "]:" << serv;
-+    return out << '[' << host << "]:" << port;
-   return out //<< ss.ss_family << ":"
--	     << buf << ':' << serv;
-+	     << host << ':' << port;
- }
-diff --git a/src/msg/msg_types.h b/src/msg/msg_types.h
-index 9c0f266..ac32c85 100644
---- a/src/msg/msg_types.h
-+++ b/src/msg/msg_types.h
-@@ -336,6 +336,7 @@ struct entity_addr_t {
-   }
- 
-   void dump(Formatter *f) const;
-+  int to_string(string &host, int &port);
- 
-   static void generate_test_instances(list<entity_addr_t*>& o);
- };
-diff --git a/src/msg/simple/Pipe.cc b/src/msg/simple/Pipe.cc
-index 74f2c87..af8e64e 100644
---- a/src/msg/simple/Pipe.cc
-+++ b/src/msg/simple/Pipe.cc
-@@ -114,6 +114,7 @@ Pipe::Pipe(SimpleMessenger *r, int st, PipeConnection *con)
- 
-   recv_max_prefetch = msgr->cct->_conf->ms_tcp_prefetch_max_size;
-   recv_buf = new char[recv_max_prefetch];
-+  BLKIN_PIPE_ENDPOINT();
- }
- 
- Pipe::~Pipe()
-@@ -124,6 +125,33 @@ Pipe::~Pipe()
-   delete[] recv_buf;
- }
- 
-+#ifdef WITH_BLKIN
-+void Pipe::set_endpoint()
-+{
-+  string type;
-+  entity_inst_t inst = msgr->get_myinst();
-+
-+  if (inst.name.is_client()) {
-+    type = "MON";
-+  } else if (inst.name.is_mds()) {
-+    type = "MDS";
-+  } else if (inst.name.is_osd()) {
-+    type = "OSD";
-+  } else if (inst.name.is_client()) {
-+    type = "CLIENT";
-+  } else {
-+    type = "UNKNOWN";
-+  }
-+
-+  string host;
-+  int port;
-+
-+  inst.addr.to_string(host, port);
-+
-+  pipe_endpoint = ZTracer::create_ZTraceEndpoint(host, port, "Messenger-" + type);
-+}
-+#endif // WITH_BLKIN
-+
- void Pipe::handle_ack(uint64_t seq)
- {
-   lsubdout(msgr->cct, ms, 15) << "reader got ack seq " << seq << dendl;
-@@ -1587,6 +1615,7 @@ void Pipe::reader()
- 	  fault(true);
- 	continue;
-       }
-+      BLKIN_MSG_TRACE_EVENT(m, "message_read");
- 
-       if (state == STATE_CLOSED ||
- 	  state == STATE_CONNECTING) {
-@@ -1654,8 +1683,9 @@ void Pipe::reader()
-           in_q->enqueue(m, m->get_priority(), conn_id);
-         }
-       }
-+      BLKIN_MSG_TRACE_EVENT(m, "messenger_end");
+     /// true if we should resend this message on failure
+     bool should_resend;
+@@ -1222,6 +1227,8 @@ public:
+ 	target.base_oloc.key.clear();
      }
--    
+ 
++    BLKIN_OP_SET_TRACE_DECL()
 +
-     else if (tag == CEPH_MSGR_TAG_CLOSE) {
-       ldout(msgr->cct,20) << "reader got CLOSE" << dendl;
-       pipe_lock.Lock();
-@@ -1824,6 +1854,9 @@ void Pipe::writer()
+     bool operator<(const Op& other) const {
+       return tid < other.tid;
+     }
+@@ -1232,6 +1239,7 @@ public:
+ 	delete out_handler.back();
+ 	out_handler.pop_back();
+       }
++      BLKIN_OP_EVENT_IF(trace, trace, "span_ended");
+     }
+   };
  
-         pipe_lock.Unlock();
+@@ -1853,7 +1861,9 @@ private:
+     op_throttle_bytes(cct, "objecter_bytes", cct->_conf->objecter_inflight_op_bytes),
+     op_throttle_ops(cct, "objecter_ops", cct->_conf->objecter_inflight_ops),
+     epoch_barrier(0)
+-  { }
++  {
++    BLKIN_MSG_END(objecter, "0.0.0.0", 0, "objecter");
++  }
+   ~Objecter();
  
-+	BLKIN_MSG_TRACE_EVENT(m, "writer_sending");
-+	BLKIN_MSG_TRACE_EVENT_IF(m->trace_end_after_span, m, "span_ended");
-+
-         ldout(msgr->cct,20) << "writer sending " << m->get_seq() << " " << m << dendl;
- 	int rc = write_message(header, footer, blist);
+   void init();
+@@ -2042,6 +2052,7 @@ public:
+ 	     snapid_t snapid, bufferlist *pbl, int flags,
+ 	     Context *onack, version_t *objver = NULL, int *data_offset = NULL) {
+     Op *o = prepare_read_op(oid, oloc, op, snapid, pbl, flags, onack, objver, data_offset);
++    BLKIN_OP_SET_TRACE(o, op.trace);
+     return op_submit(o);
+   }
+   ceph_tid_t pg_read(uint32_t hash, object_locator_t oloc,
+@@ -2220,6 +2231,29 @@ public:
+     return read(oid, oloc, 0, 0, snap, pbl, flags | global_op_flags.read() | CEPH_OSD_FLAG_READ, onfinish, objver);
+   }
  
-diff --git a/src/msg/simple/Pipe.h b/src/msg/simple/Pipe.h
-index 9b464a5..72b5de5 100644
---- a/src/msg/simple/Pipe.h
-+++ b/src/msg/simple/Pipe.h
-@@ -195,6 +195,7 @@ class DispatchQueue;
-     ceph::shared_ptr<AuthSessionHandler> session_security;
- 
-   protected:
-+    BLKIN_END_REF(pipe_endpoint)
-     friend class SimpleMessenger;
-     PipeConnectionRef connection_state;
- 
-@@ -219,6 +220,9 @@ class DispatchQueue;
-     uint64_t in_seq, in_seq_acked;
-     
-     void set_socket_options();
 +#ifdef WITH_BLKIN
-+    void set_endpoint();
-+#endif
++  ceph_tid_t read_traced(const object_t& oid, const object_locator_t& oloc,
++	     uint64_t off, uint64_t len, snapid_t snap, bufferlist *pbl, int flags,
++	     Context *onfinish, struct blkin_trace_info *info,
++	     version_t *objver = NULL, ObjectOperation *extra_ops = NULL) {
++    vector<OSDOp> ops;
++    int i = init_ops(ops, 1, extra_ops);
++    ops[i].op.op = CEPH_OSD_OP_READ;
++    ops[i].op.extent.offset = off;
++    ops[i].op.extent.length = len;
++    ops[i].op.extent.truncate_size = 0;
++    ops[i].op.extent.truncate_seq = 0;
++    Op *o = new Op(oid, oloc, ops, flags | global_op_flags.read() | CEPH_OSD_FLAG_READ, onfinish, 0, objver);
++    o->snapid = snap;
++    o->outbl = pbl;
++    ZTracer::ZTraceRef t = ZTracer::create_ZTrace("librados", objecter_endpoint);
++    t->set_trace_info(info);
++    t->event("objecter_read");
++    o->set_trace(t);
++    free(info);
++    return op_submit(o);
++  }
++#endif // WITH_BLKIN
  
-     int accept();   // server handshake
-     int connect();  // client handshake
-diff --git a/src/msg/simple/SimpleMessenger.cc b/src/msg/simple/SimpleMessenger.cc
-index 38b5d84..308492a 100644
---- a/src/msg/simple/SimpleMessenger.cc
-+++ b/src/msg/simple/SimpleMessenger.cc
-@@ -113,6 +113,7 @@ int SimpleMessenger::_send_message(Message *m, const entity_inst_t& dest)
+   // writes
+   ceph_tid_t _modify(const object_t& oid, const object_locator_t& oloc,
+@@ -2419,11 +2453,38 @@ public:
+     return op_submit(o);
+   }
  
-   lock.Lock();
-   Pipe *pipe = _lookup_pipe(dest.addr);
-+  BLKIN_MSG_TRACE_EVENT(m, "submitting_message");
-   submit_message(m, (pipe ? pipe->connection_state.get() : NULL),
-                  dest.addr, dest.name.type(), true);
-   lock.Unlock();
++#ifdef WITH_BLKIN
++  ceph_tid_t write_traced(const object_t& oid, const object_locator_t& oloc,
++	      uint64_t off, uint64_t len, const SnapContext& snapc, const bufferlist &bl,
++	      utime_t mtime, int flags,
++	      Context *onack, Context *oncommit, struct blkin_trace_info *info,
++	      version_t *objver = NULL, ObjectOperation *extra_ops = NULL) {
++    vector<OSDOp> ops;
++    int i = init_ops(ops, 1, extra_ops);
++    ops[i].op.op = CEPH_OSD_OP_WRITE;
++    ops[i].op.extent.offset = off;
++    ops[i].op.extent.length = len;
++    ops[i].op.extent.truncate_size = 0;
++    ops[i].op.extent.truncate_seq = 0;
++    ops[i].indata = bl;
++    Op *o = new Op(oid, oloc, ops, flags | global_op_flags.read() | CEPH_OSD_FLAG_WRITE, onack, oncommit, objver);
++    o->mtime = mtime;
++    o->snapc = snapc;
++    ZTracer::ZTraceRef t = ZTracer::create_ZTrace("librados", objecter_endpoint);
++    t->set_trace_info(info);
++    t->event("objecter_write");
++    o->set_trace(t);
++    free(info);
++    return op_submit(o);
++  }
++#endif // WITH_BLKIN
++
+   void list_nobjects(NListContext *p, Context *onfinish);
+   uint32_t list_nobjects_seek(NListContext *p, uint32_t pos);
+   void list_objects(ListContext *p, Context *onfinish);
+   uint32_t list_objects_seek(ListContext *p, uint32_t pos);
+ 
++
+   // -------------------------
+   // pool ops
+ private:
 -- 
 2.1.0
 
