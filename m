@@ -1,82 +1,73 @@
 From: Somnath Roy <Somnath.Roy@sandisk.com>
 Subject: RE: librados2 and librbd1 dependency on libvirt-bin
-Date: Wed, 25 Feb 2015 23:33:46 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F282BAD2A@SACMBXIP02.sdcorp.global.sandisk.com>
+Date: Wed, 25 Feb 2015 23:36:05 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F282BAD3A@SACMBXIP02.sdcorp.global.sandisk.com>
 References: <755F6B91B3BE364F9BCA11EA3F9E0C6F282BAC5F@SACMBXIP02.sdcorp.global.sandisk.com>
  <alpine.DEB.2.00.1502251516270.25838@cobra.newdream.net>
- <CACkq2mqf-aBBOuWwDVhXU4U1tsQdqLLQqr5Yxet9T=YdJXYHXw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0094.outbound.protection.outlook.com ([65.55.169.94]:32768
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+Received: from mail-bn1bon0076.outbound.protection.outlook.com ([157.56.111.76]:2031
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753263AbbBYXdw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 25 Feb 2015 18:33:52 -0500
-In-Reply-To: <CACkq2mqf-aBBOuWwDVhXU4U1tsQdqLLQqr5Yxet9T=YdJXYHXw@mail.gmail.com>
+	id S1753063AbbBYXgJ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Feb 2015 18:36:09 -0500
+In-Reply-To: <alpine.DEB.2.00.1502251516270.25838@cobra.newdream.net>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Travis Rhoden <trhoden@gmail.com>, Sage Weil <sage@newdream.net>
+To: Sage Weil <sage@newdream.net>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-V2UgZGlkIOKAmGNlcGgtZGVwbG95IHB1cmdlIDxob3N0LW5hbWU+4oCZDQpBY2NvcmRpbmcgdG8g
-dGhlIGZvbGxvd2luZyBsaW5rDQpodHRwOi8vY2VwaC5jb20vZG9jcy9tYXN0ZXIvcmFkb3MvZGVw
-bG95bWVudC9jZXBoLWRlcGxveS1wdXJnZS8NCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0N
-CkZyb206IFRyYXZpcyBSaG9kZW4gW21haWx0bzp0cmhvZGVuQGdtYWlsLmNvbV0NClNlbnQ6IFdl
-ZG5lc2RheSwgRmVicnVhcnkgMjUsIDIwMTUgMzozMiBQTQ0KVG86IFNhZ2UgV2VpbA0KQ2M6IFNv
-bW5hdGggUm95OyBDZXBoIERldmVsb3BtZW50DQpTdWJqZWN0OiBSZTogbGlicmFkb3MyIGFuZCBs
-aWJyYmQxIGRlcGVuZGVuY3kgb24gbGlidmlydC1iaW4NCg0KPHNvcnJ5IHRvIHNhZ2UgYW5kIHNv
-bW5hdGggZm9yIGRvdWJsZS1wb3N0IC0tIGNlcGgtZGV2ZWwgZ290IG1lIHdpdGggcGxhaW4gdGV4
-dCBhZ2Fpbi4gIDopID4NCg0KT24gRGViaWFuL1VidW50dSwgdGhlIHVuaW5zdGFsbC9wdXJnZSB3
-aWxsIHJlbW92ZSB0aGUgZm9sbG93aW5nIHBhY2thZ2VzOg0KDQpjZXBoDQpjZXBoLW1kcw0KY2Vw
-aC1jb21tb24NCmNlcGgtZnMtY29tbW9uLg0KDQpJcm9uaWNhbGx5LCBjZXBoLWRlcGxveSB3aWxs
-IHNwaXQgb3V0IG9uIHRoZSBDTEkgdGhhdCBpdCBkb2VzICpub3QqIHJlbW92ZSBsaWJyYWRvczIg
-YW5kIGxpYnJiZDEsIGJlY2F1c2UgeWVzIHRoYXQgd291bGQgYnJlYWsgcWVtdS9saWJ2aXJ0LiAg
-VGhlIGludGVudCBpcyB0byBsZWF2ZSB0aG9zZSBsaWJyYXJpZXMuDQoNCkkgd29uZGVyIGlmIHNv
-bWV0aGluZyBoYXMgY2hhbmdlZCBhbG9uZyB0aGVzZSBsaWVzLiAgdGhvc2UgbGlicmFyaWVzIHNo
-b3VsZCBoYXZlIHN0YXllZCBvbiB0aGUgaG9zdC4NCg0KU28gSSBhbSBjdXJpb3VzIHdoYXQgY2Vw
-aC1kZXBsb3kgY29tbWFuZCB5b3UgYWN0dWFsbHkgcmFuLg0KY2VwaC1kZXBsb3kgc2hvdWxkIG5v
-dCBiZSBhYmxlIHRvIHVuaW5zdGFsbCBsaWJyYWRvczIgb3IgbGlicmJkMSwgYnV0IHlvdSBtZW50
-aW9uZWQgdGhhdCB5b3UgcHVyZ2VkIHRoZW0uICBIb3c/ICBXYXMgaXQgdGhyb3VnaCBjZXBoLWRl
-cGxveT8NCg0KT24gV2VkLCBGZWIgMjUsIDIwMTUgYXQgMzoyMSBQTSwgU2FnZSBXZWlsIDxzYWdl
-QG5ld2RyZWFtLm5ldD4gd3JvdGU6DQo+IE9uIFdlZCwgMjUgRmViIDIwMTUsIFNvbW5hdGggUm95
-IHdyb3RlOg0KPj4gSGksDQo+PiBXZSBhcmUgZmFjaW5nIHByb2JsZW0gdGhhdCBjZXBoLWRlcGxv
-eSBwdXJnZSBpcyB1bmluc3RhbGxpbmcgbGF0ZXN0IE1lbGxhbm94IG9mZWQgZHJpdmVyIHBhY2th
-Z2VzLg0KPj4gRGlnZ2luZyBkb3duIG1vcmUgd2UgZm91bmQgbGlidmlydC1iaW4gaXMgZGVwZW5k
-ZW50IG9uIGxpYnJhZG9zMi9saWJyYmQxLg0KPj4gU28sIGhlcmUgaXMgd2hhdCBoYXBwZW5pbmcu
-DQo+Pg0KPj4gMS4gTWVsbGFub3ggb2ZlZCBkcml2ZXIgaGFzIGEgZGVwZW5kZW5jeSBvbiB0aGUg
-bGlidmlydC1iaW4qDQo+Pg0KPj4gMi4gcHVyZ2luZyBsaWJyYWRvczIvbGlicmJkMSBpcyByZW1v
-dmluZyBsaWJ2aXJ0LWJpbiBhbmQgcmVzdWx0aW5nIHRoZSByZW1vdmFsIG9mIHRoZSBNZWxsYW5v
-eCBkcml2ZXIgcGFja2FnZSBhcyB3ZWxsLg0KPj4NCj4+IEhlcmUgaXMgd2hhdCBJIGZvdW5kLg0K
-Pj4NCj4+IGh0dHA6Ly9wYWNrYWdlcy51YnVudHUuY29tL3RydXN0eS9kZXZlbC9saWJ2aXJ0LWJp
-bg0KPj4NCj4+IHVidW50dUBpcC0xMC0xNS0xNi0yMTE6fiQgYXB0LWNhY2hlIHJkZXBlbmRzIGxp
-YnJhZG9zMiBbLi4uXQ0KPg0KPiBUaGUgcHJvYmxlbSBpcyB0aGF0IGxpYnZpcnQgKGFuZCBwcm9i
-YWJseSBxZW11KSBhcmUgYnVpbHQgYWdhaW5zdCBsaWJyYmQxLg0KPiBJZiB5b3UgcmVtb3ZlIGxp
-YnJiZDEsIHRob3NlIGdldCByZW1vdmVkIHRvby4NCj4NCj4+IFNvLCBJIGFtIGN1cmlvdXMgd2h5
-IGxpYnZpcnQtYmluIGhhcyBhIGRlcGVuY2V5IG9uIGxpYnJhZG9zMi9saWJyYmQxID8NCj4NCj4g
-cWVtdSBuZWVkcyBpdCBmb3Igb2J2aW91cyByZWFzb25zLiAgbGlidmlydCBuZWVkcyBpdCB0byBt
-YW5hZ2UgaXQncw0KPiAocmJkKSBzdG9yYWdlIHBvb2xzLg0KPg0KPj4gQWxzbywgaG93IGNvbWUg
-d2UgZ2V0IHJpZCBvZiB0aGlzIGlzc3VlID8NCj4+IENlcGgtZGVwbG95IHNob3VsZCBub3QgcmVt
-b3ZlIGFueSBwYWNrYWdlIG90aGVyIHRoYW4gY2VwaCdzLg0KPg0KPiBQdXJnZSBjb3VsZCBza2lw
-IHRoZSBsaWJyYXJpZXMgdGhhdCBtYXkgaGF2ZSBvdGhlciBkZXBlbmRlbmNpZXMsIGJ1dA0KPiB0
-aGVuIGl0J3MgYSBwdXJnZS1saXRlLiAgSG9uZXN0bHkgSSB0aG91Z2h0IGl0IHNraXBwZWQgdGhl
-bSBmb3IgdGhhdA0KPiByZWFzb24gYnV0IHdlIHByb2JhYmx5IGNoYW5nZWQgaXQgYXQgc29tZSBw
-b2ludCBiZWNhdXNlIGl0IChhbHNvDQo+IGNvbmZ1c2luZ2x5KSB3b3VsZG4ndCByZW1vdmUgbGli
-cmFkb3MgZXRjLi4uDQo+DQo+IHNhZ2UNCj4NCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0
-aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiDQo+IGluIHRo
-ZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFq
-b3Jkb21vDQo+IGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8u
-aHRtbA0KDQpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXw0KDQpQTEVBU0UgTk9URTog
-VGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNzYWdl
-IGlzIGludGVuZGVkIG9ubHkgZm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50
-KHMpIG5hbWVkIGFib3ZlLiBJZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhl
-IGludGVuZGVkIHJlY2lwaWVudCwgeW91IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2
-ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywgZGlz
-c2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBz
-dHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11bmljYXRp
-b24gaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3IgZS1t
-YWlsIChhcyBzaG93biBhYm92ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBhbGwg
-Y29waWVzIG9mIHRoaXMgbWVzc2FnZSBpbiB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBj
-b3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkgc3RvcmVkIGNvcGllcykuDQoNCg==
+Thanks Sage !
+But, I think this is a serious issue, every time we will purge the cluster all the node network will be down :-(
+Basically, it should not delete any component on which non-ceph components are dependent.
+We need this purge-lite kind of stuff.
+
+Thanks & Regards
+Somnath
+
+-----Original Message-----
+From: Sage Weil [mailto:sage@newdream.net]
+Sent: Wednesday, February 25, 2015 3:21 PM
+To: Somnath Roy
+Cc: Ceph Development
+Subject: Re: librados2 and librbd1 dependency on libvirt-bin
+
+On Wed, 25 Feb 2015, Somnath Roy wrote:
+> Hi,
+> We are facing problem that ceph-deploy purge is uninstalling latest Mellanox ofed driver packages.
+> Digging down more we found libvirt-bin is dependent on librados2/librbd1.
+> So, here is what happening.
+>
+> 1. Mellanox ofed driver has a dependency on the libvirt-bin*
+>
+> 2. purging librados2/librbd1 is removing libvirt-bin and resulting the removal of the Mellanox driver package as well.
+>
+> Here is what I found.
+>
+> http://packages.ubuntu.com/trusty/devel/libvirt-bin
+>
+> ubuntu@ip-10-15-16-211:~$ apt-cache rdepends librados2 [...]
+
+The problem is that libvirt (and probably qemu) are built against librbd1.
+If you remove librbd1, those get removed too.
+
+> So, I am curious why libvirt-bin has a depencey on librados2/librbd1 ?
+
+qemu needs it for obvious reasons.  libvirt needs it to manage it's
+(rbd) storage pools.
+
+> Also, how come we get rid of this issue ?
+> Ceph-deploy should not remove any package other than ceph's.
+
+Purge could skip the libraries that may have other dependencies, but then it's a purge-lite.  Honestly I thought it skipped them for that reason but we probably changed it at some point because it (also confusingly) wouldn't remove librados etc...
+
+sage
+
+
+________________________________
+
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+
