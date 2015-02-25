@@ -1,56 +1,51 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: 02/25/2015 Weekly Ceph Performance Meeting IS ON!
-Date: Tue, 24 Feb 2015 21:44:54 -0600
-Message-ID: <54ED4536.8090501@redhat.com>
-Reply-To: mnelson@redhat.com
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Client debugging  and rados_conf_set()
+Date: Tue, 24 Feb 2015 21:36:07 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1502242133330.25838@cobra.newdream.net>
+References: <20150224194501.38982e51@guren.zaitcev.lan>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:57254 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751444AbbBYDo5 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 24 Feb 2015 22:44:57 -0500
-Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t1P3ivFo022752
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
-	for <ceph-devel@vger.kernel.org>; Tue, 24 Feb 2015 22:44:57 -0500
-Received: from [10.3.112.65] (ovpn-112-65.phx2.redhat.com [10.3.112.65])
-	by int-mx09.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t1P3itTW025610
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES128-SHA bits=128 verify=NO)
-	for <ceph-devel@vger.kernel.org>; Tue, 24 Feb 2015 22:44:56 -0500
+Received: from cobra.newdream.net ([66.33.216.30]:36900 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751410AbbBYFgH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Feb 2015 00:36:07 -0500
+In-Reply-To: <20150224194501.38982e51@guren.zaitcev.lan>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Pete Zaitcev <zaitcev@kotori.zaitcev.us>
+Cc: ceph-devel@vger.kernel.org
 
-8AM PST as usual!  Please add an agenda item if there is something you 
-want to talk about.
+On Tue, 24 Feb 2015, Pete Zaitcev wrote:
+> Hello:
+> 
+> I noticed that RadosClient.cc is full of interesting printouts, like so:
+> 
+>   ldout(cct, 1) << "setting wanted keys" << dendl;
+> 
+> So, I tried to enable them by doing this:
+> 
+> 	rc = rados_conf_set(rados, "debug_rados", "20/20");
+> 
+> However, the above produces no output. What am I missing? How are these
+> printouts made visible conventionally?
 
-Here's the links:
+Ha!  I saw that on twitter but couldn't tell what you were trying to do.
 
-Etherpad URL:
-http://pad.ceph.com/p/performance_weekly
+ log_to_stderr = true
 
-To join the Meeting:
-https://bluejeans.com/268261044
+in ceph.conf or
 
-To join via Browser:
-https://bluejeans.com/268261044/browser
+  rados_conf_set(rados, "log_to_stderr", "true");
 
-To join with Lync:
-https://bluejeans.com/268261044/lync
+or
 
+  --log-to-stderr
 
-To join via Room System:
-Video Conferencing System: bjn.vc -or- 199.48.152.152
-Meeting ID: 268261044
+on the command line.  You may also be able to do
 
-To join via Phone:
-1) Dial:
-           +1 408 740 7256
-           +1 888 240 2560(US Toll Free)
-           +1 408 317 9253(Alternate Number)
-           (see all numbers - http://bluejeans.com/numbers)
-2) Enter Conference ID: 268261044
+  CEPH_ARGS="--log-to-stderr"
 
-Mark
+(although it depends on whether the binary is calling env_to_args()).
+
+sage
