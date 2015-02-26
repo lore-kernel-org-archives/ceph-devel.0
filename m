@@ -1,17 +1,16 @@
 From: Robert LeBlanc <robert-4JaGZRWAfWbajFs6igw21g@public.gmane.org>
 Subject: Re: who is using radosgw with civetweb?
-Date: Thu, 26 Feb 2015 11:43:31 -0700
-Message-ID: <CAANLjFrHV2qisZwRUR3rG5RSk3CN8Q423rAXfn401P1JQTy0XA@mail.gmail.com>
+Date: Thu, 26 Feb 2015 11:45:40 -0700
+Message-ID: <CAANLjFrHiXmxyPTOH0kEv+7MESJBwp=bXxW=Q_30R1A=8zkfyg@mail.gmail.com>
 References: <alpine.DEB.2.00.1502251125180.25838@cobra.newdream.net>
-	<CAANLjFpHND2uyUvdzJ-pz4QOXp6SpYK=sD1WQz=rT-Two6izqw@mail.gmail.com>
-	<alpine.DEB.2.00.1502251348170.25838@cobra.newdream.net>
-	<CAANLjFovnkKRuKnUKYVRPczQZMxbrwVbDh-ygP+_-+weZtQV_w@mail.gmail.com>
-	<BC97738F8E7C8742BABED7F06FB9DF915556188C@SATLEXDAG01.amd.com>
+	<54EF008C.2050706@42on.com>
+	<107057245.16991.1424972320227.open-xchange@websrv>
+	<183263292.17021.1424976208041.open-xchange@websrv.42on.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <BC97738F8E7C8742BABED7F06FB9DF915556188C-rg0Al9uWSMePLz/DIDN4AEEOCMrvLtNR@public.gmane.org>
+In-Reply-To: <183263292.17021.1424976208041.open-xchange-qBfc5dEdgJ8K5MCArbXFlw@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -21,101 +20,83 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: "Deneau, Tom" <tom.deneau-5C7GfCeVMHo@public.gmane.org>
-Cc: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+To: Wido den Hollander <wido-fspyXLx8qC4@public.gmane.org>
+Cc: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-[client.radosgw.gateway]
-host = radosgw1
-keyring = /etc/ceph/ceph.client.radosgw.keyring
-rgw socket path = /var/run/ceph/ceph.radosgw.gateway.fastcgi.sock
-log file = /var/log/radosgw/client.radosgw.gateway.log
-rgw print continue = false
-rgw enable ops log = false
-rgw ops log rados = false
-rgw ops log data backlog = 4096
-rgw frontends = civetweb port=7480
++1 for proxy. Keep the civetweb lean and mean and if people need
+"extras" let the proxy handle this. Proxies are easy to set-up and a
+simple example could be included in the documentation.
 
-This is firefly on CentOS 6 connecting to a giant cluster.
-/etc/init.d/ceph-radosgw start
-
-Just make sure the user defined in /etc/init.d/ceph-radosgw can
-read/write to the files listed in the section (for us it was the
-apache user).
-
-On Thu, Feb 26, 2015 at 11:39 AM, Deneau, Tom <tom.deneau-5C7GfCeVMHo@public.gmane.org> wrote:
-> Robert --
+On Thu, Feb 26, 2015 at 11:43 AM, Wido den Hollander <wido-fspyXLx8qC4@public.gmane.org> wrote:
 >
-> We are still having trouble with this.
 >
-> Can you share your [client.radosgw.gateway] section of ceph.conf and
-> were there any other special things to be aware of?
->
-> -- Tom
->
-> -----Original Message-----
-> From: ceph-devel-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org [mailto:ceph-devel-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org] On Behalf Of Robert LeBlanc
-> Sent: Thursday, February 26, 2015 12:27 PM
-> To: Sage Weil
-> Cc: Ceph-User; ceph-devel
-> Subject: Re: [ceph-users] who is using radosgw with civetweb?
->
-> Thanks, we were able to get it up and running very quickly. If it performs well, I don't see any reason to use Apache+fast_cgi. I don't have any problems just focusing on civetweb.
->
-> On Wed, Feb 25, 2015 at 2:49 PM, Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
->> On Wed, 25 Feb 2015, Robert LeBlanc wrote:
->>> We tried to get radosgw working with Apache + mod_fastcgi, but due to
->>> the changes in radosgw, Apache, mode_*cgi, etc and the documentation
->>> lagging and not having a lot of time to devote to it, we abandoned it.
->>> Where it the documentation for civetweb? If it is appliance like and
->>> easy to set-up, we would like to try it to offer some feedback on
->>> your question.
+>> Op 26 feb. 2015 om 18:22 heeft Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> het volgende geschreven:
 >>
->> In giant and hammer, it is enabled by default on port 7480.  On
->> firefly, you need to add the line
+>>> On Thu, 26 Feb 2015, Wido den Hollander wrote:
+>>>> On 25-02-15 20:31, Sage Weil wrote:
+>>>> Hey,
+>>>>
+>>>> We are considering switching to civetweb (the embedded/standalone rgw web
+>>>> server) as the primary supported RGW frontend instead of the current
+>>>> apache + mod-fastcgi or mod-proxy-fcgi approach.  "Supported" here means
+>>>> both the primary platform the upstream development focuses on and what the
+>>>> downstream Red Hat product will officially support.
+>>>>
+>>>> How many people are using RGW standalone using the embedded civetweb
+>>>> server instead of apache?  In production?  At what scale?  What
+>>>> version(s) (civetweb first appeared in firefly and we've backported most
+>>>> fixes).
+>>>>
+>>>> Have you seen any problems?  Any other feedback?  The hope is to (vastly)
+>>>> simplify deployment.
+>>>
+>>> It seems like Civetweb listens on 0.0.0.0 by default and that doesn't seem
+>>> safe to me.
 >>
->>  rgw frontends = fastcgi, civetweb port=7480
+>> Can you clarify?  Is that because people may inadvertantly run this on a
+>> public host and not realize that the host is answering requests?
 >>
->> to ceph.conf (you can of course adjust the port number if you like)
->> and radosgw will run standalone w/ no apache or anything else.
+>
+> Yes, mainly. I think we should encourage users to run Apache, Nginx or Varnish as a proxy/filter in front.
+>
+> I'd just suggest to bind on localhost by default and let the user choose otherwise.
+>
+>> If we move to a world where this is the default/preferred route, this
+>> seems like a good thing.. if they don't want to respond on an address they
+>> can specify which IP to bind to?
+>>
+>
+> Most services listen on localhost unless specified otherwise.
+>
+>>> In most deployments you'll put Apache, Nginx or Varnish in front of RGW to do
+>>> the proper HTTP handling.
+>>>
+>>> I'd say that Civetweb should listen on 127.0.0.1:7480/[::1]:7480 by default.
+>>>
+>>> And make sure it listens on IPv6 by default :-)
+>>
+>> Yeah, +1 on IPv6:)
 >>
 >> sage
 >>
 >>
 >>>
->>> Thanks,
->>> Robert LeBlanc
+>>> Wido
 >>>
->>> On Wed, Feb 25, 2015 at 12:31 PM, Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
->>> > Hey,
->>> >
->>> > We are considering switching to civetweb (the embedded/standalone
->>> > rgw web
->>> > server) as the primary supported RGW frontend instead of the
->>> > current apache + mod-fastcgi or mod-proxy-fcgi approach.
->>> > "Supported" here means both the primary platform the upstream
->>> > development focuses on and what the downstream Red Hat product will officially support.
->>> >
->>> > How many people are using RGW standalone using the embedded
->>> > civetweb server instead of apache?  In production?  At what scale?
->>> > What
->>> > version(s) (civetweb first appeared in firefly and we've backported
->>> > most fixes).
->>> >
->>> > Have you seen any problems?  Any other feedback?  The hope is to
->>> > (vastly) simplify deployment.
->>> >
->>> > Thanks!
->>> > sage
->>> > _______________________________________________
->>> > ceph-users mailing list
->>> > ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
->>> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>>>> Thanks!
+>>>> sage
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->>> in the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org More majordomo
->>> info at  http://vger.kernel.org/majordomo-info.html
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >>>
 >>>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
