@@ -1,77 +1,87 @@
-From: "Deneau, Tom" <tom.deneau@amd.com>
-Subject: RE: [ceph-users] who is using radosgw with civetweb?
-Date: Thu, 26 Feb 2015 18:39:25 +0000
-Message-ID: <BC97738F8E7C8742BABED7F06FB9DF915556188C@SATLEXDAG01.amd.com>
-References: <alpine.DEB.2.00.1502251125180.25838@cobra.newdream.net>
-	<CAANLjFpHND2uyUvdzJ-pz4QOXp6SpYK=sD1WQz=rT-Two6izqw@mail.gmail.com>
-	<alpine.DEB.2.00.1502251348170.25838@cobra.newdream.net>
- <CAANLjFovnkKRuKnUKYVRPczQZMxbrwVbDh-ygP+_-+weZtQV_w@mail.gmail.com>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: who is using radosgw with civetweb?
+Date: Thu, 26 Feb 2015 19:43:27 +0100
+Message-ID: <183263292.17021.1424976208041.open-xchange@websrv.42on.com>
+References: <alpine.DEB.2.00.1502251125180.25838@cobra.newdream.net> <54EF008C.2050706@42on.com> <107057245.16991.1424972320227.open-xchange@websrv>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain;
+	charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0121.outbound.protection.outlook.com ([207.46.100.121]:3170
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753475AbbBZSjf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 26 Feb 2015 13:39:35 -0500
-In-Reply-To: <CAANLjFovnkKRuKnUKYVRPczQZMxbrwVbDh-ygP+_-+weZtQV_w@mail.gmail.com>
-Content-Language: en-US
+Received: from websrv.42on.com ([31.25.102.167]:36661 "EHLO websrv.42on.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752821AbbBZSna convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Feb 2015 13:43:30 -0500
+In-Reply-To: <107057245.16991.1424972320227.open-xchange@websrv>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Robert LeBlanc <robert@leblancnet.us>, Sage Weil <sweil@redhat.com>
-Cc: Ceph-User <ceph-users@ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: "ceph-users@ceph.com" <ceph-users@ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Um9iZXJ0IC0tDQoNCldlIGFyZSBzdGlsbCBoYXZpbmcgdHJvdWJsZSB3aXRoIHRoaXMuDQoNCkNh
-biB5b3Ugc2hhcmUgeW91ciBbY2xpZW50LnJhZG9zZ3cuZ2F0ZXdheV0gc2VjdGlvbiBvZiBjZXBo
-LmNvbmYgYW5kDQp3ZXJlIHRoZXJlIGFueSBvdGhlciBzcGVjaWFsIHRoaW5ncyB0byBiZSBhd2Fy
-ZSBvZj8NCg0KLS0gVG9tDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBjZXBo
-LWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdl
-ci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgUm9iZXJ0IExlQmxhbmMNClNlbnQ6IFRodXJzZGF5
-LCBGZWJydWFyeSAyNiwgMjAxNSAxMjoyNyBQTQ0KVG86IFNhZ2UgV2VpbA0KQ2M6IENlcGgtVXNl
-cjsgY2VwaC1kZXZlbA0KU3ViamVjdDogUmU6IFtjZXBoLXVzZXJzXSB3aG8gaXMgdXNpbmcgcmFk
-b3NndyB3aXRoIGNpdmV0d2ViPw0KDQpUaGFua3MsIHdlIHdlcmUgYWJsZSB0byBnZXQgaXQgdXAg
-YW5kIHJ1bm5pbmcgdmVyeSBxdWlja2x5LiBJZiBpdCBwZXJmb3JtcyB3ZWxsLCBJIGRvbid0IHNl
-ZSBhbnkgcmVhc29uIHRvIHVzZSBBcGFjaGUrZmFzdF9jZ2kuIEkgZG9uJ3QgaGF2ZSBhbnkgcHJv
-YmxlbXMganVzdCBmb2N1c2luZyBvbiBjaXZldHdlYi4NCg0KT24gV2VkLCBGZWIgMjUsIDIwMTUg
-YXQgMjo0OSBQTSwgU2FnZSBXZWlsIDxzd2VpbEByZWRoYXQuY29tPiB3cm90ZToNCj4gT24gV2Vk
-LCAyNSBGZWIgMjAxNSwgUm9iZXJ0IExlQmxhbmMgd3JvdGU6DQo+PiBXZSB0cmllZCB0byBnZXQg
-cmFkb3NndyB3b3JraW5nIHdpdGggQXBhY2hlICsgbW9kX2Zhc3RjZ2ksIGJ1dCBkdWUgdG8gDQo+
-PiB0aGUgY2hhbmdlcyBpbiByYWRvc2d3LCBBcGFjaGUsIG1vZGVfKmNnaSwgZXRjIGFuZCB0aGUg
-ZG9jdW1lbnRhdGlvbiANCj4+IGxhZ2dpbmcgYW5kIG5vdCBoYXZpbmcgYSBsb3Qgb2YgdGltZSB0
-byBkZXZvdGUgdG8gaXQsIHdlIGFiYW5kb25lZCBpdC4NCj4+IFdoZXJlIGl0IHRoZSBkb2N1bWVu
-dGF0aW9uIGZvciBjaXZldHdlYj8gSWYgaXQgaXMgYXBwbGlhbmNlIGxpa2UgYW5kIA0KPj4gZWFz
-eSB0byBzZXQtdXAsIHdlIHdvdWxkIGxpa2UgdG8gdHJ5IGl0IHRvIG9mZmVyIHNvbWUgZmVlZGJh
-Y2sgb24gDQo+PiB5b3VyIHF1ZXN0aW9uLg0KPg0KPiBJbiBnaWFudCBhbmQgaGFtbWVyLCBpdCBp
-cyBlbmFibGVkIGJ5IGRlZmF1bHQgb24gcG9ydCA3NDgwLiAgT24gDQo+IGZpcmVmbHksIHlvdSBu
-ZWVkIHRvIGFkZCB0aGUgbGluZQ0KPg0KPiAgcmd3IGZyb250ZW5kcyA9IGZhc3RjZ2ksIGNpdmV0
-d2ViIHBvcnQ9NzQ4MA0KPg0KPiB0byBjZXBoLmNvbmYgKHlvdSBjYW4gb2YgY291cnNlIGFkanVz
-dCB0aGUgcG9ydCBudW1iZXIgaWYgeW91IGxpa2UpIA0KPiBhbmQgcmFkb3NndyB3aWxsIHJ1biBz
-dGFuZGFsb25lIHcvIG5vIGFwYWNoZSBvciBhbnl0aGluZyBlbHNlLg0KPg0KPiBzYWdlDQo+DQo+
-DQo+Pg0KPj4gVGhhbmtzLA0KPj4gUm9iZXJ0IExlQmxhbmMNCj4+DQo+PiBPbiBXZWQsIEZlYiAy
-NSwgMjAxNSBhdCAxMjozMSBQTSwgU2FnZSBXZWlsIDxzd2VpbEByZWRoYXQuY29tPiB3cm90ZToN
-Cj4+ID4gSGV5LA0KPj4gPg0KPj4gPiBXZSBhcmUgY29uc2lkZXJpbmcgc3dpdGNoaW5nIHRvIGNp
-dmV0d2ViICh0aGUgZW1iZWRkZWQvc3RhbmRhbG9uZSANCj4+ID4gcmd3IHdlYg0KPj4gPiBzZXJ2
-ZXIpIGFzIHRoZSBwcmltYXJ5IHN1cHBvcnRlZCBSR1cgZnJvbnRlbmQgaW5zdGVhZCBvZiB0aGUg
-DQo+PiA+IGN1cnJlbnQgYXBhY2hlICsgbW9kLWZhc3RjZ2kgb3IgbW9kLXByb3h5LWZjZ2kgYXBw
-cm9hY2guICANCj4+ID4gIlN1cHBvcnRlZCIgaGVyZSBtZWFucyBib3RoIHRoZSBwcmltYXJ5IHBs
-YXRmb3JtIHRoZSB1cHN0cmVhbSANCj4+ID4gZGV2ZWxvcG1lbnQgZm9jdXNlcyBvbiBhbmQgd2hh
-dCB0aGUgZG93bnN0cmVhbSBSZWQgSGF0IHByb2R1Y3Qgd2lsbCBvZmZpY2lhbGx5IHN1cHBvcnQu
-DQo+PiA+DQo+PiA+IEhvdyBtYW55IHBlb3BsZSBhcmUgdXNpbmcgUkdXIHN0YW5kYWxvbmUgdXNp
-bmcgdGhlIGVtYmVkZGVkIA0KPj4gPiBjaXZldHdlYiBzZXJ2ZXIgaW5zdGVhZCBvZiBhcGFjaGU/
-ICBJbiBwcm9kdWN0aW9uPyAgQXQgd2hhdCBzY2FsZT8gIA0KPj4gPiBXaGF0DQo+PiA+IHZlcnNp
-b24ocykgKGNpdmV0d2ViIGZpcnN0IGFwcGVhcmVkIGluIGZpcmVmbHkgYW5kIHdlJ3ZlIGJhY2tw
-b3J0ZWQgDQo+PiA+IG1vc3QgZml4ZXMpLg0KPj4gPg0KPj4gPiBIYXZlIHlvdSBzZWVuIGFueSBw
-cm9ibGVtcz8gIEFueSBvdGhlciBmZWVkYmFjaz8gIFRoZSBob3BlIGlzIHRvIA0KPj4gPiAodmFz
-dGx5KSBzaW1wbGlmeSBkZXBsb3ltZW50Lg0KPj4gPg0KPj4gPiBUaGFua3MhDQo+PiA+IHNhZ2UN
-Cj4+ID4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCj4+
-ID4gY2VwaC11c2VycyBtYWlsaW5nIGxpc3QNCj4+ID4gY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNv
-bQ0KPj4gPiBodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2Vw
-aC5jb20NCj4+IC0tDQo+PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUg
-bGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgDQo+PiBpbiB0aGUgYm9keSBvZiBhIG1lc3Nh
-Z2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyANCj4+IGluZm8g
-YXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPj4NCj4+DQot
-LQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2Ny
-aWJlIGNlcGgtZGV2ZWwiIGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdl
-ci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5v
-cmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
+
+
+> Op 26 feb. 2015 om 18:22 heeft Sage Weil <sweil@redhat.com> het volgende geschreven:
+> 
+>> On Thu, 26 Feb 2015, Wido den Hollander wrote:
+>>> On 25-02-15 20:31, Sage Weil wrote:
+>>> Hey,
+>>> 
+>>> We are considering switching to civetweb (the embedded/standalone rgw web
+>>> server) as the primary supported RGW frontend instead of the current
+>>> apache + mod-fastcgi or mod-proxy-fcgi approach.  "Supported" here means
+>>> both the primary platform the upstream development focuses on and what the
+>>> downstream Red Hat product will officially support.
+>>> 
+>>> How many people are using RGW standalone using the embedded civetweb
+>>> server instead of apache?  In production?  At what scale?  What
+>>> version(s) (civetweb first appeared in firefly and we've backported most
+>>> fixes).
+>>> 
+>>> Have you seen any problems?  Any other feedback?  The hope is to (vastly)
+>>> simplify deployment.
+>> 
+>> It seems like Civetweb listens on 0.0.0.0 by default and that doesn't seem
+>> safe to me.
+> 
+> Can you clarify?  Is that because people may inadvertantly run this on a 
+> public host and not realize that the host is answering requests?
+> 
+
+Yes, mainly. I think we should encourage users to run Apache, Nginx or Varnish as a proxy/filter in front.
+
+I'd just suggest to bind on localhost by default and let the user choose otherwise.
+
+> If we move to a world where this is the default/preferred route, this 
+> seems like a good thing.. if they don't want to respond on an address they 
+> can specify which IP to bind to?
+> 
+
+Most services listen on localhost unless specified otherwise.
+
+>> In most deployments you'll put Apache, Nginx or Varnish in front of RGW to do
+>> the proper HTTP handling.
+>> 
+>> I'd say that Civetweb should listen on 127.0.0.1:7480/[::1]:7480 by default.
+>> 
+>> And make sure it listens on IPv6 by default :-)
+> 
+> Yeah, +1 on IPv6:)
+> 
+> sage
+> 
+> 
+>> 
+>> Wido
+>> 
+>>> Thanks!
+>>> sage
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> 
+>> 
