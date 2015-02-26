@@ -1,87 +1,100 @@
-From: Travis Rhoden <trhoden@gmail.com>
-Subject: Re: librados2 and librbd1 dependency on libvirt-bin
-Date: Wed, 25 Feb 2015 16:22:32 -0800
-Message-ID: <CACkq2mqkqqE2wz_gSTeWk71aH6GXHDPH0EzKQ77V3vCFZbpDYw@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: librados2 and librbd1 dependency on libvirt-bin
+Date: Thu, 26 Feb 2015 00:30:15 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F282BADAC@SACMBXIP02.sdcorp.global.sandisk.com>
 References: <755F6B91B3BE364F9BCA11EA3F9E0C6F282BAC5F@SACMBXIP02.sdcorp.global.sandisk.com>
- <alpine.DEB.2.00.1502251516270.25838@cobra.newdream.net> <755F6B91B3BE364F9BCA11EA3F9E0C6F282BAD3A@SACMBXIP02.sdcorp.global.sandisk.com>
+ <alpine.DEB.2.00.1502251516270.25838@cobra.newdream.net>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F282BAD3A@SACMBXIP02.sdcorp.global.sandisk.com>
+ <CACkq2mqkqqE2wz_gSTeWk71aH6GXHDPH0EzKQ77V3vCFZbpDYw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f173.google.com ([209.85.217.173]:38105 "EHLO
-	mail-lb0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753510AbbBZAWy convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Feb 2015 19:22:54 -0500
-Received: by lbiz11 with SMTP id z11so7556153lbi.5
-        for <ceph-devel@vger.kernel.org>; Wed, 25 Feb 2015 16:22:52 -0800 (PST)
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F282BAD3A@SACMBXIP02.sdcorp.global.sandisk.com>
+Received: from mail-bl2on0056.outbound.protection.outlook.com ([65.55.169.56]:3531
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752821AbbBZAaX (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 25 Feb 2015 19:30:23 -0500
+In-Reply-To: <CACkq2mqkqqE2wz_gSTeWk71aH6GXHDPH0EzKQ77V3vCFZbpDYw@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
+To: Travis Rhoden <trhoden@gmail.com>
 Cc: Sage Weil <sage@newdream.net>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Somnath,
-
-Just so I can try to recreate fully, can you also tell me the version
-of Ceph you are using, the version of ceph-deploy (previously
-mentioned), and the version of libvirt?  For example, if you have the
-Juno cloud-archive enabled or anything.
-
- - Travis
-
-On Wed, Feb 25, 2015 at 3:36 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
-> Thanks Sage !
-> But, I think this is a serious issue, every time we will purge the cluster all the node network will be down :-(
-> Basically, it should not delete any component on which non-ceph components are dependent.
-> We need this purge-lite kind of stuff.
->
-> Thanks & Regards
-> Somnath
->
-> -----Original Message-----
-> From: Sage Weil [mailto:sage@newdream.net]
-> Sent: Wednesday, February 25, 2015 3:21 PM
-> To: Somnath Roy
-> Cc: Ceph Development
-> Subject: Re: librados2 and librbd1 dependency on libvirt-bin
->
-> On Wed, 25 Feb 2015, Somnath Roy wrote:
->> Hi,
->> We are facing problem that ceph-deploy purge is uninstalling latest Mellanox ofed driver packages.
->> Digging down more we found libvirt-bin is dependent on librados2/librbd1.
->> So, here is what happening.
->>
->> 1. Mellanox ofed driver has a dependency on the libvirt-bin*
->>
->> 2. purging librados2/librbd1 is removing libvirt-bin and resulting the removal of the Mellanox driver package as well.
->>
->> Here is what I found.
->>
->> http://packages.ubuntu.com/trusty/devel/libvirt-bin
->>
->> ubuntu@ip-10-15-16-211:~$ apt-cache rdepends librados2 [...]
->
-> The problem is that libvirt (and probably qemu) are built against librbd1.
-> If you remove librbd1, those get removed too.
->
->> So, I am curious why libvirt-bin has a depencey on librados2/librbd1 ?
->
-> qemu needs it for obvious reasons.  libvirt needs it to manage it's
-> (rbd) storage pools.
->
->> Also, how come we get rid of this issue ?
->> Ceph-deploy should not remove any package other than ceph's.
->
-> Purge could skip the libraries that may have other dependencies, but then it's a purge-lite.  Honestly I thought it skipped them for that reason but we probably changed it at some point because it (also confusingly) wouldn't remove librados etc...
->
-> sage
->
->
-> ________________________________
->
-> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+VGhhbmtzIFRyYXZpcy4uDQpIZXJlIGl0IGlzLi4NCg0KQ2VwaCBpcyBnaWFudC4NCkxpYnZpcnQg
+aXMgZnJvbSBVYnVudHUgMTQuMDQgcmVwbyBvbmx5Li4uDQoNCmVtc0BlbXNub2RlNDp+JCBzdWRv
+IGRwa2cgLWwgfCBncmVwIGxpYnZpcnQqDQppaSAgbGlidmlydC1iaW4gICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgMS4yLjItMHVidW50dTEzLjEuOSAgICAgICAgICAg
+ICAgICAgICBhbWQ2NCAgICAgICAgcHJvZ3JhbXMgZm9yIHRoZSBsaWJ2aXJ0IGxpYnJhcnkNCmlp
+ICBsaWJ2aXJ0MCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAx
+LjIuMi0wdWJ1bnR1MTMuMS45ICAgICAgICAgICAgICAgICAgIGFtZDY0ICAgICAgICBsaWJyYXJ5
+IGZvciBpbnRlcmZhY2luZyB3aXRoIGRpZmZlcmVudCB2aXJ0dWFsaXphdGlvbiBzeXN0ZW1zDQpl
+bXNAZW1zbm9kZTQ6fiQgc3VkbyBkcGtnIC1sIHwgZ3JlcCBjZXBoLWRlcGxveQ0KaWkgIGNlcGgt
+ZGVwbG95ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDEuNS4yMSAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgYWxsICAgICAgICAgIENlcGgtZGVwbG95IGlz
+IGFuIGVhc3kgdG8gdXNlIGNvbmZpZ3VyYXRpb24gdG9vbA0KZW1zQGVtc25vZGU0On4kDQplbXNA
+ZW1zbm9kZTQ6fiQgY2VwaC1kZXBsb3kgLS12ZXJzaW9uDQoxLjUuMjENCmVtc0BlbXNub2RlNDp+
+JA0KDQpSZWdhcmRzDQpTb21uYXRoDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9t
+OiBjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3du
+ZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgVHJhdmlzIFJob2Rlbg0KU2VudDogV2Vk
+bmVzZGF5LCBGZWJydWFyeSAyNSwgMjAxNSA0OjIzIFBNDQpUbzogU29tbmF0aCBSb3kNCkNjOiBT
+YWdlIFdlaWw7IENlcGggRGV2ZWxvcG1lbnQNClN1YmplY3Q6IFJlOiBsaWJyYWRvczIgYW5kIGxp
+YnJiZDEgZGVwZW5kZW5jeSBvbiBsaWJ2aXJ0LWJpbg0KDQpTb21uYXRoLA0KDQpKdXN0IHNvIEkg
+Y2FuIHRyeSB0byByZWNyZWF0ZSBmdWxseSwgY2FuIHlvdSBhbHNvIHRlbGwgbWUgdGhlIHZlcnNp
+b24gb2YgQ2VwaCB5b3UgYXJlIHVzaW5nLCB0aGUgdmVyc2lvbiBvZiBjZXBoLWRlcGxveSAocHJl
+dmlvdXNseSBtZW50aW9uZWQpLCBhbmQgdGhlIHZlcnNpb24gb2YgbGlidmlydD8gIEZvciBleGFt
+cGxlLCBpZiB5b3UgaGF2ZSB0aGUgSnVubyBjbG91ZC1hcmNoaXZlIGVuYWJsZWQgb3IgYW55dGhp
+bmcuDQoNCiAtIFRyYXZpcw0KDQpPbiBXZWQsIEZlYiAyNSwgMjAxNSBhdCAzOjM2IFBNLCBTb21u
+YXRoIFJveSA8U29tbmF0aC5Sb3lAc2FuZGlzay5jb20+IHdyb3RlOg0KPiBUaGFua3MgU2FnZSAh
+DQo+IEJ1dCwgSSB0aGluayB0aGlzIGlzIGEgc2VyaW91cyBpc3N1ZSwgZXZlcnkgdGltZSB3ZSB3
+aWxsIHB1cmdlIHRoZSANCj4gY2x1c3RlciBhbGwgdGhlIG5vZGUgbmV0d29yayB3aWxsIGJlIGRv
+d24gOi0oIEJhc2ljYWxseSwgaXQgc2hvdWxkIG5vdCBkZWxldGUgYW55IGNvbXBvbmVudCBvbiB3
+aGljaCBub24tY2VwaCBjb21wb25lbnRzIGFyZSBkZXBlbmRlbnQuDQo+IFdlIG5lZWQgdGhpcyBw
+dXJnZS1saXRlIGtpbmQgb2Ygc3R1ZmYuDQo+DQo+IFRoYW5rcyAmIFJlZ2FyZHMNCj4gU29tbmF0
+aA0KPg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBTYWdlIFdlaWwgW21h
+aWx0bzpzYWdlQG5ld2RyZWFtLm5ldF0NCj4gU2VudDogV2VkbmVzZGF5LCBGZWJydWFyeSAyNSwg
+MjAxNSAzOjIxIFBNDQo+IFRvOiBTb21uYXRoIFJveQ0KPiBDYzogQ2VwaCBEZXZlbG9wbWVudA0K
+PiBTdWJqZWN0OiBSZTogbGlicmFkb3MyIGFuZCBsaWJyYmQxIGRlcGVuZGVuY3kgb24gbGlidmly
+dC1iaW4NCj4NCj4gT24gV2VkLCAyNSBGZWIgMjAxNSwgU29tbmF0aCBSb3kgd3JvdGU6DQo+PiBI
+aSwNCj4+IFdlIGFyZSBmYWNpbmcgcHJvYmxlbSB0aGF0IGNlcGgtZGVwbG95IHB1cmdlIGlzIHVu
+aW5zdGFsbGluZyBsYXRlc3QgTWVsbGFub3ggb2ZlZCBkcml2ZXIgcGFja2FnZXMuDQo+PiBEaWdn
+aW5nIGRvd24gbW9yZSB3ZSBmb3VuZCBsaWJ2aXJ0LWJpbiBpcyBkZXBlbmRlbnQgb24gbGlicmFk
+b3MyL2xpYnJiZDEuDQo+PiBTbywgaGVyZSBpcyB3aGF0IGhhcHBlbmluZy4NCj4+DQo+PiAxLiBN
+ZWxsYW5veCBvZmVkIGRyaXZlciBoYXMgYSBkZXBlbmRlbmN5IG9uIHRoZSBsaWJ2aXJ0LWJpbioN
+Cj4+DQo+PiAyLiBwdXJnaW5nIGxpYnJhZG9zMi9saWJyYmQxIGlzIHJlbW92aW5nIGxpYnZpcnQt
+YmluIGFuZCByZXN1bHRpbmcgdGhlIHJlbW92YWwgb2YgdGhlIE1lbGxhbm94IGRyaXZlciBwYWNr
+YWdlIGFzIHdlbGwuDQo+Pg0KPj4gSGVyZSBpcyB3aGF0IEkgZm91bmQuDQo+Pg0KPj4gaHR0cDov
+L3BhY2thZ2VzLnVidW50dS5jb20vdHJ1c3R5L2RldmVsL2xpYnZpcnQtYmluDQo+Pg0KPj4gdWJ1
+bnR1QGlwLTEwLTE1LTE2LTIxMTp+JCBhcHQtY2FjaGUgcmRlcGVuZHMgbGlicmFkb3MyIFsuLi5d
+DQo+DQo+IFRoZSBwcm9ibGVtIGlzIHRoYXQgbGlidmlydCAoYW5kIHByb2JhYmx5IHFlbXUpIGFy
+ZSBidWlsdCBhZ2FpbnN0IGxpYnJiZDEuDQo+IElmIHlvdSByZW1vdmUgbGlicmJkMSwgdGhvc2Ug
+Z2V0IHJlbW92ZWQgdG9vLg0KPg0KPj4gU28sIEkgYW0gY3VyaW91cyB3aHkgbGlidmlydC1iaW4g
+aGFzIGEgZGVwZW5jZXkgb24gbGlicmFkb3MyL2xpYnJiZDEgPw0KPg0KPiBxZW11IG5lZWRzIGl0
+IGZvciBvYnZpb3VzIHJlYXNvbnMuICBsaWJ2aXJ0IG5lZWRzIGl0IHRvIG1hbmFnZSBpdCdzDQo+
+IChyYmQpIHN0b3JhZ2UgcG9vbHMuDQo+DQo+PiBBbHNvLCBob3cgY29tZSB3ZSBnZXQgcmlkIG9m
+IHRoaXMgaXNzdWUgPw0KPj4gQ2VwaC1kZXBsb3kgc2hvdWxkIG5vdCByZW1vdmUgYW55IHBhY2th
+Z2Ugb3RoZXIgdGhhbiBjZXBoJ3MuDQo+DQo+IFB1cmdlIGNvdWxkIHNraXAgdGhlIGxpYnJhcmll
+cyB0aGF0IG1heSBoYXZlIG90aGVyIGRlcGVuZGVuY2llcywgYnV0IHRoZW4gaXQncyBhIHB1cmdl
+LWxpdGUuICBIb25lc3RseSBJIHRob3VnaHQgaXQgc2tpcHBlZCB0aGVtIGZvciB0aGF0IHJlYXNv
+biBidXQgd2UgcHJvYmFibHkgY2hhbmdlZCBpdCBhdCBzb21lIHBvaW50IGJlY2F1c2UgaXQgKGFs
+c28gY29uZnVzaW5nbHkpIHdvdWxkbid0IHJlbW92ZSBsaWJyYWRvcyBldGMuLi4NCj4NCj4gc2Fn
+ZQ0KPg0KPg0KPiBfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXw0KPg0KPiBQTEVBU0Ug
+Tk9URTogVGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbCBt
+ZXNzYWdlIGlzIGludGVuZGVkIG9ubHkgZm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVj
+aXBpZW50KHMpIG5hbWVkIGFib3ZlLiBJZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBu
+b3QgdGhlIGludGVuZGVkIHJlY2lwaWVudCwgeW91IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5
+b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmll
+dywgZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2Fn
+ZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11
+bmljYXRpb24gaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUg
+b3IgZS1tYWlsIChhcyBzaG93biBhYm92ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFu
+ZCBhbGwgY29waWVzIG9mIHRoaXMgbWVzc2FnZSBpbiB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIg
+aGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkgc3RvcmVkIGNvcGllcykuDQo+DQo+IC0tDQo+
+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmli
+ZSBjZXBoLWRldmVsIiANCj4gaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2
+Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gDQo+IGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtl
+cm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KLS0NClRvIHVuc3Vic2NyaWJlIGZyb20gdGhp
+cyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbiB0aGUgYm9k
+eSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9t
+byBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg==
