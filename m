@@ -1,89 +1,34 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: AW: who is using radosgw with civetweb?
-Date: Thu, 26 Feb 2015 11:15:28 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1502261112500.25838@cobra.newdream.net>
-References: <alpine.DEB.2.00.1502251125180.25838@cobra.newdream.net> <1dc4d01d051f2$febae0e0$fc30a2a0$@dunkel.de>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: Some usability question
+Date: Thu, 26 Feb 2015 21:05:53 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F282BB873@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1825081174-1424978129=:25838"
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:34690 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753825AbbBZTPg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 26 Feb 2015 14:15:36 -0500
-In-Reply-To: <1dc4d01d051f2$febae0e0$fc30a2a0$@dunkel.de>
+Received: from mail-bn1bon0071.outbound.protection.outlook.com ([157.56.111.71]:29894
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1754045AbbBZVF7 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Feb 2015 16:05:59 -0500
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Axel Dunkel <ad@dunkel.de>
-Cc: ceph-users@ceph.com, ceph-devel@vger.kernel.org
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Hi,
+Is there any way to know which OSD to map to which drive of a host from an Admin node ?
+We know from command like say 'ceph osd tree' to identify till the host where an osd belongs to but not the disk. The workaround I have is to login to the corresponding node and see the mount points to identify. Is this the best one or am I missing any command ?
+If we can depict a tree view (similar to 'ceph osd tree') from pool to disk level (pool -> hosts ( and the crush buckets hierarchy) -> osds -> disks), user can easily find out their crush map is working as expected on a specific pool (say cache tier).
 
---557981400-1825081174-1424978129=:25838
-Content-Type: TEXT/PLAIN; charset=iso-8859-1
-Content-Transfer-Encoding: 8BIT
+Second question,  regarding Erasure coded pool a certain amount of storage could be lost because of padding. I think it will be helpful if we can show how much is lost because of the variant client workload with the help of a command. This information can help user to choose the erasure coded profile (as it is dependent on K value) accordingly. Presently, rados object can't identify what is valid (and what not), so it could be a lot of effort, but is it worth ?  Any thoughts ?
 
-Hi Axel,
-
-On Thu, 26 Feb 2015, Axel Dunkel wrote:
-> Sage,
-> 
-> we use apache as a filter for security and additional functionality
-> reasons. I do like the idea, but we'd need some kind of interface to
-> filter/modify/process requests.
-
-Civetweb has some basic functionality here:
-
-	https://github.com/sunsetbrew/civetweb/blob/master/README.md#overview
-
-Notably, "URL rewrite, file blacklist, IP-based ACL" and "Download speed 
-limit based on client subnet or URI pattern" fall into the category of 
-stuff I'd expect people to be doing with Apache.  Does this cover what 
-you're after, or can you be more specific about what you need to do?
-
-Also, for cases where we don't natively do something, would running 
-something like nginx or apache in a proxying mode do the trick?
-
-sage
+Thanks & Regards
+Somnath
 
 
-> 
-> Best regards
-> Axel Dunkel
-> 
-> -----Ursprüngliche Nachricht-----
-> Von: ceph-devel-owner@vger.kernel.org
-> [mailto:ceph-devel-owner@vger.kernel.org] Im Auftrag von Sage Weil
-> Gesendet: Mittwoch, 25. Februar 2015 20:32
-> An: ceph-users@ceph.com; ceph-devel@vger.kernel.org
-> Betreff: who is using radosgw with civetweb?
-> 
-> Hey,
-> 
-> We are considering switching to civetweb (the embedded/standalone rgw web
-> server) as the primary supported RGW frontend instead of the current
-> apache + mod-fastcgi or mod-proxy-fcgi approach.  "Supported" here means
-> both the primary platform the upstream development focuses on and what the
-> downstream Red Hat product will officially support.
-> 
-> How many people are using RGW standalone using the embedded civetweb
-> server instead of apache?  In production?  At what scale?  What
-> version(s) (civetweb first appeared in firefly and we've backported most
-> fixes).
-> 
-> Have you seen any problems?  Any other feedback?  The hope is to (vastly)
-> simplify deployment.
-> 
-> Thanks!
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org More majordomo info at
-> http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
---557981400-1825081174-1424978129=:25838--
+
+________________________________
+
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+
