@@ -1,75 +1,31 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: who is using radosgw with civetweb?
-Date: Thu, 26 Feb 2015 09:22:31 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1502260920570.25838@cobra.newdream.net>
-References: <alpine.DEB.2.00.1502251125180.25838@cobra.newdream.net> <54EF008C.2050706@42on.com>
+From: John Spray <john.spray@redhat.com>
+Subject: Re: MDS crashes (80.8)
+Date: Thu, 26 Feb 2015 17:50:40 +0000
+Message-ID: <54EF5CF0.3030503@redhat.com>
+References: <CAGbvivJQYb6KpZPW0ug_q7rbL_NYB2eGS+Vcktvy_W3ECHxKbA@mail.gmail.com>	<54EF527B.8060403@redhat.com> <CAGbvivK+oHAfD3bURzDyRDsoBtKtmp35ZZ-YC7kLyLXD6mQ6fQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:49894 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:53104 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753539AbbBZRWl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 26 Feb 2015 12:22:41 -0500
-In-Reply-To: <54EF008C.2050706@42on.com>
+	id S1752971AbbBZRun (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 26 Feb 2015 12:50:43 -0500
+In-Reply-To: <CAGbvivK+oHAfD3bURzDyRDsoBtKtmp35ZZ-YC7kLyLXD6mQ6fQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>
-Cc: ceph-users@ceph.com, ceph-devel@vger.kernel.org
+To: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Thu, 26 Feb 2015, Wido den Hollander wrote:
-> On 25-02-15 20:31, Sage Weil wrote:
-> > Hey,
-> > 
-> > We are considering switching to civetweb (the embedded/standalone rgw web
-> > server) as the primary supported RGW frontend instead of the current
-> > apache + mod-fastcgi or mod-proxy-fcgi approach.  "Supported" here means
-> > both the primary platform the upstream development focuses on and what the
-> > downstream Red Hat product will officially support.
-> > 
-> > How many people are using RGW standalone using the embedded civetweb
-> > server instead of apache?  In production?  At what scale?  What
-> > version(s) (civetweb first appeared in firefly and we've backported most
-> > fixes).
-> > 
-> > Have you seen any problems?  Any other feedback?  The hope is to (vastly)
-> > simplify deployment.
-> > 
-> 
-> It seems like Civetweb listens on 0.0.0.0 by default and that doesn't seem
-> safe to me.
+On 26/02/2015 17:19, Wyllys Ingersoll wrote:
+> OK, attached is the initial log, or at least the earliest log I can find.
+>
+Ah, now that I look more closely at the backtrace, I realise that 
+creation succeeded, but it is now failing on subsequent runs because it 
+can't find the metadata pool.  I guess you probably deleted it at some 
+point between Monday and today.  You will need to create yourself some 
+filesystem pools (metadata and data) before using newfs to reset your 
+filesystem.
 
-Can you clarify?  Is that because people may inadvertantly run this on a 
-public host and not realize that the host is answering requests?
-
-If we move to a world where this is the default/preferred route, this 
-seems like a good thing.. if they don't want to respond on an address they 
-can specify which IP to bind to?
-
-> In most deployments you'll put Apache, Nginx or Varnish in front of RGW to do
-> the proper HTTP handling.
-> 
-> I'd say that Civetweb should listen on 127.0.0.1:7480/[::1]:7480 by default.
-> 
-> And make sure it listens on IPv6 by default :-)
-
-Yeah, +1 on IPv6:)
-
-sage
-
-
-> 
-> Wido
-> 
-> > Thanks!
-> > sage
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Cheers,
+John
