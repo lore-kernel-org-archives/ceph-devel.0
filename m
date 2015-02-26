@@ -1,42 +1,40 @@
-From: Radoslaw Zarzynski <rzarzynski@mirantis.com>
-Subject: Re: who is using radosgw with civetweb?
-Date: Thu, 26 Feb 2015 16:37:23 +0000 (UTC)
-Message-ID: <loom.20150226T172151-585@post.gmane.org>
-References: <alpine.DEB.2.00.1502251125180.25838@cobra.newdream.net>
+From: John Spray <john.spray@redhat.com>
+Subject: Re: MDS crashes (80.8)
+Date: Thu, 26 Feb 2015 17:06:03 +0000
+Message-ID: <54EF527B.8060403@redhat.com>
+References: <CAGbvivJQYb6KpZPW0ug_q7rbL_NYB2eGS+Vcktvy_W3ECHxKbA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:53410 "EHLO plane.gmane.org"
+Received: from mx1.redhat.com ([209.132.183.28]:55757 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753779AbbBZQkF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 26 Feb 2015 11:40:05 -0500
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1YR1Tn-0000lV-38
-	for ceph-devel@vger.kernel.org; Thu, 26 Feb 2015 17:40:03 +0100
-Received: from 98.243.40.164-rev.hti.pl ([164.40.243.98])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Thu, 26 Feb 2015 17:40:03 +0100
-Received: from rzarzynski by 98.243.40.164-rev.hti.pl with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Thu, 26 Feb 2015 17:40:03 +0100
+	id S932100AbbBZRGG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 26 Feb 2015 12:06:06 -0500
+In-Reply-To: <CAGbvivJQYb6KpZPW0ug_q7rbL_NYB2eGS+Vcktvy_W3ECHxKbA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>, ceph-devel@vger.kernel.org
 
-Sage Weil <sweil <at> redhat.com> writes:
+On 26/02/2015 15:26, Wyllys Ingersoll wrote:
+> Trying to run ceph-mds on a freshly installed firefly cluster with no
+> ceph FS created yet.
+>
+> It consistently crashes upon startup. Below is debug output showing
+> the point of the crash.   Something is obviously misconfigured or
+> broken but Im at a loss as to where the issue would be. Any ideas?
+The MDS thinks that its on-disk tables should already exist (the MDSMap 
+structure on the mons are telling it so), but when it goes to read them 
+from RADOS it's finding that they aren't there.
 
-> Have you seen any problems?  Any other feedback?  The hope is to (vastly) 
-> simplify deployment.
+This is reminiscent of http://tracker.ceph.com/issues/7485, although I 
+just checked and the v0.80.8 tag does include the fix for that. Please 
+could you see if you have the MDS log from the very first time it ran?  
+There is probably a clue there.
 
-What about the memory footprint? In some cases the civetweb frontend
-performs an additional buffering to properly calculate the size of a content
-and to attach the "Content-Length" HTTP header. Please take a look on
-RGWMongoose::write_data() and RGWMongoose::complete_request() methods. The
-problem might be best visible on HUGE container listing.
+Once you have recovered that and any other interesting diagnostic 
+information, you can try to get out of this bad state by using "ceph mds 
+newfs" to reset the MDSMap.
 
-Regards,
-Radoslaw Zarzynski
-
+Thanks,
+John
