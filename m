@@ -1,31 +1,38 @@
-From: Pete Zaitcev <zaitcev@kotori.zaitcev.us>
-Subject: Re: Client debugging  and rados_conf_set()
-Date: Wed, 25 Feb 2015 19:51:36 -0700
-Message-ID: <20150225195136.16991296@guren.zaitcev.lan>
-References: <20150224194501.38982e51@guren.zaitcev.lan>
-	<alpine.DEB.2.00.1502242133330.25838@cobra.newdream.net>
+From: Abhishek Dixit <dixitabhi@gmail.com>
+Subject: RGW : Transaction Id in response?
+Date: Thu, 26 Feb 2015 10:05:40 +0530
+Message-ID: <CAGoDY9=k7MFQVv_cJaV5jPtJUQwHddr=OmCySSC599vW4hLB6w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from takane.zaitcev.us ([96.126.117.152]:41048 "EHLO
-	takane.zaitcev.us" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752851AbbBZCvk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Feb 2015 21:51:40 -0500
-In-Reply-To: <alpine.DEB.2.00.1502242133330.25838@cobra.newdream.net>
+Received: from mail-la0-f45.google.com ([209.85.215.45]:37235 "EHLO
+	mail-la0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752657AbbBZEgC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Feb 2015 23:36:02 -0500
+Received: by labhs14 with SMTP id hs14so8549236lab.4
+        for <ceph-devel@vger.kernel.org>; Wed, 25 Feb 2015 20:36:00 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, 24 Feb 2015 21:36:07 -0800 (PST)
-Sage Weil <sage@newdream.net> wrote:
+Hi,
 
-> >   ldout(cct, 1) << "setting wanted keys" << dendl;
-> > 	rc = rados_conf_set(rados, "debug_rados", "20/20");
+I was doing comparison of Open Stack Swift response headers and Ceph
+RGW response.
+This is in regard to X-Trans-Id header in response from Open Stack
+Swift storage.
+Swift response to a request always have the header "X-Trans-Id".
+X-Trans-Id : A unique transaction identifier for this request.
 
->   rados_conf_set(rados, "log_to_stderr", "true");
+X-Trans-Id seems to serve two purpose:
+1. Every log messages for a request will carry this and aid in
+debugging/analyzing.
+2. Benchmarking for latency.
 
-Thanks a lot, that worked!
+So, do we have similar unique identifier in Ceph RGW response which
+associates with each request?
 
--- Pete
+Or do we need add support for this?
+
+Thanks
+Abhishek Dixit
