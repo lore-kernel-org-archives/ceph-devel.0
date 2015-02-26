@@ -1,197 +1,212 @@
-From: "Matt W. Benjamin" <matt@cohortfs.com>
-Subject: Re: Adding a proprietary key value store to CEPH
-Date: Wed, 25 Feb 2015 18:56:04 -0500 (EST)
-Message-ID: <246493291.168.1424908564280.JavaMail.root@thunderbeast.private.linuxbox.com>
-References: <531793771.166.1424908519960.JavaMail.root@thunderbeast.private.linuxbox.com>
+From: Yuri Weinstein <yweinste@redhat.com>
+Subject: Re: dumpling integration branch for v0.67.12 ready for QE
+Date: Wed, 25 Feb 2015 19:18:23 -0500 (EST)
+Message-ID: <507456764.27942656.1424909903162.JavaMail.zimbra@redhat.com>
+References: <54DA3A5B.5050509@dachary.org> <1520027977.15929683.1423693473209.JavaMail.zimbra@redhat.com> <1586599856.17187011.1423778777774.JavaMail.zimbra@redhat.com> <54DD268D.7050904@dachary.org> <2134758899.22244800.1424281099141.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from aa.linuxbox.com ([69.128.83.226]:3146 "EHLO aa.linuxbox.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753719AbbBYX4M (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 25 Feb 2015 18:56:12 -0500
-In-Reply-To: <531793771.166.1424908519960.JavaMail.root@thunderbeast.private.linuxbox.com>
+Received: from mx3-phx2.redhat.com ([209.132.183.24]:45026 "EHLO
+	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752829AbbBZAT1 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Feb 2015 19:19:27 -0500
+In-Reply-To: <2134758899.22244800.1424281099141.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: Varada Kari <Varada.Kari@sandisk.com>, Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sage@newdream.net>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, Tamil Muthamizhan <tmuthami@redhat.com>, Zack Cerza <zack@redhat.com>, Sandon Van Ness <svanness@redhat.com>
 
-Hi,
+All issues in http://tracker.ceph.com/issues/10560 updated.
 
-We implemented an objectstore factory which does this, and could probably be upstreamed.
+Loic - #10801 can be resolved.
 
-Matt
+v0.67.12 ready for release.
 
------ "Somnath Roy" <Somnath.Roy@sandisk.com> wrote:
+Thx
+YuriW
 
-> Yes, we will take care of both, thanks..
-> 
-> -----Original Message-----
-> From: Sage Weil [mailto:sage@newdream.net] 
-> Sent: Wednesday, February 25, 2015 3:25 PM
-> To: Somnath Roy
-> Cc: Varada Kari; Ceph Development
-> Subject: RE: Adding a proprietary key value store to CEPH
-> 
-> On Wed, 25 Feb 2015, Somnath Roy wrote:
-> > Sage,
-> > Yes, agreed..
-> > But, since k/v store is already added and we are planning to derive
-> 
-> > from that we didn't change that. Do you want us to implement entire
-> 
-> > k/vstore to be a dynamically loadable along with the k/vdb
-> underneath ?
-> 
-> Both would be nice.  I confess I haven't looked closely at the EC
-> backend implementation, but I expect that this is quite simple: it's
-> just a matter of exposing a function that instantiates an instance of
-> the ObjectStore or KeyValueDB class, right?
-> 
-> sage
-> 
-> 
-> > 
-> > Thanks & Regards
-> > Somnath
-> > 
-> > -----Original Message-----
-> > From: ceph-devel-owner@vger.kernel.org 
-> > [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
-> > Sent: Wednesday, February 25, 2015 6:46 AM
-> > To: Varada Kari
-> > Cc: Ceph Development
-> > Subject: RE: Adding a proprietary key value store to CEPH
-> > 
-> > On Wed, 25 Feb 2015, Varada Kari wrote:
-> > > Hi Sage,
-> > > 
-> > > Thanks. Will wait for your reply.
-> > > Meanwhile, Can I submit a blue print for this for next release?
-> > 
-> > Yeah, definitely.
-> > 
-> > FWIW the plugin layer I think will be most interesting going forward
-> is the ObjectStore level, not just the KeyValueDB level...
-> > 
-> > sage
-> > 
-> > 
-> > > 
-> > > Thanks,
-> > > Varada
-> > > 
-> > > -----Original Message-----
-> > > From: Sage Weil [mailto:sage@newdream.net]
-> > > Sent: Tuesday, February 24, 2015 10:21 PM
-> > > To: Varada Kari
-> > > Cc: Ceph Development
-> > > Subject: Re: Adding a proprietary key value store to CEPH
-> > > 
-> > > Hi Varada,
-> > > 
-> > > On Tue, 24 Feb 2015, Varada Kari wrote:
-> > > > Hi Sage,
-> > > >
-> > > > We are trying to integrate a new proprietary key value store to
-> CEPH. To integrate this KV-store, which is a closed source shared
-> library, we propose a new class to CEPH called PropDBStore which does
-> a dlopen and imports the required symbols. This framework will help in
-> integrating vendor specific extensions to CEPH.
-> > > >
-> > > > The gist of the implementation is as follows.
-> > > >
-> > > > 1. Implement a wrapper around the proprietary KVStore. Let us
-> call it as KVExtension. This is a shared library which implements all
-> interfaces required by CEPH KeyValueStore.
-> > > > 2. A new class is derived from KeyValueDB called PropDBStore,
-> which honors the semantics of KeyvalueStore and KeyValueDB. This class
-> acts as mediator between CEPH and KVExtension.  This class transforms
-> bufferlist etc... to const char pointers or strings for the extension
-> to understand.
-> > > > 3. PropDBStore, loads (dlopen) the KVExtension during OSD
-> initialization.  Path to the KVExtension can be mentioned in
-> ceph.conf.
-> > > > 4. Interfaces that needs to be implemented in KVExtension, which
-> are imported by the PropDBStore are added in a new header called
-> PropDBWrapper.h.  This header contains the signatures for the
-> necessary interfaces like init(), close(), submit_transaction(), get()
-> and get_iterator(). Similarly for Iterator functionality,
-> PropDBIterator.h, which specifies the signatures of seek_to_first (),
-> seek_to_last(), lower_bound() and upper_bound() etc...  PropDBStore
-> includes these headers to import the symbols, using dlsym().
-> > > > 5. Choosing the proprietary DB as Backend to the OSD is
-> controlled/managed by config options of the ceph (/etc/ceph/ceph.conf)
-> like rocksdb or leveldb.
-> > > > 6. Rest of the existing functionality is not disturbed by this
-> change. Changing the osd backend option will change backend
-> implementation. But this change is not dynamic. The type of the
-> backend should be chosen at osd creation time and osd will continue
-> use that backend till that osd is reformatted again.
-> > > > 7. The new KVStore we are trying to integrate works on a raw
-> partition, so we divided the osd drive into two partitions. One
-> partition is given to osd Meta data (super block, fsid etc...), and
-> the other is given to the new db to manage it. OSD partition is now
-> not the entire disk, but 2-4GB which needed for the metadata.
-> > > 
-> > > This sounds like a good approach to link to pretty much any
-> external backend (modulo the dlopen part).  I need to check with
-> lawyer types before I can promise we'll be able to merge something
-> like this into the main ceph.git, though!
-> > > 
-> > > Thanks-
-> > > sage
-> > > 
-> > > ________________________________
-> > > 
-> > > PLEASE NOTE: The information contained in this electronic mail
-> message is intended only for the use of the designated recipient(s)
-> named above. If the reader of this message is not the intended
-> recipient, you are hereby notified that you have received this message
-> in error and that any review, dissemination, distribution, or copying
-> of this message is strictly prohibited. If you have received this
-> communication in error, please notify the sender by telephone or
-> e-mail (as shown above) immediately and destroy any and all copies of
-> this message in your possession (whether hard copies or electronically
-> stored copies).
-> > > 
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe
-> ceph-devel" 
-> > > in the body of a message to majordomo@vger.kernel.org More
-> majordomo 
-> > > info at  http://vger.kernel.org/majordomo-info.html
-> > > 
-> > > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe
-> ceph-devel" 
-> > in the body of a message to majordomo@vger.kernel.org More majordomo
-> 
-> > info at  http://vger.kernel.org/majordomo-info.html
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe
-> ceph-devel" 
-> > in the body of a message to majordomo@vger.kernel.org More majordomo
-> 
-> > info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+----- Original Message -----
+=46rom: "Yuri Weinstein" <yweinste@redhat.com>
+To: "Loic Dachary" <loic@dachary.org>
+Cc: "Ceph Development" <ceph-devel@vger.kernel.org>, "Sage Weil" <sage@=
+redhat.com>, "Tamil Muthamizhan" <tmuthami@redhat.com>, "Zack Cerza" <z=
+ack@redhat.com>, "Sandon Van Ness" <svanness@redhat.com>
+Sent: Wednesday, February 18, 2015 9:38:19 AM
+Subject: Re: dumpling integration branch for v0.67.12 ready for QE
 
--- 
-Matt Benjamin
-CohortFS, LLC.
-315 West Huron Street, Suite 140A
-Ann Arbor, Michigan 48103
+Hi all
 
-http://cohortfs.com
+I updated all issues in http://tracker.ceph.com/issues/10560
 
-tel.  734-761-4689 
-fax.  734-769-8938 
-cel.  734-216-5309 
+Based on what is listed there, we have=20
+http://tracker.ceph.com/issues/10801 - Yehuda pls comment
+http://tracker.ceph.com/issues/10694 - Sam pls re-confirm
+
+rbd - Josh, I understood that we are good to go, pls re-confirm.
+
+I can re-run some suites if you'd like and we can make a call on this r=
+elease.
+
+Loic - back to you, let me know what you think.
+
+Thx
+YuriW
+
+----- Original Message -----
+=46rom: "Loic Dachary" <loic@dachary.org>
+To: "Yuri Weinstein" <yweinste@redhat.com>
+Cc: "Ceph Development" <ceph-devel@vger.kernel.org>, "Sage Weil" <sage@=
+redhat.com>, "Tamil Muthamizhan" <tmuthami@redhat.com>, "Zack Cerza" <z=
+ack@redhat.com>, "Sandon Van Ness" <svanness@redhat.com>
+Sent: Thursday, February 12, 2015 2:17:49 PM
+Subject: Re: dumpling integration branch for v0.67.12 ready for QE
+
+
+
+On 12/02/2015 23:06, Yuri Weinstein wrote:
+> I linked all issues related to this release testing to the ticket htt=
+p://tracker.ceph.com/issues/10560
+>=20
+> After the team leads make a call of those, including environment issu=
+es, I suggest re-running suites the failed again.
+>=20
+> Loic, I'd re-run them in the Octo, since we already started there, if=
+ you agree ?
+
+Sure :-)
+
+>=20
+> Thx
+> YuriW
+>=20
+> ----- Original Message -----
+> From: "Yuri Weinstein" <yweinste@redhat.com>
+> To: "Loic Dachary" <loic@dachary.org>
+> Cc: "Ceph Development" <ceph-devel@vger.kernel.org>, "Sage Weil" <sag=
+e@redhat.com>, "Tamil Muthamizhan" <tmuthami@redhat.com>
+> Sent: Wednesday, February 11, 2015 2:24:33 PM
+> Subject: Re: dumpling integration branch for v0.67.12 ready for QE
+>=20
+> I replied to individual suites runs, but just wanted to summarize QE =
+validation status.
+>=20
+> The following suites were executed in the Octo lab (we will use Sepia=
+ in the future if nobody objects).
+>=20
+> upgrade:dumpling
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> ['45493']
+> http://tracker.ceph.com/issues/10694 - Known "Won't fix"
+> "Assertion: osd/Watch.cc: 290: FAILED assert(!cb)"
+>=20
+> *** Sam - pls confirm the "Won't fix" status.
+>=20
+> ['45495', '45496', '45498', '45499', '45500']
+> http://tracker.ceph.com/issues/10838
+> "s3tests failed"
+>=20
+> *** Yehuda - need your verdict on s3tests.
+>=20
+> fs
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> All green !
+>=20
+> rados
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> ['45054']
+> http://tracker.ceph.com/issues/10841
+> "Issued certificate has expired"=20
+> *** Sandon pls comment.
+>=20
+> ['45168', '45169']
+> http://tracker.ceph.com/issues/10840
+> coredump "ceph_test_filestore_idempotent_sequence"
+> *** Sam - pls comment
+>=20
+> ['45215']
+> Missing packages - no ticket FYI
+> "Failed to fetch http://apt-mirror.front.sepia.ceph.com/archive.ubunt=
+u.com/ubuntu/dists/trusty-updates/universe/binary-i386/Packages  Hash S=
+um mismatch"
+>=20
+> *** Zack, Sandon ?
+>=20
+> ceph-deploy
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>=20
+> Travis - pls suggest
+> In general I am not sure if we needed to test this - Sage?
+>=20
+> rbd
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> ['45365', '45366', '45367']
+> http://tracker.ceph.com/issues/10842
+> "unable to connect to apt-mirror.front.sepia.ceph.com"
+>=20
+> ['45349', '45350', '45351', '45355', '45356', '45357', '45363']
+> http://tracker.ceph.com/issues/10802
+> "error: image still has watchers"=20
+> (duplicate of 10680)
+>=20
+> *** Zack, Sandon, Josh - all environment noise, pls comment.=20
+>=20
+> rgw
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> ['45382', '45390']
+> http://tracker.ceph.com/issues/10843
+> "s3tests failed" - could be related or duplicate of 10838
+>=20
+> *** Yehuda - same as issues in upgrades?
+>=20
+> I am standing by for you analysis/replies and recommendations for nex=
+t steps.
+>=20
+> Loic - let me know is you want to follow specific items in our backpo=
+rt testing process that I missed here.
+> PS:  I would think that you could've wanted to assign the release tic=
+ket to QE (me) for validation and at this point I could've re-assigned =
+it back to devel (you), a?
+>=20
+> Thx
+> YuriW
+>=20
+> ----- Original Message -----
+> From: "Loic Dachary" <loic@dachary.org>
+> To: "Yuri Weinstein" <yweinste@redhat.com>
+> Cc: "Ceph Development" <ceph-devel@vger.kernel.org>
+> Sent: Tuesday, February 10, 2015 9:05:31 AM
+> Subject: dumpling integration branch for v0.67.12 ready for QE
+>=20
+> Hi Yuri,
+>=20
+> The dumpling integration branch for v0.67.12 as found at https://gith=
+ub.com/ceph/ceph/commits/dumpling-backports has been approved by Yehuda=
+, Josh and Sam and is ready for QE.=20
+>=20
+> For the record, the head is https://github.com/ceph/ceph/commit/3944c=
+77c404c4a05886fe8276d5d0dd7e4f20410
+>=20
+> I think it would be best for the QE tests to use the dumpling-backpor=
+ts. The alternative would be to merge dumpling-backports into dumpling.=
+ However, since testing may take a long time and require more patches, =
+it probably is better to not do that iterative process on the dumpling =
+branch itself. As it is now, there already are a number of commits in t=
+he dumpling branch that should really be in the dumpling-backports: the=
+y do not belong to v0.67.11 and are going to be released in v0.67.12. I=
+n the future though, the dumpling branch will only receive commits that=
+ have been carefully tested and all the integration work will be on the=
+ dumpling-backports branch exclusively. So that third parties do not ha=
+ve to worry that the dumpling branch contains commits that have not bee=
+n tested yet.
+>=20
+> Cheers
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
