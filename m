@@ -1,38 +1,31 @@
-From: "Zhang, Jian" <jian.zhang@intel.com>
-Subject: RE: Ceph Develop Summit Next Week
-Date: Thu, 26 Feb 2015 02:22:40 +0000
-Message-ID: <51FC7A40FB29414D88A121A7FFEF9A471104767E@SHSMSX104.ccr.corp.intel.com>
-References: <CAAZbbf39Gq8noZ_giCNyA=7Ohyhj=qY1XbJpb8ozjywveisYYg@mail.gmail.com>
+From: Pete Zaitcev <zaitcev@kotori.zaitcev.us>
+Subject: Re: Client debugging  and rados_conf_set()
+Date: Wed, 25 Feb 2015 19:51:36 -0700
+Message-ID: <20150225195136.16991296@guren.zaitcev.lan>
+References: <20150224194501.38982e51@guren.zaitcev.lan>
+	<alpine.DEB.2.00.1502242133330.25838@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:59583 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753084AbbBZCWq (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 25 Feb 2015 21:22:46 -0500
-In-Reply-To: <CAAZbbf39Gq8noZ_giCNyA=7Ohyhj=qY1XbJpb8ozjywveisYYg@mail.gmail.com>
-Content-Language: en-US
+Received: from takane.zaitcev.us ([96.126.117.152]:41048 "EHLO
+	takane.zaitcev.us" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752851AbbBZCvk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Feb 2015 21:51:40 -0500
+In-Reply-To: <alpine.DEB.2.00.1502242133330.25838@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Patrick McGarry <pmcgarry@redhat.com>, Ceph Devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel@vger.kernel.org
 
-SGkgbGlzdCwgDQpBbnkgcmVxdWlyZW1lbnRzIHRvIHN1Ym1pdCBhIGJsdWVwcmludHM/IExvb2tz
-IEkgY2Fubm90IHN1Ym1pdCBvbmUgYW5kIHRoZSBzYW1lIGNhc2UgZm9yIG91ciBjb2xsZWFndWUs
-IHdpdGggZ29vZ2xlIElELiANCg0KVGhhbmtzDQpKaWFuDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2Fn
-ZS0tLS0tDQpGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNl
-cGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgUGF0cmljayBNY0dh
-cnJ5DQpTZW50OiBXZWRuZXNkYXksIEZlYnJ1YXJ5IDI1LCAyMDE1IDM6NTUgQU0NClRvOiBDZXBo
-IERldmVsDQpTdWJqZWN0OiBDZXBoIERldmVsb3AgU3VtbWl0IE5leHQgV2Vlaw0KDQpIZXkgQWxs
-LA0KDQpKdXN0IGEgcmVtaW5kZXIgdGhhdCBDRFMgYmx1ZXByaW50IHN1Ym1pc3Npb24gaXMgb3Bl
-biB1bnRpbCBGcmlkYXksIHNvIG1ha2Ugc3VyZSB0byBnZXQgeW91ciBJbmZlcm5hbGlzIEJsdWVw
-cmludHMgaW4gQVNBUCENCg0KaHR0cHM6Ly93aWtpLmNlcGguY29tL1BsYW5uaW5nL0JsdWVwcmlu
-dHMvSW5mZXJuYWxpcw0KDQpUaGUgc2NoZWR1bGUgd2lsbCBiZSByZWxlYXNlZCBuZXh0IE1vbmRh
-eSBmb3IgdGhlIHR3byBkYXlzIG9mIENEUyBvbiBUdWVzZGF5L1dlZG5lc2RheS4gSWYgeW91IGhh
-dmUgYW55IHF1ZXN0aW9ucyBwbGVhc2Ugc2hvdXQuIFRoYW5rcy4NCg0KDQotLSANCg0KQmVzdCBS
-ZWdhcmRzLA0KDQpQYXRyaWNrIE1jR2FycnkNCkRpcmVjdG9yIENlcGggQ29tbXVuaXR5IHx8IFJl
-ZCBIYXQNCmh0dHA6Ly9jZXBoLmNvbSAgfHwgIGh0dHA6Ly9jb21tdW5pdHkucmVkaGF0LmNvbSBA
-c2N1dHRsZW1vbmtleSB8fCBAY2VwaA0KLS0NClRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0
-OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbiB0aGUgYm9keSBvZiBh
-IG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBpbmZv
-IGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg==
+On Tue, 24 Feb 2015 21:36:07 -0800 (PST)
+Sage Weil <sage@newdream.net> wrote:
+
+> >   ldout(cct, 1) << "setting wanted keys" << dendl;
+> > 	rc = rados_conf_set(rados, "debug_rados", "20/20");
+
+>   rados_conf_set(rados, "log_to_stderr", "true");
+
+Thanks a lot, that worked!
+
+-- Pete
