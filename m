@@ -1,51 +1,75 @@
-From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Subject: Re: RGW : Transaction Id in response?
-Date: Thu, 26 Feb 2015 12:21:49 -0500 (EST)
-Message-ID: <986670957.11758198.1424971309700.JavaMail.zimbra@redhat.com>
-References: <CAGoDY9=k7MFQVv_cJaV5jPtJUQwHddr=OmCySSC599vW4hLB6w@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: who is using radosgw with civetweb?
+Date: Thu, 26 Feb 2015 09:22:31 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1502260920570.25838@cobra.newdream.net>
+References: <alpine.DEB.2.00.1502251125180.25838@cobra.newdream.net> <54EF008C.2050706@42on.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx3-phx2.redhat.com ([209.132.183.24]:40944 "EHLO
-	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753539AbbBZRVv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Feb 2015 12:21:51 -0500
-In-Reply-To: <CAGoDY9=k7MFQVv_cJaV5jPtJUQwHddr=OmCySSC599vW4hLB6w@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:49894 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753539AbbBZRWl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 26 Feb 2015 12:22:41 -0500
+In-Reply-To: <54EF008C.2050706@42on.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Abhishek Dixit <dixitabhi@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Wido den Hollander <wido@42on.com>
+Cc: ceph-users@ceph.com, ceph-devel@vger.kernel.org
+
+On Thu, 26 Feb 2015, Wido den Hollander wrote:
+> On 25-02-15 20:31, Sage Weil wrote:
+> > Hey,
+> > 
+> > We are considering switching to civetweb (the embedded/standalone rgw web
+> > server) as the primary supported RGW frontend instead of the current
+> > apache + mod-fastcgi or mod-proxy-fcgi approach.  "Supported" here means
+> > both the primary platform the upstream development focuses on and what the
+> > downstream Red Hat product will officially support.
+> > 
+> > How many people are using RGW standalone using the embedded civetweb
+> > server instead of apache?  In production?  At what scale?  What
+> > version(s) (civetweb first appeared in firefly and we've backported most
+> > fixes).
+> > 
+> > Have you seen any problems?  Any other feedback?  The hope is to (vastly)
+> > simplify deployment.
+> > 
+> 
+> It seems like Civetweb listens on 0.0.0.0 by default and that doesn't seem
+> safe to me.
+
+Can you clarify?  Is that because people may inadvertantly run this on a 
+public host and not realize that the host is answering requests?
+
+If we move to a world where this is the default/preferred route, this 
+seems like a good thing.. if they don't want to respond on an address they 
+can specify which IP to bind to?
+
+> In most deployments you'll put Apache, Nginx or Varnish in front of RGW to do
+> the proper HTTP handling.
+> 
+> I'd say that Civetweb should listen on 127.0.0.1:7480/[::1]:7480 by default.
+> 
+> And make sure it listens on IPv6 by default :-)
+
+Yeah, +1 on IPv6:)
+
+sage
 
 
-
------ Original Message -----
-> From: "Abhishek Dixit" <dixitabhi@gmail.com>
-> To: "ceph-devel" <ceph-devel@vger.kernel.org>
-> Sent: Wednesday, February 25, 2015 8:35:40 PM
-> Subject: RGW : Transaction Id in response?
 > 
-> Hi,
+> Wido
 > 
-> I was doing comparison of Open Stack Swift response headers and Ceph
-> RGW response.
-> This is in regard to X-Trans-Id header in response from Open Stack
-> Swift storage.
-> Swift response to a request always have the header "X-Trans-Id".
-> X-Trans-Id : A unique transaction identifier for this request.
+> > Thanks!
+> > sage
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
-> X-Trans-Id seems to serve two purpose:
-> 1. Every log messages for a request will carry this and aid in
-> debugging/analyzing.
-> 2. Benchmarking for latency.
 > 
-> So, do we have similar unique identifier in Ceph RGW response which
-> associates with each request?
-> 
-> Or do we need add support for this?
-> 
-
-At the moment there is no such identifier. We can leverage the rados client instance id that each radosgw instance gets when connecting to the backend, and there's also a unique running number that we use to identify each request within that gateway. We can probably concatenate these and return it as the unique identifier.
-
-Yehuda
-
