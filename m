@@ -1,232 +1,235 @@
-From: Travis Rhoden <trhoden@gmail.com>
-Subject: Re: librados2 and librbd1 dependency on libvirt-bin
-Date: Wed, 25 Feb 2015 17:21:45 -0800
-Message-ID: <CACkq2mqhKEo1efKPTcm1JX7f_COmGJiw48avbbZEoNAp47B0QQ@mail.gmail.com>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F282BAC5F@SACMBXIP02.sdcorp.global.sandisk.com>
- <alpine.DEB.2.00.1502251516270.25838@cobra.newdream.net> <755F6B91B3BE364F9BCA11EA3F9E0C6F282BAD3A@SACMBXIP02.sdcorp.global.sandisk.com>
- <CACkq2mqkqqE2wz_gSTeWk71aH6GXHDPH0EzKQ77V3vCFZbpDYw@mail.gmail.com>
- <755F6B91B3BE364F9BCA11EA3F9E0C6F282BADAC@SACMBXIP02.sdcorp.global.sandisk.com>
- <CACkq2moMx7oXSi8qSxCyqCLDoQXqJDuOL5feSZuDLBUHtJW7uw@mail.gmail.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F282BADD2@SACMBXIP02.sdcorp.global.sandisk.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: dumpling integration branch for v0.67.12 ready for QE
+Date: Thu, 26 Feb 2015 02:35:23 +0100
+Message-ID: <54EE785B.2000702@dachary.org>
+References: <54DA3A5B.5050509@dachary.org> <1520027977.15929683.1423693473209.JavaMail.zimbra@redhat.com> <1586599856.17187011.1423778777774.JavaMail.zimbra@redhat.com> <54DD268D.7050904@dachary.org> <2134758899.22244800.1424281099141.JavaMail.zimbra@redhat.com> <507456764.27942656.1424909903162.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="VrGcNmIOg3TWXiJsXsUiUMEoxlfPON4tr"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f172.google.com ([209.85.217.172]:40758 "EHLO
-	mail-lb0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752711AbbBZBWH convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Feb 2015 20:22:07 -0500
-Received: by lbdu10 with SMTP id u10so7754374lbd.7
-        for <ceph-devel@vger.kernel.org>; Wed, 25 Feb 2015 17:22:05 -0800 (PST)
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F282BADD2@SACMBXIP02.sdcorp.global.sandisk.com>
+Received: from mail2.dachary.org ([91.121.57.175]:49082 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752989AbbBZBf3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Feb 2015 20:35:29 -0500
+In-Reply-To: <507456764.27942656.1424909903162.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: Sage Weil <sage@newdream.net>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Yuri Weinstein <yweinste@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Tamil Muthamizhan <tmuthami@redhat.com>, Zack Cerza <zack@redhat.com>, Sandon Van Ness <svanness@redhat.com>
 
-Hmm, this is a mystery.
-
-I am also using 1.5.21.  The command my setup ran is:
-
-Running command: apt-get -q remove -f -y --force-yes --purge ceph
-ceph-mds ceph-common ceph-fs-common
-
-That's definitely what it is supposed to be.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--VrGcNmIOg3TWXiJsXsUiUMEoxlfPON4tr
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
 
-On Wed, Feb 25, 2015 at 4:55 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
-> What is your ceph-deploy version ?
-> We saw ceph-deploy is trying to use the following command..
->
-> Running command: sudo apt-get -q remove -f -y --force-yes --purge ceph ceph-mds ceph-common ceph-fs-common librados2
->
-> I manually tried this while uninstalling librados2 and I saw it tried to remove libvirt-bin*
 
-Yeah, if librados2 is in that apt-get remove list, it will definitely
-take libvirt-bin with it because of the -f -y --force-yes.
+On 26/02/2015 01:18, Yuri Weinstein wrote:
+> All issues in http://tracker.ceph.com/issues/10560 updated.
+>=20
+> Loic - #10801 can be resolved.
 
+Nice, thanks for the update !
 
-The code in question is here:
-
-https://github.com/ceph/ceph-deploy/blob/v1.5.21/ceph_deploy/hosts/debian/uninstall.py#L5
-
-It's a fixed list, and cannot be extended.  Which means I do not know
-where the librados2 entry is coming from.
-
-Can I ask how/where you got ceph-deploy?  Was it installed via pip or apt-get?
-
-I installed using pip.  And I looked at the following file to see that
-it looked right:
-
-/usr/local/lib/python2.7/dist-packages/ceph_deploy/hosts/debian/uninstall.py
-
-I then removed that version and installed using apt-get (which pointed
-to debian-giant on ceph.com) and used that package instead.  That
-version also worked as expected (as it should -- the two packages are
-from the same source).
-
- - Travis
->
-> Thanks & Regards
-> Somnath
->
-> -----Original Message-----
-> From: Travis Rhoden [mailto:trhoden@gmail.com]
-> Sent: Wednesday, February 25, 2015 4:46 PM
-> To: Somnath Roy
-> Cc: Sage Weil; Ceph Development
-> Subject: Re: librados2 and librbd1 dependency on libvirt-bin
->
-> Hi Somnath,
->
-> My first attempt at this showed the expected behavior.  I have to Trusty vms.  I'm using trusty1 as an admin node for trusty2, which I am install ceph and libvirt.
->
-> root@trusty1:~# ceph-deploy new trusty2
-> ....
-> root@trusty1:~# ceph-deploy install trusty2  (this successfully installs Giant) root@trusty1:~# ssh trusty2 root@trusty2:~# apt-get install libvirt-bin ....
-> root@trusty2:~# dpkg -l | egrep '(ceph|libvirt|rados|rbd)'
-> ii  ceph                             0.87.1-1trusty
-> amd64        distributed storage and file system
-> ii  ceph-common                      0.87.1-1trusty
-> amd64        common utilities to mount and interact with a ceph
-> storage cluster
-> ii  ceph-fs-common                   0.87.1-1trusty
-> amd64        common utilities to mount and interact with a ceph file
-> system
-> ii  ceph-mds                         0.87.1-1trusty
-> amd64        metadata server for the ceph distributed file system
-> ii  libcephfs1                       0.87.1-1trusty
-> amd64        Ceph distributed file system client library
-> ii  librados2                        0.87.1-1trusty
-> amd64        RADOS distributed object store client library
-> ii  librbd1                          0.87.1-1trusty
-> amd64        RADOS block device client library
-> ii  libvirt-bin                      1.2.2-0ubuntu13.1.9
-> amd64        programs for the libvirt library
-> ii  libvirt0                         1.2.2-0ubuntu13.1.9
-> amd64        library for interfacing with different virtualization
-> systems
-> ii  python-ceph                      0.87.1-1trusty
-> amd64        Python libraries for the Ceph distributed filesystem
-> root@trusty2:~# exit
->
->
-> All looks good on trusty2.  Now we do the purge:
->
-> root@trusty1:~# ceph-deploy purge trusty2 ....  ( I'm happy to fpaste this output if you want to see it)
->
-> Go back to trusty2 and see what's left:
->
-> root@trusty2:~# dpkg -l | egrep '(ceph|libvirt|rados|rbd)'
-> ii  libcephfs1                       0.87.1-1trusty
-> amd64        Ceph distributed file system client library
-> ii  librados2                        0.87.1-1trusty
-> amd64        RADOS distributed object store client library
-> ii  librbd1                          0.87.1-1trusty
-> amd64        RADOS block device client library
-> ii  libvirt-bin                      1.2.2-0ubuntu13.1.9
-> amd64        programs for the libvirt library
-> ii  libvirt0                         1.2.2-0ubuntu13.1.9
-> amd64        library for interfacing with different virtualization
-> systems
-> ii  python-ceph                      0.87.1-1trusty
-> amd64        Python libraries for the Ceph distributed filesystem
->
->
-> The ceph libraries and libvirt are all still there.  This is the expected behavior.
->
->  - Travis
->
-> On Wed, Feb 25, 2015 at 4:30 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
->> Thanks Travis..
->> Here it is..
+>=20
+> v0.67.12 ready for release.
+>=20
+> Thx
+> YuriW
+>=20
+> ----- Original Message -----
+> From: "Yuri Weinstein" <yweinste@redhat.com>
+> To: "Loic Dachary" <loic@dachary.org>
+> Cc: "Ceph Development" <ceph-devel@vger.kernel.org>, "Sage Weil" <sage@=
+redhat.com>, "Tamil Muthamizhan" <tmuthami@redhat.com>, "Zack Cerza" <zac=
+k@redhat.com>, "Sandon Van Ness" <svanness@redhat.com>
+> Sent: Wednesday, February 18, 2015 9:38:19 AM
+> Subject: Re: dumpling integration branch for v0.67.12 ready for QE
+>=20
+> Hi all
+>=20
+> I updated all issues in http://tracker.ceph.com/issues/10560
+>=20
+> Based on what is listed there, we have=20
+> http://tracker.ceph.com/issues/10801 - Yehuda pls comment
+> http://tracker.ceph.com/issues/10694 - Sam pls re-confirm
+>=20
+> rbd - Josh, I understood that we are good to go, pls re-confirm.
+>=20
+> I can re-run some suites if you'd like and we can make a call on this r=
+elease.
+>=20
+> Loic - back to you, let me know what you think.
+>=20
+> Thx
+> YuriW
+>=20
+> ----- Original Message -----
+> From: "Loic Dachary" <loic@dachary.org>
+> To: "Yuri Weinstein" <yweinste@redhat.com>
+> Cc: "Ceph Development" <ceph-devel@vger.kernel.org>, "Sage Weil" <sage@=
+redhat.com>, "Tamil Muthamizhan" <tmuthami@redhat.com>, "Zack Cerza" <zac=
+k@redhat.com>, "Sandon Van Ness" <svanness@redhat.com>
+> Sent: Thursday, February 12, 2015 2:17:49 PM
+> Subject: Re: dumpling integration branch for v0.67.12 ready for QE
+>=20
+>=20
+>=20
+> On 12/02/2015 23:06, Yuri Weinstein wrote:
+>> I linked all issues related to this release testing to the ticket http=
+://tracker.ceph.com/issues/10560
 >>
->> Ceph is giant.
->> Libvirt is from Ubuntu 14.04 repo only...
+>> After the team leads make a call of those, including environment issue=
+s, I suggest re-running suites the failed again.
 >>
->> ems@emsnode4:~$ sudo dpkg -l | grep libvirt*
->> ii  libvirt-bin                                           1.2.2-0ubuntu13.1.9                   amd64        programs for the libvirt library
->> ii  libvirt0                                              1.2.2-0ubuntu13.1.9                   amd64        library for interfacing with different virtualization systems
->> ems@emsnode4:~$ sudo dpkg -l | grep ceph-deploy
->> ii  ceph-deploy                                           1.5.21                                all          Ceph-deploy is an easy to use configuration tool
->> ems@emsnode4:~$
->> ems@emsnode4:~$ ceph-deploy --version
->> 1.5.21
->> ems@emsnode4:~$
+>> Loic, I'd re-run them in the Octo, since we already started there, if =
+you agree ?
+>=20
+> Sure :-)
+>=20
 >>
->> Regards
->> Somnath
+>> Thx
+>> YuriW
 >>
->> -----Original Message-----
->> From: ceph-devel-owner@vger.kernel.org
->> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Travis Rhoden
->> Sent: Wednesday, February 25, 2015 4:23 PM
->> To: Somnath Roy
->> Cc: Sage Weil; Ceph Development
->> Subject: Re: librados2 and librbd1 dependency on libvirt-bin
+>> ----- Original Message -----
+>> From: "Yuri Weinstein" <yweinste@redhat.com>
+>> To: "Loic Dachary" <loic@dachary.org>
+>> Cc: "Ceph Development" <ceph-devel@vger.kernel.org>, "Sage Weil" <sage=
+@redhat.com>, "Tamil Muthamizhan" <tmuthami@redhat.com>
+>> Sent: Wednesday, February 11, 2015 2:24:33 PM
+>> Subject: Re: dumpling integration branch for v0.67.12 ready for QE
 >>
->> Somnath,
+>> I replied to individual suites runs, but just wanted to summarize QE v=
+alidation status.
 >>
->> Just so I can try to recreate fully, can you also tell me the version of Ceph you are using, the version of ceph-deploy (previously mentioned), and the version of libvirt?  For example, if you have the Juno cloud-archive enabled or anything.
+>> The following suites were executed in the Octo lab (we will use Sepia =
+in the future if nobody objects).
 >>
->>  - Travis
+>> upgrade:dumpling
+>> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>> ['45493']
+>> http://tracker.ceph.com/issues/10694 - Known "Won't fix"
+>> "Assertion: osd/Watch.cc: 290: FAILED assert(!cb)"
 >>
->> On Wed, Feb 25, 2015 at 3:36 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
->>> Thanks Sage !
->>> But, I think this is a serious issue, every time we will purge the
->>> cluster all the node network will be down :-( Basically, it should not delete any component on which non-ceph components are dependent.
->>> We need this purge-lite kind of stuff.
->>>
->>> Thanks & Regards
->>> Somnath
->>>
->>> -----Original Message-----
->>> From: Sage Weil [mailto:sage@newdream.net]
->>> Sent: Wednesday, February 25, 2015 3:21 PM
->>> To: Somnath Roy
->>> Cc: Ceph Development
->>> Subject: Re: librados2 and librbd1 dependency on libvirt-bin
->>>
->>> On Wed, 25 Feb 2015, Somnath Roy wrote:
->>>> Hi,
->>>> We are facing problem that ceph-deploy purge is uninstalling latest Mellanox ofed driver packages.
->>>> Digging down more we found libvirt-bin is dependent on librados2/librbd1.
->>>> So, here is what happening.
->>>>
->>>> 1. Mellanox ofed driver has a dependency on the libvirt-bin*
->>>>
->>>> 2. purging librados2/librbd1 is removing libvirt-bin and resulting the removal of the Mellanox driver package as well.
->>>>
->>>> Here is what I found.
->>>>
->>>> http://packages.ubuntu.com/trusty/devel/libvirt-bin
->>>>
->>>> ubuntu@ip-10-15-16-211:~$ apt-cache rdepends librados2 [...]
->>>
->>> The problem is that libvirt (and probably qemu) are built against librbd1.
->>> If you remove librbd1, those get removed too.
->>>
->>>> So, I am curious why libvirt-bin has a depencey on librados2/librbd1 ?
->>>
->>> qemu needs it for obvious reasons.  libvirt needs it to manage it's
->>> (rbd) storage pools.
->>>
->>>> Also, how come we get rid of this issue ?
->>>> Ceph-deploy should not remove any package other than ceph's.
->>>
->>> Purge could skip the libraries that may have other dependencies, but then it's a purge-lite.  Honestly I thought it skipped them for that reason but we probably changed it at some point because it (also confusingly) wouldn't remove librados etc...
->>>
->>> sage
->>>
->>>
->>> ________________________________
->>>
->>> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->>> in the body of a message to majordomo@vger.kernel.org More majordomo
->>> info at  http://vger.kernel.org/majordomo-info.html
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->> in the body of a message to majordomo@vger.kernel.org More majordomo
->> info at  http://vger.kernel.org/majordomo-info.html
+>> *** Sam - pls confirm the "Won't fix" status.
+>>
+>> ['45495', '45496', '45498', '45499', '45500']
+>> http://tracker.ceph.com/issues/10838
+>> "s3tests failed"
+>>
+>> *** Yehuda - need your verdict on s3tests.
+>>
+>> fs
+>> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>> All green !
+>>
+>> rados
+>> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>> ['45054']
+>> http://tracker.ceph.com/issues/10841
+>> "Issued certificate has expired"=20
+>> *** Sandon pls comment.
+>>
+>> ['45168', '45169']
+>> http://tracker.ceph.com/issues/10840
+>> coredump "ceph_test_filestore_idempotent_sequence"
+>> *** Sam - pls comment
+>>
+>> ['45215']
+>> Missing packages - no ticket FYI
+>> "Failed to fetch http://apt-mirror.front.sepia.ceph.com/archive.ubuntu=
+=2Ecom/ubuntu/dists/trusty-updates/universe/binary-i386/Packages  Hash Su=
+m mismatch"
+>>
+>> *** Zack, Sandon ?
+>>
+>> ceph-deploy
+>> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>>
+>> Travis - pls suggest
+>> In general I am not sure if we needed to test this - Sage?
+>>
+>> rbd
+>> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>> ['45365', '45366', '45367']
+>> http://tracker.ceph.com/issues/10842
+>> "unable to connect to apt-mirror.front.sepia.ceph.com"
+>>
+>> ['45349', '45350', '45351', '45355', '45356', '45357', '45363']
+>> http://tracker.ceph.com/issues/10802
+>> "error: image still has watchers"=20
+>> (duplicate of 10680)
+>>
+>> *** Zack, Sandon, Josh - all environment noise, pls comment.=20
+>>
+>> rgw
+>> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>> ['45382', '45390']
+>> http://tracker.ceph.com/issues/10843
+>> "s3tests failed" - could be related or duplicate of 10838
+>>
+>> *** Yehuda - same as issues in upgrades?
+>>
+>> I am standing by for you analysis/replies and recommendations for next=
+ steps.
+>>
+>> Loic - let me know is you want to follow specific items in our backpor=
+t testing process that I missed here.
+>> PS:  I would think that you could've wanted to assign the release tick=
+et to QE (me) for validation and at this point I could've re-assigned it =
+back to devel (you), a?
+>>
+>> Thx
+>> YuriW
+>>
+>> ----- Original Message -----
+>> From: "Loic Dachary" <loic@dachary.org>
+>> To: "Yuri Weinstein" <yweinste@redhat.com>
+>> Cc: "Ceph Development" <ceph-devel@vger.kernel.org>
+>> Sent: Tuesday, February 10, 2015 9:05:31 AM
+>> Subject: dumpling integration branch for v0.67.12 ready for QE
+>>
+>> Hi Yuri,
+>>
+>> The dumpling integration branch for v0.67.12 as found at https://githu=
+b.com/ceph/ceph/commits/dumpling-backports has been approved by Yehuda, J=
+osh and Sam and is ready for QE.=20
+>>
+>> For the record, the head is https://github.com/ceph/ceph/commit/3944c7=
+7c404c4a05886fe8276d5d0dd7e4f20410
+>>
+>> I think it would be best for the QE tests to use the dumpling-backport=
+s. The alternative would be to merge dumpling-backports into dumpling. Ho=
+wever, since testing may take a long time and require more patches, it pr=
+obably is better to not do that iterative process on the dumpling branch =
+itself. As it is now, there already are a number of commits in the dumpli=
+ng branch that should really be in the dumpling-backports: they do not be=
+long to v0.67.11 and are going to be released in v0.67.12. In the future =
+though, the dumpling branch will only receive commits that have been care=
+fully tested and all the integration work will be on the dumpling-backpor=
+ts branch exclusively. So that third parties do not have to worry that th=
+e dumpling branch contains commits that have not been tested yet.
+>>
+>> Cheers
+>>
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--VrGcNmIOg3TWXiJsXsUiUMEoxlfPON4tr
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlTueFsACgkQ8dLMyEl6F23T/gCfbtLe24hubbzjGVDG/GTUAThj
+dUEAoLq59FFEw/r2Z5I4T2rIUkY/vHJu
+=zxZw
+-----END PGP SIGNATURE-----
+
+--VrGcNmIOg3TWXiJsXsUiUMEoxlfPON4tr--
