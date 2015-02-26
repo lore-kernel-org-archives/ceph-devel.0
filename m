@@ -1,120 +1,42 @@
-From: Michael Kuriger <mk7193-CivJcMWXhi0@public.gmane.org>
+From: Radoslaw Zarzynski <rzarzynski@mirantis.com>
 Subject: Re: who is using radosgw with civetweb?
-Date: Thu, 26 Feb 2015 16:08:17 +0000
-Message-ID: <D11484E8.12E76%mk7193@yp.com>
+Date: Thu, 26 Feb 2015 16:37:23 +0000 (UTC)
+Message-ID: <loom.20150226T172151-585@post.gmane.org>
 References: <alpine.DEB.2.00.1502251125180.25838@cobra.newdream.net>
-	<CAANLjFpHND2uyUvdzJ-pz4QOXp6SpYK=sD1WQz=rT-Two6izqw@mail.gmail.com>
-	<alpine.DEB.2.00.1502251348170.25838@cobra.newdream.net>
-	<D1147C43.12E64%mk7193@yp.com>
-	<alpine.DEB.2.00.1502260802460.25838@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="euc-kr"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.00.1502260802460.25838-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
-Content-Language: en-US
-Content-ID: <2FEEFC8EE4571C4B8F9AFEE98EE85B87-CivJcMWXhi0@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from plane.gmane.org ([80.91.229.3]:53410 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753779AbbBZQkF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 26 Feb 2015 11:40:05 -0500
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1YR1Tn-0000lV-38
+	for ceph-devel@vger.kernel.org; Thu, 26 Feb 2015 17:40:03 +0100
+Received: from 98.243.40.164-rev.hti.pl ([164.40.243.98])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Thu, 26 Feb 2015 17:40:03 +0100
+Received: from rzarzynski by 98.243.40.164-rev.hti.pl with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Thu, 26 Feb 2015 17:40:03 +0100
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-VGhhbmtzIFNhZ2UgZm9yIHRoZSBxdWljayByZXBseSENCg0KLT1NaWtlDQoNCg0KT24gMi8yNi8x
-NSwgODowNSBBTSwgIlNhZ2UgV2VpbCIgPHN3ZWlsQHJlZGhhdC5jb20+IHdyb3RlOg0KDQo+T24g
-VGh1LCAyNiBGZWIgMjAxNSwgTWljaGFlbCBLdXJpZ2VyIHdyb3RlOg0KPj4gSan2ZCBhbHNvIGxp
-a2UgdG8gc2V0IHRoaXMgdXAuICBJqfZtIG5vdCBzdXJlIHdoZXJlIHRvIGJlZ2luLiAgV2hlbiB5
-b3UNCj4+c2F5DQo+PiBlbmFibGVkIGJ5IGRlZmF1bHQsIHdoZXJlIGlzIGl0IGVuYWJsZWQ/DQo+
-DQo+VGhlIGNpdmV0d2ViIGZyb250ZW5kIGlzIGJ1aWx0IGludG8gdGhlIHJhZG9zZ3cgcHJvY2Vz
-cywgc28gZm9yIHRoZSBtb3N0DQo+cGFydCB5b3UganVzdCBoYXZlIHRvIGdldCByYWRvc2d3IHN0
-YXJ0ZWQgYW5kIGNvbmZpZ3VyZWQuICBJdCBpc24ndCB3ZWxsDQo+ZG9jdW1lbnRlZCB5ZXQsIGJ1
-dCBiYXNpY2FsbHkganVzdCBza2lwIGV2ZXJ5dGhpbmcgdGhhdCBoYXMgYW55dGhpZyB0byBkbw0K
-PndpdGggZmFzdGNnaSBvciBhcGFjaGUuICBGb3IgZXhhbXBsZSwgaWYgeW91IGZvbGxvdyB0aGUg
-ZG9jcywgeW91IGNhbg0KPmp1bXAgDQo+c3RyYWlnaHQgdG8gaGVyZToNCj4NCj4JaHR0cHM6Ly91
-cmxkZWZlbnNlLnByb29mcG9pbnQuY29tL3YyL3VybD91PWh0dHAtM0FfX2RvY3MuY2VwaC5jb21f
-ZG9jc19tYQ0KPnN0ZXJfaW5zdGFsbF9pbnN0YWxsLTJEY2VwaC0yRGdhdGV3YXlfLTIzaWQ1JmQ9
-QXdJREF3JmM9bFhrZEVLMVBDN1VLOW9LQS1CDQo+QlNJOHAxQWFtekxPU25jbTZWZm4wQ19VUSZy
-PUNTWUE5T1M2UWQ3ZlF5U0kyTER2bFEmbT16SGhxWXo3U1NuVWdCeWkzUmhDX0cNCj5PMHdueUMt
-VHUtRjM0Q2JwbHhxSnVFJnM9aXIzSWtGbzdQX2lsb3E4c2FJNjVnaURfZmtaeTRDQ2VmeVJXSFF0
-YUllcyZlPQ0KPg0KPihvciBtYXliZSBzZXQgdXAgdGhlIHdpbGRjYXJkIEROUyBpZiB5b3Ugd2Fu
-dCB0byBnZXQgZmFuY3kpLg0KPg0KPklmIHlvdSdyZSBvbiBmaXJlZmx5LCB5b3UgYWxzbyBuZWVk
-IHRvIGFkZCB0aGUgbGluZSBiZWxvdyB0byBjZXBoLmNvbmYgdG8NCj5lbmFibGUgY2l2ZXR3ZWI7
-IGZvciBnaWFudCBhbmQgaGFtbWVyIHJhZG9zZ3cgd2lsbCBsaXN0ZW4gb24gcG9ydCA3NDgwIGJ5
-DQo+ZGVmYXVsdC4NCj4NCj5zYWdlDQo+DQo+DQo+PiANCj4+IE1hbnkgdGhhbmtzLA0KPj4gTWlr
-ZQ0KPj4gDQo+PiANCj4+IE9uIDIvMjUvMTUsIDE6NDkgUE0sICJTYWdlIFdlaWwiIDxzd2VpbEBy
-ZWRoYXQuY29tPiB3cm90ZToNCj4+IA0KPj4gPk9uIFdlZCwgMjUgRmViIDIwMTUsIFJvYmVydCBM
-ZUJsYW5jIHdyb3RlOg0KPj4gPj4gV2UgdHJpZWQgdG8gZ2V0IHJhZG9zZ3cgd29ya2luZyB3aXRo
-IEFwYWNoZSArIG1vZF9mYXN0Y2dpLCBidXQgZHVlIHRvDQo+PiA+PiB0aGUgY2hhbmdlcyBpbiBy
-YWRvc2d3LCBBcGFjaGUsIG1vZGVfKmNnaSwgZXRjIGFuZCB0aGUgZG9jdW1lbnRhdGlvbg0KPj4g
-Pj4gbGFnZ2luZyBhbmQgbm90IGhhdmluZyBhIGxvdCBvZiB0aW1lIHRvIGRldm90ZSB0byBpdCwg
-d2UgYWJhbmRvbmVkDQo+Pml0Lg0KPj4gPj4gV2hlcmUgaXQgdGhlIGRvY3VtZW50YXRpb24gZm9y
-IGNpdmV0d2ViPyBJZiBpdCBpcyBhcHBsaWFuY2UgbGlrZSBhbmQNCj4+ID4+IGVhc3kgdG8gc2V0
-LXVwLCB3ZSB3b3VsZCBsaWtlIHRvIHRyeSBpdCB0byBvZmZlciBzb21lIGZlZWRiYWNrIG9uDQo+
-PnlvdXINCj4+ID4+IHF1ZXN0aW9uLg0KPj4gPg0KPj4gPkluIGdpYW50IGFuZCBoYW1tZXIsIGl0
-IGlzIGVuYWJsZWQgYnkgZGVmYXVsdCBvbiBwb3J0IDc0ODAuICBPbg0KPj5maXJlZmx5LA0KPj4g
-PnlvdSBuZWVkIHRvIGFkZCB0aGUgbGluZQ0KPj4gPg0KPj4gPiByZ3cgZnJvbnRlbmRzID0gZmFz
-dGNnaSwgY2l2ZXR3ZWIgcG9ydD03NDgwDQo+PiA+DQo+PiA+dG8gY2VwaC5jb25mICh5b3UgY2Fu
-IG9mIGNvdXJzZSBhZGp1c3QgdGhlIHBvcnQgbnVtYmVyIGlmIHlvdSBsaWtlKSBhbmQNCj4+ID5y
-YWRvc2d3IHdpbGwgcnVuIHN0YW5kYWxvbmUgdy8gbm8gYXBhY2hlIG9yIGFueXRoaW5nIGVsc2Uu
-DQo+PiA+DQo+PiA+c2FnZQ0KPj4gPg0KPj4gPg0KPj4gPj4gDQo+PiA+PiBUaGFua3MsDQo+PiA+
-PiBSb2JlcnQgTGVCbGFuYw0KPj4gPj4gDQo+PiA+PiBPbiBXZWQsIEZlYiAyNSwgMjAxNSBhdCAx
-MjozMSBQTSwgU2FnZSBXZWlsIDxzd2VpbEByZWRoYXQuY29tPiB3cm90ZToNCj4+ID4+ID4gSGV5
-LA0KPj4gPj4gPg0KPj4gPj4gPiBXZSBhcmUgY29uc2lkZXJpbmcgc3dpdGNoaW5nIHRvIGNpdmV0
-d2ViICh0aGUgZW1iZWRkZWQvc3RhbmRhbG9uZQ0KPj5yZ3cNCj4+ID4+d2ViDQo+PiA+PiA+IHNl
-cnZlcikgYXMgdGhlIHByaW1hcnkgc3VwcG9ydGVkIFJHVyBmcm9udGVuZCBpbnN0ZWFkIG9mIHRo
-ZQ0KPj5jdXJyZW50DQo+PiA+PiA+IGFwYWNoZSArIG1vZC1mYXN0Y2dpIG9yIG1vZC1wcm94eS1m
-Y2dpIGFwcHJvYWNoLiAgIlN1cHBvcnRlZCIgaGVyZQ0KPj4gPj5tZWFucw0KPj4gPj4gPiBib3Ro
-IHRoZSBwcmltYXJ5IHBsYXRmb3JtIHRoZSB1cHN0cmVhbSBkZXZlbG9wbWVudCBmb2N1c2VzIG9u
-IGFuZA0KPj4gPj53aGF0IHRoZQ0KPj4gPj4gPiBkb3duc3RyZWFtIFJlZCBIYXQgcHJvZHVjdCB3
-aWxsIG9mZmljaWFsbHkgc3VwcG9ydC4NCj4+ID4+ID4NCj4+ID4+ID4gSG93IG1hbnkgcGVvcGxl
-IGFyZSB1c2luZyBSR1cgc3RhbmRhbG9uZSB1c2luZyB0aGUgZW1iZWRkZWQNCj4+Y2l2ZXR3ZWIN
-Cj4+ID4+ID4gc2VydmVyIGluc3RlYWQgb2YgYXBhY2hlPyAgSW4gcHJvZHVjdGlvbj8gIEF0IHdo
-YXQgc2NhbGU/ICBXaGF0DQo+PiA+PiA+IHZlcnNpb24ocykgKGNpdmV0d2ViIGZpcnN0IGFwcGVh
-cmVkIGluIGZpcmVmbHkgYW5kIHdlJ3ZlIGJhY2twb3J0ZWQNCj4+ID4+bW9zdA0KPj4gPj4gPiBm
-aXhlcykuDQo+PiA+PiA+DQo+PiA+PiA+IEhhdmUgeW91IHNlZW4gYW55IHByb2JsZW1zPyAgQW55
-IG90aGVyIGZlZWRiYWNrPyAgVGhlIGhvcGUgaXMgdG8NCj4+ID4+KHZhc3RseSkNCj4+ID4+ID4g
-c2ltcGxpZnkgZGVwbG95bWVudC4NCj4+ID4+ID4NCj4+ID4+ID4gVGhhbmtzIQ0KPj4gPj4gPiBz
-YWdlDQo+PiA+PiA+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fDQo+PiA+PiA+IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0DQo+PiA+PiA+IGNlcGgtdXNlcnNA
-bGlzdHMuY2VwaC5jb20NCj4+ID4+ID4gDQo+PiANCj4+Pj5odHRwczovL3VybGRlZmVuc2UucHJv
-b2Zwb2ludC5jb20vdjIvdXJsP3U9aHR0cC0zQV9fbGlzdHMuY2VwaC5jb21fbGlzdA0KPj4+Pmlu
-DQo+PiANCj4+Pj5mby5jZ2lfY2VwaC0yRHVzZXJzLTJEY2VwaC5jb20mZD1Bd0lDQWcmYz1sWGtk
-RUsxUEM3VUs5b0tBLUJCU0k4cDFBYW16TA0KPj4+Pk9TDQo+PiANCj4+Pj5uY202VmZuMENfVVEm
-cj1DU1lBOU9TNlFkN2ZReVNJMkxEdmxRJm09a0RMUFNLRXlOSzZ1TUxmdlU4VTdHVHZhM1JNdWZB
-Yg0KPj4+Pjl3DQo+PiA+PjgxUmpJMksxWlUmcz1Wc3lKOFVIV0cwQXBMODZXWGFlRDVlT1Y1U1JB
-N1ZtR2VTa0tHd3MzcU1JJmU9DQo+PiA+PiAtLQ0KPj4gPj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0
-aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlDQo+PmNlcGgtZGV2ZWwiIGluDQo+
-PiA+PiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZw0K
-Pj4gPj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdA0KPj4gDQo+Pj4+aHR0cHM6Ly91cmxkZWZlbnNl
-LnByb29mcG9pbnQuY29tL3YyL3VybD91PWh0dHAtM0FfX3ZnZXIua2VybmVsLm9yZ19tYWoNCj4+
-Pj5vcg0KPj4gDQo+Pj4+ZG9tby0yRGluZm8uaHRtbCZkPUF3SUNBZyZjPWxYa2RFSzFQQzdVSzlv
-S0EtQkJTSThwMUFhbXpMT1NuY202VmZuMENfVVENCj4+Pj4mcg0KPj4gDQo+Pj4+PUNTWUE5T1M2
-UWQ3ZlF5U0kyTER2bFEmbT1rRExQU0tFeU5LNnVNTGZ2VThVN0dUdmEzUk11ZkFiOXc4MVJqSTJL
-MVpVJnMNCj4+Pj49aQ0KPj4gPj5STm8xSzdvSlotMTRSLUxXdU52RUkwV29PcjVVdWFEa20zSVF4
-NzdWSW8mZT0NCj4+ID4+IA0KPj4gPj4gDQo+PiA+X19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX18NCj4+ID5jZXBoLXVzZXJzIG1haWxpbmcgbGlzdA0KPj4gPmNl
-cGgtdXNlcnNAbGlzdHMuY2VwaC5jb20NCj4+IA0KPj4+aHR0cHM6Ly91cmxkZWZlbnNlLnByb29m
-cG9pbnQuY29tL3YyL3VybD91PWh0dHAtM0FfX2xpc3RzLmNlcGguY29tX2xpc3RpDQo+Pj5uZg0K
-Pj4gDQo+Pj5vLmNnaV9jZXBoLTJEdXNlcnMtMkRjZXBoLmNvbSZkPUF3SUNBZyZjPWxYa2RFSzFQ
-QzdVSzlvS0EtQkJTSThwMUFhbXpMT1MNCj4+Pm5jDQo+PiANCj4+Pm02VmZuMENfVVEmcj1DU1lB
-OU9TNlFkN2ZReVNJMkxEdmxRJm09a0RMUFNLRXlOSzZ1TUxmdlU4VTdHVHZhM1JNdWZBYjl3OA0K
-Pj4+MVINCj4+ID5qSTJLMVpVJnM9VnN5SjhVSFdHMEFwTDg2V1hhZUQ1ZU9WNVNSQTdWbUdlU2tL
-R3dzM3FNSSZlPQ0KPj4gDQo+PiAtLQ0KPj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6
-IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluDQo+PiB0aGUgYm9keSBv
-ZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZw0KPj4gTW9yZSBtYWpvcmRv
-bW8gaW5mbyBhdA0KPj5odHRwczovL3VybGRlZmVuc2UucHJvb2Zwb2ludC5jb20vdjIvdXJsP3U9
-aHR0cC0zQV9fdmdlci5rZXJuZWwub3JnX21ham9yDQo+PmRvbW8tMkRpbmZvLmh0bWwmZD1Bd0lE
-QXcmYz1sWGtkRUsxUEM3VUs5b0tBLUJCU0k4cDFBYW16TE9TbmNtNlZmbjBDX1VRJnINCj4+PUNT
-WUE5T1M2UWQ3ZlF5U0kyTER2bFEmbT16SGhxWXo3U1NuVWdCeWkzUmhDX0dPMHdueUMtVHUtRjM0
-Q2JwbHhxSnVFJnM9dw0KPj5LNmlQZjZwTUhnOEZuT2dkcTRYdXVYWWVJVno5RkVJck50R0kxNXM2
-WUEmZT0NCj4+IA0KPj4gDQoNCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5j
-b20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29t
-Cg==
+Sage Weil <sweil <at> redhat.com> writes:
+
+> Have you seen any problems?  Any other feedback?  The hope is to (vastly) 
+> simplify deployment.
+
+What about the memory footprint? In some cases the civetweb frontend
+performs an additional buffering to properly calculate the size of a content
+and to attach the "Content-Length" HTTP header. Please take a look on
+RGWMongoose::write_data() and RGWMongoose::complete_request() methods. The
+problem might be best visible on HUGE container listing.
+
+Regards,
+Radoslaw Zarzynski
+
