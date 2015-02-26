@@ -1,15 +1,19 @@
-From: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+From: Michael Kuriger <mk7193-CivJcMWXhi0@public.gmane.org>
 Subject: Re: who is using radosgw with civetweb?
-Date: Thu, 26 Feb 2015 08:05:51 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1502260802460.25838@cobra.newdream.net>
+Date: Thu, 26 Feb 2015 16:08:17 +0000
+Message-ID: <D11484E8.12E76%mk7193@yp.com>
 References: <alpine.DEB.2.00.1502251125180.25838@cobra.newdream.net>
 	<CAANLjFpHND2uyUvdzJ-pz4QOXp6SpYK=sD1WQz=rT-Two6izqw@mail.gmail.com>
 	<alpine.DEB.2.00.1502251348170.25838@cobra.newdream.net>
 	<D1147C43.12E64%mk7193@yp.com>
+	<alpine.DEB.2.00.1502260802460.25838@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-243683843-1424966752=:25838"
+Content-Type: text/plain; charset="euc-kr"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <D1147C43.12E64%mk7193-CivJcMWXhi0@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.00.1502260802460.25838-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
+Content-Language: en-US
+Content-ID: <2FEEFC8EE4571C4B8F9AFEE98EE85B87-CivJcMWXhi0@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -19,159 +23,98 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Michael Kuriger <mk7193-CivJcMWXhi0@public.gmane.org>
+To: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
-
---557981400-243683843-1424966752=:25838
-Content-Type: TEXT/PLAIN; charset=iso-8859-1
-Content-Transfer-Encoding: quoted-printable
-
-On Thu, 26 Feb 2015, Michael Kuriger wrote:
-> I=B9d also like to set this up.  I=B9m not sure where to begin.  When y=
-ou say
-> enabled by default, where is it enabled?
-
-The civetweb frontend is built into the radosgw process, so for the most=20
-part you just have to get radosgw started and configured.  It isn't well=20
-documented yet, but basically just skip everything that has anythig to do=
-=20
-with fastcgi or apache.  For example, if you follow the docs, you can jum=
-p=20
-straight to here:
-
-	http://docs.ceph.com/docs/master/install/install-ceph-gateway/#id5
-
-(or maybe set up the wildcard DNS if you want to get fancy).
-
-If you're on firefly, you also need to add the line below to ceph.conf to=
-=20
-enable civetweb; for giant and hammer radosgw will listen on port 7480 by=
-=20
-default.
-
-sage
-
-
->=20
-> Many thanks,
-> Mike
->=20
->=20
-> On 2/25/15, 1:49 PM, "Sage Weil" <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
->=20
-> >On Wed, 25 Feb 2015, Robert LeBlanc wrote:
-> >> We tried to get radosgw working with Apache + mod_fastcgi, but due t=
-o
-> >> the changes in radosgw, Apache, mode_*cgi, etc and the documentation
-> >> lagging and not having a lot of time to devote to it, we abandoned i=
-t.
-> >> Where it the documentation for civetweb? If it is appliance like and
-> >> easy to set-up, we would like to try it to offer some feedback on yo=
-ur
-> >> question.
-> >
-> >In giant and hammer, it is enabled by default on port 7480.  On firefl=
-y,
-> >you need to add the line
-> >
-> > rgw frontends =3D fastcgi, civetweb port=3D7480
-> >
-> >to ceph.conf (you can of course adjust the port number if you like) an=
-d
-> >radosgw will run standalone w/ no apache or anything else.
-> >
-> >sage
-> >
-> >
-> >>=20
-> >> Thanks,
-> >> Robert LeBlanc
-> >>=20
-> >> On Wed, Feb 25, 2015 at 12:31 PM, Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote=
-:
-> >> > Hey,
-> >> >
-> >> > We are considering switching to civetweb (the embedded/standalone =
-rgw
-> >>web
-> >> > server) as the primary supported RGW frontend instead of the curre=
-nt
-> >> > apache + mod-fastcgi or mod-proxy-fcgi approach.  "Supported" here
-> >>means
-> >> > both the primary platform the upstream development focuses on and
-> >>what the
-> >> > downstream Red Hat product will officially support.
-> >> >
-> >> > How many people are using RGW standalone using the embedded civetw=
-eb
-> >> > server instead of apache?  In production?  At what scale?  What
-> >> > version(s) (civetweb first appeared in firefly and we've backporte=
-d
-> >>most
-> >> > fixes).
-> >> >
-> >> > Have you seen any problems?  Any other feedback?  The hope is to
-> >>(vastly)
-> >> > simplify deployment.
-> >> >
-> >> > Thanks!
-> >> > sage
-> >> > _______________________________________________
-> >> > ceph-users mailing list
-> >> > ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> >> >=20
-> >>https://urldefense.proofpoint.com/v2/url?u=3Dhttp-3A__lists.ceph.com_=
-listin
-> >>fo.cgi_ceph-2Dusers-2Dceph.com&d=3DAwICAg&c=3DlXkdEK1PC7UK9oKA-BBSI8p=
-1AamzLOS
-> >>ncm6Vfn0C_UQ&r=3DCSYA9OS6Qd7fQySI2LDvlQ&m=3DkDLPSKEyNK6uMLfvU8U7GTva3=
-RMufAb9w
-> >>81RjI2K1ZU&s=3DVsyJ8UHWG0ApL86WXaeD5eOV5SRA7VmGeSkKGws3qMI&e=3D
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
-> >> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> >> More majordomo info at
-> >>https://urldefense.proofpoint.com/v2/url?u=3Dhttp-3A__vger.kernel.org=
-_major
-> >>domo-2Dinfo.html&d=3DAwICAg&c=3DlXkdEK1PC7UK9oKA-BBSI8p1AamzLOSncm6Vf=
-n0C_UQ&r
-> >>=3DCSYA9OS6Qd7fQySI2LDvlQ&m=3DkDLPSKEyNK6uMLfvU8U7GTva3RMufAb9w81RjI2=
-K1ZU&s=3Di
-> >>RNo1K7oJZ-14R-LWuNvEI0WoOr5UuaDkm3IQx77VIo&e=3D
-> >>=20
-> >>=20
-> >_______________________________________________
-> >ceph-users mailing list
-> >ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> >https://urldefense.proofpoint.com/v2/url?u=3Dhttp-3A__lists.ceph.com_l=
-istinf
-> >o.cgi_ceph-2Dusers-2Dceph.com&d=3DAwICAg&c=3DlXkdEK1PC7UK9oKA-BBSI8p1A=
-amzLOSnc
-> >m6Vfn0C_UQ&r=3DCSYA9OS6Qd7fQySI2LDvlQ&m=3DkDLPSKEyNK6uMLfvU8U7GTva3RMu=
-fAb9w81R
-> >jI2K1ZU&s=3DVsyJ8UHWG0ApL86WXaeD5eOV5SRA7VmGeSkKGws3qMI&e=3D=20
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
->=20
---557981400-243683843-1424966752=:25838
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---557981400-243683843-1424966752=:25838--
+VGhhbmtzIFNhZ2UgZm9yIHRoZSBxdWljayByZXBseSENCg0KLT1NaWtlDQoNCg0KT24gMi8yNi8x
+NSwgODowNSBBTSwgIlNhZ2UgV2VpbCIgPHN3ZWlsQHJlZGhhdC5jb20+IHdyb3RlOg0KDQo+T24g
+VGh1LCAyNiBGZWIgMjAxNSwgTWljaGFlbCBLdXJpZ2VyIHdyb3RlOg0KPj4gSan2ZCBhbHNvIGxp
+a2UgdG8gc2V0IHRoaXMgdXAuICBJqfZtIG5vdCBzdXJlIHdoZXJlIHRvIGJlZ2luLiAgV2hlbiB5
+b3UNCj4+c2F5DQo+PiBlbmFibGVkIGJ5IGRlZmF1bHQsIHdoZXJlIGlzIGl0IGVuYWJsZWQ/DQo+
+DQo+VGhlIGNpdmV0d2ViIGZyb250ZW5kIGlzIGJ1aWx0IGludG8gdGhlIHJhZG9zZ3cgcHJvY2Vz
+cywgc28gZm9yIHRoZSBtb3N0DQo+cGFydCB5b3UganVzdCBoYXZlIHRvIGdldCByYWRvc2d3IHN0
+YXJ0ZWQgYW5kIGNvbmZpZ3VyZWQuICBJdCBpc24ndCB3ZWxsDQo+ZG9jdW1lbnRlZCB5ZXQsIGJ1
+dCBiYXNpY2FsbHkganVzdCBza2lwIGV2ZXJ5dGhpbmcgdGhhdCBoYXMgYW55dGhpZyB0byBkbw0K
+PndpdGggZmFzdGNnaSBvciBhcGFjaGUuICBGb3IgZXhhbXBsZSwgaWYgeW91IGZvbGxvdyB0aGUg
+ZG9jcywgeW91IGNhbg0KPmp1bXAgDQo+c3RyYWlnaHQgdG8gaGVyZToNCj4NCj4JaHR0cHM6Ly91
+cmxkZWZlbnNlLnByb29mcG9pbnQuY29tL3YyL3VybD91PWh0dHAtM0FfX2RvY3MuY2VwaC5jb21f
+ZG9jc19tYQ0KPnN0ZXJfaW5zdGFsbF9pbnN0YWxsLTJEY2VwaC0yRGdhdGV3YXlfLTIzaWQ1JmQ9
+QXdJREF3JmM9bFhrZEVLMVBDN1VLOW9LQS1CDQo+QlNJOHAxQWFtekxPU25jbTZWZm4wQ19VUSZy
+PUNTWUE5T1M2UWQ3ZlF5U0kyTER2bFEmbT16SGhxWXo3U1NuVWdCeWkzUmhDX0cNCj5PMHdueUMt
+VHUtRjM0Q2JwbHhxSnVFJnM9aXIzSWtGbzdQX2lsb3E4c2FJNjVnaURfZmtaeTRDQ2VmeVJXSFF0
+YUllcyZlPQ0KPg0KPihvciBtYXliZSBzZXQgdXAgdGhlIHdpbGRjYXJkIEROUyBpZiB5b3Ugd2Fu
+dCB0byBnZXQgZmFuY3kpLg0KPg0KPklmIHlvdSdyZSBvbiBmaXJlZmx5LCB5b3UgYWxzbyBuZWVk
+IHRvIGFkZCB0aGUgbGluZSBiZWxvdyB0byBjZXBoLmNvbmYgdG8NCj5lbmFibGUgY2l2ZXR3ZWI7
+IGZvciBnaWFudCBhbmQgaGFtbWVyIHJhZG9zZ3cgd2lsbCBsaXN0ZW4gb24gcG9ydCA3NDgwIGJ5
+DQo+ZGVmYXVsdC4NCj4NCj5zYWdlDQo+DQo+DQo+PiANCj4+IE1hbnkgdGhhbmtzLA0KPj4gTWlr
+ZQ0KPj4gDQo+PiANCj4+IE9uIDIvMjUvMTUsIDE6NDkgUE0sICJTYWdlIFdlaWwiIDxzd2VpbEBy
+ZWRoYXQuY29tPiB3cm90ZToNCj4+IA0KPj4gPk9uIFdlZCwgMjUgRmViIDIwMTUsIFJvYmVydCBM
+ZUJsYW5jIHdyb3RlOg0KPj4gPj4gV2UgdHJpZWQgdG8gZ2V0IHJhZG9zZ3cgd29ya2luZyB3aXRo
+IEFwYWNoZSArIG1vZF9mYXN0Y2dpLCBidXQgZHVlIHRvDQo+PiA+PiB0aGUgY2hhbmdlcyBpbiBy
+YWRvc2d3LCBBcGFjaGUsIG1vZGVfKmNnaSwgZXRjIGFuZCB0aGUgZG9jdW1lbnRhdGlvbg0KPj4g
+Pj4gbGFnZ2luZyBhbmQgbm90IGhhdmluZyBhIGxvdCBvZiB0aW1lIHRvIGRldm90ZSB0byBpdCwg
+d2UgYWJhbmRvbmVkDQo+Pml0Lg0KPj4gPj4gV2hlcmUgaXQgdGhlIGRvY3VtZW50YXRpb24gZm9y
+IGNpdmV0d2ViPyBJZiBpdCBpcyBhcHBsaWFuY2UgbGlrZSBhbmQNCj4+ID4+IGVhc3kgdG8gc2V0
+LXVwLCB3ZSB3b3VsZCBsaWtlIHRvIHRyeSBpdCB0byBvZmZlciBzb21lIGZlZWRiYWNrIG9uDQo+
+PnlvdXINCj4+ID4+IHF1ZXN0aW9uLg0KPj4gPg0KPj4gPkluIGdpYW50IGFuZCBoYW1tZXIsIGl0
+IGlzIGVuYWJsZWQgYnkgZGVmYXVsdCBvbiBwb3J0IDc0ODAuICBPbg0KPj5maXJlZmx5LA0KPj4g
+PnlvdSBuZWVkIHRvIGFkZCB0aGUgbGluZQ0KPj4gPg0KPj4gPiByZ3cgZnJvbnRlbmRzID0gZmFz
+dGNnaSwgY2l2ZXR3ZWIgcG9ydD03NDgwDQo+PiA+DQo+PiA+dG8gY2VwaC5jb25mICh5b3UgY2Fu
+IG9mIGNvdXJzZSBhZGp1c3QgdGhlIHBvcnQgbnVtYmVyIGlmIHlvdSBsaWtlKSBhbmQNCj4+ID5y
+YWRvc2d3IHdpbGwgcnVuIHN0YW5kYWxvbmUgdy8gbm8gYXBhY2hlIG9yIGFueXRoaW5nIGVsc2Uu
+DQo+PiA+DQo+PiA+c2FnZQ0KPj4gPg0KPj4gPg0KPj4gPj4gDQo+PiA+PiBUaGFua3MsDQo+PiA+
+PiBSb2JlcnQgTGVCbGFuYw0KPj4gPj4gDQo+PiA+PiBPbiBXZWQsIEZlYiAyNSwgMjAxNSBhdCAx
+MjozMSBQTSwgU2FnZSBXZWlsIDxzd2VpbEByZWRoYXQuY29tPiB3cm90ZToNCj4+ID4+ID4gSGV5
+LA0KPj4gPj4gPg0KPj4gPj4gPiBXZSBhcmUgY29uc2lkZXJpbmcgc3dpdGNoaW5nIHRvIGNpdmV0
+d2ViICh0aGUgZW1iZWRkZWQvc3RhbmRhbG9uZQ0KPj5yZ3cNCj4+ID4+d2ViDQo+PiA+PiA+IHNl
+cnZlcikgYXMgdGhlIHByaW1hcnkgc3VwcG9ydGVkIFJHVyBmcm9udGVuZCBpbnN0ZWFkIG9mIHRo
+ZQ0KPj5jdXJyZW50DQo+PiA+PiA+IGFwYWNoZSArIG1vZC1mYXN0Y2dpIG9yIG1vZC1wcm94eS1m
+Y2dpIGFwcHJvYWNoLiAgIlN1cHBvcnRlZCIgaGVyZQ0KPj4gPj5tZWFucw0KPj4gPj4gPiBib3Ro
+IHRoZSBwcmltYXJ5IHBsYXRmb3JtIHRoZSB1cHN0cmVhbSBkZXZlbG9wbWVudCBmb2N1c2VzIG9u
+IGFuZA0KPj4gPj53aGF0IHRoZQ0KPj4gPj4gPiBkb3duc3RyZWFtIFJlZCBIYXQgcHJvZHVjdCB3
+aWxsIG9mZmljaWFsbHkgc3VwcG9ydC4NCj4+ID4+ID4NCj4+ID4+ID4gSG93IG1hbnkgcGVvcGxl
+IGFyZSB1c2luZyBSR1cgc3RhbmRhbG9uZSB1c2luZyB0aGUgZW1iZWRkZWQNCj4+Y2l2ZXR3ZWIN
+Cj4+ID4+ID4gc2VydmVyIGluc3RlYWQgb2YgYXBhY2hlPyAgSW4gcHJvZHVjdGlvbj8gIEF0IHdo
+YXQgc2NhbGU/ICBXaGF0DQo+PiA+PiA+IHZlcnNpb24ocykgKGNpdmV0d2ViIGZpcnN0IGFwcGVh
+cmVkIGluIGZpcmVmbHkgYW5kIHdlJ3ZlIGJhY2twb3J0ZWQNCj4+ID4+bW9zdA0KPj4gPj4gPiBm
+aXhlcykuDQo+PiA+PiA+DQo+PiA+PiA+IEhhdmUgeW91IHNlZW4gYW55IHByb2JsZW1zPyAgQW55
+IG90aGVyIGZlZWRiYWNrPyAgVGhlIGhvcGUgaXMgdG8NCj4+ID4+KHZhc3RseSkNCj4+ID4+ID4g
+c2ltcGxpZnkgZGVwbG95bWVudC4NCj4+ID4+ID4NCj4+ID4+ID4gVGhhbmtzIQ0KPj4gPj4gPiBz
+YWdlDQo+PiA+PiA+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fDQo+PiA+PiA+IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0DQo+PiA+PiA+IGNlcGgtdXNlcnNA
+bGlzdHMuY2VwaC5jb20NCj4+ID4+ID4gDQo+PiANCj4+Pj5odHRwczovL3VybGRlZmVuc2UucHJv
+b2Zwb2ludC5jb20vdjIvdXJsP3U9aHR0cC0zQV9fbGlzdHMuY2VwaC5jb21fbGlzdA0KPj4+Pmlu
+DQo+PiANCj4+Pj5mby5jZ2lfY2VwaC0yRHVzZXJzLTJEY2VwaC5jb20mZD1Bd0lDQWcmYz1sWGtk
+RUsxUEM3VUs5b0tBLUJCU0k4cDFBYW16TA0KPj4+Pk9TDQo+PiANCj4+Pj5uY202VmZuMENfVVEm
+cj1DU1lBOU9TNlFkN2ZReVNJMkxEdmxRJm09a0RMUFNLRXlOSzZ1TUxmdlU4VTdHVHZhM1JNdWZB
+Yg0KPj4+Pjl3DQo+PiA+PjgxUmpJMksxWlUmcz1Wc3lKOFVIV0cwQXBMODZXWGFlRDVlT1Y1U1JB
+N1ZtR2VTa0tHd3MzcU1JJmU9DQo+PiA+PiAtLQ0KPj4gPj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0
+aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlDQo+PmNlcGgtZGV2ZWwiIGluDQo+
+PiA+PiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZw0K
+Pj4gPj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdA0KPj4gDQo+Pj4+aHR0cHM6Ly91cmxkZWZlbnNl
+LnByb29mcG9pbnQuY29tL3YyL3VybD91PWh0dHAtM0FfX3ZnZXIua2VybmVsLm9yZ19tYWoNCj4+
+Pj5vcg0KPj4gDQo+Pj4+ZG9tby0yRGluZm8uaHRtbCZkPUF3SUNBZyZjPWxYa2RFSzFQQzdVSzlv
+S0EtQkJTSThwMUFhbXpMT1NuY202VmZuMENfVVENCj4+Pj4mcg0KPj4gDQo+Pj4+PUNTWUE5T1M2
+UWQ3ZlF5U0kyTER2bFEmbT1rRExQU0tFeU5LNnVNTGZ2VThVN0dUdmEzUk11ZkFiOXc4MVJqSTJL
+MVpVJnMNCj4+Pj49aQ0KPj4gPj5STm8xSzdvSlotMTRSLUxXdU52RUkwV29PcjVVdWFEa20zSVF4
+NzdWSW8mZT0NCj4+ID4+IA0KPj4gPj4gDQo+PiA+X19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX18NCj4+ID5jZXBoLXVzZXJzIG1haWxpbmcgbGlzdA0KPj4gPmNl
+cGgtdXNlcnNAbGlzdHMuY2VwaC5jb20NCj4+IA0KPj4+aHR0cHM6Ly91cmxkZWZlbnNlLnByb29m
+cG9pbnQuY29tL3YyL3VybD91PWh0dHAtM0FfX2xpc3RzLmNlcGguY29tX2xpc3RpDQo+Pj5uZg0K
+Pj4gDQo+Pj5vLmNnaV9jZXBoLTJEdXNlcnMtMkRjZXBoLmNvbSZkPUF3SUNBZyZjPWxYa2RFSzFQ
+QzdVSzlvS0EtQkJTSThwMUFhbXpMT1MNCj4+Pm5jDQo+PiANCj4+Pm02VmZuMENfVVEmcj1DU1lB
+OU9TNlFkN2ZReVNJMkxEdmxRJm09a0RMUFNLRXlOSzZ1TUxmdlU4VTdHVHZhM1JNdWZBYjl3OA0K
+Pj4+MVINCj4+ID5qSTJLMVpVJnM9VnN5SjhVSFdHMEFwTDg2V1hhZUQ1ZU9WNVNSQTdWbUdlU2tL
+R3dzM3FNSSZlPQ0KPj4gDQo+PiAtLQ0KPj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6
+IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluDQo+PiB0aGUgYm9keSBv
+ZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZw0KPj4gTW9yZSBtYWpvcmRv
+bW8gaW5mbyBhdA0KPj5odHRwczovL3VybGRlZmVuc2UucHJvb2Zwb2ludC5jb20vdjIvdXJsP3U9
+aHR0cC0zQV9fdmdlci5rZXJuZWwub3JnX21ham9yDQo+PmRvbW8tMkRpbmZvLmh0bWwmZD1Bd0lE
+QXcmYz1sWGtkRUsxUEM3VUs5b0tBLUJCU0k4cDFBYW16TE9TbmNtNlZmbjBDX1VRJnINCj4+PUNT
+WUE5T1M2UWQ3ZlF5U0kyTER2bFEmbT16SGhxWXo3U1NuVWdCeWkzUmhDX0dPMHdueUMtVHUtRjM0
+Q2JwbHhxSnVFJnM9dw0KPj5LNmlQZjZwTUhnOEZuT2dkcTRYdXVYWWVJVno5RkVJck50R0kxNXM2
+WUEmZT0NCj4+IA0KPj4gDQoNCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5j
+b20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29t
+Cg==
