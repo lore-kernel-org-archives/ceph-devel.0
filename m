@@ -1,90 +1,35 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: ceph versions
-Date: Fri, 27 Feb 2015 00:38:31 +0100
-Message-ID: <54EFAE77.3020101@dachary.org>
-References: <alpine.DEB.2.00.1502261451220.1619@cobra.newdream.net>
+From: Nigel Williams <nigel.williams@utas.edu.au>
+Subject: Re: Some usability question
+Date: Fri, 27 Feb 2015 10:55:19 +1100
+Message-ID: <mcobp9$d5i$1@ger.gmane.org>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F282BB873@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="xBmbLM5ptfta2RnLAtatQbq3rfMI0A1f7"
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:49679 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S932213AbbBZXid (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Feb 2015 18:38:33 -0500
-In-Reply-To: <alpine.DEB.2.00.1502261451220.1619@cobra.newdream.net>
+Received: from plane.gmane.org ([80.91.229.3]:54047 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752169AbbBZXze (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 26 Feb 2015 18:55:34 -0500
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1YR8H8-0004GT-Nz
+	for ceph-devel@vger.kernel.org; Fri, 27 Feb 2015 00:55:27 +0100
+Received: from fjzmd2s-nigelw.its.utas.edu.au ([131.217.4.28])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Fri, 27 Feb 2015 00:55:26 +0100
+Received: from nigel.williams by fjzmd2s-nigelw.its.utas.edu.au with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Fri, 27 Feb 2015 00:55:26 +0100
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F282BB873@SACMBXIP02.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---xBmbLM5ptfta2RnLAtatQbq3rfMI0A1f7
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: quoted-printable
+On 27/02/2015 8:05 AM, Somnath Roy wrote:
+> Is there any way to know which OSD to map to which drive of a host from an Admin node ?
 
-Hi Sage,
-
-I prefer Option D because it's self explanatory. We could also drop the n=
-ames. I became attached to them but they are confusing to the new users w=
-ho is required to remember that firefly is 0.80, giant is 0.87 etc.
-
-Cheers
-
-On 27/02/2015 00:12, Sage Weil wrote:
-> -- Option D -- "labeled"
->=20
-> X.Y-{dev,rc,release}Z
->=20
->  - Increment Y on each major named release
->  - Increment X if it's a major major named release (bigger change=20
-> than usual)
->  - Use dev, rc, or release prefix to clearly label what type of release=
-=20
-> this is
->  - Increment Z for stable updates
->=20
->  1.0-dev1 first infernalis dev release
->  1.0-dev2 another dev release
->  ...
->  1.0-rc1 first rc
->  1.0-rc2 next rc
->  1.0-release1 final release
->  1.0-release2 stable update
->  1.0-release3 stable update
->  1.1-dev1 first cut for j-release
->  1.1-dev2 ...
->  ...
->  1.1-rc1
->  1.1-release1 stable
->  1.1-release2 stable
->  1.1-release3 stable
->=20
-> Q: How do I tell what kind of release this is?
-> A: Look at the string embedded in the version
->=20
-> Q: Will these funny strings confuse things that sort by version?
-> A: I don't think so.
-
-dev < rc < release : good pick ;-)
-
-Cheers
+still requires a ssh login, but I guess you know about ceph-disk list?
 
 
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
-
-
---xBmbLM5ptfta2RnLAtatQbq3rfMI0A1f7
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlTvrncACgkQ8dLMyEl6F21LkQCfSJaVEy7dlDzbYBFIwe9Z3lZr
-3kUAnjSsFLflmuu/wEcAZk7SrTuT5f1h
-=tzpN
------END PGP SIGNATURE-----
-
---xBmbLM5ptfta2RnLAtatQbq3rfMI0A1f7--
