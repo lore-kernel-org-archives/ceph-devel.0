@@ -1,77 +1,60 @@
-From: =?gb2312?B?0c/V/Q==?= <zyan@redhat.com>
-Subject: Re: ceph-fuse remount issues
-Date: Thu, 26 Feb 2015 16:28:46 +0800
-Message-ID: <C2032CA0-61E4-430E-938F-C40D51BF8DDA@redhat.com>
-References: <54E66259.9040501@redhat.com>
-Mime-Version: 1.0 (Mac OS X Mail 8.2 \(2070.6\))
-Content-Type: text/plain; charset=gb2312
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:39106 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752401AbbBZI3A convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Feb 2015 03:29:00 -0500
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t1Q8T0n9010947
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
-	for <ceph-devel@vger.kernel.org>; Thu, 26 Feb 2015 03:29:00 -0500
-In-Reply-To: <54E66259.9040501@redhat.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <john.spray@redhat.com>
-Cc: ceph-devel@vger.kernel.org, Gregory Farnum <gfarnum@redhat.com>
+From: GuangYang <yguang11-1ViLX0X+lBJBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: who is using radosgw with civetweb?
+Date: Thu, 26 Feb 2015 08:34:41 +0000
+Message-ID: <BLU175-W9E8C6C85DB7489697B45FDF140@phx.gbl>
+References: <alpine.DEB.2.00.1502251125180.25838@cobra.newdream.net>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.00.1502251125180.25838-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Weil Sage <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
+
+Hi Sage,
+Is there any timeline around the switch? So that we can plan ahead for the testing.
+
+We are running apache + mod-fastcgi in production at scale (540 OSDs, 9 RGW hosts) and it looks good so far. Although at the beginning we came across a problem with large volume of 500 error, which tracked to that mod-fastcgi is using "select" which limits to 1024 FDs. We used "poll" to replace "select" and the problem was solved.
+
+Thanks,
+Guang
 
 
-> =D4=DA 2015=C4=EA2=D4=C220=C8=D5=A3=AC06:23=A3=ACJohn Spray <john.spr=
-ay@redhat.com> =D0=B4=B5=C0=A3=BA
->=20
->=20
-> Background: a while ago, we found (#10277) that existing cache expira=
-tion mechanism wasn't working with latest kernels.  We used to invalida=
-te the top level dentries, which caused fuse to invalidate everything, =
-but an implementation detail in fuse caused it to start ignoring our re=
-peated invalidate calls, so this doesn't work any more.  To persuade fu=
-se to dirty its entire metadata cache, Zheng added in a system() call t=
-o "mount -o remount" after we expire things from our client side cache.
-
-Change of d_invalidate() implementation breaks our old cache expiration=
- mechanism. When invalidating a denty, d_invalidate() also walks the de=
-ntry subtree and try pruning any unused descendant dentries. Our old ca=
-che expiration mechanism replies on this
-to prune unused dentries. We invalidate the top level dentries, d_inval=
-idate() try pruning unused dentries underneath these top level dentries=
-=2E Prior to 3.18 kernel, d_invalidate() can fail if the dentry is used=
- by some one. Implementation of d_invalidate() change
-in 3.18 kernel,  d_invalidate() always successes and unhash the dentry =
-even if it=A1=AFs still in use. This behavior changes make us not be ab=
-le to use d_invalidate() at will. One known bad consequence is getcwd()=
- system call return -EINVAL after process=A1=AF working directory gets =
-invalidated.
-
-The cephfs kernel client has no such issue because it maintains its own=
- per-session cap list. When it receives cache pressure message from MDS=
-, it can iterate the list and prune unused caps.
-
->=20
-> However, this was a bit of a hack and has created problems:
-> * You can't call mount -o remount unless you're root, so we are less =
-flexible than we used to be (#10542)
-> * While the remount is happening, unmounts sporadically fail and the =
-fuse process can become unresponsive to SIGKILL (#10916)
->=20
-> The first issue was maybe an acceptable compromise, but the second is=
-sue is just painful, and it seems like we might not have seen the last =
-of the knock on effects -- upstream maintainers certainly aren't expect=
-ing filesystems to remount themselves quite so frequently.
->=20
-> We probably have an opportunity to get something upstream in fuse to =
-support a direct call to trigger the invalidation we want, if we can wo=
-rk out what that should look like.  Thoughts?
->=20
-> John
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+----------------------------------------
+> Date: Wed, 25 Feb 2015 11:31:54 -0800
+> From: sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+> To: ceph-users-Qp0mS5GaXlQ@public.gmane.org; ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> Subject: [ceph-users] who is using radosgw with civetweb?
+>
+> Hey,
+>
+> We are considering switching to civetweb (the embedded/standalone rgw web
+> server) as the primary supported RGW frontend instead of the current
+> apache + mod-fastcgi or mod-proxy-fcgi approach. "Supported" here means
+> both the primary platform the upstream development focuses on and what the
+> downstream Red Hat product will officially support.
+>
+> How many people are using RGW standalone using the embedded civetweb
+> server instead of apache? In production? At what scale? What
+> version(s) (civetweb first appeared in firefly and we've backported most
+> fixes).
+>
+> Have you seen any problems? Any other feedback? The hope is to (vastly)
+> simplify deployment.
+>
+> Thanks!
+> sage
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+ 		 	   		  
