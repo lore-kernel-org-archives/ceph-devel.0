@@ -1,51 +1,49 @@
-From: Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
-Subject: Re: Ceph Hammer OSD Shard Tuning Test Results
-Date: Fri, 27 Feb 2015 07:10:42 +0100 (CET)
-Message-ID: <1096993261.2346577.1425017442692.JavaMail.zimbra@oxygem.tv>
-References: <54EEA49F.40606@redhat.com>
+From: M Ranga Swami Reddy <swamireddy@gmail.com>
+Subject: Re: s3-tests development
+Date: Fri, 27 Feb 2015 14:26:22 +0530
+Message-ID: <CANA9Uk5jmx1Nvf1ix=e00DsaDx2G5FCkubPUutEjvmhmU8FstQ@mail.gmail.com>
+References: <20150227023734.GE21215@sherlock>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <934614223.2346576.1425017430135.JavaMail.zimbra-M8QNeUgB6UTyG1zEObXtfA@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Mark Nelson <mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ie0-f175.google.com ([209.85.223.175]:33358 "EHLO
+	mail-ie0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752093AbbB0I4X (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 27 Feb 2015 03:56:23 -0500
+Received: by iecar1 with SMTP id ar1so28027915iec.0
+        for <ceph-devel@vger.kernel.org>; Fri, 27 Feb 2015 00:56:22 -0800 (PST)
+In-Reply-To: <20150227023734.GE21215@sherlock>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Andrew Gaul <andrew@gaul.org>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-VGhhbmtzIE1hcmsgZm9yIHRoZSByZXN1bHRzLApkZWZhdWx0IHZhbHVlcyBzZWVtIHRvIGJlIHF1
-aXRlIHJlc29uYWJsZSBpbmRlZWQuCgoKSSBhbHNvIHdvbmRlciBpcyBjcHUgZnJlcXVlbmN5IGNh
-biBoYXZlIGFuIGltcGFjdCBvbiBsYXRlbmN5IG9yIG5vdC4KSSdtIGdvaW5nIHRvIGJlbmNobWFy
-ayBvbiBkdWFsIHhlb24gMTAtY29yZXMgMywxZ2h6IG5vZGVzIGluIGNvbWluZyB3ZWVrcywKSSds
-bCB0cnkgcmVwbGF5IHlvdXIgYmVuY2htYXJrIHRvIGNvbXBhcmUKCgoKLS0tLS0gTWFpbCBvcmln
-aW5hbCAtLS0tLQpEZTogIk1hcmsgTmVsc29uIiA8bW5lbHNvbkByZWRoYXQuY29tPgrDgDogImNl
-cGgtZGV2ZWwiIDxjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZz4sICJjZXBoLXVzZXJzIiA8Y2Vw
-aC11c2Vyc0BsaXN0cy5jZXBoLmNvbT4KRW52b3nDqTogSmV1ZGkgMjYgRsOpdnJpZXIgMjAxNSAw
-NTo0NDoxNQpPYmpldDogW2NlcGgtdXNlcnNdIENlcGggSGFtbWVyIE9TRCBTaGFyZCBUdW5pbmcg
-VGVzdCBSZXN1bHRzCgpIaSBFdmVyeW9uZSwgCgpJbiB0aGUgQ2VwaCBEdW1wbGluZy9GaXJlZmx5
-L0hhbW1lciBTU0QvTWVtc3RvcmUgcGVyZm9ybWFuY2UgY29tcGFyaXNvbiAKdGhyZWFkLCBBbGV4
-YW5kcmUgREVSVU1JRVIgd29uZGVyZWQgaWYgY2hhbmdpbmcgdGhlIGRlZmF1bHQgc2hhcmQgYW5k
-IAp0aHJlYWRzIHBlciBzaGFyZCBPU0Qgc2V0dGluZ3MgbWlnaHQgaGF2ZSBhIHBvc2l0aXZlIGVm
-ZmVjdCBvbiAKcGVyZm9ybWFuY2UgaW4gb3VyIHRlc3RzLiBJIHdlbnQgYmFjayBhbmQgdXNlZCBv
-bmUgb2YgdGhlIFBDSWUgU1NEcyAKZnJvbSBvdXIgcHJldmlvdXMgdGVzdHMgdG8gZXhwZXJpbWVu
-dCB3aXRoIGEgcmVjZW50IG1hc3RlciBwdWxsLiBJIAp3YW50ZWQgdG8ga25vdyBob3cgcGVyZm9y
-bWFuY2Ugd2FzIGFmZmVjdGVkIGJ5IGNoYW5naW5nIHRoZXNlIHBhcmFtZXRlcnMgCmFuZCBhbHNv
-IHRvIHZhbGlkYXRlIHRoYXQgdGhlIGRlZmF1bHQgc2V0dGluZ3Mgc3RpbGwgYXBwZWFyIHRvIGJl
-IGNvcnJlY3QuIAoKSSBwbGFuIHRvIGNvbmR1Y3QgbW9yZSB0ZXN0cyAocG90ZW50aWFsbHkgYWNy
-b3NzIG11bHRpcGxlIFNBVEEgU1NEcyBpbiAKdGhlIHNhbWUgYm94KSwgYnV0IHRoZXNlIGluaXRp
-YWwgcmVzdWx0cyBzZWVtIHRvIHNob3cgdGhhdCB0aGUgZGVmYXVsdCAKc2V0dGluZ3MgdGhhdCB3
-ZXJlIGNob3NlbiBhcmUgcXVpdGUgcmVhc29uYWJsZS4gCgpNYXJrIAoKX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18gCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0
-IApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tIApodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGlu
-Zm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20gCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxp
-c3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vy
-cy1jZXBoLmNvbQo=
+Can you please share the pull requests urls..we can do quick review..
+
+Thanks
+Swami
+
+On Fri, Feb 27, 2015 at 8:07 AM, Andrew Gaul <andrew@gaul.org> wrote:
+> Hello cephalopods, I use s3-tests to test S3Proxy[1], Apache jclouds,
+> and an internal project.  While s3-tests has good functionality as it
+> exists, the project has not progressed much over the last six months.  I
+> have submitted over 20 pull requests to fix incorrect tests and for
+> additional test coverage but most remain unreviewed[2].  Further
+> s3-tests remains biased towards Ceph and not the AWS de facto standard,
+> failing to run against the latter due to TooManyBuckets failures[3].
+> Finally some features like V4 signature support[4] will require more
+> extensive changes.  We are at-risk of diverging; how can we best move
+> forward together?
+>
+> [1] https://github.com/andrewgaul/s3proxy
+> [2] https://github.com/ceph/s3-tests/pulls?q=is%3Aopen+is%3Apr
+> [3] https://github.com/ceph/s3-tests/issues/25
+> [4] https://github.com/ceph/s3-tests/issues/35
+>
+> --
+> Andrew Gaul
+> http://gaul.org/
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
