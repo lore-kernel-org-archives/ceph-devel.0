@@ -1,85 +1,47 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: [Manila] Ceph native driver for manila
-Date: Thu, 26 Feb 2015 16:04:06 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1502261602390.23918@cobra.newdream.net>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Some usability question
+Date: Fri, 27 Feb 2015 00:07:05 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F282BBAD1@SACMBXIP02.sdcorp.global.sandisk.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F282BB873@SACMBXIP02.sdcorp.global.sandisk.com>
+ <mcobp9$d5i$1@ger.gmane.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:57637 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753643AbbB0AEI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 26 Feb 2015 19:04:08 -0500
+Received: from mail-by2on0094.outbound.protection.outlook.com ([207.46.100.94]:47581
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753942AbbB0AHO convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Feb 2015 19:07:14 -0500
+In-Reply-To: <mcobp9$d5i$1@ger.gmane.org>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, openstack-dev@lists.openstack.org
+To: Nigel Williams <nigel.williams@utas.edu.au>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-[sorry for ceph-devel double-post, forgot to include openstack-dev]
+Hi Nigel,
+Yes, but I didn't actually noticed that it is giving osd numbers as well. I probably always used it before installation to list the disks :-)
+Thanks, this is helpful.
 
-Hi everyone,
+Regards
+Somnath
 
-The online Ceph Developer Summit is next week[1] and among other things 
-we'll be talking about how to support CephFS in Manila.  At a high level, 
-there are basically two paths:
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Nigel Williams
+Sent: Thursday, February 26, 2015 3:55 PM
+To: ceph-devel@vger.kernel.org
+Subject: Re: Some usability question
 
-1) Ganesha + the CephFS FSAL driver
+On 27/02/2015 8:05 AM, Somnath Roy wrote:
+> Is there any way to know which OSD to map to which drive of a host from an Admin node ?
 
- - This will just use the existing ganesha driver without modifications.  
-Ganesha will need to be configured with the CephFS FSAL instead of 
-GlusterFS or whatever else you might use.
- - All traffic will pass through the NFS VM, providing network isolation
-
-No real work needed here aside from testing and QA.
-
-2) Native CephFS driver
-
-As I currently understand it,
-
- - The driver will set up CephFS auth credentials so that the guest VM can 
-mount CephFS directly
- - The guest VM will need access to the Ceph network.  That makes this 
-mainly interesting for private clouds and trusted environments.
- - The guest is responsible for running 'mount -t ceph ...'.
- - I'm not sure how we provide the auth credential to the user/guest...
-
-This would perform better than an NFS gateway, but there are several gaps 
-on the security side that make this unusable currently in an untrusted 
-environment:
-
- - The CephFS MDS auth credentials currently are _very_ basic.  As in, 
-binary: can this host mount or it cannot.  We have the auth cap string 
-parsing in place to restrict to a subdirectory (e.g., this tenant can only 
-mount /tenants/foo), but the MDS does not enforce this yet.  [medium 
-project to add that]
-
- - The same credential could be used directly via librados to access the 
-data pool directly, regardless of what the MDS has to say about the 
-namespace.  There are two ways around this:
-
-   1- Give each tenant a separate rados pool.  This works today.  You'd 
-set a directory policy that puts all files created in that subdirectory in 
-that tenant's pool, then only let the client access those rados pools.
-
-     1a- We currently lack an MDS auth capability that restricts which 
-clients get to change that policy.  [small project]
-
-   2- Extend the MDS file layouts to use the rados namespaces so that 
-users can be separated within the same rados pool.  [Medium project]
-
-   3- Something fancy with MDS-generated capabilities specifying which 
-rados objects clients get to read.  This probably falls in the category of 
-research, although there are some papers we've seen that look promising. 
-[big project]
-
-Anyway, this leads to a few questions:
-
- - Who is interested in using Manila to attach CephFS to guest VMs?
- - What use cases are you interested?
- - How important is security in your environment?
-
-Thanks!
-sage
+still requires a ssh login, but I guess you know about ceph-disk list?
 
 
-[1] http://ceph.com/community/ceph-developer-summit-infernalis/
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
+________________________________
+
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
 
