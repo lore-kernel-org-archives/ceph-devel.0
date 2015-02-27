@@ -1,91 +1,88 @@
-From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Subject: Re: ceph versions
-Date: Thu, 26 Feb 2015 18:59:55 -0500 (EST)
-Message-ID: <567942662.11970131.1424995195896.JavaMail.zimbra@redhat.com>
-References: <alpine.DEB.2.00.1502261451220.1619@cobra.newdream.net> <54EFAE77.3020101@dachary.org>
+From: Sage Weil <sweil@redhat.com>
+Subject: [Manila] Ceph native driver for manila
+Date: Thu, 26 Feb 2015 16:01:25 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1502261520050.23918@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx6-phx2.redhat.com ([209.132.183.39]:47297 "EHLO
-	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752483AbbB0ABA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Feb 2015 19:01:00 -0500
-In-Reply-To: <54EFAE77.3020101@dachary.org>
+Received: from mx1.redhat.com ([209.132.183.28]:58292 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754130AbbB0AB1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 26 Feb 2015 19:01:27 -0500
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t1R01QXJ010681
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
+	for <ceph-devel@vger.kernel.org>; Thu, 26 Feb 2015 19:01:26 -0500
+Received: from redhat.com (ovpn-112-33.phx2.redhat.com [10.3.112.33])
+	by int-mx09.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t1R01PMP030372
+	for <ceph-devel@vger.kernel.org>; Thu, 26 Feb 2015 19:01:26 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+
+Hi everyone,
+
+The online Ceph Developer Summit is next week[1] and among other things 
+we'll be talking about how to support CephFS in Manila.  At a high level, 
+there are basically two paths:
+
+1) Ganesha + the CephFS FSAL driver
+
+ - This will just use the existing ganesha driver without modifications.  
+Ganesha will need to be configured with the CephFS FSAL instead of 
+GlusterFS or whatever else you might use.
+ - All traffic will pass through the NFS VM, providing network isolation
+
+No real work needed here aside from testing and QA.
+
+2) Native CephFS driver
+
+As I currently understand it,
+
+ - The driver will set up CephFS auth credentials so that the guest VM can 
+mount CephFS directly
+ - The guest VM will need access to the Ceph network.  That makes this 
+mainly interesting for private clouds and trusted environments.
+ - The guest is responsible for running 'mount -t ceph ...'.
+ - I'm not sure how we provide the auth credential to the user/guest...
+
+This would perform better than an NFS gateway, but there are several gaps 
+on the security side that make this unusable currently in an untrusted 
+environment:
+
+ - The CephFS MDS auth credentials currently are _very_ basic.  As in, 
+binary: can this host mount or it cannot.  We have the auth cap string 
+parsing in place to restrict to a subdirectory (e.g., this tenant can only 
+mount /tenants/foo), but the MDS does not enforce this yet.  [medium 
+project to add that]
+
+ - The same credential could be used directly via librados to access the 
+data pool directly, regardless of what the MDS has to say about the 
+namespace.  There are two ways around this:
+
+   1- Give each tenant a separate rados pool.  This works today.  You'd 
+set a directory policy that puts all files created in that subdirectory in 
+that tenant's pool, then only let the client access those rados pools.
+
+     1a- We currently lack an MDS auth capability that restricts which 
+clients get to change that policy.  [small project]
+
+   2- Extend the MDS file layouts to use the rados namespaces so that 
+users can be separated within the same rados pool.  [Medium project]
+
+   3- Something fancy with MDS-generated capabilities specifying which 
+rados objects clients get to read.  This probably falls in the category of 
+research, although there are some papers we've seen that look promising. 
+[big project]
+
+Anyway, this leads to a few questions:
+
+ - Who is interested in using Manila to attach CephFS to guest VMs?
+ - What use cases are you interested?
+ - How important is security in your environment?
+
+Thanks!
+sage
 
 
-
------ Original Message -----
-> From: "Loic Dachary" <loic@dachary.org>
-> To: "Sage Weil" <sweil@redhat.com>, ceph-devel@vger.kernel.org
-> Sent: Thursday, February 26, 2015 3:38:31 PM
-> Subject: Re: ceph versions
-> 
-> Hi Sage,
-> 
-> I prefer Option D because it's self explanatory. We could also drop the
-> names. I became attached to them but they are confusing to the new users who
-> is required to remember that firefly is 0.80, giant is 0.87 etc.
-> 
-> Cheers
-> 
-> On 27/02/2015 00:12, Sage Weil wrote:
-> > -- Option D -- "labeled"
-> > 
-> > X.Y-{dev,rc,release}Z
-> > 
-> >  - Increment Y on each major named release
-> >  - Increment X if it's a major major named release (bigger change
-> > than usual)
-> >  - Use dev, rc, or release prefix to clearly label what type of release
-> > this is
-> >  - Increment Z for stable updates
-> > 
-> >  1.0-dev1 first infernalis dev release
-> >  1.0-dev2 another dev release
-> >  ...
-> >  1.0-rc1 first rc
-> >  1.0-rc2 next rc
-> >  1.0-release1 final release
-> >  1.0-release2 stable update
-> >  1.0-release3 stable update
-> >  1.1-dev1 first cut for j-release
-> >  1.1-dev2 ...
-> >  ...
-> >  1.1-rc1
-> >  1.1-release1 stable
-> >  1.1-release2 stable
-> >  1.1-release3 stable
-> > 
-> > Q: How do I tell what kind of release this is?
-> > A: Look at the string embedded in the version
-> > 
-> > Q: Will these funny strings confuse things that sort by version?
-> > A: I don't think so.
-> 
-> dev < rc < release : good pick ;-)
-> 
-
-This is the one I lean towards, with one slight variation. I'd drop the 'release' tag and have X.Y[.Z] format for the formal releases, e.g.,
-2.0-dev1 first infernalis dev release
-2.0-dev2
-..
-2.0-rc1
-2.0-rc2
-...
-2.0 # infarnalis
-2.0.1 # first dot release
-...
-2.1-dev1 # first j dev release
-...
-2.1 # j release
-
-Then after a few release move to 3.0 to avoid the dreadful big numbers.
-
-Sage did mention that this might have some issues in certain environments to sort correctly. Possibly replacing the dash with a tilde solves this?
-
-Yehuda
+[1] http://ceph.com/community/ceph-developer-summit-infernalis/
