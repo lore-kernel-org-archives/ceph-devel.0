@@ -1,156 +1,56 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: ceph versions
-Date: Fri, 27 Feb 2015 01:58:25 +0100
-Message-ID: <54EFC131.8080402@dachary.org>
-References: <alpine.DEB.2.00.1502261451220.1619@cobra.newdream.net> <54EFAE77.3020101@dachary.org> <567942662.11970131.1424995195896.JavaMail.zimbra@redhat.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Some usability question
+Date: Fri, 27 Feb 2015 02:35:02 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F282BBCD6@SACMBXIP02.sdcorp.global.sandisk.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F282BB873@SACMBXIP02.sdcorp.global.sandisk.com>
+ <mcobp9$d5i$1@ger.gmane.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="UhbWBnQwbWG0LfeUWN3WP1xXkm8nOSftV"
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:49722 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751422AbbB0A62 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Feb 2015 19:58:28 -0500
-In-Reply-To: <567942662.11970131.1424995195896.JavaMail.zimbra@redhat.com>
+Received: from mail-bn1on0077.outbound.protection.outlook.com ([157.56.110.77]:8472
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752001AbbB0CfO convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Feb 2015 21:35:14 -0500
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Cc: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
+To: Nigel Williams <nigel.williams@utas.edu.au>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---UhbWBnQwbWG0LfeUWN3WP1xXkm8nOSftV
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Hi,
+One more issue I faced in case of Cache tiering.
+I couldn't find any list/show command that will show the existing cache tiers in the cluster along with its backup pool.
+Am I missing anything ?
 
+-----Original Message-----
+From: Somnath Roy
+Sent: Thursday, February 26, 2015 4:07 PM
+To: 'Nigel Williams'; ceph-devel@vger.kernel.org
+Subject: RE: Some usability question
 
+Hi Nigel,
+Yes, but I didn't actually noticed that it is giving osd numbers as well. I probably always used it before installation to list the disks :-) Thanks, this is helpful.
 
-On 27/02/2015 00:59, Yehuda Sadeh-Weinraub wrote:
->=20
->=20
-> ----- Original Message -----
->> From: "Loic Dachary" <loic@dachary.org>
->> To: "Sage Weil" <sweil@redhat.com>, ceph-devel@vger.kernel.org
->> Sent: Thursday, February 26, 2015 3:38:31 PM
->> Subject: Re: ceph versions
->>
->> Hi Sage,
->>
->> I prefer Option D because it's self explanatory. We could also drop th=
-e
->> names. I became attached to them but they are confusing to the new use=
-rs who
->> is required to remember that firefly is 0.80, giant is 0.87 etc.
->>
->> Cheers
->>
->> On 27/02/2015 00:12, Sage Weil wrote:
->>> -- Option D -- "labeled"
->>>
->>> X.Y-{dev,rc,release}Z
->>>
->>>  - Increment Y on each major named release
->>>  - Increment X if it's a major major named release (bigger change
->>> than usual)
->>>  - Use dev, rc, or release prefix to clearly label what type of relea=
-se
->>> this is
->>>  - Increment Z for stable updates
->>>
->>>  1.0-dev1 first infernalis dev release
->>>  1.0-dev2 another dev release
->>>  ...
->>>  1.0-rc1 first rc
->>>  1.0-rc2 next rc
->>>  1.0-release1 final release
->>>  1.0-release2 stable update
->>>  1.0-release3 stable update
->>>  1.1-dev1 first cut for j-release
->>>  1.1-dev2 ...
->>>  ...
->>>  1.1-rc1
->>>  1.1-release1 stable
->>>  1.1-release2 stable
->>>  1.1-release3 stable
->>>
->>> Q: How do I tell what kind of release this is?
->>> A: Look at the string embedded in the version
->>>
->>> Q: Will these funny strings confuse things that sort by version?
->>> A: I don't think so.
->>
->> dev < rc < release : good pick ;-)
->>
->=20
-> This is the one I lean towards, with one slight variation. I'd drop the=
- 'release' tag and have X.Y[.Z] format for the formal releases, e.g.,
-> 2.0-dev1 first infernalis dev release
-> 2.0-dev2
-> ..
-> 2.0-rc1
-> 2.0-rc2
-> ...
-> 2.0 # infarnalis
-> 2.0.1 # first dot release
-> ...
-> 2.1-dev1 # first j dev release
-> ...
-> 2.1 # j release
->=20
-> Then after a few release move to 3.0 to avoid the dreadful big numbers.=
+Regards
+Somnath
 
->=20
-> Sage did mention that this might have some issues in certain environmen=
-ts to sort correctly. Possibly replacing the dash with a tilde solves thi=
-s?
->=20
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Nigel Williams
+Sent: Thursday, February 26, 2015 3:55 PM
+To: ceph-devel@vger.kernel.org
+Subject: Re: Some usability question
 
-The lexicographic order of ~ is modified in debian and that may create co=
-nfusion:
+On 27/02/2015 8:05 AM, Somnath Roy wrote:
+> Is there any way to know which OSD to map to which drive of a host from an Admin node ?
 
-http://man.he.net/man5/deb-version
-
-       lexical comparison is a comparison of ASCII values modified so tha=
-t all
-       the letters sort earlier than all the non-letters and so that  a  =
-tilde
-       sorts  before  anything, even the end of a part.  For example, the=
- fol-
-       lowing parts are in sorted order: '~~', '~~a',  '~',  the  empty  =
-part,
-       'a'.
-
-The - is lower than the . so it should be good provided the major release=
-s are X.Y.0 instead of X.Y, i.e.:
-
-2.0-rc3
-2.0.0 # infarnalis
-2.0.1 # first dot release
-
-etc.
-
-Dropping the "release" word for stable releases is a good idea.
-
-Cheers
-
-> Yehuda
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+still requires a ssh login, but I guess you know about ceph-disk list?
 
 
---UhbWBnQwbWG0LfeUWN3WP1xXkm8nOSftV
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
+________________________________
 
-iEYEARECAAYFAlTvwTEACgkQ8dLMyEl6F20OHQCgjvGZ8Tz3vHqLUSbIZzRRLHBI
-TcQAn0R56NVHiREVA2lWFp0pF6t4cOH5
-=LrUd
------END PGP SIGNATURE-----
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
 
---UhbWBnQwbWG0LfeUWN3WP1xXkm8nOSftV--
