@@ -1,58 +1,89 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: Create/Contribute to blueprints.
-Date: Fri, 27 Feb 2015 15:58:20 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1502271557030.23553@cobra.newdream.net>
-References: <CAFkUHxe=4ffN_VLobW4gFwoRu28SDJeCksrGD9SWqEYN5cTQ9A@mail.gmail.com> <alpine.DEB.2.00.1502270926200.23553@cobra.newdream.net> <54F1019D.2060801@redhat.com> <CAFkUHxcV3XHCCTHugPNL+zKEb2FVH9h_9DhDMBW0D6P+w_rcPQ@mail.gmail.com>
+From: ZHOU Yuan <dunk007@gmail.com>
+Subject: Re: RGW : Transaction Id in response?
+Date: Sat, 28 Feb 2015 09:24:28 +0800
+Message-ID: <CADTt810yeHs88c4-D53z3mOU-aSfU9pu-gi9p4Qi_4w6jLGDtQ@mail.gmail.com>
+References: <CAGoDY9=pLMvUyBKSi4-vqx7XqYbOfPBenzLxPmrKCWzV9Kccig@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:53728 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755417AbbB0X6Y (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 27 Feb 2015 18:58:24 -0500
-In-Reply-To: <CAFkUHxcV3XHCCTHugPNL+zKEb2FVH9h_9DhDMBW0D6P+w_rcPQ@mail.gmail.com>
+Received: from mail-oi0-f48.google.com ([209.85.218.48]:62602 "EHLO
+	mail-oi0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750752AbbB1BYs convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 27 Feb 2015 20:24:48 -0500
+Received: by mail-oi0-f48.google.com with SMTP id a3so18637042oib.7
+        for <ceph-devel@vger.kernel.org>; Fri, 27 Feb 2015 17:24:48 -0800 (PST)
+In-Reply-To: <CAGoDY9=pLMvUyBKSi4-vqx7XqYbOfPBenzLxPmrKCWzV9Kccig@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: pmcgarry@redhat.com
-Cc: kernel neophyte <neophyte.hacker001@gmail.com>, bhubbard@redhat.com, ceph-devel@vger.kernel.org
+To: Abhishek Dixit <dixitabhi@gmail.com>
+Cc: Yehuda Sadeh-Weinraub <yehuda@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Fri, 27 Feb 2015, kernel neophyte wrote:
-> On Fri, Feb 27, 2015 at 3:45 PM, Brad Hubbard <bhubbard@redhat.com> wrote:
-> > On 02/28/2015 03:26 AM, Sage Weil wrote:
-> >>
-> >> On Fri, 27 Feb 2015, kernel neophyte wrote:
-> >>>
-> >>> Hi,
-> >>>
-> >>> Could you please point me to any documentation that explains
-> >>> creation/contribution to Blueprints for the upcoming cycle ?
-> >>>
-> >>> The create Infernalis Blueprint button is grayed out and we are
-> >>> logging in through our gmail account.
-> >>
-> >>
-> >> https://wiki.ceph.com/Planning/Blueprints/Infernalis
-> >>
-> >> is the URL to go to.  Once you log in you should be able to submit
-> >> something...
-> >>
-> >> sage
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>
-> >
-> > This doesn't seem to work if you are logging in with a Google account for
-> > example.
-> 
-> For ppl with Google Account whats the alternative ?
+On Fri, Feb 27, 2015 at 6:31 PM, Abhishek Dixit <dixitabhi@gmail.com> wrote:
+> On Thu, Feb 26, 2015 at 10:51 PM, Yehuda Sadeh-Weinraub
+> <yehuda@redhat.com> wrote:
+>>
+>>
+>> ----- Original Message -----
+>>> From: "Abhishek Dixit" <dixitabhi@gmail.com>
+>>> To: "ceph-devel" <ceph-devel@vger.kernel.org>
+>>> Sent: Wednesday, February 25, 2015 8:35:40 PM
+>>> Subject: RGW : Transaction Id in response?
+>>>
+>>> Hi,
+>>>
+>>> I was doing comparison of Open Stack Swift response headers and Ceph
+>>> RGW response.
+>>> This is in regard to X-Trans-Id header in response from Open Stack
+>>> Swift storage.
+>>> Swift response to a request always have the header "X-Trans-Id".
+>>> X-Trans-Id : A unique transaction identifier for this request.
+>>>
+>>> X-Trans-Id seems to serve two purpose:
+>>> 1. Every log messages for a request will carry this and aid in
+>>> debugging/analyzing.
+>>> 2. Benchmarking for latency.
+>>>
+>>> So, do we have similar unique identifier in Ceph RGW response which
+>>> associates with each request?
+>>>
+>>> Or do we need add support for this?
+>>>
+>>
+>> At the moment there is no such identifier. We can leverage the rados client instance id that each radosgw instance gets when connecting to the backend, and there's also a unique running number that we use to identify each request within that gateway. We can probably concatenate these and return it as the unique identifier.
+>>
+>> Yehuda
+>>
+>
+>
+> Hi Yehuda,
+>
+> I will add "X-Trans-Id" as per you suggested approach.
+> I have opened a new issue particularly for adding "X-Trans-Id" as many
+> other issues report absence of this header.
+>
+> I have assigned this to myself.
+> http://tracker.ceph.com/issues/10970
+>
 
-Argh... yeah, you're right.  If I log in with my old inktank google 
-account everything works perfectly, but I tried my personal one and it 
-doesn't let me edit...
 
-Scuttlemonkey, help!
+Hi Yehuda, Abhishek,
 
-sage
+may be we should follow the swift way considering the goal is to keep
+compatible with swift? This might make the log analysis a bit easier
+for swift cluster operators.
 
+def generate_trans_id(trans_id_suffix):
+    return 'tx%s-%010x%s' % (
+        uuid.uuid4().hex[:21], time.time(), quote(trans_id_suffix))
+
+The trans_id_suffix is configurable in swift setup.
+
+Thanks, -yuan
+
+> Thanks
+> Abhishek Dixit
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
