@@ -1,71 +1,99 @@
 From: Loic Dachary <loic@dachary.org>
-Subject: re-running teuthology jobs
-Date: Sat, 28 Feb 2015 11:28:42 +0100
-Message-ID: <54F1985A.1090907@dachary.org>
+Subject: Re: Create/Contribute to blueprints.
+Date: Sat, 28 Feb 2015 11:30:08 +0100
+Message-ID: <54F198B0.5070307@dachary.org>
+References: <CAFkUHxe=4ffN_VLobW4gFwoRu28SDJeCksrGD9SWqEYN5cTQ9A@mail.gmail.com>	<alpine.DEB.2.00.1502270926200.23553@cobra.newdream.net>	<54F1019D.2060801@redhat.com>	<CAFkUHxcV3XHCCTHugPNL+zKEb2FVH9h_9DhDMBW0D6P+w_rcPQ@mail.gmail.com>	<alpine.DEB.2.00.1502271557030.23553@cobra.newdream.net> <CAAZbbf0mCwS1SVu_2icx=pQhMFDJywC6+ZS2vZHPSr8+gKAfGw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="GHKFtJGwsEA7N2KmlTCPU9Xgkv0mxjm0K"
+ boundary="Qb4M4lA7IT15gphtU1qgXUnmOPS1Q8wtT"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:50471 "EHLO
+Received: from mail2.dachary.org ([91.121.57.175]:50473 "EHLO
 	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751185AbbB1K2q (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 28 Feb 2015 05:28:46 -0500
-Received: from [10.9.0.6] (unknown [10.0.2.28])
-	by smtp.dmail.dachary.org (Postfix) with ESMTP id 3C9F542137
-	for <ceph-devel@vger.kernel.org>; Sat, 28 Feb 2015 11:28:43 +0100 (CET)
+	with ESMTP id S1750759AbbB1KaL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 28 Feb 2015 05:30:11 -0500
+In-Reply-To: <CAAZbbf0mCwS1SVu_2icx=pQhMFDJywC6+ZS2vZHPSr8+gKAfGw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Patrick McGarry <pmcgarry@redhat.com>
+Cc: Ceph Devel <ceph-devel@vger.kernel.org>
 
 This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---GHKFtJGwsEA7N2KmlTCPU9Xgkv0mxjm0K
+--Qb4M4lA7IT15gphtU1qgXUnmOPS1Q8wtT
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
 
-Hi,
 
-A teuthology rados run ( https://github.com/ceph/ceph-qa-suite/tree/maste=
-r/suites/rados ) completed with five dead jobs out of 693. They failed be=
-cause of DNS errors and I'd like to re-run them. Ideally I could do somet=
-hing like:
 
-teuthology-schedule --run loic-2015-02-27_20:22:09-rados-firefly-backport=
-s---basic-multi --job-id 781444 --job-id  781457 ...
+On 28/02/2015 03:48, Patrick McGarry wrote:
+> Yeah, unfortunately some accounts are just not working. There doesn't
+> seem to be a discernible pattern to which ones work and which do not.
+> Before the next CDS I'll be migrating to mediawiki=20
 
-and it would re-schedule a run of the designated jobs from the designated=
- run. But I don't think such a command exist.=20
+Great move ! :-)
 
-I will therefore manually do what such a command would do, for each faile=
-d job:
+> so we have complete
+> control.  However, in the meantime if you are unable to add your
+> blueprint feel free to just email it to me directly and I'll get it up
+> this weekend. Thanks!
+>=20
+> Sorry for the inconvenience.
+>=20
+>=20
+> On Fri, Feb 27, 2015 at 6:58 PM, Sage Weil <sweil@redhat.com> wrote:
+>> On Fri, 27 Feb 2015, kernel neophyte wrote:
+>>> On Fri, Feb 27, 2015 at 3:45 PM, Brad Hubbard <bhubbard@redhat.com> w=
+rote:
+>>>> On 02/28/2015 03:26 AM, Sage Weil wrote:
+>>>>>
+>>>>> On Fri, 27 Feb 2015, kernel neophyte wrote:
+>>>>>>
+>>>>>> Hi,
+>>>>>>
+>>>>>> Could you please point me to any documentation that explains
+>>>>>> creation/contribution to Blueprints for the upcoming cycle ?
+>>>>>>
+>>>>>> The create Infernalis Blueprint button is grayed out and we are
+>>>>>> logging in through our gmail account.
+>>>>>
+>>>>>
+>>>>> https://wiki.ceph.com/Planning/Blueprints/Infernalis
+>>>>>
+>>>>> is the URL to go to.  Once you log in you should be able to submit
+>>>>> something...
+>>>>>
+>>>>> sage
+>>>>> --
+>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
+l" in
+>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>>
+>>>>
+>>>> This doesn't seem to work if you are logging in with a Google accoun=
+t for
+>>>> example.
+>>>
+>>> For ppl with Google Account whats the alternative ?
+>>
+>> Argh... yeah, you're right.  If I log in with my old inktank google
+>> account everything works perfectly, but I tried my personal one and it=
 
-* download http://qa-proxy.ceph.com/teuthology/loic-2015-02-27_20:22:09-r=
-ados-firefly-backports---basic-multi/781444/orig.config.yaml
-* git clone https://github.com/ceph/ceph-qa-suite /srv/ceph-qa-suite
-* cd /srv/ceph-qa-suite ; git checkout firefly (assuming that's the ceph-=
-qa-suite branch I'm interested in)
-* remove the fields:
-   job_id: '781444'
-   last_in_suite: false
-   worker_log: /var/lib/teuthworker/archive/worker_logs/worker.multi.1458=
-8
-* replace the suite_path: field with suite_path: /srv/ceph-qa-suite
-* teuthology-lock --lock enough machines (i.e. one for each element in th=
-e roles: section of the orig.config.yaml)
-* turn the machine list into a consumable file for teuthology : teutholog=
-y-lock --list-targets > targets.yaml=20
-* run teuthology orig.config.yaml targets.yaml
-* wait for the result
-
-Is there a better way to do that ?=20
-
-Cheers
+>> doesn't let me edit...
+>>
+>> Scuttlemonkey, help!
+>>
+>> sage
+>>
+>=20
+>=20
+>=20
 
 --=20
 Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
 
---GHKFtJGwsEA7N2KmlTCPU9Xgkv0mxjm0K
+--Qb4M4lA7IT15gphtU1qgXUnmOPS1Q8wtT
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -73,9 +101,9 @@ Content-Disposition: attachment; filename="signature.asc"
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2.0.22 (GNU/Linux)
 
-iEYEARECAAYFAlTxmFsACgkQ8dLMyEl6F22BWQCaAolTDpftHD/V1hmt91tEK1NG
-j2sAn13Yn4INv8DKrAV18jv3KqA/SiOP
-=CgdY
+iEYEARECAAYFAlTxmLAACgkQ8dLMyEl6F21rxgCgkBa6WqKyQI1wdls6dEIawxX+
++VoAoLBMrdG6u31yqN7kFIzfpxxRmJxg
+=bqlZ
 -----END PGP SIGNATURE-----
 
---GHKFtJGwsEA7N2KmlTCPU9Xgkv0mxjm0K--
+--Qb4M4lA7IT15gphtU1qgXUnmOPS1Q8wtT--
