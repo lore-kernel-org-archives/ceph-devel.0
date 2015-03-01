@@ -1,60 +1,39 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Should we create a "Stable releases" project on tracker.ceph.com
- ?
-Date: Sun, 01 Mar 2015 00:51:36 +0100
-Message-ID: <54F25488.6050703@dachary.org>
+From: Josh Durgin <jdurgin@redhat.com>
+Subject: Re: rbd and the next firefly release
+Date: Sat, 28 Feb 2015 19:16:56 -0500 (EST)
+Message-ID: <1434104180.13097157.1425169016883.JavaMail.zimbra@redhat.com>
+References: <54F24F94.2020402@dachary.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="2aQptE1PmsKVSXhiqlDdCOn1PT3IrQr4h"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:50764 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1750885AbbB1Xvi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 28 Feb 2015 18:51:38 -0500
-Received: from [10.9.0.6] (unknown [10.0.2.28])
-	by smtp.dmail.dachary.org (Postfix) with ESMTP id B8CF842137
-	for <ceph-devel@vger.kernel.org>; Sun,  1 Mar 2015 00:51:36 +0100 (CET)
+Received: from mx4-phx2.redhat.com ([209.132.183.25]:45235 "EHLO
+	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751937AbbCAASA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 28 Feb 2015 19:18:00 -0500
+In-Reply-To: <54F24F94.2020402@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---2aQptE1PmsKVSXhiqlDdCOn1PT3IrQr4h
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+----- Original Message -----
+> From: "Loic Dachary" <loic@dachary.org>
+> To: "Josh Durgin" <jdurgin@redhat.com>
+> Cc: "Ceph Development" <ceph-devel@vger.kernel.org>
+> Sent: Saturday, February 28, 2015 3:30:28 PM
+> Subject: rbd and the next firefly release
+> 
+> Hi Josh,
+> 
+> The rbd teuthology suite for the next firefly release as found in
+> https://github.com/ceph/ceph/commits/firefly-backports is green. The details
+> of the run is at http://tracker.ceph.com/issues/10641#rbd. Note that today's
+> run were to repeat the jobs that failed because of environmental problems
+> (i.e. problems that were fixed by fixing the test suite itself, not by
+> adding a patch to Ceph). Do you think it is ready for QE to start their own
+> round of testing ?
 
-Hi Ceph,
+Looks ready to me!
 
-In the past few weeks I issues in the tracker of the Ceph project to upda=
-te the progress of the ongoing effort to publish stable point releases (i=
-=2Ee. backports) at http://tracker.ceph.com/issues/10640. It started some=
-what messy but turned out to be a convenient point of reference, with one=
- issue for each stable release (see http://tracker.ceph.com/issues/10641 =
-for firefly v0.80.9 for instance). The issues were set a priority "low" b=
-ecause they are squatting the Ceph issue namespace but follow a completel=
-y different workflow.=20
-
-Would it make sense to create a "Stable releases" project in http://track=
-er.ceph.com/ ?
-
-Cheers
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---2aQptE1PmsKVSXhiqlDdCOn1PT3IrQr4h
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlTyVIgACgkQ8dLMyEl6F2379wCgpKIrS1s+rQNMNEXm31ejrccd
-Xm8Anj++772+vyFrQ098wR/UQFDcAU9X
-=u/wY
------END PGP SIGNATURE-----
-
---2aQptE1PmsKVSXhiqlDdCOn1PT3IrQr4h--
+Josh
