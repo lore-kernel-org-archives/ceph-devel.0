@@ -1,66 +1,53 @@
-From: Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
-Subject: Re: Ceph Hammer OSD Shard Tuning Test Results
-Date: Sun, 1 Mar 2015 15:38:19 +0100 (CET)
-Message-ID: <770882624.2513660.1425220699487.JavaMail.zimbra@oxygem.tv>
-References: <54EEA49F.40606@redhat.com>
-	<1096993261.2346577.1425017442692.JavaMail.zimbra@oxygem.tv>
+From: Gregory Farnum <greg@gregs42.com>
+Subject: Re: CephFS and the next firefly release
+Date: Sun, 1 Mar 2015 08:54:09 -0800
+Message-ID: <CAC6JEv_oDvfnMJZZ-52E-pZ1VW52owvbVAvv-wuJCAsq0OE+vg@mail.gmail.com>
+References: <54F1CE4B.5020004@dachary.org>
+	<CAC6JEv9C0g7Kz2eXhzP8-ENVADnHvc+AiRnMvRi6-GwYerEwjA@mail.gmail.com>
+	<54F2E787.90003@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <1334533598.2513656.1425220674977.JavaMail.zimbra-M8QNeUgB6UTyG1zEObXtfA@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Mark Nelson <mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ig0-f170.google.com ([209.85.213.170]:45741 "EHLO
+	mail-ig0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751967AbbCAQyL convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 1 Mar 2015 11:54:11 -0500
+Received: by igjz20 with SMTP id z20so11672585igj.4
+        for <ceph-devel@vger.kernel.org>; Sun, 01 Mar 2015 08:54:10 -0800 (PST)
+Received: from mail-ie0-f172.google.com (mail-ie0-f172.google.com. [209.85.223.172])
+        by mx.google.com with ESMTPSA id n17sm5599025igi.2.2015.03.01.08.54.09
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Sun, 01 Mar 2015 08:54:10 -0800 (PST)
+Received: by iecat20 with SMTP id at20so42333378iec.12
+        for <ceph-devel@vger.kernel.org>; Sun, 01 Mar 2015 08:54:09 -0800 (PST)
+In-Reply-To: <54F2E787.90003@dachary.org>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-SGkgTWFyaywKCkkgZm91bmQgYW4gcHJldmlvdXMgYmVuY2ggZnJvbSBWdSBQaGFtIChpdCdzIHdh
-cyBhYm91dCBzaW1wbGVtZXNzZW5nZXIgdnMgeGlvbWVzc2VuZ2VyKQoKaHR0cDovL3d3dy5zcGlu
-aWNzLm5ldC9saXN0cy9jZXBoLWRldmVsL21zZzIyNDE0Lmh0bWwKCmFuZCB3aXRoIDEgb3NkLCBo
-ZSB3YXMgYWJsZSB0byByZWFjaCAxMDVrIGlvcHMgd2l0aCBzaW1wbGUgbWVzc2VuZ2VyCgouIH4x
-MDVrIGlvcHMgKDRLIHJhbmRvbSByZWFkLCAyMCBjb3JlcyB1c2VkLCBudW1qb2JzPTgsIGlvcGRl
-cHRoPTMyKQoKdGhpcyB3YXMgd2l0aCBtb3JlIHBvd2VyZnVsbCBub2RlcywgYnV0IHRoZSBkaWZm
-ZXJlbmNlIHNlZW0gdG8gYmUgcXVpdGUgaHVnZQoKCgotLS0tLSBNYWlsIG9yaWdpbmFsIC0tLS0t
-CkRlOiAiYWRlcnVtaWVyIiA8YWRlcnVtaWVyQG9kaXNvLmNvbT4Kw4A6ICJNYXJrIE5lbHNvbiIg
-PG1uZWxzb25AcmVkaGF0LmNvbT4KQ2M6ICJjZXBoLWRldmVsIiA8Y2VwaC1kZXZlbEB2Z2VyLmtl
-cm5lbC5vcmc+LCAiY2VwaC11c2VycyIgPGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20+CkVudm95
-w6k6IFZlbmRyZWRpIDI3IEbDqXZyaWVyIDIwMTUgMDc6MTA6NDIKT2JqZXQ6IFJlOiBbY2VwaC11
-c2Vyc10gQ2VwaCBIYW1tZXIgT1NEIFNoYXJkIFR1bmluZyBUZXN0IFJlc3VsdHMKClRoYW5rcyBN
-YXJrIGZvciB0aGUgcmVzdWx0cywgCmRlZmF1bHQgdmFsdWVzIHNlZW0gdG8gYmUgcXVpdGUgcmVz
-b25hYmxlIGluZGVlZC4gCgoKSSBhbHNvIHdvbmRlciBpcyBjcHUgZnJlcXVlbmN5IGNhbiBoYXZl
-IGFuIGltcGFjdCBvbiBsYXRlbmN5IG9yIG5vdC4gCkknbSBnb2luZyB0byBiZW5jaG1hcmsgb24g
-ZHVhbCB4ZW9uIDEwLWNvcmVzIDMsMWdoeiBub2RlcyBpbiBjb21pbmcgd2Vla3MsIApJJ2xsIHRy
-eSByZXBsYXkgeW91ciBiZW5jaG1hcmsgdG8gY29tcGFyZSAKCgoKLS0tLS0gTWFpbCBvcmlnaW5h
-bCAtLS0tLSAKRGU6ICJNYXJrIE5lbHNvbiIgPG1uZWxzb25AcmVkaGF0LmNvbT4gCsOAOiAiY2Vw
-aC1kZXZlbCIgPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPiwgImNlcGgtdXNlcnMiIDxjZXBo
-LXVzZXJzQGxpc3RzLmNlcGguY29tPiAKRW52b3nDqTogSmV1ZGkgMjYgRsOpdnJpZXIgMjAxNSAw
-NTo0NDoxNSAKT2JqZXQ6IFtjZXBoLXVzZXJzXSBDZXBoIEhhbW1lciBPU0QgU2hhcmQgVHVuaW5n
-IFRlc3QgUmVzdWx0cyAKCkhpIEV2ZXJ5b25lLCAKCkluIHRoZSBDZXBoIER1bXBsaW5nL0ZpcmVm
-bHkvSGFtbWVyIFNTRC9NZW1zdG9yZSBwZXJmb3JtYW5jZSBjb21wYXJpc29uIAp0aHJlYWQsIEFs
-ZXhhbmRyZSBERVJVTUlFUiB3b25kZXJlZCBpZiBjaGFuZ2luZyB0aGUgZGVmYXVsdCBzaGFyZCBh
-bmQgCnRocmVhZHMgcGVyIHNoYXJkIE9TRCBzZXR0aW5ncyBtaWdodCBoYXZlIGEgcG9zaXRpdmUg
-ZWZmZWN0IG9uIApwZXJmb3JtYW5jZSBpbiBvdXIgdGVzdHMuIEkgd2VudCBiYWNrIGFuZCB1c2Vk
-IG9uZSBvZiB0aGUgUENJZSBTU0RzIApmcm9tIG91ciBwcmV2aW91cyB0ZXN0cyB0byBleHBlcmlt
-ZW50IHdpdGggYSByZWNlbnQgbWFzdGVyIHB1bGwuIEkgCndhbnRlZCB0byBrbm93IGhvdyBwZXJm
-b3JtYW5jZSB3YXMgYWZmZWN0ZWQgYnkgY2hhbmdpbmcgdGhlc2UgcGFyYW1ldGVycyAKYW5kIGFs
-c28gdG8gdmFsaWRhdGUgdGhhdCB0aGUgZGVmYXVsdCBzZXR0aW5ncyBzdGlsbCBhcHBlYXIgdG8g
-YmUgY29ycmVjdC4gCgpJIHBsYW4gdG8gY29uZHVjdCBtb3JlIHRlc3RzIChwb3RlbnRpYWxseSBh
-Y3Jvc3MgbXVsdGlwbGUgU0FUQSBTU0RzIGluIAp0aGUgc2FtZSBib3gpLCBidXQgdGhlc2UgaW5p
-dGlhbCByZXN1bHRzIHNlZW0gdG8gc2hvdyB0aGF0IHRoZSBkZWZhdWx0IApzZXR0aW5ncyB0aGF0
-IHdlcmUgY2hvc2VuIGFyZSBxdWl0ZSByZWFzb25hYmxlLiAKCk1hcmsgCgpfX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXyAKY2VwaC11c2VycyBtYWlsaW5nIGxp
-c3QgCmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20gCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0
-aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbSAKCl9fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fIApjZXBoLXVzZXJzIG1haWxpbmcgbGlzdCAKY2VwaC11c2Vy
-c0BsaXN0cy5jZXBoLmNvbSAKaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBo
-LXVzZXJzLWNlcGguY29tIApfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29t
-Cmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
+On Sun, Mar 1, 2015 at 2:18 AM, Loic Dachary <loic@dachary.org> wrote:
+> Hi Greg,
+>
+> On 01/03/2015 06:00, Gregory Farnum wrote:
+>> On Sat, Feb 28, 2015 at 6:18 AM, Loic Dachary <loic@dachary.org> wrote:
+>>> Hi Greg,
+>>>
+>>> The fs teuthology suite for the next firefly release as found in https://github.com/ceph/ceph/commits/firefly-backports came back with three failures : http://tracker.ceph.com/issues/10641#fs. Do you think it is ready for QE to start their own round of testing ?
+>>>
+>>> Cheers
+>>>
+>>> P.S. I'll include the fs suite as part of the pre-QE round of testing from now on, unless you think it is redundant or not useful.
+>>
+>> It'd be nice to see those tests run on a new enough kernel that they
+>> pass,
+>
+> Is there an open issue for this or should I create one ?
+
+Not to do it automatically, no. That's made difficult since it just
+runs as part of the generic workunits (which otherwise don't need a
+kernel of any particular kind) and we actually want to run across a
+variety of kernels to detect other bugs.
+-Greg
