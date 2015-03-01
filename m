@@ -1,73 +1,36 @@
-From: Kevin Walker <kwalker-pYqZGqgoM+uYSp6vjtUHMV6hYfS7NtTn@public.gmane.org>
-Subject: Re: Ceph Hammer OSD Shard Tuning Test Results
-Date: Mon, 2 Mar 2015 01:49:23 +0400
-Message-ID: <8C016FD9-486C-433A-B4D8-08E5D9A51564@virtualviolet.net>
-References: <54EEA49F.40606@redhat.com>
-	<1096993261.2346577.1425017442692.JavaMail.zimbra@oxygem.tv>
-	<770882624.2513660.1425220699487.JavaMail.zimbra@oxygem.tv>
-Mime-Version: 1.0 (1.0)
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <770882624.2513660.1425220699487.JavaMail.zimbra-M8QNeUgB6UTyG1zEObXtfA@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+From: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+Subject: Re: v0.93 Hammer release candidate released
+Date: Sun, 01 Mar 2015 23:04:49 +0100
+Message-ID: <54F38D01.6070200@bisect.de>
+References: <alpine.DEB.2.00.1502271408230.1577@cobra.newdream.net>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:37197 "EHLO
+	wp188.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751202AbbCAWEy (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 1 Mar 2015 17:04:54 -0500
+In-Reply-To: <alpine.DEB.2.00.1502271408230.1577@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
 
-Q2FuIEkgYXNrIHdoYXQgeGlvIGFuZCBzaW1wbGUgbWVzc2VuZ2VyIGFyZSBhbmQgdGhlIGRpZmZl
-cmVuY2VzPwoKS2luZCByZWdhcmRzCgpLZXZpbiBXYWxrZXIKKzk2OCA5NzY1IDE3NDIKCk9uIDEg
-TWFyIDIwMTUsIGF0IDE4OjM4LCBBbGV4YW5kcmUgREVSVU1JRVIgPGFkZXJ1bWllckBvZGlzby5j
-b20+IHdyb3RlOgoKSGkgTWFyaywKCkkgZm91bmQgYW4gcHJldmlvdXMgYmVuY2ggZnJvbSBWdSBQ
-aGFtIChpdCdzIHdhcyBhYm91dCBzaW1wbGVtZXNzZW5nZXIgdnMgeGlvbWVzc2VuZ2VyKQoKaHR0
-cDovL3d3dy5zcGluaWNzLm5ldC9saXN0cy9jZXBoLWRldmVsL21zZzIyNDE0Lmh0bWwKCmFuZCB3
-aXRoIDEgb3NkLCBoZSB3YXMgYWJsZSB0byByZWFjaCAxMDVrIGlvcHMgd2l0aCBzaW1wbGUgbWVz
-c2VuZ2VyCgouIH4xMDVrIGlvcHMgKDRLIHJhbmRvbSByZWFkLCAyMCBjb3JlcyB1c2VkLCBudW1q
-b2JzPTgsIGlvcGRlcHRoPTMyKQoKdGhpcyB3YXMgd2l0aCBtb3JlIHBvd2VyZnVsbCBub2Rlcywg
-YnV0IHRoZSBkaWZmZXJlbmNlIHNlZW0gdG8gYmUgcXVpdGUgaHVnZQoKCgotLS0tLSBNYWlsIG9y
-aWdpbmFsIC0tLS0tCkRlOiAiYWRlcnVtaWVyIiA8YWRlcnVtaWVyQG9kaXNvLmNvbT4Kw4A6ICJN
-YXJrIE5lbHNvbiIgPG1uZWxzb25AcmVkaGF0LmNvbT4KQ2M6ICJjZXBoLWRldmVsIiA8Y2VwaC1k
-ZXZlbEB2Z2VyLmtlcm5lbC5vcmc+LCAiY2VwaC11c2VycyIgPGNlcGgtdXNlcnNAbGlzdHMuY2Vw
-aC5jb20+CkVudm95w6k6IFZlbmRyZWRpIDI3IEbDqXZyaWVyIDIwMTUgMDc6MTA6NDIKT2JqZXQ6
-IFJlOiBbY2VwaC11c2Vyc10gQ2VwaCBIYW1tZXIgT1NEIFNoYXJkIFR1bmluZyBUZXN0IFJlc3Vs
-dHMKClRoYW5rcyBNYXJrIGZvciB0aGUgcmVzdWx0cywgCmRlZmF1bHQgdmFsdWVzIHNlZW0gdG8g
-YmUgcXVpdGUgcmVzb25hYmxlIGluZGVlZC4gCgoKSSBhbHNvIHdvbmRlciBpcyBjcHUgZnJlcXVl
-bmN5IGNhbiBoYXZlIGFuIGltcGFjdCBvbiBsYXRlbmN5IG9yIG5vdC4gCkknbSBnb2luZyB0byBi
-ZW5jaG1hcmsgb24gZHVhbCB4ZW9uIDEwLWNvcmVzIDMsMWdoeiBub2RlcyBpbiBjb21pbmcgd2Vl
-a3MsIApJJ2xsIHRyeSByZXBsYXkgeW91ciBiZW5jaG1hcmsgdG8gY29tcGFyZSAKCgoKLS0tLS0g
-TWFpbCBvcmlnaW5hbCAtLS0tLSAKRGU6ICJNYXJrIE5lbHNvbiIgPG1uZWxzb25AcmVkaGF0LmNv
-bT4gCsOAOiAiY2VwaC1kZXZlbCIgPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPiwgImNlcGgt
-dXNlcnMiIDxjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tPiAKRW52b3nDqTogSmV1ZGkgMjYgRsOp
-dnJpZXIgMjAxNSAwNTo0NDoxNSAKT2JqZXQ6IFtjZXBoLXVzZXJzXSBDZXBoIEhhbW1lciBPU0Qg
-U2hhcmQgVHVuaW5nIFRlc3QgUmVzdWx0cyAKCkhpIEV2ZXJ5b25lLCAKCkluIHRoZSBDZXBoIER1
-bXBsaW5nL0ZpcmVmbHkvSGFtbWVyIFNTRC9NZW1zdG9yZSBwZXJmb3JtYW5jZSBjb21wYXJpc29u
-IAp0aHJlYWQsIEFsZXhhbmRyZSBERVJVTUlFUiB3b25kZXJlZCBpZiBjaGFuZ2luZyB0aGUgZGVm
-YXVsdCBzaGFyZCBhbmQgCnRocmVhZHMgcGVyIHNoYXJkIE9TRCBzZXR0aW5ncyBtaWdodCBoYXZl
-IGEgcG9zaXRpdmUgZWZmZWN0IG9uIApwZXJmb3JtYW5jZSBpbiBvdXIgdGVzdHMuIEkgd2VudCBi
-YWNrIGFuZCB1c2VkIG9uZSBvZiB0aGUgUENJZSBTU0RzIApmcm9tIG91ciBwcmV2aW91cyB0ZXN0
-cyB0byBleHBlcmltZW50IHdpdGggYSByZWNlbnQgbWFzdGVyIHB1bGwuIEkgCndhbnRlZCB0byBr
-bm93IGhvdyBwZXJmb3JtYW5jZSB3YXMgYWZmZWN0ZWQgYnkgY2hhbmdpbmcgdGhlc2UgcGFyYW1l
-dGVycyAKYW5kIGFsc28gdG8gdmFsaWRhdGUgdGhhdCB0aGUgZGVmYXVsdCBzZXR0aW5ncyBzdGls
-bCBhcHBlYXIgdG8gYmUgY29ycmVjdC4gCgpJIHBsYW4gdG8gY29uZHVjdCBtb3JlIHRlc3RzIChw
-b3RlbnRpYWxseSBhY3Jvc3MgbXVsdGlwbGUgU0FUQSBTU0RzIGluIAp0aGUgc2FtZSBib3gpLCBi
-dXQgdGhlc2UgaW5pdGlhbCByZXN1bHRzIHNlZW0gdG8gc2hvdyB0aGF0IHRoZSBkZWZhdWx0IApz
-ZXR0aW5ncyB0aGF0IHdlcmUgY2hvc2VuIGFyZSBxdWl0ZSByZWFzb25hYmxlLiAKCk1hcmsgCgpf
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXyAKY2VwaC11c2Vy
-cyBtYWlsaW5nIGxpc3QgCmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20gCmh0dHA6Ly9saXN0cy5j
-ZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbSAKCl9fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fIApjZXBoLXVzZXJzIG1haWxpbmcgbGlz
-dCAKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbSAKaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3Rp
-bmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tIApfX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxp
-c3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vy
-cy1jZXBoLmNvbQpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-XwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6
-Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
+Am 27.02.2015 um 23:10 schrieb Sage Weil:
+> This is the first release candidate for Hammer, and includes all
+> of the features that will be present in the final release.  We
+> welcome and encourage any and all testing in non-production
+> clusters to identify any problems with functionality, stability, or
+> performance before the final Hammer release.
+> 
+> We suggest some caution in one area: librbd.  There is a lot of
+> new functionality around object maps and locking that is disabled
+> by default but may still affect stability for existing images.  We
+> are continuing to shake out those bugs so that the final Hammer
+> release (probably v0.94) will be stable.
+
+I've opened bug #10981. This one should get fixed for Hammer GM since
+the core code of ceph shouldn't throw any -Wdeprecated-declarations
+warnings during compilation.
+
+Danny
