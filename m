@@ -1,126 +1,66 @@
-From: Danny Al-Gaaf <danny.al-gaaf-2YacvwyR+KOzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [Manila] Ceph native driver for manila
-Date: Sun, 01 Mar 2015 15:07:36 +0100
-Message-ID: <54F31D28.9050103@bisect.de>
-References: <alpine.DEB.2.00.1502261602390.23918@cobra.newdream.net>
-Reply-To: "OpenStack Development Mailing List \(not for usage questions\)"
- <openstack-dev-ZwoEplunGu0gQVYkTtqAhEB+6BGkLq7r@public.gmane.org>
+From: Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
+Subject: Re: Ceph Hammer OSD Shard Tuning Test Results
+Date: Sun, 1 Mar 2015 15:38:19 +0100 (CET)
+Message-ID: <770882624.2513660.1425220699487.JavaMail.zimbra@oxygem.tv>
+References: <54EEA49F.40606@redhat.com>
+	<1096993261.2346577.1425017442692.JavaMail.zimbra@oxygem.tv>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <openstack-dev-bounces+god-openstack-dev=m.gmane.org-ZwoEplunGu0gQVYkTtqAhEB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.00.1502261602390.23918-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
-List-Unsubscribe: <http://lists.openstack.org/cgi-bin/mailman/options/openstack-dev>,
- <mailto:openstack-dev-request-ZwoEplunGu0gQVYkTtqAhEB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.openstack.org/pipermail/openstack-dev>
-List-Post: <mailto:openstack-dev-ZwoEplunGu0gQVYkTtqAhEB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:openstack-dev-request-ZwoEplunGu0gQVYkTtqAhEB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.openstack.org/cgi-bin/mailman/listinfo/openstack-dev>,
- <mailto:openstack-dev-request-ZwoEplunGu0gQVYkTtqAhEB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Errors-To: openstack-dev-bounces+god-openstack-dev=m.gmane.org-ZwoEplunGu0gQVYkTtqAhEB+6BGkLq7r@public.gmane.org
-To: "OpenStack Development Mailing List (not for usage questions)" <openstack-dev-ZwoEplunGu0gQVYkTtqAhEB+6BGkLq7r@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <1334533598.2513656.1425220674977.JavaMail.zimbra-M8QNeUgB6UTyG1zEObXtfA@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Mark Nelson <mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-Am 27.02.2015 um 01:04 schrieb Sage Weil:
-> [sorry for ceph-devel double-post, forgot to include
-> openstack-dev]
-> 
-> Hi everyone,
-> 
-> The online Ceph Developer Summit is next week[1] and among other
-> things we'll be talking about how to support CephFS in Manila.  At
-> a high level, there are basically two paths:
-
-We discussed the CephFS Manila topic also on the last Manila Midcycle
-Meetup (Kilo) [1][2]
-
-> 2) Native CephFS driver
-> 
-> As I currently understand it,
-> 
-> - The driver will set up CephFS auth credentials so that the guest
-> VM can mount CephFS directly - The guest VM will need access to the
-> Ceph network.  That makes this mainly interesting for private
-> clouds and trusted environments. - The guest is responsible for
-> running 'mount -t ceph ...'. - I'm not sure how we provide the auth
-> credential to the user/guest...
-
-The auth credentials need to be handled currently by a application
-orchestration solution I guess. I see currently no solution on the
-Manila layer level atm.
-
-If Ceph would provide OpenStack Keystone authentication for
-rados/cephfs instead of CephX, it could be handled via app orch easily.
-
-> This would perform better than an NFS gateway, but there are
-> several gaps on the security side that make this unusable currently
-> in an untrusted environment:
-> 
-> - The CephFS MDS auth credentials currently are _very_ basic.  As
-> in, binary: can this host mount or it cannot.  We have the auth cap
-> string parsing in place to restrict to a subdirectory (e.g., this
-> tenant can only mount /tenants/foo), but the MDS does not enforce
-> this yet.  [medium project to add that]
-> 
-> - The same credential could be used directly via librados to access
-> the data pool directly, regardless of what the MDS has to say about
-> the namespace.  There are two ways around this:
-> 
-> 1- Give each tenant a separate rados pool.  This works today.
-> You'd set a directory policy that puts all files created in that
-> subdirectory in that tenant's pool, then only let the client access
-> those rados pools.
-> 
-> 1a- We currently lack an MDS auth capability that restricts which 
-> clients get to change that policy.  [small project]
-> 
-> 2- Extend the MDS file layouts to use the rados namespaces so that
->  users can be separated within the same rados pool.  [Medium
-> project]
-> 
-> 3- Something fancy with MDS-generated capabilities specifying which
->  rados objects clients get to read.  This probably falls in the
-> category of research, although there are some papers we've seen
-> that look promising. [big project]
-> 
-> Anyway, this leads to a few questions:
-> 
-> - Who is interested in using Manila to attach CephFS to guest VMs? 
-> - What use cases are you interested? - How important is security in
-> your environment?
-
-As you know we (Deutsche Telekom) are may interested to provide shared
-filesystems via CephFS to VMs instead of e.g. via NFS. We can
-provide/discuss use cases at CDS.
-
-For us security is very critical, as the performance is too. The first
-solution via ganesha is not what we prefer (to use CephFS via p9 and
-NFS would not perform that well I guess). The second solution, to use
-CephFS directly to the VM would be a bad solution from the security
-point of view since we can't expose the Ceph public network directly
-to the VMs to prevent all the security issues we discussed already.
-
-We discussed during the Midcycle a third option:
-
-Mount CephFS directly on the host system and provide the filesystem to
-the VMs via p9/virtfs. This need nova integration (I will work on a
-POC patch for this) to setup libvirt config correctly for virtfs. This
-solve the security issue and the auth key distribution for the VMs,
-but it may introduces performance issues due to virtfs usage. We have
-to check what the specific performance impact will be. Currently this
-is the preferred solution for our use cases.
-
-What's still missing in this solution is user/tenant/subtree
-separation as in the 2th option. But this is needed anyway for CephFS
-in general.
-
-Danny
-
-[1] https://etherpad.openstack.org/p/manila-kilo-midcycle-meetup
-[2] https://etherpad.openstack.org/p/manila-meetup-winter-2015
-
-
-__________________________________________________________________________
-OpenStack Development Mailing List (not for usage questions)
-Unsubscribe: OpenStack-dev-request-ZwoEplunGu0gQVYkTtqAhEB+6BGkLq7r@public.gmane.org?subject:unsubscribe
-http://lists.openstack.org/cgi-bin/mailman/listinfo/openstack-dev
+SGkgTWFyaywKCkkgZm91bmQgYW4gcHJldmlvdXMgYmVuY2ggZnJvbSBWdSBQaGFtIChpdCdzIHdh
+cyBhYm91dCBzaW1wbGVtZXNzZW5nZXIgdnMgeGlvbWVzc2VuZ2VyKQoKaHR0cDovL3d3dy5zcGlu
+aWNzLm5ldC9saXN0cy9jZXBoLWRldmVsL21zZzIyNDE0Lmh0bWwKCmFuZCB3aXRoIDEgb3NkLCBo
+ZSB3YXMgYWJsZSB0byByZWFjaCAxMDVrIGlvcHMgd2l0aCBzaW1wbGUgbWVzc2VuZ2VyCgouIH4x
+MDVrIGlvcHMgKDRLIHJhbmRvbSByZWFkLCAyMCBjb3JlcyB1c2VkLCBudW1qb2JzPTgsIGlvcGRl
+cHRoPTMyKQoKdGhpcyB3YXMgd2l0aCBtb3JlIHBvd2VyZnVsbCBub2RlcywgYnV0IHRoZSBkaWZm
+ZXJlbmNlIHNlZW0gdG8gYmUgcXVpdGUgaHVnZQoKCgotLS0tLSBNYWlsIG9yaWdpbmFsIC0tLS0t
+CkRlOiAiYWRlcnVtaWVyIiA8YWRlcnVtaWVyQG9kaXNvLmNvbT4Kw4A6ICJNYXJrIE5lbHNvbiIg
+PG1uZWxzb25AcmVkaGF0LmNvbT4KQ2M6ICJjZXBoLWRldmVsIiA8Y2VwaC1kZXZlbEB2Z2VyLmtl
+cm5lbC5vcmc+LCAiY2VwaC11c2VycyIgPGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20+CkVudm95
+w6k6IFZlbmRyZWRpIDI3IEbDqXZyaWVyIDIwMTUgMDc6MTA6NDIKT2JqZXQ6IFJlOiBbY2VwaC11
+c2Vyc10gQ2VwaCBIYW1tZXIgT1NEIFNoYXJkIFR1bmluZyBUZXN0IFJlc3VsdHMKClRoYW5rcyBN
+YXJrIGZvciB0aGUgcmVzdWx0cywgCmRlZmF1bHQgdmFsdWVzIHNlZW0gdG8gYmUgcXVpdGUgcmVz
+b25hYmxlIGluZGVlZC4gCgoKSSBhbHNvIHdvbmRlciBpcyBjcHUgZnJlcXVlbmN5IGNhbiBoYXZl
+IGFuIGltcGFjdCBvbiBsYXRlbmN5IG9yIG5vdC4gCkknbSBnb2luZyB0byBiZW5jaG1hcmsgb24g
+ZHVhbCB4ZW9uIDEwLWNvcmVzIDMsMWdoeiBub2RlcyBpbiBjb21pbmcgd2Vla3MsIApJJ2xsIHRy
+eSByZXBsYXkgeW91ciBiZW5jaG1hcmsgdG8gY29tcGFyZSAKCgoKLS0tLS0gTWFpbCBvcmlnaW5h
+bCAtLS0tLSAKRGU6ICJNYXJrIE5lbHNvbiIgPG1uZWxzb25AcmVkaGF0LmNvbT4gCsOAOiAiY2Vw
+aC1kZXZlbCIgPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPiwgImNlcGgtdXNlcnMiIDxjZXBo
+LXVzZXJzQGxpc3RzLmNlcGguY29tPiAKRW52b3nDqTogSmV1ZGkgMjYgRsOpdnJpZXIgMjAxNSAw
+NTo0NDoxNSAKT2JqZXQ6IFtjZXBoLXVzZXJzXSBDZXBoIEhhbW1lciBPU0QgU2hhcmQgVHVuaW5n
+IFRlc3QgUmVzdWx0cyAKCkhpIEV2ZXJ5b25lLCAKCkluIHRoZSBDZXBoIER1bXBsaW5nL0ZpcmVm
+bHkvSGFtbWVyIFNTRC9NZW1zdG9yZSBwZXJmb3JtYW5jZSBjb21wYXJpc29uIAp0aHJlYWQsIEFs
+ZXhhbmRyZSBERVJVTUlFUiB3b25kZXJlZCBpZiBjaGFuZ2luZyB0aGUgZGVmYXVsdCBzaGFyZCBh
+bmQgCnRocmVhZHMgcGVyIHNoYXJkIE9TRCBzZXR0aW5ncyBtaWdodCBoYXZlIGEgcG9zaXRpdmUg
+ZWZmZWN0IG9uIApwZXJmb3JtYW5jZSBpbiBvdXIgdGVzdHMuIEkgd2VudCBiYWNrIGFuZCB1c2Vk
+IG9uZSBvZiB0aGUgUENJZSBTU0RzIApmcm9tIG91ciBwcmV2aW91cyB0ZXN0cyB0byBleHBlcmlt
+ZW50IHdpdGggYSByZWNlbnQgbWFzdGVyIHB1bGwuIEkgCndhbnRlZCB0byBrbm93IGhvdyBwZXJm
+b3JtYW5jZSB3YXMgYWZmZWN0ZWQgYnkgY2hhbmdpbmcgdGhlc2UgcGFyYW1ldGVycyAKYW5kIGFs
+c28gdG8gdmFsaWRhdGUgdGhhdCB0aGUgZGVmYXVsdCBzZXR0aW5ncyBzdGlsbCBhcHBlYXIgdG8g
+YmUgY29ycmVjdC4gCgpJIHBsYW4gdG8gY29uZHVjdCBtb3JlIHRlc3RzIChwb3RlbnRpYWxseSBh
+Y3Jvc3MgbXVsdGlwbGUgU0FUQSBTU0RzIGluIAp0aGUgc2FtZSBib3gpLCBidXQgdGhlc2UgaW5p
+dGlhbCByZXN1bHRzIHNlZW0gdG8gc2hvdyB0aGF0IHRoZSBkZWZhdWx0IApzZXR0aW5ncyB0aGF0
+IHdlcmUgY2hvc2VuIGFyZSBxdWl0ZSByZWFzb25hYmxlLiAKCk1hcmsgCgpfX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXyAKY2VwaC11c2VycyBtYWlsaW5nIGxp
+c3QgCmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20gCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0
+aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbSAKCl9fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fIApjZXBoLXVzZXJzIG1haWxpbmcgbGlzdCAKY2VwaC11c2Vy
+c0BsaXN0cy5jZXBoLmNvbSAKaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBo
+LXVzZXJzLWNlcGguY29tIApfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29t
+Cmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
