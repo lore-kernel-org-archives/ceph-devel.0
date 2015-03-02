@@ -1,16 +1,10 @@
-From: Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
-Subject: Re: Ceph Hammer OSD Shard Tuning Test Results
-Date: Mon, 2 Mar 2015 07:42:05 +0100 (CET)
-Message-ID: <34434058.2571235.1425278525490.JavaMail.zimbra@oxygem.tv>
-References: <54EEA49F.40606@redhat.com>
-	<1096993261.2346577.1425017442692.JavaMail.zimbra@oxygem.tv>
-	<770882624.2513660.1425220699487.JavaMail.zimbra@oxygem.tv>
-	<8C016FD9-486C-433A-B4D8-08E5D9A51564@virtualviolet.net>
+From: "baijiaruo-KN7UnAbNpbg@public.gmane.org" <baijiaruo-KN7UnAbNpbg@public.gmane.org>
+Subject: question about rgw create bucket
+Date: Mon, 2 Mar 2015 14:59:30 +0800
+Message-ID: <201503021459292689295@126.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: multipart/mixed; boundary="===============0490364883=="
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <268261243.2571232.1425278514343.JavaMail.zimbra-M8QNeUgB6UTyG1zEObXtfA@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -20,68 +14,85 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Kevin Walker <kwalker-pYqZGqgoM+uYSp6vjtUHMV6hYfS7NtTn@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, =?GB2312?B?Q2VwaD9EZXZlbG9wbWVudA==?= <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-Pj5DYW4gSSBhc2sgd2hhdCB4aW8gYW5kIHNpbXBsZSBtZXNzZW5nZXIgYXJlIGFuZCB0aGUgZGlm
-ZmVyZW5jZXM/IAoKc2ltcGxlIG1lc3NlbmdlciBpcyB0aGUgY2xhc3NpYyBtZXNzZW5nZXIgcHJv
-dG9jb2wgdXNlZCBzaW5jZSB0aGUgYmVnaW5pbmcgb2YgY2VwaC4KeGlvIG1lc3NlbmdlciBpcyBm
-b3IgcmRtYSAoaW5maW5pYmFuZCBvciBSb2NlIG92ZXIgZXRoZXJuZXQpCnRoZXkgYXJlIGFsc28g
-YSBuZXcgYXN5bmMgbWVzc2VuZ2VyLgoKVGhleSBzaG91bGQgaGVscCB0byByZWR1Y2UgbGF0ZW5j
-aWVzIChhbmQgYWxzbyBjcHUgdXNhZ2UgZm9yIHJkbWEsIGJlY2F1c2UgeW91IGRvbid0IGhhdmUg
-dGNwIG92ZXJoZWFkKQoKCi0tLS0tIE1haWwgb3JpZ2luYWwgLS0tLS0KRGU6ICJLZXZpbiBXYWxr
-ZXIiIDxrd2Fsa2VyQHZpcnR1YWx2aW9sZXQubmV0PgrDgDogImFkZXJ1bWllciIgPGFkZXJ1bWll
-ckBvZGlzby5jb20+CkNjOiAiTWFyayBOZWxzb24iIDxtbmVsc29uQHJlZGhhdC5jb20+LCAiY2Vw
-aC1kZXZlbCIgPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPiwgImNlcGgtdXNlcnMiIDxjZXBo
-LXVzZXJzQGxpc3RzLmNlcGguY29tPgpFbnZvecOpOiBEaW1hbmNoZSAxIE1hcnMgMjAxNSAyMjo0
-OToyMwpPYmpldDogUmU6IFtjZXBoLXVzZXJzXSBDZXBoIEhhbW1lciBPU0QgU2hhcmQgVHVuaW5n
-IFRlc3QgUmVzdWx0cwoKQ2FuIEkgYXNrIHdoYXQgeGlvIGFuZCBzaW1wbGUgbWVzc2VuZ2VyIGFy
-ZSBhbmQgdGhlIGRpZmZlcmVuY2VzPyAKCktpbmQgcmVnYXJkcyAKCktldmluIFdhbGtlciAKKzk2
-OCA5NzY1IDE3NDIgCgpPbiAxIE1hciAyMDE1LCBhdCAxODozOCwgQWxleGFuZHJlIERFUlVNSUVS
-IDxhZGVydW1pZXJAb2Rpc28uY29tPiB3cm90ZTogCgpIaSBNYXJrLCAKCkkgZm91bmQgYW4gcHJl
-dmlvdXMgYmVuY2ggZnJvbSBWdSBQaGFtIChpdCdzIHdhcyBhYm91dCBzaW1wbGVtZXNzZW5nZXIg
-dnMgeGlvbWVzc2VuZ2VyKSAKCmh0dHA6Ly93d3cuc3Bpbmljcy5uZXQvbGlzdHMvY2VwaC1kZXZl
-bC9tc2cyMjQxNC5odG1sIAoKYW5kIHdpdGggMSBvc2QsIGhlIHdhcyBhYmxlIHRvIHJlYWNoIDEw
-NWsgaW9wcyB3aXRoIHNpbXBsZSBtZXNzZW5nZXIgCgouIH4xMDVrIGlvcHMgKDRLIHJhbmRvbSBy
-ZWFkLCAyMCBjb3JlcyB1c2VkLCBudW1qb2JzPTgsIGlvcGRlcHRoPTMyKSAKCnRoaXMgd2FzIHdp
-dGggbW9yZSBwb3dlcmZ1bGwgbm9kZXMsIGJ1dCB0aGUgZGlmZmVyZW5jZSBzZWVtIHRvIGJlIHF1
-aXRlIGh1Z2UgCgoKCi0tLS0tIE1haWwgb3JpZ2luYWwgLS0tLS0gCkRlOiAiYWRlcnVtaWVyIiA8
-YWRlcnVtaWVyQG9kaXNvLmNvbT4gCsOAOiAiTWFyayBOZWxzb24iIDxtbmVsc29uQHJlZGhhdC5j
-b20+IApDYzogImNlcGgtZGV2ZWwiIDxjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZz4sICJjZXBo
-LXVzZXJzIiA8Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbT4gCkVudm95w6k6IFZlbmRyZWRpIDI3
-IEbDqXZyaWVyIDIwMTUgMDc6MTA6NDIgCk9iamV0OiBSZTogW2NlcGgtdXNlcnNdIENlcGggSGFt
-bWVyIE9TRCBTaGFyZCBUdW5pbmcgVGVzdCBSZXN1bHRzIAoKVGhhbmtzIE1hcmsgZm9yIHRoZSBy
-ZXN1bHRzLCAKZGVmYXVsdCB2YWx1ZXMgc2VlbSB0byBiZSBxdWl0ZSByZXNvbmFibGUgaW5kZWVk
-LiAKCgpJIGFsc28gd29uZGVyIGlzIGNwdSBmcmVxdWVuY3kgY2FuIGhhdmUgYW4gaW1wYWN0IG9u
-IGxhdGVuY3kgb3Igbm90LiAKSSdtIGdvaW5nIHRvIGJlbmNobWFyayBvbiBkdWFsIHhlb24gMTAt
-Y29yZXMgMywxZ2h6IG5vZGVzIGluIGNvbWluZyB3ZWVrcywgCkknbGwgdHJ5IHJlcGxheSB5b3Vy
-IGJlbmNobWFyayB0byBjb21wYXJlIAoKCgotLS0tLSBNYWlsIG9yaWdpbmFsIC0tLS0tIApEZTog
-Ik1hcmsgTmVsc29uIiA8bW5lbHNvbkByZWRoYXQuY29tPiAKw4A6ICJjZXBoLWRldmVsIiA8Y2Vw
-aC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc+LCAiY2VwaC11c2VycyIgPGNlcGgtdXNlcnNAbGlzdHMu
-Y2VwaC5jb20+IApFbnZvecOpOiBKZXVkaSAyNiBGw6l2cmllciAyMDE1IDA1OjQ0OjE1IApPYmpl
-dDogW2NlcGgtdXNlcnNdIENlcGggSGFtbWVyIE9TRCBTaGFyZCBUdW5pbmcgVGVzdCBSZXN1bHRz
-IAoKSGkgRXZlcnlvbmUsIAoKSW4gdGhlIENlcGggRHVtcGxpbmcvRmlyZWZseS9IYW1tZXIgU1NE
-L01lbXN0b3JlIHBlcmZvcm1hbmNlIGNvbXBhcmlzb24gCnRocmVhZCwgQWxleGFuZHJlIERFUlVN
-SUVSIHdvbmRlcmVkIGlmIGNoYW5naW5nIHRoZSBkZWZhdWx0IHNoYXJkIGFuZCAKdGhyZWFkcyBw
-ZXIgc2hhcmQgT1NEIHNldHRpbmdzIG1pZ2h0IGhhdmUgYSBwb3NpdGl2ZSBlZmZlY3Qgb24gCnBl
-cmZvcm1hbmNlIGluIG91ciB0ZXN0cy4gSSB3ZW50IGJhY2sgYW5kIHVzZWQgb25lIG9mIHRoZSBQ
-Q0llIFNTRHMgCmZyb20gb3VyIHByZXZpb3VzIHRlc3RzIHRvIGV4cGVyaW1lbnQgd2l0aCBhIHJl
-Y2VudCBtYXN0ZXIgcHVsbC4gSSAKd2FudGVkIHRvIGtub3cgaG93IHBlcmZvcm1hbmNlIHdhcyBh
-ZmZlY3RlZCBieSBjaGFuZ2luZyB0aGVzZSBwYXJhbWV0ZXJzIAphbmQgYWxzbyB0byB2YWxpZGF0
-ZSB0aGF0IHRoZSBkZWZhdWx0IHNldHRpbmdzIHN0aWxsIGFwcGVhciB0byBiZSBjb3JyZWN0LiAK
-CkkgcGxhbiB0byBjb25kdWN0IG1vcmUgdGVzdHMgKHBvdGVudGlhbGx5IGFjcm9zcyBtdWx0aXBs
-ZSBTQVRBIFNTRHMgaW4gCnRoZSBzYW1lIGJveCksIGJ1dCB0aGVzZSBpbml0aWFsIHJlc3VsdHMg
-c2VlbSB0byBzaG93IHRoYXQgdGhlIGRlZmF1bHQgCnNldHRpbmdzIHRoYXQgd2VyZSBjaG9zZW4g
-YXJlIHF1aXRlIHJlYXNvbmFibGUuIAoKTWFyayAKCl9fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fIApjZXBoLXVzZXJzIG1haWxpbmcgbGlzdCAKY2VwaC11c2Vy
-c0BsaXN0cy5jZXBoLmNvbSAKaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBo
-LXVzZXJzLWNlcGguY29tIAoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX18gCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0IApjZXBoLXVzZXJzQGxpc3RzLmNlcGgu
-Y29tIApodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5j
-b20gCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fIApjZXBo
-LXVzZXJzIG1haWxpbmcgbGlzdCAKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbSAKaHR0cDovL2xp
-c3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tIAoKX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5n
-IGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlz
-dGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
+This is a multi-part message in MIME format.
+
+--===============0490364883==
+Content-Type: multipart/alternative;
+	boundary="----=_001_NextPart005088307205_=----"
+
+This is a multi-part message in MIME format.
+
+------=_001_NextPart005088307205_=----
+Content-Type: text/plain;
+	charset="GB2312"
+Content-Transfer-Encoding: base64
+
+d2hlbiBJIGNyZWF0ZSBidWNrZXQsIHdoeSByZ3cgY3JlYXRlIDIgb2JqZWN0cyBpbiB0aGUgZG9t
+YWluIHJvb3QgcG9vbC4NCmFuZCBvbmUgb2JqZWN0IHN0b3JlIHN0cnVjdCBSR1dCdWNrZXRJbmZv
+ICBhbmQgdGhlIG90aGVyIG9iamVjdCBzdG9yZSBzdHJ1Y3QgUkdXQnVja2V0RW50cnlQb2ludCAN
+Cg0KYW5kIHdoZW4gSSBkZWxldGUgdGhlIGJ1Y2tldCAsIHdoeSByZ3cgb25seSBkZWxldGUgb25l
+IG9iamVjdC4NCg0KDQoNCg0KYmFpamlhcnVvQDEyNi5jb20=
+
+------=_001_NextPart005088307205_=----
+Content-Type: text/html;
+	charset="GB2312"
+Content-Transfer-Encoding: quoted-printable
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD>
+<META content=3D"text/html; charset=3Dgb2312" http-equiv=3DContent-Type>
+<STYLE>
+BLOCKQUOTE {
+	MARGIN-BOTTOM: 0px; MARGIN-LEFT: 2em; MARGIN-TOP: 0px
+}
+OL {
+	MARGIN-BOTTOM: 0px; MARGIN-TOP: 0px
+}
+UL {
+	MARGIN-BOTTOM: 0px; MARGIN-TOP: 0px
+}
+P {
+	MARGIN-BOTTOM: 0px; MARGIN-TOP: 0px
+}
+BODY {
+	FONT-SIZE: 10.5pt; FONT-FAMILY: =CE=A2=C8=ED=D1=C5=BA=DA; COLOR: #000000;=
+ LINE-HEIGHT: 1.5
+}
+</STYLE>
+
+<META name=3DGENERATOR content=3D"MSHTML 11.00.9600.17631"></HEAD>
+<BODY style=3D"MARGIN: 10px">
+<DIV>when I create bucket, why rgw create 2 objects in the domain root=20
+pool.</DIV>
+<DIV>and one object store struct RGWBucketInfo&nbsp; and the other object =
+store=20
+struct RGWBucketEntryPoint </DIV>
+<DIV>&nbsp;</DIV>
+<DIV>and when I delete the bucket , why rgw only delete one object.</DIV>
+<DIV>&nbsp;</DIV>
+<HR style=3D"HEIGHT: 1px; WIDTH: 210px" align=3Dleft color=3D#b5c4df SIZE=
+=3D1>
+
+<DIV><SPAN>
+<DIV style=3D"FONT-SIZE: 10pt; FONT-FAMILY: verdana; MARGIN: 10px">
+<DIV>baijiaruo-KN7UnAbNpbg@public.gmane.org</DIV></DIV></SPAN></DIV></BODY></HTML>
+
+------=_001_NextPart005088307205_=------
+
+
+
+--===============0490364883==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============0490364883==--
