@@ -1,89 +1,166 @@
-From: Mark Nelson <mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: Ceph Hammer OSD Shard Tuning Test Results
-Date: Mon, 02 Mar 2015 08:39:24 -0600
-Message-ID: <54F4761C.4070208@redhat.com>
-References: <54EEA49F.40606@redhat.com>
-	<1096993261.2346577.1425017442692.JavaMail.zimbra@oxygem.tv>
-	<770882624.2513660.1425220699487.JavaMail.zimbra@oxygem.tv>
+From: Alexandre DERUMIER <aderumier@odiso.com>
+Subject: Re: [ceph-users] Ceph Hammer OSD Shard Tuning Test Results
+Date: Mon, 2 Mar 2015 16:54:44 +0100 (CET)
+Message-ID: <1503408885.2666492.1425311684298.JavaMail.zimbra@oxygem.tv>
+References: <54EEA49F.40606@redhat.com> <1096993261.2346577.1425017442692.JavaMail.zimbra@oxygem.tv> <770882624.2513660.1425220699487.JavaMail.zimbra@oxygem.tv> <54F4761C.4070208@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <770882624.2513660.1425220699487.JavaMail.zimbra-M8QNeUgB6UTyG1zEObXtfA@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mailpro.odiso.net ([89.248.209.98]:35187 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751460AbbCBPyq convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Mar 2015 10:54:46 -0500
+In-Reply-To: <1210381094.2666418.1425311646322.JavaMail.zimbra@oxygem.tv>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Mark Nelson <mnelson@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@lists.ceph.com>, Vu Pham <vuhuong@mellanox.com>
 
-SGkgQWxleCwKCkkgc2VlIEkgZXZlbiByZXNwb25kZWQgaW4gdGhlIHNhbWUgdGhyZWFkISAgVGhp
-cyB3b3VsZCBiZSBhIGdvb2QgdGhpbmcgCnRvIGJyaW5nIHVwIGluIHRoZSBtZWV0aW5nIG9uIFdl
-ZG5lc2RheS4gIFRob3NlIGFyZSBmYXIgZmFzdGVyIHNpbmdsZSAKT1NEIHJlc3VsdHMgdGhhbiBJ
-J3ZlIGJlZW4gYWJsZSB0byBtdXN0ZXIgd2l0aCBzaW1wbGVtZXNzZW5nZXIuICBJIAp3b25kZXIg
-aG93IG11Y2ggZWZmZWN0IGZsb3ctY29udHJvbCBhbmQgaGVhZGVyL2RhdGEgY3JjIGhhZC4gIEhl
-IGRpZCAKaGF2ZSBxdWl0ZSBhIGJpdCBtb3JlIENQVSAoSW50ZWwgc3BlY3Mgc2F5IDE0IGNvcmVz
-IEAgMi42R0h6LCAyOCBpZiB5b3UgCmNvdW50IGh5cGVydGhyZWFkaW5nKS4gIERlcGVuZGluZyBv
-biB3aGV0aGVyIHRoZXJlIHdlcmUgMSBvciAyIENQVXMgaW4gCnRoYXQgbm9kZSwgdGhhdCBtaWdo
-dCBiZSBhcm91bmQgM3ggdGhlIENQVSBwb3dlciBJIGhhdmUgaGVyZS4KClNvbWUgb3RoZXIgdGhv
-dWdodHM6ICBXZXJlIHRoZSBzaW1wbGVtZXNzZW5nZXIgdGVzdHMgb24gSVBvSUIgb3IgbmF0aXZl
-PyAKICBIb3cgYmlnIHdhcyB0aGUgUkJEIHZvbHVtZSB0aGF0IHdhcyBjcmVhdGVkIChjb3VsZCBz
-b21lIGRhdGEgYmUgCmxvY2FsbHkgY2FjaGVkKT8gIERpZCBuZXR3b3JrIGRhdGEgdHJhbnNmZXIg
-c3RhdGlzdGljcyBtYXRjaCB0aGUgCmJlbmNobWFyayByZXN1bHQgbnVtYmVycz8KCkkgYWxzbyBk
-aWQgc29tZSB0ZXN0cyBvbiBmZGNhY2hlLCB0aG91Z2gganVzdCBnbGFuY2luZyBhdCB0aGUgcmVz
-dWx0cyBpdCAKZG9lc24ndCBsb29rIGxpa2UgdHdlYWtpbmcgdGhvc2UgcGFyYW1ldGVycyBoYWQg
-bXVjaCBlZmZlY3QuCgpNYXJrCgpPbiAwMy8wMS8yMDE1IDA4OjM4IEFNLCBBbGV4YW5kcmUgREVS
-VU1JRVIgd3JvdGU6Cj4gSGkgTWFyaywKPgo+IEkgZm91bmQgYW4gcHJldmlvdXMgYmVuY2ggZnJv
-bSBWdSBQaGFtIChpdCdzIHdhcyBhYm91dCBzaW1wbGVtZXNzZW5nZXIgdnMgeGlvbWVzc2VuZ2Vy
-KQo+Cj4gaHR0cDovL3d3dy5zcGluaWNzLm5ldC9saXN0cy9jZXBoLWRldmVsL21zZzIyNDE0Lmh0
-bWwKPgo+IGFuZCB3aXRoIDEgb3NkLCBoZSB3YXMgYWJsZSB0byByZWFjaCAxMDVrIGlvcHMgd2l0
-aCBzaW1wbGUgbWVzc2VuZ2VyCj4KPiAuIH4xMDVrIGlvcHMgKDRLIHJhbmRvbSByZWFkLCAyMCBj
-b3JlcyB1c2VkLCBudW1qb2JzPTgsIGlvcGRlcHRoPTMyKQo+Cj4gdGhpcyB3YXMgd2l0aCBtb3Jl
-IHBvd2VyZnVsbCBub2RlcywgYnV0IHRoZSBkaWZmZXJlbmNlIHNlZW0gdG8gYmUgcXVpdGUgaHVn
-ZQo+Cj4KPgo+IC0tLS0tIE1haWwgb3JpZ2luYWwgLS0tLS0KPiBEZTogImFkZXJ1bWllciIgPGFk
-ZXJ1bWllckBvZGlzby5jb20+Cj4gw4A6ICJNYXJrIE5lbHNvbiIgPG1uZWxzb25AcmVkaGF0LmNv
-bT4KPiBDYzogImNlcGgtZGV2ZWwiIDxjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZz4sICJjZXBo
-LXVzZXJzIiA8Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbT4KPiBFbnZvecOpOiBWZW5kcmVkaSAy
-NyBGw6l2cmllciAyMDE1IDA3OjEwOjQyCj4gT2JqZXQ6IFJlOiBbY2VwaC11c2Vyc10gQ2VwaCBI
-YW1tZXIgT1NEIFNoYXJkIFR1bmluZyBUZXN0IFJlc3VsdHMKPgo+IFRoYW5rcyBNYXJrIGZvciB0
-aGUgcmVzdWx0cywKPiBkZWZhdWx0IHZhbHVlcyBzZWVtIHRvIGJlIHF1aXRlIHJlc29uYWJsZSBp
-bmRlZWQuCj4KPgo+IEkgYWxzbyB3b25kZXIgaXMgY3B1IGZyZXF1ZW5jeSBjYW4gaGF2ZSBhbiBp
-bXBhY3Qgb24gbGF0ZW5jeSBvciBub3QuCj4gSSdtIGdvaW5nIHRvIGJlbmNobWFyayBvbiBkdWFs
-IHhlb24gMTAtY29yZXMgMywxZ2h6IG5vZGVzIGluIGNvbWluZyB3ZWVrcywKPiBJJ2xsIHRyeSBy
-ZXBsYXkgeW91ciBiZW5jaG1hcmsgdG8gY29tcGFyZQo+Cj4KPgo+IC0tLS0tIE1haWwgb3JpZ2lu
-YWwgLS0tLS0KPiBEZTogIk1hcmsgTmVsc29uIiA8bW5lbHNvbkByZWRoYXQuY29tPgo+IMOAOiAi
-Y2VwaC1kZXZlbCIgPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPiwgImNlcGgtdXNlcnMiIDxj
-ZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tPgo+IEVudm95w6k6IEpldWRpIDI2IEbDqXZyaWVyIDIw
-MTUgMDU6NDQ6MTUKPiBPYmpldDogW2NlcGgtdXNlcnNdIENlcGggSGFtbWVyIE9TRCBTaGFyZCBU
-dW5pbmcgVGVzdCBSZXN1bHRzCj4KPiBIaSBFdmVyeW9uZSwKPgo+IEluIHRoZSBDZXBoIER1bXBs
-aW5nL0ZpcmVmbHkvSGFtbWVyIFNTRC9NZW1zdG9yZSBwZXJmb3JtYW5jZSBjb21wYXJpc29uCj4g
-dGhyZWFkLCBBbGV4YW5kcmUgREVSVU1JRVIgd29uZGVyZWQgaWYgY2hhbmdpbmcgdGhlIGRlZmF1
-bHQgc2hhcmQgYW5kCj4gdGhyZWFkcyBwZXIgc2hhcmQgT1NEIHNldHRpbmdzIG1pZ2h0IGhhdmUg
-YSBwb3NpdGl2ZSBlZmZlY3Qgb24KPiBwZXJmb3JtYW5jZSBpbiBvdXIgdGVzdHMuIEkgd2VudCBi
-YWNrIGFuZCB1c2VkIG9uZSBvZiB0aGUgUENJZSBTU0RzCj4gZnJvbSBvdXIgcHJldmlvdXMgdGVz
-dHMgdG8gZXhwZXJpbWVudCB3aXRoIGEgcmVjZW50IG1hc3RlciBwdWxsLiBJCj4gd2FudGVkIHRv
-IGtub3cgaG93IHBlcmZvcm1hbmNlIHdhcyBhZmZlY3RlZCBieSBjaGFuZ2luZyB0aGVzZSBwYXJh
-bWV0ZXJzCj4gYW5kIGFsc28gdG8gdmFsaWRhdGUgdGhhdCB0aGUgZGVmYXVsdCBzZXR0aW5ncyBz
-dGlsbCBhcHBlYXIgdG8gYmUgY29ycmVjdC4KPgo+IEkgcGxhbiB0byBjb25kdWN0IG1vcmUgdGVz
-dHMgKHBvdGVudGlhbGx5IGFjcm9zcyBtdWx0aXBsZSBTQVRBIFNTRHMgaW4KPiB0aGUgc2FtZSBi
-b3gpLCBidXQgdGhlc2UgaW5pdGlhbCByZXN1bHRzIHNlZW0gdG8gc2hvdyB0aGF0IHRoZSBkZWZh
-dWx0Cj4gc2V0dGluZ3MgdGhhdCB3ZXJlIGNob3NlbiBhcmUgcXVpdGUgcmVhc29uYWJsZS4KPgo+
-IE1hcmsKPgo+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-Cj4gY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKPiBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCj4g
-aHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCj4K
-PiBfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwo+IGNlcGgt
-dXNlcnMgbWFpbGluZyBsaXN0Cj4gY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQo+IGh0dHA6Ly9s
-aXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo+IC0tCj4gVG8g
-dW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNl
-cGgtZGV2ZWwiIGluCj4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtl
-cm5lbC5vcmcKPiBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3Jn
-L21ham9yZG9tby1pbmZvLmh0bWwKPgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNl
-cGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBo
-LmNvbQo=
+>> This would be a good thing to bring up in the meeting on Wednesday.=20
+yes !
+
+>>I wonder how much effect flow-control and header/data crc had.=20
+yes. I known that sommath also disable crc for his bench
+
+>>Were the simplemessenger tests on IPoIB or native?=20
+
+I think it's native, as the Vu Pham benchmark was done on mellanox sx10=
+12 (ethernet).
+And xio messenger was on Roce (rdma over ethernet)
+
+>>How big was the RBD volume that was created (could some data be=20
+>>locally cached)? Did network data transfer statistics match the=20
+>>benchmark result numbers?=20
+
+
+
+I @cc Vu pham to this mail maybe it'll be able to give us answer.
+
+
+Note that I'll have same mellanox switches (sx1012) for my production c=
+luster in some weeks,
+so I'll be able to reproduce the bench. (with 2x10 cores 3,1ghz nodes a=
+nd clients).
+
+
+
+
+
+----- Mail original -----
+De: "Mark Nelson" <mnelson@redhat.com>
+=C3=80: "aderumier" <aderumier@odiso.com>
+Cc: "ceph-devel" <ceph-devel@vger.kernel.org>, "ceph-users" <ceph-users=
+@lists.ceph.com>
+Envoy=C3=A9: Lundi 2 Mars 2015 15:39:24
+Objet: Re: [ceph-users] Ceph Hammer OSD Shard Tuning Test Results
+
+Hi Alex,=20
+
+I see I even responded in the same thread! This would be a good thing=20
+to bring up in the meeting on Wednesday. Those are far faster single=20
+OSD results than I've been able to muster with simplemessenger. I=20
+wonder how much effect flow-control and header/data crc had. He did=20
+have quite a bit more CPU (Intel specs say 14 cores @ 2.6GHz, 28 if you=
+=20
+count hyperthreading). Depending on whether there were 1 or 2 CPUs in=20
+that node, that might be around 3x the CPU power I have here.=20
+
+Some other thoughts: Were the simplemessenger tests on IPoIB or native?=
+=20
+How big was the RBD volume that was created (could some data be=20
+locally cached)? Did network data transfer statistics match the=20
+benchmark result numbers?=20
+
+I also did some tests on fdcache, though just glancing at the results i=
+t=20
+doesn't look like tweaking those parameters had much effect.=20
+
+Mark=20
+
+On 03/01/2015 08:38 AM, Alexandre DERUMIER wrote:=20
+> Hi Mark,=20
+>=20
+> I found an previous bench from Vu Pham (it's was about simplemessenge=
+r vs xiomessenger)=20
+>=20
+> http://www.spinics.net/lists/ceph-devel/msg22414.html=20
+>=20
+> and with 1 osd, he was able to reach 105k iops with simple messenger=20
+>=20
+> . ~105k iops (4K random read, 20 cores used, numjobs=3D8, iopdepth=3D=
+32)=20
+>=20
+> this was with more powerfull nodes, but the difference seem to be qui=
+te huge=20
+>=20
+>=20
+>=20
+> ----- Mail original -----=20
+> De: "aderumier" <aderumier@odiso.com>=20
+> =C3=80: "Mark Nelson" <mnelson@redhat.com>=20
+> Cc: "ceph-devel" <ceph-devel@vger.kernel.org>, "ceph-users" <ceph-use=
+rs@lists.ceph.com>=20
+> Envoy=C3=A9: Vendredi 27 F=C3=A9vrier 2015 07:10:42=20
+> Objet: Re: [ceph-users] Ceph Hammer OSD Shard Tuning Test Results=20
+>=20
+> Thanks Mark for the results,=20
+> default values seem to be quite resonable indeed.=20
+>=20
+>=20
+> I also wonder is cpu frequency can have an impact on latency or not.=20
+> I'm going to benchmark on dual xeon 10-cores 3,1ghz nodes in coming w=
+eeks,=20
+> I'll try replay your benchmark to compare=20
+>=20
+>=20
+>=20
+> ----- Mail original -----=20
+> De: "Mark Nelson" <mnelson@redhat.com>=20
+> =C3=80: "ceph-devel" <ceph-devel@vger.kernel.org>, "ceph-users" <ceph=
+-users@lists.ceph.com>=20
+> Envoy=C3=A9: Jeudi 26 F=C3=A9vrier 2015 05:44:15=20
+> Objet: [ceph-users] Ceph Hammer OSD Shard Tuning Test Results=20
+>=20
+> Hi Everyone,=20
+>=20
+> In the Ceph Dumpling/Firefly/Hammer SSD/Memstore performance comparis=
+on=20
+> thread, Alexandre DERUMIER wondered if changing the default shard and=
+=20
+> threads per shard OSD settings might have a positive effect on=20
+> performance in our tests. I went back and used one of the PCIe SSDs=20
+> from our previous tests to experiment with a recent master pull. I=20
+> wanted to know how performance was affected by changing these paramet=
+ers=20
+> and also to validate that the default settings still appear to be cor=
+rect.=20
+>=20
+> I plan to conduct more tests (potentially across multiple SATA SSDs i=
+n=20
+> the same box), but these initial results seem to show that the defaul=
+t=20
+> settings that were chosen are quite reasonable.=20
+>=20
+> Mark=20
+>=20
+> _______________________________________________=20
+> ceph-users mailing list=20
+> ceph-users@lists.ceph.com=20
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com=20
+>=20
+> _______________________________________________=20
+> ceph-users mailing list=20
+> ceph-users@lists.ceph.com=20
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com=20
+> --=20
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in=20
+> the body of a message to majordomo@vger.kernel.org=20
+> More majordomo info at http://vger.kernel.org/majordomo-info.html=20
+>=20
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
