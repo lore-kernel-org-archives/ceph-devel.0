@@ -1,43 +1,66 @@
-From: John Spray <john.spray@redhat.com>
-Subject: Persistence of completed_requests in sessionmap (do we need it?)
-Date: Tue, 03 Mar 2015 21:39:30 +0000
-Message-ID: <54F62A12.8010104@redhat.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: About the blueprint OSD: Transactions
+Date: Tue, 3 Mar 2015 14:52:44 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1503031443010.25972@cobra.newdream.net>
+References: <54F57FBB.6060309@ubuntukylin.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:45746 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:52476 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756092AbbCCVjd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 3 Mar 2015 16:39:33 -0500
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t23LdWWI031476
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
-	for <ceph-devel@vger.kernel.org>; Tue, 3 Mar 2015 16:39:33 -0500
+	id S1756375AbbCCWwu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 3 Mar 2015 17:52:50 -0500
+In-Reply-To: <54F57FBB.6060309@ubuntukylin.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, zyan@redhat.com
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Li Wang <liwang@ubuntukylin.com>
+Cc: Josh Durgin <josh.durgin@inktank.com>, pmcgarry@redhat.com, ceph-devel <ceph-devel@vger.kernel.org>
 
+On Tue, 3 Mar 2015, Li Wang wrote:
+> Hi Sage,
+>   We are pretty interested in the multi-object transaction support,
+> we think it is potencially very useful. we have read your implementation
+> description, and summarize it as below, please check if our
+> understanding is correct,
+> 
+> 1 client select a master, and sends full txn to master
+> 2 master holds txn in memory, sends PREPAREs to slaves
+> 3 slaves persist PREPARE on the side, send PREPARE_ACK,
+>   in the case there is a compare-then-write operation,
+>   and compartion fail, slave will send PREPARE_FAIL instead
+> 4 master collects all PREPARE_ACKs and applies the txn
+>   and marks txn COMMITTING, in the case a PREPARE_FAIL received,
+>   master send slaves ROLL_BACK, and the slaves will discard
+>   the prepared txn
+> 5 once persisted, master send COMMITs to slaves
+> 6 master replies to client COMMITED, to enable client to proceed
+>   to do other operations except reading the commited data
+> 7 slaves get COMMIT and apply, reply with COMMIT_ACK
+> 8 master collect COMMIT_ACK and reply to client FINISHED, to enable
+>   client read the data
+> 9 master closes out txn record
 
-Zheng noticed on my new sessionmap code [1] that sessions weren't 
-getting dirtied on trim_completed_requests.  I had missed that, because 
-I was only updating the places that we already incremented the 
-sessionmap version while modifying something.
+Yep!   Plus the failure path handling...
 
-I went and looked at how this worked in the existing code, and it 
-appears that we don't actually bother persisting updates to the 
-sessionmap if completed_requests is the only thing that changed.  We 
-would *tend* to persist it as a consequence to other session updates 
-like prealloc_inos, but if one is simply issuing lots of metadata 
-updates to existing files in a loop, the sessionmap never gets written 
-back (even when expiring log segments).
+> We think it manifiests to implement a transaction itself, however,
+> it did not take into account the cases that concurrent multiple transactions,
+> how to enforce the order and atomicity among the distributed transactions,
+> how to do locking and dead locking avoidance, it seems there are
+> some further desgining jobs to do.
 
-During replay, we rebuild completed_requests from EMetaBlob::replay, and 
-we've made it this far without reliably persisting it in sessionmap, so 
-I wonder if we ever needed to save this at all? Thoughts?
+Yeah.  I think it would be nice if we can define a few simple flags 
+indicating whether the masters and/or slaves are readable during the 
+prepared-but-uncommitted phase, as there are different requirements for 
+different users.
 
-Cheers,
-John
+And we need to pick a (simple!) deadlock avoidance approach.  Maybe a 
+simple EAGAIN is enough and leave it to the clients to be consistent about 
+which object to choose as the master.
 
-1. https://github.com/ceph/ceph/pull/3718
+> We are wondering if you can move this blueprint discussion into a
+> UTC+8 friendly time, so that we can involve in
+
+I think Patrick is moving it!
+
+Thanks-
+sage
