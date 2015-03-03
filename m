@@ -1,46 +1,53 @@
-From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-Subject: Re: [ceph-users] v0.93 Hammer release candidate
-	released
-Date: Mon, 2 Mar 2015 21:18:24 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1503022117430.25972@cobra.newdream.net>
-References: <alpine.DEB.2.00.1502271408230.1577@cobra.newdream.net>
-	<alpine.DEB.2.00.1503022114370.25972@cobra.newdream.net>
+From: Li Wang <liwang@ubuntukylin.com>
+Subject: About the blueprint OSD: Transactions
+Date: Tue, 03 Mar 2015 17:32:43 +0800
+Message-ID: <54F57FBB.6060309@ubuntukylin.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.00.1503022114370.25972-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-announce-ceph.com>,
-	<mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-announce-ceph.com/>
-List-Post: <mailto:ceph-announce-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-announce-ceph.com>,
-	<mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "Ceph-announce" <ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-announce-Qp0mS5GaXlQ@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from m199-177.yeah.net ([123.58.177.199]:57977 "EHLO
+	m199-177.yeah.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753015AbbCCJla (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Mar 2015 04:41:30 -0500
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, Josh Durgin <josh.durgin@inktank.com>, pmcgarry@redhat.com
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, 2 Mar 2015, Sage Weil wrote:
-> I forgot to mention a very important note for those running the v0.92 
-> development release and upgrading:
-> 
-> On Fri, 27 Feb 2015, Sage Weil wrote:
-> > Upgrading
-> > ---------
-> 
-> * If you are upgrading from v0.92, you must stop all OSD daemons and flush their
->   journals (``ceph-osd -i NNN --flush-journal'') before upgrading.  There was
->   a transaction encoding bug in v0.92 that broke compatibility.  Upgrading from
->   v0.91 or anything earlier is safe.
-> 
-> > * No special restrictions when upgrading from firefly or giant
-> 
-> I know this has bitten a few of you already; I'm very sorry!  Following 
-> the procedure now should resolve it.
+Hi Sage,
+   We are pretty interested in the multi-object transaction support,
+we think it is potencially very useful. we have read your implementation
+description, and summarize it as below, please check if our
+understanding is correct,
 
-Sorry, to be more clear: reinstalling v0.92, flushing journals, upgrading 
-to v0.93, and then starting the OSDs should resolve it.
+1 client select a master, and sends full txn to master
+2 master holds txn in memory, sends PREPAREs to slaves
+3 slaves persist PREPARE on the side, send PREPARE_ACK,
+   in the case there is a compare-then-write operation,
+   and compartion fail, slave will send PREPARE_FAIL instead
+4 master collects all PREPARE_ACKs and applies the txn
+   and marks txn COMMITTING, in the case a PREPARE_FAIL received,
+   master send slaves ROLL_BACK, and the slaves will discard
+   the prepared txn
+5 once persisted, master send COMMITs to slaves
+6 master replies to client COMMITED, to enable client to proceed
+   to do other operations except reading the commited data
+7 slaves get COMMIT and apply, reply with COMMIT_ACK
+8 master collect COMMIT_ACK and reply to client FINISHED, to enable
+   client read the data
+9 master closes out txn record
 
-sage
+We think it manifiests to implement a transaction itself, however,
+it did not take into account the cases that concurrent multiple 
+transactions,
+how to enforce the order and atomicity among the distributed transactions,
+how to do locking and dead locking avoidance, it seems there are
+some further desgining jobs to do.
+
+We are wondering if you can move this blueprint discussion into a
+UTC+8 friendly time, so that we can involve in
+
+Cheers,
+Li Wang
+
