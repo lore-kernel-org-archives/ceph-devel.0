@@ -1,50 +1,43 @@
-From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Subject: Re: can PR 3834 apply to Hammer?
-Date: Tue, 3 Mar 2015 14:20:42 -0500 (EST)
-Message-ID: <613282524.15533979.1425410442439.JavaMail.zimbra@redhat.com>
-References: <1741775407.63.1425409415933.JavaMail.root@thunderbeast.private.linuxbox.com>
+From: John Spray <john.spray@redhat.com>
+Subject: Persistence of completed_requests in sessionmap (do we need it?)
+Date: Tue, 03 Mar 2015 21:39:30 +0000
+Message-ID: <54F62A12.8010104@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx3-phx2.redhat.com ([209.132.183.24]:47765 "EHLO
-	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752901AbbCCTUq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Mar 2015 14:20:46 -0500
-In-Reply-To: <1741775407.63.1425409415933.JavaMail.root@thunderbeast.private.linuxbox.com>
+Received: from mx1.redhat.com ([209.132.183.28]:45746 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756092AbbCCVjd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 3 Mar 2015 16:39:33 -0500
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t23LdWWI031476
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
+	for <ceph-devel@vger.kernel.org>; Tue, 3 Mar 2015 16:39:33 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Matt W. Benjamin" <matt@cohortfs.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, zyan@redhat.com
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Yeah, applied it now.
 
-Thanks,
-Yehuda
+Zheng noticed on my new sessionmap code [1] that sessions weren't 
+getting dirtied on trim_completed_requests.  I had missed that, because 
+I was only updating the places that we already incremented the 
+sessionmap version while modifying something.
 
------ Original Message -----
-> From: "Matt W. Benjamin" <matt@cohortfs.com>
-> To: "ceph-devel" <ceph-devel@vger.kernel.org>
-> Sent: Tuesday, March 3, 2015 11:03:35 AM
-> Subject: can PR 3834 apply to Hammer?
-> 
-> This was just CMake build fixes.
-> 
-> Matt
-> 
-> --
-> Matt Benjamin
-> CohortFS, LLC.
-> 315 West Huron Street, Suite 140A
-> Ann Arbor, Michigan 48103
-> 
-> http://cohortfs.com
-> 
-> tel.  734-761-4689
-> fax.  734-769-8938
-> cel.  734-216-5309
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+I went and looked at how this worked in the existing code, and it 
+appears that we don't actually bother persisting updates to the 
+sessionmap if completed_requests is the only thing that changed.  We 
+would *tend* to persist it as a consequence to other session updates 
+like prealloc_inos, but if one is simply issuing lots of metadata 
+updates to existing files in a loop, the sessionmap never gets written 
+back (even when expiring log segments).
+
+During replay, we rebuild completed_requests from EMetaBlob::replay, and 
+we've made it this far without reliably persisting it in sessionmap, so 
+I wonder if we ever needed to save this at all? Thoughts?
+
+Cheers,
+John
+
+1. https://github.com/ceph/ceph/pull/3718
