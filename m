@@ -1,125 +1,116 @@
-From: Vu Pham <vuhuong@mellanox.com>
-Subject: Re: [ceph-users] Ceph Hammer OSD Shard Tuning Test Results
-Date: Mon, 2 Mar 2015 19:56:34 +0000
-Message-ID: <em2171ea1c-5ee8-4c99-9eb2-96f12d58d360@lt-vu-6500>
-References: <1503408885.2666492.1425311684298.JavaMail.zimbra@oxygem.tv>
-Reply-To: Vu Pham <vuhuong@mellanox.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+From: Andrew Shewmaker <agshew@gmail.com>
+Subject: [PATCH V5 0/7] BlkKin (LTTng + Zipkin) tracing patchset intro
+Date: Mon,  2 Mar 2015 16:35:09 -0800
+Message-ID: <1425342915-12553-1-git-send-email-agshew@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-am1on0053.outbound.protection.outlook.com ([157.56.112.53]:47200
-	"EHLO emea01-am1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751914AbbCBURN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 2 Mar 2015 15:17:13 -0500
-In-Reply-To: <1503408885.2666492.1425311684298.JavaMail.zimbra@oxygem.tv>
-Content-Language: en-US
-Content-ID: <18299D1B073F05408F0CC1D00EF1A331@eurprd05.prod.outlook.com>
+Received: from mail-pd0-f170.google.com ([209.85.192.170]:33970 "EHLO
+	mail-pd0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754119AbbCCAfJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Mar 2015 19:35:09 -0500
+Received: by pdjg10 with SMTP id g10so43797495pdj.1
+        for <ceph-devel@vger.kernel.org>; Mon, 02 Mar 2015 16:35:09 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>, Mark Nelson <mnelson@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@lists.ceph.com>
+To: ceph-devel@vger.kernel.org
+Cc: agshew@gmail.com, marioskogias@gmail.com, chendi.xue@intel.com
 
-DQo+Pj4gIFRoaXMgd291bGQgYmUgYSBnb29kIHRoaW5nIHRvIGJyaW5nIHVwIGluIHRoZSBtZWV0
-aW5nIG9uIFdlZG5lc2RheS4NCj55ZXMgIQ0KPg0KDQpZZXMsIHdlIGNhbiBkaXNjdXNzIGRldGFp
-bHMgb24gV2VkJ3MgY2FsbC4NCg0KDQo+DQo+Pj5JIHdvbmRlciBob3cgbXVjaCBlZmZlY3QgZmxv
-dy1jb250cm9sIGFuZCBoZWFkZXIvZGF0YSBjcmMgaGFkLg0KPnllcy4gSSBrbm93biB0aGF0IHNv
-bW1hdGggYWxzbyBkaXNhYmxlIGNyYyBmb3IgaGlzIGJlbmNoDQo+DQoNCkkgZGlzYWJsZWQgY2Vw
-aCdzIGhlYWRlci9kYXRhIGNyYyBmb3IgYm90aCBzaW1wbGVtZXNzZW5nZXIgJiB4aW8gYnV0IA0K
-ZGlkbid0IHJ1biB3aXRoIGhlYWRlci9kYXRhIGNyYyBlbmFibGUgdG8gc2VlIHRoZSBkaWZmZXJl
-bmNlcy4NCg0KDQo+DQo+Pj5XZXJlIHRoZSBzaW1wbGVtZXNzZW5nZXIgdGVzdHMgb24gSVBvSUIg
-b3IgbmF0aXZlPw0KPg0KPkkgdGhpbmsgaXQncyBuYXRpdmUsIGFzIHRoZSBWdSBQaGFtIGJlbmNo
-bWFyayB3YXMgZG9uZSBvbiBtZWxsYW5veCANCj5zeDEwMTIgKGV0aGVybmV0KS4NCj5BbmQgeGlv
-IG1lc3NlbmdlciB3YXMgb24gUm9jZSAocmRtYSBvdmVyIGV0aGVybmV0KQ0KPg0KWWVzLCBpdCdz
-IG5hdGl2ZSBmb3Igc2ltcGxlbWVzc2VuZ2VyIGFuZCBSb0NFIGZvciB4aW8gbWVzc2VuZ2VyDQoN
-Cg0KPg0KPj4+SG93IGJpZyB3YXMgdGhlIFJCRCB2b2x1bWUgdGhhdCB3YXMgY3JlYXRlZCAoY291
-bGQgc29tZSBkYXRhIGJlDQo+Pj5sb2NhbGx5IGNhY2hlZCk/IERpZCBuZXR3b3JrIGRhdGEgdHJh
-bnNmZXIgc3RhdGlzdGljcyBtYXRjaCB0aGUNCj4+PmJlbmNobWFyayByZXN1bHQgbnVtYmVycz8N
-Cj4NClNpbmdsZSBPU0Qgb24gNEdCIHJhbWRpc2ssIGpvdXJuYWwgc2l6ZSBpcyAyNTZNQi4NCg0K
-UkJEIHZvbHVtZSBpcyBvbmx5IDEyOE1COyBob3dldmVyLCBJIHJhbiBmaW9fcmJkIGNsaWVudCB3
-aXRoIGRpcmVjdD0xIHRvIA0KYnlwYXNzIGxvY2FsIGJ1ZmZlciBjYWNoZQ0KWWVzLCB0aGUgbmV0
-d29yayBkYXRhIHhmZXIgc3RhdGlzdGljcyBtYXRjaCB0aGUgYmVuY2htYXJrIHJlc3VsdCANCm51
-bWJlcnMuDQpJIHVzZWQgImRzdGF0IC1OIDxldGhYPiIgdG8gbW9uaXRvciB0aGUgbmV0d29yayBk
-YXRhIHN0YXRpc3RpY3MNCg0KSSBhbHNvIHR1cm5lZCBhbGwgY29yZXMgQCBmdWxsIHNwZWVkIGFu
-ZCBhcHBsaWVkIG9uZSBwYXJhbWV0ZXIgdHVuaW5nIA0KZm9yIE1lbGxhbm94IENvbm5lY3RYLTMg
-SENBIG1seDRfY29yZSBkcml2ZXINCihvcHRpb25zIG1seDRfY29yZSAgbG9nX251bV9tZ21fZW50
-cnlfc2l6ZT0tNykNCg0KJCBjYXQgL3N5cy9kZXZpY2VzL3N5c3RlbS9jcHUvY3B1MC9jcHVmcmVx
-L2NwdWluZm9fbWF4X2ZyZXENCjI2MDEwMDANCg0KJCBmb3IgYyBpbiAuL2NwdVswLTU1XSo7IGRv
-IGVjaG8gMjYwMTAwMCA+IA0KJHtjfS9jcHVmcmVxL3NjYWxpbmdfbWluX2ZyZXE7IGRvbmUNCg0K
-DQoNCj4NCj4NCj4NCj5JIEBjYyBWdSBwaGFtIHRvIHRoaXMgbWFpbCBtYXliZSBpdCdsbCBiZSBh
-YmxlIHRvIGdpdmUgdXMgYW5zd2VyLg0KPg0KPg0KPk5vdGUgdGhhdCBJJ2xsIGhhdmUgc2FtZSBt
-ZWxsYW5veCBzd2l0Y2hlcyAoc3gxMDEyKSBmb3IgbXkgcHJvZHVjdGlvbiANCj5jbHVzdGVyIGlu
-IHNvbWUgd2Vla3MsDQo+c28gSSdsbCBiZSBhYmxlIHRvIHJlcHJvZHVjZSB0aGUgYmVuY2guICh3
-aXRoIDJ4MTAgY29yZXMgMywxZ2h6IG5vZGVzIA0KPmFuZCBjbGllbnRzKS4NCj4NCj4NCj4NCj4N
-Cj4NCj4tLS0tLSBNYWlsIG9yaWdpbmFsIC0tLS0tDQo+RGU6ICJNYXJrIE5lbHNvbiIgPG1uZWxz
-b25AcmVkaGF0LmNvbT4NCj7DgDogImFkZXJ1bWllciIgPGFkZXJ1bWllckBvZGlzby5jb20+DQo+
-Q2M6ICJjZXBoLWRldmVsIiA8Y2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc+LCAiY2VwaC11c2Vy
-cyIgDQo+PGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20+DQo+RW52b3nDqTogTHVuZGkgMiBNYXJz
-IDIwMTUgMTU6Mzk6MjQNCj5PYmpldDogUmU6IFtjZXBoLXVzZXJzXSBDZXBoIEhhbW1lciBPU0Qg
-U2hhcmQgVHVuaW5nIFRlc3QgUmVzdWx0cw0KPg0KPkhpIEFsZXgsDQo+DQo+SSBzZWUgSSBldmVu
-IHJlc3BvbmRlZCBpbiB0aGUgc2FtZSB0aHJlYWQhIFRoaXMgd291bGQgYmUgYSBnb29kIHRoaW5n
-DQo+dG8gYnJpbmcgdXAgaW4gdGhlIG1lZXRpbmcgb24gV2VkbmVzZGF5LiBUaG9zZSBhcmUgZmFy
-IGZhc3RlciBzaW5nbGUNCj5PU0QgcmVzdWx0cyB0aGFuIEkndmUgYmVlbiBhYmxlIHRvIG11c3Rl
-ciB3aXRoIHNpbXBsZW1lc3Nlbmdlci4gSQ0KPndvbmRlciBob3cgbXVjaCBlZmZlY3QgZmxvdy1j
-b250cm9sIGFuZCBoZWFkZXIvZGF0YSBjcmMgaGFkLiBIZSBkaWQNCj5oYXZlIHF1aXRlIGEgYml0
-IG1vcmUgQ1BVIChJbnRlbCBzcGVjcyBzYXkgMTQgY29yZXMgQCAyLjZHSHosIDI4IGlmIHlvdQ0K
-PmNvdW50IGh5cGVydGhyZWFkaW5nKS4gRGVwZW5kaW5nIG9uIHdoZXRoZXIgdGhlcmUgd2VyZSAx
-IG9yIDIgQ1BVcyBpbg0KPnRoYXQgbm9kZSwgdGhhdCBtaWdodCBiZSBhcm91bmQgM3ggdGhlIENQ
-VSBwb3dlciBJIGhhdmUgaGVyZS4NCj4NCj5Tb21lIG90aGVyIHRob3VnaHRzOiBXZXJlIHRoZSBz
-aW1wbGVtZXNzZW5nZXIgdGVzdHMgb24gSVBvSUIgb3IgbmF0aXZlPw0KPkhvdyBiaWcgd2FzIHRo
-ZSBSQkQgdm9sdW1lIHRoYXQgd2FzIGNyZWF0ZWQgKGNvdWxkIHNvbWUgZGF0YSBiZQ0KPmxvY2Fs
-bHkgY2FjaGVkKT8gRGlkIG5ldHdvcmsgZGF0YSB0cmFuc2ZlciBzdGF0aXN0aWNzIG1hdGNoIHRo
-ZQ0KPmJlbmNobWFyayByZXN1bHQgbnVtYmVycz8NCj4NCj5JIGFsc28gZGlkIHNvbWUgdGVzdHMg
-b24gZmRjYWNoZSwgdGhvdWdoIGp1c3QgZ2xhbmNpbmcgYXQgdGhlIHJlc3VsdHMgDQo+aXQNCj5k
-b2Vzbid0IGxvb2sgbGlrZSB0d2Vha2luZyB0aG9zZSBwYXJhbWV0ZXJzIGhhZCBtdWNoIGVmZmVj
-dC4NCj4NCj5NYXJrDQo+DQo+T24gMDMvMDEvMjAxNSAwODozOCBBTSwgQWxleGFuZHJlIERFUlVN
-SUVSIHdyb3RlOg0KPj4gIEhpIE1hcmssDQo+Pg0KPj4gIEkgZm91bmQgYW4gcHJldmlvdXMgYmVu
-Y2ggZnJvbSBWdSBQaGFtIChpdCdzIHdhcyBhYm91dCANCj4+c2ltcGxlbWVzc2VuZ2VyIHZzIHhp
-b21lc3NlbmdlcikNCj4+DQo+PiAgaHR0cDovL3d3dy5zcGluaWNzLm5ldC9saXN0cy9jZXBoLWRl
-dmVsL21zZzIyNDE0Lmh0bWwNCj4+DQo+PiAgYW5kIHdpdGggMSBvc2QsIGhlIHdhcyBhYmxlIHRv
-IHJlYWNoIDEwNWsgaW9wcyB3aXRoIHNpbXBsZSBtZXNzZW5nZXINCj4+DQo+PiAgLiB+MTA1ayBp
-b3BzICg0SyByYW5kb20gcmVhZCwgMjAgY29yZXMgdXNlZCwgbnVtam9icz04LCBpb3BkZXB0aD0z
-MikNCj4+DQo+PiAgdGhpcyB3YXMgd2l0aCBtb3JlIHBvd2VyZnVsbCBub2RlcywgYnV0IHRoZSBk
-aWZmZXJlbmNlIHNlZW0gdG8gYmUgDQo+PnF1aXRlIGh1Z2UNCj4+DQo+Pg0KPj4NCj4+ICAtLS0t
-LSBNYWlsIG9yaWdpbmFsIC0tLS0tDQo+PiAgRGU6ICJhZGVydW1pZXIiIDxhZGVydW1pZXJAb2Rp
-c28uY29tPg0KPj4gIMOAOiAiTWFyayBOZWxzb24iIDxtbmVsc29uQHJlZGhhdC5jb20+DQo+PiAg
-Q2M6ICJjZXBoLWRldmVsIiA8Y2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc+LCAiY2VwaC11c2Vy
-cyIgDQo+PjxjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tPg0KPj4gIEVudm95w6k6IFZlbmRyZWRp
-IDI3IEbDqXZyaWVyIDIwMTUgMDc6MTA6NDINCj4+ICBPYmpldDogUmU6IFtjZXBoLXVzZXJzXSBD
-ZXBoIEhhbW1lciBPU0QgU2hhcmQgVHVuaW5nIFRlc3QgUmVzdWx0cw0KPj4NCj4+ICBUaGFua3Mg
-TWFyayBmb3IgdGhlIHJlc3VsdHMsDQo+PiAgZGVmYXVsdCB2YWx1ZXMgc2VlbSB0byBiZSBxdWl0
-ZSByZXNvbmFibGUgaW5kZWVkLg0KPj4NCj4+DQo+PiAgSSBhbHNvIHdvbmRlciBpcyBjcHUgZnJl
-cXVlbmN5IGNhbiBoYXZlIGFuIGltcGFjdCBvbiBsYXRlbmN5IG9yIG5vdC4NCj4+ICBJJ20gZ29p
-bmcgdG8gYmVuY2htYXJrIG9uIGR1YWwgeGVvbiAxMC1jb3JlcyAzLDFnaHogbm9kZXMgaW4gY29t
-aW5nIA0KPj53ZWVrcywNCj4+ICBJJ2xsIHRyeSByZXBsYXkgeW91ciBiZW5jaG1hcmsgdG8gY29t
-cGFyZQ0KPj4NCj4+DQo+Pg0KPj4gIC0tLS0tIE1haWwgb3JpZ2luYWwgLS0tLS0NCj4+ICBEZTog
-Ik1hcmsgTmVsc29uIiA8bW5lbHNvbkByZWRoYXQuY29tPg0KPj4gIMOAOiAiY2VwaC1kZXZlbCIg
-PGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPiwgImNlcGgtdXNlcnMiIA0KPj48Y2VwaC11c2Vy
-c0BsaXN0cy5jZXBoLmNvbT4NCj4+ICBFbnZvecOpOiBKZXVkaSAyNiBGw6l2cmllciAyMDE1IDA1
-OjQ0OjE1DQo+PiAgT2JqZXQ6IFtjZXBoLXVzZXJzXSBDZXBoIEhhbW1lciBPU0QgU2hhcmQgVHVu
-aW5nIFRlc3QgUmVzdWx0cw0KPj4NCj4+ICBIaSBFdmVyeW9uZSwNCj4+DQo+PiAgSW4gdGhlIENl
-cGggRHVtcGxpbmcvRmlyZWZseS9IYW1tZXIgU1NEL01lbXN0b3JlIHBlcmZvcm1hbmNlIA0KPj5j
-b21wYXJpc29uDQo+PiAgdGhyZWFkLCBBbGV4YW5kcmUgREVSVU1JRVIgd29uZGVyZWQgaWYgY2hh
-bmdpbmcgdGhlIGRlZmF1bHQgc2hhcmQgYW5kDQo+PiAgdGhyZWFkcyBwZXIgc2hhcmQgT1NEIHNl
-dHRpbmdzIG1pZ2h0IGhhdmUgYSBwb3NpdGl2ZSBlZmZlY3Qgb24NCj4+ICBwZXJmb3JtYW5jZSBp
-biBvdXIgdGVzdHMuIEkgd2VudCBiYWNrIGFuZCB1c2VkIG9uZSBvZiB0aGUgUENJZSBTU0RzDQo+
-PiAgZnJvbSBvdXIgcHJldmlvdXMgdGVzdHMgdG8gZXhwZXJpbWVudCB3aXRoIGEgcmVjZW50IG1h
-c3RlciBwdWxsLiBJDQo+PiAgd2FudGVkIHRvIGtub3cgaG93IHBlcmZvcm1hbmNlIHdhcyBhZmZl
-Y3RlZCBieSBjaGFuZ2luZyB0aGVzZSANCj4+cGFyYW1ldGVycw0KPj4gIGFuZCBhbHNvIHRvIHZh
-bGlkYXRlIHRoYXQgdGhlIGRlZmF1bHQgc2V0dGluZ3Mgc3RpbGwgYXBwZWFyIHRvIGJlIA0KPj5j
-b3JyZWN0Lg0KPj4NCj4+ICBJIHBsYW4gdG8gY29uZHVjdCBtb3JlIHRlc3RzIChwb3RlbnRpYWxs
-eSBhY3Jvc3MgbXVsdGlwbGUgU0FUQSBTU0RzIA0KPj5pbg0KPj4gIHRoZSBzYW1lIGJveCksIGJ1
-dCB0aGVzZSBpbml0aWFsIHJlc3VsdHMgc2VlbSB0byBzaG93IHRoYXQgdGhlIA0KPj5kZWZhdWx0
-DQo+PiAgc2V0dGluZ3MgdGhhdCB3ZXJlIGNob3NlbiBhcmUgcXVpdGUgcmVhc29uYWJsZS4NCj4+
-DQo+PiAgTWFyaw0KPj4NCj4+ICBfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fXw0KPj4gIGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0DQo+PiAgY2VwaC11c2Vyc0Bs
-aXN0cy5jZXBoLmNvbQ0KPj4gIGh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2Vw
-aC11c2Vycy1jZXBoLmNvbQ0KPj4NCj4+ICBfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fXw0KPj4gIGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0DQo+PiAgY2VwaC11
-c2Vyc0BsaXN0cy5jZXBoLmNvbQ0KPj4gIGh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5j
-Z2kvY2VwaC11c2Vycy1jZXBoLmNvbQ0KPj4gIC0tDQo+PiAgVG8gdW5zdWJzY3JpYmUgZnJvbSB0
-aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIA0KPj5pbg0K
-Pj4gIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnDQo+
-PiAgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9t
-by1pbmZvLmh0bWwNCj4+
+The following patches are a cleaned up version of the work
+Marios Kogias first posted in August.
+http://www.spinics.net/lists/ceph-devel/msg19890.html
+This patch is against HEAD as of March 2nd at 4:30pm Mountain.
+It can also be found at https://github.com/agshew/ceph/tree/wip-blkin-v5
+
+Thanks to Josh Durgin for walking through the V4 patchset with me
+and helping with all of the issues described in the changelog below.
+And thanks to Sage for discussing the problems associated with
+the messenger_end trace event.
+
+Outstanding issues:
+
+I've seen OSD startup failures, which are probably due to the blkin patchset
+moving the call to global_init_daemonize() to earlier in ceph_osd.c:main().
+Sage had already warned that moving OSD daemonize is not safe, so I attempted
+to not move it. Unfortunately, this leads to a segfault. Either blkin needs
+initialized sooner as Marios had done, or certain tracing calls needed to be
+made conditional on blkin's initialization.
+
+So, I then attempted to modify blkin's ZTracer::create_ZTraceEndpoint(), which
+valgrind pointed at, to only create the endpoint if blkin_init() had been
+called. But that patch resulted in bad health as reported by './ceph status':
+
+     health HEALTH_WARN
+            mds a,b,c are laggy
+     ...
+
+For now, I've continued with Marios' original global_init_daemonize() move.
+
+
+After fixing the outstanding issues:
+
+ 1. push a wip-blkin branch to github.com/ceph and take advantage of gitbuilder test/qa
+ 2. submit a pull request
+ 3. add Andreas' tracepoints https://github.com/ceph/ceph/pull/2877 using Blkin
+    and investigate how easy it is to select the level of tracing detail
+
+Changes since V4:
+
+  * removed messenger_end trace event
+    In Pipe::reader(), when message is enqueued, it will be destroyed.
+    Naive pointer checks don't work here. You can't depend on
+    pointers being set to null on destruction. It may be possible to wrap
+    trace event with m->get() and m->put() to keep it around, or put this
+    trace event in dispatch paths, but just removing trace event for now
+    in order to move forward.
+  * removed mutex in aio_*_traced() methods
+    A mutex was carried forward from Marios' original patch while rebasing
+    when it should have been removed.
+  * removed Message::trace_end_after_span
+    Message::trace_end_after_span did not ever appear to be true, so
+    it has been removed
+  * added asserts for master trace and endpoint checks
+    Tried to use asserts in more places, but they prevented execution.
+    Tried to use douts and ldouts instead, but they didn't work.
+  * added parens around macro pointer args
+    parens make it safer to use pointers passed as arguments in a macro
+
+Changes since V2:
+
+  * WITH_BLKIN added to makefile vars when necessary
+  * added Blkin build instructions
+  * added Zipkin build instructions
+  * Blkin wrapper macros do not stringify args any longer.
+    The macro wrappers will be more flexible/robust if they don't
+    turn arguments into strings.
+  * added missing blkin_trace_info struct prototype to librados.h
+  * TrackedOp trace creation methods are virtual, implemented in OpRequest
+  * avoid faults due to non-existent traces
+    Check if osd_trace exists when creating a pg_trace, etc.
+    Return true only if trace creation was successful.
+    Use dout() if trace_osd, trace_pg, etc. fail, in order to ease debugging.
+  * create trace_osd in ms_fast_dispatch
+
+Changes since V1:
+  * split build changes into separate patch
+  * conditional build support for blkin (default off)
+  * blkin is not a Ceph repo submodule
+    build and install packages from https://github.com/agshew/blkin.git
+    Note: rpms don't support babeltrace plugins for use with Zipkin
+  * removal of debugging in Message::init_trace_info()
+
+With this patchset Ceph can use Blkin, a library created by
+Marios Kogias and others, which enables tracking a specific request
+from the time it enters the system at higher levels till it is finally
+served by RADOS.
+
+In general, Blkin implements the tracing semantics described in the Dapper
+paper http://static.googleusercontent.com/media/research.google.com/el/pubs/archive/36356.pdf
+in order to trace the causal relationships between the different
+processing phases that an IO request may trigger. The goal is an end-to-end
+visualisation of the request's route in the system, accompanied by information
+concerning latencies in each processing phase. Thanks to LTTng this can happen
+with a minimal overhead and in realtime. In order to visualize the results Blkin
+was integrated with Twitter's Zipkin http://twitter.github.io/zipkin/
+(which is a tracing system entirely based on Dapper).
+
+A short document describing how to test Blkin tracing in Ceph with Zipkin
+is in doc/dev/trace.rst
