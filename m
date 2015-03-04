@@ -1,59 +1,37 @@
-From: Danny Al-Gaaf <danny.al-gaaf-2YacvwyR+KOzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [Manila] Ceph native driver for manila
-Date: Wed, 04 Mar 2015 15:26:52 +0100
-Message-ID: <54F7162C.1000900@bisect.de>
-References: <alpine.DEB.2.00.1502261602390.23918@cobra.newdream.net>
- <54F31D28.9050103@bisect.de>
- <1011159141.22473140.1425478320272.JavaMail.zimbra@redhat.com>
-Reply-To: "OpenStack Development Mailing List \(not for usage questions\)"
- <openstack-dev-ZwoEplunGu0gQVYkTtqAhEB+6BGkLq7r@public.gmane.org>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: 03/04/2015 Weekly Ceph Performance Meeting IS CANCELED (Come join
+ us for day 2 of CDS!)
+Date: Wed, 04 Mar 2015 08:53:17 -0600
+Message-ID: <54F71C5D.4060508@redhat.com>
+Reply-To: mnelson@redhat.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <openstack-dev-bounces+god-openstack-dev=m.gmane.org-ZwoEplunGu0gQVYkTtqAhEB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <1011159141.22473140.1425478320272.JavaMail.zimbra-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-List-Unsubscribe: <http://lists.openstack.org/cgi-bin/mailman/options/openstack-dev>,
- <mailto:openstack-dev-request-ZwoEplunGu0gQVYkTtqAhEB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.openstack.org/pipermail/openstack-dev>
-List-Post: <mailto:openstack-dev-ZwoEplunGu0gQVYkTtqAhEB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:openstack-dev-request-ZwoEplunGu0gQVYkTtqAhEB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.openstack.org/cgi-bin/mailman/listinfo/openstack-dev>,
- <mailto:openstack-dev-request-ZwoEplunGu0gQVYkTtqAhEB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Errors-To: openstack-dev-bounces+god-openstack-dev=m.gmane.org-ZwoEplunGu0gQVYkTtqAhEB+6BGkLq7r@public.gmane.org
-To: Csaba Henk <chenk-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "OpenStack Development Mailing List (not for usage questions)" <openstack-dev-ZwoEplunGu0gQVYkTtqAhEB+6BGkLq7r@public.gmane.org>
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:44414 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757194AbbCDOxU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 4 Mar 2015 09:53:20 -0500
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t24ErKkP018116
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
+	for <ceph-devel@vger.kernel.org>; Wed, 4 Mar 2015 09:53:20 -0500
+Received: from [10.3.112.61] (ovpn-112-61.phx2.redhat.com [10.3.112.61])
+	by int-mx09.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t24ErIsB007917
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES128-SHA bits=128 verify=NO)
+	for <ceph-devel@vger.kernel.org>; Wed, 4 Mar 2015 09:53:19 -0500
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Am 04.03.2015 um 15:12 schrieb Csaba Henk:
-> Hi Danny,
-> 
-> ----- Original Message -----
->> From: "Danny Al-Gaaf" <danny.al-gaaf-2YacvwyR+KOzQB+pC5nmwQ@public.gmane.org> To: "OpenStack
->> Development Mailing List (not for usage questions)"
->> <openstack-dev-ZwoEplunGu0gQVYkTtqAhEB+6BGkLq7r@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org 
->> Sent: Sunday, March 1, 2015 3:07:36 PM Subject: Re:
->> [openstack-dev] [Manila] Ceph native driver for manila
-> ...
->> For us security is very critical, as the performance is too. The
->> first solution via ganesha is not what we prefer (to use CephFS
->> via p9 and NFS would not perform that well I guess). The second
->> solution, to use
-> 
-> Can you please explain that why does the Ganesha based stack
-> involve 9p? (Maybe I miss something basic, but I don't know.)
+Hi Guys, canceling as everyone is busy with CDS and hammer.  Come join 
+us for day 2 of CDS instead:
 
-Sorry, seems that I mixed it up with the p9 case. But the performance
-is may still an issue if you use NFS on top of CephFS (incl. all the
-VM layer involved within this setup).
+https://wiki.ceph.com/Planning/CDS/Infernalis_%28Mar_2015%29
 
-For me the question with all these NFS setups is: why should I use NFS
-on top on CephFS? What is the right to exist of CephFS in this case? I
-would like to use CephFS directly or via filesystem passthrough.
+If you are interested in seeing the performance related pull request 
+statuses for this week I've updated the perf etherpad:
 
-Danny
+http://pad.ceph.com/p/performance_weekly
 
-
-__________________________________________________________________________
-OpenStack Development Mailing List (not for usage questions)
-Unsubscribe: OpenStack-dev-request-ZwoEplunGu0gQVYkTtqAhEB+6BGkLq7r@public.gmane.org?subject:unsubscribe
-http://lists.openstack.org/cgi-bin/mailman/listinfo/openstack-dev
+Mark
