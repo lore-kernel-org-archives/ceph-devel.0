@@ -1,167 +1,72 @@
-From: Butkeev Stas <staerist@ya.ru>
-Subject: Re: Problems with "shadow" objects
-Date: Wed, 04 Mar 2015 15:40:00 +0300
-Message-ID: <607081425472800@web2m.yandex.ru>
-References: <1809941425380648@web25h.yandex.ru> <54F6D4BB.1030209@orange.com>
+From: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+Subject: Re: [openstack-dev] [Manila] Ceph native driver for manila
+Date: Wed, 04 Mar 2015 15:05:46 +0100
+Message-ID: <54F7113A.1060702@bisect.de>
+References: <alpine.DEB.2.00.1502261602390.23918@cobra.newdream.net>	<54F31D28.9050103@bisect.de>	<835936292.21191270.1425324075471.JavaMail.zimbra@redhat.com>	<CAOXiiM=n6K7LjkB0pkDBj11ND7=UhAgioBZ2wgJOY90u79ZNkA@mail.gmail.com>	<54F6467F.2000708@bisect.de> <CAOXiiMmBLRMdin7=O6x2dAG_eTHV3C=d0a09hi_--U6B3kxfhw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from forward2m.mail.yandex.net ([37.140.138.2]:33500 "EHLO
-	forward2m.mail.yandex.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756984AbbCDMrb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Mar 2015 07:47:31 -0500
-In-Reply-To: <54F6D4BB.1030209@orange.com>
+Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:58684 "EHLO
+	wp188.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754347AbbCDOFv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Mar 2015 09:05:51 -0500
+In-Reply-To: <CAOXiiMmBLRMdin7=O6x2dAG_eTHV3C=d0a09hi_--U6B3kxfhw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexis KOALLA <alexis.koalla@orange.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Deepak Shetty <dpkshetty@gmail.com>
+Cc: "OpenStack Development Mailing List (not for usage questions)" <openstack-dev@lists.openstack.org>, ceph-devel@vger.kernel.org
 
-Hello, Alex
-I have some questions on you answer
-> If you want to remove these chunks =C2=A0you just =C2=A0need to remov=
-e the parent object to which they are linked.
-How can I determine parent object?
+Am 04.03.2015 um 05:19 schrieb Deepak Shetty:
+> On Wed, Mar 4, 2015 at 5:10 AM, Danny Al-Gaaf
+> <danny.al-gaaf@bisect.de> wrote:
+>> Am 03.03.2015 um 19:31 schrieb Deepak Shetty: [...]
+[...]
+>> 
+>>> I was curious to understand. IIUC Neutron provides private and 
+>>> public networks and for VMs to access external CephFS network,
+>>> the tenant private network needs to be bridged/routed to the
+>>> external provider network and there are ways neturon achives
+>>> it.
+>>> 
+>>> Are you saying that this approach of neutron is insecure ?
+>> 
+>> I don't say neutron itself is insecure.
+>> 
+>> The problem is: we don't want any VM to get access to the ceph
+>> public network at all since this would mean access to all MON,
+>> OSDs and MDS daemons.
+>> 
+>> If a tenant VM has access to the ceph public net, which is needed
+>> to use/mount native cephfs in this VM, one critical issue would
+>> be: the client can attack any ceph component via this network.
+>> Maybe I misses something, but routing doesn't change this fact.
+>> 
+> 
+> Agree, but there are ways you can restrict the tenant VMs to
+> specific network ports only using neutron security groups and limit
+> what tenant VM can do. On the CephFS side one can use selinux
+> labels to provide addnl level of security for Ceph daemons, where
+> in only certain process can access/modify them, I am just thinking
+> aloud here, i m not sure how well cephfs works with selinux 
+> combined.
 
->> =C2=A02) What does the name of this "shadow" files?
->> =C2=A0example
->> =C2=A0with normal object:
->> =C2=A0# radosgw-admin object stat --bucket=3Ddev --object=3D"RegExp_=
-tutorial.png"
->> =C2=A0and I receive information about this object.
->>
->> =C2=A0with "shadow" object:
->> =C2=A0default.4507.1_ - bucket-id
->> =C2=A0radosgw-admin object stat --bucket=3Ddev --object=3D"_shadow_t=
-est_s3.2/2vO4WskQNBGMnC8MGaYPSLfGkhQY76U.2_7"
->> =C2=A0ERROR: failed to stat object, returned error: (2) No such file=
- or directory
->> =C2=A0how can I determine name of this object
->
-> In the command above you forgot to type the full object name
-> "default.4507.1__shadow_test_s3.2/2vO4WskQNBGMnC8MGaYPSLfGkhQY76U.3_5=
- "
-> Your command should looks like this:
-> * #**rdosgw-admin object stat --bucket=3Ddev --object=3D"_shadow_test=
-_s3.2/2vO4WskQNBGMnC8MGaYPSLfGkhQY76U.2_7"
-> *
+I don't see how neutron security groups would help here. The problem
+is if a VM has access, in which way ever, to the Ceph network a
+attacker/user can on one hand attack ALL ceph daemons and on the other
+ also, if there is a bug, crash all daemons and you would lose the
+complete cluster.
 
-What does different between my command and your command?
-my command
-radosgw-admin object stat --bucket=3Ddev --object=3D"_shadow_test_s3.2/=
-2vO4WskQNBGMnC8MGaYPSLfGkhQY76U.2_7"
-your command
-radosgw-admin object stat --bucket=3Ddev --object=3D"_shadow_test_s3.2/=
-2vO4WskQNBGMnC8MGaYPSLfGkhQY76U.2_7"
+SELinux profiles can may help with preventing subvert security or gain
+privileges it would not help in this case prevent the VM "user" to
+crash the cluster.
 
-they are the same
+> Thinking more, it seems like then you need a solution that goes via
+> the serviceVM approach but provide native CephFS mounts instead of
+> NFS ?
 
-If I try use full object name, I receive error
-Exemple
+Another level of indirection. I really like the approach of filesystem
+passthrough ... the only critical question is if virtfs/p9 is still
+supported in some way (and the question if not: why?).
 
-[root@rgw-node-2 ~]# radosgw-admin object stat --bucket=3Dtest1111 --ob=
-ject=3D"current_structure_Compressor.jpg"              =20
-{ "name": "current_structure_Compressor.jpg",
-  "size": 51249,
-  "policy": { "acl": { "acl_user_map": [
-                { "user": "admin",
-                  "acl": 15}],
-          "acl_group_map": [],
-=2E.....
-
-[root@rgw-node-2 ~]# radosgw-admin object stat --bucket=3Dtest1111 --ob=
-ject=3D"default.4380.1_current_structure_Compressor.jpg"
-ERROR: failed to stat object, returned error: (2) No such file or direc=
-tory
-
-
---=C2=A0
-Best Regards,
-Stanislav Butkeev
-
-
-04.03.2015, 12:47, "Alexis KOALLA" <alexis.koalla@orange.com>:
-> Hi Stas,
-> My comments below in the mail
->
-> Le 03/03/2015 12:04, Butkeev Stas a =C3=A9crit :
->> =C2=A0Hello, all
->>
->> =C2=A0I have ceph+RGW installation. And have some problems with "sha=
-dow" objects.
->>
->> =C2=A0For example:
->> =C2=A0#rados ls -p .rgw.buckets|grep "default.4507.1"
->>
->> =C2=A0.....
->> =C2=A0default.4507.1__shadow_test_s3.2/2vO4WskQNBGMnC8MGaYPSLfGkhQY7=
-6U.1_5
->> =C2=A0default.4507.1__shadow_test_s3.2/2vO4WskQNBGMnC8MGaYPSLfGkhQY7=
-6U.2_2
->> =C2=A0default.4507.1__shadow_test_s3.2/2vO4WskQNBGMnC8MGaYPSLfGkhQY7=
-6U.6_4
->> =C2=A0default.4507.1__shadow_test_s3.2/2vO4WskQNBGMnC8MGaYPSLfGkhQY7=
-6U.4_2
->> =C2=A0default.4507.1__shadow_test_s3.2/2vO4WskQNBGMnC8MGaYPSLfGkhQY7=
-6U.3_5
->> =C2=A0.....
->>
->> =C2=A0Please give me advices and answer on my questions
->> =C2=A01) How can I rm this "shadow" files?
->
-> Consider that "shadow =C2=A0files" are rados object and are part of a=
-n rados
-> object. In fact when the Radosgateway stores an object in the cluster=
-,
-> the object is split in several parts (called chunks) and the =C2=A0si=
-ze of
-> each chunk is by default 4Mo. But you can configure this parameter...
-> You can get more details in the online cephdocumentation
-> If you want to remove these chunks =C2=A0you just =C2=A0need to remov=
-e the parent
-> object to which they are linked.
->> =C2=A02) What does the name of this "shadow" files?
->> =C2=A0example
->> =C2=A0with normal object:
->> =C2=A0# radosgw-admin object stat --bucket=3Ddev --object=3D"RegExp_=
-tutorial.png"
->> =C2=A0and I receive information about this object.
->>
->> =C2=A0with "shadow" object:
->> =C2=A0default.4507.1_ - bucket-id
->> =C2=A0radosgw-admin object stat --bucket=3Ddev --object=3D"_shadow_t=
-est_s3.2/2vO4WskQNBGMnC8MGaYPSLfGkhQY76U.2_7"
->> =C2=A0ERROR: failed to stat object, returned error: (2) No such file=
- or directory
->> =C2=A0how can I determine name of this object
->
-> In the command above you forgot to type the full object name
-> "default.4507.1__shadow_test_s3.2/2vO4WskQNBGMnC8MGaYPSLfGkhQY76U.3_5=
- "
-> Your command should looks like this:
-> * #**rdosgw-admin object stat --bucket=3Ddev
-> --object=3D"_shadow_test_s3.2/2vO4WskQNBGMnC8MGaYPSLfGkhQY76U.2_7"
-> *
-> You an can have more details in inkscope project in github. We have
-> implemented a module that visualizes =C2=A0and show a rados object is=
- stored
-> in a Ceph cluster.
-> Regards
-> Alex
->
-> *
-> *
->> =C2=A0--
->> =C2=A0Best Regards,
->> =C2=A0Stanislav Butkeev
->> =C2=A0--
->> =C2=A0To unsubscribe from this list: send the line "unsubscribe ceph=
--devel" in
->> =C2=A0the body of a message tomajordomo@vger.kernel.org
->> =C2=A0More majordomo info athttp://vger.kernel.org/majordomo-info.ht=
-ml
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Danny
