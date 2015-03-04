@@ -1,43 +1,40 @@
-From: Josh Durgin <jdurgin@redhat.com>
-Subject: Re: v0.80.8 and librbd performance
-Date: Wed, 04 Mar 2015 11:53:39 -0800
-Message-ID: <54F762C3.2030608@redhat.com>
-References: <alpine.DEB.2.00.1503031512270.25972@cobra.newdream.net> <54F64382.7060308@redhat.com>
+From: Mel Gorman <mgorman@suse.de>
+Subject: Re: SOCK_MEMALLOC vs loopback
+Date: Wed, 4 Mar 2015 20:04:27 +0000
+Message-ID: <20150304200427.GQ3087@suse.de>
+References: <CAOi1vP8tJTMhbCyKVD66pc_Tz7+aOS236KgvQnA-S63yv1P-sA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=iso-8859-15
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:43886 "EHLO mx1.redhat.com"
+Received: from cantor2.suse.de ([195.135.220.15]:49339 "EHLO mx2.suse.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1758246AbbCDTxl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 4 Mar 2015 14:53:41 -0500
-In-Reply-To: <54F64382.7060308@redhat.com>
+	id S1759401AbbCDUEb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 4 Mar 2015 15:04:31 -0500
+Content-Disposition: inline
+In-Reply-To: <CAOi1vP8tJTMhbCyKVD66pc_Tz7+aOS236KgvQnA-S63yv1P-sA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ken Dreyer <kdreyer@redhat.com>, Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org, ceph-users@ceph.com
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: ceph-devel@vger.kernel.org, Eric Dumazet <edumazet@google.com>, Sage Weil <sage@redhat.com>, Mike Christie <mchristi@redhat.com>, NeilBrown <neilb@suse.de>, netdev@vger.kernel.org
 
-On 03/03/2015 03:28 PM, Ken Dreyer wrote:
-> On 03/03/2015 04:19 PM, Sage Weil wrote:
->> Hi,
->>
->> This is just a heads up that we've identified a performance regression in
->> v0.80.8 from previous firefly releases.  A v0.80.9 is working it's way
->> through QA and should be out in a few days.  If you haven't upgraded yet
->> you may want to wait.
->>
->> Thanks!
->> sage
->
-> Hi Sage,
->
-> I've seen a couple Redmine tickets on this (eg
-> http://tracker.ceph.com/issues/9854 ,
-> http://tracker.ceph.com/issues/10956). It's not totally clear to me
-> which of the 70+ unreleased commits on the firefly branch fix this
-> librbd issue.  Is it only the three commits in
-> https://github.com/ceph/ceph/pull/3410 , or are there more?
+On Wed, Mar 04, 2015 at 09:38:48PM +0300, Ilya Dryomov wrote:
+> Hello,
+> 
+> A short while ago Mike added a patch to libceph to set SOCK_MEMALLOC on
+> libceph sockets and PF_MEMALLOC around send/receive paths (commit
+> 89baaa570ab0, "libceph: use memalloc flags for net IO").  rbd is much
+> like nbd and is succeptible to all the same memory allocation
+> deadlocks, so it seemed like a step in the right direction.
+> 
 
-Those are the only ones needed to fix the librbd performance
-regression, yes.
+The contract for SOCK_MEMALLOC is that it would only be used for temporary
+allocations that were necessary for the system to make forward progress. In
+the case of swap-over-NFS, it would only be used for transmitting
+buffers that were necessary to write data to swap when there were no
+other options. If that contract is not met then using it can deadlock the
+system. It's the same for PF_MEMALLOC -- activating that is a recipe for
+deadlock due to memory exhaustion.
 
-Josh
+-- 
+Mel Gorman
+SUSE Labs
