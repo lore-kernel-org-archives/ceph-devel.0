@@ -1,121 +1,181 @@
-From: Csaba Henk <chenk@redhat.com>
-Subject: Re: [openstack-dev] [Manila] Ceph native driver for manila
-Date: Wed, 4 Mar 2015 10:03:25 -0500 (EST)
-Message-ID: <784685843.22537099.1425481405537.JavaMail.zimbra@redhat.com>
-References: <alpine.DEB.2.00.1502261602390.23918@cobra.newdream.net> <54F31D28.9050103@bisect.de> <1011159141.22473140.1425478320272.JavaMail.zimbra@redhat.com> <54F7162C.1000900@bisect.de>
+From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Subject: Re: Persistent Write Back Cache
+Date: Wed, 4 Mar 2015 08:33:41 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1503040826450.18660@cobra.newdream.net>
+References: <48f4882a.9Ro.9Gf.20.ePXs4G@mailjet.com>
+	<20150304174011.3279132e@batzmaru.gol.ad.jp>
+	<63f84f7b.9Ro.9Gf.1J.ePZrwr@mailjet.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx4-phx2.redhat.com ([209.132.183.25]:46069 "EHLO
-	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755514AbbCDPDc convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Mar 2015 10:03:32 -0500
-In-Reply-To: <54F7162C.1000900@bisect.de>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "OpenStack Development Mailing List (not for usage questions)" <openstack-dev@lists.openstack.org>
-Cc: ceph-devel@vger.kernel.org, Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <63f84f7b.9Ro.9Gf.1J.ePZrwr-ImYt9qTNe79BDgjK7y7TUQ@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Nick Fisk <nick-ksME7r3P/wO1Qrn1Bg8BZw@public.gmane.org>
+Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
+
+Hi Nick, Christian,
+
+This is something we've discussed a bit but hasn't made it to the top of 
+the list.
+
+I think having a single persistent copy on the client has *some* value, 
+although it's limited because its a single point of failure.  The simplest 
+scenario would be to use it as a write-through cache that accellerates 
+reads only.
+
+Another option would be to have a shared but local device (like an SSD 
+that is connected to a pair of client hosts, or has fast access within a 
+rack--a scenario that I've heard a few vendors talk about).  It 
+still leaves a host pair or rack as a failure zone, but there are 
+times where that's appropriate.
+
+In either case, though, I think the key RBD feature that would make it 
+much more valuable would be if RBD (librbd presumably) could maintain the 
+writeback cache with some sort of checkpoints or journal internally such 
+that writes that get flushed back to the cluster are always *crash 
+consistent*.  So even if you lose the client cache entirely, your disk 
+image is still holding a valid file system that looks like it is just a 
+little bit stale.
+
+If the client-side writeback cache were structured as a data journal this 
+would be pretty staightforward...  it might even mesh well with the RBD 
+mirroring?
+
+sage
 
 
 
------ Original Message -----
-> From: "Danny Al-Gaaf" <danny.al-gaaf@bisect.de>
-> To: "Csaba Henk" <chenk@redhat.com>, "OpenStack Development Mailing L=
-ist (not for usage questions)"
-> <openstack-dev@lists.openstack.org>
-> Cc: ceph-devel@vger.kernel.org
-> Sent: Wednesday, March 4, 2015 3:26:52 PM
-> Subject: Re: [openstack-dev] [Manila] Ceph native driver for manila
->=20
-> Am 04.03.2015 um 15:12 schrieb Csaba Henk:
-> > ----- Original Message -----
-> >> From: "Danny Al-Gaaf" <danny.al-gaaf@bisect.de> To: "OpenStack
-> >> Development Mailing List (not for usage questions)"
-> >> <openstack-dev@lists.openstack.org>, ceph-devel@vger.kernel.org
-> >> Sent: Sunday, March 1, 2015 3:07:36 PM Subject: Re:
-> >> [openstack-dev] [Manila] Ceph native driver for manila
-> > ...
-> >> For us security is very critical, as the performance is too. The
-> >> first solution via ganesha is not what we prefer (to use CephFS
-> >> via p9 and NFS would not perform that well I guess). The second
-> >> solution, to use
-> >=20
-> > Can you please explain that why does the Ganesha based stack
-> > involve 9p? (Maybe I miss something basic, but I don't know.)
->=20
-> Sorry, seems that I mixed it up with the p9 case. But the performance
-> is may still an issue if you use NFS on top of CephFS (incl. all the
-> VM layer involved within this setup).
->=20
-> For me the question with all these NFS setups is: why should I use NF=
-S
-> on top on CephFS? What is the right to exist of CephFS in this case? =
-I
-> would like to use CephFS directly or via filesystem passthrough.
+On Wed, 4 Mar 2015, Nick Fisk wrote:
 
-That's a good question. Or indeed, two questions:
-
-1. Why to use NFS?
-2. Why does the NFS export of Ceph need to involve CephFS?
-
-1.
-
-As of "why NFS" -- it's probably a good selling point that it's
-standard filesystem export technology and the tenants can remain
-backend-unaware as long as the backend provides NFS export.
-
-We are working on the Ganesha library --
-
-https://blueprints.launchpad.net/manila/+spec/gateway-mediated-with-gan=
-esha
-
-with the aim to make it easy to create Ganesha based drivers. So if you=
- have
-already an FSAL, you can get at an NFS exporting driver almost for free=
- (with a
-modest amount of glue code). So you could consider making such a driver=
- for
-Ceph, to satisfy customers who demand NFS access, even if there is a na=
-tive
-driver which gets the limelight.=20
-
-(See commits implementing this under "Work Items" of the BP -- one is t=
-he
-actual Ganesha library and the other two show how it can be hooked in, =
-by the
-example of the Gluster driver. At the moment flat network (share-server=
--less)
-drivers are supported.)
-
-2.
-
-As of why CephFS was the technology chosen for implementing the Ceph FS=
-AL for
-Ganesha, that's something I'd also like to know. I have the following n=
-aive
-question in mind: "Would it not have been better to implement Ceph FSAL=
- with
-something =C2=BBcloser to=C2=AB Ceph?", and I have three actual questio=
-ns about it:
-
-- does this question make sense in this form, and if not, how to amend?
-- I'm asking the question itself, or the amended version of it.
-- If the answer is yes, is there a chance someone would create an alter=
-native
-  Ceph FSAL on that assumed closer-to-Ceph technology?
-
-
-Cheers
-Csaba
-
-
-
-
-
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Hi Christian,
+> 
+> Yes that's correct, it's on the client side. I don't see this much different
+> to a battery backed Raid controller, if you lose power, the data is in the
+> cache until power resumes when it is flushed.
+> 
+> If you are going to have the same RBD accessed by multiple servers/clients
+> then you need to make sure the SSD is accessible to both (eg DRBD / Dual
+> Port SAS). But then something like pacemaker would be responsible for
+> ensuring the RBD and cache device are both present before allowing client
+> access.
+> 
+> When I wrote this I was thinking more about 2 HA iSCSI servers with RBD's,
+> however I can understand that this feature would prove more of a challenge
+> if you are using Qemu and RBD.
+> 
+> Nick
+> 
+> -----Original Message-----
+> From: ceph-users [mailto:ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org] On Behalf Of
+> Christian Balzer
+> Sent: 04 March 2015 08:40
+> To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> Cc: Nick Fisk
+> Subject: Re: [ceph-users] Persistent Write Back Cache
+> 
+> 
+> Hello,
+> 
+> If I understand you correctly, you're talking about the rbd cache on the
+> client side.
+> 
+> So assume that host or the cache SSD on if fail terminally.
+> The client thinks its sync'ed are on the permanent storage (the actual ceph
+> storage cluster), while they are only present locally. 
+> 
+> So restarting that service or VM on a different host now has to deal with
+> likely crippling data corruption.
+> 
+> Regards,
+> 
+> Christian
+> 
+> On Wed, 4 Mar 2015 08:26:52 -0000 Nick Fisk wrote:
+> 
+> > Hi All,
+> > 
+> >  
+> > 
+> > Is there anything in the pipeline to add the ability to write the 
+> > librbd cache to ssd so that it can safely ignore sync requests? I have 
+> > seen a thread a few years back where Sage was discussing something 
+> > similar, but I can't find anything more recent discussing it.
+> > 
+> >  
+> > 
+> > I've been running lots of tests on our new cluster, buffered/parallel 
+> > performance is amazing (40K Read 10K write iops), very impressed. 
+> > However sync writes are actually quite disappointing.
+> > 
+> >  
+> > 
+> > Running fio with 128k block size and depth=1, normally only gives me 
+> > about 300iops or 30MB/s. I'm seeing 2-3ms latency writing to SSD OSD's 
+> > and from what I hear that's about normal, so I don't think I have a 
+> > ceph config problem. For applications which do a lot of sync's, like 
+> > ESXi over iSCSI or SQL databases, this has a major performance impact.
+> > 
+> >  
+> > 
+> > Traditional storage arrays work around this problem by having a 
+> > battery backed cache which has latency 10-100 times less than what you 
+> > can currently achieve with Ceph and an SSD . Whilst librbd does have a 
+> > writeback cache, from what I understand it will not cache syncs and so 
+> > in my usage case, it effectively acts like a write through cache.
+> > 
+> >  
+> > 
+> > To illustrate the difference a proper write back cache can make, I put 
+> > a 1GB (512mb dirty threshold) flashcache in front of my RBD and 
+> > tweaked the flush parameters to flush dirty blocks at a large queue 
+> > depth. The same fio test (128k iodepth=1) now runs at 120MB/s and is 
+> > limited by the performance of SSD used by flashcache, as everything is 
+> > stored as 4k blocks on the ssd. In fact since everything is stored as 
+> > 4k blocks, pretty much all IO sizes are accelerated to max speed of the
+> SSD.
+> > Looking at iostat I can see all the IO's are getting coalesced into 
+> > nice large 512kb IO's at a high queue depth, which Ceph easily swallows.
+> > 
+> >  
+> > 
+> > If librbd could support writing its cache out to SSD it would 
+> > hopefully achieve the same level of performance and having it 
+> > integrated would be really neat.
+> > 
+> >  
+> > 
+> > Nick
+> > 
+> > 
+> > 
+> > 
+> 
+> 
+> -- 
+> Christian Balzer        Network/Systems Engineer                
+> chibi-FW+hd8ioUD0@public.gmane.org   	Global OnLine Japan/Fusion Communications
+> http://www.gol.com/
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> 
+> 
+> 
+> 
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> 
+> 
