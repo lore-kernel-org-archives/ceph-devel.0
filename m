@@ -1,97 +1,44 @@
-From: Li Wang <liwang@ubuntukylin.com>
-Subject: Re: About the blueprint OSD: Transactions
-Date: Thu, 05 Mar 2015 11:54:30 +0800
-Message-ID: <54F7D376.6070705@ubuntukylin.com>
-References: <ACIAwADIAN8kzvlukrK0Farh.1.1425481937528.Hmail.liwang@ubuntukylin.com> <alpine.DEB.2.00.1503041638040.23553@cobra.newdream.net>
+From: Mike Christie <mchristi@redhat.com>
+Subject: Re: SOCK_MEMALLOC vs loopback
+Date: Wed, 04 Mar 2015 22:03:51 -0600
+Message-ID: <54F7D5A7.1060404@redhat.com>
+References: <CAOi1vP8tJTMhbCyKVD66pc_Tz7+aOS236KgvQnA-S63yv1P-sA@mail.gmail.com> <20150304200427.GQ3087@suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=iso-8859-15
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m199-177.yeah.net ([123.58.177.199]:56004 "EHLO
-	m199-177.yeah.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750897AbbCEDym (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Mar 2015 22:54:42 -0500
-In-Reply-To: <alpine.DEB.2.00.1503041638040.23553@cobra.newdream.net>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Josh Durgin <josh.durgin@inktank.com>, pmcgarry@redhat.com, ceph-devel <ceph-devel@vger.kernel.org>
+Return-path: <netdev-owner@vger.kernel.org>
+In-Reply-To: <20150304200427.GQ3087@suse.de>
+Sender: netdev-owner@vger.kernel.org
+To: Mel Gorman <mgorman@suse.de>, Ilya Dryomov <idryomov@gmail.com>
+Cc: ceph-devel@vger.kernel.org, Eric Dumazet <edumazet@google.com>, Sage Weil <sage@redhat.com>, NeilBrown <neilb@suse.de>, netdev@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
+On 03/04/2015 02:04 PM, Mel Gorman wrote:
+> On Wed, Mar 04, 2015 at 09:38:48PM +0300, Ilya Dryomov wrote:
+>> Hello,
+>>
+>> A short while ago Mike added a patch to libceph to set SOCK_MEMALLOC on
+>> libceph sockets and PF_MEMALLOC around send/receive paths (commit
+>> 89baaa570ab0, "libceph: use memalloc flags for net IO").  rbd is much
+>> like nbd and is succeptible to all the same memory allocation
+>> deadlocks, so it seemed like a step in the right direction.
+>>
+> 
+> The contract for SOCK_MEMALLOC is that it would only be used for temporary
+> allocations that were necessary for the system to make forward progress. In
+> the case of swap-over-NFS, it would only be used for transmitting
+> buffers that were necessary to write data to swap when there were no
 
+Are upper layers like NFS/iSCSI/NBD/RBD supposed to know or track when
+there are no other options (for example if a GFP_ATOMIC allocation
+fails, then set the flags and retry the operation), or are they supposed
+to be able to set the flags, send IO and let the network layer handle it?
 
-On 2015/3/5 8:56, Sage Weil wrote:
-> On Wed, 4 Mar 2015, Li Wang wrote:
->> Hi Sage, Please take a look if the below works,
->> [...]
->
-> I think this works.  A few notes:
->
-> 1- I don't think there's a need to persist the txn on the master until the
-> slaves reply with PREPARE_ACK.
+> other options. If that contract is not met then using it can deadlock the
+> system. It's the same for PF_MEMALLOC -- activating that is a recipe for
+> deadlock due to memory exhaustion.
 
-I think the txn must be persisted at the very first at master side,
-since once it send the message to slaves, there must be a mechanism
-that the ROLL_BACK message could be resent to slaves if master down,
-just there may only few, rather than whole information of the
-transaction need be persisted
-
->
-> 2- This is basically optimistic concurrency with backoff if
-> possible deadlock is detected.  I think we can do the same thing in the
-> proposal in the blueprint if a PREPARE sees that a txn (in-memory) is
-> pending or if a client txn is recieved and there is a pending PREPARE.  In
-> the latter case, it seems like we should block and wait...
->
-
-Yes. We can divide the process into two steps, the first step is
-PREPARE, only for deadlock avoidance, this only refers to memory
-operation in all slaves' sides. First, master send PREPARE to slaves,
-the slaves check if there is pending transaction in memory, if so,
-reply master EAGAIN, otherwise reply PREPARE_ACK, which lead to
-an extremely fast deadlock avoidance. master collect all PREPARE_ACK,
-and send COMMIT to slaves, then slaves commit their transaction part
-to PG metadata, reply master COMMIT_ACK
-
-> 3- In either scheme, we can do full deadlock avoidance if we force
-> the master to be the lowest-sorting object name, or something like that.
-> But I think that will have a performance impact since there is likely a
-> best choice for master depending on the transaction itself... like a txn
-> that writes 4MB to an object and inserts a pointer in another object;
-> clearly the 4MB piece should be the master so that it is only written once
-> and doesn't cross the network.
->
-> sage
->
->
->
->> 1 Client calculate the
->> PG that the master object suggested by programmers belonging to, and
->> retrieve the primary OSD of that PG, called master, and send the full
->> transaction to it 2 master persist the whole transaction in the
->> corresponding PG metadata 3 master parse transaction, to obtain the set
->> of slave OSDs which are the primary OSDs of other PGs the transaction
->> referred to, and send PREPARE as well as the part of transaction needed
->> be done on each individual PG to its corresponding slave OSD 4 For each
->> slave OSD, it check if there exist a PREPARED-BUT-UNCOMMITTED
->> transaction in its PG metadata such that the two transactions share at
->> least one write operation on the same object, if so, the slave OSD give
->> up preparing, and reply PREPARE-AGAIN. Otherwise, it perform all the
->> read-and-comparison operations in its received transaction part, reply
->> PREPARE-FAIL if any of the operation fail. If all succeed, it persist
->> its transaction part in its PG metadata, and reply PREPARE-ACK 5 master
->> collect all PREPARE_ACKs, and reply client PREPARED, in the case a
->> PREPARE_FAIL received, master reply client ERROR, and send slaves
->> ROLL_BACK, and the slaves will discard its prepared transaction part, if
->> any, and reply master ROLL_BACK_ACK. master collect all ROLL_BACK_ACKs,
->> and discard the transaction. In the case of a PREPARE_AGAIN received,
->> the process is similar to PREPARE_FAIL except that master reply client
->> EAGAIN 6 master send slaves COMMIT 7 slaves get COMMIT and commit their
->> individual transaction part, and reply COMMIT_ACK 8 master collect all
->> COMMIT_ACKs and reply client COMMITTED 9 master close out the
->> transaction record It seems to work without dead locking in the normal
->> condition, however, there are still many kinds of errors it needs to
->> take into account, such as PG changing, OSD down etc, does it? Cheers,
->> Li Wang > -----????----- > ???: Sage Weil
->
->
->
+For rbd and iscsi's SOCK_MEMALLOC/PF_MEMALLOC use, I copied what you did
+for nbd in commit 7f338fe4540b1d0600b02314c7d885fd358e9eca which always
+sets those flags and seems to rely on the network layer to do the right
+thing. Are they all incorrect?
