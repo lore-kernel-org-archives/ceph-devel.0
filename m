@@ -1,37 +1,69 @@
-From: Mel Gorman <mgorman@suse.de>
-Subject: Re: SOCK_MEMALLOC vs loopback
-Date: Thu, 5 Mar 2015 09:50:44 +0000
-Message-ID: <20150305095044.GR3087@suse.de>
-References: <CAOi1vP8tJTMhbCyKVD66pc_Tz7+aOS236KgvQnA-S63yv1P-sA@mail.gmail.com>
- <20150304200427.GQ3087@suse.de>
- <54F7D5A7.1060404@redhat.com>
+From: Dennis Chen <kernel.org.gnu@gmail.com>
+Subject: Re: The project of ceph client file system porting from Linux to AIX
+Date: Thu, 5 Mar 2015 17:55:45 +0800
+Message-ID: <CA+U0gVh2=Ck2wT_TYncCfXPUGvXDSSOg_6ETnfgehRT7Jv0sHA@mail.gmail.com>
+References: <CA+U0gVhWKjxMUBAw91B1vkYrF9s=pna1eZ3HfV+vBJ5aMhKWQw@mail.gmail.com>
+ <CAM9_UU-ayOpVsKCnzaBRGoc2NOj=URStHqW33zzw5CqShq4mpg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-15
-Return-path: <netdev-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <54F7D5A7.1060404@redhat.com>
-Sender: netdev-owner@vger.kernel.org
-To: Mike Christie <mchristi@redhat.com>
-Cc: Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org, Eric Dumazet <edumazet@google.com>, Sage Weil <sage@redhat.com>, NeilBrown <neilb@suse.de>, netdev@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-pa0-f51.google.com ([209.85.220.51]:41448 "EHLO
+	mail-pa0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754501AbbCEJ4G (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Mar 2015 04:56:06 -0500
+Received: by pablj1 with SMTP id lj1so35157069pab.8
+        for <ceph-devel@vger.kernel.org>; Thu, 05 Mar 2015 01:56:05 -0800 (PST)
+In-Reply-To: <CAM9_UU-ayOpVsKCnzaBRGoc2NOj=URStHqW33zzw5CqShq4mpg@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ketor D <d.ketor@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>, Sage Weil <sage@newdream.net>, Loic Dachary <loic@dachary.org>
 
-On Wed, Mar 04, 2015 at 10:03:51PM -0600, Mike Christie wrote:
-> On 03/04/2015 02:04 PM, Mel Gorman wrote:
-> > other options. If that contract is not met then using it can deadlock the
-> > system. It's the same for PF_MEMALLOC -- activating that is a recipe for
-> > deadlock due to memory exhaustion.
-> 
-> For rbd and iscsi's SOCK_MEMALLOC/PF_MEMALLOC use, I copied what you did
-> for nbd in commit 7f338fe4540b1d0600b02314c7d885fd358e9eca which always
-> sets those flags and seems to rely on the network layer to do the right
-> thing. Are they all incorrect?
+Hello Ketor,
 
-NBD is a poor example and if it comes to that, I would suggest removing it
-and let NBD easily deadlock like it used to. NBD has other failure cases
-such as the client can get paged out if -swap is not specified. The same
-commit notes that NBD may still deadlock and that min_free_kbytes may have
-to be increased.
+About 1 more years ago, I need a free DFS can be used in AIX
+environment as a tiered storage solution for Bank DC, that why the
+project.
+This project just port the CephFS in Linux kernel to AIX kernel(maybe
+RBD in future), so it's a kernel mode AIX cephfs.
+But I have multiple projects at hand now, so the AIX cephfs project is
+in pending status... It's open, anyone can make changes from this
+project if he want.
+
+On Thu, Mar 5, 2015 at 3:11 PM, Ketor D <d.ketor@gmail.com> wrote:
+> Hi Dennis,
+>       I am interested in your project.
+>       I wrote a Win32 cephfs client https://github.com/ceph/ceph-dokan.
+>       But ceph-dokan runs in user-mode. I see you port code from
+> kernel cephfs, are you planning to write a kernel mode AIX-cephfs?
+>
+> Thanks!
+>
+>
+> 2015-03-04 17:59 GMT+08:00 Dennis Chen <kernel.org.gnu@gmail.com>:
+>> Hello,
+>>
+>> The ceph cluster now can only be used by Linux system AFAICT, so I
+>> planed to port the ceph client file system from Linux to AIX as a
+>> tiered storage solution in that platform. Below is the source code
+>> repository I've done, which is still in progress. 3 important modules:
+>>
+>> 1. aixker: maintain a uniform kernel API beteween the Linux and AIX
+>> 2. net: as a data transfering layer between the client and cluster
+>> 3. fs: as an adaptor to make the AIX can recognize the Linux file system.
+>>
+>> https://github.com/Dennis-Chen1977/aix-cephfs
+>>
+>> Welcome any comments or anything...
+>>
+>> --
+>> Den
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
 
 -- 
-Mel Gorman
-SUSE Labs
+Den
