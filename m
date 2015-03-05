@@ -1,40 +1,75 @@
-From: Mel Gorman <mgorman@suse.de>
-Subject: Re: SOCK_MEMALLOC vs loopback
-Date: Wed, 4 Mar 2015 20:04:27 +0000
-Message-ID: <20150304200427.GQ3087@suse.de>
-References: <CAOi1vP8tJTMhbCyKVD66pc_Tz7+aOS236KgvQnA-S63yv1P-sA@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: FileStore performance: coalescing operations
+Date: Wed, 4 Mar 2015 16:10:53 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1503041607590.25972@cobra.newdream.net>
+References: <20150226152807.5b71a93c@doppio> <alpine.DEB.2.00.1503031641550.25972@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-15
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cantor2.suse.de ([195.135.220.15]:49339 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1759401AbbCDUEb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 4 Mar 2015 15:04:31 -0500
-Content-Disposition: inline
-In-Reply-To: <CAOi1vP8tJTMhbCyKVD66pc_Tz7+aOS236KgvQnA-S63yv1P-sA@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:33839 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751602AbbCEAKx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Mar 2015 19:10:53 -0500
+In-Reply-To: <alpine.DEB.2.00.1503031641550.25972@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: ceph-devel@vger.kernel.org, Eric Dumazet <edumazet@google.com>, Sage Weil <sage@redhat.com>, Mike Christie <mchristi@redhat.com>, NeilBrown <neilb@suse.de>, netdev@vger.kernel.org
+To: Andreas Bluemle <andreas.bluemle@itxperts.de>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, Mar 04, 2015 at 09:38:48PM +0300, Ilya Dryomov wrote:
-> Hello,
-> 
-> A short while ago Mike added a patch to libceph to set SOCK_MEMALLOC on
-> libceph sockets and PF_MEMALLOC around send/receive paths (commit
-> 89baaa570ab0, "libceph: use memalloc flags for net IO").  rbd is much
-> like nbd and is succeptible to all the same memory allocation
-> deadlocks, so it seemed like a step in the right direction.
-> 
+On Tue, 3 Mar 2015, Sage Weil wrote:
+> I think we should try to avoid the dups in the first place in the upper 
+> layers before resorting to deduping in the FileStore. 
 
-The contract for SOCK_MEMALLOC is that it would only be used for temporary
-allocations that were necessary for the system to make forward progress. In
-the case of swap-over-NFS, it would only be used for transmitting
-buffers that were necessary to write data to swap when there were no
-other options. If that contract is not met then using it can deadlock the
-system. It's the same for PF_MEMALLOC -- activating that is a recipe for
-deadlock due to memory exhaustion.
+I took a stab at this:
 
--- 
-Mel Gorman
-SUSE Labs
+	https://github.com/ceph/ceph/pull/3878
+
+Here's what the txns look like now:
+
+{
+    "ops": [
+        {
+            "op_num": 0,
+            "op_name": "omap_setkeys",
+            "collection": "0.2_head",
+            "oid": "2\/\/head\/\/0",
+            "attr_lens": {
+                "0000000005.00000000000000000002": 178,
+                "_epoch": 4,
+                "_info": 729,
+                "can_rollback_to": 12,
+                "rollback_info_trimmed_to": 12
+            }
+        },
+        {
+            "op_num": 1,
+            "op_name": "write",
+            "collection": "0.2_head",
+            "oid": "8b08fa52\/benchmark_data_maetl_15609_object5\/head\/\/0",
+            "length": 123,
+            "offset": 0,
+            "bufferlist length": 123
+        },
+        {
+            "op_num": 2,
+            "op_name": "setattr",
+            "collection": "0.2_head",
+            "oid": "8b08fa52\/benchmark_data_maetl_15609_object5\/head\/\/0",
+            "name": "_",
+            "length": 269
+        },
+        {
+            "op_num": 3,
+            "op_name": "setattr",
+            "collection": "0.2_head",
+            "oid": "8b08fa52\/benchmark_data_maetl_15609_object5\/head\/\/0",
+            "name": "snapset",
+            "length": 31
+        }
+    ]
+}
+
+Care to give that a spin and see if it give syou a similar (or better) 
+improvement?
+
+sage
