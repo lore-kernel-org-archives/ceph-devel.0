@@ -1,43 +1,56 @@
 From: Loic Dachary <loic@dachary.org>
-Subject: gitbuilder, master branch and make check bot
-Date: Thu, 05 Mar 2015 19:00:24 +0100
-Message-ID: <54F899B8.1050005@dachary.org>
+Subject: gmock linkage / packaging errors
+Date: Thu, 05 Mar 2015 19:09:47 +0100
+Message-ID: <54F89BEB.3080303@dachary.org>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="v1sgJIdgKq9wcjLn8VaCFDwIMgutHeQib"
+ boundary="C9WkB5Jk69vVT0XLc6v52wosKw6c48Xv7"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:53404 "EHLO
+Received: from mail2.dachary.org ([91.121.57.175]:53412 "EHLO
 	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753880AbbCESA1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Mar 2015 13:00:27 -0500
-Received: from [10.9.0.6] (unknown [10.0.2.28])
-	by smtp.dmail.dachary.org (Postfix) with ESMTP id 1C5F242B25
-	for <ceph-devel@vger.kernel.org>; Thu,  5 Mar 2015 19:00:25 +0100 (CET)
+	with ESMTP id S1753174AbbCESJt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Mar 2015 13:09:49 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
 This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---v1sgJIdgKq9wcjLn8VaCFDwIMgutHeQib
+--C9WkB5Jk69vVT0XLc6v52wosKw6c48Xv7
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
 
-Hi Ceph,
+Hi Danny,
 
-The make check bot that runs on pull requests is on pause until the gitbu=
-ilder ( http://ceph.com/gitbuilder.cgi ) upgrade is complete. This should=
- fix the build of the master branch. All should be fixed in the next few =
-hours at most.
+The build of master shows linkage errors:
 
-Thanks for your patience :-)
+http://gitbuilder.sepia.ceph.com/gitbuilder-ceph-deb-trusty-amd64-basic/l=
+og.cgi?log=3D60e2bec73ff3970e0c6b44250ce465e6c5dde56f
+
+    error: dpkg-shlibdeps: couldn't find library libgmock_main.so.0 neede=
+d by debian/ceph-test/usr/bin/ceph_test_cls_lock (ELF format: 'elf64-x86-=
+64'; RPATH: '')=20
+
+    error: dpkg-shlibdeps: couldn't find library libgtest.so.0 needed by =
+debian/ceph-test/usr/bin/ceph_test_cls_lock (ELF format: 'elf64-x86-64'; =
+RPATH: '')=20
+
+    error: dpkg-shlibdeps: couldn't find library libgmock_main.so.0 neede=
+d by debian/ceph-test/usr/bin/ceph_test_rados_api_c_write_operations (ELF=
+ format: 'elf64-x86-64'; RPATH: '')=20
+
+Do you know where that comes from ? IIRC it successfully compiled in the =
+gitbuilders on a branch of yours. That's weird.
+
+Cheers
 
 --=20
 Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
 
 
---v1sgJIdgKq9wcjLn8VaCFDwIMgutHeQib
+--C9WkB5Jk69vVT0XLc6v52wosKw6c48Xv7
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -45,9 +58,9 @@ Content-Disposition: attachment; filename="signature.asc"
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2.0.22 (GNU/Linux)
 
-iEYEARECAAYFAlT4mbgACgkQ8dLMyEl6F22TaACeLA+ztBMW+3JM7gCfKDFLXQX9
-mi4AnRzhfGwb9NxkH+NdxPRsq0se5Be8
-=9Nkq
+iEYEARECAAYFAlT4m+sACgkQ8dLMyEl6F20EuwCgmgFFGHS7X76xFiB7Od+ztnoj
+VngAn28Unb6HdP1HhQ9TVJz5zcoWuOCE
+=ofNl
 -----END PGP SIGNATURE-----
 
---v1sgJIdgKq9wcjLn8VaCFDwIMgutHeQib--
+--C9WkB5Jk69vVT0XLc6v52wosKw6c48Xv7--
