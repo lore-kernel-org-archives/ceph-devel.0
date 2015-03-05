@@ -1,78 +1,280 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: About the blueprint OSD: Transactions
-Date: Wed, 4 Mar 2015 23:38:04 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1503042331010.25972@cobra.newdream.net>
-References: <ACIAwADIAN8kzvlukrK0Farh.1.1425481937528.Hmail.liwang@ubuntukylin.com> <alpine.DEB.2.00.1503041638040.23553@cobra.newdream.net> <54F7D376.6070705@ubuntukylin.com>
+From: Blair Bethwaite <blair.bethwaite-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: pool distribution quality report script
+Date: Thu, 5 Mar 2015 18:52:53 +1100
+Message-ID: <CA+z5DszPviPvJd3WS2_3RKd_GXGf8NkCe8og2EQ8wZZsbe=kUA@mail.gmail.com>
+References: <54F7D78D.2090200@redhat.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:32980 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754149AbbCEHiN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 5 Mar 2015 02:38:13 -0500
-In-Reply-To: <54F7D376.6070705@ubuntukylin.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Li Wang <liwang@ubuntukylin.com>
-Cc: Josh Durgin <josh.durgin@inktank.com>, pmcgarry@redhat.com, ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <54F7D78D.2090200-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Mark Nelson <mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Thu, 5 Mar 2015, Li Wang wrote:
-> On 2015/3/5 8:56, Sage Weil wrote:
-> > On Wed, 4 Mar 2015, Li Wang wrote:
-> > > Hi Sage, Please take a look if the below works,
-> > > [...]
-> > 
-> > I think this works.  A few notes:
-> > 
-> > 1- I don't think there's a need to persist the txn on the master until the
-> > slaves reply with PREPARE_ACK.
-> 
-> I think the txn must be persisted at the very first at master side,
-> since once it send the message to slaves, there must be a mechanism
-> that the ROLL_BACK message could be resent to slaves if master down,
-> just there may only few, rather than whole information of the
-> transaction need be persisted
+Hi Mark,
 
-I think we can still skip it because it's not about durabiliy (master and 
-slave are both PGs that are replicated), just about coordination.  if 
-master repeers the slaves will ask whether to roll forward or back and the 
-(new) master will respond with ROLLBACK or COMMIT.
+Cool, that looks handy. Though it'd be even better if it could go a
+step further and recommend re-weighting values to balance things out
+(or increased PG counts where needed).
 
-If you missed the CDS session it should be posted on youtube shortly... we 
-discussed both possibilities.  We think the main difference is that in 
-your case you have to do a double write (prepare + commit on master) but 
-that hides the commit latency sinc eyou can reply when you get the 
-PREPARE_ACKs.  In my proposal, you only write once on the master, but you 
-have to wait for the PREPAREs, and then write the COMMIT, and then reply 
-to the clients.. which will have a higher total latency.
+Cheers,
 
-> > 2- This is basically optimistic concurrency with backoff if
-> > possible deadlock is detected.  I think we can do the same thing in the
-> > proposal in the blueprint if a PREPARE sees that a txn (in-memory) is
-> > pending or if a client txn is recieved and there is a pending PREPARE.  In
-> > the latter case, it seems like we should block and wait...
-> > 
-> 
-> Yes. We can divide the process into two steps, the first step is
-> PREPARE, only for deadlock avoidance, this only refers to memory
-> operation in all slaves' sides. First, master send PREPARE to slaves,
-> the slaves check if there is pending transaction in memory, if so,
-> reply master EAGAIN, otherwise reply PREPARE_ACK, which lead to
-> an extremely fast deadlock avoidance. master collect all PREPARE_ACK,
-> and send COMMIT to slaves, then slaves commit their transaction part
-> to PG metadata, reply master COMMIT_ACK
+On 5 March 2015 at 15:11, Mark Nelson <mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+> Hi All,
+>
+> Recently some folks showed interest in gathering pool distribution
+> statistics and I remembered I wrote a script to do that a while back. It was
+> broken due to a change in the ceph pg dump output format that was committed
+> a while back, so I cleaned the script up, added detection of header fields,
+> automatic json support, and also added in calculation of expected max and
+> min PGs per OSD and std deviation.
+>
+> The script is available here:
+>
+> https://github.com/ceph/ceph-tools/blob/master/cbt/tools/readpgdump.py
+>
+> Some general comments:
+>
+> 1) Expected numbers are derived by treating PGs and OSDs as a
+> balls-in-buckets problem ala Raab & Steger:
+>
+> http://www14.in.tum.de/personen/raab/publ/balls.pdf
+>
+> 2) You can invoke it either by passing it a file or stdout, ie:
+>
+> ceph pg dump -f json | ./readpgdump.py
+>
+> or
+>
+> ./readpgdump.py ~/pgdump.out
+>
+>
+> 3) Here's a snippet of some of some sample output from a 210 OSD cluster.
+> Does this output make sense to people?  Is it useful?
+>
+>> [nhm@burnupiX tools]$ ./readpgdump.py ~/pgdump.out
+>>
+>> +----------------------------------------------------------------------------+
+>> | Detected input as plain
+>> |
+>>
+>> +----------------------------------------------------------------------------+
+>>
+>>
+>> +----------------------------------------------------------------------------+
+>> | Pool ID: 681
+>> |
+>>
+>> +----------------------------------------------------------------------------+
+>> | Participating OSDs: 210
+>> |
+>> | Participating PGs: 4096
+>> |
+>>
+>> +----------------------------------------------------------------------------+
+>> | OSDs in Primary Role (Acting)
+>> |
+>> | Expected PGs Per OSD: Min: 4, Max: 33, Mean: 19.5, Std Dev: 7.2
+>> |
+>> | Actual PGs Per OSD: Min: 7, Max: 43, Mean: 19.5, Std Dev: 6.5
+>> |
+>> | 5 Most Subscribed OSDs: 199(43), 175(36), 149(34), 167(32), 20(31)
+>> |
+>> | 5 Least Subscribed OSDs: 121(7), 46(7), 70(8), 94(9), 122(9)
+>> |
+>> | Avg Deviation from Most Subscribed OSD: 54.6%
+>> |
+>>
+>> +----------------------------------------------------------------------------+
+>> | OSDs in Secondary Role (Acting)
+>> |
+>> | Expected PGs Per OSD: Min: 18, Max: 59, Mean: 39.0, Std Dev: 10.2
+>> |
+>> | Actual PGs Per OSD: Min: 17, Max: 61, Mean: 39.0, Std Dev: 9.7
+>> |
+>> | 5 Most Subscribed OSDs: 44(61), 14(60), 2(59), 167(59), 164(57)
+>> |
+>> | 5 Least Subscribed OSDs: 35(17), 31(20), 37(20), 145(20), 16(20)
+>> |
+>> | Avg Deviation from Most Subscribed OSD: 36.0%
+>> |
+>>
+>> +----------------------------------------------------------------------------+
+>> | OSDs in All Roles (Acting)
+>> |
+>> | Expected PGs Per OSD: Min: 32, Max: 83, Mean: 58.5, Std Dev: 12.5
+>> |
+>> | Actual PGs Per OSD: Min: 29, Max: 93, Mean: 58.5, Std Dev: 14.6
+>> |
+>> | 5 Most Subscribed OSDs: 199(93), 175(92), 44(92), 167(91), 14(91)
+>> |
+>> | 5 Least Subscribed OSDs: 121(29), 35(30), 47(30), 131(32), 145(32)
+>> |
+>> | Avg Deviation from Most Subscribed OSD: 37.1%
+>> |
+>>
+>> +----------------------------------------------------------------------------+
+>> | OSDs in Primary Role (Up)
+>> |
+>> | Expected PGs Per OSD: Min: 4, Max: 33, Mean: 19.5, Std Dev: 7.2
+>> |
+>> | Actual PGs Per OSD: Min: 7, Max: 43, Mean: 19.5, Std Dev: 6.5
+>> |
+>> | 5 Most Subscribed OSDs: 199(43), 175(36), 149(34), 167(32), 20(31)
+>> |
+>> | 5 Least Subscribed OSDs: 121(7), 46(7), 70(8), 94(9), 122(9)
+>> |
+>> | Avg Deviation from Most Subscribed OSD: 54.6%
+>> |
+>>
+>> +----------------------------------------------------------------------------+
+>> | OSDs in Secondary Role (Up)
+>> |
+>> | Expected PGs Per OSD: Min: 18, Max: 59, Mean: 39.0, Std Dev: 10.2
+>> |
+>> | Actual PGs Per OSD: Min: 17, Max: 61, Mean: 39.0, Std Dev: 9.7
+>> |
+>> | 5 Most Subscribed OSDs: 44(61), 14(60), 2(59), 167(59), 164(57)
+>> |
+>> | 5 Least Subscribed OSDs: 35(17), 31(20), 37(20), 145(20), 16(20)
+>> |
+>> | Avg Deviation from Most Subscribed OSD: 36.0%
+>> |
+>>
+>> +----------------------------------------------------------------------------+
+>> | OSDs in All Roles (Up)
+>> |
+>> | Expected PGs Per OSD: Min: 32, Max: 83, Mean: 58.5, Std Dev: 12.5
+>> |
+>> | Actual PGs Per OSD: Min: 29, Max: 93, Mean: 58.5, Std Dev: 14.6
+>> |
+>> | 5 Most Subscribed OSDs: 199(93), 175(92), 44(92), 167(91), 14(91)
+>> |
+>> | 5 Least Subscribed OSDs: 121(29), 35(30), 47(30), 131(32), 145(32)
+>> |
+>> | Avg Deviation from Most Subscribed OSD: 37.1%
+>> |
+>>
+>> +----------------------------------------------------------------------------+
+>
+>
+> This is shown for all the pools, followed by the totals:
+>
+>>
+>> +----------------------------------------------------------------------------+
+>> | Pool ID: Totals (All Pools)
+>> |
+>>
+>> +----------------------------------------------------------------------------+
+>> | Participating OSDs: 210
+>> |
+>> | Participating PGs: 131072
+>> |
+>>
+>> +----------------------------------------------------------------------------+
+>> | OSDs in Primary Role (Acting)
+>> |
+>> | Expected PGs Per OSD: Min: 542, Max: 705, Mean: 624.0, Std Dev: 40.8
+>> |
+>> | Actual PGs Per OSD: Min: 356, Max: 917, Mean: 624.0, Std Dev: 176.2
+>> |
+>> | 5 Most Subscribed OSDs: 167(917), 123(876), 23(873), 194(869), 60(868)
+>> |
+>> | 5 Least Subscribed OSDs: 117(356), 155(358), 46(361), 78(361), 70(362)
+>> |
+>> | Avg Deviation from Most Subscribed OSD: 32.0%
+>> |
+>>
+>> +----------------------------------------------------------------------------+
+>> | OSDs in Secondary Role (Acting)
+>> |
+>> | Expected PGs Per OSD: Min: 1132, Max: 1363, Mean: 1248.0, Std Dev: 57.8
+>> |
+>> | Actual PGs Per OSD: Min: 864, Max: 1554, Mean: 1248.0, Std Dev: 229.9
+>> |
+>> | 5 Most Subscribed OSDs: 182(1554), 142(1552), 4(1548), 123(1544),
+>> 100(1540)|
+>> | 5 Least Subscribed OSDs: 16(864), 55(885), 18(885), 42(885), 85(891)
+>> |
+>> | Avg Deviation from Most Subscribed OSD: 19.7%
+>> |
+>>
+>> +----------------------------------------------------------------------------+
+>> | OSDs in All Roles (Acting)
+>> |
+>> | Expected PGs Per OSD: Min: 1730, Max: 2013, Mean: 1872.0, Std Dev: 70.7
+>> |
+>> | Actual PGs Per OSD: Min: 1252, Max: 2420, Mean: 1872.0, Std Dev: 402.0
+>> |
+>> | 5 Most Subscribed OSDs: 123(2420), 142(2403), 195(2390), 100(2389),
+>> 182(2380)|
+>> | 5 Least Subscribed OSDs: 55(1252), 42(1268), 16(1271), 85(1271),
+>> 155(1275) |
+>> | Avg Deviation from Most Subscribed OSD: 22.6%
+>> |
+>>
+>> +----------------------------------------------------------------------------+
+>> | OSDs in Primary Role (Up)
+>> |
+>> | Expected PGs Per OSD: Min: 542, Max: 705, Mean: 624.0, Std Dev: 40.8
+>> |
+>> | Actual PGs Per OSD: Min: 356, Max: 917, Mean: 624.0, Std Dev: 176.2
+>> |
+>> | 5 Most Subscribed OSDs: 167(917), 123(876), 23(873), 194(869), 60(868)
+>> |
+>> | 5 Least Subscribed OSDs: 117(356), 155(358), 46(361), 78(361), 70(362)
+>> |
+>> | Avg Deviation from Most Subscribed OSD: 32.0%
+>> |
+>>
+>> +----------------------------------------------------------------------------+
+>> | OSDs in Secondary Role (Up)
+>> |
+>> | Expected PGs Per OSD: Min: 1132, Max: 1363, Mean: 1248.0, Std Dev: 57.8
+>> |
+>> | Actual PGs Per OSD: Min: 864, Max: 1554, Mean: 1248.0, Std Dev: 229.9
+>> |
+>> | 5 Most Subscribed OSDs: 182(1554), 142(1552), 4(1548), 123(1544),
+>> 100(1540)|
+>> | 5 Least Subscribed OSDs: 16(864), 55(885), 18(885), 42(885), 85(891)
+>> |
+>> | Avg Deviation from Most Subscribed OSD: 19.7%
+>> |
+>>
+>> +----------------------------------------------------------------------------+
+>> | OSDs in All Roles (Up)
+>> |
+>> | Expected PGs Per OSD: Min: 1730, Max: 2013, Mean: 1872.0, Std Dev: 70.7
+>> |
+>> | Actual PGs Per OSD: Min: 1252, Max: 2420, Mean: 1872.0, Std Dev: 402.0
+>> |
+>> | 5 Most Subscribed OSDs: 123(2420), 142(2403), 195(2390), 100(2389),
+>> 182(2380)|
+>> | 5 Least Subscribed OSDs: 55(1252), 42(1268), 16(1271), 85(1271),
+>> 155(1275) |
+>> | Avg Deviation from Most Subscribed OSD: 22.6%
+>> |
+>>
+>> +----------------------------------------------------------------------------+
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-Backing off if any affected object has another in-flight transaction is 
-sufficient but also conservative since we'll fail/retry transactions that 
-actually could have completed w/o deadlocking.  The altnerative is to 
-leave it to the client to only propose transactions that won't conflict.  
-The latter is certainly an easier first version to implement :) but it may 
-also be that it's all that we want.  Solving the deadlock avoidance in the 
-general case sucks.  :(
 
-Maybe a simple backoff like you propose is a decent middle ground... I 
-susepect, though, that a large portion of transactions in the real world 
-will be A+B, A+C, A+D, etc where they are non-deadlocking but do overlap 
-(e.g. on an index or metadata object).
 
-sage
+-- 
+Cheers,
+~Blairo
