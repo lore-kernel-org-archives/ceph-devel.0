@@ -1,39 +1,48 @@
-From: Mike Christie <mchristi@redhat.com>
-Subject: Re: SOCK_MEMALLOC vs loopback
-Date: Wed, 04 Mar 2015 22:13:30 -0600
-Message-ID: <54F7D7EA.6010303@redhat.com>
-References: <CAOi1vP8tJTMhbCyKVD66pc_Tz7+aOS236KgvQnA-S63yv1P-sA@mail.gmail.com> <20150304200427.GQ3087@suse.de> <54F7D5A7.1060404@redhat.com>
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: [PATCH 1/1 linux-next] ceph: remove redundant declaration
+Date: Thu, 5 Mar 2015 13:44:52 +0800
+Message-ID: <CAAM7YAmNGE5dDHUVVfmdcZ=yYMRgyYC4wD=oyQNXmHvYkFuRrA@mail.gmail.com>
+References: <1425405470-9002-1-git-send-email-fabf@skynet.be>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-15
-Content-Transfer-Encoding: 7bit
-Return-path: <netdev-owner@vger.kernel.org>
-In-Reply-To: <54F7D5A7.1060404@redhat.com>
-Sender: netdev-owner@vger.kernel.org
-To: Mel Gorman <mgorman@suse.de>, Ilya Dryomov <idryomov@gmail.com>
-Cc: ceph-devel@vger.kernel.org, Eric Dumazet <edumazet@google.com>, Sage Weil <sage@redhat.com>, NeilBrown <neilb@suse.de>, netdev@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1425405470-9002-1-git-send-email-fabf@skynet.be>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Fabian Frederick <fabf@skynet.be>
+Cc: linux-kernel@vger.kernel.org, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On 03/04/2015 10:03 PM, Mike Christie wrote:
-> On 03/04/2015 02:04 PM, Mel Gorman wrote:
->> > On Wed, Mar 04, 2015 at 09:38:48PM +0300, Ilya Dryomov wrote:
->>> >> Hello,
->>> >>
->>> >> A short while ago Mike added a patch to libceph to set SOCK_MEMALLOC on
->>> >> libceph sockets and PF_MEMALLOC around send/receive paths (commit
->>> >> 89baaa570ab0, "libceph: use memalloc flags for net IO").  rbd is much
->>> >> like nbd and is succeptible to all the same memory allocation
->>> >> deadlocks, so it seemed like a step in the right direction.
->>> >>
->> > 
->> > The contract for SOCK_MEMALLOC is that it would only be used for temporary
->> > allocations that were necessary for the system to make forward progress. In
->> > the case of swap-over-NFS, it would only be used for transmitting
->> > buffers that were necessary to write data to swap when there were no
-> Are upper layers like NFS/iSCSI/NBD/RBD supposed to know or track when
-> there are no other options (for example if a GFP_ATOMIC allocation
-> fails, then set the flags and retry the operation), or are they supposed
-> to be able to set the flags, send IO and let the network layer handle it?
-> 
+On Wed, Mar 4, 2015 at 1:57 AM, Fabian Frederick <fabf@skynet.be> wrote:
+> ceph_aops was already defined extern in addr.c section
+>
+> Signed-off-by: Fabian Frederick <fabf@skynet.be>
+> ---
+>  fs/ceph/super.h |    1 -
+>  1 file changed, 1 deletion(-)
+>
+> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+> index 04c8124..02ca99c 100644
+> --- a/fs/ceph/super.h
+> +++ b/fs/ceph/super.h
+> @@ -881,7 +881,6 @@ extern int ceph_mmap(struct file *file, struct vm_area_struct *vma);
+>
+>  /* file.c */
+>  extern const struct file_operations ceph_file_fops;
+> -extern const struct address_space_operations ceph_aops;
+>
+>  extern int ceph_open(struct inode *inode, struct file *file);
+>  extern int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
+> --
+> 1.7.9.5
+>
 
-Oh yeah, maybe I misunderstood you. Were you just saying we should not
-be using it for the configuration we are hitting the problem on?
+Added to our testing branch
+
+Thanks
+Yan, Zheng
+
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Please read the FAQ at  http://www.tux.org/lkml/
