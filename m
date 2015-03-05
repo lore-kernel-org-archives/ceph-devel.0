@@ -1,48 +1,98 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: [PATCH 1/1 linux-next] ceph: remove redundant declaration
-Date: Thu, 5 Mar 2015 13:44:52 +0800
-Message-ID: <CAAM7YAmNGE5dDHUVVfmdcZ=yYMRgyYC4wD=oyQNXmHvYkFuRrA@mail.gmail.com>
-References: <1425405470-9002-1-git-send-email-fabf@skynet.be>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: FileStore performance: coalescing operations
+Date: Thu, 5 Mar 2015 15:04:41 +0800
+Message-ID: <CACJqLyZg--fAhanqwrqvbwUDDxgDPci1ughHU_uvWv1gcc75qQ@mail.gmail.com>
+References: <20150226152807.5b71a93c@doppio>
+	<alpine.DEB.2.00.1503031641550.25972@cobra.newdream.net>
+	<alpine.DEB.2.00.1503041607590.25972@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1425405470-9002-1-git-send-email-fabf@skynet.be>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Fabian Frederick <fabf@skynet.be>
-Cc: linux-kernel@vger.kernel.org, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-pa0-f49.google.com ([209.85.220.49]:37446 "EHLO
+	mail-pa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754301AbbCEHEm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Mar 2015 02:04:42 -0500
+Received: by paceu11 with SMTP id eu11so26319681pac.4
+        for <ceph-devel@vger.kernel.org>; Wed, 04 Mar 2015 23:04:41 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1503041607590.25972@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Andreas Bluemle <andreas.bluemle@itxperts.de>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, Mar 4, 2015 at 1:57 AM, Fabian Frederick <fabf@skynet.be> wrote:
-> ceph_aops was already defined extern in addr.c section
+I think the performance improvement can be refer to
+https://github.com/ceph/ceph/pull/2972 which I did a simple benchmark
+comparison.
+
+This coalescing should get a lighter improvement but I think obviously
+it should be better.
+
+On Thu, Mar 5, 2015 at 8:10 AM, Sage Weil <sage@newdream.net> wrote:
+> On Tue, 3 Mar 2015, Sage Weil wrote:
+>> I think we should try to avoid the dups in the first place in the upper
+>> layers before resorting to deduping in the FileStore.
 >
-> Signed-off-by: Fabian Frederick <fabf@skynet.be>
-> ---
->  fs/ceph/super.h |    1 -
->  1 file changed, 1 deletion(-)
+> I took a stab at this:
 >
-> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-> index 04c8124..02ca99c 100644
-> --- a/fs/ceph/super.h
-> +++ b/fs/ceph/super.h
-> @@ -881,7 +881,6 @@ extern int ceph_mmap(struct file *file, struct vm_area_struct *vma);
+>         https://github.com/ceph/ceph/pull/3878
 >
->  /* file.c */
->  extern const struct file_operations ceph_file_fops;
-> -extern const struct address_space_operations ceph_aops;
+> Here's what the txns look like now:
 >
->  extern int ceph_open(struct inode *inode, struct file *file);
->  extern int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
+> {
+>     "ops": [
+>         {
+>             "op_num": 0,
+>             "op_name": "omap_setkeys",
+>             "collection": "0.2_head",
+>             "oid": "2\/\/head\/\/0",
+>             "attr_lens": {
+>                 "0000000005.00000000000000000002": 178,
+>                 "_epoch": 4,
+>                 "_info": 729,
+>                 "can_rollback_to": 12,
+>                 "rollback_info_trimmed_to": 12
+>             }
+>         },
+>         {
+>             "op_num": 1,
+>             "op_name": "write",
+>             "collection": "0.2_head",
+>             "oid": "8b08fa52\/benchmark_data_maetl_15609_object5\/head\/\/0",
+>             "length": 123,
+>             "offset": 0,
+>             "bufferlist length": 123
+>         },
+>         {
+>             "op_num": 2,
+>             "op_name": "setattr",
+>             "collection": "0.2_head",
+>             "oid": "8b08fa52\/benchmark_data_maetl_15609_object5\/head\/\/0",
+>             "name": "_",
+>             "length": 269
+>         },
+>         {
+>             "op_num": 3,
+>             "op_name": "setattr",
+>             "collection": "0.2_head",
+>             "oid": "8b08fa52\/benchmark_data_maetl_15609_object5\/head\/\/0",
+>             "name": "snapset",
+>             "length": 31
+>         }
+>     ]
+> }
+>
+> Care to give that a spin and see if it give syou a similar (or better)
+> improvement?
+>
+> sage
 > --
-> 1.7.9.5
->
-
-Added to our testing branch
-
-Thanks
-Yan, Zheng
-
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> Please read the FAQ at  http://www.tux.org/lkml/
+
+
+
+-- 
+Best Regards,
+
+Wheat
