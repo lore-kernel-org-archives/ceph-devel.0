@@ -1,49 +1,104 @@
-From: GuangYang <yguang11@outlook.com>
-Subject: RE: OSD Sessions at CDS
-Date: Fri, 6 Mar 2015 14:07:41 +0000
-Message-ID: <BLU175-W231CE30B05CADC27ACFC87DF1C0@phx.gbl>
-References: <1425576201.3944.26.camel@Deepthought>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: About _setattr() optimazation and recovery accelerate
+Date: Fri, 6 Mar 2015 08:03:28 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1503060759190.18660@cobra.newdream.net>
+References: <CALZt5jxDEk2YJ+AK-NzgjiGY1JoukGW7+mQtQeZT3n+3p+N9dQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from blu004-omc4s30.hotmail.com ([65.55.111.169]:57031 "EHLO
-	BLU004-OMC4S30.hotmail.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752799AbbCFOHm (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Mar 2015 09:07:42 -0500
-In-Reply-To: <1425576201.3944.26.camel@Deepthought>
+Received: from mx1.redhat.com ([209.132.183.28]:55671 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755339AbbCFQDd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 6 Mar 2015 11:03:33 -0500
+In-Reply-To: <CALZt5jxDEk2YJ+AK-NzgjiGY1JoukGW7+mQtQeZT3n+3p+N9dQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sjust@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Nicheal <zay11022@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-PiA9PT09PT09PT09PT09PT09PUZhc3RlciBQZWVyaW5nL0xvd2VyIFRhaWwgTGF0ZW5jeT09PT09
-PT09PT09PT09PT09PT09Cj4KPiBodHRwczovL3dpa2kuY2VwaC5jb20vUGxhbm5pbmcvQmx1ZXBy
-aW50cy9JbmZlcm5hbGlzL29zZCUKPiAzQV9GYXN0ZXJfUGVlcmluZwo+Cj4gaHR0cHM6Ly93aWtp
-LmNlcGguY29tL1BsYW5uaW5nL0JsdWVwcmludHMvSW5mZXJuYWxpcy9JbXByb3ZlX3RhaWxfbGF0
-ZW5jeQo+Cj4gaHR0cDovL3BhZC5jZXBoLmNvbS9wL0ktZmFzdGVyLXBlZXJpbmdfdGFpbGluZwo+
-Cj4gSW4gYWRkaXRpb24gdG8gd2hhdCBpcyBpbiB0aGUgYmx1ZXByaW50LCBTYWdlIHN1Z2dlc3Rl
-ZCB0aGF0IHRoZSBwcmltYXJ5Cj4gaW4gc29tZSBjYXNlcyBjYW4ga2VlcCB0aGUgcGVlcl9pbmZv
-IGFuZCBwZWVyX21pc3Npbmcgc2V0cyB3aGljaCBpdAo+IGFscmVhZHkgaGFzIGlmIHRoZSBhY3Rp
-bmcgc2V0IHN0YXlzIHRoZSBzYW1lIG9yIHNocmlua3MuCj4KPiBXZSBhbHNvIHRvdWNoZWQgb24g
-cHJlcG9wdWxhdGluZyBwZ190ZW1wIGF0IHRoZSBtb25pdG9yIGFuZCBzZXR0aW5nIGEKPiBkaWZm
-ZXJlbnQgdGVtcCBwZyBwcmltYXJ5IGF0IHRoZSBtb25pdG9yIGluIHRoZSBtYXAgd2hpY2ggbWFy
-a3MgYW4gb3NkCj4gYmFjayB1cCB0byBhdm9pZCB0aGF0IHBnIGJlaW5nIHByaW1hcnkgaW1tZWRp
-YXRlbHkgKGFuZCBoYXZpbmcgdG8gYmxvY2sKPiByZWFkcyBhbmQgd3JpdGVzIG9uIHJlY292ZXJ5
-KS4KPgpIaSBTYW0sCldpdGggb3VyIGV4cGVyaWVuY2UsIHRoZSBwZWVyaW5nIGlzIG1vcmUgcGFp
-bmZ1bCB3aGVuIHRoZSBPU0Qocykgc3RheWVkIGRvd24gKGJ1dCBzdGlsbCBpbikgZm9yIGEgd2hp
-bGUgYW5kIHRoZW4gZ290IHVwLCBmb3IgZXhhbXBsZSwgdGhlIE9TRCBjcmFzaGVkIG9yIG9uZSBP
-U0QgaG9zdCBjcmFzaGVkIHdpdGhvdXQgbm90aWNlIChvciBpdCB0YWtlcyB0aW1lIHRvIHJlcGFp
-ciB0aGUgaGFyZHdhcmUpLCB3aGVuIGl0IGlzIHVwLCBpdCB3aWxsIG5lZWQgdG8gcG9wdWxhdGUg
-dGhlIFBHOjpyZWNvdmVyeV9tYXAsIHNheSB0aGVyZSBhcmUgTiBvYmplY3RzIG1pc3NpbmcsIGFu
-ZCB0aGVyZSBhcmUgTSByZXBsaWNhcywgY3VycmVudGx5IHRoZSBjb21wbGV4aXR5IG9mIHRoZSBz
-ZWFyY2ggZm9yIG1pc3NpbmcgaXMgTipNKmxvZ04uIFdoZW4gTiBpcyBsYXJnZSAoT1NEIGRvd24g
-Zm9yIGEgd2hpbGUpLCBhbmQgTSBpcyBsYXJnZSAoRUMgcG9vbCksIGFuZCBtYW55IFBHcyBhcmUg
-Z29pbmcgdGhyb3VnaCB0aGlzIHByb2Nlc3MsIGl0IGlzIG5vbi10cml2aWFsLiBUcmFja2VyICM5
-NTU4IGhhcyBzb21lIGxvZ3Mgd2l0aCBtb3JlIGRldGFpbHMuIEkgYW0gdGhpbmtpbmcgYSBzaW1w
-bGUgb3B0aW1pemF0aW9uIGlzIHRvIGRldGVjdCB0aGUgY2FzZSB0aGF0IG9ubHkgMSByZXBsaWNh
-IChpbiB0aGUgYWN0aW5nYmFja2ZpbGwgc2V0KSBoYXMgbWlzc2luZyBhbmQgYWxsIG90aGVycyBh
-cmUgY29tcGxldGUsIHdlIGNhbiBzaW1wbHkgcG9wdWxhdGUgdGhlIHJlY292ZXJ5X21hcCBieSBz
-cGVjaWZ5aW5nIChNIC0gMSkgcmVwbGljYXMgd2hvIGRvZXMgbm90IGhhdmUgYW55IG1pc3Npbmcg
-YXMgcmVjb3Zlcnkgc291cmNlLCB0aGlzIGNvdWxkIGltcHJvdmUgdGhlIGNvbXBsZXhpdHkgdG8g
-Tipsb2dOLgoKRG9lcyB0aGF0IG1ha2Ugc2Vuc2U/IElmIGl0IGRvZXMsIEkgd2lsbCBnbyBhaGVh
-ZCBwcm92aWRpbmcgYSBwYXRjaC4KClRoYW5rcywKR3VhbmcgCQkgCSAgIAkJICA=
+Hi!
+
+[copying ceph-devel]
+
+On Fri, 6 Mar 2015, Nicheal wrote:
+> Hi Sage,
+> 
+> Cool for issue #3878, Duplicated pg_log write, which is post early in
+> my issue #3244 and Single omap_setkeys transaction improve the
+> performance in FileStore as in my previous testing (most of time cost
+> in FileStore is in the transaction omap_setkeys).
+
+I can't find #3244?
+
+> Well, I think another performance issue is to the strategy of setattrs.
+> Here is some kernel log achieve from xfs behavious.
+> Mar  6 17:19:37 ceph2 kernel: start_xfs_attr_set_int: name =
+> ceph._(6), value =.259)
+> Mar  6 17:19:37 ceph2 kernel: format of di_c data: 2, format of attr
+> forks data: 1
+> Mar  6 17:19:37 ceph2 kernel: di_extsize=0, di_nextents=0,
+> di_anextents=0, di_forkoff=239
+> 
+> Mar  6 17:19:37 ceph2 kernel: start_xfs_attr_set_int: name =
+> ceph._(6), value =.259)
+> Mar  6 17:19:37 ceph2 kernel: format of di_c data: 2, format of attr
+> forks data: 2
+> Mar  6 17:19:37 ceph2 kernel: di_extsize=0, di_nextents=1,
+> di_anextents=1, di_forkoff=239
+> 
+> Mar  6 17:19:37 ceph2 kernel: start_xfs_attr_set_int: name =
+> ceph._(6), value =.259)
+> Mar  6 17:19:37 ceph2 kernel: format of di_c data: 2, format of attr
+> forks data: 2
+> Mar  6 17:19:37 ceph2 kernel: di_extsize=0, di_nextents=0,
+> di_anextents=1, di_forkoff=239
+> 
+> typedef enum xfs_dinode_fmt {
+> XFS_DINODE_FMT_DEV, /* xfs_dev_t */
+> XFS_DINODE_FMT_LOCAL, /* bulk data */
+> XFS_DINODE_FMT_EXTENTS, /* struct xfs_bmbt_rec */
+> XFS_DINODE_FMT_BTREE, /* struct xfs_bmdr_block */
+> XFS_DINODE_FMT_UUID /* uuid_t */
+> } xfs_dinode_fmt_t;
+> 
+> while attr forks data = 2 means XFS_DINODE_FMT_EXTENTS (xattr is
+> stored in extent format), while attr forks data =1 means
+> XFS_DINODE_FMT_LOCAL(xattr is stored as inline attribute).
+> 
+> However, in most cases, xattr attribute is stored in extent, not
+> inline. Please note that, I have already formatted the partition with
+> -i size=2048.  when the number of xattrs is larger than 10, it uses
+> XFS_DINODE_FMT_BTREE to accelerate key searching.
+
+Did you by chance look at what size the typical xattrs are?  I expected 
+that the usual _ and snapset attrs would be small enough to fit inline.. 
+but if they're not then we should at a minimum adjust our recommendation 
+on xfs inode size.
+
+> So, in _setattr(), we may just get xattr_key by using chain_flistxattr
+> instead of  _fgetattrs, which retrieve (key, value) pair, as value is
+> exactly no use here. and furthermore, we may consider the strategies
+> that we need move spill_out xattr to omap, while xfs only restricts
+> that each xattr value < 64K and each xattr key < 255byte.  And
+> duplicated read for XATTR_SPILL_OUT_NAME also occurs in:
+> r = chain_fgetxattr(**fd, XATTR_SPILL_OUT_NAME, buf, sizeof(buf));
+> r = _fgetattrs(**fd, inline_set);
+> And I try to ignore the _fgetattrs() logic and just update xattr
+> update in _setattr(), my ssd cluster will be improved about 2% - 3%
+> performance.
+
+I'm not quite following... do you have a patch we can look at?
+
+> Another issue about an idea of recovery is showed in
+> https://github.com/ceph/ceph/pull/3837
+> Can you give some suggestion about that?
+
+I think this direction has a lot of potential, although it will add a fair 
+bit of complexity.  
+
+I think you can avoid the truncate field and infer that from the dirtied 
+interval and the new object size.  Need to look at the patch more closely 
+still, though...
+
+sage
+
