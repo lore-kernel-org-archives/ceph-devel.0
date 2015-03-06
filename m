@@ -1,63 +1,49 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: gitbuilder, master branch and make check bot
-Date: Fri, 06 Mar 2015 03:00:44 +0100
-Message-ID: <54F90A4C.60700@dachary.org>
-References: <54F899B8.1050005@dachary.org>
+From: GuangYang <yguang11@outlook.com>
+Subject: RE: OSD Sessions at CDS
+Date: Fri, 6 Mar 2015 14:07:41 +0000
+Message-ID: <BLU175-W231CE30B05CADC27ACFC87DF1C0@phx.gbl>
+References: <1425576201.3944.26.camel@Deepthought>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="X8mLM3LiFbuoOdb8XKiA7IckPqlPajkIf"
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:53637 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1754153AbbCFCAr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Mar 2015 21:00:47 -0500
-Received: from [10.9.0.6] (unknown [10.0.2.28])
-	by smtp.dmail.dachary.org (Postfix) with ESMTP id 0314142B25
-	for <ceph-devel@vger.kernel.org>; Fri,  6 Mar 2015 03:00:44 +0100 (CET)
-In-Reply-To: <54F899B8.1050005@dachary.org>
+Received: from blu004-omc4s30.hotmail.com ([65.55.111.169]:57031 "EHLO
+	BLU004-OMC4S30.hotmail.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752799AbbCFOHm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Mar 2015 09:07:42 -0500
+In-Reply-To: <1425576201.3944.26.camel@Deepthought>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Samuel Just <sjust@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---X8mLM3LiFbuoOdb8XKiA7IckPqlPajkIf
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-Hi again,
-
-The gitbuilders are fixed as well as master. The make check bot will be b=
-ack in a few hours.
-
-Cheers
-
-On 05/03/2015 19:00, Loic Dachary wrote:
-> Hi Ceph,
->=20
-> The make check bot that runs on pull requests is on pause until the git=
-builder ( http://ceph.com/gitbuilder.cgi ) upgrade is complete. This shou=
-ld fix the build of the master branch. All should be fixed in the next fe=
-w hours at most.
->=20
-> Thanks for your patience :-)
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---X8mLM3LiFbuoOdb8XKiA7IckPqlPajkIf
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlT5CkwACgkQ8dLMyEl6F233hgCfW9AEgLBGCCI1Yk3Ul7hTlkgk
-6bwAn1XIeAA8VCMG2i9AK1vPSiIuYSN7
-=QwVJ
------END PGP SIGNATURE-----
-
---X8mLM3LiFbuoOdb8XKiA7IckPqlPajkIf--
+PiA9PT09PT09PT09PT09PT09PUZhc3RlciBQZWVyaW5nL0xvd2VyIFRhaWwgTGF0ZW5jeT09PT09
+PT09PT09PT09PT09PT09Cj4KPiBodHRwczovL3dpa2kuY2VwaC5jb20vUGxhbm5pbmcvQmx1ZXBy
+aW50cy9JbmZlcm5hbGlzL29zZCUKPiAzQV9GYXN0ZXJfUGVlcmluZwo+Cj4gaHR0cHM6Ly93aWtp
+LmNlcGguY29tL1BsYW5uaW5nL0JsdWVwcmludHMvSW5mZXJuYWxpcy9JbXByb3ZlX3RhaWxfbGF0
+ZW5jeQo+Cj4gaHR0cDovL3BhZC5jZXBoLmNvbS9wL0ktZmFzdGVyLXBlZXJpbmdfdGFpbGluZwo+
+Cj4gSW4gYWRkaXRpb24gdG8gd2hhdCBpcyBpbiB0aGUgYmx1ZXByaW50LCBTYWdlIHN1Z2dlc3Rl
+ZCB0aGF0IHRoZSBwcmltYXJ5Cj4gaW4gc29tZSBjYXNlcyBjYW4ga2VlcCB0aGUgcGVlcl9pbmZv
+IGFuZCBwZWVyX21pc3Npbmcgc2V0cyB3aGljaCBpdAo+IGFscmVhZHkgaGFzIGlmIHRoZSBhY3Rp
+bmcgc2V0IHN0YXlzIHRoZSBzYW1lIG9yIHNocmlua3MuCj4KPiBXZSBhbHNvIHRvdWNoZWQgb24g
+cHJlcG9wdWxhdGluZyBwZ190ZW1wIGF0IHRoZSBtb25pdG9yIGFuZCBzZXR0aW5nIGEKPiBkaWZm
+ZXJlbnQgdGVtcCBwZyBwcmltYXJ5IGF0IHRoZSBtb25pdG9yIGluIHRoZSBtYXAgd2hpY2ggbWFy
+a3MgYW4gb3NkCj4gYmFjayB1cCB0byBhdm9pZCB0aGF0IHBnIGJlaW5nIHByaW1hcnkgaW1tZWRp
+YXRlbHkgKGFuZCBoYXZpbmcgdG8gYmxvY2sKPiByZWFkcyBhbmQgd3JpdGVzIG9uIHJlY292ZXJ5
+KS4KPgpIaSBTYW0sCldpdGggb3VyIGV4cGVyaWVuY2UsIHRoZSBwZWVyaW5nIGlzIG1vcmUgcGFp
+bmZ1bCB3aGVuIHRoZSBPU0Qocykgc3RheWVkIGRvd24gKGJ1dCBzdGlsbCBpbikgZm9yIGEgd2hp
+bGUgYW5kIHRoZW4gZ290IHVwLCBmb3IgZXhhbXBsZSwgdGhlIE9TRCBjcmFzaGVkIG9yIG9uZSBP
+U0QgaG9zdCBjcmFzaGVkIHdpdGhvdXQgbm90aWNlIChvciBpdCB0YWtlcyB0aW1lIHRvIHJlcGFp
+ciB0aGUgaGFyZHdhcmUpLCB3aGVuIGl0IGlzIHVwLCBpdCB3aWxsIG5lZWQgdG8gcG9wdWxhdGUg
+dGhlIFBHOjpyZWNvdmVyeV9tYXAsIHNheSB0aGVyZSBhcmUgTiBvYmplY3RzIG1pc3NpbmcsIGFu
+ZCB0aGVyZSBhcmUgTSByZXBsaWNhcywgY3VycmVudGx5IHRoZSBjb21wbGV4aXR5IG9mIHRoZSBz
+ZWFyY2ggZm9yIG1pc3NpbmcgaXMgTipNKmxvZ04uIFdoZW4gTiBpcyBsYXJnZSAoT1NEIGRvd24g
+Zm9yIGEgd2hpbGUpLCBhbmQgTSBpcyBsYXJnZSAoRUMgcG9vbCksIGFuZCBtYW55IFBHcyBhcmUg
+Z29pbmcgdGhyb3VnaCB0aGlzIHByb2Nlc3MsIGl0IGlzIG5vbi10cml2aWFsLiBUcmFja2VyICM5
+NTU4IGhhcyBzb21lIGxvZ3Mgd2l0aCBtb3JlIGRldGFpbHMuIEkgYW0gdGhpbmtpbmcgYSBzaW1w
+bGUgb3B0aW1pemF0aW9uIGlzIHRvIGRldGVjdCB0aGUgY2FzZSB0aGF0IG9ubHkgMSByZXBsaWNh
+IChpbiB0aGUgYWN0aW5nYmFja2ZpbGwgc2V0KSBoYXMgbWlzc2luZyBhbmQgYWxsIG90aGVycyBh
+cmUgY29tcGxldGUsIHdlIGNhbiBzaW1wbHkgcG9wdWxhdGUgdGhlIHJlY292ZXJ5X21hcCBieSBz
+cGVjaWZ5aW5nIChNIC0gMSkgcmVwbGljYXMgd2hvIGRvZXMgbm90IGhhdmUgYW55IG1pc3Npbmcg
+YXMgcmVjb3Zlcnkgc291cmNlLCB0aGlzIGNvdWxkIGltcHJvdmUgdGhlIGNvbXBsZXhpdHkgdG8g
+Tipsb2dOLgoKRG9lcyB0aGF0IG1ha2Ugc2Vuc2U/IElmIGl0IGRvZXMsIEkgd2lsbCBnbyBhaGVh
+ZCBwcm92aWRpbmcgYSBwYXRjaC4KClRoYW5rcywKR3VhbmcgCQkgCSAgIAkJICA=
