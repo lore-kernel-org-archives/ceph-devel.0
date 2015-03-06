@@ -1,54 +1,79 @@
-From: Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Establishing the Ceph Board
-Date: Fri, 6 Mar 2015 12:00:46 -0500
-Message-ID: <CAAZbbf2qSAQQZivvZv8n4LStzh0qVrHLHctBbsg3B-LC_Zfigw@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: git submodule deinit
+Date: Fri, 06 Mar 2015 18:17:22 +0100
+Message-ID: <54F9E122.6080304@dachary.org>
+References: <54F8C745.7030508@dachary.org> <54F8E1D5.4090104@bisect.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="rQM08AIHpXX9oIvDR5f6CrMXNlcSQdfR8"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail2.dachary.org ([91.121.57.175]:54012 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751053AbbCFRRZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Mar 2015 12:17:25 -0500
+In-Reply-To: <54F8E1D5.4090104@bisect.de>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hey Cephers,
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--rQM08AIHpXX9oIvDR5f6CrMXNlcSQdfR8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-It looks like the governance work that has been going on for so long
-is (finally!) getting ready to come to fruition. If you would like
-more information feel free to check out the docs from CDS available
-at:
+Hi Danny,
 
-http://wiki.ceph.com/Planning/Blueprints/Infernalis/Ceph_Governance
+On 06/03/2015 00:08, Danny Al-Gaaf wrote:
+> Am 05.03.2015 um 22:14 schrieb Loic Dachary:
+>> Hi Danny,
+>>
+>> Unfortunately it looks like submodule deinit requires a version of
+>> git that's not in precise.
+>>
+>> http://gitbuilder.sepia.ceph.com/gitbuilder-ceph-deb-precise-amd64-bas=
+ic/log.cgi?log=3D9a0ac62a9cf27573d5345143a3bc6c6b737031db
+>>
+>>  + git submodule deinit -f .
+>>
+>> error: pathspec 'deinit' did not match any file(s) known to git.
+>>
+>> error: pathspec '-f' did not match any file(s) known to git.
+>>
+>> I'll revert that and go back to rm until we find a better way.
+>=20
+> 'git submodule deinit' was introduced in git 1.8.2(-rc3), 4. Mar 2013,
+> it is quite old, the upcoming git version is 2.3.2.
 
-What I need now is to start gathering the people/orgs that would be
-interested in participating in a Ceph Board. My goal is to involve the
-founding members in finalizing the documents and procedures so that it
-isn't just arbitrary stuff made up by one monkey. If you are
-interested in being a part of the Ceph Board please email me the
-following information:
+$ git --version
+git version 1.7.9.5
 
-Name
-Organization/Affiliation
-Resources you might contribute (money, time, developers, your own commits, etc)
+>=20
+> Which version is used in precise? The code of deinit is only a script.
+> This may could also be integrated in the existing gitbuilder code as a
+> helper function. if there is no way to update git to an newer version.
 
-That should be enough to start a dialogue. My goal here is to get a
-small group of people that can help refine the governance docs, build
-the board, and ensure the longterm health of Ceph. As always if you
-have any questions, please don't hesitate to contact me. Thanks!
+Adding such a helper to autobuild-ceph/build-ceph.sh & all to get rid of =
+the explicit rm would be a great idea.
+
+Cheers
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
 
--- 
+--rQM08AIHpXX9oIvDR5f6CrMXNlcSQdfR8
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
-Best Regards,
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
 
-Patrick McGarry
-Director Ceph Community || Red Hat
-http://ceph.com  ||  http://community.redhat.com
-@scuttlemonkey || @ceph
+iEYEARECAAYFAlT54SIACgkQ8dLMyEl6F23HNACfcKsduWjMAHsnUTyppijtG7GK
+Wr0AnRlkA/Yh0GMscgpu64+K4rGSn9Gq
+=Hly2
+-----END PGP SIGNATURE-----
+
+--rQM08AIHpXX9oIvDR5f6CrMXNlcSQdfR8--
