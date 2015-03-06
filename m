@@ -1,104 +1,92 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: About _setattr() optimazation and recovery accelerate
-Date: Fri, 6 Mar 2015 08:03:28 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1503060759190.18660@cobra.newdream.net>
-References: <CALZt5jxDEk2YJ+AK-NzgjiGY1JoukGW7+mQtQeZT3n+3p+N9dQ@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: gmock linkage / packaging errors
+Date: Fri, 06 Mar 2015 17:56:07 +0100
+Message-ID: <54F9DC27.2050601@dachary.org>
+References: <54F89BEB.3080303@dachary.org> <54F8E372.1060103@bisect.de>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="xsHeO8akcitkbkl67769qUwSKEOIPW8PA"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:55671 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755339AbbCFQDd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 6 Mar 2015 11:03:33 -0500
-In-Reply-To: <CALZt5jxDEk2YJ+AK-NzgjiGY1JoukGW7+mQtQeZT3n+3p+N9dQ@mail.gmail.com>
+Received: from mail2.dachary.org ([91.121.57.175]:53997 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752105AbbCFQ4K (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Mar 2015 11:56:10 -0500
+In-Reply-To: <54F8E372.1060103@bisect.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nicheal <zay11022@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi!
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--xsHeO8akcitkbkl67769qUwSKEOIPW8PA
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-[copying ceph-devel]
+Hi Danny,
 
-On Fri, 6 Mar 2015, Nicheal wrote:
-> Hi Sage,
-> 
-> Cool for issue #3878, Duplicated pg_log write, which is post early in
-> my issue #3244 and Single omap_setkeys transaction improve the
-> performance in FileStore as in my previous testing (most of time cost
-> in FileStore is in the transaction omap_setkeys).
+On 06/03/2015 00:14, Danny Al-Gaaf wrote:
+> Am 05.03.2015 um 19:09 schrieb Loic Dachary:
+>> Hi Danny,
+>>
+>> The build of master shows linkage errors:
+>>
+>> http://gitbuilder.sepia.ceph.com/gitbuilder-ceph-deb-trusty-amd64-basi=
+c/log.cgi?log=3D60e2bec73ff3970e0c6b44250ce465e6c5dde56f
+>>
+>>     error: dpkg-shlibdeps: couldn't find library libgmock_main.so.0 ne=
+eded by debian/ceph-test/usr/bin/ceph_test_cls_lock (ELF format: 'elf64-x=
+86-64'; RPATH: '')=20
+>>
+>>     error: dpkg-shlibdeps: couldn't find library libgtest.so.0 needed =
+by debian/ceph-test/usr/bin/ceph_test_cls_lock (ELF format: 'elf64-x86-64=
+'; RPATH: '')=20
+>>
+>>     error: dpkg-shlibdeps: couldn't find library libgmock_main.so.0 ne=
+eded by debian/ceph-test/usr/bin/ceph_test_rados_api_c_write_operations (=
+ELF format: 'elf64-x86-64'; RPATH: '')=20
+>>
+>> Do you know where that comes from ? IIRC it successfully compiled in t=
+he gitbuilders on a branch of yours. That's weird.
+>=20
+> Hm ... I have to take a look at it tomorrow. This build worked on the
+> branch:
+> http://gitbuilder.sepia.ceph.com/gitbuilder-ceph-tarball-precise-amd64-=
+basic/log.cgi?log=3Dbe7b4c38e363457efab52fc5d8d995b63cdc73fd
+>=20
+> and also this one:
+>=20
+> http://gitbuilder.sepia.ceph.com/gitbuilder-ceph-tarball-precise-amd64-=
+basic/log.cgi?log=3Dbe7b4c38e363457efab52fc5d8d995b63cdc73fd
+>=20
+> Not sure why this all is working in the branch and not in master, it's
+> really strange.
 
-I can't find #3244?
+Yes. It would be interesting to know the reason indeed. Since I managed t=
+o reproduce the exact same problem localy and consistently, I did not loo=
+k into it.
 
-> Well, I think another performance issue is to the strategy of setattrs.
-> Here is some kernel log achieve from xfs behavious.
-> Mar  6 17:19:37 ceph2 kernel: start_xfs_attr_set_int: name =
-> ceph._(6), value =.259)
-> Mar  6 17:19:37 ceph2 kernel: format of di_c data: 2, format of attr
-> forks data: 1
-> Mar  6 17:19:37 ceph2 kernel: di_extsize=0, di_nextents=0,
-> di_anextents=0, di_forkoff=239
-> 
-> Mar  6 17:19:37 ceph2 kernel: start_xfs_attr_set_int: name =
-> ceph._(6), value =.259)
-> Mar  6 17:19:37 ceph2 kernel: format of di_c data: 2, format of attr
-> forks data: 2
-> Mar  6 17:19:37 ceph2 kernel: di_extsize=0, di_nextents=1,
-> di_anextents=1, di_forkoff=239
-> 
-> Mar  6 17:19:37 ceph2 kernel: start_xfs_attr_set_int: name =
-> ceph._(6), value =.259)
-> Mar  6 17:19:37 ceph2 kernel: format of di_c data: 2, format of attr
-> forks data: 2
-> Mar  6 17:19:37 ceph2 kernel: di_extsize=0, di_nextents=0,
-> di_anextents=1, di_forkoff=239
-> 
-> typedef enum xfs_dinode_fmt {
-> XFS_DINODE_FMT_DEV, /* xfs_dev_t */
-> XFS_DINODE_FMT_LOCAL, /* bulk data */
-> XFS_DINODE_FMT_EXTENTS, /* struct xfs_bmbt_rec */
-> XFS_DINODE_FMT_BTREE, /* struct xfs_bmdr_block */
-> XFS_DINODE_FMT_UUID /* uuid_t */
-> } xfs_dinode_fmt_t;
-> 
-> while attr forks data = 2 means XFS_DINODE_FMT_EXTENTS (xattr is
-> stored in extent format), while attr forks data =1 means
-> XFS_DINODE_FMT_LOCAL(xattr is stored as inline attribute).
-> 
-> However, in most cases, xattr attribute is stored in extent, not
-> inline. Please note that, I have already formatted the partition with
-> -i size=2048.  when the number of xattrs is larger than 10, it uses
-> XFS_DINODE_FMT_BTREE to accelerate key searching.
+Cheers
 
-Did you by chance look at what size the typical xattrs are?  I expected 
-that the usual _ and snapset attrs would be small enough to fit inline.. 
-but if they're not then we should at a minimum adjust our recommendation 
-on xfs inode size.
+>=20
+> Danny
+>=20
 
-> So, in _setattr(), we may just get xattr_key by using chain_flistxattr
-> instead of  _fgetattrs, which retrieve (key, value) pair, as value is
-> exactly no use here. and furthermore, we may consider the strategies
-> that we need move spill_out xattr to omap, while xfs only restricts
-> that each xattr value < 64K and each xattr key < 255byte.  And
-> duplicated read for XATTR_SPILL_OUT_NAME also occurs in:
-> r = chain_fgetxattr(**fd, XATTR_SPILL_OUT_NAME, buf, sizeof(buf));
-> r = _fgetattrs(**fd, inline_set);
-> And I try to ignore the _fgetattrs() logic and just update xattr
-> update in _setattr(), my ssd cluster will be improved about 2% - 3%
-> performance.
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
-I'm not quite following... do you have a patch we can look at?
 
-> Another issue about an idea of recovery is showed in
-> https://github.com/ceph/ceph/pull/3837
-> Can you give some suggestion about that?
+--xsHeO8akcitkbkl67769qUwSKEOIPW8PA
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
-I think this direction has a lot of potential, although it will add a fair 
-bit of complexity.  
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
 
-I think you can avoid the truncate field and infer that from the dirtied 
-interval and the new object size.  Need to look at the patch more closely 
-still, though...
+iEYEARECAAYFAlT53CcACgkQ8dLMyEl6F20mGwCfaB8e2KZ/++mF+SiAnECW8rbS
+IGkAn1IfYxAGLJDSgACJ6Pfj4omYVwXf
+=Qbn8
+-----END PGP SIGNATURE-----
 
-sage
-
+--xsHeO8akcitkbkl67769qUwSKEOIPW8PA--
