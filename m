@@ -1,75 +1,86 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: advice on adding the rhel6-server-optional repo
-Date: Sat, 07 Mar 2015 21:03:51 +0100
-Message-ID: <54FB59A7.8080304@dachary.org>
+From: Daniel Swarbrick <daniel.swarbrick@gmail.com>
+Subject: Re: Prioritize Heartbeat packets
+Date: Sun, 08 Mar 2015 00:23:02 +0100
+Message-ID: <mdg18n$gsj$1@ger.gmane.org>
+References: <1985102496.575.1409186929716.JavaMail.root@thunderbeast.private.linuxbox.com>	<alpine.DEB.2.00.1408271755160.966@cobra.newdream.net>	<ltmnkp$tod$1@ger.gmane.org> <CAANLjFrHdDNJnMnWQk3s2cT0LZxsCGp63xHBJw7HNJocfSahzw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="6VBRqVrkT4xBgMNTfHjcba2LIwfLxEM9U"
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:54436 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752225AbbCGUDz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 7 Mar 2015 15:03:55 -0500
+Received: from plane.gmane.org ([80.91.229.3]:40399 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753123AbbCGXZJ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 7 Mar 2015 18:25:09 -0500
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1YUO5g-0002HT-GC
+	for ceph-devel@vger.kernel.org; Sun, 08 Mar 2015 00:25:04 +0100
+Received: from f053014240.adsl.alicedsl.de ([78.53.14.240])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Sun, 08 Mar 2015 00:25:04 +0100
+Received: from daniel.swarbrick by f053014240.adsl.alicedsl.de with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Sun, 08 Mar 2015 00:25:04 +0100
+In-Reply-To: <CAANLjFrHdDNJnMnWQk3s2cT0LZxsCGp63xHBJw7HNJocfSahzw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ken Dreyer <kdreyer@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: ceph-users@lists.ceph.com
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---6VBRqVrkT4xBgMNTfHjcba2LIwfLxEM9U
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Judging by the commit, this ought to do the trick:
 
-Hi Ken,
+osd heartbeat use min delay socket = true
 
-When trying to compile Ceph on a fresh rhel 6.5 provisioned in a VPS via =
-teuthology, I missed the following:
+On 07/03/15 01:20, Robert LeBlanc wrote:
+> I see that Jian Wen has done work on this for 0.94. I tried looking
+> through the code to see if I can figure out how to configure this new
+> option, but it all went over my head pretty quick.
+>
+> Can I get a brief summary on how to set the priority of heartbeat
+> packets or where to look in the code to figure it out?
+>
+> Thanks,
+>
+> On Thu, Aug 28, 2014 at 2:01 AM, Daniel Swarbrick
+> <daniel.swarbrick@profitbricks.com
+> <mailto:daniel.swarbrick@profitbricks.com>> wrote:
+>
+>     On 28/08/14 02:56, Sage Weil wrote:
+>     > I seem to remember someone telling me there were hooks/hints you could
+>     > call that would tag either a socket or possibly data on that socket with a
+>     > label for use by iptables and such.. but I forget what it was.
+>     >
+>
+>     Something like setsockopt() SO_MARK?
+>
+>             *SO_MARK *(since Linux 2.6.25)
+>                    Set the mark for each packet sent through this socket
+>     (similar
+>                    to the netfilter MARK target but socket-based).
+>     Changing the
+>                    mark can be used for mark-based routing without
+>     netfilter or
+>                    for packet filtering.  Setting this option requires the
+>                    *CAP_NET_ADMIN *capability.
+>
+>     Alternatively, directly set IP_TOS options on the socket, or SO_PRIORITY
+>     which sets the IP TOS bits as well.
+>
+>
+>     _______________________________________________
+>     ceph-users mailing list
+>     ceph-users@lists.ceph.com
+>     <mailto:ceph-users@lists.ceph.com>
+>     http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>
+>
+>
+>
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>
 
-diff --git a/ceph.spec.in b/ceph.spec.in
-index d284844..4c80cfe 100644
---- a/ceph.spec.in
-+++ b/ceph.spec.in
-@@ -45,7 +45,6 @@ BuildRequires:        gdbm
- BuildRequires: hdparm
- BuildRequires: libaio-devel
- BuildRequires: libcurl-devel
--BuildRequires: libedit-devel
- BuildRequires: libxml2-devel
- BuildRequires: libuuid-devel
- BuildRequires: libblkid-devel >=3D 2.17
-@@ -95,7 +94,6 @@ BuildRequires:        fdupes
- Requires:      gdisk
- BuildRequires: nss-devel
- BuildRequires: keyutils-libs-devel
--BuildRequires: libatomic_ops-devel
- Requires:      gdisk
- Requires(post):        chkconfig
- Requires(preun):chkconfig
 
-which I eventually found in [rhel6-server-optional] as installed with htt=
-p://tracker.ceph.com/issues/11061#note-2
-
-How do you suggest I script this in https://ceph.com/git/?p=3Dceph.git;a=3D=
-blob;f=3Dinstall-deps.sh so people don't worry about it ?
-
-Cheers
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---6VBRqVrkT4xBgMNTfHjcba2LIwfLxEM9U
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlT7WacACgkQ8dLMyEl6F20hSACgjvkvlJ/8AxWkSADtyKPGEWh6
-pD0AoIlr2j+CB9i1j528e7SXta1pod1Z
-=ibO6
------END PGP SIGNATURE-----
-
---6VBRqVrkT4xBgMNTfHjcba2LIwfLxEM9U--
