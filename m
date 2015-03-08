@@ -1,86 +1,58 @@
-From: Daniel Swarbrick <daniel.swarbrick@gmail.com>
-Subject: Re: Prioritize Heartbeat packets
-Date: Sun, 08 Mar 2015 00:23:02 +0100
-Message-ID: <mdg18n$gsj$1@ger.gmane.org>
-References: <1985102496.575.1409186929716.JavaMail.root@thunderbeast.private.linuxbox.com>	<alpine.DEB.2.00.1408271755160.966@cobra.newdream.net>	<ltmnkp$tod$1@ger.gmane.org> <CAANLjFrHdDNJnMnWQk3s2cT0LZxsCGp63xHBJw7HNJocfSahzw@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Adding custom queries to tracker.ceph.com for stable releases
+Date: Sun, 08 Mar 2015 12:44:10 +0100
+Message-ID: <54FC360A.6090201@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="mxOlDDpQ9hrkT98fwquEDc5w4w7IWfRCo"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:40399 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753123AbbCGXZJ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 7 Mar 2015 18:25:09 -0500
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1YUO5g-0002HT-GC
-	for ceph-devel@vger.kernel.org; Sun, 08 Mar 2015 00:25:04 +0100
-Received: from f053014240.adsl.alicedsl.de ([78.53.14.240])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Sun, 08 Mar 2015 00:25:04 +0100
-Received: from daniel.swarbrick by f053014240.adsl.alicedsl.de with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Sun, 08 Mar 2015 00:25:04 +0100
-In-Reply-To: <CAANLjFrHdDNJnMnWQk3s2cT0LZxsCGp63xHBJw7HNJocfSahzw@mail.gmail.com>
+Received: from mail2.dachary.org ([91.121.57.175]:54643 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751904AbbCHLoN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 8 Mar 2015 07:44:13 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: ceph-users@lists.ceph.com
+To: Ian Colle <icolle@redhat.com>, Zack Cerza <zack@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Judging by the commit, this ought to do the trick:
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--mxOlDDpQ9hrkT98fwquEDc5w4w7IWfRCo
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-osd heartbeat use min delay socket = true
+Hi Ian & Zack,
 
-On 07/03/15 01:20, Robert LeBlanc wrote:
-> I see that Jian Wen has done work on this for 0.94. I tried looking
-> through the code to see if I can figure out how to configure this new
-> option, but it all went over my head pretty quick.
->
-> Can I get a brief summary on how to set the priority of heartbeat
-> packets or where to look in the code to figure it out?
->
-> Thanks,
->
-> On Thu, Aug 28, 2014 at 2:01 AM, Daniel Swarbrick
-> <daniel.swarbrick@profitbricks.com
-> <mailto:daniel.swarbrick@profitbricks.com>> wrote:
->
->     On 28/08/14 02:56, Sage Weil wrote:
->     > I seem to remember someone telling me there were hooks/hints you could
->     > call that would tag either a socket or possibly data on that socket with a
->     > label for use by iptables and such.. but I forget what it was.
->     >
->
->     Something like setsockopt() SO_MARK?
->
->             *SO_MARK *(since Linux 2.6.25)
->                    Set the mark for each packet sent through this socket
->     (similar
->                    to the netfilter MARK target but socket-based).
->     Changing the
->                    mark can be used for mark-based routing without
->     netfilter or
->                    for packet filtering.  Setting this option requires the
->                    *CAP_NET_ADMIN *capability.
->
->     Alternatively, directly set IP_TOS options on the socket, or SO_PRIORITY
->     which sets the IP TOS bits as well.
->
->
->     _______________________________________________
->     ceph-users mailing list
->     ceph-users@lists.ceph.com
->     <mailto:ceph-users@lists.ceph.com>
->     http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->
->
->
->
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users@lists.ceph.com
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->
+I'm addressing you today because you have admin rights on http://tracker.=
+ceph.com/. When working on the next stable release for Ceph, I find conve=
+nient to use a custom query that shows only what needs to be backported, =
+grouped by project and sorted by severity. These queries are=20
+
+http://tracker.ceph.com/projects/ceph/issues?query_id=3D71 for dumpling
+http://tracker.ceph.com/projects/ceph/issues?query_id=3D74 for firefly
+http://tracker.ceph.com/projects/ceph/issues?query_id=3D68 for giant
+
+It would be great if they could be made public so I can share them with Y=
+uri and other developers. I confess my ignorance of the redmine process t=
+o do so. Your help would be much appreciated :-)
+
+Cheers
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
 
+--mxOlDDpQ9hrkT98fwquEDc5w4w7IWfRCo
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlT8NgoACgkQ8dLMyEl6F20mBACgxKOZuCdjczhHw3QrUeCeyGUo
+ihgAoL3FQl0S5LPkKalp0QR9jHce4Xrt
+=+iXB
+-----END PGP SIGNATURE-----
+
+--mxOlDDpQ9hrkT98fwquEDc5w4w7IWfRCo--
