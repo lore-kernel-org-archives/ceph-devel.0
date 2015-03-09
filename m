@@ -1,48 +1,44 @@
-From: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
-Subject: Re: Merging hammer in master: conflict on gmock
-Date: Mon, 09 Mar 2015 18:31:04 +0100
-Message-ID: <54FDD8D8.6090709@bisect.de>
-References: <54FDABC0.4080803@dachary.org>
+From: Travis Rhoden <trhoden@gmail.com>
+Subject: [ANN] ceph-deploy 1.5.22 released
+Date: Mon, 9 Mar 2015 13:32:07 -0400
+Message-ID: <CACkq2mpd9V0a87e7ucR-z-PhdEZgMT236pinE1ArL4epsZ_csA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:55682 "EHLO
-	wp188.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751666AbbCIRbR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Mar 2015 13:31:17 -0400
-In-Reply-To: <54FDABC0.4080803@dachary.org>
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:39741 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751702AbbCIRc3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Mar 2015 13:32:29 -0400
+Received: by lbiw7 with SMTP id w7so25910642lbi.6
+        for <ceph-devel@vger.kernel.org>; Mon, 09 Mar 2015 10:32:28 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, ceph-announce@lists.ceph.com
 
-Hi Loic,
+Hi All,
 
-this one is a tricky one. I didn't find a smooth/automatic solution yet.
+This is a new release of ceph-deploy that changes a couple of behaviors.
 
-This seems to work:
+On RPM-based distros, ceph-deploy will now automatically enable
+check_obsoletes in the Yum priorities plugin. This resolves an issue
+many community members hit where package dependency resolution was
+breaking due to conflicts between upstream packaging (hosted on
+ceph.com) and downstream (i.e., Fedora or EPEL).
 
-git checkout master
-git merge --no-ff origin/hammer
-git mergetool
- -> for the conflict: select 'local' for src/gmock (this should keep
-    the changes im master and ignore changes from hammer)
-git commit
+The other important change is that when using ceph-deploy to install
+Ceph packages on a RHEL machine, the --release flag *must* be used if
+you want to install upstream packages. In other words, if you want to
+install Giant on a RHEL machine, you would need to use "ceph-deploy
+install --release giant". If the --release flag is not used,
+ceph-deploy will expect to use downstream package on RHEL. This is
+documented at [1].
 
-You may have to check if the result is what's intended.
+The full changelog can be seen at [2].
 
-Danny
+Please update!
 
-Am 09.03.2015 um 15:18 schrieb Loic Dachary:
-> Hi Danny,
-> 
-> As of now, git checkout master ; git merge origin/hammer gets a 
-> conflict on gmock
-> 
-> When we last discussed it you found that git merge -m 1 was a 
-> solution. But I'm not sure I fully understand the consequences.
-> 
-> Cheers
-> 
+ - Travis
 
+
+[1] http://ceph.com/ceph-deploy/docs/install.html#distribution-notes
+[2] http://ceph.com/ceph-deploy/docs/changelog.html#id1
