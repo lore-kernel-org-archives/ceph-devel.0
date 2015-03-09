@@ -1,47 +1,105 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: packages on download.ceph.com
-Date: Mon, 09 Mar 2015 14:35:33 -0500
-Message-ID: <54FDF605.9000302@redhat.com>
-References: <BC97738F8E7C8742BABED7F06FB9DF91555668ED@SATLEXDAG01.amd.com>
+From: Robert LeBlanc <robert-4JaGZRWAfWbajFs6igw21g@public.gmane.org>
+Subject: Re: Prioritize Heartbeat packets
+Date: Mon, 9 Mar 2015 13:36:34 -0600
+Message-ID: <CAANLjFpH=0ZjXm2FKNF4Qz421jcM8QsW8HTDGpLqy5=w8POXQw@mail.gmail.com>
+References: <1985102496.575.1409186929716.JavaMail.root@thunderbeast.private.linuxbox.com>
+	<alpine.DEB.2.00.1408271755160.966@cobra.newdream.net>
+	<ltmnkp$tod$1@ger.gmane.org>
+	<CAANLjFrHdDNJnMnWQk3s2cT0LZxsCGp63xHBJw7HNJocfSahzw@mail.gmail.com>
+	<mdg18n$gsj$1@ger.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:52116 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753773AbbCITfk (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 9 Mar 2015 15:35:40 -0400
-In-Reply-To: <BC97738F8E7C8742BABED7F06FB9DF91555668ED@SATLEXDAG01.amd.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "Deneau, Tom" <tom.deneau@amd.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <mdg18n$gsj$1@ger.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Daniel Swarbrick <daniel.swarbrick-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
+I've found commit 9b9a682fe035c985e416ee1c112fa58f9045a27c and I see
+that when 'osd heartbeat use min delay socket = true' it will mark the
+packet with DSCP CS6. Based on the setting of the socket in
+msg/simple/Pipe.cc is it possible that this can apply to both OSD and
+monitor? I don't understand the code enough to know how the
+set_socket_options() is called from the OSD and monitor.
 
+If this applies to both monitor and OSD, would it be better to rename
+the option to a more generic name?
 
-On 03/09/2015 02:06 PM, Deneau, Tom wrote:
-> I'm trying to gather information on what it would take to get packages
-> for an architecture other than x86_64 up on http://download.ceph.com
+Thanks,
 
-What we've done in the past for certain non-X86 architectures (such as 
-ARM) is to get build nodes in place that can be used with our gitbuilder 
-setup to continuously make development builds:
-
-http://www.ceph.com/gitbuilder.cgi
-
-Which get put here:
-
-http://gitbuilder.ceph.com/
-
-Usually the problem is two fold:  Someone's time to set it up, and 
-making sure we have enough (or fast enough) build systems for that 
-architecture to keep up.
-
-Mark
-
+On Sat, Mar 7, 2015 at 4:23 PM, Daniel Swarbrick
+<daniel.swarbrick-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+> Judging by the commit, this ought to do the trick:
 >
-> -- Tom Deneau, AMD
+> osd heartbeat use min delay socket = true
+>
+> On 07/03/15 01:20, Robert LeBlanc wrote:
+>>
+>> I see that Jian Wen has done work on this for 0.94. I tried looking
+>> through the code to see if I can figure out how to configure this new
+>> option, but it all went over my head pretty quick.
+>>
+>> Can I get a brief summary on how to set the priority of heartbeat
+>> packets or where to look in the code to figure it out?
+>>
+>> Thanks,
+>>
+>> On Thu, Aug 28, 2014 at 2:01 AM, Daniel Swarbrick
+>> <daniel.swarbrick-EIkl63zCoXaH+58JC4qpiA@public.gmane.org
+>> <mailto:daniel.swarbrick-EIkl63zCoXaH+58JC4qpiA@public.gmane.org>> wrote:
+>>
+>>     On 28/08/14 02:56, Sage Weil wrote:
+>>     > I seem to remember someone telling me there were hooks/hints you
+>> could
+>>     > call that would tag either a socket or possibly data on that socket
+>> with a
+>>     > label for use by iptables and such.. but I forget what it was.
+>>     >
+>>
+>>     Something like setsockopt() SO_MARK?
+>>
+>>             *SO_MARK *(since Linux 2.6.25)
+>>                    Set the mark for each packet sent through this socket
+>>     (similar
+>>                    to the netfilter MARK target but socket-based).
+>>     Changing the
+>>                    mark can be used for mark-based routing without
+>>     netfilter or
+>>                    for packet filtering.  Setting this option requires the
+>>                    *CAP_NET_ADMIN *capability.
+>>
+>>     Alternatively, directly set IP_TOS options on the socket, or
+>> SO_PRIORITY
+>>     which sets the IP TOS bits as well.
+>>
+>>
+>>     _______________________________________________
+>>     ceph-users mailing list
+>>     ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+>>     <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+>>     http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>>
+>>
+>>
+>>
+>> _______________________________________________
+>> ceph-users mailing list
+>> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>>
+>
+>
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
