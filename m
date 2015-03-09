@@ -1,59 +1,48 @@
-From: Joshua Schmid <jschmid@suse.de>
-Subject: (unknown)
-Date: Mon, 09 Mar 2015 17:48:55 +0100
-Message-ID: <54FDCEF7.5030206@suse.de>
+From: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+Subject: Re: Merging hammer in master: conflict on gmock
+Date: Mon, 09 Mar 2015 18:31:04 +0100
+Message-ID: <54FDD8D8.6090709@bisect.de>
+References: <54FDABC0.4080803@dachary.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cantor2.suse.de ([195.135.220.15]:42742 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753090AbbCIQs4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 9 Mar 2015 12:48:56 -0400
-Received: from relay2.suse.de (charybdis-ext.suse.de [195.135.220.254])
-	by mx2.suse.de (Postfix) with ESMTP id 3CAEAAAC8
-	for <ceph-devel@vger.kernel.org>; Mon,  9 Mar 2015 16:48:55 +0000 (UTC)
+Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:55682 "EHLO
+	wp188.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751666AbbCIRbR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Mar 2015 13:31:17 -0400
+In-Reply-To: <54FDABC0.4080803@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA1
+Hi Loic,
 
-subscribe ceph-devel
-- --=20
-=46reundliche Gr=C3=BC=C3=9Fe - Kind regards,
-Joshua Schmid
-Trainee - Storage SAP HANA
-SUSE Linux GmbH - Maxfeldstr. 5 - 90409 N=C3=BCrnberg
--
------------------------------------------------------------------------=
----------------------------------------------
-SUSE Linux GmbH, GF: Felix Imend=C3=B6rffer, Jane Smithard,
-Jennifer Guild, Dilip Upmanyu, Graham Norton, HRB 21284 (AG N=C3=BCrnbe=
-rg)
--
------------------------------------------------------------------------=
----------------------------------------------
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
+this one is a tricky one. I didn't find a smooth/automatic solution yet.
 
-iQIcBAEBAgAGBQJU/c73AAoJEPUnwXO0u5uWxbcP/Rd3Ru9DWHfqBF965/JH7DL8
-PQXlrJwPRftFO1guZDEPTAAC8rl0gdDv903Di0R7O0ujbZP/hvKJYCgxzMvpvqWe
-opNEkLSKFfsKZgXGNKjuw3IKbpBUnX8EyvxA0NKnmLo/IJ417W6E2GOeO/dd5hgj
-xALhatwqeqntVnr1NGmbg+bKejV1Y0iIG6bJ0t9UW1Yx7soAvHmvElg2lzDnA9kb
-RkNQIT8PVojnjUfZsKZhgZtHdBKU00qurpojVBVJ+sM1jeZDDB3J5VtTKWDeZPLI
-B0WoEHw5b/BNEZGbzEdBsLhJeV6gMKkMM/KKGKQZTZ99FnITt2f2NwlMVlcS3BDn
-vSxpvnXgNehhMlm4TxCOVPDZGBFU5Np+R7pgCOi27JDcZm6MnPpAp+e+oI4HRVsj
-jLxskhS2srbtXy1w9SHKyNNV4feJ9Pki4q+SKnm8sNbmbyYyTCnCqoB7Ed30GNIT
-Xud+K36rIfgRjWz82PC+MkBWPhHmPznwcxd5TdyquGsNKK/XqgdR+Deq3UZ3i5P4
-o3dz3J1HN9cw7dIzzXRFPUVXFwjGI3TL7PPLONyFhMAGxK4EGF7VkR4YJFwZHNrH
-l2b9Ib2ZbRpe0/Lx/vPCPZsy1x7aDYPh4sOSTevlpB6hiZC2AzGeEDSb7Cjuotfc
-h87d2OBSIaRnRL1e2rSl
-=3DD1QL
------END PGP SIGNATURE-----
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+This seems to work:
+
+git checkout master
+git merge --no-ff origin/hammer
+git mergetool
+ -> for the conflict: select 'local' for src/gmock (this should keep
+    the changes im master and ignore changes from hammer)
+git commit
+
+You may have to check if the result is what's intended.
+
+Danny
+
+Am 09.03.2015 um 15:18 schrieb Loic Dachary:
+> Hi Danny,
+> 
+> As of now, git checkout master ; git merge origin/hammer gets a 
+> conflict on gmock
+> 
+> When we last discussed it you found that git merge -m 1 was a 
+> solution. But I'm not sure I fully understand the consequences.
+> 
+> Cheers
+> 
+
