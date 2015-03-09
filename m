@@ -1,158 +1,128 @@
-From: Varada Kari <Varada.Kari@sandisk.com>
-Subject: RE: Adding a proprietary key value store to CEPH
-Date: Mon, 9 Mar 2015 13:00:42 +0000
-Message-ID: <C226B0AB34511445928D9882AA519F600A583D93@SACMBXIP03.sdcorp.global.sandisk.com>
-References: <531793771.166.1424908519960.JavaMail.root@thunderbeast.private.linuxbox.com>
- <246493291.168.1424908564280.JavaMail.root@thunderbeast.private.linuxbox.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: teuthology-lock and choosing a kernel
+Date: Mon, 09 Mar 2015 15:01:05 +0100
+Message-ID: <54FDA7A1.4020406@dachary.org>
+References: <54FC459D.2090703@dachary.org> <6E9B72C6-1FA0-46D3-873E-EA99A52BE669@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="cSvRc574hqVlegqp5pCUrb0fUjHRtKI76"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1bon0095.outbound.protection.outlook.com ([157.56.111.95]:2513
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751343AbbCINA6 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 9 Mar 2015 09:00:58 -0400
-In-Reply-To: <246493291.168.1424908564280.JavaMail.root@thunderbeast.private.linuxbox.com>
-Content-Language: en-US
+Received: from mail2.dachary.org ([91.121.57.175]:55130 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S932279AbbCIOBL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Mar 2015 10:01:11 -0400
+In-Reply-To: <6E9B72C6-1FA0-46D3-873E-EA99A52BE669@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Matt W. Benjamin" <matt@cohortfs.com>, Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sage@newdream.net>
+To: Andrew Schoen <aschoen@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-SGkgTWF0dCwNCg0KQ2FuIHlvdSBwbGVhc2UgdXBzdHJlYW0gdGhlIGltcGxlbWVudGF0aW9uIHlv
-dSBhcmUgbWVudGlvbmluZz8NCg0KVmFyYWRhDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0t
-DQpGcm9tOiBNYXR0IFcuIEJlbmphbWluIFttYWlsdG86bWF0dEBjb2hvcnRmcy5jb21dDQpTZW50
-OiBUaHVyc2RheSwgRmVicnVhcnkgMjYsIDIwMTUgNToyNiBBTQ0KVG86IFNvbW5hdGggUm95DQpD
-YzogVmFyYWRhIEthcmk7IENlcGggRGV2ZWxvcG1lbnQ7IFNhZ2UgV2VpbA0KU3ViamVjdDogUmU6
-IEFkZGluZyBhIHByb3ByaWV0YXJ5IGtleSB2YWx1ZSBzdG9yZSB0byBDRVBIDQoNCkhpLA0KDQpX
-ZSBpbXBsZW1lbnRlZCBhbiBvYmplY3RzdG9yZSBmYWN0b3J5IHdoaWNoIGRvZXMgdGhpcywgYW5k
-IGNvdWxkIHByb2JhYmx5IGJlIHVwc3RyZWFtZWQuDQoNCk1hdHQNCg0KLS0tLS0gIlNvbW5hdGgg
-Um95IiA8U29tbmF0aC5Sb3lAc2FuZGlzay5jb20+IHdyb3RlOg0KDQo+IFllcywgd2Ugd2lsbCB0
-YWtlIGNhcmUgb2YgYm90aCwgdGhhbmtzLi4NCj4NCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0t
-LS0NCj4gRnJvbTogU2FnZSBXZWlsIFttYWlsdG86c2FnZUBuZXdkcmVhbS5uZXRdDQo+IFNlbnQ6
-IFdlZG5lc2RheSwgRmVicnVhcnkgMjUsIDIwMTUgMzoyNSBQTQ0KPiBUbzogU29tbmF0aCBSb3kN
-Cj4gQ2M6IFZhcmFkYSBLYXJpOyBDZXBoIERldmVsb3BtZW50DQo+IFN1YmplY3Q6IFJFOiBBZGRp
-bmcgYSBwcm9wcmlldGFyeSBrZXkgdmFsdWUgc3RvcmUgdG8gQ0VQSA0KPg0KPiBPbiBXZWQsIDI1
-IEZlYiAyMDE1LCBTb21uYXRoIFJveSB3cm90ZToNCj4gPiBTYWdlLA0KPiA+IFllcywgYWdyZWVk
-Li4NCj4gPiBCdXQsIHNpbmNlIGsvdiBzdG9yZSBpcyBhbHJlYWR5IGFkZGVkIGFuZCB3ZSBhcmUg
-cGxhbm5pbmcgdG8gZGVyaXZlDQo+DQo+ID4gZnJvbSB0aGF0IHdlIGRpZG4ndCBjaGFuZ2UgdGhh
-dC4gRG8geW91IHdhbnQgdXMgdG8gaW1wbGVtZW50IGVudGlyZQ0KPg0KPiA+IGsvdnN0b3JlIHRv
-IGJlIGEgZHluYW1pY2FsbHkgbG9hZGFibGUgYWxvbmcgd2l0aCB0aGUgay92ZGINCj4gdW5kZXJu
-ZWF0aCA/DQo+DQo+IEJvdGggd291bGQgYmUgbmljZS4gIEkgY29uZmVzcyBJIGhhdmVuJ3QgbG9v
-a2VkIGNsb3NlbHkgYXQgdGhlIEVDDQo+IGJhY2tlbmQgaW1wbGVtZW50YXRpb24sIGJ1dCBJIGV4
-cGVjdCB0aGF0IHRoaXMgaXMgcXVpdGUgc2ltcGxlOiBpdCdzDQo+IGp1c3QgYSBtYXR0ZXIgb2Yg
-ZXhwb3NpbmcgYSBmdW5jdGlvbiB0aGF0IGluc3RhbnRpYXRlcyBhbiBpbnN0YW5jZSBvZg0KPiB0
-aGUgT2JqZWN0U3RvcmUgb3IgS2V5VmFsdWVEQiBjbGFzcywgcmlnaHQ/DQo+DQo+IHNhZ2UNCj4N
-Cj4NCj4gPg0KPiA+IFRoYW5rcyAmIFJlZ2FyZHMNCj4gPiBTb21uYXRoDQo+ID4NCj4gPiAtLS0t
-LU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiA+IEZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5r
-ZXJuZWwub3JnDQo+ID4gW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10g
-T24gQmVoYWxmIE9mIFNhZ2UgV2VpbA0KPiA+IFNlbnQ6IFdlZG5lc2RheSwgRmVicnVhcnkgMjUs
-IDIwMTUgNjo0NiBBTQ0KPiA+IFRvOiBWYXJhZGEgS2FyaQ0KPiA+IENjOiBDZXBoIERldmVsb3Bt
-ZW50DQo+ID4gU3ViamVjdDogUkU6IEFkZGluZyBhIHByb3ByaWV0YXJ5IGtleSB2YWx1ZSBzdG9y
-ZSB0byBDRVBIDQo+ID4NCj4gPiBPbiBXZWQsIDI1IEZlYiAyMDE1LCBWYXJhZGEgS2FyaSB3cm90
-ZToNCj4gPiA+IEhpIFNhZ2UsDQo+ID4gPg0KPiA+ID4gVGhhbmtzLiBXaWxsIHdhaXQgZm9yIHlv
-dXIgcmVwbHkuDQo+ID4gPiBNZWFud2hpbGUsIENhbiBJIHN1Ym1pdCBhIGJsdWUgcHJpbnQgZm9y
-IHRoaXMgZm9yIG5leHQgcmVsZWFzZT8NCj4gPg0KPiA+IFllYWgsIGRlZmluaXRlbHkuDQo+ID4N
-Cj4gPiBGV0lXIHRoZSBwbHVnaW4gbGF5ZXIgSSB0aGluayB3aWxsIGJlIG1vc3QgaW50ZXJlc3Rp
-bmcgZ29pbmcgZm9yd2FyZA0KPiBpcyB0aGUgT2JqZWN0U3RvcmUgbGV2ZWwsIG5vdCBqdXN0IHRo
-ZSBLZXlWYWx1ZURCIGxldmVsLi4uDQo+ID4NCj4gPiBzYWdlDQo+ID4NCj4gPg0KPiA+ID4NCj4g
-PiA+IFRoYW5rcywNCj4gPiA+IFZhcmFkYQ0KPiA+ID4NCj4gPiA+IC0tLS0tT3JpZ2luYWwgTWVz
-c2FnZS0tLS0tDQo+ID4gPiBGcm9tOiBTYWdlIFdlaWwgW21haWx0bzpzYWdlQG5ld2RyZWFtLm5l
-dF0NCj4gPiA+IFNlbnQ6IFR1ZXNkYXksIEZlYnJ1YXJ5IDI0LCAyMDE1IDEwOjIxIFBNDQo+ID4g
-PiBUbzogVmFyYWRhIEthcmkNCj4gPiA+IENjOiBDZXBoIERldmVsb3BtZW50DQo+ID4gPiBTdWJq
-ZWN0OiBSZTogQWRkaW5nIGEgcHJvcHJpZXRhcnkga2V5IHZhbHVlIHN0b3JlIHRvIENFUEgNCj4g
-PiA+DQo+ID4gPiBIaSBWYXJhZGEsDQo+ID4gPg0KPiA+ID4gT24gVHVlLCAyNCBGZWIgMjAxNSwg
-VmFyYWRhIEthcmkgd3JvdGU6DQo+ID4gPiA+IEhpIFNhZ2UsDQo+ID4gPiA+DQo+ID4gPiA+IFdl
-IGFyZSB0cnlpbmcgdG8gaW50ZWdyYXRlIGEgbmV3IHByb3ByaWV0YXJ5IGtleSB2YWx1ZSBzdG9y
-ZSB0bw0KPiBDRVBILiBUbyBpbnRlZ3JhdGUgdGhpcyBLVi1zdG9yZSwgd2hpY2ggaXMgYSBjbG9z
-ZWQgc291cmNlIHNoYXJlZA0KPiBsaWJyYXJ5LCB3ZSBwcm9wb3NlIGEgbmV3IGNsYXNzIHRvIENF
-UEggY2FsbGVkIFByb3BEQlN0b3JlIHdoaWNoIGRvZXMNCj4gYSBkbG9wZW4gYW5kIGltcG9ydHMg
-dGhlIHJlcXVpcmVkIHN5bWJvbHMuIFRoaXMgZnJhbWV3b3JrIHdpbGwgaGVscCBpbg0KPiBpbnRl
-Z3JhdGluZyB2ZW5kb3Igc3BlY2lmaWMgZXh0ZW5zaW9ucyB0byBDRVBILg0KPiA+ID4gPg0KPiA+
-ID4gPiBUaGUgZ2lzdCBvZiB0aGUgaW1wbGVtZW50YXRpb24gaXMgYXMgZm9sbG93cy4NCj4gPiA+
-ID4NCj4gPiA+ID4gMS4gSW1wbGVtZW50IGEgd3JhcHBlciBhcm91bmQgdGhlIHByb3ByaWV0YXJ5
-IEtWU3RvcmUuIExldCB1cw0KPiBjYWxsIGl0IGFzIEtWRXh0ZW5zaW9uLiBUaGlzIGlzIGEgc2hh
-cmVkIGxpYnJhcnkgd2hpY2ggaW1wbGVtZW50cyBhbGwNCj4gaW50ZXJmYWNlcyByZXF1aXJlZCBi
-eSBDRVBIIEtleVZhbHVlU3RvcmUuDQo+ID4gPiA+IDIuIEEgbmV3IGNsYXNzIGlzIGRlcml2ZWQg
-ZnJvbSBLZXlWYWx1ZURCIGNhbGxlZCBQcm9wREJTdG9yZSwNCj4gd2hpY2ggaG9ub3JzIHRoZSBz
-ZW1hbnRpY3Mgb2YgS2V5dmFsdWVTdG9yZSBhbmQgS2V5VmFsdWVEQi4gVGhpcyBjbGFzcw0KPiBh
-Y3RzIGFzIG1lZGlhdG9yIGJldHdlZW4gQ0VQSCBhbmQgS1ZFeHRlbnNpb24uICBUaGlzIGNsYXNz
-IHRyYW5zZm9ybXMNCj4gYnVmZmVybGlzdCBldGMuLi4gdG8gY29uc3QgY2hhciBwb2ludGVycyBv
-ciBzdHJpbmdzIGZvciB0aGUgZXh0ZW5zaW9uDQo+IHRvIHVuZGVyc3RhbmQuDQo+ID4gPiA+IDMu
-IFByb3BEQlN0b3JlLCBsb2FkcyAoZGxvcGVuKSB0aGUgS1ZFeHRlbnNpb24gZHVyaW5nIE9TRA0K
-PiBpbml0aWFsaXphdGlvbi4gIFBhdGggdG8gdGhlIEtWRXh0ZW5zaW9uIGNhbiBiZSBtZW50aW9u
-ZWQgaW4NCj4gY2VwaC5jb25mLg0KPiA+ID4gPiA0LiBJbnRlcmZhY2VzIHRoYXQgbmVlZHMgdG8g
-YmUgaW1wbGVtZW50ZWQgaW4gS1ZFeHRlbnNpb24sIHdoaWNoDQo+IGFyZSBpbXBvcnRlZCBieSB0
-aGUgUHJvcERCU3RvcmUgYXJlIGFkZGVkIGluIGEgbmV3IGhlYWRlciBjYWxsZWQNCj4gUHJvcERC
-V3JhcHBlci5oLiAgVGhpcyBoZWFkZXIgY29udGFpbnMgdGhlIHNpZ25hdHVyZXMgZm9yIHRoZQ0K
-PiBuZWNlc3NhcnkgaW50ZXJmYWNlcyBsaWtlIGluaXQoKSwgY2xvc2UoKSwgc3VibWl0X3RyYW5z
-YWN0aW9uKCksIGdldCgpDQo+IGFuZCBnZXRfaXRlcmF0b3IoKS4gU2ltaWxhcmx5IGZvciBJdGVy
-YXRvciBmdW5jdGlvbmFsaXR5LA0KPiBQcm9wREJJdGVyYXRvci5oLCB3aGljaCBzcGVjaWZpZXMg
-dGhlIHNpZ25hdHVyZXMgb2Ygc2Vla190b19maXJzdCAoKSwNCj4gc2Vla190b19sYXN0KCksIGxv
-d2VyX2JvdW5kKCkgYW5kIHVwcGVyX2JvdW5kKCkgZXRjLi4uICBQcm9wREJTdG9yZQ0KPiBpbmNs
-dWRlcyB0aGVzZSBoZWFkZXJzIHRvIGltcG9ydCB0aGUgc3ltYm9scywgdXNpbmcgZGxzeW0oKS4N
-Cj4gPiA+ID4gNS4gQ2hvb3NpbmcgdGhlIHByb3ByaWV0YXJ5IERCIGFzIEJhY2tlbmQgdG8gdGhl
-IE9TRCBpcw0KPiBjb250cm9sbGVkL21hbmFnZWQgYnkgY29uZmlnIG9wdGlvbnMgb2YgdGhlIGNl
-cGggKC9ldGMvY2VwaC9jZXBoLmNvbmYpDQo+IGxpa2Ugcm9ja3NkYiBvciBsZXZlbGRiLg0KPiA+
-ID4gPiA2LiBSZXN0IG9mIHRoZSBleGlzdGluZyBmdW5jdGlvbmFsaXR5IGlzIG5vdCBkaXN0dXJi
-ZWQgYnkgdGhpcw0KPiBjaGFuZ2UuIENoYW5naW5nIHRoZSBvc2QgYmFja2VuZCBvcHRpb24gd2ls
-bCBjaGFuZ2UgYmFja2VuZA0KPiBpbXBsZW1lbnRhdGlvbi4gQnV0IHRoaXMgY2hhbmdlIGlzIG5v
-dCBkeW5hbWljLiBUaGUgdHlwZSBvZiB0aGUNCj4gYmFja2VuZCBzaG91bGQgYmUgY2hvc2VuIGF0
-IG9zZCBjcmVhdGlvbiB0aW1lIGFuZCBvc2Qgd2lsbCBjb250aW51ZQ0KPiB1c2UgdGhhdCBiYWNr
-ZW5kIHRpbGwgdGhhdCBvc2QgaXMgcmVmb3JtYXR0ZWQgYWdhaW4uDQo+ID4gPiA+IDcuIFRoZSBu
-ZXcgS1ZTdG9yZSB3ZSBhcmUgdHJ5aW5nIHRvIGludGVncmF0ZSB3b3JrcyBvbiBhIHJhdw0KPiBw
-YXJ0aXRpb24sIHNvIHdlIGRpdmlkZWQgdGhlIG9zZCBkcml2ZSBpbnRvIHR3byBwYXJ0aXRpb25z
-LiBPbmUNCj4gcGFydGl0aW9uIGlzIGdpdmVuIHRvIG9zZCBNZXRhIGRhdGEgKHN1cGVyIGJsb2Nr
-LCBmc2lkIGV0Yy4uLiksIGFuZA0KPiB0aGUgb3RoZXIgaXMgZ2l2ZW4gdG8gdGhlIG5ldyBkYiB0
-byBtYW5hZ2UgaXQuIE9TRCBwYXJ0aXRpb24gaXMgbm93DQo+IG5vdCB0aGUgZW50aXJlIGRpc2ss
-IGJ1dCAyLTRHQiB3aGljaCBuZWVkZWQgZm9yIHRoZSBtZXRhZGF0YS4NCj4gPiA+DQo+ID4gPiBU
-aGlzIHNvdW5kcyBsaWtlIGEgZ29vZCBhcHByb2FjaCB0byBsaW5rIHRvIHByZXR0eSBtdWNoIGFu
-eQ0KPiBleHRlcm5hbCBiYWNrZW5kIChtb2R1bG8gdGhlIGRsb3BlbiBwYXJ0KS4gIEkgbmVlZCB0
-byBjaGVjayB3aXRoDQo+IGxhd3llciB0eXBlcyBiZWZvcmUgSSBjYW4gcHJvbWlzZSB3ZSdsbCBi
-ZSBhYmxlIHRvIG1lcmdlIHNvbWV0aGluZw0KPiBsaWtlIHRoaXMgaW50byB0aGUgbWFpbiBjZXBo
-LmdpdCwgdGhvdWdoIQ0KPiA+ID4NCj4gPiA+IFRoYW5rcy0NCj4gPiA+IHNhZ2UNCj4gPiA+DQo+
-ID4gPiBfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXw0KPiA+ID4NCj4gPiA+IFBMRUFT
-RSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWls
-DQo+IG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRl
-ZCByZWNpcGllbnQocykNCj4gbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNz
-YWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQNCj4gcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3Rp
-ZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZQ0KPiBpbiBlcnJvciBhbmQg
-dGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcN
-Cj4gb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJl
-Y2VpdmVkIHRoaXMNCj4gY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUg
-c2VuZGVyIGJ5IHRlbGVwaG9uZSBvcg0KPiBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlh
-dGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YNCj4gdGhpcyBtZXNzYWdlIGlu
-IHlvdXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseQ0K
-PiBzdG9yZWQgY29waWVzKS4NCj4gPiA+DQo+ID4gPiAtLQ0KPiA+ID4gVG8gdW5zdWJzY3JpYmUg
-ZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlDQo+IGNlcGgtZGV2ZWwi
-DQo+ID4gPiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVs
-Lm9yZyBNb3JlDQo+IG1ham9yZG9tbw0KPiA+ID4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVs
-Lm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+ID4gPg0KPiA+ID4NCj4gPiAtLQ0KPiA+IFRvIHVu
-c3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZQ0KPiBj
-ZXBoLWRldmVsIg0KPiA+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdl
-ci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vDQo+DQo+ID4gaW5mbyBhdCAgaHR0cDovL3ZnZXIu
-a2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+ID4gLS0NCj4gPiBUbyB1bnN1YnNjcmli
-ZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUNCj4gY2VwaC1kZXZl
-bCINCj4gPiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVs
-Lm9yZyBNb3JlIG1ham9yZG9tbw0KPg0KPiA+IGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5v
-cmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPiA+DQo+ID4NCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUg
-ZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiDQo+
-IGluDQo+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3Jn
-IE1vcmUgbWFqb3Jkb21vIGluZm8NCj4gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jk
-b21vLWluZm8uaHRtbA0KDQotLQ0KTWF0dCBCZW5qYW1pbg0KQ29ob3J0RlMsIExMQy4NCjMxNSBX
-ZXN0IEh1cm9uIFN0cmVldCwgU3VpdGUgMTQwQQ0KQW5uIEFyYm9yLCBNaWNoaWdhbiA0ODEwMw0K
-DQpodHRwOi8vY29ob3J0ZnMuY29tDQoNCnRlbC4gIDczNC03NjEtNDY4OQ0KZmF4LiAgNzM0LTc2
-OS04OTM4DQpjZWwuICA3MzQtMjE2LTUzMDkNCg0KX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX18NCg0KUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBl
-bGVjdHJvbmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRo
-ZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0
-aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5
-IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFu
-ZCB0aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWlu
-ZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVj
-ZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5k
-ZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFu
-ZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3Nz
-ZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3Bp
-ZXMpLg0KDQo=
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--cSvRc574hqVlegqp5pCUrb0fUjHRtKI76
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: quoted-printable
+
+
+Of course ! Using teuthology tasks to configure the node makes perfect se=
+nse.
+
+Thanks !
+
+On 09/03/2015 14:37, Andrew Schoen wrote:
+> Loic,
+>=20
+> After locking the node like normal, you can use teuthology to install t=
+he kernel you need.  Just include the kernel stanza in your yaml file.  h=
+ttp://ceph.com/teuthology/docs/teuthology.task.html#teuthology.task.kerne=
+l.task
+>=20
+> Something like this:
+>=20
+>   interactive-on-error: true                                           =
+                                                                         =
+                             =20
+>   roles:
+>      - [mon.0, client.0]
+>   kernel:
+>      branch: testing
+>   tasks:
+>      - interactive:=20
+>=20
+> Use teuthology-lock =97list-targets to get the connection information f=
+or you newly locked node and add that to your yaml.
+>=20
+> Best,
+> Andrew
+>=20
+> On Mar 8, 2015, at 7:50 AM, Loic Dachary <loic@dachary.org <mailto:loic=
+@dachary.org>> wrote:
+>=20
+>> Hi Andrew,
+>>
+>> After successfully locking a centos 6.5 VPS in the community lab with
+>>
+>> teuthology-lock --lock-many 1 --owner loic@dachary.org <mailto:loic@da=
+chary.org> --machine-type vps --os-type centos --os-version 6.5
+>>
+>> it turns out that it has a 2.6.32 kernel by default. A more recent ker=
+nel is required to run the ceph-disk tests because it relies on /dev/loop=
+ handling partition tables as a regular disk would. After installing a 3.=
+10 kernel from http://elrepo.org/tiki/kernel-lt and rebooting, it was no =
+longer possible to reach the machine.
+>>
+>> The teuthology-suite command has a -k option which suggest there is a =
+way to specify the kernel when provisioning a machine. The command
+>>
+>> ./virtualenv/bin/teuthology-suite --dry-run -k testing --priority 101 =
+--suite rgw --suite-branch firefly --machine-type plana,burnupi,mira --di=
+stro ubuntu --email loic@dachary.org <mailto:loic@dachary.org> --owner lo=
+ic@dachary.org <mailto:loic@dachary.org>  --ceph firefly-backports
+>>
+>> shows lines like:
+>>
+>> 2015-03-08 13:43:26,432.432 INFO:teuthology.suite:dry-run: ./virtualen=
+v/bin/teuthology-schedule --name loic-2015-03-08_13:43:06-rgw-firefly-bac=
+kports-testing-basic-multi --num 1 --worker multi --priority 101 --owner =
+loic@dachary.org <mailto:loic@dachary.org> --description 'rgw/multifs/{cl=
+usters/fixed-2.yaml fs/btrfs.yaml rgw_pool_type/erasure-coded.yaml tasks/=
+rgw_multipart_upload.yaml}' -- /tmp/schedule_suite_AQ2b6w /home/loic/src/=
+ceph-qa-suite_firefly/suites/rgw/multifs/clusters/fixed-2.yaml /home/loic=
+/src/ceph-qa-suite_firefly/suites/rgw/multifs/fs/btrfs.yaml /home/loic/sr=
+c/ceph-qa-suite_firefly/suites/rgw/multifs/rgw_pool_type/erasure-coded.ya=
+ml /home/loic/src/ceph-qa-suite_firefly/suites/rgw/multifs/tasks/rgw_mult=
+ipart_upload.yaml
+>>
+>> which show the testing word as part of the job name. The https://githu=
+b.com/ceph/teuthology/ page shows some more information about kernel choi=
+ces but it's non trivial to figure out how to translate that into somethi=
+ng that could be used in the context of teuthology-lock.
+>>
+>> I'm not sure where to look and I would be grateful if you could give m=
+e a pointer to go in the right direction.
+>>
+>> Cheers
+>>
+>> --=20
+>> Lo=EFc Dachary, Artisan Logiciel Libre
+>>
+>=20
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+--cSvRc574hqVlegqp5pCUrb0fUjHRtKI76
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlT9p6EACgkQ8dLMyEl6F21fMgCfTn2gKvPAEV9tWcdBzWX8lQdD
+TvgAn2rIogum7pMeJsJyz9vt5hZT13cd
+=a8WF
+-----END PGP SIGNATURE-----
+
+--cSvRc574hqVlegqp5pCUrb0fUjHRtKI76--
