@@ -1,87 +1,56 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Regarding rbd --image-shared and --shared <tag>
-Date: Mon, 9 Mar 2015 20:38:46 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F282CA550@SACMBXIP02.sdcorp.global.sandisk.com>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F282CA4CD@SACMBXIP02.sdcorp.global.sandisk.com>
- <155930577.1108244.1425933043884.JavaMail.zimbra@redhat.com>
+From: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+Subject: Re: packages on download.ceph.com
+Date: Mon, 09 Mar 2015 21:45:32 +0100
+Message-ID: <54FE066C.2070902@bisect.de>
+References: <BC97738F8E7C8742BABED7F06FB9DF91555668ED@SATLEXDAG01.amd.com> <54FDF605.9000302@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1on0056.outbound.protection.outlook.com ([157.56.110.56]:35819
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753704AbbCIUiu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 9 Mar 2015 16:38:50 -0400
-In-Reply-To: <155930577.1108244.1425933043884.JavaMail.zimbra@redhat.com>
-Content-Language: en-US
+Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:60384 "EHLO
+	wp188.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753798AbbCIUph (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Mar 2015 16:45:37 -0400
+In-Reply-To: <54FDF605.9000302@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jason Dillaman <dillaman@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mnelson@redhat.com>, "Deneau, Tom" <tom.deneau@amd.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-VGhhbmtzIGZvciB0aGUgZGV0YWlsZWQgZXhwbGFuYXRpb24gSmFzb24gIQ0KDQpSZWdhcmRzDQpT
-b21uYXRoDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBKYXNvbiBEaWxsYW1h
-biBbbWFpbHRvOmRpbGxhbWFuQHJlZGhhdC5jb21dIA0KU2VudDogTW9uZGF5LCBNYXJjaCAwOSwg
-MjAxNSAxOjMxIFBNDQpUbzogU29tbmF0aCBSb3kNCkNjOiBjZXBoLWRldmVsQHZnZXIua2VybmVs
-Lm9yZw0KU3ViamVjdDogUmU6IFJlZ2FyZGluZyByYmQgLS1pbWFnZS1zaGFyZWQgYW5kIC0tc2hh
-cmVkIDx0YWc+DQoNClRoZXJlIGdlbmVyYWxseSBpcyBubyBidWlsdC1pbiBSQkQgcmVzdHJpY3Rp
-b24gYWJvdXQgaGF2aW5nIG11bHRpcGxlIGNsaWVudHMgcGVyZm9ybSBJTyBvbiB0aGUgc2FtZSBp
-bWFnZSAtLSBidXQgaWYgdHdvIGNsaWVudHMgd2VyZSBwZXJmb3JtaW5nIHdyaXRlIG9wZXJhdGlv
-bnMgb24gdGhlIHNhbWUgaW1hZ2UgdGhleSB3b3VsZCBuZWVkIHRvIGNvb3JkaW5hdGUgdGhlaXIg
-YWN0aXZpdGllcyBvdXRzaWRlIG9mIGxpYnJiZC9rcmJkIHRvIGVuc3VyZSB0aGV5IGFyZW4ndCBj
-b3JydXB0aW5nIHRoZSBpbWFnZS4gIFRoZXJlIGFyZSBzb21lIHVzZS1jYXNlcyB3aGVyZSBpdCBp
-cyBiZW5lZmljaWFsIHRvIHVzZSB0aGUgc2FtZSBpbWFnZSBjb25jdXJyZW50bHkgb24gbXVsdGlw
-bGUgbWFjaGluZXMgKGUuZy4gcnVubmluZyBHRlMgb3IgT0NGUyBvbiB0b3Agb2YgYW4gUkJEIGlt
-YWdlKS4NCg0KVGhlICItLXNoYXJlZCIgb3B0aW9uIGlzIGFuIGV4aXN0aW5nIG9wdGlvbiB0aGF0
-IGlzIHVzZWQgd2l0aCB0aGUgbGVnYWN5IGNvLW9wZXJhdGl2ZSBSQkQgaW1hZ2UgbG9ja2luZyBm
-ZWF0dXJlIChpLmUuIGxvY2sgYWRkIDxpbWFnZS1uYW1lPiA8aWQ+IFstLXNoYXJlZCA8dGFnPl0p
-LiAgVGhpcyBsZWdhY3kgbG9ja2luZyBmZWF0dXJlIGlzIGNvb3BlcmF0aXZlIGJlY2F1c2Ugbm90
-aGluZyBvdXRzaWRlIG9mIHRoZSByYmQgQ0xJIHVzZXMgLyBlbmZvcmNlcyB0aGVzZSBsb2Nrcywg
-c28gc2NyaXB0aW5nIHdvdWxkIGJlIHJlcXVpcmVkIHRvIGFjaGlldmUgYSBkZXNpcmVkIGVmZmVj
-dC4gIA0KDQpXaXRoIEhhbW1lciwgbGlicmJkIGhhcyBhIG5ldyBidWlsdC1pbiBhbmQgZW5mb3Jj
-ZWQgZXhjbHVzaXZlIGxvY2tpbmcgZmVhdHVyZSAoZGlzYWJsZWQgYnkgZGVmYXVsdCkgdGhhdCBl
-bnN1cmVzIHRoYXQgb25seSBhIHNpbmdsZSBsaWJyYmQgY2xpZW50IGNhbiBoYXZlIGFuIGltYWdl
-IG9wZW4gYXQgYSB0aW1lLiAgVGhpcyBuZXcgZmVhdHVyZSBpcyB0aGUgZm91bmRhdGlvbiBvZiB0
-aGUgbmV3IGxpYnJiZCBvYmplY3QgbWFwIGZlYXR1cmUgKGFsc28gZGlzYWJsZWQgYnkgZGVmYXVs
-dCkgd2hpY2ggd2lsbCB0cmFjayBpbi11c2Ugb2JqZWN0cyB3aXRoaW4gYW4gaW1hZ2UgdG8gc3Bl
-ZWQgdXAgY2VydGFpbiBvcGVyYXRpb25zLiAgSXQgd2lsbCBhbHNvIGJlIHVzZWQgYnkgdGhlIGZv
-cnRoY29taW5nIGxpYnJiZCBqb3VybmFsbGluZyBmZWF0dXJlIHRoYXQgaXMgc3RpbGwgaW4gZGV2
-ZWxvcG1lbnQuDQoNClRoZSBuZXcgIi0taW1hZ2Utc2hhcmVkIiBvcHRpb24gZm9yIHRoZSByYmQg
-Q0xJIGlzIHVzZWZ1bCBpZiB5b3UgaGF2ZSBlbmFibGVkIHRoZSBuZXcgZXhjbHVzaXZlIGxvY2tp
-bmcgZmVhdHVyZSBieSBkZWZhdWx0IChpLmUuIGJ5IGFkZGluZyByYmQgZGVmYXVsdCBmZWF0dXJl
-cyA9IDUgdG8geW91ciBjZXBoLmNvbmYpIGFuZCB5b3Ugd2FudCB0byBkaXNhYmxlIHRoZSBleGNs
-dXNpdmUgbG9ja2luZyBmZWF0dXJlIG9uIGEgc2luZ2xlIGltYWdlIGZvciBiYWNrd2FyZHMgY29t
-cGF0aWJpbGl0eSB3aXRoIGtyYmQgKHNpbmNlIGl0IGRvZXMgbm90IHlldCBzdXBwb3J0IHRoaXMg
-bmV3IGZlYXR1cmUpIG9yIG90aGVyIHVzZS1jYXNlcyB3aGVyZSB0aGUgaW1hZ2UgY2FuIGJlIG9w
-ZW5lZCBjb25jdXJyZW50bHkgYnkgdHdvIG9yIG1vcmUgY2xpZW50cy4NCg0KLS0gDQoNCkphc29u
-IERpbGxhbWFuDQpSZWQgSGF0DQpkaWxsYW1hbkByZWRoYXQuY29tDQpodHRwOi8vd3d3LnJlZGhh
-dC5jb20gDQoNCg0KLS0tLS0gT3JpZ2luYWwgTWVzc2FnZSAtLS0tLQ0KRnJvbTogIlNvbW5hdGgg
-Um95IiA8U29tbmF0aC5Sb3lAc2FuZGlzay5jb20+DQpUbzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5l
-bC5vcmcNClNlbnQ6IE1vbmRheSwgTWFyY2ggOSwgMjAxNSAzOjQ4OjE1IFBNDQpTdWJqZWN0OiBS
-ZWdhcmRpbmcgcmJkIC0taW1hZ2Utc2hhcmVkIGFuZCAtLXNoYXJlZCA8dGFnPg0KDQpIaSwNCk15
-IGFzc3VtcHRpb24gd2FzIEkgY2FuJ3QgbWFwIHRoZSBzYW1lIGltYWdlIGZyb20gdHdvIGNsaWVu
-dHMgKGFuZCBydW4gSU8gY29uY3VycmVudGx5KSAgYXMgdGhpcyBjYW4gY29ycnVwdCB0aGUgaW1h
-Z2UuIEJ1dCwgaW4gdGhlIGxhdGVzdCByYmQgY2xpIEkgc2F3IC0taW1hZ2Utc2hhcmVkIGFuZCAt
-LXNoYXJlZDx0YWc+LCB3b25kZXJpbmcgd2hhdCBpcyB0aGUgdXNlIGNhc2Ugb2YgdGhpcyA/DQpU
-aGlzIG1lYW5zIHRoYXQgSSBjYW4gbm93IG1hcCBzYW1lIGltYWdlIGZyb20gdHdvIGRpZmZlcmVu
-dCBjbGllbnRzIGFuZCBydW4gSU8gaW4gYWN0aXZlLWFjdGl2ZSBtb2RlID8NCldoYXQgaXMgdGhl
-IGRpZmZlcmVuY2UgYmV0d2VlbiAtLWltYWdlLXNoYXJlZCBhbmQgLS1zaGFyZWQ8dGFnPiA/DQpJ
-cyB0aGVyZSBhbnkgcmVzdHJpY3Rpb24gb24gdGhlIG9wZXJhdGlvbiBhbGxvd2VkIGluIHRoaXMg
-bW9kZSA/DQpBcHByZWNpYXRlIGFueSBpbmZvcm1hdGlvbiBvbiB0aGlzLg0KDQpUaGFua3MgJiBS
-ZWdhcmRzDQpTb21uYXRoDQoNCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQoNClBM
-RUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBt
-YWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRl
-ZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdl
-IGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0
-aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkg
-cmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcyBt
-ZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMg
-Y29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVw
-aG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBh
-bnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hl
-dGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCg0KLS0N
-ClRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmli
-ZSBjZXBoLWRldmVsIiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIu
-a2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3Jn
-L21ham9yZG9tby1pbmZvLmh0bWwNCg==
+Am 09.03.2015 um 20:35 schrieb Mark Nelson:
+> 
+> 
+> On 03/09/2015 02:06 PM, Deneau, Tom wrote:
+>> I'm trying to gather information on what it would take to get packages
+>> for an architecture other than x86_64 up on http://download.ceph.com
+> 
+> What we've done in the past for certain non-X86 architectures (such as
+> ARM) is to get build nodes in place that can be used with our gitbuilder
+> setup to continuously make development builds:
+> 
+> http://www.ceph.com/gitbuilder.cgi
+> 
+> Which get put here:
+> 
+> http://gitbuilder.ceph.com/
+> 
+> Usually the problem is two fold:  Someone's time to set it up, and
+> making sure we have enough (or fast enough) build systems for that
+> architecture to keep up.
+
+It would be much easier to use OpenBuildService [1] for package build.
+It supports many distributions and architectures.
+
+If you don't care that it's openSUSE infrastructure you/we could use
+build.opensuse.org to build packages e.g. for RHEL/Centos/Fedora,
+openSUSE/SLES, Debian, Ubuntu and others (I did so in the past.)
+
+At least openSUSE/SLES packages could be also build on armv7l and e.g.
+ppc/s390x ... for other distros we have to check.
+
+The question is: should we build packages (and which) or is this more a
+task for the distributions?
+
+Danny
+
+[1] http://openbuildservice.org
+[2] https://build.opensuse.org
