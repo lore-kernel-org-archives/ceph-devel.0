@@ -1,82 +1,81 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Merging hammer in master: conflict on gmock
-Date: Tue, 10 Mar 2015 09:02:34 +0100
-Message-ID: <54FEA51A.30003@dachary.org>
-References: <54FDABC0.4080803@dachary.org> <54FDD8D8.6090709@bisect.de> <54FE2775.8010608@dachary.org> <54FE8836.6040308@bisect.de>
+From: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>
+Subject: RE: conditions for removing experimental feature marks
+Date: Tue, 10 Mar 2015 10:35:35 +0000
+Message-ID: <870DE8DBB716524BAE51B2D499EC81E40AA9678C@g01jpexmbyt24>
+References: <870DE8DBB716524BAE51B2D499EC81E40AA6CEB8@g01jpexmbyt24>
+ <54E1B57F.3070201@dachary.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="A0p6LpW09XnA0AIKmBGCFhbRNHr7bm7pv"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:55652 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751868AbbCJICh (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Mar 2015 04:02:37 -0400
-In-Reply-To: <54FE8836.6040308@bisect.de>
+Received: from mgwkm02.jp.fujitsu.com ([202.219.69.169]:63100 "EHLO
+	mgwkm02.jp.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751666AbbCJKfk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Mar 2015 06:35:40 -0400
+Received: from g01jpfmpwyt01.exch.g01.fujitsu.local (g01jpfmpwyt01.exch.g01.fujitsu.local [10.128.193.38])
+	by kw-mxoi2.gw.nic.fujitsu.com (Postfix) with ESMTP id 05AD9AC0AB6
+	for <ceph-devel@vger.kernel.org>; Tue, 10 Mar 2015 19:35:38 +0900 (JST)
+In-Reply-To: <54E1B57F.3070201@dachary.org>
+Content-Language: ja-JP
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: "Shiozawa, Kensuke" <shiozawa.kennsu@jp.fujitsu.com>, "Nakao, Takanori" <nakao.takanori@jp.fujitsu.com>, "Kaga, Yoshihiro" <y-kaga@jp.fujitsu.com>, "Kawaguchi, Shotaro" <kawaguchi.s@jp.fujitsu.com>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---A0p6LpW09XnA0AIKmBGCFhbRNHr7bm7pv
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-Hi Danny,
-
-On 10/03/2015 06:59, Danny Al-Gaaf wrote:
-> Am 10.03.2015 um 00:06 schrieb Loic Dachary:
->>
->>
->> On 09/03/2015 18:31, Danny Al-Gaaf wrote:
->>> Hi Loic,
->>>
->>> this one is a tricky one. I didn't find a smooth/automatic
->>> solution yet.
->>>
->>> This seems to work:
->>>
->>> git checkout master git merge --no-ff origin/hammer git
->>> mergetool -> for the conflict: select 'local' for src/gmock (this
->>> should keep the changes im master and ignore changes from
->>> hammer)
->>
->> Do you know what changes have been done in hammer in src/gmock ?
->=20
-> It seems as if there was no change to src/gmock in hammer that is not
-> already in master.
-
-After the set of commands you suggest, how could we make sure nothing was=
- trashed or unintentionally included ? I can't think of a sure method fro=
-m the top of my head.
-
-Cheers
-
-> Danny
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---A0p6LpW09XnA0AIKmBGCFhbRNHr7bm7pv
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlT+pRoACgkQ8dLMyEl6F21yKgCgoiQbt+RUYRHXBm7TmtyNrePr
-cv0AoJ87qepgLBOEVc7IcnBILpcQdB8p
-=Y2me
------END PGP SIGNATURE-----
-
---A0p6LpW09XnA0AIKmBGCFhbRNHr7bm7pv--
+RGVhciBMb2ljLA0KDQpJIHJlYWxseSBhcG9sb2dpemUgdGhhdCBvdXIgcmVw
+bHkgaXMgdG9vIGxhdGUuDQpTaW5jZSByZW1vdmluZyBleHBlcmltZW50YWwg
+ZmxhZyBmcm9tIFNIRUMgYXQgdjAuOTQgaXMgb3VyIGltbWVkaWF0ZSBob3Bl
+LCB3ZSBzaG91bGQNCmhhdmUgc3RhcnRlZCBhbnkgYWN0aW9ucyBmb3IgdGhh
+dCBlYXJsaWVyLg0KDQpCeSB0aGUgd2F5LCB5b3UgbWVhbiB3ZSBtdXN0IGFk
+ZCBqdXN0IHRoZSBzYW1lIHdvcmthcm91bmQgYXMgMTA4ODcgZm9yIFNIRUMN
+CmlmIG91ciB0YXJnZXQgaXMgSGFtbWVyLg0KSXMgbXkgdW5kZXJzdGFuZGlu
+ZyBjb3JyZWN0ID8NCg0KPiBSdW5uaW5nIHRldXRob2xvZ3kgbG9jYWxseSBp
+cyBub24gdHJpdmlhbCwgbWF5YmUgd2UgY2FuIHByb3ZpZGUgeW91IHdpdGgg
+YWNjZXNzIHRvIHRoZQ0KPiBjb21tdW5pdHkgbGFiIHNvIHRoYXQgeW91IGNh
+biBydW4gdGV1dGhvbG9neSBzdWl0ZXMgYWdhaW5zdCB0aGUgZXhpc3Rpbmcg
+dGV1dGhvbG9neSBjbHVzdGVyDQo+IChpLmUuIGh0dHA6Ly9wdWxwaXRvLmNl
+cGguY29tLykuIFdvdWxkIHlvdSBsaWtlIG1lIHRvIGFzayA/DQoNClRoYW5r
+IHlvdSBmb3IgeW91ciBwcm9wb3NhbC4NCkl0IHdvdWxkIGJlIGdyZWF0bHkg
+aGVscGZ1bCBpZiB3ZSB3ZXJlIGFsbG93ZWQgdG8gdXNlIGl0ICENCg0KQmVz
+dCByZWdhcmRzLA0KVGFrZXNoaSBNaXlhbWFlDQoNCi0tLS0tT3JpZ2luYWwg
+TWVzc2FnZS0tLS0tDQpGcm9tOiBMb2ljIERhY2hhcnkgW21haWx0bzpsb2lj
+QGRhY2hhcnkub3JnXSANClNlbnQ6IE1vbmRheSwgRmVicnVhcnkgMTYsIDIw
+MTUgNjoxNyBQTQ0KVG86IE1peWFtYWUsIFRha2VzaGkv5a6u5YmNIOWJmzsg
+Y2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCkNjOiBTaGlvemF3YSwgS2Vu
+c3VrZS/loanmsqIg6LOi6LyUOyBOYWthbywgVGFrYW5vcmkv5Lit5bC+IOm3
+ueiplA0KU3ViamVjdDogUmU6IGNvbmRpdGlvbnMgZm9yIHJlbW92aW5nIGV4
+cGVyaW1lbnRhbCBmZWF0dXJlIG1hcmtzDQoNCkhpLA0KDQpPbiAxNi8wMi8y
+MDE1IDA4OjM3LCBNaXlhbWFlLCBUYWtlc2hpIHdyb3RlOg0KPiBEZWFyIExv
+aWMsDQo+IA0KPiBUaGFuayB5b3UgZm9yIHlvdXIgaGVscCBvbiB0aGUgcHVs
+bCByZXF1ZXN0IG9mIFNIRUMgbGFzdCB3ZWVrLg0KPiBXZSBiZWxpZXZlIHRo
+YXQgbWFya2luZyBleHBlcmltZW50YWwgZmVhdHVyZSBvbiBTSEVDIHdhcyBp
+bmV2aXRhYmxlIA0KPiBhbmQgdGhlIHdheSB0byByZXN0cmljdCB0aGUgZmVh
+dHVyZSBpcyBwcm9wZXIuDQo+IA0KPiBCeSB0aGUgd2F5LCBjb3VsZCB5b3Ug
+bGV0IHVzIGtub3cgd2hhdCBhcmUgdGhlIGNvbmRpdGlvbnMgZm9yIHJlbW92
+aW5nIA0KPiBleHBlcmltZW50YWwgZmVhdHVyZSBtYXJrcyBpbiB0aGUgZnV0
+dXJlPw0KPiBBcmUgYWRkaXRpb25hbCB0aG9yb3VnaCB0ZXN0cyByZXF1aXJl
+ZD8NCg0KVGhlIG5leHQgc3RlcCBpcyB0byBydW4gaW50ZWdyYXRpb24gdGVz
+dHMgd2l0aCB0aGUgc2hlYyBwbHVnaW4uIFRoZSBpbnRlZ3JhdGlvbiB0ZXN0
+cyBoYXZlIHNob3duIHRoYXQgdGhlIHNoZWMgcGx1Z2luIGRvZXMgbm90IGRp
+c3J1cHQgYW55dGhpbmcuIE5vdyB3ZSBzaG91bGQgY2hlY2sgaWYgaXQgd29y
+a3MgcHJvcGVybHkgdW5kZXIgc3RyZXNzIGFuZCB1cGdyYWRlcy4gSSBjcmVh
+dGVkIHR3byB0aWNrZXRzIGZvciB0aGF0IHB1cnBvc2U6DQoNCmh0dHA6Ly90
+cmFja2VyLmNlcGguY29tL2lzc3Vlcy8xMDg4NiA6IGludGVncmF0aW9uIC8g
+dGhldXRob2xvZ3kgaW50ZWdyYXRpb24gLyB0aGV1dGhvbG9neSB0aHJhc2hl
+ciB0ZXN0cyBmb3IgdGhlIHNoZWMgZXJhc3VyZSBjb2RlIHBsdWdpbg0KaHR0
+cDovL3RyYWNrZXIuY2VwaC5jb20vaXNzdWVzLzEwODg3IDogZXJhc3VyZS1j
+b2RlOiBhbGxvdyB1cGdyYWRlcyBmb3Igc2hlYyBwbHVnaW5zDQoNCkl0IHdv
+dWxkIGJlIGZhbnRhc3RpYyBpZiB5b3UgY291bGQgd29yayBvbiBodHRwOi8v
+dHJhY2tlci5jZXBoLmNvbS9pc3N1ZXMvNzI5MSA6IGl0IHdvdWxkIG1ha2Ug
+dGhlIGludGVncmF0aW9uIG9mIG5ldyBlcmFzdXJlIGNvZGUgcGx1Z2lucyBl
+YXNpZXIuIEkgcmVhbGl6ZSB0aGF0IGl0IGlzIGluZnJhc3RydWN0dXJlIHdv
+cmsgbm90IGRpcmVjdGx5IG9mIGludGVyZXN0IHRvIHRoZSBzaGVjIHBsdWdp
+biBpbXBsZW1lbnRhdGlvbi4NCg0KUnVubmluZyB0ZXV0aG9sb2d5IGxvY2Fs
+bHkgaXMgbm9uIHRyaXZpYWwsIG1heWJlIHdlIGNhbiBwcm92aWRlIHlvdSB3
+aXRoIGFjY2VzcyB0byB0aGUgY29tbXVuaXR5IGxhYiBzbyB0aGF0IHlvdSBj
+YW4gcnVuIHRldXRob2xvZ3kgc3VpdGVzIGFnYWluc3QgdGhlIGV4aXN0aW5n
+IHRldXRob2xvZ3kgY2x1c3RlciAoaS5lLiBodHRwOi8vcHVscGl0by5jZXBo
+LmNvbS8pLiBXb3VsZCB5b3UgbGlrZSBtZSB0byBhc2sgPyANCg0KQ2hlZXJz
+DQoNCj4gQmVzdCByZWdhcmRzLA0KPiBUYWtlc2hpIE1peWFtYWUNCj4gDQoN
+Ci0tDQpMb8OvYyBEYWNoYXJ5LCBBcnRpc2FuIExvZ2ljaWVsIExpYnJlDQoN
+Cg==
