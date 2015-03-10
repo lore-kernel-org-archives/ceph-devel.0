@@ -1,57 +1,104 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: teuthology-lock and choosing a kernel
-Date: Tue, 10 Mar 2015 10:19:01 +0300
-Message-ID: <CAOi1vP8T+JY1v9fnSAvK3UMr2MnzN+KJTWMY26k6zD5p_HCP_Q@mail.gmail.com>
-References: <54FC459D.2090703@dachary.org>
-	<6E9B72C6-1FA0-46D3-873E-EA99A52BE669@redhat.com>
-	<54FE1F73.9060703@dachary.org>
+From: Laurent GUERBY <laurent@guerby.net>
+Subject: Re: giant integration branch for v0.87.1 ready for QE / fix for
+ 10433/8011 ? osd/ReplicatedPG.cc: 5545: FAILED assert(soid < scrubber.start
+ || soid >= scrubber.end)
+Date: Tue, 10 Mar 2015 07:56:13 +0100
+Message-ID: <1425970573.3853.583.camel@pc2>
+References: <54DA3DD6.7070108@dachary.org> <54DB757E.2000009@dachary.org>
+	 <1387059957.19365485.1424108024488.JavaMail.zimbra@redhat.com>
+	 <1622340604.24695270.1424468972740.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-we0-f176.google.com ([74.125.82.176]:46504 "EHLO
-	mail-we0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751100AbbCJHTD convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Mar 2015 03:19:03 -0400
-Received: by wesk11 with SMTP id k11so10201465wes.13
-        for <ceph-devel@vger.kernel.org>; Tue, 10 Mar 2015 00:19:01 -0700 (PDT)
-In-Reply-To: <54FE1F73.9060703@dachary.org>
+Received: from xeon.tetaneutral.net ([91.224.149.148]:51660 "EHLO
+	xeon.tetaneutral.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751390AbbCJHX6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Mar 2015 03:23:58 -0400
+In-Reply-To: <1622340604.24695270.1424468972740.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Loic Dachary <loic@dachary.org>
-Cc: Andrew Schoen <aschoen@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Samuel Just <sjust@redhat.com>
 
-On Tue, Mar 10, 2015 at 1:32 AM, Loic Dachary <loic@dachary.org> wrote:
-> Hi Andrew,
->
-> I successfully installed a 3.19 kernel (details at http://dachary.org/?p=3594). It turns out that the loop module is compiled in and defaults to having zero partitions allowed by default. Since I was looking for a solution to have /dev/loop useable for tests, I rebooted with /boot/grub/grub.conf as
->
-> [ubuntu@vpm083 src]$ cat /boot/grub/grub.conf
-> default=0
-> timeout=5
-> splashimage=(hd0,0)/boot/grub/splash.xpm.gz
-> hiddenmenu
-> title rhel-6.5-cloudinit (3.19.0-ceph-00029-gaf5b96e)
->         root (hd0,0)
->         kernel /boot/vmlinuz-3.19.0-ceph-00029-gaf5b96e ro root=LABEL=79d3d2d4  loop.max_part=16
->         initrd /boot/initramfs-3.19.0-ceph-00029-gaf5b96e.img
->
->
-> and that works fine. Do you know if I could do that from the yaml file directly ? Alternatively I could use a kernel that does not have the loop module compiled in and modprobe it with loop.max_part=16, but it's unclear to me what kernels are available and what their names are.
+Hi,
 
-I think you can run a set of commands from yaml (see "exec" stanza), so
-you can sort of script it (GRUB_CMDLINE_LINUX=, etc), but that's never
-going to be reliable.
+Any reason why the complete fix for 8011/10433 was
+not included in giant 0.87.1?
 
-Basically the only kernel available right now is the testing flavor.
-debug flavor is some random config and has been unused for a while.
-I can try changing testing config to do CONFIG_BLK_DEV_LOOP=m if you
-don't find a good way to workaround it.
+Missing fix:
+http://workbench.dachary.org/ceph/ceph/commit/9b26de3f3653d38dcdfc5b97874089f19d2a59d7
 
-https://lists.ubuntu.com/archives/kernel-team/2009-September/007364.html
-is apparently the reason it's compiled in (our config is a somewhat old
-and slightly stripped down Ubuntu config).
+Issues:
+http://tracker.ceph.com/issues/8011
+http://tracker.ceph.com/issues/10433#note-7
 
-Thanks,
+Thanks in advance,
 
-                Ilya
+Sincerely,
+
+Laurent
+
+On Fri, 2015-02-20 at 16:49 -0500, Yuri Weinstein wrote:
+> Team leads,
+> 
+> Please review QE validation results summary in http://tracker.ceph.com/issues/10501
+> 
+> Loic - this RC looks ready for release (in my opinion) ! 
+> 
+> Thx
+> YuriW
+> 
+> ----- Original Message -----
+> From: "Yuri Weinstein" <yweinste@redhat.com>
+> To: "Loic Dachary" <loic@dachary.org>
+> Cc: "Ceph Development" <ceph-devel@vger.kernel.org>
+> Sent: Monday, February 16, 2015 9:33:44 AM
+> Subject: Re: giant integration branch for v0.87.1 ready for QE
+> 
+> I have completed suites execution on giant branch (v0.87.1 RC)
+> 
+> All results are summarized in http://tracker.ceph.com/issues/10501 under "QE VALIDATION" section.
+> Some suites had to be run more then ones due to environment noise.
+> 
+> Two suites are being re-run now - upgrade:firefly-x and powecycle.
+> 
+> Next steps:
+> -  the team leads to review/confirm results
+> -  Loic - can you review and triage issues as needed.
+> -  two suites require results analysis:
+>    multimds
+>    rados (two known tickets, but need more checking) ## 10209, 9891
+>    krbd (two new tickets, but need more checking) ## 10889, 10890
+> 
+> 
+> Thx
+> YuriW
+> 
+> ----- Original Message -----
+> From: "Loic Dachary" <loic@dachary.org>
+> To: "Yuri Weinstein" <yweinste@redhat.com>
+> Cc: "Ceph Development" <ceph-devel@vger.kernel.org>
+> Sent: Wednesday, February 11, 2015 7:30:06 AM
+> Subject: Re: giant integration branch for v0.87.1 ready for QE
+> 
+> Hi Yuri,
+> 
+> The giant-backports pull requests were merged into https://github.com/ceph/ceph/tree/giant which is not ready for testing.
+> 
+> For the record, the head is https://github.com/ceph/ceph/commit/78c71b9200da5e7d832ec58765478404d31ae6b5
+> 
+> Cheers
+> 
+> On 10/02/2015 18:20, Loic Dachary wrote:
+> > Hi Yuri,
+> > 
+> > The giant integration branch for v0.87.1 as found at https://github.com/ceph/ceph/commits/giant-backports has been approved by Yehuda, Josh and Sam and is ready for QE. 
+> > 
+> > For the record, the head is https://github.com/ceph/ceph/commit/6b08a729540c61f3c8b15c5a3ce9382634bf800c
+> > 
+> > Cheers
+> > 
+> 
+
+
