@@ -1,137 +1,43 @@
-From: Robert LeBlanc <robert@leblancnet.us>
-Subject: Re: [ceph-users] Prioritize Heartbeat packets
-Date: Mon, 9 Mar 2015 23:16:48 -0600
-Message-ID: <CAANLjFrwqr-znyMSBw=wCgiVkwqRT69ud3n0yAnhWUH=PZRTTw@mail.gmail.com>
-References: <1985102496.575.1409186929716.JavaMail.root@thunderbeast.private.linuxbox.com>
-	<alpine.DEB.2.00.1408271755160.966@cobra.newdream.net>
-	<ltmnkp$tod$1@ger.gmane.org>
-	<CAANLjFrHdDNJnMnWQk3s2cT0LZxsCGp63xHBJw7HNJocfSahzw@mail.gmail.com>
-	<mdg18n$gsj$1@ger.gmane.org>
-	<CAANLjFpH=0ZjXm2FKNF4Qz421jcM8QsW8HTDGpLqy5=w8POXQw@mail.gmail.com>
-	<CAMXzGWK+8hpv0LOp6tAGft_=f8Peb9qackcLXruQH7qVVD9chQ@mail.gmail.com>
+From: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+Subject: Re: Merging hammer in master: conflict on gmock
+Date: Tue, 10 Mar 2015 06:59:18 +0100
+Message-ID: <54FE8836.6040308@bisect.de>
+References: <54FDABC0.4080803@dachary.org> <54FDD8D8.6090709@bisect.de> <54FE2775.8010608@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-we0-f180.google.com ([74.125.82.180]:35361 "EHLO
-	mail-we0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750967AbbCJFQt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Mar 2015 01:16:49 -0400
-Received: by wesw55 with SMTP id w55so17311230wes.2
-        for <ceph-devel@vger.kernel.org>; Mon, 09 Mar 2015 22:16:48 -0700 (PDT)
-In-Reply-To: <CAMXzGWK+8hpv0LOp6tAGft_=f8Peb9qackcLXruQH7qVVD9chQ@mail.gmail.com>
+Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:40181 "EHLO
+	wp188.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750769AbbCJF7W (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 10 Mar 2015 01:59:22 -0400
+In-Reply-To: <54FE2775.8010608@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jian Wen <wenjianhn@gmail.com>
-Cc: Daniel Swarbrick <daniel.swarbrick@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Jian,
+Am 10.03.2015 um 00:06 schrieb Loic Dachary:
+> 
+> 
+> On 09/03/2015 18:31, Danny Al-Gaaf wrote:
+>> Hi Loic,
+>> 
+>> this one is a tricky one. I didn't find a smooth/automatic
+>> solution yet.
+>> 
+>> This seems to work:
+>> 
+>> git checkout master git merge --no-ff origin/hammer git
+>> mergetool -> for the conflict: select 'local' for src/gmock (this
+>> should keep the changes im master and ignore changes from
+>> hammer)
+> 
+> Do you know what changes have been done in hammer in src/gmock ?
 
-Thanks for the clarification. I'll mark traffic destined for the
-monitors as well. We are getting ready to put our first cluster into
-production. If you are interested we will be testing the heartbeat
-priority to see if we can saturate the network (not an easy task for
-40 Gb) and keep the cluster from falling apart. Our network team is
-marking COS based on the DSCP and enforcing priority. We have three
-VLANs on bonded 40 GbE, management, storage (monitors, clients, OSDs),
-and cluster (replication). We have three priority classes management
-(heartbeats on all VLANs, SSH, DNS, etc), storage traffic (no
-marking), and replication (scavenger class). We are interested to see
-how things pan out.
+It seems as if there was no change to src/gmock in hammer that is not
+already in master.
 
-Thanks,
-Robert
+Danny
 
-On Mon, Mar 9, 2015 at 8:58 PM, Jian Wen <wenjianhn@gmail.com> wrote:
-> Only OSD calls set_socket_priority().
-> See  https://github.com/ceph/ceph/pull/3353
->
-> On Tue, Mar 10, 2015 at 3:36 AM, Robert LeBlanc <robert@leblancnet.us> wrote:
->> I've found commit 9b9a682fe035c985e416ee1c112fa58f9045a27c and I see
->> that when 'osd heartbeat use min delay socket = true' it will mark the
->> packet with DSCP CS6. Based on the setting of the socket in
->> msg/simple/Pipe.cc is it possible that this can apply to both OSD and
->> monitor? I don't understand the code enough to know how the
->> set_socket_options() is called from the OSD and monitor.
->>
->> If this applies to both monitor and OSD, would it be better to rename
->> the option to a more generic name?
->>
->> Thanks,
->>
->> On Sat, Mar 7, 2015 at 4:23 PM, Daniel Swarbrick
->> <daniel.swarbrick@gmail.com> wrote:
->>> Judging by the commit, this ought to do the trick:
->>>
->>> osd heartbeat use min delay socket = true
->>>
->>> On 07/03/15 01:20, Robert LeBlanc wrote:
->>>>
->>>> I see that Jian Wen has done work on this for 0.94. I tried looking
->>>> through the code to see if I can figure out how to configure this new
->>>> option, but it all went over my head pretty quick.
->>>>
->>>> Can I get a brief summary on how to set the priority of heartbeat
->>>> packets or where to look in the code to figure it out?
->>>>
->>>> Thanks,
->>>>
->>>> On Thu, Aug 28, 2014 at 2:01 AM, Daniel Swarbrick
->>>> <daniel.swarbrick@profitbricks.com
->>>> <mailto:daniel.swarbrick@profitbricks.com>> wrote:
->>>>
->>>>     On 28/08/14 02:56, Sage Weil wrote:
->>>>     > I seem to remember someone telling me there were hooks/hints you
->>>> could
->>>>     > call that would tag either a socket or possibly data on that socket
->>>> with a
->>>>     > label for use by iptables and such.. but I forget what it was.
->>>>     >
->>>>
->>>>     Something like setsockopt() SO_MARK?
->>>>
->>>>             *SO_MARK *(since Linux 2.6.25)
->>>>                    Set the mark for each packet sent through this socket
->>>>     (similar
->>>>                    to the netfilter MARK target but socket-based).
->>>>     Changing the
->>>>                    mark can be used for mark-based routing without
->>>>     netfilter or
->>>>                    for packet filtering.  Setting this option requires the
->>>>                    *CAP_NET_ADMIN *capability.
->>>>
->>>>     Alternatively, directly set IP_TOS options on the socket, or
->>>> SO_PRIORITY
->>>>     which sets the IP TOS bits as well.
->>>>
->>>>
->>>>     _______________________________________________
->>>>     ceph-users mailing list
->>>>     ceph-users@lists.ceph.com
->>>>     <mailto:ceph-users@lists.ceph.com>
->>>>     http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>>>
->>>>
->>>>
->>>>
->>>> _______________________________________________
->>>> ceph-users mailing list
->>>> ceph-users@lists.ceph.com
->>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>>>
->>>
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> _______________________________________________
->> ceph-users mailing list
->> ceph-users@lists.ceph.com
->> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->
->
->
-> --
-> Best,
->
-> Jian
