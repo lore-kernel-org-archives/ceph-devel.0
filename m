@@ -1,141 +1,117 @@
-From: Valery Tschopp <valery.tschopp-em26ZHiX79btRgLqZ5aouw@public.gmane.org>
-Subject: ceph v0.80.9 debian source packages???
-Date: Tue, 10 Mar 2015 17:02:51 +0100
-Message-ID: <54FF15AB.3000904@switch.ch>
+From: Sage Weil <sweil@redhat.com>
+Subject: v0.80.9 Firefly released
+Date: Tue, 10 Mar 2015 12:34:14 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1503101229360.31138@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0471855382=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:35382 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751797AbbCJTeT (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 10 Mar 2015 15:34:19 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-announce@ceph.com, ceph-devel@vger.kernel.org, ceph-users@ceph.com, ceph-maintainers@ceph.com
 
-This is a cryptographically signed message in MIME format.
+This is a bugfix release for firefly.  It fixes a performance regression 
+in librbd, an important CRUSH misbehavior (see below), and several RGW 
+bugs.  We have also backported support for flock/fcntl locks to ceph-fuse 
+and libcephfs.
 
---===============0471855382==
-Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg=sha1; boundary="------------ms030501080008010400090007"
+We recommend that all Firefly users upgrade.
 
-This is a cryptographically signed message in MIME format.
+For more detailed information, see
+  http://docs.ceph.com/docs/master/_downloads/v0.80.9.txt
 
---------------ms030501080008010400090007
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: quoted-printable
+Adjusting CRUSH maps
+--------------------
 
-Hi guys,
+* This point release fixes several issues with CRUSH that trigger
+  excessive data migration when adjusting OSD weights.  These are most
+  obvious when a very small weight change (e.g., a change from 0 to
+  .01) triggers a large amount of movement, but the same set of bugs
+  can also lead to excessive (though less noticeable) movement in
+  other cases.
 
-The last trusty version 0.80.9 have been pushed in the "deb=20
-http://ceph.com/debian-firefly/ trusty main" repository yesterday.
+  However, because the bug may already have affected your cluster,
+  fixing it may trigger movement *back* to the more correct location.
+  For this reason, you must manually opt-in to the fixed behavior.
 
-The last packages have the version 0.80.9-1trusty, but I can not find=20
-the corresponding source packages in=20
-http://gitbuilder.ceph.com/ceph-deb-trusty-x86_64-basic/ref/v0.80.9
+  In order to set the new tunable to correct the behavior::
 
-Where can I find the correct ceph_0.80.9-1trusty.dsc and=20
-ceph_0.80.9-1trusty.tar.gz source packages?
+     ceph osd crush set-tunable straw_calc_version 1
 
-Regards,
-Valery
---=20
-SWITCH
---------------------------
-Valery Tschopp, Software Engineer, Peta Solutions
-Werdstrasse 2, P.O. Box, 8021 Zurich, Switzerland
-email: valery.tschopp-em26ZHiX79btRgLqZ5aouw@public.gmane.org phone: +41 44 268 1544
+  Note that this change will have no immediate effect.  However, from
+  this point forward, any 'straw' bucket in your CRUSH map that is
+  adjusted will get non-buggy internal weights, and that transition
+  may trigger some rebalancing.
 
+  You can estimate how much rebalancing will eventually be necessary
+  on your cluster with::
 
+     ceph osd getcrushmap -o /tmp/cm
+     crushtool -i /tmp/cm --num-rep 3 --test --show-mappings > /tmp/a 2>&1
+     crushtool -i /tmp/cm --set-straw-calc-version 1 -o /tmp/cm2
+     crushtool -i /tmp/cm2 --reweight -o /tmp/cm2
+     crushtool -i /tmp/cm2 --num-rep 3 --test --show-mappings > /tmp/b 2>&1
+     wc -l /tmp/a                          # num total mappings
+     diff -u /tmp/a /tmp/b | grep -c ^+    # num changed mappings
 
---------------ms030501080008010400090007
-Content-Type: application/pkcs7-signature; name="smime.p7s"
-Content-Transfer-Encoding: base64
-Content-Disposition: attachment; filename="smime.p7s"
-Content-Description: S/MIME Cryptographic Signature
+   Divide the total number of lines in /tmp/a with the number of lines
+   changed.  We've found that most clusters are under 10%.
 
-MIAGCSqGSIb3DQEHAqCAMIACAQExCzAJBgUrDgMCGgUAMIAGCSqGSIb3DQEHAQAAoIILjTCC
-BZowggSCoAMCAQICFGooCvNGIygxyVtCwp0kxKgswzXjMA0GCSqGSIb3DQEBCwUAMH8xCzAJ
-BgNVBAYTAkJNMRkwFwYDVQQKExBRdW9WYWRpcyBMaW1pdGVkMSUwIwYDVQQLExxSb290IENl
-cnRpZmljYXRpb24gQXV0aG9yaXR5MS4wLAYDVQQDEyVRdW9WYWRpcyBSb290IENlcnRpZmlj
-YXRpb24gQXV0aG9yaXR5MB4XDTE0MDUzMDE4NTAxM1oXDTIxMDMxNzE4MzMzM1owYzELMAkG
-A1UEBhMCQ0gxLDAqBgNVBAoTI1F1b1ZhZGlzIFRydXN0bGluayBTd2l0emVybGFuZCBMdGQu
-MSYwJAYDVQQDEx1RdW9WYWRpcyBTd2lzcyBBZHZhbmNlZCBDQSBHMjCCAiIwDQYJKoZIhvcN
-AQEBBQADggIPADCCAgoCggIBALKB7kQHlk/9+eTjso+B0Sm6IF327uVx0tbF4Ys62u9hinnZ
-9rAp42CbehCiAriA9DEEwPZZrTzSc4+jfTtTOtBAB7fuUUImpeUulUGW5WqNB0+mT2CzK5xq
-U3Cy00EeaPXGheBR9NeFOtFaCQC7EaEYv2h2Pb71DFvBXLCOKSByJ2wPNWajbeZdzfEpaKTo
-EinfNsON9NPKK0hf40iUOJozHCrovlA+drOsTZ42xImsebDP8h7eCbxoNXLXj6ATWycTDoIr
-bH82dxFyX9Zx1oGNA3ffwMc3m78Ukjzg0y3nzLQFiIfdXfMXqq+e2bifRbbXqMddzLIMeZIg
-QMylsCm4A6H+OFGP4Fer0r9Webc+CFYkAdd6Zt5LgDHSxcxSusLyZBRb444Qs40TYv6h0bT7
-VzCecsPYIQmZcIhygIuxAvU6nvOYXxdc4TEtlS1Hveg2LWwizwhzeas6WfyyHPy1WQuUqZKy
-SveKVQpCfsznMpfsXpYqVsDdXLiHP4gzKMQwCDZwDE267owoSd6hSuUZSIQmfGO8WZax6DAV
-FVsFxl6lFX5xfR3dpWJWJ5R6S02NQaxetEF4ANKofuOPjYh2UDonQxy/oec+O5if6FTxfJHY
-SHJylV9bOwDcu4qZJ+pB+3LWo00TpOzFvtgIFsS36KOec0dAnVc1X+NHnCDfAgMBAAGjggEo
-MIIBJDASBgNVHRMBAf8ECDAGAQH/AgEAMBEGA1UdIAQKMAgwBgYEVR0gADBxBggrBgEFBQcB
-AQRlMGMwKgYIKwYBBQUHMAGGHmh0dHA6Ly9vY3NwLnF1b3ZhZGlzZ2xvYmFsLmNvbTA1Bggr
-BgEFBQcwAoYpaHR0cDovL3RydXN0LnF1b3ZhZGlzZ2xvYmFsLmNvbS9xdnJjYS5jcnQwDgYD
-VR0PAQH/BAQDAgEGMB8GA1UdIwQYMBaAFItLbe3TKbkGGew5Oanwl4Rqy+/fMDgGA1UdHwQx
-MC8wLaAroCmGJ2h0dHA6Ly9jcmwucXVvdmFkaXNnbG9iYWwuY29tL3F2cmNhLmNybDAdBgNV
-HQ4EFgQUoCBtbUldukqF03cgsnq4iw7t1Z0wDQYJKoZIhvcNAQELBQADggEBAK4xXrlQLdGS
-ttYCFU5Y3xUpLVqb7SxFMcLfv2i54ksC/dpaQ0v2QOVMLSb5w2IrX8hD+9XGk+2WioVupYvh
-W0iWpq7NIs5C5I0K5E9+0wOQd/kiBtwcR7IIyLnPtkzxDe2GUNJXq8L4XyWFDUI0HxgIcv30
-G0AbCFCzdmffcVCMKC6oBiwCRuY6RcxRIn1R+WsAuEjphc9SqfvgmllW7aU0npSBfOV31Clh
-XcTXfROPHWN1wIHKcMvuJtyjlVX0IEXFQZ2hGIEmv2WiZU/LObutknLmHH6qg2c0agNK0mSU
-sXt6iAophkbGDL0MkOZR692YGJJpRg2bMI6knCBeVyYwggXrMIID06ADAgECAhQRn7xkPrs0
-MUd4/0Px3JWxZJSUfzANBgkqhkiG9w0BAQsFADBjMQswCQYDVQQGEwJDSDEsMCoGA1UEChMj
-UXVvVmFkaXMgVHJ1c3RsaW5rIFN3aXR6ZXJsYW5kIEx0ZC4xJjAkBgNVBAMTHVF1b1ZhZGlz
-IFN3aXNzIEFkdmFuY2VkIENBIEcyMB4XDTE0MTIyMjEwMDIxM1oXDTE3MTIyMjEwMDIwOVow
-XDELMAkGA1UEBhMCQ0gxEDAOBgNVBAgTB1p1ZXJpY2gxEDAOBgNVBAcTB1p1ZXJpY2gxDzAN
-BgNVBAoTBlNXSVRDSDEYMBYGA1UEAwwPVmFsw6lyeSBUc2Nob3BwMIIBIjANBgkqhkiG9w0B
-AQEFAAOCAQ8AMIIBCgKCAQEAvD9VQFhasJg69t/6wX5sa5jYoo+Dce1nJ1mMF5DBSINc6PTh
-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
-QmSlFyCj0fBmfA9VMPnFT2VxygAAAAAAAA==
---------------ms030501080008010400090007--
+   You can force all of this rebalancing to happen at once with::
 
---===============0471855382==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+     ceph osd crush reweight-all
 
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+   Otherwise, it will happen at some unknown point in the future when
+   CRUSH weights are next adjusted.
 
---===============0471855382==--
+Notable Changes
+---------------
+
+* ceph-fuse: flock, fcntl lock support (Yan, Zheng, Greg Farnum)
+* crush: fix straw bucket weight calculation, add straw_calc_version 
+  tunable (#10095 Sage Weil)
+* crush: fix tree bucket (Rongzu Zhu)
+* crush: fix underflow of tree weights (Loic Dachary, Sage Weil)
+* crushtool: add --reweight (Sage Weil)
+* librbd: complete pending operations before losing image (#10299 Jason 
+  Dillaman)
+* librbd: fix read caching performance regression (#9854 Jason Dillaman)
+* librbd: gracefully handle deleted/renamed pools (#10270 Jason Dillaman)
+* mon: fix dump of chooseleaf_vary_r tunable (Sage Weil)
+* osd: fix PG ref leak in snaptrimmer on peering (#10421 Kefu Chai)
+* osd: handle no-op write with snapshot (#10262 Sage Weil)
+* radosgw-admin: create subuser when creating user (#10103 Yehuda Sadeh)
+* rgw: change multipart uplaod id magic (#10271 Georgio Dimitrakakis, 
+  Yehuda Sadeh)
+* rgw: don't overwrite bucket/object owner when setting ACLs (#10978 
+  Yehuda Sadeh)
+* rgw: enable IPv6 for embedded civetweb (#10965 Yehuda Sadeh)
+* rgw: fix partial swift GET (#10553 Yehuda Sadeh)
+* rgw: fix quota disable (#9907 Dong Lei)
+* rgw: index swift keys appropriately (#10471 Hemant Burman, Yehuda Sadeh)
+* rgw: make setattrs update bucket index (#5595 Yehuda Sadeh)
+* rgw: pass civetweb configurables (#10907 Yehuda Sadeh)
+* rgw: remove swift user manifest (DLO) hash calculation (#9973 Yehuda 
+  Sadeh)
+* rgw: return correct len for 0-len objects (#9877 Yehuda Sadeh)
+* rgw: S3 object copy content-type fix (#9478 Yehuda Sadeh)
+* rgw: send ETag on S3 object copy (#9479 Yehuda Sadeh)
+* rgw: send HTTP status reason explicitly in fastcgi (Yehuda Sadeh)
+* rgw: set ulimit -n from sysvinit (el6) init script (#9587 Sage Weil)
+* rgw: update swift subuser permission masks when authenticating (#9918 
+  Yehuda Sadeh)
+* rgw: URL decode query params correctly (#10271 Georgio Dimitrakakis, 
+  Yehuda Sadeh)
+* rgw: use attrs when reading object attrs (#10307 Yehuda Sadeh)
+* rgw: use \r\n for http headers (#9254 Benedikt Fraunhofer, Yehuda Sadeh)
+
+Getting Ceph
+------------
+
+* Git at git://github.com/ceph/ceph.git
+* Tarball at http://ceph.com/download/ceph-0.80.9.tar.gz
+* For packages, see http://ceph.com/docs/master/install/get-packages
+* For ceph-deploy, see http://ceph.com/docs/master/install/install-ceph-deploy
