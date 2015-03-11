@@ -1,306 +1,114 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: RE: wip-auth
-Date: Tue, 10 Mar 2015 13:55:27 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1503101355110.31395@cobra.newdream.net>
-References: <alpine.DEB.2.00.1501221512580.19192@cobra.newdream.net> <3649A15A2562B54294DE14BCE5AC79120AB43257@ORSMSX152.amr.corp.intel.com> <alpine.DEB.2.00.1501260921250.3895@cobra.newdream.net> <3649A15A2562B54294DE14BCE5AC79120AB4E6A6@FMSMSX106.amr.corp.intel.com>
- <alpine.DEB.2.00.1501261554360.18846@cobra.newdream.net> <20150130081013.3f615803@doppio> <alpine.DEB.2.00.1501300831300.25803@cobra.newdream.net> <54D2AA3A.1070800@redhat.com> <3649A15A2562B54294DE14BCE5AC79120B5038B9@FMSMSX119.amr.corp.intel.com>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: Andrew Shewmaker <agshew@gmail.com>
+Subject: (unknown)
+Date: Tue, 10 Mar 2015 19:43:25 -0700
+Message-ID: <1426041810-3942-1-git-send-email-agshew@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:48006 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752737AbbCJUz3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 10 Mar 2015 16:55:29 -0400
-In-Reply-To: <3649A15A2562B54294DE14BCE5AC79120B5038B9@FMSMSX119.amr.corp.intel.com>
+Received: from mail-pd0-f177.google.com ([209.85.192.177]:47066 "EHLO
+	mail-pd0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750971AbbCKCoE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Mar 2015 22:44:04 -0400
+Received: by pdev10 with SMTP id v10so7159353pde.13
+        for <ceph-devel@vger.kernel.org>; Tue, 10 Mar 2015 19:44:03 -0700 (PDT)
+Subject: 
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Blinick, Stephen L" <stephen.l.blinick@intel.com>
-Cc: "mnelson@redhat.com" <mnelson@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: agshew@gmail.com, marioskogias@gmail.com, chendi.xue@intel.com
 
-On Tue, 10 Mar 2015, Blinick, Stephen L wrote:
-> Hi -- was running some baselines on 0.93 and wanted to check, will 
-> wip-auth changes go into Hamer or in a later release?  (Sorry if I 
-> missed the discussion in one of the perf meetings last month)
+The following patches are based on the work of Marios Kogias, first
+posted in August. http://www.spinics.net/lists/ceph-devel/msg19890.html
+This patch is against HEAD as of March 10th,
+commit 5d5b510810e96503b9323b010149f7bd5b45db7c.
+It can also be found at https://github.com/agshew/ceph/tree/wip-blkin-v6
 
-It will go in after hammer.  We can backport as needed.
+Thanks to Josh Durgin again for comments on the V5 patchset.
 
-sage
+I think the blkin patchset is looking pretty good at this point.
 
-> 
-> Thanks,
-> 
-> Stephen
-> 
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
-> Sent: Wednesday, February 4, 2015 4:25 PM
-> To: Sage Weil; Andreas Bluemle
-> Cc: Blinick, Stephen L; ceph-devel@vger.kernel.org
-> Subject: Re: wip-auth
-> 
-> Hi All,
-> 
-> I completed some tests with wip-auth to the memstore on ubuntu earlier today.  Basic gist of it is that the improvements in wip-auth help but don't quite get us to what can be achieved with auth disabled.  RHEL7 (without auth) continues to do very well in latency bound situations. 
-> Next up will be to see if how much this matters when testing against on SSDs.
-> 
-> Here are the results:
-> 
-> sync 4k object writes
-> =====================
-> 
-> Ceph		OS		Auth	Avg Lat (ms)	Avg IOPS
-> ----------------------------------------------------------------
-> master		Ubuntu 14.04	Yes	0.99		1007
-> Wip-auth	Ubuntu 14.04	Yes	0.81		1237
-> master		Ubuntu 14.04	No	0.64		1549
-> Wip-auth	Ubuntu 14.04	No	0.65		1563
-> master		RHEL7		No	0.32		3158
-> 
-> sync 4k object reads
-> ====================
-> 
-> Ceph		OS		Auth	Avg Lat (ms)	Avg IOPS
-> ----------------------------------------------------------------
-> master		Ubuntu 14.04	Yes	0.59		1695
-> Wip-auth	Ubuntu 14.04	Yes	0.41		2409
-> master		Ubuntu 14.04	No	0.29		3425
-> Wip-auth	Ubuntu 14.04	No	0.29		3474
-> master		RHEL7		No	0.17		5853
-> 
-> 256 concurrent 4k object writes
-> ===============================
-> 
-> Ceph		OS		Auth	Avg Lat (ms)	Avg IOPS
-> ----------------------------------------------------------------
-> master		Ubuntu 14.04	Yes	40.39		6339
-> Wip-auth	Ubuntu 14.04	Yes	26.22		9763
-> master		Ubuntu 14.04	No	17.46		14662
-> Wip-auth	Ubuntu 14.04	No	17.34		14759
-> master		RHEL7		No	14.93		17139
-> 
-> 256 concurrent 4k object reads
-> ==============================
-> 
-> Ceph		OS		Auth	Avg Lat (ms)	Avg IOPS
-> ----------------------------------------------------------------
-> master		Ubuntu 14.04	Yes	31.47		8134
-> Wip-auth	Ubuntu 14.04	Yes	19.81		12922
-> master		Ubuntu 14.04	No	12.82		19968
-> Wip-auth	Ubuntu 14.04	No	12.75		20080
-> master		RHEL7		No	12.04		21257
-> 
-> Mark
-> 
-> On 01/30/2015 03:08 PM, Sage Weil wrote:
-> > Hi Andreas,
-> >
-> > It looks like that was a stale sha1, but the newer one was also 
-> > broken.  I've retested and it's working for me now.  See latest 
-> > wip-auth,
-> > sha1 0c21a7875059bef80842756dfb003f47cc2d66a6.
-> >
-> > Thanks!
-> > sage
-> >
-> > On Fri, 30 Jan 2015, Andreas Bluemle wrote:
-> >
-> >> Hi Sage,
-> >>
-> >> I tried to integrate wip-auth into my 0.91 build environment.
-> >>
-> >> I had not been able to start the cluster successfully: ceph-mon 
-> >> crashes with a segmentation fault in CryptoKey::encrypt() (see 
-> >> attachment).
-> >>
-> >> This happens when linking with libnss or libcryptopp (version 5.6.2).
-> >>
-> >> I created the patch to add wip-auth based on github pull request 3523 
-> >> and was able to use this patch directly with 0.91 with only a minor 
-> >> adaptation for common/ceph_context.h:
-> >> the 0.91 version of ceph_context.h did not know anything about the 
-> >> experimental "class CephContextObs".
-> >>
-> >> wip-auth commit ID is 1a0507a2940f6edcc2bf9533cfa6c210b0b41933.
-> >>
-> >> As my build environment is rpm, I had to modify the invocation of the 
-> >> configure script in the spec file instead of the do_autogen.sh 
-> >> script.
-> >>
-> >>
-> >> Best Regards
-> >>
-> >> Andreas Bluemle
-> >>
-> >>
-> >> On Tue, 27 Jan 2015 09:18:45 -0800 (PST) Sage Weil <sweil@redhat.com> 
-> >> wrote:
-> >>
-> >>> I spent some time focusing on just CryptoKey::encrypt().  I 
-> >>> benchmarked 100,000 encrypts of 128 bytes and got, at baseline,
-> >>>
-> >>>   cryptopp: 100000 encoded in 0.655651
-> >>>   libnss  : 100000 encoded in 1.288786
-> >>>
-> >>> Ouch!  With a (fixed) version of my earlier patch that avoids 
-> >>> uselessly copying the input buffer:
-> >>>
-> >>>   100000 encoded in 1.231977
-> >>>
-> >>> With a patch that puts the key structures in CryptoKey instead of 
-> >>> recreating them each time:
-> >>>
-> >>>   100000 encoded in 0.396208  -- ~70% improvement over original
-> >>>
-> >>> This is pushed to wip-auth.  There's also a patch that caches key 
-> >>> structs for crypopp.. it now takes
-> >>>
-> >>>   100000 encoded in 0.440758  -- ~33% improvement over original
-> >>>
-> >>> (Not that almost anybody will ever care; we use libnss by default 
-> >>> for both rpm and deb distros.)
-> >>>
-> >>> So, yay, nss is now a bit faster.  What I'm not completely certain 
-> >>> about is whether the structures I've preserved are truly stateless 
-> >>> (and can be shared across threads, etc.).  They encrypt/decrypt 
-> >>> methods are const so, if the libraries are const-correct, it should 
-> >>> be fine... but perhaps someone familiar with nss and/or crypto++ can 
-> >>> review this?
-> >>>
-> >>> This is pushed to the latest wip-auth branch:
-> >>>
-> >>> 	https://github.com/ceph/ceph/commits/wip-auth
-> >>>
-> >>> Andreas and Stephen, what effect does this have on your numbers?
-> >>>
-> >>> Thanks!
-> >>> sage
-> >>>
-> >>>
-> >>> On Mon, 26 Jan 2015, Blinick, Stephen L wrote:
-> >>>
-> >>>> Good to know, I was wondering why the spec file defaulted to 
-> >>>> lib-nss.. the dpkg-build for debian packages just uses whatever 
-> >>>> configuration you had built, and I believe that will use 
-> >>>> libcryptopp if the dependency is installed on the build machine 
-> >>>> (last I looked).
-> >>>>
-> >>>> I forgot to mention the numbers below were based on v.91.
-> >>>>
-> >>>> Thanks,
-> >>>>
-> >>>> Stephen
-> >>>>
-> >>>> -----Original Message-----
-> >>>> From: ceph-devel-owner@vger.kernel.org 
-> >>>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
-> >>>> Sent: Monday, January 26, 2015 10:24 AM To: Blinick, Stephen L
-> >>>> Cc: andreas.bluemle@itxperts.de; ceph-devel@vger.kernel.org
-> >>>> Subject: RE: wip-auth
-> >>>>
-> >>>> On Mon, 26 Jan 2015, Blinick, Stephen L wrote:
-> >>>>> I noticed that the spec file for building RPM's defaults to 
-> >>>>> building with libnss, instead of libcrypto++.  Since the 
-> >>>>> measurements I'd done so far were from those RPM's I rebuilt with
-> >>>>> libcrypto++.. so FWIW here is the difference between those two on
-> >>>>> my system, memstore backend with a single OSD, and single client.
-> >>>>>
-> >>>>> Dual socket Xeon E5 2620v3, 64GB Memory,  RHEL7
-> >>>>> Kernel: 3.10.0-123.13.2.el7
-> >>>>>
-> >>>>> 100% 4K Writes, 1xOSD w/ Rados Bench
-> >>>>> 	libnss		            |
-> >>>>> Cryptopp # QD	IOPS	Latency(ms)   |
-> >>>>> IOPS	Latency(ms)	IOPS Improvement % 16
-> >>>>> 14432.57	1.11    |	18896.60	0.85
-> >>>>> 30.93% 100% 4K Reads, 1xOSD w/ Rados Bench libnss | Cryptopp # QD 
-> >>>>> IOPS Latency(ms)  | IOPS Latency(ms) IOPS Improvement % 16 
-> >>>>> 19532.53 0.82 | 25708.70 0.62 31.62%
-> >>>>
-> >>>> Yikes, 30%!  I think this definitely worth some effort.  We 
-> >>>> switched to libnss because it has the weird government 
-> >>>> certfiications that everyone wants and is more prevalent.  crypto++ 
-> >>>> is also not packaged for Red Hat distros at all (presumably for 
-> >>>> that reason).
-> >>>>
-> >>>> I suspect that most of the overhead is in the encryption context 
-> >>>> setup and can be avoided with a bit of effort..
-> >>>>
-> >>>> sage
-> >>>>
-> >>>>
-> >>>>>
-> >>>>>
-> >>>>> Thanks,
-> >>>>>
-> >>>>> Stephen
-> >>>>>
-> >>>>> -----Original Message-----
-> >>>>> From: ceph-devel-owner@vger.kernel.org 
-> >>>>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
-> >>>>> Sent: Thursday, January 22, 2015 4:56 PM
-> >>>>> To: andreas.bluemle@itxperts.de
-> >>>>> Cc: ceph-devel@vger.kernel.org
-> >>>>> Subject: wip-auth
-> >>>>>
-> >>>>> Hi Andreas,
-> >>>>>
-> >>>>> I took a look at the wip-auth I mentioned in the security call 
-> >>>>> last week... and the patch didn't work at all.  Sorry if you 
-> >>>>> wasted any time trying it.
-> >>>>>
-> >>>>> Anyway, I fixed it up so that it actually worked and made one 
-> >>>>> other optimization.  It would be great to hear what latencies you 
-> >>>>> measure with the changes in place.
-> >>>>>
-> >>>>> Also, it might be worth trying --with-cryptopp (or --with-nss if 
-> >>>>> you built cryptopp by default) to see if there is a difference.
-> >>>>> There is a ton of boilerplate setting up encryption contexts and 
-> >>>>> key structures and so on that I suspect could be cached (perhaps 
-> >>>>> stashed in the CryptoKey struct?) with a bit of effort.  See
-> >>>>>
-> >>>>> 	
-> >>>>> https://github.com/ceph/ceph/blob/master/src/auth/Crypto.cc#L99-L2
-> >>>>> 13
-> >>>>>
-> >>>>> sage
-> >>>>> --
-> >>>>> To unsubscribe from this list: send the line "unsubscribe 
-> >>>>> ceph-devel" in the body of a message to majordomo@vger.kernel.org 
-> >>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>>>>
-> >>>>>
-> >>>> --
-> >>>> To unsubscribe from this list: send the line "unsubscribe 
-> >>>> ceph-devel" in the body of a message to majordomo@vger.kernel.org 
-> >>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>>> -- To unsubscribe from this list: send the line "unsubscribe 
-> >>>> ceph-devel" in the body of a message to majordomo@vger.kernel.org 
-> >>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>>>
-> >>>>
-> >>>
-> >>>
-> >>
-> >>
-> >>
-> >> --
-> >> Andreas Bluemle                     mailto:Andreas.Bluemle@itxperts.de
-> >> ITXperts GmbH                       http://www.itxperts.de
-> >> Balanstrasse 73, Geb. 08            Phone: (+49) 89 89044917
-> >> D-81541 Muenchen (Germany)          Fax:   (+49) 89 89044910
-> >>
-> >> Company details: http://www.itxperts.de/imprint.htm
-> >>
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> > in the body of a message to majordomo@vger.kernel.org More majordomo 
-> > info at  http://vger.kernel.org/majordomo-info.html
-> >
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+
+Outstanding issues:
+
+1) librados will need more general blkin tracing
+currently it only has aio_read_traced() and aio_write_traced() calls
+
+2) some work will need to be done filtering blkin events/keyvalues
+
+
+To Do:
+
+ 1. push a wip-blkin branch to github.com/ceph and take advantage of gitbuilder test/qa
+ 2. submit a pull request
+ 3. add Andreas' tracepoints https://github.com/ceph/ceph/pull/2877 using Blkin
+    and investigate how easy it is to select the level of tracing detail
+
+
+Changes since V5:
+
+  * put MOSDOp encode(features) statement back that was accidentally left out in V5
+  * moved OSD daemonize call back to original spot
+  * initialized blkin in ceph-mds (and moved all initializations to first patch)
+  * updated aio_read_traced() and aio_write_traced() to match non-traced versions
+  * improved blkin wrapper readability by removing unnecessary stringification
+
+Changes since V4:
+
+  * removed messenger_end trace event
+    In Pipe::reader(), when message is enqueued, it will be destroyed.
+    Naive pointer checks don't work here. You can't depend on
+    pointers being set to null on destruction. It may be possible to wrap
+    trace event with m->get() and m->put() to keep it around, or put this
+    trace event in dispatch paths, but just removing trace event for now
+    in order to move forward.
+  * removed mutex in aio_*_traced() methods
+    A mutex was carried forward from Marios' original patch while rebasing
+    when it should have been removed.
+  * removed Message::trace_end_after_span
+    Message::trace_end_after_span did not ever appear to be true, so
+    it has been removed
+  * added asserts for master trace and endpoint checks
+    Tried to use asserts in more places, but they prevented execution.
+    Tried to use douts and ldouts instead, but they didn't work.
+  * added parens around macro pointer args
+    parens make it safer to use pointers passed as arguments in a macro
+
+Changes since V2:
+
+  * WITH_BLKIN added to makefile vars when necessary
+  * added Blkin build instructions
+  * added Zipkin build instructions
+  * Blkin wrapper macros do not stringify args any longer.
+    The macro wrappers will be more flexible/robust if they don't
+    turn arguments into strings.
+  * added missing blkin_trace_info struct prototype to librados.h
+  * TrackedOp trace creation methods are virtual, implemented in OpRequest
+  * avoid faults due to non-existent traces
+    Check if osd_trace exists when creating a pg_trace, etc.
+    Return true only if trace creation was successful.
+    Use dout() if trace_osd, trace_pg, etc. fail, in order to ease debugging.
+  * create trace_osd in ms_fast_dispatch
+
+Changes since V1:
+  * split build changes into separate patch
+  * conditional build support for blkin (default off)
+  * blkin is not a Ceph repo submodule
+    build and install packages from https://github.com/agshew/blkin.git
+    Note: rpms don't support babeltrace plugins for use with Zipkin
+  * removal of debugging in Message::init_trace_info()
+
+With this patchset Ceph can use Blkin, a library created by
+Marios Kogias and others, which enables tracking a specific request
+from the time it enters the system at higher levels till it is finally
+served by RADOS.
+
+In general, Blkin implements the tracing semantics described in the Dapper
+paper http://static.googleusercontent.com/media/research.google.com/el/pubs/archive/36356.pdf
+in order to trace the causal relationships between the different
+processing phases that an IO request may trigger. The goal is an end-to-end
+visualisation of the request's route in the system, accompanied by information
+concerning latencies in each processing phase. Thanks to LTTng this can happen
+with a minimal overhead and in realtime. In order to visualize the results Blkin
+was integrated with Twitter's Zipkin http://twitter.github.io/zipkin/
+(which is a tracing system entirely based on Dapper).
+
+A short document describing how to test Blkin tracing in Ceph with Zipkin
+is in doc/dev/trace.rst
