@@ -1,115 +1,97 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: FileStore performance: coalescing operations
-Date: Wed, 11 Mar 2015 05:34:47 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1503110534290.31395@cobra.newdream.net>
-References: <20150226152807.5b71a93c@doppio> <alpine.DEB.2.00.1503031641550.25972@cobra.newdream.net> <alpine.DEB.2.00.1503041607590.25972@cobra.newdream.net> <CACJqLyZg--fAhanqwrqvbwUDDxgDPci1ughHU_uvWv1gcc75qQ@mail.gmail.com>
- <CALZt5jxxXmDUDTc-=Nj_62GydYFbj-MHTbcZSad2K_unSNE6BA@mail.gmail.com>
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: [PATCH] ceph: match wait_for_completion_timeout return type
+Date: Wed, 11 Mar 2015 20:42:23 +0800
+Message-ID: <CAAM7YAkf7K2xeD+85o2ouC0UBqwOvyAGFUFo7e-_mcBs8pFn1A@mail.gmail.com>
+References: <1426000695-348-1-git-send-email-hofrat@osadl.org>
+	<CAAM7YAkBFn06EziJcwf-Fg4K7PNK1KdVdE5p_4r4ToBfvtwBug@mail.gmail.com>
+	<20150311110410.GA21968@opentech.at>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:47079 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751415AbbCKMes (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Mar 2015 08:34:48 -0400
-In-Reply-To: <CALZt5jxxXmDUDTc-=Nj_62GydYFbj-MHTbcZSad2K_unSNE6BA@mail.gmail.com>
+Received: from mail-la0-f50.google.com ([209.85.215.50]:38189 "EHLO
+	mail-la0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753309AbbCKMm0 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Mar 2015 08:42:26 -0400
+In-Reply-To: <20150311110410.GA21968@opentech.at>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ning Yao <zay11022@gmail.com>
-Cc: Haomai Wang <haomaiwang@gmail.com>, Andreas Bluemle <andreas.bluemle@itxperts.de>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Nicholas Mc Guire <der.herr@hofr.at>
+Cc: Nicholas Mc Guire <hofrat@osadl.org>, Yan Zheng <zyan@redhat.com>, Sage Weil <sage@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, linux-kernel@vger.kernel.org
 
-On Wed, 11 Mar 2015, Ning Yao wrote:
-> Can we also consider to coalesce two OP_SETATTR transaction to a
-> single OP_SETATTRS transaction?
+On Wed, Mar 11, 2015 at 7:04 PM, Nicholas Mc Guire <der.herr@hofr.at> wrote:
+> On Wed, 11 Mar 2015, Yan, Zheng wrote:
+>
+>> On Tue, Mar 10, 2015 at 11:18 PM, Nicholas Mc Guire <hofrat@osadl.org> wrote:
+>> > return type of wait_for_completion_timeout is unsigned long not int. An
+>> > appropriately named unsigned long is added and the assignment fixed up.
+>> >
+>> > Signed-off-by: Nicholas Mc Guire <hofrat@osadl.org>
+>> > ---
+>> >
+>> > This was only compile tested for x86_64_defconfig + CONFIG_CEPH_FS=m
+>> >
+>> > Patch is against 4.0-rc2 linux-next (localversion-next is -next-20150306)
+>> >
+>> >  fs/ceph/dir.c |    7 ++++---
+>> >  1 file changed, 4 insertions(+), 3 deletions(-)
+>> >
+>> > diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+>> > index 83e9976..4bee6b7 100644
+>> > --- a/fs/ceph/dir.c
+>> > +++ b/fs/ceph/dir.c
+>> > @@ -1218,6 +1218,7 @@ static int ceph_dir_fsync(struct file *file, loff_t start, loff_t end,
+>> >         struct ceph_mds_request *req;
+>> >         u64 last_tid;
+>> >         int ret = 0;
+>> > +       unsigned long time_left;
+>> >
+>> >         dout("dir_fsync %p\n", inode);
+>> >         ret = filemap_write_and_wait_range(inode->i_mapping, start, end);
+>> > @@ -1240,11 +1241,11 @@ static int ceph_dir_fsync(struct file *file, loff_t start, loff_t end,
+>> >                 dout("dir_fsync %p wait on tid %llu (until %llu)\n",
+>> >                      inode, req->r_tid, last_tid);
+>> >                 if (req->r_timeout) {
+>> > -                       ret = wait_for_completion_timeout(
+>> > +                       time_left = wait_for_completion_timeout(
+>> >                                 &req->r_safe_completion, req->r_timeout);
+>> > -                       if (ret > 0)
+>> > +                       if (time_left > 0)
+>> >                                 ret = 0;
+>> > -                       else if (ret == 0)
+>> > +                       else if (!time_left)
+>> >                                 ret = -EIO;  /* timed out */
+>> >                 } else {
+>> >                         wait_for_completion(&req->r_safe_completion);
+>>
+>> There are lots of similar codes in kernel. I don't think this code
+>> causes problem in reality
+>>
+> true - there are 38 (of the initial 81 files) left for which no patch has been
+> submitted yet - its cleanup in progress.
+>
+> type correctness I do believe is an issue and code readability as well
+> so both fixing the type and that name is relevant.
+>
+> As Wolfram Sang <wsa@the-dreams.de> put it:
+> <snip>
+>  'ret' being an int is kind of an idiom, so I'd rather see the variable
+>  renamed, too, like the other patches do.
+> <snip>
+> [http://lkml.iu.edu/hypermail/linux/kernel/1502.1/00084.html]
+>
+> regarding causing problems - it is hard to say - type missmatch
+> may go without problems for a long time and then pop up in strange
+> corner cases. But you are right that it is not fixing any currently
+> inown incorrect behavior.
+>
+> The motivation for cleaning this up is also to make static code checkers
+> happy which eases scanning for incorrect API usage and general bug-hunting,
 
-Yeah, definitely!
+Ok, added to our testing branch
 
-sage
+Thanks
+Yan, Zheng
 
-
-> Regards
-> Ning Yao
-> 
-> 
-> 2015-03-05 15:04 GMT+08:00 Haomai Wang <haomaiwang@gmail.com>:
-> > I think the performance improvement can be refer to
-> > https://github.com/ceph/ceph/pull/2972 which I did a simple benchmark
-> > comparison.
-> >
-> > This coalescing should get a lighter improvement but I think obviously
-> > it should be better.
-> >
-> > On Thu, Mar 5, 2015 at 8:10 AM, Sage Weil <sage@newdream.net> wrote:
-> >> On Tue, 3 Mar 2015, Sage Weil wrote:
-> >>> I think we should try to avoid the dups in the first place in the upper
-> >>> layers before resorting to deduping in the FileStore.
-> >>
-> >> I took a stab at this:
-> >>
-> >>         https://github.com/ceph/ceph/pull/3878
-> >>
-> >> Here's what the txns look like now:
-> >>
-> >> {
-> >>     "ops": [
-> >>         {
-> >>             "op_num": 0,
-> >>             "op_name": "omap_setkeys",
-> >>             "collection": "0.2_head",
-> >>             "oid": "2\/\/head\/\/0",
-> >>             "attr_lens": {
-> >>                 "0000000005.00000000000000000002": 178,
-> >>                 "_epoch": 4,
-> >>                 "_info": 729,
-> >>                 "can_rollback_to": 12,
-> >>                 "rollback_info_trimmed_to": 12
-> >>             }
-> >>         },
-> >>         {
-> >>             "op_num": 1,
-> >>             "op_name": "write",
-> >>             "collection": "0.2_head",
-> >>             "oid": "8b08fa52\/benchmark_data_maetl_15609_object5\/head\/\/0",
-> >>             "length": 123,
-> >>             "offset": 0,
-> >>             "bufferlist length": 123
-> >>         },
-> >>         {
-> >>             "op_num": 2,
-> >>             "op_name": "setattr",
-> >>             "collection": "0.2_head",
-> >>             "oid": "8b08fa52\/benchmark_data_maetl_15609_object5\/head\/\/0",
-> >>             "name": "_",
-> >>             "length": 269
-> >>         },
-> >>         {
-> >>             "op_num": 3,
-> >>             "op_name": "setattr",
-> >>             "collection": "0.2_head",
-> >>             "oid": "8b08fa52\/benchmark_data_maetl_15609_object5\/head\/\/0",
-> >>             "name": "snapset",
-> >>             "length": 31
-> >>         }
-> >>     ]
-> >> }
-> >>
-> >> Care to give that a spin and see if it give syou a similar (or better)
-> >> improvement?
-> >>
-> >> sage
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >
-> >
-> >
-> > --
-> > Best Regards,
-> >
-> > Wheat
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+>
+> thx!
+> hofrat
