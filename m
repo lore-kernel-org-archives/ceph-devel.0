@@ -1,97 +1,90 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: [PATCH] ceph: match wait_for_completion_timeout return type
-Date: Wed, 11 Mar 2015 20:42:23 +0800
-Message-ID: <CAAM7YAkf7K2xeD+85o2ouC0UBqwOvyAGFUFo7e-_mcBs8pFn1A@mail.gmail.com>
-References: <1426000695-348-1-git-send-email-hofrat@osadl.org>
-	<CAAM7YAkBFn06EziJcwf-Fg4K7PNK1KdVdE5p_4r4ToBfvtwBug@mail.gmail.com>
-	<20150311110410.GA21968@opentech.at>
+From: "Deneau, Tom" <tom.deneau@amd.com>
+Subject: RE: packages on download.ceph.com
+Date: Wed, 11 Mar 2015 18:38:54 +0000
+Message-ID: <BC97738F8E7C8742BABED7F06FB9DF9155567917@SATLEXDAG01.amd.com>
+References: <BC97738F8E7C8742BABED7F06FB9DF91555668ED@SATLEXDAG01.amd.com>
+ <54FDF605.9000302@redhat.com> <54FE066C.2070902@bisect.de>
+ <alpine.DEB.2.00.1503091358380.25972@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f50.google.com ([209.85.215.50]:38189 "EHLO
-	mail-la0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753309AbbCKMm0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Mar 2015 08:42:26 -0400
-In-Reply-To: <20150311110410.GA21968@opentech.at>
+Received: from mail-bl2on0145.outbound.protection.outlook.com ([65.55.169.145]:64320
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750957AbbCKTKT convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Mar 2015 15:10:19 -0400
+In-Reply-To: <alpine.DEB.2.00.1503091358380.25972@cobra.newdream.net>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nicholas Mc Guire <der.herr@hofr.at>
-Cc: Nicholas Mc Guire <hofrat@osadl.org>, Yan Zheng <zyan@redhat.com>, Sage Weil <sage@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, linux-kernel@vger.kernel.org
+To: Sage Weil <sweil@redhat.com>, Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+Cc: Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, Mar 11, 2015 at 7:04 PM, Nicholas Mc Guire <der.herr@hofr.at> wrote:
-> On Wed, 11 Mar 2015, Yan, Zheng wrote:
->
->> On Tue, Mar 10, 2015 at 11:18 PM, Nicholas Mc Guire <hofrat@osadl.org> wrote:
->> > return type of wait_for_completion_timeout is unsigned long not int. An
->> > appropriately named unsigned long is added and the assignment fixed up.
->> >
->> > Signed-off-by: Nicholas Mc Guire <hofrat@osadl.org>
->> > ---
->> >
->> > This was only compile tested for x86_64_defconfig + CONFIG_CEPH_FS=m
->> >
->> > Patch is against 4.0-rc2 linux-next (localversion-next is -next-20150306)
->> >
->> >  fs/ceph/dir.c |    7 ++++---
->> >  1 file changed, 4 insertions(+), 3 deletions(-)
->> >
->> > diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
->> > index 83e9976..4bee6b7 100644
->> > --- a/fs/ceph/dir.c
->> > +++ b/fs/ceph/dir.c
->> > @@ -1218,6 +1218,7 @@ static int ceph_dir_fsync(struct file *file, loff_t start, loff_t end,
->> >         struct ceph_mds_request *req;
->> >         u64 last_tid;
->> >         int ret = 0;
->> > +       unsigned long time_left;
->> >
->> >         dout("dir_fsync %p\n", inode);
->> >         ret = filemap_write_and_wait_range(inode->i_mapping, start, end);
->> > @@ -1240,11 +1241,11 @@ static int ceph_dir_fsync(struct file *file, loff_t start, loff_t end,
->> >                 dout("dir_fsync %p wait on tid %llu (until %llu)\n",
->> >                      inode, req->r_tid, last_tid);
->> >                 if (req->r_timeout) {
->> > -                       ret = wait_for_completion_timeout(
->> > +                       time_left = wait_for_completion_timeout(
->> >                                 &req->r_safe_completion, req->r_timeout);
->> > -                       if (ret > 0)
->> > +                       if (time_left > 0)
->> >                                 ret = 0;
->> > -                       else if (ret == 0)
->> > +                       else if (!time_left)
->> >                                 ret = -EIO;  /* timed out */
->> >                 } else {
->> >                         wait_for_completion(&req->r_safe_completion);
->>
->> There are lots of similar codes in kernel. I don't think this code
->> causes problem in reality
->>
-> true - there are 38 (of the initial 81 files) left for which no patch has been
-> submitted yet - its cleanup in progress.
->
-> type correctness I do believe is an issue and code readability as well
-> so both fixing the type and that name is relevant.
->
-> As Wolfram Sang <wsa@the-dreams.de> put it:
-> <snip>
->  'ret' being an int is kind of an idiom, so I'd rather see the variable
->  renamed, too, like the other patches do.
-> <snip>
-> [http://lkml.iu.edu/hypermail/linux/kernel/1502.1/00084.html]
->
-> regarding causing problems - it is hard to say - type missmatch
-> may go without problems for a long time and then pop up in strange
-> corner cases. But you are right that it is not fixing any currently
-> inown incorrect behavior.
->
-> The motivation for cleaning this up is also to make static code checkers
-> happy which eases scanning for incorrect API usage and general bug-hunting,
 
-Ok, added to our testing branch
 
-Thanks
-Yan, Zheng
+> -----Original Message-----
+> From: Sage Weil [mailto:sweil@redhat.com]
+> Sent: Monday, March 09, 2015 4:05 PM
+> To: Danny Al-Gaaf
+> Cc: Mark Nelson; Deneau, Tom; ceph-devel
+> Subject: Re: packages on download.ceph.com
+> 
+> On Mon, 9 Mar 2015, Danny Al-Gaaf wrote:
+> > Am 09.03.2015 um 20:35 schrieb Mark Nelson:
+> > > On 03/09/2015 02:06 PM, Deneau, Tom wrote:
+> > >> I'm trying to gather information on what it would take to get
+> > >> packages for an architecture other than x86_64 up on
+> > >> http://download.ceph.com
+> 
+> I'm guessing you're interested in 64-bit arm (aarch64?)?
+> 
+> I would love to have packages built for all architectures people are
+> interested in.  In practice, there are two limitations: build hardware and
+> the maintenance overhead.  For example, we have all this armv7l gear but
+> stopped doing builds because it was time consuming to keep it running.
+> The moment someone signs up to do that management we can set up vpn access to
+> the lab and add it back it.  The other problem we hit was that the armv7l
+> builds took so much longer than the x86_64 ones and the current release
+> process is easier when it's all done it one go.  I suspect what we'd end up
+> with is a situation where the packages for some architectures get posted
+> before others (which probably isn't a big deal).  Alfredo, you should chime
+> in if there are other reasons why this would make things harder.
+> 
+> > It would be much easier to use OpenBuildService [1] for package build.
+> > It supports many distributions and architectures.
+> >
+> > If you don't care that it's openSUSE infrastructure you/we could use
+> > build.opensuse.org to build packages e.g. for RHEL/Centos/Fedora,
+> > openSUSE/SLES, Debian, Ubuntu and others (I did so in the past.)
+> >
+> > At least openSUSE/SLES packages could be also build on armv7l and e.g.
+> > ppc/s390x ... for other distros we have to check.
+> >
+> > The question is: should we build packages (and which) or is this more
+> > a task for the distributions?
+> 
+> I tried OBS way back when but found it difficult to use and not particularly
+> flexible.  My main concern is that we will run into problems and not have the
+> ability to address them (for example, missing or broken distro dependencies
+> or something like that).
+> 
+> More generally, I think it has been hugely valuable to have up to date
+> packages on ceph.com as the distros tend to relatively slow to release
+> things.  Users also typically choose between several different major ceph
+> releases.  I'm pretty hesitant to abandon this...
+> 
+> sage
 
->
-> thx!
-> hofrat
+Sage --
+
+Yes, my original question was for aarch64.
+
+On that topic, since Ceph is part of Red Hat,
+can the Ceph developers lobby for getting some version of Ceph
+included in the first RHEL aarch64 release?  My understanding is that currently
+Ceph packages are not planned to be included in the default package lists.
+
+-- Tom
+
+
