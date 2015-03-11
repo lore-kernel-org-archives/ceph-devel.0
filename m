@@ -1,110 +1,54 @@
-From: Ning Yao <zay11022@gmail.com>
-Subject: Re: FileStore performance: coalescing operations
-Date: Wed, 11 Mar 2015 11:44:30 +0800
-Message-ID: <CALZt5jxxXmDUDTc-=Nj_62GydYFbj-MHTbcZSad2K_unSNE6BA@mail.gmail.com>
-References: <20150226152807.5b71a93c@doppio>
-	<alpine.DEB.2.00.1503031641550.25972@cobra.newdream.net>
-	<alpine.DEB.2.00.1503041607590.25972@cobra.newdream.net>
-	<CACJqLyZg--fAhanqwrqvbwUDDxgDPci1ughHU_uvWv1gcc75qQ@mail.gmail.com>
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: [PATCH] ceph: use msecs_to_jiffies for time conversion
+Date: Wed, 11 Mar 2015 18:13:48 +0800
+Message-ID: <CAAM7YAkYHE3FN3ZkCspc8DgMccVqNtP8TGQOxF_0sC+GE7k2Ug@mail.gmail.com>
+References: <1423223537-23277-1-git-send-email-hofrat@osadl.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f174.google.com ([209.85.214.174]:43379 "EHLO
-	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751076AbbCKDoa (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Mar 2015 23:44:30 -0400
-Received: by obcvb8 with SMTP id vb8so6242859obc.10
-        for <ceph-devel@vger.kernel.org>; Tue, 10 Mar 2015 20:44:30 -0700 (PDT)
-In-Reply-To: <CACJqLyZg--fAhanqwrqvbwUDDxgDPci1ughHU_uvWv1gcc75qQ@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomaiwang@gmail.com>
-Cc: Sage Weil <sage@newdream.net>, Andreas Bluemle <andreas.bluemle@itxperts.de>, Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1423223537-23277-1-git-send-email-hofrat@osadl.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Nicholas Mc Guire <hofrat@osadl.org>
+Cc: Sage Weil <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>, linux-kernel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-Can we also consider to coalesce two OP_SETATTR transaction to a
-single OP_SETATTRS transaction?
-Regards
-Ning Yao
+On Fri, Feb 6, 2015 at 7:52 PM, Nicholas Mc Guire <hofrat@osadl.org> wrote:
+> This is only an API consolidation and should make things more readable
+> it replaces var * HZ / 1000 by msecs_to_jiffies(var).
+>
+> Signed-off-by: Nicholas Mc Guire <hofrat@osadl.org>
+> ---
+>
+> Patch was only compile tested with x86_64_defconfig + CONFIG_CEPH_FS=m
+>
+> Patch is against 3.19.0-rc7 (localversion-next is -next-20150204)
+>
+>  fs/ceph/mds_client.c |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+> index 5f62fb7..ced7503 100644
+> --- a/fs/ceph/mds_client.c
+> +++ b/fs/ceph/mds_client.c
+> @@ -3070,7 +3070,7 @@ static void handle_lease(struct ceph_mds_client *mdsc,
+>                     di->lease_renew_from &&
+>                     di->lease_renew_after == 0) {
+>                         unsigned long duration =
+> -                               le32_to_cpu(h->duration_ms) * HZ / 1000;
+> +                               msecs_to_jiffies(le32_to_cpu(h->duration_ms));
+>
+>                         di->lease_seq = seq;
+>                         dentry->d_time = di->lease_renew_from + duration;
+> --
+> 1.7.10.4
 
+added to our testing branch
 
-2015-03-05 15:04 GMT+08:00 Haomai Wang <haomaiwang@gmail.com>:
-> I think the performance improvement can be refer to
-> https://github.com/ceph/ceph/pull/2972 which I did a simple benchmark
-> comparison.
->
-> This coalescing should get a lighter improvement but I think obviously
-> it should be better.
->
-> On Thu, Mar 5, 2015 at 8:10 AM, Sage Weil <sage@newdream.net> wrote:
->> On Tue, 3 Mar 2015, Sage Weil wrote:
->>> I think we should try to avoid the dups in the first place in the upper
->>> layers before resorting to deduping in the FileStore.
->>
->> I took a stab at this:
->>
->>         https://github.com/ceph/ceph/pull/3878
->>
->> Here's what the txns look like now:
->>
->> {
->>     "ops": [
->>         {
->>             "op_num": 0,
->>             "op_name": "omap_setkeys",
->>             "collection": "0.2_head",
->>             "oid": "2\/\/head\/\/0",
->>             "attr_lens": {
->>                 "0000000005.00000000000000000002": 178,
->>                 "_epoch": 4,
->>                 "_info": 729,
->>                 "can_rollback_to": 12,
->>                 "rollback_info_trimmed_to": 12
->>             }
->>         },
->>         {
->>             "op_num": 1,
->>             "op_name": "write",
->>             "collection": "0.2_head",
->>             "oid": "8b08fa52\/benchmark_data_maetl_15609_object5\/head\/\/0",
->>             "length": 123,
->>             "offset": 0,
->>             "bufferlist length": 123
->>         },
->>         {
->>             "op_num": 2,
->>             "op_name": "setattr",
->>             "collection": "0.2_head",
->>             "oid": "8b08fa52\/benchmark_data_maetl_15609_object5\/head\/\/0",
->>             "name": "_",
->>             "length": 269
->>         },
->>         {
->>             "op_num": 3,
->>             "op_name": "setattr",
->>             "collection": "0.2_head",
->>             "oid": "8b08fa52\/benchmark_data_maetl_15609_object5\/head\/\/0",
->>             "name": "snapset",
->>             "length": 31
->>         }
->>     ]
->> }
->>
->> Care to give that a spin and see if it give syou a similar (or better)
->> improvement?
->>
->> sage
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
+Thanks
+Yan, Zheng
 >
 > --
-> Best Regards,
->
-> Wheat
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Please read the FAQ at  http://www.tux.org/lkml/
