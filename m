@@ -1,51 +1,68 @@
 From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: [PATCH] ceph: use msecs_to_jiffies for time conversion
-Date: Wed, 11 Mar 2015 18:13:48 +0800
-Message-ID: <CAAM7YAkYHE3FN3ZkCspc8DgMccVqNtP8TGQOxF_0sC+GE7k2Ug@mail.gmail.com>
-References: <1423223537-23277-1-git-send-email-hofrat@osadl.org>
+Subject: Re: [PATCH] ceph: match wait_for_completion_timeout return type
+Date: Wed, 11 Mar 2015 18:17:18 +0800
+Message-ID: <CAAM7YAkBFn06EziJcwf-Fg4K7PNK1KdVdE5p_4r4ToBfvtwBug@mail.gmail.com>
+References: <1426000695-348-1-git-send-email-hofrat@osadl.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1423223537-23277-1-git-send-email-hofrat@osadl.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-lb0-f169.google.com ([209.85.217.169]:35318 "EHLO
+	mail-lb0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752379AbbCKKRU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Mar 2015 06:17:20 -0400
+In-Reply-To: <1426000695-348-1-git-send-email-hofrat@osadl.org>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
 To: Nicholas Mc Guire <hofrat@osadl.org>
-Cc: Sage Weil <sage@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Cc: Yan Zheng <zyan@redhat.com>, Sage Weil <sage@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, linux-kernel@vger.kernel.org
 
-On Fri, Feb 6, 2015 at 7:52 PM, Nicholas Mc Guire <hofrat@osadl.org> wrote:
-> This is only an API consolidation and should make things more readable
-> it replaces var * HZ / 1000 by msecs_to_jiffies(var).
+On Tue, Mar 10, 2015 at 11:18 PM, Nicholas Mc Guire <hofrat@osadl.org> wrote:
+> return type of wait_for_completion_timeout is unsigned long not int. An
+> appropriately named unsigned long is added and the assignment fixed up.
 >
 > Signed-off-by: Nicholas Mc Guire <hofrat@osadl.org>
 > ---
 >
-> Patch was only compile tested with x86_64_defconfig + CONFIG_CEPH_FS=m
+> This was only compile tested for x86_64_defconfig + CONFIG_CEPH_FS=m
 >
-> Patch is against 3.19.0-rc7 (localversion-next is -next-20150204)
+> Patch is against 4.0-rc2 linux-next (localversion-next is -next-20150306)
 >
->  fs/ceph/mds_client.c |    2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  fs/ceph/dir.c |    7 ++++---
+>  1 file changed, 4 insertions(+), 3 deletions(-)
 >
-> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index 5f62fb7..ced7503 100644
-> --- a/fs/ceph/mds_client.c
-> +++ b/fs/ceph/mds_client.c
-> @@ -3070,7 +3070,7 @@ static void handle_lease(struct ceph_mds_client *mdsc,
->                     di->lease_renew_from &&
->                     di->lease_renew_after == 0) {
->                         unsigned long duration =
-> -                               le32_to_cpu(h->duration_ms) * HZ / 1000;
-> +                               msecs_to_jiffies(le32_to_cpu(h->duration_ms));
+> diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+> index 83e9976..4bee6b7 100644
+> --- a/fs/ceph/dir.c
+> +++ b/fs/ceph/dir.c
+> @@ -1218,6 +1218,7 @@ static int ceph_dir_fsync(struct file *file, loff_t start, loff_t end,
+>         struct ceph_mds_request *req;
+>         u64 last_tid;
+>         int ret = 0;
+> +       unsigned long time_left;
 >
->                         di->lease_seq = seq;
->                         dentry->d_time = di->lease_renew_from + duration;
+>         dout("dir_fsync %p\n", inode);
+>         ret = filemap_write_and_wait_range(inode->i_mapping, start, end);
+> @@ -1240,11 +1241,11 @@ static int ceph_dir_fsync(struct file *file, loff_t start, loff_t end,
+>                 dout("dir_fsync %p wait on tid %llu (until %llu)\n",
+>                      inode, req->r_tid, last_tid);
+>                 if (req->r_timeout) {
+> -                       ret = wait_for_completion_timeout(
+> +                       time_left = wait_for_completion_timeout(
+>                                 &req->r_safe_completion, req->r_timeout);
+> -                       if (ret > 0)
+> +                       if (time_left > 0)
+>                                 ret = 0;
+> -                       else if (ret == 0)
+> +                       else if (!time_left)
+>                                 ret = -EIO;  /* timed out */
+>                 } else {
+>                         wait_for_completion(&req->r_safe_completion);
+
+There are lots of similar codes in kernel. I don't think this code
+causes problem in reality
+
 > --
 > 1.7.10.4
-
-added to our testing branch
-
-Thanks
-Yan, Zheng
 >
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
