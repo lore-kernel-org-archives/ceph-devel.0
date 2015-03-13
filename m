@@ -1,33 +1,52 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: RE: packages on download.ceph.com
-Date: Fri, 13 Mar 2015 16:20:18 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1503131617390.25410@cobra.newdream.net>
-References: <BC97738F8E7C8742BABED7F06FB9DF91555668ED@SATLEXDAG01.amd.com> <54FDF605.9000302@redhat.com> <54FE066C.2070902@bisect.de> <alpine.DEB.2.00.1503091358380.25972@cobra.newdream.net> <BC97738F8E7C8742BABED7F06FB9DF9155567917@SATLEXDAG01.amd.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Localized reads (RADOS/RBD)
+Date: Fri, 13 Mar 2015 16:26:36 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1503131623310.30090@cobra.newdream.net>
+References: <531034849-1426286330-cardhu_decombobulator_blackberry.rim.net-1702012346-@b15.c5.bise7.blackberry>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:39294 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752884AbbCMXU2 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 13 Mar 2015 19:20:28 -0400
-In-Reply-To: <BC97738F8E7C8742BABED7F06FB9DF9155567917@SATLEXDAG01.amd.com>
+Received: from cobra.newdream.net ([66.33.216.30]:36662 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752625AbbCMX0g (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Mar 2015 19:26:36 -0400
+In-Reply-To: <531034849-1426286330-cardhu_decombobulator_blackberry.rim.net-1702012346-@b15.c5.bise7.blackberry>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Deneau, Tom" <tom.deneau@amd.com>
-Cc: Danny Al-Gaaf <danny.al-gaaf@bisect.de>, Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Charles 'Boyo <charlesboyo@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi Tom,
+On Fri, 13 Mar 2015, Charles 'Boyo wrote:
+> Hello all.
+> 
+> When, if ever, will Ceph clients have the ability to prefer certain 
+> OSDs/hosts over others?
+> 
+> I am running 3 replica pools across 3 data centers connected by 
+> relatively narrow links. Writes have to travel out anyway but I'd prefer 
+> to keep reads local.
+> 
+> The thinking is that since all writes are synchronous across all 
+> replicas, it should be okay to read from a secondary that is nearer, 
+> faster or lightly loaded instead of reaching out to the primary at all 
+> times.
+> 
+> Can this be done with a CRUSH tweak?
+> Any ideas?
 
-On Wed, 11 Mar 2015, Deneau, Tom wrote:
-> On that topic, since Ceph is part of Red Hat,
-> can the Ceph developers lobby for getting some version of Ceph
-> included in the first RHEL aarch64 release?  My understanding is that currently
-> Ceph packages are not planned to be included in the default package lists.
+All of the logic to do this is in place on the client side, including the 
+ability to choose teh replica closest to the client based on distance 
+within the CRUSH hierarchy (based on nearest shared ancestor).
 
-Including packages in RHEL generally means they are fully supported, and 
-since we don't have any aarch64 hardware in our labs doing Ceph testing 
-yet and the storage team isn't focusing on this right now, that doesn't 
-surprise me.  I'll ping some people internally though and find out what 
-the ARM folks' plans are... I don't know too much about that project!
+What's missing is some additional work on the OSD side to make sure that 
+these reads are safe when they race with writes or (I believe) when the 
+cluster us undergoing some sort of rebalancing.  There are a few tickets 
+in the tracker for these issues.
+
+The first step to track them down would be to extend teh ceph_test_rados 
+tool to issue reads to replicas, and then to issue racing reads and 
+writes.  With the testing tools in place we can build some confidence that 
+our fixes our correctly and that we've addressed all the issues...
 
 sage
+
