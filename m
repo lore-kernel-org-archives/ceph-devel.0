@@ -1,134 +1,104 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: Question regarding our CRUSHMAP
-Date: Thu, 12 Mar 2015 20:11:54 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CA17F4@SACMBXIP01.sdcorp.global.sandisk.com>
+From: Dan van der Ster <dan@vanderster.com>
+Subject: Re: Bounding OSD memory requirements during peering/recovery
+Date: Fri, 13 Mar 2015 12:24:48 +0100
+Message-ID: <CABZ+qqkr1ioQBtfqwAnBoFv+Ew=hE-_rCcZVvRoahuZ6659-VA@mail.gmail.com>
+References: <54D78939.4000708@cam.ac.uk> <CAC6JEv8NYw2qk9O7pcSmrVwd2p=7mfLDrA+1tBmFxf2-_f-tZw@mail.gmail.com>
+ <54D92850.5080409@cam.ac.uk> <alpine.DEB.2.00.1502091746100.3035@cobra.newdream.net>
+ <CABZ+qqnaRfuSbttG4vFQLPoBiptV2m7KFTBxg505369VoiEGMQ@mail.gmail.com> <CAC6JEv-wLAnjRxJBYRrKG9Wqbd1pNKdKs4zSAK_Vojfy+kjVtA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed;
-	boundary="_002_755F6B91B3BE364F9BCA11EA3F9E0C6F28CA17F4SACMBXIP01sdcor_"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0069.outbound.protection.outlook.com ([207.46.100.69]:30426
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752346AbbCLUMB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 12 Mar 2015 16:12:01 -0400
-Content-Language: en-US
+Received: from mail-lb0-f170.google.com ([209.85.217.170]:33340 "EHLO
+	mail-lb0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752978AbbCMLZb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Mar 2015 07:25:31 -0400
+Received: by lbdu14 with SMTP id u14so22136111lbd.0
+        for <ceph-devel@vger.kernel.org>; Fri, 13 Mar 2015 04:25:30 -0700 (PDT)
+Received: from mail-la0-f49.google.com (mail-la0-f49.google.com. [209.85.215.49])
+        by mx.google.com with ESMTPSA id kx8sm343802lbc.3.2015.03.13.04.25.29
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Fri, 13 Mar 2015 04:25:29 -0700 (PDT)
+Received: by lams18 with SMTP id s18so21875784lam.9
+        for <ceph-devel@vger.kernel.org>; Fri, 13 Mar 2015 04:25:28 -0700 (PDT)
+In-Reply-To: <CAC6JEv-wLAnjRxJBYRrKG9Wqbd1pNKdKs4zSAK_Vojfy+kjVtA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <greg@gregs42.com>
+Cc: Sage Weil <sage@newdream.net>, David McBride <dwm37@cam.ac.uk>, Ceph-devel <ceph-devel@vger.kernel.org>
 
---_002_755F6B91B3BE364F9BCA11EA3F9E0C6F28CA17F4SACMBXIP01sdcor_
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+On Mon, Mar 9, 2015 at 4:47 PM, Gregory Farnum <greg@gregs42.com> wrote:
+> On Mon, Mar 9, 2015 at 8:42 AM, Dan van der Ster <dan@vanderster.com> wrote:
+>> Hi Sage,
+>>
+>> On Tue, Feb 10, 2015 at 2:51 AM, Sage Weil <sage@newdream.net> wrote:
+>>> On Mon, 9 Feb 2015, David McBride wrote:
+>>>> On 09/02/15 15:31, Gregory Farnum wrote:
+>>>>
+>>>> > So, memory usage of an OSD is usually linear in the number of PGs it
+>>>> > hosts. However, that memory can also grow based on at least one other
+>>>> > thing: the number of OSD Maps required to go through peering. It
+>>>> > *looks* to me like this is what you're running in to, not growth on
+>>>> > the number of state machines. In particular, those past_intervals you
+>>>> > mentioned. ;)
+>>>>
+>>>> Hi Greg,
+>>>>
+>>>> Right, that sounds entirely plausible, and is very helpful.
+>>>>
+>>>> In practice, that means I'll need to be careful to avoid this situation
+>>>> occurring in production ? but given that's unlikely to occur except in the
+>>>> case of non-trivial neglect, I don't think I need be particularly concerned.
+>>>>
+>>>> (Happily, I'm in the situation that my existing cluster is purely for testing
+>>>> purposes; the data is expendable.)
+>>>>
+>>>> That said, for my own peace of mind, it would be valuable to have a procedure
+>>>> that can be used to recover from this state, even if it's unlikely to occur in
+>>>> practice.
+>>>
+>>> The best luck I've had recovering from situations is something like:
+>>>
+>>> - stop all osds
+>>> - osd set nodown
+>>> - osd set nobackfill
+>>> - osd set noup
+>>> - set map cache size smaller to reduce memory footprint.
+>>>
+>>>   osd map cache size = 50
+>>>   osd map max advance = 25
+>>>   osd map share max epochs = 25
+>>>   osd pg epoch persisted max stale = 25
+>
+> It can cause extreme slowness if you get into a failure situation and
+> your OSDs need to calculate past intervals across more maps than will
+> fit in the cache. :(
 
-Hi,
-We have an environment where we want to make fault domain on chassis level.=
- 2 OSD hosts will be connected to each chassis.
-Based on that we have written the attached ruleset. I haven't changed the r=
-oot , Is this fine ?
-Also, if I have say two pools and I want to assign one pool ruleset 0 and o=
-ne with ruleset 1 with this crushmap, is this okay ?
-While adding/removing hosts frequently we are seeing the stuck/incomplete p=
-gs and the log entries like "reducing the min_size from 2 to 1 may help".  =
-I can see the lot of pg_temp entries in the 'ceph health detail' as well.  =
-I have a suspicion that it may be related to buggy crushmap, is it ?
+.. extreme slowness or is it also possible to get into a situation
+where the PGs are stuck incomplete forever?
 
+The reason I ask is because we actually had a network issue this
+morning that left OSDs flapping and a lot of osdmap epoch churn. Now
+our network has stabilized but 10 PGs are incomplete, even though all
+the OSDs are up. One PG looks like this, for example:
 
-Thanks & Regards
-Somnath
+pg 75.45 is stuck inactive for 87351.077529, current state incomplete,
+last acting [6689,1919,2329]
+pg 75.45 is stuck unclean for 87351.096198, current state incomplete,
+last acting [6689,1919,2329]
+pg 75.45 is incomplete, acting [6689,1919,2329]
 
+1919     3.62000                 osd.1919                      up
+1.00000          1.00000
+2329     3.62000                 osd.2329                      up
+1.00000          1.00000
+6689     3.62000                 osd.6689                      up
+1.00000          1.00000
 
+The pg query output here: http://pastebin.com/WyTAU69W
 
-________________________________
+Is that a result of these short map caches or could it be something
+else?  (we're running 0.93-76-gc35f422)
+WWGD (what would Greg do?) to activate these PGs?
 
-PLEASE NOTE: The information contained in this electronic mail message is i=
-ntended only for the use of the designated recipient(s) named above. If the=
- reader of this message is not the intended recipient, you are hereby notif=
-ied that you have received this message in error and that any review, disse=
-mination, distribution, or copying of this message is strictly prohibited. =
-If you have received this communication in error, please notify the sender =
-by telephone or e-mail (as shown above) immediately and destroy any and all=
- copies of this message in your possession (whether hard copies or electron=
-ically stored copies).
-
-
---_002_755F6B91B3BE364F9BCA11EA3F9E0C6F28CA17F4SACMBXIP01sdcor_
-Content-Type: text/plain; name="crush.txt"
-Content-Description: crush.txt
-Content-Disposition: attachment; filename="crush.txt"; size=4025;
-	creation-date="Thu, 12 Mar 2015 20:03:28 GMT";
-	modification-date="Thu, 12 Mar 2015 20:03:28 GMT"
-Content-Transfer-Encoding: base64
-
-IyBiZWdpbiBjcnVzaCBtYXAKdHVuYWJsZSBjaG9vc2VfbG9jYWxfdHJpZXMgMAp0dW5hYmxlIGNo
-b29zZV9sb2NhbF9mYWxsYmFja190cmllcyAwCnR1bmFibGUgY2hvb3NlX3RvdGFsX3RyaWVzIDUw
-CnR1bmFibGUgY2hvb3NlbGVhZl9kZXNjZW5kX29uY2UgMQp0dW5hYmxlIGNob29zZWxlYWZfdmFy
-eV9yIDEKCiMgZGV2aWNlcwpkZXZpY2UgMCBvc2QuMApkZXZpY2UgMSBvc2QuMQpkZXZpY2UgMiBv
-c2QuMgpkZXZpY2UgMyBvc2QuMwpkZXZpY2UgNCBvc2QuNApkZXZpY2UgNSBvc2QuNQpkZXZpY2Ug
-NiBvc2QuNgpkZXZpY2UgNyBvc2QuNwpkZXZpY2UgOCBvc2QuOApkZXZpY2UgOSBvc2QuOQpkZXZp
-Y2UgMTAgb3NkLjEwCmRldmljZSAxMSBvc2QuMTEKZGV2aWNlIDEyIG9zZC4xMgpkZXZpY2UgMTMg
-b3NkLjEzCmRldmljZSAxNCBvc2QuMTQKZGV2aWNlIDE1IG9zZC4xNQpkZXZpY2UgMTYgb3NkLjE2
-CmRldmljZSAxNyBvc2QuMTcKZGV2aWNlIDE4IG9zZC4xOApkZXZpY2UgMTkgb3NkLjE5CmRldmlj
-ZSAyMCBvc2QuMjAKZGV2aWNlIDIxIG9zZC4yMQpkZXZpY2UgMjIgb3NkLjIyCmRldmljZSAyMyBv
-c2QuMjMKZGV2aWNlIDI0IG9zZC4yNApkZXZpY2UgMjUgb3NkLjI1CmRldmljZSAyNiBvc2QuMjYK
-ZGV2aWNlIDI3IG9zZC4yNwpkZXZpY2UgMjggb3NkLjI4CmRldmljZSAyOSBvc2QuMjkKZGV2aWNl
-IDMwIG9zZC4zMApkZXZpY2UgMzEgb3NkLjMxCmRldmljZSAzMiBvc2QuMzIKZGV2aWNlIDMzIG9z
-ZC4zMwpkZXZpY2UgMzQgb3NkLjM0CmRldmljZSAzNSBvc2QuMzUKZGV2aWNlIDM2IG9zZC4zNgpk
-ZXZpY2UgMzcgb3NkLjM3CmRldmljZSAzOCBvc2QuMzgKZGV2aWNlIDM5IG9zZC4zOQpkZXZpY2Ug
-NDAgb3NkLjQwCmRldmljZSA0MSBvc2QuNDEKZGV2aWNlIDQyIG9zZC40MgpkZXZpY2UgNDMgb3Nk
-LjQzCmRldmljZSA0NCBvc2QuNDQKZGV2aWNlIDQ1IG9zZC40NQpkZXZpY2UgNDYgb3NkLjQ2CmRl
-dmljZSA0NyBvc2QuNDcKCiMgdHlwZXMKdHlwZSAwIG9zZAp0eXBlIDEgaG9zdAp0eXBlIDIgY2hh
-c3Npcwp0eXBlIDMgcmFjawp0eXBlIDQgcm93CnR5cGUgNSBwZHUKdHlwZSA2IHBvZAp0eXBlIDcg
-cm9vbQp0eXBlIDggZGF0YWNlbnRlcgp0eXBlIDkgcmVnaW9uCnR5cGUgMTAgcm9vdAoKIyBidWNr
-ZXRzCmhvc3QgZW1zbm9kZTEyIHsKCWlkIC01CQkjIGRvIG5vdCBjaGFuZ2UgdW5uZWNlc3Nhcmls
-eQoJIyB3ZWlnaHQgNTQuNzIwCglhbGcgc3RyYXcKCWhhc2ggMAkjIHJqZW5raW5zMQoJaXRlbSBv
-c2QuMCB3ZWlnaHQgNi44NDAKCWl0ZW0gb3NkLjEgd2VpZ2h0IDYuODQwCglpdGVtIG9zZC4yIHdl
-aWdodCA2Ljg0MAoJaXRlbSBvc2QuNCB3ZWlnaHQgNi44NDAKCWl0ZW0gb3NkLjUgd2VpZ2h0IDYu
-ODQwCglpdGVtIG9zZC43IHdlaWdodCA2Ljg0MAoJaXRlbSBvc2QuNiB3ZWlnaHQgNi44NDAKCWl0
-ZW0gb3NkLjQ3IHdlaWdodCA2Ljg0MAp9Cmhvc3QgZW1zbm9kZTEwIHsKCWlkIC0xMAkJIyBkbyBu
-b3QgY2hhbmdlIHVubmVjZXNzYXJpbHkKCSMgd2VpZ2h0IDU0LjcyMAoJYWxnIHN0cmF3CgloYXNo
-IDAJIyByamVua2luczEKCWl0ZW0gb3NkLjQwIHdlaWdodCA2Ljg0MAoJaXRlbSBvc2QuNDEgd2Vp
-Z2h0IDYuODQwCglpdGVtIG9zZC40MiB3ZWlnaHQgNi44NDAKCWl0ZW0gb3NkLjQzIHdlaWdodCA2
-Ljg0MAoJaXRlbSBvc2QuNDQgd2VpZ2h0IDYuODQwCglpdGVtIG9zZC40NSB3ZWlnaHQgNi44NDAK
-CWl0ZW0gb3NkLjQ2IHdlaWdodCA2Ljg0MAoJaXRlbSBvc2QuMzAgd2VpZ2h0IDYuODQwCn0KY2hh
-c3NpcyBjaGFzc2lzMSB7CglpZCAtMgkJIyBkbyBub3QgY2hhbmdlIHVubmVjZXNzYXJpbHkKCSMg
-d2VpZ2h0IDEwOS40NDAKCWFsZyBzdHJhdwoJaGFzaCAwCSMgcmplbmtpbnMxCglpdGVtIGVtc25v
-ZGUxMiB3ZWlnaHQgNTQuNzIwCglpdGVtIGVtc25vZGUxMCB3ZWlnaHQgNTQuNzIwCn0KaG9zdCBl
-bXNub2RlMyB7CglpZCAtNgkJIyBkbyBub3QgY2hhbmdlIHVubmVjZXNzYXJpbHkKCSMgd2VpZ2h0
-IDU0LjcyMAoJYWxnIHN0cmF3CgloYXNoIDAJIyByamVua2luczEKCWl0ZW0gb3NkLjggd2VpZ2h0
-IDYuODQwCglpdGVtIG9zZC45IHdlaWdodCA2Ljg0MAoJaXRlbSBvc2QuMTAgd2VpZ2h0IDYuODQw
-CglpdGVtIG9zZC4xMSB3ZWlnaHQgNi44NDAKCWl0ZW0gb3NkLjEyIHdlaWdodCA2Ljg0MAoJaXRl
-bSBvc2QuMTMgd2VpZ2h0IDYuODQwCglpdGVtIG9zZC4xNCB3ZWlnaHQgNi44NDAKCWl0ZW0gb3Nk
-LjE1IHdlaWdodCA2Ljg0MAp9Cmhvc3QgZW1zbm9kZTQgewoJaWQgLTgJCSMgZG8gbm90IGNoYW5n
-ZSB1bm5lY2Vzc2FyaWx5CgkjIHdlaWdodCA1NC43MjAKCWFsZyBzdHJhdwoJaGFzaCAwCSMgcmpl
-bmtpbnMxCglpdGVtIG9zZC4yOSB3ZWlnaHQgNi44NDAKCWl0ZW0gb3NkLjMxIHdlaWdodCA2Ljg0
-MAoJaXRlbSBvc2QuMjQgd2VpZ2h0IDYuODQwCglpdGVtIG9zZC4yNiB3ZWlnaHQgNi44NDAKCWl0
-ZW0gb3NkLjI3IHdlaWdodCA2Ljg0MAoJaXRlbSBvc2QuMjggd2VpZ2h0IDYuODQwCglpdGVtIG9z
-ZC4zIHdlaWdodCA2Ljg0MAoJaXRlbSBvc2QuMjUgd2VpZ2h0IDYuODQwCn0KY2hhc3NpcyBjaGFz
-c2lzMiB7CglpZCAtMwkJIyBkbyBub3QgY2hhbmdlIHVubmVjZXNzYXJpbHkKCSMgd2VpZ2h0IDEw
-OS40NDAKCWFsZyBzdHJhdwoJaGFzaCAwCSMgcmplbmtpbnMxCglpdGVtIGVtc25vZGUzIHdlaWdo
-dCA1NC43MjAKCWl0ZW0gZW1zbm9kZTQgd2VpZ2h0IDU0LjcyMAp9Cmhvc3QgZW1zbm9kZTExIHsK
-CWlkIC03CQkjIGRvIG5vdCBjaGFuZ2UgdW5uZWNlc3NhcmlseQoJIyB3ZWlnaHQgNTQuNzIwCglh
-bGcgc3RyYXcKCWhhc2ggMAkjIHJqZW5raW5zMQoJaXRlbSBvc2QuMTYgd2VpZ2h0IDYuODQwCglp
-dGVtIG9zZC4xNyB3ZWlnaHQgNi44NDAKCWl0ZW0gb3NkLjE4IHdlaWdodCA2Ljg0MAoJaXRlbSBv
-c2QuMTkgd2VpZ2h0IDYuODQwCglpdGVtIG9zZC4yMCB3ZWlnaHQgNi44NDAKCWl0ZW0gb3NkLjIx
-IHdlaWdodCA2Ljg0MAoJaXRlbSBvc2QuMjMgd2VpZ2h0IDYuODQwCglpdGVtIG9zZC4yMiB3ZWln
-aHQgNi44NDAKfQpob3N0IGVtc25vZGU1IHsKCWlkIC05CQkjIGRvIG5vdCBjaGFuZ2UgdW5uZWNl
-c3NhcmlseQoJIyB3ZWlnaHQgNTQuNzIwCglhbGcgc3RyYXcKCWhhc2ggMAkjIHJqZW5raW5zMQoJ
-aXRlbSBvc2QuMzIgd2VpZ2h0IDYuODQwCglpdGVtIG9zZC4zMyB3ZWlnaHQgNi44NDAKCWl0ZW0g
-b3NkLjM0IHdlaWdodCA2Ljg0MAoJaXRlbSBvc2QuMzUgd2VpZ2h0IDYuODQwCglpdGVtIG9zZC4z
-NiB3ZWlnaHQgNi44NDAKCWl0ZW0gb3NkLjM3IHdlaWdodCA2Ljg0MAoJaXRlbSBvc2QuMzggd2Vp
-Z2h0IDYuODQwCglpdGVtIG9zZC4zOSB3ZWlnaHQgNi44NDAKfQpjaGFzc2lzIGNoYXNzaXMzIHsK
-CWlkIC00CQkjIGRvIG5vdCBjaGFuZ2UgdW5uZWNlc3NhcmlseQoJIyB3ZWlnaHQgMTA5LjQ0MAoJ
-YWxnIHN0cmF3CgloYXNoIDAJIyByamVua2luczEKCWl0ZW0gZW1zbm9kZTExIHdlaWdodCA1NC43
-MjAKCWl0ZW0gZW1zbm9kZTUgd2VpZ2h0IDU0LjcyMAp9CnJvb3QgZGVmYXVsdCB7CglpZCAtMQkJ
-IyBkbyBub3QgY2hhbmdlIHVubmVjZXNzYXJpbHkKCSMgd2VpZ2h0IDMyOC4zMjAKCWFsZyBzdHJh
-dwoJaGFzaCAwCSMgcmplbmtpbnMxCglpdGVtIGNoYXNzaXMxIHdlaWdodCAxMDkuNDQwCglpdGVt
-IGNoYXNzaXMyIHdlaWdodCAxMDkuNDQwCglpdGVtIGNoYXNzaXMzIHdlaWdodCAxMDkuNDQwCn0K
-CiMgcnVsZXMKcnVsZSByZXBsaWNhdGVkX3J1bGVzZXQgewoJcnVsZXNldCAwCgl0eXBlIHJlcGxp
-Y2F0ZWQKCW1pbl9zaXplIDEKCW1heF9zaXplIDEwCglzdGVwIHRha2UgZGVmYXVsdAoJc3RlcCBj
-aG9vc2VsZWFmIGZpcnN0biAwIHR5cGUgaG9zdAoJc3RlcCBlbWl0Cn0KcnVsZSBjaGFzc2lzX3J1
-bGVzZXQgewoJcnVsZXNldCAxCgl0eXBlIHJlcGxpY2F0ZWQKCW1pbl9zaXplIDEKCW1heF9zaXpl
-IDEwCglzdGVwIHRha2UgZGVmYXVsdAoJc3RlcCBjaG9vc2VsZWFmIGZpcnN0biAwIHR5cGUgY2hh
-c3NpcwoJc3RlcCBlbWl0Cn0KCiMgZW5kIGNydXNoIG1hcAo=
-
---_002_755F6B91B3BE364F9BCA11EA3F9E0C6F28CA17F4SACMBXIP01sdcor_--
+Thanks! Dan
