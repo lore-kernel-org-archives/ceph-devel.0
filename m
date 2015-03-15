@@ -1,34 +1,70 @@
-From: Joao Eduardo Luis <joao@redhat.com>
-Subject: Re: J is for Jewel
-Date: Sun, 15 Mar 2015 10:47:20 +0000
-Message-ID: <55056338.2020002@redhat.com>
-References: <alpine.DEB.2.00.1503131200510.14008@cobra.newdream.net>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: dumpling branch for v0.67.12 is ready for release
+Date: Sun, 15 Mar 2015 22:24:32 +0100
+Message-ID: <5505F890.1010000@dachary.org>
+References: <54ECB06E.9020507@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="tqK2SOveSB8NgV2J209iGLrU6q7qtHj0e"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:37945 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751856AbbCOKrW (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 15 Mar 2015 06:47:22 -0400
-Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
-	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t2FAlLc2021935
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
-	for <ceph-devel@vger.kernel.org>; Sun, 15 Mar 2015 06:47:21 -0400
-In-Reply-To: <alpine.DEB.2.00.1503131200510.14008@cobra.newdream.net>
+Received: from mail2.dachary.org ([91.121.57.175]:58367 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751296AbbCOVYo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 15 Mar 2015 17:24:44 -0400
+In-Reply-To: <54ECB06E.9020507@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
+To: Sage Weil <sweil@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 03/13/2015 07:08 PM, Sage Weil wrote:
-> It was pretty close, but the jellyhead octopus lost out to the jewel
-> squid.  For those not keeping score that leaves us with
->
->   1   cuttlefish
->   2.5 octopodes (argonaut, giant, hammer)
->   6.5 squid (bobtail, dumpling, emperor, firefly, giant, infernalis, jewel)
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--tqK2SOveSB8NgV2J209iGLrU6q7qtHj0e
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-People may still be too traumatized to consider having another 
-cuttlefish in the near future. ;)
+Hi,
 
-   -Joao
+A gentle reminder ;-)
+
+Cheers
+
+On 24/02/2015 18:10, Loic Dachary wrote:
+> Hi Sage,
+>=20
+> QE approved https://github.com/ceph/ceph/commit/77dfbbaccfb5074899d0231=
+4a26cb9ac46a69106 for release in the https://github.com/ceph/ceph/commits=
+/dumpling branch. The release notes should now be written based on the co=
+ntent of the issues and pull requests mentioned here http://workbench.dac=
+hary.org/ceph/ceph-backports/wikis/dumpling#already-merged
+>=20
+> The release notes can now be written. In the future I'll ask about the =
+release notes earlier: the last tests do not change anything significant =
+and take days if not week. They can conveniently be done while the releas=
+e notes are written[1] instead of making them a blocker at the very end. =
+
+>=20
+> Cheers
+>=20
+> [1] Cutting a new stable release http://ceph.com/docs/master/dev/develo=
+pment-workflow/#cutting-a-new-stable-release
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--tqK2SOveSB8NgV2J209iGLrU6q7qtHj0e
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlUF+JEACgkQ8dLMyEl6F23IKQCgiE5kvlCNXh9abaC4jT0MeIIX
+beQAoIEqG2r+dnfOOqdk0ZjJNBIKyc6P
+=vF0l
+-----END PGP SIGNATURE-----
+
+--tqK2SOveSB8NgV2J209iGLrU6q7qtHj0e--
