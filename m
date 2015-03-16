@@ -1,78 +1,98 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: ceph-fuse remount issues
-Date: Mon, 16 Mar 2015 14:28:32 +0800
-Message-ID: <CAAM7YAmgh1vwKCbK-m0khtAd=NC4hDv7iSOZnxfh2=ZU92pCBg@mail.gmail.com>
-References: <54E66259.9040501@redhat.com>
-	<C2032CA0-61E4-430E-938F-C40D51BF8DDA@redhat.com>
-	<alpine.DEB.2.00.1503152222480.28155@cobra.newdream.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f45.google.com ([209.85.215.45]:36123 "EHLO
-	mail-la0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750937AbbCPG2d convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Mar 2015 02:28:33 -0400
-Received: by lamx15 with SMTP id x15so31332790lam.3
-        for <ceph-devel@vger.kernel.org>; Sun, 15 Mar 2015 23:28:32 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1503152222480.28155@cobra.newdream.net>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: =?UTF-8?B?5Lil5q2j?= <zyan@redhat.com>, John Spray <john.spray@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Gregory Farnum <gfarnum@redhat.com>
+From: Omar Sandoval <osandov-nWWhXC5lh1RBDgjK7y7TUQ@public.gmane.org>
+Subject: [RFC PATCH 0/5] Remove rw parameter from direct_IO()
+Date: Mon, 16 Mar 2015 04:33:48 -0700
+Message-ID: <cover.1426502566.git.osandov@osandov.com>
+Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Alexander Viro <viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org>, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-btrfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, osd-dev-yNzVSZO3znNg9hUCZPvPmw@public.gmane.org, linux-ext4-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-f2fs-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, fuse-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, jfs-discussion-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, HPDD-discuss-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nilfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ocfs2-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org, reiserfs-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, v9fs-developer-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, xfs-VZNHf3L845pBDgjK7y7TUQ@public.gmane.org
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Mason <clm-b10kYP2dOMg@public.gmane.org>, Josef Bacik <jbacik-b10kYP2dOMg@public.gmane.org>, David Sterba <dsterba-AlSwsSmVLrQ@public.gmane.org>, Yan Zheng <zyan-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Sage Weil <sage-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Steve French <sfrench-eUNUBHrolfbYtjvyW6yDsg@public.gmane.org>, Boaz Harrosh <ooo-rh7Tgz9RNieUD9Wbbkgo/g@public.gmane.org>, Benny Halevy <bhalevy-7I+n7zu2hftEKMMhf/gKZA@public.gmane.org>, Jan Kara <jack-AlSwsSmVLrQ@public.gmane.org>, Theodore Ts'o <tytso-3s7WtUTddSA@public.gmane.org>, Andreas Dilger <adilger.kernel-m1MBpc4rdrD3fQ9qLvQP4Q@public.gmane.org>, Jaegeuk Kim <jaegeuk-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Changman Lee <cm224.lee-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Miklos Szeredi <miklos-sUDqSbJrdHQHWmgEVkV9KA@public.gmane.org>, Steven Whitehouse <swhiteho-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Dave Kleikamp <shaggy-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Oleg Drokin <oleg.drokin-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Trond Myklebust <trond.myklebust-7I+n7zu2hftEKMMhf/gKZA@public.gmane.org>, Anna Schumaker <anna.schumaker-HgOvQuBEEgTQT0dZR+AlfA@public.gmane.org>, Ryusuke Konishi <konishi.ryusuke-Zyj7fXuS5i5L9jVzuh4AOg@public.gmane.org>, Mark Fasheh <mfasheh-IBi9RG/b67k@public.gmane.org>, Joel Becker <jlbec-aKy9MeLSZ9dg9hUCZPvPmw@public.gmane.org>, Eric Van Hensbergen <ericvh-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ron Minnich <rmin>
+List-Id: ceph-devel.vger.kernel.org
 
-On Mon, Mar 16, 2015 at 1:28 PM, Sage Weil <sweil@redhat.com> wrote:
-> Hi Zheng,
->
-> On Thu, 26 Feb 2015, ?? wrote:
->> > ? 2015?2?20??06:23?John Spray <john.spray@redhat.com> ???
->> >
->> >
->> > Background: a while ago, we found (#10277) that existing cache expiration mechanism wasn't working with latest kernels.  We used to invalidate the top level dentries, which caused fuse to invalidate everything, but an implementation detail in fuse caused it to start ignoring our repeated invalidate calls, so this doesn't work any more.  To persuade fuse to dirty its entire metadata cache, Zheng added in a system() call to "mount -o remount" after we expire things from our client side cache.
->>
->> Change of d_invalidate() implementation breaks our old cache expiration
->> mechanism. When invalidating a denty, d_invalidate() also walks the
->> dentry subtree and try pruning any unused descendant dentries. Our old
->> cache expiration mechanism replies on this to prune unused dentries. We
->> invalidate the top level dentries, d_invalidate() try pruning unused
->> dentries underneath these top level dentries. Prior to 3.18 kernel,
->> d_invalidate() can fail if the dentry is used by some one.
->> Implementation of d_invalidate() change in 3.18 kernel, d_invalidate()
->> always successes and unhash the dentry even if it?s still in use. This
->> behavior changes make us not be able to use d_invalidate() at will. One
->> known bad consequence is getcwd() system call return -EINVAL after
->> process? working directory gets invalidated.
->
-> I took another look at this and it seems to me like we might need
-> something more than a new call that does the pruning.  What we were doing
-> before was also a bit of a hack, it seems.
->
-> What is really going on is that the MDS is telling us to reduce the number
-> of inodes we have pinned.  We should ideally turn that into pressure on
-> dcache.. but it's not per-superblock, so there's not a shrinker we can
-> poke that that does what we want.
->
-> We *are* doing the dentry is, so the dentries are unhashed.
-> But they aren't getting destroyed... Zheng, this is what the previous hack
-> was doing, right?  Forcing unhashed dentries to get trimmed from the LRU?
->
-Yes, that's what previous hack does. When invalidating dentry, VFS also tries
-destroying the dentry.
+Hi,
 
-> It seems like the most elegant solution would be to patch fs/fuse to make
-> that happen in the general case when we do the invalidate upcall.  Does
-> that sound right?
+Al, here's some cleanup that you mentioned back in December that I got
+around to (https://lkml.org/lkml/2014/12/15/28).
 
-what do you mean "make that happen in the general case".  In my option,
-there isn't much fuse kernel module can do about dentry. Maybe we can try
-adding a new callback which call d_prune_aliases().
+In summary, the rw parameter to a_ops->direct_IO() is redundant with
+.type in struct iov_iter. Additionally, rw is inconsistently checked for
+being a WRITE; some filesystems do rw == WRITE, others do rw & WRITE,
+and others do both within the same function :) The distinction is that
+swapout may OR in the ITER_BVEC flag in the rw passed to ->direct_IO(),
+so the two are not equivalent (although this really only happens for
+swap-over-NFS, but it's scary nonetheless). After looking through all of
+these, it definitely looks like every check means for ANY write, not
+just non-kernel writes.
 
-Regards
-Yan, Zheng
+So, the solution presented here is:
 
->
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+- Add a helper, iov_iter_rw(), which always returns either READ or
+  WRITE, no ITER_.* or REQ_.* nonsense mixed in. For consistency, the
+  return value is always checked for equality
+- Get rid of all uses of rw in any implementations of direct_IO,
+  starting with the generic code
+- Nuke the actual parameter and update the documentation
+
+I decided to squish all of the filesystems together in patch 4 to avoid
+inundating the mailing lists with 20+ mostly two-line patches, but I can
+split those out if that's any better. Additionally, patch 1 pulls fs.h
+into uio.h, which seems undesirable.
+
+These were mostly just compile tested, with a couple of direct I/O
+xfstests run on btrfs as quick sanity check, so getting some more eyes
+on is probably a good thing. They should apply on top of v4.0-rc4.
+Please comment away.
+
+Thank you,
+
+Omar Sandoval (5):
+  new helper: iov_iter_rw()
+  Remove rw from {,__,do_}blockdev_direct_IO()
+  Remove rw from dax_{do_,}io()
+  direct_IO: use iov_iter_rw() instead of rw everywhere
+  direct_IO: remove rw from a_ops->direct_IO()
+
+ Documentation/filesystems/Locking          |  2 +-
+ Documentation/filesystems/vfs.txt          |  2 +-
+ drivers/staging/lustre/lustre/llite/rw26.c | 22 ++++++++---------
+ fs/9p/vfs_addr.c                           |  2 +-
+ fs/affs/file.c                             |  9 +++----
+ fs/block_dev.c                             |  8 +++---
+ fs/btrfs/inode.c                           | 24 +++++++++---------
+ fs/ceph/addr.c                             |  3 +--
+ fs/cifs/file.c                             |  3 +--
+ fs/dax.c                                   | 27 ++++++++++-----------
+ fs/direct-io.c                             | 39 ++++++++++++++----------------
+ fs/exofs/inode.c                           |  4 +--
+ fs/ext2/inode.c                            | 11 ++++-----
+ fs/ext3/inode.c                            | 14 +++++------
+ fs/ext4/ext4.h                             |  4 +--
+ fs/ext4/indirect.c                         | 25 ++++++++++---------
+ fs/ext4/inode.c                            | 28 ++++++++++-----------
+ fs/f2fs/data.c                             | 22 ++++++++---------
+ fs/fat/inode.c                             |  9 +++----
+ fs/fuse/file.c                             | 16 ++++++------
+ fs/gfs2/aops.c                             | 16 ++++++------
+ fs/hfs/inode.c                             |  8 +++---
+ fs/hfsplus/inode.c                         |  9 +++----
+ fs/jfs/inode.c                             |  8 +++---
+ fs/nfs/direct.c                            |  4 +--
+ fs/nilfs2/inode.c                          | 10 +++-----
+ fs/ocfs2/aops.c                            | 22 +++++++----------
+ fs/reiserfs/inode.c                        |  8 +++---
+ fs/udf/file.c                              |  3 +--
+ fs/udf/inode.c                             |  7 +++---
+ fs/xfs/xfs_aops.c                          | 12 ++++-----
+ include/linux/fs.h                         | 24 +++++++++---------
+ include/linux/nfs_fs.h                     |  2 +-
+ include/linux/uio.h                        | 10 ++++++++
+ mm/filemap.c                               |  4 +--
+ mm/page_io.c                               |  4 +--
+ 36 files changed, 206 insertions(+), 219 deletions(-)
+
+-- 
+2.3.3
+
+--
+To unsubscribe from this list: send the line "unsubscribe linux-nfs" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
