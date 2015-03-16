@@ -1,174 +1,131 @@
-From: "Matt W. Benjamin" <matt@cohortfs.com>
-Subject: Re: xio messenger is not building by default
-Date: Mon, 16 Mar 2015 14:29:26 -0400 (EDT)
-Message-ID: <315784039.57.1426530566113.JavaMail.root@thunderbeast.private.linuxbox.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: xio messenger is not building by default
+Date: Mon, 16 Mar 2015 18:50:21 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CA43D9@SACMBXIP01.sdcorp.global.sandisk.com>
 References: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CA3F35@SACMBXIP01.sdcorp.global.sandisk.com>
-Reply-To: "Matt W. Benjamin" <matt@cohortfs.com>
+ <315784039.57.1426530566113.JavaMail.root@thunderbeast.private.linuxbox.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from aa.linuxbox.com ([69.128.83.226]:2337 "EHLO aa.linuxbox.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753774AbbCPS3g (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 16 Mar 2015 14:29:36 -0400
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CA3F35@SACMBXIP01.sdcorp.global.sandisk.com>
+Received: from mail-bl2on0071.outbound.protection.outlook.com ([65.55.169.71]:7968
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S934295AbbCPSub (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 16 Mar 2015 14:50:31 -0400
+In-Reply-To: <315784039.57.1426530566113.JavaMail.root@thunderbeast.private.linuxbox.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: ceph-devel@vger.kernel.org, Sage Weil <sage@newdream.net>, Ken Dreyer <kdreyer@redhat.com>
+To: "Matt W. Benjamin" <matt@cohortfs.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@newdream.net>, Ken Dreyer <kdreyer@redhat.com>
 
-It might be possible to us Accelio over TCP, I guess.
-
-Matt
-
------ "Somnath Roy" <Somnath.Roy@sandisk.com> wrote:
-
-> Matt,
-> It is possible to build accelio without OFED packages installed.
-> But, my suspicion is , it may not work properly as I have mentioned
-> below.
-> 
-> Thanks & Regards
-> Somnath
-> 
-> -----Original Message-----
-> From: Matt W. Benjamin [mailto:matt@cohortfs.com]
-> Sent: Monday, March 16, 2015 11:22 AM
-> To: Somnath Roy
-> Cc: ceph-devel@vger.kernel.org; Sage Weil; Ken Dreyer
-> Subject: Re: xio messenger is not building by default
-> 
-> Hi,
-> 
-> ----- "Somnath Roy" <Somnath.Roy@sandisk.com> wrote:
-> 
-> > I think installing the MLNX_OFED driver package will install most
-> of
-> > the stuff(including libibverbs-dev). We need the following extra
-> > packages for building accelio.
-> > numactl libnuma-dev
-> 
-> Ah, that's also true.
-> 
-> >
-> > But, what if user is building it without OFED driver package
-> installed
-> > ?
-> 
-> Should it be possible?  I mean, to both build Xio and not have the
-> header interface?
-> 
-> > BTW, I saw accelio was giving assert if I manually install
-> > libibverbs-dev from Ubuntu repo and upgrade this OFED driver later.
-> > Cleaning the repo and rebuilding solved the issue. Seems it was
-> > linking wrong libraries.
-> 
-> I think I've seen this.
-> 
-> >
-> > Thanks & Regards
-> > Somnath
-> >
-> >
-> > -----Original Message-----
-> > From: Matt W. Benjamin [mailto:matt@cohortfs.com]
-> > Sent: Monday, March 16, 2015 9:34 AM
-> > To: Ken Dreyer
-> > Cc: ceph-devel@vger.kernel.org; Sage Weil; Somnath Roy
-> > Subject: Re: xio messenger is not building by default
-> >
-> > Hi,
-> >
-> > Yes, agree.  We do depend on librdmacm!
-> >
-> > Matt
-> >
-> > ----- "Ken Dreyer" <kdreyer@redhat.com> wrote:
-> >
-> > > On 03/16/2015 10:20 AM, Matt W. Benjamin wrote:
-> > > > Hi,
-> > > >
-> > > > Arent OFED dependencies already packaged?  I assumed that only
-> > > Accelio would
-> > > > be a submodule.
-> > > >
-> > >
-> > > Thanks for pointing that out. It's in Fedora as libibverbs-devel,
-> > and
-> > > it's in Debian as libibverbs-dev. So you're right, Accelio is the
-> > only
-> > > one to be packaged.
-> > >
-> > > Looking at configure.ac, does README.xio need to be updated to
-> > mention
-> > > librdmacm?
-> > >
-> > > - Ken
-> >
-> > --
-> > Matt Benjamin
-> > CohortFS, LLC.
-> > 315 West Huron Street, Suite 140A
-> > Ann Arbor, Michigan 48103
-> >
-> > http://cohortfs.com
-> >
-> > tel.  734-761-4689
-> > fax.  734-769-8938
-> > cel.  734-216-5309
-> >
-> > ________________________________
-> >
-> > PLEASE NOTE: The information contained in this electronic mail
-> message
-> > is intended only for the use of the designated recipient(s) named
-> > above. If the reader of this message is not the intended recipient,
-> > you are hereby notified that you have received this message in
-> error
-> > and that any review, dissemination, distribution, or copying of
-> this
-> > message is strictly prohibited. If you have received this
-> > communication in error, please notify the sender by telephone or
-> > e-mail (as shown above) immediately and destroy any and all copies
-> of
-> > this message in your possession (whether hard copies or
-> electronically
-> > stored copies).
-> 
-> --
-> Matt Benjamin
-> CohortFS, LLC.
-> 315 West Huron Street, Suite 140A
-> Ann Arbor, Michigan 48103
-> 
-> http://cohortfs.com
-> 
-> tel.  734-761-4689
-> fax.  734-769-8938
-> cel.  734-216-5309
-> 
-> ________________________________
-> 
-> PLEASE NOTE: The information contained in this electronic mail message
-> is intended only for the use of the designated recipient(s) named
-> above. If the reader of this message is not the intended recipient,
-> you are hereby notified that you have received this message in error
-> and that any review, dissemination, distribution, or copying of this
-> message is strictly prohibited. If you have received this
-> communication in error, please notify the sender by telephone or
-> e-mail (as shown above) immediately and destroy any and all copies of
-> this message in your possession (whether hard copies or electronically
-> stored copies).
-
--- 
-Matt Benjamin
-CohortFS, LLC.
-315 West Huron Street, Suite 140A
-Ann Arbor, Michigan 48103
-
-http://cohortfs.com
-
-tel.  734-761-4689 
-fax.  734-769-8938 
-cel.  734-216-5309 
+WWVzLCBidXQgd2hhdCBJIGFtIHNheWluZyBpcywgYnVpbGRpbmcgYWNjZWxpbyBsaWJyYXJ5IGl0
+c2VsZiBpcyBoYXZpbmcgc29tZSBwcm9ibGVtIGlmIEkgYnVpbGQgaXQgYmVmb3JlIEkgaW5zdGFs
+bCBPRkVEIHBhY2thZ2VzIGFuZCBkbyBhcHQtZ2V0IGxpYmlidmlyYnMtZGV2IG1hbnVhbGx5Lg0K
+Tm93LCBpZiBJIGZvbGxvdyB0aGVzZSBzdGVwcyBpdCBpcyBidWlsZGluZyBmaW5lLg0KDQoxLiBJ
+bnN0YWxsIE9GRUQgcGFja2FnZXMgKHRoaXMgd2lsbCBpbnN0YWxsIGxpYmlidmlyYnMpDQoNCjIu
+IGFwdC1nZXQgbnVtYWN0bCBsaWJudW1hLWRldg0KDQozLiBCdWlsZCBhY2NlbGlvDQoNClRoZSBh
+Y2NlbGlvIGxpYnJhcnkgZ2VuZXJhdGVkIGlzIHdvcmtpbmcgZmluZS4NCg0KU28sIGl0IHNlZW1z
+IE9GRUQgZHJpdmVyIGluc3RhbGxpbmcgc29tZSBjb3JyZWN0IGxpYnJhcmllcyAocHJvYmFibHkg
+bGliaWJ2aXJicyBvciBzb21ldGhpbmcgPykgYW5kIGFjY2VsaW8gaXMgYnVpbGRpbmcgZmluZSBi
+eSBsaW5raW5nIHdpdGggdGhvc2UuIFdlIG5lZWQgdG8gZmluZCBvdXQgd2hhdCBhcmUgdGhvc2Ug
+IGFzIGRlcGVuZGVuY3kgd2l0aCBkcml2ZXIgcGFja2FnZXMgKGluc3RhbGxpbmcgY29ycmVjdCBs
+aWJyYXJpZXMpIG1pZ2h0IG5vdCBiZSBhIGdvb2QgaWRlYS4NCkJUVywgTWVsbGFub3ggaXMgcmVj
+b21tZW5kaW5nIHRoZSBsYXRlc3QgT0ZFRCBwYWNrYWdlcyBib3RoIGZvciBUQ1AvUkRNQS4gSSBk
+aWRuJ3QgY2hlY2sgdGhlIGFjY2VsaW8gKyB0Y3AgY29ubmVjdGlvbiBpcyBnb2luZyBvbiBmaW5l
+IHdpdGggZmF1bHR5IGFjY2VsaW8gbGlicmFyeSBvZiBtaW5lIHRob3VnaC4NCg0KVGhhbmtzICYg
+UmVnYXJkcw0KU29tbmF0aA0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogTWF0
+dCBXLiBCZW5qYW1pbiBbbWFpbHRvOm1hdHRAY29ob3J0ZnMuY29tXQ0KU2VudDogTW9uZGF5LCBN
+YXJjaCAxNiwgMjAxNSAxMToyOSBBTQ0KVG86IFNvbW5hdGggUm95DQpDYzogY2VwaC1kZXZlbEB2
+Z2VyLmtlcm5lbC5vcmc7IFNhZ2UgV2VpbDsgS2VuIERyZXllcg0KU3ViamVjdDogUmU6IHhpbyBt
+ZXNzZW5nZXIgaXMgbm90IGJ1aWxkaW5nIGJ5IGRlZmF1bHQNCg0KSXQgbWlnaHQgYmUgcG9zc2li
+bGUgdG8gdXMgQWNjZWxpbyBvdmVyIFRDUCwgSSBndWVzcy4NCg0KTWF0dA0KDQotLS0tLSAiU29t
+bmF0aCBSb3kiIDxTb21uYXRoLlJveUBzYW5kaXNrLmNvbT4gd3JvdGU6DQoNCj4gTWF0dCwNCj4g
+SXQgaXMgcG9zc2libGUgdG8gYnVpbGQgYWNjZWxpbyB3aXRob3V0IE9GRUQgcGFja2FnZXMgaW5z
+dGFsbGVkLg0KPiBCdXQsIG15IHN1c3BpY2lvbiBpcyAsIGl0IG1heSBub3Qgd29yayBwcm9wZXJs
+eSBhcyBJIGhhdmUgbWVudGlvbmVkDQo+IGJlbG93Lg0KPg0KPiBUaGFua3MgJiBSZWdhcmRzDQo+
+IFNvbW5hdGgNCj4NCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogTWF0dCBX
+LiBCZW5qYW1pbiBbbWFpbHRvOm1hdHRAY29ob3J0ZnMuY29tXQ0KPiBTZW50OiBNb25kYXksIE1h
+cmNoIDE2LCAyMDE1IDExOjIyIEFNDQo+IFRvOiBTb21uYXRoIFJveQ0KPiBDYzogY2VwaC1kZXZl
+bEB2Z2VyLmtlcm5lbC5vcmc7IFNhZ2UgV2VpbDsgS2VuIERyZXllcg0KPiBTdWJqZWN0OiBSZTog
+eGlvIG1lc3NlbmdlciBpcyBub3QgYnVpbGRpbmcgYnkgZGVmYXVsdA0KPg0KPiBIaSwNCj4NCj4g
+LS0tLS0gIlNvbW5hdGggUm95IiA8U29tbmF0aC5Sb3lAc2FuZGlzay5jb20+IHdyb3RlOg0KPg0K
+PiA+IEkgdGhpbmsgaW5zdGFsbGluZyB0aGUgTUxOWF9PRkVEIGRyaXZlciBwYWNrYWdlIHdpbGwg
+aW5zdGFsbCBtb3N0DQo+IG9mDQo+ID4gdGhlIHN0dWZmKGluY2x1ZGluZyBsaWJpYnZlcmJzLWRl
+dikuIFdlIG5lZWQgdGhlIGZvbGxvd2luZyBleHRyYQ0KPiA+IHBhY2thZ2VzIGZvciBidWlsZGlu
+ZyBhY2NlbGlvLg0KPiA+IG51bWFjdGwgbGlibnVtYS1kZXYNCj4NCj4gQWgsIHRoYXQncyBhbHNv
+IHRydWUuDQo+DQo+ID4NCj4gPiBCdXQsIHdoYXQgaWYgdXNlciBpcyBidWlsZGluZyBpdCB3aXRo
+b3V0IE9GRUQgZHJpdmVyIHBhY2thZ2UNCj4gaW5zdGFsbGVkDQo+ID4gPw0KPg0KPiBTaG91bGQg
+aXQgYmUgcG9zc2libGU/ICBJIG1lYW4sIHRvIGJvdGggYnVpbGQgWGlvIGFuZCBub3QgaGF2ZSB0
+aGUNCj4gaGVhZGVyIGludGVyZmFjZT8NCj4NCj4gPiBCVFcsIEkgc2F3IGFjY2VsaW8gd2FzIGdp
+dmluZyBhc3NlcnQgaWYgSSBtYW51YWxseSBpbnN0YWxsDQo+ID4gbGliaWJ2ZXJicy1kZXYgZnJv
+bSBVYnVudHUgcmVwbyBhbmQgdXBncmFkZSB0aGlzIE9GRUQgZHJpdmVyIGxhdGVyLg0KPiA+IENs
+ZWFuaW5nIHRoZSByZXBvIGFuZCByZWJ1aWxkaW5nIHNvbHZlZCB0aGUgaXNzdWUuIFNlZW1zIGl0
+IHdhcw0KPiA+IGxpbmtpbmcgd3JvbmcgbGlicmFyaWVzLg0KPg0KPiBJIHRoaW5rIEkndmUgc2Vl
+biB0aGlzLg0KPg0KPiA+DQo+ID4gVGhhbmtzICYgUmVnYXJkcw0KPiA+IFNvbW5hdGgNCj4gPg0K
+PiA+DQo+ID4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gPiBGcm9tOiBNYXR0IFcuIEJl
+bmphbWluIFttYWlsdG86bWF0dEBjb2hvcnRmcy5jb21dDQo+ID4gU2VudDogTW9uZGF5LCBNYXJj
+aCAxNiwgMjAxNSA5OjM0IEFNDQo+ID4gVG86IEtlbiBEcmV5ZXINCj4gPiBDYzogY2VwaC1kZXZl
+bEB2Z2VyLmtlcm5lbC5vcmc7IFNhZ2UgV2VpbDsgU29tbmF0aCBSb3kNCj4gPiBTdWJqZWN0OiBS
+ZTogeGlvIG1lc3NlbmdlciBpcyBub3QgYnVpbGRpbmcgYnkgZGVmYXVsdA0KPiA+DQo+ID4gSGks
+DQo+ID4NCj4gPiBZZXMsIGFncmVlLiAgV2UgZG8gZGVwZW5kIG9uIGxpYnJkbWFjbSENCj4gPg0K
+PiA+IE1hdHQNCj4gPg0KPiA+IC0tLS0tICJLZW4gRHJleWVyIiA8a2RyZXllckByZWRoYXQuY29t
+PiB3cm90ZToNCj4gPg0KPiA+ID4gT24gMDMvMTYvMjAxNSAxMDoyMCBBTSwgTWF0dCBXLiBCZW5q
+YW1pbiB3cm90ZToNCj4gPiA+ID4gSGksDQo+ID4gPiA+DQo+ID4gPiA+IEFyZW50IE9GRUQgZGVw
+ZW5kZW5jaWVzIGFscmVhZHkgcGFja2FnZWQ/ICBJIGFzc3VtZWQgdGhhdCBvbmx5DQo+ID4gPiBB
+Y2NlbGlvIHdvdWxkDQo+ID4gPiA+IGJlIGEgc3VibW9kdWxlLg0KPiA+ID4gPg0KPiA+ID4NCj4g
+PiA+IFRoYW5rcyBmb3IgcG9pbnRpbmcgdGhhdCBvdXQuIEl0J3MgaW4gRmVkb3JhIGFzIGxpYmli
+dmVyYnMtZGV2ZWwsDQo+ID4gYW5kDQo+ID4gPiBpdCdzIGluIERlYmlhbiBhcyBsaWJpYnZlcmJz
+LWRldi4gU28geW91J3JlIHJpZ2h0LCBBY2NlbGlvIGlzIHRoZQ0KPiA+IG9ubHkNCj4gPiA+IG9u
+ZSB0byBiZSBwYWNrYWdlZC4NCj4gPiA+DQo+ID4gPiBMb29raW5nIGF0IGNvbmZpZ3VyZS5hYywg
+ZG9lcyBSRUFETUUueGlvIG5lZWQgdG8gYmUgdXBkYXRlZCB0bw0KPiA+IG1lbnRpb24NCj4gPiA+
+IGxpYnJkbWFjbT8NCj4gPiA+DQo+ID4gPiAtIEtlbg0KPiA+DQo+ID4gLS0NCj4gPiBNYXR0IEJl
+bmphbWluDQo+ID4gQ29ob3J0RlMsIExMQy4NCj4gPiAzMTUgV2VzdCBIdXJvbiBTdHJlZXQsIFN1
+aXRlIDE0MEENCj4gPiBBbm4gQXJib3IsIE1pY2hpZ2FuIDQ4MTAzDQo+ID4NCj4gPiBodHRwOi8v
+Y29ob3J0ZnMuY29tDQo+ID4NCj4gPiB0ZWwuICA3MzQtNzYxLTQ2ODkNCj4gPiBmYXguICA3MzQt
+NzY5LTg5MzgNCj4gPiBjZWwuICA3MzQtMjE2LTUzMDkNCj4gPg0KPiA+IF9fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fDQo+ID4NCj4gPiBQTEVBU0UgTk9URTogVGhlIGluZm9ybWF0aW9u
+IGNvbnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbA0KPiBtZXNzYWdlDQo+ID4gaXMgaW50
+ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFt
+ZWQNCj4gPiBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBp
+bnRlbmRlZCByZWNpcGllbnQsDQo+ID4geW91IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5b3Ug
+aGF2ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2UgaW4NCj4gZXJyb3INCj4gPiBhbmQgdGhhdCBhbnkg
+cmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YNCj4gdGhp
+cw0KPiA+IG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2
+ZWQgdGhpcw0KPiA+IGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNl
+bmRlciBieSB0ZWxlcGhvbmUgb3INCj4gPiBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlh
+dGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMNCj4gb2YNCj4gPiB0aGlzIG1lc3Nh
+Z2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yDQo+IGVsZWN0cm9u
+aWNhbGx5DQo+ID4gc3RvcmVkIGNvcGllcykuDQo+DQo+IC0tDQo+IE1hdHQgQmVuamFtaW4NCj4g
+Q29ob3J0RlMsIExMQy4NCj4gMzE1IFdlc3QgSHVyb24gU3RyZWV0LCBTdWl0ZSAxNDBBDQo+IEFu
+biBBcmJvciwgTWljaGlnYW4gNDgxMDMNCj4NCj4gaHR0cDovL2NvaG9ydGZzLmNvbQ0KPg0KPiB0
+ZWwuICA3MzQtNzYxLTQ2ODkNCj4gZmF4LiAgNzM0LTc2OS04OTM4DQo+IGNlbC4gIDczNC0yMTYt
+NTMwOQ0KPg0KPiBfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXw0KPg0KPiBQTEVBU0Ug
+Tk9URTogVGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbCBt
+ZXNzYWdlDQo+IGlzIGludGVuZGVkIG9ubHkgZm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQg
+cmVjaXBpZW50KHMpIG5hbWVkDQo+IGFib3ZlLiBJZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2Fn
+ZSBpcyBub3QgdGhlIGludGVuZGVkIHJlY2lwaWVudCwNCj4geW91IGFyZSBoZXJlYnkgbm90aWZp
+ZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2UgaW4gZXJyb3INCj4gYW5kIHRo
+YXQgYW55IHJldmlldywgZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9uLCBvciBjb3B5aW5nIG9m
+IHRoaXMNCj4gbWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5b3UgaGF2ZSByZWNl
+aXZlZCB0aGlzDQo+IGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNl
+bmRlciBieSB0ZWxlcGhvbmUgb3INCj4gZS1tYWlsIChhcyBzaG93biBhYm92ZSkgaW1tZWRpYXRl
+bHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVzIG9mDQo+IHRoaXMgbWVzc2FnZSBpbiB5
+b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkNCj4g
+c3RvcmVkIGNvcGllcykuDQoNCi0tDQpNYXR0IEJlbmphbWluDQpDb2hvcnRGUywgTExDLg0KMzE1
+IFdlc3QgSHVyb24gU3RyZWV0LCBTdWl0ZSAxNDBBDQpBbm4gQXJib3IsIE1pY2hpZ2FuIDQ4MTAz
+DQoNCmh0dHA6Ly9jb2hvcnRmcy5jb20NCg0KdGVsLiAgNzM0LTc2MS00Njg5DQpmYXguICA3MzQt
+NzY5LTg5MzgNCmNlbC4gIDczNC0yMTYtNTMwOQ0KDQpfX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fXw0KDQpQTEVBU0UgTk9URTogVGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBpbiB0aGlz
+IGVsZWN0cm9uaWMgbWFpbCBtZXNzYWdlIGlzIGludGVuZGVkIG9ubHkgZm9yIHRoZSB1c2Ugb2Yg
+dGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpIG5hbWVkIGFib3ZlLiBJZiB0aGUgcmVhZGVyIG9m
+IHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVuZGVkIHJlY2lwaWVudCwgeW91IGFyZSBoZXJl
+Ynkgbm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2UgaW4gZXJyb3Ig
+YW5kIHRoYXQgYW55IHJldmlldywgZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9uLCBvciBjb3B5
+aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5b3UgaGF2ZSBy
+ZWNlaXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNl
+bmRlciBieSB0ZWxlcGhvbmUgb3IgZS1tYWlsIChhcyBzaG93biBhYm92ZSkgaW1tZWRpYXRlbHkg
+YW5kIGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVzIG9mIHRoaXMgbWVzc2FnZSBpbiB5b3VyIHBv
+c3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkgc3RvcmVkIGNv
+cGllcykuDQoNCg==
