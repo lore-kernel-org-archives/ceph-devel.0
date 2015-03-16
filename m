@@ -1,70 +1,45 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Recruiting volunteers for the Ceph stable release team
-Date: Mon, 16 Mar 2015 16:05:01 +0100
-Message-ID: <5506F11D.8040502@dachary.org>
+From: Ken Dreyer <kdreyer@redhat.com>
+Subject: Re: xio messenger is not building by default
+Date: Mon, 16 Mar 2015 08:17:57 -0600
+Message-ID: <5506E615.30807@redhat.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CA2435@SACMBXIP01.sdcorp.global.sandisk.com> <alpine.DEB.2.00.1503131642080.30090@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="RmcNpgXuGounbGpsxeHaoC8CRBrwXuv0K"
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:58804 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753824AbbCPPFD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Mar 2015 11:05:03 -0400
-Received: from [10.9.0.6] (unknown [10.0.2.28])
-	by smtp.dmail.dachary.org (Postfix) with ESMTP id D350342B23
-	for <ceph-devel@vger.kernel.org>; Mon, 16 Mar 2015 16:05:01 +0100 (CET)
+Received: from mx1.redhat.com ([209.132.183.28]:45712 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932638AbbCPOR7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 16 Mar 2015 10:17:59 -0400
+In-Reply-To: <alpine.DEB.2.00.1503131642080.30090@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>, Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---RmcNpgXuGounbGpsxeHaoC8CRBrwXuv0K
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+On 03/13/2015 05:44 PM, Sage Weil wrote:
+> On Fri, 13 Mar 2015, Somnath Roy wrote:
+>> Hi Sage,
+>> Why we are not building xio messenger by default like other experimental features ?
+>> Let me know if you want to, I can put a patch in.
+> 
+> This is a build/packaging issue.  I think right now libxio needs to be 
+> present at build time and it's not available in any of the distros we 
+> build for.  Usually what we do in this situation is embed it as a git 
+> submodule (like we do with rocksdb).  Happy to take patches that do that 
+> if that's the best route (I suspect it is?).  There'll be a few final 
+> tweaks in the build environment then to set up the git repo mirror but 
+> nothing major.
+> 
+> I'd look at how things are handled with rocksdb now as a model?
+> 
 
-Hi Ceph,
+What are the packages that we would need in the distros? From
+README.xio, it looks like we'd need the following to be packaged:
 
-TL;DR: If you have one day a week to work on the next Ceph stable release=
-s [1] your help would be most welcome.
+https://www.openfabrics.org/downloads/verbs/
+https://github.com/accelio/accelio
 
-In the past two months I spent a fair amount of time to better understand=
- and help backporting patches to the existing stable releases [2]. I'm de=
-veloping tools [3] to automate as much as possible and document the proce=
-ss [1] to figure out who's responsible for what at any given time.
+Is there anything else that's missing?
 
-This collaborative work currently involves Red Hat employees only. But as=
- Ceph grows it would be better if the whole development community partici=
-pates. Instead of waiting until the process and tools are fully polished,=
- it would be great if a one or two person have time and motivation to ste=
-p up right away.
-
-If you're interested and have at least one day a week to devote to this, =
-please let me know.
-
-Cheers
-
-[1] Development Workflow http://ceph.com/docs/master/dev/development-work=
-flow/
-[2] Ceph Releases http://ceph.com/docs/master/releases/
-[3] Ceph workbench http://workbench.dachary.org/dachary/ceph-workbench
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
-
---RmcNpgXuGounbGpsxeHaoC8CRBrwXuv0K
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlUG8R0ACgkQ8dLMyEl6F22OMQCgoDQOEvV3XPxOz36U0unLDMvM
-ackAoIkssd2HYBYCB+kAqHB0xwoPeND6
-=pgm/
------END PGP SIGNATURE-----
-
---RmcNpgXuGounbGpsxeHaoC8CRBrwXuv0K--
+- Ken
