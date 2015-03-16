@@ -1,67 +1,120 @@
-From: Al Viro <viro-3bDd1+5oDREiFSDQTTA3OLVCufUGDwFn@public.gmane.org>
-Subject: Re: [RFC PATCH 0/5] Remove rw parameter from direct_IO()
-Date: Mon, 16 Mar 2015 18:15:21 +0000
-Message-ID: <20150316181521.GY29656@ZenIV.linux.org.uk>
-References: <cover.1426502566.git.osandov@osandov.com>
+From: "Matt W. Benjamin" <matt@cohortfs.com>
+Subject: Re: xio messenger is not building by default
+Date: Mon, 16 Mar 2015 14:22:04 -0400 (EDT)
+Message-ID: <1231373626.55.1426530124905.JavaMail.root@thunderbeast.private.linuxbox.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CA3E46@SACMBXIP01.sdcorp.global.sandisk.com>
+Reply-To: "Matt W. Benjamin" <matt@cohortfs.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <cover.1426502566.git.osandov-nWWhXC5lh1RBDgjK7y7TUQ@public.gmane.org>
-Sender: linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Omar Sandoval <osandov-nWWhXC5lh1RBDgjK7y7TUQ@public.gmane.org>
-Cc: linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-btrfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, osd-dev-yNzVSZO3znNg9hUCZPvPmw@public.gmane.org, linux-ext4-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-f2fs-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, fuse-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, jfs-discussion-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, HPDD-discuss-y27Ovi1pjclAfugRpC6u6w@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nilfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ocfs2-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org, reiserfs-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, v9fs-developer-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, xfs-VZNHf3L845pBDgjK7y7TUQ@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Mason <clm-b10kYP2dOMg@public.gmane.org>, Josef Bacik <jbacik-b10kYP2dOMg@public.gmane.org>, David Sterba <dsterba-AlSwsSmVLrQ@public.gmane.org>, Yan Zheng <zyan-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Sage Weil <sage-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Steve French <sfrench-eUNUBHrolfbYtjvyW6yDsg@public.gmane.org>, Boaz Harrosh <ooo-rh7Tgz9RNieUD9Wbbkgo/g@public.gmane.org>, Benny Halevy <bhalevy-7I+n7zu2hftEKMMhf/gKZA@public.gmane.org>, Jan Kara <jack-AlSwsSmVLrQ@public.gmane.org>, Theodore Ts'o <tytso-3s7WtUTddSA@public.gmane.org>, Andreas Dilger <adilger.kernel@dilger.>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from aa.linuxbox.com ([69.128.83.226]:2443 "EHLO aa.linuxbox.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754657AbbCPSWP (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 16 Mar 2015 14:22:15 -0400
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CA3E46@SACMBXIP01.sdcorp.global.sandisk.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: ceph-devel@vger.kernel.org, Sage Weil <sage@newdream.net>, Ken Dreyer <kdreyer@redhat.com>
 
-On Mon, Mar 16, 2015 at 04:33:48AM -0700, Omar Sandoval wrote:
+Hi,
+
+----- "Somnath Roy" <Somnath.Roy@sandisk.com> wrote:
+
+> I think installing the MLNX_OFED driver package will install most of
+> the stuff(including libibverbs-dev). We need the following extra
+> packages for building accelio.
+> numactl libnuma-dev
+
+Ah, that's also true.
+
+> 
+> But, what if user is building it without OFED driver package installed
+> ?
+
+Should it be possible?  I mean, to both build Xio and not have the header interface?
+
+> BTW, I saw accelio was giving assert if I manually install
+> libibverbs-dev from Ubuntu repo and upgrade this OFED driver later.
+> Cleaning the repo and rebuilding solved the issue. Seems it was
+> linking wrong libraries.
+
+I think I've seen this.
+
+> 
+> Thanks & Regards
+> Somnath
+> 
+> 
+> -----Original Message-----
+> From: Matt W. Benjamin [mailto:matt@cohortfs.com]
+> Sent: Monday, March 16, 2015 9:34 AM
+> To: Ken Dreyer
+> Cc: ceph-devel@vger.kernel.org; Sage Weil; Somnath Roy
+> Subject: Re: xio messenger is not building by default
+> 
 > Hi,
 > 
-> Al, here's some cleanup that you mentioned back in December that I got
-> around to (https://lkml.org/lkml/2014/12/15/28).
+> Yes, agree.  We do depend on librdmacm!
 > 
-> In summary, the rw parameter to a_ops->direct_IO() is redundant with
-> .type in struct iov_iter. Additionally, rw is inconsistently checked for
-> being a WRITE; some filesystems do rw == WRITE, others do rw & WRITE,
-> and others do both within the same function :) The distinction is that
-> swapout may OR in the ITER_BVEC flag in the rw passed to ->direct_IO(),
-> so the two are not equivalent (although this really only happens for
-> swap-over-NFS, but it's scary nonetheless). After looking through all of
-> these, it definitely looks like every check means for ANY write, not
-> just non-kernel writes.
+> Matt
 > 
-> So, the solution presented here is:
+> ----- "Ken Dreyer" <kdreyer@redhat.com> wrote:
 > 
-> - Add a helper, iov_iter_rw(), which always returns either READ or
->   WRITE, no ITER_.* or REQ_.* nonsense mixed in. For consistency, the
->   return value is always checked for equality
+> > On 03/16/2015 10:20 AM, Matt W. Benjamin wrote:
+> > > Hi,
+> > >
+> > > Arent OFED dependencies already packaged?  I assumed that only
+> > Accelio would
+> > > be a submodule.
+> > >
+> >
+> > Thanks for pointing that out. It's in Fedora as libibverbs-devel,
+> and
+> > it's in Debian as libibverbs-dev. So you're right, Accelio is the
+> only
+> > one to be packaged.
+> >
+> > Looking at configure.ac, does README.xio need to be updated to
+> mention
+> > librdmacm?
+> >
+> > - Ken
+> 
+> --
+> Matt Benjamin
+> CohortFS, LLC.
+> 315 West Huron Street, Suite 140A
+> Ann Arbor, Michigan 48103
+> 
+> http://cohortfs.com
+> 
+> tel.  734-761-4689
+> fax.  734-769-8938
+> cel.  734-216-5309
+> 
+> ________________________________
+> 
+> PLEASE NOTE: The information contained in this electronic mail message
+> is intended only for the use of the designated recipient(s) named
+> above. If the reader of this message is not the intended recipient,
+> you are hereby notified that you have received this message in error
+> and that any review, dissemination, distribution, or copying of this
+> message is strictly prohibited. If you have received this
+> communication in error, please notify the sender by telephone or
+> e-mail (as shown above) immediately and destroy any and all copies of
+> this message in your possession (whether hard copies or electronically
+> stored copies).
 
-TBH, I'm not sure I like such calling conventions, but I guess we can
-live with that.
+-- 
+Matt Benjamin
+CohortFS, LLC.
+315 West Huron Street, Suite 140A
+Ann Arbor, Michigan 48103
 
-> I decided to squish all of the filesystems together in patch 4 to avoid
-> inundating the mailing lists with 20+ mostly two-line patches, but I can
-> split those out if that's any better. Additionally, patch 1 pulls fs.h
-> into uio.h, which seems undesirable.
+http://cohortfs.com
 
-... and easily avoided if you use a macro instead of inline, without losing
-type safety or getting double evaluation, etc.
-
-Look: 0 ? (struct T *)0 : (x) always evaluates to x.  Now look at 6.5.15p3 in
-C99: the second and the third arguments are both pointers, so we are left with
-p3.4 (both arguments are pointers to qualified or unqualified versions of
-compatible types), p3.5 (one operand is a pointer and another null pointer
-constant) and p3.6 (one operand is a pointer to an object or incomplete type,
-and the other is a pointer to qualified or unqualied version of void.
-
-The first variant means that x is a pointer to qualified or unqualified
-struct T; the type of result is, per 6.5.15p6, the same as that of x.
-
-The second variant means that x is a null pointer constant ((struct T *)0 isn't
-one) and result is a null pointer to T.
-
-The third one means that x is a pointer to qualified or unqualified void.
-The type of result is the same as that of x.
-
-Now note that your variant is no better wrt type safety; worse, actually, since
-it does accept any pointer to void.  (0 ? (struct iov_iter *)0 : (x))->type
-will reject those.  And we obviously don't have double evaluation here either.
+tel.  734-761-4689 
+fax.  734-769-8938 
+cel.  734-216-5309 
