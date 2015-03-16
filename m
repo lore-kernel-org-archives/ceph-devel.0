@@ -1,89 +1,174 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: xio messenger is not building by default
-Date: Mon, 16 Mar 2015 18:25:44 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CA3F35@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CA3E46@SACMBXIP01.sdcorp.global.sandisk.com>
- <1231373626.55.1426530124905.JavaMail.root@thunderbeast.private.linuxbox.com>
+From: "Matt W. Benjamin" <matt@cohortfs.com>
+Subject: Re: xio messenger is not building by default
+Date: Mon, 16 Mar 2015 14:29:26 -0400 (EDT)
+Message-ID: <315784039.57.1426530566113.JavaMail.root@thunderbeast.private.linuxbox.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CA3F35@SACMBXIP01.sdcorp.global.sandisk.com>
+Reply-To: "Matt W. Benjamin" <matt@cohortfs.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0071.outbound.protection.outlook.com ([207.46.100.71]:62906
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S932716AbbCPSZ5 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 16 Mar 2015 14:25:57 -0400
-In-Reply-To: <1231373626.55.1426530124905.JavaMail.root@thunderbeast.private.linuxbox.com>
-Content-Language: en-US
+Received: from aa.linuxbox.com ([69.128.83.226]:2337 "EHLO aa.linuxbox.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753774AbbCPS3g (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 16 Mar 2015 14:29:36 -0400
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CA3F35@SACMBXIP01.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Matt W. Benjamin" <matt@cohortfs.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@newdream.net>, Ken Dreyer <kdreyer@redhat.com>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: ceph-devel@vger.kernel.org, Sage Weil <sage@newdream.net>, Ken Dreyer <kdreyer@redhat.com>
 
-TWF0dCwNCkl0IGlzIHBvc3NpYmxlIHRvIGJ1aWxkIGFjY2VsaW8gd2l0aG91dCBPRkVEIHBhY2th
-Z2VzIGluc3RhbGxlZC4NCkJ1dCwgbXkgc3VzcGljaW9uIGlzICwgaXQgbWF5IG5vdCB3b3JrIHBy
-b3Blcmx5IGFzIEkgaGF2ZSBtZW50aW9uZWQgYmVsb3cuDQoNClRoYW5rcyAmIFJlZ2FyZHMNClNv
-bW5hdGgNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IE1hdHQgVy4gQmVuamFt
-aW4gW21haWx0bzptYXR0QGNvaG9ydGZzLmNvbV0NClNlbnQ6IE1vbmRheSwgTWFyY2ggMTYsIDIw
-MTUgMTE6MjIgQU0NClRvOiBTb21uYXRoIFJveQ0KQ2M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwu
-b3JnOyBTYWdlIFdlaWw7IEtlbiBEcmV5ZXINClN1YmplY3Q6IFJlOiB4aW8gbWVzc2VuZ2VyIGlz
-IG5vdCBidWlsZGluZyBieSBkZWZhdWx0DQoNCkhpLA0KDQotLS0tLSAiU29tbmF0aCBSb3kiIDxT
-b21uYXRoLlJveUBzYW5kaXNrLmNvbT4gd3JvdGU6DQoNCj4gSSB0aGluayBpbnN0YWxsaW5nIHRo
-ZSBNTE5YX09GRUQgZHJpdmVyIHBhY2thZ2Ugd2lsbCBpbnN0YWxsIG1vc3Qgb2YNCj4gdGhlIHN0
-dWZmKGluY2x1ZGluZyBsaWJpYnZlcmJzLWRldikuIFdlIG5lZWQgdGhlIGZvbGxvd2luZyBleHRy
-YQ0KPiBwYWNrYWdlcyBmb3IgYnVpbGRpbmcgYWNjZWxpby4NCj4gbnVtYWN0bCBsaWJudW1hLWRl
-dg0KDQpBaCwgdGhhdCdzIGFsc28gdHJ1ZS4NCg0KPg0KPiBCdXQsIHdoYXQgaWYgdXNlciBpcyBi
-dWlsZGluZyBpdCB3aXRob3V0IE9GRUQgZHJpdmVyIHBhY2thZ2UgaW5zdGFsbGVkDQo+ID8NCg0K
-U2hvdWxkIGl0IGJlIHBvc3NpYmxlPyAgSSBtZWFuLCB0byBib3RoIGJ1aWxkIFhpbyBhbmQgbm90
-IGhhdmUgdGhlIGhlYWRlciBpbnRlcmZhY2U/DQoNCj4gQlRXLCBJIHNhdyBhY2NlbGlvIHdhcyBn
-aXZpbmcgYXNzZXJ0IGlmIEkgbWFudWFsbHkgaW5zdGFsbA0KPiBsaWJpYnZlcmJzLWRldiBmcm9t
-IFVidW50dSByZXBvIGFuZCB1cGdyYWRlIHRoaXMgT0ZFRCBkcml2ZXIgbGF0ZXIuDQo+IENsZWFu
-aW5nIHRoZSByZXBvIGFuZCByZWJ1aWxkaW5nIHNvbHZlZCB0aGUgaXNzdWUuIFNlZW1zIGl0IHdh
-cw0KPiBsaW5raW5nIHdyb25nIGxpYnJhcmllcy4NCg0KSSB0aGluayBJJ3ZlIHNlZW4gdGhpcy4N
-Cg0KPg0KPiBUaGFua3MgJiBSZWdhcmRzDQo+IFNvbW5hdGgNCj4NCj4NCj4gLS0tLS1PcmlnaW5h
-bCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogTWF0dCBXLiBCZW5qYW1pbiBbbWFpbHRvOm1hdHRAY29o
-b3J0ZnMuY29tXQ0KPiBTZW50OiBNb25kYXksIE1hcmNoIDE2LCAyMDE1IDk6MzQgQU0NCj4gVG86
-IEtlbiBEcmV5ZXINCj4gQ2M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnOyBTYWdlIFdlaWw7
-IFNvbW5hdGggUm95DQo+IFN1YmplY3Q6IFJlOiB4aW8gbWVzc2VuZ2VyIGlzIG5vdCBidWlsZGlu
-ZyBieSBkZWZhdWx0DQo+DQo+IEhpLA0KPg0KPiBZZXMsIGFncmVlLiAgV2UgZG8gZGVwZW5kIG9u
-IGxpYnJkbWFjbSENCj4NCj4gTWF0dA0KPg0KPiAtLS0tLSAiS2VuIERyZXllciIgPGtkcmV5ZXJA
-cmVkaGF0LmNvbT4gd3JvdGU6DQo+DQo+ID4gT24gMDMvMTYvMjAxNSAxMDoyMCBBTSwgTWF0dCBX
-LiBCZW5qYW1pbiB3cm90ZToNCj4gPiA+IEhpLA0KPiA+ID4NCj4gPiA+IEFyZW50IE9GRUQgZGVw
-ZW5kZW5jaWVzIGFscmVhZHkgcGFja2FnZWQ/ICBJIGFzc3VtZWQgdGhhdCBvbmx5DQo+ID4gQWNj
-ZWxpbyB3b3VsZA0KPiA+ID4gYmUgYSBzdWJtb2R1bGUuDQo+ID4gPg0KPiA+DQo+ID4gVGhhbmtz
-IGZvciBwb2ludGluZyB0aGF0IG91dC4gSXQncyBpbiBGZWRvcmEgYXMgbGliaWJ2ZXJicy1kZXZl
-bCwNCj4gYW5kDQo+ID4gaXQncyBpbiBEZWJpYW4gYXMgbGliaWJ2ZXJicy1kZXYuIFNvIHlvdSdy
-ZSByaWdodCwgQWNjZWxpbyBpcyB0aGUNCj4gb25seQ0KPiA+IG9uZSB0byBiZSBwYWNrYWdlZC4N
-Cj4gPg0KPiA+IExvb2tpbmcgYXQgY29uZmlndXJlLmFjLCBkb2VzIFJFQURNRS54aW8gbmVlZCB0
-byBiZSB1cGRhdGVkIHRvDQo+IG1lbnRpb24NCj4gPiBsaWJyZG1hY20/DQo+ID4NCj4gPiAtIEtl
-bg0KPg0KPiAtLQ0KPiBNYXR0IEJlbmphbWluDQo+IENvaG9ydEZTLCBMTEMuDQo+IDMxNSBXZXN0
-IEh1cm9uIFN0cmVldCwgU3VpdGUgMTQwQQ0KPiBBbm4gQXJib3IsIE1pY2hpZ2FuIDQ4MTAzDQo+
-DQo+IGh0dHA6Ly9jb2hvcnRmcy5jb20NCj4NCj4gdGVsLiAgNzM0LTc2MS00Njg5DQo+IGZheC4g
-IDczNC03NjktODkzOA0KPiBjZWwuICA3MzQtMjE2LTUzMDkNCj4NCj4gX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX18NCj4NCj4gUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250
-YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2FnZQ0KPiBpcyBpbnRlbmRlZCBvbmx5
-IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZA0KPiBhYm92
-ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNp
-cGllbnQsDQo+IHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQg
-dGhpcyBtZXNzYWdlIGluIGVycm9yDQo+IGFuZCB0aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRp
-b24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzDQo+IG1lc3NhZ2UgaXMgc3RyaWN0
-bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcw0KPiBjb21tdW5pY2F0aW9u
-IGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yDQo+IGUt
-bWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxs
-IGNvcGllcyBvZg0KPiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhh
-cmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5DQo+IHN0b3JlZCBjb3BpZXMpLg0KDQotLQ0KTWF0
-dCBCZW5qYW1pbg0KQ29ob3J0RlMsIExMQy4NCjMxNSBXZXN0IEh1cm9uIFN0cmVldCwgU3VpdGUg
-MTQwQQ0KQW5uIEFyYm9yLCBNaWNoaWdhbiA0ODEwMw0KDQpodHRwOi8vY29ob3J0ZnMuY29tDQoN
-CnRlbC4gIDczNC03NjEtNDY4OQ0KZmF4LiAgNzM0LTc2OS04OTM4DQpjZWwuICA3MzQtMjE2LTUz
-MDkNCg0KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCg0KUExFQVNFIE5PVEU6IFRo
-ZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2FnZSBp
-cyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChz
-KSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBp
-bnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUg
-cmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRpc3Nl
-bWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3Ry
-aWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9u
-IGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUtbWFp
-bCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNv
-cGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29w
-aWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KDQo=
+It might be possible to us Accelio over TCP, I guess.
+
+Matt
+
+----- "Somnath Roy" <Somnath.Roy@sandisk.com> wrote:
+
+> Matt,
+> It is possible to build accelio without OFED packages installed.
+> But, my suspicion is , it may not work properly as I have mentioned
+> below.
+> 
+> Thanks & Regards
+> Somnath
+> 
+> -----Original Message-----
+> From: Matt W. Benjamin [mailto:matt@cohortfs.com]
+> Sent: Monday, March 16, 2015 11:22 AM
+> To: Somnath Roy
+> Cc: ceph-devel@vger.kernel.org; Sage Weil; Ken Dreyer
+> Subject: Re: xio messenger is not building by default
+> 
+> Hi,
+> 
+> ----- "Somnath Roy" <Somnath.Roy@sandisk.com> wrote:
+> 
+> > I think installing the MLNX_OFED driver package will install most
+> of
+> > the stuff(including libibverbs-dev). We need the following extra
+> > packages for building accelio.
+> > numactl libnuma-dev
+> 
+> Ah, that's also true.
+> 
+> >
+> > But, what if user is building it without OFED driver package
+> installed
+> > ?
+> 
+> Should it be possible?  I mean, to both build Xio and not have the
+> header interface?
+> 
+> > BTW, I saw accelio was giving assert if I manually install
+> > libibverbs-dev from Ubuntu repo and upgrade this OFED driver later.
+> > Cleaning the repo and rebuilding solved the issue. Seems it was
+> > linking wrong libraries.
+> 
+> I think I've seen this.
+> 
+> >
+> > Thanks & Regards
+> > Somnath
+> >
+> >
+> > -----Original Message-----
+> > From: Matt W. Benjamin [mailto:matt@cohortfs.com]
+> > Sent: Monday, March 16, 2015 9:34 AM
+> > To: Ken Dreyer
+> > Cc: ceph-devel@vger.kernel.org; Sage Weil; Somnath Roy
+> > Subject: Re: xio messenger is not building by default
+> >
+> > Hi,
+> >
+> > Yes, agree.  We do depend on librdmacm!
+> >
+> > Matt
+> >
+> > ----- "Ken Dreyer" <kdreyer@redhat.com> wrote:
+> >
+> > > On 03/16/2015 10:20 AM, Matt W. Benjamin wrote:
+> > > > Hi,
+> > > >
+> > > > Arent OFED dependencies already packaged?  I assumed that only
+> > > Accelio would
+> > > > be a submodule.
+> > > >
+> > >
+> > > Thanks for pointing that out. It's in Fedora as libibverbs-devel,
+> > and
+> > > it's in Debian as libibverbs-dev. So you're right, Accelio is the
+> > only
+> > > one to be packaged.
+> > >
+> > > Looking at configure.ac, does README.xio need to be updated to
+> > mention
+> > > librdmacm?
+> > >
+> > > - Ken
+> >
+> > --
+> > Matt Benjamin
+> > CohortFS, LLC.
+> > 315 West Huron Street, Suite 140A
+> > Ann Arbor, Michigan 48103
+> >
+> > http://cohortfs.com
+> >
+> > tel.  734-761-4689
+> > fax.  734-769-8938
+> > cel.  734-216-5309
+> >
+> > ________________________________
+> >
+> > PLEASE NOTE: The information contained in this electronic mail
+> message
+> > is intended only for the use of the designated recipient(s) named
+> > above. If the reader of this message is not the intended recipient,
+> > you are hereby notified that you have received this message in
+> error
+> > and that any review, dissemination, distribution, or copying of
+> this
+> > message is strictly prohibited. If you have received this
+> > communication in error, please notify the sender by telephone or
+> > e-mail (as shown above) immediately and destroy any and all copies
+> of
+> > this message in your possession (whether hard copies or
+> electronically
+> > stored copies).
+> 
+> --
+> Matt Benjamin
+> CohortFS, LLC.
+> 315 West Huron Street, Suite 140A
+> Ann Arbor, Michigan 48103
+> 
+> http://cohortfs.com
+> 
+> tel.  734-761-4689
+> fax.  734-769-8938
+> cel.  734-216-5309
+> 
+> ________________________________
+> 
+> PLEASE NOTE: The information contained in this electronic mail message
+> is intended only for the use of the designated recipient(s) named
+> above. If the reader of this message is not the intended recipient,
+> you are hereby notified that you have received this message in error
+> and that any review, dissemination, distribution, or copying of this
+> message is strictly prohibited. If you have received this
+> communication in error, please notify the sender by telephone or
+> e-mail (as shown above) immediately and destroy any and all copies of
+> this message in your possession (whether hard copies or electronically
+> stored copies).
+
+-- 
+Matt Benjamin
+CohortFS, LLC.
+315 West Huron Street, Suite 140A
+Ann Arbor, Michigan 48103
+
+http://cohortfs.com
+
+tel.  734-761-4689 
+fax.  734-769-8938 
+cel.  734-216-5309 
