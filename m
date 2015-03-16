@@ -1,58 +1,61 @@
-From: "Matt W. Benjamin" <matt@cohortfs.com>
-Subject: Re: xio messenger is not building by default
-Date: Mon, 16 Mar 2015 12:33:49 -0400 (EDT)
-Message-ID: <1205925764.32.1426523629379.JavaMail.root@thunderbeast.private.linuxbox.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: xio messenger is not building by default
+Date: Mon, 16 Mar 2015 17:27:12 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CA3E46@SACMBXIP01.sdcorp.global.sandisk.com>
 References: <5507055E.6010109@redhat.com>
-Reply-To: "Matt W. Benjamin" <matt@cohortfs.com>
+ <1205925764.32.1426523629379.JavaMail.root@thunderbeast.private.linuxbox.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from aa.linuxbox.com ([69.128.83.226]:3519 "EHLO aa.linuxbox.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753314AbbCPQd6 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 16 Mar 2015 12:33:58 -0400
-In-Reply-To: <5507055E.6010109@redhat.com>
+Received: from mail-by2on0080.outbound.protection.outlook.com ([207.46.100.80]:17568
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752091AbbCPR1Z (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 16 Mar 2015 13:27:25 -0400
+In-Reply-To: <1205925764.32.1426523629379.JavaMail.root@thunderbeast.private.linuxbox.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ken Dreyer <kdreyer@redhat.com>
-Cc: ceph-devel@vger.kernel.org, Sage Weil <sage@newdream.net>, Somnath Roy <Somnath.Roy@sandisk.com>
+To: "Matt W. Benjamin" <matt@cohortfs.com>, Ken Dreyer <kdreyer@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@newdream.net>
 
-Hi,
-
-Yes, agree.  We do depend on librdmacm!
-
-Matt
-
------ "Ken Dreyer" <kdreyer@redhat.com> wrote:
-
-> On 03/16/2015 10:20 AM, Matt W. Benjamin wrote:
-> > Hi,
-> > 
-> > Arent OFED dependencies already packaged?  I assumed that only
-> Accelio would
-> > be a submodule.
-> > 
-> 
-> Thanks for pointing that out. It's in Fedora as libibverbs-devel, and
-> it's in Debian as libibverbs-dev. So you're right, Accelio is the
-> only
-> one to be packaged.
-> 
-> Looking at configure.ac, does README.xio need to be updated to
-> mention
-> librdmacm?
-> 
-> - Ken
-
--- 
-Matt Benjamin
-CohortFS, LLC.
-315 West Huron Street, Suite 140A
-Ann Arbor, Michigan 48103
-
-http://cohortfs.com
-
-tel.  734-761-4689 
-fax.  734-769-8938 
-cel.  734-216-5309 
+SSB0aGluayBpbnN0YWxsaW5nIHRoZSBNTE5YX09GRUQgZHJpdmVyIHBhY2thZ2Ugd2lsbCBpbnN0
+YWxsIG1vc3Qgb2YgdGhlIHN0dWZmKGluY2x1ZGluZyBsaWJpYnZlcmJzLWRldikuIFdlIG5lZWQg
+dGhlIGZvbGxvd2luZyBleHRyYSBwYWNrYWdlcyBmb3IgYnVpbGRpbmcgYWNjZWxpby4NCm51bWFj
+dGwgbGlibnVtYS1kZXYNCg0KQnV0LCB3aGF0IGlmIHVzZXIgaXMgYnVpbGRpbmcgaXQgd2l0aG91
+dCBPRkVEIGRyaXZlciBwYWNrYWdlIGluc3RhbGxlZCA/DQpCVFcsIEkgc2F3IGFjY2VsaW8gd2Fz
+IGdpdmluZyBhc3NlcnQgaWYgSSBtYW51YWxseSBpbnN0YWxsIGxpYmlidmVyYnMtZGV2IGZyb20g
+VWJ1bnR1IHJlcG8gYW5kIHVwZ3JhZGUgdGhpcyBPRkVEIGRyaXZlciBsYXRlci4gQ2xlYW5pbmcg
+dGhlIHJlcG8gYW5kIHJlYnVpbGRpbmcgc29sdmVkIHRoZSBpc3N1ZS4gU2VlbXMgaXQgd2FzIGxp
+bmtpbmcgd3JvbmcgbGlicmFyaWVzLg0KDQpUaGFua3MgJiBSZWdhcmRzDQpTb21uYXRoDQoNCg0K
+LS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IE1hdHQgVy4gQmVuamFtaW4gW21haWx0
+bzptYXR0QGNvaG9ydGZzLmNvbV0NClNlbnQ6IE1vbmRheSwgTWFyY2ggMTYsIDIwMTUgOTozNCBB
+TQ0KVG86IEtlbiBEcmV5ZXINCkNjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZzsgU2FnZSBX
+ZWlsOyBTb21uYXRoIFJveQ0KU3ViamVjdDogUmU6IHhpbyBtZXNzZW5nZXIgaXMgbm90IGJ1aWxk
+aW5nIGJ5IGRlZmF1bHQNCg0KSGksDQoNClllcywgYWdyZWUuICBXZSBkbyBkZXBlbmQgb24gbGli
+cmRtYWNtIQ0KDQpNYXR0DQoNCi0tLS0tICJLZW4gRHJleWVyIiA8a2RyZXllckByZWRoYXQuY29t
+PiB3cm90ZToNCg0KPiBPbiAwMy8xNi8yMDE1IDEwOjIwIEFNLCBNYXR0IFcuIEJlbmphbWluIHdy
+b3RlOg0KPiA+IEhpLA0KPiA+DQo+ID4gQXJlbnQgT0ZFRCBkZXBlbmRlbmNpZXMgYWxyZWFkeSBw
+YWNrYWdlZD8gIEkgYXNzdW1lZCB0aGF0IG9ubHkNCj4gQWNjZWxpbyB3b3VsZA0KPiA+IGJlIGEg
+c3VibW9kdWxlLg0KPiA+DQo+DQo+IFRoYW5rcyBmb3IgcG9pbnRpbmcgdGhhdCBvdXQuIEl0J3Mg
+aW4gRmVkb3JhIGFzIGxpYmlidmVyYnMtZGV2ZWwsIGFuZA0KPiBpdCdzIGluIERlYmlhbiBhcyBs
+aWJpYnZlcmJzLWRldi4gU28geW91J3JlIHJpZ2h0LCBBY2NlbGlvIGlzIHRoZSBvbmx5DQo+IG9u
+ZSB0byBiZSBwYWNrYWdlZC4NCj4NCj4gTG9va2luZyBhdCBjb25maWd1cmUuYWMsIGRvZXMgUkVB
+RE1FLnhpbyBuZWVkIHRvIGJlIHVwZGF0ZWQgdG8gbWVudGlvbg0KPiBsaWJyZG1hY20/DQo+DQo+
+IC0gS2VuDQoNCi0tDQpNYXR0IEJlbmphbWluDQpDb2hvcnRGUywgTExDLg0KMzE1IFdlc3QgSHVy
+b24gU3RyZWV0LCBTdWl0ZSAxNDBBDQpBbm4gQXJib3IsIE1pY2hpZ2FuIDQ4MTAzDQoNCmh0dHA6
+Ly9jb2hvcnRmcy5jb20NCg0KdGVsLiAgNzM0LTc2MS00Njg5DQpmYXguICA3MzQtNzY5LTg5MzgN
+CmNlbC4gIDczNC0yMTYtNTMwOQ0KDQpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXw0K
+DQpQTEVBU0UgTk9URTogVGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9u
+aWMgbWFpbCBtZXNzYWdlIGlzIGludGVuZGVkIG9ubHkgZm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2ln
+bmF0ZWQgcmVjaXBpZW50KHMpIG5hbWVkIGFib3ZlLiBJZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVz
+c2FnZSBpcyBub3QgdGhlIGludGVuZGVkIHJlY2lwaWVudCwgeW91IGFyZSBoZXJlYnkgbm90aWZp
+ZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQg
+YW55IHJldmlldywgZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9uLCBvciBjb3B5aW5nIG9mIHRo
+aXMgbWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0
+aGlzIGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSB0
+ZWxlcGhvbmUgb3IgZS1tYWlsIChhcyBzaG93biBhYm92ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ry
+b3kgYW55IGFuZCBhbGwgY29waWVzIG9mIHRoaXMgbWVzc2FnZSBpbiB5b3VyIHBvc3Nlc3Npb24g
+KHdoZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkgc3RvcmVkIGNvcGllcykuDQoN
+Cg==
