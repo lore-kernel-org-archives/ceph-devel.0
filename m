@@ -1,70 +1,60 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: dumpling branch for v0.67.12 is ready for release
-Date: Sun, 15 Mar 2015 22:24:32 +0100
-Message-ID: <5505F890.1010000@dachary.org>
-References: <54ECB06E.9020507@dachary.org>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: ceph-fuse remount issues
+Date: Sun, 15 Mar 2015 22:28:08 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1503152222480.28155@cobra.newdream.net>
+References: <54E66259.9040501@redhat.com> <C2032CA0-61E4-430E-938F-C40D51BF8DDA@redhat.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="tqK2SOveSB8NgV2J209iGLrU6q7qtHj0e"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:58367 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751296AbbCOVYo (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 15 Mar 2015 17:24:44 -0400
-In-Reply-To: <54ECB06E.9020507@dachary.org>
+Received: from mx1.redhat.com ([209.132.183.28]:59426 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750785AbbCPF2J (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 16 Mar 2015 01:28:09 -0400
+Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+	by mx1.redhat.com (Postfix) with ESMTPS id 8D5858EFC1
+	for <ceph-devel@vger.kernel.org>; Mon, 16 Mar 2015 05:28:09 +0000 (UTC)
+In-Reply-To: <C2032CA0-61E4-430E-938F-C40D51BF8DDA@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: =?GB2312?B?0c/V/Q==?= <zyan@redhat.com>
+Cc: John Spray <john.spray@redhat.com>, ceph-devel@vger.kernel.org, Gregory Farnum <gfarnum@redhat.com>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---tqK2SOveSB8NgV2J209iGLrU6q7qtHj0e
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Hi Zheng,
 
-Hi,
+On Thu, 26 Feb 2015, ?? wrote:
+> > ? 2015?2?20??06:23?John Spray <john.spray@redhat.com> ???
+> > 
+> > 
+> > Background: a while ago, we found (#10277) that existing cache expiration mechanism wasn't working with latest kernels.  We used to invalidate the top level dentries, which caused fuse to invalidate everything, but an implementation detail in fuse caused it to start ignoring our repeated invalidate calls, so this doesn't work any more.  To persuade fuse to dirty its entire metadata cache, Zheng added in a system() call to "mount -o remount" after we expire things from our client side cache.
+> 
+> Change of d_invalidate() implementation breaks our old cache expiration 
+> mechanism. When invalidating a denty, d_invalidate() also walks the 
+> dentry subtree and try pruning any unused descendant dentries. Our old 
+> cache expiration mechanism replies on this to prune unused dentries. We 
+> invalidate the top level dentries, d_invalidate() try pruning unused 
+> dentries underneath these top level dentries. Prior to 3.18 kernel, 
+> d_invalidate() can fail if the dentry is used by some one. 
+> Implementation of d_invalidate() change in 3.18 kernel, d_invalidate() 
+> always successes and unhash the dentry even if it?s still in use. This 
+> behavior changes make us not be able to use d_invalidate() at will. One 
+> known bad consequence is getcwd() system call return -EINVAL after 
+> process? working directory gets invalidated.
 
-A gentle reminder ;-)
+I took another look at this and it seems to me like we might need 
+something more than a new call that does the pruning.  What we were doing 
+before was also a bit of a hack, it seems.
 
-Cheers
+What is really going on is that the MDS is telling us to reduce the number 
+of inodes we have pinned.  We should ideally turn that into pressure on 
+dcache.. but it's not per-superblock, so there's not a shrinker we can 
+poke that that does what we want.
 
-On 24/02/2015 18:10, Loic Dachary wrote:
-> Hi Sage,
->=20
-> QE approved https://github.com/ceph/ceph/commit/77dfbbaccfb5074899d0231=
-4a26cb9ac46a69106 for release in the https://github.com/ceph/ceph/commits=
-/dumpling branch. The release notes should now be written based on the co=
-ntent of the issues and pull requests mentioned here http://workbench.dac=
-hary.org/ceph/ceph-backports/wikis/dumpling#already-merged
->=20
-> The release notes can now be written. In the future I'll ask about the =
-release notes earlier: the last tests do not change anything significant =
-and take days if not week. They can conveniently be done while the releas=
-e notes are written[1] instead of making them a blocker at the very end. =
+We *are* doing the dentry invalidations, so the dentries are unhashed.  
+But they aren't getting destroyed... Zheng, this is what the previous hack 
+was doing, right?  Forcing unhashed dentries to get trimmed from the LRU?
 
->=20
-> Cheers
->=20
-> [1] Cutting a new stable release http://ceph.com/docs/master/dev/develo=
-pment-workflow/#cutting-a-new-stable-release
->=20
+It seems like the most elegant solution would be to patch fs/fuse to make 
+that happen in the general case when we do the invalidate upcall.  Does 
+that sound right?
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---tqK2SOveSB8NgV2J209iGLrU6q7qtHj0e
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlUF+JEACgkQ8dLMyEl6F23IKQCgiE5kvlCNXh9abaC4jT0MeIIX
-beQAoIEqG2r+dnfOOqdk0ZjJNBIKyc6P
-=vF0l
------END PGP SIGNATURE-----
-
---tqK2SOveSB8NgV2J209iGLrU6q7qtHj0e--
+sage
