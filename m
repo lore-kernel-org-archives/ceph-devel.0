@@ -1,47 +1,60 @@
-From: Al Viro <viro-3bDd1+5oDREiFSDQTTA3OLVCufUGDwFn@public.gmane.org>
-Subject: Re: [RFC PATCH 1/5] new helper: iov_iter_rw()
-Date: Tue, 17 Mar 2015 18:19:15 +0000
-Message-ID: <20150317181910.GK29656@ZenIV.linux.org.uk>
-References: <cover.1426502566.git.osandov@osandov.com>
- <34dc78b262546e9343e0ed872232a97f5eaa5f15.1426502566.git.osandov@osandov.com>
- <20150316173605.GX29656@ZenIV.linux.org.uk>
- <20150317093151.GS20767@twin.jikos.cz>
+From: David Zafman <dzafman@redhat.com>
+Subject: Re: regenerating man pages
+Date: Tue, 17 Mar 2015 12:27:04 -0700
+Message-ID: <55088008.8010807@redhat.com>
+References: <55085911.9060800@redhat.com> <55085B32.9000305@redhat.com> <alpine.DEB.2.00.1503171011020.3716@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-nilfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20150317093151.GS20767-1ReQVI26iDCaZKY3DrU6dA@public.gmane.org>
-Sender: linux-nilfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: dsterba-AlSwsSmVLrQ@public.gmane.org, Omar Sandoval <osandov-nWWhXC5lh1RBDgjK7y7TUQ@public.gmane.org>, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-btrfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, osd-dev-yNzVSZO3znNg9hUCZPvPmw@public.gmane.org, linux-ext4-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-f2fs-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, fuse-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, jfs-discussion-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, HPDD-discuss-y27Ovi1pjclAfugRpC6u6w@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nilfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ocfs2-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org, reiserfs-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, v9fs-developer-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, xfs-VZNHf3L845pBDgjK7y7TUQ@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Mason <clm-b10kYP2dOMg@public.gmane.org>, Josef Bacik <jbacik-b10kYP2dOMg@public.gmane.org>, Yan Zheng <zyan-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Sage Weil <sage-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Steve French <sfrench-eUNUBHrolfbYtjvyW6yDsg@public.gmane.org>, Boaz Harrosh <ooo-rh7Tgz9RNieUD9Wbbkgo/g@public.gmane.org>, Benny Halevy <bhalevy-7I+n7zu2hftEKMMhf/gKZA@public.gmane.org>, Jan Kara <jack-AlSwsSmVLrQ@public.gmane.org>, Theodore Ts'o <tytso-3s7WtUTddSA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:56211 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932289AbbCQT1E (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 17 Mar 2015 15:27:04 -0400
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+	by mx1.redhat.com (Postfix) with ESMTPS id B3DAAC63E4
+	for <ceph-devel@vger.kernel.org>; Tue, 17 Mar 2015 19:27:04 +0000 (UTC)
+In-Reply-To: <alpine.DEB.2.00.1503171011020.3716@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, Josh Durgin <jdurgin@redhat.com>
+Cc: Ken Dreyer <kdreyer@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, Mar 17, 2015 at 10:31:51AM +0100, David Sterba wrote:
 
-> Agreed, but the proposed define is rather cryptic and I was not able to
-> understand the meaning on the first glance.
-> 
-> > #define iov_iter_rw(i) ((0 ? (struct iov_iter *)0 : (i))->type & RW_MASK)
-> 
-> This worked for me, does not compile with anything else than
-> 'struct iov_iter*' as i:
-> 
-> #define iov_iter_rw(i)	({			\
-> 	struct iov_iter __iter = *(i);		\
-> 	(i)->type & RW_MASK;			\
-> 	})
-> 
-> The assignment is optimized out.
+I found that I could not build the docs on Ubuntu 14.10 with the proper 
+packages installed.  Kefu is looking into Asphyxiate which is very 
+tempermental.  I installed an Ubuntu 11.10 in order to generate docs.
 
-... and you are getting
-	a) use of rather lousy gccism when plain C would do
-	b) double evaluation since you've got it wrong (should've been
-__iter.type & RW_MASK, if you do it that way).  As it is, if argument has
-any side effects, your variant will trigger those twice - even if the
-destination of the assignment is never used, the side effects remain.
+David
 
-I agree that it could use /* use ?: for typechecking */, but let's not go into
-({...}) land unless we absolutely have to.
---
-To unsubscribe from this list: send the line "unsubscribe linux-nilfs" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On 3/17/15 10:11 AM, Sage Weil wrote:
+> On Tue, 17 Mar 2015, Josh Durgin wrote:
+>> On 03/17/2015 09:40 AM, Ken Dreyer wrote:
+>>> I had a question about the way that we're handling man pages.
+>>>
+>>> In 356a749f63181d401d16371446bb8dc4f196c2a6 , "rbd: regenerate rbd(8)
+>>> man page", it looks like man/rbd.8 was regenerated from doc/man/8/rbd.rst
+>>>
+>>> It seems like it would be more efficient to avoid storing man pages in
+>>> Git and generate them dynamically at build time instead?
+>> Yes, that'd be great!
+>>
+>>> https://github.com/ceph/ceph/blob/master/admin/manpage-howto.txt
+>>>
+>>> "admin/build-doc" does a lot of things (including man page generation).
+>>> Could we simply run the "sphinx-build -b man" part at build time as a
+>>> part of "make"?
+>> I don't see a reason not to. It's just a matter of making it work on all
+>> the platforms we're building packages for. That might be annoying for
+>> the entirety of build-doc, but for just building man pages it should
+>> be simple.
+> I think the original reason we didn't was just because there are a lot of
+> dependencies for building the docs, so this inflates Build-Depends.  That
+> doesn't particularly bother me, though, if the deps do in fact exist.
+>
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
