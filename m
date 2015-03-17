@@ -1,52 +1,117 @@
-From: =?UTF-8?B?5b6Q5piV?= <xuxinhfut@gmail.com>
-Subject: =?UTF-8?Q?Can_i_improve_the_performance_of_rbd_rollback_in_thi?=
-	=?UTF-8?Q?s_way=EF=BC=9F?=
-Date: Tue, 17 Mar 2015 11:24:28 +0800
-Message-ID: <CAO7bE7fXz7-An2REcJKSjsb-HZFMnfi0Bo-MWtskptmLDd=8_g@mail.gmail.com>
+From: Abhishek Dixit <dixitabhi@gmail.com>
+Subject: Re: RGW : Transaction Id in response?
+Date: Tue, 17 Mar 2015 12:01:55 +0530
+Message-ID: <CAGoDY9=eAkpSFO1EhOe_9G=xz3Kv64ep2cQS9KiTMjaYVTmWUw@mail.gmail.com>
+References: <CAGoDY9=pLMvUyBKSi4-vqx7XqYbOfPBenzLxPmrKCWzV9Kccig@mail.gmail.com>
+ <CADTt810yeHs88c4-D53z3mOU-aSfU9pu-gi9p4Qi_4w6jLGDtQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f47.google.com ([209.85.218.47]:35508 "EHLO
-	mail-oi0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751181AbbCQDY3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Mar 2015 23:24:29 -0400
-Received: by oiag65 with SMTP id g65so55242719oia.2
-        for <ceph-devel@vger.kernel.org>; Mon, 16 Mar 2015 20:24:28 -0700 (PDT)
+Received: from mail-ie0-f180.google.com ([209.85.223.180]:34779 "EHLO
+	mail-ie0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751386AbbCQGcQ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Mar 2015 02:32:16 -0400
+Received: by iecsl2 with SMTP id sl2so1890180iec.1
+        for <ceph-devel@vger.kernel.org>; Mon, 16 Mar 2015 23:32:16 -0700 (PDT)
+In-Reply-To: <CADTt810yeHs88c4-D53z3mOU-aSfU9pu-gi9p4Qi_4w6jLGDtQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>, ZHOU Yuan <dunk007@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi,
+On Sat, Feb 28, 2015 at 6:54 AM, ZHOU Yuan <dunk007@gmail.com> wrote:
+> On Fri, Feb 27, 2015 at 6:31 PM, Abhishek Dixit <dixitabhi@gmail.com> wrote:
+>> On Thu, Feb 26, 2015 at 10:51 PM, Yehuda Sadeh-Weinraub
+>> <yehuda@redhat.com> wrote:
+>>>
+>>>
+>>> ----- Original Message -----
+>>>> From: "Abhishek Dixit" <dixitabhi@gmail.com>
+>>>> To: "ceph-devel" <ceph-devel@vger.kernel.org>
+>>>> Sent: Wednesday, February 25, 2015 8:35:40 PM
+>>>> Subject: RGW : Transaction Id in response?
+>>>>
+>>>> Hi,
+>>>>
+>>>> I was doing comparison of Open Stack Swift response headers and Ceph
+>>>> RGW response.
+>>>> This is in regard to X-Trans-Id header in response from Open Stack
+>>>> Swift storage.
+>>>> Swift response to a request always have the header "X-Trans-Id".
+>>>> X-Trans-Id : A unique transaction identifier for this request.
+>>>>
+>>>> X-Trans-Id seems to serve two purpose:
+>>>> 1. Every log messages for a request will carry this and aid in
+>>>> debugging/analyzing.
+>>>> 2. Benchmarking for latency.
+>>>>
+>>>> So, do we have similar unique identifier in Ceph RGW response which
+>>>> associates with each request?
+>>>>
+>>>> Or do we need add support for this?
+>>>>
+>>>
+>>> At the moment there is no such identifier. We can leverage the rados client instance id that each radosgw instance gets when connecting to the backend, and there's also a unique running number that we use to identify each request within that gateway. We can probably concatenate these and return it as the unique identifier.
+>>>
+>>> Yehuda
+>>>
+>>
+>>
+>> Hi Yehuda,
+>>
+>> I will add "X-Trans-Id" as per you suggested approach.
+>> I have opened a new issue particularly for adding "X-Trans-Id" as many
+>> other issues report absence of this header.
+>>
+>> I have assigned this to myself.
+>> http://tracker.ceph.com/issues/10970
+>>
+>
+>
+> Hi Yehuda, Abhishek,
+>
+> may be we should follow the swift way considering the goal is to keep
+> compatible with swift? This might make the log analysis a bit easier
+> for swift cluster operators.
+>
+> def generate_trans_id(trans_id_suffix):
+>     return 'tx%s-%010x%s' % (
+>         uuid.uuid4().hex[:21], time.time(), quote(trans_id_suffix))
+>
+> The trans_id_suffix is configurable in swift setup.
+>
+> Thanks, -yuan
+>
+>> Thanks
+>> Abhishek Dixit
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-I am a newbie to ceph. Recently i need to improve the performance of
-rbd rollback on xfs in my project. Through experiment i found that the
-mechanism of rbd rollback is like this:
 
-When a image is rolled back to one of its snapshot (say N), for every
-object that has been allocated,
-case A) if the object has no snap version since snap N, then the head
-version will be copied back to the latest snap (say N+M);
-case B) if the object has snap version since snap N, and it has the
-latest snap version (N+M), then the oldest snap version since snap N
-(say N+x, 0<=x<=M) will be copied to cover the head version;
-case C) if the object has snap version since snap N, and it has no
-version in the latest snap (N+M), then the head version will be copied
-back to the latest snap N+M, and the oldest snap version since snap N
-(say N+x, 0<=x<M) will be copied to cover the head version.
+Hi Yehuda, Yuan
 
-I think in case A, we need not to copied the head version back. So for
-improving performance, i comment the following statement in function
-ReplicatedPG::_rollback_to in osd/ReplicatedPG.cc,
+req_state already has req_id generated by concatenating instance_id
+and RGWRequest id field
+But this RGWRequest id field is not set when new RGWRequest is done in
+civetweb_callback function.
+So, id remains as zero.
+For "new RGWLoadGenRequest" and "new RGWFCGXRequest" id is updated to
+max_req_id.
+So do we need to fix req->id for new RGWRequest of civetweb_callback
+as at this point only, request are generated in my setup?
 
-......
-else if (rollback_to->obs.oi.soid.snap == CEPH_NOSNAP) {
-      // rolling back to the head; we just need to clone it.
-      // ctx->modify = true;
-}
-......
+Also, I have added uuid field in RGWRequest, from which we derive
+trans_id field added in struct req_state.
+This field trans_id of struct req_state is used when we are sending
+Swift response.
+I have concatenated trans_id with current time in milliseconds to
+generate X-Trans-Id header in Swift response.
 
-Can i improve performance of rollback like this? If CAN NOT, what is the reason?
+I have created a pull request on above lines.
+https://github.com/ceph/ceph/pull/4023
 
-Thank you.
-
-Xin Xu
+Thanks
+Abhishek
