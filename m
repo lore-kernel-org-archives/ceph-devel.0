@@ -1,102 +1,86 @@
-From: =?UTF-8?B?5b6Q5piV?= <xuxinhfut@gmail.com>
-Subject: =?UTF-8?Q?Re=3A_Can_i_improve_the_performance_of_rbd_rollback_in?=
-	=?UTF-8?Q?_this_way=EF=BC=9F?=
-Date: Tue, 17 Mar 2015 15:25:00 +0800
-Message-ID: <CAO7bE7fXP1uQW-RtnPPsDozt-5hr0XR9=aZHCYcuOhWW0pKU1w@mail.gmail.com>
-References: <CAO7bE7fXz7-An2REcJKSjsb-HZFMnfi0Bo-MWtskptmLDd=8_g@mail.gmail.com>
-	<576710578.4735463.1426574609418.JavaMail.zimbra@oxygem.tv>
-	<1047024924.4735475.1426574615914.JavaMail.zimbra@oxygem.tv>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Fwd: Reduce read latency and bandwidth for ec pool
+Date: Tue, 17 Mar 2015 08:48:55 +0100
+Message-ID: <5507DC67.2030800@dachary.org>
+References: <CANE=7sUo7tMT=kyuN86vs5b13nnqY9wpOuNuf=_z=P7UXKc+sg@mail.gmail.com> <CANE=7sVcY5sCaHUSFn+MDkAYzeewa767ziXXLqNiSCXhnG4s-g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="SRDUCHRRgO8thHjbh6AuAwAlH4qwOwQKH"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f181.google.com ([209.85.214.181]:35329 "EHLO
-	mail-ob0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752631AbbCQHZB convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Mar 2015 03:25:01 -0400
-Received: by obfv9 with SMTP id v9so976938obf.2
-        for <ceph-devel@vger.kernel.org>; Tue, 17 Mar 2015 00:25:00 -0700 (PDT)
-In-Reply-To: <1047024924.4735475.1426574615914.JavaMail.zimbra@oxygem.tv>
+Received: from mail2.dachary.org ([91.121.57.175]:59325 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751895AbbCQHs5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Mar 2015 03:48:57 -0400
+In-Reply-To: <CANE=7sVcY5sCaHUSFn+MDkAYzeewa767ziXXLqNiSCXhnG4s-g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Xinze Chi <xmdxcxz@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Alexandre,
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--SRDUCHRRgO8thHjbh6AuAwAlH4qwOwQKH
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-I have tried this out. It can improve the performance of rbd rollback
-greatly when the difference between the image and the sanpshot is
-small.
+Hi,
 
-But i'm not sure if this change may cause potential problem.
+On 17/03/2015 08:27, Xinze Chi wrote:
+> hi, loic:
+>=20
+>    I have an idea which could reduce read latency and bandwidth for ec =
+pool.
+>=20
+>    But, I don't know whether it is feasible.
+>=20
+>    Such as ec pool stripe_width =3D 16384 =3D 4 * 4096,  K =3D 4, M =3D=
+2
+>=20
+>    So ceph will partition the total of 16384 bytes to 4 data chunk,
+> and encoding 2 parity chunk
+>=20
+>    shard_0 include 0 - (4096-1) in original data;
+>    shard_1 include 4096 - (4096*2 - 1) in original data;
+>    shard_2 include 4096*2 - (4096 * 3 -1) in original data;
+>    shard_3 include 4096*3 - (4096 * 4 - 1) in original data
+>    shard_4 include parity chunk
+>    shard_5 include parity chunk
+>=20
+>     Now if client read (offset 0, len 4096) from object, it should
+> read 4 shard (from 0-3) and decode all this 4 chunk.
+>=20
+>     But, this example, maybe we can compute the destination shard
+> based on ec pool config ,read offset and read len , we only read
+>=20
+> shard_0 and return it to client, because shard_0 has include all data
+> as client need.
 
-Thanks
-Xin Xu
+That optimization makes sense to me. I guess you're interested in having =
+small objects in the pool and only read a few bytes at a time ?
 
-2015-03-17 14:43 GMT+08:00 Alexandre DERUMIER <aderumier@odiso.com>:
-> Hi,
-> I'm not sure it's helping for snapshot rollback, but hammer have a ne=
-w object_map feature:
->
-> https://wiki.ceph.com/Planning/Blueprints/Hammer/librbd%3A_shared_fla=
-g,_object_map
->
->
-> which help for resize,flatten,...
->
->
-> ----- Mail original -----
-> De: "=E5=BE=90=E6=98=95" <xuxinhfut@gmail.com>
-> =C3=80: "ceph-devel" <ceph-devel@vger.kernel.org>
-> Envoy=C3=A9: Mardi 17 Mars 2015 04:24:28
-> Objet: Can i improve the performance of rbd rollback in this way=EF=BC=
-=9F
->
-> Hi,
->
-> I am a newbie to ceph. Recently i need to improve the performance of
-> rbd rollback on xfs in my project. Through experiment i found that th=
-e
-> mechanism of rbd rollback is like this:
->
-> When a image is rolled back to one of its snapshot (say N), for every
-> object that has been allocated,
-> case A) if the object has no snap version since snap N, then the head
-> version will be copied back to the latest snap (say N+M);
-> case B) if the object has snap version since snap N, and it has the
-> latest snap version (N+M), then the oldest snap version since snap N
-> (say N+x, 0<=3Dx<=3DM) will be copied to cover the head version;
-> case C) if the object has snap version since snap N, and it has no
-> version in the latest snap (N+M), then the head version will be copie=
-d
-> back to the latest snap N+M, and the oldest snap version since snap N
-> (say N+x, 0<=3Dx<M) will be copied to cover the head version.
->
-> I think in case A, we need not to copied the head version back. So fo=
-r
-> improving performance, i comment the following statement in function
-> ReplicatedPG::_rollback_to in osd/ReplicatedPG.cc,
->
-> ......
-> else if (rollback_to->obs.oi.soid.snap =3D=3D CEPH_NOSNAP) {
-> // rolling back to the head; we just need to clone it.
-> // ctx->modify =3D true;
-> }
-> ......
->
-> Can i improve performance of rollback like this? If CAN NOT, what is =
-the reason?
->
-> Thank you.
->
-> Xin Xu
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Cheers
+
+>=20
+>     Wait for your comment.
+>=20
+>     Thanks.
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--SRDUCHRRgO8thHjbh6AuAwAlH4qwOwQKH
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlUH3GcACgkQ8dLMyEl6F203/QCdGhYhAh8c9fJD2iSpzsjvDa50
+aEsAn0B7I3bhS6dR9Q6opfLnY3z7xtWs
+=5YlV
+-----END PGP SIGNATURE-----
+
+--SRDUCHRRgO8thHjbh6AuAwAlH4qwOwQKH--
