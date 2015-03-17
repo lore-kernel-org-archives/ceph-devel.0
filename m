@@ -1,155 +1,135 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Fwd: Fwd: Reduce read latency and bandwidth for ec pool
-Date: Tue, 17 Mar 2015 09:58:39 +0100
-Message-ID: <5507ECBF.9030404@dachary.org>
-References: <CANE=7sUo7tMT=kyuN86vs5b13nnqY9wpOuNuf=_z=P7UXKc+sg@mail.gmail.com>	<CANE=7sVcY5sCaHUSFn+MDkAYzeewa767ziXXLqNiSCXhnG4s-g@mail.gmail.com>	<5507DC67.2030800@dachary.org>	<CANE=7sV1CQA=ZV5ELihrE4DZNGN5=4c07uP4Pv2w8LLpzqWabA@mail.gmail.com>	<CANE=7sWb3EXwwpEN_suc0JVNrm46YggVhO7sekG51w5reiMocg@mail.gmail.com>	<5507DF9E.5050903@dachary.org>	<CANE=7sUR-Wdsat=3mBHW4SWrxSJPOC4svrZkwBMYQnWQFJ5VCw@mail.gmail.com>	<5507E82A.9010306@dachary.org> <CANE=7sWF+fm-UNA+krFUEMwTKzCJHJeaaCY_aq4yHLXvhV=Yzw@mail.gmail.com>
+From: =?UTF-8?B?5b6Q5piV?= <xuxinhfut@gmail.com>
+Subject: =?UTF-8?Q?Re=3A_Can_i_improve_the_performance_of_rbd_rollback_in?=
+	=?UTF-8?Q?_this_way=EF=BC=9F?=
+Date: Tue, 17 Mar 2015 17:13:51 +0800
+Message-ID: <CAO7bE7dpG970uZxPA3Bh8jbo=YGJtv6OZuUsrUrP91GPu9XNqQ@mail.gmail.com>
+References: <CAO7bE7fXz7-An2REcJKSjsb-HZFMnfi0Bo-MWtskptmLDd=8_g@mail.gmail.com>
+	<576710578.4735463.1426574609418.JavaMail.zimbra@oxygem.tv>
+	<1047024924.4735475.1426574615914.JavaMail.zimbra@oxygem.tv>
+	<CAO7bE7fXP1uQW-RtnPPsDozt-5hr0XR9=aZHCYcuOhWW0pKU1w@mail.gmail.com>
+	<CALZt5jxdfi0nO-Zir-cCCUX1G65bVj_fLb=3ene+hqmEnYsmLA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="lpsgv4G1GRtm2pwSqVlmQ143hXmODgIn4"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:59385 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753753AbbCQI6m (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Mar 2015 04:58:42 -0400
-In-Reply-To: <CANE=7sWF+fm-UNA+krFUEMwTKzCJHJeaaCY_aq4yHLXvhV=Yzw@mail.gmail.com>
+Received: from mail-ob0-f179.google.com ([209.85.214.179]:35000 "EHLO
+	mail-ob0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932149AbbCQJNw convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Mar 2015 05:13:52 -0400
+Received: by obfv9 with SMTP id v9so2559072obf.2
+        for <ceph-devel@vger.kernel.org>; Tue, 17 Mar 2015 02:13:52 -0700 (PDT)
+In-Reply-To: <CALZt5jxdfi0nO-Zir-cCCUX1G65bVj_fLb=3ene+hqmEnYsmLA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Xinze Chi <xmdxcxz@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ning Yao <zay11022@gmail.com>
+Cc: Alexandre DERUMIER <aderumier@odiso.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---lpsgv4G1GRtm2pwSqVlmQ143hXmODgIn4
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Hi Ning,
 
+Do you mean that this change sacrifice the write performance to
+rollback performance. Without considering the write performance, does
+this method exist potential problem that crash ceph? Or it cannot get
+correct result in some corner case?
 
+Thanks
+Xin Xu
 
-On 17/03/2015 09:45, Xinze Chi wrote:
-> Sorry, I have not measure it.
->=20
-> But I think it should really reduce latency when hit miss in cache
-> pool and do_proxy_read.
-
-Interesting. I bet Jason or Josh have an opinion about this.
-
-Cheers
-
->=20
-> 2015-03-17 16:39 GMT+08:00 Loic Dachary <loic@dachary.org>:
+2015-03-17 16:40 GMT+08:00 Ning Yao <zay11022@gmail.com>:
+> 2015-03-17 15:25 GMT+08:00 =E5=BE=90=E6=98=95 <xuxinhfut@gmail.com>:
+>> Hi Alexandre,
 >>
+>> I have tried this out. It can improve the performance of rbd rollbac=
+k
+>> greatly when the difference between the image and the sanpshot is
+>> small.
 >>
->> On 17/03/2015 09:05, Xinze Chi wrote:
->>> RBD.
+> If the clone does not happen in the rollback process, you may conside=
+r
+> it would properly happen when it is modified. I may agree, if one
+> object is always not modified since the snapshot N, it may be treated
+> as a cold object so that it is likely not to be modified in the
+> following period.
+>
+>> But i'm not sure if this change may cause potential problem.
 >>
->> Did you measure that RBD does a significant amount of reads that would=
- be optimized in this way ?
+>> Thanks
+>> Xin Xu
 >>
->>> Maybe we could use tier pool.
+>> 2015-03-17 14:43 GMT+08:00 Alexandre DERUMIER <aderumier@odiso.com>:
+>>> Hi,
+>>> I'm not sure it's helping for snapshot rollback, but hammer have a =
+new object_map feature:
 >>>
->>> Thanks
+>>> https://wiki.ceph.com/Planning/Blueprints/Hammer/librbd%3A_shared_f=
+lag,_object_map
 >>>
->>> 2015-03-17 16:02 GMT+08:00 Loic Dachary <loic@dachary.org>:
->>>>
->>>>
->>>> On 17/03/2015 08:52, Xinze Chi wrote:
->>>>> ---------- Forwarded message ----------
->>>>> From: Xinze Chi <xmdxcxz@gmail.com>
->>>>> Date: 2015-03-17 15:52 GMT+08:00
->>>>> Subject: Re: Fwd: Reduce read latency and bandwidth for ec pool
->>>>> To: Loic Dachary <loic@dachary.org>
->>>>>
->>>>>
->>>>> Yes, In my VDI environment, client read 4k every time. If we can re=
+>>>
+>>> which help for resize,flatten,...
+>>>
+>>>
+>>> ----- Mail original -----
+>>> De: "=E5=BE=90=E6=98=95" <xuxinhfut@gmail.com>
+>>> =C3=80: "ceph-devel" <ceph-devel@vger.kernel.org>
+>>> Envoy=C3=A9: Mardi 17 Mars 2015 04:24:28
+>>> Objet: Can i improve the performance of rbd rollback in this way=EF=
+=BC=9F
+>>>
+>>> Hi,
+>>>
+>>> I am a newbie to ceph. Recently i need to improve the performance o=
+f
+>>> rbd rollback on xfs in my project. Through experiment i found that =
+the
+>>> mechanism of rbd rollback is like this:
+>>>
+>>> When a image is rolled back to one of its snapshot (say N), for eve=
+ry
+>>> object that has been allocated,
+>>> case A) if the object has no snap version since snap N, then the he=
 ad
->>>>> object from only shard. It would reduce the latency and bandwidth a=
-
->>>>> lot.
->>>>
->>>> I'm curious about your workload. Are you using RadosGW ? RBD ?
->>>>
->>>>> Thanks.
->>>>>
->>>>> 2015-03-17 15:48 GMT+08:00 Loic Dachary <loic@dachary.org>:
->>>>>> Hi,
->>>>>>
->>>>>> On 17/03/2015 08:27, Xinze Chi wrote:
->>>>>>> hi, loic:
->>>>>>>
->>>>>>>    I have an idea which could reduce read latency and bandwidth f=
-or ec pool.
->>>>>>>
->>>>>>>    But, I don't know whether it is feasible.
->>>>>>>
->>>>>>>    Such as ec pool stripe_width =3D 16384 =3D 4 * 4096,  K =3D 4,=
- M =3D2
->>>>>>>
->>>>>>>    So ceph will partition the total of 16384 bytes to 4 data chun=
-k,
->>>>>>> and encoding 2 parity chunk
->>>>>>>
->>>>>>>    shard_0 include 0 - (4096-1) in original data;
->>>>>>>    shard_1 include 4096 - (4096*2 - 1) in original data;
->>>>>>>    shard_2 include 4096*2 - (4096 * 3 -1) in original data;
->>>>>>>    shard_3 include 4096*3 - (4096 * 4 - 1) in original data
->>>>>>>    shard_4 include parity chunk
->>>>>>>    shard_5 include parity chunk
->>>>>>>
->>>>>>>     Now if client read (offset 0, len 4096) from object, it shoul=
-d
->>>>>>> read 4 shard (from 0-3) and decode all this 4 chunk.
->>>>>>>
->>>>>>>     But, this example, maybe we can compute the destination shard=
-
->>>>>>> based on ec pool config ,read offset and read len , we only read
->>>>>>>
->>>>>>> shard_0 and return it to client, because shard_0 has include all =
-data
->>>>>>> as client need.
->>>>>>
->>>>>> That optimization makes sense to me. I guess you're interested in =
-having small objects in the pool and only read a few bytes at a time ?
->>>>>>
->>>>>> Cheers
->>>>>>
->>>>>>>
->>>>>>>     Wait for your comment.
->>>>>>>
->>>>>>>     Thanks.
->>>>>>>
->>>>>>
->>>>>> --
->>>>>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->>>>>>
->>>>> --
->>>>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
+>>> version will be copied back to the latest snap (say N+M);
+>>> case B) if the object has snap version since snap N, and it has the
+>>> latest snap version (N+M), then the oldest snap version since snap =
+N
+>>> (say N+x, 0<=3Dx<=3DM) will be copied to cover the head version;
+>>> case C) if the object has snap version since snap N, and it has no
+>>> version in the latest snap (N+M), then the head version will be cop=
+ied
+>>> back to the latest snap N+M, and the oldest snap version since snap=
+ N
+>>> (say N+x, 0<=3Dx<M) will be copied to cover the head version.
+>>>
+>>> I think in case A, we need not to copied the head version back. So =
+for
+>>> improving performance, i comment the following statement in functio=
+n
+>>> ReplicatedPG::_rollback_to in osd/ReplicatedPG.cc,
+>>>
+>>> ......
+>>> else if (rollback_to->obs.oi.soid.snap =3D=3D CEPH_NOSNAP) {
+>>> // rolling back to the head; we just need to clone it.
+>>> // ctx->modify =3D true;
+>>> }
+>>> ......
+>>>
+>>> Can i improve performance of rollback like this? If CAN NOT, what i=
+s the reason?
+>>>
+>>> Thank you.
+>>>
+>>> Xin Xu
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
 l" in
->>>>> the body of a message to majordomo@vger.kernel.org
->>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>
->>>>
->>>> --
->>>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->>>>
->>
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at http://vger.kernel.org/majordomo-info.html
 >> --
->> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->>
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---lpsgv4G1GRtm2pwSqVlmQ143hXmODgIn4
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlUH7L8ACgkQ8dLMyEl6F232lgCgoD4WCgeU2woNH7vEkcTgeamD
-D60An1F7e9zRwk0QGubMKIzTOVDqrqLB
-=aKrF
------END PGP SIGNATURE-----
-
---lpsgv4G1GRtm2pwSqVlmQ143hXmODgIn4--
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
