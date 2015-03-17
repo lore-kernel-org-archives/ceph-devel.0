@@ -1,82 +1,67 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: =?utf-8?Q?Re:_Can_i_improve_the_performan?=
- =?utf-8?Q?ce_of_rbd_rollback_in_this_way=EF=BC=9F?=
-Date: Tue, 17 Mar 2015 07:43:35 +0100 (CET)
-Message-ID: <1047024924.4735475.1426574615914.JavaMail.zimbra@oxygem.tv>
-References: <CAO7bE7fXz7-An2REcJKSjsb-HZFMnfi0Bo-MWtskptmLDd=8_g@mail.gmail.com>
+From: Ning Yao <zay11022@gmail.com>
+Subject: Re: crc error when decode_message?
+Date: Tue, 17 Mar 2015 15:23:34 +0800
+Message-ID: <CALZt5jyiiM2NcurGLSVYYkNn+bPuwhWX8+zb0bBndKQ92p2KNg@mail.gmail.com>
+References: <CANE=7sWQaG8PZYEU9OsjkmU6GB6jKhcnSG1cm6o38EeMb65pGw@mail.gmail.com>
+	<CANE=7sXX9mFuuFGJE7edXdE2q7pt+teOjXkCgb5aWjToAYM1MA@mail.gmail.com>
+	<CACJqLybJus0ijP+xB7OorE7sAkhn8DWb7MPTJAMxSOVRL1mR4g@mail.gmail.com>
+	<CANE=7sWuRcWhNx9VFBDp5csKed06a2ZDXbd1am2G+6Ua=wFC4w@mail.gmail.com>
+	<CACJqLyZ50EkaLwSv2yEDuNq0Yj+=Og+x5gK01ao-woN1UqZPjw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:38059 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750958AbbCQGni convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Mar 2015 02:43:38 -0400
-In-Reply-To: <576710578.4735463.1426574609418.JavaMail.zimbra@oxygem.tv>
+Received: from mail-ob0-f178.google.com ([209.85.214.178]:35482 "EHLO
+	mail-ob0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752119AbbCQHXf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Mar 2015 03:23:35 -0400
+Received: by obfv9 with SMTP id v9so957256obf.2
+        for <ceph-devel@vger.kernel.org>; Tue, 17 Mar 2015 00:23:34 -0700 (PDT)
+In-Reply-To: <CACJqLyZ50EkaLwSv2yEDuNq0Yj+=Og+x5gK01ao-woN1UqZPjw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?utf-8?B?5b6Q5piV?= <xuxinhfut@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Haomai Wang <haomaiwang@gmail.com>
+Cc: Xinze Chi <xmdxcxz@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
-I'm not sure it's helping for snapshot rollback, but hammer have a new =
-object_map feature:
+2015-03-16 22:06 GMT+08:00 Haomai Wang <haomaiwang@gmail.com>:
+> On Mon, Mar 16, 2015 at 10:04 PM, Xinze Chi <xmdxcxz@gmail.com> wrote:
+>> How to process the write request in primary?
+>>
+>> Thanks.
+>>
+>> 2015-03-16 22:01 GMT+08:00 Haomai Wang <haomaiwang@gmail.com>:
+>>> AFAR Pipe and AsyncConnection both will mark self fault and shutdown
+>>> socket and peer will detect this reset. So each side has chance to
+>>> rebuild the session.
+>>>
+>>> On Mon, Mar 16, 2015 at 9:19 PM, Xinze Chi <xmdxcxz@gmail.com> wrote:
+>>>> Such as, Client send write request to osd.0 (primary), osd.0 send
+>>>> MOSDSubOp to osd.1 and osd.2
+>>>>
+>>>> osd.1 send reply to osd.0 (primary), but accident happened:
+>>>>
+>>>> 1. decode_message crc error when decode reply msg
+>>>> or
+>>>> 2. the reply msg is lost when send to osd.0, so osd.0 do not receive replay msg
+>>>>
+>>>> Could anyone tell me what is the behavior if osd.0 (primary)?
+>>>>
+>
+> osd.0 and osd.1 both will try to reconnect peer side, and the lost
+> message will be resend to osd.0 from osd.1
+So I wonder if different routing path delays the arrival of one
+message, then the in_seq would be setting ahead, then based on the
+logic. Later, if the delaying message arrives, it will be dropping and
+discard. Thus, if it is just a sub_op reply message as xinze
+describes, how ceph works after that? It seems repop of the write Op
+will be waiting infinite times until the osd restart?
 
-https://wiki.ceph.com/Planning/Blueprints/Hammer/librbd%3A_shared_flag,=
-_object_map
-
-
-which help for resize,flatten,...
-
-
------ Mail original -----
-De: "=E5=BE=90=E6=98=95" <xuxinhfut@gmail.com>
-=C3=80: "ceph-devel" <ceph-devel@vger.kernel.org>
-Envoy=C3=A9: Mardi 17 Mars 2015 04:24:28
-Objet: Can i improve the performance of rbd rollback in this way=EF=BC=9F
-
-Hi,=20
-
-I am a newbie to ceph. Recently i need to improve the performance of=20
-rbd rollback on xfs in my project. Through experiment i found that the=20
-mechanism of rbd rollback is like this:=20
-
-When a image is rolled back to one of its snapshot (say N), for every=20
-object that has been allocated,=20
-case A) if the object has no snap version since snap N, then the head=20
-version will be copied back to the latest snap (say N+M);=20
-case B) if the object has snap version since snap N, and it has the=20
-latest snap version (N+M), then the oldest snap version since snap N=20
-(say N+x, 0<=3Dx<=3DM) will be copied to cover the head version;=20
-case C) if the object has snap version since snap N, and it has no=20
-version in the latest snap (N+M), then the head version will be copied=20
-back to the latest snap N+M, and the oldest snap version since snap N=20
-(say N+x, 0<=3Dx<M) will be copied to cover the head version.=20
-
-I think in case A, we need not to copied the head version back. So for=20
-improving performance, i comment the following statement in function=20
-ReplicatedPG::_rollback_to in osd/ReplicatedPG.cc,=20
-
-=2E.....=20
-else if (rollback_to->obs.oi.soid.snap =3D=3D CEPH_NOSNAP) {=20
-// rolling back to the head; we just need to clone it.=20
-// ctx->modify =3D true;=20
-}=20
-=2E.....=20
-
-Can i improve performance of rollback like this? If CAN NOT, what is th=
-e reason?=20
-
-Thank you.=20
-
-Xin Xu=20
---=20
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n=20
-the body of a message to majordomo@vger.kernel.org=20
-More majordomo info at http://vger.kernel.org/majordomo-info.html=20
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+> --
+> Best Regards,
+>
+> Wheat
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
