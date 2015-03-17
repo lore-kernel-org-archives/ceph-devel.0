@@ -1,141 +1,53 @@
-From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Subject: Re: RGW : Transaction Id in response?
-Date: Tue, 17 Mar 2015 10:50:44 -0400 (EDT)
-Message-ID: <2060462867.22342282.1426603844200.JavaMail.zimbra@redhat.com>
-References: <CAGoDY9=pLMvUyBKSi4-vqx7XqYbOfPBenzLxPmrKCWzV9Kccig@mail.gmail.com> <CADTt810yeHs88c4-D53z3mOU-aSfU9pu-gi9p4Qi_4w6jLGDtQ@mail.gmail.com> <CAGoDY9=eAkpSFO1EhOe_9G=xz3Kv64ep2cQS9KiTMjaYVTmWUw@mail.gmail.com>
+From: Patrick McGarry <pmcgarry@redhat.com>
+Subject: Ceph Day Call For Speakers (Berlin, Beijing, San Jose)
+Date: Tue, 17 Mar 2015 11:36:38 -0400
+Message-ID: <CAAZbbf3_VpKmTQqg2D3-=XXSRszKLkGD8+SdU+ae9vi-7X7u_g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx5-phx2.redhat.com ([209.132.183.37]:52338 "EHLO
-	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752686AbbCQOur (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Mar 2015 10:50:47 -0400
-In-Reply-To: <CAGoDY9=eAkpSFO1EhOe_9G=xz3Kv64ep2cQS9KiTMjaYVTmWUw@mail.gmail.com>
+Received: from mail-ob0-f182.google.com ([209.85.214.182]:35500 "EHLO
+	mail-ob0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753823AbbCQPgj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Mar 2015 11:36:39 -0400
+Received: by obfv9 with SMTP id v9so10082047obf.2
+        for <ceph-devel@vger.kernel.org>; Tue, 17 Mar 2015 08:36:38 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Abhishek Dixit <dixitabhi@gmail.com>
-Cc: ZHOU Yuan <dunk007@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
 
+Hey Cephers,
 
+Now that the first Ceph Day is under our belt, we're looking forward
+to the next couple of events. The event in San Francisco was great,
+with many solid community speakers...and we want to keep that trend
+rolling. Take a look at the upcoming events, and if you have been
+doing cool things with Ceph, we'd love to feature them in a brief talk
+w/ Q&A. Just send me the speakers name, organization, and a title.
 
------ Original Message -----
-> From: "Abhishek Dixit" <dixitabhi@gmail.com>
-> To: "Yehuda Sadeh-Weinraub" <yehuda@redhat.com>, "ZHOU Yuan" <dunk007@gmail.com>
-> Cc: "ceph-devel" <ceph-devel@vger.kernel.org>
-> Sent: Monday, March 16, 2015 11:31:55 PM
-> Subject: Re: RGW : Transaction Id in response?
-> 
-> On Sat, Feb 28, 2015 at 6:54 AM, ZHOU Yuan <dunk007@gmail.com> wrote:
-> > On Fri, Feb 27, 2015 at 6:31 PM, Abhishek Dixit <dixitabhi@gmail.com>
-> > wrote:
-> >> On Thu, Feb 26, 2015 at 10:51 PM, Yehuda Sadeh-Weinraub
-> >> <yehuda@redhat.com> wrote:
-> >>>
-> >>>
-> >>> ----- Original Message -----
-> >>>> From: "Abhishek Dixit" <dixitabhi@gmail.com>
-> >>>> To: "ceph-devel" <ceph-devel@vger.kernel.org>
-> >>>> Sent: Wednesday, February 25, 2015 8:35:40 PM
-> >>>> Subject: RGW : Transaction Id in response?
-> >>>>
-> >>>> Hi,
-> >>>>
-> >>>> I was doing comparison of Open Stack Swift response headers and Ceph
-> >>>> RGW response.
-> >>>> This is in regard to X-Trans-Id header in response from Open Stack
-> >>>> Swift storage.
-> >>>> Swift response to a request always have the header "X-Trans-Id".
-> >>>> X-Trans-Id : A unique transaction identifier for this request.
-> >>>>
-> >>>> X-Trans-Id seems to serve two purpose:
-> >>>> 1. Every log messages for a request will carry this and aid in
-> >>>> debugging/analyzing.
-> >>>> 2. Benchmarking for latency.
-> >>>>
-> >>>> So, do we have similar unique identifier in Ceph RGW response which
-> >>>> associates with each request?
-> >>>>
-> >>>> Or do we need add support for this?
-> >>>>
-> >>>
-> >>> At the moment there is no such identifier. We can leverage the rados
-> >>> client instance id that each radosgw instance gets when connecting to
-> >>> the backend, and there's also a unique running number that we use to
-> >>> identify each request within that gateway. We can probably concatenate
-> >>> these and return it as the unique identifier.
-> >>>
-> >>> Yehuda
-> >>>
-> >>
-> >>
-> >> Hi Yehuda,
-> >>
-> >> I will add "X-Trans-Id" as per you suggested approach.
-> >> I have opened a new issue particularly for adding "X-Trans-Id" as many
-> >> other issues report absence of this header.
-> >>
-> >> I have assigned this to myself.
-> >> http://tracker.ceph.com/issues/10970
-> >>
-> >
-> >
-> > Hi Yehuda, Abhishek,
-> >
-> > may be we should follow the swift way considering the goal is to keep
-> > compatible with swift? This might make the log analysis a bit easier
-> > for swift cluster operators.
-> >
-> > def generate_trans_id(trans_id_suffix):
-> >     return 'tx%s-%010x%s' % (
-> >         uuid.uuid4().hex[:21], time.time(), quote(trans_id_suffix))
-> >
-> > The trans_id_suffix is configurable in swift setup.
-> >
-> > Thanks, -yuan
-> >
-> >> Thanks
-> >> Abhishek Dixit
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
-> Hi Yehuda, Yuan
-> 
-> req_state already has req_id generated by concatenating instance_id
-> and RGWRequest id field
-> But this RGWRequest id field is not set when new RGWRequest is done in
-> civetweb_callback function.
-> So, id remains as zero.
-> For "new RGWLoadGenRequest" and "new RGWFCGXRequest" id is updated to
-> max_req_id.
-> So do we need to fix req->id for new RGWRequest of civetweb_callback
-> as at this point only, request are generated in my setup?
+31 Mar :: Amsterdam - Full
+28 Apr :: Berlin - Speakers needed!
+06 Jun :: Beijing - Speakers needed!
+17 Jun :: San Jose - Speakers needed!
 
-We definitely need to fix that.
+We're also working on solidifying events in the following cities later
+this year:
 
-> 
-> Also, I have added uuid field in RGWRequest, from which we derive
-> trans_id field added in struct req_state.
-> This field trans_id of struct req_state is used when we are sending
-> Swift response.
-> I have concatenated trans_id with current time in milliseconds to
-> generate X-Trans-Id header in Swift response.
-> 
-> I have created a pull request on above lines.
-> https://github.com/ceph/ceph/pull/4023
+Los Angeles
+Chicago
+Austin
+Tokyo
+Melbourne
 
-Thank you, I will take a look.
+The Ceph Day events usually turn out so well because we have awesome
+community speakers who are doing real things with Ceph. Let me know if
+you're interested and we'll make sure the community gets to hear about
+your Ceph project. Thanks.
 
-Yehuda
+-- 
 
-> 
-> Thanks
-> Abhishek
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+Best Regards,
+
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
