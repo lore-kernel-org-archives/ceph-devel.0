@@ -1,67 +1,102 @@
-From: Ning Yao <zay11022@gmail.com>
-Subject: Re: crc error when decode_message?
-Date: Tue, 17 Mar 2015 15:23:34 +0800
-Message-ID: <CALZt5jyiiM2NcurGLSVYYkNn+bPuwhWX8+zb0bBndKQ92p2KNg@mail.gmail.com>
-References: <CANE=7sWQaG8PZYEU9OsjkmU6GB6jKhcnSG1cm6o38EeMb65pGw@mail.gmail.com>
-	<CANE=7sXX9mFuuFGJE7edXdE2q7pt+teOjXkCgb5aWjToAYM1MA@mail.gmail.com>
-	<CACJqLybJus0ijP+xB7OorE7sAkhn8DWb7MPTJAMxSOVRL1mR4g@mail.gmail.com>
-	<CANE=7sWuRcWhNx9VFBDp5csKed06a2ZDXbd1am2G+6Ua=wFC4w@mail.gmail.com>
-	<CACJqLyZ50EkaLwSv2yEDuNq0Yj+=Og+x5gK01ao-woN1UqZPjw@mail.gmail.com>
+From: =?UTF-8?B?5b6Q5piV?= <xuxinhfut@gmail.com>
+Subject: =?UTF-8?Q?Re=3A_Can_i_improve_the_performance_of_rbd_rollback_in?=
+	=?UTF-8?Q?_this_way=EF=BC=9F?=
+Date: Tue, 17 Mar 2015 15:25:00 +0800
+Message-ID: <CAO7bE7fXP1uQW-RtnPPsDozt-5hr0XR9=aZHCYcuOhWW0pKU1w@mail.gmail.com>
+References: <CAO7bE7fXz7-An2REcJKSjsb-HZFMnfi0Bo-MWtskptmLDd=8_g@mail.gmail.com>
+	<576710578.4735463.1426574609418.JavaMail.zimbra@oxygem.tv>
+	<1047024924.4735475.1426574615914.JavaMail.zimbra@oxygem.tv>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f178.google.com ([209.85.214.178]:35482 "EHLO
-	mail-ob0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752119AbbCQHXf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Mar 2015 03:23:35 -0400
-Received: by obfv9 with SMTP id v9so957256obf.2
-        for <ceph-devel@vger.kernel.org>; Tue, 17 Mar 2015 00:23:34 -0700 (PDT)
-In-Reply-To: <CACJqLyZ50EkaLwSv2yEDuNq0Yj+=Og+x5gK01ao-woN1UqZPjw@mail.gmail.com>
+Received: from mail-ob0-f181.google.com ([209.85.214.181]:35329 "EHLO
+	mail-ob0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752631AbbCQHZB convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Mar 2015 03:25:01 -0400
+Received: by obfv9 with SMTP id v9so976938obf.2
+        for <ceph-devel@vger.kernel.org>; Tue, 17 Mar 2015 00:25:00 -0700 (PDT)
+In-Reply-To: <1047024924.4735475.1426574615914.JavaMail.zimbra@oxygem.tv>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomaiwang@gmail.com>
-Cc: Xinze Chi <xmdxcxz@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Alexandre DERUMIER <aderumier@odiso.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-2015-03-16 22:06 GMT+08:00 Haomai Wang <haomaiwang@gmail.com>:
-> On Mon, Mar 16, 2015 at 10:04 PM, Xinze Chi <xmdxcxz@gmail.com> wrote:
->> How to process the write request in primary?
->>
->> Thanks.
->>
->> 2015-03-16 22:01 GMT+08:00 Haomai Wang <haomaiwang@gmail.com>:
->>> AFAR Pipe and AsyncConnection both will mark self fault and shutdown
->>> socket and peer will detect this reset. So each side has chance to
->>> rebuild the session.
->>>
->>> On Mon, Mar 16, 2015 at 9:19 PM, Xinze Chi <xmdxcxz@gmail.com> wrote:
->>>> Such as, Client send write request to osd.0 (primary), osd.0 send
->>>> MOSDSubOp to osd.1 and osd.2
->>>>
->>>> osd.1 send reply to osd.0 (primary), but accident happened:
->>>>
->>>> 1. decode_message crc error when decode reply msg
->>>> or
->>>> 2. the reply msg is lost when send to osd.0, so osd.0 do not receive replay msg
->>>>
->>>> Could anyone tell me what is the behavior if osd.0 (primary)?
->>>>
->
-> osd.0 and osd.1 both will try to reconnect peer side, and the lost
-> message will be resend to osd.0 from osd.1
-So I wonder if different routing path delays the arrival of one
-message, then the in_seq would be setting ahead, then based on the
-logic. Later, if the delaying message arrives, it will be dropping and
-discard. Thus, if it is just a sub_op reply message as xinze
-describes, how ceph works after that? It seems repop of the write Op
-will be waiting infinite times until the osd restart?
+Hi Alexandre,
 
+I have tried this out. It can improve the performance of rbd rollback
+greatly when the difference between the image and the sanpshot is
+small.
+
+But i'm not sure if this change may cause potential problem.
+
+Thanks
+Xin Xu
+
+2015-03-17 14:43 GMT+08:00 Alexandre DERUMIER <aderumier@odiso.com>:
+> Hi,
+> I'm not sure it's helping for snapshot rollback, but hammer have a ne=
+w object_map feature:
+>
+> https://wiki.ceph.com/Planning/Blueprints/Hammer/librbd%3A_shared_fla=
+g,_object_map
 >
 >
+> which help for resize,flatten,...
+>
+>
+> ----- Mail original -----
+> De: "=E5=BE=90=E6=98=95" <xuxinhfut@gmail.com>
+> =C3=80: "ceph-devel" <ceph-devel@vger.kernel.org>
+> Envoy=C3=A9: Mardi 17 Mars 2015 04:24:28
+> Objet: Can i improve the performance of rbd rollback in this way=EF=BC=
+=9F
+>
+> Hi,
+>
+> I am a newbie to ceph. Recently i need to improve the performance of
+> rbd rollback on xfs in my project. Through experiment i found that th=
+e
+> mechanism of rbd rollback is like this:
+>
+> When a image is rolled back to one of its snapshot (say N), for every
+> object that has been allocated,
+> case A) if the object has no snap version since snap N, then the head
+> version will be copied back to the latest snap (say N+M);
+> case B) if the object has snap version since snap N, and it has the
+> latest snap version (N+M), then the oldest snap version since snap N
+> (say N+x, 0<=3Dx<=3DM) will be copied to cover the head version;
+> case C) if the object has snap version since snap N, and it has no
+> version in the latest snap (N+M), then the head version will be copie=
+d
+> back to the latest snap N+M, and the oldest snap version since snap N
+> (say N+x, 0<=3Dx<M) will be copied to cover the head version.
+>
+> I think in case A, we need not to copied the head version back. So fo=
+r
+> improving performance, i comment the following statement in function
+> ReplicatedPG::_rollback_to in osd/ReplicatedPG.cc,
+>
+> ......
+> else if (rollback_to->obs.oi.soid.snap =3D=3D CEPH_NOSNAP) {
+> // rolling back to the head; we just need to clone it.
+> // ctx->modify =3D true;
+> }
+> ......
+>
+> Can i improve performance of rollback like this? If CAN NOT, what is =
+the reason?
+>
+> Thank you.
+>
+> Xin Xu
 > --
-> Best Regards,
->
-> Wheat
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
 > the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> More majordomo info at http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
