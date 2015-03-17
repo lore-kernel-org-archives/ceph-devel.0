@@ -1,83 +1,141 @@
-From: Gregory Farnum <greg@gregs42.com>
-Subject: Re: crc error when decode_message?
-Date: Tue, 17 Mar 2015 06:58:13 -0700
-Message-ID: <CAC6JEv_TzKg1-n1pkVgxXk5oEmMnj__a4xdK2Ag2xxrqadvVLA@mail.gmail.com>
-References: <CANE=7sWQaG8PZYEU9OsjkmU6GB6jKhcnSG1cm6o38EeMb65pGw@mail.gmail.com>
-	<CANE=7sXX9mFuuFGJE7edXdE2q7pt+teOjXkCgb5aWjToAYM1MA@mail.gmail.com>
-	<CACJqLybJus0ijP+xB7OorE7sAkhn8DWb7MPTJAMxSOVRL1mR4g@mail.gmail.com>
-	<CANE=7sWuRcWhNx9VFBDp5csKed06a2ZDXbd1am2G+6Ua=wFC4w@mail.gmail.com>
-	<CACJqLyZ50EkaLwSv2yEDuNq0Yj+=Og+x5gK01ao-woN1UqZPjw@mail.gmail.com>
-	<CALZt5jyiiM2NcurGLSVYYkNn+bPuwhWX8+zb0bBndKQ92p2KNg@mail.gmail.com>
-	<alpine.DEB.2.00.1503170643410.7043@cobra.newdream.net>
+From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Subject: Re: RGW : Transaction Id in response?
+Date: Tue, 17 Mar 2015 10:50:44 -0400 (EDT)
+Message-ID: <2060462867.22342282.1426603844200.JavaMail.zimbra@redhat.com>
+References: <CAGoDY9=pLMvUyBKSi4-vqx7XqYbOfPBenzLxPmrKCWzV9Kccig@mail.gmail.com> <CADTt810yeHs88c4-D53z3mOU-aSfU9pu-gi9p4Qi_4w6jLGDtQ@mail.gmail.com> <CAGoDY9=eAkpSFO1EhOe_9G=xz3Kv64ep2cQS9KiTMjaYVTmWUw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f182.google.com ([209.85.223.182]:33353 "EHLO
-	mail-ie0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752916AbbCQN63 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Mar 2015 09:58:29 -0400
-Received: by iecvj10 with SMTP id vj10so11124034iec.0
-        for <ceph-devel@vger.kernel.org>; Tue, 17 Mar 2015 06:58:28 -0700 (PDT)
-Received: from mail-ig0-f180.google.com (mail-ig0-f180.google.com. [209.85.213.180])
-        by mx.google.com with ESMTPSA id b17sm5980335iob.31.2015.03.17.06.58.28
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 17 Mar 2015 06:58:28 -0700 (PDT)
-Received: by igbue6 with SMTP id ue6so53368182igb.1
-        for <ceph-devel@vger.kernel.org>; Tue, 17 Mar 2015 06:58:27 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1503170643410.7043@cobra.newdream.net>
+Received: from mx5-phx2.redhat.com ([209.132.183.37]:52338 "EHLO
+	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752686AbbCQOur (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Mar 2015 10:50:47 -0400
+In-Reply-To: <CAGoDY9=eAkpSFO1EhOe_9G=xz3Kv64ep2cQS9KiTMjaYVTmWUw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ning Yao <zay11022@gmail.com>
-Cc: Haomai Wang <haomaiwang@gmail.com>, Xinze Chi <xmdxcxz@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Abhishek Dixit <dixitabhi@gmail.com>
+Cc: ZHOU Yuan <dunk007@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, Mar 17, 2015 at 6:46 AM, Sage Weil <sage@newdream.net> wrote:
-> On Tue, 17 Mar 2015, Ning Yao wrote:
->> 2015-03-16 22:06 GMT+08:00 Haomai Wang <haomaiwang@gmail.com>:
->> > On Mon, Mar 16, 2015 at 10:04 PM, Xinze Chi <xmdxcxz@gmail.com> wrote:
->> >> How to process the write request in primary?
->> >>
->> >> Thanks.
->> >>
->> >> 2015-03-16 22:01 GMT+08:00 Haomai Wang <haomaiwang@gmail.com>:
->> >>> AFAR Pipe and AsyncConnection both will mark self fault and shutdown
->> >>> socket and peer will detect this reset. So each side has chance to
->> >>> rebuild the session.
->> >>>
->> >>> On Mon, Mar 16, 2015 at 9:19 PM, Xinze Chi <xmdxcxz@gmail.com> wrote:
->> >>>> Such as, Client send write request to osd.0 (primary), osd.0 send
->> >>>> MOSDSubOp to osd.1 and osd.2
->> >>>>
->> >>>> osd.1 send reply to osd.0 (primary), but accident happened:
->> >>>>
->> >>>> 1. decode_message crc error when decode reply msg
->> >>>> or
->> >>>> 2. the reply msg is lost when send to osd.0, so osd.0 do not receive replay msg
->> >>>>
->> >>>> Could anyone tell me what is the behavior if osd.0 (primary)?
->> >>>>
->> >
->> > osd.0 and osd.1 both will try to reconnect peer side, and the lost
->> > message will be resend to osd.0 from osd.1
->> So I wonder if different routing path delays the arrival of one
->> message, then the in_seq would be setting ahead, then based on the
->> logic. Later, if the delaying message arrives, it will be dropping and
->> discard. Thus, if it is just a sub_op reply message as xinze
->> describes, how ceph works after that? It seems repop of the write Op
->> will be waiting infinite times until the osd restart?
->
-> These sorts of scenarios are why src/msg/simple/Pipe.cc (an in particular,
-> accept()) is not so simple.  The case you describe is
->
->  https://github.com/ceph/ceph/blob/master/src/msg/simple/Pipe.cc#L492
-> or
->  https://github.com/ceph/ceph/blob/master/src/msg/simple/Pipe.cc#L492
->
-> In other words, this is all masked by the Messenger layer so that the
-> higher layers (OSD.cc etc) see a single, ordered, reliable stream of
-> messages and all of the failure/retry/reconnect logic is hidden.
 
-Just to be clear, that's the original described case of reconnecting.
-The different routing paths stuff are all handled by TCP underneath
-us, which is one of the reasons we use it. ;)
--Greg
+
+----- Original Message -----
+> From: "Abhishek Dixit" <dixitabhi@gmail.com>
+> To: "Yehuda Sadeh-Weinraub" <yehuda@redhat.com>, "ZHOU Yuan" <dunk007@gmail.com>
+> Cc: "ceph-devel" <ceph-devel@vger.kernel.org>
+> Sent: Monday, March 16, 2015 11:31:55 PM
+> Subject: Re: RGW : Transaction Id in response?
+> 
+> On Sat, Feb 28, 2015 at 6:54 AM, ZHOU Yuan <dunk007@gmail.com> wrote:
+> > On Fri, Feb 27, 2015 at 6:31 PM, Abhishek Dixit <dixitabhi@gmail.com>
+> > wrote:
+> >> On Thu, Feb 26, 2015 at 10:51 PM, Yehuda Sadeh-Weinraub
+> >> <yehuda@redhat.com> wrote:
+> >>>
+> >>>
+> >>> ----- Original Message -----
+> >>>> From: "Abhishek Dixit" <dixitabhi@gmail.com>
+> >>>> To: "ceph-devel" <ceph-devel@vger.kernel.org>
+> >>>> Sent: Wednesday, February 25, 2015 8:35:40 PM
+> >>>> Subject: RGW : Transaction Id in response?
+> >>>>
+> >>>> Hi,
+> >>>>
+> >>>> I was doing comparison of Open Stack Swift response headers and Ceph
+> >>>> RGW response.
+> >>>> This is in regard to X-Trans-Id header in response from Open Stack
+> >>>> Swift storage.
+> >>>> Swift response to a request always have the header "X-Trans-Id".
+> >>>> X-Trans-Id : A unique transaction identifier for this request.
+> >>>>
+> >>>> X-Trans-Id seems to serve two purpose:
+> >>>> 1. Every log messages for a request will carry this and aid in
+> >>>> debugging/analyzing.
+> >>>> 2. Benchmarking for latency.
+> >>>>
+> >>>> So, do we have similar unique identifier in Ceph RGW response which
+> >>>> associates with each request?
+> >>>>
+> >>>> Or do we need add support for this?
+> >>>>
+> >>>
+> >>> At the moment there is no such identifier. We can leverage the rados
+> >>> client instance id that each radosgw instance gets when connecting to
+> >>> the backend, and there's also a unique running number that we use to
+> >>> identify each request within that gateway. We can probably concatenate
+> >>> these and return it as the unique identifier.
+> >>>
+> >>> Yehuda
+> >>>
+> >>
+> >>
+> >> Hi Yehuda,
+> >>
+> >> I will add "X-Trans-Id" as per you suggested approach.
+> >> I have opened a new issue particularly for adding "X-Trans-Id" as many
+> >> other issues report absence of this header.
+> >>
+> >> I have assigned this to myself.
+> >> http://tracker.ceph.com/issues/10970
+> >>
+> >
+> >
+> > Hi Yehuda, Abhishek,
+> >
+> > may be we should follow the swift way considering the goal is to keep
+> > compatible with swift? This might make the log analysis a bit easier
+> > for swift cluster operators.
+> >
+> > def generate_trans_id(trans_id_suffix):
+> >     return 'tx%s-%010x%s' % (
+> >         uuid.uuid4().hex[:21], time.time(), quote(trans_id_suffix))
+> >
+> > The trans_id_suffix is configurable in swift setup.
+> >
+> > Thanks, -yuan
+> >
+> >> Thanks
+> >> Abhishek Dixit
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >> the body of a message to majordomo@vger.kernel.org
+> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+> Hi Yehuda, Yuan
+> 
+> req_state already has req_id generated by concatenating instance_id
+> and RGWRequest id field
+> But this RGWRequest id field is not set when new RGWRequest is done in
+> civetweb_callback function.
+> So, id remains as zero.
+> For "new RGWLoadGenRequest" and "new RGWFCGXRequest" id is updated to
+> max_req_id.
+> So do we need to fix req->id for new RGWRequest of civetweb_callback
+> as at this point only, request are generated in my setup?
+
+We definitely need to fix that.
+
+> 
+> Also, I have added uuid field in RGWRequest, from which we derive
+> trans_id field added in struct req_state.
+> This field trans_id of struct req_state is used when we are sending
+> Swift response.
+> I have concatenated trans_id with current time in milliseconds to
+> generate X-Trans-Id header in Swift response.
+> 
+> I have created a pull request on above lines.
+> https://github.com/ceph/ceph/pull/4023
+
+Thank you, I will take a look.
+
+Yehuda
+
+> 
+> Thanks
+> Abhishek
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
