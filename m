@@ -1,62 +1,65 @@
-From: Omar Sandoval <osandov@osandov.com>
-Subject: Re: [RFC PATCH 1/5] new helper: iov_iter_rw()
-Date: Tue, 17 Mar 2015 03:18:35 -0700
-Message-ID: <20150317101835.GA31649@mew>
-References: <cover.1426502566.git.osandov@osandov.com>
- <34dc78b262546e9343e0ed872232a97f5eaa5f15.1426502566.git.osandov@osandov.com>
- <20150316173605.GX29656@ZenIV.linux.org.uk>
- <20150317093151.GS20767@twin.jikos.cz>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: crc error when decode_message?
+Date: Tue, 17 Mar 2015 06:46:13 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1503170643410.7043@cobra.newdream.net>
+References: <CANE=7sWQaG8PZYEU9OsjkmU6GB6jKhcnSG1cm6o38EeMb65pGw@mail.gmail.com> <CANE=7sXX9mFuuFGJE7edXdE2q7pt+teOjXkCgb5aWjToAYM1MA@mail.gmail.com> <CACJqLybJus0ijP+xB7OorE7sAkhn8DWb7MPTJAMxSOVRL1mR4g@mail.gmail.com> <CANE=7sWuRcWhNx9VFBDp5csKed06a2ZDXbd1am2G+6Ua=wFC4w@mail.gmail.com>
+ <CACJqLyZ50EkaLwSv2yEDuNq0Yj+=Og+x5gK01ao-woN1UqZPjw@mail.gmail.com> <CALZt5jyiiM2NcurGLSVYYkNn+bPuwhWX8+zb0bBndKQ92p2KNg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-ext4-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20150317093151.GS20767@twin.jikos.cz>
-Sender: linux-ext4-owner@vger.kernel.org
-To: David Sterba <dsterba@suse.cz>
-Cc: Al Viro <viro@ZenIV.linux.org.uk>, linux-fsdevel@vger.kernel.org, linux-btrfs@vger.kernel.org, ceph-devel@vger.kernel.org, linux-cifs@vger.kernel.org, osd-dev@open-osd.org, linux-ext4@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, fuse-devel@lists.sourceforge.net, cluster-devel@redhat.com, jfs-discussion@lists.sourceforge.net, HPDD-discuss@ml01.01.org, linux-nfs@vger.kernel.org, linux-nilfs@vger.kernel.org, ocfs2-devel@oss.oracle.com, reiserfs-devel@vger.kernel.org, v9fs-developer@lists.sourceforge.net, xfs@oss.sgi.com, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:58051 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753785AbbCQNqO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Mar 2015 09:46:14 -0400
+In-Reply-To: <CALZt5jyiiM2NcurGLSVYYkNn+bPuwhWX8+zb0bBndKQ92p2KNg@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ning Yao <zay11022@gmail.com>
+Cc: Haomai Wang <haomaiwang@gmail.com>, Xinze Chi <xmdxcxz@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, Mar 17, 2015 at 10:31:51AM +0100, David Sterba wrote:
-> On Mon, Mar 16, 2015 at 05:36:05PM +0000, Al Viro wrote:
-> > On Mon, Mar 16, 2015 at 04:33:49AM -0700, Omar Sandoval wrote:
-> > > Get either READ or WRITE out of iter->type.
-> > 
-> > Umm...  
-> > 
-> > > + * Get one of READ or WRITE out of iter->type without any other flags OR'd in
-> > > + * with it.
-> > > + */
-> > > +static inline int iov_iter_rw(const struct iov_iter *i)
-> > > +{
-> > > +	return i->type & RW_MASK;
-> > > +}
-> > 
-> > TBH, I would turn that into a macro.  Reason: indirect includes.
-> 
-> Agreed, but the proposed define is rather cryptic and I was not able to
-> understand the meaning on the first glance.
-> 
-> > #define iov_iter_rw(i) ((0 ? (struct iov_iter *)0 : (i))->type & RW_MASK)
-> 
-> This worked for me, does not compile with anything else than
-> 'struct iov_iter*' as i:
-> 
-> #define iov_iter_rw(i)	({			\
-> 	struct iov_iter __iter = *(i);		\
-> 	(i)->type & RW_MASK;			\
-> 	})
-> 
-> The assignment is optimized out.
+On Tue, 17 Mar 2015, Ning Yao wrote:
+> 2015-03-16 22:06 GMT+08:00 Haomai Wang <haomaiwang@gmail.com>:
+> > On Mon, Mar 16, 2015 at 10:04 PM, Xinze Chi <xmdxcxz@gmail.com> wrote:
+> >> How to process the write request in primary?
+> >>
+> >> Thanks.
+> >>
+> >> 2015-03-16 22:01 GMT+08:00 Haomai Wang <haomaiwang@gmail.com>:
+> >>> AFAR Pipe and AsyncConnection both will mark self fault and shutdown
+> >>> socket and peer will detect this reset. So each side has chance to
+> >>> rebuild the session.
+> >>>
+> >>> On Mon, Mar 16, 2015 at 9:19 PM, Xinze Chi <xmdxcxz@gmail.com> wrote:
+> >>>> Such as, Client send write request to osd.0 (primary), osd.0 send
+> >>>> MOSDSubOp to osd.1 and osd.2
+> >>>>
+> >>>> osd.1 send reply to osd.0 (primary), but accident happened:
+> >>>>
+> >>>> 1. decode_message crc error when decode reply msg
+> >>>> or
+> >>>> 2. the reply msg is lost when send to osd.0, so osd.0 do not receive replay msg
+> >>>>
+> >>>> Could anyone tell me what is the behavior if osd.0 (primary)?
+> >>>>
+> >
+> > osd.0 and osd.1 both will try to reconnect peer side, and the lost
+> > message will be resend to osd.0 from osd.1
+> So I wonder if different routing path delays the arrival of one
+> message, then the in_seq would be setting ahead, then based on the
+> logic. Later, if the delaying message arrives, it will be dropping and
+> discard. Thus, if it is just a sub_op reply message as xinze
+> describes, how ceph works after that? It seems repop of the write Op
+> will be waiting infinite times until the osd restart?
 
-[-cc individual fs maintainers to avoid all of these email bounces,
-should've looked a bit closer at that get_maintainer.pl output...]
+These sorts of scenarios are why src/msg/simple/Pipe.cc (an in particular, 
+accept()) is not so simple.  The case you describe is 
 
-I agree that this is a bit more readable, but it evaluates i twice.
-That's an easy fix, just do __iter.type instead of (i)->type, but
-there's still the possibility of someone passing in something called
-__iter as i, and the fix for that tends to be "add more underscores". At
-the very least, Al's macro could probably use a comment explaining
-what's going on there, though.
+ https://github.com/ceph/ceph/blob/master/src/msg/simple/Pipe.cc#L492
+or
+ https://github.com/ceph/ceph/blob/master/src/msg/simple/Pipe.cc#L492
 
--- 
-Omar
+In other words, this is all masked by the Messenger layer so that the 
+higher layers (OSD.cc etc) see a single, ordered, reliable stream of 
+messages and all of the failure/retry/reconnect logic is hidden.
+
+sage
