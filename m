@@ -1,66 +1,62 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: Hammer incompat bits and ceph-objectstore-tool
-Date: Wed, 18 Mar 2015 06:50:25 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1503180647280.7043@cobra.newdream.net>
-References: <5508DB26.5000706@redhat.com> <CAC6JEv-LO=_AW8KA5_=RPLarnVYdHpvg-8b8a7Fgf_4bgOww2w@mail.gmail.com>
+From: "Blinick, Stephen L" <stephen.l.blinick@intel.com>
+Subject: RE: 03/18/2015 Weekly Ceph Performance Meeting IS ON!
+Date: Wed, 18 Mar 2015 19:47:35 +0000
+Message-ID: <3649A15A2562B54294DE14BCE5AC79120B50EC45@FMSMSX119.amr.corp.intel.com>
+References: <550979BC.3090403@redhat.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:48870 "EHLO mx1.redhat.com"
+Received: from mga14.intel.com ([192.55.52.115]:51720 "EHLO mga14.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932825AbbCRNu1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 18 Mar 2015 09:50:27 -0400
-In-Reply-To: <CAC6JEv-LO=_AW8KA5_=RPLarnVYdHpvg-8b8a7Fgf_4bgOww2w@mail.gmail.com>
+	id S1755041AbbCRTri convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Mar 2015 15:47:38 -0400
+In-Reply-To: <550979BC.3090403@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@gregs42.com>
-Cc: David Zafman <dzafman@redhat.com>, Samuel Just <sjust@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: "mnelson@redhat.com" <mnelson@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, 17 Mar 2015, Gregory Farnum wrote:
-> On Tue, Mar 17, 2015 at 6:55 PM, David Zafman <dzafman@redhat.com> wrote:
-> >
-> > During upgrade testing an error occurred because ceph-objectstore-tool found
-> > during import on a Firefly node the compat_features from a export from
-> > Hammer.
-> >
-> > There are 2 new feature bits set as shown in the error message:
-> >
-> > Export has incompatible features set
-> > compat={},rocompat={},incompat={12=transaction hints,13=pg meta object}
-> >
-> > In this case as far as I can tell these osd incompatible changes wouldn't
-> > make the export data in any way incompatible.  So we may have to check
-> > compatibility bits on a case by case basis, if we want to allow the tool to
-> > work in the most cases possible.
-> >
-> > During upgrade testing it is interesting that one node has the transaction
-> > hints feature, but other nodes still running firefly don't.  Is this a case
-> > where we don't have to wait for all  OSDs to update before the cluster can
-> > start handling OP_COLL_HINT operations?
-> 
-> Mmm, I wasn't much involved in any of it but I think the tricky bit
-> about transaction hints are that they get encoded into the journal.
-> I'm not sure this handling is quite right though ? if they're not
-> recognized can't they just get skipped in the decoding stages?
-> In any case, hammer OSDs are supposed to make use of hints without
-> upgrading all OSDs, IIRC by checking with their peers on every
-> interval to decide if everybody supports the needed encoding or not
-> (since during backfill they just transfer objects, it's not a problem
-> to later include an old OSD). But it looks from a distance like there
-> may still be some design work to do here.
+Sorry to have missed most of the meeting -- is it possible to get a recording?  
 
-This was added in ad6a2be402665215a19708f55b719112096da3f4, a bit 
-before giant.  It covers the create-collection-with-size-hint operation 
-from Yahoo that prehashes the filestore, and it's just about the encoded 
-transactions in the journal.  It won't have any effect on the 
-ceph-objectstore-tool (unless we care about preserving the hashing hint 
-across export/import... I don't think we care!).
+Thanks,
 
-The pg meta object feature is about how the pg log is stored on import.  
-It won't effect export, but clearly effects how the data is imported.
+Stephen
 
-We could segregate these out in the compat structure somehow to make 
-an export vs import compat distinction, but it is probably simpler to 
-just encode those lists in the tool itself...?
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
+Sent: Wednesday, March 18, 2015 6:12 AM
+To: ceph-devel@vger.kernel.org
+Subject: 03/18/2015 Weekly Ceph Performance Meeting IS ON!
 
-sage
+8AM PST as usual!  Please add an agenda item if there is something you want to talk about!
+
+Here's the links:
+
+Etherpad URL:
+http://pad.ceph.com/p/performance_weekly
+
+To join the Meeting:
+https://bluejeans.com/268261044
+
+To join via Browser:
+https://bluejeans.com/268261044/browser
+
+To join with Lync:
+https://bluejeans.com/268261044/lync
+
+
+To join via Room System:
+Video Conferencing System: bjn.vc -or- 199.48.152.152 Meeting ID: 268261044
+
+To join via Phone:
+1) Dial:
+           +1 408 740 7256
+           +1 888 240 2560(US Toll Free)
+           +1 408 317 9253(Alternate Number)
+           (see all numbers - http://bluejeans.com/numbers)
+2) Enter Conference ID: 268261044
+
+Mark
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
