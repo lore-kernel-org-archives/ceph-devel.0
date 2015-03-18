@@ -1,42 +1,83 @@
-From: David Zafman <dzafman@redhat.com>
-Subject: Hammer incompat bits and ceph-objectstore-tool
-Date: Tue, 17 Mar 2015 18:55:50 -0700
-Message-ID: <5508DB26.5000706@redhat.com>
+From: Ning Yao <zay11022@gmail.com>
+Subject: Re: crc error when decode_message?
+Date: Wed, 18 Mar 2015 10:52:14 +0800
+Message-ID: <CALZt5jwSXOgWwCR6=BGiaPfJQJ+3h8oi7vCUny0=Q3eQbtWGmA@mail.gmail.com>
+References: <CANE=7sWQaG8PZYEU9OsjkmU6GB6jKhcnSG1cm6o38EeMb65pGw@mail.gmail.com>
+	<CANE=7sXX9mFuuFGJE7edXdE2q7pt+teOjXkCgb5aWjToAYM1MA@mail.gmail.com>
+	<CACJqLybJus0ijP+xB7OorE7sAkhn8DWb7MPTJAMxSOVRL1mR4g@mail.gmail.com>
+	<CANE=7sWuRcWhNx9VFBDp5csKed06a2ZDXbd1am2G+6Ua=wFC4w@mail.gmail.com>
+	<CACJqLyZ50EkaLwSv2yEDuNq0Yj+=Og+x5gK01ao-woN1UqZPjw@mail.gmail.com>
+	<CALZt5jyiiM2NcurGLSVYYkNn+bPuwhWX8+zb0bBndKQ92p2KNg@mail.gmail.com>
+	<alpine.DEB.2.00.1503170643410.7043@cobra.newdream.net>
+	<CAC6JEv_TzKg1-n1pkVgxXk5oEmMnj__a4xdK2Ag2xxrqadvVLA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:38654 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752963AbbCRBzu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 17 Mar 2015 21:55:50 -0400
-Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
-	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t2I1tnPY028867
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
-	for <ceph-devel@vger.kernel.org>; Tue, 17 Mar 2015 21:55:49 -0400
+Received: from mail-ob0-f176.google.com ([209.85.214.176]:33036 "EHLO
+	mail-ob0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752741AbbCRCwO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Mar 2015 22:52:14 -0400
+Received: by obcxo2 with SMTP id xo2so22571326obc.0
+        for <ceph-devel@vger.kernel.org>; Tue, 17 Mar 2015 19:52:14 -0700 (PDT)
+In-Reply-To: <CAC6JEv_TzKg1-n1pkVgxXk5oEmMnj__a4xdK2Ag2xxrqadvVLA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sjust@redhat.com>, Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <greg@gregs42.com>
+Cc: Haomai Wang <haomaiwang@gmail.com>, Xinze Chi <xmdxcxz@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+Thanks all guys. I got the ideas
+Regards
+Ning Yao
 
 
-During upgrade testing an error occurred because ceph-objectstore-tool 
-found during import on a Firefly node the compat_features from a export 
-from Hammer.
-
-There are 2 new feature bits set as shown in the error message:
-
-Export has incompatible features set 
-compat={},rocompat={},incompat={12=transaction hints,13=pg meta object}
-
-In this case as far as I can tell these osd incompatible changes 
-wouldn't make the export data in any way incompatible.  So we may have 
-to check compatibility bits on a case by case basis, if we want to allow 
-the tool to work in the most cases possible.
-
-During upgrade testing it is interesting that one node has the 
-transaction hints feature, but other nodes still running firefly don't.  
-Is this a case where we don't have to wait for all  OSDs to update 
-before the cluster can start handling OP_COLL_HINT operations?
-
-David Zafman
-
+2015-03-17 21:58 GMT+08:00 Gregory Farnum <greg@gregs42.com>:
+> On Tue, Mar 17, 2015 at 6:46 AM, Sage Weil <sage@newdream.net> wrote:
+>> On Tue, 17 Mar 2015, Ning Yao wrote:
+>>> 2015-03-16 22:06 GMT+08:00 Haomai Wang <haomaiwang@gmail.com>:
+>>> > On Mon, Mar 16, 2015 at 10:04 PM, Xinze Chi <xmdxcxz@gmail.com> wrote:
+>>> >> How to process the write request in primary?
+>>> >>
+>>> >> Thanks.
+>>> >>
+>>> >> 2015-03-16 22:01 GMT+08:00 Haomai Wang <haomaiwang@gmail.com>:
+>>> >>> AFAR Pipe and AsyncConnection both will mark self fault and shutdown
+>>> >>> socket and peer will detect this reset. So each side has chance to
+>>> >>> rebuild the session.
+>>> >>>
+>>> >>> On Mon, Mar 16, 2015 at 9:19 PM, Xinze Chi <xmdxcxz@gmail.com> wrote:
+>>> >>>> Such as, Client send write request to osd.0 (primary), osd.0 send
+>>> >>>> MOSDSubOp to osd.1 and osd.2
+>>> >>>>
+>>> >>>> osd.1 send reply to osd.0 (primary), but accident happened:
+>>> >>>>
+>>> >>>> 1. decode_message crc error when decode reply msg
+>>> >>>> or
+>>> >>>> 2. the reply msg is lost when send to osd.0, so osd.0 do not receive replay msg
+>>> >>>>
+>>> >>>> Could anyone tell me what is the behavior if osd.0 (primary)?
+>>> >>>>
+>>> >
+>>> > osd.0 and osd.1 both will try to reconnect peer side, and the lost
+>>> > message will be resend to osd.0 from osd.1
+>>> So I wonder if different routing path delays the arrival of one
+>>> message, then the in_seq would be setting ahead, then based on the
+>>> logic. Later, if the delaying message arrives, it will be dropping and
+>>> discard. Thus, if it is just a sub_op reply message as xinze
+>>> describes, how ceph works after that? It seems repop of the write Op
+>>> will be waiting infinite times until the osd restart?
+>>
+>> These sorts of scenarios are why src/msg/simple/Pipe.cc (an in particular,
+>> accept()) is not so simple.  The case you describe is
+>>
+>>  https://github.com/ceph/ceph/blob/master/src/msg/simple/Pipe.cc#L492
+>> or
+>>  https://github.com/ceph/ceph/blob/master/src/msg/simple/Pipe.cc#L492
+>>
+>> In other words, this is all masked by the Messenger layer so that the
+>> higher layers (OSD.cc etc) see a single, ordered, reliable stream of
+>> messages and all of the failure/retry/reconnect logic is hidden.
+>
+> Just to be clear, that's the original described case of reconnecting.
+> The different routing paths stuff are all handled by TCP underneath
+> us, which is one of the reasons we use it. ;)
+> -Greg
