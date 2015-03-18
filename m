@@ -1,83 +1,35 @@
 From: Ning Yao <zay11022@gmail.com>
-Subject: Re: crc error when decode_message?
-Date: Wed, 18 Mar 2015 10:52:14 +0800
-Message-ID: <CALZt5jwSXOgWwCR6=BGiaPfJQJ+3h8oi7vCUny0=Q3eQbtWGmA@mail.gmail.com>
-References: <CANE=7sWQaG8PZYEU9OsjkmU6GB6jKhcnSG1cm6o38EeMb65pGw@mail.gmail.com>
-	<CANE=7sXX9mFuuFGJE7edXdE2q7pt+teOjXkCgb5aWjToAYM1MA@mail.gmail.com>
-	<CACJqLybJus0ijP+xB7OorE7sAkhn8DWb7MPTJAMxSOVRL1mR4g@mail.gmail.com>
-	<CANE=7sWuRcWhNx9VFBDp5csKed06a2ZDXbd1am2G+6Ua=wFC4w@mail.gmail.com>
-	<CACJqLyZ50EkaLwSv2yEDuNq0Yj+=Og+x5gK01ao-woN1UqZPjw@mail.gmail.com>
-	<CALZt5jyiiM2NcurGLSVYYkNn+bPuwhWX8+zb0bBndKQ92p2KNg@mail.gmail.com>
-	<alpine.DEB.2.00.1503170643410.7043@cobra.newdream.net>
-	<CAC6JEv_TzKg1-n1pkVgxXk5oEmMnj__a4xdK2Ag2xxrqadvVLA@mail.gmail.com>
+Subject: what is the main reason for bad crc in data
+Date: Wed, 18 Mar 2015 11:08:00 +0800
+Message-ID: <CALZt5jzOXwDgaeMfRH=_F3U_-vBFA9b8E1j4dpe8y-tS+3J+cA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f176.google.com ([209.85.214.176]:33036 "EHLO
-	mail-ob0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752741AbbCRCwO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Mar 2015 22:52:14 -0400
-Received: by obcxo2 with SMTP id xo2so22571326obc.0
-        for <ceph-devel@vger.kernel.org>; Tue, 17 Mar 2015 19:52:14 -0700 (PDT)
-In-Reply-To: <CAC6JEv_TzKg1-n1pkVgxXk5oEmMnj__a4xdK2Ag2xxrqadvVLA@mail.gmail.com>
+Received: from mail-oi0-f48.google.com ([209.85.218.48]:36574 "EHLO
+	mail-oi0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754316AbbCRDIA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Mar 2015 23:08:00 -0400
+Received: by oigv203 with SMTP id v203so25822659oig.3
+        for <ceph-devel@vger.kernel.org>; Tue, 17 Mar 2015 20:08:00 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@gregs42.com>
-Cc: Haomai Wang <haomaiwang@gmail.com>, Xinze Chi <xmdxcxz@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Thanks all guys. I got the ideas
+Hi, all
+
+2015-03-16 15:55:11.124711 7fa0629da700  0 bad crc in data 2453778563
+!= exp 2391663503
+why we always got those error, probably consecutive several pieces for
+every three or four days?
+As is known for us, TCP layer uses its own crc verification to
+guarantee the correctness of the receiving data in network. So we may
+assume the main reasons coming from the memory error with non-ECC main
+memory?
+If so, we also cannot guarantee the data we write to the physical
+storage is correct with non-ECC memory? Then it may cause the
+data-inconsistency (and we may repair it during scrubing repair
+process if the content is owned  by object data, or it may lead to osd
+error, if the inconsistent data occurs in pg_log, pg_info or osdmap?)
+
 Regards
 Ning Yao
-
-
-2015-03-17 21:58 GMT+08:00 Gregory Farnum <greg@gregs42.com>:
-> On Tue, Mar 17, 2015 at 6:46 AM, Sage Weil <sage@newdream.net> wrote:
->> On Tue, 17 Mar 2015, Ning Yao wrote:
->>> 2015-03-16 22:06 GMT+08:00 Haomai Wang <haomaiwang@gmail.com>:
->>> > On Mon, Mar 16, 2015 at 10:04 PM, Xinze Chi <xmdxcxz@gmail.com> wrote:
->>> >> How to process the write request in primary?
->>> >>
->>> >> Thanks.
->>> >>
->>> >> 2015-03-16 22:01 GMT+08:00 Haomai Wang <haomaiwang@gmail.com>:
->>> >>> AFAR Pipe and AsyncConnection both will mark self fault and shutdown
->>> >>> socket and peer will detect this reset. So each side has chance to
->>> >>> rebuild the session.
->>> >>>
->>> >>> On Mon, Mar 16, 2015 at 9:19 PM, Xinze Chi <xmdxcxz@gmail.com> wrote:
->>> >>>> Such as, Client send write request to osd.0 (primary), osd.0 send
->>> >>>> MOSDSubOp to osd.1 and osd.2
->>> >>>>
->>> >>>> osd.1 send reply to osd.0 (primary), but accident happened:
->>> >>>>
->>> >>>> 1. decode_message crc error when decode reply msg
->>> >>>> or
->>> >>>> 2. the reply msg is lost when send to osd.0, so osd.0 do not receive replay msg
->>> >>>>
->>> >>>> Could anyone tell me what is the behavior if osd.0 (primary)?
->>> >>>>
->>> >
->>> > osd.0 and osd.1 both will try to reconnect peer side, and the lost
->>> > message will be resend to osd.0 from osd.1
->>> So I wonder if different routing path delays the arrival of one
->>> message, then the in_seq would be setting ahead, then based on the
->>> logic. Later, if the delaying message arrives, it will be dropping and
->>> discard. Thus, if it is just a sub_op reply message as xinze
->>> describes, how ceph works after that? It seems repop of the write Op
->>> will be waiting infinite times until the osd restart?
->>
->> These sorts of scenarios are why src/msg/simple/Pipe.cc (an in particular,
->> accept()) is not so simple.  The case you describe is
->>
->>  https://github.com/ceph/ceph/blob/master/src/msg/simple/Pipe.cc#L492
->> or
->>  https://github.com/ceph/ceph/blob/master/src/msg/simple/Pipe.cc#L492
->>
->> In other words, this is all masked by the Messenger layer so that the
->> higher layers (OSD.cc etc) see a single, ordered, reliable stream of
->> messages and all of the failure/retry/reconnect logic is hidden.
->
-> Just to be clear, that's the original described case of reconnecting.
-> The different routing paths stuff are all handled by TCP underneath
-> us, which is one of the reasons we use it. ;)
-> -Greg
