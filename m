@@ -1,111 +1,42 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: regenerating man pages
-Date: Tue, 17 Mar 2015 12:44:56 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1503171244040.3716@cobra.newdream.net>
-References: <55085911.9060800@redhat.com> <55085B32.9000305@redhat.com> <alpine.DEB.2.00.1503171011020.3716@cobra.newdream.net> <55088008.8010807@redhat.com> <CAC6JEv8Gogaspvva0MygWZ5AzwXTqaNRMbfo65XtsmcYiZYagw@mail.gmail.com> <5508836E.10307@redhat.com>
+From: David Zafman <dzafman@redhat.com>
+Subject: Hammer incompat bits and ceph-objectstore-tool
+Date: Tue, 17 Mar 2015 18:55:50 -0700
+Message-ID: <5508DB26.5000706@redhat.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:40436 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:38654 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753463AbbCQTo7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 17 Mar 2015 15:44:59 -0400
-In-Reply-To: <5508836E.10307@redhat.com>
+	id S1752963AbbCRBzu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 17 Mar 2015 21:55:50 -0400
+Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t2I1tnPY028867
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
+	for <ceph-devel@vger.kernel.org>; Tue, 17 Mar 2015 21:55:49 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <jdurgin@redhat.com>
-Cc: Gregory Farnum <greg@gregs42.com>, David Zafman <dzafman@redhat.com>, Ken Dreyer <kdreyer@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Samuel Just <sjust@redhat.com>, Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, 17 Mar 2015, Josh Durgin wrote:
-> On 03/17/2015 12:32 PM, Gregory Farnum wrote:
-> > Yeah. If this has gotten easier it's fine, but asphyxiate required a
-> > *lot* of tooling that I'd rather we not require as developer build
-> > deps. I'd imagine we can just produce them as part of the Jenkins
-> > build procedure or something?
-> 
-> None of that is needed for man pages or developer builds. asphyxiate is
-> just for getting doxygen into the docs. The man pages are generated with
-> plain sphinx, and do not need to be part of developer builds. Only
-> package builds need to generate them.
 
-Note that in practice devs will run install-deps.sh, which greps the 
-Build-depends out of the spec or debian/control file, so they'll probably 
-end up installing sphinx.  If it's just that I don't think it'll cause 
-problems though!
+During upgrade testing an error occurred because ceph-objectstore-tool 
+found during import on a Firefly node the compat_features from a export 
+from Hammer.
 
-sage
+There are 2 new feature bits set as shown in the error message:
 
-> 
-> Josh
-> 
-> > On Tue, Mar 17, 2015 at 12:27 PM, David Zafman <dzafman@redhat.com> wrote:
-> > > 
-> > > I found that I could not build the docs on Ubuntu 14.10 with the proper
-> > > packages installed.  Kefu is looking into Asphyxiate which is very
-> > > tempermental.  I installed an Ubuntu 11.10 in order to generate docs.
-> > > 
-> > > David
-> > > 
-> > > 
-> > > On 3/17/15 10:11 AM, Sage Weil wrote:
-> > > > 
-> > > > On Tue, 17 Mar 2015, Josh Durgin wrote:
-> > > > > 
-> > > > > On 03/17/2015 09:40 AM, Ken Dreyer wrote:
-> > > > > > 
-> > > > > > I had a question about the way that we're handling man pages.
-> > > > > > 
-> > > > > > In 356a749f63181d401d16371446bb8dc4f196c2a6 , "rbd: regenerate
-> > > > > > rbd(8)
-> > > > > > man page", it looks like man/rbd.8 was regenerated from
-> > > > > > doc/man/8/rbd.rst
-> > > > > > 
-> > > > > > It seems like it would be more efficient to avoid storing man pages
-> > > > > > in
-> > > > > > Git and generate them dynamically at build time instead?
-> > > > > 
-> > > > > Yes, that'd be great!
-> > > > > 
-> > > > > > https://github.com/ceph/ceph/blob/master/admin/manpage-howto.txt
-> > > > > > 
-> > > > > > "admin/build-doc" does a lot of things (including man page
-> > > > > > generation).
-> > > > > > Could we simply run the "sphinx-build -b man" part at build time as
-> > > > > > a
-> > > > > > part of "make"?
-> > > > > 
-> > > > > I don't see a reason not to. It's just a matter of making it work on
-> > > > > all
-> > > > > the platforms we're building packages for. That might be annoying for
-> > > > > the entirety of build-doc, but for just building man pages it should
-> > > > > be simple.
-> > > > 
-> > > > I think the original reason we didn't was just because there are a lot
-> > > > of
-> > > > dependencies for building the docs, so this inflates Build-Depends.
-> > > > That
-> > > > doesn't particularly bother me, though, if the deps do in fact exist.
-> > > > 
-> > > > sage
-> > > > --
-> > > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > > > the body of a message to majordomo@vger.kernel.org
-> > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > > 
-> > > 
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > > the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Export has incompatible features set 
+compat={},rocompat={},incompat={12=transaction hints,13=pg meta object}
+
+In this case as far as I can tell these osd incompatible changes 
+wouldn't make the export data in any way incompatible.  So we may have 
+to check compatibility bits on a case by case basis, if we want to allow 
+the tool to work in the most cases possible.
+
+During upgrade testing it is interesting that one node has the 
+transaction hints feature, but other nodes still running firefly don't.  
+Is this a case where we don't have to wait for all  OSDs to update 
+before the cluster can start handling OP_COLL_HINT operations?
+
+David Zafman
+
