@@ -1,37 +1,166 @@
-From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-Subject: Re: scubbing for a long time and not finished
-Date: Thu, 19 Mar 2015 06:33:30 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1503190629530.7043@cobra.newdream.net>
-References: <CANE=7sWwheXa3WZb_+b3G57MBuhcdMssJJqVjR9y9yRHu6vFEQ@mail.gmail.com>
-	<da34275f64ad3e2960322516f488fd@ip-10-0-3-214>
-	<CANE=7sWbh9aJHp603BuFZivtLJ5a-axDq7CyHCfwaDWMRw7wAg@mail.gmail.com>
+From: Abhishek Dixit <dixitabhi@gmail.com>
+Subject: Re: RGW : Transaction Id in response?
+Date: Thu, 19 Mar 2015 19:09:30 +0530
+Message-ID: <CAGoDY9kCVL=ZyFW2EdoTj0FCexFwPap-0oRQ7pnxLRkPuUAZMg@mail.gmail.com>
+References: <CAGoDY9=pLMvUyBKSi4-vqx7XqYbOfPBenzLxPmrKCWzV9Kccig@mail.gmail.com>
+ <CADTt810yeHs88c4-D53z3mOU-aSfU9pu-gi9p4Qi_4w6jLGDtQ@mail.gmail.com>
+ <CAGoDY9=eAkpSFO1EhOe_9G=xz3Kv64ep2cQS9KiTMjaYVTmWUw@mail.gmail.com> <2060462867.22342282.1426603844200.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CANE=7sWbh9aJHp603BuFZivtLJ5a-axDq7CyHCfwaDWMRw7wAg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Xinze Chi <xmdxcxz-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-lb0-f182.google.com ([209.85.217.182]:36737 "EHLO
+	mail-lb0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751525AbbCSNjx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Mar 2015 09:39:53 -0400
+Received: by lbblx11 with SMTP id lx11so30739607lbb.3
+        for <ceph-devel@vger.kernel.org>; Thu, 19 Mar 2015 06:39:51 -0700 (PDT)
+In-Reply-To: <2060462867.22342282.1426603844200.JavaMail.zimbra@redhat.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Cc: ZHOU Yuan <dunk007@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, 19 Mar 2015, Xinze Chi wrote:
-> Currently, users do not know  when some pg do scrubbing for a long time.
-> I think whether we could give some warming if it happend (defined as
-> osd_scrub_max_time).
-> It would tell the user something may be wrong in cluster.
+On Tue, Mar 17, 2015 at 8:20 PM, Yehuda Sadeh-Weinraub
+<yehuda@redhat.com> wrote:
+>
+>
+> ----- Original Message -----
+>> From: "Abhishek Dixit" <dixitabhi@gmail.com>
+>> To: "Yehuda Sadeh-Weinraub" <yehuda@redhat.com>, "ZHOU Yuan" <dunk007@gmail.com>
+>> Cc: "ceph-devel" <ceph-devel@vger.kernel.org>
+>> Sent: Monday, March 16, 2015 11:31:55 PM
+>> Subject: Re: RGW : Transaction Id in response?
+>>
+>> On Sat, Feb 28, 2015 at 6:54 AM, ZHOU Yuan <dunk007@gmail.com> wrote:
+>> > On Fri, Feb 27, 2015 at 6:31 PM, Abhishek Dixit <dixitabhi@gmail.com>
+>> > wrote:
+>> >> On Thu, Feb 26, 2015 at 10:51 PM, Yehuda Sadeh-Weinraub
+>> >> <yehuda@redhat.com> wrote:
+>> >>>
+>> >>>
+>> >>> ----- Original Message -----
+>> >>>> From: "Abhishek Dixit" <dixitabhi@gmail.com>
+>> >>>> To: "ceph-devel" <ceph-devel@vger.kernel.org>
+>> >>>> Sent: Wednesday, February 25, 2015 8:35:40 PM
+>> >>>> Subject: RGW : Transaction Id in response?
+>> >>>>
+>> >>>> Hi,
+>> >>>>
+>> >>>> I was doing comparison of Open Stack Swift response headers and Ceph
+>> >>>> RGW response.
+>> >>>> This is in regard to X-Trans-Id header in response from Open Stack
+>> >>>> Swift storage.
+>> >>>> Swift response to a request always have the header "X-Trans-Id".
+>> >>>> X-Trans-Id : A unique transaction identifier for this request.
+>> >>>>
+>> >>>> X-Trans-Id seems to serve two purpose:
+>> >>>> 1. Every log messages for a request will carry this and aid in
+>> >>>> debugging/analyzing.
+>> >>>> 2. Benchmarking for latency.
+>> >>>>
+>> >>>> So, do we have similar unique identifier in Ceph RGW response which
+>> >>>> associates with each request?
+>> >>>>
+>> >>>> Or do we need add support for this?
+>> >>>>
+>> >>>
+>> >>> At the moment there is no such identifier. We can leverage the rados
+>> >>> client instance id that each radosgw instance gets when connecting to
+>> >>> the backend, and there's also a unique running number that we use to
+>> >>> identify each request within that gateway. We can probably concatenate
+>> >>> these and return it as the unique identifier.
+>> >>>
+>> >>> Yehuda
+>> >>>
+>> >>
+>> >>
+>> >> Hi Yehuda,
+>> >>
+>> >> I will add "X-Trans-Id" as per you suggested approach.
+>> >> I have opened a new issue particularly for adding "X-Trans-Id" as many
+>> >> other issues report absence of this header.
+>> >>
+>> >> I have assigned this to myself.
+>> >> http://tracker.ceph.com/issues/10970
+>> >>
+>> >
+>> >
+>> > Hi Yehuda, Abhishek,
+>> >
+>> > may be we should follow the swift way considering the goal is to keep
+>> > compatible with swift? This might make the log analysis a bit easier
+>> > for swift cluster operators.
+>> >
+>> > def generate_trans_id(trans_id_suffix):
+>> >     return 'tx%s-%010x%s' % (
+>> >         uuid.uuid4().hex[:21], time.time(), quote(trans_id_suffix))
+>> >
+>> > The trans_id_suffix is configurable in swift setup.
+>> >
+>> > Thanks, -yuan
+>> >
+>> >> Thanks
+>> >> Abhishek Dixit
+>> >> --
+>> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> >> the body of a message to majordomo@vger.kernel.org
+>> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
+>> Hi Yehuda, Yuan
+>>
+>> req_state already has req_id generated by concatenating instance_id
+>> and RGWRequest id field
+>> But this RGWRequest id field is not set when new RGWRequest is done in
+>> civetweb_callback function.
+>> So, id remains as zero.
+>> For "new RGWLoadGenRequest" and "new RGWFCGXRequest" id is updated to
+>> max_req_id.
+>> So do we need to fix req->id for new RGWRequest of civetweb_callback
+>> as at this point only, request are generated in my setup?
+>
+> We definitely need to fix that.
 
-This should be pretty straightforward to add along with the other "stuck 
-x" warnings based on the pg_stat_t state timestamps.  On the otherhead, 
-that may be a somewhat heavyweight approach (each new warning bloats the 
-stat structure a bit); open to other ideas!
+req->id is set as ++max_req_id.
 
-sage
+Is it possible for requests to be routed through any of
+RGWFCGXFrontend or RGWLoadGenFrontend in a singe RGW instance ? I mean
+are all these front-ends available simultaneously so all requests can
+flow through either of these?
+In case it is, then I think, we have chance of having duplicate
+req->id as each of RGWLoadGenProcess  and RGWFCGXProcess have own copy
+of max_req_id.
+
+Also, max_req_id is unaccessible from civetweb_callback.
+If possible, please advise on how to proceed for this.
+
+Thanks
+Abhishek Dixit
+
+
+
+
+>
+>>
+>> Also, I have added uuid field in RGWRequest, from which we derive
+>> trans_id field added in struct req_state.
+>> This field trans_id of struct req_state is used when we are sending
+>> Swift response.
+>> I have concatenated trans_id with current time in milliseconds to
+>> generate X-Trans-Id header in Swift response.
+>>
+>> I have created a pull request on above lines.
+>> https://github.com/ceph/ceph/pull/4023
+>
+> Thank you, I will take a look.
+>
+> Yehuda
+>
+>>
+>> Thanks
+>> Abhishek
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
