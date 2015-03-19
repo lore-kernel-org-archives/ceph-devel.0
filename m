@@ -1,99 +1,116 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: Failed OSDs not getting marked down or out
-Date: Thu, 19 Mar 2015 08:01:03 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1503190758590.7043@cobra.newdream.net>
-References: <CAKeiORT21fyG0WcdgJC6Gbnpe90y_SM+VuOJDML8NXR9dG2sZA@mail.gmail.com> <alpine.DEB.2.00.1503181256160.3716@cobra.newdream.net> <CAC6JEv9SMnuXE80Y8jtMv_Qsf7MpcCAmsYjV3r5ju1B7838+kg@mail.gmail.com> <CAKeiORShxjnSVO9cRJC9ucrq-UWgRXLgqkt_Q8WO+2T7rHn2dg@mail.gmail.com>
- <CAC6JEv8TJaybJhYpq067Bhrz86f9CHtY8Lz9haKXtqED34e+Hw@mail.gmail.com>
+Subject: Re: rados_dll: A Windows port of librados
+Date: Thu, 19 Mar 2015 08:27:33 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1503190822150.9418@cobra.newdream.net>
+References: <CAHJ4zomaFxzJMBo+v50DUX=bycyagzWOfckoXPFcm1THFK8DQg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44769 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:44959 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753300AbbCSPBE (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Mar 2015 11:01:04 -0400
-In-Reply-To: <CAC6JEv8TJaybJhYpq067Bhrz86f9CHtY8Lz9haKXtqED34e+Hw@mail.gmail.com>
+	with ESMTP id S1751687AbbCSP1e (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Mar 2015 11:27:34 -0400
+In-Reply-To: <CAHJ4zomaFxzJMBo+v50DUX=bycyagzWOfckoXPFcm1THFK8DQg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@gregs42.com>
-Cc: Matt Conner <matt.conner@keepertech.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Alistair Israel <aisrael@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Thu, 19 Mar 2015, Gregory Farnum wrote:
-> Can you share the actual map? I'm not sure exactly what "rack rules"
-> means here but from your description so far I'm guessing/hoping that
-> you've accidentally restricted OSD choices in a way that limits the
-> number of peers each OSD is getting.
+Hi Alistair,
 
-It may also be that the pg_num calculation is off.  If OSDs really have 
-~200 PGs you would expect ~200-400 peers, not ~10.  Perhaps you plugged in 
-the nubmer of OSD *hosts* into your calculation instead of the number of 
-disks?
+On Thu, 19 Mar 2015, Alistair Israel wrote:
+> Hi, ceph.
+> 
+> We are pleased to announce our first milestone in bringing Ceph to the
+> Windows platform, by porting librados into rados.dll.
+> 
+> https://github.com/AcalephStorage/rados_dll
 
-Either way, the 'ceph osd dump' and 'ceph osd crush dump' output should 
-clear things up!
+This is exciting!
+ 
+> Many thanks to dketor@gmail.com and the ceph-dokan project for
+> providing the springboard and early consultation with which we were
+> able to embark upon this course (we've also forked ceph-dokan and are
+> looking to be active contributors to that project).
+> 
+> ### Overview
+> 
+>   * rados_dll is built using mingw, like ceph-dokan
+>   * Currently, it builds rados.dll, used by rados_client.exe
+>   * rados.dll provides the librados C API (linking C++ using .DLLs is
+> problematic)
+>   * rados_client.exe follows example code here
+> (http://ceph.com/docs/master/rados/api/librados-intro/) to drive
+> rados.dll, connect to a Ceph cluster and perform I/O
+>   * LGLP v2.1
+> 
+> ### Details
+> 
+> Currently, rados_dll is built, similar to ceph-dokan, from source
+> files copied over from ceph/src and with _WIN32 specific
+> modifications. It is built using gcc, and uses winsock.
+> 
+> ### Next steps
+> 
+> We've had to disable cephx authentication for now, obviously we need
+> to get this ported and working properly.
+> 
+> Currently, the build environment has to be carefully prepared by hand.
+> We're looking to add scripts to help ease and automate that process.
+> 
+> We're looking to streamline merging of changes from 'upstream' ceph.
+> First, we intend to remove unmodified source files from the src/
+> directory and use upstream ceph/src directly.
+> 
+> Next, we're looking to use tools (e.g. diff/patch, sed) to the apply
+> _WIN32 specific modifications in an automated manner whenever possible
+> to generate _WIN32 sources.
+> 
+> We hope to gain enough traction and credibility to contribute _WIN32
+> specific sections (with appropriate guards) to ceph core code.
+> Eventually, hopefully, we might be able to build rados.dll (along with
+> other Ceph components that can be ported to Windows) directly from a
+> single set of source files.
+
+I'm glad to see this.  As I said to Ketor about ceph-dokan, the goal 
+should definitely be get the portability changes upstream.  There are a 
+few other porting effots underway (Solaris, AIX; aarch64, MIPS) and 
+ultimately we want to make sure we're building portability wrappers around 
+the appropriate pieces to avoid a tangle of #ifdef's or hard to maintain 
+forks.  As you isolate these changes, let us know so we can start 
+testing and merging them.
+
+> Finally, our Makefile is hand-written (as with ceph-dokan), and we
+> welcome any help to be able to standardise on using the autotools
+> toolchain to automate that as well (or integrate with upstream).
+
+Would CMake make your life easie?
 
 sage
 
-
-> -Greg
+> ### Roadmap
 > 
-> On Thu, Mar 19, 2015 at 5:41 AM, Matt Conner <matt.conner@keepertech.com> wrote:
-> > In this case we are using rack rules with the firefly tunables. The testing
-> > was being done with a single, 3 copy, pool with placement group number 4096.
-> > This was calculated based on 10% data and 200 PGs per OSD using the
-> > calculator at http://ceph.com/pgcalc/.
-> >
-> > Thanks,
-> > Matt
-> >
-> > Matt Conner
-> > keepertechnology
-> > matt.conner@keepertech.com
-> > (240) 461-2657
-> >
-> > On Wed, Mar 18, 2015 at 4:11 PM, Gregory Farnum <greg@gregs42.com> wrote:
-> >>
-> >> On Wed, Mar 18, 2015 at 12:59 PM, Sage Weil <sage@newdream.net> wrote:
-> >> > On Wed, 18 Mar 2015, Matt Conner wrote:
-> >> >> I'm working with a 6 rack, 18 server (3 racks of 2 servers , 3 racks
-> >> >> of 4 servers), 640 OSD cluster and have run into an issue when failing
-> >> >> a storage server or rack where the OSDs are not getting marked down
-> >> >> until the monitor timeout is reached - typically resulting in all
-> >> >> writes being blocked until the timeout.
-> >> >>
-> >> >> Each of our storage servers contains 36 OSDs, so in order to prevent a
-> >> >> server from marking a OSD out (in case of network issues), we have set
-> >> >> our "mon_osd_min_down_reporters" value to 37. This value is working
-> >> >> great for a smaller cluster, but unfortunately seems to not work so
-> >> >> well in this large cluster. Tailing the monitor logs I can see that
-> >> >> the monitor is only receiving failed reports from 9-10 unique OSDs per
-> >> >> failed OSD.
-> >> >>
-> >> >> I've played around with "osd_heartbeat_min_peers", and it seems to
-> >> >> help, but I still run into issues where an OSD is not marked down. Can
-> >> >> anyone explain how the number of heartbeat peers is determined and
-> >> >> how, if necessary, I can can use "osd_heartbeat_min_peers" to ensure I
-> >> >> have enough peering to detect failures in large clusters?
-> >> >
-> >> > The peers are normally determined why which other OSDs we share a PG
-> >> > with.
-> >> > Increasing pg_num for your pools will tend to increase this.  It looks
-> >> > like osd_heartbeat_min_peers will do the same (to be honest I don't
-> >> > think
-> >> > I've ever had to use it for this), so I'm not sure why that isn't
-> >> > resolving the problem.  Maybe make sure it is set significantly higher
-> >> > than 36?  It may simply be that several of the random choices were
-> >> > within
-> >> > the same host so that when it goes down there still aren't enough peers
-> >> > to mark things down.
-> >> >
-> >> > Alternatively, you can give up on the mon_osd_min_down_reporters tweak.
-> >> > It sounds like it creates more problems than it solves...
-> >>
-> >> This normally works out okay; in particular I'd expect a lot more than
-> >> 10 peer OSDs in a cluster of this size. What's your CRUSH map and
-> >> ruleset look like? How many pools and PGs?
-> >> -Greg
-> >
-> >
+> We're looking at tackling RBD soon, and provide a native, Windows
+> system-level block device backed by Ceph. ;)
+> 
+> We welcome any and all comments, suggestions, and support.
+> 
+> ### Who we are
+> 
+> Acaleph is a small startup headquartered in Singapore, but operating mostly from
+> the Philippines, and we provide Ceph deployment, integration, support
+> and other services.
+> 
+> Julio Telan is a graduating student from De La Salle University
+> spending his internship at Acaleph, mentored by yours truly.
+> 
+> Cheers!
+> 
+> Alistair A. Israel, alistair@acale.ph
+> Julio Telan, julio_telan@dlsu.edu.ph
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
 > 
