@@ -1,123 +1,92 @@
-From: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>
-Subject: RE: conditions for removing experimental feature marks
-Date: Thu, 19 Mar 2015 02:20:31 +0000
-Message-ID: <870DE8DBB716524BAE51B2D499EC81E40AA9E155@g01jpexmbyt24>
-References: <870DE8DBB716524BAE51B2D499EC81E40AA6CEB8@g01jpexmbyt24>
- <54E1B57F.3070201@dachary.org>
- <870DE8DBB716524BAE51B2D499EC81E40AA9678C@g01jpexmbyt24>
- <54FEFEC6.2080904@dachary.org>
+From: Alistair Israel <aisrael@gmail.com>
+Subject: rados_dll: A Windows port of librados
+Date: Thu, 19 Mar 2015 13:35:34 +0800
+Message-ID: <CAHJ4zomaFxzJMBo+v50DUX=bycyagzWOfckoXPFcm1THFK8DQg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mgwkm04.jp.fujitsu.com ([202.219.69.171]:47974 "EHLO
-	mgwkm04.jp.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751577AbbCSCUg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Mar 2015 22:20:36 -0400
-Received: from g01jpfmpwyt03.exch.g01.fujitsu.local (g01jpfmpwyt03.exch.g01.fujitsu.local [10.128.193.57])
-	by kw-mxauth.gw.nic.fujitsu.com (Postfix) with ESMTP id 65FE1AC02BC
-	for <ceph-devel@vger.kernel.org>; Thu, 19 Mar 2015 11:20:33 +0900 (JST)
-In-Reply-To: <54FEFEC6.2080904@dachary.org>
-Content-Language: ja-JP
+Received: from mail-oi0-f45.google.com ([209.85.218.45]:35766 "EHLO
+	mail-oi0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750729AbbCSFgc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Mar 2015 01:36:32 -0400
+Received: by oiag65 with SMTP id g65so56591332oia.2
+        for <ceph-devel@vger.kernel.org>; Wed, 18 Mar 2015 22:36:05 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-Cc: "Shiozawa, Kensuke" <shiozawa.kennsu@jp.fujitsu.com>, "Nakao, Takanori" <nakao.takanori@jp.fujitsu.com>, "Kaga, Yoshihiro" <y-kaga@jp.fujitsu.com>, "Kawaguchi, Shotaro" <kawaguchi.s@jp.fujitsu.com>
+To: ceph-devel@vger.kernel.org
 
-RGVhciBMb2ljLA0KDQpXZSBhcmUgc3RydWdnbGluZyB3aXRoIHRldXRob2xv
-Z3ksIGJ1dCB3ZSBtdXN0IGNvbW1pdCBTSEVDJ3MgcmVjZW50IHBhdGNoZXMN
-CmluY2x1ZGluZyBJbnRlbCBzc2U0IG9wdGltaXphdGlvbiBpbnRvIEhhbW1l
-ciBiZWZvcmUgdGhhdC4NCg0KZXJhc3VyZSBjb2RlOiBmaXggc2hlYyBwZXJm
-b3JtYW5jZS9jb2Rpbmcgc3R5bGUgaXNzdWVzICM0MDgzDQpodHRwczovL2dp
-dGh1Yi5jb20vY2VwaC9jZXBoL3B1bGwvNDA4Mw0KDQpDb3VsZCB5b3UgY2hl
-Y2sgdGhlIGFib3ZlIHB1bGwgcmVxdWVzdCwgcGxlYXNlID8NCkFsbW9zdCBh
-bGwgb2YgdGhlIG1vZGlmaWNhdGlvbnMgYXJlIGZvciBTSEVDIHBsdWdpbidz
-IGZpbGUgZXhjZXB0IGZvciBzb21lIG90aGVyDQpkb2N1bWVudCBmaWxlcy4N
-Cg0KQmVzdCByZWdhcmRzLA0KVGFrZXNoaSBNaXlhbWFlDQoNCi0tLS0tT3Jp
-Z2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBMb2ljIERhY2hhcnkgW21haWx0
-bzpsb2ljQGRhY2hhcnkub3JnXSANClNlbnQ6IFR1ZXNkYXksIE1hcmNoIDEw
-LCAyMDE1IDExOjI1IFBNDQpUbzogTWl5YW1hZSwgVGFrZXNoaS/lrq7liY0g
-5YmbOyBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KQ2M6IFNoaW96YXdh
-LCBLZW5zdWtlL+WhqeayoiDos6LovJQ7IE5ha2FvLCBUYWthbm9yaS/kuK3l
-sL4g6be56KmUOyBLYWdhLCBZb3NoaWhpcm8v5Yqg6LOAIOiKs+WujzsgS2F3
-YWd1Y2hpLCBTaG90YXJvL+W3neWPoyDnv5TlpKrmnJcNClN1YmplY3Q6IFJl
-OiBjb25kaXRpb25zIGZvciByZW1vdmluZyBleHBlcmltZW50YWwgZmVhdHVy
-ZSBtYXJrcw0KDQpIaSAhDQoNCk9uIDEwLzAzLzIwMTUgMTE6MzUsIE1peWFt
-YWUsIFRha2VzaGkgd3JvdGU6DQo+IERlYXIgTG9pYywNCj4gDQo+IEkgcmVh
-bGx5IGFwb2xvZ2l6ZSB0aGF0IG91ciByZXBseSBpcyB0b28gbGF0ZS4NCj4g
-U2luY2UgcmVtb3ZpbmcgZXhwZXJpbWVudGFsIGZsYWcgZnJvbSBTSEVDIGF0
-IHYwLjk0IGlzIG91ciBpbW1lZGlhdGUgDQo+IGhvcGUsIHdlIHNob3VsZCBo
-YXZlIHN0YXJ0ZWQgYW55IGFjdGlvbnMgZm9yIHRoYXQgZWFybGllci4NCg0K
-Tm8gd29ycmllcywgaXQncyBuZXZlciB0b28gbGF0ZSB0byBkbyBnb29kIDot
-KQ0KDQo+IEJ5IHRoZSB3YXksIHlvdSBtZWFuIHdlIG11c3QgYWRkIGp1c3Qg
-dGhlIHNhbWUgd29ya2Fyb3VuZCBhcyAxMDg4NyBmb3IgDQo+IFNIRUMgaWYg
-b3VyIHRhcmdldCBpcyBIYW1tZXIuDQo+IElzIG15IHVuZGVyc3RhbmRpbmcg
-Y29ycmVjdCA/DQoNCldoYXQgaXMgbmVlZGVkIGlzIGludGVncmF0aW9uIHRl
-c3RzIHJ1bm5pbmcgZHVyaW5nIGEgZmV3IHdlZWtzIGFuZCBzaG93aW5nIHRo
-ZSBwbHVnaW4gYmVoYXZlcyB3ZWxsLiANCg0KPj4gUnVubmluZyB0ZXV0aG9s
-b2d5IGxvY2FsbHkgaXMgbm9uIHRyaXZpYWwsIG1heWJlIHdlIGNhbiBwcm92
-aWRlIHlvdSANCj4+IHdpdGggYWNjZXNzIHRvIHRoZSBjb21tdW5pdHkgbGFi
-IHNvIHRoYXQgeW91IGNhbiBydW4gdGV1dGhvbG9neSANCj4+IHN1aXRlcyBh
-Z2FpbnN0IHRoZSBleGlzdGluZyB0ZXV0aG9sb2d5IGNsdXN0ZXIgKGkuZS4g
-aHR0cDovL3B1bHBpdG8uY2VwaC5jb20vKS4gV291bGQgeW91IGxpa2UgbWUg
-dG8gYXNrID8NCj4gDQo+IFRoYW5rIHlvdSBmb3IgeW91ciBwcm9wb3NhbC4N
-Cj4gSXQgd291bGQgYmUgZ3JlYXRseSBoZWxwZnVsIGlmIHdlIHdlcmUgYWxs
-b3dlZCB0byB1c2UgaXQgIQ0KDQpDb3VsZCB5b3UgcGxlYXNlIGNvbm5lY3Qg
-dG8gaXJjLm9mdGMubmV0I3NlcGlhID8gVGhpcyBpcyB0aGUgSVJDIGNoYW5u
-ZWwgd2hlcmUgbGFiIHJlbGF0ZWQgbWF0dGVycyBhcmUgZGlzY3Vzc2VkLiBX
-ZSBjYW4gZmlndXJlIG91dCB0aGUgZGV0YWlscyB0aGVyZS4gDQoNCkluIHRo
-ZSBtZWFudGltZSB5b3UgY2FuIHRyeSB0ZXV0aG9sb2d5IGFuZCB3cml0ZSBh
-IHNpbmdsZSB0ZXN0IHF1aXRlIGVhc2lseSwgb24geW91ciBsb2NhbCBtYWNo
-aW5lLiBUaGUgdHJpY2t5IHBhcnQgY29tZXMgd2hlcmUgd2Ugd2FudCB0byBy
-dW4gc3VpdGVzIHdpdGggbGFyZ2UgbnVtYmVyIG9mIGpvYnMuIFlvdSBjYW4g
-YWRhcHQgdGhlIGluc3RydWN0aW9ucyBmcm9tIGh0dHA6Ly9kYWNoYXJ5Lm9y
-Zy8/cD0yMjA0IHRvIHlvdXIgbG9jYWwgZW52aXJvbm1lbnQuIEFsbCB5b3Ug
-bmVlZCByZWFsbHkgaXMgdGhlIGFiaWxpdHkgdG8gcnVuIHR3byB2aXJ0dWFs
-IG1hY2hpbmVzLg0KDQpDaGVlcnMNCg0KPiANCj4gQmVzdCByZWdhcmRzLA0K
-PiBUYWtlc2hpIE1peWFtYWUNCj4gDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2Fn
-ZS0tLS0tDQo+IEZyb206IExvaWMgRGFjaGFyeSBbbWFpbHRvOmxvaWNAZGFj
-aGFyeS5vcmddDQo+IFNlbnQ6IE1vbmRheSwgRmVicnVhcnkgMTYsIDIwMTUg
-NjoxNyBQTQ0KPiBUbzogTWl5YW1hZSwgVGFrZXNoaS/lrq7liY0g5YmbOyBj
-ZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KPiBDYzogU2hpb3phd2EsIEtl
-bnN1a2Uv5aGp5rKiIOizoui8lDsgTmFrYW8sIFRha2Fub3JpL+S4reWwviDp
-t7noqZQNCj4gU3ViamVjdDogUmU6IGNvbmRpdGlvbnMgZm9yIHJlbW92aW5n
-IGV4cGVyaW1lbnRhbCBmZWF0dXJlIG1hcmtzDQo+IA0KPiBIaSwNCj4gDQo+
-IE9uIDE2LzAyLzIwMTUgMDg6MzcsIE1peWFtYWUsIFRha2VzaGkgd3JvdGU6
-DQo+PiBEZWFyIExvaWMsDQo+Pg0KPj4gVGhhbmsgeW91IGZvciB5b3VyIGhl
-bHAgb24gdGhlIHB1bGwgcmVxdWVzdCBvZiBTSEVDIGxhc3Qgd2Vlay4NCj4+
-IFdlIGJlbGlldmUgdGhhdCBtYXJraW5nIGV4cGVyaW1lbnRhbCBmZWF0dXJl
-IG9uIFNIRUMgd2FzIGluZXZpdGFibGUgDQo+PiBhbmQgdGhlIHdheSB0byBy
-ZXN0cmljdCB0aGUgZmVhdHVyZSBpcyBwcm9wZXIuDQo+Pg0KPj4gQnkgdGhl
-IHdheSwgY291bGQgeW91IGxldCB1cyBrbm93IHdoYXQgYXJlIHRoZSBjb25k
-aXRpb25zIGZvciANCj4+IHJlbW92aW5nIGV4cGVyaW1lbnRhbCBmZWF0dXJl
-IG1hcmtzIGluIHRoZSBmdXR1cmU/DQo+PiBBcmUgYWRkaXRpb25hbCB0aG9y
-b3VnaCB0ZXN0cyByZXF1aXJlZD8NCj4gDQo+IFRoZSBuZXh0IHN0ZXAgaXMg
-dG8gcnVuIGludGVncmF0aW9uIHRlc3RzIHdpdGggdGhlIHNoZWMgcGx1Z2lu
-LiBUaGUgaW50ZWdyYXRpb24gdGVzdHMgaGF2ZSBzaG93biB0aGF0IHRoZSBz
-aGVjIHBsdWdpbiBkb2VzIG5vdCBkaXNydXB0IGFueXRoaW5nLiBOb3cgd2Ug
-c2hvdWxkIGNoZWNrIGlmIGl0IHdvcmtzIHByb3Blcmx5IHVuZGVyIHN0cmVz
-cyBhbmQgdXBncmFkZXMuIEkgY3JlYXRlZCB0d28gdGlja2V0cyBmb3IgdGhh
-dCBwdXJwb3NlOg0KPiANCj4gaHR0cDovL3RyYWNrZXIuY2VwaC5jb20vaXNz
-dWVzLzEwODg2IDogaW50ZWdyYXRpb24gLyB0aGV1dGhvbG9neSANCj4gaW50
-ZWdyYXRpb24gLyB0aGV1dGhvbG9neSB0aHJhc2hlciB0ZXN0cyBmb3IgdGhl
-IHNoZWMgZXJhc3VyZSBjb2RlIA0KPiBwbHVnaW4NCj4gaHR0cDovL3RyYWNr
-ZXIuY2VwaC5jb20vaXNzdWVzLzEwODg3IDogZXJhc3VyZS1jb2RlOiBhbGxv
-dyB1cGdyYWRlcyANCj4gZm9yIHNoZWMgcGx1Z2lucw0KPiANCj4gSXQgd291
-bGQgYmUgZmFudGFzdGljIGlmIHlvdSBjb3VsZCB3b3JrIG9uIGh0dHA6Ly90
-cmFja2VyLmNlcGguY29tL2lzc3Vlcy83MjkxIDogaXQgd291bGQgbWFrZSB0
-aGUgaW50ZWdyYXRpb24gb2YgbmV3IGVyYXN1cmUgY29kZSBwbHVnaW5zIGVh
-c2llci4gSSByZWFsaXplIHRoYXQgaXQgaXMgaW5mcmFzdHJ1Y3R1cmUgd29y
-ayBub3QgZGlyZWN0bHkgb2YgaW50ZXJlc3QgdG8gdGhlIHNoZWMgcGx1Z2lu
-IGltcGxlbWVudGF0aW9uLg0KPiANCj4gUnVubmluZyB0ZXV0aG9sb2d5IGxv
-Y2FsbHkgaXMgbm9uIHRyaXZpYWwsIG1heWJlIHdlIGNhbiBwcm92aWRlIHlv
-dSB3aXRoIGFjY2VzcyB0byB0aGUgY29tbXVuaXR5IGxhYiBzbyB0aGF0IHlv
-dSBjYW4gcnVuIHRldXRob2xvZ3kgc3VpdGVzIGFnYWluc3QgdGhlIGV4aXN0
-aW5nIHRldXRob2xvZ3kgY2x1c3RlciAoaS5lLiBodHRwOi8vcHVscGl0by5j
-ZXBoLmNvbS8pLiBXb3VsZCB5b3UgbGlrZSBtZSB0byBhc2sgPyANCj4gDQo+
-IENoZWVycw0KPiANCj4+IEJlc3QgcmVnYXJkcywNCj4+IFRha2VzaGkgTWl5
-YW1hZQ0KPj4NCj4gDQo+IC0tDQo+IExvw69jIERhY2hhcnksIEFydGlzYW4g
-TG9naWNpZWwgTGlicmUNCj4gDQo+IE4gICAgIHIgIHkgICBiIFggIMendiBe
-ICneunsubiArICAgeiBdeiAgIHtheSAdyofamSAsaiAgIGYgICBoICAgeiAe
-IHcgICANCiAgIGo6K3YgICB3IGogbSAgICAgICAgIHpaKyAgICAg3aJqIiAg
-IXRtbD0NCj4gDQoNCi0tDQpMb8OvYyBEYWNoYXJ5LCBBcnRpc2FuIExvZ2lj
-aWVsIExpYnJlDQoNCg==
+Hi, ceph.
+
+We are pleased to announce our first milestone in bringing Ceph to the
+Windows platform, by porting librados into rados.dll.
+
+https://github.com/AcalephStorage/rados_dll
+
+Many thanks to dketor@gmail.com and the ceph-dokan project for
+providing the springboard and early consultation with which we were
+able to embark upon this course (we've also forked ceph-dokan and are
+looking to be active contributors to that project).
+
+### Overview
+
+  * rados_dll is built using mingw, like ceph-dokan
+  * Currently, it builds rados.dll, used by rados_client.exe
+  * rados.dll provides the librados C API (linking C++ using .DLLs is
+problematic)
+  * rados_client.exe follows example code here
+(http://ceph.com/docs/master/rados/api/librados-intro/) to drive
+rados.dll, connect to a Ceph cluster and perform I/O
+  * LGLP v2.1
+
+### Details
+
+Currently, rados_dll is built, similar to ceph-dokan, from source
+files copied over from ceph/src and with _WIN32 specific
+modifications. It is built using gcc, and uses winsock.
+
+### Next steps
+
+We've had to disable cephx authentication for now, obviously we need
+to get this ported and working properly.
+
+Currently, the build environment has to be carefully prepared by hand.
+We're looking to add scripts to help ease and automate that process.
+
+We're looking to streamline merging of changes from 'upstream' ceph.
+First, we intend to remove unmodified source files from the src/
+directory and use upstream ceph/src directly.
+
+Next, we're looking to use tools (e.g. diff/patch, sed) to the apply
+_WIN32 specific modifications in an automated manner whenever possible
+to generate _WIN32 sources.
+
+We hope to gain enough traction and credibility to contribute _WIN32
+specific sections (with appropriate guards) to ceph core code.
+Eventually, hopefully, we might be able to build rados.dll (along with
+other Ceph components that can be ported to Windows) directly from a
+single set of source files.
+
+Finally, our Makefile is hand-written (as with ceph-dokan), and we
+welcome any help to be able to standardise on using the autotools
+toolchain to automate that as well (or integrate with upstream).
+
+### Roadmap
+
+We're looking at tackling RBD soon, and provide a native, Windows
+system-level block device backed by Ceph. ;)
+
+We welcome any and all comments, suggestions, and support.
+
+### Who we are
+
+Acaleph is a small startup headquartered in Singapore, but operating mostly from
+the Philippines, and we provide Ceph deployment, integration, support
+and other services.
+
+Julio Telan is a graduating student from De La Salle University
+spending his internship at Acaleph, mentored by yours truly.
+
+Cheers!
+
+Alistair A. Israel, alistair@acale.ph
+Julio Telan, julio_telan@dlsu.edu.ph
