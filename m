@@ -1,166 +1,95 @@
-From: Abhishek Dixit <dixitabhi@gmail.com>
-Subject: Re: RGW : Transaction Id in response?
-Date: Thu, 19 Mar 2015 19:09:30 +0530
-Message-ID: <CAGoDY9kCVL=ZyFW2EdoTj0FCexFwPap-0oRQ7pnxLRkPuUAZMg@mail.gmail.com>
-References: <CAGoDY9=pLMvUyBKSi4-vqx7XqYbOfPBenzLxPmrKCWzV9Kccig@mail.gmail.com>
- <CADTt810yeHs88c4-D53z3mOU-aSfU9pu-gi9p4Qi_4w6jLGDtQ@mail.gmail.com>
- <CAGoDY9=eAkpSFO1EhOe_9G=xz3Kv64ep2cQS9KiTMjaYVTmWUw@mail.gmail.com> <2060462867.22342282.1426603844200.JavaMail.zimbra@redhat.com>
+From: Gregory Farnum <greg@gregs42.com>
+Subject: Re: Failed OSDs not getting marked down or out
+Date: Thu, 19 Mar 2015 06:58:11 -0700
+Message-ID: <CAC6JEv8TJaybJhYpq067Bhrz86f9CHtY8Lz9haKXtqED34e+Hw@mail.gmail.com>
+References: <CAKeiORT21fyG0WcdgJC6Gbnpe90y_SM+VuOJDML8NXR9dG2sZA@mail.gmail.com>
+	<alpine.DEB.2.00.1503181256160.3716@cobra.newdream.net>
+	<CAC6JEv9SMnuXE80Y8jtMv_Qsf7MpcCAmsYjV3r5ju1B7838+kg@mail.gmail.com>
+	<CAKeiORShxjnSVO9cRJC9ucrq-UWgRXLgqkt_Q8WO+2T7rHn2dg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f182.google.com ([209.85.217.182]:36737 "EHLO
-	mail-lb0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751525AbbCSNjx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Mar 2015 09:39:53 -0400
-Received: by lbblx11 with SMTP id lx11so30739607lbb.3
-        for <ceph-devel@vger.kernel.org>; Thu, 19 Mar 2015 06:39:51 -0700 (PDT)
-In-Reply-To: <2060462867.22342282.1426603844200.JavaMail.zimbra@redhat.com>
+Received: from mail-ig0-f171.google.com ([209.85.213.171]:36069 "EHLO
+	mail-ig0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751191AbbCSN6M (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Mar 2015 09:58:12 -0400
+Received: by igbud6 with SMTP id ud6so24555015igb.1
+        for <ceph-devel@vger.kernel.org>; Thu, 19 Mar 2015 06:58:12 -0700 (PDT)
+Received: from mail-ig0-f172.google.com (mail-ig0-f172.google.com. [209.85.213.172])
+        by mx.google.com with ESMTPSA id k9sm1395742ige.6.2015.03.19.06.58.11
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 19 Mar 2015 06:58:11 -0700 (PDT)
+Received: by igbqf9 with SMTP id qf9so23581438igb.1
+        for <ceph-devel@vger.kernel.org>; Thu, 19 Mar 2015 06:58:11 -0700 (PDT)
+In-Reply-To: <CAKeiORShxjnSVO9cRJC9ucrq-UWgRXLgqkt_Q8WO+2T7rHn2dg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Cc: ZHOU Yuan <dunk007@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Matt Conner <matt.conner@keepertech.com>
+Cc: Sage Weil <sage@newdream.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, Mar 17, 2015 at 8:20 PM, Yehuda Sadeh-Weinraub
-<yehuda@redhat.com> wrote:
+Can you share the actual map? I'm not sure exactly what "rack rules"
+means here but from your description so far I'm guessing/hoping that
+you've accidentally restricted OSD choices in a way that limits the
+number of peers each OSD is getting.
+-Greg
+
+On Thu, Mar 19, 2015 at 5:41 AM, Matt Conner <matt.conner@keepertech.com> wrote:
+> In this case we are using rack rules with the firefly tunables. The testing
+> was being done with a single, 3 copy, pool with placement group number 4096.
+> This was calculated based on 10% data and 200 PGs per OSD using the
+> calculator at http://ceph.com/pgcalc/.
 >
+> Thanks,
+> Matt
 >
-> ----- Original Message -----
->> From: "Abhishek Dixit" <dixitabhi@gmail.com>
->> To: "Yehuda Sadeh-Weinraub" <yehuda@redhat.com>, "ZHOU Yuan" <dunk007@gmail.com>
->> Cc: "ceph-devel" <ceph-devel@vger.kernel.org>
->> Sent: Monday, March 16, 2015 11:31:55 PM
->> Subject: Re: RGW : Transaction Id in response?
+> Matt Conner
+> keepertechnology
+> matt.conner@keepertech.com
+> (240) 461-2657
+>
+> On Wed, Mar 18, 2015 at 4:11 PM, Gregory Farnum <greg@gregs42.com> wrote:
 >>
->> On Sat, Feb 28, 2015 at 6:54 AM, ZHOU Yuan <dunk007@gmail.com> wrote:
->> > On Fri, Feb 27, 2015 at 6:31 PM, Abhishek Dixit <dixitabhi@gmail.com>
->> > wrote:
->> >> On Thu, Feb 26, 2015 at 10:51 PM, Yehuda Sadeh-Weinraub
->> >> <yehuda@redhat.com> wrote:
->> >>>
->> >>>
->> >>> ----- Original Message -----
->> >>>> From: "Abhishek Dixit" <dixitabhi@gmail.com>
->> >>>> To: "ceph-devel" <ceph-devel@vger.kernel.org>
->> >>>> Sent: Wednesday, February 25, 2015 8:35:40 PM
->> >>>> Subject: RGW : Transaction Id in response?
->> >>>>
->> >>>> Hi,
->> >>>>
->> >>>> I was doing comparison of Open Stack Swift response headers and Ceph
->> >>>> RGW response.
->> >>>> This is in regard to X-Trans-Id header in response from Open Stack
->> >>>> Swift storage.
->> >>>> Swift response to a request always have the header "X-Trans-Id".
->> >>>> X-Trans-Id : A unique transaction identifier for this request.
->> >>>>
->> >>>> X-Trans-Id seems to serve two purpose:
->> >>>> 1. Every log messages for a request will carry this and aid in
->> >>>> debugging/analyzing.
->> >>>> 2. Benchmarking for latency.
->> >>>>
->> >>>> So, do we have similar unique identifier in Ceph RGW response which
->> >>>> associates with each request?
->> >>>>
->> >>>> Or do we need add support for this?
->> >>>>
->> >>>
->> >>> At the moment there is no such identifier. We can leverage the rados
->> >>> client instance id that each radosgw instance gets when connecting to
->> >>> the backend, and there's also a unique running number that we use to
->> >>> identify each request within that gateway. We can probably concatenate
->> >>> these and return it as the unique identifier.
->> >>>
->> >>> Yehuda
->> >>>
+>> On Wed, Mar 18, 2015 at 12:59 PM, Sage Weil <sage@newdream.net> wrote:
+>> > On Wed, 18 Mar 2015, Matt Conner wrote:
+>> >> I'm working with a 6 rack, 18 server (3 racks of 2 servers , 3 racks
+>> >> of 4 servers), 640 OSD cluster and have run into an issue when failing
+>> >> a storage server or rack where the OSDs are not getting marked down
+>> >> until the monitor timeout is reached - typically resulting in all
+>> >> writes being blocked until the timeout.
 >> >>
+>> >> Each of our storage servers contains 36 OSDs, so in order to prevent a
+>> >> server from marking a OSD out (in case of network issues), we have set
+>> >> our "mon_osd_min_down_reporters" value to 37. This value is working
+>> >> great for a smaller cluster, but unfortunately seems to not work so
+>> >> well in this large cluster. Tailing the monitor logs I can see that
+>> >> the monitor is only receiving failed reports from 9-10 unique OSDs per
+>> >> failed OSD.
 >> >>
->> >> Hi Yehuda,
->> >>
->> >> I will add "X-Trans-Id" as per you suggested approach.
->> >> I have opened a new issue particularly for adding "X-Trans-Id" as many
->> >> other issues report absence of this header.
->> >>
->> >> I have assigned this to myself.
->> >> http://tracker.ceph.com/issues/10970
->> >>
+>> >> I've played around with "osd_heartbeat_min_peers", and it seems to
+>> >> help, but I still run into issues where an OSD is not marked down. Can
+>> >> anyone explain how the number of heartbeat peers is determined and
+>> >> how, if necessary, I can can use "osd_heartbeat_min_peers" to ensure I
+>> >> have enough peering to detect failures in large clusters?
 >> >
+>> > The peers are normally determined why which other OSDs we share a PG
+>> > with.
+>> > Increasing pg_num for your pools will tend to increase this.  It looks
+>> > like osd_heartbeat_min_peers will do the same (to be honest I don't
+>> > think
+>> > I've ever had to use it for this), so I'm not sure why that isn't
+>> > resolving the problem.  Maybe make sure it is set significantly higher
+>> > than 36?  It may simply be that several of the random choices were
+>> > within
+>> > the same host so that when it goes down there still aren't enough peers
+>> > to mark things down.
 >> >
->> > Hi Yehuda, Abhishek,
->> >
->> > may be we should follow the swift way considering the goal is to keep
->> > compatible with swift? This might make the log analysis a bit easier
->> > for swift cluster operators.
->> >
->> > def generate_trans_id(trans_id_suffix):
->> >     return 'tx%s-%010x%s' % (
->> >         uuid.uuid4().hex[:21], time.time(), quote(trans_id_suffix))
->> >
->> > The trans_id_suffix is configurable in swift setup.
->> >
->> > Thanks, -yuan
->> >
->> >> Thanks
->> >> Abhishek Dixit
->> >> --
->> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> >> the body of a message to majordomo@vger.kernel.org
->> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> > Alternatively, you can give up on the mon_osd_min_down_reporters tweak.
+>> > It sounds like it creates more problems than it solves...
 >>
->>
->> Hi Yehuda, Yuan
->>
->> req_state already has req_id generated by concatenating instance_id
->> and RGWRequest id field
->> But this RGWRequest id field is not set when new RGWRequest is done in
->> civetweb_callback function.
->> So, id remains as zero.
->> For "new RGWLoadGenRequest" and "new RGWFCGXRequest" id is updated to
->> max_req_id.
->> So do we need to fix req->id for new RGWRequest of civetweb_callback
->> as at this point only, request are generated in my setup?
+>> This normally works out okay; in particular I'd expect a lot more than
+>> 10 peer OSDs in a cluster of this size. What's your CRUSH map and
+>> ruleset look like? How many pools and PGs?
+>> -Greg
 >
-> We definitely need to fix that.
-
-req->id is set as ++max_req_id.
-
-Is it possible for requests to be routed through any of
-RGWFCGXFrontend or RGWLoadGenFrontend in a singe RGW instance ? I mean
-are all these front-ends available simultaneously so all requests can
-flow through either of these?
-In case it is, then I think, we have chance of having duplicate
-req->id as each of RGWLoadGenProcess  and RGWFCGXProcess have own copy
-of max_req_id.
-
-Also, max_req_id is unaccessible from civetweb_callback.
-If possible, please advise on how to proceed for this.
-
-Thanks
-Abhishek Dixit
-
-
-
-
 >
->>
->> Also, I have added uuid field in RGWRequest, from which we derive
->> trans_id field added in struct req_state.
->> This field trans_id of struct req_state is used when we are sending
->> Swift response.
->> I have concatenated trans_id with current time in milliseconds to
->> generate X-Trans-Id header in Swift response.
->>
->> I have created a pull request on above lines.
->> https://github.com/ceph/ceph/pull/4023
->
-> Thank you, I will take a look.
->
-> Yehuda
->
->>
->> Thanks
->> Abhishek
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
