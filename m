@@ -1,38 +1,39 @@
-From: "Shu, Xinxin" <xinxin.shu@intel.com>
-Subject: RE: keyvaluestore speed up?
-Date: Fri, 20 Mar 2015 02:22:55 +0000
-Message-ID: <75674D092A819E4189E91166C74CB90D0150C211@shsmsx102.ccr.corp.intel.com>
-References: <CANE=7sUygGz67i-H+5v+ZmuwR4W9RuGzsWX6yhvJ=O9LKsyCSA@mail.gmail.com>
+From: Ketor D <d.ketor@gmail.com>
+Subject: Re: rados_dll: A Windows port of librados
+Date: Fri, 20 Mar 2015 10:45:16 +0800
+Message-ID: <CAM9_UU_O=ntf+pZodFwMo1qS7R7Y4S1eNFiXx-x5G2TpOEGf2g@mail.gmail.com>
+References: <CAHJ4zomaFxzJMBo+v50DUX=bycyagzWOfckoXPFcm1THFK8DQg@mail.gmail.com>
+ <alpine.DEB.2.00.1503190822150.9418@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:65349 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750862AbbCTCXY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 19 Mar 2015 22:23:24 -0400
-In-Reply-To: <CANE=7sUygGz67i-H+5v+ZmuwR4W9RuGzsWX6yhvJ=O9LKsyCSA@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-ob0-f182.google.com ([209.85.214.182]:32782 "EHLO
+	mail-ob0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750734AbbCTCpq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Mar 2015 22:45:46 -0400
+Received: by obcxo2 with SMTP id xo2so69082864obc.0
+        for <ceph-devel@vger.kernel.org>; Thu, 19 Mar 2015 19:45:46 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1503190822150.9418@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Xinze Chi <xmdxcxz@gmail.com>, Sage Weil <sweil@redhat.com>, "sjust@redhat.com" <sjust@redhat.com>, Haomai Wang <haomaiwang@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Alistair Israel <aisrael@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SSB0aGluayByb2Nrc2RiIGNhbiBzdXBwb3J0IHRoaXMgY29uZmlndXJhdGlvbi4NCg0KQ2hlZXJz
-LA0KeGlueGluDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBjZXBoLWRldmVs
-LW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJu
-ZWwub3JnXSBPbiBCZWhhbGYgT2YgWGluemUgQ2hpDQpTZW50OiBUaHVyc2RheSwgTWFyY2ggMTks
-IDIwMTUgNToyMyBQTQ0KVG86IFNhZ2UgV2VpbDsgc2p1c3RAcmVkaGF0LmNvbTsgSGFvbWFpIFdh
-bmc7IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0OiBrZXl2YWx1ZXN0b3JlIHNw
-ZWVkIHVwPw0KDQpoaSwgYWxsOg0KDQogICAgQ3VycmVudGx5IGF0IGtleXZhbHVlc3RvcmUsIG9z
-ZCBzZW5kIHN5bmMNCnJlcXVlc3Qoc3VibWl0X3RyYW5zYWN0aW9uX3N5bmMpIHRvIGZpbGVzdG9y
-ZSB3aGVuIGl0IGZpbmlzaGVzIGEgdHJhbnNhY3Rpb24uIEJ1dCBzYXRhIGRpc2sgaXMgbm90IHN1
-aXRhYmxlIGZvciBkb2luZyBzeW5jIHJlcXVlc3QuIHNzZCBkaXNrIGlzIG1vcmUgc3VpdGFibGUu
-DQoNCiAgICBTbyBJIHRoaW5rIHdoZXRoZXIgd2UgY291bGQgc2VwYXJhdGUgbGV2ZWxkYiAqLmxv
-ZyBmaWxlIHdpdGggKi5zc3QgZmlsZSBhbmQgbW92ZSAqLmxvZyB0byBzc2QgZGlzaywgd2hpY2gg
-aXMgc2ltaWxhciB3aXRoIGpvdXJuYWwgZmlsZSBpbiBjZXBoLg0KDQogICAgQnV0IG5vdywgdGhl
-IG9yaWdpbmFsIGxldmVsZGIgZG8gbm90IHN1cHBvcnQgdG8gc2VwYXJhdGUgbG9nIGZpbGUgYW5k
-IHNzdCBmaWxlLg0KDQogICAgV2FpdCBmb3IgeW91ciBjb21tZW50Lg0KDQogICAgVGhhbmtzLg0K
-LS0NClRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNj
-cmliZSBjZXBoLWRldmVsIiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZn
-ZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwu
-b3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg==
+Hi Sage,
+     I read the the rados_dll code and in my option it is very similar
+to ceph-dokan,  like just add librados code to ceph-dokan.
+     It's very easy to implement librados, librbd in ceph-dokan,
+because all base code is ported to MinGW.
+
+     I update the ceph-dokan from 0.67 to 0.92 for a long time, and
+push it to all cephers in 0.88.
+     With my experience I think if we need to split the client-side
+code from all Ceph code.After split, all port work will be much more
+easier to merge to upstream.
+     Recently I am trying to port the cephx auth to MinGW, after this
+ceph-dokan and libraodos can use cephx for mount.
+
+     And also Alistair, would you like to help port your librados code
+to ceph-dokan project with a clean pull request?
+
+Ketor
