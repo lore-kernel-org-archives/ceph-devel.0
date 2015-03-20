@@ -1,47 +1,75 @@
-From: John Spray <john.spray@redhat.com>
-Subject: Re: adding "{mds,mon} metadata" asok command
-Date: Fri, 20 Mar 2015 11:43:21 +0000
-Message-ID: <550C07D9.30700@redhat.com>
-References: <CAJE9aOP2g4=Pw-oGY4m90aXayc=Kx_GP8yLC+tTkSE62V6ObuQ@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Hitchhiker erasure code
+Date: Fri, 20 Mar 2015 13:42:35 +0100
+Message-ID: <550C15BB.9090305@dachary.org>
+References: <550BF72E.6030406@dachary.org> <3472A07E6605974CBC9BC573F1BC02E4AE8CF7E2@CERNXCHG43.cern.ch>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="NtfENLl8RuCFgNVTAMbhp46GVGRsE2IAJ"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:55424 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751893AbbCTLnZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 20 Mar 2015 07:43:25 -0400
-In-Reply-To: <CAJE9aOP2g4=Pw-oGY4m90aXayc=Kx_GP8yLC+tTkSE62V6ObuQ@mail.gmail.com>
+Received: from mail2.dachary.org ([91.121.57.175]:33367 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1750990AbbCTMmj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Mar 2015 08:42:39 -0400
+In-Reply-To: <3472A07E6605974CBC9BC573F1BC02E4AE8CF7E2@CERNXCHG43.cern.ch>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 20/03/2015 05:39, kefu chai wrote:
-> to pave the road to http://tracker.ceph.com/issues/10904, where we
-> need to add a command to list the hostname of nodes in a ceph cluster,
-> i would like to add the "{mds,mon} metadata" commands to print the
-> system information including, but not limited to hostname,
-> mem_{total,swap}_kb, and distro info, of specified mds and mon.
->
-> the implementation follow the mechanism of "osd metadata":
->
-> on the mds side i would like to reuse the MDSMonitor service:
-> 1. piggy back a map for the metadata in MMDSBeacon message,
-> 2. put the metadata into the same DBStore transaction but with another
-> prefix when storing the pending inc into local storage.
-> 3. and expose it using the "mds metadata" and later on the "service
-> ls" (not sure about the name ...)
->
-> @greg and @zyan, are you good with this? not sure this will overburden
-> the mds or not. i will use uname(2) and grep /proc/meminfo to get the
-> metadata in the same way of OSD.
-It should be straightforward to include the metadata in MMDSBeacon only 
-once per daemon lifetime, by checking if state is CEPH_MDS_STATE_BOOT -- 
-that way we don't have to worry about any ongoing costs.  I expect that 
-change can live entirely in Beacon.cc without touching any other MDS code.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--NtfENLl8RuCFgNVTAMbhp46GVGRsE2IAJ
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: quoted-printable
 
-As for the means of getting the information, I expect the generic 
-kernel/mem/cpu/distro stuff from OSD::_collect_metadata can be moved up 
-into common/ somewhere and reused as-is from mon+mds.
 
-John
+
+On 20/03/2015 13:37, Andreas Joachim Peters wrote:
+> Hi Loic,=20
+> I looked at that some time ago.
+>=20
+> Table 1 in the paper says it all:
+>=20
+> If you care about decoding and reconstruction of data it gives a good i=
+mprovement.
+> If you care mainly about encoding speed, it is not the optimal choice (=
++72.1%).
+>=20
+> The algorithm optimizes the reconstruction of data units. This is relev=
+ant if your read-size is typically smaller than the block-size e.g. you e=
+ncode 4 MB objects and you read 4kb pages. With normal EC you get a read =
+amplification of K*4k if a data stripe is down, while with hitchhiker you=
+ get only 2/3 of that traffic in case of (10,4).
+>=20
+> The most interesting to implement is probably Hitchhiker-XOR+, which yo=
+u have to combine with a Vandermonde matrix, it requires that the first p=
+arity is just the xor of all data chunks.
+>=20
+> So, yes, there is certainly a benefit in implementing that compared to =
+other approaches (Xorbas,LRC) since it does not involve a space overhead =
+and opens the door to use larger K values and save space!
+>=20
+
+That sounds appealing :-) Do you think it would be more relevant to imple=
+ment this as an additional Ceph plugin ? Or as a new jerasure technique ?=
+
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+--NtfENLl8RuCFgNVTAMbhp46GVGRsE2IAJ
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlUMFbsACgkQ8dLMyEl6F21IAACfd26wwhiDDsm90nt2pW3PK5Zv
+7AoAn2z362uRGXqs0XeRWZDnM6n0vwvs
+=B4vB
+-----END PGP SIGNATURE-----
+
+--NtfENLl8RuCFgNVTAMbhp46GVGRsE2IAJ--
