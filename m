@@ -1,37 +1,38 @@
-From: Xinze Chi <xmdxcxz@gmail.com>
-Subject: Re: scubbing for a long time and not finished
-Date: Fri, 20 Mar 2015 09:23:19 +0800
-Message-ID: <CANE=7sWQFpDpHysz8q_d2bHocagG-VxdMdjRpcgX=40nRzbVbQ@mail.gmail.com>
-References: <CANE=7sWwheXa3WZb_+b3G57MBuhcdMssJJqVjR9y9yRHu6vFEQ@mail.gmail.com>
-	<da34275f64ad3e2960322516f488fd@ip-10-0-3-214>
-	<CANE=7sWbh9aJHp603BuFZivtLJ5a-axDq7CyHCfwaDWMRw7wAg@mail.gmail.com>
-	<alpine.DEB.2.00.1503190629530.7043@cobra.newdream.net>
+From: "Shu, Xinxin" <xinxin.shu@intel.com>
+Subject: RE: keyvaluestore speed up?
+Date: Fri, 20 Mar 2015 02:22:55 +0000
+Message-ID: <75674D092A819E4189E91166C74CB90D0150C211@shsmsx102.ccr.corp.intel.com>
+References: <CANE=7sUygGz67i-H+5v+ZmuwR4W9RuGzsWX6yhvJ=O9LKsyCSA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f170.google.com ([209.85.214.170]:33532 "EHLO
-	mail-ob0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750905AbbCTBXU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Mar 2015 21:23:20 -0400
-Received: by obcxo2 with SMTP id xo2so68063298obc.0
-        for <ceph-devel@vger.kernel.org>; Thu, 19 Mar 2015 18:23:19 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1503190629530.7043@cobra.newdream.net>
+Received: from mga02.intel.com ([134.134.136.20]:65349 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750862AbbCTCXY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 19 Mar 2015 22:23:24 -0400
+In-Reply-To: <CANE=7sUygGz67i-H+5v+ZmuwR4W9RuGzsWX6yhvJ=O9LKsyCSA@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Xinze Chi <xmdxcxz@gmail.com>, Sage Weil <sweil@redhat.com>, "sjust@redhat.com" <sjust@redhat.com>, Haomai Wang <haomaiwang@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-I add a issue http://tracker.ceph.com/issues/11162.
-
-2015-03-19 21:33 GMT+08:00 Sage Weil <sage@newdream.net>:
-> On Thu, 19 Mar 2015, Xinze Chi wrote:
->> Currently, users do not know  when some pg do scrubbing for a long time.
->> I think whether we could give some warming if it happend (defined as
->> osd_scrub_max_time).
->> It would tell the user something may be wrong in cluster.
->
-> This should be pretty straightforward to add along with the other "stuck
-> x" warnings based on the pg_stat_t state timestamps.  On the otherhead,
-> that may be a somewhat heavyweight approach (each new warning bloats the
-> stat structure a bit); open to other ideas!
->
-> sage
+SSB0aGluayByb2Nrc2RiIGNhbiBzdXBwb3J0IHRoaXMgY29uZmlndXJhdGlvbi4NCg0KQ2hlZXJz
+LA0KeGlueGluDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBjZXBoLWRldmVs
+LW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJu
+ZWwub3JnXSBPbiBCZWhhbGYgT2YgWGluemUgQ2hpDQpTZW50OiBUaHVyc2RheSwgTWFyY2ggMTks
+IDIwMTUgNToyMyBQTQ0KVG86IFNhZ2UgV2VpbDsgc2p1c3RAcmVkaGF0LmNvbTsgSGFvbWFpIFdh
+bmc7IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0OiBrZXl2YWx1ZXN0b3JlIHNw
+ZWVkIHVwPw0KDQpoaSwgYWxsOg0KDQogICAgQ3VycmVudGx5IGF0IGtleXZhbHVlc3RvcmUsIG9z
+ZCBzZW5kIHN5bmMNCnJlcXVlc3Qoc3VibWl0X3RyYW5zYWN0aW9uX3N5bmMpIHRvIGZpbGVzdG9y
+ZSB3aGVuIGl0IGZpbmlzaGVzIGEgdHJhbnNhY3Rpb24uIEJ1dCBzYXRhIGRpc2sgaXMgbm90IHN1
+aXRhYmxlIGZvciBkb2luZyBzeW5jIHJlcXVlc3QuIHNzZCBkaXNrIGlzIG1vcmUgc3VpdGFibGUu
+DQoNCiAgICBTbyBJIHRoaW5rIHdoZXRoZXIgd2UgY291bGQgc2VwYXJhdGUgbGV2ZWxkYiAqLmxv
+ZyBmaWxlIHdpdGggKi5zc3QgZmlsZSBhbmQgbW92ZSAqLmxvZyB0byBzc2QgZGlzaywgd2hpY2gg
+aXMgc2ltaWxhciB3aXRoIGpvdXJuYWwgZmlsZSBpbiBjZXBoLg0KDQogICAgQnV0IG5vdywgdGhl
+IG9yaWdpbmFsIGxldmVsZGIgZG8gbm90IHN1cHBvcnQgdG8gc2VwYXJhdGUgbG9nIGZpbGUgYW5k
+IHNzdCBmaWxlLg0KDQogICAgV2FpdCBmb3IgeW91ciBjb21tZW50Lg0KDQogICAgVGhhbmtzLg0K
+LS0NClRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNj
+cmliZSBjZXBoLWRldmVsIiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZn
+ZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwu
+b3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg==
