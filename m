@@ -1,103 +1,115 @@
-From: Sanidhya Kashyap <sanidhya.gatech@gmail.com>
-Subject: [PATCH] ceph: kstrdup() memory handling
-Date: Sat, 21 Mar 2015 12:54:58 -0400
-Message-ID: <1426956898-32132-1-git-send-email-sanidhya.gatech@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: zyan@redhat.com, sage@redhat.com, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: taesoo@gatech.edu, changwoo@gatech.edu, sanidhya@gatech.edu, blee@gatech.edu, Sanidhya Kashyap <sanidhya.gatech@gmail.com>
+From: shylesh kumar <shylesh.mohan-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: How does crush selects different osds using hash(pg)
+	in diferent iterations
+Date: Sat, 21 Mar 2015 23:16:46 +0530
+Message-ID: <CAMxOGo2V+Fn+g3z5qc7oYK40wU_XJuScAdfetQrkjp6izeNULw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: multipart/mixed; boundary="===============0895455722=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-Currently, there is no check for the kstrdup() for r_path2, r_path1 and snapdir_name
-as various locations as there is a possibility of failure during memory pressure.
-Therefore, returning ENOMEM where the checks have been missed.
+--===============0895455722==
+Content-Type: multipart/alternative; boundary=f46d043c7cec4634de0511d00440
 
-Signed-off-by: Sanidhya Kashyap <sanidhya.gatech@gmail.com>
----
- fs/ceph/dir.c   | 11 +++++++++++
- fs/ceph/super.c |  8 ++++++++
- fs/ceph/xattr.c |  7 +++++++
- 3 files changed, 26 insertions(+)
+--f46d043c7cec4634de0511d00440
+Content-Type: text/plain; charset=UTF-8
 
-diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index 83e9976..be32703 100644
---- a/fs/ceph/dir.c
-+++ b/fs/ceph/dir.c
-@@ -344,6 +344,12 @@ more:
- 		req->r_direct_hash = ceph_frag_value(frag);
- 		req->r_direct_is_hash = true;
- 		req->r_path2 = kstrdup(fi->last_name, GFP_NOFS);
-+		if (!req->r_path2) {
-+			iput(inode);
-+			ceph_mdsc_put_request(req);
-+			return -ENOMEM;
-+		}
-+
- 		req->r_readdir_offset = fi->next_offset;
- 		req->r_args.readdir.frag = cpu_to_le32(frag);
- 		err = ceph_mdsc_do_request(mdsc, NULL, req);
-@@ -758,6 +764,11 @@ static int ceph_symlink(struct inode *dir, struct dentry *dentry,
- 	req->r_dentry = dget(dentry);
- 	req->r_num_caps = 2;
- 	req->r_path2 = kstrdup(dest, GFP_NOFS);
-+	if (!req->r_path2) {
-+		err = -ENOMEM;
-+		ceph_mdsc_put_request(req);
-+		goto out;
-+	}
- 	req->r_locked_dir = dir;
- 	req->r_dentry_drop = CEPH_CAP_FILE_SHARED;
- 	req->r_dentry_unless = CEPH_CAP_FILE_EXCL;
-diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index a63997b..8e68f53 100644
---- a/fs/ceph/super.c
-+++ b/fs/ceph/super.c
-@@ -345,6 +345,9 @@ static int parse_mount_options(struct ceph_mount_options **pfsopt,
- 	fsopt->rsize = CEPH_RSIZE_DEFAULT;
- 	fsopt->rasize = CEPH_RASIZE_DEFAULT;
- 	fsopt->snapdir_name = kstrdup(CEPH_SNAPDIRNAME_DEFAULT, GFP_KERNEL);
-+	if (!fsopt->snapdir_name)
-+		goto out;
-+
- 	fsopt->caps_wanted_delay_min = CEPH_CAPS_WANTED_DELAY_MIN_DEFAULT;
- 	fsopt->caps_wanted_delay_max = CEPH_CAPS_WANTED_DELAY_MAX_DEFAULT;
- 	fsopt->cap_release_safety = CEPH_CAP_RELEASE_SAFETY_DEFAULT;
-@@ -730,6 +733,11 @@ static struct dentry *open_root_dentry(struct ceph_fs_client *fsc,
- 	if (IS_ERR(req))
- 		return ERR_CAST(req);
- 	req->r_path1 = kstrdup(path, GFP_NOFS);
-+	if (!req->r_path1) {
-+		root = ERR_PTR(-ENOMEM);
-+		goto out;
-+	}
-+
- 	req->r_ino1.ino = CEPH_INO_ROOT;
- 	req->r_ino1.snap = CEPH_NOSNAP;
- 	req->r_started = started;
-diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
-index 5a492ca..299eb83 100644
---- a/fs/ceph/xattr.c
-+++ b/fs/ceph/xattr.c
-@@ -883,6 +883,11 @@ static int ceph_sync_setxattr(struct dentry *dentry, const char *name,
- 	req->r_num_caps = 1;
- 	req->r_args.setxattr.flags = cpu_to_le32(flags);
- 	req->r_path2 = kstrdup(name, GFP_NOFS);
-+	if (!req->r_path2) {
-+		ceph_mdsc_put_request(req);
-+		err = -ENOMEM;
-+		goto out;
-+	}
- 
- 	req->r_pagelist = pagelist;
- 	pagelist = NULL;
-@@ -1024,6 +1029,8 @@ static int ceph_send_removexattr(struct dentry *dentry, const char *name)
- 	req->r_inode_drop = CEPH_CAP_XATTR_SHARED;
- 	req->r_num_caps = 1;
- 	req->r_path2 = kstrdup(name, GFP_NOFS);
-+	if (!req->r_path2)
-+		return -ENOMEM;
- 
- 	err = ceph_mdsc_do_request(mdsc, NULL, req);
- 	ceph_mdsc_put_request(req);
+Hi ,
+
+I was going through this simplified crush algorithm given in ceph website.
+
+def crush(pg):
+   all_osds = ['osd.0', 'osd.1', 'osd.2', ...]
+   result = []
+   # size is the number of copies; primary+replicas
+   while len(result) < size:
+   --> *r = hash(pg)*
+       chosen = all_osds[ r % len(all_osds) ]
+       if chosen in result:
+           # OSD can be picked only once
+           continue
+       result.append(chosen)
+   return result
+
+10:24 PM (51 minutes ago)
+In the line where *r = hash(pg)* , will it gives the same hash value in
+every iteration ?
+if that is the case we always endup choosing the same osd from the list
+or will the pg number be used as seed for the hashing so that r value
+changes in the next iteration.
+
+Am I missing something really basic ??
+Can somebody please provide me some pointers ?
+
+
+
 -- 
-2.1.0
+Thanks,
+Shylesh Kumar M
+
+--f46d043c7cec4634de0511d00440
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div>Hi ,<br><br></div>I was going through this simplified=
+ crush algorithm given in ceph website.<br><br><div><pre><span>def</span> <=
+span>crush</span><span>(</span><span>pg</span><span>):</span>
+   <span>all_osds</span> <span>=3D</span> <span>[</span><span>&#39;osd.0&#3=
+9;</span><span>,</span> <span>&#39;osd.1&#39;</span><span>,</span> <span>&#=
+39;osd.2&#39;</span><span>,</span> <span>...</span><span>]</span>
+   <span>result</span> <span>=3D</span> <span>[]</span>
+   <span># size is the number of copies; primary+replicas</span>
+   <span>while</span> <span>len</span><span>(</span><span>result</span><spa=
+n>)</span> <span>&lt;</span> <span>size</span><span>:</span>
+   --&gt; <b><span>r</span> <span>=3D</span> <span>hash</span><span>(</span=
+><span>pg</span><span>)</span></b>
+       <span>chosen</span> <span>=3D</span> <span>all_osds</span><span>[</s=
+pan> <span>r</span> <span>%</span> <span>len</span><span>(</span><span>all_=
+osds</span><span>)</span> <span>]</span>
+       <span>if</span> <span>chosen</span> <span>in</span> <span>result</sp=
+an><span>:</span>
+           <span># OSD can be picked only once</span>
+           <span>continue</span>
+       <span>result</span><span>.</span><span>append</span><span>(</span><s=
+pan>chosen</span><span>)</span>
+   <span>return</span> <span>result</span><span class=3D""><font color=3D"#=
+888888">
+</font></span></pre></div><div class=3D""><div id=3D":1mk" class=3D"" tabin=
+dex=3D"0">10:24 PM (51 minutes ago)</div><div id=3D":1mk" class=3D"" tabind=
+ex=3D"0">In the line where <b>r =3D hash(pg)</b> , will it gives the same h=
+ash value in every iteration ?<br></div><div id=3D":1mk" class=3D"" tabinde=
+x=3D"0">if that is the case we always endup choosing the same osd from the =
+list <br></div><div id=3D":1mk" class=3D"" tabindex=3D"0">or will the pg nu=
+mber be used as seed for the hashing so that r value changes in the next it=
+eration.<br><br></div><div id=3D":1mk" class=3D"" tabindex=3D"0">Am I missi=
+ng something really basic ??<br></div><div id=3D":1mk" class=3D"" tabindex=
+=3D"0">Can somebody please provide me some pointers ?<br><br></div><div id=
+=3D":1mk" class=3D"" tabindex=3D"0"><br></div><div id=3D":1mk" class=3D"" t=
+abindex=3D"0"><br></div></div><div><div>-- <br><div class=3D"gmail_signatur=
+e">Thanks,<br>Shylesh Kumar M<br>=C2=A0</div>
+</div></div></div>
+
+--f46d043c7cec4634de0511d00440--
+
+--===============0895455722==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============0895455722==--
