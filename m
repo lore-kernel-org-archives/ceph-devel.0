@@ -1,50 +1,35 @@
-From: Yuri Weinstein <yweinste@redhat.com>
-Subject: Re: hammer tasks in http://tracker.ceph.com/projects/ceph-releases
-Date: Sun, 22 Mar 2015 12:16:45 -0400 (EDT)
-Message-ID: <1042516820.1185244.1427041005119.JavaMail.zimbra@redhat.com>
-References: <550E832E.6040004@dachary.org>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: OPW Contribution
+Date: Sun, 22 Mar 2015 22:44:13 +0300
+Message-ID: <CAOi1vP8+S-iKs6m205Oaj7EDFDY+H0Qa1HQ6ssHU3Pw=p5p+aw@mail.gmail.com>
+References: <CAGRfJqhRNMGYBh6pS0Ln0fYYX0RdSxS+mQxMNdKN+gd7CxCY9g@mail.gmail.com>
+	<550DC8DE.5020207@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx5-phx2.redhat.com ([209.132.183.37]:35298 "EHLO
-	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751730AbbCVRR4 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 22 Mar 2015 13:17:56 -0400
-In-Reply-To: <550E832E.6040004@dachary.org>
+Received: from mail-wg0-f48.google.com ([74.125.82.48]:35838 "EHLO
+	mail-wg0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751742AbbCVToO convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 22 Mar 2015 15:44:14 -0400
+Received: by wgdm6 with SMTP id m6so130335998wgd.2
+        for <ceph-devel@vger.kernel.org>; Sun, 22 Mar 2015 12:44:13 -0700 (PDT)
+In-Reply-To: <550DC8DE.5020207@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Loic Dachary <loic@dachary.org>
-Cc: Sage Weil <sweil@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+Cc: kuna fomboh <fombohkuna@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Loic, I think the idea was to do more process driven approach for relea=
-sing hammer, e.g. keep track of suites vs. results and open issues, so =
-we can have a high level view on status at any time before the final cu=
-t day.
+On Sat, Mar 21, 2015 at 10:39 PM, Loic Dachary <loic@dachary.org> wrote:
+> Hi,
+>
+> The simplest contribution is to pick a low hanging fruit from the tracker[1]. Alternatively you can browse the documentation at http://ceph.com/docs/master/ and file a bug at http://tracker.ceph.com/projects/ceph/issues/new when you find a typo. Then you can fix it by modifying the corresponding file at https://github.com/ceph/ceph/tree/master/doc and submitting a pull request. You will find more information about contributions at http://ceph.com/community/contribute/
 
-Do you have any suggestions or objections?
+In addition to typos, there are a lot of places with formatting gone
+wrong, especially in man pages (the reason being that man pages are
+generated from .rst files and there seems to be a number of gotchas to
+that).  Fixing those up would be a great help!
 
-Thx
-YuriW
+Thanks,
 
------ Original Message -----
-=46rom: "Loic Dachary" <loic@dachary.org>
-To: "Sage Weil" <sweil@redhat.com>
-Cc: "Ceph Development" <ceph-devel@vger.kernel.org>
-Sent: Sunday, March 22, 2015 1:54:06 AM
-Subject: hammer tasks in http://tracker.ceph.com/projects/ceph-releases
-
-Hi Sage,
-
-You have created a few hammer related tasks at http://tracker.ceph.com/=
-projects/ceph-releases/issues . What did you have in mind ?
-
-Cheers
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+                Ilya
