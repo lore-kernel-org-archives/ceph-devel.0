@@ -1,35 +1,76 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: OPW Contribution
-Date: Sun, 22 Mar 2015 22:44:13 +0300
-Message-ID: <CAOi1vP8+S-iKs6m205Oaj7EDFDY+H0Qa1HQ6ssHU3Pw=p5p+aw@mail.gmail.com>
-References: <CAGRfJqhRNMGYBh6pS0Ln0fYYX0RdSxS+mQxMNdKN+gd7CxCY9g@mail.gmail.com>
-	<550DC8DE.5020207@dachary.org>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: hammer tasks in http://tracker.ceph.com/projects/ceph-releases
+Date: Mon, 23 Mar 2015 00:50:42 +0100
+Message-ID: <550F5552.6090503@dachary.org>
+References: <550E832E.6040004@dachary.org> <1042516820.1185244.1427041005119.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="xbsFnBKJe9AiK6CuQXdaKnJhKDHlvEaWH"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f48.google.com ([74.125.82.48]:35838 "EHLO
-	mail-wg0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751742AbbCVToO convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 22 Mar 2015 15:44:14 -0400
-Received: by wgdm6 with SMTP id m6so130335998wgd.2
-        for <ceph-devel@vger.kernel.org>; Sun, 22 Mar 2015 12:44:13 -0700 (PDT)
-In-Reply-To: <550DC8DE.5020207@dachary.org>
+Received: from mail2.dachary.org ([91.121.57.175]:34624 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751954AbbCVXur (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 22 Mar 2015 19:50:47 -0400
+In-Reply-To: <1042516820.1185244.1427041005119.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: kuna fomboh <fombohkuna@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Yuri Weinstein <yweinste@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Sat, Mar 21, 2015 at 10:39 PM, Loic Dachary <loic@dachary.org> wrote:
-> Hi,
->
-> The simplest contribution is to pick a low hanging fruit from the tracker[1]. Alternatively you can browse the documentation at http://ceph.com/docs/master/ and file a bug at http://tracker.ceph.com/projects/ceph/issues/new when you find a typo. Then you can fix it by modifying the corresponding file at https://github.com/ceph/ceph/tree/master/doc and submitting a pull request. You will find more information about contributions at http://ceph.com/community/contribute/
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--xbsFnBKJe9AiK6CuQXdaKnJhKDHlvEaWH
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-In addition to typos, there are a lot of places with formatting gone
-wrong, especially in man pages (the reason being that man pages are
-generated from .rst files and there seems to be a number of gotchas to
-that).  Fixing those up would be a great help!
 
-Thanks,
 
-                Ilya
+On 22/03/2015 17:16, Yuri Weinstein wrote:
+> Loic, I think the idea was to do more process driven approach for relea=
+sing hammer, e.g. keep track of suites vs. results and open issues, so we=
+ can have a high level view on status at any time before the final cut da=
+y.
+>=20
+> Do you have any suggestions or objections?
+
+That sounds interesting :-) How would that work exactly ?
+
+Cheers
+>=20
+> Thx
+> YuriW
+>=20
+> ----- Original Message -----
+> From: "Loic Dachary" <loic@dachary.org>
+> To: "Sage Weil" <sweil@redhat.com>
+> Cc: "Ceph Development" <ceph-devel@vger.kernel.org>
+> Sent: Sunday, March 22, 2015 1:54:06 AM
+> Subject: hammer tasks in http://tracker.ceph.com/projects/ceph-releases=
+
+>=20
+> Hi Sage,
+>=20
+> You have created a few hammer related tasks at http://tracker.ceph.com/=
+projects/ceph-releases/issues . What did you have in mind ?
+>=20
+> Cheers
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--xbsFnBKJe9AiK6CuQXdaKnJhKDHlvEaWH
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlUPVVIACgkQ8dLMyEl6F22j/gCfTStqRU1rQx0WgklW2FAUN2aK
+SEQAnAis2g/EoJe4TO+0SOqqwcg+RQZk
+=H0ZH
+-----END PGP SIGNATURE-----
+
+--xbsFnBKJe9AiK6CuQXdaKnJhKDHlvEaWH--
