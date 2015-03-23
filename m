@@ -1,75 +1,61 @@
-From: Gregory Farnum <greg@gregs42.com>
-Subject: Re: [ceph-users] How does crush selects different osds using hash(pg)
- in diferent iterations
-Date: Mon, 23 Mar 2015 07:09:41 -0700
-Message-ID: <CAC6JEv9oFbJ9yY8RtFSYyATPrBCio17MQCTGe35+3m=vEi-ZNg@mail.gmail.com>
-References: <CAMxOGo2V+Fn+g3z5qc7oYK40wU_XJuScAdfetQrkjp6izeNULw@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: teuthology-suite and priorities
+Date: Mon, 23 Mar 2015 15:20:15 +0100
+Message-ID: <5510211F.3020007@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="MHXXksmMCiTEf9clpLi5ihbweUW9sWOfl"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f176.google.com ([209.85.223.176]:35446 "EHLO
-	mail-ie0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752143AbbCWOJn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Mar 2015 10:09:43 -0400
-Received: by ieclw3 with SMTP id lw3so36312128iec.2
-        for <ceph-devel@vger.kernel.org>; Mon, 23 Mar 2015 07:09:42 -0700 (PDT)
-Received: from mail-ig0-f175.google.com (mail-ig0-f175.google.com. [209.85.213.175])
-        by mx.google.com with ESMTPSA id nv8sm2481106igb.6.2015.03.23.07.09.41
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 23 Mar 2015 07:09:42 -0700 (PDT)
-Received: by igcqo1 with SMTP id qo1so39314970igc.0
-        for <ceph-devel@vger.kernel.org>; Mon, 23 Mar 2015 07:09:41 -0700 (PDT)
-In-Reply-To: <CAMxOGo2V+Fn+g3z5qc7oYK40wU_XJuScAdfetQrkjp6izeNULw@mail.gmail.com>
+Received: from mail2.dachary.org ([91.121.57.175]:35032 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752546AbbCWOUS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Mar 2015 10:20:18 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: shylesh kumar <shylesh.mohan@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
+To: Andrew Schoen <aschoen@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Sat, Mar 21, 2015 at 10:46 AM, shylesh kumar <shylesh.mohan@gmail.com> wrote:
-> Hi ,
->
-> I was going through this simplified crush algorithm given in ceph website.
->
-> def crush(pg):
->    all_osds = ['osd.0', 'osd.1', 'osd.2', ...]
->    result = []
->    # size is the number of copies; primary+replicas
->    while len(result) < size:
->    --> r = hash(pg)
->        chosen = all_osds[ r % len(all_osds) ]
->        if chosen in result:
->            # OSD can be picked only once
->            continue
->        result.append(chosen)
->    return result
->
-> 10:24 PM (51 minutes ago)
-> In the line where r = hash(pg) , will it gives the same hash value in every
-> iteration ?
-> if that is the case we always endup choosing the same osd from the list
-> or will the pg number be used as seed for the hashing so that r value
-> changes in the next iteration.
->
-> Am I missing something really basic ??
-> Can somebody please provide me some pointers ?
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--MHXXksmMCiTEf9clpLi5ihbweUW9sWOfl
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-I'm not sure where this bit of documentation came from, but the
-selection process includes the "attempt" number as one of the inputs.
-Where the attempt starts at 0 (or 1, I dunno) and increments each time
-we try to map a new OSD to the PG.
--Greg
+Hi,
 
->
->
->
-> --
-> Thanks,
-> Shylesh Kumar M
->
->
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users@lists.ceph.com
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->
+When scheduling suites that are low priority (giant for instance at http:=
+//pulpito.ceph.com/loic-2015-03-23_01:09:31-rados-giant---basic-multi/), =
+the --priority 1000 is set because (if I remember correctly) this is the =
+standard priority for nightlies. However, it seems to be different becaus=
+e this morning the giant suite was running although a hammer suite was sc=
+heduled before it (for instance http://pulpito.ceph.com/teuthology-2015-0=
+3-22_23:18:01-multimds-hammer-testing-basic-multi/) and was still waiting=
+=2E
+
+The giant suite was killed so that it does not interfere with more urgent=
+ jobs. Looking at the teuthology jobs there does not seem to be a trace o=
+f the priority, probably stored elsewhere.=20
+
+I would be very grateful if you could explain how priorities should be us=
+ed.
+
+Cheers
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--MHXXksmMCiTEf9clpLi5ihbweUW9sWOfl
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlUQIR8ACgkQ8dLMyEl6F214+ACgpmevgx/cutRhKNI6YOpCh897
+QnoAn3WLkH/AADjJAJwlo2Lf6aGKSwVj
+=i7rn
+-----END PGP SIGNATURE-----
+
+--MHXXksmMCiTEf9clpLi5ihbweUW9sWOfl--
