@@ -1,47 +1,71 @@
 From: Gregory Farnum <greg@gregs42.com>
-Subject: Re: teuthology-suite and priorities
-Date: Mon, 23 Mar 2015 07:24:37 -0700
-Message-ID: <CAC6JEv_zJFVGf38NE7gJTXXA244adPy3jr3Gb+-oPNnnmck-MQ@mail.gmail.com>
-References: <5510211F.3020007@dachary.org>
+Subject: Re: [ceph-users] More writes on filestore than on journal ?
+Date: Mon, 23 Mar 2015 07:29:05 -0700
+Message-ID: <CAC6JEv9J7jEtgv3tcruXr8TN6gXFn1_iNexv8S_F772MY2vjXw@mail.gmail.com>
+References: <1427116891.16770.25.camel@daevel.fr>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f173.google.com ([209.85.213.173]:35508 "EHLO
-	mail-ig0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752697AbbCWOYi convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Mar 2015 10:24:38 -0400
-Received: by igcau2 with SMTP id au2so43507263igc.0
-        for <ceph-devel@vger.kernel.org>; Mon, 23 Mar 2015 07:24:37 -0700 (PDT)
-Received: from mail-ie0-f179.google.com (mail-ie0-f179.google.com. [209.85.223.179])
-        by mx.google.com with ESMTPSA id 130sm702327ioz.10.2015.03.23.07.24.37
+Received: from mail-ie0-f172.google.com ([209.85.223.172]:34025 "EHLO
+	mail-ie0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752120AbbCWO3H convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Mar 2015 10:29:07 -0400
+Received: by iedfl3 with SMTP id fl3so42446130ied.1
+        for <ceph-devel@vger.kernel.org>; Mon, 23 Mar 2015 07:29:06 -0700 (PDT)
+Received: from mail-ie0-f174.google.com (mail-ie0-f174.google.com. [209.85.223.174])
+        by mx.google.com with ESMTPSA id j87sm699469iod.21.2015.03.23.07.29.05
         for <ceph-devel@vger.kernel.org>
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 23 Mar 2015 07:24:37 -0700 (PDT)
-Received: by ieclw3 with SMTP id lw3so36691275iec.2
-        for <ceph-devel@vger.kernel.org>; Mon, 23 Mar 2015 07:24:37 -0700 (PDT)
-In-Reply-To: <5510211F.3020007@dachary.org>
+        Mon, 23 Mar 2015 07:29:06 -0700 (PDT)
+Received: by ieclw3 with SMTP id lw3so36802960iec.2
+        for <ceph-devel@vger.kernel.org>; Mon, 23 Mar 2015 07:29:05 -0700 (PDT)
+In-Reply-To: <1427116891.16770.25.camel@daevel.fr>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Andrew Schoen <aschoen@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Olivier Bonvalet <ceph.list@daevel.fr>
+Cc: ceph-users <ceph-users@ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, Mar 23, 2015 at 7:20 AM, Loic Dachary <loic@dachary.org> wrote:
+On Mon, Mar 23, 2015 at 6:21 AM, Olivier Bonvalet <ceph.list@daevel.fr>=
+ wrote:
 > Hi,
 >
-> When scheduling suites that are low priority (giant for instance at http://pulpito.ceph.com/loic-2015-03-23_01:09:31-rados-giant---basic-multi/), the --priority 1000 is set because (if I remember correctly) this is the standard priority for nightlies. However, it seems to be different because this morning the giant suite was running although a hammer suite was scheduled before it (for instance http://pulpito.ceph.com/teuthology-2015-03-22_23:18:01-multimds-hammer-testing-basic-multi/) and was still waiting.
->
-> The giant suite was killed so that it does not interfere with more urgent jobs. Looking at the teuthology jobs there does not seem to be a trace of the priority, probably stored elsewhere.
->
-> I would be very grateful if you could explain how priorities should be used.
+> I'm still trying to find why there is much more write operations on
+> filestore since Emperor/Firefly than from Dumpling.
 
-I've seen a couple of oddities with suites that you've scheduled
-before, and I think something in the system might not be using
-timestamps properly. :) Also, the multimds suite is not an important
-one right now, so feel free to zap it rather than an LTS point release
-run in future.
+Do you have any history around this? It doesn't sound familiar,
+although I bet it's because of the WBThrottle and flushing changes.
 
-1000 is definitely the default, and I don't have one handy to look at
-right now but I think if you set a non-default priority it will show
-up in one of the config files.
+>
+> So, I add monitoring of all perf counters values from OSD.
+>
+> From what I see : =C2=ABfilestore.ops=C2=BB reports an average of 78 =
+operations
+> per seconds. But, block device monitoring reports an average of 113
+> operations per seconds (+45%).
+> please thoses 2 graphs :
+> - https://daevel.fr/img/firefly/osd-70.filestore-ops.png
+> - https://daevel.fr/img/firefly/osd-70.sda-ops.png
+
+That's unfortunate but perhaps not surprising =E2=80=94 any filestore o=
+p can
+change a backing file (which requires hitting both the file and the
+inode: potentially two disk seeks), as well as adding entries to the
+leveldb instance.
 -Greg
+
+>
+> Do you see what can explain this difference ? (this OSD use XFS)
+>
+> Thanks,
+> Olivier
+>
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
