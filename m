@@ -1,84 +1,92 @@
-From: Olivier Bonvalet <ceph.list@daevel.fr>
-Subject: Re: [ceph-users] More writes on filestore than on journal ?
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: teuthology-suite and priorities
 Date: Mon, 23 Mar 2015 15:35:34 +0100
-Message-ID: <1427121334.16770.36.camel@daevel.fr>
-References: <1427116891.16770.25.camel@daevel.fr>
-	 <CAC6JEv9J7jEtgv3tcruXr8TN6gXFn1_iNexv8S_F772MY2vjXw@mail.gmail.com>
+Message-ID: <551024B6.5000201@dachary.org>
+References: <5510211F.3020007@dachary.org> <CAC6JEv_zJFVGf38NE7gJTXXA244adPy3jr3Gb+-oPNnnmck-MQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="pbri1vxRNGi2fTq8XpQGaKn35s1KrAPxP"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from licorne.daevel.fr ([178.32.94.222]:59939 "EHLO
-	licorne.daevel.fr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752145AbbCWOfi (ORCPT
+Received: from mail2.dachary.org ([91.121.57.175]:35050 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752144AbbCWOfi (ORCPT
 	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Mar 2015 10:35:38 -0400
-In-Reply-To: <CAC6JEv9J7jEtgv3tcruXr8TN6gXFn1_iNexv8S_F772MY2vjXw@mail.gmail.com>
+In-Reply-To: <CAC6JEv_zJFVGf38NE7gJTXXA244adPy3jr3Gb+-oPNnnmck-MQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Gregory Farnum <greg@gregs42.com>
-Cc: ceph-users <ceph-users@ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: Andrew Schoen <aschoen@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi,
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--pbri1vxRNGi2fTq8XpQGaKn35s1KrAPxP
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-Le lundi 23 mars 2015 =C3=A0 07:29 -0700, Gregory Farnum a =C3=A9crit :
-> On Mon, Mar 23, 2015 at 6:21 AM, Olivier Bonvalet <ceph.list@daevel.f=
-r> wrote:
-> > Hi,
-> >
-> > I'm still trying to find why there is much more write operations on
-> > filestore since Emperor/Firefly than from Dumpling.
+
+Hi Greg,
+
+On 23/03/2015 15:24, Gregory Farnum wrote:
+> On Mon, Mar 23, 2015 at 7:20 AM, Loic Dachary <loic@dachary.org> wrote:=
+
+>> Hi,
+>>
+>> When scheduling suites that are low priority (giant for instance at ht=
+tp://pulpito.ceph.com/loic-2015-03-23_01:09:31-rados-giant---basic-multi/=
+), the --priority 1000 is set because (if I remember correctly) this is t=
+he standard priority for nightlies. However, it seems to be different bec=
+ause this morning the giant suite was running although a hammer suite was=
+ scheduled before it (for instance http://pulpito.ceph.com/teuthology-201=
+5-03-22_23:18:01-multimds-hammer-testing-basic-multi/) and was still wait=
+ing.
+>>
+>> The giant suite was killed so that it does not interfere with more urg=
+ent jobs. Looking at the teuthology jobs there does not seem to be a trac=
+e of the priority, probably stored elsewhere.
+>>
+>> I would be very grateful if you could explain how priorities should be=
+ used.
 >=20
-> Do you have any history around this? It doesn't sound familiar,
-> although I bet it's because of the WBThrottle and flushing changes.
+> I've seen a couple of oddities with suites that you've scheduled
+> before, and I think something in the system might not be using
+> timestamps properly. :) Also, the multimds suite is not an important
+> one right now, so feel free to zap it rather than an LTS point release
+> run in future.
 
-I only have history for block device stats and global stats reports by
-=C2=ABceph status=C2=BB.
-When I have upgrade from Dumpling to Firefly (via Emperor), write
-operations increased a lot on OSD.
-I suppose it's because of WBThrottle too, but can't find any parameter
-able to confirm that.
+I would not dare zap/kill a LTS point release run ;-)
 
+> 1000 is definitely the default, and I don't have one handy to look at
+> right now but I think if you set a non-default priority it will show
+> up in one of the config files.
 
-> >
-> > So, I add monitoring of all perf counters values from OSD.
-> >
-> > From what I see : =C2=ABfilestore.ops=C2=BB reports an average of 7=
-8 operations
-> > per seconds. But, block device monitoring reports an average of 113
-> > operations per seconds (+45%).
-> > please thoses 2 graphs :
-> > - https://daevel.fr/img/firefly/osd-70.filestore-ops.png
-> > - https://daevel.fr/img/firefly/osd-70.sda-ops.png
->=20
-> That's unfortunate but perhaps not surprising =E2=80=94 any filestore=
- op can
-> change a backing file (which requires hitting both the file and the
-> inode: potentially two disk seeks), as well as adding entries to the
-> leveldb instance.
+Right ! It shows at http://qa-proxy.ceph.com/teuthology/loic-2015-03-22_1=
+8:50:00-rgw-giant-backports---basic-multi/815885/orig.config.yaml (which =
+was a --priority 101 indeed because it was a single job suite for which I=
+ wanted results fast).=20
+
+I'll try to re-schedule with --priority 2000 then hoping it will go last.=
+=20
+
+Cheers
+
 > -Greg
 >=20
 
-Ok thanks, so this part can be =C2=ABnormal=C2=BB.
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
-> >
-> > Do you see what can explain this difference ? (this OSD use XFS)
-> >
-> > Thanks,
-> > Olivier
-> >
-> > _______________________________________________
-> > ceph-users mailing list
-> > ceph-users@lists.ceph.com
-> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--pbri1vxRNGi2fTq8XpQGaKn35s1KrAPxP
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlUQJLcACgkQ8dLMyEl6F23QBQCggHeEgmGlBDIWn4PYn6ugs9fC
+5Y8An2IvcE1DTPs72xjzwTgVZ21kizRh
+=d86c
+-----END PGP SIGNATURE-----
+
+--pbri1vxRNGi2fTq8XpQGaKn35s1KrAPxP--
