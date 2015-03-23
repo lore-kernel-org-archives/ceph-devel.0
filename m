@@ -1,36 +1,31 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: crush and go
-Date: Sun, 22 Mar 2015 22:20:23 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1503222217440.12661@cobra.newdream.net>
-References: <550DF141.2090800@dachary.org>
+From: Xinze Chi <xmdxcxz-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: add stop_scrub command for ceph
+Date: Mon, 23 Mar 2015 15:47:00 +0800
+Message-ID: <CANE=7sXF+_s7eOaLCsLW9scwrdbpfzGWqVfz86u399PCs1eNAQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:38050 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753200AbbCWFUX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Mar 2015 01:20:23 -0400
-In-Reply-To: <550DF141.2090800@dachary.org>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Sat, 21 Mar 2015, Loic Dachary wrote:
-> Hi,
-> 
-> Does anyone know of a go wrapper around the crush library ? I looked at 
-> http://go-search.org/search?q=crush but did not find anything relevant.
+hi ceph:
 
-I think it will be difficult to build such a wrapper until we spend the 
-time coralling crush into a nice .so.  The challenge there is that while 
-the core mapping code is quite simple (and in C, and duplicated in the 
-kernel), the CrushWrapper stuff depends on a bunch of Ceph infrastrcture, 
-like the bufferlist encode/decode stuff and CephContext for debugging.  
-Without all of that the core mapping library isn't terribly useful or 
-friendly.
+    Currently, there is not a command which can stop scrubbing when
+the pg is doing scrub or deep
+scrub. What about add a command to support it ? I think this s every
+used for system administrator.
 
-I'm not sure what the best path to making it more easily consumable would 
-be, to be honest...
-
-sage
+     I have add a issue to track it. http://tracker.ceph.com/issues/11202.
+-- 
+Regards,
+xinze
