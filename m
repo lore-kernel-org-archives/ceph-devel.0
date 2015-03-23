@@ -1,61 +1,75 @@
-From: Varada Kari <Varada.Kari@sandisk.com>
-Subject: RE: Adding a proprietary key value store to CEPH
-Date: Mon, 23 Mar 2015 13:42:40 +0000
-Message-ID: <C226B0AB34511445928D9882AA519F600A5902F9@SACMBXIP03.sdcorp.global.sandisk.com>
-References: <C226B0AB34511445928D9882AA519F600A56972E@SACMBXIP03.sdcorp.global.sandisk.com>
- <alpine.DEB.2.00.1502240819320.25838@cobra.newdream.net>
+From: Gregory Farnum <greg@gregs42.com>
+Subject: Re: [ceph-users] How does crush selects different osds using hash(pg)
+ in diferent iterations
+Date: Mon, 23 Mar 2015 07:09:41 -0700
+Message-ID: <CAC6JEv9oFbJ9yY8RtFSYyATPrBCio17MQCTGe35+3m=vEi-ZNg@mail.gmail.com>
+References: <CAMxOGo2V+Fn+g3z5qc7oYK40wU_XJuScAdfetQrkjp6izeNULw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1bon0088.outbound.protection.outlook.com ([157.56.111.88]:21312
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752367AbbCWOBS convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Mar 2015 10:01:18 -0400
-In-Reply-To: <alpine.DEB.2.00.1502240819320.25838@cobra.newdream.net>
-Content-Language: en-US
+Received: from mail-ie0-f176.google.com ([209.85.223.176]:35446 "EHLO
+	mail-ie0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752143AbbCWOJn (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Mar 2015 10:09:43 -0400
+Received: by ieclw3 with SMTP id lw3so36312128iec.2
+        for <ceph-devel@vger.kernel.org>; Mon, 23 Mar 2015 07:09:42 -0700 (PDT)
+Received: from mail-ig0-f175.google.com (mail-ig0-f175.google.com. [209.85.213.175])
+        by mx.google.com with ESMTPSA id nv8sm2481106igb.6.2015.03.23.07.09.41
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Mon, 23 Mar 2015 07:09:42 -0700 (PDT)
+Received: by igcqo1 with SMTP id qo1so39314970igc.0
+        for <ceph-devel@vger.kernel.org>; Mon, 23 Mar 2015 07:09:41 -0700 (PDT)
+In-Reply-To: <CAMxOGo2V+Fn+g3z5qc7oYK40wU_XJuScAdfetQrkjp6izeNULw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: shylesh kumar <shylesh.mohan@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
 
-Hi Sage,
-
-Any news on legal side to this approach? :-). I am kind of ready with the first cut version of the code, if you say okay, will submit a pull request soon.
-
-Varada
-
------Original Message-----
-From: Sage Weil [mailto:sage@newdream.net]
-Sent: Tuesday, February 24, 2015 10:21 PM
-To: Varada Kari
-Cc: Ceph Development
-Subject: Re: Adding a proprietary key value store to CEPH
-
-Hi Varada,
-
-On Tue, 24 Feb 2015, Varada Kari wrote:
-> Hi Sage,
+On Sat, Mar 21, 2015 at 10:46 AM, shylesh kumar <shylesh.mohan@gmail.com> wrote:
+> Hi ,
 >
-> We are trying to integrate a new proprietary key value store to CEPH. To integrate this KV-store, which is a closed source shared library, we propose a new class to CEPH called PropDBStore which does a dlopen and imports the required symbols. This framework will help in integrating vendor specific extensions to CEPH.
+> I was going through this simplified crush algorithm given in ceph website.
 >
-> The gist of the implementation is as follows.
+> def crush(pg):
+>    all_osds = ['osd.0', 'osd.1', 'osd.2', ...]
+>    result = []
+>    # size is the number of copies; primary+replicas
+>    while len(result) < size:
+>    --> r = hash(pg)
+>        chosen = all_osds[ r % len(all_osds) ]
+>        if chosen in result:
+>            # OSD can be picked only once
+>            continue
+>        result.append(chosen)
+>    return result
 >
-> 1. Implement a wrapper around the proprietary KVStore. Let us call it as KVExtension. This is a shared library which implements all interfaces required by CEPH KeyValueStore.
-> 2. A new class is derived from KeyValueDB called PropDBStore, which honors the semantics of KeyvalueStore and KeyValueDB. This class acts as mediator between CEPH and KVExtension.  This class transforms bufferlist etc... to const char pointers or strings for the extension to understand.
-> 3. PropDBStore, loads (dlopen) the KVExtension during OSD initialization.  Path to the KVExtension can be mentioned in ceph.conf.
-> 4. Interfaces that needs to be implemented in KVExtension, which are imported by the PropDBStore are added in a new header called PropDBWrapper.h.  This header contains the signatures for the necessary interfaces like init(), close(), submit_transaction(), get() and get_iterator(). Similarly for Iterator functionality, PropDBIterator.h, which specifies the signatures of seek_to_first (), seek_to_last(), lower_bound() and upper_bound() etc...  PropDBStore includes these headers to import the symbols, using dlsym().
-> 5. Choosing the proprietary DB as Backend to the OSD is controlled/managed by config options of the ceph (/etc/ceph/ceph.conf) like rocksdb or leveldb.
-> 6. Rest of the existing functionality is not disturbed by this change. Changing the osd backend option will change backend implementation. But this change is not dynamic. The type of the backend should be chosen at osd creation time and osd will continue use that backend till that osd is reformatted again.
-> 7. The new KVStore we are trying to integrate works on a raw partition, so we divided the osd drive into two partitions. One partition is given to osd Meta data (super block, fsid etc...), and the other is given to the new db to manage it. OSD partition is now not the entire disk, but 2-4GB which needed for the metadata.
+> 10:24 PM (51 minutes ago)
+> In the line where r = hash(pg) , will it gives the same hash value in every
+> iteration ?
+> if that is the case we always endup choosing the same osd from the list
+> or will the pg number be used as seed for the hashing so that r value
+> changes in the next iteration.
+>
+> Am I missing something really basic ??
+> Can somebody please provide me some pointers ?
 
-This sounds like a good approach to link to pretty much any external backend (modulo the dlopen part).  I need to check with lawyer types before I can promise we'll be able to merge something like this into the main ceph.git, though!
+I'm not sure where this bit of documentation came from, but the
+selection process includes the "attempt" number as one of the inputs.
+Where the attempt starts at 0 (or 1, I dunno) and increments each time
+we try to map a new OSD to the PG.
+-Greg
 
-Thanks-
-sage
-
-________________________________
-
-PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-
+>
+>
+>
+> --
+> Thanks,
+> Shylesh Kumar M
+>
+>
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>
