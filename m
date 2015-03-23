@@ -1,77 +1,75 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: crush and go
-Date: Mon, 23 Mar 2015 10:13:47 +0100
-Message-ID: <550FD94B.9090509@dachary.org>
-References: <550DF141.2090800@dachary.org> <alpine.DEB.2.00.1503222217440.12661@cobra.newdream.net>
+From: Joao Eduardo Luis <jecluis@gmail.com>
+Subject: Re: adding "{mds,mon} metadata" asok command
+Date: Mon, 23 Mar 2015 10:04:43 +0000
+Message-ID: <550FE53B.9050407@gmail.com>
+References: <CAJE9aOP2g4=Pw-oGY4m90aXayc=Kx_GP8yLC+tTkSE62V6ObuQ@mail.gmail.com> <alpine.DEB.2.00.1503200628150.7043@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="E3dBKrgbaOd1fPHiNpM2983dFipPmjoOw"
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:34837 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751918AbbCWJNv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Mar 2015 05:13:51 -0400
-In-Reply-To: <alpine.DEB.2.00.1503222217440.12661@cobra.newdream.net>
+Received: from mail-wi0-f171.google.com ([209.85.212.171]:34871 "EHLO
+	mail-wi0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752138AbbCWKEn (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Mar 2015 06:04:43 -0400
+Received: by wibdy8 with SMTP id dy8so42715560wib.0
+        for <ceph-devel@vger.kernel.org>; Mon, 23 Mar 2015 03:04:42 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1503200628150.7043@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>, kefu chai <tchaikov@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---E3dBKrgbaOd1fPHiNpM2983dFipPmjoOw
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: quoted-printable
+Sorry for the latency.
 
-
-
-On 23/03/2015 06:20, Sage Weil wrote:
-> On Sat, 21 Mar 2015, Loic Dachary wrote:
->> Hi,
+On 03/20/2015 01:30 PM, Sage Weil wrote:
+> On Fri, 20 Mar 2015, kefu chai wrote:
+>> on the mon side, i will apply the same approach to MMonJoin and
+>> MonmapMonitor, but with another prefix when putting encoding metadata
+>> into transaction.
+>
+> The MMonJoin is only used when expanding the cluster, i.e. when first
+> adding the new monitor during cluster configuration time.
+>
+>> @joao, IIRC, you were suggesting me to add another paxos service for
+>> this purpose but is it feasible to put this data into MMonJoin and
+>> persist it into the paxos service's storage?
 >>
->> Does anyone know of a go wrapper around the crush library ? I looked a=
-t=20
->> http://go-search.org/search?q=3Dcrush but did not find anything releva=
-nt.
->=20
-> I think it will be difficult to build such a wrapper until we spend the=
-=20
-> time coralling crush into a nice .so.  The challenge there is that whil=
-e=20
-> the core mapping code is quite simple (and in C, and duplicated in the =
+>> any suggestion or comments would be appreciated. if no objections, i
+>> will be on it.
+>
+> Instead, I suggest having each mon generate the metadata during startup.
+> Then, somewhere during bootstrap(), compare the stored metadata (they all
+> have a copy of the mon data set) with the actual metadata, and if it
+> varies send a new message (MMonUpdateMetadata?) to the leader requesting a
+> change.
 
-> kernel), the CrushWrapper stuff depends on a bunch of Ceph infrastrctur=
-e,=20
-> like the bufferlist encode/decode stuff and CephContext for debugging. =
-=20
-> Without all of that the core mapping library isn't terribly useful or=20
-> friendly.
->=20
-> I'm not sure what the best path to making it more easily consumable wou=
-ld=20
-> be, to be honest...
+I agree.  And I don't think we need a new service for this, and I also 
+don't think we need to write stuff to the store.  We can generate this 
+information when the monitor hits 'bootstrap()' and share it with the 
+rest of the quorum once an election finishes, and always keep it in 
+memory (unless there's some information that needs to be persisted, but 
+I was under the impression that was not the case).
 
-Hi Sage,
+This, btw, is what mon/DataHealthService.cc does, but you should be able 
+to avoid stuffing this into a service or creating a new service.  The 
+timecheck stuff in the monitor also works a bit like this -- take a look 
+at those if you need a guideline.
 
-I did not realize it was entangled. Looks like a nice GSoC project :-)
+Cheers!
 
-Cheers
+   -Joao
 
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
+>
+> Joao, what do you think?
+>
+> sage
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
 
 
---E3dBKrgbaOd1fPHiNpM2983dFipPmjoOw
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlUP2UsACgkQ8dLMyEl6F23HZwCfYq9p44VUttCoPXtgliYcJFPX
-4AUAoLRPEtiT78MXWf32GE+HUPsAG89R
-=AnJc
------END PGP SIGNATURE-----
-
---E3dBKrgbaOd1fPHiNpM2983dFipPmjoOw--
+-- 
+Joao Eduardo Luis | github.com/jecluis
