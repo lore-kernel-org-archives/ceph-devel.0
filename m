@@ -1,215 +1,42 @@
-From: Robert LeBlanc <robert@leblancnet.us>
-Subject: Re: CRUSH decompile failes
-Date: Mon, 23 Mar 2015 13:29:00 -0600
-Message-ID: <CAANLjFr-pxomgDxm=NNNE9sxbVX3xDL3zG6XYjv7zp1moSL8kQ@mail.gmail.com>
-References: <CAANLjFpnuYaETTNGBzKhKPi4vsxAbVSTw17XymP-t48PprRGjA@mail.gmail.com>
-	<CAANLjFpC+SgCghOa1vKkJ=HE-EUp3-_674FOLmMos2wjCXj_2w@mail.gmail.com>
+From: Joe Perches <joe@perches.com>
+Subject: [trivial PATCH] osdmap.h: Add missing format newlines
+Date: Mon, 23 Mar 2015 13:35:03 -0700
+Message-ID: <1427142903.16851.39.camel@perches.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f173.google.com ([209.85.212.173]:33727 "EHLO
-	mail-wi0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752565AbbCWT3C (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Mar 2015 15:29:02 -0400
-Received: by wixw10 with SMTP id w10so40506161wix.0
-        for <ceph-devel@vger.kernel.org>; Mon, 23 Mar 2015 12:29:01 -0700 (PDT)
-In-Reply-To: <CAANLjFpC+SgCghOa1vKkJ=HE-EUp3-_674FOLmMos2wjCXj_2w@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-OK, sorry for all the quick e-mails, but I got it to compile. For some
-reason there are a few errors from decompiling the CRUSH map.
+To avoid possible interleaving, add missing '\n' to formats.
 
-1. The decompiled map has "alg straw2" which is not vaild, removing
-the 2 lets it compile
-2. The hosts have weight 0.000, which I don't think prevents the map
-from compiling, but will cause other issues.
+Convert pr_warning to pr_warn while there.
 
-I created the rack entries on the command line and moved the host
-buckets to the racks, then exported the CRUSH to modify the rules.
+Signed-off-by: Joe Perches <joe@perches.com>
+---
+ include/linux/ceph/osdmap.h | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
 
-ceph osd crush add-bucket racka rack
-ceph osd crush add-bucket rackb rack
-ceph osd crush move nodev rack=racka
-ceph osd crush move nodew rack=racka
-ceph osd crush move nodex rack=rackb
-ceph osd crush move nodey rack=rackb
-ceph osd crush move racka root=default
-ceph osd crush move rackb root=default
-ceph osd crush add-bucket ssd-racka rack
-ceph osd crush add-bucket ssd-rackb rack
-ceph osd crush move ssd-racka root=ssd
-ceph osd crush move ssd-rackb root=ssd
-ceph osd crush move nodev-ssd rack=ssd-racka
-ceph osd crush move nodew-ssd rack=ssd-racka
-ceph osd crush move nodex-ssd rack=ssd-rackb
-ceph osd crush move nodey-ssd rack=ssd-rackb
-
-Just saw the e-mail from Sage saying that is all fixed after .93
-(which we are on). Saving for posterity's sake. Thanks Sage!
-
-On Mon, Mar 23, 2015 at 1:09 PM, Robert LeBlanc <robert@leblancnet.us> wrote:
-> Ok, so the decompile error is because I didn't download the CRUSH map
-> (found that out using hexdump), but I still can't compile an
-> unmodified CRUSH map.
->
-> [root@nodezz ~]# crushtool -d map.crush -o map
-> [root@nodezz ~]# crushtool -c map -o map.crush
-> map:105 error: parse error at ''
->
-> For some reason it doesn't like the rack definition. I can move things
-> around, like putting root before it and it always chokes on the first
-> rack definition no matter which one it is.
->
-> On Mon, Mar 23, 2015 at 12:53 PM, Robert LeBlanc <robert@leblancnet.us> wrote:
->> I was trying to decompile and edit the CRUSH map to adjust the CRUSH
->> rules. My first attempt created a map that would decompile, but I
->> could not recompile the CRUSH even if didn't modify it. When trying to
->> download the CRUSH fresh, now the decompile fails.
->>
->> [root@nodezz ~]# ceph osd getmap -o map.crush
->> got osdmap epoch 12792
->> [root@nodezz ~]# crushtool -d map.crush -o map
->> terminate called after throwing an instance of 'ceph::buffer::malformed_input'
->>   what():  buffer::malformed_input: bad magic number
->> *** Caught signal (Aborted) **
->>  in thread 7f889ed24780
->>  ceph version 0.93 (bebf8e9a830d998eeaab55f86bb256d4360dd3c4)
->>  1: crushtool() [0x4f4542]
->>  2: (()+0xf130) [0x7f889df97130]
->>  3: (gsignal()+0x39) [0x7f889cfd05c9]
->>  4: (abort()+0x148) [0x7f889cfd1cd8]
->>  5: (__gnu_cxx::__verbose_terminate_handler()+0x165) [0x7f889d8d49d5]
->>  6: (()+0x5e946) [0x7f889d8d2946]
->>  7: (()+0x5e973) [0x7f889d8d2973]
->>  8: (()+0x5eb9f) [0x7f889d8d2b9f]
->>  9: (CrushWrapper::decode(ceph::buffer::list::iterator&)+0x5b8) [0x523fa8]
->>  10: (main()+0x1e0e) [0x4ead4e]
->>  11: (__libc_start_main()+0xf5) [0x7f889cfbcaf5]
->>  12: crushtool() [0x4ee5a9]
->> 2015-03-23 12:46:34.637635 7f889ed24780 -1 *** Caught signal (Aborted) **
->>  in thread 7f889ed24780
->>
->>  ceph version 0.93 (bebf8e9a830d998eeaab55f86bb256d4360dd3c4)
->>  1: crushtool() [0x4f4542]
->>  2: (()+0xf130) [0x7f889df97130]
->>  3: (gsignal()+0x39) [0x7f889cfd05c9]
->>  4: (abort()+0x148) [0x7f889cfd1cd8]
->>  5: (__gnu_cxx::__verbose_terminate_handler()+0x165) [0x7f889d8d49d5]
->>  6: (()+0x5e946) [0x7f889d8d2946]
->>  7: (()+0x5e973) [0x7f889d8d2973]
->>  8: (()+0x5eb9f) [0x7f889d8d2b9f]
->>  9: (CrushWrapper::decode(ceph::buffer::list::iterator&)+0x5b8) [0x523fa8]
->>  10: (main()+0x1e0e) [0x4ead4e]
->>  11: (__libc_start_main()+0xf5) [0x7f889cfbcaf5]
->>  12: crushtool() [0x4ee5a9]
->>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
->> needed to interpret this.
->>
->> --- begin dump of recent events ---
->>    -14> 2015-03-23 12:46:34.633547 7f889ed24780  5 asok(0x3229cc0)
->> register_command perfcounters_dump hook 0x322be00
->>    -13> 2015-03-23 12:46:34.633580 7f889ed24780  5 asok(0x3229cc0)
->> register_command 1 hook 0x322be00
->>    -12> 2015-03-23 12:46:34.633587 7f889ed24780  5 asok(0x3229cc0)
->> register_command perf dump hook 0x322be00
->>    -11> 2015-03-23 12:46:34.633596 7f889ed24780  5 asok(0x3229cc0)
->> register_command perfcounters_schema hook 0x322be00
->>    -10> 2015-03-23 12:46:34.633604 7f889ed24780  5 asok(0x3229cc0)
->> register_command 2 hook 0x322be00
->>     -9> 2015-03-23 12:46:34.633609 7f889ed24780  5 asok(0x3229cc0)
->> register_command perf schema hook 0x322be00
->>     -8> 2015-03-23 12:46:34.633615 7f889ed24780  5 asok(0x3229cc0)
->> register_command perf reset hook 0x322be00
->>     -7> 2015-03-23 12:46:34.633639 7f889ed24780  5 asok(0x3229cc0)
->> register_command config show hook 0x322be00
->>     -6> 2015-03-23 12:46:34.633654 7f889ed24780  5 asok(0x3229cc0)
->> register_command config set hook 0x322be00
->>     -5> 2015-03-23 12:46:34.633661 7f889ed24780  5 asok(0x3229cc0)
->> register_command config get hook 0x322be00
->>     -4> 2015-03-23 12:46:34.633672 7f889ed24780  5 asok(0x3229cc0)
->> register_command config diff hook 0x322be00
->>     -3> 2015-03-23 12:46:34.633685 7f889ed24780  5 asok(0x3229cc0)
->> register_command log flush hook 0x322be00
->>     -2> 2015-03-23 12:46:34.633698 7f889ed24780  5 asok(0x3229cc0)
->> register_command log dump hook 0x322be00
->>     -1> 2015-03-23 12:46:34.633711 7f889ed24780  5 asok(0x3229cc0)
->> register_command log reopen hook 0x322be00
->>      0> 2015-03-23 12:46:34.637635 7f889ed24780 -1 *** Caught signal
->> (Aborted) **
->>  in thread 7f889ed24780
->>
->>  ceph version 0.93 (bebf8e9a830d998eeaab55f86bb256d4360dd3c4)
->>  1: crushtool() [0x4f4542]
->>  2: (()+0xf130) [0x7f889df97130]
->>  3: (gsignal()+0x39) [0x7f889cfd05c9]
->>  4: (abort()+0x148) [0x7f889cfd1cd8]
->>  5: (__gnu_cxx::__verbose_terminate_handler()+0x165) [0x7f889d8d49d5]
->>  6: (()+0x5e946) [0x7f889d8d2946]
->>  7: (()+0x5e973) [0x7f889d8d2973]
->>  8: (()+0x5eb9f) [0x7f889d8d2b9f]
->>  9: (CrushWrapper::decode(ceph::buffer::list::iterator&)+0x5b8) [0x523fa8]
->>  10: (main()+0x1e0e) [0x4ead4e]
->>  11: (__libc_start_main()+0xf5) [0x7f889cfbcaf5]
->>  12: crushtool() [0x4ee5a9]
->>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
->> needed to interpret this.
->>
->> --- logging levels ---
->>    0/ 5 none
->>    0/ 1 lockdep
->>    0/ 1 context
->>    1/ 1 crush
->>    1/ 5 mds
->>    1/ 5 mds_balancer
->>    1/ 5 mds_locker
->>    1/ 5 mds_log
->>    1/ 5 mds_log_expire
->>    1/ 5 mds_migrator
->>    0/ 1 buffer
->>    0/ 1 timer
->>    0/ 1 filer
->>    0/ 1 striper
->>    0/ 1 objecter
->>    0/ 5 rados
->>    0/ 5 rbd
->>    0/ 5 rbd_replay
->>    0/ 5 journaler
->>    0/ 5 objectcacher
->>    0/ 5 client
->>    0/ 5 osd
->>    0/ 5 optracker
->>    0/ 5 objclass
->>    1/ 3 filestore
->>    1/ 3 keyvaluestore
->>    1/ 3 journal
->>    0/ 5 ms
->>    1/ 5 mon
->>    0/10 monc
->>    1/ 5 paxos
->>    0/ 5 tp
->>    1/ 5 auth
->>    1/ 5 crypto
->>    1/ 1 finisher
->>    1/ 5 heartbeatmap
->>    1/ 5 perfcounter
->>    1/ 5 rgw
->>    1/10 civetweb
->>    1/ 5 javaclient
->>    1/ 5 asok
->>    1/ 1 throttle
->>    0/ 0 refs
->>    1/ 5 xio
->>   -2/-2 (syslog threshold)
->>   99/99 (stderr threshold)
->>   max_recent       500
->>   max_new         1000
->>   log_file
->> --- end dump of recent events ---
->> Aborted
->>
->> map.orig is the first map that would not compile even without edits.
->> map.crush is the file that would not decompile.
->>
->> Any ideas?
+diff --git a/include/linux/ceph/osdmap.h b/include/linux/ceph/osdmap.h
+index 561ea89..e55c08b 100644
+--- a/include/linux/ceph/osdmap.h
++++ b/include/linux/ceph/osdmap.h
+@@ -175,13 +175,12 @@ static inline int ceph_decode_pgid(void **p, void *end, struct ceph_pg *pgid)
+ 	__u8 version;
+ 
+ 	if (!ceph_has_room(p, end, 1 + 8 + 4 + 4)) {
+-		pr_warning("incomplete pg encoding");
+-
++		pr_warn("incomplete pg encoding\n");
+ 		return -EINVAL;
+ 	}
+ 	version = ceph_decode_8(p);
+ 	if (version > 1) {
+-		pr_warning("do not understand pg encoding %d > 1",
++		pr_warn("do not understand pg encoding %d > 1\n",
+ 			(int)version);
+ 		return -EINVAL;
+ 	}
