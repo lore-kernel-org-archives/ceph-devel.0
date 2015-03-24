@@ -1,72 +1,78 @@
-From: Ketor D <d.ketor@gmail.com>
-Subject: Re: rados_dll: A Windows port of librados
-Date: Tue, 24 Mar 2015 23:59:06 +0800
-Message-ID: <CAM9_UU9vG=5wwXm17fRqav2QBW5wqiB8c3rWhLR2n+xHe-g_Gw@mail.gmail.com>
-References: <CAHJ4zomaFxzJMBo+v50DUX=bycyagzWOfckoXPFcm1THFK8DQg@mail.gmail.com>
- <alpine.DEB.2.00.1503190822150.9418@cobra.newdream.net> <CAM9_UU_O=ntf+pZodFwMo1qS7R7Y4S1eNFiXx-x5G2TpOEGf2g@mail.gmail.com>
- <CAHJ4zomuAPG_nyoOo95Q1sLhyjaN43Vi1mxTuzhE+waRopdQig@mail.gmail.com>
+From: Robert LeBlanc <robert-4JaGZRWAfWbajFs6igw21g@public.gmane.org>
+Subject: Re: Does crushtool --test --simulate do what cluster
+	should do?
+Date: Tue, 24 Mar 2015 11:48:10 -0600
+Message-ID: <CAANLjFpytozjZiYv8AYszRUEn=au62UN7GJf71LAxw5meeRU6w@mail.gmail.com>
+References: <CAANLjFosqAv5a24H0mM9V5b_okXbcb7-1aNskNh14Rf6qLAVUQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f42.google.com ([209.85.218.42]:33645 "EHLO
-	mail-oi0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752268AbbCXP7h (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 24 Mar 2015 11:59:37 -0400
-Received: by oifl3 with SMTP id l3so141563771oif.0
-        for <ceph-devel@vger.kernel.org>; Tue, 24 Mar 2015 08:59:37 -0700 (PDT)
-In-Reply-To: <CAHJ4zomuAPG_nyoOo95Q1sLhyjaN43Vi1mxTuzhE+waRopdQig@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Alistair Israel <aisrael@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAANLjFosqAv5a24H0mM9V5b_okXbcb7-1aNskNh14Rf6qLAVUQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi Alistair,
-     I think you just import my code from ceph-dokan and don't know
-where is the most difficulties in merging upstream ceph.
-     File structure is not problem, the difficulties is the code in
-include/common/msg/osd/mon/mds is very different from upstream.
-     If I try to merge ceph-dokan into upstream, the merge work will
-affect the upstream developing a lot.
+I'm not sure why crushtool --test --simulate doesn't match what the
+cluster actually does, but the cluster seems to be executing the rules
+even though crushtool doesn't. Just kind of stinks that you have to
+test the rules on actual data.
 
-     So now I just update the ceph-dokan with upstream ceph, and add
-most of the client-side code in ceph-dokan. With this work, I will
-also try to refactor the code modifed for mingw and make it more
-similar to upstream.
-     Also mingw is on developing, in the latest relase ceph-dokan can
-reduce many ugly mod for mingw. So we can wait for mingw to be more
-stable for a while.
-     And after these work, it will be the timing for merging into upstream.
+Should I create a ticket for this?
 
-Ketor
-
-
-On Tue, Mar 24, 2015 at 8:14 PM, Alistair Israel <aisrael@gmail.com> wrote:
-> On Fri, Mar 20, 2015 at 10:45 AM, Ketor D <d.ketor@gmail.com> wrote:
+On Mon, Mar 23, 2015 at 6:08 PM, Robert LeBlanc <robert-4JaGZRWAfWbajFs6igw21g@public.gmane.org> wrote:
+> I'm trying to create a CRUSH ruleset and I'm using crushtool to test
+> the rules, but it doesn't seem to mapping things correctly. I have two
+> roots, on for spindles and another for SSD. I have two rules, one for
+> each root. The output of crushtool on rule 0 shows objects being
+> mapped to SSD OSDs when it should only be choosing spindles.
 >
->> And also Alistair, would you like to help port your librados code
->> to ceph-dokan project with a clean pull request?
+> I'm pretty sure I'm doing something wrong. I've tested the map on .93 and .80.8.
 >
-> Hi, Ketor!
+> The map is at http://pastebin.com/BjmuASX0
 >
-> At this point we figured it'd easier in both the short term (and
-> better long-term) to just start merging changes into "/ceph/src" (as a
-> submodule, of a fork of ceph/ceph) rather than maintaining a copy of
-> the files under "/src".
+> when running
 >
-> One of the difficulties we had with making changes with ceph-dokan was
-> how different the file structure alone was from upstream ceph. I
-> actually have a fork of ceph-dokan that mirrors the directory
-> structure of rados_dll and ceph/ceph, I can issue a PR for that (it
-> allows for clean merge).
+> crushtool -i map.crush --test --num-rep 3 --rule 0 --simulate --show-mappings
 >
-> From there, we can continue collaborating on both projects separately
-> for now, until we have enough overlap and commonality that it makes
-> sense to merge the two.
+> I'm getting mapping to OSDs > 39 which are SSDs. The same happens when
+> I run the SSD rule, I get OSDs from both roots. It is as if crushtool
+> is not selecting the correct root. In fact both rules result in the
+> same mapping:
 >
-> What do you think?
+> RNG rule 0 x 0 [0,38,23]
+> RNG rule 0 x 1 [10,25,1]
+> RNG rule 0 x 2 [11,40,0]
+> RNG rule 0 x 3 [5,30,26]
+> RNG rule 0 x 4 [44,30,10]
+> RNG rule 0 x 5 [8,26,16]
+> RNG rule 0 x 6 [24,5,36]
+> RNG rule 0 x 7 [38,10,9]
+> RNG rule 0 x 8 [39,9,23]
+> RNG rule 0 x 9 [12,3,24]
+> RNG rule 0 x 10 [18,6,41]
+> ...
 >
-> Alistair
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> RNG rule 1 x 0 [0,38,23]
+> RNG rule 1 x 1 [10,25,1]
+> RNG rule 1 x 2 [11,40,0]
+> RNG rule 1 x 3 [5,30,26]
+> RNG rule 1 x 4 [44,30,10]
+> RNG rule 1 x 5 [8,26,16]
+> RNG rule 1 x 6 [24,5,36]
+> RNG rule 1 x 7 [38,10,9]
+> RNG rule 1 x 8 [39,9,23]
+> RNG rule 1 x 9 [12,3,24]
+> RNG rule 1 x 10 [18,6,41]
+> ...
+>
+>
+> Thanks,
