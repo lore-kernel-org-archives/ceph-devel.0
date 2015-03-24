@@ -1,54 +1,25 @@
-From: Ning Yao <zay11022@gmail.com>
-Subject: Re: keyvaluestore speed up?
-Date: Tue, 24 Mar 2015 14:53:10 +0800
-Message-ID: <CALZt5jz=Sc1x3a4B5-aA6PdTeb7jtgTm6hJ=xR0H1jY7Tj1R4A@mail.gmail.com>
-References: <CANE=7sUygGz67i-H+5v+ZmuwR4W9RuGzsWX6yhvJ=O9LKsyCSA@mail.gmail.com>
-	<75674D092A819E4189E91166C74CB90D0150C211@shsmsx102.ccr.corp.intel.com>
+From: Christoph Hellwig <hch@lst.de>
+Subject: Re: [PATCH 11/12] fs: don't reassign dirty inodes to
+	default_backing_dev_info
+Date: Tue, 24 Mar 2015 07:53:25 +0100
+Message-ID: <20150324065325.GC3159@lst.de>
+References: <1421228561-16857-1-git-send-email-hch@lst.de> <1421228561-16857-12-git-send-email-hch@lst.de> <CAMM=eLe6Tt+g7dLcnn5a1fQboDknkasazsMiOFBziWPZemnYtg@mail.gmail.com> <20150323224012.GA29505@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f178.google.com ([209.85.212.178]:34409 "EHLO
-	mail-wi0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751997AbbCXGxM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 24 Mar 2015 02:53:12 -0400
-Received: by wibg7 with SMTP id g7so47404978wib.1
-        for <ceph-devel@vger.kernel.org>; Mon, 23 Mar 2015 23:53:11 -0700 (PDT)
-In-Reply-To: <75674D092A819E4189E91166C74CB90D0150C211@shsmsx102.ccr.corp.intel.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "Shu, Xinxin" <xinxin.shu@intel.com>
-Cc: Xinze Chi <xmdxcxz@gmail.com>, Sage Weil <sweil@redhat.com>, "sjust@redhat.com" <sjust@redhat.com>, Haomai Wang <haomaiwang@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20150323224012.GA29505@redhat.com>
+Sender: linux-fsdevel-owner@vger.kernel.org
+To: Mike Snitzer <snitzer@redhat.com>
+Cc: Christoph Hellwig <hch@lst.de>, David Howells <dhowells@redhat.com>, linux-nfs@vger.kernel.org, linux-mm@kvack.org, Jens Axboe <axboe@fb.com>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, device-mapper development <dm-devel@redhat.com>, linux-mtd@lists.infradead.org, Tejun Heo <tj@kernel.org>, ceph-devel@vger.kernel.org, Jeff Moyer <jmoyer@redhat.com>
+List-Id: ceph-devel.vger.kernel.org
 
-2015-03-20 10:22 GMT+08:00 Shu, Xinxin <xinxin.shu@intel.com>:
-> I think rocksdb can support this configuration.
->
-I do not find this option in rocksdb. If you know, can you provide
-this option to redirect the WAL file?
+On Mon, Mar 23, 2015 at 06:40:13PM -0400, Mike Snitzer wrote:
+> FYI, here is the DM fix I've staged for 4.0-rc6.  I'll continue testing
+> the various DM targets before requesting Linus to pull.
 
-Regards
-Ning Yao
+Yeah, from looking at the bugzilla it seemed like dm was releasing the
+dev_t before the queue has been freed.
 
-
-> Cheers,
-> xinxin
->
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Xinze Chi
-> Sent: Thursday, March 19, 2015 5:23 PM
-> To: Sage Weil; sjust@redhat.com; Haomai Wang; ceph-devel@vger.kernel.org
-> Subject: keyvaluestore speed up?
->
-> hi, all:
->
->     Currently at keyvaluestore, osd send sync
-> request(submit_transaction_sync) to filestore when it finishes a transaction. But sata disk is not suitable for doing sync request. ssd disk is more suitable.
->
->     So I think whether we could separate leveldb *.log file with *.sst file and move *.log to ssd disk, which is similar with journal file in ceph.
->
->     But now, the original leveldb do not support to separate log file and sst file.
->
->     Wait for your comment.
->
->     Thanks.
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I don't know this code to well, so this isn't a full review, but it looks like
+the right fix to me.
