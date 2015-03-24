@@ -1,45 +1,72 @@
-From: Alistair Israel <aisrael@gmail.com>
-Subject: Re: rados_dll: A Windows port of librados
-Date: Tue, 24 Mar 2015 20:14:30 +0800
-Message-ID: <CAHJ4zomuAPG_nyoOo95Q1sLhyjaN43Vi1mxTuzhE+waRopdQig@mail.gmail.com>
-References: <CAHJ4zomaFxzJMBo+v50DUX=bycyagzWOfckoXPFcm1THFK8DQg@mail.gmail.com>
- <alpine.DEB.2.00.1503190822150.9418@cobra.newdream.net> <CAM9_UU_O=ntf+pZodFwMo1qS7R7Y4S1eNFiXx-x5G2TpOEGf2g@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Teuthology tests for SHEC
+Date: Tue, 24 Mar 2015 14:22:58 +0100
+Message-ID: <55116532.9010303@dachary.org>
+References: <870DE8DBB716524BAE51B2D499EC81E40AA9F476@g01jpexmbyt24>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="J12Sjvehus2cpk4JIjQmjBw0w5UOKnlUB"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f179.google.com ([209.85.214.179]:33901 "EHLO
-	mail-ob0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751643AbbCXMPB (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 24 Mar 2015 08:15:01 -0400
-Received: by obbgg8 with SMTP id gg8so145485474obb.1
-        for <ceph-devel@vger.kernel.org>; Tue, 24 Mar 2015 05:15:00 -0700 (PDT)
-In-Reply-To: <CAM9_UU_O=ntf+pZodFwMo1qS7R7Y4S1eNFiXx-x5G2TpOEGf2g@mail.gmail.com>
+Received: from mail2.dachary.org ([91.121.57.175]:35716 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752379AbbCXNXB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 24 Mar 2015 09:23:01 -0400
+In-Reply-To: <870DE8DBB716524BAE51B2D499EC81E40AA9F476@g01jpexmbyt24>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: "Shiozawa, Kensuke" <shiozawa.kennsu@jp.fujitsu.com>, "Nakao, Takanori" <nakao.takanori@jp.fujitsu.com>, "Kaga, Yoshihiro" <y-kaga@jp.fujitsu.com>, "Kawaguchi, Shotaro" <kawaguchi.s@jp.fujitsu.com>
 
-On Fri, Mar 20, 2015 at 10:45 AM, Ketor D <d.ketor@gmail.com> wrote:
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--J12Sjvehus2cpk4JIjQmjBw0w5UOKnlUB
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-> And also Alistair, would you like to help port your librados code
-> to ceph-dokan project with a clean pull request?
+Hi,
 
-Hi, Ketor!
+On 24/03/2015 09:32, Miyamae, Takeshi wrote:
+> Dear Loic,
+>=20
+> We have just let teuthology work on our local cluster at last.
 
-At this point we figured it'd easier in both the short term (and
-better long-term) to just start merging changes into "/ceph/src" (as a
-submodule, of a fork of ceph/ceph) rather than maintaining a copy of
-the files under "/src".
+Congratulations !
 
-One of the difficulties we had with making changes with ceph-dokan was
-how different the file structure alone was from upstream ceph. I
-actually have a fork of ceph-dokan that mirrors the directory
-structure of rados_dll and ceph/ceph, I can issue a PR for that (it
-allows for clean merge).
+> If six nodes are enough to provide qualified results, we will continue =
+the teuthology tests
+> on our cluster. How many nodes are required at least for such kind of p=
+urpose ?
 
-From there, we can continue collaborating on both projects separately
-for now, until we have enough overlap and commonality that it makes
-sense to merge the two.
+Six nodes will be good. The tests typically use two or three nodes and cr=
+eate up to 14 OSDs on them.
 
-What do you think?
+> And then, we will use a local branch as a test target until #4132 will =
+be merged.
 
-Alistair
+That sounds right. Please speak up if you're having troubles.
+
+Cheers
+
+>=20
+> Best regards,
+> Takeshi Miyamae
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--J12Sjvehus2cpk4JIjQmjBw0w5UOKnlUB
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlURZTIACgkQ8dLMyEl6F22XbwCguceHDZbrHt19mmF45biGxkOg
+D6sAnRTwCwoXC2moUA5Fn3W5odRm+WXn
+=tP7O
+-----END PGP SIGNATURE-----
+
+--J12Sjvehus2cpk4JIjQmjBw0w5UOKnlUB--
