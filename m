@@ -1,60 +1,81 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: CentOS 7 yum-builddep fails on %if
-Date: Wed, 25 Mar 2015 18:55:37 +0100
-Message-ID: <5512F699.3000206@dachary.org>
+From: kefu chai <tchaikov@gmail.com>
+Subject: Re: adding "{mds,mon} metadata" asok command
+Date: Thu, 26 Mar 2015 02:18:11 +0800
+Message-ID: <CAJE9aONdmGTxFohaDgbSK6dZNKqDhCmjOo0Du=ZZyzzCy3W4UQ@mail.gmail.com>
+References: <CAJE9aOP2g4=Pw-oGY4m90aXayc=Kx_GP8yLC+tTkSE62V6ObuQ@mail.gmail.com>
+	<alpine.DEB.2.00.1503200628150.7043@cobra.newdream.net>
+	<550FE53B.9050407@gmail.com>
+	<550FEC6A.1030208@redhat.com>
+	<alpine.DEB.2.00.1503230656560.6964@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="dAHU4nDLuUmjoS8CEeljFKe7HlvIl3JJo"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:36578 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S932548AbbCYRzm (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Mar 2015 13:55:42 -0400
+Received: from mail-ig0-f170.google.com ([209.85.213.170]:35114 "EHLO
+	mail-ig0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752135AbbCYSSM convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Mar 2015 14:18:12 -0400
+Received: by igcau2 with SMTP id au2so108874695igc.0
+        for <ceph-devel@vger.kernel.org>; Wed, 25 Mar 2015 11:18:11 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1503230656560.6964@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ken Dreyer <kdreyer@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: John Spray <john.spray@redhat.com>, Joao Eduardo Luis <jecluis@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---dAHU4nDLuUmjoS8CEeljFKe7HlvIl3JJo
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+On Mon, Mar 23, 2015 at 9:58 PM, Sage Weil <sage@newdream.net> wrote:
+> On Mon, 23 Mar 2015, John Spray wrote:
+>> On 23/03/2015 10:04, Joao Eduardo Luis wrote:
+>> > I agree.  And I don't think we need a new service for this, and I =
+also don't
+>> > think we need to write stuff to the store.  We can generate this i=
+nformation
+>> > when the monitor hits 'bootstrap()' and share it with the rest of =
+the quorum
+>> > once an election finishes, and always keep it in memory (unless th=
+ere's some
+>> > information that needs to be persisted, but I was under the impres=
+sion that
+>> > was not the case).
 
-Hi Ken,
+thanks Jo=C3=A3o. yes, i will have another map in DataHealthService for=
+ the
+metadata. and update it in the way we update the health data. but will
+only send the MMonUpdateMetadata when the service bootstraps itself.
+and i will see if we can/need to remove the mon in the metadata map
+after it is removed from the quorum.
 
-yum-builddep fails on CentOS 7 on the latest ceph.spec.in with the follow=
-ing error:
+>>
+>> Just to clarify, you mean we don't need to write the mon metadata to=
+ the
+>> store, but we'd still want to persist the MDS/OSD metadata - right?
+>
+> I think we definitely still want to persist those (as we already do
+> persist the OSD metadata).
 
-error: parse error in expression
-error: /tmp/install-deps.52/ceph.spec:50: bad %if condition
-Bad spec: /tmp/install-deps.52/ceph.spec
+agreed, that's also my impression.
 
-which is
+>
+> Since we're reporting on running daemons we could get that without
+> persisting the mon metadata.  I think the question is whether we want=
+ to
+> report on the last known running instance.  I forget whether 'osd
+> metadata' includes OSDs that are down... if so, we may as well do
+> the same for mons too and persist that.
 
-%if 0%{_with_systemd}
+yes, "osd metadata" also includes OSDs that are down, except for the
+ones explicitly removed using "osd rm".
 
-https://github.com/ceph/ceph/blob/master/ceph.spec.in#L50
+>
+> sage
 
-It looks good to me though. Any idea why it happens ?
 
-Cheers
 
 --=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---dAHU4nDLuUmjoS8CEeljFKe7HlvIl3JJo
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlUS9pkACgkQ8dLMyEl6F20SOgCcCZhYjBA41EDsX45bDJzkf1+D
-fkAAoKzS4MVzvnLbW0v2VQUktjHX+6gQ
-=zI4A
------END PGP SIGNATURE-----
-
---dAHU4nDLuUmjoS8CEeljFKe7HlvIl3JJo--
+Regards
+Kefu Chai
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
