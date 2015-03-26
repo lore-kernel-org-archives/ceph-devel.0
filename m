@@ -1,163 +1,120 @@
-From: "Deneau, Tom" <tom.deneau@amd.com>
-Subject: RE: seg fault in ceph-osd on aarch64
-Date: Thu, 26 Mar 2015 18:05:18 +0000
-Message-ID: <BC97738F8E7C8742BABED7F06FB9DF9166410970@SATLEXDAG01.amd.com>
-References: <BC97738F8E7C8742BABED7F06FB9DF91664108DD@SATLEXDAG01.amd.com>
- <alpine.DEB.2.00.1503261016240.31431@cobra.newdream.net>
+From: Loic Dachary <loic@dachary.org>
+Subject: Interpreting rados / print order in teuthology output
+Date: Thu, 26 Mar 2015 23:44:33 +0100
+Message-ID: <55148BD1.2090800@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="E6DDuoNgmTIMa7Is2oJW9OW6DtP0M39oL"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0116.outbound.protection.outlook.com ([65.55.169.116]:42932
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751673AbbCZSTt convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Mar 2015 14:19:49 -0400
-In-Reply-To: <alpine.DEB.2.00.1503261016240.31431@cobra.newdream.net>
-Content-Language: en-US
+Received: from mail2.dachary.org ([91.121.57.175]:37432 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752847AbbCZWoi (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Mar 2015 18:44:38 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Zack Cerza <zcerza@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-any suggestions for stress tests, etc that might make this happen sooner?
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--E6DDuoNgmTIMa7Is2oJW9OW6DtP0M39oL
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
--- Tom
+Hi Zack,
 
-> -----Original Message-----
-> From: Sage Weil [mailto:sage@newdream.net]
-> Sent: Thursday, March 26, 2015 12:17 PM
-> To: Deneau, Tom
-> Cc: ceph-devel
-> Subject: Re: seg fault in ceph-osd on aarch64
-> 
-> On Thu, 26 Mar 2015, Deneau, Tom wrote:
-> > I've been exercising the the 64-bit arm (aarch64) version of ceph.
-> > This is from self-built rpms from the v0.93 snapshot.
-> > The "cluster" is a single system with 6 hard drives, one osd each.
-> > I've been letting it run with some rados bench and rados load-gen
-> > loops and running bonnie++ on an rbd mount.
-> >
-> > Occasionally (in the latest case after 2 days) I've seen ceph-osd
-> > crashes like the one shown below.  (showing last 10 events as well).
-> > If I am reading the objdump correctly this is from the while loop in
-> > the following code in Pipe::connect
-> >
-> > I assume this is not seen on ceph builds from other architectures?
-> >
-> > What is the recommended way to get more information on this osd crash?
-> > (looks like osd log levels are 0/5)
-> 
-> In this case, debug ms = 20 should tell us what we need!
-> 
-> Thanks-
-> sage
-> 
-> 
-> >
-> > -- Tom Deneau, AMD
-> >
-> >
-> >
-> >       if (reply.tag == CEPH_MSGR_TAG_SEQ) {
-> >         ldout(msgr->cct,10) << "got CEPH_MSGR_TAG_SEQ, reading acked_seq
-> and writing in_seq" << dendl;
-> >         uint64_t newly_acked_seq = 0;
-> >         if (tcp_read((char*)&newly_acked_seq, sizeof(newly_acked_seq)) < 0)
-> {
-> >           ldout(msgr->cct,2) << "connect read error on newly_acked_seq" <<
-> dendl;
-> >           goto fail_locked;
-> >         }
-> >         ldout(msgr->cct,2) << " got newly_acked_seq " << newly_acked_seq
-> >                            << " vs out_seq " << out_seq << dendl;
-> >         while (newly_acked_seq > out_seq) {
-> >           Message *m = _get_next_outgoing();
-> >           assert(m);
-> >           ldout(msgr->cct,2) << " discarding previously sent " << m-
-> >get_seq()
-> >                              << " " << *m << dendl;
-> >           assert(m->get_seq() <= newly_acked_seq);
-> >           m->put();
-> >           ++out_seq;
-> >         }
-> >         if (tcp_write((char*)&in_seq, sizeof(in_seq)) < 0) {
-> >           ldout(msgr->cct,2) << "connect write error on in_seq" << dendl;
-> >           goto fail_locked;
-> >         }
-> >       }
-> >
-> >
-> >
-> >
-> >   -10> 2015-03-25 09:41:11.950684 3ff8f05f010  5 -- op tracker -- seq:
-> > 3499479, time: 2015-03-25 09:41:11.950683, event: done, op: osd_op(c\
-> > lient.8322.0:1640 benchmark_data_b0c-upstairs_5647_object343 [read
-> 0~4194304] 1.5c587e9e ack+read+known_if_redirected e316)
-> >     -9> 2015-03-25 09:41:11.951356 3ff8659f010  1 --
-> > 10.236.136.224:6804/4928 <== client.8322 10.236.136.224:0/1020871 256
-> > ==== osd_op(clien\
-> > t.8322.0:1642 benchmark_data_b0c-upstairs_5647_object411 [read
-> > 0~4194304] 1.f2b5749d ack+read+known_if_redirected e316) v5 ====
-> > 201+0+0 (280\
-> > 2495612 0 0) 0x1e67cd80 con 0x71f4c80
-> >     -8> 2015-03-25 09:41:11.951397 3ff8659f010  5 -- op tracker --
-> > seq: 3499480, time: 2015-03-25 09:41:11.951205, event: header_read,
-> > op: o\
-> > sd_op(client.8322.0:1642 benchmark_data_b0c-upstairs_5647_object411 [read
-> 0~4194304] 1.f2b5749d ack+read+known_if_redirected e316)
-> >     -7> 2015-03-25 09:41:11.951411 3ff8659f010  5 -- op tracker --
-> > seq: 3499480, time: 2015-03-25 09:41:11.951214, event: throttled, op:
-> > osd\
-> > _op(client.8322.0:1642 benchmark_data_b0c-upstairs_5647_object411 [read
-> 0~4194304] 1.f2b5749d ack+read+known_if_redirected e316)
-> >     -6> 2015-03-25 09:41:11.951420 3ff8659f010  5 -- op tracker --
-> > seq: 3499480, time: 2015-03-25 09:41:11.951351, event: all_read, op:
-> > osd_\
-> > op(client.8322.0:1642 benchmark_data_b0c-upstairs_5647_object411 [read
-> 0~4194304] 1.f2b5749d ack+read+known_if_redirected e316)
-> >     -5> 2015-03-25 09:41:11.951429 3ff8659f010  5 -- op tracker --
-> > seq: 3499480, time: 0.000000, event: dispatched, op:
-> > osd_op(client.8322.0\
-> > :1642 benchmark_data_b0c-upstairs_5647_object411 [read 0~4194304]
-> 1.f2b5749d ack+read+known_if_redirected e316)
-> >     -4> 2015-03-25 09:41:11.951561 3ff9205f010  5 -- op tracker --
-> > seq: 3499480, time: 2015-03-25 09:41:11.951560, event: reached_pg, op:
-> > os\
-> > d_op(client.8322.0:1642 benchmark_data_b0c-upstairs_5647_object411 [read
-> 0~4194304] 1.f2b5749d ack+read+known_if_redirected e316)
-> >     -3> 2015-03-25 09:41:11.951627 3ff9205f010  5 -- op tracker --
-> > seq: 3499480, time: 2015-03-25 09:41:11.951627, event: started, op:
-> > osd_o\
-> > p(client.8322.0:1642 benchmark_data_b0c-upstairs_5647_object411 [read
-> 0~4194304] 1.f2b5749d ack+read+known_if_redirected e316)
-> >     -2> 2015-03-25 09:41:11.961959 3ff9205f010  1 --
-> > 10.236.136.224:6804/4928 --> 10.236.136.224:0/1020871 --
-> > osd_op_reply(1642 benchmark_da\
-> > ta_b0c-upstairs_5647_object411 [read 0~4194304] v0'0 uv2 ondisk = 0) v6 --
-> ?+0 0x3b39340 con 0x71f4c80
-> >     -1> 2015-03-25 09:41:11.962043 3ff9205f010  5 -- op tracker --
-> > seq: 3499480, time: 2015-03-25 09:41:11.962043, event: done, op:
-> > osd_op(c\
-> > lient.8322.0:1642 benchmark_data_b0c-upstairs_5647_object411 [read
-> 0~4194304] 1.f2b5749d ack+read+known_if_redirected e316)
-> >      0> 2015-03-25 09:41:12.030725 3ff8619f010 -1 *** Caught signal
-> > (Segmentation fault) **  in thread 3ff8619f010
-> >
-> >  ceph version 0.93 (bebf8e9a830d998eeaab55f86bb256d4360dd3c4)
-> >  1: /usr/bin/ceph-osd() [0xacf140]
-> >  2: [0x3ffa9520510]
-> >  3: (Pipe::connect()+0x301c) [0xc8c37c]
-> >  4: (Pipe::Writer::entry()+0x10) [0xc96b9c]
-> >  5: (Thread::entry_wrapper()+0x50) [0xba3bec]
-> >  6: (()+0x6f30) [0x3ffa9116f30]
-> >  7: (()+0xdd910) [0x3ffa8d8d910]
-> >  NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed
-> to interpret this.
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> > in the body of a message to majordomo@vger.kernel.org More majordomo
-> > info at  http://vger.kernel.org/majordomo-info.html
-> >
-> >
+I'm trying to figure out why
+
+  http://pulpito.ceph.com/loic-2015-03-26_21:18:14-upgrade:firefly-x:stre=
+ss-split-erasure-code-hammer---basic-multi/822784/
+
+failed when the same run succeeded at
+
+  http://pulpito.ceph.com/loic-2015-03-26_15:22:43-upgrade:firefly-x:stre=
+ss-split-erasure-code-hammer---basic-multi/822782/
+
+I'm kind of blocked trying to figure out why the print statement is run b=
+efore the first rados run completes at:
+
+2015-03-26T13:33:38.178 INFO:teuthology.orchestra.run.burnupi31.stderr:os=
+ds 0,1,2,3,4,5,6,7,8,9,10,11,12,13 instructed to deep-scrub
+2015-03-26T13:33:38.189 INFO:teuthology.run_tasks:Running task rados...
+2015-03-26T13:33:38.209 INFO:tasks.rados:Beginning rados...
+2015-03-26T13:33:38.210 INFO:teuthology.run_tasks:Running task print...
+2015-03-26T13:33:38.210 INFO:teuthology.task.print:**** done rados ec-cac=
+he-agent (part 1)
+2015-03-26T13:33:38.210 INFO:teuthology.run_tasks:Running task install.up=
+grade...
+2015-03-26T13:33:38.211 INFO:teuthology.task.install:project ceph config =
+{'osd.0': None} overrides {'sha1': '6994648bc443429dc2edfbb38fbaaa9a19e2b=
+dd1'}
+2015-03-26T13:33:38.211 INFO:teuthology.task.install:extra packages: []
+2015-03-26T13:33:38.211 INFO:teuthology.task.install:remote ubuntu@mira11=
+9.front.sepia.ceph.com config {'sha1': '6994648bc443429dc2edfbb38fbaaa9a1=
+9e2bdd1'}
+2015-03-26T13:33:38.212 INFO:teuthology.orchestra.run.mira119:Running: 's=
+udo lsb_release -is'
+2015-03-26T13:33:38.213 INFO:tasks.rados:clients are ['client.0']
+2015-03-26T13:33:38.213 INFO:tasks.rados:starting run 0 out of 1
+2015-03-26T13:33:38.214 INFO:teuthology.orchestra.run.burnupi31:Running: =
+'CEPH_CLIENT_ID=3D0 adjust-ulimits ceph-coverage /home/ubuntu/cephtest/ar=
+chive/coverage ceph_test_rados --op read 100 --op write 100 --op delete 5=
+0 --max-ops 4000 --objects 500 --max-in-flight 16 --size 4000000 --min-st=
+ride-size 400000 --max-stride-size 800000 --max-seconds 0 --op copy_from =
+50 --pool ecbase'
+2015-03-26T13:33:38.229 INFO:tasks.rados.rados.0.burnupi31.stdout:adding =
+op weight read -> 100
+2015-03-26T13:33:38.230 INFO:tasks.rados.rados.0.burnupi31.stdout:adding =
+op weight write -> 100
+2015-03-26T13:33:38.230 INFO:tasks.rados.rados.0.burnupi31.stdout:adding =
+op weight delete -> 50
+
+although the config reads:
+
+=2E..
+    - ceph osd pool set eccache target_max_objects 250
+- exec:
+    client.0:
+    - ceph osd deep-scrub '*'
+- rados:
+    clients:
+    - client.0
+    objects: 500
+    op_weights:
+      copy_from: 50
+      delete: 50
+      read: 100
+      write: 100
+    ops: 4000
+    pools:
+    - ecbase
+- print: '**** done rados ec-cache-agent (part 1)'
+- install.upgrade:
+    osd.0: null
+- ceph.restart:
+
+=2E..
+
+I'm kind of worried I'll make a fool of myself once more. This time it sp=
+ells "task" and not "tasks" ;-)
+
+Cheers
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--E6DDuoNgmTIMa7Is2oJW9OW6DtP0M39oL
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlUUi9EACgkQ8dLMyEl6F20UNwCcDlFzLpvx9VENMQMYj3wkGb9o
+n8AAn2XD/653MVD1xcFfD89CY3g8LMnP
+=7RkG
+-----END PGP SIGNATURE-----
+
+--E6DDuoNgmTIMa7Is2oJW9OW6DtP0M39oL--
