@@ -1,57 +1,53 @@
 From: Loic Dachary <loic@dachary.org>
-Subject: lttng broken on i386 trusty
-Date: Fri, 27 Mar 2015 10:55:50 +0100
-Message-ID: <55152926.9000400@dachary.org>
+Subject: Affected Versions: and ceph-qa-suite: use case
+Date: Fri, 27 Mar 2015 13:19:14 +0100
+Message-ID: <55154AC2.10409@dachary.org>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="AIQVOIkpgSHKgXDo94HLn0Vco2fgiTtS1"
+ boundary="f64BDBsmaVTmfGkkDBHrr549TX1AlGwR6"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:37663 "EHLO
+Received: from mail2.dachary.org ([91.121.57.175]:37749 "EHLO
 	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753566AbbC0Jzy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 27 Mar 2015 05:55:54 -0400
+	with ESMTP id S1752408AbbC0MTS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 27 Mar 2015 08:19:18 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <jdurgin@redhat.com>
+To: Yuri Weinstein <yweinste@redhat.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
 This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---AIQVOIkpgSHKgXDo94HLn0Vco2fgiTtS1
+--f64BDBsmaVTmfGkkDBHrr549TX1AlGwR6
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
 
-Hi,
+Hi Yuri,
 
-In case you did not notice:
+Here is how I understand the proposed use case for the Affected Versions:=
+ and ceph-qa-suite: fields in http://tracker.ceph.com/
 
-http://gitbuilder.sepia.ceph.com/gitbuilder-ceph-tarball-trusty-i386-basi=
-c/log.cgi?log=3Ddca722ec7b2a7fc9214844ec92310074b5cb2faa
+When the issue is created:
 
-CXXLD radosgw-admin
-CXXLD rados
-/usr/lib/gcc/i686-linux-gnu/4.8/../../../i386-linux-gnu/liblttng-ust.so: =
-undefined reference to `dlclose'
-/usr/lib/gcc/i686-linux-gnu/4.8/../../../i386-linux-gnu/liblttng-ust.so: =
-undefined reference to `dlsym'
-/usr/lib/gcc/i686-linux-gnu/4.8/../../../i386-linux-gnu/liblttng-ust.so: =
-undefined reference to `dlopen'
+* Select Affected Versions: to match the Ceph version of the bug report
+* Select the ceph-qa-suite where the bug can be reproduced or where the f=
+eature will be tested
 
-    error: collect2: ld returned 1 exit status
+When a job from a suite S fails
 
-make[3]: *** [ceph_tpbench] Error 1
-make[3]: *** Waiting for unfinished jobs....
-CXXLD ceph-objectstore-tool
-make[3]: Leaving directory `/srv/autobuild-ceph/gitbuilder.git/build/src'=
+* If the analysis of the job failure points to an existing issue
+* If closed, the issue is re-opened
+* The Affected Versions: is modified to include the Ceph version from the=
+ job failure
+* The ceph-qa-suite is modified to include the suite the job belongs to
 
-make[2]: *** [all-recursive] Error 1
-make[2]: Leaving directory `/srv/autobuild-ceph/gitbuilder.git/build/src'=
+When preparing a release for Ceph version V
 
-make[1]: *** [all] Error 2
-make[1]: Leaving directory `/srv/autobuild-ceph/gitbuilder.git/build/src'=
+* To check if the rados suite has no pending bug, query the issues that a=
+re open and Affected Versions: matches V and ceph-qa-suite matches rados
+* To check if there are no pending bug, query the issues that are open an=
+d Affected Versions: matches V
 
-
-    make: *** [all-recursive] Error 1
+Am I missing something ?
 
 Cheers
 
@@ -59,7 +55,8 @@ Cheers
 Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
 
---AIQVOIkpgSHKgXDo94HLn0Vco2fgiTtS1
+
+--f64BDBsmaVTmfGkkDBHrr549TX1AlGwR6
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -67,9 +64,9 @@ Content-Disposition: attachment; filename="signature.asc"
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2.0.22 (GNU/Linux)
 
-iEYEARECAAYFAlUVKScACgkQ8dLMyEl6F22i5gCfdoWpC9XTrFrq/OUip/7/CaAx
-IHYAnjO0YVPwmr1gM6OTYHNF7Y3ElVPn
-=ABYQ
+iEYEARECAAYFAlUVSsIACgkQ8dLMyEl6F22mYwCfSBGU0U1LfDjNl2OxvtKdc+mc
+yxgAn3hTP5i15YpGuSiyhlyzvL0Clp9K
+=ighL
 -----END PGP SIGNATURE-----
 
---AIQVOIkpgSHKgXDo94HLn0Vco2fgiTtS1--
+--f64BDBsmaVTmfGkkDBHrr549TX1AlGwR6--
