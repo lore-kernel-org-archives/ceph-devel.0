@@ -1,71 +1,56 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Documenting user visible changes
-Date: Fri, 27 Mar 2015 13:54:38 +0100
-Message-ID: <5515530E.1020404@dachary.org>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: RBD Discard issue for Cache_tier
+Date: Fri, 27 Mar 2015 06:50:38 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1503270643520.18934@cobra.newdream.net>
+References: <CALZt5jwGf2BADGSRYJY-9MB5pWHSKFOpWdjXZAZroWbwAuO+Fg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="omtaIAo0AqVP42AViq1fro5HCaj1DnJNb"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:37765 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752631AbbC0Myl (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 27 Mar 2015 08:54:41 -0400
+Received: from cobra.newdream.net ([66.33.216.30]:39968 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753064AbbC0Nuj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 27 Mar 2015 09:50:39 -0400
+In-Reply-To: <CALZt5jwGf2BADGSRYJY-9MB5pWHSKFOpWdjXZAZroWbwAuO+Fg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
-Cc: Alistair Israel <aisrael@gmail.com>, Neil Levine <nlevine@redhat.com>
+To: Ning Yao <zay11022@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---omtaIAo0AqVP42AViq1fro5HCaj1DnJNb
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+On Fri, 27 Mar 2015, Ning Yao wrote:
+> Hi all,
+> 
+> I use the kernel rbd with kernel 3.18 and open the discard option.
+> When I use the cache tier mode, the performance is ruined by
+> CEPH_OSD_OP_DELETE.
+> 
+> Since some one may delete a large file which is rarely used, the file
+> is always not in the Cache pool. So it will promote the object first
+> from the cold pool and then replace the object with an empty object.
+> After the empty object is flushed and evicted, the content is
+> eventually deleted.
+> 
+> But a large file causes lots of object promotion so that the Cache
+> pool's bandwidth is saturated. We might not need to promote a delete
+> the object when Calling can_skip_promote() and send a
+> CEPH_OSD_OP_DELETE op to cold pool from the Objecter interface, which
+> would be much better when deleting file occurs. Is that possible?
 
-Hi Ceph,
+Yes.  The trick right now is that the DELETE op is defined to return 
+ENOENT if the object doesn't exist, and the code isn't smart enough to 
+skip the promotion.  I think there are two options:
 
-It would be nice if the description of an issue contained a paragraph doc=
-umenting user visible changes, when relevant. They could be conveniently =
-linked from the release notes.=20
+1) Special case deletion code in the promotion code that skips most 
+of the work.  Unfortunately I think this will be fragile and annoying 
+to maintain.
 
-Although it could be done when backporting or preparing the release notes=
-, it's a significant amount of work, reason why it has not been done for =
-all issues so far. I tried on an issue I know well:
+2) Set a flag on the client op indicating that it can ignore the delete 
+'failure' and skip promotion. There is already a hook for this 
+(can_skip_promote) in ReplicatedPG, although it's not quite right: the 
+'FAILOK' flag means that we should proceed with the operation, but the 
+per-op return code is still supposed to be -EINVAL to the client and we 
+don't do that.  I think we actually want an 'idempotent' flag/arg for 
+delete itself.  There's plenty of room in the ceph_osd_op args to add this 
+and it should be easy to do in a backwards compatible way..
 
-   http://tracker.ceph.com/issues/9665#User-description
+sage
 
-and another I did not know anything about:
-
-   http://tracker.ceph.com/issues/6228#User-description
-
-Although Alistair proofread it and said http://tracker.ceph.com/issues/62=
-28#User-description improves his understanding of the problem and the sol=
-ution, it took me a long time to write and I don't find it particularly c=
-lear or well written. The next step would be to have it reviewed by someo=
-ne else and improve. I'd be happy to do it as part of the backport work, =
-to help developers who did not have time or forgot about it. But I suspec=
-t that if we have to do it for all issues it won't work because it's too =
-much work.
-
-I'm cc'ing Neil because he made me realize how important it is to have us=
-er visible changes properly documented.
-
-Any idea you may have are very welcome :-)
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---omtaIAo0AqVP42AViq1fro5HCaj1DnJNb
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlUVUw4ACgkQ8dLMyEl6F22WEgCgueikRJ3JxWeSpayaAZ9PIKRo
-i5oAn1G1Jnld/BLY00wKqhkAVWbbkAh9
-=bYr1
------END PGP SIGNATURE-----
-
---omtaIAo0AqVP42AViq1fro5HCaj1DnJNb--
