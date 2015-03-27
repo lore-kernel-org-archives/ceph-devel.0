@@ -1,150 +1,275 @@
-From: Chaitanya Huilgol <Chaitanya.Huilgol@sandisk.com>
-Subject: RE: tcmalloc issue
-Date: Fri, 27 Mar 2015 09:53:30 +0000
-Message-ID: <9E914F5BD7F48A4782456CEB550A42281296767B@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CAD14A@SACMBXIP01.sdcorp.global.sandisk.com>
- <976582620.219210.1427440913479.JavaMail.zimbra@oxygem.tv>
+From: Alexandre DERUMIER <aderumier@odiso.com>
+Subject: Re: tcmalloc issue
+Date: Fri, 27 Mar 2015 15:37:35 +0100 (CET)
+Message-ID: <250283338.1321814.1427467055129.JavaMail.zimbra@oxygem.tv>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CAD14A@SACMBXIP01.sdcorp.global.sandisk.com> <976582620.219210.1427440913479.JavaMail.zimbra@oxygem.tv> <9E914F5BD7F48A4782456CEB550A42281296767B@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1bbn0100.outbound.protection.outlook.com ([157.56.111.100]:13968
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752036AbbC0OcR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 27 Mar 2015 10:32:17 -0400
-In-Reply-To: <976582620.219210.1427440913479.JavaMail.zimbra@oxygem.tv>
-Content-Language: en-US
+Received: from mailpro.odiso.net ([89.248.209.98]:47722 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932097AbbC0Ohh convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 27 Mar 2015 10:37:37 -0400
+In-Reply-To: <9E914F5BD7F48A4782456CEB550A42281296767B@SACMBXIP01.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>, Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Chaitanya Huilgol <Chaitanya.Huilgol@sandisk.com>
+Cc: Somnath Roy <Somnath.Roy@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-SGksDQoNClVidW50dSBQYWNrYWdlIHZlcnNpb24gaW5mbzogDQpQYWNrYWdlOiBsaWJ0Y21hbGxv
-Yy1taW5pbWFsNA0KVmVyc2lvbnM6IA0KMi4xLTJ1YnVudHUxICgvdmFyL2xpYi9hcHQvbGlzdHMv
-aW4uYXJjaGl2ZS51YnVudHUuY29tX3VidW50dV9kaXN0c190cnVzdHlfbWFpbl9iaW5hcnktYW1k
-NjRfUGFja2FnZXMpDQogDQpPbiB0aGUgT1NELCBpbmNyZWFzaW5nIHRoZSB0aHJlYWQgY2FjaGVz
-IGZyb20gdGhlIGRlZmF1bHQgMzJNIGhhcyBkZWZpbml0ZWx5IGhlbHBlZCwgDQp3ZSBoYXZlIG5v
-dCB0ZXN0ZWQgdGhpcyBvbiBjbGllbnQgbm9kZXMgdGhvdWdoIC0gcHJvYmFibHkgd2lsbCBoZWxw
-IHRoZXJlIHRvby4gDQoNCkFzIGEgdGVtcG9yYXJ5IG5vbi1pbnRydXNpdmUgd29ya2Fyb3VuZCB3
-aXRoIHRoZSBleGlzdGluZyBsaWJ0Y21hbGxvYy1taW5pbWFsNCBsaWJyYXJ5LA0Kd2UgYXJlIGV4
-cGxpY2l0bHkgc2V0dGluZyB0aGUgdGhyZWFkIGNhY2hlZCB2YWx1ZXMgdmlhIHJhZG9zLWNsYXNz
-ZXMuIChZb3UgY2FuIGFjdHVhbGx5IHB1dCB0aGlzIGNvZGUgaW50byB0aGUgT1NEIGluaXQgcGF0
-aCB0b28pIFNlZSBwYXRjaCBiZWxvdy4gDQoNClJlZ2FyZHMsDQpDaGFpdGFueWENCg0KDQpGcm9t
-IGNhZmRiZDQxYmIzNDkyMjA5NzE2NTE2OTEwZmEzYTBlODU2YWM3YjggTW9uIFNlcCAxNyAwMDow
-MDowMCAyMDAxDQpGcm9tOiBDaGFpdGFueWEgSHVpbGdvbCA8Y2hhaXRhbnlhLmh1aWxnb2xAc2Fu
-ZGlzay5jb20+DQpEYXRlOiBGcmksIDI3IE1hciAyMDE1IDE1OjE2OjM1ICswNTMwDQpTdWJqZWN0
-OiBbUEFUQ0hdIFNldCB0Y21hbGxvYyB0aHJlYWQgY2FjaGUgdmlhIHJhZG9zLWNsYXNzDQoNCldv
-cmthcm91bmQgZm9yIGJ1ZyBpbiB0Y21hbGxvYyAoMi4xLTJ1YnVudHUxKXdoaWNoIGRvZXMgbm90
-IHVzZSB0aGUgZXhwb3J0ZWQNCnRocmVhZCBjYWNoZSBzaXplIHZhbHVlIHZpYSBlbnZpcm9ubWVu
-dCB2YXJpYWJsZS4gIFVzaW5nIGxpYnJhcnkgaW5pdCBwYXRoDQp0byBleHBsaWNpdGx5IHNldCB0
-aGlzIHZhbHVlIGluIHRjbWFsbG9jLiBObyBhY3R1YWwgb2JqZWN0IGhhbmRsZXJzIGFyZQ0KcmVn
-aXN0ZXJlZCBhbmQgaGVuY2UgZG9lcyBub3QgYWZmZWN0IHRoZSBkYXRhIHBhdGguDQoNClNpZ25l
-ZC1vZmYtYnk6IENoYWl0YW55YSBIdWlsZ29sIDxjaGFpdGFueWEuaHVpbGdvbEBzYW5kaXNrLmNv
-bT4NCi0tLQ0KIHNyYy9jbHMvTWFrZWZpbGUuYW0gICAgICAgICAgICAgICAgICB8ICA1ICsrKysN
-CiBzcmMvY2xzL3RjbWFsbG9jX2Vudi90Y21hbGxvY19lbnYuY2MgfCA1MiArKysrKysrKysrKysr
-KysrKysrKysrKysrKysrKysrKysrKysNCiAyIGZpbGVzIGNoYW5nZWQsIDU3IGluc2VydGlvbnMo
-KykNCiBjcmVhdGUgbW9kZSAxMDA2NDQgc3JjL2Nscy90Y21hbGxvY19lbnYvdGNtYWxsb2NfZW52
-LmNjDQoNCmRpZmYgLS1naXQgYS9zcmMvY2xzL01ha2VmaWxlLmFtIGIvc3JjL2Nscy9NYWtlZmls
-ZS5hbQ0KaW5kZXggZWE0NGZlNy4uYWJjZjAwNyAxMDA2NDQNCi0tLSBhL3NyYy9jbHMvTWFrZWZp
-bGUuYW0NCisrKyBiL3NyYy9jbHMvTWFrZWZpbGUuYW0NCkBAIC01LDYgKzUsMTEgQEAgbGliY2xz
-X2hlbGxvX2xhX0xJQkFERCA9ICQoUFRIUkVBRF9MSUJTKSAkKEVYVFJBTElCUykNCiBsaWJjbHNf
-aGVsbG9fbGFfTERGTEFHUyA9ICR7QU1fTERGTEFHU30gLW1vZHVsZSAtYXZvaWQtdmVyc2lvbiAt
-c2hhcmVkIC1leHBvcnQtc3ltYm9scy1yZWdleCAnLipfX2Nsc18uKicNCiByYWRvc2xpYl9MVExJ
-QlJBUklFUyArPSBsaWJjbHNfaGVsbG8ubGENCiANCitsaWJjbHNfdGNtYWxsb2NfZW52X2xhX1NP
-VVJDRVMgPSBjbHMvdGNtYWxsb2NfZW52L3RjbWFsbG9jX2Vudi5jYw0KK2xpYmNsc190Y21hbGxv
-Y19lbnZfbGFfTElCQUREID0gJChQVEhSRUFEX0xJQlMpICQoRVhUUkFMSUJTKQ0KK2xpYmNsc190
-Y21hbGxvY19lbnZfbGFfTERGTEFHUyA9ICR7QU1fTERGTEFHU30gLW1vZHVsZSAtYXZvaWQtdmVy
-c2lvbiAtc2hhcmVkIC1leHBvcnQtc3ltYm9scy1yZWdleCAnLipfX2Nsc18uKicNCityYWRvc2xp
-Yl9MVExJQlJBUklFUyArPSBsaWJjbHNfdGNtYWxsb2NfZW52LmxhDQorDQogbGliY2xzX3JiZF9s
-YV9TT1VSQ0VTID0gY2xzL3JiZC9jbHNfcmJkLmNjDQogbGliY2xzX3JiZF9sYV9MSUJBREQgPSAk
-KFBUSFJFQURfTElCUykgJChFWFRSQUxJQlMpDQogbGliY2xzX3JiZF9sYV9MREZMQUdTID0gJHtB
-TV9MREZMQUdTfSAtbW9kdWxlIC1hdm9pZC12ZXJzaW9uIC1zaGFyZWQgLWV4cG9ydC1zeW1ib2xz
-LXJlZ2V4ICcuKl9fY2xzXy4qJw0KZGlmZiAtLWdpdCBhL3NyYy9jbHMvdGNtYWxsb2NfZW52L3Rj
-bWFsbG9jX2Vudi5jYyBiL3NyYy9jbHMvdGNtYWxsb2NfZW52L3RjbWFsbG9jX2Vudi5jYw0KbmV3
-IGZpbGUgbW9kZSAxMDA2NDQNCmluZGV4IDAwMDAwMDAuLjA5MDcxODMNCi0tLSAvZGV2L251bGwN
-CisrKyBiL3NyYy9jbHMvdGNtYWxsb2NfZW52L3RjbWFsbG9jX2Vudi5jYw0KQEAgLTAsMCArMSw1
-MiBAQA0KKy8qDQorICogcmFkb3MtY2xhc3NlcyBiYXNlZCBwbHVnaW4gdG8gc2V0IFRDbWFsbG9j
-IGVudmlyb25tZW50IHZhcmlhYmxlDQorICogJ1RDTUFMTE9DX01BWF9UT1RBTF9USFJFQURfQ0FD
-SEVfQllURVMnIGFzIHRoZSBleGlzdGluZyB0Y21hbGxvYw0KKyAqIGxpYnJhcnkgaW4gdWJ1bnR1
-IDE0LjA0IExUUyBhbmQgY2VudG9zIDcuMCBoYXMgYSBidWcgd2hpY2ggZG9lcw0KKyAqIG5vdCBo
-b25vciB0aGlzIGVudg0KKyAqLyANCisjaW5jbHVkZSA8Y3N0ZGxpYj4NCisjaWZkZWYgSEFWRV9H
-UEVSRlRPT0xTX0hFQVBfUFJPRklMRVJfSA0KKyNpbmNsdWRlIDxncGVyZnRvb2xzL2hlYXAtcHJv
-ZmlsZXIuaD4NCisjZWxzZQ0KKyNpbmNsdWRlIDxnb29nbGUvaGVhcC1wcm9maWxlci5oPg0KKyNl
-bmRpZg0KKw0KKyNpZmRlZiBIQVZFX0dQRVJGVE9PTFNfTUFMTE9DX0VYVEVOU0lPTl9IDQorI2lu
-Y2x1ZGUgPGdwZXJmdG9vbHMvbWFsbG9jX2V4dGVuc2lvbi5oPg0KKyNlbHNlDQorI2luY2x1ZGUg
-PGdvb2dsZS9tYWxsb2NfZXh0ZW5zaW9uLmg+DQorI2VuZGlmDQorI2luY2x1ZGUgIm9iamNsYXNz
-L29iamNsYXNzLmgiDQorDQorQ0xTX1ZFUiAoMSwgMCkgQ0xTX05BTUUgKHRjbWFsbG9jX2VudikN
-CisjZGVmaW5lIERFRkFVTFRfQ0FDSEVfU0laRSAoMzIgKiAxMDI0ICogMTAyNCkNCisNCit2b2lk
-DQorX19jbHNfaW5pdCAoKQ0KK3sNCisgIHNpemVfdCByZXN1bHQ7DQorICBzaXplX3QgY2FjaGVf
-c3o7DQorICBjaGFyICplbnZfY2FjaGVfc3pfc3RyOw0KKw0KKyAgQ0xTX0xPRyAoMCwgIlRDTUFM
-TE9DLUVOVjogU2VhcmNoIik7DQorICBlbnZfY2FjaGVfc3pfc3RyID0gZ2V0ZW52ICgiVENNQUxM
-T0NfTUFYX1RPVEFMX1RIUkVBRF9DQUNIRV9CWVRFUyIpOw0KKyAgaWYgKGVudl9jYWNoZV9zel9z
-dHIpIHsNCisgICAgY2FjaGVfc3ogPSBzdHJ0b3VsIChlbnZfY2FjaGVfc3pfc3RyLCBOVUxMLCAw
-KTsNCisgICAgQ0xTX0xPRygwLCAiVENNQUxMT0MtRU5WOiBGb3VuZDogJWx1XG4iLCBjYWNoZV9z
-eik7DQorICAgIGlmIChjYWNoZV9zeiA+IERFRkFVTFRfQ0FDSEVfU0laRSkgew0KKyAgICAgIE1h
-bGxvY0V4dGVuc2lvbjo6aW5zdGFuY2UgKCktPg0KKyAgICAgICAgU2V0TnVtZXJpY1Byb3BlcnR5
-ICgidGNtYWxsb2MubWF4X3RvdGFsX3RocmVhZF9jYWNoZV9ieXRlcyIsIGNhY2hlX3N6KTsNCisg
-ICAgICByZXN1bHQgPSAwOw0KKyAgICAgIE1hbGxvY0V4dGVuc2lvbjo6aW5zdGFuY2UgKCktPg0K
-KyAgICAgICAgR2V0TnVtZXJpY1Byb3BlcnR5ICgidGNtYWxsb2MubWF4X3RvdGFsX3RocmVhZF9j
-YWNoZV9ieXRlcyIsICZyZXN1bHQpOw0KKyAgICAgIENMU19MT0cgKDAsICJUQ01BTExPQy1FTlY6
-VmVyaWZ5OiBtYXhfdG90YWxfdGhyZWFkX2NhY2hlX2J5dGVzPSVsdVxuIiwNCisgICAgICAgICh1
-bnNpZ25lZCBsb25nKSByZXN1bHQpOw0KKyAgICB9IGVsc2Ugew0KKyAgICAgIENMU19MT0cgKDAs
-ICJUQ01BTExPQy1FTlY6IEV4cG9ydGVkIENhY2hlU3o9JWx1IDw9IERlZmF1bHQ9JWx1IC0gSWdu
-b3JlZFxuIiwNCisgICAgICAgICh1bnNpZ25lZCBsb25nKSBjYWNoZV9zeiwgKHVuc2lnbmVkIGxv
-bmcpIERFRkFVTFRfQ0FDSEVfU0laRSk7DQorICAgIH0NCisgIH0gZWxzZSB7DQorICAgICAgQ0xT
-X0xPRygwLCAiVENNQUxMT0MtRU5WOiBOb3QgRm91bmRcbiIpOw0KKyAgfQ0KK30NCisvKiBFT0Yg
-Ki8NCi0tIA0KMS45LjENCg0KLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogY2VwaC1k
-ZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIu
-a2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIEFsZXhhbmRyZSBERVJVTUlFUg0KU2VudDogRnJpZGF5
-LCBNYXJjaCAyNywgMjAxNSAxMjo1MiBQTQ0KVG86IFNvbW5hdGggUm95DQpDYzogY2VwaC1kZXZl
-bA0KU3ViamVjdDogUmU6IHRjbWFsbG9jIGlzc3VlDQoNCkhpIFNvbW1hdGgsDQoNCmlzIGl0IG9u
-bHkgb24gb3NkcyA/DQoNCm9yIGFsc28gY2xpZW50cyA/DQoNCldoYXQgaXMgdGhlIHRtYWxsb2Mg
-dmVyc2lvbiBvbiB1YnVudHUgPyAoSSB3b3VsZCBsaWtlIHRvIGtub3duIGlmIHRoZSBwcm9ibGVt
-IGV4aXN0IGFsc28gb24gZGViaWFuKQ0KDQpSZWdhcmRzLA0KDQpBbGV4YW5kcmUNCi0tLS0tIE1h
-aWwgb3JpZ2luYWwgLS0tLS0NCkRlOiAiU29tbmF0aCBSb3kiIDxTb21uYXRoLlJveUBzYW5kaXNr
-LmNvbT4NCsOAOiAiY2VwaC1kZXZlbCIgPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPg0KRW52
-b3nDqTogVmVuZHJlZGkgMjcgTWFycyAyMDE1IDAwOjE4OjU3DQpPYmpldDogdGNtYWxsb2MgaXNz
-dWUNCg0KU2FnZSwNCkhlcmUgaXMgdGhlIHRjbWFsbG9jIGlzc3VlIEkgd2FzIHRhbGtpbmcgaW4g
-dGhlIHBlcmZvcm1hbmNlIG1lZXRpbmcuIA0KDQpodHRwOi8vY29kZS5nb29nbGUuY29tL3AvZ3Bl
-cmZ0b29scy9pc3N1ZXMvZGV0YWlsP2lkPTU4NSANCg0KVGhlIHRjbWFsbG9jIGlzIGNvbnN1bWlu
-ZyBsb3Qgb2YgY3B1cyAoYW5kIGV2ZW50dWFsbHkgc2xvd2luZyBkb3duIHRoZSBwZXJmb3JtYW5j
-ZSkgd2l0aCB0aGUgZm9sbG93aW5nIHBlcmYgdG9wIHRyYWNlLiANCg0KMjUuNzMlIGxpYnRjbWFs
-bG9jLnNvLjQuMS4yIFsuXSB0Y21hbGxvYzo6Q2VudHJhbEZyZWVMaXN0OjpGZXRjaEZyb21TcGFu
-cygpDQoxMi41MiUgbGlidGNtYWxsb2Muc28uNC4xLjIgWy5dIHRjbWFsbG9jOjpUaHJlYWRDYWNo
-ZTo6UmVsZWFzZVRvQ2VudHJhbENhY2hlKHRjbWFsbG9jOjpUaHJlYWRDYWNoZTo6RnJlZUxpc3Qq
-LCB1bnNpZ25lZCBsb25nLCBpbnQpIDExLjYyJSBsaWJ0Y21hbGxvYy5zby40LjEuMiBbLl0gdGNt
-YWxsb2M6OkNlbnRyYWxGcmVlTGlzdDo6UmVsZWFzZVRvU3BhbnModm9pZCopDQoxLjU2JSBba2Vy
-bmVsXSBba10gX19jb3B5X3VzZXJfbm9jYWNoZQ0KMS40NCUgbGlidGNtYWxsb2Muc28uNC4xLjIg
-Wy5dIHRjbWFsbG9jOjpDZW50cmFsRnJlZUxpc3Q6OlJlbW92ZVJhbmdlKHZvaWQqLCB2b2lkKiwg
-aW50KSAxLjM5JSBsaWJ0Y21hbGxvYy5zby40LjEuMiBbLl0gdGNtYWxsb2M6OkNlbnRyYWxGcmVl
-TGlzdDo6UmVsZWFzZUxpc3RUb1NwYW5zKHZvaWQqKQ0KMC44OSUgbGlidGNtYWxsb2Muc28uNC4x
-LjIgWy5dIG9wZXJhdG9yIG5ldyh1bnNpZ25lZCBsb25nKSANCg0KDQpUaGUgVENNQUxMT0NfTUFY
-X1RPVEFMX1RIUkVBRF9DQUNIRV9CWVRFUyBpcyBhbGxldmlhdGluZyB0aGF0IGJ1dCB0aGUgZW52
-IHZhcmlhYmxlIHNldHRpbmcgZm9yIHRoaXMgaXMgYSBub29wIGluIHRoZSBiaW5hcnkgd2UgYXJl
-IGhhdmluZyBpbiBVYnVudHUgMTQuMDQuIEl0IGlzIGZpeGVkIGluIGdwZXJmdG9vbHMtMi4xLjkw
-IHJlbGVhc2UuIA0KU2VlIHRoZSBmb2xsb3dpbmcgbGluay4gDQoNCmh0dHA6Ly9jb2RlLmdvb2ds
-ZS5jb20vcC9ncGVyZnRvb2xzLyANCg0KV2UgY2FuIHJlcXVlc3QgVWJ1bnR1IGd1eXMgdG8gaW5j
-b3Jwb3JhdGUgdGhpcyB2ZXJzaW9uIG9yIHRoZSBsYXRlc3QgdGNtYWxsb2MgdmVyc2lvbiB3aGlj
-aCBpcyBncGVyZnRvb2xzLTIuNC4gDQoNCkl0IHdpbGwgYmUgcmVhbGx5IGhlbHBmdWwgaWYgeW91
-IGNhbiBwdXNoIHRoZW0gdG8gaW5jb3Jwb3JhdGUgdGhpcyBpbiAxNC4wNCB1cGRhdGVzLiANCg0K
-VGhhbmtzICYgUmVnYXJkcw0KU29tbmF0aCANCg0KX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX18gDQoNClBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMg
-ZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0
-aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2Yg
-dGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVi
-eSBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBh
-bmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlp
-bmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJl
-Y2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2Vu
-ZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBh
-bmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9z
-c2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29w
-aWVzKS4gDQoNCi0tDQpUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGlu
-ZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1h
-am9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCBodHRwOi8vdmdl
-ci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwgDQoNCi0tDQpUbyB1bnN1YnNjcmliZSBm
-cm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4N
-CnRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnDQpNb3Jl
-IG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZv
-Lmh0bWwNCg==
+>>Ubuntu Package version info:=20
+>>Package: libtcmalloc-minimal4=20
+>>Versions:=20
+>>2.1-2ubuntu1 (/var/lib/apt/lists/in.archive.ubuntu.com_ubuntu_dists_t=
+rusty_main_binary-amd64_Packages)=20
+
+Thanks !
+
+looking at debian,
+debian wheezy : libtcmalloc-minimal4 (2.0-2)
+
+Seem to have the bug (I have looked inside debian src package)
+
+debian jessie : libtcmalloc-minimal4 (2.2.1-0.2)
+seem to be ok
+
+
+
+>>we have not tested this on client nodes though - probably will help t=
+here too.=20
+
+I ask about client side, because from my debian client previous bench,=20
+I have 4x more cpu on client librbd vs krbd, so maybe it's coming from =
+libtcmalloc
+
+
+
+----- Mail original -----
+De: "Chaitanya Huilgol" <Chaitanya.Huilgol@sandisk.com>
+=C3=80: "aderumier" <aderumier@odiso.com>, "Somnath Roy" <Somnath.Roy@s=
+andisk.com>
+Cc: "ceph-devel" <ceph-devel@vger.kernel.org>
+Envoy=C3=A9: Vendredi 27 Mars 2015 10:53:30
+Objet: RE: tcmalloc issue
+
+Hi,=20
+
+Ubuntu Package version info:=20
+Package: libtcmalloc-minimal4=20
+Versions:=20
+2.1-2ubuntu1 (/var/lib/apt/lists/in.archive.ubuntu.com_ubuntu_dists_tru=
+sty_main_binary-amd64_Packages)=20
+
+On the OSD, increasing the thread caches from the default 32M has defin=
+itely helped,=20
+we have not tested this on client nodes though - probably will help the=
+re too.=20
+
+As a temporary non-intrusive workaround with the existing libtcmalloc-m=
+inimal4 library,=20
+we are explicitly setting the thread cached values via rados-classes. (=
+You can actually put this code into the OSD init path too) See patch be=
+low.=20
+
+Regards,=20
+Chaitanya=20
+
+
+=46rom cafdbd41bb3492209716516910fa3a0e856ac7b8 Mon Sep 17 00:00:00 200=
+1=20
+=46rom: Chaitanya Huilgol <chaitanya.huilgol@sandisk.com>=20
+Date: Fri, 27 Mar 2015 15:16:35 +0530=20
+Subject: [PATCH] Set tcmalloc thread cache via rados-class=20
+
+Workaround for bug in tcmalloc (2.1-2ubuntu1)which does not use the exp=
+orted=20
+thread cache size value via environment variable. Using library init pa=
+th=20
+to explicitly set this value in tcmalloc. No actual object handlers are=
+=20
+registered and hence does not affect the data path.=20
+
+Signed-off-by: Chaitanya Huilgol <chaitanya.huilgol@sandisk.com>=20
+---=20
+src/cls/Makefile.am | 5 ++++=20
+src/cls/tcmalloc_env/tcmalloc_env.cc | 52 +++++++++++++++++++++++++++++=
++++++++=20
+2 files changed, 57 insertions(+)=20
+create mode 100644 src/cls/tcmalloc_env/tcmalloc_env.cc=20
+
+diff --git a/src/cls/Makefile.am b/src/cls/Makefile.am=20
+index ea44fe7..abcf007 100644=20
+--- a/src/cls/Makefile.am=20
++++ b/src/cls/Makefile.am=20
+@@ -5,6 +5,11 @@ libcls_hello_la_LIBADD =3D $(PTHREAD_LIBS) $(EXTRALIBS=
+)=20
+libcls_hello_la_LDFLAGS =3D ${AM_LDFLAGS} -module -avoid-version -share=
+d -export-symbols-regex '.*__cls_.*'=20
+radoslib_LTLIBRARIES +=3D libcls_hello.la=20
+
++libcls_tcmalloc_env_la_SOURCES =3D cls/tcmalloc_env/tcmalloc_env.cc=20
++libcls_tcmalloc_env_la_LIBADD =3D $(PTHREAD_LIBS) $(EXTRALIBS)=20
++libcls_tcmalloc_env_la_LDFLAGS =3D ${AM_LDFLAGS} -module -avoid-versio=
+n -shared -export-symbols-regex '.*__cls_.*'=20
++radoslib_LTLIBRARIES +=3D libcls_tcmalloc_env.la=20
++=20
+libcls_rbd_la_SOURCES =3D cls/rbd/cls_rbd.cc=20
+libcls_rbd_la_LIBADD =3D $(PTHREAD_LIBS) $(EXTRALIBS)=20
+libcls_rbd_la_LDFLAGS =3D ${AM_LDFLAGS} -module -avoid-version -shared =
+-export-symbols-regex '.*__cls_.*'=20
+diff --git a/src/cls/tcmalloc_env/tcmalloc_env.cc b/src/cls/tcmalloc_en=
+v/tcmalloc_env.cc=20
+new file mode 100644=20
+index 0000000..0907183=20
+--- /dev/null=20
++++ b/src/cls/tcmalloc_env/tcmalloc_env.cc=20
+@@ -0,0 +1,52 @@=20
++/*=20
++ * rados-classes based plugin to set TCmalloc environment variable=20
++ * 'TCMALLOC_MAX_TOTAL_THREAD_CACHE_BYTES' as the existing tcmalloc=20
++ * library in ubuntu 14.04 LTS and centos 7.0 has a bug which does=20
++ * not honor this env=20
++ */=20
++#include <cstdlib>=20
++#ifdef HAVE_GPERFTOOLS_HEAP_PROFILER_H=20
++#include <gperftools/heap-profiler.h>=20
++#else=20
++#include <google/heap-profiler.h>=20
++#endif=20
++=20
++#ifdef HAVE_GPERFTOOLS_MALLOC_EXTENSION_H=20
++#include <gperftools/malloc_extension.h>=20
++#else=20
++#include <google/malloc_extension.h>=20
++#endif=20
++#include "objclass/objclass.h"=20
++=20
++CLS_VER (1, 0) CLS_NAME (tcmalloc_env)=20
++#define DEFAULT_CACHE_SIZE (32 * 1024 * 1024)=20
++=20
++void=20
++__cls_init ()=20
++{=20
++ size_t result;=20
++ size_t cache_sz;=20
++ char *env_cache_sz_str;=20
++=20
++ CLS_LOG (0, "TCMALLOC-ENV: Search");=20
++ env_cache_sz_str =3D getenv ("TCMALLOC_MAX_TOTAL_THREAD_CACHE_BYTES")=
+;=20
++ if (env_cache_sz_str) {=20
++ cache_sz =3D strtoul (env_cache_sz_str, NULL, 0);=20
++ CLS_LOG(0, "TCMALLOC-ENV: Found: %lu\n", cache_sz);=20
++ if (cache_sz > DEFAULT_CACHE_SIZE) {=20
++ MallocExtension::instance ()->=20
++ SetNumericProperty ("tcmalloc.max_total_thread_cache_bytes", cache_sz=
+);=20
++ result =3D 0;=20
++ MallocExtension::instance ()->=20
++ GetNumericProperty ("tcmalloc.max_total_thread_cache_bytes", &result)=
+;=20
++ CLS_LOG (0, "TCMALLOC-ENV:Verify: max_total_thread_cache_bytes=3D%lu\=
+n",=20
++ (unsigned long) result);=20
++ } else {=20
++ CLS_LOG (0, "TCMALLOC-ENV: Exported CacheSz=3D%lu <=3D Default=3D%lu =
+- Ignored\n",=20
++ (unsigned long) cache_sz, (unsigned long) DEFAULT_CACHE_SIZE);=20
++ }=20
++ } else {=20
++ CLS_LOG(0, "TCMALLOC-ENV: Not Found\n");=20
++ }=20
++}=20
++/* EOF */=20
+--=20
+1.9.1=20
+
+----Original Message-----=20
+=46rom: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.=
+kernel.org] On Behalf Of Alexandre DERUMIER=20
+Sent: Friday, March 27, 2015 12:52 PM=20
+To: Somnath Roy=20
+Cc: ceph-devel=20
+Subject: Re: tcmalloc issue=20
+
+Hi Sommath,=20
+
+is it only on osds ?=20
+
+or also clients ?=20
+
+What is the tmalloc version on ubuntu ? (I would like to known if the p=
+roblem exist also on debian)=20
+
+Regards,=20
+
+Alexandre=20
+----- Mail original -----=20
+De: "Somnath Roy" <Somnath.Roy@sandisk.com>=20
+=C3=80: "ceph-devel" <ceph-devel@vger.kernel.org>=20
+Envoy=C3=A9: Vendredi 27 Mars 2015 00:18:57=20
+Objet: tcmalloc issue=20
+
+Sage,=20
+Here is the tcmalloc issue I was talking in the performance meeting.=20
+
+http://code.google.com/p/gperftools/issues/detail?id=3D585=20
+
+The tcmalloc is consuming lot of cpus (and eventually slowing down the =
+performance) with the following perf top trace.=20
+
+25.73% libtcmalloc.so.4.1.2 [.] tcmalloc::CentralFreeList::FetchFromSpa=
+ns()=20
+12.52% libtcmalloc.so.4.1.2 [.] tcmalloc::ThreadCache::ReleaseToCentral=
+Cache(tcmalloc::ThreadCache::FreeList*, unsigned long, int) 11.62% libt=
+cmalloc.so.4.1.2 [.] tcmalloc::CentralFreeList::ReleaseToSpans(void*)=20
+1.56% [kernel] [k] __copy_user_nocache=20
+1.44% libtcmalloc.so.4.1.2 [.] tcmalloc::CentralFreeList::RemoveRange(v=
+oid*, void*, int) 1.39% libtcmalloc.so.4.1.2 [.] tcmalloc::CentralFreeL=
+ist::ReleaseListToSpans(void*)=20
+0.89% libtcmalloc.so.4.1.2 [.] operator new(unsigned long)=20
+
+
+The TCMALLOC_MAX_TOTAL_THREAD_CACHE_BYTES is alleviating that but the e=
+nv variable setting for this is a noop in the binary we are having in U=
+buntu 14.04. It is fixed in gperftools-2.1.90 release.=20
+See the following link.=20
+
+http://code.google.com/p/gperftools/=20
+
+We can request Ubuntu guys to incorporate this version or the latest tc=
+malloc version which is gperftools-2.4.=20
+
+It will be really helpful if you can push them to incorporate this in 1=
+4.04 updates.=20
+
+Thanks & Regards=20
+Somnath=20
+
+________________________________=20
+
+PLEASE NOTE: The information contained in this electronic mail message =
+is intended only for the use of the designated recipient(s) named above=
+=2E If the reader of this message is not the intended recipient, you ar=
+e hereby notified that you have received this message in error and that=
+ any review, dissemination, distribution, or copying of this message is=
+ strictly prohibited. If you have received this communication in error,=
+ please notify the sender by telephone or e-mail (as shown above) immed=
+iately and destroy any and all copies of this message in your possessio=
+n (whether hard copies or electronically stored copies).=20
+
+--=20
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n the body of a message to majordomo@vger.kernel.org More majordomo inf=
+o at http://vger.kernel.org/majordomo-info.html=20
+
+--=20
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n=20
+the body of a message to majordomo@vger.kernel.org=20
+More majordomo info at http://vger.kernel.org/majordomo-info.html=20
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
