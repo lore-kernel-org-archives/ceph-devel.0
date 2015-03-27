@@ -1,37 +1,75 @@
-From: Ning Yao <zay11022@gmail.com>
-Subject: RBD Discard issue for Cache_tier
-Date: Fri, 27 Mar 2015 17:28:23 +0800
-Message-ID: <CALZt5jwGf2BADGSRYJY-9MB5pWHSKFOpWdjXZAZroWbwAuO+Fg@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: lttng broken on i386 trusty
+Date: Fri, 27 Mar 2015 10:55:50 +0100
+Message-ID: <55152926.9000400@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="AIQVOIkpgSHKgXDo94HLn0Vco2fgiTtS1"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f46.google.com ([74.125.82.46]:36211 "EHLO
-	mail-wg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753243AbbC0J2Y (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 27 Mar 2015 05:28:24 -0400
-Received: by wgra20 with SMTP id a20so92404022wgr.3
-        for <ceph-devel@vger.kernel.org>; Fri, 27 Mar 2015 02:28:23 -0700 (PDT)
+Received: from mail2.dachary.org ([91.121.57.175]:37663 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1753566AbbC0Jzy (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 27 Mar 2015 05:55:54 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Josh Durgin <jdurgin@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi all,
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--AIQVOIkpgSHKgXDo94HLn0Vco2fgiTtS1
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-I use the kernel rbd with kernel 3.18 and open the discard option.
-When I use the cache tier mode, the performance is ruined by
-CEPH_OSD_OP_DELETE.
+Hi,
 
-Since some one may delete a large file which is rarely used, the file
-is always not in the Cache pool. So it will promote the object first
-from the cold pool and then replace the object with an empty object.
-After the empty object is flushed and evicted, the content is
-eventually deleted.
+In case you did not notice:
 
-But a large file causes lots of object promotion so that the Cache
-pool's bandwidth is saturated. We might not need to promote a delete
-the object when Calling can_skip_promote() and send a
-CEPH_OSD_OP_DELETE op to cold pool from the Objecter interface, which
-would be much better when deleting file occurs. Is that possible?
+http://gitbuilder.sepia.ceph.com/gitbuilder-ceph-tarball-trusty-i386-basi=
+c/log.cgi?log=3Ddca722ec7b2a7fc9214844ec92310074b5cb2faa
 
-Regards
-Ning Yao
+CXXLD radosgw-admin
+CXXLD rados
+/usr/lib/gcc/i686-linux-gnu/4.8/../../../i386-linux-gnu/liblttng-ust.so: =
+undefined reference to `dlclose'
+/usr/lib/gcc/i686-linux-gnu/4.8/../../../i386-linux-gnu/liblttng-ust.so: =
+undefined reference to `dlsym'
+/usr/lib/gcc/i686-linux-gnu/4.8/../../../i386-linux-gnu/liblttng-ust.so: =
+undefined reference to `dlopen'
+
+    error: collect2: ld returned 1 exit status
+
+make[3]: *** [ceph_tpbench] Error 1
+make[3]: *** Waiting for unfinished jobs....
+CXXLD ceph-objectstore-tool
+make[3]: Leaving directory `/srv/autobuild-ceph/gitbuilder.git/build/src'=
+
+make[2]: *** [all-recursive] Error 1
+make[2]: Leaving directory `/srv/autobuild-ceph/gitbuilder.git/build/src'=
+
+make[1]: *** [all] Error 2
+make[1]: Leaving directory `/srv/autobuild-ceph/gitbuilder.git/build/src'=
+
+
+    make: *** [all-recursive] Error 1
+
+Cheers
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--AIQVOIkpgSHKgXDo94HLn0Vco2fgiTtS1
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlUVKScACgkQ8dLMyEl6F22i5gCfdoWpC9XTrFrq/OUip/7/CaAx
+IHYAnjO0YVPwmr1gM6OTYHNF7Y3ElVPn
+=ABYQ
+-----END PGP SIGNATURE-----
+
+--AIQVOIkpgSHKgXDo94HLn0Vco2fgiTtS1--
