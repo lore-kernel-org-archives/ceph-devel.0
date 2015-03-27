@@ -1,57 +1,37 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Stable release maintenance manual
-Date: Fri, 27 Mar 2015 09:19:57 +0100
-Message-ID: <551512AD.6020203@dachary.org>
+From: Ning Yao <zay11022@gmail.com>
+Subject: RBD Discard issue for Cache_tier
+Date: Fri, 27 Mar 2015 17:28:23 +0800
+Message-ID: <CALZt5jwGf2BADGSRYJY-9MB5pWHSKFOpWdjXZAZroWbwAuO+Fg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="MPf93HjamDBWI0qdhMRBKK9j7hcKvJAdp"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:37615 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753243AbbC0IUA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 27 Mar 2015 04:20:00 -0400
+Received: from mail-wg0-f46.google.com ([74.125.82.46]:36211 "EHLO
+	mail-wg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753243AbbC0J2Y (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 27 Mar 2015 05:28:24 -0400
+Received: by wgra20 with SMTP id a20so92404022wgr.3
+        for <ceph-devel@vger.kernel.org>; Fri, 27 Mar 2015 02:28:23 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alistair Israel <aisrael@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---MPf93HjamDBWI0qdhMRBKK9j7hcKvJAdp
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Hi all,
 
-Hi Alistair,
+I use the kernel rbd with kernel 3.18 and open the discard option.
+When I use the cache tier mode, the performance is ruined by
+CEPH_OSD_OP_DELETE.
 
-The backporting and stable release maintenance documentation has been rew=
-orked and is now hopefully a guide for the first timer as well as a refer=
-ence while working on backports.=20
+Since some one may delete a large file which is rarely used, the file
+is always not in the Cache pool. So it will promote the object first
+from the cold pool and then replace the object with an empty object.
+After the empty object is flushed and evicted, the content is
+eventually deleted.
 
-   http://tracker.ceph.com/projects/ceph-releases/wiki
+But a large file causes lots of object promotion so that the Cache
+pool's bandwidth is saturated. We might not need to promote a delete
+the object when Calling can_skip_promote() and send a
+CEPH_OSD_OP_DELETE op to cold pool from the Objecter interface, which
+would be much better when deleting file occurs. Is that possible?
 
-It turns out to be nothing more than a series of procedures, as it should=
- be. The discussions we had helped a lot to clarify how things should be =
-presented. It would be great if you could proofread it.
-
-Cheers
-
-P.S. please ping me on IRC when you get a chance to discuss Dumpling.
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---MPf93HjamDBWI0qdhMRBKK9j7hcKvJAdp
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlUVEq0ACgkQ8dLMyEl6F21yXQCfZaRg9fEx6mgM0dJrJD97g3vj
-escAn0g3yPSdl3lgK1bswOgW8hxORf0i
-=mWR6
------END PGP SIGNATURE-----
-
---MPf93HjamDBWI0qdhMRBKK9j7hcKvJAdp--
+Regards
+Ning Yao
