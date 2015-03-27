@@ -1,37 +1,49 @@
-From: Mark Nelson <mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: CephFS Slow writes with 1MB files
-Date: Fri, 27 Mar 2015 11:50:59 -0500
-Message-ID: <55158A73.5010409@redhat.com>
+From: Gregory Farnum <greg@gregs42.com>
+Subject: Re: [ceph-users] CephFS Slow writes with 1MB files
+Date: Fri, 27 Mar 2015 13:04:02 -0700
+Message-ID: <CAC6JEv-G_s3gRNmn3MHPiuFP6ODiOgvhX_J02KEo=Dd0X-JLGg@mail.gmail.com>
 References: <CAMzumdZo2jdHEnB55g1XOVTxc4JLq-+6JFFZSwjgox=9LOUdZA@mail.gmail.com>
 	<CAMzumdbezcb-p1_MpcSL-h8tTR0RKATt93Om6NPejtn1G6yPeQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAMzumdbezcb-p1_MpcSL-h8tTR0RKATt93Om6NPejtn1G6yPeQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Barclay Jameson <almightybeeij-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ig0-f170.google.com ([209.85.213.170]:36591 "EHLO
+	mail-ig0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752249AbbC0UED (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 27 Mar 2015 16:04:03 -0400
+Received: by igbud6 with SMTP id ud6so30180674igb.1
+        for <ceph-devel@vger.kernel.org>; Fri, 27 Mar 2015 13:04:03 -0700 (PDT)
+Received: from mail-ig0-f178.google.com (mail-ig0-f178.google.com. [209.85.213.178])
+        by mx.google.com with ESMTPSA id y6sm2293040igw.21.2015.03.27.13.04.02
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Fri, 27 Mar 2015 13:04:02 -0700 (PDT)
+Received: by ignm3 with SMTP id m3so38021790ign.0
+        for <ceph-devel@vger.kernel.org>; Fri, 27 Mar 2015 13:04:02 -0700 (PDT)
+In-Reply-To: <CAMzumdbezcb-p1_MpcSL-h8tTR0RKATt93Om6NPejtn1G6yPeQ@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Barclay Jameson <almightybeeij@gmail.com>
+Cc: ceph-users <ceph-users@ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Specifically related to BTRFS, if you have random IO to existing objects 
-it will cause terrible fragmentation due to COW.  BTRFS is often faster 
-than XFS initially but after it starts fragmenting can become much 
-slower for sequential reads.  You may want to try XFS again and see if 
-you can improve the read performance (increasing read ahead both on the 
-cephfs client and on the underlying OSD block devices to something like 
-4MB might help).
+So this is exactly the same test you ran previously, but now it's on
+faster hardware and the test is slower?
 
-Mark
+Do you have more data in the test cluster? One obvious possibility is
+that previously you were working entirely in the MDS' cache, but now
+you've got more dentries and so it's kicking data out to RADOS and
+then reading it back in.
 
-On 03/27/2015 11:47 AM, Barclay Jameson wrote:
+If you've got the memory (you appear to) you can pump up the "mds
+cache size" config option quite dramatically from it's default 100000.
+
+Other things to check are that you've got an appropriately-sized
+metadata pool, that you've not got clients competing against each
+other inappropriately, etc.
+-Greg
+
+On Fri, Mar 27, 2015 at 9:47 AM, Barclay Jameson
+<almightybeeij@gmail.com> wrote:
 > Opps I should have said that I am not just writing the data but copying it :
 >
 > time cp Small1/* Small2/*
@@ -41,7 +53,7 @@ On 03/27/2015 11:47 AM, Barclay Jameson wrote:
 > BJ
 >
 > On Fri, Mar 27, 2015 at 11:40 AM, Barclay Jameson
-> <almightybeeij-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+> <almightybeeij@gmail.com> wrote:
 >> I did a Ceph cluster install 2 weeks ago where I was getting great
 >> performance (~= PanFS) where I could write 100,000 1MB files in 61
 >> Mins (Took PanFS 59 Mins). I thought I could increase the performance
@@ -78,8 +90,7 @@ On 03/27/2015 11:47 AM, Barclay Jameson wrote:
 >> 32 GB 800 MHz
 >> Dual Proc E5472  @ 3.00GHz (8 Cores)
 >> 10Gb Intel NIC
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
