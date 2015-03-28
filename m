@@ -1,73 +1,57 @@
 From: Loic Dachary <loic@dachary.org>
-Subject: Re: Giant backport tasks
-Date: Sat, 28 Mar 2015 11:46:40 +0100
-Message-ID: <55168690.2060603@dachary.org>
-References: <87zj6x3c49.fsf@gmail.com>
+Subject: Status update for the last Giant release 0.87.2
+Date: Sat, 28 Mar 2015 12:10:16 +0100
+Message-ID: <55168C18.9060307@dachary.org>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="xvMiUpSI84iAFpTkPUIbnum62PwdA9Cnk"
+ boundary="aXno4A6gOD2Ev9Cl0VEoQeJrLXiuTAA8M"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:38113 "EHLO
+Received: from mail2.dachary.org ([91.121.57.175]:38123 "EHLO
 	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752054AbbC1Kqy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 28 Mar 2015 06:46:54 -0400
-In-Reply-To: <87zj6x3c49.fsf@gmail.com>
+	with ESMTP id S1751280AbbC1LKV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 28 Mar 2015 07:10:21 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Abhishek L <abhishek.lekshmanan@gmail.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
 This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---xvMiUpSI84iAFpTkPUIbnum62PwdA9Cnk
-Content-Type: text/plain; charset=windows-1252
+--aXno4A6gOD2Ev9Cl0VEoQeJrLXiuTAA8M
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
 
-[cc'ing ceph-devel for archive]
+Hi Abhishek,
 
-On 28/03/2015 06:49, Abhishek L wrote:
-> Hi Loic,
->=20
-> I've started looking into the pending runs for giant. The rados suites
-> came out green,=20
+Looking at the last two issues marked as needing backport to giant:
 
-\o/
+http://tracker.ceph.com/projects/ceph/issues?query_id=3D68
 
-> rgw seems to have hit a bug, updated this in the
-> tracker,=20
+(this link is at the top of http://tracker.ceph.com/projects/ceph-release=
+s/wiki/HOWTO) I'm not sure what to do about http://tracker.ceph.com/issue=
+s/10643. The problem is that it consistently shows up when testing upgrad=
+es that involve giant. We want to be sure Giant can be upgraded to Hammer=
+, therefore we need to keep testing the upgrades at least for a month or =
+two after Hammer is released to catch border cases. I think issue 10643 n=
+eeds to be fixed and included in 0.87.2 so that we can have clean upgrade=
+ tests, otherwise it will mean more work for people watching over the upg=
+rade suites (I mean Yuri here ;-). And wif 10643 is included we can squee=
+ze http://tracker.ceph.com/issues/10153 in as well, I think.
 
-Reading http://tracker.ceph.com/issues/11153#rgw I suggest you use the me=
-thod described at http://tracker.ceph.com/projects/ceph-releases/wiki/HOW=
-TO_describe_a_test_result
-
-$ python ../fail.py loic-2015-03-27_08:40:06-rgw-giant---basic-multi
-** *'mkdir -p -- /home/ubuntu/cephtest/mnt.0/client.0/tmp && cd -- /home/=
-ubuntu/cephtest/mnt.0/client.0/tmp && CEPH_CLI_TEST_DUP_COMMAND=3D1 CEPH_=
-REF=3D90b37d9bdcc044e26f978632cd68f19ece82d19a TESTDIR=3D"/home/ubuntu/ce=
-phtest" CEPH_ID=3D"0" PATH=3D$PATH:/usr/sbin adjust-ulimits ceph-coverage=
- /home/ubuntu/cephtest/archive/coverage timeout 3h /home/ubuntu/cephtest/=
-workunit.client.0/rgw/s3_bucket_quota.pl'*
-*** "rgw/multifs/{clusters/fixed-2.yaml frontend/civetweb.yaml fs/xfs.yam=
-l rgw_pool_type/replicated.yaml tasks/rgw_bucket_quota.yaml}":http://pulp=
-ito.ceph.com/loic-2015-03-27_08:40:06-rgw-giant---basic-multi/824286
-
-When you have a single bug it's marginally useful but it helps a lot when=
- you have more than a dozen.
+Once this is dealt with and you're done with http://tracker.ceph.com/issu=
+es/11259 that you found when running the rgw suite at http://tracker.ceph=
+=2Ecom/issues/11153#rgw, 0.87.2 should be good, from our point of view (t=
+he point of view of backporters) and we can move to the "asking approval"=
+ step of the workflow ( http://tracker.ceph.com/issues/11153#Workflow ). =
 
 
-> some time on why the radosgw hit a bug a little more
-> so that I can get to the cause of this.=20
-
-Great, looking forward to read about it at http://tracker.ceph.com/issues=
-/11259 ;-)
-
-Cheers
+What do you think ?
 
 --=20
-Lo=EFc Dachary, Artisan Logiciel Libre
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
 
---xvMiUpSI84iAFpTkPUIbnum62PwdA9Cnk
+--aXno4A6gOD2Ev9Cl0VEoQeJrLXiuTAA8M
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -75,9 +59,9 @@ Content-Disposition: attachment; filename="signature.asc"
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2.0.22 (GNU/Linux)
 
-iEYEARECAAYFAlUWhpAACgkQ8dLMyEl6F210XACeJZdYFw4Li1N0PgscGBra0jym
-kMcAniyCGUPtzSrLEa3PlKaLcixhluKE
-=L4Om
+iEYEARECAAYFAlUWjBgACgkQ8dLMyEl6F22sVQCgwXSUobMzrRbHL5WWbcVj9nkJ
+Ze0AoKZ6UFx1TovagOD687Nfm3k7gP6s
+=YRm3
 -----END PGP SIGNATURE-----
 
---xvMiUpSI84iAFpTkPUIbnum62PwdA9Cnk--
+--aXno4A6gOD2Ev9Cl0VEoQeJrLXiuTAA8M--
