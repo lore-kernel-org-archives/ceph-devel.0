@@ -1,87 +1,75 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Script to extract backports log
-Date: Sun, 29 Mar 2015 20:44:55 +0200
-Message-ID: <55184827.1090603@dachary.org>
-References: <CAHJ4zokWQ0T5RTMvToTgS_YZxPgQV11XTxKGaUX+gnzj5u1B0g@mail.gmail.com>
+From: Brad Hubbard <bhubbard@redhat.com>
+Subject: Re: Fedora 21 packages
+Date: Mon, 30 Mar 2015 07:55:28 +1000
+Message-ID: <551874D0.1090900@redhat.com>
+References: <CAMWPydSzi4E8YmwL+-0PFbnNTFvEJ3duVFigfmnrTWzwFQY9QQ@mail.gmail.com> <alpine.DEB.2.00.1503281034470.18934@cobra.newdream.net>
+Reply-To: bhubbard@redhat.com
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="epjX57hxgBJPkkntHBuqBXgFoWxts1ACn"
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:38457 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752318AbbC2SpC (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 29 Mar 2015 14:45:02 -0400
-In-Reply-To: <CAHJ4zokWQ0T5RTMvToTgS_YZxPgQV11XTxKGaUX+gnzj5u1B0g@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:33753 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752621AbbC2Vzg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 29 Mar 2015 17:55:36 -0400
+In-Reply-To: <alpine.DEB.2.00.1503281034470.18934@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alistair Israel <aisrael@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>, Mustafa Muhammad <mustafaa.alhamdaani@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---epjX57hxgBJPkkntHBuqBXgFoWxts1ACn
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+On 03/29/2015 03:36 AM, Sage Weil wrote:
+> On Sat, 28 Mar 2015, Mustafa Muhammad wrote:
+>> Hi,
+>> I am trying to install ceph on Fedora 21, but I can't find the
+>> packages, is there any?
+>> If not, can you please provide packages? I think they are more
+>> important than Fedora 20 packages since F21 has more support time
+>> remaining.
+>
+> We don't have f21 packages yet; knee deep in other release issues.
+>
+> We are always looking for people interested in maintaining the upstream CI
+> and build/release environment, though; it's a surprising amount of work
+> keeping it all running!  There are other distros and architectures we're
+> missing too (e.g. we have armv7l hardware but no time to resurrect the
+> builds) for lack to time.
+>
+> sage
 
-Hi Alistair,
+They look like they are there to me. Am I missing something?
 
-On 29/03/2015 19:27, Alistair Israel wrote:
-> Hi, Lo=C3=AFc.
->=20
-> Well, got some 'quality' coding time in over the weekend and managed
-> to hack this out:
-> https://gist.github.com/aisrael/b2b78d9dfdd176a232b9
->=20
-> You'll need GitPython (pip install gitpython). I managed to get
-> hyperlinks to issues, to the commits themselves, and even snuck in the
-> names of the people who've signed off on the commit.
+$ cat /etc/redhat-release
+Fedora release 21 (Twenty One)
 
-It's going to be helpful to start with the release notes but it will need=
- manual editing.
+$ yum list ceph\* --showduplicates
+Loaded plugins: langpacks
+Installed Packages
+ceph.x86_64                                                                                                            1:0.80.9-1.fc21                                                                                               @updates
+ceph-common.x86_64                                                                                                     1:0.80.9-1.fc21                                                                                               @updates
+ceph-libs-compat.x86_64                                                                                                1:0.80.9-1.fc21                                                                                               @updates
+Available Packages
+ceph.x86_64                                                                                                            1:0.80.7-1.fc21                                                                                               fedora
+ceph.x86_64                                                                                                            1:0.80.9-1.fc21                                                                                               updates
+ceph-common.x86_64                                                                                                     1:0.80.7-1.fc21                                                                                               fedora
+ceph-common.x86_64                                                                                                     1:0.80.9-1.fc21                                                                                               updates
+ceph-deploy.noarch                                                                                                     1.5.10-1.fc21                                                                                                 fedora
+ceph-deploy.noarch                                                                                                     1.5.21-1.fc21                                                                                                 updates
+ceph-devel-compat.x86_64                                                                                               1:0.80.7-1.fc21                                                                                               fedora
+ceph-devel-compat.x86_64                                                                                               1:0.80.9-1.fc21                                                                                               updates
+ceph-fuse.x86_64                                                                                                       1:0.80.7-1.fc21                                                                                               fedora
+ceph-fuse.x86_64                                                                                                       1:0.80.9-1.fc21                                                                                               updates
+ceph-libs-compat.x86_64                                                                                                1:0.80.7-1.fc21                                                                                               fedora
+ceph-libs-compat.x86_64                                                                                                1:0.80.9-1.fc21                                                                                               updates
+ceph-radosgw.x86_64                                                                                                    1:0.80.7-1.fc21                                                                                               fedora
+ceph-radosgw.x86_64                                                                                                    1:0.80.9-1.fc21                                                                                               updates
+ceph-test.x86_64                                                                                                       1:0.80.7-1.fc21                                                                                               fedora
+ceph-test.x86_64                                                                                                       1:0.80.9-1.fc21                                                                                               updates
+cephfs-java.x86_64                                                                                                     1:0.80.7-1.fc21                                                                                               fedora
+cephfs-java.x86_64                                                                                                     1:0.80.9-1.fc21                                                                                               updates
 
->=20
-> What I can't figure out is how to get the simple component or module
-> name. For example, from how to get from "common/buffer.cc" (#6003) to
-> "buffer".
->=20
+$ repoquery --location ceph
+http://mirror.as24220.net/pub/fedora/linux/updates/21/x86_64/c/ceph-0.80.9-1.fc21.x86_64.rpm
 
-I don't think it can be done automatically.
-
-> Also, using a related issue and commit, how to combine two related
-> ones. For example, #6614 is related to #6003, and in the release notes
-> both are listed as a single item.
-
-One idea would be to group commits that are in the same branch together ?=
- When a merge is found, git log xxx^1..xxx^2 will list the commits that b=
-elong to the branch that has been merged. All commits in this branch pres=
-umably relate to the same topic.
-
-> Finally, do you think I should exclude commits starting with "qa:" or
-> "test/...:"?
-
-Yes, they are not relevant ;-)
-
-I included your snippet in the HOWTO write the release notes at http://tr=
-acker.ceph.com/projects/ceph-releases/wiki/HOWTO_write_the_release_notes =
-which is linked from http://tracker.ceph.com/projects/ceph-releases/wiki/=
-HOWTO.
-
-Cheers
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---epjX57hxgBJPkkntHBuqBXgFoWxts1ACn
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlUYSCcACgkQ8dLMyEl6F22IXACgtIvkXDpHuO7nUHNngefcD2gn
-Ie4An2US1C6SUiOARN+jEgvDMBrAZvU/
-=3GlF
------END PGP SIGNATURE-----
-
---epjX57hxgBJPkkntHBuqBXgFoWxts1ACn--
+Cheers,
+Brad
