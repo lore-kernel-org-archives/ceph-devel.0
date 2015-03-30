@@ -1,31 +1,88 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: hammer timing
-Date: Mon, 30 Mar 2015 10:00:12 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1503300951420.31431@cobra.newdream.net>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: tcmalloc issue
+Date: Mon, 30 Mar 2015 17:36:49 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CB6165@SACMBXIP01.sdcorp.global.sandisk.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CAD14A@SACMBXIP01.sdcorp.global.sandisk.com>
+ <alpine.DEB.2.00.1503261646150.31431@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:54433 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752895AbbC3RAN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 30 Mar 2015 13:00:13 -0400
-Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-	by mx1.redhat.com (Postfix) with ESMTPS id C6C4B8E7B7
-	for <ceph-devel@vger.kernel.org>; Mon, 30 Mar 2015 17:00:13 +0000 (UTC)
-Received: from redhat.com (ovpn-112-30.phx2.redhat.com [10.3.112.30])
-	by int-mx09.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t2UH0CA4029022
-	for <ceph-devel@vger.kernel.org>; Mon, 30 Mar 2015 13:00:13 -0400
+Received: from mail-by2on0090.outbound.protection.outlook.com ([207.46.100.90]:38401
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752752AbbC3Rg4 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Mar 2015 13:36:56 -0400
+In-Reply-To: <alpine.DEB.2.00.1503261646150.31431@cobra.newdream.net>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>, "james.page@ubuntu.com" <james.page@ubuntu.com>, "ceph-maintainers@ceph.com" <ceph-maintainers@ceph.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-The fix for #11177 (s/ceph.default.log/ceph.log/) uncovered a bunch of 
-errors that have been showing up in the cluster (like scrub errors) that 
-teuthology was missing.  Sam has squashed most of them already, but there 
-is at least one still outstanding.  This will push out the hammer release 
-until next Monday, most likely.
+Hi James,
+Could you please let us know if this is possible ?
+If so, any timeline would be very helpful to plan our product release.
 
-In the meantime, we can continue to validate the upgrade test results 
-and/or work on post-hammer stuff.
+Thanks & Regards
+Somnath
 
+
+-----Original Message-----
+From: Sage Weil [mailto:sage@newdream.net] 
+Sent: Thursday, March 26, 2015 4:47 PM
+To: james.page@ubuntu.com; ceph-maintainers@ceph.com
+Cc: Somnath Roy; ceph-devel@vger.kernel.org
+Subject: Re: tcmalloc issue
+
+Hi James,
+
+Is it possible to get tcmalloc in trusty updated?  See below.
+
+Thanks!
 sage
+
+On Thu, 26 Mar 2015, Somnath Roy wrote:
+
+> Sage,
+> Here is the tcmalloc issue I was talking in the performance meeting.
+> 
+> http://code.google.com/p/gperftools/issues/detail?id=585
+> 
+> The tcmalloc is consuming lot of cpus (and eventually slowing down the performance) with the following perf top  trace.
+> 
+> 25.73% libtcmalloc.so.4.1.2 [.] 
+> tcmalloc::CentralFreeList::FetchFromSpans()
+> 12.52% libtcmalloc.so.4.1.2 [.] 
+> tcmalloc::ThreadCache::ReleaseToCentralCache(tcmalloc::ThreadCache::Fr
+> eeList*, unsigned long, int) 11.62% libtcmalloc.so.4.1.2 [.] 
+> tcmalloc::CentralFreeList::ReleaseToSpans(void*)
+> 1.56% [kernel] [k] __copy_user_nocache 1.44% libtcmalloc.so.4.1.2 [.] 
+> tcmalloc::CentralFreeList::RemoveRange(void*, void*, int) 1.39% 
+> libtcmalloc.so.4.1.2 [.] 
+> tcmalloc::CentralFreeList::ReleaseListToSpans(void*)
+> 0.89% libtcmalloc.so.4.1.2 [.] operator new(unsigned long)
+> 
+> 
+> The TCMALLOC_MAX_TOTAL_THREAD_CACHE_BYTES is alleviating that but the env variable setting for this is a noop in the binary we are having in Ubuntu 14.04. It is fixed in gperftools-2.1.90 release.
+> See the following link.
+> 
+> http://code.google.com/p/gperftools/
+> 
+> We can request Ubuntu guys to incorporate this version or the latest tcmalloc version which is gperftools-2.4.
+> 
+> It will be really helpful if you can push them to incorporate this in 14.04 updates.
+> 
+> Thanks & Regards
+> Somnath
+> 
+> ________________________________
+> 
+> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> in the body of a message to majordomo@vger.kernel.org More majordomo 
+> info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
