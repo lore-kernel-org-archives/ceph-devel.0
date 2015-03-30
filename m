@@ -1,63 +1,59 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: Fedora 21 packages
-Date: Mon, 30 Mar 2015 10:54:56 -0500
-Message-ID: <551971D0.4070300@redhat.com>
-References: <CAMWPydSzi4E8YmwL+-0PFbnNTFvEJ3duVFigfmnrTWzwFQY9QQ@mail.gmail.com> <alpine.DEB.2.00.1503281034470.18934@cobra.newdream.net> <551874D0.1090900@redhat.com> <alpine.DEB.2.00.1503291644260.8441@cobra.newdream.net> <20150330151731.GA17645@host1.jankratochvil.net> <alpine.DEB.2.00.1503300832280.23387@cobra.newdream.net>
+From: Ken Dreyer <kdreyer@redhat.com>
+Subject: Re: Where is the systemd files?
+Date: Mon, 30 Mar 2015 09:56:20 -0600
+Message-ID: <55197224.8040907@redhat.com>
+References: <CAANLjFoVm7a7e2Mbx-OruUCaMSYpOFpES_N_vfUP9-AbS8vcwA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:38171 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:49369 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752783AbbC3PzA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 30 Mar 2015 11:55:00 -0400
-In-Reply-To: <alpine.DEB.2.00.1503300832280.23387@cobra.newdream.net>
+	id S1752845AbbC3P4W (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 30 Mar 2015 11:56:22 -0400
+In-Reply-To: <CAANLjFoVm7a7e2Mbx-OruUCaMSYpOFpES_N_vfUP9-AbS8vcwA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, Jan Kratochvil <jan.kratochvil@redhat.com>
-Cc: Brad Hubbard <bhubbard@redhat.com>, Mustafa Muhammad <mustafaa.alhamdaani@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Robert LeBlanc <robert@leblancnet.us>, Ceph-User <ceph-users@ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>, ceph-maintainers@ceph.com
 
-On 03/30/2015 10:34 AM, Sage Weil wrote:
-> On Mon, 30 Mar 2015, Jan Kratochvil wrote:
->> On Mon, 30 Mar 2015 01:45:55 +0200, Sage Weil wrote:
->>> These packages are from downstream Fedora.  What's missing are more up
->>> to date packages built and published at ceph.com.  The distro only ships
->>> one version of Ceph (the most recent LTS), while ceph.com gets everything
->>> and ceph-deploy let's you choose which stable series or development branch
->>> to install.  We're also not doing any testing on f21.
->>
->> That's not the Fedora way.  LTS-like packages are not for Fedora, those are
->> for CentOS/RHEL (but where Ceph LTS is already present).  Latest development
->> packages are for Fedora Rawhide.  And for other cases there is also
->> https://fedorahosted.org/copr .
->
-> In that case, I think the latest stable release (e.g., giant) should go in
-> Fedora.  Maybe we could put the latest development release in Rawhide, but
-> I'm nto sure.  They're really not intended for end users.
->
-> sage
->
+The systemd service unit files were imported into the tree, but they
+have not been added into any upstream packaging yet. See the discussion
+at https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=769593 or "git log
+-- systemd". I don't think there are any upstream tickets in Redmine for
+this yet.
 
-FWIW, I've got some of our performance gear on fedora 20 right now and 
-happily use the gitbuilder packages (though there are some annoying 
-dependency issues that require different excludes during the yum 
-installation).  It's incredibly convenient to be able to simply change 
-the repo and grab the newest build from different versions the same way 
-we do in Ubuntu.  Hopefully regardless of whatever other decisions are 
-made, we can retain this kind of workflow with the gitbuilder releases.
+Since Hammer is very close to being released, the service unit files
+will not be available in the Hammer packages. The earliest we would ship
+them would be the Infernalis release series.
 
-Mark
+I've recently added a "_with_systemd" conditional to the RPM spec
+(ceph.spec.in) in master in order to support socket directory creation
+using tmpfiles.d. That same "_with_systemd" logic could be extended to
+ship the service unit files on the relevant RPM-based platforms and ship
+SysV-init scripts on the older platforms (eg RHEL 6).
 
->>
->> I have filed for Fedora-shipped ceph-deploy:
->> 	https://bugzilla.redhat.com/show_bug.cgi?id=1207275
->>
->>
->> Jan
->>
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+I'm not quite sure how we ought to handle that on Debian-based packages.
+Is there a way to conditionalize the Debian packaging to "use systemd on
+some versions of the distro, and use upstart on other versions" ?
+
+- Ken
+
+On 03/26/2015 11:13 PM, Robert LeBlanc wrote:
+> I understand that Giant should have systemd service files, but I don't
+> see them in the CentOS 7 packages.
+> 
+> https://github.com/ceph/ceph/tree/giant/systemd
+> 
+> [ulhglive-root@mon1 systemd]# rpm -qa | grep --color=always ceph
+> ceph-common-0.93-0.el7.centos.x86_64
+> python-cephfs-0.93-0.el7.centos.x86_64
+> libcephfs1-0.93-0.el7.centos.x86_64
+> ceph-0.93-0.el7.centos.x86_64
+> ceph-deploy-1.5.22-0.noarch
+> [ulhglive-root@mon1 systemd]# for i in $(rpm -qa | grep ceph); do rpm
+> -ql $i | grep -i --color=always systemd; done
+> [nothing returned]
+> 
+> Thanks,
+> Robert LeBlanc
+
