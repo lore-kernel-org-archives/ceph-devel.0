@@ -1,68 +1,77 @@
-From: Tanay Ganguly <tanayganguly-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: How to test rbd's Copy-on-Read Feature
-Date: Mon, 30 Mar 2015 15:30:11 +0530
-Message-ID: <CAGRVuSspg3tPgpHVFXL+NexEvNFYzr-VONAe44epC4XhsxgqDA@mail.gmail.com>
+From: Ning Yao <zay11022@gmail.com>
+Subject: Re: RBD Discard issue for Cache_tier
+Date: Mon, 30 Mar 2015 22:28:36 +0800
+Message-ID: <CALZt5jxgBZCGiTcYqY-Ec=15YBx9W74SMb9hK+DjW9eR0gJx3w@mail.gmail.com>
+References: <CALZt5jwGf2BADGSRYJY-9MB5pWHSKFOpWdjXZAZroWbwAuO+Fg@mail.gmail.com>
+	<alpine.DEB.2.00.1503270643520.18934@cobra.newdream.net>
+	<06E7D85B3BA36C4DB207FEDE871C53489C45EC@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0284354156=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
-
---===============0284354156==
-Content-Type: multipart/alternative; boundary=001a1140a9d4396f3a05127e8c90
-
---001a1140a9d4396f3a05127e8c90
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-wi0-f174.google.com ([209.85.212.174]:33900 "EHLO
+	mail-wi0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750938AbbC3O2h convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Mar 2015 10:28:37 -0400
+Received: by wibg7 with SMTP id g7so93261949wib.1
+        for <ceph-devel@vger.kernel.org>; Mon, 30 Mar 2015 07:28:36 -0700 (PDT)
+In-Reply-To: <06E7D85B3BA36C4DB207FEDE871C53489C45EC@SHSMSX101.ccr.corp.intel.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
+Cc: Sage Weil <sage@newdream.net>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hello All,
+Sounds much easier, if we use this.  Maybe snapshot also got this
+problem, I may not want to promote snap object when we promote its
+head version. Now the logic seems that we need to promote all snap
+objects so that we can handle rollback logic in Cache pool. While can
+we also use the proxy rollbacks so that we do not need to promote all
+snap object if we just want the head (and actually most cases are)
+Regards
+Ning Yao
 
-I went through the below link and checked that Copy-on-Read is currently
-supported only on librbd and not on rbd kernel module.
 
-https://wiki.ceph.com/Planning/Blueprints/Infernalis/rbd%3A_kernel_rbd_client_supports_copy-on-read
-
-Can someone please let me know how to test Copy-on-Read using librbd ?
-What should be the IO pattern to see the performance changes.
-
-Any pointers appreciated.
-
-Thank You,
-Tanay
-
---001a1140a9d4396f3a05127e8c90
-Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr"><div><div><div><div><div>Hello All,<br><br></div>I went th=
-rough the below link and checked that Copy-on-Read is currently supported o=
-nly on librbd and not on rbd kernel module.<br><br><a href=3D"https://wiki.=
-ceph.com/Planning/Blueprints/Infernalis/rbd%3A_kernel_rbd_client_supports_c=
-opy-on-read">https://wiki.ceph.com/Planning/Blueprints/Infernalis/rbd%3A_ke=
-rnel_rbd_client_supports_copy-on-read</a><br><br></div>Can someone please l=
-et me know how to test Copy-on-Read using librbd ?<br></div><div>What shoul=
-d be the IO pattern to see the performance changes.<br></div><div><br></div=
->Any pointers appreciated.<br><br></div>Thank You,<br></div>Tanay<br></div>
-
---001a1140a9d4396f3a05127e8c90--
-
---===============0284354156==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============0284354156==--
+2015-03-30 15:05 GMT+08:00 Wang, Zhiqiang <zhiqiang.wang@intel.com>:
+> How about handling the DELETE op in the cache tier like this:
+> 1) If the object is in the cache tier, we delete it in cache tier, replace it with a whiteout, and later flush and evict it.
+> 2) If the object is not in the cache tier, we always proxy the delete op. This can be done after the proxy write code is merged into master.
+>
+> BTW, for the skipping promotion, I proposed a PR to add a 'SKIP_PROMOTE' flag in the OpRequest, like we did for the 'FORCE_PROMOTE'. This can avoid the extra checks when handling the op. The PR is at https://github.com/ceph/ceph/pull/3975
+>
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
+> Sent: Friday, March 27, 2015 9:51 PM
+> To: Ning Yao
+> Cc: ceph-devel
+> Subject: Re: RBD Discard issue for Cache_tier
+>
+> On Fri, 27 Mar 2015, Ning Yao wrote:
+>> Hi all,
+>>
+>> I use the kernel rbd with kernel 3.18 and open the discard option.
+>> When I use the cache tier mode, the performance is ruined by
+>> CEPH_OSD_OP_DELETE.
+>>
+>> Since some one may delete a large file which is rarely used, the file
+>> is always not in the Cache pool. So it will promote the object first
+>> from the cold pool and then replace the object with an empty object.
+>> After the empty object is flushed and evicted, the content is
+>> eventually deleted.
+>>
+>> But a large file causes lots of object promotion so that the Cache
+>> pool's bandwidth is saturated. We might not need to promote a delete
+>> the object when Calling can_skip_promote() and send a
+>> CEPH_OSD_OP_DELETE op to cold pool from the Objecter interface, which
+>> would be much better when deleting file occurs. Is that possible?
+>
+> Yes.  The trick right now is that the DELETE op is defined to return ENOENT if the object doesn't exist, and the code isn't smart enough to skip the promotion.  I think there are two options:
+>
+> 1) Special case deletion code in the promotion code that skips most of the work.  Unfortunately I think this will be fragile and annoying to maintain.
+>
+> 2) Set a flag on the client op indicating that it can ignore the delete 'failure' and skip promotion. There is already a hook for this
+> (can_skip_promote) in ReplicatedPG, although it's not quite right: the 'FAILOK' flag means that we should proceed with the operation, but the per-op return code is still supposed to be -EINVAL to the client and we don't do that.  I think we actually want an 'idempotent' flag/arg for delete itself.  There's plenty of room in the ceph_osd_op args to add this and it should be easy to do in a backwards compatible way..
+>
+> sage
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
