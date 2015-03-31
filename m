@@ -1,57 +1,65 @@
-From: kernel neophyte <neophyte.hacker001@gmail.com>
-Subject: Re: Fio noshare
-Date: Tue, 31 Mar 2015 12:05:42 -0700
-Message-ID: <CAFkUHxfMXEAVkMMXQABx403-a-7z2HbynVyoX1hU0B2bDUY1Lg@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Fio noshare
+Date: Tue, 31 Mar 2015 19:32:14 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CB73F9@SACMBXIP01.sdcorp.global.sandisk.com>
 References: <CAFkUHxcy2tJsppddLLqVfdGWa9J28dKGH77s1E9RXEspeKU4YQ@mail.gmail.com>
 	<755F6B91B3BE364F9BCA11EA3F9E0C6F28CB73BB@SACMBXIP01.sdcorp.global.sandisk.com>
+ <CAFkUHxfMXEAVkMMXQABx403-a-7z2HbynVyoX1hU0B2bDUY1Lg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f172.google.com ([209.85.192.172]:33717 "EHLO
-	mail-pd0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751384AbbCaTFm convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 31 Mar 2015 15:05:42 -0400
-Received: by pdrw1 with SMTP id w1so21321446pdr.0
-        for <ceph-devel@vger.kernel.org>; Tue, 31 Mar 2015 12:05:42 -0700 (PDT)
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CB73BB@SACMBXIP01.sdcorp.global.sandisk.com>
+Received: from mail-by2on0086.outbound.protection.outlook.com ([207.46.100.86]:2400
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751325AbbCaTcT (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 31 Mar 2015 15:32:19 -0400
+In-Reply-To: <CAFkUHxfMXEAVkMMXQABx403-a-7z2HbynVyoX1hU0B2bDUY1Lg@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
+To: kernel neophyte <neophyte.hacker001@gmail.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, Mar 31, 2015 at 11:56 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
-> It's a rbd mapping option, I don't think you can specify it from fio_rbd.
-
-Thanks for confirming Somnath.
-
-> Also, I think in case fio rbd each fio job will pick up its own librbd/librados instances, so, you don't need this 'noshare' option.
->
-
-Thats what I thought, but when run fio with ioengine rbd I do not see
-any improvement. If I do the same with ioengine=libaio and have my rbd
-mapped with noshare then I see lots of improvement.
-
--Neo
-
-> Thanks & Regards
-> Somnath
->
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of kernel neophyte
-> Sent: Tuesday, March 31, 2015 11:44 AM
-> To: ceph-devel@vger.kernel.org
-> Subject: Fio noshare
->
-> Hi,
->
-> Is there any way to enable noshare while running fio with ioengine=rbd ?
->
-> -Neo
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-> ________________________________
->
-> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
->
+VGhlcmUgd2FzIGEgcmJkIGNhY2hpbmcgaXNzdWUgZWFybGllciwgdGhhdCBpcyBmaXhlZCBpbiBH
+aWFudCBvbndhcmRzLiBIb3BlIHlvdSBhcmUgdHJ5aW5nIHdpdGggdGhlIGxhdGVzdCBvbmUuDQpB
+bHNvLCB0cnkgd2l0aCAnbHNvZicgdG8gZGV0ZXJtaW5lIGhvdyBtYW55IGxpYnJhZG9zL2xpYnJi
+ZCBpbnN0YW5jZXMgZmlvX3JiZCBpcyBsb2FkaW5nLg0KQ291bGQgeW91IHNoYXJlIGEgYml0IG1v
+cmUgYWJvdXQgeW91ciBjb25maWcgKHBvb2wsIGltYWdlcyBldGMuKSBhbmQgdGhlIGZpb19yYmQg
+c2NyaXB0ID8NCkFsc28sIGhvdyBhcmUgeW91IHJ1bm5pbmcgeW91ciB0ZXN0cyA/DQoNClRoYW5r
+cyAmIFJlZ2FyZHMNClNvbW5hdGgNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206
+IGtlcm5lbCBuZW9waHl0ZSBbbWFpbHRvOm5lb3BoeXRlLmhhY2tlcjAwMUBnbWFpbC5jb21dIA0K
+U2VudDogVHVlc2RheSwgTWFyY2ggMzEsIDIwMTUgMTI6MDYgUE0NClRvOiBTb21uYXRoIFJveQ0K
+Q2M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0OiBSZTogRmlvIG5vc2hhcmUN
+Cg0KT24gVHVlLCBNYXIgMzEsIDIwMTUgYXQgMTE6NTYgQU0sIFNvbW5hdGggUm95IDxTb21uYXRo
+LlJveUBzYW5kaXNrLmNvbT4gd3JvdGU6DQo+IEl0J3MgYSByYmQgbWFwcGluZyBvcHRpb24sIEkg
+ZG9uJ3QgdGhpbmsgeW91IGNhbiBzcGVjaWZ5IGl0IGZyb20gZmlvX3JiZC4NCg0KVGhhbmtzIGZv
+ciBjb25maXJtaW5nIFNvbW5hdGguDQoNCj4gQWxzbywgSSB0aGluayBpbiBjYXNlIGZpbyByYmQg
+ZWFjaCBmaW8gam9iIHdpbGwgcGljayB1cCBpdHMgb3duIGxpYnJiZC9saWJyYWRvcyBpbnN0YW5j
+ZXMsIHNvLCB5b3UgZG9uJ3QgbmVlZCB0aGlzICdub3NoYXJlJyBvcHRpb24uDQo+DQoNClRoYXRz
+IHdoYXQgSSB0aG91Z2h0LCBidXQgd2hlbiBydW4gZmlvIHdpdGggaW9lbmdpbmUgcmJkIEkgZG8g
+bm90IHNlZSBhbnkgaW1wcm92ZW1lbnQuIElmIEkgZG8gdGhlIHNhbWUgd2l0aCBpb2VuZ2luZT1s
+aWJhaW8gYW5kIGhhdmUgbXkgcmJkIG1hcHBlZCB3aXRoIG5vc2hhcmUgdGhlbiBJIHNlZSBsb3Rz
+IG9mIGltcHJvdmVtZW50Lg0KDQotTmVvDQoNCj4gVGhhbmtzICYgUmVnYXJkcw0KPiBTb21uYXRo
+DQo+DQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IGNlcGgtZGV2ZWwtb3du
+ZXJAdmdlci5rZXJuZWwub3JnIA0KPiBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJu
+ZWwub3JnXSBPbiBCZWhhbGYgT2Yga2VybmVsIG5lb3BoeXRlDQo+IFNlbnQ6IFR1ZXNkYXksIE1h
+cmNoIDMxLCAyMDE1IDExOjQ0IEFNDQo+IFRvOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0K
+PiBTdWJqZWN0OiBGaW8gbm9zaGFyZQ0KPg0KPiBIaSwNCj4NCj4gSXMgdGhlcmUgYW55IHdheSB0
+byBlbmFibGUgbm9zaGFyZSB3aGlsZSBydW5uaW5nIGZpbyB3aXRoIGlvZW5naW5lPXJiZCA/DQo+
+DQo+IC1OZW8NCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhl
+IGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIA0KPiBpbiB0aGUgYm9keSBvZiBhIG1lc3Nh
+Z2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyANCj4gaW5mbyBh
+dCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+DQo+IF9fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fDQo+DQo+IFBMRUFTRSBOT1RFOiBUaGUgaW5mb3Jt
+YXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5k
+ZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQg
+YWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQg
+cmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVk
+IHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9u
+LCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHBy
+b2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJv
+ciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNo
+b3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2Yg
+dGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBl
+bGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCj4NCg==
