@@ -1,92 +1,183 @@
-From: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
-Subject: RE: RBD Discard issue for Cache_tier
-Date: Tue, 31 Mar 2015 03:03:07 +0000
-Message-ID: <06E7D85B3BA36C4DB207FEDE871C53489C67F8@SHSMSX101.ccr.corp.intel.com>
-References: <CALZt5jwGf2BADGSRYJY-9MB5pWHSKFOpWdjXZAZroWbwAuO+Fg@mail.gmail.com>
-	<alpine.DEB.2.00.1503270643520.18934@cobra.newdream.net>
-	<06E7D85B3BA36C4DB207FEDE871C53489C45EC@SHSMSX101.ccr.corp.intel.com>
- <CALZt5jxgBZCGiTcYqY-Ec=15YBx9W74SMb9hK+DjW9eR0gJx3w@mail.gmail.com>
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: [ceph-users] CephFS Slow writes with 1MB files
+Date: Tue, 31 Mar 2015 11:59:43 +0800
+Message-ID: <CAAM7YAkwtFLnFea3fNT_CaeA2R+_xdZONVN_s21k7_Rbd27H+Q@mail.gmail.com>
+References: <CAMzumdZo2jdHEnB55g1XOVTxc4JLq-+6JFFZSwjgox=9LOUdZA@mail.gmail.com>
+	<CAMzumdbezcb-p1_MpcSL-h8tTR0RKATt93Om6NPejtn1G6yPeQ@mail.gmail.com>
+	<CAC6JEv-G_s3gRNmn3MHPiuFP6ODiOgvhX_J02KEo=Dd0X-JLGg@mail.gmail.com>
+	<CAMzumdb8S77aYqNUyhwzZDCGp6KBFc8OueZ0pCKrkSP=hDNFPg@mail.gmail.com>
+	<CAC6JEv-4D2kF7rrnGMncbE-_63+hdDzecqpB+HrMOKp1YGwv_w@mail.gmail.com>
+	<CAMzumda7VserizM5PEoT8mwYnTHeE4CFiUiLjnjqN2xXaeNVQQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:35405 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751883AbbCaDDQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 30 Mar 2015 23:03:16 -0400
-In-Reply-To: <CALZt5jxgBZCGiTcYqY-Ec=15YBx9W74SMb9hK+DjW9eR0gJx3w@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-la0-f48.google.com ([209.85.215.48]:34117 "EHLO
+	mail-la0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751187AbbCaD7p (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Mar 2015 23:59:45 -0400
+Received: by lagg8 with SMTP id g8so3436521lag.1
+        for <ceph-devel@vger.kernel.org>; Mon, 30 Mar 2015 20:59:43 -0700 (PDT)
+In-Reply-To: <CAMzumda7VserizM5PEoT8mwYnTHeE4CFiUiLjnjqN2xXaeNVQQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ning Yao <zay11022@gmail.com>
-Cc: Sage Weil <sage@newdream.net>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Barclay Jameson <almightybeeij@gmail.com>
+Cc: Gregory Farnum <greg@gregs42.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
 
-WWVwLCBwcm94eSB3cml0ZSBjYW4gYWxzbyBoZWxwIGluIHRoZSByb2xsYmFjayBjYXNlLiBJZiB0
-aGUgaGVhZCBvYmplY3QgaXMgbm90IGluIGNhY2hlIHRpZXIsIGl0IGNhbiBiZSBwcm94aWVkIHRv
-IHRoZSBiYXNlIHRpZXIuIEJ1dCBpZiB0aGUgaGVhZCBvYmplY3QgaXMgYWxyZWFkeSB1bmRlciBw
-cm9tb3Rpbmcgb3IgaXQncyBhbHJlYWR5IGluIHRoZSBjYWNoZSB0aWVyLCB3ZSBzdGlsbCBuZWVk
-IHRvIGZvcmNlIHByb21vdGUgdGhlIHNuYXBzaG90IG9iamVjdCB3aG8gd2Ugd2FudCB0byByb2xs
-YmFjayB0by4NCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IE5pbmcgWWFvIFtt
-YWlsdG86emF5MTEwMjJAZ21haWwuY29tXSANClNlbnQ6IE1vbmRheSwgTWFyY2ggMzAsIDIwMTUg
-MTA6MjkgUE0NClRvOiBXYW5nLCBaaGlxaWFuZw0KQ2M6IFNhZ2UgV2VpbDsgY2VwaC1kZXZlbA0K
-U3ViamVjdDogUmU6IFJCRCBEaXNjYXJkIGlzc3VlIGZvciBDYWNoZV90aWVyDQoNClNvdW5kcyBt
-dWNoIGVhc2llciwgaWYgd2UgdXNlIHRoaXMuICBNYXliZSBzbmFwc2hvdCBhbHNvIGdvdCB0aGlz
-IHByb2JsZW0sIEkgbWF5IG5vdCB3YW50IHRvIHByb21vdGUgc25hcCBvYmplY3Qgd2hlbiB3ZSBw
-cm9tb3RlIGl0cyBoZWFkIHZlcnNpb24uIE5vdyB0aGUgbG9naWMgc2VlbXMgdGhhdCB3ZSBuZWVk
-IHRvIHByb21vdGUgYWxsIHNuYXAgb2JqZWN0cyBzbyB0aGF0IHdlIGNhbiBoYW5kbGUgcm9sbGJh
-Y2sgbG9naWMgaW4gQ2FjaGUgcG9vbC4gV2hpbGUgY2FuIHdlIGFsc28gdXNlIHRoZSBwcm94eSBy
-b2xsYmFja3Mgc28gdGhhdCB3ZSBkbyBub3QgbmVlZCB0byBwcm9tb3RlIGFsbCBzbmFwIG9iamVj
-dCBpZiB3ZSBqdXN0IHdhbnQgdGhlIGhlYWQgKGFuZCBhY3R1YWxseSBtb3N0IGNhc2VzIGFyZSkg
-UmVnYXJkcyBOaW5nIFlhbw0KDQoNCjIwMTUtMDMtMzAgMTU6MDUgR01UKzA4OjAwIFdhbmcsIFpo
-aXFpYW5nIDx6aGlxaWFuZy53YW5nQGludGVsLmNvbT46DQo+IEhvdyBhYm91dCBoYW5kbGluZyB0
-aGUgREVMRVRFIG9wIGluIHRoZSBjYWNoZSB0aWVyIGxpa2UgdGhpczoNCj4gMSkgSWYgdGhlIG9i
-amVjdCBpcyBpbiB0aGUgY2FjaGUgdGllciwgd2UgZGVsZXRlIGl0IGluIGNhY2hlIHRpZXIsIHJl
-cGxhY2UgaXQgd2l0aCBhIHdoaXRlb3V0LCBhbmQgbGF0ZXIgZmx1c2ggYW5kIGV2aWN0IGl0Lg0K
-PiAyKSBJZiB0aGUgb2JqZWN0IGlzIG5vdCBpbiB0aGUgY2FjaGUgdGllciwgd2UgYWx3YXlzIHBy
-b3h5IHRoZSBkZWxldGUgb3AuIFRoaXMgY2FuIGJlIGRvbmUgYWZ0ZXIgdGhlIHByb3h5IHdyaXRl
-IGNvZGUgaXMgbWVyZ2VkIGludG8gbWFzdGVyLg0KPg0KPiBCVFcsIGZvciB0aGUgc2tpcHBpbmcg
-cHJvbW90aW9uLCBJIHByb3Bvc2VkIGEgUFIgdG8gYWRkIGEgDQo+ICdTS0lQX1BST01PVEUnIGZs
-YWcgaW4gdGhlIE9wUmVxdWVzdCwgbGlrZSB3ZSBkaWQgZm9yIHRoZSANCj4gJ0ZPUkNFX1BST01P
-VEUnLiBUaGlzIGNhbiBhdm9pZCB0aGUgZXh0cmEgY2hlY2tzIHdoZW4gaGFuZGxpbmcgdGhlIG9w
-LiANCj4gVGhlIFBSIGlzIGF0IGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgvcHVsbC8zOTc1
-DQo+DQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IGNlcGgtZGV2ZWwtb3du
-ZXJAdmdlci5rZXJuZWwub3JnIA0KPiBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJu
-ZWwub3JnXSBPbiBCZWhhbGYgT2YgU2FnZSBXZWlsDQo+IFNlbnQ6IEZyaWRheSwgTWFyY2ggMjcs
-IDIwMTUgOTo1MSBQTQ0KPiBUbzogTmluZyBZYW8NCj4gQ2M6IGNlcGgtZGV2ZWwNCj4gU3ViamVj
-dDogUmU6IFJCRCBEaXNjYXJkIGlzc3VlIGZvciBDYWNoZV90aWVyDQo+DQo+IE9uIEZyaSwgMjcg
-TWFyIDIwMTUsIE5pbmcgWWFvIHdyb3RlOg0KPj4gSGkgYWxsLA0KPj4NCj4+IEkgdXNlIHRoZSBr
-ZXJuZWwgcmJkIHdpdGgga2VybmVsIDMuMTggYW5kIG9wZW4gdGhlIGRpc2NhcmQgb3B0aW9uLg0K
-Pj4gV2hlbiBJIHVzZSB0aGUgY2FjaGUgdGllciBtb2RlLCB0aGUgcGVyZm9ybWFuY2UgaXMgcnVp
-bmVkIGJ5IA0KPj4gQ0VQSF9PU0RfT1BfREVMRVRFLg0KPj4NCj4+IFNpbmNlIHNvbWUgb25lIG1h
-eSBkZWxldGUgYSBsYXJnZSBmaWxlIHdoaWNoIGlzIHJhcmVseSB1c2VkLCB0aGUgZmlsZSANCj4+
-IGlzIGFsd2F5cyBub3QgaW4gdGhlIENhY2hlIHBvb2wuIFNvIGl0IHdpbGwgcHJvbW90ZSB0aGUg
-b2JqZWN0IGZpcnN0IA0KPj4gZnJvbSB0aGUgY29sZCBwb29sIGFuZCB0aGVuIHJlcGxhY2UgdGhl
-IG9iamVjdCB3aXRoIGFuIGVtcHR5IG9iamVjdC4NCj4+IEFmdGVyIHRoZSBlbXB0eSBvYmplY3Qg
-aXMgZmx1c2hlZCBhbmQgZXZpY3RlZCwgdGhlIGNvbnRlbnQgaXMgDQo+PiBldmVudHVhbGx5IGRl
-bGV0ZWQuDQo+Pg0KPj4gQnV0IGEgbGFyZ2UgZmlsZSBjYXVzZXMgbG90cyBvZiBvYmplY3QgcHJv
-bW90aW9uIHNvIHRoYXQgdGhlIENhY2hlIA0KPj4gcG9vbCdzIGJhbmR3aWR0aCBpcyBzYXR1cmF0
-ZWQuIFdlIG1pZ2h0IG5vdCBuZWVkIHRvIHByb21vdGUgYSBkZWxldGUgDQo+PiB0aGUgb2JqZWN0
-IHdoZW4gQ2FsbGluZyBjYW5fc2tpcF9wcm9tb3RlKCkgYW5kIHNlbmQgYSANCj4+IENFUEhfT1NE
-X09QX0RFTEVURSBvcCB0byBjb2xkIHBvb2wgZnJvbSB0aGUgT2JqZWN0ZXIgaW50ZXJmYWNlLCB3
-aGljaCANCj4+IHdvdWxkIGJlIG11Y2ggYmV0dGVyIHdoZW4gZGVsZXRpbmcgZmlsZSBvY2N1cnMu
-IElzIHRoYXQgcG9zc2libGU/DQo+DQo+IFllcy4gIFRoZSB0cmljayByaWdodCBub3cgaXMgdGhh
-dCB0aGUgREVMRVRFIG9wIGlzIGRlZmluZWQgdG8gcmV0dXJuIEVOT0VOVCBpZiB0aGUgb2JqZWN0
-IGRvZXNuJ3QgZXhpc3QsIGFuZCB0aGUgY29kZSBpc24ndCBzbWFydCBlbm91Z2ggdG8gc2tpcCB0
-aGUgcHJvbW90aW9uLiAgSSB0aGluayB0aGVyZSBhcmUgdHdvIG9wdGlvbnM6DQo+DQo+IDEpIFNw
-ZWNpYWwgY2FzZSBkZWxldGlvbiBjb2RlIGluIHRoZSBwcm9tb3Rpb24gY29kZSB0aGF0IHNraXBz
-IG1vc3Qgb2YgdGhlIHdvcmsuICBVbmZvcnR1bmF0ZWx5IEkgdGhpbmsgdGhpcyB3aWxsIGJlIGZy
-YWdpbGUgYW5kIGFubm95aW5nIHRvIG1haW50YWluLg0KPg0KPiAyKSBTZXQgYSBmbGFnIG9uIHRo
-ZSBjbGllbnQgb3AgaW5kaWNhdGluZyB0aGF0IGl0IGNhbiBpZ25vcmUgdGhlIA0KPiBkZWxldGUg
-J2ZhaWx1cmUnIGFuZCBza2lwIHByb21vdGlvbi4gVGhlcmUgaXMgYWxyZWFkeSBhIGhvb2sgZm9y
-IHRoaXMNCj4gKGNhbl9za2lwX3Byb21vdGUpIGluIFJlcGxpY2F0ZWRQRywgYWx0aG91Z2ggaXQn
-cyBub3QgcXVpdGUgcmlnaHQ6IHRoZSAnRkFJTE9LJyBmbGFnIG1lYW5zIHRoYXQgd2Ugc2hvdWxk
-IHByb2NlZWQgd2l0aCB0aGUgb3BlcmF0aW9uLCBidXQgdGhlIHBlci1vcCByZXR1cm4gY29kZSBp
-cyBzdGlsbCBzdXBwb3NlZCB0byBiZSAtRUlOVkFMIHRvIHRoZSBjbGllbnQgYW5kIHdlIGRvbid0
-IGRvIHRoYXQuICBJIHRoaW5rIHdlIGFjdHVhbGx5IHdhbnQgYW4gJ2lkZW1wb3RlbnQnIGZsYWcv
-YXJnIGZvciBkZWxldGUgaXRzZWxmLiAgVGhlcmUncyBwbGVudHkgb2Ygcm9vbSBpbiB0aGUgY2Vw
-aF9vc2Rfb3AgYXJncyB0byBhZGQgdGhpcyBhbmQgaXQgc2hvdWxkIGJlIGVhc3kgdG8gZG8gaW4g
-YSBiYWNrd2FyZHMgY29tcGF0aWJsZSB3YXkuLg0KPg0KPiBzYWdlDQo+DQo+IC0tDQo+IFRvIHVu
-c3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBo
-LWRldmVsIiANCj4gaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtl
-cm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gDQo+IGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5v
-cmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
+On Sun, Mar 29, 2015 at 1:12 AM, Barclay Jameson
+<almightybeeij@gmail.com> wrote:
+> I redid my entire Ceph build going back to to CentOS 7 hoping to the
+> get the same performance I did last time.
+> The rados bench test was the best I have ever had with a time of 740
+> MB wr and 1300 MB rd. This was even better than the first rados bench
+> test that had performance equal to PanFS. I find that this does not
+> translate to my CephFS. Even with the following tweaking it still at
+> least twice as slow as PanFS and my first *Magical* build (that had
+> absolutely no tweaking):
+>
+> OSD
+>  osd_op_treads 8
+>  /sys/block/sd*/queue/nr_requests 4096
+>  /sys/block/sd*/queue/read_ahead_kb 4096
+>
+> Client
+>  rsize=16777216
+>  readdir_max_bytes=16777216
+>  readdir_max_entries=16777216
+>
+> ~160 mins to copy 100000 (1MB) files for CephFS vs ~50 mins for PanFS.
+> Throughput on CephFS is about 10MB/s vs PanFS 30 MB/s.
+>
+> Strange thing is none of the resources are taxed.
+> CPU, ram, network, disks, are not even close to being taxed on either
+> the client,mon/mds, or the osd nodes.
+> The PanFS client node was a 10Gb network the same as the CephFS client
+> but you can see the huge difference in speed.
+>
+> As per Gregs questions before:
+> There is only one client reading and writing (time cp Small1/*
+> Small2/.) but three clients have cephfs mounted, although they aren't
+> doing anything on the filesystem.
+>
+> I have done another test where I stream data info a file as fast as
+> the processor can put it there.
+> (for (i=0; i < 1000000001; i++){ fprintf (out_file, "I is : %d\n",i);}
+> ) and it is faster than the PanFS. CephFS 16GB in 105 seconds with the
+> above tuning vs 130 seconds for PanFS. Without the tuning it takes 230
+> seconds for CephFS although the first build did it in 130 seconds
+> without any tuning.
+>
+> This leads me to believe the bottleneck is the mds. Does anybody have
+> any thoughts on this?
+> Are there any tuning parameters that I would need to speed up the mds?
+
+could you enable mds debugging for a few seconds (ceph daemon mds.x
+config set debug_mds 10; sleep 10; ceph daemon mds.x config set
+debug_mds 0). and upload /var/log/ceph/mds.x.log to somewhere.
+
+Regards
+Yan, Zheng
+
+>
+> On Fri, Mar 27, 2015 at 4:50 PM, Gregory Farnum <greg@gregs42.com> wrote:
+>> On Fri, Mar 27, 2015 at 2:46 PM, Barclay Jameson
+>> <almightybeeij@gmail.com> wrote:
+>>> Yes it's the exact same hardware except for the MDS server (although I
+>>> tried using the MDS on the old node).
+>>> I have not tried moving the MON back to the old node.
+>>>
+>>> My default cache size is "mds cache size = 10000000"
+>>> The OSDs (3 of them) have 16 Disks with 4 SSD Journal Disks.
+>>> I created 2048 for data and metadata:
+>>> ceph osd pool create cephfs_data 2048 2048
+>>> ceph osd pool create cephfs_metadata 2048 2048
+>>>
+>>>
+>>> To your point on clients competing against each other... how would I check that?
+>>
+>> Do you have multiple clients mounted? Are they both accessing files in
+>> the directory(ies) you're testing? Were they accessing the same
+>> pattern of files for the old cluster?
+>>
+>> If you happen to be running a hammer rc or something pretty new you
+>> can use the MDS admin socket to explore a bit what client sessions
+>> there are and what they have permissions on and check; otherwise
+>> you'll have to figure it out from the client side.
+>> -Greg
+>>
+>>>
+>>> Thanks for the input!
+>>>
+>>>
+>>> On Fri, Mar 27, 2015 at 3:04 PM, Gregory Farnum <greg@gregs42.com> wrote:
+>>>> So this is exactly the same test you ran previously, but now it's on
+>>>> faster hardware and the test is slower?
+>>>>
+>>>> Do you have more data in the test cluster? One obvious possibility is
+>>>> that previously you were working entirely in the MDS' cache, but now
+>>>> you've got more dentries and so it's kicking data out to RADOS and
+>>>> then reading it back in.
+>>>>
+>>>> If you've got the memory (you appear to) you can pump up the "mds
+>>>> cache size" config option quite dramatically from it's default 100000.
+>>>>
+>>>> Other things to check are that you've got an appropriately-sized
+>>>> metadata pool, that you've not got clients competing against each
+>>>> other inappropriately, etc.
+>>>> -Greg
+>>>>
+>>>> On Fri, Mar 27, 2015 at 9:47 AM, Barclay Jameson
+>>>> <almightybeeij@gmail.com> wrote:
+>>>>> Opps I should have said that I am not just writing the data but copying it :
+>>>>>
+>>>>> time cp Small1/* Small2/*
+>>>>>
+>>>>> Thanks,
+>>>>>
+>>>>> BJ
+>>>>>
+>>>>> On Fri, Mar 27, 2015 at 11:40 AM, Barclay Jameson
+>>>>> <almightybeeij@gmail.com> wrote:
+>>>>>> I did a Ceph cluster install 2 weeks ago where I was getting great
+>>>>>> performance (~= PanFS) where I could write 100,000 1MB files in 61
+>>>>>> Mins (Took PanFS 59 Mins). I thought I could increase the performance
+>>>>>> by adding a better MDS server so I redid the entire build.
+>>>>>>
+>>>>>> Now it takes 4 times as long to write the same data as it did before.
+>>>>>> The only thing that changed was the MDS server. (I even tried moving
+>>>>>> the MDS back on the old slower node and the performance was the same.)
+>>>>>>
+>>>>>> The first install was on CentOS 7. I tried going down to CentOS 6.6
+>>>>>> and it's the same results.
+>>>>>> I use the same scripts to install the OSDs (which I created because I
+>>>>>> can never get ceph-deploy to behave correctly. Although, I did use
+>>>>>> ceph-deploy to create the MDS and MON and initial cluster creation.)
+>>>>>>
+>>>>>> I use btrfs on the OSDS as I can get 734 MB/s write and 1100 MB/s read
+>>>>>> with rados bench -p cephfs_data 500 write --no-cleanup && rados bench
+>>>>>> -p cephfs_data 500 seq (xfs was 734 MB/s write but only 200 MB/s read)
+>>>>>>
+>>>>>> Could anybody think of a reason as to why I am now getting a huge regression.
+>>>>>>
+>>>>>> Hardware Setup:
+>>>>>> [OSDs]
+>>>>>> 64 GB 2133 MHz
+>>>>>> Dual Proc E5-2630 v3 @ 2.40GHz (16 Cores)
+>>>>>> 40Gb Mellanox NIC
+>>>>>>
+>>>>>> [MDS/MON new]
+>>>>>> 128 GB 2133 MHz
+>>>>>> Dual Proc E5-2650 v3 @ 2.30GHz (20 Cores)
+>>>>>> 40Gb Mellanox NIC
+>>>>>>
+>>>>>> [MDS/MON old]
+>>>>>> 32 GB 800 MHz
+>>>>>> Dual Proc E5472  @ 3.00GHz (8 Cores)
+>>>>>> 10Gb Intel NIC
+>>>>> _______________________________________________
+>>>>> ceph-users mailing list
+>>>>> ceph-users@lists.ceph.com
+>>>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
