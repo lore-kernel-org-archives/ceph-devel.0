@@ -1,45 +1,57 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Fio noshare
-Date: Tue, 31 Mar 2015 18:56:16 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CB73BB@SACMBXIP01.sdcorp.global.sandisk.com>
+From: kernel neophyte <neophyte.hacker001@gmail.com>
+Subject: Re: Fio noshare
+Date: Tue, 31 Mar 2015 12:05:42 -0700
+Message-ID: <CAFkUHxfMXEAVkMMXQABx403-a-7z2HbynVyoX1hU0B2bDUY1Lg@mail.gmail.com>
 References: <CAFkUHxcy2tJsppddLLqVfdGWa9J28dKGH77s1E9RXEspeKU4YQ@mail.gmail.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F28CB73BB@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1bon0055.outbound.protection.outlook.com ([157.56.111.55]:23516
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751097AbbCaS4Z (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 31 Mar 2015 14:56:25 -0400
-In-Reply-To: <CAFkUHxcy2tJsppddLLqVfdGWa9J28dKGH77s1E9RXEspeKU4YQ@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-pd0-f172.google.com ([209.85.192.172]:33717 "EHLO
+	mail-pd0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751384AbbCaTFm convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 31 Mar 2015 15:05:42 -0400
+Received: by pdrw1 with SMTP id w1so21321446pdr.0
+        for <ceph-devel@vger.kernel.org>; Tue, 31 Mar 2015 12:05:42 -0700 (PDT)
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CB73BB@SACMBXIP01.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kernel neophyte <neophyte.hacker001@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SXQncyBhIHJiZCBtYXBwaW5nIG9wdGlvbiwgSSBkb24ndCB0aGluayB5b3UgY2FuIHNwZWNpZnkg
-aXQgZnJvbSBmaW9fcmJkLg0KQWxzbywgSSB0aGluayBpbiBjYXNlIGZpbyByYmQgZWFjaCBmaW8g
-am9iIHdpbGwgcGljayB1cCBpdHMgb3duIGxpYnJiZC9saWJyYWRvcyBpbnN0YW5jZXMsIHNvLCB5
-b3UgZG9uJ3QgbmVlZCB0aGlzICdub3NoYXJlJyBvcHRpb24uDQoNClRoYW5rcyAmIFJlZ2FyZHMN
-ClNvbW5hdGgNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IGNlcGgtZGV2ZWwt
-b3duZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5l
-bC5vcmddIE9uIEJlaGFsZiBPZiBrZXJuZWwgbmVvcGh5dGUNClNlbnQ6IFR1ZXNkYXksIE1hcmNo
-IDMxLCAyMDE1IDExOjQ0IEFNDQpUbzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNClN1Ympl
-Y3Q6IEZpbyBub3NoYXJlDQoNCkhpLA0KDQpJcyB0aGVyZSBhbnkgd2F5IHRvIGVuYWJsZSBub3No
-YXJlIHdoaWxlIHJ1bm5pbmcgZmlvIHdpdGggaW9lbmdpbmU9cmJkID8NCg0KLU5lbw0KLS0NClRv
-IHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBj
-ZXBoLWRldmVsIiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2Vy
-bmVsLm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21h
-am9yZG9tby1pbmZvLmh0bWwNCg0KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCg0K
-UExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmlj
-IG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25h
-dGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3Nh
-Z2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVk
-IHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFu
-eSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlz
-IG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhp
-cyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVs
-ZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95
-IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3
-aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KDQo=
+On Tue, Mar 31, 2015 at 11:56 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
+> It's a rbd mapping option, I don't think you can specify it from fio_rbd.
+
+Thanks for confirming Somnath.
+
+> Also, I think in case fio rbd each fio job will pick up its own librbd/librados instances, so, you don't need this 'noshare' option.
+>
+
+Thats what I thought, but when run fio with ioengine rbd I do not see
+any improvement. If I do the same with ioengine=libaio and have my rbd
+mapped with noshare then I see lots of improvement.
+
+-Neo
+
+> Thanks & Regards
+> Somnath
+>
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of kernel neophyte
+> Sent: Tuesday, March 31, 2015 11:44 AM
+> To: ceph-devel@vger.kernel.org
+> Subject: Fio noshare
+>
+> Hi,
+>
+> Is there any way to enable noshare while running fio with ioengine=rbd ?
+>
+> -Neo
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+> ________________________________
+>
+> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+>
