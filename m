@@ -1,38 +1,54 @@
-From: Robert LeBlanc <robert@leblancnet.us>
+From: Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>
 Subject: Re: Force an OSD to try to peer
-Date: Tue, 31 Mar 2015 12:08:12 -0600
-Message-ID: <CAANLjFp0pStF0iBw21XSv8a03YX4iy74rZSr_MD8e1mGR0KCAQ@mail.gmail.com>
+Date: Tue, 31 Mar 2015 18:10:58 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CB737E@SACMBXIP01.sdcorp.global.sandisk.com>
 References: <CAANLjFowYybKKueFeHHT4Ug2eTW_-RGVQRtRE7vfgF-1XXJwkA@mail.gmail.com>
 	<CAANLjFp8Vwu1=pVJy7LodbbeirRpdXPAMbOUmszkX8KuRZR4kw@mail.gmail.com>
 	<alpine.DEB.2.00.1503311035540.23387@cobra.newdream.net>
+	<CAANLjFp0pStF0iBw21XSv8a03YX4iy74rZSr_MD8e1mGR0KCAQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f169.google.com ([209.85.212.169]:38125 "EHLO
-	mail-wi0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752657AbbCaSIO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 31 Mar 2015 14:08:14 -0400
-Received: by wibgn9 with SMTP id gn9so36420378wib.1
-        for <ceph-devel@vger.kernel.org>; Tue, 31 Mar 2015 11:08:13 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1503311035540.23387@cobra.newdream.net>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Ceph-User <ceph-users@ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAANLjFp0pStF0iBw21XSv8a03YX4iy74rZSr_MD8e1mGR0KCAQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Robert LeBlanc <robert-4JaGZRWAfWbajFs6igw21g@public.gmane.org>, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-I was desperate for anything after exhausting every other possibility
-I could think of. Maybe I should put a checklist in the Ceph docs of
-things to look for.
+But, do we know why Jumbo frames may have an impact on peering ?
+In our setup so far, we haven't enabled jumbo frames other than performance reason (if at all).
+
+Thanks & Regards
+Somnath
+
+-----Original Message-----
+From: ceph-users [mailto:ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org] On Behalf Of Robert LeBlanc
+Sent: Tuesday, March 31, 2015 11:08 AM
+To: Sage Weil
+Cc: ceph-devel; Ceph-User
+Subject: Re: [ceph-users] Force an OSD to try to peer
+
+I was desperate for anything after exhausting every other possibility I could think of. Maybe I should put a checklist in the Ceph docs of things to look for.
 
 Thanks,
 
-On Tue, Mar 31, 2015 at 11:36 AM, Sage Weil <sage@newdream.net> wrote:
+On Tue, Mar 31, 2015 at 11:36 AM, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> wrote:
 > On Tue, 31 Mar 2015, Robert LeBlanc wrote:
 >> Turns out jumbo frames was not set on all the switch ports. Once that
 >> was resolved the cluster quickly became healthy.
 >
-> I always hesitate to point the finger at the jumbo frames configuration
-> but almost every time that is the culprit!
+> I always hesitate to point the finger at the jumbo frames
+> configuration but almost every time that is the culprit!
 >
 > Thanks for the update.  :)
 > sage
@@ -40,37 +56,37 @@ On Tue, Mar 31, 2015 at 11:36 AM, Sage Weil <sage@newdream.net> wrote:
 >
 >
 >>
->> On Mon, Mar 30, 2015 at 8:15 PM, Robert LeBlanc <robert@leblancnet.us> wrote:
->> > I've been working at this peering problem all day. I've done a lot of
->> > testing at the network layer and I just don't believe that we have a problem
->> > that would prevent OSDs from peering. When looking though osd_debug 20/20
->> > logs, it just doesn't look like the OSDs are trying to peer. I don't know if
->> > it is because there are so many outstanding creations or what. OSDs will
->> > peer with OSDs on other hosts, but for reason only chooses a certain number
->> > and not one that it needs to finish the peering process.
+>> On Mon, Mar 30, 2015 at 8:15 PM, Robert LeBlanc <robert-4JaGZRWAfWbajFs6igw21g@public.gmane.org> wrote:
+>> > I've been working at this peering problem all day. I've done a lot
+>> > of testing at the network layer and I just don't believe that we
+>> > have a problem that would prevent OSDs from peering. When looking
+>> > though osd_debug 20/20 logs, it just doesn't look like the OSDs are
+>> > trying to peer. I don't know if it is because there are so many
+>> > outstanding creations or what. OSDs will peer with OSDs on other
+>> > hosts, but for reason only chooses a certain number and not one that it needs to finish the peering process.
 >> >
->> > I've check: firewall, open files, number of threads allowed. These usually
->> > have given me an error in the logs that helped me fix the problem.
+>> > I've check: firewall, open files, number of threads allowed. These
+>> > usually have given me an error in the logs that helped me fix the problem.
 >> >
->> > I can't find a configuration item that specifies how many peers an OSD
->> > should contact or anything that would be artificially limiting the peering
->> > connections. I've restarted the OSDs a number of times, as well as rebooting
->> > the hosts. I beleive if the OSDs finish peering everything will clear up. I
->> > can't find anything in pg query that would help me figure out what is
->> > blocking it (peering blocked by is empty). The PGs are scattered across all
->> > the hosts so we can't pin it down to a specific host.
+>> > I can't find a configuration item that specifies how many peers an
+>> > OSD should contact or anything that would be artificially limiting
+>> > the peering connections. I've restarted the OSDs a number of times,
+>> > as well as rebooting the hosts. I beleive if the OSDs finish
+>> > peering everything will clear up. I can't find anything in pg query
+>> > that would help me figure out what is blocking it (peering blocked
+>> > by is empty). The PGs are scattered across all the hosts so we can't pin it down to a specific host.
 >> >
 >> > Any ideas on what to try would be appreciated.
 >> >
->> > [ulhglive-root@ceph9 ~]# ceph --version
->> > ceph version 0.80.7 (6c0127fcb58008793d3c8b62d925bc91963672a3)
+>> > [ulhglive-root@ceph9 ~]# ceph --version ceph version 0.80.7
+>> > (6c0127fcb58008793d3c8b62d925bc91963672a3)
 >> > [ulhglive-root@ceph9 ~]# ceph status
 >> >     cluster 48de182b-5488-42bb-a6d2-62e8e47b435c
->> >      health HEALTH_WARN 1 pgs down; 1321 pgs peering; 1321 pgs stuck
->> > inactive; 1321 pgs stuck unclean; too few pgs per osd (17 < min 20)
+>> >      health HEALTH_WARN 1 pgs down; 1321 pgs peering; 1321 pgs
+>> > stuck inactive; 1321 pgs stuck unclean; too few pgs per osd (17 < min 20)
 >> >      monmap e2: 3 mons at
->> > {mon1=10.217.72.27:6789/0,mon2=10.217.72.28:6789/0,mon3=10.217.72.29:6789/0},
->> > election epoch 30, quorum 0,1,2 mon1,mon2,mon3
+>> > {mon1=10.217.72.27:6789/0,mon2=10.217.72.28:6789/0,mon3=10.217.72.2
+>> > 9:6789/0}, election epoch 30, quorum 0,1,2 mon1,mon2,mon3
 >> >      osdmap e704: 120 osds: 120 up, 120 in
 >> >       pgmap v1895: 2048 pgs, 1 pools, 0 bytes data, 0 objects
 >> >             11447 MB used, 436 TB / 436 TB avail
@@ -910,8 +926,16 @@ On Tue, Mar 31, 2015 at 11:36 AM, Sage Weil <sage@newdream.net> wrote:
 >> >   "agent_state": {}}
 >> >
 >> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>> in the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org More majordomo
+>> info at  http://vger.kernel.org/majordomo-info.html
 >>
 >>
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+________________________________
+
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
