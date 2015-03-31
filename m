@@ -1,65 +1,109 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Fio noshare
-Date: Tue, 31 Mar 2015 19:32:14 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CB73F9@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <CAFkUHxcy2tJsppddLLqVfdGWa9J28dKGH77s1E9RXEspeKU4YQ@mail.gmail.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F28CB73BB@SACMBXIP01.sdcorp.global.sandisk.com>
- <CAFkUHxfMXEAVkMMXQABx403-a-7z2HbynVyoX1hU0B2bDUY1Lg@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Ceph disk
+Date: Tue, 31 Mar 2015 22:02:33 +0200
+Message-ID: <551AFD59.70209@dachary.org>
+References: <ruevn0vmi9p4p1m5biuhx7sc.1427804698773@email.android.com> <1427827660.6486.7.camel@debian>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="GoWISoa4Tlkx0X38Ibc38XTf1sIdEOBl4"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0086.outbound.protection.outlook.com ([207.46.100.86]:2400
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751325AbbCaTcT (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 31 Mar 2015 15:32:19 -0400
-In-Reply-To: <CAFkUHxfMXEAVkMMXQABx403-a-7z2HbynVyoX1hU0B2bDUY1Lg@mail.gmail.com>
-Content-Language: en-US
+Received: from mail2.dachary.org ([91.121.57.175]:39881 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1754620AbbCaUCg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 31 Mar 2015 16:02:36 -0400
+In-Reply-To: <1427827660.6486.7.camel@debian>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kernel neophyte <neophyte.hacker001@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Kewaan Ejaz <kewaan.ejaz@office.nacamar.de>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-VGhlcmUgd2FzIGEgcmJkIGNhY2hpbmcgaXNzdWUgZWFybGllciwgdGhhdCBpcyBmaXhlZCBpbiBH
-aWFudCBvbndhcmRzLiBIb3BlIHlvdSBhcmUgdHJ5aW5nIHdpdGggdGhlIGxhdGVzdCBvbmUuDQpB
-bHNvLCB0cnkgd2l0aCAnbHNvZicgdG8gZGV0ZXJtaW5lIGhvdyBtYW55IGxpYnJhZG9zL2xpYnJi
-ZCBpbnN0YW5jZXMgZmlvX3JiZCBpcyBsb2FkaW5nLg0KQ291bGQgeW91IHNoYXJlIGEgYml0IG1v
-cmUgYWJvdXQgeW91ciBjb25maWcgKHBvb2wsIGltYWdlcyBldGMuKSBhbmQgdGhlIGZpb19yYmQg
-c2NyaXB0ID8NCkFsc28sIGhvdyBhcmUgeW91IHJ1bm5pbmcgeW91ciB0ZXN0cyA/DQoNClRoYW5r
-cyAmIFJlZ2FyZHMNClNvbW5hdGgNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206
-IGtlcm5lbCBuZW9waHl0ZSBbbWFpbHRvOm5lb3BoeXRlLmhhY2tlcjAwMUBnbWFpbC5jb21dIA0K
-U2VudDogVHVlc2RheSwgTWFyY2ggMzEsIDIwMTUgMTI6MDYgUE0NClRvOiBTb21uYXRoIFJveQ0K
-Q2M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0OiBSZTogRmlvIG5vc2hhcmUN
-Cg0KT24gVHVlLCBNYXIgMzEsIDIwMTUgYXQgMTE6NTYgQU0sIFNvbW5hdGggUm95IDxTb21uYXRo
-LlJveUBzYW5kaXNrLmNvbT4gd3JvdGU6DQo+IEl0J3MgYSByYmQgbWFwcGluZyBvcHRpb24sIEkg
-ZG9uJ3QgdGhpbmsgeW91IGNhbiBzcGVjaWZ5IGl0IGZyb20gZmlvX3JiZC4NCg0KVGhhbmtzIGZv
-ciBjb25maXJtaW5nIFNvbW5hdGguDQoNCj4gQWxzbywgSSB0aGluayBpbiBjYXNlIGZpbyByYmQg
-ZWFjaCBmaW8gam9iIHdpbGwgcGljayB1cCBpdHMgb3duIGxpYnJiZC9saWJyYWRvcyBpbnN0YW5j
-ZXMsIHNvLCB5b3UgZG9uJ3QgbmVlZCB0aGlzICdub3NoYXJlJyBvcHRpb24uDQo+DQoNClRoYXRz
-IHdoYXQgSSB0aG91Z2h0LCBidXQgd2hlbiBydW4gZmlvIHdpdGggaW9lbmdpbmUgcmJkIEkgZG8g
-bm90IHNlZSBhbnkgaW1wcm92ZW1lbnQuIElmIEkgZG8gdGhlIHNhbWUgd2l0aCBpb2VuZ2luZT1s
-aWJhaW8gYW5kIGhhdmUgbXkgcmJkIG1hcHBlZCB3aXRoIG5vc2hhcmUgdGhlbiBJIHNlZSBsb3Rz
-IG9mIGltcHJvdmVtZW50Lg0KDQotTmVvDQoNCj4gVGhhbmtzICYgUmVnYXJkcw0KPiBTb21uYXRo
-DQo+DQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IGNlcGgtZGV2ZWwtb3du
-ZXJAdmdlci5rZXJuZWwub3JnIA0KPiBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJu
-ZWwub3JnXSBPbiBCZWhhbGYgT2Yga2VybmVsIG5lb3BoeXRlDQo+IFNlbnQ6IFR1ZXNkYXksIE1h
-cmNoIDMxLCAyMDE1IDExOjQ0IEFNDQo+IFRvOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0K
-PiBTdWJqZWN0OiBGaW8gbm9zaGFyZQ0KPg0KPiBIaSwNCj4NCj4gSXMgdGhlcmUgYW55IHdheSB0
-byBlbmFibGUgbm9zaGFyZSB3aGlsZSBydW5uaW5nIGZpbyB3aXRoIGlvZW5naW5lPXJiZCA/DQo+
-DQo+IC1OZW8NCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhl
-IGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIA0KPiBpbiB0aGUgYm9keSBvZiBhIG1lc3Nh
-Z2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyANCj4gaW5mbyBh
-dCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+DQo+IF9fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fDQo+DQo+IFBMRUFTRSBOT1RFOiBUaGUgaW5mb3Jt
-YXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5k
-ZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQg
-YWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQg
-cmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVk
-IHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9u
-LCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHBy
-b2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJv
-ciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNo
-b3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2Yg
-dGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBl
-bGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCj4NCg==
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--GoWISoa4Tlkx0X38Ibc38XTf1sIdEOBl4
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+[cc'ing ceph-devel public mailing list]
+
+Hi,
+
+On 31/03/2015 20:47, Kewaan Ejaz wrote:
+> Hello Loic,
+>=20
+> Thank you again for the opportunity to contribute to ceph. I am not sur=
+e
+> how am I suppose to proceed but I have the following things in mind;
+
+Thanks for proposing to help :-)
+
+> 1) Fully understanding the ceph-disk code
+> 2) I would start using the ceph-disk in my sandbox environment
+> (Virtualbox)
+
+You'll find that it's fairly straightforward: one file, all in it. There =
+is room for improvement.
+
+https://ceph.com/git/?p=3Dceph.git;a=3Dblob;f=3Dsrc/test/ceph-disk.sh are=
+ the tests that make check will run=20
+https://ceph.com/git/?p=3Dceph.git;a=3Dblob;f=3Dsrc/test/ceph-disk-root.s=
+h are the tests that make check will run if ./configure --enable-root-mak=
+e-check is used but you can also run one manually with cd src ; sudo test=
+/ceph-disk.sh test_activate_dev and it will use the /dev/loop device to s=
+imulate a disk. A few sanity checks were added recently to verify that th=
+e loop device has been loaded with the necessary loop.max_part=3D16 (or m=
+ore) parameter and that /dev/disk/part-byuuid is populated as expected.=20
+
+> I think I would require a week to get back to you. But other than that,=
+
+> let me know what kind of VM do you have in mind. For example,
+>=20
+> 1) What kind of OS would you prefer from the Openstack cluster?
+
+I feel more confortable with Debian or Ubuntu but CentOS or Fedora are al=
+so fine. What is required for test purposes is a dedicated tenant with th=
+e ability to run two virtual machines, 1GB RAM, 10GB disk, 1core. We woul=
+d need a variety of images to test against (Ubuntu 12.04 + 14.04, Debian =
+jessie, CentOS 7 + 6, Fedora 20 + 21, OpenSUSE 13.2).
+
+> 2) We are not using Cinder or Swift in our Openstack cluster. Is that a=
+
+> Problem?
+
+That will be fine: the loop device can be used as a spare disk instead of=
+ provisioning one with cinder.=20
+
+As soon as you can have that OpenStack tenant ready, it can be used with =
+https://github.com/osynge/whatenv to run tests for https://github.com/cep=
+h/ceph/pull/4036 and verify that the detection system actually works as e=
+xpected.=20
+
+And once it's done, we could make it so this test is run whenever a pull =
+request is posted that modifies ceph-disk and ensure we're not risking a =
+regression. It would be a very valuable service. Not too CPU intensive ei=
+ther since we're not seeing more than a few patches on ceph-disk every mo=
+nth.
+
+Cheers
+
+> Best Regards,
+> Kewaan.
+
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--GoWISoa4Tlkx0X38Ibc38XTf1sIdEOBl4
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlUa/VkACgkQ8dLMyEl6F22d1ACgv5Z04MvLPmkECNFWMODfLjzO
+UlwAoKxstCtNviXsKnYwRXmLGYG6AWz9
+=jbdb
+-----END PGP SIGNATURE-----
+
+--GoWISoa4Tlkx0X38Ibc38XTf1sIdEOBl4--
