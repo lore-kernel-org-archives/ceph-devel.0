@@ -1,46 +1,53 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: RADOS backend for Dovecot mail storage
-Date: Tue, 31 Mar 2015 13:14:10 +0200
-Message-ID: <551A8182.9020406@42on.com>
+From: Dan van der Ster <dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org>
+Subject: Re: Creating and deploying OSDs in parallel
+Date: Tue, 31 Mar 2015 14:19:29 +0200
+Message-ID: <CABZ+qqneKQhuHbLNNMfkgFeKNew=9OXKXLCTa015uHzsM5xsuw@mail.gmail.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CB60A2@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from websrv.42on.com ([31.25.102.167]:60919 "EHLO websrv.42on.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754212AbbCaLON (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 31 Mar 2015 07:14:13 -0400
-Received: from [10.15.72.62] (unknown [62.140.132.30])
-	by websrv.42on.com (Postfix) with ESMTPSA id BBB8FBFADA
-	for <ceph-devel@vger.kernel.org>; Tue, 31 Mar 2015 13:14:10 +0200 (CEST)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CB60A2-cXZ6iGhjG0il5HHZYNR2WTJ2aSJ780jGSxCzGc5ayCJWk0Htik3J/w@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>
+Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi,
-
-Recently Dovecot merged with OpenXchange as announced here:
-http://www.dovecot.fi/open-xchange-and-dovecot-announce-merger-to-create-worlds-leading-open-source-messaging-software-provider/
-
-In the past few years I've contacted Dovecot a couple of times because
-it would be very, very cool to have your e-mail stored via native RADOS.
-
-They thought it was a very cool idea, but since they had closed source
-Object Store plugins for Dovecot like Scality they couldn't allow RADOS
-to be implemented for Object Mail storage.
-
-My idea is basically: Dovecot -> libmailrados -> librados -> Ceph
-
-Now that OpenXchange acquired Dovecot it might be that this possibility
-opens up!
-
-Just wanted to get this out there. I currently won't be able to look
-into this, but it would be very cool if this happens.
-
--- 
-Wido den Hollander
-42on B.V.
-Ceph trainer and consultant
-
-Phone: +31 (0)20 700 9902
-Skype: contact42on
+SGkgU29tbmF0aCwKV2UgaGF2ZSBkZXBsb3llZCBtYW55IG1hY2hpbmVzIGluIHBhcmFsbGVsIGFu
+ZCBpdCBnZW5lcmFsbHkgd29ya3MuCktlZXAgaW4gbWluZCB0aGF0IGlmIHlvdSBkZXBsb3kgbWFu
+eSBtYW55ICg+MTAwMCkgdGhlbiB0aGlzIHdpbGwKY3JlYXRlIHNvIG1hbnkgb3NkbWFwIGluY3Jl
+bWVudGFscywgc28gcXVpY2tseSwgdGhhdCB0aGUgbWVtb3J5IHVzYWdlCm9uIHRoZSBPU0RzIHdp
+bGwgaW5jcmVhc2Ugc3Vic3RhbnRpYWxseSAodW50aWwgeW91IHJlYm9vdCkuCkJlc3QgUmVnYXJk
+cywgRGFuCgpPbiBNb24sIE1hciAzMCwgMjAxNSBhdCA1OjI5IFBNLCBTb21uYXRoIFJveSA8U29t
+bmF0aC5Sb3lAc2FuZGlzay5jb20+IHdyb3RlOgo+IEhpLAo+Cj4gSSBhbSBwbGFubmluZyB0byBt
+b2RpZnkgb3VyIGRlcGxveW1lbnQgc2NyaXB0IHNvIHRoYXQgaXQgY2FuIGNyZWF0ZSBhbmQKPiBk
+ZXBsb3kgbXVsdGlwbGUgT1NEcyBpbiBwYXJhbGxlbCB0byB0aGUgc2FtZSBob3N0IGFzIHdlbGwg
+YXMgb24gZGlmZmVyZW50Cj4gaG9zdHMuCj4KPiBKdXN0IHdhbnRlZCB0byBjaGVjayBpZiB0aGVy
+ZSBpcyBhbnkgcHJvYmxlbSB0byBydW4gc2F5IOKAmGNlcGgtZGVwbG95IG9zZAo+IGNyZWF0ZeKA
+mSBldGMuIGluIHBhcmFsbGVsIHdoaWxlIGRlcGxveWluZyBjbHVzdGVyLgo+Cj4KPgo+IFRoYW5r
+cyAmIFJlZ2FyZHMKPgo+IFNvbW5hdGgKPgo+Cj4gX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX18KPgo+IFBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMg
+ZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMKPiBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9m
+IHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlCj4gcmVhZGVy
+IG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVuZGVkIHJlY2lwaWVudCwgeW91IGFyZSBo
+ZXJlYnkKPiBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBl
+cnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LAo+IGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwg
+b3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkKPiBwcm9oaWJpdGVkLiBJZiB5
+b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFzZSBub3Rp
+ZnkKPiB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBp
+bW1lZGlhdGVseSBhbmQgZGVzdHJveQo+IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3Nh
+Z2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzCj4gb3IgZWxlY3Ryb25p
+Y2FsbHkgc3RvcmVkIGNvcGllcykuCj4KPgo+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fCj4gY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKPiBjZXBoLXVzZXJz
+QGxpc3RzLmNlcGguY29tCj4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBo
+LXVzZXJzLWNlcGguY29tCj4KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNv
+bQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
