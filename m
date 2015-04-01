@@ -1,124 +1,43 @@
-From: James Page <james.page@ubuntu.com>
-Subject: Re: tcmalloc issue
-Date: Wed, 01 Apr 2015 16:56:04 +0100
-Message-ID: <551C1514.3060607@ubuntu.com>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CAD14A@SACMBXIP01.sdcorp.global.sandisk.com> <alpine.DEB.2.00.1503261646150.31431@cobra.newdream.net>
+From: "Blinick, Stephen L" <stephen.l.blinick@intel.com>
+Subject: IO-based timing analysis on v0.93
+Date: Wed, 1 Apr 2015 16:55:46 +0000
+Message-ID: <3649A15A2562B54294DE14BCE5AC79120B51A46E@FMSMSX119.amr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from youngberry.canonical.com ([91.189.89.112]:45170 "EHLO
-	youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750874AbbDAP4H (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Apr 2015 11:56:07 -0400
-In-Reply-To: <alpine.DEB.2.00.1503261646150.31431@cobra.newdream.net>
+Received: from mga11.intel.com ([192.55.52.93]:27185 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751863AbbDAQzt convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Apr 2015 12:55:49 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, ceph-maintainers@ceph.com
-Cc: Somnath Roy <Somnath.Roy@sandisk.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: "'sweil@redhat.com'" <sweil@redhat.com>, Mark Nelson <mnelson@redhat.com>, Andreas Bluemle <andreas.bluemle@itxperts.de>, "sjust@redhat.com" <sjust@redhat.com>
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA256
+I'm sharing below the data from the timing analysis I mentioned in the performance meeting this morning.   Attachments are problematic so I'm trying Google docs.
 
-I've logged:
+The test is single node rados bench runs, 4k reads & writes, single OSD, memstore backend.    Hopefully the format is self-explanatory, but essentially key modules were modified with function entrance/exit traces and timing, as well as some traces marking the beginning and ending of a worker thread loop.  20-50K IOs are run, and then a script is used to 'detangle' the sequence of traces & timing of each individual op, using OID (tid is not available everywhere).  After the ops are detangled, which now includes the time that op spent not being processed (i.e. sitting between threads on a queue), any ops that have identical call paths are averaged together to get average times.   I then arbitrarily colored the groups of traces based on thread/major work area.
 
-https://bugs.launchpad.net/ubuntu/+source/google-perftools/+bug/1439277
+For each run, the QD was increased past the point where throughput no longer increases and only latency increases, each tab of the spreadsheet can be compared to see which component of the IO time increases.   The upper-right contains the IO time as guessed by the script vs what Rados Bench records (they are pretty similar, but Rados Bench is measuring a bit more beyond the last librados traces).
 
-The upstream fix applies cleanly to the version of gperftools in 14.04
-- - I just need a good reproducer for the SRU test case.
+Summary Sheet (with links to the others)
+https://docs.google.com/spreadsheets/d/14LplRzVKf_aM65ENJjghuY8DFGmVOIqn2n_ASAILsxo/edit?usp=sharing
 
-If anyone has one, please detail in the bug report above - I'll also
-ping on the upstream bug (but that is from 2013 so might not get much
-luck).
+Contains:
+1) 100% Reads
+2) 100% Writes
+3) 100% Reads w/ auth=none
+4) 100% writes w /auth=none
 
-On 26/03/15 23:47, Sage Weil wrote:
-> Hi James,
-> 
-> Is it possible to get tcmalloc in trusty updated?  See below.
-> 
-> Thanks! sage
-> 
-> On Thu, 26 Mar 2015, Somnath Roy wrote:
-> 
->> Sage, Here is the tcmalloc issue I was talking in the performance
->> meeting.
->> 
->> http://code.google.com/p/gperftools/issues/detail?id=585
->> 
->> The tcmalloc is consuming lot of cpus (and eventually slowing
->> down the performance) with the following perf top  trace.
->> 
->> 25.73% libtcmalloc.so.4.1.2 [.]
->> tcmalloc::CentralFreeList::FetchFromSpans() 12.52%
->> libtcmalloc.so.4.1.2 [.]
->> tcmalloc::ThreadCache::ReleaseToCentralCache(tcmalloc::ThreadCache::F
-reeList*,
->> unsigned long, int) 11.62% libtcmalloc.so.4.1.2 [.]
->> tcmalloc::CentralFreeList::ReleaseToSpans(void*) 1.56% [kernel]
->> [k] __copy_user_nocache 1.44% libtcmalloc.so.4.1.2 [.]
->> tcmalloc::CentralFreeList::RemoveRange(void*, void*, int) 1.39%
->> libtcmalloc.so.4.1.2 [.]
->> tcmalloc::CentralFreeList::ReleaseListToSpans(void*) 0.89%
->> libtcmalloc.so.4.1.2 [.] operator new(unsigned long)
->> 
->> 
->> The TCMALLOC_MAX_TOTAL_THREAD_CACHE_BYTES is alleviating that but
->> the env variable setting for this is a noop in the binary we are
->> having in Ubuntu 14.04. It is fixed in gperftools-2.1.90
->> release. See the following link.
->> 
->> http://code.google.com/p/gperftools/
->> 
->> We can request Ubuntu guys to incorporate this version or the
->> latest tcmalloc version which is gperftools-2.4.
->> 
->> It will be really helpful if you can push them to incorporate
->> this in 14.04 updates.
->> 
->> Thanks & Regards Somnath
->> 
->> ________________________________
->> 
->> PLEASE NOTE: The information contained in this electronic mail
->> message is intended only for the use of the designated
->> recipient(s) named above. If the reader of this message is not
->> the intended recipient, you are hereby notified that you have
->> received this message in error and that any review,
->> dissemination, distribution, or copying of this message is
->> strictly prohibited. If you have received this communication in
->> error, please notify the sender by telephone or e-mail (as shown
->> above) immediately and destroy any and all copies of this message
->> in your possession (whether hard copies or electronically stored
->> copies).
->> 
->> -- To unsubscribe from this list: send the line "unsubscribe
->> ceph-devel" in the body of a message to
->> majordomo@vger.kernel.org More majordomo info at
->> http://vger.kernel.org/majordomo-info.html
->> 
->> 
-> 
+In #1 and #2, the bottleneck is in the simple messenger, and with auth turned off, for #4 that appears to move to the bottleneck to the time before the finisher begins to operate on an op after the Op Worker is done with it.   
+
+I should be able to run w/ Filestore rather easily, as long as I tag what each thread is doing.  I'll also run w/ multiple clients.  Let me know if you have any comments or suggestions.
+
+Thanks,
+
+Stephen
 
 
-- -- 
-James Page
-Ubuntu and Debian Developer
-james.page@ubuntu.com
-jamespage@debian.org
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
 
-iQIcBAEBCAAGBQJVHBUUAAoJEL/srsug59jDfPYP/2zE62fCmvp9o+x7CxtDsALv
-JvlEAdtjR7F4epx/IWlrJcRW7Z8EMmXYu7Enlsc4koZhSoIgw92SzBilaSwt+d7V
-3M0xhFImlvednXJn8ppSBxIf5qrc8r57jQhnLv1rnw4+JrP+U6C994jmZCERKiN+
-Ph9+j+A7yBmIqinjdx9kbes29/wZuUgRCyF5c7Wm2xm4W3aN8ZthNKa7mbXvzO9Y
-ZNtXGcKZdKMWHbZYAmU64Sj82YQOWAdG/3FXOf+FmFOXDQG380UKCmd2aDRcqyvd
-ySBFrJVoZG2s9wr9lJBhnIebAs48WoRPXhsDXtknncw0L/ZkErF8c8HKUm4WIztM
-0fO/Zhue09vLTgOuBOmxcW6g0TW0CFhFPWXdTrb/gRfns6mOcuu57CdsvTePTEvH
-iYpWQQaccaqgO5Yt2Y7lNR7JwoEYBEX4CahaxO2XmN9wl9N/RJxMd4AhyxKCuimL
-La9YLZszHf+8qGMUjzY3NE6bgXlqUzjuNCE7ROu5rlyobrd4iRi8r4jeuZ37bR+m
-0h5SY9UyAISegSwCmtwr457FqeC+V52vlrkYZy06+yxaOaeXd3pP9GZ2o0CLhqcP
-cOva6Nt8OIemdKa6H1xm/V7uLqkJXl1xx3zEcONpzijmUS+2L6v4L3yhZQewif3d
-Ms0rECbXfF8tmuDxn8MB
-=P322
------END PGP SIGNATURE-----
