@@ -1,53 +1,56 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Firefly backports
-Date: Wed, 01 Apr 2015 09:50:42 +0200
-Message-ID: <551BA352.6000505@dachary.org>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="hbOiSkfN9fiBIX2hFM7SD8gK9rnBhW6gs"
+From: LOPEZ Jean-Charles <jelopez@redhat.com>
+Subject: Re: Firefly backports
+Date: Wed, 1 Apr 2015 08:31:27 -0400
+Message-ID: <CC77D606-E0B8-4AC4-B748-56A63A1705A5@redhat.com>
+References: <551BA352.6000505@dachary.org>
+Mime-Version: 1.0 (Mac OS X Mail 8.2 \(2070.6\))
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:40083 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752148AbbDAHwN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Apr 2015 03:52:13 -0400
+Received: from mail-qc0-f169.google.com ([209.85.216.169]:35799 "EHLO
+	mail-qc0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753700AbbDAMba convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Apr 2015 08:31:30 -0400
+Received: by qcbii10 with SMTP id ii10so16338994qcb.2
+        for <ceph-devel@vger.kernel.org>; Wed, 01 Apr 2015 05:31:30 -0700 (PDT)
+In-Reply-To: <551BA352.6000505@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: LOPEZ Jean-Charles <jelopez@redhat.com>
-Cc: "Shu, Xinxin" <xinxin.shu@intel.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Dachary Loic <loic@dachary.org>
+Cc: LOPEZ Jean-Charles <jelopez@redhat.com>, "Shu, Xinxin" <xinxin.shu@intel.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---hbOiSkfN9fiBIX2hFM7SD8gK9rnBhW6gs
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Hi Loic,
 
-Hi Jean-Charles,
+I know there is a 9 hour difference between you and me. So what about s=
+tarting at 18:00 CEST your time (09:00 PST my time).
 
-At what time would you like to meet tomorrow ?=20
+I have started reviewing the URLs you mention to get familiar with them=
+=2E
 
-It would be great if we could review the backport HOWTO (http://tracker.c=
-eph.com/projects/ceph-releases/wiki/HOWTO) and update the status of the n=
-ext firefly release (http://tracker.ceph.com/issues/11090). Xinxin starti=
-ng looking into the issues and may also have comments on the documentatio=
-n.=20
+I'm also available on Friday if needed to continue working.
 
-Cheers
+JC
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+> On 1 Apr 2015, at 03:50, Loic Dachary <loic@dachary.org> wrote:
+>=20
+> Hi Jean-Charles,
+>=20
+> At what time would you like to meet tomorrow ?=20
+>=20
+> It would be great if we could review the backport HOWTO (http://track=
+er.ceph.com/projects/ceph-releases/wiki/HOWTO) and update the status of=
+ the next firefly release (http://tracker.ceph.com/issues/11090). Xinxi=
+n starting looking into the issues and may also have comments on the do=
+cumentation.=20
+>=20
+> Cheers
+>=20
+> --=20
+> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>=20
 
-
---hbOiSkfN9fiBIX2hFM7SD8gK9rnBhW6gs
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlUbo1IACgkQ8dLMyEl6F208RQCgktTqZmuo/+SEYc2GCKY2IRRZ
-rHsAnj89icfZtaJ+fYKOXDhvXWxgcgpw
-=oXyD
------END PGP SIGNATURE-----
-
---hbOiSkfN9fiBIX2hFM7SD8gK9rnBhW6gs--
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
