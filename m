@@ -1,101 +1,124 @@
-From: Milosz Tanski <milosz@adfin.com>
-Subject: Re: durability model
-Date: Wed, 1 Apr 2015 10:18:32 -0400
-Message-ID: <CANP1eJE4dcQL=RvGjPnP2AVsqOs0DGECK=P6Ln+XKjCOEBK6Og@mail.gmail.com>
-References: <1401131148.7008.YahooMailNeo@web165003.mail.bf1.yahoo.com>
-	<CAHxYaFN6R3F6Tn0Vnh9N+pAXhOT8F7+gYLTzTgonn==GJUpX_w@mail.gmail.com>
-	<1401197435.39621.YahooMailNeo@web165002.mail.bf1.yahoo.com>
-	<5384A010.4080300@dachary.org>
-	<1401284130.75330.YahooMailNeo@web165006.mail.bf1.yahoo.com>
-	<5385ED0E.9070204@dachary.org>
-	<CANP1eJEDD7b78RXGvug+=KqVXM70WsFX+yxoAALo43LYWqH66g@mail.gmail.com>
-	<alpine.DEB.2.00.1504010647120.15540@cobra.newdream.net>
+From: James Page <james.page@ubuntu.com>
+Subject: Re: tcmalloc issue
+Date: Wed, 01 Apr 2015 16:56:04 +0100
+Message-ID: <551C1514.3060607@ubuntu.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CAD14A@SACMBXIP01.sdcorp.global.sandisk.com> <alpine.DEB.2.00.1503261646150.31431@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f50.google.com ([209.85.215.50]:35503 "EHLO
-	mail-la0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753659AbbDAOSe (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Apr 2015 10:18:34 -0400
-Received: by lahf3 with SMTP id f3so37254058lah.2
-        for <ceph-devel@vger.kernel.org>; Wed, 01 Apr 2015 07:18:32 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1504010647120.15540@cobra.newdream.net>
+Received: from youngberry.canonical.com ([91.189.89.112]:45170 "EHLO
+	youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750874AbbDAP4H (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Apr 2015 11:56:07 -0400
+In-Reply-To: <alpine.DEB.2.00.1503261646150.31431@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Loic Dachary <loic@dachary.org>, Koleos Fuskus <koleosfuscus@yahoo.com>, Kyle Bader <kyle@inktank.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>, ceph-maintainers@ceph.com
+Cc: Somnath Roy <Somnath.Roy@sandisk.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, Apr 1, 2015 at 9:49 AM, Sage Weil <sage@newdream.net> wrote:
-> On Wed, 1 Apr 2015, Milosz Tanski wrote:
->> On Wed, May 28, 2014 at 10:05 AM, Loic Dachary <loic@dachary.org> wrote:
->> >
->> >
->> > On 28/05/2014 15:35, Koleos Fuskus wrote:
->> >>
->> >>
->> >>> 1. What will be erasure model unit? Is it a pool or a placement group? I cannot see the best option here yet, probably because my inexperience with Ceph.
->> >>
->> >> A pool.
->> >> OK. this is what I thought but some things are not clear enough. I am deploying Ceph to toying a bit more.
->> >>
->> >>
->> >>> 3. Metadata: Jerasure creates metadata files. How are those files stored in ceph (what kind of
->> >> Jerasure does not create a metadata file.
->> >>
->> >> It does on my machine! at least with jerasure 1.2 on mac os :)
->> >
->> > If you mean the files that are created by the command line examples provided with jerasure (1.2 or 2), they are not required and only meant for test purposes.
->> >
->> > Cheers
->> >
->> >>
->> >>
->> >>
->> >>
->> >> I proposed an update to the documentation to clarify this : https://github.com/ceph/ceph/pull/1856 . Does it look sensible to you ?
->> >>
->> >>
->>
->> Recently while considering a hardware update on the Ceph cluster I've
->> been thinking about the durability model of the new OSD nodes once the
->> cluster is done migrating over. So I came looking through these old
->> emails. I think it might be very useful to have a web tool that
->> describes (or visualizes) the current cluster durability model, or
->> better yet helps you play with the variables to visualize the changes.
->>
->> If we can formulate the rules model based on some common variables
->> (about machines, OSDs, racks) and replication rules (count or erasure
->> coding paramaters). Then we can spit out useful information like:
->> - How many nodes / racks / osds do you need to lose to have data offline
->> - What percentage of data is going to be unavailable if you lose X resources
->> - What's the probability of data loss over time
->> - How does the readability model impact your cluster network traffic,
->> repair traffic
->>
->> I think it would be stair-forward to build the web app. In fact, I'll
->> volunteer myself for that task. Before we start that I would suggest
->> we try to get the model in something like Google Docs Sheets so we can
->> use it as a basis.
->
-> If can you haven't seen this:
->
->         https://github.com/ceph/ceph-tools/tree/master/models/reliability
->
-> It's not web-based but it probably could be changed to be.  I definitely
-> like the idea of having a hosted version.
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
 
-Somehow I missed this. I'll take a stab to converting it into a web app.
+I've logged:
 
->
-> sage
+https://bugs.launchpad.net/ubuntu/+source/google-perftools/+bug/1439277
+
+The upstream fix applies cleanly to the version of gperftools in 14.04
+- - I just need a good reproducer for the SRU test case.
+
+If anyone has one, please detail in the bug report above - I'll also
+ping on the upstream bug (but that is from 2013 so might not get much
+luck).
+
+On 26/03/15 23:47, Sage Weil wrote:
+> Hi James,
+> 
+> Is it possible to get tcmalloc in trusty updated?  See below.
+> 
+> Thanks! sage
+> 
+> On Thu, 26 Mar 2015, Somnath Roy wrote:
+> 
+>> Sage, Here is the tcmalloc issue I was talking in the performance
+>> meeting.
+>> 
+>> http://code.google.com/p/gperftools/issues/detail?id=585
+>> 
+>> The tcmalloc is consuming lot of cpus (and eventually slowing
+>> down the performance) with the following perf top  trace.
+>> 
+>> 25.73% libtcmalloc.so.4.1.2 [.]
+>> tcmalloc::CentralFreeList::FetchFromSpans() 12.52%
+>> libtcmalloc.so.4.1.2 [.]
+>> tcmalloc::ThreadCache::ReleaseToCentralCache(tcmalloc::ThreadCache::F
+reeList*,
+>> unsigned long, int) 11.62% libtcmalloc.so.4.1.2 [.]
+>> tcmalloc::CentralFreeList::ReleaseToSpans(void*) 1.56% [kernel]
+>> [k] __copy_user_nocache 1.44% libtcmalloc.so.4.1.2 [.]
+>> tcmalloc::CentralFreeList::RemoveRange(void*, void*, int) 1.39%
+>> libtcmalloc.so.4.1.2 [.]
+>> tcmalloc::CentralFreeList::ReleaseListToSpans(void*) 0.89%
+>> libtcmalloc.so.4.1.2 [.] operator new(unsigned long)
+>> 
+>> 
+>> The TCMALLOC_MAX_TOTAL_THREAD_CACHE_BYTES is alleviating that but
+>> the env variable setting for this is a noop in the binary we are
+>> having in Ubuntu 14.04. It is fixed in gperftools-2.1.90
+>> release. See the following link.
+>> 
+>> http://code.google.com/p/gperftools/
+>> 
+>> We can request Ubuntu guys to incorporate this version or the
+>> latest tcmalloc version which is gperftools-2.4.
+>> 
+>> It will be really helpful if you can push them to incorporate
+>> this in 14.04 updates.
+>> 
+>> Thanks & Regards Somnath
+>> 
+>> ________________________________
+>> 
+>> PLEASE NOTE: The information contained in this electronic mail
+>> message is intended only for the use of the designated
+>> recipient(s) named above. If the reader of this message is not
+>> the intended recipient, you are hereby notified that you have
+>> received this message in error and that any review,
+>> dissemination, distribution, or copying of this message is
+>> strictly prohibited. If you have received this communication in
+>> error, please notify the sender by telephone or e-mail (as shown
+>> above) immediately and destroy any and all copies of this message
+>> in your possession (whether hard copies or electronically stored
+>> copies).
+>> 
+>> -- To unsubscribe from this list: send the line "unsubscribe
+>> ceph-devel" in the body of a message to
+>> majordomo@vger.kernel.org More majordomo info at
+>> http://vger.kernel.org/majordomo-info.html
+>> 
+>> 
+> 
 
 
+- -- 
+James Page
+Ubuntu and Debian Developer
+james.page@ubuntu.com
+jamespage@debian.org
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
 
--- 
-Milosz Tanski
-CTO
-16 East 34th Street, 15th floor
-New York, NY 10016
-
-p: 646-253-9055
-e: milosz@adfin.com
+iQIcBAEBCAAGBQJVHBUUAAoJEL/srsug59jDfPYP/2zE62fCmvp9o+x7CxtDsALv
+JvlEAdtjR7F4epx/IWlrJcRW7Z8EMmXYu7Enlsc4koZhSoIgw92SzBilaSwt+d7V
+3M0xhFImlvednXJn8ppSBxIf5qrc8r57jQhnLv1rnw4+JrP+U6C994jmZCERKiN+
+Ph9+j+A7yBmIqinjdx9kbes29/wZuUgRCyF5c7Wm2xm4W3aN8ZthNKa7mbXvzO9Y
+ZNtXGcKZdKMWHbZYAmU64Sj82YQOWAdG/3FXOf+FmFOXDQG380UKCmd2aDRcqyvd
+ySBFrJVoZG2s9wr9lJBhnIebAs48WoRPXhsDXtknncw0L/ZkErF8c8HKUm4WIztM
+0fO/Zhue09vLTgOuBOmxcW6g0TW0CFhFPWXdTrb/gRfns6mOcuu57CdsvTePTEvH
+iYpWQQaccaqgO5Yt2Y7lNR7JwoEYBEX4CahaxO2XmN9wl9N/RJxMd4AhyxKCuimL
+La9YLZszHf+8qGMUjzY3NE6bgXlqUzjuNCE7ROu5rlyobrd4iRi8r4jeuZ37bR+m
+0h5SY9UyAISegSwCmtwr457FqeC+V52vlrkYZy06+yxaOaeXd3pP9GZ2o0CLhqcP
+cOva6Nt8OIemdKa6H1xm/V7uLqkJXl1xx3zEcONpzijmUS+2L6v4L3yhZQewif3d
+Ms0rECbXfF8tmuDxn8MB
+=P322
+-----END PGP SIGNATURE-----
