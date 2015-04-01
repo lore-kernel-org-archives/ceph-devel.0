@@ -1,42 +1,62 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Advice for implementation of LED behavior in Ceph ecosystem
-Date: Wed, 1 Apr 2015 16:17:32 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1504011613410.23387@cobra.newdream.net>
-References: <2C438B34CAC8264398F5C7AF7411910A6341F7EB@G4W3206.americas.hpqcorp.net> <551C6083.4070707@redhat.com> <551C693E.6020100@redhat.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH] libceph: don't set memalloc flags in loopback case
+Date: Thu, 2 Apr 2015 02:40:19 +0300
+Message-ID: <CAOi1vP-u_sWF0uZpbYCN9qUp80tXQvmnJdOjWM3kpSR1JqSDMg@mail.gmail.com>
+References: <1427908760-7083-1-git-send-email-idryomov@gmail.com>
+	<20150401230323.GD20397@suse.de>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:48445 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751496AbbDAXRd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Apr 2015 19:17:33 -0400
-In-Reply-To: <551C693E.6020100@redhat.com>
+Received: from mail-wi0-f171.google.com ([209.85.212.171]:32973 "EHLO
+	mail-wi0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751576AbbDAXkU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Apr 2015 19:40:20 -0400
+Received: by wixm2 with SMTP id m2so45333122wix.0
+        for <ceph-devel@vger.kernel.org>; Wed, 01 Apr 2015 16:40:19 -0700 (PDT)
+In-Reply-To: <20150401230323.GD20397@suse.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <john.spray@redhat.com>
-Cc: "Handzik, Joe" <joseph.t.handzik@hp.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Mel Gorman <mgorman@suse.de>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Mike Christie <michaelc@cs.wisc.edu>, Sage Weil <sage@redhat.com>
 
-On Wed, 1 Apr 2015, John Spray wrote:
-> I guess in this interesting case you could either:
->  * Allow other OSDs on the same host to handle the 'tell blink' command for
-> the dead OSD's drive
->  * Leave this to calamari/whoever to read the dead OSD's block device path
-> from "ceph osd metadata", and go blink the LEDs themselves.
+On Thu, Apr 2, 2015 at 2:03 AM, Mel Gorman <mgorman@suse.de> wrote:
+> On Wed, Apr 01, 2015 at 08:19:20PM +0300, Ilya Dryomov wrote:
+>> Following nbd and iscsi, commit 89baaa570ab0 ("libceph: use memalloc
+>> flags for net IO") set SOCK_MEMALLOC and PF_MEMALLOC flags for rbd and
+>> cephfs.  However it turned out to not play nice with loopback scenario,
+>> leading to lockups with a full socket send-q and empty recv-q.
+>>
+>> While we always advised against colocating kernel client and ceph
+>> servers on the same box, a few people are doing it and it's also useful
+>> for light development testing, so rather than reverting make sure to
+>> not set those flags in the loopback case.
+>>
+>
+> This does not clarify why the non-loopback case needs access to pfmemalloc
+> reserves. Granted, I've spent zero time on this but it's really unclear
+> what problem was originally tried to be solved and why dirty page limiting
+> was insufficient. Swap over NFS was always a very special case minimally
+> because it's immune to dirty page throttling.
 
-#2 really sounds safer to me.  In particular, you need to be really 
-careful not to flash an LED until you're sure you don't need the data on 
-the disk (i.e., it's down+out and the cluster state is healthy--no heroic 
-measures needed).  I think anything that triggers flashing that doesn't 
-have a holistic view of the cluster would be dangerous.
+I don't think there was any particular problem tried to be solved,
+certainly not one we hit and fixed with 89baaa570ab0.  Mike is out this
+week, but I'm pretty sure he said he copied this for iscsi from nbd
+because you nudged him to (and you yourself did this for nbd as part of
+swap-over-NFS series).  And then one day when I tracked down a lockup
+caused by the fact that ceph workqueues didn't have a WQ_MEM_RECLAIM
+tag he remembered his SOCK_MEMALLOC/PF_MEMALLOC iscsi patch and copied
+it for rbd/cephfs.  As I mentioned in the previous thread [1], because
+rbd is very similar to nbd, it seemed like a step in the right
+direction...
 
-That, combined with the complications around ceph-osd possibly not 
-running, make me thing this would be the calamari agent that does the 
-flashing.
+We didn't get a clear answer from you in [1].  If this is the wrong
+thing to do for network block devices then we should yank it
+universally (nbd, iscsi, libceph).  If not, this patch simply tries to
+keep ceph loopback scenario alive, for toy setups and development
+testing, if nothing else.
 
-It also may be necessary for the disk -> last known state mapping to go 
-somewhere other than in just osd metadata; if the osd is recreated or the 
-id gets reused that info go away.  (We could also be careful to avoid 
-deallocating the id until the disk is removed, I guess, but it's another 
-constraint to worry about.)
+[1] http://thread.gmane.org/gmane.comp.file-systems.ceph.devel/23708
 
-sage
+Thanks,
+
+                Ilya
