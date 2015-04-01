@@ -1,109 +1,93 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Ceph disk
-Date: Tue, 31 Mar 2015 22:02:33 +0200
-Message-ID: <551AFD59.70209@dachary.org>
-References: <ruevn0vmi9p4p1m5biuhx7sc.1427804698773@email.android.com> <1427827660.6486.7.camel@debian>
+From: kernel neophyte <neophyte.hacker001@gmail.com>
+Subject: Re: Fio noshare
+Date: Tue, 31 Mar 2015 19:11:20 -0700
+Message-ID: <CAFkUHxfA8WPwtbHiuV5g=73Lhox9P8nYzY+nhHezqQ==qYmMnw@mail.gmail.com>
+References: <CAFkUHxcy2tJsppddLLqVfdGWa9J28dKGH77s1E9RXEspeKU4YQ@mail.gmail.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F28CB73BB@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CAFkUHxfMXEAVkMMXQABx403-a-7z2HbynVyoX1hU0B2bDUY1Lg@mail.gmail.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F28CB73F9@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="GoWISoa4Tlkx0X38Ibc38XTf1sIdEOBl4"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:39881 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1754620AbbCaUCg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 31 Mar 2015 16:02:36 -0400
-In-Reply-To: <1427827660.6486.7.camel@debian>
+Received: from mail-pa0-f44.google.com ([209.85.220.44]:36060 "EHLO
+	mail-pa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750836AbbDACLU convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 31 Mar 2015 22:11:20 -0400
+Received: by padcy3 with SMTP id cy3so37152114pad.3
+        for <ceph-devel@vger.kernel.org>; Tue, 31 Mar 2015 19:11:20 -0700 (PDT)
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CB73F9@SACMBXIP01.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Kewaan Ejaz <kewaan.ejaz@office.nacamar.de>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---GoWISoa4Tlkx0X38Ibc38XTf1sIdEOBl4
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Hi Somnath,
 
-[cc'ing ceph-devel public mailing list]
+Thanks! it turned out to be a mistake from my side.
 
-Hi,
+On Tue, Mar 31, 2015 at 12:32 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
+> There was a rbd caching issue earlier, that is fixed in Giant onwards. Hope you are trying with the latest one.
 
-On 31/03/2015 20:47, Kewaan Ejaz wrote:
-> Hello Loic,
->=20
-> Thank you again for the opportunity to contribute to ceph. I am not sur=
-e
-> how am I suppose to proceed but I have the following things in mind;
+Yep, I am using latest master.
 
-Thanks for proposing to help :-)
+> Also, try with 'lsof' to determine how many librados/librbd instances fio_rbd is loading.
 
-> 1) Fully understanding the ceph-disk code
-> 2) I would start using the ceph-disk in my sandbox environment
-> (Virtualbox)
+Yep, you are right.
 
-You'll find that it's fairly straightforward: one file, all in it. There =
-is room for improvement.
+> Could you share a bit more about your config (pool, images etc.) and the fio_rbd script
 
-https://ceph.com/git/?p=3Dceph.git;a=3Dblob;f=3Dsrc/test/ceph-disk.sh are=
- the tests that make check will run=20
-https://ceph.com/git/?p=3Dceph.git;a=3Dblob;f=3Dsrc/test/ceph-disk-root.s=
-h are the tests that make check will run if ./configure --enable-root-mak=
-e-check is used but you can also run one manually with cd src ; sudo test=
-/ceph-disk.sh test_activate_dev and it will use the /dev/loop device to s=
-imulate a disk. A few sanity checks were added recently to verify that th=
-e loop device has been loaded with the necessary loop.max_part=3D16 (or m=
-ore) parameter and that /dev/disk/part-byuuid is populated as expected.=20
+I am trying to measure osd scaling. I have three servers one as
+client, other as monitor/admin and the last one with multiple osd's.
 
-> I think I would require a week to get back to you. But other than that,=
-
-> let me know what kind of VM do you have in mind. For example,
->=20
-> 1) What kind of OS would you prefer from the Openstack cluster?
-
-I feel more confortable with Debian or Ubuntu but CentOS or Fedora are al=
-so fine. What is required for test purposes is a dedicated tenant with th=
-e ability to run two virtual machines, 1GB RAM, 10GB disk, 1core. We woul=
-d need a variety of images to test against (Ubuntu 12.04 + 14.04, Debian =
-jessie, CentOS 7 + 6, Fedora 20 + 21, OpenSUSE 13.2).
-
-> 2) We are not using Cinder or Swift in our Openstack cluster. Is that a=
-
-> Problem?
-
-That will be fine: the loop device can be used as a spare disk instead of=
- provisioning one with cinder.=20
-
-As soon as you can have that OpenStack tenant ready, it can be used with =
-https://github.com/osynge/whatenv to run tests for https://github.com/cep=
-h/ceph/pull/4036 and verify that the detection system actually works as e=
-xpected.=20
-
-And once it's done, we could make it so this test is run whenever a pull =
-request is posted that modifies ceph-disk and ensure we're not risking a =
-regression. It would be a very valuable service. Not too CPU intensive ei=
-ther since we're not seeing more than a few patches on ceph-disk every mo=
-nth.
-
-Cheers
-
-> Best Regards,
-> Kewaan.
+Every run I am adding an osd and measuring how it scales.
 
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---GoWISoa4Tlkx0X38Ibc38XTf1sIdEOBl4
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlUa/VkACgkQ8dLMyEl6F22d1ACgv5Z04MvLPmkECNFWMODfLjzO
-UlwAoKxstCtNviXsKnYwRXmLGYG6AWz9
-=jbdb
------END PGP SIGNATURE-----
-
---GoWISoa4Tlkx0X38Ibc38XTf1sIdEOBl4--
+> Also, how are you running your tests ?
+>
+> Thanks & Regards
+> Somnath
+>
+> -----Original Message-----
+> From: kernel neophyte [mailto:neophyte.hacker001@gmail.com]
+> Sent: Tuesday, March 31, 2015 12:06 PM
+> To: Somnath Roy
+> Cc: ceph-devel@vger.kernel.org
+> Subject: Re: Fio noshare
+>
+> On Tue, Mar 31, 2015 at 11:56 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
+>> It's a rbd mapping option, I don't think you can specify it from fio_rbd.
+>
+> Thanks for confirming Somnath.
+>
+>> Also, I think in case fio rbd each fio job will pick up its own librbd/librados instances, so, you don't need this 'noshare' option.
+>>
+>
+> Thats what I thought, but when run fio with ioengine rbd I do not see any improvement. If I do the same with ioengine=libaio and have my rbd mapped with noshare then I see lots of improvement.
+>
+> -Neo
+>
+>> Thanks & Regards
+>> Somnath
+>>
+>> -----Original Message-----
+>> From: ceph-devel-owner@vger.kernel.org
+>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of kernel neophyte
+>> Sent: Tuesday, March 31, 2015 11:44 AM
+>> To: ceph-devel@vger.kernel.org
+>> Subject: Fio noshare
+>>
+>> Hi,
+>>
+>> Is there any way to enable noshare while running fio with ioengine=rbd ?
+>>
+>> -Neo
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>> in the body of a message to majordomo@vger.kernel.org More majordomo
+>> info at  http://vger.kernel.org/majordomo-info.html
+>>
+>> ________________________________
+>>
+>> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+>>
