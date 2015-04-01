@@ -1,131 +1,152 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH] libceph: don't set memalloc flags in loopback case
-Date: Wed,  1 Apr 2015 20:19:20 +0300
-Message-ID: <1427908760-7083-1-git-send-email-idryomov@gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: tcmalloc issue
+Date: Wed, 1 Apr 2015 17:54:32 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CB8270@SACMBXIP01.sdcorp.global.sandisk.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CAD14A@SACMBXIP01.sdcorp.global.sandisk.com>
+ <alpine.DEB.2.00.1503261646150.31431@cobra.newdream.net>
+ <551C1514.3060607@ubuntu.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f52.google.com ([209.85.215.52]:35658 "EHLO
-	mail-la0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751113AbbDARTa (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Apr 2015 13:19:30 -0400
-Received: by lahf3 with SMTP id f3so41387481lah.2
-        for <ceph-devel@vger.kernel.org>; Wed, 01 Apr 2015 10:19:29 -0700 (PDT)
+Received: from mail-bn1bon0061.outbound.protection.outlook.com ([157.56.111.61]:53888
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752142AbbDARyl convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Apr 2015 13:54:41 -0400
+In-Reply-To: <551C1514.3060607@ubuntu.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Mike Christie <michaelc@cs.wisc.edu>, Mel Gorman <mgorman@suse.de>, Sage Weil <sage@redhat.com>
+To: James Page <james.page@ubuntu.com>, Sage Weil <sage@newdream.net>, "ceph-maintainers@ceph.com" <ceph-maintainers@ceph.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Following nbd and iscsi, commit 89baaa570ab0 ("libceph: use memalloc
-flags for net IO") set SOCK_MEMALLOC and PF_MEMALLOC flags for rbd and
-cephfs.  However it turned out to not play nice with loopback scenario,
-leading to lockups with a full socket send-q and empty recv-q.
+Thanks James !
 
-While we always advised against colocating kernel client and ceph
-servers on the same box, a few people are doing it and it's also useful
-for light development testing, so rather than reverting make sure to
-not set those flags in the loopback case.
+the tcmalloc bug is reported in the following link.
 
-Cc: Mike Christie <michaelc@cs.wisc.edu>
-Cc: Mel Gorman <mgorman@suse.de>
-Cc: Sage Weil <sage@redhat.com>
-Cc: stable@vger.kernel.org # 3.18+, needs backporting
-Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
----
- net/ceph/messenger.c | 40 +++++++++++++++++++++++++++++++++++++---
- 1 file changed, 37 insertions(+), 3 deletions(-)
+http://code.google.com/p/gperftools/issues/detail?id=585
 
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index 6b3f54ed65ba..9fa2cce71164 100644
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -101,6 +101,7 @@
- #define CON_FLAG_WRITE_PENDING	   2  /* we have data ready to send */
- #define CON_FLAG_SOCK_CLOSED	   3  /* socket state changed to closed */
- #define CON_FLAG_BACKOFF           4  /* need to retry queuing delayed work */
-+#define CON_FLAG_LOCAL             5  /* using loopback interface */
- 
- static bool con_flag_valid(unsigned long con_flag)
- {
-@@ -110,6 +111,7 @@ static bool con_flag_valid(unsigned long con_flag)
- 	case CON_FLAG_WRITE_PENDING:
- 	case CON_FLAG_SOCK_CLOSED:
- 	case CON_FLAG_BACKOFF:
-+	case CON_FLAG_LOCAL:
- 		return true;
- 	default:
- 		return false;
-@@ -470,6 +472,18 @@ static void set_sock_callbacks(struct socket *sock,
-  * socket helpers
-  */
- 
-+static bool sk_is_loopback(struct sock *sk)
-+{
-+	struct dst_entry *dst = sk_dst_get(sk);
-+	bool ret = false;
-+
-+	if (dst) {
-+		ret = dst->dev && (dst->dev->flags & IFF_LOOPBACK);
-+		dst_release(dst);
-+	}
-+	return ret;
-+}
-+
- /*
-  * initiate connection to a remote socket.
-  */
-@@ -484,7 +498,7 @@ static int ceph_tcp_connect(struct ceph_connection *con)
- 			       IPPROTO_TCP, &sock);
- 	if (ret)
- 		return ret;
--	sock->sk->sk_allocation = GFP_NOFS | __GFP_MEMALLOC;
-+	sock->sk->sk_allocation = GFP_NOFS;
- 
- #ifdef CONFIG_LOCKDEP
- 	lockdep_set_class(&sock->sk->sk_lock, &socket_class);
-@@ -510,6 +524,11 @@ static int ceph_tcp_connect(struct ceph_connection *con)
- 		return ret;
- 	}
- 
-+	if (sk_is_loopback(sock->sk))
-+		con_flag_set(con, CON_FLAG_LOCAL);
-+	else
-+		con_flag_clear(con, CON_FLAG_LOCAL);
-+
- 	if (con->msgr->tcp_nodelay) {
- 		int optval = 1;
- 
-@@ -520,7 +539,18 @@ static int ceph_tcp_connect(struct ceph_connection *con)
- 			       ret);
- 	}
- 
--	sk_set_memalloc(sock->sk);
-+	/*
-+	 * Tagging with SOCK_MEMALLOC / setting PF_MEMALLOC may lead to
-+	 * lockups if our peer is on the same host (communicating via
-+	 * loopback) due to sk_filter() mercilessly dropping pfmemalloc
-+	 * skbs on the receiving side - receiving loopback socket is
-+	 * not going to be tagged with SOCK_MEMALLOC.  See:
-+	 *
-+	 * - http://article.gmane.org/gmane.linux.kernel/1418791
-+	 * - http://article.gmane.org/gmane.linux.kernel.stable/46128
-+	 */
-+	if (!con_flag_test(con, CON_FLAG_LOCAL))
-+		sk_set_memalloc(sock->sk);
- 
- 	con->sock = sock;
- 	return 0;
-@@ -2811,7 +2841,11 @@ static void con_work(struct work_struct *work)
- 	unsigned long pflags = current->flags;
- 	bool fault;
- 
--	current->flags |= PF_MEMALLOC;
-+	/*
-+	 * See SOCK_MEMALLOC comment in ceph_tcp_connect().
-+	 */
-+	if (!con_flag_test(con, CON_FLAG_LOCAL))
-+		current->flags |= PF_MEMALLOC;
- 
- 	mutex_lock(&con->mutex);
- 	while (true) {
--- 
-1.9.3
+So, do you want us to give the steps on how we are hitting the following trace or to reproduce the bug reported in the above link ?
+
+If you are asking about hitting the stack trace I mentioned below, it is just running ceph with lot of IOs for longer period of time.
+
+Let us know.
+
+Regards
+Somnath
+
+-----Original Message-----
+From: James Page [mailto:james.page@ubuntu.com]
+Sent: Wednesday, April 01, 2015 8:56 AM
+To: Sage Weil; ceph-maintainers@ceph.com
+Cc: Somnath Roy; ceph-devel@vger.kernel.org
+Subject: Re: tcmalloc issue
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
+
+I've logged:
+
+https://bugs.launchpad.net/ubuntu/+source/google-perftools/+bug/1439277
+
+The upstream fix applies cleanly to the version of gperftools in 14.04
+- - I just need a good reproducer for the SRU test case.
+
+If anyone has one, please detail in the bug report above - I'll also ping on the upstream bug (but that is from 2013 so might not get much luck).
+
+On 26/03/15 23:47, Sage Weil wrote:
+> Hi James,
+>
+> Is it possible to get tcmalloc in trusty updated?  See below.
+>
+> Thanks! sage
+>
+> On Thu, 26 Mar 2015, Somnath Roy wrote:
+>
+>> Sage, Here is the tcmalloc issue I was talking in the performance
+>> meeting.
+>>
+>> http://code.google.com/p/gperftools/issues/detail?id=585
+>>
+>> The tcmalloc is consuming lot of cpus (and eventually slowing down
+>> the performance) with the following perf top  trace.
+>>
+>> 25.73% libtcmalloc.so.4.1.2 [.]
+>> tcmalloc::CentralFreeList::FetchFromSpans() 12.52%
+>> libtcmalloc.so.4.1.2 [.]
+>> tcmalloc::ThreadCache::ReleaseToCentralCache(tcmalloc::ThreadCache::F
+reeList*,
+>> unsigned long, int) 11.62% libtcmalloc.so.4.1.2 [.]
+>> tcmalloc::CentralFreeList::ReleaseToSpans(void*) 1.56% [kernel] [k]
+>> __copy_user_nocache 1.44% libtcmalloc.so.4.1.2 [.]
+>> tcmalloc::CentralFreeList::RemoveRange(void*, void*, int) 1.39%
+>> libtcmalloc.so.4.1.2 [.]
+>> tcmalloc::CentralFreeList::ReleaseListToSpans(void*) 0.89%
+>> libtcmalloc.so.4.1.2 [.] operator new(unsigned long)
+>>
+>>
+>> The TCMALLOC_MAX_TOTAL_THREAD_CACHE_BYTES is alleviating that but the
+>> env variable setting for this is a noop in the binary we are having
+>> in Ubuntu 14.04. It is fixed in gperftools-2.1.90 release. See the
+>> following link.
+>>
+>> http://code.google.com/p/gperftools/
+>>
+>> We can request Ubuntu guys to incorporate this version or the latest
+>> tcmalloc version which is gperftools-2.4.
+>>
+>> It will be really helpful if you can push them to incorporate this in
+>> 14.04 updates.
+>>
+>> Thanks & Regards Somnath
+>>
+>> ________________________________
+>>
+>> PLEASE NOTE: The information contained in this electronic mail
+>> message is intended only for the use of the designated
+>> recipient(s) named above. If the reader of this message is not the
+>> intended recipient, you are hereby notified that you have received
+>> this message in error and that any review, dissemination,
+>> distribution, or copying of this message is strictly prohibited. If
+>> you have received this communication in error, please notify the
+>> sender by telephone or e-mail (as shown
+>> above) immediately and destroy any and all copies of this message in
+>> your possession (whether hard copies or electronically stored
+>> copies).
+>>
+>> -- To unsubscribe from this list: send the line "unsubscribe
+>> ceph-devel" in the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at http://vger.kernel.org/majordomo-info.html
+>>
+>>
+>
+
+
+- --
+James Page
+Ubuntu and Debian Developer
+james.page@ubuntu.com
+jamespage@debian.org
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
+
+iQIcBAEBCAAGBQJVHBUUAAoJEL/srsug59jDfPYP/2zE62fCmvp9o+x7CxtDsALv
+JvlEAdtjR7F4epx/IWlrJcRW7Z8EMmXYu7Enlsc4koZhSoIgw92SzBilaSwt+d7V
+3M0xhFImlvednXJn8ppSBxIf5qrc8r57jQhnLv1rnw4+JrP+U6C994jmZCERKiN+
+Ph9+j+A7yBmIqinjdx9kbes29/wZuUgRCyF5c7Wm2xm4W3aN8ZthNKa7mbXvzO9Y
+ZNtXGcKZdKMWHbZYAmU64Sj82YQOWAdG/3FXOf+FmFOXDQG380UKCmd2aDRcqyvd
+ySBFrJVoZG2s9wr9lJBhnIebAs48WoRPXhsDXtknncw0L/ZkErF8c8HKUm4WIztM
+0fO/Zhue09vLTgOuBOmxcW6g0TW0CFhFPWXdTrb/gRfns6mOcuu57CdsvTePTEvH
+iYpWQQaccaqgO5Yt2Y7lNR7JwoEYBEX4CahaxO2XmN9wl9N/RJxMd4AhyxKCuimL
+La9YLZszHf+8qGMUjzY3NE6bgXlqUzjuNCE7ROu5rlyobrd4iRi8r4jeuZ37bR+m
+0h5SY9UyAISegSwCmtwr457FqeC+V52vlrkYZy06+yxaOaeXd3pP9GZ2o0CLhqcP
+cOva6Nt8OIemdKa6H1xm/V7uLqkJXl1xx3zEcONpzijmUS+2L6v4L3yhZQewif3d
+Ms0rECbXfF8tmuDxn8MB
+=P322
+-----END PGP SIGNATURE-----
+
+________________________________
+
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
 
