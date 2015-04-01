@@ -1,43 +1,131 @@
-From: "Blinick, Stephen L" <stephen.l.blinick@intel.com>
-Subject: IO-based timing analysis on v0.93
-Date: Wed, 1 Apr 2015 16:55:46 +0000
-Message-ID: <3649A15A2562B54294DE14BCE5AC79120B51A46E@FMSMSX119.amr.corp.intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: [PATCH] libceph: don't set memalloc flags in loopback case
+Date: Wed,  1 Apr 2015 20:19:20 +0300
+Message-ID: <1427908760-7083-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:27185 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751863AbbDAQzt convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Apr 2015 12:55:49 -0400
-Content-Language: en-US
+Received: from mail-la0-f52.google.com ([209.85.215.52]:35658 "EHLO
+	mail-la0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751113AbbDARTa (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Apr 2015 13:19:30 -0400
+Received: by lahf3 with SMTP id f3so41387481lah.2
+        for <ceph-devel@vger.kernel.org>; Wed, 01 Apr 2015 10:19:29 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-Cc: "'sweil@redhat.com'" <sweil@redhat.com>, Mark Nelson <mnelson@redhat.com>, Andreas Bluemle <andreas.bluemle@itxperts.de>, "sjust@redhat.com" <sjust@redhat.com>
+To: ceph-devel@vger.kernel.org
+Cc: Mike Christie <michaelc@cs.wisc.edu>, Mel Gorman <mgorman@suse.de>, Sage Weil <sage@redhat.com>
 
-I'm sharing below the data from the timing analysis I mentioned in the performance meeting this morning.   Attachments are problematic so I'm trying Google docs.
+Following nbd and iscsi, commit 89baaa570ab0 ("libceph: use memalloc
+flags for net IO") set SOCK_MEMALLOC and PF_MEMALLOC flags for rbd and
+cephfs.  However it turned out to not play nice with loopback scenario,
+leading to lockups with a full socket send-q and empty recv-q.
 
-The test is single node rados bench runs, 4k reads & writes, single OSD, memstore backend.    Hopefully the format is self-explanatory, but essentially key modules were modified with function entrance/exit traces and timing, as well as some traces marking the beginning and ending of a worker thread loop.  20-50K IOs are run, and then a script is used to 'detangle' the sequence of traces & timing of each individual op, using OID (tid is not available everywhere).  After the ops are detangled, which now includes the time that op spent not being processed (i.e. sitting between threads on a queue), any ops that have identical call paths are averaged together to get average times.   I then arbitrarily colored the groups of traces based on thread/major work area.
+While we always advised against colocating kernel client and ceph
+servers on the same box, a few people are doing it and it's also useful
+for light development testing, so rather than reverting make sure to
+not set those flags in the loopback case.
 
-For each run, the QD was increased past the point where throughput no longer increases and only latency increases, each tab of the spreadsheet can be compared to see which component of the IO time increases.   The upper-right contains the IO time as guessed by the script vs what Rados Bench records (they are pretty similar, but Rados Bench is measuring a bit more beyond the last librados traces).
+Cc: Mike Christie <michaelc@cs.wisc.edu>
+Cc: Mel Gorman <mgorman@suse.de>
+Cc: Sage Weil <sage@redhat.com>
+Cc: stable@vger.kernel.org # 3.18+, needs backporting
+Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+---
+ net/ceph/messenger.c | 40 +++++++++++++++++++++++++++++++++++++---
+ 1 file changed, 37 insertions(+), 3 deletions(-)
 
-Summary Sheet (with links to the others)
-https://docs.google.com/spreadsheets/d/14LplRzVKf_aM65ENJjghuY8DFGmVOIqn2n_ASAILsxo/edit?usp=sharing
-
-Contains:
-1) 100% Reads
-2) 100% Writes
-3) 100% Reads w/ auth=none
-4) 100% writes w /auth=none
-
-In #1 and #2, the bottleneck is in the simple messenger, and with auth turned off, for #4 that appears to move to the bottleneck to the time before the finisher begins to operate on an op after the Op Worker is done with it.   
-
-I should be able to run w/ Filestore rather easily, as long as I tag what each thread is doing.  I'll also run w/ multiple clients.  Let me know if you have any comments or suggestions.
-
-Thanks,
-
-Stephen
-
-
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index 6b3f54ed65ba..9fa2cce71164 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -101,6 +101,7 @@
+ #define CON_FLAG_WRITE_PENDING	   2  /* we have data ready to send */
+ #define CON_FLAG_SOCK_CLOSED	   3  /* socket state changed to closed */
+ #define CON_FLAG_BACKOFF           4  /* need to retry queuing delayed work */
++#define CON_FLAG_LOCAL             5  /* using loopback interface */
+ 
+ static bool con_flag_valid(unsigned long con_flag)
+ {
+@@ -110,6 +111,7 @@ static bool con_flag_valid(unsigned long con_flag)
+ 	case CON_FLAG_WRITE_PENDING:
+ 	case CON_FLAG_SOCK_CLOSED:
+ 	case CON_FLAG_BACKOFF:
++	case CON_FLAG_LOCAL:
+ 		return true;
+ 	default:
+ 		return false;
+@@ -470,6 +472,18 @@ static void set_sock_callbacks(struct socket *sock,
+  * socket helpers
+  */
+ 
++static bool sk_is_loopback(struct sock *sk)
++{
++	struct dst_entry *dst = sk_dst_get(sk);
++	bool ret = false;
++
++	if (dst) {
++		ret = dst->dev && (dst->dev->flags & IFF_LOOPBACK);
++		dst_release(dst);
++	}
++	return ret;
++}
++
+ /*
+  * initiate connection to a remote socket.
+  */
+@@ -484,7 +498,7 @@ static int ceph_tcp_connect(struct ceph_connection *con)
+ 			       IPPROTO_TCP, &sock);
+ 	if (ret)
+ 		return ret;
+-	sock->sk->sk_allocation = GFP_NOFS | __GFP_MEMALLOC;
++	sock->sk->sk_allocation = GFP_NOFS;
+ 
+ #ifdef CONFIG_LOCKDEP
+ 	lockdep_set_class(&sock->sk->sk_lock, &socket_class);
+@@ -510,6 +524,11 @@ static int ceph_tcp_connect(struct ceph_connection *con)
+ 		return ret;
+ 	}
+ 
++	if (sk_is_loopback(sock->sk))
++		con_flag_set(con, CON_FLAG_LOCAL);
++	else
++		con_flag_clear(con, CON_FLAG_LOCAL);
++
+ 	if (con->msgr->tcp_nodelay) {
+ 		int optval = 1;
+ 
+@@ -520,7 +539,18 @@ static int ceph_tcp_connect(struct ceph_connection *con)
+ 			       ret);
+ 	}
+ 
+-	sk_set_memalloc(sock->sk);
++	/*
++	 * Tagging with SOCK_MEMALLOC / setting PF_MEMALLOC may lead to
++	 * lockups if our peer is on the same host (communicating via
++	 * loopback) due to sk_filter() mercilessly dropping pfmemalloc
++	 * skbs on the receiving side - receiving loopback socket is
++	 * not going to be tagged with SOCK_MEMALLOC.  See:
++	 *
++	 * - http://article.gmane.org/gmane.linux.kernel/1418791
++	 * - http://article.gmane.org/gmane.linux.kernel.stable/46128
++	 */
++	if (!con_flag_test(con, CON_FLAG_LOCAL))
++		sk_set_memalloc(sock->sk);
+ 
+ 	con->sock = sock;
+ 	return 0;
+@@ -2811,7 +2841,11 @@ static void con_work(struct work_struct *work)
+ 	unsigned long pflags = current->flags;
+ 	bool fault;
+ 
+-	current->flags |= PF_MEMALLOC;
++	/*
++	 * See SOCK_MEMALLOC comment in ceph_tcp_connect().
++	 */
++	if (!con_flag_test(con, CON_FLAG_LOCAL))
++		current->flags |= PF_MEMALLOC;
+ 
+ 	mutex_lock(&con->mutex);
+ 	while (true) {
+-- 
+1.9.3
 
