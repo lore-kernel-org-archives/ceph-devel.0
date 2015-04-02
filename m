@@ -1,51 +1,57 @@
-From: "Handzik, Joe" <joseph.t.handzik@hp.com>
-Subject: Re: Advice for implementation of LED behavior in Ceph ecosystem
-Date: Wed, 1 Apr 2015 23:48:18 +0000
-Message-ID: <D4BC34EA-07C3-4763-BD8C-BF8EBC917B55@hp.com>
-References: <2C438B34CAC8264398F5C7AF7411910A6341F7EB@G4W3206.americas.hpqcorp.net>
- <551C6083.4070707@redhat.com>
- <551C693E.6020100@redhat.com>,<alpine.DEB.2.00.1504011613410.23387@cobra.newdream.net>
+From: Mel Gorman <mgorman@suse.de>
+Subject: Re: [PATCH] libceph: don't set memalloc flags in loopback case
+Date: Thu, 2 Apr 2015 06:41:24 +0100
+Message-ID: <20150402054124.GE20397@suse.de>
+References: <1427908760-7083-1-git-send-email-idryomov@gmail.com>
+ <20150401230323.GD20397@suse.de>
+ <CAOi1vP-u_sWF0uZpbYCN9qUp80tXQvmnJdOjWM3kpSR1JqSDMg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=iso-8859-15
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from g4t3427.houston.hp.com ([15.201.208.55]:60650 "EHLO
-	g4t3427.houston.hp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751846AbbDAXuM convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Apr 2015 19:50:12 -0400
-In-Reply-To: <alpine.DEB.2.00.1504011613410.23387@cobra.newdream.net>
-Content-Language: en-US
+Received: from cantor2.suse.de ([195.135.220.15]:39337 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752762AbbDBFl3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 2 Apr 2015 01:41:29 -0400
+Content-Disposition: inline
+In-Reply-To: <CAOi1vP-u_sWF0uZpbYCN9qUp80tXQvmnJdOjWM3kpSR1JqSDMg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: John Spray <john.spray@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Mike Christie <michaelc@cs.wisc.edu>, Sage Weil <sage@redhat.com>
 
-Well, keep in mind that this isn't just for identification of failed disks. I can conceive of use cases where a user flips on one or more drive LEDs for identification or debugging purposes. That would be the distinction between identity and fail. We can give the user the ability to distinguish between the two and figure out which they'd want to use at any given time (also, keep in mind that the failure LED is not customer controllable behind some storage controllers anyway...).
+On Thu, Apr 02, 2015 at 02:40:19AM +0300, Ilya Dryomov wrote:
+> On Thu, Apr 2, 2015 at 2:03 AM, Mel Gorman <mgorman@suse.de> wrote:
+> > On Wed, Apr 01, 2015 at 08:19:20PM +0300, Ilya Dryomov wrote:
+> >> Following nbd and iscsi, commit 89baaa570ab0 ("libceph: use memalloc
+> >> flags for net IO") set SOCK_MEMALLOC and PF_MEMALLOC flags for rbd and
+> >> cephfs.  However it turned out to not play nice with loopback scenario,
+> >> leading to lockups with a full socket send-q and empty recv-q.
+> >>
+> >> While we always advised against colocating kernel client and ceph
+> >> servers on the same box, a few people are doing it and it's also useful
+> >> for light development testing, so rather than reverting make sure to
+> >> not set those flags in the loopback case.
+> >>
+> >
+> > This does not clarify why the non-loopback case needs access to pfmemalloc
+> > reserves. Granted, I've spent zero time on this but it's really unclear
+> > what problem was originally tried to be solved and why dirty page limiting
+> > was insufficient. Swap over NFS was always a very special case minimally
+> > because it's immune to dirty page throttling.
+> 
+> I don't think there was any particular problem tried to be solved,
 
-I was wondering if I'd need to carry along the last known disk state...guess I'll figure that nuance out as I go.
+Then please go back and look at why dirty page limiting is insufficient
+for ceph.
 
-Joe
+> certainly not one we hit and fixed with 89baaa570ab0.  Mike is out this
+> week, but I'm pretty sure he said he copied this for iscsi from nbd
+> because you nudged him to (and you yourself did this for nbd as part of
+> swap-over-NFS series).
 
-> On Apr 1, 2015, at 6:17 PM, Sage Weil <sage@newdream.net> wrote:
-> 
-> #2 really sounds safer to me.  In particular, you need to be really 
-> careful not to flash an LED until you're sure you don't need the data on 
-> the disk (i.e., it's down+out and the cluster state is healthy--no heroic 
-> measures needed).  I think anything that triggers flashing that doesn't 
-> have a holistic view of the cluster would be dangerous.
-> 
-> That, combined with the complications around ceph-osd possibly not 
-> running, make me thing this would be the calamari agent that does the 
-> flashing.
-> 
-> It also may be necessary for the disk -> last known state mapping to go 
-> somewhere other than in just osd metadata; if the osd is recreated or the 
-> id gets reused that info go away.  (We could also be careful to avoid 
-> deallocating the id until the disk is removed, I guess, but it's another 
-> constraint to worry about.)
-> 
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+In http://thread.gmane.org/gmane.comp.file-systems.ceph.devel/23708 I
+stated that if ceph insisted on using using nbd as justification for ceph
+using __GFP_MEMALLOC that it was preferred that nbd be broken instead. In
+commit 7f338fe4540b1d0600b02314c7d885fd358e9eca, the use case in mind was
+the swap-over-nbd case and I regret I didn't have userspace explicitly
+tell the kernel that NBD was being used as a swap device.
