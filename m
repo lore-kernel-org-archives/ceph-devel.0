@@ -1,94 +1,59 @@
-From: Mel Gorman <mgorman@suse.de>
-Subject: Re: [PATCH] libceph: don't set memalloc flags in loopback case
-Date: Fri, 3 Apr 2015 11:34:23 +0100
-Message-ID: <20150403103423.GW4701@suse.de>
-References: <1427908760-7083-1-git-send-email-idryomov@gmail.com>
- <20150401230323.GD20397@suse.de>
- <CAOi1vP-u_sWF0uZpbYCN9qUp80tXQvmnJdOjWM3kpSR1JqSDMg@mail.gmail.com>
- <20150402054124.GE20397@suse.de>
- <CAOi1vP_VYDQ1+CjzGG4kZx5C2K97Vhv63w2s9edLE4rnZ2pTMA@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: the tarbal gitbuilders are currently broken
+Date: Fri, 03 Apr 2015 20:41:02 +0200
+Message-ID: <551EDEBE.6060906@dachary.org>
+References: <551DFF73.4040700@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-15
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="oVdL5rBCfxbtjvq32gtAJK6lfbfA7Ku8q"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cantor2.suse.de ([195.135.220.15]:43257 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751338AbbDCKe1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 3 Apr 2015 06:34:27 -0400
-Content-Disposition: inline
-In-Reply-To: <CAOi1vP_VYDQ1+CjzGG4kZx5C2K97Vhv63w2s9edLE4rnZ2pTMA@mail.gmail.com>
+Received: from mail2.dachary.org ([91.121.57.175]:41448 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752536AbbDCSlG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Apr 2015 14:41:06 -0400
+Received: from [10.9.0.6] (unknown [10.0.2.28])
+	by smtp.dmail.dachary.org (Postfix) with ESMTP id 36D4042B21
+	for <ceph-devel@vger.kernel.org>; Fri,  3 Apr 2015 20:41:03 +0200 (CEST)
+In-Reply-To: <551DFF73.4040700@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Mike Christie <michaelc@cs.wisc.edu>, Sage Weil <sage@redhat.com>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Thu, Apr 02, 2015 at 11:35:35AM +0300, Ilya Dryomov wrote:
-> On Thu, Apr 2, 2015 at 8:41 AM, Mel Gorman <mgorman@suse.de> wrote:
-> > On Thu, Apr 02, 2015 at 02:40:19AM +0300, Ilya Dryomov wrote:
-> >> On Thu, Apr 2, 2015 at 2:03 AM, Mel Gorman <mgorman@suse.de> wrote:
-> >> > On Wed, Apr 01, 2015 at 08:19:20PM +0300, Ilya Dryomov wrote:
-> >> >> Following nbd and iscsi, commit 89baaa570ab0 ("libceph: use memalloc
-> >> >> flags for net IO") set SOCK_MEMALLOC and PF_MEMALLOC flags for rbd and
-> >> >> cephfs.  However it turned out to not play nice with loopback scenario,
-> >> >> leading to lockups with a full socket send-q and empty recv-q.
-> >> >>
-> >> >> While we always advised against colocating kernel client and ceph
-> >> >> servers on the same box, a few people are doing it and it's also useful
-> >> >> for light development testing, so rather than reverting make sure to
-> >> >> not set those flags in the loopback case.
-> >> >>
-> >> >
-> >> > This does not clarify why the non-loopback case needs access to pfmemalloc
-> >> > reserves. Granted, I've spent zero time on this but it's really unclear
-> >> > what problem was originally tried to be solved and why dirty page limiting
-> >> > was insufficient. Swap over NFS was always a very special case minimally
-> >> > because it's immune to dirty page throttling.
-> >>
-> >> I don't think there was any particular problem tried to be solved,
-> >
-> > Then please go back and look at why dirty page limiting is insufficient
-> > for ceph.
-> >
-> >> certainly not one we hit and fixed with 89baaa570ab0.  Mike is out this
-> >> week, but I'm pretty sure he said he copied this for iscsi from nbd
-> >> because you nudged him to (and you yourself did this for nbd as part of
-> >> swap-over-NFS series).
-> >
-> > In http://thread.gmane.org/gmane.comp.file-systems.ceph.devel/23708 I
-> > stated that if ceph insisted on using using nbd as justification for ceph
-> > using __GFP_MEMALLOC that it was preferred that nbd be broken instead. In
-> > commit 7f338fe4540b1d0600b02314c7d885fd358e9eca, the use case in mind was
-> > the swap-over-nbd case and I regret I didn't have userspace explicitly
-> > tell the kernel that NBD was being used as a swap device.
-> 
-> OK, it all starts to make sense now.  So ideally nbd would only use
-> __GFP_MEMALLOC if nbd-client was invoked with -swap - you just didn't
-> implement that. 
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--oVdL5rBCfxbtjvq32gtAJK6lfbfA7Ku8q
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-Yes.
+They have been fixed and run make check.
 
-> I think ceph is fine with dirty page limiting in general,
+On 03/04/2015 04:48, Loic Dachary wrote:
+> Hi,
+>=20
+> After re-installing the tarbal gitbuilders so that they run make check =
+(which they didn't in the past few weeks), it turns out that some of them=
+ timeout. https://github.com/ceph/autobuild-ceph/pull/39/files will hopef=
+ully fix this by running make -jX check. It has been installed on gitbuil=
+der-ceph-tarball-trusty-amd64-basic for testing.
+>=20
+> Cheers
+>=20
 
-Then I suggest removing ceph's usage of __GFP_MEMALLOC until there is a
-genuine problem that dirty page limiting is unable to handle.  Dirty page
-limiting might stall in some cases but worst case for __GFP_MEMALLOC abuse
-is a livelocked machine.
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
-> so it's only
-> if we wanted to support swap-over-rbd (cephfs is a bit of a weak link
-> currently, so I'm not going there) would we need to enable
-> SOCK_MEMALLOC/PF_MEMALLOC and only for that ceph_client instance.
 
-Yes.
+--oVdL5rBCfxbtjvq32gtAJK6lfbfA7Ku8q
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
-> Sounds like that will require a "swap" libceph option, which will also
-> implicitly enable "noshare" to make sure __GFP_MEMALLOC ceph_client is
-> not shared with anything else - luckily we don't have a userspace
-> process a la nbd-client we need to worry about.
-> 
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
 
-I'm not familiar enough with the ins and outs of rbd to know what sort
-of implementation hazards might be encountered.
+iEYEARECAAYFAlUe3r4ACgkQ8dLMyEl6F21AzgCfTeuhzaYnOd+Plw8R8eldTQjs
+Vw0AoMJwMBeWiLoRSm0EZ9qqfeccuO+K
+=0fiY
+-----END PGP SIGNATURE-----
 
--- 
-Mel Gorman
-SUSE Labs
+--oVdL5rBCfxbtjvq32gtAJK6lfbfA7Ku8q--
