@@ -1,76 +1,268 @@
-From: Mike Christie <mchristi@redhat.com>
-Subject: Re: [PATCH] libceph: don't set memalloc flags in loopback case
-Date: Fri, 03 Apr 2015 15:03:53 -0500
-Message-ID: <551EF229.5000509@redhat.com>
-References: <1427908760-7083-1-git-send-email-idryomov@gmail.com> <20150401230323.GD20397@suse.de> <CAOi1vP-u_sWF0uZpbYCN9qUp80tXQvmnJdOjWM3kpSR1JqSDMg@mail.gmail.com> <20150402054124.GE20397@suse.de>
+From: Barclay Jameson <almightybeeij@gmail.com>
+Subject: Re: [ceph-users] CephFS Slow writes with 1MB files
+Date: Fri, 3 Apr 2015 15:57:05 -0500
+Message-ID: <CAMzumdb9eAJTpx_y4EULtvmjVe0x4NHUJ4aJ3BwH8YrxZEF+Ug@mail.gmail.com>
+References: <CAMzumdZo2jdHEnB55g1XOVTxc4JLq-+6JFFZSwjgox=9LOUdZA@mail.gmail.com>
+	<CAMzumdbezcb-p1_MpcSL-h8tTR0RKATt93Om6NPejtn1G6yPeQ@mail.gmail.com>
+	<CAC6JEv-G_s3gRNmn3MHPiuFP6ODiOgvhX_J02KEo=Dd0X-JLGg@mail.gmail.com>
+	<CAMzumdb8S77aYqNUyhwzZDCGp6KBFc8OueZ0pCKrkSP=hDNFPg@mail.gmail.com>
+	<CAC6JEv-4D2kF7rrnGMncbE-_63+hdDzecqpB+HrMOKp1YGwv_w@mail.gmail.com>
+	<CAMzumda7VserizM5PEoT8mwYnTHeE4CFiUiLjnjqN2xXaeNVQQ@mail.gmail.com>
+	<CAAM7YAkwtFLnFea3fNT_CaeA2R+_xdZONVN_s21k7_Rbd27H+Q@mail.gmail.com>
+	<CAMzumdZG4Zqv5SWGTRTS_FTEUe3EwVbbBThjXVTP2gQadMhFsw@mail.gmail.com>
+	<CAAM7YA=hz1E+HJtDKoh-vzwyrGU=O3S822jOWSJzViWG-0-L=w@mail.gmail.com>
+	<CAMzumdYdeTv0qF9VdNHb4CM=DNV_HC2nQ7sVnqJ+5w6=TrvCiQ@mail.gmail.com>
+	<CAAM7YA=Bf+q6Bp2X3zyZ9LF7q1iUeP77htr9DPesS81bhjr5Qw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:46670 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751495AbbDCUDz (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 3 Apr 2015 16:03:55 -0400
-In-Reply-To: <20150402054124.GE20397@suse.de>
+Received: from mail-qg0-f50.google.com ([209.85.192.50]:36543 "EHLO
+	mail-qg0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752519AbbDCU5G (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Apr 2015 16:57:06 -0400
+Received: by qgeb100 with SMTP id b100so58782315qge.3
+        for <ceph-devel@vger.kernel.org>; Fri, 03 Apr 2015 13:57:06 -0700 (PDT)
+In-Reply-To: <CAAM7YA=Bf+q6Bp2X3zyZ9LF7q1iUeP77htr9DPesS81bhjr5Qw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mel Gorman <mgorman@suse.de>, Ilya Dryomov <idryomov@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Mike Christie <michaelc@cs.wisc.edu>, Sage Weil <sage@redhat.com>
+To: "Yan, Zheng" <ukernel@gmail.com>
+Cc: Gregory Farnum <greg@gregs42.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
 
-On 04/02/2015 12:41 AM, Mel Gorman wrote:
-> On Thu, Apr 02, 2015 at 02:40:19AM +0300, Ilya Dryomov wrote:
->> > On Thu, Apr 2, 2015 at 2:03 AM, Mel Gorman <mgorman@suse.de> wrote:
->>> > > On Wed, Apr 01, 2015 at 08:19:20PM +0300, Ilya Dryomov wrote:
->>>> > >> Following nbd and iscsi, commit 89baaa570ab0 ("libceph: use memalloc
->>>> > >> flags for net IO") set SOCK_MEMALLOC and PF_MEMALLOC flags for rbd and
->>>> > >> cephfs.  However it turned out to not play nice with loopback scenario,
->>>> > >> leading to lockups with a full socket send-q and empty recv-q.
->>>> > >>
->>>> > >> While we always advised against colocating kernel client and ceph
->>>> > >> servers on the same box, a few people are doing it and it's also useful
->>>> > >> for light development testing, so rather than reverting make sure to
->>>> > >> not set those flags in the loopback case.
->>>> > >>
->>> > >
->>> > > This does not clarify why the non-loopback case needs access to pfmemalloc
->>> > > reserves. Granted, I've spent zero time on this but it's really unclear
->>> > > what problem was originally tried to be solved and why dirty page limiting
->>> > > was insufficient. Swap over NFS was always a very special case minimally
->>> > > because it's immune to dirty page throttling.
->> > 
->> > I don't think there was any particular problem tried to be solved,
-> Then please go back and look at why dirty page limiting is insufficient
-> for ceph.
-> 
+I pulled down the gitbuilder package (ceph version 0.93-223-g5c2ecc3
+(5c2ecc3b8901e6491f1fde8858b51794ffa892e2) ) and redid the cluster.
+The small test files ( time cp small1/* small2/. ) went from the 2 min
+30 seconds to 1 min 40 secs. With some initial tuning I was able to
+get it down to 1 min 22 secs.
+It is much better but I still have more work to do to get it to 1 min
+for 1600 files.
 
-The problem I was trying to solve is just the basic one where block
-drivers have in the past been required to be able to make forward
-progress on a write. With iscsi under heavy IO and memory use loads, we
-will see memory allocation failures from the network layer followed by
-hard system lock ups. The block layer and its drivers like scsi does not
-make any distinction between swap and non swap disks to handle this
-problem. It will always just work when the network is not involved. I
-thought we did not special case swap, because there were cases where
-there may not be swappable pages, and the mm layer then needs to write
-out pages to other non-swap disks to be able to free up memory.
+Thank you for the pointer Zheng it was _extremely_ helpful :)
 
-In the block layer and scsi drivers like qla2xxx forward progress is
-easier to handle. They just use bio, request, scsi_cmnd, scatterlist,
-etc mempools and internally preallocate some resources they need. For
-iscsi and other block drivers that use the network, it is more difficult
-as you of course know, and when I did the iscsi and rbd/ceph patches I
-had thought we were supposed to be using the memalloc related flags to
-handle this problem for both swap and non swap cases. I might have
-misunderstood you way back when I did those patches originally.
+Still more work to do in terms of performance and speed (the goal is
+to replace the HPC tmp space we have on Panasas)
 
-For dirty page limiting, I thought the problem is that it is difficult
-to get right and at the same time not affect performance for some
-workloads. For non-net block drivers, we do not have to configure it
-just to handle this problem. It just works, and so I thought we have
-been trying to solve this problem in a similar way as the rest of the
-block layer by having some memory reserves.
+Thanks again,
 
-Also on a related note, I thought I heard at LSF that that forward
-progress requirement for non swap writes was going away. Is that true
-and is it something that is going to happen in the near future or was it
-more of a wish list item.
+Beeij
+
+On Thu, Apr 2, 2015 at 9:12 PM, Yan, Zheng <ukernel@gmail.com> wrote:
+> On Thu, Apr 2, 2015 at 11:18 PM, Barclay Jameson
+> <almightybeeij@gmail.com> wrote:
+>> I am using the Giant release. The OSDs and MON/MDS are using default
+>> RHEL 7 kernel. Client is using elrepo 3.19 kernel. I am also using
+>> cephaux.
+>
+> I reproduced this issue by using giant release. It's a bug in the MDS
+> code. Could you try the newest development version ceph (It includes
+> the fix). Or apply the attached patch to source of  giant release.
+>
+> Regards
+> Yan, Zheng
+>
+>>
+>> I may have found something.
+>> I did the build manually as such I did _NOT_ set up these config settings:
+>> filestore xattr use omap = false
+>> filestore max inline xattr size = 65536,
+>> filestore_max_inline_xattr_size_xfs = 65536
+>> filestore_max_inline_xattr_size_other = 512
+>> filestore_max_inline_xattrs_xfs = 10
+>>
+>> I just changed these settings to see if it will make a difference.
+>> I copied data from one directory that had files I created before I set
+>> these values ( time cp small1/* small2/.) and it takes 2 min 30 secs
+>> to copy 1600 files.
+>> If I took the files I just copied from small2 and copy them to a
+>> different directory ( time cp small2/* small3/.) it only takes 5 mins
+>> to copy 10000 files!
+>>
+>> Could this be part of the problem?
+>>
+>>
+>> On Thu, Apr 2, 2015 at 6:03 AM, Yan, Zheng <ukernel@gmail.com> wrote:
+>>> On Wed, Apr 1, 2015 at 12:31 AM, Barclay Jameson
+>>> <almightybeeij@gmail.com> wrote:
+>>>> Here is the mds output from the command you requested. I did this
+>>>> during the small data run . ( time cp small1/* small2/ )
+>>>> It is 20MB in size so I couldn't find a place online that would accept
+>>>> that much data.
+>>>>
+>>>> Please find attached file.
+>>>>
+>>>> Thanks,
+>>>
+>>> In the log file, each 'create' request is followed by several
+>>> 'getattr' requests. I guess these 'getattr' requests resulted from
+>>> some kinds of permission check, but I can't reproduce this situation
+>>> locally.
+>>>
+>>> which version of ceph/kernel are you using? do you use ceph-fuse or
+>>> kernel client, what's the mount options?
+>>>
+>>> Regards
+>>> Yan, Zheng
+>>>
+>>>
+>>>>
+>>>> Beeij
+>>>>
+>>>>
+>>>> On Mon, Mar 30, 2015 at 10:59 PM, Yan, Zheng <ukernel@gmail.com> wrote:
+>>>>> On Sun, Mar 29, 2015 at 1:12 AM, Barclay Jameson
+>>>>> <almightybeeij@gmail.com> wrote:
+>>>>>> I redid my entire Ceph build going back to to CentOS 7 hoping to the
+>>>>>> get the same performance I did last time.
+>>>>>> The rados bench test was the best I have ever had with a time of 740
+>>>>>> MB wr and 1300 MB rd. This was even better than the first rados bench
+>>>>>> test that had performance equal to PanFS. I find that this does not
+>>>>>> translate to my CephFS. Even with the following tweaking it still at
+>>>>>> least twice as slow as PanFS and my first *Magical* build (that had
+>>>>>> absolutely no tweaking):
+>>>>>>
+>>>>>> OSD
+>>>>>>  osd_op_treads 8
+>>>>>>  /sys/block/sd*/queue/nr_requests 4096
+>>>>>>  /sys/block/sd*/queue/read_ahead_kb 4096
+>>>>>>
+>>>>>> Client
+>>>>>>  rsize=16777216
+>>>>>>  readdir_max_bytes=16777216
+>>>>>>  readdir_max_entries=16777216
+>>>>>>
+>>>>>> ~160 mins to copy 100000 (1MB) files for CephFS vs ~50 mins for PanFS.
+>>>>>> Throughput on CephFS is about 10MB/s vs PanFS 30 MB/s.
+>>>>>>
+>>>>>> Strange thing is none of the resources are taxed.
+>>>>>> CPU, ram, network, disks, are not even close to being taxed on either
+>>>>>> the client,mon/mds, or the osd nodes.
+>>>>>> The PanFS client node was a 10Gb network the same as the CephFS client
+>>>>>> but you can see the huge difference in speed.
+>>>>>>
+>>>>>> As per Gregs questions before:
+>>>>>> There is only one client reading and writing (time cp Small1/*
+>>>>>> Small2/.) but three clients have cephfs mounted, although they aren't
+>>>>>> doing anything on the filesystem.
+>>>>>>
+>>>>>> I have done another test where I stream data info a file as fast as
+>>>>>> the processor can put it there.
+>>>>>> (for (i=0; i < 1000000001; i++){ fprintf (out_file, "I is : %d\n",i);}
+>>>>>> ) and it is faster than the PanFS. CephFS 16GB in 105 seconds with the
+>>>>>> above tuning vs 130 seconds for PanFS. Without the tuning it takes 230
+>>>>>> seconds for CephFS although the first build did it in 130 seconds
+>>>>>> without any tuning.
+>>>>>>
+>>>>>> This leads me to believe the bottleneck is the mds. Does anybody have
+>>>>>> any thoughts on this?
+>>>>>> Are there any tuning parameters that I would need to speed up the mds?
+>>>>>
+>>>>> could you enable mds debugging for a few seconds (ceph daemon mds.x
+>>>>> config set debug_mds 10; sleep 10; ceph daemon mds.x config set
+>>>>> debug_mds 0). and upload /var/log/ceph/mds.x.log to somewhere.
+>>>>>
+>>>>> Regards
+>>>>> Yan, Zheng
+>>>>>
+>>>>>>
+>>>>>> On Fri, Mar 27, 2015 at 4:50 PM, Gregory Farnum <greg@gregs42.com> wrote:
+>>>>>>> On Fri, Mar 27, 2015 at 2:46 PM, Barclay Jameson
+>>>>>>> <almightybeeij@gmail.com> wrote:
+>>>>>>>> Yes it's the exact same hardware except for the MDS server (although I
+>>>>>>>> tried using the MDS on the old node).
+>>>>>>>> I have not tried moving the MON back to the old node.
+>>>>>>>>
+>>>>>>>> My default cache size is "mds cache size = 10000000"
+>>>>>>>> The OSDs (3 of them) have 16 Disks with 4 SSD Journal Disks.
+>>>>>>>> I created 2048 for data and metadata:
+>>>>>>>> ceph osd pool create cephfs_data 2048 2048
+>>>>>>>> ceph osd pool create cephfs_metadata 2048 2048
+>>>>>>>>
+>>>>>>>>
+>>>>>>>> To your point on clients competing against each other... how would I check that?
+>>>>>>>
+>>>>>>> Do you have multiple clients mounted? Are they both accessing files in
+>>>>>>> the directory(ies) you're testing? Were they accessing the same
+>>>>>>> pattern of files for the old cluster?
+>>>>>>>
+>>>>>>> If you happen to be running a hammer rc or something pretty new you
+>>>>>>> can use the MDS admin socket to explore a bit what client sessions
+>>>>>>> there are and what they have permissions on and check; otherwise
+>>>>>>> you'll have to figure it out from the client side.
+>>>>>>> -Greg
+>>>>>>>
+>>>>>>>>
+>>>>>>>> Thanks for the input!
+>>>>>>>>
+>>>>>>>>
+>>>>>>>> On Fri, Mar 27, 2015 at 3:04 PM, Gregory Farnum <greg@gregs42.com> wrote:
+>>>>>>>>> So this is exactly the same test you ran previously, but now it's on
+>>>>>>>>> faster hardware and the test is slower?
+>>>>>>>>>
+>>>>>>>>> Do you have more data in the test cluster? One obvious possibility is
+>>>>>>>>> that previously you were working entirely in the MDS' cache, but now
+>>>>>>>>> you've got more dentries and so it's kicking data out to RADOS and
+>>>>>>>>> then reading it back in.
+>>>>>>>>>
+>>>>>>>>> If you've got the memory (you appear to) you can pump up the "mds
+>>>>>>>>> cache size" config option quite dramatically from it's default 100000.
+>>>>>>>>>
+>>>>>>>>> Other things to check are that you've got an appropriately-sized
+>>>>>>>>> metadata pool, that you've not got clients competing against each
+>>>>>>>>> other inappropriately, etc.
+>>>>>>>>> -Greg
+>>>>>>>>>
+>>>>>>>>> On Fri, Mar 27, 2015 at 9:47 AM, Barclay Jameson
+>>>>>>>>> <almightybeeij@gmail.com> wrote:
+>>>>>>>>>> Opps I should have said that I am not just writing the data but copying it :
+>>>>>>>>>>
+>>>>>>>>>> time cp Small1/* Small2/*
+>>>>>>>>>>
+>>>>>>>>>> Thanks,
+>>>>>>>>>>
+>>>>>>>>>> BJ
+>>>>>>>>>>
+>>>>>>>>>> On Fri, Mar 27, 2015 at 11:40 AM, Barclay Jameson
+>>>>>>>>>> <almightybeeij@gmail.com> wrote:
+>>>>>>>>>>> I did a Ceph cluster install 2 weeks ago where I was getting great
+>>>>>>>>>>> performance (~= PanFS) where I could write 100,000 1MB files in 61
+>>>>>>>>>>> Mins (Took PanFS 59 Mins). I thought I could increase the performance
+>>>>>>>>>>> by adding a better MDS server so I redid the entire build.
+>>>>>>>>>>>
+>>>>>>>>>>> Now it takes 4 times as long to write the same data as it did before.
+>>>>>>>>>>> The only thing that changed was the MDS server. (I even tried moving
+>>>>>>>>>>> the MDS back on the old slower node and the performance was the same.)
+>>>>>>>>>>>
+>>>>>>>>>>> The first install was on CentOS 7. I tried going down to CentOS 6.6
+>>>>>>>>>>> and it's the same results.
+>>>>>>>>>>> I use the same scripts to install the OSDs (which I created because I
+>>>>>>>>>>> can never get ceph-deploy to behave correctly. Although, I did use
+>>>>>>>>>>> ceph-deploy to create the MDS and MON and initial cluster creation.)
+>>>>>>>>>>>
+>>>>>>>>>>> I use btrfs on the OSDS as I can get 734 MB/s write and 1100 MB/s read
+>>>>>>>>>>> with rados bench -p cephfs_data 500 write --no-cleanup && rados bench
+>>>>>>>>>>> -p cephfs_data 500 seq (xfs was 734 MB/s write but only 200 MB/s read)
+>>>>>>>>>>>
+>>>>>>>>>>> Could anybody think of a reason as to why I am now getting a huge regression.
+>>>>>>>>>>>
+>>>>>>>>>>> Hardware Setup:
+>>>>>>>>>>> [OSDs]
+>>>>>>>>>>> 64 GB 2133 MHz
+>>>>>>>>>>> Dual Proc E5-2630 v3 @ 2.40GHz (16 Cores)
+>>>>>>>>>>> 40Gb Mellanox NIC
+>>>>>>>>>>>
+>>>>>>>>>>> [MDS/MON new]
+>>>>>>>>>>> 128 GB 2133 MHz
+>>>>>>>>>>> Dual Proc E5-2650 v3 @ 2.30GHz (20 Cores)
+>>>>>>>>>>> 40Gb Mellanox NIC
+>>>>>>>>>>>
+>>>>>>>>>>> [MDS/MON old]
+>>>>>>>>>>> 32 GB 800 MHz
+>>>>>>>>>>> Dual Proc E5472  @ 3.00GHz (8 Cores)
+>>>>>>>>>>> 10Gb Intel NIC
+>>>>>>>>>> _______________________________________________
+>>>>>>>>>> ceph-users mailing list
+>>>>>>>>>> ceph-users@lists.ceph.com
+>>>>>>>>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>>>>>> _______________________________________________
+>>>>>> ceph-users mailing list
+>>>>>> ceph-users@lists.ceph.com
+>>>>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
