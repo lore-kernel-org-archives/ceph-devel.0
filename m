@@ -1,57 +1,43 @@
-From: huang jun <hjwsm1989@gmail.com>
-Subject: how to recovery lost objects
-Date: Sat, 4 Apr 2015 07:25:39 +0800
-Message-ID: <CABAwU-YkJVV6qnixUC2t2yzKQezJgM-Jk7hTFC24LFiFN77ZHA@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: Regarding ceph rbd write path
+Date: Sat, 4 Apr 2015 00:17:24 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CB9849@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f173.google.com ([209.85.217.173]:33885 "EHLO
-	mail-lb0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751256AbbDCXZl (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Apr 2015 19:25:41 -0400
-Received: by lboc7 with SMTP id c7so86276429lbo.1
-        for <ceph-devel@vger.kernel.org>; Fri, 03 Apr 2015 16:25:39 -0700 (PDT)
+Received: from mail-bl2on0076.outbound.protection.outlook.com ([65.55.169.76]:57832
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751844AbbDDARb convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Apr 2015 20:17:31 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-hi,ceph
 
-Last week, we  add 48 OSDs to our exist cluster, the special thing is during
-the  backfill and recovery procedure,  some osds going to 100% full(we
-have set osd_full_ratio to 0.99).
-In each full OSD, we find one PG  that the PG's acting and up set
-didn't include this OSD anymore, then move the PG data to stale disk,
-and then restart the full OSDs, the backfill and recovery finally fininshed. And
-"ceph -s" shows all PG state is "active+clean". So we didn't copy the backuped
-data back.
+Hi Sage/Sam,
+Here is my understanding on ceph rbd write path.
 
-But now  we have a problem, we queried a file, find that one object of the file
-is lost, but the PG status is ok
+1. Based on the image order rbd will decide the rados object size, say 4MB.
 
-root@node1:~# ceph osd  map data 10000024b56.00000001
-osdmap e64986 pool 'data' (0) object '10000024b56.00000001' -> pg
-0.6b96f1d3 (0.11d3) -> up ([85,22], p85) acting ([85,22], p85)
+2. Now, from application say 64K chunks are being written to the rbd image.
 
-root@node1:/var/lib/ceph/osd/ceph-85/current/0.11d3_head# find ./
--name 10000024b56*
+3. rbd will calculate the objectids (one of the 4MB objects) and start populating the 4MB objects with 64K chunks.
 
-root@node5:/var/lib/ceph/osd/ceph-22/current/0.11d3_head#  find ./
--name 10000024b56*
-root@node5:/var/lib/ceph/osd/ceph-22/current/0.11d3_head# ls -R *|grep
-10000024b56
+4. Now, for each of this 64K chunk OSD will write 2 setattrs and the OMAP attrs.
 
-As you can see, there are no object 10000024b56.00000001 found both in
-osd.85 and osd.82.
+If the above flow is correct, it is updating the same metadata for every 64K chunk write to the same object (and same pg). So, my question is, is there any way to optimize (coalesce) that in either rbd/osd layer ?
+I couldn't find any way in the osd layer as it is holding pg->lock till a transaction complete. But, is there any way in the rbd side so that it can intelligently stage/coalesce the writes for the same object and do a batch commit?
+This should definitely improve WA/performance for seq writes, may not be much for random though.
 
-we check all backuped PG data, but with no luck.
+Let me know your opinion on this.
 
-Does the object to PG refection changes after add OSDs? i think only
-the PG to OSD reflection changes.
+Thanks & Regards
+Somnath
 
-how to recovery lost objects?
+________________________________
 
-Any tips or hints are welcome.
--- 
-thanks
-huangjun
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+
