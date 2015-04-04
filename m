@@ -1,20 +1,39 @@
 From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: Regarding ceph rbd write path
-Date: Sat, 4 Apr 2015 00:17:24 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CB9849@SACMBXIP01.sdcorp.global.sandisk.com>
+Subject: RE: Regarding ceph rbd write path
+Date: Sat, 4 Apr 2015 00:30:12 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CB9860@SACMBXIP01.sdcorp.global.sandisk.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CB9849@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0076.outbound.protection.outlook.com ([65.55.169.76]:57832
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+Received: from mail-by2on0079.outbound.protection.outlook.com ([207.46.100.79]:33786
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751844AbbDDARb convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Apr 2015 20:17:31 -0400
+	id S1752148AbbDDAaR convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Apr 2015 20:30:17 -0400
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CB9849@SACMBXIP01.sdcorp.global.sandisk.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+In fact, we can probably do it from the OSD side like this.
+
+1. A thread in the sharded opWq is taking the ops within a pg by acquiring lock in the pg_for_processing data structure.
+
+2. Now, before taking the job, it can do a bit processing to look for the same object transaction in the map till that time and coalesce that to a single job.
+
+Let me know if I am missing anything.
+
+Thanks & Regards
+Somnath
+
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
+Sent: Friday, April 03, 2015 5:17 PM
+To: ceph-devel@vger.kernel.org
+Subject: Regarding ceph rbd write path
 
 
 Hi Sage/Sam,
@@ -41,3 +60,5 @@ ________________________________
 
 PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
 
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
