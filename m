@@ -1,90 +1,74 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Regarding ceph rbd write path
-Date: Sat, 4 Apr 2015 05:20:59 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CB9A27@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CB9849@SACMBXIP01.sdcorp.global.sandisk.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F28CB9860@SACMBXIP01.sdcorp.global.sandisk.com>
- <CACJqLyaP5AGcgRS2XjDd+OroYpoJVB0rMjqP1b2TcJFF6ob73g@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: how to recovery lost objects
+Date: Sat, 4 Apr 2015 01:21:30 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1504040118270.15540@cobra.newdream.net>
+References: <CABAwU-YkJVV6qnixUC2t2yzKQezJgM-Jk7hTFC24LFiFN77ZHA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1on0092.outbound.protection.outlook.com ([157.56.110.92]:17437
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751405AbbDDFVF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 4 Apr 2015 01:21:05 -0400
-In-Reply-To: <CACJqLyaP5AGcgRS2XjDd+OroYpoJVB0rMjqP1b2TcJFF6ob73g@mail.gmail.com>
-Content-Language: en-US
+Received: from cobra.newdream.net ([66.33.216.30]:38061 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751686AbbDDIVb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 4 Apr 2015 04:21:31 -0400
+In-Reply-To: <CABAwU-YkJVV6qnixUC2t2yzKQezJgM-Jk7hTFC24LFiFN77ZHA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomaiwang@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: huang jun <hjwsm1989@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-SGFvbWFpLA0KWWVhaCwgSSB0aG91Z2h0IHNvLCBidXQsIEkgZGlkbid0IGtub3cgbXVjaCBhYm91
-dCB0aGF0IGltcGxlbWVudGF0aW9uLiBHb29kIHRvIGtub3cgdGhhdCBpdCBpcyB0YWtpbmcgY2Fy
-ZSBvZiB0aGF0Lg0KQnV0LCBrcmJkIHBhdGggd2lsbCBzdGlsbCBiZSBzdWJvcHRpbWFsIHRoZW4u
-DQpJZiB3ZSBjYW4gZG8gc29tZXRoaW5nIGluIE9TRCBsYXllciwgd2UgbWF5IGJlIGFibGUgdG8g
-YWRkaXRpb25hbGx5IGNvYWxlc2NlIG11bHRpcGxlIHdyaXRlcyB3aXRoaW4gYSBQRyB0byBhIHNp
-bmdsZSB0cmFuc2FjdGlvbiAob2YgY291cnNlIHdlIG5lZWQgdG8gbWFpbnRhaW4gb3JkZXIpLiBC
-ZW5lZml0IGNvdWxkIGJlIHNpbmdsZSBvbWFwIGF0dHJpYnV0ZXMgdXBkYXRlIGZvciBtdWx0aXBs
-ZSBvYmplY3Qgd3JpdGUgd2l0aGluIGEgUEcuDQpNYXkgYmUgSSBzaG91bGQgY29tZSB1cCB3aXRo
-IGEgcHJvdG90eXBlIGlmIHlvdSBndXlzIGFyZSBub3QgZm9yZXNlZWluZyBhbnkgcHJvYmxlbS4N
-Cg0KVGhhbmtzICYgUmVnYXJkcw0KU29tbmF0aA0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0t
-LQ0KRnJvbTogSGFvbWFpIFdhbmcgW21haWx0bzpoYW9tYWl3YW5nQGdtYWlsLmNvbV0gDQpTZW50
-OiBGcmlkYXksIEFwcmlsIDAzLCAyMDE1IDk6NDcgUE0NClRvOiBTb21uYXRoIFJveQ0KQ2M6IGNl
-cGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0OiBSZTogUmVnYXJkaW5nIGNlcGggcmJk
-IHdyaXRlIHBhdGgNCg0KT24gU2F0LCBBcHIgNCwgMjAxNSBhdCA4OjMwIEFNLCBTb21uYXRoIFJv
-eSA8U29tbmF0aC5Sb3lAc2FuZGlzay5jb20+IHdyb3RlOg0KPiBJbiBmYWN0LCB3ZSBjYW4gcHJv
-YmFibHkgZG8gaXQgZnJvbSB0aGUgT1NEIHNpZGUgbGlrZSB0aGlzLg0KPg0KPiAxLiBBIHRocmVh
-ZCBpbiB0aGUgc2hhcmRlZCBvcFdxIGlzIHRha2luZyB0aGUgb3BzIHdpdGhpbiBhIHBnIGJ5IGFj
-cXVpcmluZyBsb2NrIGluIHRoZSBwZ19mb3JfcHJvY2Vzc2luZyBkYXRhIHN0cnVjdHVyZS4NCj4N
-Cj4gMi4gTm93LCBiZWZvcmUgdGFraW5nIHRoZSBqb2IsIGl0IGNhbiBkbyBhIGJpdCBwcm9jZXNz
-aW5nIHRvIGxvb2sgZm9yIHRoZSBzYW1lIG9iamVjdCB0cmFuc2FjdGlvbiBpbiB0aGUgbWFwIHRp
-bGwgdGhhdCB0aW1lIGFuZCBjb2FsZXNjZSB0aGF0IHRvIGEgc2luZ2xlIGpvYi4NCj4NCj4gTGV0
-IG1lIGtub3cgaWYgSSBhbSBtaXNzaW5nIGFueXRoaW5nLg0KPg0KPiBUaGFua3MgJiBSZWdhcmRz
-DQo+IFNvbW5hdGgNCj4NCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogY2Vw
-aC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgDQo+IFttYWlsdG86Y2VwaC1kZXZlbC1vd25l
-ckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBTb21uYXRoIFJveQ0KPiBTZW50OiBGcmlk
-YXksIEFwcmlsIDAzLCAyMDE1IDU6MTcgUE0NCj4gVG86IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwu
-b3JnDQo+IFN1YmplY3Q6IFJlZ2FyZGluZyBjZXBoIHJiZCB3cml0ZSBwYXRoDQo+DQo+DQo+IEhp
-IFNhZ2UvU2FtLA0KPiBIZXJlIGlzIG15IHVuZGVyc3RhbmRpbmcgb24gY2VwaCByYmQgd3JpdGUg
-cGF0aC4NCj4NCj4gMS4gQmFzZWQgb24gdGhlIGltYWdlIG9yZGVyIHJiZCB3aWxsIGRlY2lkZSB0
-aGUgcmFkb3Mgb2JqZWN0IHNpemUsIHNheSA0TUIuDQo+DQo+IDIuIE5vdywgZnJvbSBhcHBsaWNh
-dGlvbiBzYXkgNjRLIGNodW5rcyBhcmUgYmVpbmcgd3JpdHRlbiB0byB0aGUgcmJkIGltYWdlLg0K
-Pg0KPiAzLiByYmQgd2lsbCBjYWxjdWxhdGUgdGhlIG9iamVjdGlkcyAob25lIG9mIHRoZSA0TUIg
-b2JqZWN0cykgYW5kIHN0YXJ0IHBvcHVsYXRpbmcgdGhlIDRNQiBvYmplY3RzIHdpdGggNjRLIGNo
-dW5rcy4NCj4NCj4gNC4gTm93LCBmb3IgZWFjaCBvZiB0aGlzIDY0SyBjaHVuayBPU0Qgd2lsbCB3
-cml0ZSAyIHNldGF0dHJzIGFuZCB0aGUgT01BUCBhdHRycy4NCj4NCj4gSWYgdGhlIGFib3ZlIGZs
-b3cgaXMgY29ycmVjdCwgaXQgaXMgdXBkYXRpbmcgdGhlIHNhbWUgbWV0YWRhdGEgZm9yIGV2ZXJ5
-IDY0SyBjaHVuayB3cml0ZSB0byB0aGUgc2FtZSBvYmplY3QgKGFuZCBzYW1lIHBnKS4gU28sIG15
-IHF1ZXN0aW9uIGlzLCBpcyB0aGVyZSBhbnkgd2F5IHRvIG9wdGltaXplIChjb2FsZXNjZSkgdGhh
-dCBpbiBlaXRoZXIgcmJkL29zZCBsYXllciA/DQo+IEkgY291bGRuJ3QgZmluZCBhbnkgd2F5IGlu
-IHRoZSBvc2QgbGF5ZXIgYXMgaXQgaXMgaG9sZGluZyBwZy0+bG9jayB0aWxsIGEgdHJhbnNhY3Rp
-b24gY29tcGxldGUuIEJ1dCwgaXMgdGhlcmUgYW55IHdheSBpbiB0aGUgcmJkIHNpZGUgc28gdGhh
-dCBpdCBjYW4gaW50ZWxsaWdlbnRseSBzdGFnZS9jb2FsZXNjZSB0aGUgd3JpdGVzIGZvciB0aGUg
-c2FtZSBvYmplY3QgYW5kIGRvIGEgYmF0Y2ggY29tbWl0Pw0KPiBUaGlzIHNob3VsZCBkZWZpbml0
-ZWx5IGltcHJvdmUgV0EvcGVyZm9ybWFuY2UgZm9yIHNlcSB3cml0ZXMsIG1heSBub3QgYmUgbXVj
-aCBmb3IgcmFuZG9tIHRob3VnaC4NCg0KRG8geW91IGNvbnNpZGVyIHRvIHVzZSBSQkRDYWNoZT8g
-SXQgY291bGQgY292ZXIgbW9zdCBvZiBjYXNlcyB5b3Ugc2FpZCBJIHRoaW5rLg0KDQo+DQo+IExl
-dCBtZSBrbm93IHlvdXIgb3BpbmlvbiBvbiB0aGlzLg0KPg0KPiBUaGFua3MgJiBSZWdhcmRzDQo+
-IFNvbW5hdGgNCj4NCj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCj4NCj4gUExF
-QVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1h
-aWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVk
-IHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2Ug
-aXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRo
-YXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSBy
-ZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1l
-c3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBj
-b21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBo
-b25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFu
-eSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0
-aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KPg0KPiAt
-LQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJz
-Y3JpYmUgY2VwaC1kZXZlbCIgDQo+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRv
-bW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIA0KPiBpbmZvIGF0ICBodHRwOi8vdmdl
-ci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUg
-ZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIA0K
-PiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBN
-b3JlIG1ham9yZG9tbyANCj4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRv
-bW8taW5mby5odG1sDQoNCg0KDQotLQ0KQmVzdCBSZWdhcmRzLA0KDQpXaGVhdA0K
+On Sat, 4 Apr 2015, huang jun wrote:
+> hi,ceph
+> 
+> Last week, we  add 48 OSDs to our exist cluster, the special thing is during
+> the  backfill and recovery procedure,  some osds going to 100% full(we
+> have set osd_full_ratio to 0.99).
+> In each full OSD, we find one PG  that the PG's acting and up set
+> didn't include this OSD anymore, then move the PG data to stale disk,
+
+Note: copying data like this is generally not safe!  Even if you preserve 
+xattrs tehre is some metadata kept in leveldb that isn't copied.  The new 
+ceph-objectstore-tool has a new export/import pg function that should be 
+used instead!
+
+> and then restart the full OSDs, the backfill and recovery finally fininshed. And
+> "ceph -s" shows all PG state is "active+clean". So we didn't copy the backuped
+> data back.
+
+This sounds fine.  Removing PGs like this generally *does* work (although 
+it will leave some junk behind in leveldb).
+
+> But now  we have a problem, we queried a file, find that one object of the file
+> is lost, but the PG status is ok
+> 
+> root@node1:~# ceph osd  map data 10000024b56.00000001
+> osdmap e64986 pool 'data' (0) object '10000024b56.00000001' -> pg
+> 0.6b96f1d3 (0.11d3) -> up ([85,22], p85) acting ([85,22], p85)
+> 
+> root@node1:/var/lib/ceph/osd/ceph-85/current/0.11d3_head# find ./
+> -name 10000024b56*
+> 
+> root@node5:/var/lib/ceph/osd/ceph-22/current/0.11d3_head#  find ./
+> -name 10000024b56*
+> root@node5:/var/lib/ceph/osd/ceph-22/current/0.11d3_head# ls -R *|grep
+> 10000024b56
+> 
+> As you can see, there are no object 10000024b56.00000001 found both in
+> osd.85 and osd.82.
+
+Are you sure that object should exist (or existed before)?  CephFS only 
+creates the object if data was written to it; the empty parts of a 
+sparse file may not have an object at all.
+> 
+> we check all backuped PG data, but with no luck.
+> 
+> Does the object to PG refection changes after add OSDs? i think only
+> the PG to OSD reflection changes.
+> 
+> how to recovery lost objects?
+> 
+> Any tips or hints are welcome.
+
+Nothing here would have obviously made those objects get lost.  How many 
+such objects are there?
+
+sage
