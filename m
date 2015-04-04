@@ -1,81 +1,90 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: Regarding ceph rbd write path
-Date: Sat, 4 Apr 2015 12:46:38 +0800
-Message-ID: <CACJqLyaP5AGcgRS2XjDd+OroYpoJVB0rMjqP1b2TcJFF6ob73g@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Regarding ceph rbd write path
+Date: Sat, 4 Apr 2015 05:20:59 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CB9A27@SACMBXIP01.sdcorp.global.sandisk.com>
 References: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CB9849@SACMBXIP01.sdcorp.global.sandisk.com>
 	<755F6B91B3BE364F9BCA11EA3F9E0C6F28CB9860@SACMBXIP01.sdcorp.global.sandisk.com>
+ <CACJqLyaP5AGcgRS2XjDd+OroYpoJVB0rMjqP1b2TcJFF6ob73g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f171.google.com ([209.85.223.171]:36449 "EHLO
-	mail-ie0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751201AbbDDEqj convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 4 Apr 2015 00:46:39 -0400
-Received: by iebrs15 with SMTP id rs15so16946090ieb.3
-        for <ceph-devel@vger.kernel.org>; Fri, 03 Apr 2015 21:46:38 -0700 (PDT)
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CB9860@SACMBXIP01.sdcorp.global.sandisk.com>
+Received: from mail-bn1on0092.outbound.protection.outlook.com ([157.56.110.92]:17437
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751405AbbDDFVF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 4 Apr 2015 01:21:05 -0400
+In-Reply-To: <CACJqLyaP5AGcgRS2XjDd+OroYpoJVB0rMjqP1b2TcJFF6ob73g@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
+To: Haomai Wang <haomaiwang@gmail.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Sat, Apr 4, 2015 at 8:30 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
-> In fact, we can probably do it from the OSD side like this.
->
-> 1. A thread in the sharded opWq is taking the ops within a pg by acquiring lock in the pg_for_processing data structure.
->
-> 2. Now, before taking the job, it can do a bit processing to look for the same object transaction in the map till that time and coalesce that to a single job.
->
-> Let me know if I am missing anything.
->
-> Thanks & Regards
-> Somnath
->
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
-> Sent: Friday, April 03, 2015 5:17 PM
-> To: ceph-devel@vger.kernel.org
-> Subject: Regarding ceph rbd write path
->
->
-> Hi Sage/Sam,
-> Here is my understanding on ceph rbd write path.
->
-> 1. Based on the image order rbd will decide the rados object size, say 4MB.
->
-> 2. Now, from application say 64K chunks are being written to the rbd image.
->
-> 3. rbd will calculate the objectids (one of the 4MB objects) and start populating the 4MB objects with 64K chunks.
->
-> 4. Now, for each of this 64K chunk OSD will write 2 setattrs and the OMAP attrs.
->
-> If the above flow is correct, it is updating the same metadata for every 64K chunk write to the same object (and same pg). So, my question is, is there any way to optimize (coalesce) that in either rbd/osd layer ?
-> I couldn't find any way in the osd layer as it is holding pg->lock till a transaction complete. But, is there any way in the rbd side so that it can intelligently stage/coalesce the writes for the same object and do a batch commit?
-> This should definitely improve WA/performance for seq writes, may not be much for random though.
-
-Do you consider to use RBDCache? It could cover most of cases you said I think.
-
->
-> Let me know your opinion on this.
->
-> Thanks & Regards
-> Somnath
->
-> ________________________________
->
-> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
--- 
-Best Regards,
-
-Wheat
+SGFvbWFpLA0KWWVhaCwgSSB0aG91Z2h0IHNvLCBidXQsIEkgZGlkbid0IGtub3cgbXVjaCBhYm91
+dCB0aGF0IGltcGxlbWVudGF0aW9uLiBHb29kIHRvIGtub3cgdGhhdCBpdCBpcyB0YWtpbmcgY2Fy
+ZSBvZiB0aGF0Lg0KQnV0LCBrcmJkIHBhdGggd2lsbCBzdGlsbCBiZSBzdWJvcHRpbWFsIHRoZW4u
+DQpJZiB3ZSBjYW4gZG8gc29tZXRoaW5nIGluIE9TRCBsYXllciwgd2UgbWF5IGJlIGFibGUgdG8g
+YWRkaXRpb25hbGx5IGNvYWxlc2NlIG11bHRpcGxlIHdyaXRlcyB3aXRoaW4gYSBQRyB0byBhIHNp
+bmdsZSB0cmFuc2FjdGlvbiAob2YgY291cnNlIHdlIG5lZWQgdG8gbWFpbnRhaW4gb3JkZXIpLiBC
+ZW5lZml0IGNvdWxkIGJlIHNpbmdsZSBvbWFwIGF0dHJpYnV0ZXMgdXBkYXRlIGZvciBtdWx0aXBs
+ZSBvYmplY3Qgd3JpdGUgd2l0aGluIGEgUEcuDQpNYXkgYmUgSSBzaG91bGQgY29tZSB1cCB3aXRo
+IGEgcHJvdG90eXBlIGlmIHlvdSBndXlzIGFyZSBub3QgZm9yZXNlZWluZyBhbnkgcHJvYmxlbS4N
+Cg0KVGhhbmtzICYgUmVnYXJkcw0KU29tbmF0aA0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0t
+LQ0KRnJvbTogSGFvbWFpIFdhbmcgW21haWx0bzpoYW9tYWl3YW5nQGdtYWlsLmNvbV0gDQpTZW50
+OiBGcmlkYXksIEFwcmlsIDAzLCAyMDE1IDk6NDcgUE0NClRvOiBTb21uYXRoIFJveQ0KQ2M6IGNl
+cGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0OiBSZTogUmVnYXJkaW5nIGNlcGggcmJk
+IHdyaXRlIHBhdGgNCg0KT24gU2F0LCBBcHIgNCwgMjAxNSBhdCA4OjMwIEFNLCBTb21uYXRoIFJv
+eSA8U29tbmF0aC5Sb3lAc2FuZGlzay5jb20+IHdyb3RlOg0KPiBJbiBmYWN0LCB3ZSBjYW4gcHJv
+YmFibHkgZG8gaXQgZnJvbSB0aGUgT1NEIHNpZGUgbGlrZSB0aGlzLg0KPg0KPiAxLiBBIHRocmVh
+ZCBpbiB0aGUgc2hhcmRlZCBvcFdxIGlzIHRha2luZyB0aGUgb3BzIHdpdGhpbiBhIHBnIGJ5IGFj
+cXVpcmluZyBsb2NrIGluIHRoZSBwZ19mb3JfcHJvY2Vzc2luZyBkYXRhIHN0cnVjdHVyZS4NCj4N
+Cj4gMi4gTm93LCBiZWZvcmUgdGFraW5nIHRoZSBqb2IsIGl0IGNhbiBkbyBhIGJpdCBwcm9jZXNz
+aW5nIHRvIGxvb2sgZm9yIHRoZSBzYW1lIG9iamVjdCB0cmFuc2FjdGlvbiBpbiB0aGUgbWFwIHRp
+bGwgdGhhdCB0aW1lIGFuZCBjb2FsZXNjZSB0aGF0IHRvIGEgc2luZ2xlIGpvYi4NCj4NCj4gTGV0
+IG1lIGtub3cgaWYgSSBhbSBtaXNzaW5nIGFueXRoaW5nLg0KPg0KPiBUaGFua3MgJiBSZWdhcmRz
+DQo+IFNvbW5hdGgNCj4NCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogY2Vw
+aC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgDQo+IFttYWlsdG86Y2VwaC1kZXZlbC1vd25l
+ckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBTb21uYXRoIFJveQ0KPiBTZW50OiBGcmlk
+YXksIEFwcmlsIDAzLCAyMDE1IDU6MTcgUE0NCj4gVG86IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwu
+b3JnDQo+IFN1YmplY3Q6IFJlZ2FyZGluZyBjZXBoIHJiZCB3cml0ZSBwYXRoDQo+DQo+DQo+IEhp
+IFNhZ2UvU2FtLA0KPiBIZXJlIGlzIG15IHVuZGVyc3RhbmRpbmcgb24gY2VwaCByYmQgd3JpdGUg
+cGF0aC4NCj4NCj4gMS4gQmFzZWQgb24gdGhlIGltYWdlIG9yZGVyIHJiZCB3aWxsIGRlY2lkZSB0
+aGUgcmFkb3Mgb2JqZWN0IHNpemUsIHNheSA0TUIuDQo+DQo+IDIuIE5vdywgZnJvbSBhcHBsaWNh
+dGlvbiBzYXkgNjRLIGNodW5rcyBhcmUgYmVpbmcgd3JpdHRlbiB0byB0aGUgcmJkIGltYWdlLg0K
+Pg0KPiAzLiByYmQgd2lsbCBjYWxjdWxhdGUgdGhlIG9iamVjdGlkcyAob25lIG9mIHRoZSA0TUIg
+b2JqZWN0cykgYW5kIHN0YXJ0IHBvcHVsYXRpbmcgdGhlIDRNQiBvYmplY3RzIHdpdGggNjRLIGNo
+dW5rcy4NCj4NCj4gNC4gTm93LCBmb3IgZWFjaCBvZiB0aGlzIDY0SyBjaHVuayBPU0Qgd2lsbCB3
+cml0ZSAyIHNldGF0dHJzIGFuZCB0aGUgT01BUCBhdHRycy4NCj4NCj4gSWYgdGhlIGFib3ZlIGZs
+b3cgaXMgY29ycmVjdCwgaXQgaXMgdXBkYXRpbmcgdGhlIHNhbWUgbWV0YWRhdGEgZm9yIGV2ZXJ5
+IDY0SyBjaHVuayB3cml0ZSB0byB0aGUgc2FtZSBvYmplY3QgKGFuZCBzYW1lIHBnKS4gU28sIG15
+IHF1ZXN0aW9uIGlzLCBpcyB0aGVyZSBhbnkgd2F5IHRvIG9wdGltaXplIChjb2FsZXNjZSkgdGhh
+dCBpbiBlaXRoZXIgcmJkL29zZCBsYXllciA/DQo+IEkgY291bGRuJ3QgZmluZCBhbnkgd2F5IGlu
+IHRoZSBvc2QgbGF5ZXIgYXMgaXQgaXMgaG9sZGluZyBwZy0+bG9jayB0aWxsIGEgdHJhbnNhY3Rp
+b24gY29tcGxldGUuIEJ1dCwgaXMgdGhlcmUgYW55IHdheSBpbiB0aGUgcmJkIHNpZGUgc28gdGhh
+dCBpdCBjYW4gaW50ZWxsaWdlbnRseSBzdGFnZS9jb2FsZXNjZSB0aGUgd3JpdGVzIGZvciB0aGUg
+c2FtZSBvYmplY3QgYW5kIGRvIGEgYmF0Y2ggY29tbWl0Pw0KPiBUaGlzIHNob3VsZCBkZWZpbml0
+ZWx5IGltcHJvdmUgV0EvcGVyZm9ybWFuY2UgZm9yIHNlcSB3cml0ZXMsIG1heSBub3QgYmUgbXVj
+aCBmb3IgcmFuZG9tIHRob3VnaC4NCg0KRG8geW91IGNvbnNpZGVyIHRvIHVzZSBSQkRDYWNoZT8g
+SXQgY291bGQgY292ZXIgbW9zdCBvZiBjYXNlcyB5b3Ugc2FpZCBJIHRoaW5rLg0KDQo+DQo+IExl
+dCBtZSBrbm93IHlvdXIgb3BpbmlvbiBvbiB0aGlzLg0KPg0KPiBUaGFua3MgJiBSZWdhcmRzDQo+
+IFNvbW5hdGgNCj4NCj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCj4NCj4gUExF
+QVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1h
+aWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVk
+IHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2Ug
+aXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRo
+YXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSBy
+ZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1l
+c3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBj
+b21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBo
+b25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFu
+eSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0
+aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KPg0KPiAt
+LQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJz
+Y3JpYmUgY2VwaC1kZXZlbCIgDQo+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRv
+bW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIA0KPiBpbmZvIGF0ICBodHRwOi8vdmdl
+ci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUg
+ZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIA0K
+PiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBN
+b3JlIG1ham9yZG9tbyANCj4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRv
+bW8taW5mby5odG1sDQoNCg0KDQotLQ0KQmVzdCBSZWdhcmRzLA0KDQpXaGVhdA0K
