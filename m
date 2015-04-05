@@ -1,76 +1,34 @@
-From: Dmitry Monakhov <dmonakhov@openvz.org>
-Subject: [PATCH 06/16] ceph: use is_xxx_kiocb instead of filp->fl_flags
-Date: Sat,  4 Apr 2015 23:13:15 +0400
-Message-ID: <1428174805-853-7-git-send-email-dmonakhov@openvz.org>
-References: <1428174805-853-1-git-send-email-dmonakhov@openvz.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1428174805-853-1-git-send-email-dmonakhov@openvz.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: linux-fsdevel@vger.kernel.org, viro@zeniv.linux.org.uk, Dmitry Monakhov <dmonakhov@openvz.org>, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+From: kernel neophyte <neophyte.hacker001@gmail.com>
+Subject: Cehp - tip - build break ?
+Date: Sat, 4 Apr 2015 22:07:00 -0700
+Message-ID: <CAFkUHxdMwZDR7=Z1XeyF9zrNzV2e1U+OWcsRpVusi_GhzCPN1A@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-pd0-f174.google.com ([209.85.192.174]:35940 "EHLO
+	mail-pd0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750759AbbDEFHB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 5 Apr 2015 01:07:01 -0400
+Received: by pdea3 with SMTP id a3so8476189pde.3
+        for <ceph-devel@vger.kernel.org>; Sat, 04 Apr 2015 22:07:01 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Cc: ceph-devel@vger.kernel.org
-Signed-off-by: Dmitry Monakhov <dmonakhov@openvz.org>
----
- fs/ceph/file.c |   13 ++++++-------
- 1 files changed, 6 insertions(+), 7 deletions(-)
+Hi,
 
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 139f2fe..3ac67bf 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -442,7 +442,7 @@ static ssize_t ceph_sync_read(struct kiocb *iocb, struct iov_iter *i,
- 
- 	dout("sync_read on file %p %llu~%u %s\n", file, off,
- 	     (unsigned)len,
--	     (file->f_flags & O_DIRECT) ? "O_DIRECT" : "");
-+	     (is_direct_kiocb(iocb)) ? "O_DIRECT" : "");
- 
- 	if (!len)
- 		return 0;
-@@ -457,7 +457,7 @@ static ssize_t ceph_sync_read(struct kiocb *iocb, struct iov_iter *i,
- 	if (ret < 0)
- 		return ret;
- 
--	if (file->f_flags & O_DIRECT) {
-+	if (is_direct_kiocb(iocb)) {
- 		while (iov_iter_count(i)) {
- 			size_t start;
- 			ssize_t n;
-@@ -828,8 +828,7 @@ again:
- 		return ret;
- 
- 	if ((got & (CEPH_CAP_FILE_CACHE|CEPH_CAP_FILE_LAZYIO)) == 0 ||
--	    (iocb->ki_filp->f_flags & O_DIRECT) ||
--	    (fi->flags & CEPH_F_SYNC)) {
-+	    is_direct_kiocb(iocb) || (fi->flags & CEPH_F_SYNC)) {
- 
- 		dout("aio_sync_read %p %llx.%llx %llu~%u got cap refs on %s\n",
- 		     inode, ceph_vinop(inode), iocb->ki_pos, (unsigned)len,
-@@ -953,7 +952,7 @@ static ssize_t ceph_write_iter(struct kiocb *iocb, struct iov_iter *from)
- 	/* We can write back this queue in page reclaim */
- 	current->backing_dev_info = inode_to_bdi(inode);
- 
--	err = generic_write_checks(file, &pos, &count, S_ISBLK(inode->i_mode));
-+	err = generic_write_checks(iocb, &pos, &count, S_ISBLK(inode->i_mode));
- 	if (err)
- 		goto out;
- 
-@@ -997,12 +996,12 @@ retry_snap:
- 	     inode, ceph_vinop(inode), pos, count, ceph_cap_string(got));
- 
- 	if ((got & (CEPH_CAP_FILE_BUFFER|CEPH_CAP_FILE_LAZYIO)) == 0 ||
--	    (file->f_flags & O_DIRECT) || (fi->flags & CEPH_F_SYNC)) {
-+	    is_direct_kiocb(iocb) || (fi->flags & CEPH_F_SYNC)) {
- 		struct iov_iter data;
- 		mutex_unlock(&inode->i_mutex);
- 		/* we might need to revert back to that point */
- 		data = *from;
--		if (file->f_flags & O_DIRECT)
-+		if (is_direct_kiocb(iocb))
- 			written = ceph_sync_direct_write(iocb, &data, pos);
- 		else
- 			written = ceph_sync_write(iocb, &data, pos);
--- 
-1.7.1
+I am seeing build break in ceph master.
+
+make[3]: *** No rule to make target
+`../src/gmock/lib/libgmock_main.la', needed by `unittest_librbd'.
+Stop.
+
+make[3]: *** Waiting for unfinished jobs....
+
+  CXX      test/erasure-code/ceph_erasure_code_non_regression.o
+
+
+Am I missing anything obvious ?
+
+
+-Neo
