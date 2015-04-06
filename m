@@ -1,22 +1,105 @@
-From: Al Viro <viro-3bDd1+5oDREiFSDQTTA3OLVCufUGDwFn@public.gmane.org>
-Subject: Re: [RFC PATCH 0/5] Remove rw parameter from direct_IO()
-Date: Sun, 5 Apr 2015 17:27:59 +0100
-Message-ID: <20150405162758.GI889@ZenIV.linux.org.uk>
-References: <cover.1426502566.git.osandov@osandov.com>
+From: Ta Ba Tuan <tuantb-QlevPasa8l681eZEIcUDRw@public.gmane.org>
+Subject: How to unset lfor setting (from cache pool)
+Date: Mon, 06 Apr 2015 16:21:11 +0700
+Message-ID: <55225007.7040404@vccloud.vn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <cover.1426502566.git.osandov-nWWhXC5lh1RBDgjK7y7TUQ@public.gmane.org>
-Sender: linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Omar Sandoval <osandov-nWWhXC5lh1RBDgjK7y7TUQ@public.gmane.org>
-Cc: linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-btrfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, osd-dev-yNzVSZO3znNg9hUCZPvPmw@public.gmane.org, linux-ext4-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-f2fs-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, fuse-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, jfs-discussion-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, HPDD-discuss-y27Ovi1pjclAfugRpC6u6w@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nilfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ocfs2-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org, reiserfs-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, v9fs-developer-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, xfs-VZNHf3L845pBDgjK7y7TUQ@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Mason <clm-b10kYP2dOMg@public.gmane.org>, Josef Bacik <jbacik-b10kYP2dOMg@public.gmane.org>, David Sterba <dsterba-AlSwsSmVLrQ@public.gmane.org>, Yan Zheng <zyan-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Sage Weil <sage-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Steve French <sfrench-eUNUBHrolfbYtjvyW6yDsg@public.gmane.org>, Boaz Harrosh <ooo-rh7Tgz9RNieUD9Wbbkgo/g@public.gmane.org>, Benny Halevy <bhalevy-7I+n7zu2hftEKMMhf/gKZA@public.gmane.org>, Jan Kara <jack-AlSwsSmVLrQ@public.gmane.org>, Theodore Ts'o <tytso-3s7WtUTddSA@public.gmane.org>, Andreas Dilger <adilger.kernel@dilger.>
+Content-Type: multipart/mixed; boundary="===============1454277900=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Mon, Mar 16, 2015 at 04:33:48AM -0700, Omar Sandoval wrote:
-> Hi,
-> 
-> Al, here's some cleanup that you mentioned back in December that I got
-> around to (https://lkml.org/lkml/2014/12/15/28).
+This is a multi-part message in MIME format.
+--===============1454277900==
+Content-Type: multipart/alternative;
+ boundary="------------070606020908090708060409"
 
-Applied.  See #for-next
+This is a multi-part message in MIME format.
+--------------070606020908090708060409
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+
+Hi all,
+
+I have ever to setup the cache-pool for my pool.
+But had some proplems about cache-pool running, so I removed the cache 
+pool from My CEPH Cluster.
+
+The DATA pool currently don't use cache pool, but "lfor" setting still 
+be appeared.
+*lfor* seems is a setting, not flag.
+
+pool 3 'data_pool' replicated size 3 min_size 1 crush_ruleset 4 
+object_hash rjenkins pg_num 4098 pgp_num 4098 last_change 145235 *lfor 
+75731* flags hashpspool stripe_width 0
+
+How to unset lfor?,  and  After unsetting lofr, My pool activities OK?
+
+Thanks!
+--
+Tuantaba
+Ha Noi-VietNam.
+
+
+
+--------------070606020908090708060409
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+<html>
+  <head>
+
+    <meta http-equiv=3D"content-type" content=3D"text/html; charset=3Dutf=
+-8">
+  </head>
+  <body bgcolor=3D"#FFFFFF" text=3D"#000000">
+    Hi all,<br>
+    <br>
+    I have ever to setup the cache-pool for my pool.<br>
+    But had some proplems about cache-pool running, so I removed the
+    cache pool from My CEPH Cluster.<br>
+    <br>
+    The DATA pool currently don't use cache pool, but "lfor" setting
+    still be appeared.<br>
+    <b>lfor</b> seems is a setting, not flag.<br>
+    <br>
+    pool 3 'data_pool' replicated size 3 min_size 1 crush_ruleset 4
+    object_hash rjenkins pg_num 4098 pgp_num 4098 last_change 145235 <b>l=
+for
+      75731</b> flags hashpspool stripe_width 0<br>
+    <br>
+    How to unset lfor?,=C2=A0 and=C2=A0 After unsetting lofr, My pool act=
+ivities
+    OK?<br>
+    <br>
+    Thanks!<br>
+    --<br>
+    Tuantaba<br>
+    Ha Noi-VietNam.<br>
+    <br>
+    <br>
+  </body>
+</html>
+
+--------------070606020908090708060409--
+
+--===============1454277900==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============1454277900==--
