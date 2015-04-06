@@ -1,105 +1,62 @@
-From: Ta Ba Tuan <tuantb-QlevPasa8l681eZEIcUDRw@public.gmane.org>
-Subject: How to unset lfor setting (from cache pool)
-Date: Mon, 06 Apr 2015 16:21:11 +0700
-Message-ID: <55225007.7040404@vccloud.vn>
+From: Patrick McGarry <pmcgarry@redhat.com>
+Subject: A (real) Ceph Hackathon
+Date: Mon, 6 Apr 2015 09:43:38 -0400
+Message-ID: <CAAZbbf3JsheX1+G=btVibX=STFfJJ2TCe4m0mohy4PMH40DTXA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1454277900=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ob0-f176.google.com ([209.85.214.176]:33933 "EHLO
+	mail-ob0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753188AbbDFNnj convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Apr 2015 09:43:39 -0400
+Received: by obbgh1 with SMTP id gh1so40427024obb.1
+        for <ceph-devel@vger.kernel.org>; Mon, 06 Apr 2015 06:43:38 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
 
-This is a multi-part message in MIME format.
---===============1454277900==
-Content-Type: multipart/alternative;
- boundary="------------070606020908090708060409"
+Hey Cephers,
 
-This is a multi-part message in MIME format.
---------------070606020908090708060409
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+=46or four days, August 10-13, Intel and Red Hat are holding a face to
+face Ceph hackathon in Hillsboro, Oregon! We will be focusing on both
+bug fixes and feature progression in the areas listed below.
 
-Hi all,
+Any developer who has made a significant contribution to the Ceph code
+base is invited to join us. To support good collaboration we have a
+limit of 25 developers for this event.
 
-I have ever to setup the cache-pool for my pool.
-But had some proplems about cache-pool running, so I removed the cache 
-pool from My CEPH Cluster.
+To request an invitation please email pmcgarry@redhat.com with a link
+to your github user so that we can verify a few commits and ensure you
+are already comfortable with the Ceph code base.
 
-The DATA pool currently don't use cache pool, but "lfor" setting still 
-be appeared.
-*lfor* seems is a setting, not flag.
+The following members of the Ceph core team will be joining the hackath=
+on:
 
-pool 3 'data_pool' replicated size 3 min_size 1 crush_ruleset 4 
-object_hash rjenkins pg_num 4098 pgp_num 4098 last_change 145235 *lfor 
-75731* flags hashpspool stripe_width 0
+  *   Josh Durgin (CTL for RBD)
+  *   Sam Just (CTL for RADOS)
+  *   Mark Nelson (Performance Engineer)
 
-How to unset lfor?,  and  After unsetting lofr, My pool activities OK?
+The topics we hope to focus on are:
 
-Thanks!
+  *   End to end performance and scalability for block storage
+  *   Performance of SSD for backing-store
+  *   Enhancements to RGW and streamlining the new Civetweb interface
+  *   Other ideas at the request of attendees=E2=80=A6
+
+Hope to see you there!
+
+
+--=20
+
+Best Regards,
+
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
 --
-Tuantaba
-Ha Noi-VietNam.
-
-
-
---------------070606020908090708060409
-Content-Type: text/html; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-<html>
-  <head>
-
-    <meta http-equiv=3D"content-type" content=3D"text/html; charset=3Dutf=
--8">
-  </head>
-  <body bgcolor=3D"#FFFFFF" text=3D"#000000">
-    Hi all,<br>
-    <br>
-    I have ever to setup the cache-pool for my pool.<br>
-    But had some proplems about cache-pool running, so I removed the
-    cache pool from My CEPH Cluster.<br>
-    <br>
-    The DATA pool currently don't use cache pool, but "lfor" setting
-    still be appeared.<br>
-    <b>lfor</b> seems is a setting, not flag.<br>
-    <br>
-    pool 3 'data_pool' replicated size 3 min_size 1 crush_ruleset 4
-    object_hash rjenkins pg_num 4098 pgp_num 4098 last_change 145235 <b>l=
-for
-      75731</b> flags hashpspool stripe_width 0<br>
-    <br>
-    How to unset lfor?,=C2=A0 and=C2=A0 After unsetting lofr, My pool act=
-ivities
-    OK?<br>
-    <br>
-    Thanks!<br>
-    --<br>
-    Tuantaba<br>
-    Ha Noi-VietNam.<br>
-    <br>
-    <br>
-  </body>
-</html>
-
---------------070606020908090708060409--
-
---===============1454277900==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============1454277900==--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
