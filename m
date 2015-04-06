@@ -1,102 +1,58 @@
-From: kernel neophyte <neophyte.hacker001@gmail.com>
-Subject: Re: Cehp - tip - build break ?
-Date: Mon, 6 Apr 2015 09:09:58 -0700
-Message-ID: <CAFkUHxdOsYqyi6yuVpL8fCOpL95xTrsjhi_9=5HW4Xi903f6Uw@mail.gmail.com>
-References: <CAFkUHxdMwZDR7=Z1XeyF9zrNzV2e1U+OWcsRpVusi_GhzCPN1A@mail.gmail.com>
-	<55210974.2010009@dachary.org>
-	<CAFkUHxe_tHvkYM_As7A8x42UT5XTzGLB-mjROv=t9NVgd+EiEQ@mail.gmail.com>
-	<alpine.DEB.2.00.1504060906550.4469@cobra.newdream.net>
+From: Gregory Farnum <greg-3KCAGdo1P2hBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: How to unset lfor setting (from cache pool)
+Date: Mon, 6 Apr 2015 10:54:36 -0700
+Message-ID: <CAC6JEv86h8Fp-rogMyFO1AKMqpsCPzohXfEF0HwgfJtrWONHgg@mail.gmail.com>
+References: <55225007.7040404@vccloud.vn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f174.google.com ([209.85.192.174]:35256 "EHLO
-	mail-pd0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751331AbbDFQJ7 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Apr 2015 12:09:59 -0400
-Received: by pddn5 with SMTP id n5so48681290pdd.2
-        for <ceph-devel@vger.kernel.org>; Mon, 06 Apr 2015 09:09:59 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1504060906550.4469@cobra.newdream.net>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Loic Dachary <loic@dachary.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <55225007.7040404-QlevPasa8l681eZEIcUDRw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Ta Ba Tuan <tuantb-QlevPasa8l681eZEIcUDRw@public.gmane.org>
+Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Mon, Apr 6, 2015 at 9:07 AM, Sage Weil <sage@newdream.net> wrote:
-> On Mon, 6 Apr 2015, kernel neophyte wrote:
->> On Sun, Apr 5, 2015 at 3:07 AM, Loic Dachary <loic@dachary.org> wrot=
-e:
->> > Hi,
->> >
->> > My guess is that it's because the gmock directory has been replace=
-d by a gmock submodule and git pull won't be enough to do the right thi=
-ng.
->> > The simplest workaround is to git clone a fresh copy. Or you can t=
-ry ./autogen.sh which should also do what's necessary.
->>
->> Cloned a fresh copy, still the same.
+On Mon, Apr 6, 2015 at 2:21 AM, Ta Ba Tuan <tuantb-QlevPasa8l681eZEIcUDRw@public.gmane.org> wrote:
+> Hi all,
 >
-> Make sure you run make in teh top-level directory, not inside src/, a=
-t
-> least once to get the gmock stuff built.
-
-
-Yep thats exactly what I am doing. In the top level directory:
-
-=2E/autogen.sh
-=2E/configure
-make -j12
-
-
--Neo
+> I have ever to setup the cache-pool for my pool.
+> But had some proplems about cache-pool running, so I removed the cache pool
+> from My CEPH Cluster.
 >
-> sage
+> The DATA pool currently don't use cache pool, but "lfor" setting still be
+> appeared.
+> lfor seems is a setting, not flag.
 >
->>
->>
->>
->> -Neo
->> >
->> > Cheers
->> >
->> > On 05/04/2015 07:07, kernel neophyte wrote:
->> >> Hi,
->> >>
->> >> I am seeing build break in ceph master.
->> >>
->> >> make[3]: *** No rule to make target
->> >> `../src/gmock/lib/libgmock_main.la', needed by `unittest_librbd'.
->> >> Stop.
->> >>
->> >> make[3]: *** Waiting for unfinished jobs....
->> >>
->> >>   CXX      test/erasure-code/ceph_erasure_code_non_regression.o
->> >>
->> >>
->> >> Am I missing anything obvious ?
->> >>
->> >>
->> >> -Neo
->> >> --
->> >> To unsubscribe from this list: send the line "unsubscribe ceph-de=
-vel" in
->> >> the body of a message to majordomo@vger.kernel.org
->> >> More majordomo info at  http://vger.kernel.org/majordomo-info.htm=
-l
->> >>
->> >
->> > --
->> > Lo=C3=AFc Dachary, Artisan Logiciel Libre
->> >
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> pool 3 'data_pool' replicated size 3 min_size 1 crush_ruleset 4 object_hash
+> rjenkins pg_num 4098 pgp_num 4098 last_change 145235 lfor 75731 flags
+> hashpspool stripe_width 0
+>
+> How to unset lfor?,  and  After unsetting lofr, My pool activities OK?
+
+"lfor" is not a config option; it's "last force op resend" and the
+value is an OSDMap epoch. You can see some details about exactly what
+it means in the v0.80.2 changelog.
+-Greg
+
+>
+> Thanks!
+> --
+> Tuantaba
+> Ha Noi-VietNam.
+>
+>
+>
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>
