@@ -1,23 +1,23 @@
-From: Mel Gorman <mgorman@suse.de>
+From: Mike Christie <mchristi@redhat.com>
 Subject: Re: [PATCH] Revert "libceph: use memalloc flags for net IO"
-Date: Tue, 7 Apr 2015 16:41:02 +0100
-Message-ID: <20150407154102.GA4701@suse.de>
+Date: Tue, 07 Apr 2015 10:41:53 -0500
+Message-ID: <5523FAC1.9050403@redhat.com>
 References: <1428414024-47769-1-git-send-email-idryomov@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-15
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cantor2.suse.de ([195.135.220.15]:54728 "EHLO mx2.suse.de"
+Received: from mx1.redhat.com ([209.132.183.28]:60670 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752989AbbDGPlH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 7 Apr 2015 11:41:07 -0400
-Content-Disposition: inline
+	id S1755483AbbDGPoG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 7 Apr 2015 11:44:06 -0400
 In-Reply-To: <1428414024-47769-1-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: ceph-devel@vger.kernel.org, Mike Christie <michaelc@cs.wisc.edu>, Sage Weil <sage@redhat.com>
+To: Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
+Cc: Mike Christie <michaelc@cs.wisc.edu>, Mel Gorman <mgorman@suse.de>, Sage Weil <sage@redhat.com>
 
-On Tue, Apr 07, 2015 at 04:40:24PM +0300, Ilya Dryomov wrote:
+On 04/07/2015 08:40 AM, Ilya Dryomov wrote:
 > This reverts commit 89baaa570ab0b476db09408d209578cfed700e9f.
 > 
 > Dirty page throttling should be sufficient for us in the general case
@@ -50,8 +50,7 @@ On Tue, Apr 07, 2015 at 04:40:24PM +0300, Ilya Dryomov wrote:
 > Cc: stable@vger.kernel.org # 3.18+, needs backporting
 > Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 
-Acked-by: Mel Gorman <mgorman@suse.de>
+Yeah, I misunderstood the memalloc flag use.
 
--- 
-Mel Gorman
-SUSE Labs
+Reviewed-by: Mike Christie <michaelc@cs.wisc.edu>
+
