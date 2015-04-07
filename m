@@ -1,97 +1,75 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH] Revert "libceph: use memalloc flags for net IO"
-Date: Tue,  7 Apr 2015 16:40:24 +0300
-Message-ID: <1428414024-47769-1-git-send-email-idryomov@gmail.com>
+From: Kewaan Ejaz <kewaan.ejaz@office.nacamar.de>
+Subject: Re: Ceph disk
+Date: Tue, 07 Apr 2015 15:17:56 +0200
+Message-ID: <1428412676.22152.101.camel@NAC>
+References: <ruevn0vmi9p4p1m5biuhx7sc.1427804698773@email.android.com>
+	 <1427827660.6486.7.camel@debian> <551AFD59.70209@dachary.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f177.google.com ([209.85.217.177]:34649 "EHLO
-	mail-lb0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753986AbbDGNkf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Apr 2015 09:40:35 -0400
-Received: by lboc7 with SMTP id c7so42720909lbo.1
-        for <ceph-devel@vger.kernel.org>; Tue, 07 Apr 2015 06:40:34 -0700 (PDT)
+Received: from mail.newmedia.nacamar.net ([62.27.60.172]:43627 "EHLO
+	mail01.newmedia.nacamar.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756059AbbDGNXy (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Apr 2015 09:23:54 -0400
+In-Reply-To: <551AFD59.70209@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Mike Christie <michaelc@cs.wisc.edu>, Mel Gorman <mgorman@suse.de>, Sage Weil <sage@redhat.com>
+To: Ceph Development <ceph-devel@vger.kernel.org>
+Cc: Loic Dachary <loic@dachary.org>
 
-This reverts commit 89baaa570ab0b476db09408d209578cfed700e9f.
 
-Dirty page throttling should be sufficient for us in the general case
-so there is no need to use __GFP_MEMALLOC - it would be needed only in
-the swap-over-rbd case, which we currently don't support.  (It would
-probably take approximately the commit that is being reverted to add
-that support, but we would also need the "swap" option to distinguish
-from the general case and make sure swap ceph_client-s aren't shared
-with anything else.)  See ceph-devel threads [1] and [2] for the
-details of why enabling pfmemalloc reserves for all cases is a bad
-thing.
+Hi Folks,
 
-On top of potential system lockups related to drained emergency
-reserves, this turned out to cause ceph lockups in case peers are on
-the same host and communicating via loopback due to sk_filter()
-dropping pfmemalloc skbs on the receiving side because the receiving
-loopback socket is not tagged with SOCK_MEMALLOC.
+Sorry for the lack of updates from my side. Actually, we had a few crashes in our openstack cluster (nothing out of the norm) but due to easter holidays, manpower has been quite tight. I am also working on recovering/setting up those lost compute nodes to make the resources available for our environment. I will update you all
+once the pressure is gone. Thanks for your understanding!
 
-[1] "SOCK_MEMALLOC vs loopback"
-    http://www.spinics.net/lists/ceph-devel/msg22998.html
-[2] "[PATCH] libceph: don't set memalloc flags in loopback case"
-    http://www.spinics.net/lists/ceph-devel/msg23392.html
+Best Regards,
+Kewaan.
+On Tue, 2015-03-31 at 22:02 +0200, Loic Dachary wrote:
+> [cc'ing ceph-devel public mailing list]
+> 
+> Hi,
+> 
+> On 31/03/2015 20:47, Kewaan Ejaz wrote:
+> > Hello Loic,
+> > 
+> > Thank you again for the opportunity to contribute to ceph. I am not sure
+> > how am I suppose to proceed but I have the following things in mind;
+> 
+> Thanks for proposing to help :-)
+> 
+> > 1) Fully understanding the ceph-disk code
+> > 2) I would start using the ceph-disk in my sandbox environment
+> > (Virtualbox)
+> 
+> You'll find that it's fairly straightforward: one file, all in it. There is room for improvement.
+> 
+> https://ceph.com/git/?p=ceph.git;a=blob;f=src/test/ceph-disk.sh are the tests that make check will run 
+> https://ceph.com/git/?p=ceph.git;a=blob;f=src/test/ceph-disk-root.sh are the tests that make check will run if ./configure --enable-root-make-check is used but you can also run one manually with cd src ; sudo test/ceph-disk.sh test_activate_dev and it will use the /dev/loop device to simulate a disk. A few sanity checks were added recently to verify that the loop device has been loaded with the necessary loop.max_part=16 (or more) parameter and that /dev/disk/part-byuuid is populated as expected. 
+> 
+> > I think I would require a week to get back to you. But other than that,
+> > let me know what kind of VM do you have in mind. For example,
+> > 
+> > 1) What kind of OS would you prefer from the Openstack cluster?
+> 
+> I feel more confortable with Debian or Ubuntu but CentOS or Fedora are also fine. What is required for test purposes is a dedicated tenant with the ability to run two virtual machines, 1GB RAM, 10GB disk, 1core. We would need a variety of images to test against (Ubuntu 12.04 + 14.04, Debian jessie, CentOS 7 + 6, Fedora 20 + 21, OpenSUSE 13.2).
+> 
+> > 2) We are not using Cinder or Swift in our Openstack cluster. Is that a
+> > Problem?
+> 
+> That will be fine: the loop device can be used as a spare disk instead of provisioning one with cinder. 
+> 
+> As soon as you can have that OpenStack tenant ready, it can be used with https://github.com/osynge/whatenv to run tests for https://github.com/ceph/ceph/pull/4036 and verify that the detection system actually works as expected. 
+> 
+> And once it's done, we could make it so this test is run whenever a pull request is posted that modifies ceph-disk and ensure we're not risking a regression. It would be a very valuable service. Not too CPU intensive either since we're not seeing more than a few patches on ceph-disk every month.
+> 
+> Cheers
+> 
+> > Best Regards,
+> > Kewaan.
+> 
+> 
 
-Conflicts:
-	net/ceph/messenger.c [ context: tcp_nodelay option ]
 
-Cc: Mike Christie <michaelc@cs.wisc.edu>
-Cc: Mel Gorman <mgorman@suse.de>
-Cc: Sage Weil <sage@redhat.com>
-Cc: stable@vger.kernel.org # 3.18+, needs backporting
-Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
----
- net/ceph/messenger.c | 9 +--------
- 1 file changed, 1 insertion(+), 8 deletions(-)
-
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index 6b3f54ed65ba..a9f4ae45b7fb 100644
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -484,7 +484,7 @@ static int ceph_tcp_connect(struct ceph_connection *con)
- 			       IPPROTO_TCP, &sock);
- 	if (ret)
- 		return ret;
--	sock->sk->sk_allocation = GFP_NOFS | __GFP_MEMALLOC;
-+	sock->sk->sk_allocation = GFP_NOFS;
- 
- #ifdef CONFIG_LOCKDEP
- 	lockdep_set_class(&sock->sk->sk_lock, &socket_class);
-@@ -520,8 +520,6 @@ static int ceph_tcp_connect(struct ceph_connection *con)
- 			       ret);
- 	}
- 
--	sk_set_memalloc(sock->sk);
--
- 	con->sock = sock;
- 	return 0;
- }
-@@ -2808,11 +2806,8 @@ static void con_work(struct work_struct *work)
- {
- 	struct ceph_connection *con = container_of(work, struct ceph_connection,
- 						   work.work);
--	unsigned long pflags = current->flags;
- 	bool fault;
- 
--	current->flags |= PF_MEMALLOC;
--
- 	mutex_lock(&con->mutex);
- 	while (true) {
- 		int ret;
-@@ -2866,8 +2861,6 @@ static void con_work(struct work_struct *work)
- 		con_fault_finish(con);
- 
- 	con->ops->put(con);
--
--	tsk_restore_flags(current, pflags, PF_MEMALLOC);
- }
- 
- /*
--- 
-1.9.3
 
