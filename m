@@ -1,61 +1,119 @@
-From: Ta Ba Tuan <tuantb@vccloud.vn>
-Subject: Re: [ceph-users] How to unset lfor setting (from cache pool)
-Date: Tue, 07 Apr 2015 09:43:10 +0700
-Message-ID: <5523443E.4010506@vccloud.vn>
-References: <55225007.7040404@vccloud.vn> <CAC6JEv86h8Fp-rogMyFO1AKMqpsCPzohXfEF0HwgfJtrWONHgg@mail.gmail.com>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: Regarding ceph rbd write path
+Date: Tue, 7 Apr 2015 14:51:22 +0800
+Message-ID: <CACJqLyZ9kL6JDMpTeQyTbH1Rb6Cbi+KvOen=Bmw5RLDC_Gzpnw@mail.gmail.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CB9849@SACMBXIP01.sdcorp.global.sandisk.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F28CB9860@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CACJqLyaP5AGcgRS2XjDd+OroYpoJVB0rMjqP1b2TcJFF6ob73g@mail.gmail.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F28CB9A27@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from static.vdc.vn ([123.30.242.142]:57613 "EHLO smtp.vccloud.vn"
-	rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
-	id S1752984AbbDGCnX (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 6 Apr 2015 22:43:23 -0400
-In-Reply-To: <CAC6JEv86h8Fp-rogMyFO1AKMqpsCPzohXfEF0HwgfJtrWONHgg@mail.gmail.com>
+Received: from mail-pa0-f50.google.com ([209.85.220.50]:35298 "EHLO
+	mail-pa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751144AbbDGGvX convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Apr 2015 02:51:23 -0400
+Received: by patj18 with SMTP id j18so68989822pat.2
+        for <ceph-devel@vger.kernel.org>; Mon, 06 Apr 2015 23:51:23 -0700 (PDT)
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CB9A27@SACMBXIP01.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@gregs42.com>
-Cc: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-I understand, Thank Gregory Farnum for your explaining
+On Sat, Apr 4, 2015 at 1:20 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
+> Haomai,
+> Yeah, I thought so, but, I didn't know much about that implementation. Good to know that it is taking care of that.
+> But, krbd path will still be suboptimal then.
+> If we can do something in OSD layer, we may be able to additionally coalesce multiple writes within a PG to a single transaction (of course we need to maintain order). Benefit could be single omap attributes update for multiple object write within a PG.
+> May be I should come up with a prototype if you guys are not foreseeing any problem.
 
+I'm not sure but I think it's not a simple way to implement a
+effective coalesce multiple transaction via this way.
 
---
-Tuantaba
-Ha Noi-VietNam
+As for extra metadata, we already have inprogress PR to reduce it as
+far as possible.
 
-On 07/04/2015 00:54, Gregory Farnum wrote:
-> On Mon, Apr 6, 2015 at 2:21 AM, Ta Ba Tuan <tuantb@vccloud.vn> wrote:
->> Hi all,
->>
->> I have ever to setup the cache-pool for my pool.
->> But had some proplems about cache-pool running, so I removed the cache pool
->> from My CEPH Cluster.
->>
->> The DATA pool currently don't use cache pool, but "lfor" setting still be
->> appeared.
->> lfor seems is a setting, not flag.
->>
->> pool 3 'data_pool' replicated size 3 min_size 1 crush_ruleset 4 object_hash
->> rjenkins pg_num 4098 pgp_num 4098 last_change 145235 lfor 75731 flags
->> hashpspool stripe_width 0
->>
->> How to unset lfor?,  and  After unsetting lofr, My pool activities OK?
-> "lfor" is not a config option; it's "last force op resend" and the
-> value is an OSDMap epoch. You can see some details about exactly what
-> it means in the v0.80.2 changelog.
-> -Greg
+Anyway, maybe some smart ideas could apply to this problem, look forward it.
+
 >
->> Thanks!
+> Thanks & Regards
+> Somnath
+>
+> -----Original Message-----
+> From: Haomai Wang [mailto:haomaiwang@gmail.com]
+> Sent: Friday, April 03, 2015 9:47 PM
+> To: Somnath Roy
+> Cc: ceph-devel@vger.kernel.org
+> Subject: Re: Regarding ceph rbd write path
+>
+> On Sat, Apr 4, 2015 at 8:30 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
+>> In fact, we can probably do it from the OSD side like this.
+>>
+>> 1. A thread in the sharded opWq is taking the ops within a pg by acquiring lock in the pg_for_processing data structure.
+>>
+>> 2. Now, before taking the job, it can do a bit processing to look for the same object transaction in the map till that time and coalesce that to a single job.
+>>
+>> Let me know if I am missing anything.
+>>
+>> Thanks & Regards
+>> Somnath
+>>
+>> -----Original Message-----
+>> From: ceph-devel-owner@vger.kernel.org
+>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
+>> Sent: Friday, April 03, 2015 5:17 PM
+>> To: ceph-devel@vger.kernel.org
+>> Subject: Regarding ceph rbd write path
+>>
+>>
+>> Hi Sage/Sam,
+>> Here is my understanding on ceph rbd write path.
+>>
+>> 1. Based on the image order rbd will decide the rados object size, say 4MB.
+>>
+>> 2. Now, from application say 64K chunks are being written to the rbd image.
+>>
+>> 3. rbd will calculate the objectids (one of the 4MB objects) and start populating the 4MB objects with 64K chunks.
+>>
+>> 4. Now, for each of this 64K chunk OSD will write 2 setattrs and the OMAP attrs.
+>>
+>> If the above flow is correct, it is updating the same metadata for every 64K chunk write to the same object (and same pg). So, my question is, is there any way to optimize (coalesce) that in either rbd/osd layer ?
+>> I couldn't find any way in the osd layer as it is holding pg->lock till a transaction complete. But, is there any way in the rbd side so that it can intelligently stage/coalesce the writes for the same object and do a batch commit?
+>> This should definitely improve WA/performance for seq writes, may not be much for random though.
+>
+> Do you consider to use RBDCache? It could cover most of cases you said I think.
+>
+>>
+>> Let me know your opinion on this.
+>>
+>> Thanks & Regards
+>> Somnath
+>>
+>> ________________________________
+>>
+>> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+>>
 >> --
->> Tuantaba
->> Ha Noi-VietNam.
->>
->>
->>
->> _______________________________________________
->> ceph-users mailing list
->> ceph-users@lists.ceph.com
->> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>> in the body of a message to majordomo@vger.kernel.org More majordomo
+>> info at  http://vger.kernel.org/majordomo-info.html
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>> in the body of a message to majordomo@vger.kernel.org More majordomo
+>> info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+>
+> --
+> Best Regards,
+>
+> Wheat
 
+
+
+-- 
+Best Regards,
+
+Wheat
