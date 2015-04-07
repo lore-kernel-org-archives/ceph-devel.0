@@ -1,225 +1,145 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: [ceph-users] OSD auto-mount after server reboot
-Date: Tue, 07 Apr 2015 23:31:10 +0200
-Message-ID: <55244C9E.2080502@dachary.org>
-References: <CAPntomBscGHp-oTqRJmG7by-OVsJ7O=WSu0G_TbYKAmN4qNE0Q@mail.gmail.com>	<5521614D.8090600@dachary.org>	<CAPntomCu4dtC-Zq7JaBrXFs+pLt=ToMdCyH5f7jc6bHTBQrLrg@mail.gmail.com>	<5522D9FD.3000502@dachary.org>	<CAPntomDDTF6=dNnZnkybfE-5Us_uDTSRoWupRnk42tabb2P+vQ@mail.gmail.com>	<CAPntomBdNp=eqdXYytojVF=2GTccX3c+MY9nf4Gh-c71_mYKnA@mail.gmail.com>	<55242DEE.5030907@dachary.org> <CAPntomByauf=ep7iDaL0qCRoWm1qL1xrOvGCrn1dv-zdkTgU5Q@mail.gmail.com>
+From: Yann Dupont <yann@objoo.org>
+Subject: v0.94 "Hammer" contributors credits
+Date: Tue, 07 Apr 2015 23:34:07 +0200
+Message-ID: <55244D4F.4010100@objoo.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="hqsfwCAO59NWboquis8tJvMXG8JOMs3tP"
+Content-Type: text/plain; charset=windows-1252;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:42996 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753551AbbDGVbV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Apr 2015 17:31:21 -0400
-In-Reply-To: <CAPntomByauf=ep7iDaL0qCRoWm1qL1xrOvGCrn1dv-zdkTgU5Q@mail.gmail.com>
+Received: from 4.mo2.mail-out.ovh.net ([87.98.172.75]:56770 "EHLO
+	4.mo2.mail-out.ovh.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753113AbbDGWL3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Apr 2015 18:11:29 -0400
+Received: from mail135.ha.ovh.net (gw6.ovh.net [213.251.189.206])
+	by mo2.mail-out.ovh.net (Postfix) with SMTP id 83ACFFF9839
+	for <ceph-devel@vger.kernel.org>; Tue,  7 Apr 2015 23:34:09 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: shiva rkreddy <shiva.rkreddy@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---hqsfwCAO59NWboquis8tJvMXG8JOMs3tP
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Hi Ceph,
 
+Here is a sorted list of authors and organizations who contributed
+to v0.94 "Hammer", by number of commits or reviews back to v0.93.
+The affiliation of authors to organizations can be updated by
+submitting a patch to :
+https://github.com/ceph/ceph/blob/master/.organizationmap
 
+All commits are reviewed but the number of reviews is a fraction of
+the number of commits. More often than not, the reviewer(s) is only
+mentioned in the message of the merge although it means that all
+associated commits have been reviewed. If you are curious about how it
+is done, the details are at
+https://wiki.ceph.com/Community/Ceph_contributors_list_maintenance_guid=
+e
 
-On 07/04/2015 23:03, shiva rkreddy wrote:
-> It turns out that ceph service is set ceph to off. Following defect tal=
-ks about it..Once its set to on, everything worked fine after host reboot=
-=2E
->=20
-> http://tracker.ceph.com/issues/9090
+As hammer is a stable version, this post will be followed by another=20
+with contributors back from previous stable version.
 
-Interesting :-) Does that mean that the ceph service was somehow turned o=
-ff when upgrading from v0.80.7 to v0.80.9 ?
+Number of lines added and removed, by authors
+      1	  3811 Samuel Just <sjust@redhat.com>
+      2	  3662 Boris Ranto <branto@redhat.com>
+      3	  1246 Jason Dillaman <dillaman@redhat.com>
+      4	  1224 David Zafman <dzafman@redhat.com>
+      5	   473 Sage Weil <sweil@redhat.com>
+      6	   353 Yehuda Sadeh <ysadehwe@redhat.com>
+      7	   349 Ken Dreyer <kdreyer@redhat.com>
+      8	   159 Loic Dachary <ldachary@redhat.com>
+      9	   149 Takeshi Miyamae <miyamae.takeshi@jp.fujitsu.com>
+     10	   122 Noah Watkins <nwatkins@redhat.com>
+     11	    97 Josh Durgin <jdurgin@redhat.com>
+     12	    61 Ilya Dryomov <idryomov@redhat.com>
+     13	    59 Jo=E3o Eduardo Lu=EDs <joao@redhat.com>
+     14	    29 Kefu Chai <kchai@redhat.com>
+     15	    23 Matt Benjamin <matt@cohortfs.com>
+     16	    22 Ma Jianpeng <jianpeng.ma@intel.com>
+     17	    20 Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+     18	    18 Rohan Mars <code@rohanmars.com>
+     19	    17 Yan, Zheng <zyan@redhat.com>
+     20	    11 Raju Kurunkad <raju.kurunkad@sandisk.com>
+     21	     8 Jenkins <jenkins@inktank.com>
+     22	     7 Xiong Yiliang <xiongyiliang@xunlei.com>
+     23	     4 Haomai Wang <haomaiwang@gmail.com>
+     24	     3 Greg Farnum <gfarnum@redhat.com>
 
->=20
-> On Tue, Apr 7, 2015 at 2:20 PM, Loic Dachary <loic@dachary.org <mailto:=
-loic@dachary.org>> wrote:
->=20
->     [cc'ing ceph-devel for archival purposes]
->=20
->     Hi,
->=20
->     On 07/04/2015 19:55, shiva rkreddy wrote:
->     > Hi Loic,
->     > I've looked at the way our cluster provisioning partition and lab=
-el the journal device. Its done using /*parted*/ command with "gpt" label=
-=2E  Following is the parted output for /dev/sdr that we were looking yes=
-terday.
->     >
->     > # parted /dev/sdr
->     > GNU Parted 2.1
->     > Using /dev/sdr
->     > Welcome to GNU Parted! Type 'help' to view a list of commands.
->     > (parted) p
->     > Model: ASR7160 JBOD-R (scsi)
->     > Disk /dev/sdr: 960GB
->     > Sector size (logical/physical): 512B/512B
->     > Partition Table: *gpt*
->     >
->     > Number  Start   End    Size   File system  Name     Flags
->     >  1      9599MB  240GB  230GB               primary
->     >  2      250GB   480GB  230GB               primary
->     >  3      490GB   720GB  230GB               primary
->     >  4      730GB   960GB  230GB               primary
->     >
->     > (parted)
->     >
->     > *# sgdisk --info 1 /dev/sdr*
->     > Partition GUID code: 45B0969E-9B03-4F30-B4C6-B4B80CEFF106 (Micros=
-oft basic data)
->     > Partition unique GUID: 0A45987B-DC77-4816-B506-DEE0DC60AE9E
->     > First sector: 18747392 (at 8.9 GiB)
->     > Last sector: 468707327 (at 223.5 GiB)
->     > Partition size: 449959936 sectors (214.6 GiB)
->     > Attribute flags: 0000000000000000
->     > Partition name: 'primary'
->     >
->     >
->     > We stared to put label on the disk based on a blog at http://blog=
-=2Ezhaw.ch/icclab/deploy-ceph-and-start-using-it-end-to-end-tutorial-inst=
-allation-part-13/
->     >
->     > I'm not sure why sgdisk is getting  "Microsoft basics data".
->=20
->     It's not a big deal as long as it's what ceph-disk expects:
->=20
->     https://github.com/ceph/ceph/blob/firefly/src/ceph-disk#L76
->=20
->     The more interesting question would be to figure out if ceph-disk-u=
-dev is called from
->=20
->     https://github.com/ceph/ceph/blob/firefly/udev/95-ceph-osd-alt.rule=
-s
->=20
->     We have tried udevadm trigger --sysname-match=3Dsd* yesterday and v=
-erified it is called when a udev event is sent by the kernel. And you hav=
-e added that to /etc/rc.local to make sure it is called at least once at =
-boot time. Would you have time to experiment as described at https://wiki=
-=2Eubuntu.com/DebuggingUdev to get more information about what happens du=
-ring the boot phase of your machine ?
->=20
->     Cheers
->=20
->     >
->     > Thanks,
->     > Shiva
->     >
->     > On Mon, Apr 6, 2015 at 2:29 PM, shiva rkreddy <shiva.rkreddy@gmai=
-l.com <mailto:shiva.rkreddy@gmail.com> <mailto:shiva.rkreddy@gmail.com <m=
-ailto:shiva.rkreddy@gmail.com>>> wrote:
->     >
->     >     Hi,
->     >
->     >     I'm on IRC as *shivark*
->     >
->     >     # sgdisk --info 1 /dev/sdb
->     >     Partition GUID code: 4FBD7E29-9D25-41B8-AFD0-062C0CEFF05D (Un=
-known)
->     >     Partition unique GUID: 1618223E-B8C9-4C4A-B5D2-EBFF6D64CB12
->     >     First sector: 2048 (at 1024.0 KiB)
->     >     Last sector: 7811870686 (at 3.6 TiB)
->     >     Partition size: 7811868639 sectors (3.6 TiB)
->     >     Attribute flags: 0000000000000000
->     >     Partition name: 'ceph data'
->     >     #
->     >
->     >
->     >     On Mon, Apr 6, 2015 at 2:09 PM, Loic Dachary <loic@dachary.or=
-g <mailto:loic@dachary.org> <mailto:loic@dachary.org <mailto:loic@dachary=
-=2Eorg>>> wrote:
->     >
->     >         Hi,
->     >
->     >         lrwxrwxrwx 1 root root 10 Apr  4 16:27 1618223e-b8c9-4c4a=
--b5d2-ebff6d64cb12 -> ../../sdb1
->     >
->     >         looks encouraging. Could you
->     >
->     >         sudo sgdisk --info 1 /dev/sdb
->     >
->     >         to check that it matches ? If you're on IRC feel free to =
-ping me (CEST France/Paris time) and we can have a debug session.
->     >
->     >         Cheers
->     >
->     >         On 06/04/2015 02:47, shiva rkreddy wrote:
->     >         > We have currently two  osds configured on this system r=
-unning  RHEL6.5, sharing a ssd drive as journal devices.
->     >         >
->     >         > udevadm trigger --sysname-match=3Dsdb or udevadm trigge=
-r --sysname-match=3D/dev/sdb, return without any output. Same thing happe=
-ns on ceph 0.80.7 where mount and services are started automatically.
->     >         >
->     >         > Output paste from ceph 0.80.9 is : http://pastebin.com/=
-1Yqntadi
->     >         >
->     >         >
->     >         > On Sun, Apr 5, 2015 at 11:22 AM, Loic Dachary <loic@dac=
-hary.org <mailto:loic@dachary.org> <mailto:loic@dachary.org <mailto:loic@=
-dachary.org>> <mailto:loic@dachary.org <mailto:loic@dachary.org> <mailto:=
-loic@dachary.org <mailto:loic@dachary.org>>>> wrote:
->     >         >
->     >         >
->     >         >
->     >         >     On 04/04/2015 22:09, shiva rkreddy wrote:
->     >         >     > HI,
->     >         >     > I'm currently testing Firefly 0.80.9 and noticed =
-that OSD are not auto-mounted after server reboot.
->     >         >     > It used to mount auto with Firefly 0.80.7.  OS is=
- RHEL 6.5.
->     >         >     >
->     >         >     > There was another thread earlier on this topic wi=
-th v0.80.8, suggestion was to add mount points to /etc/fstab.
->     >         >     >
->     >         >     > Question is whether the 0.80.7 behaviour could re=
-turn or its needs to be done via /etc/fstab or something else?
->     >         >
->     >         >     It should work without adding lines in /etc/fstab. =
-Could you give more details about your setup ? Could you try
->     >         >
->     >         >     udevadm trigger --sysname-match=3Dsdb
->     >         >
->     >         >     if an osd is managing /dev/sdb. Does that mount the=
- osd ? It would also be useful to have the output of ls -l /dev/disk/by-p=
-artuuid
->     >         >
->     >         >     Cheers
->     >         >
->     >         >     --
->     >         >     Lo=C3=AFc Dachary, Artisan Logiciel Libre
->     >         >
->     >         >
->     >
->     >         --
->     >         Lo=C3=AFc Dachary, Artisan Logiciel Libre
->     >
->     >
->     >
->=20
->     --
->     Lo=C3=AFc Dachary, Artisan Logiciel Libre
->=20
->=20
+Number of lines added and removed, by organization
+      1	 11665 Red Hat <contact@redhat.com>
+      2	   149 Fujitsu <contact@fujitsu.com>
+      3	    25 Unaffiliated <no@organization.net>
+      4	    23 CohortFS, LLC <contact@cohortfs.com>
+      5	    22 Intel <contact@intel.com>
+      6	    20 Deutsche Telekom <contact@telekom.de>
+      7	    11 SanDisk <contact@sandisk.com>
+      8	     8 Inktank <contact@inktank.com>
+      9	     4 UnitedStack <contact@unitedstack.com>
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+Commits, by authors
+      1	     33 Samuel Just <sjust@redhat.com>
+      2	     33 Jason Dillaman <dillaman@redhat.com>
+      3	     18 Sage Weil <sweil@redhat.com>
+      4	     14 David Zafman <dzafman@redhat.com>
+      5	     14 Boris Ranto <branto@redhat.com>
+      6	     11 Yehuda Sadeh <ysadehwe@redhat.com>
+      7	     11 Loic Dachary <ldachary@redhat.com>
+      8	      6 Jo=E3o Eduardo Lu=EDs <joao@redhat.com>
+      9	      5 Josh Durgin <jdurgin@redhat.com>
+     10	      3 Ma Jianpeng <jianpeng.ma@intel.com>
+     11	      2 Noah Watkins <nwatkins@redhat.com>
+     12	      2 Matt Benjamin <matt@cohortfs.com>
+     13	      2 Ken Dreyer <kdreyer@redhat.com>
+     14	      2 Kefu Chai <kchai@redhat.com>
+     15	      2 Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+     16	      1 Yan, Zheng <zyan@redhat.com>
+     17	      1 Xiong Yiliang <xiongyiliang@xunlei.com>
+     18	      1 Takeshi Miyamae <miyamae.takeshi@jp.fujitsu.com>
+     19	      1 Rohan Mars <code@rohanmars.com>
+     20	      1 Raju Kurunkad <raju.kurunkad@sandisk.com>
+     21	      1 Jenkins <jenkins@inktank.com>
+     22	      1 Ilya Dryomov <idryomov@redhat.com>
+     23	      1 Haomai Wang <haomaiwang@gmail.com>
+     24	      1 Greg Farnum <gfarnum@redhat.com>
+
+Commits, by organizations
+      1	    154 Red Hat <contact@redhat.com>
+      2	      3 Intel <contact@intel.com>
+      3	      2 Unaffiliated <no@organization.net>
+      4	      2 Deutsche Telekom <contact@telekom.de>
+      5	      2 CohortFS, LLC <contact@cohortfs.com>
+      6	      1 UnitedStack <contact@unitedstack.com>
+      7	      1 SanDisk <contact@sandisk.com>
+      8	      1 Inktank <contact@inktank.com>
+      9	      1 Fujitsu <contact@fujitsu.com>
+
+Reviews, by authors (one review spans multiple commits)
+      1	     26 Sage Weil <sweil@redhat.com>
+      2	      8 Samuel Just <sjust@redhat.com>
+      3	      7 Loic Dachary <ldachary@redhat.com>
+      4	      7 Josh Durgin <jdurgin@redhat.com>
+      5	      5 Kefu Chai <kchai@redhat.com>
+      6	      2 Greg Farnum <gfarnum@redhat.com>
+      7	      1 Yehuda Sadeh <ysadehwe@redhat.com>
+      8	      1 Yann Dupont <yann@objoo.org>
+      9	      1 Nilamdyuti Goswami <ngoswami@redhat.com>
+     10	      1 Jo=E3o Eduardo Lu=EDs <joao@redhat.com>
+     11	      1 Jason Dillaman <dillaman@redhat.com>
+     12	      1 Dan Mick <dmick@redhat.com>
+
+Reviews, by organizations (one review spans multiple commits)
+      1	     60 Red Hat <contact@redhat.com>
+      2	      1 Unaffiliated <no@organization.net>
 
 
---hqsfwCAO59NWboquis8tJvMXG8JOMs3tP
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+Cheers,
+Yann
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlUkTJ4ACgkQ8dLMyEl6F20IJwCdE6yRcrmtUGO1VAJR4SllJkSH
-4tgAnRoAmAs64srnCerFTFp+TIsDY79b
-=O3fv
------END PGP SIGNATURE-----
-
---hqsfwCAO59NWboquis8tJvMXG8JOMs3tP--
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
