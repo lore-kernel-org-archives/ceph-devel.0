@@ -1,200 +1,76 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: [ceph-users] OSD auto-mount after server reboot
-Date: Tue, 07 Apr 2015 21:20:14 +0200
-Message-ID: <55242DEE.5030907@dachary.org>
-References: <CAPntomBscGHp-oTqRJmG7by-OVsJ7O=WSu0G_TbYKAmN4qNE0Q@mail.gmail.com>	<5521614D.8090600@dachary.org>	<CAPntomCu4dtC-Zq7JaBrXFs+pLt=ToMdCyH5f7jc6bHTBQrLrg@mail.gmail.com>	<5522D9FD.3000502@dachary.org>	<CAPntomDDTF6=dNnZnkybfE-5Us_uDTSRoWupRnk42tabb2P+vQ@mail.gmail.com> <CAPntomBdNp=eqdXYytojVF=2GTccX3c+MY9nf4Gh-c71_mYKnA@mail.gmail.com>
+From: Pavan Rallabhandi <Pavan.Rallabhandi@sandisk.com>
+Subject: RE: RGW rados handles
+Date: Tue, 7 Apr 2015 18:16:17 +0000
+Message-ID: <68A06213B74F1742A2C48216AE1BB6B8087B4AE1@SACMBXIP02.sdcorp.global.sandisk.com>
+References: <68A06213B74F1742A2C48216AE1BB6B8087B4697@SACMBXIP02.sdcorp.global.sandisk.com>
+ <2024043038.8779749.1428427378183.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="0k4f3FsNpiUoH96r7MspH0x93X0tifUsq"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:42920 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751484AbbDGTUY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Apr 2015 15:20:24 -0400
-In-Reply-To: <CAPntomBdNp=eqdXYytojVF=2GTccX3c+MY9nf4Gh-c71_mYKnA@mail.gmail.com>
+Received: from mail-bl2on0066.outbound.protection.outlook.com ([65.55.169.66]:42640
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753254AbbDGTsa (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 7 Apr 2015 15:48:30 -0400
+In-Reply-To: <2024043038.8779749.1428427378183.JavaMail.zimbra@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: shiva rkreddy <shiva.rkreddy@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---0k4f3FsNpiUoH96r7MspH0x93X0tifUsq
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-[cc'ing ceph-devel for archival purposes]
-
-Hi,
-
-On 07/04/2015 19:55, shiva rkreddy wrote:
-> Hi Loic,
-> I've looked at the way our cluster provisioning partition and label the=
- journal device. Its done using /*parted*/ command with "gpt" label.  Fol=
-lowing is the parted output for /dev/sdr that we were looking yesterday.
->=20
-> # parted /dev/sdr
-> GNU Parted 2.1
-> Using /dev/sdr
-> Welcome to GNU Parted! Type 'help' to view a list of commands.
-> (parted) p                                                             =
- =20
-> Model: ASR7160 JBOD-R (scsi)
-> Disk /dev/sdr: 960GB
-> Sector size (logical/physical): 512B/512B
-> Partition Table: *gpt*
->=20
-> Number  Start   End    Size   File system  Name     Flags
->  1      9599MB  240GB  230GB               primary
->  2      250GB   480GB  230GB               primary
->  3      490GB   720GB  230GB               primary
->  4      730GB   960GB  230GB               primary
->=20
-> (parted)    =20
->=20
-> *# sgdisk --info 1 /dev/sdr*
-> Partition GUID code: 45B0969E-9B03-4F30-B4C6-B4B80CEFF106 (Microsoft ba=
-sic data)
-> Partition unique GUID: 0A45987B-DC77-4816-B506-DEE0DC60AE9E
-> First sector: 18747392 (at 8.9 GiB)
-> Last sector: 468707327 (at 223.5 GiB)
-> Partition size: 449959936 sectors (214.6 GiB)
-> Attribute flags: 0000000000000000
-> Partition name: 'primary'
->=20
->=20
-> We stared to put label on the disk based on a blog at http://blog.zhaw.=
-ch/icclab/deploy-ceph-and-start-using-it-end-to-end-tutorial-installation=
--part-13/
->=20
-> I'm not sure why sgdisk is getting  "Microsoft basics data".
-
-It's not a big deal as long as it's what ceph-disk expects:
-
-https://github.com/ceph/ceph/blob/firefly/src/ceph-disk#L76
-
-The more interesting question would be to figure out if ceph-disk-udev is=
- called from
-
-https://github.com/ceph/ceph/blob/firefly/udev/95-ceph-osd-alt.rules
-
-We have tried udevadm trigger --sysname-match=3Dsd* yesterday and verifie=
-d it is called when a udev event is sent by the kernel. And you have adde=
-d that to /etc/rc.local to make sure it is called at least once at boot t=
-ime. Would you have time to experiment as described at https://wiki.ubunt=
-u.com/DebuggingUdev to get more information about what happens during the=
- boot phase of your machine ?
-
-Cheers
-
->                          =20
-> Thanks,
-> Shiva
->=20
-> On Mon, Apr 6, 2015 at 2:29 PM, shiva rkreddy <shiva.rkreddy@gmail.com =
-<mailto:shiva.rkreddy@gmail.com>> wrote:
->=20
->     Hi,
->=20
->     I'm on IRC as *shivark*
->=20
->     # sgdisk --info 1 /dev/sdb
->     Partition GUID code: 4FBD7E29-9D25-41B8-AFD0-062C0CEFF05D (Unknown)=
-
->     Partition unique GUID: 1618223E-B8C9-4C4A-B5D2-EBFF6D64CB12
->     First sector: 2048 (at 1024.0 KiB)
->     Last sector: 7811870686 (at 3.6 TiB)
->     Partition size: 7811868639 sectors (3.6 TiB)
->     Attribute flags: 0000000000000000
->     Partition name: 'ceph data'
->     #
->=20
->=20
->     On Mon, Apr 6, 2015 at 2:09 PM, Loic Dachary <loic@dachary.org <mai=
-lto:loic@dachary.org>> wrote:
->=20
->         Hi,
->=20
->         lrwxrwxrwx 1 root root 10 Apr  4 16:27 1618223e-b8c9-4c4a-b5d2-=
-ebff6d64cb12 -> ../../sdb1
->=20
->         looks encouraging. Could you
->=20
->         sudo sgdisk --info 1 /dev/sdb
->=20
->         to check that it matches ? If you're on IRC feel free to ping m=
-e (CEST France/Paris time) and we can have a debug session.
->=20
->         Cheers
->=20
->         On 06/04/2015 02:47, shiva rkreddy wrote:
->         > We have currently two  osds configured on this system running=
-  RHEL6.5, sharing a ssd drive as journal devices.
->         >
->         > udevadm trigger --sysname-match=3Dsdb or udevadm trigger --sy=
-sname-match=3D/dev/sdb, return without any output. Same thing happens on =
-ceph 0.80.7 where mount and services are started automatically.
->         >
->         > Output paste from ceph 0.80.9 is : http://pastebin.com/1Yqnta=
-di
->         >
->         >
->         > On Sun, Apr 5, 2015 at 11:22 AM, Loic Dachary <loic@dachary.o=
-rg <mailto:loic@dachary.org> <mailto:loic@dachary.org <mailto:loic@dachar=
-y.org>>> wrote:
->         >
->         >
->         >
->         >     On 04/04/2015 22:09, shiva rkreddy wrote:
->         >     > HI,
->         >     > I'm currently testing Firefly 0.80.9 and noticed that O=
-SD are not auto-mounted after server reboot.
->         >     > It used to mount auto with Firefly 0.80.7.  OS is RHEL =
-6.5.
->         >     >
->         >     > There was another thread earlier on this topic with v0.=
-80.8, suggestion was to add mount points to /etc/fstab.
->         >     >
->         >     > Question is whether the 0.80.7 behaviour could return o=
-r its needs to be done via /etc/fstab or something else?
->         >
->         >     It should work without adding lines in /etc/fstab. Could =
-you give more details about your setup ? Could you try
->         >
->         >     udevadm trigger --sysname-match=3Dsdb
->         >
->         >     if an osd is managing /dev/sdb. Does that mount the osd ?=
- It would also be useful to have the output of ls -l /dev/disk/by-partuui=
-d
->         >
->         >     Cheers
->         >
->         >     --
->         >     Lo=C3=AFc Dachary, Artisan Logiciel Libre
->         >
->         >
->=20
->         --
->         Lo=C3=AFc Dachary, Artisan Logiciel Libre
->=20
->=20
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---0k4f3FsNpiUoH96r7MspH0x93X0tifUsq
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlUkLe4ACgkQ8dLMyEl6F22PlwCgot6OZCswZerTLPXTAoEdH5Wt
-svoAnRQwjvmOlpyBJrtTcpvqgES1o2c7
-=RzQq
------END PGP SIGNATURE-----
-
---0k4f3FsNpiUoH96r7MspH0x93X0tifUsq--
+VGhhbmtzIGZvciB0aGUgcmVzcG9uc2UgWWVodWRhLiAgUGxlYXNlIGZpbmQgbXkgcmVwbGllcyBp
+bmxpbmUgID4+DQoNClRoYW5rcywNCi1QYXZhbi4NCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0t
+LS0NCkZyb206IFllaHVkYSBTYWRlaC1XZWlucmF1YiBbbWFpbHRvOnllaHVkYUByZWRoYXQuY29t
+XQ0KU2VudDogVHVlc2RheSwgQXByaWwgMDcsIDIwMTUgMTA6NTMgUE0NClRvOiBQYXZhbiBSYWxs
+YWJoYW5kaQ0KQ2M6IENlcGggRGV2ZWxvcG1lbnQ7IFNhZ2UgV2VpbA0KU3ViamVjdDogUmU6IFJH
+VyByYWRvcyBoYW5kbGVzDQoNCg0KDQotLS0tLSBPcmlnaW5hbCBNZXNzYWdlIC0tLS0tDQo+IEZy
+b206ICJQYXZhbiBSYWxsYWJoYW5kaSIgPFBhdmFuLlJhbGxhYmhhbmRpQHNhbmRpc2suY29tPg0K
+PiBUbzogIkNlcGggRGV2ZWxvcG1lbnQiIDxjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZz4NCj4g
+Q2M6IHllaHVkYUByZWRoYXQuY29tDQo+IFNlbnQ6IFR1ZXNkYXksIEFwcmlsIDcsIDIwMTUgNzow
+MzozNyBBTQ0KPiBTdWJqZWN0OiBSR1cgcmFkb3MgaGFuZGxlcw0KPg0KPiBIaSwNCj4NCj4gQXMg
+cGFydCBvZiBjaGFyYWN0ZXJpemluZyBSR1cgcmVhZCBwZXJmb3JtYW5jZSwgaGF2ZSBvYnNlcnZl
+ZCB0aGF0DQo+IHRoZXJlIGlzIGEgc2luZ2xlIFJBRE9TIGNvbm5lY3Rpb24gdGhhdCBpcyBjb25z
+dW1lZCBieSBzbyBtYW55IFJHVw0KPiB3b3JrZXIgdGhyZWFkcywgcmVzdWx0aW5nIGluIHNvbWUg
+YW1vdW50IG9mIHNlcmlhbGl6YXRpb24gYXQgdGhhdA0KPiBsZXZlbC4gTWFraW5nIHRoZSBSQURP
+UyBoYW5kbGVzIG11bHRpcGxlLCBhbmQgc2hhcmVkIGFjcm9zcyB0aGUgd29ya2VyDQo+IHRocmVh
+ZHMgaW4gYSBSUiBmYXNoaW9uLCBoYXZlIHlpZWxkZWQgYSBmYWN0b3Igb2YgfjUwJSBpbXByb3Zl
+bWVudA0KPiAoZm9yIHJlYWQgcmVxdWVzdHMpIGluIHRocm91Z2hwdXQgYW5kIHdpdGggbXVjaCBi
+ZXR0ZXIgcmVzcG9uc2UgdGltZXMNCj4gb24gbXkgc2V0dXAgKHdpbGwgc2hhcmUgdGhlIGNvbmZp
+Z3VyYXRpb24gYW5kIHJlc3VsdHMgaW4gZHVlIGNvdXJzZSkuDQo+DQo+IFdhbnRlZCB0byB1bmRl
+cnN0YW5kIGlmIHRoZXJlIGlzIGEgY29uc3RyYWludCBpbiBoYXZpbmcgc2luZ2xlIFJBRE9TDQo+
+IGluc3RhbmNlIHBlciBSR1csIHRoYXQgY291bGQgb3RoZXJ3aXNlIGJlIGEgY29uZmlndXJhYmxl
+IG9wdGlvbiwgZm9yDQo+IHdoaWNoIEkgaGF2ZSBhIFBSIGluIHBpcGVsaW5lLg0KDQpXZSBkaXNj
+dXNzZWQgdGhpcyBhIHdoaWxlIGJhY2ssIGFuZCBpaXJjLCB0aGUgbWFpbiBpc3N1ZSB0aGF0IHdh
+cyBicm91Z2h0IHdhcyB0aGF0IHdlJ2QgZW5kIHVwIGNyZWF0aW5nIG11bHRpcGxlIHNvY2tldHMg
+dG8gdGhlIGJhY2tlbmQsIHdoaWNoIG1pZ2h0IGJlIHByb2JsZW1hdGljIGJvdGggdG8gdGhlIGNs
+aWVudCBpdHNlbGYsIGJ1dCBhbHNvIHRvIHRoZSBvc2RzLiBBIHNpbWlsYXIgZWZmZWN0IHdvdWxk
+IHBvdGVudGlhbGx5IGJlIGFjaGlldmVkIGJ5IGFkZGluZyBtb3JlIGdhdGV3YXlzLg0KDQo+PiBU
+cnVlLCBidXQgdGhlbiB0aG91Z2h0IHRoZSBjb25jZXJuIG9mIGhhdmluZyBtdWx0aXBsZSBzb2Nr
+ZXRzIGF0IHRoZSBiYWNrZW5kIHdvdWxkIHN0aWxsIGJlIHRydWUsIHdpdGggbW9yZSBnYXRld2F5
+cy4gT24gdGhlIG90aGVyIGhhbmQsIHRoaXMgbWlnaHQgYWxsZXZpYXRlIHRoZSBidXJkZW4gb24g
+dGhlIGNsaWVudCBtYWNoaW5lcyB0byBoYXZlIHNvIG1hbnkgZ2F0ZXdheXMsIHBvc3NpYmx5IHJ1
+bm5pbmcgYmVoaW5kIGEgbG9hZCBiYWxhbmNlci4NCg0KSSdtIG5vdCBhd2FyZSBvZiBhbnkgb3Ro
+ZXIgaXNzdWVzLiBJJ20gaGF2aW5nIHRyb3VibGUgY29taW5nIHVwIHdpdGggd2hhdCB3b3VsZCBn
+byB3cm9uZy4gSGF2aW5nIG11bHRpcGxlIHJhZG9zIGNvbm5lY3Rpb24gbWVhbnMgdGhhdCBjZXJ0
+YWluIG9yZGVyaW5nIGd1YXJhbnRlZXMgYXJlIGxvc3QsIGJ1dCBJJ20gbm90IHRvbyBzdXJlIGlm
+IGFuZCB3aGVyZSB3ZSByZWx5IG9uIHRoZXNlLCBhbmQgaXQgd2lsbCBhbHNvIGRlcGVuZCBvbiB0
+aGUgd2F5IHlvdSBpbXBsZW1lbnRlZCBpdC4gV2UnZCBsb3ZlIHRvIHNlZSB0aGUgY29kZS4NCg0K
+Pj4gU3VyZSwgd291bGQgc2VuZCB0aGUgUFIgb3V0IGZvciByZXZpZXcuIEhhdmUgY3VycmVudGx5
+IGltcGxlbWVudGVkIGl0IGluIGEgdHJ1ZSBSUiB3YXksIHdoZXJlIGluLCBhIHJhZG9zIGhhbmRs
+ZSBpcyBwaWNrZWQgdXAgZnJvbSB0aGUgYnVuY2ggYXZhaWxhYmxlIG9uIHRoZSBmbHkuIEhhdmUg
+cnVuIHNvbWUgZ2VuZXJpYyBzd2lmdCBQVVQgYW5kIEdFVCByZXF1ZXN0cyh2aWEgQ09TQkVOQ0gp
+IHRvIGZpbmQgbm8gZmFpbHVyZXMsIG5vdCBzbyBmYXIgaW4gbXkgcnVucy4NCg0KWWVodWRhDQoN
+Cl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQoNClBMRUFTRSBOT1RFOiBUaGUgaW5m
+b3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50
+ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFt
+ZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5k
+ZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2Vp
+dmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0
+aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5
+IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBl
+cnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFz
+IHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMg
+b2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBv
+ciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCg0K
