@@ -1,25 +1,44 @@
-From: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: v0.94 Hammer released
-Date: Tue, 7 Apr 2015 13:54:43 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1504071349220.31599@cobra.newdream.net>
+From: "O'Reilly, Dan" <Daniel.OReilly-EYjPQcvs5+o@public.gmane.org>
+Subject: Re: v0.94 Hammer released
+Date: Tue, 7 Apr 2015 15:00:04 -0600
+Message-ID: <72F29FF8CF6F4A439821624088377AF2011C7BFD77@MER2-EXCH07A2.echostar.com>
+References: <alpine.DEB.2.00.1504071349220.31599@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-announce-ceph.com>,
-	<mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-announce-ceph.com/>
-List-Post: <mailto:ceph-announce-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-announce-ceph.com>,
-	<mailto:ceph-announce-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "Ceph-announce" <ceph-announce-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-announce-Qp0mS5GaXlQ@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.00.1504071349220.31599-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: 'Sage Weil' <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "ceph-announce-Qp0mS5GaXlQ@public.gmane.org" <ceph-announce-Qp0mS5GaXlQ@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, "ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org" <ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-This major release is expected to form the basis of the next long-term
-stable series.  It is intended to supercede v0.80.x Firefly.
+Where are the RPM repos for HAMMER?
+
+Dan O'Reilly
+UNIX Systems Administration
+
+9601 S. Meridian Blvd.
+Englewood, CO 80112
+720-514-6293
+
+
+
+-----Original Message-----
+From: ceph-users [mailto:ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org] On Behalf Of Sage Weil
+Sent: Tuesday, April 07, 2015 2:55 PM
+To: ceph-announce-Qp0mS5GaXlQ@public.gmane.org; ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; ceph-users-Qp0mS5GaXlQ@public.gmane.org; ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org
+Subject: [ceph-users] v0.94 Hammer released
+
+This major release is expected to form the basis of the next long-term stable series.  It is intended to supercede v0.80.x Firefly.
 
 Highlights since Giant include:
 
@@ -63,7 +82,7 @@ Highlights since Giant include:
   made to the cluster.
 * RADOS cache tiering: A series of changes have been made in the
   cache tiering code that improve performance and reduce latency.
-* Experimental RDMA support: There is now experimental support the RDMA 
+* Experimental RDMA support: There is now experimental support the RDMA
   via the Accelio (libxio) library.
 * New administrator commands: The 'ceph osd df' command shows
   pertinent details on OSD disk utilizations.  The 'ceph pg ls ...'
@@ -99,22 +118,13 @@ Other highlights since Firefly include:
   and repair purposes.  This is most heavily used by our QA
   infrastructure to exercise recovery code.
 
-I would like to take this opportunity to call out the amazing growth
-in contributors to Ceph beyond the core development team from Inktank.
-Hammer features major new features and improvements from Intel,
-UnitedStack, Yahoo, UbuntuKylin, CohortFS, Mellanox, CERN, Deutsche
-Telekom, Mirantis, and SanDisk.
+I would like to take this opportunity to call out the amazing growth in contributors to Ceph beyond the core development team from Inktank.
+Hammer features major new features and improvements from Intel, UnitedStack, Yahoo, UbuntuKylin, CohortFS, Mellanox, CERN, Deutsche Telekom, Mirantis, and SanDisk.
 
 Dedication
 ----------
 
-This release is dedicated in memoriam to Sandon Van Ness, aka
-Houkouonchi, who unexpectedly passed away a few weeks ago.  Sandon was
-responsible for maintaining the large and complex Sepia lab that
-houses the Ceph project's build and test infrastructure.  His efforts
-have made an important impact on our ability to reliably test Ceph
-with a relatively small group of people.  He was a valued member of
-the team and we will miss him.  H is also for Houkouonchi.
+This release is dedicated in memoriam to Sandon Van Ness, aka Houkouonchi, who unexpectedly passed away a few weeks ago.  Sandon was responsible for maintaining the large and complex Sepia lab that houses the Ceph project's build and test infrastructure.  His efforts have made an important impact on our ability to reliably test Ceph with a relatively small group of people.  He was a valued member of the team and we will miss him.  H is also for Houkouonchi.
 
 Upgrading
 ---------
@@ -168,3 +178,9 @@ Getting Ceph
 * Tarball at http://ceph.com/download/ceph-0.94.tar.gz
 * For packages, see http://ceph.com/docs/master/install/get-packages
 * For ceph-deploy, see http://ceph.com/docs/master/install/install-ceph-deploy
+
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
