@@ -1,119 +1,131 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: Regarding ceph rbd write path
-Date: Tue, 7 Apr 2015 14:51:22 +0800
-Message-ID: <CACJqLyZ9kL6JDMpTeQyTbH1Rb6Cbi+KvOen=Bmw5RLDC_Gzpnw@mail.gmail.com>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CB9849@SACMBXIP01.sdcorp.global.sandisk.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F28CB9860@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CACJqLyaP5AGcgRS2XjDd+OroYpoJVB0rMjqP1b2TcJFF6ob73g@mail.gmail.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F28CB9A27@SACMBXIP01.sdcorp.global.sandisk.com>
+From: Mel Gorman <mgorman@suse.de>
+Subject: Re: [PATCH] libceph: don't set memalloc flags in loopback case
+Date: Tue, 7 Apr 2015 13:35:13 +0100
+Message-ID: <20150407123513.GZ4701@suse.de>
+References: <1427908760-7083-1-git-send-email-idryomov@gmail.com>
+ <20150401230323.GD20397@suse.de>
+ <CAOi1vP-u_sWF0uZpbYCN9qUp80tXQvmnJdOjWM3kpSR1JqSDMg@mail.gmail.com>
+ <20150402054124.GE20397@suse.de>
+ <551EF229.5000509@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=iso-8859-15
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f50.google.com ([209.85.220.50]:35298 "EHLO
-	mail-pa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751144AbbDGGvX convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Apr 2015 02:51:23 -0400
-Received: by patj18 with SMTP id j18so68989822pat.2
-        for <ceph-devel@vger.kernel.org>; Mon, 06 Apr 2015 23:51:23 -0700 (PDT)
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CB9A27@SACMBXIP01.sdcorp.global.sandisk.com>
+Received: from cantor2.suse.de ([195.135.220.15]:41220 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752849AbbDGMfT (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 7 Apr 2015 08:35:19 -0400
+Content-Disposition: inline
+In-Reply-To: <551EF229.5000509@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Mike Christie <mchristi@redhat.com>
+Cc: Ilya Dryomov <idryomov@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>, Mike Christie <michaelc@cs.wisc.edu>, Sage Weil <sage@redhat.com>
 
-On Sat, Apr 4, 2015 at 1:20 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
-> Haomai,
-> Yeah, I thought so, but, I didn't know much about that implementation. Good to know that it is taking care of that.
-> But, krbd path will still be suboptimal then.
-> If we can do something in OSD layer, we may be able to additionally coalesce multiple writes within a PG to a single transaction (of course we need to maintain order). Benefit could be single omap attributes update for multiple object write within a PG.
-> May be I should come up with a prototype if you guys are not foreseeing any problem.
+On Fri, Apr 03, 2015 at 03:03:53PM -0500, Mike Christie wrote:
+> On 04/02/2015 12:41 AM, Mel Gorman wrote:
+> > On Thu, Apr 02, 2015 at 02:40:19AM +0300, Ilya Dryomov wrote:
+> >> > On Thu, Apr 2, 2015 at 2:03 AM, Mel Gorman <mgorman@suse.de> wrote:
+> >>> > > On Wed, Apr 01, 2015 at 08:19:20PM +0300, Ilya Dryomov wrote:
+> >>>> > >> Following nbd and iscsi, commit 89baaa570ab0 ("libceph: use memalloc
+> >>>> > >> flags for net IO") set SOCK_MEMALLOC and PF_MEMALLOC flags for rbd and
+> >>>> > >> cephfs.  However it turned out to not play nice with loopback scenario,
+> >>>> > >> leading to lockups with a full socket send-q and empty recv-q.
+> >>>> > >>
+> >>>> > >> While we always advised against colocating kernel client and ceph
+> >>>> > >> servers on the same box, a few people are doing it and it's also useful
+> >>>> > >> for light development testing, so rather than reverting make sure to
+> >>>> > >> not set those flags in the loopback case.
+> >>>> > >>
+> >>> > >
+> >>> > > This does not clarify why the non-loopback case needs access to pfmemalloc
+> >>> > > reserves. Granted, I've spent zero time on this but it's really unclear
+> >>> > > what problem was originally tried to be solved and why dirty page limiting
+> >>> > > was insufficient. Swap over NFS was always a very special case minimally
+> >>> > > because it's immune to dirty page throttling.
+> >> > 
+> >> > I don't think there was any particular problem tried to be solved,
+> > Then please go back and look at why dirty page limiting is insufficient
+> > for ceph.
+> > 
+> 
+> The problem I was trying to solve is just the basic one where block
+> drivers have in the past been required to be able to make forward
+> progress on a write. With iscsi under heavy IO and memory use loads, we
+> will see memory allocation failures from the network layer followed by
+> hard system lock ups.
 
-I'm not sure but I think it's not a simple way to implement a
-effective coalesce multiple transaction via this way.
+Why was it unable to discard clean file pages or swap anonymous pages
+to local disk to ensure forward progress? Are you swapping over ISCSI
+that requires network transmits? If so, then you may need to do something
+similar to swap-over-NFS when the network is involved. Enabling pfmemalloc
+reserves for all communications is not the answer as it's trading one
+set of problems for another -- specifically emergency reserves will be
+used in cases where emergency reserves are not required with the risk of
+the machine locking up.
 
-As for extra metadata, we already have inprogress PR to reduce it as
-far as possible.
+> The block layer and its drivers like scsi does not
+> make any distinction between swap and non swap disks to handle this
+> problem.
 
-Anyway, maybe some smart ideas could apply to this problem, look forward it.
+Can they be identified like swap-over-NFS is? If not, why not?
 
->
-> Thanks & Regards
-> Somnath
->
-> -----Original Message-----
-> From: Haomai Wang [mailto:haomaiwang@gmail.com]
-> Sent: Friday, April 03, 2015 9:47 PM
-> To: Somnath Roy
-> Cc: ceph-devel@vger.kernel.org
-> Subject: Re: Regarding ceph rbd write path
->
-> On Sat, Apr 4, 2015 at 8:30 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
->> In fact, we can probably do it from the OSD side like this.
->>
->> 1. A thread in the sharded opWq is taking the ops within a pg by acquiring lock in the pg_for_processing data structure.
->>
->> 2. Now, before taking the job, it can do a bit processing to look for the same object transaction in the map till that time and coalesce that to a single job.
->>
->> Let me know if I am missing anything.
->>
->> Thanks & Regards
->> Somnath
->>
->> -----Original Message-----
->> From: ceph-devel-owner@vger.kernel.org
->> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
->> Sent: Friday, April 03, 2015 5:17 PM
->> To: ceph-devel@vger.kernel.org
->> Subject: Regarding ceph rbd write path
->>
->>
->> Hi Sage/Sam,
->> Here is my understanding on ceph rbd write path.
->>
->> 1. Based on the image order rbd will decide the rados object size, say 4MB.
->>
->> 2. Now, from application say 64K chunks are being written to the rbd image.
->>
->> 3. rbd will calculate the objectids (one of the 4MB objects) and start populating the 4MB objects with 64K chunks.
->>
->> 4. Now, for each of this 64K chunk OSD will write 2 setattrs and the OMAP attrs.
->>
->> If the above flow is correct, it is updating the same metadata for every 64K chunk write to the same object (and same pg). So, my question is, is there any way to optimize (coalesce) that in either rbd/osd layer ?
->> I couldn't find any way in the osd layer as it is holding pg->lock till a transaction complete. But, is there any way in the rbd side so that it can intelligently stage/coalesce the writes for the same object and do a batch commit?
->> This should definitely improve WA/performance for seq writes, may not be much for random though.
->
-> Do you consider to use RBDCache? It could cover most of cases you said I think.
->
->>
->> Let me know your opinion on this.
->>
->> Thanks & Regards
->> Somnath
->>
->> ________________________________
->>
->> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->> in the body of a message to majordomo@vger.kernel.org More majordomo
->> info at  http://vger.kernel.org/majordomo-info.html
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->> in the body of a message to majordomo@vger.kernel.org More majordomo
->> info at  http://vger.kernel.org/majordomo-info.html
->
->
->
-> --
-> Best Regards,
->
-> Wheat
+> It will always just work when the network is not involved.
 
+Your other option is to fail to add swap if writing to it requires
+network buffers. The configuration is a hand-grenade and better to mark
+it as unsupported until such time as it is properly handled.
 
+> I
+> thought we did not special case swap, because there were cases where
+> there may not be swappable pages, and the mm layer then needs to write
+> out pages to other non-swap disks to be able to free up memory.
+> 
+> In the block layer and scsi drivers like qla2xxx forward progress is
+> easier to handle. They just use bio, request, scsi_cmnd, scatterlist,
+> etc mempools and internally preallocate some resources they need. For
+> iscsi and other block drivers that use the network, it is more difficult
+> as you of course know, and when I did the iscsi and rbd/ceph patches I
+> had thought we were supposed to be using the memalloc related flags to
+> handle this problem for both swap and non swap cases. I might have
+> misunderstood you way back when I did those patches originally.
+> 
+
+Only the swap case should use emergency reserves like this. File-backed
+cases should discard clean file pages and depend on the dirty page
+limiting to ensure enough clean pages are free. There is a corner case
+where anonymous memory uses 100-dirty_ratio of memory and all other
+memory is dirty so it is still necessary to have a local swap device to
+avoid this specific case.
+
+> For dirty page limiting, I thought the problem is that it is difficult
+> to get right and at the same time not affect performance for some
+> workloads.
+
+There can be stalls as a result of this. Digging into the reserves until
+the machine locks up does not avoid them. At best, it simply moves when
+the stall occurs because the allocation is fine but other users must
+wait on kswapd to make progress or direct reclaim to restore the
+emergency reserves.
+
+> For non-net block drivers, we do not have to configure it
+> just to handle this problem. It just works, and so I thought we have
+> been trying to solve this problem in a similar way as the rest of the
+> block layer by having some memory reserves.
+> 
+
+That reserve is not the allocator emergency reserves.
+
+> Also on a related note, I thought I heard at LSF that that forward
+> progress requirement for non swap writes was going away. Is that true
+> and is it something that is going to happen in the near future or was it
+> more of a wish list item.
+
+At best, that was a wish-list item. There was some discussion stating it
+would be nice if reserves would be guaranteed to exist on a
+per-subsystem basis to guarantee forward progress but there is no
+commitment to actually implement it. Even if it did exist, then it would
+not be consumed via __GFP_MEMALLOC.
 
 -- 
-Best Regards,
-
-Wheat
+Mel Gorman
+SUSE Labs
