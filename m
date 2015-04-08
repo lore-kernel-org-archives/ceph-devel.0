@@ -1,72 +1,71 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: Initial newstore vs filestore results
-Date: Tue, 07 Apr 2015 20:45:58 -0500
-Message-ID: <55248856.1010808@redhat.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Initial newstore vs filestore results
+Date: Wed, 8 Apr 2015 01:48:00 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD75A03@SACMBXIP01.sdcorp.global.sandisk.com>
 References: <5523F069.3000400@redhat.com> <55242D15.8080800@redhat.com>
+ <55248856.1010808@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:34335 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753027AbbDHBqB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 7 Apr 2015 21:46:01 -0400
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-	by mx1.redhat.com (Postfix) with ESMTPS id 8B59C2B9DFB
-	for <ceph-devel@vger.kernel.org>; Wed,  8 Apr 2015 01:46:01 +0000 (UTC)
-Received: from [10.3.112.84] (ovpn-112-84.phx2.redhat.com [10.3.112.84])
-	by int-mx10.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t381jwUV003526
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-	for <ceph-devel@vger.kernel.org>; Tue, 7 Apr 2015 21:46:00 -0400
-In-Reply-To: <55242D15.8080800@redhat.com>
+Received: from mail-bn1bon0081.outbound.protection.outlook.com ([157.56.111.81]:64429
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753769AbbDHBsG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 7 Apr 2015 21:48:06 -0400
+In-Reply-To: <55248856.1010808@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-
-
-On 04/07/2015 02:16 PM, Mark Nelson wrote:
-> On 04/07/2015 09:57 AM, Mark Nelson wrote:
->> Hi Guys,
->>
->> I ran some quick tests on Sage's newstore branch.  So far given that
->> this is a prototype, things are looking pretty good imho.  The 4MB
->> object rados bench read/write and small read performance looks
->> especially good.  Keep in mind that this is not using the SSD journals
->> in any way, so 640MB/s sequential writes is actually really good
->> compared to filestore without SSD journals.
->>
->> small write performance appears to be fairly bad, especially in the RBD
->> case where it's small writes to larger objects.  I'm going to sit down
->> and see if I can figure out what's going on.  It's bad enough that I
->> suspect there's just something odd going on.
->>
->> Mark
->
-> Seekwatcher/blktrace graphs of a 4 OSD cluster using newstore for those
-> interested:
->
-> http://nhm.ceph.com/newstore/
->
-> Interestingly small object write/read performance with 4 OSDs was about
-> 1/3-1/4 the speed of the same cluster with 36 OSDs.
->
-> Note: Thanks Dan for fixing the directory column width!
->
-> Mark
-
-New fio/librbd results using Sage's latest code that attempts to keep 
-small overwrite extents in the db.  This is 4 OSD so not directly 
-comparable to the 36 OSD tests above, but does include seekwatcher 
-graphs.  Results in MB/s:
-
-	write	read	randw	randr
-4MB	57.9	319.6	55.2	285.9
-128KB	2.5	230.6	2.4	125.4
-4KB	0.46	55.65	1.11	3.56
-
-Seekwatcher graphs:
-
-http://nhm.ceph.com/newstore/20150407/
-
-Mark
+TWFyaywNCkNvdWxkIHlvdSBwbGVhc2Ugc2VuZCB0aGUgaW5zdHJ1Y3Rpb24gb3V0IG9uIGhvdyB0
+byB1c2UgdGhpcyBuZXcgc3RvcmU/DQoNClRoYW5rcyAmIFJlZ2FyZHMNClNvbW5hdGgNCg0KLS0t
+LS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJu
+ZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFs
+ZiBPZiBNYXJrIE5lbHNvbg0KU2VudDogVHVlc2RheSwgQXByaWwgMDcsIDIwMTUgNjo0NiBQTQ0K
+VG86IGNlcGgtZGV2ZWwNClN1YmplY3Q6IFJlOiBJbml0aWFsIG5ld3N0b3JlIHZzIGZpbGVzdG9y
+ZSByZXN1bHRzDQoNCg0KDQpPbiAwNC8wNy8yMDE1IDAyOjE2IFBNLCBNYXJrIE5lbHNvbiB3cm90
+ZToNCj4gT24gMDQvMDcvMjAxNSAwOTo1NyBBTSwgTWFyayBOZWxzb24gd3JvdGU6DQo+PiBIaSBH
+dXlzLA0KPj4NCj4+IEkgcmFuIHNvbWUgcXVpY2sgdGVzdHMgb24gU2FnZSdzIG5ld3N0b3JlIGJy
+YW5jaC4gIFNvIGZhciBnaXZlbiB0aGF0DQo+PiB0aGlzIGlzIGEgcHJvdG90eXBlLCB0aGluZ3Mg
+YXJlIGxvb2tpbmcgcHJldHR5IGdvb2QgaW1oby4gIFRoZSA0TUINCj4+IG9iamVjdCByYWRvcyBi
+ZW5jaCByZWFkL3dyaXRlIGFuZCBzbWFsbCByZWFkIHBlcmZvcm1hbmNlIGxvb2tzDQo+PiBlc3Bl
+Y2lhbGx5IGdvb2QuICBLZWVwIGluIG1pbmQgdGhhdCB0aGlzIGlzIG5vdCB1c2luZyB0aGUgU1NE
+DQo+PiBqb3VybmFscyBpbiBhbnkgd2F5LCBzbyA2NDBNQi9zIHNlcXVlbnRpYWwgd3JpdGVzIGlz
+IGFjdHVhbGx5IHJlYWxseQ0KPj4gZ29vZCBjb21wYXJlZCB0byBmaWxlc3RvcmUgd2l0aG91dCBT
+U0Qgam91cm5hbHMuDQo+Pg0KPj4gc21hbGwgd3JpdGUgcGVyZm9ybWFuY2UgYXBwZWFycyB0byBi
+ZSBmYWlybHkgYmFkLCBlc3BlY2lhbGx5IGluIHRoZQ0KPj4gUkJEIGNhc2Ugd2hlcmUgaXQncyBz
+bWFsbCB3cml0ZXMgdG8gbGFyZ2VyIG9iamVjdHMuICBJJ20gZ29pbmcgdG8gc2l0DQo+PiBkb3du
+IGFuZCBzZWUgaWYgSSBjYW4gZmlndXJlIG91dCB3aGF0J3MgZ29pbmcgb24uICBJdCdzIGJhZCBl
+bm91Z2gNCj4+IHRoYXQgSSBzdXNwZWN0IHRoZXJlJ3MganVzdCBzb21ldGhpbmcgb2RkIGdvaW5n
+IG9uLg0KPj4NCj4+IE1hcmsNCj4NCj4gU2Vla3dhdGNoZXIvYmxrdHJhY2UgZ3JhcGhzIG9mIGEg
+NCBPU0QgY2x1c3RlciB1c2luZyBuZXdzdG9yZSBmb3INCj4gdGhvc2UNCj4gaW50ZXJlc3RlZDoN
+Cj4NCj4gaHR0cDovL25obS5jZXBoLmNvbS9uZXdzdG9yZS8NCj4NCj4gSW50ZXJlc3RpbmdseSBz
+bWFsbCBvYmplY3Qgd3JpdGUvcmVhZCBwZXJmb3JtYW5jZSB3aXRoIDQgT1NEcyB3YXMNCj4gYWJv
+dXQNCj4gMS8zLTEvNCB0aGUgc3BlZWQgb2YgdGhlIHNhbWUgY2x1c3RlciB3aXRoIDM2IE9TRHMu
+DQo+DQo+IE5vdGU6IFRoYW5rcyBEYW4gZm9yIGZpeGluZyB0aGUgZGlyZWN0b3J5IGNvbHVtbiB3
+aWR0aCENCj4NCj4gTWFyaw0KDQpOZXcgZmlvL2xpYnJiZCByZXN1bHRzIHVzaW5nIFNhZ2UncyBs
+YXRlc3QgY29kZSB0aGF0IGF0dGVtcHRzIHRvIGtlZXAgc21hbGwgb3ZlcndyaXRlIGV4dGVudHMg
+aW4gdGhlIGRiLiAgVGhpcyBpcyA0IE9TRCBzbyBub3QgZGlyZWN0bHkgY29tcGFyYWJsZSB0byB0
+aGUgMzYgT1NEIHRlc3RzIGFib3ZlLCBidXQgZG9lcyBpbmNsdWRlIHNlZWt3YXRjaGVyIGdyYXBo
+cy4gIFJlc3VsdHMgaW4gTUIvczoNCg0KICAgICAgICB3cml0ZSAgIHJlYWQgICAgcmFuZHcgICBy
+YW5kcg0KNE1CICAgICA1Ny45ICAgIDMxOS42ICAgNTUuMiAgICAyODUuOQ0KMTI4S0IgICAyLjUg
+ICAgIDIzMC42ICAgMi40ICAgICAxMjUuNA0KNEtCICAgICAwLjQ2ICAgIDU1LjY1ICAgMS4xMSAg
+ICAzLjU2DQoNClNlZWt3YXRjaGVyIGdyYXBoczoNCg0KaHR0cDovL25obS5jZXBoLmNvbS9uZXdz
+dG9yZS8yMDE1MDQwNy8NCg0KTWFyaw0KLS0NClRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0
+OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbiB0aGUgYm9keSBvZiBh
+IG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBpbmZv
+IGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg0KX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX18NCg0KUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlv
+biBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBv
+bmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92
+ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNp
+cGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhp
+cyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRp
+c3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGli
+aXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBw
+bGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24g
+YWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlz
+IG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0
+cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KDQo=
