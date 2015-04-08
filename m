@@ -1,271 +1,161 @@
-From: Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: Preliminary RDMA vs TCP numbers
-Date: Wed, 8 Apr 2015 16:23:23 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD761B4@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD75D78@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CABYiri_ihguSripu=gs-MA7Qr8GRDk7H5hw5BNKf-9OSFu1z8g@mail.gmail.com>
-	<6442513.754.1428484840531.JavaMail.andrei@tuchka>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Initial newstore vs filestore results
+Date: Wed, 8 Apr 2015 09:49:33 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1504080942440.4469@cobra.newdream.net>
+References: <5523F069.3000400@redhat.com> <55242D15.8080800@redhat.com> <55248856.1010808@redhat.com> <alpine.DEB.2.00.1504071951120.4469@cobra.newdream.net> <CACJqLyY+tqNxAv+kLMQNgb_iWWW=jArz2k-KOTcTjfui=kRCtQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============2132182783=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <6442513.754.1428484840531.JavaMail.andrei@tuchka>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Andrei Mikhailovsky <andrei-930XJYlnu5nQT0dZR+AlfA@public.gmane.org>, Andrey Korolyov <andrey-5vqebrSIFTo@public.gmane.org>
-Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:39935 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754228AbbDHQtd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Apr 2015 12:49:33 -0400
+In-Reply-To: <CACJqLyY+tqNxAv+kLMQNgb_iWWW=jArz2k-KOTcTjfui=kRCtQ@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Haomai Wang <haomaiwang@gmail.com>
+Cc: Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
---===============2132182783==
-Content-Language: en-US
-Content-Type: multipart/alternative;
-	boundary="_000_755F6B91B3BE364F9BCA11EA3F9E0C6F2CD761B4SACMBXIP01sdcor_"
+On Wed, 8 Apr 2015, Haomai Wang wrote:
+> On Wed, Apr 8, 2015 at 10:58 AM, Sage Weil <sage@newdream.net> wrote:
+> > On Tue, 7 Apr 2015, Mark Nelson wrote:
+> >> On 04/07/2015 02:16 PM, Mark Nelson wrote:
+> >> > On 04/07/2015 09:57 AM, Mark Nelson wrote:
+> >> > > Hi Guys,
+> >> > >
+> >> > > I ran some quick tests on Sage's newstore branch.  So far given that
+> >> > > this is a prototype, things are looking pretty good imho.  The 4MB
+> >> > > object rados bench read/write and small read performance looks
+> >> > > especially good.  Keep in mind that this is not using the SSD journals
+> >> > > in any way, so 640MB/s sequential writes is actually really good
+> >> > > compared to filestore without SSD journals.
+> >> > >
+> >> > > small write performance appears to be fairly bad, especially in the RBD
+> >> > > case where it's small writes to larger objects.  I'm going to sit down
+> >> > > and see if I can figure out what's going on.  It's bad enough that I
+> >> > > suspect there's just something odd going on.
+> >> > >
+> >> > > Mark
+> >> >
+> >> > Seekwatcher/blktrace graphs of a 4 OSD cluster using newstore for those
+> >> > interested:
+> >> >
+> >> > http://nhm.ceph.com/newstore/
+> >> >
+> >> > Interestingly small object write/read performance with 4 OSDs was about
+> >> > 1/3-1/4 the speed of the same cluster with 36 OSDs.
+> >> >
+> >> > Note: Thanks Dan for fixing the directory column width!
+> >> >
+> >> > Mark
+> >>
+> >> New fio/librbd results using Sage's latest code that attempts to keep small
+> >> overwrite extents in the db.  This is 4 OSD so not directly comparable to the
+> >> 36 OSD tests above, but does include seekwatcher graphs.  Results in MB/s:
+> >>
+> >>       write   read    randw   randr
+> >> 4MB   57.9    319.6   55.2    285.9
+> >> 128KB 2.5     230.6   2.4     125.4
+> >> 4KB   0.46    55.65   1.11    3.56
+> >
+> > What would be very interesting would be to see the 4KB performance
+> > with the defaults (newstore overlay max = 32) vs overlays disabled
+> > (newstore overlay max = 0) and see if/how much it is helping.
+> >
+> > The latest branch also has open-by-handle.  It's on by default (newstore
+> > open by handle = true).  I think for most workloads it won't be very
+> > noticeable... I think there are two questions we need to answer though:
+> >
+> > 1) Does it have any impact on a creation workload (say, 4kb objects).  It
+> > shouldn't, but we should confirm.
+> >
+> > 2) Does it impact small object random reads with a cold cache.  I think to
+> > see the effect we'll probably need to pile a ton of objects into the
+> > store, drop caches, and then do random reads.  In the best case the
+> > effect will be small, but hopefully noticeable: we should go from
+> > a directory lookup (1+ seeks) + inode lookup (1+ seek) + data
+> > read, to inode lookup (1+ seek) + data read.  So, 3 -> 2 seeks best case?
+> > I'm not really sure what XFS is doing under the covers here..
+> 
+> WOW, it's really a cool implementation beyond my original mind
+> according to blueprint. Handler, overlay_map and data_map looks so
+> flexible and make small io cheaper in theory. Now we only have 1
+> element in data_map and I'm not sure your goal about the future's
+> usage. Although I have a unclearly idea that it could enhance the role
+> of NewStore and make local filesystem just as a block space allocator.
+> Let NewStore own a variable of FTL(File Translation Layer), so many
+> cool features could be added. What's your idea about data_map?
 
---_000_755F6B91B3BE364F9BCA11EA3F9E0C6F2CD761B4SACMBXIP01sdcor_
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Exactly, that is one option.  The other is that we'd treat the data_map 
+similar to overlay_map with a fixed or max extent size so that a large 
+partial overwrite will mostly go to a new file instead of doing the 
+slow WAL.
 
-QW5kcmVpLA0KWWVzLCBJIHNlZSBpdCBoYXMgbG90IG9mIHBvdGVudGlhbCBhbmQgSSBiZWxpZXZl
-IGZpeGluZyB0aGUgcGVyZm9ybWFuY2UgYm90dGxlbmVja3MgaW5zaWRlIFhJTyBtZXNzZW5nZXIg
-aXQgc2hvdWxkIGdvIGZ1cnRoZXIuDQpXZSBhcmUgd29ya2luZyBvbiBpdCBhbmQgd2lsbCBrZWVw
-IGNvbW11bml0eSBwb3N0ZWQuLg0KDQpUaGFua3MgJiBSZWdhcmRzDQpTb21uYXRoDQoNCkZyb206
-IEFuZHJlaSBNaWtoYWlsb3Zza3kgW21haWx0bzphbmRyZWlAYXJob250LmNvbV0NClNlbnQ6IFdl
-ZG5lc2RheSwgQXByaWwgMDgsIDIwMTUgMjoyMiBBTQ0KVG86IEFuZHJleSBLb3JvbHlvdg0KQ2M6
-IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb207IGNlcGgtZGV2ZWw7IFNvbW5hdGggUm95DQpTdWJq
-ZWN0OiBSZTogW2NlcGgtdXNlcnNdIFByZWxpbWluYXJ5IFJETUEgdnMgVENQIG51bWJlcnMNCg0K
-SGksDQoNCkFtIEkgdGhlIG9ubHkgcGVyc29uIG5vdGljaW5nIGRpc2FwcG9pbnRpbmcgcmVzdWx0
-cyBmcm9tIHRoZSBwcmVsaW1pbmFyeSBSRE1BIHRlc3RpbmcsIG9yIGFtIEkgcmVhZGluZyB0aGUg
-bnVtYmVycyB3cm9uZz8NCg0KWWVzLCBpdCdzIHRydWUgdGhhdCBvbiBhIHZlcnkgc21hbGwgY2x1
-c3RlciB5b3UgZG8gc2VlIGEgZ3JlYXQgaW1wcm92ZW1lbnQgaW4gcmRtYSwgYnV0IGluIHJlYWwg
-bGlmZSByZG1hIGlzIHVzZWQgaW4gbGFyZ2UgaW5mcmFzdHJ1Y3R1cmUgcHJvamVjdHMsIG5vdCBv
-biBhIGZldyBzZXJ2ZXJzIHdpdGggYSBoYW5kZnVsIG9mIG9zZHMuIEluIGZhY3QsIGZyb20gd2hh
-dCBpJ3ZlIHNlZW4gZnJvbSB0aGUgc2xpZGVzLCB0aGUgcmRtYSBpbXBsZW1lbnRhdGlvbiBzY2Fs
-ZXMgaG9ycmlibHkgdG8gdGhlIHBvaW50IHRoYXQgaXQgYmVjb21lcyBzbG93ZXIgdGhlIG1vcmUg
-b3NkcyB5b3UgdGhyb3VnaCBhdCBpdC4NCg0KRnJvbSBteSBsaW1pdGVkIGtub3dsZWRnZSwgaSBo
-YXZlIGV4cGVjdGVkIGEgbXVjaCBoaWdoZXIgcGVyZm9ybWFuY2UgZ2FpbnMgd2l0aCByZG1hLCB0
-YWtpbmcgaW50byBhY2NvdW50IHRoYXQgeW91IHNob3VsZCBoYXZlIG11Y2ggbG93ZXIgbGF0ZW5j
-eSBhbmQgb3ZlcmhlYWQgYW5kIGxvd2VyIGNwdSB1dGlsaXNhdGlvbiB3aGVuIHVzaW5nIHRoaXMg
-dHJhbnNwb3J0IGluIGNvbXBhcmlzb24gd2l0aCB0Y3AuDQoNCkFyZSB3ZSBsaWtlbHkgdG8gc2Vl
-IGEgZ3JlYXQgZGVhbCBvZiBpbXByb3ZlbWVudCB3aXRoIGNlcGggYW5kIHJkbWEgaW4gYSBuZWFy
-IGZ1dHVyZT8gSXMgdGhlcmUgYSByb2FkbWFwIGZvciBoYXZpbmcgYSBzdGFibGUgYW5kIHJlbGlh
-YmxlIHJkbWEgcHJvdG9jb2wgc3VwcG9ydD8NCg0KVGhhbmtzDQoNCkFuZHJlaQ0KX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX18NCkZyb206ICJBbmRyZXkgS29yb2x5b3YiIDxhbmRyZXlA
-eGRlbC5ydTxtYWlsdG86YW5kcmV5QHhkZWwucnU+Pg0KVG86ICJTb21uYXRoIFJveSIgPFNvbW5h
-dGguUm95QHNhbmRpc2suY29tPG1haWx0bzpTb21uYXRoLlJveUBzYW5kaXNrLmNvbT4+DQpDYzog
-Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbTxtYWlsdG86Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNv
-bT4sICJjZXBoLWRldmVsIiA8Y2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc8bWFpbHRvOmNlcGgt
-ZGV2ZWxAdmdlci5rZXJuZWwub3JnPj4NClNlbnQ6IFdlZG5lc2RheSwgOCBBcHJpbCwgMjAxNSA5
-OjI4OjEyIEFNDQpTdWJqZWN0OiBSZTogW2NlcGgtdXNlcnNdIFByZWxpbWluYXJ5IFJETUEgdnMg
-VENQIG51bWJlcnMNCg0KT24gV2VkLCBBcHIgOCwgMjAxNSBhdCAxMToxNyBBTSwgU29tbmF0aCBS
-b3kgPFNvbW5hdGguUm95QHNhbmRpc2suY29tPG1haWx0bzpTb21uYXRoLlJveUBzYW5kaXNrLmNv
-bT4+IHdyb3RlOg0KPg0KPiBIaSwNCj4gUGxlYXNlIGZpbmQgdGhlIHByZWxpbWluYXJ5IHBlcmZv
-cm1hbmNlIG51bWJlcnMgb2YgVENQIFZzIFJETUEgKFhJTykgaW1wbGVtZW50YXRpb24gKG9uIHRv
-cCBvZiBTU0RzKSBpbiB0aGUgZm9sbG93aW5nIGxpbmsuDQo+DQo+IGh0dHA6Ly93d3cuc2xpZGVz
-aGFyZS5uZXQvc29tbmF0aHJveTc1NjgvY2VwaC1vbi1yZG1hDQo+DQo+IFRoZSBhdHRhY2htZW50
-IGRpZG4ndCBnbyB0aHJvdWdoIGl0IHNlZW1zLCBzbywgSSBoYWQgdG8gdXNlIHNsaWRlc2hhcmUu
-DQo+DQo+IE1hcmssDQo+IElmIHdlIGhhdmUgdGltZSwgSSBjYW4gcHJlc2VudCBpdCBpbiB0b21v
-cnJvdydzIHBlcmZvcm1hbmNlIG1lZXRpbmcuDQo+DQo+IFRoYW5rcyAmIFJlZ2FyZHMNCj4gU29t
-bmF0aA0KPg0KDQpUaG9zZSBudW1iZXJzIGFyZSByZWFsbHkgaW1wcmVzc2l2ZSAoZm9yIHNtYWxs
-IG51bWJlcnMgYXQgbGVhc3QpISBXaGF0DQphcmUgVENQIHNldHRpbmdzIHlvdSB1c2luZz9Gb3Ig
-ZXhhbXBsZSwgZGlmZmVyZW5jZSBjYW4gYmUgbG93ZXJlZCBvbg0Kc2NhbGUgZHVlIHRvIGxlc3Mg
-aW50ZW5zaXZlIHBlci1jb25uZWN0aW9uIGFjY2VsZXJhdGlvbiBvbiBDVUJJQyBvbiBhDQpsYXJn
-ZXIgbnVtYmVyIG9mIG5vZGVzLCB0aG91Z2ggSSBkbyBub3QgYmVsaWV2ZSB0aGF0IGl0IHdhcyBh
-IG1haW4NCnJlYXNvbiBmb3IgYW4gb2JzZXJ2ZWQgVENQIGNhdGNodXAgb24gYSByZWxhdGl2ZWx5
-IGZsYXQgd29ya2xvYWQgc3VjaA0KYXMgZmlvIGdlbmVyYXRlcy4NCl9fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdA0K
-Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbTxtYWlsdG86Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNv
-bT4NCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNv
-bQ0KDQoNCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQoNClBMRUFTRSBOT1RFOiBU
-aGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2Ug
-aXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQo
-cykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUg
-aW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBoYXZl
-IHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNz
-ZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0
-cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlv
-biBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1h
-aWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBj
-b3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNv
-cGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCg0K
+> My concern currently still is WAL after fsync and kv commiting, maybe
+> fsync process is just fine because mostly we won't meet this case in
+> rbd. But submit sync kv transaction isn't a low latency job I think,
+> maybe we could let WAL parallel with kv commiting?(yes, I really
+> concern the latency of one op :-) )
 
---_000_755F6B91B3BE364F9BCA11EA3F9E0C6F2CD761B4SACMBXIP01sdcor_
-Content-Type: text/html; charset="utf-8"
-Content-Transfer-Encoding: base64
+The WAL has to come after kv commit.  But the fsync after the wal 
+completion sucks, especially since we are always dispatching a single 
+fsync at a time so it's kind of worst-case seek behavior.  We could throw 
+these into another parallel fsync queue so that the fs can batch them up, 
+but I'm not sure we will enough parallelism.  What would really be nice is 
+a batch fsync syscall, but in leiu of that maybe we wait until we have a 
+bunch of fsyncs pending and then throw them at the kernel together in a 
+bunch of threads?  Not sure.  These aren't normally time sensitive 
+unless a read comes along (which is pretty rare), but they have to be done 
+for correctness.
 
-PGh0bWwgeG1sbnM6dj0idXJuOnNjaGVtYXMtbWljcm9zb2Z0LWNvbTp2bWwiIHhtbG5zOm89InVy
-bjpzY2hlbWFzLW1pY3Jvc29mdC1jb206b2ZmaWNlOm9mZmljZSIgeG1sbnM6dz0idXJuOnNjaGVt
-YXMtbWljcm9zb2Z0LWNvbTpvZmZpY2U6d29yZCIgeG1sbnM6bT0iaHR0cDovL3NjaGVtYXMubWlj
-cm9zb2Z0LmNvbS9vZmZpY2UvMjAwNC8xMi9vbW1sIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcv
-VFIvUkVDLWh0bWw0MCI+DQo8aGVhZD4NCjxtZXRhIGh0dHAtZXF1aXY9IkNvbnRlbnQtVHlwZSIg
-Y29udGVudD0idGV4dC9odG1sOyBjaGFyc2V0PXV0Zi04Ij4NCjxtZXRhIG5hbWU9IkdlbmVyYXRv
-ciIgY29udGVudD0iTWljcm9zb2Z0IFdvcmQgMTQgKGZpbHRlcmVkIG1lZGl1bSkiPg0KPCEtLVtp
-ZiAhbXNvXT48c3R5bGU+dlw6KiB7YmVoYXZpb3I6dXJsKCNkZWZhdWx0I1ZNTCk7fQ0Kb1w6KiB7
-YmVoYXZpb3I6dXJsKCNkZWZhdWx0I1ZNTCk7fQ0Kd1w6KiB7YmVoYXZpb3I6dXJsKCNkZWZhdWx0
-I1ZNTCk7fQ0KLnNoYXBlIHtiZWhhdmlvcjp1cmwoI2RlZmF1bHQjVk1MKTt9DQo8L3N0eWxlPjwh
-W2VuZGlmXS0tPjxzdHlsZT48IS0tDQovKiBGb250IERlZmluaXRpb25zICovDQpAZm9udC1mYWNl
-DQoJe2ZvbnQtZmFtaWx5OkhlbHZldGljYTsNCglwYW5vc2UtMToyIDExIDYgNCAyIDIgMiAyIDIg
-NDt9DQpAZm9udC1mYWNlDQoJe2ZvbnQtZmFtaWx5OkhlbHZldGljYTsNCglwYW5vc2UtMToyIDEx
-IDYgNCAyIDIgMiAyIDIgNDt9DQpAZm9udC1mYWNlDQoJe2ZvbnQtZmFtaWx5OkNhbGlicmk7DQoJ
-cGFub3NlLTE6MiAxNSA1IDIgMiAyIDQgMyAyIDQ7fQ0KQGZvbnQtZmFjZQ0KCXtmb250LWZhbWls
-eTpUYWhvbWE7DQoJcGFub3NlLTE6MiAxMSA2IDQgMyA1IDQgNCAyIDQ7fQ0KLyogU3R5bGUgRGVm
-aW5pdGlvbnMgKi8NCnAuTXNvTm9ybWFsLCBsaS5Nc29Ob3JtYWwsIGRpdi5Nc29Ob3JtYWwNCgl7
-bWFyZ2luOjBpbjsNCgltYXJnaW4tYm90dG9tOi4wMDAxcHQ7DQoJZm9udC1zaXplOjEyLjBwdDsN
-Cglmb250LWZhbWlseToiVGltZXMgTmV3IFJvbWFuIiwic2VyaWYiO30NCmE6bGluaywgc3Bhbi5N
-c29IeXBlcmxpbmsNCgl7bXNvLXN0eWxlLXByaW9yaXR5Ojk5Ow0KCWNvbG9yOmJsdWU7DQoJdGV4
-dC1kZWNvcmF0aW9uOnVuZGVybGluZTt9DQphOnZpc2l0ZWQsIHNwYW4uTXNvSHlwZXJsaW5rRm9s
-bG93ZWQNCgl7bXNvLXN0eWxlLXByaW9yaXR5Ojk5Ow0KCWNvbG9yOnB1cnBsZTsNCgl0ZXh0LWRl
-Y29yYXRpb246dW5kZXJsaW5lO30NCnANCgl7bXNvLXN0eWxlLXByaW9yaXR5Ojk5Ow0KCW1hcmdp
-bjowaW47DQoJbWFyZ2luLWJvdHRvbTouMDAwMXB0Ow0KCWZvbnQtc2l6ZToxMi4wcHQ7DQoJZm9u
-dC1mYW1pbHk6IlRpbWVzIE5ldyBSb21hbiIsInNlcmlmIjt9DQpwLk1zb0FjZXRhdGUsIGxpLk1z
-b0FjZXRhdGUsIGRpdi5Nc29BY2V0YXRlDQoJe21zby1zdHlsZS1wcmlvcml0eTo5OTsNCgltc28t
-c3R5bGUtbGluazoiQmFsbG9vbiBUZXh0IENoYXIiOw0KCW1hcmdpbjowaW47DQoJbWFyZ2luLWJv
-dHRvbTouMDAwMXB0Ow0KCWZvbnQtc2l6ZTo4LjBwdDsNCglmb250LWZhbWlseToiVGFob21hIiwi
-c2Fucy1zZXJpZiI7fQ0Kc3Bhbi5FbWFpbFN0eWxlMTgNCgl7bXNvLXN0eWxlLXR5cGU6cGVyc29u
-YWwtcmVwbHk7DQoJZm9udC1mYW1pbHk6IkNhbGlicmkiLCJzYW5zLXNlcmlmIjsNCgljb2xvcjoj
-MUY0OTdEO30NCnNwYW4uQmFsbG9vblRleHRDaGFyDQoJe21zby1zdHlsZS1uYW1lOiJCYWxsb29u
-IFRleHQgQ2hhciI7DQoJbXNvLXN0eWxlLXByaW9yaXR5Ojk5Ow0KCW1zby1zdHlsZS1saW5rOiJC
-YWxsb29uIFRleHQiOw0KCWZvbnQtZmFtaWx5OiJUYWhvbWEiLCJzYW5zLXNlcmlmIjt9DQouTXNv
-Q2hwRGVmYXVsdA0KCXttc28tc3R5bGUtdHlwZTpleHBvcnQtb25seTsNCglmb250LXNpemU6MTAu
-MHB0O30NCkBwYWdlIFdvcmRTZWN0aW9uMQ0KCXtzaXplOjguNWluIDExLjBpbjsNCgltYXJnaW46
-MS4waW4gMS4waW4gMS4waW4gMS4waW47fQ0KZGl2LldvcmRTZWN0aW9uMQ0KCXtwYWdlOldvcmRT
-ZWN0aW9uMTt9DQotLT48L3N0eWxlPjwhLS1baWYgZ3RlIG1zbyA5XT48eG1sPg0KPG86c2hhcGVk
-ZWZhdWx0cyB2OmV4dD0iZWRpdCIgc3BpZG1heD0iMTAyNiIgLz4NCjwveG1sPjwhW2VuZGlmXS0t
-PjwhLS1baWYgZ3RlIG1zbyA5XT48eG1sPg0KPG86c2hhcGVsYXlvdXQgdjpleHQ9ImVkaXQiPg0K
-PG86aWRtYXAgdjpleHQ9ImVkaXQiIGRhdGE9IjEiIC8+DQo8L286c2hhcGVsYXlvdXQ+PC94bWw+
-PCFbZW5kaWZdLS0+DQo8L2hlYWQ+DQo8Ym9keSBsYW5nPSJFTi1VUyIgbGluaz0iYmx1ZSIgdmxp
-bms9InB1cnBsZSI+DQo8ZGl2IGNsYXNzPSJXb3JkU2VjdGlvbjEiPg0KPHAgY2xhc3M9Ik1zb05v
-cm1hbCI+PHNwYW4gc3R5bGU9ImZvbnQtc2l6ZToxMS4wcHQ7Zm9udC1mYW1pbHk6JnF1b3Q7Q2Fs
-aWJyaSZxdW90OywmcXVvdDtzYW5zLXNlcmlmJnF1b3Q7O2NvbG9yOiMxRjQ5N0QiPkFuZHJlaSw8
-bzpwPjwvbzpwPjwvc3Bhbj48L3A+DQo8cCBjbGFzcz0iTXNvTm9ybWFsIj48c3BhbiBzdHlsZT0i
-Zm9udC1zaXplOjExLjBwdDtmb250LWZhbWlseTomcXVvdDtDYWxpYnJpJnF1b3Q7LCZxdW90O3Nh
-bnMtc2VyaWYmcXVvdDs7Y29sb3I6IzFGNDk3RCI+WWVzLCBJIHNlZSBpdCBoYXMgbG90IG9mIHBv
-dGVudGlhbCBhbmQgSSBiZWxpZXZlIGZpeGluZyB0aGUgcGVyZm9ybWFuY2UgYm90dGxlbmVja3Mg
-aW5zaWRlIFhJTyBtZXNzZW5nZXIgaXQgc2hvdWxkIGdvIGZ1cnRoZXIuPG86cD48L286cD48L3Nw
-YW4+PC9wPg0KPHAgY2xhc3M9Ik1zb05vcm1hbCI+PHNwYW4gc3R5bGU9ImZvbnQtc2l6ZToxMS4w
-cHQ7Zm9udC1mYW1pbHk6JnF1b3Q7Q2FsaWJyaSZxdW90OywmcXVvdDtzYW5zLXNlcmlmJnF1b3Q7
-O2NvbG9yOiMxRjQ5N0QiPldlIGFyZSB3b3JraW5nIG9uIGl0IGFuZCB3aWxsIGtlZXAgY29tbXVu
-aXR5IHBvc3RlZC4uPG86cD48L286cD48L3NwYW4+PC9wPg0KPHAgY2xhc3M9Ik1zb05vcm1hbCI+
-PHNwYW4gc3R5bGU9ImZvbnQtc2l6ZToxMS4wcHQ7Zm9udC1mYW1pbHk6JnF1b3Q7Q2FsaWJyaSZx
-dW90OywmcXVvdDtzYW5zLXNlcmlmJnF1b3Q7O2NvbG9yOiMxRjQ5N0QiPjxvOnA+Jm5ic3A7PC9v
-OnA+PC9zcGFuPjwvcD4NCjxwIGNsYXNzPSJNc29Ob3JtYWwiPjxzcGFuIHN0eWxlPSJmb250LXNp
-emU6MTEuMHB0O2ZvbnQtZmFtaWx5OiZxdW90O0NhbGlicmkmcXVvdDssJnF1b3Q7c2Fucy1zZXJp
-ZiZxdW90Oztjb2xvcjojMUY0OTdEIj5UaGFua3MgJmFtcDsgUmVnYXJkczxvOnA+PC9vOnA+PC9z
-cGFuPjwvcD4NCjxwIGNsYXNzPSJNc29Ob3JtYWwiPjxzcGFuIHN0eWxlPSJmb250LXNpemU6MTEu
-MHB0O2ZvbnQtZmFtaWx5OiZxdW90O0NhbGlicmkmcXVvdDssJnF1b3Q7c2Fucy1zZXJpZiZxdW90
-Oztjb2xvcjojMUY0OTdEIj5Tb21uYXRoPG86cD48L286cD48L3NwYW4+PC9wPg0KPHAgY2xhc3M9
-Ik1zb05vcm1hbCI+PHNwYW4gc3R5bGU9ImZvbnQtc2l6ZToxMS4wcHQ7Zm9udC1mYW1pbHk6JnF1
-b3Q7Q2FsaWJyaSZxdW90OywmcXVvdDtzYW5zLXNlcmlmJnF1b3Q7O2NvbG9yOiMxRjQ5N0QiPjxv
-OnA+Jm5ic3A7PC9vOnA+PC9zcGFuPjwvcD4NCjxkaXY+DQo8ZGl2IHN0eWxlPSJib3JkZXI6bm9u
-ZTtib3JkZXItdG9wOnNvbGlkICNCNUM0REYgMS4wcHQ7cGFkZGluZzozLjBwdCAwaW4gMGluIDBp
-biI+DQo8cCBjbGFzcz0iTXNvTm9ybWFsIj48Yj48c3BhbiBzdHlsZT0iZm9udC1zaXplOjEwLjBw
-dDtmb250LWZhbWlseTomcXVvdDtUYWhvbWEmcXVvdDssJnF1b3Q7c2Fucy1zZXJpZiZxdW90OyI+
-RnJvbTo8L3NwYW4+PC9iPjxzcGFuIHN0eWxlPSJmb250LXNpemU6MTAuMHB0O2ZvbnQtZmFtaWx5
-OiZxdW90O1RhaG9tYSZxdW90OywmcXVvdDtzYW5zLXNlcmlmJnF1b3Q7Ij4gQW5kcmVpIE1pa2hh
-aWxvdnNreSBbbWFpbHRvOmFuZHJlaUBhcmhvbnQuY29tXQ0KPGJyPg0KPGI+U2VudDo8L2I+IFdl
-ZG5lc2RheSwgQXByaWwgMDgsIDIwMTUgMjoyMiBBTTxicj4NCjxiPlRvOjwvYj4gQW5kcmV5IEtv
-cm9seW92PGJyPg0KPGI+Q2M6PC9iPiBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tOyBjZXBoLWRl
-dmVsOyBTb21uYXRoIFJveTxicj4NCjxiPlN1YmplY3Q6PC9iPiBSZTogW2NlcGgtdXNlcnNdIFBy
-ZWxpbWluYXJ5IFJETUEgdnMgVENQIG51bWJlcnM8bzpwPjwvbzpwPjwvc3Bhbj48L3A+DQo8L2Rp
-dj4NCjwvZGl2Pg0KPHAgY2xhc3M9Ik1zb05vcm1hbCI+PG86cD4mbmJzcDs8L286cD48L3A+DQo8
-ZGl2Pg0KPHAgY2xhc3M9Ik1zb05vcm1hbCI+PHNwYW4gc3R5bGU9ImZvbnQtc2l6ZToxMC4wcHQ7
-Zm9udC1mYW1pbHk6JnF1b3Q7QXJpYWwmcXVvdDssJnF1b3Q7c2Fucy1zZXJpZiZxdW90Oztjb2xv
-cjpibGFjayI+SGksPGJyPg0KPGJyPg0KQW0gSSB0aGUgb25seSBwZXJzb24gbm90aWNpbmcgZGlz
-YXBwb2ludGluZyByZXN1bHRzIGZyb20gdGhlIHByZWxpbWluYXJ5IFJETUEgdGVzdGluZywgb3Ig
-YW0gSSByZWFkaW5nIHRoZSBudW1iZXJzIHdyb25nPw0KPGJyPg0KPGJyPg0KWWVzLCBpdCdzIHRy
-dWUgdGhhdCBvbiBhIHZlcnkgc21hbGwgY2x1c3RlciB5b3UgZG8gc2VlIGEgZ3JlYXQgaW1wcm92
-ZW1lbnQgaW4gcmRtYSwgYnV0IGluIHJlYWwgbGlmZSByZG1hIGlzIHVzZWQgaW4gbGFyZ2UgaW5m
-cmFzdHJ1Y3R1cmUgcHJvamVjdHMsIG5vdCBvbiBhIGZldyBzZXJ2ZXJzIHdpdGggYSBoYW5kZnVs
-IG9mIG9zZHMuIEluIGZhY3QsIGZyb20gd2hhdCBpJ3ZlIHNlZW4gZnJvbSB0aGUgc2xpZGVzLCB0
-aGUgcmRtYSBpbXBsZW1lbnRhdGlvbg0KIHNjYWxlcyBob3JyaWJseSB0byB0aGUgcG9pbnQgdGhh
-dCBpdCBiZWNvbWVzIHNsb3dlciB0aGUgbW9yZSBvc2RzIHlvdSB0aHJvdWdoIGF0IGl0Ljxicj4N
-Cjxicj4NCkZyb20gbXkgbGltaXRlZCBrbm93bGVkZ2UsIGkgaGF2ZSBleHBlY3RlZCBhIG11Y2gg
-aGlnaGVyIHBlcmZvcm1hbmNlIGdhaW5zIHdpdGggcmRtYSwgdGFraW5nIGludG8gYWNjb3VudCB0
-aGF0IHlvdSBzaG91bGQgaGF2ZSBtdWNoIGxvd2VyIGxhdGVuY3kgYW5kIG92ZXJoZWFkIGFuZCBs
-b3dlciBjcHUgdXRpbGlzYXRpb24gd2hlbiB1c2luZyB0aGlzIHRyYW5zcG9ydCBpbiBjb21wYXJp
-c29uIHdpdGggdGNwLjxicj4NCjxicj4NCkFyZSB3ZSBsaWtlbHkgdG8gc2VlIGEgZ3JlYXQgZGVh
-bCBvZiBpbXByb3ZlbWVudCB3aXRoIGNlcGggYW5kIHJkbWEgaW4gYSBuZWFyIGZ1dHVyZT8gSXMg
-dGhlcmUgYSByb2FkbWFwIGZvciBoYXZpbmcgYSBzdGFibGUgYW5kIHJlbGlhYmxlIHJkbWEgcHJv
-dG9jb2wgc3VwcG9ydD88YnI+DQo8YnI+DQpUaGFua3M8YnI+DQo8YnI+DQpBbmRyZWk8bzpwPjwv
-bzpwPjwvc3Bhbj48L3A+DQo8ZGl2IGNsYXNzPSJNc29Ob3JtYWwiIGFsaWduPSJjZW50ZXIiIHN0
-eWxlPSJ0ZXh0LWFsaWduOmNlbnRlciI+PHNwYW4gc3R5bGU9ImZvbnQtc2l6ZToxMC4wcHQ7Zm9u
-dC1mYW1pbHk6JnF1b3Q7QXJpYWwmcXVvdDssJnF1b3Q7c2Fucy1zZXJpZiZxdW90Oztjb2xvcjpi
-bGFjayI+DQo8aHIgc2l6ZT0iMiIgd2lkdGg9IjEwMCUiIGFsaWduPSJjZW50ZXIiIGlkPSJ6d2No
-ciI+DQo8L3NwYW4+PC9kaXY+DQo8YmxvY2txdW90ZSBzdHlsZT0iYm9yZGVyOm5vbmU7Ym9yZGVy
-LWxlZnQ6c29saWQgIzEwMTBGRiAxLjVwdDtwYWRkaW5nOjBpbiAwaW4gMGluIDQuMHB0O21hcmdp
-bi1sZWZ0OjMuNzVwdDttYXJnaW4tdG9wOjUuMHB0O21hcmdpbi1ib3R0b206NS4wcHQiPg0KPHAg
-Y2xhc3M9Ik1zb05vcm1hbCI+PGI+PHNwYW4gc3R5bGU9ImZvbnQtZmFtaWx5OiZxdW90O0hlbHZl
-dGljYSZxdW90OywmcXVvdDtzYW5zLXNlcmlmJnF1b3Q7O2NvbG9yOmJsYWNrIj5Gcm9tOg0KPC9z
-cGFuPjwvYj48c3BhbiBzdHlsZT0iZm9udC1mYW1pbHk6JnF1b3Q7SGVsdmV0aWNhJnF1b3Q7LCZx
-dW90O3NhbnMtc2VyaWYmcXVvdDs7Y29sb3I6YmxhY2siPiZxdW90O0FuZHJleSBLb3JvbHlvdiZx
-dW90OyAmbHQ7PGEgaHJlZj0ibWFpbHRvOmFuZHJleUB4ZGVsLnJ1Ij5hbmRyZXlAeGRlbC5ydTwv
-YT4mZ3Q7PGJyPg0KPGI+VG86IDwvYj4mcXVvdDtTb21uYXRoIFJveSZxdW90OyAmbHQ7PGEgaHJl
-Zj0ibWFpbHRvOlNvbW5hdGguUm95QHNhbmRpc2suY29tIj5Tb21uYXRoLlJveUBzYW5kaXNrLmNv
-bTwvYT4mZ3Q7PGJyPg0KPGI+Q2M6IDwvYj48YSBocmVmPSJtYWlsdG86Y2VwaC11c2Vyc0BsaXN0
-cy5jZXBoLmNvbSI+Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbTwvYT4sICZxdW90O2NlcGgtZGV2
-ZWwmcXVvdDsgJmx0OzxhIGhyZWY9Im1haWx0bzpjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZyI+
-Y2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc8L2E+Jmd0Ozxicj4NCjxiPlNlbnQ6IDwvYj5XZWRu
-ZXNkYXksIDggQXByaWwsIDIwMTUgOToyODoxMiBBTTxicj4NCjxiPlN1YmplY3Q6IDwvYj5SZTog
-W2NlcGgtdXNlcnNdIFByZWxpbWluYXJ5IFJETUEgdnMgVENQIG51bWJlcnM8YnI+DQo8YnI+DQpP
-biBXZWQsIEFwciA4LCAyMDE1IGF0IDExOjE3IEFNLCBTb21uYXRoIFJveSAmbHQ7PGEgaHJlZj0i
-bWFpbHRvOlNvbW5hdGguUm95QHNhbmRpc2suY29tIj5Tb21uYXRoLlJveUBzYW5kaXNrLmNvbTwv
-YT4mZ3Q7IHdyb3RlOjxicj4NCiZndDs8YnI+DQomZ3Q7IEhpLDxicj4NCiZndDsgUGxlYXNlIGZp
-bmQgdGhlIHByZWxpbWluYXJ5IHBlcmZvcm1hbmNlIG51bWJlcnMgb2YgVENQIFZzIFJETUEgKFhJ
-TykgaW1wbGVtZW50YXRpb24gKG9uIHRvcCBvZiBTU0RzKSBpbiB0aGUgZm9sbG93aW5nIGxpbmsu
-PGJyPg0KJmd0Ozxicj4NCiZndDsgPGEgaHJlZj0iaHR0cDovL3d3dy5zbGlkZXNoYXJlLm5ldC9z
-b21uYXRocm95NzU2OC9jZXBoLW9uLXJkbWEiPmh0dHA6Ly93d3cuc2xpZGVzaGFyZS5uZXQvc29t
-bmF0aHJveTc1NjgvY2VwaC1vbi1yZG1hPC9hPjxicj4NCiZndDs8YnI+DQomZ3Q7IFRoZSBhdHRh
-Y2htZW50IGRpZG4ndCBnbyB0aHJvdWdoIGl0IHNlZW1zLCBzbywgSSBoYWQgdG8gdXNlIHNsaWRl
-c2hhcmUuPGJyPg0KJmd0Ozxicj4NCiZndDsgTWFyayw8YnI+DQomZ3Q7IElmIHdlIGhhdmUgdGlt
-ZSwgSSBjYW4gcHJlc2VudCBpdCBpbiB0b21vcnJvdydzIHBlcmZvcm1hbmNlIG1lZXRpbmcuPGJy
-Pg0KJmd0Ozxicj4NCiZndDsgVGhhbmtzICZhbXA7IFJlZ2FyZHM8YnI+DQomZ3Q7IFNvbW5hdGg8
-YnI+DQomZ3Q7PGJyPg0KPGJyPg0KVGhvc2UgbnVtYmVycyBhcmUgcmVhbGx5IGltcHJlc3NpdmUg
-KGZvciBzbWFsbCBudW1iZXJzIGF0IGxlYXN0KSEgV2hhdDxicj4NCmFyZSBUQ1Agc2V0dGluZ3Mg
-eW91IHVzaW5nP0ZvciBleGFtcGxlLCBkaWZmZXJlbmNlIGNhbiBiZSBsb3dlcmVkIG9uPGJyPg0K
-c2NhbGUgZHVlIHRvIGxlc3MgaW50ZW5zaXZlIHBlci1jb25uZWN0aW9uIGFjY2VsZXJhdGlvbiBv
-biBDVUJJQyBvbiBhPGJyPg0KbGFyZ2VyIG51bWJlciBvZiBub2RlcywgdGhvdWdoIEkgZG8gbm90
-IGJlbGlldmUgdGhhdCBpdCB3YXMgYSBtYWluPGJyPg0KcmVhc29uIGZvciBhbiBvYnNlcnZlZCBU
-Q1AgY2F0Y2h1cCBvbiBhIHJlbGF0aXZlbHkgZmxhdCB3b3JrbG9hZCBzdWNoPGJyPg0KYXMgZmlv
-IGdlbmVyYXRlcy48YnI+DQpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fXzxicj4NCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0PGJyPg0KPGEgaHJlZj0ibWFpbHRv
-OmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20iPmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb208L2E+
-PGJyPg0KPGEgaHJlZj0iaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVz
-ZXJzLWNlcGguY29tIj5odHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNl
-cnMtY2VwaC5jb208L2E+PG86cD48L286cD48L3NwYW4+PC9wPg0KPC9ibG9ja3F1b3RlPg0KPHAg
-Y2xhc3M9Ik1zb05vcm1hbCI+PHNwYW4gc3R5bGU9ImZvbnQtc2l6ZToxMC4wcHQ7Zm9udC1mYW1p
-bHk6JnF1b3Q7QXJpYWwmcXVvdDssJnF1b3Q7c2Fucy1zZXJpZiZxdW90Oztjb2xvcjpibGFjayI+
-PG86cD4mbmJzcDs8L286cD48L3NwYW4+PC9wPg0KPC9kaXY+DQo8L2Rpdj4NCjxicj4NCjxocj4N
-Cjxmb250IGZhY2U9IkFyaWFsIiBjb2xvcj0iR3JheSIgc2l6ZT0iMiI+PGJyPg0KUExFQVNFIE5P
-VEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVz
-c2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lw
-aWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90
-IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91
-IGhhdmUgcmVjZWl2ZWQgdGhpcw0KIG1lc3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmll
-dywgZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2Fn
-ZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11
-bmljYXRpb24gaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUg
-b3IgZS1tYWlsIChhcyBzaG93biBhYm92ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kNCiBhbnkg
-YW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hldGhl
-ciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS48YnI+DQo8YnI+
-DQo8L2ZvbnQ+DQo8L2JvZHk+DQo8L2h0bWw+DQo=
+> Then from the actual rados write op, it will add setattr and
+> omap_setkeys ops. Current NewStore looks plays badly for setattr. It
+> always encode all xattrs(and other not so tiny fields) and write again
+> (Is this true?) though it could batch multi transaction's onode write
+> in short time.
 
---_000_755F6B91B3BE364F9BCA11EA3F9E0C6F2CD761B4SACMBXIP01sdcor_--
+Yeah, this could be optimized so that we only unpack and repack the 
+bufferlist, or do a single walk through the buffer to do the updates 
+(similar to what TMAP used to do).
 
---===============2132182783==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+> NewStore also employ much more workload to KeyValueDB compared to
+> FileStore, so maybe we need to consider the rich workload again
+> compared before. FileStore only use leveldb just for write workload
+> mainly so leveldb could fit into greatly, but currently overlay
+> keys(read) and onode(read) will occur a main latency source in normal
+> IO I think. The default kvdb like leveldb and rocksdb both plays not
+> well for random read workload, it maybe will be problem. Looking for
+> another kv db maybe a choice.
 
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+I'm defaulting to rocksdb for now.  We should try LMDB at some point...
 
---===============2132182783==--
+> And it still doesn't add journal codes for wal?
+
+I'm pretty sure the WAL stuff is all complete?
+
+Anyway, I think most of the pieces are there, so now it's a matter of 
+figuring out how well they work for different workloads, then tuning and 
+optimizing...
+
+> Anyway, NewStore should cover more workloads compared to FileStore. Good 
+> job!
+
+Thanks!
+sage
+
+> 
+> >
+> > sage
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+> 
+> -- 
+> Best Regards,
+> 
+> Wheat
+> 
+> 
