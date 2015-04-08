@@ -1,101 +1,45 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: Initial newstore vs filestore results
-Date: Wed, 08 Apr 2015 09:38:46 -0500
-Message-ID: <55253D76.1030409@redhat.com>
-References: <5523F069.3000400@redhat.com> <55242D15.8080800@redhat.com> <55248856.1010808@redhat.com> <alpine.DEB.2.00.1504071951120.4469@cobra.newdream.net>
+From: Travis Rhoden <trhoden@gmail.com>
+Subject: [ANN] ceph-deploy 1.5.23 released
+Date: Wed, 8 Apr 2015 10:40:21 -0400
+Message-ID: <CACkq2mpHdM5v6qdYt7JqWqpqgAty+6WNNdKW6t3ghs0kSWaiBA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:46262 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932180AbbDHOit (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 8 Apr 2015 10:38:49 -0400
-In-Reply-To: <alpine.DEB.2.00.1504071951120.4469@cobra.newdream.net>
+Received: from mail-qg0-f49.google.com ([209.85.192.49]:35944 "EHLO
+	mail-qg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932150AbbDHOkm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Apr 2015 10:40:42 -0400
+Received: by qgeb100 with SMTP id b100so29814847qge.3
+        for <ceph-devel@vger.kernel.org>; Wed, 08 Apr 2015 07:40:41 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, ceph-announce@lists.ceph.com
 
+Hi All,
 
+This is a new release of ceph-deploy that includes a new feature for
+Hammer and bugfixes.  ceph-deploy can be installed from the ceph.com
+hosted repos for Firefly, Giant, Hammer, or testing, and is also
+available on PyPI.
 
-On 04/07/2015 09:58 PM, Sage Weil wrote:
-> On Tue, 7 Apr 2015, Mark Nelson wrote:
->> On 04/07/2015 02:16 PM, Mark Nelson wrote:
->>> On 04/07/2015 09:57 AM, Mark Nelson wrote:
->>>> Hi Guys,
->>>>
->>>> I ran some quick tests on Sage's newstore branch.  So far given that
->>>> this is a prototype, things are looking pretty good imho.  The 4MB
->>>> object rados bench read/write and small read performance looks
->>>> especially good.  Keep in mind that this is not using the SSD journals
->>>> in any way, so 640MB/s sequential writes is actually really good
->>>> compared to filestore without SSD journals.
->>>>
->>>> small write performance appears to be fairly bad, especially in the RBD
->>>> case where it's small writes to larger objects.  I'm going to sit down
->>>> and see if I can figure out what's going on.  It's bad enough that I
->>>> suspect there's just something odd going on.
->>>>
->>>> Mark
->>>
->>> Seekwatcher/blktrace graphs of a 4 OSD cluster using newstore for those
->>> interested:
->>>
->>> http://nhm.ceph.com/newstore/
->>>
->>> Interestingly small object write/read performance with 4 OSDs was about
->>> 1/3-1/4 the speed of the same cluster with 36 OSDs.
->>>
->>> Note: Thanks Dan for fixing the directory column width!
->>>
->>> Mark
->>
->> New fio/librbd results using Sage's latest code that attempts to keep small
->> overwrite extents in the db.  This is 4 OSD so not directly comparable to the
->> 36 OSD tests above, but does include seekwatcher graphs.  Results in MB/s:
->>
->> 	write	read	randw	randr
->> 4MB	57.9	319.6	55.2	285.9
->> 128KB	2.5	230.6	2.4	125.4
->> 4KB	0.46	55.65	1.11	3.56
->
-> What would be very interesting would be to see the 4KB performance
-> with the defaults (newstore overlay max = 32) vs overlays disabled
-> (newstore overlay max = 0) and see if/how much it is helping.
->
-> The latest branch also has open-by-handle.  It's on by default (newstore
-> open by handle = true).  I think for most workloads it won't be very
-> noticeable... I think there are two questions we need to answer though:
->
-> 1) Does it have any impact on a creation workload (say, 4kb objects).  It
-> shouldn't, but we should confirm.
+ceph-deploy now defaults to installing the Hammer release. If you need
+to install a different release, use the --release flag.
 
-4KB objects via rados bench ok?
+To go along with the Hammer release, ceph-deploy now includes support
+for a drastically simplified deployment for RGW.  See further details
+at [1] and [2].
 
->
-> 2) Does it impact small object random reads with a cold cache.  I think to
-> see the effect we'll probably need to pile a ton of objects into the
-> store, drop caches, and then do random reads.  In the best case the
-> effect will be small, but hopefully noticeable: we should go from
-> a directory lookup (1+ seeks) + inode lookup (1+ seek) + data
-> read, to inode lookup (1+ seek) + data read.  So, 3 -> 2 seeks best case?
-> I'm not really sure what XFS is doing under the covers here...
+This release also fixes an issue where keyrings pushed to remote nodes
+ended up with world-readable permissions.
 
-So the above test process for RBD was basically:
+The full changelog can be seen at [3].
 
-1) create a configurable sized RBD volume (16GB in this case across 4 OSDs).
-2) fill volume with 4MB writes to preallocate the blocks
-3) repeat for each test:
-3a) drop cache and sync
-3b) Run the test
+Please update!
 
+Cheers,
 
+ - Travis
 
->
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+[1] http://ceph.com/docs/master/start/quick-ceph-deploy/#add-an-rgw-instance
+[2] http://ceph.com/ceph-deploy/docs/rgw.html
+[3] http://ceph.com/ceph-deploy/docs/changelog.html#id2
