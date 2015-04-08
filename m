@@ -1,257 +1,141 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: [ceph-users] OSD auto-mount after server reboot
-Date: Wed, 08 Apr 2015 10:57:35 +0200
-Message-ID: <5524ED7F.8010907@dachary.org>
-References: <CAPntomBscGHp-oTqRJmG7by-OVsJ7O=WSu0G_TbYKAmN4qNE0Q@mail.gmail.com>	<5521614D.8090600@dachary.org>	<CAPntomCu4dtC-Zq7JaBrXFs+pLt=ToMdCyH5f7jc6bHTBQrLrg@mail.gmail.com>	<5522D9FD.3000502@dachary.org>	<CAPntomDDTF6=dNnZnkybfE-5Us_uDTSRoWupRnk42tabb2P+vQ@mail.gmail.com>	<CAPntomBdNp=eqdXYytojVF=2GTccX3c+MY9nf4Gh-c71_mYKnA@mail.gmail.com>	<55242DEE.5030907@dachary.org>	<CAPntomByauf=ep7iDaL0qCRoWm1qL1xrOvGCrn1dv-zdkTgU5Q@mail.gmail.com>	<55244C9E.2080502@dachary.org> <CAPntomCz9KdoGNcOgkqZ6p12k=vrq=bFKTV__kaB26fZLdDmnA@mail.gmail.com>
+From: Andrei Mikhailovsky <andrei-930XJYlnu5nQT0dZR+AlfA@public.gmane.org>
+Subject: Re: Preliminary RDMA vs TCP numbers
+Date: Wed, 8 Apr 2015 10:22:05 +0100 (BST)
+Message-ID: <6442513.754.1428484840531.JavaMail.andrei@tuchka>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD75D78@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CABYiri_ihguSripu=gs-MA7Qr8GRDk7H5hw5BNKf-9OSFu1z8g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="oPFrkdOuJjoAr0aA3qbNQVXoVPKotwmMN"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:43256 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751348AbbDHI5o (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Apr 2015 04:57:44 -0400
-In-Reply-To: <CAPntomCz9KdoGNcOgkqZ6p12k=vrq=bFKTV__kaB26fZLdDmnA@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: shiva rkreddy <shiva.rkreddy@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: multipart/mixed; boundary="===============0495740272=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CABYiri_ihguSripu=gs-MA7Qr8GRDk7H5hw5BNKf-9OSFu1z8g-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Andrey Korolyov <andrey-5vqebrSIFTo@public.gmane.org>
+Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---oPFrkdOuJjoAr0aA3qbNQVXoVPKotwmMN
+--===============0495740272==
+Content-Type: multipart/alternative;
+	boundary="----=_Part_753_14911911.1428484840530"
+
+------=_Part_753_14911911.1428484840530
 Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+
+Hi, 
+
+Am I the only person noticing disappointing results from the preliminary RDMA testing, or am I reading the numbers wrong? 
+
+Yes, it's true that on a very small cluster you do see a great improvement in rdma, but in real life rdma is used in large infrastructure projects, not on a few servers with a handful of osds. In fact, from what i've seen from the slides, the rdma implementation scales horribly to the point that it becomes slower the more osds you through at it. 
+
+From my limited knowledge, i have expected a much higher performance gains with rdma, taking into account that you should have much lower latency and overhead and lower cpu utilisation when using this transport in comparison with tcp. 
+
+Are we likely to see a great deal of improvement with ceph and rdma in a near future? Is there a roadmap for having a stable and reliable rdma protocol support? 
+
+Thanks 
+
+Andrei 
+----- Original Message -----
+
+> From: "Andrey Korolyov" <andrey-5vqebrSIFTo@public.gmane.org>
+> To: "Somnath Roy" <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>
+> Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, "ceph-devel"
+> <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+> Sent: Wednesday, 8 April, 2015 9:28:12 AM
+> Subject: Re: [ceph-users] Preliminary RDMA vs TCP numbers
+
+> On Wed, Apr 8, 2015 at 11:17 AM, Somnath Roy
+> <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org> wrote:
+> >
+> > Hi,
+> > Please find the preliminary performance numbers of TCP Vs RDMA
+> > (XIO) implementation (on top of SSDs) in the following link.
+> >
+> > http://www.slideshare.net/somnathroy7568/ceph-on-rdma
+> >
+> > The attachment didn't go through it seems, so, I had to use
+> > slideshare.
+> >
+> > Mark,
+> > If we have time, I can present it in tomorrow's performance
+> > meeting.
+> >
+> > Thanks & Regards
+> > Somnath
+> >
+
+> Those numbers are really impressive (for small numbers at least)!
+> What
+> are TCP settings you using?For example, difference can be lowered on
+> scale due to less intensive per-connection acceleration on CUBIC on a
+> larger number of nodes, though I do not believe that it was a main
+> reason for an observed TCP catchup on a relatively flat workload such
+> as fio generates.
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+------=_Part_753_14911911.1428484840530
+Content-Type: text/html; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
 
+<html><head><style type=3D'text/css'>p { margin: 0; }</style></head><body><=
+div style=3D'font-family: arial,helvetica,sans-serif; font-size: 10pt; colo=
+r: #000000'>Hi,<br><br>Am I the only person noticing disappointing results =
+from the preliminary RDMA testing, or am I reading the numbers wrong? <br><=
+br>Yes, it's true that on a very small cluster you do see a great improveme=
+nt in rdma, but in real life rdma is used in large infrastructure projects,=
+ not on a few servers with a handful of osds. In fact, from what i've seen =
+from the slides, the rdma implementation scales horribly to the point that =
+it becomes slower the more osds you through at it.<br><br>From my limited k=
+nowledge, i have expected a much higher performance gains with rdma, taking=
+ into account that you should have much lower latency and overhead and lowe=
+r cpu utilisation when using this transport in comparison with tcp.<br><br>=
+Are we likely to see a great deal of improvement with ceph and rdma in a ne=
+ar future? Is there a roadmap for having a stable and reliable rdma protoco=
+l support?<br><br>Thanks<br><br>Andrei<br><hr id=3D"zwchr"><blockquote styl=
+e=3D"border-left: 2px solid rgb(16, 16, 255); margin-left: 5px; padding-lef=
+t: 5px; color: rgb(0, 0, 0); font-weight: normal; font-style: normal; text-=
+decoration: none; font-family: Helvetica,Arial,sans-serif; font-size: 12pt;=
+"><b>From: </b>"Andrey Korolyov" &lt;andrey-5vqebrSIFTo@public.gmane.org&gt;<br><b>To: </b>"Somn=
+ath Roy" &lt;Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org&gt;<br><b>Cc: </b>ceph-users-idqoXFIVOFJ4Eiagz67IpQ@public.gmane.org=
+h.com, "ceph-devel" &lt;ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org&gt;<br><b>Sent: </b>Wedn=
+esday, 8 April, 2015 9:28:12 AM<br><b>Subject: </b>Re: [ceph-users] Prelimi=
+nary RDMA vs TCP numbers<br><br>On Wed, Apr 8, 2015 at 11:17 AM, Somnath Ro=
+y &lt;Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org&gt; wrote:<br>&gt;<br>&gt; Hi,<br>&gt; Please=
+ find the preliminary performance numbers of TCP Vs RDMA (XIO) implementati=
+on (on top of SSDs) in the following link.<br>&gt;<br>&gt; http://www.slide=
+share.net/somnathroy7568/ceph-on-rdma<br>&gt;<br>&gt; The attachment didn't=
+ go through it seems, so, I had to use slideshare.<br>&gt;<br>&gt; Mark,<br=
+>&gt; If we have time, I can present it in tomorrow's performance meeting.<=
+br>&gt;<br>&gt; Thanks &amp; Regards<br>&gt; Somnath<br>&gt;<br><br>Those n=
+umbers are really impressive (for small numbers at least)! What<br>are TCP =
+settings you using?For example, difference can be lowered on<br>scale due t=
+o less intensive per-connection acceleration on CUBIC on a<br>larger number=
+ of nodes, though I do not believe that it was a main<br>reason for an obse=
+rved TCP catchup on a relatively flat workload such<br>as fio generates.<br=
+>_______________________________________________<br>ceph-users mailing list=
+<br>ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org<br>http://lists.ceph.com/listinfo.cgi/ceph-us=
+ers-ceph.com<br></blockquote><br></div></body></html>
+------=_Part_753_14911911.1428484840530--
 
+--===============0495740272==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
 
-On 08/04/2015 02:16, shiva rkreddy wrote:
-> We didn't do a upgrade from 0.80.7 to 0.80.9. It was a fresh install wi=
-th ceph 0.80.9 with ceph-deploy version 1.15.12.
->=20
-> May be  should have used ceph-deploy version 1.15.16  https://github.co=
-m/ceph/ceph-deploy/pull/240/files
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
-Ok, mystery solved then, right ?
->=20
->=20
-> On Tue, Apr 7, 2015 at 4:31 PM, Loic Dachary <loic@dachary.org <mailto:=
-loic@dachary.org>> wrote:
->=20
->=20
->=20
->     On 07/04/2015 23:03, shiva rkreddy wrote:
->     > It turns out that ceph service is set ceph to off. Following defe=
-ct talks about it..Once its set to on, everything worked fine after host =
-reboot.
->     >
->     > http://tracker.ceph.com/issues/9090
->=20
->     Interesting :-) Does that mean that the ceph service was somehow tu=
-rned off when upgrading from v0.80.7 to v0.80.9 ?
->=20
->     >
->     > On Tue, Apr 7, 2015 at 2:20 PM, Loic Dachary <loic@dachary.org <m=
-ailto:loic@dachary.org> <mailto:loic@dachary.org <mailto:loic@dachary.org=
->>> wrote:
->     >
->     >     [cc'ing ceph-devel for archival purposes]
->     >
->     >     Hi,
->     >
->     >     On 07/04/2015 19:55, shiva rkreddy wrote:
->     >     > Hi Loic,
->     >     > I've looked at the way our cluster provisioning partition a=
-nd label the journal device. Its done using /*parted*/ command with "gpt"=
- label.  Following is the parted output for /dev/sdr that we were looking=
- yesterday.
->     >     >
->     >     > # parted /dev/sdr
->     >     > GNU Parted 2.1
->     >     > Using /dev/sdr
->     >     > Welcome to GNU Parted! Type 'help' to view a list of comman=
-ds.
->     >     > (parted) p
->     >     > Model: ASR7160 JBOD-R (scsi)
->     >     > Disk /dev/sdr: 960GB
->     >     > Sector size (logical/physical): 512B/512B
->     >     > Partition Table: *gpt*
->     >     >
->     >     > Number  Start   End    Size   File system  Name     Flags
->     >     >  1      9599MB  240GB  230GB               primary
->     >     >  2      250GB   480GB  230GB               primary
->     >     >  3      490GB   720GB  230GB               primary
->     >     >  4      730GB   960GB  230GB               primary
->     >     >
->     >     > (parted)
->     >     >
->     >     > *# sgdisk --info 1 /dev/sdr*
->     >     > Partition GUID code: 45B0969E-9B03-4F30-B4C6-B4B80CEFF106 (=
-Microsoft basic data)
->     >     > Partition unique GUID: 0A45987B-DC77-4816-B506-DEE0DC60AE9E=
-
->     >     > First sector: 18747392 (at 8.9 GiB)
->     >     > Last sector: 468707327 (at 223.5 GiB)
->     >     > Partition size: 449959936 sectors (214.6 GiB)
->     >     > Attribute flags: 0000000000000000
->     >     > Partition name: 'primary'
->     >     >
->     >     >
->     >     > We stared to put label on the disk based on a blog at http:=
-//blog.zhaw.ch/icclab/deploy-ceph-and-start-using-it-end-to-end-tutorial-=
-installation-part-13/
->     >     >
->     >     > I'm not sure why sgdisk is getting  "Microsoft basics data"=
-=2E
->     >
->     >     It's not a big deal as long as it's what ceph-disk expects:
->     >
->     >     https://github.com/ceph/ceph/blob/firefly/src/ceph-disk#L76
->     >
->     >     The more interesting question would be to figure out if ceph-=
-disk-udev is called from
->     >
->     >     https://github.com/ceph/ceph/blob/firefly/udev/95-ceph-osd-al=
-t.rules
->     >
->     >     We have tried udevadm trigger --sysname-match=3Dsd* yesterday=
- and verified it is called when a udev event is sent by the kernel. And y=
-ou have added that to /etc/rc.local to make sure it is called at least on=
-ce at boot time. Would you have time to experiment as described at https:=
-//wiki.ubuntu.com/DebuggingUdev to get more information about what happen=
-s during the boot phase of your machine ?
->     >
->     >     Cheers
->     >
->     >     >
->     >     > Thanks,
->     >     > Shiva
->     >     >
->     >     > On Mon, Apr 6, 2015 at 2:29 PM, shiva rkreddy <shiva.rkredd=
-y@gmail.com <mailto:shiva.rkreddy@gmail.com> <mailto:shiva.rkreddy@gmail.=
-com <mailto:shiva.rkreddy@gmail.com>> <mailto:shiva.rkreddy@gmail.com <ma=
-ilto:shiva.rkreddy@gmail.com> <mailto:shiva.rkreddy@gmail.com <mailto:shi=
-va.rkreddy@gmail.com>>>> wrote:
->     >     >
->     >     >     Hi,
->     >     >
->     >     >     I'm on IRC as *shivark*
->     >     >
->     >     >     # sgdisk --info 1 /dev/sdb
->     >     >     Partition GUID code: 4FBD7E29-9D25-41B8-AFD0-062C0CEFF0=
-5D (Unknown)
->     >     >     Partition unique GUID: 1618223E-B8C9-4C4A-B5D2-EBFF6D64=
-CB12
->     >     >     First sector: 2048 (at 1024.0 KiB)
->     >     >     Last sector: 7811870686 (at 3.6 TiB)
->     >     >     Partition size: 7811868639 sectors (3.6 TiB)
->     >     >     Attribute flags: 0000000000000000
->     >     >     Partition name: 'ceph data'
->     >     >     #
->     >     >
->     >     >
->     >     >     On Mon, Apr 6, 2015 at 2:09 PM, Loic Dachary <loic@dach=
-ary.org <mailto:loic@dachary.org> <mailto:loic@dachary.org <mailto:loic@d=
-achary.org>> <mailto:loic@dachary.org <mailto:loic@dachary.org> <mailto:l=
-oic@dachary.org <mailto:loic@dachary.org>>>> wrote:
->     >     >
->     >     >         Hi,
->     >     >
->     >     >         lrwxrwxrwx 1 root root 10 Apr  4 16:27 1618223e-b8c=
-9-4c4a-b5d2-ebff6d64cb12 -> ../../sdb1
->     >     >
->     >     >         looks encouraging. Could you
->     >     >
->     >     >         sudo sgdisk --info 1 /dev/sdb
->     >     >
->     >     >         to check that it matches ? If you're on IRC feel fr=
-ee to ping me (CEST France/Paris time) and we can have a debug session.
->     >     >
->     >     >         Cheers
->     >     >
->     >     >         On 06/04/2015 02:47, shiva rkreddy wrote:
->     >     >         > We have currently two  osds configured on this sy=
-stem running  RHEL6.5, sharing a ssd drive as journal devices.
->     >     >         >
->     >     >         > udevadm trigger --sysname-match=3Dsdb or udevadm =
-trigger --sysname-match=3D/dev/sdb, return without any output. Same thing=
- happens on ceph 0.80.7 where mount and services are started automaticall=
-y.
->     >     >         >
->     >     >         > Output paste from ceph 0.80.9 is : http://pastebi=
-n.com/1Yqntadi
->     >     >         >
->     >     >         >
->     >     >         > On Sun, Apr 5, 2015 at 11:22 AM, Loic Dachary <lo=
-ic@dachary.org <mailto:loic@dachary.org> <mailto:loic@dachary.org <mailto=
-:loic@dachary.org>> <mailto:loic@dachary.org <mailto:loic@dachary.org> <m=
-ailto:loic@dachary.org <mailto:loic@dachary.org>>> <mailto:loic@dachary.o=
-rg <mailto:loic@dachary.org> <mailto:loic@dachary.org <mailto:loic@dachar=
-y.org>> <mailto:loic@dachary.org <mailto:loic@dachary.org> <mailto:loic@d=
-achary.org <mailto:loic@dachary.org>>>>> wrote:
->     >     >         >
->     >     >         >
->     >     >         >
->     >     >         >     On 04/04/2015 22:09, shiva rkreddy wrote:
->     >     >         >     > HI,
->     >     >         >     > I'm currently testing Firefly 0.80.9 and no=
-ticed that OSD are not auto-mounted after server reboot.
->     >     >         >     > It used to mount auto with Firefly 0.80.7. =
- OS is RHEL 6.5.
->     >     >         >     >
->     >     >         >     > There was another thread earlier on this to=
-pic with v0.80.8, suggestion was to add mount points to /etc/fstab.
->     >     >         >     >
->     >     >         >     > Question is whether the 0.80.7 behaviour co=
-uld return or its needs to be done via /etc/fstab or something else?
->     >     >         >
->     >     >         >     It should work without adding lines in /etc/f=
-stab. Could you give more details about your setup ? Could you try
->     >     >         >
->     >     >         >     udevadm trigger --sysname-match=3Dsdb
->     >     >         >
->     >     >         >     if an osd is managing /dev/sdb. Does that mou=
-nt the osd ? It would also be useful to have the output of ls -l /dev/dis=
-k/by-partuuid
->     >     >         >
->     >     >         >     Cheers
->     >     >         >
->     >     >         >     --
->     >     >         >     Lo=C3=AFc Dachary, Artisan Logiciel Libre
->     >     >         >
->     >     >         >
->     >     >
->     >     >         --
->     >     >         Lo=C3=AFc Dachary, Artisan Logiciel Libre
->     >     >
->     >     >
->     >     >
->     >
->     >     --
->     >     Lo=C3=AFc Dachary, Artisan Logiciel Libre
->     >
->     >
->=20
->     --
->     Lo=C3=AFc Dachary, Artisan Logiciel Libre
->=20
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---oPFrkdOuJjoAr0aA3qbNQVXoVPKotwmMN
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlUk7X8ACgkQ8dLMyEl6F22cDQCgw8vpvpQA8dNz45tSE2ej93em
-TKYAnRb6rl/P+uYePm5qRsDJMixBbff+
-=XfBw
------END PGP SIGNATURE-----
-
---oPFrkdOuJjoAr0aA3qbNQVXoVPKotwmMN--
+--===============0495740272==--
