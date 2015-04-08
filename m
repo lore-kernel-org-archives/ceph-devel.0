@@ -1,15 +1,16 @@
 From: Andrei Mikhailovsky <andrei-930XJYlnu5nQT0dZR+AlfA@public.gmane.org>
 Subject: Re: Preliminary RDMA vs TCP numbers
-Date: Wed, 8 Apr 2015 19:16:40 +0100 (BST)
-Message-ID: <13289231.842.1428516917655.JavaMail.andrei@tuchka>
+Date: Wed, 8 Apr 2015 19:21:30 +0100 (BST)
+Message-ID: <20652394.861.1428517205743.JavaMail.andrei@tuchka>
 References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD75D78@SACMBXIP01.sdcorp.global.sandisk.com>
 	<CABYiri_ihguSripu=gs-MA7Qr8GRDk7H5hw5BNKf-9OSFu1z8g@mail.gmail.com>
 	<6442513.754.1428484840531.JavaMail.andrei@tuchka>
 	<755F6B91B3BE364F9BCA11EA3F9E0C6F2CD761B4@SACMBXIP01.sdcorp.global.sandisk.com>
+	<13289231.842.1428516917655.JavaMail.andrei@tuchka>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0112480069=="
+Content-Type: multipart/mixed; boundary="===============1019140585=="
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD761B4-cXZ6iGhjG0il5HHZYNR2WTJ2aSJ780jGSxCzGc5ayCJWk0Htik3J/w@public.gmane.org>
+In-Reply-To: <13289231.842.1428516917655.JavaMail.andrei@tuchka>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -23,172 +24,261 @@ To: Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>
 Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
---===============0112480069==
+--===============1019140585==
 Content-Type: multipart/alternative;
-	boundary="----=_Part_841_28200728.1428516917654"
+	boundary="----=_Part_860_17961344.1428517205742"
 
-------=_Part_841_28200728.1428516917654
+------=_Part_860_17961344.1428517205742
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 
-Somnath, 
-
-Sounds very promising! I can't wait to try it on my cluster as I am currently using IPOIB instread of the native rdma. 
-
-Cheers 
+Mike, yeah, I wouldn't switch to rdma until it is fully supported in a stable release ))) 
 
 Andrei 
 
 ----- Original Message -----
 
-> From: "Somnath Roy" <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>
-> To: "Andrei Mikhailovsky" <andrei-930XJYlnu5nQT0dZR+AlfA@public.gmane.org>, "Andrey Korolyov"
-> <andrey-5vqebrSIFTo@public.gmane.org>
+> From: "Andrei Mikhailovsky" <andrei-930XJYlnu5nQT0dZR+AlfA@public.gmane.org>
+> To: "Somnath Roy" <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>
 > Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, "ceph-devel"
 > <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-> Sent: Wednesday, 8 April, 2015 5:23:23 PM
-> Subject: RE: [ceph-users] Preliminary RDMA vs TCP numbers
-
-> Andrei,
-> Yes, I see it has lot of potential and I believe fixing the
-> performance bottlenecks inside XIO messenger it should go further.
-> We are working on it and will keep community posted..
-
-> Thanks & Regards
-> Somnath
-
-> From: Andrei Mikhailovsky [mailto:andrei-930XJYlnu5nQT0dZR+AlfA@public.gmane.org]
-> Sent: Wednesday, April 08, 2015 2:22 AM
-> To: Andrey Korolyov
-> Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org; ceph-devel; Somnath Roy
+> Sent: Wednesday, 8 April, 2015 7:16:40 PM
 > Subject: Re: [ceph-users] Preliminary RDMA vs TCP numbers
 
-> Hi,
+> Somnath,
 
-> Am I the only person noticing disappointing results from the
-> preliminary RDMA testing, or am I reading the numbers wrong?
+> Sounds very promising! I can't wait to try it on my cluster as I am
+> currently using IPOIB instread of the native rdma.
 
-> Yes, it's true that on a very small cluster you do see a great
-> improvement in rdma, but in real life rdma is used in large
-> infrastructure projects, not on a few servers with a handful of
-> osds. In fact, from what i've seen from the slides, the rdma
-> implementation scales horribly to the point that it becomes slower
-> the more osds you through at it.
-
-> From my limited knowledge, i have expected a much higher performance
-> gains with rdma, taking into account that you should have much lower
-> latency and overhead and lower cpu utilisation when using this
-> transport in comparison with tcp.
-
-> Are we likely to see a great deal of improvement with ceph and rdma
-> in a near future? Is there a roadmap for having a stable and
-> reliable rdma protocol support?
-
-> Thanks
+> Cheers
 
 > Andrei
+
 > ----- Original Message -----
 
-> > From: "Andrey Korolyov" < andrey-5vqebrSIFTo@public.gmane.org >
+> > From: "Somnath Roy" <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>
 > 
-> > To: "Somnath Roy" < Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org >
+> > To: "Andrei Mikhailovsky" <andrei-930XJYlnu5nQT0dZR+AlfA@public.gmane.org>, "Andrey Korolyov"
+> > <andrey-5vqebrSIFTo@public.gmane.org>
 > 
-> > Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org , "ceph-devel" <
-> > ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org >
+> > Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, "ceph-devel"
+> > <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 > 
-> > Sent: Wednesday, 8 April, 2015 9:28:12 AM
+> > Sent: Wednesday, 8 April, 2015 5:23:23 PM
+> 
+> > Subject: RE: [ceph-users] Preliminary RDMA vs TCP numbers
+> 
+
+> > Andrei,
+> 
+> > Yes, I see it has lot of potential and I believe fixing the
+> > performance bottlenecks inside XIO messenger it should go further.
+> 
+> > We are working on it and will keep community posted..
+> 
+
+> > Thanks & Regards
+> 
+> > Somnath
+> 
+
+> > From: Andrei Mikhailovsky [mailto:andrei-930XJYlnu5nQT0dZR+AlfA@public.gmane.org]
+> 
+> > Sent: Wednesday, April 08, 2015 2:22 AM
+> 
+> > To: Andrey Korolyov
+> 
+> > Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org; ceph-devel; Somnath Roy
 > 
 > > Subject: Re: [ceph-users] Preliminary RDMA vs TCP numbers
 > 
 
-> > On Wed, Apr 8, 2015 at 11:17 AM, Somnath Roy <
-> > Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org > wrote:
-> 
-> > >
-> 
-> > > Hi,
-> 
-> > > Please find the preliminary performance numbers of TCP Vs RDMA
-> > > (XIO) implementation (on top of SSDs) in the following link.
-> 
-> > >
-> 
-> > > http://www.slideshare.net/somnathroy7568/ceph-on-rdma
-> 
-> > >
-> 
-> > > The attachment didn't go through it seems, so, I had to use
-> > > slideshare.
-> 
-> > >
-> 
-> > > Mark,
-> 
-> > > If we have time, I can present it in tomorrow's performance
-> > > meeting.
-> 
-> > >
-> 
-> > > Thanks & Regards
-> 
-> > > Somnath
-> 
-> > >
+> > Hi,
 > 
 
-> > Those numbers are really impressive (for small numbers at least)!
-> > What
+> > Am I the only person noticing disappointing results from the
+> > preliminary RDMA testing, or am I reading the numbers wrong?
 > 
-> > are TCP settings you using?For example, difference can be lowered
-> > on
-> 
-> > scale due to less intensive per-connection acceleration on CUBIC on
-> > a
-> 
-> > larger number of nodes, though I do not believe that it was a main
-> 
-> > reason for an observed TCP catchup on a relatively flat workload
-> > such
-> 
-> > as fio generates.
-> 
-> > _______________________________________________
-> 
-> > ceph-users mailing list
-> 
-> > ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> 
-> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-> 
-> PLEASE NOTE: The information contained in this electronic mail
-> message is intended only for the use of the designated recipient(s)
-> named above. If the reader of this message is not the intended
-> recipient, you are hereby notified that you have received this
-> message in error and that any review, dissemination, distribution,
-> or copying of this message is strictly prohibited. If you have
-> received this communication in error, please notify the sender by
-> telephone or e-mail (as shown above) immediately and destroy any and
-> all copies of this message in your possession (whether hard copies
-> or electronically stored copies).
 
-------=_Part_841_28200728.1428516917654
+> > Yes, it's true that on a very small cluster you do see a great
+> > improvement in rdma, but in real life rdma is used in large
+> > infrastructure projects, not on a few servers with a handful of
+> > osds. In fact, from what i've seen from the slides, the rdma
+> > implementation scales horribly to the point that it becomes slower
+> > the more osds you through at it.
+> 
+
+> > From my limited knowledge, i have expected a much higher
+> > performance
+> > gains with rdma, taking into account that you should have much
+> > lower
+> > latency and overhead and lower cpu utilisation when using this
+> > transport in comparison with tcp.
+> 
+
+> > Are we likely to see a great deal of improvement with ceph and rdma
+> > in a near future? Is there a roadmap for having a stable and
+> > reliable rdma protocol support?
+> 
+
+> > Thanks
+> 
+
+> > Andrei
+> 
+> > ----- Original Message -----
+> 
+
+> > > From: "Andrey Korolyov" < andrey-5vqebrSIFTo@public.gmane.org >
+> > 
+> 
+> > > To: "Somnath Roy" < Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org >
+> > 
+> 
+> > > Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org , "ceph-devel" <
+> > > ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org >
+> > 
+> 
+> > > Sent: Wednesday, 8 April, 2015 9:28:12 AM
+> > 
+> 
+> > > Subject: Re: [ceph-users] Preliminary RDMA vs TCP numbers
+> > 
+> 
+
+> > > On Wed, Apr 8, 2015 at 11:17 AM, Somnath Roy <
+> > > Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org > wrote:
+> > 
+> 
+> > > >
+> > 
+> 
+> > > > Hi,
+> > 
+> 
+> > > > Please find the preliminary performance numbers of TCP Vs RDMA
+> > > > (XIO) implementation (on top of SSDs) in the following link.
+> > 
+> 
+> > > >
+> > 
+> 
+> > > > http://www.slideshare.net/somnathroy7568/ceph-on-rdma
+> > 
+> 
+> > > >
+> > 
+> 
+> > > > The attachment didn't go through it seems, so, I had to use
+> > > > slideshare.
+> > 
+> 
+> > > >
+> > 
+> 
+> > > > Mark,
+> > 
+> 
+> > > > If we have time, I can present it in tomorrow's performance
+> > > > meeting.
+> > 
+> 
+> > > >
+> > 
+> 
+> > > > Thanks & Regards
+> > 
+> 
+> > > > Somnath
+> > 
+> 
+> > > >
+> > 
+> 
+
+> > > Those numbers are really impressive (for small numbers at least)!
+> > > What
+> > 
+> 
+> > > are TCP settings you using?For example, difference can be lowered
+> > > on
+> > 
+> 
+> > > scale due to less intensive per-connection acceleration on CUBIC
+> > > on
+> > > a
+> > 
+> 
+> > > larger number of nodes, though I do not believe that it was a
+> > > main
+> > 
+> 
+> > > reason for an observed TCP catchup on a relatively flat workload
+> > > such
+> > 
+> 
+> > > as fio generates.
+> > 
+> 
+> > > _______________________________________________
+> > 
+> 
+> > > ceph-users mailing list
+> > 
+> 
+> > > ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> > 
+> 
+> > > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> > 
+> 
+> > PLEASE NOTE: The information contained in this electronic mail
+> > message is intended only for the use of the designated recipient(s)
+> > named above. If the reader of this message is not the intended
+> > recipient, you are hereby notified that you have received this
+> > message in error and that any review, dissemination, distribution,
+> > or copying of this message is strictly prohibited. If you have
+> > received this communication in error, please notify the sender by
+> > telephone or e-mail (as shown above) immediately and destroy any
+> > and
+> > all copies of this message in your possession (whether hard copies
+> > or electronically stored copies).
+> 
+
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+------=_Part_860_17961344.1428517205742
 Content-Type: text/html; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
 
 <html><head><style type=3D'text/css'>p { margin: 0; }</style></head><body><=
 div style=3D'font-family: arial,helvetica,sans-serif; font-size: 10pt; colo=
-r: #000000'>Somnath,<br><br>Sounds very promising! I can't wait to try it o=
-n my cluster as I am currently using IPOIB instread of the native rdma.<br>=
-<br>Cheers<br><br>Andrei<br><br><div><br></div><br><hr id=3D"zwchr"><blockq=
-uote style=3D"border-left: 2px solid rgb(16, 16, 255); margin-left: 5px; pa=
-dding-left: 5px; color: rgb(0, 0, 0); font-weight: normal; font-style: norm=
-al; text-decoration: none; font-family: Helvetica,Arial,sans-serif; font-si=
-ze: 12pt;"><b>From: </b>"Somnath Roy" &lt;Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org&gt;<br><b=
->To: </b>"Andrei Mikhailovsky" &lt;andrei-930XJYlnu5nQT0dZR+AlfA@public.gmane.org&gt;, "Andrey Korolyov"=
- &lt;andrey-5vqebrSIFTo@public.gmane.org&gt;<br><b>Cc: </b>ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, "ceph-deve=
-l" &lt;ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org&gt;<br><b>Sent: </b>Wednesday, 8 April, 2=
-015 5:23:23 PM<br><b>Subject: </b>RE: [ceph-users] Preliminary RDMA vs TCP =
-numbers<br><br>
+r: #000000'>Mike, yeah, I wouldn't switch to rdma until it is fully support=
+ed in a stable release )))<br><br>Andrei<br><br><br><hr id=3D"zwchr"><block=
+quote style=3D"border-left: 2px solid rgb(16, 16, 255); margin-left: 5px; p=
+adding-left: 5px; color: rgb(0, 0, 0); font-weight: normal; font-style: nor=
+mal; text-decoration: none; font-family: Helvetica,Arial,sans-serif; font-s=
+ize: 12pt;"><b>From: </b>"Andrei Mikhailovsky" &lt;andrei-930XJYlnu5nQT0dZR+AlfA@public.gmane.org&gt;<br=
+><b>To: </b>"Somnath Roy" &lt;Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org&gt;<br><b>Cc: </b>cep=
+h-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, "ceph-devel" &lt;ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org&gt;<br>=
+<b>Sent: </b>Wednesday, 8 April, 2015 7:16:40 PM<br><b>Subject: </b>Re: [ce=
+ph-users] Preliminary RDMA vs TCP numbers<br><br><style>p { margin: 0; }</s=
+tyle><div style=3D"font-family: arial,helvetica,sans-serif; font-size: 10pt=
+; color: rgb(0, 0, 0);">Somnath,<br><br>Sounds very promising! I can't wait=
+ to try it on my cluster as I am currently using IPOIB instread of the nati=
+ve rdma.<br><br>Cheers<br><br>Andrei<br><br><div><br></div><br><hr id=3D"zw=
+chr"><blockquote style=3D"border-left: 2px solid rgb(16, 16, 255); margin-l=
+eft: 5px; padding-left: 5px; color: rgb(0, 0, 0); font-weight: normal; font=
+-style: normal; text-decoration: none; font-family: Helvetica,Arial,sans-se=
+rif; font-size: 12pt;"><b>From: </b>"Somnath Roy" &lt;Somnath.Roy@sandisk.c=
+om&gt;<br><b>To: </b>"Andrei Mikhailovsky" &lt;andrei-930XJYlnu5nQT0dZR+AlfA@public.gmane.org&gt;, "Andr=
+ey Korolyov" &lt;andrey-5vqebrSIFTo@public.gmane.org&gt;<br><b>Cc: </b>ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org=
+, "ceph-devel" &lt;ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org&gt;<br><b>Sent: </b>Wednesday=
+, 8 April, 2015 5:23:23 PM<br><b>Subject: </b>RE: [ceph-users] Preliminary =
+RDMA vs TCP numbers<br><br>
 
 
 
@@ -276,9 +366,9 @@ n></p>
 alibri&quot;,&quot;sans-serif&quot;; color: rgb(31, 73, 125);">&nbsp;</span=
 ></p>
 <div>
-<div style=3D"border-right: medium none; border-width: 1pt medium medium; b=
-order-style: solid none none; border-color: rgb(181, 196, 223) -moz-use-tex=
-t-color -moz-use-text-color; padding: 3pt 0in 0in;">
+<div style=3D"border-width: 1pt medium medium; border-style: solid none non=
+e; border-color: rgb(181, 196, 223) -moz-use-text-color -moz-use-text-color=
+; padding: 3pt 0in 0in;">
 <p class=3D"MsoNormal"><b><span style=3D"font-size: 10pt; font-family: &quo=
 t;Tahoma&quot;,&quot;sans-serif&quot;;">From:</span></b><span style=3D"font=
 -size: 10pt; font-family: &quot;Tahoma&quot;,&quot;sans-serif&quot;;"> Andr=
@@ -395,10 +485,13 @@ n above) immediately and destroy
  or electronically stored copies).<br>
 <br>
 </font>
-</blockquote><br></div></body></html>
-------=_Part_841_28200728.1428516917654--
+</blockquote><br></div><br>_______________________________________________<=
+br>ceph-users mailing list<br>ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org<br>http://lists.cep=
+h.com/listinfo.cgi/ceph-users-ceph.com<br></blockquote><br></div></body></h=
+tml>
+------=_Part_860_17961344.1428517205742--
 
---===============0112480069==
+--===============1019140585==
 Content-Type: text/plain; charset="us-ascii"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
@@ -409,4 +502,4 @@ ceph-users mailing list
 ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
---===============0112480069==--
+--===============1019140585==--
