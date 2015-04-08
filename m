@@ -1,73 +1,139 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: newstore performance update
-Date: Mon, 4 May 2015 11:08:26 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1505041106300.24939@cobra.newdream.net>
-References: <554016E2.3000104@redhat.com> <6F3FA899187F0043BA1827A69DA2F7CC021E4894@shsmsx102.ccr.corp.intel.com> <alpine.DEB.2.00.1504290929400.5458@cobra.newdream.net>, <55422E0A.6010204@redhat.com> <ijupkkkyuvtsofr81j33sd7l.1430402112852@email.android.com>
- <554237F8.5070907@redhat.com> <alpine.DEB.2.00.1504301107310.5458@cobra.newdream.net> <5543923E.1020607@redhat.com> <alpine.DEB.2.00.1505011731500.5458@cobra.newdream.net> <5547B156.8060508@redhat.com>
+From: Viral Mehta <viral.vkm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: Preliminary RDMA vs TCP numbers
+Date: Wed, 8 Apr 2015 13:59:45 +0530
+Message-ID: <CANX6Dam1VMBfDJDLp3sT54jB0=iKENJBZDAZgrm+O+zMZmYT0g@mail.gmail.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD75D78@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:37670 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751007AbbEDSIa (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 4 May 2015 14:08:30 -0400
-In-Reply-To: <5547B156.8060508@redhat.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>
-Cc: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: multipart/mixed; boundary="===============0570288784=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD75D78-cXZ6iGhjG0il5HHZYNR2WTJ2aSJ780jGSxCzGc5ayCJWk0Htik3J/w@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>
+Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Mon, 4 May 2015, Mark Nelson wrote:
-> On 05/01/2015 07:33 PM, Sage Weil wrote:
-> > Ok, I think I figured out what was going on.  The db->submit_transaction()
-> > call (from _txc_finish_io) was blocking when there was a
-> > submit_transaction_sync() in progress.  This was making me hit a ceiling
-> > of about 80 iops on my slow disk.  When I moved that into _kv_sync_thread
-> > (just prior to the submit_transaction_sync() call) it jumps up to 300+
-> > iops.
-> > 
-> > I pushed that to wip-newstore.
-> > 
-> > Further, if I drop the O_DSYNC, it goes up another 50% or so.  It'll take
-> > a bit more coding to effectively batch the (implicit) fdatasync from the
-> > O_DSYNC up, though, and capture some of that.  Next!
-> > 
-> > sage
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> 
-> Ran through a bunch of tests on 0c728ccc over the weekend:
-> 
-> http://nhm.ceph.com/newstore/5d96fe6f_vs_0c728ccc.pdf
-> 
-> The good news is that sequential writes on spinning disks are looking
-> significantly better!  We went from 40x slower than filestore for small
-> sequential IO to only about 30-40% slower and we become faster than filestore
-> at 64kb+ IO sizes.
-> 
-> 128kb-2MB sequential writes with data on spinning disk and rocksdb on SSD
-> regressed.  Newstore is no longer really any faster than filestore for those
-> IO sizes.  We saw something similar for random IO, where spinning disk only
-> results improved and spinning disk + rocksdb on SSD regressed.
-> 
-> With everything on SSD, we saw small sequential writes improve and nearly all
-> random writes regress.  Not sure how much these regressions are due to
-> 0c728ccc vs other commits yet.
+--===============0570288784==
+Content-Type: multipart/alternative; boundary=047d7bfcee7a65d857051332550d
 
-That's surprising!  I pushed a commit that makes this tunable,
+--047d7bfcee7a65d857051332550d
+Content-Type: text/plain; charset=UTF-8
 
- newstore sync submit transaction = false (default)
+I am sorry, I am new to the discussion.
 
-Can you see if setting that to true (effectively reverting my last change) 
-fixes the ssd regression?
+But, is it TCP offloaded (TOE) or otherwise ?
 
-It may also be that this is a simple locking issue that we can fix in 
-rocksdb.  Again, the behavior I saw was that the db->submit_transaction() 
-call would block until the sync commit (from kv_sync_thread) finished.  
-I would expect rocksdb to be more careful about that, so maybe there is 
-something else funny/subtle going on.
+On Wed, Apr 8, 2015 at 1:47 PM, Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org> wrote:
 
-sage
+>
+> Hi,
+> Please find the preliminary performance numbers of TCP Vs RDMA (XIO)
+> implementation (on top of SSDs) in the following link.
+>
+> http://www.slideshare.net/somnathroy7568/ceph-on-rdma
+>
+> The attachment didn't go through it seems, so, I had to use slideshare.
+>
+> Mark,
+> If we have time, I can present it in tomorrow's performance meeting.
+>
+> Thanks & Regards
+> Somnath
+>
+> ________________________________
+>
+> PLEASE NOTE: The information contained in this electronic mail message is
+> intended only for the use of the designated recipient(s) named above. If
+> the reader of this message is not the intended recipient, you are hereby
+> notified that you have received this message in error and that any review,
+> dissemination, distribution, or copying of this message is strictly
+> prohibited. If you have received this communication in error, please notify
+> the sender by telephone or e-mail (as shown above) immediately and destroy
+> any and all copies of this message in your possession (whether hard copies
+> or electronically stored copies).
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+
+
+
+-- 
+Thanks,
+Viral Mehta
+
+--047d7bfcee7a65d857051332550d
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div>I am sorry, I am new to the discussion.<br><br></div>=
+But, is it TCP offloaded (TOE) or otherwise ?<br></div><div class=3D"gmail_=
+extra"><br><div class=3D"gmail_quote">On Wed, Apr 8, 2015 at 1:47 PM, Somna=
+th Roy <span dir=3D"ltr">&lt;<a href=3D"mailto:Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org" tar=
+get=3D"_blank">Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org</a>&gt;</span> wrote:<br><blockquote=
+ class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc soli=
+d;padding-left:1ex"><br>
+Hi,<br>
+Please find the preliminary performance numbers of TCP Vs RDMA (XIO) implem=
+entation (on top of SSDs) in the following link.<br>
+<br>
+<a href=3D"http://www.slideshare.net/somnathroy7568/ceph-on-rdma" target=3D=
+"_blank">http://www.slideshare.net/somnathroy7568/ceph-on-rdma</a><br>
+<br>
+The attachment didn&#39;t go through it seems, so, I had to use slideshare.=
+<br>
+<br>
+Mark,<br>
+If we have time, I can present it in tomorrow&#39;s performance meeting.<br=
+>
+<br>
+Thanks &amp; Regards<br>
+Somnath<br>
+<br>
+________________________________<br>
+<br>
+PLEASE NOTE: The information contained in this electronic mail message is i=
+ntended only for the use of the designated recipient(s) named above. If the=
+ reader of this message is not the intended recipient, you are hereby notif=
+ied that you have received this message in error and that any review, disse=
+mination, distribution, or copying of this message is strictly prohibited. =
+If you have received this communication in error, please notify the sender =
+by telephone or e-mail (as shown above) immediately and destroy any and all=
+ copies of this message in your possession (whether hard copies or electron=
+ically stored copies).<br>
+<br>
+--<br>
+To unsubscribe from this list: send the line &quot;unsubscribe ceph-devel&q=
+uot; in<br>
+the body of a message to <a href=3D"mailto:majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org">major=
+domo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org</a><br>
+More majordomo info at=C2=A0 <a href=3D"http://vger.kernel.org/majordomo-in=
+fo.html" target=3D"_blank">http://vger.kernel.org/majordomo-info.html</a><b=
+r>
+</blockquote></div><br><br clear=3D"all"><br>-- <br><div class=3D"gmail_sig=
+nature">Thanks,<br>Viral Mehta</div>
+</div>
+
+--047d7bfcee7a65d857051332550d--
+
+--===============0570288784==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============0570288784==--
