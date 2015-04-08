@@ -1,99 +1,103 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: Initial newstore vs filestore results
-Date: Tue, 07 Apr 2015 20:53:06 -0500
-Message-ID: <55248A02.5050602@redhat.com>
-References: <5523F069.3000400@redhat.com> <55242D15.8080800@redhat.com> <55248856.1010808@redhat.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD75A03@SACMBXIP01.sdcorp.global.sandisk.com>
+From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Subject: RE: Initial newstore vs filestore results
+Date: Wed, 8 Apr 2015 02:26:23 +0000
+Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC021C882F@shsmsx102.ccr.corp.intel.com>
+References: <5523F069.3000400@redhat.com> <55242D15.8080800@redhat.com>
+ <55248856.1010808@redhat.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD75A03@SACMBXIP01.sdcorp.global.sandisk.com>
+ <55248A02.5050602@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:35070 "EHLO mx1.redhat.com"
+Received: from mga01.intel.com ([192.55.52.88]:49773 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753055AbbDHBxM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 7 Apr 2015 21:53:12 -0400
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD75A03@SACMBXIP01.sdcorp.global.sandisk.com>
+	id S1753224AbbDHC03 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 7 Apr 2015 22:26:29 -0400
+In-Reply-To: <55248A02.5050602@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mnelson@redhat.com>, Somnath Roy <Somnath.Roy@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Somnath,
-
-Sure.  It's very easy:
-
-1) install or build wip-newstore
-2) Add the following to your ceph.conf file:
-
-enable experimental unrecoverable data corrupting features = newstore 
-rocksdb
-osd objectstore = newstore
-
-Lots of interesting things to dig into!
-
-Mark
-
-On 04/07/2015 08:48 PM, Somnath Roy wrote:
-> Mark,
-> Could you please send the instruction out on how to use this new store?
->
-> Thanks & Regards
-> Somnath
->
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
-> Sent: Tuesday, April 07, 2015 6:46 PM
-> To: ceph-devel
-> Subject: Re: Initial newstore vs filestore results
->
->
->
-> On 04/07/2015 02:16 PM, Mark Nelson wrote:
->> On 04/07/2015 09:57 AM, Mark Nelson wrote:
->>> Hi Guys,
->>>
->>> I ran some quick tests on Sage's newstore branch.  So far given that
->>> this is a prototype, things are looking pretty good imho.  The 4MB
->>> object rados bench read/write and small read performance looks
->>> especially good.  Keep in mind that this is not using the SSD
->>> journals in any way, so 640MB/s sequential writes is actually really
->>> good compared to filestore without SSD journals.
->>>
->>> small write performance appears to be fairly bad, especially in the
->>> RBD case where it's small writes to larger objects.  I'm going to sit
->>> down and see if I can figure out what's going on.  It's bad enough
->>> that I suspect there's just something odd going on.
->>>
->>> Mark
->>
->> Seekwatcher/blktrace graphs of a 4 OSD cluster using newstore for
->> those
->> interested:
->>
->> http://nhm.ceph.com/newstore/
->>
->> Interestingly small object write/read performance with 4 OSDs was
->> about
->> 1/3-1/4 the speed of the same cluster with 36 OSDs.
->>
->> Note: Thanks Dan for fixing the directory column width!
->>
->> Mark
->
-> New fio/librbd results using Sage's latest code that attempts to keep small overwrite extents in the db.  This is 4 OSD so not directly comparable to the 36 OSD tests above, but does include seekwatcher graphs.  Results in MB/s:
->
->          write   read    randw   randr
-> 4MB     57.9    319.6   55.2    285.9
-> 128KB   2.5     230.6   2.4     125.4
-> 4KB     0.46    55.65   1.11    3.56
->
-> Seekwatcher graphs:
->
-> http://nhm.ceph.com/newstore/20150407/
->
-> Mark
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-> ________________________________
->
-> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
->
+SGkgbWFyaywgDQoNClJlYWxseSB0aGFua3MgZm9yIHRoZSBkYXRhLg0KDQpOb3Qgc3VyZSBpZiB0
+aGlzIFBSIHdpbGwgYmUgbWVyZ2VkIHNvb24gKGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgv
+cHVsbC80MjY277yJDQoNClNvbWUgIGtub3duIGJ1Z3MgYXJvdW5kIDoNCiAgICAgICBgcmFkb3Mg
+bHNgIHdpbGwgY2F1c2UgYXNzZXJ0IGZhdWx0ICh3aGljaCB3YXMgZml4IGJ5IHRoZSBQUikgDQog
+ICAgICAgIGByYmQgbGlzdGAgd2lsbCBhbHNvIGNhdXNlIGFzc2VydCBmYWlsdXJlIChiZWNhdXNl
+IG9tYXBfaXRlciBoYXNu4oCZdCBpbXBsZW1lbnRlZCB5ZXQpLg0KICAgICAgICBQRyB3aWxsIG5v
+dCBiYWNrIHRvIGFjdGl2ZStjbGVhbiBhZnRlciByZXN0YXJ0IE9TRC4gKHdpcCkNCg0KVGhlIG1v
+c3QgcGVyZm9ybWFuY2UgcmVsYXRlZCBwYXJ0IHNlZW1zIGFib3V0IHRoZSBuZXdzdG9yZV9mc3lu
+Y190aHJlYWRzIGFuZCByb2Nrc2RiIHR1bmluZw0KICAgICAgICAgVGhlIHNtYWxsIHJhZG9zIHdy
+aXRlIHBlcmZvcm1hbmNlIGRlZ3JhZGF0aW9uIHNob3VsZCByZWxhdGVkIHdpdGggZnN5bmMgc2lj
+ZSBpdCdzIGluIGNyZWF0aW9uIG1vZGUgdGhhdCB3aWxsIG5vdCBnbyB0aHJvdWdoIHJvY2tzZGIu
+DQogICAgICAgICBUaGUgUkJEIHJhbmRvbSB3cml0ZSBjYXNlIHNob3VsZCByZWxhdGVkIHdpdGgg
+cm9ja3NkYiBzaW5jZSB0aGUgY29tcGFjdGlvbiBvdmVyaGVhZChhbmQgYWxzbyB0aGUgV0FMIGxv
+ZyB0aGVyZSkuDQoNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBY
+aWFveGkNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBjZXBoLWRldmVsLW93bmVy
+QHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3Jn
+XSBPbiBCZWhhbGYgT2YgTWFyayBOZWxzb24NClNlbnQ6IFdlZG5lc2RheSwgQXByaWwgOCwgMjAx
+NSA5OjUzIEFNDQpUbzogU29tbmF0aCBSb3k7IGNlcGgtZGV2ZWwNClN1YmplY3Q6IFJlOiBJbml0
+aWFsIG5ld3N0b3JlIHZzIGZpbGVzdG9yZSByZXN1bHRzDQoNCkhpIFNvbW5hdGgsDQoNClN1cmUu
+ICBJdCdzIHZlcnkgZWFzeToNCg0KMSkgaW5zdGFsbCBvciBidWlsZCB3aXAtbmV3c3RvcmUNCjIp
+IEFkZCB0aGUgZm9sbG93aW5nIHRvIHlvdXIgY2VwaC5jb25mIGZpbGU6DQoNCmVuYWJsZSBleHBl
+cmltZW50YWwgdW5yZWNvdmVyYWJsZSBkYXRhIGNvcnJ1cHRpbmcgZmVhdHVyZXMgPSBuZXdzdG9y
+ZSByb2Nrc2RiIG9zZCBvYmplY3RzdG9yZSA9IG5ld3N0b3JlDQoNCkxvdHMgb2YgaW50ZXJlc3Rp
+bmcgdGhpbmdzIHRvIGRpZyBpbnRvIQ0KDQpNYXJrDQoNCk9uIDA0LzA3LzIwMTUgMDg6NDggUE0s
+IFNvbW5hdGggUm95IHdyb3RlOg0KPiBNYXJrLA0KPiBDb3VsZCB5b3UgcGxlYXNlIHNlbmQgdGhl
+IGluc3RydWN0aW9uIG91dCBvbiBob3cgdG8gdXNlIHRoaXMgbmV3IHN0b3JlPw0KPg0KPiBUaGFu
+a3MgJiBSZWdhcmRzDQo+IFNvbW5hdGgNCj4NCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0N
+Cj4gRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgDQo+IFttYWlsdG86Y2Vw
+aC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBNYXJrIE5lbHNvbg0K
+PiBTZW50OiBUdWVzZGF5LCBBcHJpbCAwNywgMjAxNSA2OjQ2IFBNDQo+IFRvOiBjZXBoLWRldmVs
+DQo+IFN1YmplY3Q6IFJlOiBJbml0aWFsIG5ld3N0b3JlIHZzIGZpbGVzdG9yZSByZXN1bHRzDQo+
+DQo+DQo+DQo+IE9uIDA0LzA3LzIwMTUgMDI6MTYgUE0sIE1hcmsgTmVsc29uIHdyb3RlOg0KPj4g
+T24gMDQvMDcvMjAxNSAwOTo1NyBBTSwgTWFyayBOZWxzb24gd3JvdGU6DQo+Pj4gSGkgR3V5cywN
+Cj4+Pg0KPj4+IEkgcmFuIHNvbWUgcXVpY2sgdGVzdHMgb24gU2FnZSdzIG5ld3N0b3JlIGJyYW5j
+aC4gIFNvIGZhciBnaXZlbiB0aGF0IA0KPj4+IHRoaXMgaXMgYSBwcm90b3R5cGUsIHRoaW5ncyBh
+cmUgbG9va2luZyBwcmV0dHkgZ29vZCBpbWhvLiAgVGhlIDRNQiANCj4+PiBvYmplY3QgcmFkb3Mg
+YmVuY2ggcmVhZC93cml0ZSBhbmQgc21hbGwgcmVhZCBwZXJmb3JtYW5jZSBsb29rcyANCj4+PiBl
+c3BlY2lhbGx5IGdvb2QuICBLZWVwIGluIG1pbmQgdGhhdCB0aGlzIGlzIG5vdCB1c2luZyB0aGUg
+U1NEIA0KPj4+IGpvdXJuYWxzIGluIGFueSB3YXksIHNvIDY0ME1CL3Mgc2VxdWVudGlhbCB3cml0
+ZXMgaXMgYWN0dWFsbHkgcmVhbGx5IA0KPj4+IGdvb2QgY29tcGFyZWQgdG8gZmlsZXN0b3JlIHdp
+dGhvdXQgU1NEIGpvdXJuYWxzLg0KPj4+DQo+Pj4gc21hbGwgd3JpdGUgcGVyZm9ybWFuY2UgYXBw
+ZWFycyB0byBiZSBmYWlybHkgYmFkLCBlc3BlY2lhbGx5IGluIHRoZSANCj4+PiBSQkQgY2FzZSB3
+aGVyZSBpdCdzIHNtYWxsIHdyaXRlcyB0byBsYXJnZXIgb2JqZWN0cy4gIEknbSBnb2luZyB0byAN
+Cj4+PiBzaXQgZG93biBhbmQgc2VlIGlmIEkgY2FuIGZpZ3VyZSBvdXQgd2hhdCdzIGdvaW5nIG9u
+LiAgSXQncyBiYWQgDQo+Pj4gZW5vdWdoIHRoYXQgSSBzdXNwZWN0IHRoZXJlJ3MganVzdCBzb21l
+dGhpbmcgb2RkIGdvaW5nIG9uLg0KPj4+DQo+Pj4gTWFyaw0KPj4NCj4+IFNlZWt3YXRjaGVyL2Js
+a3RyYWNlIGdyYXBocyBvZiBhIDQgT1NEIGNsdXN0ZXIgdXNpbmcgbmV3c3RvcmUgZm9yIA0KPj4g
+dGhvc2UNCj4+IGludGVyZXN0ZWQ6DQo+Pg0KPj4gaHR0cDovL25obS5jZXBoLmNvbS9uZXdzdG9y
+ZS8NCj4+DQo+PiBJbnRlcmVzdGluZ2x5IHNtYWxsIG9iamVjdCB3cml0ZS9yZWFkIHBlcmZvcm1h
+bmNlIHdpdGggNCBPU0RzIHdhcyANCj4+IGFib3V0DQo+PiAxLzMtMS80IHRoZSBzcGVlZCBvZiB0
+aGUgc2FtZSBjbHVzdGVyIHdpdGggMzYgT1NEcy4NCj4+DQo+PiBOb3RlOiBUaGFua3MgRGFuIGZv
+ciBmaXhpbmcgdGhlIGRpcmVjdG9yeSBjb2x1bW4gd2lkdGghDQo+Pg0KPj4gTWFyaw0KPg0KPiBO
+ZXcgZmlvL2xpYnJiZCByZXN1bHRzIHVzaW5nIFNhZ2UncyBsYXRlc3QgY29kZSB0aGF0IGF0dGVt
+cHRzIHRvIGtlZXAgc21hbGwgb3ZlcndyaXRlIGV4dGVudHMgaW4gdGhlIGRiLiAgVGhpcyBpcyA0
+IE9TRCBzbyBub3QgZGlyZWN0bHkgY29tcGFyYWJsZSB0byB0aGUgMzYgT1NEIHRlc3RzIGFib3Zl
+LCBidXQgZG9lcyBpbmNsdWRlIHNlZWt3YXRjaGVyIGdyYXBocy4gIFJlc3VsdHMgaW4gTUIvczoN
+Cj4NCj4gICAgICAgICAgd3JpdGUgICByZWFkICAgIHJhbmR3ICAgcmFuZHINCj4gNE1CICAgICA1
+Ny45ICAgIDMxOS42ICAgNTUuMiAgICAyODUuOQ0KPiAxMjhLQiAgIDIuNSAgICAgMjMwLjYgICAy
+LjQgICAgIDEyNS40DQo+IDRLQiAgICAgMC40NiAgICA1NS42NSAgIDEuMTEgICAgMy41Ng0KPg0K
+PiBTZWVrd2F0Y2hlciBncmFwaHM6DQo+DQo+IGh0dHA6Ly9uaG0uY2VwaC5jb20vbmV3c3RvcmUv
+MjAxNTA0MDcvDQo+DQo+IE1hcmsNCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxp
+c3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIA0KPiBpbiB0aGUgYm9k
+eSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9t
+byANCj4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1s
+DQo+DQo+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQo+DQo+IFBMRUFTRSBOT1RF
+OiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3Nh
+Z2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGll
+bnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0
+aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBo
+YXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBk
+aXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlz
+IHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNh
+dGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBl
+LW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFs
+bCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJk
+IGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCj4NCi0tDQpUbyB1bnN1
+YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1k
+ZXZlbCIgaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5v
+cmcgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRv
+bW8taW5mby5odG1sDQo=
