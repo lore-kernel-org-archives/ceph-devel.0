@@ -1,61 +1,80 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Backporting to Firefly
-Date: Wed, 08 Apr 2015 11:22:05 +0200
-Message-ID: <5524F33D.9010303@dachary.org>
+From: Amon Ott <a.ott@m-privacy.de>
+Subject: init script bug with multiple clusters
+Date: Wed, 08 Apr 2015 11:58:17 +0200
+Message-ID: <5524FBB9.9070300@m-privacy.de>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="w8FW2BAxvbmgPu9s9q47lhhxcv0T0JuAR"
+Content-Type: multipart/mixed;
+ boundary="------------020802000101030202090205"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:43274 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751662AbbDHJWK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Apr 2015 05:22:10 -0400
+Received: from www.m-privacy.de ([85.214.155.129]:60627 "EHLO www.m-privacy.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751164AbbDHKEP (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 8 Apr 2015 06:04:15 -0400
+Received: from localhost (localhost [127.0.0.1])
+	by www.m-privacy.de (Postfix) with ESMTP id 81BD52400E1
+	for <ceph-devel@vger.kernel.org>; Wed,  8 Apr 2015 11:58:25 +0200 (CEST)
+Received: from www.m-privacy.de ([127.0.0.1])
+ by localhost (www.m-privacy.de [127.0.0.1]) (maiad, port 10024) with ESMTP
+ id 15273-04 for <ceph-devel@vger.kernel.org>;
+ Wed,  8 Apr 2015 11:58:19 +0200 (CEST)
+Received: from gw.compuniverse.de (f052212217.adsl.alicedsl.de [78.52.212.217])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by www.m-privacy.de (Postfix) with ESMTPSA id 615172400E0
+	for <ceph-devel@vger.kernel.org>; Wed,  8 Apr 2015 11:58:19 +0200 (CEST)
+Received: from [192.168.201.30] (tgham.compuniverse.de [192.168.201.30])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA (256/256 bits))
+	(Client did not present a certificate)
+	by gw.compuniverse.de (Postfix) with ESMTPS id 434198251C
+	for <ceph-devel@vger.kernel.org>; Wed,  8 Apr 2015 11:58:18 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Shu, Xinxin" <xinxin.shu@intel.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---w8FW2BAxvbmgPu9s9q47lhhxcv0T0JuAR
+This is a multi-part message in MIME format.
+--------------020802000101030202090205
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 
-Hi,
+Hello Ceph!
 
-I see you have been busy backporting issues to Firefly today, this is gre=
-at :-)=20
+The Ceph init script (src/init-ceph.in) creates pid files without
+cluster names. This means that only one cluster can run at a time. The
+solution is simple and works fine here, patch against 0.94 is attached.
 
-https://github.com/ceph/ceph/pulls/xinxinsh
+Amon Ott
+-- 
+Dr. Amon Ott
+m-privacy GmbH           Tel: +49 30 24342334
+Werner-Voß-Damm 62       Fax: +49 30 99296856
+12101 Berlin             http://www.m-privacy.de
 
-It would be helpful if you could update the pull requests (and the corres=
-ponding issues) as explained at http://tracker.ceph.com/projects/ceph-rel=
-eases/wiki/HOWTO_backport_commits.=20
+Amtsgericht Charlottenburg, HRB 84946
 
-Once it's done I propose we move to the next step, as explained at http:/=
-/tracker.ceph.com/projects/ceph-releases/wiki/HOWTO: merging your pull re=
-quests in the integration branch ( step 5 http://tracker.ceph.com/project=
-s/ceph-releases/wiki/HOWTO_populate_the_integration_branch ) and running =
-tests on them ( step 6 http://tracker.ceph.com/projects/ceph-releases/wik=
-i/HOWTO_run_integration_and_upgrade_tests).
+Geschäftsführer:
+ Dipl.-Kfm. Holger Maczkowsky,
+ Roman Maczkowsky
 
-Cheers
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+GnuPG-Key-ID: 0x2DD3A649
 
 
---w8FW2BAxvbmgPu9s9q47lhhxcv0T0JuAR
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+--------------020802000101030202090205
+Content-Type: text/x-patch;
+ name="mprivacy-ceph-init.diff"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment;
+ filename="mprivacy-ceph-init.diff"
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
+--- ceph-0.93/src/init-ceph.in	2015-02-27 19:47:15.000000000 +0100
++++ ceph-0.93/src/init-ceph.in.mp	2015-04-07 13:29:47.127067864 +0200
+@@ -227,7 +237,7 @@
+ 
+     get_conf run_dir "/var/run/ceph" "run dir"
+ 
+-    get_conf pid_file "$run_dir/$type.$id.pid" "pid file"
++    get_conf pid_file "$run_dir/$cluster-$type.$id.pid" "pid file"
+ 
+     if [ "$command" = "start" ]; then
+ 	if [ -n "$pid_file" ]; then
 
-iEYEARECAAYFAlUk8z0ACgkQ8dLMyEl6F20VBACfePWAtd+qYGaKnoct3zPotdsB
-QaAAn2XJeBxmxkqPEj5khi+wMBWnrxT0
-=DNK1
------END PGP SIGNATURE-----
-
---w8FW2BAxvbmgPu9s9q47lhhxcv0T0JuAR--
+--------------020802000101030202090205--
