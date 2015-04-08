@@ -1,45 +1,54 @@
-From: Travis Rhoden <trhoden@gmail.com>
-Subject: [ANN] ceph-deploy 1.5.23 released
-Date: Wed, 8 Apr 2015 10:40:21 -0400
-Message-ID: <CACkq2mpHdM5v6qdYt7JqWqpqgAty+6WNNdKW6t3ghs0kSWaiBA@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Preliminary RDMA vs TCP numbers
+Date: Wed, 8 Apr 2015 16:12:25 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD76178@SACMBXIP01.sdcorp.global.sandisk.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD75D78@SACMBXIP01.sdcorp.global.sandisk.com>
+ <CABYiri_ihguSripu=gs-MA7Qr8GRDk7H5hw5BNKf-9OSFu1z8g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qg0-f49.google.com ([209.85.192.49]:35944 "EHLO
-	mail-qg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932150AbbDHOkm (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Apr 2015 10:40:42 -0400
-Received: by qgeb100 with SMTP id b100so29814847qge.3
-        for <ceph-devel@vger.kernel.org>; Wed, 08 Apr 2015 07:40:41 -0700 (PDT)
+Received: from mail-bn1bon0089.outbound.protection.outlook.com ([157.56.111.89]:38648
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1754076AbbDHQMa (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 8 Apr 2015 12:12:30 -0400
+In-Reply-To: <CABYiri_ihguSripu=gs-MA7Qr8GRDk7H5hw5BNKf-9OSFu1z8g@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, ceph-announce@lists.ceph.com
+To: Andrey Korolyov <andrey@xdel.ru>
+Cc: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi All,
-
-This is a new release of ceph-deploy that includes a new feature for
-Hammer and bugfixes.  ceph-deploy can be installed from the ceph.com
-hosted repos for Firefly, Giant, Hammer, or testing, and is also
-available on PyPI.
-
-ceph-deploy now defaults to installing the Hammer release. If you need
-to install a different release, use the --release flag.
-
-To go along with the Hammer release, ceph-deploy now includes support
-for a drastically simplified deployment for RGW.  See further details
-at [1] and [2].
-
-This release also fixes an issue where keyrings pushed to remote nodes
-ended up with world-readable permissions.
-
-The full changelog can be seen at [3].
-
-Please update!
-
-Cheers,
-
- - Travis
-
-[1] http://ceph.com/docs/master/start/quick-ceph-deploy/#add-an-rgw-instance
-[2] http://ceph.com/ceph-deploy/docs/rgw.html
-[3] http://ceph.com/ceph-deploy/docs/changelog.html#id2
+SSB1c2VkIHRoZSBkZWZhdWx0IFRDUCBzZXR0aW5nIGluIFVidW50dSAxNC4wNC4NCg0KLS0tLS1P
+cmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IEFuZHJleSBLb3JvbHlvdiBbbWFpbHRvOmFuZHJl
+eUB4ZGVsLnJ1XQ0KU2VudDogV2VkbmVzZGF5LCBBcHJpbCAwOCwgMjAxNSAxOjI4IEFNDQpUbzog
+U29tbmF0aCBSb3kNCkNjOiBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tOyBjZXBoLWRldmVsDQpT
+dWJqZWN0OiBSZTogUHJlbGltaW5hcnkgUkRNQSB2cyBUQ1AgbnVtYmVycw0KDQpPbiBXZWQsIEFw
+ciA4LCAyMDE1IGF0IDExOjE3IEFNLCBTb21uYXRoIFJveSA8U29tbmF0aC5Sb3lAc2FuZGlzay5j
+b20+IHdyb3RlOg0KPg0KPiBIaSwNCj4gUGxlYXNlIGZpbmQgdGhlIHByZWxpbWluYXJ5IHBlcmZv
+cm1hbmNlIG51bWJlcnMgb2YgVENQIFZzIFJETUEgKFhJTykgaW1wbGVtZW50YXRpb24gKG9uIHRv
+cCBvZiBTU0RzKSBpbiB0aGUgZm9sbG93aW5nIGxpbmsuDQo+DQo+IGh0dHA6Ly93d3cuc2xpZGVz
+aGFyZS5uZXQvc29tbmF0aHJveTc1NjgvY2VwaC1vbi1yZG1hDQo+DQo+IFRoZSBhdHRhY2htZW50
+IGRpZG4ndCBnbyB0aHJvdWdoIGl0IHNlZW1zLCBzbywgSSBoYWQgdG8gdXNlIHNsaWRlc2hhcmUu
+DQo+DQo+IE1hcmssDQo+IElmIHdlIGhhdmUgdGltZSwgSSBjYW4gcHJlc2VudCBpdCBpbiB0b21v
+cnJvdydzIHBlcmZvcm1hbmNlIG1lZXRpbmcuDQo+DQo+IFRoYW5rcyAmIFJlZ2FyZHMNCj4gU29t
+bmF0aA0KPg0KDQpUaG9zZSBudW1iZXJzIGFyZSByZWFsbHkgaW1wcmVzc2l2ZSAoZm9yIHNtYWxs
+IG51bWJlcnMgYXQgbGVhc3QpISBXaGF0IGFyZSBUQ1Agc2V0dGluZ3MgeW91IHVzaW5nP0ZvciBl
+eGFtcGxlLCBkaWZmZXJlbmNlIGNhbiBiZSBsb3dlcmVkIG9uIHNjYWxlIGR1ZSB0byBsZXNzIGlu
+dGVuc2l2ZSBwZXItY29ubmVjdGlvbiBhY2NlbGVyYXRpb24gb24gQ1VCSUMgb24gYSBsYXJnZXIg
+bnVtYmVyIG9mIG5vZGVzLCB0aG91Z2ggSSBkbyBub3QgYmVsaWV2ZSB0aGF0IGl0IHdhcyBhIG1h
+aW4gcmVhc29uIGZvciBhbiBvYnNlcnZlZCBUQ1AgY2F0Y2h1cCBvbiBhIHJlbGF0aXZlbHkgZmxh
+dCB3b3JrbG9hZCBzdWNoIGFzIGZpbyBnZW5lcmF0ZXMuDQoNCl9fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fDQoNClBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGlu
+IHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVz
+ZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFk
+ZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJl
+IGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBl
+cnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9y
+IGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBo
+YXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0
+aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlh
+dGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlv
+dXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9y
+ZWQgY29waWVzKS4NCg0K
