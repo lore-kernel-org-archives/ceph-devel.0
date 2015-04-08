@@ -1,198 +1,412 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Initial newstore vs filestore results
-Date: Wed, 8 Apr 2015 10:38:31 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1504081034531.4469@cobra.newdream.net>
-References: <5523F069.3000400@redhat.com> <55242D15.8080800@redhat.com> <55248856.1010808@redhat.com> <alpine.DEB.2.00.1504071951120.4469@cobra.newdream.net> <CACJqLyY+tqNxAv+kLMQNgb_iWWW=jArz2k-KOTcTjfui=kRCtQ@mail.gmail.com> <alpine.DEB.2.00.1504080942440.4469@cobra.newdream.net>
- <CAC6JEv83BeQR8i50nZ0Y7Qyf68OyBaWR9PhNLyXq35BfF5BO4w@mail.gmail.com>
+From: Andrei Mikhailovsky <andrei-930XJYlnu5nQT0dZR+AlfA@public.gmane.org>
+Subject: Re: Preliminary RDMA vs TCP numbers
+Date: Wed, 8 Apr 2015 19:16:40 +0100 (BST)
+Message-ID: <13289231.842.1428516917655.JavaMail.andrei@tuchka>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD75D78@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CABYiri_ihguSripu=gs-MA7Qr8GRDk7H5hw5BNKf-9OSFu1z8g@mail.gmail.com>
+	<6442513.754.1428484840531.JavaMail.andrei@tuchka>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F2CD761B4@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:40219 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754331AbbDHRib (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Apr 2015 13:38:31 -0400
-In-Reply-To: <CAC6JEv83BeQR8i50nZ0Y7Qyf68OyBaWR9PhNLyXq35BfF5BO4w@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@gregs42.com>
-Cc: Haomai Wang <haomaiwang@gmail.com>, Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: multipart/mixed; boundary="===============0112480069=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD761B4-cXZ6iGhjG0il5HHZYNR2WTJ2aSJ780jGSxCzGc5ayCJWk0Htik3J/w@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>
+Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Wed, 8 Apr 2015, Gregory Farnum wrote:
-> On Wed, Apr 8, 2015 at 9:49 AM, Sage Weil <sage@newdream.net> wrote:
-> > On Wed, 8 Apr 2015, Haomai Wang wrote:
-> >> On Wed, Apr 8, 2015 at 10:58 AM, Sage Weil <sage@newdream.net> wrote:
-> >> > On Tue, 7 Apr 2015, Mark Nelson wrote:
-> >> >> On 04/07/2015 02:16 PM, Mark Nelson wrote:
-> >> >> > On 04/07/2015 09:57 AM, Mark Nelson wrote:
-> >> >> > > Hi Guys,
-> >> >> > >
-> >> >> > > I ran some quick tests on Sage's newstore branch.  So far given that
-> >> >> > > this is a prototype, things are looking pretty good imho.  The 4MB
-> >> >> > > object rados bench read/write and small read performance looks
-> >> >> > > especially good.  Keep in mind that this is not using the SSD journals
-> >> >> > > in any way, so 640MB/s sequential writes is actually really good
-> >> >> > > compared to filestore without SSD journals.
-> >> >> > >
-> >> >> > > small write performance appears to be fairly bad, especially in the RBD
-> >> >> > > case where it's small writes to larger objects.  I'm going to sit down
-> >> >> > > and see if I can figure out what's going on.  It's bad enough that I
-> >> >> > > suspect there's just something odd going on.
-> >> >> > >
-> >> >> > > Mark
-> >> >> >
-> >> >> > Seekwatcher/blktrace graphs of a 4 OSD cluster using newstore for those
-> >> >> > interested:
-> >> >> >
-> >> >> > http://nhm.ceph.com/newstore/
-> >> >> >
-> >> >> > Interestingly small object write/read performance with 4 OSDs was about
-> >> >> > 1/3-1/4 the speed of the same cluster with 36 OSDs.
-> >> >> >
-> >> >> > Note: Thanks Dan for fixing the directory column width!
-> >> >> >
-> >> >> > Mark
-> >> >>
-> >> >> New fio/librbd results using Sage's latest code that attempts to keep small
-> >> >> overwrite extents in the db.  This is 4 OSD so not directly comparable to the
-> >> >> 36 OSD tests above, but does include seekwatcher graphs.  Results in MB/s:
-> >> >>
-> >> >>       write   read    randw   randr
-> >> >> 4MB   57.9    319.6   55.2    285.9
-> >> >> 128KB 2.5     230.6   2.4     125.4
-> >> >> 4KB   0.46    55.65   1.11    3.56
-> >> >
-> >> > What would be very interesting would be to see the 4KB performance
-> >> > with the defaults (newstore overlay max = 32) vs overlays disabled
-> >> > (newstore overlay max = 0) and see if/how much it is helping.
-> >> >
-> >> > The latest branch also has open-by-handle.  It's on by default (newstore
-> >> > open by handle = true).  I think for most workloads it won't be very
-> >> > noticeable... I think there are two questions we need to answer though:
-> >> >
-> >> > 1) Does it have any impact on a creation workload (say, 4kb objects).  It
-> >> > shouldn't, but we should confirm.
-> >> >
-> >> > 2) Does it impact small object random reads with a cold cache.  I think to
-> >> > see the effect we'll probably need to pile a ton of objects into the
-> >> > store, drop caches, and then do random reads.  In the best case the
-> >> > effect will be small, but hopefully noticeable: we should go from
-> >> > a directory lookup (1+ seeks) + inode lookup (1+ seek) + data
-> >> > read, to inode lookup (1+ seek) + data read.  So, 3 -> 2 seeks best case?
-> >> > I'm not really sure what XFS is doing under the covers here..
-> >>
-> >> WOW, it's really a cool implementation beyond my original mind
-> >> according to blueprint. Handler, overlay_map and data_map looks so
-> >> flexible and make small io cheaper in theory. Now we only have 1
-> >> element in data_map and I'm not sure your goal about the future's
-> >> usage. Although I have a unclearly idea that it could enhance the role
-> >> of NewStore and make local filesystem just as a block space allocator.
-> >> Let NewStore own a variable of FTL(File Translation Layer), so many
-> >> cool features could be added. What's your idea about data_map?
-> >
-> > Exactly, that is one option.  The other is that we'd treat the data_map
-> > similar to overlay_map with a fixed or max extent size so that a large
-> > partial overwrite will mostly go to a new file instead of doing the
-> > slow WAL.
-> >
-> >> My concern currently still is WAL after fsync and kv commiting, maybe
-> >> fsync process is just fine because mostly we won't meet this case in
-> >> rbd. But submit sync kv transaction isn't a low latency job I think,
-> >> maybe we could let WAL parallel with kv commiting?(yes, I really
-> >> concern the latency of one op :-) )
-> >
-> > The WAL has to come after kv commit.  But the fsync after the wal
-> > completion sucks, especially since we are always dispatching a single
-> > fsync at a time so it's kind of worst-case seek behavior.  We could throw
-> > these into another parallel fsync queue so that the fs can batch them up,
-> > but I'm not sure we will enough parallelism.  What would really be nice is
-> > a batch fsync syscall, but in leiu of that maybe we wait until we have a
-> > bunch of fsyncs pending and then throw them at the kernel together in a
-> > bunch of threads?  Not sure.  These aren't normally time sensitive
-> > unless a read comes along (which is pretty rare), but they have to be done
-> > for correctness.
+--===============0112480069==
+Content-Type: multipart/alternative;
+	boundary="----=_Part_841_28200728.1428516917654"
+
+------=_Part_841_28200728.1428516917654
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+
+Somnath, 
+
+Sounds very promising! I can't wait to try it on my cluster as I am currently using IPOIB instread of the native rdma. 
+
+Cheers 
+
+Andrei 
+
+----- Original Message -----
+
+> From: "Somnath Roy" <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>
+> To: "Andrei Mikhailovsky" <andrei-930XJYlnu5nQT0dZR+AlfA@public.gmane.org>, "Andrey Korolyov"
+> <andrey-5vqebrSIFTo@public.gmane.org>
+> Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, "ceph-devel"
+> <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+> Sent: Wednesday, 8 April, 2015 5:23:23 PM
+> Subject: RE: [ceph-users] Preliminary RDMA vs TCP numbers
+
+> Andrei,
+> Yes, I see it has lot of potential and I believe fixing the
+> performance bottlenecks inside XIO messenger it should go further.
+> We are working on it and will keep community posted..
+
+> Thanks & Regards
+> Somnath
+
+> From: Andrei Mikhailovsky [mailto:andrei-930XJYlnu5nQT0dZR+AlfA@public.gmane.org]
+> Sent: Wednesday, April 08, 2015 2:22 AM
+> To: Andrey Korolyov
+> Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org; ceph-devel; Somnath Roy
+> Subject: Re: [ceph-users] Preliminary RDMA vs TCP numbers
+
+> Hi,
+
+> Am I the only person noticing disappointing results from the
+> preliminary RDMA testing, or am I reading the numbers wrong?
+
+> Yes, it's true that on a very small cluster you do see a great
+> improvement in rdma, but in real life rdma is used in large
+> infrastructure projects, not on a few servers with a handful of
+> osds. In fact, from what i've seen from the slides, the rdma
+> implementation scales horribly to the point that it becomes slower
+> the more osds you through at it.
+
+> From my limited knowledge, i have expected a much higher performance
+> gains with rdma, taking into account that you should have much lower
+> latency and overhead and lower cpu utilisation when using this
+> transport in comparison with tcp.
+
+> Are we likely to see a great deal of improvement with ceph and rdma
+> in a near future? Is there a roadmap for having a stable and
+> reliable rdma protocol support?
+
+> Thanks
+
+> Andrei
+> ----- Original Message -----
+
+> > From: "Andrey Korolyov" < andrey-5vqebrSIFTo@public.gmane.org >
 > 
-> Couldn't we write both the log entry and the data in parallel and only
-> acknowledge to the client once both commit?
-> If we replay the log without the data we'll know it didn't get
-> committed, and we can collect the data after replay if it's not
-> referenced by the log (I'm speculating, as I haven't looked at the
-> code or how it's actually choosing names).
-
-We're only doing WAL for things where we need atomicity, like a partial 
-overwrite.  In that case, we need to avoid clobbering old state until we 
-the new transaction in its entirety.  I'm not sure we can get around 
-those...
-
-There are times when we can avoid it, though, mainly with creation of new 
-objects and with appends.  In both of those cases we write directly to the 
-file, fsync, and then commit the kv transaction.  I guess we could do 
-something clever there and roll-back the transaction if we find that the 
-backing file doesn't have what we expected it to.  I'm worried that will 
-turn out to be really complex, though: we'd need to roll back the kv 
-transaction, including any other changes it made (creating, 
-deleting, or updating other k/v pairs), *and* any later transactions on 
-the same sequencer.
-
-s
-
-
-> -Greg
+> > To: "Somnath Roy" < Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org >
 > 
-> >
-> >> Then from the actual rados write op, it will add setattr and
-> >> omap_setkeys ops. Current NewStore looks plays badly for setattr. It
-> >> always encode all xattrs(and other not so tiny fields) and write again
-> >> (Is this true?) though it could batch multi transaction's onode write
-> >> in short time.
-> >
-> > Yeah, this could be optimized so that we only unpack and repack the
-> > bufferlist, or do a single walk through the buffer to do the updates
-> > (similar to what TMAP used to do).
-> >
-> >> NewStore also employ much more workload to KeyValueDB compared to
-> >> FileStore, so maybe we need to consider the rich workload again
-> >> compared before. FileStore only use leveldb just for write workload
-> >> mainly so leveldb could fit into greatly, but currently overlay
-> >> keys(read) and onode(read) will occur a main latency source in normal
-> >> IO I think. The default kvdb like leveldb and rocksdb both plays not
-> >> well for random read workload, it maybe will be problem. Looking for
-> >> another kv db maybe a choice.
-> >
-> > I'm defaulting to rocksdb for now.  We should try LMDB at some point...
-> >
-> >> And it still doesn't add journal codes for wal?
-> >
-> > I'm pretty sure the WAL stuff is all complete?
-> >
-> > Anyway, I think most of the pieces are there, so now it's a matter of
-> > figuring out how well they work for different workloads, then tuning and
-> > optimizing...
-> >
-> >> Anyway, NewStore should cover more workloads compared to FileStore. Good
-> >> job!
-> >
-> > Thanks!
-> > sage
-> >
-> >>
-> >> >
-> >> > sage
-> >> > --
-> >> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >> > the body of a message to majordomo@vger.kernel.org
-> >> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>
-> >>
-> >>
-> >> --
-> >> Best Regards,
-> >>
-> >> Wheat
-> >>
-> >>
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org , "ceph-devel" <
+> > ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org >
 > 
+> > Sent: Wednesday, 8 April, 2015 9:28:12 AM
 > 
+> > Subject: Re: [ceph-users] Preliminary RDMA vs TCP numbers
+> 
+
+> > On Wed, Apr 8, 2015 at 11:17 AM, Somnath Roy <
+> > Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org > wrote:
+> 
+> > >
+> 
+> > > Hi,
+> 
+> > > Please find the preliminary performance numbers of TCP Vs RDMA
+> > > (XIO) implementation (on top of SSDs) in the following link.
+> 
+> > >
+> 
+> > > http://www.slideshare.net/somnathroy7568/ceph-on-rdma
+> 
+> > >
+> 
+> > > The attachment didn't go through it seems, so, I had to use
+> > > slideshare.
+> 
+> > >
+> 
+> > > Mark,
+> 
+> > > If we have time, I can present it in tomorrow's performance
+> > > meeting.
+> 
+> > >
+> 
+> > > Thanks & Regards
+> 
+> > > Somnath
+> 
+> > >
+> 
+
+> > Those numbers are really impressive (for small numbers at least)!
+> > What
+> 
+> > are TCP settings you using?For example, difference can be lowered
+> > on
+> 
+> > scale due to less intensive per-connection acceleration on CUBIC on
+> > a
+> 
+> > larger number of nodes, though I do not believe that it was a main
+> 
+> > reason for an observed TCP catchup on a relatively flat workload
+> > such
+> 
+> > as fio generates.
+> 
+> > _______________________________________________
+> 
+> > ceph-users mailing list
+> 
+> > ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> 
+> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> 
+> PLEASE NOTE: The information contained in this electronic mail
+> message is intended only for the use of the designated recipient(s)
+> named above. If the reader of this message is not the intended
+> recipient, you are hereby notified that you have received this
+> message in error and that any review, dissemination, distribution,
+> or copying of this message is strictly prohibited. If you have
+> received this communication in error, please notify the sender by
+> telephone or e-mail (as shown above) immediately and destroy any and
+> all copies of this message in your possession (whether hard copies
+> or electronically stored copies).
+
+------=_Part_841_28200728.1428516917654
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+<html><head><style type=3D'text/css'>p { margin: 0; }</style></head><body><=
+div style=3D'font-family: arial,helvetica,sans-serif; font-size: 10pt; colo=
+r: #000000'>Somnath,<br><br>Sounds very promising! I can't wait to try it o=
+n my cluster as I am currently using IPOIB instread of the native rdma.<br>=
+<br>Cheers<br><br>Andrei<br><br><div><br></div><br><hr id=3D"zwchr"><blockq=
+uote style=3D"border-left: 2px solid rgb(16, 16, 255); margin-left: 5px; pa=
+dding-left: 5px; color: rgb(0, 0, 0); font-weight: normal; font-style: norm=
+al; text-decoration: none; font-family: Helvetica,Arial,sans-serif; font-si=
+ze: 12pt;"><b>From: </b>"Somnath Roy" &lt;Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org&gt;<br><b=
+>To: </b>"Andrei Mikhailovsky" &lt;andrei-930XJYlnu5nQT0dZR+AlfA@public.gmane.org&gt;, "Andrey Korolyov"=
+ &lt;andrey-5vqebrSIFTo@public.gmane.org&gt;<br><b>Cc: </b>ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, "ceph-deve=
+l" &lt;ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org&gt;<br><b>Sent: </b>Wednesday, 8 April, 2=
+015 5:23:23 PM<br><b>Subject: </b>RE: [ceph-users] Preliminary RDMA vs TCP =
+numbers<br><br>
+
+
+
+<style><!--
+
+@font-face
+=09{font-family:Helvetica;
+=09panose-1:2 11 6 4 2 2 2 2 2 4;}
+@font-face
+=09{font-family:Helvetica;
+=09panose-1:2 11 6 4 2 2 2 2 2 4;}
+@font-face
+=09{font-family:Calibri;
+=09panose-1:2 15 5 2 2 2 4 3 2 4;}
+@font-face
+=09{font-family:Tahoma;
+=09panose-1:2 11 6 4 3 5 4 4 2 4;}
+
+p.MsoNormal, li.MsoNormal, div.MsoNormal
+=09{margin:0in;
+=09margin-bottom:.0001pt;
+=09font-size:12.0pt;
+=09font-family:"Times New Roman","serif";}
+a:link, span.MsoHyperlink
+=09{mso-style-priority:99;
+=09color:blue;
+=09text-decoration:underline;}
+a:visited, span.MsoHyperlinkFollowed
+=09{mso-style-priority:99;
+=09color:purple;
+=09text-decoration:underline;}
+p
+=09{mso-style-priority:99;
+=09margin:0in;
+=09margin-bottom:.0001pt;
+=09font-size:12.0pt;
+=09font-family:"Times New Roman","serif";}
+p.MsoAcetate, li.MsoAcetate, div.MsoAcetate
+=09{mso-style-priority:99;
+=09mso-style-link:"Balloon Text Char";
+=09margin:0in;
+=09margin-bottom:.0001pt;
+=09font-size:8.0pt;
+=09font-family:"Tahoma","sans-serif";}
+span.EmailStyle18
+=09{mso-style-type:personal-reply;
+=09font-family:"Calibri","sans-serif";
+=09color:#1F497D;}
+span.BalloonTextChar
+=09{mso-style-name:"Balloon Text Char";
+=09mso-style-priority:99;
+=09mso-style-link:"Balloon Text";
+=09font-family:"Tahoma","sans-serif";}
+.MsoChpDefault
+=09{mso-style-type:export-only;
+=09font-size:10.0pt;}
+@page WordSection1
+=09{size:8.5in 11.0in;
+=09margin:1.0in 1.0in 1.0in 1.0in;}
+div.WordSection1
+=09{page:WordSection1;}
+--></style>
+
+<div class=3D"WordSection1">
+<p class=3D"MsoNormal"><span style=3D"font-size: 11pt; font-family: &quot;C=
+alibri&quot;,&quot;sans-serif&quot;; color: rgb(31, 73, 125);">Andrei,</spa=
+n></p>
+<p class=3D"MsoNormal"><span style=3D"font-size: 11pt; font-family: &quot;C=
+alibri&quot;,&quot;sans-serif&quot;; color: rgb(31, 73, 125);">Yes, I see i=
+t has lot of potential and I believe fixing the performance bottlenecks ins=
+ide XIO messenger it should go further.</span></p>
+<p class=3D"MsoNormal"><span style=3D"font-size: 11pt; font-family: &quot;C=
+alibri&quot;,&quot;sans-serif&quot;; color: rgb(31, 73, 125);">We are worki=
+ng on it and will keep community posted..</span></p>
+<p class=3D"MsoNormal"><span style=3D"font-size: 11pt; font-family: &quot;C=
+alibri&quot;,&quot;sans-serif&quot;; color: rgb(31, 73, 125);">&nbsp;</span=
+></p>
+<p class=3D"MsoNormal"><span style=3D"font-size: 11pt; font-family: &quot;C=
+alibri&quot;,&quot;sans-serif&quot;; color: rgb(31, 73, 125);">Thanks &amp;=
+ Regards</span></p>
+<p class=3D"MsoNormal"><span style=3D"font-size: 11pt; font-family: &quot;C=
+alibri&quot;,&quot;sans-serif&quot;; color: rgb(31, 73, 125);">Somnath</spa=
+n></p>
+<p class=3D"MsoNormal"><span style=3D"font-size: 11pt; font-family: &quot;C=
+alibri&quot;,&quot;sans-serif&quot;; color: rgb(31, 73, 125);">&nbsp;</span=
+></p>
+<div>
+<div style=3D"border-right: medium none; border-width: 1pt medium medium; b=
+order-style: solid none none; border-color: rgb(181, 196, 223) -moz-use-tex=
+t-color -moz-use-text-color; padding: 3pt 0in 0in;">
+<p class=3D"MsoNormal"><b><span style=3D"font-size: 10pt; font-family: &quo=
+t;Tahoma&quot;,&quot;sans-serif&quot;;">From:</span></b><span style=3D"font=
+-size: 10pt; font-family: &quot;Tahoma&quot;,&quot;sans-serif&quot;;"> Andr=
+ei Mikhailovsky [mailto:andrei-930XJYlnu5nQT0dZR+AlfA@public.gmane.org]
+<br>
+<b>Sent:</b> Wednesday, April 08, 2015 2:22 AM<br>
+<b>To:</b> Andrey Korolyov<br>
+<b>Cc:</b> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org; ceph-devel; Somnath Roy<br>
+<b>Subject:</b> Re: [ceph-users] Preliminary RDMA vs TCP numbers</span></p>
+</div>
+</div>
+<p class=3D"MsoNormal">&nbsp;</p>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-size: 10pt; font-family: &quot;A=
+rial&quot;,&quot;sans-serif&quot;; color: black;">Hi,<br>
+<br>
+Am I the only person noticing disappointing results from the preliminary RD=
+MA testing, or am I reading the numbers wrong?
+<br>
+<br>
+Yes, it's true that on a very small cluster you do see a great improvement =
+in rdma, but in real life rdma is used in large infrastructure projects, no=
+t on a few servers with a handful of osds. In fact, from what i've seen fro=
+m the slides, the rdma implementation
+ scales horribly to the point that it becomes slower the more osds you thro=
+ugh at it.<br>
+<br>
+From my limited knowledge, i have expected a much higher performance gains =
+with rdma, taking into account that you should have much lower latency and =
+overhead and lower cpu utilisation when using this transport in comparison =
+with tcp.<br>
+<br>
+Are we likely to see a great deal of improvement with ceph and rdma in a ne=
+ar future? Is there a roadmap for having a stable and reliable rdma protoco=
+l support?<br>
+<br>
+Thanks<br>
+<br>
+Andrei</span></p>
+<div class=3D"MsoNormal" style=3D"text-align: center;" align=3D"center"><sp=
+an style=3D"font-size: 10pt; font-family: &quot;Arial&quot;,&quot;sans-seri=
+f&quot;; color: black;">
+<hr id=3D"zwchr" align=3D"center" size=3D"2" width=3D"100%">
+</span></div>
+<blockquote style=3D"border-width: medium medium medium 1.5pt; border-style=
+: none none none solid; border-color: -moz-use-text-color -moz-use-text-col=
+or -moz-use-text-color rgb(16, 16, 255); padding: 0in 0in 0in 4pt; margin-l=
+eft: 3.75pt; margin-top: 5pt; margin-bottom: 5pt;">
+<p class=3D"MsoNormal"><b><span style=3D"font-family: &quot;Helvetica&quot;=
+,&quot;sans-serif&quot;; color: black;">From:
+</span></b><span style=3D"font-family: &quot;Helvetica&quot;,&quot;sans-ser=
+if&quot;; color: black;">"Andrey Korolyov" &lt;<a href=3D"mailto:andrey@xde=
+l.ru" target=3D"_blank">andrey-5vqebrSIFTo@public.gmane.org</a>&gt;<br>
+<b>To: </b>"Somnath Roy" &lt;<a href=3D"mailto:Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org" tar=
+get=3D"_blank">Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org</a>&gt;<br>
+<b>Cc: </b><a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" target=3D"_blank">c=
+eph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a>, "ceph-devel" &lt;<a href=3D"mailto:ceph-devel=
+@vger.kernel.org" target=3D"_blank">ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org</a>&gt;<br>
+<b>Sent: </b>Wednesday, 8 April, 2015 9:28:12 AM<br>
+<b>Subject: </b>Re: [ceph-users] Preliminary RDMA vs TCP numbers<br>
+<br>
+On Wed, Apr 8, 2015 at 11:17 AM, Somnath Roy &lt;<a href=3D"mailto:Somnath.=
+Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org" target=3D"_blank">Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org</a>&gt; wrote:<b=
+r>
+&gt;<br>
+&gt; Hi,<br>
+&gt; Please find the preliminary performance numbers of TCP Vs RDMA (XIO) i=
+mplementation (on top of SSDs) in the following link.<br>
+&gt;<br>
+&gt; <a href=3D"http://www.slideshare.net/somnathroy7568/ceph-on-rdma" targ=
+et=3D"_blank">http://www.slideshare.net/somnathroy7568/ceph-on-rdma</a><br>
+&gt;<br>
+&gt; The attachment didn't go through it seems, so, I had to use slideshare=
+.<br>
+&gt;<br>
+&gt; Mark,<br>
+&gt; If we have time, I can present it in tomorrow's performance meeting.<b=
+r>
+&gt;<br>
+&gt; Thanks &amp; Regards<br>
+&gt; Somnath<br>
+&gt;<br>
+<br>
+Those numbers are really impressive (for small numbers at least)! What<br>
+are TCP settings you using?For example, difference can be lowered on<br>
+scale due to less intensive per-connection acceleration on CUBIC on a<br>
+larger number of nodes, though I do not believe that it was a main<br>
+reason for an observed TCP catchup on a relatively flat workload such<br>
+as fio generates.<br>
+_______________________________________________<br>
+ceph-users mailing list<br>
+<a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" target=3D"_blank">ceph-users@l=
+ists.ceph.com</a><br>
+<a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" target=
+=3D"_blank">http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com</a></spa=
+n></p>
+</blockquote>
+<p class=3D"MsoNormal"><span style=3D"font-size: 10pt; font-family: &quot;A=
+rial&quot;,&quot;sans-serif&quot;; color: black;">&nbsp;</span></p>
+</div>
+</div>
+<br>
+<hr>
+<font color=3D"Gray" face=3D"Arial" size=3D"2"><br>
+PLEASE NOTE: The information contained in this electronic mail message is i=
+ntended only for the use of the designated recipient(s) named above. If the=
+ reader of this message is not the intended recipient, you are hereby notif=
+ied that you have received this
+ message in error and that any review, dissemination, distribution, or copy=
+ing of this message is strictly prohibited. If you have received this commu=
+nication in error, please notify the sender by telephone or e-mail (as show=
+n above) immediately and destroy
+ any and all copies of this message in your possession (whether hard copies=
+ or electronically stored copies).<br>
+<br>
+</font>
+</blockquote><br></div></body></html>
+------=_Part_841_28200728.1428516917654--
+
+--===============0112480069==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============0112480069==--
