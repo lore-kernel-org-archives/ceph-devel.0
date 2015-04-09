@@ -1,103 +1,65 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: Initial newstore vs filestore results
-Date: Wed, 08 Apr 2015 22:19:40 -0500
-Message-ID: <5525EFCC.3070607@redhat.com>
-References: <5523F069.3000400@redhat.com> <55242D15.8080800@redhat.com> <55248856.1010808@redhat.com> <alpine.DEB.2.00.1504071951120.4469@cobra.newdream.net>
+From: James Page <james.page@ubuntu.com>
+Subject: Re: tcmalloc issue
+Date: Thu, 09 Apr 2015 06:59:04 +0100
+Message-ID: <55261528.7040607@ubuntu.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CAD14A@SACMBXIP01.sdcorp.global.sandisk.com> <alpine.DEB.2.00.1503261646150.31431@cobra.newdream.net> <551C1514.3060607@ubuntu.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F28CB8270@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:54438 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753139AbbDIDTn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 8 Apr 2015 23:19:43 -0400
-In-Reply-To: <alpine.DEB.2.00.1504071951120.4469@cobra.newdream.net>
+Received: from youngberry.canonical.com ([91.189.89.112]:36940 "EHLO
+	youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751142AbbDIF7G (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Apr 2015 01:59:06 -0400
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CB8270@SACMBXIP01.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>, Sage Weil <sage@newdream.net>, "ceph-maintainers@ceph.com" <ceph-maintainers@ceph.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 04/07/2015 09:58 PM, Sage Weil wrote:
-> On Tue, 7 Apr 2015, Mark Nelson wrote:
->> On 04/07/2015 02:16 PM, Mark Nelson wrote:
->>> On 04/07/2015 09:57 AM, Mark Nelson wrote:
->>>> Hi Guys,
->>>>
->>>> I ran some quick tests on Sage's newstore branch.  So far given that
->>>> this is a prototype, things are looking pretty good imho.  The 4MB
->>>> object rados bench read/write and small read performance looks
->>>> especially good.  Keep in mind that this is not using the SSD journals
->>>> in any way, so 640MB/s sequential writes is actually really good
->>>> compared to filestore without SSD journals.
->>>>
->>>> small write performance appears to be fairly bad, especially in the RBD
->>>> case where it's small writes to larger objects.  I'm going to sit down
->>>> and see if I can figure out what's going on.  It's bad enough that I
->>>> suspect there's just something odd going on.
->>>>
->>>> Mark
->>>
->>> Seekwatcher/blktrace graphs of a 4 OSD cluster using newstore for those
->>> interested:
->>>
->>> http://nhm.ceph.com/newstore/
->>>
->>> Interestingly small object write/read performance with 4 OSDs was about
->>> 1/3-1/4 the speed of the same cluster with 36 OSDs.
->>>
->>> Note: Thanks Dan for fixing the directory column width!
->>>
->>> Mark
->>
->> New fio/librbd results using Sage's latest code that attempts to keep small
->> overwrite extents in the db.  This is 4 OSD so not directly comparable to the
->> 36 OSD tests above, but does include seekwatcher graphs.  Results in MB/s:
->>
->> 	write	read	randw	randr
->> 4MB	57.9	319.6	55.2	285.9
->> 128KB	2.5	230.6	2.4	125.4
->> 4KB	0.46	55.65	1.11	3.56
->
-> What would be very interesting would be to see the 4KB performance
-> with the defaults (newstore overlay max = 32) vs overlays disabled
-> (newstore overlay max = 0) and see if/how much it is helping.
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
 
-And here we go.  1 OSD, 1X replication.  16GB RBD volume.
+On 01/04/15 18:54, Somnath Roy wrote:
+> the tcmalloc bug is reported in the following link.
+> 
+> http://code.google.com/p/gperftools/issues/detail?id=585
+> 
+> So, do you want us to give the steps on how we are hitting the
+> following trace or to reproduce the bug reported in the above link
+> ?
+> 
+> If you are asking about hitting the stack trace I mentioned below,
+> it is just running ceph with lot of IOs for longer period of time.
 
-4MB		write	read	randw	randr
-default overlay	36.13	106.61	34.49	92.69
-no overlay	36.29	105.61	34.49	93.55
-				
-128KB		write	read	randw	randr
-default overlay	1.71	97.90	1.65	25.79
-no overlay	1.72	97.80	1.66	25.78
-				
-4KB		write	read	randw	randr
-default overlay	0.40	61.88	1.29	1.11
-no overlay	0.05	61.26	0.05	1.10
+A minimal test case on how to reproduce the bug is sufficient; we can
+of course complete the second activity as well as soon as we have the
+update available.
 
-seekwatcher movies generating now, but I'm going to bed soon so I'll 
-have to wait until tomorrow morning to post them. :)
+Cheers
 
->
-> The latest branch also has open-by-handle.  It's on by default (newstore
-> open by handle = true).  I think for most workloads it won't be very
-> noticeable... I think there are two questions we need to answer though:
->
-> 1) Does it have any impact on a creation workload (say, 4kb objects).  It
-> shouldn't, but we should confirm.
->
-> 2) Does it impact small object random reads with a cold cache.  I think to
-> see the effect we'll probably need to pile a ton of objects into the
-> store, drop caches, and then do random reads.  In the best case the
-> effect will be small, but hopefully noticeable: we should go from
-> a directory lookup (1+ seeks) + inode lookup (1+ seek) + data
-> read, to inode lookup (1+ seek) + data read.  So, 3 -> 2 seeks best case?
-> I'm not really sure what XFS is doing under the covers here...
->
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+James
+
+
+- -- 
+James Page
+Ubuntu and Debian Developer
+james.page@ubuntu.com
+jamespage@debian.org
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
+
+iQIcBAEBCAAGBQJVJhUoAAoJEL/srsug59jD/WoQAJqZYJ82xcDDxuD5C9RnUXha
+2UtYNXZTK9O1NdiLqsNw14SPKtOQ6IDyfJjvB2v+ddfvRxhlfSM6LmC4ERa0t0SW
+a3tfwx9fQ0WEz2r35nkupHwo+Z4yfTAuHgGom3rH6tq4gbAInn7J+4unsxghV1kf
+op/c9qNJZV9jqfqMZFFgwwptK7rJ4mKJDvGIRU4ddc9HEKnqukJHQAHh3zUlNXC9
+6y11RAHFh0FcgEEHys3o/ui0JVzNjmP8HJXISzyWSqO6J2NxqRNYoKGTk81zBvrf
+IkWDDujCcTQoAU2aW6ERRvG1Dkzc9oTLdcmb0gGCKKpqa1m1GjnqS1B39rjheXio
+HK5L9HO11Fs+9uONBXWvI6P0GXi3UQoe1NaVQB85EL+NPFbTdKr9zw8nOyyqZ9Y5
+X55uVRAscLV/jb1vYIU5JxSNWof4BtPSjQzq29cithPqfWyF2N+eyQbCrAaIu1oP
+QGSnryCsoWDARyvjMIFxcsd2X6nFnOd9DMgumi6O1ksKAe1P38k1iUWFwXXutby6
+6eTdZtOj9Wc4VNRPb8SYBkBSlU+dCgRVMlNUImcCKWR6w8+Y9BbQU7OwQGEzj9Xw
+f9sdi+4JA04l/BXdAtlVwSj4uSm2Q6R/YK4szpRGs24EOV6dX+aCMK5ezBIliPo0
+D/7ZD03rXkiBzHuBqiay
+=066U
+-----END PGP SIGNATURE-----
