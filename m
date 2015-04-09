@@ -1,75 +1,50 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: Initial newstore vs filestore results
-Date: Thu, 09 Apr 2015 12:00:52 -0500
-Message-ID: <5526B044.2090002@redhat.com>
-References: <5523F069.3000400@redhat.com> <55242D15.8080800@redhat.com> <55248856.1010808@redhat.com> <alpine.DEB.2.00.1504071951120.4469@cobra.newdream.net> <5525EFCC.3070607@redhat.com>
+From: "Deneau, Tom" <tom.deneau@amd.com>
+Subject: RE: ms_crc_data false
+Date: Thu, 9 Apr 2015 17:01:28 +0000
+Message-ID: <BC97738F8E7C8742BABED7F06FB9DF9166416E5D@SATLEXDAG01.amd.com>
+References: <BC97738F8E7C8742BABED7F06FB9DF9166416855@SATLEXDAG01.amd.com>
+ <CAC6JEv92Z8JrwHwDbzB9xNpWa+tApJP7dJ6gs1PNzaN5w1UKQg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:44227 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753680AbbDIRAz (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 9 Apr 2015 13:00:55 -0400
-In-Reply-To: <5525EFCC.3070607@redhat.com>
+Received: from mail-bl2on0147.outbound.protection.outlook.com ([65.55.169.147]:20896
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753478AbbDIRBe (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 9 Apr 2015 13:01:34 -0400
+In-Reply-To: <CAC6JEv92Z8JrwHwDbzB9xNpWa+tApJP7dJ6gs1PNzaN5w1UKQg@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
+To: Gregory Farnum <greg@gregs42.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 04/08/2015 10:19 PM, Mark Nelson wrote:
-> On 04/07/2015 09:58 PM, Sage Weil wrote:
->> What would be very interesting would be to see the 4KB performance
->> with the defaults (newstore overlay max = 32) vs overlays disabled
->> (newstore overlay max = 0) and see if/how much it is helping.
->
-> And here we go.  1 OSD, 1X replication.  16GB RBD volume.
->
-> 4MB        write    read    randw    randr
-> default overlay    36.13    106.61    34.49    92.69
-> no overlay    36.29    105.61    34.49    93.55
->
-> 128KB        write    read    randw    randr
-> default overlay    1.71    97.90    1.65    25.79
-> no overlay    1.72    97.80    1.66    25.78
->
-> 4KB        write    read    randw    randr
-> default overlay    0.40    61.88    1.29    1.11
-> no overlay    0.05    61.26    0.05    1.10
->
-
-Update this morning.  Also ran filestore tests for comparison.  Next 
-we'll look at how tweaking the overlay for different IO sizes affects 
-things.  IE the overlay threshold is 64k right now and it appears that 
-128K write IOs for instance are quite a bit worse with newstore 
-currently than with filestore.  Sage also just committed changes that 
-will allow overlay writes during append/create which may help improve 
-small IO write performance as well in some cases.
-
-4MB		write	read	randw	randr
-default overlay	36.13	106.61	34.49	92.69
-no overlay	36.29	105.61	34.49	93.55
-filestore	36.17	84.59	34.11	79.85
-				
-128KB		write	read	randw	randr
-default overlay	1.71	97.90	1.65	25.79
-no overlay	1.72	97.80	1.66	25.78
-filestore	27.15	79.91	8.77	19.00
-				
-4KB		write	read	randw	randr
-default overlay	0.40	61.88	1.29	1.11
-no overlay	0.05	61.26	0.05	1.10
-filestore	4.14	56.30	0.42	0.76
-
-Seekwatcher movies and graphs available here:
-
-http://nhm.ceph.com/newstore/20150408/
-
-Note for instance the very interesting blktrace patterns for 4K random 
-writes on the OSD in each case:
-
-http://nhm.ceph.com/newstore/20150408/filestore/RBD_00004096_randwrite.png
-http://nhm.ceph.com/newstore/20150408/default_overlay/RBD_00004096_randwrite.png
-http://nhm.ceph.com/newstore/20150408/no_overlay/RBD_00004096_randwrite.png
-
-Mark
+DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogR3JlZ29yeSBGYXJudW0g
+W21haWx0bzpncmVnQGdyZWdzNDIuY29tXQ0KPiBTZW50OiBXZWRuZXNkYXksIEFwcmlsIDA4LCAy
+MDE1IDY6MjYgUE0NCj4gVG86IERlbmVhdSwgVG9tDQo+IENjOiBjZXBoLWRldmVsDQo+IFN1Ympl
+Y3Q6IFJlOiBtc19jcmNfZGF0YSBmYWxzZQ0KPiANCj4gT24gV2VkLCBBcHIgOCwgMjAxNSBhdCAz
+OjM4IFBNLCBEZW5lYXUsIFRvbSA8dG9tLmRlbmVhdUBhbWQuY29tPiB3cm90ZToNCj4gPiBXaXRo
+IDAuOTMsIEkgdHJpZWQNCj4gPiAgICAgY2VwaCB0ZWxsICdvc2QuKicgaW5qZWN0YXJncyAnLS1t
+c19jcmNfZGF0YT1mYWxzZScgJy0tDQo+IG1zX2NyY19oZWFkZXI9ZmFsc2UnDQo+ID4NCj4gPiBh
+bmQgc2F3IHRoZSBjaGFuZ2VzIHJlZmxlY3RlZCBpbiBjZXBoIGFkbWluLWRhZW1vbg0KPiA+DQo+
+ID4gQnV0IGhhdmluZyBkb25lIHRoYXQsIHBlcmYgdG9wIHN0aWxsIHNob3dzIHRpbWUgYmVpbmcg
+c3BlbnQgaW4gY3JjMzINCj4gcm91dGluZXMuDQo+ID4gSXMgdGhlcmUgc29tZSBvdGhlciBwYXJh
+bWV0ZXIgdGhhdCBuZWVkcyBjaGFuZ2luZz8NCj4gDQo+IFlvdSBjYW4gY2hhbmdlIHRoaXMgY29u
+ZmlnIHZhbHVlLCBidXQgdW5mb3J0dW5hdGVseSBpdCB3b24ndCBoYXZlIGFueSBlZmZlY3QNCj4g
+b24gYSBydW5uaW5nIGRhZW1vbi4gWW91J2xsIG5lZWQgdG8gc3BlY2lmeSBpdCBpbiBhIGNvbmZp
+ZyBhbmQgcmVzdGFydC4NCj4gLUdyZWcNCg0KVGhhbmtzLCBHcmVnLg0KDQpIZXJlIGFyZSBzb21l
+IG9ic2VydmF0aW9ucyBvbiBteSBzaW5nbGUgbm9kZSBzeXN0ZW0gDQphZnRlciBjaGFuZ2luZyB0
+aGUgY2VwaC5jb25mIGFuZCByZXN0YXJ0aW5nIGFsbCBkYWVtb25zLi4uDQoNCmxvb3AgcmFkb3Mg
+YmVuY2ggc2VxIHJlYWRpbmcgNE0gb2JqZWN0cyAoMSB0aHJlYWQpIChkcm9wcGluZyBjYWNoZXMg
+YmVmb3JlIGVhY2ggaW52b2NhdGlvbikNCiAgICogQlcgd2VudCB1cCB3aXRoIG1zIGNyYyB4eHgg
+PSBmYWxzZQ0KICAgKiBidXQgc3RpbGwgc2VlIHNpZ25maWNhbnQgY3JjMzIgbGluZSBhdHRyaWJ1
+dGVkIHRvIGNlcGgtb3NkDQogICAgICAqIG5vIHdyaXRlcyBoYXBwZW5pbmcNCiAgICAgICogbm90
+ZTogd2l0aCBtcyBjcmMgeHh4ID0gdHJ1ZSwgdGhlcmUgd2VyZSAyIGNyYzMyIGxpbmVzIGluIHBl
+cmYgdG9wLCB0aGUgMm5kDQogICAgICAgIG9uZSBhdHRyaWJ1dGVkIHRvIGxpYnJhZG9zLCB0aGF0
+IG9uZSBpcyBnb25lIHdpdGggbXMgY3JjIHh4eCA9IGZhbHNlDQoNCmxvb3AgcmFkb3MgZ2V0IHNp
+bmdsZSBsYXJnZU9iamVjdCAoMS42RykgL2Rldi9udWxsIChkcm9wcGluZyBjYWNoZXMgYmVmb3Jl
+IGVhY2ggaW52b2NhdGlvbikNCiAgICogbm8gY2hhbmdlIGluIEJXIGZyb20gbXMgY3JjIHh4eCA9
+IHRydWUNCiAgICogbm8gY3JjMzIgbGluZSBpbiBwZXJmIHRvcA0KICAgICAgKiB3aGVyZWFzIHdp
+dGggbXMgY3JjIHh4eD10cnVlIHRoZXJlIHdlcmUgMiBsaW5lcyBvbmUgZm9yIGNlcGgtb3NkLCBv
+bmUgZm9yIGxpYnJhZG9zDQoNCi0tIFRvbSBEZW5lYXUNCg0KDQoNCg0K
