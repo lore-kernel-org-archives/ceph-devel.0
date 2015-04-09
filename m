@@ -1,83 +1,148 @@
-From: "Duan, Jiangang" <jiangang.duan@intel.com>
-Subject: RE: Call for jenkins slaves to improve multi operating system
- support
-Date: Thu, 9 Apr 2015 10:30:02 +0000
-Message-ID: <A9F57F2ABA6BB2469F01E127557C6C9B112D04C9@SHSMSX104.ccr.corp.intel.com>
-References: <55250954.1010305@dachary.org>
- <A9F57F2ABA6BB2469F01E127557C6C9B112CC572@SHSMSX104.ccr.corp.intel.com>
- <55252DEE.105@dachary.org>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Call for jenkins slaves to improve multi operating system support
+Date: Thu, 09 Apr 2015 14:55:50 +0200
+Message-ID: <552676D6.9040206@dachary.org>
+References: <55250954.1010305@dachary.org> <A9F57F2ABA6BB2469F01E127557C6C9B112CC572@SHSMSX104.ccr.corp.intel.com> <55252DEE.105@dachary.org> <A9F57F2ABA6BB2469F01E127557C6C9B112D04C9@SHSMSX104.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="1aoee67HqILSCGwflULOItv0vmGbp1p11"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:52591 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755034AbbDIKaH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 9 Apr 2015 06:30:07 -0400
-In-Reply-To: <55252DEE.105@dachary.org>
-Content-Language: en-US
+Received: from mail2.dachary.org ([91.121.57.175]:44051 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751613AbbDIM4A (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Apr 2015 08:56:00 -0400
+In-Reply-To: <A9F57F2ABA6BB2469F01E127557C6C9B112D04C9@SHSMSX104.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
+To: "Duan, Jiangang" <jiangang.duan@intel.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-R290IHlvdS4NCkxldCBtZSBzZWUgaWYgd2UgY2FuIGhlbHAgLSBpdCBtYXkgdGFrZSBzb21lIHRp
-bWUgLSB3ZSBoYXZlIHRoZSBzZXJ2ZXJzIGJ1dCBuZWVkIGZpbmQgc29tZSBwZW9wbGUgdG8gc2V0
-IGl0IHVwLiANCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IExvaWMgRGFjaGFy
-eSBbbWFpbHRvOmxvaWNAZGFjaGFyeS5vcmddIA0KU2VudDogV2VkbmVzZGF5LCBBcHJpbCAwOCwg
-MjAxNSA5OjMzIFBNDQpUbzogRHVhbiwgSmlhbmdhbmc7IENlcGggRGV2ZWxvcG1lbnQNClN1Ympl
-Y3Q6IFJlOiBDYWxsIGZvciBqZW5raW5zIHNsYXZlcyB0byBpbXByb3ZlIG11bHRpIG9wZXJhdGlu
-ZyBzeXN0ZW0gc3VwcG9ydA0KDQoNCg0KT24gMDgvMDQvMjAxNSAxNToyMSwgRHVhbiwgSmlhbmdh
-bmcgd3JvdGU6DQo+IExvcmljLA0KPiANCj4gZG8geW91IG1lYW4gd2UgbmVlZCBnaXZlIHRoZSBz
-ZXJ2ZXJzIHRvIHlvdSBvciB3ZSBqdXN0IGJ1aWxkIHRoZSB0ZXN0aW5nIGluc2lkZSBvdXIgb3du
-IHNlcnZlciByb29tIHRvIGRvIGFsbCB0aGUgdGVzdGluZz8NCg0KVGhhbmtzIGZvciBhc2tpbmcs
-IEkgcmVhbGl6ZSB0aGF0IHdhcyBub3QgY2xlYXIuIA0KDQpUaGUgaWRlYSBpcyBub3QgdG8gZG9u
-YXRlIGhhcmR3YXJlLCBiZWNhdXNlIHRoYXQgd291bGQgcmVxdWlyZSBtYW5wb3dlciBhbmQgZXh0
-cmEgY29zdHMgdG8gY29ubmVjdCB0byB0aGUgbmV0LiANCg0KV2hhdCB3b3VsZCBiZSB1c2VmdWwg
-aXMgYSBtYWNoaW5lIGNvbm5lY3RlZCB0byB0aGUgbmV0IGFuZCBkZWRpY2F0ZWQgdG8gcnVubmlu
-ZyBhIGplbmtpbnMgc2xhdmUuIEl0IHJlY2VpdmVzIGEgYnVpbGQgZnJvbSB0aGUgamVua2lucyBt
-YXN0ZXIgKGh0dHA6Ly9qZW5raW5zLmNlcGguZGFjaGFyeS5vcmcvKSB2aWEgc3NoIChwb3NzaWJs
-eSB3aXRoIGEgdHVubmVsIGlmIGJlaGluZCBhIE5BVCksIGNsb25lIGh0dHA6Ly9naXRodWIuY29t
-L2NlcGgvY2VwaCwgZXhlY3V0ZSB0aGUgcnVuLW1ha2UtY2hlY2suc2ggc2NyaXB0IHRoYXQgaXMg
-Zm91bmQgYXQgdGhlIHJvb3Qgb2YgdGhlIHJlcG9zaXRvcnkgYW5kIHJlcG9ydHMgZmFpbHVyZSAv
-IHN1Y2Nlc3MgYmFjayB0byB0aGUgamVua2lucyBtYXN0ZXIuDQoNCkRvZXMgdGhhdCBtYWtlIHNl
-bnNlID8NCg0KPiANCj4gLWppYW5nYW5nDQo+IA0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0t
-LQ0KPiBGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgt
-ZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgTG9pYyBEYWNoYXJ5DQo+
-IFNlbnQ6IFdlZG5lc2RheSwgQXByaWwgMDgsIDIwMTUgNjo1NiBQTQ0KPiBUbzogQ2VwaCBEZXZl
-bG9wbWVudA0KPiBTdWJqZWN0OiBDYWxsIGZvciBqZW5raW5zIHNsYXZlcyB0byBpbXByb3ZlIG11
-bHRpIG9wZXJhdGluZyBzeXN0ZW0gc3VwcG9ydA0KPiANCj4gSGkgQ2VwaCwNCj4gDQo+IFdoZW4g
-YSBjb250cmlidXRpb24gaXMgcHJvcG9zZWQgdG8gQ2VwaCBbMV0sIGEgYm90IGNvbXBpbGVzIGFu
-ZCBydW4gdGVzdHMgd2l0aCBpdCB0byBwcm92aWRlIGZlZWRiYWNrIHRvIHRoZSBkZXZlbG9wZXIg
-WzJdLiBXaGVuIHNvbWV0aGluZyBnb2VzIHdyb25nIHRoZSBmYWlsdXJlIGNhbiBiZSByZXBlYXRl
-ZCBvbiB0aGUgZGV2ZWxvcGVyIG1hY2hpbmUgWzNdIGZvciBkZWJ1Zy4gVGhpcyBhbHNvIGhlbHBz
-IHRoZSByZXZpZXdlciB3aG8ga25vd3MgdGhlIGNvZGUgY29tcGlsZXMgYW5kIGRvZXMgbm90IGJy
-ZWFrIGFueXRoaW5nIHRoYXQgd291bGQgYmUgZGV0ZWN0ZWQgYnkgIm1ha2UgY2hlY2siLg0KPiAN
-Cj4gVGhlIGJvdCBydW5zIG9uIENlbnRPUyA3IGFuZCBVYnVudHUgMTQuMDQgb25seSwgYW5kIHBy
-b2JsZW1zIHJlbGF0ZWQgdG8gb2xkZXIgb3BlcmF0aW5nIHN5c3RlbXMgKGhlYWRlcnMsIGNvbXBp
-bGVyIHZlcnNpb24sIGV0Yy4pIG1heSBiZSBkZXRlY3RlZCBsYXRlciwgd2hlbiBidWlsZGluZyBw
-YWNrYWdlcyBbNF0gYW5kIGFmdGVyIHRoZSBwdWxsIHJlcXVlc3QgaGFzIGJlZW4gbWVyZ2VkIGlu
-IG1hc3Rlci4gVGhpcyBpcyByYXJlIGJ1dCByZXF1aXJlcyBleHRyYSBhdHRlbnRpb24gZnJvbSB0
-aGUgcmV2aWV3ZXIgYW5kIG5lZWRzIHRvIGJlIGRlYWx0IHdpdGggdXJnZW50bHkgd2hlbiBpdCBo
-YXBwZW5zLg0KPiANCj4gSWYgeW91IGNhbiBzcGFyZSBhIG1hY2hpbmUgdG8gaGVscCBleHBhbmQg
-dGhlIG9wZXJhdGluZyBzeXN0ZW1zIG9uIHdoaWNoIHRlc3RzIGNhbiBydW4sIGl0IHdvdWxkIGJl
-IGEgZ3JlYXQgaGVscC4gVGhlIG1pbmltdW0gaGFyZHdhcmUgY29uZmlndXJhdGlvbiB0byBydW4g
-YSBzbGF2ZSBpczoNCj4gDQo+ICogIHg4Nl82NCBhcmNoaXRlY3R1cmUgZm9yIENlbnRPUyA2LCBG
-ZWRvcmEgMjEsIE9wZW5TVVNFIDEzLjIsIERlYmlhbiBHTlUvTGludXggSmVzc2llLCBVYnVudHUg
-MTQuMDINCj4gDQo+ICAgMzIgR0IgUkFNDQo+ICAgMjAwIEdCIFNTRA0KPiAgIDggY29yZSA+IDIu
-NUdoeg0KPiANCj4gKiAgaTM4NiBhcmNoaXRlY3R1cmUgZm9yIENlbnRPUyA3LCBDZW50T1MgNiwg
-RmVkb3JhIDIxLCBEZWJpYW4gR05VL0xpbnV4IEplc3NpZSwgVWJ1bnR1IDE0LjA0LCBVYnVudHUg
-MTQuMDINCj4gDQo+ICAgNCBHQiBSQU0NCj4gICAyMDAgR0IgZGlzaw0KPiAgIDIgY29yZQ0KPiAN
-Cj4gKiAgYXJtdjcsIGFybXY4IGFyY2hpdGVjdHVyZSBmb3IgVWJ1bnR1IDE0LjA0DQo+IA0KPiAg
-IDQgR0IgUkFNDQo+ICAgMjAwIEdCIGRpc2sNCj4gICAyIGNvcmUgDQo+IA0KPiBOb3RlIHRoYXQg
-c2luY2UgdGhlIG1ha2UgY2hlY2sgYm90IGNhbiBydW4gaW4gYSBkb2NrZXIgY29udGFpbmVyLCB4
-ODZfNjQgbWFjaGluZXMgY2FuIGJlIHVzZWQgdG8gcnVuIGFueSBvZiB0aGUgb3BlcmF0aW5nIHN5
-c3RlbXMgZm9yIHdoaWNoIGEgZG9ja2VyIGZpbGUgaGFzIGJlZW4gcHJlcGFyZWQgWzVdLg0KPiAN
-Cj4gQ2hlZXJzDQo+IA0KPiBbMV0gcHVsbCByZXF1ZXN0cyBodHRwczovL2dpdGh1Yi5jb20vY2Vw
-aC9jZXBoL3B1bGxzDQo+IFsyXSBtYWtlIGNoZWNrIGJvdCBmZWVkYmFjayBodHRwczovL2dpdGh1
-Yi5jb20vY2VwaC9jZXBoL3B1bGwvNDI5NiNpc3N1ZWNvbW1lbnQtOTA4MTIwNjQNCj4gWzNdIHJ1
-bi1tYWtlLWNoZWNrLnNoIGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgvYmxvYi9tYXN0ZXIv
-cnVuLW1ha2UtY2hlY2suc2gjTDQ0DQo+IFs0XSBnaXRidWlsZGVyIGh0dHA6Ly9jZXBoLmNvbS9n
-aXRidWlsZGVyLmNnaSBbNV0gaHR0cHM6Ly9jZXBoLmNvbS9naXQvP3A9Y2VwaC5naXQ7YT1ibG9i
-O2Y9c3JjL3Rlc3QvTWFrZWZpbGUuYW07aGI9aGFtbWVyI2w5MQ0KPiANCj4gLS0NCj4gTG/Dr2Mg
-RGFjaGFyeSwgQXJ0aXNhbiBMb2dpY2llbCBMaWJyZQ0KPiANCg0KLS0gDQpMb8OvYyBEYWNoYXJ5
-LCBBcnRpc2FuIExvZ2ljaWVsIExpYnJlDQoNCg==
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--1aoee67HqILSCGwflULOItv0vmGbp1p11
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+
+
+On 09/04/2015 12:30, Duan, Jiangang wrote:
+> Got you.
+> Let me see if we can help - it may take some time - we have the servers=
+ but need find some people to set it up.=20
+
+Thanks a lot, I'm looking forward to that :-)
+
+> -----Original Message-----
+> From: Loic Dachary [mailto:loic@dachary.org]=20
+> Sent: Wednesday, April 08, 2015 9:33 PM
+> To: Duan, Jiangang; Ceph Development
+> Subject: Re: Call for jenkins slaves to improve multi operating system =
+support
+>=20
+>=20
+>=20
+> On 08/04/2015 15:21, Duan, Jiangang wrote:
+>> Loric,
+>>
+>> do you mean we need give the servers to you or we just build the testi=
+ng inside our own server room to do all the testing?
+>=20
+> Thanks for asking, I realize that was not clear.=20
+>=20
+> The idea is not to donate hardware, because that would require manpower=
+ and extra costs to connect to the net.=20
+>=20
+> What would be useful is a machine connected to the net and dedicated to=
+ running a jenkins slave. It receives a build from the jenkins master (ht=
+tp://jenkins.ceph.dachary.org/) via ssh (possibly with a tunnel if behind=
+ a NAT), clone http://github.com/ceph/ceph, execute the run-make-check.sh=
+ script that is found at the root of the repository and reports failure /=
+ success back to the jenkins master.
+>=20
+> Does that make sense ?
+>=20
+>>
+>> -jiangang
+>>
+>> -----Original Message-----
+>> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.k=
+ernel.org] On Behalf Of Loic Dachary
+>> Sent: Wednesday, April 08, 2015 6:56 PM
+>> To: Ceph Development
+>> Subject: Call for jenkins slaves to improve multi operating system sup=
+port
+>>
+>> Hi Ceph,
+>>
+>> When a contribution is proposed to Ceph [1], a bot compiles and run te=
+sts with it to provide feedback to the developer [2]. When something goes=
+ wrong the failure can be repeated on the developer machine [3] for debug=
+=2E This also helps the reviewer who knows the code compiles and does not=
+ break anything that would be detected by "make check".
+>>
+>> The bot runs on CentOS 7 and Ubuntu 14.04 only, and problems related t=
+o older operating systems (headers, compiler version, etc.) may be detect=
+ed later, when building packages [4] and after the pull request has been =
+merged in master. This is rare but requires extra attention from the revi=
+ewer and needs to be dealt with urgently when it happens.
+>>
+>> If you can spare a machine to help expand the operating systems on whi=
+ch tests can run, it would be a great help. The minimum hardware configur=
+ation to run a slave is:
+>>
+>> *  x86_64 architecture for CentOS 6, Fedora 21, OpenSUSE 13.2, Debian =
+GNU/Linux Jessie, Ubuntu 14.02
+>>
+>>   32 GB RAM
+>>   200 GB SSD
+>>   8 core > 2.5Ghz
+>>
+>> *  i386 architecture for CentOS 7, CentOS 6, Fedora 21, Debian GNU/Lin=
+ux Jessie, Ubuntu 14.04, Ubuntu 14.02
+>>
+>>   4 GB RAM
+>>   200 GB disk
+>>   2 core
+>>
+>> *  armv7, armv8 architecture for Ubuntu 14.04
+>>
+>>   4 GB RAM
+>>   200 GB disk
+>>   2 core=20
+>>
+>> Note that since the make check bot can run in a docker container, x86_=
+64 machines can be used to run any of the operating systems for which a d=
+ocker file has been prepared [5].
+>>
+>> Cheers
+>>
+>> [1] pull requests https://github.com/ceph/ceph/pulls
+>> [2] make check bot feedback https://github.com/ceph/ceph/pull/4296#iss=
+uecomment-90812064
+>> [3] run-make-check.sh https://github.com/ceph/ceph/blob/master/run-mak=
+e-check.sh#L44
+>> [4] gitbuilder http://ceph.com/gitbuilder.cgi [5] https://ceph.com/git=
+/?p=3Dceph.git;a=3Dblob;f=3Dsrc/test/Makefile.am;hb=3Dhammer#l91
+>>
+>> --
+>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>>
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--1aoee67HqILSCGwflULOItv0vmGbp1p11
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlUmdtYACgkQ8dLMyEl6F21BCQCcCj4eMPpJurVWcbThu9S9iS2c
+n2MAn3seGBRQ4XPXT2cCSrF1GvpsysHU
+=zdXT
+-----END PGP SIGNATURE-----
+
+--1aoee67HqILSCGwflULOItv0vmGbp1p11--
