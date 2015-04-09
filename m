@@ -1,102 +1,83 @@
-From: Chaitanya Huilgol <Chaitanya.Huilgol@sandisk.com>
-Subject: RE: tcmalloc issue
-Date: Thu, 9 Apr 2015 09:00:36 +0000
-Message-ID: <9E914F5BD7F48A4782456CEB550A422824489892@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CAD14A@SACMBXIP01.sdcorp.global.sandisk.com>
- <alpine.DEB.2.00.1503261646150.31431@cobra.newdream.net>
- <551C1514.3060607@ubuntu.com>
- <755F6B91B3BE364F9BCA11EA3F9E0C6F28CB8270@SACMBXIP01.sdcorp.global.sandisk.com>
- <55261528.7040607@ubuntu.com>
+From: "Duan, Jiangang" <jiangang.duan@intel.com>
+Subject: RE: Call for jenkins slaves to improve multi operating system
+ support
+Date: Thu, 9 Apr 2015 10:30:02 +0000
+Message-ID: <A9F57F2ABA6BB2469F01E127557C6C9B112D04C9@SHSMSX104.ccr.corp.intel.com>
+References: <55250954.1010305@dachary.org>
+ <A9F57F2ABA6BB2469F01E127557C6C9B112CC572@SHSMSX104.ccr.corp.intel.com>
+ <55252DEE.105@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1on0066.outbound.protection.outlook.com ([157.56.110.66]:3360
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S933539AbbDIJQk convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Apr 2015 05:16:40 -0400
-In-Reply-To: <55261528.7040607@ubuntu.com>
+Received: from mga11.intel.com ([192.55.52.93]:52591 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755034AbbDIKaH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 9 Apr 2015 06:30:07 -0400
+In-Reply-To: <55252DEE.105@dachary.org>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: James Page <james.page@ubuntu.com>, Somnath Roy <Somnath.Roy@sandisk.com>, Sage Weil <sage@newdream.net>, "ceph-maintainers@ceph.com" <ceph-maintainers@ceph.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi James,
-
-Please find source of the test program to verify this bug at http://pastebin.com/KAxQZARm
-compile it with  -ltcmalloc
-To test:
-Export a non-default value of the cache size, for eg
-# export TCMALLOC_MAX_TOTAL_THREAD_CACHE_BYTES=67108864
-Run the test prog, For the buggy version you will see
-
-Tcmalloc BUG! TCMALLOC_MAX_TOTAL_THREAD_CACHE_BYTES: 67108864 Internal Size: 33554432 different
-
-With the bug fixed, you should see
-
-"Tcmalloc Internal and Env cache size are same:67108864"
-
-Hope this helps.
-
-Regards,
-Chaitanya
-
------Original Message-----
-From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of James Page
-Sent: Thursday, April 09, 2015 11:29 AM
-To: Somnath Roy; Sage Weil; ceph-maintainers@ceph.com
-Cc: ceph-devel@vger.kernel.org
-Subject: Re: tcmalloc issue
-
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA256
-
-On 01/04/15 18:54, Somnath Roy wrote:
-> the tcmalloc bug is reported in the following link.
->
-> http://code.google.com/p/gperftools/issues/detail?id=585
->
-> So, do you want us to give the steps on how we are hitting the
-> following trace or to reproduce the bug reported in the above link ?
->
-> If you are asking about hitting the stack trace I mentioned below, it
-> is just running ceph with lot of IOs for longer period of time.
-
-A minimal test case on how to reproduce the bug is sufficient; we can of course complete the second activity as well as soon as we have the update available.
-
-Cheers
-
-James
-
-
-- --
-James Page
-Ubuntu and Debian Developer
-james.page@ubuntu.com
-jamespage@debian.org
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQIcBAEBCAAGBQJVJhUoAAoJEL/srsug59jD/WoQAJqZYJ82xcDDxuD5C9RnUXha
-2UtYNXZTK9O1NdiLqsNw14SPKtOQ6IDyfJjvB2v+ddfvRxhlfSM6LmC4ERa0t0SW
-a3tfwx9fQ0WEz2r35nkupHwo+Z4yfTAuHgGom3rH6tq4gbAInn7J+4unsxghV1kf
-op/c9qNJZV9jqfqMZFFgwwptK7rJ4mKJDvGIRU4ddc9HEKnqukJHQAHh3zUlNXC9
-6y11RAHFh0FcgEEHys3o/ui0JVzNjmP8HJXISzyWSqO6J2NxqRNYoKGTk81zBvrf
-IkWDDujCcTQoAU2aW6ERRvG1Dkzc9oTLdcmb0gGCKKpqa1m1GjnqS1B39rjheXio
-HK5L9HO11Fs+9uONBXWvI6P0GXi3UQoe1NaVQB85EL+NPFbTdKr9zw8nOyyqZ9Y5
-X55uVRAscLV/jb1vYIU5JxSNWof4BtPSjQzq29cithPqfWyF2N+eyQbCrAaIu1oP
-QGSnryCsoWDARyvjMIFxcsd2X6nFnOd9DMgumi6O1ksKAe1P38k1iUWFwXXutby6
-6eTdZtOj9Wc4VNRPb8SYBkBSlU+dCgRVMlNUImcCKWR6w8+Y9BbQU7OwQGEzj9Xw
-f9sdi+4JA04l/BXdAtlVwSj4uSm2Q6R/YK4szpRGs24EOV6dX+aCMK5ezBIliPo0
-D/7ZD03rXkiBzHuBqiay
-=066U
------END PGP SIGNATURE-----
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-________________________________
-
-PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-
+R290IHlvdS4NCkxldCBtZSBzZWUgaWYgd2UgY2FuIGhlbHAgLSBpdCBtYXkgdGFrZSBzb21lIHRp
+bWUgLSB3ZSBoYXZlIHRoZSBzZXJ2ZXJzIGJ1dCBuZWVkIGZpbmQgc29tZSBwZW9wbGUgdG8gc2V0
+IGl0IHVwLiANCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IExvaWMgRGFjaGFy
+eSBbbWFpbHRvOmxvaWNAZGFjaGFyeS5vcmddIA0KU2VudDogV2VkbmVzZGF5LCBBcHJpbCAwOCwg
+MjAxNSA5OjMzIFBNDQpUbzogRHVhbiwgSmlhbmdhbmc7IENlcGggRGV2ZWxvcG1lbnQNClN1Ympl
+Y3Q6IFJlOiBDYWxsIGZvciBqZW5raW5zIHNsYXZlcyB0byBpbXByb3ZlIG11bHRpIG9wZXJhdGlu
+ZyBzeXN0ZW0gc3VwcG9ydA0KDQoNCg0KT24gMDgvMDQvMjAxNSAxNToyMSwgRHVhbiwgSmlhbmdh
+bmcgd3JvdGU6DQo+IExvcmljLA0KPiANCj4gZG8geW91IG1lYW4gd2UgbmVlZCBnaXZlIHRoZSBz
+ZXJ2ZXJzIHRvIHlvdSBvciB3ZSBqdXN0IGJ1aWxkIHRoZSB0ZXN0aW5nIGluc2lkZSBvdXIgb3du
+IHNlcnZlciByb29tIHRvIGRvIGFsbCB0aGUgdGVzdGluZz8NCg0KVGhhbmtzIGZvciBhc2tpbmcs
+IEkgcmVhbGl6ZSB0aGF0IHdhcyBub3QgY2xlYXIuIA0KDQpUaGUgaWRlYSBpcyBub3QgdG8gZG9u
+YXRlIGhhcmR3YXJlLCBiZWNhdXNlIHRoYXQgd291bGQgcmVxdWlyZSBtYW5wb3dlciBhbmQgZXh0
+cmEgY29zdHMgdG8gY29ubmVjdCB0byB0aGUgbmV0LiANCg0KV2hhdCB3b3VsZCBiZSB1c2VmdWwg
+aXMgYSBtYWNoaW5lIGNvbm5lY3RlZCB0byB0aGUgbmV0IGFuZCBkZWRpY2F0ZWQgdG8gcnVubmlu
+ZyBhIGplbmtpbnMgc2xhdmUuIEl0IHJlY2VpdmVzIGEgYnVpbGQgZnJvbSB0aGUgamVua2lucyBt
+YXN0ZXIgKGh0dHA6Ly9qZW5raW5zLmNlcGguZGFjaGFyeS5vcmcvKSB2aWEgc3NoIChwb3NzaWJs
+eSB3aXRoIGEgdHVubmVsIGlmIGJlaGluZCBhIE5BVCksIGNsb25lIGh0dHA6Ly9naXRodWIuY29t
+L2NlcGgvY2VwaCwgZXhlY3V0ZSB0aGUgcnVuLW1ha2UtY2hlY2suc2ggc2NyaXB0IHRoYXQgaXMg
+Zm91bmQgYXQgdGhlIHJvb3Qgb2YgdGhlIHJlcG9zaXRvcnkgYW5kIHJlcG9ydHMgZmFpbHVyZSAv
+IHN1Y2Nlc3MgYmFjayB0byB0aGUgamVua2lucyBtYXN0ZXIuDQoNCkRvZXMgdGhhdCBtYWtlIHNl
+bnNlID8NCg0KPiANCj4gLWppYW5nYW5nDQo+IA0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0t
+LQ0KPiBGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgt
+ZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgTG9pYyBEYWNoYXJ5DQo+
+IFNlbnQ6IFdlZG5lc2RheSwgQXByaWwgMDgsIDIwMTUgNjo1NiBQTQ0KPiBUbzogQ2VwaCBEZXZl
+bG9wbWVudA0KPiBTdWJqZWN0OiBDYWxsIGZvciBqZW5raW5zIHNsYXZlcyB0byBpbXByb3ZlIG11
+bHRpIG9wZXJhdGluZyBzeXN0ZW0gc3VwcG9ydA0KPiANCj4gSGkgQ2VwaCwNCj4gDQo+IFdoZW4g
+YSBjb250cmlidXRpb24gaXMgcHJvcG9zZWQgdG8gQ2VwaCBbMV0sIGEgYm90IGNvbXBpbGVzIGFu
+ZCBydW4gdGVzdHMgd2l0aCBpdCB0byBwcm92aWRlIGZlZWRiYWNrIHRvIHRoZSBkZXZlbG9wZXIg
+WzJdLiBXaGVuIHNvbWV0aGluZyBnb2VzIHdyb25nIHRoZSBmYWlsdXJlIGNhbiBiZSByZXBlYXRl
+ZCBvbiB0aGUgZGV2ZWxvcGVyIG1hY2hpbmUgWzNdIGZvciBkZWJ1Zy4gVGhpcyBhbHNvIGhlbHBz
+IHRoZSByZXZpZXdlciB3aG8ga25vd3MgdGhlIGNvZGUgY29tcGlsZXMgYW5kIGRvZXMgbm90IGJy
+ZWFrIGFueXRoaW5nIHRoYXQgd291bGQgYmUgZGV0ZWN0ZWQgYnkgIm1ha2UgY2hlY2siLg0KPiAN
+Cj4gVGhlIGJvdCBydW5zIG9uIENlbnRPUyA3IGFuZCBVYnVudHUgMTQuMDQgb25seSwgYW5kIHBy
+b2JsZW1zIHJlbGF0ZWQgdG8gb2xkZXIgb3BlcmF0aW5nIHN5c3RlbXMgKGhlYWRlcnMsIGNvbXBp
+bGVyIHZlcnNpb24sIGV0Yy4pIG1heSBiZSBkZXRlY3RlZCBsYXRlciwgd2hlbiBidWlsZGluZyBw
+YWNrYWdlcyBbNF0gYW5kIGFmdGVyIHRoZSBwdWxsIHJlcXVlc3QgaGFzIGJlZW4gbWVyZ2VkIGlu
+IG1hc3Rlci4gVGhpcyBpcyByYXJlIGJ1dCByZXF1aXJlcyBleHRyYSBhdHRlbnRpb24gZnJvbSB0
+aGUgcmV2aWV3ZXIgYW5kIG5lZWRzIHRvIGJlIGRlYWx0IHdpdGggdXJnZW50bHkgd2hlbiBpdCBo
+YXBwZW5zLg0KPiANCj4gSWYgeW91IGNhbiBzcGFyZSBhIG1hY2hpbmUgdG8gaGVscCBleHBhbmQg
+dGhlIG9wZXJhdGluZyBzeXN0ZW1zIG9uIHdoaWNoIHRlc3RzIGNhbiBydW4sIGl0IHdvdWxkIGJl
+IGEgZ3JlYXQgaGVscC4gVGhlIG1pbmltdW0gaGFyZHdhcmUgY29uZmlndXJhdGlvbiB0byBydW4g
+YSBzbGF2ZSBpczoNCj4gDQo+ICogIHg4Nl82NCBhcmNoaXRlY3R1cmUgZm9yIENlbnRPUyA2LCBG
+ZWRvcmEgMjEsIE9wZW5TVVNFIDEzLjIsIERlYmlhbiBHTlUvTGludXggSmVzc2llLCBVYnVudHUg
+MTQuMDINCj4gDQo+ICAgMzIgR0IgUkFNDQo+ICAgMjAwIEdCIFNTRA0KPiAgIDggY29yZSA+IDIu
+NUdoeg0KPiANCj4gKiAgaTM4NiBhcmNoaXRlY3R1cmUgZm9yIENlbnRPUyA3LCBDZW50T1MgNiwg
+RmVkb3JhIDIxLCBEZWJpYW4gR05VL0xpbnV4IEplc3NpZSwgVWJ1bnR1IDE0LjA0LCBVYnVudHUg
+MTQuMDINCj4gDQo+ICAgNCBHQiBSQU0NCj4gICAyMDAgR0IgZGlzaw0KPiAgIDIgY29yZQ0KPiAN
+Cj4gKiAgYXJtdjcsIGFybXY4IGFyY2hpdGVjdHVyZSBmb3IgVWJ1bnR1IDE0LjA0DQo+IA0KPiAg
+IDQgR0IgUkFNDQo+ICAgMjAwIEdCIGRpc2sNCj4gICAyIGNvcmUgDQo+IA0KPiBOb3RlIHRoYXQg
+c2luY2UgdGhlIG1ha2UgY2hlY2sgYm90IGNhbiBydW4gaW4gYSBkb2NrZXIgY29udGFpbmVyLCB4
+ODZfNjQgbWFjaGluZXMgY2FuIGJlIHVzZWQgdG8gcnVuIGFueSBvZiB0aGUgb3BlcmF0aW5nIHN5
+c3RlbXMgZm9yIHdoaWNoIGEgZG9ja2VyIGZpbGUgaGFzIGJlZW4gcHJlcGFyZWQgWzVdLg0KPiAN
+Cj4gQ2hlZXJzDQo+IA0KPiBbMV0gcHVsbCByZXF1ZXN0cyBodHRwczovL2dpdGh1Yi5jb20vY2Vw
+aC9jZXBoL3B1bGxzDQo+IFsyXSBtYWtlIGNoZWNrIGJvdCBmZWVkYmFjayBodHRwczovL2dpdGh1
+Yi5jb20vY2VwaC9jZXBoL3B1bGwvNDI5NiNpc3N1ZWNvbW1lbnQtOTA4MTIwNjQNCj4gWzNdIHJ1
+bi1tYWtlLWNoZWNrLnNoIGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgvYmxvYi9tYXN0ZXIv
+cnVuLW1ha2UtY2hlY2suc2gjTDQ0DQo+IFs0XSBnaXRidWlsZGVyIGh0dHA6Ly9jZXBoLmNvbS9n
+aXRidWlsZGVyLmNnaSBbNV0gaHR0cHM6Ly9jZXBoLmNvbS9naXQvP3A9Y2VwaC5naXQ7YT1ibG9i
+O2Y9c3JjL3Rlc3QvTWFrZWZpbGUuYW07aGI9aGFtbWVyI2w5MQ0KPiANCj4gLS0NCj4gTG/Dr2Mg
+RGFjaGFyeSwgQXJ0aXNhbiBMb2dpY2llbCBMaWJyZQ0KPiANCg0KLS0gDQpMb8OvYyBEYWNoYXJ5
+LCBBcnRpc2FuIExvZ2ljaWVsIExpYnJlDQoNCg==
