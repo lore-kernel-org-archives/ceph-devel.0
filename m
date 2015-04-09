@@ -1,148 +1,116 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Call for jenkins slaves to improve multi operating system support
-Date: Thu, 09 Apr 2015 14:55:50 +0200
-Message-ID: <552676D6.9040206@dachary.org>
-References: <55250954.1010305@dachary.org> <A9F57F2ABA6BB2469F01E127557C6C9B112CC572@SHSMSX104.ccr.corp.intel.com> <55252DEE.105@dachary.org> <A9F57F2ABA6BB2469F01E127557C6C9B112D04C9@SHSMSX104.ccr.corp.intel.com>
+From: James Page <james.page@ubuntu.com>
+Subject: Re: tcmalloc issue
+Date: Thu, 09 Apr 2015 15:13:20 +0100
+Message-ID: <55268900.1090909@ubuntu.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CAD14A@SACMBXIP01.sdcorp.global.sandisk.com> <alpine.DEB.2.00.1503261646150.31431@cobra.newdream.net> <551C1514.3060607@ubuntu.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F28CB8270@SACMBXIP01.sdcorp.global.sandisk.com> <55261528.7040607@ubuntu.com> <9E914F5BD7F48A4782456CEB550A422824489892@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="1aoee67HqILSCGwflULOItv0vmGbp1p11"
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:44051 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751613AbbDIM4A (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Apr 2015 08:56:00 -0400
-In-Reply-To: <A9F57F2ABA6BB2469F01E127557C6C9B112D04C9@SHSMSX104.ccr.corp.intel.com>
+Received: from youngberry.canonical.com ([91.189.89.112]:39394 "EHLO
+	youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753055AbbDIONX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Apr 2015 10:13:23 -0400
+In-Reply-To: <9E914F5BD7F48A4782456CEB550A422824489892@SACMBXIP01.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Duan, Jiangang" <jiangang.duan@intel.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Chaitanya Huilgol <Chaitanya.Huilgol@sandisk.com>, Somnath Roy <Somnath.Roy@sandisk.com>, Sage Weil <sage@newdream.net>, "ceph-maintainers@ceph.com" <ceph-maintainers@ceph.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---1aoee67HqILSCGwflULOItv0vmGbp1p11
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
 
+Thanks Chaitanya
 
+I've tested and uploaded the patched version to trusty-proposed - the
+SRU team should accept that into testing in the next day or so - they
+will update the bug when that happens.
 
-On 09/04/2015 12:30, Duan, Jiangang wrote:
-> Got you.
-> Let me see if we can help - it may take some time - we have the servers=
- but need find some people to set it up.=20
+On 09/04/15 10:00, Chaitanya Huilgol wrote:
+> Hi James,
+> 
+> Please find source of the test program to verify this bug at
+> http://pastebin.com/KAxQZARm compile it with  -ltcmalloc To test: 
+> Export a non-default value of the cache size, for eg # export
+> TCMALLOC_MAX_TOTAL_THREAD_CACHE_BYTES=67108864 Run the test prog,
+> For the buggy version you will see
+> 
+> Tcmalloc BUG! TCMALLOC_MAX_TOTAL_THREAD_CACHE_BYTES: 67108864
+> Internal Size: 33554432 different
+> 
+> With the bug fixed, you should see
+> 
+> "Tcmalloc Internal and Env cache size are same:67108864"
+> 
+> Hope this helps.
+> 
+> Regards, Chaitanya
+> 
+> -----Original Message----- From: ceph-devel-owner@vger.kernel.org
+> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of James Page 
+> Sent: Thursday, April 09, 2015 11:29 AM To: Somnath Roy; Sage Weil;
+> ceph-maintainers@ceph.com Cc: ceph-devel@vger.kernel.org Subject:
+> Re: tcmalloc issue
+> 
+> On 01/04/15 18:54, Somnath Roy wrote:
+>> the tcmalloc bug is reported in the following link.
+> 
+>> http://code.google.com/p/gperftools/issues/detail?id=585
+> 
+>> So, do you want us to give the steps on how we are hitting the 
+>> following trace or to reproduce the bug reported in the above
+>> link ?
+> 
+>> If you are asking about hitting the stack trace I mentioned
+>> below, it is just running ceph with lot of IOs for longer period
+>> of time.
+> 
+> A minimal test case on how to reproduce the bug is sufficient; we
+> can of course complete the second activity as well as soon as we
+> have the update available.
+> 
+> Cheers
+> 
+> James
+> 
+> 
+> -- To unsubscribe from this list: send the line "unsubscribe
+> ceph-devel" in the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> ________________________________
+> 
+> PLEASE NOTE: The information contained in this electronic mail
+> message is intended only for the use of the designated recipient(s)
+> named above. If the reader of this message is not the intended
+> recipient, you are hereby notified that you have received this
+> message in error and that any review, dissemination, distribution,
+> or copying of this message is strictly prohibited. If you have
+> received this communication in error, please notify the sender by
+> telephone or e-mail (as shown above) immediately and destroy any
+> and all copies of this message in your possession (whether hard
+> copies or electronically stored copies).
+> 
 
-Thanks a lot, I'm looking forward to that :-)
-
-> -----Original Message-----
-> From: Loic Dachary [mailto:loic@dachary.org]=20
-> Sent: Wednesday, April 08, 2015 9:33 PM
-> To: Duan, Jiangang; Ceph Development
-> Subject: Re: Call for jenkins slaves to improve multi operating system =
-support
->=20
->=20
->=20
-> On 08/04/2015 15:21, Duan, Jiangang wrote:
->> Loric,
->>
->> do you mean we need give the servers to you or we just build the testi=
-ng inside our own server room to do all the testing?
->=20
-> Thanks for asking, I realize that was not clear.=20
->=20
-> The idea is not to donate hardware, because that would require manpower=
- and extra costs to connect to the net.=20
->=20
-> What would be useful is a machine connected to the net and dedicated to=
- running a jenkins slave. It receives a build from the jenkins master (ht=
-tp://jenkins.ceph.dachary.org/) via ssh (possibly with a tunnel if behind=
- a NAT), clone http://github.com/ceph/ceph, execute the run-make-check.sh=
- script that is found at the root of the repository and reports failure /=
- success back to the jenkins master.
->=20
-> Does that make sense ?
->=20
->>
->> -jiangang
->>
->> -----Original Message-----
->> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.k=
-ernel.org] On Behalf Of Loic Dachary
->> Sent: Wednesday, April 08, 2015 6:56 PM
->> To: Ceph Development
->> Subject: Call for jenkins slaves to improve multi operating system sup=
-port
->>
->> Hi Ceph,
->>
->> When a contribution is proposed to Ceph [1], a bot compiles and run te=
-sts with it to provide feedback to the developer [2]. When something goes=
- wrong the failure can be repeated on the developer machine [3] for debug=
-=2E This also helps the reviewer who knows the code compiles and does not=
- break anything that would be detected by "make check".
->>
->> The bot runs on CentOS 7 and Ubuntu 14.04 only, and problems related t=
-o older operating systems (headers, compiler version, etc.) may be detect=
-ed later, when building packages [4] and after the pull request has been =
-merged in master. This is rare but requires extra attention from the revi=
-ewer and needs to be dealt with urgently when it happens.
->>
->> If you can spare a machine to help expand the operating systems on whi=
-ch tests can run, it would be a great help. The minimum hardware configur=
-ation to run a slave is:
->>
->> *  x86_64 architecture for CentOS 6, Fedora 21, OpenSUSE 13.2, Debian =
-GNU/Linux Jessie, Ubuntu 14.02
->>
->>   32 GB RAM
->>   200 GB SSD
->>   8 core > 2.5Ghz
->>
->> *  i386 architecture for CentOS 7, CentOS 6, Fedora 21, Debian GNU/Lin=
-ux Jessie, Ubuntu 14.04, Ubuntu 14.02
->>
->>   4 GB RAM
->>   200 GB disk
->>   2 core
->>
->> *  armv7, armv8 architecture for Ubuntu 14.04
->>
->>   4 GB RAM
->>   200 GB disk
->>   2 core=20
->>
->> Note that since the make check bot can run in a docker container, x86_=
-64 machines can be used to run any of the operating systems for which a d=
-ocker file has been prepared [5].
->>
->> Cheers
->>
->> [1] pull requests https://github.com/ceph/ceph/pulls
->> [2] make check bot feedback https://github.com/ceph/ceph/pull/4296#iss=
-uecomment-90812064
->> [3] run-make-check.sh https://github.com/ceph/ceph/blob/master/run-mak=
-e-check.sh#L44
->> [4] gitbuilder http://ceph.com/gitbuilder.cgi [5] https://ceph.com/git=
-/?p=3Dceph.git;a=3Dblob;f=3Dsrc/test/Makefile.am;hb=3Dhammer#l91
->>
->> --
->> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->>
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---1aoee67HqILSCGwflULOItv0vmGbp1p11
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
+- -- 
+James Page
+Ubuntu and Debian Developer
+james.page@ubuntu.com
+jamespage@debian.org
 -----BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
+Version: GnuPG v2
 
-iEYEARECAAYFAlUmdtYACgkQ8dLMyEl6F21BCQCcCj4eMPpJurVWcbThu9S9iS2c
-n2MAn3seGBRQ4XPXT2cCSrF1GvpsysHU
-=zdXT
+iQIcBAEBCAAGBQJVJokAAAoJEL/srsug59jDnNsQAM1h8T+XbzbyxIk31MSGuh6h
+TfFs4ioBmv6IJFn7E+Le3WES3/Yqmhy1Sf1AHr1QtQNARJ9qqmNuU+M7IA/84A6o
+6VvxKBb3fHWGJieG/ymaVVREuJUHJLfEEaqyZOrh++nsyuzf/nAymKSzJMl5Z8o1
+ugOSqS/GryXORW2nzuWIHeAh3feETyBe2rFBeYTYkR65fsFyjMK5DTHNLh0SFTR3
+Elc+qdyamau+XwlRZOz9ClyELk0vP2iWsaNj/KJrXGm104aCaf2NhnsX4IW4yz1s
+GkcPhaFtR/V9d/txS8syMmh9b01rQL6Zxje3n0C63E0/AqLqBHF7NX60xbeiqAvw
+5xPTK/6e4dARPaIzzCgY4vEjX/CQ38kFQYikU6lSIww873LgtdPAzJp15axH40E4
+1YdtMAoSva/hVwkkjPLK7a8SVg4+sfVOho4FH7m8TZmLxpMXSH+ea4SFN9s9uuEa
+jnA3mo5T50EeXQuYvmO87A4ABKGrOwBOvr3rmF4q/GnHGdONI+fctQW7JSmjJsMH
+WrOwAWyte+A5hRRySiPw7EXqrj583l/iTaP+pd0eyWTcpoKKxp3Ver2nIsWGEe7+
+Mq1lFii8Z3Z4rqthjWEg4iVw3HwQS+ArjYISuy4TnQUcnbG/Avp0liMM4VaBndF1
+gefiZ4SMb5yxPriWndzf
+=H69u
 -----END PGP SIGNATURE-----
-
---1aoee67HqILSCGwflULOItv0vmGbp1p11--
