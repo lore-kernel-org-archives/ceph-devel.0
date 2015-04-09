@@ -1,143 +1,103 @@
-From: kernel neophyte <neophyte.hacker001@gmail.com>
-Subject: Re: lttng broken on i386 trusty
-Date: Wed, 8 Apr 2015 17:51:12 -0700
-Message-ID: <CAFkUHxeW4bR8jLKJ3XA+yLzMaZbK6ww+77pAkP_S9ofhyYHjtA@mail.gmail.com>
-References: <55152926.9000400@dachary.org>
-	<CAFkUHxckG3r05gbgaHQzYagU8BhjCNjApwj8iWAiyGu1U4Ub-A@mail.gmail.com>
-	<5525B7B1.9000903@redhat.com>
-	<CAFkUHxeJF=6y3oym-vF1XEGSWs9MWWCt1nJ0X90H8k1KfuWPiA@mail.gmail.com>
-	<5525C10C.5020506@redhat.com>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: Re: Initial newstore vs filestore results
+Date: Wed, 08 Apr 2015 22:19:40 -0500
+Message-ID: <5525EFCC.3070607@redhat.com>
+References: <5523F069.3000400@redhat.com> <55242D15.8080800@redhat.com> <55248856.1010808@redhat.com> <alpine.DEB.2.00.1504071951120.4469@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f178.google.com ([209.85.192.178]:35063 "EHLO
-	mail-pd0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754264AbbDIAvM convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Apr 2015 20:51:12 -0400
-Received: by pddn5 with SMTP id n5so133472275pdd.2
-        for <ceph-devel@vger.kernel.org>; Wed, 08 Apr 2015 17:51:12 -0700 (PDT)
-In-Reply-To: <5525C10C.5020506@redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:54438 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753139AbbDIDTn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 8 Apr 2015 23:19:43 -0400
+In-Reply-To: <alpine.DEB.2.00.1504071951120.4469@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <jdurgin@redhat.com>
-Cc: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Strange! I see the build succeeds for deb
+On 04/07/2015 09:58 PM, Sage Weil wrote:
+> On Tue, 7 Apr 2015, Mark Nelson wrote:
+>> On 04/07/2015 02:16 PM, Mark Nelson wrote:
+>>> On 04/07/2015 09:57 AM, Mark Nelson wrote:
+>>>> Hi Guys,
+>>>>
+>>>> I ran some quick tests on Sage's newstore branch.  So far given that
+>>>> this is a prototype, things are looking pretty good imho.  The 4MB
+>>>> object rados bench read/write and small read performance looks
+>>>> especially good.  Keep in mind that this is not using the SSD journals
+>>>> in any way, so 640MB/s sequential writes is actually really good
+>>>> compared to filestore without SSD journals.
+>>>>
+>>>> small write performance appears to be fairly bad, especially in the RBD
+>>>> case where it's small writes to larger objects.  I'm going to sit down
+>>>> and see if I can figure out what's going on.  It's bad enough that I
+>>>> suspect there's just something odd going on.
+>>>>
+>>>> Mark
+>>>
+>>> Seekwatcher/blktrace graphs of a 4 OSD cluster using newstore for those
+>>> interested:
+>>>
+>>> http://nhm.ceph.com/newstore/
+>>>
+>>> Interestingly small object write/read performance with 4 OSDs was about
+>>> 1/3-1/4 the speed of the same cluster with 36 OSDs.
+>>>
+>>> Note: Thanks Dan for fixing the directory column width!
+>>>
+>>> Mark
+>>
+>> New fio/librbd results using Sage's latest code that attempts to keep small
+>> overwrite extents in the db.  This is 4 OSD so not directly comparable to the
+>> 36 OSD tests above, but does include seekwatcher graphs.  Results in MB/s:
+>>
+>> 	write	read	randw	randr
+>> 4MB	57.9	319.6	55.2	285.9
+>> 128KB	2.5	230.6	2.4	125.4
+>> 4KB	0.46	55.65	1.11	3.56
+>
+> What would be very interesting would be to see the 4KB performance
+> with the defaults (newstore overlay max = 32) vs overlays disabled
+> (newstore overlay max = 0) and see if/how much it is helping.
 
--Neo
+And here we go.  1 OSD, 1X replication.  16GB RBD volume.
 
-On Wed, Apr 8, 2015 at 5:00 PM, Josh Durgin <jdurgin@redhat.com> wrote:
-> Ah, I didn't notice Loic disabled it for the tarball gitbuilder (it
-> makes sense to disable there since it's not needed, and speeds up bui=
-ld
-> + tests that that gitbuilder does).
+4MB		write	read	randw	randr
+default overlay	36.13	106.61	34.49	92.69
+no overlay	36.29	105.61	34.49	93.55
+				
+128KB		write	read	randw	randr
+default overlay	1.71	97.90	1.65	25.79
+no overlay	1.72	97.80	1.66	25.78
+				
+4KB		write	read	randw	randr
+default overlay	0.40	61.88	1.29	1.11
+no overlay	0.05	61.26	0.05	1.10
+
+seekwatcher movies generating now, but I'm going to bed soon so I'll 
+have to wait until tomorrow morning to post them. :)
+
 >
-> I'm not sure why it's failing --with-lttng yet. Odd that it doesn't
-> fail in the deb gitbuilder, which still has lttng autodetected.
+> The latest branch also has open-by-handle.  It's on by default (newstore
+> open by handle = true).  I think for most workloads it won't be very
+> noticeable... I think there are two questions we need to answer though:
 >
-> Josh
+> 1) Does it have any impact on a creation workload (say, 4kb objects).  It
+> shouldn't, but we should confirm.
 >
+> 2) Does it impact small object random reads with a cold cache.  I think to
+> see the effect we'll probably need to pile a ton of objects into the
+> store, drop caches, and then do random reads.  In the best case the
+> effect will be small, but hopefully noticeable: we should go from
+> a directory lookup (1+ seeks) + inode lookup (1+ seek) + data
+> read, to inode lookup (1+ seek) + data read.  So, 3 -> 2 seeks best case?
+> I'm not really sure what XFS is doing under the covers here...
 >
-> On 04/08/2015 04:25 PM, kernel neophyte wrote:
->>
->> Thats because its being run with --without-lttng
->>
->> as per the log in
->>
->> http://gitbuilder.sepia.ceph.com/gitbuilder-ceph-tarball-trusty-i386=
--basic/log.cgi?log=3D21f60a9d26f821ba1cd1db8bb79f8aff2a028582:
->>
->> ./configure --with-debug --with-radosgw --with-libatomic-ops
->> --without-lttng --disable-static --without-cryptopp --with-tcmalloc
->>
->> if you change it to --with-lttng it will fail
->>
->> -Neo
->>
->> On Wed, Apr 8, 2015 at 4:20 PM, Josh Durgin <jdurgin@redhat.com> wro=
-te:
->>>
->>> Are you still seeing the same error on the latest master?
->>> The gitbuilder is building successfully now:
->>>
->>>
->>> http://gitbuilder.sepia.ceph.com/gitbuilder-ceph-tarball-trusty-i38=
-6-basic/log.cgi?log=3D21f60a9d26f821ba1cd1db8bb79f8aff2a028582
->>>
->>>
->>> On 04/08/2015 04:07 PM, kernel neophyte wrote:
->>>>
->>>>
->>>> Need help! This is still broken!
->>>>
->>>> -Neo
->>>>
->>>> On Fri, Mar 27, 2015 at 2:55 AM, Loic Dachary <loic@dachary.org> w=
-rote:
->>>>>
->>>>>
->>>>> Hi,
->>>>>
->>>>> In case you did not notice:
->>>>>
->>>>>
->>>>>
->>>>> http://gitbuilder.sepia.ceph.com/gitbuilder-ceph-tarball-trusty-i=
-386-basic/log.cgi?log=3Ddca722ec7b2a7fc9214844ec92310074b5cb2faa
->>>>>
->>>>> CXXLD radosgw-admin
->>>>> CXXLD rados
->>>>>
->>>>> /usr/lib/gcc/i686-linux-gnu/4.8/../../../i386-linux-gnu/liblttng-=
-ust.so:
->>>>> undefined reference to `dlclose'
->>>>>
->>>>> /usr/lib/gcc/i686-linux-gnu/4.8/../../../i386-linux-gnu/liblttng-=
-ust.so:
->>>>> undefined reference to `dlsym'
->>>>>
->>>>> /usr/lib/gcc/i686-linux-gnu/4.8/../../../i386-linux-gnu/liblttng-=
-ust.so:
->>>>> undefined reference to `dlopen'
->>>>>
->>>>>       error: collect2: ld returned 1 exit status
->>>>>
->>>>> make[3]: *** [ceph_tpbench] Error 1
->>>>> make[3]: *** Waiting for unfinished jobs....
->>>>> CXXLD ceph-objectstore-tool
->>>>> make[3]: Leaving directory
->>>>> `/srv/autobuild-ceph/gitbuilder.git/build/src'
->>>>> make[2]: *** [all-recursive] Error 1
->>>>> make[2]: Leaving directory
->>>>> `/srv/autobuild-ceph/gitbuilder.git/build/src'
->>>>> make[1]: *** [all] Error 2
->>>>> make[1]: Leaving directory
->>>>> `/srv/autobuild-ceph/gitbuilder.git/build/src'
->>>>>
->>>>>       make: *** [all-recursive] Error 1
->>>>>
->>>>> Cheers
->>>>>
->>>>> --
->>>>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->>>>>
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-dev=
-el" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>
->>>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
