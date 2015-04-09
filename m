@@ -1,50 +1,52 @@
-From: "Deneau, Tom" <tom.deneau@amd.com>
-Subject: RE: ms_crc_data false
-Date: Thu, 9 Apr 2015 17:01:28 +0000
-Message-ID: <BC97738F8E7C8742BABED7F06FB9DF9166416E5D@SATLEXDAG01.amd.com>
-References: <BC97738F8E7C8742BABED7F06FB9DF9166416855@SATLEXDAG01.amd.com>
- <CAC6JEv92Z8JrwHwDbzB9xNpWa+tApJP7dJ6gs1PNzaN5w1UKQg@mail.gmail.com>
+From: Abhishek L <abhishek.lekshmanan@gmail.com>
+Subject: Preparing Giant v0.87.2 release
+Date: Thu, 09 Apr 2015 23:53:22 +0530
+Message-ID: <87bnixrwit.fsf@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: multipart/signed; boundary="=-=-=";
+	micalg=pgp-sha1; protocol="application/pgp-signature"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0147.outbound.protection.outlook.com ([65.55.169.147]:20896
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753478AbbDIRBe (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 9 Apr 2015 13:01:34 -0400
-In-Reply-To: <CAC6JEv92Z8JrwHwDbzB9xNpWa+tApJP7dJ6gs1PNzaN5w1UKQg@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-pd0-f175.google.com ([209.85.192.175]:33654 "EHLO
+	mail-pd0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755724AbbDISZI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Apr 2015 14:25:08 -0400
+Received: by pdbnk13 with SMTP id nk13so161476483pdb.0
+        for <ceph-devel@vger.kernel.org>; Thu, 09 Apr 2015 11:25:08 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@gregs42.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Loic Dachary <loic@dachary.org>
 
-DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogR3JlZ29yeSBGYXJudW0g
-W21haWx0bzpncmVnQGdyZWdzNDIuY29tXQ0KPiBTZW50OiBXZWRuZXNkYXksIEFwcmlsIDA4LCAy
-MDE1IDY6MjYgUE0NCj4gVG86IERlbmVhdSwgVG9tDQo+IENjOiBjZXBoLWRldmVsDQo+IFN1Ympl
-Y3Q6IFJlOiBtc19jcmNfZGF0YSBmYWxzZQ0KPiANCj4gT24gV2VkLCBBcHIgOCwgMjAxNSBhdCAz
-OjM4IFBNLCBEZW5lYXUsIFRvbSA8dG9tLmRlbmVhdUBhbWQuY29tPiB3cm90ZToNCj4gPiBXaXRo
-IDAuOTMsIEkgdHJpZWQNCj4gPiAgICAgY2VwaCB0ZWxsICdvc2QuKicgaW5qZWN0YXJncyAnLS1t
-c19jcmNfZGF0YT1mYWxzZScgJy0tDQo+IG1zX2NyY19oZWFkZXI9ZmFsc2UnDQo+ID4NCj4gPiBh
-bmQgc2F3IHRoZSBjaGFuZ2VzIHJlZmxlY3RlZCBpbiBjZXBoIGFkbWluLWRhZW1vbg0KPiA+DQo+
-ID4gQnV0IGhhdmluZyBkb25lIHRoYXQsIHBlcmYgdG9wIHN0aWxsIHNob3dzIHRpbWUgYmVpbmcg
-c3BlbnQgaW4gY3JjMzINCj4gcm91dGluZXMuDQo+ID4gSXMgdGhlcmUgc29tZSBvdGhlciBwYXJh
-bWV0ZXIgdGhhdCBuZWVkcyBjaGFuZ2luZz8NCj4gDQo+IFlvdSBjYW4gY2hhbmdlIHRoaXMgY29u
-ZmlnIHZhbHVlLCBidXQgdW5mb3J0dW5hdGVseSBpdCB3b24ndCBoYXZlIGFueSBlZmZlY3QNCj4g
-b24gYSBydW5uaW5nIGRhZW1vbi4gWW91J2xsIG5lZWQgdG8gc3BlY2lmeSBpdCBpbiBhIGNvbmZp
-ZyBhbmQgcmVzdGFydC4NCj4gLUdyZWcNCg0KVGhhbmtzLCBHcmVnLg0KDQpIZXJlIGFyZSBzb21l
-IG9ic2VydmF0aW9ucyBvbiBteSBzaW5nbGUgbm9kZSBzeXN0ZW0gDQphZnRlciBjaGFuZ2luZyB0
-aGUgY2VwaC5jb25mIGFuZCByZXN0YXJ0aW5nIGFsbCBkYWVtb25zLi4uDQoNCmxvb3AgcmFkb3Mg
-YmVuY2ggc2VxIHJlYWRpbmcgNE0gb2JqZWN0cyAoMSB0aHJlYWQpIChkcm9wcGluZyBjYWNoZXMg
-YmVmb3JlIGVhY2ggaW52b2NhdGlvbikNCiAgICogQlcgd2VudCB1cCB3aXRoIG1zIGNyYyB4eHgg
-PSBmYWxzZQ0KICAgKiBidXQgc3RpbGwgc2VlIHNpZ25maWNhbnQgY3JjMzIgbGluZSBhdHRyaWJ1
-dGVkIHRvIGNlcGgtb3NkDQogICAgICAqIG5vIHdyaXRlcyBoYXBwZW5pbmcNCiAgICAgICogbm90
-ZTogd2l0aCBtcyBjcmMgeHh4ID0gdHJ1ZSwgdGhlcmUgd2VyZSAyIGNyYzMyIGxpbmVzIGluIHBl
-cmYgdG9wLCB0aGUgMm5kDQogICAgICAgIG9uZSBhdHRyaWJ1dGVkIHRvIGxpYnJhZG9zLCB0aGF0
-IG9uZSBpcyBnb25lIHdpdGggbXMgY3JjIHh4eCA9IGZhbHNlDQoNCmxvb3AgcmFkb3MgZ2V0IHNp
-bmdsZSBsYXJnZU9iamVjdCAoMS42RykgL2Rldi9udWxsIChkcm9wcGluZyBjYWNoZXMgYmVmb3Jl
-IGVhY2ggaW52b2NhdGlvbikNCiAgICogbm8gY2hhbmdlIGluIEJXIGZyb20gbXMgY3JjIHh4eCA9
-IHRydWUNCiAgICogbm8gY3JjMzIgbGluZSBpbiBwZXJmIHRvcA0KICAgICAgKiB3aGVyZWFzIHdp
-dGggbXMgY3JjIHh4eD10cnVlIHRoZXJlIHdlcmUgMiBsaW5lcyBvbmUgZm9yIGNlcGgtb3NkLCBv
-bmUgZm9yIGxpYnJhZG9zDQoNCi0tIFRvbSBEZW5lYXUNCg0KDQoNCg0K
+--=-=-=
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+Hi Sage,
+
+Lo=C3=AFc and I have been working towards backporting issues towards the ne=
+xt
+giant release, we have been able to backport all the commits marked for
+giant backports and successfully run the integration suites. The tasks
+are tracked at http://tracker.ceph.com/issues/11153. Do you think, the
+next giant release is ready to be published, in which case, we'll
+proceed to ask the respective project leads to sign off the release and
+start the QE process.
+
+=2D-=20
+Abhishek
+
+--=-=-=
+Content-Type: application/pgp-signature; name="signature.asc"; name="signature.asc"; description="Digital signature"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iQEcBAEBAgAGBQJVJsOpAAoJEPnwZB8bZe1fuIQH/0We2fr4mR5wo19U5Ix1xeV6
+/mRgrN3Hc5H5JK6HG7eXoECJhxz1ZZK+eSW/Cd2fuxRE69v96jZ88Vzp/b/iB5Dm
+/uj0HpgmV4AFBvbzs3KqasrHpWliBoZnOPLkKLS95KuE/jsKjyKeqErZ9tqJQfna
+pRNqhg41I25rDzvh5vhTNr6bjiot2AErk6/cYtnvQlsYSECJk2CwLqsBCXstlevU
+Pr6P9PyIyEwwEJfppAZqvVh4usHhk2QEg630YwXoyhCJSRInKcf3UIzVq6sKVb5k
+fJ/PlKI2xDWHvTNS4omn4QuGsvllN7Crl29WBpZcqS89En6pPs5YAccgpR8Ll9o=
+=2mdk
+-----END PGP SIGNATURE-----
+--=-=-=--
