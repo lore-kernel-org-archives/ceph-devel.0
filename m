@@ -1,52 +1,67 @@
-From: Abhishek L <abhishek.lekshmanan@gmail.com>
-Subject: Preparing Giant v0.87.2 release
-Date: Thu, 09 Apr 2015 23:53:22 +0530
-Message-ID: <87bnixrwit.fsf@gmail.com>
+From: Pavan Rallabhandi <Pavan.Rallabhandi@sandisk.com>
+Subject: RE: RGW rados handles
+Date: Thu, 9 Apr 2015 18:49:37 +0000
+Message-ID: <68A06213B74F1742A2C48216AE1BB6B8087B71C4@SACMBXIP02.sdcorp.global.sandisk.com>
+References: <68A06213B74F1742A2C48216AE1BB6B8087B4697@SACMBXIP02.sdcorp.global.sandisk.com>
+ <2024043038.8779749.1428427378183.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; boundary="=-=-=";
-	micalg=pgp-sha1; protocol="application/pgp-signature"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f175.google.com ([209.85.192.175]:33654 "EHLO
-	mail-pd0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755724AbbDISZI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Apr 2015 14:25:08 -0400
-Received: by pdbnk13 with SMTP id nk13so161476483pdb.0
-        for <ceph-devel@vger.kernel.org>; Thu, 09 Apr 2015 11:25:08 -0700 (PDT)
+Received: from mail-bl2on0058.outbound.protection.outlook.com ([65.55.169.58]:48832
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S932855AbbDIStq (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 9 Apr 2015 14:49:46 -0400
+In-Reply-To: <2024043038.8779749.1428427378183.JavaMail.zimbra@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Loic Dachary <loic@dachary.org>
+To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>
 
---=-=-=
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-Hi Sage,
-
-Lo=C3=AFc and I have been working towards backporting issues towards the ne=
-xt
-giant release, we have been able to backport all the commits marked for
-giant backports and successfully run the integration suites. The tasks
-are tracked at http://tracker.ceph.com/issues/11153. Do you think, the
-next giant release is ready to be published, in which case, we'll
-proceed to ask the respective project leads to sign off the release and
-start the QE process.
-
-=2D-=20
-Abhishek
-
---=-=-=
-Content-Type: application/pgp-signature; name="signature.asc"; name="signature.asc"; description="Digital signature"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iQEcBAEBAgAGBQJVJsOpAAoJEPnwZB8bZe1fuIQH/0We2fr4mR5wo19U5Ix1xeV6
-/mRgrN3Hc5H5JK6HG7eXoECJhxz1ZZK+eSW/Cd2fuxRE69v96jZ88Vzp/b/iB5Dm
-/uj0HpgmV4AFBvbzs3KqasrHpWliBoZnOPLkKLS95KuE/jsKjyKeqErZ9tqJQfna
-pRNqhg41I25rDzvh5vhTNr6bjiot2AErk6/cYtnvQlsYSECJk2CwLqsBCXstlevU
-Pr6P9PyIyEwwEJfppAZqvVh4usHhk2QEg630YwXoyhCJSRInKcf3UIzVq6sKVb5k
-fJ/PlKI2xDWHvTNS4omn4QuGsvllN7Crl29WBpZcqS89En6pPs5YAccgpR8Ll9o=
-=2mdk
------END PGP SIGNATURE-----
---=-=-=--
+SGkgWWVodWRhLA0KDQpQbGVhc2UgZmluZCB0aGUgUFIgaHR0cHM6Ly9naXRodWIuY29tL2NlcGgv
+Y2VwaC9wdWxsLzQzMDkgZm9yIHRoZSBzYW1lLg0KDQpUaGFua3MsDQotUGF2YW4uDQoNCi0tLS0t
+T3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBZZWh1ZGEgU2FkZWgtV2VpbnJhdWIgW21haWx0
+bzp5ZWh1ZGFAcmVkaGF0LmNvbV0NClNlbnQ6IFR1ZXNkYXksIEFwcmlsIDA3LCAyMDE1IDEwOjUz
+IFBNDQpUbzogUGF2YW4gUmFsbGFiaGFuZGkNCkNjOiBDZXBoIERldmVsb3BtZW50OyBTYWdlIFdl
+aWwNClN1YmplY3Q6IFJlOiBSR1cgcmFkb3MgaGFuZGxlcw0KDQoNCg0KLS0tLS0gT3JpZ2luYWwg
+TWVzc2FnZSAtLS0tLQ0KPiBGcm9tOiAiUGF2YW4gUmFsbGFiaGFuZGkiIDxQYXZhbi5SYWxsYWJo
+YW5kaUBzYW5kaXNrLmNvbT4NCj4gVG86ICJDZXBoIERldmVsb3BtZW50IiA8Y2VwaC1kZXZlbEB2
+Z2VyLmtlcm5lbC5vcmc+DQo+IENjOiB5ZWh1ZGFAcmVkaGF0LmNvbQ0KPiBTZW50OiBUdWVzZGF5
+LCBBcHJpbCA3LCAyMDE1IDc6MDM6MzcgQU0NCj4gU3ViamVjdDogUkdXIHJhZG9zIGhhbmRsZXMN
+Cj4NCj4gSGksDQo+DQo+IEFzIHBhcnQgb2YgY2hhcmFjdGVyaXppbmcgUkdXIHJlYWQgcGVyZm9y
+bWFuY2UsIGhhdmUgb2JzZXJ2ZWQgdGhhdA0KPiB0aGVyZSBpcyBhIHNpbmdsZSBSQURPUyBjb25u
+ZWN0aW9uIHRoYXQgaXMgY29uc3VtZWQgYnkgc28gbWFueSBSR1cNCj4gd29ya2VyIHRocmVhZHMs
+IHJlc3VsdGluZyBpbiBzb21lIGFtb3VudCBvZiBzZXJpYWxpemF0aW9uIGF0IHRoYXQNCj4gbGV2
+ZWwuIE1ha2luZyB0aGUgUkFET1MgaGFuZGxlcyBtdWx0aXBsZSwgYW5kIHNoYXJlZCBhY3Jvc3Mg
+dGhlIHdvcmtlcg0KPiB0aHJlYWRzIGluIGEgUlIgZmFzaGlvbiwgaGF2ZSB5aWVsZGVkIGEgZmFj
+dG9yIG9mIH41MCUgaW1wcm92ZW1lbnQNCj4gKGZvciByZWFkIHJlcXVlc3RzKSBpbiB0aHJvdWdo
+cHV0IGFuZCB3aXRoIG11Y2ggYmV0dGVyIHJlc3BvbnNlIHRpbWVzDQo+IG9uIG15IHNldHVwICh3
+aWxsIHNoYXJlIHRoZSBjb25maWd1cmF0aW9uIGFuZCByZXN1bHRzIGluIGR1ZSBjb3Vyc2UpLg0K
+Pg0KPiBXYW50ZWQgdG8gdW5kZXJzdGFuZCBpZiB0aGVyZSBpcyBhIGNvbnN0cmFpbnQgaW4gaGF2
+aW5nIHNpbmdsZSBSQURPUw0KPiBpbnN0YW5jZSBwZXIgUkdXLCB0aGF0IGNvdWxkIG90aGVyd2lz
+ZSBiZSBhIGNvbmZpZ3VyYWJsZSBvcHRpb24sIGZvcg0KPiB3aGljaCBJIGhhdmUgYSBQUiBpbiBw
+aXBlbGluZS4NCg0KV2UgZGlzY3Vzc2VkIHRoaXMgYSB3aGlsZSBiYWNrLCBhbmQgaWlyYywgdGhl
+IG1haW4gaXNzdWUgdGhhdCB3YXMgYnJvdWdodCB3YXMgdGhhdCB3ZSdkIGVuZCB1cCBjcmVhdGlu
+ZyBtdWx0aXBsZSBzb2NrZXRzIHRvIHRoZSBiYWNrZW5kLCB3aGljaCBtaWdodCBiZSBwcm9ibGVt
+YXRpYyBib3RoIHRvIHRoZSBjbGllbnQgaXRzZWxmLCBidXQgYWxzbyB0byB0aGUgb3Nkcy4gQSBz
+aW1pbGFyIGVmZmVjdCB3b3VsZCBwb3RlbnRpYWxseSBiZSBhY2hpZXZlZCBieSBhZGRpbmcgbW9y
+ZSBnYXRld2F5cy4NCkknbSBub3QgYXdhcmUgb2YgYW55IG90aGVyIGlzc3Vlcy4gSSdtIGhhdmlu
+ZyB0cm91YmxlIGNvbWluZyB1cCB3aXRoIHdoYXQgd291bGQgZ28gd3JvbmcuIEhhdmluZyBtdWx0
+aXBsZSByYWRvcyBjb25uZWN0aW9uIG1lYW5zIHRoYXQgY2VydGFpbiBvcmRlcmluZyBndWFyYW50
+ZWVzIGFyZSBsb3N0LCBidXQgSSdtIG5vdCB0b28gc3VyZSBpZiBhbmQgd2hlcmUgd2UgcmVseSBv
+biB0aGVzZSwgYW5kIGl0IHdpbGwgYWxzbyBkZXBlbmQgb24gdGhlIHdheSB5b3UgaW1wbGVtZW50
+ZWQgaXQuIFdlJ2QgbG92ZSB0byBzZWUgdGhlIGNvZGUuDQoNClllaHVkYQ0KDQpfX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fXw0KDQpQTEVBU0UgTk9URTogVGhlIGluZm9ybWF0aW9uIGNv
+bnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNzYWdlIGlzIGludGVuZGVkIG9ubHkg
+Zm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpIG5hbWVkIGFib3ZlLiBJ
+ZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVuZGVkIHJlY2lwaWVu
+dCwgeW91IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1l
+c3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywgZGlzc2VtaW5hdGlvbiwgZGlzdHJp
+YnV0aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVk
+LiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFz
+ZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3IgZS1tYWlsIChhcyBzaG93biBhYm92
+ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVzIG9mIHRoaXMgbWVz
+c2FnZSBpbiB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25p
+Y2FsbHkgc3RvcmVkIGNvcGllcykuDQoNCg==
