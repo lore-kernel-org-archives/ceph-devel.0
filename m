@@ -1,65 +1,101 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: preparing hammer v0.94.1
-Date: Fri, 10 Apr 2015 12:06:58 +0200
-Message-ID: <5527A0C2.8090403@dachary.org>
+From: Ning Yao <zay11022@gmail.com>
+Subject: Re: Initial newstore vs filestore results
+Date: Fri, 10 Apr 2015 18:25:43 +0800
+Message-ID: <CALZt5jzyg2vODYfhPP_WS7cgY5tutDfkVwwAqfqFKQRCa-udwQ@mail.gmail.com>
+References: <5523F069.3000400@redhat.com>
+	<55242D15.8080800@redhat.com>
+	<55248856.1010808@redhat.com>
+	<alpine.DEB.2.00.1504071951120.4469@cobra.newdream.net>
+	<5525EFCC.3070607@redhat.com>
+	<5526B044.2090002@redhat.com>
+	<A9F57F2ABA6BB2469F01E127557C6C9B112D385D@SHSMSX104.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="PLaQssc9odTN0qXcp6QgrcR9SUeXHjD2K"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:44652 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1754443AbbDJKHB (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Apr 2015 06:07:01 -0400
+Received: from mail-wg0-f45.google.com ([74.125.82.45]:35282 "EHLO
+	mail-wg0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754773AbbDJKZo convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Apr 2015 06:25:44 -0400
+Received: by wgyo15 with SMTP id o15so13239735wgy.2
+        for <ceph-devel@vger.kernel.org>; Fri, 10 Apr 2015 03:25:43 -0700 (PDT)
+In-Reply-To: <A9F57F2ABA6BB2469F01E127557C6C9B112D385D@SHSMSX104.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, LOPEZ Jean-Charles <jelopez@redhat.com>
+To: "Duan, Jiangang" <jiangang.duan@intel.com>
+Cc: Mark Nelson <mnelson@redhat.com>, Sage Weil <sage@newdream.net>, ceph-devel <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---PLaQssc9odTN0qXcp6QgrcR9SUeXHjD2K
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-Hi Sage,
-
-The draft release notes are at https://github.com/ceph/ceph/pull/4330. A =
-minimal (34 jobs, no thrasher or file system variation) was scheduled at =
-http://pulpito.ceph.com/loic-2015-04-10_11:51:30-rados-hammer-backports--=
--basic-multi/ with a high priority, including a backport of the v4 bucket=
- feature detection fix from https://github.com/ceph/ceph/pull/4322. The b=
-ackport is in the https://github.com/ceph/ceph/tree/hammer-backports inte=
-gration branch which contains:
-
-$ git log --graph --oneline ceph/master..ceph/hammer-backports
-*   2d03afb Merge 4328: DNM: v4 bucket feature detection
-|\ =20
-| * 087c160 crush: fix has_v4_buckets()
-| * 8e8cccc crush: fix dump of has_v4_buckets
-|/ =20
-* b5921d5 crush/mapper: fix divide-by-0 in straw2
-* 93c8f43 osd: fix negative degraded objects during backfilling
-
-The issue tracking progress for v0.94.1 is http://tracker.ceph.com/issues=
-/11353
-
-Cheers
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+KV store introduces too much write amplification, we may need
+self-implemented WAL?
+Regards
+Ning Yao
 
 
---PLaQssc9odTN0qXcp6QgrcR9SUeXHjD2K
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlUnoMIACgkQ8dLMyEl6F21iiQCgg0s7xe3c8HvJII7NbJij6SdN
-o7MAn1RH3W/6GHGI5wuZwLJIh2MXdQI4
-=Z5H7
------END PGP SIGNATURE-----
-
---PLaQssc9odTN0qXcp6QgrcR9SUeXHjD2K--
+2015-04-10 14:11 GMT+08:00 Duan, Jiangang <jiangang.duan@intel.com>:
+> IMHO, the newstore performance depends so much on KV store performance due to the WAL -  so pick up the right KV or tune it will be the 1st step to do.
+>
+> -jiangang
+>
+>
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
+> Sent: Friday, April 10, 2015 1:01 AM
+> To: Sage Weil
+> Cc: ceph-devel
+> Subject: Re: Initial newstore vs filestore results
+>
+> On 04/08/2015 10:19 PM, Mark Nelson wrote:
+>> On 04/07/2015 09:58 PM, Sage Weil wrote:
+>>> What would be very interesting would be to see the 4KB performance
+>>> with the defaults (newstore overlay max = 32) vs overlays disabled
+>>> (newstore overlay max = 0) and see if/how much it is helping.
+>>
+>> And here we go.  1 OSD, 1X replication.  16GB RBD volume.
+>>
+>> 4MB        write    read    randw    randr
+>> default overlay    36.13    106.61    34.49    92.69
+>> no overlay    36.29    105.61    34.49    93.55
+>>
+>> 128KB        write    read    randw    randr
+>> default overlay    1.71    97.90    1.65    25.79
+>> no overlay    1.72    97.80    1.66    25.78
+>>
+>> 4KB        write    read    randw    randr
+>> default overlay    0.40    61.88    1.29    1.11
+>> no overlay    0.05    61.26    0.05    1.10
+>>
+>
+> Update this morning.  Also ran filestore tests for comparison.  Next we'll look at how tweaking the overlay for different IO sizes affects things.  IE the overlay threshold is 64k right now and it appears that 128K write IOs for instance are quite a bit worse with newstore currently than with filestore.  Sage also just committed changes that will allow overlay writes during append/create which may help improve small IO write performance as well in some cases.
+>
+> 4MB             write   read    randw   randr
+> default overlay 36.13   106.61  34.49   92.69
+> no overlay      36.29   105.61  34.49   93.55
+> filestore       36.17   84.59   34.11   79.85
+>
+> 128KB           write   read    randw   randr
+> default overlay 1.71    97.90   1.65    25.79
+> no overlay      1.72    97.80   1.66    25.78
+> filestore       27.15   79.91   8.77    19.00
+>
+> 4KB             write   read    randw   randr
+> default overlay 0.40    61.88   1.29    1.11
+> no overlay      0.05    61.26   0.05    1.10
+> filestore       4.14    56.30   0.42    0.76
+>
+> Seekwatcher movies and graphs available here:
+>
+> http://nhm.ceph.com/newstore/20150408/
+>
+> Note for instance the very interesting blktrace patterns for 4K random writes on the OSD in each case:
+>
+> http://nhm.ceph.com/newstore/20150408/filestore/RBD_00004096_randwrite.png
+> http://nhm.ceph.com/newstore/20150408/default_overlay/RBD_00004096_randwrite.png
+> http://nhm.ceph.com/newstore/20150408/no_overlay/RBD_00004096_randwrite.png
+>
+> Mark
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
