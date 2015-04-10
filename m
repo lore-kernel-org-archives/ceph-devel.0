@@ -1,86 +1,61 @@
-From: "Duan, Jiangang" <jiangang.duan@intel.com>
-Subject: RE: Initial newstore vs filestore results
-Date: Fri, 10 Apr 2015 06:11:18 +0000
-Message-ID: <A9F57F2ABA6BB2469F01E127557C6C9B112D385D@SHSMSX104.ccr.corp.intel.com>
-References: <5523F069.3000400@redhat.com> <55242D15.8080800@redhat.com>
- <55248856.1010808@redhat.com>
- <alpine.DEB.2.00.1504071951120.4469@cobra.newdream.net>
- <5525EFCC.3070607@redhat.com> <5526B044.2090002@redhat.com>
+From: =?UTF-8?B?5rGg5L+h5rO9?= <xmdxcxz@gmail.com>
+Subject: partial acks when send reply to client to reduce write latency
+Date: Fri, 10 Apr 2015 14:38:09 +0800
+Message-ID: <CANE=7sWb_0o=NPR3O-yVjoGJyy_Oye0TFXt82FsTccH4R0BBcA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:11145 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751924AbbDJGLW convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Apr 2015 02:11:22 -0400
-In-Reply-To: <5526B044.2090002@redhat.com>
-Content-Language: en-US
+Received: from mail-vn0-f44.google.com ([209.85.216.44]:43859 "EHLO
+	mail-vn0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755642AbbDJGiK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Apr 2015 02:38:10 -0400
+Received: by vnbg7 with SMTP id g7so3174953vnb.10
+        for <ceph-devel@vger.kernel.org>; Thu, 09 Apr 2015 23:38:09 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>, Sage Weil <sage@newdream.net>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-IMHO, the newstore performance depends so much on KV store performance due to the WAL -  so pick up the right KV or tune it will be the 1st step to do. 
+hi, all:
 
--jiangang
+    Now, ceph should received all ack message from remote and then
+reply ack to client, What
 
+about directly reply to client if primary has been received some of
+them. Below is the request
 
------Original Message-----
-From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
-Sent: Friday, April 10, 2015 1:01 AM
-To: Sage Weil
-Cc: ceph-devel
-Subject: Re: Initial newstore vs filestore results
+trace among osd. Primary wait for second sub_op_commit_rec msg for a long time.
 
-On 04/08/2015 10:19 PM, Mark Nelson wrote:
-> On 04/07/2015 09:58 PM, Sage Weil wrote:
->> What would be very interesting would be to see the 4KB performance 
->> with the defaults (newstore overlay max = 32) vs overlays disabled 
->> (newstore overlay max = 0) and see if/how much it is helping.
->
-> And here we go.  1 OSD, 1X replication.  16GB RBD volume.
->
-> 4MB        write    read    randw    randr
-> default overlay    36.13    106.61    34.49    92.69
-> no overlay    36.29    105.61    34.49    93.55
->
-> 128KB        write    read    randw    randr
-> default overlay    1.71    97.90    1.65    25.79
-> no overlay    1.72    97.80    1.66    25.78
->
-> 4KB        write    read    randw    randr
-> default overlay    0.40    61.88    1.29    1.11
-> no overlay    0.05    61.26    0.05    1.10
->
+    Does it make sense?
 
-Update this morning.  Also ran filestore tests for comparison.  Next we'll look at how tweaking the overlay for different IO sizes affects things.  IE the overlay threshold is 64k right now and it appears that 128K write IOs for instance are quite a bit worse with newstore currently than with filestore.  Sage also just committed changes that will allow overlay writes during append/create which may help improve small IO write performance as well in some cases.
-
-4MB		write	read	randw	randr
-default overlay	36.13	106.61	34.49	92.69
-no overlay	36.29	105.61	34.49	93.55
-filestore	36.17	84.59	34.11	79.85
-				
-128KB		write	read	randw	randr
-default overlay	1.71	97.90	1.65	25.79
-no overlay	1.72	97.80	1.66	25.78
-filestore	27.15	79.91	8.77	19.00
-				
-4KB		write	read	randw	randr
-default overlay	0.40	61.88	1.29	1.11
-no overlay	0.05	61.26	0.05	1.10
-filestore	4.14	56.30	0.42	0.76
-
-Seekwatcher movies and graphs available here:
-
-http://nhm.ceph.com/newstore/20150408/
-
-Note for instance the very interesting blktrace patterns for 4K random writes on the OSD in each case:
-
-http://nhm.ceph.com/newstore/20150408/filestore/RBD_00004096_randwrite.png
-http://nhm.ceph.com/newstore/20150408/default_overlay/RBD_00004096_randwrite.png
-http://nhm.ceph.com/newstore/20150408/no_overlay/RBD_00004096_randwrite.png
-
-Mark
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+                [
+                    { "time": "2015-04-10 10:40:15.373835",
+                      "event": "waiting_for_osdmap"},
+                    { "time": "2015-04-10 10:40:15.375143",
+                      "event": "reached_pg"},
+                    { "time": "2015-04-10 10:40:15.375210",
+                      "event": "started"},
+                    { "time": "2015-04-10 10:40:15.375234",
+                      "event": "started"},
+                    { "time": "2015-04-10 10:40:15.375432",
+                      "event": "waiting for subops from [34,20]"},
+                    { "time": "2015-04-10 10:40:15.375846",
+                      "event": "commit_queued_for_journal_write"},
+                    { "time": "2015-04-10 10:40:15.381176",
+                      "event": "write_thread_in_journal_buffer"},
+                    { "time": "2015-04-10 10:40:15.384739",
+                      "event": "journaled_completion_queued"},
+                    { "time": "2015-04-10 10:40:15.384838",
+                      "event": "op_commit"},
+                    { "time": "2015-04-10 10:40:15.387949",
+                      "event": "op_applied"},
+                    { "time": "2015-04-10 10:40:15.389616",
+                      "event": "sub_op_commit_rec"},
+                    { "time": "2015-04-10 10:40:20.946123",
+                      "event": "sub_op_commit_rec"},
+                    { "time": "2015-04-10 10:40:20.946142",
+                      "event": "commit_sent"},
+                    { "time": "2015-04-10 10:40:20.946157",
+                      "event": "done"}]]},
+-- 
+Regards,
+xinze
