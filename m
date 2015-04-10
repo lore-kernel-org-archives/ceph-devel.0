@@ -1,155 +1,65 @@
-From: Jian Wen <wenjianhn-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: Prioritize Heartbeat packets
-Date: Fri, 10 Apr 2015 14:39:06 +0800
-Message-ID: <CAMXzGWJJpDbV0M0rtTkoRU=tSkgi3tM=x6Sy+wKhfZ=oPNy2hw@mail.gmail.com>
-References: <1985102496.575.1409186929716.JavaMail.root@thunderbeast.private.linuxbox.com>
-	<alpine.DEB.2.00.1408271755160.966@cobra.newdream.net>
-	<ltmnkp$tod$1@ger.gmane.org>
-	<CAANLjFrHdDNJnMnWQk3s2cT0LZxsCGp63xHBJw7HNJocfSahzw@mail.gmail.com>
-	<mdg18n$gsj$1@ger.gmane.org>
-	<CAANLjFpH=0ZjXm2FKNF4Qz421jcM8QsW8HTDGpLqy5=w8POXQw@mail.gmail.com>
-	<CAMXzGWK+8hpv0LOp6tAGft_=f8Peb9qackcLXruQH7qVVD9chQ@mail.gmail.com>
-	<CAANLjFrwqr-znyMSBw=wCgiVkwqRT69ud3n0yAnhWUH=PZRTTw@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: preparing hammer v0.94.1
+Date: Fri, 10 Apr 2015 12:06:58 +0200
+Message-ID: <5527A0C2.8090403@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAANLjFrwqr-znyMSBw=wCgiVkwqRT69ud3n0yAnhWUH=PZRTTw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Robert LeBlanc <robert-4JaGZRWAfWbajFs6igw21g@public.gmane.org>
-Cc: Daniel Swarbrick <daniel.swarbrick-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="PLaQssc9odTN0qXcp6QgrcR9SUeXHjD2K"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail2.dachary.org ([91.121.57.175]:44652 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1754443AbbDJKHB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Apr 2015 06:07:01 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, LOPEZ Jean-Charles <jelopez@redhat.com>
 
-Robert,
-    60 days ago, we enabled this feature in our production environment.
-    It works for us.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--PLaQssc9odTN0qXcp6QgrcR9SUeXHjD2K
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-    Did you see any flapping OSDs?
+Hi Sage,
 
-On Tue, Mar 10, 2015 at 1:16 PM, Robert LeBlanc <robert-4JaGZRWAfWbajFs6igw21g@public.gmane.org> wrote:
-> Jian,
->
-> Thanks for the clarification. I'll mark traffic destined for the
-> monitors as well. We are getting ready to put our first cluster into
-> production. If you are interested we will be testing the heartbeat
-> priority to see if we can saturate the network (not an easy task for
-> 40 Gb) and keep the cluster from falling apart. Our network team is
-> marking COS based on the DSCP and enforcing priority. We have three
-> VLANs on bonded 40 GbE, management, storage (monitors, clients, OSDs),
-> and cluster (replication). We have three priority classes management
-> (heartbeats on all VLANs, SSH, DNS, etc), storage traffic (no
-> marking), and replication (scavenger class). We are interested to see
-> how things pan out.
->
-> Thanks,
-> Robert
->
-> On Mon, Mar 9, 2015 at 8:58 PM, Jian Wen <wenjianhn-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
->> Only OSD calls set_socket_priority().
->> See  https://github.com/ceph/ceph/pull/3353
->>
->> On Tue, Mar 10, 2015 at 3:36 AM, Robert LeBlanc <robert-4JaGZRWAfWbajFs6igw21g@public.gmane.org> wrote:
->>> I've found commit 9b9a682fe035c985e416ee1c112fa58f9045a27c and I see
->>> that when 'osd heartbeat use min delay socket = true' it will mark the
->>> packet with DSCP CS6. Based on the setting of the socket in
->>> msg/simple/Pipe.cc is it possible that this can apply to both OSD and
->>> monitor? I don't understand the code enough to know how the
->>> set_socket_options() is called from the OSD and monitor.
->>>
->>> If this applies to both monitor and OSD, would it be better to rename
->>> the option to a more generic name?
->>>
->>> Thanks,
->>>
->>> On Sat, Mar 7, 2015 at 4:23 PM, Daniel Swarbrick
->>> <daniel.swarbrick-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
->>>> Judging by the commit, this ought to do the trick:
->>>>
->>>> osd heartbeat use min delay socket = true
->>>>
->>>> On 07/03/15 01:20, Robert LeBlanc wrote:
->>>>>
->>>>> I see that Jian Wen has done work on this for 0.94. I tried looking
->>>>> through the code to see if I can figure out how to configure this new
->>>>> option, but it all went over my head pretty quick.
->>>>>
->>>>> Can I get a brief summary on how to set the priority of heartbeat
->>>>> packets or where to look in the code to figure it out?
->>>>>
->>>>> Thanks,
->>>>>
->>>>> On Thu, Aug 28, 2014 at 2:01 AM, Daniel Swarbrick
->>>>> <daniel.swarbrick-EIkl63zCoXaH+58JC4qpiA@public.gmane.org
->>>>> <mailto:daniel.swarbrick-EIkl63zCoXaH+58JC4qpiA@public.gmane.org>> wrote:
->>>>>
->>>>>     On 28/08/14 02:56, Sage Weil wrote:
->>>>>     > I seem to remember someone telling me there were hooks/hints you
->>>>> could
->>>>>     > call that would tag either a socket or possibly data on that socket
->>>>> with a
->>>>>     > label for use by iptables and such.. but I forget what it was.
->>>>>     >
->>>>>
->>>>>     Something like setsockopt() SO_MARK?
->>>>>
->>>>>             *SO_MARK *(since Linux 2.6.25)
->>>>>                    Set the mark for each packet sent through this socket
->>>>>     (similar
->>>>>                    to the netfilter MARK target but socket-based).
->>>>>     Changing the
->>>>>                    mark can be used for mark-based routing without
->>>>>     netfilter or
->>>>>                    for packet filtering.  Setting this option requires the
->>>>>                    *CAP_NET_ADMIN *capability.
->>>>>
->>>>>     Alternatively, directly set IP_TOS options on the socket, or
->>>>> SO_PRIORITY
->>>>>     which sets the IP TOS bits as well.
->>>>>
->>>>>
->>>>>     _______________________________________________
->>>>>     ceph-users mailing list
->>>>>     ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
->>>>>     <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
->>>>>     http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>>>>
->>>>>
->>>>>
->>>>>
->>>>> _______________________________________________
->>>>> ceph-users mailing list
->>>>> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
->>>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>>>>
->>>>
->>>>
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>> _______________________________________________
->>> ceph-users mailing list
->>> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
->>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>
->>
->>
->> --
->> Best,
->>
->> Jian
+The draft release notes are at https://github.com/ceph/ceph/pull/4330. A =
+minimal (34 jobs, no thrasher or file system variation) was scheduled at =
+http://pulpito.ceph.com/loic-2015-04-10_11:51:30-rados-hammer-backports--=
+-basic-multi/ with a high priority, including a backport of the v4 bucket=
+ feature detection fix from https://github.com/ceph/ceph/pull/4322. The b=
+ackport is in the https://github.com/ceph/ceph/tree/hammer-backports inte=
+gration branch which contains:
+
+$ git log --graph --oneline ceph/master..ceph/hammer-backports
+*   2d03afb Merge 4328: DNM: v4 bucket feature detection
+|\ =20
+| * 087c160 crush: fix has_v4_buckets()
+| * 8e8cccc crush: fix dump of has_v4_buckets
+|/ =20
+* b5921d5 crush/mapper: fix divide-by-0 in straw2
+* 93c8f43 osd: fix negative degraded objects during backfilling
+
+The issue tracking progress for v0.94.1 is http://tracker.ceph.com/issues=
+/11353
+
+Cheers
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
 
+--PLaQssc9odTN0qXcp6QgrcR9SUeXHjD2K
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
--- 
-Best,
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
 
-Jian
+iEYEARECAAYFAlUnoMIACgkQ8dLMyEl6F21iiQCgg0s7xe3c8HvJII7NbJij6SdN
+o7MAn1RH3W/6GHGI5wuZwLJIh2MXdQI4
+=Z5H7
+-----END PGP SIGNATURE-----
+
+--PLaQssc9odTN0qXcp6QgrcR9SUeXHjD2K--
