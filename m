@@ -1,105 +1,55 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: proposal to stop using "backport: " in commit logs
-Date: Mon, 13 Apr 2015 22:04:38 +0200
-Message-ID: <552C2156.8090406@dachary.org>
-References: <552BF349.50909@redhat.com>	<CAC6JEv8BqBkispnR7xZmC66p8YO4ckHH2mQFy_vt6MB+U=u-ZA@mail.gmail.com>	<552BFCBA.2010201@dachary.org> <CAC6JEv8DTj2mdJspfe8Xo9VOFaRgH6egz3Uh2V_wo-UcwdXfSg@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: Regarding newstore performance
+Date: Mon, 13 Apr 2015 23:53:53 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD78CA3@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="aoHqotMLnNX2NfHC798NaBw7T0VNvQ5cm"
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:46003 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751669AbbDMUEl (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Apr 2015 16:04:41 -0400
-In-Reply-To: <CAC6JEv8DTj2mdJspfe8Xo9VOFaRgH6egz3Uh2V_wo-UcwdXfSg@mail.gmail.com>
+Received: from mail-by2on0093.outbound.protection.outlook.com ([207.46.100.93]:25772
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750935AbbDMXx6 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Apr 2015 19:53:58 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@gregs42.com>
-Cc: Ken Dreyer <kdreyer@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---aoHqotMLnNX2NfHC798NaBw7T0VNvQ5cm
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Sage,
+I was doing some preliminary performance testing of newstore on a single OSD (SSD) , single replication setup. Here is my findings so far.
 
+Test:
+-----
 
+        64K random writes with QD= 64 using fio_rbd.
 
-On 13/04/2015 20:53, Gregory Farnum wrote:
-> On Mon, Apr 13, 2015 at 10:28 AM, Loic Dachary <loic@dachary.org> wrote=
-:
->>
->> Hi Greg,
->>
->> On 13/04/2015 19:04, Gregory Farnum wrote:
->>> On Mon, Apr 13, 2015 at 9:48 AM, Ken Dreyer <kdreyer@redhat.com> wrot=
-e:
->>>> A while ago this came up in #ceph-devel and I wanted to bring it to =
-a
->>>> wider audience.
->>>>
->>>> Should we stop the convention of adding the "backport: " tags in Git=
-?
->>>>
->>>> Loic brought up the point that this data is essentially immutable af=
-ter
->>>> we merge it, and it's better to point at a Redmine tracker where we =
-can
->>>> alter the "backport" field.
->>>>
->>>> This makes it easier to adjust the "backport" data after the code's =
-been
->>>> merged to master. It also makes it easier for whoever is corralling =
-the
->>>> backport efforts, because the person only have one place to look
->>>> (Redmine) instead of two (Redmine + git commit logs).
->>>>
->>>> For what it's worth I agree with Loic on this.
->>>>
->>>> Any objections?
->>>
->>> Why don't we just treat the backport commit tag as an expected value,=
+Results :
+----------
 
->>> and any corresponding redmine data as the canonical one?
->>
->> That's what we currently do, I think.
->>
->>> I find the
->>> backport tags to be useful when reviewing commits and I think the
->>> authorial intention matters.
->>
->> A git-notes could be added for that purpose instead.
->=20
-> Huh, I'm not previously familiar with that mechanism. Is there any
-> particular reason you didn't use that for tracking backport states to
-> begin with? It looks like it's sort of designed for this purpose.
+        1. With all default settings, I am seeing very spiky performance. FIO is reporting between 0-~1K random write IOPS with many times IO stops at 0s...Tried with bigger overlay max size value but results are similar...
 
-My thoughts exactly. But I figure that out only recently. The cross refer=
-encing script  which currently creates a web page should be changed to up=
-date / verify git notes in a namespace dedicated to backporting, in a jso=
-n format that is rigid and meant to be consistent and reliable. And the w=
-eb page should be a display of these git notes instead of what it current=
-ly is. The default git notes name space could be used by developers to st=
-ore human edited notes about commits such as the Backport field etc. beca=
-use there is value in loosely maintained information.
+        2. Next I set the newstore_overlay_max = 0 and I got pretty stable performance ~800-900 IOPS (write duration is short though).
 
-Cheers
+        3. I tried to tweak all the settings one by one but not much benefit anywhere.
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+        4. One interesting observation here, in my setup if I set newstore_sync_queue_transaction = true , I am getting iops ~600-700..Which is ~100 less.
+             This is quite contrary to my keyvaluestore experiment where I got ~3X improvement by doing sync  writes !
+
+        5. Filestore performance in the similar setup is ~1.6K after 1 TB of data write.
+
+I am trying to figure out from the code what exactly this overlay writes does. Any insight/explanation would be helpful here.
+
+I am planning to do some more experiment with newstore including WA comparison between filestore vs newstore. Will publish the result soon.
+
+Thanks & Regards
+Somnath
 
 
---aoHqotMLnNX2NfHC798NaBw7T0VNvQ5cm
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
 
-iEYEARECAAYFAlUsIVYACgkQ8dLMyEl6F20Y/QCfTOON9/1MmH4be9mH4SGbxkNh
-o6QAn3OfpZ3xO6kJDmKaE2heZuQg4hy/
-=M5ls
------END PGP SIGNATURE-----
 
---aoHqotMLnNX2NfHC798NaBw7T0VNvQ5cm--
+________________________________
+
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+
