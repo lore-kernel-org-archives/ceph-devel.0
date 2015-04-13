@@ -1,53 +1,47 @@
-From: "Matt W. Benjamin" <matt@cohortfs.com>
-Subject: Re: loadable objectstore
-Date: Mon, 13 Apr 2015 12:09:51 -0400 (EDT)
-Message-ID: <1445111370.34.1428941391820.JavaMail.root@thunderbeast.private.linuxbox.com>
-References: <alpine.DEB.2.00.1504110746540.4469@cobra.newdream.net>
-Reply-To: "Matt W. Benjamin" <matt@cohortfs.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: v0.94.1 Hammer released
+Date: Mon, 13 Apr 2015 09:10:14 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1504130847250.15431@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from aa.linuxbox.com ([69.128.83.226]:2163 "EHLO aa.linuxbox.com"
+Received: from mx1.redhat.com ([209.132.183.28]:56695 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751604AbbDMQJ7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 13 Apr 2015 12:09:59 -0400
-In-Reply-To: <alpine.DEB.2.00.1504110746540.4469@cobra.newdream.net>
+	id S1751604AbbDMQKU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 13 Apr 2015 12:10:20 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Varada Kari <Varada.Kari@sandisk.com>
+To: ceph-announce@ceph.com, ceph-devel@vger.kernel.org, ceph-users@ceph.com, ceph-maintainers@ceph.com
 
-Seems good to me.
+This bug fix release fixes a few critical issues with CRUSH.  The most 
+important addresses a bug in feature bit enforcement that may prevent 
+pre-hammer clients from communicating with the cluster during an upgrade.  
+This only manifests in some cases (for example, when the 'rack' type is in 
+use in the CRUSH map, and possibly other cases), but for safety we 
+strongly recommend that all users use 0.94.1 instead of 0.94 when 
+upgrading.
 
------ "Sage Weil" <sage@newdream.net> wrote:
+There is also a fix in the new straw2 buckets when OSD weights are 0.
 
-> On Sat, 11 Apr 2015, Varada Kari wrote:
-> > Hi Matt/ Sage,
-> > 
-> > Thanks for sharing the pull request. Will work on the items what
-> sage 
-> > was mentioning in the comments along with the items in the tracker.
-> 
-> I pushed a wip-plugin branch with the pattern I had in mind... does
-> this 
-> make sense?  It's only compile tested, and still needs preload()
-> methods 
-> implemented so that long-running daemons (or perhaps others?) can
-> preload 
-> it all at once.
-> 
+We recommend that all v0.94 users upgrade.
 
-Matt
+Notable changes
+---------------
 
--- 
-Matt Benjamin
-CohortFS, LLC.
-315 West Huron Street, Suite 140A
-Ann Arbor, Michigan 48103
+* crush: fix divide-by-0 in straw2 (#11357 Sage Weil)
+* crush: fix has_v4_buckets (#11364 Sage Weil)
+* osd: fix negative degraded objects during backfilling (#7737 Guang Yang)
 
-http://cohortfs.com
+For more detailed information, see the complete changelog at
 
-tel.  734-761-4689 
-fax.  734-769-8938 
-cel.  734-216-5309 
+  http://docs.ceph.com/docs/master/_downloads/v0.94.1.txt
+
+Getting Ceph
+------------
+
+* Git at git://github.com/ceph/ceph.git
+* Tarball at http://ceph.com/download/ceph-0.94.1.tar.gz
+* For packages, see http://ceph.com/docs/master/install/get-packages
+* For ceph-deploy, see http://ceph.com/docs/master/install/install-ceph-deploy
+
+
