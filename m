@@ -1,24 +1,39 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: Regarding newstore performance
-Date: Mon, 13 Apr 2015 19:06:50 -0500
-Message-ID: <552C5A1A.4030201@redhat.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Regarding newstore performance
+Date: Tue, 14 Apr 2015 00:12:16 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD78CE3@SACMBXIP01.sdcorp.global.sandisk.com>
 References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD78CA3@SACMBXIP01.sdcorp.global.sandisk.com>
+ <552C5A1A.4030201@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:54380 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754865AbbDNAGx (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 13 Apr 2015 20:06:53 -0400
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD78CA3@SACMBXIP01.sdcorp.global.sandisk.com>
+Received: from mail-bn1on0091.outbound.protection.outlook.com ([157.56.110.91]:18138
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751527AbbDNAMU convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Apr 2015 20:12:20 -0400
+In-Reply-To: <552C5A1A.4030201@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Somnath,  I'm running similar tests right now looking at newstore 
-with 8m and no overlay on spinning disk, spinning disk + SSD WAL, and 
-SSD.  Should have results in the next hour or two.
+Thanks Mark..Let me know if you are doing any tuning in rocksdb layer.
+BTW, do you know what this overlay does ? why it is impacting performance so much ? 
+By looking at the code I am seeing lot of extra K/v operation in case of overlay writes.
+Waiting for Sage's reply on that part..
+
+Regards
+Somnath
+
+-----Original Message-----
+From: Mark Nelson [mailto:mnelson@redhat.com] 
+Sent: Monday, April 13, 2015 5:07 PM
+To: Somnath Roy; ceph-devel
+Subject: Re: Regarding newstore performance
+
+Hi Somnath,  I'm running similar tests right now looking at newstore with 8m and no overlay on spinning disk, spinning disk + SSD WAL, and SSD.  Should have results in the next hour or two.
 
 Mark
 
@@ -61,7 +76,7 @@ On 04/13/2015 06:53 PM, Somnath Roy wrote:
 > PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
 >
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> in the body of a message to majordomo@vger.kernel.org More majordomo 
+> info at  http://vger.kernel.org/majordomo-info.html
 >
