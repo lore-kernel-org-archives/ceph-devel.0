@@ -1,148 +1,68 @@
-From: Tim Serong <tserong@suse.com>
-Subject: Re: [Ceph-maintainers] statically allocated uid/gid for ceph
-Date: Tue, 14 Apr 2015 14:03:14 +1000
-Message-ID: <552C9182.5030605@suse.com>
-References: <alpine.DEB.2.00.1412061245410.18213@cobra.newdream.net> <5488919E.4090109@redhat.com> <alpine.DEB.2.00.1412101044300.22847@cobra.newdream.net> <5488FC46.5080106@suse.com> <alpine.DEB.2.00.1504131802400.32097@cobra.newdream.net>
+From: Alexandre DERUMIER <aderumier@odiso.com>
+Subject: how to test hammer rbd objectmap feature ?
+Date: Tue, 14 Apr 2015 09:48:23 +0200 (CEST)
+Message-ID: <2146461277.257952132.1428997703232.JavaMail.zimbra@oxygem.tv>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.emea.novell.com ([130.57.118.101]:36634 "EHLO
-	mail.emea.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750741AbbDNEDx (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-	Tue, 14 Apr 2015 00:03:53 -0400
-In-Reply-To: <alpine.DEB.2.00.1504131802400.32097@cobra.newdream.net>
+Received: from mailpro.odiso.net ([89.248.209.98]:56822 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751465AbbDNHs0 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Apr 2015 03:48:26 -0400
+Received: from localhost (localhost [127.0.0.1])
+	by mailpro.odiso.net (Postfix) with ESMTP id B251440755C36
+	for <ceph-devel@vger.kernel.org>; Tue, 14 Apr 2015 09:48:23 +0200 (CEST)
+Received: from mailpro.odiso.net ([127.0.0.1])
+	by localhost (mailpro.odiso.net [127.0.0.1]) (amavisd-new, port 10032)
+	with ESMTP id 5NmsYRNySut1 for <ceph-devel@vger.kernel.org>;
+	Tue, 14 Apr 2015 09:48:23 +0200 (CEST)
+Received: from localhost (localhost [127.0.0.1])
+	by mailpro.odiso.net (Postfix) with ESMTP id 8B11940755C75
+	for <ceph-devel@vger.kernel.org>; Tue, 14 Apr 2015 09:48:23 +0200 (CEST)
+Received: from mailpro.odiso.net ([127.0.0.1])
+	by localhost (mailpro.odiso.net [127.0.0.1]) (amavisd-new, port 10026)
+	with ESMTP id 9Pe7eWMG-bbN for <ceph-devel@vger.kernel.org>;
+	Tue, 14 Apr 2015 09:48:23 +0200 (CEST)
+Received: from mailpro.odiso.net (mailpro.odiso.net [10.1.31.112])
+	by mailpro.odiso.net (Postfix) with ESMTP id 6646540755C36
+	for <ceph-devel@vger.kernel.org>; Tue, 14 Apr 2015 09:48:23 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Ken Dreyer <kdreyer@redhat.com>, cjwatson@debian.org, timm@fnal.gov, osynge@suse.com, ceph-maintainers@ceph.com, ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 04/14/2015 11:05 AM, Sage Weil wrote:
-> Tim, Owen:
-> 
-> Can we get a 'ceph' user/group uid/gid allocated for SUSE to get this 
-> unstuck?  IMO the radosgw systemd stuff is blocked behind this too.
+Hi,
 
-I haven't yet been able to get a good answer to assignment of static
-UIDs and GIDs (I was told all the ones between 0-99 are taken already).
+I would like to known how to enable object map on hammer ?
 
-But, if it's OK for the UID and GID numbers to potentially be different
-on different systems, adding a "ceph" user and "ceph" group is easy, we
-just add appropriate `groupadd -r ceph` and `useradd -r ceph`
-invocations to the rpm %pre script, which will give a UID/GID somewhere
-in the 100-499 range (see
-https://en.opensuse.org/openSUSE:Packaging_guidelines#Users_and_Groups
-for some notes on this).  We'd also want to update rpmlint to not whine
-about the "ceph" name.
+I found a post hammer commit here:
 
-I originally thought the risk of non-static UID/GID numbers on different
-systems was terrible, but...
+https://github.com/ceph/ceph/commit/3a7b28d9a2de365d515ea1380ee9e4f867504e10
+"rbd: add feature enable/disable support"
 
-> I think a osd-prestart.sh snippet (or similar) that does a chown -R of any 
-> non-root osd data to the local ceph user prior to starting the daemon will 
-> handle the cross-distro changes without too much trouble.  I'd lean toward 
-> not going from root -> ceph, though, and have the start script stay root 
-> and not drop privs if the data is owned by root.. that covers upgrades 
-> without interruption.
-> 
-> What do you think?
+-   Specifies which RBD format 2 features are to be enabled when creating
+-   an image. The numbers from the desired features below should be added
+-   to compute the parameter value:
++   Specifies which RBD format 2 feature should be enabled when creating
++   an image. Multiple features can be enabled by repeating this option
++   multiple times. The following features are supported:
 
-...that sounds reasonable, and I think it would also handle the case
-where, say, you move an OSD from one SUSE host to another - if the
-UID/GID doesn't match (maybe some other `useradd`ing software was
-installed first on the other host), the chown will fix it anyway.
+-.. option:: --image-features features
++.. option:: --image-feature feature
 
-Are there any holes in this?
-
-Regards,
-
-Tim
+-   +1: layering support
+-   +2: striping v2 support
+-   +4: exclusive locking support
+-   +8: object map support
++   layering: layering support
++   striping: striping v2 support
++   exclusive-lock: exclusive locking support
++   object-map: object map support (requires exclusive-lock)
 
 
-> 
-> 
-> On Thu, 11 Dec 2014, Tim Serong wrote:
-> 
->> On 12/11/2014 05:48 AM, Sage Weil wrote:
->>> +ceph-devel
->>>
->>> On Wed, 10 Dec 2014, Ken Dreyer wrote:
->>>> On 12/06/2014 01:54 PM, Sage Weil wrote:
->>>>> Hi Colin, Boris, Owen,
->>>>>
->>>>> We would like to choose a statically allocated uid and gid for use by Ceph 
->>>>> storage servers.  The basic goals are:
->>>>>
->>>>>  - run daemons as non-root (right now everything is uid 0 (runtime and 
->>>>> on-disk data) and this is clearly not ideal)
->>>>>  - enable hot swap of disks between storage servers
->>>>>  - standardize across distros so that we can build clusters with a mix
->>>>>
->>>>> To support the hot swap, we can't use the usual uids allocated dynamically 
->>>>> during package installation.  Disks will completely filled with Ceph data 
->>>>> files with the uid from one machine and will not be usable on another 
->>>>> machine.
->>>>>
->>>>> I'm hoping we can choose a static uid/gid pair that is unused for Debian 
->>>>> (and Ubuntu), Fedora (and RHEL/CentOS), and OpenSUSE/SLES.  This will let 
->>>>> us maintain consistency across the entire ecosystem.
->>>>
->>>> How many system users should I request from the Fedora Packaging
->>>> Committee, and what should their names be?
->>>>
->>>> For example, are ceph-mon and ceph-osd going to run under the same
->>>> non-privileged system account?
->>>
->>> Hmm, my first impulse was to make a single user and group.  But it might 
->>> make sense that e.g. rgw should run in a different context than ceph-osd 
->>> or ceph-mon.
->>>
->>> If we go down that road, then maybe
->>>
->>>  ceph-osd
->>>  ceph-mon
->>>  ceph-mds
->>>  ceph-rgw
->>>  ceph-calamari
->>>
->>> and a 'ceph' group that we can use for /var/log/ceph etc for the qemu 
->>> and other librados users?
->>>
->>> Alternatively, if we just do user+group ceph, then rgw can run as www-data 
->>> or apache (as it does now).  Not sure what makes the most sense for 
->>> ceph-calamari.
->>
->> FWIW my gut says go with a single ceph user+group and leave rgw running
->> as the apache user.
->>
->> Calamari consists of a few pieces - the web-accessible bit runs as the
->> apache user, then there's the cthulhu daemon, as well as carbon-cache
->> for the graphite stuff.  These latter two I believe run as root (at
->> least, they do with my SUSE packages which have systemd units for each
->> of these services, and I assume they run as root on other distros where
->> they're run under supervisord).  Now that I think of it though, I wonder
->> if it makes sense to just run the whole lot as the apache user...?
->>
->> Regards,
->>
->> Tim
->> -- 
->> Tim Serong
->> Senior Clustering Engineer
->> SUSE
->> tserong@suse.com
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
-> 
+So, in current hammer release, we can only setup objectmap and other features on rbd volume creation ?
+
+Do this patch allow to change features on the fly ?
+If yes, is it planned to backport it to hammer soon ?
 
 
--- 
-Tim Serong
-Senior Clustering Engineer
-SUSE
-tserong@suse.com
