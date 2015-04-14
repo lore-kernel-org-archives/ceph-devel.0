@@ -1,112 +1,38 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: [Ceph-maintainers] statically allocated uid/gid for ceph
-Date: Mon, 13 Apr 2015 18:05:08 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1504131802400.32097@cobra.newdream.net>
-References: <alpine.DEB.2.00.1412061245410.18213@cobra.newdream.net> <5488919E.4090109@redhat.com> <alpine.DEB.2.00.1412101044300.22847@cobra.newdream.net> <5488FC46.5080106@suse.com>
+From: Ketor D <d.ketor@gmail.com>
+Subject: [Issue]Ceph cluster hang due to network partition
+Date: Tue, 14 Apr 2015 11:59:50 +0800
+Message-ID: <CAM9_UU9SwjQ1FxYHcT2wrXwi1oCH5xuwRJQ9D-rwHwATTusTZw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:53144 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755069AbbDNBFT (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 13 Apr 2015 21:05:19 -0400
-In-Reply-To: <5488FC46.5080106@suse.com>
+Received: from mail-qk0-f172.google.com ([209.85.220.172]:35960 "EHLO
+	mail-qk0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750741AbbDNEAa (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Apr 2015 00:00:30 -0400
+Received: by qku63 with SMTP id 63so217310773qku.3
+        for <ceph-devel@vger.kernel.org>; Mon, 13 Apr 2015 21:00:29 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tim Serong <tserong@suse.com>
-Cc: Ken Dreyer <kdreyer@redhat.com>, cjwatson@debian.org, timm@fnal.gov, osynge@suse.com, ceph-maintainers@ceph.com, ceph-devel@vger.kernel.org
+To: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Tim, Owen:
+Hi Sage,
+      We recently meet a network partition problem, cause our ceph
+cluster can not service rbd service.
+       We are running 0.67.5 on our customer cluster. And the network
+partition is 3 osd can connect mon, but can not connect with all other
+osds.
+       Then many PGs fall in peering status, and rbd I/O is hang.
 
-Can we get a 'ceph' user/group uid/gid allocated for SUSE to get this 
-unstuck?  IMO the radosgw systemd stuff is blocked behind this too.
+        Before we operate the cluster , I set nout flag and stop the 3
+OSDs. After operating the 3 OSDs memory and OS bootup, the network is
+partition. The 3 OSDs start, then many PGs went to peering.
+I stoped the 3 OSDs process, but the PGs fall in peering.
+        After network partition is fixed, all PG get active+clean, all is OK.
 
-I think a osd-prestart.sh snippet (or similar) that does a chown -R of any 
-non-root osd data to the local ceph user prior to starting the daemon will 
-handle the cross-distro changes without too much trouble.  I'd lean toward 
-not going from root -> ceph, though, and have the start script stay root 
-and not drop privs if the data is owned by root.. that covers upgrades 
-without interruption.
+        I can't explain this, because I think the OSD can judge if the
+other OSD is alive, and I can see 3OSD is marked down in 'ceph osd
+tree'.
+        Why did these PGs fall in peering?
 
-What do you think?
-
-sage
-
-
-
-On Thu, 11 Dec 2014, Tim Serong wrote:
-
-> On 12/11/2014 05:48 AM, Sage Weil wrote:
-> > +ceph-devel
-> > 
-> > On Wed, 10 Dec 2014, Ken Dreyer wrote:
-> >> On 12/06/2014 01:54 PM, Sage Weil wrote:
-> >>> Hi Colin, Boris, Owen,
-> >>>
-> >>> We would like to choose a statically allocated uid and gid for use by Ceph 
-> >>> storage servers.  The basic goals are:
-> >>>
-> >>>  - run daemons as non-root (right now everything is uid 0 (runtime and 
-> >>> on-disk data) and this is clearly not ideal)
-> >>>  - enable hot swap of disks between storage servers
-> >>>  - standardize across distros so that we can build clusters with a mix
-> >>>
-> >>> To support the hot swap, we can't use the usual uids allocated dynamically 
-> >>> during package installation.  Disks will completely filled with Ceph data 
-> >>> files with the uid from one machine and will not be usable on another 
-> >>> machine.
-> >>>
-> >>> I'm hoping we can choose a static uid/gid pair that is unused for Debian 
-> >>> (and Ubuntu), Fedora (and RHEL/CentOS), and OpenSUSE/SLES.  This will let 
-> >>> us maintain consistency across the entire ecosystem.
-> >>
-> >> How many system users should I request from the Fedora Packaging
-> >> Committee, and what should their names be?
-> >>
-> >> For example, are ceph-mon and ceph-osd going to run under the same
-> >> non-privileged system account?
-> > 
-> > Hmm, my first impulse was to make a single user and group.  But it might 
-> > make sense that e.g. rgw should run in a different context than ceph-osd 
-> > or ceph-mon.
-> > 
-> > If we go down that road, then maybe
-> > 
-> >  ceph-osd
-> >  ceph-mon
-> >  ceph-mds
-> >  ceph-rgw
-> >  ceph-calamari
-> > 
-> > and a 'ceph' group that we can use for /var/log/ceph etc for the qemu 
-> > and other librados users?
-> > 
-> > Alternatively, if we just do user+group ceph, then rgw can run as www-data 
-> > or apache (as it does now).  Not sure what makes the most sense for 
-> > ceph-calamari.
-> 
-> FWIW my gut says go with a single ceph user+group and leave rgw running
-> as the apache user.
-> 
-> Calamari consists of a few pieces - the web-accessible bit runs as the
-> apache user, then there's the cthulhu daemon, as well as carbon-cache
-> for the graphite stuff.  These latter two I believe run as root (at
-> least, they do with my SUSE packages which have systemd units for each
-> of these services, and I assume they run as root on other distros where
-> they're run under supervisord).  Now that I think of it though, I wonder
-> if it makes sense to just run the whole lot as the apache user...?
-> 
-> Regards,
-> 
-> Tim
-> -- 
-> Tim Serong
-> Senior Clustering Engineer
-> SUSE
-> tserong@suse.com
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Thanks!
+Ketor
