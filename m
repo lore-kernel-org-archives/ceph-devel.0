@@ -1,65 +1,54 @@
-From: Gaudenz Steinlin <gaudenz@debian.org>
-Subject: Re: [Ceph-maintainers] statically allocated uid/gid for ceph
-Date: Wed, 15 Apr 2015 19:14:35 +0200
-Message-ID: <87bnip2u10.fsf@meteor.durcheinandertal.bofh>
-References: <alpine.DEB.2.00.1412061245410.18213@cobra.newdream.net> <5488919E.4090109@redhat.com> <alpine.DEB.2.00.1412101044300.22847@cobra.newdream.net> <5488FC46.5080106@suse.com> <alpine.DEB.2.00.1504131802400.32097@cobra.newdream.net> <552C9182.5030605@suse.com> <alpine.DEB.2.00.1504140819190.4469@cobra.newdream.net> <552D3C74.2000104@redhat.com>
+From: Venkateswara Rao Jujjuri <jujjuri@gmail.com>
+Subject: Few CEPH questions.
+Date: Wed, 15 Apr 2015 15:08:57 -0700
+Message-ID: <CAKKTCLWv1+pqW5_yj5d1T_6sDx+M1axev4T1We52vUmAytmRZw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; boundary="=-=-=";
-	micalg=pgp-sha512; protocol="application/pgp-signature"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from vechigen.cirrax.com ([217.197.128.12]:34949 "EHLO
-	mail.cirrax.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756658AbbDORYX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 15 Apr 2015 13:24:23 -0400
-In-Reply-To: <552D3C74.2000104@redhat.com>
+Received: from mail-qk0-f182.google.com ([209.85.220.182]:36224 "EHLO
+	mail-qk0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756477AbbDOWJk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 15 Apr 2015 18:09:40 -0400
+Received: by qku63 with SMTP id 63so107700615qku.3
+        for <ceph-devel@vger.kernel.org>; Wed, 15 Apr 2015 15:09:39 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ken Dreyer <kdreyer@redhat.com>, Sage Weil <sweil@redhat.com>, Tim Serong <tserong@suse.com>
-Cc: ceph-devel@vger.kernel.org, cjwatson@debian.org, ceph-maintainers@ceph.com, timm@fnal.gov
+To: ceph-devel@vger.kernel.org
 
---=-=-=
-Content-Type: text/plain
-Content-Transfer-Encoding: quoted-printable
+Hi All, I am new to this mailing list.
+I have few basic questions on the CEPH, hope someone can answer me.
+Thanks in advance.!!
 
 
-Hi
+I would like to understand more the the placement policy, especially
+on the failure path.
 
-Ken Dreyer <kdreyer@redhat.com> writes:
+1. Machines going up and down is fairly common in a data center.
+     How often does the cluster map change?
+     Every machine bounce causes an update/distribution of cluster map?
+     and affect the CRUSH? Does it cause cluster network too chatty?
 
-> On 04/14/2015 09:21 AM, Sage Weil wrote:
->> I think we still want them to be static across a distro; it's the=20
->> cross-distro change that will be relatively rare.  So a fixed ID from ea=
-ch=20
->> distro family ought to be okay?
->
-> Sounds sane to me. I've filed https://fedorahosted.org/fpc/ticket/524 to
-> request one from Fedora.
+2. Ceph mainly depends on the primary OSD in a given PG.
+    What happens in the read/write path if that OSD is down at that moment?
+    There can be cases, OSD is down but cluster map is not up to date.
+    When the write/read fail, does the client retry it after
+populating clustermap?
 
-I have now requested the same for Debian. If the request is granted we
-will most likely get the uid/gid 64045. Maybe others could use the same.
-It seems that only Debian has a range of reserved ids for this purpose.
-I would expect Ubuntu to use the same id, but that's up to them finally.
+3. Whenever the cluster map changes, it may not propagate to the entire cluster.
+    Some clients may be running with old map, and may end-up in wrong OSD.
+    Do we depend on peering to take care of this situation?
 
-Gaudenz
+4. If a OSD becomes too full, which may take reads, but no writes anymore. Does
+    CRUSH() take that into account? Does it generate different maps
+for reads vs writes?
+     or this case is handled by distributing(moving) data off of the OSD?
 
---=-=-=
-Content-Type: application/pgp-signature; name="signature.asc"
+6. Does CRUSH() takes OSD size into consideration?
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
+7. Does CEPH support quorum writes? (2 out of 3 is a success. )
 
-iQIVAwUBVS6cfM3PKyWkzVd5AQon6Q//RpFiKHX+q5RJJ4yO0NJqI1/rVE9ObmAp
-p0r4eHK1dYjWrFWAfMCOij9LAFBMKElh608p3oMjODHPlobUcbev7EbphQ0hr4qJ
-g4tuSUp0NgeAqtKBSRQruKuzUzm0Z5U/IgIFWNBiQhZ8k77Bl0o43dDPCBJeBtj0
-UtPtcTYIHya41O31GU0K7EA4y5m+/VDLrji2bhJeCgnH16Em2+lpTZAzmdoM1RjZ
-kfnLKquP2XVGAevvFwF9LFRWlLviFy/PdguaKcm5LTqBnsM4E+33CA186RI0TIPZ
-5uu880JS1V2cFMV35r2v1/oe6s+UDXr+ezxHsfTp9kMNaAMYIdbd3WgSDzEbZ32y
-bSUqo0SDaoZQKrMjUxn3jSIwiq5mnVakYMedU7iJR1bKP5wdLiMubrflDrX7KTpP
-AmjDY3yuDxiQaTalP0Vc6JTdTe9T3u4MBwJB3O7enj4XjCAJV8i7VPcrfSTQ5utE
-WyoPaebSIMBQSRUwnnW8Afd66yMp6nIkgRCq2KhJ0efuYGHEkd4hFhE6LFAeJY1i
-TfbeVBul7WbdjcjD9UbX1GJEblYIKh+dfljQ3xMWEXoYmkD1B7hln5JcBIIhDyjL
-6cgqxVOPW1yOxlmF8YuibgjLdzRPUZkd2wxUlcRg52Xhsr8I6fQpv8SwOzX2/174
-NgPutW7HNvc=
-=4SLF
------END PGP SIGNATURE-----
---=-=-=--
+--
+Jvrao
+---
+First they ignore you, then they laugh at you, then they fight you,
+then you win. - Mahatma Gandhi
