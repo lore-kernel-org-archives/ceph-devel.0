@@ -1,268 +1,209 @@
-From: shiva rkreddy <shiva.rkreddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: v0.80.8 and librbd performance
-Date: Tue, 14 Apr 2015 23:27:24 -0500
-Message-ID: <CAPntomDT90q48xsk=FSr-Va-aSJdZk5j9iALoZeCvOVb1djTKA@mail.gmail.com>
-References: <bb7a4f02-e495-4d69-961f-b0f970b407d1@redhat.com>
-	<CAPntomB=AiCtx2ypTi+fUFUCUDtkyURb=d-RgwX3ft2mrAibEA@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Regarding newstore performance
+Date: Wed, 15 Apr 2015 06:01:48 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD79CFB@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1151855416=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAPntomB=AiCtx2ypTi+fUFUCUDtkyURb=d-RgwX3ft2mrAibEA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Josh Durgin <jdurgin-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
-
---===============1151855416==
-Content-Type: multipart/alternative; boundary=001a113f3d1c908bcd0513bbc3fc
-
---001a113f3d1c908bcd0513bbc3fc
-Content-Type: text/plain; charset=UTF-8
-
-Retried the test with by setting: rbd_concurrent_management_ops and
-rbd-concurrent-management-ops to 20 (default 10?) and didn't see any
-difference in the delete time.
-
-Steps:
-1. Create 20, 500GB volumes
-2. run : rbd -n clientkey -p cindervols rbd rm $volumeId &
-3. run rbd ls command in with 1 second sleep and capture output  : rbd -n
-clientkey -p cindervols rbd ls
-
-It took the same amount of time to remove all entries in the pool when the
-ops setting was default.
-
-Thanks
-
-On Tue, Apr 14, 2015 at 10:01 PM, shiva rkreddy <shiva.rkreddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-wrote:
-
-> The clusters are in test environment, so its a new deployment of 0.80.9.
-> OS on the cluster nodes is reinstalled as well, so there shouldn't be any
-> fs aging unless the disks are slowing down.
->
-> The perf measurement is done initiating multiple cinder create/delete
-> commands and tracking the volume to be in available or completely gone from
-> "cinder list" output.
-> Even running  "rbd rm " command from cinder node results in similar
-> behaviour.
->
-> I'll try with  increasing  rbd_concurrent_management in ceph.conf.
->  Is the param name rbd_concurrent_management or rbd-concurrent-management ?
->
->
-> On Tue, Apr 14, 2015 at 12:36 PM, Josh Durgin <jdurgin-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
->
->> I don't see any commits that would be likely to affect that between
->> 0.80.7 and 0.80.9.
->>
->> Is this after upgrading an existing cluster?
->> Could this be due to fs aging beneath your osds?
->>
->> How are you measuring create/delete performance?
->>
->> You can try increasing rbd concurrent management ops in ceph.conf on the
->> cinder node. This affects delete speed, since rbd tries to delete each
->> object in a volume.
->>
->> Josh
->>
->> *From:* shiva rkreddy <shiva.rkreddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
->> *Sent:* Apr 14, 2015 5:53 AM
->> *To:* Josh Durgin
->> *Cc:* Ken Dreyer; Sage Weil; Ceph Development; ceph-users-Qp0mS5GaXlQ@public.gmane.org
->> *Subject:* Re: v0.80.8 and librbd performance
->>
->> Hi Josh,
->>
->> We are using firefly 0.80.9 and see both cinder create/delete numbers
->> slow down compared 0.80.7.
->> I don't see any specific tuning requirements and our cluster is run
->> pretty much on default configuration.
->> Do you recommend any tuning or can you please suggest some log signatures
->> we need to be looking at?
->>
->> Thanks
->> shiva
->>
->> On Wed, Mar 4, 2015 at 1:53 PM, Josh Durgin <jdurgin-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
->>
->>> On 03/03/2015 03:28 PM, Ken Dreyer wrote:
->>>
->>>> On 03/03/2015 04:19 PM, Sage Weil wrote:
->>>>
->>>>> Hi,
->>>>>
->>>>> This is just a heads up that we've identified a performance regression
->>>>> in
->>>>> v0.80.8 from previous firefly releases.  A v0.80.9 is working it's way
->>>>> through QA and should be out in a few days.  If you haven't upgraded
->>>>> yet
->>>>> you may want to wait.
->>>>>
->>>>> Thanks!
->>>>> sage
->>>>>
->>>>
->>>> Hi Sage,
->>>>
->>>> I've seen a couple Redmine tickets on this (eg
->>>> http://tracker.ceph.com/issues/9854 ,
->>>> http://tracker.ceph.com/issues/10956). It's not totally clear to me
->>>> which of the 70+ unreleased commits on the firefly branch fix this
->>>> librbd issue.  Is it only the three commits in
->>>> https://github.com/ceph/ceph/pull/3410 , or are there more?
->>>>
->>>
->>> Those are the only ones needed to fix the librbd performance
->>> regression, yes.
->>>
->>> Josh
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>
->>
->
-
---001a113f3d1c908bcd0513bbc3fc
-Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr"><div><div><div><div>Retried the test with by setting: rbd_=
-concurrent_management_ops and rbd-concurrent-management-ops to 20 (default =
-10?) and didn&#39;t see any difference in the delete time.<br><br></div>Ste=
-ps:<br></div>1. Create 20, 500GB volumes<br></div>2. run : rbd -n clientkey=
- -p cindervols rbd rm $volumeId &amp;<br></div>3. run rbd ls command in wit=
-h 1 second sleep and capture output=C2=A0 : rbd -n clientkey -p cindervols =
-rbd ls <br><div><br></div><div>It took the same amount of time to remove al=
-l entries in the pool when the ops setting was default.<br><br></div><div>T=
-hanks</div><div><div><div><div><div><div class=3D"gmail_extra"><br><div cla=
-ss=3D"gmail_quote">On Tue, Apr 14, 2015 at 10:01 PM, shiva rkreddy <span di=
-r=3D"ltr">&lt;<a href=3D"mailto:shiva.rkreddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org" target=3D"_blank">=
-shiva.rkreddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt;</span> wrote:<br><blockquote class=3D"gmail=
-_quote" style=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204=
-,204);padding-left:1ex"><div dir=3D"ltr"><div><div><div><div><div>The clust=
-ers are in test environment, so its a new deployment of 0.80.9. OS on the c=
-luster nodes is reinstalled as well, so there shouldn&#39;t be any fs aging=
- unless the disks are slowing down.<br><br></div>The perf measurement is do=
-ne initiating multiple cinder create/delete commands and tracking the volum=
-e to be in available or completely gone from &quot;cinder list&quot; output=
-.<br></div></div>Even running=C2=A0 &quot;rbd rm &quot; command from cinder=
- node results in similar behaviour.<br><br></div><div>I&#39;ll try with=C2=
-=A0 increasing=C2=A0 rbd_concurrent_management in ceph.conf.<br>=C2=A0Is th=
-e param name rbd_concurrent_management or rbd-concurrent-management ?<br></=
-div></div><div><div class=3D"h5"><div><div><br><div><div><div><div><div><di=
-v class=3D"gmail_extra"><br><div class=3D"gmail_quote">On Tue, Apr 14, 2015=
- at 12:36 PM, Josh Durgin <span dir=3D"ltr">&lt;<a href=3D"mailto:jdurgin@r=
-edhat.com" target=3D"_blank">jdurgin-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org</a>&gt;</span> wrote:<br><b=
-lockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-le=
-ft:1px solid rgb(204,204,204);padding-left:1ex"><div style=3D"font-family:C=
-alibri,Arial,Helvetica,sans-serif;font-size:12pt;color:rgb(0,0,0)"><p dir=
-=3D"ltr">I don&#39;t see any commits that would be likely to affect that be=
-tween 0.80.7 and 0.80.9.</p>
-<p dir=3D"ltr">Is this after upgrading an existing cluster?<br>
-Could this be due to fs aging beneath your osds?</p>
-<p dir=3D"ltr">How are you measuring create/delete performance?</p>
-<p dir=3D"ltr">You can try increasing rbd concurrent management ops in ceph=
-.conf on the cinder node. This affects delete speed, since rbd tries to del=
-ete each object in a volume.</p>
-<p dir=3D"ltr">Josh</p>
-</div><div style=3D"clear:both"><br><div style=3D"border-width:1pt medium m=
-edium;border-style:solid none none;border-color:rgb(225,225,225) -moz-use-t=
-ext-color -moz-use-text-color;padding:3pt 0cm 0cm"><span style=3D"font-size=
-:11pt;font-family:Calibri,Arial,Helvetica,sans-serif"><b>From:</b> shiva rk=
-reddy &lt;<a href=3D"mailto:shiva.rkreddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org" target=3D"_blank">shiv=
-a.rkreddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt;<br><b>Sent:</b> Apr 14, 2015 5:53 AM<br><b>To:<=
-/b> Josh Durgin<br><b>Cc:</b> Ken Dreyer; Sage Weil; Ceph Development; <a h=
-ref=3D"mailto:ceph-users-Qp0mS5GaXlQ@public.gmane.org" target=3D"_blank">ceph-users-Qp0mS5GaXlQ@public.gmane.org</a=
-><span><br><b>Subject:</b> Re: v0.80.8 and librbd performance<br></span></s=
-pan></div></div><div><div><br type=3D"attribution"><div><blockquote style=
-=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding=
--left:1ex"><div dir=3D"ltr">Hi Josh,<div><br></div><div>We are using firefl=
-y 0.80.9 and see both cinder create/delete numbers slow down compared 0.80.=
-7.</div><div>I don&#39;t see any specific tuning requirements and our clust=
-er is run pretty much on default configuration.</div><div>Do you recommend =
-any tuning or can you please suggest some log signatures we need to be look=
-ing at?</div><div><br></div><div>Thanks</div><div>shiva</div></div><div cla=
-ss=3D"gmail_extra"><br><div class=3D"gmail_quote">On Wed, Mar 4, 2015 at 1:=
-53 PM, Josh Durgin <span dir=3D"ltr">&lt;<a href=3D"mailto:jdurgin@redhat.c=
-om" target=3D"_blank">jdurgin-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org</a>&gt;</span> wrote:<br><blockquo=
-te class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-left:1px =
-solid rgb(204,204,204);padding-left:1ex"><span>On 03/03/2015 03:28 PM, Ken =
-Dreyer wrote:<br>
-<blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-=
-left:1px solid rgb(204,204,204);padding-left:1ex">
-On 03/03/2015 04:19 PM, Sage Weil wrote:<br>
-<blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-=
-left:1px solid rgb(204,204,204);padding-left:1ex">
-Hi,<br>
-<br>
-This is just a heads up that we&#39;ve identified a performance regression =
-in<br>
-v0.80.8 from previous firefly releases.=C2=A0 A v0.80.9 is working it&#39;s=
- way<br>
-through QA and should be out in a few days.=C2=A0 If you haven&#39;t upgrad=
-ed yet<br>
-you may want to wait.<br>
-<br>
-Thanks!<br>
-sage<br>
-</blockquote>
-<br>
-Hi Sage,<br>
-<br>
-I&#39;ve seen a couple Redmine tickets on this (eg<br>
-<a href=3D"http://tracker.ceph.com/issues/9854" target=3D"_blank">http://tr=
-acker.ceph.com/<u></u>issues/9854</a> ,<br>
-<a href=3D"http://tracker.ceph.com/issues/10956" target=3D"_blank">http://t=
-racker.ceph.com/<u></u>issues/10956</a>). It&#39;s not totally clear to me<=
-br>
-which of the 70+ unreleased commits on the firefly branch fix this<br>
-librbd issue.=C2=A0 Is it only the three commits in<br>
-<a href=3D"https://github.com/ceph/ceph/pull/3410" target=3D"_blank">https:=
-//github.com/ceph/ceph/<u></u>pull/3410</a> , or are there more?<br>
-</blockquote>
-<br></span>
-Those are the only ones needed to fix the librbd performance<br>
-regression, yes.<span><font color=3D"#888888"><br>
-<br>
-Josh</font></span><div><div><br>
---<br>
-To unsubscribe from this list: send the line &quot;unsubscribe ceph-devel&q=
-uot; in<br>
-the body of a message to <a href=3D"mailto:majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" targe=
-t=3D"_blank">majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org</a><br>
-More majordomo info at=C2=A0 <a href=3D"http://vger.kernel.org/majordomo-in=
-fo.html" target=3D"_blank">http://vger.kernel.org/<u></u>majordomo-info.htm=
-l</a><br>
-</div></div></blockquote></div><br></div>
-</blockquote></div></div></div></blockquote></div><br></div></div></div></d=
-iv></div></div></div></div></div></div></div>
-</blockquote></div><br></div></div></div></div></div></div></div>
-
---001a113f3d1c908bcd0513bbc3fc--
-
---===============1151855416==
 Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-bn1on0079.outbound.protection.outlook.com ([157.56.110.79]:56352
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S932740AbbDOGB5 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 15 Apr 2015 02:01:57 -0400
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+Hi Sage/Mark,
+I did some WA experiment with newstore with the similar settings I mentioned yesterday.
 
---===============1151855416==--
+Test:
+-------
+
+64K Random write with 64 QD and writing total of 1 TB of data.
+
+
+Newstore:
+------------
+
+Fio output at the end of 1 TB write.
+-------------------------------------------
+
+rbd_iodepth32: (g=0): rw=randwrite, bs=64K-64K/64K-64K/64K-64K, ioengine=rbd, iodepth=64
+fio-2.1.11-20-g9a44
+Starting 1 process
+rbd engine: RBD version: 0.1.9
+Jobs: 1 (f=1): [w(1)] [100.0% done] [0KB/49600KB/0KB /s] [0/775/0 iops] [eta 00m:00s]
+rbd_iodepth32: (groupid=0, jobs=1): err= 0: pid=42907: Tue Apr 14 00:34:23 2015
+  write: io=1000.0GB, bw=48950KB/s, iops=764, runt=21421419msec
+    slat (usec): min=43, max=9480, avg=116.45, stdev=10.99
+    clat (msec): min=13, max=1331, avg=83.55, stdev=52.97
+     lat (msec): min=14, max=1331, avg=83.67, stdev=52.97
+    clat percentiles (msec):
+     |  1.00th=[   60],  5.00th=[   68], 10.00th=[   71], 20.00th=[   74],
+     | 30.00th=[   76], 40.00th=[   78], 50.00th=[   81], 60.00th=[   83],
+     | 70.00th=[   86], 80.00th=[   90], 90.00th=[   94], 95.00th=[   98],
+     | 99.00th=[  109], 99.50th=[  114], 99.90th=[ 1188], 99.95th=[ 1221],
+     | 99.99th=[ 1270]
+    bw (KB  /s): min=   62, max=101888, per=100.00%, avg=49760.84, stdev=7320.03
+    lat (msec) : 20=0.01%, 50=0.38%, 100=96.00%, 250=3.34%, 500=0.03%
+    lat (msec) : 750=0.02%, 1000=0.03%, 2000=0.20%
+  cpu          : usr=10.85%, sys=1.76%, ctx=123504191, majf=0, minf=603964
+  IO depths    : 1=0.1%, 2=0.1%, 4=0.1%, 8=0.1%, 16=0.1%, 32=2.1%, >=64=97.9%
+     submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     complete  : 0=0.0%, 4=100.0%, 8=0.1%, 16=0.1%, 32=0.0%, 64=0.1%, >=64=0.0%
+     issued    : total=r=0/w=16384000/d=0, short=r=0/w=0/d=0
+     latency   : target=0, window=0, percentile=100.00%, depth=64
+
+Run status group 0 (all jobs):
+  WRITE: io=1000.0GB, aggrb=48949KB/s, minb=48949KB/s, maxb=48949KB/s, mint=21421419msec, maxt=21421419msec
+
+
+So, iops getting is ~764.
+99th percentile latency should be 100ms.
+
+Write amplification at disk level:
+--------------------------------------
+
+SanDisk SSDs have some disk level counters that can measure number of host writes with flash logical page size and number of actual flash writes with the same flash logical page size. The difference between these two is the actual WA causing to disk.
+
+Please find the data in the following xls.
+
+https://docs.google.com/spreadsheets/d/1vIT6PHRbLdk_IqFDc2iM_teMolDUlxcX5TLMRzdXyJE/edit?usp=sharing
+
+Total host writes in this period = 923896266
+
+Total flash writes in this period = 1465339040
+
+
+FileStore:
+-------------
+
+Fio output at the end of 1 TB write.
+-------------------------------------------
+
+rbd_iodepth32: (g=0): rw=randwrite, bs=64K-64K/64K-64K/64K-64K, ioengine=rbd, iodepth=64
+fio-2.1.11-20-g9a44
+Starting 1 process
+rbd engine: RBD version: 0.1.9
+Jobs: 1 (f=1): [w(1)] [100.0% done] [0KB/164.7MB/0KB /s] [0/2625/0 iops] [eta 00m:01s]
+rbd_iodepth32: (groupid=0, jobs=1): err= 0: pid=44703: Tue Apr 14 18:44:00 2015
+  write: io=1000.0GB, bw=98586KB/s, iops=1540, runt=10636117msec
+    slat (usec): min=42, max=7144, avg=120.45, stdev=45.80
+    clat (usec): min=942, max=3954.6K, avg=40776.42, stdev=81231.25
+     lat (msec): min=1, max=3954, avg=40.90, stdev=81.23
+    clat percentiles (msec):
+     |  1.00th=[    7],  5.00th=[   11], 10.00th=[   13], 20.00th=[   16],
+     | 30.00th=[   18], 40.00th=[   20], 50.00th=[   22], 60.00th=[   25],
+     | 70.00th=[   30], 80.00th=[   40], 90.00th=[   67], 95.00th=[  114],
+     | 99.00th=[  433], 99.50th=[  570], 99.90th=[  914], 99.95th=[ 1090],
+     | 99.99th=[ 1647]
+    bw (KB  /s): min=   32, max=243072, per=100.00%, avg=103148.37, stdev=63090.00
+    lat (usec) : 1000=0.01%
+    lat (msec) : 2=0.01%, 4=0.14%, 10=4.50%, 20=38.34%, 50=42.42%
+    lat (msec) : 100=8.81%, 250=3.48%, 500=1.58%, 750=0.50%, 1000=0.14%
+    lat (msec) : 2000=0.06%, >=2000=0.01%
+  cpu          : usr=18.46%, sys=2.64%, ctx=63096633, majf=0, minf=923370
+  IO depths    : 1=0.1%, 2=0.1%, 4=0.1%, 8=0.1%, 16=0.6%, 32=80.4%, >=64=19.1%
+     submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     complete  : 0=0.0%, 4=94.3%, 8=2.9%, 16=1.9%, 32=0.9%, 64=0.1%, >=64=0.0%
+     issued    : total=r=0/w=16384000/d=0, short=r=0/w=0/d=0
+     latency   : target=0, window=0, percentile=100.00%, depth=64
+
+Run status group 0 (all jobs):
+  WRITE: io=1000.0GB, aggrb=98586KB/s, minb=98586KB/s, maxb=98586KB/s, mint=10636117msec, maxt=10636117msec
+
+Disk stats (read/write):
+  sda: ios=0/251, merge=0/149, ticks=0/0, in_queue=0, util=0.00%
+
+So, iops here is ~1500.
+99th percentile latency should be within 50ms
+
+
+Write amplification at disk level:
+--------------------------------------
+
+Total host writes in this period = 643611346
+
+Total flash writes in this period = 1157304512
+
+
+
+https://docs.google.com/spreadsheets/d/1gbIATBerS8COzSsJRMbkFXCSbLjn61Fz49CLH8WPh7Q/edit?pli=1#gid=95373000
+
+
+
+
+
+Summary:
+------------
+
+1.  The performance is doubled in case of filestore and latency is almost half.
+
+2. Total number of flash writes is impacted by by both application write pattern + FTL logic etc. etc. So, I am not going into that.  Things to note the significant increase of host writes with newstore and that's definitely causing extra WA compare to  filestore.
+
+3. Considering flash page size = 4K, the total writes in case of filestore = 2455 GB with a 1000 GB fio write vs 3524 GB with newstore. So, WA of filestore is ~2.4 vs ~3.5 in case of newstore. Considering inherent 2X WA for filestore, it is doing pretty good here.
+     Now, in case of newstore , it is not supposed to write WAL in case of new writes. It will be interesting to see % of new writes coming..Will analyze that..
+
+4. If you can open my xls and graphs above, you can see initially host writes and flash writes are very similar in case of newstore and then it jumps high. Not sure why though. I will rerun the tests to confirm similar phenomenon.
+
+5. The cumulative flash write  and cumulative host write graph is the actual WA (host + FW) caused by the write.
+
+What's next:
+---------------
+
+1. Need to understand why 3.5 WA for newstore.
+
+2. Try with different  Rocksdb tuning and record the impact.
+
+
+Any feedback/suggestion is much appreciated.
+
+Thanks & Regards
+Somnath
+
+-----Original Message-----
+From: Somnath Roy
+Sent: Monday, April 13, 2015 4:54 PM
+To: ceph-devel
+Subject: Regarding newstore performance
+
+Sage,
+I was doing some preliminary performance testing of newstore on a single OSD (SSD) , single replication setup. Here is my findings so far.
+
+Test:
+-----
+
+        64K random writes with QD= 64 using fio_rbd.
+
+Results :
+----------
+
+        1. With all default settings, I am seeing very spiky performance. FIO is reporting between 0-~1K random write IOPS with many times IO stops at 0s...Tried with bigger overlay max size value but results are similar...
+
+        2. Next I set the newstore_overlay_max = 0 and I got pretty stable performance ~800-900 IOPS (write duration is short though).
+
+        3. I tried to tweak all the settings one by one but not much benefit anywhere.
+
+        4. One interesting observation here, in my setup if I set newstore_sync_queue_transaction = true , I am getting iops ~600-700..Which is ~100 less.
+             This is quite contrary to my keyvaluestore experiment where I got ~3X improvement by doing sync  writes !
+
+        5. Filestore performance in the similar setup is ~1.6K after 1 TB of data write.
+
+I am trying to figure out from the code what exactly this overlay writes does. Any insight/explanation would be helpful here.
+
+I am planning to do some more experiment with newstore including WA comparison between filestore vs newstore. Will publish the result soon.
+
+Thanks & Regards
+Somnath
+
+
+
+
+
+________________________________
+
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+
