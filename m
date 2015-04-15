@@ -1,74 +1,55 @@
-From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Subject: Re: radosgw and the next giant release v0.87.2
-Date: Wed, 15 Apr 2015 12:16:22 -0400 (EDT)
-Message-ID: <1796922641.219521.1429114582431.JavaMail.zimbra@redhat.com>
-References: <552E32B0.6040101@dachary.org>
+From: Andrey Korolyov <andrey@xdel.ru>
+Subject: leaking mons on a latest dumpling
+Date: Wed, 15 Apr 2015 19:38:43 +0300
+Message-ID: <CABYiri9j=bDPGu1KLTzvywt6shCnJ7AWbtywV8WoUtG8m1=_xA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx6-phx2.redhat.com ([209.132.183.39]:34062 "EHLO
-	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751422AbbDOQR1 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 15 Apr 2015 12:17:27 -0400
-In-Reply-To: <552E32B0.6040101@dachary.org>
+Received: from mail-lb0-f180.google.com ([209.85.217.180]:35274 "EHLO
+	mail-lb0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S965133AbbDOQjG convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 15 Apr 2015 12:39:06 -0400
+Received: by lbbuc2 with SMTP id uc2so38509599lbb.2
+        for <ceph-devel@vger.kernel.org>; Wed, 15 Apr 2015 09:39:04 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Abhishek L <abhishek.lekshmanan@gmail.com>
+To: ceph-devel <ceph-devel@vger.kernel.org>
+
+Hello,
+
+there is a slow leak which is presented in all ceph versions I assume
+but it is positively exposed only on large time spans and on large
+clusters. It looks like the lower is monitor placed in the quorum
+hierarchy, the higher the leak is:
 
 
+{"election_epoch":26,"quorum":[0,1,2,3,4],"quorum_names":["0","1","2","3","4"],"quorum_leader_name":"0","monmap":{"epoch":1,"fsid":"a2ec787e-3551-4a6f-aa24-deedbd8f8d01","modified":"2015-03-05
+13:48:54.696784","created":"2015-03-05
+13:48:54.696784","mons":[{"rank":0,"name":"0","addr":"10.0.1.91:6789\/0"},{"rank":1,"name":"1","addr":"10.0.1.92:6789\/0"},{"rank":2,"name":"2","addr":"10.0.1.93:6789\/0"},{"rank":3,"name":"3","addr":"10.0.1.94:6789\/0"},{"rank":4,"name":"4","addr":"10.0.1.95:6789\/0"}]}}
 
------ Original Message -----
-> From: "Loic Dachary" <loic@dachary.org>
-> To: "Yehuda Sadeh" <yehuda@redhat.com>
-> Cc: "Ceph Development" <ceph-devel@vger.kernel.org>, "Abhishek L" <ab=
-hishek.lekshmanan@gmail.com>
-> Sent: Wednesday, April 15, 2015 2:43:12 AM
-> Subject: radosgw and the next giant release v0.87.2
->=20
-> Hi Yehuda,
->=20
-> The next giant release as found at https://github.com/ceph/ceph/tree/=
-giant
-> passed the rgw suite (http://tracker.ceph.com/issues/11153#rgw). One =
-run had
-> a transient failure (http://tracker.ceph.com/issues/11259) that did n=
-ot
-> repeat. You will also find traces of failed run because of
-> http://tracker.ceph.com/issues/11180 but that was resolved by backpor=
-ting
-> https://github.com/ceph/ceph-qa-suite/pull/375.
->=20
-> Do you think it is ready for QE to start their own round of testing ?
+ceph heap stats -m 10.0.1.95:6789 | grep Actual
+MALLOC: =    427626648 (  407.8 MiB) Actual memory used (physical + swap)
+ceph heap stats -m 10.0.1.94:6789 | grep Actual
+MALLOC: =    289550488 (  276.1 MiB) Actual memory used (physical + swap)
+ceph heap stats -m 10.0.1.93:6789 | grep Actual
+MALLOC: =    230592664 (  219.9 MiB) Actual memory used (physical + swap)
+ceph heap stats -m 10.0.1.92:6789 | grep Actual
+MALLOC: =    253710488 (  242.0 MiB) Actual memory used (physical + swap)
+ceph heap stats -m 10.0.1.91:6789 | grep Actual
+MALLOC: =     97112216 (   92.6 MiB) Actual memory used (physical + swap)
 
-Yes.
+for almost same uptime, the data difference is:
+rd KB 55365750505
+wr KB 82719722467
 
->=20
-> Note that it will be the last giant release.
->=20
-> Cheers
->=20
-> P.S. http://tracker.ceph.com/issues/11153#Release-information has dir=
-ect
-> links to the pull requests merged into giant since v0.87.1 in case yo=
-u need
-> more context about one of them.
->=20
-> --
-> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->=20
->=20
->=20
->=20
->=20
->=20
->=20
->=20
->=20
->=20
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+The leak itself is not very critical but of course requires some
+script work to restart monitors at least once per month on a 300Tb
+cluster to prevent >1G memory consumption by monitor processes. Given
+a current status for a dumpling, it would be probably possible to
+identify leak source and then forward-port fix to the newer releases,
+as the freshest version I am running on a large scale is a top of
+dumpling branch, otherwise it would require enormous amount of time to
+check fix proposals.
+
+Thanks!
