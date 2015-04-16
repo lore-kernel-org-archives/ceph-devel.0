@@ -1,92 +1,57 @@
-From: Andrey Korolyov <andrey@xdel.ru>
-Subject: Re: leaking mons on a latest dumpling
-Date: Thu, 16 Apr 2015 14:25:16 +0300
-Message-ID: <CABYiri-0aA7by3GADZPRA=WSjMqFNgrfM+ANRfFuFbuR1fuw5w@mail.gmail.com>
-References: <CABYiri9j=bDPGu1KLTzvywt6shCnJ7AWbtywV8WoUtG8m1=_xA@mail.gmail.com>
- <552F7311.9000405@suse.de>
+From: James Page <james.page@ubuntu.com>
+Subject: Re: tcmalloc issue
+Date: Thu, 16 Apr 2015 12:48:05 +0100
+Message-ID: <552FA175.2000808@ubuntu.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CAD14A@SACMBXIP01.sdcorp.global.sandisk.com> <alpine.DEB.2.00.1503261646150.31431@cobra.newdream.net> <551C1514.3060607@ubuntu.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F28CB8270@SACMBXIP01.sdcorp.global.sandisk.com> <55261528.7040607@ubuntu.com> <9E914F5BD7F48A4782456CEB550A422824489892@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f45.google.com ([209.85.215.45]:33164 "EHLO
-	mail-la0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753573AbbDPLZi convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Apr 2015 07:25:38 -0400
-Received: by layy10 with SMTP id y10so54159090lay.0
-        for <ceph-devel@vger.kernel.org>; Thu, 16 Apr 2015 04:25:36 -0700 (PDT)
-In-Reply-To: <552F7311.9000405@suse.de>
+Received: from youngberry.canonical.com ([91.189.89.112]:53779 "EHLO
+	youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753439AbbDPLsL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Apr 2015 07:48:11 -0400
+In-Reply-To: <9E914F5BD7F48A4782456CEB550A422824489892@SACMBXIP01.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Joao Eduardo Luis <joao@suse.de>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Chaitanya Huilgol <Chaitanya.Huilgol@sandisk.com>, Somnath Roy <Somnath.Roy@sandisk.com>, Sage Weil <sage@newdream.net>, "ceph-maintainers@ceph.com" <ceph-maintainers@ceph.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, Apr 16, 2015 at 11:30 AM, Joao Eduardo Luis <joao@suse.de> wrote:
-> On 04/15/2015 05:38 PM, Andrey Korolyov wrote:
->> Hello,
->>
->> there is a slow leak which is presented in all ceph versions I assume
->> but it is positively exposed only on large time spans and on large
->> clusters. It looks like the lower is monitor placed in the quorum
->> hierarchy, the higher the leak is:
->>
->>
->> {"election_epoch":26,"quorum":[0,1,2,3,4],"quorum_names":["0","1","2","3","4"],"quorum_leader_name":"0","monmap":{"epoch":1,"fsid":"a2ec787e-3551-4a6f-aa24-deedbd8f8d01","modified":"2015-03-05
->> 13:48:54.696784","created":"2015-03-05
->> 13:48:54.696784","mons":[{"rank":0,"name":"0","addr":"10.0.1.91:6789\/0"},{"rank":1,"name":"1","addr":"10.0.1.92:6789\/0"},{"rank":2,"name":"2","addr":"10.0.1.93:6789\/0"},{"rank":3,"name":"3","addr":"10.0.1.94:6789\/0"},{"rank":4,"name":"4","addr":"10.0.1.95:6789\/0"}]}}
->>
->> ceph heap stats -m 10.0.1.95:6789 | grep Actual
->> MALLOC: =    427626648 (  407.8 MiB) Actual memory used (physical + swap)
->> ceph heap stats -m 10.0.1.94:6789 | grep Actual
->> MALLOC: =    289550488 (  276.1 MiB) Actual memory used (physical + swap)
->> ceph heap stats -m 10.0.1.93:6789 | grep Actual
->> MALLOC: =    230592664 (  219.9 MiB) Actual memory used (physical + swap)
->> ceph heap stats -m 10.0.1.92:6789 | grep Actual
->> MALLOC: =    253710488 (  242.0 MiB) Actual memory used (physical + swap)
->> ceph heap stats -m 10.0.1.91:6789 | grep Actual
->> MALLOC: =     97112216 (   92.6 MiB) Actual memory used (physical + swap)
->>
->> for almost same uptime, the data difference is:
->> rd KB 55365750505
->> wr KB 82719722467
->>
->> The leak itself is not very critical but of course requires some
->> script work to restart monitors at least once per month on a 300Tb
->> cluster to prevent >1G memory consumption by monitor processes. Given
->> a current status for a dumpling, it would be probably possible to
->> identify leak source and then forward-port fix to the newer releases,
->> as the freshest version I am running on a large scale is a top of
->> dumpling branch, otherwise it would require enormous amount of time to
->> check fix proposals.
->
-> There have been numerous reports of a slow leak in the monitors on
-> dumpling and firefly.  I'm sure there's a ticket for that but I wasn't
-> able to find it.
->
-> Many hours were spent chasing down this leak to no avail, despite of
-> plugging several leaks throughout the code (especially in firefly, that
-> should have been backported to dumpling at some point or the other).
->
-> This was mostly hard to figure out because it tends to require a
-> long-term cluster to show up, and the biggest the cluster is the larger
-> the probability of triggering it.  This behavior has me believing that
-> this should be somewhere in the message dispatching workflow and, given
-> it's the leader that suffers the most, should be somewhere in the
-> read-write message dispatching (PaxosService::prepare_update()).  But
-> despite code inspections, I don't think we ever found the cause -- or
-> that any fixed leak was ever flagged as the root of the problem.
->
-> Anyway, since Giant, most complaints (if not all!) went away.  Maybe I
-> missed them, or maybe people suffering from this just stopped
-> complaining.  I'm hoping it's the first rather than the latter and, as
-> luck has it, maybe the fix was a fortunate side-effect of some other change.
->
->   -Joao
->
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
 
-Thanks for an explanation, I accidentally reversed the logical order
-describing leadership placement above. I`ll go through non-ported
-commits for ff and will port most promising ones on a spare time
-occasion, checking if the leak disappeared or not (it takes about a
-week to see the difference for mine workloads). Could dump structures
-be helpful for developers to ring a bell for deterministic
-suggestions?
+Hi Folks
+
+The proposed fix is now in the 'proposed' pocket for 14.04 - see:
+
+https://bugs.launchpad.net/ubuntu/+source/google-perftools/+bug/1439277
+
+on how to enable that pocket for testing if you'd like to confirm that
+you are able to use the required feature now.
+
+Cheers
+
+James
+
+- -- 
+James Page
+Ubuntu and Debian Developer
+james.page@ubuntu.com
+jamespage@debian.org
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
+
+iQIcBAEBCAAGBQJVL6F1AAoJEL/srsug59jDRGoP/AuQ8jGGAKgsRGu/aSnAzG0N
+Aepa9AEnE2CH310HiYXqaKsmthKLwFy6vEkL0AkL4c4oDNVh9sdTaqBWV8qZXkxo
+iSzWMeoId54du5F/wgk5e+Itk78tdxmdBhiALlCyudm2erlIYzc1iMLwBY1AIO3u
+Ii7KngmPZj1d8DtUtfWAMoY8HbKSeZLpPpsu0mNOE6yzY/AycPlF/FPpWYoV2VBF
+fUEOWu3FCst8YwGnegMwi3PIrjdvvVOfU1QxRJgeP8/oy5QB+LqAIHQEwpLsiASv
+CJDZXj82SbFhMJxSj2vFF8WdfoNFz80DeMtdp268zjxaHVHVEjEszPAaZr862EHE
+5qIXfAYgTYXtfI9p12OZm1PX7ogH45pfk5iMOZyZIWijkAnFHdMZ3ePHUMa+cBeR
+DBE3Zbd7BJ+jFQ53rtkTI1L9TmUikad5BRVJXB9bVIENDOxj69vS7dn960FsWme8
+CulQ/Scil/Da8vauo/itKx2ey3tVuxX96hUAHubCjBgQyPPmW/KTqICYLgMMUy2n
+ZPMwVfKeM29KuLtyCu/VGdKtjaqjUl5QvTL0NJQaS18wFbsJOBGjwS2Mqfy2mVyU
+3SDLAshD43m6Se2St8gEMIL3n5WYdGTksqb/iBVRKUfl3FhuBLTpb4ixtz3D2Tn1
+HS2oqV/Bl/XFE0iyvPoM
+=WHzY
+-----END PGP SIGNATURE-----
