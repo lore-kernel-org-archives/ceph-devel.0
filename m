@@ -1,82 +1,68 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: tcmalloc issue
-Date: Thu, 16 Apr 2015 14:55:41 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD7A5AF@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F28CAD14A@SACMBXIP01.sdcorp.global.sandisk.com>
- <alpine.DEB.2.00.1503261646150.31431@cobra.newdream.net>
- <551C1514.3060607@ubuntu.com>
- <755F6B91B3BE364F9BCA11EA3F9E0C6F28CB8270@SACMBXIP01.sdcorp.global.sandisk.com>
- <55261528.7040607@ubuntu.com>
- <9E914F5BD7F48A4782456CEB550A422824489892@SACMBXIP01.sdcorp.global.sandisk.com>
- <552FA175.2000808@ubuntu.com>
+From: Ketor D <d.ketor@gmail.com>
+Subject: Re: [Issue]Ceph cluster hang due to network partition
+Date: Thu, 16 Apr 2015 23:20:38 +0800
+Message-ID: <CAM9_UU8XYwUYPWh3VXE-c8A=31m42MxohhVEakhZyFpb6p89aA@mail.gmail.com>
+References: <CAM9_UU9SwjQ1FxYHcT2wrXwi1oCH5xuwRJQ9D-rwHwATTusTZw@mail.gmail.com>
+ <alpine.DEB.2.00.1504140816011.4469@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1bon0061.outbound.protection.outlook.com ([157.56.111.61]:49433
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1754543AbbDPOzp convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Apr 2015 10:55:45 -0400
-In-Reply-To: <552FA175.2000808@ubuntu.com>
-Content-Language: en-US
+Received: from mail-ob0-f172.google.com ([209.85.214.172]:35543 "EHLO
+	mail-ob0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751082AbbDPPVJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Apr 2015 11:21:09 -0400
+Received: by obbfy7 with SMTP id fy7so43654588obb.2
+        for <ceph-devel@vger.kernel.org>; Thu, 16 Apr 2015 08:21:09 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1504140816011.4469@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: James Page <james.page@ubuntu.com>, Chaitanya Huilgol <Chaitanya.Huilgol@sandisk.com>, Sage Weil <sage@newdream.net>, "ceph-maintainers@ceph.com" <ceph-maintainers@ceph.com>
+To: Sage Weil <sweil@redhat.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Thanks James !
-We will try this out.
+Hi Sage,
+      Thanks for you reply.
+      Finally we fixed the network and ceph goes HEALTH_OK.
+      We will improve our ops to get rid of network parition to fix
+this problem.
 
-Regards
-Somnath
+Ketor
 
------Original Message-----
-From: James Page [mailto:james.page@ubuntu.com]
-Sent: Thursday, April 16, 2015 4:48 AM
-To: Chaitanya Huilgol; Somnath Roy; Sage Weil; ceph-maintainers@ceph.com
-Cc: ceph-devel@vger.kernel.org
-Subject: Re: tcmalloc issue
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA256
-
-Hi Folks
-
-The proposed fix is now in the 'proposed' pocket for 14.04 - see:
-
-https://bugs.launchpad.net/ubuntu/+source/google-perftools/+bug/1439277
-
-on how to enable that pocket for testing if you'd like to confirm that you are able to use the required feature now.
-
-Cheers
-
-James
-
-- --
-James Page
-Ubuntu and Debian Developer
-james.page@ubuntu.com
-jamespage@debian.org
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQIcBAEBCAAGBQJVL6F1AAoJEL/srsug59jDRGoP/AuQ8jGGAKgsRGu/aSnAzG0N
-Aepa9AEnE2CH310HiYXqaKsmthKLwFy6vEkL0AkL4c4oDNVh9sdTaqBWV8qZXkxo
-iSzWMeoId54du5F/wgk5e+Itk78tdxmdBhiALlCyudm2erlIYzc1iMLwBY1AIO3u
-Ii7KngmPZj1d8DtUtfWAMoY8HbKSeZLpPpsu0mNOE6yzY/AycPlF/FPpWYoV2VBF
-fUEOWu3FCst8YwGnegMwi3PIrjdvvVOfU1QxRJgeP8/oy5QB+LqAIHQEwpLsiASv
-CJDZXj82SbFhMJxSj2vFF8WdfoNFz80DeMtdp268zjxaHVHVEjEszPAaZr862EHE
-5qIXfAYgTYXtfI9p12OZm1PX7ogH45pfk5iMOZyZIWijkAnFHdMZ3ePHUMa+cBeR
-DBE3Zbd7BJ+jFQ53rtkTI1L9TmUikad5BRVJXB9bVIENDOxj69vS7dn960FsWme8
-CulQ/Scil/Da8vauo/itKx2ey3tVuxX96hUAHubCjBgQyPPmW/KTqICYLgMMUy2n
-ZPMwVfKeM29KuLtyCu/VGdKtjaqjUl5QvTL0NJQaS18wFbsJOBGjwS2Mqfy2mVyU
-3SDLAshD43m6Se2St8gEMIL3n5WYdGTksqb/iBVRKUfl3FhuBLTpb4ixtz3D2Tn1
-HS2oqV/Bl/XFE0iyvPoM
-=WHzY
------END PGP SIGNATURE-----
-
-________________________________
-
-PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-
+On Tue, Apr 14, 2015 at 11:18 PM, Sage Weil <sweil@redhat.com> wrote:
+> On Tue, 14 Apr 2015, Ketor D wrote:
+>> Hi Sage,
+>>       We recently meet a network partition problem, cause our ceph
+>> cluster can not service rbd service.
+>>        We are running 0.67.5 on our customer cluster. And the network
+>> partition is 3 osd can connect mon, but can not connect with all other
+>> osds.
+>>        Then many PGs fall in peering status, and rbd I/O is hang.
+>>
+>>         Before we operate the cluster , I set nout flag and stop the 3
+>> OSDs. After operating the 3 OSDs memory and OS bootup, the network is
+>> partition. The 3 OSDs start, then many PGs went to peering.
+>> I stoped the 3 OSDs process, but the PGs fall in peering.
+>
+> One possibility is that those PGs were all on the partitioned side; in
+> that case you would have seen stale+peering+... states.
+> Another possibility is that there was not sufficient PG [meta]data on
+> the other side of the partition and the PGs got stuck in down+... or
+> incomplete+... states.
+>
+> Or, there was another partition somewhere or cofusion such that there were
+> OSDs that were unreachable but still in the 'up' state.
+>
+> sage
+>
+>
+>>         After network partition is fixed, all PG get active+clean, all is OK.
+>>
+>>         I can't explain this, because I think the OSD can judge if the
+>> other OSD is alive, and I can see 3OSD is marked down in 'ceph osd
+>> tree'.
+>>         Why did these PGs fall in peering?
+>>
+>> Thanks!
+>> Ketor
+>>
+>>
