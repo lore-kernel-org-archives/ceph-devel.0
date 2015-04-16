@@ -1,28 +1,46 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Ceph.com
-Date: Thu, 16 Apr 2015 12:15:56 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1504161214331.18547@cobra.newdream.net>
-References: <CAAZbbf3dnrjC3Y=vODZAsX=K6fhKC9OjOS051s5BnW_gbC67yw@mail.gmail.com>
+From: Josh Durgin <jdurgin@redhat.com>
+Subject: Re: client/cluster compatibility testing
+Date: Thu, 16 Apr 2015 13:59:11 -0700
+Message-ID: <5530229F.5020509@redhat.com>
+References: <alpine.DEB.2.00.1504160935130.18547@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:53454 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750715AbbDPTP5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Apr 2015 15:15:57 -0400
-In-Reply-To: <CAAZbbf3dnrjC3Y=vODZAsX=K6fhKC9OjOS051s5BnW_gbC67yw@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:46955 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751652AbbDPU7I (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 16 Apr 2015 16:59:08 -0400
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+	by mx1.redhat.com (Postfix) with ESMTPS id D19A2C1F09
+	for <ceph-devel@vger.kernel.org>; Thu, 16 Apr 2015 20:59:08 +0000 (UTC)
+In-Reply-To: <alpine.DEB.2.00.1504160935130.18547@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Patrick McGarry <pmcgarry@redhat.com>
-Cc: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
+To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
 
-We've fixed it so that 404 handling isn't done by wordpress/php and 
-things are muuuch happier.  We've also moved all of the git stuff to 
-git.ceph.com.  There is a redirect from http://ceph.com/git to 
-git.ceph.com (tho no https on the new site yet) and a proxy for 
-git://ceph.com.
+On 04/16/2015 09:42 AM, Sage Weil wrote:
+> I think the simplest way to address this is to talk about compatibility in
+> terms of the upstream stable releases (firefly, hammer, etc.), and test
+> that compatibility with teuthology tests from ceph-qa-suite.git.  We have
+> some basic inter-version client/cluster tests already in
+> suites/upgrade/client-upgrade.  Currently these test new (version "x")
+> clients against a given release (dumpling, firefly).  I think we just need
+> to add hammer to that mix, and then add a second set of tests that do the
+> reverse: test clients from a given release (dumpling, firefly, hammer)
+> against an arbitrary cluster version ("x").
 
-Please let us know if anything still appears to be broken or slow!
+The suites in suites/upgrade/$version-x do this, and use a mixed
+version cluster rather than a purely version x cluster. It seems like
+people would want that intra-cluster version coverage for smooth
+upgrades.
 
-Thanks-
-sage
+Just need to add hammer-x there too (Yuri's renaming the client ones to
+be $version-client-x for less confusion).
+
+Also I think we'll want to start doing mixed-client-version tests,
+particularly for things like rbd's exclusive locking:
+
+http://tracker.ceph.com/issues/11405
+
+Josh
