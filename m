@@ -1,46 +1,79 @@
-From: Josh Durgin <jdurgin@redhat.com>
+From: Yuri Weinstein <yweinste@redhat.com>
 Subject: Re: client/cluster compatibility testing
-Date: Thu, 16 Apr 2015 13:59:11 -0700
-Message-ID: <5530229F.5020509@redhat.com>
+Date: Thu, 16 Apr 2015 16:59:47 -0400 (EDT)
+Message-ID: <1543401580.1470287.1429217987676.JavaMail.zimbra@redhat.com>
 References: <alpine.DEB.2.00.1504160935130.18547@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:46955 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751652AbbDPU7I (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 16 Apr 2015 16:59:08 -0400
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-	by mx1.redhat.com (Postfix) with ESMTPS id D19A2C1F09
-	for <ceph-devel@vger.kernel.org>; Thu, 16 Apr 2015 20:59:08 +0000 (UTC)
+Received: from mx3-phx2.redhat.com ([209.132.183.24]:46176 "EHLO
+	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751652AbbDPU7s (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Apr 2015 16:59:48 -0400
 In-Reply-To: <alpine.DEB.2.00.1504160935130.18547@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
+To: Sage Weil <sweil@redhat.com>
+Cc: ceph-devel@vger.kernel.org
 
-On 04/16/2015 09:42 AM, Sage Weil wrote:
-> I think the simplest way to address this is to talk about compatibility in
-> terms of the upstream stable releases (firefly, hammer, etc.), and test
-> that compatibility with teuthology tests from ceph-qa-suite.git.  We have
-> some basic inter-version client/cluster tests already in
-> suites/upgrade/client-upgrade.  Currently these test new (version "x")
-> clients against a given release (dumpling, firefly).  I think we just need
-> to add hammer to that mix, and then add a second set of tests that do the
-> reverse: test clients from a given release (dumpling, firefly, hammer)
-> against an arbitrary cluster version ("x").
+Yea, Sage, that sounds reasonable.
 
-The suites in suites/upgrade/$version-x do this, and use a mixed
-version cluster rather than a purely version x cluster. It seems like
-people would want that intra-cluster version coverage for smooth
-upgrades.
+I added a ticket to capture this plan (http://tracker.ceph.com/issues/11413) and will add those tests soon.
 
-Just need to add hammer-x there too (Yuri's renaming the client ones to
-be $version-client-x for less confusion).
+Please add your comments to the ticket above.
 
-Also I think we'll want to start doing mixed-client-version tests,
-particularly for things like rbd's exclusive locking:
+I am assuming that it will look something like this for dumpling, firefly and hammer:
 
-http://tracker.ceph.com/issues/11405
+dumpling(stable) -> client-x
+firefly(stable) -> client-x
+hammer(stable) -> client-x
 
-Josh
+and reverse
+
+dumpling-client(stable) -> cluster-x
+firefly-cluster(stable) -> cluster-x
+hammer-cluster(stable) -> cluster-x
+
+Yes?
+
+Thx
+YuriW
+
+----- Original Message -----
+From: "Sage Weil" <sweil@redhat.com>
+To: ceph-devel@vger.kernel.org
+Sent: Thursday, April 16, 2015 9:42:29 AM
+Subject: client/cluster compatibility testing
+
+Now that there are several different vendors shipping and supporting Ceph 
+in their products, we'll invariably have people running different 
+versions of Ceph that are interested in interoperability.  If we focus 
+just on client <-> cluster compatability, I think the issues are (1) 
+compatibility between upstream ceph versions (firefly vs hammer) and 
+(2) ensuring that any downstream changes the vendor makes don't break that 
+compatibility.
+
+I think the simplest way to address this is to talk about compatibility in 
+terms of the upstream stable releases (firefly, hammer, etc.), and test 
+that compatibility with teuthology tests from ceph-qa-suite.git.  We have 
+some basic inter-version client/cluster tests already in 
+suites/upgrade/client-upgrade.  Currently these test new (version "x") 
+clients against a given release (dumpling, firefly).  I think we just need 
+to add hammer to that mix, and then add a second set of tests that do the 
+reverse: test clients from a given release (dumpling, firefly, hammer) 
+against an arbitrary cluster version ("x").
+
+We'll obviously run these tests on upstream releases to ensure that we are 
+not breaking compatibility (or are doing so in known, explicit ways).  
+Downstream folks can run the same test suites against any changes they 
+make as well to ensure that their product is "compatible with firefly 
+clients," or whatever.
+
+Does that sound reasonable?
+sage
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
