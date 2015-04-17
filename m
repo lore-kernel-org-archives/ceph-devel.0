@@ -1,64 +1,89 @@
 From: Gregory Farnum <greg@gregs42.com>
-Subject: Re: CephFS and the next giant release v0.87.2
-Date: Thu, 16 Apr 2015 16:22:48 -0700
-Message-ID: <CAC6JEv9FuG8Vr=SjwuACrggj4U8-Qe82u-K9Bu_ZOSapSGWkYQ@mail.gmail.com>
-References: <552E316D.5060703@dachary.org>
-	<CAC6JEv8iAOHb2+R9TXFwQ0BnmaY-zYfq4E7MzZsK_Doa7LN5gA@mail.gmail.com>
-	<553042E5.4040501@dachary.org>
+Subject: Re: Ceph master - build broken unless --enable-debug specified
+Date: Thu, 16 Apr 2015 17:27:05 -0700
+Message-ID: <CAC6JEv_uRE=UfVQpZ+NtzX2nCpMthienXuTdNHtynDK6oQ4G1A@mail.gmail.com>
+References: <5529E9BC.2090203@catalyst.net.nz>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f181.google.com ([209.85.213.181]:34032 "EHLO
-	mail-ig0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751426AbbDPXWt convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Apr 2015 19:22:49 -0400
-Received: by iget9 with SMTP id t9so18271697ige.1
-        for <ceph-devel@vger.kernel.org>; Thu, 16 Apr 2015 16:22:49 -0700 (PDT)
-Received: from mail-ig0-f180.google.com (mail-ig0-f180.google.com. [209.85.213.180])
-        by mx.google.com with ESMTPSA id d8sm140776igl.19.2015.04.16.16.22.48
+Received: from mail-ig0-f171.google.com ([209.85.213.171]:38520 "EHLO
+	mail-ig0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751973AbbDQA1H convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Apr 2015 20:27:07 -0400
+Received: by igbhj9 with SMTP id hj9so2783137igb.1
+        for <ceph-devel@vger.kernel.org>; Thu, 16 Apr 2015 17:27:06 -0700 (PDT)
+Received: from mail-ig0-f171.google.com (mail-ig0-f171.google.com. [209.85.213.171])
+        by mx.google.com with ESMTPSA id n7sm231723iga.13.2015.04.16.17.27.05
         for <ceph-devel@vger.kernel.org>
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 16 Apr 2015 16:22:48 -0700 (PDT)
-Received: by igbhj9 with SMTP id hj9so1844775igb.1
-        for <ceph-devel@vger.kernel.org>; Thu, 16 Apr 2015 16:22:48 -0700 (PDT)
-In-Reply-To: <553042E5.4040501@dachary.org>
+        Thu, 16 Apr 2015 17:27:06 -0700 (PDT)
+Received: by igbhj9 with SMTP id hj9so2782913igb.1
+        for <ceph-devel@vger.kernel.org>; Thu, 16 Apr 2015 17:27:05 -0700 (PDT)
+In-Reply-To: <5529E9BC.2090203@catalyst.net.nz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Abhishek L <abhishek.lekshmanan@gmail.com>
+To: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>, Josh Durgin <jdurgin@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, Apr 16, 2015 at 4:16 PM, Loic Dachary <loic@dachary.org> wrote:
-> Hi Greg,
+On Sat, Apr 11, 2015 at 8:42 PM, Mark Kirkwood
+<mark.kirkwood@catalyst.net.nz> wrote:
+> Hi,
 >
-> On 17/04/2015 00:44, Gregory Farnum wrote:
->> On Wed, Apr 15, 2015 at 2:37 AM, Loic Dachary <loic@dachary.org> wrote:
->>> Hi Greg,
->>>
->>> The next giant release as found at https://github.com/ceph/ceph/tree/giant passed the fs suite (http://tracker.ceph.com/issues/11153#fs). Do you think it is ready for QE to start their own round of testing ?
->>>
->>> Note that it will be the last giant release.
->>>
->>> Cheers
->>>
->>> P.S. http://tracker.ceph.com/issues/11153#Release-information has direct links to the pull requests merged into giant since v0.87.1 in case you need more context about one of them.
->>
->> All those PRs look like fine ones to release.
->>
->> I remember you went through a big purge of giant-tagged backports at
->> one point though (when we thought we weren't going to do any more
->> releases at all). Did that get somehow undone and all of those dealt
->> with?
+> Building without --enable-debug produces:
 >
-> I inadvertendly closed a few issue that I should not have (less than 10 more than 5 IIRC). I carefully reviewed all of them and they have been dealt with indeed. There now is a HOWTO to prevent that kind of mistake, hopefully. http://tracker.ceph.com/projects/ceph-releases/wiki/HOWTO_resolve_issues_that_are_Pending_Backport
+> ceph_fuse.cc: In member function =E2=80=98virtual void* main(int, con=
+st char**,
+> const char**)::RemountTest::entry()=E2=80=99:
+> ceph_fuse.cc:146:15: warning: ignoring return value of =E2=80=98int s=
+ystem(const
+> char*)=E2=80=99, declared with attribute warn_unused_result [-Wunused=
+-result]
+>     system(buf);
+>                ^
+>   CXX      ceph_osd.o
+>   CXX      ceph_mds.o
+> make[3]: *** No rule to make target '../src/gmock/lib/libgmock_main.l=
+a',
+> needed by 'unittest_librbd'.  Stop.
+> make[3]: *** Waiting for unfinished jobs....
+>   CXX      test/erasure-code/ceph_erasure_code_non_regression.o
+> make[3]: Leaving directory '/home/markir/develop/c/ceph/src'
+> Makefile:20716: recipe for target 'all-recursive' failed
+> make[2]: *** [all-recursive] Error 1
+> make[2]: Leaving directory '/home/markir/develop/c/ceph/src'
+> Makefile:8977: recipe for target 'all' failed
+> make[1]: *** [all] Error 2
+> make[1]: Leaving directory '/home/markir/develop/c/ceph/src'
+> Makefile:467: recipe for target 'all-recursive' failed
+> make: *** [all-recursive] Error 1
 >
->> Some of them were more important than others and it would be
->> some work for me to reconstruct the list, but I'll need to do that if
->> you haven't already. :/
 >
-> There are a four giant issues that are candidate for backporting : http://tracker.ceph.com/projects/ceph/issues?query_id=68, only one of which is related to CephFS. Do you think it must be included in this last giant release ?
+> Adding in --enable-debug gives a successful build.
+>
+> This is on Ubuntu 14.10 64 bit, and the build procedure is:
+>
+> $ git pull
+> $ git submodule update --init
+> $ ./autogen.sh
+> $ ./configure --prefix=3D/usr --sysconfdir=3D/etc --localstatedir=3D/=
+var \
+>               [--with-debug \ ]
+>               --with-nss \
+>               --with-radosgw \
+>               --with-librocksdb-static=3Dcheck \
+>
+> $ make [ -j4 ]
 
-Nope, not that one!
-
-This all looks good to me then, thanks.
+Yep, looks like the unittest_librbd binary is in the noinst_PROGRAMS
+target (whatever that is) rather than the check_PROGRAMS target.
+Changing that seems to work =E2=80=94 I pushed a branch wip-nodebug-bui=
+ld
+fixing it, but if you have your own fix a PR is welcome. If not I'll
+make a PR in the next couple days.
 -Greg
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
