@@ -1,157 +1,183 @@
-From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Subject: RE: Regarding newstore performance
-Date: Fri, 17 Apr 2015 14:29:58 +0000
-Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC021CF066@shsmsx102.ccr.corp.intel.com>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD79CFB@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CACJqLybLO=ut70O7Mf_RCnJwzBPAH45OBnGLdHesdnRziCUUiQ@mail.gmail.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F2CD7A0A1@SACMBXIP01.sdcorp.global.sandisk.com>
-	<6F3FA899187F0043BA1827A69DA2F7CC021CE207@shsmsx102.ccr.corp.intel.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F2CD7A350@SACMBXIP01.sdcorp.global.sandisk.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F2CD7A4EF@SACMBXIP01.sdcorp.global.sandisk.com>
-	<552FFCAE.1040303@redhat.com>
-	<alpine.DEB.2.00.1504161718020.18547@cobra.newdream.net>
-	<5530F843.6050708@redhat.com>
-	<6F3FA899187F0043BA1827A69DA2F7CC021CEFFA@shsmsx102.ccr.corp.intel.com>
- <CACJqLyZCyQ6sRfv4w2_VJ4csxcVRqoaYy4VHHecX3pAZZHqsDA@mail.gmail.com>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: Re: Regarding newstore performance
+Date: Fri, 17 Apr 2015 09:34:25 -0500
+Message-ID: <553119F1.5050102@redhat.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD79CFB@SACMBXIP01.sdcorp.global.sandisk.com>	<CACJqLybLO=ut70O7Mf_RCnJwzBPAH45OBnGLdHesdnRziCUUiQ@mail.gmail.com>	<755F6B91B3BE364F9BCA11EA3F9E0C6F2CD7A0A1@SACMBXIP01.sdcorp.global.sandisk.com>	<6F3FA899187F0043BA1827A69DA2F7CC021CE207@shsmsx102.ccr.corp.intel.com>	<755F6B91B3BE364F9BCA11EA3F9E0C6F2CD7A350@SACMBXIP01.sdcorp.global.sandisk.com>	<755F6B91B3BE364F9BCA11EA3F9E0C6F2CD7A4EF@SACMBXIP01.sdcorp.global.sandisk.com>	<552FFCAE.1040303@redhat.com>	<alpine.DEB.2.00.1504161718020.18547@cobra.newdream.net>	<5530F843.6050708@redhat.com>	<6F3FA899187F0043BA1827A69DA2F7CC021CEFFA@shsmsx102.ccr.corp.intel.com> <CACJqLyZCyQ6sRfv4w2_VJ4csxcVRqoaYy4VHHecX3pAZZHqsDA@mail.gmail.com> <6F3FA899187F0043BA1827A69DA2F7CC021CF066@shsmsx102.ccr.corp.intel.co
+ m>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:51183 "EHLO mga01.intel.com"
+Received: from mx1.redhat.com ([209.132.183.28]:58863 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S933455AbbDQOaF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 17 Apr 2015 10:30:05 -0400
-In-Reply-To: <CACJqLyZCyQ6sRfv4w2_VJ4csxcVRqoaYy4VHHecX3pAZZHqsDA@mail.gmail.com>
-Content-Language: en-US
+	id S1754418AbbDQOeg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 17 Apr 2015 10:34:36 -0400
+In-Reply-To: <6F3FA899187F0043BA1827A69DA2F7CC021CF066@shsmsx102.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomaiwang@gmail.com>
-Cc: Mark Nelson <mnelson@redhat.com>, Sage Weil <sage@newdream.net>, Somnath Roy <Somnath.Roy@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>, Haomai Wang <haomaiwang@gmail.com>
+Cc: Sage Weil <sage@newdream.net>, Somnath Roy <Somnath.Roy@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-SSB1c2UgZGVhZGxpbmUuDQoNClllcyBpbiBSb2Nrc0RCIGV2ZXJ5IGNvbW1pdCB3aWxsIGZvbGxv
-dyBieSBhIGZzeW5jL2ZkYXRhc3luYyBmb3IgV0FMIGxvZyBkYXRhIHNhZmVseS4gTm90IHN1cmUg
-aWYgdGhleSBjb3VsZCB3cml0ZSB0aGUgV0FMIGxvZyBieSBPX0RJUkVDVCB0byBhdm9pZCB0b25z
-IG9mIGZzeW5jPw0KDQpIZXJlIGlzIHRoZSBEQiBzdGF0cyB0aGF0IEkgcHJpbnRlZCBldmVyeSA1
-cyxzaG93aW5nIDEgd3JpdGUvc3luYy4NCg0KKiogREIgU3RhdHMgKioNClVwdGltZShzZWNzKTog
-MTEyNy42IHRvdGFsLCA1LjkgaW50ZXJ2YWwNCkN1bXVsYXRpdmUgd3JpdGVzOiAxNzIzMDg2IHdy
-aXRlcywgODI1MTAwMiBrZXlzLCAxNzIzMDAyIGJhdGNoZXMsIDEuMCB3cml0ZXMgcGVyIGJhdGNo
-LCAxNC40NiBHQiB1c2VyIGluZ2VzdCwgc3RhbGwgdGltZTogMCB1cw0KQ3VtdWxhdGl2ZSBXQUw6
-IDE3MjMwODcgd3JpdGVzLCAxNzIzMDAxIHN5bmNzLCAxLjAwIHdyaXRlcyBwZXIgc3luYywgMTQu
-NDYgR0Igd3JpdHRlbg0KSW50ZXJ2YWwgd3JpdGVzOiAxNTE3OSB3cml0ZXMsIDc3MDE3IGtleXMs
-IDE1MTc5IGJhdGNoZXMsIDEuMCB3cml0ZXMgcGVyIGJhdGNoLCAyOS40IE1CIHVzZXIgaW5nZXN0
-LCBzdGFsbCB0aW1lOiAwIHVzDQpJbnRlcnZhbCBXQUw6IDE1MTgwIHdyaXRlcywgMTUxNzkgc3lu
-Y3MsIDEuMDAgd3JpdGVzIHBlciBzeW5jLCAwLjAzIE1CIHdyaXR0ZW4NCg0KDQotLS0tLU9yaWdp
-bmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogSGFvbWFpIFdhbmcgW21haWx0bzpoYW9tYWl3YW5nQGdt
-YWlsLmNvbV0gDQpTZW50OiBGcmlkYXksIEFwcmlsIDE3LCAyMDE1IDEwOjIwIFBNDQpUbzogQ2hl
-biwgWGlhb3hpDQpDYzogTWFyayBOZWxzb247IFNhZ2UgV2VpbDsgU29tbmF0aCBSb3k7IGNlcGgt
-ZGV2ZWwNClN1YmplY3Q6IFJlOiBSZWdhcmRpbmcgbmV3c3RvcmUgcGVyZm9ybWFuY2UNCg0KT24g
-RnJpLCBBcHIgMTcsIDIwMTUgYXQgMTA6MDggUE0sIENoZW4sIFhpYW94aSA8eGlhb3hpLmNoZW5A
-aW50ZWwuY29tPiB3cm90ZToNCj4gSSB0cmllZCB0byBzcGlsaXQgdGhlIERCL2RhdGEvV0FMIGlu
-dG8gMyBkaWZmZXJlbnQgU1NELCB0aGUgSU9TVEFUIGxvb2tzIGxpa2UgYmVsb3c6DQo+DQo+IFNE
-QiBpcyB0aGUgZGF0YSB3aGlsZSBTREMgaXMgZGIgYW5kIFNERCBpcyB0aGUgV0FMIG9mIFJvY2tz
-REIuDQo+IFRoZSBJTyBwYXR0ZXJuIGlzIDRLQiByYW5kb20gd3JpdGUoUUQ9OCkgb250b3Agb2Yg
-YSBwcmUtZmlsbGVkIFJCRCwgdXNpbmcgZmlvLWxpYnJiZC4NCj4NCj4gVGhlIHJlc3VsdCBsb29r
-cyBzdHJhbmdlLA0KPiAxLiBpbiBTREIoZGF0YSBwYXJ0KSwgd2UgYXJlIGV4cGVjdGluZyA0S0Ig
-SU8gYnV0IGFjdHVhbGx5IHdlIG9ubHkgZ2V0IDJLQig0U2VjdG9yKS4NCj4gMi4gVGhlcmUgYXJl
-IG5vdCB0aGF0IG11Y2ggZGF0YSB3cml0dGVuIHRvIExldmVsIDArLCBvbmx5IDAuNTNNQi9zIDMu
-IA0KPiBOb3RlIHRoYXQgdGhlIGF2Z3F1LXN6IGlzIHZlcnkgbG93IGNvbXBhcmVkIHRvIFFEPTgg
-aW4gRklPLCBzZWVtcyB0aGUgcHJvYmxlbSBpcyB0aGF0IHdlIGNhbm5vdCBjb21taXQgdGhlIFdB
-TCBmYXN0IGVub3VnaC4NCg0KQXJlIHlvdSB1c2luZyBkZWZhdWx0IGlvIHNjaGVkdWxlciBmb3Ig
-dGhlc2Ugc3NkPyBJJ20gbm90IHN1cmUgdGhhdCBsaW51eCBjZnEgc2NoZWR1bGVyIHdpbGwgbWFr
-ZSBmc3luYy9mZGF0YXN5bmMgYmVoaW5kIGFsbCBpbnByb2dyZXNzIHdyaXRlIG9wLiBTbyBpZiB3
-ZSBhbHdheXMgaXNzdWUgZnN5bmMgaW4gcm9ja3NkYiBsYXllciwgaXQgd2lsbCB0cnkgdG8gbWVy
-Z2UgbW9yZSBmc3luYyByZXF1ZXN0cz8gTWF5YmUgeW91IGNvdWxkIG1vdmUgdG8gZGVhZGxpbmUg
-b3Igbm9vcD8NCg0KPg0KPg0KPiBNeSBjb2RlIGJhc2UgaXMgNmU5YjJmY2UzMGNmMjk3ZTYwNDU0
-Njg5YzZmYjQwNmI2ZTc4Njg4OSwNCj4NCj4gYXZnLWNwdTogICV1c2VyICAgJW5pY2UgJXN5c3Rl
-bSAlaW93YWl0ICAlc3RlYWwgICAlaWRsZQ0KPiAgICAgICAgICAgMTUuNzcgICAgMC4wMCAgICA4
-Ljg3ICAgIDIuMDYgICAgMC4wMCAgIDczLjMwDQo+DQo+IERldmljZTogICAgICAgICBycnFtL3Mg
-ICB3cnFtL3MgICAgIHIvcyAgICAgdy9zICAgIHJNQi9zICAgIHdNQi9zIGF2Z3JxLXN6IGF2Z3F1
-LXN6ICAgYXdhaXQgcl9hd2FpdCB3X2F3YWl0ICBzdmN0bSAgJXV0aWwNCj4gc2RhICAgICAgICAg
-ICAgICAgMC4wMCAgICAxMC42MCAgICAwLjAwICAgNDkuNjAgICAgIDAuMDAgICAgMjEuNTYgICA4
-OTAuMzkgICAgIDYuNjggIDEzNC43NiAgICAwLjAwICAxMzQuNzYgICAxLjE2ICAgNS43Ng0KPiBz
-ZGIgICAgICAgICAgICAgICAwLjAwICAgICAwLjAwICAgIDAuMDAgMTYyNy4zMCAgICAgMC4wMCAg
-ICAgMy4yMiAgICAgNC4wNSAgICAgMC4xMSAgICAwLjA3ICAgIDAuMDAgICAgMC4wNyAgIDAuMDYg
-IDEwLjUyDQo+IHNkYyAgICAgICAgICAgICAgIDAuMDAgICAgIDAuMDAgICAgMC4yMCAgICA0LjMw
-ICAgICAwLjAwICAgICAwLjUzICAgMjM5LjMzICAgICAwLjAwICAgIDEuMDcgICAgMi4wMCAgICAx
-LjAyICAgMC43MSAgIDAuMzINCj4gc2RkICAgICAgICAgICAgICAgMC4wMCAgIDYxMi4wMCAgICAw
-LjAwIDE4MjkuNTAgICAgIDAuMDAgICAgIDkuNDEgICAgMTAuNTMgICAgIDAuODUgICAgMC40NiAg
-ICAwLjAwICAgIDAuNDYgICAwLjQ2ICA4NC42OA0KPg0KPg0KPiAvZGV2L3NkYzEgICAgICAxNTYx
-NzI3OTYgIDI3NDA2MjAgMTUzNDMyMTc2ICAgMiUgL3Jvb3QvY2VwaC0wLWRiDQo+IC9kZXYvc2Rk
-MSAgICAgIDE5NTI2NDU3MiAgICA0MTk0MCAxOTUyMjI2MzIgICAxJSAvcm9vdC9jZXBoLTAtZGIt
-d2FsDQo+IC9kZXYvc2RiMSAgICAgIDE1NjE3Mjc5NiAxMDUxOTUzMiAxNDU2NTMyNjQgICA3JSAv
-dmFyL2xpYi9jZXBoL29zZC9jZXBoLTANCj4NCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0N
-Cj4gRnJvbTogTWFyayBOZWxzb24gW21haWx0bzptbmVsc29uQHJlZGhhdC5jb21dDQo+IFNlbnQ6
-IEZyaWRheSwgQXByaWwgMTcsIDIwMTUgODoxMSBQTQ0KPiBUbzogU2FnZSBXZWlsDQo+IENjOiBT
-b21uYXRoIFJveTsgQ2hlbiwgWGlhb3hpOyBIYW9tYWkgV2FuZzsgY2VwaC1kZXZlbA0KPiBTdWJq
-ZWN0OiBSZTogUmVnYXJkaW5nIG5ld3N0b3JlIHBlcmZvcm1hbmNlDQo+DQo+DQo+DQo+IE9uIDA0
-LzE2LzIwMTUgMDc6MzggUE0sIFNhZ2UgV2VpbCB3cm90ZToNCj4+IE9uIFRodSwgMTYgQXByIDIw
-MTUsIE1hcmsgTmVsc29uIHdyb3RlOg0KPj4+IE9uIDA0LzE2LzIwMTUgMDE6MTcgQU0sIFNvbW5h
-dGggUm95IHdyb3RlOg0KPj4+PiBIZXJlIGlzIHRoZSBkYXRhIHdpdGggb21hcCBzZXBhcmF0ZWQg
-dG8gYW5vdGhlciBTU0QgYW5kIGFmdGVyIA0KPj4+PiAxMDAwR0Igb2YgZmlvIHdyaXRlcyAoc2Ft
-ZSBwcm9maWxlKS4uDQo+Pj4+DQo+Pj4+IG9tYXAgd3JpdGVzOg0KPj4+PiAtLS0tLS0tLS0tLS0t
-DQo+Pj4+DQo+Pj4+IFRvdGFsIGhvc3Qgd3JpdGVzIGluIHRoaXMgcGVyaW9kID0gNTUxMDIwMTEx
-IC0tLS0tLSB+MjEwMSBHQg0KPj4+Pg0KPj4+PiBUb3RhbCBmbGFzaCB3cml0ZXMgaW4gdGhpcyBw
-ZXJpb2QgPSAxMTUwNjc5MzM2DQo+Pj4+DQo+Pj4+IGRhdGEgd3JpdGVzOg0KPj4+PiAtLS0tLS0t
-LS0tLQ0KPj4+Pg0KPj4+PiBUb3RhbCBob3N0IHdyaXRlcyBpbiB0aGlzIHBlcmlvZCA9IDMwMjU1
-MDM4OCAtLS0gfjExNTQgR0INCj4+Pj4NCj4+Pj4gVG90YWwgZmxhc2ggd3JpdGVzIGluIHRoaXMg
-cGVyaW9kID0gNjAwMjM4MzI4DQo+Pj4+DQo+Pj4+IFNvLCBhY3R1YWwgZGF0YSB3cml0ZSBXQSBp
-cyB+MS4xIGJ1dCBvbWFwIG92ZXJoZWFkIGlzIH4yLjEgYW5kIA0KPj4+PiBhZGRpbmcgdGhvc2Ug
-Z2V0dGluZyB+My4yIFdBIG92ZXJhbGwuDQo+Pg0KPj4gVGhpcyBhbGwgc3VnZ2VzdHMgdGhhdCBn
-ZXR0aW5nIHJvY2tzZGIgdG8gbm90IHJld3JpdGUgdGhlIHdhbCBlbnRyaWVzIA0KPj4gYXQgYWxs
-IHdpbGwgYmUgdGhlIGJpZyB3aW4uICBJIHRoaW5rIFhpYW94aSBoYWQgdHVuYWJsZSBzdWdnZXN0
-aW9ucyANCj4+IGZvciB0aGF0PyAgSSBkaWRuJ3QgZ3JvayB0aGUgcm9ja3NkYiB0ZXJtcyBpbW1l
-ZGlhdGVseSBzbyB0aGV5IGRpZG4ndCANCj4+IG1ha2UgYSBsb3Qgb2Ygc2Vuc2UgYXQgdGhlIHRp
-bWUuLiB0aGlzIGlzIHByb2JhYmx5IGEgZ29vZCBwbGFjZSB0byANCj4+IGZvY3VzLCB0aG91Z2gu
-ICBUaGUgcm9ja3NkYiBjb21wYWN0aW9uIHN0YXRzIHNob3VsZCBoZWxwIG91dCB0aGVyZS4NCj4+
-DQo+PiBCdXQuLi4gdG9kYXkgSSBpZ25vcmVkIHRoaXMgZW50aXJlbHkgYW5kIHB1dCByb2Nrc2Ri
-IGluIHRtcGZzIGFuZCANCj4+IGZvY3VzZWQganVzdCBvbiB0aGUgYWN0dWFsIHdhbCBJT3MgZG9u
-ZSB0byB0aGUgZnJhZ21lbnRzIGZpbGVzIGFmdGVyIHRoZSBmYWN0Lg0KPj4gRm9yIHNpbXBsaWNp
-dHkgSSBmb2N1c2VkIGp1c3Qgb24gMTI4ayByYW5kb20gd3JpdGVzIGludG8gNG1iIG9iamVjdHMu
-DQo+Pg0KPj4gZmlvIGNhbiBnZXQgfjE4IG1iL3NlYyBvbiBteSBkaXNrIHdpdGggaW9kZXB0aD0x
-LiAgSW50ZXJlc3RpbmdseSwgDQo+PiBzZXR0aW5nDQo+PiBpb2RlcHRoPTE2IG1ha2VzIG5vIGRp
-ZmZlcmVudCAqdW50aWwqIEkgYWxzbyBzZXQgdGhpbmt0aW1lPTEwICh1cywgb3IgDQo+PiBhbG1v
-c3QgYW55IHZhbHVlIHJlYWxseSkgYW5kIHRoaW5rdGltZV9ibG9ja3M9MTYsIGF0IHdoaWNoIHBv
-aW50IGl0IA0KPj4gZ29lcyB1cCB3aXRoIHRoZSBpb2RlcHRoLiAgSSdtIG5vdCBxdWl0ZSBzdXJl
-IHdoYXQgaXMgZ29pbmcgb24gdGhlcmUgDQo+PiBidXQgaXQgc2VlbXMgdG8gYmUgcHJldmVudGlu
-ZyB0aGUgZWxldmF0b3IgYW5kL29yIGRpc2sgZnJvbSANCj4+IHJlb3JkZXJpbmcgd3JpdGVzIGFu
-ZCBtYWtlIG1vcmUgZWZmaWNpZW50IHN3ZWVwcyBhY3Jvc3MgdGhlIGRpc2suICBJbiANCj4+IGFu
-eSBjYXNlLCB0aG91Z2gsIHdpdGggdGhhdCB0d2Vha2VkIEkgY2FuIGdldCB1cCB0byB+MzBtYi9z
-ZWMgd2l0aCBxZCAxNiwgfjQwbWIvc2VjIHdpdGggcWQgNjQuDQo+PiBTaW1pbGFybHksIHdpdGgg
-cWEgMSBhbmQgdGhpbmt0aW1lIG9mIDI1MHVzLCBpdCBkcm9wcyB0byBsaWtlIA0KPj4gMTVtYi9z
-ZWMsIHdoaWNoIGlzIGJhc2ljYWxseSB3aGF0IEkgd2FzIGdldHRpbmcgZnJvbSBuZXdzdG9yZS4g
-IA0KPj4gSGVyZSdzIG15IGZpbw0KPj4gY29uZmlnOg0KPj4NCj4+ICAgICAgIGh0dHA6Ly9mcGFz
-dGUub3JnLzIxMjExMC80MjkyMzA4OS8NCj4NCj4NCj4gWWlrZXMhICBUaGF0IGlzIGEgZ3JlYXQg
-b2JzZXJ2YXRpb24gU2FnZSENCj4NCj4+DQo+PiBDb25jbHVzaW9uOiB3ZSBuZWVkIG11bHRpcGxl
-IHRocmVhZHMgKG9yIGxpYmFpbykgdG8gZ2V0IGxvdHMgb2YgSU9zIA0KPj4gaW4gZmxpZ2h0IHNv
-IHRoYXQgdGhlIGJsb2NrIGxheWVyIGFuZC9vciBkaXNrIGNhbiByZW9yZGVyIGFuZCBiZSBlZmZp
-Y2llbnQuDQo+PiBJIGFkZGVkIGEgdGhyZWFkcG9vbCBmb3IgZG9pbmcgd2FsIHdvcmsgKG5ld3N0
-b3JlIHdhbCB0aHJlYWRzID0gOCBieQ0KPj4gZGVmYXVsdCkgYW5kIGl0IG1ha2VzIGEgYmlnIGRp
-ZmZlcmVuY2UuICBOb3cgSSBhbSBnZXR0aW5nIG1vcmUgbGlrZSANCj4+IDE5bWIvc2VjIHcvIDQg
-dGhyZWFkcyBhbmQgY2xpZW50IChzbWFsbGlvYmVuY2gpIHFkIDE2LiAgSXQncyBub3QgDQo+PiBn
-b2luZyB1cCBtdWNoIGZyb20gdGhlcmUgYXMgSSBzY2FsZSB0aHJlYWRzIG9yIHFkLCBzdHJhbmdl
-bHk7IG5vdCBzdXJlIHdoeSB5ZXQuDQo+Pg0KPj4gQnV0Li4uIHRoYXQncyBhIGJpZyBpbXByb3Zl
-bWVudCBvdmVyIGEgZmV3IGRheXMgYWdvICh+OG1iL3NlYykuICBBbmQgDQo+PiBvbiB0aGlzIGRy
-aXZlIGZpbGVzdG9yZSB3aXRoIGpvdXJuYWwgb24gc3NkIGdldHMgfjguNW1iL3NlYy4gIFNvIA0K
-Pj4gd2UncmUgd2lubmluZywgeWF5IQ0KPj4NCj4+IEkgdGFibGVkIHRoZSBsaWJhaW8gcGF0Y2gg
-Zm9yIG5vdyBzaW5jZSBpdCB3YXMgZ2V0dGluZyBzcHVyaW91cyANCj4+IEVJTlZBTCBhbmQgd291
-bGQgY29uc2lzdGVudGx5IFNJR0JVRyBmcm9tIGlvX2dldGV2ZW50cygpIHdoZW4gDQo+PiBjZXBo
-LW9zZCBkaWQNCj4+IGRsb3BlbigpIG9uIHRoZSByYWRvcyBwbHVnaW5zICh3ZWlyZCEpLg0KPj4N
-Cj4+IE1hcmssIGF0IHRoaXMgcG9pbnQgaXQgaXMgcHJvYmFibHkgd29ydGggY2hlY2tpbmcgdGhh
-dCB5b3UgY2FuIA0KPj4gcmVwcm9kdWNlIHRoZXNlIHJlc3VsdHM/ICBJZiBzbywgd2UgY2FuIHJl
-ZG8gdGhlIGlvIHNpemUgc3dlZXAuICBJIA0KPj4gcGlja2VkIDggd2FsIHRocmVhZHMgc2luY2Ug
-dGhhdCB3YXMgZW5vdWdoIHRvIGhlbHAgYW5kIGdvaW5nIGhpZ2hlciANCj4+IGRpZG4ndCBzZWVt
-IHRvIG1ha2UgbXVjaCBkaWZmZXJlbmNlLCBidXQgYXQgc29tZSBwb2ludCB3ZSdsbCB3YW50IHRv
-IA0KPj4gYmUgbW9yZSBjYXJlZnVsIGFib3V0IHBpY2tpbmcgdGhhdCBudW1iZXIuICBXZSBjb3Vs
-ZCBhbHNvIHVzZSBsaWJhaW8gDQo+PiBoZXJlLCBidXQgSSdtIG5vdCBzdXJlIGl0J3Mgd29ydGgg
-aXQuICBBbmQgdGhpcyBhcHByb2FjaCBpcyBzb21ld2hhdCANCj4+IG9ydGhvZ29uYWwgdG8gdGhl
-IGlkZWEgb2YgZWZmaWNpZW50bHkgcGFzc2luZyB0aGUga2VybmVsIHRoaW5ncyB0byBmZGF0YXN5
-bmMuDQo+DQo+IEFic29sdXRlbHkhICBJJ2xsIGdldCBzb21lIHRlc3RzIHJ1bm5pbmcgbm93LiAg
-TG9va3MgbGlrZSBldmVyeW9uZSBpcyBqdW1waW5nIG9uIHRoZSBsaWJhaW8gYmFuZHdhZ29uIHdo
-aWNoIG5haXZlbHkgc2VlbXMgbGlrZSB0aGUgcmlnaHQgd2F5IHRvIG1lIHRvby4gIENhbiB5b3Ug
-dGFsayBhIGxpdHRsZSBiaXQgbW9yZSBhYm91dCBob3cgeW91J2Qgc2VlIGZkYXRhc3luYyB3b3Jr
-IGluIHRoaXMgY2FzZSB0aG91Z2ggdnMgdGhlIHRocmVhZGVkIGltcGxlbWVudGF0aW9uPw0KPg0K
-Pj4NCj4+IEFueXdheSwgbmV4dCB1cCBpcyBwcm9iYWJseSB3cmFuZ2xpbmcgcm9ja3NkYidzIGxv
-ZyENCj4NCj4gSSBqdW1wZWQgb24gI3JvY2tzZGIgb24gZnJlZW5vZGUgeWVzdGVyZGF5IHRvIGFz
-ayBhYm91dCBpdCwgYnV0IEkgdGhpbmsgd2UnbGwgcHJvYmFibHkganVzdCBuZWVkIHRvIGhpdCB0
-aGUgbWFpbGluZyBsaXN0Lg0KPg0KPj4NCj4+IHNhZ2UNCj4+DQoNCg0KDQotLQ0KQmVzdCBSZWdh
-cmRzLA0KDQpXaGVhdA0K
+
+
+On 04/17/2015 09:29 AM, Chen, Xiaoxi wrote:
+> I use deadline.
+>
+> Yes in RocksDB every commit will follow by a fsync/fdatasync for WAL log data safely. Not sure if they could write the WAL log by O_DIRECT to avoid tons of fsync?
+>
+> Here is the DB stats that I printed every 5s,showing 1 write/sync.
+>
+> ** DB Stats **
+> Uptime(secs): 1127.6 total, 5.9 interval
+> Cumulative writes: 1723086 writes, 8251002 keys, 1723002 batches, 1.0 writes per batch, 14.46 GB user ingest, stall time: 0 us
+> Cumulative WAL: 1723087 writes, 1723001 syncs, 1.00 writes per sync, 14.46 GB written
+> Interval writes: 15179 writes, 77017 keys, 15179 batches, 1.0 writes per batch, 29.4 MB user ingest, stall time: 0 us
+> Interval WAL: 15180 writes, 15179 syncs, 1.00 writes per sync, 0.03 MB written
+
+Yes, the dbstats for the test I did yesterday also show 1 write/sync:
+
+http://www.fpaste.org/212007/raw/
+
+>
+>
+> -----Original Message-----
+> From: Haomai Wang [mailto:haomaiwang@gmail.com]
+> Sent: Friday, April 17, 2015 10:20 PM
+> To: Chen, Xiaoxi
+> Cc: Mark Nelson; Sage Weil; Somnath Roy; ceph-devel
+> Subject: Re: Regarding newstore performance
+>
+> On Fri, Apr 17, 2015 at 10:08 PM, Chen, Xiaoxi <xiaoxi.chen@intel.com> wrote:
+>> I tried to spilit the DB/data/WAL into 3 different SSD, the IOSTAT looks like below:
+>>
+>> SDB is the data while SDC is db and SDD is the WAL of RocksDB.
+>> The IO pattern is 4KB random write(QD=8) ontop of a pre-filled RBD, using fio-librbd.
+>>
+>> The result looks strange,
+>> 1. in SDB(data part), we are expecting 4KB IO but actually we only get 2KB(4Sector).
+>> 2. There are not that much data written to Level 0+, only 0.53MB/s 3.
+>> Note that the avgqu-sz is very low compared to QD=8 in FIO, seems the problem is that we cannot commit the WAL fast enough.
+>
+> Are you using default io scheduler for these ssd? I'm not sure that linux cfq scheduler will make fsync/fdatasync behind all inprogress write op. So if we always issue fsync in rocksdb layer, it will try to merge more fsync requests? Maybe you could move to deadline or noop?
+>
+>>
+>>
+>> My code base is 6e9b2fce30cf297e60454689c6fb406b6e786889,
+>>
+>> avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+>>            15.77    0.00    8.87    2.06    0.00   73.30
+>>
+>> Device:         rrqm/s   wrqm/s     r/s     w/s    rMB/s    wMB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
+>> sda               0.00    10.60    0.00   49.60     0.00    21.56   890.39     6.68  134.76    0.00  134.76   1.16   5.76
+>> sdb               0.00     0.00    0.00 1627.30     0.00     3.22     4.05     0.11    0.07    0.00    0.07   0.06  10.52
+>> sdc               0.00     0.00    0.20    4.30     0.00     0.53   239.33     0.00    1.07    2.00    1.02   0.71   0.32
+>> sdd               0.00   612.00    0.00 1829.50     0.00     9.41    10.53     0.85    0.46    0.00    0.46   0.46  84.68
+>>
+>>
+>> /dev/sdc1      156172796  2740620 153432176   2% /root/ceph-0-db
+>> /dev/sdd1      195264572    41940 195222632   1% /root/ceph-0-db-wal
+>> /dev/sdb1      156172796 10519532 145653264   7% /var/lib/ceph/osd/ceph-0
+>>
+>> -----Original Message-----
+>> From: Mark Nelson [mailto:mnelson@redhat.com]
+>> Sent: Friday, April 17, 2015 8:11 PM
+>> To: Sage Weil
+>> Cc: Somnath Roy; Chen, Xiaoxi; Haomai Wang; ceph-devel
+>> Subject: Re: Regarding newstore performance
+>>
+>>
+>>
+>> On 04/16/2015 07:38 PM, Sage Weil wrote:
+>>> On Thu, 16 Apr 2015, Mark Nelson wrote:
+>>>> On 04/16/2015 01:17 AM, Somnath Roy wrote:
+>>>>> Here is the data with omap separated to another SSD and after
+>>>>> 1000GB of fio writes (same profile)..
+>>>>>
+>>>>> omap writes:
+>>>>> -------------
+>>>>>
+>>>>> Total host writes in this period = 551020111 ------ ~2101 GB
+>>>>>
+>>>>> Total flash writes in this period = 1150679336
+>>>>>
+>>>>> data writes:
+>>>>> -----------
+>>>>>
+>>>>> Total host writes in this period = 302550388 --- ~1154 GB
+>>>>>
+>>>>> Total flash writes in this period = 600238328
+>>>>>
+>>>>> So, actual data write WA is ~1.1 but omap overhead is ~2.1 and
+>>>>> adding those getting ~3.2 WA overall.
+>>>
+>>> This all suggests that getting rocksdb to not rewrite the wal entries
+>>> at all will be the big win.  I think Xiaoxi had tunable suggestions
+>>> for that?  I didn't grok the rocksdb terms immediately so they didn't
+>>> make a lot of sense at the time.. this is probably a good place to
+>>> focus, though.  The rocksdb compaction stats should help out there.
+>>>
+>>> But... today I ignored this entirely and put rocksdb in tmpfs and
+>>> focused just on the actual wal IOs done to the fragments files after the fact.
+>>> For simplicity I focused just on 128k random writes into 4mb objects.
+>>>
+>>> fio can get ~18 mb/sec on my disk with iodepth=1.  Interestingly,
+>>> setting
+>>> iodepth=16 makes no different *until* I also set thinktime=10 (us, or
+>>> almost any value really) and thinktime_blocks=16, at which point it
+>>> goes up with the iodepth.  I'm not quite sure what is going on there
+>>> but it seems to be preventing the elevator and/or disk from
+>>> reordering writes and make more efficient sweeps across the disk.  In
+>>> any case, though, with that tweaked I can get up to ~30mb/sec with qd 16, ~40mb/sec with qd 64.
+>>> Similarly, with qa 1 and thinktime of 250us, it drops to like
+>>> 15mb/sec, which is basically what I was getting from newstore.
+>>> Here's my fio
+>>> config:
+>>>
+>>>        http://fpaste.org/212110/42923089/
+>>
+>>
+>> Yikes!  That is a great observation Sage!
+>>
+>>>
+>>> Conclusion: we need multiple threads (or libaio) to get lots of IOs
+>>> in flight so that the block layer and/or disk can reorder and be efficient.
+>>> I added a threadpool for doing wal work (newstore wal threads = 8 by
+>>> default) and it makes a big difference.  Now I am getting more like
+>>> 19mb/sec w/ 4 threads and client (smalliobench) qd 16.  It's not
+>>> going up much from there as I scale threads or qd, strangely; not sure why yet.
+>>>
+>>> But... that's a big improvement over a few days ago (~8mb/sec).  And
+>>> on this drive filestore with journal on ssd gets ~8.5mb/sec.  So
+>>> we're winning, yay!
+>>>
+>>> I tabled the libaio patch for now since it was getting spurious
+>>> EINVAL and would consistently SIGBUG from io_getevents() when
+>>> ceph-osd did
+>>> dlopen() on the rados plugins (weird!).
+>>>
+>>> Mark, at this point it is probably worth checking that you can
+>>> reproduce these results?  If so, we can redo the io size sweep.  I
+>>> picked 8 wal threads since that was enough to help and going higher
+>>> didn't seem to make much difference, but at some point we'll want to
+>>> be more careful about picking that number.  We could also use libaio
+>>> here, but I'm not sure it's worth it.  And this approach is somewhat
+>>> orthogonal to the idea of efficiently passing the kernel things to fdatasync.
+>>
+>> Absolutely!  I'll get some tests running now.  Looks like everyone is jumping on the libaio bandwagon which naively seems like the right way to me too.  Can you talk a little bit more about how you'd see fdatasync work in this case though vs the threaded implementation?
+>>
+>>>
+>>> Anyway, next up is probably wrangling rocksdb's log!
+>>
+>> I jumped on #rocksdb on freenode yesterday to ask about it, but I think we'll probably just need to hit the mailing list.
+>>
+>>>
+>>> sage
+>>>
+>
+>
+>
+> --
+> Best Regards,
+>
+> Wheat
+>
