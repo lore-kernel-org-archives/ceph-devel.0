@@ -1,179 +1,68 @@
-From: Douglas Fuller <dfuller@redhat.com>
-Subject: [PATCH] ceph: support multiple class method calls in one ceph_msg
-Date: Fri, 17 Apr 2015 16:55:56 -0400
-Message-ID: <DA0DBDF5-6009-485E-87AF-C0DCE4265D7A@redhat.com>
-Mime-Version: 1.0 (Mac OS X Mail 8.2 \(2098\))
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: rados and the next giant release v0.87.2
+Date: Fri, 17 Apr 2015 23:10:39 +0200
+Message-ID: <553176CF.80702@dachary.org>
+References: <552E33D7.9010800@dachary.org>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="0n9rtdV7NTwcF9KxR5jSU4R52L2LrfOHf"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:43203 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753252AbbDQUz6 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 17 Apr 2015 16:55:58 -0400
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t3HKtwcD002692
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
-	for <ceph-devel@vger.kernel.org>; Fri, 17 Apr 2015 16:55:58 -0400
-Received: from [10.10.50.244] (unused [10.10.50.244] (may be forged))
-	by int-mx11.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t3HKtuFc004974
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-	for <ceph-devel@vger.kernel.org>; Fri, 17 Apr 2015 16:55:58 -0400
+Received: from mail2.dachary.org ([91.121.57.175]:48523 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752176AbbDQVKn (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 17 Apr 2015 17:10:43 -0400
+In-Reply-To: <552E33D7.9010800@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Samuel Just <sjust@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Abhishek L <abhishek.lekshmanan@gmail.com>
 
-From: Douglas Fuller <dfuller@redhat.com>
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--0n9rtdV7NTwcF9KxR5jSU4R52L2LrfOHf
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-Messages are received from the wire directly into destination buffers.
-A short read could result in corruption of the following destination
-buffers. Allocate a single message buffer for all class method calls
-and split them at the osd_client level. This only applies to ceph_msgs
-containing multiple op call and may break support for ceph_msgs
-containing a mix of class method calls that return data and other ops.
+For the record:
 
-Signed-off-by: Douglas Fuller <dfuller@redhat.com>
----
-include/linux/ceph/osd_client.h |  1 +
-net/ceph/messenger.c            |  1 +
-net/ceph/osd_client.c           | 88 ++++++++++++++++++++++++++++++++++++++++-
-3 files changed, 88 insertions(+), 2 deletions(-)
+<loicd> sjusthm: when you get a moment could you take a look at the "rado=
+s and the next giant release v0.87.2" mail ? it's hopefully a quick revie=
+w. If not it can wait until next week ;-)
+<sjusthm> loicd: lookin
+<sjusthm> loicd: looks good for qe to me
+<loicd> sjusthm: thanks !
 
-diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
-index 61b19c4..65fcf80 100644
---- a/include/linux/ceph/osd_client.h
-+++ b/include/linux/ceph/osd_client.h
-@@ -99,6 +99,7 @@ struct ceph_osd_req_op {
-			struct ceph_osd_data request_info;
-			struct ceph_osd_data request_data;
-			struct ceph_osd_data response_data;
-+			struct ceph_osd_data chain_data;
-			__u8 class_len;
-			__u8 method_len;
-			__u8 argc;
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index 967080a..681a47d 100644
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -907,6 +907,7 @@ static void ceph_msg_data_pages_cursor_init(struct ceph_msg_data_cursor *cursor,
-	BUG_ON(!data->pages);
-	BUG_ON(!data->length);
+On 15/04/2015 11:48, Loic Dachary wrote:
+> Hi Sam,
+>=20
+> The next giant release as found at https://github.com/ceph/ceph/tree/gi=
+ant passed the rados suite (http://tracker.ceph.com/issues/11153#rados). =
+Do you think it is ready for QE to start their own round of testing ?
+>=20
+> Note that it will be the last giant release.=20
+>=20
+> Cheers
+>=20
+> P.S. http://tracker.ceph.com/issues/11153#Release-information has direc=
+t links to the pull requests merged into giant since v0.87.1 in case you =
+need more context about one of them.
+>=20
 
-+	/* bug here (issue 11424) if a short read (length < data->length) */
-	cursor->resid = min(length, data->length);
-	page_count = calc_pages_for(data->alignment, (u64)data->length);
-	cursor->page_offset = data->alignment & ~PAGE_MASK;
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 41a4abc..ba2296b 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -301,6 +301,69 @@ static void osd_req_op_data_release(struct ceph_osd_request *osd_req,
-	}
-}
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
-+static int __build_op_cls_chain(struct ceph_osd_request *osd_req)
-+{
-+	u64 chain_length = 0;
-+	u32 chain_pagecount = 0;
-+	struct ceph_osd_req_op *op = NULL;
-+	struct ceph_osd_data *osd_data;
-+	struct ceph_osd_data *chain_data;
-+	struct page **pages;
-+	int i;
-+
-+	chain_data = osd_req_op_data(osd_req, 0, cls, chain_data);
-+
-+	for (i=0; i<osd_req->r_num_ops; i++)
-+	{
-+		op = &osd_req->r_ops[i];
-+		BUG_ON(op->op != CEPH_OSD_OP_CALL);
-+
-+		osd_data = osd_req_op_data(osd_req, i, cls, chain_data);
-+		osd_data->length = 0;
-+
-+		osd_data = osd_req_op_data(osd_req, i, cls, response_data);
-+		chain_length += osd_data->length;
-+	}
-+
-+	chain_data->length = chain_length;
-+	chain_pagecount = (u32)calc_pages_for(0, chain_data->length);
-+	pages = ceph_alloc_page_vector(chain_pagecount, GFP_KERNEL);
-+	if (IS_ERR(pages))
-+		return PTR_ERR(pages);
-+	ceph_osd_data_pages_init(chain_data, pages, chain_length, 0, false, false);
-+
-+	return 0;
-+}
-+
-+static int __split_cls_op_chain(struct ceph_osd_request *osd_req)
-+{
-+	int i;
-+	void * data;
-+	void * p;
-+	struct ceph_osd_data *osd_data;
-+
-+	osd_data = osd_req_op_data(osd_req, 0, cls, chain_data);
-+
-+	data = kzalloc(osd_data->length, GFP_KERNEL);
-+	if (!data)
-+		return -ENOMEM;
-+
-+	ceph_copy_from_page_vector(osd_data->pages, data, 0, osd_data->length);
-+	ceph_osd_data_release(osd_data);
-+
-+	p = data;
-+	for (i=0; i<osd_req->r_num_ops; i++)
-+	{
-+		osd_data = osd_req_op_data(osd_req, i, cls, response_data);
-+		ceph_copy_to_page_vector(osd_data->pages, p,
-+			0, osd_req->r_reply_op_len[i]);
-+		p += osd_req->r_reply_op_len[i];
-+	}
-+
-+	kfree(data);
-+	return 0;
-+}
-+
-/*
- * requests
- */
-@@ -694,8 +757,20 @@ static u64 osd_req_encode_op(struct ceph_osd_request *req,
-			src->payload_len += data_length;
-			request_data_len += data_length;
-		}
--		osd_data = &src->cls.response_data;
--		ceph_osdc_msg_data_add(req->r_reply, osd_data);
-+		if (which == 0)
-+		{
-+			int err;
-+
-+			err = __build_op_cls_chain(req);
-+			if (err == -ENOMEM)
-+			{
-+				pr_err("error allocating memory for op chain\n");
-+				return 0;
-+			}
-+			osd_data = &src->cls.chain_data;
-+			if (osd_data->length)
-+				ceph_osdc_msg_data_add(req->r_reply, osd_data);
-+		}
-		break;
-	case CEPH_OSD_OP_STARTSYNC:
-		break;
-@@ -1825,6 +1900,15 @@ static void handle_reply(struct ceph_osd_client *osdc, struct ceph_msg *msg,
-	for (i = 0; i < numops; i++)
-		req->r_reply_op_result[i] = ceph_decode_32(&p);
 
-+	if (req->r_ops[0].op == CEPH_OSD_OP_CALL &&
-+			req->r_ops[0].cls.chain_data.length)
-+	{
-+		int err;
-+		err = __split_cls_op_chain(req);
-+		if (err == -ENOMEM)
-+			goto bad_put;
-+	}
-+
-	if (le16_to_cpu(msg->hdr.version) >= 6) {
-		p += 8 + 4; /* skip replay_version */
-		p += 8; /* skip user_version */
--- 
-1.9.3
+--0n9rtdV7NTwcF9KxR5jSU4R52L2LrfOHf
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlUxds8ACgkQ8dLMyEl6F21kCACcCL9Jhc5kVS84Rkff3BYKtCNH
+CPkAnRxt+ZxDJ6uPdHj/t1B8ZiiZEMYh
+=WNpP
+-----END PGP SIGNATURE-----
+
+--0n9rtdV7NTwcF9KxR5jSU4R52L2LrfOHf--
