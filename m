@@ -1,103 +1,62 @@
-From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Subject: RE: Regarding newstore performance
-Date: Fri, 17 Apr 2015 00:55:44 +0000
-Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC021CEA57@shsmsx102.ccr.corp.intel.com>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD79CFB@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CACJqLybLO=ut70O7Mf_RCnJwzBPAH45OBnGLdHesdnRziCUUiQ@mail.gmail.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F2CD7A0A1@SACMBXIP01.sdcorp.global.sandisk.com>
-	<6F3FA899187F0043BA1827A69DA2F7CC021CE207@shsmsx102.ccr.corp.intel.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F2CD7A350@SACMBXIP01.sdcorp.global.sandisk.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F2CD7A4EF@SACMBXIP01.sdcorp.global.sandisk.com>
-	<552FFCAE.1040303@redhat.com>
-	<alpine.DEB.2.00.1504161718020.18547@cobra.newdream.net>
- <CAC6JEv84j86Ntnv1FqFwFEKdMJRWpi0x-sssDOovb3g=e7NAgQ@mail.gmail.com>
+From: Gregory Farnum <greg@gregs42.com>
+Subject: Re: init script bug with multiple clusters
+Date: Thu, 16 Apr 2015 18:01:26 -0700
+Message-ID: <CAC6JEv9gHVrTmuo_Nc1vSxCDmh9WckYwrBN34nPrt7gwptGmYA@mail.gmail.com>
+References: <5524FBB9.9070300@m-privacy.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:20772 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751486AbbDQA4N (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 16 Apr 2015 20:56:13 -0400
-In-Reply-To: <CAC6JEv84j86Ntnv1FqFwFEKdMJRWpi0x-sssDOovb3g=e7NAgQ@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-ig0-f171.google.com ([209.85.213.171]:36300 "EHLO
+	mail-ig0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751355AbbDQBB1 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Apr 2015 21:01:27 -0400
+Received: by igblo3 with SMTP id lo3so3047596igb.1
+        for <ceph-devel@vger.kernel.org>; Thu, 16 Apr 2015 18:01:27 -0700 (PDT)
+Received: from mail-ig0-f169.google.com (mail-ig0-f169.google.com. [209.85.213.169])
+        by mx.google.com with ESMTPSA id i20sm284171igh.16.2015.04.16.18.01.26
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 16 Apr 2015 18:01:26 -0700 (PDT)
+Received: by igblo3 with SMTP id lo3so3289884igb.0
+        for <ceph-devel@vger.kernel.org>; Thu, 16 Apr 2015 18:01:26 -0700 (PDT)
+In-Reply-To: <5524FBB9.9070300@m-privacy.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@gregs42.com>, Sage Weil <sage@newdream.net>
-Cc: Mark Nelson <mnelson@redhat.com>, Somnath Roy <Somnath.Roy@sandisk.com>, Haomai Wang <haomaiwang@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Amon Ott <a.ott@m-privacy.de>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-QWdyZWUuLi4uVGhyZWFkcG9vbC9RdWV1ZS9Mb2NraW5nIGlzIGluIGdlbmVyYWxseSBiYWQgZm9y
-IGxhdGVuY3kuIENhbiB3ZSBqdXN0IG1ha2UgbmV3c3RvcmUgYmFja2VuZCBhcyBzeW5jaHJvbml6
-ZSBhcyBwb3NzaWJsZSBhbmQgdXRpbGl6ZSB0aGUgcGFyYWxsZWxpc20gYnkgbW9yZSAjT1NEX09Q
-X1RIUkVBRD8gSG9wZWZ1bGx5IHdlIGNvdWxkIGhhdmUgYmV0dGVyIGxhdGVuY3kgaW4gbG93ICNR
-RCBjYXNlLg0KIA0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogR3JlZ29yeSBG
-YXJudW0gW21haWx0bzpncmVnQGdyZWdzNDIuY29tXSANClNlbnQ6IEZyaWRheSwgQXByaWwgMTcs
-IDIwMTUgODo0OCBBTQ0KVG86IFNhZ2UgV2VpbA0KQ2M6IE1hcmsgTmVsc29uOyBTb21uYXRoIFJv
-eTsgQ2hlbiwgWGlhb3hpOyBIYW9tYWkgV2FuZzsgY2VwaC1kZXZlbA0KU3ViamVjdDogUmU6IFJl
-Z2FyZGluZyBuZXdzdG9yZSBwZXJmb3JtYW5jZQ0KDQpPbiBUaHUsIEFwciAxNiwgMjAxNSBhdCA1
-OjM4IFBNLCBTYWdlIFdlaWwgPHNhZ2VAbmV3ZHJlYW0ubmV0PiB3cm90ZToNCj4gT24gVGh1LCAx
-NiBBcHIgMjAxNSwgTWFyayBOZWxzb24gd3JvdGU6DQo+PiBPbiAwNC8xNi8yMDE1IDAxOjE3IEFN
-LCBTb21uYXRoIFJveSB3cm90ZToNCj4+ID4gSGVyZSBpcyB0aGUgZGF0YSB3aXRoIG9tYXAgc2Vw
-YXJhdGVkIHRvIGFub3RoZXIgU1NEIGFuZCBhZnRlciANCj4+ID4gMTAwMEdCIG9mIGZpbyB3cml0
-ZXMgKHNhbWUgcHJvZmlsZSkuLg0KPj4gPg0KPj4gPiBvbWFwIHdyaXRlczoNCj4+ID4gLS0tLS0t
-LS0tLS0tLQ0KPj4gPg0KPj4gPiBUb3RhbCBob3N0IHdyaXRlcyBpbiB0aGlzIHBlcmlvZCA9IDU1
-MTAyMDExMSAtLS0tLS0gfjIxMDEgR0INCj4+ID4NCj4+ID4gVG90YWwgZmxhc2ggd3JpdGVzIGlu
-IHRoaXMgcGVyaW9kID0gMTE1MDY3OTMzNg0KPj4gPg0KPj4gPiBkYXRhIHdyaXRlczoNCj4+ID4g
-LS0tLS0tLS0tLS0NCj4+ID4NCj4+ID4gVG90YWwgaG9zdCB3cml0ZXMgaW4gdGhpcyBwZXJpb2Qg
-PSAzMDI1NTAzODggLS0tIH4xMTU0IEdCDQo+PiA+DQo+PiA+IFRvdGFsIGZsYXNoIHdyaXRlcyBp
-biB0aGlzIHBlcmlvZCA9IDYwMDIzODMyOA0KPj4gPg0KPj4gPiBTbywgYWN0dWFsIGRhdGEgd3Jp
-dGUgV0EgaXMgfjEuMSBidXQgb21hcCBvdmVyaGVhZCBpcyB+Mi4xIGFuZCANCj4+ID4gYWRkaW5n
-IHRob3NlIGdldHRpbmcgfjMuMiBXQSBvdmVyYWxsLg0KPg0KPiBUaGlzIGFsbCBzdWdnZXN0cyB0
-aGF0IGdldHRpbmcgcm9ja3NkYiB0byBub3QgcmV3cml0ZSB0aGUgd2FsIGVudHJpZXMgDQo+IGF0
-IGFsbCB3aWxsIGJlIHRoZSBiaWcgd2luLiAgSSB0aGluayBYaWFveGkgaGFkIHR1bmFibGUgc3Vn
-Z2VzdGlvbnMgDQo+IGZvciB0aGF0PyAgSSBkaWRuJ3QgZ3JvayB0aGUgcm9ja3NkYiB0ZXJtcyBp
-bW1lZGlhdGVseSBzbyB0aGV5IGRpZG4ndCANCj4gbWFrZSBhIGxvdCBvZiBzZW5zZSBhdCB0aGUg
-dGltZS4uIHRoaXMgaXMgcHJvYmFibHkgYSBnb29kIHBsYWNlIHRvIA0KPiBmb2N1cywgdGhvdWdo
-LiAgVGhlIHJvY2tzZGIgY29tcGFjdGlvbiBzdGF0cyBzaG91bGQgaGVscCBvdXQgdGhlcmUuDQo+
-DQo+IEJ1dC4uLiB0b2RheSBJIGlnbm9yZWQgdGhpcyBlbnRpcmVseSBhbmQgcHV0IHJvY2tzZGIg
-aW4gdG1wZnMgYW5kIA0KPiBmb2N1c2VkIGp1c3Qgb24gdGhlIGFjdHVhbCB3YWwgSU9zIGRvbmUg
-dG8gdGhlIGZyYWdtZW50cyBmaWxlcyBhZnRlciB0aGUgZmFjdC4NCj4gRm9yIHNpbXBsaWNpdHkg
-SSBmb2N1c2VkIGp1c3Qgb24gMTI4ayByYW5kb20gd3JpdGVzIGludG8gNG1iIG9iamVjdHMuDQo+
-DQo+IGZpbyBjYW4gZ2V0IH4xOCBtYi9zZWMgb24gbXkgZGlzayB3aXRoIGlvZGVwdGg9MS4gIElu
-dGVyZXN0aW5nbHksIA0KPiBzZXR0aW5nDQo+IGlvZGVwdGg9MTYgbWFrZXMgbm8gZGlmZmVyZW50
-ICp1bnRpbCogSSBhbHNvIHNldCB0aGlua3RpbWU9MTAgKHVzLCBvciANCj4gYWxtb3N0IGFueSB2
-YWx1ZSByZWFsbHkpIGFuZCB0aGlua3RpbWVfYmxvY2tzPTE2LCBhdCB3aGljaCBwb2ludCBpdCAN
-Cj4gZ29lcyB1cCB3aXRoIHRoZSBpb2RlcHRoLiAgSSdtIG5vdCBxdWl0ZSBzdXJlIHdoYXQgaXMg
-Z29pbmcgb24gdGhlcmUgDQo+IGJ1dCBpdCBzZWVtcyB0byBiZSBwcmV2ZW50aW5nIHRoZSBlbGV2
-YXRvciBhbmQvb3IgZGlzayBmcm9tIHJlb3JkZXJpbmcgDQo+IHdyaXRlcyBhbmQgbWFrZSBtb3Jl
-IGVmZmljaWVudCBzd2VlcHMgYWNyb3NzIHRoZSBkaXNrLiAgSW4gYW55IGNhc2UsIA0KPiB0aG91
-Z2gsIHdpdGggdGhhdCB0d2Vha2VkIEkgY2FuIGdldCB1cCB0byB+MzBtYi9zZWMgd2l0aCBxZCAx
-NiwgfjQwbWIvc2VjIHdpdGggcWQgNjQuDQo+IFNpbWlsYXJseSwgd2l0aCBxYSAxIGFuZCB0aGlu
-a3RpbWUgb2YgMjUwdXMsIGl0IGRyb3BzIHRvIGxpa2UgDQo+IDE1bWIvc2VjLCB3aGljaCBpcyBi
-YXNpY2FsbHkgd2hhdCBJIHdhcyBnZXR0aW5nIGZyb20gbmV3c3RvcmUuICBIZXJlJ3MgDQo+IG15
-IGZpbw0KPiBjb25maWc6DQo+DQo+ICAgICAgICAgaHR0cDovL2ZwYXN0ZS5vcmcvMjEyMTEwLzQy
-OTIzMDg5Lw0KPg0KPiBDb25jbHVzaW9uOiB3ZSBuZWVkIG11bHRpcGxlIHRocmVhZHMgKG9yIGxp
-YmFpbykgdG8gZ2V0IGxvdHMgb2YgSU9zIGluIA0KPiBmbGlnaHQgc28gdGhhdCB0aGUgYmxvY2sg
-bGF5ZXIgYW5kL29yIGRpc2sgY2FuIHJlb3JkZXIgYW5kIGJlIGVmZmljaWVudC4NCj4gSSBhZGRl
-ZCBhIHRocmVhZHBvb2wgZm9yIGRvaW5nIHdhbCB3b3JrIChuZXdzdG9yZSB3YWwgdGhyZWFkcyA9
-IDggYnkNCj4gZGVmYXVsdCkgYW5kIGl0IG1ha2VzIGEgYmlnIGRpZmZlcmVuY2UuICBOb3cgSSBh
-bSBnZXR0aW5nIG1vcmUgbGlrZSANCj4gMTltYi9zZWMgdy8gNCB0aHJlYWRzIGFuZCBjbGllbnQg
-KHNtYWxsaW9iZW5jaCkgcWQgMTYuICBJdCdzIG5vdCBnb2luZyANCj4gdXAgbXVjaCBmcm9tIHRo
-ZXJlIGFzIEkgc2NhbGUgdGhyZWFkcyBvciBxZCwgc3RyYW5nZWx5OyBub3Qgc3VyZSB3aHkgeWV0
-Lg0KPg0KPiBCdXQuLi4gdGhhdCdzIGEgYmlnIGltcHJvdmVtZW50IG92ZXIgYSBmZXcgZGF5cyBh
-Z28gKH44bWIvc2VjKS4gIEFuZCANCj4gb24gdGhpcyBkcml2ZSBmaWxlc3RvcmUgd2l0aCBqb3Vy
-bmFsIG9uIHNzZCBnZXRzIH44LjVtYi9zZWMuICBTbyB3ZSdyZSANCj4gd2lubmluZywgeWF5IQ0K
-Pg0KPiBJIHRhYmxlZCB0aGUgbGliYWlvIHBhdGNoIGZvciBub3cgc2luY2UgaXQgd2FzIGdldHRp
-bmcgc3B1cmlvdXMgRUlOVkFMIA0KPiBhbmQgd291bGQgY29uc2lzdGVudGx5IFNJR0JVRyBmcm9t
-IGlvX2dldGV2ZW50cygpIHdoZW4gY2VwaC1vc2QgZGlkIA0KPiBkbG9wZW4oKSBvbiB0aGUgcmFk
-b3MgcGx1Z2lucyAod2VpcmQhKS4NCj4NCj4gTWFyaywgYXQgdGhpcyBwb2ludCBpdCBpcyBwcm9i
-YWJseSB3b3J0aCBjaGVja2luZyB0aGF0IHlvdSBjYW4gDQo+IHJlcHJvZHVjZSB0aGVzZSByZXN1
-bHRzPyAgSWYgc28sIHdlIGNhbiByZWRvIHRoZSBpbyBzaXplIHN3ZWVwLiAgSSANCj4gcGlja2Vk
-IDggd2FsIHRocmVhZHMgc2luY2UgdGhhdCB3YXMgZW5vdWdoIHRvIGhlbHAgYW5kIGdvaW5nIGhp
-Z2hlciANCj4gZGlkbid0IHNlZW0gdG8gbWFrZSBtdWNoIGRpZmZlcmVuY2UsIGJ1dCBhdCBzb21l
-IHBvaW50IHdlJ2xsIHdhbnQgdG8gDQo+IGJlIG1vcmUgY2FyZWZ1bCBhYm91dCBwaWNraW5nIHRo
-YXQgbnVtYmVyLiAgV2UgY291bGQgYWxzbyB1c2UgbGliYWlvIA0KPiBoZXJlLCBidXQgSSdtIG5v
-dCBzdXJlIGl0J3Mgd29ydGggaXQuICBBbmQgdGhpcyBhcHByb2FjaCBpcyBzb21ld2hhdCANCj4g
-b3J0aG9nb25hbCB0byB0aGUgaWRlYSBvZiBlZmZpY2llbnRseSBwYXNzaW5nIHRoZSBrZXJuZWwg
-dGhpbmdzIHRvIGZkYXRhc3luYy4NCg0KQWRkaW5nIGFub3RoZXIgdGhyZWFkIHN3aXRjaCB0byB0
-aGUgSU8gcGF0aCBpcyBnb2luZyB0byBtYWtlIHVzIHZlcnkgc2FkIGluIHRoZSBmdXR1cmUsIHNv
-IEkgdGhpbmsgdGhpcydkIGJlIGEgYmFkIHByb3RvdHlwZSB2ZXJzaW9uIHRvIGhhdmUgZXNjYXBl
-IGludG8gdGhlIHdpbGQuIEkga2VlcCBoZWFyaW5nIFNhbSdzIHRhbGsgYWJvdXQgbmVlZGluZyB0
-byBnZXQgZG93biB0byAxIHRocmVhZCBzd2l0Y2ggaWYgd2UncmUgZXZlciB0byBob3BlIGZvciAx
-MDB1c2VjIHdyaXRlcy4NCg0KU28gY29uc2lkZXIgdGhpcyBvbmUgdm90ZSBmb3IgbWFraW5nIGxp
-YmFpbyB3b3JrLCBhbmQgc29vbmVyIHJhdGhlciB0aGFuIGxhdGVyLiA6KSAtR3JlZw0K
+This looks good to me, but we need an explicit sign-off from you for
+it. If you can submit it as a PR on Github that's easiest for us, but
+if not can you send it in git email patch form? :)
+-Greg
+
+On Wed, Apr 8, 2015 at 2:58 AM, Amon Ott <a.ott@m-privacy.de> wrote:
+> Hello Ceph!
+>
+> The Ceph init script (src/init-ceph.in) creates pid files without
+> cluster names. This means that only one cluster can run at a time. Th=
+e
+> solution is simple and works fine here, patch against 0.94 is attache=
+d.
+>
+> Amon Ott
+> --
+> Dr. Amon Ott
+> m-privacy GmbH           Tel: +49 30 24342334
+> Werner-Vo=C3=9F-Damm 62       Fax: +49 30 99296856
+> 12101 Berlin             http://www.m-privacy.de
+>
+> Amtsgericht Charlottenburg, HRB 84946
+>
+> Gesch=C3=A4ftsf=C3=BChrer:
+>  Dipl.-Kfm. Holger Maczkowsky,
+>  Roman Maczkowsky
+>
+> GnuPG-Key-ID: 0x2DD3A649
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
