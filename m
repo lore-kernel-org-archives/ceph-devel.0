@@ -1,78 +1,48 @@
-From: Yuri Weinstein <yweinste@redhat.com>
-Subject: Re: client/cluster compatibility testing
-Date: Mon, 20 Apr 2015 17:17:54 -0400 (EDT)
-Message-ID: <402130240.3271153.1429564674313.JavaMail.zimbra@redhat.com>
-References: <alpine.DEB.2.00.1504160935130.18547@cobra.newdream.net> <5530229F.5020509@redhat.com>
+From: Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Online Ceph Tech Talk - This Thursday
+Date: Mon, 20 Apr 2015 17:51:27 -0400
+Message-ID: <CAAZbbf3NDMs0Bhw3SKW_exgvqqsi6eepbXchLHGBvuOWH=XZQA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx6-phx2.redhat.com ([209.132.183.39]:48069 "EHLO
-	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754292AbbDTVRy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Apr 2015 17:17:54 -0400
-In-Reply-To: <5530229F.5020509@redhat.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <jdurgin@redhat.com>
-Cc: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-We have a PR https://github.com/ceph/ceph-qa-suite/pull/414 that addressed part of this issue, e.g. added hammer-x to the mix (it's ready to be merged).
+Hey Cephers,
 
-We also have two tickets where requirements for this suite were captured:
-http://tracker.ceph.com/issues/11413
-http://tracker.ceph.com/issues/11414
+Just to remind you, our monthly Online Ceph Tech Talk is coming up
+again this Thursday at 1p EDT via the BlueJeans tool. We will be
+recording it and publishing to YouTube for those who can't make it,
+but if you'd like to ask questions make sure you are there!
 
-Per Josh's comment "Also I think we'll want to start doing mixed-client-version tests, particularly for things like rbd's exclusive locking", I assigned #11414 for next steps.
+This month we'll be featuring a talk on Calamari/Romana (management
+API / GUI) by Gregory Meno. Now is your chance to ask about API
+development and how you can use the Ceph management API to drive your
+own GUIs and projects.
 
-Question/request to the team leads - pls either agree with a need to add specific tests for mixed clients testing (and pls add tickets as you feel necessary.) or suggest otherwise.
+The information for joining the call and other logistics can be found at:
 
-I am guessing:
+http://ceph.com/ceph-tech-talks/
 
-rbd - confirmed by Josh, we need those
-rados - Sam, Sage?
-cephfs - Greg?
-rgw - Yehuda?
+If you have any questions after reading that page, feel free to
+contact me. Thanks!
 
-I am sure I missing lots of others...
 
-What do you think?
+-- 
 
-Thx
-YuriW
+Best Regards,
 
------ Original Message -----
-From: "Josh Durgin" <jdurgin@redhat.com>
-To: "Sage Weil" <sweil@redhat.com>, ceph-devel@vger.kernel.org
-Sent: Thursday, April 16, 2015 1:59:11 PM
-Subject: Re: client/cluster compatibility testing
-
-On 04/16/2015 09:42 AM, Sage Weil wrote:
-> I think the simplest way to address this is to talk about compatibility in
-> terms of the upstream stable releases (firefly, hammer, etc.), and test
-> that compatibility with teuthology tests from ceph-qa-suite.git.  We have
-> some basic inter-version client/cluster tests already in
-> suites/upgrade/client-upgrade.  Currently these test new (version "x")
-> clients against a given release (dumpling, firefly).  I think we just need
-> to add hammer to that mix, and then add a second set of tests that do the
-> reverse: test clients from a given release (dumpling, firefly, hammer)
-> against an arbitrary cluster version ("x").
-
-The suites in suites/upgrade/$version-x do this, and use a mixed
-version cluster rather than a purely version x cluster. It seems like
-people would want that intra-cluster version coverage for smooth
-upgrades.
-
-Just need to add hammer-x there too (Yuri's renaming the client ones to
-be $version-client-x for less confusion).
-
-Also I think we'll want to start doing mixed-client-version tests,
-particularly for things like rbd's exclusive locking:
-
-http://tracker.ceph.com/issues/11405
-
-Josh
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
