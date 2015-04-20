@@ -1,74 +1,114 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: hashing variation in rados bench runs
-Date: Mon, 20 Apr 2015 08:15:29 -0500
-Message-ID: <5534FBF1.5050909@redhat.com>
-References: <BC97738F8E7C8742BABED7F06FB9DF9166429CD5@SATLEXDAG01.amd.com>
+From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Subject: NewStore performance analysis
+Date: Mon, 20 Apr 2015 14:59:36 +0000
+Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC021D081C@shsmsx102.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:43905 "EHLO mx1.redhat.com"
+Received: from mga09.intel.com ([134.134.136.24]:27048 "EHLO mga09.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751791AbbDTNPh (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 20 Apr 2015 09:15:37 -0400
-In-Reply-To: <BC97738F8E7C8742BABED7F06FB9DF9166429CD5@SATLEXDAG01.amd.com>
+	id S1750765AbbDTO7m (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 20 Apr 2015 10:59:42 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Deneau, Tom" <tom.deneau@amd.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>, Mark Nelson <mnelson@redhat.com>, Somnath Roy <Somnath.Roy@sandisk.com>, "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Cc: "Duan, Jiangang" <jiangang.duan@intel.com>, "Zhang, Jian" <jian.zhang@intel.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On 04/20/2015 07:37 AM, Deneau, Tom wrote:
-> I have been trying to run rados bench runs and I've noticed a lot of variations from run to run.
-> The runs generally write data with --no-cleanup then read it back (seq), dropping the caches in between
-> I admit this is on a single node "cluster" with 5 data disks so maybe not realistic but...
->
-> In my runs I also collect disk activity traces.  When I look at the seq read scores, I've noticed
-> the low scoring runs always have a "hot" disk which maxes out while others might be at 30% to 40% usage.
-> Whereas in the high scoring runs the disk activity is much more evenly distributed.
-> I realize the hashing of objects to primary osds depends on the object names which are different for each run
-> (in rados bench, the object names include the pid).  But I was surprised at the sometimes marked unevenness
-> in the hashing.
->
-> Have others seen this and is there a good workaround?
-
-So I'd start by narrowing down why that one disk is hot.  First step is 
-to just look at the amount of data on the disks and see if that one disk 
-has a lot more than the others.  Next might be to try our pool 
-distribution quality script and see how the PG distribution looks:
-
-https://github.com/ceph/cbt/blob/master/tools/readpgdump.py
-
-run it like:
-
-ceph pg dump | ./readpgdump.py
-
-That will give you a ton of statistics on pool distribution quality and 
-possible OSD weighting strategies.
-
-Beyond that, like you said there is some inherent randomness not just in 
-the PG distribution but in the way that objects are distributed to PGs. 
-  There is a test that would be very interesting to do but I'm not sure 
-anyone has done it yet for crush/straw.  Basically the idea is that if 
-you have very similar names for objects with only 1 input bit flipped, 
-how does the mapping change.  IE say you have objects with names 
-[object1,object2,object3...objectN].  Even if the distribution is random 
-for inputs up to N, how much clumpiness is there as you iterate over 
-objects within the distribution?  This kind of testing is often done for 
-hashing algorithms and folks have done it for Jenkins, but it might be 
-nice to see something like this repeated for Ceph/Crush.
-
-Beyond that, there's also the concern that at the OS or even hardware 
-level there is some contention for IOs as request come in for multiple 
-disks that could cause some to end up waiting more than others.  We've 
-seen this with network gear, and suspect we've seen it with disks on SAS 
-expander backplanes, especially with SATA drives mixed in.  On the other 
-hand we've seen setups that work well too so there's no easy answer.
-
-Mark
-
->
-> -- Tom Deneau, AMD
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+W1Jlc2VuZCBpbiBwbGFpbiB0ZXh0XQ0KDQpIaSwNCsKgwqDCoMKgwqDCoCBJIGhhdmUgcGxheWVk
+IHNvbWUgdHVuYWJsZSBvbiBSb2Nrc0RCIHRoZXNlIGRheXMsIHRyeSB0byBvcHRpbWl6ZSB0aGUg
+cGVyZm9ybWFuY2Ugb2YgTmV3c3RvcmUuwqDCoCBGcm9tIHRoZSBkYXRhIG5vdyAsc2VlbXMgdGhl
+IFdBIG9mwqAgUm9ja3NEQiBpcyBub3QgdGhlIGlzc3VlIHRoYXQgYmxvY2tpbmcgdGhlIHBlcmZv
+cm1hbmNlLCBhbmQgYWxzbyBzZWVtcyBub3QgdGhlIGZyYWdtZW50IHBhcnQoYWlvL2RpbywgZXRj
+KS4gVGhlIGlzc3VlIG1pZ2h0IGJlIGhvdyBtdWNoIE9QUyByb2Nrc2RiIGNhbiBvZmZlciB1bmRl
+ciAxLXdyaXRlLXBlci1zeW5jIHdvcmtsb2FkLiBJIGNhbm5vdCBmaW5kIHRoZSBudW1iZXIgb25s
+aW5lIHNvIEkgd2lsbCBkbyBpdCBieSBteXNlbGYsIMKgaWYgdGhhdCBudW1iZXIgaXMgbG93LCBt
+YXliZSB3ZSBuZWVkIGhvbGRpbmcgbXVsdGlwbGUgUm9ja3NEQiBpbnN0YW5jZSBpbiBvbmUgT1NE
+IGFuZCBkbyBzb21lIHNoYXJkaW5nIC4NCg0KVGhlIFdBTCBsb2cgb2YgUm9ja3NkYiwgUm9ja3NE
+QiBkYXRhIGZpbGUgYW5kIE5ld3N0b3JlIGRpcmVjdG9yeSB3ZXJlIGJhY2tlZCBieSAzIHNlcGFy
+YXRlIFNTRHMuIA0KL2Rldi9zZGMxwqDCoMKgwqDCoCAxNTYxNzI3OTYgwqDCoMKgMzI5MjggMTU2
+MTM5ODY4wqDCoCAxJSAvcm9vdC9jZXBoLTAtZGINCi9kZXYvc2RkMcKgwqDCoMKgwqAgMTk1MjY0
+NTcywqDCoMKgIDMyOTI4IDE5NTIzMTY0NMKgwqAgMSUgL3Jvb3QvY2VwaC0wLWRiLXdhbA0KL2Rl
+di9zZGIxwqDCoMKgwqDCoCAxNTYxNzI3OTYgMTA1ODk1NTIgMTQ1NTgzMjQ0wqDCoCA3JSAvdmFy
+L2xpYi9jZXBoL29zZC9jZXBoLTANCg0KU29tZSBpbnRlcmVzdGluZyBmaW5kcyBoZXJlOg0KDQox
+LiDCoEF2Z19yZXFzeiBpbiBTREIobmV3c3RvcmUgRlMgcGFydCkgaXMgMktCLCB0aGF0IGlzIGhh
+bGYgb2YgdGhlIHJlcXVlc3QgYmxvY2sgc2l6ZSg0S0IpLMKgIElPUFMgaW4gaW9zdGF0KDJLKSBp
+cyB+IDJYIG9mIHRoZSBudW1iZXIgcmVwb3J0ZWQgYnkgRklPLiBCVyBtYXRjaGVkDQoNCkRldmlj
+ZTrCoMKgwqDCoMKgwqDCoMKgIHJycW0vc8KgwqAgd3JxbS9zwqDCoMKgwqAgci9zwqDCoMKgwqAg
+dy9zwqDCoMKgIHJNQi9zwqDCoMKgIHdNQi9zIGF2Z3JxLXN6IGF2Z3F1LXN6wqDCoCBhd2FpdCBy
+X2F3YWl0IHdfYXdhaXTCoCBzdmN0bcKgICV1dGlsDQpzZGHCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
+wqDCoMKgIDAuMDDCoMKgwqDCoCAwLjAwwqDCoMKgIDAuMDDCoMKgIDU4LjMzwqDCoMKgwqAgMC4w
+MMKgwqDCoCAyOC45OMKgIDEwMTcuNTHCoMKgwqDCoCA2LjMzwqAgMTA4LjU1wqDCoMKgIDAuMDDC
+oCAxMDguNTXCoMKgIDEuMzDCoMKgIDcuNjANCnNkYsKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
+wqAgMC4wMMKgwqDCoMKgIDAuMDDCoMKgwqAgMC4wMCAyMDM4LjAwwqDCoMKgwqAgMC4wMMKgwqDC
+oMKgIDMuOTjCoMKgwqDCoCA0LjAwwqDCoMKgwqAgMC4xM8KgwqDCoCAwLjA3wqDCoMKgIDAuMDDC
+oMKgwqAgMC4wN8KgwqAgMC4wN8KgIDEzLjMzDQpzZGPCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
+oMKgIDAuMDDCoMKgwqDCoCAwLjAwwqDCoMKgIDAuMDDCoMKgwqAgMC4wMMKgwqDCoMKgIDAuMDDC
+oMKgwqDCoCAwLjAwwqDCoMKgwqAgMC4wMMKgwqDCoMKgIDAuMDDCoMKgwqAgMC4wMMKgwqDCoCAw
+LjAwwqDCoMKgIDAuMDDCoMKgIDAuMDDCoMKgIDAuMDANCnNkZMKgwqDCoMKgwqDCoMKgwqDCoMKg
+wqDCoMKgwqAgMC4wMMKgwqAgNzQ3LjY3wqDCoMKgIDAuMDAgMjA5OS42N8KgwqDCoMKgIDAuMDDC
+oMKgwqAgMTEuMjjCoMKgwqAgMTEuMDDCoMKgwqDCoCAwLjc2wqDCoMKgIDAuMzbCoMKgwqAgMC4w
+MMKgwqDCoCAwLjM2wqDCoCAwLjM2wqAgNzUuNzMgwqANCg0KSSBiZWxpZXZlIG5ld3N0b3JlIHdp
+bGwgbm90IHNwbGl0IHRoZSByZXF1ZXN0LCBzbyB0aGVyZSBzaG91bGQgYmUgc29tZSB2ZXJ5IHNt
+YWxsIElPKH4wS0IpIGdvZXMgd2l0aCB0aGUgZGF0YSB3cml0ZSg0S0IpLCB3aGVyZSB0aGUgc21h
+bGwgSU8gY29tZXMgZnJvbSA/IMKgDQoNCkFsc28gY2hlY2tlZCB0aGUgRmlsZXN0b3JlIGRhdGEs
+IHRoaXMgYmVoYXZpb3IgaXMgbm90IHByZXNlbnQgaW4gRmlsZXN0b3JlLCBjaGFuZ2luZyB0aGUg
+V0JUaHJvdHRsZSB3aWxsIGFmZmVjdCB0aGUgbnVtYmVyLiBTbyBzZWVtcyB0aGlzIGJlaGF2aW9y
+IGlzIHJlbGF0ZWQgd2l0aCB0aGUgZmx1c2hpbmcgbWVjaGFuaXNtPyBJbiBuZXdzdG9yZSB3ZSBh
+cmUgZG9pbmcgZmRhdGFzeW5jIG1vcmUgYWdncmVzc2l2ZWx5Lg0KDQoNCg0KMi4gTm90aWNlIHRo
+YXQgYnkgdHVuaW5nIHRoZSB3cml0ZV9idWZmZXJfc2l6ZSAsIHdpcnRlX2J1ZmZlcl9udW0gYW5k
+IG1pbl93cml0ZV9idWZmZXJfbnVtYmVyX3RvX21lcmdlLCB3ZSBjYW4gbWFrZSB0aGUgREIgd3Jp
+dGUgdG8gWkVSTw0KDQpMb29rIGF0IHRoZSBpb3N0YXQgb2YgU0RDLCBhY3R1YWxseSB0aGVyZSBp
+cyBhbG1vc3Qgbm8gSU8gaGFwcGVuZWQgdGhlcmUsIHRoYXQgaXMgYmVjYXVzZSBtb3N0IG9mIHRo
+ZSBXQUwgZW50cmllcyB3ZXJlIG1lcmdlZCBiZWZvcmUgZmx1c2hpbmcgdG8gTGV2ZWwwLg0KDQpP
+dGhlciBSb2Nrc0RCIHR1bmluZyBhcmUgb3JpZ2luYWxseSB0cnlpbmcgwqB0byBvcHRpbWl6ZSB0
+aGUgY29tcGFjdGlvbiBiZWhhdmlvciwgYnV0IHNpbmNlIHRoZXJlIGlzIGZldyBkYXRhIHdyaXR0
+ZW4gdG8gTGV2ZWwwLCB0aGUgY29tcGFjdGlvbiBpcyBhbG1vc3QgdW5tZWFzdXJhYmxlIGhlcmUu
+DQoNCg0KMy4gRGlzYWJsZSBSb2Nrc0RCIFdBTCBjYW4gM1ggwqB0aGUgcGVyZm9ybWFuY2UoQWx0
+aG91Z2ggdGhpcyBpcyBkZWZpbml0ZWx5IFdST05HIFdBWSkNCg0KSnVzdCBjdXJpb3VzIGlmIHRo
+ZXJlIGlzIG5vIGV4dHJhIElPIGhhcHBlbmVkIGluIERCIHNpZGUsIHdoYXQgdGhlIHBlcmZvcm1h
+bmNlIGxvb2tzIGxpa2UuDQpJIHR1cm4gb2ZmIHRoZSBXQUwgbG9nIG9mIHJvY2tzIERCLCB0aGUg
+cGVyZm9ybWFuY2UgaXMgM3goNzk5LTI0NjQgLCBsYXQgZnJvbSAxMCAtPiAzLjIpDQoNCjQuIFRo
+ZSBhdmcgcXVldWUgc2l6ZSBpcyA8MSBpbiBhbnkgY2FzZSwgYm90aCBEQl9XQUwgcGFydCBhbmQg
+ZnJhZ21lbnQgcGFydC4NCg0KSSBndWVzcyB0aGVyZSBpcyBzb21lIGxvY2sgaW4gcm9ja3NkYjo6
+V3JpdGVCYXRjaCgpIHRoYXQgcHJldmVudGluZyBtdWx0aXBsZSBPU0RfT1BfVEhSRUFEIHdvcmtp
+bmcgY29uY3VycmVudGx5LCBub3QgY2FyZWZ1bGx5IGFuYWx5emVkLiANCg0KQW4gZWFzeSB3YXkg
+dG8gbWVhc3VyZSBtaWdodCBiZSBjb21tZW50IG91dMKgIGRiLT5zdWJtaXRfdHJhbnNhY3Rpb24o
+dHhjLT50KTsgaW4gTmV3U3RvcmU6Ol90eGNfc3VibWl0X2t2LCB0byBzZWUgaWYgd2UgY2FuIGdl
+dCBtb3JlIFFEIGluIGZyYWdtZW50IHBhcnQgd2l0aG91dCBpc3N1aW5nIHRoZSBEQi4NCg0KDQot
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+Q29uZmlndXJhdGlvbnMtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0NCsKgwqDCoMKgwqDCoCBNeSBzZXR1cCBpcyBTU0QgYmFzZWQsIDEgT1NELCBwb29sIHdp
+dGggMTAwcGcgYW5kIHNpemUgPTEuIFRoZSBwYXR0ZXJuIEkgYW0gd29ya2luZyBvbiBpcyA0S0Ig
+cmFuZG9tIHdyaXRlKFFEPTgpIG9uIHRvcCBvZiBSQkQodXNpbmcgZmlvLWxpYnJiZCkuRklPIGNv
+bmZpZ3VyYXRpb24gaXM6DQrCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqAgYnM9NGsNCmlv
+ZGVwdGg9OA0Kc2l6ZT0xMGcNCmlvZGVwdGhfYmF0Y2hfc3VibWl0PTENCmlvZGVwdGhfYmF0Y2hf
+Y29tcGxldGU9MQ0KDQrCoMKgwqDCoMKgwqAgVGhlIHR1bmluZyBJIGFtIHVzaW5nIGFyZSBsaXN0
+ZWQgaGVyZSwgdGhpcyBtaWdodCBub3QgYmUgdGhlIGJlc3QgYnV0IGFscmVhZHkgc2hvd2luZyBz
+b21ldGhpbmcuDQrCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqAgwqDCoMKgIHJvY2tzZGJf
+c3RhdHNfZHVtcF9wZXJpb2Rfc2VjID0gNQ0KwqDCoMKgIHJvY2tzZGJfbWF4X2JhY2tncm91bmRf
+Y29tcGFjdGlvbnMgPSA0DQrCoMKgwqAgcm9ja3NkYl9jb21wYWN0aW9uX3RocmVhZHMgPSA0DQrC
+oMKgwqAgcm9ja3NkYl93cml0ZV9idWZmZXJfc2l6ZSA9IDUzNjg3MDkxMsKgIC8vNTEyTUINCsKg
+wqDCoCByb2Nrc2RiX3dyaXRlX2J1ZmZlcl9udW0gPSA0DQrCoMKgwqAgcm9ja3NkYl9taW5fd3Jp
+dGVfYnVmZmVyX251bWJlcl90b19tZXJnZSA9IDINCsKgwqDCoCByb2Nrc2RiX2xldmVsMF9maWxl
+X251bV9jb21wYWN0aW9uX3RyaWdnZXIgPSA0DQrCoMKgwqAgcm9ja3NkYl9tYXhfYnl0ZXNfZm9y
+X2xldmVsX2Jhc2UgPSAxMDQ4NTc2MDAgLy8xMDBNQg0KwqDCoMKgIHJvY2tzZGJfdGFyZ2V0X2Zp
+bGVfc2l6ZV9iYXNlID0gMTA0ODU3NjDCoMKgwqDCoMKgIC8vMTBNQg0KwqDCoMKgIHJvY2tzZGJf
+bnVtX2xldmVscyA9IDMgLy8gU28gdGhlIE1BWF9EQl9TSVpFIHdvdWxkIGJlIH4xMEdCKDEwME1C
+KiAxMF4zKSwgZmFpciBlbm91Z2guDQrjgIByb2Nrc2RiX2NvbXByZXNzaW9uID0gbm9uZQ0KDQoN
+CsKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
+wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
+oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
+wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
+oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
+wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
+oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
+wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgIMKgwqDCoMKg
+wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
+oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
+wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
+oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
+wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqAgWGlhb3hp
+DQoNCuOAgA0KwqDCoMKgwqDCoMKgwqAgDQo=
