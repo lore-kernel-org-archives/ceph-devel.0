@@ -1,154 +1,171 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: NewStore performance analysis
-Date: Mon, 20 Apr 2015 10:55:22 -0500
-Message-ID: <5535216A.10509@redhat.com>
-References: <6F3FA899187F0043BA1827A69DA2F7CC021D081C@shsmsx102.ccr.corp.intel.com> <alpine.DEB.2.00.1504200826500.18547@cobra.newdream.net>
+From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Subject: =?utf-8?B?5Zue5aSNOiBSZTogTmV3U3RvcmUgcGVyZm9ybWFuY2UgYW5hbHlzaXM=?=
+Date: Mon, 20 Apr 2015 16:11:05 +0000
+Message-ID: <oqwenulom2umn8f37cg5gvgh.1429545030301@email.android.com>
+References: <6F3FA899187F0043BA1827A69DA2F7CC021D081C@shsmsx102.ccr.corp.intel.com>
+ <alpine.DEB.2.00.1504200826500.18547@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-15; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:59831 "EHLO mx1.redhat.com"
+Received: from mga09.intel.com ([134.134.136.24]:48789 "EHLO mga09.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752769AbbDTPzd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 20 Apr 2015 11:55:33 -0400
+	id S1753831AbbDTQLK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 20 Apr 2015 12:11:10 -0400
 In-Reply-To: <alpine.DEB.2.00.1504200826500.18547@cobra.newdream.net>
+Content-Language: zh-CN
+Content-ID: <36E34A0192DEAC43B6BBDEBDB8F1E078@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Cc: Somnath Roy <Somnath.Roy@sandisk.com>, "Duan, Jiangang" <jiangang.duan@intel.com>, "Zhang, Jian" <jian.zhang@intel.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: Mark Nelson <mnelson@redhat.com>, Somnath Roy <Somnath.Roy@sandisk.com>, "Duan, Jiangang" <jiangang.duan@intel.com>, "Zhang, Jian" <jian.zhang@intel.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On 04/20/2015 10:39 AM, Sage Weil wrote:
-> On Mon, 20 Apr 2015, Chen, Xiaoxi wrote:
->> [Resend in plain text]
->>
->> Hi,
->>         I have played some tunable on RocksDB these days, try to optimize the performance of Newstore.   From the data now ,seems the WA of  RocksDB is not the issue that blocking the performance, and also seems not the fragment part(aio/dio, etc). The issue might be how much OPS rocksdb can offer under 1-write-per-sync workload. I cannot find the number online so I will do it by myself,  if that number is low, maybe we need holding multiple RocksDB instance in one OSD and do some sharding .
->>
->> The WAL log of Rocksdb, RocksDB data file and Newstore directory were backed by 3 separate SSDs.
->> /dev/sdc1      156172796    32928 156139868   1% /root/ceph-0-db
->> /dev/sdd1      195264572    32928 195231644   1% /root/ceph-0-db-wal
->> /dev/sdb1      156172796 10589552 145583244   7% /var/lib/ceph/osd/ceph-0
->>
->> Some interesting finds here:
->>
->> 1.  Avg_reqsz in SDB(newstore FS part) is 2KB, that is half of the request block size(4KB),  IOPS in iostat(2K) is ~ 2X of the number reported by FIO. BW matched
->>
->> Device:         rrqm/s   wrqm/s     r/s     w/s    rMB/s    wMB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
->> sda               0.00     0.00    0.00   58.33     0.00    28.98  1017.51     6.33  108.55    0.00  108.55   1.30   7.60
->> sdb               0.00     0.00    0.00 2038.00     0.00     3.98     4.00     0.13    0.07    0.00    0.07   0.07  13.33
->> sdc               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
->> sdd               0.00   747.67    0.00 2099.67     0.00    11.28    11.00     0.76    0.36    0.00    0.36   0.36  75.73
->>
->> I believe newstore will not split the request, so there should be some very small IO(~0KB) goes with the data write(4KB), where the small IO comes from ?
->>
->> Also checked the Filestore data, this behavior is not present in Filestore, changing the WBThrottle will affect the number. So seems this behavior is related with the flushing mechanism? In newstore we are doing fdatasync more aggressively.
->
-> Yeah, it sounds like the difference is that newstore is doing immediate
-> fdatasync's (on new objects or appends, and on applying post-commit wal
-> items).  The 2k IOs are probably the xfs journal commit?
->
->> 2. Notice that by tuning the write_buffer_size , wirte_buffer_num and
->> min_write_buffer_number_to_merge, we can make the DB write to ZERO
->>
->> Look at the iostat of SDC, actually there is almost no IO happened
->> there, that is because most of the WAL entries were merged before
->> flushing to Level0.
->>
->> Other RocksDB tuning are originally trying  to optimize the compaction
->> behavior, but since there is few data written to Level0, the compaction
->> is almost unmeasurable here.
->
-> This is good news.  Was the overlay code being used in this case?  (By
-> default it should kick in for 4k writes unless you do 'newstore overlay
-> max = 0' or similar.  If we can confirm that our wal writes aren't being
-> amplified at all that's great news.
-
-So I should retest, but with overlay disabled I thought I was still 
-seeing writes into level 0 (and ultimately propagated to level 4) when 
-testing on the SSD using 6 512MB buffers and 
-min_write_buffer_number_to_merge = 2 on my SSD setup.  I'll try poking 
-at it some more using the other settings Xiaoxi tested.  The good news 
-is that with all of the changes we've made, spinning disk write 
-performance is getting much closer to (and sometimes beating!) 
-filestore.  Sent some results along in the other thread.
-
->
->> 3. Disable RocksDB WAL can 3X  the performance(Although this is
->> definitely WRONG WAY)
->>
->> Just curious if there is no extra IO happened in DB side, what the
->> performance looks like. I turn off the WAL log of rocks DB, the
->> performance is 3x(799-2464 , lat from 10 -> 3.2)
->>
->> 4. The avg queue size is <1 in any case, both DB_WAL part and fragment
->> part.
->>
->> I guess there is some lock in rocksdb::WriteBatch() that preventing
->> multiple OSD_OP_THREAD working concurrently, not carefully analyzed.
->
-> I think it's just newstore, actually.  The only thing that ever triggers a
-> commit/sync is the _kv_sync_thread, which calls submit_transaction_sync(),
-> and it's just one thread.  On the one hand it's kind of lame to have
-> this loop pushing queued transactions to disk.  On the other hand it
-> serves to throttle work and provide fairness with all the other IO we
-> are generating.
->
-> Again, I think the main limiting factor here though is going to be how
-> rocksdb implements its WAL (as a file which requires 2 IOs per commit, one
-> to write the data block(s) and one to update/journal the file size
-> and/or allocation changes).
-
-I'm still struck by the massive performance loss on my SSD configuration 
-going from 4MB IOs to 2MB IOs.  SSD theoretical is around 1.7GB/s.  With 
-4MB IOs on recent newstore we can achieve a little north of 1GB/s (ie 
-better than filestore!), but as soon as we drop to 2MB IOs performance 
-drops to 200MB/s while filestore stays around 600MB/s.  The partial 
-object writes really hurt.
-
->
->> An easy way to measure might be comment out
->> db->submit_transaction(txc->t); in NewStore::_txc_submit_kv, to see if
->> we can get more QD in fragment part without issuing the DB.
->
-> I'm not sure I totally understand the interface.. my assumption is that
-> queue_transaction will give rocksdb the txn to commit whenever it finds it
-> convenient (no idea what policy is used there) and queue_transaction_sync
-> will trigger a commit now.  If we did have multiple threads doing
-> queue_trandsaction_sync (by, say, calling it directly in _txc_submit_kv)
-> would qa go up?
->
-> Thanks!
-> sage
->
->
->
->
->>
->>
->> ----------------------------------------------------------Configurations---------------------------------------------------------------------------------------------------------
->>         My setup is SSD based, 1 OSD, pool with 100pg and size =1. The pattern I am working on is 4KB random write(QD=8) on top of RBD(using fio-librbd).FIO configuration is:
->>                  bs=4k
->> iodepth=8
->> size=10g
->> iodepth_batch_submit=1
->> iodepth_batch_complete=1
->>
->>         The tuning I am using are listed here, this might not be the best but already showing something.
->>                      rocksdb_stats_dump_period_sec = 5
->>      rocksdb_max_background_compactions = 4
->>      rocksdb_compaction_threads = 4
->>      rocksdb_write_buffer_size = 536870912  //512MB
->>      rocksdb_write_buffer_num = 4
->>      rocksdb_min_write_buffer_number_to_merge = 2
->>      rocksdb_level0_file_num_compaction_trigger = 4
->>      rocksdb_max_bytes_for_level_base = 104857600 //100MB
->>      rocksdb_target_file_size_base = 10485760      //10MB
->>      rocksdb_num_levels = 3 // So the MAX_DB_SIZE would be ~10GB(100MB* 10^3), fair enough.
->> ?rocksdb_compression = none
->>
->>
->>                                                                                                                                                                                                                                                                                                                                                                                  Xiaoxi
->>
->> ?
->>
->> N?????r??y??????X???v???)?{.n?????z?]z????ay?????j??f???h??????w??????j:+v???w????????????zZ+???????j"????i
+CgoKCi0tLS0gU2FnZSBXZWls57yW5YaZIC0tLS0KCj4gT24gTW9uLCAyMCBBcHIgMjAxNSwgQ2hl
+biwgWGlhb3hpIHdyb3RlOg0KPiA+IFtSZXNlbmQgaW4gcGxhaW4gdGV4dF0NCj4gPiANCj4gPiBI
+aSwNCj4gPiDCoMKgwqDCoMKgwqAgSSBoYXZlIHBsYXllZCBzb21lIHR1bmFibGUgb24gUm9ja3NE
+QiB0aGVzZSBkYXlzLCB0cnkgdG8gb3B0aW1pemUgdGhlIHBlcmZvcm1hbmNlIG9mIE5ld3N0b3Jl
+LsKgwqAgRnJvbSB0aGUgZGF0YSBub3cgLHNlZW1zIHRoZSBXQSBvZsKgIFJvY2tzREIgaXMgbm90
+IHRoZSBpc3N1ZSB0aGF0IGJsb2NraW5nIHRoZSBwZXJmb3JtYW5jZSwgYW5kIGFsc28gc2VlbXMg
+bm90IHRoZSBmcmFnbWVudCBwYXJ0KGFpby9kaW8sIGV0YykuIFRoZSBpc3N1ZSBtaWdodCBiZSBo
+b3cgbXVjaCBPUFMgcm9ja3NkYiBjYW4gb2ZmZXIgdW5kZXIgMS13cml0ZS1wZXItc3luYyB3b3Jr
+bG9hZC4gSSBjYW5ub3QgZmluZCB0aGUgbnVtYmVyIG9ubGluZSBzbyBJIHdpbGwgZG8gaXQgYnkg
+bXlzZWxmLCDCoGlmIHRoYXQgbnVtYmVyIGlzIGxvdywgbWF5YmUgd2UgbmVlZCBob2xkaW5nIG11
+bHRpcGxlIFJvY2tzREIgaW5zdGFuY2UgaW4gb25lIE9TRCBhbmQgZG8gc29tZSBzaGFyZGluZyAu
+DQo+ID4gDQo+ID4gVGhlIFdBTCBsb2cgb2YgUm9ja3NkYiwgUm9ja3NEQiBkYXRhIGZpbGUgYW5k
+IE5ld3N0b3JlIGRpcmVjdG9yeSB3ZXJlIGJhY2tlZCBieSAzIHNlcGFyYXRlIFNTRHMuIA0KPiA+
+IC9kZXYvc2RjMcKgwqDCoMKgwqAgMTU2MTcyNzk2IMKgwqDCoDMyOTI4IDE1NjEzOTg2OMKgwqAg
+MSUgL3Jvb3QvY2VwaC0wLWRiDQo+ID4gL2Rldi9zZGQxwqDCoMKgwqDCoCAxOTUyNjQ1NzLCoMKg
+wqAgMzI5MjggMTk1MjMxNjQ0wqDCoCAxJSAvcm9vdC9jZXBoLTAtZGItd2FsDQo+ID4gL2Rldi9z
+ZGIxwqDCoMKgwqDCoCAxNTYxNzI3OTYgMTA1ODk1NTIgMTQ1NTgzMjQ0wqDCoCA3JSAvdmFyL2xp
+Yi9jZXBoL29zZC9jZXBoLTANCj4gPiANCj4gPiBTb21lIGludGVyZXN0aW5nIGZpbmRzIGhlcmU6
+DQo+ID4gDQo+ID4gMS4gwqBBdmdfcmVxc3ogaW4gU0RCKG5ld3N0b3JlIEZTIHBhcnQpIGlzIDJL
+QiwgdGhhdCBpcyBoYWxmIG9mIHRoZSByZXF1ZXN0IGJsb2NrIHNpemUoNEtCKSzCoCBJT1BTIGlu
+IGlvc3RhdCgySykgaXMgfiAyWCBvZiB0aGUgbnVtYmVyIHJlcG9ydGVkIGJ5IEZJTy4gQlcgbWF0
+Y2hlZA0KPiA+IA0KPiA+IERldmljZTrCoMKgwqDCoMKgwqDCoMKgIHJycW0vc8KgwqAgd3JxbS9z
+wqDCoMKgwqAgci9zwqDCoMKgwqAgdy9zwqDCoMKgIHJNQi9zwqDCoMKgIHdNQi9zIGF2Z3JxLXN6
+IGF2Z3F1LXN6wqDCoCBhd2FpdCByX2F3YWl0IHdfYXdhaXTCoCBzdmN0bcKgICV1dGlsDQo+ID4g
+c2RhwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoCAwLjAwwqDCoMKgwqAgMC4wMMKgwqDCoCAw
+LjAwwqDCoCA1OC4zM8KgwqDCoMKgIDAuMDDCoMKgwqAgMjguOTjCoCAxMDE3LjUxwqDCoMKgwqAg
+Ni4zM8KgIDEwOC41NcKgwqDCoCAwLjAwwqAgMTA4LjU1wqDCoCAxLjMwwqDCoCA3LjYwDQo+ID4g
+c2RiwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoCAwLjAwwqDCoMKgwqAgMC4wMMKgwqDCoCAw
+LjAwIDIwMzguMDDCoMKgwqDCoCAwLjAwwqDCoMKgwqAgMy45OMKgwqDCoMKgIDQuMDDCoMKgwqDC
+oCAwLjEzwqDCoMKgIDAuMDfCoMKgwqAgMC4wMMKgwqDCoCAwLjA3wqDCoCAwLjA3wqAgMTMuMzMN
+Cj4gPiBzZGPCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgIDAuMDDCoMKgwqDCoCAwLjAwwqDC
+oMKgIDAuMDDCoMKgwqAgMC4wMMKgwqDCoMKgIDAuMDDCoMKgwqDCoCAwLjAwwqDCoMKgwqAgMC4w
+MMKgwqDCoMKgIDAuMDDCoMKgwqAgMC4wMMKgwqDCoCAwLjAwwqDCoMKgIDAuMDDCoMKgIDAuMDDC
+oMKgIDAuMDANCj4gPiBzZGTCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgIDAuMDDCoMKgIDc0
+Ny42N8KgwqDCoCAwLjAwIDIwOTkuNjfCoMKgwqDCoCAwLjAwwqDCoMKgIDExLjI4wqDCoMKgIDEx
+LjAwwqDCoMKgwqAgMC43NsKgwqDCoCAwLjM2wqDCoMKgIDAuMDDCoMKgwqAgMC4zNsKgwqAgMC4z
+NsKgIDc1LjczIMKgDQo+ID4gDQo+ID4gSSBiZWxpZXZlIG5ld3N0b3JlIHdpbGwgbm90IHNwbGl0
+IHRoZSByZXF1ZXN0LCBzbyB0aGVyZSBzaG91bGQgYmUgc29tZSB2ZXJ5IHNtYWxsIElPKH4wS0Ip
+IGdvZXMgd2l0aCB0aGUgZGF0YSB3cml0ZSg0S0IpLCB3aGVyZSB0aGUgc21hbGwgSU8gY29tZXMg
+ZnJvbSA/IMKgDQo+ID4gDQo+ID4gQWxzbyBjaGVja2VkIHRoZSBGaWxlc3RvcmUgZGF0YSwgdGhp
+cyBiZWhhdmlvciBpcyBub3QgcHJlc2VudCBpbiBGaWxlc3RvcmUsIGNoYW5naW5nIHRoZSBXQlRo
+cm90dGxlIHdpbGwgYWZmZWN0IHRoZSBudW1iZXIuIFNvIHNlZW1zIHRoaXMgYmVoYXZpb3IgaXMg
+cmVsYXRlZCB3aXRoIHRoZSBmbHVzaGluZyBtZWNoYW5pc20/IEluIG5ld3N0b3JlIHdlIGFyZSBk
+b2luZyBmZGF0YXN5bmMgbW9yZSBhZ2dyZXNzaXZlbHkuDQo+IA0KPiBZZWFoLCBpdCBzb3VuZHMg
+bGlrZSB0aGUgZGlmZmVyZW5jZSBpcyB0aGF0IG5ld3N0b3JlIGlzIGRvaW5nIGltbWVkaWF0ZSAN
+Cj4gZmRhdGFzeW5jJ3MgKG9uIG5ldyBvYmplY3RzIG9yIGFwcGVuZHMsIGFuZCBvbiBhcHBseWlu
+ZyBwb3N0LWNvbW1pdCB3YWwgDQo+IGl0ZW1zKS4gIFRoZSAyayBJT3MgYXJlIHByb2JhYmx5IHRo
+ZSB4ZnMgam91cm5hbCBjb21taXQ/DQoKPiANCj4gPiAyLiBOb3RpY2UgdGhhdCBieSB0dW5pbmcg
+dGhlIHdyaXRlX2J1ZmZlcl9zaXplICwgd2lydGVfYnVmZmVyX251bSBhbmQgDQo+ID4gbWluX3dy
+aXRlX2J1ZmZlcl9udW1iZXJfdG9fbWVyZ2UsIHdlIGNhbiBtYWtlIHRoZSBEQiB3cml0ZSB0byBa
+RVJPDQo+ID4gDQo+ID4gTG9vayBhdCB0aGUgaW9zdGF0IG9mIFNEQywgYWN0dWFsbHkgdGhlcmUg
+aXMgYWxtb3N0IG5vIElPIGhhcHBlbmVkIA0KPiA+IHRoZXJlLCB0aGF0IGlzIGJlY2F1c2UgbW9z
+dCBvZiB0aGUgV0FMIGVudHJpZXMgd2VyZSBtZXJnZWQgYmVmb3JlIA0KPiA+IGZsdXNoaW5nIHRv
+IExldmVsMC4NCj4gPiANCj4gPiBPdGhlciBSb2Nrc0RCIHR1bmluZyBhcmUgb3JpZ2luYWxseSB0
+cnlpbmcgwqB0byBvcHRpbWl6ZSB0aGUgY29tcGFjdGlvbiANCj4gPiBiZWhhdmlvciwgYnV0IHNp
+bmNlIHRoZXJlIGlzIGZldyBkYXRhIHdyaXR0ZW4gdG8gTGV2ZWwwLCB0aGUgY29tcGFjdGlvbiAN
+Cj4gPiBpcyBhbG1vc3QgdW5tZWFzdXJhYmxlIGhlcmUuDQo+IA0KPiBUaGlzIGlzIGdvb2QgbmV3
+cy4gIFdhcyB0aGUgb3ZlcmxheSBjb2RlIGJlaW5nIHVzZWQgaW4gdGhpcyBjYXNlPyAgKEJ5IA0K
+PiBkZWZhdWx0IGl0IHNob3VsZCBraWNrIGluIGZvciA0ayB3cml0ZXMgdW5sZXNzIHlvdSBkbyAn
+bmV3c3RvcmUgb3ZlcmxheSANCj4gbWF4ID0gMCcgb3Igc2ltaWxhci4gIElmIHdlIGNhbiBjb25m
+aXJtIHRoYXQgb3VyIHdhbCB3cml0ZXMgYXJlbid0IGJlaW5nIA0KPiBhbXBsaWZpZWQgYXQgYWxs
+IHRoYXQncyBncmVhdCBuZXdzLg0KPiANCk5vLCBJIGRpc2FibGVkIG92ZXJsYXkgaW4gYWxsIGNh
+c2VzLiBJIHRoaW5rIHdpdGggdGhlIGxhdGVzdCBjb21taXQgaW4gd2lwLW5ld3N0b3JlLCB3ZSBj
+YW4gY2FwcGluZyB0aGUgdG90YWwgYW1vdW50IG9mIHdhbCwgd2l0aCB0aGF0IEkgdGhpbmsgd2Ug
+Y2FuIGNhY3VsYXRlIHRoZSB3cml0ZS5idWZmZXIgc2l6ZSBhbmQgb3RoZXIgdHVuYWJsZS4KPiA+
+IDMuIERpc2FibGUgUm9ja3NEQiBXQUwgY2FuIDNYIMKgdGhlIHBlcmZvcm1hbmNlKEFsdGhvdWdo
+IHRoaXMgaXMgDQo+ID4gZGVmaW5pdGVseSBXUk9ORyBXQVkpDQo+ID4gDQo+ID4gSnVzdCBjdXJp
+b3VzIGlmIHRoZXJlIGlzIG5vIGV4dHJhIElPIGhhcHBlbmVkIGluIERCIHNpZGUsIHdoYXQgdGhl
+IA0KPiA+IHBlcmZvcm1hbmNlIGxvb2tzIGxpa2UuIEkgdHVybiBvZmYgdGhlIFdBTCBsb2cgb2Yg
+cm9ja3MgREIsIHRoZSANCj4gPiBwZXJmb3JtYW5jZSBpcyAzeCg3OTktMjQ2NCAsIGxhdCBmcm9t
+IDEwIC0+IDMuMikNCj4gPiANCj4gPiA0LiBUaGUgYXZnIHF1ZXVlIHNpemUgaXMgPDEgaW4gYW55
+IGNhc2UsIGJvdGggREJfV0FMIHBhcnQgYW5kIGZyYWdtZW50IA0KPiA+IHBhcnQuDQo+ID4gDQo+
+ID4gSSBndWVzcyB0aGVyZSBpcyBzb21lIGxvY2sgaW4gcm9ja3NkYjo6V3JpdGVCYXRjaCgpIHRo
+YXQgcHJldmVudGluZyANCj4gPiBtdWx0aXBsZSBPU0RfT1BfVEhSRUFEIHdvcmtpbmcgY29uY3Vy
+cmVudGx5LCBub3QgY2FyZWZ1bGx5IGFuYWx5emVkLg0KPiANCj4gSSB0aGluayBpdCdzIGp1c3Qg
+bmV3c3RvcmUsIGFjdHVhbGx5LiAgVGhlIG9ubHkgdGhpbmcgdGhhdCBldmVyIHRyaWdnZXJzIGEg
+DQo+IGNvbW1pdC9zeW5jIGlzIHRoZSBfa3Zfc3luY190aHJlYWQsIHdoaWNoIGNhbGxzIHN1Ym1p
+dF90cmFuc2FjdGlvbl9zeW5jKCksIA0KPiBhbmQgaXQncyBqdXN0IG9uZSB0aHJlYWQuICBPbiB0
+aGUgb25lIGhhbmQgaXQncyBraW5kIG9mIGxhbWUgdG8gaGF2ZSANCj4gdGhpcyBsb29wIHB1c2hp
+bmcgcXVldWVkIHRyYW5zYWN0aW9ucyB0byBkaXNrLiAgT24gdGhlIG90aGVyIGhhbmQgaXQgDQo+
+IHNlcnZlcyB0byB0aHJvdHRsZSB3b3JrIGFuZCBwcm92aWRlIGZhaXJuZXNzIHdpdGggYWxsIHRo
+ZSBvdGhlciBJTyB3ZSANCj4gYXJlIGdlbmVyYXRpbmcuDQo+IA0KPiBBZ2FpbiwgSSB0aGluayB0
+aGUgbWFpbiBsaW1pdGluZyBmYWN0b3IgaGVyZSB0aG91Z2ggaXMgZ29pbmcgdG8gYmUgaG93IA0K
+PiByb2Nrc2RiIGltcGxlbWVudHMgaXRzIFdBTCAoYXMgYSBmaWxlIHdoaWNoIHJlcXVpcmVzIDIg
+SU9zIHBlciBjb21taXQsIG9uZSANCj4gdG8gd3JpdGUgdGhlIGRhdGEgYmxvY2socykgYW5kIG9u
+ZSB0byB1cGRhdGUvam91cm5hbCB0aGUgZmlsZSBzaXplIA0KPiBhbmQvb3IgYWxsb2NhdGlvbiBj
+aGFuZ2VzKS4NCj4gIA0KVGhhdCBpcyB0cnVlLCBoYXZlIHRoZSByb2Nrc2RiIGNvbW11bml0eSBw
+bGFuIHRvIG9wdGltaXpzIGl0PyAgIApUaGUgd2FsIGlzIGluIGEgc2VwZXJhdGUgc3NkIGluIHRo
+aXMgY2FzZSwgc28gc2VlbXMgdGhpcyBpcyBub3QgdGhlIGxpbWl0IGZhY3RvciBpbiB0aGlzIHRl
+c3QuCgoKPiA+IEFuIGVhc3kgd2F5IHRvIG1lYXN1cmUgbWlnaHQgYmUgY29tbWVudCBvdXTCoCAN
+Cj4gPiBkYi0+c3VibWl0X3RyYW5zYWN0aW9uKHR4Yy0+dCk7IGluIE5ld1N0b3JlOjpfdHhjX3N1
+Ym1pdF9rdiwgdG8gc2VlIGlmIA0KPiA+IHdlIGNhbiBnZXQgbW9yZSBRRCBpbiBmcmFnbWVudCBw
+YXJ0IHdpdGhvdXQgaXNzdWluZyB0aGUgREIuDQo+IA0KPiBJJ20gbm90IHN1cmUgSSB0b3RhbGx5
+IHVuZGVyc3RhbmQgdGhlIGludGVyZmFjZS4uIG15IGFzc3VtcHRpb24gaXMgdGhhdCANCj4gcXVl
+dWVfdHJhbnNhY3Rpb24gd2lsbCBnaXZlIHJvY2tzZGIgdGhlIHR4biB0byBjb21taXQgd2hlbmV2
+ZXIgaXQgZmluZHMgaXQgDQo+IGNvbnZlbmllbnQgKG5vIGlkZWEgd2hhdCBwb2xpY3kgaXMgdXNl
+ZCB0aGVyZSkgYW5kIHF1ZXVlX3RyYW5zYWN0aW9uX3N5bmMgDQo+IHdpbGwgdHJpZ2dlciBhIGNv
+bW1pdCBub3cuICBJZiB3ZSBkaWQgaGF2ZSBtdWx0aXBsZSB0aHJlYWRzIGRvaW5nIA0KPiBxdWV1
+ZV90cmFuZHNhY3Rpb25fc3luYyAoYnksIHNheSwgY2FsbGluZyBpdCBkaXJlY3RseSBpbiBfdHhj
+X3N1Ym1pdF9rdikgDQo+IHdvdWxkIHFhIGdvIHVwPw0KPiANCkkgdGhpbmsgeW91IG1pZ2h0IG1p
+c3Mgc29tZXRoaW5nLCBjdXJyZW50bHkgdGhlIHR3byBpbnRlcmZhY2UgYXJlIGV4YWN0bHkgdGhl
+IFNBTUUgdW5sZXNzIHlvdSBzZXQgcm9ja3NkYi1kaXNhYmxlLXN5bmM9dHJ1ZSh3aGljaCBpcyBm
+YWxzZSBieSBkZWZhdWx0KS4KCldoZW4gY29tbWl0LCByb2Nrc2RiIHdpbGwgd3JpdGUgdGhlIGNv
+bnRlbnQgdG8gYm90aCBtZW10YWJsZSh3cml0ZSBidWZmZXIpIGFuZCBXQUwuIGlmIHRoZSB0cmFu
+c2FjdGlvbiAgZG9lc250IGdvIHdpdGggc3luYywgaXQgd2lsbCBhbHNvIGNvbW1pdCBub3csYnV0
+IHRoZSB3cml0ZSB0byBXQUwgd2lsbCBOT1QgYmUgc3luYyhieSBjYWxsaW5nIGZkYXRhc3luYyku
+IFRoYXQgbWVhbnMgd2UgbWF5IGxvc2UgZGF0YSBpZiBwb3dlciBmYWlsdXJlL2tlcm5lbCBwYW5p
+Yy4gVGhpcyBpcyB3aHkgaSBjaGFuZ2VkIHRoZSBkZWZhdWx0IHJvY2tzZGItZGlzYWJsZS1zeW5j
+IGZyb20gdHJ1ZSB0byBmYWxzZSBpbiBwcmV2aW91cyBwYXRjaC4KICAgICAgICBUaGFua3MKICAg
+ICAgICAgIFhpYW94aQoKCgo+IFRoYW5rcyENCj4gc2FnZQ0KPiANCj4gDQo+IA0KPiANCj4gPiAN
+Cj4gPiANCj4gPiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tQ29uZmlndXJhdGlvbnMtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0NCj4gPiDCoMKgwqDCoMKgwqAgTXkgc2V0dXAgaXMgU1NEIGJhc2Vk
+LCAxIE9TRCwgcG9vbCB3aXRoIDEwMHBnIGFuZCBzaXplID0xLiBUaGUgcGF0dGVybiBJIGFtIHdv
+cmtpbmcgb24gaXMgNEtCIHJhbmRvbSB3cml0ZShRRD04KSBvbiB0b3Agb2YgUkJEKHVzaW5nIGZp
+by1saWJyYmQpLkZJTyBjb25maWd1cmF0aW9uIGlzOg0KPiA+IMKgwqDCoMKgwqDCoMKgwqDCoMKg
+wqDCoMKgwqDCoCBicz00aw0KPiA+IGlvZGVwdGg9OA0KPiA+IHNpemU9MTBnDQo+ID4gaW9kZXB0
+aF9iYXRjaF9zdWJtaXQ9MQ0KPiA+IGlvZGVwdGhfYmF0Y2hfY29tcGxldGU9MQ0KPiA+IA0KPiA+
+IMKgwqDCoMKgwqDCoCBUaGUgdHVuaW5nIEkgYW0gdXNpbmcgYXJlIGxpc3RlZCBoZXJlLCB0aGlz
+IG1pZ2h0IG5vdCBiZSB0aGUgYmVzdCBidXQgYWxyZWFkeSBzaG93aW5nIHNvbWV0aGluZy4NCj4g
+PiDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqAgwqDCoMKgIHJvY2tzZGJfc3RhdHNfZHVt
+cF9wZXJpb2Rfc2VjID0gNQ0KPiA+IMKgwqDCoCByb2Nrc2RiX21heF9iYWNrZ3JvdW5kX2NvbXBh
+Y3Rpb25zID0gNA0KPiA+IMKgwqDCoCByb2Nrc2RiX2NvbXBhY3Rpb25fdGhyZWFkcyA9IDQNCj4g
+PiDCoMKgwqAgcm9ja3NkYl93cml0ZV9idWZmZXJfc2l6ZSA9IDUzNjg3MDkxMsKgIC8vNTEyTUIN
+Cj4gPiDCoMKgwqAgcm9ja3NkYl93cml0ZV9idWZmZXJfbnVtID0gNA0KPiA+IMKgwqDCoCByb2Nr
+c2RiX21pbl93cml0ZV9idWZmZXJfbnVtYmVyX3RvX21lcmdlID0gMg0KPiA+IMKgwqDCoCByb2Nr
+c2RiX2xldmVsMF9maWxlX251bV9jb21wYWN0aW9uX3RyaWdnZXIgPSA0DQo+ID4gwqDCoMKgIHJv
+Y2tzZGJfbWF4X2J5dGVzX2Zvcl9sZXZlbF9iYXNlID0gMTA0ODU3NjAwIC8vMTAwTUINCj4gPiDC
+oMKgwqAgcm9ja3NkYl90YXJnZXRfZmlsZV9zaXplX2Jhc2UgPSAxMDQ4NTc2MMKgwqDCoMKgwqAg
+Ly8xME1CDQo+ID4gwqDCoMKgIHJvY2tzZGJfbnVtX2xldmVscyA9IDMgLy8gU28gdGhlIE1BWF9E
+Ql9TSVpFIHdvdWxkIGJlIH4xMEdCKDEwME1CKiAxMF4zKSwgZmFpciBlbm91Z2guDQo+ID4gP3Jv
+Y2tzZGJfY29tcHJlc3Npb24gPSBub25lDQo+ID4gDQo+ID4gDQo+ID4gwqDCoMKgwqDCoMKgwqDC
+oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
+wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
+oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
+wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
+oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
+wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
+oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
+wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqAgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
+wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
+oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
+wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
+oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
+wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoCBYaWFveGkNCj4gPiANCj4gPiA/DQo+
+ID4gwqDCoMKgwqDCoMKgwqAgDQo+ID4gTj8/Pz8/cj8/eT8/Pz8/P1g/Pz92Pz8/KT97Lm4/Pz8/
+P3o/XXo/Pz8/YXk/HT8/Pz9qBz8/Zj8/P2g/Pz8/Px4/dz8/Pww/Pz9qOit2Pz8/dz8/Pz8/Pz8/
+Bz8/Pz96Wis/Pz8/Pz8/aiI/Pz8/aQ==
