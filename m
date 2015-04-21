@@ -1,94 +1,150 @@
-From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Subject: =?utf-8?B?UkU6IOWbnuWkjTogUmU6IE5ld1N0b3JlIHBlcmZvcm1hbmNlIGFuYWx5c2lz?=
-Date: Tue, 21 Apr 2015 06:43:44 +0000
-Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC021D1018@shsmsx102.ccr.corp.intel.com>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: =?UTF-8?B?UmU6IOWbnuWkjTogUmU6IE5ld1N0b3JlIHBlcmZvcm1hbmNlIGFuYWx5c2lz?=
+Date: Tue, 21 Apr 2015 16:51:56 +0800
+Message-ID: <CACJqLybRGUEXqoME_fQpNHtbYG73En2AnhgMsZ+WEN+EYP3xqw@mail.gmail.com>
 References: <6F3FA899187F0043BA1827A69DA2F7CC021D081C@shsmsx102.ccr.corp.intel.com>
- <alpine.DEB.2.00.1504200826500.18547@cobra.newdream.net>
- <oqwenulom2umn8f37cg5gvgh.1429545030301@email.android.com>
- <alpine.DEB.2.00.1504200945000.18547@cobra.newdream.net>
+	<alpine.DEB.2.00.1504200826500.18547@cobra.newdream.net>
+	<oqwenulom2umn8f37cg5gvgh.1429545030301@email.android.com>
+	<alpine.DEB.2.00.1504200945000.18547@cobra.newdream.net>
+	<6F3FA899187F0043BA1827A69DA2F7CC021D1018@shsmsx102.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:64049 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751603AbbDUGoc (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 21 Apr 2015 02:44:32 -0400
-In-Reply-To: <alpine.DEB.2.00.1504200945000.18547@cobra.newdream.net>
-Content-Language: en-US
+Received: from mail-pa0-f54.google.com ([209.85.220.54]:35045 "EHLO
+	mail-pa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751586AbbDUIv5 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 Apr 2015 04:51:57 -0400
+Received: by pabtp1 with SMTP id tp1so234815695pab.2
+        for <ceph-devel@vger.kernel.org>; Tue, 21 Apr 2015 01:51:57 -0700 (PDT)
+In-Reply-To: <6F3FA899187F0043BA1827A69DA2F7CC021D1018@shsmsx102.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Mark Nelson <mnelson@redhat.com>, Somnath Roy <Somnath.Roy@sandisk.com>, "Duan, Jiangang" <jiangang.duan@intel.com>, "Zhang, Jian" <jian.zhang@intel.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Cc: Sage Weil <sweil@redhat.com>, Mark Nelson <mnelson@redhat.com>, Somnath Roy <Somnath.Roy@sandisk.com>, "Duan, Jiangang" <jiangang.duan@intel.com>, "Zhang, Jian" <jian.zhang@intel.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-SGkgU2FnZSwNCglXZWxsLCB0aGF0J3MgDQoJCXN1Ym1pdF90cmFuc2FjdGlvbiAtLSBzdWJtaXQg
-YSB0cmFuc2FjdGlvbiAsIHdoZXRoZXIgYmxvY2sgd2FpdGluZyBmb3IgZmRhdGFzeW5jIGRlcGVu
-ZHMgb24gcm9ja3NkYi1kaXNhYmxlLXN5bmMuICANCgkJc3VibWl0X3RyYW5zYWN0aW9uX3N5bmMg
-LS0gcXVldWUgdHJhbnNhY3Rpb24gYW5kIHdhaXQgdW50aWwgaXQgaXMgc3RhYmxlIG9uIGRpc2su
-DQoJU28gaWYgd2UgZGVmYXVsdCByb2Nrc2RiLWRpc2FibGUtc3luYyB0byBmYWxzZSwgdGhlIHR3
-byBBUEkgYXJlIHNhbWUuIEkgaGF2ZW4ndCBsb29rIGF0IHRoZSBMZXZlbERCIGJ1dCBJIHN1c3Bl
-Y3QgaXQncyBzaW1pbGFyLg0KDQoJSSBqdXN0IHJlLXJlYWQgdGhlIE5ld3N0b3JlIGNvZGUsIHNl
-ZW1zIHRoZSB3b3JrZmxvdyBpcyBub3QgYXMgdGhhdCB3ZSB3YW50LiBXZSBpc3N1ZSBhIGJ1bmNo
-IG9mIHN1Ym1pdF90cmFuc2FjdGlvbiBhbmQgaW4gdGhlIF9rdl9zeW5jX3RocmVhZCB3ZSB0cnkg
-dG8gaGF2ZSBhIGNoZWNrcG9pbnQgdGhhdCBlbnN1cmUgcHJldmlvdXMgdHJhbnNhY3Rpb24gYXJl
-IHBlcnNpc3RlbnQsIGJ5IHVzaW5nIHN1Ym1pdF90cmFuc2NhdGlvbl9zeW5jIHRvIHN1Ym1pdCBh
-biBlbXB0eSB0cmFuc2FjdGlvbi4gIEJ1dCBhY3R1YWxseSANCgkxLiB0aGUgc3VibWl0X3RyYW5z
-YWN0aW9uIGlzIGFscmVhZHkgYSBzeW5jaHJvbml6ZWQgY2FsbCBzbyB0aGUgZW1wdHkgdHJhbnNj
-YXRpb24gaW4gX2t2X3N5bmNfdGhyZWFkIGlzIGtpbmQgb2Ygd2FzdGUuDQoJMi4gQW4gc3luYyB0
-cmFuc2FjdGlvbiBjYW5ub3QgZW5zdXJlIHRoZSBwcmV2aW91cyB0cmFuc2FjdGlvbiBpcyBhbHNv
-IHN5bmNlZC4gVGhlIEFQSSBkb2Vzbid0IGd1YXJhbnRlZSB0aGlzLCBhbmQgZnJvbSBpbXBsZW1l
-bnRhdGlvbiwgdGhpcyB0d28gdHJhbnNhY3Rpb25zIG1heSBnb2VzIHRvIGRpZmZlcmVudCBXQUwg
-ZmlsZXMuICANCg0KCVllcywgaWYgd2Ugd2FudCwgd2UgY2FuIGhhdmUgYSBRdWV1ZSBhbmQgVGhy
-ZWFkIHRoYXQgY29sbGVjdGluZyB0aGUgdHJhbnNhY3Rpb25zIGFuZCBtZXJnZSB0aGVtIHRvIGEg
-YmlnIHRyYW5zYWN0aW9uICwgc29tZSA6OmZkYXRhc3luYyB3aWxsIGJlIHNhdmVkIGhlcmUuIEJ1
-dCB0aGlzIGFwcHJvYWNoIGxvb2tzIGNvbXBsZXguIA0KDQoJU29tZSBvcHRpbWl6YXRpb25zIGlu
-IG15IG1pbmQgYXJlOg0KCTEuIEJhdGNoIHRoZSBjbGVhbnVwIG9wZXJhdGlvbnMgaW4gX2FwcGx5
-X3dhbF90cmFuc2FjdGlvbiwgd2UgZG9u4oCZdCBuZWVkIHRvIHN5bmNocm9uaXplZCByZW1vdmUg
-dGhlIFdBTCBpdGVtLCB3ZSBjYW4ganVzdCBwdXQgdGhlbSBpbnRvIGt2X3N5bmNfdGhyZWFkX1Eg
-YW5kIGxldCBrdl9zeW5jX3RocmVhZCB0byBmb3JtIGEgYmF0Y2ggdHJhbnNhY3Rpb24gdGhhdCBk
-ZWxldGVkIGEgYnVuY2ggb2Yga2V5Lg0KCTIuIFdlIGRvbid0IG5lZWQgdGhlIGVtcHR5IHRyYW5z
-YWN0aW9uIGluIGt2X3N5bmNfdGhyZWFkLCB3ZSBjb3VsZCBjYWxsIHRoZSBfdHhjX2t2X2Zpbmlz
-aF9rdiBkaXJlY3RseSBmcm9tIF90eGNfc3VibWl0X2t2LCAgc2luY2UgdGhlIEtWIGlzIHN5bmNo
-cm9uaXplZC4NCiAgICAgICAgICAgICAgCTMuICBUaGVuIHdlIGNhbiByZW5hbWUgX2t2X3N5bmNf
-dGhyZWFkIHRvIF9rdl9jbGVhbnVwX3RocmVhZCB0byBiZXR0ZXIgZGVzY3JpcHQgaXRzIHdvcmsu
-IA0KDQoJSG93IGRvIHlvdSB0aGluaw0KDQoJCQkJCQkJCQkJCQkJCQlYaWFveGkNCi0tLS0tT3Jp
-Z2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBTYWdlIFdlaWwgW21haWx0bzpzd2VpbEByZWRoYXQu
-Y29tXSANClNlbnQ6IFR1ZXNkYXksIEFwcmlsIDIxLCAyMDE1IDEyOjQ4IEFNDQpUbzogQ2hlbiwg
-WGlhb3hpDQpDYzogTWFyayBOZWxzb247IFNvbW5hdGggUm95OyBEdWFuLCBKaWFuZ2FuZzsgWmhh
-bmcsIEppYW47IGNlcGgtZGV2ZWwNClN1YmplY3Q6IFJlOiDlm57lpI06IFJlOiBOZXdTdG9yZSBw
-ZXJmb3JtYW5jZSBhbmFseXNpcw0KDQpPbiBNb24sIDIwIEFwciAyMDE1LCBDaGVuLCBYaWFveGkg
-d3JvdGU6DQo+ID4gPiBBbiBlYXN5IHdheSB0byBtZWFzdXJlIG1pZ2h0IGJlIGNvbW1lbnQgb3V0
-DQo+ID4gPiBkYi0+c3VibWl0X3RyYW5zYWN0aW9uKHR4Yy0+dCk7IGluIE5ld1N0b3JlOjpfdHhj
-X3N1Ym1pdF9rdiwgdG8gDQo+ID4gPiBkYi0+c2VlIGlmDQo+ID4gPiB3ZSBjYW4gZ2V0IG1vcmUg
-UUQgaW4gZnJhZ21lbnQgcGFydCB3aXRob3V0IGlzc3VpbmcgdGhlIERCLg0KPiA+IA0KPiA+IEkn
-bSBub3Qgc3VyZSBJIHRvdGFsbHkgdW5kZXJzdGFuZCB0aGUgaW50ZXJmYWNlLi4gbXkgYXNzdW1w
-dGlvbiBpcyANCj4gPiB0aGF0IHF1ZXVlX3RyYW5zYWN0aW9uIHdpbGwgZ2l2ZSByb2Nrc2RiIHRo
-ZSB0eG4gdG8gY29tbWl0IHdoZW5ldmVyIA0KPiA+IGl0IGZpbmRzIGl0IGNvbnZlbmllbnQgKG5v
-IGlkZWEgd2hhdCBwb2xpY3kgaXMgdXNlZCB0aGVyZSkgYW5kIA0KPiA+IHF1ZXVlX3RyYW5zYWN0
-aW9uX3N5bmMgd2lsbCB0cmlnZ2VyIGEgY29tbWl0IG5vdy4gIElmIHdlIGRpZCBoYXZlIA0KPiA+
-IG11bHRpcGxlIHRocmVhZHMgZG9pbmcgcXVldWVfdHJhbmRzYWN0aW9uX3N5bmMgKGJ5LCBzYXks
-IGNhbGxpbmcgaXQgDQo+ID4gZGlyZWN0bHkgaW4gX3R4Y19zdWJtaXRfa3YpIHdvdWxkIHFhIGdv
-IHVwPw0KPiA+IA0KPiBJIHRoaW5rIHlvdSBtaWdodCBtaXNzIHNvbWV0aGluZywgY3VycmVudGx5
-IHRoZSB0d28gaW50ZXJmYWNlIGFyZSANCj4gZXhhY3RseSB0aGUgU0FNRSB1bmxlc3MgeW91IHNl
-dCByb2Nrc2RiLWRpc2FibGUtc3luYz10cnVlKHdoaWNoIGlzIA0KPiBmYWxzZSBieSBkZWZhdWx0
-KS4NCj4gDQo+IFdoZW4gY29tbWl0LCByb2Nrc2RiIHdpbGwgd3JpdGUgdGhlIGNvbnRlbnQgdG8g
-Ym90aCBtZW10YWJsZSh3cml0ZQ0KPiBidWZmZXIpIGFuZCBXQUwuIGlmIHRoZSB0cmFuc2FjdGlv
-biBkb2VzbnQgZ28gd2l0aCBzeW5jLCBpdCB3aWxsIGFsc28gDQo+IGNvbW1pdCBub3csYnV0IHRo
-ZSB3cml0ZSB0byBXQUwgd2lsbCBOT1QgYmUgc3luYyhieSBjYWxsaW5nIGZkYXRhc3luYykuDQo+
-IFRoYXQgbWVhbnMgd2UgbWF5IGxvc2UgZGF0YSBpZiBwb3dlciBmYWlsdXJlL2tlcm5lbCBwYW5p
-Yy4gVGhpcyBpcyB3aHkgDQo+IGkgY2hhbmdlZCB0aGUgZGVmYXVsdCByb2Nrc2RiLWRpc2FibGUt
-c3luYyBmcm9tIHRydWUgdG8gZmFsc2UgaW4gDQo+IHByZXZpb3VzIHBhdGNoLg0KDQpZZWFoLCBJ
-J20gY29uZnVzZWQuICA6KQ0KDQpTbyBub3cgJ3JvY2tzZGIgZGlzYWJsZSBzeW5jID0gZmFsc2Un
-LCB3aGljaCBzZWVtcyB0byBiZSBvYnZpb3VzbHkgd2hhdCB3ZSB3YW50IGZvciBuZXdzdG9yZS4g
-IEl0J3MgZGlmZmVyZW50IGZvciBmaWxlc3RvcmUsIHdoaWNoIGlzIGRvaW5nIGEgc3luY2ZzIGNo
-ZWNrcG9pbnQuICBQZXJoYXBzIHdlIHNob3VsZCBoYXZlIG5ld3N0b3JlIHNldCB0aGF0IGV4cGxp
-Y2l0bHkgaW5zdGVhZCBvZiBwYXNzaW5nIHRocm91Z2ggYSBjb25maWcgb3B0aW9uLg0KDQpJbiBh
-bnkgY2FzZSwgdGhvdWdoLCBJJ20gY29uZnVzZWQgYnkNCg0KPiBpZiB0aGUgdHJhbnNhY3Rpb24g
-ZG9lc250IGdvIHdpdGggc3luYywgaXQgd2lsbCBhbHNvIGNvbW1pdCBub3csYnV0IA0KPiB0aGUg
-d3JpdGUgdG8gV0FMIHdpbGwgTk9UIGJlIHN5bmMoYnkgY2FsbGluZyBmZGF0YXN5bmMpLg0KDQpX
-aGF0IGRvZXMgaXQgbWVhbiB0byAnY29tbWl0JyBidXQgbm90IGNhbGwgZmRhdGFzeW5jPyAgV2hh
-dCBkb2VzIGNvbW1pdCBtZWFuIGluIHRoaXMgY2FzZT8NCg0KQW5kLCBhbmQgSSBjb3JyZWN0IGlu
-IHVuZGVyc3RhbmRpbmcgdGhhdCB3ZSBoYXZlDQoNCiBxdWV1ZV90cmFuc2FjdGlvbiAtLSBxdWV1
-ZSBhIHRyYW5zYWN0aW9uIGJ1dCBkb24ndCBibG9jayB3YWl0aW5nIGZvciBmZGF0YXN5bmMgIHF1
-ZXVlX3RyYW5zYWN0aW9uX3N5bmMgLS0gcXVldWUgdHJhbnNhY3Rpb24gYW5kIHdhaXQgdW50aWwg
-aXQgaXMgc3RhYmxlIG9uIGRpc2sNCg0KdG8gd29yayB3aXRoPw0KDQpUaGFua3MhDQpzYWdlDQo=
+On Tue, Apr 21, 2015 at 2:43 PM, Chen, Xiaoxi <xiaoxi.chen@intel.com> w=
+rote:
+> Hi Sage,
+>         Well, that's
+>                 submit_transaction -- submit a transaction , whether =
+block waiting for fdatasync depends on rocksdb-disable-sync.
+>                 submit_transaction_sync -- queue transaction and wait=
+ until it is stable on disk.
+>         So if we default rocksdb-disable-sync to false, the two API a=
+re same. I haven't look at the LevelDB but I suspect it's similar.
+
+Eh, I don't think it's the same. By default WriteOption.disableWAL is
+false in our ceph side, and submit_transaction will use
+WriteOption.sync=3Dfalse and submit_transaction_sync will use
+WriteOption.sync=3Dtrue.
+
+If sync=3D=3Dfase, rocksdb won't sync log file, otherwise it will call
+fsync/fdatasync to flush log file.
+
+Plz correct me if not. :-)
+
+>
+>         I just re-read the Newstore code, seems the workflow is not a=
+s that we want. We issue a bunch of submit_transaction and in the _kv_s=
+ync_thread we try to have a checkpoint that ensure previous transaction=
+ are persistent, by using submit_transcation_sync to submit an empty tr=
+ansaction.  But actually
+>         1. the submit_transaction is already a synchronized call so t=
+he empty transcation in _kv_sync_thread is kind of waste.
+>         2. An sync transaction cannot ensure the previous transaction=
+ is also synced. The API doesn't guarantee this, and from implementatio=
+n, this two transactions may goes to different WAL files.
+>
+>         Yes, if we want, we can have a Queue and Thread that collecti=
+ng the transactions and merge them to a big transaction , some ::fdatas=
+ync will be saved here. But this approach looks complex.
+>
+>         Some optimizations in my mind are:
+>         1. Batch the cleanup operations in _apply_wal_transaction, we=
+ don=E2=80=99t need to synchronized remove the WAL item, we can just pu=
+t them into kv_sync_thread_Q and let kv_sync_thread to form a batch tra=
+nsaction that deleted a bunch of key.
+>         2. We don't need the empty transaction in kv_sync_thread, we =
+could call the _txc_kv_finish_kv directly from _txc_submit_kv,  since t=
+he KV is synchronized.
+>                 3.  Then we can rename _kv_sync_thread to _kv_cleanup=
+_thread to better descript its work.
+>
+>         How do you think
+>
+>                                                                      =
+                                                   Xiaoxi
+> -----Original Message-----
+> From: Sage Weil [mailto:sweil@redhat.com]
+> Sent: Tuesday, April 21, 2015 12:48 AM
+> To: Chen, Xiaoxi
+> Cc: Mark Nelson; Somnath Roy; Duan, Jiangang; Zhang, Jian; ceph-devel
+> Subject: Re: =E5=9B=9E=E5=A4=8D: Re: NewStore performance analysis
+>
+> On Mon, 20 Apr 2015, Chen, Xiaoxi wrote:
+>> > > An easy way to measure might be comment out
+>> > > db->submit_transaction(txc->t); in NewStore::_txc_submit_kv, to
+>> > > db->see if
+>> > > we can get more QD in fragment part without issuing the DB.
+>> >
+>> > I'm not sure I totally understand the interface.. my assumption is
+>> > that queue_transaction will give rocksdb the txn to commit wheneve=
+r
+>> > it finds it convenient (no idea what policy is used there) and
+>> > queue_transaction_sync will trigger a commit now.  If we did have
+>> > multiple threads doing queue_trandsaction_sync (by, say, calling i=
+t
+>> > directly in _txc_submit_kv) would qa go up?
+>> >
+>> I think you might miss something, currently the two interface are
+>> exactly the SAME unless you set rocksdb-disable-sync=3Dtrue(which is
+>> false by default).
+>>
+>> When commit, rocksdb will write the content to both memtable(write
+>> buffer) and WAL. if the transaction doesnt go with sync, it will als=
+o
+>> commit now,but the write to WAL will NOT be sync(by calling fdatasyn=
+c).
+>> That means we may lose data if power failure/kernel panic. This is w=
+hy
+>> i changed the default rocksdb-disable-sync from true to false in
+>> previous patch.
+>
+> Yeah, I'm confused.  :)
+>
+> So now 'rocksdb disable sync =3D false', which seems to be obviously =
+what we want for newstore.  It's different for filestore, which is doin=
+g a syncfs checkpoint.  Perhaps we should have newstore set that explic=
+itly instead of passing through a config option.
+>
+> In any case, though, I'm confused by
+>
+>> if the transaction doesnt go with sync, it will also commit now,but
+>> the write to WAL will NOT be sync(by calling fdatasync).
+>
+> What does it mean to 'commit' but not call fdatasync?  What does comm=
+it mean in this case?
+>
+> And, and I correct in understanding that we have
+>
+>  queue_transaction -- queue a transaction but don't block waiting for=
+ fdatasync  queue_transaction_sync -- queue transaction and wait until =
+it is stable on disk
+>
+> to work with?
+>
+> Thanks!
+> sage
+
+
+
+--=20
+Best Regards,
+
+Wheat
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
