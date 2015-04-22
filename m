@@ -1,43 +1,40 @@
-From: Gregory Farnum <greg@gregs42.com>
-Subject: Re: init script bug with multiple clusters
-Date: Wed, 22 Apr 2015 14:04:38 -0700
-Message-ID: <CAC6JEv8qApCFWX342oz_gLBY12f8+xQ3f34nfHe5PmXYbsfTEw@mail.gmail.com>
-References: <5524FBB9.9070300@m-privacy.de>
-	<CAC6JEv9gHVrTmuo_Nc1vSxCDmh9WckYwrBN34nPrt7gwptGmYA@mail.gmail.com>
-	<5530AEFB.1010805@m-privacy.de>
+From: Ken Dreyer <kdreyer@redhat.com>
+Subject: systemd unit files and multiple daemons
+Date: Wed, 22 Apr 2015 15:57:12 -0600
+Message-ID: <55381938.7010600@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f175.google.com ([209.85.213.175]:38157 "EHLO
-	mail-ig0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751793AbbDVVEj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 22 Apr 2015 17:04:39 -0400
-Received: by igbhj9 with SMTP id hj9so8135750igb.1
-        for <ceph-devel@vger.kernel.org>; Wed, 22 Apr 2015 14:04:39 -0700 (PDT)
-Received: from mail-ig0-f171.google.com (mail-ig0-f171.google.com. [209.85.213.171])
-        by mx.google.com with ESMTPSA id w2sm4069346igl.22.2015.04.22.14.04.38
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 22 Apr 2015 14:04:38 -0700 (PDT)
-Received: by igbhj9 with SMTP id hj9so8135424igb.1
-        for <ceph-devel@vger.kernel.org>; Wed, 22 Apr 2015 14:04:38 -0700 (PDT)
-In-Reply-To: <5530AEFB.1010805@m-privacy.de>
+Received: from mx1.redhat.com ([209.132.183.28]:47637 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756659AbbDVV5O (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 22 Apr 2015 17:57:14 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Amon Ott <a.ott@m-privacy.de>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
 
-On Thu, Apr 16, 2015 at 11:58 PM, Amon Ott <a.ott@m-privacy.de> wrote:
-> Am 17.04.2015 um 03:01 schrieb Gregory Farnum:
->> This looks good to me, but we need an explicit sign-off from you for
->> it. If you can submit it as a PR on Github that's easiest for us, but
->> if not can you send it in git email patch form? :)
->
-> Attached patch against next branch in git email form - hope this is as
-> expected. Our devel system cannot send mail directly.
+I could really use some eyes on the systemd change proposed here:
+http://tracker.ceph.com/issues/11344
 
-Yep, thanks! And sorry about the delay. I've set up a PR at
-https://github.com/ceph/ceph/pull/4437 to make sure it gets reviewed
-by somebody else with a little more of an eye on the init scripts;
-should go in soon. :)
--Greg
+Specifically, on bullet #4 there, should we have a single
+"ceph-mon.service" (implying that users should only run one monitor
+daemon per server) or if we should support multiple "ceph-mon@" services
+(implying that users will need to specify additional information when
+starting the service(s)). The version in our tree is "ceph-mon@". James'
+work for Ubuntu Vivid is only "ceph-mon" [2]. Same thing for ceph-mds vs
+ceph-mds@.
+
+I'd prefer to keep Ubuntu downstream the same as Ceph upstream.
+
+What do we want to do for this?
+
+How common is it to run multiple monitor daemons or mds daemons on a
+single host?
+
+- Ken
+
+
+[1] https://github.com/ceph/ceph/tree/master/systemd
+[2]
+http://bazaar.launchpad.net/~ubuntu-branches/ubuntu/vivid/ceph/vivid/files/head:/debian/lib-systemd/
