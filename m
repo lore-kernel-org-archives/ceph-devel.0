@@ -1,95 +1,43 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: [GIT PULL] Ceph updates for 4.1-rc1
-Date: Wed, 22 Apr 2015 09:36:04 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1504220907230.11741@cobra.newdream.net>
+From: Gregory Farnum <greg@gregs42.com>
+Subject: Re: init script bug with multiple clusters
+Date: Wed, 22 Apr 2015 14:04:38 -0700
+Message-ID: <CAC6JEv8qApCFWX342oz_gLBY12f8+xQ3f34nfHe5PmXYbsfTEw@mail.gmail.com>
+References: <5524FBB9.9070300@m-privacy.de>
+	<CAC6JEv9gHVrTmuo_Nc1vSxCDmh9WckYwrBN34nPrt7gwptGmYA@mail.gmail.com>
+	<5530AEFB.1010805@m-privacy.de>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: torvalds@linux-foundation.org
-Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ig0-f175.google.com ([209.85.213.175]:38157 "EHLO
+	mail-ig0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751793AbbDVVEj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 22 Apr 2015 17:04:39 -0400
+Received: by igbhj9 with SMTP id hj9so8135750igb.1
+        for <ceph-devel@vger.kernel.org>; Wed, 22 Apr 2015 14:04:39 -0700 (PDT)
+Received: from mail-ig0-f171.google.com (mail-ig0-f171.google.com. [209.85.213.171])
+        by mx.google.com with ESMTPSA id w2sm4069346igl.22.2015.04.22.14.04.38
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 22 Apr 2015 14:04:38 -0700 (PDT)
+Received: by igbhj9 with SMTP id hj9so8135424igb.1
+        for <ceph-devel@vger.kernel.org>; Wed, 22 Apr 2015 14:04:38 -0700 (PDT)
+In-Reply-To: <5530AEFB.1010805@m-privacy.de>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Amon Ott <a.ott@m-privacy.de>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Linux,
+On Thu, Apr 16, 2015 at 11:58 PM, Amon Ott <a.ott@m-privacy.de> wrote:
+> Am 17.04.2015 um 03:01 schrieb Gregory Farnum:
+>> This looks good to me, but we need an explicit sign-off from you for
+>> it. If you can submit it as a PR on Github that's easiest for us, but
+>> if not can you send it in git email patch form? :)
+>
+> Attached patch against next branch in git email form - hope this is as
+> expected. Our devel system cannot send mail directly.
 
-Please pull the following Ceph updates from
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
-
-This time around we have a collection of CephFS fixes from Zheng around 
-MDS failure handling and snapshots, support for a new CRUSH straw2 
-algorithm (to sync up with userspace) and several RBD cleanups and fixes 
-from Ilya, an error path leak fix from Taesoo, and then an assorted 
-collection of cleanups from others.
-
-Thanks!
-sage
-
-
-----------------------------------------------------------------
-Fabian Frederick (1):
-      ceph: remove redundant declaration
-
-Ilya Dryomov (12):
-      rbd: be more informative on -ENOENT failures
-      libceph: don't overwrite specific con error msgs
-      rbd: mark block queue as non-rotational
-      libceph, ceph: split ceph_show_options()
-      libceph: expose client options through debugfs
-      ceph: show non-default options only
-      libceph: simplify our debugfs attr macro
-      crush: drop unnecessary include from mapper.c
-      crush: ensuring at most num-rep osds are selected
-      crush: straw2 bucket type with an efficient 64-bit crush_ln()
-      libceph: announce support for straw2 buckets
-      rbd: rbd_wq comment is obsolete
-
-Joe Perches (1):
-      libceph: osdmap.h: Add missing format newlines
-
-Nicholas Mc Guire (2):
-      ceph: use msecs_to_jiffies for time conversion
-      ceph: match wait_for_completion_timeout return type
-
-Sanidhya Kashyap (1):
-      ceph: kstrdup() memory handling
-
-Taesoo Kim (1):
-      ceph: properly release page upon error
-
-Yan, Zheng (10):
-      ceph: drop cap releases in requests composed before cap reconnect
-      ceph: fix dcache/nocache mount option
-      ceph: keep i_snap_realm while there are writers
-      ceph: don't mark dirty caps when there is no auth cap
-      ceph: don't zero i_wrbuffer_ref when reconnecting is denied
-      ceph: cleanup unsafe requests when reconnecting is denied
-      ceph: hold on to exclusive caps on complete directories
-      ceph: fix null pointer dereference in send_mds_reconnect()
-      ceph: rename snapshot support
-      ceph: fix uninline data function
-
- drivers/block/rbd.c                |   26 ++++--
- fs/ceph/addr.c                     |   38 ++++++---
- fs/ceph/caps.c                     |   51 ++++++++---
- fs/ceph/dir.c                      |   48 ++++++++---
- fs/ceph/mds_client.c               |   61 +++++++++----
- fs/ceph/strings.c                  |    1 +
- fs/ceph/super.c                    |   56 ++++++------
- fs/ceph/super.h                    |    4 +-
- fs/ceph/xattr.c                    |   23 +++--
- include/linux/ceph/ceph_features.h |   16 +++-
- include/linux/ceph/ceph_fs.h       |    1 +
- include/linux/ceph/debugfs.h       |    8 +-
- include/linux/ceph/libceph.h       |    2 +
- include/linux/ceph/osdmap.h        |    5 +-
- include/linux/crush/crush.h        |   12 ++-
- net/ceph/ceph_common.c             |   37 ++++++++
- net/ceph/crush/crush.c             |   14 +++
- net/ceph/crush/crush_ln_table.h    |  166 ++++++++++++++++++++++++++++++++++++
- net/ceph/crush/mapper.c            |  118 +++++++++++++++++++++++--
- net/ceph/debugfs.c                 |   24 ++++++
- net/ceph/messenger.c               |   25 +++---
- net/ceph/osdmap.c                  |   25 ++++++
- 22 files changed, 633 insertions(+), 128 deletions(-)
- create mode 100644 net/ceph/crush/crush_ln_table.h
+Yep, thanks! And sorry about the delay. I've set up a PR at
+https://github.com/ceph/ceph/pull/4437 to make sure it gets reviewed
+by somebody else with a little more of an eye on the init scripts;
+should go in soon. :)
+-Greg
