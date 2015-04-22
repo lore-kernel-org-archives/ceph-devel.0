@@ -1,91 +1,161 @@
-From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Subject: =?utf-8?B?UkU6IOWbnuWkjTogUmU6IOWbnuWkjTogUmU6IOWbnuWkjTogUmU6IE5ld1N0?=
- =?utf-8?Q?ore_performance_analysis?=
-Date: Wed, 22 Apr 2015 03:34:42 +0000
-Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC021DD80A@shsmsx102.ccr.corp.intel.com>
-References: <6F3FA899187F0043BA1827A69DA2F7CC021D081C@shsmsx102.ccr.corp.intel.com>
- <alpine.DEB.2.00.1504200826500.18547@cobra.newdream.net>
- <oqwenulom2umn8f37cg5gvgh.1429545030301@email.android.com>
- <alpine.DEB.2.00.1504200945000.18547@cobra.newdream.net>
- <6F3FA899187F0043BA1827A69DA2F7CC021D1018@shsmsx102.ccr.corp.intel.com>
- <CACJqLybRGUEXqoME_fQpNHtbYG73En2AnhgMsZ+WEN+EYP3xqw@mail.gmail.com>,
- <alpine.DEB.2.00.1504211246450.18547@cobra.ne
- <alpine.DEB.2.00.1504211627110.18547@cobra.newdream.net>
- <yg97r6x6t1ff48fm6yxbycg8.1429659769859@email.android.com>
- <alpine.DEB.2.00.1504211654560.18547@cobra.newdream.net>
- <5536E44C.20302@redhat.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: should we prepare to release firefly v0.80.10 ?
+Date: Wed, 22 Apr 2015 10:26:10 +0200
+Message-ID: <55375B22.5060307@dachary.org>
+References: <55362279.5060105@dachary.org> <alpine.DEB.2.00.1504210851130.18547@cobra.newdream.net> <55367E8D.1090805@redhat.com> <acaeb07b-41c3-40bc-87a3-9d82ce346ae7@redhat.com> <5537229F.4050501@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="Rb19LE3uM24B7BnNTeJrc8t3ve5V6U5fH"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:64544 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756028AbbDVDex (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 21 Apr 2015 23:34:53 -0400
-In-Reply-To: <5536E44C.20302@redhat.com>
-Content-Language: en-US
+Received: from mail2.dachary.org ([91.121.57.175]:50606 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1754870AbbDVI0P (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 22 Apr 2015 04:26:15 -0400
+In-Reply-To: <5537229F.4050501@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>, Sage Weil <sage@newdream.net>
-Cc: Haomai Wang <haomaiwang@gmail.com>, Somnath Roy <Somnath.Roy@sandisk.com>, "Duan, Jiangang" <jiangang.duan@intel.com>, "Zhang, Jian" <jian.zhang@intel.com>, ceph-devel <ceph-devel@vger.kernel.org>, "Xue, Chendi" <chendi.xue@intel.com>
+To: David Zafman <dzafman@redhat.com>, Samuel Just <sjust@redhat.com>, Sage Weil <sweil@redhat.com>
+Cc: "Shu, Xinxin" <xinxin.shu@intel.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-SGkgU2FnZSBhbmQgTWFyaywNCg0KICAgICAgICAgICBDaGVuZGkgZnJvbSBvdXIgdGVhbSBoYWQg
-ZG9uZSB0aGUgdGVzdCBiYXNlZCBvbiB2MC45MS4gVGhlIHNldHVwIGlzIDQgbm9kZXMsIHRvdGFs
-bHkgNDBIRERzIHdpdGggU1NEcyBhcyBqb3VybmFsLCByZXBsaWNhPTINCg0KICAgICAgICAgICBN
-b3VudCBhIHBhcnRpdGlvbiBmcm9tIGpvdXJuYWwgU1NEIHRvIC9jdXJyZW50L29tYXAgYmVuZWZp
-dCA0SyByYW5kb20gd3JpdGUgSU9QUyhwZWFrKSAgZnJvbSAxNTI0IHRvIDI2OTQsIHRoYXQncyA3
-NiUgd2hpbGUgb3RoZXIgSU8gcGF0dGVybnMga2VlcCB0aGUgc2FtZS4NCg0KU29tZSBkZXRhaWxz
-IGFyZSBoZXJlLg0KICAgICAgICAgICBJZiB0aGlzIGNhbiByZXByb2R1Y2UgaW4gb3RoZXIgc2V0
-dXAsIEkgc3VzcGVjdCBpdCB3b3J0aCB1cyB0byBpbnZlc3RpZ2F0ZSBzb21lIHRpbWUgdG8gZG8g
-dGhlIGRldGVjdGlvbi4NCg0KCQlSdW5pZAlPUF9TSVpFCU9QX1RZUEUJUUQJRW5naW5lCXNlcnZl
-cl9udW0JY2xpZW50X251bQlyYmRfbnVtCVJCRF9GSU9fSU9QUwlSQkRfRklPX0JXCVJCRF9GSU9f
-TGF0ZW5jeQlvc2RfcmVhZF9pb3BzCW9zZF93cml0ZV9pb3BzCW9zZF9yZWFkX2J3CQ0KUHJldgkJ
-MzA1CTRrCXJhbmR3cml0ZQlxZDgJdmRiCTQJMgk0MAkxNTI0CTYxNzAuMQkgICAgICAgICAgICAy
-MDkuMzg1MQkgICAgICAgICAgICA3Ljg2MjE5NgkgICAgICAgICAgNzY3Ny42NDgJMC40NDY1NjYJ
-NTQuOTE2NDM1DQpPbWFwMnNzZAkzMjAJNGsJcmFuZHdyaXRlCXFkOAl2ZGIJNAkyCTQwCTI2OTQJ
-MTA4NjQuMjMJMTE5LjQ1ODcJMzIyLjQzMzQJMTA5MzAJMS40MDkyNjYJNzEuMzM4MzMNCg0KCQkJ
-CQkJCQkJCQkJCQkJWGlhb3hpDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogTWFy
-ayBOZWxzb24gW21haWx0bzptbmVsc29uQHJlZGhhdC5jb21dIA0KU2VudDogV2VkbmVzZGF5LCBB
-cHJpbCAyMiwgMjAxNSA3OjU5IEFNDQpUbzogU2FnZSBXZWlsOyBDaGVuLCBYaWFveGkNCkNjOiBI
-YW9tYWkgV2FuZzsgU29tbmF0aCBSb3k7IER1YW4sIEppYW5nYW5nOyBaaGFuZywgSmlhbjsgY2Vw
-aC1kZXZlbA0KU3ViamVjdDogUmU6IOWbnuWkjTogUmU6IOWbnuWkjTogUmU6IOWbnuWkjTogUmU6
-IE5ld1N0b3JlIHBlcmZvcm1hbmNlIGFuYWx5c2lzDQoNCk9uIDA0LzIxLzIwMTUgMDY6NTcgUE0s
-IFNhZ2UgV2VpbCB3cm90ZToNCj4gT24gVHVlLCAyMSBBcHIgMjAxNSwgQ2hlbiwgWGlhb3hpIHdy
-b3RlOg0KPj4gLS0tLSBTYWdlIFdlaWw/PyAtLS0tDQo+Pg0KPj4+IE9uIFR1ZSwgMjEgQXByIDIw
-MTUsIENoZW4sIFhpYW94aSB3cm90ZToNCj4+Pj4gSGFvbWFpIGlzIHJpZ2h0IGluIHRoZW9yeSwg
-YnV0IEkgYW0gbm90IHN1cmUgd2hldGhlciBhbGwNCj4+Pj4gdXNlcihtb24sZmlsZXN0b3JlLGt2
-c3RvcmUpIG9mIHN1Ym1pdF90cmFuc2FjdGlvbiBBUEkgY2xlYXJseSANCj4+Pj4gaG9sZGluZyB0
-aGUgZXhwZWN0YXRpb24gdGhhdCB0aGVpciBkYXRhIGlzIG5vdCBwZXJzaXN0ZW50IGFuZCBtYXkg
-DQo+Pj4+IGxvc3QgaW4gZmFpbHVyZS4gIFNvIGluIHJvY2tzZGIgbm93IHRoZSBzeW5jIGlzIGRl
-ZmF1bHQgdG8gdHJ1ZSANCj4+Pj4gZXZlbiBpbiBzdWJtaXRfdHJhbnNhY3Rpb24oYW5kIHRoaXMg
-b3B0aW9uIG1ha2UgdGhlIHR3byBhcGkgZXhhY3RseSB0aGUgc2FtZSkuDQo+Pj4+IE1heWJlIHdl
-IG5lZWQgdG8gcmVuYW1lIHRoZSBhcGkgdG8NCj4+Pj4gc3VibWl0X3RyYW5zYWN0aW9uX3BlcnNp
-c3RlbnQvbm9ucGVyc2lzdGVudCB0byBiZXR0ZXIgZGlzY3JpYmUgdGhlIA0KPj4+PiBiZWhhdmlv
-cj8NCj4+Pg0KPj4+IExldCdzIGF1ZGl0IHRoZW0sIHRoZW4uLiBJIHRoaW5rIHRoZXkgYXJlIHJp
-Z2h0LCBidXQgd2UgbWF5IGFzIHdlbGwgDQo+Pj4gY29uZmlybSENCj4+Pg0KPj4+IEFnYWluLCBG
-aWxlU3RvcmUgaXMgdGhlIG9kZCBvbmUgb3V0IGhlcmUgYmVjYXVzZSBpdCBpcyByZWx5aW5nIG9u
-IA0KPj4+IHRoZQ0KPj4+IHN5bmNmcygyKSBhdCBjb21taXQgdGltZSBmb3IgZXZlcnl0aGluZy4N
-Cj4+Pg0KPj4NCj4+IFllcywgc28gbWF5YmUgd2UgZG9udCBuZWVkIHRvIGV4cG9zZSB0aGUgb3B0
-aW9uIHRvIHVzZXIsIHdlIGNhbiANCj4+IGRlY2lkZSB3aGV0aGVyIHRvLnN5bmMgaW4gY29kZSBs
-b2dpYy4NCj4NCj4gWWVhaCwgSSB0aGluayBpdCdsbCByZWR1Y2UgY29uZnVzaW9uIHRvby4gIEkg
-c3VnZ2VzdCB3ZSBkbyBhIHB1bGwgDQo+IHJlcXVlc3QgYWdhaW5zdCBtYXN0ZXIgdGhhdCBkb2Vz
-IHRoaXMuLi4gbGV0IG1lIGtub3cgaWYgeW91IHdhbnQgdG8gZG8gDQo+IGl0LCBvdGhlcndpc2Ug
-SSB3aWxsIQ0KPg0KPj4gSSByZW1lbWJlciBzb21lIGZvbGtzIGluIG91dCB0ZWFtIHRyaWVkIHRv
-IG1vdmUgS1ZEQiB0byBhIHBhcnRpdGlvbiANCj4+IG9uIFNTRCB3aGlsZSBsZWF2ZSBvdGhlciBm
-aWxlc3RvcmUgZGF0YSBvbiBIREQsIGluIG15IG1lbW9yeSBpdCANCj4+IGJlbmlmaXQgcGVyZm9y
-bWFuY2UuICBUaGlzIGRlcGxveW1lbnQgaXMgcHJvYmxlbWF0aWMgd2l0aCANCj4+IGt2X3N5bmM9
-ZmFsc2UuICBnV2lsbCBjaGVjayB0aGUgZGF0YSBmaXJzdCBhbmQgdGhlbiB3ZSBjYW4gZXZhbHVh
-dGUgDQo+PiB3aGV0aGUgd2Ugd2FudCB0byBzdXBwb3J0IHRoaXMga2luZCBvZiBkZXBsb3ltZW50
-Lg0KPg0KPiBXZSBjb3VsZCBkZXRlY3QgdGhpcyBieSBkb2luZyBhIHN0YXQoMikgb24gdGhlIGN1
-cnJlbnQvb21hcC8gdnMgDQo+IGN1cnJlbnQvIGRpcnMgYW5kIGNoZWNraW5nIGlmIGl0J3MgYSBk
-aWZmZXJlbnQgZmlsZSBzeXN0ZW0uICBJZiBzbywgd2UgDQo+IGNhbiBkbyB0aGUNCj4gc3luY2Zz
-KDIpIG9uIGJvdGggZGlycy4gIFRoZSBidHJmcyBjYXNlIHdvdWxkIHByb2JhYmx5IG5vdCBiZSAN
-Cj4gcHJhY3RpY2FsLCBidXQgd2UgY2FuIGVycm9yIG91dCBpbiB0aGF0IGNhc2UuICBCdXQgeWVh
-aCBub3Qgc3VyZSBob3cgDQo+IGltcG9ydGFudCBpdCB3b3VsZCBiZSB0byBzdXBwb3J0IHRoaXMg
-c2luY2UgZmlsZXN0b3JlIGRvZXNuJ3QgdXNlIA0KPiBsZXZlbGRiIHRoYXQgaGVhdmlseS4uLiBh
-bmQgSSdkIHByZWZlciB0byBsaW1pdCBvdXIgaW52ZXN0bWVudCBvZiB0aW1lIA0KPiB0aGVyZSBp
-ZiB3ZSBjYW4gaW5zdGVhZCBtYWtlIG5ld3N0b3JlIChvciBzb21ldGhpbmcgZWxzZSkgYmV0dGVy
-Lg0KDQpGV0lXLCB0aGUgbGFzdCB0aW1lIEkgdHJpZWQgcHV0dGluZyBsZXZlbGRiIG9uIFNTRCBk
-aWRuJ3QgcmVhbGx5IGhlbHAgYXQgYWxsLiAgSXQncyBiZWVuIGEgd2hpbGUgc28gbWF5YmUgdGhh
-dCdzIGNoYW5nZWQsIGJ1dCBuZXdzdG9yZSBkZWZpbml0ZWx5IHNlZW1zIGxpa2UgdGhlIHdheSBm
-b3J3YXJkIHRvIG1lLg0KDQpNYXJrDQo=
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--Rb19LE3uM24B7BnNTeJrc8t3ve5V6U5fH
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+
+
+On 22/04/2015 06:25, David Zafman wrote:
+>=20
+> All the changes for testing are in ceph-qa-suite firefly branch.
+>=20
+> After updating from the git repo, the firefly branch doesn't include th=
+ese 2 commits.   Was there an issue with this change?
+
+I'm not monitoring the nightlies close enough to be sure it did not show.=
+ I'll ask Yuri if he remembers anything.
+
+Cheers
+
+>=20
+> David
+>=20
+> commit 71624947a338dabb6ed71d94e2e003bf984074cc
+> Merge: 3da69ba 35ee8e0
+> Author: Loic Dachary <loic@dachary.org>
+> Date:   Fri Apr 3 10:47:42 2015 +0200
+>=20
+>     Merge pull request #394 from dzafman/wip-11139-firefly
+>=20
+>     ceph_manager: Check for exit status 11 from ceph-objectstore-tool i=
+mport
+>=20
+>     Reviewed-by: Loic Dachary <ldachary@redhat.com>
+>=20
+> commit 35ee8e0d4e1e8cac61ff9f5d8d644f93de4cdf60
+> Author: David Zafman <dzafman@redhat.com>
+> Date:   Fri Mar 20 19:56:55 2015 -0700
+>=20
+>     ceph_manager: Check for exit status 11 from ceph-objectstore-tool i=
+mport
+>=20
+>     Fixes: #11139
+>=20
+>     Signed-off-by: David Zafman <dzafman@redhat.com>
+>     (cherry picked from commit 6c5300552d00232d6ecb2c1aa641d515c9d8cd34=
+)
+>=20
+> David
+>=20
+> On 4/21/15 7:39 PM, Samuel Just wrote:
+>>
+>> Ok, so ceoh_objectstrore_tool is being tested in firefly as part of th=
+e current firefly ceph-qa-suite branch?
+>> -Sam
+>>
+>> Sent from Nine <http://www.9folders.com/>
+>>
+>> *From:* David Zafman
+>> *Sent:* Apr 21, 2015 10:16 PM
+>> *To:* Sage Weil;Loic Dachary
+>> *Cc:* Ceph Development;Shu, Xinxin;sjust@redhat.com
+>> *Subject:* Re: should we prepare to release firefly v0.80.10 ?
+>>
+>>
+>>
+>> In early march I ran rados:thrash on the firefly backport of the
+>> ceph-objectstore-tool changes (wip-cot-firefly).  We considered it
+>> passed, even though an obscure segfault was seen:
+>>
+>> bug #11141: Segmentation Violation: ceph-objectstore-tool doing --op
+>> list-pgs
+>>
+>> David
+>>
+>>
+>> On 4/21/15 8:52 AM, Sage Weil wrote:
+>> > The bulk of it is ceph-objectstore-tool, which is important to get i=
+nto a
+>> > release, IMO.  David, are these being tested in the firefly thrashin=
+g
+>> > tests yet?
+>> >
+>> > The only other one I'm worried about is
+>> >
+>> > 6fd3dfa osd: do not ignore deleted pgs on startup
+>> >
+>> > Sam, I assume the recent hammer upgrade issue is would bite firefly =
+folks
+>> > who upgrade too?
+>> >
+>> > sage
+>> >
+>> >
+>> > On Tue, 21 Apr 2015, Loic Dachary wrote:
+>> >
+>> >> Hi Sage,
+>> >>
+>> >> The firefly branch has a number of fixes ( http://tracker.ceph.com/=
+issues/11090#Release-information ) and has been used for upgrade tests in=
+ the past few weeks. A few other issues have been backported since and ar=
+e being tested in the integration branch ( http://tracker.ceph.com/issues=
+/11090#teuthology-run-commitb91bbb434e6363a99a632cf3841f70f1f2549f79-inte=
+gration-branch-april-2015 ).
+>> >>
+>> >> Do you think these changes deserve a firefly v0.80.10 release ? Sho=
+uld we ask each lead for their approval ? Or is it better to keep backpor=
+ting what needs to be and wait a few weeks ?
+>> >>
+>> >> Cheers
+>> >>
+>> >> --
+>> >> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>> >>
+>>
+>> --=20
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
+in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--Rb19LE3uM24B7BnNTeJrc8t3ve5V6U5fH
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlU3WyIACgkQ8dLMyEl6F21aIwCfcWuJ2GL2gTyBqqae4gltejG9
+KoUAoKeEA3sRMOeHvuN/hLnqvK2kESNU
+=zJ4/
+-----END PGP SIGNATURE-----
+
+--Rb19LE3uM24B7BnNTeJrc8t3ve5V6U5fH--
