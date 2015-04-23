@@ -1,37 +1,39 @@
-From: Gregory Farnum <greg@gregs42.com>
-Subject: Re: ceph tell osd bench
-Date: Thu, 23 Apr 2015 10:36:35 -0700
-Message-ID: <CAC6JEv8x-6hVBCiqSDH-oHPeMum3fe7d+V_fb8MoGmLdD4FQ+A@mail.gmail.com>
+From: "Deneau, Tom" <tom.deneau@amd.com>
+Subject: RE: ceph tell osd bench
+Date: Thu, 23 Apr 2015 18:35:06 +0000
+Message-ID: <BC97738F8E7C8742BABED7F06FB9DF916642E209@SATLEXDAG01.amd.com>
 References: <BC97738F8E7C8742BABED7F06FB9DF916642BFFE@SATLEXDAG01.amd.com>
+ <CAC6JEv8x-6hVBCiqSDH-oHPeMum3fe7d+V_fb8MoGmLdD4FQ+A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f181.google.com ([209.85.223.181]:35115 "EHLO
-	mail-ie0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S966414AbbDWRgg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Apr 2015 13:36:36 -0400
-Received: by iejt8 with SMTP id t8so66258746iej.2
-        for <ceph-devel@vger.kernel.org>; Thu, 23 Apr 2015 10:36:35 -0700 (PDT)
-Received: from mail-ig0-f176.google.com (mail-ig0-f176.google.com. [209.85.213.176])
-        by mx.google.com with ESMTPSA id cy11sm12598933igc.14.2015.04.23.10.36.35
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 23 Apr 2015 10:36:35 -0700 (PDT)
-Received: by iget9 with SMTP id t9so14371491ige.1
-        for <ceph-devel@vger.kernel.org>; Thu, 23 Apr 2015 10:36:35 -0700 (PDT)
-In-Reply-To: <BC97738F8E7C8742BABED7F06FB9DF916642BFFE@SATLEXDAG01.amd.com>
+Received: from mail-bn1bon0147.outbound.protection.outlook.com ([157.56.111.147]:17591
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1030514AbbDWSfN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 23 Apr 2015 14:35:13 -0400
+In-Reply-To: <CAC6JEv8x-6hVBCiqSDH-oHPeMum3fe7d+V_fb8MoGmLdD4FQ+A@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Deneau, Tom" <tom.deneau@amd.com>
+To: Gregory Farnum <greg@gregs42.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, Apr 23, 2015 at 6:58 AM, Deneau, Tom <tom.deneau@amd.com> wrote:
-> While running ceph tell osd bench and playing around with the total_bytes and block_size parameters,
-> I have noticed that if the total_bytes written is less than about 0.5G, the bytes/sec is much higher.
-> Why is that?
-
-It's probably only writing the data into the journal at that size. I'm
-a bit surprised because I thought the osd bench took care to only
-provide stable numbers, but maybe it's just using well-chosen defaults
-and at half a gig you're running well below them.
--Greg
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBHcmVnb3J5IEZhcm51bSBbbWFp
+bHRvOmdyZWdAZ3JlZ3M0Mi5jb21dDQo+IFNlbnQ6IFRodXJzZGF5LCBBcHJpbCAyMywgMjAxNSAx
+MjozNyBQTQ0KPiBUbzogRGVuZWF1LCBUb20NCj4gQ2M6IGNlcGgtZGV2ZWwNCj4gU3ViamVjdDog
+UmU6IGNlcGggdGVsbCBvc2QgYmVuY2gNCj4gDQo+IE9uIFRodSwgQXByIDIzLCAyMDE1IGF0IDY6
+NTggQU0sIERlbmVhdSwgVG9tIDx0b20uZGVuZWF1QGFtZC5jb20+IHdyb3RlOg0KPiA+IFdoaWxl
+IHJ1bm5pbmcgY2VwaCB0ZWxsIG9zZCBiZW5jaCBhbmQgcGxheWluZyBhcm91bmQgd2l0aCB0aGUg
+dG90YWxfYnl0ZXMNCj4gYW5kIGJsb2NrX3NpemUgcGFyYW1ldGVycywNCj4gPiBJIGhhdmUgbm90
+aWNlZCB0aGF0IGlmIHRoZSB0b3RhbF9ieXRlcyB3cml0dGVuIGlzIGxlc3MgdGhhbiBhYm91dCAw
+LjVHLCB0aGUNCj4gYnl0ZXMvc2VjIGlzIG11Y2ggaGlnaGVyLg0KPiA+IFdoeSBpcyB0aGF0Pw0K
+PiANCj4gSXQncyBwcm9iYWJseSBvbmx5IHdyaXRpbmcgdGhlIGRhdGEgaW50byB0aGUgam91cm5h
+bCBhdCB0aGF0IHNpemUuIEknbQ0KPiBhIGJpdCBzdXJwcmlzZWQgYmVjYXVzZSBJIHRob3VnaHQg
+dGhlIG9zZCBiZW5jaCB0b29rIGNhcmUgdG8gb25seQ0KPiBwcm92aWRlIHN0YWJsZSBudW1iZXJz
+LCBidXQgbWF5YmUgaXQncyBqdXN0IHVzaW5nIHdlbGwtY2hvc2VuIGRlZmF1bHRzDQo+IGFuZCBh
+dCBoYWxmIGEgZ2lnIHlvdSdyZSBydW5uaW5nIHdlbGwgYmVsb3cgdGhlbS4NCj4gLUdyZWcNCg0K
+c28gaXMgYW4gb3NkIHdyaXRlIChhcyB1c2VkIGJ5IHRlbGwgb3NkIGJlbmNoKSBjb25zaWRlcmVk
+IGNvbXBsZXRlIHdoZW4NCml0IGlzIHdyaXR0ZW4gdG8gdGhlIGpvdXJuYWw/DQoNCi0tIFRvbQ0K
+DQo=
