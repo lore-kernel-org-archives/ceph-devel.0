@@ -1,165 +1,43 @@
-From: Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: strange benchmark problem : restarting osd daemon
- improve performance from 100k iops to 300k iops
-Date: Fri, 24 Apr 2015 18:41:15 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD80F83@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <1232683114.515741917.1429692005478.JavaMail.zimbra@oxygem.tv>
-	<336199846.535234014.1429720226874.JavaMail.zimbra@oxygem.tv>
-	<1806383776.554938002.1429776034371.JavaMail.zimbra@oxygem.tv>
-	<1112295705.562655711.1429786696959.JavaMail.zimbra@oxygem.tv>
-	<5538D86C.1090506@redhat.com>
-	<1903663405.564474385.1429790186021.JavaMail.zimbra@oxygem.tv>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F2CD806BE@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CAF-rypyB=CjjJQs_+3Q=ELCVwpg9nyWKdBu8gVyuDQa49=GHtw@mail.gmail.com>
-	<1270073308.621430804.1429893511370.JavaMail.zimbra@oxygem.tv>
-	<BEEF4E3E-92BD-4E41-8E17-5BF9476A3674@profihost.ag>
+From: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+Subject: Re: running daemons as user/group ceph
+Date: Fri, 24 Apr 2015 22:16:17 +0200
+Message-ID: <553AA491.6040409@bisect.de>
+References: <alpine.DEB.2.00.1504241037370.5458@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1131244973=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Stefan Priebe - Profihost AG <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>, Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
-Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Milosz Tanski <milosz-B5zB6C1i6pkAvxtiuMwx3w@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
-
---===============1131244973==
-Content-Language: en-US
-Content-Type: multipart/alternative;
-	boundary="_000_755F6B91B3BE364F9BCA11EA3F9E0C6F2CD80F83SACMBXIP01sdcor_"
-
---_000_755F6B91B3BE364F9BCA11EA3F9E0C6F2CD80F83SACMBXIP01sdcor_
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-
-PDwgRG9lcyBpdCBhbHNvIHdvcmsgZm9yIGZpcmVmbHk/DQpObywgaXQgaXMgaW50ZWdyYXRlZCBw
-b3N0IEdpYW50Lg0KDQpUaGFua3MgJiBSZWdhcmRzDQpTb21uYXRoDQoNCkZyb206IFN0ZWZhbiBQ
-cmllYmUgLSBQcm9maWhvc3QgQUcgW21haWx0bzpzLnByaWViZUBwcm9maWhvc3QuYWddDQpTZW50
-OiBGcmlkYXksIEFwcmlsIDI0LCAyMDE1IDEwOjM3IEFNDQpUbzogQWxleGFuZHJlIERFUlVNSUVS
-DQpDYzogY2VwaC11c2VyczsgY2VwaC1kZXZlbDsgU29tbmF0aCBSb3k7IE1hcmsgTmVsc29uOyBN
-aWxvc3ogVGFuc2tpDQpTdWJqZWN0OiBSZTogW2NlcGgtdXNlcnNdIHN0cmFuZ2UgYmVuY2htYXJr
-IHByb2JsZW0gOiByZXN0YXJ0aW5nIG9zZCBkYWVtb24gaW1wcm92ZSBwZXJmb3JtYW5jZSBmcm9t
-IDEwMGsgaW9wcyB0byAzMDBrIGlvcHMNCg0KSXMgamVtYWxsb2MgcmVjb21tYW5kZWQgaW4gZ2Vu
-ZXJhbD8gRG9lcyBpdCBhbHNvIHdvcmsgZm9yIGZpcmVmbHk/DQoNClN0ZWZhbg0KDQpFeGN1c2Ug
-bXkgdHlwbyBzZW50IGZyb20gbXkgbW9iaWxlIHBob25lLg0KDQoNCg0KX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX18NCg0KUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWlu
-ZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0
-aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhl
-IHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlv
-dSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdl
-IGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlv
-biwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYg
-eW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90
-aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGlt
-bWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2Ug
-aW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5
-IHN0b3JlZCBjb3BpZXMpLg0KDQo=
-
---_000_755F6B91B3BE364F9BCA11EA3F9E0C6F2CD80F83SACMBXIP01sdcor_
-Content-Type: text/html; charset="utf-8"
-Content-Transfer-Encoding: base64
-
-PGh0bWwgeG1sbnM6dj0idXJuOnNjaGVtYXMtbWljcm9zb2Z0LWNvbTp2bWwiIHhtbG5zOm89InVy
-bjpzY2hlbWFzLW1pY3Jvc29mdC1jb206b2ZmaWNlOm9mZmljZSIgeG1sbnM6dz0idXJuOnNjaGVt
-YXMtbWljcm9zb2Z0LWNvbTpvZmZpY2U6d29yZCIgeG1sbnM6bT0iaHR0cDovL3NjaGVtYXMubWlj
-cm9zb2Z0LmNvbS9vZmZpY2UvMjAwNC8xMi9vbW1sIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcv
-VFIvUkVDLWh0bWw0MCI+DQo8aGVhZD4NCjxtZXRhIGh0dHAtZXF1aXY9IkNvbnRlbnQtVHlwZSIg
-Y29udGVudD0idGV4dC9odG1sOyBjaGFyc2V0PXV0Zi04Ij4NCjxtZXRhIG5hbWU9IkdlbmVyYXRv
-ciIgY29udGVudD0iTWljcm9zb2Z0IFdvcmQgMTQgKGZpbHRlcmVkIG1lZGl1bSkiPg0KPHN0eWxl
-PjwhLS0NCi8qIEZvbnQgRGVmaW5pdGlvbnMgKi8NCkBmb250LWZhY2UNCgl7Zm9udC1mYW1pbHk6
-Q2FsaWJyaTsNCglwYW5vc2UtMToyIDE1IDUgMiAyIDIgNCAzIDIgNDt9DQpAZm9udC1mYWNlDQoJ
-e2ZvbnQtZmFtaWx5OlRhaG9tYTsNCglwYW5vc2UtMToyIDExIDYgNCAzIDUgNCA0IDIgNDt9DQov
-KiBTdHlsZSBEZWZpbml0aW9ucyAqLw0KcC5Nc29Ob3JtYWwsIGxpLk1zb05vcm1hbCwgZGl2Lk1z
-b05vcm1hbA0KCXttYXJnaW46MGluOw0KCW1hcmdpbi1ib3R0b206LjAwMDFwdDsNCglmb250LXNp
-emU6MTIuMHB0Ow0KCWZvbnQtZmFtaWx5OiJUaW1lcyBOZXcgUm9tYW4iLCJzZXJpZiI7fQ0KYTps
-aW5rLCBzcGFuLk1zb0h5cGVybGluaw0KCXttc28tc3R5bGUtcHJpb3JpdHk6OTk7DQoJY29sb3I6
-Ymx1ZTsNCgl0ZXh0LWRlY29yYXRpb246dW5kZXJsaW5lO30NCmE6dmlzaXRlZCwgc3Bhbi5Nc29I
-eXBlcmxpbmtGb2xsb3dlZA0KCXttc28tc3R5bGUtcHJpb3JpdHk6OTk7DQoJY29sb3I6cHVycGxl
-Ow0KCXRleHQtZGVjb3JhdGlvbjp1bmRlcmxpbmU7fQ0KcC5Nc29BY2V0YXRlLCBsaS5Nc29BY2V0
-YXRlLCBkaXYuTXNvQWNldGF0ZQ0KCXttc28tc3R5bGUtcHJpb3JpdHk6OTk7DQoJbXNvLXN0eWxl
-LWxpbms6IkJhbGxvb24gVGV4dCBDaGFyIjsNCgltYXJnaW46MGluOw0KCW1hcmdpbi1ib3R0b206
-LjAwMDFwdDsNCglmb250LXNpemU6OC4wcHQ7DQoJZm9udC1mYW1pbHk6IlRhaG9tYSIsInNhbnMt
-c2VyaWYiO30NCnNwYW4uQmFsbG9vblRleHRDaGFyDQoJe21zby1zdHlsZS1uYW1lOiJCYWxsb29u
-IFRleHQgQ2hhciI7DQoJbXNvLXN0eWxlLXByaW9yaXR5Ojk5Ow0KCW1zby1zdHlsZS1saW5rOiJC
-YWxsb29uIFRleHQiOw0KCWZvbnQtZmFtaWx5OiJUYWhvbWEiLCJzYW5zLXNlcmlmIjt9DQpzcGFu
-LkVtYWlsU3R5bGUxOQ0KCXttc28tc3R5bGUtdHlwZTpwZXJzb25hbDsNCglmb250LWZhbWlseToi
-Q2FsaWJyaSIsInNhbnMtc2VyaWYiOw0KCWNvbG9yOiMxRjQ5N0Q7fQ0Kc3Bhbi5FbWFpbFN0eWxl
-MjANCgl7bXNvLXN0eWxlLXR5cGU6cGVyc29uYWwtcmVwbHk7DQoJZm9udC1mYW1pbHk6IkNhbGli
-cmkiLCJzYW5zLXNlcmlmIjsNCgljb2xvcjojMUY0OTdEO30NCi5Nc29DaHBEZWZhdWx0DQoJe21z
-by1zdHlsZS10eXBlOmV4cG9ydC1vbmx5Ow0KCWZvbnQtc2l6ZToxMC4wcHQ7fQ0KQHBhZ2UgV29y
-ZFNlY3Rpb24xDQoJe3NpemU6OC41aW4gMTEuMGluOw0KCW1hcmdpbjoxLjBpbiAxLjBpbiAxLjBp
-biAxLjBpbjt9DQpkaXYuV29yZFNlY3Rpb24xDQoJe3BhZ2U6V29yZFNlY3Rpb24xO30NCi0tPjwv
-c3R5bGU+PCEtLVtpZiBndGUgbXNvIDldPjx4bWw+DQo8bzpzaGFwZWRlZmF1bHRzIHY6ZXh0PSJl
-ZGl0IiBzcGlkbWF4PSIxMDI2IiAvPg0KPC94bWw+PCFbZW5kaWZdLS0+PCEtLVtpZiBndGUgbXNv
-IDldPjx4bWw+DQo8bzpzaGFwZWxheW91dCB2OmV4dD0iZWRpdCI+DQo8bzppZG1hcCB2OmV4dD0i
-ZWRpdCIgZGF0YT0iMSIgLz4NCjwvbzpzaGFwZWxheW91dD48L3htbD48IVtlbmRpZl0tLT4NCjwv
-aGVhZD4NCjxib2R5IGxhbmc9IkVOLVVTIiBsaW5rPSJibHVlIiB2bGluaz0icHVycGxlIj4NCjxk
-aXYgY2xhc3M9IldvcmRTZWN0aW9uMSI+DQo8cCBjbGFzcz0iTXNvTm9ybWFsIj48c3BhbiBzdHls
-ZT0iZm9udC1zaXplOjExLjBwdDtmb250LWZhbWlseTomcXVvdDtDYWxpYnJpJnF1b3Q7LCZxdW90
-O3NhbnMtc2VyaWYmcXVvdDs7Y29sb3I6IzFGNDk3RCI+Jmx0OyZsdDs8L3NwYW4+IERvZXMgaXQg
-YWxzbyB3b3JrIGZvciBmaXJlZmx5PzxvOnA+PC9vOnA+PC9wPg0KPHAgY2xhc3M9Ik1zb05vcm1h
-bCI+Tm8sIGl0IGlzIGludGVncmF0ZWQgcG9zdCBHaWFudC48bzpwPjwvbzpwPjwvcD4NCjxwIGNs
-YXNzPSJNc29Ob3JtYWwiPjxvOnA+Jm5ic3A7PC9vOnA+PC9wPg0KPHAgY2xhc3M9Ik1zb05vcm1h
-bCI+VGhhbmtzICZhbXA7IFJlZ2FyZHM8bzpwPjwvbzpwPjwvcD4NCjxwIGNsYXNzPSJNc29Ob3Jt
-YWwiPlNvbW5hdGg8c3BhbiBzdHlsZT0iZm9udC1zaXplOjExLjBwdDtmb250LWZhbWlseTomcXVv
-dDtDYWxpYnJpJnF1b3Q7LCZxdW90O3NhbnMtc2VyaWYmcXVvdDs7Y29sb3I6IzFGNDk3RCI+PG86
-cD48L286cD48L3NwYW4+PC9wPg0KPHAgY2xhc3M9Ik1zb05vcm1hbCI+PHNwYW4gc3R5bGU9ImZv
-bnQtc2l6ZToxMS4wcHQ7Zm9udC1mYW1pbHk6JnF1b3Q7Q2FsaWJyaSZxdW90OywmcXVvdDtzYW5z
-LXNlcmlmJnF1b3Q7O2NvbG9yOiMxRjQ5N0QiPjxvOnA+Jm5ic3A7PC9vOnA+PC9zcGFuPjwvcD4N
-CjxkaXY+DQo8ZGl2IHN0eWxlPSJib3JkZXI6bm9uZTtib3JkZXItdG9wOnNvbGlkICNCNUM0REYg
-MS4wcHQ7cGFkZGluZzozLjBwdCAwaW4gMGluIDBpbiI+DQo8cCBjbGFzcz0iTXNvTm9ybWFsIj48
-Yj48c3BhbiBzdHlsZT0iZm9udC1zaXplOjEwLjBwdDtmb250LWZhbWlseTomcXVvdDtUYWhvbWEm
-cXVvdDssJnF1b3Q7c2Fucy1zZXJpZiZxdW90OyI+RnJvbTo8L3NwYW4+PC9iPjxzcGFuIHN0eWxl
-PSJmb250LXNpemU6MTAuMHB0O2ZvbnQtZmFtaWx5OiZxdW90O1RhaG9tYSZxdW90OywmcXVvdDtz
-YW5zLXNlcmlmJnF1b3Q7Ij4gU3RlZmFuIFByaWViZSAtIFByb2ZpaG9zdCBBRyBbPGEgaHJlZj0i
-bWFpbHRvOnMucHJpZWJlQHByb2ZpaG9zdC5hZyI+bWFpbHRvOnMucHJpZWJlQHByb2ZpaG9zdC5h
-ZzwvYT5dDQo8YnI+DQo8Yj5TZW50OjwvYj4gRnJpZGF5LCBBcHJpbCAyNCwgMjAxNSAxMDozNyBB
-TTxicj4NCjxiPlRvOjwvYj4gQWxleGFuZHJlIERFUlVNSUVSPGJyPg0KPGI+Q2M6PC9iPiBjZXBo
-LXVzZXJzOyBjZXBoLWRldmVsOyBTb21uYXRoIFJveTsgTWFyayBOZWxzb247IE1pbG9zeiBUYW5z
-a2k8YnI+DQo8Yj5TdWJqZWN0OjwvYj4gUmU6IFtjZXBoLXVzZXJzXSBzdHJhbmdlIGJlbmNobWFy
-ayBwcm9ibGVtIDogcmVzdGFydGluZyBvc2QgZGFlbW9uIGltcHJvdmUgcGVyZm9ybWFuY2UgZnJv
-bSAxMDBrIGlvcHMgdG8gMzAwayBpb3BzPG86cD48L286cD48L3NwYW4+PC9wPg0KPC9kaXY+DQo8
-L2Rpdj4NCjxwIGNsYXNzPSJNc29Ob3JtYWwiPjxvOnA+Jm5ic3A7PC9vOnA+PC9wPg0KPGRpdj4N
-CjxwIGNsYXNzPSJNc29Ob3JtYWwiPklzIGplbWFsbG9jIHJlY29tbWFuZGVkIGluIGdlbmVyYWw/
-IERvZXMgaXQgYWxzbyB3b3JrIGZvciBmaXJlZmx5Pzxicj4NCjxicj4NClN0ZWZhbjxvOnA+PC9v
-OnA+PC9wPg0KPGRpdj4NCjxwIGNsYXNzPSJNc29Ob3JtYWwiPjxvOnA+Jm5ic3A7PC9vOnA+PC9w
-Pg0KPC9kaXY+DQo8ZGl2Pg0KPHAgY2xhc3M9Ik1zb05vcm1hbCI+RXhjdXNlIG15IHR5cG8gczxz
-cGFuIHN0eWxlPSJmb250LXNpemU6MTMuMHB0Ij5lbnQgZnJvbSBteSBtb2JpbGUgcGhvbmUuPC9z
-cGFuPjxvOnA+PC9vOnA+PC9wPg0KPC9kaXY+DQo8L2Rpdj4NCjxkaXY+DQo8cCBjbGFzcz0iTXNv
-Tm9ybWFsIiBzdHlsZT0ibWFyZ2luLWJvdHRvbToxMi4wcHQiPjxicj4NCjxicj4NCjxvOnA+PC9v
-OnA+PC9wPg0KPC9kaXY+DQo8L2Rpdj4NCjxicj4NCjxocj4NCjxmb250IGZhY2U9IkFyaWFsIiBj
-b2xvcj0iR3JheSIgc2l6ZT0iMiI+PGJyPg0KUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBj
-b250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5
-IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4g
-SWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGll
-bnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcw0K
-IG1lc3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywgZGlzc2VtaW5hdGlvbiwgZGlz
-dHJpYnV0aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJp
-dGVkLiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBs
-ZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3IgZS1tYWlsIChhcyBzaG93biBh
-Ym92ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kNCiBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhp
-cyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVj
-dHJvbmljYWxseSBzdG9yZWQgY29waWVzKS48YnI+DQo8YnI+DQo8L2ZvbnQ+DQo8L2JvZHk+DQo8
-L2h0bWw+DQo=
-
---_000_755F6B91B3BE364F9BCA11EA3F9E0C6F2CD80F83SACMBXIP01sdcor_--
-
---===============1131244973==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:42677 "EHLO
+	wp188.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756096AbbDXUgH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 24 Apr 2015 16:36:07 -0400
+In-Reply-To: <alpine.DEB.2.00.1504241037370.5458@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, kdreyer@redhat.com
+Cc: ceph-devel@vger.kernel.org, ceph-maintainers@ceph.com
 
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+Am 24.04.2015 um 19:37 schrieb Sage Weil:
+[...]
+> -- systemd --
+> 
+> Most of the daemons can just get the User=ceph and Group=cpeh lines in the 
+> unit files.  The OSD is tricky, though, since we want the prestart script 
+> to run as root so that it can chown the disk contents if necessary.  We 
+> have two options, I think:
+> 
+> 1) run prestart and ceph-osd as root, and add a ceph daemon arg to drop 
+> privileges and setuid.
+> 
+> 2) add a sudo rule so that the ceph user can run the chown command from 
+> prestart.  (This seems more dangerous.)
+> 
+> Thoughts?
 
---===============1131244973==--
+Do we need to change the start scripts for SysV init? Or is this
+something we should ignore because the most distros will use systemd in
+the future.
+
+Danny
+
