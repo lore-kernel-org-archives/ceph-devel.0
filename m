@@ -1,99 +1,150 @@
-From: Alex Elder <elder@ieee.org>
-Subject: Re: [PATCH 0/3] rbd: header read/refresh improvements
-Date: Fri, 24 Apr 2015 10:03:56 -0500
-Message-ID: <553A5B5C.9070909@ieee.org>
-References: <cover.1429814290.git.dfuller@redhat.com> <553A411A.8060902@ieee.org> <CAOi1vP85mJS3_e1PS-2zNzT3BDVmwV75qquo_sRiUrK2Whw5kQ@mail.gmail.com> <9D2825F1-BA75-433E-9B92-63D405339F0E@redhat.com>
+From: Sage Weil <sage@newdream.net>
+Subject: RE: Ceph code tests / teuthology
+Date: Fri, 24 Apr 2015 09:02:01 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1504240900330.5458@cobra.newdream.net>
+References: <06681238D8946F44A60AA400760A1CBF01F237CC@SHSMSX104.ccr.corp.intel.com> <552B89FF.70809@dachary.org> <06681238D8946F44A60AA400760A1CBF01F42F47@SHSMSX104.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1128371804-1429891321=:5458"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f173.google.com ([209.85.192.173]:35451 "EHLO
-	mail-pd0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754070AbbDXPD7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Apr 2015 11:03:59 -0400
-Received: by pdbqd1 with SMTP id qd1so51347740pdb.2
-        for <ceph-devel@vger.kernel.org>; Fri, 24 Apr 2015 08:03:59 -0700 (PDT)
-In-Reply-To: <9D2825F1-BA75-433E-9B92-63D405339F0E@redhat.com>
+Received: from cobra.newdream.net ([66.33.216.30]:33549 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1030464AbbDXQCC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Apr 2015 12:02:02 -0400
+In-Reply-To: <06681238D8946F44A60AA400760A1CBF01F42F47@SHSMSX104.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Douglas Fuller <dfuller@redhat.com>, Ilya Dryomov <idryomov@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: "Zhou, Yuan" <yuan.zhou@intel.com>
+Cc: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>, Zack Cerza <zack@redhat.com>
 
-On 04/24/2015 09:40 AM, Douglas Fuller wrote:
->
->> On Apr 24, 2015, at 10:17 AM, Ilya Dryomov <idryomov@gmail.com>
->> wrote:
->>
->> On Fri, Apr 24, 2015 at 4:11 PM, Alex Elder <elder@ieee.org>
->> wrote:
->>> On 04/23/2015 02:06 PM, Douglas Fuller wrote:
->>>>
->>>> Support multiple class op calls in one ceph_msg and consolidate
->>>> rbd header read and refresh processes to use this feature to
->>>> reduce the number of ceph_msgs sent for that process. Refresh
->>>> features on header refresh and begin returning EIO if features
->>>> have changed since mapping.
->>>>
->>>> Douglas Fuller (3): ceph: support multiple class method calls
->>>> in one ceph_msg rbd: combine object method calls in header
->>>> refresh using fewer ceph_msgs rbd: re-read features during
->>>> header refresh and detect changes.
->>>>
->>>> drivers/block/rbd.c             | 518
->>>> +++++++++++++++++++++++++++++-----------
->>>> include/linux/ceph/osd_client.h |   3 +- net/ceph/messenger.c
->>>> |   4 + net/ceph/osd_client.c           |  92 ++++++- 4 files
->>>> changed, 470 insertions(+), 147 deletions(-)
->>>>
->>>
->>> In case Ilya or others don't get to it soon, I plan to review
->>> this series tomorrow.
->>
->> I was planning take a look while I'm the road during the weekend.
->>
->> Doug, from a quick look this revision still has a bunch of style
->> issues, most notably the alignment of function parameters and
->> braces around if / else.  See Documentation/CodingStyle in the
->> kernel tree for examples.
->
-> I needed to put out v2 in part because I squashed a couple fixup
-> commits in the wrong place, leaving some things behind in #2 that
-> were corrected in #3.
->
-> I changed the braces in that version, but the function parameter
-> indents are inconsistent throughout the code. I=E2=80=99ll try to com=
-e up
-> with a compromise.
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-When in doubt, lean toward the style used in the rest of
-the kernel.  I used a few conventions that are not consistent
-with that in a lot of places, and those can be gradually
-phased toward what's recommended for the kernel.  Some
-examples are:
-     sizeof x or sizeof (x)  -->  sizeof(x)
-     (cast) foo  --> (cast)foo
-     White space under comment blocks
-     static int\nfunction(...)   -> static int function(...)
+--557981400-1128371804-1429891321=:5458
+Content-Type: TEXT/PLAIN; charset=iso-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-					-Alex
+On Fri, 24 Apr 2015, Zhou, Yuan wrote:
+> Hi Loic/Zack,
+>=20
+> So I've got some progress here. I was able to run a single job with=20
+> teuthology xxx.yaml targets.yaml. From the code, teuthology-suite needs=
+=20
+> to query the lock-server for some machine info, like os_type, platform.=
+=20
+> Is there any documents for the lock-server?
 
->>
->> You might also want to run your patches through
->> scripts/checkpatch.pl, but take it with a grain of salt - it can be
->> a bit too extreme at times.  No need to post v3 with just style
->> fixes, wait for more feedback.
->
-> Thanks again for all feedback.
->
->>
->> Thanks,
->>
->> Ilya
->
+You can skip these checks with=20
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+ check-locks: false
+
+in the job yaml.
+
+sage
+
+
+>=20
+> Thanks, -yuan
+>=20
+> -----Original Message-----
+> From: Loic Dachary [mailto:loic@dachary.org]=20
+> Sent: Monday, April 13, 2015 5:19 PM
+> To: Zhou, Yuan
+> Cc: Ceph Development; Zack Cerza
+> Subject: Re: Ceph code tests / teuthology
+>=20
+> Hi,
+>=20
+> On 13/04/2015 04:39, Zhou, Yuan wrote:> Hi Loic,
+> >=20
+> > =20
+> >=20
+> > I'm trying to setup an internal Teuthology cluster here. I was able t=
+o setup a 3 node cluster now. however there's not much docs and I'm confu=
+sed about some questions here:
+> >=20
+> > =20
+> >=20
+> > 1)      how does Ceph upstream do tests? Currently I see there's a) J=
+ekins(make check on each PR)=20
+>=20
+> Yes.
+>=20
+> > b) Teuthology Integration tests(on important PR only).
+> >
+>=20
+> The teuthology tests are run either by cron jobs or by people. http://p=
+ulpito.ceph.com/. They are not run on pull request.
+>=20
+> > 2)      Teuthology automatically fetch the binary files from gitbuild=
+er.ceph.com currently. However the binary will not be built for each pull=
+ request?=20
+>=20
+> Right. Teuthology can be pointed to an alternate repository but there i=
+s a catch: it needs to have the same naming conventions as gitbuilder.cep=
+h.com. These naming convention are not documented (as far as I know) and =
+you would need to read the code to figure them out. When I tried to custo=
+mize the repository, I replaced the code locating the repository with som=
+ething that was configurable instead (reading the yaml file). But I did i=
+t in a hackish way and did not take the time to figure out how to contrib=
+ute that back properly.
+>=20
+> > 3)      Can Teuthology working on VMs? I got some info from your blog=
+, looks like you're running Teuthology on a Openstack/Docker.
+>=20
+> The easiest way is to prepare three VMs and make sure you can ssh to th=
+em without password. You then create a targets.yaml file with these three=
+ machines. And you can run a single job that will use them. It will save =
+you the trouble of setting up a full teuthology cluster (I think http://d=
+achary.org/?p=3D2204 is still mostly valid). The downside is that it only=
+ allows you to run a single job at a time and will not allow you to run t=
+euthology-suite to schedule a number of jobs and have them wait in the qu=
+eue.
+>=20
+> I'm not actually using the docker backend I hacked together, therefore =
+I don't recommend you try this route, unless you have a week or two to de=
+vote to it. =20
+>=20
+> > 4)      If I have a working Teuthology cluster now, how do I start a =
+full run? or only the workunits/* is good enough?
+>=20
+> For instance:
+>=20
+> ./virtualenv/bin/teuthology-suite --filter-out btrfs,ext4 --priority 10=
+00 --suite rados --suite-branch giant --machine-type plana,burnupi,mira -=
+-distro ubuntu --email abhishek.lekshmanan@gmail.com --owner abhishek.lek=
+shmanan@gmail.com --ceph giant-backports
+>=20
+> http://tracker.ceph.com/issues/11153 contains many examples of how teut=
+hology is run to test stable releases.
+>=20
+> The easiest way to create a single job probably is to run ./virtualenv/=
+bin/teuthology-suite : it will output calls to teuthology that you can pr=
+obalby copy / paste to run a single job. I've not tried that and went a m=
+ore difficult route instead (manually assembling yaml files to create a j=
+ob).=20
+>=20
+> Zack will probably have more hints and advices on how to run your own t=
+euthology suite.
+>=20
+> Cheers
+>=20
+> > =20
+> >=20
+> > Thanks for any hints!
+> >=20
+> > -yuan
+> >=20
+> > =20
+> >=20
+>=20
+> --=20
+> Lo=EFc Dachary, Artisan Logiciel Libre
+>=20
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+>=20
+--557981400-1128371804-1429891321=:5458--
