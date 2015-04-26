@@ -1,85 +1,137 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: running daemons as user/group ceph
-Date: Sat, 25 Apr 2015 10:26:30 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1504251020410.28845@cobra.newdream.net>
-References: <alpine.DEB.2.00.1504241037370.5458@cobra.newdream.net> <553AAFFB.4070808@redhat.com> <alpine.DEB.2.00.1504241411440.5458@cobra.newdream.net> <553AC41E.80100@redhat.com> <alpine.DEB.2.00.1504241630050.5458@cobra.newdream.net>
- <553B43B2.2070102@bisect.de>
+From: Mohamed Pakkeer <mdfakkeer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: CephFs - Ceph-fuse Client Read Performance During
+	Cache Tier Flushing
+Date: Sun, 26 Apr 2015 11:28:24 +0530
+Message-ID: <CAN7LZ4GUxgWH+eMZVrxMgxxBVQYAdG3EvUZqOA5VtdttftSvFA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:42415 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1031625AbbDYR0k (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 25 Apr 2015 13:26:40 -0400
-In-Reply-To: <553B43B2.2070102@bisect.de>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
-Cc: Ken Dreyer <kdreyer@redhat.com>, ceph-devel@vger.kernel.org, ceph-maintainers@ceph.com
+Content-Type: multipart/mixed; boundary="===============1155801442=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Sat, 25 Apr 2015, Danny Al-Gaaf wrote:
-> Am 25.04.2015 um 01:34 schrieb Sage Weil:
-> > On Fri, 24 Apr 2015, Ken Dreyer wrote:
-> >> Oh, my bad, sorry I missed that part of the pull request! Looks good to me.
-> > 
-> > Still missing ceph.spec file changes, if you're up for it.  :)
-> 
-> I can change the spec files, but do we have finally some user/group IDs
-> for RHEL/Fedora and SLE/openSUSE?
+--===============1155801442==
+Content-Type: multipart/alternative; boundary=047d7b3a7f7e443e7105149a517b
 
-Not yet, but I think the specfile should have a generic adduser (or 
-whatever) that just allocates a uid for distros where the uid isn't 
-preallocated; using the fixed uid will be a conditional special case for 
-those distros where it is fixed.
+--047d7b3a7f7e443e7105149a517b
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 
-> > I'm working on the chown piece, but I'm not sure what to do about the 
-> > journal device (if it is a device).  We can either
-> > 
-> >  - add ceph to the 'disk' group.  This means it can scribble on any device 
-> > in the system, which seems less than ideal.
-> 
-> I wouldn't do that. Especially from the security perspective.
+Hi
 
-Yeah
+ I was doing some testing on erasure coded based CephFS cluster. cluster is
+running with giant 0.87.1 release.
 
-> >  - chown the journal device to ceph when the daemon is started.  This 
-> > means the user can only scribble on other ceph devices, which seems about 
-> > right.  But I'm not sure what the implications of chowning random devices 
-> > like /dev/sdc2 to ceph are.
-> 
-> Not sure if this is what we want or that this is the "usual" way to
-> handle these issues.
 
-It's certainly the simplest, it if passes muster...
 
-> >  - do something tricky where we open the block device on startup before 
-> > doing the setuid, and reuse that file handle later.  This likely screws up 
-> > all kinds layering because we want the privs to drop very eary (before we 
-> > start opening log files, for example) and only the journal code knows what 
-> > mode to open the file as.  Any solution here will be kind of kludgey, I 
-> > think.
-> 
-> The log files are not the issue here I guess since you can set the
-> correct permissions outside of the daemons. If an OSD need to open a
-> device it would be appropriate to open the device as root before
-> dropping the privileges. The code shouldn't be that complicated we did
-> such things e.g. in hald before.
+Cluster info
 
-I'm just worried that if we open(O_CREAT) the log files before dropping 
-privs then they'll be owned by root instead of ceph.  And that any other 
-random stuff that happens in the relatively long gap between start and 
-opening the FileStore's journal will have elevated privs and create files 
-(pid file, admin socket file in /var/run/ceph, etc.).  And special casing 
-moving the journal open to the beginning will be tricky because the 
-ObjectStore is pluggable, and because we have to do the FileStore init 
-(including thread creation etc) after the fork.
+15 * 36 drives node(journal on same osd)
 
-> Another issue: there is the --enable-root-make-check configure option. I 
-> didn't take a look at the code yet, but does anybody know if these tests 
-> refer to something that needs root privileges within the daemons or is 
-> it due to testing something (like e.g. mount rbd's)?
+3 * 4 drives SSD cache node( Intel DC3500)
 
-I suspect it's the ceph-disk tests?
+3 * MON/MDS
 
-sage
+EC 10 +3
 
+10G Ethernet for private and cluster network
+
+
+
+We got approx. 55MB/s read transfer speed using ceph-fuse client, when the
+data was available on cache tier( cold storage was empty). When I tried to
+add more data, ceph started the flushing the data from cache tier to cold
+storage. During flushing, cluster read speed became approx 100 KB/s. But I
+got 50 =E2=80=93 55MB/s write transfer speed during flushing from multiple
+simultaneous ceph-fuse client( 1G Ethernet). I think there is an issue on
+data migration from cold storage to cache tier during ceph-fuse client
+read. Am I hitting any known issue/bug or is there any issue with my
+cluster?
+
+
+
+I used big video files( approx 5 GB to 10 GB) for this testing .
+
+
+
+Any help ?
+
+Cheers
+K.Mohamed Pakkeer
+
+--047d7b3a7f7e443e7105149a517b
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><p class=3D"MsoNormal">Hi </p>
+
+<p class=3D"MsoNormal">=C2=A0I was doing some testing
+on erasure coded based CephFS cluster. cluster is running with giant 0.87.1
+release. </p>
+
+<p class=3D"MsoNormal">=C2=A0</p>
+
+<p class=3D"MsoNormal">Cluster info</p>
+
+<p class=3D"MsoNormal">15 * 36 drives node(journal on same osd)</p>
+
+<p class=3D"MsoNormal">3 * 4 drives SSD cache node( Intel DC3500)</p>
+
+<p class=3D"MsoNormal">3 * MON/MDS</p>
+
+<p class=3D"MsoNormal">EC 10 +3</p><p class=3D"MsoNormal">10G Ethernet for =
+private and cluster network</p>
+
+<p class=3D"MsoNormal">=C2=A0</p>
+
+<p class=3D"MsoNormal">We got approx. 55MB/s read transfer speed using ceph=
+-fuse
+client, when the data was available on cache tier( cold storage was empty).=
+ When
+I tried to add more data, ceph started the flushing the data from cache tie=
+r to
+cold storage. During flushing, cluster read speed became approx 100 KB/s. B=
+ut I
+got 50 =E2=80=93 55MB/s write transfer speed during flushing from multiple =
+simultaneous
+ceph-fuse client( 1G Ethernet). I think there is an issue on data migration=
+ from
+cold storage to cache tier during ceph-fuse client read. Am I hitting any k=
+nown
+issue/bug or is there any issue with my cluster?</p>
+
+<p class=3D"MsoNormal">=C2=A0</p>
+
+<p class=3D"MsoNormal">I used big video files( approx 5 GB to 10 GB) for th=
+is
+testing .</p>
+
+<p class=3D"MsoNormal">=C2=A0</p>
+
+<p class=3D"MsoNormal">Any help ?</p><div><br></div><div class=3D"gmail_sig=
+nature">Cheers =C2=A0=C2=A0<br><span>K.</span>Mohamed <span>Pakkeer</span><=
+br><br><br></div>
+</div>
+
+--047d7b3a7f7e443e7105149a517b--
+
+--===============1155801442==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============1155801442==--
