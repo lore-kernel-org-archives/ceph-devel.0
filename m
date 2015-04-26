@@ -1,137 +1,126 @@
-From: Mohamed Pakkeer <mdfakkeer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: CephFs - Ceph-fuse Client Read Performance During
-	Cache Tier Flushing
-Date: Sun, 26 Apr 2015 11:28:24 +0530
-Message-ID: <CAN7LZ4GUxgWH+eMZVrxMgxxBVQYAdG3EvUZqOA5VtdttftSvFA@mail.gmail.com>
+From: Alex Elder <elder@ieee.org>
+Subject: Re: [PATCHv2 0/3] rbd: header read/refresh improvements
+Date: Sun, 26 Apr 2015 01:29:42 -0500
+Message-ID: <553C85D6.3010407@ieee.org>
+References: <cover.1429881439.git.dfuller@redhat.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1155801442=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
-
---===============1155801442==
-Content-Type: multipart/alternative; boundary=047d7b3a7f7e443e7105149a517b
-
---047d7b3a7f7e443e7105149a517b
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-Hi
-
- I was doing some testing on erasure coded based CephFS cluster. cluster is
-running with giant 0.87.1 release.
-
-
-
-Cluster info
-
-15 * 36 drives node(journal on same osd)
-
-3 * 4 drives SSD cache node( Intel DC3500)
-
-3 * MON/MDS
-
-EC 10 +3
-
-10G Ethernet for private and cluster network
-
-
-
-We got approx. 55MB/s read transfer speed using ceph-fuse client, when the
-data was available on cache tier( cold storage was empty). When I tried to
-add more data, ceph started the flushing the data from cache tier to cold
-storage. During flushing, cluster read speed became approx 100 KB/s. But I
-got 50 =E2=80=93 55MB/s write transfer speed during flushing from multiple
-simultaneous ceph-fuse client( 1G Ethernet). I think there is an issue on
-data migration from cold storage to cache tier during ceph-fuse client
-read. Am I hitting any known issue/bug or is there any issue with my
-cluster?
-
-
-
-I used big video files( approx 5 GB to 10 GB) for this testing .
-
-
-
-Any help ?
-
-Cheers
-K.Mohamed Pakkeer
-
---047d7b3a7f7e443e7105149a517b
-Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr"><p class=3D"MsoNormal">Hi </p>
-
-<p class=3D"MsoNormal">=C2=A0I was doing some testing
-on erasure coded based CephFS cluster. cluster is running with giant 0.87.1
-release. </p>
-
-<p class=3D"MsoNormal">=C2=A0</p>
-
-<p class=3D"MsoNormal">Cluster info</p>
-
-<p class=3D"MsoNormal">15 * 36 drives node(journal on same osd)</p>
-
-<p class=3D"MsoNormal">3 * 4 drives SSD cache node( Intel DC3500)</p>
-
-<p class=3D"MsoNormal">3 * MON/MDS</p>
-
-<p class=3D"MsoNormal">EC 10 +3</p><p class=3D"MsoNormal">10G Ethernet for =
-private and cluster network</p>
-
-<p class=3D"MsoNormal">=C2=A0</p>
-
-<p class=3D"MsoNormal">We got approx. 55MB/s read transfer speed using ceph=
--fuse
-client, when the data was available on cache tier( cold storage was empty).=
- When
-I tried to add more data, ceph started the flushing the data from cache tie=
-r to
-cold storage. During flushing, cluster read speed became approx 100 KB/s. B=
-ut I
-got 50 =E2=80=93 55MB/s write transfer speed during flushing from multiple =
-simultaneous
-ceph-fuse client( 1G Ethernet). I think there is an issue on data migration=
- from
-cold storage to cache tier during ceph-fuse client read. Am I hitting any k=
-nown
-issue/bug or is there any issue with my cluster?</p>
-
-<p class=3D"MsoNormal">=C2=A0</p>
-
-<p class=3D"MsoNormal">I used big video files( approx 5 GB to 10 GB) for th=
-is
-testing .</p>
-
-<p class=3D"MsoNormal">=C2=A0</p>
-
-<p class=3D"MsoNormal">Any help ?</p><div><br></div><div class=3D"gmail_sig=
-nature">Cheers =C2=A0=C2=A0<br><span>K.</span>Mohamed <span>Pakkeer</span><=
-br><br><br></div>
-</div>
-
---047d7b3a7f7e443e7105149a517b--
-
---===============1155801442==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-pa0-f51.google.com ([209.85.220.51]:35728 "EHLO
+	mail-pa0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751104AbbDZG3q (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 26 Apr 2015 02:29:46 -0400
+Received: by pabtp1 with SMTP id tp1so93290417pab.2
+        for <ceph-devel@vger.kernel.org>; Sat, 25 Apr 2015 23:29:45 -0700 (PDT)
+In-Reply-To: <cover.1429881439.git.dfuller@redhat.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Douglas Fuller <dfuller@redhat.com>, ceph-devel@vger.kernel.org
 
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+On 04/24/2015 08:22 AM, Douglas Fuller wrote:
+> Support multiple class op calls in one ceph_msg and consolidate rbd header
+> read and refresh processes to use this feature to reduce the number of
+> ceph_msgs sent for that process. Refresh features on header refresh and
+> begin returning EIO if features have changed since mapping.
 
---===============1155801442==--
+I think I understand the motivation for what you're doing here.
+You ultimately want to pack more ops into a message, which
+would be really great.  Ideally you could pack some arbitrary
+number (much larger than 3), but it seems to me there'll be
+some restructuring required to get there.
+
+I am having a hard time understanding your intended
+implementation though.  I've looked mainly at your first
+patch, and scanned the other two.  Let's see if I have
+it right.
+
+You are adding another hunk of data to a class request,
+and using it as an intermediate buffer for receiving
+data.
+
+Currently a class request has three "hunks":
+- request_info, a pagelist data item, which contains the
+   class name and method name, and perhaps someday, an
+   argument list (?).
+- request_data, which can contain any number of data
+   items of any type, and constitutes outgoing data for
+   a write request.
+- response_data, also any number of any type of data
+   items, which constitutes space into which incoming
+   data is placed.
+
+You are adding a fourth:
+- chain_data, which is a page vector big enough to hold
+   all incoming response data.
+
+When building up an OSD request, we call osd_req_encode_op()
+for every op in the request.  For a class op, that records
+the length of the class and method names in the op structure,
+and then appends those names to the outbound request_data.
+Following that, the "real" request data (if any) provided
+with the class op is appended to request_data.
+
+Next (before your patches) whatever buffer space was provided
+(as a page array, pagelist, or bio) to receive response data
+is appended to response_data.  Prior to this, the class
+op will have been set up with adequate buffers to directly
+receive the expected data.
+
+What your first patch seems to do is circumvent this last
+step, and instead of using the prearranged buffers, you
+allocate another page vector, big enough to hold the
+combined size of all response_data data items, and store
+that in the new chain_data field of an OSD request class op.
+(Note that this could be in *any* of the ops in an OSD
+request, though I suspect it's always the first.)
+
+When a response arrives, if the *first* op in the request
+array is CEPH_OSD_OP_CALL, you "split" the data, which will
+have been deposited in the "chain_data" page vector.  That
+process involves allocating another buffer sufficient to
+hold the entirety of the received data.  You copy the
+received data into that buffer and release the chain_data
+page vector.  And then you copy the data from this new
+buffer back into the original response array, and then
+free the buffer.
+
+This sounds pretty expensive.  For every class operation
+you are copying the received data two extra times.
+
+It's possible I'm not understanding what you're doing here
+and that's why I'm writing this now.  Before I provide
+any more specific commentary on your patches, I want to
+be sure I understand what you're trying to do.
+
+If my understanding *is* correct, I would say you're
+going about this the wrong way, and I may have some
+suggestions for a better approach.
+
+Will you please correct me where I'm wrong above, and
+maybe give a little better high-level explanation of
+what you're trying to do?  I see in patch 1 you mention
+a problem with short reads, and there may be a simpler
+fix than that (to begin with).  But beyond that, if
+you're trying to incorporate more ops in a message,
+there may be better ways to go about that as well.
+
+Thanks.
+
+					-Alex
+
+> v2: Edit history and address comments from Mike Christie.
+>
+> Douglas Fuller (3):
+>    ceph: support multiple class method calls in one ceph_msg
+>    rbd: combine object method calls in header refresh using fewer
+>      ceph_msgs
+>    rbd: re-read features during header refresh and detect changes.
+>
+>   drivers/block/rbd.c             | 512 +++++++++++++++++++++++++++++-----------
+>   include/linux/ceph/osd_client.h |   3 +-
+>   net/ceph/messenger.c            |   4 +
+>   net/ceph/osd_client.c           |  90 ++++++-
+>   4 files changed, 462 insertions(+), 147 deletions(-)
+>
+
