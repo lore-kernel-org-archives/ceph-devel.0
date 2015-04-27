@@ -1,60 +1,37 @@
 From: Loic Dachary <loic@dachary.org>
-Subject: Re: Retiring GIant
-Date: Tue, 28 Apr 2015 00:30:53 +0200
-Message-ID: <553EB89D.1040102@dachary.org>
-References: <553EB447.5070305@dachary.org>
+Subject: make check bot silent today
+Date: Tue, 28 Apr 2015 00:36:32 +0200
+Message-ID: <553EB9F0.9070700@dachary.org>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="nbIdbiqWrKAC8njOdHWXrjpr4kkXCFc0s"
+ boundary="v748ERpltp0mKFPpLadqNdWkoHCs1mhni"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:53500 "EHLO
+Received: from mail2.dachary.org ([91.121.57.175]:53506 "EHLO
 	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S965241AbbD0Wa5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Apr 2015 18:30:57 -0400
-In-Reply-To: <553EB447.5070305@dachary.org>
+	with ESMTP id S965143AbbD0Wge (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Apr 2015 18:36:34 -0400
+Received: from [10.9.0.6] (unknown [10.0.2.28])
+	by smtp.dmail.dachary.org (Postfix) with ESMTP id BC31042B23
+	for <ceph-devel@vger.kernel.org>; Tue, 28 Apr 2015 00:36:32 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Abhishek L <abhishek.lekshmanan@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
 This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---nbIdbiqWrKAC8njOdHWXrjpr4kkXCFc0s
+--v748ERpltp0mKFPpLadqNdWkoHCs1mhni
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
 
+Hi,
 
-
-On 28/04/2015 00:12, Loic Dachary wrote:
-> Hi Abhishek,
->=20
-> The final Giant release has been published and we can now move to the l=
-ast phase of the workflow: retirement :-) I summarized the steps at
-
-(Hit Control-J by accident ;-)
-
-http://tracker.ceph.com/projects/ceph-releases/wiki/HOWTO_retire_a_stable=
-_release
-
-* https://github.com/ceph/ceph/milestones/2 =3D> closed
-* no more pull requests targetting giant
-* updated http://tracker.ceph.com/projects/ceph-releases/wiki/HOWTO to re=
-move the giant line
-* removed the "giant" word from the backport field in http://tracker.ceph=
-=2Ecom/issues/10976 http://tracker.ceph.com/issues/11358 http://tracker.c=
-eph.com/issues/11335 http://tracker.ceph.com/issues/10863
-* keep http://tracker.ceph.com/projects/ceph/issues?query_id=3D68 after v=
-erifying it is empty (giant custom query) but make it non public
-* did not close giant in http://tracker.ceph.com/rb/release/ because it d=
-oes not show
-* Update http://tracker.ceph.com/projects/ceph-releases/settings to remov=
-e the release link
-
-I think the only thing left is to close
-
-http://tracker.ceph.com/issues/11153
-
-Did I miss anything ?
+Although the make check bot worked on today's pull requests ( http://jenk=
+ins.ceph.dachary.org/job/ceph/ ), it did not report results back to the c=
+orresponding pull request. You can find the results by looking at individ=
+ual builds (for instance http://jenkins.ceph.dachary.org/job/ceph/1828/ s=
+hows it is about origin/pull/4472 which matches pull request https://gith=
+ub.com/ceph/ceph/pull/4472). If you don't feel like digging in the jenkin=
+s log, rebasing and force-pushing the pull request will trigger the bot.
 
 Cheers
 
@@ -62,7 +39,7 @@ Cheers
 Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
 
---nbIdbiqWrKAC8njOdHWXrjpr4kkXCFc0s
+--v748ERpltp0mKFPpLadqNdWkoHCs1mhni
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -70,9 +47,9 @@ Content-Disposition: attachment; filename="signature.asc"
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2.0.22 (GNU/Linux)
 
-iEYEARECAAYFAlU+uJ4ACgkQ8dLMyEl6F23gDACeNuDrIMpfMbY/3CJtmZ58D4D1
-QwkAn1s/q8aeWocfftGef15yXmXyOccb
-=y6R/
+iEYEARECAAYFAlU+ufAACgkQ8dLMyEl6F21XnwCgkEZ0qjh17jQvL2rS2Zp5LV/p
+4y8Anjmb/ZOKW8uoM7/kkouHHH9xRr52
+=zwyl
 -----END PGP SIGNATURE-----
 
---nbIdbiqWrKAC8njOdHWXrjpr4kkXCFc0s--
+--v748ERpltp0mKFPpLadqNdWkoHCs1mhni--
