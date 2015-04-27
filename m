@@ -1,48 +1,98 @@
 From: Alex Elder <elder@linaro.org>
-Subject: [PATCH 0/7] ceph-client: some refactoring patches
-Date: Mon, 27 Apr 2015 12:13:08 -0500
-Message-ID: <1430154795-17123-1-git-send-email-elder@linaro.org>
+Subject: [PATCH 1/7] messenger: update state diagram
+Date: Mon, 27 Apr 2015 12:13:09 -0500
+Message-ID: <1430154795-17123-2-git-send-email-elder@linaro.org>
+References: <1430154795-17123-1-git-send-email-elder@linaro.org>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:35935 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753197AbbD0RNT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Apr 2015 13:13:19 -0400
-Received: by pabsx10 with SMTP id sx10so135725971pab.3
-        for <ceph-devel@vger.kernel.org>; Mon, 27 Apr 2015 10:13:19 -0700 (PDT)
+Received: from mail-pd0-f177.google.com ([209.85.192.177]:35966 "EHLO
+	mail-pd0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753467AbbD0RNU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Apr 2015 13:13:20 -0400
+Received: by pdea3 with SMTP id a3so134950557pde.3
+        for <ceph-devel@vger.kernel.org>; Mon, 27 Apr 2015 10:13:20 -0700 (PDT)
 Received: from shibby.corp.google.com ([104.135.1.105])
-        by mx.google.com with ESMTPSA id ff10sm12124675pab.13.2015.04.27.10.13.18
+        by mx.google.com with ESMTPSA id ff10sm12124675pab.13.2015.04.27.10.13.19
         for <ceph-devel@vger.kernel.org>
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
-        Mon, 27 Apr 2015 10:13:18 -0700 (PDT)
+        Mon, 27 Apr 2015 10:13:19 -0700 (PDT)
+In-Reply-To: <1430154795-17123-1-git-send-email-elder@linaro.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Most of this series is just comment changes and a few minor naming
-tweaks.  The last two patches actually change code, but the
-resulting behavior should be identical to before.
+Update the fabulous state diagram in "messenger.c" to reflect the
+way the code operates.  Two new transitions are added:
 
-These have been compile tested only.  They (especially the last two)
-need to run through teuthology.  The series is based on the current
-testing branch:
-    5eeb14f ceph: check OSD caps before read/write
+    CLOSED -> CLOSED
+    CLOSING -> CLOSING
 
-					-Alex
+Signed-off-by: Alex Elder <elder@linaro.org>
+---
+ net/ceph/messenger.c | 51 +++++++++++++++++++++++++--------------------------
+ 1 file changed, 25 insertions(+), 26 deletions(-)
 
-Alex Elder (7):
-  messenger: update state diagram
-  messenger: add some clarifying comments
-  messenger: rename "out_kvec_left" field
-  osd_client: don't supply connection to handle_reply()
-  osd_client: improve safety of osd_req_op_data() macro
-  messenger: encapsulate grabbing incoming message
-  messenger: con_work() is not really a loop
-
- include/linux/ceph/messenger.h |   2 +-
- net/ceph/messenger.c           | 254 +++++++++++++++++++++++------------------
- net/ceph/osd_client.c          |  16 +--
- 3 files changed, 156 insertions(+), 116 deletions(-)
-
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index 967080a..9dfdb20 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -46,32 +46,31 @@
+  *          | con_sock_state_init()
+  *          v
+  *      ----------
+- *      | CLOSED |  initialized, but no socket (and no
+- *      ----------  TCP connection)
+- *       ^      \
+- *       |       \ con_sock_state_connecting()
+- *       |        ----------------------
+- *       |                              \
+- *       + con_sock_state_closed()       \
+- *       |+---------------------------    \
+- *       | \                          \    \
+- *       |  -----------                \    \
+- *       |  | CLOSING |  socket event;  \    \
+- *       |  -----------  await close     \    \
+- *       |       ^                        \   |
+- *       |       |                         \  |
+- *       |       + con_sock_state_closing() \ |
+- *       |      / \                         | |
+- *       |     /   ---------------          | |
+- *       |    /                   \         v v
+- *       |   /                    --------------
+- *       |  /    -----------------| CONNECTING |  socket created, TCP
+- *       |  |   /                 --------------  connect initiated
+- *       |  |   | con_sock_state_connected()
+- *       |  |   v
+- *      -------------
+- *      | CONNECTED |  TCP connection established
+- *      -------------
++ *      | CLOSED |  initialized, but no socket (and no TCP connection)
++ *      ----------
++ *       ^   \  \  con_sock_state_connecting()
++ *       |   /   ------------------------
++ *       +<--                            \
++ *       |\  cen_sock_state_closed()      \
++ *       | +<--------------------------    \
++ *       |  \                          \    \
++ *       | -----------                  \    \
++ *       | | CLOSING |  socket event;    \    \
++ *       | -----------  await close       \    \
++ *       |    /   ^                        \    \
++ *       |    \   |                         \   |
++ *       |     -->+ con_sock_state_closing() \  |
++ *       |       / \                         |  |
++ *       |      /   ----------------------   |  |
++ *       |     /                          \  |  v
++ *       |    /                        --------------
++ *       |   /    ---------------------| CONNECTING |  socket created, TCP
++ *       |   |   /                     --------------  connect initiated
++ *       |   |   | con_sock_state_connected()
++ *       |   |   v
++ *     -------------
++ *     | CONNECTED |  TCP connection established
++ *     -------------
+  *
+  * State values for ceph_connection->sock_state; NEW is assumed to be 0.
+  */
 -- 
 2.1.0
 
