@@ -1,172 +1,87 @@
-From: Mohamed Pakkeer <mdfakkeer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: CephFs - Ceph-fuse Client Read Performance During
-	Cache Tier Flushing
-Date: Mon, 27 Apr 2015 21:04:27 +0530
-Message-ID: <CAN7LZ4FpViaQyBJBBpLvmdVZpAmgrRc-JmpX-UCtt-LDrYdCUw@mail.gmail.com>
-References: <CAN7LZ4GUxgWH+eMZVrxMgxxBVQYAdG3EvUZqOA5VtdttftSvFA@mail.gmail.com>
+From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Subject: Re: [PATCH] Swift: Set Content-Length when requesting/checking
+ Keystone tokens
+Date: Mon, 27 Apr 2015 11:35:51 -0400 (EDT)
+Message-ID: <1638259563.5815735.1430148951109.JavaMail.zimbra@redhat.com>
+References: <1429979938-18465-1-git-send-email-hroussea@cern.ch>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0837866726=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAN7LZ4GUxgWH+eMZVrxMgxxBVQYAdG3EvUZqOA5VtdttftSvFA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx6-phx2.redhat.com ([209.132.183.39]:60657 "EHLO
+	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753022AbbD0Pf4 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Apr 2015 11:35:56 -0400
+In-Reply-To: <1429979938-18465-1-git-send-email-hroussea@cern.ch>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Herve Rousseau <hroussea@cern.ch>
+Cc: ceph-devel@vger.kernel.org
 
---===============0837866726==
-Content-Type: multipart/alternative; boundary=001a1137947a3b21380514b67b2d
+This looks good. Can you send a pull request to the ceph github reposit=
+ory?
 
---001a1137947a3b21380514b67b2d
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Thanks,
+Yehuda
 
-Hi all
-
-The issue is resolved after upgrading Ceph from Giant to Hammer(0.94.1)
-
-cheers
-K.Mohamed Pakkeer
-
-On Sun, Apr 26, 2015 at 11:28 AM, Mohamed Pakkeer <mdfakkeer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-wrote:
-
-> Hi
->
->  I was doing some testing on erasure coded based CephFS cluster. cluster
-> is running with giant 0.87.1 release.
->
->
->
-> Cluster info
->
-> 15 * 36 drives node(journal on same osd)
->
-> 3 * 4 drives SSD cache node( Intel DC3500)
->
-> 3 * MON/MDS
->
-> EC 10 +3
->
-> 10G Ethernet for private and cluster network
->
->
->
-> We got approx. 55MB/s read transfer speed using ceph-fuse client, when th=
-e
-> data was available on cache tier( cold storage was empty). When I tried t=
-o
-> add more data, ceph started the flushing the data from cache tier to cold
-> storage. During flushing, cluster read speed became approx 100 KB/s. But =
-I
-> got 50 =E2=80=93 55MB/s write transfer speed during flushing from multipl=
-e
-> simultaneous ceph-fuse client( 1G Ethernet). I think there is an issue on
-> data migration from cold storage to cache tier during ceph-fuse client
-> read. Am I hitting any known issue/bug or is there any issue with my
-> cluster?
->
->
->
-> I used big video files( approx 5 GB to 10 GB) for this testing .
->
->
->
-> Any help ?
->
-> Cheers
-> K.Mohamed Pakkeer
->
->
->
-
-
---=20
-Thanks & Regards
-K.Mohamed Pakkeer
-Mobile- 0091-8754410114
-
---001a1137947a3b21380514b67b2d
-Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr">Hi all<div><br></div><div>The issue is resolved after upgr=
-ading Ceph from Giant to Hammer(0.94.1)</div><div><br></div><div>cheers</di=
-v><div>K.Mohamed Pakkeer</div></div><div class=3D"gmail_extra"><br><div cla=
-ss=3D"gmail_quote">On Sun, Apr 26, 2015 at 11:28 AM, Mohamed Pakkeer <span =
-dir=3D"ltr">&lt;<a href=3D"mailto:mdfakkeer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org" target=3D"_blank">md=
-fakkeer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt;</span> wrote:<br><blockquote class=3D"gmail_quote=
-" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex"><=
-div dir=3D"ltr"><p class=3D"MsoNormal">Hi </p>
-
-<p class=3D"MsoNormal">=C2=A0I was doing some testing
-on erasure coded based CephFS cluster. cluster is running with giant 0.87.1
-release. </p>
-
-<p class=3D"MsoNormal">=C2=A0</p>
-
-<p class=3D"MsoNormal">Cluster info</p>
-
-<p class=3D"MsoNormal">15 * 36 drives node(journal on same osd)</p>
-
-<p class=3D"MsoNormal">3 * 4 drives SSD cache node( Intel DC3500)</p>
-
-<p class=3D"MsoNormal">3 * MON/MDS</p>
-
-<p class=3D"MsoNormal">EC 10 +3</p><p class=3D"MsoNormal">10G Ethernet for =
-private and cluster network</p>
-
-<p class=3D"MsoNormal">=C2=A0</p>
-
-<p class=3D"MsoNormal">We got approx. 55MB/s read transfer speed using ceph=
--fuse
-client, when the data was available on cache tier( cold storage was empty).=
- When
-I tried to add more data, ceph started the flushing the data from cache tie=
-r to
-cold storage. During flushing, cluster read speed became approx 100 KB/s. B=
-ut I
-got 50 =E2=80=93 55MB/s write transfer speed during flushing from multiple =
-simultaneous
-ceph-fuse client( 1G Ethernet). I think there is an issue on data migration=
- from
-cold storage to cache tier during ceph-fuse client read. Am I hitting any k=
-nown
-issue/bug or is there any issue with my cluster?</p>
-
-<p class=3D"MsoNormal">=C2=A0</p>
-
-<p class=3D"MsoNormal">I used big video files( approx 5 GB to 10 GB) for th=
-is
-testing .</p>
-
-<p class=3D"MsoNormal">=C2=A0</p>
-
-<p class=3D"MsoNormal">Any help ?</p><div><br></div><div>Cheers =C2=A0=C2=
-=A0<br><span>K.</span>Mohamed <span>Pakkeer</span><br><br><br></div>
-</div>
-</blockquote></div><br><br clear=3D"all"><div><br></div>-- <br><div class=
-=3D"gmail_signature">Thanks &amp; Regards=C2=A0 =C2=A0 <br><span>K.</span>M=
-ohamed <span>Pakkeer</span><br>Mobile- 0091-8754410114<br><br></div>
-</div>
-
---001a1137947a3b21380514b67b2d--
-
---===============0837866726==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============0837866726==--
+----- Original Message -----
+> From: "Herve Rousseau" <hroussea@cern.ch>
+> To: ceph-devel@vger.kernel.org
+> Cc: "Herv=C3=A9 Rousseau" <hroussea@cern.ch>
+> Sent: Saturday, April 25, 2015 9:38:58 AM
+> Subject: [PATCH] Swift: Set Content-Length when requesting/checking K=
+eystone tokens
+>=20
+> From: Herv=C3=A9 Rousseau <hroussea@cern.ch>
+>=20
+> Running Keystone with WSGIChunkedRequest=3DOn is not supported.
+>=20
+> We have to make sure that we set the Content-Length header when getti=
+ng
+> an admin token and checking revoked tokens, otherwise Keystone return=
+s
+> a HTTP 411 error.
+>=20
+> Same applies when checking revoked tickets.
+>=20
+> Signed-off-by: Herv=C3=A9 Rousseau <hroussea@cern.ch>
+> ---
+>  src/rgw/rgw_swift.cc |    2 ++
+>  1 files changed, 2 insertions(+), 0 deletions(-)
+>=20
+> diff --git a/src/rgw/rgw_swift.cc b/src/rgw/rgw_swift.cc
+> index 76f21ee..a08d944 100644
+> --- a/src/rgw/rgw_swift.cc
+> +++ b/src/rgw/rgw_swift.cc
+> @@ -269,6 +269,7 @@ int	RGWSwift::get_keystone_admin_token(std::strin=
+g&
+> token)
+>      std::stringstream ss;
+>      jf.flush(ss);
+>      token_req.set_post_data(ss.str());
+> +    token_req.set_send_length(ss.str().length());
+>      int ret =3D token_req.process("POST", token_url.c_str());
+>      if (ret < 0)
+>        return ret;
+> @@ -296,6 +297,7 @@ int RGWSwift::check_revoked()
+>      return -EINVAL;
+>    url.append("v2.0/tokens/revoked");
+>    req.append_header("X-Auth-Token", token);
+> +  req.set_send_length(0);
+>    int ret =3D req.process(url.c_str());
+>    if (ret < 0)
+>      return ret;
+> --
+> 1.7.1
+>=20
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
