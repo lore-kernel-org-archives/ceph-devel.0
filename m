@@ -1,56 +1,59 @@
-From: "Shu, Xinxin" <xinxin.shu@intel.com>
-Subject: RE: Firefly integration branch : OK
-Date: Mon, 27 Apr 2015 09:19:04 +0000
-Message-ID: <75674D092A819E4189E91166C74CB90D015333B1@shsmsx102.ccr.corp.intel.com>
-References: <553DEDD3.2030202@dachary.org>
+From: Tim Serong <tserong@suse.com>
+Subject: Re: [Ceph-maintainers] statically allocated uid/gid for ceph
+Date: Mon, 27 Apr 2015 19:56:23 +1000
+Message-ID: <553E07C7.8030905@suse.com>
+References: <alpine.DEB.2.00.1412061245410.18213@cobra.newdream.net> <5488919E.4090109@redhat.com> <alpine.DEB.2.00.1412101044300.22847@cobra.newdream.net> <5488FC46.5080106@suse.com> <alpine.DEB.2.00.1504131802400.32097@cobra.newdream.net> <552C9182.5030605@suse.com> <alpine.DEB.2.00.1504140819190.4469@cobra.newdream.net> <552D3C74.2000104@redhat.com> <87bnip2u10.fsf@meteor.durcheinandertal.bofh>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:62015 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932169AbbD0JTI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 27 Apr 2015 05:19:08 -0400
-In-Reply-To: <553DEDD3.2030202@dachary.org>
-Content-Language: en-US
+Received: from victor.provo.novell.com ([137.65.250.26]:55484 "EHLO
+	prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S932066AbbD0J4m (ORCPT
+	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+	Mon, 27 Apr 2015 05:56:42 -0400
+In-Reply-To: <87bnip2u10.fsf@meteor.durcheinandertal.bofh>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Gaudenz Steinlin <gaudenz@debian.org>, Ken Dreyer <kdreyer@redhat.com>, Sage Weil <sweil@redhat.com>
+Cc: ceph-devel@vger.kernel.org, cjwatson@debian.org, ceph-maintainers@ceph.com, timm@fnal.gov, Owen Synge <osynge@suse.com>
 
-SGkgbG9pYywgY2FuIHdlIG1lcmdlIFBSICg0NDE0IH4gNDQxNikgaW50byBpbnRlZ3JhdGlvbiBi
-cmFuY2ggbm93IA0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogY2VwaC1kZXZl
-bC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2Vy
-bmVsLm9yZ10gT24gQmVoYWxmIE9mIExvaWMgRGFjaGFyeQ0KU2VudDogTW9uZGF5LCBBcHJpbCAy
-NywgMjAxNSA0OjA2IFBNDQpUbzogU2h1LCBYaW54aW4NCkNjOiBDZXBoIERldmVsb3BtZW50DQpT
-dWJqZWN0OiBGaXJlZmx5IGludGVncmF0aW9uIGJyYW5jaCA6IE9LDQoNCkhpLA0KDQpJIHNhdyB0
-aGlzIG1vcm5pbmcgdGhlIGZpcmVmbHkgaW50ZWdyYXRpb24gYnJhbmNoIHBhc3NlZCByYWRvcyBh
-bmQgcmJkIHN1aXRlcyA6LSkgDQoNCmh0dHA6Ly90cmFja2VyLmNlcGguY29tL2lzc3Vlcy8xMTA5
-MCNyYWRvcw0KaHR0cDovL3RyYWNrZXIuY2VwaC5jb20vaXNzdWVzLzExMDkwI3JiZA0KDQpUaGUg
-aXNzdWUgaGFzIGJlZW4gdXBkYXRlZCBhY2NvcmRpbmdseS4gSXQgbWVhbnMgdGhlIGZvbGxvd2lu
-ZyBwdWxsIHJlcXVlc3RzIHBhc3NlZDoNCg0KJCBnaXQgbG9nIC0tbWVyZ2VzIC0tb25lbGluZSAx
-MjE0M2ZmOWIyNWZkZDk2ZjhkMWE5Y2VjYjEzMjljN2YzNTRkNDE0Li5iOTFiYmI0MzRlNjM2M2E5
-OWE2MzJjZjM4NDFmNzBmMWYyNTQ5Zjc5DQpiOTFiYmI0IE1lcmdlIDQyNDU6IGxpYnJiZDogc25h
-cF9yZW1vdmUgc2hvdWxkIGlnbm9yZSAtRU5PRU5UIGVycm9ycyA2MjQ1YmVkIE1lcmdlIDQyMDY6
-IGxpYnJiZDogYWNxdWlyZSBjYWNoZV9sb2NrIGJlZm9yZSByZWZyZXNoaW5nIHBhcmVudA0KZWYw
-OGFhOSBNZXJnZSA0MTg1OiBGQUlMRUQgYXNzZXJ0KHNvaWQgPCBzY3J1YmJlci5zdGFydCB8fCBz
-b2lkID49IHNjcnViYmVyLmVuZCkgYWUxYjE4YSBNZXJnZSAzOTYzOiBSYWRvcy5zaHV0ZG93bigp
-IGRpZXMgd2l0aCBJbGxlZ2FsIGluc3RydWN0aW9uIChjb3JlIGR1bXBlZCkgMDU2ZGIwZiBNZXJn
-ZSA0Mzg1OiBvc2Q6IEVOT0VOVCBvbiBjbG9uZQ0KZTRiMWZkMSBNZXJnZSA0Mzg0OiBwZyBzdHVj
-ayBzdGFsZSBhZnRlciBjcmVhdGUgd2l0aCBhY3RpdmF0aW9uIGRlbGF5IDU5NzEyNGIgTWVyZ2Ug
-NDM4MzogZXJhc3VyZS1jb2RlLXByb2ZpbGUgc2V0IHJhY2VzIHdpdGggZXJhc3VyZS1jb2RlLXBy
-b2ZpbGUgcm0NCmI3YmJkNDMgTWVyZ2UgNDM4Mjogb3NkL1BHTG9nLmg6IDI3OTogRkFJTEVEIGFz
-c2VydChsb2cubG9nLnNpemUoKSA9PSBsb2dfa2V5c19kZWJ1Zy5zaXplKCkpDQoNCk91ZiBvdCB0
-aGVzZSwgdGhyZWUgYXJlIGJhY2twb3J0cyByZWFkeSB0byBiZSByZXZpZXdlZCBieSB0aGVpciBv
-cmlnaW5hbCBhdXRob3JzOg0KDQowNTZkYjBmIE1lcmdlIDQzODU6IG9zZDogRU5PRU5UIG9uIGNs
-b25lIGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgvcHVsbC80Mzg1DQplNGIxZmQxIE1lcmdl
-IDQzODQ6IHBnIHN0dWNrIHN0YWxlIGFmdGVyIGNyZWF0ZSB3aXRoIGFjdGl2YXRpb24gZGVsYXkg
-aHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC9wdWxsLzQzODQNCmI3YmJkNDMgTWVyZ2UgNDM4
-Mjogb3NkL1BHTG9nLmg6IDI3OTogRkFJTEVEIGFzc2VydChsb2cubG9nLnNpemUoKSA9PSBsb2df
-a2V5c19kZWJ1Zy5zaXplKCkpDQoNClRoZSBzaW1wbGVzdCB3YXkgd291bGQgYmUgdG8gYXNrIGZv
-ciB0aGVpciByZXZpZXcgd2l0aCBhIGNvbW1lbnQgaW4gdGhlIHB1bGwgcmVxdWVzdCwgd2l0aCBh
-IHJlZmVyZW5jZSB0byB0aGUgdGVzdCBzdWl0ZSByZXN1bHRzIHNvIHRoZXkga25vdyBpdCBwYXNz
-ZWQgdGhlIHN1aXRlcy4gV2lsbCB5b3UgaGF2ZSB0aW1lIHRvIGRvIHRoaXMgdG9kYXkgPyBJZiB5
-b3UgZG9uJ3QgaGF2ZSB0aW1lLCBqdXN0IGxldCBtZSBrbm93IGFuZCBJJ2xsIGRvIGl0IGZvciB5
-b3UuDQoNCkNoZWVycw0KDQotLQ0KTG/Dr2MgRGFjaGFyeSwgQXJ0aXNhbiBMb2dpY2llbCBMaWJy
-ZQ0KDQo=
+On 04/16/2015 03:14 AM, Gaudenz Steinlin wrote:
+> 
+> Hi
+> 
+> Ken Dreyer <kdreyer@redhat.com> writes:
+> 
+>> On 04/14/2015 09:21 AM, Sage Weil wrote:
+>>> I think we still want them to be static across a distro; it's the 
+>>> cross-distro change that will be relatively rare.  So a fixed ID from each 
+>>> distro family ought to be okay?
+>>
+>> Sounds sane to me. I've filed https://fedorahosted.org/fpc/ticket/524 to
+>> request one from Fedora.
+> 
+> I have now requested the same for Debian. If the request is granted we
+> will most likely get the uid/gid 64045. Maybe others could use the same.
+> It seems that only Debian has a range of reserved ids for this purpose.
+> I would expect Ubuntu to use the same id, but that's up to them finally.
+
+Fedora has rejected the request for a static UID (see
+https://fedorahosted.org/fpc/ticket/524#comment:16), and I haven't made
+much progress on the SUSE front.  I did suggest everyone just do what
+Debian does ;) but both Fedora and SUSE people pointed out that the 64K
+range isn't safe to claim, what with not being specifically reserved.
+
+I did make one small bit of progress - I've added the ceph user and
+group to rpmlint on openSUSE Factory
+(https://build.opensuse.org/request/show/303537) so at least the SUSE
+build won't bitch if files specified in any of the packages are owned by
+ceph:ceph.
+
+Regards,
+
+Tim
+-- 
+Tim Serong
+Senior Clustering Engineer
+SUSE
+tserong@suse.com
