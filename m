@@ -1,193 +1,122 @@
-From: Alex Elder <elder@ieee.org>
-Subject: Re: [PATCH 2/3] libceph: allow setting osd_req_op's flags
-Date: Mon, 27 Apr 2015 10:24:06 -0500
-Message-ID: <553E5496.6090704@ieee.org>
-References: <1430123096-11516-1-git-send-email-zyan@redhat.com> <1430123096-11516-2-git-send-email-zyan@redhat.com>
+From: Alexandre DERUMIER <aderumier@odiso.com>
+Subject: Re: Hitting tcmalloc bug even with patch applied
+Date: Mon, 27 Apr 2015 17:25:34 +0200 (CEST)
+Message-ID: <616080493.708389966.1430148334591.JavaMail.zimbra@oxygem.tv>
+References: <615356748.699601184.1430136382697.JavaMail.zimbra@oxygem.tv> <837264898.702990831.1430140908848.JavaMail.zimbra@oxygem.tv> <553E4D51.9010103@adfin.com> <553E4E68.8080801@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f48.google.com ([209.85.220.48]:36815 "EHLO
-	mail-pa0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751141AbbD0PYM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Apr 2015 11:24:12 -0400
-Received: by pabsx10 with SMTP id sx10so132662904pab.3
-        for <ceph-devel@vger.kernel.org>; Mon, 27 Apr 2015 08:24:11 -0700 (PDT)
-In-Reply-To: <1430123096-11516-2-git-send-email-zyan@redhat.com>
+Received: from mailpro.odiso.net ([89.248.209.98]:36756 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753129AbbD0PZh convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Apr 2015 11:25:37 -0400
+In-Reply-To: <553E4E68.8080801@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zyan@redhat.com>, ceph-devel@vger.kernel.org
-Cc: idryomov@gmail.com
+To: Mark Nelson <mnelson@redhat.com>
+Cc: Milosz Tanski <milosz@adfin.com>, ceph-devel <ceph-devel@vger.kernel.org>, Somnath Roy <somnath.roy@sandisk.com>
 
-On 04/27/2015 03:24 AM, Yan, Zheng wrote:
-> Signed-off-by: Yan, Zheng <zyan@redhat.com>
+>>Looks like the default is 16MB:=20
+>>http://gperftools.googlecode.com/svn/trunk/doc/tcmalloc.html=20
 
-This looks good.  I think for both of these first two
-patches you could have supplied a brief commit message.
+I don't known if setting it to 128MB have performance impact (cpu, memo=
+ry garbage collection ?)
+I'll try to test different values between 16->128MB.
 
-I won't be able to review your third patch right now, sorry.
 
-Reviewed-by: Alex Elder <elder@linaro.org>
 
-> ---
->   drivers/block/rbd.c             |  4 ++--
->   fs/ceph/addr.c                  |  3 ++-
->   fs/ceph/file.c                  |  2 +-
->   include/linux/ceph/osd_client.h |  2 +-
->   net/ceph/osd_client.c           | 24 +++++++++++++++---------
->   5 files changed, 21 insertions(+), 14 deletions(-)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 8125233..15ddc5e 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -2371,7 +2371,7 @@ static void rbd_img_obj_request_fill(struct rbd_obj_request *obj_request,
->   	}
->
->   	if (opcode == CEPH_OSD_OP_DELETE)
-> -		osd_req_op_init(osd_request, num_ops, opcode);
-> +		osd_req_op_init(osd_request, num_ops, opcode, 0);
->   	else
->   		osd_req_op_extent_init(osd_request, num_ops, opcode,
->   				       offset, length, 0, 0);
-> @@ -2843,7 +2843,7 @@ static int rbd_img_obj_exists_submit(struct rbd_obj_request *obj_request)
->   		goto out;
->   	stat_request->callback = rbd_img_obj_exists_callback;
->
-> -	osd_req_op_init(stat_request->osd_req, 0, CEPH_OSD_OP_STAT);
-> +	osd_req_op_init(stat_request->osd_req, 0, CEPH_OSD_OP_STAT, 0);
->   	osd_req_op_raw_data_in_pages(stat_request->osd_req, 0, pages, size, 0,
->   					false, false);
->   	rbd_osd_req_format_read(stat_request);
-> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-> index cab1cf5..bdeea57 100644
-> --- a/fs/ceph/addr.c
-> +++ b/fs/ceph/addr.c
-> @@ -884,7 +884,8 @@ get_more_pages:
->   				}
->
->   				if (do_sync)
-> -					osd_req_op_init(req, 1, CEPH_OSD_OP_STARTSYNC);
-> +					osd_req_op_init(req, 1,
-> +							CEPH_OSD_OP_STARTSYNC, 0);
->
->   				req->r_callback = writepages_finish;
->   				req->r_inode = inode;
-> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-> index d533075..a972019 100644
-> --- a/fs/ceph/file.c
-> +++ b/fs/ceph/file.c
-> @@ -615,7 +615,7 @@ ceph_sync_direct_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos)
->   			break;
->   		}
->
-> -		osd_req_op_init(req, 1, CEPH_OSD_OP_STARTSYNC);
-> +		osd_req_op_init(req, 1, CEPH_OSD_OP_STARTSYNC, 0);
->
->   		n = iov_iter_get_pages_alloc(from, &pages, len, &start);
->   		if (unlikely(n < 0)) {
-> diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
-> index 61b19c4..7506b48 100644
-> --- a/include/linux/ceph/osd_client.h
-> +++ b/include/linux/ceph/osd_client.h
-> @@ -249,7 +249,7 @@ extern void ceph_osdc_handle_map(struct ceph_osd_client *osdc,
->   				 struct ceph_msg *msg);
->
->   extern void osd_req_op_init(struct ceph_osd_request *osd_req,
-> -					unsigned int which, u16 opcode);
-> +			    unsigned int which, u16 opcode, u32 flags);
->
->   extern void osd_req_op_raw_data_in_pages(struct ceph_osd_request *,
->   					unsigned int which,
-> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> index b93531f..e3c2e8b 100644
-> --- a/net/ceph/osd_client.c
-> +++ b/net/ceph/osd_client.c
-> @@ -453,7 +453,7 @@ __CEPH_FORALL_OSD_OPS(GENERATE_CASE)
->    */
->   static struct ceph_osd_req_op *
->   _osd_req_op_init(struct ceph_osd_request *osd_req, unsigned int which,
-> -				u16 opcode)
-> +		 u16 opcode, u32 flags)
->   {
->   	struct ceph_osd_req_op *op;
->
-> @@ -463,14 +463,15 @@ _osd_req_op_init(struct ceph_osd_request *osd_req, unsigned int which,
->   	op = &osd_req->r_ops[which];
->   	memset(op, 0, sizeof (*op));
->   	op->op = opcode;
-> +	op->flags = flags;
->
->   	return op;
->   }
->
->   void osd_req_op_init(struct ceph_osd_request *osd_req,
-> -				unsigned int which, u16 opcode)
-> +		     unsigned int which, u16 opcode, u32 flags)
->   {
-> -	(void)_osd_req_op_init(osd_req, which, opcode);
-> +	(void)_osd_req_op_init(osd_req, which, opcode, flags);
->   }
->   EXPORT_SYMBOL(osd_req_op_init);
->
-> @@ -479,7 +480,8 @@ void osd_req_op_extent_init(struct ceph_osd_request *osd_req,
->   				u64 offset, u64 length,
->   				u64 truncate_size, u32 truncate_seq)
->   {
-> -	struct ceph_osd_req_op *op = _osd_req_op_init(osd_req, which, opcode);
-> +	struct ceph_osd_req_op *op = _osd_req_op_init(osd_req, which,
-> +						      opcode, 0);
->   	size_t payload_len = 0;
->
->   	BUG_ON(opcode != CEPH_OSD_OP_READ && opcode != CEPH_OSD_OP_WRITE &&
-> @@ -518,7 +520,8 @@ EXPORT_SYMBOL(osd_req_op_extent_update);
->   void osd_req_op_cls_init(struct ceph_osd_request *osd_req, unsigned int which,
->   			u16 opcode, const char *class, const char *method)
->   {
-> -	struct ceph_osd_req_op *op = _osd_req_op_init(osd_req, which, opcode);
-> +	struct ceph_osd_req_op *op = _osd_req_op_init(osd_req, which,
-> +						      opcode, 0);
->   	struct ceph_pagelist *pagelist;
->   	size_t payload_len = 0;
->   	size_t size;
-> @@ -555,7 +558,8 @@ int osd_req_op_xattr_init(struct ceph_osd_request *osd_req, unsigned int which,
->   			  u16 opcode, const char *name, const void *value,
->   			  size_t size, u8 cmp_op, u8 cmp_mode)
->   {
-> -	struct ceph_osd_req_op *op = _osd_req_op_init(osd_req, which, opcode);
-> +	struct ceph_osd_req_op *op = _osd_req_op_init(osd_req, which,
-> +						      opcode, 0);
->   	struct ceph_pagelist *pagelist;
->   	size_t payload_len;
->
-> @@ -588,7 +592,8 @@ void osd_req_op_watch_init(struct ceph_osd_request *osd_req,
->   				unsigned int which, u16 opcode,
->   				u64 cookie, u64 version, int flag)
->   {
-> -	struct ceph_osd_req_op *op = _osd_req_op_init(osd_req, which, opcode);
-> +	struct ceph_osd_req_op *op = _osd_req_op_init(osd_req, which,
-> +						      opcode, 0);
->
->   	BUG_ON(opcode != CEPH_OSD_OP_NOTIFY_ACK && opcode != CEPH_OSD_OP_WATCH);
->
-> @@ -605,7 +610,8 @@ void osd_req_op_alloc_hint_init(struct ceph_osd_request *osd_req,
->   				u64 expected_write_size)
->   {
->   	struct ceph_osd_req_op *op = _osd_req_op_init(osd_req, which,
-> -						      CEPH_OSD_OP_SETALLOCHINT);
-> +						      CEPH_OSD_OP_SETALLOCHINT,
-> +						      0);
->
->   	op->alloc_hint.expected_object_size = expected_object_size;
->   	op->alloc_hint.expected_write_size = expected_write_size;
-> @@ -789,7 +795,7 @@ struct ceph_osd_request *ceph_osdc_new_request(struct ceph_osd_client *osdc,
->   	}
->
->   	if (opcode == CEPH_OSD_OP_CREATE || opcode == CEPH_OSD_OP_DELETE) {
-> -		osd_req_op_init(req, which, opcode);
-> +		osd_req_op_init(req, which, opcode, 0);
->   	} else {
->   		u32 object_size = le32_to_cpu(layout->fl_object_size);
->   		u32 object_base = off - objoff;
->
 
+----- Mail original -----
+De: "Mark Nelson" <mnelson@redhat.com>
+=C3=80: "Milosz Tanski" <milosz@adfin.com>, "aderumier" <aderumier@odis=
+o.com>, "ceph-devel" <ceph-devel@vger.kernel.org>, "Somnath Roy" <somna=
+th.roy@sandisk.com>
+Envoy=C3=A9: Lundi 27 Avril 2015 16:57:44
+Objet: Re: Hitting tcmalloc bug even with patch applied
+
+Looks like the default is 16MB:=20
+
+http://gperftools.googlecode.com/svn/trunk/doc/tcmalloc.html=20
+
+On 04/27/2015 09:53 AM, Milosz Tanski wrote:=20
+>=20
+>=20
+> On 4/27/15 9:21 AM, Alexandre DERUMIER wrote:=20
+>> Seem that starting osd with:=20
+>>=20
+>> TCMALLOC_MAX_TOTAL_THREAD_CACHE_BYTES=3D128M /usr/bin/ceph-osd=20
+>>=20
+>> fix it.=20
+>>=20
+>> I don't known if it's the right way ?=20
+>=20
+> Do you know what the default is if you don't specify it?=20
+>>=20
+>>=20
+>>=20
+>> ----- Mail original -----=20
+>> De: "aderumier" <aderumier@odiso.com>=20
+>> =C3=80: "ceph-devel" <ceph-devel@vger.kernel.org>, "Somnath Roy" <so=
+mnath.roy@sandisk.com>=20
+>> Envoy=C3=A9: Lundi 27 Avril 2015 14:06:22=20
+>> Objet: Hitting tcmalloc bug even with patch applied=20
+>>=20
+>> Hi,=20
+>>=20
+>> I'm hitting the tcmalloc even with patch apply.=20
+>> It's mainly occur when I try to bench fio with a lot jobs (20 - 40 j=
+obs)=20
+>>=20
+>> Does It need to tuned something in osd environnement variable ?=20
+>>=20
+>>=20
+>> I double check it with=20
+>>=20
+>> #g++ -o gperftest gperftest.c -ltcmalloc=20
+>> # export TCMALLOC_MAX_TOTAL_THREAD_CACHE_BYTES=3D67108864=20
+>> # ./gperftest=20
+>> Tcmalloc OK! Internal and Env cache size are same:67108864=20
+>>=20
+>>=20
+>> perf top=20
+>> -------=20
+>> 10.04% libtcmalloc.so.4.1.2 [.] tcmalloc::ThreadCache::ReleaseToCent=
+ralCache=20
+>> 8.19% libtcmalloc.so.4.1.2 [.] tcmalloc::CentralFreeList::FetchFromS=
+pans=20
+>> 3.89% libtcmalloc.so.4.1.2 [.] tcmalloc::CentralFreeList::ReleaseToS=
+pans=20
+>> 2.04% libtcmalloc.so.4.1.2 [.] tcmalloc::CentralFreeList::ReleaseLis=
+tToSpans=20
+>> 1.79% libtcmalloc.so.4.1.2 [.] operator new=20
+>> 1.25% ceph-osd [.] ConfFile::load_from_buffer=20
+>> 1.21% libtcmalloc.so.4.1.2 [.] operator delete=20
+>> 1.14% [kernel] [k] _raw_spin_lock=20
+>> 1.08% libstdc++.so.6.0.19 [.] std::basic_string<char, std::char_trai=
+ts<char>, std::allocator<char> >::basic_string=20
+>> 1.04% [kernel] [k] __schedule=20
+>> 1.00% libpthread-2.17.so [.] pthread_mutex_trylock=20
+>> 0.90% [kernel] [k] native_write_msr_safe=20
+>> 0.89% [kernel] [k] __switch_to=20
+>> 0.79% [kernel] [k] _raw_spin_lock_irqsave=20
+>> 0.73% [kernel] [k] copy_user_enhanced_fast_string=20
+>>=20
+>>=20
+>>=20
+>> Regards,=20
+>>=20
+>> Alexandre=20
+>=20
+> --=20
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in=20
+> the body of a message to majordomo@vger.kernel.org=20
+> More majordomo info at http://vger.kernel.org/majordomo-info.html=20
+>=20
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
