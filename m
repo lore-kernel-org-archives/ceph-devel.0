@@ -1,1309 +1,885 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: [ceph-users] strange benchmark problem : restarting osd daemon
+From: Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
+Subject: Re: strange benchmark problem : restarting osd daemon
  improve performance from 100k iops to 300k iops
-Date: Mon, 27 Apr 2015 11:34:50 -0500
-Message-ID: <553E652A.2060607@redhat.com>
-References: <1232683114.515741917.1429692005478.JavaMail.zimbra@oxygem.tv> <1270073308.621430804.1429893511370.JavaMail.zimbra@oxygem.tv> <BEEF4E3E-92BD-4E41-8E17-5BF9476A3674@profihost.ag> <553A8527.3020503@redhat.com> <1416266012.633995646.1429937143054.JavaMail.zimbra@oxygem.tv> <94521284.683547748.1430110881936.JavaMail.zimbra@oxygem.tv> <1545533798.684536916.1430113581382.JavaMail.zimbra@oxygem.tv> <553E4DAA.2070206@redhat.com> <1650722244.707717709.1430147472406.JavaMail.zimbra@oxygem.tv>
+Date: Mon, 27 Apr 2015 18:45:40 +0200 (CEST)
+Message-ID: <205623974.712193182.1430153140877.JavaMail.zimbra@oxygem.tv>
+References: <1232683114.515741917.1429692005478.JavaMail.zimbra@oxygem.tv>
+	<553A8527.3020503@redhat.com>
+	<1416266012.633995646.1429937143054.JavaMail.zimbra@oxygem.tv>
+	<94521284.683547748.1430110881936.JavaMail.zimbra@oxygem.tv>
+	<1545533798.684536916.1430113581382.JavaMail.zimbra@oxygem.tv>
+	<553E4DAA.2070206@redhat.com>
+	<1650722244.707717709.1430147472406.JavaMail.zimbra@oxygem.tv>
+	<553E652A.2060607@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:38018 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753069AbbD0Qez (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 27 Apr 2015 12:34:55 -0400
-In-Reply-To: <1650722244.707717709.1430147472406.JavaMail.zimbra@oxygem.tv>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>
-Cc: ceph-users <ceph-users@lists.ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>, Milosz Tanski <milosz@adfin.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <553E652A.2060607-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Mark Nelson <mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Milosz Tanski <milosz-B5zB6C1i6pkAvxtiuMwx3w@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-
-
-On 04/27/2015 10:11 AM, Alexandre DERUMIER wrote:
->>> Is it possible that you were suffering from the bug during the firs=
-t
->>> test but once reinstalled you hadn't hit it yet?
->
-> yes, I'm pretty sure I'm hitting the tcmalloc bug since the beginning=
-=2E
-> I had patched it, but I think it's not enough.
-> I had always this bug in random, but mainly when I have a "lot" of co=
-ncurrent client (20 -40).
-> more client increase - lower iops .
->
->
-> Today,I had try to start osd with TCMALLOC_MAX_TOTAL_THREAD_CACHE_BYT=
-ES=3D128M ,
-> and now it's working fine in all my benchs.
->
->
->>> That's a pretty major
->>> performance swing.  I'm not sure if we can draw any conclusions abo=
-ut
->>> jemalloc vs tcmalloc until we can figure out what went wrong.
->
->  From my bench, jemalloc use a little bit more cpu than tcmalloc (may=
-be 1% or 2%).
-> Tcmalloc seem to works better, with correct tuning of thread_cache_by=
-tes.
->
->
-> But I don't known how to tune TCMALLOC_MAX_TOTAL_THREAD_CACHE_BYTES c=
-orrectly.
-> Maybe Sommath can tell us ?
-
-Ok, just to make sure that I understand:
-
-tcmalloc un-tuned: ~50k IOPS once bug sets in
-tcmalloc with patch and 128MB thread cache bytes: ~195k IOPS
-jemalloc un-tuned: ~150k IOPS
-
-Is that correct?  Are there configurations/results I'm missing?
-
-Mark
-
->
->
-> ----- Mail original -----
-> De: "Mark Nelson" <mnelson@redhat.com>
-> =C3=80: "aderumier" <aderumier@odiso.com>
-> Cc: "ceph-users" <ceph-users@lists.ceph.com>, "ceph-devel" <ceph-deve=
-l@vger.kernel.org>, "Milosz Tanski" <milosz@adfin.com>
-> Envoy=C3=A9: Lundi 27 Avril 2015 16:54:34
-> Objet: Re: [ceph-users] strange benchmark problem : restarting osd da=
-emon improve performance from 100k iops to 300k iops
->
-> Hi Alex,
->
-> Is it possible that you were suffering from the bug during the first
-> test but once reinstalled you hadn't hit it yet? That's a pretty majo=
-r
-> performance swing. I'm not sure if we can draw any conclusions about
-> jemalloc vs tcmalloc until we can figure out what went wrong.
->
-> Mark
->
-> On 04/27/2015 12:46 AM, Alexandre DERUMIER wrote:
->>>> I'll retest tcmalloc, because I was prety sure to have patched it =
-correctly.
->>
->> Ok, I really think I have patched tcmalloc wrongly.
->> I have repatched it, reinstalled it, and now I'm getting 195k iops w=
-ith a single osd (10fio rbd jobs 4k randread).
->>
->> So better than jemalloc.
->>
->>
->> ----- Mail original -----
->> De: "aderumier" <aderumier@odiso.com>
->> =C3=80: "Mark Nelson" <mnelson@redhat.com>
->> Cc: "ceph-users" <ceph-users@lists.ceph.com>, "ceph-devel" <ceph-dev=
-el@vger.kernel.org>, "Milosz Tanski" <milosz@adfin.com>
->> Envoy=C3=A9: Lundi 27 Avril 2015 07:01:21
->> Objet: Re: [ceph-users] strange benchmark problem : restarting osd d=
-aemon improve performance from 100k iops to 300k iops
->>
->> Hi,
->>
->> also another big difference,
->>
->> I can reach now 180k iops with a single jemalloc osd (data in buffer=
-) vs 50k iops max with tcmalloc.
->>
->> I'll retest tcmalloc, because I was prety sure to have patched it co=
-rrectly.
->>
->>
->> ----- Mail original -----
->> De: "aderumier" <aderumier@odiso.com>
->> =C3=80: "Mark Nelson" <mnelson@redhat.com>
->> Cc: "ceph-users" <ceph-users@lists.ceph.com>, "ceph-devel" <ceph-dev=
-el@vger.kernel.org>, "Milosz Tanski" <milosz@adfin.com>
->> Envoy=C3=A9: Samedi 25 Avril 2015 06:45:43
->> Objet: Re: [ceph-users] strange benchmark problem : restarting osd d=
-aemon improve performance from 100k iops to 300k iops
->>
->>>> We haven't done any kind of real testing on jemalloc, so use at yo=
-ur own
->>>> peril. Having said that, we've also been very interested in hearin=
-g
->>>> community feedback from folks trying it out, so please feel free t=
-o give
->>>> it a shot. :D
->>
->> Some feedback, I have runned bench all the night, no speed regressio=
-n.
->>
->> And I have a speed increase with fio with more jobs. (with tcmalloc,=
- it seem to be the reverse)
->>
->> with tcmalloc :
->>
->> 10 fio-rbd jobs =3D 300k iops
->> 15 fio-rbd jobs =3D 290k iops
->> 20 fio-rbd jobs =3D 270k iops
->> 40 fio-rbd jobs =3D 250k iops
->>
->> (all with up and down values during the fio bench)
->>
->>
->> with jemalloc:
->>
->> 10 fio-rbd jobs =3D 300k iops
->> 15 fio-rbd jobs =3D 320k iops
->> 20 fio-rbd jobs =3D 330k iops
->> 40 fio-rbd jobs =3D 370k iops (can get more currently, only 1 client=
- machine with 20cores 100%)
->>
->> (all with contant values during the fio bench)
->>
->> ----- Mail original -----
->> De: "Mark Nelson" <mnelson@redhat.com>
->> =C3=80: "Stefan Priebe" <s.priebe@profihost.ag>, "aderumier" <aderum=
-ier@odiso.com>
->> Cc: "ceph-users" <ceph-users@lists.ceph.com>, "ceph-devel" <ceph-dev=
-el@vger.kernel.org>, "Somnath Roy" <Somnath.Roy@sandisk.com>, "Milosz T=
-anski" <milosz@adfin.com>
->> Envoy=C3=A9: Vendredi 24 Avril 2015 20:02:15
->> Objet: Re: [ceph-users] strange benchmark problem : restarting osd d=
-aemon improve performance from 100k iops to 300k iops
->>
->> We haven't done any kind of real testing on jemalloc, so use at your=
- own
->> peril. Having said that, we've also been very interested in hearing
->> community feedback from folks trying it out, so please feel free to =
-give
->> it a shot. :D
->>
->> Mark
->>
->> On 04/24/2015 12:36 PM, Stefan Priebe - Profihost AG wrote:
->>> Is jemalloc recommanded in general? Does it also work for firefly?
->>>
->>> Stefan
->>>
->>> Excuse my typo sent from my mobile phone.
->>>
->>> Am 24.04.2015 um 18:38 schrieb Alexandre DERUMIER <aderumier@odiso.=
-com
->>> <mailto:aderumier@odiso.com>>:
->>>
->>>> Hi,
->>>>
->>>> I have finished to rebuild ceph with jemalloc,
->>>>
->>>> all seem to working fine.
->>>>
->>>> I got a constant 300k iops for the moment, so no speed regression.
->>>>
->>>> I'll do more long benchmark next week.
->>>>
->>>> Regards,
->>>>
->>>> Alexandre
->>>>
->>>> ----- Mail original -----
->>>> De: "Irek Fasikhov" <malmyzh@gmail.com <mailto:malmyzh@gmail.com>>
->>>> =C3=80: "Somnath Roy" <Somnath.Roy@sandisk.com
->>>> <mailto:Somnath.Roy@sandisk.com>>
->>>> Cc: "aderumier" <aderumier@odiso.com <mailto:aderumier@odiso.com>>=
-,
->>>> "Mark Nelson" <mnelson@redhat.com <mailto:mnelson@redhat.com>>,
->>>> "ceph-users" <ceph-users@lists.ceph.com
->>>> <mailto:ceph-users@lists.ceph.com>>, "ceph-devel"
->>>> <ceph-devel@vger.kernel.org <mailto:ceph-devel@vger.kernel.org>>,
->>>> "Milosz Tanski" <milosz@adfin.com <mailto:milosz@adfin.com>>
->>>> Envoy=C3=A9: Vendredi 24 Avril 2015 13:37:52
->>>> Objet: Re: [ceph-users] strange benchmark problem : restarting osd
->>>> daemon improve performance from 100k iops to 300k iops
->>>>
->>>> Hi,Alexandre!
->>>> Do not try to change the parameter vm.min_free_kbytes?
->>>>
->>>> 2015-04-23 19:24 GMT+03:00 Somnath Roy < Somnath.Roy@sandisk.com
->>>> <mailto:Somnath.Roy@sandisk.com> > :
->>>>
->>>>
->>>> Alexandre,
->>>> You can configure with --with-jemalloc or ./do_autogen -J to build
->>>> ceph with jemalloc.
->>>>
->>>> Thanks & Regards
->>>> Somnath
->>>>
->>>> -----Original Message-----
->>>> From: ceph-users [mailto: ceph-users-bounces@lists.ceph.com
->>>> <mailto:ceph-users-bounces@lists.ceph.com> ] On Behalf Of Alexandr=
-e
->>>> DERUMIER
->>>> Sent: Thursday, April 23, 2015 4:56 AM
->>>> To: Mark Nelson
->>>> Cc: ceph-users; ceph-devel; Milosz Tanski
->>>> Subject: Re: [ceph-users] strange benchmark problem : restarting o=
-sd
->>>> daemon improve performance from 100k iops to 300k iops
->>>>
->>>>>> If you have the means to compile the same version of ceph with
->>>>>> jemalloc, I would be very interested to see how it does.
->>>>
->>>> Yes, sure. (I have around 3-4 weeks to do all the benchs)
->>>>
->>>> But I don't know how to do it ?
->>>> I'm running the cluster on centos7.1, maybe it can be easy to patc=
-h
->>>> the srpms to rebuild the package with jemalloc.
->>>>
->>>>
->>>>
->>>> ----- Mail original -----
->>>> De: "Mark Nelson" < mnelson@redhat.com <mailto:mnelson@redhat.com>=
- >
->>>> =C3=80: "aderumier" < aderumier@odiso.com <mailto:aderumier@odiso.=
-com> >,
->>>> "Srinivasula Maram" < Srinivasula.Maram@sandisk.com
->>>> <mailto:Srinivasula.Maram@sandisk.com> >
->>>> Cc: "ceph-users" < ceph-users@lists.ceph.com
->>>> <mailto:ceph-users@lists.ceph.com> >, "ceph-devel" <
->>>> ceph-devel@vger.kernel.org <mailto:ceph-devel@vger.kernel.org> >,
->>>> "Milosz Tanski" < milosz@adfin.com <mailto:milosz@adfin.com> >
->>>> Envoy=C3=A9: Jeudi 23 Avril 2015 13:33:00
->>>> Objet: Re: [ceph-users] strange benchmark problem : restarting osd
->>>> daemon improve performance from 100k iops to 300k iops
->>>>
->>>> Thanks for the testing Alexandre!
->>>>
->>>> If you have the means to compile the same version of ceph with
->>>> jemalloc, I would be very interested to see how it does.
->>>>
->>>> In some ways I'm glad it turned out not to be NUMA. I still suspec=
-t we
->>>> will have to deal with it at some point, but perhaps not today. ;)
->>>>
->>>> Mark
->>>>
->>>> On 04/23/2015 05:58 AM, Alexandre DERUMIER wrote:
->>>>> Maybe it's tcmalloc related
->>>>> I thinked to have patched it correctly, but perf show a lot of
->>>>> tcmalloc::ThreadCache::ReleaseToCentralCache
->>>>>
->>>>> before osd restart (100k)
->>>>> ------------------
->>>>> 11.66% ceph-osd libtcmalloc.so.4.1.2 [.]
->>>>> tcmalloc::ThreadCache::ReleaseToCentralCache
->>>>> 8.51% ceph-osd libtcmalloc.so.4.1.2 [.]
->>>>> tcmalloc::CentralFreeList::FetchFromSpans
->>>>> 3.04% ceph-osd libtcmalloc.so.4.1.2 [.]
->>>>> tcmalloc::CentralFreeList::ReleaseToSpans
->>>>> 2.04% ceph-osd libtcmalloc.so.4.1.2 [.] operator new 1.63% swappe=
-r
->>>>> [kernel.kallsyms] [k] intel_idle 1.35% ceph-osd libtcmalloc.so.4.=
-1.2
->>>>> [.] tcmalloc::CentralFreeList::ReleaseListToSpans
->>>>> 1.33% ceph-osd libtcmalloc.so.4.1.2 [.] operator delete 1.07% cep=
-h-osd
->>>>> libstdc++.so.6.0.19 [.] std::basic_string<char,
->>>>> std::char_traits<char>, std::allocator<char> >::basic_string 0.91=
-%
->>>>> ceph-osd libpthread-2.17.so [.] pthread_mutex_trylock 0.88% ceph-=
-osd
->>>>> libc-2.17.so [.] __memcpy_ssse3_back 0.81% ceph-osd ceph-osd [.]
->>>>> Mutex::Lock 0.79% ceph-osd [kernel.kallsyms] [k]
->>>>> copy_user_enhanced_fast_string 0.74% ceph-osd libpthread-2.17.so =
-[.]
->>>>> pthread_mutex_unlock 0.67% ceph-osd [kernel.kallsyms] [k]
->>>>> _raw_spin_lock 0.63% swapper [kernel.kallsyms] [k]
->>>>> native_write_msr_safe 0.62% ceph-osd [kernel.kallsyms] [k]
->>>>> avc_has_perm_noaudit 0.58% ceph-osd ceph-osd [.] operator< 0.57%
->>>>> ceph-osd [kernel.kallsyms] [k] __schedule 0.57% ceph-osd
->>>>> [kernel.kallsyms] [k] __d_lookup_rcu 0.54% swapper [kernel.kallsy=
-ms]
->>>>> [k] __schedule
->>>>>
->>>>>
->>>>> after osd restart (300k iops)
->>>>> ------------------------------
->>>>> 3.47% ceph-osd libtcmalloc.so.4.1.2 [.] operator new 1.92% ceph-o=
-sd
->>>>> libtcmalloc.so.4.1.2 [.] operator delete 1.86% swapper
->>>>> [kernel.kallsyms] [k] intel_idle 1.52% ceph-osd libstdc++.so.6.0.=
-19
->>>>> [.] std::basic_string<char, std::char_traits<char>,
->>>>> std::allocator<char> >::basic_string 1.34% ceph-osd
->>>>> libtcmalloc.so.4.1.2 [.] tcmalloc::ThreadCache::ReleaseToCentralC=
-ache
->>>>> 1.24% ceph-osd libc-2.17.so [.] __memcpy_ssse3_back 1.23% ceph-os=
-d
->>>>> ceph-osd [.] Mutex::Lock 1.21% ceph-osd libpthread-2.17.so [.]
->>>>> pthread_mutex_trylock 1.11% ceph-osd [kernel.kallsyms] [k]
->>>>> copy_user_enhanced_fast_string 0.95% ceph-osd libpthread-2.17.so =
-[.]
->>>>> pthread_mutex_unlock 0.94% ceph-osd [kernel.kallsyms] [k]
->>>>> _raw_spin_lock 0.78% ceph-osd [kernel.kallsyms] [k] __d_lookup_rc=
-u
->>>>> 0.70% ceph-osd [kernel.kallsyms] [k] tcp_sendmsg 0.70% ceph-osd
->>>>> ceph-osd [.] Message::Message 0.68% ceph-osd [kernel.kallsyms] [k=
-]
->>>>> __schedule 0.66% ceph-osd [kernel.kallsyms] [k] idle_cpu 0.65%
->>>>> ceph-osd libtcmalloc.so.4.1.2 [.]
->>>>> tcmalloc::CentralFreeList::FetchFromSpans
->>>>> 0.64% swapper [kernel.kallsyms] [k] native_write_msr_safe 0.61%
->>>>> ceph-osd ceph-osd [.]
->>>>> std::tr1::_Sp_counted_base<(__gnu_cxx::_Lock_policy)2>::_M_releas=
-e
->>>>> 0.60% swapper [kernel.kallsyms] [k] __schedule 0.60% ceph-osd
->>>>> libstdc++.so.6.0.19 [.] 0x00000000000bdd2b 0.57% ceph-osd ceph-os=
-d [.]
->>>>> operator< 0.57% ceph-osd ceph-osd [.] crc32_iscsi_00 0.56% ceph-o=
-sd
->>>>> libstdc++.so.6.0.19 [.] std::string::_Rep::_M_dispose 0.55% ceph-=
-osd
->>>>> [kernel.kallsyms] [k] __switch_to 0.54% ceph-osd libc-2.17.so [.]
->>>>> vfprintf 0.52% ceph-osd [kernel.kallsyms] [k] fget_light
->>>>>
->>>>> ----- Mail original -----
->>>>> De: "aderumier" < aderumier@odiso.com <mailto:aderumier@odiso.com=
-> >
->>>>> =C3=80: "Srinivasula Maram" < Srinivasula.Maram@sandisk.com
->>>>> <mailto:Srinivasula.Maram@sandisk.com> >
->>>>> Cc: "ceph-users" < ceph-users@lists.ceph.com
->>>>> <mailto:ceph-users@lists.ceph.com> >, "ceph-devel"
->>>>> < ceph-devel@vger.kernel.org <mailto:ceph-devel@vger.kernel.org> =
->,
->>>>> "Milosz Tanski" < milosz@adfin.com <mailto:milosz@adfin.com> >
->>>>> Envoy=C3=A9: Jeudi 23 Avril 2015 10:00:34
->>>>> Objet: Re: [ceph-users] strange benchmark problem : restarting os=
-d
->>>>> daemon improve performance from 100k iops to 300k iops
->>>>>
->>>>> Hi,
->>>>> I'm hitting this bug again today.
->>>>>
->>>>> So don't seem to be numa related (I have try to flush linux buffe=
-r to
->>>>> be sure).
->>>>>
->>>>> and tcmalloc is patched (I don't known how to verify that it's ok=
-).
->>>>>
->>>>> I don't have restarted osd yet.
->>>>>
->>>>> Maybe some perf trace could be usefulll ?
->>>>>
->>>>>
->>>>> ----- Mail original -----
->>>>> De: "aderumier" < aderumier@odiso.com <mailto:aderumier@odiso.com=
-> >
->>>>> =C3=80: "Srinivasula Maram" < Srinivasula.Maram@sandisk.com
->>>>> <mailto:Srinivasula.Maram@sandisk.com> >
->>>>> Cc: "ceph-users" < ceph-users@lists.ceph.com
->>>>> <mailto:ceph-users@lists.ceph.com> >, "ceph-devel"
->>>>> < ceph-devel@vger.kernel.org <mailto:ceph-devel@vger.kernel.org> =
->,
->>>>> "Milosz Tanski" < milosz@adfin.com <mailto:milosz@adfin.com> >
->>>>> Envoy=C3=A9: Mercredi 22 Avril 2015 18:30:26
->>>>> Objet: Re: [ceph-users] strange benchmark problem : restarting os=
-d
->>>>> daemon improve performance from 100k iops to 300k iops
->>>>>
->>>>> Hi,
->>>>>
->>>>>>> I feel it is due to tcmalloc issue
->>>>>
->>>>> Indeed, I had patched one of my node, but not the other.
->>>>> So maybe I have hit this bug. (but I can't confirm, I don't have
->>>>> traces).
->>>>>
->>>>> But numa interleaving seem to help in my case (maybe not from
->>>>> 100->300k, but 250k->300k).
->>>>>
->>>>> I need to do more long tests to confirm that.
->>>>>
->>>>>
->>>>> ----- Mail original -----
->>>>> De: "Srinivasula Maram" < Srinivasula.Maram@sandisk.com
->>>>> <mailto:Srinivasula.Maram@sandisk.com> >
->>>>> =C3=80: "Mark Nelson" < mnelson@redhat.com <mailto:mnelson@redhat=
-=2Ecom> >,
->>>>> "aderumier"
->>>>> < aderumier@odiso.com <mailto:aderumier@odiso.com> >, "Milosz Tan=
-ski"
->>>>> < milosz@adfin.com <mailto:milosz@adfin.com> >
->>>>> Cc: "ceph-devel" < ceph-devel@vger.kernel.org
->>>>> <mailto:ceph-devel@vger.kernel.org> >, "ceph-users"
->>>>> < ceph-users@lists.ceph.com <mailto:ceph-users@lists.ceph.com> >
->>>>> Envoy=C3=A9: Mercredi 22 Avril 2015 16:34:33
->>>>> Objet: RE: [ceph-users] strange benchmark problem : restarting os=
-d
->>>>> daemon improve performance from 100k iops to 300k iops
->>>>>
->>>>> I feel it is due to tcmalloc issue
->>>>>
->>>>> I have seen similar issue in my setup after 20 days.
->>>>>
->>>>> Thanks,
->>>>> Srinivas
->>>>>
->>>>>
->>>>>
->>>>> -----Original Message-----
->>>>> From: ceph-users [mailto: ceph-users-bounces@lists.ceph.com
->>>>> <mailto:ceph-users-bounces@lists.ceph.com> ] On Behalf
->>>>> Of Mark Nelson
->>>>> Sent: Wednesday, April 22, 2015 7:31 PM
->>>>> To: Alexandre DERUMIER; Milosz Tanski
->>>>> Cc: ceph-devel; ceph-users
->>>>> Subject: Re: [ceph-users] strange benchmark problem : restarting =
-osd
->>>>> daemon improve performance from 100k iops to 300k iops
->>>>>
->>>>> Hi Alexandre,
->>>>>
->>>>> We should discuss this at the perf meeting today. We knew NUMA no=
-de
->>>>> affinity issues were going to crop up sooner or later (and indeed
->>>>> already have in some cases), but this is pretty major. It's proba=
-bly
->>>>> time to really dig in and figure out how to deal with this.
->>>>>
->>>>> Note: this is one of the reasons I like small nodes with single
->>>>> sockets and fewer OSDs.
->>>>>
->>>>> Mark
->>>>>
->>>>> On 04/22/2015 08:56 AM, Alexandre DERUMIER wrote:
->>>>>> Hi,
->>>>>>
->>>>>> I have done a lot of test today, and it seem indeed numa related=
-=2E
->>>>>>
->>>>>> My numastat was
->>>>>>
->>>>>> # numastat
->>>>>> node0 node1
->>>>>> numa_hit 99075422 153976877
->>>>>> numa_miss 167490965 1493663
->>>>>> numa_foreign 1493663 167491417
->>>>>> interleave_hit 157745 167015
->>>>>> local_node 99049179 153830554
->>>>>> other_node 167517697 1639986
->>>>>>
->>>>>> So, a lot of miss.
->>>>>>
->>>>>> In this case , I can reproduce ios going from 85k to 300k iops, =
-up
->>>>>> and down.
->>>>>>
->>>>>> now setting
->>>>>> echo 0 > /proc/sys/kernel/numa_balancing
->>>>>>
->>>>>> and starting osd daemons with
->>>>>>
->>>>>> numactl --interleave=3Dall /usr/bin/ceph-osd
->>>>>>
->>>>>>
->>>>>> I have a constant 300k iops !
->>>>>>
->>>>>>
->>>>>> I wonder if it could be improve by binding osd daemons to specif=
-ic
->>>>>> numa node.
->>>>>> I have 2 numanode of 10 cores with 6 osd, but I think it also
->>>>>> require ceph.conf osd threads tunning.
->>>>>>
->>>>>>
->>>>>>
->>>>>> ----- Mail original -----
->>>>>> De: "Milosz Tanski" < milosz@adfin.com <mailto:milosz@adfin.com>=
- >
->>>>>> =C3=80: "aderumier" < aderumier@odiso.com <mailto:aderumier@odis=
-o.com> >
->>>>>> Cc: "ceph-devel" < ceph-devel@vger.kernel.org
->>>>>> <mailto:ceph-devel@vger.kernel.org> >, "ceph-users"
->>>>>> < ceph-users@lists.ceph.com <mailto:ceph-users@lists.ceph.com> >
->>>>>> Envoy=C3=A9: Mercredi 22 Avril 2015 12:54:23
->>>>>> Objet: Re: [ceph-users] strange benchmark problem : restarting o=
-sd
->>>>>> daemon improve performance from 100k iops to 300k iops
->>>>>>
->>>>>>
->>>>>>
->>>>>> On Wed, Apr 22, 2015 at 5:01 AM, Alexandre DERUMIER <
->>>>>> aderumier@odiso.com <mailto:aderumier@odiso.com> > wrote:
->>>>>>
->>>>>>
->>>>>> I wonder if it could be numa related,
->>>>>>
->>>>>> I'm using centos 7.1,
->>>>>> and auto numa balacning is enabled
->>>>>>
->>>>>> cat /proc/sys/kernel/numa_balancing =3D 1
->>>>>>
->>>>>> Maybe osd daemon access to buffer on wrong numa node.
->>>>>>
->>>>>> I'll try to reproduce the problem
->>>>>>
->>>>>>
->>>>>>
->>>>>> Can you force the degenerate case using numactl? To either affir=
-m or
->>>>>> deny your suspicion.
->>>>>>
->>>>>>
->>>>>>
->>>>>>
->>>>>> ----- Mail original -----
->>>>>> De: "aderumier" < aderumier@odiso.com <mailto:aderumier@odiso.co=
-m> >
->>>>>> =C3=80: "ceph-devel" < ceph-devel@vger.kernel.org
->>>>>> <mailto:ceph-devel@vger.kernel.org> >, "ceph-users" <
->>>>>> ceph-users@lists.ceph.com <mailto:ceph-users@lists.ceph.com> >
->>>>>> Envoy=C3=A9: Mercredi 22 Avril 2015 10:40:05
->>>>>> Objet: [ceph-users] strange benchmark problem : restarting osd d=
-aemon
->>>>>> improve performance from 100k iops to 300k iops
->>>>>>
->>>>>> Hi,
->>>>>>
->>>>>> I was doing some benchmarks,
->>>>>> I have found an strange behaviour.
->>>>>>
->>>>>> Using fio with rbd engine, I was able to reach around 100k iops.
->>>>>> (osd datas in linux buffer, iostat show 0% disk access)
->>>>>>
->>>>>> then after restarting all osd daemons,
->>>>>>
->>>>>> the same fio benchmark show now around 300k iops.
->>>>>> (osd datas in linux buffer, iostat show 0% disk access)
->>>>>>
->>>>>>
->>>>>> any ideas?
->>>>>>
->>>>>>
->>>>>>
->>>>>>
->>>>>> before restarting osd
->>>>>> ---------------------
->>>>>> rbd_iodepth32-test: (g=3D0): rw=3Drandread, bs=3D4K-4K/4K-4K/4K-=
-4K,
->>>>>> ioengine=3Drbd, iodepth=3D32 ...
->>>>>> fio-2.2.7-10-g51e9
->>>>>> Starting 10 processes
->>>>>> rbd engine: RBD version: 0.1.9
->>>>>> rbd engine: RBD version: 0.1.9
->>>>>> rbd engine: RBD version: 0.1.9
->>>>>> rbd engine: RBD version: 0.1.9
->>>>>> rbd engine: RBD version: 0.1.9
->>>>>> rbd engine: RBD version: 0.1.9
->>>>>> rbd engine: RBD version: 0.1.9
->>>>>> rbd engine: RBD version: 0.1.9
->>>>>> rbd engine: RBD version: 0.1.9
->>>>>> rbd engine: RBD version: 0.1.9
->>>>>> ^Cbs: 10 (f=3D10): [r(10)] [2.9% done] [376.1MB/0KB/0KB /s] [96.=
-6K/0/0
->>>>>> iops] [eta 14m:45s]
->>>>>> fio: terminating on signal 2
->>>>>>
->>>>>> rbd_iodepth32-test: (groupid=3D0, jobs=3D10): err=3D 0: pid=3D17=
-075: Wed Apr
->>>>>> 22 10:00:04 2015 read : io=3D11558MB, bw=3D451487KB/s, iops=3D11=
-2871, runt=3D
->>>>>> 26215msec slat (usec): min=3D5, max=3D3685, avg=3D16.89, stdev=3D=
-17.38 clat
->>>>>> (usec): min=3D5, max=3D62584, avg=3D2695.80, stdev=3D5351.23 lat=
- (usec):
->>>>>> min=3D109, max=3D62598, avg=3D2712.68, stdev=3D5350.42 clat perc=
-entiles
->>>>>> (usec):
->>>>>> | 1.00th=3D[ 155], 5.00th=3D[ 183], 10.00th=3D[ 205], 20.00th=3D=
-[ 247],
->>>>>> | 30.00th=3D[ 294], 40.00th=3D[ 354], 50.00th=3D[ 446], 60.00th=3D=
-[ 660],
->>>>>> | 70.00th=3D[ 1176], 80.00th=3D[ 3152], 90.00th=3D[ 9024], 95.00=
-th=3D[14656],
->>>>>> | 99.00th=3D[25984], 99.50th=3D[30336], 99.90th=3D[38656], 99.95=
-th=3D[41728],
->>>>>> | 99.99th=3D[47360]
->>>>>> bw (KB /s): min=3D23928, max=3D154416, per=3D10.07%, avg=3D45462=
-=2E82,
->>>>>> stdev=3D28809.95 lat (usec) : 10=3D0.01%, 20=3D0.01%, 50=3D0.01%=
-, 100=3D0.01%,
->>>>>> 250=3D20.79% lat (usec) : 500=3D32.74%, 750=3D8.99%, 1000=3D5.03=
-% lat (msec) :
->>>>>> 2=3D8.37%, 4=3D6.21%, 10=3D8.90%, 20=3D6.60%, 50=3D2.37% lat (ms=
-ec) : 100=3D0.01%
->>>>>> cpu : usr=3D15.90%, sys=3D3.01%, ctx=3D765446, majf=3D0, minf=3D=
-8710 IO depths :
->>>>>> 1=3D0.4%, 2=3D0.9%, 4=3D2.3%, 8=3D7.4%, 16=3D75.5%, 32=3D13.6%, =
->=3D64=3D0.0% submit :
->>>>>> 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, 64=3D0.0%,=
- >=3D64=3D0.0%
->>>>>> complete : 0=3D0.0%, 4=3D93.6%, 8=3D2.8%, 16=3D2.4%, 32=3D1.2%, =
-64=3D0.0%,
->>>>>>> =3D64=3D0.0% issued : total=3Dr=3D2958935/w=3D0/d=3D0, short=3D=
-r=3D0/w=3D0/d=3D0,
->>>>>> drop=3Dr=3D0/w=3D0/d=3D0 latency : target=3D0, window=3D0, perce=
-ntile=3D100.00%,
->>>>>> depth=3D32
->>>>>>
->>>>>> Run status group 0 (all jobs):
->>>>>> READ: io=3D11558MB, aggrb=3D451487KB/s, minb=3D451487KB/s, maxb=3D=
-451487KB/s,
->>>>>> mint=3D26215msec, maxt=3D26215msec
->>>>>>
->>>>>> Disk stats (read/write):
->>>>>> sdg: ios=3D0/29, merge=3D0/16, ticks=3D0/3, in_queue=3D3, util=3D=
-0.01%
->>>>>> [root@ceph1-3 fiorbd]# ./fio fiorbd
->>>>>> rbd_iodepth32-test: (g=3D0): rw=3Drandread, bs=3D4K-4K/4K-4K/4K-=
-4K,
->>>>>> ioengine=3Drbd, iodepth=3D32
->>>>>>
->>>>>>
->>>>>>
->>>>>>
->>>>>> AFTER RESTARTING OSDS
->>>>>> ----------------------
->>>>>> [root@ceph1-3 fiorbd]# ./fio fiorbd
->>>>>> rbd_iodepth32-test: (g=3D0): rw=3Drandread, bs=3D4K-4K/4K-4K/4K-=
-4K,
->>>>>> ioengine=3Drbd, iodepth=3D32 ...
->>>>>> fio-2.2.7-10-g51e9
->>>>>> Starting 10 processes
->>>>>> rbd engine: RBD version: 0.1.9
->>>>>> rbd engine: RBD version: 0.1.9
->>>>>> rbd engine: RBD version: 0.1.9
->>>>>> rbd engine: RBD version: 0.1.9
->>>>>> rbd engine: RBD version: 0.1.9
->>>>>> rbd engine: RBD version: 0.1.9
->>>>>> rbd engine: RBD version: 0.1.9
->>>>>> rbd engine: RBD version: 0.1.9
->>>>>> rbd engine: RBD version: 0.1.9
->>>>>> rbd engine: RBD version: 0.1.9
->>>>>> ^Cbs: 10 (f=3D10): [r(10)] [0.2% done] [1155MB/0KB/0KB /s] [296K=
-/0/0
->>>>>> iops] [eta 01h:09m:27s]
->>>>>> fio: terminating on signal 2
->>>>>>
->>>>>> rbd_iodepth32-test: (groupid=3D0, jobs=3D10): err=3D 0: pid=3D18=
-252: Wed Apr
->>>>>> 22 10:02:28 2015 read : io=3D7655.7MB, bw=3D1036.8MB/s, iops=3D2=
-65218,
->>>>>> runt=3D 7389msec slat (usec): min=3D5, max=3D3406, avg=3D26.59, =
-stdev=3D40.35
->>>>>> clat
->>>>>> (usec): min=3D8, max=3D684328, avg=3D930.43, stdev=3D6419.12 lat=
- (usec):
->>>>>> min=3D154, max=3D684342, avg=3D957.02, stdev=3D6419.28 clat perc=
-entiles
->>>>>> (usec):
->>>>>> | 1.00th=3D[ 243], 5.00th=3D[ 314], 10.00th=3D[ 366], 20.00th=3D=
-[ 450],
->>>>>> | 30.00th=3D[ 524], 40.00th=3D[ 604], 50.00th=3D[ 692], 60.00th=3D=
-[ 796],
->>>>>> | 70.00th=3D[ 924], 80.00th=3D[ 1096], 90.00th=3D[ 1400], 95.00t=
-h=3D[ 1720],
->>>>>> | 99.00th=3D[ 2672], 99.50th=3D[ 3248], 99.90th=3D[ 5920], 99.95=
-th=3D[ 9792],
->>>>>> | 99.99th=3D[436224]
->>>>>> bw (KB /s): min=3D32614, max=3D143160, per=3D10.19%, avg=3D10807=
-6.46,
->>>>>> stdev=3D28263.82 lat (usec) : 10=3D0.01%, 20=3D0.01%, 50=3D0.01%=
-, 100=3D0.01%,
->>>>>> 250=3D1.23% lat (usec) : 500=3D25.64%, 750=3D29.15%, 1000=3D18.8=
-4% lat (msec)
->>>>>> : 2=3D22.19%, 4=3D2.69%, 10=3D0.21%, 20=3D0.02%, 50=3D0.01% lat =
-(msec) :
->>>>>> 250=3D0.01%, 500=3D0.02%, 750=3D0.01% cpu : usr=3D44.06%, sys=3D=
-11.26%,
->>>>>> ctx=3D642620, majf=3D0, minf=3D6832 IO depths : 1=3D0.1%, 2=3D0.=
-5%, 4=3D2.0%,
->>>>>> 8=3D11.5%, 16=3D77.8%, 32=3D8.1%, >=3D64=3D0.0% submit : 0=3D0.0=
-%, 4=3D100.0%,
->>>>>> 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, 64=3D0.0%, >=3D64=3D0.0% complet=
-e : 0=3D0.0%,
->>>>>> 4=3D94.1%, 8=3D1.3%, 16=3D2.3%, 32=3D2.3%, 64=3D0.0%, >=3D64=3D0=
-=2E0% issued :
->>>>>> total=3Dr=3D1959697/w=3D0/d=3D0, short=3Dr=3D0/w=3D0/d=3D0, drop=
-=3Dr=3D0/w=3D0/d=3D0 latency :
->>>>>> target=3D0, window=3D0, percentile=3D100.00%, depth=3D32
->>>>>>
->>>>>> Run status group 0 (all jobs):
->>>>>> READ: io=3D7655.7MB, aggrb=3D1036.8MB/s, minb=3D1036.8MB/s,
->>>>>> maxb=3D1036.8MB/s, mint=3D7389msec, maxt=3D7389msec
->>>>>>
->>>>>> Disk stats (read/write):
->>>>>> sdg: ios=3D0/21, merge=3D0/10, ticks=3D0/2, in_queue=3D2, util=3D=
-0.03%
->>>>>>
->>>>>>
->>>>>>
->>>>>>
->>>>>> CEPH LOG
->>>>>> --------
->>>>>>
->>>>>> before restarting osd
->>>>>> ----------------------
->>>>>>
->>>>>> 2015-04-22 09:53:17.568095 mon.0 10.7.0.152:6789/0 2144 : cluste=
-r
->>>>>> [INF] pgmap v11330: 964 pgs: 2 active+undersized+degraded, 62
->>>>>> active+remapped, 900 active+clean; 390 GB data, 391 GB used, 904=
- GB /
->>>>>> 1295 GB avail; 298 MB/s rd, 76465 op/s
->>>>>> 2015-04-22 09:53:18.574524 mon.0 10.7.0.152:6789/0 2145 : cluste=
-r
->>>>>> [INF] pgmap v11331: 964 pgs: 2 active+undersized+degraded, 62
->>>>>> active+remapped, 900 active+clean; 390 GB data, 391 GB used, 904=
- GB /
->>>>>> 1295 GB avail; 333 MB/s rd, 85355 op/s
->>>>>> 2015-04-22 09:53:19.579351 mon.0 10.7.0.152:6789/0 2146 : cluste=
-r
->>>>>> [INF] pgmap v11332: 964 pgs: 2 active+undersized+degraded, 62
->>>>>> active+remapped, 900 active+clean; 390 GB data, 391 GB used, 904=
- GB /
->>>>>> 1295 GB avail; 343 MB/s rd, 87932 op/s
->>>>>> 2015-04-22 09:53:20.591586 mon.0 10.7.0.152:6789/0 2147 : cluste=
-r
->>>>>> [INF] pgmap v11333: 964 pgs: 2 active+undersized+degraded, 62
->>>>>> active+remapped, 900 active+clean; 390 GB data, 391 GB used, 904=
- GB /
->>>>>> 1295 GB avail; 328 MB/s rd, 84151 op/s
->>>>>> 2015-04-22 09:53:21.600650 mon.0 10.7.0.152:6789/0 2148 : cluste=
-r
->>>>>> [INF] pgmap v11334: 964 pgs: 2 active+undersized+degraded, 62
->>>>>> active+remapped, 900 active+clean; 390 GB data, 391 GB used, 904=
- GB /
->>>>>> 1295 GB avail; 237 MB/s rd, 60855 op/s
->>>>>> 2015-04-22 09:53:22.607966 mon.0 10.7.0.152:6789/0 2149 : cluste=
-r
->>>>>> [INF] pgmap v11335: 964 pgs: 2 active+undersized+degraded, 62
->>>>>> active+remapped, 900 active+clean; 390 GB data, 391 GB used, 904=
- GB /
->>>>>> 1295 GB avail; 144 MB/s rd, 36935 op/s
->>>>>> 2015-04-22 09:53:23.617780 mon.0 10.7.0.152:6789/0 2150 : cluste=
-r
->>>>>> [INF] pgmap v11336: 964 pgs: 2 active+undersized+degraded, 62
->>>>>> active+remapped, 900 active+clean; 390 GB data, 391 GB used, 904=
- GB /
->>>>>> 1295 GB avail; 321 MB/s rd, 82334 op/s
->>>>>> 2015-04-22 09:53:24.622341 mon.0 10.7.0.152:6789/0 2151 : cluste=
-r
->>>>>> [INF] pgmap v11337: 964 pgs: 2 active+undersized+degraded, 62
->>>>>> active+remapped, 900 active+clean; 390 GB data, 391 GB used, 904=
- GB /
->>>>>> 1295 GB avail; 368 MB/s rd, 94211 op/s
->>>>>> 2015-04-22 09:53:25.628432 mon.0 10.7.0.152:6789/0 2152 : cluste=
-r
->>>>>> [INF] pgmap v11338: 964 pgs: 2 active+undersized+degraded, 62
->>>>>> active+remapped, 900 active+clean; 390 GB data, 391 GB used, 904=
- GB /
->>>>>> 1295 GB avail; 244 MB/s rd, 62644 op/s
->>>>>> 2015-04-22 09:53:26.632855 mon.0 10.7.0.152:6789/0 2153 : cluste=
-r
->>>>>> [INF] pgmap v11339: 964 pgs: 2 active+undersized+degraded, 62
->>>>>> active+remapped, 900 active+clean; 390 GB data, 391 GB used, 904=
- GB /
->>>>>> 1295 GB avail; 175 MB/s rd, 44997 op/s
->>>>>> 2015-04-22 09:53:27.636573 mon.0 10.7.0.152:6789/0 2154 : cluste=
-r
->>>>>> [INF] pgmap v11340: 964 pgs: 2 active+undersized+degraded, 62
->>>>>> active+remapped, 900 active+clean; 390 GB data, 391 GB used, 904=
- GB /
->>>>>> 1295 GB avail; 122 MB/s rd, 31259 op/s
->>>>>> 2015-04-22 09:53:28.645784 mon.0 10.7.0.152:6789/0 2155 : cluste=
-r
->>>>>> [INF] pgmap v11341: 964 pgs: 2 active+undersized+degraded, 62
->>>>>> active+remapped, 900 active+clean; 390 GB data, 391 GB used, 904=
- GB /
->>>>>> 1295 GB avail; 229 MB/s rd, 58674 op/s
->>>>>> 2015-04-22 09:53:29.657128 mon.0 10.7.0.152:6789/0 2156 : cluste=
-r
->>>>>> [INF] pgmap v11342: 964 pgs: 2 active+undersized+degraded, 62
->>>>>> active+remapped, 900 active+clean; 390 GB data, 391 GB used, 904=
- GB /
->>>>>> 1295 GB avail; 271 MB/s rd, 69501 op/s
->>>>>> 2015-04-22 09:53:30.662796 mon.0 10.7.0.152:6789/0 2157 : cluste=
-r
->>>>>> [INF] pgmap v11343: 964 pgs: 2 active+undersized+degraded, 62
->>>>>> active+remapped, 900 active+clean; 390 GB data, 391 GB used, 904=
- GB /
->>>>>> 1295 GB avail; 211 MB/s rd, 54020 op/s
->>>>>> 2015-04-22 09:53:31.666421 mon.0 10.7.0.152:6789/0 2158 : cluste=
-r
->>>>>> [INF] pgmap v11344: 964 pgs: 2 active+undersized+degraded, 62
->>>>>> active+remapped, 900 active+clean; 390 GB data, 391 GB used, 904=
- GB /
->>>>>> 1295 GB avail; 164 MB/s rd, 42001 op/s
->>>>>> 2015-04-22 09:53:32.670842 mon.0 10.7.0.152:6789/0 2159 : cluste=
-r
->>>>>> [INF] pgmap v11345: 964 pgs: 2 active+undersized+degraded, 62
->>>>>> active+remapped, 900 active+clean; 390 GB data, 391 GB used, 904=
- GB /
->>>>>> 1295 GB avail; 134 MB/s rd, 34380 op/s
->>>>>> 2015-04-22 09:53:33.681357 mon.0 10.7.0.152:6789/0 2160 : cluste=
-r
->>>>>> [INF] pgmap v11346: 964 pgs: 2 active+undersized+degraded, 62
->>>>>> active+remapped, 900 active+clean; 390 GB data, 391 GB used, 904=
- GB /
->>>>>> 1295 GB avail; 293 MB/s rd, 75213 op/s
->>>>>> 2015-04-22 09:53:34.692177 mon.0 10.7.0.152:6789/0 2161 : cluste=
-r
->>>>>> [INF] pgmap v11347: 964 pgs: 2 active+undersized+degraded, 62
->>>>>> active+remapped, 900 active+clean; 390 GB data, 391 GB used, 904=
- GB /
->>>>>> 1295 GB avail; 337 MB/s rd, 86353 op/s
->>>>>> 2015-04-22 09:53:35.697401 mon.0 10.7.0.152:6789/0 2162 : cluste=
-r
->>>>>> [INF] pgmap v11348: 964 pgs: 2 active+undersized+degraded, 62
->>>>>> active+remapped, 900 active+clean; 390 GB data, 391 GB used, 904=
- GB /
->>>>>> 1295 GB avail; 229 MB/s rd, 58839 op/s
->>>>>> 2015-04-22 09:53:36.699309 mon.0 10.7.0.152:6789/0 2163 : cluste=
-r
->>>>>> [INF] pgmap v11349: 964 pgs: 2 active+undersized+degraded, 62
->>>>>> active+remapped, 900 active+clean; 390 GB data, 391 GB used, 904=
- GB /
->>>>>> 1295 GB avail; 152 MB/s rd, 39117 op/s
->>>>>>
->>>>>>
->>>>>> restarting osd
->>>>>> ---------------
->>>>>>
->>>>>> 2015-04-22 10:00:09.766906 mon.0 10.7.0.152:6789/0 2255 : cluste=
-r
->>>>>> [INF] osd.0 marked itself down
->>>>>> 2015-04-22 10:00:09.790212 mon.0 10.7.0.152:6789/0 2256 : cluste=
-r
->>>>>> [INF] osdmap e849: 9 osds: 8 up, 9 in
->>>>>> 2015-04-22 10:00:09.793050 mon.0 10.7.0.152:6789/0 2257 : cluste=
-r
->>>>>> [INF] pgmap v11439: 964 pgs: 2 active+undersized+degraded, 8
->>>>>> stale+active+remapped, 106 stale+active+clean, 54 active+remappe=
-d,
->>>>>> stale+active+794
->>>>>> active+clean; 419 GB data, 420 GB used, 874 GB / 1295 GB avail; =
-516
->>>>>> kB/s rd, 130 op/s
->>>>>> 2015-04-22 10:00:10.795966 mon.0 10.7.0.152:6789/0 2258 : cluste=
-r
->>>>>> [INF] osdmap e850: 9 osds: 8 up, 9 in
->>>>>> 2015-04-22 10:00:10.796675 mon.0 10.7.0.152:6789/0 2259 : cluste=
-r
->>>>>> [INF] pgmap v11440: 964 pgs: 2 active+undersized+degraded, 8
->>>>>> stale+active+remapped, 106 stale+active+clean, 54 active+remappe=
-d,
->>>>>> stale+active+794
->>>>>> active+clean; 419 GB data, 420 GB used, 874 GB / 1295 GB avail
->>>>>> 2015-04-22 10:00:11.798257 mon.0 10.7.0.152:6789/0 2260 : cluste=
-r
->>>>>> [INF] pgmap v11441: 964 pgs: 2 active+undersized+degraded, 8
->>>>>> stale+active+remapped, 106 stale+active+clean, 54 active+remappe=
-d,
->>>>>> stale+active+794
->>>>>> active+clean; 419 GB data, 420 GB used, 874 GB / 1295 GB avail
->>>>>> 2015-04-22 10:00:12.339696 mon.0 10.7.0.152:6789/0 2262 : cluste=
-r
->>>>>> [INF] osd.1 marked itself down
->>>>>> 2015-04-22 10:00:12.800168 mon.0 10.7.0.152:6789/0 2263 : cluste=
-r
->>>>>> [INF] osdmap e851: 9 osds: 7 up, 9 in
->>>>>> 2015-04-22 10:00:12.806498 mon.0 10.7.0.152:6789/0 2264 : cluste=
-r
->>>>>> [INF] pgmap v11443: 964 pgs: 1 active+undersized+degraded, 13
->>>>>> stale+active+remapped, 216 stale+active+clean, 49 active+remappe=
-d,
->>>>>> stale+active+684
->>>>>> active+clean, 1 stale+active+undersized+degraded; 419 GB data, 4=
-20 GB
->>>>>> used, 874 GB / 1295 GB avail
->>>>>> 2015-04-22 10:00:13.804186 mon.0 10.7.0.152:6789/0 2265 : cluste=
-r
->>>>>> [INF] osdmap e852: 9 osds: 7 up, 9 in
->>>>>> 2015-04-22 10:00:13.805216 mon.0 10.7.0.152:6789/0 2266 : cluste=
-r
->>>>>> [INF] pgmap v11444: 964 pgs: 1 active+undersized+degraded, 13
->>>>>> stale+active+remapped, 216 stale+active+clean, 49 active+remappe=
-d,
->>>>>> stale+active+684
->>>>>> active+clean, 1 stale+active+undersized+degraded; 419 GB data, 4=
-20 GB
->>>>>> used, 874 GB / 1295 GB avail
->>>>>> 2015-04-22 10:00:14.781785 mon.0 10.7.0.152:6789/0 2268 : cluste=
-r
->>>>>> [INF] osd.2 marked itself down
->>>>>> 2015-04-22 10:00:14.810571 mon.0 10.7.0.152:6789/0 2269 : cluste=
-r
->>>>>> [INF] osdmap e853: 9 osds: 6 up, 9 in
->>>>>> 2015-04-22 10:00:14.813871 mon.0 10.7.0.152:6789/0 2270 : cluste=
-r
->>>>>> [INF] pgmap v11445: 964 pgs: 1 active+undersized+degraded, 22
->>>>>> stale+active+remapped, 300 stale+active+clean, 40 active+remappe=
-d,
->>>>>> stale+active+600
->>>>>> active+clean, 1 stale+active+undersized+degraded; 419 GB data, 4=
-20 GB
->>>>>> used, 874 GB / 1295 GB avail
->>>>>> 2015-04-22 10:00:15.810333 mon.0 10.7.0.152:6789/0 2271 : cluste=
-r
->>>>>> [INF] osdmap e854: 9 osds: 6 up, 9 in
->>>>>> 2015-04-22 10:00:15.811425 mon.0 10.7.0.152:6789/0 2272 : cluste=
-r
->>>>>> [INF] pgmap v11446: 964 pgs: 1 active+undersized+degraded, 22
->>>>>> stale+active+remapped, 300 stale+active+clean, 40 active+remappe=
-d,
->>>>>> stale+active+600
->>>>>> active+clean, 1 stale+active+undersized+degraded; 419 GB data, 4=
-20 GB
->>>>>> used, 874 GB / 1295 GB avail
->>>>>> 2015-04-22 10:00:16.395105 mon.0 10.7.0.152:6789/0 2273 : cluste=
-r
->>>>>> [INF] HEALTH_WARN; 2 pgs degraded; 323 pgs stale; 2 pgs stuck
->>>>>> degraded; 64 pgs stuck unclean; 2 pgs stuck undersized; 2 pgs
->>>>>> undersized; 3/9 in osds are down; clock skew detected on mon.cep=
-h1-2
->>>>>> 2015-04-22 10:00:16.814432 mon.0 10.7.0.152:6789/0 2274 : cluste=
-r
->>>>>> [INF] osd.1 10.7.0.152:6800/14848 boot
->>>>>> 2015-04-22 10:00:16.814938 mon.0 10.7.0.152:6789/0 2275 : cluste=
-r
->>>>>> [INF] osdmap e855: 9 osds: 7 up, 9 in
->>>>>> 2015-04-22 10:00:16.815942 mon.0 10.7.0.152:6789/0 2276 : cluste=
-r
->>>>>> [INF] pgmap v11447: 964 pgs: 1 active+undersized+degraded, 22
->>>>>> stale+active+remapped, 300 stale+active+clean, 40 active+remappe=
-d,
->>>>>> stale+active+600
->>>>>> active+clean, 1 stale+active+undersized+degraded; 419 GB data, 4=
-20 GB
->>>>>> used, 874 GB / 1295 GB avail
->>>>>> 2015-04-22 10:00:17.222281 mon.0 10.7.0.152:6789/0 2278 : cluste=
-r
->>>>>> [INF] osd.3 marked itself down
->>>>>> 2015-04-22 10:00:17.819371 mon.0 10.7.0.152:6789/0 2279 : cluste=
-r
->>>>>> [INF] osdmap e856: 9 osds: 6 up, 9 in
->>>>>> 2015-04-22 10:00:17.822041 mon.0 10.7.0.152:6789/0 2280 : cluste=
-r
->>>>>> [INF] pgmap v11448: 964 pgs: 1 active+undersized+degraded, 25
->>>>>> stale+active+remapped, 394 stale+active+clean, 37 active+remappe=
-d,
->>>>>> stale+active+506
->>>>>> active+clean, 1 stale+active+undersized+degraded; 419 GB data, 4=
-20 GB
->>>>>> used, 874 GB / 1295 GB avail
->>>>>> 2015-04-22 10:00:18.551068 mon.0 10.7.0.152:6789/0 2282 : cluste=
-r
->>>>>> [INF] osd.6 marked itself down
->>>>>> 2015-04-22 10:00:18.819387 mon.0 10.7.0.152:6789/0 2283 : cluste=
-r
->>>>>> [INF] osd.2 10.7.0.152:6812/15410 boot
->>>>>> 2015-04-22 10:00:18.821134 mon.0 10.7.0.152:6789/0 2284 : cluste=
-r
->>>>>> [INF] osdmap e857: 9 osds: 6 up, 9 in
->>>>>> 2015-04-22 10:00:18.824440 mon.0 10.7.0.152:6789/0 2285 : cluste=
-r
->>>>>> [INF] pgmap v11449: 964 pgs: 1 active+undersized+degraded, 30
->>>>>> stale+active+remapped, 502 stale+active+clean, 32 active+remappe=
-d,
->>>>>> stale+active+398
->>>>>> active+clean, 1 stale+active+undersized+degraded; 419 GB data, 4=
-20 GB
->>>>>> used, 874 GB / 1295 GB avail
->>>>>> 2015-04-22 10:00:19.820947 mon.0 10.7.0.152:6789/0 2287 : cluste=
-r
->>>>>> [INF] osdmap e858: 9 osds: 6 up, 9 in
->>>>>> 2015-04-22 10:00:19.821853 mon.0 10.7.0.152:6789/0 2288 : cluste=
-r
->>>>>> [INF] pgmap v11450: 964 pgs: 1 active+undersized+degraded, 30
->>>>>> stale+active+remapped, 502 stale+active+clean, 32 active+remappe=
-d,
->>>>>> stale+active+398
->>>>>> active+clean, 1 stale+active+undersized+degraded; 419 GB data, 4=
-20 GB
->>>>>> used, 874 GB / 1295 GB avail
->>>>>> 2015-04-22 10:00:20.828047 mon.0 10.7.0.152:6789/0 2290 : cluste=
-r
->>>>>> [INF] osd.3 10.7.0.152:6816/15971 boot
->>>>>> 2015-04-22 10:00:20.828431 mon.0 10.7.0.152:6789/0 2291 : cluste=
-r
->>>>>> [INF] osdmap e859: 9 osds: 7 up, 9 in
->>>>>> 2015-04-22 10:00:20.829126 mon.0 10.7.0.152:6789/0 2292 : cluste=
-r
->>>>>> [INF] pgmap v11451: 964 pgs: 1 active+undersized+degraded, 30
->>>>>> stale+active+remapped, 502 stale+active+clean, 32 active+remappe=
-d,
->>>>>> stale+active+398
->>>>>> active+clean, 1 stale+active+undersized+degraded; 419 GB data, 4=
-20 GB
->>>>>> used, 874 GB / 1295 GB avail
->>>>>> 2015-04-22 10:00:20.991343 mon.0 10.7.0.152:6789/0 2294 : cluste=
-r
->>>>>> [INF] osd.7 marked itself down
->>>>>> 2015-04-22 10:00:21.830389 mon.0 10.7.0.152:6789/0 2295 : cluste=
-r
->>>>>> [INF] osd.0 10.7.0.152:6804/14481 boot
->>>>>> 2015-04-22 10:00:21.832518 mon.0 10.7.0.152:6789/0 2296 : cluste=
-r
->>>>>> [INF] osdmap e860: 9 osds: 7 up, 9 in
->>>>>> 2015-04-22 10:00:21.836129 mon.0 10.7.0.152:6789/0 2297 : cluste=
-r
->>>>>> [INF] pgmap v11452: 964 pgs: 1 active+undersized+degraded, 35
->>>>>> stale+active+remapped, 608 stale+active+clean, 27 active+remappe=
-d,
->>>>>> stale+active+292
->>>>>> active+clean, 1 stale+active+undersized+degraded; 419 GB data, 4=
-20 GB
->>>>>> used, 874 GB / 1295 GB avail
->>>>>> 2015-04-22 10:00:22.830456 mon.0 10.7.0.152:6789/0 2298 : cluste=
-r
->>>>>> [INF] osd.6 10.7.0.153:6808/21955 boot
->>>>>> 2015-04-22 10:00:22.832171 mon.0 10.7.0.152:6789/0 2299 : cluste=
-r
->>>>>> [INF] osdmap e861: 9 osds: 8 up, 9 in
->>>>>> 2015-04-22 10:00:22.836272 mon.0 10.7.0.152:6789/0 2300 : cluste=
-r
->>>>>> [INF] pgmap v11453: 964 pgs: 3 active+undersized+degraded, 27
->>>>>> stale+active+remapped, 498 stale+active+clean, 2 peering, 28
->>>>>> active+remapped, 402 active+clean, 4 remapped+peering; 419 GB da=
-ta,
->>>>>> 420 GB used, 874 GB / 1295 GB avail
->>>>>> 2015-04-22 10:00:23.420309 mon.0 10.7.0.152:6789/0 2302 : cluste=
-r
->>>>>> [INF] osd.8 marked itself down
->>>>>> 2015-04-22 10:00:23.833708 mon.0 10.7.0.152:6789/0 2303 : cluste=
-r
->>>>>> [INF] osdmap e862: 9 osds: 7 up, 9 in
->>>>>> 2015-04-22 10:00:23.836459 mon.0 10.7.0.152:6789/0 2304 : cluste=
-r
->>>>>> [INF] pgmap v11454: 964 pgs: 3 active+undersized+degraded, 44
->>>>>> stale+active+remapped, 587 stale+active+clean, 2 peering, 11
->>>>>> active+remapped, 313 active+clean, 4 remapped+peering; 419 GB da=
-ta,
->>>>>> 420 GB used, 874 GB / 1295 GB avail
->>>>>> 2015-04-22 10:00:24.832905 mon.0 10.7.0.152:6789/0 2305 : cluste=
-r
->>>>>> [INF] osd.7 10.7.0.153:6804/22536 boot
->>>>>> 2015-04-22 10:00:24.834381 mon.0 10.7.0.152:6789/0 2306 : cluste=
-r
->>>>>> [INF] osdmap e863: 9 osds: 8 up, 9 in
->>>>>> 2015-04-22 10:00:24.836977 mon.0 10.7.0.152:6789/0 2307 : cluste=
-r
->>>>>> [INF] pgmap v11455: 964 pgs: 3 active+undersized+degraded, 31
->>>>>> stale+active+remapped, 503 stale+active+clean, 4
->>>>>> active+undersized+degraded+remapped, 5 peering, 13 active+remapp=
-ed,
->>>>>> 397 active+clean, 8 remapped+peering; 419 GB data, 420 GB used, =
-874
->>>>>> GB / 1295 GB avail
->>>>>> 2015-04-22 10:00:25.834459 mon.0 10.7.0.152:6789/0 2309 : cluste=
-r
->>>>>> [INF] osdmap e864: 9 osds: 8 up, 9 in
->>>>>> 2015-04-22 10:00:25.835727 mon.0 10.7.0.152:6789/0 2310 : cluste=
-r
->>>>>> [INF] pgmap v11456: 964 pgs: 3 active+undersized+degraded, 31
->>>>>> stale+active+remapped, 503 stale+active+clean, 4
->>>>>> active+undersized+degraded+remapped, 5 peering, 13 active
->>>>>>
->>>>>>
->>>>>> AFTER OSD RESTART
->>>>>> ------------------
->>>>>>
->>>>>>
->>>>>> 2015-04-22 10:09:27.609052 mon.0 10.7.0.152:6789/0 2339 : cluste=
-r
->>>>>> [INF] pgmap v11478: 964 pgs: 2 active+undersized+degraded, 62
->>>>>> active+remapped, 900 active+clean; 419 GB data, 421 GB used, 874=
- GB /
->>>>>> 1295 GB avail; 786 MB/s rd, 196 kop/s
->>>>>> 2015-04-22 10:09:28.618082 mon.0 10.7.0.152:6789/0 2340 : cluste=
-r
->>>>>> [INF] pgmap v11479: 964 pgs: 2 active+undersized+degraded, 62
->>>>>> active+remapped, 900 active+clean; 419 GB data, 421 GB used, 874=
- GB /
->>>>>> 1295 GB avail; 1578 MB/s rd, 394 kop/s
->>>>>> 2015-04-22 10:09:30.629067 mon.0 10.7.0.152:6789/0 2341 : cluste=
-r
->>>>>> [INF] pgmap v11480: 964 pgs: 2 active+undersized+degraded, 62
->>>>>> active+remapped, 900 active+clean; 419 GB data, 421 GB used, 874=
- GB /
->>>>>> 1295 GB avail; 932 MB/s rd, 233 kop/s
->>>>>> 2015-04-22 10:09:32.645890 mon.0 10.7.0.152:6789/0 2342 : cluste=
-r
->>>>>> [INF] pgmap v11481: 964 pgs: 2 active+undersized+degraded, 62
->>>>>> active+remapped, 900 active+clean; 419 GB data, 421 GB used, 874=
- GB /
->>>>>> 1295 GB avail; 627 MB/s rd, 156 kop/s
->>>>>> 2015-04-22 10:09:33.652634 mon.0 10.7.0.152:6789/0 2343 : cluste=
-r
->>>>>> [INF] pgmap v11482: 964 pgs: 2 active+undersized+degraded, 62
->>>>>> active+remapped, 900 active+clean; 419 GB data, 421 GB used, 874=
- GB /
->>>>>> 1295 GB avail; 1034 MB/s rd, 258 kop/s
->>>>>> 2015-04-22 10:09:35.655657 mon.0 10.7.0.152:6789/0 2344 : cluste=
-r
->>>>>> [INF] pgmap v11483: 964 pgs: 2 active+undersized+degraded, 62
->>>>>> active+remapped, 900 active+clean; 419 GB data, 421 GB used, 874=
- GB /
->>>>>> 1295 GB avail; 529 MB/s rd, 132 kop/s
->>>>>> 2015-04-22 10:09:37.674332 mon.0 10.7.0.152:6789/0 2345 : cluste=
-r
->>>>>> [INF] pgmap v11484: 964 pgs: 2 active+undersized+degraded, 62
->>>>>> active+remapped, 900 active+clean; 419 GB data, 421 GB used, 874=
- GB /
->>>>>> 1295 GB avail; 770 MB/s rd, 192 kop/s
->>>>>> 2015-04-22 10:09:38.679445 mon.0 10.7.0.152:6789/0 2346 : cluste=
-r
->>>>>> [INF] pgmap v11485: 964 pgs: 2 active+undersized+degraded, 62
->>>>>> active+remapped, 900 active+clean; 419 GB data, 421 GB used, 874=
- GB /
->>>>>> 1295 GB avail; 1358 MB/s rd, 339 kop/s
->>>>>> 2015-04-22 10:09:40.690037 mon.0 10.7.0.152:6789/0 2347 : cluste=
-r
->>>>>> [INF] pgmap v11486: 964 pgs: 2 active+undersized+degraded, 62
->>>>>> active+remapped, 900 active+clean; 419 GB data, 421 GB used, 874=
- GB /
->>>>>> 1295 GB avail; 649 MB/s rd, 162 kop/s
->>>>>> 2015-04-22 10:09:42.707164 mon.0 10.7.0.152:6789/0 2348 : cluste=
-r
->>>>>> [INF] pgmap v11487: 964 pgs: 2 active+undersized+degraded, 62
->>>>>> active+remapped, 900 active+clean; 419 GB data, 421 GB used, 874=
- GB /
->>>>>> 1295 GB avail; 580 MB/s rd, 145 kop/s
->>>>>> 2015-04-22 10:09:43.713736 mon.0 10.7.0.152:6789/0 2349 : cluste=
-r
->>>>>> [INF] pgmap v11488: 964 pgs: 2 active+undersized+degraded, 62
->>>>>> active+remapped, 900 active+clean; 419 GB data, 421 GB used, 874=
- GB /
->>>>>> 1295 GB avail; 962 MB/s rd, 240 kop/s
->>>>>> 2015-04-22 10:09:45.718658 mon.0 10.7.0.152:6789/0 2350 : cluste=
-r
->>>>>> [INF] pgmap v11489: 964 pgs: 2 active+undersized+degraded, 62
->>>>>> active+remapped, 900 active+clean; 419 GB data, 421 GB used, 874=
- GB /
->>>>>> 1295 GB avail; 506 MB/s rd, 126 kop/s
->>>>>> 2015-04-22 10:09:47.737358 mon.0 10.7.0.152:6789/0 2351 : cluste=
-r
->>>>>> [INF] pgmap v11490: 964 pgs: 2 active+undersized+degraded, 62
->>>>>> active+remapped, 900 active+clean; 419 GB data, 421 GB used, 874=
- GB /
->>>>>> 1295 GB avail; 774 MB/s rd, 193 kop/s
->>>>>> 2015-04-22 10:09:48.743338 mon.0 10.7.0.152:6789/0 2352 : cluste=
-r
->>>>>> [INF] pgmap v11491: 964 pgs: 2 active+undersized+degraded, 62
->>>>>> active+remapped, 900 active+clean; 419 GB data, 421 GB used, 874=
- GB /
->>>>>> 1295 GB avail; 1363 MB/s rd, 340 kop/s
->>>>>> 2015-04-22 10:09:50.746685 mon.0 10.7.0.152:6789/0 2353 : cluste=
-r
->>>>>> [INF] pgmap v11492: 964 pgs: 2 active+undersized+degraded, 62
->>>>>> active+remapped, 900 active+clean; 419 GB data, 421 GB used, 874=
- GB /
->>>>>> 1295 GB avail; 662 MB/s rd, 165 kop/s
->>>>>> 2015-04-22 10:09:52.762461 mon.0 10.7.0.152:6789/0 2354 : cluste=
-r
->>>>>> [INF] pgmap v11493: 964 pgs: 2 active+undersized+degraded, 62
->>>>>> active+remapped, 900 active+clean; 419 GB data, 421 GB used, 874=
- GB /
->>>>>> 1295 GB avail; 593 MB/s rd, 148 kop/s
->>>>>> 2015-04-22 10:09:53.767729 mon.0 10.7.0.152:6789/0 2355 : cluste=
-r
->>>>>> [INF] pgmap v11494: 964 pgs: 2 active+undersized+degraded, 62
->>>>>> active+remapped, 900 active+clean; 419 GB data, 421 GB used, 874=
- GB /
->>>>>> 1295 GB avail; 938 MB/s rd, 234 kop/s
->>>>>>
->>>>>> _______________________________________________
->>>>>> ceph-users mailing list
->>>>>> ceph-users@lists.ceph.com <mailto:ceph-users@lists.ceph.com>
->>>>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>>>>>
->>>>> _______________________________________________
->>>>> ceph-users mailing list
->>>>> ceph-users@lists.ceph.com <mailto:ceph-users@lists.ceph.com>
->>>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>>>>
->>>>> ________________________________
->>>>>
->>>>> PLEASE NOTE: The information contained in this electronic mail
->>>>> message is intended only for the use of the designated recipient(=
-s)
->>>>> named above. If the reader of this message is not the intended
->>>>> recipient, you are hereby notified that you have received this
->>>>> message in error and that any review, dissemination, distribution=
-, or
->>>>> copying of this message is strictly prohibited. If you have recei=
-ved
->>>>> this communication in error, please notify the sender by telephon=
-e or
->>>>> e-mail (as shown above) immediately and destroy any and all copie=
-s of
->>>>> this message in your possession (whether hard copies or
->>>>> electronically stored copies).
->>>>>
->>>>> _______________________________________________
->>>>> ceph-users mailing list
->>>>> ceph-users@lists.ceph.com <mailto:ceph-users@lists.ceph.com>
->>>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>>>>
->>>>> _______________________________________________
->>>>> ceph-users mailing list
->>>>> ceph-users@lists.ceph.com <mailto:ceph-users@lists.ceph.com>
->>>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>>>>
->>>> _______________________________________________
->>>> ceph-users mailing list
->>>> ceph-users@lists.ceph.com <mailto:ceph-users@lists.ceph.com>
->>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>>> _______________________________________________
->>>> ceph-users mailing list
->>>> ceph-users@lists.ceph.com <mailto:ceph-users@lists.ceph.com>
->>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>>>
->>>>
->>>>
->>>>
->>>>
->>>>
->>>> --
->>>> =D0=A1 =D1=83=D0=B2=D0=B0=D0=B6=D0=B5=D0=BD=D0=B8=D0=B5=D0=BC, =D0=
-=A4=D0=B0=D1=81=D0=B8=D1=85=D0=BE=D0=B2 =D0=98=D1=80=D0=B5=D0=BA =D0=9D=
-=D1=83=D1=80=D0=B3=D0=B0=D1=8F=D0=B7=D0=BE=D0=B2=D0=B8=D1=87
->>>> =D0=9C=D0=BE=D0=B1.: +79229045757
->>>>
->>>>
->>>>
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-dev=
-el" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> <mailto:majordomo@vger.kernel.org>
->>>> More majordomo info at http://vger.kernel.org/majordomo-info.html
->>
->>
->> _______________________________________________
->> ceph-users mailing list
->> ceph-users@lists.ceph.com
->> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>
->>
->>
->> _______________________________________________
->> ceph-users mailing list
->> ceph-users@lists.ceph.com
->> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>
->>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at http://vger.kernel.org/majordomo-info.html
->>
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+T2ssIGp1c3QgdG8gbWFrZSBzdXJlIHRoYXQgSSB1bmRlcnN0YW5kOgoKPj50Y21hbGxvYyB1bi10
+dW5lZDogfjUwayBJT1BTIG9uY2UgYnVnIHNldHMgaW4KeWVzLCBpdCdzIHJlYWxseSByYW5kb20s
+IGJ1dCB3aGVuIGhpdHRpbmcgdGhlIGJ1ZywgeWVzIHRoaXMgaXMgdGhlIHdvcnN0ZSBJIGhhdmUg
+c2Vlbi4KCgo+PnRjbWFsbG9jIHdpdGggcGF0Y2ggYW5kIDEyOE1CIHRocmVhZCBjYWNoZSBieXRl
+czogfjE5NWsgSU9QUwp5ZXMKPj5qZW1hbGxvYyB1bi10dW5lZDogfjE1MGsgSU9QUwpJdCdzIG1v
+cmUgYXJvdW5kIDE4NWsgaW9wcyAgKGEgbGl0dGxlIGJpdCBsZXNzIHRoYW4gdGNtYWxsb2MsIHdp
+dGggYSBsaXR0bGUgYml0IG1vcmUgY3B1IHVzYWdlKQoKCgoKLS0tLS0gTWFpbCBvcmlnaW5hbCAt
+LS0tLQpEZTogIk1hcmsgTmVsc29uIiA8bW5lbHNvbkByZWRoYXQuY29tPgrDgDogImFkZXJ1bWll
+ciIgPGFkZXJ1bWllckBvZGlzby5jb20+CkNjOiAiY2VwaC11c2VycyIgPGNlcGgtdXNlcnNAbGlz
+dHMuY2VwaC5jb20+LCAiY2VwaC1kZXZlbCIgPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPiwg
+Ik1pbG9zeiBUYW5za2kiIDxtaWxvc3pAYWRmaW4uY29tPgpFbnZvecOpOiBMdW5kaSAyNyBBdnJp
+bCAyMDE1IDE4OjM0OjUwCk9iamV0OiBSZTogW2NlcGgtdXNlcnNdIHN0cmFuZ2UgYmVuY2htYXJr
+IHByb2JsZW0gOiByZXN0YXJ0aW5nIG9zZCBkYWVtb24gaW1wcm92ZSBwZXJmb3JtYW5jZSBmcm9t
+IDEwMGsgaW9wcyB0byAzMDBrIGlvcHMKCk9uIDA0LzI3LzIwMTUgMTA6MTEgQU0sIEFsZXhhbmRy
+ZSBERVJVTUlFUiB3cm90ZTogCj4+PiBJcyBpdCBwb3NzaWJsZSB0aGF0IHlvdSB3ZXJlIHN1ZmZl
+cmluZyBmcm9tIHRoZSBidWcgZHVyaW5nIHRoZSBmaXJzdCAKPj4+IHRlc3QgYnV0IG9uY2UgcmVp
+bnN0YWxsZWQgeW91IGhhZG4ndCBoaXQgaXQgeWV0PyAKPiAKPiB5ZXMsIEknbSBwcmV0dHkgc3Vy
+ZSBJJ20gaGl0dGluZyB0aGUgdGNtYWxsb2MgYnVnIHNpbmNlIHRoZSBiZWdpbm5pbmcuIAo+IEkg
+aGFkIHBhdGNoZWQgaXQsIGJ1dCBJIHRoaW5rIGl0J3Mgbm90IGVub3VnaC4gCj4gSSBoYWQgYWx3
+YXlzIHRoaXMgYnVnIGluIHJhbmRvbSwgYnV0IG1haW5seSB3aGVuIEkgaGF2ZSBhICJsb3QiIG9m
+IGNvbmN1cnJlbnQgY2xpZW50ICgyMCAtNDApLiAKPiBtb3JlIGNsaWVudCBpbmNyZWFzZSAtIGxv
+d2VyIGlvcHMgLiAKPiAKPiAKPiBUb2RheSxJIGhhZCB0cnkgdG8gc3RhcnQgb3NkIHdpdGggVENN
+QUxMT0NfTUFYX1RPVEFMX1RIUkVBRF9DQUNIRV9CWVRFUz0xMjhNICwgCj4gYW5kIG5vdyBpdCdz
+IHdvcmtpbmcgZmluZSBpbiBhbGwgbXkgYmVuY2hzLiAKPiAKPiAKPj4+IFRoYXQncyBhIHByZXR0
+eSBtYWpvciAKPj4+IHBlcmZvcm1hbmNlIHN3aW5nLiBJJ20gbm90IHN1cmUgaWYgd2UgY2FuIGRy
+YXcgYW55IGNvbmNsdXNpb25zIGFib3V0IAo+Pj4gamVtYWxsb2MgdnMgdGNtYWxsb2MgdW50aWwg
+d2UgY2FuIGZpZ3VyZSBvdXQgd2hhdCB3ZW50IHdyb25nLiAKPiAKPiBGcm9tIG15IGJlbmNoLCBq
+ZW1hbGxvYyB1c2UgYSBsaXR0bGUgYml0IG1vcmUgY3B1IHRoYW4gdGNtYWxsb2MgKG1heWJlIDEl
+IG9yIDIlKS4gCj4gVGNtYWxsb2Mgc2VlbSB0byB3b3JrcyBiZXR0ZXIsIHdpdGggY29ycmVjdCB0
+dW5pbmcgb2YgdGhyZWFkX2NhY2hlX2J5dGVzLiAKPiAKPiAKPiBCdXQgSSBkb24ndCBrbm93biBo
+b3cgdG8gdHVuZSBUQ01BTExPQ19NQVhfVE9UQUxfVEhSRUFEX0NBQ0hFX0JZVEVTIGNvcnJlY3Rs
+eS4gCj4gTWF5YmUgU29tbWF0aCBjYW4gdGVsbCB1cyA/IAoKT2ssIGp1c3QgdG8gbWFrZSBzdXJl
+IHRoYXQgSSB1bmRlcnN0YW5kOiAKCnRjbWFsbG9jIHVuLXR1bmVkOiB+NTBrIElPUFMgb25jZSBi
+dWcgc2V0cyBpbiAKdGNtYWxsb2Mgd2l0aCBwYXRjaCBhbmQgMTI4TUIgdGhyZWFkIGNhY2hlIGJ5
+dGVzOiB+MTk1ayBJT1BTIApqZW1hbGxvYyB1bi10dW5lZDogfjE1MGsgSU9QUyAKCklzIHRoYXQg
+Y29ycmVjdD8gQXJlIHRoZXJlIGNvbmZpZ3VyYXRpb25zL3Jlc3VsdHMgSSdtIG1pc3Npbmc/IAoK
+TWFyayAKCj4gCj4gCj4gLS0tLS0gTWFpbCBvcmlnaW5hbCAtLS0tLSAKPiBEZTogIk1hcmsgTmVs
+c29uIiA8bW5lbHNvbkByZWRoYXQuY29tPiAKPiDDgDogImFkZXJ1bWllciIgPGFkZXJ1bWllckBv
+ZGlzby5jb20+IAo+IENjOiAiY2VwaC11c2VycyIgPGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20+
+LCAiY2VwaC1kZXZlbCIgPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPiwgIk1pbG9zeiBUYW5z
+a2kiIDxtaWxvc3pAYWRmaW4uY29tPiAKPiBFbnZvecOpOiBMdW5kaSAyNyBBdnJpbCAyMDE1IDE2
+OjU0OjM0IAo+IE9iamV0OiBSZTogW2NlcGgtdXNlcnNdIHN0cmFuZ2UgYmVuY2htYXJrIHByb2Js
+ZW0gOiByZXN0YXJ0aW5nIG9zZCBkYWVtb24gaW1wcm92ZSBwZXJmb3JtYW5jZSBmcm9tIDEwMGsg
+aW9wcyB0byAzMDBrIGlvcHMgCj4gCj4gSGkgQWxleCwgCj4gCj4gSXMgaXQgcG9zc2libGUgdGhh
+dCB5b3Ugd2VyZSBzdWZmZXJpbmcgZnJvbSB0aGUgYnVnIGR1cmluZyB0aGUgZmlyc3QgCj4gdGVz
+dCBidXQgb25jZSByZWluc3RhbGxlZCB5b3UgaGFkbid0IGhpdCBpdCB5ZXQ/IFRoYXQncyBhIHBy
+ZXR0eSBtYWpvciAKPiBwZXJmb3JtYW5jZSBzd2luZy4gSSdtIG5vdCBzdXJlIGlmIHdlIGNhbiBk
+cmF3IGFueSBjb25jbHVzaW9ucyBhYm91dCAKPiBqZW1hbGxvYyB2cyB0Y21hbGxvYyB1bnRpbCB3
+ZSBjYW4gZmlndXJlIG91dCB3aGF0IHdlbnQgd3JvbmcuIAo+IAo+IE1hcmsgCj4gCj4gT24gMDQv
+MjcvMjAxNSAxMjo0NiBBTSwgQWxleGFuZHJlIERFUlVNSUVSIHdyb3RlOiAKPj4+PiBJJ2xsIHJl
+dGVzdCB0Y21hbGxvYywgYmVjYXVzZSBJIHdhcyBwcmV0eSBzdXJlIHRvIGhhdmUgcGF0Y2hlZCBp
+dCBjb3JyZWN0bHkuIAo+PiAKPj4gT2ssIEkgcmVhbGx5IHRoaW5rIEkgaGF2ZSBwYXRjaGVkIHRj
+bWFsbG9jIHdyb25nbHkuIAo+PiBJIGhhdmUgcmVwYXRjaGVkIGl0LCByZWluc3RhbGxlZCBpdCwg
+YW5kIG5vdyBJJ20gZ2V0dGluZyAxOTVrIGlvcHMgd2l0aCBhIHNpbmdsZSBvc2QgKDEwZmlvIHJi
+ZCBqb2JzIDRrIHJhbmRyZWFkKS4gCj4+IAo+PiBTbyBiZXR0ZXIgdGhhbiBqZW1hbGxvYy4gCj4+
+IAo+PiAKPj4gLS0tLS0gTWFpbCBvcmlnaW5hbCAtLS0tLSAKPj4gRGU6ICJhZGVydW1pZXIiIDxh
+ZGVydW1pZXJAb2Rpc28uY29tPiAKPj4gw4A6ICJNYXJrIE5lbHNvbiIgPG1uZWxzb25AcmVkaGF0
+LmNvbT4gCj4+IENjOiAiY2VwaC11c2VycyIgPGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20+LCAi
+Y2VwaC1kZXZlbCIgPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPiwgIk1pbG9zeiBUYW5za2ki
+IDxtaWxvc3pAYWRmaW4uY29tPiAKPj4gRW52b3nDqTogTHVuZGkgMjcgQXZyaWwgMjAxNSAwNzow
+MToyMSAKPj4gT2JqZXQ6IFJlOiBbY2VwaC11c2Vyc10gc3RyYW5nZSBiZW5jaG1hcmsgcHJvYmxl
+bSA6IHJlc3RhcnRpbmcgb3NkIGRhZW1vbiBpbXByb3ZlIHBlcmZvcm1hbmNlIGZyb20gMTAwayBp
+b3BzIHRvIDMwMGsgaW9wcyAKPj4gCj4+IEhpLCAKPj4gCj4+IGFsc28gYW5vdGhlciBiaWcgZGlm
+ZmVyZW5jZSwgCj4+IAo+PiBJIGNhbiByZWFjaCBub3cgMTgwayBpb3BzIHdpdGggYSBzaW5nbGUg
+amVtYWxsb2Mgb3NkIChkYXRhIGluIGJ1ZmZlcikgdnMgNTBrIGlvcHMgbWF4IHdpdGggdGNtYWxs
+b2MuIAo+PiAKPj4gSSdsbCByZXRlc3QgdGNtYWxsb2MsIGJlY2F1c2UgSSB3YXMgcHJldHkgc3Vy
+ZSB0byBoYXZlIHBhdGNoZWQgaXQgY29ycmVjdGx5LiAKPj4gCj4+IAo+PiAtLS0tLSBNYWlsIG9y
+aWdpbmFsIC0tLS0tIAo+PiBEZTogImFkZXJ1bWllciIgPGFkZXJ1bWllckBvZGlzby5jb20+IAo+
+PiDDgDogIk1hcmsgTmVsc29uIiA8bW5lbHNvbkByZWRoYXQuY29tPiAKPj4gQ2M6ICJjZXBoLXVz
+ZXJzIiA8Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbT4sICJjZXBoLWRldmVsIiA8Y2VwaC1kZXZl
+bEB2Z2VyLmtlcm5lbC5vcmc+LCAiTWlsb3N6IFRhbnNraSIgPG1pbG9zekBhZGZpbi5jb20+IAo+
+PiBFbnZvecOpOiBTYW1lZGkgMjUgQXZyaWwgMjAxNSAwNjo0NTo0MyAKPj4gT2JqZXQ6IFJlOiBb
+Y2VwaC11c2Vyc10gc3RyYW5nZSBiZW5jaG1hcmsgcHJvYmxlbSA6IHJlc3RhcnRpbmcgb3NkIGRh
+ZW1vbiBpbXByb3ZlIHBlcmZvcm1hbmNlIGZyb20gMTAwayBpb3BzIHRvIDMwMGsgaW9wcyAKPj4g
+Cj4+Pj4gV2UgaGF2ZW4ndCBkb25lIGFueSBraW5kIG9mIHJlYWwgdGVzdGluZyBvbiBqZW1hbGxv
+Yywgc28gdXNlIGF0IHlvdXIgb3duIAo+Pj4+IHBlcmlsLiBIYXZpbmcgc2FpZCB0aGF0LCB3ZSd2
+ZSBhbHNvIGJlZW4gdmVyeSBpbnRlcmVzdGVkIGluIGhlYXJpbmcgCj4+Pj4gY29tbXVuaXR5IGZl
+ZWRiYWNrIGZyb20gZm9sa3MgdHJ5aW5nIGl0IG91dCwgc28gcGxlYXNlIGZlZWwgZnJlZSB0byBn
+aXZlIAo+Pj4+IGl0IGEgc2hvdC4gOkQgCj4+IAo+PiBTb21lIGZlZWRiYWNrLCBJIGhhdmUgcnVu
+bmVkIGJlbmNoIGFsbCB0aGUgbmlnaHQsIG5vIHNwZWVkIHJlZ3Jlc3Npb24uIAo+PiAKPj4gQW5k
+IEkgaGF2ZSBhIHNwZWVkIGluY3JlYXNlIHdpdGggZmlvIHdpdGggbW9yZSBqb2JzLiAod2l0aCB0
+Y21hbGxvYywgaXQgc2VlbSB0byBiZSB0aGUgcmV2ZXJzZSkgCj4+IAo+PiB3aXRoIHRjbWFsbG9j
+IDogCj4+IAo+PiAxMCBmaW8tcmJkIGpvYnMgPSAzMDBrIGlvcHMgCj4+IDE1IGZpby1yYmQgam9i
+cyA9IDI5MGsgaW9wcyAKPj4gMjAgZmlvLXJiZCBqb2JzID0gMjcwayBpb3BzIAo+PiA0MCBmaW8t
+cmJkIGpvYnMgPSAyNTBrIGlvcHMgCj4+IAo+PiAoYWxsIHdpdGggdXAgYW5kIGRvd24gdmFsdWVz
+IGR1cmluZyB0aGUgZmlvIGJlbmNoKSAKPj4gCj4+IAo+PiB3aXRoIGplbWFsbG9jOiAKPj4gCj4+
+IDEwIGZpby1yYmQgam9icyA9IDMwMGsgaW9wcyAKPj4gMTUgZmlvLXJiZCBqb2JzID0gMzIwayBp
+b3BzIAo+PiAyMCBmaW8tcmJkIGpvYnMgPSAzMzBrIGlvcHMgCj4+IDQwIGZpby1yYmQgam9icyA9
+IDM3MGsgaW9wcyAoY2FuIGdldCBtb3JlIGN1cnJlbnRseSwgb25seSAxIGNsaWVudCBtYWNoaW5l
+IHdpdGggMjBjb3JlcyAxMDAlKSAKPj4gCj4+IChhbGwgd2l0aCBjb250YW50IHZhbHVlcyBkdXJp
+bmcgdGhlIGZpbyBiZW5jaCkgCj4+IAo+PiAtLS0tLSBNYWlsIG9yaWdpbmFsIC0tLS0tIAo+PiBE
+ZTogIk1hcmsgTmVsc29uIiA8bW5lbHNvbkByZWRoYXQuY29tPiAKPj4gw4A6ICJTdGVmYW4gUHJp
+ZWJlIiA8cy5wcmllYmVAcHJvZmlob3N0LmFnPiwgImFkZXJ1bWllciIgPGFkZXJ1bWllckBvZGlz
+by5jb20+IAo+PiBDYzogImNlcGgtdXNlcnMiIDxjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tPiwg
+ImNlcGgtZGV2ZWwiIDxjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZz4sICJTb21uYXRoIFJveSIg
+PFNvbW5hdGguUm95QHNhbmRpc2suY29tPiwgIk1pbG9zeiBUYW5za2kiIDxtaWxvc3pAYWRmaW4u
+Y29tPiAKPj4gRW52b3nDqTogVmVuZHJlZGkgMjQgQXZyaWwgMjAxNSAyMDowMjoxNSAKPj4gT2Jq
+ZXQ6IFJlOiBbY2VwaC11c2Vyc10gc3RyYW5nZSBiZW5jaG1hcmsgcHJvYmxlbSA6IHJlc3RhcnRp
+bmcgb3NkIGRhZW1vbiBpbXByb3ZlIHBlcmZvcm1hbmNlIGZyb20gMTAwayBpb3BzIHRvIDMwMGsg
+aW9wcyAKPj4gCj4+IFdlIGhhdmVuJ3QgZG9uZSBhbnkga2luZCBvZiByZWFsIHRlc3Rpbmcgb24g
+amVtYWxsb2MsIHNvIHVzZSBhdCB5b3VyIG93biAKPj4gcGVyaWwuIEhhdmluZyBzYWlkIHRoYXQs
+IHdlJ3ZlIGFsc28gYmVlbiB2ZXJ5IGludGVyZXN0ZWQgaW4gaGVhcmluZyAKPj4gY29tbXVuaXR5
+IGZlZWRiYWNrIGZyb20gZm9sa3MgdHJ5aW5nIGl0IG91dCwgc28gcGxlYXNlIGZlZWwgZnJlZSB0
+byBnaXZlIAo+PiBpdCBhIHNob3QuIDpEIAo+PiAKPj4gTWFyayAKPj4gCj4+IE9uIDA0LzI0LzIw
+MTUgMTI6MzYgUE0sIFN0ZWZhbiBQcmllYmUgLSBQcm9maWhvc3QgQUcgd3JvdGU6IAo+Pj4gSXMg
+amVtYWxsb2MgcmVjb21tYW5kZWQgaW4gZ2VuZXJhbD8gRG9lcyBpdCBhbHNvIHdvcmsgZm9yIGZp
+cmVmbHk/IAo+Pj4gCj4+PiBTdGVmYW4gCj4+PiAKPj4+IEV4Y3VzZSBteSB0eXBvIHNlbnQgZnJv
+bSBteSBtb2JpbGUgcGhvbmUuIAo+Pj4gCj4+PiBBbSAyNC4wNC4yMDE1IHVtIDE4OjM4IHNjaHJp
+ZWIgQWxleGFuZHJlIERFUlVNSUVSIDxhZGVydW1pZXJAb2Rpc28uY29tIAo+Pj4gPG1haWx0bzph
+ZGVydW1pZXJAb2Rpc28uY29tPj46IAo+Pj4gCj4+Pj4gSGksIAo+Pj4+IAo+Pj4+IEkgaGF2ZSBm
+aW5pc2hlZCB0byByZWJ1aWxkIGNlcGggd2l0aCBqZW1hbGxvYywgCj4+Pj4gCj4+Pj4gYWxsIHNl
+ZW0gdG8gd29ya2luZyBmaW5lLiAKPj4+PiAKPj4+PiBJIGdvdCBhIGNvbnN0YW50IDMwMGsgaW9w
+cyBmb3IgdGhlIG1vbWVudCwgc28gbm8gc3BlZWQgcmVncmVzc2lvbi4gCj4+Pj4gCj4+Pj4gSSds
+bCBkbyBtb3JlIGxvbmcgYmVuY2htYXJrIG5leHQgd2Vlay4gCj4+Pj4gCj4+Pj4gUmVnYXJkcywg
+Cj4+Pj4gCj4+Pj4gQWxleGFuZHJlIAo+Pj4+IAo+Pj4+IC0tLS0tIE1haWwgb3JpZ2luYWwgLS0t
+LS0gCj4+Pj4gRGU6ICJJcmVrIEZhc2lraG92IiA8bWFsbXl6aEBnbWFpbC5jb20gPG1haWx0bzpt
+YWxteXpoQGdtYWlsLmNvbT4+IAo+Pj4+IMOAOiAiU29tbmF0aCBSb3kiIDxTb21uYXRoLlJveUBz
+YW5kaXNrLmNvbSAKPj4+PiA8bWFpbHRvOlNvbW5hdGguUm95QHNhbmRpc2suY29tPj4gCj4+Pj4g
+Q2M6ICJhZGVydW1pZXIiIDxhZGVydW1pZXJAb2Rpc28uY29tIDxtYWlsdG86YWRlcnVtaWVyQG9k
+aXNvLmNvbT4+LCAKPj4+PiAiTWFyayBOZWxzb24iIDxtbmVsc29uQHJlZGhhdC5jb20gPG1haWx0
+bzptbmVsc29uQHJlZGhhdC5jb20+PiwgCj4+Pj4gImNlcGgtdXNlcnMiIDxjZXBoLXVzZXJzQGxp
+c3RzLmNlcGguY29tIAo+Pj4+IDxtYWlsdG86Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbT4+LCAi
+Y2VwaC1kZXZlbCIgCj4+Pj4gPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnIDxtYWlsdG86Y2Vw
+aC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc+PiwgCj4+Pj4gIk1pbG9zeiBUYW5za2kiIDxtaWxvc3pA
+YWRmaW4uY29tIDxtYWlsdG86bWlsb3N6QGFkZmluLmNvbT4+IAo+Pj4+IEVudm95w6k6IFZlbmRy
+ZWRpIDI0IEF2cmlsIDIwMTUgMTM6Mzc6NTIgCj4+Pj4gT2JqZXQ6IFJlOiBbY2VwaC11c2Vyc10g
+c3RyYW5nZSBiZW5jaG1hcmsgcHJvYmxlbSA6IHJlc3RhcnRpbmcgb3NkIAo+Pj4+IGRhZW1vbiBp
+bXByb3ZlIHBlcmZvcm1hbmNlIGZyb20gMTAwayBpb3BzIHRvIDMwMGsgaW9wcyAKPj4+PiAKPj4+
+PiBIaSxBbGV4YW5kcmUhIAo+Pj4+IERvIG5vdCB0cnkgdG8gY2hhbmdlIHRoZSBwYXJhbWV0ZXIg
+dm0ubWluX2ZyZWVfa2J5dGVzPyAKPj4+PiAKPj4+PiAyMDE1LTA0LTIzIDE5OjI0IEdNVCswMzow
+MCBTb21uYXRoIFJveSA8IFNvbW5hdGguUm95QHNhbmRpc2suY29tIAo+Pj4+IDxtYWlsdG86U29t
+bmF0aC5Sb3lAc2FuZGlzay5jb20+ID4gOiAKPj4+PiAKPj4+PiAKPj4+PiBBbGV4YW5kcmUsIAo+
+Pj4+IFlvdSBjYW4gY29uZmlndXJlIHdpdGggLS13aXRoLWplbWFsbG9jIG9yIC4vZG9fYXV0b2dl
+biAtSiB0byBidWlsZCAKPj4+PiBjZXBoIHdpdGggamVtYWxsb2MuIAo+Pj4+IAo+Pj4+IFRoYW5r
+cyAmIFJlZ2FyZHMgCj4+Pj4gU29tbmF0aCAKPj4+PiAKPj4+PiAtLS0tLU9yaWdpbmFsIE1lc3Nh
+Z2UtLS0tLSAKPj4+PiBGcm9tOiBjZXBoLXVzZXJzIFttYWlsdG86IGNlcGgtdXNlcnMtYm91bmNl
+c0BsaXN0cy5jZXBoLmNvbSAKPj4+PiA8bWFpbHRvOmNlcGgtdXNlcnMtYm91bmNlc0BsaXN0cy5j
+ZXBoLmNvbT4gXSBPbiBCZWhhbGYgT2YgQWxleGFuZHJlIAo+Pj4+IERFUlVNSUVSIAo+Pj4+IFNl
+bnQ6IFRodXJzZGF5LCBBcHJpbCAyMywgMjAxNSA0OjU2IEFNIAo+Pj4+IFRvOiBNYXJrIE5lbHNv
+biAKPj4+PiBDYzogY2VwaC11c2VyczsgY2VwaC1kZXZlbDsgTWlsb3N6IFRhbnNraSAKPj4+PiBT
+dWJqZWN0OiBSZTogW2NlcGgtdXNlcnNdIHN0cmFuZ2UgYmVuY2htYXJrIHByb2JsZW0gOiByZXN0
+YXJ0aW5nIG9zZCAKPj4+PiBkYWVtb24gaW1wcm92ZSBwZXJmb3JtYW5jZSBmcm9tIDEwMGsgaW9w
+cyB0byAzMDBrIGlvcHMgCj4+Pj4gCj4+Pj4+PiBJZiB5b3UgaGF2ZSB0aGUgbWVhbnMgdG8gY29t
+cGlsZSB0aGUgc2FtZSB2ZXJzaW9uIG9mIGNlcGggd2l0aCAKPj4+Pj4+IGplbWFsbG9jLCBJIHdv
+dWxkIGJlIHZlcnkgaW50ZXJlc3RlZCB0byBzZWUgaG93IGl0IGRvZXMuIAo+Pj4+IAo+Pj4+IFll
+cywgc3VyZS4gKEkgaGF2ZSBhcm91bmQgMy00IHdlZWtzIHRvIGRvIGFsbCB0aGUgYmVuY2hzKSAK
+Pj4+PiAKPj4+PiBCdXQgSSBkb24ndCBrbm93IGhvdyB0byBkbyBpdCA/IAo+Pj4+IEknbSBydW5u
+aW5nIHRoZSBjbHVzdGVyIG9uIGNlbnRvczcuMSwgbWF5YmUgaXQgY2FuIGJlIGVhc3kgdG8gcGF0
+Y2ggCj4+Pj4gdGhlIHNycG1zIHRvIHJlYnVpbGQgdGhlIHBhY2thZ2Ugd2l0aCBqZW1hbGxvYy4g
+Cj4+Pj4gCj4+Pj4gCj4+Pj4gCj4+Pj4gLS0tLS0gTWFpbCBvcmlnaW5hbCAtLS0tLSAKPj4+PiBE
+ZTogIk1hcmsgTmVsc29uIiA8IG1uZWxzb25AcmVkaGF0LmNvbSA8bWFpbHRvOm1uZWxzb25AcmVk
+aGF0LmNvbT4gPiAKPj4+PiDDgDogImFkZXJ1bWllciIgPCBhZGVydW1pZXJAb2Rpc28uY29tIDxt
+YWlsdG86YWRlcnVtaWVyQG9kaXNvLmNvbT4gPiwgCj4+Pj4gIlNyaW5pdmFzdWxhIE1hcmFtIiA8
+IFNyaW5pdmFzdWxhLk1hcmFtQHNhbmRpc2suY29tIAo+Pj4+IDxtYWlsdG86U3Jpbml2YXN1bGEu
+TWFyYW1Ac2FuZGlzay5jb20+ID4gCj4+Pj4gQ2M6ICJjZXBoLXVzZXJzIiA8IGNlcGgtdXNlcnNA
+bGlzdHMuY2VwaC5jb20gCj4+Pj4gPG1haWx0bzpjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tPiA+
+LCAiY2VwaC1kZXZlbCIgPCAKPj4+PiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZyA8bWFpbHRv
+OmNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPiA+LCAKPj4+PiAiTWlsb3N6IFRhbnNraSIgPCBt
+aWxvc3pAYWRmaW4uY29tIDxtYWlsdG86bWlsb3N6QGFkZmluLmNvbT4gPiAKPj4+PiBFbnZvecOp
+OiBKZXVkaSAyMyBBdnJpbCAyMDE1IDEzOjMzOjAwIAo+Pj4+IE9iamV0OiBSZTogW2NlcGgtdXNl
+cnNdIHN0cmFuZ2UgYmVuY2htYXJrIHByb2JsZW0gOiByZXN0YXJ0aW5nIG9zZCAKPj4+PiBkYWVt
+b24gaW1wcm92ZSBwZXJmb3JtYW5jZSBmcm9tIDEwMGsgaW9wcyB0byAzMDBrIGlvcHMgCj4+Pj4g
+Cj4+Pj4gVGhhbmtzIGZvciB0aGUgdGVzdGluZyBBbGV4YW5kcmUhIAo+Pj4+IAo+Pj4+IElmIHlv
+dSBoYXZlIHRoZSBtZWFucyB0byBjb21waWxlIHRoZSBzYW1lIHZlcnNpb24gb2YgY2VwaCB3aXRo
+IAo+Pj4+IGplbWFsbG9jLCBJIHdvdWxkIGJlIHZlcnkgaW50ZXJlc3RlZCB0byBzZWUgaG93IGl0
+IGRvZXMuIAo+Pj4+IAo+Pj4+IEluIHNvbWUgd2F5cyBJJ20gZ2xhZCBpdCB0dXJuZWQgb3V0IG5v
+dCB0byBiZSBOVU1BLiBJIHN0aWxsIHN1c3BlY3Qgd2UgCj4+Pj4gd2lsbCBoYXZlIHRvIGRlYWwg
+d2l0aCBpdCBhdCBzb21lIHBvaW50LCBidXQgcGVyaGFwcyBub3QgdG9kYXkuIDspIAo+Pj4+IAo+
+Pj4+IE1hcmsgCj4+Pj4gCj4+Pj4gT24gMDQvMjMvMjAxNSAwNTo1OCBBTSwgQWxleGFuZHJlIERF
+UlVNSUVSIHdyb3RlOiAKPj4+Pj4gTWF5YmUgaXQncyB0Y21hbGxvYyByZWxhdGVkIAo+Pj4+PiBJ
+IHRoaW5rZWQgdG8gaGF2ZSBwYXRjaGVkIGl0IGNvcnJlY3RseSwgYnV0IHBlcmYgc2hvdyBhIGxv
+dCBvZiAKPj4+Pj4gdGNtYWxsb2M6OlRocmVhZENhY2hlOjpSZWxlYXNlVG9DZW50cmFsQ2FjaGUg
+Cj4+Pj4+IAo+Pj4+PiBiZWZvcmUgb3NkIHJlc3RhcnQgKDEwMGspIAo+Pj4+PiAtLS0tLS0tLS0t
+LS0tLS0tLS0gCj4+Pj4+IDExLjY2JSBjZXBoLW9zZCBsaWJ0Y21hbGxvYy5zby40LjEuMiBbLl0g
+Cj4+Pj4+IHRjbWFsbG9jOjpUaHJlYWRDYWNoZTo6UmVsZWFzZVRvQ2VudHJhbENhY2hlIAo+Pj4+
+PiA4LjUxJSBjZXBoLW9zZCBsaWJ0Y21hbGxvYy5zby40LjEuMiBbLl0gCj4+Pj4+IHRjbWFsbG9j
+OjpDZW50cmFsRnJlZUxpc3Q6OkZldGNoRnJvbVNwYW5zIAo+Pj4+PiAzLjA0JSBjZXBoLW9zZCBs
+aWJ0Y21hbGxvYy5zby40LjEuMiBbLl0gCj4+Pj4+IHRjbWFsbG9jOjpDZW50cmFsRnJlZUxpc3Q6
+OlJlbGVhc2VUb1NwYW5zIAo+Pj4+PiAyLjA0JSBjZXBoLW9zZCBsaWJ0Y21hbGxvYy5zby40LjEu
+MiBbLl0gb3BlcmF0b3IgbmV3IDEuNjMlIHN3YXBwZXIgCj4+Pj4+IFtrZXJuZWwua2FsbHN5bXNd
+IFtrXSBpbnRlbF9pZGxlIDEuMzUlIGNlcGgtb3NkIGxpYnRjbWFsbG9jLnNvLjQuMS4yIAo+Pj4+
+PiBbLl0gdGNtYWxsb2M6OkNlbnRyYWxGcmVlTGlzdDo6UmVsZWFzZUxpc3RUb1NwYW5zIAo+Pj4+
+PiAxLjMzJSBjZXBoLW9zZCBsaWJ0Y21hbGxvYy5zby40LjEuMiBbLl0gb3BlcmF0b3IgZGVsZXRl
+IDEuMDclIGNlcGgtb3NkIAo+Pj4+PiBsaWJzdGRjKysuc28uNi4wLjE5IFsuXSBzdGQ6OmJhc2lj
+X3N0cmluZzxjaGFyLCAKPj4+Pj4gc3RkOjpjaGFyX3RyYWl0czxjaGFyPiwgc3RkOjphbGxvY2F0
+b3I8Y2hhcj4gPjo6YmFzaWNfc3RyaW5nIDAuOTElIAo+Pj4+PiBjZXBoLW9zZCBsaWJwdGhyZWFk
+LTIuMTcuc28gWy5dIHB0aHJlYWRfbXV0ZXhfdHJ5bG9jayAwLjg4JSBjZXBoLW9zZCAKPj4+Pj4g
+bGliYy0yLjE3LnNvIFsuXSBfX21lbWNweV9zc3NlM19iYWNrIDAuODElIGNlcGgtb3NkIGNlcGgt
+b3NkIFsuXSAKPj4+Pj4gTXV0ZXg6OkxvY2sgMC43OSUgY2VwaC1vc2QgW2tlcm5lbC5rYWxsc3lt
+c10gW2tdIAo+Pj4+PiBjb3B5X3VzZXJfZW5oYW5jZWRfZmFzdF9zdHJpbmcgMC43NCUgY2VwaC1v
+c2QgbGlicHRocmVhZC0yLjE3LnNvIFsuXSAKPj4+Pj4gcHRocmVhZF9tdXRleF91bmxvY2sgMC42
+NyUgY2VwaC1vc2QgW2tlcm5lbC5rYWxsc3ltc10gW2tdIAo+Pj4+PiBfcmF3X3NwaW5fbG9jayAw
+LjYzJSBzd2FwcGVyIFtrZXJuZWwua2FsbHN5bXNdIFtrXSAKPj4+Pj4gbmF0aXZlX3dyaXRlX21z
+cl9zYWZlIDAuNjIlIGNlcGgtb3NkIFtrZXJuZWwua2FsbHN5bXNdIFtrXSAKPj4+Pj4gYXZjX2hh
+c19wZXJtX25vYXVkaXQgMC41OCUgY2VwaC1vc2QgY2VwaC1vc2QgWy5dIG9wZXJhdG9yPCAwLjU3
+JSAKPj4+Pj4gY2VwaC1vc2QgW2tlcm5lbC5rYWxsc3ltc10gW2tdIF9fc2NoZWR1bGUgMC41NyUg
+Y2VwaC1vc2QgCj4+Pj4+IFtrZXJuZWwua2FsbHN5bXNdIFtrXSBfX2RfbG9va3VwX3JjdSAwLjU0
+JSBzd2FwcGVyIFtrZXJuZWwua2FsbHN5bXNdIAo+Pj4+PiBba10gX19zY2hlZHVsZSAKPj4+Pj4g
+Cj4+Pj4+IAo+Pj4+PiBhZnRlciBvc2QgcmVzdGFydCAoMzAwayBpb3BzKSAKPj4+Pj4gLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tIAo+Pj4+PiAzLjQ3JSBjZXBoLW9zZCBsaWJ0Y21hbGxv
+Yy5zby40LjEuMiBbLl0gb3BlcmF0b3IgbmV3IDEuOTIlIGNlcGgtb3NkIAo+Pj4+PiBsaWJ0Y21h
+bGxvYy5zby40LjEuMiBbLl0gb3BlcmF0b3IgZGVsZXRlIDEuODYlIHN3YXBwZXIgCj4+Pj4+IFtr
+ZXJuZWwua2FsbHN5bXNdIFtrXSBpbnRlbF9pZGxlIDEuNTIlIGNlcGgtb3NkIGxpYnN0ZGMrKy5z
+by42LjAuMTkgCj4+Pj4+IFsuXSBzdGQ6OmJhc2ljX3N0cmluZzxjaGFyLCBzdGQ6OmNoYXJfdHJh
+aXRzPGNoYXI+LCAKPj4+Pj4gc3RkOjphbGxvY2F0b3I8Y2hhcj4gPjo6YmFzaWNfc3RyaW5nIDEu
+MzQlIGNlcGgtb3NkIAo+Pj4+PiBsaWJ0Y21hbGxvYy5zby40LjEuMiBbLl0gdGNtYWxsb2M6OlRo
+cmVhZENhY2hlOjpSZWxlYXNlVG9DZW50cmFsQ2FjaGUgCj4+Pj4+IDEuMjQlIGNlcGgtb3NkIGxp
+YmMtMi4xNy5zbyBbLl0gX19tZW1jcHlfc3NzZTNfYmFjayAxLjIzJSBjZXBoLW9zZCAKPj4+Pj4g
+Y2VwaC1vc2QgWy5dIE11dGV4OjpMb2NrIDEuMjElIGNlcGgtb3NkIGxpYnB0aHJlYWQtMi4xNy5z
+byBbLl0gCj4+Pj4+IHB0aHJlYWRfbXV0ZXhfdHJ5bG9jayAxLjExJSBjZXBoLW9zZCBba2VybmVs
+LmthbGxzeW1zXSBba10gCj4+Pj4+IGNvcHlfdXNlcl9lbmhhbmNlZF9mYXN0X3N0cmluZyAwLjk1
+JSBjZXBoLW9zZCBsaWJwdGhyZWFkLTIuMTcuc28gWy5dIAo+Pj4+PiBwdGhyZWFkX211dGV4X3Vu
+bG9jayAwLjk0JSBjZXBoLW9zZCBba2VybmVsLmthbGxzeW1zXSBba10gCj4+Pj4+IF9yYXdfc3Bp
+bl9sb2NrIDAuNzglIGNlcGgtb3NkIFtrZXJuZWwua2FsbHN5bXNdIFtrXSBfX2RfbG9va3VwX3Jj
+dSAKPj4+Pj4gMC43MCUgY2VwaC1vc2QgW2tlcm5lbC5rYWxsc3ltc10gW2tdIHRjcF9zZW5kbXNn
+IDAuNzAlIGNlcGgtb3NkIAo+Pj4+PiBjZXBoLW9zZCBbLl0gTWVzc2FnZTo6TWVzc2FnZSAwLjY4
+JSBjZXBoLW9zZCBba2VybmVsLmthbGxzeW1zXSBba10gCj4+Pj4+IF9fc2NoZWR1bGUgMC42NiUg
+Y2VwaC1vc2QgW2tlcm5lbC5rYWxsc3ltc10gW2tdIGlkbGVfY3B1IDAuNjUlIAo+Pj4+PiBjZXBo
+LW9zZCBsaWJ0Y21hbGxvYy5zby40LjEuMiBbLl0gCj4+Pj4+IHRjbWFsbG9jOjpDZW50cmFsRnJl
+ZUxpc3Q6OkZldGNoRnJvbVNwYW5zIAo+Pj4+PiAwLjY0JSBzd2FwcGVyIFtrZXJuZWwua2FsbHN5
+bXNdIFtrXSBuYXRpdmVfd3JpdGVfbXNyX3NhZmUgMC42MSUgCj4+Pj4+IGNlcGgtb3NkIGNlcGgt
+b3NkIFsuXSAKPj4+Pj4gc3RkOjp0cjE6Ol9TcF9jb3VudGVkX2Jhc2U8KF9fZ251X2N4eDo6X0xv
+Y2tfcG9saWN5KTI+OjpfTV9yZWxlYXNlIAo+Pj4+PiAwLjYwJSBzd2FwcGVyIFtrZXJuZWwua2Fs
+bHN5bXNdIFtrXSBfX3NjaGVkdWxlIDAuNjAlIGNlcGgtb3NkIAo+Pj4+PiBsaWJzdGRjKysuc28u
+Ni4wLjE5IFsuXSAweDAwMDAwMDAwMDAwYmRkMmIgMC41NyUgY2VwaC1vc2QgY2VwaC1vc2QgWy5d
+IAo+Pj4+PiBvcGVyYXRvcjwgMC41NyUgY2VwaC1vc2QgY2VwaC1vc2QgWy5dIGNyYzMyX2lzY3Np
+XzAwIDAuNTYlIGNlcGgtb3NkIAo+Pj4+PiBsaWJzdGRjKysuc28uNi4wLjE5IFsuXSBzdGQ6OnN0
+cmluZzo6X1JlcDo6X01fZGlzcG9zZSAwLjU1JSBjZXBoLW9zZCAKPj4+Pj4gW2tlcm5lbC5rYWxs
+c3ltc10gW2tdIF9fc3dpdGNoX3RvIDAuNTQlIGNlcGgtb3NkIGxpYmMtMi4xNy5zbyBbLl0gCj4+
+Pj4+IHZmcHJpbnRmIDAuNTIlIGNlcGgtb3NkIFtrZXJuZWwua2FsbHN5bXNdIFtrXSBmZ2V0X2xp
+Z2h0IAo+Pj4+PiAKPj4+Pj4gLS0tLS0gTWFpbCBvcmlnaW5hbCAtLS0tLSAKPj4+Pj4gRGU6ICJh
+ZGVydW1pZXIiIDwgYWRlcnVtaWVyQG9kaXNvLmNvbSA8bWFpbHRvOmFkZXJ1bWllckBvZGlzby5j
+b20+ID4gCj4+Pj4+IMOAOiAiU3Jpbml2YXN1bGEgTWFyYW0iIDwgU3Jpbml2YXN1bGEuTWFyYW1A
+c2FuZGlzay5jb20gCj4+Pj4+IDxtYWlsdG86U3Jpbml2YXN1bGEuTWFyYW1Ac2FuZGlzay5jb20+
+ID4gCj4+Pj4+IENjOiAiY2VwaC11c2VycyIgPCBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tIAo+
+Pj4+PiA8bWFpbHRvOmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20+ID4sICJjZXBoLWRldmVsIiAK
+Pj4+Pj4gPCBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZyA8bWFpbHRvOmNlcGgtZGV2ZWxAdmdl
+ci5rZXJuZWwub3JnPiA+LCAKPj4+Pj4gIk1pbG9zeiBUYW5za2kiIDwgbWlsb3N6QGFkZmluLmNv
+bSA8bWFpbHRvOm1pbG9zekBhZGZpbi5jb20+ID4gCj4+Pj4+IEVudm95w6k6IEpldWRpIDIzIEF2
+cmlsIDIwMTUgMTA6MDA6MzQgCj4+Pj4+IE9iamV0OiBSZTogW2NlcGgtdXNlcnNdIHN0cmFuZ2Ug
+YmVuY2htYXJrIHByb2JsZW0gOiByZXN0YXJ0aW5nIG9zZCAKPj4+Pj4gZGFlbW9uIGltcHJvdmUg
+cGVyZm9ybWFuY2UgZnJvbSAxMDBrIGlvcHMgdG8gMzAwayBpb3BzIAo+Pj4+PiAKPj4+Pj4gSGks
+IAo+Pj4+PiBJJ20gaGl0dGluZyB0aGlzIGJ1ZyBhZ2FpbiB0b2RheS4gCj4+Pj4+IAo+Pj4+PiBT
+byBkb24ndCBzZWVtIHRvIGJlIG51bWEgcmVsYXRlZCAoSSBoYXZlIHRyeSB0byBmbHVzaCBsaW51
+eCBidWZmZXIgdG8gCj4+Pj4+IGJlIHN1cmUpLiAKPj4+Pj4gCj4+Pj4+IGFuZCB0Y21hbGxvYyBp
+cyBwYXRjaGVkIChJIGRvbid0IGtub3duIGhvdyB0byB2ZXJpZnkgdGhhdCBpdCdzIG9rKS4gCj4+
+Pj4+IAo+Pj4+PiBJIGRvbid0IGhhdmUgcmVzdGFydGVkIG9zZCB5ZXQuIAo+Pj4+PiAKPj4+Pj4g
+TWF5YmUgc29tZSBwZXJmIHRyYWNlIGNvdWxkIGJlIHVzZWZ1bGxsID8gCj4+Pj4+IAo+Pj4+PiAK
+Pj4+Pj4gLS0tLS0gTWFpbCBvcmlnaW5hbCAtLS0tLSAKPj4+Pj4gRGU6ICJhZGVydW1pZXIiIDwg
+YWRlcnVtaWVyQG9kaXNvLmNvbSA8bWFpbHRvOmFkZXJ1bWllckBvZGlzby5jb20+ID4gCj4+Pj4+
+IMOAOiAiU3Jpbml2YXN1bGEgTWFyYW0iIDwgU3Jpbml2YXN1bGEuTWFyYW1Ac2FuZGlzay5jb20g
+Cj4+Pj4+IDxtYWlsdG86U3Jpbml2YXN1bGEuTWFyYW1Ac2FuZGlzay5jb20+ID4gCj4+Pj4+IENj
+OiAiY2VwaC11c2VycyIgPCBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tIAo+Pj4+PiA8bWFpbHRv
+OmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20+ID4sICJjZXBoLWRldmVsIiAKPj4+Pj4gPCBjZXBo
+LWRldmVsQHZnZXIua2VybmVsLm9yZyA8bWFpbHRvOmNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3Jn
+PiA+LCAKPj4+Pj4gIk1pbG9zeiBUYW5za2kiIDwgbWlsb3N6QGFkZmluLmNvbSA8bWFpbHRvOm1p
+bG9zekBhZGZpbi5jb20+ID4gCj4+Pj4+IEVudm95w6k6IE1lcmNyZWRpIDIyIEF2cmlsIDIwMTUg
+MTg6MzA6MjYgCj4+Pj4+IE9iamV0OiBSZTogW2NlcGgtdXNlcnNdIHN0cmFuZ2UgYmVuY2htYXJr
+IHByb2JsZW0gOiByZXN0YXJ0aW5nIG9zZCAKPj4+Pj4gZGFlbW9uIGltcHJvdmUgcGVyZm9ybWFu
+Y2UgZnJvbSAxMDBrIGlvcHMgdG8gMzAwayBpb3BzIAo+Pj4+PiAKPj4+Pj4gSGksIAo+Pj4+PiAK
+Pj4+Pj4+PiBJIGZlZWwgaXQgaXMgZHVlIHRvIHRjbWFsbG9jIGlzc3VlIAo+Pj4+PiAKPj4+Pj4g
+SW5kZWVkLCBJIGhhZCBwYXRjaGVkIG9uZSBvZiBteSBub2RlLCBidXQgbm90IHRoZSBvdGhlci4g
+Cj4+Pj4+IFNvIG1heWJlIEkgaGF2ZSBoaXQgdGhpcyBidWcuIChidXQgSSBjYW4ndCBjb25maXJt
+LCBJIGRvbid0IGhhdmUgCj4+Pj4+IHRyYWNlcykuIAo+Pj4+PiAKPj4+Pj4gQnV0IG51bWEgaW50
+ZXJsZWF2aW5nIHNlZW0gdG8gaGVscCBpbiBteSBjYXNlIChtYXliZSBub3QgZnJvbSAKPj4+Pj4g
+MTAwLT4zMDBrLCBidXQgMjUway0+MzAwaykuIAo+Pj4+PiAKPj4+Pj4gSSBuZWVkIHRvIGRvIG1v
+cmUgbG9uZyB0ZXN0cyB0byBjb25maXJtIHRoYXQuIAo+Pj4+PiAKPj4+Pj4gCj4+Pj4+IC0tLS0t
+IE1haWwgb3JpZ2luYWwgLS0tLS0gCj4+Pj4+IERlOiAiU3Jpbml2YXN1bGEgTWFyYW0iIDwgU3Jp
+bml2YXN1bGEuTWFyYW1Ac2FuZGlzay5jb20gCj4+Pj4+IDxtYWlsdG86U3Jpbml2YXN1bGEuTWFy
+YW1Ac2FuZGlzay5jb20+ID4gCj4+Pj4+IMOAOiAiTWFyayBOZWxzb24iIDwgbW5lbHNvbkByZWRo
+YXQuY29tIDxtYWlsdG86bW5lbHNvbkByZWRoYXQuY29tPiA+LCAKPj4+Pj4gImFkZXJ1bWllciIg
+Cj4+Pj4+IDwgYWRlcnVtaWVyQG9kaXNvLmNvbSA8bWFpbHRvOmFkZXJ1bWllckBvZGlzby5jb20+
+ID4sICJNaWxvc3ogVGFuc2tpIiAKPj4+Pj4gPCBtaWxvc3pAYWRmaW4uY29tIDxtYWlsdG86bWls
+b3N6QGFkZmluLmNvbT4gPiAKPj4+Pj4gQ2M6ICJjZXBoLWRldmVsIiA8IGNlcGgtZGV2ZWxAdmdl
+ci5rZXJuZWwub3JnIAo+Pj4+PiA8bWFpbHRvOmNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPiA+
+LCAiY2VwaC11c2VycyIgCj4+Pj4+IDwgY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbSA8bWFpbHRv
+OmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20+ID4gCj4+Pj4+IEVudm95w6k6IE1lcmNyZWRpIDIy
+IEF2cmlsIDIwMTUgMTY6MzQ6MzMgCj4+Pj4+IE9iamV0OiBSRTogW2NlcGgtdXNlcnNdIHN0cmFu
+Z2UgYmVuY2htYXJrIHByb2JsZW0gOiByZXN0YXJ0aW5nIG9zZCAKPj4+Pj4gZGFlbW9uIGltcHJv
+dmUgcGVyZm9ybWFuY2UgZnJvbSAxMDBrIGlvcHMgdG8gMzAwayBpb3BzIAo+Pj4+PiAKPj4+Pj4g
+SSBmZWVsIGl0IGlzIGR1ZSB0byB0Y21hbGxvYyBpc3N1ZSAKPj4+Pj4gCj4+Pj4+IEkgaGF2ZSBz
+ZWVuIHNpbWlsYXIgaXNzdWUgaW4gbXkgc2V0dXAgYWZ0ZXIgMjAgZGF5cy4gCj4+Pj4+IAo+Pj4+
+PiBUaGFua3MsIAo+Pj4+PiBTcmluaXZhcyAKPj4+Pj4gCj4+Pj4+IAo+Pj4+PiAKPj4+Pj4gLS0t
+LS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0gCj4+Pj4+IEZyb206IGNlcGgtdXNlcnMgW21haWx0bzog
+Y2VwaC11c2Vycy1ib3VuY2VzQGxpc3RzLmNlcGguY29tIAo+Pj4+PiA8bWFpbHRvOmNlcGgtdXNl
+cnMtYm91bmNlc0BsaXN0cy5jZXBoLmNvbT4gXSBPbiBCZWhhbGYgCj4+Pj4+IE9mIE1hcmsgTmVs
+c29uIAo+Pj4+PiBTZW50OiBXZWRuZXNkYXksIEFwcmlsIDIyLCAyMDE1IDc6MzEgUE0gCj4+Pj4+
+IFRvOiBBbGV4YW5kcmUgREVSVU1JRVI7IE1pbG9zeiBUYW5za2kgCj4+Pj4+IENjOiBjZXBoLWRl
+dmVsOyBjZXBoLXVzZXJzIAo+Pj4+PiBTdWJqZWN0OiBSZTogW2NlcGgtdXNlcnNdIHN0cmFuZ2Ug
+YmVuY2htYXJrIHByb2JsZW0gOiByZXN0YXJ0aW5nIG9zZCAKPj4+Pj4gZGFlbW9uIGltcHJvdmUg
+cGVyZm9ybWFuY2UgZnJvbSAxMDBrIGlvcHMgdG8gMzAwayBpb3BzIAo+Pj4+PiAKPj4+Pj4gSGkg
+QWxleGFuZHJlLCAKPj4+Pj4gCj4+Pj4+IFdlIHNob3VsZCBkaXNjdXNzIHRoaXMgYXQgdGhlIHBl
+cmYgbWVldGluZyB0b2RheS4gV2Uga25ldyBOVU1BIG5vZGUgCj4+Pj4+IGFmZmluaXR5IGlzc3Vl
+cyB3ZXJlIGdvaW5nIHRvIGNyb3AgdXAgc29vbmVyIG9yIGxhdGVyIChhbmQgaW5kZWVkIAo+Pj4+
+PiBhbHJlYWR5IGhhdmUgaW4gc29tZSBjYXNlcyksIGJ1dCB0aGlzIGlzIHByZXR0eSBtYWpvci4g
+SXQncyBwcm9iYWJseSAKPj4+Pj4gdGltZSB0byByZWFsbHkgZGlnIGluIGFuZCBmaWd1cmUgb3V0
+IGhvdyB0byBkZWFsIHdpdGggdGhpcy4gCj4+Pj4+IAo+Pj4+PiBOb3RlOiB0aGlzIGlzIG9uZSBv
+ZiB0aGUgcmVhc29ucyBJIGxpa2Ugc21hbGwgbm9kZXMgd2l0aCBzaW5nbGUgCj4+Pj4+IHNvY2tl
+dHMgYW5kIGZld2VyIE9TRHMuIAo+Pj4+PiAKPj4+Pj4gTWFyayAKPj4+Pj4gCj4+Pj4+IE9uIDA0
+LzIyLzIwMTUgMDg6NTYgQU0sIEFsZXhhbmRyZSBERVJVTUlFUiB3cm90ZTogCj4+Pj4+PiBIaSwg
+Cj4+Pj4+PiAKPj4+Pj4+IEkgaGF2ZSBkb25lIGEgbG90IG9mIHRlc3QgdG9kYXksIGFuZCBpdCBz
+ZWVtIGluZGVlZCBudW1hIHJlbGF0ZWQuIAo+Pj4+Pj4gCj4+Pj4+PiBNeSBudW1hc3RhdCB3YXMg
+Cj4+Pj4+PiAKPj4+Pj4+ICMgbnVtYXN0YXQgCj4+Pj4+PiBub2RlMCBub2RlMSAKPj4+Pj4+IG51
+bWFfaGl0IDk5MDc1NDIyIDE1Mzk3Njg3NyAKPj4+Pj4+IG51bWFfbWlzcyAxNjc0OTA5NjUgMTQ5
+MzY2MyAKPj4+Pj4+IG51bWFfZm9yZWlnbiAxNDkzNjYzIDE2NzQ5MTQxNyAKPj4+Pj4+IGludGVy
+bGVhdmVfaGl0IDE1Nzc0NSAxNjcwMTUgCj4+Pj4+PiBsb2NhbF9ub2RlIDk5MDQ5MTc5IDE1Mzgz
+MDU1NCAKPj4+Pj4+IG90aGVyX25vZGUgMTY3NTE3Njk3IDE2Mzk5ODYgCj4+Pj4+PiAKPj4+Pj4+
+IFNvLCBhIGxvdCBvZiBtaXNzLiAKPj4+Pj4+IAo+Pj4+Pj4gSW4gdGhpcyBjYXNlICwgSSBjYW4g
+cmVwcm9kdWNlIGlvcyBnb2luZyBmcm9tIDg1ayB0byAzMDBrIGlvcHMsIHVwIAo+Pj4+Pj4gYW5k
+IGRvd24uIAo+Pj4+Pj4gCj4+Pj4+PiBub3cgc2V0dGluZyAKPj4+Pj4+IGVjaG8gMCA+IC9wcm9j
+L3N5cy9rZXJuZWwvbnVtYV9iYWxhbmNpbmcgCj4+Pj4+PiAKPj4+Pj4+IGFuZCBzdGFydGluZyBv
+c2QgZGFlbW9ucyB3aXRoIAo+Pj4+Pj4gCj4+Pj4+PiBudW1hY3RsIC0taW50ZXJsZWF2ZT1hbGwg
+L3Vzci9iaW4vY2VwaC1vc2QgCj4+Pj4+PiAKPj4+Pj4+IAo+Pj4+Pj4gSSBoYXZlIGEgY29uc3Rh
+bnQgMzAwayBpb3BzICEgCj4+Pj4+PiAKPj4+Pj4+IAo+Pj4+Pj4gSSB3b25kZXIgaWYgaXQgY291
+bGQgYmUgaW1wcm92ZSBieSBiaW5kaW5nIG9zZCBkYWVtb25zIHRvIHNwZWNpZmljIAo+Pj4+Pj4g
+bnVtYSBub2RlLiAKPj4+Pj4+IEkgaGF2ZSAyIG51bWFub2RlIG9mIDEwIGNvcmVzIHdpdGggNiBv
+c2QsIGJ1dCBJIHRoaW5rIGl0IGFsc28gCj4+Pj4+PiByZXF1aXJlIGNlcGguY29uZiBvc2QgdGhy
+ZWFkcyB0dW5uaW5nLiAKPj4+Pj4+IAo+Pj4+Pj4gCj4+Pj4+PiAKPj4+Pj4+IC0tLS0tIE1haWwg
+b3JpZ2luYWwgLS0tLS0gCj4+Pj4+PiBEZTogIk1pbG9zeiBUYW5za2kiIDwgbWlsb3N6QGFkZmlu
+LmNvbSA8bWFpbHRvOm1pbG9zekBhZGZpbi5jb20+ID4gCj4+Pj4+PiDDgDogImFkZXJ1bWllciIg
+PCBhZGVydW1pZXJAb2Rpc28uY29tIDxtYWlsdG86YWRlcnVtaWVyQG9kaXNvLmNvbT4gPiAKPj4+
+Pj4+IENjOiAiY2VwaC1kZXZlbCIgPCBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZyAKPj4+Pj4+
+IDxtYWlsdG86Y2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc+ID4sICJjZXBoLXVzZXJzIiAKPj4+
+Pj4+IDwgY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbSA8bWFpbHRvOmNlcGgtdXNlcnNAbGlzdHMu
+Y2VwaC5jb20+ID4gCj4+Pj4+PiBFbnZvecOpOiBNZXJjcmVkaSAyMiBBdnJpbCAyMDE1IDEyOjU0
+OjIzIAo+Pj4+Pj4gT2JqZXQ6IFJlOiBbY2VwaC11c2Vyc10gc3RyYW5nZSBiZW5jaG1hcmsgcHJv
+YmxlbSA6IHJlc3RhcnRpbmcgb3NkIAo+Pj4+Pj4gZGFlbW9uIGltcHJvdmUgcGVyZm9ybWFuY2Ug
+ZnJvbSAxMDBrIGlvcHMgdG8gMzAwayBpb3BzIAo+Pj4+Pj4gCj4+Pj4+PiAKPj4+Pj4+IAo+Pj4+
+Pj4gT24gV2VkLCBBcHIgMjIsIDIwMTUgYXQgNTowMSBBTSwgQWxleGFuZHJlIERFUlVNSUVSIDwg
+Cj4+Pj4+PiBhZGVydW1pZXJAb2Rpc28uY29tIDxtYWlsdG86YWRlcnVtaWVyQG9kaXNvLmNvbT4g
+PiB3cm90ZTogCj4+Pj4+PiAKPj4+Pj4+IAo+Pj4+Pj4gSSB3b25kZXIgaWYgaXQgY291bGQgYmUg
+bnVtYSByZWxhdGVkLCAKPj4+Pj4+IAo+Pj4+Pj4gSSdtIHVzaW5nIGNlbnRvcyA3LjEsIAo+Pj4+
+Pj4gYW5kIGF1dG8gbnVtYSBiYWxhY25pbmcgaXMgZW5hYmxlZCAKPj4+Pj4+IAo+Pj4+Pj4gY2F0
+IC9wcm9jL3N5cy9rZXJuZWwvbnVtYV9iYWxhbmNpbmcgPSAxIAo+Pj4+Pj4gCj4+Pj4+PiBNYXli
+ZSBvc2QgZGFlbW9uIGFjY2VzcyB0byBidWZmZXIgb24gd3JvbmcgbnVtYSBub2RlLiAKPj4+Pj4+
+IAo+Pj4+Pj4gSSdsbCB0cnkgdG8gcmVwcm9kdWNlIHRoZSBwcm9ibGVtIAo+Pj4+Pj4gCj4+Pj4+
+PiAKPj4+Pj4+IAo+Pj4+Pj4gQ2FuIHlvdSBmb3JjZSB0aGUgZGVnZW5lcmF0ZSBjYXNlIHVzaW5n
+IG51bWFjdGw/IFRvIGVpdGhlciBhZmZpcm0gb3IgCj4+Pj4+PiBkZW55IHlvdXIgc3VzcGljaW9u
+LiAKPj4+Pj4+IAo+Pj4+Pj4gCj4+Pj4+PiAKPj4+Pj4+IAo+Pj4+Pj4gLS0tLS0gTWFpbCBvcmln
+aW5hbCAtLS0tLSAKPj4+Pj4+IERlOiAiYWRlcnVtaWVyIiA8IGFkZXJ1bWllckBvZGlzby5jb20g
+PG1haWx0bzphZGVydW1pZXJAb2Rpc28uY29tPiA+IAo+Pj4+Pj4gw4A6ICJjZXBoLWRldmVsIiA8
+IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnIAo+Pj4+Pj4gPG1haWx0bzpjZXBoLWRldmVsQHZn
+ZXIua2VybmVsLm9yZz4gPiwgImNlcGgtdXNlcnMiIDwgCj4+Pj4+PiBjZXBoLXVzZXJzQGxpc3Rz
+LmNlcGguY29tIDxtYWlsdG86Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbT4gPiAKPj4+Pj4+IEVu
+dm95w6k6IE1lcmNyZWRpIDIyIEF2cmlsIDIwMTUgMTA6NDA6MDUgCj4+Pj4+PiBPYmpldDogW2Nl
+cGgtdXNlcnNdIHN0cmFuZ2UgYmVuY2htYXJrIHByb2JsZW0gOiByZXN0YXJ0aW5nIG9zZCBkYWVt
+b24gCj4+Pj4+PiBpbXByb3ZlIHBlcmZvcm1hbmNlIGZyb20gMTAwayBpb3BzIHRvIDMwMGsgaW9w
+cyAKPj4+Pj4+IAo+Pj4+Pj4gSGksIAo+Pj4+Pj4gCj4+Pj4+PiBJIHdhcyBkb2luZyBzb21lIGJl
+bmNobWFya3MsIAo+Pj4+Pj4gSSBoYXZlIGZvdW5kIGFuIHN0cmFuZ2UgYmVoYXZpb3VyLiAKPj4+
+Pj4+IAo+Pj4+Pj4gVXNpbmcgZmlvIHdpdGggcmJkIGVuZ2luZSwgSSB3YXMgYWJsZSB0byByZWFj
+aCBhcm91bmQgMTAwayBpb3BzLiAKPj4+Pj4+IChvc2QgZGF0YXMgaW4gbGludXggYnVmZmVyLCBp
+b3N0YXQgc2hvdyAwJSBkaXNrIGFjY2VzcykgCj4+Pj4+PiAKPj4+Pj4+IHRoZW4gYWZ0ZXIgcmVz
+dGFydGluZyBhbGwgb3NkIGRhZW1vbnMsIAo+Pj4+Pj4gCj4+Pj4+PiB0aGUgc2FtZSBmaW8gYmVu
+Y2htYXJrIHNob3cgbm93IGFyb3VuZCAzMDBrIGlvcHMuIAo+Pj4+Pj4gKG9zZCBkYXRhcyBpbiBs
+aW51eCBidWZmZXIsIGlvc3RhdCBzaG93IDAlIGRpc2sgYWNjZXNzKSAKPj4+Pj4+IAo+Pj4+Pj4g
+Cj4+Pj4+PiBhbnkgaWRlYXM/IAo+Pj4+Pj4gCj4+Pj4+PiAKPj4+Pj4+IAo+Pj4+Pj4gCj4+Pj4+
+PiBiZWZvcmUgcmVzdGFydGluZyBvc2QgCj4+Pj4+PiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0gCj4+
+Pj4+PiByYmRfaW9kZXB0aDMyLXRlc3Q6IChnPTApOiBydz1yYW5kcmVhZCwgYnM9NEstNEsvNEst
+NEsvNEstNEssIAo+Pj4+Pj4gaW9lbmdpbmU9cmJkLCBpb2RlcHRoPTMyIC4uLiAKPj4+Pj4+IGZp
+by0yLjIuNy0xMC1nNTFlOSAKPj4+Pj4+IFN0YXJ0aW5nIDEwIHByb2Nlc3NlcyAKPj4+Pj4+IHJi
+ZCBlbmdpbmU6IFJCRCB2ZXJzaW9uOiAwLjEuOSAKPj4+Pj4+IHJiZCBlbmdpbmU6IFJCRCB2ZXJz
+aW9uOiAwLjEuOSAKPj4+Pj4+IHJiZCBlbmdpbmU6IFJCRCB2ZXJzaW9uOiAwLjEuOSAKPj4+Pj4+
+IHJiZCBlbmdpbmU6IFJCRCB2ZXJzaW9uOiAwLjEuOSAKPj4+Pj4+IHJiZCBlbmdpbmU6IFJCRCB2
+ZXJzaW9uOiAwLjEuOSAKPj4+Pj4+IHJiZCBlbmdpbmU6IFJCRCB2ZXJzaW9uOiAwLjEuOSAKPj4+
+Pj4+IHJiZCBlbmdpbmU6IFJCRCB2ZXJzaW9uOiAwLjEuOSAKPj4+Pj4+IHJiZCBlbmdpbmU6IFJC
+RCB2ZXJzaW9uOiAwLjEuOSAKPj4+Pj4+IHJiZCBlbmdpbmU6IFJCRCB2ZXJzaW9uOiAwLjEuOSAK
+Pj4+Pj4+IHJiZCBlbmdpbmU6IFJCRCB2ZXJzaW9uOiAwLjEuOSAKPj4+Pj4+IF5DYnM6IDEwIChm
+PTEwKTogW3IoMTApXSBbMi45JSBkb25lXSBbMzc2LjFNQi8wS0IvMEtCIC9zXSBbOTYuNksvMC8w
+IAo+Pj4+Pj4gaW9wc10gW2V0YSAxNG06NDVzXSAKPj4+Pj4+IGZpbzogdGVybWluYXRpbmcgb24g
+c2lnbmFsIDIgCj4+Pj4+PiAKPj4+Pj4+IHJiZF9pb2RlcHRoMzItdGVzdDogKGdyb3VwaWQ9MCwg
+am9icz0xMCk6IGVycj0gMDogcGlkPTE3MDc1OiBXZWQgQXByIAo+Pj4+Pj4gMjIgMTA6MDA6MDQg
+MjAxNSByZWFkIDogaW89MTE1NThNQiwgYnc9NDUxNDg3S0IvcywgaW9wcz0xMTI4NzEsIHJ1bnQ9
+IAo+Pj4+Pj4gMjYyMTVtc2VjIHNsYXQgKHVzZWMpOiBtaW49NSwgbWF4PTM2ODUsIGF2Zz0xNi44
+OSwgc3RkZXY9MTcuMzggY2xhdCAKPj4+Pj4+ICh1c2VjKTogbWluPTUsIG1heD02MjU4NCwgYXZn
+PTI2OTUuODAsIHN0ZGV2PTUzNTEuMjMgbGF0ICh1c2VjKTogCj4+Pj4+PiBtaW49MTA5LCBtYXg9
+NjI1OTgsIGF2Zz0yNzEyLjY4LCBzdGRldj01MzUwLjQyIGNsYXQgcGVyY2VudGlsZXMgCj4+Pj4+
+PiAodXNlYyk6IAo+Pj4+Pj4gfCAxLjAwdGg9WyAxNTVdLCA1LjAwdGg9WyAxODNdLCAxMC4wMHRo
+PVsgMjA1XSwgMjAuMDB0aD1bIDI0N10sIAo+Pj4+Pj4gfCAzMC4wMHRoPVsgMjk0XSwgNDAuMDB0
+aD1bIDM1NF0sIDUwLjAwdGg9WyA0NDZdLCA2MC4wMHRoPVsgNjYwXSwgCj4+Pj4+PiB8IDcwLjAw
+dGg9WyAxMTc2XSwgODAuMDB0aD1bIDMxNTJdLCA5MC4wMHRoPVsgOTAyNF0sIDk1LjAwdGg9WzE0
+NjU2XSwgCj4+Pj4+PiB8IDk5LjAwdGg9WzI1OTg0XSwgOTkuNTB0aD1bMzAzMzZdLCA5OS45MHRo
+PVszODY1Nl0sIDk5Ljk1dGg9WzQxNzI4XSwgCj4+Pj4+PiB8IDk5Ljk5dGg9WzQ3MzYwXSAKPj4+
+Pj4+IGJ3IChLQiAvcyk6IG1pbj0yMzkyOCwgbWF4PTE1NDQxNiwgcGVyPTEwLjA3JSwgYXZnPTQ1
+NDYyLjgyLCAKPj4+Pj4+IHN0ZGV2PTI4ODA5Ljk1IGxhdCAodXNlYykgOiAxMD0wLjAxJSwgMjA9
+MC4wMSUsIDUwPTAuMDElLCAxMDA9MC4wMSUsIAo+Pj4+Pj4gMjUwPTIwLjc5JSBsYXQgKHVzZWMp
+IDogNTAwPTMyLjc0JSwgNzUwPTguOTklLCAxMDAwPTUuMDMlIGxhdCAobXNlYykgOiAKPj4+Pj4+
+IDI9OC4zNyUsIDQ9Ni4yMSUsIDEwPTguOTAlLCAyMD02LjYwJSwgNTA9Mi4zNyUgbGF0IChtc2Vj
+KSA6IDEwMD0wLjAxJSAKPj4+Pj4+IGNwdSA6IHVzcj0xNS45MCUsIHN5cz0zLjAxJSwgY3R4PTc2
+NTQ0NiwgbWFqZj0wLCBtaW5mPTg3MTAgSU8gZGVwdGhzIDogCj4+Pj4+PiAxPTAuNCUsIDI9MC45
+JSwgND0yLjMlLCA4PTcuNCUsIDE2PTc1LjUlLCAzMj0xMy42JSwgPj02ND0wLjAlIHN1Ym1pdCA6
+IAo+Pj4+Pj4gMD0wLjAlLCA0PTEwMC4wJSwgOD0wLjAlLCAxNj0wLjAlLCAzMj0wLjAlLCA2ND0w
+LjAlLCA+PTY0PTAuMCUgCj4+Pj4+PiBjb21wbGV0ZSA6IDA9MC4wJSwgND05My42JSwgOD0yLjgl
+LCAxNj0yLjQlLCAzMj0xLjIlLCA2ND0wLjAlLCAKPj4+Pj4+PiA9NjQ9MC4wJSBpc3N1ZWQgOiB0
+b3RhbD1yPTI5NTg5MzUvdz0wL2Q9MCwgc2hvcnQ9cj0wL3c9MC9kPTAsIAo+Pj4+Pj4gZHJvcD1y
+PTAvdz0wL2Q9MCBsYXRlbmN5IDogdGFyZ2V0PTAsIHdpbmRvdz0wLCBwZXJjZW50aWxlPTEwMC4w
+MCUsIAo+Pj4+Pj4gZGVwdGg9MzIgCj4+Pj4+PiAKPj4+Pj4+IFJ1biBzdGF0dXMgZ3JvdXAgMCAo
+YWxsIGpvYnMpOiAKPj4+Pj4+IFJFQUQ6IGlvPTExNTU4TUIsIGFnZ3JiPTQ1MTQ4N0tCL3MsIG1p
+bmI9NDUxNDg3S0IvcywgbWF4Yj00NTE0ODdLQi9zLCAKPj4+Pj4+IG1pbnQ9MjYyMTVtc2VjLCBt
+YXh0PTI2MjE1bXNlYyAKPj4+Pj4+IAo+Pj4+Pj4gRGlzayBzdGF0cyAocmVhZC93cml0ZSk6IAo+
+Pj4+Pj4gc2RnOiBpb3M9MC8yOSwgbWVyZ2U9MC8xNiwgdGlja3M9MC8zLCBpbl9xdWV1ZT0zLCB1
+dGlsPTAuMDElIAo+Pj4+Pj4gW3Jvb3RAY2VwaDEtMyBmaW9yYmRdIyAuL2ZpbyBmaW9yYmQgCj4+
+Pj4+PiByYmRfaW9kZXB0aDMyLXRlc3Q6IChnPTApOiBydz1yYW5kcmVhZCwgYnM9NEstNEsvNEst
+NEsvNEstNEssIAo+Pj4+Pj4gaW9lbmdpbmU9cmJkLCBpb2RlcHRoPTMyIAo+Pj4+Pj4gCj4+Pj4+
+PiAKPj4+Pj4+IAo+Pj4+Pj4gCj4+Pj4+PiBBRlRFUiBSRVNUQVJUSU5HIE9TRFMgCj4+Pj4+PiAt
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tIAo+Pj4+Pj4gW3Jvb3RAY2VwaDEtMyBmaW9yYmRdIyAuL2Zp
+byBmaW9yYmQgCj4+Pj4+PiByYmRfaW9kZXB0aDMyLXRlc3Q6IChnPTApOiBydz1yYW5kcmVhZCwg
+YnM9NEstNEsvNEstNEsvNEstNEssIAo+Pj4+Pj4gaW9lbmdpbmU9cmJkLCBpb2RlcHRoPTMyIC4u
+LiAKPj4+Pj4+IGZpby0yLjIuNy0xMC1nNTFlOSAKPj4+Pj4+IFN0YXJ0aW5nIDEwIHByb2Nlc3Nl
+cyAKPj4+Pj4+IHJiZCBlbmdpbmU6IFJCRCB2ZXJzaW9uOiAwLjEuOSAKPj4+Pj4+IHJiZCBlbmdp
+bmU6IFJCRCB2ZXJzaW9uOiAwLjEuOSAKPj4+Pj4+IHJiZCBlbmdpbmU6IFJCRCB2ZXJzaW9uOiAw
+LjEuOSAKPj4+Pj4+IHJiZCBlbmdpbmU6IFJCRCB2ZXJzaW9uOiAwLjEuOSAKPj4+Pj4+IHJiZCBl
+bmdpbmU6IFJCRCB2ZXJzaW9uOiAwLjEuOSAKPj4+Pj4+IHJiZCBlbmdpbmU6IFJCRCB2ZXJzaW9u
+OiAwLjEuOSAKPj4+Pj4+IHJiZCBlbmdpbmU6IFJCRCB2ZXJzaW9uOiAwLjEuOSAKPj4+Pj4+IHJi
+ZCBlbmdpbmU6IFJCRCB2ZXJzaW9uOiAwLjEuOSAKPj4+Pj4+IHJiZCBlbmdpbmU6IFJCRCB2ZXJz
+aW9uOiAwLjEuOSAKPj4+Pj4+IHJiZCBlbmdpbmU6IFJCRCB2ZXJzaW9uOiAwLjEuOSAKPj4+Pj4+
+IF5DYnM6IDEwIChmPTEwKTogW3IoMTApXSBbMC4yJSBkb25lXSBbMTE1NU1CLzBLQi8wS0IgL3Nd
+IFsyOTZLLzAvMCAKPj4+Pj4+IGlvcHNdIFtldGEgMDFoOjA5bToyN3NdIAo+Pj4+Pj4gZmlvOiB0
+ZXJtaW5hdGluZyBvbiBzaWduYWwgMiAKPj4+Pj4+IAo+Pj4+Pj4gcmJkX2lvZGVwdGgzMi10ZXN0
+OiAoZ3JvdXBpZD0wLCBqb2JzPTEwKTogZXJyPSAwOiBwaWQ9MTgyNTI6IFdlZCBBcHIgCj4+Pj4+
+PiAyMiAxMDowMjoyOCAyMDE1IHJlYWQgOiBpbz03NjU1LjdNQiwgYnc9MTAzNi44TUIvcywgaW9w
+cz0yNjUyMTgsIAo+Pj4+Pj4gcnVudD0gNzM4OW1zZWMgc2xhdCAodXNlYyk6IG1pbj01LCBtYXg9
+MzQwNiwgYXZnPTI2LjU5LCBzdGRldj00MC4zNSAKPj4+Pj4+IGNsYXQgCj4+Pj4+PiAodXNlYyk6
+IG1pbj04LCBtYXg9Njg0MzI4LCBhdmc9OTMwLjQzLCBzdGRldj02NDE5LjEyIGxhdCAodXNlYyk6
+IAo+Pj4+Pj4gbWluPTE1NCwgbWF4PTY4NDM0MiwgYXZnPTk1Ny4wMiwgc3RkZXY9NjQxOS4yOCBj
+bGF0IHBlcmNlbnRpbGVzIAo+Pj4+Pj4gKHVzZWMpOiAKPj4+Pj4+IHwgMS4wMHRoPVsgMjQzXSwg
+NS4wMHRoPVsgMzE0XSwgMTAuMDB0aD1bIDM2Nl0sIDIwLjAwdGg9WyA0NTBdLCAKPj4+Pj4+IHwg
+MzAuMDB0aD1bIDUyNF0sIDQwLjAwdGg9WyA2MDRdLCA1MC4wMHRoPVsgNjkyXSwgNjAuMDB0aD1b
+IDc5Nl0sIAo+Pj4+Pj4gfCA3MC4wMHRoPVsgOTI0XSwgODAuMDB0aD1bIDEwOTZdLCA5MC4wMHRo
+PVsgMTQwMF0sIDk1LjAwdGg9WyAxNzIwXSwgCj4+Pj4+PiB8IDk5LjAwdGg9WyAyNjcyXSwgOTku
+NTB0aD1bIDMyNDhdLCA5OS45MHRoPVsgNTkyMF0sIDk5Ljk1dGg9WyA5NzkyXSwgCj4+Pj4+PiB8
+IDk5Ljk5dGg9WzQzNjIyNF0gCj4+Pj4+PiBidyAoS0IgL3MpOiBtaW49MzI2MTQsIG1heD0xNDMx
+NjAsIHBlcj0xMC4xOSUsIGF2Zz0xMDgwNzYuNDYsIAo+Pj4+Pj4gc3RkZXY9MjgyNjMuODIgbGF0
+ICh1c2VjKSA6IDEwPTAuMDElLCAyMD0wLjAxJSwgNTA9MC4wMSUsIDEwMD0wLjAxJSwgCj4+Pj4+
+PiAyNTA9MS4yMyUgbGF0ICh1c2VjKSA6IDUwMD0yNS42NCUsIDc1MD0yOS4xNSUsIDEwMDA9MTgu
+ODQlIGxhdCAobXNlYykgCj4+Pj4+PiA6IDI9MjIuMTklLCA0PTIuNjklLCAxMD0wLjIxJSwgMjA9
+MC4wMiUsIDUwPTAuMDElIGxhdCAobXNlYykgOiAKPj4+Pj4+IDI1MD0wLjAxJSwgNTAwPTAuMDIl
+LCA3NTA9MC4wMSUgY3B1IDogdXNyPTQ0LjA2JSwgc3lzPTExLjI2JSwgCj4+Pj4+PiBjdHg9NjQy
+NjIwLCBtYWpmPTAsIG1pbmY9NjgzMiBJTyBkZXB0aHMgOiAxPTAuMSUsIDI9MC41JSwgND0yLjAl
+LCAKPj4+Pj4+IDg9MTEuNSUsIDE2PTc3LjglLCAzMj04LjElLCA+PTY0PTAuMCUgc3VibWl0IDog
+MD0wLjAlLCA0PTEwMC4wJSwgCj4+Pj4+PiA4PTAuMCUsIDE2PTAuMCUsIDMyPTAuMCUsIDY0PTAu
+MCUsID49NjQ9MC4wJSBjb21wbGV0ZSA6IDA9MC4wJSwgCj4+Pj4+PiA0PTk0LjElLCA4PTEuMyUs
+IDE2PTIuMyUsIDMyPTIuMyUsIDY0PTAuMCUsID49NjQ9MC4wJSBpc3N1ZWQgOiAKPj4+Pj4+IHRv
+dGFsPXI9MTk1OTY5Ny93PTAvZD0wLCBzaG9ydD1yPTAvdz0wL2Q9MCwgZHJvcD1yPTAvdz0wL2Q9
+MCBsYXRlbmN5IDogCj4+Pj4+PiB0YXJnZXQ9MCwgd2luZG93PTAsIHBlcmNlbnRpbGU9MTAwLjAw
+JSwgZGVwdGg9MzIgCj4+Pj4+PiAKPj4+Pj4+IFJ1biBzdGF0dXMgZ3JvdXAgMCAoYWxsIGpvYnMp
+OiAKPj4+Pj4+IFJFQUQ6IGlvPTc2NTUuN01CLCBhZ2dyYj0xMDM2LjhNQi9zLCBtaW5iPTEwMzYu
+OE1CL3MsIAo+Pj4+Pj4gbWF4Yj0xMDM2LjhNQi9zLCBtaW50PTczODltc2VjLCBtYXh0PTczODlt
+c2VjIAo+Pj4+Pj4gCj4+Pj4+PiBEaXNrIHN0YXRzIChyZWFkL3dyaXRlKTogCj4+Pj4+PiBzZGc6
+IGlvcz0wLzIxLCBtZXJnZT0wLzEwLCB0aWNrcz0wLzIsIGluX3F1ZXVlPTIsIHV0aWw9MC4wMyUg
+Cj4+Pj4+PiAKPj4+Pj4+IAo+Pj4+Pj4gCj4+Pj4+PiAKPj4+Pj4+IENFUEggTE9HIAo+Pj4+Pj4g
+LS0tLS0tLS0gCj4+Pj4+PiAKPj4+Pj4+IGJlZm9yZSByZXN0YXJ0aW5nIG9zZCAKPj4+Pj4+IC0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0gCj4+Pj4+PiAKPj4+Pj4+IDIwMTUtMDQtMjIgMDk6NTM6MTcu
+NTY4MDk1IG1vbi4wIDEwLjcuMC4xNTI6Njc4OS8wIDIxNDQgOiBjbHVzdGVyIAo+Pj4+Pj4gW0lO
+Rl0gcGdtYXAgdjExMzMwOiA5NjQgcGdzOiAyIGFjdGl2ZSt1bmRlcnNpemVkK2RlZ3JhZGVkLCA2
+MiAKPj4+Pj4+IGFjdGl2ZStyZW1hcHBlZCwgOTAwIGFjdGl2ZStjbGVhbjsgMzkwIEdCIGRhdGEs
+IDM5MSBHQiB1c2VkLCA5MDQgR0IgLyAKPj4+Pj4+IDEyOTUgR0IgYXZhaWw7IDI5OCBNQi9zIHJk
+LCA3NjQ2NSBvcC9zIAo+Pj4+Pj4gMjAxNS0wNC0yMiAwOTo1MzoxOC41NzQ1MjQgbW9uLjAgMTAu
+Ny4wLjE1Mjo2Nzg5LzAgMjE0NSA6IGNsdXN0ZXIgCj4+Pj4+PiBbSU5GXSBwZ21hcCB2MTEzMzE6
+IDk2NCBwZ3M6IDIgYWN0aXZlK3VuZGVyc2l6ZWQrZGVncmFkZWQsIDYyIAo+Pj4+Pj4gYWN0aXZl
+K3JlbWFwcGVkLCA5MDAgYWN0aXZlK2NsZWFuOyAzOTAgR0IgZGF0YSwgMzkxIEdCIHVzZWQsIDkw
+NCBHQiAvIAo+Pj4+Pj4gMTI5NSBHQiBhdmFpbDsgMzMzIE1CL3MgcmQsIDg1MzU1IG9wL3MgCj4+
+Pj4+PiAyMDE1LTA0LTIyIDA5OjUzOjE5LjU3OTM1MSBtb24uMCAxMC43LjAuMTUyOjY3ODkvMCAy
+MTQ2IDogY2x1c3RlciAKPj4+Pj4+IFtJTkZdIHBnbWFwIHYxMTMzMjogOTY0IHBnczogMiBhY3Rp
+dmUrdW5kZXJzaXplZCtkZWdyYWRlZCwgNjIgCj4+Pj4+PiBhY3RpdmUrcmVtYXBwZWQsIDkwMCBh
+Y3RpdmUrY2xlYW47IDM5MCBHQiBkYXRhLCAzOTEgR0IgdXNlZCwgOTA0IEdCIC8gCj4+Pj4+PiAx
+Mjk1IEdCIGF2YWlsOyAzNDMgTUIvcyByZCwgODc5MzIgb3AvcyAKPj4+Pj4+IDIwMTUtMDQtMjIg
+MDk6NTM6MjAuNTkxNTg2IG1vbi4wIDEwLjcuMC4xNTI6Njc4OS8wIDIxNDcgOiBjbHVzdGVyIAo+
+Pj4+Pj4gW0lORl0gcGdtYXAgdjExMzMzOiA5NjQgcGdzOiAyIGFjdGl2ZSt1bmRlcnNpemVkK2Rl
+Z3JhZGVkLCA2MiAKPj4+Pj4+IGFjdGl2ZStyZW1hcHBlZCwgOTAwIGFjdGl2ZStjbGVhbjsgMzkw
+IEdCIGRhdGEsIDM5MSBHQiB1c2VkLCA5MDQgR0IgLyAKPj4+Pj4+IDEyOTUgR0IgYXZhaWw7IDMy
+OCBNQi9zIHJkLCA4NDE1MSBvcC9zIAo+Pj4+Pj4gMjAxNS0wNC0yMiAwOTo1MzoyMS42MDA2NTAg
+bW9uLjAgMTAuNy4wLjE1Mjo2Nzg5LzAgMjE0OCA6IGNsdXN0ZXIgCj4+Pj4+PiBbSU5GXSBwZ21h
+cCB2MTEzMzQ6IDk2NCBwZ3M6IDIgYWN0aXZlK3VuZGVyc2l6ZWQrZGVncmFkZWQsIDYyIAo+Pj4+
+Pj4gYWN0aXZlK3JlbWFwcGVkLCA5MDAgYWN0aXZlK2NsZWFuOyAzOTAgR0IgZGF0YSwgMzkxIEdC
+IHVzZWQsIDkwNCBHQiAvIAo+Pj4+Pj4gMTI5NSBHQiBhdmFpbDsgMjM3IE1CL3MgcmQsIDYwODU1
+IG9wL3MgCj4+Pj4+PiAyMDE1LTA0LTIyIDA5OjUzOjIyLjYwNzk2NiBtb24uMCAxMC43LjAuMTUy
+OjY3ODkvMCAyMTQ5IDogY2x1c3RlciAKPj4+Pj4+IFtJTkZdIHBnbWFwIHYxMTMzNTogOTY0IHBn
+czogMiBhY3RpdmUrdW5kZXJzaXplZCtkZWdyYWRlZCwgNjIgCj4+Pj4+PiBhY3RpdmUrcmVtYXBw
+ZWQsIDkwMCBhY3RpdmUrY2xlYW47IDM5MCBHQiBkYXRhLCAzOTEgR0IgdXNlZCwgOTA0IEdCIC8g
+Cj4+Pj4+PiAxMjk1IEdCIGF2YWlsOyAxNDQgTUIvcyByZCwgMzY5MzUgb3AvcyAKPj4+Pj4+IDIw
+MTUtMDQtMjIgMDk6NTM6MjMuNjE3NzgwIG1vbi4wIDEwLjcuMC4xNTI6Njc4OS8wIDIxNTAgOiBj
+bHVzdGVyIAo+Pj4+Pj4gW0lORl0gcGdtYXAgdjExMzM2OiA5NjQgcGdzOiAyIGFjdGl2ZSt1bmRl
+cnNpemVkK2RlZ3JhZGVkLCA2MiAKPj4+Pj4+IGFjdGl2ZStyZW1hcHBlZCwgOTAwIGFjdGl2ZStj
+bGVhbjsgMzkwIEdCIGRhdGEsIDM5MSBHQiB1c2VkLCA5MDQgR0IgLyAKPj4+Pj4+IDEyOTUgR0Ig
+YXZhaWw7IDMyMSBNQi9zIHJkLCA4MjMzNCBvcC9zIAo+Pj4+Pj4gMjAxNS0wNC0yMiAwOTo1Mzoy
+NC42MjIzNDEgbW9uLjAgMTAuNy4wLjE1Mjo2Nzg5LzAgMjE1MSA6IGNsdXN0ZXIgCj4+Pj4+PiBb
+SU5GXSBwZ21hcCB2MTEzMzc6IDk2NCBwZ3M6IDIgYWN0aXZlK3VuZGVyc2l6ZWQrZGVncmFkZWQs
+IDYyIAo+Pj4+Pj4gYWN0aXZlK3JlbWFwcGVkLCA5MDAgYWN0aXZlK2NsZWFuOyAzOTAgR0IgZGF0
+YSwgMzkxIEdCIHVzZWQsIDkwNCBHQiAvIAo+Pj4+Pj4gMTI5NSBHQiBhdmFpbDsgMzY4IE1CL3Mg
+cmQsIDk0MjExIG9wL3MgCj4+Pj4+PiAyMDE1LTA0LTIyIDA5OjUzOjI1LjYyODQzMiBtb24uMCAx
+MC43LjAuMTUyOjY3ODkvMCAyMTUyIDogY2x1c3RlciAKPj4+Pj4+IFtJTkZdIHBnbWFwIHYxMTMz
+ODogOTY0IHBnczogMiBhY3RpdmUrdW5kZXJzaXplZCtkZWdyYWRlZCwgNjIgCj4+Pj4+PiBhY3Rp
+dmUrcmVtYXBwZWQsIDkwMCBhY3RpdmUrY2xlYW47IDM5MCBHQiBkYXRhLCAzOTEgR0IgdXNlZCwg
+OTA0IEdCIC8gCj4+Pj4+PiAxMjk1IEdCIGF2YWlsOyAyNDQgTUIvcyByZCwgNjI2NDQgb3AvcyAK
+Pj4+Pj4+IDIwMTUtMDQtMjIgMDk6NTM6MjYuNjMyODU1IG1vbi4wIDEwLjcuMC4xNTI6Njc4OS8w
+IDIxNTMgOiBjbHVzdGVyIAo+Pj4+Pj4gW0lORl0gcGdtYXAgdjExMzM5OiA5NjQgcGdzOiAyIGFj
+dGl2ZSt1bmRlcnNpemVkK2RlZ3JhZGVkLCA2MiAKPj4+Pj4+IGFjdGl2ZStyZW1hcHBlZCwgOTAw
+IGFjdGl2ZStjbGVhbjsgMzkwIEdCIGRhdGEsIDM5MSBHQiB1c2VkLCA5MDQgR0IgLyAKPj4+Pj4+
+IDEyOTUgR0IgYXZhaWw7IDE3NSBNQi9zIHJkLCA0NDk5NyBvcC9zIAo+Pj4+Pj4gMjAxNS0wNC0y
+MiAwOTo1MzoyNy42MzY1NzMgbW9uLjAgMTAuNy4wLjE1Mjo2Nzg5LzAgMjE1NCA6IGNsdXN0ZXIg
+Cj4+Pj4+PiBbSU5GXSBwZ21hcCB2MTEzNDA6IDk2NCBwZ3M6IDIgYWN0aXZlK3VuZGVyc2l6ZWQr
+ZGVncmFkZWQsIDYyIAo+Pj4+Pj4gYWN0aXZlK3JlbWFwcGVkLCA5MDAgYWN0aXZlK2NsZWFuOyAz
+OTAgR0IgZGF0YSwgMzkxIEdCIHVzZWQsIDkwNCBHQiAvIAo+Pj4+Pj4gMTI5NSBHQiBhdmFpbDsg
+MTIyIE1CL3MgcmQsIDMxMjU5IG9wL3MgCj4+Pj4+PiAyMDE1LTA0LTIyIDA5OjUzOjI4LjY0NTc4
+NCBtb24uMCAxMC43LjAuMTUyOjY3ODkvMCAyMTU1IDogY2x1c3RlciAKPj4+Pj4+IFtJTkZdIHBn
+bWFwIHYxMTM0MTogOTY0IHBnczogMiBhY3RpdmUrdW5kZXJzaXplZCtkZWdyYWRlZCwgNjIgCj4+
+Pj4+PiBhY3RpdmUrcmVtYXBwZWQsIDkwMCBhY3RpdmUrY2xlYW47IDM5MCBHQiBkYXRhLCAzOTEg
+R0IgdXNlZCwgOTA0IEdCIC8gCj4+Pj4+PiAxMjk1IEdCIGF2YWlsOyAyMjkgTUIvcyByZCwgNTg2
+NzQgb3AvcyAKPj4+Pj4+IDIwMTUtMDQtMjIgMDk6NTM6MjkuNjU3MTI4IG1vbi4wIDEwLjcuMC4x
+NTI6Njc4OS8wIDIxNTYgOiBjbHVzdGVyIAo+Pj4+Pj4gW0lORl0gcGdtYXAgdjExMzQyOiA5NjQg
+cGdzOiAyIGFjdGl2ZSt1bmRlcnNpemVkK2RlZ3JhZGVkLCA2MiAKPj4+Pj4+IGFjdGl2ZStyZW1h
+cHBlZCwgOTAwIGFjdGl2ZStjbGVhbjsgMzkwIEdCIGRhdGEsIDM5MSBHQiB1c2VkLCA5MDQgR0Ig
+LyAKPj4+Pj4+IDEyOTUgR0IgYXZhaWw7IDI3MSBNQi9zIHJkLCA2OTUwMSBvcC9zIAo+Pj4+Pj4g
+MjAxNS0wNC0yMiAwOTo1MzozMC42NjI3OTYgbW9uLjAgMTAuNy4wLjE1Mjo2Nzg5LzAgMjE1NyA6
+IGNsdXN0ZXIgCj4+Pj4+PiBbSU5GXSBwZ21hcCB2MTEzNDM6IDk2NCBwZ3M6IDIgYWN0aXZlK3Vu
+ZGVyc2l6ZWQrZGVncmFkZWQsIDYyIAo+Pj4+Pj4gYWN0aXZlK3JlbWFwcGVkLCA5MDAgYWN0aXZl
+K2NsZWFuOyAzOTAgR0IgZGF0YSwgMzkxIEdCIHVzZWQsIDkwNCBHQiAvIAo+Pj4+Pj4gMTI5NSBH
+QiBhdmFpbDsgMjExIE1CL3MgcmQsIDU0MDIwIG9wL3MgCj4+Pj4+PiAyMDE1LTA0LTIyIDA5OjUz
+OjMxLjY2NjQyMSBtb24uMCAxMC43LjAuMTUyOjY3ODkvMCAyMTU4IDogY2x1c3RlciAKPj4+Pj4+
+IFtJTkZdIHBnbWFwIHYxMTM0NDogOTY0IHBnczogMiBhY3RpdmUrdW5kZXJzaXplZCtkZWdyYWRl
+ZCwgNjIgCj4+Pj4+PiBhY3RpdmUrcmVtYXBwZWQsIDkwMCBhY3RpdmUrY2xlYW47IDM5MCBHQiBk
+YXRhLCAzOTEgR0IgdXNlZCwgOTA0IEdCIC8gCj4+Pj4+PiAxMjk1IEdCIGF2YWlsOyAxNjQgTUIv
+cyByZCwgNDIwMDEgb3AvcyAKPj4+Pj4+IDIwMTUtMDQtMjIgMDk6NTM6MzIuNjcwODQyIG1vbi4w
+IDEwLjcuMC4xNTI6Njc4OS8wIDIxNTkgOiBjbHVzdGVyIAo+Pj4+Pj4gW0lORl0gcGdtYXAgdjEx
+MzQ1OiA5NjQgcGdzOiAyIGFjdGl2ZSt1bmRlcnNpemVkK2RlZ3JhZGVkLCA2MiAKPj4+Pj4+IGFj
+dGl2ZStyZW1hcHBlZCwgOTAwIGFjdGl2ZStjbGVhbjsgMzkwIEdCIGRhdGEsIDM5MSBHQiB1c2Vk
+LCA5MDQgR0IgLyAKPj4+Pj4+IDEyOTUgR0IgYXZhaWw7IDEzNCBNQi9zIHJkLCAzNDM4MCBvcC9z
+IAo+Pj4+Pj4gMjAxNS0wNC0yMiAwOTo1MzozMy42ODEzNTcgbW9uLjAgMTAuNy4wLjE1Mjo2Nzg5
+LzAgMjE2MCA6IGNsdXN0ZXIgCj4+Pj4+PiBbSU5GXSBwZ21hcCB2MTEzNDY6IDk2NCBwZ3M6IDIg
+YWN0aXZlK3VuZGVyc2l6ZWQrZGVncmFkZWQsIDYyIAo+Pj4+Pj4gYWN0aXZlK3JlbWFwcGVkLCA5
+MDAgYWN0aXZlK2NsZWFuOyAzOTAgR0IgZGF0YSwgMzkxIEdCIHVzZWQsIDkwNCBHQiAvIAo+Pj4+
+Pj4gMTI5NSBHQiBhdmFpbDsgMjkzIE1CL3MgcmQsIDc1MjEzIG9wL3MgCj4+Pj4+PiAyMDE1LTA0
+LTIyIDA5OjUzOjM0LjY5MjE3NyBtb24uMCAxMC43LjAuMTUyOjY3ODkvMCAyMTYxIDogY2x1c3Rl
+ciAKPj4+Pj4+IFtJTkZdIHBnbWFwIHYxMTM0NzogOTY0IHBnczogMiBhY3RpdmUrdW5kZXJzaXpl
+ZCtkZWdyYWRlZCwgNjIgCj4+Pj4+PiBhY3RpdmUrcmVtYXBwZWQsIDkwMCBhY3RpdmUrY2xlYW47
+IDM5MCBHQiBkYXRhLCAzOTEgR0IgdXNlZCwgOTA0IEdCIC8gCj4+Pj4+PiAxMjk1IEdCIGF2YWls
+OyAzMzcgTUIvcyByZCwgODYzNTMgb3AvcyAKPj4+Pj4+IDIwMTUtMDQtMjIgMDk6NTM6MzUuNjk3
+NDAxIG1vbi4wIDEwLjcuMC4xNTI6Njc4OS8wIDIxNjIgOiBjbHVzdGVyIAo+Pj4+Pj4gW0lORl0g
+cGdtYXAgdjExMzQ4OiA5NjQgcGdzOiAyIGFjdGl2ZSt1bmRlcnNpemVkK2RlZ3JhZGVkLCA2MiAK
+Pj4+Pj4+IGFjdGl2ZStyZW1hcHBlZCwgOTAwIGFjdGl2ZStjbGVhbjsgMzkwIEdCIGRhdGEsIDM5
+MSBHQiB1c2VkLCA5MDQgR0IgLyAKPj4+Pj4+IDEyOTUgR0IgYXZhaWw7IDIyOSBNQi9zIHJkLCA1
+ODgzOSBvcC9zIAo+Pj4+Pj4gMjAxNS0wNC0yMiAwOTo1MzozNi42OTkzMDkgbW9uLjAgMTAuNy4w
+LjE1Mjo2Nzg5LzAgMjE2MyA6IGNsdXN0ZXIgCj4+Pj4+PiBbSU5GXSBwZ21hcCB2MTEzNDk6IDk2
+NCBwZ3M6IDIgYWN0aXZlK3VuZGVyc2l6ZWQrZGVncmFkZWQsIDYyIAo+Pj4+Pj4gYWN0aXZlK3Jl
+bWFwcGVkLCA5MDAgYWN0aXZlK2NsZWFuOyAzOTAgR0IgZGF0YSwgMzkxIEdCIHVzZWQsIDkwNCBH
+QiAvIAo+Pj4+Pj4gMTI5NSBHQiBhdmFpbDsgMTUyIE1CL3MgcmQsIDM5MTE3IG9wL3MgCj4+Pj4+
+PiAKPj4+Pj4+IAo+Pj4+Pj4gcmVzdGFydGluZyBvc2QgCj4+Pj4+PiAtLS0tLS0tLS0tLS0tLS0g
+Cj4+Pj4+PiAKPj4+Pj4+IDIwMTUtMDQtMjIgMTA6MDA6MDkuNzY2OTA2IG1vbi4wIDEwLjcuMC4x
+NTI6Njc4OS8wIDIyNTUgOiBjbHVzdGVyIAo+Pj4+Pj4gW0lORl0gb3NkLjAgbWFya2VkIGl0c2Vs
+ZiBkb3duIAo+Pj4+Pj4gMjAxNS0wNC0yMiAxMDowMDowOS43OTAyMTIgbW9uLjAgMTAuNy4wLjE1
+Mjo2Nzg5LzAgMjI1NiA6IGNsdXN0ZXIgCj4+Pj4+PiBbSU5GXSBvc2RtYXAgZTg0OTogOSBvc2Rz
+OiA4IHVwLCA5IGluIAo+Pj4+Pj4gMjAxNS0wNC0yMiAxMDowMDowOS43OTMwNTAgbW9uLjAgMTAu
+Ny4wLjE1Mjo2Nzg5LzAgMjI1NyA6IGNsdXN0ZXIgCj4+Pj4+PiBbSU5GXSBwZ21hcCB2MTE0Mzk6
+IDk2NCBwZ3M6IDIgYWN0aXZlK3VuZGVyc2l6ZWQrZGVncmFkZWQsIDggCj4+Pj4+PiBzdGFsZSth
+Y3RpdmUrcmVtYXBwZWQsIDEwNiBzdGFsZSthY3RpdmUrY2xlYW4sIDU0IGFjdGl2ZStyZW1hcHBl
+ZCwgCj4+Pj4+PiBzdGFsZSthY3RpdmUrNzk0IAo+Pj4+Pj4gYWN0aXZlK2NsZWFuOyA0MTkgR0Ig
+ZGF0YSwgNDIwIEdCIHVzZWQsIDg3NCBHQiAvIDEyOTUgR0IgYXZhaWw7IDUxNiAKPj4+Pj4+IGtC
+L3MgcmQsIDEzMCBvcC9zIAo+Pj4+Pj4gMjAxNS0wNC0yMiAxMDowMDoxMC43OTU5NjYgbW9uLjAg
+MTAuNy4wLjE1Mjo2Nzg5LzAgMjI1OCA6IGNsdXN0ZXIgCj4+Pj4+PiBbSU5GXSBvc2RtYXAgZTg1
+MDogOSBvc2RzOiA4IHVwLCA5IGluIAo+Pj4+Pj4gMjAxNS0wNC0yMiAxMDowMDoxMC43OTY2NzUg
+bW9uLjAgMTAuNy4wLjE1Mjo2Nzg5LzAgMjI1OSA6IGNsdXN0ZXIgCj4+Pj4+PiBbSU5GXSBwZ21h
+cCB2MTE0NDA6IDk2NCBwZ3M6IDIgYWN0aXZlK3VuZGVyc2l6ZWQrZGVncmFkZWQsIDggCj4+Pj4+
+PiBzdGFsZSthY3RpdmUrcmVtYXBwZWQsIDEwNiBzdGFsZSthY3RpdmUrY2xlYW4sIDU0IGFjdGl2
+ZStyZW1hcHBlZCwgCj4+Pj4+PiBzdGFsZSthY3RpdmUrNzk0IAo+Pj4+Pj4gYWN0aXZlK2NsZWFu
+OyA0MTkgR0IgZGF0YSwgNDIwIEdCIHVzZWQsIDg3NCBHQiAvIDEyOTUgR0IgYXZhaWwgCj4+Pj4+
+PiAyMDE1LTA0LTIyIDEwOjAwOjExLjc5ODI1NyBtb24uMCAxMC43LjAuMTUyOjY3ODkvMCAyMjYw
+IDogY2x1c3RlciAKPj4+Pj4+IFtJTkZdIHBnbWFwIHYxMTQ0MTogOTY0IHBnczogMiBhY3RpdmUr
+dW5kZXJzaXplZCtkZWdyYWRlZCwgOCAKPj4+Pj4+IHN0YWxlK2FjdGl2ZStyZW1hcHBlZCwgMTA2
+IHN0YWxlK2FjdGl2ZStjbGVhbiwgNTQgYWN0aXZlK3JlbWFwcGVkLCAKPj4+Pj4+IHN0YWxlK2Fj
+dGl2ZSs3OTQgCj4+Pj4+PiBhY3RpdmUrY2xlYW47IDQxOSBHQiBkYXRhLCA0MjAgR0IgdXNlZCwg
+ODc0IEdCIC8gMTI5NSBHQiBhdmFpbCAKPj4+Pj4+IDIwMTUtMDQtMjIgMTA6MDA6MTIuMzM5Njk2
+IG1vbi4wIDEwLjcuMC4xNTI6Njc4OS8wIDIyNjIgOiBjbHVzdGVyIAo+Pj4+Pj4gW0lORl0gb3Nk
+LjEgbWFya2VkIGl0c2VsZiBkb3duIAo+Pj4+Pj4gMjAxNS0wNC0yMiAxMDowMDoxMi44MDAxNjgg
+bW9uLjAgMTAuNy4wLjE1Mjo2Nzg5LzAgMjI2MyA6IGNsdXN0ZXIgCj4+Pj4+PiBbSU5GXSBvc2Rt
+YXAgZTg1MTogOSBvc2RzOiA3IHVwLCA5IGluIAo+Pj4+Pj4gMjAxNS0wNC0yMiAxMDowMDoxMi44
+MDY0OTggbW9uLjAgMTAuNy4wLjE1Mjo2Nzg5LzAgMjI2NCA6IGNsdXN0ZXIgCj4+Pj4+PiBbSU5G
+XSBwZ21hcCB2MTE0NDM6IDk2NCBwZ3M6IDEgYWN0aXZlK3VuZGVyc2l6ZWQrZGVncmFkZWQsIDEz
+IAo+Pj4+Pj4gc3RhbGUrYWN0aXZlK3JlbWFwcGVkLCAyMTYgc3RhbGUrYWN0aXZlK2NsZWFuLCA0
+OSBhY3RpdmUrcmVtYXBwZWQsIAo+Pj4+Pj4gc3RhbGUrYWN0aXZlKzY4NCAKPj4+Pj4+IGFjdGl2
+ZStjbGVhbiwgMSBzdGFsZSthY3RpdmUrdW5kZXJzaXplZCtkZWdyYWRlZDsgNDE5IEdCIGRhdGEs
+IDQyMCBHQiAKPj4+Pj4+IHVzZWQsIDg3NCBHQiAvIDEyOTUgR0IgYXZhaWwgCj4+Pj4+PiAyMDE1
+LTA0LTIyIDEwOjAwOjEzLjgwNDE4NiBtb24uMCAxMC43LjAuMTUyOjY3ODkvMCAyMjY1IDogY2x1
+c3RlciAKPj4+Pj4+IFtJTkZdIG9zZG1hcCBlODUyOiA5IG9zZHM6IDcgdXAsIDkgaW4gCj4+Pj4+
+PiAyMDE1LTA0LTIyIDEwOjAwOjEzLjgwNTIxNiBtb24uMCAxMC43LjAuMTUyOjY3ODkvMCAyMjY2
+IDogY2x1c3RlciAKPj4+Pj4+IFtJTkZdIHBnbWFwIHYxMTQ0NDogOTY0IHBnczogMSBhY3RpdmUr
+dW5kZXJzaXplZCtkZWdyYWRlZCwgMTMgCj4+Pj4+PiBzdGFsZSthY3RpdmUrcmVtYXBwZWQsIDIx
+NiBzdGFsZSthY3RpdmUrY2xlYW4sIDQ5IGFjdGl2ZStyZW1hcHBlZCwgCj4+Pj4+PiBzdGFsZSth
+Y3RpdmUrNjg0IAo+Pj4+Pj4gYWN0aXZlK2NsZWFuLCAxIHN0YWxlK2FjdGl2ZSt1bmRlcnNpemVk
+K2RlZ3JhZGVkOyA0MTkgR0IgZGF0YSwgNDIwIEdCIAo+Pj4+Pj4gdXNlZCwgODc0IEdCIC8gMTI5
+NSBHQiBhdmFpbCAKPj4+Pj4+IDIwMTUtMDQtMjIgMTA6MDA6MTQuNzgxNzg1IG1vbi4wIDEwLjcu
+MC4xNTI6Njc4OS8wIDIyNjggOiBjbHVzdGVyIAo+Pj4+Pj4gW0lORl0gb3NkLjIgbWFya2VkIGl0
+c2VsZiBkb3duIAo+Pj4+Pj4gMjAxNS0wNC0yMiAxMDowMDoxNC44MTA1NzEgbW9uLjAgMTAuNy4w
+LjE1Mjo2Nzg5LzAgMjI2OSA6IGNsdXN0ZXIgCj4+Pj4+PiBbSU5GXSBvc2RtYXAgZTg1MzogOSBv
+c2RzOiA2IHVwLCA5IGluIAo+Pj4+Pj4gMjAxNS0wNC0yMiAxMDowMDoxNC44MTM4NzEgbW9uLjAg
+MTAuNy4wLjE1Mjo2Nzg5LzAgMjI3MCA6IGNsdXN0ZXIgCj4+Pj4+PiBbSU5GXSBwZ21hcCB2MTE0
+NDU6IDk2NCBwZ3M6IDEgYWN0aXZlK3VuZGVyc2l6ZWQrZGVncmFkZWQsIDIyIAo+Pj4+Pj4gc3Rh
+bGUrYWN0aXZlK3JlbWFwcGVkLCAzMDAgc3RhbGUrYWN0aXZlK2NsZWFuLCA0MCBhY3RpdmUrcmVt
+YXBwZWQsIAo+Pj4+Pj4gc3RhbGUrYWN0aXZlKzYwMCAKPj4+Pj4+IGFjdGl2ZStjbGVhbiwgMSBz
+dGFsZSthY3RpdmUrdW5kZXJzaXplZCtkZWdyYWRlZDsgNDE5IEdCIGRhdGEsIDQyMCBHQiAKPj4+
+Pj4+IHVzZWQsIDg3NCBHQiAvIDEyOTUgR0IgYXZhaWwgCj4+Pj4+PiAyMDE1LTA0LTIyIDEwOjAw
+OjE1LjgxMDMzMyBtb24uMCAxMC43LjAuMTUyOjY3ODkvMCAyMjcxIDogY2x1c3RlciAKPj4+Pj4+
+IFtJTkZdIG9zZG1hcCBlODU0OiA5IG9zZHM6IDYgdXAsIDkgaW4gCj4+Pj4+PiAyMDE1LTA0LTIy
+IDEwOjAwOjE1LjgxMTQyNSBtb24uMCAxMC43LjAuMTUyOjY3ODkvMCAyMjcyIDogY2x1c3RlciAK
+Pj4+Pj4+IFtJTkZdIHBnbWFwIHYxMTQ0NjogOTY0IHBnczogMSBhY3RpdmUrdW5kZXJzaXplZCtk
+ZWdyYWRlZCwgMjIgCj4+Pj4+PiBzdGFsZSthY3RpdmUrcmVtYXBwZWQsIDMwMCBzdGFsZSthY3Rp
+dmUrY2xlYW4sIDQwIGFjdGl2ZStyZW1hcHBlZCwgCj4+Pj4+PiBzdGFsZSthY3RpdmUrNjAwIAo+
+Pj4+Pj4gYWN0aXZlK2NsZWFuLCAxIHN0YWxlK2FjdGl2ZSt1bmRlcnNpemVkK2RlZ3JhZGVkOyA0
+MTkgR0IgZGF0YSwgNDIwIEdCIAo+Pj4+Pj4gdXNlZCwgODc0IEdCIC8gMTI5NSBHQiBhdmFpbCAK
+Pj4+Pj4+IDIwMTUtMDQtMjIgMTA6MDA6MTYuMzk1MTA1IG1vbi4wIDEwLjcuMC4xNTI6Njc4OS8w
+IDIyNzMgOiBjbHVzdGVyIAo+Pj4+Pj4gW0lORl0gSEVBTFRIX1dBUk47IDIgcGdzIGRlZ3JhZGVk
+OyAzMjMgcGdzIHN0YWxlOyAyIHBncyBzdHVjayAKPj4+Pj4+IGRlZ3JhZGVkOyA2NCBwZ3Mgc3R1
+Y2sgdW5jbGVhbjsgMiBwZ3Mgc3R1Y2sgdW5kZXJzaXplZDsgMiBwZ3MgCj4+Pj4+PiB1bmRlcnNp
+emVkOyAzLzkgaW4gb3NkcyBhcmUgZG93bjsgY2xvY2sgc2tldyBkZXRlY3RlZCBvbiBtb24uY2Vw
+aDEtMiAKPj4+Pj4+IDIwMTUtMDQtMjIgMTA6MDA6MTYuODE0NDMyIG1vbi4wIDEwLjcuMC4xNTI6
+Njc4OS8wIDIyNzQgOiBjbHVzdGVyIAo+Pj4+Pj4gW0lORl0gb3NkLjEgMTAuNy4wLjE1Mjo2ODAw
+LzE0ODQ4IGJvb3QgCj4+Pj4+PiAyMDE1LTA0LTIyIDEwOjAwOjE2LjgxNDkzOCBtb24uMCAxMC43
+LjAuMTUyOjY3ODkvMCAyMjc1IDogY2x1c3RlciAKPj4+Pj4+IFtJTkZdIG9zZG1hcCBlODU1OiA5
+IG9zZHM6IDcgdXAsIDkgaW4gCj4+Pj4+PiAyMDE1LTA0LTIyIDEwOjAwOjE2LjgxNTk0MiBtb24u
+MCAxMC43LjAuMTUyOjY3ODkvMCAyMjc2IDogY2x1c3RlciAKPj4+Pj4+IFtJTkZdIHBnbWFwIHYx
+MTQ0NzogOTY0IHBnczogMSBhY3RpdmUrdW5kZXJzaXplZCtkZWdyYWRlZCwgMjIgCj4+Pj4+PiBz
+dGFsZSthY3RpdmUrcmVtYXBwZWQsIDMwMCBzdGFsZSthY3RpdmUrY2xlYW4sIDQwIGFjdGl2ZSty
+ZW1hcHBlZCwgCj4+Pj4+PiBzdGFsZSthY3RpdmUrNjAwIAo+Pj4+Pj4gYWN0aXZlK2NsZWFuLCAx
+IHN0YWxlK2FjdGl2ZSt1bmRlcnNpemVkK2RlZ3JhZGVkOyA0MTkgR0IgZGF0YSwgNDIwIEdCIAo+
+Pj4+Pj4gdXNlZCwgODc0IEdCIC8gMTI5NSBHQiBhdmFpbCAKPj4+Pj4+IDIwMTUtMDQtMjIgMTA6
+MDA6MTcuMjIyMjgxIG1vbi4wIDEwLjcuMC4xNTI6Njc4OS8wIDIyNzggOiBjbHVzdGVyIAo+Pj4+
+Pj4gW0lORl0gb3NkLjMgbWFya2VkIGl0c2VsZiBkb3duIAo+Pj4+Pj4gMjAxNS0wNC0yMiAxMDow
+MDoxNy44MTkzNzEgbW9uLjAgMTAuNy4wLjE1Mjo2Nzg5LzAgMjI3OSA6IGNsdXN0ZXIgCj4+Pj4+
+PiBbSU5GXSBvc2RtYXAgZTg1NjogOSBvc2RzOiA2IHVwLCA5IGluIAo+Pj4+Pj4gMjAxNS0wNC0y
+MiAxMDowMDoxNy44MjIwNDEgbW9uLjAgMTAuNy4wLjE1Mjo2Nzg5LzAgMjI4MCA6IGNsdXN0ZXIg
+Cj4+Pj4+PiBbSU5GXSBwZ21hcCB2MTE0NDg6IDk2NCBwZ3M6IDEgYWN0aXZlK3VuZGVyc2l6ZWQr
+ZGVncmFkZWQsIDI1IAo+Pj4+Pj4gc3RhbGUrYWN0aXZlK3JlbWFwcGVkLCAzOTQgc3RhbGUrYWN0
+aXZlK2NsZWFuLCAzNyBhY3RpdmUrcmVtYXBwZWQsIAo+Pj4+Pj4gc3RhbGUrYWN0aXZlKzUwNiAK
+Pj4+Pj4+IGFjdGl2ZStjbGVhbiwgMSBzdGFsZSthY3RpdmUrdW5kZXJzaXplZCtkZWdyYWRlZDsg
+NDE5IEdCIGRhdGEsIDQyMCBHQiAKPj4+Pj4+IHVzZWQsIDg3NCBHQiAvIDEyOTUgR0IgYXZhaWwg
+Cj4+Pj4+PiAyMDE1LTA0LTIyIDEwOjAwOjE4LjU1MTA2OCBtb24uMCAxMC43LjAuMTUyOjY3ODkv
+MCAyMjgyIDogY2x1c3RlciAKPj4+Pj4+IFtJTkZdIG9zZC42IG1hcmtlZCBpdHNlbGYgZG93biAK
+Pj4+Pj4+IDIwMTUtMDQtMjIgMTA6MDA6MTguODE5Mzg3IG1vbi4wIDEwLjcuMC4xNTI6Njc4OS8w
+IDIyODMgOiBjbHVzdGVyIAo+Pj4+Pj4gW0lORl0gb3NkLjIgMTAuNy4wLjE1Mjo2ODEyLzE1NDEw
+IGJvb3QgCj4+Pj4+PiAyMDE1LTA0LTIyIDEwOjAwOjE4LjgyMTEzNCBtb24uMCAxMC43LjAuMTUy
+OjY3ODkvMCAyMjg0IDogY2x1c3RlciAKPj4+Pj4+IFtJTkZdIG9zZG1hcCBlODU3OiA5IG9zZHM6
+IDYgdXAsIDkgaW4gCj4+Pj4+PiAyMDE1LTA0LTIyIDEwOjAwOjE4LjgyNDQ0MCBtb24uMCAxMC43
+LjAuMTUyOjY3ODkvMCAyMjg1IDogY2x1c3RlciAKPj4+Pj4+IFtJTkZdIHBnbWFwIHYxMTQ0OTog
+OTY0IHBnczogMSBhY3RpdmUrdW5kZXJzaXplZCtkZWdyYWRlZCwgMzAgCj4+Pj4+PiBzdGFsZSth
+Y3RpdmUrcmVtYXBwZWQsIDUwMiBzdGFsZSthY3RpdmUrY2xlYW4sIDMyIGFjdGl2ZStyZW1hcHBl
+ZCwgCj4+Pj4+PiBzdGFsZSthY3RpdmUrMzk4IAo+Pj4+Pj4gYWN0aXZlK2NsZWFuLCAxIHN0YWxl
+K2FjdGl2ZSt1bmRlcnNpemVkK2RlZ3JhZGVkOyA0MTkgR0IgZGF0YSwgNDIwIEdCIAo+Pj4+Pj4g
+dXNlZCwgODc0IEdCIC8gMTI5NSBHQiBhdmFpbCAKPj4+Pj4+IDIwMTUtMDQtMjIgMTA6MDA6MTku
+ODIwOTQ3IG1vbi4wIDEwLjcuMC4xNTI6Njc4OS8wIDIyODcgOiBjbHVzdGVyIAo+Pj4+Pj4gW0lO
+Rl0gb3NkbWFwIGU4NTg6IDkgb3NkczogNiB1cCwgOSBpbiAKPj4+Pj4+IDIwMTUtMDQtMjIgMTA6
+MDA6MTkuODIxODUzIG1vbi4wIDEwLjcuMC4xNTI6Njc4OS8wIDIyODggOiBjbHVzdGVyIAo+Pj4+
+Pj4gW0lORl0gcGdtYXAgdjExNDUwOiA5NjQgcGdzOiAxIGFjdGl2ZSt1bmRlcnNpemVkK2RlZ3Jh
+ZGVkLCAzMCAKPj4+Pj4+IHN0YWxlK2FjdGl2ZStyZW1hcHBlZCwgNTAyIHN0YWxlK2FjdGl2ZStj
+bGVhbiwgMzIgYWN0aXZlK3JlbWFwcGVkLCAKPj4+Pj4+IHN0YWxlK2FjdGl2ZSszOTggCj4+Pj4+
+PiBhY3RpdmUrY2xlYW4sIDEgc3RhbGUrYWN0aXZlK3VuZGVyc2l6ZWQrZGVncmFkZWQ7IDQxOSBH
+QiBkYXRhLCA0MjAgR0IgCj4+Pj4+PiB1c2VkLCA4NzQgR0IgLyAxMjk1IEdCIGF2YWlsIAo+Pj4+
+Pj4gMjAxNS0wNC0yMiAxMDowMDoyMC44MjgwNDcgbW9uLjAgMTAuNy4wLjE1Mjo2Nzg5LzAgMjI5
+MCA6IGNsdXN0ZXIgCj4+Pj4+PiBbSU5GXSBvc2QuMyAxMC43LjAuMTUyOjY4MTYvMTU5NzEgYm9v
+dCAKPj4+Pj4+IDIwMTUtMDQtMjIgMTA6MDA6MjAuODI4NDMxIG1vbi4wIDEwLjcuMC4xNTI6Njc4
+OS8wIDIyOTEgOiBjbHVzdGVyIAo+Pj4+Pj4gW0lORl0gb3NkbWFwIGU4NTk6IDkgb3NkczogNyB1
+cCwgOSBpbiAKPj4+Pj4+IDIwMTUtMDQtMjIgMTA6MDA6MjAuODI5MTI2IG1vbi4wIDEwLjcuMC4x
+NTI6Njc4OS8wIDIyOTIgOiBjbHVzdGVyIAo+Pj4+Pj4gW0lORl0gcGdtYXAgdjExNDUxOiA5NjQg
+cGdzOiAxIGFjdGl2ZSt1bmRlcnNpemVkK2RlZ3JhZGVkLCAzMCAKPj4+Pj4+IHN0YWxlK2FjdGl2
+ZStyZW1hcHBlZCwgNTAyIHN0YWxlK2FjdGl2ZStjbGVhbiwgMzIgYWN0aXZlK3JlbWFwcGVkLCAK
+Pj4+Pj4+IHN0YWxlK2FjdGl2ZSszOTggCj4+Pj4+PiBhY3RpdmUrY2xlYW4sIDEgc3RhbGUrYWN0
+aXZlK3VuZGVyc2l6ZWQrZGVncmFkZWQ7IDQxOSBHQiBkYXRhLCA0MjAgR0IgCj4+Pj4+PiB1c2Vk
+LCA4NzQgR0IgLyAxMjk1IEdCIGF2YWlsIAo+Pj4+Pj4gMjAxNS0wNC0yMiAxMDowMDoyMC45OTEz
+NDMgbW9uLjAgMTAuNy4wLjE1Mjo2Nzg5LzAgMjI5NCA6IGNsdXN0ZXIgCj4+Pj4+PiBbSU5GXSBv
+c2QuNyBtYXJrZWQgaXRzZWxmIGRvd24gCj4+Pj4+PiAyMDE1LTA0LTIyIDEwOjAwOjIxLjgzMDM4
+OSBtb24uMCAxMC43LjAuMTUyOjY3ODkvMCAyMjk1IDogY2x1c3RlciAKPj4+Pj4+IFtJTkZdIG9z
+ZC4wIDEwLjcuMC4xNTI6NjgwNC8xNDQ4MSBib290IAo+Pj4+Pj4gMjAxNS0wNC0yMiAxMDowMDoy
+MS44MzI1MTggbW9uLjAgMTAuNy4wLjE1Mjo2Nzg5LzAgMjI5NiA6IGNsdXN0ZXIgCj4+Pj4+PiBb
+SU5GXSBvc2RtYXAgZTg2MDogOSBvc2RzOiA3IHVwLCA5IGluIAo+Pj4+Pj4gMjAxNS0wNC0yMiAx
+MDowMDoyMS44MzYxMjkgbW9uLjAgMTAuNy4wLjE1Mjo2Nzg5LzAgMjI5NyA6IGNsdXN0ZXIgCj4+
+Pj4+PiBbSU5GXSBwZ21hcCB2MTE0NTI6IDk2NCBwZ3M6IDEgYWN0aXZlK3VuZGVyc2l6ZWQrZGVn
+cmFkZWQsIDM1IAo+Pj4+Pj4gc3RhbGUrYWN0aXZlK3JlbWFwcGVkLCA2MDggc3RhbGUrYWN0aXZl
+K2NsZWFuLCAyNyBhY3RpdmUrcmVtYXBwZWQsIAo+Pj4+Pj4gc3RhbGUrYWN0aXZlKzI5MiAKPj4+
+Pj4+IGFjdGl2ZStjbGVhbiwgMSBzdGFsZSthY3RpdmUrdW5kZXJzaXplZCtkZWdyYWRlZDsgNDE5
+IEdCIGRhdGEsIDQyMCBHQiAKPj4+Pj4+IHVzZWQsIDg3NCBHQiAvIDEyOTUgR0IgYXZhaWwgCj4+
+Pj4+PiAyMDE1LTA0LTIyIDEwOjAwOjIyLjgzMDQ1NiBtb24uMCAxMC43LjAuMTUyOjY3ODkvMCAy
+Mjk4IDogY2x1c3RlciAKPj4+Pj4+IFtJTkZdIG9zZC42IDEwLjcuMC4xNTM6NjgwOC8yMTk1NSBi
+b290IAo+Pj4+Pj4gMjAxNS0wNC0yMiAxMDowMDoyMi44MzIxNzEgbW9uLjAgMTAuNy4wLjE1Mjo2
+Nzg5LzAgMjI5OSA6IGNsdXN0ZXIgCj4+Pj4+PiBbSU5GXSBvc2RtYXAgZTg2MTogOSBvc2RzOiA4
+IHVwLCA5IGluIAo+Pj4+Pj4gMjAxNS0wNC0yMiAxMDowMDoyMi44MzYyNzIgbW9uLjAgMTAuNy4w
+LjE1Mjo2Nzg5LzAgMjMwMCA6IGNsdXN0ZXIgCj4+Pj4+PiBbSU5GXSBwZ21hcCB2MTE0NTM6IDk2
+NCBwZ3M6IDMgYWN0aXZlK3VuZGVyc2l6ZWQrZGVncmFkZWQsIDI3IAo+Pj4+Pj4gc3RhbGUrYWN0
+aXZlK3JlbWFwcGVkLCA0OTggc3RhbGUrYWN0aXZlK2NsZWFuLCAyIHBlZXJpbmcsIDI4IAo+Pj4+
+Pj4gYWN0aXZlK3JlbWFwcGVkLCA0MDIgYWN0aXZlK2NsZWFuLCA0IHJlbWFwcGVkK3BlZXJpbmc7
+IDQxOSBHQiBkYXRhLCAKPj4+Pj4+IDQyMCBHQiB1c2VkLCA4NzQgR0IgLyAxMjk1IEdCIGF2YWls
+IAo+Pj4+Pj4gMjAxNS0wNC0yMiAxMDowMDoyMy40MjAzMDkgbW9uLjAgMTAuNy4wLjE1Mjo2Nzg5
+LzAgMjMwMiA6IGNsdXN0ZXIgCj4+Pj4+PiBbSU5GXSBvc2QuOCBtYXJrZWQgaXRzZWxmIGRvd24g
+Cj4+Pj4+PiAyMDE1LTA0LTIyIDEwOjAwOjIzLjgzMzcwOCBtb24uMCAxMC43LjAuMTUyOjY3ODkv
+MCAyMzAzIDogY2x1c3RlciAKPj4+Pj4+IFtJTkZdIG9zZG1hcCBlODYyOiA5IG9zZHM6IDcgdXAs
+IDkgaW4gCj4+Pj4+PiAyMDE1LTA0LTIyIDEwOjAwOjIzLjgzNjQ1OSBtb24uMCAxMC43LjAuMTUy
+OjY3ODkvMCAyMzA0IDogY2x1c3RlciAKPj4+Pj4+IFtJTkZdIHBnbWFwIHYxMTQ1NDogOTY0IHBn
+czogMyBhY3RpdmUrdW5kZXJzaXplZCtkZWdyYWRlZCwgNDQgCj4+Pj4+PiBzdGFsZSthY3RpdmUr
+cmVtYXBwZWQsIDU4NyBzdGFsZSthY3RpdmUrY2xlYW4sIDIgcGVlcmluZywgMTEgCj4+Pj4+PiBh
+Y3RpdmUrcmVtYXBwZWQsIDMxMyBhY3RpdmUrY2xlYW4sIDQgcmVtYXBwZWQrcGVlcmluZzsgNDE5
+IEdCIGRhdGEsIAo+Pj4+Pj4gNDIwIEdCIHVzZWQsIDg3NCBHQiAvIDEyOTUgR0IgYXZhaWwgCj4+
+Pj4+PiAyMDE1LTA0LTIyIDEwOjAwOjI0LjgzMjkwNSBtb24uMCAxMC43LjAuMTUyOjY3ODkvMCAy
+MzA1IDogY2x1c3RlciAKPj4+Pj4+IFtJTkZdIG9zZC43IDEwLjcuMC4xNTM6NjgwNC8yMjUzNiBi
+b290IAo+Pj4+Pj4gMjAxNS0wNC0yMiAxMDowMDoyNC44MzQzODEgbW9uLjAgMTAuNy4wLjE1Mjo2
+Nzg5LzAgMjMwNiA6IGNsdXN0ZXIgCj4+Pj4+PiBbSU5GXSBvc2RtYXAgZTg2MzogOSBvc2RzOiA4
+IHVwLCA5IGluIAo+Pj4+Pj4gMjAxNS0wNC0yMiAxMDowMDoyNC44MzY5NzcgbW9uLjAgMTAuNy4w
+LjE1Mjo2Nzg5LzAgMjMwNyA6IGNsdXN0ZXIgCj4+Pj4+PiBbSU5GXSBwZ21hcCB2MTE0NTU6IDk2
+NCBwZ3M6IDMgYWN0aXZlK3VuZGVyc2l6ZWQrZGVncmFkZWQsIDMxIAo+Pj4+Pj4gc3RhbGUrYWN0
+aXZlK3JlbWFwcGVkLCA1MDMgc3RhbGUrYWN0aXZlK2NsZWFuLCA0IAo+Pj4+Pj4gYWN0aXZlK3Vu
+ZGVyc2l6ZWQrZGVncmFkZWQrcmVtYXBwZWQsIDUgcGVlcmluZywgMTMgYWN0aXZlK3JlbWFwcGVk
+LCAKPj4+Pj4+IDM5NyBhY3RpdmUrY2xlYW4sIDggcmVtYXBwZWQrcGVlcmluZzsgNDE5IEdCIGRh
+dGEsIDQyMCBHQiB1c2VkLCA4NzQgCj4+Pj4+PiBHQiAvIDEyOTUgR0IgYXZhaWwgCj4+Pj4+PiAy
+MDE1LTA0LTIyIDEwOjAwOjI1LjgzNDQ1OSBtb24uMCAxMC43LjAuMTUyOjY3ODkvMCAyMzA5IDog
+Y2x1c3RlciAKPj4+Pj4+IFtJTkZdIG9zZG1hcCBlODY0OiA5IG9zZHM6IDggdXAsIDkgaW4gCj4+
+Pj4+PiAyMDE1LTA0LTIyIDEwOjAwOjI1LjgzNTcyNyBtb24uMCAxMC43LjAuMTUyOjY3ODkvMCAy
+MzEwIDogY2x1c3RlciAKPj4+Pj4+IFtJTkZdIHBnbWFwIHYxMTQ1NjogOTY0IHBnczogMyBhY3Rp
+dmUrdW5kZXJzaXplZCtkZWdyYWRlZCwgMzEgCj4+Pj4+PiBzdGFsZSthY3RpdmUrcmVtYXBwZWQs
+IDUwMyBzdGFsZSthY3RpdmUrY2xlYW4sIDQgCj4+Pj4+PiBhY3RpdmUrdW5kZXJzaXplZCtkZWdy
+YWRlZCtyZW1hcHBlZCwgNSBwZWVyaW5nLCAxMyBhY3RpdmUgCj4+Pj4+PiAKPj4+Pj4+IAo+Pj4+
+Pj4gQUZURVIgT1NEIFJFU1RBUlQgCj4+Pj4+PiAtLS0tLS0tLS0tLS0tLS0tLS0gCj4+Pj4+PiAK
+Pj4+Pj4+IAo+Pj4+Pj4gMjAxNS0wNC0yMiAxMDowOToyNy42MDkwNTIgbW9uLjAgMTAuNy4wLjE1
+Mjo2Nzg5LzAgMjMzOSA6IGNsdXN0ZXIgCj4+Pj4+PiBbSU5GXSBwZ21hcCB2MTE0Nzg6IDk2NCBw
+Z3M6IDIgYWN0aXZlK3VuZGVyc2l6ZWQrZGVncmFkZWQsIDYyIAo+Pj4+Pj4gYWN0aXZlK3JlbWFw
+cGVkLCA5MDAgYWN0aXZlK2NsZWFuOyA0MTkgR0IgZGF0YSwgNDIxIEdCIHVzZWQsIDg3NCBHQiAv
+IAo+Pj4+Pj4gMTI5NSBHQiBhdmFpbDsgNzg2IE1CL3MgcmQsIDE5NiBrb3AvcyAKPj4+Pj4+IDIw
+MTUtMDQtMjIgMTA6MDk6MjguNjE4MDgyIG1vbi4wIDEwLjcuMC4xNTI6Njc4OS8wIDIzNDAgOiBj
+bHVzdGVyIAo+Pj4+Pj4gW0lORl0gcGdtYXAgdjExNDc5OiA5NjQgcGdzOiAyIGFjdGl2ZSt1bmRl
+cnNpemVkK2RlZ3JhZGVkLCA2MiAKPj4+Pj4+IGFjdGl2ZStyZW1hcHBlZCwgOTAwIGFjdGl2ZStj
+bGVhbjsgNDE5IEdCIGRhdGEsIDQyMSBHQiB1c2VkLCA4NzQgR0IgLyAKPj4+Pj4+IDEyOTUgR0Ig
+YXZhaWw7IDE1NzggTUIvcyByZCwgMzk0IGtvcC9zIAo+Pj4+Pj4gMjAxNS0wNC0yMiAxMDowOToz
+MC42MjkwNjcgbW9uLjAgMTAuNy4wLjE1Mjo2Nzg5LzAgMjM0MSA6IGNsdXN0ZXIgCj4+Pj4+PiBb
+SU5GXSBwZ21hcCB2MTE0ODA6IDk2NCBwZ3M6IDIgYWN0aXZlK3VuZGVyc2l6ZWQrZGVncmFkZWQs
+IDYyIAo+Pj4+Pj4gYWN0aXZlK3JlbWFwcGVkLCA5MDAgYWN0aXZlK2NsZWFuOyA0MTkgR0IgZGF0
+YSwgNDIxIEdCIHVzZWQsIDg3NCBHQiAvIAo+Pj4+Pj4gMTI5NSBHQiBhdmFpbDsgOTMyIE1CL3Mg
+cmQsIDIzMyBrb3AvcyAKPj4+Pj4+IDIwMTUtMDQtMjIgMTA6MDk6MzIuNjQ1ODkwIG1vbi4wIDEw
+LjcuMC4xNTI6Njc4OS8wIDIzNDIgOiBjbHVzdGVyIAo+Pj4+Pj4gW0lORl0gcGdtYXAgdjExNDgx
+OiA5NjQgcGdzOiAyIGFjdGl2ZSt1bmRlcnNpemVkK2RlZ3JhZGVkLCA2MiAKPj4+Pj4+IGFjdGl2
+ZStyZW1hcHBlZCwgOTAwIGFjdGl2ZStjbGVhbjsgNDE5IEdCIGRhdGEsIDQyMSBHQiB1c2VkLCA4
+NzQgR0IgLyAKPj4+Pj4+IDEyOTUgR0IgYXZhaWw7IDYyNyBNQi9zIHJkLCAxNTYga29wL3MgCj4+
+Pj4+PiAyMDE1LTA0LTIyIDEwOjA5OjMzLjY1MjYzNCBtb24uMCAxMC43LjAuMTUyOjY3ODkvMCAy
+MzQzIDogY2x1c3RlciAKPj4+Pj4+IFtJTkZdIHBnbWFwIHYxMTQ4MjogOTY0IHBnczogMiBhY3Rp
+dmUrdW5kZXJzaXplZCtkZWdyYWRlZCwgNjIgCj4+Pj4+PiBhY3RpdmUrcmVtYXBwZWQsIDkwMCBh
+Y3RpdmUrY2xlYW47IDQxOSBHQiBkYXRhLCA0MjEgR0IgdXNlZCwgODc0IEdCIC8gCj4+Pj4+PiAx
+Mjk1IEdCIGF2YWlsOyAxMDM0IE1CL3MgcmQsIDI1OCBrb3AvcyAKPj4+Pj4+IDIwMTUtMDQtMjIg
+MTA6MDk6MzUuNjU1NjU3IG1vbi4wIDEwLjcuMC4xNTI6Njc4OS8wIDIzNDQgOiBjbHVzdGVyIAo+
+Pj4+Pj4gW0lORl0gcGdtYXAgdjExNDgzOiA5NjQgcGdzOiAyIGFjdGl2ZSt1bmRlcnNpemVkK2Rl
+Z3JhZGVkLCA2MiAKPj4+Pj4+IGFjdGl2ZStyZW1hcHBlZCwgOTAwIGFjdGl2ZStjbGVhbjsgNDE5
+IEdCIGRhdGEsIDQyMSBHQiB1c2VkLCA4NzQgR0IgLyAKPj4+Pj4+IDEyOTUgR0IgYXZhaWw7IDUy
+OSBNQi9zIHJkLCAxMzIga29wL3MgCj4+Pj4+PiAyMDE1LTA0LTIyIDEwOjA5OjM3LjY3NDMzMiBt
+b24uMCAxMC43LjAuMTUyOjY3ODkvMCAyMzQ1IDogY2x1c3RlciAKPj4+Pj4+IFtJTkZdIHBnbWFw
+IHYxMTQ4NDogOTY0IHBnczogMiBhY3RpdmUrdW5kZXJzaXplZCtkZWdyYWRlZCwgNjIgCj4+Pj4+
+PiBhY3RpdmUrcmVtYXBwZWQsIDkwMCBhY3RpdmUrY2xlYW47IDQxOSBHQiBkYXRhLCA0MjEgR0Ig
+dXNlZCwgODc0IEdCIC8gCj4+Pj4+PiAxMjk1IEdCIGF2YWlsOyA3NzAgTUIvcyByZCwgMTkyIGtv
+cC9zIAo+Pj4+Pj4gMjAxNS0wNC0yMiAxMDowOTozOC42Nzk0NDUgbW9uLjAgMTAuNy4wLjE1Mjo2
+Nzg5LzAgMjM0NiA6IGNsdXN0ZXIgCj4+Pj4+PiBbSU5GXSBwZ21hcCB2MTE0ODU6IDk2NCBwZ3M6
+IDIgYWN0aXZlK3VuZGVyc2l6ZWQrZGVncmFkZWQsIDYyIAo+Pj4+Pj4gYWN0aXZlK3JlbWFwcGVk
+LCA5MDAgYWN0aXZlK2NsZWFuOyA0MTkgR0IgZGF0YSwgNDIxIEdCIHVzZWQsIDg3NCBHQiAvIAo+
+Pj4+Pj4gMTI5NSBHQiBhdmFpbDsgMTM1OCBNQi9zIHJkLCAzMzkga29wL3MgCj4+Pj4+PiAyMDE1
+LTA0LTIyIDEwOjA5OjQwLjY5MDAzNyBtb24uMCAxMC43LjAuMTUyOjY3ODkvMCAyMzQ3IDogY2x1
+c3RlciAKPj4+Pj4+IFtJTkZdIHBnbWFwIHYxMTQ4NjogOTY0IHBnczogMiBhY3RpdmUrdW5kZXJz
+aXplZCtkZWdyYWRlZCwgNjIgCj4+Pj4+PiBhY3RpdmUrcmVtYXBwZWQsIDkwMCBhY3RpdmUrY2xl
+YW47IDQxOSBHQiBkYXRhLCA0MjEgR0IgdXNlZCwgODc0IEdCIC8gCj4+Pj4+PiAxMjk1IEdCIGF2
+YWlsOyA2NDkgTUIvcyByZCwgMTYyIGtvcC9zIAo+Pj4+Pj4gMjAxNS0wNC0yMiAxMDowOTo0Mi43
+MDcxNjQgbW9uLjAgMTAuNy4wLjE1Mjo2Nzg5LzAgMjM0OCA6IGNsdXN0ZXIgCj4+Pj4+PiBbSU5G
+XSBwZ21hcCB2MTE0ODc6IDk2NCBwZ3M6IDIgYWN0aXZlK3VuZGVyc2l6ZWQrZGVncmFkZWQsIDYy
+IAo+Pj4+Pj4gYWN0aXZlK3JlbWFwcGVkLCA5MDAgYWN0aXZlK2NsZWFuOyA0MTkgR0IgZGF0YSwg
+NDIxIEdCIHVzZWQsIDg3NCBHQiAvIAo+Pj4+Pj4gMTI5NSBHQiBhdmFpbDsgNTgwIE1CL3MgcmQs
+IDE0NSBrb3AvcyAKPj4+Pj4+IDIwMTUtMDQtMjIgMTA6MDk6NDMuNzEzNzM2IG1vbi4wIDEwLjcu
+MC4xNTI6Njc4OS8wIDIzNDkgOiBjbHVzdGVyIAo+Pj4+Pj4gW0lORl0gcGdtYXAgdjExNDg4OiA5
+NjQgcGdzOiAyIGFjdGl2ZSt1bmRlcnNpemVkK2RlZ3JhZGVkLCA2MiAKPj4+Pj4+IGFjdGl2ZSty
+ZW1hcHBlZCwgOTAwIGFjdGl2ZStjbGVhbjsgNDE5IEdCIGRhdGEsIDQyMSBHQiB1c2VkLCA4NzQg
+R0IgLyAKPj4+Pj4+IDEyOTUgR0IgYXZhaWw7IDk2MiBNQi9zIHJkLCAyNDAga29wL3MgCj4+Pj4+
+PiAyMDE1LTA0LTIyIDEwOjA5OjQ1LjcxODY1OCBtb24uMCAxMC43LjAuMTUyOjY3ODkvMCAyMzUw
+IDogY2x1c3RlciAKPj4+Pj4+IFtJTkZdIHBnbWFwIHYxMTQ4OTogOTY0IHBnczogMiBhY3RpdmUr
+dW5kZXJzaXplZCtkZWdyYWRlZCwgNjIgCj4+Pj4+PiBhY3RpdmUrcmVtYXBwZWQsIDkwMCBhY3Rp
+dmUrY2xlYW47IDQxOSBHQiBkYXRhLCA0MjEgR0IgdXNlZCwgODc0IEdCIC8gCj4+Pj4+PiAxMjk1
+IEdCIGF2YWlsOyA1MDYgTUIvcyByZCwgMTI2IGtvcC9zIAo+Pj4+Pj4gMjAxNS0wNC0yMiAxMDow
+OTo0Ny43MzczNTggbW9uLjAgMTAuNy4wLjE1Mjo2Nzg5LzAgMjM1MSA6IGNsdXN0ZXIgCj4+Pj4+
+PiBbSU5GXSBwZ21hcCB2MTE0OTA6IDk2NCBwZ3M6IDIgYWN0aXZlK3VuZGVyc2l6ZWQrZGVncmFk
+ZWQsIDYyIAo+Pj4+Pj4gYWN0aXZlK3JlbWFwcGVkLCA5MDAgYWN0aXZlK2NsZWFuOyA0MTkgR0Ig
+ZGF0YSwgNDIxIEdCIHVzZWQsIDg3NCBHQiAvIAo+Pj4+Pj4gMTI5NSBHQiBhdmFpbDsgNzc0IE1C
+L3MgcmQsIDE5MyBrb3AvcyAKPj4+Pj4+IDIwMTUtMDQtMjIgMTA6MDk6NDguNzQzMzM4IG1vbi4w
+IDEwLjcuMC4xNTI6Njc4OS8wIDIzNTIgOiBjbHVzdGVyIAo+Pj4+Pj4gW0lORl0gcGdtYXAgdjEx
+NDkxOiA5NjQgcGdzOiAyIGFjdGl2ZSt1bmRlcnNpemVkK2RlZ3JhZGVkLCA2MiAKPj4+Pj4+IGFj
+dGl2ZStyZW1hcHBlZCwgOTAwIGFjdGl2ZStjbGVhbjsgNDE5IEdCIGRhdGEsIDQyMSBHQiB1c2Vk
+LCA4NzQgR0IgLyAKPj4+Pj4+IDEyOTUgR0IgYXZhaWw7IDEzNjMgTUIvcyByZCwgMzQwIGtvcC9z
+IAo+Pj4+Pj4gMjAxNS0wNC0yMiAxMDowOTo1MC43NDY2ODUgbW9uLjAgMTAuNy4wLjE1Mjo2Nzg5
+LzAgMjM1MyA6IGNsdXN0ZXIgCj4+Pj4+PiBbSU5GXSBwZ21hcCB2MTE0OTI6IDk2NCBwZ3M6IDIg
+YWN0aXZlK3VuZGVyc2l6ZWQrZGVncmFkZWQsIDYyIAo+Pj4+Pj4gYWN0aXZlK3JlbWFwcGVkLCA5
+MDAgYWN0aXZlK2NsZWFuOyA0MTkgR0IgZGF0YSwgNDIxIEdCIHVzZWQsIDg3NCBHQiAvIAo+Pj4+
+Pj4gMTI5NSBHQiBhdmFpbDsgNjYyIE1CL3MgcmQsIDE2NSBrb3AvcyAKPj4+Pj4+IDIwMTUtMDQt
+MjIgMTA6MDk6NTIuNzYyNDYxIG1vbi4wIDEwLjcuMC4xNTI6Njc4OS8wIDIzNTQgOiBjbHVzdGVy
+IAo+Pj4+Pj4gW0lORl0gcGdtYXAgdjExNDkzOiA5NjQgcGdzOiAyIGFjdGl2ZSt1bmRlcnNpemVk
+K2RlZ3JhZGVkLCA2MiAKPj4+Pj4+IGFjdGl2ZStyZW1hcHBlZCwgOTAwIGFjdGl2ZStjbGVhbjsg
+NDE5IEdCIGRhdGEsIDQyMSBHQiB1c2VkLCA4NzQgR0IgLyAKPj4+Pj4+IDEyOTUgR0IgYXZhaWw7
+IDU5MyBNQi9zIHJkLCAxNDgga29wL3MgCj4+Pj4+PiAyMDE1LTA0LTIyIDEwOjA5OjUzLjc2Nzcy
+OSBtb24uMCAxMC43LjAuMTUyOjY3ODkvMCAyMzU1IDogY2x1c3RlciAKPj4+Pj4+IFtJTkZdIHBn
+bWFwIHYxMTQ5NDogOTY0IHBnczogMiBhY3RpdmUrdW5kZXJzaXplZCtkZWdyYWRlZCwgNjIgCj4+
+Pj4+PiBhY3RpdmUrcmVtYXBwZWQsIDkwMCBhY3RpdmUrY2xlYW47IDQxOSBHQiBkYXRhLCA0MjEg
+R0IgdXNlZCwgODc0IEdCIC8gCj4+Pj4+PiAxMjk1IEdCIGF2YWlsOyA5MzggTUIvcyByZCwgMjM0
+IGtvcC9zIAo+Pj4+Pj4gCj4+Pj4+PiBfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fXyAKPj4+Pj4+IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0IAo+Pj4+Pj4gY2Vw
+aC11c2Vyc0BsaXN0cy5jZXBoLmNvbSA8bWFpbHRvOmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20+
+IAo+Pj4+Pj4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNl
+cGguY29tIAo+Pj4+Pj4gCj4+Pj4+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fIAo+Pj4+PiBjZXBoLXVzZXJzIG1haWxpbmcgbGlzdCAKPj4+Pj4gY2VwaC11
+c2Vyc0BsaXN0cy5jZXBoLmNvbSA8bWFpbHRvOmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20+IAo+
+Pj4+PiBodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5j
+b20gCj4+Pj4+IAo+Pj4+PiBfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXyAKPj4+Pj4g
+Cj4+Pj4+IFBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxl
+Y3Ryb25pYyBtYWlsIAo+Pj4+PiBtZXNzYWdlIGlzIGludGVuZGVkIG9ubHkgZm9yIHRoZSB1c2Ug
+b2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpIAo+Pj4+PiBuYW1lZCBhYm92ZS4gSWYgdGhl
+IHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCAKPj4+Pj4gcmVjaXBp
+ZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMg
+Cj4+Pj4+IG1lc3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywgZGlzc2VtaW5hdGlv
+biwgZGlzdHJpYnV0aW9uLCBvciAKPj4+Pj4gY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3Ry
+aWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgCj4+Pj4+IHRoaXMgY29tbXVu
+aWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBv
+ciAKPj4+Pj4gZS1tYWlsIChhcyBzaG93biBhYm92ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kg
+YW55IGFuZCBhbGwgY29waWVzIG9mIAo+Pj4+PiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNz
+aW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIAo+Pj4+PiBlbGVjdHJvbmljYWxseSBzdG9yZWQg
+Y29waWVzKS4gCj4+Pj4+IAo+Pj4+PiBfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fXyAKPj4+Pj4gY2VwaC11c2VycyBtYWlsaW5nIGxpc3QgCj4+Pj4+IGNlcGgt
+dXNlcnNAbGlzdHMuY2VwaC5jb20gPG1haWx0bzpjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tPiAK
+Pj4+Pj4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGgu
+Y29tIAo+Pj4+PiAKPj4+Pj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX18gCj4+Pj4+IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0IAo+Pj4+PiBjZXBoLXVzZXJz
+QGxpc3RzLmNlcGguY29tIDxtYWlsdG86Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbT4gCj4+Pj4+
+IGh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbSAK
+Pj4+Pj4gCj4+Pj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X18gCj4+Pj4gY2VwaC11c2VycyBtYWlsaW5nIGxpc3QgCj4+Pj4gY2VwaC11c2Vyc0BsaXN0cy5j
+ZXBoLmNvbSA8bWFpbHRvOmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20+IAo+Pj4+IGh0dHA6Ly9s
+aXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbSAKPj4+PiBfX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXyAKPj4+PiBjZXBoLXVz
+ZXJzIG1haWxpbmcgbGlzdCAKPj4+PiBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tIDxtYWlsdG86
+Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbT4gCj4+Pj4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xp
+c3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tIAo+Pj4+IAo+Pj4+IAo+Pj4+IAo+Pj4+IAo+
+Pj4+IAo+Pj4+IAo+Pj4+IC0tIAo+Pj4+INChINGD0LLQsNC20LXQvdC40LXQvCwg0KTQsNGB0LjR
+hdC+0LIg0JjRgNC10Log0J3Rg9GA0LPQsNGP0LfQvtCy0LjRhyAKPj4+PiDQnNC+0LEuOiArNzky
+MjkwNDU3NTcgCj4+Pj4gCj4+Pj4gCj4+Pj4gCj4+Pj4gLS0gCj4+Pj4gVG8gdW5zdWJzY3JpYmUg
+ZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGlu
+IAo+Pj4+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3Jn
+IAo+Pj4+IDxtYWlsdG86bWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZz4gCj4+Pj4gTW9yZSBtYWpv
+cmRvbW8gaW5mbyBhdCBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwg
+Cj4+IAo+PiAKPj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X18gCj4+IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0IAo+PiBjZXBoLXVzZXJzQGxpc3RzLmNlcGgu
+Y29tIAo+PiBodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2Vw
+aC5jb20gCj4+IAo+PiAKPj4gCj4+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fIAo+PiBjZXBoLXVzZXJzIG1haWxpbmcgbGlzdCAKPj4gY2VwaC11c2Vyc0Bs
+aXN0cy5jZXBoLmNvbSAKPj4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBo
+LXVzZXJzLWNlcGguY29tIAo+PiAKPj4gCj4+IAo+PiAtLSAKPj4gVG8gdW5zdWJzY3JpYmUgZnJv
+bSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIAo+
+PiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyAKPj4g
+TW9yZSBtYWpvcmRvbW8gaW5mbyBhdCBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1p
+bmZvLmh0bWwgCj4+IApfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0
+dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
