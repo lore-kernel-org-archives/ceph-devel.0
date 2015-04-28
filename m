@@ -1,52 +1,54 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: make check bot paused
-Date: Wed, 29 Apr 2015 00:40:43 +0200
-Message-ID: <55400C6B.9070907@dachary.org>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: newstore performance update
+Date: Tue, 28 Apr 2015 18:25:22 -0500
+Message-ID: <554016E2.3000104@redhat.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="DLTuow1toepnrUqjq4rfmc7vrXu2wahrr"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:54201 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1030901AbbD1Wkr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Apr 2015 18:40:47 -0400
-Received: from [10.9.0.6] (unknown [10.0.2.28])
-	by smtp.dmail.dachary.org (Postfix) with ESMTP id 9100F420A2
-	for <ceph-devel@vger.kernel.org>; Wed, 29 Apr 2015 00:40:44 +0200 (CEST)
+Received: from mx1.redhat.com ([209.132.183.28]:33671 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1030957AbbD1XZZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 28 Apr 2015 19:25:25 -0400
+Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t3SNPPGA009676
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
+	for <ceph-devel@vger.kernel.org>; Tue, 28 Apr 2015 19:25:25 -0400
+Received: from [10.3.112.75] (ovpn-112-75.phx2.redhat.com [10.3.112.75])
+	by int-mx13.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t3SNPNn8031484
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+	for <ceph-devel@vger.kernel.org>; Tue, 28 Apr 2015 19:25:24 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---DLTuow1toepnrUqjq4rfmc7vrXu2wahrr
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Hi Guys,
 
-Hi,
+Sage has been furiously working away at fixing bugs in newstore and 
+improving performance.  Specifically we've been focused on write 
+performance as newstore was lagging filestore but quite a bit 
+previously.  A lot of work has gone into implementing libaio behind the 
+scenes and as a result performance on spinning disks with SSD WAL (and 
+SSD backed rocksdb) has improved pretty dramatically. It's now often 
+beating filestore:
 
-The make check bot needs to go through all passed pull requests before it=
- can start working again. This is because of https://issues.jenkins-ci.or=
-g/browse/JENKINS-22752 and we just need to wait it out. It should not las=
-t more than 24h.
+http://nhm.ceph.com/newstore/newstore-5d96fe6-no_overlay.pdf
 
-Cheers
+On the other hand, sequential writes are slower than random writes when 
+the OSD, DB, and WAL are all on the same device be it a spinning disk or 
+SSD.  In this situation newstore does better with random writes and 
+sometimes beats filestore (such as in the everything-on-spinning disk 
+tests, and when IO sizes are small in the everything-on-ssd tests).
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+Newstore is changing daily so keep in mind that these results are almost 
+assuredly going to change.  An interesting area of investigation will be 
+why sequential writes are slower than random writes, and whether or not 
+we are being limited by rocksdb ingest speed and how.
 
+I've also uploaded a quick perf call-graph I grabbed during the 
+"all-SSD" 32KB sequential write test to see if rocksdb was starving one 
+of the cores, but found something that looks quite a bit different:
 
---DLTuow1toepnrUqjq4rfmc7vrXu2wahrr
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+http://nhm.ceph.com/newstore/newstore-5d96fe6-no_overlay.pdf
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlVADGsACgkQ8dLMyEl6F21UbQCgri2yaRmrGk2+b0T6IbFiBAIy
-fWMAoK+cUsf7IW9qtV7Rcjd3jkrYV7H3
-=nMj9
------END PGP SIGNATURE-----
-
---DLTuow1toepnrUqjq4rfmc7vrXu2wahrr--
+Mark
