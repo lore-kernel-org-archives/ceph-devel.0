@@ -1,128 +1,508 @@
-From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Subject: RE: newstore performance update
-Date: Wed, 29 Apr 2015 15:00:30 +0000
-Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC021E4A8B@shsmsx102.ccr.corp.intel.com>
-References: <554016E2.3000104@redhat.com>
- <6F3FA899187F0043BA1827A69DA2F7CC021E4894@shsmsx102.ccr.corp.intel.com>
- <5540DA92.3070505@redhat.com>
+From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Subject: Re: Upgrade from Giant to Hammer and after some basic
+ operations most of the OSD's went down
+Date: Wed, 29 Apr 2015 08:38:50 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1504290838060.5458@cobra.newdream.net>
+References: <479273764e377f37b81dc6b0ccd55fb3@mail.meizo.com>
+	<964da36ebed90592d8f5794ac2617a36@mail.meizo.com>
+	<1226598674.7136470.1430138991322.JavaMail.zimbra@redhat.com>
+	<76bac95ebd000308018bf900d11fae1e@mail.meizo.com>
+	<alpine.DEB.2.00.1504270919020.5458@cobra.newdream.net>
+	<03cd5dfba8f5fec3f80458a92d377a60@mail.meizo.com>
+	<alpine.DEB.2.00.1504271034560.5458@cobra.newdream.net>
+	<a06d58aa527edec6225737f18abb055b@mail.meizo.com>
+	<alpine.DEB.2.00.1504271222002.5458@cobra.newdream.net>
+	<8bed4ff8a05a8b96ed848e9f1aafa576@mail.meizo.com>
+	<alpine.DEB.2.00.1504280959280.5458@cobra.newdream.net>
+	<bb760e0f01a667a582f6bda67cc31684@mail.meizo.com>
+	<alpine.DEB.2.00.1504281155530.5458@cobra.newdream.net>
+	<f9adb4b2dcada947f418b6f95ad7a8d1@mail.meizo.com>
+	<alpine.DEB.2.00.1504281256440.5458@cobra.newdream.net>
+	<alpine.DEB.2.00.1504281355130.5458@cobra.newdream.net>
+	<81216125e573cf00539f61cc090b282b@mail.meizo.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:34778 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1423096AbbD2PAq (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 29 Apr 2015 11:00:46 -0400
-In-Reply-To: <5540DA92.3070505@redhat.com>
-Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <81216125e573cf00539f61cc090b282b-Mp+lKDbUk+6SvdrsE3bNcA@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Tuomas Juntunen <tuomas.juntunen-TGwGjfj4lcphU2BovMVX9g@public.gmane.org>
+Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogY2VwaC1kZXZlbC1vd25l
-ckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVsLQ0KPiBvd25lckB2Z2VyLmtlcm5l
-bC5vcmddIE9uIEJlaGFsZiBPZiBNYXJrIE5lbHNvbg0KPiBTZW50OiBXZWRuZXNkYXksIEFwcmls
-IDI5LCAyMDE1IDk6MjAgUE0NCj4gVG86IENoZW4sIFhpYW94aQ0KPiBDYzogY2VwaC1kZXZlbEB2
-Z2VyLmtlcm5lbC5vcmcNCj4gU3ViamVjdDogUmU6IG5ld3N0b3JlIHBlcmZvcm1hbmNlIHVwZGF0
-ZQ0KPiANCj4gDQo+IA0KPiBPbiAwNC8yOS8yMDE1IDAzOjMzIEFNLCBDaGVuLCBYaWFveGkgd3Jv
-dGU6DQo+ID4gSGkgTWFyaywNCj4gPiAJUmVhbGx5IGdvb2QgdGVzdDopIEkgb25seSBwbGF5ZWQg
-YSBiaXQgb24gU1NELCB0aGUgcGFyYWxsZWwgV0FMIHRocmVhZHMNCj4gcmVhbGx5IGhlbHBzIGJ1
-dCB3ZSBzdGlsbCBoYXZlIGEgbG9uZyB3YXkgdG8gZ28gZXNwZWNpYWxseSBvbiBhbGwtc3NkIGNh
-c2UuDQo+ID4gSSB0cmllZCB0aGlzDQo+IGh0dHBzOi8vZ2l0aHViLmNvbS9mYWNlYm9vay9yb2Nr
-c2RiL2Jsb2IvbWFzdGVyL3V0aWwvZW52X3Bvc2l4LmNjI0wxNTE1DQo+IGJ5IGhhY2tpbmcgdGhl
-IHJvY2tzZGIsIGJ1dCB0aGUgcGVyZm9ybWFuY2UgZGlmZmVyZW5jZSBpcyBuZWdsaWdpYmxlLg0K
-PiA+DQo+ID4gVGhlIHJvY2tzZGIgZGlnZXN0IHNwZWVkIHNob3VsZCBiZSB0aGUgcHJvYmxlbSwg
-SSBiZWxpZXZlLCBJIHdhcyBwbGFubmVkDQo+IHRvIHByb3ZlIHRoaXMgYnkgc2tpcCBhbGwgZGIg
-dHJhbnNhY3Rpb24sIGJ1dCBmYWlsZWQgc2luY2UgaGl0dGluZyBvdGhlciBkZWFkbG9jaw0KPiBi
-dWcgaW4gbmV3c3RvcmUuDQo+IA0KPiBJIHRoaW5rIHNhZ2UgaGFzIHdvcmtlZCB0aHJvdWdoIGFs
-bCBvZiB0aGUgZGVhZGxvY2sgYnVncyBJIHdhcyBzZWVpbmcgc2hvcnQgb2YNCj4gcG9zc2libHkg
-c29tZXRoaW5nIGdvaW5nIG9uIHdpdGggdGhlIG92ZXJsYXkgY29kZS4gIFRoYXQgcHJvYmFibHkg
-c2hvdWxkbid0DQo+IG1hdHRlciBvbiBTU0QgdGhvdWdoIGFzIGl0J3MgcHJvYmFibHkgYmVzdCB0
-byBsZWF2ZSBvdmVybGF5IG9mZi4NCj4gDQo+ID4NCj4gPiBCZWxvdyBhcmUgYSBiaXQgbW9yZSBj
-b21tZW50cy4NCj4gPj4gU2FnZSBoYXMgYmVlbiBmdXJpb3VzbHkgd29ya2luZyBhd2F5IGF0IGZp
-eGluZyBidWdzIGluIG5ld3N0b3JlIGFuZA0KPiA+PiBpbXByb3ZpbmcgcGVyZm9ybWFuY2UuICBT
-cGVjaWZpY2FsbHkgd2UndmUgYmVlbiBmb2N1c2VkIG9uIHdyaXRlDQo+ID4+IHBlcmZvcm1hbmNl
-IGFzIG5ld3N0b3JlIHdhcyBsYWdnaW5nIGZpbGVzdG9yZSBidXQgcXVpdGUgYSBiaXQNCj4gPj4g
-cHJldmlvdXNseS4gIEEgbG90IG9mIHdvcmsgaGFzIGdvbmUgaW50byBpbXBsZW1lbnRpbmcgbGli
-YWlvIGJlaGluZA0KPiA+PiB0aGUgc2NlbmVzIGFuZCBhcyBhIHJlc3VsdCBwZXJmb3JtYW5jZSBv
-biBzcGlubmluZyBkaXNrcyB3aXRoIFNTRCBXQUwNCj4gPj4gKGFuZCBTU0QgYmFja2VkIHJvY2tz
-ZGIpIGhhcyBpbXByb3ZlZCBwcmV0dHkgZHJhbWF0aWNhbGx5LiBJdCdzIG5vdw0KPiBvZnRlbiBi
-ZWF0aW5nIGZpbGVzdG9yZToNCj4gPj4NCj4gPg0KPiA+IFNTRCBEQiBpcyBzdGlsbCBiZXR0ZXIg
-dGhhbiBTU0QgV0FMIHdpdGggcmVxdWVzdCBzaXplID4gMTI4S0IsIHRoaXMgaW5kaWNhdGUNCj4g
-c29tZSBXQUxzIGFyZSBhY3R1YWxseSB3cml0dGVuIHRvIExldmVsMC4uLkhtbSwgY291bGQgd2Ug
-YWRkDQo+IG5ld3N0b3JlX3dhbF9tYXhfb3BzL2J5dGVzIHRvIGNhcHBpbmcgdGhlIHRvdGFsIFdB
-TCBzaXplKGhvdyBtdWNoIGRhdGENCj4gaXMgaW4gV0FMIGJ1dCBub3QgeWV0IGFwcGx5IHRvIGJh
-Y2tlbmQgRlMpID8gIEkgc3VzcGVjdCB0aGlzIHdvdWxkIGltcHJvdmUNCj4gcGVyZm9ybWFuY2Ug
-YnkgcHJldmVudCBzb21lIElPIHdpdGggaGlnaCBXQSBjb3N0IGFuZCBsYXRlbmN5Pw0KPiANCj4g
-U2VlbXMgbGlrZSBpdCBjb3VsZCB3b3JrLCBidXQgSSB3aXNoIHdlIGRpZG4ndCBoYXZlIHRvIGFk
-ZCBhIHdvcmthcm91bmQuDQo+ICAgSXQnZCBiZSBuaWNlIGlmIHdlIGNvdWxkIGp1c3QgdGVsbCBy
-b2Nrc2RiIG5vdCB0byBwcm9wYWdhdGUgdGhhdCBkYXRhLg0KPiAgIEkgZG9uJ3QgcmVtZW1iZXIs
-IGNhbiB3ZSB1c2UgY29sdW1uIGZhbWlsaWVzIGZvciB0aGlzPw0KPiANCk5vLCBjb2x1bW4gZmFt
-aWxpZXMgd2lsbCBub3QgaGVscCB0byB0aGlzIGNhc2UsICB3ZSB3YW50IHRvIHVzZSBjb2x1bW4g
-ZmFtaWxpZXMgdG8gZW5mb3JjZSBkaWZmZXJlbnQgbGF5b3V0IGFuZCBwb2xpY3kgZm9yIGRpZmZl
-cmVudCBraW5kIG9mIGRhdGEuDQpGb3IgZXhhbXBsZSAsIFdBTCBpdGVtcyBnbyB3aXRoIGxhcmdl
-IHdyaXRlIGJ1ZmZlciB0aGF0IG9wdGltaXplIGZvciB3cml0ZSh3aXRoIHRoZSBjb3N0IG9mIHJl
-YWQgYW1wbGlmaWNhdGlvbikgLCBhbmQgbm8gYmxvY2sgY2FjaGUocmVhZCBjYWNoZSkgc2hvdWxk
-IGJlIHRoZXJlLiBCdXQgT25vZGUgc2hvdWxkIGdvIHdpdGggbGFyZ2UgYmxvY2sgY2FjaGUgYW5k
-IEZld2VyIGxldmVsMCwgdGhhdCByZWR1Y2UgcmVhZCBhbXBsaWZpY2F0aW9uLi4uLiBXaXRoIENv
-bHVtbiBmYW1pbGllcyB3ZSBjYW4gc3VwcG9ydCB0aGlzIHVzYWdlLg0KPiA+DQo+ID4+IGh0dHA6
-Ly9uaG0uY2VwaC5jb20vbmV3c3RvcmUvbmV3c3RvcmUtNWQ5NmZlNi1ub19vdmVybGF5LnBkZg0K
-PiA+Pg0KPiA+PiBPbiB0aGUgb3RoZXIgaGFuZCwgc2VxdWVudGlhbCB3cml0ZXMgYXJlIHNsb3dl
-ciB0aGFuIHJhbmRvbSB3cml0ZXMNCj4gPj4gd2hlbiB0aGUgT1NELCBEQiwgYW5kIFdBTCBhcmUg
-YWxsIG9uIHRoZSBzYW1lIGRldmljZSBiZSBpdCBhIHNwaW5uaW5nDQo+IGRpc2sgb3IgU1NELg0K
-PiA+DQo+ID4gSSB0aGluayBzZXF1ZW50aWFsIHdyaXRlcyBzbG93ZXIgdGhhbiByYW5kb20gaXMg
-YnkgZGVzaWduIGluIE5ld3N0b3JlLA0KPiBiZWNhdXNlIGZvciBldmVyeSBvYmplY3Qgd2UgY2Fu
-IG9ubHkgaGF2ZSBvbmUgV0FMICwgdGhhdCBtZWFucyBubw0KPiBjb25jdXJyZW50IElPIGlmIHRo
-ZSByZXFfc2l6ZSogUUQgPCA0TUIuIE5vdCBzdXJlIGhvdyBtYW55ICNRRCBkbyB5b3UNCj4gaGF2
-ZSBpbiB0aGUgdGVzdD8gSSBzdXNwZWN0IDY0IHNpbmNlIHRoZXJlIGlzIGEgYm9vc3QgaW4gc2Vx
-IHdyaXRlIHBlcmZvcm1hbmNlDQo+IHdpdGggcmVxIHNpemUgPiA2NCAoIDY0S0IqNjQ9NE1CKS4N
-Cj4gDQo+IFlvdSBuYWlsZWQgaXQsIDY0Lg0KPiANCj4gPg0KPiA+IEluIHRoaXMgY2FzZSwgIElP
-IHBhdHRlcm4gd2lsbCBiZSA6IDEgd3JpdGUgdG8gREIgV0FMLT5TeW5jLT4gMSBXcml0ZSB0byBG
-UyAtPg0KPiBTeW5jLCAgd2UgZG8gZXZlcnl0aGluZyBpbiBzeW5jaHJvbml6ZSB3YXkgLHdoaWNo
-IGlzIGVzc2VudGlhbGx5IGV4cGVuc2l2ZS4NCj4gDQo+IFdpbGwgeW91IGJlIG9uIHRoZSBwZXJm
-b3JtYW5jZSBjYWxsIHRoaXMgbW9ybmluZz8gIFBlcmhhcHMgd2UgY2FuIHRhbGsgYWJvdXQNCj4g
-aXQgbW9yZSB0aGVyZT8NCg0KV2lsbCBiZSB0aGVyZSwgc2VlIHlvdSB0aGVuLg0KPiANCj4gPg0K
-PiA+DQo+IAkJCQlYaWFveGkuDQo+ID4+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+ID4+
-IEZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZl
-bC0NCj4gPj4gb3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgTWFyayBOZWxzb24N
-Cj4gPj4gU2VudDogV2VkbmVzZGF5LCBBcHJpbCAyOSwgMjAxNSA3OjI1IEFNDQo+ID4+IFRvOiBj
-ZXBoLWRldmVsDQo+ID4+IFN1YmplY3Q6IG5ld3N0b3JlIHBlcmZvcm1hbmNlIHVwZGF0ZQ0KPiA+
-Pg0KPiA+PiBIaSBHdXlzLA0KPiA+Pg0KPiA+PiBTYWdlIGhhcyBiZWVuIGZ1cmlvdXNseSB3b3Jr
-aW5nIGF3YXkgYXQgZml4aW5nIGJ1Z3MgaW4gbmV3c3RvcmUgYW5kDQo+ID4+IGltcHJvdmluZyBw
-ZXJmb3JtYW5jZS4gIFNwZWNpZmljYWxseSB3ZSd2ZSBiZWVuIGZvY3VzZWQgb24gd3JpdGUNCj4g
-Pj4gcGVyZm9ybWFuY2UgYXMgbmV3c3RvcmUgd2FzIGxhZ2dpbmcgZmlsZXN0b3JlIGJ1dCBxdWl0
-ZSBhIGJpdA0KPiA+PiBwcmV2aW91c2x5LiAgQSBsb3Qgb2Ygd29yayBoYXMgZ29uZSBpbnRvIGlt
-cGxlbWVudGluZyBsaWJhaW8gYmVoaW5kDQo+ID4+IHRoZSBzY2VuZXMgYW5kIGFzIGEgcmVzdWx0
-IHBlcmZvcm1hbmNlIG9uIHNwaW5uaW5nIGRpc2tzIHdpdGggU1NEIFdBTA0KPiA+PiAoYW5kIFNT
-RCBiYWNrZWQgcm9ja3NkYikgaGFzIGltcHJvdmVkIHByZXR0eSBkcmFtYXRpY2FsbHkuIEl0J3Mg
-bm93DQo+IG9mdGVuIGJlYXRpbmcgZmlsZXN0b3JlOg0KPiA+Pg0KPiA+DQo+ID4+IGh0dHA6Ly9u
-aG0uY2VwaC5jb20vbmV3c3RvcmUvbmV3c3RvcmUtNWQ5NmZlNi1ub19vdmVybGF5LnBkZg0KPiA+
-Pg0KPiA+PiBPbiB0aGUgb3RoZXIgaGFuZCwgc2VxdWVudGlhbCB3cml0ZXMgYXJlIHNsb3dlciB0
-aGFuIHJhbmRvbSB3cml0ZXMNCj4gPj4gd2hlbiB0aGUgT1NELCBEQiwgYW5kIFdBTCBhcmUgYWxs
-IG9uIHRoZSBzYW1lIGRldmljZSBiZSBpdCBhIHNwaW5uaW5nDQo+IGRpc2sgb3IgU1NELg0KPiA+
-DQo+ID4+IEluIHRoaXMgc2l0dWF0aW9uIG5ld3N0b3JlIGRvZXMgYmV0dGVyIHdpdGggcmFuZG9t
-IHdyaXRlcyBhbmQNCj4gPj4gc29tZXRpbWVzIGJlYXRzIGZpbGVzdG9yZSAoc3VjaCBhcyBpbiB0
-aGUgZXZlcnl0aGluZy1vbi1zcGlubmluZyBkaXNrDQo+ID4+IHRlc3RzLCBhbmQgd2hlbiBJTyBz
-aXplcyBhcmUgc21hbGwgaW4gdGhlIGV2ZXJ5dGhpbmctb24tc3NkIHRlc3RzKS4NCj4gPj4NCj4g
-Pj4gTmV3c3RvcmUgaXMgY2hhbmdpbmcgZGFpbHkgc28ga2VlcCBpbiBtaW5kIHRoYXQgdGhlc2Ug
-cmVzdWx0cyBhcmUNCj4gPj4gYWxtb3N0IGFzc3VyZWRseSBnb2luZyB0byBjaGFuZ2UuICBBbiBp
-bnRlcmVzdGluZyBhcmVhIG9mDQo+ID4+IGludmVzdGlnYXRpb24gd2lsbCBiZSB3aHkgc2VxdWVu
-dGlhbCB3cml0ZXMgYXJlIHNsb3dlciB0aGFuIHJhbmRvbQ0KPiA+PiB3cml0ZXMsIGFuZCB3aGV0
-aGVyIG9yIG5vdCB3ZSBhcmUgYmVpbmcgbGltaXRlZCBieSByb2Nrc2RiIGluZ2VzdCBzcGVlZA0K
-PiBhbmQgaG93Lg0KPiA+DQo+ID4+DQo+ID4+IEkndmUgYWxzbyB1cGxvYWRlZCBhIHF1aWNrIHBl
-cmYgY2FsbC1ncmFwaCBJIGdyYWJiZWQgZHVyaW5nIHRoZQ0KPiA+PiAiYWxsLVNTRCIgMzJLQiBz
-ZXF1ZW50aWFsIHdyaXRlIHRlc3QgdG8gc2VlIGlmIHJvY2tzZGIgd2FzIHN0YXJ2aW5nDQo+ID4+
-IG9uZSBvZiB0aGUgY29yZXMsIGJ1dCBmb3VuZCBzb21ldGhpbmcgdGhhdCBsb29rcyBxdWl0ZSBh
-IGJpdCBkaWZmZXJlbnQ6DQo+ID4+DQo+ID4+IGh0dHA6Ly9uaG0uY2VwaC5jb20vbmV3c3RvcmUv
-bmV3c3RvcmUtNWQ5NmZlNi1ub19vdmVybGF5LnBkZg0KPiA+Pg0KPiA+PiBNYXJrDQo+ID4+IC0t
-DQo+ID4+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1
-YnNjcmliZSBjZXBoLWRldmVsIg0KPiA+PiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFq
-b3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlDQo+IG1ham9yZG9tbw0KPiA+PiBpbmZvIGF0IGh0
-dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPiA+IE4gICAgIHIgIHkg
-ICBiIFggIMendiBeICneunsubiArICAgeiBdeiAgIHtheSAdyofamSAsaiAgIGYgICBoICAgeiAe
-IHcNCj4gDQo+ICAgIGo6K3YgICB3IGogbSAgICAgICAgIHpaKyAgICAg3aJqIiAgIXRtbD0NCj4g
-Pg0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAi
-dW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4gdGhlDQo+IGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1h
-am9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdA0KPiBodHRwOi8v
-dmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg==
+On Wed, 29 Apr 2015, Tuomas Juntunen wrote:
+> Hi
+> 
+> I updated that version and it seems that something did happen, the osd's
+> stayed up for a while and 'ceph status' got updated. But then in couple of
+> minutes, they all went down the same way.
+> 
+> I have attached new 'ceph osd dump -f json-pretty' and got a new log from
+> one of the osd's with osd debug = 20,
+> http://beta.xaasbox.com/ceph/ceph-osd.15.log
+
+Sam mentioned that you had said earlier that this was not critical data?  
+If not, I think the simplest thing is to just drop those pools.  The 
+important thing (from my perspective at least :) is that we understand the 
+root cause and can prevent this in the future.
+
+sage
+
+
+> 
+> Thank you!
+> 
+> Br,
+> Tuomas
+> 
+> 
+> 
+> -----Original Message-----
+> From: Sage Weil [mailto:sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org] 
+> Sent: 28. huhtikuuta 2015 23:57
+> To: Tuomas Juntunen
+> Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org; ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> Subject: Re: [ceph-users] Upgrade from Giant to Hammer and after some basic
+> operations most of the OSD's went down
+> 
+> Hi Tuomas,
+> 
+> I've pushed an updated wip-hammer-snaps branch.  Can you please try it?  
+> The build will appear here
+> 
+> 	
+> http://gitbuilder.ceph.com/ceph-deb-trusty-x86_64-basic/sha1/08bf531331afd5e
+> 2eb514067f72afda11bcde286
+> 
+> (or a similar url; adjust for your distro).
+> 
+> Thanks!
+> sage
+> 
+> 
+> On Tue, 28 Apr 2015, Sage Weil wrote:
+> 
+> > [adding ceph-devel]
+> > 
+> > Okay, I see the problem.  This seems to be unrelated ot the giant -> 
+> > hammer move... it's a result of the tiering changes you made:
+> > 
+> > > > > > > > The following:
+> > > > > > > > 
+> > > > > > > > ceph osd tier add img images --force-nonempty ceph osd 
+> > > > > > > > tier cache-mode images forward ceph osd tier set-overlay 
+> > > > > > > > img images
+> > 
+> > Specifically, --force-nonempty bypassed important safety checks.
+> > 
+> > 1. images had snapshots (and removed_snaps)
+> > 
+> > 2. images was added as a tier *of* img, and img's removed_snaps was 
+> > copied to images, clobbering the removed_snaps value (see
+> > OSDMap::Incremental::propagate_snaps_to_tiers)
+> > 
+> > 3. tiering relation was undone, but removed_snaps was still gone
+> > 
+> > 4. on OSD startup, when we load the PG, removed_snaps is initialized 
+> > with the older map.  later, in PGPool::update(), we assume that 
+> > removed_snaps alwasy grows (never shrinks) and we trigger an assert.
+> > 
+> > To fix this I think we need to do 2 things:
+> > 
+> > 1. make the OSD forgiving out removed_snaps getting smaller.  This is 
+> > probably a good thing anyway: once we know snaps are removed on all 
+> > OSDs we can prune the interval_set in the OSDMap.  Maybe.
+> > 
+> > 2. Fix the mon to prevent this from happening, *even* when 
+> > --force-nonempty is specified.  (This is the root cause.)
+> > 
+> > I've opened http://tracker.ceph.com/issues/11493 to track this.
+> > 
+> > sage
+> > 
+> >     
+> > 
+> > > > > > > > 
+> > > > > > > > Idea was to make images as a tier to img, move data to img 
+> > > > > > > > then change
+> > > > > > > clients to use the new img pool.
+> > > > > > > > 
+> > > > > > > > Br,
+> > > > > > > > Tuomas
+> > > > > > > > 
+> > > > > > > > > Can you explain exactly what you mean by:
+> > > > > > > > >
+> > > > > > > > > "Also I created one pool for tier to be able to move 
+> > > > > > > > > data without
+> > > > > > > outage."
+> > > > > > > > >
+> > > > > > > > > -Sam
+> > > > > > > > > ----- Original Message -----
+> > > > > > > > > From: "tuomas juntunen" 
+> > > > > > > > > <tuomas.juntunen-TGwGjfj4lcphU2BovMVX9g@public.gmane.org>
+> > > > > > > > > To: "Ian Colle" <icolle-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> > > > > > > > > Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> > > > > > > > > Sent: Monday, April 27, 2015 4:23:44 AM
+> > > > > > > > > Subject: Re: [ceph-users] Upgrade from Giant to Hammer 
+> > > > > > > > > and after some basic operations most of the OSD's went 
+> > > > > > > > > down
+> > > > > > > > >
+> > > > > > > > > Hi
+> > > > > > > > >
+> > > > > > > > > Any solution for this yet?
+> > > > > > > > >
+> > > > > > > > > Br,
+> > > > > > > > > Tuomas
+> > > > > > > > >
+> > > > > > > > >> It looks like you may have hit
+> > > > > > > > >> http://tracker.ceph.com/issues/7915
+> > > > > > > > >>
+> > > > > > > > >> Ian R. Colle
+> > > > > > > > >> Global Director
+> > > > > > > > >> of Software Engineering Red Hat (Inktank is now part of 
+> > > > > > > > >> Red Hat!) http://www.linkedin.com/in/ircolle
+> > > > > > > > >> http://www.twitter.com/ircolle
+> > > > > > > > >> Cell: +1.303.601.7713
+> > > > > > > > >> Email: icolle-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+> > > > > > > > >>
+> > > > > > > > >> ----- Original Message -----
+> > > > > > > > >> From: "tuomas juntunen" 
+> > > > > > > > >> <tuomas.juntunen-TGwGjfj4lcphU2BovMVX9g@public.gmane.org>
+> > > > > > > > >> To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> > > > > > > > >> Sent: Monday, April 27, 2015 1:56:29 PM
+> > > > > > > > >> Subject: [ceph-users] Upgrade from Giant to Hammer and 
+> > > > > > > > >> after some basic operations most of the OSD's went down
+> > > > > > > > >>
+> > > > > > > > >>
+> > > > > > > > >>
+> > > > > > > > >> I upgraded Ceph from 0.87 Giant to 0.94.1 Hammer
+> > > > > > > > >>
+> > > > > > > > >> Then created new pools and deleted some old ones. Also 
+> > > > > > > > >> I created one pool for tier to be able to move data 
+> > > > > > > > >> without
+> > > outage.
+> > > > > > > > >>
+> > > > > > > > >> After these operations all but 10 OSD's are down and 
+> > > > > > > > >> creating this kind of messages to logs, I get more than 
+> > > > > > > > >> 100gb of these in a
+> > > > > > night:
+> > > > > > > > >>
+> > > > > > > > >>  -19> 2015-04-27 10:17:08.808584 7fd8e748d700  5 osd.23
+> > > pg_epoch:
+> > > > 
+> > > > > > > > >> 17882 pg[0.189( v 8480'7 (0'0,8480'7] local-les=16609 
+> > > > > > > > >> n=0
+> > > > > > > > >> ec=1 les/c
+> > > > > > > > >> 16609/16659
+> > > > > > > > >> 16590/16590/16590) [24,3,23] r=2 lpr=17838
+> > > > > > > > >> pi=15659-16589/42
+> > > > > > > > >> crt=8480'7 lcod
+> > > > > > > > >> 0'0 inactive NOTIFY] enter Started
+> > > > > > > > >>    -18> 2015-04-27 10:17:08.808596 7fd8e748d700  5 
+> > > > > > > > >> osd.23
+> > > > pg_epoch:
+> > > > > 
+> > > > > > > > >> 17882 pg[0.189( v 8480'7 (0'0,8480'7] local-les=16609 
+> > > > > > > > >> n=0
+> > > > > > > > >> ec=1 les/c
+> > > > > > > > >> 16609/16659
+> > > > > > > > >> 16590/16590/16590) [24,3,23] r=2 lpr=17838
+> > > > > > > > >> pi=15659-16589/42
+> > > > > > > > >> crt=8480'7 lcod
+> > > > > > > > >> 0'0 inactive NOTIFY] enter Start
+> > > > > > > > >>    -17> 2015-04-27 10:17:08.808608 7fd8e748d700  1 
+> > > > > > > > >> osd.23
+> > > > pg_epoch:
+> > > > > 
+> > > > > > > > >> 17882 pg[0.189( v 8480'7 (0'0,8480'7] local-les=16609 
+> > > > > > > > >> n=0
+> > > > > > > > >> ec=1 les/c
+> > > > > > > > >> 16609/16659
+> > > > > > > > >> 16590/16590/16590) [24,3,23] r=2 lpr=17838
+> > > > > > > > >> pi=15659-16589/42
+> > > > > > > > >> crt=8480'7 lcod
+> > > > > > > > >> 0'0 inactive NOTIFY] state<Start>: transitioning to Stray
+> > > > > > > > >>    -16> 2015-04-27 10:17:08.808621 7fd8e748d700  5 
+> > > > > > > > >> osd.23
+> > > > pg_epoch:
+> > > > > 
+> > > > > > > > >> 17882 pg[0.189( v 8480'7 (0'0,8480'7] local-les=16609 
+> > > > > > > > >> n=0
+> > > > > > > > >> ec=1 les/c
+> > > > > > > > >> 16609/16659
+> > > > > > > > >> 16590/16590/16590) [24,3,23] r=2 lpr=17838
+> > > > > > > > >> pi=15659-16589/42
+> > > > > > > > >> crt=8480'7 lcod
+> > > > > > > > >> 0'0 inactive NOTIFY] exit Start 0.000025 0 0.000000
+> > > > > > > > >>    -15> 2015-04-27 10:17:08.808637 7fd8e748d700  5 
+> > > > > > > > >> osd.23
+> > > > pg_epoch:
+> > > > > 
+> > > > > > > > >> 17882 pg[0.189( v 8480'7 (0'0,8480'7] local-les=16609 
+> > > > > > > > >> n=0
+> > > > > > > > >> ec=1 les/c
+> > > > > > > > >> 16609/16659
+> > > > > > > > >> 16590/16590/16590) [24,3,23] r=2 lpr=17838
+> > > > > > > > >> pi=15659-16589/42
+> > > > > > > > >> crt=8480'7 lcod
+> > > > > > > > >> 0'0 inactive NOTIFY] enter Started/Stray
+> > > > > > > > >>    -14> 2015-04-27 10:17:08.808796 7fd8e748d700  5 
+> > > > > > > > >> osd.23
+> > > > pg_epoch:
+> > > > > 
+> > > > > > > > >> 17882 pg[10.181( empty local-les=17879 n=0 ec=17863 
+> > > > > > > > >> les/c
+> > > > > > > > >> 17879/17879
+> > > > > > > > >> 17863/17863/17863) [25,5,23] r=2 lpr=17879 crt=0'0 
+> > > > > > > > >> inactive NOTIFY] exit Reset 0.119467 4 0.000037
+> > > > > > > > >>    -13> 2015-04-27 10:17:08.808817 7fd8e748d700  5 
+> > > > > > > > >> osd.23
+> > > > pg_epoch:
+> > > > > 
+> > > > > > > > >> 17882 pg[10.181( empty local-les=17879 n=0 ec=17863 
+> > > > > > > > >> les/c
+> > > > > > > > >> 17879/17879
+> > > > > > > > >> 17863/17863/17863) [25,5,23] r=2 lpr=17879 crt=0'0 
+> > > > > > > > >> inactive NOTIFY] enter Started
+> > > > > > > > >>    -12> 2015-04-27 10:17:08.808828 7fd8e748d700  5 
+> > > > > > > > >> osd.23
+> > > > pg_epoch:
+> > > > > 
+> > > > > > > > >> 17882 pg[10.181( empty local-les=17879 n=0 ec=17863 
+> > > > > > > > >> les/c
+> > > > > > > > >> 17879/17879
+> > > > > > > > >> 17863/17863/17863) [25,5,23] r=2 lpr=17879 crt=0'0 
+> > > > > > > > >> inactive NOTIFY] enter Start
+> > > > > > > > >>    -11> 2015-04-27 10:17:08.808838 7fd8e748d700  1 
+> > > > > > > > >> osd.23
+> > > > pg_epoch:
+> > > > > 
+> > > > > > > > >> 17882 pg[10.181( empty local-les=17879 n=0 ec=17863 
+> > > > > > > > >> les/c
+> > > > > > > > >> 17879/17879
+> > > > > > > > >> 17863/17863/17863) [25,5,23] r=2 lpr=17879 crt=0'0 
+> > > > > > > > >> inactive NOTIFY]
+> > > > > > > > >> state<Start>: transitioning to Stray
+> > > > > > > > >>    -10> 2015-04-27 10:17:08.808849 7fd8e748d700  5 
+> > > > > > > > >> osd.23
+> > > > pg_epoch:
+> > > > > 
+> > > > > > > > >> 17882 pg[10.181( empty local-les=17879 n=0 ec=17863 
+> > > > > > > > >> les/c
+> > > > > > > > >> 17879/17879
+> > > > > > > > >> 17863/17863/17863) [25,5,23] r=2 lpr=17879 crt=0'0 
+> > > > > > > > >> inactive NOTIFY] exit Start 0.000020 0 0.000000
+> > > > > > > > >>     -9> 2015-04-27 10:17:08.808861 7fd8e748d700  5 
+> > > > > > > > >> osd.23
+> > > > pg_epoch:
+> > > > > 
+> > > > > > > > >> 17882 pg[10.181( empty local-les=17879 n=0 ec=17863 
+> > > > > > > > >> les/c
+> > > > > > > > >> 17879/17879
+> > > > > > > > >> 17863/17863/17863) [25,5,23] r=2 lpr=17879 crt=0'0 
+> > > > > > > > >> inactive NOTIFY] enter Started/Stray
+> > > > > > > > >>     -8> 2015-04-27 10:17:08.809427 7fd8e748d700  5 
+> > > > > > > > >> osd.23
+> > > > pg_epoch:
+> > > > > 
+> > > > > > > > >> 17882 pg[2.189( empty local-les=16127 n=0 ec=1 les/c
+> > > > > > > > >> 16127/16344
+> > > > > > > > >> 16125/16125/16125) [23,5] r=0 lpr=17838 crt=0'0 mlcod 
+> > > > > > > > >> 0'0 inactive] exit Reset 7.511623 45 0.000165
+> > > > > > > > >>     -7> 2015-04-27 10:17:08.809445 7fd8e748d700  5 
+> > > > > > > > >> osd.23
+> > > > pg_epoch:
+> > > > > 
+> > > > > > > > >> 17882 pg[2.189( empty local-les=16127 n=0 ec=1 les/c
+> > > > > > > > >> 16127/16344
+> > > > > > > > >> 16125/16125/16125) [23,5] r=0 lpr=17838 crt=0'0 mlcod 
+> > > > > > > > >> 0'0 inactive] enter Started
+> > > > > > > > >>     -6> 2015-04-27 10:17:08.809456 7fd8e748d700  5 
+> > > > > > > > >> osd.23
+> > > > pg_epoch:
+> > > > > 
+> > > > > > > > >> 17882 pg[2.189( empty local-les=16127 n=0 ec=1 les/c
+> > > > > > > > >> 16127/16344
+> > > > > > > > >> 16125/16125/16125) [23,5] r=0 lpr=17838 crt=0'0 mlcod 
+> > > > > > > > >> 0'0 inactive] enter Start
+> > > > > > > > >>     -5> 2015-04-27 10:17:08.809468 7fd8e748d700  1 
+> > > > > > > > >> osd.23
+> > > > pg_epoch:
+> > > > > 
+> > > > > > > > >> 17882 pg[2.189( empty local-les=16127 n=0 ec=1 les/c
+> > > > > > > > >> 16127/16344
+> > > > > > > > >> 16125/16125/16125) [23,5] r=0 lpr=17838 crt=0'0 mlcod 
+> > > > > > > > >> 0'0 inactive]
+> > > > > > > > >> state<Start>: transitioning to Primary
+> > > > > > > > >>     -4> 2015-04-27 10:17:08.809479 7fd8e748d700  5 
+> > > > > > > > >> osd.23
+> > > > pg_epoch:
+> > > > > 
+> > > > > > > > >> 17882 pg[2.189( empty local-les=16127 n=0 ec=1 les/c
+> > > > > > > > >> 16127/16344
+> > > > > > > > >> 16125/16125/16125) [23,5] r=0 lpr=17838 crt=0'0 mlcod 
+> > > > > > > > >> 0'0 inactive] exit Start 0.000023 0 0.000000
+> > > > > > > > >>     -3> 2015-04-27 10:17:08.809492 7fd8e748d700  5 
+> > > > > > > > >> osd.23
+> > > > pg_epoch:
+> > > > > 
+> > > > > > > > >> 17882 pg[2.189( empty local-les=16127 n=0 ec=1 les/c
+> > > > > > > > >> 16127/16344
+> > > > > > > > >> 16125/16125/16125) [23,5] r=0 lpr=17838 crt=0'0 mlcod 
+> > > > > > > > >> 0'0 inactive] enter Started/Primary
+> > > > > > > > >>     -2> 2015-04-27 10:17:08.809502 7fd8e748d700  5 
+> > > > > > > > >> osd.23
+> > > > pg_epoch:
+> > > > > 
+> > > > > > > > >> 17882 pg[2.189( empty local-les=16127 n=0 ec=1 les/c
+> > > > > > > > >> 16127/16344
+> > > > > > > > >> 16125/16125/16125) [23,5] r=0 lpr=17838 crt=0'0 mlcod 
+> > > > > > > > >> 0'0 inactive] enter Started/Primary/Peering
+> > > > > > > > >>     -1> 2015-04-27 10:17:08.809513 7fd8e748d700  5 
+> > > > > > > > >> osd.23
+> > > > pg_epoch:
+> > > > > 
+> > > > > > > > >> 17882 pg[2.189( empty local-les=16127 n=0 ec=1 les/c
+> > > > > > > > >> 16127/16344
+> > > > > > > > >> 16125/16125/16125) [23,5] r=0 lpr=17838 crt=0'0 mlcod 
+> > > > > > > > >> 0'0 peering] enter Started/Primary/Peering/GetInfo
+> > > > > > > > >>      0> 2015-04-27 10:17:08.813837 7fd8e748d700 -1
+> > > > > > > ./include/interval_set.h:
+> > > > > > > > >> In
+> > > > > > > > >> function 'void interval_set<T>::erase(T, T) [with T =
+> > > snapid_t]' 
+> > > > > > > > >> thread
+> > > > > > > > >> 7fd8e748d700 time 2015-04-27 10:17:08.809899
+> > > > > > > > >> ./include/interval_set.h: 385: FAILED assert(_size >= 
+> > > > > > > > >> 0)
+> > > > > > > > >>
+> > > > > > > > >>  ceph version 0.94.1
+> > > > > > > > >> (e4bfad3a3c51054df7e537a724c8d0bf9be972ff)
+> > > > > > > > >>  1: (ceph::__ceph_assert_fail(char const*, char const*, 
+> > > > > > > > >> int, char
+> > > > > > > > >> const*)+0x8b)
+> > > > > > > > >> [0xbc271b]
+> > > > > > > > >>  2: 
+> > > > > > > > >> (interval_set<snapid_t>::subtract(interval_set<snapid_t
+> > > > > > > > >> >
+> > > > > > > > >> const&)+0xb0) [0x82cd50]
+> > > > > > > > >>  3: (PGPool::update(std::tr1::shared_ptr<OSDMap
+> > > > > > > > >> const>)+0x52e) [0x80113e]
+> > > > > > > > >>  4: (PG::handle_advance_map(std::tr1::shared_ptr<OSDMap
+> > > > > > > > >> const>, std::tr1::shared_ptr<OSDMap const>, 
+> > > > > > > > >> const>std::vector<int,
+> > > > > > > > >> std::allocator<int> >&, int, std::vector<int, 
+> > > > > > > > >> std::allocator<int>
+> > > > > > > > >> >&, int, PG::RecoveryCtx*)+0x282) [0x801652]
+> > > > > > > > >>  5: (OSD::advance_pg(unsigned int, PG*, 
+> > > > > > > > >> ThreadPool::TPHandle&, PG::RecoveryCtx*, 
+> > > > > > > > >> std::set<boost::intrusive_ptr<PG>,
+> > > > > > > > >> std::less<boost::intrusive_ptr<PG> >, 
+> > > > > > > > >> std::allocator<boost::intrusive_ptr<PG> > >*)+0x2c3) 
+> > > > > > > > >> [0x6b0e43]
+> > > > > > > > >>  6: (OSD::process_peering_events(std::list<PG*,
+> > > > > > > > >> std::allocator<PG*>
+> > > > > > > > >> > const&,
+> > > > > > > > >> ThreadPool::TPHandle&)+0x21c) [0x6b191c]
+> > > > > > > > >>  7: (OSD::PeeringWQ::_process(std::list<PG*,
+> > > > > > > > >> std::allocator<PG*>
+> > > > > > > > >> > const&,
+> > > > > > > > >> ThreadPool::TPHandle&)+0x18) [0x709278]
+> > > > > > > > >>  8: (ThreadPool::worker(ThreadPool::WorkThread*)+0xa5e)
+> > > > > > > > >> [0xbb38ae]
+> > > > > > > > >>  9: (ThreadPool::WorkThread::entry()+0x10) [0xbb4950]
+> > > > > > > > >>  10: (()+0x8182) [0x7fd906946182]
+> > > > > > > > >>  11: (clone()+0x6d) [0x7fd904eb147d]
+> > > > > > > > >>
+> > > > > > > > >> Also by monitoring (ceph -w) I get the following 
+> > > > > > > > >> messages, also lots of
+> > > > > > > them.
+> > > > > > > > >>
+> > > > > > > > >> 2015-04-27 10:39:52.935812 mon.0 [INF] from='client.?
+> > > > > > > 10.20.0.13:0/1174409'
+> > > > > > > > >> entity='osd.30' cmd=[{"prefix": "osd crush 
+> > > > > > > > >> create-or-move",
+> > > > "args":
+> > > > > > > > >> ["host=ceph3", "root=default"], "id": 30, "weight": 1.82}]:
+> 
+> > > > > > > > >> dispatch
+> > > > > > > > >> 2015-04-27 10:39:53.297376 mon.0 [INF] from='client.?
+> > > > > > > 10.20.0.13:0/1174483'
+> > > > > > > > >> entity='osd.26' cmd=[{"prefix": "osd crush 
+> > > > > > > > >> create-or-move",
+> > > > "args":
+> > > > > > > > >> ["host=ceph3", "root=default"], "id": 26, "weight": 1.82}]:
+> 
+> > > > > > > > >> dispatch
+> > > > > > > > >>
+> > > > > > > > >>
+> > > > > > > > >> This is a cluster of 3 nodes with 36 OSD's, nodes are 
+> > > > > > > > >> also mons and mds's to save servers. All run Ubuntu
+> 14.04.2.
+> > > > > > > > >>
+> > > > > > > > >> I have pretty much tried everything I could think of.
+> > > > > > > > >>
+> > > > > > > > >> Restarting daemons doesn't help.
+> > > > > > > > >>
+> > > > > > > > >> Any help would be appreciated. I can also provide more 
+> > > > > > > > >> logs if necessary. They just seem to get pretty large 
+> > > > > > > > >> in few
+> > > moments.
+> > > > > > > > >>
+> > > > > > > > >> Thank you
+> > > > > > > > >> Tuomas
+> > > > > > > > >>
+> > > > > > > > >>
+> > > > > > > > >> _______________________________________________
+> > > > > > > > >> ceph-users mailing list ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org 
+> > > > > > > > >> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> > > > > > > > >>
+> > > > > > > > >>
+> > > > > > > > >>
+> > > > > > > > >
+> > > > > > > > >
+> > > > > > > > > _______________________________________________
+> > > > > > > > > ceph-users mailing list
+> > > > > > > > > ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org 
+> > > > > > > > > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> > > > > > > > >
+> > > > > > > > >
+> > > > > > > > >
+> > > > > > > > 
+> > > > > > > > 
+> > > > > > > > _______________________________________________
+> > > > > > > > ceph-users mailing list
+> > > > > > > > ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> > > > > > > > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> > > > > > > > 
+> > > > > > > > 
+> > > > > > > > 
+> > > > > > > > _______________________________________________
+> > > > > > > > ceph-users mailing list
+> > > > > > > > ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> > > > > > > > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> > > > > > > > 
+> > > > > > > > 
+> > > > > > > 
+> > > > > > 
+> > > > > > 
+> > > > > 
+> > > > > 
+> > > > 
+> > > 
+> > > 
+> > _______________________________________________
+> > ceph-users mailing list
+> > ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> > 
+> > 
+> 
