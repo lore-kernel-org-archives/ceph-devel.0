@@ -1,121 +1,97 @@
-From: Alex Elder <elder@ieee.org>
-Subject: Re: [PATCH 02/10] ceph: add start/finish encoding helpers
-Date: Wed, 29 Apr 2015 16:54:53 -0500
-Message-ID: <5541532D.1030503@ieee.org>
-References: <1430258747-12506-1-git-send-email-mchristi@redhat.com> <1430258747-12506-3-git-send-email-mchristi@redhat.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Firefly integration branch : OK
+Date: Thu, 30 Apr 2015 00:30:37 +0200
+Message-ID: <55415B8D.9050309@dachary.org>
+References: <553DEDD3.2030202@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="f09CERK4tkqjbbGhhsFsMUSckuUtGW9FI"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f178.google.com ([209.85.192.178]:33598 "EHLO
-	mail-pd0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751214AbbD2VzH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Apr 2015 17:55:07 -0400
-Received: by pdbnk13 with SMTP id nk13so40192463pdb.0
-        for <ceph-devel@vger.kernel.org>; Wed, 29 Apr 2015 14:55:07 -0700 (PDT)
-In-Reply-To: <1430258747-12506-3-git-send-email-mchristi@redhat.com>
+Received: from mail2.dachary.org ([91.121.57.175]:54849 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751023AbbD2Wak (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Apr 2015 18:30:40 -0400
+In-Reply-To: <553DEDD3.2030202@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: mchristi@redhat.com, ceph-devel@vger.kernel.org
+To: "Shu, Xinxin" <xinxin.shu@intel.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 04/28/2015 05:05 PM, mchristi@redhat.com wrote:
-> From: Mike Christie <michaelc@cs.wisc.edu>
->
-> This patch adds helpers to encode/decode the starting blocks
-> locking code. They are the equivalent of ENCODE_START and
-> DECODE_START_LEGACY_COMPAT_LEN in the userspace ceph code.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--f09CERK4tkqjbbGhhsFsMUSckuUtGW9FI
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-Your subject line says "start/finish encoding" but really it's just
-encode/decode.
+Hi,
 
-I have a few suggestions and questions, below.  Also, I'm about to
-get on a plane, so I won't be providing any more reviews for a while.
+I took the liberty of ping'ing Sam on IRC a few minutes ago on your behal=
+f (he is the original author of the three backports you did). He just got=
+ back from India, I could not miss the opportunity ;-)
 
-					-Alex
+Cheers
 
-> Signed-off-by: Mike Christie <michaelc@cs.wisc.edu>
-> ---
->   include/linux/ceph/decode.h | 55 +++++++++++++++++++++++++++++++++++++++++++++
->   1 file changed, 55 insertions(+)
->
-> diff --git a/include/linux/ceph/decode.h b/include/linux/ceph/decode.h
-> index a6ef9cc..96ec43d 100644
-> --- a/include/linux/ceph/decode.h
-> +++ b/include/linux/ceph/decode.h
-> @@ -217,6 +217,61 @@ static inline void ceph_encode_string(void **p, void *end,
->   	*p += len;
->   }
->
-> +/*
-> + * version and length starting block encoders/decoders
-> + */
-> +
-> +/* current code version (u8) + compat code version (u8) + len of struct (u32) */
-> +#define CEPH_ENCODING_START_BLK_LEN 6
+On 27/04/2015 10:05, Loic Dachary wrote:
+> Hi,
+>=20
+> I saw this morning the firefly integration branch passed rados and rbd =
+suites :-)=20
+>=20
+> http://tracker.ceph.com/issues/11090#rados
+> http://tracker.ceph.com/issues/11090#rbd
+>=20
+> The issue has been updated accordingly. It means the following pull req=
+uests passed:
+>=20
+> $ git log --merges --oneline 12143ff9b25fdd96f8d1a9cecb1329c7f354d414..=
+b91bbb434e6363a99a632cf3841f70f1f2549f79
+> b91bbb4 Merge 4245: librbd: snap_remove should ignore -ENOENT errors
+> 6245bed Merge 4206: librbd: acquire cache_lock before refreshing parent=
 
-I don't see this used. (I'm sure it will be soon though.)
+> ef08aa9 Merge 4185: FAILED assert(soid < scrubber.start || soid >=3D sc=
+rubber.end)
+> ae1b18a Merge 3963: Rados.shutdown() dies with Illegal instruction (cor=
+e dumped)
+> 056db0f Merge 4385: osd: ENOENT on clone
+> e4b1fd1 Merge 4384: pg stuck stale after create with activation delay
+> 597124b Merge 4383: erasure-code-profile set races with erasure-code-pr=
+ofile rm
+> b7bbd43 Merge 4382: osd/PGLog.h: 279: FAILED assert(log.log.size() =3D=3D=
+ log_keys_debug.size())
+>=20
+> Ouf ot these, three are backports ready to be reviewed by their origina=
+l authors:
+>=20
+> 056db0f Merge 4385: osd: ENOENT on clone https://github.com/ceph/ceph/p=
+ull/4385
+> e4b1fd1 Merge 4384: pg stuck stale after create with activation delay h=
+ttps://github.com/ceph/ceph/pull/4384
+> b7bbd43 Merge 4382: osd/PGLog.h: 279: FAILED assert(log.log.size() =3D=3D=
+ log_keys_debug.size())
+>=20
+> The simplest way would be to ask for their review with a comment in the=
+ pull request, with a reference to the test suite results so they know it=
+ passed the suites. Will you have time to do this today ? If you don't ha=
+ve time, just let me know and I'll do it for you.
+>=20
+> Cheers
+>=20
 
-Why not just explain what it is in code?
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
-#define CEPH_ENCODING_START_BLK_LEN \
-		(sizeof(u8) + sizeof(u8) + sizeof(u32))
 
-> +/**
-> + * ceph_start_encoding - start encoding block
-> + * @p: buffer to encode data in
-> + * @curr_ver: current (code) version of the encoding
-> + * @compat_ver: oldest code version that can decode it
-> + * @len: length of data that will be encoded in buffer
-> + */
-> +static inline void ceph_start_encoding(void **p, u8 curr_ver, u8 compat_ver,
-> +				       u32 len)
-> +{
-> +	ceph_encode_8(p, curr_ver);
-> +	ceph_encode_8(p, compat_ver);
-> +	ceph_encode_32(p, len);
-> +}
-> +
-> +/**
-> + * ceph_start_decoding_compat - decode block with legacy support for older schemes
-> + * @p: buffer to decode
-> + * @end: end of decode buffer
-> + * @curr_ver: current version of the encoding that the code supports/encode
-> + * @compat_ver: oldest version that includes a __u8 compat version field
-> + * @len_ver: oldest version that includes a __u32 length wrapper
-> + * @len: buffer to return len of data in buffer
-> + */
-> +static inline int ceph_start_decoding_compat(void **p, void *end, u8 curr_ver,
-> +					     u8 compat_ver, u8 len_ver, u32 *len)
-> +{
-> +	u8 struct_ver, struct_compat;
-> +
-> +	ceph_decode_8_safe(p, end, struct_ver, fail);
-> +	if (struct_ver >= curr_ver) {
+--f09CERK4tkqjbbGhhsFsMUSckuUtGW9FI
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
-It seems to me it doesn't matter whether the current code
-supports the struct compat version or not.  What matters
-is whether the encoded header contains the compat field
-or not.  I'm not sure what determines that.
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
 
-> +		ceph_decode_8_safe(p, end, struct_compat, fail);
-> +		if (curr_ver < struct_compat)
-> +			return -EINVAL;
-> +	}
-> +
-> +	if (struct_ver >= len_ver) {
-> +		ceph_decode_32_safe(p, end, *len, fail);
-> +	} else {
-> +		*len = 0;
-> +	}
-> +
-> +	return 0;
-> +fail:
-> +	return -ERANGE;
-> +}
-> +
-> +
->   #define ceph_encode_need(p, end, n, bad)			\
->   	do {							\
->   		if (!likely(ceph_has_room(p, end, n)))		\
->
+iEYEARECAAYFAlVBW40ACgkQ8dLMyEl6F20/jwCgw7yEwE9ftB1N5LQXFgT9VhiQ
+D14AoLNeCXeGKMxRW7etRDSAzZzNMF4F
+=G8H0
+-----END PGP SIGNATURE-----
 
+--f09CERK4tkqjbbGhhsFsMUSckuUtGW9FI--
