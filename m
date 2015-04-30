@@ -1,66 +1,37 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: CephFS + Erasure coding
-Date: Thu, 30 Apr 2015 21:57:39 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD83DCB@SACMBXIP01.sdcorp.global.sandisk.com>
+From: Gregory Farnum <greg@gregs42.com>
+Subject: Re: CephFS + Erasure coding
+Date: Thu, 30 Apr 2015 15:00:39 -0700
+Message-ID: <CAC6JEv-5b1JqdpoGXo02P2+xyhtUoCPx-B+17_RemJQbGkxVQg@mail.gmail.com>
 References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD83D5B@SACMBXIP01.sdcorp.global.sandisk.com>
- <CAC6JEv-pqbJ3JzV4MayJPF=1TAgVs0pm1=FxHvpScX2UsH4Otw@mail.gmail.com>
- <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD83DA9@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CAC6JEv-pqbJ3JzV4MayJPF=1TAgVs0pm1=FxHvpScX2UsH4Otw@mail.gmail.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F2CD83DA9@SACMBXIP01.sdcorp.global.sandisk.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F2CD83DCB@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0067.outbound.protection.outlook.com ([65.55.169.67]:59680
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751489AbbD3V5r (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 30 Apr 2015 17:57:47 -0400
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD83DA9@SACMBXIP01.sdcorp.global.sandisk.com>
-Content-Language: en-US
+Received: from mail-ie0-f176.google.com ([209.85.223.176]:35954 "EHLO
+	mail-ie0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750717AbbD3WAk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Apr 2015 18:00:40 -0400
+Received: by iebrs15 with SMTP id rs15so78571687ieb.3
+        for <ceph-devel@vger.kernel.org>; Thu, 30 Apr 2015 15:00:39 -0700 (PDT)
+Received: from mail-ig0-f177.google.com (mail-ig0-f177.google.com. [209.85.213.177])
+        by mx.google.com with ESMTPSA id e6sm1807627igy.15.2015.04.30.15.00.39
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 30 Apr 2015 15:00:39 -0700 (PDT)
+Received: by igbhj9 with SMTP id hj9so26201625igb.1
+        for <ceph-devel@vger.kernel.org>; Thu, 30 Apr 2015 15:00:39 -0700 (PDT)
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD83DCB@SACMBXIP01.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@gregs42.com>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-R3JlZywNClByb2JhYmx5IG5vdCBzdXBwb3J0ZWQgcmlnaHQgbm93LCBidXQsIHdhbnRlZCB0byBj
-b25maXJtIGlmIHRoZXJlIGlzIGFueSB3YXkgd2UgY2FuIHVzZSBDZXBoIGNhY2hlIHRpZXIgZm9y
-IG9ubHkgd3JpdGVzIGFuZCByZWFkcyBhcmUgZm9yd2FyZGVkIHRvIHRoZSBiYWNrZW5kIGVyYXN1
-cmUgY29kZWQgcG9vbC4NCg0KVGhhbmtzICYgUmVnYXJkcw0KU29tbmF0aA0KDQotLS0tLU9yaWdp
-bmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcg
-W21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIFNv
-bW5hdGggUm95DQpTZW50OiBUaHVyc2RheSwgQXByaWwgMzAsIDIwMTUgMjoyOCBQTQ0KVG86IEdy
-ZWdvcnkgRmFybnVtDQpDYzogY2VwaC1kZXZlbA0KU3ViamVjdDogUkU6IENlcGhGUyArIEVyYXN1
-cmUgY29kaW5nDQoNCkdvdCBpdCAsIHRoYW5rcyAhDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0t
-LS0tDQpGcm9tOiBHcmVnb3J5IEZhcm51bSBbbWFpbHRvOmdyZWdAZ3JlZ3M0Mi5jb21dDQpTZW50
-OiBUaHVyc2RheSwgQXByaWwgMzAsIDIwMTUgMjoyMSBQTQ0KVG86IFNvbW5hdGggUm95DQpDYzog
-Y2VwaC1kZXZlbA0KU3ViamVjdDogUmU6IENlcGhGUyArIEVyYXN1cmUgY29kaW5nDQoNCk9uIFRo
-dSwgQXByIDMwLCAyMDE1IGF0IDE6NTUgUE0sIFNvbW5hdGggUm95IDxTb21uYXRoLlJveUBzYW5k
-aXNrLmNvbT4gd3JvdGU6DQo+IEhpIEdyZWcsDQo+IEZvcmdpdmUgbXkgaWdub3JhbmNlIG9uIHRo
-aXMgcGFydCBpZiBpdCBpcyBhbHJlYWR5IGRpc2N1c3NlZCBpbiB0aGUgY29tbXVuaXR5LiBDb3Vs
-ZCB5b3UgcGxlYXNlIGxldCBtZSBrbm93IGlmIENlcGhGUyBpcyBzdXBwb3J0aW5nIEVyYXN1cmUg
-Y29kZWQgcG9vbCBpbiB0aGUgYmFja2VuZCBvciBub3QgPw0KPiBJZiBub3QsIGlzIHRoZXJlIGFu
-eSBwbGFuIG9mIHN1cHBvcnRpbmcgdGhpcyBraW5kIG9mIGNvbmZpZ3VyYXRpb24gaW4gbmVhciBm
-dXR1cmUgPw0KDQpZb3UgY2FuIHNldCByZXBsaWNhdGVkIGNhY2hlIHBvb2xzLCBwb3NpdGlvbmVk
-IGFzIHRpZXJzIG92ZXIgYW4gRUMgcG9vbCwgYXMgZGF0YSBwb29scyBmb3IgQ2VwaEZTLiBZb3Ug
-Y2Fubm90IHVzZSBFQyBwb29scyBkaXJlY3RseSBmb3IgQ2VwaEZTLiBXZSBoYXZlIG5vIHBsYW5z
-IHRvIGFkZCBzdXBwb3J0IGZvciBFQyBwb29scyBpbiB0aGUgZm9yZXNlZWFibGUgZnV0dXJlIOKA
-lCBzaW5jZSB0aGV5IGhhdmUgbGltaXRlZCBSQURPUyBmdW5jdGlvbmFsaXR5IHdlJ2QgbmVlZCB0
-byBpbXBsZW1lbnQgYSB3aG9sZSBsb2ctc3RydWN0dXJlZCBmaWxlIHN0b3JhZ2Ugc3lzdGVtIG9y
-IHNvbWV0aGluZy4gOiggLUdyZWcNCg0KPg0KPiBUaGFua3MgJiBSZWdhcmRzDQo+IFNvbW5hdGgN
-Cj4NCj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCj4NCj4gUExFQVNFIE5PVEU6
-IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2Fn
-ZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVu
-dChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRo
-ZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhh
-dmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRp
-c3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMg
-c3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0
-aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUt
-bWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxs
-IGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQg
-Y29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KPg0KPiAtLQ0KPiBUbyB1
-bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2Vw
-aC1kZXZlbCIgDQo+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5r
-ZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIA0KPiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwu
-b3JnL21ham9yZG9tby1pbmZvLmh0bWwNCgQgey5uICsgICAgICAgKyUgIGx6d20gIGIg66eyICBy
-ICB5x6kg1696WCAgFyAg3Kh9ICAgxqB6ICZqOit2ICAgICAgICB6WisgICt6ZiAgIGggICB+ICAg
-IGkgICB6IB4gdyAgID8gICAgJiAp36IbZg0K
+On Thu, Apr 30, 2015 at 2:57 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
+> Greg,
+> Probably not supported right now, but, wanted to confirm if there is any way we can use Ceph cache tier for only writes and reads are forwarded to the backend erasure coded pool.
+
+Anything like that would be based on what librados does; CephFS can't
+do anything special there. I'm not following the proxy changes and
+things that are being done now in any detail.
