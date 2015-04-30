@@ -1,383 +1,137 @@
-From: Jason Dillaman <dillaman@redhat.com>
-Subject: Re: [PATCH 08/10] ceph/rbd: add notify support
-Date: Wed, 29 Apr 2015 20:50:23 -0400 (EDT)
-Message-ID: <1827767224.9610228.1430355023472.JavaMail.zimbra@redhat.com>
-References: <1430258747-12506-1-git-send-email-mchristi@redhat.com> <1430258747-12506-9-git-send-email-mchristi@redhat.com>
+From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Subject: RE: newstore performance update
+Date: Thu, 30 Apr 2015 01:08:43 +0000
+Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC021E60E6@shsmsx102.ccr.corp.intel.com>
+References: <554016E2.3000104@redhat.com>
+	<CAKKTCLX31EBc8oOs6tVVRu4c5prUYD=3G=8fK3pMvLQTM+1iSQ@mail.gmail.com>
+	<554020DC.6020009@redhat.com>
+ <CAFkUHxe=e+1Hk7ChtF+HHFkQ-RtBNBhzJ=VCu+x_aZF4MyMiRA@mail.gmail.com>
+ <5540D7DA.2000503@redhat.com>
+ <6F3FA899187F0043BA1827A69DA2F7CC021E4AEC@shsmsx102.ccr.corp.intel.com>
+ <55412BAD.8000400@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx6-phx2.redhat.com ([209.132.183.39]:54219 "EHLO
-	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750986AbbD3AuY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Apr 2015 20:50:24 -0400
-In-Reply-To: <1430258747-12506-9-git-send-email-mchristi@redhat.com>
+Received: from mga14.intel.com ([192.55.52.115]:4802 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751248AbbD3BJ2 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 29 Apr 2015 21:09:28 -0400
+In-Reply-To: <55412BAD.8000400@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: mchristi@redhat.com
-Cc: ceph-devel@vger.kernel.org
+To: Mark Nelson <mnelson@redhat.com>, kernel neophyte <neophyte.hacker001@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Minor: in librbd, RBD notify op (rbd_notify_op) codes 0 - 10 have now been allocated.
-
--- 
-
-Jason Dillaman 
-Red Hat 
-dillaman@redhat.com 
-http://www.redhat.com 
-
-
------ Original Message -----
-From: mchristi@redhat.com
-To: ceph-devel@vger.kernel.org
-Sent: Tuesday, April 28, 2015 6:05:45 PM
-Subject: [PATCH 08/10] ceph/rbd: add notify support
-
-From: Mike Christie <michaelc@cs.wisc.edu>
-
-This adds support for rados's notify call. It is being used to notify
-scsi PR and TMF watchers that the scsi pr info has changed, or that
-we want to sync up on TMF execution (currently only LUN_RESET).
-
-I did not add support for the notify2 recv buffer as I am not using
-it yet. Currently, this results in log messages like:
-
-kernel: libceph: read_partial_message skipping long message (48 > 0)
-
-This commit message used to say, I was going to add it later as I need
-it to be able to send scsi sense codes, but I guess Doug is going to do
-that now. Thanks Doug!
-
-Signed-off-by: Mike Christie <michaelc@cs.wisc.edu>
----
- drivers/block/rbd.c             | 118 ++++++++++++++++++++++++++++++++++++----
- include/linux/ceph/osd_client.h |  16 +++++-
- include/linux/ceph/rados.h      |   9 +++
- net/ceph/osd_client.c           |  51 +++++++++++++++++
- 4 files changed, 182 insertions(+), 12 deletions(-)
-
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index a70447c..aed38c0 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -132,6 +132,21 @@ static int atomic_dec_return_safe(atomic_t *v)
- #define DEV_NAME_LEN		32
- #define MAX_INT_FORMAT_WIDTH	((5 * sizeof (int)) / 2 + 1)
- 
-+enum rbd_notify_op {
-+	RBD_NOTIFY_OP_ACQUIRED_LOCK	= 0,
-+	RBD_NOTIFY_OP_RELEASED_LOCK	= 1,
-+	RBD_NOTIFY_OP_REQUEST_LOCK	= 2,
-+	RBD_NOTIFY_OP_HEADER_UPDATE	= 3,
-+	RBD_NOTIFY_OP_ASYNC_PROGRESS	= 4,
-+	RBD_NOTIFY_OP_ASYNC_COMPLETE	= 5,
-+	RBD_NOTIFY_OP_FLATTEN		= 6,
-+	RBD_NOTIFY_OP_RESIZE		= 7,
-+	RBD_NOTIFY_OP_SNAP_CREATE	= 8,
-+	RBD_NOTIFY_OP_SCSI_PR_UPDATE	= 9,
-+	RBD_NOTIFY_OP_SCSI_LUN_RESET_START	= 10,
-+	RBD_NOTIFY_OP_SCSI_LUN_RESET_COMPLETE	= 11,
-+};
-+
- /*
-  * block device image metadata (in-memory version)
-  */
-@@ -1847,6 +1862,7 @@ static void rbd_osd_req_callback(struct ceph_osd_request *osd_req,
- 	case CEPH_OSD_OP_CALL:
- 	case CEPH_OSD_OP_NOTIFY_ACK:
- 	case CEPH_OSD_OP_WATCH:
-+	case CEPH_OSD_OP_NOTIFY:
- 		rbd_osd_trivial_callback(obj_request);
- 		break;
- 	default:
-@@ -3087,27 +3103,51 @@ static void rbd_watch_cb(u64 ver, u64 notify_id, u8 opcode, s32 return_code,
- {
- 	struct rbd_device *rbd_dev = (struct rbd_device *)data;
- 	int ret;
-+	u32 len, notify_op = -1;
-+	void *p = payload, *end = p + payload_len;
- 
- 	if (!rbd_dev)
- 		return;
- 
--	dout("%s: \"%s\" notify_id %llu opcode %u\n", __func__,
-+	dout("%s: \"%s\" notify_id %llu opcode %u rc %d bl len %u\n", __func__,
- 		rbd_dev->header_name, (unsigned long long)notify_id,
--		(unsigned int)opcode);
-+		(unsigned int)opcode, return_code, payload_len);
- 
--	/*
--	 * Until adequate refresh error handling is in place, there is
--	 * not much we can do here, except warn.
--	 *
--	 * See http://tracker.ceph.com/issues/5040
--	 */
--	ret = rbd_dev_refresh(rbd_dev);
--	if (ret)
--		rbd_warn(rbd_dev, "refresh failed: %d", ret);
-+	if (payload_len) {
-+		if (ceph_start_decoding(&p, end, 1, &len))
-+			goto decode_fail;
-+		ceph_decode_32_safe(&p, end, notify_op, decode_fail);
-+	}
-+
-+	if (opcode == CEPH_WATCH_EVENT_DISCONNECT)
-+		return;
-+
-+	dout("%s: \"%s\" RBD notify op %u\n", __func__, rbd_dev->header_name,
-+	     notify_op);
-+
-+	switch (notify_op) {
-+	case RBD_NOTIFY_OP_SCSI_PR_UPDATE:
-+		break;
-+	default:
-+		/*
-+		 * Until adequate refresh error handling is in place, there is
-+		 * not much we can do here, except warn.
-+		 *
-+		 * See http://tracker.ceph.com/issues/5040
-+		 */
-+		ret = rbd_dev_refresh(rbd_dev);
-+		if (ret)
-+			rbd_warn(rbd_dev, "refresh failed: %d", ret);
-+	}
- 
- 	ret = rbd_obj_notify_ack_sync(rbd_dev, notify_id);
- 	if (ret)
- 		rbd_warn(rbd_dev, "notify_ack ret %d", ret);
-+	return;
-+
-+decode_fail:
-+	rbd_warn(rbd_dev, "Invalid op/notify_op %u/%u", (unsigned int)opcode,
-+		 notify_op);
- }
- 
- /*
-@@ -3260,6 +3300,12 @@ static int rbd_obj_request_sync(struct rbd_device *rbd_dev,
- 							   inbound_size,
- 							   0, false, false);
- 			break;
-+		case CEPH_OSD_OP_NOTIFY:
-+			osd_req_op_notify_response_data_pages(
-+							obj_request->osd_req,
-+							0, pages, inbound_size,
-+							0, false, false);
-+			break;
- 		default:
- 			BUG();
- 		}
-@@ -3279,6 +3325,11 @@ static int rbd_obj_request_sync(struct rbd_device *rbd_dev,
- 							obj_request->osd_req, 0,
- 							pagelist);
- 			break;
-+		case CEPH_OSD_OP_NOTIFY:
-+			osd_req_op_notify_request_data_pagelist(
-+							obj_request->osd_req, 0,
-+							pagelist);
-+			break;
- 		default:
- 			BUG();
- 		}
-@@ -3349,6 +3400,51 @@ out:
- 	return ret;
- }
- 
-+static int rbd_obj_notify_scsi_event_sync(struct rbd_device *rbd_dev,
-+					  u32 notify_op,
-+					  u32 notify_timeout)
-+{
-+	struct rbd_obj_request *obj_request;
-+	int ret = -ENOMEM;
-+	struct {
-+		__le32 version;
-+		__le32 timeout;
-+		__le32 buf_len;
-+		/* payload only supports basic ops where we just send the op */
-+		u8 curr_ver;
-+		u8 compat_ver;
-+		__le32 len;
-+		__le32 notify_op;
-+	} __attribute__ ((packed)) notify_buf = { 0 };
-+
-+	notify_buf.version = cpu_to_le32(0);
-+	notify_buf.timeout = cpu_to_le32(notify_timeout);
-+	notify_buf.buf_len = cpu_to_le32(10);
-+	notify_buf.curr_ver = 2;
-+	notify_buf.compat_ver = 1;
-+	notify_buf.len = cpu_to_le32(sizeof(__le32));
-+	notify_buf.notify_op = cpu_to_le32(notify_op);
-+
-+	obj_request = rbd_obj_request_create(rbd_dev->header_name, 0, 0,
-+					     OBJ_REQUEST_PAGES);
-+	if (!obj_request)
-+		return -ENOMEM;
-+
-+	obj_request->osd_req = rbd_osd_req_create(rbd_dev, OBJ_OP_WRITE,
-+						  1, obj_request);
-+	if (!obj_request->osd_req)
-+		goto out;
-+
-+	osd_req_op_notify_init(obj_request->osd_req, 0, CEPH_OSD_OP_NOTIFY,
-+			       rbd_dev->watch_event->cookie);
-+
-+	ret = rbd_obj_request_sync(rbd_dev, obj_request, &notify_buf,
-+				   sizeof(notify_buf), NULL, 0);
-+out:
-+	rbd_obj_request_put(obj_request);
-+	return ret;
-+}
-+
- static void rbd_queue_workfn(struct work_struct *work)
- {
- 	struct request *rq = blk_mq_rq_from_pdu(work);
-diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
-index 8c4ba9a..d512dfa 100644
---- a/include/linux/ceph/osd_client.h
-+++ b/include/linux/ceph/osd_client.h
-@@ -110,6 +110,11 @@ struct ceph_osd_req_op {
- 			u32 gen;
- 		} watch;
- 		struct {
-+			u64 cookie;
-+			struct ceph_osd_data request_data;
-+			struct ceph_osd_data response_data;
-+		} notify;
-+		struct {
- 			u64 expected_object_size;
- 			u64 expected_write_size;
- 		} alloc_hint;
-@@ -301,7 +306,16 @@ extern void osd_req_op_cls_response_data_pages(struct ceph_osd_request *,
- 					struct page **pages, u64 length,
- 					u32 alignment, bool pages_from_pool,
- 					bool own_pages);
--
-+extern void osd_req_op_notify_request_data_pagelist(struct ceph_osd_request *,
-+					unsigned int which,
-+					struct ceph_pagelist *pagelist);
-+extern void osd_req_op_notify_response_data_pages(struct ceph_osd_request *,
-+					unsigned int which,
-+					struct page **pages, u64 length,
-+					u32 alignment, bool pages_from_pool,
-+					bool own_pages);
-+extern void osd_req_op_notify_init(struct ceph_osd_request *osd_req,
-+				   unsigned int which, u16 opcode, u64 cookie);
- extern void osd_req_op_cls_init(struct ceph_osd_request *osd_req,
- 					unsigned int which, u16 opcode,
- 					const char *class, const char *method);
-diff --git a/include/linux/ceph/rados.h b/include/linux/ceph/rados.h
-index 7d3721f..cae82b36 100644
---- a/include/linux/ceph/rados.h
-+++ b/include/linux/ceph/rados.h
-@@ -427,6 +427,12 @@ enum {
- 	CEPH_OSD_WATCH_OP_PING = 7,
- };
- 
-+enum {
-+	CEPH_WATCH_EVENT_NOTIFY			= 1, /* notifying watcher */
-+	CEPH_WATCH_EVENT_NOTIFY_COMPLETE	= 2, /* notifier notified when done */
-+	CEPH_WATCH_EVENT_DISCONNECT		= 3, /* we were disconnected */
-+};
-+
- /*
-  * an individual object operation.  each may be accompanied by some data
-  * payload
-@@ -465,6 +471,9 @@ struct ceph_osd_op {
- 			__u32 gen;	/* registration generation */
- 		} __attribute__ ((packed)) watch;
- 		struct {
-+			__le64 cookie;
-+		} __attribute__ ((packed)) notify;
-+		struct {
- 			__le64 offset, length;
- 			__le64 src_offset;
- 		} __attribute__ ((packed)) clonerange;
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index cfdb6aa..8e90ee3 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -243,6 +243,29 @@ void osd_req_op_cls_response_data_pages(struct ceph_osd_request *osd_req,
- }
- EXPORT_SYMBOL(osd_req_op_cls_response_data_pages);
- 
-+void osd_req_op_notify_response_data_pages(struct ceph_osd_request *osd_req,
-+			unsigned int which, struct page **pages, u64 length,
-+			u32 alignment, bool pages_from_pool, bool own_pages)
-+{
-+	struct ceph_osd_data *osd_data;
-+
-+	osd_data = osd_req_op_data(osd_req, which, notify, response_data);
-+	ceph_osd_data_pages_init(osd_data, pages, length, alignment,
-+				pages_from_pool, own_pages);
-+}
-+EXPORT_SYMBOL(osd_req_op_notify_response_data_pages);
-+
-+void osd_req_op_notify_request_data_pagelist(
-+			struct ceph_osd_request *osd_req,
-+			unsigned int which, struct ceph_pagelist *pagelist)
-+{
-+	struct ceph_osd_data *osd_data;
-+
-+	osd_data = osd_req_op_data(osd_req, which, notify, request_data);
-+	ceph_osd_data_pagelist_init(osd_data, pagelist);
-+}
-+EXPORT_SYMBOL(osd_req_op_notify_request_data_pagelist);
-+
- static u64 ceph_osd_data_length(struct ceph_osd_data *osd_data)
- {
- 	switch (osd_data->type) {
-@@ -292,6 +315,10 @@ static void osd_req_op_data_release(struct ceph_osd_request *osd_req,
- 		ceph_osd_data_release(&op->cls.request_data);
- 		ceph_osd_data_release(&op->cls.response_data);
- 		break;
-+	case CEPH_OSD_OP_NOTIFY:
-+		ceph_osd_data_release(&op->notify.request_data);
-+		ceph_osd_data_release(&op->notify.response_data);
-+		break;
- 	case CEPH_OSD_OP_SETXATTR:
- 	case CEPH_OSD_OP_CMPXATTR:
- 		ceph_osd_data_release(&op->xattr.osd_data);
-@@ -581,6 +608,16 @@ int osd_req_op_xattr_init(struct ceph_osd_request *osd_req, unsigned int which,
- }
- EXPORT_SYMBOL(osd_req_op_xattr_init);
- 
-+void osd_req_op_notify_init(struct ceph_osd_request *osd_req, unsigned int which,
-+			    u16 opcode, u64 cookie)
-+{
-+	struct ceph_osd_req_op *op = _osd_req_op_init(osd_req, which, opcode);
-+
-+	BUG_ON(opcode != CEPH_OSD_OP_NOTIFY);
-+	op->watch.cookie = cookie;
-+}
-+EXPORT_SYMBOL(osd_req_op_notify_init);
-+
- void osd_req_op_watch_init(struct ceph_osd_request *osd_req, unsigned int which,
- 			   u16 opcode, u8 watch_opcode, u64 cookie)
- {
-@@ -698,6 +735,20 @@ static u64 osd_req_encode_op(struct ceph_osd_request *req,
- 		break;
- 	case CEPH_OSD_OP_STARTSYNC:
- 		break;
-+	case CEPH_OSD_OP_NOTIFY:
-+		dst->notify.cookie = cpu_to_le64(src->notify.cookie);
-+
-+		osd_data = &src->notify.request_data;
-+		data_length = ceph_osd_data_length(osd_data);
-+		if (data_length) {
-+			BUG_ON(osd_data->type == CEPH_OSD_DATA_TYPE_NONE);
-+			ceph_osdc_msg_data_add(req->r_request, osd_data);
-+			src->payload_len += data_length;
-+			request_data_len += data_length;
-+		}
-+		osd_data = &src->notify.response_data;
-+		ceph_osdc_msg_data_add(req->r_reply, osd_data);
-+		break;
- 	case CEPH_OSD_OP_NOTIFY_ACK:
- 	case CEPH_OSD_OP_WATCH:
- 		dst->watch.cookie = cpu_to_le64(src->watch.cookie);
--- 
-1.8.3.1
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGkgTWFyaw0KICAgICAgICBJIHdhcyBzZWVpbmcgNTAlLi4uT2ggeWVhaCwgSSBnbyB3aXRoIG5l
+d3N0b3JlX2FpbyA9ICBmYWxzZSwgbWF5YmUgYWlvIGFscmVhZHkgZXhwbG9pdCB0aGUgcGFyYWxs
+ZWxpc20uDQpJdCdzIGludGVyZXN0aW5nIGhlcmUsIHdlIGhhdmUgdHdvIHdheSB0byBwYXJhbGxl
+bCB0aGUgSU9zLA0KIDEuU3luY19pbyhsaWtlbHkgdXNlIERJTyBpZiB0aGUgcmVxdWVzdCBpcyBh
+bGlnbmVkKSB3aXRoIG11bHRpIFdBTCB0aHJlYWQuICAobmV3c3RvcmVfYWlvPSBmYWxzZSwgbmV3
+c3RvcmVfc3luY193YWxfYXBwbHkgPSBmYWxzZSwgbmV3c3RvcmVfd2FsX3RocmVhZHMgPSBOKQ0K
+IDIuIGFzeW4gSU8gaXNzdWUgYnkga3Zfc3luY190aHJlYWQobmV3c3RvcmVfYWlvID0gdHJ1ZSwg
+bmV3c3RvcmVfc3luY193YWxfYXBwbHkgPSB0cnVlLCBuZXdzdG9yZV93YWxfdGhyZWFkcz13aGF0
+ZXZlciwgZG9lc24ndCBtYWtlIHNlbnNlICksDQoNCkRvIHdlIGhhdmUgYW55IHByZSBrbm93bGVk
+Z2UgYWJvdXQgd2hpY2ggd2F5IGlzIGJldHRlciBvbiBzb21lIGtpbmQgb2YgZGV2aWNlPyBJIHN1
+c3BlY3QgQUlPIHdpbGwgYmUgYmV0dGVyIGZvciBIREQgd2hpbGUgc3luY19pbyttdWx0aXRocmVh
+ZCB3aWxsIGJldHRlciBpbiBTU0QuDQoNClhpYW94aQ0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2Fn
+ZS0tLS0tDQo+IEZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86
+Y2VwaC1kZXZlbC0NCj4gb3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgTWFyayBO
+ZWxzb24NCj4gU2VudDogVGh1cnNkYXksIEFwcmlsIDMwLCAyMDE1IDM6MDYgQU0NCj4gVG86IENo
+ZW4sIFhpYW94aTsga2VybmVsIG5lb3BoeXRlDQo+IENjOiBjZXBoLWRldmVsDQo+IFN1YmplY3Q6
+IFJlOiBuZXdzdG9yZSBwZXJmb3JtYW5jZSB1cGRhdGUNCj4gDQo+IEhpIFhpYW94aSwNCj4gDQo+
+IEkganVzdCB0cmllZCBzZXR0aW5nIG5ld3N0b3JlX3N5bmNfd2FsX2FwcGx5IHRvIGZhbHNlLCBi
+dXQgaXQgc2VlbWVkIHRvIG1ha2UNCj4gdmVyeSBsaXR0bGUgZGlmZmVyZW5jZSBmb3IgbWUuICBI
+b3cgbXVjaCBpbXByb3ZlbWVudCB3ZXJlIHlvdSBzZWVpbmcgd2l0aA0KPiBpdD8NCj4gDQo+IE1h
+cmsNCj4gDQo+IE9uIDA0LzI5LzIwMTUgMTA6NTUgQU0sIENoZW4sIFhpYW94aSB3cm90ZToNCj4g
+PiBIaSBNYXJrLA0KPiA+ICAgICAgICAgWW91IG1heSBtaXNzIHRoaXMgdHVuYWJsZTogICBuZXdz
+dG9yZV9zeW5jX3dhbF9hcHBseSwgd2hpY2ggaXMNCj4gZGVmYXVsdCB0byB0cnVlLCBidXQgd291
+bGQgYmUgYmV0dGVyIHRvIG1ha2UgaWYgZmFsc2UuDQo+ID4gICAgICAgICBJZiBzeW5jX3dhbF9h
+cHBseSBpcyB0cnVlLCBXQUwgYXBwbHkgd2lsbCBiZSBkb24gc3luY2hyb25pemUgKGluDQo+IGt2
+X3N5bmNfdGhyZWFkKSBpbnN0ZWFkIG9mIFdBTCB0aHJlYWQuIFNlZQ0KPiA+IAlpZiAoZ19jb25m
+LT5uZXdzdG9yZV9zeW5jX3dhbF9hcHBseSkgew0KPiA+IAkgIF93YWxfYXBwbHkodHhjKTsNCj4g
+PiAJfSBlbHNlIHsNCj4gPiAJICB3YWxfd3EucXVldWUodHhjKTsNCj4gPiAJfQ0KPiA+ICAgICAg
+ICAgIFR3ZWFraW5nIHRoaXMgdG8gZmFsc2UgaGVscHMgYSBsb3QgaW4gbXkgc2V0dXAuIEFsbCBv
+dGhlciBsb29rcyBnb29kLg0KPiA+DQo+ID4gICAgICAgICAgIEFuZCwgY291bGQgeW91IG1ha2Ug
+V0FMIGluIGEgZGlmZmVyZW50IHBhcnRpdGlvbiBidXQgc2FtZSBTU0QgYXMgREI/DQo+IFRoZW4g
+ZnJvbSBJT1NUQVQgLXAgLCB3ZSBjYW4gaWRlbnRpZnkgaG93IG11Y2ggd3JpdGVzIHRvIERCIGFu
+ZCBob3cgbXVjaA0KPiB3cml0ZSB0byBXQUwuIEkgYW0gYWx3YXlzIHNlZWluZyB6ZXJvIGluIG15
+IHNldHVwLg0KPiA+DQo+ID4NCj4gCQkJWGlhb3hpLg0KPiA+DQo+ID4+IC0tLS0tT3JpZ2luYWwg
+TWVzc2FnZS0tLS0tDQo+ID4+IEZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3Jn
+IFttYWlsdG86Y2VwaC1kZXZlbC0NCj4gPj4gb3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhh
+bGYgT2YgTWFyayBOZWxzb24NCj4gPj4gU2VudDogV2VkbmVzZGF5LCBBcHJpbCAyOSwgMjAxNSA5
+OjA5IFBNDQo+ID4+IFRvOiBrZXJuZWwgbmVvcGh5dGUNCj4gPj4gQ2M6IGNlcGgtZGV2ZWwNCj4g
+Pj4gU3ViamVjdDogUmU6IG5ld3N0b3JlIHBlcmZvcm1hbmNlIHVwZGF0ZQ0KPiA+Pg0KPiA+PiBI
+aSwNCj4gPj4NCj4gPj4gY2VwaC5jb25mIGZpbGUgYXR0YWNoZWQuICBJdCdzIGEgbGl0dGxlIHVn
+bHkgYmVjYXVzZSBJJ3ZlIGJlZW4NCj4gPj4gcGxheWluZyB3aXRoIHZhcmlvdXMgcGFyYW1ldGVy
+cy4gIFlvdSdsbCBwcm9iYWJseSB3YW50IHRvIGVuYWJsZQ0KPiA+PiBkZWJ1ZyBuZXdzdG9yZSA9
+IDMwIGlmIHlvdSBwbGFuIHRvIGRvIGFueSBkZWJ1Z2dpbmcuICBBbHNvLCB0aGUgY29kZQ0KPiA+
+PiBoYXMgYmVlbiBjaGFuZ2luZyBxdWlja2x5IHNvIHBlcmZvcm1hbmNlIG1heSBoYXZlIGNoYW5n
+ZWQgaWYgeW91DQo+IGhhdmVuJ3QgdGVzdGVkIHdpdGhpbiB0aGUgbGFzdCB3ZWVrLg0KPiA+Pg0K
+PiA+PiBNYXJrDQo+ID4+DQo+ID4+IE9uIDA0LzI4LzIwMTUgMDk6NTkgUE0sIGtlcm5lbCBuZW9w
+aHl0ZSB3cm90ZToNCj4gPj4+IEhpIE1hcmssDQo+ID4+Pg0KPiA+Pj4gSSBhbSB0cnlpbmcgdG8g
+bWVhc3VyZSA0ayBSVyBwZXJmb3JtYW5jZSBvbiBOZXdzdG9yZSwgYW5kIEkgYW0gbm90DQo+ID4+
+PiBhbnl3aGVyZSBjbG9zZSB0byB0aGUgbnVtYmVycyB5b3UgYXJlIGdldHRpbmchDQo+ID4+Pg0K
+PiA+Pj4gQ291bGQgeW91IHNoYXJlIHlvdXIgY2VwaC5jb25mIGZvciB0aGVzZSB0ZXN0ID8NCj4g
+Pj4+DQo+ID4+PiAtTmVvDQo+ID4+Pg0KPiA+Pj4gT24gVHVlLCBBcHIgMjgsIDIwMTUgYXQgNTow
+NyBQTSwgTWFyayBOZWxzb24gPG1uZWxzb25AcmVkaGF0LmNvbT4NCj4gPj4gd3JvdGU6DQo+ID4+
+Pj4gTm90aGluZyBvZmZpY2lhbCwgdGhvdWdoIHJvdWdobHkgZnJvbSBtZW1vcnk6DQo+ID4+Pj4N
+Cj4gPj4+PiB+MS43R0IvcyBhbmQgc29tZXRoaW5nIGNyYXp5IGxpa2UgMTAwSyBJT1BTIGZvciB0
+aGUgU1NELg0KPiA+Pj4+DQo+ID4+Pj4gfjE1ME1CL3MgYW5kIH4xMjUtMTUwIElPUFMgZm9yIHRo
+ZSBzcGlubmluZyBkaXNrLg0KPiA+Pj4+DQo+ID4+Pj4gTWFyaw0KPiA+Pj4+DQo+ID4+Pj4NCj4g
+Pj4+PiBPbiAwNC8yOC8yMDE1IDA3OjAwIFBNLCBWZW5rYXRlc3dhcmEgUmFvIEp1amp1cmkgd3Jv
+dGU6DQo+ID4+Pj4+DQo+ID4+Pj4+IFRoYW5rcyBmb3Igc2hhcmluZzsgbmV3c3RvcmUgbnVtYmVy
+cyBsb29rIGxvdCBiZXR0ZXI7DQo+ID4+Pj4+DQo+ID4+Pj4+IFdvbmRlcmluZyBpZiB3ZSBoYXZl
+IGFueSBiYXNlIGxpbmUgbnVtYmVycyB0byBwdXQgdGhpbmdzIGludG8NCj4gPj4gcGVyc3BlY3Rp
+dmUuDQo+ID4+Pj4+IGxpa2Ugd2hhdCBpcyBpdCBvbiBYRlMgb3Igb24gbGlicmFkb3M/DQo+ID4+
+Pj4+DQo+ID4+Pj4+IEpWDQo+ID4+Pj4+DQo+ID4+Pj4+IE9uIFR1ZSwgQXByIDI4LCAyMDE1IGF0
+IDQ6MjUgUE0sIE1hcmsgTmVsc29uIDxtbmVsc29uQHJlZGhhdC5jb20+DQo+ID4+IHdyb3RlOg0K
+PiA+Pj4+Pj4NCj4gPj4+Pj4+IEhpIEd1eXMsDQo+ID4+Pj4+Pg0KPiA+Pj4+Pj4gU2FnZSBoYXMg
+YmVlbiBmdXJpb3VzbHkgd29ya2luZyBhd2F5IGF0IGZpeGluZyBidWdzIGluIG5ld3N0b3JlDQo+
+ID4+Pj4+PiBhbmQgaW1wcm92aW5nIHBlcmZvcm1hbmNlLiAgU3BlY2lmaWNhbGx5IHdlJ3ZlIGJl
+ZW4gZm9jdXNlZCBvbg0KPiA+Pj4+Pj4gd3JpdGUgcGVyZm9ybWFuY2UgYXMgbmV3c3RvcmUgd2Fz
+IGxhZ2dpbmcgZmlsZXN0b3JlIGJ1dCBxdWl0ZSBhDQo+ID4+Pj4+PiBiaXQgcHJldmlvdXNseS4g
+IEEgbG90IG9mIHdvcmsgaGFzIGdvbmUgaW50byBpbXBsZW1lbnRpbmcgbGliYWlvDQo+ID4+Pj4+
+PiBiZWhpbmQgdGhlIHNjZW5lcyBhbmQgYXMgYSByZXN1bHQgcGVyZm9ybWFuY2Ugb24gc3Bpbm5p
+bmcgZGlza3MNCj4gPj4+Pj4+IHdpdGggU1NEIFdBTCAoYW5kIFNTRCBiYWNrZWQgcm9ja3NkYikg
+aGFzIGltcHJvdmVkIHByZXR0eQ0KPiA+Pj4+Pj4gZHJhbWF0aWNhbGx5LiBJdCdzIG5vdyBvZnRl
+biBiZWF0aW5nIGZpbGVzdG9yZToNCj4gPj4+Pj4+DQo+ID4+Pj4+PiBodHRwOi8vbmhtLmNlcGgu
+Y29tL25ld3N0b3JlL25ld3N0b3JlLTVkOTZmZTYtbm9fb3ZlcmxheS5wZGYNCj4gPj4+Pj4+DQo+
+ID4+Pj4+PiBPbiB0aGUgb3RoZXIgaGFuZCwgc2VxdWVudGlhbCB3cml0ZXMgYXJlIHNsb3dlciB0
+aGFuIHJhbmRvbQ0KPiA+Pj4+Pj4gd3JpdGVzIHdoZW4gdGhlIE9TRCwgREIsIGFuZCBXQUwgYXJl
+IGFsbCBvbiB0aGUgc2FtZSBkZXZpY2UgYmUgaXQNCj4gPj4+Pj4+IGEgc3Bpbm5pbmcgZGlzayBv
+ciBTU0QuDQo+ID4+Pj4+PiBJbiB0aGlzIHNpdHVhdGlvbiBuZXdzdG9yZSBkb2VzIGJldHRlciB3
+aXRoIHJhbmRvbSB3cml0ZXMgYW5kDQo+ID4+Pj4+PiBzb21ldGltZXMgYmVhdHMgZmlsZXN0b3Jl
+IChzdWNoIGFzIGluIHRoZSBldmVyeXRoaW5nLW9uLXNwaW5uaW5nDQo+ID4+Pj4+PiBkaXNrIHRl
+c3RzLCBhbmQgd2hlbiBJTyBzaXplcyBhcmUgc21hbGwgaW4gdGhlIGV2ZXJ5dGhpbmctb24tc3Nk
+DQo+ID4+Pj4+PiB0ZXN0cykuDQo+ID4+Pj4+Pg0KPiA+Pj4+Pj4gTmV3c3RvcmUgaXMgY2hhbmdp
+bmcgZGFpbHkgc28ga2VlcCBpbiBtaW5kIHRoYXQgdGhlc2UgcmVzdWx0cyBhcmUNCj4gPj4+Pj4+
+IGFsbW9zdCBhc3N1cmVkbHkgZ29pbmcgdG8gY2hhbmdlLiAgQW4gaW50ZXJlc3RpbmcgYXJlYSBv
+Zg0KPiA+Pj4+Pj4gaW52ZXN0aWdhdGlvbiB3aWxsIGJlIHdoeSBzZXF1ZW50aWFsIHdyaXRlcyBh
+cmUgc2xvd2VyIHRoYW4NCj4gPj4+Pj4+IHJhbmRvbSB3cml0ZXMsIGFuZCB3aGV0aGVyIG9yIG5v
+dCB3ZSBhcmUgYmVpbmcgbGltaXRlZCBieSByb2Nrc2RiDQo+ID4+Pj4+PiBpbmdlc3Qgc3BlZWQg
+YW5kIGhvdy4NCj4gPj4+Pj4+DQo+ID4+Pj4+PiBJJ3ZlIGFsc28gdXBsb2FkZWQgYSBxdWljayBw
+ZXJmIGNhbGwtZ3JhcGggSSBncmFiYmVkIGR1cmluZyB0aGUgImFsbC0NCj4gU1NEIg0KPiA+Pj4+
+Pj4gMzJLQiBzZXF1ZW50aWFsIHdyaXRlIHRlc3QgdG8gc2VlIGlmIHJvY2tzZGIgd2FzIHN0YXJ2
+aW5nIG9uZSBvZg0KPiA+Pj4+Pj4gdGhlIGNvcmVzLCBidXQgZm91bmQgc29tZXRoaW5nIHRoYXQg
+bG9va3MgcXVpdGUgYSBiaXQgZGlmZmVyZW50Og0KPiA+Pj4+Pj4NCj4gPj4+Pj4+IGh0dHA6Ly9u
+aG0uY2VwaC5jb20vbmV3c3RvcmUvbmV3c3RvcmUtNWQ5NmZlNi1ub19vdmVybGF5LnBkZg0KPiA+
+Pj4+Pj4NCj4gPj4+Pj4+IE1hcmsNCj4gPj4+Pj4+IC0tDQo+ID4+Pj4+PiBUbyB1bnN1YnNjcmli
+ZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUNCj4gPj4+Pj4+IGNl
+cGgtZGV2ZWwiIGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0bw0KPiBtYWpvcmRvbW9Admdlci5r
+ZXJuZWwub3JnDQo+ID4+Pj4+PiBNb3JlIG1ham9yZG9tbyBpbmZvIGF0DQo+ID4+Pj4+PiBodHRw
+Oi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4gPj4+Pj4NCj4gPj4+Pj4N
+Cj4gPj4+Pj4NCj4gPj4+Pj4NCj4gPj4+PiAtLQ0KPiA+Pj4+IFRvIHVuc3Vic2NyaWJlIGZyb20g
+dGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIg0KPiA+Pj4+
+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1v
+cmUNCj4gPj4gbWFqb3Jkb21vDQo+ID4+Pj4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9y
+Zy9tYWpvcmRvbW8taW5mby5odG1sDQo+ID4+PiAtLQ0KPiA+Pj4gVG8gdW5zdWJzY3JpYmUgZnJv
+bSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiDQo+ID4+
+PiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBN
+b3JlDQo+ID4+IG1ham9yZG9tbw0KPiA+Pj4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9y
+Zy9tYWpvcmRvbW8taW5mby5odG1sDQo+ID4+Pg0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9t
+IHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4gdGhl
+DQo+IGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBt
+YWpvcmRvbW8gaW5mbyBhdA0KPiBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZv
+Lmh0bWwNCg==
