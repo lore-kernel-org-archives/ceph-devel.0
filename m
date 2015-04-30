@@ -1,163 +1,536 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: newstore performance update
-Date: Thu, 30 Apr 2015 09:11:04 -0500
-Message-ID: <554237F8.5070907@redhat.com>
-References: <554016E2.3000104@redhat.com> <6F3FA899187F0043BA1827A69DA2F7CC021E4894@shsmsx102.ccr.corp.intel.com> <alpine.DEB.2.00.1504290929400.5458@cobra.newdream.net>,<55422E0A.6010204@redhat.com> <ijupkkkyuvtsofr81j33sd7l.1430402112852@email.android.com>
+From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Subject: Re: Upgrade from Giant to Hammer and after some basic
+ operations most of the OSD's went down
+Date: Thu, 30 Apr 2015 08:23:04 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1504300822330.5458@cobra.newdream.net>
+References: <479273764e377f37b81dc6b0ccd55fb3@mail.meizo.com>
+	<1226598674.7136470.1430138991322.JavaMail.zimbra@redhat.com>
+	<76bac95ebd000308018bf900d11fae1e@mail.meizo.com>
+	<alpine.DEB.2.00.1504270919020.5458@cobra.newdream.net>
+	<03cd5dfba8f5fec3f80458a92d377a60@mail.meizo.com>
+	<alpine.DEB.2.00.1504271034560.5458@cobra.newdream.net>
+	<a06d58aa527edec6225737f18abb055b@mail.meizo.com>
+	<alpine.DEB.2.00.1504271222002.5458@cobra.newdream.net>
+	<8bed4ff8a05a8b96ed848e9f1aafa576@mail.meizo.com>
+	<alpine.DEB.2.00.1504280959280.5458@cobra.newdream.net>
+	<bb760e0f01a667a582f6bda67cc31684@mail.meizo.com>
+	<alpine.DEB.2.00.1504281155530.5458@cobra.newdream.net>
+	<f9adb4b2dcada947f418b6f95ad7a8d1@mail.meizo.com>
+	<alpine.DEB.2.00.1504281256440.5458@cobra.newdream.net>
+	<alpine.DEB.2.00.1504281355130.5458@cobra.newdream.net>
+	<81216125e573cf00539f61cc090b282b@mail.meizo.com>
+	<alpine.DEB.2.00.1504290838060.5458@cobra.newdream.net>
+	<928ebb7320e4eb07f14071e997ed7be2@mail.meizo.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:36674 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750811AbbD3OLK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 30 Apr 2015 10:11:10 -0400
-In-Reply-To: <ijupkkkyuvtsofr81j33sd7l.1430402112852@email.android.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>, Sage Weil <sweil@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <928ebb7320e4eb07f14071e997ed7be2-Mp+lKDbUk+6SvdrsE3bNcA@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Tuomas Juntunen <tuomas.juntunen-TGwGjfj4lcphU2BovMVX9g@public.gmane.org>
+Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
+On Thu, 30 Apr 2015, tuomas.juntunen-TGwGjfj4lcphU2BovMVX9g@public.gmane.org wrote:
+> Hey
+> 
+> Yes I can drop the images data, you think this will fix it?
 
+It's a slightly different assert that (I believe) should not trigger once 
+the pool is deleted.  Please give that a try and if you still hit it I'll 
+whip up a workaround.
 
-On 04/30/2015 09:02 AM, Chen, Xiaoxi wrote:
-> I am not sure I really understand the osd code, but from the osd log,=
-  in the sequential small write case, only one inflight op happening=A1=
-=AD
->
-> and Mark, did you pre-allocate the rbd before doing sequential test? =
-I believe you did, so both seq and random are in WAL mode.
+Thanks!
+sage
 
-Yes, the RBD image is pre-allocated.  Maybe Sage can chime in regarding=
-=20
-the one inflight op.
-
-Mark
-
->
-> ---- Mark Nelson=B1=E0=D0=B4 ----
->
->
-> On 04/29/2015 11:38 AM, Sage Weil wrote:
->> On Wed, 29 Apr 2015, Chen, Xiaoxi wrote:
->>> Hi Mark,
->>>       Really good test:) I only played a bit on SSD, the parallel W=
-AL
->>> threads really helps but we still have a long way to go especially =
-on
->>> all-ssd case. I tried this
->>> https://github.com/facebook/rocksdb/blob/master/util/env_posix.cc#L=
-1515
->>> by hacking the rocksdb, but the performance difference is negligibl=
-e.
->>
->> It gave me a 25% bump when rocksdb is on a spinning disk, so I went =
-ahead
->> and committed the change to the branch.  Probably not noticeable on =
-the
->> SSD, though it can't hurt.
->>
->>> The rocksdb digest speed should be the problem, I believe, I was pl=
-anned
->>> to prove this by skip all db transaction, but failed since hitting =
-other
->>> deadlock bug in newstore.
->>
->> Will look at that next!
->>
->>>
->>> Below are a bit more comments.
->>>> Sage has been furiously working away at fixing bugs in newstore an=
-d
->>>> improving performance.  Specifically we've been focused on write
->>>> performance as newstore was lagging filestore but quite a bit prev=
-iously.  A
->>>> lot of work has gone into implementing libaio behind the scenes an=
-d as a
->>>> result performance on spinning disks with SSD WAL (and SSD backed =
-rocksdb)
->>>> has improved pretty dramatically. It's now often beating filestore=
-:
->>>>
->>>
->>> SSD DB is still better than SSD WAL with request size > 128KB, this=
- indicate some WALs are actually written to Level0...Hmm, could we add =
-newstore_wal_max_ops/bytes to capping the total WAL size(how much data =
-is in WAL but not yet apply to backend FS) ?  I suspect this would impr=
-ove performance by prevent some IO with high WA cost and latency?
->>>
->>>> http://nhm.ceph.com/newstore/newstore-5d96fe6-no_overlay.pdf
->>>>
->>>> On the other hand, sequential writes are slower than random writes=
- when
->>>> the OSD, DB, and WAL are all on the same device be it a spinning d=
-isk or SSD.
->>>
->>> I think sequential writes slower than random is by design in Newsto=
-re,
->>> because for every object we can only have one WAL , that means no
->>> concurrent IO if the req_size* QD < 4MB. Not sure how many #QD do y=
-ou
->>> have in the test? I suspect 64 since there is a boost in seq write
->>> performance with req size > 64 ( 64KB*64=3D4MB).
->>>
->>> In this case, IO pattern will be : 1 write to DB WAL->Sync-> 1 Writ=
-e to
->>> FS -> Sync, we do everything in synchronize way ,which is essential=
-ly
->>> expensive.
->>
->> The number of syncs is the same for appends vs wal... in both cases =
-we
->> fdatasync the file and the db commit, but with WAL the fs sync comes=
- after
->> the commit point instead of before (and we don't double-write the da=
-ta).
->> Appends should still be pipelined (many in flight for the same objec=
-t)...
->> and the db syncs will be batched in both cases (submit_transaction f=
-or
->> each io, and a single thread doing the submit_transaction_sync in a =
-loop).
->>
->> If that's not the case then it's an accident?
->>
->> sage
->
-> So I ran some more tests last night on 2c914df7 to see if any of the =
-new
-> changes made much difference for spinning disk small sequential write=
-s,
-> and the short answer is no.  Since overlay now works again I also ran
-> tests with overlay enabled, and this may have helped marginally (and =
-had
-> mixed results for random writes, may need to tweak the default).
->
-> After this I got to thinking about how the WAL-on-SSD results were so
-> much better that I wanted to confirm that this issue is WAL related. =
- I
-> tried setting DisableWAL. This resulted in about a 90x increase in
-> sequential write performance, but only a 2x increase in random write
-> performance.  What's more, if you look at the last graph on the pdf
-> linked below, you can see that sequential 4k writes with WAL enabled =
-are
-> significantly slower than 4K random writes, but sequential 4K writes
-> with WAL disabled are significantly faster.
->
-> http://nhm.ceph.com/newstore/Newstore_DisableWAL.pdf
->
-> So I guess now I wonder what is happening that is different in each
-> case.  I'll probably sit down and start looking through the blktrace
-> data and try to get more statistics out of rocksdb for each case.  It
-> would be useful if we could tie the rocksdb stats call into an asok c=
-ommand:
->
-> DB::GetProperty("rocksdb.stats", &stats)
->
-> Mark
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+ > 
+> 
+> Br,
+> 
+> Tuomas
+> 
+> > On Wed, 29 Apr 2015, Tuomas Juntunen wrote:
+> >> Hi
+> >>
+> >> I updated that version and it seems that something did happen, the osd's
+> >> stayed up for a while and 'ceph status' got updated. But then in couple of
+> >> minutes, they all went down the same way.
+> >>
+> >> I have attached new 'ceph osd dump -f json-pretty' and got a new log from
+> >> one of the osd's with osd debug = 20,
+> >> http://beta.xaasbox.com/ceph/ceph-osd.15.log
+> >
+> > Sam mentioned that you had said earlier that this was not critical data?
+> > If not, I think the simplest thing is to just drop those pools.  The
+> > important thing (from my perspective at least :) is that we understand the
+> > root cause and can prevent this in the future.
+> >
+> > sage
+> >
+> >
+> >>
+> >> Thank you!
+> >>
+> >> Br,
+> >> Tuomas
+> >>
+> >>
+> >>
+> >> -----Original Message-----
+> >> From: Sage Weil [mailto:sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org]
+> >> Sent: 28. huhtikuuta 2015 23:57
+> >> To: Tuomas Juntunen
+> >> Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org; ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> >> Subject: Re: [ceph-users] Upgrade from Giant to Hammer and after some basic
+> >> operations most of the OSD's went down
+> >>
+> >> Hi Tuomas,
+> >>
+> >> I've pushed an updated wip-hammer-snaps branch.  Can you please try it?
+> >> The build will appear here
+> >>
+> >>
+> >> http://gitbuilder.ceph.com/ceph-deb-trusty-x86_64-basic/sha1/08bf531331afd5e
+> >> 2eb514067f72afda11bcde286
+> >>
+> >> (or a similar url; adjust for your distro).
+> >>
+> >> Thanks!
+> >> sage
+> >>
+> >>
+> >> On Tue, 28 Apr 2015, Sage Weil wrote:
+> >>
+> >> > [adding ceph-devel]
+> >> >
+> >> > Okay, I see the problem.  This seems to be unrelated ot the giant ->
+> >> > hammer move... it's a result of the tiering changes you made:
+> >> >
+> >> > > > > > > > The following:
+> >> > > > > > > >
+> >> > > > > > > > ceph osd tier add img images --force-nonempty ceph osd
+> >> > > > > > > > tier cache-mode images forward ceph osd tier set-overlay
+> >> > > > > > > > img images
+> >> >
+> >> > Specifically, --force-nonempty bypassed important safety checks.
+> >> >
+> >> > 1. images had snapshots (and removed_snaps)
+> >> >
+> >> > 2. images was added as a tier *of* img, and img's removed_snaps was
+> >> > copied to images, clobbering the removed_snaps value (see
+> >> > OSDMap::Incremental::propagate_snaps_to_tiers)
+> >> >
+> >> > 3. tiering relation was undone, but removed_snaps was still gone
+> >> >
+> >> > 4. on OSD startup, when we load the PG, removed_snaps is initialized
+> >> > with the older map.  later, in PGPool::update(), we assume that
+> >> > removed_snaps alwasy grows (never shrinks) and we trigger an assert.
+> >> >
+> >> > To fix this I think we need to do 2 things:
+> >> >
+> >> > 1. make the OSD forgiving out removed_snaps getting smaller.  This is
+> >> > probably a good thing anyway: once we know snaps are removed on all
+> >> > OSDs we can prune the interval_set in the OSDMap.  Maybe.
+> >> >
+> >> > 2. Fix the mon to prevent this from happening, *even* when
+> >> > --force-nonempty is specified.  (This is the root cause.)
+> >> >
+> >> > I've opened http://tracker.ceph.com/issues/11493 to track this.
+> >> >
+> >> > sage
+> >> >
+> >> >
+> >> >
+> >> > > > > > > >
+> >> > > > > > > > Idea was to make images as a tier to img, move data to img
+> >> > > > > > > > then change
+> >> > > > > > > clients to use the new img pool.
+> >> > > > > > > >
+> >> > > > > > > > Br,
+> >> > > > > > > > Tuomas
+> >> > > > > > > >
+> >> > > > > > > > > Can you explain exactly what you mean by:
+> >> > > > > > > > >
+> >> > > > > > > > > "Also I created one pool for tier to be able to move
+> >> > > > > > > > > data without
+> >> > > > > > > outage."
+> >> > > > > > > > >
+> >> > > > > > > > > -Sam
+> >> > > > > > > > > ----- Original Message -----
+> >> > > > > > > > > From: "tuomas juntunen"
+> >> > > > > > > > > <tuomas.juntunen-TGwGjfj4lcphU2BovMVX9g@public.gmane.org>
+> >> > > > > > > > > To: "Ian Colle" <icolle-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> >> > > > > > > > > Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> >> > > > > > > > > Sent: Monday, April 27, 2015 4:23:44 AM
+> >> > > > > > > > > Subject: Re: [ceph-users] Upgrade from Giant to Hammer
+> >> > > > > > > > > and after some basic operations most of the OSD's went
+> >> > > > > > > > > down
+> >> > > > > > > > >
+> >> > > > > > > > > Hi
+> >> > > > > > > > >
+> >> > > > > > > > > Any solution for this yet?
+> >> > > > > > > > >
+> >> > > > > > > > > Br,
+> >> > > > > > > > > Tuomas
+> >> > > > > > > > >
+> >> > > > > > > > >> It looks like you may have hit
+> >> > > > > > > > >> http://tracker.ceph.com/issues/7915
+> >> > > > > > > > >>
+> >> > > > > > > > >> Ian R. Colle
+> >> > > > > > > > >> Global Director
+> >> > > > > > > > >> of Software Engineering Red Hat (Inktank is now part of
+> >> > > > > > > > >> Red Hat!) http://www.linkedin.com/in/ircolle
+> >> > > > > > > > >> http://www.twitter.com/ircolle
+> >> > > > > > > > >> Cell: +1.303.601.7713
+> >> > > > > > > > >> Email: icolle-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+> >> > > > > > > > >>
+> >> > > > > > > > >> ----- Original Message -----
+> >> > > > > > > > >> From: "tuomas juntunen"
+> >> > > > > > > > >> <tuomas.juntunen-TGwGjfj4lcphU2BovMVX9g@public.gmane.org>
+> >> > > > > > > > >> To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> >> > > > > > > > >> Sent: Monday, April 27, 2015 1:56:29 PM
+> >> > > > > > > > >> Subject: [ceph-users] Upgrade from Giant to Hammer and
+> >> > > > > > > > >> after some basic operations most of the OSD's went down
+> >> > > > > > > > >>
+> >> > > > > > > > >>
+> >> > > > > > > > >>
+> >> > > > > > > > >> I upgraded Ceph from 0.87 Giant to 0.94.1 Hammer
+> >> > > > > > > > >>
+> >> > > > > > > > >> Then created new pools and deleted some old ones. Also
+> >> > > > > > > > >> I created one pool for tier to be able to move data
+> >> > > > > > > > >> without
+> >> > > outage.
+> >> > > > > > > > >>
+> >> > > > > > > > >> After these operations all but 10 OSD's are down and
+> >> > > > > > > > >> creating this kind of messages to logs, I get more than
+> >> > > > > > > > >> 100gb of these in a
+> >> > > > > > night:
+> >> > > > > > > > >>
+> >> > > > > > > > >>  -19> 2015-04-27 10:17:08.808584 7fd8e748d700  5 osd.23
+> >> > > pg_epoch:
+> >> > > >
+> >> > > > > > > > >> 17882 pg[0.189( v 8480'7 (0'0,8480'7] local-les=16609
+> >> > > > > > > > >> n=0
+> >> > > > > > > > >> ec=1 les/c
+> >> > > > > > > > >> 16609/16659
+> >> > > > > > > > >> 16590/16590/16590) [24,3,23] r=2 lpr=17838
+> >> > > > > > > > >> pi=15659-16589/42
+> >> > > > > > > > >> crt=8480'7 lcod
+> >> > > > > > > > >> 0'0 inactive NOTIFY] enter Started
+> >> > > > > > > > >>    -18> 2015-04-27 10:17:08.808596 7fd8e748d700  5
+> >> > > > > > > > >> osd.23
+> >> > > > pg_epoch:
+> >> > > > >
+> >> > > > > > > > >> 17882 pg[0.189( v 8480'7 (0'0,8480'7] local-les=16609
+> >> > > > > > > > >> n=0
+> >> > > > > > > > >> ec=1 les/c
+> >> > > > > > > > >> 16609/16659
+> >> > > > > > > > >> 16590/16590/16590) [24,3,23] r=2 lpr=17838
+> >> > > > > > > > >> pi=15659-16589/42
+> >> > > > > > > > >> crt=8480'7 lcod
+> >> > > > > > > > >> 0'0 inactive NOTIFY] enter Start
+> >> > > > > > > > >>    -17> 2015-04-27 10:17:08.808608 7fd8e748d700  1
+> >> > > > > > > > >> osd.23
+> >> > > > pg_epoch:
+> >> > > > >
+> >> > > > > > > > >> 17882 pg[0.189( v 8480'7 (0'0,8480'7] local-les=16609
+> >> > > > > > > > >> n=0
+> >> > > > > > > > >> ec=1 les/c
+> >> > > > > > > > >> 16609/16659
+> >> > > > > > > > >> 16590/16590/16590) [24,3,23] r=2 lpr=17838
+> >> > > > > > > > >> pi=15659-16589/42
+> >> > > > > > > > >> crt=8480'7 lcod
+> >> > > > > > > > >> 0'0 inactive NOTIFY] state<Start>: transitioning to Stray
+> >> > > > > > > > >>    -16> 2015-04-27 10:17:08.808621 7fd8e748d700  5
+> >> > > > > > > > >> osd.23
+> >> > > > pg_epoch:
+> >> > > > >
+> >> > > > > > > > >> 17882 pg[0.189( v 8480'7 (0'0,8480'7] local-les=16609
+> >> > > > > > > > >> n=0
+> >> > > > > > > > >> ec=1 les/c
+> >> > > > > > > > >> 16609/16659
+> >> > > > > > > > >> 16590/16590/16590) [24,3,23] r=2 lpr=17838
+> >> > > > > > > > >> pi=15659-16589/42
+> >> > > > > > > > >> crt=8480'7 lcod
+> >> > > > > > > > >> 0'0 inactive NOTIFY] exit Start 0.000025 0 0.000000
+> >> > > > > > > > >>    -15> 2015-04-27 10:17:08.808637 7fd8e748d700  5
+> >> > > > > > > > >> osd.23
+> >> > > > pg_epoch:
+> >> > > > >
+> >> > > > > > > > >> 17882 pg[0.189( v 8480'7 (0'0,8480'7] local-les=16609
+> >> > > > > > > > >> n=0
+> >> > > > > > > > >> ec=1 les/c
+> >> > > > > > > > >> 16609/16659
+> >> > > > > > > > >> 16590/16590/16590) [24,3,23] r=2 lpr=17838
+> >> > > > > > > > >> pi=15659-16589/42
+> >> > > > > > > > >> crt=8480'7 lcod
+> >> > > > > > > > >> 0'0 inactive NOTIFY] enter Started/Stray
+> >> > > > > > > > >>    -14> 2015-04-27 10:17:08.808796 7fd8e748d700  5
+> >> > > > > > > > >> osd.23
+> >> > > > pg_epoch:
+> >> > > > >
+> >> > > > > > > > >> 17882 pg[10.181( empty local-les=17879 n=0 ec=17863
+> >> > > > > > > > >> les/c
+> >> > > > > > > > >> 17879/17879
+> >> > > > > > > > >> 17863/17863/17863) [25,5,23] r=2 lpr=17879 crt=0'0
+> >> > > > > > > > >> inactive NOTIFY] exit Reset 0.119467 4 0.000037
+> >> > > > > > > > >>    -13> 2015-04-27 10:17:08.808817 7fd8e748d700  5
+> >> > > > > > > > >> osd.23
+> >> > > > pg_epoch:
+> >> > > > >
+> >> > > > > > > > >> 17882 pg[10.181( empty local-les=17879 n=0 ec=17863
+> >> > > > > > > > >> les/c
+> >> > > > > > > > >> 17879/17879
+> >> > > > > > > > >> 17863/17863/17863) [25,5,23] r=2 lpr=17879 crt=0'0
+> >> > > > > > > > >> inactive NOTIFY] enter Started
+> >> > > > > > > > >>    -12> 2015-04-27 10:17:08.808828 7fd8e748d700  5
+> >> > > > > > > > >> osd.23
+> >> > > > pg_epoch:
+> >> > > > >
+> >> > > > > > > > >> 17882 pg[10.181( empty local-les=17879 n=0 ec=17863
+> >> > > > > > > > >> les/c
+> >> > > > > > > > >> 17879/17879
+> >> > > > > > > > >> 17863/17863/17863) [25,5,23] r=2 lpr=17879 crt=0'0
+> >> > > > > > > > >> inactive NOTIFY] enter Start
+> >> > > > > > > > >>    -11> 2015-04-27 10:17:08.808838 7fd8e748d700  1
+> >> > > > > > > > >> osd.23
+> >> > > > pg_epoch:
+> >> > > > >
+> >> > > > > > > > >> 17882 pg[10.181( empty local-les=17879 n=0 ec=17863
+> >> > > > > > > > >> les/c
+> >> > > > > > > > >> 17879/17879
+> >> > > > > > > > >> 17863/17863/17863) [25,5,23] r=2 lpr=17879 crt=0'0
+> >> > > > > > > > >> inactive NOTIFY]
+> >> > > > > > > > >> state<Start>: transitioning to Stray
+> >> > > > > > > > >>    -10> 2015-04-27 10:17:08.808849 7fd8e748d700  5
+> >> > > > > > > > >> osd.23
+> >> > > > pg_epoch:
+> >> > > > >
+> >> > > > > > > > >> 17882 pg[10.181( empty local-les=17879 n=0 ec=17863
+> >> > > > > > > > >> les/c
+> >> > > > > > > > >> 17879/17879
+> >> > > > > > > > >> 17863/17863/17863) [25,5,23] r=2 lpr=17879 crt=0'0
+> >> > > > > > > > >> inactive NOTIFY] exit Start 0.000020 0 0.000000
+> >> > > > > > > > >>     -9> 2015-04-27 10:17:08.808861 7fd8e748d700  5
+> >> > > > > > > > >> osd.23
+> >> > > > pg_epoch:
+> >> > > > >
+> >> > > > > > > > >> 17882 pg[10.181( empty local-les=17879 n=0 ec=17863
+> >> > > > > > > > >> les/c
+> >> > > > > > > > >> 17879/17879
+> >> > > > > > > > >> 17863/17863/17863) [25,5,23] r=2 lpr=17879 crt=0'0
+> >> > > > > > > > >> inactive NOTIFY] enter Started/Stray
+> >> > > > > > > > >>     -8> 2015-04-27 10:17:08.809427 7fd8e748d700  5
+> >> > > > > > > > >> osd.23
+> >> > > > pg_epoch:
+> >> > > > >
+> >> > > > > > > > >> 17882 pg[2.189( empty local-les=16127 n=0 ec=1 les/c
+> >> > > > > > > > >> 16127/16344
+> >> > > > > > > > >> 16125/16125/16125) [23,5] r=0 lpr=17838 crt=0'0 mlcod
+> >> > > > > > > > >> 0'0 inactive] exit Reset 7.511623 45 0.000165
+> >> > > > > > > > >>     -7> 2015-04-27 10:17:08.809445 7fd8e748d700  5
+> >> > > > > > > > >> osd.23
+> >> > > > pg_epoch:
+> >> > > > >
+> >> > > > > > > > >> 17882 pg[2.189( empty local-les=16127 n=0 ec=1 les/c
+> >> > > > > > > > >> 16127/16344
+> >> > > > > > > > >> 16125/16125/16125) [23,5] r=0 lpr=17838 crt=0'0 mlcod
+> >> > > > > > > > >> 0'0 inactive] enter Started
+> >> > > > > > > > >>     -6> 2015-04-27 10:17:08.809456 7fd8e748d700  5
+> >> > > > > > > > >> osd.23
+> >> > > > pg_epoch:
+> >> > > > >
+> >> > > > > > > > >> 17882 pg[2.189( empty local-les=16127 n=0 ec=1 les/c
+> >> > > > > > > > >> 16127/16344
+> >> > > > > > > > >> 16125/16125/16125) [23,5] r=0 lpr=17838 crt=0'0 mlcod
+> >> > > > > > > > >> 0'0 inactive] enter Start
+> >> > > > > > > > >>     -5> 2015-04-27 10:17:08.809468 7fd8e748d700  1
+> >> > > > > > > > >> osd.23
+> >> > > > pg_epoch:
+> >> > > > >
+> >> > > > > > > > >> 17882 pg[2.189( empty local-les=16127 n=0 ec=1 les/c
+> >> > > > > > > > >> 16127/16344
+> >> > > > > > > > >> 16125/16125/16125) [23,5] r=0 lpr=17838 crt=0'0 mlcod
+> >> > > > > > > > >> 0'0 inactive]
+> >> > > > > > > > >> state<Start>: transitioning to Primary
+> >> > > > > > > > >>     -4> 2015-04-27 10:17:08.809479 7fd8e748d700  5
+> >> > > > > > > > >> osd.23
+> >> > > > pg_epoch:
+> >> > > > >
+> >> > > > > > > > >> 17882 pg[2.189( empty local-les=16127 n=0 ec=1 les/c
+> >> > > > > > > > >> 16127/16344
+> >> > > > > > > > >> 16125/16125/16125) [23,5] r=0 lpr=17838 crt=0'0 mlcod
+> >> > > > > > > > >> 0'0 inactive] exit Start 0.000023 0 0.000000
+> >> > > > > > > > >>     -3> 2015-04-27 10:17:08.809492 7fd8e748d700  5
+> >> > > > > > > > >> osd.23
+> >> > > > pg_epoch:
+> >> > > > >
+> >> > > > > > > > >> 17882 pg[2.189( empty local-les=16127 n=0 ec=1 les/c
+> >> > > > > > > > >> 16127/16344
+> >> > > > > > > > >> 16125/16125/16125) [23,5] r=0 lpr=17838 crt=0'0 mlcod
+> >> > > > > > > > >> 0'0 inactive] enter Started/Primary
+> >> > > > > > > > >>     -2> 2015-04-27 10:17:08.809502 7fd8e748d700  5
+> >> > > > > > > > >> osd.23
+> >> > > > pg_epoch:
+> >> > > > >
+> >> > > > > > > > >> 17882 pg[2.189( empty local-les=16127 n=0 ec=1 les/c
+> >> > > > > > > > >> 16127/16344
+> >> > > > > > > > >> 16125/16125/16125) [23,5] r=0 lpr=17838 crt=0'0 mlcod
+> >> > > > > > > > >> 0'0 inactive] enter Started/Primary/Peering
+> >> > > > > > > > >>     -1> 2015-04-27 10:17:08.809513 7fd8e748d700  5
+> >> > > > > > > > >> osd.23
+> >> > > > pg_epoch:
+> >> > > > >
+> >> > > > > > > > >> 17882 pg[2.189( empty local-les=16127 n=0 ec=1 les/c
+> >> > > > > > > > >> 16127/16344
+> >> > > > > > > > >> 16125/16125/16125) [23,5] r=0 lpr=17838 crt=0'0 mlcod
+> >> > > > > > > > >> 0'0 peering] enter Started/Primary/Peering/GetInfo
+> >> > > > > > > > >>      0> 2015-04-27 10:17:08.813837 7fd8e748d700 -1
+> >> > > > > > > ./include/interval_set.h:
+> >> > > > > > > > >> In
+> >> > > > > > > > >> function 'void interval_set<T>::erase(T, T) [with T =
+> >> > > snapid_t]'
+> >> > > > > > > > >> thread
+> >> > > > > > > > >> 7fd8e748d700 time 2015-04-27 10:17:08.809899
+> >> > > > > > > > >> ./include/interval_set.h: 385: FAILED assert(_size >=
+> >> > > > > > > > >> 0)
+> >> > > > > > > > >>
+> >> > > > > > > > >>  ceph version 0.94.1
+> >> > > > > > > > >> (e4bfad3a3c51054df7e537a724c8d0bf9be972ff)
+> >> > > > > > > > >>  1: (ceph::__ceph_assert_fail(char const*, char const*,
+> >> > > > > > > > >> int, char
+> >> > > > > > > > >> const*)+0x8b)
+> >> > > > > > > > >> [0xbc271b]
+> >> > > > > > > > >>  2:
+> >> > > > > > > > >> (interval_set<snapid_t>::subtract(interval_set<snapid_t
+> >> > > > > > > > >> >
+> >> > > > > > > > >> const&)+0xb0) [0x82cd50]
+> >> > > > > > > > >>  3: (PGPool::update(std::tr1::shared_ptr<OSDMap
+> >> > > > > > > > >> const>)+0x52e) [0x80113e]
+> >> > > > > > > > >>  4: (PG::handle_advance_map(std::tr1::shared_ptr<OSDMap
+> >> > > > > > > > >> const>, std::tr1::shared_ptr<OSDMap const>,
+> >> > > > > > > > >> const>std::vector<int,
+> >> > > > > > > > >> std::allocator<int> >&, int, std::vector<int,
+> >> > > > > > > > >> std::allocator<int>
+> >> > > > > > > > >> >&, int, PG::RecoveryCtx*)+0x282) [0x801652]
+> >> > > > > > > > >>  5: (OSD::advance_pg(unsigned int, PG*,
+> >> > > > > > > > >> ThreadPool::TPHandle&, PG::RecoveryCtx*,
+> >> > > > > > > > >> std::set<boost::intrusive_ptr<PG>,
+> >> > > > > > > > >> std::less<boost::intrusive_ptr<PG> >,
+> >> > > > > > > > >> std::allocator<boost::intrusive_ptr<PG> > >*)+0x2c3)
+> >> > > > > > > > >> [0x6b0e43]
+> >> > > > > > > > >>  6: (OSD::process_peering_events(std::list<PG*,
+> >> > > > > > > > >> std::allocator<PG*>
+> >> > > > > > > > >> > const&,
+> >> > > > > > > > >> ThreadPool::TPHandle&)+0x21c) [0x6b191c]
+> >> > > > > > > > >>  7: (OSD::PeeringWQ::_process(std::list<PG*,
+> >> > > > > > > > >> std::allocator<PG*>
+> >> > > > > > > > >> > const&,
+> >> > > > > > > > >> ThreadPool::TPHandle&)+0x18) [0x709278]
+> >> > > > > > > > >>  8: (ThreadPool::worker(ThreadPool::WorkThread*)+0xa5e)
+> >> > > > > > > > >> [0xbb38ae]
+> >> > > > > > > > >>  9: (ThreadPool::WorkThread::entry()+0x10) [0xbb4950]
+> >> > > > > > > > >>  10: (()+0x8182) [0x7fd906946182]
+> >> > > > > > > > >>  11: (clone()+0x6d) [0x7fd904eb147d]
+> >> > > > > > > > >>
+> >> > > > > > > > >> Also by monitoring (ceph -w) I get the following
+> >> > > > > > > > >> messages, also lots of
+> >> > > > > > > them.
+> >> > > > > > > > >>
+> >> > > > > > > > >> 2015-04-27 10:39:52.935812 mon.0 [INF] from='client.?
+> >> > > > > > > 10.20.0.13:0/1174409'
+> >> > > > > > > > >> entity='osd.30' cmd=[{"prefix": "osd crush
+> >> > > > > > > > >> create-or-move",
+> >> > > > "args":
+> >> > > > > > > > >> ["host=ceph3", "root=default"], "id": 30, "weight": 1.82}]:
+> >>
+> >> > > > > > > > >> dispatch
+> >> > > > > > > > >> 2015-04-27 10:39:53.297376 mon.0 [INF] from='client.?
+> >> > > > > > > 10.20.0.13:0/1174483'
+> >> > > > > > > > >> entity='osd.26' cmd=[{"prefix": "osd crush
+> >> > > > > > > > >> create-or-move",
+> >> > > > "args":
+> >> > > > > > > > >> ["host=ceph3", "root=default"], "id": 26, "weight": 1.82}]:
+> >>
+> >> > > > > > > > >> dispatch
+> >> > > > > > > > >>
+> >> > > > > > > > >>
+> >> > > > > > > > >> This is a cluster of 3 nodes with 36 OSD's, nodes are
+> >> > > > > > > > >> also mons and mds's to save servers. All run Ubuntu
+> >> 14.04.2.
+> >> > > > > > > > >>
+> >> > > > > > > > >> I have pretty much tried everything I could think of.
+> >> > > > > > > > >>
+> >> > > > > > > > >> Restarting daemons doesn't help.
+> >> > > > > > > > >>
+> >> > > > > > > > >> Any help would be appreciated. I can also provide more
+> >> > > > > > > > >> logs if necessary. They just seem to get pretty large
+> >> > > > > > > > >> in few
+> >> > > moments.
+> >> > > > > > > > >>
+> >> > > > > > > > >> Thank you
+> >> > > > > > > > >> Tuomas
+> >> > > > > > > > >>
+> >> > > > > > > > >>
+> >> > > > > > > > >> _______________________________________________
+> >> > > > > > > > >> ceph-users mailing list ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> >> > > > > > > > >> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> >> > > > > > > > >>
+> >> > > > > > > > >>
+> >> > > > > > > > >>
+> >> > > > > > > > >
+> >> > > > > > > > >
+> >> > > > > > > > > _______________________________________________
+> >> > > > > > > > > ceph-users mailing list
+> >> > > > > > > > > ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> >> > > > > > > > > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> >> > > > > > > > >
+> >> > > > > > > > >
+> >> > > > > > > > >
+> >> > > > > > > >
+> >> > > > > > > >
+> >> > > > > > > > _______________________________________________
+> >> > > > > > > > ceph-users mailing list
+> >> > > > > > > > ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> >> > > > > > > > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> >> > > > > > > >
+> >> > > > > > > >
+> >> > > > > > > >
+> >> > > > > > > > _______________________________________________
+> >> > > > > > > > ceph-users mailing list
+> >> > > > > > > > ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> >> > > > > > > > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> >> > > > > > > >
+> >> > > > > > > >
+> >> > > > > > >
+> >> > > > > >
+> >> > > > > >
+> >> > > > >
+> >> > > > >
+> >> > > >
+> >> > >
+> >> > >
+> >> > _______________________________________________
+> >> > ceph-users mailing list
+> >> > ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> >> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> >> >
+> >> >
+> >>
+> >
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
