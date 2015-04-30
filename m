@@ -1,103 +1,163 @@
-From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Subject: Re: Re: newstore performance update
-Date: Thu, 30 Apr 2015 14:02:23 +0000
-Message-ID: <ijupkkkyuvtsofr81j33sd7l.1430402112852@email.android.com>
-References: <554016E2.3000104@redhat.com>
- <6F3FA899187F0043BA1827A69DA2F7CC021E4894@shsmsx102.ccr.corp.intel.com>
- <alpine.DEB.2.00.1504290929400.5458@cobra.newdream.net>,<55422E0A.6010204@redhat.com>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: Re: newstore performance update
+Date: Thu, 30 Apr 2015 09:11:04 -0500
+Message-ID: <554237F8.5070907@redhat.com>
+References: <554016E2.3000104@redhat.com> <6F3FA899187F0043BA1827A69DA2F7CC021E4894@shsmsx102.ccr.corp.intel.com> <alpine.DEB.2.00.1504290929400.5458@cobra.newdream.net>,<55422E0A.6010204@redhat.com> <ijupkkkyuvtsofr81j33sd7l.1430402112852@email.android.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=gbk;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:28650 "EHLO mga14.intel.com"
+Received: from mx1.redhat.com ([209.132.183.28]:36674 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750934AbbD3ODA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 30 Apr 2015 10:03:00 -0400
-In-Reply-To: <55422E0A.6010204@redhat.com>
-Content-Language: zh-CN
+	id S1750811AbbD3OLK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 30 Apr 2015 10:11:10 -0400
+In-Reply-To: <ijupkkkyuvtsofr81j33sd7l.1430402112852@email.android.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, Mark Nelson <mnelson@redhat.com>
+To: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>, Sage Weil <sweil@redhat.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SSBhbSBub3Qgc3VyZSBJIHJlYWxseSB1bmRlcnN0YW5kIHRoZSBvc2QgY29kZSwgYnV0IGZyb20g
-dGhlIG9zZCBsb2csICBpbiB0aGUgc2VxdWVudGlhbCBzbWFsbCB3cml0ZSBjYXNlLCBvbmx5IG9u
-ZSBpbmZsaWdodCBvcCBoYXBwZW5pbmehrQ0KDQphbmQgTWFyaywgZGlkIHlvdSBwcmUtYWxsb2Nh
-dGUgdGhlIHJiZCBiZWZvcmUgZG9pbmcgc2VxdWVudGlhbCB0ZXN0PyBJIGJlbGlldmUgeW91IGRp
-ZCwgc28gYm90aCBzZXEgYW5kIHJhbmRvbSBhcmUgaW4gV0FMIG1vZGUuDQoNCi0tLS0gTWFyayBO
-ZWxzb26x4NC0IC0tLS0NCg0KDQpPbiAwNC8yOS8yMDE1IDExOjM4IEFNLCBTYWdlIFdlaWwgd3Jv
-dGU6DQo+IE9uIFdlZCwgMjkgQXByIDIwMTUsIENoZW4sIFhpYW94aSB3cm90ZToNCj4+IEhpIE1h
-cmssDQo+PiAgICAgIFJlYWxseSBnb29kIHRlc3Q6KSBJIG9ubHkgcGxheWVkIGEgYml0IG9uIFNT
-RCwgdGhlIHBhcmFsbGVsIFdBTA0KPj4gdGhyZWFkcyByZWFsbHkgaGVscHMgYnV0IHdlIHN0aWxs
-IGhhdmUgYSBsb25nIHdheSB0byBnbyBlc3BlY2lhbGx5IG9uDQo+PiBhbGwtc3NkIGNhc2UuIEkg
-dHJpZWQgdGhpcw0KPj4gaHR0cHM6Ly9naXRodWIuY29tL2ZhY2Vib29rL3JvY2tzZGIvYmxvYi9t
-YXN0ZXIvdXRpbC9lbnZfcG9zaXguY2MjTDE1MTUNCj4+IGJ5IGhhY2tpbmcgdGhlIHJvY2tzZGIs
-IGJ1dCB0aGUgcGVyZm9ybWFuY2UgZGlmZmVyZW5jZSBpcyBuZWdsaWdpYmxlLg0KPg0KPiBJdCBn
-YXZlIG1lIGEgMjUlIGJ1bXAgd2hlbiByb2Nrc2RiIGlzIG9uIGEgc3Bpbm5pbmcgZGlzaywgc28g
-SSB3ZW50IGFoZWFkDQo+IGFuZCBjb21taXR0ZWQgdGhlIGNoYW5nZSB0byB0aGUgYnJhbmNoLiAg
-UHJvYmFibHkgbm90IG5vdGljZWFibGUgb24gdGhlDQo+IFNTRCwgdGhvdWdoIGl0IGNhbid0IGh1
-cnQuDQo+DQo+PiBUaGUgcm9ja3NkYiBkaWdlc3Qgc3BlZWQgc2hvdWxkIGJlIHRoZSBwcm9ibGVt
-LCBJIGJlbGlldmUsIEkgd2FzIHBsYW5uZWQNCj4+IHRvIHByb3ZlIHRoaXMgYnkgc2tpcCBhbGwg
-ZGIgdHJhbnNhY3Rpb24sIGJ1dCBmYWlsZWQgc2luY2UgaGl0dGluZyBvdGhlcg0KPj4gZGVhZGxv
-Y2sgYnVnIGluIG5ld3N0b3JlLg0KPg0KPiBXaWxsIGxvb2sgYXQgdGhhdCBuZXh0IQ0KPg0KPj4N
-Cj4+IEJlbG93IGFyZSBhIGJpdCBtb3JlIGNvbW1lbnRzLg0KPj4+IFNhZ2UgaGFzIGJlZW4gZnVy
-aW91c2x5IHdvcmtpbmcgYXdheSBhdCBmaXhpbmcgYnVncyBpbiBuZXdzdG9yZSBhbmQNCj4+PiBp
-bXByb3ZpbmcgcGVyZm9ybWFuY2UuICBTcGVjaWZpY2FsbHkgd2UndmUgYmVlbiBmb2N1c2VkIG9u
-IHdyaXRlDQo+Pj4gcGVyZm9ybWFuY2UgYXMgbmV3c3RvcmUgd2FzIGxhZ2dpbmcgZmlsZXN0b3Jl
-IGJ1dCBxdWl0ZSBhIGJpdCBwcmV2aW91c2x5LiAgQQ0KPj4+IGxvdCBvZiB3b3JrIGhhcyBnb25l
-IGludG8gaW1wbGVtZW50aW5nIGxpYmFpbyBiZWhpbmQgdGhlIHNjZW5lcyBhbmQgYXMgYQ0KPj4+
-IHJlc3VsdCBwZXJmb3JtYW5jZSBvbiBzcGlubmluZyBkaXNrcyB3aXRoIFNTRCBXQUwgKGFuZCBT
-U0QgYmFja2VkIHJvY2tzZGIpDQo+Pj4gaGFzIGltcHJvdmVkIHByZXR0eSBkcmFtYXRpY2FsbHku
-IEl0J3Mgbm93IG9mdGVuIGJlYXRpbmcgZmlsZXN0b3JlOg0KPj4+DQo+Pg0KPj4gU1NEIERCIGlz
-IHN0aWxsIGJldHRlciB0aGFuIFNTRCBXQUwgd2l0aCByZXF1ZXN0IHNpemUgPiAxMjhLQiwgdGhp
-cyBpbmRpY2F0ZSBzb21lIFdBTHMgYXJlIGFjdHVhbGx5IHdyaXR0ZW4gdG8gTGV2ZWwwLi4uSG1t
-LCBjb3VsZCB3ZSBhZGQgbmV3c3RvcmVfd2FsX21heF9vcHMvYnl0ZXMgdG8gY2FwcGluZyB0aGUg
-dG90YWwgV0FMIHNpemUoaG93IG11Y2ggZGF0YSBpcyBpbiBXQUwgYnV0IG5vdCB5ZXQgYXBwbHkg
-dG8gYmFja2VuZCBGUykgPyAgSSBzdXNwZWN0IHRoaXMgd291bGQgaW1wcm92ZSBwZXJmb3JtYW5j
-ZSBieSBwcmV2ZW50IHNvbWUgSU8gd2l0aCBoaWdoIFdBIGNvc3QgYW5kIGxhdGVuY3k/DQo+Pg0K
-Pj4+IGh0dHA6Ly9uaG0uY2VwaC5jb20vbmV3c3RvcmUvbmV3c3RvcmUtNWQ5NmZlNi1ub19vdmVy
-bGF5LnBkZg0KPj4+DQo+Pj4gT24gdGhlIG90aGVyIGhhbmQsIHNlcXVlbnRpYWwgd3JpdGVzIGFy
-ZSBzbG93ZXIgdGhhbiByYW5kb20gd3JpdGVzIHdoZW4NCj4+PiB0aGUgT1NELCBEQiwgYW5kIFdB
-TCBhcmUgYWxsIG9uIHRoZSBzYW1lIGRldmljZSBiZSBpdCBhIHNwaW5uaW5nIGRpc2sgb3IgU1NE
-Lg0KPj4NCj4+IEkgdGhpbmsgc2VxdWVudGlhbCB3cml0ZXMgc2xvd2VyIHRoYW4gcmFuZG9tIGlz
-IGJ5IGRlc2lnbiBpbiBOZXdzdG9yZSwNCj4+IGJlY2F1c2UgZm9yIGV2ZXJ5IG9iamVjdCB3ZSBj
-YW4gb25seSBoYXZlIG9uZSBXQUwgLCB0aGF0IG1lYW5zIG5vDQo+PiBjb25jdXJyZW50IElPIGlm
-IHRoZSByZXFfc2l6ZSogUUQgPCA0TUIuIE5vdCBzdXJlIGhvdyBtYW55ICNRRCBkbyB5b3UNCj4+
-IGhhdmUgaW4gdGhlIHRlc3Q/IEkgc3VzcGVjdCA2NCBzaW5jZSB0aGVyZSBpcyBhIGJvb3N0IGlu
-IHNlcSB3cml0ZQ0KPj4gcGVyZm9ybWFuY2Ugd2l0aCByZXEgc2l6ZSA+IDY0ICggNjRLQio2ND00
-TUIpLg0KPj4NCj4+IEluIHRoaXMgY2FzZSwgSU8gcGF0dGVybiB3aWxsIGJlIDogMSB3cml0ZSB0
-byBEQiBXQUwtPlN5bmMtPiAxIFdyaXRlIHRvDQo+PiBGUyAtPiBTeW5jLCB3ZSBkbyBldmVyeXRo
-aW5nIGluIHN5bmNocm9uaXplIHdheSAsd2hpY2ggaXMgZXNzZW50aWFsbHkNCj4+IGV4cGVuc2l2
-ZS4NCj4NCj4gVGhlIG51bWJlciBvZiBzeW5jcyBpcyB0aGUgc2FtZSBmb3IgYXBwZW5kcyB2cyB3
-YWwuLi4gaW4gYm90aCBjYXNlcyB3ZQ0KPiBmZGF0YXN5bmMgdGhlIGZpbGUgYW5kIHRoZSBkYiBj
-b21taXQsIGJ1dCB3aXRoIFdBTCB0aGUgZnMgc3luYyBjb21lcyBhZnRlcg0KPiB0aGUgY29tbWl0
-IHBvaW50IGluc3RlYWQgb2YgYmVmb3JlIChhbmQgd2UgZG9uJ3QgZG91YmxlLXdyaXRlIHRoZSBk
-YXRhKS4NCj4gQXBwZW5kcyBzaG91bGQgc3RpbGwgYmUgcGlwZWxpbmVkIChtYW55IGluIGZsaWdo
-dCBmb3IgdGhlIHNhbWUgb2JqZWN0KS4uLg0KPiBhbmQgdGhlIGRiIHN5bmNzIHdpbGwgYmUgYmF0
-Y2hlZCBpbiBib3RoIGNhc2VzIChzdWJtaXRfdHJhbnNhY3Rpb24gZm9yDQo+IGVhY2ggaW8sIGFu
-ZCBhIHNpbmdsZSB0aHJlYWQgZG9pbmcgdGhlIHN1Ym1pdF90cmFuc2FjdGlvbl9zeW5jIGluIGEg
-bG9vcCkuDQo+DQo+IElmIHRoYXQncyBub3QgdGhlIGNhc2UgdGhlbiBpdCdzIGFuIGFjY2lkZW50
-Pw0KPg0KPiBzYWdlDQoNClNvIEkgcmFuIHNvbWUgbW9yZSB0ZXN0cyBsYXN0IG5pZ2h0IG9uIDJj
-OTE0ZGY3IHRvIHNlZSBpZiBhbnkgb2YgdGhlIG5ldw0KY2hhbmdlcyBtYWRlIG11Y2ggZGlmZmVy
-ZW5jZSBmb3Igc3Bpbm5pbmcgZGlzayBzbWFsbCBzZXF1ZW50aWFsIHdyaXRlcywNCmFuZCB0aGUg
-c2hvcnQgYW5zd2VyIGlzIG5vLiAgU2luY2Ugb3ZlcmxheSBub3cgd29ya3MgYWdhaW4gSSBhbHNv
-IHJhbg0KdGVzdHMgd2l0aCBvdmVybGF5IGVuYWJsZWQsIGFuZCB0aGlzIG1heSBoYXZlIGhlbHBl
-ZCBtYXJnaW5hbGx5IChhbmQgaGFkDQptaXhlZCByZXN1bHRzIGZvciByYW5kb20gd3JpdGVzLCBt
-YXkgbmVlZCB0byB0d2VhayB0aGUgZGVmYXVsdCkuDQoNCkFmdGVyIHRoaXMgSSBnb3QgdG8gdGhp
-bmtpbmcgYWJvdXQgaG93IHRoZSBXQUwtb24tU1NEIHJlc3VsdHMgd2VyZSBzbw0KbXVjaCBiZXR0
-ZXIgdGhhdCBJIHdhbnRlZCB0byBjb25maXJtIHRoYXQgdGhpcyBpc3N1ZSBpcyBXQUwgcmVsYXRl
-ZC4gIEkNCnRyaWVkIHNldHRpbmcgRGlzYWJsZVdBTC4gVGhpcyByZXN1bHRlZCBpbiBhYm91dCBh
-IDkweCBpbmNyZWFzZSBpbg0Kc2VxdWVudGlhbCB3cml0ZSBwZXJmb3JtYW5jZSwgYnV0IG9ubHkg
-YSAyeCBpbmNyZWFzZSBpbiByYW5kb20gd3JpdGUNCnBlcmZvcm1hbmNlLiAgV2hhdCdzIG1vcmUs
-IGlmIHlvdSBsb29rIGF0IHRoZSBsYXN0IGdyYXBoIG9uIHRoZSBwZGYNCmxpbmtlZCBiZWxvdywg
-eW91IGNhbiBzZWUgdGhhdCBzZXF1ZW50aWFsIDRrIHdyaXRlcyB3aXRoIFdBTCBlbmFibGVkIGFy
-ZQ0Kc2lnbmlmaWNhbnRseSBzbG93ZXIgdGhhbiA0SyByYW5kb20gd3JpdGVzLCBidXQgc2VxdWVu
-dGlhbCA0SyB3cml0ZXMNCndpdGggV0FMIGRpc2FibGVkIGFyZSBzaWduaWZpY2FudGx5IGZhc3Rl
-ci4NCg0KaHR0cDovL25obS5jZXBoLmNvbS9uZXdzdG9yZS9OZXdzdG9yZV9EaXNhYmxlV0FMLnBk
-Zg0KDQpTbyBJIGd1ZXNzIG5vdyBJIHdvbmRlciB3aGF0IGlzIGhhcHBlbmluZyB0aGF0IGlzIGRp
-ZmZlcmVudCBpbiBlYWNoDQpjYXNlLiAgSSdsbCBwcm9iYWJseSBzaXQgZG93biBhbmQgc3RhcnQg
-bG9va2luZyB0aHJvdWdoIHRoZSBibGt0cmFjZQ0KZGF0YSBhbmQgdHJ5IHRvIGdldCBtb3JlIHN0
-YXRpc3RpY3Mgb3V0IG9mIHJvY2tzZGIgZm9yIGVhY2ggY2FzZS4gIEl0DQp3b3VsZCBiZSB1c2Vm
-dWwgaWYgd2UgY291bGQgdGllIHRoZSByb2Nrc2RiIHN0YXRzIGNhbGwgaW50byBhbiBhc29rIGNv
-bW1hbmQ6DQoNCkRCOjpHZXRQcm9wZXJ0eSgicm9ja3NkYi5zdGF0cyIsICZzdGF0cykNCg0KTWFy
-aw0KDQo=
+
+
+On 04/30/2015 09:02 AM, Chen, Xiaoxi wrote:
+> I am not sure I really understand the osd code, but from the osd log,=
+  in the sequential small write case, only one inflight op happening=A1=
+=AD
+>
+> and Mark, did you pre-allocate the rbd before doing sequential test? =
+I believe you did, so both seq and random are in WAL mode.
+
+Yes, the RBD image is pre-allocated.  Maybe Sage can chime in regarding=
+=20
+the one inflight op.
+
+Mark
+
+>
+> ---- Mark Nelson=B1=E0=D0=B4 ----
+>
+>
+> On 04/29/2015 11:38 AM, Sage Weil wrote:
+>> On Wed, 29 Apr 2015, Chen, Xiaoxi wrote:
+>>> Hi Mark,
+>>>       Really good test:) I only played a bit on SSD, the parallel W=
+AL
+>>> threads really helps but we still have a long way to go especially =
+on
+>>> all-ssd case. I tried this
+>>> https://github.com/facebook/rocksdb/blob/master/util/env_posix.cc#L=
+1515
+>>> by hacking the rocksdb, but the performance difference is negligibl=
+e.
+>>
+>> It gave me a 25% bump when rocksdb is on a spinning disk, so I went =
+ahead
+>> and committed the change to the branch.  Probably not noticeable on =
+the
+>> SSD, though it can't hurt.
+>>
+>>> The rocksdb digest speed should be the problem, I believe, I was pl=
+anned
+>>> to prove this by skip all db transaction, but failed since hitting =
+other
+>>> deadlock bug in newstore.
+>>
+>> Will look at that next!
+>>
+>>>
+>>> Below are a bit more comments.
+>>>> Sage has been furiously working away at fixing bugs in newstore an=
+d
+>>>> improving performance.  Specifically we've been focused on write
+>>>> performance as newstore was lagging filestore but quite a bit prev=
+iously.  A
+>>>> lot of work has gone into implementing libaio behind the scenes an=
+d as a
+>>>> result performance on spinning disks with SSD WAL (and SSD backed =
+rocksdb)
+>>>> has improved pretty dramatically. It's now often beating filestore=
+:
+>>>>
+>>>
+>>> SSD DB is still better than SSD WAL with request size > 128KB, this=
+ indicate some WALs are actually written to Level0...Hmm, could we add =
+newstore_wal_max_ops/bytes to capping the total WAL size(how much data =
+is in WAL but not yet apply to backend FS) ?  I suspect this would impr=
+ove performance by prevent some IO with high WA cost and latency?
+>>>
+>>>> http://nhm.ceph.com/newstore/newstore-5d96fe6-no_overlay.pdf
+>>>>
+>>>> On the other hand, sequential writes are slower than random writes=
+ when
+>>>> the OSD, DB, and WAL are all on the same device be it a spinning d=
+isk or SSD.
+>>>
+>>> I think sequential writes slower than random is by design in Newsto=
+re,
+>>> because for every object we can only have one WAL , that means no
+>>> concurrent IO if the req_size* QD < 4MB. Not sure how many #QD do y=
+ou
+>>> have in the test? I suspect 64 since there is a boost in seq write
+>>> performance with req size > 64 ( 64KB*64=3D4MB).
+>>>
+>>> In this case, IO pattern will be : 1 write to DB WAL->Sync-> 1 Writ=
+e to
+>>> FS -> Sync, we do everything in synchronize way ,which is essential=
+ly
+>>> expensive.
+>>
+>> The number of syncs is the same for appends vs wal... in both cases =
+we
+>> fdatasync the file and the db commit, but with WAL the fs sync comes=
+ after
+>> the commit point instead of before (and we don't double-write the da=
+ta).
+>> Appends should still be pipelined (many in flight for the same objec=
+t)...
+>> and the db syncs will be batched in both cases (submit_transaction f=
+or
+>> each io, and a single thread doing the submit_transaction_sync in a =
+loop).
+>>
+>> If that's not the case then it's an accident?
+>>
+>> sage
+>
+> So I ran some more tests last night on 2c914df7 to see if any of the =
+new
+> changes made much difference for spinning disk small sequential write=
+s,
+> and the short answer is no.  Since overlay now works again I also ran
+> tests with overlay enabled, and this may have helped marginally (and =
+had
+> mixed results for random writes, may need to tweak the default).
+>
+> After this I got to thinking about how the WAL-on-SSD results were so
+> much better that I wanted to confirm that this issue is WAL related. =
+ I
+> tried setting DisableWAL. This resulted in about a 90x increase in
+> sequential write performance, but only a 2x increase in random write
+> performance.  What's more, if you look at the last graph on the pdf
+> linked below, you can see that sequential 4k writes with WAL enabled =
+are
+> significantly slower than 4K random writes, but sequential 4K writes
+> with WAL disabled are significantly faster.
+>
+> http://nhm.ceph.com/newstore/Newstore_DisableWAL.pdf
+>
+> So I guess now I wonder what is happening that is different in each
+> case.  I'll probably sit down and start looking through the blktrace
+> data and try to get more statistics out of rocksdb for each case.  It
+> would be useful if we could tie the rocksdb stats call into an asok c=
+ommand:
+>
+> DB::GetProperty("rocksdb.stats", &stats)
+>
+> Mark
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
