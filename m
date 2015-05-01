@@ -1,725 +1,227 @@
-From: tuomas.juntunen@databasement.fi
-Subject: Re: [ceph-users] Upgrade from Giant to Hammer and after some basic
-      operations most of the OSD's went down
-Date: Fri, 1 May 2015 21:13:54 +0300 (EEST)
-Message-ID: <56c96198e8b0d8e70fbf96fdd209d70a@mail.meizo.com>
-References: <38d13d8d20504f90212053827aba9ba8@mail.meizo.com>
-    <dc614dd85caf6cecfd59897b96a019ad@mail.meizo.com>
-    <alpine.DEB.2.00.1505010902490.5458@cobra.newdream.net>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: K/V store optimization
+Date: Fri, 1 May 2015 19:05:02 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD8431B@SACMBXIP01.sdcorp.global.sandisk.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD84052@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CACJqLybYKSKmwNtvTpRKDk-Hu47NrL7DJ23UaGTC8+cZoOyhzg@mail.gmail.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F2CD84086@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CACJqLyZ74xR_nBcKHUPieanCvfHzFw4ELRDn4oc_b9Cusm05Jw@mail.gmail.com>
+	<CACJqLyYMCKA2eZRQ2_J4uyGhGGzO4WBeWvrs-S2y769YU1BnDg@mail.gmail.com>
+	<C226B0AB34511445928D9882AA519F601C3F7069@SACMBXIP03.sdcorp.global.sandisk.com>
+ <CACJqLyZMfT8Kns57kNBx20zd=N7xDCZkSZCzQXCg7=0TkfcQnA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.meizo.com ([212.16.102.51]:51770 "EHLO flower.meizo.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750905AbbEASN7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 1 May 2015 14:13:59 -0400
-Received: from webmail.meizo.com (localhost [127.0.0.1])
-	by mail.meizo.com (meizo_smtpd + meizo-maildrop) with SMTP
-	for <ceph-devel@vger.kernel.org>; Fri, 01 May 2015 21:13:55 +0300
-In-Reply-To: <alpine.DEB.2.00.1505010902490.5458@cobra.newdream.net>
+Received: from mail-bn1bon0055.outbound.protection.outlook.com ([157.56.111.55]:34976
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750913AbbEATFJ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 1 May 2015 15:05:09 -0400
+In-Reply-To: <CACJqLyZMfT8Kns57kNBx20zd=N7xDCZkSZCzQXCg7=0TkfcQnA@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: "tuomas.juntunen" <tuomas.juntunen@databasement.fi>, ceph-users@lists.ceph.com, ceph-devel@vger.kernel.org
+To: Haomai Wang <haomaiwang@gmail.com>, Varada Kari <Varada.Kari@sandisk.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Thanks, I'll do this when the commit is available and report back.
-
-And indeed, I'll change to the official ones after everything is ok.
-
-Br,
-Tuomas
-
-> On Fri, 1 May 2015, tuomas.juntunen@databasement.fi wrote:
->> Hi
->>
->> I deleted the images and img pools and started osd's, they still die=
-=2E
->>
->> Here's a log of one of the osd's after this, if you need it.
->>
->> http://beta.xaasbox.com/ceph/ceph-osd.19.log
->
-> I've pushed another commit that should avoid this case, sha1
-> 425bd4e1dba00cc2243b0c27232d1f9740b04e34.
->
-> Note that once the pools are fully deleted (shouldn't take too long o=
-nce
-> the osds are up and stabilize) you should switch back to the normal
-> packages that don't have these workarounds.
->
-> sage
->
->
->
->>
->> Br,
->> Tuomas
->>
->>
->> > Thanks man. I'll try it tomorrow. Have a good one.
->> >
->> > Br,T
->> >
->> > -------- Original message --------
->> > From: Sage Weil <sage@newdream.net>
->> > Date: 30/04/2015  18:23  (GMT+02:00)
->> > To: Tuomas Juntunen <tuomas.juntunen@databasement.fi>
->> > Cc: ceph-users@lists.ceph.com, ceph-devel@vger.kernel.org
->> > Subject: RE: [ceph-users] Upgrade from Giant to Hammer and after s=
-ome basic
->>
->> > operations most of the OSD's went down
->> >
->> > On Thu, 30 Apr 2015, tuomas.juntunen@databasement.fi wrote:
->> >> Hey
->> >>
->> >> Yes I can drop the images data, you think this will fix it?
->> >
->> > It's a slightly different assert that (I believe) should not trigg=
-er once
->> > the pool is deleted.=C2=A0 Please give that a try and if you still=
- hit it I'll
->> > whip up a workaround.
->> >
->> > Thanks!
->> > sage
->> >
->> >  >
->> >>
->> >> Br,
->> >>
->> >> Tuomas
->> >>
->> >> > On Wed, 29 Apr 2015, Tuomas Juntunen wrote:
->> >> >> Hi
->> >> >>
->> >> >> I updated that version and it seems that something did happen,=
- the osd's
->> >> >> stayed up for a while and 'ceph status' got updated. But then =
-in couple
->> of
->> >> >> minutes, they all went down the same way.
->> >> >>
->> >> >> I have attached new 'ceph osd dump -f json-pretty' and got a n=
-ew log
->> from
->> >> >> one of the osd's with osd debug =3D 20,
->> >> >> http://beta.xaasbox.com/ceph/ceph-osd.15.log
->> >> >
->> >> > Sam mentioned that you had said earlier that this was not criti=
-cal data?
->> >> > If not, I think the simplest thing is to just drop those pools.=
-=C2=A0 The
->> >> > important thing (from my perspective at least :) is that we und=
-erstand
->> the
->> >> > root cause and can prevent this in the future.
->> >> >
->> >> > sage
->> >> >
->> >> >
->> >> >>
->> >> >> Thank you!
->> >> >>
->> >> >> Br,
->> >> >> Tuomas
->> >> >>
->> >> >>
->> >> >>
->> >> >> -----Original Message-----
->> >> >> From: Sage Weil [mailto:sage@newdream.net]
->> >> >> Sent: 28. huhtikuuta 2015 23:57
->> >> >> To: Tuomas Juntunen
->> >> >> Cc: ceph-users@lists.ceph.com; ceph-devel@vger.kernel.org
->> >> >> Subject: Re: [ceph-users] Upgrade from Giant to Hammer and aft=
-er some
->> basic
->> >> >> operations most of the OSD's went down
->> >> >>
->> >> >> Hi Tuomas,
->> >> >>
->> >> >> I've pushed an updated wip-hammer-snaps branch.=C2=A0 Can you =
-please try it?
->> >> >> The build will appear here
->> >> >>
->> >> >>
->> >> >> http://gitbuilder.ceph.com/ceph-deb-trusty-x86_64-basic/sha1/0=
-8bf531331afd5e
->> >> >> 2eb514067f72afda11bcde286
->> >> >>
->> >> >> (or a similar url; adjust for your distro).
->> >> >>
->> >> >> Thanks!
->> >> >> sage
->> >> >>
->> >> >>
->> >> >> On Tue, 28 Apr 2015, Sage Weil wrote:
->> >> >>
->> >> >> > [adding ceph-devel]
->> >> >> >
->> >> >> > Okay, I see the problem.=C2=A0 This seems to be unrelated ot=
- the giant ->
->> >> >> > hammer move... it's a result of the tiering changes you made=
-:
->> >> >> >
->> >> >> > > > > > > > The following:
->> >> >> > > > > > > >
->> >> >> > > > > > > > ceph osd tier add img images --force-nonempty ce=
-ph osd
->> >> >> > > > > > > > tier cache-mode images forward ceph osd tier set=
--overlay
->> >> >> > > > > > > > img images
->> >> >> >
->> >> >> > Specifically, --force-nonempty bypassed important safety che=
-cks.
->> >> >> >
->> >> >> > 1. images had snapshots (and removed_snaps)
->> >> >> >
->> >> >> > 2. images was added as a tier *of* img, and img's removed_sn=
-aps was
->> >> >> > copied to images, clobbering the removed_snaps value (see
->> >> >> > OSDMap::Incremental::propagate_snaps_to_tiers)
->> >> >> >
->> >> >> > 3. tiering relation was undone, but removed_snaps was still =
-gone
->> >> >> >
->> >> >> > 4. on OSD startup, when we load the PG, removed_snaps is ini=
-tialized
->> >> >> > with the older map.=C2=A0 later, in PGPool::update(), we ass=
-ume that
->> >> >> > removed_snaps alwasy grows (never shrinks) and we trigger an=
- assert.
->> >> >> >
->> >> >> > To fix this I think we need to do 2 things:
->> >> >> >
->> >> >> > 1. make the OSD forgiving out removed_snaps getting smaller.=
-=C2=A0 This is
->> >> >> > probably a good thing anyway: once we know snaps are removed=
- on all
->> >> >> > OSDs we can prune the interval_set in the OSDMap.=C2=A0 Mayb=
-e.
->> >> >> >
->> >> >> > 2. Fix the mon to prevent this from happening, *even* when
->> >> >> > --force-nonempty is specified.=C2=A0 (This is the root cause=
-=2E)
->> >> >> >
->> >> >> > I've opened http://tracker.ceph.com/issues/11493 to track th=
-is.
->> >> >> >
->> >> >> > sage
->> >> >> >
->> >> >> >
->> >> >> >
->> >> >> > > > > > > >
->> >> >> > > > > > > > Idea was to make images as a tier to img, move d=
-ata to img
->> >> >> > > > > > > > then change
->> >> >> > > > > > > clients to use the new img pool.
->> >> >> > > > > > > >
->> >> >> > > > > > > > Br,
->> >> >> > > > > > > > Tuomas
->> >> >> > > > > > > >
->> >> >> > > > > > > > > Can you explain exactly what you mean by:
->> >> >> > > > > > > > >
->> >> >> > > > > > > > > "Also I created one pool for tier to be able t=
-o move
->> >> >> > > > > > > > > data without
->> >> >> > > > > > > outage."
->> >> >> > > > > > > > >
->> >> >> > > > > > > > > -Sam
->> >> >> > > > > > > > > ----- Original Message -----
->> >> >> > > > > > > > > From: "tuomas juntunen"
->> >> >> > > > > > > > > <tuomas.juntunen@databasement.fi>
->> >> >> > > > > > > > > To: "Ian Colle" <icolle@redhat.com>
->> >> >> > > > > > > > > Cc: ceph-users@lists.ceph.com
->> >> >> > > > > > > > > Sent: Monday, April 27, 2015 4:23:44 AM
->> >> >> > > > > > > > > Subject: Re: [ceph-users] Upgrade from Giant t=
-o Hammer
->> >> >> > > > > > > > > and after some basic operations most of the OS=
-D's went
->> >> >> > > > > > > > > down
->> >> >> > > > > > > > >
->> >> >> > > > > > > > > Hi
->> >> >> > > > > > > > >
->> >> >> > > > > > > > > Any solution for this yet?
->> >> >> > > > > > > > >
->> >> >> > > > > > > > > Br,
->> >> >> > > > > > > > > Tuomas
->> >> >> > > > > > > > >
->> >> >> > > > > > > > >> It looks like you may have hit
->> >> >> > > > > > > > >> http://tracker.ceph.com/issues/7915
->> >> >> > > > > > > > >>
->> >> >> > > > > > > > >> Ian R. Colle
->> >> >> > > > > > > > >> Global Director
->> >> >> > > > > > > > >> of Software Engineering Red Hat (Inktank is n=
-ow part of
->> >> >> > > > > > > > >> Red Hat!) http://www.linkedin.com/in/ircolle
->> >> >> > > > > > > > >> http://www.twitter.com/ircolle
->> >> >> > > > > > > > >> Cell: +1.303.601.7713
->> >> >> > > > > > > > >> Email: icolle@redhat.com
->> >> >> > > > > > > > >>
->> >> >> > > > > > > > >> ----- Original Message -----
->> >> >> > > > > > > > >> From: "tuomas juntunen"
->> >> >> > > > > > > > >> <tuomas.juntunen@databasement.fi>
->> >> >> > > > > > > > >> To: ceph-users@lists.ceph.com
->> >> >> > > > > > > > >> Sent: Monday, April 27, 2015 1:56:29 PM
->> >> >> > > > > > > > >> Subject: [ceph-users] Upgrade from Giant to H=
-ammer and
->> >> >> > > > > > > > >> after some basic operations most of the OSD's=
- went down
->> >> >> > > > > > > > >>
->> >> >> > > > > > > > >>
->> >> >> > > > > > > > >>
->> >> >> > > > > > > > >> I upgraded Ceph from 0.87 Giant to 0.94.1 Ham=
-mer
->> >> >> > > > > > > > >>
->> >> >> > > > > > > > >> Then created new pools and deleted some old o=
-nes. Also
->> >> >> > > > > > > > >> I created one pool for tier to be able to mov=
-e data
->> >> >> > > > > > > > >> without
->> >> >> > > outage.
->> >> >> > > > > > > > >>
->> >> >> > > > > > > > >> After these operations all but 10 OSD's are d=
-own and
->> >> >> > > > > > > > >> creating this kind of messages to logs, I get=
- more than
->> >> >> > > > > > > > >> 100gb of these in a
->> >> >> > > > > > night:
->> >> >> > > > > > > > >>
->> >> >> > > > > > > > >>=C2=A0 -19> 2015-04-27 10:17:08.808584 7fd8e74=
-8d700=C2=A0 5
->> osd.23
->> >> >> > > pg_epoch:
->> >> >> > > >
->> >> >> > > > > > > > >> 17882 pg[0.189( v 8480'7 (0'0,8480'7] local-l=
-es=3D16609
->> >> >> > > > > > > > >> n=3D0
->> >> >> > > > > > > > >> ec=3D1 les/c
->> >> >> > > > > > > > >> 16609/16659
->> >> >> > > > > > > > >> 16590/16590/16590) [24,3,23] r=3D2 lpr=3D1783=
-8
->> >> >> > > > > > > > >> pi=3D15659-16589/42
->> >> >> > > > > > > > >> crt=3D8480'7 lcod
->> >> >> > > > > > > > >> 0'0 inactive NOTIFY] enter Started
->> >> >> > > > > > > > >>=C2=A0=C2=A0=C2=A0 -18> 2015-04-27 10:17:08.80=
-8596 7fd8e748d700=C2=A0 5
->> >> >> > > > > > > > >> osd.23
->> >> >> > > > pg_epoch:
->> >> >> > > > >
->> >> >> > > > > > > > >> 17882 pg[0.189( v 8480'7 (0'0,8480'7] local-l=
-es=3D16609
->> >> >> > > > > > > > >> n=3D0
->> >> >> > > > > > > > >> ec=3D1 les/c
->> >> >> > > > > > > > >> 16609/16659
->> >> >> > > > > > > > >> 16590/16590/16590) [24,3,23] r=3D2 lpr=3D1783=
-8
->> >> >> > > > > > > > >> pi=3D15659-16589/42
->> >> >> > > > > > > > >> crt=3D8480'7 lcod
->> >> >> > > > > > > > >> 0'0 inactive NOTIFY] enter Start
->> >> >> > > > > > > > >>=C2=A0=C2=A0=C2=A0 -17> 2015-04-27 10:17:08.80=
-8608 7fd8e748d700=C2=A0 1
->> >> >> > > > > > > > >> osd.23
->> >> >> > > > pg_epoch:
->> >> >> > > > >
->> >> >> > > > > > > > >> 17882 pg[0.189( v 8480'7 (0'0,8480'7] local-l=
-es=3D16609
->> >> >> > > > > > > > >> n=3D0
->> >> >> > > > > > > > >> ec=3D1 les/c
->> >> >> > > > > > > > >> 16609/16659
->> >> >> > > > > > > > >> 16590/16590/16590) [24,3,23] r=3D2 lpr=3D1783=
-8
->> >> >> > > > > > > > >> pi=3D15659-16589/42
->> >> >> > > > > > > > >> crt=3D8480'7 lcod
->> >> >> > > > > > > > >> 0'0 inactive NOTIFY] state<Start>: transition=
-ing to
->> Stray
->> >> >> > > > > > > > >>=C2=A0=C2=A0=C2=A0 -16> 2015-04-27 10:17:08.80=
-8621 7fd8e748d700=C2=A0 5
->> >> >> > > > > > > > >> osd.23
->> >> >> > > > pg_epoch:
->> >> >> > > > >
->> >> >> > > > > > > > >> 17882 pg[0.189( v 8480'7 (0'0,8480'7] local-l=
-es=3D16609
->> >> >> > > > > > > > >> n=3D0
->> >> >> > > > > > > > >> ec=3D1 les/c
->> >> >> > > > > > > > >> 16609/16659
->> >> >> > > > > > > > >> 16590/16590/16590) [24,3,23] r=3D2 lpr=3D1783=
-8
->> >> >> > > > > > > > >> pi=3D15659-16589/42
->> >> >> > > > > > > > >> crt=3D8480'7 lcod
->> >> >> > > > > > > > >> 0'0 inactive NOTIFY] exit Start 0.000025 0 0.=
-000000
->> >> >> > > > > > > > >>=C2=A0=C2=A0=C2=A0 -15> 2015-04-27 10:17:08.80=
-8637 7fd8e748d700=C2=A0 5
->> >> >> > > > > > > > >> osd.23
->> >> >> > > > pg_epoch:
->> >> >> > > > >
->> >> >> > > > > > > > >> 17882 pg[0.189( v 8480'7 (0'0,8480'7] local-l=
-es=3D16609
->> >> >> > > > > > > > >> n=3D0
->> >> >> > > > > > > > >> ec=3D1 les/c
->> >> >> > > > > > > > >> 16609/16659
->> >> >> > > > > > > > >> 16590/16590/16590) [24,3,23] r=3D2 lpr=3D1783=
-8
->> >> >> > > > > > > > >> pi=3D15659-16589/42
->> >> >> > > > > > > > >> crt=3D8480'7 lcod
->> >> >> > > > > > > > >> 0'0 inactive NOTIFY] enter Started/Stray
->> >> >> > > > > > > > >>=C2=A0=C2=A0=C2=A0 -14> 2015-04-27 10:17:08.80=
-8796 7fd8e748d700=C2=A0 5
->> >> >> > > > > > > > >> osd.23
->> >> >> > > > pg_epoch:
->> >> >> > > > >
->> >> >> > > > > > > > >> 17882 pg[10.181( empty local-les=3D17879 n=3D=
-0 ec=3D17863
->> >> >> > > > > > > > >> les/c
->> >> >> > > > > > > > >> 17879/17879
->> >> >> > > > > > > > >> 17863/17863/17863) [25,5,23] r=3D2 lpr=3D1787=
-9 crt=3D0'0
->> >> >> > > > > > > > >> inactive NOTIFY] exit Reset 0.119467 4 0.0000=
-37
->> >> >> > > > > > > > >>=C2=A0=C2=A0=C2=A0 -13> 2015-04-27 10:17:08.80=
-8817 7fd8e748d700=C2=A0 5
->> >> >> > > > > > > > >> osd.23
->> >> >> > > > pg_epoch:
->> >> >> > > > >
->> >> >> > > > > > > > >> 17882 pg[10.181( empty local-les=3D17879 n=3D=
-0 ec=3D17863
->> >> >> > > > > > > > >> les/c
->> >> >> > > > > > > > >> 17879/17879
->> >> >> > > > > > > > >> 17863/17863/17863) [25,5,23] r=3D2 lpr=3D1787=
-9 crt=3D0'0
->> >> >> > > > > > > > >> inactive NOTIFY] enter Started
->> >> >> > > > > > > > >>=C2=A0=C2=A0=C2=A0 -12> 2015-04-27 10:17:08.80=
-8828 7fd8e748d700=C2=A0 5
->> >> >> > > > > > > > >> osd.23
->> >> >> > > > pg_epoch:
->> >> >> > > > >
->> >> >> > > > > > > > >> 17882 pg[10.181( empty local-les=3D17879 n=3D=
-0 ec=3D17863
->> >> >> > > > > > > > >> les/c
->> >> >> > > > > > > > >> 17879/17879
->> >> >> > > > > > > > >> 17863/17863/17863) [25,5,23] r=3D2 lpr=3D1787=
-9 crt=3D0'0
->> >> >> > > > > > > > >> inactive NOTIFY] enter Start
->> >> >> > > > > > > > >>=C2=A0=C2=A0=C2=A0 -11> 2015-04-27 10:17:08.80=
-8838 7fd8e748d700=C2=A0 1
->> >> >> > > > > > > > >> osd.23
->> >> >> > > > pg_epoch:
->> >> >> > > > >
->> >> >> > > > > > > > >> 17882 pg[10.181( empty local-les=3D17879 n=3D=
-0 ec=3D17863
->> >> >> > > > > > > > >> les/c
->> >> >> > > > > > > > >> 17879/17879
->> >> >> > > > > > > > >> 17863/17863/17863) [25,5,23] r=3D2 lpr=3D1787=
-9 crt=3D0'0
->> >> >> > > > > > > > >> inactive NOTIFY]
->> >> >> > > > > > > > >> state<Start>: transitioning to Stray
->> >> >> > > > > > > > >>=C2=A0=C2=A0=C2=A0 -10> 2015-04-27 10:17:08.80=
-8849 7fd8e748d700=C2=A0 5
->> >> >> > > > > > > > >> osd.23
->> >> >> > > > pg_epoch:
->> >> >> > > > >
->> >> >> > > > > > > > >> 17882 pg[10.181( empty local-les=3D17879 n=3D=
-0 ec=3D17863
->> >> >> > > > > > > > >> les/c
->> >> >> > > > > > > > >> 17879/17879
->> >> >> > > > > > > > >> 17863/17863/17863) [25,5,23] r=3D2 lpr=3D1787=
-9 crt=3D0'0
->> >> >> > > > > > > > >> inactive NOTIFY] exit Start 0.000020 0 0.0000=
-00
->> >> >> > > > > > > > >>=C2=A0=C2=A0=C2=A0=C2=A0 -9> 2015-04-27 10:17:=
-08.808861 7fd8e748d700=C2=A0 5
->> >> >> > > > > > > > >> osd.23
->> >> >> > > > pg_epoch:
->> >> >> > > > >
->> >> >> > > > > > > > >> 17882 pg[10.181( empty local-les=3D17879 n=3D=
-0 ec=3D17863
->> >> >> > > > > > > > >> les/c
->> >> >> > > > > > > > >> 17879/17879
->> >> >> > > > > > > > >> 17863/17863/17863) [25,5,23] r=3D2 lpr=3D1787=
-9 crt=3D0'0
->> >> >> > > > > > > > >> inactive NOTIFY] enter Started/Stray
->> >> >> > > > > > > > >>=C2=A0=C2=A0=C2=A0=C2=A0 -8> 2015-04-27 10:17:=
-08.809427 7fd8e748d700=C2=A0 5
->> >> >> > > > > > > > >> osd.23
->> >> >> > > > pg_epoch:
->> >> >> > > > >
->> >> >> > > > > > > > >> 17882 pg[2.189( empty local-les=3D16127 n=3D0=
- ec=3D1 les/c
->> >> >> > > > > > > > >> 16127/16344
->> >> >> > > > > > > > >> 16125/16125/16125) [23,5] r=3D0 lpr=3D17838 c=
-rt=3D0'0 mlcod
->> >> >> > > > > > > > >> 0'0 inactive] exit Reset 7.511623 45 0.000165
->> >> >> > > > > > > > >>=C2=A0=C2=A0=C2=A0=C2=A0 -7> 2015-04-27 10:17:=
-08.809445 7fd8e748d700=C2=A0 5
->> >> >> > > > > > > > >> osd.23
->> >> >> > > > pg_epoch:
->> >> >> > > > >
->> >> >> > > > > > > > >> 17882 pg[2.189( empty local-les=3D16127 n=3D0=
- ec=3D1 les/c
->> >> >> > > > > > > > >> 16127/16344
->> >> >> > > > > > > > >> 16125/16125/16125) [23,5] r=3D0 lpr=3D17838 c=
-rt=3D0'0 mlcod
->> >> >> > > > > > > > >> 0'0 inactive] enter Started
->> >> >> > > > > > > > >>=C2=A0=C2=A0=C2=A0=C2=A0 -6> 2015-04-27 10:17:=
-08.809456 7fd8e748d700=C2=A0 5
->> >> >> > > > > > > > >> osd.23
->> >> >> > > > pg_epoch:
->> >> >> > > > >
->> >> >> > > > > > > > >> 17882 pg[2.189( empty local-les=3D16127 n=3D0=
- ec=3D1 les/c
->> >> >> > > > > > > > >> 16127/16344
->> >> >> > > > > > > > >> 16125/16125/16125) [23,5] r=3D0 lpr=3D17838 c=
-rt=3D0'0 mlcod
->> >> >> > > > > > > > >> 0'0 inactive] enter Start
->> >> >> > > > > > > > >>=C2=A0=C2=A0=C2=A0=C2=A0 -5> 2015-04-27 10:17:=
-08.809468 7fd8e748d700=C2=A0 1
->> >> >> > > > > > > > >> osd.23
->> >> >> > > > pg_epoch:
->> >> >> > > > >
->> >> >> > > > > > > > >> 17882 pg[2.189( empty local-les=3D16127 n=3D0=
- ec=3D1 les/c
->> >> >> > > > > > > > >> 16127/16344
->> >> >> > > > > > > > >> 16125/16125/16125) [23,5] r=3D0 lpr=3D17838 c=
-rt=3D0'0 mlcod
->> >> >> > > > > > > > >> 0'0 inactive]
->> >> >> > > > > > > > >> state<Start>: transitioning to Primary
->> >> >> > > > > > > > >>=C2=A0=C2=A0=C2=A0=C2=A0 -4> 2015-04-27 10:17:=
-08.809479 7fd8e748d700=C2=A0 5
->> >> >> > > > > > > > >> osd.23
->> >> >> > > > pg_epoch:
->> >> >> > > > >
->> >> >> > > > > > > > >> 17882 pg[2.189( empty local-les=3D16127 n=3D0=
- ec=3D1 les/c
->> >> >> > > > > > > > >> 16127/16344
->> >> >> > > > > > > > >> 16125/16125/16125) [23,5] r=3D0 lpr=3D17838 c=
-rt=3D0'0 mlcod
->> >> >> > > > > > > > >> 0'0 inactive] exit Start 0.000023 0 0.000000
->> >> >> > > > > > > > >>=C2=A0=C2=A0=C2=A0=C2=A0 -3> 2015-04-27 10:17:=
-08.809492 7fd8e748d700=C2=A0 5
->> >> >> > > > > > > > >> osd.23
->> >> >> > > > pg_epoch:
->> >> >> > > > >
->> >> >> > > > > > > > >> 17882 pg[2.189( empty local-les=3D16127 n=3D0=
- ec=3D1 les/c
->> >> >> > > > > > > > >> 16127/16344
->> >> >> > > > > > > > >> 16125/16125/16125) [23,5] r=3D0 lpr=3D17838 c=
-rt=3D0'0 mlcod
->> >> >> > > > > > > > >> 0'0 inactive] enter Started/Primary
->> >> >> > > > > > > > >>=C2=A0=C2=A0=C2=A0=C2=A0 -2> 2015-04-27 10:17:=
-08.809502 7fd8e748d700=C2=A0 5
->> >> >> > > > > > > > >> osd.23
->> >> >> > > > pg_epoch:
->> >> >> > > > >
->> >> >> > > > > > > > >> 17882 pg[2.189( empty local-les=3D16127 n=3D0=
- ec=3D1 les/c
->> >> >> > > > > > > > >> 16127/16344
->> >> >> > > > > > > > >> 16125/16125/16125) [23,5] r=3D0 lpr=3D17838 c=
-rt=3D0'0 mlcod
->> >> >> > > > > > > > >> 0'0 inactive] enter Started/Primary/Peering
->> >> >> > > > > > > > >>=C2=A0=C2=A0=C2=A0=C2=A0 -1> 2015-04-27 10:17:=
-08.809513 7fd8e748d700=C2=A0 5
->> >> >> > > > > > > > >> osd.23
->> >> >> > > > pg_epoch:
->> >> >> > > > >
->> >> >> > > > > > > > >> 17882 pg[2.189( empty local-les=3D16127 n=3D0=
- ec=3D1 les/c
->> >> >> > > > > > > > >> 16127/16344
->> >> >> > > > > > > > >> 16125/16125/16125) [23,5] r=3D0 lpr=3D17838 c=
-rt=3D0'0 mlcod
->> >> >> > > > > > > > >> 0'0 peering] enter Started/Primary/Peering/Ge=
-tInfo
->> >> >> > > > > > > > >>=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 0> 2015-04-27 1=
-0:17:08.813837 7fd8e748d700 -1
->> >> >> > > > > > > ./include/interval_set.h:
->> >> >> > > > > > > > >> In
->> >> >> > > > > > > > >> function 'void interval_set<T>::erase(T, T) [=
-with T =3D
->> >> >> > > snapid_t]'
->> >> >> > > > > > > > >> thread
->> >> >> > > > > > > > >> 7fd8e748d700 time 2015-04-27 10:17:08.809899
->> >> >> > > > > > > > >> ./include/interval_set.h: 385: FAILED assert(=
-_size >=3D
->> >> >> > > > > > > > >> 0)
->> >> >> > > > > > > > >>
->> >> >> > > > > > > > >>=C2=A0 ceph version 0.94.1
->> >> >> > > > > > > > >> (e4bfad3a3c51054df7e537a724c8d0bf9be972ff)
->> >> >> > > > > > > > >>=C2=A0 1: (ceph::__ceph_assert_fail(char const=
-*, char
->> const*,
->> >> >> > > > > > > > >> int, char
->> >> >> > > > > > > > >> const*)+0x8b)
->> >> >> > > > > > > > >> [0xbc271b]
->> >> >> > > > > > > > >>=C2=A0 2:
->> >> >> > > > > > > > >> (interval_set<snapid_t>::subtract(interval_se=
-t<snapid_t
->> >> >> > > > > > > > >> >
->> >> >> > > > > > > > >> const&)+0xb0) [0x82cd50]
->> >> >> > > > > > > > >>=C2=A0 3: (PGPool::update(std::tr1::shared_ptr=
-<OSDMap
->> >> >> > > > > > > > >> const>)+0x52e) [0x80113e]
->> >> >> > > > > > > > >>=C2=A0 4:
->> (PG::handle_advance_map(std::tr1::shared_ptr<OSDMap
->> >> >> > > > > > > > >> const>, std::tr1::shared_ptr<OSDMap const>,
->> >> >> > > > > > > > >> const>std::vector<int,
->> >> >> > > > > > > > >> std::allocator<int> >&, int, std::vector<int,
->> >> >> > > > > > > > >> std::allocator<int>
->> >> >> > > > > > > > >> >&, int, PG::RecoveryCtx*)+0x282) [0x801652]
->> >> >> > > > > > > > >>=C2=A0 5: (OSD::advance_pg(unsigned int, PG*,
->> >> >> > > > > > > > >> ThreadPool::TPHandle&, PG::RecoveryCtx*,
->> >> >> > > > > > > > >> std::set<boost::intrusive_ptr<PG>,
->> >> >> > > > > > > > >> std::less<boost::intrusive_ptr<PG> >,
->> >> >> > > > > > > > >> std::allocator<boost::intrusive_ptr<PG> > >*)=
-+0x2c3)
->> >> >> > > > > > > > >> [0x6b0e43]
->> >> >> > > > > > > > >>=C2=A0 6: (OSD::process_peering_events(std::li=
-st<PG*,
->> >> >> > > > > > > > >> std::allocator<PG*>
->> >> >> > > > > > > > >> > const&,
->> >> >> > > > > > > > >> ThreadPool::TPHandle&)+0x21c) [0x6b191c]
->> >> >> > > > > > > > >>=C2=A0 7: (OSD::PeeringWQ::_process(std::list<=
-PG*,
->> >> >> > > > > > > > >> std::allocator<PG*>
->> >> >> > > > > > > > >> > const&,
->> >> >> > > > > > > > >> ThreadPool::TPHandle&)+0x18) [0x709278]
->> >> >> > > > > > > > >>=C2=A0 8:
->> (ThreadPool::worker(ThreadPool::WorkThread*)+0xa5e)
->> >> >> > > > > > > > >> [0xbb38ae]
->> >> >> > > > > > > > >>=C2=A0 9: (ThreadPool::WorkThread::entry()+0x1=
-0) [0xbb4950]
->> >> >> > > > > > > > >>=C2=A0 10: (()+0x8182) [0x7fd906946182]
->> >> >> > > > > > > > >>=C2=A0 11: (clone()+0x6d) [0x7fd904eb147d]
->> >> >> > > > > > > > >>
->> >> >> > > > > > > > >> Also by monitoring (ceph -w) I get the follow=
-ing
->> >> >> > > > > > > > >> messages, also lots of
->> >> >> > > > > > > them.
->> >> >> > > > > > > > >>
->> >> >> > > > > > > > >> 2015-04-27 10:39:52.935812 mon.0 [INF] from=3D=
-'client.?
->> >> >> > > > > > > 10.20.0.13:0/1174409'
->> >> >> > > > > > > > >> entity=3D'osd.30' cmd=3D[{"prefix": "osd crus=
-h
->> >> >> > > > > > > > >> create-or-move",
->> >> >> > > > "args":
->> >> >> > > > > > > > >> ["host=3Dceph3", "root=3Ddefault"], "id": 30,=
- "weight":
->> >> 1.82}]:
->> >> >>
->> >> >> > > > > > > > >> dispatch
->> >> >> > > > > > > > >> 2015-04-27 10:39:53.297376 mon.0 [INF] from=3D=
-'client.?
->> >> >> > > > > > > 10.20.0.13:0/1174483'
->> >> >> > > > > > > > >> entity=3D'osd.26' cmd=3D[{"prefix": "osd crus=
-h
->> >> >> > > > > > > > >> create-or-move",
->> >> >> > > > "args":
->> >> >> > > > > > > > >> ["host=3Dceph3", "root=3Ddefault"], "id": 26,=
- "weight":
->> >> 1.82}]:
->> >> >>
->> >> >> > > > > > > > >> dispatch
->> >> >> > > > > > > > >>
->> >> >> > > > > > > > >>
->> >> >> > > > > > > > >> This is a cluster of 3 nodes with 36 OSD's, n=
-odes are
->> >> >> > > > > > > > >> also mons and mds's to save servers. All run =
-Ubuntu
->> >> >> 14.04.2.
->> >> >> > > > > > > > >>
->> >> >> > > > > > > > >> I have pretty much tried everything I could t=
-hink of.
->> >> >> > > > > > > > >>
->> >> >> > > > > > > > >> Restarting daemons doesn't help.
->> >> >> > > > > > > > >>
->> >> >> > > > > > > > >> Any help would be appreciated. I can also pro=
-vide more
->> >> >> > > > > > > > >> logs if necessary. They just seem to get pret=
-ty large
->> >> >> > > > > > > > >> in few
->> >> >> > > moments.
->> >> >> > > > > > > > >>
->> >> >> > > > > > > > >> Thank you
->> >> >> > > > > > > > >> Tuomas
->> >> >> > > > > > > > >>
->> >> >> > > > > > > > >>
->> >> >> > > > > > > > >> _____________________________________________=
-__
->> >> >> > > > > > > > >> ceph-users mailing list ceph-users@lists.ceph=
-=2Ecom
->> >> >> > > > > > > > >> http://lists.ceph.com/listinfo.cgi/ceph-users=
--ceph.com
->> >> >> > > > > > > > >>
->> >> >> > > > > > > > >>
->> >> >> > > > > > > > >>
->> >> >> > > > > > > > >
->> >> >> > > > > > > > >
->> >> >> > > > > > > > > ______________________________________________=
-_
->> >> >> > > > > > > > > ceph-users mailing list
->> >> >> > > > > > > > > ceph-users@lists.ceph.com
->> >> >> > > > > > > > > http://lists.ceph.com/listinfo.cgi/ceph-users-=
-ceph.com
->> >> >> > > > > > > > >
->> >> >> > > > > > > > >
->> >> >> > > > > > > > >
->> >> >> > > > > > > >
->> >> >> > > > > > > >
->> >> >> > > > > > > > _______________________________________________
->> >> >> > > > > > > > ceph-users mailing list
->> >> >> > > > > > > > ceph-users@lists.ceph.com
->> >> >> > > > > > > > http://lists.ceph.com/listinfo.cgi/ceph-users-ce=
-ph.com
->> >> >> > > > > > > >
->> >> >> > > > > > > >
->> >> >> > > > > > > >
->> >> >> > > > > > > > _______________________________________________
->> >> >> > > > > > > > ceph-users mailing list
->> >> >> > > > > > > > ceph-users@lists.ceph.com
->> >> >> > > > > > > > http://lists.ceph.com/listinfo.cgi/ceph-users-ce=
-ph.com
->> >> >> > > > > > > >
->> >> >> > > > > > > >
->> >> >> > > > > > >
->> >> >> > > > > >
->> >> >> > > > > >
->> >> >> > > > >
->> >> >> > > > >
->> >> >> > > >
->> >> >> > >
->> >> >> > >
->> >> >> > _______________________________________________
->> >> >> > ceph-users mailing list
->> >> >> > ceph-users@lists.ceph.com
->> >> >> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->> >> >> >
->> >> >> >
->> >> >>
->> >> >
->> >>
->> >>
->> >> --
->> >> To unsubscribe from this list: send the line "unsubscribe ceph-de=
-vel" in
->> >> the body of a message to majordomo@vger.kernel.org
->> >> More majordomo info at=C2=A0 http://vger.kernel.org/majordomo-inf=
-o.html
->> >>
->> >>
->> > _______________________________________________
->> > ceph-users mailing list
->> > ceph-users@lists.ceph.com
->> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->> >
->>
->>
->>
-
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+VmFyYWRhL0hhb21haSwNCkkgdGhvdWdodCBhYm91dCB0aGF0IGVhcmxpZXIgLCBidXQsIHRoZSBX
+QSBpbmR1Y2VkIGJ5IHRoYXQgYWxzbyBpcyAqbm90IG5lZ2xpZ2libGUqLiBIZXJlIGlzIGFuIGV4
+YW1wbGUuIFNheSB3ZSBoYXZlIDUxMiBUQiBvZiBzdG9yYWdlIGFuZCB3ZSBoYXZlIDRNQiByYWRv
+cyBvYmplY3Qgc2l6ZS4gU28sIHRvdGFsIG9iamVjdHMgPSA1MTIgVEIvNE1CID0gMTM0MjE3NzI4
+LiBOb3csIGlmIDRLIGlzIHN0cmlwZSBzaXplICwgZXZlcnkgNE1CIG9iamVjdCB3aWxsIGluZHVj
+ZSBtYXggNE1CLzRLID0gMTAyNCBoZWFkZXIgd3JpdGVzLiBTbywgdG90YWwgb2YgMTM3NDM4OTUz
+NDcyIGhlYWRlciB3cml0ZXMuIEVhY2ggaGVhZGVyIHNpemUgaXMgfjIwMCBieXRlcyBidXQgaXQg
+d2lsbCBnZW5lcmF0ZSBmbGFzaCBwYWdlIHNpemUgYW1vdW50IG9mIHdyaXRlcyAoZ2VuZXJhbGx5
+IDRLLzhLLzE2SykuIENvbnNpZGVyaW5nIG1pbiA0SyAsIGl0IHdpbGwgb3ZlcmFsbCBnZW5lcmF0
+ZSB+NTEyIFRCIG9mIGV4dHJhIHdyaXRlcyBpbiB3b3JzdCBjYXNlIDotKSBJIGRpZG4ndCBjb25z
+aWRlciB3aGF0IGlmIGluIGJldHdlZW4gdHJ1bmNhdGUgY29tZXMgYW5kIGRpc3J1cHQgdGhlIGhl
+YWRlciBiaXRtYXAuIFRoaXMgd2lsbCBjYXVzZSBtb3JlIGhlYWRlciB3cml0ZXMuDQpTbywgd2Ug
+KmNhbid0KiBnbyBpbiB0aGlzIHBhdGguIA0KTm93LCBIYW9tYWksIEkgZG9uJ3QgdW5kZXJzdGFu
+ZCB3aHkgdGhlcmUgd2lsbCBiZSBleHRyYSByZWFkcyBpbiB0aGUgcHJvcG9zYWwgSSBnYXZlLiBM
+ZXQncyBjb25zaWRlciBzb21lIHVzZSBjYXNlcy4NCg0KMS4gNE1CIG9iamVjdCBzaXplIGFuZCA2
+NEsgc3RyaXBlIHNpemUsIHNvLCB0b3RhbCBvZiA2NCBzdHJpcGVzIGFuZCA2NCBlbnRyaWVzIGlu
+IHRoZSBoZWFkZXIgYml0bWFwLiBPdXQgb2YgdGhhdCBzYXkgb25seSAxMCBzdHJpcGVzIGFyZSB2
+YWxpZC4gTm93LCByZWFkIHJlcXVlc3QgY2FtZSBmb3IgdGhlIGVudGlyZSA0TUIgb2JqZWN0cywg
+d2UgZGV0ZXJtaW5lZCB0aGUgbnVtYmVyIG9mIGV4dGVudHMgdG8gYmUgcmVhZCA9IDY0LCBidXQg
+ZG9uJ3Qga25vdyB2YWxpZCBleHRlbnRzLiBTbywgc2VuZCBvdXQgYSByYW5nZSBxdWVyeSB3aXRo
+IF9TRVFfMDAwMDAwMDAwMDAzODM2MV9TVFJJUF8qIGFuZCBiYWNrZW5kIGxpa2UgbGV2ZWxkYi9y
+b2Nrc2RiIHdpbGwgb25seSBzZW5kIG91dCB2YWxpZCAxMCBleHRlbnRzIHRvIHVzLiBSYXRoZXIg
+d2hhdCB3ZSBhcmUgZG9pbmcgbm93LCB3ZSBhcmUgY29uc3VsdGluZyBiaXQgbWFwIGFuZCBzZW5k
+aW5nIHNwZWNpZmljIDEwIGtleXMgZm9yIHJlYWQgd2hpY2ggaXMgKmluZWZmaWNpZW50KiB0aGFu
+IHNlbmRpbmcgYSByYW5nZSBxdWVyeS4gSWYgd2UgYXJlIHRoaW5raW5nIHRoZXJlIHdpbGwgYmUg
+Y3ljbGVzIHNwZW50IGZvciByZWFkaW5nIGludmFsaWQgb2JqZWN0cywgaXQgaXMgbm90IHRydWUg
+YXMgbGV2ZWxkYi9yb2Nrc2RiIG1haW50YWlucyBhIGJsb29tIGZpbHRlciBmb3IgYSB2YWxpZCBr
+ZXlzIGFuZCBpdCBpcyBpbi1tZW1vcnkuIFRoaXMgaXMgbm90IGNvc3RseSBmb3IgYnRyZWUgYmFz
+ZWQga2V5dmFsdWUgZGIgYXMgd2VsbC4NCg0KMi4gTm90aGluZyBpcyBkaWZmZXJlbnQgZm9yIHdy
+aXRlIGFzIHdlbGwsIHdpdGggdGhlIGFib3ZlIHdheSB3ZSB3aWxsIGVuZCB1cCByZWFkaW5nIHNh
+bWUgYW1vdW50IG9mIGRhdGEuDQoNCkxldCBtZSBrbm93IGlmIEkgYW0gbWlzc2luZyBhbnl0aGlu
+Zy4NCg0KVGhhbmtzICYgUmVnYXJkcw0KU29tbmF0aA0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2Ut
+LS0tLQ0KRnJvbTogSGFvbWFpIFdhbmcgW21haWx0bzpoYW9tYWl3YW5nQGdtYWlsLmNvbV0gDQpT
+ZW50OiBGcmlkYXksIE1heSAwMSwgMjAxNSA5OjAyIEFNDQpUbzogVmFyYWRhIEthcmkNCkNjOiBT
+b21uYXRoIFJveTsgY2VwaC1kZXZlbA0KU3ViamVjdDogUmU6IEsvViBzdG9yZSBvcHRpbWl6YXRp
+b24NCg0KT24gRnJpLCBNYXkgMSwgMjAxNSBhdCAxMTo1NSBQTSwgVmFyYWRhIEthcmkgPFZhcmFk
+YS5LYXJpQHNhbmRpc2suY29tPiB3cm90ZToNCj4gSGkgSGFvbWksDQo+DQo+IEFjdHVhbGx5IHdl
+IGRvbid0IG5lZWQgdG8gdXBkYXRlIHRoZSBoZWFkZXIgZm9yIGFsbCB0aGUgd3JpdGVzLCB3ZSBu
+ZWVkIHRvIHVwZGF0ZSB3aGVuIGFueSBoZWFkZXIgZmllbGRzIGdldHMgdXBkYXRlZC4gQnV0IHdl
+IGFyZSBtYWtpbmcgaGVhZGVyLT51cGRhdGVkIHRvIHRydWUgdW5jb25kaXRpb25hbGx5IGluIF9n
+ZW5lcmljX3dyaXRlKCksIHdoaWNoIGlzIG1ha2luZyB0aGUgd3JpdGUgb2YgaGVhZGVyIG9iamVj
+dCBmb3IgYWxsIHRoZSBzdHJpcCB3cml0ZSBldmVuIGZvciBhIG92ZXJ3cml0ZSwgd2hpY2ggd2Ug
+Y2FuIGVsaW1pbmF0ZSBieSB1cGRhdGluZyB0aGUgaGVhZGVyLT51cGRhdGVkIGFjY29yZGluZ2x5
+LiBJZiB5b3Ugb2JzZXJ2ZSB3ZSBuZXZlciBtYWtlIHRoZSBoZWFkZXItPnVwZGF0ZWQgZmFsc2Ug
+YW55d2hlcmUuIFdlIG5lZWQgdG8gbWFrZSBpdCBmYWxzZSBvbmNlIHdlIHdyaXRlIHRoZSBoZWFk
+ZXIuDQo+DQo+IEluIHdvcnN0IGNhc2UsIHdlIG5lZWQgdG8gdXBkYXRlIHRoZSBoZWFkZXIgdGls
+bCBhbGwgdGhlIHN0cmlwcyBnZXRzIHBvcHVsYXRlZCBhbmQgd2hlbiBhbnkgY2xvbmUvc25hcHNo
+b3QgaXMgY3JlYXRlZC4NCj4NCj4gSSBoYXZlIGZpeGVkIHRoZXNlIGlzc3Vlcywgd2lsbCBiZSBz
+ZW5kaW5nIGEgUFIgc29vbiBvbmNlIG15IHVuaXQgdGVzdGluZyBjb21wbGV0ZXMuDQoNCkdyZWF0
+ISBGcm9tIFNvbW5hdGgncyBzdGF0ZW1lbnRzLCBJIGp1c3QgdGhpbmsgaXQgbWF5IHNvbWV0aGlu
+ZyB3cm9uZyB3aXRoICJ1cGRhdGVkIiBmaWVsZC4gSXQgd291bGQgYmUgbmljZSB0byBjYXRjaCB0
+aGlzLg0KDQo+DQo+IFZhcmFkYQ0KPg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBG
+cm9tOiBjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyANCj4gW21haWx0bzpjZXBoLWRl
+dmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIEhhb21haSBXYW5nDQo+IFNl
+bnQ6IEZyaWRheSwgTWF5IDAxLCAyMDE1IDU6NTMgUE0NCj4gVG86IFNvbW5hdGggUm95DQo+IENj
+OiBjZXBoLWRldmVsDQo+IFN1YmplY3Q6IFJlOiBLL1Ygc3RvcmUgb3B0aW1pemF0aW9uDQo+DQo+
+IE9uIEZyaSwgTWF5IDEsIDIwMTUgYXQgMjo1NyBQTSwgSGFvbWFpIFdhbmcgPGhhb21haXdhbmdA
+Z21haWwuY29tPiB3cm90ZToNCj4+IE9uIEZyaSwgTWF5IDEsIDIwMTUgYXQgMjozNyBQTSwgU29t
+bmF0aCBSb3kgPFNvbW5hdGguUm95QHNhbmRpc2suY29tPiB3cm90ZToNCj4+PiBUaGFua3MgSGFv
+bWFpICENCj4+PiBSZXNwb25zZSBpbmxpbmUuLg0KPj4+DQo+Pj4gUmVnYXJkcw0KPj4+IFNvbW5h
+dGgNCj4+Pg0KPj4+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+Pj4gRnJvbTogSGFvbWFp
+IFdhbmcgW21haWx0bzpoYW9tYWl3YW5nQGdtYWlsLmNvbV0NCj4+PiBTZW50OiBUaHVyc2RheSwg
+QXByaWwgMzAsIDIwMTUgMTA6NDkgUE0NCj4+PiBUbzogU29tbmF0aCBSb3kNCj4+PiBDYzogY2Vw
+aC1kZXZlbA0KPj4+IFN1YmplY3Q6IFJlOiBLL1Ygc3RvcmUgb3B0aW1pemF0aW9uDQo+Pj4NCj4+
+PiBPbiBGcmksIE1heSAxLCAyMDE1IGF0IDEyOjU1IFBNLCBTb21uYXRoIFJveSA8U29tbmF0aC5S
+b3lAc2FuZGlzay5jb20+IHdyb3RlOg0KPj4+PiBIaSBIYW9tYWksDQo+Pj4+IEkgd2FzIGRvaW5n
+IHNvbWUgaW52ZXN0aWdhdGlvbiB3aXRoIEsvViBzdG9yZSBhbmQgSU1PIHdlIGNhbiBkbyB0aGUg
+Zm9sbG93aW5nIG9wdGltaXphdGlvbiBvbiB0aGF0Lg0KPj4+Pg0KPj4+PiAxLiBPbiBldmVyeSB3
+cml0ZSBLZXlWYWx1ZVN0b3JlIGlzIHdyaXRpbmcgb25lIGV4dHJhIHNtYWxsIGF0dHJpYnV0ZSB3
+aXRoIHByZWZpeCBfR0hPQkpUT1NFUSogd2hpY2ggaXMgc3RvcmluZyB0aGUgaGVhZGVyIGluZm9y
+bWF0aW9uLiBUaGlzIGV4dHJhIHdyaXRlIHdpbGwgaHVydCB1cyBiYWRseSBpbiBjYXNlIGZsYXNo
+IFdBLiBJIHdhcyB0aGlua2luZyBpZiB3ZSBjYW4gZ2V0IHJpZCBvZiB0aGlzIGluIHRoZSBmb2xs
+b3dpbmcgd2F5Lg0KPj4+Pg0KPj4+PiAgICAgICBTZWVtcyBsaWtlIHBlcnNpc3RpbmcgaGVhZGVy
+cyBkdXJpbmcgY3JlYXRpb24gdGltZSBzaG91bGQgYmUgc3VmZmljaWVudC4gVGhlIHJlYXNvbiBp
+cyB0aGUgZm9sbG93aW5nLi4NCj4+Pj4gICAgICAgIGEuIFRoZSBoZWFkZXItPnNlcSBmb3IgZ2Vu
+ZXJhdGluZyBwcmVmaXggd2lsbCBiZSB3cml0dGVuIG9ubHkgd2hlbiBoZWFkZXIgaXMgZ2VuZXJh
+dGVkLiBTbywgaWYgd2Ugd2FudCB0byB1c2UgdGhlIF9TRVEgKiBhcyBwcmVmaXgsIHdlIGNhbiBy
+ZWFkIHRoZSBoZWFkZXIgYW5kIHVzZSBpdCBkdXJpbmcgd3JpdGUuDQo+Pj4+ICAgICAgICBiLiBJ
+IHRoaW5rIHdlIGRvbid0IG5lZWQgdGhlIHN0cmlwZSBiaXRtYXAvaGVhZGVyLT5tYXhfbGVuL3N0
+cmlwZV9zaXplIGFzIHdlbGwuIFRoZSBiaXRtYXAgaXMgcmVxdWlyZWQgdG8gZGV0ZXJtaW5lIHRo
+ZSBhbHJlYWR5IHdyaXR0ZW4gZXh0ZW50cyBmb3IgYSB3cml0ZS4gTm93LCBhbnkgSy9WIGRiIHN1
+cHBvcnRpbmcgcmFuZ2UgcXVlcmllcyAoYW55IHBvcHVsYXIgZGIgZG9lcyksIHdlIGNhbiBhbHdh
+eXMgc2VuZCBkb3duDQo+Pj4+ICAgICAgICAgICAgcmFuZ2UgcXVlcnkgd2l0aCBwcmVmaXggc2F5
+IF9TRVFfMDAwMDAwMDAwMDAzOTQ2OF9TVFJJUF8gYW5kIGl0IHNob3VsZCByZXR1cm4gdGhlIHZh
+bGlkIGV4dGVudHMuIE5vIGV4dHJhIHJlYWRzIGhlcmUgc2luY2UgYW55d2F5IHdlIG5lZWQgdG8g
+cmVhZCB0aG9zZSBleHRlbnRzIGluIHJlYWQvd3JpdGUgcGF0aC4NCj4+Pj4NCj4+Pg0KPj4+IEZy
+b20gbXkgbWluZCwgSSB0aGluayBub3JtYWwgSU8gd29uJ3QgYWx3YXlzIHdyaXRlIGhlYWRlciEg
+SWYgeW91IG5vdGljZSBsb3RzIG9mIGhlYWRlciB3cml0dGVuLCBtYXliZSBzb21lIGNhc2VzIHdy
+b25nIGFuZCBuZWVkIHRvIGZpeC4NCj4+Pg0KPj4+IFdlIGhhdmUgYSAidXBkYXRlZCIgZmllbGQg
+dG8gaW5kaWNhdG9yIHdoZXRoZXIgd2UgbmVlZCB0byB3cml0ZSBnaG9iamVjdF90IGhlYWRlciBm
+b3IgZWFjaCB0cmFuc2FjdGlvbi4gT25seSAgIm1heF9zaXplIiBhbmQgImJpdHMiDQo+Pj4gY2hh
+bmdlZCB3aWxsIHNldCAidXBkYXRlPXRydWUiLCBpZiB3ZSB3cml0ZSB3YXJtIGRhdGEgSSBkb24n
+dCB3ZSB3aWxsIHdyaXRlIGhlYWRlciBhZ2Fpbi4NCj4+Pg0KPj4+IEhtbSwgbWF5YmUgImJpdHMi
+IHdpbGwgYmUgY2hhbmdlZCBvZnRlbiBzbyBpdCB3aWxsIHdyaXRlIHRoZSB3aG9sZSBoZWFkZXIg
+YWdhaW4gd2hlbiBkb2luZyBmcmVzaCB3cml0aW5nLiBJIHRoaW5rIGEgZmVhc2libGUgd2F5IGlz
+IHNlcGFyYXRlICJiaXRzIiBmcm9tIGhlYWRlci4gVGhlIHNpemUgb2YgImJpdHMiIHVzdWFsbHkg
+aXMgNTEyLTEwMjQob3IgbW9yZSBmb3IgbGFyZ2VyIG9iamVjdCkgYnl0ZXMsIEkgdGhpbmsgaWYg
+d2UgZmFjZSBiYXJlbWV0YWwgc3NkIG9yIGFueSBiYWNrZW5kIHBhc3N0aHJvdWdoIGxvY2FsZnMv
+c2NzaSwgd2UgY2FuIHNwbGl0IGJpdHMgdG8gc2V2ZXJhbCBmaXhlZCBzaXplIGtleXMuIElmIHNv
+IHdlIGNhbiBhdm9pZCBtb3N0IG9mIGhlYWRlciB3cml0ZS4NCj4+Pg0KPj4+IFtTb21uYXRoXSBZ
+ZXMsIGJlY2F1c2Ugb2YgYml0bWFwIHVwZGF0ZSwgaXQgaXMgcmV3cml0aW5nIGhlYWRlciBvbiBl
+YWNoIHRyYW5zYWN0aW9uLiBJIGRvbid0IHRoaW5rIHNlcGFyYXRpbmcgYml0cyBmcm9tIGhlYWRl
+ciB3aWxsIGhlbHAgbXVjaCBhcyBhbnkgc21hbGwgd3JpdGUgd2lsbCBpbmR1Y2UgZmxhc2ggbG9n
+aWNhbCBwYWdlIHNpemUgYW1vdW50IHdyaXRlIGZvciBtb3N0IG9mIHRoZSBkYnMgdW5sZXNzIHRo
+ZXkgYXJlIGRvaW5nIHNvbWUgb3B0aW1pemF0aW9uIGludGVybmFsbHkuDQo+DQo+IEkganVzdCB0
+aGluayB3ZSBtYXkgY291bGQgdGhpbmsgbWV0YWRhdGEgdXBkYXRlIGVzcGVjaWFsbHkgImJpdHMi
+IGFzIGpvdXJuYWwuIFNvIGlmIHdlIGhhdmUgYSBzdWJtaXRfdHJhbnNhY3Rpb24gd2hpY2ggd2ls
+bCB0b2dldGhlciBhbGwgImJpdHMiIHVwZGF0ZSB0byBhIHJlcXVlc3QgYW5kIGZsdXNoIHRvIGEg
+Zm9ybWF0ZSBrZXkgbmFtZWQgbGlrZSAiYml0cy1qb3VybmFsLVtzZXFdIi4gV2UgY291bGQgYWN0
+dWFsbHkgd3JpdGViYWNrIGlucGxhY2UgaGVhZGVyIHZlcnkgbGF0ZS4gSXQgY291bGQgaGVscCBJ
+IHRoaW5rLg0KPg0KPj4NCj4+IFllYWgsIGJ1dCB3ZSBjYW4ndCBnZXQgcmlkIG9mIGl0IGlmIHdl
+IHdhbnQgdG8gaW1wbGVtZW50IGEgc2ltcGxlIA0KPj4gbG9naWMgbWFwcGVyIGluIGtleXZhbHVl
+c3RvcmUgbGF5ZXIuIE90aGVyd2lzZSwgd2UgbmVlZCB0byByZWFkIGFsbCANCj4+IGtleXMgZ28g
+ZG93biB0byB0aGUgYmFja2VuZC4NCj4+DQo+Pj4+DQo+Pj4+IDIuIEkgd2FzIHRoaW5raW5nIG5v
+dCB0byByZWFkIHRoaXMgR0hvYmplY3QgYXQgYWxsIGR1cmluZyByZWFkL3dyaXRlIHBhdGguIEZv
+ciB0aGF0LCB3ZSBuZWVkIHRvIGdldCByaWQgb2YgdGhlIFNFUSBzdHVmZiBhbmQgY2FsY3VsYXRl
+IHRoZSBvYmplY3Qga2V5cyBvbiB0aGUgZmx5LiBXZSBjYW4gdW5pcXVlbHkgZm9ybSB0aGUgR0hP
+YmplY3Qga2V5cyBhbmQgYWRkIHRoYXQgYXMgcHJlZml4IHRvIGF0dHJpYnV0ZXMgbGlrZSB0aGlz
+Lg0KPj4+Pg0KPj4+PiAgICAgICAgICAgICAgICAgX0dIT0JKVE9TRVFfMSVlNTlfaGVhZCE5REQy
+OUI2OCEhMSEhcmJkX2RhdGElZTEwMDU3NGIwZGM1MSVlMDAwMDAwMDAwMDAwYzE4YSFoZWFkICAg
+ICAtLS0tLT4gZm9yIGhlYWRlciAod2lsbCBiZSBjcmVhdGVkIG9uZSB0aW1lKQ0KPj4+Pg0KPj4+
+PiBfR0hPQkpUT1NFUV8xJWU1OV9oZWFkITlERDI5QjY4ISExISFyYmRfZGF0YSVlMTAwNTc0YjBk
+YzUxJWUwMDAwMDAwDQo+Pj4+IDANCj4+Pj4gMDAgMDBjMThhIWhlYWQgX19PQkpPTUFQICogLT4g
+Zm9yIGFsbCBvbWFwIGF0dHJpYnV0ZXMNCj4+Pj4NCj4+Pj4gICAgICAgICBfR0hPQkpUT1NFUV8x
+JWU1OV9oZWFkITlERDI5QjY4ISExISFyYmRfZGF0YSVlMTAwNTc0YjBkYzUxJWUwMDAwMDAwMDAw
+MDBjMThhIWhlYWRfX09CSkFUVFJfXyogIC0+IGZvciBhbGwgYXR0cnMNCj4+Pj4gICAgICAgICBf
+R0hPQkpUT1NFUV8xJWU1OV9oZWFkITlERDI5QjY4ISExISFyYmRfZGF0YSVlMTAwNTc0YjBkYzUx
+JWUwMDAwMDAwMDAwMDBjMThhIWhlYWRfX1NUUklQXzxzdHJpcGUtbm8+IC0+IGZvciBhbGwgc3Ry
+aXBzLg0KPj4+Pg0KPj4+PiAgQWxzbywga2VlcGluZyB0aGUgc2ltaWxhciBwcmVmaXggdG8gYWxs
+IHRoZSBrZXlzIGZvciBhbiBvYmplY3Qgd2lsbCBiZSBoZWxwaW5nIGsvdiBkYnMgaW4gZ2VuZXJh
+bCBhcyBsb3Qgb2YgZGJzIGRvIG9wdGltaXphdGlvbiBiYXNlZCBvbiBzaW1pbGFyIGtleSBwcmVm
+aXguDQo+Pj4NCj4+PiBXZSBjYW4ndCBnZXQgcmlkIG9mIGhlYWRlciBsb29rIEkgdGhpbmssIGJl
+Y2F1c2Ugd2UgbmVlZCB0byBjaGVjayB0aGlzIG9iamVjdCBpcyBleGlzdGVkIGFuZCB0aGlzIGlz
+IHJlcXVpcmVkIGJ5IE9iamVjdFN0b3JlIHNlbWFudGljLiBEbyB5b3UgdGhpbmsgdGhpcyB3aWxs
+IGJlIGJvdHRsZW5lY2sgZm9yIHJlYWQvd3JpdGUgcGF0aD8gRnJvbSBteSB2aWV3LCBpZiBJIGlu
+Y3JlYXNlIGtleXZhbHVlc3RvcmVfaGVhZGVyX2NhY2hlX3NpemUgdG8gdmVyeSBsYXJnZSBudW1i
+ZXIgbGlrZSAxMDI0MDAsIGFsbW9zdCBvZiBoZWFkZXIgc2hvdWxkIGJlIGNhY2hlZCBpbm1lbW9y
+eS4gS2V5VmFsdWVTdG9yZSB1c2VzIFJhbmRvbUNhY2hlIHRvIHN0b3JlIGhlYWRlciBjYWNoZSwg
+aXQgc2hvdWxkIGJlIGNoZWFwZXIuIEFuZCBoZWFkZXIgaW4gS2V5VmFsdWVTdG9yZSBpcyBhbGlr
+ZSAiZmlsZSBkZXNjcmlwdG9yIiBpbiBsb2NhbCBmcywgYSBsYXJnZSBoZWFkZXIgY2FjaGUgc2l6
+ZSBpcyBlbmNvdXJhZ2VkIHNpbmNlICJoZWFkZXIiIGlzICBsaWdodHdlaWdodCBjb21wYXJlZCB0
+byBpbm9kZS4NCj4+Pg0KPj4+IFtTb21uYXRoXSBOb3BlLCBzbyBmYXIgSSBhbSBub3Qgc2VlaW5n
+IHRoaXMgYXMgYSBib3R0bGVuZWNrLCBidXQgdGhpbmtpbmcgaWYgd2UgY2FuIGdldCByaWQgb2Yg
+ZXh0cmEgcmVhZCBhbHdheXMuLkluIG91ciBjYXNlIG9uZSBPU0Qgd2lsbCBzZXJ2ZSB+OFRCIG9m
+IHN0b3JhZ2UsIHNvLCB0byBjYWNoZSBhbGwgdGhlc2UgaGVhZGVycyBpbiBtZW1vcnkgd2UgbmVl
+ZCB+NDIwTUIgKGNvbnNpZGVyaW5nIGRlZmF1bHQgNE1CIHJhZG9zIG9iamVjdCBzaXplIGFuZCBo
+ZWFkZXIgc2l6ZSBpcyB+MjAwYnl0ZXMpLCB3aGljaCBpcyBraW5kIG9mIGJpZy4gU28sIEkgdGhp
+bmsgdGhlcmUgd2lsbCBiZSBzb21lIGRpc2sgcmVhZCBhbHdheXMuDQo+Pj4gSSB0aGluayBqdXN0
+IHF1ZXJ5aW5nIHRoZSBwYXJ0aWN1bGFyIG9iamVjdCBzaG91bGQgcmV2ZWFsIHdoZXRoZXIgb2Jq
+ZWN0IGV4aXN0cyBvciBub3QuIE5vdCBzdXJlIGlmIHdlIG5lZWQgdG8gdmVyaWZ5IGhlYWRlcnMg
+YWx3YXlzIGluIHRoZSBpbyBwYXRoIHRvIGRldGVybWluZSBpZiBvYmplY3QgZXhpc3RzIG9yIG5v
+dC4gSSBrbm93IGluIGNhc2Ugb2Ygb21hcCBpdCBpcyBpbXBsZW1lbnRlZCBsaWtlIHRoYXQsIGJ1
+dCwgSSBkb24ndCBrbm93IHdoYXQgYmVuZWZpdCB3ZSBhcmUgZ2V0dGluZyBieSBkb2luZyB0aGF0
+Lg0KPj4+DQo+Pj4+DQo+Pj4+IDMuIFdlIGNhbiBhZ2dyZWdhdGUgdGhlIHNtYWxsIHdyaXRlcyBp
+biB0aGUgYnVmZmVyIHRyYW5zYWN0aW9uIGFuZCBpc3N1ZSBvbmUgc2luZ2xlIGtleS92YWx1ZSB3
+cml0ZSB0byB0aGUgZGJzLiBJZiBkYnMgYXJlIGFscmVhZHkgZG9pbmcgc21hbGwgd3JpdGUgYWdn
+cmVnYXRpb24gLCB0aGlzIHdvbid0IGhlbHAgbXVjaCB0aG91Z2guDQo+Pj4NCj4+PiBZZXMsIGl0
+IGNvdWxkIGJlIGRvbmUganVzdCBsaWtlIE5ld1N0b3JlIGRpZCEgU28ga2V5dmFsdWVzdG9yZSdz
+IHByb2Nlc3MgZmxhdyB3aWxsIGJlIHRoaXM6DQo+Pj4NCj4+PiBzZXZlcmFsIHBnIHRocmVhZHM6
+IHF1ZXVlX3RyYW5zYWN0aW9uDQo+Pj4gICAgICAgICAgICAgICB8DQo+Pj4gICAgICAgICAgICAg
+ICB8DQo+Pj4gc2V2ZXJhbCBrZXl2YWx1ZXN0b3JlIG9wIHRocmVhZHM6IGRvX3RyYW5zYWN0aW9u
+DQo+Pj4gICAgICAgICAgICAgICB8DQo+Pj4ga2V5dmFsdWVzdG9yZSBzdWJtaXQgdGhyZWFkOiBj
+YWxsIGRiLT5zdWJtaXRfdHJhbnNhY3Rpb25fc3luYw0KPj4+DQo+Pj4gU28gdGhlIGJhbmR3aWR0
+aCBzaG91bGQgYmUgYmV0dGVyLg0KPj4+DQo+Pj4gQW5vdGhlciBvcHRpbWl6YXRpb24gcG9pbnQg
+aXMgcmVkdWNpbmcgbG9jayBncmFudWxhcml0eSB0byBvYmplY3QtbGV2ZWwoY3VycmVudGx5IGlz
+IHBnIGxldmVsKSwgSSB0aGluayBpZiB3ZSB1c2UgYSBzZXBhcnRvciBzdWJtaXQgdGhyZWFkIGl0
+IHdpbGwgaGVscGZ1bCBiZWNhdXNlIG11bHRpIHRyYW5zYWN0aW9uIGluIG9uZSBwZyB3aWxsIGJl
+IHF1ZXVlZCBpbiBvcmRlcmluZy4NCj4+PiBbU29tbmF0aF0gWWVhaC4uVGhhdCBJIHJhaXNlZCBl
+YXJsaWVyLCBidXQsIGl0IHNlZW1zIHF1aXRlIGEgZmV3IGltcGFjdCBmb3IgdGhhdC4gQnV0LCBp
+dCB3b3J0aCB0cnlpbmcuLk1heSBiZSBuZWVkIHRvIGRpc2N1c3Mgd2l0aCBTYWdlL1NhbS4NCj4+
+DQo+PiBDb29sIQ0KPj4NCj4+Pg0KPj4+DQo+Pj4+DQo+Pj4+IFBsZWFzZSBzaGFyZSB5b3VyIHRo
+b3VnaHQgYXJvdW5kIHRoaXMuDQo+Pj4+DQo+Pj4NCj4+PiBJIGFsd2F5cyByZXRoaW5rIHRvIGlt
+cHJvdmUga2V5dmFsdWVzdG9yZSBwZXJmb3JtYW5jZSwgYnV0IEkgZG9uJ3QgaGF2ZSBhIGdvb2Qg
+YmFja2VuZCBzdGlsbCBub3cuIEEgc3NkIHZlbmRvciB3aG8gY2FuIHByb3ZpZGUgd2l0aCBGVEwg
+aW50ZXJmYWNlIHdvdWxkIGJlIGdyZWF0IEkgdGhpbmssIHNvIHdlIGNhbiBvZmZsb2FkIGxvdHMg
+b2YgdGhpbmdzIHRvIEZUTCBsYXllci4NCj4+Pg0KPj4+PiBUaGFua3MgJiBSZWdhcmRzDQo+Pj4+
+IFNvbW5hdGgNCj4+Pj4NCj4+Pj4NCj4+Pj4NCj4+Pj4NCj4+Pj4gX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX18NCj4+Pj4NCj4+Pj4gUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBj
+b250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5
+IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4g
+SWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGll
+bnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBt
+ZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3Ry
+aWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRl
+ZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVh
+c2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJv
+dmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1l
+c3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9u
+aWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KPj4+Pg0KPj4+PiAtLQ0KPj4+PiBUbyB1bnN1YnNjcmli
+ZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIN
+Cj4+Pj4gaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5v
+cmcgTW9yZSANCj4+Pj4gbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcv
+bWFqb3Jkb21vLWluZm8uaHRtbA0KPj4+DQo+Pj4NCj4+Pg0KPj4+IC0tDQo+Pj4gQmVzdCBSZWdh
+cmRzLA0KPj4+DQo+Pj4gV2hlYXQNCj4+DQo+Pg0KPj4NCj4+IC0tDQo+PiBCZXN0IFJlZ2FyZHMs
+DQo+Pg0KPj4gV2hlYXQNCj4NCj4NCj4NCj4gLS0NCj4gQmVzdCBSZWdhcmRzLA0KPg0KPiBXaGVh
+dA0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAi
+dW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgDQo+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBt
+YWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIA0KPiBpbmZvIGF0ICBodHRw
+Oi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg0KDQoNCi0tDQpCZXN0IFJl
+Z2FyZHMsDQoNCldoZWF0DQo=
