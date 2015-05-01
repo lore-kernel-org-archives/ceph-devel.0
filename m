@@ -1,151 +1,207 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: K/V store optimization
-Date: Fri, 1 May 2015 20:22:52 +0800
-Message-ID: <CACJqLyYMCKA2eZRQ2_J4uyGhGGzO4WBeWvrs-S2y769YU1BnDg@mail.gmail.com>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD84052@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CACJqLybYKSKmwNtvTpRKDk-Hu47NrL7DJ23UaGTC8+cZoOyhzg@mail.gmail.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F2CD84086@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CACJqLyZ74xR_nBcKHUPieanCvfHzFw4ELRDn4oc_b9Cusm05Jw@mail.gmail.com>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: Re: newstore performance update
+Date: Fri, 01 May 2015 09:48:30 -0500
+Message-ID: <5543923E.1020607@redhat.com>
+References: <554016E2.3000104@redhat.com> <6F3FA899187F0043BA1827A69DA2F7CC021E4894@shsmsx102.ccr.corp.intel.com> <alpine.DEB.2.00.1504290929400.5458@cobra.newdream.net>, <55422E0A.6010204@redhat.com> <ijupkkkyuvtsofr81j33sd7l.1430402112852@email.android.com> <554237F8.5070907@redhat.com> <alpine.DEB.2.00.1504301107310.5458@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f42.google.com ([209.85.220.42]:34102 "EHLO
-	mail-pa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751270AbbEAMWx convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 May 2015 08:22:53 -0400
-Received: by pacyx8 with SMTP id yx8so89715801pac.1
-        for <ceph-devel@vger.kernel.org>; Fri, 01 May 2015 05:22:53 -0700 (PDT)
-In-Reply-To: <CACJqLyZ74xR_nBcKHUPieanCvfHzFw4ELRDn4oc_b9Cusm05Jw@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:55256 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752828AbbEAOsd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 1 May 2015 10:48:33 -0400
+In-Reply-To: <alpine.DEB.2.00.1504301107310.5458@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
-
-On Fri, May 1, 2015 at 2:57 PM, Haomai Wang <haomaiwang@gmail.com> wrote:
-> On Fri, May 1, 2015 at 2:37 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
->> Thanks Haomai !
->> Response inline..
->>
->> Regards
->> Somnath
->>
->> -----Original Message-----
->> From: Haomai Wang [mailto:haomaiwang@gmail.com]
->> Sent: Thursday, April 30, 2015 10:49 PM
->> To: Somnath Roy
->> Cc: ceph-devel
->> Subject: Re: K/V store optimization
->>
->> On Fri, May 1, 2015 at 12:55 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
->>> Hi Haomai,
->>> I was doing some investigation with K/V store and IMO we can do the following optimization on that.
->>>
->>> 1. On every write KeyValueStore is writing one extra small attribute with prefix _GHOBJTOSEQ* which is storing the header information. This extra write will hurt us badly in case flash WA. I was thinking if we can get rid of this in the following way.
->>>
->>>       Seems like persisting headers during creation time should be sufficient. The reason is the following..
->>>        a. The header->seq for generating prefix will be written only when header is generated. So, if we want to use the _SEQ * as prefix, we can read the header and use it during write.
->>>        b. I think we don't need the stripe bitmap/header->max_len/stripe_size as well. The bitmap is required to determine the already written extents for a write. Now, any K/V db supporting range queries (any popular db does), we can always send down
->>>            range query with prefix say _SEQ_0000000000039468_STRIP_ and it should return the valid extents. No extra reads here since anyway we need to read those extents in read/write path.
->>>
->>
->> From my mind, I think normal IO won't always write header! If you notice lots of header written, maybe some cases wrong and need to fix.
->>
->> We have a "updated" field to indicator whether we need to write ghobject_t header for each transaction. Only  "max_size" and "bits"
->> changed will set "update=true", if we write warm data I don't we will write header again.
->>
->> Hmm, maybe "bits" will be changed often so it will write the whole header again when doing fresh writing. I think a feasible way is separate "bits" from header. The size of "bits" usually is 512-1024(or more for larger object) bytes, I think if we face baremetal ssd or any backend passthrough localfs/scsi, we can split bits to several fixed size keys. If so we can avoid most of header write.
->>
->> [Somnath] Yes, because of bitmap update, it is rewriting header on each transaction. I don't think separating bits from header will help much as any small write will induce flash logical page size amount write for most of the dbs unless they are doing some optimization internally.
-
-I just think we may could think metadata update especially "bits" as
-journal. So if we have a submit_transaction which will together all
-"bits" update to a request and flush to a formate key named like
-"bits-journal-[seq]". We could actually writeback inplace header very
-late. It could help I think.
-
->
-> Yeah, but we can't get rid of it if we want to implement a simple
-> logic mapper in keyvaluestore layer. Otherwise, we need to read all
-> keys go down to the backend.
->
->>>
->>> 2. I was thinking not to read this GHobject at all during read/write path. For that, we need to get rid of the SEQ stuff and calculate the object keys on the fly. We can uniquely form the GHObject keys and add that as prefix to attributes like this.
->>>
->>>                 _GHOBJTOSEQ_1%e59_head!9DD29B68!!1!!rbd_data%e100574b0dc51%e000000000000c18a!head     -----> for header (will be created one time)
->>>
->>> _GHOBJTOSEQ_1%e59_head!9DD29B68!!1!!rbd_data%e100574b0dc51%e0000000000
->>> 00c18a!head __OBJOMAP * -> for all omap attributes
->>>
->>>         _GHOBJTOSEQ_1%e59_head!9DD29B68!!1!!rbd_data%e100574b0dc51%e000000000000c18a!head__OBJATTR__*  -> for all attrs
->>>         _GHOBJTOSEQ_1%e59_head!9DD29B68!!1!!rbd_data%e100574b0dc51%e000000000000c18a!head__STRIP_<stripe-no> -> for all strips.
->>>
->>>  Also, keeping the similar prefix to all the keys for an object will be helping k/v dbs in general as lot of dbs do optimization based on similar key prefix.
->>
->> We can't get rid of header look I think, because we need to check this object is existed and this is required by ObjectStore semantic. Do you think this will be bottleneck for read/write path? From my view, if I increase keyvaluestore_header_cache_size to very large number like 102400, almost of header should be cached inmemory. KeyValueStore uses RandomCache to store header cache, it should be cheaper. And header in KeyValueStore is alike "file descriptor" in local fs, a large header cache size is encouraged since "header" is  lightweight compared to inode.
->>
->> [Somnath] Nope, so far I am not seeing this as a bottleneck, but thinking if we can get rid of extra read always..In our case one OSD will serve ~8TB of storage, so, to cache all these headers in memory we need ~420MB (considering default 4MB rados object size and header size is ~200bytes), which is kind of big. So, I think there will be some disk read always.
->> I think just querying the particular object should reveal whether object exists or not. Not sure if we need to verify headers always in the io path to determine if object exists or not. I know in case of omap it is implemented like that, but, I don't know what benefit we are getting by doing that.
->>
->>>
->>> 3. We can aggregate the small writes in the buffer transaction and issue one single key/value write to the dbs. If dbs are already doing small write aggregation , this won't help much though.
->>
->> Yes, it could be done just like NewStore did! So keyvaluestore's process flaw will be this:
->>
->> several pg threads: queue_transaction
->>               |
->>               |
->> several keyvaluestore op threads: do_transaction
->>               |
->> keyvaluestore submit thread: call db->submit_transaction_sync
->>
->> So the bandwidth should be better.
->>
->> Another optimization point is reducing lock granularity to object-level(currently is pg level), I think if we use a separtor submit thread it will helpful because multi transaction in one pg will be queued in ordering.
->> [Somnath] Yeah..That I raised earlier, but, it seems quite a few impact for that. But, it worth trying..May be need to discuss with Sage/Sam.
->
-> Cool!
->
->>
->>
->>>
->>> Please share your thought around this.
->>>
->>
->> I always rethink to improve keyvaluestore performance, but I don't have a good backend still now. A ssd vendor who can provide with FTL interface would be great I think, so we can offload lots of things to FTL layer.
->>
->>> Thanks & Regards
->>> Somnath
->>>
->>>
->>>
->>>
->>> ________________________________
->>>
->>> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->>> in the body of a message to majordomo@vger.kernel.org More majordomo
->>> info at  http://vger.kernel.org/majordomo-info.html
->>
->>
->>
->> --
->> Best Regards,
->>
->> Wheat
->
->
->
-> --
-> Best Regards,
->
-> Wheat
+To: Sage Weil <sweil@redhat.com>
+Cc: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
 
 
--- 
-Best Regards,
+On 04/30/2015 01:09 PM, Sage Weil wrote:
+> On Thu, 30 Apr 2015, Mark Nelson wrote:
+>> On 04/30/2015 09:02 AM, Chen, Xiaoxi wrote:
+>>> I am not sure I really understand the osd code, but from the osd log,  in
+>>> the sequential small write case, only one inflight op happening?
+>>>
+>>> and Mark, did you pre-allocate the rbd before doing sequential test? I
+>>> believe you did, so both seq and random are in WAL mode.
+>>
+>> Yes, the RBD image is pre-allocated.  Maybe Sage can chime in regarding the
+>> one inflight op.
+>
+> I'm not sure why that would happen.  :/  How are you generating the
+> client workload?
+>
 
-Wheat
+So I spent some time last night and this morning looking at the blktrace 
+data for the 4k writes and random writes with WAL enabled vs WAL 
+disabled from the fio tests I ran.  Again, these are writing to 
+pre-allocated RBD volumes using fio's librbd engine.  First, let me 
+relink the fio output:
+
+http://nhm.ceph.com/newstore/Newstore_DisableWAL.pdf
+
+Now to the blkparse data:
+
+1) First 4K sequential writes with WAL enabled
+
+  65,98  23    16685   299.949350592     0  C  WS 987486832 + 8 [0]
+  65,98  23    16686   299.949368012     0  C  WS 506480736 + 24 [0]
+  65,98  14     2360   299.962768962     0  C  WS 0 [0]
+  65,98  23    16691   299.974361401     0  C  WS 506480752 + 16 [0]
+  65,98  20     3027   299.974390473     0  C  WS 987486840 + 8 [0]
+  65,98   1     3024   299.987774998     0  C  WS 0 [0]
+  65,98  19    14351   299.999283821     0  C  WS 987486848 + 8 [0]
+  65,98  19    14355   299.999485481     0  C  WS 506480760 + 24 [0]
+  65,98  11    35231   300.012809485     0  C  WS 0 [0]
+
+
+In the above snippet looking just at IO completion, the following 
+pattern shows up during most of the tests:
+
+Offset1 + 8 sector write
+Offset2 + 24 sector write
+13.4 ms passes
+sync
+11.6 ms passes
+(Offset2+24) + 16 sector write
+(Offset1 + 8) + 8 sector write
+13.4 ms passes
+sync
+11.5 ms passes
+...
+
+Corresponding performance from the client looks awful.  Even though each 
+sequence of writes are near the previous ones (either offset1 or 
+offset2) the syncs break everything up and IOs can't get coalesced. 
+Seekwatcher shows that we are seek bound with low write performance:
+
+http://nhm.ceph.com/newstore/newstore-4kcompare/write-no_overlay.png
+
+
+2) Now let's look at 4k sequential writes with WAL disabled
+
+  65,98   0   240834   106.619823415     0  C  WS 1023518280 + 336 [0]
+  65,98   5   247024   106.619951276     0  C  WS 1023518672 + 8 [0]
+  65,98  22    15236   106.620066459     0  C  WS 1023518616 + 8 [0]
+  65,98  16    56941   106.620218013     0  C  WS 1023518624 + 8 [0]
+  65,98   5   247028   106.620285799     0  C  WS 1023518632 + 8 [0]
+  65,98   0   240962   106.620429464     0  C  WS 1023518640 + 8 [0]
+  65,98   0   240966   106.620511011     0  C  WS 1023518648 + 8 [0]
+  65,98  11   118842   106.620623999     0  C  WS 1023518656 + 8 [0]
+  65,98   0   240970   106.620679708     0  C  WS 1023518664 + 8 [0]
+  65,98  10   176487   106.620841586     0  C  WS 1023518680 + 8 [0]
+  65,98  16    56953   106.621014772     0  C  WS 1023518688 + 8 [0]
+  65,98   0   240974   106.621220848     0  C  WS 1023518696 + 8 [0]
+  65,98   0   240977   106.621356662     0  C  WS 1023518704 + 8 [0]
+  65,98   2   442988   106.621434274     0  C  WS 1023518712 + 8 [0]
+  65,98  11   118847   106.621595007     0  C  WS 1023518720 + 8 [0]
+  65,98   0   240981   106.621751495     0  C  WS 1023518728 + 8 [0]
+  65,98   0   240986   106.621851059     0  C  WS 1023518736 + 8 [0]
+  65,98  10   176492   106.622023419     0  C  WS 1023518744 + 8 [0]
+  65,98  16    56958   106.622110615     0  C  WS 1023518752 + 8 [0]
+  65,98   0   240989   106.622219993     0  C  WS 1023518760 + 8 [0]
+  65,98   0   240992   106.622346208     0  C  WS 1023518768 + 8 [0]
+  65,98   9    82616   106.635362498     0  C  WS 0 [0]
+  65,98   9    82617   106.635375456     0  C  WS 0 [0]
+  65,98   9    82618   106.635380562     0  C  WS 0 [0]
+  65,98   9    82619   106.635383740     0  C  WS 0 [0]
+  65,98   9    82620   106.635387332     0  C  WS 0 [0]
+  65,98   9    82621   106.635390764     0  C  WS 0 [0]
+  65,98   9    82622   106.635392820     0  C  WS 0 [0]
+  65,98   9    82623   106.635394784     0  C  WS 0 [0]
+  65,98   9    82624   106.635397124     0  C  WS 0 [0]
+  65,98   9    82625   106.635399943     0  C  WS 0 [0]
+  65,98   9    82626   106.635402499     0  C  WS 0 [0]
+  65,98   9    82627   106.635404467     0  C  WS 0 [0]
+  65,98   9    82628   106.635406529     0  C  WS 0 [0]
+  65,98   9    82629   106.635408483     0  C  WS 0 [0]
+  65,98   9    82630   106.635410587     0  C  WS 0 [0]
+  65,98   9    82631   106.635412247     0  C  WS 0 [0]
+  65,98   9    82632   106.635413967     0  C  WS 0 [0]
+  65,98   9    82633   106.635415899     0  C  WS 0 [0]
+  65,98   9    82634   106.635417967     0  C  WS 0 [0]
+  65,98   9    82635   106.635420009     0  C  WS 0 [0]
+  65,98   9    82636   106.635422023     0  C  WS 0 [0]
+  65,98   9    82637   106.635424223     0  C  WS 0 [0]
+  65,98   9    82638   106.635426137     0  C  WS 0 [0]
+  65,98   9    82639   106.635427517     0  C  WS 0 [0]
+  65,98   9    82640   106.635429917     0  C  WS 0 [0]
+  65,98   9    82641   106.635431273     0  C  WS 0 [0]
+  65,98   9    82642   106.635433951     0  C  WS 0 [0]
+  65,98   9    82643   106.635436395     0  C  WS 0 [0]
+  65,98   9    82644   106.635437899     0  C  WS 0 [0]
+  65,98   9    82645   106.635439551     0  C  WS 0 [0]
+  65,98   9    82646   106.635441279     0  C  WS 0 [0]
+  65,98   9    82647   106.635443819     0  C  WS 0 [0]
+  65,98   9    82648   106.635446153     0  C  WS 0 [0]
+  65,98   9    82649   106.635448087     0  C  WS 0 [0]
+  65,98   9    82650   106.635449941     0  C  WS 0 [0]
+  65,98   9    82651   106.635452109     0  C  WS 0 [0]
+  65,98   9    82652   106.635454277     0  C  WS 0 [0]
+  65,98   9    82653   106.635455857     0  C  WS 0 [0]
+  65,98   9    82654   106.635459427     0  C  WS 0 [0]
+  65,98   9    82655   106.635462091     0  C  WS 0 [0]
+  65,98   9    82656   106.635464085     0  C  WS 0 [0]
+  65,98   9    82657   106.635465641     0  C  WS 0 [0]
+  65,98   9    82658   106.635467459     0  C  WS 0 [0]
+  65,98   9    82659   106.635469062     0  C  WS 0 [0]
+  65,98   9    82660   106.635470756     0  C  WS 0 [0]
+  65,98   9    82661   106.635472536     0  C  WS 0 [0]
+  65,98   9    82662   106.635474170     0  C  WS 0 [0]
+  65,98   9    82663   106.635476042     0  C  WS 0 [0]
+  65,98   9    82664   106.635478350     0  C  WS 0 [0]
+  65,98   9    82665   106.635479712     0  C  WS 0 [0]
+  65,98   9    82666   106.635481426     0  C  WS 0 [0]
+
+One big IO with lots of small IOs all very close to each other, followed 
+by a bunch of syncs.  So obviously when we have the WAL disabled we see 
+better behavior with writes coalesced and all happening to near sectors 
+(maybe disk cache can further improve things).  We see much higher 
+throughput for 4K writes from fio and better looking seekwatcher graphs 
+despite similar seek counts:
+
+http://nhm.ceph.com/newstore/newstore-4kcompare/write-disableWAL.png
+
+
+
+3) The fio data shows that even 4k random writes were faster than 4k 
+sequential writes, so let's look at that example too
+
+  65,98  10    39620   300.555953354 27232  C  WS 988714792 + 8 [0]
+  65,98  21    33866   300.556215582     0  C  WS 998965304 + 8 [0]
+  65,98   8    39399   300.556270604     0  C  WS 1003622152 + 8 [0]
+  65,98  11    42850   300.556405280     0  C  WS 1001728168 + 8 [0]
+  65,98  19    49049   300.556470467     0  C  WS 1013797432 + 8 [0]
+  65,98  20    32309   300.556576481     0  C  WS 1014721088 + 8 [0]
+  65,98  19    49053   300.556654659     0  C  WS 1009844896 + 8 [0]
+  65,98   8    39403   300.556781158     0  C  WS 996936976 + 8 [0]
+  65,98  11    42854   300.556869300     0  C  WS 1019774584 + 8 [0]
+  65,98  23    67877   300.611701072     0  C  WS 0 [0]
+  65,98  23    67878   300.612084266     0  C  WS 507447792 + 104 [0]
+  65,98  14    11820   300.621380910     0  C  WS 0 [0]
+  65,98  14    11821   300.621388810     0  C  WS 0 [0]
+  65,98  14    11822   300.621392050     0  C  WS 0 [0]
+  65,98  14    11823   300.621395373     0  C  WS 0 [0]
+  65,98  14    11824   300.621399047     0  C  WS 0 [0]
+  65,98  14    11825   300.621402197     0  C  WS 0 [0]
+  65,98  14    11826   300.621406650     0  C  WS 0 [0]
+  65,98  14    11827   300.621409130     0  C  WS 0 [0]
+
+So we have 1 big write (WAL?) with lots of random little writes and the 
+syncs get grouped up and delayed.  Seekwatcher data confirms higher 
+throughput than in the sequential 4k write case:
+
+http://nhm.ceph.com/newstore/newstore-4kcompare/randwrite-no_overlay.png
+
+
+So my take away from this is that I think Xiaoxi is right.  With 4k 
+sequential writes we see presumably 1 WAL IO and 1 write followed by 
+fsync and this all happens synchronously.  When we disable WAL we get 
+lots of concurrency, at least some of the writes coalesced, and over all 
+better behavior.  When we perform random IO even with WAL enabled, we 
+see lots of random IOs before fsyncs and a nice big coalesced IO (WAL?).
+
+Mark
