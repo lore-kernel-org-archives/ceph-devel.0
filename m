@@ -1,182 +1,180 @@
-From: Varada Kari <Varada.Kari@sandisk.com>
-Subject: RE: K/V store optimization
-Date: Fri, 1 May 2015 15:55:52 +0000
-Message-ID: <C226B0AB34511445928D9882AA519F601C3F7069@SACMBXIP03.sdcorp.global.sandisk.com>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: K/V store optimization
+Date: Sat, 2 May 2015 00:02:00 +0800
+Message-ID: <CACJqLyZMfT8Kns57kNBx20zd=N7xDCZkSZCzQXCg7=0TkfcQnA@mail.gmail.com>
 References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD84052@SACMBXIP01.sdcorp.global.sandisk.com>
 	<CACJqLybYKSKmwNtvTpRKDk-Hu47NrL7DJ23UaGTC8+cZoOyhzg@mail.gmail.com>
 	<755F6B91B3BE364F9BCA11EA3F9E0C6F2CD84086@SACMBXIP01.sdcorp.global.sandisk.com>
 	<CACJqLyZ74xR_nBcKHUPieanCvfHzFw4ELRDn4oc_b9Cusm05Jw@mail.gmail.com>
- <CACJqLyYMCKA2eZRQ2_J4uyGhGGzO4WBeWvrs-S2y769YU1BnDg@mail.gmail.com>
+	<CACJqLyYMCKA2eZRQ2_J4uyGhGGzO4WBeWvrs-S2y769YU1BnDg@mail.gmail.com>
+	<C226B0AB34511445928D9882AA519F601C3F7069@SACMBXIP03.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0074.outbound.protection.outlook.com ([207.46.100.74]:16032
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1754008AbbEAPz6 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 1 May 2015 11:55:58 -0400
-In-Reply-To: <CACJqLyYMCKA2eZRQ2_J4uyGhGGzO4WBeWvrs-S2y769YU1BnDg@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-pd0-f172.google.com ([209.85.192.172]:36649 "EHLO
+	mail-pd0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755061AbbEAQCA convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 May 2015 12:02:00 -0400
+Received: by pdea3 with SMTP id a3so95809595pde.3
+        for <ceph-devel@vger.kernel.org>; Fri, 01 May 2015 09:02:00 -0700 (PDT)
+In-Reply-To: <C226B0AB34511445928D9882AA519F601C3F7069@SACMBXIP03.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomaiwang@gmail.com>, Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Varada Kari <Varada.Kari@sandisk.com>
+Cc: Somnath Roy <Somnath.Roy@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-SGkgSGFvbWksDQoNCkFjdHVhbGx5IHdlIGRvbid0IG5lZWQgdG8gdXBkYXRlIHRoZSBoZWFkZXIg
-Zm9yIGFsbCB0aGUgd3JpdGVzLCB3ZSBuZWVkIHRvIHVwZGF0ZSB3aGVuIGFueSBoZWFkZXIgZmll
-bGRzIGdldHMgdXBkYXRlZC4gQnV0IHdlIGFyZSBtYWtpbmcgaGVhZGVyLT51cGRhdGVkIHRvIHRy
-dWUgdW5jb25kaXRpb25hbGx5IGluIF9nZW5lcmljX3dyaXRlKCksIHdoaWNoIGlzIG1ha2luZyB0
-aGUgd3JpdGUgb2YgaGVhZGVyIG9iamVjdCBmb3IgYWxsIHRoZSBzdHJpcCB3cml0ZSBldmVuIGZv
-ciBhIG92ZXJ3cml0ZSwgd2hpY2ggd2UgY2FuIGVsaW1pbmF0ZSBieSB1cGRhdGluZyB0aGUgaGVh
-ZGVyLT51cGRhdGVkIGFjY29yZGluZ2x5LiBJZiB5b3Ugb2JzZXJ2ZSB3ZSBuZXZlciBtYWtlIHRo
-ZSBoZWFkZXItPnVwZGF0ZWQgZmFsc2UgYW55d2hlcmUuIFdlIG5lZWQgdG8gbWFrZSBpdCBmYWxz
-ZSBvbmNlIHdlIHdyaXRlIHRoZSBoZWFkZXIuIA0KDQpJbiB3b3JzdCBjYXNlLCB3ZSBuZWVkIHRv
-IHVwZGF0ZSB0aGUgaGVhZGVyIHRpbGwgYWxsIHRoZSBzdHJpcHMgZ2V0cyBwb3B1bGF0ZWQgYW5k
-IHdoZW4gYW55IGNsb25lL3NuYXBzaG90IGlzIGNyZWF0ZWQuIA0KDQpJIGhhdmUgZml4ZWQgdGhl
-c2UgaXNzdWVzLCB3aWxsIGJlIHNlbmRpbmcgYSBQUiBzb29uIG9uY2UgbXkgdW5pdCB0ZXN0aW5n
-IGNvbXBsZXRlcy4NCg0KVmFyYWRhDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9t
-OiBjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3du
-ZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgSGFvbWFpIFdhbmcNClNlbnQ6IEZyaWRh
-eSwgTWF5IDAxLCAyMDE1IDU6NTMgUE0NClRvOiBTb21uYXRoIFJveQ0KQ2M6IGNlcGgtZGV2ZWwN
-ClN1YmplY3Q6IFJlOiBLL1Ygc3RvcmUgb3B0aW1pemF0aW9uDQoNCk9uIEZyaSwgTWF5IDEsIDIw
-MTUgYXQgMjo1NyBQTSwgSGFvbWFpIFdhbmcgPGhhb21haXdhbmdAZ21haWwuY29tPiB3cm90ZToN
-Cj4gT24gRnJpLCBNYXkgMSwgMjAxNSBhdCAyOjM3IFBNLCBTb21uYXRoIFJveSA8U29tbmF0aC5S
-b3lAc2FuZGlzay5jb20+IHdyb3RlOg0KPj4gVGhhbmtzIEhhb21haSAhDQo+PiBSZXNwb25zZSBp
-bmxpbmUuLg0KPj4NCj4+IFJlZ2FyZHMNCj4+IFNvbW5hdGgNCj4+DQo+PiAtLS0tLU9yaWdpbmFs
-IE1lc3NhZ2UtLS0tLQ0KPj4gRnJvbTogSGFvbWFpIFdhbmcgW21haWx0bzpoYW9tYWl3YW5nQGdt
-YWlsLmNvbV0NCj4+IFNlbnQ6IFRodXJzZGF5LCBBcHJpbCAzMCwgMjAxNSAxMDo0OSBQTQ0KPj4g
-VG86IFNvbW5hdGggUm95DQo+PiBDYzogY2VwaC1kZXZlbA0KPj4gU3ViamVjdDogUmU6IEsvViBz
-dG9yZSBvcHRpbWl6YXRpb24NCj4+DQo+PiBPbiBGcmksIE1heSAxLCAyMDE1IGF0IDEyOjU1IFBN
-LCBTb21uYXRoIFJveSA8U29tbmF0aC5Sb3lAc2FuZGlzay5jb20+IHdyb3RlOg0KPj4+IEhpIEhh
-b21haSwNCj4+PiBJIHdhcyBkb2luZyBzb21lIGludmVzdGlnYXRpb24gd2l0aCBLL1Ygc3RvcmUg
-YW5kIElNTyB3ZSBjYW4gZG8gdGhlIGZvbGxvd2luZyBvcHRpbWl6YXRpb24gb24gdGhhdC4NCj4+
-Pg0KPj4+IDEuIE9uIGV2ZXJ5IHdyaXRlIEtleVZhbHVlU3RvcmUgaXMgd3JpdGluZyBvbmUgZXh0
-cmEgc21hbGwgYXR0cmlidXRlIHdpdGggcHJlZml4IF9HSE9CSlRPU0VRKiB3aGljaCBpcyBzdG9y
-aW5nIHRoZSBoZWFkZXIgaW5mb3JtYXRpb24uIFRoaXMgZXh0cmEgd3JpdGUgd2lsbCBodXJ0IHVz
-IGJhZGx5IGluIGNhc2UgZmxhc2ggV0EuIEkgd2FzIHRoaW5raW5nIGlmIHdlIGNhbiBnZXQgcmlk
-IG9mIHRoaXMgaW4gdGhlIGZvbGxvd2luZyB3YXkuDQo+Pj4NCj4+PiAgICAgICBTZWVtcyBsaWtl
-IHBlcnNpc3RpbmcgaGVhZGVycyBkdXJpbmcgY3JlYXRpb24gdGltZSBzaG91bGQgYmUgc3VmZmlj
-aWVudC4gVGhlIHJlYXNvbiBpcyB0aGUgZm9sbG93aW5nLi4NCj4+PiAgICAgICAgYS4gVGhlIGhl
-YWRlci0+c2VxIGZvciBnZW5lcmF0aW5nIHByZWZpeCB3aWxsIGJlIHdyaXR0ZW4gb25seSB3aGVu
-IGhlYWRlciBpcyBnZW5lcmF0ZWQuIFNvLCBpZiB3ZSB3YW50IHRvIHVzZSB0aGUgX1NFUSAqIGFz
-IHByZWZpeCwgd2UgY2FuIHJlYWQgdGhlIGhlYWRlciBhbmQgdXNlIGl0IGR1cmluZyB3cml0ZS4N
-Cj4+PiAgICAgICAgYi4gSSB0aGluayB3ZSBkb24ndCBuZWVkIHRoZSBzdHJpcGUgYml0bWFwL2hl
-YWRlci0+bWF4X2xlbi9zdHJpcGVfc2l6ZSBhcyB3ZWxsLiBUaGUgYml0bWFwIGlzIHJlcXVpcmVk
-IHRvIGRldGVybWluZSB0aGUgYWxyZWFkeSB3cml0dGVuIGV4dGVudHMgZm9yIGEgd3JpdGUuIE5v
-dywgYW55IEsvViBkYiBzdXBwb3J0aW5nIHJhbmdlIHF1ZXJpZXMgKGFueSBwb3B1bGFyIGRiIGRv
-ZXMpLCB3ZSBjYW4gYWx3YXlzIHNlbmQgZG93bg0KPj4+ICAgICAgICAgICAgcmFuZ2UgcXVlcnkg
-d2l0aCBwcmVmaXggc2F5IF9TRVFfMDAwMDAwMDAwMDAzOTQ2OF9TVFJJUF8gYW5kIGl0IHNob3Vs
-ZCByZXR1cm4gdGhlIHZhbGlkIGV4dGVudHMuIE5vIGV4dHJhIHJlYWRzIGhlcmUgc2luY2UgYW55
-d2F5IHdlIG5lZWQgdG8gcmVhZCB0aG9zZSBleHRlbnRzIGluIHJlYWQvd3JpdGUgcGF0aC4NCj4+
-Pg0KPj4NCj4+IEZyb20gbXkgbWluZCwgSSB0aGluayBub3JtYWwgSU8gd29uJ3QgYWx3YXlzIHdy
-aXRlIGhlYWRlciEgSWYgeW91IG5vdGljZSBsb3RzIG9mIGhlYWRlciB3cml0dGVuLCBtYXliZSBz
-b21lIGNhc2VzIHdyb25nIGFuZCBuZWVkIHRvIGZpeC4NCj4+DQo+PiBXZSBoYXZlIGEgInVwZGF0
-ZWQiIGZpZWxkIHRvIGluZGljYXRvciB3aGV0aGVyIHdlIG5lZWQgdG8gd3JpdGUgZ2hvYmplY3Rf
-dCBoZWFkZXIgZm9yIGVhY2ggdHJhbnNhY3Rpb24uIE9ubHkgICJtYXhfc2l6ZSIgYW5kICJiaXRz
-Ig0KPj4gY2hhbmdlZCB3aWxsIHNldCAidXBkYXRlPXRydWUiLCBpZiB3ZSB3cml0ZSB3YXJtIGRh
-dGEgSSBkb24ndCB3ZSB3aWxsIHdyaXRlIGhlYWRlciBhZ2Fpbi4NCj4+DQo+PiBIbW0sIG1heWJl
-ICJiaXRzIiB3aWxsIGJlIGNoYW5nZWQgb2Z0ZW4gc28gaXQgd2lsbCB3cml0ZSB0aGUgd2hvbGUg
-aGVhZGVyIGFnYWluIHdoZW4gZG9pbmcgZnJlc2ggd3JpdGluZy4gSSB0aGluayBhIGZlYXNpYmxl
-IHdheSBpcyBzZXBhcmF0ZSAiYml0cyIgZnJvbSBoZWFkZXIuIFRoZSBzaXplIG9mICJiaXRzIiB1
-c3VhbGx5IGlzIDUxMi0xMDI0KG9yIG1vcmUgZm9yIGxhcmdlciBvYmplY3QpIGJ5dGVzLCBJIHRo
-aW5rIGlmIHdlIGZhY2UgYmFyZW1ldGFsIHNzZCBvciBhbnkgYmFja2VuZCBwYXNzdGhyb3VnaCBs
-b2NhbGZzL3Njc2ksIHdlIGNhbiBzcGxpdCBiaXRzIHRvIHNldmVyYWwgZml4ZWQgc2l6ZSBrZXlz
-LiBJZiBzbyB3ZSBjYW4gYXZvaWQgbW9zdCBvZiBoZWFkZXIgd3JpdGUuDQo+Pg0KPj4gW1NvbW5h
-dGhdIFllcywgYmVjYXVzZSBvZiBiaXRtYXAgdXBkYXRlLCBpdCBpcyByZXdyaXRpbmcgaGVhZGVy
-IG9uIGVhY2ggdHJhbnNhY3Rpb24uIEkgZG9uJ3QgdGhpbmsgc2VwYXJhdGluZyBiaXRzIGZyb20g
-aGVhZGVyIHdpbGwgaGVscCBtdWNoIGFzIGFueSBzbWFsbCB3cml0ZSB3aWxsIGluZHVjZSBmbGFz
-aCBsb2dpY2FsIHBhZ2Ugc2l6ZSBhbW91bnQgd3JpdGUgZm9yIG1vc3Qgb2YgdGhlIGRicyB1bmxl
-c3MgdGhleSBhcmUgZG9pbmcgc29tZSBvcHRpbWl6YXRpb24gaW50ZXJuYWxseS4NCg0KSSBqdXN0
-IHRoaW5rIHdlIG1heSBjb3VsZCB0aGluayBtZXRhZGF0YSB1cGRhdGUgZXNwZWNpYWxseSAiYml0
-cyIgYXMgam91cm5hbC4gU28gaWYgd2UgaGF2ZSBhIHN1Ym1pdF90cmFuc2FjdGlvbiB3aGljaCB3
-aWxsIHRvZ2V0aGVyIGFsbCAiYml0cyIgdXBkYXRlIHRvIGEgcmVxdWVzdCBhbmQgZmx1c2ggdG8g
-YSBmb3JtYXRlIGtleSBuYW1lZCBsaWtlICJiaXRzLWpvdXJuYWwtW3NlcV0iLiBXZSBjb3VsZCBh
-Y3R1YWxseSB3cml0ZWJhY2sgaW5wbGFjZSBoZWFkZXIgdmVyeSBsYXRlLiBJdCBjb3VsZCBoZWxw
-IEkgdGhpbmsuDQoNCj4NCj4gWWVhaCwgYnV0IHdlIGNhbid0IGdldCByaWQgb2YgaXQgaWYgd2Ug
-d2FudCB0byBpbXBsZW1lbnQgYSBzaW1wbGUgDQo+IGxvZ2ljIG1hcHBlciBpbiBrZXl2YWx1ZXN0
-b3JlIGxheWVyLiBPdGhlcndpc2UsIHdlIG5lZWQgdG8gcmVhZCBhbGwgDQo+IGtleXMgZ28gZG93
-biB0byB0aGUgYmFja2VuZC4NCj4NCj4+Pg0KPj4+IDIuIEkgd2FzIHRoaW5raW5nIG5vdCB0byBy
-ZWFkIHRoaXMgR0hvYmplY3QgYXQgYWxsIGR1cmluZyByZWFkL3dyaXRlIHBhdGguIEZvciB0aGF0
-LCB3ZSBuZWVkIHRvIGdldCByaWQgb2YgdGhlIFNFUSBzdHVmZiBhbmQgY2FsY3VsYXRlIHRoZSBv
-YmplY3Qga2V5cyBvbiB0aGUgZmx5LiBXZSBjYW4gdW5pcXVlbHkgZm9ybSB0aGUgR0hPYmplY3Qg
-a2V5cyBhbmQgYWRkIHRoYXQgYXMgcHJlZml4IHRvIGF0dHJpYnV0ZXMgbGlrZSB0aGlzLg0KPj4+
-DQo+Pj4gICAgICAgICAgICAgICAgIF9HSE9CSlRPU0VRXzElZTU5X2hlYWQhOUREMjlCNjghITEh
-IXJiZF9kYXRhJWUxMDA1NzRiMGRjNTElZTAwMDAwMDAwMDAwMGMxOGEhaGVhZCAgICAgLS0tLS0+
-IGZvciBoZWFkZXIgKHdpbGwgYmUgY3JlYXRlZCBvbmUgdGltZSkNCj4+Pg0KPj4+IF9HSE9CSlRP
-U0VRXzElZTU5X2hlYWQhOUREMjlCNjghITEhIXJiZF9kYXRhJWUxMDA1NzRiMGRjNTElZTAwMDAw
-MDAwDQo+Pj4gMDAgMDBjMThhIWhlYWQgX19PQkpPTUFQICogLT4gZm9yIGFsbCBvbWFwIGF0dHJp
-YnV0ZXMNCj4+Pg0KPj4+ICAgICAgICAgX0dIT0JKVE9TRVFfMSVlNTlfaGVhZCE5REQyOUI2OCEh
-MSEhcmJkX2RhdGElZTEwMDU3NGIwZGM1MSVlMDAwMDAwMDAwMDAwYzE4YSFoZWFkX19PQkpBVFRS
-X18qICAtPiBmb3IgYWxsIGF0dHJzDQo+Pj4gICAgICAgICBfR0hPQkpUT1NFUV8xJWU1OV9oZWFk
-ITlERDI5QjY4ISExISFyYmRfZGF0YSVlMTAwNTc0YjBkYzUxJWUwMDAwMDAwMDAwMDBjMThhIWhl
-YWRfX1NUUklQXzxzdHJpcGUtbm8+IC0+IGZvciBhbGwgc3RyaXBzLg0KPj4+DQo+Pj4gIEFsc28s
-IGtlZXBpbmcgdGhlIHNpbWlsYXIgcHJlZml4IHRvIGFsbCB0aGUga2V5cyBmb3IgYW4gb2JqZWN0
-IHdpbGwgYmUgaGVscGluZyBrL3YgZGJzIGluIGdlbmVyYWwgYXMgbG90IG9mIGRicyBkbyBvcHRp
-bWl6YXRpb24gYmFzZWQgb24gc2ltaWxhciBrZXkgcHJlZml4Lg0KPj4NCj4+IFdlIGNhbid0IGdl
-dCByaWQgb2YgaGVhZGVyIGxvb2sgSSB0aGluaywgYmVjYXVzZSB3ZSBuZWVkIHRvIGNoZWNrIHRo
-aXMgb2JqZWN0IGlzIGV4aXN0ZWQgYW5kIHRoaXMgaXMgcmVxdWlyZWQgYnkgT2JqZWN0U3RvcmUg
-c2VtYW50aWMuIERvIHlvdSB0aGluayB0aGlzIHdpbGwgYmUgYm90dGxlbmVjayBmb3IgcmVhZC93
-cml0ZSBwYXRoPyBGcm9tIG15IHZpZXcsIGlmIEkgaW5jcmVhc2Uga2V5dmFsdWVzdG9yZV9oZWFk
-ZXJfY2FjaGVfc2l6ZSB0byB2ZXJ5IGxhcmdlIG51bWJlciBsaWtlIDEwMjQwMCwgYWxtb3N0IG9m
-IGhlYWRlciBzaG91bGQgYmUgY2FjaGVkIGlubWVtb3J5LiBLZXlWYWx1ZVN0b3JlIHVzZXMgUmFu
-ZG9tQ2FjaGUgdG8gc3RvcmUgaGVhZGVyIGNhY2hlLCBpdCBzaG91bGQgYmUgY2hlYXBlci4gQW5k
-IGhlYWRlciBpbiBLZXlWYWx1ZVN0b3JlIGlzIGFsaWtlICJmaWxlIGRlc2NyaXB0b3IiIGluIGxv
-Y2FsIGZzLCBhIGxhcmdlIGhlYWRlciBjYWNoZSBzaXplIGlzIGVuY291cmFnZWQgc2luY2UgImhl
-YWRlciIgaXMgIGxpZ2h0d2VpZ2h0IGNvbXBhcmVkIHRvIGlub2RlLg0KPj4NCj4+IFtTb21uYXRo
-XSBOb3BlLCBzbyBmYXIgSSBhbSBub3Qgc2VlaW5nIHRoaXMgYXMgYSBib3R0bGVuZWNrLCBidXQg
-dGhpbmtpbmcgaWYgd2UgY2FuIGdldCByaWQgb2YgZXh0cmEgcmVhZCBhbHdheXMuLkluIG91ciBj
-YXNlIG9uZSBPU0Qgd2lsbCBzZXJ2ZSB+OFRCIG9mIHN0b3JhZ2UsIHNvLCB0byBjYWNoZSBhbGwg
-dGhlc2UgaGVhZGVycyBpbiBtZW1vcnkgd2UgbmVlZCB+NDIwTUIgKGNvbnNpZGVyaW5nIGRlZmF1
-bHQgNE1CIHJhZG9zIG9iamVjdCBzaXplIGFuZCBoZWFkZXIgc2l6ZSBpcyB+MjAwYnl0ZXMpLCB3
-aGljaCBpcyBraW5kIG9mIGJpZy4gU28sIEkgdGhpbmsgdGhlcmUgd2lsbCBiZSBzb21lIGRpc2sg
-cmVhZCBhbHdheXMuDQo+PiBJIHRoaW5rIGp1c3QgcXVlcnlpbmcgdGhlIHBhcnRpY3VsYXIgb2Jq
-ZWN0IHNob3VsZCByZXZlYWwgd2hldGhlciBvYmplY3QgZXhpc3RzIG9yIG5vdC4gTm90IHN1cmUg
-aWYgd2UgbmVlZCB0byB2ZXJpZnkgaGVhZGVycyBhbHdheXMgaW4gdGhlIGlvIHBhdGggdG8gZGV0
-ZXJtaW5lIGlmIG9iamVjdCBleGlzdHMgb3Igbm90LiBJIGtub3cgaW4gY2FzZSBvZiBvbWFwIGl0
-IGlzIGltcGxlbWVudGVkIGxpa2UgdGhhdCwgYnV0LCBJIGRvbid0IGtub3cgd2hhdCBiZW5lZml0
-IHdlIGFyZSBnZXR0aW5nIGJ5IGRvaW5nIHRoYXQuDQo+Pg0KPj4+DQo+Pj4gMy4gV2UgY2FuIGFn
-Z3JlZ2F0ZSB0aGUgc21hbGwgd3JpdGVzIGluIHRoZSBidWZmZXIgdHJhbnNhY3Rpb24gYW5kIGlz
-c3VlIG9uZSBzaW5nbGUga2V5L3ZhbHVlIHdyaXRlIHRvIHRoZSBkYnMuIElmIGRicyBhcmUgYWxy
-ZWFkeSBkb2luZyBzbWFsbCB3cml0ZSBhZ2dyZWdhdGlvbiAsIHRoaXMgd29uJ3QgaGVscCBtdWNo
-IHRob3VnaC4NCj4+DQo+PiBZZXMsIGl0IGNvdWxkIGJlIGRvbmUganVzdCBsaWtlIE5ld1N0b3Jl
-IGRpZCEgU28ga2V5dmFsdWVzdG9yZSdzIHByb2Nlc3MgZmxhdyB3aWxsIGJlIHRoaXM6DQo+Pg0K
-Pj4gc2V2ZXJhbCBwZyB0aHJlYWRzOiBxdWV1ZV90cmFuc2FjdGlvbg0KPj4gICAgICAgICAgICAg
-ICB8DQo+PiAgICAgICAgICAgICAgIHwNCj4+IHNldmVyYWwga2V5dmFsdWVzdG9yZSBvcCB0aHJl
-YWRzOiBkb190cmFuc2FjdGlvbg0KPj4gICAgICAgICAgICAgICB8DQo+PiBrZXl2YWx1ZXN0b3Jl
-IHN1Ym1pdCB0aHJlYWQ6IGNhbGwgZGItPnN1Ym1pdF90cmFuc2FjdGlvbl9zeW5jDQo+Pg0KPj4g
-U28gdGhlIGJhbmR3aWR0aCBzaG91bGQgYmUgYmV0dGVyLg0KPj4NCj4+IEFub3RoZXIgb3B0aW1p
-emF0aW9uIHBvaW50IGlzIHJlZHVjaW5nIGxvY2sgZ3JhbnVsYXJpdHkgdG8gb2JqZWN0LWxldmVs
-KGN1cnJlbnRseSBpcyBwZyBsZXZlbCksIEkgdGhpbmsgaWYgd2UgdXNlIGEgc2VwYXJ0b3Igc3Vi
-bWl0IHRocmVhZCBpdCB3aWxsIGhlbHBmdWwgYmVjYXVzZSBtdWx0aSB0cmFuc2FjdGlvbiBpbiBv
-bmUgcGcgd2lsbCBiZSBxdWV1ZWQgaW4gb3JkZXJpbmcuDQo+PiBbU29tbmF0aF0gWWVhaC4uVGhh
-dCBJIHJhaXNlZCBlYXJsaWVyLCBidXQsIGl0IHNlZW1zIHF1aXRlIGEgZmV3IGltcGFjdCBmb3Ig
-dGhhdC4gQnV0LCBpdCB3b3J0aCB0cnlpbmcuLk1heSBiZSBuZWVkIHRvIGRpc2N1c3Mgd2l0aCBT
-YWdlL1NhbS4NCj4NCj4gQ29vbCENCj4NCj4+DQo+Pg0KPj4+DQo+Pj4gUGxlYXNlIHNoYXJlIHlv
-dXIgdGhvdWdodCBhcm91bmQgdGhpcy4NCj4+Pg0KPj4NCj4+IEkgYWx3YXlzIHJldGhpbmsgdG8g
-aW1wcm92ZSBrZXl2YWx1ZXN0b3JlIHBlcmZvcm1hbmNlLCBidXQgSSBkb24ndCBoYXZlIGEgZ29v
-ZCBiYWNrZW5kIHN0aWxsIG5vdy4gQSBzc2QgdmVuZG9yIHdobyBjYW4gcHJvdmlkZSB3aXRoIEZU
-TCBpbnRlcmZhY2Ugd291bGQgYmUgZ3JlYXQgSSB0aGluaywgc28gd2UgY2FuIG9mZmxvYWQgbG90
-cyBvZiB0aGluZ3MgdG8gRlRMIGxheWVyLg0KPj4NCj4+PiBUaGFua3MgJiBSZWdhcmRzDQo+Pj4g
-U29tbmF0aA0KPj4+DQo+Pj4NCj4+Pg0KPj4+DQo+Pj4gX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX18NCj4+Pg0KPj4+IFBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVk
-IGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhl
-IHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSBy
-ZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3Ug
-YXJlIGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBp
-biBlcnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24s
-IG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlv
-dSBoYXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlm
-eSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1l
-ZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGlu
-IHlvdXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBz
-dG9yZWQgY29waWVzKS4NCj4+Pg0KPj4+IC0tDQo+Pj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlz
-IGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiDQo+Pj4gaW4gdGhl
-IGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpv
-cmRvbW8gDQo+Pj4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5m
-by5odG1sDQo+Pg0KPj4NCj4+DQo+PiAtLQ0KPj4gQmVzdCBSZWdhcmRzLA0KPj4NCj4+IFdoZWF0
-DQo+DQo+DQo+DQo+IC0tDQo+IEJlc3QgUmVnYXJkcywNCj4NCj4gV2hlYXQNCg0KDQoNCi0tDQpC
-ZXN0IFJlZ2FyZHMsDQoNCldoZWF0DQotLQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6
-IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIHRoZSBib2R5IG9mIGEg
-bWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGluZm8g
-YXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
+On Fri, May 1, 2015 at 11:55 PM, Varada Kari <Varada.Kari@sandisk.com> wrote:
+> Hi Haomi,
+>
+> Actually we don't need to update the header for all the writes, we need to update when any header fields gets updated. But we are making header->updated to true unconditionally in _generic_write(), which is making the write of header object for all the strip write even for a overwrite, which we can eliminate by updating the header->updated accordingly. If you observe we never make the header->updated false anywhere. We need to make it false once we write the header.
+>
+> In worst case, we need to update the header till all the strips gets populated and when any clone/snapshot is created.
+>
+> I have fixed these issues, will be sending a PR soon once my unit testing completes.
+
+Great! From Somnath's statements, I just think it may something wrong
+with "updated" field. It would be nice to catch this.
+
+>
+> Varada
+>
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Haomai Wang
+> Sent: Friday, May 01, 2015 5:53 PM
+> To: Somnath Roy
+> Cc: ceph-devel
+> Subject: Re: K/V store optimization
+>
+> On Fri, May 1, 2015 at 2:57 PM, Haomai Wang <haomaiwang@gmail.com> wrote:
+>> On Fri, May 1, 2015 at 2:37 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
+>>> Thanks Haomai !
+>>> Response inline..
+>>>
+>>> Regards
+>>> Somnath
+>>>
+>>> -----Original Message-----
+>>> From: Haomai Wang [mailto:haomaiwang@gmail.com]
+>>> Sent: Thursday, April 30, 2015 10:49 PM
+>>> To: Somnath Roy
+>>> Cc: ceph-devel
+>>> Subject: Re: K/V store optimization
+>>>
+>>> On Fri, May 1, 2015 at 12:55 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
+>>>> Hi Haomai,
+>>>> I was doing some investigation with K/V store and IMO we can do the following optimization on that.
+>>>>
+>>>> 1. On every write KeyValueStore is writing one extra small attribute with prefix _GHOBJTOSEQ* which is storing the header information. This extra write will hurt us badly in case flash WA. I was thinking if we can get rid of this in the following way.
+>>>>
+>>>>       Seems like persisting headers during creation time should be sufficient. The reason is the following..
+>>>>        a. The header->seq for generating prefix will be written only when header is generated. So, if we want to use the _SEQ * as prefix, we can read the header and use it during write.
+>>>>        b. I think we don't need the stripe bitmap/header->max_len/stripe_size as well. The bitmap is required to determine the already written extents for a write. Now, any K/V db supporting range queries (any popular db does), we can always send down
+>>>>            range query with prefix say _SEQ_0000000000039468_STRIP_ and it should return the valid extents. No extra reads here since anyway we need to read those extents in read/write path.
+>>>>
+>>>
+>>> From my mind, I think normal IO won't always write header! If you notice lots of header written, maybe some cases wrong and need to fix.
+>>>
+>>> We have a "updated" field to indicator whether we need to write ghobject_t header for each transaction. Only  "max_size" and "bits"
+>>> changed will set "update=true", if we write warm data I don't we will write header again.
+>>>
+>>> Hmm, maybe "bits" will be changed often so it will write the whole header again when doing fresh writing. I think a feasible way is separate "bits" from header. The size of "bits" usually is 512-1024(or more for larger object) bytes, I think if we face baremetal ssd or any backend passthrough localfs/scsi, we can split bits to several fixed size keys. If so we can avoid most of header write.
+>>>
+>>> [Somnath] Yes, because of bitmap update, it is rewriting header on each transaction. I don't think separating bits from header will help much as any small write will induce flash logical page size amount write for most of the dbs unless they are doing some optimization internally.
+>
+> I just think we may could think metadata update especially "bits" as journal. So if we have a submit_transaction which will together all "bits" update to a request and flush to a formate key named like "bits-journal-[seq]". We could actually writeback inplace header very late. It could help I think.
+>
+>>
+>> Yeah, but we can't get rid of it if we want to implement a simple
+>> logic mapper in keyvaluestore layer. Otherwise, we need to read all
+>> keys go down to the backend.
+>>
+>>>>
+>>>> 2. I was thinking not to read this GHobject at all during read/write path. For that, we need to get rid of the SEQ stuff and calculate the object keys on the fly. We can uniquely form the GHObject keys and add that as prefix to attributes like this.
+>>>>
+>>>>                 _GHOBJTOSEQ_1%e59_head!9DD29B68!!1!!rbd_data%e100574b0dc51%e000000000000c18a!head     -----> for header (will be created one time)
+>>>>
+>>>> _GHOBJTOSEQ_1%e59_head!9DD29B68!!1!!rbd_data%e100574b0dc51%e00000000
+>>>> 00 00c18a!head __OBJOMAP * -> for all omap attributes
+>>>>
+>>>>         _GHOBJTOSEQ_1%e59_head!9DD29B68!!1!!rbd_data%e100574b0dc51%e000000000000c18a!head__OBJATTR__*  -> for all attrs
+>>>>         _GHOBJTOSEQ_1%e59_head!9DD29B68!!1!!rbd_data%e100574b0dc51%e000000000000c18a!head__STRIP_<stripe-no> -> for all strips.
+>>>>
+>>>>  Also, keeping the similar prefix to all the keys for an object will be helping k/v dbs in general as lot of dbs do optimization based on similar key prefix.
+>>>
+>>> We can't get rid of header look I think, because we need to check this object is existed and this is required by ObjectStore semantic. Do you think this will be bottleneck for read/write path? From my view, if I increase keyvaluestore_header_cache_size to very large number like 102400, almost of header should be cached inmemory. KeyValueStore uses RandomCache to store header cache, it should be cheaper. And header in KeyValueStore is alike "file descriptor" in local fs, a large header cache size is encouraged since "header" is  lightweight compared to inode.
+>>>
+>>> [Somnath] Nope, so far I am not seeing this as a bottleneck, but thinking if we can get rid of extra read always..In our case one OSD will serve ~8TB of storage, so, to cache all these headers in memory we need ~420MB (considering default 4MB rados object size and header size is ~200bytes), which is kind of big. So, I think there will be some disk read always.
+>>> I think just querying the particular object should reveal whether object exists or not. Not sure if we need to verify headers always in the io path to determine if object exists or not. I know in case of omap it is implemented like that, but, I don't know what benefit we are getting by doing that.
+>>>
+>>>>
+>>>> 3. We can aggregate the small writes in the buffer transaction and issue one single key/value write to the dbs. If dbs are already doing small write aggregation , this won't help much though.
+>>>
+>>> Yes, it could be done just like NewStore did! So keyvaluestore's process flaw will be this:
+>>>
+>>> several pg threads: queue_transaction
+>>>               |
+>>>               |
+>>> several keyvaluestore op threads: do_transaction
+>>>               |
+>>> keyvaluestore submit thread: call db->submit_transaction_sync
+>>>
+>>> So the bandwidth should be better.
+>>>
+>>> Another optimization point is reducing lock granularity to object-level(currently is pg level), I think if we use a separtor submit thread it will helpful because multi transaction in one pg will be queued in ordering.
+>>> [Somnath] Yeah..That I raised earlier, but, it seems quite a few impact for that. But, it worth trying..May be need to discuss with Sage/Sam.
+>>
+>> Cool!
+>>
+>>>
+>>>
+>>>>
+>>>> Please share your thought around this.
+>>>>
+>>>
+>>> I always rethink to improve keyvaluestore performance, but I don't have a good backend still now. A ssd vendor who can provide with FTL interface would be great I think, so we can offload lots of things to FTL layer.
+>>>
+>>>> Thanks & Regards
+>>>> Somnath
+>>>>
+>>>>
+>>>>
+>>>>
+>>>> ________________________________
+>>>>
+>>>> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+>>>>
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>>>> in the body of a message to majordomo@vger.kernel.org More majordomo
+>>>> info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>>
+>>>
+>>> --
+>>> Best Regards,
+>>>
+>>> Wheat
+>>
+>>
+>>
+>> --
+>> Best Regards,
+>>
+>> Wheat
+>
+>
+>
+> --
+> Best Regards,
+>
+> Wheat
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+-- 
+Best Regards,
+
+Wheat
