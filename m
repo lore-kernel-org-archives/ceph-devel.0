@@ -1,53 +1,119 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: K/V store optimization
-Date: Fri, 1 May 2015 04:55:05 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD84052@SACMBXIP01.sdcorp.global.sandisk.com>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: K/V store optimization
+Date: Fri, 1 May 2015 13:49:23 +0800
+Message-ID: <CACJqLybYKSKmwNtvTpRKDk-Hu47NrL7DJ23UaGTC8+cZoOyhzg@mail.gmail.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD84052@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0083.outbound.protection.outlook.com ([65.55.169.83]:15127
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750838AbbEAEzW convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 May 2015 00:55:22 -0400
-Content-Language: en-US
+Received: from mail-pd0-f182.google.com ([209.85.192.182]:35152 "EHLO
+	mail-pd0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750786AbbEAFtY convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 May 2015 01:49:24 -0400
+Received: by pdbqd1 with SMTP id qd1so83284033pdb.2
+        for <ceph-devel@vger.kernel.org>; Thu, 30 Apr 2015 22:49:23 -0700 (PDT)
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD84052@SACMBXIP01.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Haomai,
-I was doing some investigation with K/V store and IMO we can do the following optimization on that.
+On Fri, May 1, 2015 at 12:55 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
+> Hi Haomai,
+> I was doing some investigation with K/V store and IMO we can do the following optimization on that.
+>
+> 1. On every write KeyValueStore is writing one extra small attribute with prefix _GHOBJTOSEQ* which is storing the header information. This extra write will hurt us badly in case flash WA. I was thinking if we can get rid of this in the following way.
+>
+>       Seems like persisting headers during creation time should be sufficient. The reason is the following..
+>        a. The header->seq for generating prefix will be written only when header is generated. So, if we want to use the _SEQ * as prefix, we can read the header and use it during write.
+>        b. I think we don't need the stripe bitmap/header->max_len/stripe_size as well. The bitmap is required to determine the already written extents for a write. Now, any K/V db supporting range queries (any popular db does), we can always send down
+>            range query with prefix say _SEQ_0000000000039468_STRIP_ and it should return the valid extents. No extra reads here since anyway we need to read those extents in read/write path.
+>
 
-1. On every write KeyValueStore is writing one extra small attribute with prefix _GHOBJTOSEQ* which is storing the header information. This extra write will hurt us badly in case flash WA. I was thinking if we can get rid of this in the following way.
+From my mind, I think normal IO won't always write header! If you
+notice lots of header written, maybe some cases wrong and need to fix.
 
-      Seems like persisting headers during creation time should be sufficient. The reason is the following..
-       a. The header->seq for generating prefix will be written only when header is generated. So, if we want to use the _SEQ * as prefix, we can read the header and use it during write.
-       b. I think we don't need the stripe bitmap/header->max_len/stripe_size as well. The bitmap is required to determine the already written extents for a write. Now, any K/V db supporting range queries (any popular db does), we can always send down
-           range query with prefix say _SEQ_0000000000039468_STRIP_ and it should return the valid extents. No extra reads here since anyway we need to read those extents in read/write path.
+We have a "updated" field to indicator whether we need to write
+ghobject_t header for each transaction. Only  "max_size" and "bits"
+changed will set "update=true", if we write warm data I don't we will
+write header again.
+
+Hmm, maybe "bits" will be changed often so it will write the whole
+header again when doing fresh writing. I think a feasible way is
+separate "bits" from header. The size of "bits" usually is 512-1024(or
+more for larger object) bytes, I think if we face baremetal ssd or any
+backend passthrough localfs/scsi, we can split bits to several fixed
+size keys. If so we can avoid most of header write.
+>
+> 2. I was thinking not to read this GHobject at all during read/write path. For that, we need to get rid of the SEQ stuff and calculate the object keys on the fly. We can uniquely form the GHObject keys and add that as prefix to attributes like this.
+>
+>                 _GHOBJTOSEQ_1%e59_head!9DD29B68!!1!!rbd_data%e100574b0dc51%e000000000000c18a!head     -----> for header (will be created one time)
+>                 _GHOBJTOSEQ_1%e59_head!9DD29B68!!1!!rbd_data%e100574b0dc51%e000000000000c18a!head __OBJOMAP * -> for all omap attributes
+>
+>         _GHOBJTOSEQ_1%e59_head!9DD29B68!!1!!rbd_data%e100574b0dc51%e000000000000c18a!head__OBJATTR__*  -> for all attrs
+>         _GHOBJTOSEQ_1%e59_head!9DD29B68!!1!!rbd_data%e100574b0dc51%e000000000000c18a!head__STRIP_<stripe-no> -> for all strips.
+>
+>  Also, keeping the similar prefix to all the keys for an object will be helping k/v dbs in general as lot of dbs do optimization based on similar key prefix.
+
+We can't get rid of header look I think, because we need to check this
+object is existed and this is required by ObjectStore semantic. Do you
+think this will be bottleneck for read/write path? From my view, if I
+increase keyvaluestore_header_cache_size to very large number like
+102400, almost of header should be cached inmemory. KeyValueStore uses
+RandomCache to store header cache, it should be cheaper. And header in
+KeyValueStore is alike "file descriptor" in local fs, a large header
+cache size is encouraged since "header" is  lightweight compared to
+inode.
+
+>
+> 3. We can aggregate the small writes in the buffer transaction and issue one single key/value write to the dbs. If dbs are already doing small write aggregation , this won't help much though.
+
+Yes, it could be done just like NewStore did! So keyvaluestore's
+process flaw will be this:
+
+several pg threads: queue_transaction
+              |
+              |
+several keyvaluestore op threads: do_transaction
+              |
+keyvaluestore submit thread: call db->submit_transaction_sync
+
+So the bandwidth should be better.
+
+Another optimization point is reducing lock granularity to
+object-level(currently is pg level), I think if we use a separtor
+submit thread it will helpful because multi transaction in one pg will
+be queued in ordering.
 
 
-2. I was thinking not to read this GHobject at all during read/write path. For that, we need to get rid of the SEQ stuff and calculate the object keys on the fly. We can uniquely form the GHObject keys and add that as prefix to attributes like this.
+>
+> Please share your thought around this.
+>
 
-                _GHOBJTOSEQ_1%e59_head!9DD29B68!!1!!rbd_data%e100574b0dc51%e000000000000c18a!head     -----> for header (will be created one time)
-                _GHOBJTOSEQ_1%e59_head!9DD29B68!!1!!rbd_data%e100574b0dc51%e000000000000c18a!head __OBJOMAP * -> for all omap attributes
+I always rethink to improve keyvaluestore performance, but I don't
+have a good backend still now. A ssd vendor who can provide with FTL
+interface would be great I think, so we can offload lots of things to
+FTL layer.
 
-        _GHOBJTOSEQ_1%e59_head!9DD29B68!!1!!rbd_data%e100574b0dc51%e000000000000c18a!head__OBJATTR__*  -> for all attrs
-        _GHOBJTOSEQ_1%e59_head!9DD29B68!!1!!rbd_data%e100574b0dc51%e000000000000c18a!head__STRIP_<stripe-no> -> for all strips.
+> Thanks & Regards
+> Somnath
+>
+>
+>
+>
+> ________________________________
+>
+> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
- Also, keeping the similar prefix to all the keys for an object will be helping k/v dbs in general as lot of dbs do optimization based on similar key prefix.
-
-3. We can aggregate the small writes in the buffer transaction and issue one single key/value write to the dbs. If dbs are already doing small write aggregation , this won't help much though.
-
-Please share your thought around this.
-
-Thanks & Regards
-Somnath
 
 
+-- 
+Best Regards,
 
-
-________________________________
-
-PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-
+Wheat
