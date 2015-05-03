@@ -1,38 +1,38 @@
 From: Loic Dachary <loic@dachary.org>
-Subject: Ceph tag v0.94.1.1 etc.
-Date: Sun, 03 May 2015 12:09:55 +0200
-Message-ID: <5545F3F3.8030206@dachary.org>
+Subject: suites running on the hammer-backports branch
+Date: Sun, 03 May 2015 15:08:10 +0200
+Message-ID: <55461DBA.1060009@dachary.org>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="wR9Pl8M8snvnrwpHnRjgTdSSclraIxa69"
+ boundary="M2xrTFK8b7HflS7C9tspO1F2C6TdJC1v6"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:56567 "EHLO
+Received: from mail2.dachary.org ([91.121.57.175]:56608 "EHLO
 	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751632AbbECKJ6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 3 May 2015 06:09:58 -0400
-Received: from [10.9.0.6] (unknown [10.0.2.28])
-	by smtp.dmail.dachary.org (Postfix) with ESMTP id 3D1D0420A4
-	for <ceph-devel@vger.kernel.org>; Sun,  3 May 2015 12:09:55 +0200 (CEST)
+	with ESMTP id S1750886AbbECNIM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 3 May 2015 09:08:12 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Abhishek L <abhishek.lekshmanan@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
 This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---wR9Pl8M8snvnrwpHnRjgTdSSclraIxa69
+--M2xrTFK8b7HflS7C9tspO1F2C6TdJC1v6
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
 
-Hi,
+Hi Abhishek,
 
-At https://git.ceph.com/?p=3Dceph.git there are tags such as
+The rados suite you scheduled ( http://tracker.ceph.com/issues/11492#rado=
+s ) failed because of environmental noise and I re-scheduled the 84 faile=
+d jobs on your behalf.
 
-v0.94.1.1
-v0.80.8.1
+I've scheduled the rgw suite as well, suppressing the apache tests and ke=
+eping the civetweb tests which should be enough for the purpose of the pu=
+ll requests in the integration branch (44 jobs instead of 88 jobs). http:=
+//tracker.ceph.com/issues/11492#rgw
 
-etc.
-
-What are they ?
+The rbd and fs suites were also scheduled, as usual.
 
 Cheers
 
@@ -40,7 +40,7 @@ Cheers
 Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
 
---wR9Pl8M8snvnrwpHnRjgTdSSclraIxa69
+--M2xrTFK8b7HflS7C9tspO1F2C6TdJC1v6
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -48,9 +48,9 @@ Content-Disposition: attachment; filename="signature.asc"
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2.0.22 (GNU/Linux)
 
-iEYEARECAAYFAlVF8/MACgkQ8dLMyEl6F20fswCeMG6cgJ4nyLlhW6d1p69V33jw
-4BwAoIa70rcrTxBh+CEzEzc/jyFQs3eo
-=VbkW
+iEYEARECAAYFAlVGHboACgkQ8dLMyEl6F23q+QCgh34JSspz76/GlUFlAgTRVThB
+7KQAn12q068B/KuX7de1xuSDOv1i5vck
+=8buq
 -----END PGP SIGNATURE-----
 
---wR9Pl8M8snvnrwpHnRjgTdSSclraIxa69--
+--M2xrTFK8b7HflS7C9tspO1F2C6TdJC1v6--
