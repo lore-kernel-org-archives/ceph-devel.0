@@ -1,173 +1,59 @@
-From: Vasu Kulkarni <vakulkar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: Help with CEPH deployment
-Date: Mon, 4 May 2015 14:41:08 -0400 (EDT)
-Message-ID: <1620151933.8571048.1430764868642.JavaMail.zimbra@redhat.com>
-References: <CAKKTCLVJJA04BuymLiONYKmJELGpbPp776g=btF1ha4TRhHR-w@mail.gmail.com>
-	<CAKKTCLXG3nzSQs8V5Qq7ycpbd__-vVHMG3Dma+Mihij4o7kakg@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: cephfs security for multitenancy
+Date: Mon, 4 May 2015 11:59:29 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1505041134380.24943@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAKKTCLXG3nzSQs8V5Qq7ycpbd__-vVHMG3Dma+Mihij4o7kakg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Venkateswara Rao Jujjuri <jujjuri-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:56473 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751007AbbEDS7d (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 4 May 2015 14:59:33 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: jashank42@gmail.com, nishtha3rai@gmail.com
+Cc: gfarnum@redhat.com, ceph-devel@vger.kernel.org
 
-What are your initial monitor nodes? i,e what nodes did you specify in the first step: ceph-deploy new {initial-monitor-node(s)}
-Did you specify rgulistan-wsl11 as your monitor node in that step?
+GSoC and Outreachy have made their assignments and I'm very excited that 
+we will have two interns this summer to work on our efforts around 
+improved security for CephFS in multitenant environments!  Both Nishtha 
+and Jashan will be joining us starting in a few weeks (mid-May?).  
+Welcome!
 
+The other CephFS developers you'll likely be interacting with (besides me) 
+are Greg Farnum (also in California), Zheng Yan (China), and John Spray 
+(Scotland).  We have a daily video call (usually 5-15 minutes) at 14:30 
+UTC (8pm IST, I believe).  You are welcome and encouraged to join when you 
+can.  We also use the ceph-devel email list, the #ceph-devel IRC channel 
+on irc.oftc.net to communicate, and the github comment stream for code 
+review.
 
------ Original Message -----
-From: "Venkateswara Rao Jujjuri" <jujjuri-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-To: "ceph-devel" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Sent: Sunday, May 3, 2015 10:42:29 AM
-Subject: Re: [ceph-users] Help with CEPH deployment
+We currently have a few things planned:
 
-Here is the output..I am still stuck at this step. :(
-(multiple times tried to by purging and restarting from scratch)
+- A "root_squash" mode that works similarly to the NFS option.  Nishtha 
+got started on this a few weeks back with some initial patches, posted 
+here:
 
-vjujjuri@rgulistan-wsl10:~/ceph-cluster$ ceph-deploy mon create-initial
-[ceph_deploy.conf][DEBUG ] found configuration file at:
-/home/vjujjuri/.cephdeploy.conf
-[ceph_deploy.cli][INFO  ] Invoked (1.5.23): /usr/bin/ceph-deploy mon
-create-initial
-[ceph_deploy.mon][DEBUG ] Deploying mon, cluster ceph hosts rgulistan-wsl11
-[ceph_deploy.mon][DEBUG ] detecting platform for host rgulistan-wsl11 ...
-[rgulistan-wsl11][DEBUG ] connection detected need for sudo
-[rgulistan-wsl11][DEBUG ] connected to host: rgulistan-wsl11
-[rgulistan-wsl11][DEBUG ] detect platform information from remote host
-[rgulistan-wsl11][DEBUG ] detect machine type
-[ceph_deploy.mon][INFO  ] distro info: Ubuntu 12.04 precise
-[rgulistan-wsl11][DEBUG ] determining if provided host has same
-hostname in remote
-[rgulistan-wsl11][DEBUG ] get remote short hostname
-[rgulistan-wsl11][DEBUG ] deploying mon to rgulistan-wsl11
-[rgulistan-wsl11][DEBUG ] get remote short hostname
-[rgulistan-wsl11][DEBUG ] remote hostname: rgulistan-wsl11
-[rgulistan-wsl11][DEBUG ] write cluster configuration to
-/etc/ceph/{cluster}.conf
-[rgulistan-wsl11][DEBUG ] create the mon path if it does not exist
-[rgulistan-wsl11][DEBUG ] checking for done path:
-/var/lib/ceph/mon/ceph-rgulistan-wsl11/done
-[rgulistan-wsl11][DEBUG ] create a done file to avoid re-doing the mon
-deployment
-[rgulistan-wsl11][DEBUG ] create the init path if it does not exist
-[rgulistan-wsl11][DEBUG ] locating the `service` executable...
-[rgulistan-wsl11][INFO  ] Running command: sudo initctl emit ceph-mon
-cluster=ceph id=rgulistan-wsl11
-[rgulistan-wsl11][INFO  ] Running command: sudo ceph --cluster=ceph
---admin-daemon /var/run/ceph/ceph-mon.rgulistan-wsl11.asok mon_status
-[rgulistan-wsl11][DEBUG ]
-********************************************************************************
-[rgulistan-wsl11][DEBUG ] status for monitor: mon.rgulistan-wsl11
-[rgulistan-wsl11][DEBUG ] {
-[rgulistan-wsl11][DEBUG ]   "election_epoch": 1,
-[rgulistan-wsl11][DEBUG ]   "extra_probe_peers": [],
-[rgulistan-wsl11][DEBUG ]   "monmap": {
-[rgulistan-wsl11][DEBUG ]     "created": "2015-05-02 10:52:17.318500",
-[rgulistan-wsl11][DEBUG ]     "epoch": 1,
-[rgulistan-wsl11][DEBUG ]     "fsid": "64e48bd5-f174-44a4-a485-7df3adbdad3d",
-[rgulistan-wsl11][DEBUG ]     "modified": "2015-05-02 10:52:17.318500",
-[rgulistan-wsl11][DEBUG ]     "mons": [
-[rgulistan-wsl11][DEBUG ]       {
-[rgulistan-wsl11][DEBUG ]         "addr": "xx.xx.xx.xx:6789/0",
-[rgulistan-wsl11][DEBUG ]         "name": "rgulistan-wsl11",
-[rgulistan-wsl11][DEBUG ]         "rank": 0
-[rgulistan-wsl11][DEBUG ]       }
-[rgulistan-wsl11][DEBUG ]     ]
-[rgulistan-wsl11][DEBUG ]   },
-[rgulistan-wsl11][DEBUG ]   "name": "rgulistan-wsl11",
-[rgulistan-wsl11][DEBUG ]   "outside_quorum": [],
-[rgulistan-wsl11][DEBUG ]   "quorum": [
-[rgulistan-wsl11][DEBUG ]     0
-[rgulistan-wsl11][DEBUG ]   ],
-[rgulistan-wsl11][DEBUG ]   "rank": 0,
-[rgulistan-wsl11][DEBUG ]   "state": "leader",
-[rgulistan-wsl11][DEBUG ]   "sync_provider": []
-[rgulistan-wsl11][DEBUG ] }
-[rgulistan-wsl11][DEBUG ]
-********************************************************************************
-[rgulistan-wsl11][INFO  ] monitor: mon.rgulistan-wsl11 is running
-[rgulistan-wsl11][INFO  ] Running command: sudo ceph --cluster=ceph
---admin-daemon /var/run/ceph/ceph-mon.rgulistan-wsl11.asok mon_status
-[ceph_deploy.mon][INFO  ] processing monitor mon.rgulistan-wsl11
-[rgulistan-wsl11][DEBUG ] connection detected need for sudo
-[rgulistan-wsl11][DEBUG ] connected to host: rgulistan-wsl11
-[rgulistan-wsl11][INFO  ] Running command: sudo ceph --cluster=ceph
---admin-daemon /var/run/ceph/ceph-mon.rgulistan-wsl11.asok mon_status
-[ceph_deploy.mon][INFO  ] mon.rgulistan-wsl11 monitor has reached quorum!
-[ceph_deploy.mon][INFO  ] all initial monitors are running and have
-formed quorum
-[ceph_deploy.mon][INFO  ] Running gatherkeys...
-[ceph_deploy.gatherkeys][DEBUG ] Checking rgulistan-wsl11 for
-/etc/ceph/ceph.client.admin.keyring
-[rgulistan-wsl11][DEBUG ] connection detected need for sudo
-[rgulistan-wsl11][DEBUG ] connected to host: rgulistan-wsl11
-[rgulistan-wsl11][DEBUG ] detect platform information from remote host
-[rgulistan-wsl11][DEBUG ] detect machine type
-[rgulistan-wsl11][DEBUG ] fetch remote file
-[ceph_deploy.gatherkeys][WARNIN] Unable to find
-/etc/ceph/ceph.client.admin.keyring on rgulistan-wsl11
-[ceph_deploy][ERROR ] KeyNotFoundError: Could not find keyring file:
-/etc/ceph/ceph.client.admin.keyring on host rgulistan-wsl11
+	https://github.com/ceph/ceph/pull/4112
 
+We were hoping we could define some pretty simple semantics that capture 
+both the root_squash behavior (that provides some minimal security when 
+lots of hosts are mounting a shared fs) and also the case where a client 
+is only allowed to behave as one user, as Greg points out that may be too 
+ambitious.
 
+- The ability to restrict a client to act as a single user.  This is 
+important if, for example, we want to allow unprivileged ceph-fuse or 
+libcephfs users to be properly restricted.
 
+- The ability to restrict a client to a path or subdirectory.  We have the 
+parsing in place for MDSAuthCap, but that's about it.  This will require a 
+range of checks in the MDS to ensure that the client is not doing anything 
+outside of their permitted subtree.
 
+My gut says that working out the root_squash semantics and figuring out if 
+there is overlap with the restrict-to-uid behavior is the first order of 
+business.  Greg and I talked about it several weeks back but all I can 
+remember now was that it wasn't as simple as I'd hoped...
 
-On Sat, May 2, 2015 at 1:58 PM, Venkateswara Rao Jujjuri
-<jujjuri-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> Started to install basic cluster from scratch, but running into keyring issues.
-> Basically /etc/ceph/ceph.client.admin.keyring is not getting generated
-> on monitor node.
-> When I tried to create it on the monitor node, it fails with:
->
-> $ ceph auth get-or-create client.admin mon 'allow *' mds 'allow *' osd
-> 'allow *' -o /etc/ceph/ceph.client.admin.keyring
-> 2015-05-02 12:32:59.198588 7f0e30395700 -1 monclient(hunting): ERROR:
-> missing keyring, cannot use cephx for authentication
-> 2015-05-02 12:32:59.198592 7f0e30395700  0 librados: client.admin
-> initialization error (2) No such file or directory
-> Error connecting to cluster: ObjectNotFound
->
->
-> $ ceph --version
-> ceph version 0.94.1 (e4bfad3a3c51054df7e537a724c8d0bf9be972ff)
->
->
-> Following these insructions:
->
-> http://docs.ceph.com/docs/master/start/quick-ceph-deploy/
->
-> Failing at :
->
-> $ ceph-deploy  mon create-initial
-> because it could not find /etc/ceph/ceph.client.admin.keyring
->
-> Help appreciated.
-> --
-> Jvrao
-> ---
-> First they ignore you, then they laugh at you, then they fight you,
-> then you win. - Mahatma Gandhi
-
-
-
--- 
-Jvrao
----
-First they ignore you, then they laugh at you, then they fight you,
-then you win. - Mahatma Gandhi
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+sage
