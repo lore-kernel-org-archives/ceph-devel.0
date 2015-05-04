@@ -1,64 +1,48 @@
-From: Ken Dreyer <kdreyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: The first infernalis dev release will be v9.0.0
-Date: Mon, 4 May 2015 13:21:20 -0400 (EDT)
-Message-ID: <111694596.8527816.1430760080256.JavaMail.zimbra@redhat.com>
-References: <alpine.DEB.2.00.1504301528410.5458@cobra.newdream.net>
-	<5547A9EB.4040404@dachary.org>
+From: Gregory Farnum <greg@gregs42.com>
+Subject: Re: Effects of varying page size on OSD writes
+Date: Mon, 4 May 2015 10:23:41 -0700
+Message-ID: <CAC6JEv9SrAt-q-Q2mTDGjbiW+WqnUfnEZRJi7HNBcBoU3CgBvg@mail.gmail.com>
+References: <CAPvkgC1psL7xc8V_n+tzHoWdgLviyYw7T3m_Lg5Ej-kaMzYB7w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <5547A9EB.4040404-cLsNCMjd+0JAfugRpC6u6w@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Loic Dachary <loic-cLsNCMjd+0JAfugRpC6u6w@public.gmane.org>
-Cc: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ig0-f169.google.com ([209.85.213.169]:38586 "EHLO
+	mail-ig0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751403AbbEDRXn (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 May 2015 13:23:43 -0400
+Received: by igbhj9 with SMTP id hj9so89217433igb.1
+        for <ceph-devel@vger.kernel.org>; Mon, 04 May 2015 10:23:42 -0700 (PDT)
+Received: from mail-ig0-f174.google.com (mail-ig0-f174.google.com. [209.85.213.174])
+        by mx.google.com with ESMTPSA id v14sm5569522igd.12.2015.05.04.10.23.42
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Mon, 04 May 2015 10:23:42 -0700 (PDT)
+Received: by igbyr2 with SMTP id yr2so90604873igb.0
+        for <ceph-devel@vger.kernel.org>; Mon, 04 May 2015 10:23:42 -0700 (PDT)
+In-Reply-To: <CAPvkgC1psL7xc8V_n+tzHoWdgLviyYw7T3m_Lg5Ej-kaMzYB7w@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Steve Capper <steve.capper@linaro.org>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-VGhpcyBtYWtlcyBhIGxvdCBvZiBzZW5zZS4gVGhhbmtzIQoKLSBLZW4KCi0tLS0tIE9yaWdpbmFs
-IE1lc3NhZ2UgLS0tLS0KPiBGcm9tOiAiTG9pYyBEYWNoYXJ5IiA8bG9pY0BkYWNoYXJ5Lm9yZz4K
-PiBUbzogIlNhZ2UgV2VpbCIgPHN3ZWlsQHJlZGhhdC5jb20+LCBjZXBoLWRldmVsQHZnZXIua2Vy
-bmVsLm9yZywgY2VwaC11c2Vyc0BjZXBoLmNvbQo+IFNlbnQ6IE1vbmRheSwgTWF5IDQsIDIwMTUg
-MTE6MTg6MzUgQU0KPiBTdWJqZWN0OiBSZTogVGhlIGZpcnN0IGluZmVybmFsaXMgZGV2IHJlbGVh
-c2Ugd2lsbCBiZSB2OS4wLjAKPiAKPiArMSA7LSkKPiAKPiBPbiAwNC8wNS8yMDE1IDE4OjA5LCBT
-YWdlIFdlaWwgd3JvdGU6Cj4gPiBUaGUgZmlyc3QgQ2VwaCByZWxlYXNlIGJhY2sgaW4gSmFuIG9m
-IDIwMDggd2FzIDAuMS4gIFRoYXQgbWFkZSBzZW5zZSBhdAo+ID4gdGhlIHRpbWUuICBXZSBoYXZl
-bid0IHJldmlzZWQgdGhlIHZlcnNpb25pbmcgc2NoZW1lIHNpbmNlIHRoZW4sIGhvd2V2ZXIsCj4g
-PiBhbmQgYXJlIG5vdyBhdCAwLjk0LjEgKGZpcnN0IEhhbW1lciBwb2ludCByZWxlYXNlKS4gIFRv
-IGF2b2lkIHJlYWNoaW5nCj4gPiAwLjk5IChhbmQgMC4xMDAgb3IgMS4wMD8pIHdlIGhhdmUgYSBu
-ZXcgc3RyYXRlZ3kuICBUaGlzIHdhcyBkaXNjdXNzZWQgYQo+ID4gYml0IG9uIGNlcGgtZGV2ZWwg
-YW5kIGluICNjZXBoLWRldmVsIGFuZCB0aGVyZSBkb2Vzbid0IGFwcGVhciB0byBiZSBhbnkKPiA+
-IHNjaGVtZSB0aGF0IGV2ZXJ5b25lIGxpa2VzLgo+ID4gCj4gPiBTbywgd2UncmUgZ29pbmcgdG8g
-Z28gd2l0aCBzb21ldGhpbmcgdGhhdCBvbmx5IGEgZmV3IHBlb3BsZSBkaXNsaWtlOgo+ID4gCj4g
-PiAgeC4wLnogLSBkZXZlbG9wbWVudCByZWxlYXNlcyAoZm9yIGVhcmx5IHRlc3RlcnMgYW5kIHRo
-ZSBicmF2ZSBhdCBoZWFydCkKPiA+ICB4LjEueiAtIHJlbGVhc2UgY2FuZGlkYXRlcyAoZm9yIHRl
-c3QgY2x1c3RlcnMsIGJyYXZlIHVzZXJzKQo+ID4gIHguMi56IC0gc3RhYmxlL2J1Z2ZpeCByZWxl
-YXNlcyAoZm9yIHVzZXJzKQo+ID4gCj4gPiB4IHdpbGwgc3RhcnQgYXQgOSBmb3IgSW5mZXJuYWxp
-cyAoIkkiIGlzIHRoZSA5dGggbGV0dGVyKSwgbWFraW5nIG91ciBmaXJzdAo+ID4gZGV2ZWxvcG1l
-bnQgcmVsZWFzZSBvZiB0aGUgOXRoIHJlbGVhc2UgY3ljbGUgOS4wLjAuICBTdWJzZXF1ZW50Cj4g
-PiBkZXZlbG9wbWVudCByZWxlYXNlcyB3aWxsIGJlIDkuMC4xLCA5LjAuMiwgZXRjLgo+ID4gCj4g
-PiBJbiBhIGNvdXBsZSBtb250aHMgd2UnbGwgaGF2ZSBhIDkuMS4wIChhbmQgbWF5YmUgOS4xLjEp
-IHJlbGVhc2UgY2FuZGlkYXRlLgo+ID4gCj4gPiBBIGZldyB3ZWVrcyBhZnRlciB0aGF0IHdlJ2xs
-IGhhdmUgdGhlIEluZmVybmFsaXMgcmVsZWFzZSA5LjIuMCwgZm9sbG93ZWQKPiA+IGJ5IHN0YWJs
-ZSBidWcgZml4IHVwZGF0ZXMgOS4yLjEsIDkuMi4yLCBldGMuLCBhbmQgdGhlbiBiZWdpbiB3b3Jr
-IG9uIHRoZQo+ID4gSmV3ZWwgKDEwLnkueikgcmVsZWFzZS4KPiA+IAo+ID4gV2UnbGwgc2VlIGhv
-dyB0aGlzIHdvcmtzIG91dC4gIFdlIGNhbiBhZGp1c3QgdGhpcyBpbiB0aGUgZnV0dXJlIHRvIGFu
-eQo+ID4gb3RoZXIgOS55Lnogc2NoZW1lIChlLmcuLCA5LjEsIDkuMiBldGMgZGV2IHJlbGVhc2Vz
-IGFuZCA5LjgueiBzdGFibGUKPiA+IHJlbGVhc2VzKTsgdGhlIG1haW4gY29tbWl0bWVudCBoZXJl
-IGlzIHRvIHRoZSA5IHBhcnQsIGluZGljYXRpbmcKPiA+IEluZmVybmFsaXMgaXMgdGhlIDl0aCBt
-YWpvciByZWxlYXNlIGN5Y2xlLgo+ID4gCj4gPiBPbndhcmQhCj4gPiBzYWdlCj4gPiAtLQo+ID4g
-VG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJl
-IGNlcGgtZGV2ZWwiIGluCj4gPiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZn
-ZXIua2VybmVsLm9yZwo+ID4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2Vy
-bmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sCj4gPiAKPiAKPiAtLQo+IExvw69jIERhY2hhcnks
-IEFydGlzYW4gTG9naWNpZWwgTGlicmUKPiAKPiAKX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0Bs
-aXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNl
-cnMtY2VwaC5jb20K
+On Fri, May 1, 2015 at 7:54 AM, Steve Capper <steve.capper@linaro.org> wrote:
+> Hello,
+> Whilst testing Ceph 0.94.1 on 64-bit ARM hardware, I noticed that
+> switching the kernel PAGE_SIZE from 4KB to 64KB caused an increase by
+> a factor of ~6 in the total amount of data written to disk (according
+> to blktrace) by the OSD when running the RBD bench-write test (with
+> --io-pattern rand, --io-size=4096, --num-threads=16, --io-total=$((50
+> << 20))).
+>
+> Delving into the source, it is apparent that the FileJournal code uses
+> the current page size for the block size. I was wondering why
+> something like the block device sector size wasn't used instead? Is
+> there a mmap somewhere that I missed, or are fewer larger blocks
+> better for most use cases? (The use case above may be overly
+> contrived?).
+
+This isn't an area of the kernel I know much about, but doesn't the
+page cache work in memory page size, regardless of what the disk is
+doing? FileJournal/FileStore are definitely trying to be friendly to
+what the page cache is up to.
+-Greg
