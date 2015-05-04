@@ -1,45 +1,54 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: The first infernalis dev release will be v9.0.0
-Date: Mon, 4 May 2015 09:09:41 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1504301528410.5458@cobra.newdream.net>
+From: Gaudenz Steinlin <gaudenz@debian.org>
+Subject: Re: Request for static uid/gid for ceph
+Date: Mon, 04 May 2015 15:00:26 +0200
+Message-ID: <87h9rsts45.fsf@meteor.durcheinandertal.bofh>
+References: <87egnl2u87.fsf@meteor.durcheinandertal.bofh>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:53837 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751497AbbEDQJr (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 4 May 2015 12:09:47 -0400
+Received: from vechigen.cirrax.com ([217.197.128.12]:39639 "EHLO
+	mail.cirrax.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750941AbbEDQZx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 May 2015 12:25:53 -0400
+In-Reply-To: <87egnl2u87.fsf@meteor.durcheinandertal.bofh>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, ceph-users@ceph.com
+To: base-passwd@packages.debian.org
+Cc: timm@fnal.gov, ceph-maintainers@ceph.com, ceph-devel@vger.kernel.org
 
-The first Ceph release back in Jan of 2008 was 0.1.  That made sense at 
-the time.  We haven't revised the versioning scheme since then, however, 
-and are now at 0.94.1 (first Hammer point release).  To avoid reaching 
-0.99 (and 0.100 or 1.00?) we have a new strategy.  This was discussed a 
-bit on ceph-devel and in #ceph-devel and there doesn't appear to be any 
-scheme that everyone likes.
 
-So, we're going to go with something that only a few people dislike:
+Hi base-passwd maintainers
 
- x.0.z - development releases (for early testers and the brave at heart)
- x.1.z - release candidates (for test clusters, brave users)
- x.2.z - stable/bugfix releases (for users)
+Did you receive the request below? Anything I need to do to get it
+processed? Any estimate how long it will take until I get a decision?
 
-x will start at 9 for Infernalis ("I" is the 9th letter), making our first 
-development release of the 9th release cycle 9.0.0.  Subsequent 
-development releases will be 9.0.1, 9.0.2, etc.
+Thanks for your work
 
-In a couple months we'll have a 9.1.0 (and maybe 9.1.1) release candidate.
+Gaudenz
 
-A few weeks after that we'll have the Infernalis release 9.2.0, followed 
-by stable bug fix updates 9.2.1, 9.2.2, etc., and then begin work on the 
-Jewel (10.y.z) release.
+Gaudenz Steinlin <gaudenz@debian.org> writes:
 
-We'll see how this works out.  We can adjust this in the future to any 
-other 9.y.z scheme (e.g., 9.1, 9.2 etc dev releases and 9.8.z stable 
-releases); the main commitment here is to the 9 part, indicating 
-Infernalis is the 9th major release cycle.
-
-Onward!
-sage
+> Hi
+>
+> Ceph is currently developing unprivileged user support, and the upstream
+> developers are asking each of the distros to allocate a static numerical
+> UID for the "ceph" user and group.
+>
+> The reason for the static number is to allow Ceph users to hot-swap hard
+> drives from one OSD server to another. Currently this practice works
+> because Ceph writes its files as "uid 0", but when Ceph starts writing
+> its files as an unprivileged user, it will be nice to allow
+> administrators to unplug a drive and plug it into another computer and
+> everything to just work.
+>
+> For this I'm requesting an uid and gid from the reserved range
+> 60000-64999 according to the process outlined in
+> https://anonscm.debian.org/cgit/users/cjwatson/base-passwd.git/tree/README.
+>
+> Thanks,
+> Gaudenz
+>
+> _______________________________________________
+> Ceph-maintainers mailing list
+> Ceph-maintainers@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-maintainers-ceph.com
