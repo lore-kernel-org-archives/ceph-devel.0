@@ -1,60 +1,73 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: newstore performance update
-Date: Mon, 04 May 2015 12:50:14 -0500
-Message-ID: <5547B156.8060508@redhat.com>
-References: <554016E2.3000104@redhat.com> <6F3FA899187F0043BA1827A69DA2F7CC021E4894@shsmsx102.ccr.corp.intel.com> <alpine.DEB.2.00.1504290929400.5458@cobra.newdream.net>, <55422E0A.6010204@redhat.com> <ijupkkkyuvtsofr81j33sd7l.1430402112852@email.android.com> <554237F8.5070907@redhat.com> <alpine.DEB.2.00.1504301107310.5458@cobra.newdream.net> <5543923E.1020607@redhat.com> <alpine.DEB.2.00.1505011731500.5458@cobra.newdream.net>
+From: Abhishek L <abhishek.lekshmanan@gmail.com>
+Subject: Re: suites running on the hammer-backports branch
+Date: Mon, 4 May 2015 23:29:58 +0530
+Message-ID: <CAEw75dOomkcukQcTc7Xkt0g8u__CFAsLvjP3SE14VZsr=D_Urw@mail.gmail.com>
+References: <55461DBA.1060009@dachary.org>
+	<55473AFF.80902@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:47087 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751444AbbEDRuR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 4 May 2015 13:50:17 -0400
-In-Reply-To: <alpine.DEB.2.00.1505011731500.5458@cobra.newdream.net>
+Received: from mail-qc0-f171.google.com ([209.85.216.171]:34759 "EHLO
+	mail-qc0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750919AbbEDR77 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 May 2015 13:59:59 -0400
+Received: by qcyk17 with SMTP id k17so75879796qcy.1
+        for <ceph-devel@vger.kernel.org>; Mon, 04 May 2015 10:59:58 -0700 (PDT)
+In-Reply-To: <55473AFF.80902@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 05/01/2015 07:33 PM, Sage Weil wrote:
-> Ok, I think I figured out what was going on.  The db->submit_transaction()
-> call (from _txc_finish_io) was blocking when there was a
-> submit_transaction_sync() in progress.  This was making me hit a ceiling
-> of about 80 iops on my slow disk.  When I moved that into _kv_sync_thread
-> (just prior to the submit_transaction_sync() call) it jumps up to 300+
-> iops.
+On Mon, May 4, 2015 at 2:55 PM, Loic Dachary <loic@dachary.org> wrote:
 >
-> I pushed that to wip-newstore.
 >
-> Further, if I drop the O_DSYNC, it goes up another 50% or so.  It'll take
-> a bit more coding to effectively batch the (implicit) fdatasync from the
-> O_DSYNC up, though, and capture some of that.  Next!
+> On 03/05/2015 15:08, Loic Dachary wrote:> Hi Abhishek,
+>>
+>> The rados suite you scheduled ( http://tracker.ceph.com/issues/11492=
+#rados ) failed because of environmental noise and I re-scheduled the 8=
+4 failed jobs on your behalf.
 >
-> sage
+> It turns out the rados suite did not fail because of environmental no=
+ise but because the thrasher yaml file also contains the ceph installat=
+ion. Removing the thrasher yaml file had the infortunate side effect of=
+ not installing Ceph. And without Ceph installed the tests don't run ve=
+ry well ;-) I fixed this at https://github.com/dachary/ceph-qa-suite/tr=
+ee/wip-rados-no-thrash-hammer and re-scheduled a suite of 116 jobs at h=
+ttp://tracker.ceph.com/issues/11492#rados
+>
+> Note that it was not possible to only re-schedule the ones that faile=
+d (88 out of 116) using the usual method because I introduced new yaml =
+files (ceph.yaml with only the ceph installation). The descriptions are=
+ differents and the filtering does not work anymore.
+
+It seems a couple of the rados suites have failed again.. I've linked
+the corresponding job ids against the failures in the tracker descripti=
+on,
+though I'm not sure of the reason yet (probably some changes in upstrea=
+m
+teuthology?)
+
+
+>>
+>> I've scheduled the rgw suite as well, suppressing the apache tests a=
+nd keeping the civetweb tests which should be enough for the purpose of=
+ the pull requests in the integration branch (44 jobs instead of 88 job=
+s). http://tracker.ceph.com/issues/11492#rgw
+>>
+>> The rbd and fs suites were also scheduled, as usual.
+>>
+>> Cheers
+>>
+>
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Lo=C3=AFc Dachary, Artisan Logiciel Libre
 >
-
-Ran through a bunch of tests on 0c728ccc over the weekend:
-
-http://nhm.ceph.com/newstore/5d96fe6f_vs_0c728ccc.pdf
-
-The good news is that sequential writes on spinning disks are looking 
-significantly better!  We went from 40x slower than filestore for small 
-sequential IO to only about 30-40% slower and we become faster than 
-filestore at 64kb+ IO sizes.
-
-128kb-2MB sequential writes with data on spinning disk and rocksdb on 
-SSD regressed.  Newstore is no longer really any faster than filestore 
-for those IO sizes.  We saw something similar for random IO, where 
-spinning disk only results improved and spinning disk + rocksdb on SSD 
-regressed.
-
-With everything on SSD, we saw small sequential writes improve and 
-nearly all random writes regress.  Not sure how much these regressions 
-are due to 0c728ccc vs other commits yet.
-
-Mark
+Regards
+Abhishek
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
