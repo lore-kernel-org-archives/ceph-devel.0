@@ -1,65 +1,56 @@
 From: Loic Dachary <loic@dachary.org>
-Subject: Re: suites running on the hammer-backports branch
-Date: Mon, 04 May 2015 11:25:19 +0200
-Message-ID: <55473AFF.80902@dachary.org>
-References: <55461DBA.1060009@dachary.org>
+Subject: Draft retirement mail for dumpling
+Date: Mon, 04 May 2015 12:28:35 +0200
+Message-ID: <554749D3.1060306@dachary.org>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="TNuj2ndOsJJ1tv91nfX8m9lD2ePebEPii"
+ boundary="peN7fGShin6BTueao9vNfe6H5TdPvOu22"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:56920 "EHLO
+Received: from mail2.dachary.org ([91.121.57.175]:56950 "EHLO
 	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751365AbbEDJZV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 May 2015 05:25:21 -0400
-In-Reply-To: <55461DBA.1060009@dachary.org>
+	with ESMTP id S1752548AbbEDK2i (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 May 2015 06:28:38 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Abhishek L <abhishek.lekshmanan@gmail.com>
+To: Sage Weil <sweil@redhat.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
 This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---TNuj2ndOsJJ1tv91nfX8m9lD2ePebEPii
+--peN7fGShin6BTueao9vNfe6H5TdPvOu22
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
 
+Hi Sage,
 
+Do you think it's worth sending a mail announcing the retirement of dumpl=
+ing ?=20
 
-On 03/05/2015 15:08, Loic Dachary wrote:> Hi Abhishek,
->=20
-> The rados suite you scheduled ( http://tracker.ceph.com/issues/11492#ra=
-dos ) failed because of environmental noise and I re-scheduled the 84 fai=
-led jobs on your behalf.
+It could be something like:
 
-It turns out the rados suite did not fail because of environmental noise =
-but because the thrasher yaml file also contains the ceph installation. R=
-emoving the thrasher yaml file had the infortunate side effect of not ins=
-talling Ceph. And without Ceph installed the tests don't run very well ;-=
-) I fixed this at https://github.com/dachary/ceph-qa-suite/tree/wip-rados=
--no-thrash-hammer and re-scheduled a suite of 116 jobs at http://tracker.=
-ceph.com/issues/11492#rados
+Hi,
 
-Note that it was not possible to only re-schedule the ones that failed (8=
-8 out of 116) using the usual method because I introduced new yaml files =
-(ceph.yaml with only the ceph installation). The descriptions are differe=
-nts and the filtering does not work anymore.
+Dumpling, the first major stable release of Ceph[1] published August 2013=
+ retires after more than 18 months of service. People running a Dumpling =
+cluster should upgrade to Firefly and then to Hammer.=20
 
->=20
-> I've scheduled the rgw suite as well, suppressing the apache tests and =
-keeping the civetweb tests which should be enough for the purpose of the =
-pull requests in the integration branch (44 jobs instead of 88 jobs). htt=
-p://tracker.ceph.com/issues/11492#rgw
->=20
-> The rbd and fs suites were also scheduled, as usual.
->=20
-> Cheers
->=20
+Ceph developers are actively fixing bugs on both Firefly and Hammer and p=
+oint releases are published on a regular basis. For more information on t=
+he past Ceph releases and their expected lifetime, please see the release=
+ timeline at http://ceph.com/docs/master/releases/. For information about=
+ the preparation of the next stable release, go to the "Stable releases a=
+nd backports" project at http://tracker.ceph.com/projects/ceph-releases/i=
+ssues
+
+Cheers
+
+[1] Dumpling release http://ceph.com/releases/v0-67-dumpling-released/
 
 --=20
 Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
 
---TNuj2ndOsJJ1tv91nfX8m9lD2ePebEPii
+--peN7fGShin6BTueao9vNfe6H5TdPvOu22
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -67,9 +58,9 @@ Content-Disposition: attachment; filename="signature.asc"
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2.0.22 (GNU/Linux)
 
-iEYEARECAAYFAlVHOv8ACgkQ8dLMyEl6F22czACfXj7ZcajAy1rUBkoRXSEWGify
-7lYAoJ+m2YMqdqksRvVG/Tb6qRU2I7PF
-=fZvl
+iEYEARECAAYFAlVHSdMACgkQ8dLMyEl6F20OiQCcCeD+4uNxgWbN9S86Z1q2yFZG
+OWkAn3MGZkZamVXKQsucahBK9660lz+D
+=xEJO
 -----END PGP SIGNATURE-----
 
---TNuj2ndOsJJ1tv91nfX8m9lD2ePebEPii--
+--peN7fGShin6BTueao9vNfe6H5TdPvOu22--
