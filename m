@@ -1,51 +1,39 @@
-From: Abhishek L <abhishek.lekshmanan@gmail.com>
-Subject: Preparing hammer v0.94.2 release
-Date: Tue, 05 May 2015 16:46:16 +0530
-Message-ID: <87383bmfzz.fsf@gmail.com>
+From: John Spray <john.spray@redhat.com>
+Subject: Use of YAML for defining complex tests (or Python...?)
+Date: Tue, 05 May 2015 12:35:05 +0100
+Message-ID: <5548AAE9.2000302@redhat.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; boundary="=-=-=";
-	micalg=pgp-sha1; protocol="application/pgp-signature"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f50.google.com ([209.85.220.50]:36406 "EHLO
-	mail-pa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932878AbbEELSS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 May 2015 07:18:18 -0400
-Received: by pabsx10 with SMTP id sx10so189931421pab.3
-        for <ceph-devel@vger.kernel.org>; Tue, 05 May 2015 04:18:18 -0700 (PDT)
+Received: from mx1.redhat.com ([209.132.183.28]:34137 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753471AbbEELfH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 5 May 2015 07:35:07 -0400
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+	by mx1.redhat.com (Postfix) with ESMTPS id 10E2B8F011
+	for <ceph-devel@vger.kernel.org>; Tue,  5 May 2015 11:35:06 +0000 (UTC)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@redhat.com>
-Cc: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Samuel Just <sjust@redhat.com>, Zack Cerza <zcerza@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
---=-=-=
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Hi,
 
-Hi Sage
+I noted with interest the rather complex .yaml file in this PR:
+https://github.com/ceph/ceph-qa-suite/pull/428/files
 
-Lo=C3=AFc and I have been working towards backporting issues for the next
-hammer release, and we have been able to backport the commits marked for
-hammer backports and successfully run the integration suites. The tasks
-are tracked at http://tracker.ceph.com/issues/11492. Do you think, the
-next hammer release is ready to be published, in which case, we'll
-proceed to ask the respective project leads to sign off the release and
-begin the QE process.
+...with the accompanying addition of loop constructs in this PR:
+https://github.com/ceph/teuthology/pull/481
 
-Cheers
-Abhishek
+Teuthology YAML files appear to be at risk of becoming a fully fledged 
+scripting language.  Why not write python scripts instead, for the more 
+complex tests (e.g. anything that would need the full_sequential or loop 
+constructs)?
 
---=-=-=
-Content-Type: application/pgp-signature; name="signature.asc"; name="signature.asc"; description="Digital signature"
+On the cephfs side, we hit the point where test procedures were complex 
+enough to need their own mini-framework inside tasks/cephfs -- a similar 
+structure could be useful for people working on other subsystems as well.
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iQEcBAEBAgAGBQJVSKaKAAoJEPnwZB8bZe1fR+0H/jgafV4WpTdNQ/btx7DRUS0+
-toPoLcRUo+pD1rwe5BMEDVHDiJiYn2h/ONtQM7dFFY9iuJhtZDCwRpzA3QmE2fU/
-ynBKh2EPz+OP5v2eExrvoao0v3TCgMjX3XW5EP4fJdQzjMFiGKrc78LCmhNmuNRE
-dh4VXMgFi6O7heoiuOCbhgfGc22lKFmLKLEkJ6U4ED/gzB9touh4GhylQXNjfGPe
-Le3pb55HL5MTY/VKekBIcXzdS6BU9VTxE7sB83iQ0dP3G0dIbNhstlnUJOincC1A
-1wdlO2D199BrnS2/ssYZZwZVfb23VaQRa3zZuGB8OB9zXdvA1gUgR2HPBbVO99s=
-=bu8a
------END PGP SIGNATURE-----
---=-=-=--
+Cheers,
+John
