@@ -1,109 +1,75 @@
-From: Gregory Farnum <greg@gregs42.com>
-Subject: Re: Configure dependencies can be the same as make dependencies
-Date: Tue, 5 May 2015 07:31:11 -0700
-Message-ID: <CAC6JEv_s1i9vw8zt16iW1WBe9JRfpG_cg2npnvuvmzpoUYxuYg@mail.gmail.com>
-References: <5548807A.6060103@dachary.org>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: Re: newstore performance update
+Date: Tue, 05 May 2015 12:43:11 -0500
+Message-ID: <5549012F.3040407@redhat.com>
+References: <554016E2.3000104@redhat.com> <6F3FA899187F0043BA1827A69DA2F7CC021E4894@shsmsx102.ccr.corp.intel.com> <alpine.DEB.2.00.1504290929400.5458@cobra.newdream.net>, <55422E0A.6010204@redhat.com> <ijupkkkyuvtsofr81j33sd7l.1430402112852@email.android.com> <554237F8.5070907@redhat.com> <alpine.DEB.2.00.1504301107310.5458@cobra.newdream.net> <5543923E.1020607@redhat.com> <alpine.DEB.2.00.1505011731500.5458@cobra.newdream.net> <5547B156.8060508@redhat.com> <alpine.DEB.2.00.1505041106300.24939@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f181.google.com ([209.85.223.181]:33675 "EHLO
-	mail-ie0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S2993184AbbEEObN convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 May 2015 10:31:13 -0400
-Received: by iecrt8 with SMTP id rt8so146341580iec.0
-        for <ceph-devel@vger.kernel.org>; Tue, 05 May 2015 07:31:12 -0700 (PDT)
-Received: from mail-ig0-f175.google.com (mail-ig0-f175.google.com. [209.85.213.175])
-        by mx.google.com with ESMTPSA id z3sm7399439igr.7.2015.05.05.07.31.11
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 05 May 2015 07:31:11 -0700 (PDT)
-Received: by iget9 with SMTP id t9so79504738ige.1
-        for <ceph-devel@vger.kernel.org>; Tue, 05 May 2015 07:31:11 -0700 (PDT)
-In-Reply-To: <5548807A.6060103@dachary.org>
+Received: from mx1.redhat.com ([209.132.183.28]:37532 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755623AbbEERnR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 5 May 2015 13:43:17 -0400
+In-Reply-To: <alpine.DEB.2.00.1505041106300.24939@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Kefu Chai <kchai@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, May 5, 2015 at 1:34 AM, Loic Dachary <loic@dachary.org> wrote:
-> Hi Kefu,
+On 05/04/2015 01:08 PM, Sage Weil wrote:
+> On Mon, 4 May 2015, Mark Nelson wrote:
+>> On 05/01/2015 07:33 PM, Sage Weil wrote:
+>>
+>> Ran through a bunch of tests on 0c728ccc over the weekend:
+>>
+>> http://nhm.ceph.com/newstore/5d96fe6f_vs_0c728ccc.pdf
+>>
+>> The good news is that sequential writes on spinning disks are looking
+>> significantly better!  We went from 40x slower than filestore for small
+>> sequential IO to only about 30-40% slower and we become faster than filestore
+>> at 64kb+ IO sizes.
+>>
+>> 128kb-2MB sequential writes with data on spinning disk and rocksdb on SSD
+>> regressed.  Newstore is no longer really any faster than filestore for those
+>> IO sizes.  We saw something similar for random IO, where spinning disk only
+>> results improved and spinning disk + rocksdb on SSD regressed.
+>>
+>> With everything on SSD, we saw small sequential writes improve and nearly all
+>> random writes regress.  Not sure how much these regressions are due to
+>> 0c728ccc vs other commits yet.
 >
-> In the context of https://github.com/ceph/ceph/pull/4449 and https://=
-github.com/ceph/ceph/pull/4544 I see you're going out of your way to im=
-plement mechanisms that make it possible to require less dependencies w=
-hen running
+> That's surprising!  I pushed a commit that makes this tunable,
 >
->    ./configure
+>   newstore sync submit transaction = false (default)
 >
-> than what is required by
+> Can you see if setting that to true (effectively reverting my last change)
+> fixes the ssd regression?
 >
->    ./make check
+> It may also be that this is a simple locking issue that we can fix in
+> rocksdb.  Again, the behavior I saw was that the db->submit_transaction()
+> call would block until the sync commit (from kv_sync_thread) finished.
+> I would expect rocksdb to be more careful about that, so maybe there is
+> something else funny/subtle going on.
 >
-> I think the right solution is to require the same set of dependencies=
-, regardless. It can easily be done by running ./install-deps.sh[1].
+> sage
 >
-> This script is already used in jenkins.ceph.com and saved us from the=
- recurring pain of manually updating the jenkins slaves every time a de=
-pendency was added to either ceph.spec.in or debian/control.
->
-> Although it is possible to run ./configure with a subset of the depen=
-dencies that are required to run make check, it trades automatic instal=
-lation of packages for significant manual maintenance. It saves a littl=
-e disk and bandwidth every time a dependency is modified in the ceph.sp=
-ec.in or debian/control files, which happens a few times a months at mo=
-st. The work items to manually maintain this difference:
->
-> * the set of dependencies that ./configure requires needs to be manua=
-lly maintained, it is not listed anywhere at the moment. It changes les=
-s often than ceph.spec.in or debian/control but it does change from tim=
-e to time
-> * the configure script has to be engineered to only require dependenc=
-ies (assuming these dependencies are listed somewhere). In other word, =
-every time you change the configure script you have to be extra careful=
- to not introduce a new dependency, even when it would help implement w=
-hat you're after in a simpler way.
-> * the configure script dependencies in the context of CI actually cha=
-nge every time you consider using --enable-something because it modifie=
-s the set of files your tarbal is made of. If the corresponding somethi=
-ng is not installed, the configure will likely not do what you want and=
- you'll have to add something manually on the CI machine (or use instal=
-l-deps.sh but that would defeat the purpose of separating configure dep=
-endencies from make dependencies)
-> * to avoid adding dependencies to configure, it is tempting to forbid=
- file generation when preparing the tarbal (I'm thinking .8 generation =
-specifically), although it is legitimate for the tarbal generation to i=
-nvolve some processing and transformation of the sources that require t=
-ools to run
-> * it is very unlikely a new developer will remember configure depende=
-ncies and make dependencies are different and mistakes will be done all=
- the time, creating needless frustration
 
-Maybe I'm missing something, but...
+Ok, ran through new SSD tests and wasn't able to replicate the poor 
+random performance from 0c728ccc again.
 
-configure's purpose in life is to set up the build system so that Ceph
-will successfully build on the current system. If configure assumes
-that you have stuff installed that you don't need to have installed to
-build, then it is not doing its job.
-Similarly, if "make check" won't run on a system that otherwise builds
-Ceph, that's a problem with "make check", not a problem with configure
-or the rest of Ceph. If we require *extra* dependencies to support
-make check that's very bad =E2=80=94 it's becoming more popular for ven=
-dors to
-build Ceph on more exotic architectures and systems, and the chances
-are good that they'll do the minimal porting job, and simply skip
-running "make check" if it requires extra bits.
+http://nhm.ceph.com/newstore/sync_submit_transaction.pdf
 
-Now, there are times when we decide something is important so we have
-configure default to one configuration and require a flag to change
-it. But in general that's not what we want to do, and IIRC there was
-an issue where configure was actually failing despite it being
-perfectly fine to build without some library or other.
+Haven't dug into the blktrace or collectl data yet to see if there are 
+any interesting differences, but I'll try to look at that later if I get 
+a bit of free time.
 
-Etc etc.
--Greg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+The good news is that sync submit transaction = false seems to make a 
+pretty noticeable improvement with 8c8c5903 on an SSD backed newstore 
+OSD.  At small IO sizes we appear to be doing better than filestore for 
+both random and sequential IO.  Interestingly random writes still appear 
+to be faster than sequential writes when everything is on SSD!
+
+It looks like the big remaining issue now is 64kb+ sized writes on SSD.
+
+Mark
