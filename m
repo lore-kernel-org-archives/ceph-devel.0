@@ -1,79 +1,32 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: should we prepare to release firefly v0.80.10 ?
-Date: Tue, 05 May 2015 11:25:36 +0200
-Message-ID: <55488C90.5090302@dachary.org>
-References: <55362279.5060105@dachary.org>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="jvXJUoC3JVMJorRJHLqwTb7bQSt9Udnfi"
+From: mchristi@redhat.com
+Subject: [PATCH 0/5] target/rbd: distributed lun reset support
+Date: Tue,  5 May 2015 04:56:13 -0500
+Message-ID: <1430819778-24483-1-git-send-email-mchristi@redhat.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:57614 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1031381AbbEEJZj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 May 2015 05:25:39 -0400
-In-Reply-To: <55362279.5060105@dachary.org>
+Received: from mx1.redhat.com ([209.132.183.28]:52786 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757336AbbEEJ4V (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 5 May 2015 05:56:21 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, "Shu, Xinxin" <xinxin.shu@intel.com>
+To: ceph-devel@vger.kernel.org, target-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---jvXJUoC3JVMJorRJHLqwTb7bQSt9Udnfi
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+The following patches allow drivers like libceph/rbd to distribute
+execution of scsi task management functions across multiple nodes
+(still working on issues with distributed PRs).
 
-Hi,
+In this patchset, I added a new type of callout/module for these
+cluster aware modules. The idea is that something like drbd could maybe do
+something optimized for them, or nbd could, or you could use dlm
+plus some file system, or do something cluster FS specific. For rbd
+we are making rados/libceph calls.
 
-Unless I'm mistaken it looks like
-
-http://tracker.ceph.com/issues/11429 OSD::load_pgs: we need to handle the=
- case where an upgrade from earlier versions which ignored non-existent p=
-gs resurrects a pg with a prehistoric osdmap
-
-deserves to be in the next release. With this one, do you think v0.80.10 =
-should be published ? There was concerns about ceph_objectstore_tools and=
- thrashing but my understanding is that the nightlies ran enough tests in=
- the past two weeks to clear that.
-
-If there is not enough incentive to publish v0.80.10 at the moment we can=
- proceed with another batch of backports (about 10 of them pending) and t=
-est them.
-
-Cheers
-
-On 21/04/2015 12:12, Loic Dachary wrote:
-> Hi Sage,
->=20
-> The firefly branch has a number of fixes ( http://tracker.ceph.com/issu=
-es/11090#Release-information ) and has been used for upgrade tests in the=
- past few weeks. A few other issues have been backported since and are be=
-ing tested in the integration branch ( http://tracker.ceph.com/issues/110=
-90#teuthology-run-commitb91bbb434e6363a99a632cf3841f70f1f2549f79-integrat=
-ion-branch-april-2015 ).=20
->=20
-> Do you think these changes deserve a firefly v0.80.10 release ? Should =
-we ask each lead for their approval ? Or is it better to keep backporting=
- what needs to be and wait a few weeks ?
->=20
-> Cheers
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+I am mostly looking for feedback on the hooks/callouts approach. I was
+not sure if we wanted to maybe instead do somethign like add new callouts
+to the request_queue (request_queue->reset_q) or block_device or
+add some new block layer REQ_TYPEs (REQ_TYPE_DEVICE_RESET or
+REQ_TYPE_PGR_REGISTER, etc). In this patchset I just added new
+callouts that modules can implement, because I thought this was most
+similar to how we do fabric modules and so it was a ok fit.
 
 
---jvXJUoC3JVMJorRJHLqwTb7bQSt9Udnfi
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlVIjJAACgkQ8dLMyEl6F23zwQCgvqKI6gL9vrOexSTaOSFxTqxM
-V44Ani+yRYBetettyx/QC6jposaCmK9/
-=ecF4
------END PGP SIGNATURE-----
-
---jvXJUoC3JVMJorRJHLqwTb7bQSt9Udnfi--
