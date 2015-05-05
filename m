@@ -1,150 +1,69 @@
 From: Loic Dachary <loic@dachary.org>
 Subject: Re: should we prepare to release firefly v0.80.10 ?
-Date: Tue, 05 May 2015 11:17:27 +0200
-Message-ID: <55488AA7.5020709@dachary.org>
-References: <55362279.5060105@dachary.org> <alpine.DEB.2.00.1504210851130.18547@cobra.newdream.net> <55367E8D.1090805@redhat.com> <acaeb07b-41c3-40bc-87a3-9d82ce346ae7@redhat.com> <5537229F.4050501@redhat.com>
+Date: Tue, 05 May 2015 11:25:36 +0200
+Message-ID: <55488C90.5090302@dachary.org>
+References: <55362279.5060105@dachary.org>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="FVEmubRRQRCKprCPHHKVCj4luRspVV6uN"
+ boundary="jvXJUoC3JVMJorRJHLqwTb7bQSt9Udnfi"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:57606 "EHLO
+Received: from mail2.dachary.org ([91.121.57.175]:57614 "EHLO
 	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751175AbbEEJR3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 May 2015 05:17:29 -0400
-In-Reply-To: <5537229F.4050501@redhat.com>
+	with ESMTP id S1031381AbbEEJZj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 May 2015 05:25:39 -0400
+In-Reply-To: <55362279.5060105@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: David Zafman <dzafman@redhat.com>
-Cc: "Shu, Xinxin" <xinxin.shu@intel.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, "Shu, Xinxin" <xinxin.shu@intel.com>
 
 This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---FVEmubRRQRCKprCPHHKVCj4luRspVV6uN
+--jvXJUoC3JVMJorRJHLqwTb7bQSt9Udnfi
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
 
-Hi David,
+Hi,
 
-These changes have been merged in ceph-qa-suite for about two weeks now, =
-did you notice problems ?
+Unless I'm mistaken it looks like
+
+http://tracker.ceph.com/issues/11429 OSD::load_pgs: we need to handle the=
+ case where an upgrade from earlier versions which ignored non-existent p=
+gs resurrects a pg with a prehistoric osdmap
+
+deserves to be in the next release. With this one, do you think v0.80.10 =
+should be published ? There was concerns about ceph_objectstore_tools and=
+ thrashing but my understanding is that the nightlies ran enough tests in=
+ the past two weeks to clear that.
+
+If there is not enough incentive to publish v0.80.10 at the moment we can=
+ proceed with another batch of backports (about 10 of them pending) and t=
+est them.
 
 Cheers
 
-On 22/04/2015 06:25, David Zafman wrote:
+On 21/04/2015 12:12, Loic Dachary wrote:
+> Hi Sage,
 >=20
-> All the changes for testing are in ceph-qa-suite firefly branch.
+> The firefly branch has a number of fixes ( http://tracker.ceph.com/issu=
+es/11090#Release-information ) and has been used for upgrade tests in the=
+ past few weeks. A few other issues have been backported since and are be=
+ing tested in the integration branch ( http://tracker.ceph.com/issues/110=
+90#teuthology-run-commitb91bbb434e6363a99a632cf3841f70f1f2549f79-integrat=
+ion-branch-april-2015 ).=20
 >=20
-> After updating from the git repo, the firefly branch doesn't include th=
-ese 2 commits.   Was there an issue with this change?
+> Do you think these changes deserve a firefly v0.80.10 release ? Should =
+we ask each lead for their approval ? Or is it better to keep backporting=
+ what needs to be and wait a few weeks ?
 >=20
-> David
->=20
-> commit 71624947a338dabb6ed71d94e2e003bf984074cc
-> Merge: 3da69ba 35ee8e0
-> Author: Loic Dachary <loic@dachary.org>
-> Date:   Fri Apr 3 10:47:42 2015 +0200
->=20
->     Merge pull request #394 from dzafman/wip-11139-firefly
->=20
->     ceph_manager: Check for exit status 11 from ceph-objectstore-tool i=
-mport
->=20
->     Reviewed-by: Loic Dachary <ldachary@redhat.com>
->=20
-> commit 35ee8e0d4e1e8cac61ff9f5d8d644f93de4cdf60
-> Author: David Zafman <dzafman@redhat.com>
-> Date:   Fri Mar 20 19:56:55 2015 -0700
->=20
->     ceph_manager: Check for exit status 11 from ceph-objectstore-tool i=
-mport
->=20
->     Fixes: #11139
->=20
->     Signed-off-by: David Zafman <dzafman@redhat.com>
->     (cherry picked from commit 6c5300552d00232d6ecb2c1aa641d515c9d8cd34=
-)
->=20
-> David
->=20
-> On 4/21/15 7:39 PM, Samuel Just wrote:
->>
->> Ok, so ceoh_objectstrore_tool is being tested in firefly as part of th=
-e current firefly ceph-qa-suite branch?
->> -Sam
->>
->> Sent from Nine <http://www.9folders.com/>
->>
->> *From:* David Zafman
->> *Sent:* Apr 21, 2015 10:16 PM
->> *To:* Sage Weil;Loic Dachary
->> *Cc:* Ceph Development;Shu, Xinxin;sjust@redhat.com
->> *Subject:* Re: should we prepare to release firefly v0.80.10 ?
->>
->>
->>
->> In early march I ran rados:thrash on the firefly backport of the
->> ceph-objectstore-tool changes (wip-cot-firefly).  We considered it
->> passed, even though an obscure segfault was seen:
->>
->> bug #11141: Segmentation Violation: ceph-objectstore-tool doing --op
->> list-pgs
->>
->> David
->>
->>
->> On 4/21/15 8:52 AM, Sage Weil wrote:
->> > The bulk of it is ceph-objectstore-tool, which is important to get i=
-nto a
->> > release, IMO.  David, are these being tested in the firefly thrashin=
-g
->> > tests yet?
->> >
->> > The only other one I'm worried about is
->> >
->> > 6fd3dfa osd: do not ignore deleted pgs on startup
->> >
->> > Sam, I assume the recent hammer upgrade issue is would bite firefly =
-folks
->> > who upgrade too?
->> >
->> > sage
->> >
->> >
->> > On Tue, 21 Apr 2015, Loic Dachary wrote:
->> >
->> >> Hi Sage,
->> >>
->> >> The firefly branch has a number of fixes ( http://tracker.ceph.com/=
-issues/11090#Release-information ) and has been used for upgrade tests in=
- the past few weeks. A few other issues have been backported since and ar=
-e being tested in the integration branch ( http://tracker.ceph.com/issues=
-/11090#teuthology-run-commitb91bbb434e6363a99a632cf3841f70f1f2549f79-inte=
-gration-branch-april-2015 ).
->> >>
->> >> Do you think these changes deserve a firefly v0.80.10 release ? Sho=
-uld we ask each lead for their approval ? Or is it better to keep backpor=
-ting what needs to be and wait a few weeks ?
->> >>
->> >> Cheers
->> >>
->> >> --
->> >> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->> >>
->>
->> --=20
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
-in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
+> Cheers
 >=20
 
 --=20
 Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
 
---FVEmubRRQRCKprCPHHKVCj4luRspVV6uN
+--jvXJUoC3JVMJorRJHLqwTb7bQSt9Udnfi
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -152,9 +71,9 @@ Content-Disposition: attachment; filename="signature.asc"
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2.0.22 (GNU/Linux)
 
-iEYEARECAAYFAlVIiqcACgkQ8dLMyEl6F23G9QCaAhgYKb9BfzILFk2QLtWC2jV2
-0/IAoLh/MxCf2f8qz3qY9EFi+DekcYuC
-=oMtw
+iEYEARECAAYFAlVIjJAACgkQ8dLMyEl6F23zwQCgvqKI6gL9vrOexSTaOSFxTqxM
+V44Ani+yRYBetettyx/QC6jposaCmK9/
+=ecF4
 -----END PGP SIGNATURE-----
 
---FVEmubRRQRCKprCPHHKVCj4luRspVV6uN--
+--jvXJUoC3JVMJorRJHLqwTb7bQSt9Udnfi--
