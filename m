@@ -1,78 +1,56 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Use of YAML for defining complex tests (or Python...?)
-Date: Tue, 05 May 2015 14:15:57 +0200
-Message-ID: <5548B47D.5000706@dachary.org>
-References: <5548AAE9.2000302@redhat.com>
+From: Joao Eduardo Luis <joao-l3A5Bk7waGM@public.gmane.org>
+Subject: Re: The first infernalis dev release will be v9.0.0
+Date: Tue, 05 May 2015 15:20:48 +0100
+Message-ID: <5548D1C0.30204@suse.de>
+References: <alpine.DEB.2.00.1504301528410.5458@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="PxHal3UAk8FAjUhejQultar1Fg5NkGG0j"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:57778 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1422778AbbEEMQA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 May 2015 08:16:00 -0400
-In-Reply-To: <5548AAE9.2000302@redhat.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <john.spray@redhat.com>, Samuel Just <sjust@redhat.com>, Zack Cerza <zcerza@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.00.1504301528410.5458-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---PxHal3UAk8FAjUhejQultar1Fg5NkGG0j
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+On 05/04/2015 05:09 PM, Sage Weil wrote:
+> The first Ceph release back in Jan of 2008 was 0.1.  That made sense at 
+> the time.  We haven't revised the versioning scheme since then, however, 
+> and are now at 0.94.1 (first Hammer point release).  To avoid reaching 
+> 0.99 (and 0.100 or 1.00?) we have a new strategy.  This was discussed a 
+> bit on ceph-devel and in #ceph-devel and there doesn't appear to be any 
+> scheme that everyone likes.
+> 
+> So, we're going to go with something that only a few people dislike:
+> 
+>  x.0.z - development releases (for early testers and the brave at heart)
+>  x.1.z - release candidates (for test clusters, brave users)
+>  x.2.z - stable/bugfix releases (for users)
+> 
+> x will start at 9 for Infernalis ("I" is the 9th letter), making our first 
+> development release of the 9th release cycle 9.0.0.  Subsequent 
+> development releases will be 9.0.1, 9.0.2, etc.
+> 
+> In a couple months we'll have a 9.1.0 (and maybe 9.1.1) release candidate.
+> 
+> A few weeks after that we'll have the Infernalis release 9.2.0, followed 
+> by stable bug fix updates 9.2.1, 9.2.2, etc., and then begin work on the 
+> Jewel (10.y.z) release.
+> 
+> We'll see how this works out.  We can adjust this in the future to any 
+> other 9.y.z scheme (e.g., 9.1, 9.2 etc dev releases and 9.8.z stable 
+> releases); the main commitment here is to the 9 part, indicating 
+> Infernalis is the 9th major release cycle.
 
+Looks sane!
 
+I'm guessing once 9.1.0 is frozen the dev cycles will move on to 10.0.1?
 
-On 05/05/2015 13:35, John Spray wrote:> Hi,
->=20
-> I noted with interest the rather complex .yaml file in this PR:
-> https://github.com/ceph/ceph-qa-suite/pull/428/files
->=20
-> ...with the accompanying addition of loop constructs in this PR:
-> https://github.com/ceph/teuthology/pull/481
->=20
-> Teuthology YAML files appear to be at risk of becoming a fully fledged =
-scripting language.  Why not write python scripts instead, for the more c=
-omplex tests (e.g. anything that would need the full_sequential or loop c=
-onstructs)?
-
-I guess we should be careful to not abuse YAML where scripts would be mor=
-e appropriate. I tend to agree with you: singleton-nomsgr/all/11429.yaml =
-should be a script.
-
-My 2cts
-
->=20
-> On the cephfs side, we hit the point where test procedures were complex=
- enough to need their own mini-framework inside tasks/cephfs -- a similar=
- structure could be useful for people working on other subsystems as well=
-=2E
->=20
-> Cheers,
-> John
-> --=20
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---PxHal3UAk8FAjUhejQultar1Fg5NkGG0j
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlVItH0ACgkQ8dLMyEl6F20ABACgoqgD7woG0YedW1hxvmtjDhEo
-gbcAn0RTrf5ong1aXVlpwo+hy/hoNqVa
-=ZypV
------END PGP SIGNATURE-----
-
---PxHal3UAk8FAjUhejQultar1Fg5NkGG0j--
+  -Joao
