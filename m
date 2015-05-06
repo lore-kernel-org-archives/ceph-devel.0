@@ -1,41 +1,117 @@
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH 0/5] target/rbd: distributed lun reset support
-Date: Tue, 5 May 2015 23:48:12 -0700
-Message-ID: <20150506064812.GA5181@infradead.org>
-References: <1430819778-24483-1-git-send-email-mchristi@redhat.com>
- <20150505174939.GA21297@infradead.org>
- <55499D46.9040008@redhat.com>
+From: Ming Lin <mlin@kernel.org>
+Subject: Re: [PATCH 07/10] block: kill merge_bvec_fn() completely
+Date: Wed, 6 May 2015 00:10:24 -0700
+Message-ID: <CAF1ivSZ0fA9RPQ6VrQSUveQjYjM1UXt_28Vod9RiH16jqnBn6A@mail.gmail.com>
+References: <1430203717-13307-1-git-send-email-mlin@kernel.org>
+	<1430203717-13307-8-git-send-email-mlin@kernel.org>
+	<20150429080919.342fddfd@notabene.brown>
+	<5547241B.1040903@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <target-devel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <55499D46.9040008@redhat.com>
-Sender: target-devel-owner@vger.kernel.org
-To: Mike Christie <mchristi@redhat.com>
-Cc: Christoph Hellwig <hch@infradead.org>, ceph-devel@vger.kernel.org, target-devel@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <5547241B.1040903@kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ming Lin <mlin@kernel.org>
+Cc: NeilBrown <neilb@suse.de>, lkml <linux-kernel@vger.kernel.org>, Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>, Kent Overstreet <kent.overstreet@gmail.com>, Dongsu Park <dongsu.park@profitbricks.com>, Lars Ellenberg <drbd-dev@lists.linbit.com>, drbd-user@lists.linbit.com, Jiri Kosina <jkosina@suse.cz>, Yehuda Sadeh <yehuda@inktank.com>, Sage Weil <sage@inktank.com>, Alex Elder <elder@kernel.org>, ceph-devel@vger.kernel.org, Alasdair Kergon <agk@redhat.com>, Mike Snitzer <snitzer@redhat.com>, dm-devel@redhat.com, linux-raid@vger.kernel.org, Christoph Hellwig <hch@infradead.org>, "Martin K. Petersen" <martin.petersen@oracle.com>
 List-Id: ceph-devel.vger.kernel.org
 
-On Tue, May 05, 2015 at 11:49:10PM -0500, Mike Christie wrote:
-> On 05/05/2015 12:49 PM, Christoph Hellwig wrote:
-> > Can you explain why you want to hook into the lun reset code?  I know
-> > the PR code needs to issue implicit task aborts, but I don't
-> > understand the need to do something with lun resets.
-> 
-> I thought if you exported a LU through multiple LIO nodes and its ALUA
-> state was active optimized/non-optimized on those nodes, then you would
-> have to do similar cleanup across the cluster. For example, don't we
-> have to fail commands on those other nodes, and then also depending on
-> the TAS bit value return task aborted statuses?
+On Mon, May 4, 2015 at 12:47 AM, Ming Lin <mlin@kernel.org> wrote:
+> On 04/28/2015 03:09 PM, NeilBrown wrote:
+>> On Mon, 27 Apr 2015 23:48:34 -0700 Ming Lin <mlin@kernel.org> wrote:
+>>
+>>> From: Kent Overstreet <kent.overstreet@gmail.com>
+>>>
+>>> As generic_make_request() is now able to handle arbitrarily sized bios,
+>>> it's no longer necessary for each individual block driver to define its
+>>> own ->merge_bvec_fn() callback. Remove every invocation completely.
+>>
+>> This patch it just a little premature I think.
+>>
+>> md/raid5 still assumes read requests will mostly fit within a single chunk
+>> (which merge_bvec_fn encourages) so they can be serviced without using the
+>> stripe-cache.
+>> You've just broken that assumption.
+>>
+>> I think 'chunk_aligned_read' needs to get a loop using bio_split, a bit like
+>> raid0, first.
+>
+> How about below?
 
-Oh, you're actually implementing active/active exports.  Yes, in that
-case we'll need to distribute LUN resets.
+Hi NeilBrown,
 
-> > As for the API:  I would much prefer to have things at the block layer
-> > in some form than adding side band protocol for specific functionality.
-> > 
-> 
-> Ok. For what you need for your NFS cluster work, will you have a
-> request_queue or block_device or gendisk?
+Are you OK with below fix?
+Then I'll include it in the next version.
 
-All of them.  It's just another consumer of the in-kernel block devices
-interface.
+Thanks.
+
+>
+>  drivers/md/raid5.c | 35 ++++++++++++++++++++++++++++++++---
+>  1 file changed, 32 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/md/raid5.c b/drivers/md/raid5.c
+> index e42b624..2ddfa1e 100644
+> --- a/drivers/md/raid5.c
+> +++ b/drivers/md/raid5.c
+> @@ -4709,7 +4709,7 @@ static void raid5_align_endio(struct bio *bi, int error)
+>         add_bio_to_retry(raid_bi, conf);
+>  }
+>
+> -static int chunk_aligned_read(struct mddev *mddev, struct bio * raid_bio)
+> +static int __chunk_aligned_read(struct mddev *mddev, struct bio *raid_bio)
+>  {
+>         struct r5conf *conf = mddev->private;
+>         int dd_idx;
+> @@ -4718,7 +4718,7 @@ static int chunk_aligned_read(struct mddev *mddev, struct bio * raid_bio)
+>         sector_t end_sector;
+>
+>         if (!in_chunk_boundary(mddev, raid_bio)) {
+> -               pr_debug("chunk_aligned_read : non aligned\n");
+> +               pr_debug("__chunk_aligned_read : non aligned\n");
+>                 return 0;
+>         }
+>         /*
+> @@ -4793,6 +4793,35 @@ static int chunk_aligned_read(struct mddev *mddev, struct bio * raid_bio)
+>         }
+>  }
+>
+> +static struct bio *chunk_aligned_read(struct mddev *mddev, struct bio *raid_bio)
+> +{
+> +       struct bio *split;
+> +
+> +       do {
+> +               sector_t sector = raid_bio->bi_iter.bi_sector;
+> +               unsigned chunk_sects = mddev->chunk_sectors;
+> +
+> +               unsigned sectors = chunk_sects -
+> +                       (likely(is_power_of_2(chunk_sects))
+> +                        ? (sector & (chunk_sects-1))
+> +                        : sector_div(sector, chunk_sects));
+> +
+> +               if (sectors < bio_sectors(raid_bio)) {
+> +                       split = bio_split(raid_bio, sectors, GFP_NOIO, fs_bio_set);
+> +                       bio_chain(split, raid_bio);
+> +               } else
+> +                       split = raid_bio;
+> +
+> +               if (!__chunk_aligned_read(mddev, split)) {
+> +                       if (split != raid_bio)
+> +                               generic_make_request(raid_bio);
+> +                       return split;
+> +               }
+> +       } while (split != raid_bio);
+> +
+> +       return NULL;
+> +}
+> +
+>  /* __get_priority_stripe - get the next stripe to process
+>   *
+>   * Full stripe writes are allowed to pass preread active stripes up until
+> @@ -5071,7 +5100,7 @@ static void make_request(struct mddev *mddev, struct bio * bi)
+>          */
+>         if (rw == READ && mddev->degraded == 0 &&
+>              mddev->reshape_position == MaxSector &&
+> -            chunk_aligned_read(mddev,bi))
+> +            (!(bi = chunk_aligned_read(mddev, bi))))
+>                 return;
+>
+>         if (unlikely(bi->bi_rw & REQ_DISCARD)) {
