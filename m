@@ -1,56 +1,56 @@
-From: Joao Eduardo Luis <joao@suse.de>
-Subject: Re: [ceph-users] The first infernalis dev release will be v9.0.0
-Date: Wed, 06 May 2015 09:29:05 +0100
-Message-ID: <5549D0D1.8020009@suse.de>
-References: <alpine.DEB.2.00.1504301528410.5458@cobra.newdream.net>	<5548D1C0.30204@suse.de>	<alpine.DEB.2.00.1505050945230.13336@cobra.newdream.net>	<CADA4hP+aeXmLqv2YGQsG7Hh72ZM8S9D8YTsvVktt22jGdYqTAg@mail.gmail.com>	<alpine.DEB.2.00.1505050951540.13336@cobra.newdream.net> <5ABDA982-178E-4CD0-AF35-D79D064A5D49@me.com>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: 05/06/2015 Weekly Ceph Performance Meeting IS ON!
+Date: Wed, 06 May 2015 07:45:28 -0500
+Message-ID: <554A0CE8.1030804@redhat.com>
+Reply-To: mnelson@redhat.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cantor2.suse.de ([195.135.220.15]:35943 "EHLO mx2.suse.de"
+Received: from mx1.redhat.com ([209.132.183.28]:57948 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751155AbbEFI3H (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 6 May 2015 04:29:07 -0400
-In-Reply-To: <5ABDA982-178E-4CD0-AF35-D79D064A5D49@me.com>
+	id S1751012AbbEFMpb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 6 May 2015 08:45:31 -0400
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t46CjVrf010241
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
+	for <ceph-devel@vger.kernel.org>; Wed, 6 May 2015 08:45:31 -0400
+Received: from [10.3.112.23] (ovpn-112-23.phx2.redhat.com [10.3.112.23])
+	by int-mx09.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t46CjS1C004034
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+	for <ceph-devel@vger.kernel.org>; Wed, 6 May 2015 08:45:30 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?B?U3RlZmZlbiBXIFPDuHJlbnNlbg==?= <stefws@me.com>, Sage Weil <sweil@redhat.com>
-Cc: ceph-users@ceph.com, ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 05/05/2015 08:54 PM, Steffen W S=C3=B8rensen wrote:
->=20
->> On 05/05/2015, at 18.52, Sage Weil <sweil@redhat.com> wrote:
->>
->> On Tue, 5 May 2015, Tony Harris wrote:
->>> So with this, will even numbers then be LTS?  Since 9.0.0 is follow=
-ing
->>> 0.94.x/Hammer, and every other release is normally LTS, I'm guessin=
-g 10.x.x,
->>> 12.x.x, etc. will be LTS...
->>
->> It looks that way now, although I can't promise the pattern will hol=
-d!
-> I read it like major version is the release ie. Infernails, Jewel etc=
-=2E following the letter position in the alfabet, I =3D 9th. letter, so=
- we see all numbers 10,11,12,13=E2=80=A625
-> minor numbers =3D 2 will denote LTS eg. <major release>.2.<patch leve=
-l>
+8AM PST as usual! Discussion topics include:  Newstore updates.  Please 
+feel free to add your own!
 
-minor number '2' will denote 'stable', as oposed to 'dev' (minor =3D 0)=
- or
-'release candidate' (minor =3D 1).  LTS has been every other major
-version; so given Hammer is an LTS and Infernallis is not, then Jewel
-would likely be a long term stable.
+Here's the links:
 
-The point Tony was making is that this cadence, should it be kept as is=
-,
-would match perfectly with even major versions (jewel 10.x, L-release
-12.x, ...).
+Etherpad URL:
+http://pad.ceph.com/p/performance_weekly
 
-  -Joao
+To join the Meeting:
+https://bluejeans.com/268261044
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+To join via Browser:
+https://bluejeans.com/268261044/browser
+
+To join with Lync:
+https://bluejeans.com/268261044/lync
+
+
+To join via Room System:
+Video Conferencing System: bjn.vc -or- 199.48.152.152
+Meeting ID: 268261044
+
+To join via Phone:
+1) Dial:
+           +1 408 740 7256
+           +1 888 240 2560(US Toll Free)
+           +1 408 317 9253(Alternate Number)
+           (see all numbers - http://bluejeans.com/numbers)
+2) Enter Conference ID: 268261044
+
+Mark
