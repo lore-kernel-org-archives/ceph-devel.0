@@ -1,72 +1,29 @@
-From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Subject: RE: Newstore Read ?
-Date: Wed, 6 May 2015 00:55:20 +0000
-Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC021ECA6F@shsmsx102.ccr.corp.intel.com>
-References: <CAFkUHxe6fiewz78H4CTuPghqJr6nTdJq4Ucn2O6H1uEqVGgKqQ@mail.gmail.com>
- <554948D2.8070403@redhat.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RGW + erasure coding
+Date: Wed, 6 May 2015 01:35:49 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD86F12@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:33895 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S965423AbbEFAzY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 5 May 2015 20:55:24 -0400
-In-Reply-To: <554948D2.8070403@redhat.com>
+Received: from mail-bn1on0075.outbound.protection.outlook.com ([157.56.110.75]:12231
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751697AbbEFBfx convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 May 2015 21:35:53 -0400
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>, kernel neophyte <neophyte.hacker001@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-SGkgTmVvLA0KDQogICAgICAgVGhlIG5ld3N0b3JlOjpmaWVfbWFwIGlzbid0IGltcGxlbWVudGVk
-IHlldCwgc28gQ0VQSF9PU0RfT1BfU1BBUlNFX1JFQUQgd2lsbCBnZXQgYW4gYXNzZXJ0KDApLiBJ
-IHdpbGwgdHJ5IHRvIG1ha2UgaXQgZG9uZSB0b2RheTopDQoJCQkJCQkJCVhpYW94aQ0KDQo+IC0t
-LS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5r
-ZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC0NCj4gb3duZXJAdmdlci5rZXJuZWwub3JnXSBP
-biBCZWhhbGYgT2YgTWFyayBOZWxzb24NCj4gU2VudDogV2VkbmVzZGF5LCBNYXkgNiwgMjAxNSA2
-OjQ5IEFNDQo+IFRvOiBrZXJuZWwgbmVvcGh5dGU7IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3Jn
-DQo+IFN1YmplY3Q6IFJlOiBOZXdzdG9yZSBSZWFkID8NCj4gDQo+IE9uIDA1LzA1LzIwMTUgMDU6
-MTEgUE0sIGtlcm5lbCBuZW9waHl0ZSB3cm90ZToNCj4gPiBIaSwNCj4gPg0KPiA+IEkgYW0gdW5h
-YmxlIHRvIGdldCBhbnkgcmVhZHMgb3V0IG9mIE5ld3N0b3JlLiBUaGUgbG9nIGlzIGZpbGxlZCB3
-aXRoDQo+ID4gYXNzZXJ0IGZhaWx1cmVzLg0KPiA+DQo+ID4+IDIwMTUtMDUtMDUgMTQ6NDk6NDYu
-NjU0MTEzIDdmNDIzNjM4NzcwMCAtMSBvcy9uZXdzdG9yZS9OZXdTdG9yZS5jYzoNCj4gPj4gSW4g
-ZnVuY3Rpb24gJ3ZpcnR1YWwgaW50IE5ld1N0b3JlOjpmaWVtYXAoY29sbF90LCBjb25zdCBnaG9i
-amVjdF90JiwNCj4gPj4gdWludDY0X3QsIHNpemVfdCwgY2VwaDo6YnVmZmVybGlzdCYpJyB0aHJl
-YWQgN2Y0MjM2Mzg3NzAwIHRpbWUNCj4gPj4gMjAxNS0wNS0wNSAxNDo0OTo0Ni41ODI5OTENCj4g
-Pg0KPiA+IG9zL25ld3N0b3JlL05ld1N0b3JlLmNjOiAxMzcxOiBGQUlMRUQgYXNzZXJ0KDApDQo+
-ID4NCj4gPg0KPiA+ICAgY2VwaCB2ZXJzaW9uIDAuOTMtMTA5OC1nNjZlNTU1ZA0KPiA+ICg2NmU1
-NTVkNGE2ZTJmZDIxZWZkOWRhMGQxZWJkM2ZlYjAyNGIwNDFlKQ0KPiA+DQo+ID4gICAxOiAoY2Vw
-aDo6X19jZXBoX2Fzc2VydF9mYWlsKGNoYXIgY29uc3QqLCBjaGFyIGNvbnN0KiwgaW50LCBjaGFy
-DQo+ID4gY29uc3QqKSsweDhiKSBbMHhjOWJkZWJdDQo+ID4NCj4gPiAgIDI6IGNlcGgtb3NkKCkg
-WzB4OWVhMjkzXQ0KPiA+DQo+ID4gICAzOiAoUmVwbGljYXRlZFBHOjpkb19vc2Rfb3BzKFJlcGxp
-Y2F0ZWRQRzo6T3BDb250ZXh0KiwNCj4gPiBzdGQ6OnZlY3RvcjxPU0RPcCwgc3RkOjphbGxvY2F0
-b3I8T1NET3A+ID4mKSsweDcwOGMpIFsweDhkOGNjY10NCj4gPg0KPiA+ICAgNDoNCj4gPiAoUmVw
-bGljYXRlZFBHOjpwcmVwYXJlX3RyYW5zYWN0aW9uKFJlcGxpY2F0ZWRQRzo6T3BDb250ZXh0Kikr
-MHg5NykNCj4gPiBbMHg4ZTY0MjddDQo+ID4NCj4gPiAgIDU6IChSZXBsaWNhdGVkUEc6OmV4ZWN1
-dGVfY3R4KFJlcGxpY2F0ZWRQRzo6T3BDb250ZXh0KikrMHg1ZTUpDQo+ID4gWzB4OGU2Yzg1XQ0K
-PiA+DQo+ID4gICA2OiAoUmVwbGljYXRlZFBHOjpkb19vcChzdGQ6OnRyMTo6c2hhcmVkX3B0cjxP
-cFJlcXVlc3Q+JikrMHgyOTA3KQ0KPiA+IFsweDhlYWM4N10NCj4gPg0KPiA+ICAgNzogKFJlcGxp
-Y2F0ZWRQRzo6ZG9fcmVxdWVzdChzdGQ6OnRyMTo6c2hhcmVkX3B0cjxPcFJlcXVlc3Q+JiwNCj4g
-PiBUaHJlYWRQb29sOjpUUEhhbmRsZSYpKzB4NjZhKSBbMHg4NzdiZWFdDQo+ID4NCj4gPiAgIDg6
-IChPU0Q6OmRlcXVldWVfb3AoYm9vc3Q6OmludHJ1c2l2ZV9wdHI8UEc+LA0KPiA+IHN0ZDo6dHIx
-OjpzaGFyZWRfcHRyPE9wUmVxdWVzdD4sIFRocmVhZFBvb2w6OlRQSGFuZGxlJikrMHgzYmQpDQo+
-ID4gWzB4NmQ5NGZkXQ0KPiA+DQo+ID4gICA5OiAoT1NEOjpTaGFyZGVkT3BXUTo6X3Byb2Nlc3Mo
-dW5zaWduZWQgaW50LA0KPiA+IGNlcGg6OmhlYXJ0YmVhdF9oYW5kbGVfZCopKzB4MzMxKSBbMHg2
-ZDlhMjFdDQo+ID4NCj4gPiAgIDEwOiAoU2hhcmRlZFRocmVhZFBvb2w6OnNoYXJkZWR0aHJlYWRw
-b29sX3dvcmtlcih1bnNpZ25lZA0KPiA+IGludCkrMHg4NzUpIFsweGM3NzkwNV0NCj4gPg0KPiA+
-ICAgMTE6IChTaGFyZGVkVGhyZWFkUG9vbDo6V29ya1RocmVhZFNoYXJkZWQ6OmVudHJ5KCkrMHgx
-MCkgWzB4Yzc5YTIwXQ0KPiA+DQo+ID4gICAxMjogKCgpKzB4ODE4MikgWzB4N2Y0MjdmZTdjMTgy
-XQ0KPiA+DQo+ID4gICAxMzogKGNsb25lKCkrMHg2ZCkgWzB4N2Y0MjdkZThlNDdkXQ0KPiA+DQo+
-ID4gICBOT1RFOiBhIGNvcHkgb2YgdGhlIGV4ZWN1dGFibGUsIG9yIGBvYmpkdW1wIC1yZFMgPGV4
-ZWN1dGFibGU+YCBpcw0KPiA+IG5lZWRlZCB0byBpbnRlcnByZXQgdGhpcy4NCj4gPg0KPiA+IElz
-IGFueW9uZSBlbHNlIHNlZWluZyB0aGlzID8NCj4gDQo+IEkndmUgbW9zdGx5IGJlZW4gZm9jdXNl
-ZCBvbiB3cml0ZSBwZXJmb3JtYW5jZS4gIFJlYWRzIHVzZWQgdG8gd29yaywgYnV0IGl0J3MNCj4g
-cG9zc2libGUgc29tZXRoaW5nIGJyb2tlIHJlY2VudGx5LiAgSSdsbCB0cnkgdG8gcmVwcm9kdWNl
-Lg0KPiANCj4gPg0KPiA+IC1OZW8NCj4gPiAtLQ0KPiA+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhp
-cyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIg0KPiA+IGluIHRo
-ZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUNCj4g
-bWFqb3Jkb21vDQo+ID4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8t
-aW5mby5odG1sDQo+ID4NCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNl
-bmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIHRoZQ0KPiBib2R5IG9mIGEg
-bWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGluZm8g
-YXQNCj4gaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo=
+Hi,
+I am planning to setup RGW on top of Erasure coded pool. RGW stores all of its data in the .rgw.buckets pool and I am planning to configure this pool as erasure-coded. I think configuring all other rgw pools as replicated should be fine as they don't store lot of data.
+Please let me know if I am missing anything, any comments/suggestion/performance tuning insight  on this will be very helpful.
+
+Thanks & Regards
+Somnath
+
+________________________________
+
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+
