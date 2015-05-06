@@ -1,300 +1,72 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: v9.0.0 contributors credits
-Date: Wed, 06 May 2015 01:39:32 +0200
-Message-ID: <554954B4.5010103@dachary.org>
+From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Subject: RE: Newstore Read ?
+Date: Wed, 6 May 2015 00:55:20 +0000
+Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC021ECA6F@shsmsx102.ccr.corp.intel.com>
+References: <CAFkUHxe6fiewz78H4CTuPghqJr6nTdJq4Ucn2O6H1uEqVGgKqQ@mail.gmail.com>
+ <554948D2.8070403@redhat.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="u4iuraoPhQjDpk57pIFAT2xrRw4EIb6uE"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:58190 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753007AbbEEXjf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 May 2015 19:39:35 -0400
-Received: from [10.9.0.6] (unknown [10.0.2.28])
-	by smtp.dmail.dachary.org (Postfix) with ESMTP id 2C2DB42B45
-	for <ceph-devel@vger.kernel.org>; Wed,  6 May 2015 01:39:33 +0200 (CEST)
+Received: from mga11.intel.com ([192.55.52.93]:33895 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S965423AbbEFAzY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 5 May 2015 20:55:24 -0400
+In-Reply-To: <554948D2.8070403@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mnelson@redhat.com>, kernel neophyte <neophyte.hacker001@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---u4iuraoPhQjDpk57pIFAT2xrRw4EIb6uE
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-Hi Ceph,
-
-Here is a sorted list of authors and organizations who contributed to v9.=
-0.0, by number of commits or reviews back to v0.94. The affiliation of au=
-thors to organizations can be updated by submitting a patch to https://gi=
-thub.com/ceph/ceph/blob/master/.organizationmap
-
-All commits are reviewed but the number of reviews is a fraction of the n=
-umber of commits. More often than not, the reviewer(s) is only mentioned =
-in the message of the merge although it means that all associated commits=
- have been reviewed. If you are curious about how it is done, the details=
- are at https://wiki.ceph.com/Community/Ceph_contributors_list_maintenanc=
-e_guide
-
-The number of lines added and removed can be surprisingly high when a dev=
-eloper refactors part of the code, transforms a directory into a submodul=
-e etc.=20
-
-Number of lines added and removed, by authors
-     1	184873 Danny Al-Gaaf <danny.al-gaaf@bisect.de>
-     2	 34777 Kefu Chai <kchai@redhat.com>
-     3	  9643 Sage Weil <sweil@redhat.com>
-     4	  8572 Yuan Zhou <yuan.zhou@intel.com>
-     5	  4717 John Spray <jspray@redhat.com>
-     6	  3828 Nilamdyuti Goswami <ngoswami@redhat.com>
-     7	  2167 Yan, Zheng <zyan@redhat.com>
-     8	  1991 Haomai Wang <haomaiwang@gmail.com>
-     9	  1398 Jason Dillaman <dillaman@redhat.com>
-    10	  1380 Loic Dachary <ldachary@redhat.com>
-    11	   814 Kiseleva Alyona <akiselyova@mirantis.com>
-    12	   794 Xavier Roche <roche+git@exalead.com>
-    13	   472 Michal Jarzabek <stiopa@gmail.com>
-    14	   440 Zhiqiang Wang <zhiqiang.wang@intel.com>
-    15	   311 Ma Jianpeng <jianpeng.ma@intel.com>
-    16	   266 Xiaoxi Chen <xiaoxi.chen@intel.com>
-    17	   242 Mykola Golub <mgolub@mirantis.com>
-    18	   229 Zhi (David) Zhang <zhangz@yahoo-inc.com>
-    19	   221 Dmitry Yatsushkevich <dyatsushkevich@mirantis.com>
-    20	   214 Noah Watkins <nwatkins@redhat.com>
-    21	   179 Yann Dupont <yann@objoo.org>
-    22	   162 Douglas Fuller <dfuller@redhat.com>
-    23	   149 Takeshi Miyamae <miyamae.takeshi@jp.fujitsu.com>
-    24	   136 Yazen Ghannam <yazen.ghannam@linaro.org>
-    25	   136 Ilya Dryomov <idryomov@redhat.com>
-    26	   134 Abhishek Lekshmanan <abhishek.lekshmanan@ril.com>
-    27	   119 Xinze Chi <xmdxcxz@gmail.com>
-    28	   110 Josh Durgin <jdurgin@redhat.com>
-    29	   108 Alexandre Marangone <amarango@redhat.com>
-    30	   105 Rajesh Nambiar <rajesh.n@msystechnologies.com>
-    31	   102 Robin Dehu <robindehu@gmail.com>
-    32	   102 Dmytro Iurchenko <diurchenko@mirantis.com>
-    33	   100 Yehuda Sadeh <ysadehwe@redhat.com>
-    34	    88 Travis Rhoden <trhoden@redhat.com>
-    35	    69 Radoslaw Zarzynski <rzarzynski@mirantis.com>
-    36	    68 Alfredo Deza <adeza@redhat.com>
-    37	    63 Matt Benjamin <matt@cohortfs.com>
-    38	    56 Ken Dreyer <kdreyer@redhat.com>
-    39	    54 Raju Kurunkad <raju.kurunkad@sandisk.com>
-    40	    46 Ning Yao <yaoning@ruijie.com.cn>
-    41	    40 Vu Pham <vu@mellanox.com>
-    42	    40 Orit Wasserman <owasserm@redhat.com>
-    43	    28 Vartika Rai <vartikarai17@gmail.com>
-    44	    20 Guang Yang <yguang@yahoo-inc.com>
-    45	    18 Ian Kelling <ian@iankelling.org>
-    46	    16 Andreas Peters <andreas.joachim.peters@cern.ch>
-    47	    13 Lee Revell <rlrevell@gmail.com>
-    48	    12 Greg Farnum <gfarnum@redhat.com>
-    49	    12 Gaurav Kumar Garg <garg.gaurav52@gmail.com>
-    50	    12 Dan van der Ster <daniel.vanderster@cern.ch>
-    51	    11 David Zafman <dzafman@redhat.com>
-    52	    10 Thomas Johnson <NTmatter@gmail.com>
-    53	    10 Shu, Xinxin <xinxin.shu@intel.com>
-    54	     9 James Page <james.page@ubuntu.com>
-    55	     8 Jenkins <jenkins@inktank.com>
-    56	     8 Florian Haas <florian@hastexo.com>
-    57	     7 Xiong Yiliang <xiongyiliang@xunlei.com>
-    58	     6 Samuel Just <sjust@redhat.com>
-    59	     6 Neha Ummareddy <nehaummareddy@gmail.com>
-    60	     6 Bosse Klykken <larkly@gmail.com>
-    61	     5 Swami Reddy <swami.reddy@ril.com>
-    62	     5 Javier Guerra <javier@guerrag.com>
-    63	     4 Gregory Meno <gmeno@redhat.com>
-    64	     2 Zhicheng Wei <zhicheng@opensourceforge.net>
-    65	     2 Xingyi Wu <wuxingyi2015@outlook.com>
-    66	     2 Vicente Cheng <freeze.bilsted@gmail.com>
-    67	     2 Pete Zaitcev <zaitcev@redhat.com>
-    68	     2 Florian Marsylle <florian.marsylle@hotmail.fr>
-    69	     2 Fabio Alessandro Locati <fabiolocati@gmail.com>
-    70	     2 Andy Allan <andy@gravitystorm.co.uk>
-    71	     2 Alexis Normand <n.al3xis@gmail.com>
-    72	     0 Patrick McGarry <pmcgarry@redhat.com>
-
-Number of lines added and removed, by organization
-     1	184873 Deutsche Telekom <contact@telekom.de>
-     2	 59027 Red Hat <contact@redhat.com>
-     3	  9599 Intel <contact@intel.com>
-     4	  2982 Unaffiliated <no@organization.net>
-     5	  1448 Mirantis <contact@mirantis.com>
-     6	   794 Exalead <contact@exalead.com>
-     7	   249 Yahoo! <contact@yahoo-inc.com>
-     8	   149 Fujitsu <contact@fujitsu.com>
-     9	   139 Reliance Jio Infocomm Ltd. <contact@ril.com>
-    10	   136 Linaro <contact@linaro.org>
-    11	   105 MSys Technologies <contact@msystechnologies.com>
-    12	    63 CohortFS, LLC <contact@cohortfs.com>
-    13	    54 SanDisk <contact@sandisk.com>
-    14	    46 Ruijie Networks <contact@ruijie.com.cn>
-    15	    40 Mellanox <contact@mellanox.com>
-    16	    28 CERN <contact@cern.ch>
-    17	     9 Canonical <contact@canonical.com>
-    18	     8 Inktank <contact@inktank.com>
-    19	     8 Hastexo <contact@hastexo.com>
-
-Commits, by authors
-     1	     70 Danny Al-Gaaf <danny.al-gaaf@bisect.de>
-     2	     69 John Spray <jspray@redhat.com>
-     3	     50 Loic Dachary <ldachary@redhat.com>
-     4	     48 Sage Weil <sweil@redhat.com>
-     5	     46 Haomai Wang <haomaiwang@gmail.com>
-     6	     41 Yan, Zheng <zyan@redhat.com>
-     7	     40 Kefu Chai <kchai@redhat.com>
-     8	     37 Yann Dupont <yann@objoo.org>
-     9	     34 Abhishek Lekshmanan <abhishek.lekshmanan@ril.com>
-    10	     24 Jason Dillaman <dillaman@redhat.com>
-    11	     21 Nilamdyuti Goswami <ngoswami@redhat.com>
-    12	     19 Ma Jianpeng <jianpeng.ma@intel.com>
-    13	     12 Zhiqiang Wang <zhiqiang.wang@intel.com>
-    14	      9 Xinze Chi <xmdxcxz@gmail.com>
-    15	      9 Kiseleva Alyona <akiselyova@mirantis.com>
-    16	      8 Yehuda Sadeh <ysadehwe@redhat.com>
-    17	      8 Radoslaw Zarzynski <rzarzynski@mirantis.com>
-    18	      8 Ken Dreyer <kdreyer@redhat.com>
-    19	      7 Xavier Roche <roche+git@exalead.com>
-    20	      7 Noah Watkins <nwatkins@redhat.com>
-    21	      6 Josh Durgin <jdurgin@redhat.com>
-    22	      5 Mykola Golub <mgolub@mirantis.com>
-    23	      5 Ilya Dryomov <idryomov@redhat.com>
-    24	      4 Xiaoxi Chen <xiaoxi.chen@intel.com>
-    25	      4 David Zafman <dzafman@redhat.com>
-    26	      3 Travis Rhoden <trhoden@redhat.com>
-    27	      3 Swami Reddy <swami.reddy@ril.com>
-    28	      3 Rajesh Nambiar <rajesh.n@msystechnologies.com>
-    29	      3 Matt Benjamin <matt@cohortfs.com>
-    30	      3 Guang Yang <yguang@yahoo-inc.com>
-    31	      3 Greg Farnum <gfarnum@redhat.com>
-    32	      3 Dmitry Yatsushkevich <dyatsushkevich@mirantis.com>
-    33	      3 Alfredo Deza <adeza@redhat.com>
-    34	      2 Yuan Zhou <yuan.zhou@intel.com>
-    35	      2 Vu Pham <vu@mellanox.com>
-    36	      2 Thomas Johnson <NTmatter@gmail.com>
-    37	      2 Raju Kurunkad <raju.kurunkad@sandisk.com>
-    38	      2 Michal Jarzabek <stiopa@gmail.com>
-    39	      2 Lee Revell <rlrevell@gmail.com>
-    40	      2 Javier Guerra <javier@guerrag.com>
-    41	      2 Florian Haas <florian@hastexo.com>
-    42	      2 Douglas Fuller <dfuller@redhat.com>
-    43	      2 Dmytro Iurchenko <diurchenko@mirantis.com>
-    44	      2 Dan van der Ster <daniel.vanderster@cern.ch>
-    45	      2 Bosse Klykken <larkly@gmail.com>
-    46	      1 Zhi (David) Zhang <zhangz@yahoo-inc.com>
-    47	      1 Zhicheng Wei <zhicheng@opensourceforge.net>
-    48	      1 Yazen Ghannam <yazen.ghannam@linaro.org>
-    49	      1 Xiong Yiliang <xiongyiliang@xunlei.com>
-    50	      1 Xingyi Wu <wuxingyi2015@outlook.com>
-    51	      1 Vicente Cheng <freeze.bilsted@gmail.com>
-    52	      1 Vartika Rai <vartikarai17@gmail.com>
-    53	      1 Takeshi Miyamae <miyamae.takeshi@jp.fujitsu.com>
-    54	      1 Shu, Xinxin <xinxin.shu@intel.com>
-    55	      1 Samuel Just <sjust@redhat.com>
-    56	      1 Robin Dehu <robindehu@gmail.com>
-    57	      1 Pete Zaitcev <zaitcev@redhat.com>
-    58	      1 Patrick McGarry <pmcgarry@redhat.com>
-    59	      1 Orit Wasserman <owasserm@redhat.com>
-    60	      1 Ning Yao <yaoning@ruijie.com.cn>
-    61	      1 Neha Ummareddy <nehaummareddy@gmail.com>
-    62	      1 Jenkins <jenkins@inktank.com>
-    63	      1 James Page <james.page@ubuntu.com>
-    64	      1 Ian Kelling <ian@iankelling.org>
-    65	      1 Gregory Meno <gmeno@redhat.com>
-    66	      1 Gaurav Kumar Garg <garg.gaurav52@gmail.com>
-    67	      1 Florian Marsylle <florian.marsylle@hotmail.fr>
-    68	      1 Fabio Alessandro Locati <fabiolocati@gmail.com>
-    69	      1 Andy Allan <andy@gravitystorm.co.uk>
-    70	      1 Andreas Peters <andreas.joachim.peters@cern.ch>
-    71	      1 Alexis Normand <n.al3xis@gmail.com>
-    72	      1 Alexandre Marangone <amarango@redhat.com>
-
-Commits, by organizations
-     1	    348 Red Hat <contact@redhat.com>
-     2	    115 Unaffiliated <no@organization.net>
-     3	     70 Deutsche Telekom <contact@telekom.de>
-     4	     38 Intel <contact@intel.com>
-     5	     37 Reliance Jio Infocomm Ltd. <contact@ril.com>
-     6	     27 Mirantis <contact@mirantis.com>
-     7	      7 Exalead <contact@exalead.com>
-     8	      4 Yahoo! <contact@yahoo-inc.com>
-     9	      3 MSys Technologies <contact@msystechnologies.com>
-    10	      3 CohortFS, LLC <contact@cohortfs.com>
-    11	      3 CERN <contact@cern.ch>
-    12	      2 SanDisk <contact@sandisk.com>
-    13	      2 Mellanox <contact@mellanox.com>
-    14	      2 Hastexo <contact@hastexo.com>
-    15	      1 Ruijie Networks <contact@ruijie.com.cn>
-    16	      1 Linaro <contact@linaro.org>
-    17	      1 Inktank <contact@inktank.com>
-    18	      1 Fujitsu <contact@fujitsu.com>
-    19	      1 Canonical <contact@canonical.com>
-
-Reviews, by authors (one review spans multiple commits)
-     1	     76 Loic Dachary <ldachary@redhat.com>
-     2	     34 Kefu Chai <kchai@redhat.com>
-     3	     30 Sage Weil <sweil@redhat.com>
-     4	     26 Josh Durgin <jdurgin@redhat.com>
-     5	     24 Greg Farnum <gfarnum@redhat.com>
-     6	     15 Yehuda Sadeh <ysadehwe@redhat.com>
-     7	     15 John Spray <jspray@redhat.com>
-     8	      6 Danny Al-Gaaf <danny.al-gaaf@bisect.de>
-     9	      5 Ken Dreyer <kdreyer@redhat.com>
-    10	      4 Haomai Wang <haomaiwang@gmail.com>
-    11	      3 Samuel Just <sjust@redhat.com>
-    12	      2 Zhi (David) Zhang <zhangz@yahoo-inc.com>
-    13	      2 Yann Dupont <yann@objoo.org>
-    14	      2 Simon Guinot <simon.guinot@sequanux.org>
-    15	      2 Owen Synge <osynge@suse.com>
-    16	      2 Joao Eduardo Luis <joao@suse.de>
-    17	      2 Dan Mick <dmick@redhat.com>
-    18	      2 Abhishek Lekshmanan <abhishek.lekshmanan@ril.com>
-    19	      1 Yuri Weinstein <yuriw@redhat.com>
-    20	      1 Yan, Zheng <zyan@redhat.com>
-    21	      1 Travis Rhoden <trhoden@redhat.com>
-    22	      1 Steve Capper <steve.capper@linaro.org>
-    23	      1 Raju Kurunkad <Raju.Kurunkad@sandisk.com>
-    24	      1 Jian Wen <wenjian@letv.com>
-    25	      1 Jason Dillaman <dillaman@redhat.com>
-    26	      1 James Page <james.page@ubuntu.com>
-    27	      1 David Zafman <dzafman@redhat.com>
-    28	      1 Billy Olsen <billy.olsen@canonical.com>
-    29	      1 Andrew Bartlett <abartlet@catalyst.net.nz>
-    30	      1 Alistair Israel <aisrael@gmail.com>
-    31	      1 Alfredo Deza <adeza@redhat.com>
-
-Reviews, by organizations (one review spans multiple commits)
-     1	    234 Red Hat <contact@redhat.com>
-     2	      9 Unaffiliated <no@organization.net>
-     3	      6 Deutsche Telekom <contact@telekom.de>
-     4	      3 SUSE <contact@suse.com>
-     5	      3 Cloudwatt <libre.licensing@cloudwatt.com>
-     6	      2 Yahoo! <contact@yahoo-inc.com>
-     7	      2 Reliance Jio Infocomm Ltd. <contact@ril.com>
-     8	      2 Canonical <contact@canonical.com>
-     9	      1 SanDisk <contact@sandisk.com>
-    10	      1 Linaro <contact@linaro.org>
-    11	      1 Catalyst <enquiries@catalyst.net.nz>
-    12	      1 Acaleph <contact@acale.ph>
-
-
-
-Cheers
-
-
-
---u4iuraoPhQjDpk57pIFAT2xrRw4EIb6uE
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlVJVLQACgkQ8dLMyEl6F20fmgCcCzn+nHYeHFlzIK54XVqZl2WG
-/+cAmwavBeLA2H9OlmKoQchmP6ltYDYD
-=Xzr2
------END PGP SIGNATURE-----
-
---u4iuraoPhQjDpk57pIFAT2xrRw4EIb6uE--
+SGkgTmVvLA0KDQogICAgICAgVGhlIG5ld3N0b3JlOjpmaWVfbWFwIGlzbid0IGltcGxlbWVudGVk
+IHlldCwgc28gQ0VQSF9PU0RfT1BfU1BBUlNFX1JFQUQgd2lsbCBnZXQgYW4gYXNzZXJ0KDApLiBJ
+IHdpbGwgdHJ5IHRvIG1ha2UgaXQgZG9uZSB0b2RheTopDQoJCQkJCQkJCVhpYW94aQ0KDQo+IC0t
+LS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5r
+ZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC0NCj4gb3duZXJAdmdlci5rZXJuZWwub3JnXSBP
+biBCZWhhbGYgT2YgTWFyayBOZWxzb24NCj4gU2VudDogV2VkbmVzZGF5LCBNYXkgNiwgMjAxNSA2
+OjQ5IEFNDQo+IFRvOiBrZXJuZWwgbmVvcGh5dGU7IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3Jn
+DQo+IFN1YmplY3Q6IFJlOiBOZXdzdG9yZSBSZWFkID8NCj4gDQo+IE9uIDA1LzA1LzIwMTUgMDU6
+MTEgUE0sIGtlcm5lbCBuZW9waHl0ZSB3cm90ZToNCj4gPiBIaSwNCj4gPg0KPiA+IEkgYW0gdW5h
+YmxlIHRvIGdldCBhbnkgcmVhZHMgb3V0IG9mIE5ld3N0b3JlLiBUaGUgbG9nIGlzIGZpbGxlZCB3
+aXRoDQo+ID4gYXNzZXJ0IGZhaWx1cmVzLg0KPiA+DQo+ID4+IDIwMTUtMDUtMDUgMTQ6NDk6NDYu
+NjU0MTEzIDdmNDIzNjM4NzcwMCAtMSBvcy9uZXdzdG9yZS9OZXdTdG9yZS5jYzoNCj4gPj4gSW4g
+ZnVuY3Rpb24gJ3ZpcnR1YWwgaW50IE5ld1N0b3JlOjpmaWVtYXAoY29sbF90LCBjb25zdCBnaG9i
+amVjdF90JiwNCj4gPj4gdWludDY0X3QsIHNpemVfdCwgY2VwaDo6YnVmZmVybGlzdCYpJyB0aHJl
+YWQgN2Y0MjM2Mzg3NzAwIHRpbWUNCj4gPj4gMjAxNS0wNS0wNSAxNDo0OTo0Ni41ODI5OTENCj4g
+Pg0KPiA+IG9zL25ld3N0b3JlL05ld1N0b3JlLmNjOiAxMzcxOiBGQUlMRUQgYXNzZXJ0KDApDQo+
+ID4NCj4gPg0KPiA+ICAgY2VwaCB2ZXJzaW9uIDAuOTMtMTA5OC1nNjZlNTU1ZA0KPiA+ICg2NmU1
+NTVkNGE2ZTJmZDIxZWZkOWRhMGQxZWJkM2ZlYjAyNGIwNDFlKQ0KPiA+DQo+ID4gICAxOiAoY2Vw
+aDo6X19jZXBoX2Fzc2VydF9mYWlsKGNoYXIgY29uc3QqLCBjaGFyIGNvbnN0KiwgaW50LCBjaGFy
+DQo+ID4gY29uc3QqKSsweDhiKSBbMHhjOWJkZWJdDQo+ID4NCj4gPiAgIDI6IGNlcGgtb3NkKCkg
+WzB4OWVhMjkzXQ0KPiA+DQo+ID4gICAzOiAoUmVwbGljYXRlZFBHOjpkb19vc2Rfb3BzKFJlcGxp
+Y2F0ZWRQRzo6T3BDb250ZXh0KiwNCj4gPiBzdGQ6OnZlY3RvcjxPU0RPcCwgc3RkOjphbGxvY2F0
+b3I8T1NET3A+ID4mKSsweDcwOGMpIFsweDhkOGNjY10NCj4gPg0KPiA+ICAgNDoNCj4gPiAoUmVw
+bGljYXRlZFBHOjpwcmVwYXJlX3RyYW5zYWN0aW9uKFJlcGxpY2F0ZWRQRzo6T3BDb250ZXh0Kikr
+MHg5NykNCj4gPiBbMHg4ZTY0MjddDQo+ID4NCj4gPiAgIDU6IChSZXBsaWNhdGVkUEc6OmV4ZWN1
+dGVfY3R4KFJlcGxpY2F0ZWRQRzo6T3BDb250ZXh0KikrMHg1ZTUpDQo+ID4gWzB4OGU2Yzg1XQ0K
+PiA+DQo+ID4gICA2OiAoUmVwbGljYXRlZFBHOjpkb19vcChzdGQ6OnRyMTo6c2hhcmVkX3B0cjxP
+cFJlcXVlc3Q+JikrMHgyOTA3KQ0KPiA+IFsweDhlYWM4N10NCj4gPg0KPiA+ICAgNzogKFJlcGxp
+Y2F0ZWRQRzo6ZG9fcmVxdWVzdChzdGQ6OnRyMTo6c2hhcmVkX3B0cjxPcFJlcXVlc3Q+JiwNCj4g
+PiBUaHJlYWRQb29sOjpUUEhhbmRsZSYpKzB4NjZhKSBbMHg4NzdiZWFdDQo+ID4NCj4gPiAgIDg6
+IChPU0Q6OmRlcXVldWVfb3AoYm9vc3Q6OmludHJ1c2l2ZV9wdHI8UEc+LA0KPiA+IHN0ZDo6dHIx
+OjpzaGFyZWRfcHRyPE9wUmVxdWVzdD4sIFRocmVhZFBvb2w6OlRQSGFuZGxlJikrMHgzYmQpDQo+
+ID4gWzB4NmQ5NGZkXQ0KPiA+DQo+ID4gICA5OiAoT1NEOjpTaGFyZGVkT3BXUTo6X3Byb2Nlc3Mo
+dW5zaWduZWQgaW50LA0KPiA+IGNlcGg6OmhlYXJ0YmVhdF9oYW5kbGVfZCopKzB4MzMxKSBbMHg2
+ZDlhMjFdDQo+ID4NCj4gPiAgIDEwOiAoU2hhcmRlZFRocmVhZFBvb2w6OnNoYXJkZWR0aHJlYWRw
+b29sX3dvcmtlcih1bnNpZ25lZA0KPiA+IGludCkrMHg4NzUpIFsweGM3NzkwNV0NCj4gPg0KPiA+
+ICAgMTE6IChTaGFyZGVkVGhyZWFkUG9vbDo6V29ya1RocmVhZFNoYXJkZWQ6OmVudHJ5KCkrMHgx
+MCkgWzB4Yzc5YTIwXQ0KPiA+DQo+ID4gICAxMjogKCgpKzB4ODE4MikgWzB4N2Y0MjdmZTdjMTgy
+XQ0KPiA+DQo+ID4gICAxMzogKGNsb25lKCkrMHg2ZCkgWzB4N2Y0MjdkZThlNDdkXQ0KPiA+DQo+
+ID4gICBOT1RFOiBhIGNvcHkgb2YgdGhlIGV4ZWN1dGFibGUsIG9yIGBvYmpkdW1wIC1yZFMgPGV4
+ZWN1dGFibGU+YCBpcw0KPiA+IG5lZWRlZCB0byBpbnRlcnByZXQgdGhpcy4NCj4gPg0KPiA+IElz
+IGFueW9uZSBlbHNlIHNlZWluZyB0aGlzID8NCj4gDQo+IEkndmUgbW9zdGx5IGJlZW4gZm9jdXNl
+ZCBvbiB3cml0ZSBwZXJmb3JtYW5jZS4gIFJlYWRzIHVzZWQgdG8gd29yaywgYnV0IGl0J3MNCj4g
+cG9zc2libGUgc29tZXRoaW5nIGJyb2tlIHJlY2VudGx5LiAgSSdsbCB0cnkgdG8gcmVwcm9kdWNl
+Lg0KPiANCj4gPg0KPiA+IC1OZW8NCj4gPiAtLQ0KPiA+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhp
+cyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIg0KPiA+IGluIHRo
+ZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUNCj4g
+bWFqb3Jkb21vDQo+ID4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8t
+aW5mby5odG1sDQo+ID4NCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNl
+bmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIHRoZQ0KPiBib2R5IG9mIGEg
+bWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGluZm8g
+YXQNCj4gaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo=
