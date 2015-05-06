@@ -1,39 +1,87 @@
-From: Abhishek L <abhishek.lekshmanan@gmail.com>
-Subject: Re: release notes script dependencies
-Date: Wed, 6 May 2015 09:57:55 +0530
-Message-ID: <CAEw75dOCcdafHQhdc6uv+HsQVnOVE+rD8VdAAYFALFfFSEq2cg@mail.gmail.com>
-References: <55491259.4010003@dachary.org>
+From: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
+Subject: RE: CephFS + Erasure coding
+Date: Wed, 6 May 2015 04:29:42 +0000
+Message-ID: <06E7D85B3BA36C4DB207FEDE871C53489D9EF9@SHSMSX101.ccr.corp.intel.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD83D5B@SACMBXIP01.sdcorp.global.sandisk.com>
+ <CAC6JEv-pqbJ3JzV4MayJPF=1TAgVs0pm1=FxHvpScX2UsH4Otw@mail.gmail.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD83DA9@SACMBXIP01.sdcorp.global.sandisk.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD83DCB@SACMBXIP01.sdcorp.global.sandisk.com>
+ <06E7D85B3BA36C4DB207FEDE871C53489D9E71@SHSMSX101.ccr.corp.intel.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD86F6A@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f172.google.com ([209.85.216.172]:36408 "EHLO
-	mail-qc0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759236AbbEFE1z (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 May 2015 00:27:55 -0400
-Received: by qcbgy10 with SMTP id gy10so46327787qcb.3
-        for <ceph-devel@vger.kernel.org>; Tue, 05 May 2015 21:27:55 -0700 (PDT)
-In-Reply-To: <55491259.4010003@dachary.org>
+Received: from mga09.intel.com ([134.134.136.24]:24231 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1759297AbbEFE3r (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 6 May 2015 00:29:47 -0400
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD86F6A@SACMBXIP01.sdcorp.global.sandisk.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>, Gregory Farnum <greg@gregs42.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, May 6, 2015 at 12:26 AM, Loic Dachary <loic@dachary.org> wrote:
-> Hi Abhishek,
->
-> It would be useful to add instructions on what dependencies to pull to run http://tracker.ceph.com/projects/ceph-releases/wiki/HOWTO_write_the_release_notes. Something like
->
-> virtualenv /tmp/foo
-> . /tmp/foo/bin/activate
-> pip install GitPython # I recognized the library from the import ;-)
-> pip install ?? # I tried half a dozen but could not find one that matches the import github semantic
-
-The module was githubpy (I agree there are too many of github python
-modules around :-)) I added a basic argparser for the script; I've put
-it up as a github repo at
-https://github.com/theanalyst/ceph-release-helper
-
-Let me know if you're facing any problems using it
-
-Regards
-Abhishek
+VGhpcyBoYXMgYmVlbiBpbiB0aGUgSGFtbWVyIHJlbGVhc2Ugd2hlbiB0aGUgcHJveHkgcmVhZCBj
+b2RlIGdldCBtZXJnZWQgaW4uDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBT
+b21uYXRoIFJveSBbbWFpbHRvOlNvbW5hdGguUm95QHNhbmRpc2suY29tXSANClNlbnQ6IFdlZG5l
+c2RheSwgTWF5IDYsIDIwMTUgMTI6MTcgUE0NClRvOiBXYW5nLCBaaGlxaWFuZzsgR3JlZ29yeSBG
+YXJudW0NCkNjOiBjZXBoLWRldmVsDQpTdWJqZWN0OiBSRTogQ2VwaEZTICsgRXJhc3VyZSBjb2Rp
+bmcNCg0KVGhhbmtzIFdhbmcgIQ0KQnV0LCBpcyB0aGlzIHN1cHBvcnRlZCByaWdodCBub3cgb3Ig
+Y29taW5nIHdpdGggb2JqZWN0IHN0dWIgaW1wbGVtZW50YXRpb24gaW4gSW5mZXJuYWxpcyA/DQoN
+ClJlZ2FyZHMNClNvbW5hdGgNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IFdh
+bmcsIFpoaXFpYW5nIFttYWlsdG86emhpcWlhbmcud2FuZ0BpbnRlbC5jb21dDQpTZW50OiBUdWVz
+ZGF5LCBNYXkgMDUsIDIwMTUgNzo0MiBQTQ0KVG86IFNvbW5hdGggUm95OyBHcmVnb3J5IEZhcm51
+bQ0KQ2M6IGNlcGgtZGV2ZWwNClN1YmplY3Q6IFJFOiBDZXBoRlMgKyBFcmFzdXJlIGNvZGluZw0K
+DQpJIHRoaW5rIHRoZSByZWFkcHJveHkgbW9kZSBpcyB3aGF0IHlvdSBuZWVkLiBSZWFkIGlzIHBy
+b3hpZWQgdG8gdGhlIGJhc2UgdGllciwgYW5kIHdyaXRlIGlzIG9uIHRoZSBjYWNoZSB0aWVyLg0K
+DQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2Vy
+Lmtlcm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10gT24g
+QmVoYWxmIE9mIFNvbW5hdGggUm95DQpTZW50OiBGcmlkYXksIE1heSAxLCAyMDE1IDU6NTggQU0N
+ClRvOiBHcmVnb3J5IEZhcm51bQ0KQ2M6IGNlcGgtZGV2ZWwNClN1YmplY3Q6IFJFOiBDZXBoRlMg
+KyBFcmFzdXJlIGNvZGluZw0KDQpHcmVnLA0KUHJvYmFibHkgbm90IHN1cHBvcnRlZCByaWdodCBu
+b3csIGJ1dCwgd2FudGVkIHRvIGNvbmZpcm0gaWYgdGhlcmUgaXMgYW55IHdheSB3ZSBjYW4gdXNl
+IENlcGggY2FjaGUgdGllciBmb3Igb25seSB3cml0ZXMgYW5kIHJlYWRzIGFyZSBmb3J3YXJkZWQg
+dG8gdGhlIGJhY2tlbmQgZXJhc3VyZSBjb2RlZCBwb29sLg0KDQpUaGFua3MgJiBSZWdhcmRzDQpT
+b21uYXRoDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBjZXBoLWRldmVsLW93
+bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwu
+b3JnXSBPbiBCZWhhbGYgT2YgU29tbmF0aCBSb3kNClNlbnQ6IFRodXJzZGF5LCBBcHJpbCAzMCwg
+MjAxNSAyOjI4IFBNDQpUbzogR3JlZ29yeSBGYXJudW0NCkNjOiBjZXBoLWRldmVsDQpTdWJqZWN0
+OiBSRTogQ2VwaEZTICsgRXJhc3VyZSBjb2RpbmcNCg0KR290IGl0ICwgdGhhbmtzICENCg0KLS0t
+LS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IEdyZWdvcnkgRmFybnVtIFttYWlsdG86Z3Jl
+Z0BncmVnczQyLmNvbV0NClNlbnQ6IFRodXJzZGF5LCBBcHJpbCAzMCwgMjAxNSAyOjIxIFBNDQpU
+bzogU29tbmF0aCBSb3kNCkNjOiBjZXBoLWRldmVsDQpTdWJqZWN0OiBSZTogQ2VwaEZTICsgRXJh
+c3VyZSBjb2RpbmcNCg0KT24gVGh1LCBBcHIgMzAsIDIwMTUgYXQgMTo1NSBQTSwgU29tbmF0aCBS
+b3kgPFNvbW5hdGguUm95QHNhbmRpc2suY29tPiB3cm90ZToNCj4gSGkgR3JlZywNCj4gRm9yZ2l2
+ZSBteSBpZ25vcmFuY2Ugb24gdGhpcyBwYXJ0IGlmIGl0IGlzIGFscmVhZHkgZGlzY3Vzc2VkIGlu
+IHRoZSBjb21tdW5pdHkuIENvdWxkIHlvdSBwbGVhc2UgbGV0IG1lIGtub3cgaWYgQ2VwaEZTIGlz
+IHN1cHBvcnRpbmcgRXJhc3VyZSBjb2RlZCBwb29sIGluIHRoZSBiYWNrZW5kIG9yIG5vdCA/DQo+
+IElmIG5vdCwgaXMgdGhlcmUgYW55IHBsYW4gb2Ygc3VwcG9ydGluZyB0aGlzIGtpbmQgb2YgY29u
+ZmlndXJhdGlvbiBpbiBuZWFyIGZ1dHVyZSA/DQoNCllvdSBjYW4gc2V0IHJlcGxpY2F0ZWQgY2Fj
+aGUgcG9vbHMsIHBvc2l0aW9uZWQgYXMgdGllcnMgb3ZlciBhbiBFQyBwb29sLCBhcyBkYXRhIHBv
+b2xzIGZvciBDZXBoRlMuIFlvdSBjYW5ub3QgdXNlIEVDIHBvb2xzIGRpcmVjdGx5IGZvciBDZXBo
+RlMuIFdlIGhhdmUgbm8gcGxhbnMgdG8gYWRkIHN1cHBvcnQgZm9yIEVDIHBvb2xzIGluIHRoZSBm
+b3Jlc2VlYWJsZSBmdXR1cmUg4oCUIHNpbmNlIHRoZXkgaGF2ZSBsaW1pdGVkIFJBRE9TIGZ1bmN0
+aW9uYWxpdHkgd2UnZCBuZWVkIHRvIGltcGxlbWVudCBhIHdob2xlIGxvZy1zdHJ1Y3R1cmVkIGZp
+bGUgc3RvcmFnZSBzeXN0ZW0gb3Igc29tZXRoaW5nLiA6KCAtR3JlZw0KDQo+DQo+IFRoYW5rcyAm
+IFJlZ2FyZHMNCj4gU29tbmF0aA0KPg0KPiBfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+Xw0KPg0KPiBQTEVBU0UgTk9URTogVGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBpbiB0aGlzIGVs
+ZWN0cm9uaWMgbWFpbCBtZXNzYWdlIGlzIGludGVuZGVkIG9ubHkgZm9yIHRoZSB1c2Ugb2YgdGhl
+IGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpIG5hbWVkIGFib3ZlLiBJZiB0aGUgcmVhZGVyIG9mIHRo
+aXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVuZGVkIHJlY2lwaWVudCwgeW91IGFyZSBoZXJlYnkg
+bm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2UgaW4gZXJyb3IgYW5k
+IHRoYXQgYW55IHJldmlldywgZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9uLCBvciBjb3B5aW5n
+IG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5b3UgaGF2ZSByZWNl
+aXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRl
+ciBieSB0ZWxlcGhvbmUgb3IgZS1tYWlsIChhcyBzaG93biBhYm92ZSkgaW1tZWRpYXRlbHkgYW5k
+IGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVzIG9mIHRoaXMgbWVzc2FnZSBpbiB5b3VyIHBvc3Nl
+c3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkgc3RvcmVkIGNvcGll
+cykuDQo+DQo+IC0tDQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBs
+aW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiANCj4gaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdl
+IHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gDQo+IGluZm8gYXQg
+IGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KBCB7Lm4gKyAgICAg
+ICArJSAgbHp3bSAgYiDrp7IgIHIgIHnHqSDXr3pYICAXICDcqH0gICDGoHogJmo6K3YgICAgICAg
+IHpaKyAgK3pmICAgaCAgIH4gICAgaSAgIHogHiB3ICAgPyAgICAmICnfohtmDQpOICAgICByICB5
+ICAgYiBYICDHp3YgXiAp3rp7Lm4gKyAgIHogXXogICB7YXkgHcqH2pkgLGogICBmICAgaCAgIHog
+HiB3ICAgICAgIGo6K3YgICB3IGogbSAgICAgICAgIHpaKyAgICAg3aJqIiAgISBpDQo=
