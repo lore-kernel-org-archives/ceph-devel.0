@@ -1,59 +1,56 @@
-From: Christoph Hellwig <hch@lst.de>
-Subject: Re: [PATCH 07/10] block: kill merge_bvec_fn() completely
-Date: Wed, 6 May 2015 09:26:37 +0200
-Message-ID: <20150506072637.GB23083@lst.de>
-References: <1430203717-13307-1-git-send-email-mlin@kernel.org> <1430203717-13307-8-git-send-email-mlin@kernel.org> <20150429080919.342fddfd@notabene.brown> <5547241B.1040903@kernel.org>
+From: Joao Eduardo Luis <joao@suse.de>
+Subject: Re: [ceph-users] The first infernalis dev release will be v9.0.0
+Date: Wed, 06 May 2015 09:29:05 +0100
+Message-ID: <5549D0D1.8020009@suse.de>
+References: <alpine.DEB.2.00.1504301528410.5458@cobra.newdream.net>	<5548D1C0.30204@suse.de>	<alpine.DEB.2.00.1505050945230.13336@cobra.newdream.net>	<CADA4hP+aeXmLqv2YGQsG7Hh72ZM8S9D8YTsvVktt22jGdYqTAg@mail.gmail.com>	<alpine.DEB.2.00.1505050951540.13336@cobra.newdream.net> <5ABDA982-178E-4CD0-AF35-D79D064A5D49@me.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <5547241B.1040903@kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ming Lin <mlin@kernel.org>
-Cc: NeilBrown <neilb@suse.de>, linux-kernel@vger.kernel.org, Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>, Kent Overstreet <kent.overstreet@gmail.com>, Dongsu Park <dongsu.park@profitbricks.com>, Lars Ellenberg <drbd-dev@lists.linbit.com>, drbd-user@lists.linbit.com, Jiri Kosina <jkosina@suse.cz>, Yehuda Sadeh <yehuda@inktank.com>, Sage Weil <sage@inktank.com>, Alex Elder <elder@kernel.org>, ceph-devel@vger.kernel.org, Alasdair Kergon <agk@redhat.com>, Mike Snitzer <snitzer@redhat.com>, dm-devel@redhat.com, linux-raid@vger.kernel.org, Christoph Hellwig <hch@infradead.org>, "Martin K. Petersen" <martin.petersen@oracle.com>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cantor2.suse.de ([195.135.220.15]:35943 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751155AbbEFI3H (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 6 May 2015 04:29:07 -0400
+In-Reply-To: <5ABDA982-178E-4CD0-AF35-D79D064A5D49@me.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: =?UTF-8?B?U3RlZmZlbiBXIFPDuHJlbnNlbg==?= <stefws@me.com>, Sage Weil <sweil@redhat.com>
+Cc: ceph-users@ceph.com, ceph-devel@vger.kernel.org
 
-> -static int chunk_aligned_read(struct mddev *mddev, struct bio * raid_bio)
-> +static int __chunk_aligned_read(struct mddev *mddev, struct bio *raid_bio)
+On 05/05/2015 08:54 PM, Steffen W S=C3=B8rensen wrote:
+>=20
+>> On 05/05/2015, at 18.52, Sage Weil <sweil@redhat.com> wrote:
+>>
+>> On Tue, 5 May 2015, Tony Harris wrote:
+>>> So with this, will even numbers then be LTS?  Since 9.0.0 is follow=
+ing
+>>> 0.94.x/Hammer, and every other release is normally LTS, I'm guessin=
+g 10.x.x,
+>>> 12.x.x, etc. will be LTS...
+>>
+>> It looks that way now, although I can't promise the pattern will hol=
+d!
+> I read it like major version is the release ie. Infernails, Jewel etc=
+=2E following the letter position in the alfabet, I =3D 9th. letter, so=
+ we see all numbers 10,11,12,13=E2=80=A625
+> minor numbers =3D 2 will denote LTS eg. <major release>.2.<patch leve=
+l>
 
-Call it raid5_read_one_chunk or something similar descriptive?
+minor number '2' will denote 'stable', as oposed to 'dev' (minor =3D 0)=
+ or
+'release candidate' (minor =3D 1).  LTS has been every other major
+version; so given Hammer is an LTS and Infernallis is not, then Jewel
+would likely be a long term stable.
 
->  {
->  	struct r5conf *conf = mddev->private;
->  	int dd_idx;
-> @@ -4718,7 +4718,7 @@ static int chunk_aligned_read(struct mddev *mddev, struct bio * raid_bio)
->  	sector_t end_sector;
->  
->  	if (!in_chunk_boundary(mddev, raid_bio)) {
-> -		pr_debug("chunk_aligned_read : non aligned\n");
-> +		pr_debug("__chunk_aligned_read : non aligned\n");
+The point Tony was making is that this cadence, should it be kept as is=
+,
+would match perfectly with even major versions (jewel 10.x, L-release
+12.x, ...).
 
-Switch to __func__?
+  -Joao
 
-> +static struct bio *chunk_aligned_read(struct mddev *mddev, struct bio *raid_bio)
-> +{
-> +	struct bio *split;
-> +
-> +	do {
-> +		sector_t sector = raid_bio->bi_iter.bi_sector;
-> +		unsigned chunk_sects = mddev->chunk_sectors;
-> +
-> +		unsigned sectors = chunk_sects -
-> +			(likely(is_power_of_2(chunk_sects))
-> +			 ? (sector & (chunk_sects-1))
-> +			 : sector_div(sector, chunk_sects));
-
-This would be a lot more readable with a good old if.
-
->  	if (rw == READ && mddev->degraded == 0 &&
->  	     mddev->reshape_position == MaxSector &&
-> -	     chunk_aligned_read(mddev,bi))
-> +	     (!(bi = chunk_aligned_read(mddev, bi))))
->  		return;
-
-	if (rw == READ && mddev->degraded == 0 &&
-	    mddev->reshape_position == MaxSector) {
-		bi = chunk_aligned_read(mddev, bi);
-		if (!bi)
-			return;
-	}
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
