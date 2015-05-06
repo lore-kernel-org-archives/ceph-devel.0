@@ -1,155 +1,74 @@
-From: Italo Santos <okdokk-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: RGW + erasure coding
-Date: Tue, 5 May 2015 22:48:32 -0300
-Message-ID: <ABACEE296F334616AE79B9075D49C8D1@gmail.com>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD86F12@SACMBXIP01.sdcorp.global.sandisk.com>
+From: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
+Subject: RE: CephFS + Erasure coding
+Date: Wed, 6 May 2015 02:42:24 +0000
+Message-ID: <06E7D85B3BA36C4DB207FEDE871C53489D9E71@SHSMSX101.ccr.corp.intel.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD83D5B@SACMBXIP01.sdcorp.global.sandisk.com>
+ <CAC6JEv-pqbJ3JzV4MayJPF=1TAgVs0pm1=FxHvpScX2UsH4Otw@mail.gmail.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD83DA9@SACMBXIP01.sdcorp.global.sandisk.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD83DCB@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1210385157=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD86F12-cXZ6iGhjG0il5HHZYNR2WTJ2aSJ780jGSxCzGc5ayCJWk0Htik3J/w@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Somnath Roy <Somnath.Roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>
-Cc: "=?utf-8?Q?ceph-users=40lists.ceph.com?=" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
-
---===============1210385157==
-Content-Type: multipart/alternative; boundary="554972f0_53299938_d885"
-
---554972f0_53299938_d885
 Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: quoted-printable
-Content-Disposition: inline
+Content-Transfer-Encoding: base64
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mga11.intel.com ([192.55.52.93]:2814 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752184AbbEFCm3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 5 May 2015 22:42:29 -0400
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD83DCB@SACMBXIP01.sdcorp.global.sandisk.com>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>, Gregory Farnum <greg@gregs42.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-I use RGW with the .rgw.bucktes as EC pool and works fine as well, I=E2=80=
-=99m able to reach =7E300MB/s using a physical RGW server with 4 OSD node=
-s with SAS 10K drives w/out SSD journal. =20
-
-Also, I=E2=80=99ve tested create all other pools as EC pool too but RGW d=
-aemon doesn=E2=80=99t start, so I realised that the only pool should be E=
-C was the data pool (.rgw.buckets) =20
-
-Regards.
-
-Italo Santos
-http://italosantos.com.br/
-
-
-On Tuesday, May 5, 2015 at 22:35, Somnath Roy wrote:
-
-> Hi,
-> I am planning to setup RGW on top of Erasure coded pool. RGW stores all=
- of its data in the .rgw.buckets pool and I am planning to configure this=
- pool as erasure-coded. I think configuring all other rgw pools as replic=
-ated should be fine as they don't store lot of data.
-> Please let me know if I am missing anything, any comments/suggestion/pe=
-rformance tuning insight on this will be very helpful.
-> =20
-> Thanks & Regards
-> Somnath
-> =20
-> =5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=
-=5F=5F=5F=5F=5F=5F=5F=5F
-> =20
-> PLEASE NOTE: The information contained in this electronic mail message =
-is intended only for the use of the designated recipient(s) named above. =
-If the reader of this message is not the intended recipient, you are here=
-by notified that you have received this message in error and that any rev=
-iew, dissemination, distribution, or copying of this message is strictly =
-prohibited. If you have received this communication in error, please noti=
-fy the sender by telephone or e-mail (as shown above) immediately and des=
-troy any and all copies of this message in your possession (whether hard =
-copies or electronically stored copies).
-> =20
-> =5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=
-=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F
-> ceph-users mailing list
-> ceph-users=40lists.ceph.com (mailto:ceph-users=40lists.ceph.com)
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-> =20
-> =20
-
-
-
---554972f0_53299938_d885
-Content-Type: text/html; charset="utf-8"
-Content-Transfer-Encoding: quoted-printable
-Content-Disposition: inline
-
-
-                <div>
-                    I use RGW with the .rgw.bucktes as EC pool and works =
-fine as well, I=E2=80=99m able to reach =7E300MB/s using a physical RGW s=
-erver with 4 OSD nodes with SAS 10K drives w/out SSD journal.
-                </div><div><br></div><div>Also, I=E2=80=99ve tested creat=
-e all other pools as EC pool too but RGW daemon doesn=E2=80=99t start, so=
- I realised that the only pool should be EC was the data pool (.rgw.bucke=
-ts)</div>
-                <div><div><br></div><div style=3D=22background-color: rgb=
-(255, 255, 255);=22>Regards.</div><div style=3D=22background-color: rgb(2=
-55, 255, 255);=22><br></div><div style=3D=22background-color: rgb(255, 25=
-5, 255);=22><b>Italo Santos</b></div><div style=3D=22background-color: rg=
-b(255, 255, 255);=22><a href=3D=22http://italosantos.com.br/=22 style=3D=22=
-color: rgb(0, 106, 227);=22>http://italosantos.com.br/</a></div><div><br>=
-</div></div>
-                =20
-                <p style=3D=22color: =23A0A0A8;=22>On Tuesday, May 5, 201=
-5 at 22:35, Somnath Roy wrote:</p>
-                <blockquote type=3D=22cite=22 style=3D=22border-left-styl=
-e:solid;border-width:1px;margin-left:0px;padding-left:10px;=22>
-                    <span><div><div><div>Hi,</div><div>I am planning to s=
-etup RGW on top of Erasure coded pool. RGW stores all of its data in the =
-.rgw.buckets pool and I am planning to configure this pool as erasure-cod=
-ed. I think configuring all other rgw pools as replicated should be fine =
-as they don't store lot of data.</div><div>Please let me know if I am mis=
-sing anything, any comments/suggestion/performance tuning insight  on thi=
-s will be very helpful.</div><div><br></div><div>Thanks &amp; Regards</di=
-v><div>Somnath</div><div><br></div><div>=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=
-=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F</div><div=
-><br></div><div>PLEASE NOTE: The information contained in this electronic=
- mail message is intended only for the use of the designated recipient(s)=
- named above. If the reader of this message is not the intended recipient=
-, you are hereby notified that you have received this message in error an=
-d that any review, dissemination, distribution, or copying of this messag=
-e is strictly prohibited. If you have received this communication in erro=
-r, please notify the sender by telephone or e-mail (as shown above) immed=
-iately and destroy any and all copies of this message in your possession =
-(whether hard copies or electronically stored copies).</div><div><br></di=
-v><div>=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=
-=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=5F=
-</div><div>ceph-users mailing list</div><div><a href=3D=22mailto:ceph-use=
-rs=40lists.ceph.com=22>ceph-users=40lists.ceph.com</a></div><div><a href=3D=
-=22http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com=22>http://lists=
-.ceph.com/listinfo.cgi/ceph-users-ceph.com</a></div></div></div></span>
-                =20
-                =20
-                =20
-                =20
-                </blockquote>
-                =20
-                <div>
-                    <br>
-                </div>
-            
---554972f0_53299938_d885--
-
-
---===============1210385157==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============1210385157==--
+SSB0aGluayB0aGUgcmVhZHByb3h5IG1vZGUgaXMgd2hhdCB5b3UgbmVlZC4gUmVhZCBpcyBwcm94
+aWVkIHRvIHRoZSBiYXNlIHRpZXIsIGFuZCB3cml0ZSBpcyBvbiB0aGUgY2FjaGUgdGllci4NCg0K
+LS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5r
+ZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJl
+aGFsZiBPZiBTb21uYXRoIFJveQ0KU2VudDogRnJpZGF5LCBNYXkgMSwgMjAxNSA1OjU4IEFNDQpU
+bzogR3JlZ29yeSBGYXJudW0NCkNjOiBjZXBoLWRldmVsDQpTdWJqZWN0OiBSRTogQ2VwaEZTICsg
+RXJhc3VyZSBjb2RpbmcNCg0KR3JlZywNClByb2JhYmx5IG5vdCBzdXBwb3J0ZWQgcmlnaHQgbm93
+LCBidXQsIHdhbnRlZCB0byBjb25maXJtIGlmIHRoZXJlIGlzIGFueSB3YXkgd2UgY2FuIHVzZSBD
+ZXBoIGNhY2hlIHRpZXIgZm9yIG9ubHkgd3JpdGVzIGFuZCByZWFkcyBhcmUgZm9yd2FyZGVkIHRv
+IHRoZSBiYWNrZW5kIGVyYXN1cmUgY29kZWQgcG9vbC4NCg0KVGhhbmtzICYgUmVnYXJkcw0KU29t
+bmF0aA0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogY2VwaC1kZXZlbC1vd25l
+ckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9y
+Z10gT24gQmVoYWxmIE9mIFNvbW5hdGggUm95DQpTZW50OiBUaHVyc2RheSwgQXByaWwgMzAsIDIw
+MTUgMjoyOCBQTQ0KVG86IEdyZWdvcnkgRmFybnVtDQpDYzogY2VwaC1kZXZlbA0KU3ViamVjdDog
+UkU6IENlcGhGUyArIEVyYXN1cmUgY29kaW5nDQoNCkdvdCBpdCAsIHRoYW5rcyAhDQoNCi0tLS0t
+T3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBHcmVnb3J5IEZhcm51bSBbbWFpbHRvOmdyZWdA
+Z3JlZ3M0Mi5jb21dDQpTZW50OiBUaHVyc2RheSwgQXByaWwgMzAsIDIwMTUgMjoyMSBQTQ0KVG86
+IFNvbW5hdGggUm95DQpDYzogY2VwaC1kZXZlbA0KU3ViamVjdDogUmU6IENlcGhGUyArIEVyYXN1
+cmUgY29kaW5nDQoNCk9uIFRodSwgQXByIDMwLCAyMDE1IGF0IDE6NTUgUE0sIFNvbW5hdGggUm95
+IDxTb21uYXRoLlJveUBzYW5kaXNrLmNvbT4gd3JvdGU6DQo+IEhpIEdyZWcsDQo+IEZvcmdpdmUg
+bXkgaWdub3JhbmNlIG9uIHRoaXMgcGFydCBpZiBpdCBpcyBhbHJlYWR5IGRpc2N1c3NlZCBpbiB0
+aGUgY29tbXVuaXR5LiBDb3VsZCB5b3UgcGxlYXNlIGxldCBtZSBrbm93IGlmIENlcGhGUyBpcyBz
+dXBwb3J0aW5nIEVyYXN1cmUgY29kZWQgcG9vbCBpbiB0aGUgYmFja2VuZCBvciBub3QgPw0KPiBJ
+ZiBub3QsIGlzIHRoZXJlIGFueSBwbGFuIG9mIHN1cHBvcnRpbmcgdGhpcyBraW5kIG9mIGNvbmZp
+Z3VyYXRpb24gaW4gbmVhciBmdXR1cmUgPw0KDQpZb3UgY2FuIHNldCByZXBsaWNhdGVkIGNhY2hl
+IHBvb2xzLCBwb3NpdGlvbmVkIGFzIHRpZXJzIG92ZXIgYW4gRUMgcG9vbCwgYXMgZGF0YSBwb29s
+cyBmb3IgQ2VwaEZTLiBZb3UgY2Fubm90IHVzZSBFQyBwb29scyBkaXJlY3RseSBmb3IgQ2VwaEZT
+LiBXZSBoYXZlIG5vIHBsYW5zIHRvIGFkZCBzdXBwb3J0IGZvciBFQyBwb29scyBpbiB0aGUgZm9y
+ZXNlZWFibGUgZnV0dXJlIOKAlCBzaW5jZSB0aGV5IGhhdmUgbGltaXRlZCBSQURPUyBmdW5jdGlv
+bmFsaXR5IHdlJ2QgbmVlZCB0byBpbXBsZW1lbnQgYSB3aG9sZSBsb2ctc3RydWN0dXJlZCBmaWxl
+IHN0b3JhZ2Ugc3lzdGVtIG9yIHNvbWV0aGluZy4gOiggLUdyZWcNCg0KPg0KPiBUaGFua3MgJiBS
+ZWdhcmRzDQo+IFNvbW5hdGgNCj4NCj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18N
+Cj4NCj4gUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVj
+dHJvbmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBk
+ZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlz
+IG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5v
+dGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0
+aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBv
+ZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2
+ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIg
+YnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBk
+ZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNz
+aW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMp
+Lg0KPg0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGlu
+ZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgDQo+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0
+byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIA0KPiBpbmZvIGF0ICBo
+dHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCgQgey5uICsgICAgICAg
+KyUgIGx6d20gIGIg66eyICByICB5x6kg1696WCAgFyAg3Kh9ICAgxqB6ICZqOit2ICAgICAgICB6
+WisgICt6ZiAgIGggICB+ICAgIGkgICB6IB4gdyAgID8gICAgJiAp36IbZg0KTiAgICAgciAgeSAg
+IGIgWCAgx6d2IF4gKd66ey5uICsgICB6IF16ICAge2F5IB3Kh9qZICxqICAgZiAgIGggICB6IB4g
+dyAgICAgICBqOit2ICAgdyBqIG0gICAgICAgICB6WisgICAgIN2iaiIgICEgaQ0K
