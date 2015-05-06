@@ -1,88 +1,65 @@
-From: Abhishek L <abhishek.lekshmanan@gmail.com>
-Subject: Re: release notes script dependencies
-Date: Wed, 06 May 2015 22:11:55 +0530
-Message-ID: <878ud1r73g.fsf@gmail.com>
-References: <55491259.4010003@dachary.org> <CAEw75dOCcdafHQhdc6uv+HsQVnOVE+rD8VdAAYFALFfFSEq2cg@mail.gmail.com> <554A2B55.8050203@dachary.org> <alpine.DEB.2.00.1505060918340.28239@cobra.newdream.net> <554A42CB.8050201@dachary.org>
+From: Ming Lin <mlin@kernel.org>
+Subject: Re: [PATCH 07/10] block: kill merge_bvec_fn() completely
+Date: Wed, 6 May 2015 10:05:09 -0700
+Message-ID: <CAF1ivSaSAqfG3-U37T5U3a7_L4q-PD7Mw980K51CqzrtXx8CGA@mail.gmail.com>
+References: <1430203717-13307-1-git-send-email-mlin@kernel.org>
+	<1430203717-13307-8-git-send-email-mlin@kernel.org>
+	<20150429080919.342fddfd@notabene.brown>
+	<5547241B.1040903@kernel.org>
+	<20150506072637.GB23083@lst.de>
 Mime-Version: 1.0
-Content-Type: multipart/signed; boundary="=-=-=";
-	micalg=pgp-sha1; protocol="application/pgp-signature"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f169.google.com ([209.85.192.169]:34060 "EHLO
-	mail-pd0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752249AbbEFQoO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 May 2015 12:44:14 -0400
-Received: by pdbqa5 with SMTP id qa5so14728712pdb.1
-        for <ceph-devel@vger.kernel.org>; Wed, 06 May 2015 09:44:12 -0700 (PDT)
-In-reply-to: <554A42CB.8050201@dachary.org>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Sage Weil <sage@newdream.net>, Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20150506072637.GB23083@lst.de>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Christoph Hellwig <hch@lst.de>
+Cc: Ming Lin <mlin@kernel.org>, NeilBrown <neilb@suse.de>, lkml <linux-kernel@vger.kernel.org>, Jens Axboe <axboe@kernel.dk>, Kent Overstreet <kent.overstreet@gmail.com>, Dongsu Park <dongsu.park@profitbricks.com>, Lars Ellenberg <drbd-dev@lists.linbit.com>, drbd-user@lists.linbit.com, Jiri Kosina <jkosina@suse.cz>, Yehuda Sadeh <yehuda@inktank.com>, Sage Weil <sage@inktank.com>, Alex Elder <elder@kernel.org>, ceph-devel@vger.kernel.org, Alasdair Kergon <agk@redhat.com>, Mike Snitzer <snitzer@redhat.com>, dm-devel@redhat.com, linux-raid@vger.kernel.org, Christoph Hellwig <hch@infradead.org>, "Martin K. Petersen" <martin.petersen@oracle.com>
+List-Id: ceph-devel.vger.kernel.org
 
---=-=-=
-Content-Type: text/plain
-Content-Transfer-Encoding: quoted-printable
-
-
-Loic Dachary writes:
-
-> On 06/05/2015 18:19, Sage Weil wrote:
->> On Wed, 6 May 2015, Loic Dachary wrote:
->>>
->>> Hi Abhishek,
->>>
->>> On 06/05/2015 06:27, Abhishek L wrote:
->>>> On Wed, May 6, 2015 at 12:26 AM, Loic Dachary <loic@dachary.org> wrote:
->>>>> Hi Abhishek,
->>>>>
->>>>> It would be useful to add instructions on what dependencies to pull t=
-o run http://tracker.ceph.com/projects/ceph-releases/wiki/HOWTO_write_the_r=
-elease_notes. Something like
->>>>>
->>>>> virtualenv /tmp/foo
->>>>> . /tmp/foo/bin/activate
->>>>> pip install GitPython # I recognized the library from the import ;-)
->>>>> pip install ?? # I tried half a dozen but could not find one that mat=
-ches the import github semantic
->>>>
->>>> The module was githubpy (I agree there are too many of github python
->>>> modules around :-)) I added a basic argparser for the script; I've put
->>>> it up as a github repo at
->>>> https://github.com/theanalyst/ceph-release-helper
->>>>
->>>> Let me know if you're facing any problems using it
->>>
->>> It works :-) http://tracker.ceph.com/projects/ceph-releases/wiki/HOWTO_=
-write_the_release_notes amended accordingly.
->>=20
->> Could we put the script in ceph.git/src/scripts or similar instead of a=
-=20
->> separate repo?  One less thing to clone...
+On Wed, May 6, 2015 at 12:26 AM, Christoph Hellwig <hch@lst.de> wrote:
+>> -static int chunk_aligned_read(struct mddev *mddev, struct bio * raid_bio)
+>> +static int __chunk_aligned_read(struct mddev *mddev, struct bio *raid_bio)
 >
-> +1
-
-Sure, I'll send in a patch=20
-
+> Call it raid5_read_one_chunk or something similar descriptive?
 >
->>=20
->> sage
->>=20
+>>  {
+>>       struct r5conf *conf = mddev->private;
+>>       int dd_idx;
+>> @@ -4718,7 +4718,7 @@ static int chunk_aligned_read(struct mddev *mddev, struct bio * raid_bio)
+>>       sector_t end_sector;
+>>
+>>       if (!in_chunk_boundary(mddev, raid_bio)) {
+>> -             pr_debug("chunk_aligned_read : non aligned\n");
+>> +             pr_debug("__chunk_aligned_read : non aligned\n");
+>
+> Switch to __func__?
+>
+>> +static struct bio *chunk_aligned_read(struct mddev *mddev, struct bio *raid_bio)
+>> +{
+>> +     struct bio *split;
+>> +
+>> +     do {
+>> +             sector_t sector = raid_bio->bi_iter.bi_sector;
+>> +             unsigned chunk_sects = mddev->chunk_sectors;
+>> +
+>> +             unsigned sectors = chunk_sects -
+>> +                     (likely(is_power_of_2(chunk_sects))
+>> +                      ? (sector & (chunk_sects-1))
+>> +                      : sector_div(sector, chunk_sects));
+>
+> This would be a lot more readable with a good old if.
+>
+>>       if (rw == READ && mddev->degraded == 0 &&
+>>            mddev->reshape_position == MaxSector &&
+>> -          chunk_aligned_read(mddev,bi))
+>> +          (!(bi = chunk_aligned_read(mddev, bi))))
+>>               return;
+>
+>         if (rw == READ && mddev->degraded == 0 &&
+>             mddev->reshape_position == MaxSector) {
+>                 bi = chunk_aligned_read(mddev, bi);
+>                 if (!bi)
+>                         return;
+>         }
 
-=2D-=20
-Abhishek
-
---=-=-=
-Content-Type: application/pgp-signature; name="signature.asc"; name="signature.asc"; description="Digital signature"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iQEcBAEBAgAGBQJVSkReAAoJEPnwZB8bZe1fCNwH/Ruw+mcFDS1BZXyNuGJB+wOd
-5Cgsrtdiqo7W6hX9itM9SA0PcrIX0FYFcuZdUCqMI3MU2I7g7sdEACyduMHCkE4+
-a2B+1rBiaSu/m3//01dXXVY0zHW4sjt4eWIe25iFVlX0iF/nC403NGGgrJcxxkGZ
-J1H5cHYp+Tw9/whEo3dHi8zghcsmOIxBs1lRHPoxbcPV0v2wzDnV+I7DK4DIgiZ3
-w6SbQq4hosG5t/oAwCaLRTiuoRSRnBQ4v0hBlj9Dgddn1HRWtpv5+CiOneJqxjid
-fsq7Hfa9LQ4HD4i/Pb3KrsA2KDp5uH6UYNZQDM9OqKnoAG+Kj831RZh5rbdCmAw=
-=2cdZ
------END PGP SIGNATURE-----
---=-=-=--
+Will update all. Thanks.
