@@ -1,39 +1,77 @@
 From: Alexandre DERUMIER <aderumier@odiso.com>
 Subject: Re: CRC algorithm selection
-Date: Thu, 7 May 2015 07:04:58 +0200 (CEST)
-Message-ID: <1129879155.20587125.1430975098173.JavaMail.zimbra@oxygem.tv>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD8773C@SACMBXIP01.sdcorp.global.sandisk.com>
+Date: Thu, 7 May 2015 07:46:24 +0200 (CEST)
+Message-ID: <2117340096.21872970.1430977584564.JavaMail.zimbra@oxygem.tv>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD8773C@SACMBXIP01.sdcorp.global.sandisk.com> <1129879155.20587125.1430975098173.JavaMail.zimbra@oxygem.tv>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:42078 "EHLO
+Received: from mailpro.odiso.net ([89.248.209.98]:45324 "EHLO
 	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751178AbbEGFFC convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 May 2015 01:05:02 -0400
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD8773C@SACMBXIP01.sdcorp.global.sandisk.com>
+	with ESMTP id S1750726AbbEGFq2 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 May 2015 01:46:28 -0400
+In-Reply-To: <1129879155.20587125.1430975098173.JavaMail.zimbra@oxygem.tv>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Somnath Roy <Somnath.Roy@sandisk.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Sommath, nice debug !
+>>I have found a redhat bugzilla about ceph and yasm.=20
+>>https://bugzilla.redhat.com/show_bug.cgi?id=3D1190882=20
+>>Seem to be blocked by SELinux.=20
+speak too fast, it's fixed.
+
+I see that yasm is require in all build packages requirements,
+
+src/test/debian-jessie/debian/control:               yasm [amd64],
+src/test/fedora/ceph.spec.in:BuildRequires:	yasm
+src/test/ubuntu-12.04/debian/control:               yasm [amd64],
+src/test/ubuntu-14.04/debian/control:               yasm [amd64],
+src/test/centos-6/ceph.spec.in:BuildRequires:	yasm
+src/test/centos-7/ceph.spec.in:BuildRequires:	yasm
+
+
+and also a commit sage about incompatibility with x32
+
+commit 49a08eb46ef277225fff0d9a0920c37427175f54
+Author: Thorsten Glaser <tg@mirbsd.de>
+Date:   Mon Sep 8 12:49:50 2014 -0700
+
+    debian: only B-R yasm on amd64
+
+    Make yasm dependency amd64 only, it isn?t used elsewhere
+    but breaks x32 (which is mis-detected as amd64)
+
+    Signed-off-by: Sage Weil <sage@redhat.com>
+    (cherry picked from commit 9ab46dc5b49219aa6194861c393c938f23001c52=
+)
+
+
+----- Mail original -----
+De: "aderumier" <aderumier@odiso.com>
+=C3=80: "Somnath Roy" <Somnath.Roy@sandisk.com>
+Cc: "ceph-devel" <ceph-devel@vger.kernel.org>
+Envoy=C3=A9: Jeudi 7 Mai 2015 07:04:58
+Objet: Re: CRC algorithm selection
+
+Hi Sommath, nice debug !=20
 
 >>BTW, I think we need to error out configure script (or at least docum=
 ent ) if build server is not having 'yasm' installed.=20
 
-I have found a redhat bugzilla about ceph and yasm.
+I have found a redhat bugzilla about ceph and yasm.=20
 
-https://bugzilla.redhat.com/show_bug.cgi?id=3D1190882
+https://bugzilla.redhat.com/show_bug.cgi?id=3D1190882=20
 
-Seem to be blocked by SELinux.
+Seem to be blocked by SELinux.=20
 
 
------ Mail original -----
-De: "Somnath Roy" <Somnath.Roy@sandisk.com>
-=C3=80: "ceph-devel" <ceph-devel@vger.kernel.org>
-Envoy=C3=A9: Mercredi 6 Mai 2015 20:36:35
-Objet: CRC algorithm selection
+----- Mail original -----=20
+De: "Somnath Roy" <Somnath.Roy@sandisk.com>=20
+=C3=80: "ceph-devel" <ceph-devel@vger.kernel.org>=20
+Envoy=C3=A9: Mercredi 6 Mai 2015 20:36:35=20
+Objet: CRC algorithm selection=20
 
 Sage,=20
 Based on the discussion of today's performance meeting, I ran the crc32=
@@ -137,6 +175,11 @@ e hereby notified that you have received this message in error and that=
 iately and destroy any and all copies of this message in your possessio=
 n (whether hard copies or electronically stored copies).=20
 
+--=20
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n=20
+the body of a message to majordomo@vger.kernel.org=20
+More majordomo info at http://vger.kernel.org/majordomo-info.html=20
 --=20
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n=20
