@@ -1,54 +1,96 @@
-From: Samuel Just <sjust@redhat.com>
-Subject: straw vs straw2 mapping differences
-Date: Wed, 6 May 2015 18:20:32 -0400 (EDT)
-Message-ID: <810923992.14617375.1430950832629.JavaMail.zimbra@redhat.com>
-References: <29256929.14615303.1430950349937.JavaMail.zimbra@redhat.com>
+From: kernel neophyte <neophyte.hacker001@gmail.com>
+Subject: Re: Newstore Read ?
+Date: Wed, 6 May 2015 20:01:37 -0700
+Message-ID: <CAFkUHxc+R8ozdfia_G3GwW4b7YPHa6WUsW772SE+TTruR4o8uQ@mail.gmail.com>
+References: <CAFkUHxe6fiewz78H4CTuPghqJr6nTdJq4Ucn2O6H1uEqVGgKqQ@mail.gmail.com>
+	<CACJqLyYVGYj-vXmQgMwr47i-im6m=n_S9OB6dagbg306G_Mf4A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed;
-	boundary="----=_Part_14617373_693759958.1430950832626"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx3-phx2.redhat.com ([209.132.183.24]:40249 "EHLO
-	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750997AbbEFWUd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 May 2015 18:20:33 -0400
-In-Reply-To: <29256929.14615303.1430950349937.JavaMail.zimbra@redhat.com>
+Received: from mail-pd0-f174.google.com ([209.85.192.174]:34946 "EHLO
+	mail-pd0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751708AbbEGDBi (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 May 2015 23:01:38 -0400
+Received: by pdbqd1 with SMTP id qd1so27900016pdb.2
+        for <ceph-devel@vger.kernel.org>; Wed, 06 May 2015 20:01:37 -0700 (PDT)
+In-Reply-To: <CACJqLyYVGYj-vXmQgMwr47i-im6m=n_S9OB6dagbg306G_Mf4A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>, "'ceph-users@lists.ceph.com' (ceph-users@lists.ceph.com)" <ceph-users@lists.ceph.com>
+To: Haomai Wang <haomaiwang@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-------=_Part_14617373_693759958.1430950832626
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+On Tue, May 5, 2015 at 10:01 PM, Haomai Wang <haomaiwang@gmail.com> wrote:
+> I think you may need to disable sparse op in client side. NewStore
 
-I took a bit of time to get a feel for how different the straw2 mappings are vs straw1 mappings.  For a bucket in which all weights are the same, I saw no changed mappings, which is as expected.  However, on a map with 3 hosts each of which has 4 osds with weights 1,2,3, and 4 (crush-different-weight.straw), 1360/10000 mappings wind up different.  Some good news is that this effect is smaller with smaller weight differences.  When the osd weights are 1, 1.1, 1.2, and 1.3 (crush-different-weight-close.straw), only 377/10000 single osd mappings are different.  I've attached a tarball with a script for reproducing the results and the maps I tested.
--Sam
-------=_Part_14617373_693759958.1430950832626
-Content-Type: application/x-compressed-tar; name=strawtest.tgz
-Content-Disposition: attachment; filename=strawtest.tgz
-Content-Transfer-Encoding: base64
+Could you please explain more ?  I do not see any config option ?
 
-H4sIAEeTSlUAA+1bbW+rNhTO1/ArPLVSpUkk2Lylmra/EhFwEt8SG2HT3G67++07NiEvJDTtmheu
-5ucD8eGxzTm2OTw1VKoyWSsq1XhwNXiAOA71L45Db/+3wQCTkJAQ4yAKBh7GJAgGKLyeSztUUiUl
-QgOZrN6td47/SSG385+KVZGUdGrOjOTyctc4M//Yi4Pd/AdQTx/JAHmXc6Eb//P5f/hlPGN8PEvk
-0nEeSlrkSUrRmqklehNVicSao7Ss5FIJkSOompRvzvbE7/+MF0y56ZKmL6JScpzSYumPZZmOt3Uc
-Zy5KxBDj6NeRWVy/oUw4wzRR6JGhv5GkGXqSY0PVRzJePAGxAHeQ+wqkOTlNkzydvtJSMsGf0B9o
-rFbF+JGNiDN83PnoprpbV2xpxtv8tuFhtXZH7opx9zvydCn5DiWslytYvFq52jeMXLbXHhh9J8GP
-XIo1tCkKxhdy39NRc/JrV9Ken7vW7koZm8+R+6brVkVRUilduNlXgrs541QetTjh7l6/ujcnE5w6
-9167Fl/HXv7Xy9FVa+FCqqPumrLFUtU37BevoddypJ/rp/O/j328yf+eH3sE8n8URL7N/7fAA5rR
-BdvkeAS3u6MqnsxyitKlEJJOcwFpd6pKBonCO03OkzyfJelLVy0l1LaLsM3mNJlPMypTyrOp4PDw
-wdsaZvEdpH0gnQeU0VeWUunUv5A2hcxGXmNiY+LGJMYkjekb02/MwJhBY4bGDBszMmbUmLEx48ac
-GHPSmM/GfN66UbuFd35tHDMhqLcCAtDH2v26iNFSSFWXCQxQIiXb1PJRCUNclwNUinVdDFGRVXUx
-QoXY9BNDBbGqyxOUJQoe6lzRsj7zjEqYc8E31/R0ZaWdmlXpC1XS0U4YTzz0lzNkGXLJcAjDLhAX
-SrvFFxRVnFOYBJmULH9zgK4zBsJkBDe1M0zyRT2BzhDiWCIPqpTfKH9hXGLoVdFVPW/bhnW7LYEb
-grQI0hB+i/APW/zYBYKbQILrBRJ0BRJ2BRJ1BRJ3BkKaQMLrBTLpCuS5KxDsdUWCcTsUR69jZDKH
-KW3i8a8TT72KNw0ne87Vq6KDIIfED0ffIZB25kmVq8ZjfB2PdyPTDFzQjBxUrnJIG/qItFZnIKJp
-NjVnqXGsKcLFzN29q+UMQWROJftTZ9ghyMxNGWpKBRJTJS+0CXFzapeh0ZyVUnHIVaZXk6XqOnTF
-VO0bJPC9x8i9H2wWH0Jb/2l1T0t4WLh6ji8i/z6n/8zf/5Ef27//bwKr/6z+s/rvRvqv7e95/Yfv
-qv/aA/8B/XfE9En/xT+n/vOt/rO4Err1X7363DSHJfA1Hfhx/Ye9MI4GHtEvjKz+uwWs/rP6r+/6
-D8MgntR/eERO6z888vuo/9qBRF2BxJ2B9GP/rx0I9roiwbgdyh31XzCKTuu/NkEOifvqP+yPJlb/
-WVwF5/TfJXYAz+u/YLv/F0VY7//FXmD13y1g9Z/Vf33Xf5/f/wv6uf/3+fe/R4H0Q//9l/e/wf33
-/7DXtQF4xJAWc18J6Ht2C9DiGmjrv0t/+6fxmfe/Uay//wujyL7/vQms/rP6r+/6r02QLsI/JHqn
-/9pE1EX05P3vO/t/XfrviMHtUO66/9ch/9oEaYvWu+7/ESv+LK6E97//u4wS/NT7X6y//4sjoK3+
-uwGs/rP6ryf672hT6ez+X5vo+/d/Vv/19P8/+q3/Iqv/LCwsLCwsLCwsLCwsLL6IfwE1SP8RAFAA
-AA==
-------=_Part_14617373_693759958.1430950832626--
+-Neo
+
+
+> doesn't support fiemap interface now.
+>
+> On Wed, May 6, 2015 at 6:11 AM, kernel neophyte
+> <neophyte.hacker001@gmail.com> wrote:
+>> Hi,
+>>
+>> I am unable to get any reads out of Newstore. The log is filled with
+>> assert failures.
+>>
+>>> 2015-05-05 14:49:46.654113 7f4236387700 -1 os/newstore/NewStore.cc: In function 'virtual int NewStore::fiemap(coll_t, const ghobject_t&, uint64_t, size_t, ceph::bufferlist&)' thread 7f4236387700 time 2015-05-05 14:49:46.582991
+>>
+>> os/newstore/NewStore.cc: 1371: FAILED assert(0)
+>>
+>>
+>>  ceph version 0.93-1098-g66e555d (66e555d4a6e2fd21efd9da0d1ebd3feb024b041e)
+>>
+>>  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+>> const*)+0x8b) [0xc9bdeb]
+>>
+>>  2: ceph-osd() [0x9ea293]
+>>
+>>  3: (ReplicatedPG::do_osd_ops(ReplicatedPG::OpContext*,
+>> std::vector<OSDOp, std::allocator<OSDOp> >&)+0x708c) [0x8d8ccc]
+>>
+>>  4: (ReplicatedPG::prepare_transaction(ReplicatedPG::OpContext*)+0x97)
+>> [0x8e6427]
+>>
+>>  5: (ReplicatedPG::execute_ctx(ReplicatedPG::OpContext*)+0x5e5) [0x8e6c85]
+>>
+>>  6: (ReplicatedPG::do_op(std::tr1::shared_ptr<OpRequest>&)+0x2907) [0x8eac87]
+>>
+>>  7: (ReplicatedPG::do_request(std::tr1::shared_ptr<OpRequest>&,
+>> ThreadPool::TPHandle&)+0x66a) [0x877bea]
+>>
+>>  8: (OSD::dequeue_op(boost::intrusive_ptr<PG>,
+>> std::tr1::shared_ptr<OpRequest>, ThreadPool::TPHandle&)+0x3bd)
+>> [0x6d94fd]
+>>
+>>  9: (OSD::ShardedOpWQ::_process(unsigned int,
+>> ceph::heartbeat_handle_d*)+0x331) [0x6d9a21]
+>>
+>>  10: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x875)
+>> [0xc77905]
+>>
+>>  11: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0xc79a20]
+>>
+>>  12: (()+0x8182) [0x7f427fe7c182]
+>>
+>>  13: (clone()+0x6d) [0x7f427de8e47d]
+>>
+>>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+>> needed to interpret this.
+>>
+>> Is anyone else seeing this ?
+>>
+>> -Neo
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+>
+> --
+> Best Regards,
+>
+> Wheat
