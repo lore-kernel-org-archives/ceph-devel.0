@@ -1,61 +1,110 @@
-From: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
-Subject: RE: 05/06/2015 Weekly Ceph Performance Meeting IS ON!
-Date: Thu, 7 May 2015 06:39:09 +0000
-Message-ID: <06E7D85B3BA36C4DB207FEDE871C53489DB42F@SHSMSX101.ccr.corp.intel.com>
-References: <554A0CE8.1030804@redhat.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Stable releases and backports team metrics
+Date: Thu, 07 May 2015 16:22:46 +0200
+Message-ID: <554B7536.8040508@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="7icjotjpFUeB9SBpcrPlxtQ9tiVttIwQ8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:42810 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751033AbbEGGj3 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 May 2015 02:39:29 -0400
-In-Reply-To: <554A0CE8.1030804@redhat.com>
-Content-Language: en-US
+Received: from mail2.dachary.org ([91.121.57.175]:59272 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1750900AbbEGOWt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 May 2015 10:22:49 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "mnelson@redhat.com" <mnelson@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Shu, Xinxin" <xinxin.shu@intel.com>, Abhishek L <abhishek.lekshmanan@gmail.com>, Nathan Cutler <ncutler@suse.cz>, LOPEZ Jean-Charles <jelopez@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Mark,
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--7icjotjpFUeB9SBpcrPlxtQ9tiVttIwQ8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-In the meeting you mentioned fio has some new features which can generate workload other than pure random. Can you share the config for that? I may want to use this to test the performance of proxy write. Thanks!
+Hi,
 
------Original Message-----
-From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
-Sent: Wednesday, May 6, 2015 8:45 PM
-To: ceph-devel@vger.kernel.org
-Subject: 05/06/2015 Weekly Ceph Performance Meeting IS ON!
+I was curious to visualize the impact of our work as a team compared to w=
+hat the situation was a few months ago, back when only Red Hat employees =
+cared for backports. Here is how it was for firefly v0.80.9:
 
-8AM PST as usual! Discussion topics include:  Newstore updates.  Please feel free to add your own!
+$ bash ../backports.sh tags/v0.80.8..tags/v0.80.9
+Backports, by organizations
+---------------------------
+Red Hat <contact@redhat.com>
 
-Here's the links:
+Backports, by backporter
+------------------------
+David Zafman <dzafman@redhat.com>
+Greg Farnum <gfarnum@redhat.com>
+Jason Dillaman <dillaman@redhat.com>
+Josh Durgin <jdurgin@redhat.com>
+Kefu Chai <kchai@redhat.com>
+Loic Dachary <ldachary@redhat.com>
+Sage Weil <sweil@redhat.com>
+Yan, Zheng <zyan@redhat.com>
+Yehuda Sadeh <ysadehwe@redhat.com>
 
-Etherpad URL:
-http://pad.ceph.com/p/performance_weekly
-
-To join the Meeting:
-https://bluejeans.com/268261044
-
-To join via Browser:
-https://bluejeans.com/268261044/browser
-
-To join with Lync:
-https://bluejeans.com/268261044/lync
+and here how the upcoming v0.80.10 would look if it was to be published t=
+oday (not including the content of the current firefly-backports branch).=
 
 
-To join via Room System:
-Video Conferencing System: bjn.vc -or- 199.48.152.152 Meeting ID: 268261044
+$ bash ../backports.sh tags/v0.80.9..ceph/firefly
+Backports, by organizations
+---------------------------
+Intel <contact@intel.com>
+Red Hat <contact@redhat.com>
+Reliance Jio Infocomm Ltd. <contact@ril.com>
+SUSE <contact@suse.com>
 
-To join via Phone:
-1) Dial:
-           +1 408 740 7256
-           +1 888 240 2560(US Toll Free)
-           +1 408 317 9253(Alternate Number)
-           (see all numbers - http://bluejeans.com/numbers)
-2) Enter Conference ID: 268261044
+Backports, by backporter
+------------------------
+Abhishek Lekshmanan <abhishek.lekshmanan@ril.com>
+Alfredo Deza <adeza@redhat.com>
+David Zafman <dzafman@redhat.com>
+Greg Farnum <gfarnum@redhat.com>
+Jason Dillaman <dillaman@redhat.com>
+Jean-Charles Lopez <jelopez@redhat.com>
+Joao Eduardo Luis <joao@suse.de>
+Loic Dachary <ldachary@redhat.com>
+Sage Weil <sweil@redhat.com>
+Shu, Xinxin <xinxin.shu@intel.com>
+Yan, Zheng <zyan@redhat.com>
+Yehuda Sadeh <ysadehwe@redhat.com>
 
-Mark
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+It's nice to see more diversity :-)
+
+Cheers
+
+cat > backports.sh <<'EOF'
+range=3D"$1"
+TMP=3D/tmp/credits
+echo "Backports, by organizations"
+echo "---------------------------"
+git log --no-merges --pretty=3D'%cN <%cE>' $range | grep -v -i jenkins | =
+git -c mailmap.file=3D.organizationmap check-mailmap --stdin | sort -u
+echo
+echo "Backports, by backporter"
+echo "------------------------"
+git log --no-merges --pretty=3D'%cN <%cE>' $range | grep -v -i jenkins | =
+git -c mailmap.file=3D.peoplemap check-mailmap --stdin | sort -u
+echo
+EOF
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--7icjotjpFUeB9SBpcrPlxtQ9tiVttIwQ8
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlVLdTYACgkQ8dLMyEl6F234nQCgoL8mwrgDv0eNBJXYZE5ZRL5O
+qssAnj50gJNwfkxfeDy5AIDBhxv9yhJW
+=dEcA
+-----END PGP SIGNATURE-----
+
+--7icjotjpFUeB9SBpcrPlxtQ9tiVttIwQ8--
