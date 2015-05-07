@@ -1,157 +1,59 @@
-From: Travis Rhoden <trhoden@gmail.com>
-Subject: Re: Ceph-deploy refuses to create a named daemon
-Date: Thu, 7 May 2015 11:04:32 -0400
-Message-ID: <CACkq2mr0KTsNCWkt4hJiqyQLk7WX5EMDMkcek=HRGDnFzqVKag@mail.gmail.com>
-References: <552B38F9.5020506@catalyst.net.nz> <55375EFA.2030600@catalyst.net.nz>
- <CACkq2mrafdPPpA2-AAU=pnpP7DBevr_qvgshouxxzsYksWuvsw@mail.gmail.com>
+From: Alex Elder <elder@ieee.org>
+Subject: Re: [PATCHv2 0/3] rbd: header read/refresh improvements
+Date: Thu, 07 May 2015 10:28:58 -0500
+Message-ID: <554B84BA.9000501@ieee.org>
+References: <cover.1429881439.git.dfuller@redhat.com> <553C85D6.3010407@ieee.org> <CAOi1vP_s5d1jL0pppedF_PsjkX9qnU772GHDDZXR6HR6C+1ioQ@mail.gmail.com> <CD78243E-DADC-49D1-A23F-4E4880045A30@redhat.com> <553CF887.6000803@ieee.org> <E52372BD-69F7-4D41-B9AF-BEEBFE2FF9B0@redhat.com> <alpine.DEB.2.00.1504262110090.5458@cobra.newdream.net> <DAE9CF5D-1D64-4A73-9469-DA2EDC00F69D@redhat.com> <553DBDAE.7080603@ieee.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f172.google.com ([209.85.216.172]:35419 "EHLO
-	mail-qc0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751196AbbEGPEy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 May 2015 11:04:54 -0400
-Received: by qcbgu10 with SMTP id gu10so22435151qcb.2
-        for <ceph-devel@vger.kernel.org>; Thu, 07 May 2015 08:04:53 -0700 (PDT)
-In-Reply-To: <CACkq2mrafdPPpA2-AAU=pnpP7DBevr_qvgshouxxzsYksWuvsw@mail.gmail.com>
+Received: from mail-ig0-f175.google.com ([209.85.213.175]:38141 "EHLO
+	mail-ig0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750876AbbEGP3B (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 May 2015 11:29:01 -0400
+Received: by igbhj9 with SMTP id hj9so48643461igb.1
+        for <ceph-devel@vger.kernel.org>; Thu, 07 May 2015 08:29:01 -0700 (PDT)
+In-Reply-To: <553DBDAE.7080603@ieee.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Douglas Fuller <dfuller@redhat.com>, Sage Weil <sage@newdream.net>
+Cc: Ilya Dryomov <idryomov@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hello again Mark,
+On 04/26/2015 11:40 PM, Alex Elder wrote:
+> On 04/26/2015 11:35 PM, Douglas Fuller wrote:
+>> This solution just feels hacky and inefficient, so I think there is a
+>> desire to feel like we at least tried to come up something simpler
+>> and more efficient before proceeding.
+> 
+> Right.  And somehow more fitting with the existing code, if
+> that's possible.  There are a few things in this proposal
+> that are just special case code, and it would be nice to
+> avoid that.
+> 
+> I'm sorry I've been too busy today to get back to this.  I spent
+> a lot of time on Saturday getting ramped back up on this code
+> so I could provide a decent review...
+> 
+> I'm going to at least look at the code (error on a read op)
+> before going to bed, so I at least know what the problem is.
+> I'll try to have something to say (even if it's "I've got
+> nothing") in the next day or two.
+> 
+>                     -Alex
 
-Thanks again for pointing this out. After some discussion, we would
-like to keep the 'client.rgw.*' naming convention, and we do need to
-update ceph-deploy to make sure people do not shoot themselves in the
-foot with this.
+It's been a week and a half since I sent this.  I don't
+expect to be able to contribute anything for at least a
+few more days.
 
-It will still be totally fine to have custom names, but more along the
-lines of client.rgw.foo, client.rgw.bar, etc.
+If adding this functionality is something you need quickly,
+I don't want you to be waiting for me.
 
-I've filed http://tracker.ceph.com/issues/11561 to track this.
+If you can wait, I will gladly review it and offer my
+suggestions for a better way (if I can think of one...).
 
- - Travis
+But if not, you should just proceed with what you have
+if it solves the problem.
 
-On Wed, Apr 22, 2015 at 9:24 AM, Travis Rhoden <trhoden@gmail.com> wrote:
-> Hi Mark,
->
-> Thanks for the detective work!  I'll confirm whether the constraint on
-> the client name is really intended -- I believe that it is.  Once
-> confirmed, I completely agree that ceph-deploy should not allow you to
-> create rgw daemons with names that we know Ceph is going to reject.
->
->  - Travis
->
-> On Wed, Apr 22, 2015 at 4:42 AM, Mark Kirkwood
-> <mark.kirkwood@catalyst.net.nz> wrote:
->> On 13/04/15 15:33, Mark Kirkwood wrote:
->>>
->>> Hi,
->>>
->>> I've been experimenting with the new rgw creation in ceph-deploy, using
->>> version 1.5.23 together with ceph 0.94 (-948-gd77de49).
->>>
->>> If simply run it without any args, then it works fine. e.g:
->>>
->>>
->>> $ ceph-deploy  rgw create ceph1
->>>
->>>
->>> However if I try to set a name for the daemon:
->>>
->>>
->>> $ ceph-deploy  rgw create ceph1:radosgw.ceph1
->>>
->>>
->>> then it fails to create and start a radosgw daemon at all. Poking
->>> through the logs I see:
->>>
->>> $ tail ceph-client.radosgw.ceph1.log
->>> 2015-04-13 14:13:20.513860 7f7e36c04840  0 librados:
->>> client.radosgw.ceph1 authentication error (1) Operation not permitted
->>>
->>>
->>> Not terribly informative. Looking at the audit log:
->>>
->>> $ tail ceph.audit.log
->>> 015-04-13 15:10:37.880085 mon.0 192.168.122.21:6789/0 147 : audit [INF]
->>> from='client.? 192.168.122.22:0/1004669' entity='client.bootstrap-rgw'
->>> cmd=[{"prefix": "auth get-or-create", "entity": "client.radosgw.ceph2",
->>> "caps": ["osd", "allow rwx", "mon", "allow rw"]}]:  access denied
->>>
->>>
->>> Looking at what ceph-deploy is doing I see that the failing command is:
->>>
->>>
->>> $ sudo ceph --cluster ceph --name client.bootstrap-rgw --keyring
->>> /var/lib/ceph/bootstrap-rgw/ceph.keyring auth get-or-create
->>> client.radosgw.ceph2 osd 'allow rwx' mon 'allow rw' -o
->>> /var/lib/ceph/radosgw/ceph-radosgw.ceph2/keyring
->>>
->>>
->>> This is failing whereas the equivalent command with radosgw replaced by
->>> rgw works. Looking at what privileges client.bootstrap-rgw has I see:
->>>
->>> $ sudo ceph auth get client.bootstrap-rgw
->>> [client.bootstrap-rgw]
->>>      key = XXXXXXXXXXXXXXXXXX==
->>>      caps mon = "allow profile bootstrap-rgw"
->>>
->>> Ah, so need to look at how the profile bootstrap-rgw is setup:
->>>
->>> $ more src/mon/MonCap.cc
->>> ...
->>>    if (profile == "bootstrap-rgw") {
->>>      profile_grants.push_back(MonCapGrant("mon", MON_CAP_R));  // read
->>> monmap
->>>      profile_grants.push_back(MonCapGrant("osd", MON_CAP_R));  // read
->>> osdmap
->>>      profile_grants.push_back(MonCapGrant("mon getmap"));
->>>      profile_grants.push_back(MonCapGrant("auth get-or-create"));  //
->>> FIXME: this can expose other mds keys
->>>      profile_grants.back().command_args["entity"] = StringConstraint("",
->>> "client.rgw.");           <======
->>>      profile_grants.back().command_args["caps_mon"] =
->>> StringConstraint("allow rw", "");
->>>      profile_grants.back().command_args["caps_osd"] =
->>> StringConstraint("allow rwx", "");
->>>    }
->>> ...
->>>
->>> I see - the ["entity"] check requires the name to match "client.rgw.".
->>> Double checking back on the deployed host (ceph1), I see that:
->>>
->>>
->>> $ ceph --cluster ceph --name client.bootstrap-rgw --keyring
->>> /var/lib/ceph/bootstrap-rgw/ceph.keyring auth get-or-create
->>> client.rgw.ceph3 osd 'allow rwx' mon 'allow rw'
->>> [client.rgw.ceph3]
->>>      key = AQCrNytVp9bqFBAAgTJVQDVQFJqiSkFqD68XsQ==
->>> $ ceph --cluster ceph --name client.bootstrap-rgw --keyring
->>> /var/lib/ceph/bootstrap-rgw/ceph.keyring auth get-or-create
->>> client.radosgw.ceph3 osd 'allow rwx' mon 'allow rw'
->>> Error EACCES: access denied
->>>
->>> Ok so that is definitely the problem.
->>>
->>> Is this restriction intended? If so we really should make ceph-deploy
->>> aware of this...as it is a bit of a foot gun (and not as easy as I made
->>> it seem above to figure out *why* the deploy didn't work).
->>>
->>> Cheers
->>>
->>> Mark
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
->> ping?
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I just don't want to keep you waiting.
+
+					-Alex
