@@ -1,109 +1,149 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: Newstore Read ?
-Date: Thu, 7 May 2015 12:08:40 +0800
-Message-ID: <CACJqLyZmyQiaF8jdfe0xD-VGgzoDg82si75uQFab0cT2-Xw4eg@mail.gmail.com>
-References: <CAFkUHxe6fiewz78H4CTuPghqJr6nTdJq4Ucn2O6H1uEqVGgKqQ@mail.gmail.com>
-	<CACJqLyYVGYj-vXmQgMwr47i-im6m=n_S9OB6dagbg306G_Mf4A@mail.gmail.com>
-	<CAFkUHxc+R8ozdfia_G3GwW4b7YPHa6WUsW772SE+TTruR4o8uQ@mail.gmail.com>
+From: Alexandre DERUMIER <aderumier@odiso.com>
+Subject: Re: CRC algorithm selection
+Date: Thu, 7 May 2015 07:04:58 +0200 (CEST)
+Message-ID: <1129879155.20587125.1430975098173.JavaMail.zimbra@oxygem.tv>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD8773C@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f171.google.com ([209.85.192.171]:36194 "EHLO
-	mail-pd0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750968AbbEGEIl (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 May 2015 00:08:41 -0400
-Received: by pdea3 with SMTP id a3so29313899pde.3
-        for <ceph-devel@vger.kernel.org>; Wed, 06 May 2015 21:08:40 -0700 (PDT)
-In-Reply-To: <CAFkUHxc+R8ozdfia_G3GwW4b7YPHa6WUsW772SE+TTruR4o8uQ@mail.gmail.com>
+Received: from mailpro.odiso.net ([89.248.209.98]:42078 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751178AbbEGFFC convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 May 2015 01:05:02 -0400
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD8773C@SACMBXIP01.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kernel neophyte <neophyte.hacker001@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hmm, I looked at rbd configs that doesn't support disable sprase read.
-So It looks like we can't do rbd read for NewStore now.
+Hi Sommath, nice debug !
 
-On Thu, May 7, 2015 at 11:01 AM, kernel neophyte
-<neophyte.hacker001@gmail.com> wrote:
-> On Tue, May 5, 2015 at 10:01 PM, Haomai Wang <haomaiwang@gmail.com> wrote:
->> I think you may need to disable sparse op in client side. NewStore
->
-> Could you please explain more ?  I do not see any config option ?
->
-> -Neo
->
->
->> doesn't support fiemap interface now.
->>
->> On Wed, May 6, 2015 at 6:11 AM, kernel neophyte
->> <neophyte.hacker001@gmail.com> wrote:
->>> Hi,
->>>
->>> I am unable to get any reads out of Newstore. The log is filled with
->>> assert failures.
->>>
->>>> 2015-05-05 14:49:46.654113 7f4236387700 -1 os/newstore/NewStore.cc: In function 'virtual int NewStore::fiemap(coll_t, const ghobject_t&, uint64_t, size_t, ceph::bufferlist&)' thread 7f4236387700 time 2015-05-05 14:49:46.582991
->>>
->>> os/newstore/NewStore.cc: 1371: FAILED assert(0)
->>>
->>>
->>>  ceph version 0.93-1098-g66e555d (66e555d4a6e2fd21efd9da0d1ebd3feb024b041e)
->>>
->>>  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
->>> const*)+0x8b) [0xc9bdeb]
->>>
->>>  2: ceph-osd() [0x9ea293]
->>>
->>>  3: (ReplicatedPG::do_osd_ops(ReplicatedPG::OpContext*,
->>> std::vector<OSDOp, std::allocator<OSDOp> >&)+0x708c) [0x8d8ccc]
->>>
->>>  4: (ReplicatedPG::prepare_transaction(ReplicatedPG::OpContext*)+0x97)
->>> [0x8e6427]
->>>
->>>  5: (ReplicatedPG::execute_ctx(ReplicatedPG::OpContext*)+0x5e5) [0x8e6c85]
->>>
->>>  6: (ReplicatedPG::do_op(std::tr1::shared_ptr<OpRequest>&)+0x2907) [0x8eac87]
->>>
->>>  7: (ReplicatedPG::do_request(std::tr1::shared_ptr<OpRequest>&,
->>> ThreadPool::TPHandle&)+0x66a) [0x877bea]
->>>
->>>  8: (OSD::dequeue_op(boost::intrusive_ptr<PG>,
->>> std::tr1::shared_ptr<OpRequest>, ThreadPool::TPHandle&)+0x3bd)
->>> [0x6d94fd]
->>>
->>>  9: (OSD::ShardedOpWQ::_process(unsigned int,
->>> ceph::heartbeat_handle_d*)+0x331) [0x6d9a21]
->>>
->>>  10: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x875)
->>> [0xc77905]
->>>
->>>  11: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0xc79a20]
->>>
->>>  12: (()+0x8182) [0x7f427fe7c182]
->>>
->>>  13: (clone()+0x6d) [0x7f427de8e47d]
->>>
->>>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
->>> needed to interpret this.
->>>
->>> Is anyone else seeing this ?
->>>
->>> -Neo
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
->>
->> --
->> Best Regards,
->>
->> Wheat
+>>BTW, I think we need to error out configure script (or at least docum=
+ent ) if build server is not having 'yasm' installed.=20
+
+I have found a redhat bugzilla about ceph and yasm.
+
+https://bugzilla.redhat.com/show_bug.cgi?id=3D1190882
+
+Seem to be blocked by SELinux.
 
 
+----- Mail original -----
+De: "Somnath Roy" <Somnath.Roy@sandisk.com>
+=C3=80: "ceph-devel" <ceph-devel@vger.kernel.org>
+Envoy=C3=A9: Mercredi 6 Mai 2015 20:36:35
+Objet: CRC algorithm selection
 
--- 
-Best Regards,
+Sage,=20
+Based on the discussion of today's performance meeting, I ran the crc32=
+ unittest and here is the result.=20
 
-Wheat
+root@emsserver2:/home/ceph-main/src# ./unittest_crc32c=20
+Running main() from gmock_main.cc=20
+[=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D] Running 7 tests from 1 test case.=20
+[----------] Global test environment set-up.=20
+[----------] 7 tests from Crc32c=20
+[ RUN ] Crc32c.Small=20
+[ OK ] Crc32c.Small (0 ms)=20
+[ RUN ] Crc32c.PartialWord=20
+[ OK ] Crc32c.PartialWord (0 ms)=20
+[ RUN ] Crc32c.Big=20
+[ OK ] Crc32c.Big (16 ms)=20
+[ RUN ] Crc32c.Performance=20
+populating large buffer=20
+calculating crc=20
+best choice =3D 1193.86 MB/sec=20
+best choice 0xffffffff =3D 1193.56 MB/sec=20
+sctp =3D 1190.6 MB/sec=20
+intel baseline =3D 261.623 MB/sec=20
+[ OK ] Crc32c.Performance (7064 ms)=20
+[ RUN ] Crc32c.Range=20
+[ OK ] Crc32c.Range (0 ms)=20
+[ RUN ] Crc32c.RangeZero=20
+[ OK ] Crc32c.RangeZero (0 ms)=20
+[ RUN ] Crc32c.RangeNull=20
+[ OK ] Crc32c.RangeNull (0 ms)=20
+[----------] 7 tests from Crc32c (7080 ms total)=20
+
+[----------] Global test environment tear-down=20
+[=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D] 7 tests from 1 test case ran. (7080 ms=
+ total)=20
+[ PASSED ] 7 tests.=20
+
+
+So, it seems 'sctp' is giving better performance and thus it is recomme=
+nding this.=20
+
+So, it seems it is not picking up *_intel_fast method and going back to=
+ make file I saw 'configure' was skipping yasm check since in my setup =
+yasm was not installed.=20
+I manually installed 'yasm' and rebuild everything. Now, here is the re=
+sult..It is picking up *_intel_fast method and it is ~6 times faster !!=
+!=20
+
+
+root@emsserver2:/home/ceph-main/src# ./unittest_crc32c=20
+Running main() from gmock_main.cc=20
+[=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D] Running 7 tests from 1 test case.=20
+[----------] Global test environment set-up.=20
+[----------] 7 tests from Crc32c=20
+[ RUN ] Crc32c.Small=20
+[ OK ] Crc32c.Small (0 ms)=20
+[ RUN ] Crc32c.PartialWord=20
+[ OK ] Crc32c.PartialWord (0 ms)=20
+[ RUN ] Crc32c.Big=20
+[ OK ] Crc32c.Big (4 ms)=20
+[ RUN ] Crc32c.Performance=20
+populating large buffer=20
+calculating crc=20
+best choice =3D 6275.01 MB/sec=20
+best choice 0xffffffff =3D 6314.59 MB/sec=20
+sctp =3D 1187.1 MB/sec=20
+intel baseline =3D 261.652 MB/sec=20
+[ OK ] Crc32c.Performance (5709 ms)=20
+[ RUN ] Crc32c.Range=20
+[ OK ] Crc32c.Range (0 ms)=20
+[ RUN ] Crc32c.RangeZero=20
+[ OK ] Crc32c.RangeZero (0 ms)=20
+[ RUN ] Crc32c.RangeNull=20
+[ OK ] Crc32c.RangeNull (0 ms)=20
+[----------] 7 tests from Crc32c (5713 ms total)=20
+
+[----------] Global test environment tear-down=20
+[=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D] 7 tests from 1 test case ran. (5713 ms=
+ total)=20
+[ PASSED ] 7 tests.=20
+
+
+Thanks for the pointer and I will enable my journal tests with crc enab=
+led.=20
+
+BTW, I think we need to error out configure script (or at least documen=
+t ) if build server is not having 'yasm' installed.=20
+
+Thanks & Regards=20
+Somnath=20
+
+________________________________=20
+
+PLEASE NOTE: The information contained in this electronic mail message =
+is intended only for the use of the designated recipient(s) named above=
+=2E If the reader of this message is not the intended recipient, you ar=
+e hereby notified that you have received this message in error and that=
+ any review, dissemination, distribution, or copying of this message is=
+ strictly prohibited. If you have received this communication in error,=
+ please notify the sender by telephone or e-mail (as shown above) immed=
+iately and destroy any and all copies of this message in your possessio=
+n (whether hard copies or electronically stored copies).=20
+
+--=20
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n=20
+the body of a message to majordomo@vger.kernel.org=20
+More majordomo info at http://vger.kernel.org/majordomo-info.html=20
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
