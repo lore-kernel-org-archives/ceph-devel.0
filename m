@@ -1,30 +1,35 @@
-From: Gregory Farnum <greg@gregs42.com>
+From: Yuri Weinstein <yweinste@redhat.com>
 Subject: Re: Nightlies and dumpling
-Date: Fri, 8 May 2015 13:49:43 -0700
-Message-ID: <CAC6JEv-sa-aMqLtMxvqv=au6jDRnDEy4VeNkY6phRRLb-adYAQ@mail.gmail.com>
-References: <554D2081.7040503@dachary.org>
+Date: Fri, 8 May 2015 16:50:28 -0400 (EDT)
+Message-ID: <535125048.16542951.1431118228126.JavaMail.zimbra@redhat.com>
+References: <554D2081.7040503@dachary.org> <CAC6JEv-sa-aMqLtMxvqv=au6jDRnDEy4VeNkY6phRRLb-adYAQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f54.google.com ([209.85.215.54]:33332 "EHLO
-	mail-la0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753348AbbEHUtr convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 May 2015 16:49:47 -0400
-Received: by layy10 with SMTP id y10so60598818lay.0
-        for <ceph-devel@vger.kernel.org>; Fri, 08 May 2015 13:49:46 -0700 (PDT)
-Received: from mail-la0-f43.google.com (mail-la0-f43.google.com. [209.85.215.43])
-        by mx.google.com with ESMTPSA id ky7sm1396595lab.37.2015.05.08.13.49.44
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 08 May 2015 13:49:45 -0700 (PDT)
-Received: by labbd9 with SMTP id bd9so60628624lab.2
-        for <ceph-devel@vger.kernel.org>; Fri, 08 May 2015 13:49:43 -0700 (PDT)
-In-Reply-To: <554D2081.7040503@dachary.org>
+Received: from mx4-phx2.redhat.com ([209.132.183.25]:49812 "EHLO
+	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751003AbbEHUvc convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 May 2015 16:51:32 -0400
+In-Reply-To: <CAC6JEv-sa-aMqLtMxvqv=au6jDRnDEy4VeNkY6phRRLb-adYAQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Yuri Weinstein <yweinste@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, Alistair Israel <aisrael@gmail.com>
+To: Gregory Farnum <greg@gregs42.com>
+Cc: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>, Alistair Israel <aisrael@gmail.com>
+
++1
+
+
+Thx
+YuriW
+
+----- Original Message -----
+=46rom: "Gregory Farnum" <greg@gregs42.com>
+To: "Loic Dachary" <loic@dachary.org>
+Cc: "Yuri Weinstein" <yweinste@redhat.com>, "Ceph Development" <ceph-de=
+vel@vger.kernel.org>, "Alistair Israel" <aisrael@gmail.com>
+Sent: Friday, May 8, 2015 1:49:43 PM
+Subject: Re: Nightlies and dumpling
 
 On Fri, May 8, 2015 at 1:45 PM, Loic Dachary <loic@dachary.org> wrote:
 > Hi,
