@@ -1,84 +1,82 @@
-From: Joao Eduardo Luis <joao@suse.de>
-Subject: RFC: Deprecating ceph-tool commands
-Date: Sat, 09 May 2015 00:55:04 +0100
-Message-ID: <554D4CD8.6020809@suse.de>
+From: Gregory Farnum <greg@gregs42.com>
+Subject: Re: Nightlies and dumpling
+Date: Fri, 8 May 2015 16:55:51 -0700
+Message-ID: <CAC6JEv9ELHGdhY76_iobKk1fYCs5rz=dphTCsjOTmsbR7bbMMg@mail.gmail.com>
+References: <554D2081.7040503@dachary.org>
+	<CAC6JEv-sa-aMqLtMxvqv=au6jDRnDEy4VeNkY6phRRLb-adYAQ@mail.gmail.com>
+	<554D32D0.1090608@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cantor2.suse.de ([195.135.220.15]:58529 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751167AbbEHXzG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 8 May 2015 19:55:06 -0400
+Received: from mail-ie0-f176.google.com ([209.85.223.176]:34938 "EHLO
+	mail-ie0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751167AbbEHXzx convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 May 2015 19:55:53 -0400
+Received: by ieczm2 with SMTP id zm2so75118816iec.2
+        for <ceph-devel@vger.kernel.org>; Fri, 08 May 2015 16:55:52 -0700 (PDT)
+Received: from mail-ie0-f180.google.com (mail-ie0-f180.google.com. [209.85.223.180])
+        by mx.google.com with ESMTPSA id d15sm608456igo.8.2015.05.08.16.55.51
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Fri, 08 May 2015 16:55:52 -0700 (PDT)
+Received: by iepj10 with SMTP id j10so71869210iep.0
+        for <ceph-devel@vger.kernel.org>; Fri, 08 May 2015 16:55:51 -0700 (PDT)
+In-Reply-To: <554D32D0.1090608@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Alistair Israel <aisrael@gmail.com>
 
-All,
+On Fri, May 8, 2015 at 3:04 PM, Loic Dachary <loic@dachary.org> wrote:
+>
+>
+> On 08/05/2015 22:49, Gregory Farnum wrote:
+>> On Fri, May 8, 2015 at 1:45 PM, Loic Dachary <loic@dachary.org> wrot=
+e:
+>>> Hi,
+>>>
+>>> I was going through the checklist to retire a release, to verify no=
+thing was left behind for Dumpling
+>>>
+>>>    http://tracker.ceph.com/projects/ceph-releases/wiki/HOWTO_retire=
+_a_stable_release
+>>>
+>>> and from the nightlies crontab that you published, I found
+>>>
+>>> http://tracker.ceph.com/projects/ceph-releases/wiki/Typica
+>>>
+>>> 10 18 * * 0,4 teuthology-suite -v -c giant -k distro -m typica -s u=
+pgrade/dumpling-firefly-x --filter ubuntu_
+>>>
+>>> and
+>>>
+>>> http://tracker.ceph.com/projects/ceph-releases/wiki/Sepia
+>>>
+>>> 10 17 * * 2,4,7 teuthology-suite -v -c next -k distro -m plana,burn=
+upi,mira -s upgrade/dumpling-firefly-x --filter ubuntu_
+>>>
+>>> 13 19 * * 7 teuthology-suite -v -c firefly -k distro -m vps -s upgr=
+ade/dumpling-x ~/vps.yaml
+>>>
+>>> 15 18 * * 3,6 teuthology-suite -v -c giant -k distro -m vps -s upgr=
+ade/dumpling-firefly-x ~/vps.yaml
+>>
+>> You'll notice that these are all tests which upgrade from dumpling t=
+o
+>> something else. We want to keep testing that to make sure we aren't
+>> missing something in the upgrade paths =E2=80=94 which would be bad,=
+ even
+>> though we're about ready to stop supporting dumpling. ;)
+>
+> Indeed :-) Say a problem is found, how is it going to be resolved ?
 
-While working on #11545 (mon: have mon-specific commands under 'ceph mon
-...') I crashed into a slightly tough brick wall.
-
-The purpose of #11545 is to move certain commands, such as 'ceph scrub',
-'ceph compact' and 'ceph sync force' to the 'mon' module of the ceph-tool.
-
-These commands have long stood in this format because 'mon'-module
-commands have been traditionally considered as being somehow related
-with monmaps and/or the MonmapMonitor.  However, from a user
-perspective, if they relate to the monitor itself (and not cluster-wide)
-they should reside under the 'mon'-module.
-
-As such, I decided they should be moved to 'ceph mon scrub', 'ceph mon
-compact' and 'ceph mon sync force'.
-
-Adding these commands and doing the correct mapping is not hard at all.
- However, backward compatibility must be maintained, and simply dropping
-the old style commands doesn't seem reasonable at all.
-
-Keeping the old style commands alongside with the new commands is
-trivial enough to not pose a problem, but they must go away at some
-point.  After everyone get used to the new commands, and as soon as the
-vast majority of deployments support the new commands, the old style
-commands will simply be clutter.
-
-And while these commands are not widely used, and while most people
-certainly have not ever needed to use them, this sort of thing can at
-some point be required for any other (most commonly used) command.
-
-As I have not been able to find any mentions to guidelines to
-deprecating commands, I thus propose the following:
-
-A command being DEPRECATED must be:
-
- - clearly marked as DEPRECATED in usage;
- - kept around for at least 2 major releases;
- - kept compatible for the duration of the deprecation period.
-
-Once two major releases go by, the command will then enter the OBSOLETE
-period.  This would be one major release, during which the command would
-no longer work although still acknowledged.  A simple message down the
-lines of 'This command is now obsolete; please check the docs' would
-suffice to inform the user.
-
-The command would no longer exist in the next major release.
-
-This approach gives a lifespan of roughly 3 releases (at current rate,
-roughly 1.5 years) before being completely dropped.  This should give
-enough time to people to realize what has happened and adjust any
-scripts they may have.
-
-E.g., a command being deprecated in Infernallis would be completely
-dropped in the L-release, spanning its existence to at least one
-long-term stable (i.e., jewel) and being dropped as soon as the first
-dev cycle for the L-release begins.
-
-Any thoughts and comments are welcome.
-
-Cheers!
-
-  -Joao
-
-p.s., If you want to take a look at how this would translate in terms of
-code on the monitor, please check [1].
-
-[1] - https://github.com/ceph/ceph/pull/4595
+Depends on the problem. If it's in the upgrade path, we'll add stuff
+to handle backwards compatibility. If dumpling simply stops running in
+the lab...presumably by then we'll have stopped caring about it for
+everything else too. ;)
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
