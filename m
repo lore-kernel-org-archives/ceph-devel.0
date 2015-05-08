@@ -1,112 +1,67 @@
-From: "Nicholas A. Bellinger" <nab@linux-iscsi.org>
-Subject: Re: [PATCH 0/5] target/rbd: distributed lun reset support
-Date: Fri, 08 May 2015 00:02:40 -0700
-Message-ID: <1431068560.10406.147.camel@haakon3.risingtidesystems.com>
-References: <1430819778-24483-1-git-send-email-mchristi@redhat.com>
-	 <20150505174939.GA21297@infradead.org> <55499D46.9040008@redhat.com>
-	 <20150506064812.GA5181@infradead.org> <554C51D5.30202@redhat.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: long running workloads/rbd_fsx_cache_writeback.yaml on hammer
+Date: Fri, 08 May 2015 11:07:49 +0200
+Message-ID: <554C7CE5.4070600@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <target-devel-owner@vger.kernel.org>
-In-Reply-To: <554C51D5.30202@redhat.com>
-Sender: target-devel-owner@vger.kernel.org
-To: Mike Christie <mchristi@redhat.com>
-Cc: Christoph Hellwig <hch@infradead.org>, ceph-devel@vger.kernel.org, target-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="n3f8KoqHELF1j75HwsMqSEB8FldvqN0h7"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail2.dachary.org ([91.121.57.175]:59816 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752075AbbEHJHy (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 May 2015 05:07:54 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Jason Dillaman <dillaman@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Mike,
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--n3f8KoqHELF1j75HwsMqSEB8FldvqN0h7
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-On Fri, 2015-05-08 at 01:04 -0500, Mike Christie wrote:
-> On 05/06/2015 01:48 AM, Christoph Hellwig wrote:
-> >>> As for the API:  I would much prefer to have things at the block layer
-> >>> in some form than adding side band protocol for specific functionality.
-> >>>
-> >>
-> >> Ok. For what you need for your NFS cluster work, will you have a
-> >> request_queue or block_device or gendisk?
-> > 
-> > All of them.  It's just another consumer of the in-kernel block devices
-> > interface.
-> 
-> Will users use lio with what you are working on?
-> 
-> I ask because I am thinking it might be better to implement my own
-> se_subsystem_api and sbc_ops structs and in my backend just make libceph
-> calls directly for callouts like sbc_ops->execute_rw. So I would not have
-> a block_device or request_queue if I went that route.
-> 
-> If I do my own backend, for reset support (PR support will be similar
-> with callouts added to the se_subsystem_api) I would just need the patch
-> below.
+Hi Janson,
 
-<nod>
+There is a long running (12h +) job at
 
-I think extending se_subsystem_api will be the preferred approach for
-supporting backend active/active distributed LUN_RESET.
+http://pulpito.ceph.com/loic-2015-05-07_09:46:27-rbd-hammer-backports---b=
+asic-multi/878799/
 
-> 
-> diff --git a/drivers/target/target_core_tmr.c b/drivers/target/target_core_tmr.c
-> index 315ec34..b5a3b68 100644
-> --- a/drivers/target/target_core_tmr.c
-> +++ b/drivers/target/target_core_tmr.c
-> @@ -323,7 +323,7 @@ static void core_tmr_drain_state_list(
->  	}
->  }
->  
-> -int core_tmr_lun_reset(
-> +int target_core_local_tmr_lun_reset(
->          struct se_device *dev,
->          struct se_tmr_req *tmr,
->          struct list_head *preempt_and_abort_list,
-> @@ -386,4 +386,18 @@ int core_tmr_lun_reset(
->  			dev->transport->name);
->  	return 0;
->  }
-> +EXPORT_SYMBOL(target_core_local_tmr_lun_reset);
->  
-> +int core_tmr_lun_reset(
-> +	struct se_device *dev,
-> +	struct se_tmr_req *tmr,
-> +	struct list_head *preempt_and_abort_list,
-> +	struct se_cmd *prout_cmd)
-> +{
-> +	if (dev->transport->reset_device)
-> +		return dev->transport->reset_device(dev);
-> +	else
-> +		return target_core_local_tmr_lun_reset(dev, tmr,
-> +						       preempt_and_abort_list,
-> +						       prout_cmd);
-> +}
-> diff --git a/include/target/target_core_backend.h b/include/target/target_core_backend.h
-> index d61be72..faad6c4 100644
-> --- a/include/target/target_core_backend.h
-> +++ b/include/target/target_core_backend.h
-> @@ -31,6 +31,7 @@ struct se_subsystem_api {
->  	struct se_device *(*alloc_device)(struct se_hba *, const char *);
->  	int (*configure_device)(struct se_device *);
->  	void (*free_device)(struct se_device *device);
-> +	int (*reset_device)(struct se_device *);
->  
->  	ssize_t (*set_configfs_dev_params)(struct se_device *,
->  					   const char *, ssize_t);
-> @@ -139,4 +139,7 @@ int	se_dev_set_max_sectors(struct se_device *, u32);
->  int	se_dev_set_optimal_sectors(struct se_device *, u32);
->  int	se_dev_set_block_size(struct se_device *, u32);
->  
-> +int	target_core_local_tmr_lun_reset(struct se_device *, struct se_tmr_req *,
-> +					struct list_head *, struct se_cmd *);
-> +
->  #endif /* TARGET_CORE_BACKEND_H */
-> 
+which is about
 
-The backend driver will also need to enforce it's own TAS setting when
-providing a custom LUN_RESET callback in order to disable this logic
-within target_core_mod.
+ rbd/thrash/{base/install.yaml clusters/fixed-2.yaml fs/xfs.yaml msgr-fai=
+lures/few.yaml thrashers/default.yaml workloads/rbd_fsx_cache_writeback.y=
+aml}=20
 
-For persistent reservations ops, se_subsystem_api will require a
-PREEMPT_AND_ABORT specific callback too, yes..?
+and runs on the current hammer-backports branch which contains a few libr=
+bd backports
 
-Do you see any additional SPC-3 PR specific required callbacks..?
+http://tracker.ceph.com/issues/11492#Teuthology-run-commit-commita79146fc=
+3cae28bf4c07478fb4566b06942da60d-hammer-backports-branch-May-2015
 
---nab
+I don't see an obvious cause for error in the logs. Does it ring a bell ?=
+ Is it supposed to take that long ? Note that all other jobs completed su=
+ccessfully (see http://pulpito.ceph.com/loic-2015-05-07_09:46:27-rbd-hamm=
+er-backports---basic-multi/ for details).
+
+Cheers
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--n3f8KoqHELF1j75HwsMqSEB8FldvqN0h7
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlVMfOUACgkQ8dLMyEl6F22E6wCeObZz4l2Ri7M0BcNBkp2tA39U
+HiUAn2xBmQ8tviWozNpbnhUM61Tg87Kr
+=aogD
+-----END PGP SIGNATURE-----
+
+--n3f8KoqHELF1j75HwsMqSEB8FldvqN0h7--
