@@ -1,167 +1,101 @@
-From: Venkateswara Rao Jujjuri <jujjuri@gmail.com>
-Subject: Re: Ceph Performance puzzle.
-Date: Fri, 8 May 2015 11:13:04 -0700
-Message-ID: <CAKKTCLUuOWOzz0hNxc0jsL2kawNNTvHUN+epO3sa3oE+87NL8A@mail.gmail.com>
-References: <CAKKTCLV2deJU-s=GubM9xcNNd8bfLZ0OE1xEZD5s4E0dyci4Zg@mail.gmail.com>
+From: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
+Subject: Ceph build system broken with automake 1.96
+Date: Fri, 8 May 2015 18:13:23 +0000
+Message-ID: <99767EA2E27DD44DB4E9F9B9ACA458C03B313F83@SSIEXCH-MB3.ssi.samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f179.google.com ([209.85.214.179]:34921 "EHLO
-	mail-ob0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752741AbbEHSNZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 May 2015 14:13:25 -0400
-Received: by obcus9 with SMTP id us9so31657204obc.2
-        for <ceph-devel@vger.kernel.org>; Fri, 08 May 2015 11:13:25 -0700 (PDT)
-In-Reply-To: <CAKKTCLV2deJU-s=GubM9xcNNd8bfLZ0OE1xEZD5s4E0dyci4Zg@mail.gmail.com>
+Received: from mx2.ssi.samsung.com ([207.140.43.206]:56857 "EHLO
+	mx2.ssi.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752849AbbEHSN0 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 May 2015 14:13:26 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>, Mark Nelson <mnelson@redhat.com>, zhiqiang.wang@intel.com
+To: Jason Dillaman <dillaman@redhat.com>, Gregory Farnum <greg@gregs42.com>
+Cc: Tom Deneau <tom.deneau@amd.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Little more data..
-First I am trying to eliminate network/filesystem/disk issues on why I
-am seeing performance drop going from 16k to 32k object size.
-Everything is pointing me to CEPH.
-
-1. FIlesystem Test.
-
-I am using EXT4 as my base FS for CEPH, just to eliminate the FS
-issue, I wrote a small program
-which creates files(OSYNC) of varying sizes totaling to to .5 GB on
-each filesystem. Though XFS is better than
-EXT4 I did not see any of the FS performance going down as the
-filesize increased.
-
-16 threads
-fSize:8192 FS:XFS  totalsize:512 MB sec:294 Throughput:1 MB/sec
-Latency/f:4483 us
-fSize:8192 FS:EXT4 totalsize:512 MB sec:398 Throughput:1 MB/sec
-Latency/f:6079 us
-
-fSize:16384 FS:XFS  totalsize:512 MB sec:159 Throughput:3 MB/sec
-Latency/f:4859 us
-fSize:16384 FS:EXT4 totalsize:512 MB sec:178 Throughput:2 MB/sec
-Latency/f:5452 us
-
-fSize:32768 FS:XFS  totalsize:512 MB sec:97  Throughput:5 MB/sec
-Latency/f:5897 us
-fSize:32768 FS:EXT4 totalsize:512 MB sec:101 Throughput:5 MB/sec Latency:6142 us
-
-fSize:65536 FS:XFS  totalsize:512 MB sec:65 Throughput:7 MB/sec
-Latency/f:7941 us
-fSize:65536 FS:EXT4 totalsize:512 MB sec:71 Throughput:7 MB/sec
-Latency/f:8681 us
-
-fSize:131072 FS:XFS  totalsize:512 MB sec:47 Throughput:10 MB/sec
-Latency/f:11427 us
-fSize:131072 FS:EXT4 totalsize:512 MB sec:52 Throughput:9 MB/sec
-Latency/f:12664 us
-
-2. Ntwork Test
-
-vjujjuri@wsl6:~$ iperf -c wsl2 -P 16
-[SUM]  0.0-10.1 sec  1.11 GBytes   945 Mbits/sec
-
-vjujjuri@wsl6:~$ iperf -c wsl3 -P 16
-[SUM]  0.0-10.1 sec  1.11 GBytes   946 Mbits/sec
-vjujjuri@wsl6:~$ iperf -c wsl4 -P 16
-[SUM]  0.0-10.1 sec  1.11 GBytes   944 Mbits/sec
-
-So netowrk is consistent for 1Gb NIC.
-
-3.
-As I mentioned above, OSD bench gave consistent results. i.e as the
-object size increases I am getting better throughput.
-
-4.
-I tried rados bench with 1 thread. , which also saw increase in
-bandwidth with object size.
-1 Thread
-8k   Bandwidth (MB/sec):     1.651  Average Latency:        0.00467157
-16k  Bandwidth (MB/sec):     3.241  Average Latency:        0.00481853
-64k  Bandwidth (MB/sec):     9.878  Average Latency:        0.00632447
-
-
-5. I tried with 10 threads, which is flat. At least no degradation.
-10 Thread
-16k Bandwidth (MB/sec):     32.826    Average Latency:        0.00380627
-64k Bandwidth (MB/sec):     32.981    Average Latency:        0.0151577
-
-6. But, at 16 threads I see 16k peaks and falls drastically after
-that. and the puzzle continues...
-
-SIze     BandWidth   Latency
-1M         39.916          0.400774
-512k      32.797            0.243906
-64k        28.98             0.03449
-32k        41.56             0.0120
-16k         47.545           0.005
-8k           17.078          0.0072
-
-Thanks,
-JV
-
-
-On Thu, May 7, 2015 at 11:38 AM, Venkateswara Rao Jujjuri
-<jujjuri@gmail.com> wrote:
-> Hope someone sheds light. Not able to reason out what I am seeing.
-> OSD bench shows that bandwidth is increasing with BlockSize.
-> While librados bench shows bandwidth is falling after 16k.
-> I have 3 SSD  OSDs in SSD pool.
->
-> vjujjuri@wsl6:~$ iperf -csl2 -P 16
->  [SUM]  0.0-10.1 sec  1.11 GBytes   945 Mbits/sec
->
-> vjujjuri@wsl13:/media/data$ ceph --version
-> ceph version 0.94.1 (e4bfad3a3c51054df7e537a724c8d0bf9be972ff)
->
->
-> vjujjuri@wsl13:/media/data$ ceph tell osd.0 bench 10485760 8192
-> {
->     "bytes_written": 10485760,
->     "blocksize": 8192,
->     "bytes_per_sec": 47176008.000000
-> }
->
-> vjujjuri@wsl13:/media/data$ ceph tell osd.0 bench 10485760 16384
-> {
->     "bytes_written": 10485760,
->     "blocksize": 16384,
->     "bytes_per_sec": 109491958.000000
-> }
->
-> vjujjuri@wsl13:/media/data$ ceph tell osd.0 bench 10485760 32768
-> {
->     "bytes_written": 10485760,
->     "blocksize": 32768,
->     "bytes_per_sec": 242963276.000000
-> }
->
-> Where as the bench:
-> vjujjuri@wsl13:/media/data$ rados bench -p sfdc_ssd -b 8192 10 write
-> --no-cleanup
-> Bandwidth (MB/sec):     25.878
->
-> vjujjuri@wsl13:/media/data$ rados bench -p sfdc_ssd -b 16384 10 write
-> --no-cleanup
-> Bandwidth (MB/sec):     48.425
->
-> vjujjuri@wsl13:/media/data$ rados bench -p sfdc_ssd -b 32768 10 write
-> --no-cleanup
-> Bandwidth (MB/sec):     35.750
->
-> Thanks in advance
->
->
-> --
-> Jvrao
-> ---
-> First they ignore you, then they laugh at you, then they fight you,
-> then you win. - Mahatma Gandhi
-
-
-
--- 
-Jvrao
----
-First they ignore you, then they laugh at you, then they fight you,
-then you win. - Mahatma Gandhi
+SGkgQWxsLA0KICAgQnVpbGQgc3lzdGVtIHdhcyBicm9rZW4gZm9yIGF1dG9tYWtlIDEuOTYuIFdo
+ZW4gSSBuZWVkIHRvIHN3aXRjaCBhdXRvbWFrZSBmcm9tIDEuMTQgdG8gYXV0b21ha2UgMS45NiBm
+b3Igc29tZSBmZWF0dXJlcyAsIEkgIGdvdCBiZWxvdyBlcnJvcnMgZXJyb3JzIGZvciBDZXBoIGNv
+bXBpbGF0aW9uIHdpdGggYXV0b21ha2UgMS45Ni4gIEF1dG9tYWtlKGFjbG9jYWwgKSAxLjk2IGRv
+ZXMgbm90IHN1cHBvcnQgLS1pbnN0YWxsIG9wdGlvbiBhbnkgbW9yZS4NCiAgDQpTeW5jaHJvbml6
+aW5nIHN1Ym1vZHVsZSB1cmwgZm9yICdjZXBoLWVyYXN1cmUtY29kZS1jb3JwdXMnDQpTeW5jaHJv
+bml6aW5nIHN1Ym1vZHVsZSB1cmwgZm9yICdjZXBoLW9iamVjdC1jb3JwdXMnDQpTeW5jaHJvbml6
+aW5nIHN1Ym1vZHVsZSB1cmwgZm9yICdzcmMvY2l2ZXR3ZWInDQpTeW5jaHJvbml6aW5nIHN1Ym1v
+ZHVsZSB1cmwgZm9yICdzcmMvZXJhc3VyZS1jb2RlL2plcmFzdXJlL2dmLWNvbXBsZXRlJw0KU3lu
+Y2hyb25pemluZyBzdWJtb2R1bGUgdXJsIGZvciAnc3JjL2VyYXN1cmUtY29kZS9qZXJhc3VyZS9q
+ZXJhc3VyZScNClN5bmNocm9uaXppbmcgc3VibW9kdWxlIHVybCBmb3IgJ3NyYy9nbW9jaycNClN5
+bmNocm9uaXppbmcgc3VibW9kdWxlIHVybCBmb3IgJ3NyYy9saWJzMycNClN5bmNocm9uaXppbmcg
+c3VibW9kdWxlIHVybCBmb3IgJ3NyYy9yb2Nrc2RiJw0KKyBnaXQgc3VibW9kdWxlIHVwZGF0ZSAt
+LWZvcmNlIC0taW5pdCAtLXJlY3Vyc2l2ZQ0KU3VibW9kdWxlIHBhdGggJ2NlcGgtZXJhc3VyZS1j
+b2RlLWNvcnB1cyc6IGNoZWNrZWQgb3V0ICdmMWY5NWExZGU5ZGVhOTFiMGY4ODMwYTAxZThiODY3
+M2UzZjI0MWUxJw0KU3VibW9kdWxlIHBhdGggJ2NlcGgtb2JqZWN0LWNvcnB1cyc6IGNoZWNrZWQg
+b3V0ICdkYTQzZWIxMTk1NThmYjQ2ZDg2ZTYyZjNiODJkNWNhNjM1NDZmNjllJw0KU3VibW9kdWxl
+IHBhdGggJ3NyYy9jaXZldHdlYic6IGNoZWNrZWQgb3V0ICdhZjc2NjIzMzAzMjQyYmEzMTU3ZmVm
+MTkxMzRmMjdlZmQzODk3N2UwJw0KU3VibW9kdWxlIHBhdGggJ3NyYy9lcmFzdXJlLWNvZGUvamVy
+YXN1cmUvZ2YtY29tcGxldGUnOiBjaGVja2VkIG91dCAnZDM4NDk1MmM2OGE2NGQ5M2FjN2FmNjM0
+MWQ1NTE5ZWE1ZDI5NThiOScNClN1Ym1vZHVsZSBwYXRoICdzcmMvZXJhc3VyZS1jb2RlL2plcmFz
+dXJlL2plcmFzdXJlJzogY2hlY2tlZCBvdXQgJzAyNzMxZGY0YzFlYWUxODE5YzQ0NTNjOWQzYWI2
+ZDQwOGNhZGQwODUnDQpTdWJtb2R1bGUgcGF0aCAnc3JjL2dtb2NrJzogY2hlY2tlZCBvdXQgJ2Q3
+MDFmOWQ1NDdhMDM2NzdkNjEyZDdhZjNmMjEyODcxYTQyN2YwNTgnDQpTdWJtb2R1bGUgcGF0aCAn
+c3JjL2dtb2NrL2d0ZXN0JzogY2hlY2tlZCBvdXQgJzAyY2ZiZDcyYzU3YzQzZWI5OGNmZDE4Nzc5
+Y2ZmZWMyM2QwM2I4YzgnDQpTdWJtb2R1bGUgcGF0aCAnc3JjL2xpYnMzJzogY2hlY2tlZCBvdXQg
+J2RjZjk4ZmYwNGJjNWRhY2Q1ZDQ1ODU0YTMyODcwZDg2ZGQ3YjI2YzcnDQpTdWJtb2R1bGUgcGF0
+aCAnc3JjL3JvY2tzZGInOiBjaGVja2VkIG91dCAnNmNhN2JlZmI1NTc2Nzc4NGE0NDdhNWRhZGRk
+MDllMzg3ZWM5MmJkMycNCisgcm0gLWYgY29uZmlnLmNhY2hlDQorIGFjbG9jYWwgLUkgbTQgLS1p
+bnN0YWxsDQphY2xvY2FsOiB1bnJlY29nbml6ZWQgb3B0aW9uIC0tIGAtLWluc3RhbGwnDQpUcnkg
+YGFjbG9jYWwgLS1oZWxwJyBmb3IgbW9yZSBpbmZvcm1hdGlvbi4NCg0Kcm9vdEBzc2QtT3B0aVBs
+ZXgtNzAxMDovaG9tZS9zc2QvV29ya3NwYWNlL2NlcGhfOS4wIyBhdXRvbQ0KYXV0b200dGUgICAg
+ICAgYXV0b21ha2UgICAgICAgYXV0b21ha2UtMS4xNCAgYXV0b21ha2UtMS45ICAgDQoNCnJvb3RA
+c3NkLU9wdGlQbGV4LTcwMTA6L2hvbWUvc3NkL1dvcmtzcGFjZS9jZXBoXzkuMCMgYXV0b21ha2Ug
+LS12ZXJzaW9uDQpVc2VsZXNzIHVzZSBvZiAvZCBtb2RpZmllciBpbiB0cmFuc2xpdGVyYXRpb24g
+b3BlcmF0b3IgYXQgL3Vzci9zaGFyZS9hdXRvbWFrZS0xLjkvQXV0b21ha2UvV3JhcC5wbSBsaW5l
+IDYwLg0KYXV0b21ha2UgKEdOVSBhdXRvbWFrZSkgMS45LjYNCldyaXR0ZW4gYnkgVG9tIFRyb21l
+eSA8dHJvbWV5QHJlZGhhdC5jb20+Lg0KDQpDb3B5cmlnaHQgMjAwNSBGcmVlIFNvZnR3YXJlIEZv
+dW5kYXRpb24sIEluYy4NClRoaXMgaXMgZnJlZSBzb2Z0d2FyZTsgc2VlIHRoZSBzb3VyY2UgZm9y
+IGNvcHlpbmcgY29uZGl0aW9ucy4gIFRoZXJlIGlzIE5PDQp3YXJyYW50eTsgbm90IGV2ZW4gZm9y
+IE1FUkNIQU5UQUJJTElUWSBvciBGSVRORVNTIEZPUiBBIFBBUlRJQ1VMQVIgUFVSUE9TRS4NCg0K
+DQoNCg0KDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBjZXBoLWRldmVsLW93
+bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwu
+b3JnXSBPbiBCZWhhbGYgT2YgSmFzb24gRGlsbGFtYW4NClNlbnQ6IEZyaWRheSwgTWF5IDA4LCAy
+MDE1IDY6MzcgQU0NClRvOiBHcmVnb3J5IEZhcm51bQ0KQ2M6IFRvbSBEZW5lYXU7IGNlcGgtZGV2
+ZWwNClN1YmplY3Q6IFJlOiBObyBydWxlIHRvIG1ha2UgdGFyZ2V0IGAuLi9zcmMvZ21vY2svbGli
+L2xpYmdtb2NrX21haW4ubGEnDQoNClRoZSBmaXggaXMgYXZhaWxhYmxlIG9uIHRoZSBtYXN0ZXIg
+YnJhbmNoIHVuZGVyIGNvbW1pdCA5MzMzMzJiZS4gIFlvdSBjYW4gd29ya2Fyb3VuZCB0aGUgaXNz
+dWUgYnkgcnVubmluZyAibWFrZSBjaGVjayIgdG8gZW5zdXJlIGd0ZXN0L2dtb2NrIGlzIGNvbXBp
+bGVkIG9yIHJ1biAiY29uZmlndXJlIC0td2l0aC1kZWJ1ZyIuDQoNCi0tIA0KDQpKYXNvbiBEaWxs
+YW1hbg0KUmVkIEhhdA0KZGlsbGFtYW5AcmVkaGF0LmNvbQ0KaHR0cDovL3d3dy5yZWRoYXQuY29t
+IA0KDQoNCi0tLS0tIE9yaWdpbmFsIE1lc3NhZ2UgLS0tLS0NCkZyb206ICJHcmVnb3J5IEZhcm51
+bSIgPGdyZWdAZ3JlZ3M0Mi5jb20+DQpUbzogIlRvbSBEZW5lYXUiIDx0b20uZGVuZWF1QGFtZC5j
+b20+DQpDYzogImNlcGgtZGV2ZWwiIDxjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZz4NClNlbnQ6
+IEZyaWRheSwgTWF5IDgsIDIwMTUgMTI6NTc6NTcgQU0NClN1YmplY3Q6IFJlOiBObyBydWxlIHRv
+IG1ha2UgdGFyZ2V0IGAuLi9zcmMvZ21vY2svbGliL2xpYmdtb2NrX21haW4ubGEnDQoNClllYWg7
+IEkgc2VlIHRoaXMgdG9vLiBJdCB0b29rIG1lIGEgd2hpbGUgdG8gcmVjYWxsIGJ1dCB0aGlzIHdh
+cyBhIHRlbXBvcmFyeSBidWcgYW5kIGlzIHJlc29sdmVkIG5vdy4gWW91IHNob3VsZCBiZSBhYmxl
+IHRvIGZpbmQgdGhlIGZpeCBieSBnb2luZyB0aHJvdWdoIHRoZSBtYWtlZmlsZSBjb21taXRzLCBh
+bmQgdGhpbmdzIHdpbGwgd29yayBpZiB5b3Ugc2V0IGl0IHVwIHRvIGJ1aWxkIHRoZSB1bml0IHRl
+c3RzIGFzIHdlbGwuDQotR3JlZw0KDQpPbiBUaHUsIE1heSA3LCAyMDE1IGF0IDg6MjQgUE0sIERl
+bmVhdSwgVG9tIDx0b20uZGVuZWF1QGFtZC5jb20+IHdyb3RlOg0KPiBJIHdhbnRlZCB0byBidWls
+ZCB2OS4wLjAgdXNpbmcNCj4gSSBkaWQNCj4gICAgICAgICBnaXQgY2xvbmUgaHR0cDovL2dpdGh1
+Yi5jb20vY2VwaC9jZXBoDQo+ICAgICAgICAgZ2l0IGNoZWNrb3V0IHY5LjAuMA0KPiAgICAgICAg
+IGdpdCBzdWJtb2R1bGUgdXBkYXRlIC0tZm9yY2UgLS1pbml0IC0tcmVjdXJzaXZlDQo+ICAgICAg
+ICAgYXV0b2dlbjsgY29uZmlndXJlOyBtYWtlDQo+DQo+IFdoZW4gSSBkbyBzbyBJIGdldCB0aGUg
+Zm9sbG93aW5nIGVycm9yDQo+DQo+IG1ha2VbM106ICoqKiBObyBydWxlIHRvIG1ha2UgdGFyZ2V0
+IGAuLi9zcmMvZ21vY2svbGliL2xpYmdtb2NrX21haW4ubGEnLCBuZWVkZWQgYnkgYHVuaXR0ZXN0
+X2xpYnJiZCcuICBTdG9wLg0KPg0KPiBJIGRpZCBub3QgaGF2ZSB0aGlzIHByb2JsZW0gd2hlbiBJ
+IGhhZCBjaGVja2VkIG91dCAwLjk0LjEgSXMgdGhlcmUgDQo+IHNvbWUgc3VibW9kdWxlIHN0ZXAg
+SSBhbSBtaXNzaW5nPw0KPg0KPiBCeSB0aGUgd2F5LCBhbiBycG1idWlsZCBvZiB2OS4wLjAgZnJv
+bSB0aGUgdGFyLmJ6MiB3b3JrZWQgZmluZS4NCj4NCj4gLS0gVG9tIERlbmVhdSwgQU1EDQo+DQo+
+DQo+IC0tDQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1
+bnN1YnNjcmliZSBjZXBoLWRldmVsIiANCj4gaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1h
+am9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gDQo+IGluZm8gYXQgIGh0dHA6
+Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KLS0NClRvIHVuc3Vic2NyaWJl
+IGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBp
+biB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3Jl
+IG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZv
+Lmh0bWwNCi0tDQpUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAi
+dW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9y
+ZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIu
+a2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo=
