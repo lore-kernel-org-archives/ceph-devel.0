@@ -1,101 +1,68 @@
 From: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
-Subject: Ceph build system broken with automake 1.96
-Date: Fri, 8 May 2015 18:13:23 +0000
-Message-ID: <99767EA2E27DD44DB4E9F9B9ACA458C03B313F83@SSIEXCH-MB3.ssi.samsung.com>
+Subject: RE: libcrush.so
+Date: Fri, 8 May 2015 18:13:53 +0000
+Message-ID: <99767EA2E27DD44DB4E9F9B9ACA458C03B313F99@SSIEXCH-MB3.ssi.samsung.com>
+References: <06681238D8946F44A60AA400760A1CBF01F60F19@SHSMSX104.ccr.corp.intel.com>
+ <99767EA2E27DD44DB4E9F9B9ACA458C03B313F2B@SSIEXCH-MB3.ssi.samsung.com>
+ <554CF90C.8050404@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.ssi.samsung.com ([207.140.43.206]:56857 "EHLO
+Received: from mx2.ssi.samsung.com ([207.140.43.206]:56922 "EHLO
 	mx2.ssi.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752849AbbEHSN0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 May 2015 14:13:26 -0400
+	with ESMTP id S1753075AbbEHSN4 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 May 2015 14:13:56 -0400
+In-Reply-To: <554CF90C.8050404@redhat.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jason Dillaman <dillaman@redhat.com>, Gregory Farnum <greg@gregs42.com>
-Cc: Tom Deneau <tom.deneau@amd.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mnelson@redhat.com>, "Zhou, Yuan" <yuan.zhou@intel.com>, Ceph Development <ceph-devel@vger.kernel.org>
+Cc: "Cohen, David E" <david.e.cohen@intel.com>, "Yu, Zhidong" <zhidong.yu@intel.com>
 
-SGkgQWxsLA0KICAgQnVpbGQgc3lzdGVtIHdhcyBicm9rZW4gZm9yIGF1dG9tYWtlIDEuOTYuIFdo
-ZW4gSSBuZWVkIHRvIHN3aXRjaCBhdXRvbWFrZSBmcm9tIDEuMTQgdG8gYXV0b21ha2UgMS45NiBm
-b3Igc29tZSBmZWF0dXJlcyAsIEkgIGdvdCBiZWxvdyBlcnJvcnMgZXJyb3JzIGZvciBDZXBoIGNv
-bXBpbGF0aW9uIHdpdGggYXV0b21ha2UgMS45Ni4gIEF1dG9tYWtlKGFjbG9jYWwgKSAxLjk2IGRv
-ZXMgbm90IHN1cHBvcnQgLS1pbnN0YWxsIG9wdGlvbiBhbnkgbW9yZS4NCiAgDQpTeW5jaHJvbml6
-aW5nIHN1Ym1vZHVsZSB1cmwgZm9yICdjZXBoLWVyYXN1cmUtY29kZS1jb3JwdXMnDQpTeW5jaHJv
-bml6aW5nIHN1Ym1vZHVsZSB1cmwgZm9yICdjZXBoLW9iamVjdC1jb3JwdXMnDQpTeW5jaHJvbml6
-aW5nIHN1Ym1vZHVsZSB1cmwgZm9yICdzcmMvY2l2ZXR3ZWInDQpTeW5jaHJvbml6aW5nIHN1Ym1v
-ZHVsZSB1cmwgZm9yICdzcmMvZXJhc3VyZS1jb2RlL2plcmFzdXJlL2dmLWNvbXBsZXRlJw0KU3lu
-Y2hyb25pemluZyBzdWJtb2R1bGUgdXJsIGZvciAnc3JjL2VyYXN1cmUtY29kZS9qZXJhc3VyZS9q
-ZXJhc3VyZScNClN5bmNocm9uaXppbmcgc3VibW9kdWxlIHVybCBmb3IgJ3NyYy9nbW9jaycNClN5
-bmNocm9uaXppbmcgc3VibW9kdWxlIHVybCBmb3IgJ3NyYy9saWJzMycNClN5bmNocm9uaXppbmcg
-c3VibW9kdWxlIHVybCBmb3IgJ3NyYy9yb2Nrc2RiJw0KKyBnaXQgc3VibW9kdWxlIHVwZGF0ZSAt
-LWZvcmNlIC0taW5pdCAtLXJlY3Vyc2l2ZQ0KU3VibW9kdWxlIHBhdGggJ2NlcGgtZXJhc3VyZS1j
-b2RlLWNvcnB1cyc6IGNoZWNrZWQgb3V0ICdmMWY5NWExZGU5ZGVhOTFiMGY4ODMwYTAxZThiODY3
-M2UzZjI0MWUxJw0KU3VibW9kdWxlIHBhdGggJ2NlcGgtb2JqZWN0LWNvcnB1cyc6IGNoZWNrZWQg
-b3V0ICdkYTQzZWIxMTk1NThmYjQ2ZDg2ZTYyZjNiODJkNWNhNjM1NDZmNjllJw0KU3VibW9kdWxl
-IHBhdGggJ3NyYy9jaXZldHdlYic6IGNoZWNrZWQgb3V0ICdhZjc2NjIzMzAzMjQyYmEzMTU3ZmVm
-MTkxMzRmMjdlZmQzODk3N2UwJw0KU3VibW9kdWxlIHBhdGggJ3NyYy9lcmFzdXJlLWNvZGUvamVy
-YXN1cmUvZ2YtY29tcGxldGUnOiBjaGVja2VkIG91dCAnZDM4NDk1MmM2OGE2NGQ5M2FjN2FmNjM0
-MWQ1NTE5ZWE1ZDI5NThiOScNClN1Ym1vZHVsZSBwYXRoICdzcmMvZXJhc3VyZS1jb2RlL2plcmFz
-dXJlL2plcmFzdXJlJzogY2hlY2tlZCBvdXQgJzAyNzMxZGY0YzFlYWUxODE5YzQ0NTNjOWQzYWI2
-ZDQwOGNhZGQwODUnDQpTdWJtb2R1bGUgcGF0aCAnc3JjL2dtb2NrJzogY2hlY2tlZCBvdXQgJ2Q3
-MDFmOWQ1NDdhMDM2NzdkNjEyZDdhZjNmMjEyODcxYTQyN2YwNTgnDQpTdWJtb2R1bGUgcGF0aCAn
-c3JjL2dtb2NrL2d0ZXN0JzogY2hlY2tlZCBvdXQgJzAyY2ZiZDcyYzU3YzQzZWI5OGNmZDE4Nzc5
-Y2ZmZWMyM2QwM2I4YzgnDQpTdWJtb2R1bGUgcGF0aCAnc3JjL2xpYnMzJzogY2hlY2tlZCBvdXQg
-J2RjZjk4ZmYwNGJjNWRhY2Q1ZDQ1ODU0YTMyODcwZDg2ZGQ3YjI2YzcnDQpTdWJtb2R1bGUgcGF0
-aCAnc3JjL3JvY2tzZGInOiBjaGVja2VkIG91dCAnNmNhN2JlZmI1NTc2Nzc4NGE0NDdhNWRhZGRk
-MDllMzg3ZWM5MmJkMycNCisgcm0gLWYgY29uZmlnLmNhY2hlDQorIGFjbG9jYWwgLUkgbTQgLS1p
-bnN0YWxsDQphY2xvY2FsOiB1bnJlY29nbml6ZWQgb3B0aW9uIC0tIGAtLWluc3RhbGwnDQpUcnkg
-YGFjbG9jYWwgLS1oZWxwJyBmb3IgbW9yZSBpbmZvcm1hdGlvbi4NCg0Kcm9vdEBzc2QtT3B0aVBs
-ZXgtNzAxMDovaG9tZS9zc2QvV29ya3NwYWNlL2NlcGhfOS4wIyBhdXRvbQ0KYXV0b200dGUgICAg
-ICAgYXV0b21ha2UgICAgICAgYXV0b21ha2UtMS4xNCAgYXV0b21ha2UtMS45ICAgDQoNCnJvb3RA
-c3NkLU9wdGlQbGV4LTcwMTA6L2hvbWUvc3NkL1dvcmtzcGFjZS9jZXBoXzkuMCMgYXV0b21ha2Ug
-LS12ZXJzaW9uDQpVc2VsZXNzIHVzZSBvZiAvZCBtb2RpZmllciBpbiB0cmFuc2xpdGVyYXRpb24g
-b3BlcmF0b3IgYXQgL3Vzci9zaGFyZS9hdXRvbWFrZS0xLjkvQXV0b21ha2UvV3JhcC5wbSBsaW5l
-IDYwLg0KYXV0b21ha2UgKEdOVSBhdXRvbWFrZSkgMS45LjYNCldyaXR0ZW4gYnkgVG9tIFRyb21l
-eSA8dHJvbWV5QHJlZGhhdC5jb20+Lg0KDQpDb3B5cmlnaHQgMjAwNSBGcmVlIFNvZnR3YXJlIEZv
-dW5kYXRpb24sIEluYy4NClRoaXMgaXMgZnJlZSBzb2Z0d2FyZTsgc2VlIHRoZSBzb3VyY2UgZm9y
-IGNvcHlpbmcgY29uZGl0aW9ucy4gIFRoZXJlIGlzIE5PDQp3YXJyYW50eTsgbm90IGV2ZW4gZm9y
-IE1FUkNIQU5UQUJJTElUWSBvciBGSVRORVNTIEZPUiBBIFBBUlRJQ1VMQVIgUFVSUE9TRS4NCg0K
-DQoNCg0KDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBjZXBoLWRldmVsLW93
-bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwu
-b3JnXSBPbiBCZWhhbGYgT2YgSmFzb24gRGlsbGFtYW4NClNlbnQ6IEZyaWRheSwgTWF5IDA4LCAy
-MDE1IDY6MzcgQU0NClRvOiBHcmVnb3J5IEZhcm51bQ0KQ2M6IFRvbSBEZW5lYXU7IGNlcGgtZGV2
-ZWwNClN1YmplY3Q6IFJlOiBObyBydWxlIHRvIG1ha2UgdGFyZ2V0IGAuLi9zcmMvZ21vY2svbGli
-L2xpYmdtb2NrX21haW4ubGEnDQoNClRoZSBmaXggaXMgYXZhaWxhYmxlIG9uIHRoZSBtYXN0ZXIg
-YnJhbmNoIHVuZGVyIGNvbW1pdCA5MzMzMzJiZS4gIFlvdSBjYW4gd29ya2Fyb3VuZCB0aGUgaXNz
-dWUgYnkgcnVubmluZyAibWFrZSBjaGVjayIgdG8gZW5zdXJlIGd0ZXN0L2dtb2NrIGlzIGNvbXBp
-bGVkIG9yIHJ1biAiY29uZmlndXJlIC0td2l0aC1kZWJ1ZyIuDQoNCi0tIA0KDQpKYXNvbiBEaWxs
-YW1hbg0KUmVkIEhhdA0KZGlsbGFtYW5AcmVkaGF0LmNvbQ0KaHR0cDovL3d3dy5yZWRoYXQuY29t
-IA0KDQoNCi0tLS0tIE9yaWdpbmFsIE1lc3NhZ2UgLS0tLS0NCkZyb206ICJHcmVnb3J5IEZhcm51
-bSIgPGdyZWdAZ3JlZ3M0Mi5jb20+DQpUbzogIlRvbSBEZW5lYXUiIDx0b20uZGVuZWF1QGFtZC5j
-b20+DQpDYzogImNlcGgtZGV2ZWwiIDxjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZz4NClNlbnQ6
-IEZyaWRheSwgTWF5IDgsIDIwMTUgMTI6NTc6NTcgQU0NClN1YmplY3Q6IFJlOiBObyBydWxlIHRv
-IG1ha2UgdGFyZ2V0IGAuLi9zcmMvZ21vY2svbGliL2xpYmdtb2NrX21haW4ubGEnDQoNClllYWg7
-IEkgc2VlIHRoaXMgdG9vLiBJdCB0b29rIG1lIGEgd2hpbGUgdG8gcmVjYWxsIGJ1dCB0aGlzIHdh
-cyBhIHRlbXBvcmFyeSBidWcgYW5kIGlzIHJlc29sdmVkIG5vdy4gWW91IHNob3VsZCBiZSBhYmxl
-IHRvIGZpbmQgdGhlIGZpeCBieSBnb2luZyB0aHJvdWdoIHRoZSBtYWtlZmlsZSBjb21taXRzLCBh
-bmQgdGhpbmdzIHdpbGwgd29yayBpZiB5b3Ugc2V0IGl0IHVwIHRvIGJ1aWxkIHRoZSB1bml0IHRl
-c3RzIGFzIHdlbGwuDQotR3JlZw0KDQpPbiBUaHUsIE1heSA3LCAyMDE1IGF0IDg6MjQgUE0sIERl
-bmVhdSwgVG9tIDx0b20uZGVuZWF1QGFtZC5jb20+IHdyb3RlOg0KPiBJIHdhbnRlZCB0byBidWls
-ZCB2OS4wLjAgdXNpbmcNCj4gSSBkaWQNCj4gICAgICAgICBnaXQgY2xvbmUgaHR0cDovL2dpdGh1
-Yi5jb20vY2VwaC9jZXBoDQo+ICAgICAgICAgZ2l0IGNoZWNrb3V0IHY5LjAuMA0KPiAgICAgICAg
-IGdpdCBzdWJtb2R1bGUgdXBkYXRlIC0tZm9yY2UgLS1pbml0IC0tcmVjdXJzaXZlDQo+ICAgICAg
-ICAgYXV0b2dlbjsgY29uZmlndXJlOyBtYWtlDQo+DQo+IFdoZW4gSSBkbyBzbyBJIGdldCB0aGUg
-Zm9sbG93aW5nIGVycm9yDQo+DQo+IG1ha2VbM106ICoqKiBObyBydWxlIHRvIG1ha2UgdGFyZ2V0
-IGAuLi9zcmMvZ21vY2svbGliL2xpYmdtb2NrX21haW4ubGEnLCBuZWVkZWQgYnkgYHVuaXR0ZXN0
-X2xpYnJiZCcuICBTdG9wLg0KPg0KPiBJIGRpZCBub3QgaGF2ZSB0aGlzIHByb2JsZW0gd2hlbiBJ
-IGhhZCBjaGVja2VkIG91dCAwLjk0LjEgSXMgdGhlcmUgDQo+IHNvbWUgc3VibW9kdWxlIHN0ZXAg
-SSBhbSBtaXNzaW5nPw0KPg0KPiBCeSB0aGUgd2F5LCBhbiBycG1idWlsZCBvZiB2OS4wLjAgZnJv
-bSB0aGUgdGFyLmJ6MiB3b3JrZWQgZmluZS4NCj4NCj4gLS0gVG9tIERlbmVhdSwgQU1EDQo+DQo+
-DQo+IC0tDQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1
-bnN1YnNjcmliZSBjZXBoLWRldmVsIiANCj4gaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1h
-am9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gDQo+IGluZm8gYXQgIGh0dHA6
-Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KLS0NClRvIHVuc3Vic2NyaWJl
-IGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBp
-biB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3Jl
-IG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZv
-Lmh0bWwNCi0tDQpUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAi
-dW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9y
-ZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIu
-a2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo=
+Good to know. thanks
+
+-----Original Message-----
+From: Mark Nelson [mailto:mnelson@redhat.com] 
+Sent: Friday, May 08, 2015 10:58 AM
+To: James (Fei) Liu-SSI; Zhou, Yuan; Ceph Development
+Cc: Cohen, David E; Yu, Zhidong
+Subject: Re: libcrush.so
+
+FWIW, an easily buildable libcrush would be fantastic for simulation purposes (and things like avalanche analysis!) as well.
+
+Mark
+
+On 05/08/2015 12:40 PM, James (Fei) Liu-SSI wrote:
+> Hi Yuan,
+>     Very interesting. Would be possible to know why application needs to access the cursh map directly instead of accessing through ceph tool?
+>
+>    Regards,
+>    James
+>
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org 
+> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Zhou, Yuan
+> Sent: Thursday, May 07, 2015 6:29 PM
+> To: Ceph Development
+> Cc: Cohen, David E; Yu, Zhidong
+> Subject: libcrush.so
+>
+> Ceph use crush algorithm to provide the mapping of objects to OSD servers. This is great for clients so they could talk to with these OSDs directly. However there are some scenarios where the application needs to access the crush map, for load-balancing as an example.
+>
+> Currently Ceph doesn't provides any API to render the layout. If your application needs to access the crush map you'll going to rely on the command 'ceph osd map pool_name obj_name'. With this libcrush.so we could let the application to choose which nodes to access. The other advantage is we could provide some other bindings(python, go) based on this also.
+>
+>  From the git log we find libcrush was there before but removed out since Argonaut. Can anyone kindly share us the background of this change?
+>
+>
+> Thanks, -yuan
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> in the body of a message to majordomo@vger.kernel.org More majordomo 
+> info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> in the body of a message to majordomo@vger.kernel.org More majordomo 
+> info at  http://vger.kernel.org/majordomo-info.html
+>
