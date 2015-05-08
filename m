@@ -1,72 +1,70 @@
 From: Jason Dillaman <dillaman@redhat.com>
-Subject: Re: long running workloads/rbd_fsx_cache_writeback.yaml on hammer
-Date: Fri, 8 May 2015 08:36:23 -0400 (EDT)
-Message-ID: <1191272410.13855776.1431088583253.JavaMail.zimbra@redhat.com>
-References: <554C7CE5.4070600@dachary.org>
+Subject: Re: No rule to make target `../src/gmock/lib/libgmock_main.la'
+Date: Fri, 8 May 2015 09:37:08 -0400 (EDT)
+Message-ID: <1713012883.13901760.1431092228519.JavaMail.zimbra@redhat.com>
+References: <BC97738F8E7C8742BABED7F06FB9DF9166435336@SATLEXDAG01.amd.com> <CAC6JEv_dBdhqgXkaqULm-6xumQRJJVjUCFE_nV3wkr3CMC8bag@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx5-phx2.redhat.com ([209.132.183.37]:45032 "EHLO
+Received: from mx5-phx2.redhat.com ([209.132.183.37]:47970 "EHLO
 	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752886AbbEHMh2 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 May 2015 08:37:28 -0400
-In-Reply-To: <554C7CE5.4070600@dachary.org>
+	with ESMTP id S1753152AbbEHNhN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 May 2015 09:37:13 -0400
+In-Reply-To: <CAC6JEv_dBdhqgXkaqULm-6xumQRJJVjUCFE_nV3wkr3CMC8bag@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <greg@gregs42.com>
+Cc: Tom Deneau <tom.deneau@amd.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Nice catch.  It is deadlocked in a code path between handling a watch/n=
-otify error from librados and flushing the internal cache.  The issue a=
-lready appears to exist in the hammer branch.
+The fix is available on the master branch under commit 933332be.  You can workaround the issue by running "make check" to ensure gtest/gmock is compiled or run "configure --with-debug".
 
---=20
+-- 
 
-Jason Dillaman=20
-Red Hat=20
-dillaman@redhat.com=20
-http://www.redhat.com=20
+Jason Dillaman 
+Red Hat 
+dillaman@redhat.com 
+http://www.redhat.com 
 
 
 ----- Original Message -----
-=46rom: "Loic Dachary" <loic@dachary.org>
-To: "Jason Dillaman" <dillaman@redhat.com>
-Cc: "Ceph Development" <ceph-devel@vger.kernel.org>
-Sent: Friday, May 8, 2015 5:07:49 AM
-Subject: long running workloads/rbd_fsx_cache_writeback.yaml on hammer
+From: "Gregory Farnum" <greg@gregs42.com>
+To: "Tom Deneau" <tom.deneau@amd.com>
+Cc: "ceph-devel" <ceph-devel@vger.kernel.org>
+Sent: Friday, May 8, 2015 12:57:57 AM
+Subject: Re: No rule to make target `../src/gmock/lib/libgmock_main.la'
 
-Hi Janson,
+Yeah; I see this too. It took me a while to recall but this was a
+temporary bug and is resolved now. You should be able to find the fix
+by going through the makefile commits, and things will work if you set
+it up to build the unit tests as well.
+-Greg
 
-There is a long running (12h +) job at
-
-http://pulpito.ceph.com/loic-2015-05-07_09:46:27-rbd-hammer-backports--=
--basic-multi/878799/
-
-which is about
-
- rbd/thrash/{base/install.yaml clusters/fixed-2.yaml fs/xfs.yaml msgr-f=
-ailures/few.yaml thrashers/default.yaml workloads/rbd_fsx_cache_writeba=
-ck.yaml}=20
-
-and runs on the current hammer-backports branch which contains a few li=
-brbd backports
-
-http://tracker.ceph.com/issues/11492#Teuthology-run-commit-commita79146=
-fc3cae28bf4c07478fb4566b06942da60d-hammer-backports-branch-May-2015
-
-I don't see an obvious cause for error in the logs. Does it ring a bell=
- ? Is it supposed to take that long ? Note that all other jobs complete=
-d successfully (see http://pulpito.ceph.com/loic-2015-05-07_09:46:27-rb=
-d-hammer-backports---basic-multi/ for details).
-
-Cheers
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
+On Thu, May 7, 2015 at 8:24 PM, Deneau, Tom <tom.deneau@amd.com> wrote:
+> I wanted to build v9.0.0 using
+> I did
+>         git clone http://github.com/ceph/ceph
+>         git checkout v9.0.0
+>         git submodule update --force --init --recursive
+>         autogen; configure; make
+>
+> When I do so I get the following error
+>
+> make[3]: *** No rule to make target `../src/gmock/lib/libgmock_main.la', needed by `unittest_librbd'.  Stop.
+>
+> I did not have this problem when I had checked out 0.94.1
+> Is there some submodule step I am missing?
+>
+> By the way, an rpmbuild of v9.0.0 from the tar.bz2 worked fine.
+>
+> -- Tom Deneau, AMD
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 --
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 the body of a message to majordomo@vger.kernel.org
 More majordomo info at  http://vger.kernel.org/majordomo-info.html
