@@ -1,43 +1,38 @@
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH 0/5] target/rbd: distributed lun reset support
-Date: Sat, 9 May 2015 07:29:35 -0700
-Message-ID: <20150509142935.GA31964@infradead.org>
-References: <1430819778-24483-1-git-send-email-mchristi@redhat.com>
- <20150505174939.GA21297@infradead.org>
- <55499D46.9040008@redhat.com>
- <20150506064812.GA5181@infradead.org>
- <554C51D5.30202@redhat.com>
+From: Joao Eduardo Luis <joao-l3A5Bk7waGM@public.gmane.org>
+Subject: Re: RFC: Deprecating ceph-tool commands
+Date: Sat, 09 May 2015 16:01:37 +0100
+Message-ID: <554E2151.4070003@suse.de>
+References: <554D4CD8.6020809@suse.de> <554DCC0C.7040000@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <target-devel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <554C51D5.30202@redhat.com>
-Sender: target-devel-owner@vger.kernel.org
-To: Mike Christie <mchristi@redhat.com>
-Cc: Christoph Hellwig <hch@infradead.org>, ceph-devel@vger.kernel.org, target-devel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <554DCC0C.7040000-cLsNCMjd+0JAfugRpC6u6w@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Loic Dachary <loic-cLsNCMjd+0JAfugRpC6u6w@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Fri, May 08, 2015 at 01:04:05AM -0500, Mike Christie wrote:
-> > All of them.  It's just another consumer of the in-kernel block devices
-> > interface.
+On 05/09/2015 09:57 AM, Loic Dachary wrote:
+> Hi,
 > 
-> Will users use lio with what you are working on?
-
-It's the other way around.  The pNFS block device uses a block device
-it wants to use persistent reservations on.  If we do have a proper
-in-kernel API for that it could also work on say RBD and NVMe as long as
-they provide a mapping for SCSI3 PRs.  For NVMe that exists as a spec,
-and for RBD it seems like you're about to deliver one.
-
-> I ask because I am thinking it might be better to implement my own
-> se_subsystem_api and sbc_ops structs and in my backend just make libceph
-> calls directly for callouts like sbc_ops->execute_rw. So I would not have
-> a block_device or request_queue if I went that route.
+> On 09/05/2015 01:55, Joao Eduardo Luis wrote:
+>> This approach gives a lifespan of roughly 3 releases (at current rate,
+>> roughly 1.5 years) before being completely dropped.  This should give
+>> enough time to people to realize what has happened and adjust any
+>> scripts they may have.
 > 
-> If I do my own backend, for reset support (PR support will be similar
-> with callouts added to the se_subsystem_api) I would just need the patch
-> below.
+> That sounds reasonable. 
+> 
+> In the python documentation I find it very convenient to have "New in X.Y.Z" next to a given API call or behavior, as well as "Deprectated since". Although release notes https://github.com/ceph/ceph/commit/e3b788a56c640fb19d8aa9464ebf5bc84c97ec6f are useful when upgrading (to answer the question "What API will break ?"), it's not the primary location I'll check when considering using something. 
 
-It's defintively simpler, so for prototyping it might be the way to go.
-I think in the long run going for a general block device API will be
-more useful for everyone involved.
+Agreed, docs will have to be changed, including man pages.
+
+  -Joao
