@@ -1,38 +1,27 @@
-From: Joao Eduardo Luis <joao-l3A5Bk7waGM@public.gmane.org>
-Subject: Re: RFC: Deprecating ceph-tool commands
-Date: Sat, 09 May 2015 16:01:37 +0100
-Message-ID: <554E2151.4070003@suse.de>
-References: <554D4CD8.6020809@suse.de> <554DCC0C.7040000@dachary.org>
+From: Yuri Weinstein <yweinste@redhat.com>
+Subject: Issue 11581
+Date: Sat, 9 May 2015 11:31:41 -0400 (EDT)
+Message-ID: <1235499545.16647812.1431185501947.JavaMail.zimbra@redhat.com>
+References: <1628232621.16647640.1431185290826.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <554DCC0C.7040000-cLsNCMjd+0JAfugRpC6u6w@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Loic Dachary <loic-cLsNCMjd+0JAfugRpC6u6w@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx3-phx2.redhat.com ([209.132.183.24]:57803 "EHLO
+	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750955AbbEIPbm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 9 May 2015 11:31:42 -0400
+In-Reply-To: <1628232621.16647640.1431185290826.JavaMail.zimbra@redhat.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, Zack Cerza <zack@redhat.com>, Dan Mick <dmick@redhat.com>, Andrew Schoen <aschoen@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 05/09/2015 09:57 AM, Loic Dachary wrote:
-> Hi,
-> 
-> On 09/05/2015 01:55, Joao Eduardo Luis wrote:
->> This approach gives a lifespan of roughly 3 releases (at current rate,
->> roughly 1.5 years) before being completely dropped.  This should give
->> enough time to people to realize what has happened and adjust any
->> scripts they may have.
-> 
-> That sounds reasonable. 
-> 
-> In the python documentation I find it very convenient to have "New in X.Y.Z" next to a given API call or behavior, as well as "Deprectated since". Although release notes https://github.com/ceph/ceph/commit/e3b788a56c640fb19d8aa9464ebf5bc84c97ec6f are useful when upgrading (to answer the question "What API will break ?"), it's not the primary location I'll check when considering using something. 
+FYI
 
-Agreed, docs will have to be changed, including man pages.
+I added an issue # 11581 (http://tracker.ceph.com/issues/11581) to capture information on "broken" machines problem in our labs.
 
-  -Joao
+Please keep troubleshooting steps in it alone with info on "bad" machines, so we know exact steps to deal with those issues in repeatable way.
+
+Thx
+YuriW
