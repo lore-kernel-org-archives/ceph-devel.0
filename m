@@ -1,52 +1,93 @@
-From: Gregory Farnum <greg@gregs42.com>
-Subject: Re: Newstore Update Part 2
-Date: Fri, 8 May 2015 17:19:28 -0700
-Message-ID: <CAC6JEv-thH39P9LG3ErioqzJ=MUVyWNz9_zx+Azg2aAZ+ah2yw@mail.gmail.com>
-References: <554D44E3.7080600@redhat.com>
+From: Gregory Farnum <greg-3KCAGdo1P2hBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: RFC: Deprecating ceph-tool commands
+Date: Fri, 8 May 2015 17:28:17 -0700
+Message-ID: <CAC6JEv9++PqXAkPSykDzN1=7atpTZWuzAZviSY9qWkMis9JStg@mail.gmail.com>
+References: <554D4CD8.6020809@suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f173.google.com ([209.85.213.173]:37591 "EHLO
-	mail-ig0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752988AbbEIATa (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 May 2015 20:19:30 -0400
-Received: by igbsb11 with SMTP id sb11so34630012igb.0
-        for <ceph-devel@vger.kernel.org>; Fri, 08 May 2015 17:19:29 -0700 (PDT)
-Received: from mail-ig0-f181.google.com (mail-ig0-f181.google.com. [209.85.213.181])
-        by mx.google.com with ESMTPSA id o2sm648715igr.9.2015.05.08.17.19.28
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 08 May 2015 17:19:28 -0700 (PDT)
-Received: by igbsb11 with SMTP id sb11so34629819igb.0
-        for <ceph-devel@vger.kernel.org>; Fri, 08 May 2015 17:19:28 -0700 (PDT)
-In-Reply-To: <554D44E3.7080600@redhat.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <554D4CD8.6020809-l3A5Bk7waGM@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Joao Eduardo Luis <joao-l3A5Bk7waGM@public.gmane.org>
+Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Fri, May 8, 2015 at 4:21 PM, Mark Nelson <mnelson@redhat.com> wrote:
-> Hi Guys,
->
-> At the performance meeting this week we discussed the possibility of
-> changing how newstore handles large partial overwrites.
-
-Er, what was the potential change?
-
-> To determine if
-> this is useful, we look at rados bench and rbd performance of newstore at
-> various IO sizes.  I've also included some rados bench read results as folks
-> were interested in those.  On the graphs I've tried to mark interesting
-> improvements/regressions and also some questions/comments. These tests were
-> run without overlay which may help small IO performance in some cases.
->
-> Graphs are here:
->
-> http://nhm.ceph.com/newstore/8c8c5903_rbd_rados_tests.pdf
->
-> Thanks,
-> Mark
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+T24gRnJpLCBNYXkgOCwgMjAxNSBhdCA0OjU1IFBNLCBKb2FvIEVkdWFyZG8gTHVpcyA8am9hb0Bz
+dXNlLmRlPiB3cm90ZToKPiBBbGwsCj4KPiBXaGlsZSB3b3JraW5nIG9uICMxMTU0NSAobW9uOiBo
+YXZlIG1vbi1zcGVjaWZpYyBjb21tYW5kcyB1bmRlciAnY2VwaCBtb24KPiAuLi4nKSBJIGNyYXNo
+ZWQgaW50byBhIHNsaWdodGx5IHRvdWdoIGJyaWNrIHdhbGwuCj4KPiBUaGUgcHVycG9zZSBvZiAj
+MTE1NDUgaXMgdG8gbW92ZSBjZXJ0YWluIGNvbW1hbmRzLCBzdWNoIGFzICdjZXBoIHNjcnViJywK
+PiAnY2VwaCBjb21wYWN0JyBhbmQgJ2NlcGggc3luYyBmb3JjZScgdG8gdGhlICdtb24nIG1vZHVs
+ZSBvZiB0aGUgY2VwaC10b29sLgo+Cj4gVGhlc2UgY29tbWFuZHMgaGF2ZSBsb25nIHN0b29kIGlu
+IHRoaXMgZm9ybWF0IGJlY2F1c2UgJ21vbictbW9kdWxlCj4gY29tbWFuZHMgaGF2ZSBiZWVuIHRy
+YWRpdGlvbmFsbHkgY29uc2lkZXJlZCBhcyBiZWluZyBzb21laG93IHJlbGF0ZWQKPiB3aXRoIG1v
+bm1hcHMgYW5kL29yIHRoZSBNb25tYXBNb25pdG9yLiAgSG93ZXZlciwgZnJvbSBhIHVzZXIKPiBw
+ZXJzcGVjdGl2ZSwgaWYgdGhleSByZWxhdGUgdG8gdGhlIG1vbml0b3IgaXRzZWxmIChhbmQgbm90
+IGNsdXN0ZXItd2lkZSkKPiB0aGV5IHNob3VsZCByZXNpZGUgdW5kZXIgdGhlICdtb24nLW1vZHVs
+ZS4KPgo+IEFzIHN1Y2gsIEkgZGVjaWRlZCB0aGV5IHNob3VsZCBiZSBtb3ZlZCB0byAnY2VwaCBt
+b24gc2NydWInLCAnY2VwaCBtb24KPiBjb21wYWN0JyBhbmQgJ2NlcGggbW9uIHN5bmMgZm9yY2Un
+Lgo+Cj4gQWRkaW5nIHRoZXNlIGNvbW1hbmRzIGFuZCBkb2luZyB0aGUgY29ycmVjdCBtYXBwaW5n
+IGlzIG5vdCBoYXJkIGF0IGFsbC4KPiAgSG93ZXZlciwgYmFja3dhcmQgY29tcGF0aWJpbGl0eSBt
+dXN0IGJlIG1haW50YWluZWQsIGFuZCBzaW1wbHkgZHJvcHBpbmcKPiB0aGUgb2xkIHN0eWxlIGNv
+bW1hbmRzIGRvZXNuJ3Qgc2VlbSByZWFzb25hYmxlIGF0IGFsbC4KPgo+IEtlZXBpbmcgdGhlIG9s
+ZCBzdHlsZSBjb21tYW5kcyBhbG9uZ3NpZGUgd2l0aCB0aGUgbmV3IGNvbW1hbmRzIGlzCj4gdHJp
+dmlhbCBlbm91Z2ggdG8gbm90IHBvc2UgYSBwcm9ibGVtLCBidXQgdGhleSBtdXN0IGdvIGF3YXkg
+YXQgc29tZQo+IHBvaW50LiAgQWZ0ZXIgZXZlcnlvbmUgZ2V0IHVzZWQgdG8gdGhlIG5ldyBjb21t
+YW5kcywgYW5kIGFzIHNvb24gYXMgdGhlCj4gdmFzdCBtYWpvcml0eSBvZiBkZXBsb3ltZW50cyBz
+dXBwb3J0IHRoZSBuZXcgY29tbWFuZHMsIHRoZSBvbGQgc3R5bGUKPiBjb21tYW5kcyB3aWxsIHNp
+bXBseSBiZSBjbHV0dGVyLgo+Cj4gQW5kIHdoaWxlIHRoZXNlIGNvbW1hbmRzIGFyZSBub3Qgd2lk
+ZWx5IHVzZWQsIGFuZCB3aGlsZSBtb3N0IHBlb3BsZQo+IGNlcnRhaW5seSBoYXZlIG5vdCBldmVy
+IG5lZWRlZCB0byB1c2UgdGhlbSwgdGhpcyBzb3J0IG9mIHRoaW5nIGNhbiBhdAo+IHNvbWUgcG9p
+bnQgYmUgcmVxdWlyZWQgZm9yIGFueSBvdGhlciAobW9zdCBjb21tb25seSB1c2VkKSBjb21tYW5k
+Lgo+Cj4gQXMgSSBoYXZlIG5vdCBiZWVuIGFibGUgdG8gZmluZCBhbnkgbWVudGlvbnMgdG8gZ3Vp
+ZGVsaW5lcyB0bwo+IGRlcHJlY2F0aW5nIGNvbW1hbmRzLCBJIHRodXMgcHJvcG9zZSB0aGUgZm9s
+bG93aW5nOgo+Cj4gQSBjb21tYW5kIGJlaW5nIERFUFJFQ0FURUQgbXVzdCBiZToKPgo+ICAtIGNs
+ZWFybHkgbWFya2VkIGFzIERFUFJFQ0FURUQgaW4gdXNhZ2U7Cj4gIC0ga2VwdCBhcm91bmQgZm9y
+IGF0IGxlYXN0IDIgbWFqb3IgcmVsZWFzZXM7Cj4gIC0ga2VwdCBjb21wYXRpYmxlIGZvciB0aGUg
+ZHVyYXRpb24gb2YgdGhlIGRlcHJlY2F0aW9uIHBlcmlvZC4KPgo+IE9uY2UgdHdvIG1ham9yIHJl
+bGVhc2VzIGdvIGJ5LCB0aGUgY29tbWFuZCB3aWxsIHRoZW4gZW50ZXIgdGhlIE9CU09MRVRFCj4g
+cGVyaW9kLiAgVGhpcyB3b3VsZCBiZSBvbmUgbWFqb3IgcmVsZWFzZSwgZHVyaW5nIHdoaWNoIHRo
+ZSBjb21tYW5kIHdvdWxkCj4gbm8gbG9uZ2VyIHdvcmsgYWx0aG91Z2ggc3RpbGwgYWNrbm93bGVk
+Z2VkLiAgQSBzaW1wbGUgbWVzc2FnZSBkb3duIHRoZQo+IGxpbmVzIG9mICdUaGlzIGNvbW1hbmQg
+aXMgbm93IG9ic29sZXRlOyBwbGVhc2UgY2hlY2sgdGhlIGRvY3MnIHdvdWxkCj4gc3VmZmljZSB0
+byBpbmZvcm0gdGhlIHVzZXIuCj4KPiBUaGUgY29tbWFuZCB3b3VsZCBubyBsb25nZXIgZXhpc3Qg
+aW4gdGhlIG5leHQgbWFqb3IgcmVsZWFzZS4KPgo+IFRoaXMgYXBwcm9hY2ggZ2l2ZXMgYSBsaWZl
+c3BhbiBvZiByb3VnaGx5IDMgcmVsZWFzZXMgKGF0IGN1cnJlbnQgcmF0ZSwKPiByb3VnaGx5IDEu
+NSB5ZWFycykgYmVmb3JlIGJlaW5nIGNvbXBsZXRlbHkgZHJvcHBlZC4gIFRoaXMgc2hvdWxkIGdp
+dmUKPiBlbm91Z2ggdGltZSB0byBwZW9wbGUgdG8gcmVhbGl6ZSB3aGF0IGhhcyBoYXBwZW5lZCBh
+bmQgYWRqdXN0IGFueQo+IHNjcmlwdHMgdGhleSBtYXkgaGF2ZS4KPgo+IEUuZy4sIGEgY29tbWFu
+ZCBiZWluZyBkZXByZWNhdGVkIGluIEluZmVybmFsbGlzIHdvdWxkIGJlIGNvbXBsZXRlbHkKPiBk
+cm9wcGVkIGluIHRoZSBMLXJlbGVhc2UsIHNwYW5uaW5nIGl0cyBleGlzdGVuY2UgdG8gYXQgbGVh
+c3Qgb25lCj4gbG9uZy10ZXJtIHN0YWJsZSAoaS5lLiwgamV3ZWwpIGFuZCBiZWluZyBkcm9wcGVk
+IGFzIHNvb24gYXMgdGhlIGZpcnN0Cj4gZGV2IGN5Y2xlIGZvciB0aGUgTC1yZWxlYXNlIGJlZ2lu
+cy4KCldlbGwsIHRoaXMgaXMgYW4gaW50ZXJlc3RpbmcgZGlsZW1tYS4gIkFzIGEgdXNlciIsIEkg
+dGhpbmsgSSdkIHdhbnQgaXQKdG8gYmUgZGVwcmVjYXRlZCBhbmQgd2FybmluZyBtZSBmb3Igb25l
+IHJlbGVhc2UgSSBydW4g4oCUIEknbGwgc2VlIGl0CndoZW4gSSB1cGdyYWRlIGFuZCB0aGVuIGtu
+b3cgSSBuZWVkIHRvIGZpeCBpdCDigJQgYW5kIHRoZW4gaXQgY2FuIGJlCm9ic29sZXRlZCBpbiB0
+aGUgbmV4dCByZWxlYXNlIEkgcnVuLgoKSXQncyB0aGF0ICJyZWxlYXNlIEkgcnVuIiBiaXQgdGhh
+dCdzIHRyaWNreSB0aG91Z2gsIHJpZ2h0PyBJIHByZXN1bWUKeW91IG1hZGUgaXQgdHdvIGJpZyBy
+ZWxlYXNlcyBiZWNhdXNlIHRoYXQgc2hvdWxkIGNhcHR1cmUgYXQgbGVhc3Qgb25lCnJlbGVhc2Ug
+c3VwcG9ydGVkIGJ5IGRvd25zdHJlYW0gcHJvdmlkZXJzPyBCdXQgdGhlIHJlbGVhc2UgbWFya2lu
+ZyBpdAphcyBvYnNvbGV0ZWQgd2lsbCBvZnRlbiBub3QgYmUgY2FwdHVyZWQgYnkgZG93bnN0cmVh
+bXMuIFNvIGl0IHNlZW1zCmxpa2UgZWl0aGVyIHdlIHNob3VsZCBkbyB0d28gcmVsZWFzZXMgaW4g
+ZWFjaCBzdGF0ZSwgb3IgZWxzZSB3ZSBzaG91bGQKYXMgYSBjb21tdW5pdHkgZG8gb25lIHJlbGVh
+c2UgaW4gZWFjaCBzdGF0ZSBhbmQgaWYgdGhlIGRvd25zdHJlYW1zCndhbnQgdG8ga2VlcCBjb21t
+YW5kIG1hcHBpbmdzIGFyb3VuZCBmb3IgbG9uZ2VyIHRoZXkgY2FuIGRvIHRoYXQuIEluCmdlbmVy
+YWwgaXQncyBub3QgbGlrZSB0aG9zZSBhcmUgZ29pbmcgdG8gYmUgdHJpY2t5IHBhdGNoZXMgdG8g
+YXBwbHkuLi4KCkFsc28sIEkgdGhpbmsgdGhpcyBzZXQgb2YgY29tbWFuZHMgaXMgc3VmZmljaWVu
+dGx5IHNwZWNpYWwtcHVycG9zZQp0aGF0IHlvdSBjb3VsZCBwcm9iYWJseSBqdXN0IG1ha2UgdGhl
+IHN3YXAgYW5kIGhhdmUgdGhlIHRvcC1sZXZlbCBvbmVzCnNwaXQgb3V0IGFuIGVycm9yIHJlZmVy
+cmluZyB0byB0aGUgbW92ZTsgd2UgZG9uJ3QgbmVjZXNzYXJpbHkgbmVlZCB0bwptYWtlIGRlY2lz
+aW9ucyBvbiB0aGlzIHJpZ2h0IG5vdy4KLUdyZWcKX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0Bs
+aXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNl
+cnMtY2VwaC5jb20K
