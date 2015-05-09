@@ -1,80 +1,160 @@
 From: Gregory Farnum <greg@gregs42.com>
-Subject: Re: Nightlies and dumpling
-Date: Fri, 8 May 2015 16:55:51 -0700
-Message-ID: <CAC6JEv9ELHGdhY76_iobKk1fYCs5rz=dphTCsjOTmsbR7bbMMg@mail.gmail.com>
-References: <554D2081.7040503@dachary.org>
-	<CAC6JEv-sa-aMqLtMxvqv=au6jDRnDEy4VeNkY6phRRLb-adYAQ@mail.gmail.com>
-	<554D32D0.1090608@dachary.org>
+Subject: Re: rados semantic changes
+Date: Fri, 8 May 2015 17:16:16 -0700
+Message-ID: <CAC6JEv-BO88qnp4-Pkd6Qy5C+-OsgFBJPRTNFtprBQONUqZf+w@mail.gmail.com>
+References: <alpine.DEB.2.00.1505061044140.28239@cobra.newdream.net>
+	<1500936117.16594659.1431127115994.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f176.google.com ([209.85.223.176]:34938 "EHLO
-	mail-ie0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751167AbbEHXzx convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 May 2015 19:55:53 -0400
-Received: by ieczm2 with SMTP id zm2so75118816iec.2
-        for <ceph-devel@vger.kernel.org>; Fri, 08 May 2015 16:55:52 -0700 (PDT)
-Received: from mail-ie0-f180.google.com (mail-ie0-f180.google.com. [209.85.223.180])
-        by mx.google.com with ESMTPSA id d15sm608456igo.8.2015.05.08.16.55.51
+Received: from mail-ig0-f177.google.com ([209.85.213.177]:33900 "EHLO
+	mail-ig0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752988AbbEIAQS convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 May 2015 20:16:18 -0400
+Received: by iget9 with SMTP id t9so40337252ige.1
+        for <ceph-devel@vger.kernel.org>; Fri, 08 May 2015 17:16:17 -0700 (PDT)
+Received: from mail-ig0-f177.google.com (mail-ig0-f177.google.com. [209.85.213.177])
+        by mx.google.com with ESMTPSA id fs5sm114075igb.0.2015.05.08.17.16.16
         for <ceph-devel@vger.kernel.org>
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 08 May 2015 16:55:52 -0700 (PDT)
-Received: by iepj10 with SMTP id j10so71869210iep.0
-        for <ceph-devel@vger.kernel.org>; Fri, 08 May 2015 16:55:51 -0700 (PDT)
-In-Reply-To: <554D32D0.1090608@dachary.org>
+        Fri, 08 May 2015 17:16:16 -0700 (PDT)
+Received: by igbpi8 with SMTP id pi8so33920423igb.1
+        for <ceph-devel@vger.kernel.org>; Fri, 08 May 2015 17:16:16 -0700 (PDT)
+In-Reply-To: <1500936117.16594659.1431127115994.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Alistair Israel <aisrael@gmail.com>
+To: Samuel Just <sjust@redhat.com>
+Cc: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Fri, May 8, 2015 at 3:04 PM, Loic Dachary <loic@dachary.org> wrote:
->
->
-> On 08/05/2015 22:49, Gregory Farnum wrote:
->> On Fri, May 8, 2015 at 1:45 PM, Loic Dachary <loic@dachary.org> wrot=
-e:
->>> Hi,
->>>
->>> I was going through the checklist to retire a release, to verify no=
-thing was left behind for Dumpling
->>>
->>>    http://tracker.ceph.com/projects/ceph-releases/wiki/HOWTO_retire=
-_a_stable_release
->>>
->>> and from the nightlies crontab that you published, I found
->>>
->>> http://tracker.ceph.com/projects/ceph-releases/wiki/Typica
->>>
->>> 10 18 * * 0,4 teuthology-suite -v -c giant -k distro -m typica -s u=
-pgrade/dumpling-firefly-x --filter ubuntu_
->>>
->>> and
->>>
->>> http://tracker.ceph.com/projects/ceph-releases/wiki/Sepia
->>>
->>> 10 17 * * 2,4,7 teuthology-suite -v -c next -k distro -m plana,burn=
-upi,mira -s upgrade/dumpling-firefly-x --filter ubuntu_
->>>
->>> 13 19 * * 7 teuthology-suite -v -c firefly -k distro -m vps -s upgr=
-ade/dumpling-x ~/vps.yaml
->>>
->>> 15 18 * * 3,6 teuthology-suite -v -c giant -k distro -m vps -s upgr=
-ade/dumpling-firefly-x ~/vps.yaml
->>
->> You'll notice that these are all tests which upgrade from dumpling t=
-o
->> something else. We want to keep testing that to make sure we aren't
->> missing something in the upgrade paths =E2=80=94 which would be bad,=
- even
->> though we're about ready to stop supporting dumpling. ;)
->
-> Indeed :-) Say a problem is found, how is it going to be resolved ?
+Do we have any tickets or something motivating these? I'm not quite
+sure which of these problems are things you noticed, versus things
+we've seen in the field, versus stuff that might make our lives easier
+in the future.
 
-Depends on the problem. If it's in the upgrade path, we'll add stuff
-to handle backwards compatibility. If dumpling simply stops running in
-the lab...presumably by then we'll have stopped caring about it for
-everything else too. ;)
+That said, my votes so far are
+On Fri, May 8, 2015 at 4:18 PM, Samuel Just <sjust@redhat.com> wrote:
+> So, the problem is sequences of piplined operations like:
+>
+> (object does not exist)
+> 1. [exists_guard, write]
+> 2. [write]
+>
+> Currently, if a client sends 1. and then 2. without waiting for 1. to=
+ complete, the guarantee is that even in the event of peering or a clie=
+nt crash the only visible orderings are [], [1], and [1, 2].  However, =
+if both operations complete (with 1. returning ENOENT) and are then rep=
+layed, we will see a result of [2, 1].  1. will be executed first, but =
+since 2. already completed, exists_guard will not error out, and the wr=
+ite will succeed.  2. will then return immediately with success since p=
+g log will contain an entry indicating that it already happened.  Delet=
+e seems to be a special case of this.
+>
+> For the more general problem, it seems like the objecter cannot pipel=
+ine rw ops with any kind of write (including other rw ops).  This means=
+ the objecter in the case above would hold 2. back until 1. completes a=
+nd is not in danger of being re-sent.  We'll need some machinery in the=
+ objecter to handle this part.
+
+Although I think you mean it can't pipeline rw ops on the same object,
+that still seems unpleasant =E2=80=94 especially for our more annoying
+operations that might touch multiple objects.
+
+>
+> For this to work, we need the pg log to record that an op marked as w=
+ has been processed regardless of the result.  We can do this for a par=
+ticular op type marked as w by ensuring that it always succeeds, by wri=
+ting a noop log entry recording the result, or by giving up and marking=
+ that op rw.
+>
+> It seems to me that:
+> 1) delete should always succeed.  We'll have to record a noop log ent=
+ry to ensure that it is not replayed out of turn.
+
+yes
+
+>   - Or we can leave delete as it is and mark it rw.
+> 2) omap and xattr set operations implicitly create the object and the=
+refore always succeed.
+
+that's not current behavior? yes
+
+> 3) omap remove operations are marked as rw so they can return ENOENT.
+>   - Otherwise, an omap remove operation on a non-existing object woul=
+d have to add a noop entry to the log or implicitly create the object -=
+- the latter would be particularly odd.
+>   - Or, we could record a noop log entry with the return code.
+
+This one =E2=80=94 I don't think log entries are very expensive, and I =
+don't
+think we want to serialize omap ops. In particular I think serializing
+omap rm would be bad for rgw.
+
+> 4) I don't think there are any current object classes which should be=
+ marked w, but they should be carefully audited.
+>
+> On the implementation side, we probably need new versions of the affe=
+cted librados calls (omap_set2?, blind_delete?) since we are changing t=
+he return values and there may be older code which relies on this behav=
+ior.
+
+But then they'd also be preserving broken behavior, right? Perhaps
+it's time to do something interesting with our versioning.
+
+>
+> Write ordered reads also appear to be fundamentally broken in the cur=
+rent implementation for the same reason.  It seems like we'd have to ha=
+ndle that at the objecter level by marking the reads rw.
+>
+> We could also find a way to relax the ordering guarantees even furthe=
+r, but I fear that that would make it excessively difficult to reason a=
+bout librados operation ordering.
+>
+> Thoughts?
+> -Sam
+>
+> ----- Original Message -----
+> From: "Sage Weil" <sweil@redhat.com>
+> To: sjust@redhat.com, ceph-devel@vger.kernel.org
+> Sent: Wednesday, May 6, 2015 10:47:11 AM
+> Subject: rados semantic changes
+>
+> It sounds like we're kicking around two proposed changes:
+>
+> 1) A delete will never -ENOENT; a delete on a non-existent object is =
+a
+> success.  This is important for cache tiering, and allowing us to ski=
+p
+> checking the base tier for certain client requests.
+>
+> 2) Any write will implicitly create the object.  If we want such a
+> dependency (so we see ENOENT), the user can put an assert_exists in t=
+he op
+> vector.
+>
+> I think what both of these amount to is that the writes have no read-=
+side
+> checks and will effectively never fail (except for true failure
+> cases).  If the user wants some sort of failure, it will be explicit
+> in the form of another read check in the op vector.
+>
+> Sam, is this what you're thinking?
+>
+> It's a subtle but real change in the semantics of rados ops, but I
+> think now would be the time to make it...
+>
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
