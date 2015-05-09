@@ -1,189 +1,119 @@
-From: Samuel Just <sjust@redhat.com>
-Subject: Re: rados semantic changes
-Date: Sat, 9 May 2015 00:20:01 -0400 (EDT)
-Message-ID: <395372379.16619495.1431145201844.JavaMail.zimbra@redhat.com>
-References: <alpine.DEB.2.00.1505061044140.28239@cobra.newdream.net> <1500936117.16594659.1431127115994.JavaMail.zimbra@redhat.com> <CAC6JEv-BO88qnp4-Pkd6Qy5C+-OsgFBJPRTNFtprBQONUqZf+w@mail.gmail.com> <957242752.16609080.1431132817134.JavaMail.zimbra@redhat.com>
+From: Joao Eduardo Luis <joao-l3A5Bk7waGM@public.gmane.org>
+Subject: Re: RFC: Deprecating ceph-tool commands
+Date: Sat, 09 May 2015 09:31:29 +0100
+Message-ID: <554DC5E1.6010307@suse.de>
+References: <554D4CD8.6020809@suse.de>
+	<CAC6JEv9++PqXAkPSykDzN1=7atpTZWuzAZviSY9qWkMis9JStg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx3-phx2.redhat.com ([209.132.183.24]:42410 "EHLO
-	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750872AbbEIEUD convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 9 May 2015 00:20:03 -0400
-In-Reply-To: <957242752.16609080.1431132817134.JavaMail.zimbra@redhat.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@gregs42.com>
-Cc: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAC6JEv9++PqXAkPSykDzN1=7atpTZWuzAZviSY9qWkMis9JStg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Gregory Farnum <greg-3KCAGdo1P2hBDgjK7y7TUQ@public.gmane.org>
+Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Oops, omap and xattr set do create the object already.
--Sam
-
------ Original Message -----
-=46rom: "Samuel Just" <sjust@redhat.com>
-To: "Gregory Farnum" <greg@gregs42.com>
-Cc: "Sage Weil" <sweil@redhat.com>, ceph-devel@vger.kernel.org
-Sent: Friday, May 8, 2015 5:53:37 PM
-Subject: Re: rados semantic changes
-
-Just some things I noticed.  It'll be relatively easy to reproduce in c=
-eph_test_rados.  We haven't seen it only because the three existing rad=
-os users and ceph_test_rados don't happen to send problematic sequences=
-=2E
--Sam
-
------ Original Message -----
-=46rom: "Gregory Farnum" <greg@gregs42.com>
-To: "Samuel Just" <sjust@redhat.com>
-Cc: "Sage Weil" <sweil@redhat.com>, ceph-devel@vger.kernel.org
-Sent: Friday, May 8, 2015 5:16:16 PM
-Subject: Re: rados semantic changes
-
-Do we have any tickets or something motivating these? I'm not quite
-sure which of these problems are things you noticed, versus things
-we've seen in the field, versus stuff that might make our lives easier
-in the future.
-
-That said, my votes so far are
-On Fri, May 8, 2015 at 4:18 PM, Samuel Just <sjust@redhat.com> wrote:
-> So, the problem is sequences of piplined operations like:
->
-> (object does not exist)
-> 1. [exists_guard, write]
-> 2. [write]
->
-> Currently, if a client sends 1. and then 2. without waiting for 1. to=
- complete, the guarantee is that even in the event of peering or a clie=
-nt crash the only visible orderings are [], [1], and [1, 2].  However, =
-if both operations complete (with 1. returning ENOENT) and are then rep=
-layed, we will see a result of [2, 1].  1. will be executed first, but =
-since 2. already completed, exists_guard will not error out, and the wr=
-ite will succeed.  2. will then return immediately with success since p=
-g log will contain an entry indicating that it already happened.  Delet=
-e seems to be a special case of this.
->
-> For the more general problem, it seems like the objecter cannot pipel=
-ine rw ops with any kind of write (including other rw ops).  This means=
- the objecter in the case above would hold 2. back until 1. completes a=
-nd is not in danger of being re-sent.  We'll need some machinery in the=
- objecter to handle this part.
-
-Although I think you mean it can't pipeline rw ops on the same object,
-that still seems unpleasant =E2=80=94 especially for our more annoying
-operations that might touch multiple objects.
-
->
-> For this to work, we need the pg log to record that an op marked as w=
- has been processed regardless of the result.  We can do this for a par=
-ticular op type marked as w by ensuring that it always succeeds, by wri=
-ting a noop log entry recording the result, or by giving up and marking=
- that op rw.
->
-> It seems to me that:
-> 1) delete should always succeed.  We'll have to record a noop log ent=
-ry to ensure that it is not replayed out of turn.
-
-yes
-
->   - Or we can leave delete as it is and mark it rw.
-> 2) omap and xattr set operations implicitly create the object and the=
-refore always succeed.
-
-that's not current behavior? yes
-
-> 3) omap remove operations are marked as rw so they can return ENOENT.
->   - Otherwise, an omap remove operation on a non-existing object woul=
-d have to add a noop entry to the log or implicitly create the object -=
-- the latter would be particularly odd.
->   - Or, we could record a noop log entry with the return code.
-
-This one =E2=80=94 I don't think log entries are very expensive, and I =
-don't
-think we want to serialize omap ops. In particular I think serializing
-omap rm would be bad for rgw.
-
-> 4) I don't think there are any current object classes which should be=
- marked w, but they should be carefully audited.
->
-> On the implementation side, we probably need new versions of the affe=
-cted librados calls (omap_set2?, blind_delete?) since we are changing t=
-he return values and there may be older code which relies on this behav=
-ior.
-
-But then they'd also be preserving broken behavior, right? Perhaps
-it's time to do something interesting with our versioning.
-
->
-> Write ordered reads also appear to be fundamentally broken in the cur=
-rent implementation for the same reason.  It seems like we'd have to ha=
-ndle that at the objecter level by marking the reads rw.
->
-> We could also find a way to relax the ordering guarantees even furthe=
-r, but I fear that that would make it excessively difficult to reason a=
-bout librados operation ordering.
->
-> Thoughts?
-> -Sam
->
-> ----- Original Message -----
-> From: "Sage Weil" <sweil@redhat.com>
-> To: sjust@redhat.com, ceph-devel@vger.kernel.org
-> Sent: Wednesday, May 6, 2015 10:47:11 AM
-> Subject: rados semantic changes
->
-> It sounds like we're kicking around two proposed changes:
->
-> 1) A delete will never -ENOENT; a delete on a non-existent object is =
-a
-> success.  This is important for cache tiering, and allowing us to ski=
-p
-> checking the base tier for certain client requests.
->
-> 2) Any write will implicitly create the object.  If we want such a
-> dependency (so we see ENOENT), the user can put an assert_exists in t=
-he op
-> vector.
->
-> I think what both of these amount to is that the writes have no read-=
-side
-> checks and will effectively never fail (except for true failure
-> cases).  If the user wants some sort of failure, it will be explicit
-> in the form of another read check in the op vector.
->
-> Sam, is this what you're thinking?
->
-> It's a subtle but real change in the semantics of rados ops, but I
-> think now would be the time to make it...
->
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+T24gMDkvMDUvMTUgMDE6MjgsIEdyZWdvcnkgRmFybnVtIHdyb3RlOgo+IE9uIEZyaSwgTWF5IDgs
+IDIwMTUgYXQgNDo1NSBQTSwgSm9hbyBFZHVhcmRvIEx1aXMgPGpvYW9Ac3VzZS5kZT4gd3JvdGU6
+Cj4+IEFsbCwKPj4KPj4gV2hpbGUgd29ya2luZyBvbiAjMTE1NDUgKG1vbjogaGF2ZSBtb24tc3Bl
+Y2lmaWMgY29tbWFuZHMgdW5kZXIgJ2NlcGggbW9uCj4+IC4uLicpIEkgY3Jhc2hlZCBpbnRvIGEg
+c2xpZ2h0bHkgdG91Z2ggYnJpY2sgd2FsbC4KPj4KPj4gVGhlIHB1cnBvc2Ugb2YgIzExNTQ1IGlz
+IHRvIG1vdmUgY2VydGFpbiBjb21tYW5kcywgc3VjaCBhcyAnY2VwaCBzY3J1YicsCj4+ICdjZXBo
+IGNvbXBhY3QnIGFuZCAnY2VwaCBzeW5jIGZvcmNlJyB0byB0aGUgJ21vbicgbW9kdWxlIG9mIHRo
+ZSBjZXBoLXRvb2wuCj4+Cj4+IFRoZXNlIGNvbW1hbmRzIGhhdmUgbG9uZyBzdG9vZCBpbiB0aGlz
+IGZvcm1hdCBiZWNhdXNlICdtb24nLW1vZHVsZQo+PiBjb21tYW5kcyBoYXZlIGJlZW4gdHJhZGl0
+aW9uYWxseSBjb25zaWRlcmVkIGFzIGJlaW5nIHNvbWVob3cgcmVsYXRlZAo+PiB3aXRoIG1vbm1h
+cHMgYW5kL29yIHRoZSBNb25tYXBNb25pdG9yLiAgSG93ZXZlciwgZnJvbSBhIHVzZXIKPj4gcGVy
+c3BlY3RpdmUsIGlmIHRoZXkgcmVsYXRlIHRvIHRoZSBtb25pdG9yIGl0c2VsZiAoYW5kIG5vdCBj
+bHVzdGVyLXdpZGUpCj4+IHRoZXkgc2hvdWxkIHJlc2lkZSB1bmRlciB0aGUgJ21vbictbW9kdWxl
+Lgo+Pgo+PiBBcyBzdWNoLCBJIGRlY2lkZWQgdGhleSBzaG91bGQgYmUgbW92ZWQgdG8gJ2NlcGgg
+bW9uIHNjcnViJywgJ2NlcGggbW9uCj4+IGNvbXBhY3QnIGFuZCAnY2VwaCBtb24gc3luYyBmb3Jj
+ZScuCj4+Cj4+IEFkZGluZyB0aGVzZSBjb21tYW5kcyBhbmQgZG9pbmcgdGhlIGNvcnJlY3QgbWFw
+cGluZyBpcyBub3QgaGFyZCBhdCBhbGwuCj4+ICAgSG93ZXZlciwgYmFja3dhcmQgY29tcGF0aWJp
+bGl0eSBtdXN0IGJlIG1haW50YWluZWQsIGFuZCBzaW1wbHkgZHJvcHBpbmcKPj4gdGhlIG9sZCBz
+dHlsZSBjb21tYW5kcyBkb2Vzbid0IHNlZW0gcmVhc29uYWJsZSBhdCBhbGwuCj4+Cj4+IEtlZXBp
+bmcgdGhlIG9sZCBzdHlsZSBjb21tYW5kcyBhbG9uZ3NpZGUgd2l0aCB0aGUgbmV3IGNvbW1hbmRz
+IGlzCj4+IHRyaXZpYWwgZW5vdWdoIHRvIG5vdCBwb3NlIGEgcHJvYmxlbSwgYnV0IHRoZXkgbXVz
+dCBnbyBhd2F5IGF0IHNvbWUKPj4gcG9pbnQuICBBZnRlciBldmVyeW9uZSBnZXQgdXNlZCB0byB0
+aGUgbmV3IGNvbW1hbmRzLCBhbmQgYXMgc29vbiBhcyB0aGUKPj4gdmFzdCBtYWpvcml0eSBvZiBk
+ZXBsb3ltZW50cyBzdXBwb3J0IHRoZSBuZXcgY29tbWFuZHMsIHRoZSBvbGQgc3R5bGUKPj4gY29t
+bWFuZHMgd2lsbCBzaW1wbHkgYmUgY2x1dHRlci4KPj4KPj4gQW5kIHdoaWxlIHRoZXNlIGNvbW1h
+bmRzIGFyZSBub3Qgd2lkZWx5IHVzZWQsIGFuZCB3aGlsZSBtb3N0IHBlb3BsZQo+PiBjZXJ0YWlu
+bHkgaGF2ZSBub3QgZXZlciBuZWVkZWQgdG8gdXNlIHRoZW0sIHRoaXMgc29ydCBvZiB0aGluZyBj
+YW4gYXQKPj4gc29tZSBwb2ludCBiZSByZXF1aXJlZCBmb3IgYW55IG90aGVyIChtb3N0IGNvbW1v
+bmx5IHVzZWQpIGNvbW1hbmQuCj4+Cj4+IEFzIEkgaGF2ZSBub3QgYmVlbiBhYmxlIHRvIGZpbmQg
+YW55IG1lbnRpb25zIHRvIGd1aWRlbGluZXMgdG8KPj4gZGVwcmVjYXRpbmcgY29tbWFuZHMsIEkg
+dGh1cyBwcm9wb3NlIHRoZSBmb2xsb3dpbmc6Cj4+Cj4+IEEgY29tbWFuZCBiZWluZyBERVBSRUNB
+VEVEIG11c3QgYmU6Cj4+Cj4+ICAgLSBjbGVhcmx5IG1hcmtlZCBhcyBERVBSRUNBVEVEIGluIHVz
+YWdlOwo+PiAgIC0ga2VwdCBhcm91bmQgZm9yIGF0IGxlYXN0IDIgbWFqb3IgcmVsZWFzZXM7Cj4+
+ICAgLSBrZXB0IGNvbXBhdGlibGUgZm9yIHRoZSBkdXJhdGlvbiBvZiB0aGUgZGVwcmVjYXRpb24g
+cGVyaW9kLgo+Pgo+PiBPbmNlIHR3byBtYWpvciByZWxlYXNlcyBnbyBieSwgdGhlIGNvbW1hbmQg
+d2lsbCB0aGVuIGVudGVyIHRoZSBPQlNPTEVURQo+PiBwZXJpb2QuICBUaGlzIHdvdWxkIGJlIG9u
+ZSBtYWpvciByZWxlYXNlLCBkdXJpbmcgd2hpY2ggdGhlIGNvbW1hbmQgd291bGQKPj4gbm8gbG9u
+Z2VyIHdvcmsgYWx0aG91Z2ggc3RpbGwgYWNrbm93bGVkZ2VkLiAgQSBzaW1wbGUgbWVzc2FnZSBk
+b3duIHRoZQo+PiBsaW5lcyBvZiAnVGhpcyBjb21tYW5kIGlzIG5vdyBvYnNvbGV0ZTsgcGxlYXNl
+IGNoZWNrIHRoZSBkb2NzJyB3b3VsZAo+PiBzdWZmaWNlIHRvIGluZm9ybSB0aGUgdXNlci4KPj4K
+Pj4gVGhlIGNvbW1hbmQgd291bGQgbm8gbG9uZ2VyIGV4aXN0IGluIHRoZSBuZXh0IG1ham9yIHJl
+bGVhc2UuCj4+Cj4+IFRoaXMgYXBwcm9hY2ggZ2l2ZXMgYSBsaWZlc3BhbiBvZiByb3VnaGx5IDMg
+cmVsZWFzZXMgKGF0IGN1cnJlbnQgcmF0ZSwKPj4gcm91Z2hseSAxLjUgeWVhcnMpIGJlZm9yZSBi
+ZWluZyBjb21wbGV0ZWx5IGRyb3BwZWQuICBUaGlzIHNob3VsZCBnaXZlCj4+IGVub3VnaCB0aW1l
+IHRvIHBlb3BsZSB0byByZWFsaXplIHdoYXQgaGFzIGhhcHBlbmVkIGFuZCBhZGp1c3QgYW55Cj4+
+IHNjcmlwdHMgdGhleSBtYXkgaGF2ZS4KPj4KPj4gRS5nLiwgYSBjb21tYW5kIGJlaW5nIGRlcHJl
+Y2F0ZWQgaW4gSW5mZXJuYWxsaXMgd291bGQgYmUgY29tcGxldGVseQo+PiBkcm9wcGVkIGluIHRo
+ZSBMLXJlbGVhc2UsIHNwYW5uaW5nIGl0cyBleGlzdGVuY2UgdG8gYXQgbGVhc3Qgb25lCj4+IGxv
+bmctdGVybSBzdGFibGUgKGkuZS4sIGpld2VsKSBhbmQgYmVpbmcgZHJvcHBlZCBhcyBzb29uIGFz
+IHRoZSBmaXJzdAo+PiBkZXYgY3ljbGUgZm9yIHRoZSBMLXJlbGVhc2UgYmVnaW5zLgo+Cj4gV2Vs
+bCwgdGhpcyBpcyBhbiBpbnRlcmVzdGluZyBkaWxlbW1hLiAiQXMgYSB1c2VyIiwgSSB0aGluayBJ
+J2Qgd2FudCBpdAo+IHRvIGJlIGRlcHJlY2F0ZWQgYW5kIHdhcm5pbmcgbWUgZm9yIG9uZSByZWxl
+YXNlIEkgcnVuIOKAlCBJJ2xsIHNlZSBpdAo+IHdoZW4gSSB1cGdyYWRlIGFuZCB0aGVuIGtub3cg
+SSBuZWVkIHRvIGZpeCBpdCDigJQgYW5kIHRoZW4gaXQgY2FuIGJlCj4gb2Jzb2xldGVkIGluIHRo
+ZSBuZXh0IHJlbGVhc2UgSSBydW4uCj4KPiBJdCdzIHRoYXQgInJlbGVhc2UgSSBydW4iIGJpdCB0
+aGF0J3MgdHJpY2t5IHRob3VnaCwgcmlnaHQ/IEkgcHJlc3VtZQo+IHlvdSBtYWRlIGl0IHR3byBi
+aWcgcmVsZWFzZXMgYmVjYXVzZSB0aGF0IHNob3VsZCBjYXB0dXJlIGF0IGxlYXN0IG9uZQo+IHJl
+bGVhc2Ugc3VwcG9ydGVkIGJ5IGRvd25zdHJlYW0gcHJvdmlkZXJzPyBCdXQgdGhlIHJlbGVhc2Ug
+bWFya2luZyBpdAo+IGFzIG9ic29sZXRlZCB3aWxsIG9mdGVuIG5vdCBiZSBjYXB0dXJlZCBieSBk
+b3duc3RyZWFtcy4gU28gaXQgc2VlbXMKPiBsaWtlIGVpdGhlciB3ZSBzaG91bGQgZG8gdHdvIHJl
+bGVhc2VzIGluIGVhY2ggc3RhdGUsIG9yIGVsc2Ugd2Ugc2hvdWxkCj4gYXMgYSBjb21tdW5pdHkg
+ZG8gb25lIHJlbGVhc2UgaW4gZWFjaCBzdGF0ZSBhbmQgaWYgdGhlIGRvd25zdHJlYW1zCj4gd2Fu
+dCB0byBrZWVwIGNvbW1hbmQgbWFwcGluZ3MgYXJvdW5kIGZvciBsb25nZXIgdGhleSBjYW4gZG8g
+dGhhdC4gSW4KPiBnZW5lcmFsIGl0J3Mgbm90IGxpa2UgdGhvc2UgYXJlIGdvaW5nIHRvIGJlIHRy
+aWNreSBwYXRjaGVzIHRvIGFwcGx5Li4uCgpNeSBpbml0aWFsIHRob3VnaHQgd2FzIG5vdCBldmVu
+IGFib3V0IGRvd25zdHJlYW0gcmVsZWFzZXMsIGFuZCBhbHRob3VnaCAKdGhhdCB3b3VsZCBiZSBh
+IHZhbGlkIHBvaW50IEkgYmVsaWV2ZSBkb3duc3RyZWFtIGNhbiBqdXN0IGFzIHdlbGwgZGVhbCAK
+d2l0aCBpdCBhcyB0aGV5IHNlZSBmaXQuCgpIb3dldmVyLCBBRkFDVCB0aG9zZSBjb25zdW1pbmcg
+ZGlyZWN0bHkgZnJvbSB1cHN0cmVhbSB0ZW5kIHRvIGJlIGluIG9uZSAKb2YgdHdvIGNhdGVnb3Jp
+ZXM6IHVwZ3JhZGUgZXZlcnkgcmVsZWFzZSBvciwgbW9yZSBjb21tb25seSwgc2tpcCAKaW50ZXJt
+ZWRpYXRlIHJlbGVhc2VzIGFuZCBqdXN0IGdvIGZvciB0aGUgbG9uZy10ZXJtIHN0YWJsZXMuCktl
+ZXBpbmcgYSAyIHJlbGVhc2VzIHRpbWUgc3BhbiArIGF0IGxlYXN0IG9uZSBvdGhlciB0byBvYnNv
+bGV0ZSB0aGUgCmNvbW1hbmQgd2lsbCBndWFyYW50ZWUgdGhhdCB3ZSBhbHdheXMgZ2V0IHRoZSBk
+ZXByZWNhdGVkIGNvbW1hbmQgaW4gYXQgCmxlYXN0IG9uZSBsb25nLXRlcm0gc3RhYmxlLgoKSSBh
+bSBub3Qgb3Bwb3NlZCB0byBrZWVwIHRoZSBjb21tYW5kIG9ic29sZXRlIGZvciBhbm90aGVyIHR3
+byBtYWpvciAKcmVsZWFzZXMsIGJ1dCB0aGF0IGRvZXMgc2VlbSBhIGJpdCBleGNlc3NpdmUuICBJ
+J20gbXVjaCBtb3JlIGNvbmNlcm5lZCAKYWJvdXQga2VlcGluZyB0aGUgY29tbWFuZCBkZXByZWNh
+dGVkIGZvciBhdCBsZWFzdCB0d28gcmVsZWFzZXMgdGhhbiBJIGFtIAp3aXRoIGhvdyBsb25nIHdl
+IGtlZXAgaXQgb2Jzb2xldGUuCgo+IEFsc28sIEkgdGhpbmsgdGhpcyBzZXQgb2YgY29tbWFuZHMg
+aXMgc3VmZmljaWVudGx5IHNwZWNpYWwtcHVycG9zZQo+IHRoYXQgeW91IGNvdWxkIHByb2JhYmx5
+IGp1c3QgbWFrZSB0aGUgc3dhcCBhbmQgaGF2ZSB0aGUgdG9wLWxldmVsIG9uZXMKPiBzcGl0IG91
+dCBhbiBlcnJvciByZWZlcnJpbmcgdG8gdGhlIG1vdmU7IHdlIGRvbid0IG5lY2Vzc2FyaWx5IG5l
+ZWQgdG8KPiBtYWtlIGRlY2lzaW9ucyBvbiB0aGlzIHJpZ2h0IG5vdy4KCkkgY291bGQuICBJdCB3
+b3VsZCBub3QgYmUgYXMgY2xlYW4sIGVzcGVjaWFsbHkgY29uc2lkZXJpbmcgdGhlIApwdXJwb3Nl
+LXNwZWNpZmljIGxvZ2ljIHRvIG1haW50YWluIGJhY2t3YXJkIGNvbXBhdGliaWxpdHksIGJ1dCBJ
+IGRpZCB0cnkgCnRoYXQgYXQgZmlyc3QgLS0gYW5kIGdvdCBhbm5veWVkIGJ5IGhvdyB1Z2x5IHRo
+YXQgd2FzLgoKUmF0aGVyIHRoYW4gZ29pbmcgdGhhdCB3YXkgdGhvdWdoLCBJJ20gdGFraW5nIHRo
+aXMgYXMgYW4gb3Bwb3J0dW5pdHkgdG8gCm9wZW4gdGhpcyBkZWJhdGUuICBUaGVzZSBhcmUgc2lt
+cGxlIGVub3VnaCBjb21tYW5kcyB0byBhbGxvdyB1cyB0byAKcm9sbGJhY2sgYW55IG1ham9yIGRl
+Y2lzaW9ucyB3ZSBtYXkgdGFrZSBub3cgYW5kIGZpbmUtdHVuZSB0aGUgcHJvY2VzcyAKaWYgd2Ug
+ZmluZCBpdCBsYWNraW5nLgoKSW5zdGVhZCBvZiB3YWl0aW5nIGZvciB0aGUgbmV4dCBiaWcgY29t
+bWFuZCB3ZSBtYXkgd2FudCB0byBkZXByZWNhdGUgYW5kIAplbmQgdXAgZG9pbmcgaXQgdGhlbi4K
+CiAgIC1Kb2FvCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+XwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6
+Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
