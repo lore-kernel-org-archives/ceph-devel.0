@@ -1,162 +1,52 @@
 From: Gregory Farnum <greg@gregs42.com>
-Subject: Re: rados semantic changes
-Date: Fri, 8 May 2015 17:16:16 -0700
-Message-ID: <CAC6JEv-BO88qnp4-Pkd6Qy5C+-OsgFBJPRTNFtprBQONUqZf+w@mail.gmail.com>
-References: <alpine.DEB.2.00.1505061044140.28239@cobra.newdream.net>
-	<1500936117.16594659.1431127115994.JavaMail.zimbra@redhat.com>
+Subject: Re: Newstore Update Part 2
+Date: Fri, 8 May 2015 17:19:28 -0700
+Message-ID: <CAC6JEv-thH39P9LG3ErioqzJ=MUVyWNz9_zx+Azg2aAZ+ah2yw@mail.gmail.com>
+References: <554D44E3.7080600@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f177.google.com ([209.85.213.177]:33900 "EHLO
-	mail-ig0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752988AbbEIAQS convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 May 2015 20:16:18 -0400
-Received: by iget9 with SMTP id t9so40337252ige.1
-        for <ceph-devel@vger.kernel.org>; Fri, 08 May 2015 17:16:17 -0700 (PDT)
-Received: from mail-ig0-f177.google.com (mail-ig0-f177.google.com. [209.85.213.177])
-        by mx.google.com with ESMTPSA id fs5sm114075igb.0.2015.05.08.17.16.16
+Received: from mail-ig0-f173.google.com ([209.85.213.173]:37591 "EHLO
+	mail-ig0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752988AbbEIATa (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 May 2015 20:19:30 -0400
+Received: by igbsb11 with SMTP id sb11so34630012igb.0
+        for <ceph-devel@vger.kernel.org>; Fri, 08 May 2015 17:19:29 -0700 (PDT)
+Received: from mail-ig0-f181.google.com (mail-ig0-f181.google.com. [209.85.213.181])
+        by mx.google.com with ESMTPSA id o2sm648715igr.9.2015.05.08.17.19.28
         for <ceph-devel@vger.kernel.org>
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 08 May 2015 17:16:16 -0700 (PDT)
-Received: by igbpi8 with SMTP id pi8so33920423igb.1
-        for <ceph-devel@vger.kernel.org>; Fri, 08 May 2015 17:16:16 -0700 (PDT)
-In-Reply-To: <1500936117.16594659.1431127115994.JavaMail.zimbra@redhat.com>
+        Fri, 08 May 2015 17:19:28 -0700 (PDT)
+Received: by igbsb11 with SMTP id sb11so34629819igb.0
+        for <ceph-devel@vger.kernel.org>; Fri, 08 May 2015 17:19:28 -0700 (PDT)
+In-Reply-To: <554D44E3.7080600@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sjust@redhat.com>
-Cc: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mnelson@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Do we have any tickets or something motivating these? I'm not quite
-sure which of these problems are things you noticed, versus things
-we've seen in the field, versus stuff that might make our lives easier
-in the future.
+On Fri, May 8, 2015 at 4:21 PM, Mark Nelson <mnelson@redhat.com> wrote:
+> Hi Guys,
+>
+> At the performance meeting this week we discussed the possibility of
+> changing how newstore handles large partial overwrites.
 
-That said, my votes so far are
-On Fri, May 8, 2015 at 4:18 PM, Samuel Just <sjust@redhat.com> wrote:
-> So, the problem is sequences of piplined operations like:
->
-> (object does not exist)
-> 1. [exists_guard, write]
-> 2. [write]
->
-> Currently, if a client sends 1. and then 2. without waiting for 1. to=
- complete, the guarantee is that even in the event of peering or a clie=
-nt crash the only visible orderings are [], [1], and [1, 2].  However, =
-if both operations complete (with 1. returning ENOENT) and are then rep=
-layed, we will see a result of [2, 1].  1. will be executed first, but =
-since 2. already completed, exists_guard will not error out, and the wr=
-ite will succeed.  2. will then return immediately with success since p=
-g log will contain an entry indicating that it already happened.  Delet=
-e seems to be a special case of this.
->
-> For the more general problem, it seems like the objecter cannot pipel=
-ine rw ops with any kind of write (including other rw ops).  This means=
- the objecter in the case above would hold 2. back until 1. completes a=
-nd is not in danger of being re-sent.  We'll need some machinery in the=
- objecter to handle this part.
+Er, what was the potential change?
 
-Although I think you mean it can't pipeline rw ops on the same object,
-that still seems unpleasant =E2=80=94 especially for our more annoying
-operations that might touch multiple objects.
-
+> To determine if
+> this is useful, we look at rados bench and rbd performance of newstore at
+> various IO sizes.  I've also included some rados bench read results as folks
+> were interested in those.  On the graphs I've tried to mark interesting
+> improvements/regressions and also some questions/comments. These tests were
+> run without overlay which may help small IO performance in some cases.
 >
-> For this to work, we need the pg log to record that an op marked as w=
- has been processed regardless of the result.  We can do this for a par=
-ticular op type marked as w by ensuring that it always succeeds, by wri=
-ting a noop log entry recording the result, or by giving up and marking=
- that op rw.
+> Graphs are here:
 >
-> It seems to me that:
-> 1) delete should always succeed.  We'll have to record a noop log ent=
-ry to ensure that it is not replayed out of turn.
-
-yes
-
->   - Or we can leave delete as it is and mark it rw.
-> 2) omap and xattr set operations implicitly create the object and the=
-refore always succeed.
-
-that's not current behavior? yes
-
-> 3) omap remove operations are marked as rw so they can return ENOENT.
->   - Otherwise, an omap remove operation on a non-existing object woul=
-d have to add a noop entry to the log or implicitly create the object -=
-- the latter would be particularly odd.
->   - Or, we could record a noop log entry with the return code.
-
-This one =E2=80=94 I don't think log entries are very expensive, and I =
-don't
-think we want to serialize omap ops. In particular I think serializing
-omap rm would be bad for rgw.
-
-> 4) I don't think there are any current object classes which should be=
- marked w, but they should be carefully audited.
+> http://nhm.ceph.com/newstore/8c8c5903_rbd_rados_tests.pdf
 >
-> On the implementation side, we probably need new versions of the affe=
-cted librados calls (omap_set2?, blind_delete?) since we are changing t=
-he return values and there may be older code which relies on this behav=
-ior.
-
-But then they'd also be preserving broken behavior, right? Perhaps
-it's time to do something interesting with our versioning.
-
->
-> Write ordered reads also appear to be fundamentally broken in the cur=
-rent implementation for the same reason.  It seems like we'd have to ha=
-ndle that at the objecter level by marking the reads rw.
->
-> We could also find a way to relax the ordering guarantees even furthe=
-r, but I fear that that would make it excessively difficult to reason a=
-bout librados operation ordering.
->
-> Thoughts?
-> -Sam
->
-> ----- Original Message -----
-> From: "Sage Weil" <sweil@redhat.com>
-> To: sjust@redhat.com, ceph-devel@vger.kernel.org
-> Sent: Wednesday, May 6, 2015 10:47:11 AM
-> Subject: rados semantic changes
->
-> It sounds like we're kicking around two proposed changes:
->
-> 1) A delete will never -ENOENT; a delete on a non-existent object is =
-a
-> success.  This is important for cache tiering, and allowing us to ski=
-p
-> checking the base tier for certain client requests.
->
-> 2) Any write will implicitly create the object.  If we want such a
-> dependency (so we see ENOENT), the user can put an assert_exists in t=
-he op
-> vector.
->
-> I think what both of these amount to is that the writes have no read-=
-side
-> checks and will effectively never fail (except for true failure
-> cases).  If the user wants some sort of failure, it will be explicit
-> in the form of another read check in the op vector.
->
-> Sam, is this what you're thinking?
->
-> It's a subtle but real change in the semantics of rados ops, but I
-> think now would be the time to make it...
->
-> sage
+> Thanks,
+> Mark
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
