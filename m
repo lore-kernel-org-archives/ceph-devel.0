@@ -1,57 +1,189 @@
-From: "Zhou, Yuan" <yuan.zhou@intel.com>
-Subject: RE: libcrush.so
-Date: Sat, 9 May 2015 01:39:32 +0000
-Message-ID: <06681238D8946F44A60AA400760A1CBF01F63369@SHSMSX104.ccr.corp.intel.com>
-References: <06681238D8946F44A60AA400760A1CBF01F60F19@SHSMSX104.ccr.corp.intel.com>
- <CAC6JEv-+-rQzDaMCmb1Nx8f+QtDToDp0EZD3g5T=gQOZ+BkwMA@mail.gmail.com>
+From: Samuel Just <sjust@redhat.com>
+Subject: Re: rados semantic changes
+Date: Sat, 9 May 2015 00:20:01 -0400 (EDT)
+Message-ID: <395372379.16619495.1431145201844.JavaMail.zimbra@redhat.com>
+References: <alpine.DEB.2.00.1505061044140.28239@cobra.newdream.net> <1500936117.16594659.1431127115994.JavaMail.zimbra@redhat.com> <CAC6JEv-BO88qnp4-Pkd6Qy5C+-OsgFBJPRTNFtprBQONUqZf+w@mail.gmail.com> <957242752.16609080.1431132817134.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:3802 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753241AbbEIBjg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 8 May 2015 21:39:36 -0400
-In-Reply-To: <CAC6JEv-+-rQzDaMCmb1Nx8f+QtDToDp0EZD3g5T=gQOZ+BkwMA@mail.gmail.com>
-Content-Language: en-US
+Received: from mx3-phx2.redhat.com ([209.132.183.24]:42410 "EHLO
+	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750872AbbEIEUD convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 9 May 2015 00:20:03 -0400
+In-Reply-To: <957242752.16609080.1431132817134.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Gregory Farnum <greg@gregs42.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, "Cohen, David E" <david.e.cohen@intel.com>, "Yu, Zhidong" <zhidong.yu@intel.com>
+Cc: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
 
-R3JlZywgVGhhbmtzIGEgbG90IGZvciB0aGUgaW5mbyEgDQpZZXMgY3VycmVudCBDUlVTSCBjb2Rl
-IGhlYXZpbHkgcmVsaWVzIG9uIHRoZSBpbnRlcm5hbCBkYXRhIHN0cnVjdHVyZXMgYW5kIGl0J3Mg
-YSBiaXQgZGlmZmljdWx0IHRvIGV4dHJhY3QgaXQgb3V0LiANCkZvciB0aGUgQVBJcywgZG8geW91
-IGhhdmUgYW55IGlkZWFzIG9uIHRoaXM/IEN1cnJlbnRseSBJIHNlZSB0aGVyZSBzaG91bGQgaGF2
-ZToNCg0KbWFwIG9iamVjdCB0byBwZzogZ2l2ZSB0aGUgb2JqZWN0IG5hbWUsIHJldHVybiB0aGUg
-cGcgCQ0KbWFwIHBnIHRvIG9zZHM6IGdpdmUgdGhlIHBnLCByZXR1cm4gdGhlIG9zZCBsaXN0cyAN
-Cg0KV2UgaGF2ZSBkb25lIHNvbWUgdGVzdHMgaGVyZS4gTGV0IG1lIHNlZSBpZiBJIGNhbiBtYWtl
-IGl0IG1vcmUgY2xlYW4gZm9yIGEgUFIuIA0KDQpUaGFua3MsIC15dWFuDQoNCi0tLS0tT3JpZ2lu
-YWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBHcmVnb3J5IEZhcm51bSBbbWFpbHRvOmdyZWdAZ3JlZ3M0
-Mi5jb21dIA0KU2VudDogRnJpZGF5LCBNYXkgOCwgMjAxNSAxMjozNyBQTQ0KVG86IFpob3UsIFl1
-YW4NCkNjOiBDZXBoIERldmVsb3BtZW50OyBDb2hlbiwgRGF2aWQgRTsgWXUsIFpoaWRvbmcNClN1
-YmplY3Q6IFJlOiBsaWJjcnVzaC5zbw0KDQpPbiBUaHUsIE1heSA3LCAyMDE1IGF0IDY6MjkgUE0s
-IFpob3UsIFl1YW4gPHl1YW4uemhvdUBpbnRlbC5jb20+IHdyb3RlOg0KPiBDZXBoIHVzZSBjcnVz
-aCBhbGdvcml0aG0gdG8gcHJvdmlkZSB0aGUgbWFwcGluZyBvZiBvYmplY3RzIHRvIE9TRCBzZXJ2
-ZXJzLiBUaGlzIGlzIGdyZWF0IGZvciBjbGllbnRzIHNvIHRoZXkgY291bGQgdGFsayB0byB3aXRo
-IHRoZXNlIE9TRHMgZGlyZWN0bHkuIEhvd2V2ZXIgdGhlcmUgYXJlIHNvbWUgc2NlbmFyaW9zIHdo
-ZXJlIHRoZSBhcHBsaWNhdGlvbiBuZWVkcyB0byBhY2Nlc3MgdGhlIGNydXNoIG1hcCwgZm9yIGxv
-YWQtYmFsYW5jaW5nIGFzIGFuIGV4YW1wbGUuDQo+DQo+IEN1cnJlbnRseSBDZXBoIGRvZXNuJ3Qg
-cHJvdmlkZXMgYW55IEFQSSB0byByZW5kZXIgdGhlIGxheW91dC4gSWYgeW91ciBhcHBsaWNhdGlv
-biBuZWVkcyB0byBhY2Nlc3MgdGhlIGNydXNoIG1hcCB5b3UnbGwgZ29pbmcgdG8gcmVseSBvbiB0
-aGUgY29tbWFuZCAnY2VwaCBvc2QgbWFwIHBvb2xfbmFtZSBvYmpfbmFtZScuIFdpdGggdGhpcyBs
-aWJjcnVzaC5zbyB3ZSBjb3VsZCBsZXQgdGhlIGFwcGxpY2F0aW9uIHRvIGNob29zZSB3aGljaCBu
-b2RlcyB0byBhY2Nlc3MuIFRoZSBvdGhlciBhZHZhbnRhZ2UgaXMgd2UgY291bGQgcHJvdmlkZSBz
-b21lIG90aGVyIGJpbmRpbmdzKHB5dGhvbiwgZ28pIGJhc2VkIG9uIHRoaXMgYWxzby4NCj4NCj4g
-RnJvbSB0aGUgZ2l0IGxvZyB3ZSBmaW5kIGxpYmNydXNoIHdhcyB0aGVyZSBiZWZvcmUgYnV0IHJl
-bW92ZWQgb3V0IHNpbmNlIEFyZ29uYXV0LiBDYW4gYW55b25lIGtpbmRseSBzaGFyZSB1cyB0aGUg
-YmFja2dyb3VuZCBvZiB0aGlzIGNoYW5nZT8NCg0KSSBkb24ndCB0aGluayB0aGVyZSB3YXMgZXZl
-ciBhIGxpYmNydXNoIHRoYXQgd2FzIGZyaWVuZGx5IGZvciBleHRlcm5hbCB1c2UuIFRoZXJlIHdh
-cyBhIG1ha2VmaWxlLWxldmVsICJsaWJjcnVzaCIgYnV0IGl0IGdvdCBtZXJnZWQgaW50byBsaWJj
-b21tb24sIHByZXN1bWFibHkgZm9yIGVhc2Ugb2YgbWFpbnRlbmFuY2UuIFRoZSBpbnRlcmZhY2Vz
-IHdlIHVzZSBhcm91bmQgQ1JVU0ggYXJlIGp1c3Qgbm90IHZlcnkgY2xlYW4sIElJUkM7IHRoZSBD
-IGludGVyZmFjZSBpcyBvcGFxdWUgYW5kIHRoZSBDKysgQ3J1c2hXcmFwcGVyIGJpdHMgYXJlLi4u
-d2VsbCwgQysrLCBhbmQgbm90IGVhc3kgdG8gY2hhbmdlIGludG8gc29tZXRoaW5nIHNlcGFyYWJs
-ZSBmcm9tIHRoZSBPU0RNYXAsIGVpdGhlci4gOi8NCg0KVGhhdCBzYWlkLCBpZiBzb21lYm9keSB3
-YW50ZWQgdG8gcmV3b3JrIHRoZSBjb2RlIGludGVyZmFjZXMgdG8gYmUgbmljZXIsIFBScyBhcmUg
-YWx3YXlzIHdlbGNvbWUuIDspDQo=
+Oops, omap and xattr set do create the object already.
+-Sam
+
+----- Original Message -----
+=46rom: "Samuel Just" <sjust@redhat.com>
+To: "Gregory Farnum" <greg@gregs42.com>
+Cc: "Sage Weil" <sweil@redhat.com>, ceph-devel@vger.kernel.org
+Sent: Friday, May 8, 2015 5:53:37 PM
+Subject: Re: rados semantic changes
+
+Just some things I noticed.  It'll be relatively easy to reproduce in c=
+eph_test_rados.  We haven't seen it only because the three existing rad=
+os users and ceph_test_rados don't happen to send problematic sequences=
+=2E
+-Sam
+
+----- Original Message -----
+=46rom: "Gregory Farnum" <greg@gregs42.com>
+To: "Samuel Just" <sjust@redhat.com>
+Cc: "Sage Weil" <sweil@redhat.com>, ceph-devel@vger.kernel.org
+Sent: Friday, May 8, 2015 5:16:16 PM
+Subject: Re: rados semantic changes
+
+Do we have any tickets or something motivating these? I'm not quite
+sure which of these problems are things you noticed, versus things
+we've seen in the field, versus stuff that might make our lives easier
+in the future.
+
+That said, my votes so far are
+On Fri, May 8, 2015 at 4:18 PM, Samuel Just <sjust@redhat.com> wrote:
+> So, the problem is sequences of piplined operations like:
+>
+> (object does not exist)
+> 1. [exists_guard, write]
+> 2. [write]
+>
+> Currently, if a client sends 1. and then 2. without waiting for 1. to=
+ complete, the guarantee is that even in the event of peering or a clie=
+nt crash the only visible orderings are [], [1], and [1, 2].  However, =
+if both operations complete (with 1. returning ENOENT) and are then rep=
+layed, we will see a result of [2, 1].  1. will be executed first, but =
+since 2. already completed, exists_guard will not error out, and the wr=
+ite will succeed.  2. will then return immediately with success since p=
+g log will contain an entry indicating that it already happened.  Delet=
+e seems to be a special case of this.
+>
+> For the more general problem, it seems like the objecter cannot pipel=
+ine rw ops with any kind of write (including other rw ops).  This means=
+ the objecter in the case above would hold 2. back until 1. completes a=
+nd is not in danger of being re-sent.  We'll need some machinery in the=
+ objecter to handle this part.
+
+Although I think you mean it can't pipeline rw ops on the same object,
+that still seems unpleasant =E2=80=94 especially for our more annoying
+operations that might touch multiple objects.
+
+>
+> For this to work, we need the pg log to record that an op marked as w=
+ has been processed regardless of the result.  We can do this for a par=
+ticular op type marked as w by ensuring that it always succeeds, by wri=
+ting a noop log entry recording the result, or by giving up and marking=
+ that op rw.
+>
+> It seems to me that:
+> 1) delete should always succeed.  We'll have to record a noop log ent=
+ry to ensure that it is not replayed out of turn.
+
+yes
+
+>   - Or we can leave delete as it is and mark it rw.
+> 2) omap and xattr set operations implicitly create the object and the=
+refore always succeed.
+
+that's not current behavior? yes
+
+> 3) omap remove operations are marked as rw so they can return ENOENT.
+>   - Otherwise, an omap remove operation on a non-existing object woul=
+d have to add a noop entry to the log or implicitly create the object -=
+- the latter would be particularly odd.
+>   - Or, we could record a noop log entry with the return code.
+
+This one =E2=80=94 I don't think log entries are very expensive, and I =
+don't
+think we want to serialize omap ops. In particular I think serializing
+omap rm would be bad for rgw.
+
+> 4) I don't think there are any current object classes which should be=
+ marked w, but they should be carefully audited.
+>
+> On the implementation side, we probably need new versions of the affe=
+cted librados calls (omap_set2?, blind_delete?) since we are changing t=
+he return values and there may be older code which relies on this behav=
+ior.
+
+But then they'd also be preserving broken behavior, right? Perhaps
+it's time to do something interesting with our versioning.
+
+>
+> Write ordered reads also appear to be fundamentally broken in the cur=
+rent implementation for the same reason.  It seems like we'd have to ha=
+ndle that at the objecter level by marking the reads rw.
+>
+> We could also find a way to relax the ordering guarantees even furthe=
+r, but I fear that that would make it excessively difficult to reason a=
+bout librados operation ordering.
+>
+> Thoughts?
+> -Sam
+>
+> ----- Original Message -----
+> From: "Sage Weil" <sweil@redhat.com>
+> To: sjust@redhat.com, ceph-devel@vger.kernel.org
+> Sent: Wednesday, May 6, 2015 10:47:11 AM
+> Subject: rados semantic changes
+>
+> It sounds like we're kicking around two proposed changes:
+>
+> 1) A delete will never -ENOENT; a delete on a non-existent object is =
+a
+> success.  This is important for cache tiering, and allowing us to ski=
+p
+> checking the base tier for certain client requests.
+>
+> 2) Any write will implicitly create the object.  If we want such a
+> dependency (so we see ENOENT), the user can put an assert_exists in t=
+he op
+> vector.
+>
+> I think what both of these amount to is that the writes have no read-=
+side
+> checks and will effectively never fail (except for true failure
+> cases).  If the user wants some sort of failure, it will be explicit
+> in the form of another read check in the op vector.
+>
+> Sam, is this what you're thinking?
+>
+> It's a subtle but real change in the semantics of rados ops, but I
+> think now would be the time to make it...
+>
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
