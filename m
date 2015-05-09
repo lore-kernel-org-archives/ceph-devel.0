@@ -1,61 +1,57 @@
 From: "Zhou, Yuan" <yuan.zhou@intel.com>
 Subject: RE: libcrush.so
-Date: Sat, 9 May 2015 01:25:51 +0000
-Message-ID: <06681238D8946F44A60AA400760A1CBF01F632C2@SHSMSX104.ccr.corp.intel.com>
+Date: Sat, 9 May 2015 01:39:32 +0000
+Message-ID: <06681238D8946F44A60AA400760A1CBF01F63369@SHSMSX104.ccr.corp.intel.com>
 References: <06681238D8946F44A60AA400760A1CBF01F60F19@SHSMSX104.ccr.corp.intel.com>
- <99767EA2E27DD44DB4E9F9B9ACA458C03B313F2B@SSIEXCH-MB3.ssi.samsung.com>
+ <CAC6JEv-+-rQzDaMCmb1Nx8f+QtDToDp0EZD3g5T=gQOZ+BkwMA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:7781 "EHLO mga11.intel.com"
+Received: from mga14.intel.com ([192.55.52.115]:3802 "EHLO mga14.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752784AbbEIBZz convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 May 2015 21:25:55 -0400
-In-Reply-To: <99767EA2E27DD44DB4E9F9B9ACA458C03B313F2B@SSIEXCH-MB3.ssi.samsung.com>
+	id S1753241AbbEIBjg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 8 May 2015 21:39:36 -0400
+In-Reply-To: <CAC6JEv-+-rQzDaMCmb1Nx8f+QtDToDp0EZD3g5T=gQOZ+BkwMA@mail.gmail.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>, Ceph Development <ceph-devel@vger.kernel.org>
-Cc: "Cohen, David E" <david.e.cohen@intel.com>, "Yu, Zhidong" <zhidong.yu@intel.com>
+To: Gregory Farnum <greg@gregs42.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, "Cohen, David E" <david.e.cohen@intel.com>, "Yu, Zhidong" <zhidong.yu@intel.com>
 
-Hi James,
-
-This happens usually when the storage platform and applications are in segmented networks. For example, in a cluster with multiple RGW instances, if we could know the which RGW instance is the closest to primary copy, then we can do more efficient local read/write through some particular deployment. 
-There's one feature in Openstack Swift [1] which is able to provide the location of objects inside a cluster.
-
-Thanks, -yuan
-
-[1] https://github.com/openstack/swift/blob/master/swift/common/middleware/list_endpoints.py
-
------Original Message-----
-From: James (Fei) Liu-SSI [mailto:james.liu@ssi.samsung.com] 
-Sent: Saturday, May 9, 2015 1:40 AM
-To: Zhou, Yuan; Ceph Development
-Cc: Cohen, David E; Yu, Zhidong
-Subject: RE: libcrush.so
-
-Hi Yuan,
-   Very interesting. Would be possible to know why application needs to access the cursh map directly instead of accessing through ceph tool?
-
-  Regards,
-  James
-
------Original Message-----
-From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Zhou, Yuan
-Sent: Thursday, May 07, 2015 6:29 PM
-To: Ceph Development
-Cc: Cohen, David E; Yu, Zhidong
-Subject: libcrush.so
-
-Ceph use crush algorithm to provide the mapping of objects to OSD servers. This is great for clients so they could talk to with these OSDs directly. However there are some scenarios where the application needs to access the crush map, for load-balancing as an example. 
-
-Currently Ceph doesn't provides any API to render the layout. If your application needs to access the crush map you'll going to rely on the command 'ceph osd map pool_name obj_name'. With this libcrush.so we could let the application to choose which nodes to access. The other advantage is we could provide some other bindings(python, go) based on this also.
-
-From the git log we find libcrush was there before but removed out since Argonaut. Can anyone kindly share us the background of this change?
-
-
-Thanks, -yuan
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+R3JlZywgVGhhbmtzIGEgbG90IGZvciB0aGUgaW5mbyEgDQpZZXMgY3VycmVudCBDUlVTSCBjb2Rl
+IGhlYXZpbHkgcmVsaWVzIG9uIHRoZSBpbnRlcm5hbCBkYXRhIHN0cnVjdHVyZXMgYW5kIGl0J3Mg
+YSBiaXQgZGlmZmljdWx0IHRvIGV4dHJhY3QgaXQgb3V0LiANCkZvciB0aGUgQVBJcywgZG8geW91
+IGhhdmUgYW55IGlkZWFzIG9uIHRoaXM/IEN1cnJlbnRseSBJIHNlZSB0aGVyZSBzaG91bGQgaGF2
+ZToNCg0KbWFwIG9iamVjdCB0byBwZzogZ2l2ZSB0aGUgb2JqZWN0IG5hbWUsIHJldHVybiB0aGUg
+cGcgCQ0KbWFwIHBnIHRvIG9zZHM6IGdpdmUgdGhlIHBnLCByZXR1cm4gdGhlIG9zZCBsaXN0cyAN
+Cg0KV2UgaGF2ZSBkb25lIHNvbWUgdGVzdHMgaGVyZS4gTGV0IG1lIHNlZSBpZiBJIGNhbiBtYWtl
+IGl0IG1vcmUgY2xlYW4gZm9yIGEgUFIuIA0KDQpUaGFua3MsIC15dWFuDQoNCi0tLS0tT3JpZ2lu
+YWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBHcmVnb3J5IEZhcm51bSBbbWFpbHRvOmdyZWdAZ3JlZ3M0
+Mi5jb21dIA0KU2VudDogRnJpZGF5LCBNYXkgOCwgMjAxNSAxMjozNyBQTQ0KVG86IFpob3UsIFl1
+YW4NCkNjOiBDZXBoIERldmVsb3BtZW50OyBDb2hlbiwgRGF2aWQgRTsgWXUsIFpoaWRvbmcNClN1
+YmplY3Q6IFJlOiBsaWJjcnVzaC5zbw0KDQpPbiBUaHUsIE1heSA3LCAyMDE1IGF0IDY6MjkgUE0s
+IFpob3UsIFl1YW4gPHl1YW4uemhvdUBpbnRlbC5jb20+IHdyb3RlOg0KPiBDZXBoIHVzZSBjcnVz
+aCBhbGdvcml0aG0gdG8gcHJvdmlkZSB0aGUgbWFwcGluZyBvZiBvYmplY3RzIHRvIE9TRCBzZXJ2
+ZXJzLiBUaGlzIGlzIGdyZWF0IGZvciBjbGllbnRzIHNvIHRoZXkgY291bGQgdGFsayB0byB3aXRo
+IHRoZXNlIE9TRHMgZGlyZWN0bHkuIEhvd2V2ZXIgdGhlcmUgYXJlIHNvbWUgc2NlbmFyaW9zIHdo
+ZXJlIHRoZSBhcHBsaWNhdGlvbiBuZWVkcyB0byBhY2Nlc3MgdGhlIGNydXNoIG1hcCwgZm9yIGxv
+YWQtYmFsYW5jaW5nIGFzIGFuIGV4YW1wbGUuDQo+DQo+IEN1cnJlbnRseSBDZXBoIGRvZXNuJ3Qg
+cHJvdmlkZXMgYW55IEFQSSB0byByZW5kZXIgdGhlIGxheW91dC4gSWYgeW91ciBhcHBsaWNhdGlv
+biBuZWVkcyB0byBhY2Nlc3MgdGhlIGNydXNoIG1hcCB5b3UnbGwgZ29pbmcgdG8gcmVseSBvbiB0
+aGUgY29tbWFuZCAnY2VwaCBvc2QgbWFwIHBvb2xfbmFtZSBvYmpfbmFtZScuIFdpdGggdGhpcyBs
+aWJjcnVzaC5zbyB3ZSBjb3VsZCBsZXQgdGhlIGFwcGxpY2F0aW9uIHRvIGNob29zZSB3aGljaCBu
+b2RlcyB0byBhY2Nlc3MuIFRoZSBvdGhlciBhZHZhbnRhZ2UgaXMgd2UgY291bGQgcHJvdmlkZSBz
+b21lIG90aGVyIGJpbmRpbmdzKHB5dGhvbiwgZ28pIGJhc2VkIG9uIHRoaXMgYWxzby4NCj4NCj4g
+RnJvbSB0aGUgZ2l0IGxvZyB3ZSBmaW5kIGxpYmNydXNoIHdhcyB0aGVyZSBiZWZvcmUgYnV0IHJl
+bW92ZWQgb3V0IHNpbmNlIEFyZ29uYXV0LiBDYW4gYW55b25lIGtpbmRseSBzaGFyZSB1cyB0aGUg
+YmFja2dyb3VuZCBvZiB0aGlzIGNoYW5nZT8NCg0KSSBkb24ndCB0aGluayB0aGVyZSB3YXMgZXZl
+ciBhIGxpYmNydXNoIHRoYXQgd2FzIGZyaWVuZGx5IGZvciBleHRlcm5hbCB1c2UuIFRoZXJlIHdh
+cyBhIG1ha2VmaWxlLWxldmVsICJsaWJjcnVzaCIgYnV0IGl0IGdvdCBtZXJnZWQgaW50byBsaWJj
+b21tb24sIHByZXN1bWFibHkgZm9yIGVhc2Ugb2YgbWFpbnRlbmFuY2UuIFRoZSBpbnRlcmZhY2Vz
+IHdlIHVzZSBhcm91bmQgQ1JVU0ggYXJlIGp1c3Qgbm90IHZlcnkgY2xlYW4sIElJUkM7IHRoZSBD
+IGludGVyZmFjZSBpcyBvcGFxdWUgYW5kIHRoZSBDKysgQ3J1c2hXcmFwcGVyIGJpdHMgYXJlLi4u
+d2VsbCwgQysrLCBhbmQgbm90IGVhc3kgdG8gY2hhbmdlIGludG8gc29tZXRoaW5nIHNlcGFyYWJs
+ZSBmcm9tIHRoZSBPU0RNYXAsIGVpdGhlci4gOi8NCg0KVGhhdCBzYWlkLCBpZiBzb21lYm9keSB3
+YW50ZWQgdG8gcmV3b3JrIHRoZSBjb2RlIGludGVyZmFjZXMgdG8gYmUgbmljZXIsIFBScyBhcmUg
+YWx3YXlzIHdlbGNvbWUuIDspDQo=
