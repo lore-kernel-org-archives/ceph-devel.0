@@ -1,56 +1,85 @@
-From: Owen Synge <osynge@suse.com>
-Subject: Re: autodetecting init system.
-Date: Mon, 11 May 2015 19:26:48 +0200
-Message-ID: <5550E658.3010806@suse.com>
-References: <5550D903.8000802@suse.com> <5550DACA.4070504@redhat.com>
+From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Subject: Re: rgw and the next hammer release v0.94.2
+Date: Mon, 11 May 2015 13:27:21 -0400 (EDT)
+Message-ID: <685374108.12313692.1431365241610.JavaMail.zimbra@redhat.com>
+References: <5550A0E3.8000006@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.emea.novell.com ([130.57.118.101]:37965 "EHLO
-	mail.emea.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751713AbbEKR1w (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-	Mon, 11 May 2015 13:27:52 -0400
-In-Reply-To: <5550DACA.4070504@redhat.com>
+Received: from mx6-phx2.redhat.com ([209.132.183.39]:53109 "EHLO
+	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752233AbbEKR2a convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 May 2015 13:28:30 -0400
+In-Reply-To: <5550A0E3.8000006@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <john.spray@redhat.com>, ceph-devel@vger.kernel.org
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Abhishek L <abhishek.lekshmanan@gmail.com>
 
-On 05/11/2015 06:37 PM, John Spray wrote:
-> On 11/05/2015 17:29, Owen Synge wrote:
->> Dear all,
->>
->> Many init systems are used in linux now. Some ceph code needs to know
->> the init system. (I must admit I have not looked into Solaris, MacOS and
->> BSD and probably should have)
->>
->> It would be nice to have one function that detects the init system
->>
->> Since the init system can be specified in ceph and ceph-deploy
->> explicitly it seems to be its reasonable to fail clearly to detect init
->> system.
-> I think I'm missing some background here.  I was under the impression
-> that distros generally had a preferred init system (even if they let you
-> switch), and if another is in use then compatibility links are usually
-> provided (e.g. sysv-style calling through to systemd or vice versa). 
-> Given that, the distro packaging then uses whatever the "right" way to
-> start a service is for that distro, and it's up to the distro to make
-> sure that command is available.
 
-I am not sure that sysV can emulate systemd, but systemd can and does
-emulate sysV by default on SUSE and I think also debian .
 
-> Otherwise don't we descend into a kind of madness where a package
-> post-install script can't start a service, because it doesn't know what
-> command to run?
+----- Original Message -----
+> From: "Loic Dachary" <loic@dachary.org>
+> To: "Yehuda Sadeh" <yehuda@redhat.com>
+> Cc: "Ceph Development" <ceph-devel@vger.kernel.org>, "Abhishek L" <ab=
+hishek.lekshmanan@gmail.com>
+> Sent: Monday, May 11, 2015 5:30:27 AM
+> Subject: rgw and the next hammer release v0.94.2
+>=20
+> Hi Yehuda,
+>=20
+> The next hammer release as found at https://github.com/ceph/ceph/tree=
+/hammer
+> passed the rgw suite (http://tracker.ceph.com/issues/11492#rgw). Note=
+ that
+> the hammer branch does not yet include
+> https://github.com/ceph/ceph/pull/4568 (it was included in the tests
+> though). If https://github.com/ceph/ceph/pull/4568 is merged before Q=
+E
+> starts their round of testing, it will be in v0.94.2. If it is not me=
+rged,
+> it will have to wait until v0.94.3 is published. Either way is fine.
 
-I have not yet tested converting ubuntu or debian latest releases with
-non standard init systems (anything other than systemd).
+I merged it in now.
 
-The main reason is I do expect the exact "madness" you predict, that
-said they claim support for this.
+>=20
+> Do you think the hammer branch is ready for QE to start their own rou=
+nd of
+> testing ?
+>=20
 
-best regards
+Yes.
 
-Owen
+Thanks,
+Yehuda
+
+> Cheers
+>=20
+> P.S. http://tracker.ceph.com/issues/11492#Release-information has dir=
+ect
+> links to the pull requests merged into hammer since v0.94.1 in case y=
+ou need
+> more context about one of them.
+>=20
+> --
+> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>=20
+>=20
+>=20
+>=20
+>=20
+>=20
+>=20
+>=20
+>=20
+>=20
+>=20
+>=20
+>=20
+>=20
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
