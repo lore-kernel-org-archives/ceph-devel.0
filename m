@@ -1,62 +1,96 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: libnuma / ceph
-Date: Sun, 10 May 2015 19:48:10 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1505101947350.28239@cobra.newdream.net>
-References: <CAMieVSeUfLN0NGG6cxGy_Hbi0FwuzkivfFLqcAGxwX7BrjW-DQ@mail.gmail.com>
+From: Alexandre DERUMIER <aderumier@odiso.com>
+Subject: Re: [Cbt] client fio-rbd benchmark : debian wheezy vs ubuntu vivid
+ : big difference
+Date: Mon, 11 May 2015 07:53:45 +0200 (CEST)
+Message-ID: <1493232379.166886818.1431323625432.JavaMail.zimbra@oxygem.tv>
+References: <1658395363.138804047.1431248752885.JavaMail.zimbra@oxygem.tv>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:47018 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751644AbbEKCsN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 10 May 2015 22:48:13 -0400
-Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t4B2mClI004440
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
-	for <ceph-devel@vger.kernel.org>; Sun, 10 May 2015 22:48:12 -0400
-In-Reply-To: <CAMieVSeUfLN0NGG6cxGy_Hbi0FwuzkivfFLqcAGxwX7BrjW-DQ@mail.gmail.com>
+Received: from mailpro.odiso.net ([89.248.209.98]:38454 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751065AbbEKFxt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 May 2015 01:53:49 -0400
+In-Reply-To: <1658395363.138804047.1431248752885.JavaMail.zimbra@oxygem.tv>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Kyle Bader <kbader@redhat.com>
-Cc: ceph-devel@vger.kernel.org
+To: cbt <cbt@ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Cc: Stefan Priebe <s.priebe@profihost.ag>
 
-On Sat, 9 May 2015, Kyle Bader wrote:
-> It looks like the NUMA problem [1] could easily be solved by:
-> 
-> #include <numa.h> in ceph-osd.cc
-> numa_available() should return 0
-> read from /var/lib/ceph/ceph-$id/numa_node
-> make sure int
-> make sure sure numa node exists
-> int numa_bind(numa_node)
-> 
-> Then that OSD will only use the cpu cores and memory in that NUMA
-> region. This could also be handy for converging ceph-mon/rgw/etc with
-> OSD.
-> 
-> [mon.a]
-> numa_node = 1
-> 
-> ceph-mon numa_bind(1)
-> 
-> [rgw.a]
-> numa_node = 1
-> 
-> radosgw numa_bind(1)
+Seem that's is ok too on debian jessie (with an extra boost with rbd_cache true)
 
-Hmm!
+Maybe is it related to old glibc on debian wheezy ?
 
-So, numa_node default would probably be -1.  What about 
-a zone_reclaim_mode option?  Or should we just do a warning?
 
-sage
 
-> 
-> [1] https://www.mail-archive.com/ceph-users@lists.ceph.com/msg16274.html
-> 
-> -- 
-> Kyle Bader - Red Hat
-> Senior Solution Architect
-> Ceph Storage Architectures
-> 
-> 
+
+
+debian jessie: rbd_cache=false : iops=202985 : %Cpu(s): 21,9 us,  9,5 sy,  0,0 ni, 66,1 id,  0,0 wa,  0,0 hi,  2,6 si,  0,0 st
+debian jessie: rbd_cache=true :  iops=215290 : %Cpu(s): 27,9 us, 10,8 sy,  0,0 ni, 58,8 id,  0,0 wa,  0,0 hi,  2,6 si,  0,0 st
+
+
+ubuntu vivid : rbd_cache=false : iops=201089 %Cpu(s): 21,3 us, 12,8 sy, 0,0 ni, 61,8 id, 0,0 wa, 0,0 hi, 4,1 si, 0,0 st 
+ubuntu vivid : rbd_cache=true  : iops=197549 %Cpu(s): 27,2 us, 15,3 sy, 0,0 ni, 53,2 id, 0,0 wa, 0,0 hi, 4,2 si, 0,0 st 
+debian wheezy : rbd_cache=false: iops=161272 %Cpu(s): 28.4 us, 15.4 sy, 0.0 ni, 52.8 id, 0.0 wa, 0.0 hi, 3.4 si, 0.0 st 
+debian wheezy : rbd_cache=true : iops=135893 %Cpu(s): 30.0 us, 15.5 sy, 0.0 ni, 51.5 id, 0.0 wa, 0.0 hi, 3.0 si, 0.0 st 
+
+
+
+jessie perf report
+------------------
++    9,18%     3,75%             fio  libc-2.19.so         [.] malloc
++    6,76%     5,70%             fio  libc-2.19.so         [.] _int_malloc
++    5,83%     5,64%             fio  libc-2.19.so         [.] _int_free
++    5,11%     0,15%             fio  libpthread-2.19.so   [.] __libc_recv
++    4,81%     4,81%         swapper  [kernel.kallsyms]    [k] intel_idle
++    3,72%     0,37%             fio  libpthread-2.19.so   [.] pthread_cond_broadcast@@GLIBC_2.3.2
++    3,41%     0,04%             fio  libpthread-2.19.so   [.] 0x000000000000efad
++    3,31%     0,54%             fio  libpthread-2.19.so   [.] pthread_cond_wait@@GLIBC_2.3.2
++    3,19%     0,09%             fio  libpthread-2.19.so   [.] __lll_unlock_wake
++    2,52%     0,00%             fio  librados.so.2.0.0    [.] ceph::buffer::create_aligned(unsigned int, unsigned int)
++    2,09%     0,08%             fio  libc-2.19.so         [.] __posix_memalign
++    2,04%     0,26%             fio  libpthread-2.19.so   [.] __lll_lock_wait
++    2,02%     0,13%             fio  libc-2.19.so         [.] _mid_memalign
++    1,95%     1,91%             fio  libc-2.19.so         [.] __memcpy_sse2_unaligned
++    1,88%     0,08%             fio  libc-2.19.so         [.] _int_memalign
++    1,88%     0,00%             fio  libc-2.19.so         [.] __clone
++    1,88%     0,00%             fio  libpthread-2.19.so   [.] start_thread
++    1,88%     0,12%             fio  fio                  [.] thread_main
++    1,37%     1,37%         swapper  [kernel.kallsyms]    [k] native_write_msr_safe
++    1,29%     0,05%             fio  libc-2.19.so         [.] __lll_unlock_wake_private
++    1,24%     1,24%             fio  libpthread-2.19.so   [.] pthread_mutex_trylock
++    1,24%     0,29%             fio  libc-2.19.so         [.] __lll_lock_wait_private
++    1,19%     0,21%             fio  librbd.so.1.0.0      [.] std::_List_base<ceph::buffer::ptr, std::allocator<ceph::buffer::ptr> >::_M_clear()
++    1,19%     1,19%             fio  libc-2.19.so         [.] free
++    1,18%     1,18%             fio  libc-2.19.so         [.] malloc_consolidate
++    1,14%     1,14%             fio  [kernel.kallsyms]    [k] get_futex_key_refs.isra.13
++    1,10%     1,10%             fio  [kernel.kallsyms]    [k] __schedule
++    1,00%     0,28%             fio  librados.so.2.0.0    [.] ceph::buffer::list::append(char const*, unsigned int)
++    0,96%     0,00%             fio  librbd.so.1.0.0      [.] 0x000000000005b2e7
++    0,96%     0,96%             fio  [kernel.kallsyms]    [k] _raw_spin_lock
++    0,92%     0,21%             fio  librados.so.2.0.0    [.] ceph::buffer::list::append(ceph::buffer::ptr const&, unsigned int, unsigned int)
++    0,91%     0,00%             fio  librados.so.2.0.0    [.] 0x000000000006e6c0
++    0,90%     0,90%         swapper  [kernel.kallsyms]    [k] __switch_to
++    0,89%     0,01%             fio  librbd.so.1.0.0      [.] 0x00000000000ce1f1
++    0,89%     0,89%         swapper  [kernel.kallsyms]    [k] cpu_startup_entry
++    0,87%     0,01%             fio  librados.so.2.0.0    [.] 0x00000000002e3ff1
++    0,86%     0,00%             fio  libc-2.19.so         [.] 0x00000000000dd50d
++    0,85%     0,85%             fio  [kernel.kallsyms]    [k] try_to_wake_up
++    0,83%     0,83%         swapper  [kernel.kallsyms]    [k] __schedule
++    0,82%     0,82%             fio  [kernel.kallsyms]    [k] copy_user_enhanced_fast_string
++    0,81%     0,00%             fio  librados.so.2.0.0    [.] 0x0000000000137abc
++    0,80%     0,80%         swapper  [kernel.kallsyms]    [k] menu_select
++    0,75%     0,75%             fio  [kernel.kallsyms]    [k] _raw_spin_lock_bh
++    0,75%     0,75%             fio  [kernel.kallsyms]    [k] futex_wake
++    0,75%     0,75%             fio  libpthread-2.19.so   [.] __pthread_mutex_unlock_usercnt
++    0,73%     0,73%             fio  [kernel.kallsyms]    [k] __switch_to
++    0,70%     0,70%             fio  libstdc++.so.6.0.20  [.] std::basic_string<char, std::char_traits<char>, std::allocator<char> >::basic_string(std::string const&)
++    0,70%     0,36%             fio  librados.so.2.0.0    [.] ceph::buffer::list::iterator::copy(unsigned int, char*)
++    0,70%     0,23%             fio  fio                  [.] get_io_u
++    0,67%     0,67%             fio  [kernel.kallsyms]    [k] finish_task_switch
++    0,67%     0,32%             fio  libpthread-2.19.so   [.] pthread_rwlock_unlock
++    0,67%     0,00%             fio  librados.so.2.0.0    [.] 0x00000000000cea98
++    0,64%     0,00%             fio  librados.so.2.0.0    [.] 0x00000000002e3f87
++    0,63%     0,63%             fio  [kernel.kallsyms]    [k] futex_wait_setup
++    0,62%     0,62%         swapper  [kernel.kallsyms]    [k] enqueue_task_fair
