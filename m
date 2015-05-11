@@ -1,133 +1,57 @@
-From: Owen Synge <osynge@suse.com>
+From: Sage Weil <sage@newdream.net>
 Subject: Re: autodetecting init system.
-Date: Mon, 11 May 2015 19:28:03 +0200
-Message-ID: <5550E6A3.8000404@suse.com>
-References: <5550D903.8000802@suse.com>
+Date: Mon, 11 May 2015 10:34:56 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1505111032530.28239@cobra.newdream.net>
+References: <5550D903.8000802@suse.com> <5550DACA.4070504@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.emea.novell.com ([130.57.118.101]:57995 "EHLO
-	mail.emea.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752384AbbEKR3U (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-	Mon, 11 May 2015 13:29:20 -0400
-In-Reply-To: <5550D903.8000802@suse.com>
+Received: from cobra.newdream.net ([66.33.216.30]:56181 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751353AbbEKRe4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 May 2015 13:34:56 -0400
+In-Reply-To: <5550DACA.4070504@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: John Spray <john.spray@redhat.com>
+Cc: Owen Synge <osynge@suse.com>, ceph-devel@vger.kernel.org
 
+On Mon, 11 May 2015, John Spray wrote:
+> On 11/05/2015 17:29, Owen Synge wrote:
+> > Dear all,
+> > 
+> > Many init systems are used in linux now. Some ceph code needs to know
+> > the init system. (I must admit I have not looked into Solaris, MacOS and
+> > BSD and probably should have)
+> > 
+> > It would be nice to have one function that detects the init system
+> > 
+> > Since the init system can be specified in ceph and ceph-deploy
+> > explicitly it seems to be its reasonable to fail clearly to detect init
+> > system.
+>
+> I think I'm missing some background here.  I was under the impression that
+> distros generally had a preferred init system (even if they let you switch),
+> and if another is in use then compatibility links are usually provided (e.g.
+> sysv-style calling through to systemd or vice versa).  Given that, the distro
+> packaging then uses whatever the "right" way to start a service is for that
+> distro, and it's up to the distro to make sure that command is available.
+> 
+> Otherwise don't we descend into a kind of madness where a package post-install
+> script can't start a service, because it doesn't know what command to run?
 
+Ceph daemons are marked with a file like 
+/var/lib/ceph/$type/.../{upstart,systemd,sysvinit} indicating which init 
+system is responsible for starting/stopping them.  This is necesary mainly 
+because on most systems they *do* coexist--at least with sysvinit scripts.
 
-On 05/11/2015 06:29 PM, Owen Synge wrote:
-> Dear all,
->=20
-> Many init systems are used in linux now. Some ceph code needs to know
-> the init system. (I must admit I have not looked into Solaris, MacOS =
-and
-> BSD and probably should have)
->=20
-> It would be nice to have one function that detects the init system
->=20
-> Since the init system can be specified in ceph and ceph-deploy
-> explicitly it seems to be its reasonable to fail clearly to detect in=
-it
-> system.
->=20
-> I see 4 ways I can see to detect init system.
->=20
-> (A) Check pid 1.
-> (B) Use a database of OS to init mapping / compile time.
-> (C) look for init manipulation tools and infure the init system from =
-tools.
->=20
-> Comments:
-> ~~~~~~~~
->=20
-> (A1) systmd can be detected easily with.
->=20
->  grep -qs systemd /proc/1/comm
+Owen, this is basically what ceph-detect-init is doing now, right?
 
+IIRC the users are:
 
-A further comment is how will this work in chroot / containers?
+ - ceph-disk, when creating a new osd
+ - ceph-deploy, when deploying a mon or mds or rgw
 
->=20
-> (A2) With init scripts such as its hard to know what the init system.
->=20
-> (B1) For operating systems like RHEL, SLE, CENTOS, Fedora and scienti=
-fic
-> linux this works well.
->=20
-> (B2) FOr operating systems like newer debian and ubuntu releases more
-> than one init system can be installed and used on the OS, so making a
-> database / doing it at compile time are not practical on all OS's
->=20
-> (C1) This is fairly reliable.
->=20
-> (C2) sysV tools have compatibility scripts / programs on other platfo=
-rms
-> so if you use a points system for each init system helper script you =
-can
-> infure systemd over sysV if sytemctrl exists for example.
->=20
-> So to summarise this:
-> ~~~~~~~~~~~~~~~~~~~~
->=20
-> (1) No one system is perfect in all cases.
-> (2) Combined these systesm can provide reliable init system detection=
-=2E
->=20
-> My proposed approach.
-> ~~~~~~~~~~~~~~~~~~~~
->=20
-> (I) Use all three approaches where each approach can provide and answ=
-er,
-> or fail to provide an answer.
->=20
-> (II) Should any approaches disagree -> fail to detect init system.
->=20
-> (III) Should all approaches agree -> then return init system.
->=20
-> (III) Should no approaches provide an init system -> fail to return i=
-nit
-> system.
->=20
-> Comments
-> ~~~~~~~~
->=20
-> This multi layered and comparing way of doing init systems may seem
-> complete overkill, or maybe its useful.
->=20
-> What do you guys think?
->=20
-> Best regards
->=20
-> Owen
->=20
->=20
->=20
->=20
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
+Thanks!
+sage
 
---=20
-SUSE LINUX GmbH, GF: Jeff Hawn, Jennifer Guild, Felix Imend=C3=B6rffer,=
- HRB
-21284 (AG
-N=C3=BCrnberg)
-
-Maxfeldstra=C3=9Fe 5
-
-90409 N=C3=BCrnberg
-
-Germany
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
