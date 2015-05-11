@@ -1,41 +1,79 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: trimming rbd image does not reclaim free space
-Date: Mon, 11 May 2015 14:47:26 +0300
-Message-ID: <CAOi1vP82mq27JMKm_ETwE0pzw5fG1x+tSnSx1904Fmc-hHhOtg@mail.gmail.com>
-References: <927CE7A8-9A06-4CC3-A687-87E153070635@gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: controlling which OSD goes to which PG / testing a fix
+Date: Mon, 11 May 2015 13:51:08 +0200
+Message-ID: <555097AC.6000000@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="WKSKPSoSQfwDr8cnsjba3XCx7upgXj5hf"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f172.google.com ([209.85.212.172]:35735 "EHLO
-	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751509AbbEKLr2 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 May 2015 07:47:28 -0400
-Received: by widdi4 with SMTP id di4so101917519wid.0
-        for <ceph-devel@vger.kernel.org>; Mon, 11 May 2015 04:47:26 -0700 (PDT)
-In-Reply-To: <927CE7A8-9A06-4CC3-A687-87E153070635@gmail.com>
+Received: from mail2.dachary.org ([91.121.57.175]:32861 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1753179AbbEKLvL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 May 2015 07:51:11 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?Q?Edgaras_Luko=C5=A1evi=C4=8Dius?= <edgaras.lukosevicius@gmail.com>
+To: Shylesh Kumar <shmohan@redhat.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, May 11, 2015 at 2:26 PM, Edgaras Luko=C5=A1evi=C4=8Dius
-<edgaras.lukosevicius@gmail.com> wrote:
-> Hello,
->
-> I have ceph pool (size=3D2) and three RBD images (2TB each) and I hav=
-e noticed, that deleting data does not reclaim data on ceph.
-> What I have done is mount RBD device as a loopback device loop0, moun=
-ted it to a filesystem, ran =E2=80=9Cfstrim=E2=80=9D and got response:
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--WKSKPSoSQfwDr8cnsjba3XCx7upgXj5hf
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-What do you mean by that?  Can you elaborate - paste the commands you
-used?
+Hi,
 
-Thanks,
+Sorry I did not get a chance to answer in time to your question on IRC.=20
 
-                Ilya
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+<shylesh> loicd: a ruleset having  {step take osd.0
+<shylesh>         step emit
+<shylesh> }  should choose osd.0 for all pgs right=20
+<shylesh> wats the error with this crushmap ruleset http://pastebin.com/y=
+Xn1t4sU
+<shylesh> i want all pgs to be on [0,1,3] which is working as expected
+<shylesh> but if 3 goesdown i want it to be [0,1,4] .. this is not happen=
+ing=20
+<loicd> shylesh: hi !
+<loicd> shylesh: looking at http://pastebin.com/yXn1t4sU (answering here =
+because that's the channel where non dev questions are best archived)
+<loicd> shylesh: that's a very unusual crush map. You want to precisely c=
+ontrol the order in which the OSDs are assigned to a placement group, is =
+that right ?=20
+<loicd> If that's so, maybe your use case would be better served by other=
+ means. What are you trying to achieve ? Measure the bandwidth between OS=
+Ds during repair maybe ?=20
+<shylesh> loicd: I want one group of PG mapped to [0,1,3] and another gro=
+up of pgs(may be from different pool) mapped to [0,1,2] and I will mark 3=
+ as out and 2 as down=20
+<shylesh> so that new group becomes [0,1,4] , osd4 will have degraded and=
+ misplaced pgs to get mapped
+<shylesh> there is a fix i want to test , degraded pgs should get priorit=
+y over misplaced pgs
+<shylesh> so now i want to see on osd4 degraded will be recovered first a=
+nd then misplaced
+<shylesh> now the mapping is working fine but if suppose 2 goes down i wi=
+ll be left with [0,1] for some reason 4 is not joining the replica group
+
+Could you show the fix that you want to test ? I may be able to figure ou=
+t a simpler strategy to verify that it does what is expected.
+
+Cheers
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--WKSKPSoSQfwDr8cnsjba3XCx7upgXj5hf
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlVQl6wACgkQ8dLMyEl6F21xJACbBq9EG5O3uBdWkxABywmrGqnC
+giQAoIcu4p0lBJ3UN8NvUgYWUZuc6+4D
+=5DSe
+-----END PGP SIGNATURE-----
+
+--WKSKPSoSQfwDr8cnsjba3XCx7upgXj5hf--
