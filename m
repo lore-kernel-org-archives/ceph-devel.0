@@ -1,30 +1,126 @@
-From: Josh Durgin <jdurgin@redhat.com>
-Subject: Re: rbd and the next hammer release v0.94.2
-Date: Mon, 11 May 2015 15:28:35 -0700
-Message-ID: <55512D13.5000204@redhat.com>
-References: <55509DC5.4090703@dachary.org>
+From: "Zhou, Yuan" <yuan.zhou@intel.com>
+Subject: RE: libcrush.so
+Date: Mon, 11 May 2015 22:39:59 +0000
+Message-ID: <06681238D8946F44A60AA400760A1CBF01F67155@SHSMSX104.ccr.corp.intel.com>
+References: <06681238D8946F44A60AA400760A1CBF01F60F19@SHSMSX104.ccr.corp.intel.com>
+ <99767EA2E27DD44DB4E9F9B9ACA458C03B313F2B@SSIEXCH-MB3.ssi.samsung.com>
+ <06681238D8946F44A60AA400760A1CBF01F632C2@SHSMSX104.ccr.corp.intel.com>
+ <alpine.DEB.2.00.1505101932560.28239@cobra.newdream.net>
+ <4C76A0D9F9998D47879EE649C8F7D7FFE1ACA9@FMSMSX108.amr.corp.intel.com>
+ <alpine.DEB.2.00.1505110958460.28239@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:36287 "EHLO mx1.redhat.com"
+Received: from mga11.intel.com ([192.55.52.93]:57291 "EHLO mga11.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750837AbbEKW2h (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 11 May 2015 18:28:37 -0400
-In-Reply-To: <55509DC5.4090703@dachary.org>
+	id S1752217AbbEKWkV convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 May 2015 18:40:21 -0400
+In-Reply-To: <alpine.DEB.2.00.1505110958460.28239@cobra.newdream.net>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Abhishek L <abhishek.lekshmanan@gmail.com>
+To: Sage Weil <sage@newdream.net>, "Cohen, David E" <david.e.cohen@intel.com>
+Cc: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>, Ceph Development <ceph-devel@vger.kernel.org>, "Yu, Zhidong" <zhidong.yu@intel.com>
 
-On 05/11/2015 05:17 AM, Loic Dachary wrote:
-> Hi Josh,
->
-> The next hammer release as found at https://github.com/ceph/ceph/tree/hammer passed the rbd suite (http://tracker.ceph.com/issues/11492#rbd). Do you think it is ready for QE to start their own round of testing ?
->
-> Cheers
->
-> P.S. http://tracker.ceph.com/issues/11492#Release-information has direct links to the pull requests merged into hammer since v0.94.1 in case you need more context about one of them.
->
+Yes Sage, I think this will work for us. 
+In fact we did tested in this way,  the first step is to make librados have the latest osd map and then based on the weight and the crush rule, it's able to use crush_do_rule to get the acting set. Is this approach right?
 
-Looks ready to me!
+-----Original Message-----
+From: Sage Weil [mailto:sage@newdream.net] 
+Sent: Tuesday, May 12, 2015 1:01 AM
+To: Cohen, David E
+Cc: James (Fei) Liu-SSI; Ceph Development; Yu, Zhidong; Zhou, Yuan
+Subject: RE: libcrush.so
+
+On Mon, 11 May 2015, Cohen, David E wrote:
+> The "ceph_get_osd_crush_location" method is made available via 
+> libcephfs. In deployment scenarios that don't include CephFS it will 
+> be ideal if this method is also available.  However, there is no 
+> equivalent method available via librados. Instead, it looks like you 
+> have to use the "rados_mon_command_target" to mimic the functionality 
+> of the command line tools.
+
+Yeah, okay.  Would adding those calls to librados address your use-case?
+
+As Greg mentioned, putting together a separate libcrush.so is a bit of work because the useful bits that encode/decode maps and so forth pull in a bunch of generic Ceph code and there will be some annoying linking issues to sort out if running alongside other Ceph code (like librados).  
+And even if we did all of that work, it'll push responsibility to the user to make sure they have the latest osdmap.  If the goal is to calculate mappings for a running cluster, adding to librados seems like the easiest path forward...
+
+sage
+
+> 
+> /dave.
+> 
+> https://github.com/ceph/ceph/blob/master/debian/libcephfs-java.jlibs
+> https://github.com/ceph/ceph/blob/master/src/include/cephfs/libcephfs.
+> h https://github.com/ceph/ceph/blob/master/src/libcephfs.cc
+> 
+> 
+> -----Original Message-----
+> From: Sage Weil [mailto:sage@newdream.net]
+> Sent: Sunday, May 10, 2015 10:34 PM
+> To: Zhou, Yuan
+> Cc: James (Fei) Liu-SSI; Ceph Development; Cohen, David E; Yu, Zhidong
+> Subject: RE: libcrush.so
+> 
+> On Sat, 9 May 2015, Zhou, Yuan wrote:
+> > Hi James,
+> > 
+> > This happens usually when the storage platform and applications are in segmented networks. For example, in a cluster with multiple RGW instances, if we could know the which RGW instance is the closest to primary copy, then we can do more efficient local read/write through some particular deployment. 
+> > There's one feature in Openstack Swift [1] which is able to provide the location of objects inside a cluster.
+> 
+> I think the place for this is librados--and I believe there is already a method to do this (I think... I know there is in libcephfs as the hadoop bindings use it).  That way you don't have to deal with the annoying details of getting an up to date map and so on.
+> 
+> sage
+> 
+> 
+> > 
+> > Thanks, -yuan
+> > 
+> > [1]
+> > https://github.com/openstack/swift/blob/master/swift/common/middlewa
+> > re
+> > /list_endpoints.py
+> > 
+> > -----Original Message-----
+> > From: James (Fei) Liu-SSI [mailto:james.liu@ssi.samsung.com]
+> > Sent: Saturday, May 9, 2015 1:40 AM
+> > To: Zhou, Yuan; Ceph Development
+> > Cc: Cohen, David E; Yu, Zhidong
+> > Subject: RE: libcrush.so
+> > 
+> > Hi Yuan,
+> >    Very interesting. Would be possible to know why application needs to access the cursh map directly instead of accessing through ceph tool?
+> > 
+> >   Regards,
+> >   James
+> > 
+> > -----Original Message-----
+> > From: ceph-devel-owner@vger.kernel.org 
+> > [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Zhou, Yuan
+> > Sent: Thursday, May 07, 2015 6:29 PM
+> > To: Ceph Development
+> > Cc: Cohen, David E; Yu, Zhidong
+> > Subject: libcrush.so
+> > 
+> > Ceph use crush algorithm to provide the mapping of objects to OSD servers. This is great for clients so they could talk to with these OSDs directly. However there are some scenarios where the application needs to access the crush map, for load-balancing as an example. 
+> > 
+> > Currently Ceph doesn't provides any API to render the layout. If your application needs to access the crush map you'll going to rely on the command 'ceph osd map pool_name obj_name'. With this libcrush.so we could let the application to choose which nodes to access. The other advantage is we could provide some other bindings(python, go) based on this also.
+> > 
+> > >From the git log we find libcrush was there before but removed out since Argonaut. Can anyone kindly share us the background of this change?
+> > 
+> > 
+> > Thanks, -yuan
+> > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> > in the body of a message to majordomo@vger.kernel.org More majordomo 
+> > info at  http://vger.kernel.org/majordomo-info.html
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> > in the body of a message to majordomo@vger.kernel.org More majordomo 
+> > info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> > 
+> 
+> 
