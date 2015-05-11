@@ -1,87 +1,138 @@
-From: Gregory Farnum <greg@gregs42.com>
-Subject: Re: Analyzing the nightlies
-Date: Mon, 11 May 2015 15:50:21 -0700
-Message-ID: <CAC6JEv_2wHzYeHseRAUx5guizswz2PsGE8wGVL=KpBYiBbkziw@mail.gmail.com>
-References: <554DD3D7.7090407@dachary.org>
+From: Sage Weil <sage@newdream.net>
+Subject: RE: libcrush.so
+Date: Mon, 11 May 2015 15:52:47 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1505111551480.28239@cobra.newdream.net>
+References: <06681238D8946F44A60AA400760A1CBF01F60F19@SHSMSX104.ccr.corp.intel.com> <99767EA2E27DD44DB4E9F9B9ACA458C03B313F2B@SSIEXCH-MB3.ssi.samsung.com> <06681238D8946F44A60AA400760A1CBF01F632C2@SHSMSX104.ccr.corp.intel.com> <alpine.DEB.2.00.1505101932560.28239@cobra.newdream.net>
+ <4C76A0D9F9998D47879EE649C8F7D7FFE1ACA9@FMSMSX108.amr.corp.intel.com> <alpine.DEB.2.00.1505110958460.28239@cobra.newdream.net> <06681238D8946F44A60AA400760A1CBF01F67155@SHSMSX104.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f180.google.com ([209.85.223.180]:32822 "EHLO
-	mail-ie0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750837AbbEKWuW convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 May 2015 18:50:22 -0400
-Received: by iepj10 with SMTP id j10so118012945iep.0
-        for <ceph-devel@vger.kernel.org>; Mon, 11 May 2015 15:50:21 -0700 (PDT)
-Received: from mail-ig0-f174.google.com (mail-ig0-f174.google.com. [209.85.213.174])
-        by mx.google.com with ESMTPSA id f11sm10689142iod.7.2015.05.11.15.50.21
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 11 May 2015 15:50:21 -0700 (PDT)
-Received: by igbsb11 with SMTP id sb11so85887860igb.0
-        for <ceph-devel@vger.kernel.org>; Mon, 11 May 2015 15:50:21 -0700 (PDT)
-In-Reply-To: <554DD3D7.7090407@dachary.org>
+Received: from cobra.newdream.net ([66.33.216.30]:57815 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751245AbbEKWws (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 May 2015 18:52:48 -0400
+In-Reply-To: <06681238D8946F44A60AA400760A1CBF01F67155@SHSMSX104.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Yuri Weinstein <yweinste@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: "Zhou, Yuan" <yuan.zhou@intel.com>
+Cc: "Cohen, David E" <david.e.cohen@intel.com>, "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>, Ceph Development <ceph-devel@vger.kernel.org>, "Yu, Zhidong" <zhidong.yu@intel.com>
 
-On Sat, May 9, 2015 at 2:31 AM, Loic Dachary <loic@dachary.org> wrote:
-> Hi Yuri,
->
-> It would be useful to add more information bout how the nightlies are=
- analyzed at
->
->    http://tracker.ceph.com/projects/ceph-releases/wiki/HOWTO_monitor_=
-the_automated_tests_AKA_nightlies
->
-> At this point my understanding is that you look over all of them and =
-you carry the burden of
->
-> * sorting out the environmental noise
-> * creating new bugs for errors for which there is no match in the tra=
-cker
-> * add a link to the failed job in pre-existing issues found in the tr=
-acker (useful to figure out the frequency and helps with debug when the=
-re are multiple outputs / logs)
->
-> You do so by using tools such as https://github.com/jcsp/scrape/blob/=
-master/scrape.py and maybe others and you also format your mail message=
-s so that they can be parsed by a program (although such a program does=
- not exist yet, it could go over all your messages and build a database=
- from the mails you sent).
->
-> In the http://lists.ceph.com/private.cgi/ceph-qa-ceph.com/ archives, =
-I see that Greg also regularly goes over the errors and other developer=
-s also do. What I'm not sure about is if it's best effort ? Is there a =
-time like bug scrubbing or sprint planning when developers say "Let's a=
-nalyze QA results and dig bugs" ?
+On Mon, 11 May 2015, Zhou, Yuan wrote:
+> Yes Sage, I think this will work for us. In fact we did tested in this 
+> way, the first step is to make librados have the latest osd map and then 
+> based on the weight and the crush rule, it's able to use crush_do_rule 
+> to get the acting set. Is this approach right?
 
-I know that Yuri looks at some nightlies but I'm not sure which ones
-he's responsible for =E2=80=94 I think it's the upgrade suites?
-In general analyzing the nightlies is (unfortunately? maybe
-positively) the team lead's responsibility to make happen. Right now I
-think that means we each pretty much go over (or ignore) the tests
-covering our area as it suits us; I send emails because I find it
-convenient but I know Sam mostly just makes bugs. Now that things have
-settled down some in the labs I'm planning to sett up a rotation
-amongst my team to cover them (it is *not* a small time commitment,
-sadly).
+Yeah, I think so.
 
-The most annoying part of the job is when the lab breaks =E2=80=94 real=
-izing
-that this means we can or cannot ignore such-and-such a set of
-symptoms, making sure that it's not something new in Ceph or the test
-that we changed, and then adjudicating responsibility for the fix
-between the very nebulous group of people whose fault or
-responsibility it might be. (We have a lot of hands in teuthology and
-a lot in the lab, not in an entirely overlapping set, and any one of
-them can cause breakage.) It's not always clear when I see a batch of
-runs failed over the weekend if the problem has been resolved yet or
-not. :(
--Greg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+There is already a wait_for_map() type call in librados, so I would make 
+the API call only calculate the mapping (using whatever the current map 
+is).  The caller can then do one call to ensure a fresh map and then 
+calculate N mappings without any additional map sync overhead.
+
+Sound right?
+
+sage
+
+
+> 
+> -----Original Message-----
+> From: Sage Weil [mailto:sage@newdream.net] 
+> Sent: Tuesday, May 12, 2015 1:01 AM
+> To: Cohen, David E
+> Cc: James (Fei) Liu-SSI; Ceph Development; Yu, Zhidong; Zhou, Yuan
+> Subject: RE: libcrush.so
+> 
+> On Mon, 11 May 2015, Cohen, David E wrote:
+> > The "ceph_get_osd_crush_location" method is made available via 
+> > libcephfs. In deployment scenarios that don't include CephFS it will 
+> > be ideal if this method is also available.  However, there is no 
+> > equivalent method available via librados. Instead, it looks like you 
+> > have to use the "rados_mon_command_target" to mimic the functionality 
+> > of the command line tools.
+> 
+> Yeah, okay.  Would adding those calls to librados address your use-case?
+> 
+> As Greg mentioned, putting together a separate libcrush.so is a bit of work because the useful bits that encode/decode maps and so forth pull in a bunch of generic Ceph code and there will be some annoying linking issues to sort out if running alongside other Ceph code (like librados).  
+> And even if we did all of that work, it'll push responsibility to the user to make sure they have the latest osdmap.  If the goal is to calculate mappings for a running cluster, adding to librados seems like the easiest path forward...
+> 
+> sage
+> 
+> > 
+> > /dave.
+> > 
+> > https://github.com/ceph/ceph/blob/master/debian/libcephfs-java.jlibs
+> > https://github.com/ceph/ceph/blob/master/src/include/cephfs/libcephfs.
+> > h https://github.com/ceph/ceph/blob/master/src/libcephfs.cc
+> > 
+> > 
+> > -----Original Message-----
+> > From: Sage Weil [mailto:sage@newdream.net]
+> > Sent: Sunday, May 10, 2015 10:34 PM
+> > To: Zhou, Yuan
+> > Cc: James (Fei) Liu-SSI; Ceph Development; Cohen, David E; Yu, Zhidong
+> > Subject: RE: libcrush.so
+> > 
+> > On Sat, 9 May 2015, Zhou, Yuan wrote:
+> > > Hi James,
+> > > 
+> > > This happens usually when the storage platform and applications are in segmented networks. For example, in a cluster with multiple RGW instances, if we could know the which RGW instance is the closest to primary copy, then we can do more efficient local read/write through some particular deployment. 
+> > > There's one feature in Openstack Swift [1] which is able to provide the location of objects inside a cluster.
+> > 
+> > I think the place for this is librados--and I believe there is already a method to do this (I think... I know there is in libcephfs as the hadoop bindings use it).  That way you don't have to deal with the annoying details of getting an up to date map and so on.
+> > 
+> > sage
+> > 
+> > 
+> > > 
+> > > Thanks, -yuan
+> > > 
+> > > [1]
+> > > https://github.com/openstack/swift/blob/master/swift/common/middlewa
+> > > re
+> > > /list_endpoints.py
+> > > 
+> > > -----Original Message-----
+> > > From: James (Fei) Liu-SSI [mailto:james.liu@ssi.samsung.com]
+> > > Sent: Saturday, May 9, 2015 1:40 AM
+> > > To: Zhou, Yuan; Ceph Development
+> > > Cc: Cohen, David E; Yu, Zhidong
+> > > Subject: RE: libcrush.so
+> > > 
+> > > Hi Yuan,
+> > >    Very interesting. Would be possible to know why application needs to access the cursh map directly instead of accessing through ceph tool?
+> > > 
+> > >   Regards,
+> > >   James
+> > > 
+> > > -----Original Message-----
+> > > From: ceph-devel-owner@vger.kernel.org 
+> > > [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Zhou, Yuan
+> > > Sent: Thursday, May 07, 2015 6:29 PM
+> > > To: Ceph Development
+> > > Cc: Cohen, David E; Yu, Zhidong
+> > > Subject: libcrush.so
+> > > 
+> > > Ceph use crush algorithm to provide the mapping of objects to OSD servers. This is great for clients so they could talk to with these OSDs directly. However there are some scenarios where the application needs to access the crush map, for load-balancing as an example. 
+> > > 
+> > > Currently Ceph doesn't provides any API to render the layout. If your application needs to access the crush map you'll going to rely on the command 'ceph osd map pool_name obj_name'. With this libcrush.so we could let the application to choose which nodes to access. The other advantage is we could provide some other bindings(python, go) based on this also.
+> > > 
+> > > >From the git log we find libcrush was there before but removed out since Argonaut. Can anyone kindly share us the background of this change?
+> > > 
+> > > 
+> > > Thanks, -yuan
+> > > 
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> > > in the body of a message to majordomo@vger.kernel.org More majordomo 
+> > > info at  http://vger.kernel.org/majordomo-info.html
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> > > in the body of a message to majordomo@vger.kernel.org More majordomo 
+> > > info at  http://vger.kernel.org/majordomo-info.html
+> > > 
+> > > 
+> > 
+> > 
+> 
+> 
