@@ -1,94 +1,114 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: EC backend benchmark
-Date: Tue, 12 May 2015 00:02:27 +0200
-Message-ID: <555126F3.1050607@dachary.org>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: EC backend benchmark
+Date: Mon, 11 May 2015 22:11:10 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD8A4FA@SACMBXIP01.sdcorp.global.sandisk.com>
 References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD8A41B@SACMBXIP01.sdcorp.global.sandisk.com>
+ <555126F3.1050607@dachary.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="ITAbtoFL2s4uu3Owue2QeUn9JxFTAE8Gv"
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:33243 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751693AbbEKWCa (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 May 2015 18:02:30 -0400
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD8A41B@SACMBXIP01.sdcorp.global.sandisk.com>
+Received: from mail-bn1bon0080.outbound.protection.outlook.com ([157.56.111.80]:38700
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751530AbbEKWNw convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 May 2015 18:13:52 -0400
+In-Reply-To: <555126F3.1050607@dachary.org>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
+To: Loic Dachary <loic@dachary.org>
 Cc: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---ITAbtoFL2s4uu3Owue2QeUn9JxFTAE8Gv
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: quoted-printable
+Thanks Loic..
+<< inline
+
+Regards
+Somnath
+-----Original Message-----
+=46rom: Loic Dachary [mailto:loic@dachary.org]
+Sent: Monday, May 11, 2015 3:02 PM
+To: Somnath Roy
+Cc: ceph-users@lists.ceph.com; Ceph Development
+Subject: Re: EC backend benchmark
 
 Hi,
 [Sorry I missed the body of your questions, here is my answer ;-]
 
 On 11/05/2015 23:13, Somnath Roy wrote:> Summary :
->=20
+>
 > -------------
->=20
-> =20
->=20
-> 1. It is doing pretty good in Reads and 4 Rados Bench clients are satur=
-ating 40 GB network. With more physical server, it is scaling almost line=
-arly and saturating 40 GbE on both the host.
->=20
-> =20
->=20
-> 2. As suspected with Ceph, problem is again with writes. Throughput wis=
-e it is beating replicated pools in significant numbers. But, it is not s=
-caling with multiple clients and not saturating anything.
->=20
-> =20
->=20
-> =20
->=20
+>
+>
+>
+> 1. It is doing pretty good in Reads and 4 Rados Bench clients are sat=
+urating 40 GB network. With more physical server, it is scaling almost =
+linearly and saturating 40 GbE on both the host.
+>
+>
+>
+> 2. As suspected with Ceph, problem is again with writes. Throughput w=
+ise it is beating replicated pools in significant numbers. But, it is n=
+ot scaling with multiple clients and not saturating anything.
+>
+>
+>
+>
+>
 > So, my question is the following.
->=20
-> =20
->=20
-> 1. Probably, nothing to do with EC backend, we are suffering because of=
- filestore inefficiencies. Do you think any tunable like EC stipe size (o=
-r anything else) will help here ?
+>
+>
+>
+> 1. Probably, nothing to do with EC backend, we are suffering because =
+of filestore inefficiencies. Do you think any tunable like EC stipe siz=
+e (or anything else) will help here ?
 
-I think Mark Nelson would be in a better position that me to answer as he=
- has conducted many experiments with erasure coded pools.
+I think Mark Nelson would be in a better position that me to answer as =
+he has conducted many experiments with erasure coded pools.
 
+[Somnath] Sure, Mark, any insight  ? :-)
 
-> 2. I couldn=92t make fault domain as =91host=92, because of HW limitati=
-on. Do you think will that play a role in performance for bigger k values=
- ?
+> 2. I couldn't make fault domain as 'host', because of HW limitation. =
+Do you think will that play a role in performance for bigger k values ?
 
-I don't see a reason why there would be a direct relationship between the=
- failure domain and the values of k. Do you have a specific example in mi=
-nd ?
+I don't see a reason why there would be a direct relationship between t=
+he failure domain and the values of k. Do you have a specific example i=
+n mind ?
 
-> 3. Even though it is not saturating 40 GbE for writes, do you think sep=
-arating out public/private network will help in terms of performance ?
+[Somnath] Nope, other than more network hops..If failure domain is OSD,=
+ more than one chunks could be within a host...But, since I have 40GbE =
+and not saturating network BW (for bigger cluster that probability is l=
+ess), IMO it shouldn't matter. I thought of checking with you.
+
+> 3. Even though it is not saturating 40 GbE for writes, do you think s=
+eparating out public/private network will help in terms of performance =
+?
 
 I don't think so. What is the bottleneck ? CPU or disk I/O ?
 
+[Somnath] For write, no resources (cpu/network/disk) are saturating.
+
 Cheers
 
---=20
+--
 Lo=EFc Dachary, Artisan Logiciel Libre
 
 
 
---ITAbtoFL2s4uu3Owue2QeUn9JxFTAE8Gv
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+________________________________
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
+PLEASE NOTE: The information contained in this electronic mail message =
+is intended only for the use of the designated recipient(s) named above=
+=2E If the reader of this message is not the intended recipient, you ar=
+e hereby notified that you have received this message in error and that=
+ any review, dissemination, distribution, or copying of this message is=
+ strictly prohibited. If you have received this communication in error,=
+ please notify the sender by telephone or e-mail (as shown above) immed=
+iately and destroy any and all copies of this message in your possessio=
+n (whether hard copies or electronically stored copies).
 
-iEYEARECAAYFAlVRJvMACgkQ8dLMyEl6F23kPQCgr+0HHZxdUTQtTIj7WqUV8lZ1
-2WsAoJJukyfmoG0JMaJIj112Pn39AQ9T
-=ZHYq
------END PGP SIGNATURE-----
-
---ITAbtoFL2s4uu3Owue2QeUn9JxFTAE8Gv--
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
