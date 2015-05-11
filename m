@@ -1,67 +1,2178 @@
 From: Loic Dachary <loic@dachary.org>
-Subject: Caching the erasure code decoding matrix
-Date: Mon, 11 May 2015 22:46:59 +0200
-Message-ID: <55511543.3040603@dachary.org>
+Subject: Re: EC backend benchmark
+Date: Mon, 11 May 2015 23:24:26 +0200
+Message-ID: <55511E0A.7010408@dachary.org>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD8A41B@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="v5aOR5fEuJkr57tav1JnvfCOrqbBfWNS2"
+ boundary="9WQrScbr9D0MkwgBTi0Dgo4VIBb0lDAVN"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:33166 "EHLO
+Received: from mail2.dachary.org ([91.121.57.175]:33210 "EHLO
 	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752363AbbEKUrB (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 May 2015 16:47:01 -0400
+	with ESMTP id S1751639AbbEKVY3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 May 2015 17:24:29 -0400
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD8A41B@SACMBXIP01.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andreas-Joachim Peters <andreas.joachim.peters@cern.ch>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@lists.ceph.com>
 
 This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---v5aOR5fEuJkr57tav1JnvfCOrqbBfWNS2
-Content-Type: text/plain; charset=utf-8
+--9WQrScbr9D0MkwgBTi0Dgo4VIBb0lDAVN
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: quoted-printable
 
-Hi Andreas,
+Hi,
 
-I gave a shot at implementing a cache to avoid computing the decoding mat=
-rix every time a 4KB stripe needs it, for the jerasure plugin, in the sam=
-e way you did it for the ISA plugin.=20
-
-The draft is at https://github.com/dachary/ceph/commit/a6fb5257fabd810704=
-405c8bc13743d1592ecc54 if you're curious. Then I did some benchmarking an=
-d was quite disappointed. It looks like whenever the matrix needs to be c=
-omputed jerasure_invert_matrix needs ~4000 cycles. Compared to the cost o=
-f galois_w08_region_multiply (~4 millions cycles), it is very small [1].
-
-With the ISA plugin ec_init_table is less expensive than jerasure_invert_=
-matrix with ~1200 cycles as well as the the function ec_encode_data_avx (=
-1.5 millions cycles) [2].
-
-In both cases though the order of magnitude remains (1000 to 1) and makes=
- me wonder if I'm not missing something.
-
-What do you think ?
+Thanks for sharing :-) Have you published the tools that you used to gath=
+er these results ? It would be great to have a way to reproduce the same =
+measures in different contexts.
 
 Cheers
 
-[1] jerasure profiling: make -j4 ceph_erasure_code_benchmark && rm bench.=
-callgrind &&  valgrind --tool=3Dcallgrind --callgrind-out-file=3Dbench.ca=
-llgrind      ./ceph_erasure_code_benchmark      --plugin jerasure      --=
-parameter directory=3D.libs --workload decode --verbose      --parameter =
-technique=3Dreed_sol_van      --parameter k=3D4      --parameter m=3D2   =
-   --iterations 1024 --erased 1 --erased 2 && kcachegrind bench.callgrind=
-=20
-[2] isa profiling: make -j4 ceph_erasure_code_benchmark && rm bench.callg=
-rind &&  valgrind --tool=3Dcallgrind --callgrind-out-file=3Dbench.callgri=
-nd      ./ceph_erasure_code_benchmark      --plugin isa      --parameter =
-directory=3D.libs --workload decode --verbose      --parameter technique=3D=
-reed_sol_van      --parameter k=3D4      --parameter m=3D2      --iterati=
-ons 1024 --erased 1 --erased 2 && kcachegrind bench.callgrind=20
+On 11/05/2015 23:13, Somnath Roy wrote:
+> =20
+>=20
+> Hi Loic and community,
+>=20
+> =20
+>=20
+> I have gathered the following data on EC backend (all flash). I have de=
+cided to use Jerasure since space saving is the utmost priority.
+>=20
+> =20
+>=20
+> Setup:
+>=20
+> --------
+>=20
+> =20
+>=20
+> 41 OSDs (each on 8 TB flash), 5 node Ceph cluster. 48 core HT enabled c=
+pu/64 GB RAM. Tested with Rados Bench clients.
+>=20
+> =20
+>=20
+> =20
+>=20
+> EC plug-in
+>=20
+> =09
+>=20
+> EC ratio
+>=20
+> =09
+>=20
+> EC fault domain
+>=20
+> =09
+>=20
+> Workload
+>=20
+> =09
+>=20
+> Total clients
+>=20
+> =09
+>=20
+> Num client Host
+>=20
+> =09
+>=20
+> Runtime (Sec)
+>=20
+> =09
+>=20
+> QD
+>=20
+> (single client)
+>=20
+> =09
+>=20
+> Latency/client
+>=20
+> (avg/Max)
+>=20
+> =09
+>=20
+> BW (aggregated)
+>=20
+> =09
+>=20
+> Object_size
+>=20
+> =09
+>=20
+> Node Cpu usage %
+>=20
+> =09
+>=20
+> BW/HT core
+>=20
+> Jerasure
+>=20
+> =09
+>=20
+> 9,3
+>=20
+> =09
+>=20
+> OSD
+>=20
+> =09
+>=20
+> PUT
+>=20
+> =09
+>=20
+> 4
+>=20
+> =09
+>=20
+> 1
+>=20
+> =09
+>=20
+> 100
+>=20
+> =09
+>=20
+> 64
+>=20
+> =09
+>=20
+> 0.5/1.2
+>=20
+> =09
+>=20
+> 1786 MB/S
+>=20
+> =09
+>=20
+> 4M
+>=20
+> =09
+>=20
+> 28%
+>=20
+> =09
+>=20
+> 132 MB/s
+>=20
+> Jerasure
+>=20
+> =09
+>=20
+> 9,3
+>=20
+> =09
+>=20
+> OSD
+>=20
+> =09
+>=20
+> PUT
+>=20
+> =09
+>=20
+> 8
+>=20
+> =09
+>=20
+> 2
+>=20
+> =09
+>=20
+> 100
+>=20
+> =09
+>=20
+> 64
+>=20
+> =09
+>=20
+> 0.9/2.1
+>=20
+> =09
+>=20
+> 2174 MB/s
+>=20
+> =09
+>=20
+> 4M
+>=20
+> =09
+>=20
+> 35%
+>=20
+> =09
+>=20
+> 129 MB/s
+>=20
+> Jerasure
+>=20
+> =09
+>=20
+> 4,1
+>=20
+> =09
+>=20
+> Host
+>=20
+> =09
+>=20
+> PUT
+>=20
+> =09
+>=20
+> 4
+>=20
+> =09
+>=20
+> 1
+>=20
+> =09
+>=20
+> 100
+>=20
+> =09
+>=20
+> 64
+>=20
+> =09
+>=20
+> 0.5/2.3
+>=20
+> =09
+>=20
+> 1737 MB/s
+>=20
+> =09
+>=20
+> 4M
+>=20
+> =09
+>=20
+> 14%
+>=20
+> =09
+>=20
+> 258 MB/s
+>=20
+> Jerasure
+>=20
+> =09
+>=20
+> 4,1
+>=20
+> =09
+>=20
+> Host
+>=20
+> =09
+>=20
+> PUT
+>=20
+> =09
+>=20
+> 8
+>=20
+> =09
+>=20
+> 2
+>=20
+> =09
+>=20
+> 100
+>=20
+> =09
+>=20
+> 64
+>=20
+> =09
+>=20
+> 1.0/25 (!)
+>=20
+> =09
+>=20
+> 1783 MB/s
+>=20
+> =09
+>=20
+> 4M
+>=20
+> =09
+>=20
+> 14%
+>=20
+> =09
+>=20
+> 265 MB/s
+>=20
+> Jerasure
+>=20
+> =09
+>=20
+> 15,3
+>=20
+> =09
+>=20
+> OSD
+>=20
+> =09
+>=20
+> PUT
+>=20
+> =09
+>=20
+> 4
+>=20
+> =09
+>=20
+> 1
+>=20
+> =09
+>=20
+> 100
+>=20
+> =09
+>=20
+> 64
+>=20
+> =09
+>=20
+> 0.6/1.4
+>=20
+> =09
+>=20
+> 1530 MB/s
+>=20
+> =09
+>=20
+> 4M
+>=20
+> =09
+>=20
+> 40%
+>=20
+> =09
+>=20
+> 79 MB/s
+>=20
+> Jerasure
+>=20
+> =09
+>=20
+> 15,3
+>=20
+> =09
+>=20
+> OSD
+>=20
+> =09
+>=20
+> PUT
+>=20
+> =09
+>=20
+> 8
+>=20
+> =09
+>=20
+> 2
+>=20
+> =09
+>=20
+> 100
+>=20
+> =09
+>=20
+> 64
+>=20
+> =09
+>=20
+> 1.0/4.7
+>=20
+> =09
+>=20
+> 1886 MB/s
+>=20
+> =09
+>=20
+> 4M
+>=20
+> =09
+>=20
+> 45%
+>=20
+> =09
+>=20
+> 87 MB/s
+>=20
+> Jerasure
+>=20
+> =09
+>=20
+> 6,2
+>=20
+> =09
+>=20
+> OSD
+>=20
+> =09
+>=20
+> PUT
+>=20
+> =09
+>=20
+> 4
+>=20
+> =09
+>=20
+> 1
+>=20
+> =09
+>=20
+> 100
+>=20
+> =09
+>=20
+> 64
+>=20
+> =09
+>=20
+> 0.5/1.2
+>=20
+> =09
+>=20
+> 1917 MB/s
+>=20
+> =09
+>=20
+> 4M
+>=20
+> =09
+>=20
+> 24%
+>=20
+> =09
+>=20
+> 166 MB/s
+>=20
+> Jerasure
+>=20
+> =09
+>=20
+> 6,2
+>=20
+> =09
+>=20
+> OSD
+>=20
+> =09
+>=20
+> PUT
+>=20
+> =09
+>=20
+> 8
+>=20
+> =09
+>=20
+> 2
+>=20
+> =09
+>=20
+> 100
+>=20
+> =09
+>=20
+> 64
+>=20
+> =09
+>=20
+> 0.8/2.2
+>=20
+> =09
+>=20
+> 2281 MB/s
+>=20
+> =09
+>=20
+> 4M
+>=20
+> =09
+>=20
+> 28%
+>=20
+> =09
+>=20
+> 170 MB/s
+>=20
+> Jerasure
+>=20
+> =09
+>=20
+> 6,2 (RS_r6_op)
+>=20
+> =09
+>=20
+> OSD
+>=20
+> =09
+>=20
+> PUT
+>=20
+> =09
+>=20
+> 4
+>=20
+> =09
+>=20
+> 1
+>=20
+> =09
+>=20
+> 100
+>=20
+> =09
+>=20
+> 64
+>=20
+> =09
+>=20
+> 0.5/1.2
+>=20
+> =09
+>=20
+> 1876 MB/s
+>=20
+> =09
+>=20
+> 4M
+>=20
+> =09
+>=20
+> 25%
+>=20
+> =09
+>=20
+> 156 MB/s
+>=20
+> Jerasure
+>=20
+> =09
+>=20
+> 6,2 (RS_r6_op)
+>=20
+> =09
+>=20
+> OSD
+>=20
+> =09
+>=20
+> PUT
+>=20
+> =09
+>=20
+> 8
+>=20
+> =09
+>=20
+> 2
+>=20
+> =09
+>=20
+> 100
+>=20
+> =09
+>=20
+> 64
+>=20
+> =09
+>=20
+> 0.8/1.9
+>=20
+> =09
+>=20
+> 2292 MB/s
+>=20
+> =09
+>=20
+> 4M
+>=20
+> =09
+>=20
+> 31%
+>=20
+> =09
+>=20
+> 154 MB/s
+>=20
+> *Jerasure*
+>=20
+> =09
+>=20
+> *6,2 (cauchy_orig)*
+>=20
+> =09
+>=20
+> *OSD*
+>=20
+> =09
+>=20
+> *PUT*
+>=20
+> =09
+>=20
+> *4*
+>=20
+> =09
+>=20
+> *1*
+>=20
+> =09
+>=20
+> *100*
+>=20
+> =09
+>=20
+> *64*
+>=20
+> =09
+>=20
+> *0.5/1.1*
+>=20
+> =09
+>=20
+> *2025 MB/s*
+>=20
+> =09
+>=20
+> *4M*
+>=20
+> =09
+>=20
+> *18%*
+>=20
+> =09
+>=20
+> *234 MB/s*
+>=20
+> *Jerasure*
+>=20
+> =09
+>=20
+> *6,2 (cauchy_orig)*
+>=20
+> =09
+>=20
+> *OSD*
+>=20
+> =09
+>=20
+> *PUT*
+>=20
+> =09
+>=20
+> *8*
+>=20
+> =09
+>=20
+> *2*
+>=20
+> =09
+>=20
+> *100*
+>=20
+> =09
+>=20
+> *64*
+>=20
+> =09
+>=20
+> *0.8/1.9*
+>=20
+> =09
+>=20
+> *2497 MB/s*
+>=20
+> =09
+>=20
+> *4M*
+>=20
+> =09
+>=20
+> *21%*
+>=20
+> =09
+>=20
+> *247 MB/s*
+>=20
+> Jerasure
+>=20
+> =09
+>=20
+> 6,2 (cauchy_good)
+>=20
+> =09
+>=20
+> OSD
+>=20
+> =09
+>=20
+> PUT
+>=20
+> =09
+>=20
+> 4
+>=20
+> =09
+>=20
+> 1
+>=20
+> =09
+>=20
+> 100
+>=20
+> =09
+>=20
+> 64
+>=20
+> =09
+>=20
+> 0.5/1.3
+>=20
+> =09
+>=20
+> 1947MB/s
+>=20
+> =09
+>=20
+> 4M
+>=20
+> =09
+>=20
+> 18%
+>=20
+> =09
+>=20
+> 225 MB/s
+>=20
+> Jerasure
+>=20
+> =09
+>=20
+> 6,2 (cauchy_good)
+>=20
+> =09
+>=20
+> OSD
+>=20
+> =09
+>=20
+> PUT
+>=20
+> =09
+>=20
+> 8
+>=20
+> =09
+>=20
+> 2
+>=20
+> =09
+>=20
+> 100
+>=20
+> =09
+>=20
+> 64
+>=20
+> =09
+>=20
+> 0.9/8.5
+>=20
+> =09
+>=20
+> 2336 MB/s
+>=20
+> =09
+>=20
+> 4M
+>=20
+> =09
+>=20
+> 21%
+>=20
+> =09
+>=20
+> 231 MB/s
+>=20
+> Jerasure
+>=20
+> =09
+>=20
+> 6,2 (liberation)
+>=20
+> =09
+>=20
+> OSD
+>=20
+> =09
+>=20
+> PUT
+>=20
+> =09
+>=20
+> 4
+>=20
+> =09
+>=20
+> 1
+>=20
+> =09
+>=20
+> 100
+>=20
+> =09
+>=20
+> 64
+>=20
+> =09
+>=20
+> 0.6/1.6
+>=20
+> =09
+>=20
+> 1806 MB/s
+>=20
+> =09
+>=20
+> 4M
+>=20
+> =09
+>=20
+> 16%
+>=20
+> =09
+>=20
+> 235 MB/s
+>=20
+> Jerasure
+>=20
+> =09
+>=20
+> 6,2 (liberation)
+>=20
+> =09
+>=20
+> OSD
+>=20
+> =09
+>=20
+> PUT
+>=20
+> =09
+>=20
+> 8
+>=20
+> =09
+>=20
+> 2
+>=20
+> =09
+>=20
+> 100
+>=20
+> =09
+>=20
+> 64
+>=20
+> =09
+>=20
+> 1.1/12
+>=20
+> =09
+>=20
+> 1969 MB/s
+>=20
+> =09
+>=20
+> 4M
+>=20
+> =09
+>=20
+> 17%
+>=20
+> =09
+>=20
+> 241 MB/s
+>=20
+> Jerasure
+>=20
+> =09
+>=20
+> 6,2 (blaum_roth)
+>=20
+> =09
+>=20
+> OSD
+>=20
+> =09
+>=20
+> PUT
+>=20
+> =09
+>=20
+> 4
+>=20
+> =09
+>=20
+> 1
+>=20
+> =09
+>=20
+> 100
+>=20
+> =09
+>=20
+> 64
+>=20
+> =09
+>=20
+> 0.5/1.5
+>=20
+> =09
+>=20
+> 1859 MB/s
+>=20
+> =09
+>=20
+> 4M
+>=20
+> =09
+>=20
+> 17%
+>=20
+> =09
+>=20
+> 227 MB/s
+>=20
+> Jerasure
+>=20
+> =09
+>=20
+> 6,2 (blaum_roth)
+>=20
+> =09
+>=20
+> OSD
+>=20
+> =09
+>=20
+> PUT
+>=20
+> =09
+>=20
+> 8
+>=20
+> =09
+>=20
+> 2
+>=20
+> =09
+>=20
+> 100
+>=20
+> =09
+>=20
+> 64
+>=20
+> =09
+>=20
+> 1.0/5.8
+>=20
+> =09
+>=20
+> 2042 MB/s
+>=20
+> =09
+>=20
+> 4M
+>=20
+> =09
+>=20
+> 19%
+>=20
+> =09
+>=20
+> 224 MB/s
+>=20
+> Jerasure
+>=20
+> =09
+>=20
+> 6,2 (liber8tion)
+>=20
+> =09
+>=20
+> OSD
+>=20
+> =09
+>=20
+> PUT
+>=20
+> =09
+>=20
+> 4
+>=20
+> =09
+>=20
+> 1
+>=20
+> =09
+>=20
+> 100
+>=20
+> =09
+>=20
+> 64
+>=20
+> =09
+>=20
+> 0.5/1.3
+>=20
+> =09
+>=20
+> 1809 MB/s
+>=20
+> =09
+>=20
+> 4M
+>=20
+> =09
+>=20
+> 17%
+>=20
+> =09
+>=20
+> 221 MB/s
+>=20
+> Jerasure
+>=20
+> =09
+>=20
+> 6,2 (liber8tion)
+>=20
+> =09
+>=20
+> OSD
+>=20
+> =09
+>=20
+> PUT
+>=20
+> =09
+>=20
+> 8
+>=20
+> =09
+>=20
+> 2
+>=20
+> =09
+>=20
+> 100
+>=20
+> =09
+>=20
+> 64
+>=20
+> =09
+>=20
+> 1.1/15.7
+>=20
+> =09
+>=20
+> 1749 MB/s
+>=20
+> =09
+>=20
+> 4M
+>=20
+> =09
+>=20
+> 16%
+>=20
+> =09
+>=20
+> 227 MB/s
+>=20
+> Jerasure
+>=20
+> =09
+>=20
+> 10,2 (cauchy_orig)
+>=20
+> =09
+>=20
+> OSD
+>=20
+> =09
+>=20
+> PUT
+>=20
+> =09
+>=20
+> 4
+>=20
+> =09
+>=20
+> 1
+>=20
+> =09
+>=20
+> 100
+>=20
+> =09
+>=20
+> 64
+>=20
+> =09
+>=20
+> 0.5/1.3
+>=20
+> =09
+>=20
+> 2066 MB/s
+>=20
+> =09
+>=20
+> 4M
+>=20
+> =09
+>=20
+> 20%
+>=20
+> =09
+>=20
+> 215 MB/s
+>=20
+> Jerasure
+>=20
+> =09
+>=20
+> 10,2 (cauchy_orig)
+>=20
+> =09
+>=20
+> OSD
+>=20
+> =09
+>=20
+> PUT
+>=20
+> =09
+>=20
+> 8
+>=20
+> =09
+>=20
+> 2
+>=20
+> =09
+>=20
+> 100
+>=20
+> =09
+>=20
+> 64
+>=20
+> =09
+>=20
+> 0.9/6.2
+>=20
+> =09
+>=20
+> 2019 MB/s
+>=20
+> =09
+>=20
+> 4M
+>=20
+> =09
+>=20
+> 24%
+>=20
+> =09
+>=20
+> 175 MB/s
+>=20
+> *Jerasure*
+>=20
+> =09
+>=20
+> *14,2 (cauchy_orig)*
+>=20
+> =09
+>=20
+> *OSD*
+>=20
+> =09
+>=20
+> *PUT*
+>=20
+> =09
+>=20
+> *4*
+>=20
+> =09
+>=20
+> *1*
+>=20
+> =09
+>=20
+> *100*
+>=20
+> =09
+>=20
+> *64*
+>=20
+> =09
+>=20
+> *0.5/1.5*
+>=20
+> =09
+>=20
+> *1872 MB/s*
+>=20
+> =09
+>=20
+> *4M*
+>=20
+> =09
+>=20
+> *18%*
+>=20
+> =09
+>=20
+> *216 MB/s*
+>=20
+> *Jerasure*
+>=20
+> =09
+>=20
+> *14,2 (cauchy_orig)*
+>=20
+> =09
+>=20
+> *OSD*
+>=20
+> =09
+>=20
+> *PUT*
+>=20
+> =09
+>=20
+> *8*
+>=20
+> =09
+>=20
+> *2*
+>=20
+> =09
+>=20
+> *100*
+>=20
+> =09
+>=20
+> *64*
+>=20
+> =09
+>=20
+> *1.0/7.4*
+>=20
+> =09
+>=20
+> *2043 Mb/s*
+>=20
+> =09
+>=20
+> *4M*
+>=20
+> =09
+>=20
+> *18%*
+>=20
+> =09
+>=20
+> *236 MB/s*
+>=20
+> Replication
+>=20
+> =09
+>=20
+> 2 replica
+>=20
+> =09
+>=20
+> Host
+>=20
+> =09
+>=20
+> PUT
+>=20
+> =09
+>=20
+> 4
+>=20
+> =09
+>=20
+> 1
+>=20
+> =09
+>=20
+> 100
+>=20
+> =09
+>=20
+> 64
+>=20
+> =09
+>=20
+> 0.7/8.8
+>=20
+> =09
+>=20
+> 1198 MB/s
+>=20
+> =09
+>=20
+> 4M
+>=20
+> =09
+>=20
+> 8%
+>=20
+> =09
+>=20
+> 311 MB/s
+>=20
+> Replication
+>=20
+> =09
+>=20
+> 2 replica
+>=20
+> =09
+>=20
+> Host
+>=20
+> =09
+>=20
+> PUT
+>=20
+> =09
+>=20
+> 8
+>=20
+> =09
+>=20
+> 2
+>=20
+> =09
+>=20
+> 100
+>=20
+> =09
+>=20
+> 64
+>=20
+> =09
+>=20
+> 1.7/33
+>=20
+> =09
+>=20
+> 1256 MB/s
+>=20
+> =09
+>=20
+> 4M
+>=20
+> =09
+>=20
+> 8%
+>=20
+> =09
+>=20
+> 327 MB/s
+>=20
+> Jerasure
+>=20
+> =09
+>=20
+> 9,3
+>=20
+> =09
+>=20
+> OSD
+>=20
+> =09
+>=20
+> GET
+>=20
+> =09
+>=20
+> 4
+>=20
+> =09
+>=20
+> 1
+>=20
+> =09
+>=20
+> 100
+>=20
+> =09
+>=20
+> 64
+>=20
+> =09
+>=20
+> 0.2/0.6
+>=20
+> =09
+>=20
+> 4338 MB/s
+>=20
+> =09
+>=20
+> 4M
+>=20
+> =09
+>=20
+> 24%
+>=20
+> =09
+>=20
+> 376 MB/s
+>=20
+> Jerasure
+>=20
+> =09
+>=20
+> 9,3
+>=20
+> =09
+>=20
+> OSD
+>=20
+> =09
+>=20
+> GET
+>=20
+> =09
+>=20
+> 8
+>=20
+> =09
+>=20
+> 2
+>=20
+> =09
+>=20
+> 100
+>=20
+> =09
+>=20
+> 64
+>=20
+> =09
+>=20
+> 0.2/0.9
+>=20
+> =09
+>=20
+> 8002 MB/s
+>=20
+> =09
+>=20
+> 4M
+>=20
+> =09
+>=20
+> 54%
+>=20
+> =09
+>=20
+> 308 MB/s
+>=20
+> Jerasure
+>=20
+> =09
+>=20
+> 4,1
+>=20
+> =09
+>=20
+> Host
+>=20
+> =09
+>=20
+> GET
+>=20
+> =09
+>=20
+> 4
+>=20
+> =09
+>=20
+> 1
+>=20
+> =09
+>=20
+> 100
+>=20
+> =09
+>=20
+> 64
+>=20
+> =09
+>=20
+> 0.2/0.7
+>=20
+> =09
+>=20
+> 4630 MB/s
+>=20
+> =09
+>=20
+> 4M
+>=20
+> =09
+>=20
+> 18%
+>=20
+> =09
+>=20
+> 535 MB/s
+>=20
+> Jerasure
+>=20
+> =09
+>=20
+> 4,1
+>=20
+> =09
+>=20
+> Host
+>=20
+> =09
+>=20
+> GET
+>=20
+> =09
+>=20
+> 8
+>=20
+> =09
+>=20
+> 2
+>=20
+> =09
+>=20
+> 100
+>=20
+> =09
+>=20
+> 64
+>=20
+> =09
+>=20
+> 0.2/0.7
+>=20
+> =09
+>=20
+> 8600 MB/s
+>=20
+> =09
+>=20
+> 4M
+>=20
+> =09
+>=20
+> 42%
+>=20
+> =09
+>=20
+> 426 MB/s
+>=20
+> *Jerasure*
+>=20
+> =09
+>=20
+> *14,2 (cauchy_orig)*
+>=20
+> =09
+>=20
+> *OSD*
+>=20
+> =09
+>=20
+> *GET*
+>=20
+> =09
+>=20
+> *4*
+>=20
+> =09
+>=20
+> *1*
+>=20
+> =09
+>=20
+> *100*
+>=20
+> =09
+>=20
+> *64*
+>=20
+> =09
+>=20
+> *0.2/0.7*
+>=20
+> =09
+>=20
+> *4329 MB/s*
+>=20
+> =09
+>=20
+> *4M*
+>=20
+> =09
+>=20
+> *24%*
+>=20
+> =09
+>=20
+> *375 MB/s*
+>=20
+> Jerasure
+>=20
+> =09
+>=20
+> 10,2 (cauchy_orig)
+>=20
+> =09
+>=20
+> OSD
+>=20
+> =09
+>=20
+> GET
+>=20
+> =09
+>=20
+> 4
+>=20
+> =09
+>=20
+> 1
+>=20
+> =09
+>=20
+> 100
+>=20
+> =09
+>=20
+> 64
+>=20
+> =09
+>=20
+> 0.2/0.6
+>=20
+> =09
+>=20
+> 4366 MB/s
+>=20
+> =09
+>=20
+> 4M
+>=20
+> =09
+>=20
+> 19%
+>=20
+> =09
+>=20
+> 478 MB/s
+>=20
+> Jerasure
+>=20
+> =09
+>=20
+> 6,2 (cauchy_orig)
+>=20
+> =09
+>=20
+> OSD
+>=20
+> =09
+>=20
+> GET
+>=20
+> =09
+>=20
+> 4
+>=20
+> =09
+>=20
+> 1
+>=20
+> =09
+>=20
+> 100
+>=20
+> =09
+>=20
+> 64
+>=20
+> =09
+>=20
+> 0.2/0.7
+>=20
+> =09
+>=20
+> 4370 MB/s
+>=20
+> =09
+>=20
+> 4M
+>=20
+> =09
+>=20
+> 16%
+>=20
+> =09
+>=20
+> 569 MB/s
+>=20
+> Jerasure
+>=20
+> =09
+>=20
+> 6,2
+>=20
+> =09
+>=20
+> OSD
+>=20
+> =09
+>=20
+> GET
+>=20
+> =09
+>=20
+> 4
+>=20
+> =09
+>=20
+> 1
+>=20
+> =09
+>=20
+> 100
+>=20
+> =09
+>=20
+> 64
+>=20
+> =09
+>=20
+> 0.2/0.5
+>=20
+> =09
+>=20
+> 4324 MB/s
+>=20
+> =09
+>=20
+> 4M
+>=20
+> =09
+>=20
+> 20%
+>=20
+> =09
+>=20
+> 450 MB/s
+>=20
+> Replication
+>=20
+> =09
+>=20
+> 2 replica
+>=20
+> =09
+>=20
+> Host
+>=20
+> =09
+>=20
+> GET
+>=20
+> =09
+>=20
+> 4
+>=20
+> =09
+>=20
+> 1
+>=20
+> =09
+>=20
+> 100
+>=20
+> =09
+>=20
+> 64
+>=20
+> =09
+>=20
+> 0.2/0.5
+>=20
+> =09
+>=20
+> 4418 MB/s
+>=20
+> =09
+>=20
+> 4M
+>=20
+> =09
+>=20
+> 8%
+>=20
+> =09
+>=20
+> 1150 MB/s
+>=20
+> Replication
+>=20
+> =09
+>=20
+> 2 replica
+>=20
+> =09
+>=20
+> Host
+>=20
+> =09
+>=20
+> GET
+>=20
+> =09
+>=20
+> 8
+>=20
+> =09
+>=20
+> 2
+>=20
+> =09
+>=20
+> 100
+>=20
+> =09
+>=20
+> 64
+>=20
+> =09
+>=20
+> 0.2/0.9
+>=20
+> =09
+>=20
+> 8935 MB/s
+>=20
+> =09
+>=20
+> 4M
+>=20
+> =09
+>=20
+> 18%
+>=20
+> =09
+>=20
+> 1034 MB/s
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> Summary :
+>=20
+> -------------
+>=20
+> =20
+>=20
+> 1. It is doing pretty good in Reads and 4 Rados Bench clients are satur=
+ating 40 GB network. With more physical server, it is scaling almost line=
+arly and saturating 40 GbE on both the host.
+>=20
+> =20
+>=20
+> 2. As suspected with Ceph, problem is again with writes. Throughput wis=
+e it is beating replicated pools in significant numbers. But, it is not s=
+caling with multiple clients and not saturating anything.
+>=20
+> =20
+>=20
+> =20
+>=20
+> So, my question is the following.
+>=20
+> =20
+>=20
+> 1. Probably, nothing to do with EC backend, we are suffering because of=
+ filestore inefficiencies. Do you think any tunable like EC stipe size (o=
+r anything else) will help here ?
+>=20
+> =20
+>=20
+> 2. I couldn=92t make fault domain as =91host=92, because of HW limitati=
+on. Do you think will that play a role in performance for bigger k values=
+ ?
+>=20
+> =20
+>=20
+> 3. Even though it is not saturating 40 GbE for writes, do you think sep=
+arating out public/private network will help in terms of performance ?
+>=20
+> =20
+>=20
+> =20
+>=20
+> Any feedback on this is much appreciated.
+>=20
+> =20
+>=20
+> =20
+>=20
+> Thanks & Regards
+>=20
+> Somnath
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+> =20
+>=20
+>=20
+> -----------------------------------------------------------------------=
+-------------------------------------------------------------------------=
+-------------------------------------------------------------------------=
+-------------------------------------------------------------------------=
+-------------------------------------------------------------------------=
+-------------------------------------------------------------------------=
+-------------------------------------------------------------------------=
+-------------------------------------------------------------------------=
+-------------------------------------------------------------------------=
+-------------------------------------------------------------------------=
+-------------------------------------------------------------------------=
+-------------------------------------------------------------------------=
+-------------------------------------------------------------------------=
+-------------------------------------------
+>=20
+> PLEASE NOTE: The information contained in this electronic mail message =
+is intended only for the use of the designated recipient(s) named above. =
+If the reader of this message is not the intended recipient, you are here=
+by notified that you have received this message in error and that any rev=
+iew, dissemination, distribution, or copying of this message is strictly =
+prohibited. If you have received this communication in error, please noti=
+fy the sender by telephone or e-mail (as shown above) immediately and des=
+troy any and all copies of this message in your possession (whether hard =
+copies or electronically stored copies).
+>=20
+
 --=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+Lo=EFc Dachary, Artisan Logiciel Libre
 
 
---v5aOR5fEuJkr57tav1JnvfCOrqbBfWNS2
+--9WQrScbr9D0MkwgBTi0Dgo4VIBb0lDAVN
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -69,9 +2180,9 @@ Content-Disposition: attachment; filename="signature.asc"
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2.0.22 (GNU/Linux)
 
-iEYEARECAAYFAlVRFUMACgkQ8dLMyEl6F22KOgCcCXLSRowiouSNXUrYuJThFY4+
-FXkAoJf5M7XhNvNp3/3DQHUe2pGbQmc/
-=6RAZ
+iEYEARECAAYFAlVRHgoACgkQ8dLMyEl6F23KIQCgnhp9+j3caTFCaYNLZvEoDh7Q
+I2oAoKHGHWg+tniR311SN7ocEwvK/nyz
+=PS+g
 -----END PGP SIGNATURE-----
 
---v5aOR5fEuJkr57tav1JnvfCOrqbBfWNS2--
+--9WQrScbr9D0MkwgBTi0Dgo4VIBb0lDAVN--
