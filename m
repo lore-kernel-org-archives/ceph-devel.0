@@ -1,146 +1,56 @@
-From: Gregory Farnum <greg@gregs42.com>
-Subject: Re: rados bench single instance vs. multiple instances
-Date: Mon, 11 May 2015 10:27:02 -0700
-Message-ID: <CAC6JEv-K_WXKj7LG41CNrNOnY77CWRWs-sb_gZ3Abh8gFvy3nw@mail.gmail.com>
-References: <BC97738F8E7C8742BABED7F06FB9DF916643E836@SATLEXDAG01.amd.com>
-	<alpine.DEB.2.00.1505111003060.28239@cobra.newdream.net>
-	<BC97738F8E7C8742BABED7F06FB9DF9166440A10@SATLEXDAG01.amd.com>
-	<CAC6JEv-M+JdR3CdqCaZchWtkrg7ou_k4gDXdPnR9jmJfe9DfzA@mail.gmail.com>
-	<BC97738F8E7C8742BABED7F06FB9DF9166440A3B@SATLEXDAG01.amd.com>
+From: Owen Synge <osynge@suse.com>
+Subject: Re: autodetecting init system.
+Date: Mon, 11 May 2015 19:26:48 +0200
+Message-ID: <5550E658.3010806@suse.com>
+References: <5550D903.8000802@suse.com> <5550DACA.4070504@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f178.google.com ([209.85.223.178]:35764 "EHLO
-	mail-ie0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751403AbbEKR1D convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 May 2015 13:27:03 -0400
-Received: by ieczm2 with SMTP id zm2so113805504iec.2
-        for <ceph-devel@vger.kernel.org>; Mon, 11 May 2015 10:27:03 -0700 (PDT)
-Received: from mail-ig0-f181.google.com (mail-ig0-f181.google.com. [209.85.213.181])
-        by mx.google.com with ESMTPSA id o9sm10113364ioe.35.2015.05.11.10.27.02
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 11 May 2015 10:27:02 -0700 (PDT)
-Received: by iget9 with SMTP id t9so76852987ige.1
-        for <ceph-devel@vger.kernel.org>; Mon, 11 May 2015 10:27:02 -0700 (PDT)
-In-Reply-To: <BC97738F8E7C8742BABED7F06FB9DF9166440A3B@SATLEXDAG01.amd.com>
+Received: from mail.emea.novell.com ([130.57.118.101]:37965 "EHLO
+	mail.emea.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751713AbbEKR1w (ORCPT
+	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+	Mon, 11 May 2015 13:27:52 -0400
+In-Reply-To: <5550DACA.4070504@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Deneau, Tom" <tom.deneau@amd.com>
-Cc: Sage Weil <sage@newdream.net>, ceph-devel <ceph-devel@vger.kernel.org>
+To: John Spray <john.spray@redhat.com>, ceph-devel@vger.kernel.org
 
-On Mon, May 11, 2015 at 10:25 AM, Deneau, Tom <tom.deneau@amd.com> wrot=
-e:
->
->
->> -----Original Message-----
->> From: Gregory Farnum [mailto:greg@gregs42.com]
->> Sent: Monday, May 11, 2015 12:18 PM
->> To: Deneau, Tom
->> Cc: Sage Weil; ceph-devel
->> Subject: Re: rados bench single instance vs. multiple instances
+On 05/11/2015 06:37 PM, John Spray wrote:
+> On 11/05/2015 17:29, Owen Synge wrote:
+>> Dear all,
 >>
->> On Mon, May 11, 2015 at 10:15 AM, Deneau, Tom <tom.deneau@amd.com> w=
-rote:
->> >
->> >
->> >> -----Original Message-----
->> >> From: Sage Weil [mailto:sage@newdream.net]
->> >> Sent: Monday, May 11, 2015 12:04 PM
->> >> To: Deneau, Tom
->> >> Cc: ceph-devel
->> >> Subject: Re: rados bench single instance vs. multiple instances
->> >>
->> >> On Mon, 11 May 2015, Deneau, Tom wrote:
->> >> > I have noticed the following while running rados bench seq read
->> >> > tests with a 40M object size
->> >> >
->> >> >     single rados bench, 4 concurrent ops,                     b=
-andwidth
->> =3D
->> >> 190 MB/s
->> >> >     4 copies of rados bench, 1 concurrent op each,  aggregate
->> >> > bandwidth =3D 310 MB/s
->> >> >
->> >> > and in fact the single rados bench seems limited to 190, no mat=
-ter
->> >> > how many
->> >> concurrent ops.
->> >> >
->> >> > I don't see this kind of behavior with a 4M object size.
->> >> >
->> >> > (The above are with caches dropped on the osd targets)
->> >> >
->> >> > It doesn't seem to be related to the total number of bytes bein=
-g
->> >> > processed by the single because if I don't drop the caches, bot=
-h
->> >> > the single rados bench and the 4-copy rados bench get much high=
-er
->> >> > numbers
->> >> > (600 vs. 900) but still the single rados bench appears limited,=
- no
->> >> > matter
->> >> how many concurrent ops are used.
->> >> >
->> >> > Is there kind of throttling going on by design here?
->> >>
->> >> It might be the librados throttles:
->> >>
->> >> OPTION(objecter_inflight_op_bytes, OPT_U64, 1024*1024*100) // max
->> >> in-flight data (both directions)
->> >> OPTION(objecter_inflight_ops, OPT_U64, 1024)               // max=
- in-
->> flight
->> >> ios
->> >>
->> >> IIRC these only affect librados.. which would include 'rados benc=
-h'.
->> >>
->> >> sage
->> >>
->> >
->> > I noticed those, and tried setting them higher but it didn't seem =
-to have
->> an effect.
->> > But maybe I didn't change it correctly.
->> >
->> > What I did:
->> >    * stop all osds
->> >    * add the following lines to ceph.conf
->> >      [osd]
->> >         objecter_inflight_op_bytes =3D 1048576000
+>> Many init systems are used in linux now. Some ceph code needs to know
+>> the init system. (I must admit I have not looked into Solaris, MacOS and
+>> BSD and probably should have)
 >>
->> This is a client-side configuration, so putting it in the OSD sectio=
-n won't
->> have any effect.
+>> It would be nice to have one function that detects the init system
 >>
->> Do note that even without this, having 1x4 requests outstanding is n=
-ot quite
->> the same as having 4x1 requests outstanding =E2=80=94 a single clien=
-t only gets one
->> thread to communicate with each OSD, so the cluster has a bit less
->> parallelism when outstanding requests map to the same OSD.
->> But I don't think that should be too obvious at this point.
->> -Greg
->>
->
-> OK, on the client side, I just put it in the [global] section.
-> That seemed to do the trick.
->
-> (I assume nothing else needs to be done for the client side).
->
-> What was the reason for this limit?
-> Should I expect any undesirable side effects from changing this value=
-?
+>> Since the init system can be specified in ceph and ceph-deploy
+>> explicitly it seems to be its reasonable to fail clearly to detect init
+>> system.
+> I think I'm missing some background here.  I was under the impression
+> that distros generally had a preferred init system (even if they let you
+> switch), and if another is in use then compatibility links are usually
+> provided (e.g. sysv-style calling through to systemd or vice versa). 
+> Given that, the distro packaging then uses whatever the "right" way to
+> start a service is for that distro, and it's up to the distro to make
+> sure that command is available.
 
-The limit is there to prevent undue memory usage by the Ceph clients;
-it's just a feedback throttle for anybody putting in data. If you've
-got the memory to allow increased usage, there's no downside.
--Greg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I am not sure that sysV can emulate systemd, but systemd can and does
+emulate sysV by default on SUSE and I think also debian .
+
+> Otherwise don't we descend into a kind of madness where a package
+> post-install script can't start a service, because it doesn't know what
+> command to run?
+
+I have not yet tested converting ubuntu or debian latest releases with
+non standard init systems (anything other than systemd).
+
+The main reason is I do expect the exact "madness" you predict, that
+said they claim support for this.
+
+best regards
+
+Owen
