@@ -1,135 +1,71 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: rados semantic changes
-Date: Sun, 10 May 2015 19:31:39 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1505101927130.28239@cobra.newdream.net>
-References: <alpine.DEB.2.00.1505061044140.28239@cobra.newdream.net> <1500936117.16594659.1431127115994.JavaMail.zimbra@redhat.com> <CAC6JEv-BO88qnp4-Pkd6Qy5C+-OsgFBJPRTNFtprBQONUqZf+w@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: RE: libcrush.so
+Date: Sun, 10 May 2015 19:34:04 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1505101932560.28239@cobra.newdream.net>
+References: <06681238D8946F44A60AA400760A1CBF01F60F19@SHSMSX104.ccr.corp.intel.com> <99767EA2E27DD44DB4E9F9B9ACA458C03B313F2B@SSIEXCH-MB3.ssi.samsung.com> <06681238D8946F44A60AA400760A1CBF01F632C2@SHSMSX104.ccr.corp.intel.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:44299 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751644AbbEKCbo (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 10 May 2015 22:31:44 -0400
-In-Reply-To: <CAC6JEv-BO88qnp4-Pkd6Qy5C+-OsgFBJPRTNFtprBQONUqZf+w@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:51780 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752099AbbEKCeF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 10 May 2015 22:34:05 -0400
+In-Reply-To: <06681238D8946F44A60AA400760A1CBF01F632C2@SHSMSX104.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@gregs42.com>
-Cc: Samuel Just <sjust@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Zhou, Yuan" <yuan.zhou@intel.com>
+Cc: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>, Ceph Development <ceph-devel@vger.kernel.org>, "Cohen, David E" <david.e.cohen@intel.com>, "Yu, Zhidong" <zhidong.yu@intel.com>
 
-On Fri, 8 May 2015, Gregory Farnum wrote:
-> Do we have any tickets or something motivating these? I'm not quite
-> sure which of these problems are things you noticed, versus things
-> we've seen in the field, versus stuff that might make our lives easier
-> in the future.
+On Sat, 9 May 2015, Zhou, Yuan wrote:
+> Hi James,
 > 
-> That said, my votes so far are
-> On Fri, May 8, 2015 at 4:18 PM, Samuel Just <sjust@redhat.com> wrote:
-> > So, the problem is sequences of piplined operations like:
-> >
-> > (object does not exist)
-> > 1. [exists_guard, write]
-> > 2. [write]
-> >
-> > Currently, if a client sends 1. and then 2. without waiting for 1. to complete, the guarantee is that even in the event of peering or a client crash the only visible orderings are [], [1], and [1, 2].  However, if both operations complete (with 1. returning ENOENT) and are then replayed, we will see a result of [2, 1].  1. will be executed first, but since 2. already completed, exists_guard will not error out, and the write will succeed.  2. will then return immediately with success since pg log will contain an entry indicating that it already happened.  Delete seems to be a special case of this.
-> >
-> > For the more general problem, it seems like the objecter cannot pipeline rw ops with any kind of write (including other rw ops).  This means the objecter in the case above would hold 2. back until 1. completes and is not in danger of being re-sent.  We'll need some machinery in the objecter to handle this part.
-> 
-> Although I think you mean it can't pipeline rw ops on the same object,
-> that still seems unpleasant ? especially for our more annoying
-> operations that might touch multiple objects.
-> 
-> >
-> > For this to work, we need the pg log to record that an op marked as w has been processed regardless of the result.  We can do this for a particular op type marked as w by ensuring that it always succeeds, by writing a noop log entry recording the result, or by giving up and marking that op rw.
-> >
-> > It seems to me that:
-> > 1) delete should always succeed.  We'll have to record a noop log entry to ensure that it is not replayed out of turn.
-> 
-> yes
-> 
-> >   - Or we can leave delete as it is and mark it rw.
-> > 2) omap and xattr set operations implicitly create the object and therefore always succeed.
-> 
-> that's not current behavior? yes
-> 
-> > 3) omap remove operations are marked as rw so they can return ENOENT.
-> >   - Otherwise, an omap remove operation on a non-existing object would have to add a noop entry to the log or implicitly create the object -- the latter would be particularly odd.
-> >   - Or, we could record a noop log entry with the return code.
-> 
-> This one ? I don't think log entries are very expensive, and I don't
-> think we want to serialize omap ops. In particular I think serializing
-> omap rm would be bad for rgw.
+> This happens usually when the storage platform and applications are in segmented networks. For example, in a cluster with multiple RGW instances, if we could know the which RGW instance is the closest to primary copy, then we can do more efficient local read/write through some particular deployment. 
+> There's one feature in Openstack Swift [1] which is able to provide the location of objects inside a cluster.
 
-Yeah, agree on these.  It'll be pretty easy to log noop items.
-
-We could also put a return value in those noop log entries (or, perhaps, 
-any log entry).  If I'm following correctly, that will allow the client to 
-pipeline RW ops.  I'm not sure that's the best idea in the general case 
-(e.g., if we expect the test to fail frequently), but an op flag 
-could indicate whether we want to record/log test failures (allowing 
-the client to pipeline) or whether the objecter will plug the request 
-stream for the object to keep things correct.
-
-Actually, I'm not really sure we'll want to cram all that into the 
-Objecter--it'll mean a hash_map by object that checks that there 
-aren't already in-flight rw ops on the given object, etc., which may have 
-a significant performance impact, all to guard against a sequence 
-very few clients will ever generate.
+I think the place for this is librados--and I believe there is already a 
+method to do this (I think... I know there is in libcephfs as the hadoop 
+bindings use it).  That way you don't have to deal with the annoying 
+details of getting an up to date map and so on.
 
 sage
 
 
 > 
-> > 4) I don't think there are any current object classes which should be marked w, but they should be carefully audited.
-> >
-> > On the implementation side, we probably need new versions of the affected librados calls (omap_set2?, blind_delete?) since we are changing the return values and there may be older code which relies on this behavior.
+> Thanks, -yuan
 > 
-> But then they'd also be preserving broken behavior, right? Perhaps
-> it's time to do something interesting with our versioning.
+> [1] https://github.com/openstack/swift/blob/master/swift/common/middleware/list_endpoints.py
 > 
-> >
-> > Write ordered reads also appear to be fundamentally broken in the current implementation for the same reason.  It seems like we'd have to handle that at the objecter level by marking the reads rw.
-> >
-> > We could also find a way to relax the ordering guarantees even further, but I fear that that would make it excessively difficult to reason about librados operation ordering.
-> >
-> > Thoughts?
-> > -Sam
-> >
-> > ----- Original Message -----
-> > From: "Sage Weil" <sweil@redhat.com>
-> > To: sjust@redhat.com, ceph-devel@vger.kernel.org
-> > Sent: Wednesday, May 6, 2015 10:47:11 AM
-> > Subject: rados semantic changes
-> >
-> > It sounds like we're kicking around two proposed changes:
-> >
-> > 1) A delete will never -ENOENT; a delete on a non-existent object is a
-> > success.  This is important for cache tiering, and allowing us to skip
-> > checking the base tier for certain client requests.
-> >
-> > 2) Any write will implicitly create the object.  If we want such a
-> > dependency (so we see ENOENT), the user can put an assert_exists in the op
-> > vector.
-> >
-> > I think what both of these amount to is that the writes have no read-side
-> > checks and will effectively never fail (except for true failure
-> > cases).  If the user wants some sort of failure, it will be explicit
-> > in the form of another read check in the op vector.
-> >
-> > Sam, is this what you're thinking?
-> >
-> > It's a subtle but real change in the semantics of rados ops, but I
-> > think now would be the time to make it...
-> >
-> > sage
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> -----Original Message-----
+> From: James (Fei) Liu-SSI [mailto:james.liu@ssi.samsung.com] 
+> Sent: Saturday, May 9, 2015 1:40 AM
+> To: Zhou, Yuan; Ceph Development
+> Cc: Cohen, David E; Yu, Zhidong
+> Subject: RE: libcrush.so
+> 
+> Hi Yuan,
+>    Very interesting. Would be possible to know why application needs to access the cursh map directly instead of accessing through ceph tool?
+> 
+>   Regards,
+>   James
+> 
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Zhou, Yuan
+> Sent: Thursday, May 07, 2015 6:29 PM
+> To: Ceph Development
+> Cc: Cohen, David E; Yu, Zhidong
+> Subject: libcrush.so
+> 
+> Ceph use crush algorithm to provide the mapping of objects to OSD servers. This is great for clients so they could talk to with these OSDs directly. However there are some scenarios where the application needs to access the crush map, for load-balancing as an example. 
+> 
+> Currently Ceph doesn't provides any API to render the layout. If your application needs to access the crush map you'll going to rely on the command 'ceph osd map pool_name obj_name'. With this libcrush.so we could let the application to choose which nodes to access. The other advantage is we could provide some other bindings(python, go) based on this also.
+> 
+> >From the git log we find libcrush was there before but removed out since Argonaut. Can anyone kindly share us the background of this change?
+> 
+> 
+> Thanks, -yuan
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
