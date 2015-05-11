@@ -1,83 +1,131 @@
-From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Subject: Re: rgw and the next hammer release v0.94.2
-Date: Mon, 11 May 2015 13:27:21 -0400 (EDT)
-Message-ID: <685374108.12313692.1431365241610.JavaMail.zimbra@redhat.com>
-References: <5550A0E3.8000006@dachary.org>
+From: Owen Synge <osynge@suse.com>
+Subject: Re: autodetecting init system.
+Date: Mon, 11 May 2015 19:28:03 +0200
+Message-ID: <5550E6A3.8000404@suse.com>
+References: <5550D903.8000802@suse.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx6-phx2.redhat.com ([209.132.183.39]:53109 "EHLO
-	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752233AbbEKR2a convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 May 2015 13:28:30 -0400
-In-Reply-To: <5550A0E3.8000006@dachary.org>
+Received: from mail.emea.novell.com ([130.57.118.101]:57995 "EHLO
+	mail.emea.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752384AbbEKR3U (ORCPT
+	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+	Mon, 11 May 2015 13:29:20 -0400
+In-Reply-To: <5550D903.8000802@suse.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Abhishek L <abhishek.lekshmanan@gmail.com>
+To: ceph-devel@vger.kernel.org
 
 
 
------ Original Message -----
-> From: "Loic Dachary" <loic@dachary.org>
-> To: "Yehuda Sadeh" <yehuda@redhat.com>
-> Cc: "Ceph Development" <ceph-devel@vger.kernel.org>, "Abhishek L" <ab=
-hishek.lekshmanan@gmail.com>
-> Sent: Monday, May 11, 2015 5:30:27 AM
-> Subject: rgw and the next hammer release v0.94.2
+On 05/11/2015 06:29 PM, Owen Synge wrote:
+> Dear all,
 >=20
-> Hi Yehuda,
+> Many init systems are used in linux now. Some ceph code needs to know
+> the init system. (I must admit I have not looked into Solaris, MacOS =
+and
+> BSD and probably should have)
 >=20
-> The next hammer release as found at https://github.com/ceph/ceph/tree=
-/hammer
-> passed the rgw suite (http://tracker.ceph.com/issues/11492#rgw). Note=
- that
-> the hammer branch does not yet include
-> https://github.com/ceph/ceph/pull/4568 (it was included in the tests
-> though). If https://github.com/ceph/ceph/pull/4568 is merged before Q=
-E
-> starts their round of testing, it will be in v0.94.2. If it is not me=
-rged,
-> it will have to wait until v0.94.3 is published. Either way is fine.
+> It would be nice to have one function that detects the init system
+>=20
+> Since the init system can be specified in ceph and ceph-deploy
+> explicitly it seems to be its reasonable to fail clearly to detect in=
+it
+> system.
+>=20
+> I see 4 ways I can see to detect init system.
+>=20
+> (A) Check pid 1.
+> (B) Use a database of OS to init mapping / compile time.
+> (C) look for init manipulation tools and infure the init system from =
+tools.
+>=20
+> Comments:
+> ~~~~~~~~
+>=20
+> (A1) systmd can be detected easily with.
+>=20
+>  grep -qs systemd /proc/1/comm
 
-I merged it in now.
+
+A further comment is how will this work in chroot / containers?
 
 >=20
-> Do you think the hammer branch is ready for QE to start their own rou=
-nd of
-> testing ?
+> (A2) With init scripts such as its hard to know what the init system.
 >=20
-
-Yes.
-
-Thanks,
-Yehuda
-
-> Cheers
+> (B1) For operating systems like RHEL, SLE, CENTOS, Fedora and scienti=
+fic
+> linux this works well.
 >=20
-> P.S. http://tracker.ceph.com/issues/11492#Release-information has dir=
-ect
-> links to the pull requests merged into hammer since v0.94.1 in case y=
-ou need
-> more context about one of them.
+> (B2) FOr operating systems like newer debian and ubuntu releases more
+> than one init system can be installed and used on the OS, so making a
+> database / doing it at compile time are not practical on all OS's
+>=20
+> (C1) This is fairly reliable.
+>=20
+> (C2) sysV tools have compatibility scripts / programs on other platfo=
+rms
+> so if you use a points system for each init system helper script you =
+can
+> infure systemd over sysV if sytemctrl exists for example.
+>=20
+> So to summarise this:
+> ~~~~~~~~~~~~~~~~~~~~
+>=20
+> (1) No one system is perfect in all cases.
+> (2) Combined these systesm can provide reliable init system detection=
+=2E
+>=20
+> My proposed approach.
+> ~~~~~~~~~~~~~~~~~~~~
+>=20
+> (I) Use all three approaches where each approach can provide and answ=
+er,
+> or fail to provide an answer.
+>=20
+> (II) Should any approaches disagree -> fail to detect init system.
+>=20
+> (III) Should all approaches agree -> then return init system.
+>=20
+> (III) Should no approaches provide an init system -> fail to return i=
+nit
+> system.
+>=20
+> Comments
+> ~~~~~~~~
+>=20
+> This multi layered and comparing way of doing init systems may seem
+> complete overkill, or maybe its useful.
+>=20
+> What do you guys think?
+>=20
+> Best regards
+>=20
+> Owen
+>=20
+>=20
+>=20
+>=20
 >=20
 > --
-> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >=20
->=20
->=20
->=20
->=20
->=20
->=20
->=20
->=20
->=20
->=20
->=20
->=20
->=20
+
+--=20
+SUSE LINUX GmbH, GF: Jeff Hawn, Jennifer Guild, Felix Imend=C3=B6rffer,=
+ HRB
+21284 (AG
+N=C3=BCrnberg)
+
+Maxfeldstra=C3=9Fe 5
+
+90409 N=C3=BCrnberg
+
+Germany
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
