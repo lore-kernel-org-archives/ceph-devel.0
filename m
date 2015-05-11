@@ -1,317 +1,138 @@
-From: Alexandre Oliva <oliva@gnu.org>
-Subject: Introduce ceph_ectool
-Date: Sun, 10 May 2015 23:03:04 -0300
-Message-ID: <orpp67j2g7.fsf@livre.home>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: rados semantic changes
+Date: Sun, 10 May 2015 19:31:39 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1505101927130.28239@cobra.newdream.net>
+References: <alpine.DEB.2.00.1505061044140.28239@cobra.newdream.net> <1500936117.16594659.1431127115994.JavaMail.zimbra@redhat.com> <CAC6JEv-BO88qnp4-Pkd6Qy5C+-OsgFBJPRTNFtprBQONUqZf+w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from linux-libre.fsfla.org ([208.118.235.54]:54748 "EHLO
-	linux-libre.fsfla.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751435AbbEKCSW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 10 May 2015 22:18:22 -0400
-Received: from freie.home (home.lxoliva.fsfla.org [172.31.160.22])
-	by linux-libre.fsfla.org (8.14.4/8.14.4/Debian-4.1ubuntu1) with ESMTP id t4B23YWo001883
-	for <ceph-devel@vger.kernel.org>; Mon, 11 May 2015 02:03:36 GMT
+Received: from mx1.redhat.com ([209.132.183.28]:44299 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751644AbbEKCbo (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 10 May 2015 22:31:44 -0400
+In-Reply-To: <CAC6JEv-BO88qnp4-Pkd6Qy5C+-OsgFBJPRTNFtprBQONUqZf+w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Gregory Farnum <greg@gregs42.com>
+Cc: Samuel Just <sjust@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-If a crush rule change wants to move shards of EC pools, and any file
-fails to read due to a bad block, the osd will crash, and to avoid
-further unexpected failures it must be kept down until other OSDs
-recover the PG.
+On Fri, 8 May 2015, Gregory Farnum wrote:
+> Do we have any tickets or something motivating these? I'm not quite
+> sure which of these problems are things you noticed, versus things
+> we've seen in the field, versus stuff that might make our lives easier
+> in the future.
+> 
+> That said, my votes so far are
+> On Fri, May 8, 2015 at 4:18 PM, Samuel Just <sjust@redhat.com> wrote:
+> > So, the problem is sequences of piplined operations like:
+> >
+> > (object does not exist)
+> > 1. [exists_guard, write]
+> > 2. [write]
+> >
+> > Currently, if a client sends 1. and then 2. without waiting for 1. to complete, the guarantee is that even in the event of peering or a client crash the only visible orderings are [], [1], and [1, 2].  However, if both operations complete (with 1. returning ENOENT) and are then replayed, we will see a result of [2, 1].  1. will be executed first, but since 2. already completed, exists_guard will not error out, and the write will succeed.  2. will then return immediately with success since pg log will contain an entry indicating that it already happened.  Delete seems to be a special case of this.
+> >
+> > For the more general problem, it seems like the objecter cannot pipeline rw ops with any kind of write (including other rw ops).  This means the objecter in the case above would hold 2. back until 1. completes and is not in danger of being re-sent.  We'll need some machinery in the objecter to handle this part.
+> 
+> Although I think you mean it can't pipeline rw ops on the same object,
+> that still seems unpleasant ? especially for our more annoying
+> operations that might touch multiple objects.
+> 
+> >
+> > For this to work, we need the pg log to record that an op marked as w has been processed regardless of the result.  We can do this for a particular op type marked as w by ensuring that it always succeeds, by writing a noop log entry recording the result, or by giving up and marking that op rw.
+> >
+> > It seems to me that:
+> > 1) delete should always succeed.  We'll have to record a noop log entry to ensure that it is not replayed out of turn.
+> 
+> yes
+> 
+> >   - Or we can leave delete as it is and mark it rw.
+> > 2) omap and xattr set operations implicitly create the object and therefore always succeed.
+> 
+> that's not current behavior? yes
+> 
+> > 3) omap remove operations are marked as rw so they can return ENOENT.
+> >   - Otherwise, an omap remove operation on a non-existing object would have to add a noop entry to the log or implicitly create the object -- the latter would be particularly odd.
+> >   - Or, we could record a noop log entry with the return code.
+> 
+> This one ? I don't think log entries are very expensive, and I don't
+> think we want to serialize omap ops. In particular I think serializing
+> omap rm would be bad for rgw.
 
-With ceph_ectool, you can recompute the contents of the broken file out
-of the object proper, if the PG is active, or out of files extracted
-from other active shards, and replace the broken file, so that the OSD
-won't crash any more.
+Yeah, agree on these.  It'll be pretty easy to log noop items.
 
-I'm aware of the jerasure example program that purports to do the same,
-but the erasures generated by it are not compatible with those generated
-by ceph, at least not for the cauchy_good erasures in my 4+4 setting.
-With ceph_ectool, I have managed to recover some severely degraded
-objects and recompute data and erasure codes of various files.
+We could also put a return value in those noop log entries (or, perhaps, 
+any log entry).  If I'm following correctly, that will allow the client to 
+pipeline RW ops.  I'm not sure that's the best idea in the general case 
+(e.g., if we expect the test to fail frequently), but an op flag 
+could indicate whether we want to record/log test failures (allowing 
+the client to pipeline) or whether the objecter will plug the request 
+stream for the object to keep things correct.
 
-Signed-off-by: Alexandre Oliva <oliva@gnu.org>
----
- src/tools/Makefile.am    |    6 +
- src/tools/ceph_ectool.cc |  247 ++++++++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 253 insertions(+)
- create mode 100644 src/tools/ceph_ectool.cc
+Actually, I'm not really sure we'll want to cram all that into the 
+Objecter--it'll mean a hash_map by object that checks that there 
+aren't already in-flight rw ops on the given object, etc., which may have 
+a significant performance impact, all to guard against a sequence 
+very few clients will ever generate.
 
-diff --git a/src/tools/Makefile.am b/src/tools/Makefile.am
-index 1a73995..e4ea0d0 100644
---- a/src/tools/Makefile.am
-+++ b/src/tools/Makefile.am
-@@ -102,6 +102,12 @@ ceph_mon_store_converter_SOURCES = tools/mon_store_converter.cc
- ceph_mon_store_converter_LDADD = $(LIBMON) $(LIBOS) $(CEPH_GLOBAL)
- bin_PROGRAMS += ceph_mon_store_converter
- 
-+ceph_ectool_SOURCES = tools/ceph_ectool.cc
-+ceph_ectool_CXXFLAGS = ${AM_CXXFLAGS} \
-+	-I$(top_srcdir)/src/erasure-code -I$(top_srcdir)/src/osd
-+ceph_ectool_LDADD = $(LIBOS) $(LIBOSD_TYPES) $(CEPH_GLOBAL)
-+bin_PROGRAMS += ceph_ectool
-+
- noinst_HEADERS += \
- 	tools/cephfs/JournalTool.h \
- 	tools/cephfs/JournalScanner.h \
-diff --git a/src/tools/ceph_ectool.cc b/src/tools/ceph_ectool.cc
-new file mode 100644
-index 0000000..04b3894
---- /dev/null
-+++ b/src/tools/ceph_ectool.cc
-@@ -0,0 +1,247 @@
-+/*
-+ * Ceph - scalable distributed file system
-+ *
-+ * Copyright (C) 2015 Alexandre Oliva <oliva@gnu.org>
-+ *
-+ * This is free software; you can redistribute it and/or
-+ * modify it under the terms of the GNU Lesser General Public
-+ * License version 2.1, as published by the Free Software
-+ * Foundation.  See file COPYING.
-+ *
-+ */
-+
-+#include "erasure-code/ErasureCodePlugin.h"
-+#include "osd/ECUtil.h"
-+#include "global/global_context.h"
-+#include "global/global_init.h"
-+#include "common/config.h"
-+#include <unistd.h>
-+#include <fcntl.h>
-+#include <sys/stat.h>
-+
-+int main(int argc, char *argv[]) {
-+  if (argc < 3)
-+    {
-+      cout << "usage: ceph_ectool profile stripe object shard0 shard1..." << endl
-+	   << "profile names a file with the output of the command" << endl
-+	   << "  ceph osd erasure-code-profile get <profile>" << endl
-+	   << "stripe is the stripe width of the pool" << endl
-+	   << "object is the full object filename" << endl
-+	   << "shard# is the filename of the given shard" << endl
-+	   << "files named -- or an empty string are assumed absent" << endl
-+	   << "files named but absent are created with decoded data" << endl
-+	   << "given object and shards are verified against each other" << endl;
-+      return 0;
-+    }
-+
-+  vector<const char *> ceph_options, def_args;
-+  global_init(&def_args, ceph_options, CEPH_ENTITY_TYPE_OSD,
-+	      CODE_ENVIRONMENT_UTILITY_NODOUT, 0);
-+  common_init_finish(g_ceph_context);
-+  g_conf = g_ceph_context->_conf;
-+  g_conf->set_val_or_die("log_to_stderr", "true");
-+  g_conf->set_val_or_die("err_to_stderr", "true");
-+  g_conf->apply_changes(NULL);
-+
-+  map<string,string> profile;
-+  {
-+    char *pname = argv[1];
-+    int fd = open(pname, O_RDONLY);
-+    if (fd == -1) {
-+      cerr << pname << " not found" << endl;
-+      return 1;
-+    }
-+    struct stat st;
-+    memset(&st, 0, sizeof(struct stat));
-+    int r = fstat(fd, &st);
-+    assert(r == 0);
-+    int len = st.st_size;
-+    char buf[len];
-+    if (read(fd, buf, len) != len) {
-+      cerr << pname << ": failed to read " << len << " bytes" << endl;
-+      return 1;
-+    }
-+    for (int i = 0; i < len; i++) {
-+      string first;
-+      while (i < len && buf[i] != '=' && buf[i] != '\n')
-+	first += buf[i++];
-+      if (i == len || buf[i] == '\n') {
-+	cerr << pname << " does not look like a profile at line " << first << endl;
-+	return 1;
-+      }
-+      assert (buf[i] == '=');
-+      i++;
-+      string second;
-+      while (i < len && buf[i] != '\n')
-+	second += buf[i++];
-+      if (i < len)
-+	assert (buf[i] == '\n');
-+      profile[first] = second;
-+    }
-+    if (!profile.count("plugin")) {
-+      cerr << pname << " does not define plugin=<name>" << endl;
-+      return 1;
-+    }
-+  }
-+  ErasureCodeInterfaceRef ec_impl;
-+  {
-+    stringstream ss;
-+    ceph::ErasureCodePluginRegistry::instance().
-+      factory(profile.find("plugin")->second,
-+	      profile, &ec_impl, ss);
-+    assert(ec_impl);
-+  }
-+
-+  int k = ec_impl->get_data_chunk_count();
-+  int m = ec_impl->get_coding_chunk_count();
-+  int stripe_width = atoi (argv[2]);
-+
-+  if (stripe_width <= 0 || stripe_width % k) {
-+    cerr << "stripe must be a positive multiple of " << k << endl;
-+    return 1;
-+  }
-+
-+  if (argc != 1 + 2 + 1 + k + m) {
-+    cerr << "not enough filenames given: got " << argc - 3
-+	 << ", expected " << 1 + k + m << endl;
-+    return 1;
-+  }
-+
-+  char **name = argv + 3;
-+  bool named[1+k+m];
-+  bool present[1+k+m];
-+  bufferlist data[1+k+m];
-+  int bufsize = 0;
-+  int objsize = 0;
-+  int size_file = -1;
-+  for (int i = 0, a = 2; i <= k + m; i++, a++) {
-+    named[i] = present[i] = name[i] && strcmp (name[i], "--");
-+    if (named[i]) {
-+      int fd = ::open(name[i], O_RDONLY);
-+      if (fd < 0)
-+	present[i] = false;
-+      else {
-+	struct stat st;
-+	memset(&st, 0, sizeof(struct stat));
-+	int r = fstat(fd, &st);
-+	assert(r == 0);
-+	int len = st.st_size;
-+	int xobjsize = len * (i ? k : 1);
-+	if (size_file == -1) {
-+	  if (xobjsize % stripe_width) {
-+	    if (!i)
-+	      cerr << "object must be padded to a multiple of "
-+		   << stripe_width << " bytes" << endl;
-+	    else
-+	      cerr << "shard must be padded to be a multiple of "
-+		   << stripe_width / k << " bytes" << endl;
-+	    return 1;
-+	  }
-+
-+	  bufsize = xobjsize / k;
-+	  objsize = xobjsize;
-+	  size_file = i;
-+	} else if ((i ? bufsize : objsize) != len) {
-+	  cerr << name[i] << " has " << len << " bytes, but based on "
-+	       << name[size_file] << " we expected "
-+	       << (i ? bufsize : objsize) << " bytes" << endl;
-+	  return 1;
-+	}
-+
-+	bufferptr bp(len);
-+	if (read(fd, bp.c_str(), len) != len) {
-+	  cerr << name[i] << ": failed to read " << len << " bytes" << endl;
-+	  return 1;
-+	}
-+
-+	close(fd);
-+
-+	data[i].push_back(bp);
-+      }
-+    }
-+  }
-+
-+  if (size_file == -1) {
-+    cerr << "no given file" << endl;
-+    return 1;
-+  }
-+
-+  ECUtil::stripe_info_t sinfo(ec_impl->get_data_chunk_count(), stripe_width);
-+
-+  if (!present[0]) {
-+    map<int, bufferlist> to_decode;
-+    map<int, bufferlist*> out;
-+    for (int i = 1, s = 0; i <= k + m; i++, s++) {
-+      if (!named[i])
-+	continue;
-+
-+      if (present[i])
-+	to_decode[s] = data[i];
-+      else
-+	out[s] = &data[i];
-+    }
-+
-+    if (named[0] && !present[0]) {
-+      if (ECUtil::decode(sinfo, ec_impl, to_decode, &data[0]) != 0) {
-+	cerr << "reconstruction of object failed" << endl;
-+	return 1;
-+      }
-+
-+      int fd = creat(name[0], 0600);
-+      if (data[0].write_fd(fd) != 0) {
-+	cerr << "failed to write to " << name[0] << endl;
-+	return 1;
-+      }
-+    }
-+
-+    if (ECUtil::decode(sinfo, ec_impl, to_decode, out) != 0) {
-+      cerr << "reconstruction of missing shards failed" << endl;
-+      return 1;
-+    }
-+
-+    for (int i = 1, s = 0; i <= k + m; i++, s++) {
-+      if (!named[i])
-+	continue;
-+
-+      if (!present[i]) {
-+	int fd = creat(name[i], 0600);
-+	if (data[i].write_fd(fd) != 0 || close(fd) != 0) {
-+	  cerr << "failed to write to " << name[i] << endl;
-+	  return 1;
-+	}
-+      }
-+    }
-+  } else {
-+    set<int> want;
-+    map<int, bufferlist> out;
-+
-+    for (int i = 1, s = 0; i <= k + m; i++, s++) {
-+      if (!named[i])
-+	continue;
-+
-+      want.insert(s);
-+    }
-+
-+    if (ECUtil::encode(sinfo, ec_impl, data[0], want, &out) != 0) {
-+      cerr << "encoding failed" << endl;
-+      return 1;
-+    }
-+
-+    for (int i = 1, s = 0; i <= k + m; i++, s++) {
-+      if (!named[i])
-+	continue;
-+
-+      if (!present[i]) {
-+	int fd = creat(name[i], 0600);
-+	if (out[s].write_fd(fd) != 0 || close(fd) != 0) {
-+	  cerr << "failed to write to " << name[i] << endl;
-+	  return 1;
-+	}
-+      } else if (!(data[i] == out[s])) {
-+	cerr << name[i] << " deviates from the data encoded from "
-+	     << name[0] << endl;
-+	return 1;
-+      }
-+    }
-+  }
-+}
+sage
 
--- 
-Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
-You must be the change you wish to see in the world. -- Gandhi
-Be Free! -- http://FSFLA.org/   FSF Latin America board member
-Free Software Evangelist|Red Hat Brasil GNU Toolchain Engineer
+
+> 
+> > 4) I don't think there are any current object classes which should be marked w, but they should be carefully audited.
+> >
+> > On the implementation side, we probably need new versions of the affected librados calls (omap_set2?, blind_delete?) since we are changing the return values and there may be older code which relies on this behavior.
+> 
+> But then they'd also be preserving broken behavior, right? Perhaps
+> it's time to do something interesting with our versioning.
+> 
+> >
+> > Write ordered reads also appear to be fundamentally broken in the current implementation for the same reason.  It seems like we'd have to handle that at the objecter level by marking the reads rw.
+> >
+> > We could also find a way to relax the ordering guarantees even further, but I fear that that would make it excessively difficult to reason about librados operation ordering.
+> >
+> > Thoughts?
+> > -Sam
+> >
+> > ----- Original Message -----
+> > From: "Sage Weil" <sweil@redhat.com>
+> > To: sjust@redhat.com, ceph-devel@vger.kernel.org
+> > Sent: Wednesday, May 6, 2015 10:47:11 AM
+> > Subject: rados semantic changes
+> >
+> > It sounds like we're kicking around two proposed changes:
+> >
+> > 1) A delete will never -ENOENT; a delete on a non-existent object is a
+> > success.  This is important for cache tiering, and allowing us to skip
+> > checking the base tier for certain client requests.
+> >
+> > 2) Any write will implicitly create the object.  If we want such a
+> > dependency (so we see ENOENT), the user can put an assert_exists in the op
+> > vector.
+> >
+> > I think what both of these amount to is that the writes have no read-side
+> > checks and will effectively never fail (except for true failure
+> > cases).  If the user wants some sort of failure, it will be explicit
+> > in the form of another read check in the op vector.
+> >
+> > Sam, is this what you're thinking?
+> >
+> > It's a subtle but real change in the semantics of rados ops, but I
+> > think now would be the time to make it...
+> >
+> > sage
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
