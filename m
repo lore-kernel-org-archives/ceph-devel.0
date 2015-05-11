@@ -1,57 +1,77 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: autodetecting init system.
-Date: Mon, 11 May 2015 10:34:56 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1505111032530.28239@cobra.newdream.net>
-References: <5550D903.8000802@suse.com> <5550DACA.4070504@redhat.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Caching the erasure code decoding matrix
+Date: Mon, 11 May 2015 22:46:59 +0200
+Message-ID: <55511543.3040603@dachary.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="v5aOR5fEuJkr57tav1JnvfCOrqbBfWNS2"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:56181 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751353AbbEKRe4 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 May 2015 13:34:56 -0400
-In-Reply-To: <5550DACA.4070504@redhat.com>
+Received: from mail2.dachary.org ([91.121.57.175]:33166 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752363AbbEKUrB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 May 2015 16:47:01 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <john.spray@redhat.com>
-Cc: Owen Synge <osynge@suse.com>, ceph-devel@vger.kernel.org
+To: Andreas-Joachim Peters <andreas.joachim.peters@cern.ch>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, 11 May 2015, John Spray wrote:
-> On 11/05/2015 17:29, Owen Synge wrote:
-> > Dear all,
-> > 
-> > Many init systems are used in linux now. Some ceph code needs to know
-> > the init system. (I must admit I have not looked into Solaris, MacOS and
-> > BSD and probably should have)
-> > 
-> > It would be nice to have one function that detects the init system
-> > 
-> > Since the init system can be specified in ceph and ceph-deploy
-> > explicitly it seems to be its reasonable to fail clearly to detect init
-> > system.
->
-> I think I'm missing some background here.  I was under the impression that
-> distros generally had a preferred init system (even if they let you switch),
-> and if another is in use then compatibility links are usually provided (e.g.
-> sysv-style calling through to systemd or vice versa).  Given that, the distro
-> packaging then uses whatever the "right" way to start a service is for that
-> distro, and it's up to the distro to make sure that command is available.
-> 
-> Otherwise don't we descend into a kind of madness where a package post-install
-> script can't start a service, because it doesn't know what command to run?
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--v5aOR5fEuJkr57tav1JnvfCOrqbBfWNS2
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-Ceph daemons are marked with a file like 
-/var/lib/ceph/$type/.../{upstart,systemd,sysvinit} indicating which init 
-system is responsible for starting/stopping them.  This is necesary mainly 
-because on most systems they *do* coexist--at least with sysvinit scripts.
+Hi Andreas,
 
-Owen, this is basically what ceph-detect-init is doing now, right?
+I gave a shot at implementing a cache to avoid computing the decoding mat=
+rix every time a 4KB stripe needs it, for the jerasure plugin, in the sam=
+e way you did it for the ISA plugin.=20
 
-IIRC the users are:
+The draft is at https://github.com/dachary/ceph/commit/a6fb5257fabd810704=
+405c8bc13743d1592ecc54 if you're curious. Then I did some benchmarking an=
+d was quite disappointed. It looks like whenever the matrix needs to be c=
+omputed jerasure_invert_matrix needs ~4000 cycles. Compared to the cost o=
+f galois_w08_region_multiply (~4 millions cycles), it is very small [1].
 
- - ceph-disk, when creating a new osd
- - ceph-deploy, when deploying a mon or mds or rgw
+With the ISA plugin ec_init_table is less expensive than jerasure_invert_=
+matrix with ~1200 cycles as well as the the function ec_encode_data_avx (=
+1.5 millions cycles) [2].
 
-Thanks!
-sage
+In both cases though the order of magnitude remains (1000 to 1) and makes=
+ me wonder if I'm not missing something.
 
+What do you think ?
+
+Cheers
+
+[1] jerasure profiling: make -j4 ceph_erasure_code_benchmark && rm bench.=
+callgrind &&  valgrind --tool=3Dcallgrind --callgrind-out-file=3Dbench.ca=
+llgrind      ./ceph_erasure_code_benchmark      --plugin jerasure      --=
+parameter directory=3D.libs --workload decode --verbose      --parameter =
+technique=3Dreed_sol_van      --parameter k=3D4      --parameter m=3D2   =
+   --iterations 1024 --erased 1 --erased 2 && kcachegrind bench.callgrind=
+=20
+[2] isa profiling: make -j4 ceph_erasure_code_benchmark && rm bench.callg=
+rind &&  valgrind --tool=3Dcallgrind --callgrind-out-file=3Dbench.callgri=
+nd      ./ceph_erasure_code_benchmark      --plugin isa      --parameter =
+directory=3D.libs --workload decode --verbose      --parameter technique=3D=
+reed_sol_van      --parameter k=3D4      --parameter m=3D2      --iterati=
+ons 1024 --erased 1 --erased 2 && kcachegrind bench.callgrind=20
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--v5aOR5fEuJkr57tav1JnvfCOrqbBfWNS2
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlVRFUMACgkQ8dLMyEl6F22KOgCcCXLSRowiouSNXUrYuJThFY4+
+FXkAoJf5M7XhNvNp3/3DQHUe2pGbQmc/
+=6RAZ
+-----END PGP SIGNATURE-----
+
+--v5aOR5fEuJkr57tav1JnvfCOrqbBfWNS2--
