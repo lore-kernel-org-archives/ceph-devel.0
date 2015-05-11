@@ -1,44 +1,143 @@
-From: Michael Kuriger <mk7193-CivJcMWXhi0@public.gmane.org>
-Subject: New Calamari server
-Date: Mon, 11 May 2015 21:43:34 +0000
-Message-ID: <D1766F6E.30C8E%mk7193@yp.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: autodetecting init system.
+Date: Mon, 11 May 2015 23:45:19 +0200
+Message-ID: <555122EF.4090105@dachary.org>
+References: <5550D903.8000802@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="xQeDEJLe3JKEW5Ba1ptrrseMbrTgN1a1m"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail2.dachary.org ([91.121.57.175]:33234 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752115AbbEKVpW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 May 2015 17:45:22 -0400
+In-Reply-To: <5550D903.8000802@suse.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Owen Synge <osynge@suse.com>, ceph-devel@vger.kernel.org
+
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--xQeDEJLe3JKEW5Ba1ptrrseMbrTgN1a1m
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Content-Language: en-US
-Content-ID: <C3CA51412BFF654CB6B77D6DD1D21FE0-CivJcMWXhi0@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
 
-I had an issue with my calamari server, so I built a new one from scratch.
- I=B9ve been struggling trying to get the new server to start up and see my
-ceph cluster.  I went so far as to remove salt and diamond from my ceph
-nodes and reinstalled again.  On my calamari server, it sees the hosts
-connected but doesn=B9t detect a cluster.  What am I missing?  I=B9ve set up
-many calamari servers on different ceph clusters, but this is the first
-time I=B9ve tried to build a new calamari server.
+Hi Owen,
 
-Here=B9s what I see on my calamari GUI:
+It would help to provide one or two use cases where (C) solves a problem =
+that (B) (that is the current ceph-detect-init approach) does not solve. =
+I sense there is something better in (C) but I can't think of a use case =
+just now (maybe because I've been thinking about erasure code all day :-)=
+=2E=20
 
-New Calamari Installation
+Cheers
 
-This appears to be the first time you have started Calamari and there are
-no clusters currently configured.
+On 11/05/2015 18:29, Owen Synge wrote:
+> Dear all,
+>=20
+> Many init systems are used in linux now. Some ceph code needs to know
+> the init system. (I must admit I have not looked into Solaris, MacOS an=
+d
+> BSD and probably should have)
+>=20
+> It would be nice to have one function that detects the init system
+>=20
+> Since the init system can be specified in ceph and ceph-deploy
+> explicitly it seems to be its reasonable to fail clearly to detect init=
 
-33 Ceph servers are connected to Calamari, but no Ceph cluster has been
-created yet. Please use ceph-deploy to create a cluster; please see the
-Inktank Ceph Enterprise documentation for more details.
+> system.
+>=20
+> I see 4 ways I can see to detect init system.
+>=20
+> (A) Check pid 1.
+> (B) Use a database of OS to init mapping / compile time.
+> (C) look for init manipulation tools and infure the init system from to=
+ols.
+>=20
+> Comments:
+> ~~~~~~~~
+>=20
+> (A1) systmd can be detected easily with.
+>=20
+>  grep -qs systemd /proc/1/comm
+>=20
+> (A2) With init scripts such as its hard to know what the init system.
+>=20
+> (B1) For operating systems like RHEL, SLE, CENTOS, Fedora and scientifi=
+c
+> linux this works well.
+>=20
+> (B2) FOr operating systems like newer debian and ubuntu releases more
+> than one init system can be installed and used on the OS, so making a
+> database / doing it at compile time are not practical on all OS's
+>=20
+> (C1) This is fairly reliable.
+>=20
+> (C2) sysV tools have compatibility scripts / programs on other platform=
+s
+> so if you use a points system for each init system helper script you ca=
+n
+> infure systemd over sysV if sytemctrl exists for example.
+>=20
+> So to summarise this:
+> ~~~~~~~~~~~~~~~~~~~~
+>=20
+> (1) No one system is perfect in all cases.
+> (2) Combined these systesm can provide reliable init system detection.
+>=20
+> My proposed approach.
+> ~~~~~~~~~~~~~~~~~~~~
+>=20
+> (I) Use all three approaches where each approach can provide and answer=
+,
+> or fail to provide an answer.
+>=20
+> (II) Should any approaches disagree -> fail to detect init system.
+>=20
+> (III) Should all approaches agree -> then return init system.
+>=20
+> (III) Should no approaches provide an init system -> fail to return ini=
+t
+> system.
+>=20
+> Comments
+> ~~~~~~~~
+>=20
+> This multi layered and comparing way of doing init systems may seem
+> complete overkill, or maybe its useful.
+>=20
+> What do you guys think?
+>=20
+> Best regards
+>=20
+> Owen
+>=20
+>=20
+>=20
+>=20
+>=20
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
 
-Thanks!
-Mike Kuriger
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--xQeDEJLe3JKEW5Ba1ptrrseMbrTgN1a1m
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlVRIu8ACgkQ8dLMyEl6F21IwwCeNMIIUe+mH1QX0eqfgzXWGC35
+JVAAnAngabPd/KtHWSoQ4H0TMhn2t1Xp
+=nWOs
+-----END PGP SIGNATURE-----
+
+--xQeDEJLe3JKEW5Ba1ptrrseMbrTgN1a1m--
