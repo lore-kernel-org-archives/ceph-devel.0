@@ -1,83 +1,48 @@
 From: Loic Dachary <loic@dachary.org>
-Subject: Re: Merging PRs on the command line
-Date: Wed, 13 May 2015 00:09:23 +0200
-Message-ID: <55527A13.8040208@dachary.org>
-References: <55527771.6060401@redhat.com>
+Subject: rados suite for firefly v0.80.10 is running
+Date: Wed, 13 May 2015 00:55:16 +0200
+Message-ID: <555284D4.7090006@dachary.org>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="SJQ2acQuTJaICRrHbWB6cgTVOGKXfmR6p"
+ boundary="s8mcU6p0eWe5cDbiALd0AeRndCuPCMnPL"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:34035 "EHLO
+Received: from mail2.dachary.org ([91.121.57.175]:34050 "EHLO
 	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S933734AbbELWJ0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 May 2015 18:09:26 -0400
-In-Reply-To: <55527771.6060401@redhat.com>
+	with ESMTP id S1754012AbbELWzV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 May 2015 18:55:21 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ken Dreyer <kdreyer@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Shu, Xinxin" <xinxin.shu@intel.com>, Nathan Cutler <ncutler@suse.cz>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
 This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---SJQ2acQuTJaICRrHbWB6cgTVOGKXfmR6p
+--s8mcU6p0eWe5cDbiALd0AeRndCuPCMnPL
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
 
-Hi Ken,
+Hi,
 
-That's handy, thank you :-)
+The necessary backport to ceph-qa-suite https://github.com/ceph/ceph-qa-s=
+uite/pull/435 turned out to be simple enough, which is good. I failed in =
+various interesting ways before figuring it out ;-) Now that it's merged,=
+ the firefly backport of http://tracker.ceph.com/issues/11429 that Xinxin=
+ prepared at https://github.com/ceph/ceph/pull/4556 should pass ( it did =
+at least once at http://pulpito.ceph.com/loic-2015-05-13_00:01:26-rados-f=
+irefly-backports---basic-multi/ ).=20
+
+The rados suite was scheduled as explained at http://tracker.ceph.com/iss=
+ues/11090#rados with normal priority. Since a lot of hammer related tests=
+ are running at the moment I guess it will take a few days to complete.=20
+
+Hopefully there won't be any other blockers for v0.80.10 :-)
 
 Cheers
-
-On 12/05/2015 23:58, Ken Dreyer wrote:
-> Hi Loic,
->=20
-> I was reading over some of the HOWTO docs in the wiki, and saw the step=
-s
-> here:
->=20
-> http://tracker.ceph.com/projects/ceph-releases/wiki/HOWTO_populate_the_=
-integration_branch
->=20
-> It looks like you're using curl to get the title of the PR, populating
-> the commit message, etc.
->=20
-> I've found that GitHub's "hub" utility is really great for simplifying
-> this. I typically merge PRs in GitHub by running the following in my
-> local clone:
->=20
->   git checkout master
->   git pull
->   hub merge https://github.com/ceph/ceph/pull/4658
->   git commit --amend (to add my "Reviewed-by" line to the merge commit)=
-
->   git push
->=20
-> The hub utility uses GitHub's APIs to automatically add a
-> non-fast-forward commit with a "regular" commit message that looks
-> more-or-less identical to the one that I'd get if I clicked the "Merge"=
-
-> button in the web UI.
->=20
-> The thing that sold me on this is that all the merge commits are
-> authored by "kdreyer@redhat.com" instead of my personal email address. =
-I
-> found that when I clicked the "Merge" button in GitHub's web UI, the
-> merge commits were authored by my primary email address for my
-> "ktdreyer" GitHub UID, which isn't really what I want for Ceph.
->=20
-> - Ken
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
 --=20
 Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
 
---SJQ2acQuTJaICRrHbWB6cgTVOGKXfmR6p
+--s8mcU6p0eWe5cDbiALd0AeRndCuPCMnPL
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -85,9 +50,9 @@ Content-Disposition: attachment; filename="signature.asc"
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2.0.22 (GNU/Linux)
 
-iEYEARECAAYFAlVSehMACgkQ8dLMyEl6F22G6gCghOE2I0RUE2Xy+49kuQPXX9wh
-Ep8AoI+ahtHh85Rs2GIcL8knEWJLkJRH
-=qniw
+iEYEARECAAYFAlVShNQACgkQ8dLMyEl6F21IiQCfQxA8kIkr4kPCeq1JLtdm0Kj/
+tdEAn3HDG0swBDuAhYqMRPn1nauFFMsJ
+=L//Z
 -----END PGP SIGNATURE-----
 
---SJQ2acQuTJaICRrHbWB6cgTVOGKXfmR6p--
+--s8mcU6p0eWe5cDbiALd0AeRndCuPCMnPL--
