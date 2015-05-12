@@ -1,59 +1,29 @@
-From: Michael Kuriger <mk7193@yp.com>
-Subject: Re: [ceph-users] New Calamari server
-Date: Tue, 12 May 2015 15:57:21 +0000
-Message-ID: <D177704C.31735%mk7193@yp.com>
-References: <D1766F6E.30C8E%mk7193@yp.com>
- <1308156878.221639216.1431419724991.JavaMail.zimbra@oxygem.tv>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: how to print bad crc data message body to logfile
+Date: Tue, 12 May 2015 09:37:54 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1505120937290.28239@cobra.newdream.net>
+References: <CABAwU-ZNTo==+H-RjsUP8Zp_0FMMGrzH6Ao3uXFOEXSD=8aVZQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx0b-0015cc01.pphosted.com ([67.231.156.132]:62903 "EHLO
-	mx0b-0015cc01.pphosted.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753365AbbELP6G (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 12 May 2015 11:58:06 -0400
-In-Reply-To: <1308156878.221639216.1431419724991.JavaMail.zimbra@oxygem.tv>
-Content-Language: en-US
-Content-ID: <A9FCF334E0BD5143BB5A84AD2C7B9E07@yp.com>
+Received: from cobra.newdream.net ([66.33.216.30]:33516 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932850AbbELQhz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 May 2015 12:37:55 -0400
+In-Reply-To: <CABAwU-ZNTo==+H-RjsUP8Zp_0FMMGrzH6Ao3uXFOEXSD=8aVZQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>
-Cc: ceph-users <ceph-users@ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: huang jun <hjwsm1989@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-SW4gbXkgY2FzZSwgSSBkaWQgcmVtb3ZlIGFsbCBzYWx0IGtleXMuICBUaGUgc2FsdCBwb3J0aW9u
-IG9mIG15IGluc3RhbGwgaXMNCndvcmtpbmcuICBJdOKAmXMganVzdCB0aGF0IHRoZSBjYWxhbWFy
-aSBzZXJ2ZXIgaXMgbm90IHNlZWluZyB0aGUgY2VwaA0KY2x1c3Rlci4NCg0KDQogDQoNCiANCk1p
-Y2hhZWwgS3VyaWdlcg0KU3IuIFVuaXggU3lzdGVtcyBFbmdpbmVlcg0KKiBtazcxOTNAeXAuY29t
-IHwoIDgxOC02NDktNzIzNQ0KDQoNCg0KDQoNCk9uIDUvMTIvMTUsIDE6MzUgQU0sICJBbGV4YW5k
-cmUgREVSVU1JRVIiIDxhZGVydW1pZXJAb2Rpc28uY29tPiB3cm90ZToNCg0KPkhpLCB3aGVuIHlv
-dSBoYXZlIHJlbW92ZSBzYWx0IGZyb20gbm9kZXMsDQo+DQo+ZG8geW91IGhhdmUgcmVtb3ZlIHRo
-ZSBvbGQgbWFzdGVyIGtleQ0KPi9ldGMvc2FsdC9wa2kvbWluaW9uL21pbmlvbl9tYXN0ZXIucHVi
-DQo+DQo+Pw0KPg0KPkkgaGF2ZSBhZGQgdGhlIHNhbWUgYmVoYXZpb3IgdGhhbiB5b3Ugd2hlbiBy
-ZWluc3RhbGxpbmcgY2FsYW1hcmkgc2VydmVyLA0KPmFuZCBwcmV2aW91c2x5IGluc3RhbGxlZCBz
-YWx0IG9uIGNlcGggbm9kZXMNCj4od2l0aCBleHBsaWNpdCBlcnJvciBhYm91dCB0aGUga2V5IGlu
-IC92YXIvbG9nL3NhbHQvbWluaW9uIG9uIGNlcGggbm9kZXMpDQo+DQo+LS0tLS0gTWFpbCBvcmln
-aW5hbCAtLS0tLQ0KPkRlOiAiTWljaGFlbCBLdXJpZ2VyIiA8bWs3MTkzQHlwLmNvbT4NCj7DgDog
-ImNlcGgtdXNlcnMiIDxjZXBoLXVzZXJzQGNlcGguY29tPg0KPkNjOiAiY2VwaC1kZXZlbCIgPGNl
-cGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPg0KPkVudm95w6k6IEx1bmRpIDExIE1haSAyMDE1IDIz
-OjQzOjM0DQo+T2JqZXQ6IFtjZXBoLXVzZXJzXSBOZXcgQ2FsYW1hcmkgc2VydmVyDQo+DQo+SSBo
-YWQgYW4gaXNzdWUgd2l0aCBteSBjYWxhbWFyaSBzZXJ2ZXIsIHNvIEkgYnVpbHQgYSBuZXcgb25l
-IGZyb20NCj5zY3JhdGNoLiANCj5Jwrl2ZSBiZWVuIHN0cnVnZ2xpbmcgdHJ5aW5nIHRvIGdldCB0
-aGUgbmV3IHNlcnZlciB0byBzdGFydCB1cCBhbmQgc2VlIG15DQo+Y2VwaCBjbHVzdGVyLiBJIHdl
-bnQgc28gZmFyIGFzIHRvIHJlbW92ZSBzYWx0IGFuZCBkaWFtb25kIGZyb20gbXkgY2VwaA0KPm5v
-ZGVzIGFuZCByZWluc3RhbGxlZCBhZ2Fpbi4gT24gbXkgY2FsYW1hcmkgc2VydmVyLCBpdCBzZWVz
-IHRoZSBob3N0cw0KPmNvbm5lY3RlZCBidXQgZG9lc27CuXQgZGV0ZWN0IGEgY2x1c3Rlci4gV2hh
-dCBhbSBJIG1pc3Npbmc/IEnCuXZlIHNldCB1cA0KPm1hbnkgY2FsYW1hcmkgc2VydmVycyBvbiBk
-aWZmZXJlbnQgY2VwaCBjbHVzdGVycywgYnV0IHRoaXMgaXMgdGhlIGZpcnN0DQo+dGltZSBJwrl2
-ZSB0cmllZCB0byBidWlsZCBhIG5ldyBjYWxhbWFyaSBzZXJ2ZXIuDQo+DQo+SGVyZcK5cyB3aGF0
-IEkgc2VlIG9uIG15IGNhbGFtYXJpIEdVSToNCj4NCj5OZXcgQ2FsYW1hcmkgSW5zdGFsbGF0aW9u
-DQo+DQo+VGhpcyBhcHBlYXJzIHRvIGJlIHRoZSBmaXJzdCB0aW1lIHlvdSBoYXZlIHN0YXJ0ZWQg
-Q2FsYW1hcmkgYW5kIHRoZXJlIGFyZQ0KPm5vIGNsdXN0ZXJzIGN1cnJlbnRseSBjb25maWd1cmVk
-Lg0KPg0KPjMzIENlcGggc2VydmVycyBhcmUgY29ubmVjdGVkIHRvIENhbGFtYXJpLCBidXQgbm8g
-Q2VwaCBjbHVzdGVyIGhhcyBiZWVuDQo+Y3JlYXRlZCB5ZXQuIFBsZWFzZSB1c2UgY2VwaC1kZXBs
-b3kgdG8gY3JlYXRlIGEgY2x1c3RlcjsgcGxlYXNlIHNlZSB0aGUNCj5Jbmt0YW5rIENlcGggRW50
-ZXJwcmlzZSBkb2N1bWVudGF0aW9uIGZvciBtb3JlIGRldGFpbHMuDQo+DQo+VGhhbmtzISANCj5N
-aWtlIEt1cmlnZXIgDQo+DQo+DQo+DQo+DQo+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX18NCj5jZXBoLXVzZXJzIG1haWxpbmcgbGlzdA0KPmNlcGgtdXNlcnNA
-bGlzdHMuY2VwaC5jb20NCj5odHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgt
-dXNlcnMtY2VwaC5jb20gDQoNCg==
+On Tue, 12 May 2015, huang jun wrote:
+> hi,all
+> we see the bad data crc warning and we have set debug_ms=20, but the
+> message body doesn't logged into /var/log/ceph/ceph-osd.x.log file.
+> Did i miss something? or i need to change the buffer::list::hexdump()
+> function and recompile it?
+
+Hrm, it should be there at level 20.  Unless that was added in a version 
+newer than what you're running?
+
+sage
