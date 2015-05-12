@@ -1,163 +1,30 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Ceph tag v0.94.1.1 etc.
-Date: Tue, 12 May 2015 19:34:37 +0200
-Message-ID: <555239AD.4080204@dachary.org>
-References: <5545F3F3.8030206@dachary.org> <1294313931.8466302.1430752677295.JavaMail.zimbra@redhat.com> <55479692.9040800@dachary.org>
+From: Goldwyn Rodrigues <rgoldwyn@suse.de>
+Subject: cephfs task: Extend file layout ceph_file_layout to specify a namespace
+ id
+Date: Tue, 12 May 2015 12:42:45 -0500
+Message-ID: <55523B95.9010005@suse.de>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="BVoBmqgSOQTToewatkpeo3t923sO65xvu"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:33885 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S933003AbbELRek (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 May 2015 13:34:40 -0400
-In-Reply-To: <55479692.9040800@dachary.org>
+Received: from cantor2.suse.de ([195.135.220.15]:58644 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932850AbbELRmt (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 12 May 2015 13:42:49 -0400
+Received: from relay2.suse.de (charybdis-ext.suse.de [195.135.220.254])
+	by mx2.suse.de (Postfix) with ESMTP id E1675AABA
+	for <ceph-devel@vger.kernel.org>; Tue, 12 May 2015 17:42:47 +0000 (UTC)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ken Dreyer <kdreyer@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---BVoBmqgSOQTToewatkpeo3t923sO65xvu
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Hi,
 
-Ping ?
+The task mentioned in $SUBJECT is a part of the multi-tenancy cephfs 
+project. Has someone taken the task as yet? If not, I am interested in 
+working on the task.
 
-On 04/05/2015 17:56, Loic Dachary wrote:
-> Hi,
->=20
-> It's great that the Ceph release published in Red Hat products is avail=
-able in this way. It would be quite difficult to reverse engineer that fr=
-om the sources distributed with the Red Velvet product. This is what I se=
-e at the moment:
->=20
-> $ git log --oneline --no-merges tags/v0.80.8..tags/v0.80.8.1
-> 00b6fb0 0.80.8.1
-> c7fdbab osdc: Constrain max number of in-flight read requests
-> ec711a9 Revert "Enforce cache size on read requests"
-> 0ccd1d3 Revert "rbd: ObjectCacher reads can hang when reading sparse fi=
-les"
-> f38b7b4 init-radosgw*: don't require rgw_socket_path to be defined
-> 2cbe4fb init-radosgw.sysv: set ulimit -n before starting daemon
-> d75a9e3 build: remove LIBPERFGLUE from LIBMDS
->=20
-> $ git log --oneline --no-merges tags/v0.94.1..tags/v0.94.1.1
-> f4f12a6 0.94.1.1
-> 235e555 init-radosgw: run RGW as root
-> 85faf5f rgw: remove meta file after deleting bucket The meta file is de=
-leted only if the bucket meta data is not synced
-> 0420c89 Move ceph-dencoder build to client
-> 32589dd Rework mds/Makefile.am to support a dencoder client build
-> e6911ec rgw/Makefile.am: Populate DENCODER_SOURCES properly
-> 46e85f7 Dencoder should never be built with tcmalloc
->=20
-> and I'd like to make sure this is going to be taken into account for th=
-e next v0.80.10[1] and v0.94.2[2].=20
->=20
-> As of today all of v0.94.1.1 is in the hammer branch upstream:
->=20
-> $ git --no-pager cherry -v ceph/hammer tags/v0.94.1.1
-> - 46e85f72a26186963836ee9071b93417ebc41af2 Dencoder should never be bui=
-lt with tcmalloc
-> - e6911ec0730b2786fe7b4b1345cd847140b3c0eb rgw/Makefile.am: Populate DE=
-NCODER_SOURCES properly
-> - 32589dd39c54e494364967a99db8bd11983c1998 Rework mds/Makefile.am to su=
-pport a dencoder client build
-> - 0420c8923696e624e41175e5354bcabdc2b362a8 Move ceph-dencoder build to =
-client
-> - 85faf5fd5b557f826dad8914f5c1751ff1658375 rgw: remove meta file after =
-deleting bucket The meta file is deleted only if the bucket meta data is =
-not synced
-> - 235e5556ddfde5114a79e54f061ea4accd613fc5 init-radosgw: run RGW as roo=
-t
-> + f4f12a634b0a92938d54d77910134dbbcdf864e6 0.94.1.1
->=20
-> and all but one of v0.80.8.1 are in the firefly branch upstream:
->=20
-> $ git --no-pager cherry -v ceph/firefly tags/v0.80.8.1
-> + d75a9e374e6581c57461018952ed125c929aeb30 build: remove LIBPERFGLUE fr=
-om LIBMDS
-> - 2cbe4fb6436dc959eb54cbcc5226b5ebff974d8d init-radosgw.sysv: set ulimi=
-t -n before starting daemon
-> - f38b7b407325d14868c2798035282f1e29e92485 init-radosgw*: don't require=
- rgw_socket_path to be defined
-> - 0ccd1d379d02da5371cebf962465757b0ac741ab Revert "rbd: ObjectCacher re=
-ads can hang when reading sparse files"
-> - ec711a9f30ac829f6504038063babd51f4b50488 Revert "Enforce cache size o=
-n read requests"
-> - c7fdbabb237a78aa7a7c282725ce438f60bc4d75 osdc: Constrain max number o=
-f in-flight read requests
-> + 00b6fb027bb6fccda6716ef577464d30d96959cc 0.80.8.1
->=20
-> What process do you suggest we put in place to converge our efforts ? I=
-t would set a good example that others can follow.
->=20
-> [1] Firefly v0.80.10 preparation http://tracker.ceph.com/issues/11090
-> [2] Hammer v0.94.2 preparation http://tracker.ceph.com/issues/11492
->=20
-> Cheers
->=20
-> On 04/05/2015 17:17, Ken Dreyer wrote:
->> Hi Loic,
->>
->> These are tags on the rhcs-* branches. These branches and tags more-or=
--less indicate what we're shipping Red Hat's "Ceph Storage" product downs=
-tream, which is basically a fork of 0.80.8 and 0.94.1.
->>
->> Instead of keeping these branches in an internal repository behind Red=
- Hat's firewall I figured I would push them to the public GitHub reposito=
-ry instead, since that fits with certain aspects of the way that Inktank =
-used to build its downstream product. (Re-using the same Jenkins build sy=
-stem upstream and downstream).
->>
->> I don't know how long we'll keep to this model; it's just the one that=
- works for the moment. I realize this mixes downstream and upstream in a =
-way that's a bit unconventional.
->>
->> - Ken
->>
->> ----- Original Message -----
->>> From: "Loic Dachary" <loic@dachary.org>
->>> To: "Ceph Development" <ceph-devel@vger.kernel.org>
->>> Sent: Sunday, May 3, 2015 4:09:55 AM
->>> Subject: Ceph tag v0.94.1.1 etc.
->>>
->>> Hi,
->>>
->>> At https://git.ceph.com/?p=3Dceph.git there are tags such as
->>>
->>> v0.94.1.1
->>> v0.80.8.1
->>>
->>> etc.
->>>
->>> What are they ?
->>>
->>> Cheers
->>>
->>> --
->>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->>>
->>>
->=20
+Regards,
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---BVoBmqgSOQTToewatkpeo3t923sO65xvu
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlVSOa0ACgkQ8dLMyEl6F222hACgu1MRJmKK+kW6Aqy27vvbKkMk
-KykAnRy+HoTwYhjZXx2OIgFLpJhl0Inn
-=40gW
------END PGP SIGNATURE-----
-
---BVoBmqgSOQTToewatkpeo3t923sO65xvu--
+-- 
+Goldwyn
