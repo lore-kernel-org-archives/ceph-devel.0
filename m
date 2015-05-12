@@ -1,95 +1,56 @@
-From: Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: Ceph User Committee Vote
-Date: Tue, 12 May 2015 17:06:31 -0400
-Message-ID: <CAAZbbf10aa7V4Htza5mq5ugVuxyKJxdhGe0K+=bh-GY7BLAgGg@mail.gmail.com>
-References: <CAAZbbf0u5Gnizq+rsny42cPNCYb4w2XB9RC1it7KhEfwVAx+Qw@mail.gmail.com>
-	<CA+7XDxOxzY8p5GxPsf6nooKhG50HGANEStwviCY9XJE+6yzAzQ@mail.gmail.com>
+From: kernel neophyte <neophyte.hacker001@gmail.com>
+Subject: Re: rocksdb with jemalloc
+Date: Tue, 12 May 2015 14:07:13 -0700
+Message-ID: <CAFkUHxdQAC-FM6-zEz-3wpMtQY9q1ka1eehFnZYcmg9vr68s9w@mail.gmail.com>
+References: <CAFkUHxeqZGTiipGdb1voLzRGChDnumRnOgd50Ce8LjBm6eL0Hg@mail.gmail.com>
+	<55516BB9.6000709@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CA+7XDxOxzY8p5GxPsf6nooKhG50HGANEStwviCY9XJE+6yzAzQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: eric mourgaya <eric.mourgaya-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Wido den Hollander <wido-fspyXLx8qC4@public.gmane.org>
-Cc: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Loic Dachary <ldachary-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "ceph-community-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-community-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-pa0-f54.google.com ([209.85.220.54]:35717 "EHLO
+	mail-pa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933128AbbELVHO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 May 2015 17:07:14 -0400
+Received: by pabtp1 with SMTP id tp1so26352357pab.2
+        for <ceph-devel@vger.kernel.org>; Tue, 12 May 2015 14:07:13 -0700 (PDT)
+In-Reply-To: <55516BB9.6000709@redhat.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Mark Nelson <mnelson@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-I know Wido was looking to potentially get on the ballot here, so am
-including him.
-
-I'm also including ceph-user and ceph-devel in case anyone else had
-strong feelings about leading the Ceph User Committee (CUC). Thanks.
-
-As Eric mentioned. If you are interested in taking on the role and
-responsibility of CUC Chair please submit your name, email, and a
-short bio that we can use in creating the voting ballot. Thanks.
-
-
-
-On Tue, May 12, 2015 at 5:03 PM, eric mourgaya <eric.mourgaya-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> Hi all,
->
-> The   campain to become ceph community header is openned.
-> I will collected all run  by email with Patrick.  if you are interested  by
-> this  please send us an  email with
->  you name and you company and if  possible a short  text to help  people  to
-> vote  for you.
-> I will compile all run  the 1th  June 2015 a  web  page.  We can start the
-> vote after this, and stop it the  10th  June.
->
-> thanks,
->
->
->
->
-> 2015-05-11 17:23 GMT+02:00 Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>:
+On Mon, May 11, 2015 at 7:55 PM, Mark Nelson <mnelson@redhat.com> wrote:
+> On 05/11/2015 08:41 PM, kernel neophyte wrote:
 >>
->> Hey all,
->>
->> By my count the last user committee election was almost exactly 12 mos
->> ago [1] (the original plan was for 6 mo elections, but I'm happy with
->> 1 year). Eric, would you like to organize the next set of elections so
->> we can make sure this is polished and clean by the time the Ceph Board
->> is launched in July? Thanks!
->>
->> [1]
->> https://wiki.ceph.com/Community/Ceph_User_Committee/2014-04_Ceph_User_Committee_Elections
+>> Hi,
 >>
 >>
+>> I am trying to use newstore + rocksdb + jemalloc. Currently rocksdb in
+>> ceph compiles only with tcmalloc and not with jemalloc.
+>>
+>> Is there any reason for this limitation ?
+>
+>
+> Heya, I'm guessing it's not by design, simply no one's tried doing it yet.
+> What are you running into?
+>
+I run into configure: error: --with-jemalloc called with
+--with-librocksdb_static, turn off
+                                --with-librocksdb-static or --with-jemalloc
+
+I do not see why  --with-librocksdb-static cannot be called --with-jemalloc
+
+I pulled in changes from mainline rocksdb, I am testing it out, I will
+send out a pull request to enable -with-librocksdb-static
+--with-jemalloc
+
+-Neo
+
+>>
+>> -Neo
 >> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >>
->> Best Regards,
->>
->> Patrick McGarry
->> Director Ceph Community || Red Hat
->> http://ceph.com  ||  http://community.redhat.com
->> @scuttlemonkey || @ceph
 >
->
->
->
-> --
-> Eric Mourgaya,
->
->
-> Respectons la planete!
-> Luttons contre la mediocrite!
-
-
-
--- 
-
-Best Regards,
-
-Patrick McGarry
-Director Ceph Community || Red Hat
-http://ceph.com  ||  http://community.redhat.com
-@scuttlemonkey || @ceph
