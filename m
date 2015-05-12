@@ -1,85 +1,49 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: trimming rbd image does not reclaim free space
-Date: Tue, 12 May 2015 10:09:04 +0200
-Message-ID: <5551B520.6070706@42on.com>
-References: <927CE7A8-9A06-4CC3-A687-87E153070635@gmail.com> <DC28859B-7D5F-4F5A-B4F9-BF5232FFED97@gmail.com>
+From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Subject: RE: rocksdb with jemalloc
+Date: Tue, 12 May 2015 08:11:43 +0000
+Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC021EF61E@shsmsx102.ccr.corp.intel.com>
+References: <CAFkUHxeqZGTiipGdb1voLzRGChDnumRnOgd50Ce8LjBm6eL0Hg@mail.gmail.com>
+ <55516BB9.6000709@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from websrv.42on.com ([31.25.102.167]:43393 "EHLO websrv.42on.com"
+Received: from mga01.intel.com ([192.55.52.88]:38898 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932093AbbELIJM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 12 May 2015 04:09:12 -0400
-In-Reply-To: <DC28859B-7D5F-4F5A-B4F9-BF5232FFED97@gmail.com>
+	id S932069AbbELILt (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 12 May 2015 04:11:49 -0400
+In-Reply-To: <55516BB9.6000709@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?B?RWRnYXJhcyBMdWtvxaFldmnEjWl1cw==?= <edgaras.lukosevicius@gmail.com>, ceph-devel@vger.kernel.org
+To: Mark Nelson <mnelson@redhat.com>, kernel neophyte <neophyte.hacker001@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 05/12/2015 09:48 AM, Edgaras Luko=C5=A1evi=C4=8Dius wrote:
-> Resending commands I=E2=80=99m using to everyone.
->=20
-> # rbd-fuse -p pool -r image /mnt/trim/
-> # losetup /dev/loop0 /mnt/trim/image
-> # kpartx -av /dev/loop0
-> # mount /dev/mapper/loop0p1 /mnt/fstrim/
-> # fstrim -v /mnt/fstrim/
-> /mnt/fstrim/: 1.1 TiB (1167710830592 bytes) trimmed
->=20
-> I don=E2=80=99t use qemu, kvm.
->=20
-
-I think that kernel 3.10 doesn't support TRIM yet. Afaik it was
-implemented in kernel 3.18 of 3.19
-
-Wido
-
-> Anyone can help with this?
->=20
->=20
-> On 11 May 2015, at 14:26, Edgaras Luko=C5=A1evi=C4=8Dius <edgaras.luk=
-osevicius@gmail.com> wrote:
->=20
->> Hello,
->>
->> I have ceph pool (size=3D2) and three RBD images (2TB each) and I ha=
-ve noticed, that deleting data does not reclaim data on ceph.
->> What I have done is mount RBD device as a loopback device loop0, mou=
-nted it to a filesystem, ran =E2=80=9Cfstrim=E2=80=9D and got response:
->>
->> /mnt/fstrim/: 1.1 TiB (1167710830592 bytes) trimmed
->> /mnt/fstrim/: 1 TiB (1125871489024 bytes) trimmed
->> /mnt/fstrim/: 1.1 TiB (1186485440512 bytes) trimmed
->>
->> Now that would be almost perfect if not the fact, that space was not=
- reclaimed on ceph itself. Using =E2=80=9Cceph osd df=E2=80=9D I still =
-see same usage even after waiting few hours and I don=E2=80=99t see any=
- action.
->>
->> I=E2=80=99m using ceph v0.94-2 and kernel 3.10
->>
->> What is the proper way to reclaim unused space? I had pool size 3, b=
-ut had to lower it to two, to avoid getting my OSDs full.
->>
->> Thanks.
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
-
---=20
-Wido den Hollander
-42on B.V.
-Ceph trainer and consultant
-
-Phone: +31 (0)20 700 9902
-Skype: contact42on
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGkgTmVvLA0KICAgICAgICAgIERpZCB5b3UgaGl0IHRoZSBlcnJvciB3aGVuIGRvaW5nIGNvbmZp
+Z3VyZT8gVGhlIGVycm9yIG1lc3NhZ2UgbG9va3MgbGlrZQ0KCQljb25maWd1cmU6IGVycm9yOiAt
+LXdpdGgtamVtYWxsb2MgY2FsbGVkIHdpdGggLS13aXRoLWxpYnJvY2tzZGJfc3RhdGljLCB0dXJu
+IG9mZg0KCQkJICAgICAgICAtLXdpdGgtbGlicm9ja3NkYi1zdGF0aWMgb3IgLS13aXRoLWplbWFs
+bG9jDQogICAgICAgICAgVGhpcyBpcyBiZWNhdXNlIFJvY2tzREIgdXNlIHRjbWFsbG9jIHNvIHdl
+IGNhbm5vdCBidWlsZCBpdCB3aXRoIGplbWFsbG9jLiANCiAgICAgICAgICBCdXQgaWYgeW91IG1h
+bnVhbGx5IGNsb25lIFJvY2tzREIgZnJvbSBmYWNlYm9vayAsIGNvbXBpbGUgaXQgYW5kIGluc3Rh
+bGwsIHRoZW4gdXNlIC4vY29uZmlndXJlIC0td2l0aC1saWJyb2Nrc2RiIC0td2l0aC1qZW1hbGxv
+Yywgc2VlbXMgd2UgY2FuIHBhc3MgdGhlIGJ1aWxkLg0KDQoJCQkJCQkJCQkJCQkJWGlhb3hpDQoN
+Cj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogY2VwaC1kZXZlbC1vd25lckB2
+Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVsLQ0KPiBvd25lckB2Z2VyLmtlcm5lbC5v
+cmddIE9uIEJlaGFsZiBPZiBNYXJrIE5lbHNvbg0KPiBTZW50OiBUdWVzZGF5LCBNYXkgMTIsIDIw
+MTUgMTA6NTYgQU0NCj4gVG86IGtlcm5lbCBuZW9waHl0ZTsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5l
+bC5vcmcNCj4gU3ViamVjdDogUmU6IHJvY2tzZGIgd2l0aCBqZW1hbGxvYw0KPiANCj4gT24gMDUv
+MTEvMjAxNSAwODo0MSBQTSwga2VybmVsIG5lb3BoeXRlIHdyb3RlOg0KPiA+IEhpLA0KPiA+DQo+
+ID4NCj4gPiBJIGFtIHRyeWluZyB0byB1c2UgbmV3c3RvcmUgKyByb2Nrc2RiICsgamVtYWxsb2Mu
+IEN1cnJlbnRseSByb2Nrc2RiIGluDQo+ID4gY2VwaCBjb21waWxlcyBvbmx5IHdpdGggdGNtYWxs
+b2MgYW5kIG5vdCB3aXRoIGplbWFsbG9jLg0KPiA+DQo+ID4gSXMgdGhlcmUgYW55IHJlYXNvbiBm
+b3IgdGhpcyBsaW1pdGF0aW9uID8NCj4gDQo+IEhleWEsIEknbSBndWVzc2luZyBpdCdzIG5vdCBi
+eSBkZXNpZ24sIHNpbXBseSBubyBvbmUncyB0cmllZCBkb2luZyBpdCB5ZXQuICBXaGF0DQo+IGFy
+ZSB5b3UgcnVubmluZyBpbnRvPw0KPiANCj4gPg0KPiA+IC1OZW8NCj4gPiAtLQ0KPiA+IFRvIHVu
+c3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBo
+LWRldmVsIg0KPiA+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5r
+ZXJuZWwub3JnIE1vcmUNCj4gbWFqb3Jkb21vDQo+ID4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2Vy
+bmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+ID4NCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUg
+ZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGlu
+IHRoZQ0KPiBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1v
+cmUgbWFqb3Jkb21vIGluZm8gYXQNCj4gaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8t
+aW5mby5odG1sDQo=
