@@ -1,96 +1,125 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: how to print bad crc data message body to logfile
-Date: Tue, 12 May 2015 16:17:49 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1505121616520.20395@cobra.newdream.net>
-References: <CABAwU-ZNTo==+H-RjsUP8Zp_0FMMGrzH6Ao3uXFOEXSD=8aVZQ@mail.gmail.com> <alpine.DEB.2.00.1505120937290.28239@cobra.newdream.net> <CABAwU-ZsQR8eNjLS0RvvKrTO26=YmZ-0DbwQDNtqgb+wdnwF1g@mail.gmail.com> <alpine.DEB.2.00.1505120956590.28239@cobra.newdream.net>
- <CABAwU-aVyJ=ix5Rqm0eRbcjhDjJoi_3STgw-MyB-1_0X5Yc6Gw@mail.gmail.com> <CABAwU-b0y4+heqo+Xuj4JvSOcmJpq45JPENo0RzG0R69OD3_1Q@mail.gmail.com>
+From: Bruce McFarland <Bruce.McFarland-rnQ3HPfPGGWsvWnuDiJtQA@public.gmane.org>
+Subject: Does anyone understand Calamari??
+Date: Tue, 12 May 2015 23:34:41 +0000
+Message-ID: <7E8CF9C16F722345A89076330719CB1F4A82525D@EXMAIL1.taec.toshiba.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:35633 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934025AbbELXRu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 May 2015 19:17:50 -0400
-In-Reply-To: <CABAwU-b0y4+heqo+Xuj4JvSOcmJpq45JPENo0RzG0R69OD3_1Q@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: huang jun <hjwsm1989@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: multipart/mixed; boundary="===============0494808566=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: "ceph-calamari-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-calamari-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, "ceph-devel
+	(ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org)" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Wed, 13 May 2015, huang jun wrote:
-> how to redirect the data.hexdump() to a log file,it's print to screen
-> when we use "tail -f /var/log/ceph/ceph-osd.x.log"  dynamically
-> monitor the log file. i'm not familiar with ceph's debug system code,
-> so where should i begin?
+--===============0494808566==
+Content-Language: en-US
+Content-Type: multipart/alternative;
+	boundary="_000_7E8CF9C16F722345A89076330719CB1F4A82525DEXMAIL1taectosh_"
 
-If debug ms = 20 in the [osd] section, it really should be logged there.  
-You can verify the setting with
+--_000_7E8CF9C16F722345A89076330719CB1F4A82525DEXMAIL1taectosh_
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 
- ceph daemon osd.NNN config show | grep debug_ms
+Increasing the audience since ceph-calamari is not responsive. What salt ev=
+ent/info does the Calamari Master expect to see from the ceph-mon to determ=
+ine there is an working cluster? I had to change servers hosting the calama=
+ri master and can't get the new machine to recognize the cluster. The 'salt=
+ \* ceph.get_heartbeats' returns monmap, fsid, ver, epoch, etc for the moni=
+tor and all of the osd's. Can anyone point me to docs or code that might en=
+lighten me to what I'm overlooking? Thanks.
 
-The OSD doesn't generally log anything to stdout/stderr (except during 
-startup)...
+--_000_7E8CF9C16F722345A89076330719CB1F4A82525DEXMAIL1taectosh_
+Content-Type: text/html; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 
-sage
+<html xmlns:v=3D"urn:schemas-microsoft-com:vml" xmlns:o=3D"urn:schemas-micr=
+osoft-com:office:office" xmlns:w=3D"urn:schemas-microsoft-com:office:word" =
+xmlns:m=3D"http://schemas.microsoft.com/office/2004/12/omml" xmlns=3D"http:=
+//www.w3.org/TR/REC-html40">
+<head>
+<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dus-ascii"=
+>
+<meta name=3D"Generator" content=3D"Microsoft Word 14 (filtered medium)">
+<style><!--
+/* Font Definitions */
+@font-face
+	{font-family:"MS Mincho";
+	panose-1:2 2 6 9 4 2 5 8 3 4;}
+@font-face
+	{font-family:"MS Mincho";
+	panose-1:2 2 6 9 4 2 5 8 3 4;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+@font-face
+	{font-family:"\@MS Mincho";
+	panose-1:2 2 6 9 4 2 5 8 3 4;}
+/* Style Definitions */
+p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin:0in;
+	margin-bottom:.0001pt;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";}
+a:link, span.MsoHyperlink
+	{mso-style-priority:99;
+	color:blue;
+	text-decoration:underline;}
+a:visited, span.MsoHyperlinkFollowed
+	{mso-style-priority:99;
+	color:purple;
+	text-decoration:underline;}
+span.EmailStyle17
+	{mso-style-type:personal-compose;
+	font-family:"Calibri","sans-serif";
+	color:windowtext;}
+.MsoChpDefault
+	{mso-style-type:export-only;
+	font-family:"Calibri","sans-serif";}
+@page WordSection1
+	{size:8.5in 11.0in;
+	margin:1.0in 1.0in 1.0in 1.0in;}
+div.WordSection1
+	{page:WordSection1;}
+--></style><!--[if gte mso 9]><xml>
+<o:shapedefaults v:ext=3D"edit" spidmax=3D"1026" />
+</xml><![endif]--><!--[if gte mso 9]><xml>
+<o:shapelayout v:ext=3D"edit">
+<o:idmap v:ext=3D"edit" data=3D"1" />
+</o:shapelayout></xml><![endif]-->
+</head>
+<body lang=3D"EN-US" link=3D"blue" vlink=3D"purple">
+<div class=3D"WordSection1">
+<p class=3D"MsoNormal">Increasing the audience since ceph-calamari is not r=
+esponsive. What salt event/info does the Calamari Master expect to see from=
+ the ceph-mon to determine there is an working cluster? I had to change ser=
+vers hosting the calamari master and
+ can&#8217;t get the new machine to recognize the cluster. The &#8216;salt =
+\* ceph.get_heartbeats&#8217; returns monmap, fsid, ver, epoch, etc for the=
+ monitor and all of the osd&#8217;s. Can anyone point me to docs or code th=
+at might enlighten me to what I&#8217;m overlooking? Thanks.<o:p></o:p></p>
+</div>
+</body>
+</html>
 
+--_000_7E8CF9C16F722345A89076330719CB1F4A82525DEXMAIL1taectosh_--
 
+--===============0494808566==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
 
-> 
-> 2015-05-13 1:06 GMT+08:00 huang jun <hjwsm1989@gmail.com>:
-> > ah, it's also at level 20 in v0.80.7,
-> > the control code is:
-> >
-> > ldout(cct, 20) << " ";
-> >  data.hexdump(*_dout);
-> >  *_dout << dendl;
-> >
-> > _dout is a ostream pointer, i think it should print to stdout or stderr,
-> > but seems i was wrong.
-> >
-> > 2015-05-13 0:57 GMT+08:00 Sage Weil <sage@newdream.net>:
-> >> On Wed, 13 May 2015, huang jun wrote:
-> >>> we use 0.80.7 version, do you mean the newer ceph release will print
-> >>> the message content to log file if we set debug_ms=20?
-> >>
-> >> I mean I verified that current master prints at level 20, but maybe 0.80.7
-> >> doesn't.. I didn't check :)
-> >>
-> >>>
-> >>> 2015-05-13 0:37 GMT+08:00 Sage Weil <sage@newdream.net>:
-> >>> > On Tue, 12 May 2015, huang jun wrote:
-> >>> >> hi,all
-> >>> >> we see the bad data crc warning and we have set debug_ms=20, but the
-> >>> >> message body doesn't logged into /var/log/ceph/ceph-osd.x.log file.
-> >>> >> Did i miss something? or i need to change the buffer::list::hexdump()
-> >>> >> function and recompile it?
-> >>> >
-> >>> > Hrm, it should be there at level 20.  Unless that was added in a version
-> >>> > newer than what you're running?
-> >>> >
-> >>> > sage
-> >>>
-> >>>
-> >>>
-> >>> --
-> >>> thanks
-> >>> huangjun
-> >>>
-> >>>
-> >
-> >
-> >
-> > --
-> > thanks
-> > huangjun
-> 
-> 
-> 
-> -- 
-> thanks
-> huangjun
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============0494808566==--
