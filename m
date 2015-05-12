@@ -1,69 +1,71 @@
-From: Owen Synge <osynge@suse.com>
-Subject: Re: autodetecting init system.
-Date: Tue, 12 May 2015 09:25:47 +0200
-Message-ID: <5551AAFB.5070307@suse.com>
-References: <5550D903.8000802@suse.com> <5550DACA.4070504@redhat.com> <alpine.DEB.2.00.1505111032530.28239@cobra.newdream.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+From: =?utf-8?Q?Edgaras_Luko=C5=A1evi=C4=8Dius?=
+	<edgaras.lukosevicius@gmail.com>
+Subject: Re: trimming rbd image does not reclaim free space
+Date: Tue, 12 May 2015 10:48:47 +0300
+Message-ID: <DC28859B-7D5F-4F5A-B4F9-BF5232FFED97@gmail.com>
+References: <927CE7A8-9A06-4CC3-A687-87E153070635@gmail.com>
+Mime-Version: 1.0 (Mac OS X Mail 7.3 \(1878.6\))
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.emea.novell.com ([130.57.118.101]:47201 "EHLO
-	mail.emea.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752299AbbELH0w (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-	Tue, 12 May 2015 03:26:52 -0400
-In-Reply-To: <alpine.DEB.2.00.1505111032530.28239@cobra.newdream.net>
+Received: from mail-wi0-f177.google.com ([209.85.212.177]:36988 "EHLO
+	mail-wi0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752630AbbELHs5 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 May 2015 03:48:57 -0400
+Received: by widdi4 with SMTP id di4so2884535wid.0
+        for <ceph-devel@vger.kernel.org>; Tue, 12 May 2015 00:48:56 -0700 (PDT)
+Received: from [192.168.168.7] ([37.157.144.44])
+        by mx.google.com with ESMTPSA id u9sm26375627wjx.15.2015.05.12.00.48.54
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
+        Tue, 12 May 2015 00:48:54 -0700 (PDT)
+In-Reply-To: <927CE7A8-9A06-4CC3-A687-87E153070635@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, John Spray <john.spray@redhat.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+
+Resending commands I=E2=80=99m using to everyone.
+
+# rbd-fuse -p pool -r image /mnt/trim/
+# losetup /dev/loop0 /mnt/trim/image
+# kpartx -av /dev/loop0
+# mount /dev/mapper/loop0p1 /mnt/fstrim/
+# fstrim -v /mnt/fstrim/
+/mnt/fstrim/: 1.1 TiB (1167710830592 bytes) trimmed
+
+I don=E2=80=99t use qemu, kvm.
+
+Anyone can help with this?
 
 
+On 11 May 2015, at 14:26, Edgaras Luko=C5=A1evi=C4=8Dius <edgaras.lukos=
+evicius@gmail.com> wrote:
 
-On 05/11/2015 07:34 PM, Sage Weil wrote:
-> On Mon, 11 May 2015, John Spray wrote:
->> On 11/05/2015 17:29, Owen Synge wrote:
->>> Dear all,
->>>
->>> Many init systems are used in linux now. Some ceph code needs to know
->>> the init system. (I must admit I have not looked into Solaris, MacOS and
->>> BSD and probably should have)
->>>
->>> It would be nice to have one function that detects the init system
->>>
->>> Since the init system can be specified in ceph and ceph-deploy
->>> explicitly it seems to be its reasonable to fail clearly to detect init
->>> system.
->>
->> I think I'm missing some background here.  I was under the impression that
->> distros generally had a preferred init system (even if they let you switch),
->> and if another is in use then compatibility links are usually provided (e.g.
->> sysv-style calling through to systemd or vice versa).  Given that, the distro
->> packaging then uses whatever the "right" way to start a service is for that
->> distro, and it's up to the distro to make sure that command is available.
->>
->> Otherwise don't we descend into a kind of madness where a package post-install
->> script can't start a service, because it doesn't know what command to run?
-> 
-> Ceph daemons are marked with a file like 
-> /var/lib/ceph/$type/.../{upstart,systemd,sysvinit} indicating which init 
-> system is responsible for starting/stopping them.  This is necesary mainly 
-> because on most systems they *do* coexist--at least with sysvinit scripts.
-> 
-> Owen, this is basically what ceph-detect-init is doing now, right?
+> Hello,
+>=20
+> I have ceph pool (size=3D2) and three RBD images (2TB each) and I hav=
+e noticed, that deleting data does not reclaim data on ceph.
+> What I have done is mount RBD device as a loopback device loop0, moun=
+ted it to a filesystem, ran =E2=80=9Cfstrim=E2=80=9D and got response:
+>=20
+> /mnt/fstrim/: 1.1 TiB (1167710830592 bytes) trimmed
+> /mnt/fstrim/: 1 TiB (1125871489024 bytes) trimmed
+> /mnt/fstrim/: 1.1 TiB (1186485440512 bytes) trimmed
+>=20
+> Now that would be almost perfect if not the fact, that space was not =
+reclaimed on ceph itself. Using =E2=80=9Cceph osd df=E2=80=9D I still s=
+ee same usage even after waiting few hours and I don=E2=80=99t see any =
+action.
+>=20
+> I=E2=80=99m using ceph v0.94-2 and kernel 3.10
+>=20
+> What is the proper way to reclaim unused space? I had pool size 3, bu=
+t had to lower it to two, to avoid getting my OSDs full.
+>=20
+> Thanks.
 
-ceph-detect-init detects the init system and is intended to be used for
-marking the init system. Once marked the init system will not need to be
-detected a second time.
-
-> IIRC the users are:
-> 
->  - ceph-disk, when creating a new osd
->  - ceph-deploy, when deploying a mon or mds or rgw
-
-Yes though maybe it will be used by other services such as mon and mds
-if needed in the future.
-
-Best regards
-
-Owen
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
