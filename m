@@ -1,26 +1,200 @@
-From: kernel neophyte <neophyte.hacker001@gmail.com>
-Subject: rocksdb with jemalloc
-Date: Mon, 11 May 2015 18:41:25 -0700
-Message-ID: <CAFkUHxeqZGTiipGdb1voLzRGChDnumRnOgd50Ce8LjBm6eL0Hg@mail.gmail.com>
+From: Varada Kari <Varada.Kari@sandisk.com>
+Subject: RE: loadable objectstore
+Date: Tue, 12 May 2015 01:49:12 +0000
+Message-ID: <C226B0AB34511445928D9882AA519F601C413AC0@SACMBXIP03.sdcorp.global.sandisk.com>
+References: <1395275405.143.1428703419864.JavaMail.root@thunderbeast.private.linuxbox.com>
+ <alpine.DEB.2.00.1504101545120.4469@cobra.newdream.net>
+ <C226B0AB34511445928D9882AA519F601C3DB5ED@SACMBXIP03.sdcorp.global.sandisk.com>
+ <alpine.DEB.2.00.1504110746540.4469@cobra.newdream.net>
+ <5529387F.2040607@dachary.org>
+ <alpine.DEB.2.00.1504110849020.4469@cobra.newdream.net>
+ <C226B0AB34511445928D9882AA519F601C3E1D41@SACMBXIP03.sdcorp.global.sandisk.com>
+ <alpine.DEB.2.00.1505111641080.28239@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f52.google.com ([209.85.220.52]:32840 "EHLO
-	mail-pa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752001AbbELBlZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 May 2015 21:41:25 -0400
-Received: by pacwv17 with SMTP id wv17so125513244pac.0
-        for <ceph-devel@vger.kernel.org>; Mon, 11 May 2015 18:41:25 -0700 (PDT)
+Received: from mail-bl2on0064.outbound.protection.outlook.com ([65.55.169.64]:32448
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752422AbbELBtS convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 May 2015 21:49:18 -0400
+In-Reply-To: <alpine.DEB.2.00.1505111641080.28239@cobra.newdream.net>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Loic Dachary <loic@dachary.org>, "Matt W. Benjamin" <matt@cohortfs.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi,
+Hi Sage,
 
+Sorry for the delay. Just started working on this. Will send some updat=
+e soon. Been busy with other tasks.
 
-I am trying to use newstore + rocksdb + jemalloc. Currently rocksdb in
-ceph compiles only with tcmalloc and not with jemalloc.
+Varada
 
-Is there any reason for this limitation ?
+-----Original Message-----
+=46rom: Sage Weil [mailto:sage@newdream.net]=20
+Sent: Tuesday, May 12, 2015 5:11 AM
+To: Varada Kari
+Cc: Loic Dachary; Matt W. Benjamin; ceph-devel
+Subject: RE: loadable objectstore
 
--Neo
+Hi Varada,
+
+Any progress on this?
+
+Thanks!
+sage
+
+On Sat, 11 Apr 2015, Varada Kari wrote:
+
+> Thanks Sage and Loic. Will add the missing pieces and integrate the o=
+bject factory and plugin changes.=20
+>=20
+> Varada
+>=20
+> -----Original Message-----
+> From: Sage Weil [mailto:sage@newdream.net]
+> Sent: Saturday, April 11, 2015 9:19 PM
+> To: Loic Dachary
+> Cc: Varada Kari; Matt W. Benjamin; ceph-devel
+> Subject: Re: loadable objectstore
+>=20
+> On Sat, 11 Apr 2015, Loic Dachary wrote:
+> > Hi Sage,
+> >=20
+> > It looks like common/PluginRegistry.{h,cc} are missing from=20
+> > 18ad8df1094db52c839dc6b2dc689fc882230acb
+>=20
+> whoops pushed! :)
+>=20
+> sage
+>=20
+> >=20
+> > Cheers
+> >=20
+> > On 11/04/2015 16:51, Sage Weil wrote:
+> > > On Sat, 11 Apr 2015, Varada Kari wrote:
+> > >> Hi Matt/ Sage,
+> > >>
+> > >> Thanks for sharing the pull request. Will work on the items what=
+=20
+> > >> sage was mentioning in the comments along with the items in the =
+tracker.
+> > >=20
+> > > I pushed a wip-plugin branch with the pattern I had in mind...=20
+> > > does this make sense?  It's only compile tested, and still needs
+> > > preload() methods implemented so that long-running daemons (or=20
+> > > perhaps others?) can preload it all at once.
+> > >=20
+> > > Ideally we would replace ErasurePluginRegistry with this too,=20
+> > > which means the naming of the .so's needs to be a bit more=20
+> > > flexible as the EC plugin scheme is something like=20
+> > > /usr/lib/ceph/erasure-code/libec_$name.so (not a strict function=20
+> > > of type and name).  Or actually, we can just rename the EC .so's=20
+> > > when this goes in?  Since they're explicitly incompatible between=
+=20
+> > > versions there is no reason the names need to remain consistent..=
+=2E
+> > >=20
+> > > sage
+> > >=20
+> > >>
+> > >> Varada
+> > >>
+> > >> -----Original Message-----
+> > >> From: Sage Weil [mailto:sage@newdream.net]
+> > >> Sent: Saturday, April 11, 2015 4:16 AM
+> > >> To: Matt W. Benjamin
+> > >> Cc: Varada Kari; ceph-devel
+> > >> Subject: Re: loadable objectstore
+> > >>
+> > >> On Fri, 10 Apr 2015, Matt W. Benjamin wrote:
+> > >>> Hi Varada,
+> > >>>
+> > >>> I pushed branch hammer-osfactory to=20
+> > >>> https://github.com/linuxbox2/ceph.git
+> > >>>
+> > >>> It can at least provide a starting point for discussion, if not=
+=20
+> > >>> a jumping off point;  I do think it's basically what Sage descr=
+ibed.
+> > >>
+> > >> I made a few comments on the pull request.  I think a factory cl=
+ass is the way to go, but we should be able to make the plugin loading =
+part generic and not interface specific at all...
+> > >>
+> > >> sage
+> > >>
+> > >>>
+> > >>> I was able to update the CMake build system to build the tree, =
+I=20
+> > >>> haven't attempted Autotools. :(
+> > >>>
+> > >>> Regards,
+> > >>>
+> > >>> Matt
+> > >>>
+> > >>> --
+> > >>> Matt Benjamin
+> > >>> CohortFS, LLC.
+> > >>> 315 West Huron Street, Suite 140A Ann Arbor, Michigan 48103
+> > >>>
+> > >>> http://cohortfs.com
+> > >>>
+> > >>> tel.  734-761-4689
+> > >>> fax.  734-769-8938
+> > >>> cel.  734-216-5309
+> > >>> --
+> > >>> To unsubscribe from this list: send the line "unsubscribe ceph-=
+devel"
+> > >>> in the body of a message to majordomo@vger.kernel.org More=20
+> > >>> majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > >>>
+> > >>>
+> > >>
+> > >> ________________________________
+> > >>
+> > >> PLEASE NOTE: The information contained in this electronic mail m=
+essage is intended only for the use of the designated recipient(s) name=
+d above. If the reader of this message is not the intended recipient, y=
+ou are hereby notified that you have received this message in error and=
+ that any review, dissemination, distribution, or copying of this messa=
+ge is strictly prohibited. If you have received this communication in e=
+rror, please notify the sender by telephone or e-mail (as shown above) =
+immediately and destroy any and all copies of this message in your poss=
+ession (whether hard copies or electronically stored copies).
+> > >>
+> > >> --
+> > >> To unsubscribe from this list: send the line "unsubscribe=20
+> > >> ceph-devel" in the body of a message to majordomo@vger.kernel.or=
+g=20
+> > >> More majordomo info at =20
+> > >> http://vger.kernel.org/majordomo-info.html
+> > >>
+> > >>
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe=20
+> > > ceph-devel" in the body of a message to majordomo@vger.kernel.org=
+=20
+> > > More majordomo info at  http://vger.kernel.org/majordomo-info.htm=
+l
+> > >=20
+> >=20
+> > --
+> > Lo=EFc Dachary, Artisan Logiciel Libre
+> >=20
+> >=20
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+=20
+> in the body of a message to majordomo@vger.kernel.org More majordomo=20
+> info at  http://vger.kernel.org/majordomo-info.html
+>=20
+>=20
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
