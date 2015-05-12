@@ -1,40 +1,83 @@
-From: Gregory Farnum <greg@gregs42.com>
-Subject: Re: cephfs task: Extend file layout ceph_file_layout to specify a
- namespace id
-Date: Tue, 12 May 2015 10:48:14 -0700
-Message-ID: <CAC6JEv8gp-GAiFaOt1BFGnPMmd5F0OGNBwnV=9bUHZ8xAhgRow@mail.gmail.com>
-References: <55523B95.9010005@suse.de>
+From: Bruce McFarland <Bruce.McFarland-rnQ3HPfPGGWsvWnuDiJtQA@public.gmane.org>
+Subject: Re: New Calamari server
+Date: Tue, 12 May 2015 17:51:12 +0000
+Message-ID: <7E8CF9C16F722345A89076330719CB1F4A824EDF@EXMAIL1.taec.toshiba.com>
+References: <D1766F6E.30C8E%mk7193@yp.com>
+	<1308156878.221639216.1431419724991.JavaMail.zimbra@oxygem.tv>
+	<D177704C.31735%mk7193@yp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f176.google.com ([209.85.213.176]:35651 "EHLO
-	mail-ig0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933003AbbELRsP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 May 2015 13:48:15 -0400
-Received: by igbyr2 with SMTP id yr2so115606676igb.0
-        for <ceph-devel@vger.kernel.org>; Tue, 12 May 2015 10:48:15 -0700 (PDT)
-Received: from mail-ie0-f171.google.com (mail-ie0-f171.google.com. [209.85.223.171])
-        by mx.google.com with ESMTPSA id rr5sm614160igb.7.2015.05.12.10.48.14
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 12 May 2015 10:48:14 -0700 (PDT)
-Received: by iecmd7 with SMTP id md7so8572167iec.1
-        for <ceph-devel@vger.kernel.org>; Tue, 12 May 2015 10:48:14 -0700 (PDT)
-In-Reply-To: <55523B95.9010005@suse.de>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Goldwyn Rodrigues <rgoldwyn@suse.de>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, jashank42@gmail.com, nishtha3rai@gmail.com
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <D177704C.31735%mk7193-CivJcMWXhi0@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Michael Kuriger <mk7193-CivJcMWXhi0@public.gmane.org>, Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Tue, May 12, 2015 at 10:42 AM, Goldwyn Rodrigues <rgoldwyn@suse.de> wrote:
-> Hi,
->
-> The task mentioned in $SUBJECT is a part of the multi-tenancy cephfs
-> project. Has someone taken the task as yet? If not, I am interested in
-> working on the task.
-
-We've got a few GSoC students who will be working on multi-tenancy
-issues and we'd expected this to be one of the things they do, but I
-don't think any work has started on it yet so if you wanted to claim
-that feature it should be all good.
--Greg
+SSBhbSBoYXZpbmcgYSBzaW1pbGFyIGlzc3VlLiBUaGUgY2x1c3RlciBpcyB1cCBhbmQgc2FsdCBp
+cyBydW5uaW5nIG9uIGFuZCBoYXMgYWNjZXB0ZWQga2V5cyBmcm9tIGFsbCBub2RlcywgaW5jbHVk
+aW5nIHRoZSBtb25pdG9yLiBJIGNhbiBpc3N1ZSBzYWx0IGFuZCBzYWx0L2NlcGgucHkgY29tbWFu
+ZHMgZnJvbSB0aGUgQ2FsYW1hcmkgaW5jbHVkaW5nICdzYWx0IFwqIGNlcGguZ2V0X2hlYXJ0YmVh
+dHMnIHdoaWNoIHJldHVybnMgZnJvbSBhbGwgbm9kZXMgaW5jbHVkaW5nIHRoZSBtb25pdG9yIHdp
+dGggdGhlIG1vbm1hcCBlcG9jaCBldGMuIENhbGFtYXJpIHJlcG9ydHMgdGhhdCBpdCBzZWVzIGFs
+bCBvZiB0aGUgQ2VwaCBzZXJ2ZXJzLCBidXQgbm90IGEgQ2VwaCBjbHVzdGVyLiBJcyB0aGVyZSBh
+IHNhbHQgZXZlbnQgYmVzaWRlcyBjZXBoLmdldC1oZWFydGJlYXRzIHRoYXQgdGhlIENhbGFtYXJp
+IG1hc3RlciByZXF1aXJlcyB0byByZWNvZ25pemUgdGhlIGNsdXN0ZXI/DQoNCj4gLS0tLS1Pcmln
+aW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5v
+cmcgW21haWx0bzpjZXBoLWRldmVsLQ0KPiBvd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFs
+ZiBPZiBNaWNoYWVsIEt1cmlnZXINCj4gU2VudDogVHVlc2RheSwgTWF5IDEyLCAyMDE1IDg6NTcg
+QU0NCj4gVG86IEFsZXhhbmRyZSBERVJVTUlFUg0KPiBDYzogY2VwaC11c2VyczsgY2VwaC1kZXZl
+bA0KPiBTdWJqZWN0OiBSZTogW2NlcGgtdXNlcnNdIE5ldyBDYWxhbWFyaSBzZXJ2ZXINCj4gDQo+
+IEluIG15IGNhc2UsIEkgZGlkIHJlbW92ZSBhbGwgc2FsdCBrZXlzLiAgVGhlIHNhbHQgcG9ydGlv
+biBvZiBteSBpbnN0YWxsIGlzDQo+IHdvcmtpbmcuICBJdOKAmXMganVzdCB0aGF0IHRoZSBjYWxh
+bWFyaSBzZXJ2ZXIgaXMgbm90IHNlZWluZyB0aGUgY2VwaCBjbHVzdGVyLg0KPiANCj4gDQo+IA0K
+PiANCj4gDQo+IE1pY2hhZWwgS3VyaWdlcg0KPiBTci4gVW5peCBTeXN0ZW1zIEVuZ2luZWVyDQo+
+ICogbWs3MTkzQHlwLmNvbSB8KCA4MTgtNjQ5LTcyMzUNCj4gDQo+IA0KPiANCj4gDQo+IA0KPiBP
+biA1LzEyLzE1LCAxOjM1IEFNLCAiQWxleGFuZHJlIERFUlVNSUVSIiA8YWRlcnVtaWVyQG9kaXNv
+LmNvbT4NCj4gd3JvdGU6DQo+IA0KPiA+SGksIHdoZW4geW91IGhhdmUgcmVtb3ZlIHNhbHQgZnJv
+bSBub2RlcywNCj4gPg0KPiA+ZG8geW91IGhhdmUgcmVtb3ZlIHRoZSBvbGQgbWFzdGVyIGtleQ0K
+PiA+L2V0Yy9zYWx0L3BraS9taW5pb24vbWluaW9uX21hc3Rlci5wdWINCj4gPg0KPiA+Pw0KPiA+
+DQo+ID5JIGhhdmUgYWRkIHRoZSBzYW1lIGJlaGF2aW9yIHRoYW4geW91IHdoZW4gcmVpbnN0YWxs
+aW5nIGNhbGFtYXJpDQo+ID5zZXJ2ZXIsIGFuZCBwcmV2aW91c2x5IGluc3RhbGxlZCBzYWx0IG9u
+IGNlcGggbm9kZXMgKHdpdGggZXhwbGljaXQNCj4gPmVycm9yIGFib3V0IHRoZSBrZXkgaW4gL3Zh
+ci9sb2cvc2FsdC9taW5pb24gb24gY2VwaCBub2RlcykNCj4gPg0KPiA+LS0tLS0gTWFpbCBvcmln
+aW5hbCAtLS0tLQ0KPiA+RGU6ICJNaWNoYWVsIEt1cmlnZXIiIDxtazcxOTNAeXAuY29tPg0KPiA+
+w4A6ICJjZXBoLXVzZXJzIiA8Y2VwaC11c2Vyc0BjZXBoLmNvbT4NCj4gPkNjOiAiY2VwaC1kZXZl
+bCIgPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPg0KPiA+RW52b3nDqTogTHVuZGkgMTEgTWFp
+IDIwMTUgMjM6NDM6MzQNCj4gPk9iamV0OiBbY2VwaC11c2Vyc10gTmV3IENhbGFtYXJpIHNlcnZl
+cg0KPiA+DQo+ID5JIGhhZCBhbiBpc3N1ZSB3aXRoIG15IGNhbGFtYXJpIHNlcnZlciwgc28gSSBi
+dWlsdCBhIG5ldyBvbmUgZnJvbQ0KPiA+c2NyYXRjaC4NCj4gPknCuXZlIGJlZW4gc3RydWdnbGlu
+ZyB0cnlpbmcgdG8gZ2V0IHRoZSBuZXcgc2VydmVyIHRvIHN0YXJ0IHVwIGFuZCBzZWUNCj4gPm15
+IGNlcGggY2x1c3Rlci4gSSB3ZW50IHNvIGZhciBhcyB0byByZW1vdmUgc2FsdCBhbmQgZGlhbW9u
+ZCBmcm9tIG15DQo+ID5jZXBoIG5vZGVzIGFuZCByZWluc3RhbGxlZCBhZ2Fpbi4gT24gbXkgY2Fs
+YW1hcmkgc2VydmVyLCBpdCBzZWVzIHRoZQ0KPiA+aG9zdHMgY29ubmVjdGVkIGJ1dCBkb2VzbsK5
+dCBkZXRlY3QgYSBjbHVzdGVyLiBXaGF0IGFtIEkgbWlzc2luZz8gScK5dmUNCj4gPnNldCB1cCBt
+YW55IGNhbGFtYXJpIHNlcnZlcnMgb24gZGlmZmVyZW50IGNlcGggY2x1c3RlcnMsIGJ1dCB0aGlz
+IGlzDQo+ID50aGUgZmlyc3QgdGltZSBJwrl2ZSB0cmllZCB0byBidWlsZCBhIG5ldyBjYWxhbWFy
+aSBzZXJ2ZXIuDQo+ID4NCj4gPkhlcmXCuXMgd2hhdCBJIHNlZSBvbiBteSBjYWxhbWFyaSBHVUk6
+DQo+ID4NCj4gPk5ldyBDYWxhbWFyaSBJbnN0YWxsYXRpb24NCj4gPg0KPiA+VGhpcyBhcHBlYXJz
+IHRvIGJlIHRoZSBmaXJzdCB0aW1lIHlvdSBoYXZlIHN0YXJ0ZWQgQ2FsYW1hcmkgYW5kIHRoZXJl
+DQo+ID5hcmUgbm8gY2x1c3RlcnMgY3VycmVudGx5IGNvbmZpZ3VyZWQuDQo+ID4NCj4gPjMzIENl
+cGggc2VydmVycyBhcmUgY29ubmVjdGVkIHRvIENhbGFtYXJpLCBidXQgbm8gQ2VwaCBjbHVzdGVy
+IGhhcyBiZWVuDQo+ID5jcmVhdGVkIHlldC4gUGxlYXNlIHVzZSBjZXBoLWRlcGxveSB0byBjcmVh
+dGUgYSBjbHVzdGVyOyBwbGVhc2Ugc2VlIHRoZQ0KPiA+SW5rdGFuayBDZXBoIEVudGVycHJpc2Ug
+ZG9jdW1lbnRhdGlvbiBmb3IgbW9yZSBkZXRhaWxzLg0KPiA+DQo+ID5UaGFua3MhDQo+ID5NaWtl
+IEt1cmlnZXINCj4gPg0KPiA+DQo+ID4NCj4gPg0KPiA+X19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX18NCj4gPmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0DQo+ID5j
+ZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tDQo+ID5odHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGlu
+Zm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20NCj4gDQo+IAQgey5uICsgICAgICAgKyUgIGx6d20g
+IGIg66eyICByICB5x6kg1696WCAgFyAg3Kh9ICAgxqB6ICZqOit2ICAgICAgICB6WisgICt6ZiAg
+IGggICB+ICAgIGkNCj4geiAeIHcgICA/ICAgICYgKd+iG2YNCl9fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgt
+dXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9j
+ZXBoLXVzZXJzLWNlcGguY29tCg==
