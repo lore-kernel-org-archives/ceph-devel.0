@@ -1,124 +1,95 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: With ceph-detect-init changes, make install fails
-Date: Tue, 12 May 2015 20:53:53 +0200
-Message-ID: <55524C41.3040707@dachary.org>
-References: <CAFkUHxdwK4YkoJ+B1Vkcn5006wXpj5nKDu5tR1w16Q_1mBntBA@mail.gmail.com>
+From: Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: Ceph User Committee Vote
+Date: Tue, 12 May 2015 17:06:31 -0400
+Message-ID: <CAAZbbf10aa7V4Htza5mq5ugVuxyKJxdhGe0K+=bh-GY7BLAgGg@mail.gmail.com>
+References: <CAAZbbf0u5Gnizq+rsny42cPNCYb4w2XB9RC1it7KhEfwVAx+Qw@mail.gmail.com>
+	<CA+7XDxOxzY8p5GxPsf6nooKhG50HGANEStwviCY9XJE+6yzAzQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="e273mFmnOQC6eto8JtuA0HaDJivwXes8u"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:33944 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S933069AbbELSyA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 May 2015 14:54:00 -0400
-In-Reply-To: <CAFkUHxdwK4YkoJ+B1Vkcn5006wXpj5nKDu5tR1w16Q_1mBntBA@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: kernel neophyte <neophyte.hacker001@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CA+7XDxOxzY8p5GxPsf6nooKhG50HGANEStwviCY9XJE+6yzAzQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: eric mourgaya <eric.mourgaya-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Wido den Hollander <wido-fspyXLx8qC4@public.gmane.org>
+Cc: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Loic Dachary <ldachary-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "ceph-community-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-community-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---e273mFmnOQC6eto8JtuA0HaDJivwXes8u
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+I know Wido was looking to potentially get on the ballot here, so am
+including him.
 
-Hi,
+I'm also including ceph-user and ceph-devel in case anyone else had
+strong feelings about leading the Ceph User Committee (CUC). Thanks.
 
-I've created http://tracker.ceph.com/issues/11598 to track this problem. =
-Thanks for proposing solutions, it will help a lot.
-
-Cheers
-
-On 12/05/2015 20:26, kernel neophyte wrote:
-> Hi,
->=20
-> With the recent ceph-detect-init changes, make install now fails (
-> make succeeds hence this is not detected by build bots )
->=20
-> Error:
->=20
-> cd ceph-detect-init ; \
->=20
-> if lsb_release -si | grep --quiet 'Ubuntu\|Debian\|Devuan' ; then \
->=20
-> options=3D--install-layout=3Ddeb ; \
->=20
-> else \
->=20
-> options=3D--prefix=3D/usr ; \
->=20
-> fi ; \
->=20
-> python setup.py install --root=3D $options
->=20
-> running install
->=20
-> Checking .pth file support in usr/lib/python2.7/dist-packages/
->=20
-> /usr/bin/python -E -c pass
->=20
-> TEST FAILED: usr/lib/python2.7/dist-packages/ does NOT support .pth fil=
-es
->=20
-> error: bad install directory or PYTHONPATH
->=20
->=20
-> You are attempting to install a package to a directory that is not
->=20
-> on PYTHONPATH and which Python does not read ".pth" files from.  The
->=20
-> installation directory you specified (via --install-dir, --prefix, or
->=20
-> the distutils default setting) was:
->=20
->=20
->     usr/lib/python2.7/dist-packages/
->=20
->=20
-> and your PYTHONPATH environment variable currently contains:
->=20
->=20
->     '../src/pybind'
->=20
->=20
-> Here are some of your options for correcting the problem:
->=20
->=20
-> * You can choose a different installation directory, i.e., one that is
->=20
->   on PYTHONPATH or supports .pth files
->=20
->=20
-> * You can add the installation directory to the PYTHONPATH environment
->=20
->   variable.  (It must then also be on PYTHONPATH whenever you run
->=20
->   Python and want to use the package(s) you are installing.)
->=20
->=20
-> * You can set up the installation directory to support ".pth" files by
->=20
->   using one of the approaches described here:
->=20
->=20
->   https://pythonhosted.org/setuptools/easy_install.html#custom-installa=
-tion-locations
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+As Eric mentioned. If you are interested in taking on the role and
+responsibility of CUC Chair please submit your name, email, and a
+short bio that we can use in creating the voting ballot. Thanks.
 
 
---e273mFmnOQC6eto8JtuA0HaDJivwXes8u
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
+On Tue, May 12, 2015 at 5:03 PM, eric mourgaya <eric.mourgaya-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+> Hi all,
+>
+> The   campain to become ceph community header is openned.
+> I will collected all run  by email with Patrick.  if you are interested  by
+> this  please send us an  email with
+>  you name and you company and if  possible a short  text to help  people  to
+> vote  for you.
+> I will compile all run  the 1th  June 2015 a  web  page.  We can start the
+> vote after this, and stop it the  10th  June.
+>
+> thanks,
+>
+>
+>
+>
+> 2015-05-11 17:23 GMT+02:00 Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>:
+>>
+>> Hey all,
+>>
+>> By my count the last user committee election was almost exactly 12 mos
+>> ago [1] (the original plan was for 6 mo elections, but I'm happy with
+>> 1 year). Eric, would you like to organize the next set of elections so
+>> we can make sure this is polished and clean by the time the Ceph Board
+>> is launched in July? Thanks!
+>>
+>> [1]
+>> https://wiki.ceph.com/Community/Ceph_User_Committee/2014-04_Ceph_User_Committee_Elections
+>>
+>>
+>> --
+>>
+>> Best Regards,
+>>
+>> Patrick McGarry
+>> Director Ceph Community || Red Hat
+>> http://ceph.com  ||  http://community.redhat.com
+>> @scuttlemonkey || @ceph
+>
+>
+>
+>
+> --
+> Eric Mourgaya,
+>
+>
+> Respectons la planete!
+> Luttons contre la mediocrite!
 
-iEYEARECAAYFAlVSTEEACgkQ8dLMyEl6F21wPACdE+7YpYzHe3AAe8uWQiAYZJG/
-IIoAnRN1RPNc7+ZUbAfVPu35b2KofETj
-=MD42
------END PGP SIGNATURE-----
 
---e273mFmnOQC6eto8JtuA0HaDJivwXes8u--
+
+-- 
+
+Best Regards,
+
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
