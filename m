@@ -1,140 +1,322 @@
-From: Bruce McFarland <Bruce.McFarland-rnQ3HPfPGGWsvWnuDiJtQA@public.gmane.org>
-Subject: Re: [ceph-calamari] Does anyone understand Calamari??
-Date: Wed, 13 May 2015 00:18:09 +0000
-Message-ID: <7E8CF9C16F722345A89076330719CB1F4A825343@EXMAIL1.taec.toshiba.com>
-References: <7E8CF9C16F722345A89076330719CB1F4A82525D@EXMAIL1.taec.toshiba.com>
-	<607C9580-DF69-4CA0-9D65-550700893CA8@redhat.com>
+From: Josh Durgin <jdurgin@redhat.com>
+Subject: RBD mirroring design draft
+Date: Tue, 12 May 2015 17:42:44 -0700
+Message-ID: <55529E04.1070202@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <607C9580-DF69-4CA0-9D65-550700893CA8-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Gregory Meno <gmeno-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: "ceph-calamari-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-calamari-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel
-	(ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org)" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:41382 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S964955AbbEMAmo (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 12 May 2015 20:42:44 -0400
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t4D0ghCD016066
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
+	for <ceph-devel@vger.kernel.org>; Tue, 12 May 2015 20:42:44 -0400
+Received: from [10.17.97.236] (dhcp-10-17-97-236.lax.redhat.com [10.17.97.236])
+	by int-mx09.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t4D0ggqa011682
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+	for <ceph-devel@vger.kernel.org>; Tue, 12 May 2015 20:42:43 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-TWFzdGVyIHdhcyBlc3M2OCBhbmQgbm93IGl0J3MgZXNzcGVyZjMuIA0KDQpPbiBhbGwgY2x1c3Rl
-ciBub2RlcyB0aGUgZm9sbG93aW5nIGZpbGVzIG5vdyBoYXZlICdtYXN0ZXI6IGVzc3BlcmYzJw0K
-L2V0Yy9zYWx0L21pbmlvbiANCi9ldGMvc2FsdC9taW5pb24vY2FsYW1hcmkuY29uZiANCi9ldGMv
-ZGlhbW9uZC9kaWFtb25kLmNvbmYNCg0KVGhlICdzYWx0IFwqIGNlcGguZ2V0X2hlYXJ0YmVhdHMn
-IGlzIGJlaW5nIHJ1biBvbiBlc3NwZXJmMyAtIGhlcmVzIGEgJ3NhbHQgXCogdGVzdC5waW5nJyBm
-cm9tIGVzc3BlcmYzIENhbGFtYXJpIE1hc3RlciB0byB0aGUgY2x1c3Rlci4gSSd2ZSBhbHNvIGlu
-Y2x1ZGVkIGEgcXVpY2sgY2x1c3RlciBzYW5pdHkgdGVzdCB3aXRoIHRoZSBvdXRwdXQgb2YgY2Vw
-aCAtcyBhbmQgY2VwaCBvc2QgdHJlZS4gQW5kIGZvciB5b3VyIHJlYWRpbmcgcGxlYXN1cmUgdGhl
-IG91dHB1dCBvZiAnc2FsdCBvY3Rlb24xMDkgY2VwaC5nZXRfaGVhcnRiZWF0cycgc2luY2UgSSBz
-dXNwZWN0IHRoZXJlIG1pZ2h0IGJlIGEgbWlzc2luZyBmaWVsZCBpbiB0aGUgbW9uaXRvciByZXNw
-b25zZS4gDQoNCm9vdEBlc3NwZXJmMzovZXRjL2NlcGgjIHNhbHQgXCogdGVzdC5waW5nDQpvY3Rl
-b24xMDg6DQogICAgVHJ1ZQ0Kb2N0ZW9uMTE0Og0KICAgIFRydWUNCm9jdGVvbjExMToNCiAgICBU
-cnVlDQpvY3Rlb24xMDE6DQogICAgVHJ1ZQ0Kb2N0ZW9uMTA2Og0KICAgIFRydWUNCm9jdGVvbjEw
-OToNCiAgICBUcnVlDQpvY3Rlb24xMTg6DQogICAgVHJ1ZQ0Kcm9vdEBlc3NwZXJmMzovZXRjL2Nl
-cGgjIGNlcGggb3NkIHRyZWUNCiMgaWQJd2VpZ2h0CXR5cGUgbmFtZQl1cC9kb3duCXJld2VpZ2h0
-DQotMQk3CXJvb3QgZGVmYXVsdA0KLTQJMQkJaG9zdCBvY3Rlb24xMDgNCjAJMQkJCW9zZC4wCXVw
-CTEJDQotMgkxCQlob3N0IG9jdGVvbjExMQ0KMQkxCQkJb3NkLjEJdXAJMQkNCi01CTEJCWhvc3Qg
-b2N0ZW9uMTE1DQoyCTEJCQlvc2QuMglETkUJCQ0KLTYJMQkJaG9zdCBvY3Rlb24xMTgNCjMJMQkJ
-CW9zZC4zCXVwCTEJDQotNwkxCQlob3N0IG9jdGVvbjExNA0KNAkxCQkJb3NkLjQJdXAJMQkNCi04
-CTEJCWhvc3Qgb2N0ZW9uMTA2DQo1CTEJCQlvc2QuNQl1cAkxCQ0KLTkJMQkJaG9zdCBvY3Rlb24x
-MDENCjYJMQkJCW9zZC42CXVwCTEJDQpyb290QGVzc3BlcmYzOi9ldGMvY2VwaCMgY2VwaCAtcyAN
-CiAgICBjbHVzdGVyIDg2OGJmYWNjLWU0OTItMTFlNC04OWZhLTAwMGZiNzExMTEwYw0KICAgICBo
-ZWFsdGggSEVBTFRIX09LDQogICAgIG1vbm1hcCBlMTogMSBtb25zIGF0IHtvY3Rlb24xMDk9MjA5
-LjI0My4xNjAuNzA6Njc4OS8wfSwgZWxlY3Rpb24gZXBvY2ggMSwgcXVvcnVtIDAgb2N0ZW9uMTA5
-DQogICAgIG9zZG1hcCBlODA6IDYgb3NkczogNiB1cCwgNiBpbg0KICAgICAgcGdtYXAgdjI2NzY1
-OiA3MjggcGdzLCAyIHBvb2xzLCAyMDA3MCBNQiBkYXRhLCAxNTAwMyBvYmplY3RzDQogICAgICAg
-ICAgICA2MDYwNCBNQiB1c2VkLCAyNzM0IEdCIC8gMjc5MyBHQiBhdmFpbA0KICAgICAgICAgICAg
-ICAgICA3MjggYWN0aXZlK2NsZWFuDQpyb290QGVzc3BlcmYzOi9ldGMvY2VwaCMNCg0Kcm9vdEBl
-c3NwZXJmMzovZXRjL2NlcGgjIHNhbHQgb2N0ZW9uMTA5IGNlcGguZ2V0X2hlYXJ0YmVhdHMNCm9j
-dGVvbjEwOToNCiAgICAtLS0tLS0tLS0tDQogICAgLSBib290X3RpbWU6DQogICAgICAgIDE0MzA3
-ODQ0MzENCiAgICAtIGNlcGhfdmVyc2lvbjoNCiAgICAgICAgMC44MC44LTAuZWw2DQogICAgLSBz
-ZXJ2aWNlczoNCiAgICAgICAgLS0tLS0tLS0tLQ0KICAgICAgICBjZXBoLW1vbi5vY3Rlb24xMDk6
-DQogICAgICAgICAgICAtLS0tLS0tLS0tDQogICAgICAgICAgICBjbHVzdGVyOg0KICAgICAgICAg
-ICAgICAgIGNlcGgNCiAgICAgICAgICAgIGZzaWQ6DQogICAgICAgICAgICAgICAgODY4YmZhY2Mt
-ZTQ5Mi0xMWU0LTg5ZmEtMDAwZmI3MTExMTBjDQogICAgICAgICAgICBpZDoNCiAgICAgICAgICAg
-ICAgICBvY3Rlb24xMDkNCiAgICAgICAgICAgIHN0YXR1czoNCiAgICAgICAgICAgICAgICAtLS0t
-LS0tLS0tDQogICAgICAgICAgICAgICAgZWxlY3Rpb25fZXBvY2g6DQogICAgICAgICAgICAgICAg
-ICAgIDENCiAgICAgICAgICAgICAgICBleHRyYV9wcm9iZV9wZWVyczoNCiAgICAgICAgICAgICAg
-ICBtb25tYXA6DQogICAgICAgICAgICAgICAgICAgIC0tLS0tLS0tLS0NCiAgICAgICAgICAgICAg
-ICAgICAgY3JlYXRlZDoNCiAgICAgICAgICAgICAgICAgICAgICAgIDIwMTUtMDQtMTYgMjM6NTA6
-NTIuNDEyNjg2DQogICAgICAgICAgICAgICAgICAgIGVwb2NoOg0KICAgICAgICAgICAgICAgICAg
-ICAgICAgMQ0KICAgICAgICAgICAgICAgICAgICBmc2lkOg0KICAgICAgICAgICAgICAgICAgICAg
-ICAgODY4YmZhY2MtZTQ5Mi0xMWU0LTg5ZmEtMDAwZmI3MTExMTBjDQogICAgICAgICAgICAgICAg
-ICAgIG1vZGlmaWVkOg0KICAgICAgICAgICAgICAgICAgICAgICAgMjAxNS0wNC0xNiAyMzo1MDo1
-Mi40MTI2ODYNCiAgICAgICAgICAgICAgICAgICAgbW9uczoNCiAgICAgICAgICAgICAgICAgICAg
-ICAgIC0tLS0tLS0tLS0NCiAgICAgICAgICAgICAgICAgICAgICAgIC0gYWRkcjoNCiAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAyMDkuMjQzLjE2MC43MDo2Nzg5LzANCiAgICAgICAgICAgICAg
-ICAgICAgICAgIC0gbmFtZToNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBvY3Rlb24xMDkN
-CiAgICAgICAgICAgICAgICAgICAgICAgIC0gcmFuazoNCiAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAwDQogICAgICAgICAgICAgICAgbmFtZToNCiAgICAgICAgICAgICAgICAgICAgb2N0ZW9u
-MTA5DQogICAgICAgICAgICAgICAgb3V0c2lkZV9xdW9ydW06DQogICAgICAgICAgICAgICAgcXVv
-cnVtOg0KICAgICAgICAgICAgICAgICAgICAtIDANCiAgICAgICAgICAgICAgICByYW5rOg0KICAg
-ICAgICAgICAgICAgICAgICAwDQogICAgICAgICAgICAgICAgc3RhdGU6DQogICAgICAgICAgICAg
-ICAgICAgIGxlYWRlcg0KICAgICAgICAgICAgICAgIHN5bmNfcHJvdmlkZXI6DQogICAgICAgICAg
-ICB0eXBlOg0KICAgICAgICAgICAgICAgIG1vbg0KICAgICAgICAgICAgdmVyc2lvbjoNCiAgICAg
-ICAgICAgICAgICAwLjg2DQogICAgLS0tLS0tLS0tLQ0KICAgIC0gODY4YmZhY2MtZTQ5Mi0xMWU0
-LTg5ZmEtMDAwZmI3MTExMTBjOg0KICAgICAgICAtLS0tLS0tLS0tDQogICAgICAgIGZzaWQ6DQog
-ICAgICAgICAgICA4NjhiZmFjYy1lNDkyLTExZTQtODlmYS0wMDBmYjcxMTExMGMNCiAgICAgICAg
-bmFtZToNCiAgICAgICAgICAgIGNlcGgNCiAgICAgICAgdmVyc2lvbnM6DQogICAgICAgICAgICAt
-LS0tLS0tLS0tDQogICAgICAgICAgICBjb25maWc6DQogICAgICAgICAgICAgICAgODdmMTc1YzYw
-ZTVjN2VjMDZjMjYzYzU1NjA1NmZiY2INCiAgICAgICAgICAgIGhlYWx0aDoNCiAgICAgICAgICAg
-ICAgICBhOTA3ZDBlYzM5NTcxMzM2OWI0ODQzMzgxZWMzMWJjMg0KICAgICAgICAgICAgbWRzX21h
-cDoNCiAgICAgICAgICAgICAgICAxDQogICAgICAgICAgICBtb25fbWFwOg0KICAgICAgICAgICAg
-ICAgIDENCiAgICAgICAgICAgIG1vbl9zdGF0dXM6DQogICAgICAgICAgICAgICAgMQ0KICAgICAg
-ICAgICAgb3NkX21hcDoNCiAgICAgICAgICAgICAgICA4MA0KICAgICAgICAgICAgcGdfc3VtbWFy
-eToNCiAgICAgICAgICAgICAgICA3ZTI5ZDdjYzkzY2ZjZWQ4ZjNmMTQ2Y2M3OGY1NjgyZg0Kcm9v
-dEBlc3NwZXJmMzovZXRjL2NlcGgjDQoNCg0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0t
-DQo+IEZyb206IEdyZWdvcnkgTWVubyBbbWFpbHRvOmdtZW5vQHJlZGhhdC5jb21dDQo+IFNlbnQ6
-IFR1ZXNkYXksIE1heSAxMiwgMjAxNSA1OjAzIFBNDQo+IFRvOiBCcnVjZSBNY0ZhcmxhbmQNCj4g
-Q2M6IGNlcGgtY2FsYW1hcmlAbGlzdHMuY2VwaC5jb207IGNlcGgtdXNlcnNAY2VwaC5jb207IGNl
-cGgtZGV2ZWwNCj4gKGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnKQ0KPiBTdWJqZWN0OiBSZTog
-W2NlcGgtY2FsYW1hcmldIERvZXMgYW55b25lIHVuZGVyc3RhbmQgQ2FsYW1hcmk/Pw0KPiANCj4g
-QnJ1Y2UsDQo+IA0KPiBJdCBpcyBncmVhdCB0byBoZWFyIHRoYXQgc2FsdCBpcyByZXBvcnRpbmcg
-c3RhdHVzIGZyb20gYWxsIHRoZSBub2RlcyBpbiB0aGUNCj4gY2x1c3Rlci4NCj4gDQo+IExldCBt
-ZSBzZWUgaWYgSSB1bmRlcnN0YW5kIHlvdXIgcXVlc3Rpb246DQo+IA0KPiBZb3Ugd2FudCB0byBr
-bm93IHdoYXQgY29uZGl0aW9ucyBjYXVzZSB1cyB0byByZWNvZ25pemUgYSB3b3JraW5nIGNsdXN0
-ZXI/DQo+IA0KPiBzZWUNCj4gaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2FsYW1hcmkvYmxvYi9t
-YXN0ZXIvY3RodWxodS9jdGh1bGh1L21hbmFnZXIvDQo+IG1hbmFnZXIucHkjTDEzNQ0KPiANCj4g
-aHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2FsYW1hcmkvYmxvYi9tYXN0ZXIvY3RodWxodS9jdGh1
-bGh1L21hbmFnZXIvDQo+IG1hbmFnZXIucHkjTDM0OQ0KPiANCj4gYW5kDQo+IA0KPiBodHRwczov
-L2dpdGh1Yi5jb20vY2VwaC9jYWxhbWFyaS9ibG9iL21hc3Rlci9jdGh1bGh1L2N0aHVsaHUvbWFu
-YWdlci9jDQo+IGx1c3Rlcl9tb25pdG9yLnB5DQo+IA0KPiANCj4gTGV04oCZcyBjaGVjayB0aGF0
-IHlvdSBuZWVkIHRvIGJlIGRpZ2dpbmcgaW50byB0aGF0IGxldmVsIG9mIGRldGFpbDoNCj4gDQo+
-IFlvdSBzd2l0Y2hlZCB0byBhIG5ldyBpbnN0YW5jZSBvZiBjYWxhbWFyaSBhbmQgaXQgaXMgbm90
-IHJlY29nbml6aW5nIHRoZQ0KPiBjbHVzdGVyLg0KPiANCj4gWW91IHdoYXQgdG8ga25vdyB3aGF0
-IHlvdSBhcmUgb3Zlcmxvb2tpbmc/IFdvdWxkIHlvdSBwbGVhc2UgY2xhcmlmeSB3aXRoDQo+IHNv
-bWUgaG9zdG5hbWVzPw0KPiANCj4gaS5lLiBMZXQgc2F5IHRoYXQgeW91ciBvbGQgY2FsYW1hcmkg
-bm9kZSB3YXMgY2FsbGVkIGNhbGFtYXJpQSBhbmQgdGhhdCB5b3VyDQo+IG5ldyBub2RlIGlzIGNh
-bGFtYXJpQg0KPiANCj4gZnJvbSB3aGljaCBhcmUgeW91IHJ1bm5pbmcgdGhlIGdldF9oZWFydGJl
-YXRzPw0KPiANCj4gd2hhdCBpcyB0aGUgbWFzdGVyIHNldHRpbmcgaW4gdGhlIG1pbmlvbiBjb25m
-aWcgZmlsZXMgb3V0IG9uIHRoZSBub2RlcyBvZiB0aGUNCj4gY2x1c3RlciBpZiB0aGluZ3MgYXJl
-IHNldHVwIGNvcnJlY3RseSB0aGV5IHdvdWxkIGxvb2sgbGlrZSB0aGlzOg0KPiANCj4gW3Jvb3RA
-bm9kZTEgc2hhZG93X21hbl0jIGNhdCAvZXRjL3NhbHQvbWluaW9uLmQvY2FsYW1hcmkuY29uZg0K
-PiBtYXN0ZXI6IGNhbGFtYXJpQg0KPiANCj4gDQo+IElmIHRoaXMgaXMgdGhlIGNhc2UgdGhlIHRo
-aW5nIEkgd291bGQgY2hlY2sgaXMgdGhlDQo+IGh0dHA6Ly9jYWxhbWFyaUIvYXBpL3YyL2NsdXN0
-ZXIgZW5kcG9pbnQgaXMgcmVwb3J0aW5nIGFueXRoaW5nPw0KPiANCj4gaG9wZSB0aGlzIGhlbHBz
-LA0KPiBHcmVnb3J5DQo+IA0KPiA+IE9uIE1heSAxMiwgMjAxNSwgYXQgNDozNCBQTSwgQnJ1Y2Ug
-TWNGYXJsYW5kDQo+IDxCcnVjZS5NY0ZhcmxhbmRAdGFlYy50b3NoaWJhLmNvbT4gd3JvdGU6DQo+
-ID4NCj4gPiBJbmNyZWFzaW5nIHRoZSBhdWRpZW5jZSBzaW5jZSBjZXBoLWNhbGFtYXJpIGlzIG5v
-dCByZXNwb25zaXZlLiBXaGF0IHNhbHQNCj4gZXZlbnQvaW5mbyBkb2VzIHRoZSBDYWxhbWFyaSBN
-YXN0ZXIgZXhwZWN0IHRvIHNlZSBmcm9tIHRoZSBjZXBoLW1vbiB0bw0KPiBkZXRlcm1pbmUgdGhl
-cmUgaXMgYW4gd29ya2luZyBjbHVzdGVyPyBJIGhhZCB0byBjaGFuZ2Ugc2VydmVycyBob3N0aW5n
-IHRoZQ0KPiBjYWxhbWFyaSBtYXN0ZXIgYW5kIGNhbuKAmXQgZ2V0IHRoZSBuZXcgbWFjaGluZSB0
-byByZWNvZ25pemUgdGhlIGNsdXN0ZXIuDQo+IFRoZSDigJhzYWx0IFwqIGNlcGguZ2V0X2hlYXJ0
-YmVhdHPigJkgcmV0dXJucyBtb25tYXAsIGZzaWQsIHZlciwgZXBvY2gsIGV0YyBmb3INCj4gdGhl
-IG1vbml0b3IgYW5kIGFsbCBvZiB0aGUgb3Nk4oCZcy4gQ2FuIGFueW9uZSBwb2ludCBtZSB0byBk
-b2NzIG9yIGNvZGUgdGhhdA0KPiBtaWdodCBlbmxpZ2h0ZW4gbWUgdG8gd2hhdCBJ4oCZbSBvdmVy
-bG9va2luZz8gVGhhbmtzLg0KPiA+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fDQo+ID4gY2VwaC1jYWxhbWFyaSBtYWlsaW5nIGxpc3QNCj4gPiBjZXBoLWNh
-bGFtYXJpQGxpc3RzLmNlcGguY29tDQo+ID4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZv
-LmNnaS9jZXBoLWNhbGFtYXJpLWNlcGguY29tDQoNCl9fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNA
-bGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVz
-ZXJzLWNlcGguY29tCg==
+We've talked about this a bit at ceph developer summits, but haven't
+gone through several parts of the design thoroughly. I'd like to post
+this to a wider audience and get feedback on this draft of a design.
+
+The journal parts are more defined, but the failover/failback workflow
+and general configuration need more fleshing out. Enabling/disabling
+journaling on existing images isn't described yet, though it's
+something that should be supported.
+
+=============
+RBD Mirroring
+=============
+
+The goal of rbd mirroring is to provide disaster recovery for rbd
+images.
+
+This includes:
+
+1) maintaining a crash-consistent view of an image
+2) streaming updates from one site to another
+3) failover/failback
+
+I'll refer to different (cluster, pool1, [pool2, ... poolN]) combinations
+where rbd images are stored as "zones" here, which would be a new
+abstraction introduced for easier configuration of mirroring. This is
+the same term used by radosgw replication.
+
+Crash consistency
+-----------------
+
+This is the basic level of consistency block devices can provide with
+no higher-level hooks, like qemu's guest agent. For replaying a stream
+of block device writes, higher-level hooks could make sense, but these
+could be added later as points in a stream of writes. For crash
+consistency, rbd just needs to maintain the order of writes. There are
+a few ways to do this:
+
+a) snapshots
+
+   rbd has supported differential snapshots for a while now, and these
+   are great for performing backups. They don't work as well for
+   providing a stream of consistent updates, since there is overhead in
+   space and I/O load to creating and deleting rados snapshots. For
+   backend filesystems like xfs and ext4, frequent snapshots would turn
+   many small writes into copies of 4MB and a small write, wasting
+   space. Deleting snapshots is also expensive if there hundreds or
+   thousands happening all the time. Rados snapshots were not designed
+   for this kind of load. In addition, diffing snapshots does not tell
+   us the order in which writes were done, so a partially applied
+   diff would be inconsistent and likely unusable.
+
+b) log-structured rbd
+
+   The simplest way to keep writes in order is to only write them in
+   order, by appending to a log of rados objects. This is great for
+   mirroring, but vastly complicates everything else. This would
+   require all the usual bells and whistles of a log-structured
+   filesystem, including garbage collection, reference tracking, a new
+   rbd-level snapshot mechanism, and more. Custom fsck-like tools for
+   consistency checking and repair would be needed, and the I/O paths
+   would be much more complex. This is a good research project, but
+   it would take a long time to develop and stabilize.
+
+c) journaling
+
+   Journaling is an intermediate step between snapshots and log
+   structured rbd. The idea is that each image has a log of all writes
+   (including data) and metadata changes, like resize, snapshot
+   create/delete, etc. This journal is stored as a series of rados
+   objects, similar to cephfs' journal. A write would first be appended
+   to the journal, acked to the librbd user at that point, and later
+   written out to the usual rbd data objects. Extending rbd's existing
+   client-side cache to track this allows reads of data written to the
+   journal but not the data objects to be satisfied from the cache, and
+   avoids issues of stale reads. This data needs to be kept in memory
+   anyway, so it makes sense to keep it in the cache, where it can be
+   useful.
+
+Structure
+^^^^^^^^^
+
+The journal could be stored in a separate pool from the image, such as
+one backed by ssds to improve write performance. Since it is
+append-only, the journal's data could be stored in an EC pool to save
+space.
+
+It will need some metadata regarding positions in the journal. These
+could be stored as omap values in a 'journal header' object in a
+replicated pool, for rbd perhaps the same pool as the image for
+simplicity. The header would contain at least:
+
+* pool_id - where journal data is stored
+* journal_object_prefix - unique prefix for journal data objects
+* positions - (zone, purpose, object num, offset) tuples indexed by zone
+* object_size - approximate size of each data object
+* object_num_begin - current earliest object in the log
+* object_num_end - max potential object in the log
+
+Similar to rbd images, journal data would be stored in objects named
+after the journal_object_prefix and their object number. To avoid
+issues of padding or splitting journal entries, and to make it simpler
+to keep append-only, it's easier to allow the objects to be near
+object_size before moving to the next object number instead of
+sticking with an exact object size.
+
+Ideally this underlying structure could be used for both rbd and
+cephfs. Variable sized objects are different from the existing cephfs
+journal, which uses fixed-size objects for striping. The default is
+still 4MB chunks though. How important is striping the journal to
+cephfs? For rbd it seems unlikely to help much, since updates need to
+be batched up by the client cache anyway.
+
+Usage
+^^^^^
+
+When an rbd image with journaling enabled is opened, the journal
+metadata would be read and the last part of the journal would be
+replayed if necessary.
+
+In general, a write would first go to the journal, return to the
+client, and then be written to the underlying rbd image. Once a
+threshold of bytes of journal entries are flushed, or a time period is
+reached and some journal entries were flushed, a position with purpose
+"flushed" for the zone the rbd image is in would be updated in the
+journal metadata.
+
+Trimming old entries from the journal would be allowed up to the
+minimum of all the positions stored in its metadata. This would be an
+asynchronous operation executed by the consumers of the journal.
+
+There would be a new feature bit for rbd images to enable
+journaling. As a first step it could only be set when an image is
+created.
+
+One way to enable it dynamically would be to take a snapshot at the
+same time to serve as a base for mirroring further changes.  This
+could be added as a journal entry for snapshot creation with a special
+'internal' flag, and the snapshot could be deleted by the process that
+trims this journal entry.
+
+Deleting an image would delete its journal, despite any mirroring in
+progress, since mirroring is not backup.
+
+Streaming Updates
+-----------------
+
+This a complex area with many trade-offs. I expect we'll need some
+iteration to find good general solutions here. I'll describe a simple
+initial step, and some potential optimizations, and issues to address
+in future versions.
+
+In general, there will be a new daemon (tentatively called rbd-mirror
+here) that reads journal entries from images in one zone and replays
+them in different zones. An initial implementation might connect to
+ceph clusters in all zones, and replay writes and metadata changes to
+images in other zones directly via librbd. To simplify failover, it
+would be better to run these in follower zones rather than the leader
+zone.
+
+There are a couple of improvements on this we'd probably want to make
+early:
+
+* using multiple threads to mirror many images at once
+* using multiple processes to scale across machines, so one node is
+not a bottleneck
+
+Some other possible optimizations:
+* reading a large window of the journal to coalesce overlapping writes
+* decoupling reading from the leader zone and writing to follower zones,
+to allow optimizations like compression of the journal or other
+transforms as data is sent, and relaxing the requirement for one node
+to be directly connected to more than one ceph cluster
+
+Noticing updates
+^^^^^^^^^^^^^^^^
+
+There are two kinds of changes that rbd-mirror needs to be aware of:
+
+1) journaled image creation/deletion
+
+The features of an image are only stored in the image's header right
+now. To get updates of these more easily, we need an index of some
+sort. This could take the form of an additional index in the
+rbd_directory object, which already contains all images. Creating or
+deleting an image with the journal feature bit could send a rados
+notify on the rbd_directory object, and rbd-mirror could watch
+rbd_directory for these notifications. The notifications could contain
+information about the image (at least its features), but if
+rbd-mirror's watch times out it could simply re-read the features of
+all images in a pool that it cares about (more on this later).
+
+Dynamically enabling/disabling features would work the same way. The
+image header would be updated as usual, and the rbd_directory index
+would be updated as well. If the journaling feature bit changed, a
+notify on the rbd_directory object would be sent.
+
+Since we'd be storing the features in two places, to keep them in sync
+we could use an approach like:
+
+a) set a new updated_features field on image header
+b) set features on rbd_directory
+c) clear updated_features and set features on image header
+
+This is all through the lock holder, so we don't need to worry about
+concurrent updates - header operations are prefixed by an assertion
+that the lock is still held for extra safety.
+
+2) journal updates for a particular image
+
+Generally rbd-mirror can keep reading the journal until it hits the
+end, detected by -ENOENT on an object or less than the journal's
+target object size.
+
+Once it reaches the end, it can poll for new content periodically, or
+use notifications like watch/notify on the journal header for the max
+journal object number to change. I don't think polling in this case is
+very expensive, especially if it uses exponential backoff to a
+configurable max time it can be behind the journal.
+
+Clones
+^^^^^^
+
+Cloning is currently the only way images can be related. Mirroring
+should preserve these relationships so mirrored zones behave the same
+as the original zone.
+
+In order for clones with non-zero overlap to be useful, their parent
+snapshot must be present in the zone already. A simple approach is to
+avoid mirroring clones until their parent snapshot is mirrored.
+
+Clones refer to parents by pool id, image id, and snapshot id. These
+are all generated automatically when each is created, so they will be
+different in different zones. Since pools and images can be renamed,
+we'll need a way to make sure we keep the correct mappings in mirrored
+zones. A simple way to do this is to record a leader zone ->
+follower zone mapping for pool and image ids. When a pool or image
+is created in follower zones, their mapping to the ids in the leader
+zone would be stored in the destination zone.
+
+Parallelism
+^^^^^^^^^^^
+
+Mirroring many images is embarrassingly parallel. A simple unit of
+work is an image (more specifically a journal, if e.g. a group of
+images shared a journal as part of a consistency group in the future).
+
+Spreading this work across threads within a single process is
+relatively simple. For HA, and to avoid a single NIC becoming a
+bottleneck, we'll want to spread out the work across multiple
+processes (and probably multiple hosts). rbd-mirror should have no
+local state, so we just need a mechanism to coordinate the division of
+work across multiple processes.
+
+One way to do this would be layering on top of watch/notify. Each
+rbd-mirror process in a zone could watch the same object, and shard
+the set of images to mirror based on a hash of image ids onto the
+current set of rbd-mirror processes sorted by client gid. The set of
+rbd-mirror processes could be determined by listing watchers.
+
+Failover
+--------
+
+Watch/notify could also be used (via a predetermined object) to
+communicate with rbd-mirror processes to get sync status from each,
+and for managing failover.
+
+Failing over means preventing changes in the original leader zone, and
+making the new leader zone writeable. The state of a zone (read-only vs
+writeable) could be stored in a zone's metadata in rados to represent
+this, and images with the journal feature bit could check this before
+being opened read/write for safety. To make it race-proof, the zone
+state can be a tri-state - read-only, read-write, or changing.
+
+In the original leader zone, if it is still running, the zone would be
+set to read-only mode and all clients could be blacklisted to avoid
+creating too much divergent history to rollback later.
+
+In the new leader zone, the zone's state would be set to 'changing',
+and rbd-mirror processes would be told to stop copying from the
+original leader and close the images they were mirroring to.  New
+rbd-mirror processes should refuse to start mirroring when the zone is
+not read-only. Once the mirroring processes have stopped, the zone
+could be set to read-write, and begin normal usage.
+
+Failback
+^^^^^^^^
+
+In this scenario, after failing over, the original leader zone (A)
+starts running again, but needs to catch up to the current leader
+(B). At a high level, this involves syncing up the image by rolling
+back the updates in A past the point B synced to as noted in an
+images's journal in A, and mirroring all the changes since then from
+B.
+
+This would need to be an offline operation, since at some point
+B would need to go read-only before A goes read-write. Making this
+transition online is outside the scope of mirroring for now, since it
+would require another level of indirection for rbd users like QEMU.
