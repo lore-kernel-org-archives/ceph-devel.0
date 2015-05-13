@@ -1,17 +1,14 @@
-From: Gregory Meno <gmeno-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [ceph-calamari] Does anyone understand Calamari??
-Date: Tue, 12 May 2015 19:08:07 -0700
-Message-ID: <D363AFC4-84C1-42EB-A5F0-792A88B685C4@redhat.com>
-References: <7E8CF9C16F722345A89076330719CB1F4A82525D@EXMAIL1.taec.toshiba.com>
-	<607C9580-DF69-4CA0-9D65-550700893CA8@redhat.com>
-	<7E8CF9C16F722345A89076330719CB1F4A825343@EXMAIL1.taec.toshiba.com>
-	<95DFDC74-A336-46C4-B72E-24E9747CDD6F@redhat.com>
-	<7E8CF9C16F722345A89076330719CB1F4A8253D3@EXMAIL1.taec.toshiba.com>
-Mime-Version: 1.0 (Mac OS X Mail 8.2 \(2098\))
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+From: Wido den Hollander <wido-fspyXLx8qC4@public.gmane.org>
+Subject: Re: Ceph User Committee Vote
+Date: Wed, 13 May 2015 09:03:29 +0200
+Message-ID: <5552F741.6080308@42on.com>
+References: <CAAZbbf0u5Gnizq+rsny42cPNCYb4w2XB9RC1it7KhEfwVAx+Qw@mail.gmail.com>	<CA+7XDxOxzY8p5GxPsf6nooKhG50HGANEStwviCY9XJE+6yzAzQ@mail.gmail.com>
+	<CAAZbbf10aa7V4Htza5mq5ugVuxyKJxdhGe0K+=bh-GY7BLAgGg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <7E8CF9C16F722345A89076330719CB1F4A8253D3-S73WLWeSKkaudDcc988YZay9ae4OIm1A@public.gmane.org>
+In-Reply-To: <CAAZbbf10aa7V4Htza5mq5ugVuxyKJxdhGe0K+=bh-GY7BLAgGg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -21,160 +18,94 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Bruce McFarland <Bruce.McFarland-rnQ3HPfPGGWsvWnuDiJtQA@public.gmane.org>
-Cc: "ceph-calamari-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-calamari-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel (ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org)" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+To: Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, eric mourgaya <eric.mourgaya-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Loic Dachary <ldachary-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "ceph-community-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-community-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-SWRlYWxseSBJIHdvdWxkIGxpa2UgZXZlcnl0aGluZyBpbiAvdmFyL2xvZy9jYWxtYXJpCgpiZSBz
-dXJlIHRvIHNldCBjYWxhbWFyaS5jb25mIGxpa2Ugc286CltzaGFkb3dfbWFuQHZwbTEwNyB+XSQg
-Z3JlcCBERUJVRyAvZXRjL2NhbGFtYXJpL2NhbGFtYXJpLmNvbmYgCmxvZ19sZXZlbCA9IERFQlVH
-CmRiX2xvZ19sZXZlbCA9IERFQlVHCmxvZ19sZXZlbCA9IERFQlVHCgp0aGVuIHJlc3RhcnQgY3Ro
-dWxodSBhbmQgYXBhY2hlCgp2aXNpdCBodHRwOi8vZXNzcGVyZjMvYXBpL3YyL2NsdXN0ZXIKYW5k
-IGh0dHA6Ly9lc3NwZXJmMwoKYW5kIHRoZW4gc2hhcmUgdGhlIGxvZ3MgaGVyZS4gSG9wZWZ1bGx5
-IHNvbWV0aGluZyBvYnZpb3VzIHdpbGwgYmUgb2ZmIGluIGVpdGhlciBjYWxhbWFyaSBvciBjdGh1
-bGh1IGxvZwoKcmVnYXJkcywKR3JlZ29yeQoKPiBPbiBNYXkgMTIsIDIwMTUsIGF0IDY6MTEgUE0s
-IEJydWNlIE1jRmFybGFuZCA8QnJ1Y2UuTWNGYXJsYW5kQHRhZWMudG9zaGliYS5jb20+IHdyb3Rl
-Ogo+IAo+IFdoaWNoIGxvZ3M/IEknbSBhc3N1bWluZyAvdmFyL2xvZy9zYWx0L21pbm9uIHNpbmNl
-IHRoZSByZXN0IG9uIHRoZSBtaW5pb25zIGFyZSByZWxhdGl2ZWx5IGVtcHR5LiBQb3NzaWJseSBD
-dGh1bGh1IGZyb20gdGhlIG1hc3Rlcj8KPiAKPiBJJ20gcnVubmluZyBvbiBVYnVudHUgMTQuMDQg
-YW5kIGRvbid0IGhhdmUgYW4gaHR0cGQgc2VydmljZS4gSSBoYWQgYmVlbiBzdGFydC9zdG9wcGlu
-ZyBhcGFjaGUyLiBMaWtld2lzZSB0aGVyZSBpcyBubyBzdXBlcnZpc29yZCBzZXJ2aWNlIGFuZCBJ
-J3ZlIGJlZW4gdXNpbmcgc3VwZXJ2aXNvcmN0bCB0byBzdGFydC9zdG9wIEN0aHVsaHUuIAo+IAo+
-IEkndmUgcGVyZm9ybWVkIHRoZSBjYWxhbWFyaS1jdGwgY2xlYXIvaW5pdCBzZXF1ZW5jZSBtb3Jl
-IHRoYW4gdHdpY2Ugd2l0aCBhbHNvIHN0b3BwaW5nL3N0YXJ0aW5nIGFwYWNoZTIgYW5kIEN0aHVs
-aHUuCj4gCj4+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tCj4+IEZyb206IEdyZWdvcnkgTWVu
-byBbbWFpbHRvOmdtZW5vQHJlZGhhdC5jb21dCj4+IFNlbnQ6IFR1ZXNkYXksIE1heSAxMiwgMjAx
-NSA1OjU4IFBNCj4+IFRvOiBCcnVjZSBNY0ZhcmxhbmQKPj4gQ2M6IGNlcGgtY2FsYW1hcmlAbGlz
-dHMuY2VwaC5jb207IGNlcGgtdXNlcnNAY2VwaC5jb207IGNlcGgtZGV2ZWwKPj4gKGNlcGgtZGV2
-ZWxAdmdlci5rZXJuZWwub3JnKQo+PiBTdWJqZWN0OiBSZTogW2NlcGgtY2FsYW1hcmldIERvZXMg
-YW55b25lIHVuZGVyc3RhbmQgQ2FsYW1hcmk/Pwo+PiAKPj4gQWxsIHRoYXQgbG9va3MgZmluZS4K
-Pj4gCj4+IFRoZXJlIG11c3QgYmUgc29tZSBzdGF0ZSB3aGVyZSB0aGUgY2x1c3RlciBpcyBrbm93
-biB0byBjYWxhbWFyaSBhbmQgaXQgaXMKPj4gZmFpbGluZyB0byBhY3R1YWxseSBzaG93IGl0Lgo+
-PiAKPj4gSWYgeW91IGhhdmUgdGltZSB0byBkZWJ1ZyBJIHdvdWxkIGxvdmUgdG8gc2VlIHRoZSBs
-b2dzIGF0IGRlYnVnIGxldmVsLgo+PiAKPj4gSWYgeW91IGRvbuKAmXQgd2UgY291bGQgdHJ5IGNs
-ZWFuaW5nIG91dCBjYWxhbWFyaeKAmXMgc3RhdGUuCj4+IHN1ZG8gc3VwZXJ2aXNvcmN0bCBzaHV0
-ZG93bgo+PiBzdWRvIHNlcnZpY2UgaHR0cGQgc3RvcAo+PiBzdWRvIGNhbGFtYXJpLWN0bCBjbOKA
-lHllcy1pLWFtLXN1cmUKPj4gc3VkbyBjYWxhbWFyaS1jdGwgaW5pdGlhbGl6ZQo+PiBjYQo+PiB0
-aGVuCj4+IHN1ZG8gc2VydmljZSBzdXBlcnZpc29yZCBzdGFydAo+PiBzdWRvIHNlcnZpY2UgaHR0
-cGQgc3RhcnQKPj4gCj4+IHNlZSB3aGF0IHRoZSBBUEkgYW5kIFVJIHNheXMgdGhlbi4KPj4gCj4+
-IHJlZ2FyZHMsCj4+IEdyZWdvcnkKPj4+IE9uIE1heSAxMiwgMjAxNSwgYXQgNToxOCBQTSwgQnJ1
-Y2UgTWNGYXJsYW5kCj4+IDxCcnVjZS5NY0ZhcmxhbmRAdGFlYy50b3NoaWJhLmNvbT4gd3JvdGU6
-Cj4+PiAKPj4+IE1hc3RlciB3YXMgZXNzNjggYW5kIG5vdyBpdCdzIGVzc3BlcmYzLgo+Pj4gCj4+
-PiBPbiBhbGwgY2x1c3RlciBub2RlcyB0aGUgZm9sbG93aW5nIGZpbGVzIG5vdyBoYXZlICdtYXN0
-ZXI6IGVzc3BlcmYzJwo+Pj4gL2V0Yy9zYWx0L21pbmlvbgo+Pj4gL2V0Yy9zYWx0L21pbmlvbi9j
-YWxhbWFyaS5jb25mCj4+PiAvZXRjL2RpYW1vbmQvZGlhbW9uZC5jb25mCj4+PiAKPj4+IFRoZSAn
-c2FsdCBcKiBjZXBoLmdldF9oZWFydGJlYXRzJyBpcyBiZWluZyBydW4gb24gZXNzcGVyZjMgLSBo
-ZXJlcyBhICdzYWx0IFwqCj4+IHRlc3QucGluZycgZnJvbSBlc3NwZXJmMyBDYWxhbWFyaSBNYXN0
-ZXIgdG8gdGhlIGNsdXN0ZXIuIEkndmUgYWxzbyBpbmNsdWRlZCBhCj4+IHF1aWNrIGNsdXN0ZXIg
-c2FuaXR5IHRlc3Qgd2l0aCB0aGUgb3V0cHV0IG9mIGNlcGggLXMgYW5kIGNlcGggb3NkIHRyZWUu
-IEFuZCBmb3IKPj4geW91ciByZWFkaW5nIHBsZWFzdXJlIHRoZSBvdXRwdXQgb2YgJ3NhbHQgb2N0
-ZW9uMTA5IGNlcGguZ2V0X2hlYXJ0YmVhdHMnCj4+IHNpbmNlIEkgc3VzcGVjdCB0aGVyZSBtaWdo
-dCBiZSBhIG1pc3NpbmcgZmllbGQgaW4gdGhlIG1vbml0b3IgcmVzcG9uc2UuCj4+PiAKPj4+IG9v
-dEBlc3NwZXJmMzovZXRjL2NlcGgjIHNhbHQgXCogdGVzdC5waW5nCj4+PiBvY3Rlb24xMDg6Cj4+
-PiAgVHJ1ZQo+Pj4gb2N0ZW9uMTE0Ogo+Pj4gIFRydWUKPj4+IG9jdGVvbjExMToKPj4+ICBUcnVl
-Cj4+PiBvY3Rlb24xMDE6Cj4+PiAgVHJ1ZQo+Pj4gb2N0ZW9uMTA2Ogo+Pj4gIFRydWUKPj4+IG9j
-dGVvbjEwOToKPj4+ICBUcnVlCj4+PiBvY3Rlb24xMTg6Cj4+PiAgVHJ1ZQo+Pj4gcm9vdEBlc3Nw
-ZXJmMzovZXRjL2NlcGgjIGNlcGggb3NkIHRyZWUKPj4+ICMgaWQJd2VpZ2h0CXR5cGUgbmFtZQl1
-cC9kb3duCXJld2VpZ2h0Cj4+PiAtMQk3CXJvb3QgZGVmYXVsdAo+Pj4gLTQJMQkJaG9zdCBvY3Rl
-b24xMDgKPj4+IDAJMQkJCW9zZC4wCXVwCTEKPj4+IC0yCTEJCWhvc3Qgb2N0ZW9uMTExCj4+PiAx
-CTEJCQlvc2QuMQl1cAkxCj4+PiAtNQkxCQlob3N0IG9jdGVvbjExNQo+Pj4gMgkxCQkJb3NkLjIJ
-RE5FCj4+PiAtNgkxCQlob3N0IG9jdGVvbjExOAo+Pj4gMwkxCQkJb3NkLjMJdXAJMQo+Pj4gLTcJ
-MQkJaG9zdCBvY3Rlb24xMTQKPj4+IDQJMQkJCW9zZC40CXVwCTEKPj4+IC04CTEJCWhvc3Qgb2N0
-ZW9uMTA2Cj4+PiA1CTEJCQlvc2QuNQl1cAkxCj4+PiAtOQkxCQlob3N0IG9jdGVvbjEwMQo+Pj4g
-NgkxCQkJb3NkLjYJdXAJMQo+Pj4gcm9vdEBlc3NwZXJmMzovZXRjL2NlcGgjIGNlcGggLXMKPj4+
-ICBjbHVzdGVyIDg2OGJmYWNjLWU0OTItMTFlNC04OWZhLTAwMGZiNzExMTEwYwo+Pj4gICBoZWFs
-dGggSEVBTFRIX09LCj4+PiAgIG1vbm1hcCBlMTogMSBtb25zIGF0IHtvY3Rlb24xMDk9MjA5LjI0
-My4xNjAuNzA6Njc4OS8wfSwgZWxlY3Rpb24KPj4gZXBvY2ggMSwgcXVvcnVtIDAgb2N0ZW9uMTA5
-Cj4+PiAgIG9zZG1hcCBlODA6IDYgb3NkczogNiB1cCwgNiBpbgo+Pj4gICAgcGdtYXAgdjI2NzY1
-OiA3MjggcGdzLCAyIHBvb2xzLCAyMDA3MCBNQiBkYXRhLCAxNTAwMyBvYmplY3RzCj4+PiAgICAg
-ICAgICA2MDYwNCBNQiB1c2VkLCAyNzM0IEdCIC8gMjc5MyBHQiBhdmFpbAo+Pj4gICAgICAgICAg
-ICAgICA3MjggYWN0aXZlK2NsZWFuCj4+PiByb290QGVzc3BlcmYzOi9ldGMvY2VwaCMKPj4+IAo+
-Pj4gcm9vdEBlc3NwZXJmMzovZXRjL2NlcGgjIHNhbHQgb2N0ZW9uMTA5IGNlcGguZ2V0X2hlYXJ0
-YmVhdHMKPj4+IG9jdGVvbjEwOToKPj4+ICAtLS0tLS0tLS0tCj4+PiAgLSBib290X3RpbWU6Cj4+
-PiAgICAgIDE0MzA3ODQ0MzEKPj4+ICAtIGNlcGhfdmVyc2lvbjoKPj4+ICAgICAgMC44MC44LTAu
-ZWw2Cj4+PiAgLSBzZXJ2aWNlczoKPj4+ICAgICAgLS0tLS0tLS0tLQo+Pj4gICAgICBjZXBoLW1v
-bi5vY3Rlb24xMDk6Cj4+PiAgICAgICAgICAtLS0tLS0tLS0tCj4+PiAgICAgICAgICBjbHVzdGVy
-Ogo+Pj4gICAgICAgICAgICAgIGNlcGgKPj4+ICAgICAgICAgIGZzaWQ6Cj4+PiAgICAgICAgICAg
-ICAgODY4YmZhY2MtZTQ5Mi0xMWU0LTg5ZmEtMDAwZmI3MTExMTBjCj4+PiAgICAgICAgICBpZDoK
-Pj4+ICAgICAgICAgICAgICBvY3Rlb24xMDkKPj4+ICAgICAgICAgIHN0YXR1czoKPj4+ICAgICAg
-ICAgICAgICAtLS0tLS0tLS0tCj4+PiAgICAgICAgICAgICAgZWxlY3Rpb25fZXBvY2g6Cj4+PiAg
-ICAgICAgICAgICAgICAgIDEKPj4+ICAgICAgICAgICAgICBleHRyYV9wcm9iZV9wZWVyczoKPj4+
-ICAgICAgICAgICAgICBtb25tYXA6Cj4+PiAgICAgICAgICAgICAgICAgIC0tLS0tLS0tLS0KPj4+
-ICAgICAgICAgICAgICAgICAgY3JlYXRlZDoKPj4+ICAgICAgICAgICAgICAgICAgICAgIDIwMTUt
-MDQtMTYgMjM6NTA6NTIuNDEyNjg2Cj4+PiAgICAgICAgICAgICAgICAgIGVwb2NoOgo+Pj4gICAg
-ICAgICAgICAgICAgICAgICAgMQo+Pj4gICAgICAgICAgICAgICAgICBmc2lkOgo+Pj4gICAgICAg
-ICAgICAgICAgICAgICAgODY4YmZhY2MtZTQ5Mi0xMWU0LTg5ZmEtMDAwZmI3MTExMTBjCj4+PiAg
-ICAgICAgICAgICAgICAgIG1vZGlmaWVkOgo+Pj4gICAgICAgICAgICAgICAgICAgICAgMjAxNS0w
-NC0xNiAyMzo1MDo1Mi40MTI2ODYKPj4+ICAgICAgICAgICAgICAgICAgbW9uczoKPj4+ICAgICAg
-ICAgICAgICAgICAgICAgIC0tLS0tLS0tLS0KPj4+ICAgICAgICAgICAgICAgICAgICAgIC0gYWRk
-cjoKPj4+ICAgICAgICAgICAgICAgICAgICAgICAgICAyMDkuMjQzLjE2MC43MDo2Nzg5LzAKPj4+
-ICAgICAgICAgICAgICAgICAgICAgIC0gbmFtZToKPj4+ICAgICAgICAgICAgICAgICAgICAgICAg
-ICBvY3Rlb24xMDkKPj4+ICAgICAgICAgICAgICAgICAgICAgIC0gcmFuazoKPj4+ICAgICAgICAg
-ICAgICAgICAgICAgICAgICAwCj4+PiAgICAgICAgICAgICAgbmFtZToKPj4+ICAgICAgICAgICAg
-ICAgICAgb2N0ZW9uMTA5Cj4+PiAgICAgICAgICAgICAgb3V0c2lkZV9xdW9ydW06Cj4+PiAgICAg
-ICAgICAgICAgcXVvcnVtOgo+Pj4gICAgICAgICAgICAgICAgICAtIDAKPj4+ICAgICAgICAgICAg
-ICByYW5rOgo+Pj4gICAgICAgICAgICAgICAgICAwCj4+PiAgICAgICAgICAgICAgc3RhdGU6Cj4+
-PiAgICAgICAgICAgICAgICAgIGxlYWRlcgo+Pj4gICAgICAgICAgICAgIHN5bmNfcHJvdmlkZXI6
-Cj4+PiAgICAgICAgICB0eXBlOgo+Pj4gICAgICAgICAgICAgIG1vbgo+Pj4gICAgICAgICAgdmVy
-c2lvbjoKPj4+ICAgICAgICAgICAgICAwLjg2Cj4+PiAgLS0tLS0tLS0tLQo+Pj4gIC0gODY4YmZh
-Y2MtZTQ5Mi0xMWU0LTg5ZmEtMDAwZmI3MTExMTBjOgo+Pj4gICAgICAtLS0tLS0tLS0tCj4+PiAg
-ICAgIGZzaWQ6Cj4+PiAgICAgICAgICA4NjhiZmFjYy1lNDkyLTExZTQtODlmYS0wMDBmYjcxMTEx
-MGMKPj4+ICAgICAgbmFtZToKPj4+ICAgICAgICAgIGNlcGgKPj4+ICAgICAgdmVyc2lvbnM6Cj4+
-PiAgICAgICAgICAtLS0tLS0tLS0tCj4+PiAgICAgICAgICBjb25maWc6Cj4+PiAgICAgICAgICAg
-ICAgODdmMTc1YzYwZTVjN2VjMDZjMjYzYzU1NjA1NmZiY2IKPj4+ICAgICAgICAgIGhlYWx0aDoK
-Pj4+ICAgICAgICAgICAgICBhOTA3ZDBlYzM5NTcxMzM2OWI0ODQzMzgxZWMzMWJjMgo+Pj4gICAg
-ICAgICAgbWRzX21hcDoKPj4+ICAgICAgICAgICAgICAxCj4+PiAgICAgICAgICBtb25fbWFwOgo+
-Pj4gICAgICAgICAgICAgIDEKPj4+ICAgICAgICAgIG1vbl9zdGF0dXM6Cj4+PiAgICAgICAgICAg
-ICAgMQo+Pj4gICAgICAgICAgb3NkX21hcDoKPj4+ICAgICAgICAgICAgICA4MAo+Pj4gICAgICAg
-ICAgcGdfc3VtbWFyeToKPj4+ICAgICAgICAgICAgICA3ZTI5ZDdjYzkzY2ZjZWQ4ZjNmMTQ2Y2M3
-OGY1NjgyZgo+Pj4gcm9vdEBlc3NwZXJmMzovZXRjL2NlcGgjCj4+PiAKPj4+IAo+Pj4gCj4+Pj4g
-LS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0KPj4+PiBGcm9tOiBHcmVnb3J5IE1lbm8gW21haWx0
-bzpnbWVub0ByZWRoYXQuY29tXQo+Pj4+IFNlbnQ6IFR1ZXNkYXksIE1heSAxMiwgMjAxNSA1OjAz
-IFBNCj4+Pj4gVG86IEJydWNlIE1jRmFybGFuZAo+Pj4+IENjOiBjZXBoLWNhbGFtYXJpQGxpc3Rz
-LmNlcGguY29tOyBjZXBoLXVzZXJzQGNlcGguY29tOyBjZXBoLWRldmVsCj4+Pj4gKGNlcGgtZGV2
-ZWxAdmdlci5rZXJuZWwub3JnKQo+Pj4+IFN1YmplY3Q6IFJlOiBbY2VwaC1jYWxhbWFyaV0gRG9l
-cyBhbnlvbmUgdW5kZXJzdGFuZCBDYWxhbWFyaT8/Cj4+Pj4gCj4+Pj4gQnJ1Y2UsCj4+Pj4gCj4+
-Pj4gSXQgaXMgZ3JlYXQgdG8gaGVhciB0aGF0IHNhbHQgaXMgcmVwb3J0aW5nIHN0YXR1cyBmcm9t
-IGFsbCB0aGUgbm9kZXMKPj4+PiBpbiB0aGUgY2x1c3Rlci4KPj4+PiAKPj4+PiBMZXQgbWUgc2Vl
-IGlmIEkgdW5kZXJzdGFuZCB5b3VyIHF1ZXN0aW9uOgo+Pj4+IAo+Pj4+IFlvdSB3YW50IHRvIGtu
-b3cgd2hhdCBjb25kaXRpb25zIGNhdXNlIHVzIHRvIHJlY29nbml6ZSBhIHdvcmtpbmcKPj4gY2x1
-c3Rlcj8KPj4+PiAKPj4+PiBzZWUKPj4+PiAKPj4gaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2Fs
-YW1hcmkvYmxvYi9tYXN0ZXIvY3RodWxodS9jdGh1bGh1L21hbmFnZXIvCj4+Pj4gbWFuYWdlci5w
-eSNMMTM1Cj4+Pj4gCj4+Pj4gCj4+IGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2NhbGFtYXJpL2Js
-b2IvbWFzdGVyL2N0aHVsaHUvY3RodWxodS9tYW5hZ2VyLwo+Pj4+IG1hbmFnZXIucHkjTDM0OQo+
-Pj4+IAo+Pj4+IGFuZAo+Pj4+IAo+Pj4+IAo+PiBodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jYWxh
-bWFyaS9ibG9iL21hc3Rlci9jdGh1bGh1L2N0aHVsaHUvbWFuYWdlci8KPj4+PiBjCj4+Pj4gbHVz
-dGVyX21vbml0b3IucHkKPj4+PiAKPj4+PiAKPj4+PiBMZXTigJlzIGNoZWNrIHRoYXQgeW91IG5l
-ZWQgdG8gYmUgZGlnZ2luZyBpbnRvIHRoYXQgbGV2ZWwgb2YgZGV0YWlsOgo+Pj4+IAo+Pj4+IFlv
-dSBzd2l0Y2hlZCB0byBhIG5ldyBpbnN0YW5jZSBvZiBjYWxhbWFyaSBhbmQgaXQgaXMgbm90IHJl
-Y29nbml6aW5nCj4+Pj4gdGhlIGNsdXN0ZXIuCj4+Pj4gCj4+Pj4gWW91IHdoYXQgdG8ga25vdyB3
-aGF0IHlvdSBhcmUgb3Zlcmxvb2tpbmc/IFdvdWxkIHlvdSBwbGVhc2UgY2xhcmlmeQo+Pj4+IHdp
-dGggc29tZSBob3N0bmFtZXM/Cj4+Pj4gCj4+Pj4gaS5lLiBMZXQgc2F5IHRoYXQgeW91ciBvbGQg
-Y2FsYW1hcmkgbm9kZSB3YXMgY2FsbGVkIGNhbGFtYXJpQSBhbmQKPj4+PiB0aGF0IHlvdXIgbmV3
-IG5vZGUgaXMgY2FsYW1hcmlCCj4+Pj4gCj4+Pj4gZnJvbSB3aGljaCBhcmUgeW91IHJ1bm5pbmcg
-dGhlIGdldF9oZWFydGJlYXRzPwo+Pj4+IAo+Pj4+IHdoYXQgaXMgdGhlIG1hc3RlciBzZXR0aW5n
-IGluIHRoZSBtaW5pb24gY29uZmlnIGZpbGVzIG91dCBvbiB0aGUKPj4+PiBub2RlcyBvZiB0aGUg
-Y2x1c3RlciBpZiB0aGluZ3MgYXJlIHNldHVwIGNvcnJlY3RseSB0aGV5IHdvdWxkIGxvb2sgbGlr
-ZSB0aGlzOgo+Pj4+IAo+Pj4+IFtyb290QG5vZGUxIHNoYWRvd19tYW5dIyBjYXQgL2V0Yy9zYWx0
-L21pbmlvbi5kL2NhbGFtYXJpLmNvbmYKPj4+PiBtYXN0ZXI6IGNhbGFtYXJpQgo+Pj4+IAo+Pj4+
-IAo+Pj4+IElmIHRoaXMgaXMgdGhlIGNhc2UgdGhlIHRoaW5nIEkgd291bGQgY2hlY2sgaXMgdGhl
-Cj4+Pj4gaHR0cDovL2NhbGFtYXJpQi9hcGkvdjIvY2x1c3RlciBlbmRwb2ludCBpcyByZXBvcnRp
-bmcgYW55dGhpbmc/Cj4+Pj4gCj4+Pj4gaG9wZSB0aGlzIGhlbHBzLAo+Pj4+IEdyZWdvcnkKPj4+
-PiAKPj4+Pj4gT24gTWF5IDEyLCAyMDE1LCBhdCA0OjM0IFBNLCBCcnVjZSBNY0ZhcmxhbmQKPj4+
-PiA8QnJ1Y2UuTWNGYXJsYW5kQHRhZWMudG9zaGliYS5jb20+IHdyb3RlOgo+Pj4+PiAKPj4+Pj4g
-SW5jcmVhc2luZyB0aGUgYXVkaWVuY2Ugc2luY2UgY2VwaC1jYWxhbWFyaSBpcyBub3QgcmVzcG9u
-c2l2ZS4gV2hhdAo+Pj4+PiBzYWx0Cj4+Pj4gZXZlbnQvaW5mbyBkb2VzIHRoZSBDYWxhbWFyaSBN
-YXN0ZXIgZXhwZWN0IHRvIHNlZSBmcm9tIHRoZSBjZXBoLW1vbgo+Pj4+IHRvIGRldGVybWluZSB0
-aGVyZSBpcyBhbiB3b3JraW5nIGNsdXN0ZXI/IEkgaGFkIHRvIGNoYW5nZSBzZXJ2ZXJzCj4+Pj4g
-aG9zdGluZyB0aGUgY2FsYW1hcmkgbWFzdGVyIGFuZCBjYW7igJl0IGdldCB0aGUgbmV3IG1hY2hp
-bmUgdG8gcmVjb2duaXplCj4+IHRoZSBjbHVzdGVyLgo+Pj4+IFRoZSDigJhzYWx0IFwqIGNlcGgu
-Z2V0X2hlYXJ0YmVhdHPigJkgcmV0dXJucyBtb25tYXAsIGZzaWQsIHZlciwgZXBvY2gsCj4+Pj4g
-ZXRjIGZvciB0aGUgbW9uaXRvciBhbmQgYWxsIG9mIHRoZSBvc2TigJlzLiBDYW4gYW55b25lIHBv
-aW50IG1lIHRvIGRvY3MKPj4+PiBvciBjb2RlIHRoYXQgbWlnaHQgZW5saWdodGVuIG1lIHRvIHdo
-YXQgSeKAmW0gb3Zlcmxvb2tpbmc/IFRoYW5rcy4KPj4+Pj4gX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX18KPj4+Pj4gY2VwaC1jYWxhbWFyaSBtYWlsaW5nIGxp
-c3QKPj4+Pj4gY2VwaC1jYWxhbWFyaUBsaXN0cy5jZXBoLmNvbQo+Pj4+PiBodHRwOi8vbGlzdHMu
-Y2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtY2FsYW1hcmktY2VwaC5jb20KPj4+IAo+IAoKX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBt
-YWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5j
-b20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
+Yes, I want to set myself candidate for the Ceph User Committee election.
+
+I've been with the Ceph project for over 5 years now and have been
+developing various kinds of tools and integrations for Ceph.
+
+Next to that I maintain the EU mirror and I want to expand the mirror
+system of Ceph so that we have a better reliability globally but also
+want to provide more detailed statistics about the mirrors and downloads.
+
+Combined with my extensive Ceph experience I think I would be a good
+community head.
+
+Wido
+
+On 05/12/2015 11:06 PM, Patrick McGarry wrote:
+> I know Wido was looking to potentially get on the ballot here, so am
+> including him.
+> 
+> I'm also including ceph-user and ceph-devel in case anyone else had
+> strong feelings about leading the Ceph User Committee (CUC). Thanks.
+> 
+> As Eric mentioned. If you are interested in taking on the role and
+> responsibility of CUC Chair please submit your name, email, and a
+> short bio that we can use in creating the voting ballot. Thanks.
+> 
+> 
+> 
+> On Tue, May 12, 2015 at 5:03 PM, eric mourgaya <eric.mourgaya-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+>> Hi all,
+>>
+>> The   campain to become ceph community header is openned.
+>> I will collected all run  by email with Patrick.  if you are interested  by
+>> this  please send us an  email with
+>>  you name and you company and if  possible a short  text to help  people  to
+>> vote  for you.
+>> I will compile all run  the 1th  June 2015 a  web  page.  We can start the
+>> vote after this, and stop it the  10th  June.
+>>
+>> thanks,
+>>
+>>
+>>
+>>
+>> 2015-05-11 17:23 GMT+02:00 Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>:
+>>>
+>>> Hey all,
+>>>
+>>> By my count the last user committee election was almost exactly 12 mos
+>>> ago [1] (the original plan was for 6 mo elections, but I'm happy with
+>>> 1 year). Eric, would you like to organize the next set of elections so
+>>> we can make sure this is polished and clean by the time the Ceph Board
+>>> is launched in July? Thanks!
+>>>
+>>> [1]
+>>> https://wiki.ceph.com/Community/Ceph_User_Committee/2014-04_Ceph_User_Committee_Elections
+>>>
+>>>
+>>> --
+>>>
+>>> Best Regards,
+>>>
+>>> Patrick McGarry
+>>> Director Ceph Community || Red Hat
+>>> http://ceph.com  ||  http://community.redhat.com
+>>> @scuttlemonkey || @ceph
+>>
+>>
+>>
+>>
+>> --
+>> Eric Mourgaya,
+>>
+>>
+>> Respectons la planete!
+>> Luttons contre la mediocrite!
+> 
+> 
+> 
+
+
+-- 
+Wido den Hollander
+42on B.V.
+Ceph trainer and consultant
+
+Phone: +31 (0)20 700 9902
+Skype: contact42on
