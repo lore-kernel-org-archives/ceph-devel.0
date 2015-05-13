@@ -1,10 +1,12 @@
-From: Michael Kuriger <mk7193-CivJcMWXhi0@public.gmane.org>
+From: Bruce McFarland <Bruce.McFarland-rnQ3HPfPGGWsvWnuDiJtQA@public.gmane.org>
 Subject: Re: Does anyone understand Calamari??
-Date: Wed, 13 May 2015 20:59:31 +0000
-Message-ID: <D17908E7.31B8A%mk7193@yp.com>
+Date: Wed, 13 May 2015 22:33:28 +0000
+Message-ID: <7E8CF9C16F722345A89076330719CB1F4A825CAB@EXMAIL1.taec.toshiba.com>
+References: <D17908E7.31B8A%mk7193@yp.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1796057603=="
+Content-Type: multipart/mixed; boundary="===============0439579774=="
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <D17908E7.31B8A%mk7193-CivJcMWXhi0@public.gmane.org>
 Content-Language: en-US
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
@@ -15,22 +17,35 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Bruce McFarland <Bruce.McFarland-rnQ3HPfPGGWsvWnuDiJtQA@public.gmane.org>, "ceph-calamari-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-calamari-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, "ceph-devel
-	(ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org)" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Michael Kuriger <mk7193-CivJcMWXhi0@public.gmane.org>, "ceph-calamari-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-calamari-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, "ceph-devel	(ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org)" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
---===============1796057603==
+--===============0439579774==
 Content-Language: en-US
-Content-Type: multipart/related; boundary="_004_D17908E731B8Amk7193ypcom_";
+Content-Type: multipart/related;
+	boundary="_004_7E8CF9C16F722345A89076330719CB1F4A825CABEXMAIL1taectosh_";
 	type="multipart/alternative"
 
---_004_D17908E731B8Amk7193ypcom_
+--_004_7E8CF9C16F722345A89076330719CB1F4A825CABEXMAIL1taectosh_
 Content-Type: multipart/alternative;
-	boundary="_000_D17908E731B8Amk7193ypcom_"
+	boundary="_000_7E8CF9C16F722345A89076330719CB1F4A825CABEXMAIL1taectosh_"
 
---_000_D17908E731B8Amk7193ypcom_
-Content-Type: text/plain; charset="Windows-1252"
+--_000_7E8CF9C16F722345A89076330719CB1F4A825CABEXMAIL1taectosh_
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: quoted-printable
+
+Possibly my issue as well. The calamari master is salt 0.17.5 but the minio=
+ns are running 2015.2.0rc2. I have to build the minions from source (big en=
+dian unsupported architecture). All of my salt issues seemed to get resolve=
+d when I got similar versions of ZMQ running on both master and minion. The=
+ calamari master is running on Ubuntu 14.04.
+
+
+From: Michael Kuriger [mailto:mk7193-CivJcMWXhi0@public.gmane.org]
+Sent: Wednesday, May 13, 2015 2:00 PM
+To: Bruce McFarland; ceph-calamari-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org; ceph-users-Qp0mS5GaXlQ@public.gmane.org; cep=
+h-devel (ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org)
+Subject: Re: [ceph-users] Does anyone understand Calamari??
 
 OK, I finally got mine working.  For whatever reason, the latest version of=
  salt was the issue for me.  Leaving the latest version of salt on the cala=
@@ -48,7 +63,9 @@ mari server is working, but had to downgrade the minions.
     salt.noarch 0:2014.7.1-1.el6        salt-minion.noarch 0:2014.7.1-1.el6
 
 
+
 This is on CentOS 6.6
+
 
 
 -=3DMike Kuriger
@@ -60,7 +77,7 @@ This is on CentOS 6.6
 
 Michael Kuriger
 Sr. Unix Systems Engineer
-=95 mk7193-CivJcMWXhi0@public.gmane.org<mailto:mk7193-CivJcMWXhi0@public.gmane.org> |=95 818-649-7235
+* mk7193-CivJcMWXhi0@public.gmane.org<mailto:mk7193-CivJcMWXhi0@public.gmane.org> |* 818-649-7235
 
 
 From: Bruce McFarland <Bruce.McFarland-rnQ3HPfPGGWsvWnuDiJtQA@public.gmane.org<mailto:Bruce.McFarl=
@@ -76,141 +93,32 @@ Subject: [ceph-users] Does anyone understand Calamari??
 Increasing the audience since ceph-calamari is not responsive. What salt ev=
 ent/info does the Calamari Master expect to see from the ceph-mon to determ=
 ine there is an working cluster? I had to change servers hosting the calama=
-ri master and can=92t get the new machine to recognize the cluster. The =91=
-salt \* ceph.get_heartbeats=92 returns monmap, fsid, ver, epoch, etc for th=
-e monitor and all of the osd=92s. Can anyone point me to docs or code that =
-might enlighten me to what I=92m overlooking? Thanks.
+ri master and can't get the new machine to recognize the cluster. The 'salt=
+ \* ceph.get_heartbeats' returns monmap, fsid, ver, epoch, etc for the moni=
+tor and all of the osd's. Can anyone point me to docs or code that might en=
+lighten me to what I'm overlooking? Thanks.
 
---_000_D17908E731B8Amk7193ypcom_
-Content-Type: text/html; charset="Windows-1252"
-Content-ID: <83F22C0D5232E14B9C5CB6F94D3A54B6-CivJcMWXhi0@public.gmane.org>
+--_000_7E8CF9C16F722345A89076330719CB1F4A825CABEXMAIL1taectosh_
+Content-Type: text/html; charset="us-ascii"
 Content-Transfer-Encoding: quoted-printable
 
-<html>
+<html xmlns:v=3D"urn:schemas-microsoft-com:vml" xmlns:o=3D"urn:schemas-micr=
+osoft-com:office:office" xmlns:w=3D"urn:schemas-microsoft-com:office:word" =
+xmlns:m=3D"http://schemas.microsoft.com/office/2004/12/omml" xmlns=3D"http:=
+//www.w3.org/TR/REC-html40">
 <head>
-<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3DWindows-1=
-252">
-</head>
-<body style=3D"word-wrap: break-word; -webkit-nbsp-mode: space; -webkit-lin=
-e-break: after-white-space; color: rgb(0, 0, 0); font-size: 14px; font-fami=
-ly: Calibri, sans-serif;">
-<div>
-<div>OK, I finally got mine working. &nbsp;For whatever reason, the latest =
-version of salt was the issue for me. &nbsp;Leaving the latest version of s=
-alt on the calamari server is working, but had to downgrade the minions.</d=
-iv>
-<div><br>
-</div>
-<div>
-<p style=3D"margin: 0px; font-size: 11px; font-family: Menlo;">&nbsp;&nbsp;=
-Removed:</p>
-<p style=3D"margin: 0px; font-size: 11px; font-family: Menlo;">&nbsp; &nbsp=
-; salt.noarch 0:2014.7.5-1.el6&nbsp; &nbsp; &nbsp; &nbsp; salt-minion.noarc=
-h 0:2014.7.5-1.el6&nbsp; &nbsp; &nbsp; &nbsp;</p>
-<p style=3D"margin: 0px; font-size: 11px; font-family: Menlo; min-height: 1=
-3px;">&nbsp;&nbsp;</p>
-<p style=3D"margin: 0px; font-size: 11px; font-family: Menlo;">&nbsp; Insta=
-lled:</p>
-<p style=3D"margin: 0px; font-size: 11px; font-family: Menlo;">&nbsp; &nbsp=
-; salt.noarch 0:2014.7.1-1.el6&nbsp; &nbsp; &nbsp; &nbsp; salt-minion.noarc=
-h 0:2014.7.1-1.el6&nbsp; &nbsp; &nbsp; &nbsp;</p>
-<p style=3D"margin: 0px; font-size: 11px; font-family: Menlo;"><br>
-</p>
-<p style=3D"margin: 0px; font-size: 11px; font-family: Menlo;">This is on C=
-entOS 6.6</p>
-<p style=3D"margin: 0px; font-size: 11px; font-family: Menlo;"><br>
-</p>
-<p style=3D"margin: 0px; font-size: 11px; font-family: Menlo;">-=3DMike Kur=
-iger</p>
-</div>
-<div>
-<div><br>
-</div>
-<div>
-<p class=3D"MsoNormal" style=3D"font-size: 12pt; font-family: 'Times New Ro=
-man', serif;">
-<span style=3D"font-size: 10.5pt; font-family: Calibri, sans-serif;">&nbsp;=
-</span></p>
-<table class=3D"MsoNormalTable" border=3D"0" cellspacing=3D"0" cellpadding=
-=3D"0" style=3D"font-family: Calibri;">
-<tbody>
-<tr>
-<td width=3D"84" style=3D"width: 63.3pt; border-style: none solid none none=
-; border-right-color: rgb(122, 122, 124); border-right-width: 1pt; padding:=
- 0in;">
-<p class=3D"MsoNormal" style=3D"font-size: 12pt; font-family: 'Times New Ro=
-man', serif;">
-<span style=3D"font-size: 11.5pt; font-family: Calibri, sans-serif; color: =
-rgb(31, 73, 125);"><img width=3D"75" height=3D"57" id=3D"Picture_x0020_1" s=
-rc=3D"cid:B4177D5E-1EF8-404D-8A66-2239A715A4FE" alt=3D"yp" type=3D"image/pn=
-g"></span><span style=3D"font-size: 13.5pt; font-family: Calibri, sans-seri=
-f; color: rgb(31, 73, 125);"><o:p></o:p></span></p>
-</td>
-<td width=3D"9" style=3D"width: 6.7pt; padding: 0in;">
-<p class=3D"MsoNormal" style=3D"font-size: 12pt; font-family: 'Times New Ro=
-man', serif;">
-<span style=3D"font-size: 11pt; font-family: Calibri, sans-serif; color: rg=
-b(31, 73, 125);">&nbsp;</span><span style=3D"font-size: 11pt; font-family: =
-Calibri, sans-serif; color: rgb(31, 73, 125);"><o:p></o:p></span></p>
-</td>
-<td width=3D"507" style=3D"width: 380pt; padding: 0in;">
-<p class=3D"MsoNormal" style=3D"font-size: 12pt; font-family: 'Times New Ro=
-man', serif;">
-<span style=3D"font-family: Calibri, sans-serif; color: rgb(64, 64, 64);">M=
-ichael Kuriger</span><span style=3D"font-family: Calibri, sans-serif; color=
-: rgb(31, 73, 125);"><o:p></o:p></span></p>
-<p class=3D"MsoNormal" style=3D"font-size: 12pt; font-family: 'Times New Ro=
-man', serif;">
-<span style=3D"font-family: Calibri, sans-serif; color: rgb(64, 64, 64);">S=
-r. Unix Systems Engineer</span><span style=3D"font-family: Calibri, sans-se=
-rif; color: rgb(31, 73, 125);"><o:p></o:p></span></p>
-<p class=3D"MsoNormal" style=3D"font-size: 12pt; font-family: 'Times New Ro=
-man', serif;">
-<span style=3D"font-size: 10pt; font-family: Wingdings; color: rgb(148, 138=
-, 84);">*</span><span style=3D"font-size: 10pt; font-family: Arial, sans-se=
-rif; color: rgb(64, 64, 64);">&nbsp;<a href=3D"mailto:mk7193-CivJcMWXhi0@public.gmane.org">mk7193=
-@yp.com</a>&nbsp;|</span><span style=3D"font-size: 10pt; font-family: Wingd=
-ings; color: rgb(148, 138, 84);">(</span><span style=3D"font-size: 10.5pt; =
-font-family: Calibri, sans-serif;">&nbsp;818-649-7235</span></p>
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-<div><br>
-</div>
-<span id=3D"OLK_SRC_BODY_SECTION">
-<div style=3D"font-family:Calibri; font-size:11pt; text-align:left; color:b=
-lack; BORDER-BOTTOM: medium none; BORDER-LEFT: medium none; PADDING-BOTTOM:=
- 0in; PADDING-LEFT: 0in; PADDING-RIGHT: 0in; BORDER-TOP: #b5c4df 1pt solid;=
- BORDER-RIGHT: medium none; PADDING-TOP: 3pt">
-<span style=3D"font-weight:bold">From: </span>Bruce McFarland &lt;<a href=
-=3D"mailto:Bruce.McFarland-rnQ3HPfPGGWsvWnuDiJtQA@public.gmane.org">Bruce.McFarland-rnQ3HPfPGGWoFjWMlG8qsQ@public.gmane.org=
-om</a>&gt;<br>
-<span style=3D"font-weight:bold">Date: </span>Tuesday, May 12, 2015 at 4:34=
- PM<br>
-<span style=3D"font-weight:bold">To: </span>&quot;<a href=3D"mailto:ceph-ca=
-lamari-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">ceph-calamari-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a>&quot; &lt;<a href=
-=3D"mailto:ceph-calamari-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">ceph-calamari-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a>&g=
-t;, ceph-users &lt;<a href=3D"mailto:ceph-users-Qp0mS5GaXlQ@public.gmane.org">ceph-users@ceph.c=
-om</a>&gt;,
- &quot;ceph-devel (<a href=3D"mailto:ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org">ceph-devel=
-@vger.kernel.org</a>)&quot; &lt;<a href=3D"mailto:ceph-devel-u79uwXL29TaqPxH82wqD4g@public.gmane.org=
-g">ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org</a>&gt;<br>
-<span style=3D"font-weight:bold">Subject: </span>[ceph-users] Does anyone u=
-nderstand Calamari??<br>
-</div>
-<div><br>
-</div>
-<div xmlns:v=3D"urn:schemas-microsoft-com:vml" xmlns:o=3D"urn:schemas-micro=
-soft-com:office:office" xmlns:w=3D"urn:schemas-microsoft-com:office:word" x=
-mlns:m=3D"http://schemas.microsoft.com/office/2004/12/omml" xmlns=3D"http:/=
-/www.w3.org/TR/REC-html40">
+<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dus-ascii"=
+>
 <meta name=3D"Generator" content=3D"Microsoft Word 14 (filtered medium)">
-<style><!--
+<!--[if !mso]><style>v\:* {behavior:url(#default#VML);}
+o\:* {behavior:url(#default#VML);}
+w\:* {behavior:url(#default#VML);}
+.shape {behavior:url(#default#VML);}
+</style><![endif]--><style><!--
 /* Font Definitions */
+@font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
 @font-face
 	{font-family:"MS Mincho";
 	panose-1:2 2 6 9 4 2 5 8 3 4;}
@@ -221,8 +129,14 @@ mlns:m=3D"http://schemas.microsoft.com/office/2004/12/omml" xmlns=3D"http:/=
 	{font-family:Calibri;
 	panose-1:2 15 5 2 2 2 4 3 2 4;}
 @font-face
+	{font-family:Tahoma;
+	panose-1:2 11 6 4 3 5 4 4 2 4;}
+@font-face
 	{font-family:"\@MS Mincho";
 	panose-1:2 2 6 9 4 2 5 8 3 4;}
+@font-face
+	{font-family:Menlo;
+	panose-1:0 0 0 0 0 0 0 0 0 0;}
 /* Style Definitions */
 p.MsoNormal, li.MsoNormal, div.MsoNormal
 	{margin:0in;
@@ -237,13 +151,37 @@ a:visited, span.MsoHyperlinkFollowed
 	{mso-style-priority:99;
 	color:purple;
 	text-decoration:underline;}
-span.EmailStyle17
-	{mso-style-type:personal-compose;
+p
+	{mso-style-priority:99;
+	mso-margin-top-alt:auto;
+	margin-right:0in;
+	mso-margin-bottom-alt:auto;
+	margin-left:0in;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";}
+p.MsoAcetate, li.MsoAcetate, div.MsoAcetate
+	{mso-style-priority:99;
+	mso-style-link:"Balloon Text Char";
+	margin:0in;
+	margin-bottom:.0001pt;
+	font-size:8.0pt;
+	font-family:"Tahoma","sans-serif";}
+span.EmailStyle18
+	{mso-style-type:personal;
 	font-family:"Calibri","sans-serif";
 	color:windowtext;}
+span.BalloonTextChar
+	{mso-style-name:"Balloon Text Char";
+	mso-style-priority:99;
+	mso-style-link:"Balloon Text";
+	font-family:"Tahoma","sans-serif";}
+span.EmailStyle21
+	{mso-style-type:personal-reply;
+	font-family:"Calibri","sans-serif";
+	color:#1F497D;}
 .MsoChpDefault
 	{mso-style-type:export-only;
-	font-family:"Calibri","sans-serif";}
+	font-size:10.0pt;}
 @page WordSection1
 	{size:8.5in 11.0in;
 	margin:1.0in 1.0in 1.0in 1.0in;}
@@ -255,33 +193,181 @@ div.WordSection1
 <o:shapelayout v:ext=3D"edit">
 <o:idmap v:ext=3D"edit" data=3D"1" />
 </o:shapelayout></xml><![endif]-->
-<div lang=3D"EN-US" link=3D"blue" vlink=3D"purple">
+</head>
+<body lang=3D"EN-US" link=3D"blue" vlink=3D"purple">
 <div class=3D"WordSection1">
-<p class=3D"MsoNormal">Increasing the audience since ceph-calamari is not r=
-esponsive. What salt event/info does the Calamari Master expect to see from=
- the ceph-mon to determine there is an working cluster? I had to change ser=
-vers hosting the calamari master and
- can=92t get the new machine to recognize the cluster. The =91salt \* ceph.=
-get_heartbeats=92 returns monmap, fsid, ver, epoch, etc for the monitor and=
- all of the osd=92s. Can anyone point me to docs or code that might enlight=
-en me to what I=92m overlooking? Thanks.<o:p></o:p></p>
+<p class=3D"MsoNormal"><span style=3D"color:#1F497D">Possibly my issue as w=
+ell. The calamari master is salt 0.17.5 but the minions are running 2015.2.=
+0rc2. I have to build the minions from source (big endian unsupported archi=
+tecture). All of my salt issues seemed
+ to get resolved when I got similar versions of ZMQ running on both master =
+and minion. The calamari master is running on Ubuntu 14.04.<o:p></o:p></spa=
+n></p>
+<p class=3D"MsoNormal"><span style=3D"color:#1F497D"><o:p>&nbsp;</o:p></spa=
+n></p>
+<p class=3D"MsoNormal"><span style=3D"color:#1F497D"><o:p>&nbsp;</o:p></spa=
+n></p>
+<div style=3D"border:none;border-left:solid blue 1.5pt;padding:0in 0in 0in =
+4.0pt">
+<div>
+<div style=3D"border:none;border-top:solid #B5C4DF 1.0pt;padding:3.0pt 0in =
+0in 0in">
+<p class=3D"MsoNormal"><b><span style=3D"font-size:10.0pt;font-family:&quot=
+;Tahoma&quot;,&quot;sans-serif&quot;">From:</span></b><span style=3D"font-s=
+ize:10.0pt;font-family:&quot;Tahoma&quot;,&quot;sans-serif&quot;"> Michael =
+Kuriger [mailto:mk7193-CivJcMWXhi0@public.gmane.org]
+<br>
+<b>Sent:</b> Wednesday, May 13, 2015 2:00 PM<br>
+<b>To:</b> Bruce McFarland; ceph-calamari-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org; ceph-users@ceph.c=
+om; ceph-devel (ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org)<br>
+<b>Subject:</b> Re: [ceph-users] Does anyone understand Calamari??<o:p></o:=
+p></span></p>
+</div>
+</div>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+<div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-size:10.5pt;color:black">OK, I f=
+inally got mine working. &nbsp;For whatever reason, the latest version of s=
+alt was the issue for me. &nbsp;Leaving the latest version of salt on the c=
+alamari server is working, but had to downgrade
+ the minions.<o:p></o:p></span></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-size:10.5pt;color:black"><o:p>&n=
+bsp;</o:p></span></p>
+</div>
+<div>
+<p style=3D"margin:0in;margin-bottom:.0001pt"><span style=3D"font-size:8.5p=
+t;font-family:&quot;Menlo&quot;,&quot;serif&quot;;color:black">&nbsp;&nbsp;=
+Removed:<o:p></o:p></span></p>
+<p style=3D"margin:0in;margin-bottom:.0001pt"><span style=3D"font-size:8.5p=
+t;font-family:&quot;Menlo&quot;,&quot;serif&quot;;color:black">&nbsp; &nbsp=
+; salt.noarch 0:2014.7.5-1.el6&nbsp; &nbsp; &nbsp; &nbsp; salt-minion.noarc=
+h 0:2014.7.5-1.el6&nbsp; &nbsp; &nbsp; &nbsp;<o:p></o:p></span></p>
+<p style=3D"margin:0in;margin-bottom:.0001pt;min-height: 13px"><span style=
+=3D"font-size:8.5pt;font-family:&quot;Menlo&quot;,&quot;serif&quot;;color:b=
+lack">&nbsp;&nbsp;<o:p></o:p></span></p>
+<p style=3D"margin:0in;margin-bottom:.0001pt"><span style=3D"font-size:8.5p=
+t;font-family:&quot;Menlo&quot;,&quot;serif&quot;;color:black">&nbsp; Insta=
+lled:<o:p></o:p></span></p>
+<p style=3D"margin:0in;margin-bottom:.0001pt"><span style=3D"font-size:8.5p=
+t;font-family:&quot;Menlo&quot;,&quot;serif&quot;;color:black">&nbsp; &nbsp=
+; salt.noarch 0:2014.7.1-1.el6&nbsp; &nbsp; &nbsp; &nbsp; salt-minion.noarc=
+h 0:2014.7.1-1.el6&nbsp; &nbsp; &nbsp; &nbsp;<o:p></o:p></span></p>
+<p style=3D"margin:0in;margin-bottom:.0001pt"><span style=3D"font-size:8.5p=
+t;font-family:&quot;Menlo&quot;,&quot;serif&quot;;color:black"><o:p>&nbsp;<=
+/o:p></span></p>
+<p style=3D"margin:0in;margin-bottom:.0001pt"><span style=3D"font-size:8.5p=
+t;font-family:&quot;Menlo&quot;,&quot;serif&quot;;color:black">This is on C=
+entOS 6.6<o:p></o:p></span></p>
+<p style=3D"margin:0in;margin-bottom:.0001pt"><span style=3D"font-size:8.5p=
+t;font-family:&quot;Menlo&quot;,&quot;serif&quot;;color:black"><o:p>&nbsp;<=
+/o:p></span></p>
+<p style=3D"margin:0in;margin-bottom:.0001pt"><span style=3D"font-size:8.5p=
+t;font-family:&quot;Menlo&quot;,&quot;serif&quot;;color:black">-=3DMike Kur=
+iger<o:p></o:p></span></p>
+</div>
+<div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-size:10.5pt;color:black"><o:p>&n=
+bsp;</o:p></span></p>
+</div>
+<div>
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span style=3D"font-size:10.5pt;color:black">&nbsp;</span><span st=
+yle=3D"font-size:12.0pt;font-family:&quot;Times New Roman&quot;,&quot;serif=
+&quot;;color:black"><o:p></o:p></span></p>
+<table class=3D"MsoNormalTable" border=3D"0" cellspacing=3D"0" cellpadding=
+=3D"0">
+<tbody>
+<tr>
+<td width=3D"84" style=3D"width:63.3pt;border:none;border-right:solid #7A7A=
+7C 1.0pt;padding:0in 0in 0in 0in">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span style=3D"font-size:11.5pt;color:#1F497D"><img width=3D"75" h=
+eight=3D"57" id=3D"Picture_x0020_1" src=3D"cid:image001.png-HMQGKcdgDs3ka2+Sj5X+9Q@public.gmane.org=
+90" alt=3D"yp"></span><span style=3D"font-size:12.0pt"><o:p></o:p></span></=
+p>
+</td>
+<td width=3D"9" style=3D"width:6.7pt;padding:0in 0in 0in 0in">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span style=3D"color:#1F497D">&nbsp;</span><span style=3D"font-siz=
+e:12.0pt"><o:p></o:p></span></p>
+</td>
+<td width=3D"507" style=3D"width:380.0pt;padding:0in 0in 0in 0in">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span style=3D"color:#404040">Michael Kuriger</span><span style=3D=
+"font-family:&quot;Times New Roman&quot;,&quot;serif&quot;"><o:p></o:p></sp=
+an></p>
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span style=3D"color:#404040">Sr. Unix Systems Engineer</span><o:p=
+></o:p></p>
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span style=3D"font-size:10.0pt;font-family:Wingdings;color:#948A5=
+4">*</span><span style=3D"font-size:10.0pt;font-family:&quot;Arial&quot;,&q=
+uot;sans-serif&quot;;color:#404040">&nbsp;<a href=3D"mailto:mk7193-CivJcMWXhi0@public.gmane.org">=
+mk7193-CivJcMWXhi0@public.gmane.org</a>&nbsp;|</span><span style=3D"font-size:10.0pt;font-family:=
+Wingdings;color:#948A54">(</span><span style=3D"font-size:10.5pt">&nbsp;818=
+-649-7235</span><span style=3D"font-size:12.0pt"><o:p></o:p></span></p>
+</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 </div>
-</span>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-size:10.5pt;color:black"><o:p>&n=
+bsp;</o:p></span></p>
+</div>
+<div style=3D"border:none;border-top:solid #B5C4DF 1.0pt;padding:3.0pt 0in =
+0in 0in">
+<p class=3D"MsoNormal"><b><span style=3D"color:black">From: </span></b><spa=
+n style=3D"color:black">Bruce McFarland &lt;<a href=3D"mailto:Bruce.McFarla=
+nd-rnQ3HPfPGGWsvWnuDiJtQA@public.gmane.org">Bruce.McFarland-rnQ3HPfPGGWsvWnuDiJtQA@public.gmane.org</a>&gt;<br>
+<b>Date: </b>Tuesday, May 12, 2015 at 4:34 PM<br>
+<b>To: </b>&quot;<a href=3D"mailto:ceph-calamari-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">ceph-calam=
+ari-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a>&quot; &lt;<a href=3D"mailto:ceph-calamari-idqoXFIVOFLXfrYAhh+zQw@public.gmane.org=
+.com">ceph-calamari-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a>&gt;, ceph-users &lt;<a href=3D"mailt=
+o:ceph-users-Qp0mS5GaXlQ@public.gmane.org">ceph-users-Qp0mS5GaXlQ@public.gmane.org</a>&gt;, &quot;ceph-devel
+ (<a href=3D"mailto:ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org">ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org<=
+/a>)&quot; &lt;<a href=3D"mailto:ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org">ceph-devel@vge=
+r.kernel.org</a>&gt;<br>
+<b>Subject: </b>[ceph-users] Does anyone understand Calamari??<o:p></o:p></=
+span></p>
+</div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-size:10.5pt;color:black"><o:p>&n=
+bsp;</o:p></span></p>
+</div>
+<div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"color:black">Increasing the audience =
+since ceph-calamari is not responsive. What salt event/info does the Calama=
+ri Master expect to see from the ceph-mon to determine there is an working =
+cluster? I had to change servers hosting
+ the calamari master and can&#8217;t get the new machine to recognize the c=
+luster. The &#8216;salt \* ceph.get_heartbeats&#8217; returns monmap, fsid,=
+ ver, epoch, etc for the monitor and all of the osd&#8217;s. Can anyone poi=
+nt me to docs or code that might enlighten me to what I&#8217;m
+ overlooking? Thanks.<o:p></o:p></span></p>
+</div>
+</div>
+</div>
+</div>
 </body>
 </html>
 
---_000_D17908E731B8Amk7193ypcom_--
+--_000_7E8CF9C16F722345A89076330719CB1F4A825CABEXMAIL1taectosh_--
 
---_004_D17908E731B8Amk7193ypcom_
-Content-Type: image/png; name="A78C4A05-FC1E-4FCA-A8F8-D2C4B9EEC9CA[1].png"
-Content-Description: A78C4A05-FC1E-4FCA-A8F8-D2C4B9EEC9CA[1].png
-Content-Disposition: inline;
-	filename="A78C4A05-FC1E-4FCA-A8F8-D2C4B9EEC9CA[1].png"; size=4193;
-	creation-date="Wed, 13 May 2015 20:59:31 GMT";
-	modification-date="Wed, 13 May 2015 20:59:31 GMT"
-Content-ID: <B4177D5E-1EF8-404D-8A66-2239A715A4FE>
+--_004_7E8CF9C16F722345A89076330719CB1F4A825CABEXMAIL1taectosh_
+Content-Type: image/png; name="image001.png"
+Content-Description: image001.png
+Content-Disposition: inline; filename="image001.png"; size=4193;
+	creation-date="Wed, 13 May 2015 22:33:28 GMT";
+	modification-date="Wed, 13 May 2015 22:33:28 GMT"
+Content-ID: <image001.png-HMQGKcdgDs3ch3A6brQHxDRmByFHzeGd@public.gmane.org>
 Content-Transfer-Encoding: base64
 
 iVBORw0KGgoAAAANSUhEUgAAAEsAAAA5CAIAAADxxkF3AAAAAXNSR0IArs4c6QAAEBtJREFUaAXV
@@ -359,9 +445,9 @@ pXXSlhuLvVoaSg0kZYeCqaQsv0upCFaEG7K/uDP8jZjxiyYFw/wsl6EJsYkwTlWt5CF+1RngRpyW
 yWg4wE+bWAaCEcwvrgywYWZ/GRtJdt6RpKYTQxn9Q4FwNBQ2xaaSH6ngV7WxvsP9tC4lByqCGZ1U
 WmUzHt1VheX2I/0/TI6R3G5HQwIAAAAASUVORK5CYII=
 
---_004_D17908E731B8Amk7193ypcom_--
+--_004_7E8CF9C16F722345A89076330719CB1F4A825CABEXMAIL1taectosh_--
 
---===============1796057603==
+--===============0439579774==
 Content-Type: text/plain; charset="us-ascii"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
@@ -372,4 +458,4 @@ ceph-users mailing list
 ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
---===============1796057603==--
+--===============0439579774==--
