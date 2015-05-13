@@ -1,300 +1,55 @@
-From: Butkeev Stas <staerist@ya.ru>
-Subject: Problems with installation httpd and mod_ssl from ceph repo
-Date: Wed, 13 May 2015 16:49:21 +0300
-Message-ID: <4009181431524961@web9g.yandex.ru>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=koi8-r
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: [PATCH 2/2] Revert "libceph: clear r_req_lru_item in __unregister_linger_request()"
+Date: Wed, 13 May 2015 17:57:32 +0300
+Message-ID: <1431529052-13932-3-git-send-email-idryomov@gmail.com>
+References: <1431529052-13932-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from forward14p.cmail.yandex.net ([87.250.241.142]:39921 "EHLO
-	forward14p.cmail.yandex.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S934250AbbEMN4g (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 13 May 2015 09:56:36 -0400
+Received: from mail-wi0-f174.google.com ([209.85.212.174]:37568 "EHLO
+	mail-wi0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934541AbbEMO54 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 May 2015 10:57:56 -0400
+Received: by widdi4 with SMTP id di4so59372192wid.0
+        for <ceph-devel@vger.kernel.org>; Wed, 13 May 2015 07:57:55 -0700 (PDT)
+In-Reply-To: <1431529052-13932-1-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
-Cc: ceph-qa@ceph.com, ceph-maintainers@ceph.com
+Cc: Alex Elder <elder@linaro.org>
 
-Hello everyone
+This reverts commit ba9d114ec5578e6e99a4dfa37ff8ae688040fd64.
 
-I have rhel 6.5 OS.
-Today I faced with next error with dependencies.
-Initially I installed httpd and after I wanted to install mod_ssl for o=
-ne. But got problem.
-Step to reproduce:
-1) Install http
+.. which introduced a regression that prevented all lingering requests
+requeued in kick_requests() from ever being sent to the OSDs, resulting
+in a lot of missed notifies.  In retrospect it's pretty obvious that
+r_req_lru_item item in the case of lingering requests can be used not
+only for notarget, but also for unsent linkage due to how tightly
+actual map and enqueue operations are coupled in __map_request().
 
-[16:41]:[root@host ~]# yum install httpd -y
-Loaded plugins: priorities
-Setting up Install Process
-58 packages excluded due to repository priority protections
-Resolving Dependencies
---> Running transaction check
----> Package httpd.x86_64 0:2.2.22-1.ceph.el6 will be installed
---> Finished Dependency Resolution
+The assertion that was being silenced is taken care of in the previous
+("libceph: request a new osdmap if lingering request maps to no osd")
+commit: by always kicking homeless lingering requests we ensure that
+none of them ends up on the notarget list outside of the critical
+section guarded by request_mutex.
 
-Dependencies Resolved
+Cc: stable@vger.kernel.org # 3.18+, needs 3d8c73c93605 "libceph: request a new osdmap if lingering request maps to no osd"
+Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+---
+ net/ceph/osd_client.c | 2 --
+ 1 file changed, 2 deletions(-)
 
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D
- Package                                  Arch                         =
-             Version                                                Rep=
-ository                                           Size
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D
-Installing:
- httpd                                    x86_64                       =
-             2.2.22-1.ceph.el6                                      6.1=
-0-addons-orig                                    812 k
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 31d4b1ebff01..c4ec9239249a 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -1306,8 +1306,6 @@ static void __unregister_linger_request(struct ceph_osd_client *osdc,
+ 		if (list_empty(&req->r_osd_item))
+ 			req->r_osd = NULL;
+ 	}
+-
+-	list_del_init(&req->r_req_lru_item); /* can be on notarget */
+ 	ceph_osdc_put_request(req);
+ }
+ 
+-- 
+1.9.3
 
-Transaction Summary
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D
-Install       1 Package(s)
-
-Total download size: 812 k
-Installed size: 3.0 M
-Downloading Packages:
-httpd-2.2.22-1.ceph.el6.x86_64.rpm                                     =
-                                                                       =
-                                | 812 kB     00:00    =20
-Running rpm_check_debug
-Running Transaction Test
-Transaction Test Succeeded
-Running Transaction
-  Installing : httpd-2.2.22-1.ceph.el6.x86_64                          =
-                                                                       =
-                                                   1/1=20
-  Verifying  : httpd-2.2.22-1.ceph.el6.x86_64                          =
-                                                                       =
-                                                   1/1=20
-
-Installed:
-  httpd.x86_64 0:2.2.22-1.ceph.el6                                     =
-                                                                       =
-                                                      =20
-
-Complete!
-
-2) Install mod_ssl
-
-[16:43]:[root@host ~]# yum install mod_ssl -y
-Loaded plugins: priorities
-Setting up Install Process
-58 packages excluded due to repository priority protections
-Resolving Dependencies
---> Running transaction check
----> Package mod_ssl.x86_64 1:2.2.22-1.ceph.el6 will be installed
---> Processing Dependency: httpd-mmn =3D 20051115-x86-64 for package: 1=
-:mod_ssl-2.2.22-1.ceph.el6.x86_64
---> Finished Dependency Resolution
-Error: Package: 1:mod_ssl-2.2.22-1.ceph.el6.x86_64 (6.10-addons-orig)
-           Requires: httpd-mmn =3D 20051115-x86-64
-           Installed: httpd-2.2.22-1.ceph.el6.x86_64 (@6.10-addons-orig=
-)
-               httpd-mmn =3D 20051115
-               httpd-mmn =3D 20051115-x86-64
-           Available: httpd-2.2.15-39.el6.x86_64 (6.10-rhn)
-               httpd-mmn =3D 20051115
- You could try using --skip-broken to work around the problem
- You could try running: rpm -Va --nofiles --nodigest
-
-But if I try to install these two packages together all will work fine
-
-Step to reproduce:
-1) Remove httpd
-
-[16:43]:[root@host ~]# yum remove httpd -y
-Loaded plugins: priorities
-Setting up Remove Process
-Resolving Dependencies
---> Running transaction check
----> Package httpd.x86_64 0:2.2.22-1.ceph.el6 will be erased
---> Finished Dependency Resolution
-
-Dependencies Resolved
-
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D
- Package                                  Arch                         =
-             Version                                               Repo=
-sitory                                            Size
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D
-Removing:
- httpd                                    x86_64                       =
-             2.2.22-1.ceph.el6                                     @6.1=
-0-addons-orig                                    3.0 M
-
-Transaction Summary
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D
-Remove        1 Package(s)
-
-Installed size: 3.0 M
-Downloading Packages:
-Running rpm_check_debug
-Running Transaction Test
-Transaction Test Succeeded
-Running Transaction
-  Erasing    : httpd-2.2.22-1.ceph.el6.x86_64                          =
-                                                                       =
-                                                   1/1=20
-  Verifying  : httpd-2.2.22-1.ceph.el6.x86_64                          =
-                                                                       =
-                                                   1/1=20
-
-Removed:
-  httpd.x86_64 0:2.2.22-1.ceph.el6                                     =
-                                                                       =
-                                                      =20
-
-Complete!
-
-2) Install httpd and mod_ssl together
-
-[16:46]:[root@ak25 rgw fs osd ~]# yum install httpd mod_ssl -y
-Loaded plugins: priorities
-Setting up Install Process
-58 packages excluded due to repository priority protections
-Resolving Dependencies
---> Running transaction check
----> Package httpd.x86_64 0:2.2.22-1.ceph.el6 will be installed
----> Package mod_ssl.x86_64 1:2.2.22-1.ceph.el6 will be installed
---> Finished Dependency Resolution
-
-Dependencies Resolved
-
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D
- Package                                   Arch                        =
-             Version                                                 Re=
-pository                                          Size
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D
-Installing:
- httpd                                     x86_64                      =
-             2.2.22-1.ceph.el6                                       6.=
-10-addons-orig                                   812 k
- mod_ssl                                   x86_64                      =
-             1:2.2.22-1.ceph.el6                                     6.=
-10-addons-orig                                    73 k
-
-Transaction Summary
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D
-Install       2 Package(s)
-
-Total download size: 885 k
-Installed size: 3.1 M
-Downloading Packages:
-(1/2): httpd-2.2.22-1.ceph.el6.x86_64.rpm                              =
-                                                                       =
-                                | 812 kB     00:00    =20
-(2/2): mod_ssl-2.2.22-1.ceph.el6.x86_64.rpm                            =
-                                                                       =
-                                |  73 kB     00:00    =20
------------------------------------------------------------------------=
------------------------------------------------------------------------=
--------------------------------------------------------
-Total                                                                  =
-                                                                       =
-                        29 MB/s | 885 kB     00:00    =20
-Running rpm_check_debug
-Running Transaction Test
-Transaction Test Succeeded
-Running Transaction
-  Installing : httpd-2.2.22-1.ceph.el6.x86_64                          =
-                                                                       =
-                                                   1/2=20
-  Installing : 1:mod_ssl-2.2.22-1.ceph.el6.x86_64                      =
-                                                                       =
-                                                   2/2=20
-  Verifying  : httpd-2.2.22-1.ceph.el6.x86_64                          =
-                                                                       =
-                                                   1/2=20
-  Verifying  : 1:mod_ssl-2.2.22-1.ceph.el6.x86_64                      =
-                                                                       =
-                                                   2/2=20
-
-Installed:
-  httpd.x86_64 0:2.2.22-1.ceph.el6                                     =
-                            mod_ssl.x86_64 1:2.2.22-1.ceph.el6         =
-                                                      =20
-
-Complete!
-
-Could you solve this problem with dependencies.
-
---=9A
-Best Regards,
-Stanislav Butkeev
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
