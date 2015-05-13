@@ -1,99 +1,101 @@
-From: Gregory Meno <gmeno@redhat.com>
-Subject: Re: [ceph-calamari] [ceph-users] Does anyone understand Calamari??
-Date: Wed, 13 May 2015 15:52:15 -0700
-Message-ID: <6FD19CFC-0C99-468B-9B12-A1AD3086F133@redhat.com>
-References: <D17908E7.31B8A%mk7193@yp.com> <7E8CF9C16F722345A89076330719CB1F4A825CAB@EXMAIL1.taec.toshiba.com>
-Mime-Version: 1.0 (Mac OS X Mail 8.2 \(2098\))
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Bruce McFarland <Bruce.McFarland@taec.toshiba.com>
+Subject: RE: [ceph-calamari] [ceph-users] Does anyone understand Calamari??
+Date: Wed, 13 May 2015 23:15:49 +0000
+Message-ID: <7E8CF9C16F722345A89076330719CB1F4A825DB9@EXMAIL1.taec.toshiba.com>
+References: <D17908E7.31B8A%mk7193@yp.com>
+ <7E8CF9C16F722345A89076330719CB1F4A825CAB@EXMAIL1.taec.toshiba.com>
+ <6FD19CFC-0C99-468B-9B12-A1AD3086F133@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:55408 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S934657AbbEMWwX convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 May 2015 18:52:23 -0400
-In-Reply-To: <7E8CF9C16F722345A89076330719CB1F4A825CAB@EXMAIL1.taec.toshiba.com>
+Received: from mailhost.taec.toshiba.com ([209.243.128.33]:62513 "EHLO
+	mailhost.taec.toshiba.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934251AbbEMXP4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 May 2015 19:15:56 -0400
+In-Reply-To: <6FD19CFC-0C99-468B-9B12-A1AD3086F133@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Bruce McFarland <Bruce.McFarland@taec.toshiba.com>
+To: Gregory Meno <gmeno@redhat.com>
 Cc: Michael Kuriger <mk7193@yp.com>, "ceph-calamari@lists.ceph.com" <ceph-calamari@lists.ceph.com>, "ceph-users@ceph.com" <ceph-users@ceph.com>, "ceph-devel (ceph-devel@vger.kernel.org)" <ceph-devel@vger.kernel.org>
 
-Wow,
-
-That must be a record. I didn=E2=80=99t realize that.
-
-It turns out that you=E2=80=99ll have the best experience if the versio=
-ns of master and minion are in sync.
-
-We test and use 2014.1.5 and are still evaluating 2014.7.Z.
-
-Glad to hear things are working better.
-
-regards,
-Gregory
-
-
-
-> On May 13, 2015, at 3:33 PM, Bruce McFarland <Bruce.McFarland@taec.to=
-shiba.com> wrote:
->=20
-> Possibly my issue as well. The calamari master is salt 0.17.5 but the=
- minions are running 2015.2.0rc2. I have to build the minions from sour=
-ce (big endian unsupported architecture). All of my salt issues seemed =
-to get resolved when I got similar versions of ZMQ running on both mast=
-er and minion. The calamari master is running on Ubuntu 14.04.
-> =20
-> =20
-> From: Michael Kuriger [mailto:mk7193@yp.com]=20
-> Sent: Wednesday, May 13, 2015 2:00 PM
-> To: Bruce McFarland; ceph-calamari@lists.ceph.com; ceph-users@ceph.co=
-m; ceph-devel (ceph-devel@vger.kernel.org)
-> Subject: Re: [ceph-users] Does anyone understand Calamari??
-> =20
-> OK, I finally got mine working.  For whatever reason, the latest vers=
-ion of salt was the issue for me.  Leaving the latest version of salt o=
-n the calamari server is working, but had to downgrade the minions.
-> =20
->   Removed:
->     salt.noarch 0:2014.7.5-1.el6        salt-minion.noarch 0:2014.7.5=
--1.el6      =20
->  =20
->   Installed:
->     salt.noarch 0:2014.7.1-1.el6        salt-minion.noarch 0:2014.7.1=
--1.el6      =20
-> =20
-> This is on CentOS 6.6
-> =20
-> -=3DMike Kuriger
-> =20
-> =20
-> <image001.png>
-> =20
-> Michael Kuriger
-> Sr. Unix Systems Engineer
-> * mk7193@yp.com |( 818-649-7235
-> =20
-> From: Bruce McFarland <Bruce.McFarland@taec.toshiba.com>
-> Date: Tuesday, May 12, 2015 at 4:34 PM
-> To: "ceph-calamari@lists.ceph.com" <ceph-calamari@lists.ceph.com>, ce=
-ph-users <ceph-users@ceph.com>, "ceph-devel (ceph-devel@vger.kernel.org=
-)" <ceph-devel@vger.kernel.org>
-> Subject: [ceph-users] Does anyone understand Calamari??
-> =20
-> Increasing the audience since ceph-calamari is not responsive. What s=
-alt event/info does the Calamari Master expect to see from the ceph-mon=
- to determine there is an working cluster? I had to change servers host=
-ing the calamari master and can=E2=80=99t get the new machine to recogn=
-ize the cluster. The =E2=80=98salt \* ceph.get_heartbeats=E2=80=99 retu=
-rns monmap, fsid, ver, epoch, etc for the monitor and all of the osd=E2=
-=80=99s. Can anyone point me to docs or code that might enlighten me to=
- what I=E2=80=99m overlooking? Thanks.
-> _______________________________________________
-> ceph-calamari mailing list
-> ceph-calamari@lists.ceph.com
-> http://lists.ceph.com/listinfo.cgi/ceph-calamari-ceph.com
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SW4gbXkgbmV2ZXIgZW5kaW5nIHNhZ2Egb2YgY2FsYW1hcmkgd2l0aCBtaW5pb25zIG9uIGEgYmln
+IGVuZGlhbiBhcmNoaXRlY3R1cmUgSSd2ZSBicm91Z2h0IHVwIGFub3RoZXIgc2VydmVyIGZyb20g
+YSAgY2xlYW4gaW5zdGFsbCBvZiBVYnVudHUgMTQuMDQuIFRoZSBjYWxhbWFyaSBtYXN0ZXIgaXMg
+bm93IGVzc3BlcmYxMy4gDQoNCkkgd2FzIGFibGUgdG8gZmlndXJlIG91dCBob3cgdG8gcmVidWls
+ZCBzYWx0LW1pbmlvbiB3aXRoIHptcSA+IDMuMC41IHdoaWNoIGdvdCBzYWx0IHdvcmtpbmcgc28g
+dGhlICdzYWx0IFwqIGNlcGguZ2V0X2hlYXJ0YmVhdHMnIGZyb20gdGhlIG1hc3RlciBnZXRzIGV4
+cGVjdGVkIGluZm8uIEkgaGF2ZSBtYWRlIGEgY291cGxlIG9mIGF0dGVtcHRzIGF0IHJlYnVpbGRp
+bmcgc2FsdC1taW5pb24gd2l0aCBzYWx0IDAuMTcuNSwgYnV0IGl0IGtlcHQgcmVidWlsZGluZyB3
+aXRoIHRoZSByYzIgc2FsdCBjb2RlLiBJJ2xsIHJldmlzaXQgdGhhdCBleGVyY2lzZS4gDQoNCnJv
+b3RAZXNzcGVyZjEzOi9ldGMvY2VwaCMgc2FsdCAtLXZlcnNpb25zDQogICAgICAgICAgIFNhbHQ6
+IDAuMTcuNQ0KICAgICAgICAgUHl0aG9uOiAyLjcuNiAoZGVmYXVsdCwgTWFyIDIyIDIwMTQsIDIy
+OjU5OjU2KQ0KICAgICAgICAgSmluamEyOiAyLjcuMg0KICAgICAgIE0yQ3J5cHRvOiAwLjIxLjEN
+CiBtc2dwYWNrLXB5dGhvbjogMC4zLjANCiAgIG1zZ3BhY2stcHVyZTogTm90IEluc3RhbGxlZA0K
+ICAgICAgIHB5Y3J5cHRvOiAyLjYuMQ0KICAgICAgICAgUHlZQU1MOiAzLjEwIA0KICAgICAgICAg
+IFB5Wk1ROiAxNC4wLjENCiAgICAgICAgICAgIFpNUTogNC4wLjQNCnJvb3RAZXNzcGVyZjEzOi9l
+dGMvY2VwaCMNCg0Kcm9vdEBLVkRyaXZlMTE6fiMgc2FsdCAtLXZlcnNpb25zDQogICAgICAgICAg
+IFNhbHQ6IDIwMTUuMi4wcmMyDQogICAgICAgICBQeXRob246IDIuNi42IChyMjY2Ojg0MjkyLCBE
+ZWMgMjkgMjAxMCwgMDA6NTU6MDcpDQogICAgICAgICBKaW5qYTI6IDIuNy4zDQogICAgICAgTTJD
+cnlwdG86IDAuMjAuMQ0KIG1zZ3BhY2stcHl0aG9uOiAwLjQuNg0KICAgbXNncGFjay1wdXJlOiBO
+b3QgSW5zdGFsbGVkDQogICAgICAgcHljcnlwdG86IDIuMS4wDQogICAgICAgIGxpYm5hY2w6IE5v
+dCBJbnN0YWxsZWQNCiAgICAgICAgIFB5WUFNTDogMy4wOQ0KICAgICAgICAgIGlvZmxvOiBOb3Qg
+SW5zdGFsbGVkDQogICAgICAgICAgUHlaTVE6IDE0LjUuMA0KICAgICAgICAgICBSQUVUOiBOb3Qg
+SW5zdGFsbGVkDQogICAgICAgICAgICBaTVE6IDQuMC41DQogICAgICAgICAgIE1ha286IE5vdCBJ
+bnN0YWxsZWQNCnJvb3RAS1ZEcml2ZTExOn4jDQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0t
+LS0NCj4gRnJvbTogR3JlZ29yeSBNZW5vIFttYWlsdG86Z21lbm9AcmVkaGF0LmNvbV0NCj4gU2Vu
+dDogV2VkbmVzZGF5LCBNYXkgMTMsIDIwMTUgMzo1MiBQTQ0KPiBUbzogQnJ1Y2UgTWNGYXJsYW5k
+DQo+IENjOiBNaWNoYWVsIEt1cmlnZXI7IGNlcGgtY2FsYW1hcmlAbGlzdHMuY2VwaC5jb207IGNl
+cGgtdXNlcnNAY2VwaC5jb207DQo+IGNlcGgtZGV2ZWwgKGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwu
+b3JnKQ0KPiBTdWJqZWN0OiBSZTogW2NlcGgtY2FsYW1hcmldIFtjZXBoLXVzZXJzXSBEb2VzIGFu
+eW9uZSB1bmRlcnN0YW5kDQo+IENhbGFtYXJpPz8NCj4gDQo+IFdvdywNCj4gDQo+IFRoYXQgbXVz
+dCBiZSBhIHJlY29yZC4gSSBkaWRu4oCZdCByZWFsaXplIHRoYXQuDQo+IA0KPiBJdCB0dXJucyBv
+dXQgdGhhdCB5b3XigJlsbCBoYXZlIHRoZSBiZXN0IGV4cGVyaWVuY2UgaWYgdGhlIHZlcnNpb25z
+IG9mIG1hc3RlciBhbmQNCj4gbWluaW9uIGFyZSBpbiBzeW5jLg0KPiANCj4gV2UgdGVzdCBhbmQg
+dXNlIDIwMTQuMS41IGFuZCBhcmUgc3RpbGwgZXZhbHVhdGluZyAyMDE0LjcuWi4NCj4gDQo+IEds
+YWQgdG8gaGVhciB0aGluZ3MgYXJlIHdvcmtpbmcgYmV0dGVyLg0KPiANCj4gcmVnYXJkcywNCj4g
+R3JlZ29yeQ0KPiANCj4gDQo+IA0KPiA+IE9uIE1heSAxMywgMjAxNSwgYXQgMzozMyBQTSwgQnJ1
+Y2UgTWNGYXJsYW5kDQo+IDxCcnVjZS5NY0ZhcmxhbmRAdGFlYy50b3NoaWJhLmNvbT4gd3JvdGU6
+DQo+ID4NCj4gPiBQb3NzaWJseSBteSBpc3N1ZSBhcyB3ZWxsLiBUaGUgY2FsYW1hcmkgbWFzdGVy
+IGlzIHNhbHQgMC4xNy41IGJ1dCB0aGUNCj4gbWluaW9ucyBhcmUgcnVubmluZyAyMDE1LjIuMHJj
+Mi4gSSBoYXZlIHRvIGJ1aWxkIHRoZSBtaW5pb25zIGZyb20gc291cmNlDQo+IChiaWcgZW5kaWFu
+IHVuc3VwcG9ydGVkIGFyY2hpdGVjdHVyZSkuIEFsbCBvZiBteSBzYWx0IGlzc3VlcyBzZWVtZWQg
+dG8gZ2V0DQo+IHJlc29sdmVkIHdoZW4gSSBnb3Qgc2ltaWxhciB2ZXJzaW9ucyBvZiBaTVEgcnVu
+bmluZyBvbiBib3RoIG1hc3RlciBhbmQNCj4gbWluaW9uLiBUaGUgY2FsYW1hcmkgbWFzdGVyIGlz
+IHJ1bm5pbmcgb24gVWJ1bnR1IDE0LjA0Lg0KPiA+DQo+ID4NCj4gPiBGcm9tOiBNaWNoYWVsIEt1
+cmlnZXIgW21haWx0bzptazcxOTNAeXAuY29tXQ0KPiA+IFNlbnQ6IFdlZG5lc2RheSwgTWF5IDEz
+LCAyMDE1IDI6MDAgUE0NCj4gPiBUbzogQnJ1Y2UgTWNGYXJsYW5kOyBjZXBoLWNhbGFtYXJpQGxp
+c3RzLmNlcGguY29tOyBjZXBoLQ0KPiB1c2Vyc0BjZXBoLmNvbTsgY2VwaC1kZXZlbCAoY2VwaC1k
+ZXZlbEB2Z2VyLmtlcm5lbC5vcmcpDQo+ID4gU3ViamVjdDogUmU6IFtjZXBoLXVzZXJzXSBEb2Vz
+IGFueW9uZSB1bmRlcnN0YW5kIENhbGFtYXJpPz8NCj4gPg0KPiA+IE9LLCBJIGZpbmFsbHkgZ290
+IG1pbmUgd29ya2luZy4gIEZvciB3aGF0ZXZlciByZWFzb24sIHRoZSBsYXRlc3QgdmVyc2lvbiBv
+Zg0KPiBzYWx0IHdhcyB0aGUgaXNzdWUgZm9yIG1lLiAgTGVhdmluZyB0aGUgbGF0ZXN0IHZlcnNp
+b24gb2Ygc2FsdCBvbiB0aGUgY2FsYW1hcmkNCj4gc2VydmVyIGlzIHdvcmtpbmcsIGJ1dCBoYWQg
+dG8gZG93bmdyYWRlIHRoZSBtaW5pb25zLg0KPiA+DQo+ID4gICBSZW1vdmVkOg0KPiA+ICAgICBz
+YWx0Lm5vYXJjaCAwOjIwMTQuNy41LTEuZWw2ICAgICAgICBzYWx0LW1pbmlvbi5ub2FyY2ggMDoy
+MDE0LjcuNS0xLmVsNg0KPiA+DQo+ID4gICBJbnN0YWxsZWQ6DQo+ID4gICAgIHNhbHQubm9hcmNo
+IDA6MjAxNC43LjEtMS5lbDYgICAgICAgIHNhbHQtbWluaW9uLm5vYXJjaCAwOjIwMTQuNy4xLTEu
+ZWw2DQo+ID4NCj4gPiBUaGlzIGlzIG9uIENlbnRPUyA2LjYNCj4gPg0KPiA+IC09TWlrZSBLdXJp
+Z2VyDQo+ID4NCj4gPg0KPiA+IDxpbWFnZTAwMS5wbmc+DQo+ID4NCj4gPiBNaWNoYWVsIEt1cmln
+ZXINCj4gPiBTci4gVW5peCBTeXN0ZW1zIEVuZ2luZWVyDQo+ID4gKiBtazcxOTNAeXAuY29tIHwo
+IDgxOC02NDktNzIzNQ0KPiA+DQo+ID4gRnJvbTogQnJ1Y2UgTWNGYXJsYW5kIDxCcnVjZS5NY0Zh
+cmxhbmRAdGFlYy50b3NoaWJhLmNvbT4NCj4gPiBEYXRlOiBUdWVzZGF5LCBNYXkgMTIsIDIwMTUg
+YXQgNDozNCBQTQ0KPiA+IFRvOiAiY2VwaC1jYWxhbWFyaUBsaXN0cy5jZXBoLmNvbSIgPGNlcGgt
+Y2FsYW1hcmlAbGlzdHMuY2VwaC5jb20+LA0KPiBjZXBoLXVzZXJzIDxjZXBoLXVzZXJzQGNlcGgu
+Y29tPiwgImNlcGgtZGV2ZWwgKGNlcGgtDQo+IGRldmVsQHZnZXIua2VybmVsLm9yZykiIDxjZXBo
+LWRldmVsQHZnZXIua2VybmVsLm9yZz4NCj4gPiBTdWJqZWN0OiBbY2VwaC11c2Vyc10gRG9lcyBh
+bnlvbmUgdW5kZXJzdGFuZCBDYWxhbWFyaT8/DQo+ID4NCj4gPiBJbmNyZWFzaW5nIHRoZSBhdWRp
+ZW5jZSBzaW5jZSBjZXBoLWNhbGFtYXJpIGlzIG5vdCByZXNwb25zaXZlLiBXaGF0IHNhbHQNCj4g
+ZXZlbnQvaW5mbyBkb2VzIHRoZSBDYWxhbWFyaSBNYXN0ZXIgZXhwZWN0IHRvIHNlZSBmcm9tIHRo
+ZSBjZXBoLW1vbiB0bw0KPiBkZXRlcm1pbmUgdGhlcmUgaXMgYW4gd29ya2luZyBjbHVzdGVyPyBJ
+IGhhZCB0byBjaGFuZ2Ugc2VydmVycyBob3N0aW5nIHRoZQ0KPiBjYWxhbWFyaSBtYXN0ZXIgYW5k
+IGNhbuKAmXQgZ2V0IHRoZSBuZXcgbWFjaGluZSB0byByZWNvZ25pemUgdGhlIGNsdXN0ZXIuDQo+
+IFRoZSDigJhzYWx0IFwqIGNlcGguZ2V0X2hlYXJ0YmVhdHPigJkgcmV0dXJucyBtb25tYXAsIGZz
+aWQsIHZlciwgZXBvY2gsIGV0YyBmb3INCj4gdGhlIG1vbml0b3IgYW5kIGFsbCBvZiB0aGUgb3Nk
+4oCZcy4gQ2FuIGFueW9uZSBwb2ludCBtZSB0byBkb2NzIG9yIGNvZGUgdGhhdA0KPiBtaWdodCBl
+bmxpZ2h0ZW4gbWUgdG8gd2hhdCBJ4oCZbSBvdmVybG9va2luZz8gVGhhbmtzLg0KPiA+IF9fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQo+ID4gY2VwaC1jYWxh
+bWFyaSBtYWlsaW5nIGxpc3QNCj4gPiBjZXBoLWNhbGFtYXJpQGxpc3RzLmNlcGguY29tDQo+ID4g
+aHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLWNhbGFtYXJpLWNlcGguY29t
+DQoNCg==
