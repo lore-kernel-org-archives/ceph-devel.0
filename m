@@ -1,89 +1,140 @@
-From: Gregory Meno <gmeno@redhat.com>
+From: Bruce McFarland <Bruce.McFarland-rnQ3HPfPGGWsvWnuDiJtQA@public.gmane.org>
 Subject: Re: [ceph-calamari] Does anyone understand Calamari??
-Date: Tue, 12 May 2015 17:02:54 -0700
-Message-ID: <607C9580-DF69-4CA0-9D65-550700893CA8@redhat.com>
+Date: Wed, 13 May 2015 00:18:09 +0000
+Message-ID: <7E8CF9C16F722345A89076330719CB1F4A825343@EXMAIL1.taec.toshiba.com>
 References: <7E8CF9C16F722345A89076330719CB1F4A82525D@EXMAIL1.taec.toshiba.com>
-Mime-Version: 1.0 (Mac OS X Mail 8.2 \(2098\))
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:42964 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754011AbbEMAC6 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 May 2015 20:02:58 -0400
-In-Reply-To: <7E8CF9C16F722345A89076330719CB1F4A82525D@EXMAIL1.taec.toshiba.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Bruce McFarland <Bruce.McFarland@taec.toshiba.com>
-Cc: "ceph-calamari@lists.ceph.com" <ceph-calamari@lists.ceph.com>, "ceph-users@ceph.com" <ceph-users@ceph.com>, "ceph-devel (ceph-devel@vger.kernel.org)" <ceph-devel@vger.kernel.org>
+	<607C9580-DF69-4CA0-9D65-550700893CA8@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <607C9580-DF69-4CA0-9D65-550700893CA8-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Gregory Meno <gmeno-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: "ceph-calamari-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-calamari-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel
+	(ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org)" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Bruce,
-
-It is great to hear that salt is reporting status from all the nodes in=
- the cluster.
-
-Let me see if I understand your question:
-
-You want to know what conditions cause us to recognize a working cluste=
-r?
-
-see https://github.com/ceph/calamari/blob/master/cthulhu/cthulhu/manage=
-r/manager.py#L135
-
-https://github.com/ceph/calamari/blob/master/cthulhu/cthulhu/manager/ma=
-nager.py#L349
-
-and
-
-https://github.com/ceph/calamari/blob/master/cthulhu/cthulhu/manager/cl=
-uster_monitor.py
-
-
-Let=E2=80=99s check that you need to be digging into that level of deta=
-il:
-
-You switched to a new instance of calamari and it is not recognizing th=
-e cluster.
-
-You what to know what you are overlooking? Would you please clarify wit=
-h some hostnames?
-
-i.e. Let say that your old calamari node was called calamariA and that =
-your new node is calamariB
-
-from which are you running the get_heartbeats?
-
-what is the master setting in the minion config files out on the nodes =
-of the cluster if things are setup correctly they would look like this:
-
-[root@node1 shadow_man]# cat /etc/salt/minion.d/calamari.conf=20
-master: calamariB
-
-
-If this is the case the thing I would check is the http://calamariB/api=
-/v2/cluster endpoint is reporting anything?
-
-hope this helps,
-Gregory
-
-> On May 12, 2015, at 4:34 PM, Bruce McFarland <Bruce.McFarland@taec.to=
-shiba.com> wrote:
->=20
-> Increasing the audience since ceph-calamari is not responsive. What s=
-alt event/info does the Calamari Master expect to see from the ceph-mon=
- to determine there is an working cluster? I had to change servers host=
-ing the calamari master and can=E2=80=99t get the new machine to recogn=
-ize the cluster. The =E2=80=98salt \* ceph.get_heartbeats=E2=80=99 retu=
-rns monmap, fsid, ver, epoch, etc for the monitor and all of the osd=E2=
-=80=99s. Can anyone point me to docs or code that might enlighten me to=
- what I=E2=80=99m overlooking? Thanks.
-> _______________________________________________
-> ceph-calamari mailing list
-> ceph-calamari@lists.ceph.com
-> http://lists.ceph.com/listinfo.cgi/ceph-calamari-ceph.com
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+TWFzdGVyIHdhcyBlc3M2OCBhbmQgbm93IGl0J3MgZXNzcGVyZjMuIA0KDQpPbiBhbGwgY2x1c3Rl
+ciBub2RlcyB0aGUgZm9sbG93aW5nIGZpbGVzIG5vdyBoYXZlICdtYXN0ZXI6IGVzc3BlcmYzJw0K
+L2V0Yy9zYWx0L21pbmlvbiANCi9ldGMvc2FsdC9taW5pb24vY2FsYW1hcmkuY29uZiANCi9ldGMv
+ZGlhbW9uZC9kaWFtb25kLmNvbmYNCg0KVGhlICdzYWx0IFwqIGNlcGguZ2V0X2hlYXJ0YmVhdHMn
+IGlzIGJlaW5nIHJ1biBvbiBlc3NwZXJmMyAtIGhlcmVzIGEgJ3NhbHQgXCogdGVzdC5waW5nJyBm
+cm9tIGVzc3BlcmYzIENhbGFtYXJpIE1hc3RlciB0byB0aGUgY2x1c3Rlci4gSSd2ZSBhbHNvIGlu
+Y2x1ZGVkIGEgcXVpY2sgY2x1c3RlciBzYW5pdHkgdGVzdCB3aXRoIHRoZSBvdXRwdXQgb2YgY2Vw
+aCAtcyBhbmQgY2VwaCBvc2QgdHJlZS4gQW5kIGZvciB5b3VyIHJlYWRpbmcgcGxlYXN1cmUgdGhl
+IG91dHB1dCBvZiAnc2FsdCBvY3Rlb24xMDkgY2VwaC5nZXRfaGVhcnRiZWF0cycgc2luY2UgSSBz
+dXNwZWN0IHRoZXJlIG1pZ2h0IGJlIGEgbWlzc2luZyBmaWVsZCBpbiB0aGUgbW9uaXRvciByZXNw
+b25zZS4gDQoNCm9vdEBlc3NwZXJmMzovZXRjL2NlcGgjIHNhbHQgXCogdGVzdC5waW5nDQpvY3Rl
+b24xMDg6DQogICAgVHJ1ZQ0Kb2N0ZW9uMTE0Og0KICAgIFRydWUNCm9jdGVvbjExMToNCiAgICBU
+cnVlDQpvY3Rlb24xMDE6DQogICAgVHJ1ZQ0Kb2N0ZW9uMTA2Og0KICAgIFRydWUNCm9jdGVvbjEw
+OToNCiAgICBUcnVlDQpvY3Rlb24xMTg6DQogICAgVHJ1ZQ0Kcm9vdEBlc3NwZXJmMzovZXRjL2Nl
+cGgjIGNlcGggb3NkIHRyZWUNCiMgaWQJd2VpZ2h0CXR5cGUgbmFtZQl1cC9kb3duCXJld2VpZ2h0
+DQotMQk3CXJvb3QgZGVmYXVsdA0KLTQJMQkJaG9zdCBvY3Rlb24xMDgNCjAJMQkJCW9zZC4wCXVw
+CTEJDQotMgkxCQlob3N0IG9jdGVvbjExMQ0KMQkxCQkJb3NkLjEJdXAJMQkNCi01CTEJCWhvc3Qg
+b2N0ZW9uMTE1DQoyCTEJCQlvc2QuMglETkUJCQ0KLTYJMQkJaG9zdCBvY3Rlb24xMTgNCjMJMQkJ
+CW9zZC4zCXVwCTEJDQotNwkxCQlob3N0IG9jdGVvbjExNA0KNAkxCQkJb3NkLjQJdXAJMQkNCi04
+CTEJCWhvc3Qgb2N0ZW9uMTA2DQo1CTEJCQlvc2QuNQl1cAkxCQ0KLTkJMQkJaG9zdCBvY3Rlb24x
+MDENCjYJMQkJCW9zZC42CXVwCTEJDQpyb290QGVzc3BlcmYzOi9ldGMvY2VwaCMgY2VwaCAtcyAN
+CiAgICBjbHVzdGVyIDg2OGJmYWNjLWU0OTItMTFlNC04OWZhLTAwMGZiNzExMTEwYw0KICAgICBo
+ZWFsdGggSEVBTFRIX09LDQogICAgIG1vbm1hcCBlMTogMSBtb25zIGF0IHtvY3Rlb24xMDk9MjA5
+LjI0My4xNjAuNzA6Njc4OS8wfSwgZWxlY3Rpb24gZXBvY2ggMSwgcXVvcnVtIDAgb2N0ZW9uMTA5
+DQogICAgIG9zZG1hcCBlODA6IDYgb3NkczogNiB1cCwgNiBpbg0KICAgICAgcGdtYXAgdjI2NzY1
+OiA3MjggcGdzLCAyIHBvb2xzLCAyMDA3MCBNQiBkYXRhLCAxNTAwMyBvYmplY3RzDQogICAgICAg
+ICAgICA2MDYwNCBNQiB1c2VkLCAyNzM0IEdCIC8gMjc5MyBHQiBhdmFpbA0KICAgICAgICAgICAg
+ICAgICA3MjggYWN0aXZlK2NsZWFuDQpyb290QGVzc3BlcmYzOi9ldGMvY2VwaCMNCg0Kcm9vdEBl
+c3NwZXJmMzovZXRjL2NlcGgjIHNhbHQgb2N0ZW9uMTA5IGNlcGguZ2V0X2hlYXJ0YmVhdHMNCm9j
+dGVvbjEwOToNCiAgICAtLS0tLS0tLS0tDQogICAgLSBib290X3RpbWU6DQogICAgICAgIDE0MzA3
+ODQ0MzENCiAgICAtIGNlcGhfdmVyc2lvbjoNCiAgICAgICAgMC44MC44LTAuZWw2DQogICAgLSBz
+ZXJ2aWNlczoNCiAgICAgICAgLS0tLS0tLS0tLQ0KICAgICAgICBjZXBoLW1vbi5vY3Rlb24xMDk6
+DQogICAgICAgICAgICAtLS0tLS0tLS0tDQogICAgICAgICAgICBjbHVzdGVyOg0KICAgICAgICAg
+ICAgICAgIGNlcGgNCiAgICAgICAgICAgIGZzaWQ6DQogICAgICAgICAgICAgICAgODY4YmZhY2Mt
+ZTQ5Mi0xMWU0LTg5ZmEtMDAwZmI3MTExMTBjDQogICAgICAgICAgICBpZDoNCiAgICAgICAgICAg
+ICAgICBvY3Rlb24xMDkNCiAgICAgICAgICAgIHN0YXR1czoNCiAgICAgICAgICAgICAgICAtLS0t
+LS0tLS0tDQogICAgICAgICAgICAgICAgZWxlY3Rpb25fZXBvY2g6DQogICAgICAgICAgICAgICAg
+ICAgIDENCiAgICAgICAgICAgICAgICBleHRyYV9wcm9iZV9wZWVyczoNCiAgICAgICAgICAgICAg
+ICBtb25tYXA6DQogICAgICAgICAgICAgICAgICAgIC0tLS0tLS0tLS0NCiAgICAgICAgICAgICAg
+ICAgICAgY3JlYXRlZDoNCiAgICAgICAgICAgICAgICAgICAgICAgIDIwMTUtMDQtMTYgMjM6NTA6
+NTIuNDEyNjg2DQogICAgICAgICAgICAgICAgICAgIGVwb2NoOg0KICAgICAgICAgICAgICAgICAg
+ICAgICAgMQ0KICAgICAgICAgICAgICAgICAgICBmc2lkOg0KICAgICAgICAgICAgICAgICAgICAg
+ICAgODY4YmZhY2MtZTQ5Mi0xMWU0LTg5ZmEtMDAwZmI3MTExMTBjDQogICAgICAgICAgICAgICAg
+ICAgIG1vZGlmaWVkOg0KICAgICAgICAgICAgICAgICAgICAgICAgMjAxNS0wNC0xNiAyMzo1MDo1
+Mi40MTI2ODYNCiAgICAgICAgICAgICAgICAgICAgbW9uczoNCiAgICAgICAgICAgICAgICAgICAg
+ICAgIC0tLS0tLS0tLS0NCiAgICAgICAgICAgICAgICAgICAgICAgIC0gYWRkcjoNCiAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAyMDkuMjQzLjE2MC43MDo2Nzg5LzANCiAgICAgICAgICAgICAg
+ICAgICAgICAgIC0gbmFtZToNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBvY3Rlb24xMDkN
+CiAgICAgICAgICAgICAgICAgICAgICAgIC0gcmFuazoNCiAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAwDQogICAgICAgICAgICAgICAgbmFtZToNCiAgICAgICAgICAgICAgICAgICAgb2N0ZW9u
+MTA5DQogICAgICAgICAgICAgICAgb3V0c2lkZV9xdW9ydW06DQogICAgICAgICAgICAgICAgcXVv
+cnVtOg0KICAgICAgICAgICAgICAgICAgICAtIDANCiAgICAgICAgICAgICAgICByYW5rOg0KICAg
+ICAgICAgICAgICAgICAgICAwDQogICAgICAgICAgICAgICAgc3RhdGU6DQogICAgICAgICAgICAg
+ICAgICAgIGxlYWRlcg0KICAgICAgICAgICAgICAgIHN5bmNfcHJvdmlkZXI6DQogICAgICAgICAg
+ICB0eXBlOg0KICAgICAgICAgICAgICAgIG1vbg0KICAgICAgICAgICAgdmVyc2lvbjoNCiAgICAg
+ICAgICAgICAgICAwLjg2DQogICAgLS0tLS0tLS0tLQ0KICAgIC0gODY4YmZhY2MtZTQ5Mi0xMWU0
+LTg5ZmEtMDAwZmI3MTExMTBjOg0KICAgICAgICAtLS0tLS0tLS0tDQogICAgICAgIGZzaWQ6DQog
+ICAgICAgICAgICA4NjhiZmFjYy1lNDkyLTExZTQtODlmYS0wMDBmYjcxMTExMGMNCiAgICAgICAg
+bmFtZToNCiAgICAgICAgICAgIGNlcGgNCiAgICAgICAgdmVyc2lvbnM6DQogICAgICAgICAgICAt
+LS0tLS0tLS0tDQogICAgICAgICAgICBjb25maWc6DQogICAgICAgICAgICAgICAgODdmMTc1YzYw
+ZTVjN2VjMDZjMjYzYzU1NjA1NmZiY2INCiAgICAgICAgICAgIGhlYWx0aDoNCiAgICAgICAgICAg
+ICAgICBhOTA3ZDBlYzM5NTcxMzM2OWI0ODQzMzgxZWMzMWJjMg0KICAgICAgICAgICAgbWRzX21h
+cDoNCiAgICAgICAgICAgICAgICAxDQogICAgICAgICAgICBtb25fbWFwOg0KICAgICAgICAgICAg
+ICAgIDENCiAgICAgICAgICAgIG1vbl9zdGF0dXM6DQogICAgICAgICAgICAgICAgMQ0KICAgICAg
+ICAgICAgb3NkX21hcDoNCiAgICAgICAgICAgICAgICA4MA0KICAgICAgICAgICAgcGdfc3VtbWFy
+eToNCiAgICAgICAgICAgICAgICA3ZTI5ZDdjYzkzY2ZjZWQ4ZjNmMTQ2Y2M3OGY1NjgyZg0Kcm9v
+dEBlc3NwZXJmMzovZXRjL2NlcGgjDQoNCg0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0t
+DQo+IEZyb206IEdyZWdvcnkgTWVubyBbbWFpbHRvOmdtZW5vQHJlZGhhdC5jb21dDQo+IFNlbnQ6
+IFR1ZXNkYXksIE1heSAxMiwgMjAxNSA1OjAzIFBNDQo+IFRvOiBCcnVjZSBNY0ZhcmxhbmQNCj4g
+Q2M6IGNlcGgtY2FsYW1hcmlAbGlzdHMuY2VwaC5jb207IGNlcGgtdXNlcnNAY2VwaC5jb207IGNl
+cGgtZGV2ZWwNCj4gKGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnKQ0KPiBTdWJqZWN0OiBSZTog
+W2NlcGgtY2FsYW1hcmldIERvZXMgYW55b25lIHVuZGVyc3RhbmQgQ2FsYW1hcmk/Pw0KPiANCj4g
+QnJ1Y2UsDQo+IA0KPiBJdCBpcyBncmVhdCB0byBoZWFyIHRoYXQgc2FsdCBpcyByZXBvcnRpbmcg
+c3RhdHVzIGZyb20gYWxsIHRoZSBub2RlcyBpbiB0aGUNCj4gY2x1c3Rlci4NCj4gDQo+IExldCBt
+ZSBzZWUgaWYgSSB1bmRlcnN0YW5kIHlvdXIgcXVlc3Rpb246DQo+IA0KPiBZb3Ugd2FudCB0byBr
+bm93IHdoYXQgY29uZGl0aW9ucyBjYXVzZSB1cyB0byByZWNvZ25pemUgYSB3b3JraW5nIGNsdXN0
+ZXI/DQo+IA0KPiBzZWUNCj4gaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2FsYW1hcmkvYmxvYi9t
+YXN0ZXIvY3RodWxodS9jdGh1bGh1L21hbmFnZXIvDQo+IG1hbmFnZXIucHkjTDEzNQ0KPiANCj4g
+aHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2FsYW1hcmkvYmxvYi9tYXN0ZXIvY3RodWxodS9jdGh1
+bGh1L21hbmFnZXIvDQo+IG1hbmFnZXIucHkjTDM0OQ0KPiANCj4gYW5kDQo+IA0KPiBodHRwczov
+L2dpdGh1Yi5jb20vY2VwaC9jYWxhbWFyaS9ibG9iL21hc3Rlci9jdGh1bGh1L2N0aHVsaHUvbWFu
+YWdlci9jDQo+IGx1c3Rlcl9tb25pdG9yLnB5DQo+IA0KPiANCj4gTGV04oCZcyBjaGVjayB0aGF0
+IHlvdSBuZWVkIHRvIGJlIGRpZ2dpbmcgaW50byB0aGF0IGxldmVsIG9mIGRldGFpbDoNCj4gDQo+
+IFlvdSBzd2l0Y2hlZCB0byBhIG5ldyBpbnN0YW5jZSBvZiBjYWxhbWFyaSBhbmQgaXQgaXMgbm90
+IHJlY29nbml6aW5nIHRoZQ0KPiBjbHVzdGVyLg0KPiANCj4gWW91IHdoYXQgdG8ga25vdyB3aGF0
+IHlvdSBhcmUgb3Zlcmxvb2tpbmc/IFdvdWxkIHlvdSBwbGVhc2UgY2xhcmlmeSB3aXRoDQo+IHNv
+bWUgaG9zdG5hbWVzPw0KPiANCj4gaS5lLiBMZXQgc2F5IHRoYXQgeW91ciBvbGQgY2FsYW1hcmkg
+bm9kZSB3YXMgY2FsbGVkIGNhbGFtYXJpQSBhbmQgdGhhdCB5b3VyDQo+IG5ldyBub2RlIGlzIGNh
+bGFtYXJpQg0KPiANCj4gZnJvbSB3aGljaCBhcmUgeW91IHJ1bm5pbmcgdGhlIGdldF9oZWFydGJl
+YXRzPw0KPiANCj4gd2hhdCBpcyB0aGUgbWFzdGVyIHNldHRpbmcgaW4gdGhlIG1pbmlvbiBjb25m
+aWcgZmlsZXMgb3V0IG9uIHRoZSBub2RlcyBvZiB0aGUNCj4gY2x1c3RlciBpZiB0aGluZ3MgYXJl
+IHNldHVwIGNvcnJlY3RseSB0aGV5IHdvdWxkIGxvb2sgbGlrZSB0aGlzOg0KPiANCj4gW3Jvb3RA
+bm9kZTEgc2hhZG93X21hbl0jIGNhdCAvZXRjL3NhbHQvbWluaW9uLmQvY2FsYW1hcmkuY29uZg0K
+PiBtYXN0ZXI6IGNhbGFtYXJpQg0KPiANCj4gDQo+IElmIHRoaXMgaXMgdGhlIGNhc2UgdGhlIHRo
+aW5nIEkgd291bGQgY2hlY2sgaXMgdGhlDQo+IGh0dHA6Ly9jYWxhbWFyaUIvYXBpL3YyL2NsdXN0
+ZXIgZW5kcG9pbnQgaXMgcmVwb3J0aW5nIGFueXRoaW5nPw0KPiANCj4gaG9wZSB0aGlzIGhlbHBz
+LA0KPiBHcmVnb3J5DQo+IA0KPiA+IE9uIE1heSAxMiwgMjAxNSwgYXQgNDozNCBQTSwgQnJ1Y2Ug
+TWNGYXJsYW5kDQo+IDxCcnVjZS5NY0ZhcmxhbmRAdGFlYy50b3NoaWJhLmNvbT4gd3JvdGU6DQo+
+ID4NCj4gPiBJbmNyZWFzaW5nIHRoZSBhdWRpZW5jZSBzaW5jZSBjZXBoLWNhbGFtYXJpIGlzIG5v
+dCByZXNwb25zaXZlLiBXaGF0IHNhbHQNCj4gZXZlbnQvaW5mbyBkb2VzIHRoZSBDYWxhbWFyaSBN
+YXN0ZXIgZXhwZWN0IHRvIHNlZSBmcm9tIHRoZSBjZXBoLW1vbiB0bw0KPiBkZXRlcm1pbmUgdGhl
+cmUgaXMgYW4gd29ya2luZyBjbHVzdGVyPyBJIGhhZCB0byBjaGFuZ2Ugc2VydmVycyBob3N0aW5n
+IHRoZQ0KPiBjYWxhbWFyaSBtYXN0ZXIgYW5kIGNhbuKAmXQgZ2V0IHRoZSBuZXcgbWFjaGluZSB0
+byByZWNvZ25pemUgdGhlIGNsdXN0ZXIuDQo+IFRoZSDigJhzYWx0IFwqIGNlcGguZ2V0X2hlYXJ0
+YmVhdHPigJkgcmV0dXJucyBtb25tYXAsIGZzaWQsIHZlciwgZXBvY2gsIGV0YyBmb3INCj4gdGhl
+IG1vbml0b3IgYW5kIGFsbCBvZiB0aGUgb3Nk4oCZcy4gQ2FuIGFueW9uZSBwb2ludCBtZSB0byBk
+b2NzIG9yIGNvZGUgdGhhdA0KPiBtaWdodCBlbmxpZ2h0ZW4gbWUgdG8gd2hhdCBJ4oCZbSBvdmVy
+bG9va2luZz8gVGhhbmtzLg0KPiA+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fDQo+ID4gY2VwaC1jYWxhbWFyaSBtYWlsaW5nIGxpc3QNCj4gPiBjZXBoLWNh
+bGFtYXJpQGxpc3RzLmNlcGguY29tDQo+ID4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZv
+LmNnaS9jZXBoLWNhbGFtYXJpLWNlcGguY29tDQoNCl9fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNA
+bGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVz
+ZXJzLWNlcGguY29tCg==
