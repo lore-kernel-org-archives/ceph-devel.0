@@ -1,124 +1,101 @@
-From: kernel neophyte <neophyte.hacker001@gmail.com>
-Subject: Re: With ceph-detect-init changes, make install fails
-Date: Wed, 13 May 2015 09:42:00 -0700
-Message-ID: <CAFkUHxcH20FzAX+y3LoPnJTG-Uz=cgjPrckYJ330-_dahMxKNQ@mail.gmail.com>
-References: <CAFkUHxdwK4YkoJ+B1Vkcn5006wXpj5nKDu5tR1w16Q_1mBntBA@mail.gmail.com>
-	<55532CB2.8060201@dachary.org>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: Re: rados bench single instance vs. multiple instances
+Date: Wed, 13 May 2015 11:16:35 -0500
+Message-ID: <555378E3.4000309@redhat.com>
+References: <BC97738F8E7C8742BABED7F06FB9DF916643E836@SATLEXDAG01.amd.com> <alpine.DEB.2.00.1505111003060.28239@cobra.newdream.net> <BC97738F8E7C8742BABED7F06FB9DF91664428FA@SATLEXDAG01.amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252;
+	format=flowed
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f173.google.com ([209.85.192.173]:33743 "EHLO
-	mail-pd0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753207AbbEMQmB convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 May 2015 12:42:01 -0400
-Received: by pdbnk13 with SMTP id nk13so56845981pdb.0
-        for <ceph-devel@vger.kernel.org>; Wed, 13 May 2015 09:42:00 -0700 (PDT)
-In-Reply-To: <55532CB2.8060201@dachary.org>
+Received: from mx1.redhat.com ([209.132.183.28]:39004 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S965125AbbEMQuc (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 13 May 2015 12:50:32 -0400
+In-Reply-To: <BC97738F8E7C8742BABED7F06FB9DF91664428FA@SATLEXDAG01.amd.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Deneau, Tom" <tom.deneau@amd.com>, Sage Weil <sage@newdream.net>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Loic,
-
-https://github.com/ceph/ceph/pull/4663 fixes the issue. Thanks!
-
--Neo
-
-On Wed, May 13, 2015 at 3:51 AM, Loic Dachary <loic@dachary.org> wrote:
-> Hi,
+On 05/13/2015 10:05 AM, Deneau, Tom wrote:
 >
-> http://tracker.ceph.com/issues/11598 should be fixed with https://git=
-hub.com/ceph/ceph/pull/4663. Would you have time to review this fix ?
 >
-> Thanks !
+>> -----Original Message-----
+>> From: Sage Weil [mailto:sage@newdream.net]
+>> Sent: Monday, May 11, 2015 12:04 PM
+>> To: Deneau, Tom
+>> Cc: ceph-devel
+>> Subject: Re: rados bench single instance vs. multiple instances
+>>
+>> On Mon, 11 May 2015, Deneau, Tom wrote:
+>>> I have noticed the following while running rados bench seq read tes=
+ts
+>>> with a 40M object size
+>>>
+>>>      single rados bench, 4 concurrent ops,                     band=
+width =3D
+>> 190 MB/s
+>>>      4 copies of rados bench, 1 concurrent op each,  aggregate
+>>> bandwidth =3D 310 MB/s
+>>>
+>>> and in fact the single rados bench seems limited to 190, no matter =
+how many
+>> concurrent ops.
+>>>
+>>> I don't see this kind of behavior with a 4M object size.
+>>>
+>>> (The above are with caches dropped on the osd targets)
+>>>
+>>> It doesn't seem to be related to the total number of bytes being
+>>> processed by the single because if I don't drop the caches, both th=
+e
+>>> single rados bench and the 4-copy rados bench get much higher numbe=
+rs
+>>> (600 vs. 900) but still the single rados bench appears limited, no =
+matter
+>> how many concurrent ops are used.
+>>>
+>>> Is there kind of throttling going on by design here?
+>>
+>> It might be the librados throttles:
+>>
+>> OPTION(objecter_inflight_op_bytes, OPT_U64, 1024*1024*100) // max in=
+-flight
+>> data (both directions)
+>> OPTION(objecter_inflight_ops, OPT_U64, 1024)               // max in=
+-flight
+>> ios
+>>
+>> IIRC these only affect librados.. which would include 'rados bench'.
+>>
+>> sage
+>>
 >
-> On 12/05/2015 20:26, kernel neophyte wrote:
->> Hi,
->>
->> With the recent ceph-detect-init changes, make install now fails (
->> make succeeds hence this is not detected by build bots )
->>
->> Error:
->>
->> cd ceph-detect-init ; \
->>
->> if lsb_release -si | grep --quiet 'Ubuntu\|Debian\|Devuan' ; then \
->>
->> options=3D--install-layout=3Ddeb ; \
->>
->> else \
->>
->> options=3D--prefix=3D/usr ; \
->>
->> fi ; \
->>
->> python setup.py install --root=3D $options
->>
->> running install
->>
->> Checking .pth file support in usr/lib/python2.7/dist-packages/
->>
->> /usr/bin/python -E -c pass
->>
->> TEST FAILED: usr/lib/python2.7/dist-packages/ does NOT support .pth =
-files
->>
->> error: bad install directory or PYTHONPATH
->>
->>
->> You are attempting to install a package to a directory that is not
->>
->> on PYTHONPATH and which Python does not read ".pth" files from.  The
->>
->> installation directory you specified (via --install-dir, --prefix, o=
-r
->>
->> the distutils default setting) was:
->>
->>
->>     usr/lib/python2.7/dist-packages/
->>
->>
->> and your PYTHONPATH environment variable currently contains:
->>
->>
->>     '../src/pybind'
->>
->>
->> Here are some of your options for correcting the problem:
->>
->>
->> * You can choose a different installation directory, i.e., one that =
-is
->>
->>   on PYTHONPATH or supports .pth files
->>
->>
->> * You can add the installation directory to the PYTHONPATH environme=
-nt
->>
->>   variable.  (It must then also be on PYTHONPATH whenever you run
->>
->>   Python and want to use the package(s) you are installing.)
->>
->>
->> * You can set up the installation directory to support ".pth" files =
-by
->>
->>   using one of the approaches described here:
->>
->>
->>   https://pythonhosted.org/setuptools/easy_install.html#custom-insta=
-llation-locations
->>
->>
->> -Neo
->>
+> Just a follow-up that changing the limits of the two options mentione=
+d above
+> did indeed solve my problem.
+
+Yay!  I suspect max bytes more so than max ops?
+
+
+Mark
+
+>
+> Also, my na=EFve understanding of the architecture was that things li=
+ke RBD and RGW were
+> layered on librados as shown in http://ceph.com/docs/master/architect=
+ure/.  So wouldn't these
+> throttles apply to those stacks as well?
+>
+> -- Tom Deneau
+>
 >
 > --
-> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
