@@ -1,17 +1,17 @@
 From: Haomai Wang <haomaiwang@gmail.com>
 Subject: Re: RBD mirroring design draft
-Date: Wed, 13 May 2015 15:48:53 +0800
-Message-ID: <CACJqLybPsk1aEab7iNb7gA2BKay=Gj=EJvViQR2TnTnQLigdhQ@mail.gmail.com>
+Date: Wed, 13 May 2015 16:07:19 +0800
+Message-ID: <CACJqLyZA2+eXd=cqDwYOyqeE+O+kovHOF=HavGp=SWkrJ-LgVw@mail.gmail.com>
 References: <55529E04.1070202@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f176.google.com ([209.85.192.176]:33085 "EHLO
-	mail-pd0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753348AbbEMHsy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 May 2015 03:48:54 -0400
-Received: by pdbnk13 with SMTP id nk13so43409110pdb.0
-        for <ceph-devel@vger.kernel.org>; Wed, 13 May 2015 00:48:53 -0700 (PDT)
+Received: from mail-pa0-f54.google.com ([209.85.220.54]:35932 "EHLO
+	mail-pa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932109AbbEMIHT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 May 2015 04:07:19 -0400
+Received: by pabsx10 with SMTP id sx10so42869294pab.3
+        for <ceph-devel@vger.kernel.org>; Wed, 13 May 2015 01:07:19 -0700 (PDT)
 In-Reply-To: <55529E04.1070202@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
