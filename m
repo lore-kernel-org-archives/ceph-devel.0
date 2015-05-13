@@ -1,125 +1,89 @@
-From: Bruce McFarland <Bruce.McFarland-rnQ3HPfPGGWsvWnuDiJtQA@public.gmane.org>
-Subject: Does anyone understand Calamari??
-Date: Tue, 12 May 2015 23:34:41 +0000
-Message-ID: <7E8CF9C16F722345A89076330719CB1F4A82525D@EXMAIL1.taec.toshiba.com>
-Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0494808566=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: "ceph-calamari-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-calamari-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, "ceph-devel
-	(ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org)" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+From: Gregory Meno <gmeno@redhat.com>
+Subject: Re: [ceph-calamari] Does anyone understand Calamari??
+Date: Tue, 12 May 2015 17:02:54 -0700
+Message-ID: <607C9580-DF69-4CA0-9D65-550700893CA8@redhat.com>
+References: <7E8CF9C16F722345A89076330719CB1F4A82525D@EXMAIL1.taec.toshiba.com>
+Mime-Version: 1.0 (Mac OS X Mail 8.2 \(2098\))
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:42964 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754011AbbEMAC6 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 May 2015 20:02:58 -0400
+In-Reply-To: <7E8CF9C16F722345A89076330719CB1F4A82525D@EXMAIL1.taec.toshiba.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Bruce McFarland <Bruce.McFarland@taec.toshiba.com>
+Cc: "ceph-calamari@lists.ceph.com" <ceph-calamari@lists.ceph.com>, "ceph-users@ceph.com" <ceph-users@ceph.com>, "ceph-devel (ceph-devel@vger.kernel.org)" <ceph-devel@vger.kernel.org>
 
---===============0494808566==
-Content-Language: en-US
-Content-Type: multipart/alternative;
-	boundary="_000_7E8CF9C16F722345A89076330719CB1F4A82525DEXMAIL1taectosh_"
+Bruce,
 
---_000_7E8CF9C16F722345A89076330719CB1F4A82525DEXMAIL1taectosh_
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+It is great to hear that salt is reporting status from all the nodes in=
+ the cluster.
 
-Increasing the audience since ceph-calamari is not responsive. What salt ev=
-ent/info does the Calamari Master expect to see from the ceph-mon to determ=
-ine there is an working cluster? I had to change servers hosting the calama=
-ri master and can't get the new machine to recognize the cluster. The 'salt=
- \* ceph.get_heartbeats' returns monmap, fsid, ver, epoch, etc for the moni=
-tor and all of the osd's. Can anyone point me to docs or code that might en=
-lighten me to what I'm overlooking? Thanks.
+Let me see if I understand your question:
 
---_000_7E8CF9C16F722345A89076330719CB1F4A82525DEXMAIL1taectosh_
-Content-Type: text/html; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+You want to know what conditions cause us to recognize a working cluste=
+r?
 
-<html xmlns:v=3D"urn:schemas-microsoft-com:vml" xmlns:o=3D"urn:schemas-micr=
-osoft-com:office:office" xmlns:w=3D"urn:schemas-microsoft-com:office:word" =
-xmlns:m=3D"http://schemas.microsoft.com/office/2004/12/omml" xmlns=3D"http:=
-//www.w3.org/TR/REC-html40">
-<head>
-<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dus-ascii"=
->
-<meta name=3D"Generator" content=3D"Microsoft Word 14 (filtered medium)">
-<style><!--
-/* Font Definitions */
-@font-face
-	{font-family:"MS Mincho";
-	panose-1:2 2 6 9 4 2 5 8 3 4;}
-@font-face
-	{font-family:"MS Mincho";
-	panose-1:2 2 6 9 4 2 5 8 3 4;}
-@font-face
-	{font-family:Calibri;
-	panose-1:2 15 5 2 2 2 4 3 2 4;}
-@font-face
-	{font-family:"\@MS Mincho";
-	panose-1:2 2 6 9 4 2 5 8 3 4;}
-/* Style Definitions */
-p.MsoNormal, li.MsoNormal, div.MsoNormal
-	{margin:0in;
-	margin-bottom:.0001pt;
-	font-size:11.0pt;
-	font-family:"Calibri","sans-serif";}
-a:link, span.MsoHyperlink
-	{mso-style-priority:99;
-	color:blue;
-	text-decoration:underline;}
-a:visited, span.MsoHyperlinkFollowed
-	{mso-style-priority:99;
-	color:purple;
-	text-decoration:underline;}
-span.EmailStyle17
-	{mso-style-type:personal-compose;
-	font-family:"Calibri","sans-serif";
-	color:windowtext;}
-.MsoChpDefault
-	{mso-style-type:export-only;
-	font-family:"Calibri","sans-serif";}
-@page WordSection1
-	{size:8.5in 11.0in;
-	margin:1.0in 1.0in 1.0in 1.0in;}
-div.WordSection1
-	{page:WordSection1;}
---></style><!--[if gte mso 9]><xml>
-<o:shapedefaults v:ext=3D"edit" spidmax=3D"1026" />
-</xml><![endif]--><!--[if gte mso 9]><xml>
-<o:shapelayout v:ext=3D"edit">
-<o:idmap v:ext=3D"edit" data=3D"1" />
-</o:shapelayout></xml><![endif]-->
-</head>
-<body lang=3D"EN-US" link=3D"blue" vlink=3D"purple">
-<div class=3D"WordSection1">
-<p class=3D"MsoNormal">Increasing the audience since ceph-calamari is not r=
-esponsive. What salt event/info does the Calamari Master expect to see from=
- the ceph-mon to determine there is an working cluster? I had to change ser=
-vers hosting the calamari master and
- can&#8217;t get the new machine to recognize the cluster. The &#8216;salt =
-\* ceph.get_heartbeats&#8217; returns monmap, fsid, ver, epoch, etc for the=
- monitor and all of the osd&#8217;s. Can anyone point me to docs or code th=
-at might enlighten me to what I&#8217;m overlooking? Thanks.<o:p></o:p></p>
-</div>
-</body>
-</html>
+see https://github.com/ceph/calamari/blob/master/cthulhu/cthulhu/manage=
+r/manager.py#L135
 
---_000_7E8CF9C16F722345A89076330719CB1F4A82525DEXMAIL1taectosh_--
+https://github.com/ceph/calamari/blob/master/cthulhu/cthulhu/manager/ma=
+nager.py#L349
 
---===============0494808566==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+and
 
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+https://github.com/ceph/calamari/blob/master/cthulhu/cthulhu/manager/cl=
+uster_monitor.py
 
---===============0494808566==--
+
+Let=E2=80=99s check that you need to be digging into that level of deta=
+il:
+
+You switched to a new instance of calamari and it is not recognizing th=
+e cluster.
+
+You what to know what you are overlooking? Would you please clarify wit=
+h some hostnames?
+
+i.e. Let say that your old calamari node was called calamariA and that =
+your new node is calamariB
+
+from which are you running the get_heartbeats?
+
+what is the master setting in the minion config files out on the nodes =
+of the cluster if things are setup correctly they would look like this:
+
+[root@node1 shadow_man]# cat /etc/salt/minion.d/calamari.conf=20
+master: calamariB
+
+
+If this is the case the thing I would check is the http://calamariB/api=
+/v2/cluster endpoint is reporting anything?
+
+hope this helps,
+Gregory
+
+> On May 12, 2015, at 4:34 PM, Bruce McFarland <Bruce.McFarland@taec.to=
+shiba.com> wrote:
+>=20
+> Increasing the audience since ceph-calamari is not responsive. What s=
+alt event/info does the Calamari Master expect to see from the ceph-mon=
+ to determine there is an working cluster? I had to change servers host=
+ing the calamari master and can=E2=80=99t get the new machine to recogn=
+ize the cluster. The =E2=80=98salt \* ceph.get_heartbeats=E2=80=99 retu=
+rns monmap, fsid, ver, epoch, etc for the monitor and all of the osd=E2=
+=80=99s. Can anyone point me to docs or code that might enlighten me to=
+ what I=E2=80=99m overlooking? Thanks.
+> _______________________________________________
+> ceph-calamari mailing list
+> ceph-calamari@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-calamari-ceph.com
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
