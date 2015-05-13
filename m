@@ -1,150 +1,228 @@
-From: Gregory Meno <gmeno-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [ceph-calamari] Does anyone understand Calamari??
-Date: Tue, 12 May 2015 17:58:13 -0700
-Message-ID: <95DFDC74-A336-46C4-B72E-24E9747CDD6F@redhat.com>
-References: <7E8CF9C16F722345A89076330719CB1F4A82525D@EXMAIL1.taec.toshiba.com>
-	<607C9580-DF69-4CA0-9D65-550700893CA8@redhat.com>
-	<7E8CF9C16F722345A89076330719CB1F4A825343@EXMAIL1.taec.toshiba.com>
-Mime-Version: 1.0 (Mac OS X Mail 8.2 \(2098\))
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <7E8CF9C16F722345A89076330719CB1F4A825343-S73WLWeSKkaudDcc988YZay9ae4OIm1A@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Bruce McFarland <Bruce.McFarland-rnQ3HPfPGGWsvWnuDiJtQA@public.gmane.org>
-Cc: "ceph-calamari-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-calamari-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel (ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org)" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+From: David Zafman <dzafman@redhat.com>
+Subject: osd/PGLog.cc: 716: FAILED assert(log.log.size() == log_keys_debug.size())
+Date: Tue, 12 May 2015 18:01:29 -0700
+Message-ID: <5552A269.5050404@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:34890 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S964896AbbEMBBa (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 12 May 2015 21:01:30 -0400
+Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
+	by mx1.redhat.com (Postfix) with ESMTPS id 9C16BB599C
+	for <ceph-devel@vger.kernel.org>; Wed, 13 May 2015 01:01:30 +0000 (UTC)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Samuel Just <sjust@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-QWxsIHRoYXQgbG9va3MgZmluZS4KClRoZXJlIG11c3QgYmUgc29tZSBzdGF0ZSB3aGVyZSB0aGUg
-Y2x1c3RlciBpcyBrbm93biB0byBjYWxhbWFyaSBhbmQgaXQgaXMgZmFpbGluZyB0byBhY3R1YWxs
-eSBzaG93IGl0LgoKSWYgeW91IGhhdmUgdGltZSB0byBkZWJ1ZyBJIHdvdWxkIGxvdmUgdG8gc2Vl
-IHRoZSBsb2dzIGF0IGRlYnVnIGxldmVsLgoKSWYgeW91IGRvbuKAmXQgd2UgY291bGQgdHJ5IGNs
-ZWFuaW5nIG91dCBjYWxhbWFyaeKAmXMgc3RhdGUuCnN1ZG8gc3VwZXJ2aXNvcmN0bCBzaHV0ZG93
-bgpzdWRvIHNlcnZpY2UgaHR0cGQgc3RvcApzdWRvIGNhbGFtYXJpLWN0bCBjbGVhciDigJR5ZXMt
-aS1hbS1zdXJlCnN1ZG8gY2FsYW1hcmktY3RsIGluaXRpYWxpemUKCnRoZW4gCnN1ZG8gc2Vydmlj
-ZSBzdXBlcnZpc29yZCBzdGFydApzdWRvIHNlcnZpY2UgaHR0cGQgc3RhcnQKCnNlZSB3aGF0IHRo
-ZSBBUEkgYW5kIFVJIHNheXMgdGhlbi4KCnJlZ2FyZHMsCkdyZWdvcnkgCj4gT24gTWF5IDEyLCAy
-MDE1LCBhdCA1OjE4IFBNLCBCcnVjZSBNY0ZhcmxhbmQgPEJydWNlLk1jRmFybGFuZEB0YWVjLnRv
-c2hpYmEuY29tPiB3cm90ZToKPiAKPiBNYXN0ZXIgd2FzIGVzczY4IGFuZCBub3cgaXQncyBlc3Nw
-ZXJmMy4gCj4gCj4gT24gYWxsIGNsdXN0ZXIgbm9kZXMgdGhlIGZvbGxvd2luZyBmaWxlcyBub3cg
-aGF2ZSAnbWFzdGVyOiBlc3NwZXJmMycKPiAvZXRjL3NhbHQvbWluaW9uIAo+IC9ldGMvc2FsdC9t
-aW5pb24vY2FsYW1hcmkuY29uZiAKPiAvZXRjL2RpYW1vbmQvZGlhbW9uZC5jb25mCj4gCj4gVGhl
-ICdzYWx0IFwqIGNlcGguZ2V0X2hlYXJ0YmVhdHMnIGlzIGJlaW5nIHJ1biBvbiBlc3NwZXJmMyAt
-IGhlcmVzIGEgJ3NhbHQgXCogdGVzdC5waW5nJyBmcm9tIGVzc3BlcmYzIENhbGFtYXJpIE1hc3Rl
-ciB0byB0aGUgY2x1c3Rlci4gSSd2ZSBhbHNvIGluY2x1ZGVkIGEgcXVpY2sgY2x1c3RlciBzYW5p
-dHkgdGVzdCB3aXRoIHRoZSBvdXRwdXQgb2YgY2VwaCAtcyBhbmQgY2VwaCBvc2QgdHJlZS4gQW5k
-IGZvciB5b3VyIHJlYWRpbmcgcGxlYXN1cmUgdGhlIG91dHB1dCBvZiAnc2FsdCBvY3Rlb24xMDkg
-Y2VwaC5nZXRfaGVhcnRiZWF0cycgc2luY2UgSSBzdXNwZWN0IHRoZXJlIG1pZ2h0IGJlIGEgbWlz
-c2luZyBmaWVsZCBpbiB0aGUgbW9uaXRvciByZXNwb25zZS4gCj4gCj4gb290QGVzc3BlcmYzOi9l
-dGMvY2VwaCMgc2FsdCBcKiB0ZXN0LnBpbmcKPiBvY3Rlb24xMDg6Cj4gICAgVHJ1ZQo+IG9jdGVv
-bjExNDoKPiAgICBUcnVlCj4gb2N0ZW9uMTExOgo+ICAgIFRydWUKPiBvY3Rlb24xMDE6Cj4gICAg
-VHJ1ZQo+IG9jdGVvbjEwNjoKPiAgICBUcnVlCj4gb2N0ZW9uMTA5Ogo+ICAgIFRydWUKPiBvY3Rl
-b24xMTg6Cj4gICAgVHJ1ZQo+IHJvb3RAZXNzcGVyZjM6L2V0Yy9jZXBoIyBjZXBoIG9zZCB0cmVl
-Cj4gIyBpZAl3ZWlnaHQJdHlwZSBuYW1lCXVwL2Rvd24JcmV3ZWlnaHQKPiAtMQk3CXJvb3QgZGVm
-YXVsdAo+IC00CTEJCWhvc3Qgb2N0ZW9uMTA4Cj4gMAkxCQkJb3NkLjAJdXAJMQkKPiAtMgkxCQlo
-b3N0IG9jdGVvbjExMQo+IDEJMQkJCW9zZC4xCXVwCTEJCj4gLTUJMQkJaG9zdCBvY3Rlb24xMTUK
-PiAyCTEJCQlvc2QuMglETkUJCQo+IC02CTEJCWhvc3Qgb2N0ZW9uMTE4Cj4gMwkxCQkJb3NkLjMJ
-dXAJMQkKPiAtNwkxCQlob3N0IG9jdGVvbjExNAo+IDQJMQkJCW9zZC40CXVwCTEJCj4gLTgJMQkJ
-aG9zdCBvY3Rlb24xMDYKPiA1CTEJCQlvc2QuNQl1cAkxCQo+IC05CTEJCWhvc3Qgb2N0ZW9uMTAx
-Cj4gNgkxCQkJb3NkLjYJdXAJMQkKPiByb290QGVzc3BlcmYzOi9ldGMvY2VwaCMgY2VwaCAtcyAK
-PiAgICBjbHVzdGVyIDg2OGJmYWNjLWU0OTItMTFlNC04OWZhLTAwMGZiNzExMTEwYwo+ICAgICBo
-ZWFsdGggSEVBTFRIX09LCj4gICAgIG1vbm1hcCBlMTogMSBtb25zIGF0IHtvY3Rlb24xMDk9MjA5
-LjI0My4xNjAuNzA6Njc4OS8wfSwgZWxlY3Rpb24gZXBvY2ggMSwgcXVvcnVtIDAgb2N0ZW9uMTA5
-Cj4gICAgIG9zZG1hcCBlODA6IDYgb3NkczogNiB1cCwgNiBpbgo+ICAgICAgcGdtYXAgdjI2NzY1
-OiA3MjggcGdzLCAyIHBvb2xzLCAyMDA3MCBNQiBkYXRhLCAxNTAwMyBvYmplY3RzCj4gICAgICAg
-ICAgICA2MDYwNCBNQiB1c2VkLCAyNzM0IEdCIC8gMjc5MyBHQiBhdmFpbAo+ICAgICAgICAgICAg
-ICAgICA3MjggYWN0aXZlK2NsZWFuCj4gcm9vdEBlc3NwZXJmMzovZXRjL2NlcGgjCj4gCj4gcm9v
-dEBlc3NwZXJmMzovZXRjL2NlcGgjIHNhbHQgb2N0ZW9uMTA5IGNlcGguZ2V0X2hlYXJ0YmVhdHMK
-PiBvY3Rlb24xMDk6Cj4gICAgLS0tLS0tLS0tLQo+ICAgIC0gYm9vdF90aW1lOgo+ICAgICAgICAx
-NDMwNzg0NDMxCj4gICAgLSBjZXBoX3ZlcnNpb246Cj4gICAgICAgIDAuODAuOC0wLmVsNgo+ICAg
-IC0gc2VydmljZXM6Cj4gICAgICAgIC0tLS0tLS0tLS0KPiAgICAgICAgY2VwaC1tb24ub2N0ZW9u
-MTA5Ogo+ICAgICAgICAgICAgLS0tLS0tLS0tLQo+ICAgICAgICAgICAgY2x1c3RlcjoKPiAgICAg
-ICAgICAgICAgICBjZXBoCj4gICAgICAgICAgICBmc2lkOgo+ICAgICAgICAgICAgICAgIDg2OGJm
-YWNjLWU0OTItMTFlNC04OWZhLTAwMGZiNzExMTEwYwo+ICAgICAgICAgICAgaWQ6Cj4gICAgICAg
-ICAgICAgICAgb2N0ZW9uMTA5Cj4gICAgICAgICAgICBzdGF0dXM6Cj4gICAgICAgICAgICAgICAg
-LS0tLS0tLS0tLQo+ICAgICAgICAgICAgICAgIGVsZWN0aW9uX2Vwb2NoOgo+ICAgICAgICAgICAg
-ICAgICAgICAxCj4gICAgICAgICAgICAgICAgZXh0cmFfcHJvYmVfcGVlcnM6Cj4gICAgICAgICAg
-ICAgICAgbW9ubWFwOgo+ICAgICAgICAgICAgICAgICAgICAtLS0tLS0tLS0tCj4gICAgICAgICAg
-ICAgICAgICAgIGNyZWF0ZWQ6Cj4gICAgICAgICAgICAgICAgICAgICAgICAyMDE1LTA0LTE2IDIz
-OjUwOjUyLjQxMjY4Ngo+ICAgICAgICAgICAgICAgICAgICBlcG9jaDoKPiAgICAgICAgICAgICAg
-ICAgICAgICAgIDEKPiAgICAgICAgICAgICAgICAgICAgZnNpZDoKPiAgICAgICAgICAgICAgICAg
-ICAgICAgIDg2OGJmYWNjLWU0OTItMTFlNC04OWZhLTAwMGZiNzExMTEwYwo+ICAgICAgICAgICAg
-ICAgICAgICBtb2RpZmllZDoKPiAgICAgICAgICAgICAgICAgICAgICAgIDIwMTUtMDQtMTYgMjM6
-NTA6NTIuNDEyNjg2Cj4gICAgICAgICAgICAgICAgICAgIG1vbnM6Cj4gICAgICAgICAgICAgICAg
-ICAgICAgICAtLS0tLS0tLS0tCj4gICAgICAgICAgICAgICAgICAgICAgICAtIGFkZHI6Cj4gICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgMjA5LjI0My4xNjAuNzA6Njc4OS8wCj4gICAgICAgICAg
-ICAgICAgICAgICAgICAtIG5hbWU6Cj4gICAgICAgICAgICAgICAgICAgICAgICAgICAgb2N0ZW9u
-MTA5Cj4gICAgICAgICAgICAgICAgICAgICAgICAtIHJhbms6Cj4gICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgMAo+ICAgICAgICAgICAgICAgIG5hbWU6Cj4gICAgICAgICAgICAgICAgICAgIG9j
-dGVvbjEwOQo+ICAgICAgICAgICAgICAgIG91dHNpZGVfcXVvcnVtOgo+ICAgICAgICAgICAgICAg
-IHF1b3J1bToKPiAgICAgICAgICAgICAgICAgICAgLSAwCj4gICAgICAgICAgICAgICAgcmFuazoK
-PiAgICAgICAgICAgICAgICAgICAgMAo+ICAgICAgICAgICAgICAgIHN0YXRlOgo+ICAgICAgICAg
-ICAgICAgICAgICBsZWFkZXIKPiAgICAgICAgICAgICAgICBzeW5jX3Byb3ZpZGVyOgo+ICAgICAg
-ICAgICAgdHlwZToKPiAgICAgICAgICAgICAgICBtb24KPiAgICAgICAgICAgIHZlcnNpb246Cj4g
-ICAgICAgICAgICAgICAgMC44Ngo+ICAgIC0tLS0tLS0tLS0KPiAgICAtIDg2OGJmYWNjLWU0OTIt
-MTFlNC04OWZhLTAwMGZiNzExMTEwYzoKPiAgICAgICAgLS0tLS0tLS0tLQo+ICAgICAgICBmc2lk
-Ogo+ICAgICAgICAgICAgODY4YmZhY2MtZTQ5Mi0xMWU0LTg5ZmEtMDAwZmI3MTExMTBjCj4gICAg
-ICAgIG5hbWU6Cj4gICAgICAgICAgICBjZXBoCj4gICAgICAgIHZlcnNpb25zOgo+ICAgICAgICAg
-ICAgLS0tLS0tLS0tLQo+ICAgICAgICAgICAgY29uZmlnOgo+ICAgICAgICAgICAgICAgIDg3ZjE3
-NWM2MGU1YzdlYzA2YzI2M2M1NTYwNTZmYmNiCj4gICAgICAgICAgICBoZWFsdGg6Cj4gICAgICAg
-ICAgICAgICAgYTkwN2QwZWMzOTU3MTMzNjliNDg0MzM4MWVjMzFiYzIKPiAgICAgICAgICAgIG1k
-c19tYXA6Cj4gICAgICAgICAgICAgICAgMQo+ICAgICAgICAgICAgbW9uX21hcDoKPiAgICAgICAg
-ICAgICAgICAxCj4gICAgICAgICAgICBtb25fc3RhdHVzOgo+ICAgICAgICAgICAgICAgIDEKPiAg
-ICAgICAgICAgIG9zZF9tYXA6Cj4gICAgICAgICAgICAgICAgODAKPiAgICAgICAgICAgIHBnX3N1
-bW1hcnk6Cj4gICAgICAgICAgICAgICAgN2UyOWQ3Y2M5M2NmY2VkOGYzZjE0NmNjNzhmNTY4MmYK
-PiByb290QGVzc3BlcmYzOi9ldGMvY2VwaCMKPiAKPiAKPiAKPj4gLS0tLS1PcmlnaW5hbCBNZXNz
-YWdlLS0tLS0KPj4gRnJvbTogR3JlZ29yeSBNZW5vIFttYWlsdG86Z21lbm9AcmVkaGF0LmNvbV0K
-Pj4gU2VudDogVHVlc2RheSwgTWF5IDEyLCAyMDE1IDU6MDMgUE0KPj4gVG86IEJydWNlIE1jRmFy
-bGFuZAo+PiBDYzogY2VwaC1jYWxhbWFyaUBsaXN0cy5jZXBoLmNvbTsgY2VwaC11c2Vyc0BjZXBo
-LmNvbTsgY2VwaC1kZXZlbAo+PiAoY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcpCj4+IFN1Ympl
-Y3Q6IFJlOiBbY2VwaC1jYWxhbWFyaV0gRG9lcyBhbnlvbmUgdW5kZXJzdGFuZCBDYWxhbWFyaT8/
-Cj4+IAo+PiBCcnVjZSwKPj4gCj4+IEl0IGlzIGdyZWF0IHRvIGhlYXIgdGhhdCBzYWx0IGlzIHJl
-cG9ydGluZyBzdGF0dXMgZnJvbSBhbGwgdGhlIG5vZGVzIGluIHRoZQo+PiBjbHVzdGVyLgo+PiAK
-Pj4gTGV0IG1lIHNlZSBpZiBJIHVuZGVyc3RhbmQgeW91ciBxdWVzdGlvbjoKPj4gCj4+IFlvdSB3
-YW50IHRvIGtub3cgd2hhdCBjb25kaXRpb25zIGNhdXNlIHVzIHRvIHJlY29nbml6ZSBhIHdvcmtp
-bmcgY2x1c3Rlcj8KPj4gCj4+IHNlZQo+PiBodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jYWxhbWFy
-aS9ibG9iL21hc3Rlci9jdGh1bGh1L2N0aHVsaHUvbWFuYWdlci8KPj4gbWFuYWdlci5weSNMMTM1
-Cj4+IAo+PiBodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jYWxhbWFyaS9ibG9iL21hc3Rlci9jdGh1
-bGh1L2N0aHVsaHUvbWFuYWdlci8KPj4gbWFuYWdlci5weSNMMzQ5Cj4+IAo+PiBhbmQKPj4gCj4+
-IGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2NhbGFtYXJpL2Jsb2IvbWFzdGVyL2N0aHVsaHUvY3Ro
-dWxodS9tYW5hZ2VyL2MKPj4gbHVzdGVyX21vbml0b3IucHkKPj4gCj4+IAo+PiBMZXTigJlzIGNo
-ZWNrIHRoYXQgeW91IG5lZWQgdG8gYmUgZGlnZ2luZyBpbnRvIHRoYXQgbGV2ZWwgb2YgZGV0YWls
-Ogo+PiAKPj4gWW91IHN3aXRjaGVkIHRvIGEgbmV3IGluc3RhbmNlIG9mIGNhbGFtYXJpIGFuZCBp
-dCBpcyBub3QgcmVjb2duaXppbmcgdGhlCj4+IGNsdXN0ZXIuCj4+IAo+PiBZb3Ugd2hhdCB0byBr
-bm93IHdoYXQgeW91IGFyZSBvdmVybG9va2luZz8gV291bGQgeW91IHBsZWFzZSBjbGFyaWZ5IHdp
-dGgKPj4gc29tZSBob3N0bmFtZXM/Cj4+IAo+PiBpLmUuIExldCBzYXkgdGhhdCB5b3VyIG9sZCBj
-YWxhbWFyaSBub2RlIHdhcyBjYWxsZWQgY2FsYW1hcmlBIGFuZCB0aGF0IHlvdXIKPj4gbmV3IG5v
-ZGUgaXMgY2FsYW1hcmlCCj4+IAo+PiBmcm9tIHdoaWNoIGFyZSB5b3UgcnVubmluZyB0aGUgZ2V0
-X2hlYXJ0YmVhdHM/Cj4+IAo+PiB3aGF0IGlzIHRoZSBtYXN0ZXIgc2V0dGluZyBpbiB0aGUgbWlu
-aW9uIGNvbmZpZyBmaWxlcyBvdXQgb24gdGhlIG5vZGVzIG9mIHRoZQo+PiBjbHVzdGVyIGlmIHRo
-aW5ncyBhcmUgc2V0dXAgY29ycmVjdGx5IHRoZXkgd291bGQgbG9vayBsaWtlIHRoaXM6Cj4+IAo+
-PiBbcm9vdEBub2RlMSBzaGFkb3dfbWFuXSMgY2F0IC9ldGMvc2FsdC9taW5pb24uZC9jYWxhbWFy
-aS5jb25mCj4+IG1hc3RlcjogY2FsYW1hcmlCCj4+IAo+PiAKPj4gSWYgdGhpcyBpcyB0aGUgY2Fz
-ZSB0aGUgdGhpbmcgSSB3b3VsZCBjaGVjayBpcyB0aGUKPj4gaHR0cDovL2NhbGFtYXJpQi9hcGkv
-djIvY2x1c3RlciBlbmRwb2ludCBpcyByZXBvcnRpbmcgYW55dGhpbmc/Cj4+IAo+PiBob3BlIHRo
-aXMgaGVscHMsCj4+IEdyZWdvcnkKPj4gCj4+PiBPbiBNYXkgMTIsIDIwMTUsIGF0IDQ6MzQgUE0s
-IEJydWNlIE1jRmFybGFuZAo+PiA8QnJ1Y2UuTWNGYXJsYW5kQHRhZWMudG9zaGliYS5jb20+IHdy
-b3RlOgo+Pj4gCj4+PiBJbmNyZWFzaW5nIHRoZSBhdWRpZW5jZSBzaW5jZSBjZXBoLWNhbGFtYXJp
-IGlzIG5vdCByZXNwb25zaXZlLiBXaGF0IHNhbHQKPj4gZXZlbnQvaW5mbyBkb2VzIHRoZSBDYWxh
-bWFyaSBNYXN0ZXIgZXhwZWN0IHRvIHNlZSBmcm9tIHRoZSBjZXBoLW1vbiB0bwo+PiBkZXRlcm1p
-bmUgdGhlcmUgaXMgYW4gd29ya2luZyBjbHVzdGVyPyBJIGhhZCB0byBjaGFuZ2Ugc2VydmVycyBo
-b3N0aW5nIHRoZQo+PiBjYWxhbWFyaSBtYXN0ZXIgYW5kIGNhbuKAmXQgZ2V0IHRoZSBuZXcgbWFj
-aGluZSB0byByZWNvZ25pemUgdGhlIGNsdXN0ZXIuCj4+IFRoZSDigJhzYWx0IFwqIGNlcGguZ2V0
-X2hlYXJ0YmVhdHPigJkgcmV0dXJucyBtb25tYXAsIGZzaWQsIHZlciwgZXBvY2gsIGV0YyBmb3IK
-Pj4gdGhlIG1vbml0b3IgYW5kIGFsbCBvZiB0aGUgb3Nk4oCZcy4gQ2FuIGFueW9uZSBwb2ludCBt
-ZSB0byBkb2NzIG9yIGNvZGUgdGhhdAo+PiBtaWdodCBlbmxpZ2h0ZW4gbWUgdG8gd2hhdCBJ4oCZ
-bSBvdmVybG9va2luZz8gVGhhbmtzLgo+Pj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX18KPj4+IGNlcGgtY2FsYW1hcmkgbWFpbGluZyBsaXN0Cj4+PiBjZXBo
-LWNhbGFtYXJpQGxpc3RzLmNlcGguY29tCj4+PiBodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGlu
-Zm8uY2dpL2NlcGgtY2FsYW1hcmktY2VwaC5jb20KPiAKCl9fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNl
-cnNAbGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBo
-LXVzZXJzLWNlcGguY29tCg==
+
+Your debugging code dumped out information ( tracker #10718 )
+
+ubuntu@teuthology:/a/dzafman-2015-05-12_08:43:26-rados-wip-10809-11135-10290---basic-multi/887648
+
+Missing 562'201 in log_keys_debug?
+
+2015-05-12 14:36:52.874844 7f40906cf700 10 osd.4 pg_epoch: 718 pg[1.17( 
+v 562'201 (562'201,562'201] local-les=714 n=1 ec=6 les/c 714/714 
+718/718/718) [4,5] r=0 lpr=718 pi=629-717/4 crt=562'201 lcod 0'0 mlcod 
+0'0 peering] handle_peering_event: epoch_sent: 718 epoch_requested: 718 
+MLogRec from 0
+2015-05-12 14:36:52.874868 7f40906cf700 10 osd.4 pg_epoch: 718 pg[1.17( 
+v 562'201 (562'201,562'201] local-les=714 n=1 ec=6 les/c 714/714 
+718/718/718) [4,5] r=0 lpr=718 pi=629-717/4 crt=562'201 lcod 0'0 mlcod 
+0'0 peering] state<Started/Primary/Peering/GetLog>: GetLog: received 
+master log from osd0
+2015-05-12 14:36:52.874883 7f40906cf700 10 osd.4 pg_epoch: 718 pg[1.17( 
+v 562'201 (562'201,562'201] local-les=714 n=1 ec=6 les/c 714/714 
+718/718/718) [4,5] r=0 lpr=718 pi=629-717/4 crt=562'201 lcod 0'0 mlcod 
+0'0 peering] state<Started/Primary/Peering/GetLog>: leaving GetLog
+2015-05-12 14:36:52.874896 7f40906cf700 10 osd.4 pg_epoch: 718 pg[1.17( 
+v 562'201 (562'201,562'201] local-les=714 n=1 ec=6 les/c 714/714 
+718/718/718) [4,5] r=0 lpr=718 pi=629-717/4 crt=562'201 lcod 0'0 mlcod 
+0'0 peering] state<Started/Primary/Peering/GetLog>: processing master log
+2015-05-12 14:36:52.874907 7f40906cf700 10 osd.4 pg_epoch: 718 pg[1.17( 
+v 562'201 (562'201,562'201] local-les=714 n=1 ec=6 les/c 714/714 
+718/718/718) [4,5] r=0 lpr=718 pi=629-717/4 crt=562'201 lcod 0'0 mlcod 
+0'0 peering] proc_master_log for osd.0: log((0'0,562'201], crt=562'201) 
+missing(0)
+2015-05-12 14:36:52.874921 7f40906cf700 10 merge_log log((0'0,562'201], 
+crt=562'201) from osd.0 into log((562'201,562'201], crt=562'201)
+2015-05-12 14:36:52.874925 7f40906cf700 10 merge_log extending tail to 0'0
+2015-05-12 14:36:52.874928 7f40906cf700 15 15'134 (0'0) modify 
+90e1ad17/burnupi6122880-441/head//1 by client.4125.0:2212 2015-05-12 
+14:04:42.823178
+2015-05-12 14:36:52.874938 7f40906cf700 15 15'135 (15'134) modify 
+90e1ad17/burnupi6122880-441/head//1 by client.4125.0:2213 2015-05-12 
+14:04:42.844801
+2015-05-12 14:36:52.874944 7f40906cf700 15 15'136 (15'135) modify 
+90e1ad17/burnupi6122880-441/head//1 by client.4125.0:2214 2015-05-12 
+14:04:42.848297
+2015-05-12 14:36:52.874949 7f40906cf700 15 15'137 (15'136) modify 
+90e1ad17/burnupi6122880-441/head//1 by client.4125.0:2215 2015-05-12 
+14:04:42.848357
+2015-05-12 14:36:52.874955 7f40906cf700 15 279'175 (15'137) modify 
+90e1ad17/burnupi6122880-441/head//1 by client.4125.0:5420 2015-05-12 
+14:19:04.447741
+2015-05-12 14:36:52.874960 7f40906cf700 15 279'176 (279'175) modify   
+90e1ad17/burnupi6122880-441/head//1 by client.4125.0:5421 2015-05-12 
+14:19:04.464582
+2015-05-12 14:36:52.874965 7f40906cf700 15 279'177 (279'176) modify   
+90e1ad17/burnupi6122880-441/head//1 by client.4125.0:5422 2015-05-12 
+14:19:04.464660
+2015-05-12 14:36:52.874971 7f40906cf700 15 337'178 (279'177) modify   
+90e1ad17/burnupi6122880-441/head//1 by client.4125.0:5808 2015-05-12 
+14:20:50.892462
+2015-05-12 14:36:52.874977 7f40906cf700 15 337'179 (337'178) modify   
+90e1ad17/burnupi6122880-441/head//1 by client.4125.0:5809 2015-05-12 
+14:20:50.914984
+2015-05-12 14:36:52.874982 7f40906cf700 15 337'180 (337'179) modify   
+90e1ad17/burnupi6122880-441/head//1 by client.4125.0:5810 2015-05-12 
+14:20:50.916936
+2015-05-12 14:36:52.874987 7f40906cf700 15 337'181 (337'180) modify   
+90e1ad17/burnupi6122880-441/head//1 by client.4125.0:5811 2015-05-12 
+14:20:50.916966
+2015-05-12 14:36:52.874994 7f40906cf700 15 562'197 (337'181) modify   
+90e1ad17/burnupi6122880-441/head//1 by client.4125.0:7714 2015-05-12 
+14:30:30.661467
+2015-05-12 14:36:52.874999 7f40906cf700 15 562'198 (562'197) modify   
+90e1ad17/burnupi6122880-441/head//1 by client.4125.0:7715 2015-05-12 
+14:30:30.681130
+2015-05-12 14:36:52.875004 7f40906cf700 15 562'199 (562'198) modify   
+90e1ad17/burnupi6122880-441/head//1 by client.4125.0:7716 2015-05-12 
+14:30:30.700124
+2015-05-12 14:36:52.875009 7f40906cf700 15 562'200 (562'199) modify   
+90e1ad17/burnupi6122880-441/head//1 by client.4125.0:7717 2015-05-12 
+14:30:30.700243
+2015-05-12 14:36:52.875015 7f40906cf700 15 562'201 (562'200) modify   
+90e1ad17/burnupi6122880-441/head//1 by client.4125.0:7718 2015-05-12 
+14:30:30.700555
+2015-05-12 14:36:52.875020 7f40906cf700 10 merge_log result 
+log((0'0,562'201], crt=562'201) missing(0) changed=1
+2015-05-12 14:36:52.875025 7f40906cf700 10 osd.4 pg_epoch: 718 pg[1.17( 
+v 562'201 (0'0,562'201] local-les=714 n=1 ec=6 les/c 714/714 
+718/718/718) [4,5] r=0 lpr=718 pi=629-717/4 crt=562'201 lcod 0'0 mlcod 
+0'0 peering]  peer osd.0 now 1.17( v 562'201 (0'0,562'201] local-les=714 
+n=1 ec=6 les/c 714/714 718/718/718) missing(0)
+2015-05-12 14:36:52.875046 7f40906cf700  5 osd.4 pg_epoch: 718 pg[1.17( 
+v 562'201 (0'0,562'201] local-les=714 n=1 ec=6 les/c 714/714 
+718/718/718) [4,5] r=0 lpr=718 pi=629-717/4 crt=562'201 lcod 0'0 mlcod 
+0'0 peering] exit Started/Primary/Peering/GetLog 0.006766 2 0.000301
+2015-05-12 14:36:52.875061 7f40906cf700 15 osd.4 pg_epoch: 718 pg[1.17( 
+v 562'201 (0'0,562'201] local-les=714 n=1 ec=6 les/c 714/714 
+718/718/718) [4,5] r=0 lpr=718 pi=629-717/4 crt=562'201 lcod 0'0 mlcod 
+0'0 peering] publish_stats_to_osd 718:24
+2015-05-12 14:36:52.875074 7f40906cf700  5 osd.4 pg_epoch: 718 pg[1.17( 
+v 562'201 (0'0,562'201] local-les=714 n=1 ec=6 les/c 714/714 
+718/718/718) [4,5] r=0 lpr=718 pi=629-717/4 crt=562'201 lcod 0'0 mlcod 
+0'0 peering] enter Started/Primary/Peering/GetMissing
+2015-05-12 14:36:52.875085 7f40906cf700 10 osd.4 pg_epoch: 718 pg[1.17( 
+v 562'201 (0'0,562'201] local-les=714 n=1 ec=6 les/c 714/714 
+718/718/718) [4,5] r=0 lpr=718 pi=629-717/4 crt=562'201 lcod 0'0 mlcod 
+0'0 peering] state<Started/Primary/Peering/GetMissing>:  still need 
+up_thru update before going active
+2015-05-12 14:36:52.875098 7f40906cf700  5 osd.4 pg_epoch: 718 pg[1.17( 
+v 562'201 (0'0,562'201] local-les=714 n=1 ec=6 les/c 714/714 
+718/718/718) [4,5] r=0 lpr=718 pi=629-717/4 crt=562'201 lcod 0'0 mlcod 
+0'0 peering] exit Started/Primary/Peering/GetMissing 0.000024 0 0.000000
+2015-05-12 14:36:52.875111 7f40906cf700 15 osd.4 pg_epoch: 718 pg[1.17( 
+v 562'201 (0'0,562'201] local-les=714 n=1 ec=6 les/c 714/714 
+718/718/718) [4,5] r=0 lpr=718 pi=629-717/4 crt=562'201 lcod 0'0 mlcod 
+0'0 peering] publish_stats_to_osd 718: no change since
+2015-05-12 14:36:52.875123 7f40906cf700  5 osd.4 pg_epoch: 718 pg[1.17( 
+v 562'201 (0'0,562'201] local-les=714 n=1 ec=6 les/c 714/714 
+718/718/718) [4,5] r=0 lpr=718 pi=629-717/4 crt=562'201 lcod 0'0 mlcod 
+0'0 peering] enter Started/Primary/Peering/WaitUpThru
+2015-05-12 14:36:52.875159 7f40906cf700  5 write_log with: dirty_to: 
+562'201, dirty_from: 4294967295'18446744073709551615, 
+dirty_divergent_priors: false, divergent_priors: 0, writeout_from: 
+4294967295'18446744073709551615, trimmed:
+2015-05-12 14:36:52.875277 7f40906cf700 -1 log.log.size() != 
+log_keys_debug.size()
+2015-05-12 14:36:52.875281 7f40906cf700 -1 actual log:
+2015-05-12 14:36:52.875282 7f40906cf700 -1     15'134 (0'0) modify 
+90e1ad17/burnupi6122880-441/head//1 by client.4125.0:2212 2015-05-12 
+14:04:42.823178
+2015-05-12 14:36:52.875293 7f40906cf700 -1     15'135 (15'134) modify   
+90e1ad17/burnupi6122880-441/head//1 by client.4125.0:2213 2015-05-12 
+14:04:42.844801
+2015-05-12 14:36:52.875302 7f40906cf700 -1     15'136 (15'135) modify   
+90e1ad17/burnupi6122880-441/head//1 by client.4125.0:2214 2015-05-12 
+14:04:42.848297
+2015-05-12 14:36:52.875310 7f40906cf700 -1     15'137 (15'136) modify   
+90e1ad17/burnupi6122880-441/head//1 by client.4125.0:2215 2015-05-12 
+14:04:42.848357
+2015-05-12 14:36:52.875319 7f40906cf700 -1     279'175 (15'137) modify   
+90e1ad17/burnupi6122880-441/head//1 by client.4125.0:5420 2015-05-12 
+14:19:04.447741
+2015-05-12 14:36:52.875328 7f40906cf700 -1     279'176 (279'175) 
+modify   90e1ad17/burnupi6122880-441/head//1 by client.4125.0:5421 
+2015-05-12 14:19:04.464582
+2015-05-12 14:36:52.875338 7f40906cf700 -1     279'177 (279'176) 
+modify   90e1ad17/burnupi6122880-441/head//1 by client.4125.0:5422 
+2015-05-12 14:19:04.464660
+2015-05-12 14:36:52.875344 7f40906cf700 -1     337'178 (279'177) 
+modify   90e1ad17/burnupi6122880-441/head//1 by client.4125.0:5808 
+2015-05-12 14:20:50.892462
+2015-05-12 14:36:52.875348 7f40906cf700 -1     337'179 (337'178) 
+modify   90e1ad17/burnupi6122880-441/head//1 by client.4125.0:5809 
+2015-05-12 14:20:50.914984
+2015-05-12 14:36:52.875353 7f40906cf700 -1     337'180 (337'179) 
+modify   90e1ad17/burnupi6122880-441/head//1 by client.4125.0:5810 
+2015-05-12 14:20:50.916936
+2015-05-12 14:36:52.875358 7f40906cf700 -1     337'181 (337'180) 
+modify   90e1ad17/burnupi6122880-441/head//1 by client.4125.0:5811 
+2015-05-12 14:20:50.916966
+2015-05-12 14:36:52.875363 7f40906cf700 -1     562'197 (337'181) 
+modify   90e1ad17/burnupi6122880-441/head//1 by client.4125.0:7714 
+2015-05-12 14:30:30.661467
+2015-05-12 14:36:52.875368 7f40906cf700 -1     562'198 (562'197) 
+modify   90e1ad17/burnupi6122880-441/head//1 by client.4125.0:7715 
+2015-05-12 14:30:30.681130
+2015-05-12 14:36:52.875373 7f40906cf700 -1     562'199 (562'198) 
+modify   90e1ad17/burnupi6122880-441/head//1 by client.4125.0:7716 
+2015-05-12 14:30:30.700124
+2015-05-12 14:36:52.875377 7f40906cf700 -1     562'200 (562'199) 
+modify   90e1ad17/burnupi6122880-441/head//1 by client.4125.0:7717 
+2015-05-12 14:30:30.700243
+2015-05-12 14:36:52.875382 7f40906cf700 -1     562'201 (562'200) 
+modify   90e1ad17/burnupi6122880-441/head//1 by client.4125.0:7718 
+2015-05-12 14:30:30.700555
+2015-05-12 14:36:52.875387 7f40906cf700 -1 log_keys_debug:
+2015-05-12 14:36:52.875388 7f40906cf700 -1 0000000015.00000000000000000134
+2015-05-12 14:36:52.875389 7f40906cf700 -1 0000000015.00000000000000000135
+2015-05-12 14:36:52.875390 7f40906cf700 -1 0000000015.00000000000000000136
+2015-05-12 14:36:52.875391 7f40906cf700 -1 0000000015.00000000000000000137
+2015-05-12 14:36:52.875392 7f40906cf700 -1 0000000279.00000000000000000175
+2015-05-12 14:36:52.875393 7f40906cf700 -1 0000000279.00000000000000000176
+2015-05-12 14:36:52.875393 7f40906cf700 -1 0000000279.00000000000000000177
+2015-05-12 14:36:52.875394 7f40906cf700 -1 0000000337.00000000000000000178
+2015-05-12 14:36:52.875395 7f40906cf700 -1 0000000337.00000000000000000179
+2015-05-12 14:36:52.875396 7f40906cf700 -1 0000000337.00000000000000000180
+2015-05-12 14:36:52.875397 7f40906cf700 -1 0000000337.00000000000000000181
+2015-05-12 14:36:52.875398 7f40906cf700 -1 0000000562.00000000000000000197
+2015-05-12 14:36:52.875398 7f40906cf700 -1 0000000562.00000000000000000198
+2015-05-12 14:36:52.875399 7f40906cf700 -1 0000000562.00000000000000000199
+2015-05-12 14:36:52.875400 7f40906cf700 -1 0000000562.00000000000000000200
+2015-05-12 14:36:52.894933 7f40906cf700 -1 osd/PGLog.cc: In function 
+'void PGLog::check()' thread 7f40906cf700 time 2015-05-12 14:36:52.875403
+osd/PGLog.cc: 716: FAILED assert(log.log.size() == log_keys_debug.size())
+
+  ceph version 9.0.0-682-g8f4927e (8f4927eab2f016edeb5719f67d109e9abb3180f7)
+  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char 
+const*)+0x7f) [0xaebcff]
+  2: (PGLog::check()+0x794) [0x7324e4]
+  3: (PGLog::write_log(ObjectStore::Transaction&, std::map<std::string, 
+ceph::buffer::list, std::less<std::string>, 
+std::allocator<std::pair<std::string const, ceph::buffer::list> > >*, 
+coll_t const&, ghobject_t const&)+0x1c4) [0x73b604]
+  4: (PG::write_if_dirty(ObjectStore::Transaction&)+0x87) [0x78e1c7]
+  5: (OSD::process_peering_events(std::list<PG*, std::allocator<PG*> > 
+const&, ThreadPool::TPHandle&)+0x2c0) [0x673c80]
+  6: (OSD::PeeringWQ::_process(std::list<PG*, std::allocator<PG*> > 
+const&, ThreadPool::TPHandle&)+0x12) [0x6c9652]
+  7: (ThreadPool::worker(ThreadPool::WorkThread*)+0x48e) [0xadb1de]
+  8: (ThreadPool::WorkThread::entry()+0x10) [0xaddfe0]
+  9: (()+0x7e9a) [0x7f40a9c14e9a]
+  10: (clone()+0x6d) [0x7f40a83bd3fd]
