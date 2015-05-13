@@ -1,106 +1,93 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH 1/2] libceph: request a new osdmap if lingering request maps to no osd
-Date: Wed, 13 May 2015 17:57:31 +0300
-Message-ID: <1431529052-13932-2-git-send-email-idryomov@gmail.com>
-References: <1431529052-13932-1-git-send-email-idryomov@gmail.com>
+From: "Deneau, Tom" <tom.deneau@amd.com>
+Subject: RE: rados bench single instance vs. multiple instances
+Date: Wed, 13 May 2015 15:05:46 +0000
+Message-ID: <BC97738F8E7C8742BABED7F06FB9DF91664428FA@SATLEXDAG01.amd.com>
+References: <BC97738F8E7C8742BABED7F06FB9DF916643E836@SATLEXDAG01.amd.com>
+ <alpine.DEB.2.00.1505111003060.28239@cobra.newdream.net>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f49.google.com ([74.125.82.49]:34086 "EHLO
-	mail-wg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934303AbbEMO5z (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 May 2015 10:57:55 -0400
-Received: by wgic8 with SMTP id c8so46534814wgi.1
-        for <ceph-devel@vger.kernel.org>; Wed, 13 May 2015 07:57:53 -0700 (PDT)
-In-Reply-To: <1431529052-13932-1-git-send-email-idryomov@gmail.com>
+Received: from mail-bl2on0111.outbound.protection.outlook.com ([65.55.169.111]:18400
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S965582AbbEMPFx convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 May 2015 11:05:53 -0400
+In-Reply-To: <alpine.DEB.2.00.1505111003060.28239@cobra.newdream.net>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Alex Elder <elder@linaro.org>
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-This commit does two things.  First, if there are any homeless
-lingering requests, we now request a new osdmap even if the osdmap that
-is being processed brought no changes, i.e. if a given lingering
-request turned homeless in one of the previous epochs and remained
-homeless in the current epoch.  Not doing so leaves us with a stale
-osdmap and as a result we may miss our window for reestablishing the
-watch and lose notifies.
 
-MON=1 OSD=1:
 
-    # cat linger-needmap.sh
-    #!/bin/bash
-    rbd create --size 1 test
-    DEV=$(rbd map test)
-    ceph osd out 0
-    rbd map dne/dne # obtain a new osdmap as a side effect (!)
-    sleep 1
-    ceph osd in 0
-    rbd resize --size 2 test
-    # rbd info test | grep size -> 2M
-    # blockdev --getsize $DEV -> 1M
+> -----Original Message-----
+> From: Sage Weil [mailto:sage@newdream.net]
+> Sent: Monday, May 11, 2015 12:04 PM
+> To: Deneau, Tom
+> Cc: ceph-devel
+> Subject: Re: rados bench single instance vs. multiple instances
+>=20
+> On Mon, 11 May 2015, Deneau, Tom wrote:
+> > I have noticed the following while running rados bench seq read tes=
+ts
+> > with a 40M object size
+> >
+> >     single rados bench, 4 concurrent ops,                     bandw=
+idth =3D
+> 190 MB/s
+> >     4 copies of rados bench, 1 concurrent op each,  aggregate
+> > bandwidth =3D 310 MB/s
+> >
+> > and in fact the single rados bench seems limited to 190, no matter =
+how many
+> concurrent ops.
+> >
+> > I don't see this kind of behavior with a 4M object size.
+> >
+> > (The above are with caches dropped on the osd targets)
+> >
+> > It doesn't seem to be related to the total number of bytes being
+> > processed by the single because if I don't drop the caches, both th=
+e
+> > single rados bench and the 4-copy rados bench get much higher numbe=
+rs
+> > (600 vs. 900) but still the single rados bench appears limited, no =
+matter
+> how many concurrent ops are used.
+> >
+> > Is there kind of throttling going on by design here?
+>=20
+> It might be the librados throttles:
+>=20
+> OPTION(objecter_inflight_op_bytes, OPT_U64, 1024*1024*100) // max in-=
+flight
+> data (both directions)
+> OPTION(objecter_inflight_ops, OPT_U64, 1024)               // max in-=
+flight
+> ios
+>=20
+> IIRC these only affect librados.. which would include 'rados bench'.
+>=20
+> sage
+>=20
 
-N.B.: Not obtaining a new osdmap in between "osd out" and "osd in"
-above is enough to make it miss that resize notify, but that is a
-bug^Wlimitation of ceph watch/notify v1.
+Just a follow-up that changing the limits of the two options mentioned =
+above
+did indeed solve my problem.
 
-Second, homeless lingering requests are now kicked just like those
-lingering requests whose mapping has changed.  This is mainly to
-recognize that a homeless lingering request makes no sense and to
-preserve the invariant that a registered lingering request is not
-sitting on any of r_req_lru_item lists.  This spares us a WARN_ON,
-which commit ba9d114ec557 ("libceph: clear r_req_lru_item in
-__unregister_linger_request()") tried to fix the _wrong_ way.
+Also, my na=EFve understanding of the architecture was that things like=
+ RBD and RGW were
+layered on librados as shown in http://ceph.com/docs/master/architectur=
+e/.  So wouldn't these
+throttles apply to those stacks as well?
 
-Cc: stable@vger.kernel.org # 3.10+
-Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
----
- net/ceph/osd_client.c | 31 ++++++++++++++++++++-----------
- 1 file changed, 20 insertions(+), 11 deletions(-)
+-- Tom Deneau
 
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 41a4abc7e98e..31d4b1ebff01 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -2017,20 +2017,29 @@ static void kick_requests(struct ceph_osd_client *osdc, bool force_resend,
- 		err = __map_request(osdc, req,
- 				    force_resend || force_resend_writes);
- 		dout("__map_request returned %d\n", err);
--		if (err == 0)
--			continue;  /* no change and no osd was specified */
- 		if (err < 0)
- 			continue;  /* hrm! */
--		if (req->r_osd == NULL) {
--			dout("tid %llu maps to no valid osd\n", req->r_tid);
--			needmap++;  /* request a newer map */
--			continue;
--		}
-+		if (req->r_osd == NULL || err > 0) {
-+			if (req->r_osd == NULL) {
-+				dout("lingering %p tid %llu maps to no osd\n",
-+				     req, req->r_tid);
-+				/*
-+				 * A homeless lingering request makes
-+				 * no sense, as it's job is to keep
-+				 * a particular OSD connection open.
-+				 * Request a newer map and kick the
-+				 * request, knowing that it won't be
-+				 * resent until we actually get a map
-+				 * that can tell us where to send it.
-+				 */
-+				needmap++;
-+			}
- 
--		dout("kicking lingering %p tid %llu osd%d\n", req, req->r_tid,
--		     req->r_osd ? req->r_osd->o_osd : -1);
--		__register_request(osdc, req);
--		__unregister_linger_request(osdc, req);
-+			dout("kicking lingering %p tid %llu osd%d\n", req,
-+			     req->r_tid, req->r_osd ? req->r_osd->o_osd : -1);
-+			__register_request(osdc, req);
-+			__unregister_linger_request(osdc, req);
-+		}
- 	}
- 	reset_changed_osds(osdc);
- 	mutex_unlock(&osdc->request_mutex);
--- 
-1.9.3
 
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
