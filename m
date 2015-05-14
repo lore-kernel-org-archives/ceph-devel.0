@@ -1,115 +1,74 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH] rbd: timeout watch teardown on unmap with mount_timeout
-Date: Thu, 14 May 2015 13:00:22 +0300
-Message-ID: <1431597622-1573-1-git-send-email-idryomov@gmail.com>
+From: Tim Serong <tserong@suse.com>
+Subject: Re: [Ceph-maintainers] statically allocated uid/gid for ceph
+Date: Thu, 14 May 2015 22:16:06 +1000
+Message-ID: <55549206.3040008@suse.com>
+References: <alpine.DEB.2.00.1412061245410.18213@cobra.newdream.net> <5488919E.4090109@redhat.com> <alpine.DEB.2.00.1412101044300.22847@cobra.newdream.net> <5488FC46.5080106@suse.com> <alpine.DEB.2.00.1504131802400.32097@cobra.newdream.net> <552C9182.5030605@suse.com> <alpine.DEB.2.00.1504140819190.4469@cobra.newdream.net> <552D3C74.2000104@redhat.com> <87bnip2u10.fsf@meteor.durcheinandertal.bofh> <553E07C7.8030905@suse.com> <alpine.DEB.2.00.1504270901250.5458@cobra.newdream.net>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f51.google.com ([74.125.82.51]:34507 "EHLO
-	mail-wg0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932301AbbENKAi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 May 2015 06:00:38 -0400
-Received: by wguv19 with SMTP id v19so7638446wgu.1
-        for <ceph-devel@vger.kernel.org>; Thu, 14 May 2015 03:00:37 -0700 (PDT)
-Received: from localhost.localdomain ([109.110.66.238])
-        by mx.google.com with ESMTPSA id yz3sm4888725wjc.19.2015.05.14.03.00.34
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 14 May 2015 03:00:35 -0700 (PDT)
+Received: from victor.provo.novell.com ([137.65.250.26]:60939 "EHLO
+	prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S932456AbbENMQ1 (ORCPT
+	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+	Thu, 14 May 2015 08:16:27 -0400
+In-Reply-To: <alpine.DEB.2.00.1504270901250.5458@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sweil@redhat.com>
+Cc: Gaudenz Steinlin <gaudenz@debian.org>, Ken Dreyer <kdreyer@redhat.com>, ceph-devel@vger.kernel.org, cjwatson@debian.org, ceph-maintainers@ceph.com, timm@fnal.gov, Owen Synge <osynge@suse.com>
 
-As part of unmap sequence, kernel client has to talk to the OSDs to
-teardown watch on the header object.  If none of the OSDs are available
-it would hang forever, until interrupted by a signal - when that
-happens we follow through with the rest of unmap procedure (i.e.
-unregister the device and put all the data structures) and the unmap is
-still considired successful (rbd cli tool exits with 0).  The watch on
-the userspace side should eventually timeout so that's fine.
+On 04/28/2015 02:02 AM, Sage Weil wrote:
+>> much progress on the SUSE front.  I did suggest everyone just do what
+>> Debian does ;) but both Fedora and SUSE people pointed out that the 64K
+>> range isn't safe to claim, what with not being specifically reserved.
+>>
+>> I did make one small bit of progress - I've added the ceph user and
+>> group to rpmlint on openSUSE Factory
+>> (https://build.opensuse.org/request/show/303537) so at least the SUSE
+>> build won't bitch if files specified in any of the packages are owned by
+>> ceph:ceph.
 
-This isn't very nice, because various userspace tools (pacemaker rbd
-resource agent, for example) then have to worry about setting up their
-own timeouts.  Timeout it with mount_timeout (60 seconds by default).
+It is my sad duty to report that I've been unable to get a static
+UID/GID allocated for SLES or openSUSE.
 
-This also changes rbd_obj_request_wait() to return -EINTR instead of
--ERESTARTSYS if interrupted - I don't think we want to mess with
-restarts for any of rbd map/unmap requests.
+TL;DR:
 
-Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
----
- drivers/block/rbd.c | 40 +++++++++++++++++++++++++++++-----------
- 1 file changed, 29 insertions(+), 11 deletions(-)
+* There's nothing free in the reserved static range 0-99.
+* We can't take something from the unreserved ranges (500-999,
+60001-64K) and hope for the best due to potential conflicts with old
+systems, LDAP users on those ranges, customers, etc. etc.
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 349115ae3bc2..3fabdfdbc0b1 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -1564,21 +1564,37 @@ static void rbd_obj_request_end(struct rbd_obj_request *obj_request)
-  * Wait for an object request to complete.  If interrupted, cancel the
-  * underlying osd request.
-  */
--static int rbd_obj_request_wait(struct rbd_obj_request *obj_request)
-+static int __rbd_obj_request_wait(struct rbd_obj_request *obj_request,
-+				  unsigned long timeout)
- {
--	int ret;
-+	long ret;
- 
- 	dout("%s %p\n", __func__, obj_request);
--
--	ret = wait_for_completion_interruptible(&obj_request->completion);
--	if (ret < 0) {
--		dout("%s %p interrupted\n", __func__, obj_request);
-+	ret = wait_for_completion_interruptible_timeout(
-+					&obj_request->completion, timeout);
-+	if (ret <= 0) {
-+		if (ret == 0)
-+			ret = -ETIMEDOUT;
-+		else
-+			ret = -EINTR;
- 		rbd_obj_request_end(obj_request);
--		return ret;
-+	} else {
-+		ret = 0;
- 	}
- 
--	dout("%s %p done\n", __func__, obj_request);
--	return 0;
-+	dout("%s %p ret %d\n", __func__, obj_request, (int)ret);
-+	return ret;
-+}
-+
-+static int rbd_obj_request_wait(struct rbd_obj_request *obj_request)
-+{
-+	return __rbd_obj_request_wait(obj_request, MAX_SCHEDULE_TIMEOUT);
-+}
-+
-+static int rbd_obj_request_wait_timeo(struct rbd_obj_request *obj_request,
-+				      unsigned long timeout)
-+{
-+	return __rbd_obj_request_wait(obj_request, timeout);
- }
- 
- static void rbd_img_request_complete(struct rbd_img_request *img_request)
-@@ -3121,7 +3137,9 @@ static struct rbd_obj_request *rbd_obj_watch_request_helper(
- 						struct rbd_device *rbd_dev,
- 						bool watch)
- {
--	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
-+	struct ceph_client *client = rbd_dev->rbd_client->client;
-+	struct ceph_osd_client *osdc = &client->osdc;
-+	unsigned long timeout = client->options->mount_timeout * HZ;
- 	struct rbd_obj_request *obj_request;
- 	int ret;
- 
-@@ -3148,7 +3166,7 @@ static struct rbd_obj_request *rbd_obj_watch_request_helper(
- 	if (ret)
- 		goto out;
- 
--	ret = rbd_obj_request_wait(obj_request);
-+	ret = rbd_obj_request_wait_timeo(obj_request, timeout);
- 	if (ret)
- 		goto out;
- 
+Consequently I would like to propose the following as a least-worst
+fallback/workaround:
+
+1) Add functionality to ceph-deploy to create the user and group during
+`ceph-deploy install`.  This would happen iff new (optional) --ceph-uid
+and --ceph-gid arguments[1] were passed to `ceph-deploy install`, and
+would happen before any ceph packages are installed.  This would allow
+individual sites to choose the UID/GID so they know it doesn't conflict
+with anything already in use.
+
+2) Add a guard to the %pre script in the RPM so it only invokes `useradd
+and `groupadd` if the ceph user and group don't already exist.
+
+If the UID and GID aren't specified during `ceph-deploy install`, then
+it'll fall back to "next available" in the system range when
+useradd/groupadd are invoked in the rpm %pre script.
+
+The above should have no impact on other distros where a fixed UID/GID
+is already set in the package.
+
+Does this sound viable?
+
+Regards,
+
+Tim
+
+[1] Or, possibly, it should force both UID and GID to the same number,
+meaning we only need one argument, say --ceph-uidgid?
 -- 
-1.9.3
-
+Tim Serong
+Senior Clustering Engineer
+SUSE
+tserong@suse.com
