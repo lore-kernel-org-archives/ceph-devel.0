@@ -1,56 +1,86 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: journal writes when running rados bench seq on ec pool
-Date: Wed, 13 May 2015 23:48:23 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD8BFBD@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <BC97738F8E7C8742BABED7F06FB9DF9166442D87@SATLEXDAG01.amd.com>
+From: Josh Durgin <jdurgin@redhat.com>
+Subject: Re: RBD mirroring design draft
+Date: Wed, 13 May 2015 21:21:48 -0700
+Message-ID: <555422DC.6050400@redhat.com>
+References: <55529E04.1070202@redhat.com> <CACJqLyZA2+eXd=cqDwYOyqeE+O+kovHOF=HavGp=SWkrJ-LgVw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0096.outbound.protection.outlook.com ([207.46.100.96]:29742
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753531AbbEMXs0 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 May 2015 19:48:26 -0400
-In-Reply-To: <BC97738F8E7C8742BABED7F06FB9DF9166442D87@SATLEXDAG01.amd.com>
-Content-Language: en-US
+Received: from mx1.redhat.com ([209.132.183.28]:60884 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750775AbbENEVt (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 14 May 2015 00:21:49 -0400
+In-Reply-To: <CACJqLyZA2+eXd=cqDwYOyqeE+O+kovHOF=HavGp=SWkrJ-LgVw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Deneau, Tom" <tom.deneau@amd.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Haomai Wang <haomaiwang@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Tom,
-Good that you brought this up !
-I was also seeing the small writes during reads but forgot to mention in my last report on EC.
-Basically, Ceph code base seems to be issuing small writes during reads and it is basically going to both data/jounal (considering filestore backend) ..But, since data partition is syncing on every 5 sec , it is not obvious there.
+On 05/13/2015 01:07 AM, Haomai Wang wrote:
+> On Wed, May 13, 2015 at 8:42 AM, Josh Durgin <jdurgin@redhat.com> wrote:
+>> Some other possible optimizations:
+>> * reading a large window of the journal to coalesce overlapping writes
+>> * decoupling reading from the leader zone and writing to follower zones,
+>> to allow optimizations like compression of the journal or other
+>> transforms as data is sent, and relaxing the requirement for one node
+>> to be directly connected to more than one ceph cluster
+>
+> Maybe we could add separate NIC/network support which only used to
+> write journaling data to journaling pool? From my mind, a multi-site
+> cluster always need another low-latency fiber.
 
-Loic,
-Could you please explain a bit more on this ? What exactly we are writing during reads ?
+Yeah, this seems desirable. It seems like it'd be possible based on the 
+way the NICs and routing tables are setup, without needing any special
+configuration from ceph, or am I missing something?
 
-Thanks & Regards
-Somnath
+>> Failover
+>> --------
+>>
+>> Watch/notify could also be used (via a predetermined object) to
+>> communicate with rbd-mirror processes to get sync status from each,
+>> and for managing failover.
+>>
+>> Failing over means preventing changes in the original leader zone, and
+>> making the new leader zone writeable. The state of a zone (read-only vs
+>> writeable) could be stored in a zone's metadata in rados to represent
+>> this, and images with the journal feature bit could check this before
+>> being opened read/write for safety. To make it race-proof, the zone
+>> state can be a tri-state - read-only, read-write, or changing.
+>>
+>> In the original leader zone, if it is still running, the zone would be
+>> set to read-only mode and all clients could be blacklisted to avoid
+>> creating too much divergent history to rollback later.
+>>
+>> In the new leader zone, the zone's state would be set to 'changing',
+>> and rbd-mirror processes would be told to stop copying from the
+>> original leader and close the images they were mirroring to.  New
+>> rbd-mirror processes should refuse to start mirroring when the zone is
+>> not read-only. Once the mirroring processes have stopped, the zone
+>> could be set to read-write, and begin normal usage.
+>>
+>> Failback
+>> ^^^^^^^^
+>>
+>> In this scenario, after failing over, the original leader zone (A)
+>> starts running again, but needs to catch up to the current leader
+>> (B). At a high level, this involves syncing up the image by rolling
+>> back the updates in A past the point B synced to as noted in an
+>> images's journal in A, and mirroring all the changes since then from
+>> B.
+>>
+>> This would need to be an offline operation, since at some point
+>> B would need to go read-only before A goes read-write. Making this
+>> transition online is outside the scope of mirroring for now, since it
+>> would require another level of indirection for rbd users like QEMU.
+>
+> So do you mean when primary zone failed we need to switch primary zone
+> offline by hand?
 
------Original Message-----
-From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Deneau, Tom
-Sent: Wednesday, May 13, 2015 4:40 PM
-To: ceph-devel
-Subject: journal writes when running rados bench seq on ec pool
+I think we'd want to have some higher-level script controlling it, with
+a pluggable trigger that could be based on user-defined monitoring.
 
-I am running a rados bench seq read benchmark on an erasure-coded pool (k=2, m=1),
-and recording the disk activity.   I notice that I always see a small number of writes
-to the journal partitions during the seq read run.  (I always drop the caches on the osd nodes before starting the seq read run).
-
-I never see this journal write behavior with a replicated pool and I didn't think there would be any journal writes with either kind of pool on a read benchmark.
-
-The write activity is low enough that it's probably not that important performance-wise but I as just curious as to what would cause this.
-
--- Tom Deneau
-
-
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-________________________________
-
-PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-
+This is something I'm less sure of though, it'd be good to get more
+feedback on what users are interested in here. Would ceph detecting 
+failure based on e.g. rbd-mirror timing out reads from the leader zone
+be good enough for most users?
