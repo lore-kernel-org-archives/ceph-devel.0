@@ -1,36 +1,61 @@
-From: "Deneau, Tom" <tom.deneau@amd.com>
-Subject: which osds get used for ec pool reads?
-Date: Thu, 14 May 2015 16:27:14 +0000
-Message-ID: <BC97738F8E7C8742BABED7F06FB9DF9166448682@SATLEXDAG01.amd.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: [Ceph-maintainers] statically allocated uid/gid for ceph
+Date: Thu, 14 May 2015 09:41:45 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1505140935020.10788@cobra.newdream.net>
+References: <alpine.DEB.2.00.1412061245410.18213@cobra.newdream.net> <5488919E.4090109@redhat.com> <alpine.DEB.2.00.1412101044300.22847@cobra.newdream.net> <5488FC46.5080106@suse.com> <alpine.DEB.2.00.1504131802400.32097@cobra.newdream.net> <552C9182.5030605@suse.com>
+ <alpine.DEB.2.00.1504140819190.4469@cobra.newdream.net> <552D3C74.2000104@redhat.com> <87bnip2u10.fsf@meteor.durcheinandertal.bofh> <553E07C7.8030905@suse.com> <alpine.DEB.2.00.1504270901250.5458@cobra.newdream.net> <55549206.3040008@suse.com>
+ <alpine.DEB.2.00.1505140906400.10788@cobra.newdream.net> <CAANLjFpgivwxMhFLy4OcCxnJ_k5ssORCUm2r+BgtU+LEPQmvPw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-152798833-1431621708=:10788"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0138.outbound.protection.outlook.com ([65.55.169.138]:20544
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S932600AbbENQlb convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 May 2015 12:41:31 -0400
-Received: from satlvexedge01.amd.com (satlvexedge01.amd.com [10.177.96.28])
-	(using TLSv1 with cipher AES128-SHA (128/128 bits))
-	(No client certificate requested)
-	by atltwp02.amd.com (Axway MailGate 5.3.1) with ESMTPS id 28AF2D16050
-	for <ceph-devel@vger.kernel.org>; Thu, 14 May 2015 12:27:15 -0400 (EDT)
-Content-Language: en-US
+Received: from mx1.redhat.com ([209.132.183.28]:55730 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S933498AbbENQmG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 14 May 2015 12:42:06 -0400
+In-Reply-To: <CAANLjFpgivwxMhFLy4OcCxnJ_k5ssORCUm2r+BgtU+LEPQmvPw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Robert LeBlanc <robert@leblancnet.us>
+Cc: Tim Serong <tserong@suse.com>, Gaudenz Steinlin <gaudenz@debian.org>, Ken Dreyer <kdreyer@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, cjwatson@debian.org, ceph-maintainers@ceph.com, Steven Timm <timm@fnal.gov>, Owen Synge <osynge@suse.com>
 
-I am looking at disk activity on reads from an erasure coded pool (k=2, m=1).
-I have a contrived setup where I am reading a bunch of names that are
-all in the same PG.  I see disk activity only from the 2 K osds, not the M osd.
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-As I understand http://ceph.com/docs/master/architecture/,  in this situation
-all 3 osds would be read and the first two to return would be used but that is not what I see.
+--557981400-152798833-1431621708=:10788
+Content-Type: TEXT/PLAIN; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 
-In this particular contrived setup, all of the OSDs are on a single node,
-would that be causing the 2-OSD read behavior that I am seeing?
+On Thu, 14 May 2015, Robert LeBlanc wrote:
+> -----BEGIN PGP SIGNED MESSAGE-----
+> Hash: SHA256
+> 
+> On Thu, May 14, 2015 at 10:08 AM, Sage Weil  wrote:
+> > The above should have no impact on other distros where a fixed UID/GID
+> > is already set in the package.
+> 
+> This sounds pretty reasonable to me!  Perhaps there can be a 'default'
+> (but still opt-in) uid that is reserved and won't conflict going forward,
+> but may conflict with legacy environments?  That at least minimizes
+> complexity/pain for fresh environments (which I suspect will
+> be the bulk of the install base)?
+> 
+> 
+> Since there is no guarantee, can we just default to the same UID/GID that wa
+> s received from Debian, or is there a known conflict in RH/Cent/SUSE/etc?
 
--- Tom Deneau
+The Fedora UID is 167.
+  - fedora: 0-200 = fixed allocations
+  - debian: 100-999 = dynamically allocated
+  - suse: 100-499 = dyamically allocated system users
 
+The Debian UID is likely to be 64045.
+  - fedora: undefined (1000-60000 = user accounts, nothing above that)
+  - debian: 60000-64999 = reserved fixed uids, dynamically created
+  - suse: undefined (1000-60000 = user accounts, nothing above that)
 
+I'm not sure which is less likely: colliding with a dynamically allocated 
+system user (how many of those are there?) or a regular user (64045 is a 
+very large uid).
+
+sage
+--557981400-152798833-1431621708=:10788--
