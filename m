@@ -1,91 +1,101 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
+From: Sage Weil <sage@newdream.net>
 Subject: RE: which osds get used for ec pool reads?
-Date: Thu, 14 May 2015 19:54:38 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD8C854@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <BC97738F8E7C8742BABED7F06FB9DF9166448682@SATLEXDAG01.amd.com>
-	<1146045701.21089476.1431622348438.JavaMail.zimbra@redhat.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F2CD8C782@SACMBXIP01.sdcorp.global.sandisk.com>
- <CAC6JEv_xsOVPh2RxRgGD=K2Q0bj_u13TmgkAhP1Jn5CEWMJLgw@mail.gmail.com>
+Date: Thu, 14 May 2015 12:56:51 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1505141255410.10788@cobra.newdream.net>
+References: <BC97738F8E7C8742BABED7F06FB9DF9166448682@SATLEXDAG01.amd.com> <1146045701.21089476.1431622348438.JavaMail.zimbra@redhat.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD8C782@SACMBXIP01.sdcorp.global.sandisk.com> <CAC6JEv_xsOVPh2RxRgGD=K2Q0bj_u13TmgkAhP1Jn5CEWMJLgw@mail.gmail.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD8C854@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1on0091.outbound.protection.outlook.com ([157.56.110.91]:35376
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S965007AbbENTyo (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 14 May 2015 15:54:44 -0400
-In-Reply-To: <CAC6JEv_xsOVPh2RxRgGD=K2Q0bj_u13TmgkAhP1Jn5CEWMJLgw@mail.gmail.com>
-Content-Language: en-US
+Received: from cobra.newdream.net ([66.33.216.30]:46208 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1422672AbbENT4w (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 May 2015 15:56:52 -0400
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD8C854@SACMBXIP01.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@gregs42.com>
-Cc: Samuel Just <sjust@redhat.com>, Tom Deneau <tom.deneau@amd.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: Gregory Farnum <greg@gregs42.com>, Samuel Just <sjust@redhat.com>, Tom Deneau <tom.deneau@amd.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-R3JlZywNCkkgdGhpbmsgdGhlIFlhaG9vIGRhdGEgbWlzc2luZyBhbiBpbXBvcnRhbnQgZmFjdG9y
-IHdoYXQgaXMgdGhlIGNwdSBvdmVyaGVhZCBvZiBkb2luZyB0aGF0IHNpbmNlIHdlIGhhdmUgdG8g
-ZGVjb2RlIGV2ZXJ5dGltZS4uSW4gZmxhc2ggZW52aXJvbm1lbnQgY3B1IGlzIGFuIGltcG9ydGFu
-dCBmYWN0b3IgYXMgd2UgY2FuIHJ1biBvZiB0aGF0IGVhc2lseS4uWWVzLCBpdCBpcyByZWR1Y2lu
-ZyB0YWlsIGxhdGVuY2llcyBidXQgcHJvYmFibHkgbm90IGV2ZXJ5IGFwcGxpY2F0aW9uIGlzIGxh
-dGVuY3kgc2Vuc2l0aXZlLi4NCkl0IHdpbGwgYmUgZ29vZCBpZiB3ZSBjYW4gZXZhbHVhdGUgZXZl
-cnkgcHJvcy9jb25zIG9mIHRoaXMgYXBwcm9hY2guLklNTyB0aGVyZSBzaG91bGQgYmUgYSBjb25m
-aWcgb3B0aW9uIG9mIHNlbGVjdGluZyBvbmUgb3ZlciBhbm90aGVyLi5JbiB0aGF0IGNhc2UsIHdl
-IGNhbiBlYXNpbHkgZXZhbHVhdGUgdGhlIGJlbmVmaXRzLg0KDQpUaGFua3MgJiBSZWdhcmRzDQpT
-b21uYXRoDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBHcmVnb3J5IEZhcm51
-bSBbbWFpbHRvOmdyZWdAZ3JlZ3M0Mi5jb21dIA0KU2VudDogVGh1cnNkYXksIE1heSAxNCwgMjAx
-NSAxMTozNCBBTQ0KVG86IFNvbW5hdGggUm95DQpDYzogU2FtdWVsIEp1c3Q7IFRvbSBEZW5lYXU7
-IGNlcGgtZGV2ZWwNClN1YmplY3Q6IFJlOiB3aGljaCBvc2RzIGdldCB1c2VkIGZvciBlYyBwb29s
-IHJlYWRzPw0KDQpPbiBUaHUsIE1heSAxNCwgMjAxNSBhdCAxMToyMyBBTSwgU29tbmF0aCBSb3kg
-PFNvbW5hdGguUm95QHNhbmRpc2suY29tPiB3cm90ZToNCj4gU2FtLA0KPiBJdCBzZWVtcyB0aGUg
-Y3VycmVudCBjb2RlIGlzIG9wdGltaXplZCBmb3IgcGVyZm9ybWFuY2UuIFNvLCB3aGF0J3MgdGhl
-IGFkdmFudGFnZSB0aGUgbmV3IGNoYW5nZXMgYXJlIGJyaW5naW5nID8NCj4gRXZlcnkgdGltZSB3
-ZSB3aWxsIGJlIGRvaW5nIGRlY29kaW5nIHRoZW4gPw0KDQpJZiB5b3UgcmVhZCBldmVyeSBibG9j
-aywgeW91IGluY3JlYXNlIHRoZSBhbW91bnQgb2YgZGF0YSBhY2Nlc3NlZCBidXQgY2FuIGF2b2lk
-IHRoZSBsb25nIHRhaWwgbGF0ZW5jaWVzLiBUaGVyZSBhcmUgYSBidW5jaCBvZiByZXNlYXJjaCBw
-YXBlcnMgYWJvdXQgdGhlc2UgdHJhZGVvZmZzIGFuZCB0aGUgc3VycHJpc2luZyBsYXRlbmN5IGlt
-cHJvdmVtZW50cyB5b3UgY2FuIGdldCBvbiB0aGUgYWdncmVnYXRlIHJlYWQsIGFuZCBZYWhvbyEg
-dGFsa2VkIGFib3V0IHRoaXMgaW4gdGhlaXIgYmxvZyBwb3N0IG9uIHRoZWlyIHVzZSBvZiBDZXBo
-LiA6KSAtR3JlZw0KDQo+DQo+IFRoYW5rcyAmIFJlZ2FyZHMNCj4gU29tbmF0aA0KPg0KPiAtLS0t
-LU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZnZXIua2Vy
-bmVsLm9yZyANCj4gW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10gT24g
-QmVoYWxmIE9mIFNhbXVlbCBKdXN0DQo+IFNlbnQ6IFRodXJzZGF5LCBNYXkgMTQsIDIwMTUgOTo1
-MiBBTQ0KPiBUbzogVG9tIERlbmVhdQ0KPiBDYzogY2VwaC1kZXZlbA0KPiBTdWJqZWN0OiBSZTog
-d2hpY2ggb3NkcyBnZXQgdXNlZCBmb3IgZWMgcG9vbCByZWFkcz8NCj4NCj4gVGhlcmUgaXMgYSBi
-cmFuY2ggd2hpY2ggbWF5IG1lcmdlIHNvb25pc2ggd2hpY2ggd2lsbCBvcHRpb25hbGx5IHJlYWQg
-ZnJvbSBhbGwgc2hhcmRzIGFuZCB1c2UgdGhlIGZpcnN0IE4uICBJdCdzIG5vdCBtZXJnZWQgeWV0
-LiAgSWYgdGhlIHBncyBhcmUgaGVhbHRoeSwgdGhlIGN1cnJlbnQgYmVoYXZpb3IgaXMgdG8gcmVh
-ZCBmcm9tIHRoZSBkYXRhIHNoYXJkcyAoc2luY2UgeW91IGRvbid0IG5lZWQgdG8gcGVyZm9ybSBh
-IGRlY29kZSBpbiB0aGF0IGNhc2UpLg0KPiAtU2FtDQo+DQo+IC0tLS0tIE9yaWdpbmFsIE1lc3Nh
-Z2UgLS0tLS0NCj4gRnJvbTogIlRvbSBEZW5lYXUiIDx0b20uZGVuZWF1QGFtZC5jb20+DQo+IFRv
-OiAiY2VwaC1kZXZlbCIgPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPg0KPiBTZW50OiBUaHVy
-c2RheSwgTWF5IDE0LCAyMDE1IDk6Mjc6MTQgQU0NCj4gU3ViamVjdDogd2hpY2ggb3NkcyBnZXQg
-dXNlZCBmb3IgZWMgcG9vbCByZWFkcz8NCj4NCj4gSSBhbSBsb29raW5nIGF0IGRpc2sgYWN0aXZp
-dHkgb24gcmVhZHMgZnJvbSBhbiBlcmFzdXJlIGNvZGVkIHBvb2wgKGs9MiwgbT0xKS4NCj4gSSBo
-YXZlIGEgY29udHJpdmVkIHNldHVwIHdoZXJlIEkgYW0gcmVhZGluZyBhIGJ1bmNoIG9mIG5hbWVz
-IHRoYXQgYXJlIGFsbCBpbiB0aGUgc2FtZSBQRy4gIEkgc2VlIGRpc2sgYWN0aXZpdHkgb25seSBm
-cm9tIHRoZSAyIEsgb3Nkcywgbm90IHRoZSBNIG9zZC4NCj4NCj4gQXMgSSB1bmRlcnN0YW5kIGh0
-dHA6Ly9jZXBoLmNvbS9kb2NzL21hc3Rlci9hcmNoaXRlY3R1cmUvLCAgaW4gdGhpcyBzaXR1YXRp
-b24gYWxsIDMgb3NkcyB3b3VsZCBiZSByZWFkIGFuZCB0aGUgZmlyc3QgdHdvIHRvIHJldHVybiB3
-b3VsZCBiZSB1c2VkIGJ1dCB0aGF0IGlzIG5vdCB3aGF0IEkgc2VlLg0KPg0KPiBJbiB0aGlzIHBh
-cnRpY3VsYXIgY29udHJpdmVkIHNldHVwLCBhbGwgb2YgdGhlIE9TRHMgYXJlIG9uIGEgc2luZ2xl
-IG5vZGUsIHdvdWxkIHRoYXQgYmUgY2F1c2luZyB0aGUgMi1PU0QgcmVhZCBiZWhhdmlvciB0aGF0
-IEkgYW0gc2VlaW5nPw0KPg0KPiAtLSBUb20gRGVuZWF1DQo+DQo+DQo+IC0tDQo+IFRvIHVuc3Vi
-c2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRl
-dmVsIiANCj4gaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5l
-bC5vcmcgTW9yZSBtYWpvcmRvbW8gDQo+IGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcv
-bWFqb3Jkb21vLWluZm8uaHRtbA0KPg0KPg0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRo
-aXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgDQo+IGluIHRo
-ZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFq
-b3Jkb21vIA0KPiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZv
-Lmh0bWwNCj4NCj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCj4NCj4gUExFQVNF
-IE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwg
-bWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJl
-Y2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMg
-bm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQg
-eW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZp
-ZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3Nh
-Z2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21t
-dW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25l
-IG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBh
-bmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVy
-IGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KPg0K
+On Thu, 14 May 2015, Somnath Roy wrote:
+> Greg,
+> I think the Yahoo data missing an important factor what is the cpu 
+> overhead of doing that since we have to decode everytime..In flash 
+> environment cpu is an important factor as we can run of that 
+> easily..Yes, it is reducing tail latencies but probably not every 
+> application is latency sensitive..
+> It will be good if we can evaluate every pros/cons of this approach..IMO 
+> there should be a config option of selecting one over another..In that 
+> case, we can easily evaluate the benefits.
+
+Dont worry, there is a config option need to enable this and it's off by 
+default.
+
+sage
+
+
+> 
+> Thanks & Regards
+> Somnath
+> 
+> -----Original Message-----
+> From: Gregory Farnum [mailto:greg@gregs42.com] 
+> Sent: Thursday, May 14, 2015 11:34 AM
+> To: Somnath Roy
+> Cc: Samuel Just; Tom Deneau; ceph-devel
+> Subject: Re: which osds get used for ec pool reads?
+> 
+> On Thu, May 14, 2015 at 11:23 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
+> > Sam,
+> > It seems the current code is optimized for performance. So, what's the advantage the new changes are bringing ?
+> > Every time we will be doing decoding then ?
+> 
+> If you read every block, you increase the amount of data accessed but can avoid the long tail latencies. There are a bunch of research papers about these tradeoffs and the surprising latency improvements you can get on the aggregate read, and Yahoo! talked about this in their blog post on their use of Ceph. :) -Greg
+> 
+> >
+> > Thanks & Regards
+> > Somnath
+> >
+> > -----Original Message-----
+> > From: ceph-devel-owner@vger.kernel.org 
+> > [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Samuel Just
+> > Sent: Thursday, May 14, 2015 9:52 AM
+> > To: Tom Deneau
+> > Cc: ceph-devel
+> > Subject: Re: which osds get used for ec pool reads?
+> >
+> > There is a branch which may merge soonish which will optionally read from all shards and use the first N.  It's not merged yet.  If the pgs are healthy, the current behavior is to read from the data shards (since you don't need to perform a decode in that case).
+> > -Sam
+> >
+> > ----- Original Message -----
+> > From: "Tom Deneau" <tom.deneau@amd.com>
+> > To: "ceph-devel" <ceph-devel@vger.kernel.org>
+> > Sent: Thursday, May 14, 2015 9:27:14 AM
+> > Subject: which osds get used for ec pool reads?
+> >
+> > I am looking at disk activity on reads from an erasure coded pool (k=2, m=1).
+> > I have a contrived setup where I am reading a bunch of names that are all in the same PG.  I see disk activity only from the 2 K osds, not the M osd.
+> >
+> > As I understand http://ceph.com/docs/master/architecture/,  in this situation all 3 osds would be read and the first two to return would be used but that is not what I see.
+> >
+> > In this particular contrived setup, all of the OSDs are on a single node, would that be causing the 2-OSD read behavior that I am seeing?
+> >
+> > -- Tom Deneau
+> >
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> > in the body of a message to majordomo@vger.kernel.org More majordomo 
+> > info at  http://vger.kernel.org/majordomo-info.html
+> >
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> > in the body of a message to majordomo@vger.kernel.org More majordomo 
+> > info at  http://vger.kernel.org/majordomo-info.html
+> >
+> > ________________________________
+> >
+> > PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+> >
+> N?????r??y??????X???v???)?{.n?????z?]z????ay?????j??f???h??????w??????j:+v???w????????????zZ+???????j"????i
