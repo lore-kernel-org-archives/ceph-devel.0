@@ -1,47 +1,67 @@
-From: Samuel Just <sjust@redhat.com>
-Subject: Re: which osds get used for ec pool reads?
-Date: Thu, 14 May 2015 12:52:28 -0400 (EDT)
-Message-ID: <1146045701.21089476.1431622348438.JavaMail.zimbra@redhat.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: which osds get used for ec pool reads?
+Date: Thu, 14 May 2015 18:23:45 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD8C782@SACMBXIP01.sdcorp.global.sandisk.com>
 References: <BC97738F8E7C8742BABED7F06FB9DF9166448682@SATLEXDAG01.amd.com>
+ <1146045701.21089476.1431622348438.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx6-phx2.redhat.com ([209.132.183.39]:36145 "EHLO
-	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933006AbbENQwb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 May 2015 12:52:31 -0400
-In-Reply-To: <BC97738F8E7C8742BABED7F06FB9DF9166448682@SATLEXDAG01.amd.com>
+Received: from mail-bl2on0060.outbound.protection.outlook.com ([65.55.169.60]:27264
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S932670AbbENSXu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 14 May 2015 14:23:50 -0400
+In-Reply-To: <1146045701.21089476.1431622348438.JavaMail.zimbra@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tom Deneau <tom.deneau@amd.com>
+To: Samuel Just <sjust@redhat.com>, Tom Deneau <tom.deneau@amd.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-There is a branch which may merge soonish which will optionally read from all shards and use the first N.  It's not merged yet.  If the pgs are healthy, the current behavior is to read from the data shards (since you don't need to perform a decode in that case).
--Sam
-
------ Original Message -----
-From: "Tom Deneau" <tom.deneau@amd.com>
-To: "ceph-devel" <ceph-devel@vger.kernel.org>
-Sent: Thursday, May 14, 2015 9:27:14 AM
-Subject: which osds get used for ec pool reads?
-
-I am looking at disk activity on reads from an erasure coded pool (k=2, m=1).
-I have a contrived setup where I am reading a bunch of names that are
-all in the same PG.  I see disk activity only from the 2 K osds, not the M osd.
-
-As I understand http://ceph.com/docs/master/architecture/,  in this situation
-all 3 osds would be read and the first two to return would be used but that is not what I see.
-
-In this particular contrived setup, all of the OSDs are on a single node,
-would that be causing the 2-OSD read behavior that I am seeing?
-
--- Tom Deneau
-
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
+U2FtLA0KSXQgc2VlbXMgdGhlIGN1cnJlbnQgY29kZSBpcyBvcHRpbWl6ZWQgZm9yIHBlcmZvcm1h
+bmNlLiBTbywgd2hhdCdzIHRoZSBhZHZhbnRhZ2UgdGhlIG5ldyBjaGFuZ2VzIGFyZSBicmluZ2lu
+ZyA/DQpFdmVyeSB0aW1lIHdlIHdpbGwgYmUgZG9pbmcgZGVjb2RpbmcgdGhlbiA/DQoNClRoYW5r
+cyAmIFJlZ2FyZHMNClNvbW5hdGgNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206
+IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC1vd25l
+ckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBTYW11ZWwgSnVzdA0KU2VudDogVGh1cnNk
+YXksIE1heSAxNCwgMjAxNSA5OjUyIEFNDQpUbzogVG9tIERlbmVhdQ0KQ2M6IGNlcGgtZGV2ZWwN
+ClN1YmplY3Q6IFJlOiB3aGljaCBvc2RzIGdldCB1c2VkIGZvciBlYyBwb29sIHJlYWRzPw0KDQpU
+aGVyZSBpcyBhIGJyYW5jaCB3aGljaCBtYXkgbWVyZ2Ugc29vbmlzaCB3aGljaCB3aWxsIG9wdGlv
+bmFsbHkgcmVhZCBmcm9tIGFsbCBzaGFyZHMgYW5kIHVzZSB0aGUgZmlyc3QgTi4gIEl0J3Mgbm90
+IG1lcmdlZCB5ZXQuICBJZiB0aGUgcGdzIGFyZSBoZWFsdGh5LCB0aGUgY3VycmVudCBiZWhhdmlv
+ciBpcyB0byByZWFkIGZyb20gdGhlIGRhdGEgc2hhcmRzIChzaW5jZSB5b3UgZG9uJ3QgbmVlZCB0
+byBwZXJmb3JtIGEgZGVjb2RlIGluIHRoYXQgY2FzZSkuDQotU2FtDQoNCi0tLS0tIE9yaWdpbmFs
+IE1lc3NhZ2UgLS0tLS0NCkZyb206ICJUb20gRGVuZWF1IiA8dG9tLmRlbmVhdUBhbWQuY29tPg0K
+VG86ICJjZXBoLWRldmVsIiA8Y2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc+DQpTZW50OiBUaHVy
+c2RheSwgTWF5IDE0LCAyMDE1IDk6Mjc6MTQgQU0NClN1YmplY3Q6IHdoaWNoIG9zZHMgZ2V0IHVz
+ZWQgZm9yIGVjIHBvb2wgcmVhZHM/DQoNCkkgYW0gbG9va2luZyBhdCBkaXNrIGFjdGl2aXR5IG9u
+IHJlYWRzIGZyb20gYW4gZXJhc3VyZSBjb2RlZCBwb29sIChrPTIsIG09MSkuDQpJIGhhdmUgYSBj
+b250cml2ZWQgc2V0dXAgd2hlcmUgSSBhbSByZWFkaW5nIGEgYnVuY2ggb2YgbmFtZXMgdGhhdCBh
+cmUgYWxsIGluIHRoZSBzYW1lIFBHLiAgSSBzZWUgZGlzayBhY3Rpdml0eSBvbmx5IGZyb20gdGhl
+IDIgSyBvc2RzLCBub3QgdGhlIE0gb3NkLg0KDQpBcyBJIHVuZGVyc3RhbmQgaHR0cDovL2NlcGgu
+Y29tL2RvY3MvbWFzdGVyL2FyY2hpdGVjdHVyZS8sICBpbiB0aGlzIHNpdHVhdGlvbiBhbGwgMyBv
+c2RzIHdvdWxkIGJlIHJlYWQgYW5kIHRoZSBmaXJzdCB0d28gdG8gcmV0dXJuIHdvdWxkIGJlIHVz
+ZWQgYnV0IHRoYXQgaXMgbm90IHdoYXQgSSBzZWUuDQoNCkluIHRoaXMgcGFydGljdWxhciBjb250
+cml2ZWQgc2V0dXAsIGFsbCBvZiB0aGUgT1NEcyBhcmUgb24gYSBzaW5nbGUgbm9kZSwgd291bGQg
+dGhhdCBiZSBjYXVzaW5nIHRoZSAyLU9TRCByZWFkIGJlaGF2aW9yIHRoYXQgSSBhbSBzZWVpbmc/
+DQoNCi0tIFRvbSBEZW5lYXUNCg0KDQotLQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6
+IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIHRoZSBib2R5IG9mIGEg
+bWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGluZm8g
+YXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KDQoNCi0tDQpU
+byB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUg
+Y2VwaC1kZXZlbCIgaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtl
+cm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9t
+YWpvcmRvbW8taW5mby5odG1sDQoNCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQoN
+ClBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25p
+YyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWdu
+YXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNz
+YWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmll
+ZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBh
+bnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhp
+cyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRo
+aXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRl
+bGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJv
+eSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAo
+d2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCg0K
