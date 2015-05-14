@@ -1,21 +1,31 @@
-From: Sage Weil <sage@newdream.net>
-Subject: RE: which osds get used for ec pool reads?
-Date: Thu, 14 May 2015 12:56:51 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1505141255410.10788@cobra.newdream.net>
-References: <BC97738F8E7C8742BABED7F06FB9DF9166448682@SATLEXDAG01.amd.com> <1146045701.21089476.1431622348438.JavaMail.zimbra@redhat.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD8C782@SACMBXIP01.sdcorp.global.sandisk.com> <CAC6JEv_xsOVPh2RxRgGD=K2Q0bj_u13TmgkAhP1Jn5CEWMJLgw@mail.gmail.com>
- <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD8C854@SACMBXIP01.sdcorp.global.sandisk.com>
+From: Samuel Just <sjust@redhat.com>
+Subject: Re: which osds get used for ec pool reads?
+Date: Thu, 14 May 2015 16:20:27 -0400 (EDT)
+Message-ID: <1682320147.21315899.1431634827875.JavaMail.zimbra@redhat.com>
+References: <BC97738F8E7C8742BABED7F06FB9DF9166448682@SATLEXDAG01.amd.com> <1146045701.21089476.1431622348438.JavaMail.zimbra@redhat.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD8C782@SACMBXIP01.sdcorp.global.sandisk.com> <CAC6JEv_xsOVPh2RxRgGD=K2Q0bj_u13TmgkAhP1Jn5CEWMJLgw@mail.gmail.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD8C854@SACMBXIP01.sdcorp.global.sandisk.com> <alpine.DEB.2.00.1505141255410.10788@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:46208 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1422672AbbENT4w (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 May 2015 15:56:52 -0400
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD8C854@SACMBXIP01.sdcorp.global.sandisk.com>
+Received: from mx5-phx2.redhat.com ([209.132.183.37]:43672 "EHLO
+	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1161074AbbENUUj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 May 2015 16:20:39 -0400
+In-Reply-To: <alpine.DEB.2.00.1505141255410.10788@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: Gregory Farnum <greg@gregs42.com>, Samuel Just <sjust@redhat.com>, Tom Deneau <tom.deneau@amd.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Somnath Roy <Somnath.Roy@sandisk.com>, Gregory Farnum <greg@gregs42.com>, Tom Deneau <tom.deneau@amd.com>, ceph-devel <ceph-devel@vger.kernel.org>
+
+It should really be a pool property.
+-Sam
+
+----- Original Message -----
+From: "Sage Weil" <sage@newdream.net>
+To: "Somnath Roy" <Somnath.Roy@sandisk.com>
+Cc: "Gregory Farnum" <greg@gregs42.com>, "Samuel Just" <sjust@redhat.com>, "Tom Deneau" <tom.deneau@amd.com>, "ceph-devel" <ceph-devel@vger.kernel.org>
+Sent: Thursday, May 14, 2015 12:56:51 PM
+Subject: RE: which osds get used for ec pool reads?
 
 On Thu, 14 May 2015, Somnath Roy wrote:
 > Greg,
@@ -98,4 +108,10 @@ sage
 > >
 > > PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
 > >
-> N?????r??y??????X???v???)?{.n?????z?]z????ay?????j??f???h??????w??????j:+v???w????????????zZ+???????j"????i
+> N?????r??y??????X???v???)?{.n?????z?]z????ay?????j??f???h??????w??????j:+v???w????????????zZ+???????j"????i
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
