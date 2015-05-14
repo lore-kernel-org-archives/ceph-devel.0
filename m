@@ -1,96 +1,52 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Problem running make check
-Date: Fri, 15 May 2015 01:15:19 +0200
-Message-ID: <55552C87.1080100@dachary.org>
-References: <CAEFDAA5BroNoMvR8Yyvf+nj_0RJa20gkCUhJo3zrbvYNYa5w1g@mail.gmail.com> <CAC6JEv9s1fSk7X5XSp8CtYN6Qr3SR5+XRD-Lu51YDJw0RGdRNA@mail.gmail.com>
+From: huang jun <hjwsm1989@gmail.com>
+Subject: bad CRC in data error on ARM
+Date: Fri, 15 May 2015 07:51:46 +0800
+Message-ID: <CABAwU-Y8-fV6cFza0oHt8yJ4+-nYs51b0rQ5qDqQCfpJUk2kvw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="6sstOmEfscGRN5orRovQeeULojK0m6sbx"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:35477 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S932923AbbENXPc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 May 2015 19:15:32 -0400
-In-Reply-To: <CAC6JEv9s1fSk7X5XSp8CtYN6Qr3SR5+XRD-Lu51YDJw0RGdRNA@mail.gmail.com>
+Received: from mail-la0-f45.google.com ([209.85.215.45]:36575 "EHLO
+	mail-la0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1161102AbbENXvr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 May 2015 19:51:47 -0400
+Received: by lagv1 with SMTP id v1so92384461lag.3
+        for <ceph-devel@vger.kernel.org>; Thu, 14 May 2015 16:51:46 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Michal Jarzabek <stiopa@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---6sstOmEfscGRN5orRovQeeULojK0m6sbx
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+hi,all
 
+We run ceph cluster on ARM platform (arm64, linux kernel 3.14, OS
+ubuntu 14.10), and use "dd if=/dev/zero of=/mnt/test bs=4M count=125"
+to write data.  On the osd side, we got bad data CRC error.
 
+The kclient log: (tid=6)
+May 14 17:21:08 node103 kernel: [  180.194312] CPU[0] libceph:
+send_request ffffffc8d252f000 tid-6 to osd0 flags 36 pg 1.9aae829f req
+data size is 4194304
+May 14 17:21:08 node103 kernel: [  180.194316] CPU[0] libceph: tid-6
+----- ffffffc0702f66c8 to osd0 42=osd_op len 197+0+4194304 -----
+libceph: tid-6 front_crc is 388648745 middle_crc is 0 data_crc is 3036014994
 
-On 14/05/2015 22:55, Gregory Farnum wrote:
-> On Thu, May 14, 2015 at 1:24 PM, Michal Jarzabek <stiopa@gmail.com> wro=
-te:
->> Hi,
->>
->> After cloning ceph repo and then running:
->> ./autogen.sh
->> ./configure
->> make -j 8
->> make check
->>
->> make check always hangs after following lines:
->> LD_PRELOAD=3Dliblttng-ust-fork.so
->> PASS: unittest_texttable
->> LD_PRELOAD=3Dliblttng-ust-fork.so
->> PASS: unittest_on_exit
->> LD_PRELOAD=3Dliblttng-ust-fork.so
->> PASS: unittest_readahead
->> LD_PRELOAD=3Dliblttng-ust-fork.so
->> PASS: unittest_tableformatter
->> LD_PRELOAD=3Dliblttng-ust-fork.so
->> PASS: unittest_bit_vector
->> LD_PRELOAD=3Dliblttng-ust-fork.so
->> PASS: ceph-detect-init/run-tox.sh
->> LD_PRELOAD=3Dliblttng-ust-fork.so
->>
->> Any idea what might be a problem?
+The OSD-0 log:
+2015-05-13 08:12:50.049345 7f378d8d8700  0 seq  3 tid 6 front_len 197
+mid_len 0 data_len 4194304
+2015-05-13 08:12:50.049348 7f378d8d8700  0 crc in front 388648745 exp 388648745
+2015-05-13 08:12:50.049395 7f378d8d8700  0 crc in middle 0 exp 0
+2015-05-13 08:12:50.049964 7f378d8d8700  0 crc in data 0 exp 3036014994
+2015-05-13 08:12:50.050234 7f378d8d8700  0 bad crc in data 0 != exp 3036014994
 
-In addition to what Greg said:
+some considerations:
+1) we use ceph 0.80.7 realse version and compile it on ARM, did this
+works? or  does ceph's code has ARM branch?
 
-=2E/configure --without-lttng ...
+2) as we have write 125 objects, only few of them report CRC error,
+and the right object's data_crc is 0 both on osd and kclient. the
+wrong object's data_crc is not 0 on kclient, but osd calculate result
+0. the object data came from /dev/zero, i think the data_crc should be
+0, am i right?
 
-lttng is indeed the most probably cause for failure. How much RAM/CPU doe=
-s your machine have ? Is this running on SSD or spinner ? Not that a spin=
-ner would be a problem but mor than -j4 on a spinner is probably not a go=
-od idea because the disk will be the bottleneck.
-
->=20
-> You can try building without lttng, which has helped some users, and
-> you can check if you have high enough ulimit settings. The defaults on
-> my box were not high enough; I bumped both files and processes up to
-> 16k and rebooted before I could get it working properly.
-
-> -Greg
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---6sstOmEfscGRN5orRovQeeULojK0m6sbx
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlVVLIgACgkQ8dLMyEl6F22LWgCghZ95SaxBj53QkTVAnofyeeTG
-mckAnicV4CnCirKeHZ4uRPUzjTdWqYdC
-=z40P
------END PGP SIGNATURE-----
-
---6sstOmEfscGRN5orRovQeeULojK0m6sbx--
+-- 
+thanks
+huangjun
