@@ -1,75 +1,104 @@
-From: Sage Weil <sweil@redhat.com>
+From: Robert LeBlanc <robert@leblancnet.us>
 Subject: Re: [Ceph-maintainers] statically allocated uid/gid for ceph
-Date: Thu, 14 May 2015 09:08:20 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1505140906400.10788@cobra.newdream.net>
-References: <alpine.DEB.2.00.1412061245410.18213@cobra.newdream.net> <5488919E.4090109@redhat.com> <alpine.DEB.2.00.1412101044300.22847@cobra.newdream.net> <5488FC46.5080106@suse.com> <alpine.DEB.2.00.1504131802400.32097@cobra.newdream.net> <552C9182.5030605@suse.com>
- <alpine.DEB.2.00.1504140819190.4469@cobra.newdream.net> <552D3C74.2000104@redhat.com> <87bnip2u10.fsf@meteor.durcheinandertal.bofh> <553E07C7.8030905@suse.com> <alpine.DEB.2.00.1504270901250.5458@cobra.newdream.net> <55549206.3040008@suse.com>
+Date: Thu, 14 May 2015 10:20:51 -0600
+Message-ID: <CAANLjFo0OKui4j9HVW7TaoOsSn3Dq+P0rPS0i6SG=8Za4Q1L1w@mail.gmail.com>
+References: <alpine.DEB.2.00.1412061245410.18213@cobra.newdream.net>
+	<5488919E.4090109@redhat.com>
+	<alpine.DEB.2.00.1412101044300.22847@cobra.newdream.net>
+	<5488FC46.5080106@suse.com>
+	<alpine.DEB.2.00.1504131802400.32097@cobra.newdream.net>
+	<552C9182.5030605@suse.com>
+	<alpine.DEB.2.00.1504140819190.4469@cobra.newdream.net>
+	<552D3C74.2000104@redhat.com>
+	<87bnip2u10.fsf@meteor.durcheinandertal.bofh>
+	<553E07C7.8030905@suse.com>
+	<alpine.DEB.2.00.1504270901250.5458@cobra.newdream.net>
+	<55549206.3040008@suse.com>
+	<alpine.DEB.2.00.1505140906400.10788@cobra.newdream.net>
+	<CAANLjFpgivwxMhFLy4OcCxnJ_k5ssORCUm2r+BgtU+LEPQmvPw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:59882 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S965012AbbENQIf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 14 May 2015 12:08:35 -0400
-In-Reply-To: <55549206.3040008@suse.com>
+Received: from mail-wg0-f53.google.com ([74.125.82.53]:33507 "EHLO
+	mail-wg0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752373AbbENQUx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 May 2015 12:20:53 -0400
+Received: by wgin8 with SMTP id n8so81109774wgi.0
+        for <ceph-devel@vger.kernel.org>; Thu, 14 May 2015 09:20:52 -0700 (PDT)
+In-Reply-To: <CAANLjFpgivwxMhFLy4OcCxnJ_k5ssORCUm2r+BgtU+LEPQmvPw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tim Serong <tserong@suse.com>
-Cc: Gaudenz Steinlin <gaudenz@debian.org>, Ken Dreyer <kdreyer@redhat.com>, ceph-devel@vger.kernel.org, cjwatson@debian.org, ceph-maintainers@ceph.com, timm@fnal.gov, Owen Synge <osynge@suse.com>
+To: Sage Weil <sweil@redhat.com>
+Cc: Tim Serong <tserong@suse.com>, Gaudenz Steinlin <gaudenz@debian.org>, Ken Dreyer <kdreyer@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, cjwatson@debian.org, ceph-maintainers@ceph.com, Steven Timm <timm@fnal.gov>, Owen Synge <osynge@suse.com>
 
-On Thu, 14 May 2015, Tim Serong wrote:
-> On 04/28/2015 02:02 AM, Sage Weil wrote:
-> >> much progress on the SUSE front.  I did suggest everyone just do what
-> >> Debian does ;) but both Fedora and SUSE people pointed out that the 64K
-> >> range isn't safe to claim, what with not being specifically reserved.
-> >>
-> >> I did make one small bit of progress - I've added the ceph user and
-> >> group to rpmlint on openSUSE Factory
-> >> (https://build.opensuse.org/request/show/303537) so at least the SUSE
-> >> build won't bitch if files specified in any of the packages are owned by
-> >> ceph:ceph.
-> 
-> It is my sad duty to report that I've been unable to get a static
-> UID/GID allocated for SLES or openSUSE.
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
 
-Too bad!  :(
+blagh HTML....
 
-> * There's nothing free in the reserved static range 0-99.
-> * We can't take something from the unreserved ranges (500-999,
-> 60001-64K) and hope for the best due to potential conflicts with old
-> systems, LDAP users on those ranges, customers, etc. etc.
+- ----------------
+Robert LeBlanc
+GPG Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
 
-Just out of curiousity, what is 100-499?
+On Thu, May 14, 2015 at 10:19 AM, Robert LeBlanc  wrote:
+- -----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
 
-> Consequently I would like to propose the following as a least-worst
-> fallback/workaround:
-> 
-> 1) Add functionality to ceph-deploy to create the user and group during
-> `ceph-deploy install`.  This would happen iff new (optional) --ceph-uid
-> and --ceph-gid arguments[1] were passed to `ceph-deploy install`, and
-> would happen before any ceph packages are installed.  This would allow
-> individual sites to choose the UID/GID so they know it doesn't conflict
-> with anything already in use.
-> 
-> 2) Add a guard to the %pre script in the RPM so it only invokes `useradd
-> and `groupadd` if the ceph user and group don't already exist.
-> 
-> If the UID and GID aren't specified during `ceph-deploy install`, then
-> it'll fall back to "next available" in the system range when
-> useradd/groupadd are invoked in the rpm %pre script.
-> 
+On Thu, May 14, 2015 at 10:08 AM, Sage Weil  wrote:
 > The above should have no impact on other distros where a fixed UID/GID
 > is already set in the package.
 
-This sounds pretty reasonable to me!  Perhaps there can be a 'default' 
-(but still opt-in) uid that is reserved and won't conflict going forward, 
-but may conflict with legacy environments?  That at least minimizes 
-complexity/pain for fresh environments (which I suspect will 
+This sounds pretty reasonable to me!  Perhaps there can be a 'default'
+(but still opt-in) uid that is reserved and won't conflict going forward,
+but may conflict with legacy environments?  That at least minimizes
+complexity/pain for fresh environments (which I suspect will
 be the bulk of the install base)?
 
-> [1] Or, possibly, it should force both UID and GID to the same number,
-> meaning we only need one argument, say --ceph-uidgid?
 
-+1
+Since there is no guarantee, can we just default to the same UID/GID
+that was received from Debian, or is there a known conflict in
+RH/Cent/SUSE/etc?
 
-sage
+ ----------------
+Robert LeBlanc
+GPG Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
+
+- -----BEGIN PGP SIGNATURE-----
+Version: Mailvelope v0.13.1
+Comment: https://www.mailvelope.com
+
+wsFcBAEBCAAQBQJVVMr7CRDmVDuy+mK58QAAZtoQAL0geoqctooRrc+UaKLN
+FbpfPRzF7wRyPbrwFJZV1jqJC1e4n1wVI/tRCaTNKOrlE/7e7AiEwPczwjD7
+OLKXU1FJ/HNDXM5W0dbfBL8eauHziHo0ufK+odSAIuy+Tx21/Ll4+7FvrCj+
+14pJ3wsNn4FHyDD7UpdJwYc+fK0QdqPrKzv8TJXxSE5RLNcRlem2FZxZn0MV
+2xFaDdFDbBMZCTFM88wgU4ZewEIsJ12+nCHD8MgIIOrXSarK3sE1cIf0ihtu
+WLD1hksOQtNGU2D3vSxYFYsFHIgwS/Cx/FuXggFmLQcK5FABlIS+UqveyY+e
+lAcmkhA1auAcm0p1dp4GevKnfx5CxfcSGUEc7SQEa37/sNjplRTRPDGa/Pwg
+8u989hTwf6acoCMhEp7P9i3MApeAEgYcQrd8fF5fK7nLr+hRbgLBoUWqm7pj
+Ji3uVm3qFAjWQLBoeyVD0XfETU733CShAEWSP4pKsvfl7DNny/IBcGVM1j5g
++kf1BKP8QSPOGtR2dUZQIfjg0gUUuRaUU/JHItGUdua6XygcIf/g9RB+6pBx
+SbSbMyKEjl+K+NhUcD6DavtrG4+sC4WTOdtqzxRZvnxQ09LlBLUWh4UMkjgd
+L2j8C9z7dHgvL/ifR73plPSqL+RDiuLCthjjjGIj+DATbB5RlPQO+501AAyH
+bwk1
+=4CmY
+- -----END PGP SIGNATURE-----
+
+-----BEGIN PGP SIGNATURE-----
+Version: Mailvelope v0.13.1
+Comment: https://www.mailvelope.com
+
+wsFcBAEBCAAQBQJVVMtXCRDmVDuy+mK58QAANCAP/i58Tb1zbtP6ZblgxTKV
+N7cXLTNZAoVvSdMWj9VcP//2Ha9CMFV/Qu9GrVdeOJkDfcvn2T6Hx6UU0l6P
+5cvRD6LDG+g8JFuh2kGZksarBBq47/Leg7Z57OQcQGh/59sIkmj7LiXzguZo
+r9lB9F19j5Ejy91ztF2Ai+VHV7hEN+qRY/UQjCnL/PfyGzBgsL3emMg7NHde
+stDyzRVIKDKbwELYPYaTn1vNYq7NAY9F5ziuDd5LDKdma61UtBloPmVtxaiN
+WaycGVey3FlB0CeQKwqee0ZhkC2YhqhK0LjyTB3NhlLSHTEhiSjRIUMZeKX1
+9H99HcYS6GjI9WBJ3MudznwPkkIwqzN4BKkgbcyYql/NNU0jzCHDNQ8lnbCa
++wCaKXQl4rLhrdQTRnFramVPuO6vPpUp85HsNA+xKrddFBBU+/RU6tK4OTgv
+5XoYMVc8+aaZd1k62fjCafGs/B7a9QnYtU5GFOo67p7UnsZ2ISGKEv3fnR+E
+eeXQ+2AKdjKB1f9XZcG6JLrY10ddwNmjz0dDNNxTo+Dd427hpspQaf1WRDyx
+Lb1Qq4O+xx8bNbzPZHcSlNPq6tdCJKri7ZC8vCU3aXLXMKvTk5fRrA56qTkk
+SsaOYqpYk9gbYj2bQeLjIY+lFrrsm1/NqzvXIHfX7BYbTiYKKl5ncDeDAjTq
+sk6v
+=cY5H
+-----END PGP SIGNATURE-----
