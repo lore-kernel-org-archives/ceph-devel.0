@@ -1,44 +1,75 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Request for static uid/gid for ceph
-Date: Fri, 15 May 2015 08:24:38 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1505150824170.10788@cobra.newdream.net>
-References: <87egnl2u87.fsf@meteor.durcheinandertal.bofh> <20150515102415.GN10485@riva.ucam.org>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: should we prepare to release firefly v0.80.10 ?
+Date: Fri, 15 May 2015 12:05:56 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1505151205220.10788@cobra.newdream.net>
+References: <55362279.5060105@dachary.org> <alpine.DEB.2.00.1504210851130.18547@cobra.newdream.net> <5555F85B.3000407@dachary.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-900831217-1431716758=:10788"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:57684 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934155AbbEOPYj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 15 May 2015 11:24:39 -0400
-In-Reply-To: <20150515102415.GN10485@riva.ucam.org>
+Received: from mx1.redhat.com ([209.132.183.28]:51150 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754426AbbEOTF7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 15 May 2015 15:05:59 -0400
+In-Reply-To: <5555F85B.3000407@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Colin Watson <cjwatson@debian.org>
-Cc: Gaudenz Steinlin <gaudenz@debian.org>, base-passwd@packages.debian.org, Tim Serong <tserong@suse.com>, ceph-devel@vger.kernel.org, Ken Dreyer <kdreyer@redhat.com>, ceph-maintainers@ceph.com, timm@fnal.gov
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, "Shu, Xinxin" <xinxin.shu@intel.com>, dzafman@redhat.com, sjust@redhat.com
 
-On Fri, 15 May 2015, Colin Watson wrote:
-> On Wed, Apr 15, 2015 at 07:10:16PM +0200, Gaudenz Steinlin wrote:
-> > Ceph is currently developing unprivileged user support, and the upstream
-> > developers are asking each of the distros to allocate a static numerical
-> > UID for the "ceph" user and group.
-> > 
-> > The reason for the static number is to allow Ceph users to hot-swap hard
-> > drives from one OSD server to another. Currently this practice works
-> > because Ceph writes its files as "uid 0", but when Ceph starts writing
-> > its files as an unprivileged user, it will be nice to allow
-> > administrators to unplug a drive and plug it into another computer and
-> > everything to just work.
-> > 
-> > For this I'm requesting an uid and gid from the reserved range
-> > 60000-64999 according to the process outlined in
-> > https://anonscm.debian.org/cgit/users/cjwatson/base-passwd.git/tree/README.
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
+
+--557981400-900831217-1431716758=:10788
+Content-Type: TEXT/PLAIN; charset=utf-8
+Content-Transfer-Encoding: 8BIT
+
+On Fri, 15 May 2015, Loic Dachary wrote:
+> Hi Sage,
 > 
-> Sorry for the delay.  This seems entirely reasonable; I've allocated
-> uid/gid 64045, which you'll now find in the git tree above.  I haven't
-> uploaded base-passwd with this yet, but you can go ahead and make use of
-> this immediately in Debian/Ubuntu without needing to wait for an upload.
+> On 21/04/2015 17:52, Sage Weil wrote:
+> > The bulk of it is ceph-objectstore-tool, which is important to get into a 
+> > release, IMO.  David, are these being tested in the firefly thrashing 
+> > tests yet?
+> > 
+> > The only other one I'm worried about is
+> > 
+> > 6fd3dfa osd: do not ignore deleted pgs on startup
+> > 
+> > Sam, I assume the recent hammer upgrade issue is would bite firefly folks 
+> > who upgrade too?
+> 
+> A backport of "OSD::load_pgs: we need to handle the case where an upgrade from earlier versions which ignored non-existent pgs resurrects a pg with a prehistoric osdmap" http://tracker.ceph.com/issues/11429 found at https://github.com/ceph/ceph/pull/4556 has been successfully tested on firefly at http://pulpito.ceph.com/loic-2015-05-13_00:01:26-rados-firefly-backports---basic-multi/ and in a rados suite run that completed today http://tracker.ceph.com/issues/11090#rados.
+> 
+> Provided https://github.com/ceph/ceph/pull/4556 is merged, do you think we should prepare to release firefly v0.80.10 ?
 
-Excellent!  Thanks, Colin!
+As Yehuda mentioned the other open issue is the rgw multipart corruption.  
+I'm guessing we want to include that?
 
 sage
 
+> 
+> Cheers
+> 
+> > 
+> > sage
+> > 
+> > 
+> > On Tue, 21 Apr 2015, Loic Dachary wrote:
+> > 
+> >> Hi Sage,
+> >>
+> >> The firefly branch has a number of fixes ( http://tracker.ceph.com/issues/11090#Release-information ) and has been used for upgrade tests in the past few weeks. A few other issues have been backported since and are being tested in the integration branch ( http://tracker.ceph.com/issues/11090#teuthology-run-commitb91bbb434e6363a99a632cf3841f70f1f2549f79-integration-branch-april-2015 ). 
+> >>
+> >> Do you think these changes deserve a firefly v0.80.10 release ? Should we ask each lead for their approval ? Or is it better to keep backporting what needs to be and wait a few weeks ?
+> >>
+> >> Cheers
+> >>
+> >> -- 
+> >> Loïc Dachary, Artisan Logiciel Libre
+> >>
+> 
+> -- 
+> Loïc Dachary, Artisan Logiciel Libre
+> 
+> 
+--557981400-900831217-1431716758=:10788--
