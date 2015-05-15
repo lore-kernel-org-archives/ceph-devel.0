@@ -1,119 +1,84 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: should we prepare to release firefly v0.80.10 ?
-Date: Fri, 15 May 2015 22:19:52 +0200
-Message-ID: <555654E8.1030806@dachary.org>
-References: <55362279.5060105@dachary.org> <alpine.DEB.2.00.1504210851130.18547@cobra.newdream.net> <5555F85B.3000407@dachary.org> <alpine.DEB.2.00.1505151205220.10788@cobra.newdream.net>
+From: Artem Elkin <Artem.Elkin@icl-services.com>
+Subject: straw2-like algorithm
+Date: Fri, 15 May 2015 21:33:16 +0000
+Message-ID: <DB3PR03MB06841B94BC544DA1466E1E95D4C70@DB3PR03MB0684.eurprd03.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="PWPXnObhlQoisToAdqgoJ6ndcqafpBFlD"
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:36036 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S934755AbbEOUTz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 15 May 2015 16:19:55 -0400
-In-Reply-To: <alpine.DEB.2.00.1505151205220.10788@cobra.newdream.net>
+Received: from mail-db3on0127.outbound.protection.outlook.com ([157.55.234.127]:3655
+	"EHLO emea01-db3-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S934608AbbEOVdT convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 15 May 2015 17:33:19 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, "Shu, Xinxin" <xinxin.shu@intel.com>, dzafman@redhat.com, sjust@redhat.com
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---PWPXnObhlQoisToAdqgoJ6ndcqafpBFlD
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Hi,
 
+I've checked straw2 algorithm. It uses two 2Kb lookup tables to determine the log values. The exponential distribution could be achieved as a sum of squares of normally distributed numbers. And sum of multiple uniformly distributed values is a good approximation to the normal distribution. Event with 4 bytes sum the result is quite ok.
+I've tried this (the code is in C#, but I believe you'll catch the idea):
 
+public Item Select(Obj obj, out int iters)
+{
+    iters = 0;
+    while (true)
+    {
+        ++iters;
+        Item selectedItem = null;
+        long min = long.MaxValue;
+        for (int index = 0; index < Items.Count; index++)
+        {
+            var item = Items[index];
+            if (item.Weight == 0)
+                continue;
+            var k = index + 1;
+            byte[] rnd1 = obj.GetPseudoRandom(iters * k);
+            byte[] rnd2 = obj.GetPseudoRandom(2 * iters + rnd1[0] * k);
 
-On 15/05/2015 21:05, Sage Weil wrote:
-> On Fri, 15 May 2015, Loic Dachary wrote:
->> Hi Sage,
->>
->> On 21/04/2015 17:52, Sage Weil wrote:
->>> The bulk of it is ceph-objectstore-tool, which is important to get in=
-to a=20
->>> release, IMO.  David, are these being tested in the firefly thrashing=
-=20
->>> tests yet?
->>>
->>> The only other one I'm worried about is
->>>
->>> 6fd3dfa osd: do not ignore deleted pgs on startup
->>>
->>> Sam, I assume the recent hammer upgrade issue is would bite firefly f=
-olks=20
->>> who upgrade too?
->>
->> A backport of "OSD::load_pgs: we need to handle the case where an upgr=
-ade from earlier versions which ignored non-existent pgs resurrects a pg =
-with a prehistoric osdmap" http://tracker.ceph.com/issues/11429 found at =
-https://github.com/ceph/ceph/pull/4556 has been successfully tested on fi=
-refly at http://pulpito.ceph.com/loic-2015-05-13_00:01:26-rados-firefly-b=
-ackports---basic-multi/ and in a rados suite run that completed today htt=
-p://tracker.ceph.com/issues/11090#rados.
->>
->> Provided https://github.com/ceph/ceph/pull/4556 is merged, do you thin=
-k we should prepare to release firefly v0.80.10 ?
->=20
-> As Yehuda mentioned the other open issue is the rgw multipart corruptio=
-n. =20
-> I'm guessing we want to include that?
+            int sum1 = 2;//avarage sbyte is -0.5; move the center to 0
+            for (int i = 0; i < 4; i++)
+                sum1 += (sbyte)rnd1[i];
 
-Yes, we will include and test the http://tracker.ceph.com/issues/11622 an=
-d http://tracker.ceph.com/issues/11604 backports.
+            int sum2 = 2;
+            for (int i = 0; i < 4; i++)
+                sum2 += (sbyte)rnd2[i];
 
-Cheers
+            long rnd = sum1 * sum1 + sum2 * sum2; //approx exponential
+            rnd <<= 30;
+            rnd /= item.Weight;
+            if (rnd < min)
+            {
+                min = rnd;
+                selectedItem = item;
+            }
+        }
 
->=20
-> sage
->=20
->>
->> Cheers
->>
->>>
->>> sage
->>>
->>>
->>> On Tue, 21 Apr 2015, Loic Dachary wrote:
->>>
->>>> Hi Sage,
->>>>
->>>> The firefly branch has a number of fixes ( http://tracker.ceph.com/i=
-ssues/11090#Release-information ) and has been used for upgrade tests in =
-the past few weeks. A few other issues have been backported since and are=
- being tested in the integration branch ( http://tracker.ceph.com/issues/=
-11090#teuthology-run-commitb91bbb434e6363a99a632cf3841f70f1f2549f79-integ=
-ration-branch-april-2015 ).=20
->>>>
->>>> Do you think these changes deserve a firefly v0.80.10 release ? Shou=
-ld we ask each lead for their approval ? Or is it better to keep backport=
-ing what needs to be and wait a few weeks ?
->>>>
->>>> Cheers
->>>>
->>>> --=20
->>>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->>>>
->>
->> --=20
->> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->>
+        if (!selectedItem.disabled)
+            return selectedItem;
+    }
+}
+( https://github.com/artelk/CRUSH_Selection_Algorithm_Test/blob/master/Program.cs )
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+With 10 items (with weights 1..2) within the bucket and 10^5 objects the object distribution is like this:
 
+Weight:1, w:0.0625, diff:-1.38%, count:6164
+Weight:2, w:0.1250, diff:-1.65%, count:12294
+Weight:1, w:0.0625, diff:1.57%, count:6348
+Weight:1, w:0.0625, diff:-0.18%, count:6239
+Weight:2, w:0.1250, diff:0.19%, count:12524
+Weight:2, w:0.1250, diff:1.43%, count:12679
+Weight:2, w:0.1250, diff:0.92%, count:12615
+Weight:2, w:0.1250, diff:0.77%, count:12596
+Weight:1, w:0.0625, diff:0.59%, count:6287
+Weight:2, w:0.1250, diff:-1.97%, count:12254
 
---PWPXnObhlQoisToAdqgoJ6ndcqafpBFlD
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+So the deviation from the expected numbers is quite small. With 10^6 objects the deviation becomes lesser than 1%. I've tried to add more bucket items with different weights and tried to change the weights of arbitrary items. The amount of moved objects is very close to optimal one.
+What do you think of that?
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
+Btw, I've tried another algorithm. That is of O(1) complexity. But it requires a few seconds for initialization (this can be optimized) and creates a several megabyte array which is cached until the next changes in crush map and\or osd weights. Could you tell me if the selection algorithms (straw\tree\list\...) are called every time the object is read\written or there is some memory cached {pg_id->[osd list]} table that is used for the placement decision?
 
-iEYEARECAAYFAlVWVOgACgkQ8dLMyEl6F21QjwCeNXH2ZXezX26Rsi/WiNQSGIIE
-uqQAnjXpYbqtcb2i41dNMT7MVE7GZzSU
-=kZhW
------END PGP SIGNATURE-----
-
---PWPXnObhlQoisToAdqgoJ6ndcqafpBFlD--
+Regards,
+Artem
