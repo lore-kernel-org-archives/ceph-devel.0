@@ -1,116 +1,47 @@
 From: Michal Jarzabek <stiopa@gmail.com>
-Subject: Re: Problem running make check
-Date: Sat, 16 May 2015 15:10:19 +0100
-Message-ID: <CAEFDAA7WXWc+5CK_QAkAFq04kCPRSKmBwHgouuYHZBR2wigCUg@mail.gmail.com>
-References: <CAEFDAA5BroNoMvR8Yyvf+nj_0RJa20gkCUhJo3zrbvYNYa5w1g@mail.gmail.com>
-	<CAC6JEv9s1fSk7X5XSp8CtYN6Qr3SR5+XRD-Lu51YDJw0RGdRNA@mail.gmail.com>
-	<55552C87.1080100@dachary.org>
-	<CAEFDAA5b7DDzycDT0BY98en9wUiKjOVW1nJYL6drpuumkBJWGg@mail.gmail.com>
+Subject: make check, src/test/ceph-disk.sh fails on Mint
+Date: Sat, 16 May 2015 16:49:08 +0100
+Message-ID: <CAEFDAA6rAJeS80+Qrg=orzug++YWmGee31KYu1=pLy2s3HDYiQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f53.google.com ([74.125.82.53]:32995 "EHLO
-	mail-wg0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751092AbbEPOKU convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 16 May 2015 10:10:20 -0400
-Received: by wgin8 with SMTP id n8so143778636wgi.0
-        for <ceph-devel@vger.kernel.org>; Sat, 16 May 2015 07:10:19 -0700 (PDT)
-In-Reply-To: <CAEFDAA5b7DDzycDT0BY98en9wUiKjOVW1nJYL6drpuumkBJWGg@mail.gmail.com>
+Received: from mail-wi0-f171.google.com ([209.85.212.171]:34999 "EHLO
+	mail-wi0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753622AbbEPPtJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 16 May 2015 11:49:09 -0400
+Received: by wicmx19 with SMTP id mx19so26829457wic.0
+        for <ceph-devel@vger.kernel.org>; Sat, 16 May 2015 08:49:08 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Didn't notice that I had not enough space on my HDD.
-It works now, thanks for help!
+Hi,
 
+Is there any simple way to fix this? I'm not really familiar with python...
+
+DEBUG:ceph-disk:ceph osd.0 data dir is ready at
+/home/stiopa/development/ceph/ceph/src/test-ceph-disk/dir
+DEBUG:ceph-disk:Creating symlink test-ceph-disk/osd/ceph-0 ->
+/home/stiopa/development/ceph/ceph/src/test-ceph-disk/dir
+ttest_mark_init: 203: ceph-detect-init
+Traceback (most recent call last):
+  File "/home/stiopa/development/ceph/ceph/src/virtualenv-test-ceph-disk/bin/ceph-detect-init",
+line 9, in <module>
+    load_entry_point('ceph-detect-init==1.0.1', 'console_scripts',
+'ceph-detect-init')()
+  File "/home/stiopa/development/ceph/ceph/src/ceph-detect-init/ceph_detect_init/main.py",
+line 56, in run
+    print(ceph_detect_init.get(args.use_rhceph).init)
+  File "/home/stiopa/development/ceph/ceph/src/ceph-detect-init/ceph_detect_init/__init__.py",
+line 34, in get
+    release=release)
+ceph_detect_init.exc.UnsupportedPlatform: Platform is not supported.:
+LinuxMint rebecca 17.1
+test_mark_init: 203: test -f
+/home/stiopa/development/ceph/ceph/src/test-ceph-disk/dir/
+test_mark_init: 203: return 1
+run: 620: status=1
+run: 621: set +x
+
+Thanks,
 Michal
-
-On Sat, May 16, 2015 at 9:55 AM, Michal Jarzabek <stiopa@gmail.com> wro=
-te:
-> Loic: I've got 16GB ram, SSD and 3.3GHz 4 cores cpu
->
-> I have increased ulimit settings as Greg suggested to 16K and turned =
-off lttng.
-> Now it hangs in different place:
->
-> ...
-> PASS: unittest_ipaddr
-> PASS: unittest_texttable
-> PASS: unittest_on_exit
-> PASS: unittest_readahead
-> PASS: unittest_tableformatter
-> PASS: unittest_bit_vector
-> PASS: ceph-detect-init/run-tox.sh
-> FAIL: test/erasure-code/test-erasure-code.sh
-> PASS: test/run-rbd-unit-tests.sh
->
->
->
-> On Fri, May 15, 2015 at 12:15 AM, Loic Dachary <loic@dachary.org> wro=
-te:
->>
->>
->> On 14/05/2015 22:55, Gregory Farnum wrote:
->>> On Thu, May 14, 2015 at 1:24 PM, Michal Jarzabek <stiopa@gmail.com>=
- wrote:
->>>> Hi,
->>>>
->>>> After cloning ceph repo and then running:
->>>> ./autogen.sh
->>>> ./configure
->>>> make -j 8
->>>> make check
->>>>
->>>> make check always hangs after following lines:
->>>> LD_PRELOAD=3Dliblttng-ust-fork.so
->>>> PASS: unittest_texttable
->>>> LD_PRELOAD=3Dliblttng-ust-fork.so
->>>> PASS: unittest_on_exit
->>>> LD_PRELOAD=3Dliblttng-ust-fork.so
->>>> PASS: unittest_readahead
->>>> LD_PRELOAD=3Dliblttng-ust-fork.so
->>>> PASS: unittest_tableformatter
->>>> LD_PRELOAD=3Dliblttng-ust-fork.so
->>>> PASS: unittest_bit_vector
->>>> LD_PRELOAD=3Dliblttng-ust-fork.so
->>>> PASS: ceph-detect-init/run-tox.sh
->>>> LD_PRELOAD=3Dliblttng-ust-fork.so
->>>>
->>>> Any idea what might be a problem?
->>
->> In addition to what Greg said:
->>
->> ./configure --without-lttng ...
->>
->> lttng is indeed the most probably cause for failure. How much RAM/CP=
-U does your machine have ? Is this running on SSD or spinner ? Not that=
- a spinner would be a problem but mor than -j4 on a spinner is probably=
- not a good idea because the disk will be the bottleneck.
->>
->>>
->>> You can try building without lttng, which has helped some users, an=
-d
->>> you can check if you have high enough ulimit settings. The defaults=
- on
->>> my box were not high enough; I bumped both files and processes up t=
-o
->>> 16k and rebooted before I could get it working properly.
->>
->>> -Greg
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
-l" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>
->> --
->> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->>
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
