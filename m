@@ -1,47 +1,26 @@
-From: Michal Jarzabek <stiopa@gmail.com>
-Subject: make check, src/test/ceph-disk.sh fails on Mint
-Date: Sat, 16 May 2015 16:49:08 +0100
-Message-ID: <CAEFDAA6rAJeS80+Qrg=orzug++YWmGee31KYu1=pLy2s3HDYiQ@mail.gmail.com>
+From: David Zafman <dzafman@redhat.com>
+Subject: Re: make check, src/test/ceph-disk.sh fails on Mint
+Date: Sat, 16 May 2015 14:30:59 -0700
+Message-ID: <5557B713.70905@redhat.com>
+References: <CAEFDAA6rAJeS80+Qrg=orzug++YWmGee31KYu1=pLy2s3HDYiQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f171.google.com ([209.85.212.171]:34999 "EHLO
-	mail-wi0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753622AbbEPPtJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 16 May 2015 11:49:09 -0400
-Received: by wicmx19 with SMTP id mx19so26829457wic.0
-        for <ceph-devel@vger.kernel.org>; Sat, 16 May 2015 08:49:08 -0700 (PDT)
+Received: from mx1.redhat.com ([209.132.183.28]:57755 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750792AbbEPVbC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 16 May 2015 17:31:02 -0400
+In-Reply-To: <CAEFDAA6rAJeS80+Qrg=orzug++YWmGee31KYu1=pLy2s3HDYiQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Michal Jarzabek <stiopa@gmail.com>, ceph-devel@vger.kernel.org
 
-Hi,
 
-Is there any simple way to fix this? I'm not really familiar with python...
+Is something really broken?  Or are you just on an unsupported platform?
 
-DEBUG:ceph-disk:ceph osd.0 data dir is ready at
-/home/stiopa/development/ceph/ceph/src/test-ceph-disk/dir
-DEBUG:ceph-disk:Creating symlink test-ceph-disk/osd/ceph-0 ->
-/home/stiopa/development/ceph/ceph/src/test-ceph-disk/dir
-ttest_mark_init: 203: ceph-detect-init
-Traceback (most recent call last):
-  File "/home/stiopa/development/ceph/ceph/src/virtualenv-test-ceph-disk/bin/ceph-detect-init",
-line 9, in <module>
-    load_entry_point('ceph-detect-init==1.0.1', 'console_scripts',
-'ceph-detect-init')()
-  File "/home/stiopa/development/ceph/ceph/src/ceph-detect-init/ceph_detect_init/main.py",
-line 56, in run
-    print(ceph_detect_init.get(args.use_rhceph).init)
-  File "/home/stiopa/development/ceph/ceph/src/ceph-detect-init/ceph_detect_init/__init__.py",
-line 34, in get
-    release=release)
-ceph_detect_init.exc.UnsupportedPlatform: Platform is not supported.:
-LinuxMint rebecca 17.1
-test_mark_init: 203: test -f
-/home/stiopa/development/ceph/ceph/src/test-ceph-disk/dir/
-test_mark_init: 203: return 1
-run: 620: status=1
-run: 621: set +x
+David
 
-Thanks,
-Michal
+On 5/16/15 8:49 AM, Michal Jarzabek wrote:
+> ceph_detect_init.exc.UnsupportedPlatform: Platform is not supported.:
+
