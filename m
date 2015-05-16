@@ -1,109 +1,94 @@
-From: Gregory Farnum <greg@gregs42.com>
-Subject: Re: straw2-like algorithm
-Date: Fri, 15 May 2015 15:28:16 -0700
-Message-ID: <CAC6JEv_+63VOuTN=PgOahWE-KZT=oRvpzux_M0MPbrEbwUeVsg@mail.gmail.com>
-References: <DB3PR03MB06841B94BC544DA1466E1E95D4C70@DB3PR03MB0684.eurprd03.prod.outlook.com>
+From: huang jun <hjwsm1989@gmail.com>
+Subject: Re: bad CRC in data error on ARM
+Date: Sat, 16 May 2015 10:10:37 +0800
+Message-ID: <CABAwU-YpoDsx50f2FieLyMX0Fqf3_nyPiayNxEdm6u6q5fF1Yg@mail.gmail.com>
+References: <CABAwU-Y8-fV6cFza0oHt8yJ4+-nYs51b0rQ5qDqQCfpJUk2kvw@mail.gmail.com>
+	<CAPvkgC1OeQBKq+m42qccKkQHz1rLuGHt29rLJwVQrP=5V92DKw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:34492 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S2992435AbbEOW2R convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 15 May 2015 18:28:17 -0400
-Received: by ieczm2 with SMTP id zm2so60552570iec.1
-        for <ceph-devel@vger.kernel.org>; Fri, 15 May 2015 15:28:17 -0700 (PDT)
-Received: from mail-ig0-f172.google.com (mail-ig0-f172.google.com. [209.85.213.172])
-        by mx.google.com with ESMTPSA id n14sm2123721ion.5.2015.05.15.15.28.16
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 15 May 2015 15:28:16 -0700 (PDT)
-Received: by igbyr2 with SMTP id yr2so8494153igb.0
-        for <ceph-devel@vger.kernel.org>; Fri, 15 May 2015 15:28:16 -0700 (PDT)
-In-Reply-To: <DB3PR03MB06841B94BC544DA1466E1E95D4C70@DB3PR03MB0684.eurprd03.prod.outlook.com>
+Received: from mail-la0-f52.google.com ([209.85.215.52]:33405 "EHLO
+	mail-la0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1946121AbbEPCKj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 15 May 2015 22:10:39 -0400
+Received: by lagr1 with SMTP id r1so64889114lag.0
+        for <ceph-devel@vger.kernel.org>; Fri, 15 May 2015 19:10:37 -0700 (PDT)
+In-Reply-To: <CAPvkgC1OeQBKq+m42qccKkQHz1rLuGHt29rLJwVQrP=5V92DKw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Artem Elkin <Artem.Elkin@icl-services.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Steve Capper <steve.capper@linaro.org>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Yazen Ghannam <yazen.ghannam@linaro.org>
 
-On Fri, May 15, 2015 at 2:33 PM, Artem Elkin
-<Artem.Elkin@icl-services.com> wrote:
-> Hi,
->
-> I've checked straw2 algorithm. It uses two 2Kb lookup tables to determine the log values. The exponential distribution could be achieved as a sum of squares of normally distributed numbers. And sum of multiple uniformly distributed values is a good approximation to the normal distribution. Event with 4 bytes sum the result is quite ok.
-> I've tried this (the code is in C#, but I believe you'll catch the idea):
->
-> public Item Select(Obj obj, out int iters)
-> {
->     iters = 0;
->     while (true)
->     {
->         ++iters;
->         Item selectedItem = null;
->         long min = long.MaxValue;
->         for (int index = 0; index < Items.Count; index++)
->         {
->             var item = Items[index];
->             if (item.Weight == 0)
->                 continue;
->             var k = index + 1;
->             byte[] rnd1 = obj.GetPseudoRandom(iters * k);
->             byte[] rnd2 = obj.GetPseudoRandom(2 * iters + rnd1[0] * k);
->
->             int sum1 = 2;//avarage sbyte is -0.5; move the center to 0
->             for (int i = 0; i < 4; i++)
->                 sum1 += (sbyte)rnd1[i];
->
->             int sum2 = 2;
->             for (int i = 0; i < 4; i++)
->                 sum2 += (sbyte)rnd2[i];
->
->             long rnd = sum1 * sum1 + sum2 * sum2; //approx exponential
->             rnd <<= 30;
->             rnd /= item.Weight;
->             if (rnd < min)
->             {
->                 min = rnd;
->                 selectedItem = item;
->             }
->         }
->
->         if (!selectedItem.disabled)
->             return selectedItem;
->     }
-> }
-> ( https://github.com/artelk/CRUSH_Selection_Algorithm_Test/blob/master/Program.cs )
->
-> With 10 items (with weights 1..2) within the bucket and 10^5 objects the object distribution is like this:
->
-> Weight:1, w:0.0625, diff:-1.38%, count:6164
-> Weight:2, w:0.1250, diff:-1.65%, count:12294
-> Weight:1, w:0.0625, diff:1.57%, count:6348
-> Weight:1, w:0.0625, diff:-0.18%, count:6239
-> Weight:2, w:0.1250, diff:0.19%, count:12524
-> Weight:2, w:0.1250, diff:1.43%, count:12679
-> Weight:2, w:0.1250, diff:0.92%, count:12615
-> Weight:2, w:0.1250, diff:0.77%, count:12596
-> Weight:1, w:0.0625, diff:0.59%, count:6287
-> Weight:2, w:0.1250, diff:-1.97%, count:12254
->
-> So the deviation from the expected numbers is quite small. With 10^6 objects the deviation becomes lesser than 1%. I've tried to add more bucket items with different weights and tried to change the weights of arbitrary items. The amount of moved objects is very close to optimal one.
-> What do you think of that?
->
-> Btw, I've tried another algorithm. That is of O(1) complexity. But it requires a few seconds for initialization (this can be optimized) and creates a several megabyte array which is cached until the next changes in crush map and\or osd weights. Could you tell me if the selection algorithms (straw\tree\list\...) are called every time the object is read\written or there is some memory cached {pg_id->[osd list]} table that is used for the placement decision?
+hi,steve
 
-Maybe I'm misunderstanding what you're saying here, and it's
-definitely an interesting topic, but:
+2015-05-15 16:36 GMT+08:00 Steve Capper <steve.capper@linaro.org>:
+> On 15 May 2015 at 00:51, huang jun <hjwsm1989@gmail.com> wrote:
+>> hi,all
+>
+> Hi HuangJun,
+>
+>>
+>> We run ceph cluster on ARM platform (arm64, linux kernel 3.14, OS
+>> ubuntu 14.10), and use "dd if=/dev/zero of=/mnt/test bs=4M count=125"
+>> to write data.  On the osd side, we got bad data CRC error.
+>>
+>> The kclient log: (tid=6)
+>> May 14 17:21:08 node103 kernel: [  180.194312] CPU[0] libceph:
+>> send_request ffffffc8d252f000 tid-6 to osd0 flags 36 pg 1.9aae829f req
+>> data size is 4194304
+>> May 14 17:21:08 node103 kernel: [  180.194316] CPU[0] libceph: tid-6
+>> ----- ffffffc0702f66c8 to osd0 42=osd_op len 197+0+4194304 -----
+>> libceph: tid-6 front_crc is 388648745 middle_crc is 0 data_crc is 3036014994
+>>
+>> The OSD-0 log:
+>> 2015-05-13 08:12:50.049345 7f378d8d8700  0 seq  3 tid 6 front_len 197
+>> mid_len 0 data_len 4194304
+>> 2015-05-13 08:12:50.049348 7f378d8d8700  0 crc in front 388648745 exp 388648745
+>> 2015-05-13 08:12:50.049395 7f378d8d8700  0 crc in middle 0 exp 0
+>> 2015-05-13 08:12:50.049964 7f378d8d8700  0 crc in data 0 exp 3036014994
+>> 2015-05-13 08:12:50.050234 7f378d8d8700  0 bad crc in data 0 != exp 3036014994
+>>
+>> some considerations:
+>> 1) we use ceph 0.80.7 realse version and compile it on ARM, did this
+>> works? or  does ceph's code has ARM branch?
+>
+> We did run a Ceph version close to that for 64-bit ARM, I'm checking
+> out 0.80.7 now to test.
+> In v9.0.0, there is some code to use the ARM optional crc32c
+> instructions, but this isn't in 0.80.7.
+>
+>>
+>> 2) as we have write 125 objects, only few of them report CRC error,
+>> and the right object's data_crc is 0 both on osd and kclient. the
+>> wrong object's data_crc is not 0 on kclient, but osd calculate result
+>> 0. the object data came from /dev/zero, i think the data_crc should be
+>> 0, am i right?
+>>
+>
+> If the initial CRC seed value is non-zero, then the CRC of a buffer
+> full of zeros won't be zero.
+> So ceph_crc32c(somethingnonzero, zerofilledbuffer, len), will be non-zero.
+>
+> I would like to reproduce this problem here.
+> What steps did you take before this error occurred?
+> Is this a cephfs filesystem or something on top of an RBD image?
+> Which kernel are you running? Is it the one that comes with Ubuntu?
+> (If so which package version is it?)
+>
+We use linux kernel version 3.14 and we just tested it on Ubuntu, and
+ceph version v0.80.7. Both cephfs and RBD image have CRC problems.
+I'm not sure whether it's related to Memory, since we tested many
+times, but just a few reported CRC error.
+As i mentioned, i doubt the memory fault changed the data, because we
+write 125 objects, and the all data_crc is 0 except the Bad CRC
+object's data_crc. Any tips are welcome.
 
-The current implementation is pretty heavily-optimized. If I
-understand and remember correctly, we are currently using two small
-lookup tables to do the calculations. We started out with the the sum
-of squares thing (mathematically at least) and then were using the
-standard methods to compute that, but it was slower than we wanted.
-The full-sized lookup table was the next step (and we could encode it
-into the source if we wanted), but due to typical cache size tradeoffs
-the combined lookup table and computation we're doing now is usually
-faster.
+> Cheers,
+> --
+> Steve
 
-At least, this is how I remember it. Somebody who actually did the
-work might be able to contradict me. ;)
+
+
+-- 
+thanks
+huangjun
