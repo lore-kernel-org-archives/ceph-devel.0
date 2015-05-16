@@ -1,28 +1,37 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: (unknown)
-Date: Sat, 16 May 2015 18:42:19 +0800
-Message-ID: <CACJqLyZUy_-kfaCeM7ZaS_PawtdWuNOG2eu5tFxdZB33WooxKg@mail.gmail.com>
+From: huang jun <hjwsm1989@gmail.com>
+Subject: Re: bad CRC in data error on ARM
+Date: Sat, 16 May 2015 18:54:36 +0800
+Message-ID: <CABAwU-bx4k+fgszjW4XOh9jGiHdi1=M_go1qzPKYEBfC7Kh7cA@mail.gmail.com>
+References: <CABAwU-Y8-fV6cFza0oHt8yJ4+-nYs51b0rQ5qDqQCfpJUk2kvw@mail.gmail.com>
+	<CAPvkgC1OeQBKq+m42qccKkQHz1rLuGHt29rLJwVQrP=5V92DKw@mail.gmail.com>
+	<CABAwU-YpoDsx50f2FieLyMX0Fqf3_nyPiayNxEdm6u6q5fF1Yg@mail.gmail.com>
+	<CACJqLyZ6+VEw597JRgsjeWntYVOiEWLGNmXc2F5wEbwzOVZCjA@mail.gmail.com>
+	<CABAwU-az+xyq856FJfe7kP1tgohO9K+6M9VZ0KPifvxBDpyhWg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f45.google.com ([209.85.220.45]:35574 "EHLO
-	mail-pa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750973AbbEPKmT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 16 May 2015 06:42:19 -0400
-Received: by pacwv17 with SMTP id wv17so60875554pac.2
-        for <ceph-devel@vger.kernel.org>; Sat, 16 May 2015 03:42:19 -0700 (PDT)
-Subject: 
+Received: from mail-la0-f49.google.com ([209.85.215.49]:35302 "EHLO
+	mail-la0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751132AbbEPKyi (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 16 May 2015 06:54:38 -0400
+Received: by labbd9 with SMTP id bd9so157114744lab.2
+        for <ceph-devel@vger.kernel.org>; Sat, 16 May 2015 03:54:37 -0700 (PDT)
+In-Reply-To: <CABAwU-az+xyq856FJfe7kP1tgohO9K+6M9VZ0KPifvxBDpyhWg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: huang jun <hjwsm1989@gmail.com>
+To: Haomai Wang <haomaiwang@gmail.com>
 Cc: Steve Capper <steve.capper@linaro.org>, ceph-devel <ceph-devel@vger.kernel.org>, Yazen Ghannam <yazen.ghannam@linaro.org>
 
-Even if from /dev/zero, the data crc shouldn't be 0.
+<<Even if from /dev/zero, the data crc shouldn't be 0.
+we print all 4M object's data crc, it seems all 0 until now.
+<<I guess osd(arm) doesn't do crc computing. But from code, crc for arm
+<<should be fine
+When decode a message, it will check the fron_crc, middle_crc and also data_crc,
+so not OSD but MON and MDS will do crc computing, and the OSD side
+compute the CRC value is 0, which is different with the data_crc in
+message footer.data_crc.
 
-I guess osd(arm) doesn't do crc computing. But from code, crc for arm
-should be fine
-
-On Sat, May 16, 2015 at 6:21 PM, huang jun <hjwsm1989@gmail.com> wrote:
+2015-05-16 18:21 GMT+08:00 huang jun <hjwsm1989@gmail.com>:
 > that always happen, every test have such errors. And our cluster and
 > client that  running on X86 works fine, never seen bad crc error.
 >
@@ -125,6 +134,5 @@ On Sat, May 16, 2015 at 6:21 PM, huang jun <hjwsm1989@gmail.com> wrote:
 
 
 -- 
-Best Regards,
-
-Wheat
+thanks
+huangjun
