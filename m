@@ -1,71 +1,106 @@
-From: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
-Subject: Package build from master busted on Ubuntu Vivid
-Date: Sat, 16 May 2015 19:53:02 +1200
-Message-ID: <5556F75E.5040101@catalyst.net.nz>
+From: Michal Jarzabek <stiopa@gmail.com>
+Subject: Re: Problem running make check
+Date: Sat, 16 May 2015 09:55:47 +0100
+Message-ID: <CAEFDAA5b7DDzycDT0BY98en9wUiKjOVW1nJYL6drpuumkBJWGg@mail.gmail.com>
+References: <CAEFDAA5BroNoMvR8Yyvf+nj_0RJa20gkCUhJo3zrbvYNYa5w1g@mail.gmail.com>
+	<CAC6JEv9s1fSk7X5XSp8CtYN6Qr3SR5+XRD-Lu51YDJw0RGdRNA@mail.gmail.com>
+	<55552C87.1080100@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from bertrand.catalyst.net.nz ([202.78.240.40]:48639 "EHLO
-	mail.catalyst.net.nz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932626AbbEPHxI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 16 May 2015 03:53:08 -0400
-Received: from localhost (localhost [127.0.0.1])
-	by mail.catalyst.net.nz (Postfix) with ESMTP id E4C0132B49
-	for <ceph-devel@vger.kernel.org>; Sat, 16 May 2015 19:53:04 +1200 (NZST)
-Received: from mail.catalyst.net.nz ([127.0.0.1])
-	by localhost (bertrand.catalyst.net.nz [127.0.0.1]) (amavisd-new, port 10024)
-	with ESMTP id EDPzzXTATBij for <ceph-devel@vger.kernel.org>;
-	Sat, 16 May 2015 19:53:02 +1200 (NZST)
-Received: from [192.168.1.64] (125-237-67-100.jetstream.xtra.co.nz [125.237.67.100])
-	(Authenticated sender: mark.kirkwood)
-	by mail.catalyst.net.nz (Postfix) with ESMTPSA id B9BDA322B4
-	for <ceph-devel@vger.kernel.org>; Sat, 16 May 2015 19:53:02 +1200 (NZST)
+Received: from mail-wi0-f171.google.com ([209.85.212.171]:37727 "EHLO
+	mail-wi0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754836AbbEPIzt convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 16 May 2015 04:55:49 -0400
+Received: by wibt6 with SMTP id t6so16828671wib.0
+        for <ceph-devel@vger.kernel.org>; Sat, 16 May 2015 01:55:48 -0700 (PDT)
+In-Reply-To: <55552C87.1080100@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Loic Dachary <loic@dachary.org>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
+Loic: I've got 16GB ram, SSD and 3.3GHz 4 cores cpu
 
-While a standard build (configure, make etc) on $platform works fine, 
-attempting to build packages gets:
+I have increased ulimit settings as Greg suggested to 16K and turned of=
+f lttng.
+Now it hangs in different place:
 
-$ dpkg-buildpackage -j4
-dpkg-buildpackage: source package ceph
-dpkg-buildpackage: source version 9.0.0-1
-dpkg-buildpackage: source distribution stable
-dpkg-buildpackage: source changed by Alfredo Deza <adeza@redhat.com>
-dpkg-buildpackage: host architecture amd64
-  dpkg-source --before-build ceph
-  fakeroot debian/rules clean
-dh_testdir
-dh_testroot
-rm -f build-stamp configure-stamp
-[ ! -f Makefile ] || /usr/bin/make distclean
-make[1]: Entering directory '/home/markir/develop/c/ceph'
-Making distclean in .
-make[2]: Entering directory '/home/markir/develop/c/ceph'
-rm -rf .libs _libs
-rm -f *.lo
-test -z "ceph.spec" || rm -f ceph.spec
-rm -f libtool config.lt
-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
-test . = "." || test -z "" || rm -f
-rm -f cscope.out cscope.in.out cscope.po.out cscope.files
-make[2]: Leaving directory '/home/markir/develop/c/ceph'
-Making distclean in src
-make[2]: Entering directory '/home/markir/develop/c/ceph/src'
-Making distclean in gmock
-make[3]: Entering directory '/home/markir/develop/c/ceph/src/gmock'
-make[3]: *** No rule to make target 'distclean'.  Stop.
-make[3]: Leaving directory '/home/markir/develop/c/ceph/src/gmock'
-Makefile:21632: recipe for target 'distclean-recursive' failed
-make[2]: *** [distclean-recursive] Error 1
-make[2]: Leaving directory '/home/markir/develop/c/ceph/src'
-Makefile:469: recipe for target 'distclean-recursive' failed
-make[1]: *** [distclean-recursive] Error 1
-make[1]: Leaving directory '/home/markir/develop/c/ceph'
-debian/rules:62: recipe for target 'clean' failed
-make: *** [clean] Error 2
-dpkg-buildpackage: error: fakeroot debian/rules clean gave error exit 
-status 2
+=2E..
+PASS: unittest_ipaddr
+PASS: unittest_texttable
+PASS: unittest_on_exit
+PASS: unittest_readahead
+PASS: unittest_tableformatter
+PASS: unittest_bit_vector
+PASS: ceph-detect-init/run-tox.sh
+=46AIL: test/erasure-code/test-erasure-code.sh
+PASS: test/run-rbd-unit-tests.sh
+
+
+
+On Fri, May 15, 2015 at 12:15 AM, Loic Dachary <loic@dachary.org> wrote=
+:
+>
+>
+> On 14/05/2015 22:55, Gregory Farnum wrote:
+>> On Thu, May 14, 2015 at 1:24 PM, Michal Jarzabek <stiopa@gmail.com> =
+wrote:
+>>> Hi,
+>>>
+>>> After cloning ceph repo and then running:
+>>> ./autogen.sh
+>>> ./configure
+>>> make -j 8
+>>> make check
+>>>
+>>> make check always hangs after following lines:
+>>> LD_PRELOAD=3Dliblttng-ust-fork.so
+>>> PASS: unittest_texttable
+>>> LD_PRELOAD=3Dliblttng-ust-fork.so
+>>> PASS: unittest_on_exit
+>>> LD_PRELOAD=3Dliblttng-ust-fork.so
+>>> PASS: unittest_readahead
+>>> LD_PRELOAD=3Dliblttng-ust-fork.so
+>>> PASS: unittest_tableformatter
+>>> LD_PRELOAD=3Dliblttng-ust-fork.so
+>>> PASS: unittest_bit_vector
+>>> LD_PRELOAD=3Dliblttng-ust-fork.so
+>>> PASS: ceph-detect-init/run-tox.sh
+>>> LD_PRELOAD=3Dliblttng-ust-fork.so
+>>>
+>>> Any idea what might be a problem?
+>
+> In addition to what Greg said:
+>
+> ./configure --without-lttng ...
+>
+> lttng is indeed the most probably cause for failure. How much RAM/CPU=
+ does your machine have ? Is this running on SSD or spinner ? Not that =
+a spinner would be a problem but mor than -j4 on a spinner is probably =
+not a good idea because the disk will be the bottleneck.
+>
+>>
+>> You can try building without lttng, which has helped some users, and
+>> you can check if you have high enough ulimit settings. The defaults =
+on
+>> my box were not high enough; I bumped both files and processes up to
+>> 16k and rebooted before I could get it working properly.
+>
+>> -Greg
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>
+> --
+> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
