@@ -1,106 +1,109 @@
-From: Michal Jarzabek <stiopa@gmail.com>
-Subject: Re: Problem running make check
-Date: Sat, 16 May 2015 09:55:47 +0100
-Message-ID: <CAEFDAA5b7DDzycDT0BY98en9wUiKjOVW1nJYL6drpuumkBJWGg@mail.gmail.com>
-References: <CAEFDAA5BroNoMvR8Yyvf+nj_0RJa20gkCUhJo3zrbvYNYa5w1g@mail.gmail.com>
-	<CAC6JEv9s1fSk7X5XSp8CtYN6Qr3SR5+XRD-Lu51YDJw0RGdRNA@mail.gmail.com>
-	<55552C87.1080100@dachary.org>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: bad CRC in data error on ARM
+Date: Sat, 16 May 2015 17:30:03 +0800
+Message-ID: <CACJqLyZ6+VEw597JRgsjeWntYVOiEWLGNmXc2F5wEbwzOVZCjA@mail.gmail.com>
+References: <CABAwU-Y8-fV6cFza0oHt8yJ4+-nYs51b0rQ5qDqQCfpJUk2kvw@mail.gmail.com>
+	<CAPvkgC1OeQBKq+m42qccKkQHz1rLuGHt29rLJwVQrP=5V92DKw@mail.gmail.com>
+	<CABAwU-YpoDsx50f2FieLyMX0Fqf3_nyPiayNxEdm6u6q5fF1Yg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f171.google.com ([209.85.212.171]:37727 "EHLO
-	mail-wi0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754836AbbEPIzt convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 16 May 2015 04:55:49 -0400
-Received: by wibt6 with SMTP id t6so16828671wib.0
-        for <ceph-devel@vger.kernel.org>; Sat, 16 May 2015 01:55:48 -0700 (PDT)
-In-Reply-To: <55552C87.1080100@dachary.org>
+Received: from mail-pd0-f179.google.com ([209.85.192.179]:36295 "EHLO
+	mail-pd0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755074AbbEPJaD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 16 May 2015 05:30:03 -0400
+Received: by pdfh10 with SMTP id h10so57037032pdf.3
+        for <ceph-devel@vger.kernel.org>; Sat, 16 May 2015 02:30:03 -0700 (PDT)
+In-Reply-To: <CABAwU-YpoDsx50f2FieLyMX0Fqf3_nyPiayNxEdm6u6q5fF1Yg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: huang jun <hjwsm1989@gmail.com>
+Cc: Steve Capper <steve.capper@linaro.org>, ceph-devel <ceph-devel@vger.kernel.org>, Yazen Ghannam <yazen.ghannam@linaro.org>
 
-Loic: I've got 16GB ram, SSD and 3.3GHz 4 cores cpu
+is this always happen or occasionally?
 
-I have increased ulimit settings as Greg suggested to 16K and turned of=
-f lttng.
-Now it hangs in different place:
-
-=2E..
-PASS: unittest_ipaddr
-PASS: unittest_texttable
-PASS: unittest_on_exit
-PASS: unittest_readahead
-PASS: unittest_tableformatter
-PASS: unittest_bit_vector
-PASS: ceph-detect-init/run-tox.sh
-=46AIL: test/erasure-code/test-erasure-code.sh
-PASS: test/run-rbd-unit-tests.sh
-
-
-
-On Fri, May 15, 2015 at 12:15 AM, Loic Dachary <loic@dachary.org> wrote=
-:
+On Sat, May 16, 2015 at 10:10 AM, huang jun <hjwsm1989@gmail.com> wrote:
+> hi,steve
 >
->
-> On 14/05/2015 22:55, Gregory Farnum wrote:
->> On Thu, May 14, 2015 at 1:24 PM, Michal Jarzabek <stiopa@gmail.com> =
-wrote:
->>> Hi,
->>>
->>> After cloning ceph repo and then running:
->>> ./autogen.sh
->>> ./configure
->>> make -j 8
->>> make check
->>>
->>> make check always hangs after following lines:
->>> LD_PRELOAD=3Dliblttng-ust-fork.so
->>> PASS: unittest_texttable
->>> LD_PRELOAD=3Dliblttng-ust-fork.so
->>> PASS: unittest_on_exit
->>> LD_PRELOAD=3Dliblttng-ust-fork.so
->>> PASS: unittest_readahead
->>> LD_PRELOAD=3Dliblttng-ust-fork.so
->>> PASS: unittest_tableformatter
->>> LD_PRELOAD=3Dliblttng-ust-fork.so
->>> PASS: unittest_bit_vector
->>> LD_PRELOAD=3Dliblttng-ust-fork.so
->>> PASS: ceph-detect-init/run-tox.sh
->>> LD_PRELOAD=3Dliblttng-ust-fork.so
->>>
->>> Any idea what might be a problem?
->
-> In addition to what Greg said:
->
-> ./configure --without-lttng ...
->
-> lttng is indeed the most probably cause for failure. How much RAM/CPU=
- does your machine have ? Is this running on SSD or spinner ? Not that =
-a spinner would be a problem but mor than -j4 on a spinner is probably =
-not a good idea because the disk will be the bottleneck.
->
+> 2015-05-15 16:36 GMT+08:00 Steve Capper <steve.capper@linaro.org>:
+>> On 15 May 2015 at 00:51, huang jun <hjwsm1989@gmail.com> wrote:
+>>> hi,all
 >>
->> You can try building without lttng, which has helped some users, and
->> you can check if you have high enough ulimit settings. The defaults =
-on
->> my box were not high enough; I bumped both files and processes up to
->> 16k and rebooted before I could get it working properly.
+>> Hi HuangJun,
+>>
+>>>
+>>> We run ceph cluster on ARM platform (arm64, linux kernel 3.14, OS
+>>> ubuntu 14.10), and use "dd if=/dev/zero of=/mnt/test bs=4M count=125"
+>>> to write data.  On the osd side, we got bad data CRC error.
+>>>
+>>> The kclient log: (tid=6)
+>>> May 14 17:21:08 node103 kernel: [  180.194312] CPU[0] libceph:
+>>> send_request ffffffc8d252f000 tid-6 to osd0 flags 36 pg 1.9aae829f req
+>>> data size is 4194304
+>>> May 14 17:21:08 node103 kernel: [  180.194316] CPU[0] libceph: tid-6
+>>> ----- ffffffc0702f66c8 to osd0 42=osd_op len 197+0+4194304 -----
+>>> libceph: tid-6 front_crc is 388648745 middle_crc is 0 data_crc is 3036014994
+>>>
+>>> The OSD-0 log:
+>>> 2015-05-13 08:12:50.049345 7f378d8d8700  0 seq  3 tid 6 front_len 197
+>>> mid_len 0 data_len 4194304
+>>> 2015-05-13 08:12:50.049348 7f378d8d8700  0 crc in front 388648745 exp 388648745
+>>> 2015-05-13 08:12:50.049395 7f378d8d8700  0 crc in middle 0 exp 0
+>>> 2015-05-13 08:12:50.049964 7f378d8d8700  0 crc in data 0 exp 3036014994
+>>> 2015-05-13 08:12:50.050234 7f378d8d8700  0 bad crc in data 0 != exp 3036014994
+>>>
+>>> some considerations:
+>>> 1) we use ceph 0.80.7 realse version and compile it on ARM, did this
+>>> works? or  does ceph's code has ARM branch?
+>>
+>> We did run a Ceph version close to that for 64-bit ARM, I'm checking
+>> out 0.80.7 now to test.
+>> In v9.0.0, there is some code to use the ARM optional crc32c
+>> instructions, but this isn't in 0.80.7.
+>>
+>>>
+>>> 2) as we have write 125 objects, only few of them report CRC error,
+>>> and the right object's data_crc is 0 both on osd and kclient. the
+>>> wrong object's data_crc is not 0 on kclient, but osd calculate result
+>>> 0. the object data came from /dev/zero, i think the data_crc should be
+>>> 0, am i right?
+>>>
+>>
+>> If the initial CRC seed value is non-zero, then the CRC of a buffer
+>> full of zeros won't be zero.
+>> So ceph_crc32c(somethingnonzero, zerofilledbuffer, len), will be non-zero.
+>>
+>> I would like to reproduce this problem here.
+>> What steps did you take before this error occurred?
+>> Is this a cephfs filesystem or something on top of an RBD image?
+>> Which kernel are you running? Is it the one that comes with Ubuntu?
+>> (If so which package version is it?)
+>>
+> We use linux kernel version 3.14 and we just tested it on Ubuntu, and
+> ceph version v0.80.7. Both cephfs and RBD image have CRC problems.
+> I'm not sure whether it's related to Memory, since we tested many
+> times, but just a few reported CRC error.
+> As i mentioned, i doubt the memory fault changed the data, because we
+> write 125 objects, and the all data_crc is 0 except the Bad CRC
+> object's data_crc. Any tips are welcome.
 >
->> -Greg
+>> Cheers,
 >> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
+>> Steve
+>
+>
 >
 > --
-> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> thanks
+> huangjun
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+-- 
+Best Regards,
+
+Wheat
