@@ -1,143 +1,223 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: ceph-ci.git?
-Date: Mon, 18 May 2015 10:09:08 +0200
-Message-ID: <55599E24.6040208@dachary.org>
-References: <alpine.DEB.2.00.1505172130440.8350@cobra.newdream.net>
+From: huang jun <hjwsm1989@gmail.com>
+Subject: Re: bad CRC in data error on ARM
+Date: Mon, 18 May 2015 18:43:50 +0800
+Message-ID: <CABAwU-brw5zNQrJGGFWDW5OZu9zE-OB0XoS03gER5v4nwXKudg@mail.gmail.com>
+References: <CABAwU-Y8-fV6cFza0oHt8yJ4+-nYs51b0rQ5qDqQCfpJUk2kvw@mail.gmail.com>
+	<CAPvkgC1OeQBKq+m42qccKkQHz1rLuGHt29rLJwVQrP=5V92DKw@mail.gmail.com>
+	<CABAwU-YpoDsx50f2FieLyMX0Fqf3_nyPiayNxEdm6u6q5fF1Yg@mail.gmail.com>
+	<CACJqLyZ6+VEw597JRgsjeWntYVOiEWLGNmXc2F5wEbwzOVZCjA@mail.gmail.com>
+	<CABAwU-az+xyq856FJfe7kP1tgohO9K+6M9VZ0KPifvxBDpyhWg@mail.gmail.com>
+	<CABAwU-bx4k+fgszjW4XOh9jGiHdi1=M_go1qzPKYEBfC7Kh7cA@mail.gmail.com>
+	<CACJqLybs5XNBoNHvsr6GcA_xa195oH6zeJKt3tadVcU4rEz5ZA@mail.gmail.com>
+	<CABAwU-adREPUjQ=om+59dYLOtfwNmfs0s=jhSkzbadYihLgmYQ@mail.gmail.com>
+	<CACJqLybDwRP5KqDrcmbg6PbYiG-dYOaZs3TNL7xyiOxhuWnX9w@mail.gmail.com>
+	<CABAwU-ZKRh1O_JoT7Hme5322+BFy8m285Y_1HS-DwZ8_=rQ89A@mail.gmail.com>
+	<CACJqLyYu6ZZz4G9gKBt-GtHVdXMJHd-5Y8eQbkCj6OPcZo0ikg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="dflBwc3ep2vJ6XQVXsKqjr5MXn5IfUO1O"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:36917 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1750967AbbERIJK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 May 2015 04:09:10 -0400
-In-Reply-To: <alpine.DEB.2.00.1505172130440.8350@cobra.newdream.net>
+Received: from mail-la0-f44.google.com ([209.85.215.44]:33308 "EHLO
+	mail-la0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753182AbbERKnw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 May 2015 06:43:52 -0400
+Received: by lagr1 with SMTP id r1so131428050lag.0
+        for <ceph-devel@vger.kernel.org>; Mon, 18 May 2015 03:43:51 -0700 (PDT)
+In-Reply-To: <CACJqLyYu6ZZz4G9gKBt-GtHVdXMJHd-5Y8eQbkCj6OPcZo0ikg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
+To: Haomai Wang <haomaiwang@gmail.com>
+Cc: Steve Capper <steve.capper@linaro.org>, ceph-devel <ceph-devel@vger.kernel.org>, Yazen Ghannam <yazen.ghannam@linaro.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---dflBwc3ep2vJ6XQVXsKqjr5MXn5IfUO1O
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: quoted-printable
+yes, OSD the data dump content seems right, since there are 4194304 bytes "0".
+ it's weird that  client calculate the wrong data crc but send the
+right data content to OSD.
 
-Hi Sage,
-
-On 18/05/2015 06:40, Sage Weil wrote:
-> As the number of people contributing code grows, we've added more and m=
-ore=20
-> people to the github ceph org who have write access to ceph.git.  Those=
-=20
-> people can merge pull requests and can also push branches directly to t=
-he=20
-> repo.
->=20
-> We also use ceph.git as a source for the test build infrastrucure=20
-> (gitbuilders) to generate packages for QA or hot fixes and make check=20
-> tests.  This leads to an every-growing body of wip-* branches in the re=
-po=20
-> (which is annoying), and also means that in order to build something to=
-=20
-> test in QA you also get the ability to (say) push directly to master.
->=20
-> How about we instead
->=20
->  - create a second repo named something like ceph-ci.git (that's the be=
-st=20
-> I can come up with at the moment)=20
->  - add this as a second source for all gitbuilders (they can poll a lis=
-t)
->  - move all wip-* branches here
->  - create a new github team with contributing developers who can push t=
-o=20
-> this repo and are trusted not to wreak havoc on the builders
->  - remove all the cruft from ceph.git, so that it's just master, next, =
-the=20
-> stable branches, release tags, and anything else similarly important.
->  - restrict ceph.git write access to core developers
->=20
-> This will improve security somewhat and reduce the risk of an accidenta=
-l=20
-> push to an important branch.
->=20
-> It may also reduce the risk associated with accidental force pushes=20
-> (something we've hemmed and hawed about recently) by limiting the circl=
-e=20
-> of people who can write to ceph.git and also changing workflows so that=
- it=20
-> is almost never used directly...
-
-Having a reference repository for releases only, would be a great move.
-
-One problem with promoting http://github.com/ceph/ceph to that role is th=
-at while the migration is in progress there will be two queues of pull re=
-quests, the new one at http://github.com/ceph-ci/ceph and the old one at =
-http://github.com/ceph/ceph. Given our current flow of pull requests the =
-migration will probably take about three months. And after that, since it=
-'s not possible to forbid pull requests on github.com (you can disable is=
-sues but not pull requests on a given repository) there will forever be a=
- flow of misdirected pull requests against the old repository.
-
-Maybe it would be better to keep http://github.com/ceph/ceph as it is and=
- create a release repository (say https://git.ceph.com/?p=3Dceph-release.=
-git) to only have the stable, master and next branches. Contributors who =
-accidentally force push master on http://github.com/ceph/ceph would have =
-the comfort of knowing that master on https://git.ceph.com/?p=3Dceph-rele=
-ase.git can be trusted to be a reference.
-
-Updating https://git.ceph.com/?p=3Dceph-release.git could be done by a ga=
-te instead of trusting a group of people with it. The gate could be as si=
-mple as a cron job mirroring a predefined list of stable branches from ht=
-tp://github.com/ceph/ceph to https://git.ceph.com/?p=3Dceph-release.git. =
-Although it could evolve into something more sophisticated in the future =
-(such as *not* mirroring a branch for which the gitbuilders are red), thi=
-s simple minded mirror would already effectively protect us against a for=
-ce push, because the mirroring command would be setup in a way that does =
-not allow force push. In the event of a force push on http://github.com/c=
-eph/ceph, the mirror would fail and the force pushed branch on http://git=
-hub.com/ceph/ceph can conveniently be reset to the latest from https://gi=
-t.ceph.com/?p=3Dceph-release.git.
-
-Although https://git.ceph.com/?p=3Dceph-release.git could be setup as htt=
-p://github.com/ceph/ceph-release, it has a few disadvantages (pull reques=
-ts can be misdirected to it, the repository cannot be set to protect agai=
-nst force push).
-
-As time passes existing workflows (releases for instance) can gradually/o=
-pportunistically migrate from using http://github.com/ceph/ceph as a sour=
-ce to https://git.ceph.com/?p=3Dceph-release.git, to benefit from a more =
-stable source. But even if they don't, the worst that can happen is that =
-they temporarily suffer from a forced push, just as they currently do.
-
-Cheers
-
->=20
-> ?
-> sage
->=20
+2015-05-18 15:06 GMT+08:00 Haomai Wang <haomaiwang@gmail.com>:
+> Oh, very sorry. I need to refresh my mind.
+>
+> Yeah, if data is filled in zero and messenger code will use zero seed
+> then crc value is 0 !
+>
+> When decode failed, do you get the data dump content?
+>
+>
+> On Mon, May 18, 2015 at 9:20 AM, huang jun <hjwsm1989@gmail.com> wrote:
+>> hi,haomai
+>> I have tested it again, use "dd if=/dev/zero of=/mnt/test bs=4M
+>> count=1000" on our X86 cluster, and we confirmed that, all
+>> 4194304 bytes object's data_crc is 0 both in client and OSD side.
+>> Note that we use /dev/zero to generate data bytes.
+>>
+>> 2015-05-16 22:07 GMT+08:00 Haomai Wang <haomaiwang@gmail.com>:
+>>> Maybe I'm missing something, but from your osd.log:
+>>>
+>>> 2015-05-13 08:12:50.050234 7f378d8d8700  0 bad crc in data 0 != exp 3036014994
+>>>
+>>> osd side compute the crc value from data is "0", it shouldn't happen
+>>> if we have any data bytes.
+>>>
+>>> On Sat, May 16, 2015 at 7:34 PM, huang jun <hjwsm1989@gmail.com> wrote:
+>>>> we think is the client send the wrong crc value.
+>>>> we print data on OSD side, it seems ok, no data changed, but the
+>>>> calculated crc not equals the one passed from client.
+>>>>
+>>>>
+>>>> 2015-05-16 19:25 GMT+08:00 Haomai Wang <haomaiwang@gmail.com>:
+>>>>> On Sat, May 16, 2015 at 6:54 PM, huang jun <hjwsm1989@gmail.com> wrote:
+>>>>>> <<Even if from /dev/zero, the data crc shouldn't be 0.
+>>>>>> we print all 4M object's data crc, it seems all 0 until now.
+>>>>>> <<I guess osd(arm) doesn't do crc computing. But from code, crc for arm
+>>>>>> <<should be fine
+>>>>>> When decode a message, it will check the fron_crc, middle_crc and also data_crc,
+>>>>>> so not OSD but MON and MDS will do crc computing, and the OSD side
+>>>>>> compute the CRC value is 0, which is different with the data_crc in
+>>>>>> message footer.data_crc.
+>>>>>
+>>>>> I'm not following your meaning. The core problem is osd computes a
+>>>>> wrong crc value?
+>>>>>
+>>>>>>
+>>>>>> 2015-05-16 18:21 GMT+08:00 huang jun <hjwsm1989@gmail.com>:
+>>>>>>> that always happen, every test have such errors. And our cluster and
+>>>>>>> client that  running on X86 works fine, never seen bad crc error.
+>>>>>>>
+>>>>>>>
+>>>>>>> 2015-05-16 17:30 GMT+08:00 Haomai Wang <haomaiwang@gmail.com>:
+>>>>>>>> is this always happen or occasionally?
+>>>>>>>>
+>>>>>>>> On Sat, May 16, 2015 at 10:10 AM, huang jun <hjwsm1989@gmail.com> wrote:
+>>>>>>>>> hi,steve
+>>>>>>>>>
+>>>>>>>>> 2015-05-15 16:36 GMT+08:00 Steve Capper <steve.capper@linaro.org>:
+>>>>>>>>>> On 15 May 2015 at 00:51, huang jun <hjwsm1989@gmail.com> wrote:
+>>>>>>>>>>> hi,all
+>>>>>>>>>>
+>>>>>>>>>> Hi HuangJun,
+>>>>>>>>>>
+>>>>>>>>>>>
+>>>>>>>>>>> We run ceph cluster on ARM platform (arm64, linux kernel 3.14, OS
+>>>>>>>>>>> ubuntu 14.10), and use "dd if=/dev/zero of=/mnt/test bs=4M count=125"
+>>>>>>>>>>> to write data.  On the osd side, we got bad data CRC error.
+>>>>>>>>>>>
+>>>>>>>>>>> The kclient log: (tid=6)
+>>>>>>>>>>> May 14 17:21:08 node103 kernel: [  180.194312] CPU[0] libceph:
+>>>>>>>>>>> send_request ffffffc8d252f000 tid-6 to osd0 flags 36 pg 1.9aae829f req
+>>>>>>>>>>> data size is 4194304
+>>>>>>>>>>> May 14 17:21:08 node103 kernel: [  180.194316] CPU[0] libceph: tid-6
+>>>>>>>>>>> ----- ffffffc0702f66c8 to osd0 42=osd_op len 197+0+4194304 -----
+>>>>>>>>>>> libceph: tid-6 front_crc is 388648745 middle_crc is 0 data_crc is 3036014994
+>>>>>>>>>>>
+>>>>>>>>>>> The OSD-0 log:
+>>>>>>>>>>> 2015-05-13 08:12:50.049345 7f378d8d8700  0 seq  3 tid 6 front_len 197
+>>>>>>>>>>> mid_len 0 data_len 4194304
+>>>>>>>>>>> 2015-05-13 08:12:50.049348 7f378d8d8700  0 crc in front 388648745 exp 388648745
+>>>>>>>>>>> 2015-05-13 08:12:50.049395 7f378d8d8700  0 crc in middle 0 exp 0
+>>>>>>>>>>> 2015-05-13 08:12:50.049964 7f378d8d8700  0 crc in data 0 exp 3036014994
+>>>>>>>>>>> 2015-05-13 08:12:50.050234 7f378d8d8700  0 bad crc in data 0 != exp 3036014994
+>>>>>>>>>>>
+>>>>>>>>>>> some considerations:
+>>>>>>>>>>> 1) we use ceph 0.80.7 realse version and compile it on ARM, did this
+>>>>>>>>>>> works? or  does ceph's code has ARM branch?
+>>>>>>>>>>
+>>>>>>>>>> We did run a Ceph version close to that for 64-bit ARM, I'm checking
+>>>>>>>>>> out 0.80.7 now to test.
+>>>>>>>>>> In v9.0.0, there is some code to use the ARM optional crc32c
+>>>>>>>>>> instructions, but this isn't in 0.80.7.
+>>>>>>>>>>
+>>>>>>>>>>>
+>>>>>>>>>>> 2) as we have write 125 objects, only few of them report CRC error,
+>>>>>>>>>>> and the right object's data_crc is 0 both on osd and kclient. the
+>>>>>>>>>>> wrong object's data_crc is not 0 on kclient, but osd calculate result
+>>>>>>>>>>> 0. the object data came from /dev/zero, i think the data_crc should be
+>>>>>>>>>>> 0, am i right?
+>>>>>>>>>>>
+>>>>>>>>>>
+>>>>>>>>>> If the initial CRC seed value is non-zero, then the CRC of a buffer
+>>>>>>>>>> full of zeros won't be zero.
+>>>>>>>>>> So ceph_crc32c(somethingnonzero, zerofilledbuffer, len), will be non-zero.
+>>>>>>>>>>
+>>>>>>>>>> I would like to reproduce this problem here.
+>>>>>>>>>> What steps did you take before this error occurred?
+>>>>>>>>>> Is this a cephfs filesystem or something on top of an RBD image?
+>>>>>>>>>> Which kernel are you running? Is it the one that comes with Ubuntu?
+>>>>>>>>>> (If so which package version is it?)
+>>>>>>>>>>
+>>>>>>>>> We use linux kernel version 3.14 and we just tested it on Ubuntu, and
+>>>>>>>>> ceph version v0.80.7. Both cephfs and RBD image have CRC problems.
+>>>>>>>>> I'm not sure whether it's related to Memory, since we tested many
+>>>>>>>>> times, but just a few reported CRC error.
+>>>>>>>>> As i mentioned, i doubt the memory fault changed the data, because we
+>>>>>>>>> write 125 objects, and the all data_crc is 0 except the Bad CRC
+>>>>>>>>> object's data_crc. Any tips are welcome.
+>>>>>>>>>
+>>>>>>>>>> Cheers,
+>>>>>>>>>> --
+>>>>>>>>>> Steve
+>>>>>>>>>
+>>>>>>>>>
+>>>>>>>>>
+>>>>>>>>> --
+>>>>>>>>> thanks
+>>>>>>>>> huangjun
+>>>>>>>>> --
+>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>>>>>
+>>>>>>>>
+>>>>>>>>
+>>>>>>>> --
+>>>>>>>> Best Regards,
+>>>>>>>>
+>>>>>>>> Wheat
+>>>>>>>
+>>>>>>>
+>>>>>>>
+>>>>>>> --
+>>>>>>> thanks
+>>>>>>> huangjun
+>>>>>>
+>>>>>>
+>>>>>>
+>>>>>> --
+>>>>>> thanks
+>>>>>> huangjun
+>>>>>
+>>>>>
+>>>>>
+>>>>> --
+>>>>> Best Regards,
+>>>>>
+>>>>> Wheat
+>>>>
+>>>>
+>>>>
+>>>> --
+>>>> thanks
+>>>> huangjun
+>>>
+>>>
+>>>
+>>> --
+>>> Best Regards,
+>>>
+>>> Wheat
+>>
+>>
+>>
+>> --
+>> thanks
+>> huangjun
+>
+>
+>
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
+> Best Regards,
+>
+> Wheat
 
 
---dflBwc3ep2vJ6XQVXsKqjr5MXn5IfUO1O
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlVZniQACgkQ8dLMyEl6F21vMACfTst0p1Nv3aWqnVySjRpCiTxo
-dOwAnjx01J+KE/daPvBWBELT6QVE5gKd
-=XX/q
------END PGP SIGNATURE-----
-
---dflBwc3ep2vJ6XQVXsKqjr5MXn5IfUO1O--
+-- 
+thanks
+huangjun
