@@ -1,89 +1,66 @@
-From: flisky <yinjifeng@lianjia.com>
-Subject: Re: [EMG]incomplete pgs make RGW unusable
-Date: Tue, 19 May 2015 16:57:29 +0800
-Message-ID: <mjettq$dj6$1@ger.gmane.org>
-References: <mjdupr$jtu$1@ger.gmane.org>
+From: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>
+Subject: RE: What crush ruleset for a given SHEC configuration ?
+Date: Tue, 19 May 2015 09:11:10 +0000
+Message-ID: <870DE8DBB716524BAE51B2D499EC81E40AAF9098@g01jpexmbyt24>
+References: <555ADA6F.7000702@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:57035 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754631AbbESI5m (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 19 May 2015 04:57:42 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1YudLE-0001Zl-Qo
-	for ceph-devel@vger.kernel.org; Tue, 19 May 2015 10:57:37 +0200
-Received: from 106.39.60.34 ([106.39.60.34])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Tue, 19 May 2015 10:57:36 +0200
-Received: from yinjifeng by 106.39.60.34 with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Tue, 19 May 2015 10:57:36 +0200
-In-Reply-To: <mjdupr$jtu$1@ger.gmane.org>
+Received: from mgwkm01.jp.fujitsu.com ([202.219.69.168]:55017 "EHLO
+	mgwkm01.jp.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754895AbbESJVe (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 May 2015 05:21:34 -0400
+Received: from g01jpfmpwyt03.exch.g01.fujitsu.local (g01jpfmpwyt03.exch.g01.fujitsu.local [10.128.193.57])
+	by kw-mxq.gw.nic.fujitsu.com (Postfix) with ESMTP id DE6A7AC01D9
+	for <ceph-devel@vger.kernel.org>; Tue, 19 May 2015 18:11:12 +0900 (JST)
+In-Reply-To: <555ADA6F.7000702@dachary.org>
+Content-Language: ja-JP
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-I follow the instruction from=20
-http://tracker.ceph.com/issues/10411#note-4, and finally get=20
-force_create_pg work.
-
-Thanks, Brian Rak. It helps a lot.
-
-And, it would be great if the=20
-[feature](http://tracker.ceph.com/issues/10098) is implemented.
-
-BR,
-
-On 2015=E5=B9=B405=E6=9C=8819=E6=97=A5 08:06, flisky wrote:
-> Hi core developers,
->
-> Sorry, I have to raise this from user list because there is no respon=
-se.
->
-> I reformat the disks to increase osd journal size. During the process=
-, I
-> lost 9 pgs.
->
-> The incomplete pgs belong to the pool .rgw.buckets, which causes slow
-> requests and make RGW unusable.
-> I have to restart the OSDs and RGWs time to time, to make RGW respons=
-ible.
->
-> The most scary things happen. I cannot recovery the incomplete pgs.
->
-> [force_create_pg](http://tracker.ceph.com/issues/10098) marks it a
-> feature to handle this.
->
-> The [blog](https://ceph.com/community/incomplete-pgs-oh-my/) is not
-> working, either.
->
-> And finally I give up the recovery, and use 'rados cppool' to copy ou=
-r
-> huge pool, it's STUCK...
->
-> I'm very frustrated, and very surprised that Ceph doesn't offer a way=
- to
-> just let the lost data lost.
->
-> Could anyone give any advise on this? Thanks!
->
-> Sincerely,
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGkgTG9pYywNCg0KPiB0byByZWNvdmVyIEQ2IHdoaWNoIGlzIGluIHJhY2sg
+MiBpdCBtYXkgYmUgbmVjZXNzYXJ5IHRvIHVzZSBQMiBmcm9tIHJhY2sgMQ0K
+DQpCZWNhdXNlIEQ2IGNhbiBiZSByZWNvdmVyZWQgZnJvbSBQMyBhcyB3ZWxs
+LCBQMiBpcyBub3QgbmVjZXNzYXJpbHkgdXNlZCB0byByZWNvdmVyIEQ2Lg0K
+SG93ZXZlciwgd2hlbiBENiBpcyByZWNvdmVyZWQgZnJvbSBQMywgRDUgd2hp
+Y2ggaXMgaW4gcmFjayAxIG11c3QgYmUgcmVhZC4NClRoZXJlZm9yZSwgSSBi
+ZWxpZXZlIENlcGgtTFJDIGlzIG1vcmUgZWZmaWNpZW50IHdoZW4gbmV0d29y
+ayByZXNvdXJjZXMgaXMgcG9vciBzdWNoIGFzDQppbiBjYXNlIG9mIEdlby1S
+ZXBsaWNhdGlvbi4gU0hFQyBzaG91bGQgYmUgdXNlZCBpbiBhIHNpbmdsZSBk
+YXRhIGNlbnRlciB0aGF0IGhhcyBlbm91Z2gNCm5ldHdvcmsgcmVzb3VyY2Vz
+Lg0KDQpCZXN0IHJlZ2FyZHMsDQpUYWtlc2hpIE1peWFtYWUNCg0KLS0tLS1P
+cmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IExvaWMgRGFjaGFyeSBbbWFp
+bHRvOmxvaWNAZGFjaGFyeS5vcmddIA0KU2VudDogVHVlc2RheSwgTWF5IDE5
+LCAyMDE1IDM6MzkgUE0NClRvOiBNaXlhbWFlLCBUYWtlc2hpL+WuruWJjSDl
+iZsNCkNjOiBDZXBoIERldmVsb3BtZW50DQpTdWJqZWN0OiBXaGF0IGNydXNo
+IHJ1bGVzZXQgZm9yIGEgZ2l2ZW4gU0hFQyBjb25maWd1cmF0aW9uID8NCg0K
+SGkgVGFrZXNoaSwNCg0KSW4gdGhlIGNvbnRleHQgb2YgaHR0cDovL2NlcGgu
+Y29tL2RvY3MvbWFzdGVyL3JhZG9zL29wZXJhdGlvbnMvZXJhc3VyZS1jb2Rl
+LXNoZWMvIGl0IHdvdWxkIGJlIHVzZWZ1bCB0byBoYXZlIGEgbW9yZSBkZXRh
+aWxlZCBleHBsYW5hdGlvbiBvZiB3aHkgU0hFQyBpcyBtb3JlIGVmZmljaWVu
+dCBkdXJpbmcgcmVjb3ZlcnkgKGluIHRoZSBpbnRyb2R1Y3Rpb24pLiANCg0K
+QW0gSSBjb3JyZWN0IHRvIGFzc3VtZSB0aGF0IFNIRUMgZG9lcyBub3QgcHJv
+dmlkZSBhIHdheSB0byBjb250cm9sIHRoZSBsb2NhbGl0eSBvZiB0aGUgY2h1
+bmtzID8gRm9yIGluc3RhbmNlIGluIHRoZSBmb2xsb3dpbmcgc2NlbmFyaW86
+DQoNCnJhY2sgMSBoYXMgMTAgT1NEcw0KcmFjayAyIGhhcyAxMCBPU0RzDQoN
+CmEgY3J1c2ggcnVsZXNldCBpcyBtYWRlIHRvIHByb3ZpZGUgMTUgT1NEcyB3
+aXRoIDcgaW4gdGhlIGZpcnN0IHJhY2ssIDggaW4gdGhlIGxhc3QgcmFjazog
+dGhlIGZpcnN0IDcgYXJlIGluIHJhY2sgMSwgdGhlIGxhc3QgOCBpbiByYWNr
+IDIuIFdoZW4gU0hFQyBpcyB1c2VkIHdpdGggc3VjaCBhIGNydXNoIHJ1bGVz
+ZXQsIGl0IGNhbm5vdCBndWFyYW50ZWUgdGhhdCB0aGUgbG9zcyBvZiBvbmUg
+Y2h1bmsgaW4gcmFjayAyIGNhbiBhbHdheXMgYmUgcmVjb3ZlcmVkIHdpdGgg
+Y2h1bmtzIGZyb20gcmFjayAyLiBXaGVuIHJlYWRpbmcgYXQgZmlndXJlIDMg
+b2YNCg0KaHR0cHM6Ly93aWtpLmNlcGguY29tL1BsYW5uaW5nL0JsdWVwcmlu
+dHMvSGFtbWVyL1NoaW5nbGVkX0VyYXN1cmVfQ29kZV8lMjhTSEVDJTI5DQoN
+CndpdGggRDEgdG8gRDUsIFAxIGFuZCBQMiBpbiByYWNrIDEgYW5kIEQ2IHRv
+IEQxMCwgUDMsIFA0LCBQNSBpbiByYWNrIDIsIG15IHVuZGVyc3RhbmRpbmcg
+aXMgdGhhdCB0byByZWNvdmVyIEQ2IHdoaWNoIGlzIGluIHJhY2sgMiBpdCBt
+YXkgYmUgbmVjZXNzYXJ5IHRvIHVzZSBQMiBmcm9tIHJhY2sgMS4gQW5kIHRv
+IHJlY292ZXIgRDUgd2hpY2ggaXMgaW4gcmFjayAxIGl0IG1heSBiZSBuZWNl
+c3NhcnkgdG8gdXNlIFAzIGZyb20gcmFjayAyLg0KDQpNYXliZSBJJ20gbWlz
+c2luZyBzb21ldGhpbmcgPyBUaGFua3MgaW4gYWR2YW5jZSBmb3IgeW91ciBl
+eHBsYW5hdGlvbnMgOi0pDQoNCkNoZWVycw0KLS0gDQpMb8OvYyBEYWNoYXJ5
+LCBBcnRpc2FuIExvZ2ljaWVsIExpYnJlDQoNCg==
