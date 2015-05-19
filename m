@@ -1,116 +1,46 @@
-From: Srikanth Madugundi <srikanth.madugundi-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: radosgw performance with small files
-Date: Tue, 19 May 2015 09:31:26 -0700
-Message-ID: <CACAg-u9vczzJ4eT0onf4RLqzaGrgGnVQA=kR4bJdSV1ieBA_Fw@mail.gmail.com>
+From: Gregory Farnum <greg@gregs42.com>
+Subject: Re: Jobs of a teuthology run
+Date: Tue, 19 May 2015 09:53:06 -0700
+Message-ID: <CAC6JEv8EmentqokDkQv-8c8fWVYwUZVqhP8vxRK0pomPFRjMPQ@mail.gmail.com>
+References: <06E7D85B3BA36C4DB207FEDE871C53489E8212@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0828453309=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
-
---===============0828453309==
-Content-Type: multipart/alternative; boundary=001a113d7e3a88a24d051671d784
-
---001a113d7e3a88a24d051671d784
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ie0-f182.google.com ([209.85.223.182]:36279 "EHLO
+	mail-ie0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753767AbbESQxI convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 May 2015 12:53:08 -0400
+Received: by iepj10 with SMTP id j10so18579636iep.3
+        for <ceph-devel@vger.kernel.org>; Tue, 19 May 2015 09:53:07 -0700 (PDT)
+Received: from mail-ig0-f181.google.com (mail-ig0-f181.google.com. [209.85.213.181])
+        by mx.google.com with ESMTPSA id n9sm8232198igy.2.2015.05.19.09.53.06
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 19 May 2015 09:53:06 -0700 (PDT)
+Received: by igbpi8 with SMTP id pi8so111516297igb.0
+        for <ceph-devel@vger.kernel.org>; Tue, 19 May 2015 09:53:06 -0700 (PDT)
+In-Reply-To: <06E7D85B3BA36C4DB207FEDE871C53489E8212@SHSMSX101.ccr.corp.intel.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
-
-I am seeing write performance hit with small files (60K) using radosgw. The
-radosgw is configured to run with 600 threads. Here is the write speed I
-get with file sizes of 60K
-
-
-# sudo ceph -s
-    cluster e445e46e-4d84-4606-9923-16fff64446dc
-     health HEALTH_OK
-     monmap e1: 1 mons at {osd187=13.24.0.7:6789/0}, election epoch 1,
-quorum 0 osd187
-     osdmap e205: 28 osds: 22 up, 22 in
-      pgmap v17007: 1078 pgs, 9 pools, 154 GB data, 653 kobjects
-            292 GB used, 8709 GB / 9002 GB avail
-                1078 active+clean
-  client io 1117 kB/s rd, *2878 kB/s wr*, 2513 op/s
-#
+On Tue, May 19, 2015 at 6:17 AM, Wang, Zhiqiang <zhiqiang.wang@intel.com> wrote:
+> Hi all,
+>
+> I was running teuthology on sepia to test proxy write. I used the command like below to start the run. Somehow it generated 1143 jobs. I see from pulpit that there are usually no more than 300 jobs in other people's run. So my question is that should I go ahead with the 1000+ jobs? Or Is there some way to filter out some, so that I just need to run 200+ jobs?
+>
+> ./virtualenv/bin/teuthology-suite --filter-out btrfs,ext4 --suite rados --suite-branch hammer --machine-type plana,burnupi,mira --distro ubuntu --email zhiqiang.wang@intel.com --owner zhiqiang.wang@intel.com --ceph wip-proxy-write
 
 
-If I run the same script with larger file sizes(1MB-3MB), I get a better
-write speed.
+There's a (relatively new) --subset [x]/[y] option, which splits up
+the suite into y pieces. All the pieces together contain every test,
+and each piece uses every test "fragment" at least once. A common one
+is to split it up into ~14 pieces and iterate through the x on each
+subsequent run. You can use this instead of the --filter-out flags.
 
-
-# sudo ceph -s
-    cluster e445e46e-4d84-4606-9923-16fff64446dc
-     health HEALTH_OK
-     monmap e1: 1 mons at {osd187=13.24.0.79:6789/0}, election epoch 1,
-quorum 0 osd187
-     osdmap e205: 28 osds: 22 up, 22 in
-      pgmap v16883: 1078 pgs, 9 pools, 125 GB data, 140 kobjects
-            192 GB used, 8809 GB / 9002 GB avail
-                1078 active+clean
-  client io *105 MB/s wr*, 1839 op/s
-#
-
-My cluster has 2 OSD hosts running total of 20 osd daemons, 1 mon and 1
-radosgw hosts. Is the bottleneck coming from the single radosgw process? If
-so, is it possible to run radosgw in multi process mode?
-
-Regards
-Srikanth
-
---001a113d7e3a88a24d051671d784
-Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr">Hi,<div><br></div><div>I am seeing write performance hit w=
-ith small files (60K) using radosgw. The radosgw is configured to run with =
-600 threads. Here is the write speed I get with file sizes of 60K<br><div><=
-br></div><div><br></div><div><div># sudo ceph -s</div><div>=C2=A0 =C2=A0 cl=
-uster e445e46e-4d84-4606-9923-16fff64446dc</div><div>=C2=A0 =C2=A0 =C2=A0he=
-alth HEALTH_OK</div><div>=C2=A0 =C2=A0 =C2=A0monmap e1: 1 mons at {osd187=
-=3D<a href=3D"http://13.24.0.7:6789/0">13.24.0.7:6789/0</a>}, election epoc=
-h 1, quorum 0 osd187</div><div>=C2=A0 =C2=A0 =C2=A0osdmap e205: 28 osds: 22=
- up, 22 in</div><div>=C2=A0 =C2=A0 =C2=A0 pgmap v17007: 1078 pgs, 9 pools, =
-154 GB data, 653 kobjects</div><div>=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 292 GB used, 8709 GB / 9002 GB avail</div><div>=C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 1078 active+clean</div><div>=C2=A0 client i=
-o 1117 kB/s rd, <b>2878 kB/s wr</b>, 2513 op/s</div></div><div>#</div><div>=
-<br></div><div><br></div><div>If I run the same script with larger file siz=
-es(1MB-3MB), I get a better write speed.=C2=A0</div><div><div><br></div></d=
-iv><div><br></div><div><div># sudo ceph -s</div><div>=C2=A0 =C2=A0 cluster =
-e445e46e-4d84-4606-9923-16fff64446dc</div><div>=C2=A0 =C2=A0 =C2=A0health H=
-EALTH_OK</div><div>=C2=A0 =C2=A0 =C2=A0monmap e1: 1 mons at {osd187=3D<a hr=
-ef=3D"http://13.24.0.79:6789/0">13.24.0.79:6789/0</a>}, election epoch 1, q=
-uorum 0 osd187</div><div>=C2=A0 =C2=A0 =C2=A0osdmap e205: 28 osds: 22 up, 2=
-2 in</div><div>=C2=A0 =C2=A0 =C2=A0 pgmap v16883: 1078 pgs, 9 pools, 125 GB=
- data, 140 kobjects</div><div>=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 192=
- GB used, 8809 GB / 9002 GB avail</div><div>=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0 =C2=A0 1078 active+clean</div><div>=C2=A0 client io <b>10=
-5 MB/s wr</b>, 1839 op/s</div></div><div>#</div></div><div><br></div><div>M=
-y cluster has 2 OSD hosts running total of 20 osd daemons, 1 mon and 1 rado=
-sgw hosts. Is the bottleneck coming from the single radosgw process? If so,=
- is it possible to run radosgw in multi process mode?</div><div><br></div><=
-div>Regards</div><div>Srikanth</div><div><br></div></div>
-
---001a113d7e3a88a24d051671d784--
-
---===============0828453309==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============0828453309==--
+And yes, please don't try and run an 1100-test suite through the
+cluster; it's already overloaded (especially with the point release
+testing that has been going on). :(
+-Greg
