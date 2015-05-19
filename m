@@ -1,102 +1,89 @@
-From: "Shu, Xinxin" <xinxin.shu@intel.com>
-Subject: RE: Need help compiling 0.94.1 with jemalloc
-Date: Tue, 19 May 2015 07:38:31 +0000
-Message-ID: <75674D092A819E4189E91166C74CB90D01553437@shsmsx102.ccr.corp.intel.com>
-References: <CAANLjFq1xNGms4q811oJp7TtzLjqWRQO9t-gcNdkvr5vWHP5GQ@mail.gmail.com>
+From: flisky <yinjifeng@lianjia.com>
+Subject: Re: [EMG]incomplete pgs make RGW unusable
+Date: Tue, 19 May 2015 16:57:29 +0800
+Message-ID: <mjettq$dj6$1@ger.gmane.org>
+References: <mjdupr$jtu$1@ger.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:36434 "EHLO mga02.intel.com"
+Received: from plane.gmane.org ([80.91.229.3]:57035 "EHLO plane.gmane.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754268AbbESHif (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 19 May 2015 03:38:35 -0400
-In-Reply-To: <CAANLjFq1xNGms4q811oJp7TtzLjqWRQO9t-gcNdkvr5vWHP5GQ@mail.gmail.com>
-Content-Language: en-US
+	id S1754631AbbESI5m (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 19 May 2015 04:57:42 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1YudLE-0001Zl-Qo
+	for ceph-devel@vger.kernel.org; Tue, 19 May 2015 10:57:37 +0200
+Received: from 106.39.60.34 ([106.39.60.34])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Tue, 19 May 2015 10:57:36 +0200
+Received: from yinjifeng by 106.39.60.34 with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Tue, 19 May 2015 10:57:36 +0200
+In-Reply-To: <mjdupr$jtu$1@ger.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Robert LeBlanc <robert@leblancnet.us>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-UGxlYXNlIHJlZmVyIHRvIGh0dHBzOi8vZ2l0aHViLmNvbS9mYWNlYm9vay9yb2Nrc2RiL2Jsb2Iv
-bWFzdGVyL2luY2x1ZGUvcm9ja3NkYi9vcHRpb25zLmgjTDU2MCAsIHRoZSBsYXRlc3Qgcm9ja3Nk
-YiBtb3ZlIHRoZXNlIG9wdGlvbnMgdG8gQmxvY2tCYXNlZFRhYmxlT3B0aW9uLCBJIHRoaW5rIHlv
-dSBzaG91bGQgdHJ5IGxhdGVzdCBjZXBoLCB0aGlzIFBSIGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBo
-L2NlcGgvcHVsbC80NjIyIGhhcyBiZWVuIG1lcmdlZCBpbnRvIG1hc3Rlcg0KDQpDaGVlcnMsDQp4
-aW54aW4NCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IGNlcGgtZGV2ZWwtb3du
-ZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5v
-cmddIE9uIEJlaGFsZiBPZiBSb2JlcnQgTGVCbGFuYw0KU2VudDogVHVlc2RheSwgTWF5IDE5LCAy
-MDE1IDEyOjI0IFBNDQpUbzogY2VwaC1kZXZlbA0KU3ViamVjdDogTmVlZCBoZWxwIGNvbXBpbGlu
-ZyAwLjk0LjEgd2l0aCBqZW1hbGxvYw0KDQotLS0tLUJFR0lOIFBHUCBTSUdORUQgTUVTU0FHRS0t
-LS0tDQpIYXNoOiBTSEEyNTYNCg0KSSdtIHRyeWluZyB0byBidWlsZCBDZXBoIDAuOTQuMSB3aXRo
-IGplbWFsbG9jIGFuZCB3aXRob3V0IHRjbWFsbG9jLg0KSSd2ZSBkb3dubG9hZGVkIHJvY2tzZGIg
-ZnJvbSB0aGVpciBtYXN0ZXIgYnJhbmNoICh0byBnZXQgdGhlIGplbWFsbG9jDQpvcHRpb24pIGFu
-ZCBidWlsdCByb2Nrc2RiIHdpdGggdGhlIHNoYXJlZCBsaWJyYXJpZXMuIFdoZW4gSSB0cnkgYW5k
-IGJ1aWxkIENlcGgsIGl0IGZhaWxzIG9uOg0KDQpvcy9Sb2Nrc0RCU3RvcmUuY2M6IEluIG1lbWJl
-ciBmdW5jdGlvbiAnaW50IFJvY2tzREJTdG9yZTo6ZG9fb3BlbihzdGQ6Om9zdHJlYW0mLCBib29s
-KSc6DQpvcy9Sb2Nrc0RCU3RvcmUuY2M6NjU6MTU6IGVycm9yOiAnc3RydWN0IHJvY2tzZGI6Ok9w
-dGlvbnMnIGhhcyBubyBtZW1iZXIgbmFtZWQgJ2Jsb2NrX2NhY2hlJw0KICAgICBsZG9wdGlvbnMu
-YmxvY2tfY2FjaGUgPSByb2Nrc2RiOjpOZXdMUlVDYWNoZShvcHRpb25zLmNhY2hlX3NpemUpOw0K
-ICAgICAgICAgICAgICAgXg0Kb3MvUm9ja3NEQlN0b3JlLmNjOjY4OjE1OiBlcnJvcjogJ3N0cnVj
-dCByb2Nrc2RiOjpPcHRpb25zJyBoYXMgbm8gbWVtYmVyIG5hbWVkICdibG9ja19zaXplJw0KICAg
-ICBsZG9wdGlvbnMuYmxvY2tfc2l6ZSA9IG9wdGlvbnMuYmxvY2tfc2l6ZTsNCiAgICAgICAgICAg
-ICAgIF4NCm9zL1JvY2tzREJTdG9yZS5jYzo3MjoxNTogZXJyb3I6ICdzdHJ1Y3Qgcm9ja3NkYjo6
-T3B0aW9ucycgaGFzIG5vIG1lbWJlciBuYW1lZCAnZmlsdGVyX3BvbGljeScNCiAgICAgbGRvcHRp
-b25zLmZpbHRlcl9wb2xpY3kgPSBfZmlsdGVycG9saWN5Ow0KICAgICAgICAgICAgICAgXg0Kb3Mv
-Um9ja3NEQlN0b3JlLmNjOjg2OjE1OiBlcnJvcjogJ3N0cnVjdCByb2Nrc2RiOjpPcHRpb25zJyBo
-YXMgbm8gbWVtYmVyIG5hbWVkICdibG9ja19yZXN0YXJ0X2ludGVydmFsJw0KICAgICBsZG9wdGlv
-bnMuYmxvY2tfcmVzdGFydF9pbnRlcnZhbCA9IG9wdGlvbnMuYmxvY2tfcmVzdGFydF9pbnRlcnZh
-bDsNCiAgICAgICAgICAgICAgIF4NCg0KSSBjYW4gc2VlIGluIHRoZSBjb25maWcubG9nIHRoYXQg
-aXQgaXMgZmluZGluZyB0aGUgc2hhcmVkIHJvY2tkYiBsaWJyYXJpZXMgb2suIEkndmUgY29uZmln
-dXJlZCB3aXRoOg0KDQouL2NvbmZpZ3VyZSAkKGZvciBpIGluIC91c3Ive2xpYjY0LGxpYn0vanZt
-L2phdmEvaW5jbHVkZXssL2xpbnV4fTsgZG8gWyAtZCAkaSBdICYmIGphdmFfaW5jPSIkamF2YV9p
-bmMgLUkkaSI7IGRvbmUpIC0tcHJlZml4PS91c3IgLS1sb2NhbHN0YXRlZGlyPS92YXIgLS1zeXNj
-b25mZGlyPS9ldGMgLS1kb2NkaXI9L3Vzci9zaGFyZS9kb2MvY2VwaCAtLXdpdGgtbnNzIC0td2l0
-aG91dC1jcnlwdG9wcCAtLXdpdGgtcmVzdC1iZW5jaCAtLXdpdGgtZGVidWcgLS1lbmFibGUtY2Vw
-aGZzLWphdmEgLS13aXRoLWxpYnJvY2tzZGItc3RhdGljPW5vIC0td2l0aC1yYWRvc2d3IC0td2l0
-aC1qZW1hbGxvYyAtLXdpdGhvdXQtdGNtYWxsb2MgLS13aXRoLWxpYnJvY2tzZGINCg0KVGhlcmUg
-aXMgb25lIHdhcm5pbmcgaW4gdGhlIGNvbmZpZy5sb2csIGJ1dCBpdCBzZWVtcyB0byBoYXBwaWx5
-IG1vdmUgcmlnaHQgYWxvbmcuDQoNCmNvbmZpZ3VyZToyMTM0NjogY2hlY2tpbmcgZm9yIExJQlJP
-Q0tTREINCmNvbmZpZ3VyZToyMTM1MzogJFBLR19DT05GSUcgLS1leGlzdHMgLS1wcmludC1lcnJv
-cnMgInJvY2tzZGIiDQpQYWNrYWdlIHJvY2tzZGIgd2FzIG5vdCBmb3VuZCBpbiB0aGUgcGtnLWNv
-bmZpZyBzZWFyY2ggcGF0aC4NClBlcmhhcHMgeW91IHNob3VsZCBhZGQgdGhlIGRpcmVjdG9yeSBj
-b250YWluaW5nIGByb2Nrc2RiLnBjJw0KdG8gdGhlIFBLR19DT05GSUdfUEFUSCBlbnZpcm9ubWVu
-dCB2YXJpYWJsZSBObyBwYWNrYWdlICdyb2Nrc2RiJyBmb3VuZA0KY29uZmlndXJlOjIxMzU2OiAk
-PyA9IDENCmNvbmZpZ3VyZToyMTM3MDogJFBLR19DT05GSUcgLS1leGlzdHMgLS1wcmludC1lcnJv
-cnMgInJvY2tzZGIiDQpQYWNrYWdlIHJvY2tzZGIgd2FzIG5vdCBmb3VuZCBpbiB0aGUgcGtnLWNv
-bmZpZyBzZWFyY2ggcGF0aC4NClBlcmhhcHMgeW91IHNob3VsZCBhZGQgdGhlIGRpcmVjdG9yeSBj
-b250YWluaW5nIGByb2Nrc2RiLnBjJw0KdG8gdGhlIFBLR19DT05GSUdfUEFUSCBlbnZpcm9ubWVu
-dCB2YXJpYWJsZSBObyBwYWNrYWdlICdyb2Nrc2RiJyBmb3VuZA0KY29uZmlndXJlOjIxMzczOiAk
-PyA9IDENCmNvbmZpZ3VyZToyMTM4NzogcmVzdWx0OiBubw0KTm8gcGFja2FnZSAncm9ja3NkYicg
-Zm91bmQNCmNvbmZpZ3VyZToyMTQxNzogY2hlY2tpbmcgZm9yIG9wZW4gaW4gLWxyb2Nrc2RiDQpj
-b25maWd1cmU6MjE0NDI6IGdjYyAtbyBjb25mdGVzdCAtZyAtTzIgICBjb25mdGVzdC5jIC1scm9j
-a3NkYiAgID4mNQ0KY29uZmlndXJlOjIxNDQyOiAkPyA9IDANCmNvbmZpZ3VyZToyMTQ1MTogcmVz
-dWx0OiB5ZXMNCmNvbmZpZ3VyZToyMTY3ODogY2hlY2tpbmcgZm9yIGlvX3N1Ym1pdCBpbiAtbGFp
-bw0KY29uZmlndXJlOjIxNzAzOiBnY2MgLW8gY29uZnRlc3QgLWcgLU8yICAgY29uZnRlc3QuYyAt
-bGFpbyAgLWxyb2Nrc2RiICA+JjUNCmNvbmZpZ3VyZToyMTcwMzogJD8gPSAwDQpjb25maWd1cmU6
-MjE3MTI6IHJlc3VsdDogeWVzDQoNCkkgZG9uJ3QgaGF2ZSBhIHJvY2tzZGIucGMgZnJvbSBteSBi
-dWlsZCBvZiBpdCwgc28gSSdtIG5vdCBzdXJlIHdoYXQgZXhhY3RseSBpdCBpcyB0YWxraW5nIGFi
-b3V0Lg0KDQpJJ3ZlIGhhZCBzb21lIHZlcnkgaW50ZXJlc3RpbmcgcmVzdWx0cyBmcm9tIHByZWxv
-YWRpbmcgZGlmZmVyZW50IG1lbW9yeSBhbGxvY2F0b3JzIGFuZCBJJ2QgbGlrZSB0byB0cnkgYSBj
-b21wbGV0ZSBqZW1hbGxvYyBpbnN0YWxsIHRoZW4gc2hhcmUgbXkgcmVzdWx0cy4gU28gYW55IHB1
-c2ggaW4gdGhlIHJpZ2h0IGRpcmVjdGlvbiB3b3VsZCBiZSBtdWNoIGFwcHJlY2lhdGVkLg0KDQpU
-aGFuayB5b3UsDQoNCi0gLS0tLS0tLS0tLS0tLS0tLQ0KUm9iZXJ0IExlQmxhbmMNCkdQRyBGaW5n
-ZXJwcmludCA3OUEyIDlDQTQgNkNDNCA0NUREIEE5MDQgIEM3MEUgRTY1NCAzQkIyIEZBNjIgQjlG
-MSAtLS0tLUJFR0lOIFBHUCBTSUdOQVRVUkUtLS0tLQ0KVmVyc2lvbjogTWFpbHZlbG9wZSB2MC4x
-My4xDQpDb21tZW50OiBodHRwczovL3d3dy5tYWlsdmVsb3BlLmNvbQ0KDQp3c0ZjQkFFQkNBQVFC
-UUpWV3JySkNSRG1WRHV5K21LNThRQUFCL3dRQUx3Y0hwN3lsb2sxYVdUQjFCeEINCjRsUFhiNlNK
-RmQvTk1QcTNWSWN6OS8ydThsMXVTemVyTkRUOUxtWjB0bG1BVTduVW1aNUZ5aEI2ak0xVA0KUnNZ
-cm8za3l1QmdkTWdpbU5uQVlqcWd2TnMvdDFzNkRCaGlHL3BadVhQYlNHeUlMTmVtZ1FmNUlJWE5I
-DQpDRmdaTDhiSnpvL1pabFlEOXRBdCtYbjkyV1gvUjZad0lhMmswcnF2aHhEelJYcWFvNWpEVVJE
-UVVjOTMNCktJdGNrdWhkVlRnMUVsekIvMVl1aHU4QVQwZFVQaUwwZWxpamxoNmt0dmdjNE41K3NJ
-OUdqc2o2VlU0bQ0KRXBIei93N1ZndDc1U0lwZXRGNXA3Z2IxZnphT3FmYzNWRm1pSnVQTE05MDgv
-bGhMTXA3cU5jelBNM29wDQp1c2pLYk4zdFFjSDVsMzhrWUJCRW1oaitEdXFuOTllZk9yQzkxTXNk
-SHNDTUx6dVVwMVRiaGFJVVNaMmcNClVyZWwxd2ZwNnZBMEFGT1JBNlFyUEVlY2ZHMVE3TWxkdDVs
-NFRWbDluTk1xN0Z2enJZSkJESWJGZXJMSQ0KYmgvWTltNWZUcXJ0VG1OYjFHdURMQkhOc0JNbC8w
-d3VUMVpZcmIvekt6aE1CZHd6NEJJTmRCWllrZUNKDQpNbXJTdW9YaDFSOUJNVFY0YWV5QmRxc21z
-YjFMTVJzbnpic2swTVc1VGIyQUZNUnJtL012RlpvLzBEMlENCkx6bSt4cDNqZUtqai9OTzV5TVpX
-aG5RSGRSaktpVmw1bHJhUm84M0NqRDFPUVZpcDE3aHdidjRvTTFCdg0KRlQyUVFQWEZWUUp2bW55
-ZjZyWklzb3g5SmpJOFN0QkozamNkOUdyZXdNVnVadWFQQmNPbnFxS0FZc1l0DQppOTAyDQo9RVh2
-NA0KLS0tLS1FTkQgUEdQIFNJR05BVFVSRS0tLS0tDQotLQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0
-aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIHRoZSBi
-b2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jk
-b21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
+I follow the instruction from=20
+http://tracker.ceph.com/issues/10411#note-4, and finally get=20
+force_create_pg work.
+
+Thanks, Brian Rak. It helps a lot.
+
+And, it would be great if the=20
+[feature](http://tracker.ceph.com/issues/10098) is implemented.
+
+BR,
+
+On 2015=E5=B9=B405=E6=9C=8819=E6=97=A5 08:06, flisky wrote:
+> Hi core developers,
+>
+> Sorry, I have to raise this from user list because there is no respon=
+se.
+>
+> I reformat the disks to increase osd journal size. During the process=
+, I
+> lost 9 pgs.
+>
+> The incomplete pgs belong to the pool .rgw.buckets, which causes slow
+> requests and make RGW unusable.
+> I have to restart the OSDs and RGWs time to time, to make RGW respons=
+ible.
+>
+> The most scary things happen. I cannot recovery the incomplete pgs.
+>
+> [force_create_pg](http://tracker.ceph.com/issues/10098) marks it a
+> feature to handle this.
+>
+> The [blog](https://ceph.com/community/incomplete-pgs-oh-my/) is not
+> working, either.
+>
+> And finally I give up the recovery, and use 'rados cppool' to copy ou=
+r
+> huge pool, it's STUCK...
+>
+> I'm very frustrated, and very surprised that Ceph doesn't offer a way=
+ to
+> just let the lost data lost.
+>
+> Could anyone give any advise on this? Thanks!
+>
+> Sincerely,
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
