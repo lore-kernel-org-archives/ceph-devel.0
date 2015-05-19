@@ -1,66 +1,108 @@
-From: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>
-Subject: RE: What crush ruleset for a given SHEC configuration ?
-Date: Tue, 19 May 2015 09:11:10 +0000
-Message-ID: <870DE8DBB716524BAE51B2D499EC81E40AAF9098@g01jpexmbyt24>
-References: <555ADA6F.7000702@dachary.org>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: What crush ruleset for a given SHEC configuration ?
+Date: Tue, 19 May 2015 12:47:00 +0200
+Message-ID: <555B14A4.5000008@dachary.org>
+References: <555ADA6F.7000702@dachary.org> <870DE8DBB716524BAE51B2D499EC81E40AAF9098@g01jpexmbyt24>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="257Bn8i7qMslu9wPvP6GDD2Uo2wCT5r9C"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mgwkm01.jp.fujitsu.com ([202.219.69.168]:55017 "EHLO
-	mgwkm01.jp.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754895AbbESJVe (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 May 2015 05:21:34 -0400
-Received: from g01jpfmpwyt03.exch.g01.fujitsu.local (g01jpfmpwyt03.exch.g01.fujitsu.local [10.128.193.57])
-	by kw-mxq.gw.nic.fujitsu.com (Postfix) with ESMTP id DE6A7AC01D9
-	for <ceph-devel@vger.kernel.org>; Tue, 19 May 2015 18:11:12 +0900 (JST)
-In-Reply-To: <555ADA6F.7000702@dachary.org>
-Content-Language: ja-JP
+Received: from mail2.dachary.org ([91.121.57.175]:37723 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1753405AbbESKrE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 May 2015 06:47:04 -0400
+In-Reply-To: <870DE8DBB716524BAE51B2D499EC81E40AAF9098@g01jpexmbyt24>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
+To: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-SGkgTG9pYywNCg0KPiB0byByZWNvdmVyIEQ2IHdoaWNoIGlzIGluIHJhY2sg
-MiBpdCBtYXkgYmUgbmVjZXNzYXJ5IHRvIHVzZSBQMiBmcm9tIHJhY2sgMQ0K
-DQpCZWNhdXNlIEQ2IGNhbiBiZSByZWNvdmVyZWQgZnJvbSBQMyBhcyB3ZWxs
-LCBQMiBpcyBub3QgbmVjZXNzYXJpbHkgdXNlZCB0byByZWNvdmVyIEQ2Lg0K
-SG93ZXZlciwgd2hlbiBENiBpcyByZWNvdmVyZWQgZnJvbSBQMywgRDUgd2hp
-Y2ggaXMgaW4gcmFjayAxIG11c3QgYmUgcmVhZC4NClRoZXJlZm9yZSwgSSBi
-ZWxpZXZlIENlcGgtTFJDIGlzIG1vcmUgZWZmaWNpZW50IHdoZW4gbmV0d29y
-ayByZXNvdXJjZXMgaXMgcG9vciBzdWNoIGFzDQppbiBjYXNlIG9mIEdlby1S
-ZXBsaWNhdGlvbi4gU0hFQyBzaG91bGQgYmUgdXNlZCBpbiBhIHNpbmdsZSBk
-YXRhIGNlbnRlciB0aGF0IGhhcyBlbm91Z2gNCm5ldHdvcmsgcmVzb3VyY2Vz
-Lg0KDQpCZXN0IHJlZ2FyZHMsDQpUYWtlc2hpIE1peWFtYWUNCg0KLS0tLS1P
-cmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IExvaWMgRGFjaGFyeSBbbWFp
-bHRvOmxvaWNAZGFjaGFyeS5vcmddIA0KU2VudDogVHVlc2RheSwgTWF5IDE5
-LCAyMDE1IDM6MzkgUE0NClRvOiBNaXlhbWFlLCBUYWtlc2hpL+WuruWJjSDl
-iZsNCkNjOiBDZXBoIERldmVsb3BtZW50DQpTdWJqZWN0OiBXaGF0IGNydXNo
-IHJ1bGVzZXQgZm9yIGEgZ2l2ZW4gU0hFQyBjb25maWd1cmF0aW9uID8NCg0K
-SGkgVGFrZXNoaSwNCg0KSW4gdGhlIGNvbnRleHQgb2YgaHR0cDovL2NlcGgu
-Y29tL2RvY3MvbWFzdGVyL3JhZG9zL29wZXJhdGlvbnMvZXJhc3VyZS1jb2Rl
-LXNoZWMvIGl0IHdvdWxkIGJlIHVzZWZ1bCB0byBoYXZlIGEgbW9yZSBkZXRh
-aWxlZCBleHBsYW5hdGlvbiBvZiB3aHkgU0hFQyBpcyBtb3JlIGVmZmljaWVu
-dCBkdXJpbmcgcmVjb3ZlcnkgKGluIHRoZSBpbnRyb2R1Y3Rpb24pLiANCg0K
-QW0gSSBjb3JyZWN0IHRvIGFzc3VtZSB0aGF0IFNIRUMgZG9lcyBub3QgcHJv
-dmlkZSBhIHdheSB0byBjb250cm9sIHRoZSBsb2NhbGl0eSBvZiB0aGUgY2h1
-bmtzID8gRm9yIGluc3RhbmNlIGluIHRoZSBmb2xsb3dpbmcgc2NlbmFyaW86
-DQoNCnJhY2sgMSBoYXMgMTAgT1NEcw0KcmFjayAyIGhhcyAxMCBPU0RzDQoN
-CmEgY3J1c2ggcnVsZXNldCBpcyBtYWRlIHRvIHByb3ZpZGUgMTUgT1NEcyB3
-aXRoIDcgaW4gdGhlIGZpcnN0IHJhY2ssIDggaW4gdGhlIGxhc3QgcmFjazog
-dGhlIGZpcnN0IDcgYXJlIGluIHJhY2sgMSwgdGhlIGxhc3QgOCBpbiByYWNr
-IDIuIFdoZW4gU0hFQyBpcyB1c2VkIHdpdGggc3VjaCBhIGNydXNoIHJ1bGVz
-ZXQsIGl0IGNhbm5vdCBndWFyYW50ZWUgdGhhdCB0aGUgbG9zcyBvZiBvbmUg
-Y2h1bmsgaW4gcmFjayAyIGNhbiBhbHdheXMgYmUgcmVjb3ZlcmVkIHdpdGgg
-Y2h1bmtzIGZyb20gcmFjayAyLiBXaGVuIHJlYWRpbmcgYXQgZmlndXJlIDMg
-b2YNCg0KaHR0cHM6Ly93aWtpLmNlcGguY29tL1BsYW5uaW5nL0JsdWVwcmlu
-dHMvSGFtbWVyL1NoaW5nbGVkX0VyYXN1cmVfQ29kZV8lMjhTSEVDJTI5DQoN
-CndpdGggRDEgdG8gRDUsIFAxIGFuZCBQMiBpbiByYWNrIDEgYW5kIEQ2IHRv
-IEQxMCwgUDMsIFA0LCBQNSBpbiByYWNrIDIsIG15IHVuZGVyc3RhbmRpbmcg
-aXMgdGhhdCB0byByZWNvdmVyIEQ2IHdoaWNoIGlzIGluIHJhY2sgMiBpdCBt
-YXkgYmUgbmVjZXNzYXJ5IHRvIHVzZSBQMiBmcm9tIHJhY2sgMS4gQW5kIHRv
-IHJlY292ZXIgRDUgd2hpY2ggaXMgaW4gcmFjayAxIGl0IG1heSBiZSBuZWNl
-c3NhcnkgdG8gdXNlIFAzIGZyb20gcmFjayAyLg0KDQpNYXliZSBJJ20gbWlz
-c2luZyBzb21ldGhpbmcgPyBUaGFua3MgaW4gYWR2YW5jZSBmb3IgeW91ciBl
-eHBsYW5hdGlvbnMgOi0pDQoNCkNoZWVycw0KLS0gDQpMb8OvYyBEYWNoYXJ5
-LCBBcnRpc2FuIExvZ2ljaWVsIExpYnJlDQoNCg==
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--257Bn8i7qMslu9wPvP6GDD2Uo2wCT5r9C
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+
+
+On 19/05/2015 11:11, Miyamae, Takeshi wrote:
+> Hi Loic,
+>=20
+>> to recover D6 which is in rack 2 it may be necessary to use P2 from ra=
+ck 1
+>=20
+> Because D6 can be recovered from P3 as well, P2 is not necessarily used=
+ to recover D6.
+> However, when D6 is recovered from P3, D5 which is in rack 1 must be re=
+ad.
+> Therefore, I believe Ceph-LRC is more efficient when network resources =
+is poor such as
+> in case of Geo-Replication. SHEC should be used in a single data center=
+ that has enough
+> network resources.
+
+Thanks for the detailed explanation, it is clear now :-)
+
+Cheers
+
+>=20
+> Best regards,
+> Takeshi Miyamae
+>=20
+> -----Original Message-----
+> From: Loic Dachary [mailto:loic@dachary.org]=20
+> Sent: Tuesday, May 19, 2015 3:39 PM
+> To: Miyamae, Takeshi/=E5=AE=AE=E5=89=8D =E5=89=9B
+> Cc: Ceph Development
+> Subject: What crush ruleset for a given SHEC configuration ?
+>=20
+> Hi Takeshi,
+>=20
+> In the context of http://ceph.com/docs/master/rados/operations/erasure-=
+code-shec/ it would be useful to have a more detailed explanation of why =
+SHEC is more efficient during recovery (in the introduction).=20
+>=20
+> Am I correct to assume that SHEC does not provide a way to control the =
+locality of the chunks ? For instance in the following scenario:
+>=20
+> rack 1 has 10 OSDs
+> rack 2 has 10 OSDs
+>=20
+> a crush ruleset is made to provide 15 OSDs with 7 in the first rack, 8 =
+in the last rack: the first 7 are in rack 1, the last 8 in rack 2. When S=
+HEC is used with such a crush ruleset, it cannot guarantee that the loss =
+of one chunk in rack 2 can always be recovered with chunks from rack 2. W=
+hen reading at figure 3 of
+>=20
+> https://wiki.ceph.com/Planning/Blueprints/Hammer/Shingled_Erasure_Code_=
+%28SHEC%29
+>=20
+> with D1 to D5, P1 and P2 in rack 1 and D6 to D10, P3, P4, P5 in rack 2,=
+ my understanding is that to recover D6 which is in rack 2 it may be nece=
+ssary to use P2 from rack 1. And to recover D5 which is in rack 1 it may =
+be necessary to use P3 from rack 2.
+>=20
+> Maybe I'm missing something ? Thanks in advance for your explanations :=
+-)
+>=20
+> Cheers
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--257Bn8i7qMslu9wPvP6GDD2Uo2wCT5r9C
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlVbFKQACgkQ8dLMyEl6F20hbACgpBti3cuJ8W/FETyWZYrMcwKl
+C+sAn0+x/VUa7U35I2CQS4sz7U6NqIQa
+=hXyE
+-----END PGP SIGNATURE-----
+
+--257Bn8i7qMslu9wPvP6GDD2Uo2wCT5r9C--
