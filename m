@@ -1,56 +1,100 @@
-From: flisky <yinjifeng@lianjia.com>
-Subject: [EMG]incomplete pgs make RGW unusable
-Date: Tue, 19 May 2015 08:06:01 +0800
-Message-ID: <mjdupr$jtu$1@ger.gmane.org>
+From: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
+Subject: RE: Proxy write performance on fio with zipf distribution
+Date: Tue, 19 May 2015 02:15:22 +0000
+Message-ID: <06E7D85B3BA36C4DB207FEDE871C53489E80B2@SHSMSX101.ccr.corp.intel.com>
+References: <06E7D85B3BA36C4DB207FEDE871C53489E7E4D@SHSMSX101.ccr.corp.intel.com>
+ <555A0363.3020305@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:34202 "EHLO plane.gmane.org"
+Received: from mga11.intel.com ([192.55.52.93]:38962 "EHLO mga11.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751946AbbESAKI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 18 May 2015 20:10:08 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1YuV6j-0002mX-3y
-	for ceph-devel@vger.kernel.org; Tue, 19 May 2015 02:10:07 +0200
-Received: from 118.186.147.8 ([118.186.147.8])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Tue, 19 May 2015 02:10:05 +0200
-Received: from yinjifeng by 118.186.147.8 with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Tue, 19 May 2015 02:10:05 +0200
+	id S1751073AbbESCP2 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 May 2015 22:15:28 -0400
+In-Reply-To: <555A0363.3020305@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Mark Nelson <mnelson@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi core developers,
+Hi Mark,
 
-Sorry, I have to raise this from user list because there is no response.
+I don't have the data of the base pool on fio zipf for now. But we can have some observations from the data below. The whole data size of the testing is 400GB. And the max cache size is 80GB (100GB*0.8 full ratio). From the output of fio-genzipf, top 10% of the data is hit over 80% of the time. That's to say, if the cache evict algorithm is good enough, 40GB cache should be enough to have a reasonable good performance. But from the without proxy write performance below, the result is much lower than expected. So I think the cache evict algorithm also needs improvements. With this in mind, I would guess the proxy write performance result may not be better than the with ssd journal base pool result.
 
-I reformat the disks to increase osd journal size. During the process, I 
-lost 9 pgs.
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
+Sent: Monday, May 18, 2015 11:21 PM
+To: Wang, Zhiqiang; ceph-devel@vger.kernel.org
+Subject: Re: Proxy write performance on fio with zipf distribution
 
-The incomplete pgs belong to the pool .rgw.buckets, which causes slow 
-requests and make RGW unusable.
-I have to restart the OSDs and RGWs time to time, to make RGW responsible.
+On 05/18/2015 02:29 AM, Wang, Zhiqiang wrote:
+> Hi all,
+>
+> This is a follow-up of a previous discussion in the performance weekly meeting on proxy write performance. Several months ago, I tested the performance of proxy write using fio with uniform random distribution. The performance gain is about 3.5x compared with non-proxywrite case. However, the uniform random workload is not an ideal workload for cache tiering. I learned from Mark/Sage that fio can generate non-uniform random (zipf/pareto) workload using some config options. I did the evaluations. Please allow me to report the results here.
+>
+> Configurations:
+> - 2 ceph node, each with 1xIntel Xeon E3-1275 V2 @3.5GHz CPU, 32GB 
+> memory, 10Gb NIC. There are 8 HDDs and 6 intel DCS3700 SSDs on each 
+> node
+> - 1 ceph client, with 2xIntel Xeon x5570 @2.93GHz CPU, 128GB memory 
+> and 10GB NIC, running 20 VMs, each VM runs fio on a RBD
+> - Base pool: composed of 16 HDD OSDs, with 4 SSDs acting as the 
+> journal
+> - Cache pool: composed of 8 SSD OSDs, journals are on the same SSD
+> - Data set size: 20x20GB
+> - Cache tier configurations: target_max_bytes 100GB, 
+> cache_target_dirty_ratio 0.4, cache_target_full_ratio 0.8, write 
+> recency 1
+> - Code version: proxy write code is at https://github.com/ceph/ceph/pull/3354. The without proxy write code version is on the same branch, but eliminating the proxy write commits.
+> - Fio configuration: 4k random write, random_distribution zipf:1.1, 
+> ioengine libaio The top 10% of the data is hit over 80% of the time as generated by fio-genzipf. I don't quite understand what the '-b' option means, and fio-genzipf core dumps if I use 4096 for it. So I used 1000000, which seems to be the default.
+> # ./fio-genzipf -t zipf -i 1.1 -b 1000000 -g 400 -o 10 Generating Zipf 
+> distribution with 1.100000 input and 400 GB size and 1000000 block_size.
+>
+>     Rows           Hits %         Sum %           # Hits          Size
+> ----------------------------------------------------------------------------------------------------------------------------
+> Top  10.00%      82.86%          82.86%           355883        331.44G
+> |->  20.00%       4.13%          86.99%            17725         16.51G
+> |->  30.00%       2.86%          89.85%            12278         11.43G
+> |->  40.00%       1.58%          91.43%             6781          6.32G
+> |->  50.00%       1.43%          92.85%             6139          5.72G
+> |->  60.00%       1.43%          94.28%             6139          5.72G
+> |->  70.00%       1.43%          95.71%             6139          5.72G
+> |->  80.00%       1.43%          97.14%             6139          5.72G
+> |->  90.00%       1.43%          98.57%             6139          5.72G
+> |-> 100.00%       1.43%         100.00%             6134          5.71G
+> ----------------------------------------------------------------------
+> -----------------------------------------------------
+>
+> Performance results:
+>
+> - Without proxy write results
+> QD			1		2		4		8		16
+> IOPS			190		200		203		201		198
+> Latency (ms)	100.43	191.9	380.57	775.15	1600.66
+>
+> - With proxy write results
+> QD			1		2		4		8		16
+> IOPS			902		896		1067	1207	1486
+> Latency (ms)	22.08	44.43	74.83	133.12	217.42
+>
+> As you can see from above, proxy write improves IOPS from ~200 up to ~1400, and reduces latency by about 80%.
+>
+> Any comments/feedbacks are welcomed.
 
-The most scary things happen. I cannot recovery the incomplete pgs.
+Excellent testing Zhiqiang!  It looks like proxy write helps dramatically.  Do you happen to know what the performance of the base pool is without the cache tier involved?  That was the big problem we saw back in firefly.  We didn't have proxy write, but here's the results we saw for 4k random writes and 4k random zipf 1.2 writes in 4 different pool configurations (base, base+ssd journal, base+ssd tiering, ssd as base)
 
-[force_create_pg](http://tracker.ceph.com/issues/10098) marks it a 
-feature to handle this.
+http://nhm.ceph.com/librbdfio-tiering-tests2/randwrite%204K-iops.png
 
-The [blog](https://ceph.com/community/incomplete-pgs-oh-my/) is not 
-working, either.
+that graph is a bit difficult to make out, but the gist of it is that in firefly, the performance of a spinning disk base pool with SSD cache pool was significantly slower than either the base pool or the ssd cache pool when used independently.  This was true both for 4K random writes and 4K random zipf 1.2 distribution writes.  This was primarily limited by the sequential write throughput of the cache tier due to the number of 4MB object promotions.
 
-And finally I give up the recovery, and use 'rados cppool' to copy our 
-huge pool, it's STUCK...
+Mark
 
-I'm very frustrated, and very surprised that Ceph doesn't offer a way to 
-just let the lost data lost.
-
-Could anyone give any advise on this? Thanks!
-
-Sincerely,
-
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> in the body of a message to majordomo@vger.kernel.org More majordomo 
+> info at  http://vger.kernel.org/majordomo-info.html
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
