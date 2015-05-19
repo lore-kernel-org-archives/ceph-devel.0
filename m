@@ -1,71 +1,102 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: What crush ruleset for a given SHEC configuration ?
-Date: Tue, 19 May 2015 08:38:39 +0200
-Message-ID: <555ADA6F.7000702@dachary.org>
+From: "Shu, Xinxin" <xinxin.shu@intel.com>
+Subject: RE: Need help compiling 0.94.1 with jemalloc
+Date: Tue, 19 May 2015 07:38:31 +0000
+Message-ID: <75674D092A819E4189E91166C74CB90D01553437@shsmsx102.ccr.corp.intel.com>
+References: <CAANLjFq1xNGms4q811oJp7TtzLjqWRQO9t-gcNdkvr5vWHP5GQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="5FlRTtDqngwcccTPM4VRV0w37eIVdCQwM"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:37590 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1755205AbbESGip (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 May 2015 02:38:45 -0400
+Received: from mga02.intel.com ([134.134.136.20]:36434 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754268AbbESHif (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 19 May 2015 03:38:35 -0400
+In-Reply-To: <CAANLjFq1xNGms4q811oJp7TtzLjqWRQO9t-gcNdkvr5vWHP5GQ@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Robert LeBlanc <robert@leblancnet.us>, ceph-devel <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---5FlRTtDqngwcccTPM4VRV0w37eIVdCQwM
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-Hi Takeshi,
-
-In the context of http://ceph.com/docs/master/rados/operations/erasure-co=
-de-shec/ it would be useful to have a more detailed explanation of why SH=
-EC is more efficient during recovery (in the introduction).=20
-
-Am I correct to assume that SHEC does not provide a way to control the lo=
-cality of the chunks ? For instance in the following scenario:
-
-rack 1 has 10 OSDs
-rack 2 has 10 OSDs
-
-a crush ruleset is made to provide 15 OSDs with 7 in the first rack, 8 in=
- the last rack: the first 7 are in rack 1, the last 8 in rack 2. When SHE=
-C is used with such a crush ruleset, it cannot guarantee that the loss of=
- one chunk in rack 2 can always be recovered with chunks from rack 2. Whe=
-n reading at figure 3 of
-
-https://wiki.ceph.com/Planning/Blueprints/Hammer/Shingled_Erasure_Code_%2=
-8SHEC%29
-
-with D1 to D5, P1 and P2 in rack 1 and D6 to D10, P3, P4, P5 in rack 2, m=
-y understanding is that to recover D6 which is in rack 2 it may be necess=
-ary to use P2 from rack 1. And to recover D5 which is in rack 1 it may be=
- necessary to use P3 from rack 2.
-
-Maybe I'm missing something ? Thanks in advance for your explanations :-)=
-
-
-Cheers
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---5FlRTtDqngwcccTPM4VRV0w37eIVdCQwM
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlVa2m8ACgkQ8dLMyEl6F20SaQCfWFyehRKRDVLQ/nIhTg5vlHGf
-jaUAn1uZzwKvhYxpCrwAIqggY3keSoYx
-=LT/m
------END PGP SIGNATURE-----
-
---5FlRTtDqngwcccTPM4VRV0w37eIVdCQwM--
+UGxlYXNlIHJlZmVyIHRvIGh0dHBzOi8vZ2l0aHViLmNvbS9mYWNlYm9vay9yb2Nrc2RiL2Jsb2Iv
+bWFzdGVyL2luY2x1ZGUvcm9ja3NkYi9vcHRpb25zLmgjTDU2MCAsIHRoZSBsYXRlc3Qgcm9ja3Nk
+YiBtb3ZlIHRoZXNlIG9wdGlvbnMgdG8gQmxvY2tCYXNlZFRhYmxlT3B0aW9uLCBJIHRoaW5rIHlv
+dSBzaG91bGQgdHJ5IGxhdGVzdCBjZXBoLCB0aGlzIFBSIGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBo
+L2NlcGgvcHVsbC80NjIyIGhhcyBiZWVuIG1lcmdlZCBpbnRvIG1hc3Rlcg0KDQpDaGVlcnMsDQp4
+aW54aW4NCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IGNlcGgtZGV2ZWwtb3du
+ZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5v
+cmddIE9uIEJlaGFsZiBPZiBSb2JlcnQgTGVCbGFuYw0KU2VudDogVHVlc2RheSwgTWF5IDE5LCAy
+MDE1IDEyOjI0IFBNDQpUbzogY2VwaC1kZXZlbA0KU3ViamVjdDogTmVlZCBoZWxwIGNvbXBpbGlu
+ZyAwLjk0LjEgd2l0aCBqZW1hbGxvYw0KDQotLS0tLUJFR0lOIFBHUCBTSUdORUQgTUVTU0FHRS0t
+LS0tDQpIYXNoOiBTSEEyNTYNCg0KSSdtIHRyeWluZyB0byBidWlsZCBDZXBoIDAuOTQuMSB3aXRo
+IGplbWFsbG9jIGFuZCB3aXRob3V0IHRjbWFsbG9jLg0KSSd2ZSBkb3dubG9hZGVkIHJvY2tzZGIg
+ZnJvbSB0aGVpciBtYXN0ZXIgYnJhbmNoICh0byBnZXQgdGhlIGplbWFsbG9jDQpvcHRpb24pIGFu
+ZCBidWlsdCByb2Nrc2RiIHdpdGggdGhlIHNoYXJlZCBsaWJyYXJpZXMuIFdoZW4gSSB0cnkgYW5k
+IGJ1aWxkIENlcGgsIGl0IGZhaWxzIG9uOg0KDQpvcy9Sb2Nrc0RCU3RvcmUuY2M6IEluIG1lbWJl
+ciBmdW5jdGlvbiAnaW50IFJvY2tzREJTdG9yZTo6ZG9fb3BlbihzdGQ6Om9zdHJlYW0mLCBib29s
+KSc6DQpvcy9Sb2Nrc0RCU3RvcmUuY2M6NjU6MTU6IGVycm9yOiAnc3RydWN0IHJvY2tzZGI6Ok9w
+dGlvbnMnIGhhcyBubyBtZW1iZXIgbmFtZWQgJ2Jsb2NrX2NhY2hlJw0KICAgICBsZG9wdGlvbnMu
+YmxvY2tfY2FjaGUgPSByb2Nrc2RiOjpOZXdMUlVDYWNoZShvcHRpb25zLmNhY2hlX3NpemUpOw0K
+ICAgICAgICAgICAgICAgXg0Kb3MvUm9ja3NEQlN0b3JlLmNjOjY4OjE1OiBlcnJvcjogJ3N0cnVj
+dCByb2Nrc2RiOjpPcHRpb25zJyBoYXMgbm8gbWVtYmVyIG5hbWVkICdibG9ja19zaXplJw0KICAg
+ICBsZG9wdGlvbnMuYmxvY2tfc2l6ZSA9IG9wdGlvbnMuYmxvY2tfc2l6ZTsNCiAgICAgICAgICAg
+ICAgIF4NCm9zL1JvY2tzREJTdG9yZS5jYzo3MjoxNTogZXJyb3I6ICdzdHJ1Y3Qgcm9ja3NkYjo6
+T3B0aW9ucycgaGFzIG5vIG1lbWJlciBuYW1lZCAnZmlsdGVyX3BvbGljeScNCiAgICAgbGRvcHRp
+b25zLmZpbHRlcl9wb2xpY3kgPSBfZmlsdGVycG9saWN5Ow0KICAgICAgICAgICAgICAgXg0Kb3Mv
+Um9ja3NEQlN0b3JlLmNjOjg2OjE1OiBlcnJvcjogJ3N0cnVjdCByb2Nrc2RiOjpPcHRpb25zJyBo
+YXMgbm8gbWVtYmVyIG5hbWVkICdibG9ja19yZXN0YXJ0X2ludGVydmFsJw0KICAgICBsZG9wdGlv
+bnMuYmxvY2tfcmVzdGFydF9pbnRlcnZhbCA9IG9wdGlvbnMuYmxvY2tfcmVzdGFydF9pbnRlcnZh
+bDsNCiAgICAgICAgICAgICAgIF4NCg0KSSBjYW4gc2VlIGluIHRoZSBjb25maWcubG9nIHRoYXQg
+aXQgaXMgZmluZGluZyB0aGUgc2hhcmVkIHJvY2tkYiBsaWJyYXJpZXMgb2suIEkndmUgY29uZmln
+dXJlZCB3aXRoOg0KDQouL2NvbmZpZ3VyZSAkKGZvciBpIGluIC91c3Ive2xpYjY0LGxpYn0vanZt
+L2phdmEvaW5jbHVkZXssL2xpbnV4fTsgZG8gWyAtZCAkaSBdICYmIGphdmFfaW5jPSIkamF2YV9p
+bmMgLUkkaSI7IGRvbmUpIC0tcHJlZml4PS91c3IgLS1sb2NhbHN0YXRlZGlyPS92YXIgLS1zeXNj
+b25mZGlyPS9ldGMgLS1kb2NkaXI9L3Vzci9zaGFyZS9kb2MvY2VwaCAtLXdpdGgtbnNzIC0td2l0
+aG91dC1jcnlwdG9wcCAtLXdpdGgtcmVzdC1iZW5jaCAtLXdpdGgtZGVidWcgLS1lbmFibGUtY2Vw
+aGZzLWphdmEgLS13aXRoLWxpYnJvY2tzZGItc3RhdGljPW5vIC0td2l0aC1yYWRvc2d3IC0td2l0
+aC1qZW1hbGxvYyAtLXdpdGhvdXQtdGNtYWxsb2MgLS13aXRoLWxpYnJvY2tzZGINCg0KVGhlcmUg
+aXMgb25lIHdhcm5pbmcgaW4gdGhlIGNvbmZpZy5sb2csIGJ1dCBpdCBzZWVtcyB0byBoYXBwaWx5
+IG1vdmUgcmlnaHQgYWxvbmcuDQoNCmNvbmZpZ3VyZToyMTM0NjogY2hlY2tpbmcgZm9yIExJQlJP
+Q0tTREINCmNvbmZpZ3VyZToyMTM1MzogJFBLR19DT05GSUcgLS1leGlzdHMgLS1wcmludC1lcnJv
+cnMgInJvY2tzZGIiDQpQYWNrYWdlIHJvY2tzZGIgd2FzIG5vdCBmb3VuZCBpbiB0aGUgcGtnLWNv
+bmZpZyBzZWFyY2ggcGF0aC4NClBlcmhhcHMgeW91IHNob3VsZCBhZGQgdGhlIGRpcmVjdG9yeSBj
+b250YWluaW5nIGByb2Nrc2RiLnBjJw0KdG8gdGhlIFBLR19DT05GSUdfUEFUSCBlbnZpcm9ubWVu
+dCB2YXJpYWJsZSBObyBwYWNrYWdlICdyb2Nrc2RiJyBmb3VuZA0KY29uZmlndXJlOjIxMzU2OiAk
+PyA9IDENCmNvbmZpZ3VyZToyMTM3MDogJFBLR19DT05GSUcgLS1leGlzdHMgLS1wcmludC1lcnJv
+cnMgInJvY2tzZGIiDQpQYWNrYWdlIHJvY2tzZGIgd2FzIG5vdCBmb3VuZCBpbiB0aGUgcGtnLWNv
+bmZpZyBzZWFyY2ggcGF0aC4NClBlcmhhcHMgeW91IHNob3VsZCBhZGQgdGhlIGRpcmVjdG9yeSBj
+b250YWluaW5nIGByb2Nrc2RiLnBjJw0KdG8gdGhlIFBLR19DT05GSUdfUEFUSCBlbnZpcm9ubWVu
+dCB2YXJpYWJsZSBObyBwYWNrYWdlICdyb2Nrc2RiJyBmb3VuZA0KY29uZmlndXJlOjIxMzczOiAk
+PyA9IDENCmNvbmZpZ3VyZToyMTM4NzogcmVzdWx0OiBubw0KTm8gcGFja2FnZSAncm9ja3NkYicg
+Zm91bmQNCmNvbmZpZ3VyZToyMTQxNzogY2hlY2tpbmcgZm9yIG9wZW4gaW4gLWxyb2Nrc2RiDQpj
+b25maWd1cmU6MjE0NDI6IGdjYyAtbyBjb25mdGVzdCAtZyAtTzIgICBjb25mdGVzdC5jIC1scm9j
+a3NkYiAgID4mNQ0KY29uZmlndXJlOjIxNDQyOiAkPyA9IDANCmNvbmZpZ3VyZToyMTQ1MTogcmVz
+dWx0OiB5ZXMNCmNvbmZpZ3VyZToyMTY3ODogY2hlY2tpbmcgZm9yIGlvX3N1Ym1pdCBpbiAtbGFp
+bw0KY29uZmlndXJlOjIxNzAzOiBnY2MgLW8gY29uZnRlc3QgLWcgLU8yICAgY29uZnRlc3QuYyAt
+bGFpbyAgLWxyb2Nrc2RiICA+JjUNCmNvbmZpZ3VyZToyMTcwMzogJD8gPSAwDQpjb25maWd1cmU6
+MjE3MTI6IHJlc3VsdDogeWVzDQoNCkkgZG9uJ3QgaGF2ZSBhIHJvY2tzZGIucGMgZnJvbSBteSBi
+dWlsZCBvZiBpdCwgc28gSSdtIG5vdCBzdXJlIHdoYXQgZXhhY3RseSBpdCBpcyB0YWxraW5nIGFi
+b3V0Lg0KDQpJJ3ZlIGhhZCBzb21lIHZlcnkgaW50ZXJlc3RpbmcgcmVzdWx0cyBmcm9tIHByZWxv
+YWRpbmcgZGlmZmVyZW50IG1lbW9yeSBhbGxvY2F0b3JzIGFuZCBJJ2QgbGlrZSB0byB0cnkgYSBj
+b21wbGV0ZSBqZW1hbGxvYyBpbnN0YWxsIHRoZW4gc2hhcmUgbXkgcmVzdWx0cy4gU28gYW55IHB1
+c2ggaW4gdGhlIHJpZ2h0IGRpcmVjdGlvbiB3b3VsZCBiZSBtdWNoIGFwcHJlY2lhdGVkLg0KDQpU
+aGFuayB5b3UsDQoNCi0gLS0tLS0tLS0tLS0tLS0tLQ0KUm9iZXJ0IExlQmxhbmMNCkdQRyBGaW5n
+ZXJwcmludCA3OUEyIDlDQTQgNkNDNCA0NUREIEE5MDQgIEM3MEUgRTY1NCAzQkIyIEZBNjIgQjlG
+MSAtLS0tLUJFR0lOIFBHUCBTSUdOQVRVUkUtLS0tLQ0KVmVyc2lvbjogTWFpbHZlbG9wZSB2MC4x
+My4xDQpDb21tZW50OiBodHRwczovL3d3dy5tYWlsdmVsb3BlLmNvbQ0KDQp3c0ZjQkFFQkNBQVFC
+UUpWV3JySkNSRG1WRHV5K21LNThRQUFCL3dRQUx3Y0hwN3lsb2sxYVdUQjFCeEINCjRsUFhiNlNK
+RmQvTk1QcTNWSWN6OS8ydThsMXVTemVyTkRUOUxtWjB0bG1BVTduVW1aNUZ5aEI2ak0xVA0KUnNZ
+cm8za3l1QmdkTWdpbU5uQVlqcWd2TnMvdDFzNkRCaGlHL3BadVhQYlNHeUlMTmVtZ1FmNUlJWE5I
+DQpDRmdaTDhiSnpvL1pabFlEOXRBdCtYbjkyV1gvUjZad0lhMmswcnF2aHhEelJYcWFvNWpEVVJE
+UVVjOTMNCktJdGNrdWhkVlRnMUVsekIvMVl1aHU4QVQwZFVQaUwwZWxpamxoNmt0dmdjNE41K3NJ
+OUdqc2o2VlU0bQ0KRXBIei93N1ZndDc1U0lwZXRGNXA3Z2IxZnphT3FmYzNWRm1pSnVQTE05MDgv
+bGhMTXA3cU5jelBNM29wDQp1c2pLYk4zdFFjSDVsMzhrWUJCRW1oaitEdXFuOTllZk9yQzkxTXNk
+SHNDTUx6dVVwMVRiaGFJVVNaMmcNClVyZWwxd2ZwNnZBMEFGT1JBNlFyUEVlY2ZHMVE3TWxkdDVs
+NFRWbDluTk1xN0Z2enJZSkJESWJGZXJMSQ0KYmgvWTltNWZUcXJ0VG1OYjFHdURMQkhOc0JNbC8w
+d3VUMVpZcmIvekt6aE1CZHd6NEJJTmRCWllrZUNKDQpNbXJTdW9YaDFSOUJNVFY0YWV5QmRxc21z
+YjFMTVJzbnpic2swTVc1VGIyQUZNUnJtL012RlpvLzBEMlENCkx6bSt4cDNqZUtqai9OTzV5TVpX
+aG5RSGRSaktpVmw1bHJhUm84M0NqRDFPUVZpcDE3aHdidjRvTTFCdg0KRlQyUVFQWEZWUUp2bW55
+ZjZyWklzb3g5SmpJOFN0QkozamNkOUdyZXdNVnVadWFQQmNPbnFxS0FZc1l0DQppOTAyDQo9RVh2
+NA0KLS0tLS1FTkQgUEdQIFNJR05BVFVSRS0tLS0tDQotLQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0
+aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIHRoZSBi
+b2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jk
+b21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
