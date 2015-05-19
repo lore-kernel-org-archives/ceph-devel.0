@@ -1,149 +1,79 @@
-From: Christian Salzmann <Christian.Salzmann@fu-berlin.de>
-Subject: Re: kernel BUG at .../fs/ceph/xattr.c:287!
-Date: Tue, 19 May 2015 15:21:26 +0200
-Message-ID: <555B38D6.4020805@fu-berlin.de>
-References: <mjfatn$c1e$1@ger.gmane.org>	<555B3185.8010304@ieee.org> <CAOi1vP8kMTuteHfd-0kwmnouELRCB4prFOu8=aTKsDiLP5=iKw@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: [EMG]incomplete pgs make RGW unusable
+Date: Tue, 19 May 2015 07:42:11 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1505190741450.9510@cobra.newdream.net>
+References: <mjdupr$jtu$1@ger.gmane.org> <mjettq$dj6$1@ger.gmane.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg=sha1; boundary="------------ms070308020809060605080406"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from outpost18.zedat.fu-berlin.de ([130.133.4.111]:51125 "EHLO
-	outpost18.zedat.fu-berlin.de" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755862AbbESN3M (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 19 May 2015 09:29:12 -0400
-In-Reply-To: <CAOi1vP8kMTuteHfd-0kwmnouELRCB4prFOu8=aTKsDiLP5=iKw@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:45914 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753116AbbESOmM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 May 2015 10:42:12 -0400
+In-Reply-To: <mjettq$dj6$1@ger.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>, Alex Elder <elder@ieee.org>
-Cc: CSa <salzmann@mi.fu-berlin.de>, Ceph Development <ceph-devel@vger.kernel.org>
+To: flisky <yinjifeng@lianjia.com>
+Cc: ceph-devel@vger.kernel.org
 
-This is a cryptographically signed message in MIME format.
+On Tue, 19 May 2015, flisky wrote:
+> I follow the instruction from http://tracker.ceph.com/issues/10411#note-4, and
+> finally get force_create_pg work.
+> 
+> Thanks, Brian Rak. It helps a lot.
+> 
+> And, it would be great if the [feature](http://tracker.ceph.com/issues/10098)
+> is implemented.
 
---------------ms070308020809060605080406
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+I've bumped this up toward the top of the backlog.. it shouldn't be 
+terribly difficult to implement!
 
-On 19.05.2015 15:10, Ilya Dryomov wrote:
-
-> Is there a symlink involved by any chance? =20
-
-Can't tell.
-
-> Probably fixed by 0abb43dcacb5 "ceph: fix llistxattr on symlink" in 3.1=
-8.
-
-thanks! I'll give it a try!
-
-ciao
-Christian
+sage
 
 
---------------ms070308020809060605080406
-Content-Type: application/pkcs7-signature; name="smime.p7s"
-Content-Transfer-Encoding: base64
-Content-Disposition: attachment; filename="smime.p7s"
-Content-Description: S/MIME Cryptographic Signature
-
-MIAGCSqGSIb3DQEHAqCAMIACAQExCzAJBgUrDgMCGgUAMIAGCSqGSIb3DQEHAQAAoIIQxjCC
-BNUwggO9oAMCAQICCFBOxvU9EbRkMA0GCSqGSIb3DQEBCwUAMHExCzAJBgNVBAYTAkRFMRww
-GgYDVQQKExNEZXV0c2NoZSBUZWxla29tIEFHMR8wHQYDVQQLExZULVRlbGVTZWMgVHJ1c3Qg
-Q2VudGVyMSMwIQYDVQQDExpEZXV0c2NoZSBUZWxla29tIFJvb3QgQ0EgMjAeFw0xNDA3MjIx
-MjA4MjZaFw0xOTA3MDkyMzU5MDBaMFoxCzAJBgNVBAYTAkRFMRMwEQYDVQQKEwpERk4tVmVy
-ZWluMRAwDgYDVQQLEwdERk4tUEtJMSQwIgYDVQQDExtERk4tVmVyZWluIFBDQSBHbG9iYWwg
-LSBHMDEwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDpm8NnhfkNrvWNVMOWUDU9
-YuluTO2U1wBblSJ01CDrNI/W7MAxBAuZgeKmFNJSoCgjhIt0iQReW+DieMF4yxbLKDU5ey2Q
-RdDtoAB6fL9KDhsAw4bpXCsxEXsM84IkQ4wcOItqaACa7txPeKvSxhObdq3u3ibo7wGvdA/B
-CaL2a869080UME/15eOkyGKbghoDJzANAmVgTe3RCSMqljVYJ9N2xnG2kB3E7f81hn1vM7Pb
-D8URwoqDoZRdQWvY0hD1TP3KUazZve+Sg7va64sWVlZDz+HVEz2mHycwzUlU28kTNJpxdcVs
-6qcLmPkhnSevPqM5OUhqjK3JmfvDEvK9AgMBAAGjggGGMIIBgjAOBgNVHQ8BAf8EBAMCAQYw
-HQYDVR0OBBYEFEm3xs/oPR9/6kR7Eyn38QpwPt5kMB8GA1UdIwQYMBaAFDHDeRu69VPXF+CJ
-ei0XbAqzK50zMBIGA1UdEwEB/wQIMAYBAf8CAQIwYgYDVR0gBFswWTARBg8rBgEEAYGtIYIs
-AQEEAgIwEQYPKwYBBAGBrSGCLAEBBAMAMBEGDysGAQQBga0hgiwBAQQDATAPBg0rBgEEAYGt
-IYIsAQEEMA0GCysGAQQBga0hgiweMD4GA1UdHwQ3MDUwM6AxoC+GLWh0dHA6Ly9wa2kwMzM2
-LnRlbGVzZWMuZGUvcmwvRFRfUk9PVF9DQV8yLmNybDB4BggrBgEFBQcBAQRsMGowLAYIKwYB
-BQUHMAGGIGh0dHA6Ly9vY3NwMDMzNi50ZWxlc2VjLmRlL29jc3ByMDoGCCsGAQUFBzAChi5o
-dHRwOi8vcGtpMDMzNi50ZWxlc2VjLmRlL2NydC9EVF9ST09UX0NBXzIuY2VyMA0GCSqGSIb3
-DQEBCwUAA4IBAQBjICj9nCGGcr45Rlk5MiW8qQGbDczKfUGchm0KbiyzE1l1sTOSG2EnFv/D
-stU1gvuEKgFJvWa7Zi+ywgZdbj9u4wFaW8pDY1yVtuExpx/VB19N5mWCTjL5w3x6S81NXHTu
-IfJ1AuxSPtLJatOQI25JZzW+f01WpOzML8+3oZeocj7JvEDWWqQIPda8gsO3tzKOsSyOam23
-NQIZz/U5RFhjpyQAELC7/E6vbi84u6VXST/YblBvLJeW3B1GmmWJz67M8uXZn1OzPqEvkqnY
-C8aEHwTG6x7on321e6UC8STFJGMRNMxakyAqeYg6JUKQqWU7fIbTEhUjKfws2sw5W1QXMIIF
-jzCCBHegAwIBAgIHF5BgzPm5bjANBgkqhkiG9w0BAQsFADBaMQswCQYDVQQGEwJERTETMBEG
-A1UEChMKREZOLVZlcmVpbjEQMA4GA1UECxMHREZOLVBLSTEkMCIGA1UEAxMbREZOLVZlcmVp
-biBQQ0EgR2xvYmFsIC0gRzAxMB4XDTE0MDUxMjE1MDUzMloXDTE5MDcwOTIzNTkwMFowgbUx
-CzAJBgNVBAYTAkRFMQ8wDQYDVQQIEwZCZXJsaW4xDzANBgNVBAcTBkJlcmxpbjEiMCAGA1UE
-ChMZRnJlaWUgVW5pdmVyc2l0YWV0IEJlcmxpbjEOMAwGA1UECxMFWkVEQVQxMDAuBgNVBAMT
-J0ZyZWllIFVuaXZlcnNpdGFldCBCZXJsaW4gLSBGVS1DQSAtIEcwMTEeMBwGCSqGSIb3DQEJ
-ARYPY2FARlUtQmVybGluLkRFMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAjYUI
-0048zDNevkmXipCDjSpIr+sEbhiXPzWnZnCnkmLOrEMFaNDWDX6kcVQ1VP71opEfGuR5LtW0
-P6N+JM8E8y5HXdap62bD4Yfg0KQEmlh9vpMQ75BckReW7wRKH/Ntcrg8gwn97d17Hs8hgRGk
-8cpBRAs5v5hcqRZcjR63mKCismsjld6MVdWSNYhZJhpcnb0dVzMa3A7Rf1OsXHwDXrhusCNp
-h1+Pazuw2XbIKWSCsFS4qlhHOj5QA375qk5IjjsUnw2FqljLiziu9xB4/jhSx1fz6+5RVnTe
-5Tb9GMbk5RVR+dvPTnzF96T/yW5DqsFIL+xBYQ8juFoBQog3MwIDAQABo4IB/DCCAfgwEgYD
-VR0TAQH/BAgwBgEB/wIBATAOBgNVHQ8BAf8EBAMCAQYwEQYDVR0gBAowCDAGBgRVHSAAMB0G
-A1UdDgQWBBQG4T30b/Qwt3o7V7AxBYl7DVhabDAfBgNVHSMEGDAWgBRJt8bP6D0ff+pEexMp
-9/EKcD7eZDAaBgNVHREEEzARgQ9jYUBGVS1CZXJsaW4uREUwgYgGA1UdHwSBgDB+MD2gO6A5
-hjdodHRwOi8vY2RwMS5wY2EuZGZuLmRlL2dsb2JhbC1yb290LWNhL3B1Yi9jcmwvY2Fjcmwu
-Y3JsMD2gO6A5hjdodHRwOi8vY2RwMi5wY2EuZGZuLmRlL2dsb2JhbC1yb290LWNhL3B1Yi9j
-cmwvY2FjcmwuY3JsMIHXBggrBgEFBQcBAQSByjCBxzAzBggrBgEFBQcwAYYnaHR0cDovL29j
-c3AucGNhLmRmbi5kZS9PQ1NQLVNlcnZlci9PQ1NQMEcGCCsGAQUFBzAChjtodHRwOi8vY2Rw
-MS5wY2EuZGZuLmRlL2dsb2JhbC1yb290LWNhL3B1Yi9jYWNlcnQvY2FjZXJ0LmNydDBHBggr
-BgEFBQcwAoY7aHR0cDovL2NkcDIucGNhLmRmbi5kZS9nbG9iYWwtcm9vdC1jYS9wdWIvY2Fj
-ZXJ0L2NhY2VydC5jcnQwDQYJKoZIhvcNAQELBQADggEBADRy38buZjrfDN8mZiukEjlsx+6s
-/DKj5YYWaAvUB5kqhL2TM58bPyq4sYAVCDWALifAk11Gx4/Rp1PLNFd4tnoRcQsfgN8ywECp
-WBbgESOC73tfa6ZSPEY8uZ4yUk0o2nwxkgU0V3/b7/51XLp5TA5gBeL3aYcjYQ17QN14Mh12
-MiXFp5VbPBDTHkinUXt316A8Qj09wJnHMOjt5M+ZDn82YYC7vFDzjNkNmw46PRL3hZOfZb1I
-S+fhVlR4eW0FBLqmGg+4Y7Y4KKrwBcBK3OzME5jN71LkdNu1lkB43OfT+YOMT+pqZp1l0U6D
-GZa3SZy5xfWY3EL5BYVM8xAfoZgwggZWMIIFPqADAgECAgcWwB71OQVRMA0GCSqGSIb3DQEB
-BQUAMIG1MQswCQYDVQQGEwJERTEPMA0GA1UECBMGQmVybGluMQ8wDQYDVQQHEwZCZXJsaW4x
-IjAgBgNVBAoTGUZyZWllIFVuaXZlcnNpdGFldCBCZXJsaW4xDjAMBgNVBAsTBVpFREFUMTAw
-LgYDVQQDEydGcmVpZSBVbml2ZXJzaXRhZXQgQmVybGluIC0gRlUtQ0EgLSBHMDExHjAcBgkq
-hkiG9w0BCQEWD2NhQEZVLUJlcmxpbi5ERTAeFw0xMzEyMDUxNTUzMTBaFw0xNjEyMDQxNTUz
-MTBaMIG0MQswCQYDVQQGEwJERTEPMA0GA1UECBMGQmVybGluMQ8wDQYDVQQHEwZCZXJsaW4x
-IjAgBgNVBAoTGUZyZWllIFVuaXZlcnNpdGFldCBCZXJsaW4xLjAsBgNVBAsTJUZhY2hiZXJl
-aWNoIE1hdGhlbWF0aWsgdW5kIEluZm9ybWF0aWsxEjAQBgNVBAsTCUlULURpZW5zdDEbMBkG
-A1UEAxMSQ2hyaXN0aWFuIFNhbHptYW5uMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKC
-AQEAneplf76HPK/nNOIyVSWMgdATjW96I1h1RzvsfEyeatZFRpVW5WSbVYgagolL/rCJdCw8
-pJE6k0/wqaZ0VUb4gEu5GmEOUpMg6RDtTt/HMN3DwXq6lmzudzXNCaMB0/FCIkG4fYzy7/Qp
-wzjXkFQMOYkanNgGdwgvJdqLI7PcvKpRuQYJUPl9zqCh35Qco4xuBiFLr0o58eaeicAF3MaI
-ri/vVWp/SwdL/s3dcoiEyaJzpjlRAs5U4G10TMulO7G22OTbwDIk0moVJ+QvM9Bz6s/Cb/qb
-Yj4xnZHW/HcRtCtccwIIW/TsJ/HpkuHpeHcKFdCPNLE657WR0kO1RMhbBwIDAQABo4ICaDCC
-AmQwLwYDVR0gBCgwJjARBg8rBgEEAYGtIYIsAQEEAwEwEQYPKwYBBAGBrSGCLAIBBAMBMAkG
-A1UdEwQCMAAwCwYDVR0PBAQDAgXgMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDBDAd
-BgNVHQ4EFgQU/SMFCLcige3/9kkETMso0moP5ykwHwYDVR0jBBgwFoAUBuE99G/0MLd6O1ew
-MQWJew1YWmwwga8GA1UdEQSBpzCBpIEfQ2hyaXN0aWFuLlNhbHptYW5uQGZ1LWJlcmxpbi5k
-ZYEfY2hyaXN0aWFuLnNhbHptYW5uQGZ1LWJlcmxpbi5kZYEiQ2hyaXN0aWFuLlNhbHptYW5u
-QG1pLmZ1LWJlcmxpbi5kZYEiY2hyaXN0aWFuLnNhbHptYW5uQG1pLmZ1LWJlcmxpbi5kZYEY
-c2Fsem1hbm5AbWkuZnUtYmVybGluLmRlMHUGA1UdHwRuMGwwNKAyoDCGLmh0dHA6Ly9jZHAx
-LnBjYS5kZm4uZGUvZnUtY2EvcHViL2NybC9jYWNybC5jcmwwNKAyoDCGLmh0dHA6Ly9jZHAy
-LnBjYS5kZm4uZGUvZnUtY2EvcHViL2NybC9jYWNybC5jcmwwgZAGCCsGAQUFBwEBBIGDMIGA
-MD4GCCsGAQUFBzAChjJodHRwOi8vY2RwMS5wY2EuZGZuLmRlL2Z1LWNhL3B1Yi9jYWNlcnQv
-Y2FjZXJ0LmNydDA+BggrBgEFBQcwAoYyaHR0cDovL2NkcDIucGNhLmRmbi5kZS9mdS1jYS9w
-dWIvY2FjZXJ0L2NhY2VydC5jcnQwDQYJKoZIhvcNAQEFBQADggEBABkyJakjtv1b9blOntm+
-LYzv3rDZlJbdmfVZPUu4kVFiwlMhDFFynQ6JkMuNeq0aKhmP44Gx8JXdyZ2pWZMzERHLiKh5
-nG9Jf/uyrzJRPLvwtiR2xx0AxjDR93Xp2Yw3F4q+hgwhKbd9q4CqsWoc+JP9/ITxribAxp4n
-KSJDnU3V8bXHw4wt2x1B0nB26KCcRUpt9ZyIWJhydJAX5cRpGfqIx9yOyHUp9Sejs43uq+uA
-HmspT8ChzKUbR8WCsmtn0VvNssGZ9bhVGoDxJgxodr+lir74fB/cDXDhsbfqvybQucyHohZ/
-PLa/a3HjoSrgTiuRNdiFmqT50+2W3/ySfmMxggRkMIIEYAIBATCBwTCBtTELMAkGA1UEBhMC
-REUxDzANBgNVBAgTBkJlcmxpbjEPMA0GA1UEBxMGQmVybGluMSIwIAYDVQQKExlGcmVpZSBV
-bml2ZXJzaXRhZXQgQmVybGluMQ4wDAYDVQQLEwVaRURBVDEwMC4GA1UEAxMnRnJlaWUgVW5p
-dmVyc2l0YWV0IEJlcmxpbiAtIEZVLUNBIC0gRzAxMR4wHAYJKoZIhvcNAQkBFg9jYUBGVS1C
-ZXJsaW4uREUCBxbAHvU5BVEwCQYFKw4DAhoFAKCCAncwGAYJKoZIhvcNAQkDMQsGCSqGSIb3
-DQEHATAcBgkqhkiG9w0BCQUxDxcNMTUwNTE5MTMyMTI2WjAjBgkqhkiG9w0BCQQxFgQULQeM
-nmVLSls9pi2ssVM14hGeA/YwbAYJKoZIhvcNAQkPMV8wXTALBglghkgBZQMEASowCwYJYIZI
-AWUDBAECMAoGCCqGSIb3DQMHMA4GCCqGSIb3DQMCAgIAgDANBggqhkiG9w0DAgIBQDAHBgUr
-DgMCBzANBggqhkiG9w0DAgIBKDCB0gYJKwYBBAGCNxAEMYHEMIHBMIG1MQswCQYDVQQGEwJE
-RTEPMA0GA1UECBMGQmVybGluMQ8wDQYDVQQHEwZCZXJsaW4xIjAgBgNVBAoTGUZyZWllIFVu
-aXZlcnNpdGFldCBCZXJsaW4xDjAMBgNVBAsTBVpFREFUMTAwLgYDVQQDEydGcmVpZSBVbml2
-ZXJzaXRhZXQgQmVybGluIC0gRlUtQ0EgLSBHMDExHjAcBgkqhkiG9w0BCQEWD2NhQEZVLUJl
-cmxpbi5ERQIHFsAe9TkFUTCB1AYLKoZIhvcNAQkQAgsxgcSggcEwgbUxCzAJBgNVBAYTAkRF
-MQ8wDQYDVQQIEwZCZXJsaW4xDzANBgNVBAcTBkJlcmxpbjEiMCAGA1UEChMZRnJlaWUgVW5p
-dmVyc2l0YWV0IEJlcmxpbjEOMAwGA1UECxMFWkVEQVQxMDAuBgNVBAMTJ0ZyZWllIFVuaXZl
-cnNpdGFldCBCZXJsaW4gLSBGVS1DQSAtIEcwMTEeMBwGCSqGSIb3DQEJARYPY2FARlUtQmVy
-bGluLkRFAgcWwB71OQVRMA0GCSqGSIb3DQEBAQUABIIBAFlcgByLPMHh+LrMTITyV+FJEhsB
-eEb21OKRUsyXC1R8Nh1mbk5tW8/j/OCZxN9TTFiMIwJEL5V9FPszUQPNxkeDyag9RBmpxuZA
-KDkG6wjzKrtAaqo/cWSW1fbRfWZ/YR3FUbh0UGT64IRKT7zuwB17Pxj/kTOauBz/gETBwyI9
-/3YsnQ6688Tx3gUIIexIkXNFUKVQIT9SiGreTQJ7M4P0Cgaabgibt5w67j3ULNzeqi6rW25u
-vZbwIVwz+IzWYypjj+i1R6Ug/UJg+N8e0hezGycD5hCWQMJC0dDu/VK2zoM4Fc0N2dRrDmfb
-6AvTudZRyKidvKXS+5zckYpB62oAAAAAAAA=
---------------ms070308020809060605080406--
+> 
+> BR,
+> 
+> On 2015?05?19? 08:06, flisky wrote:
+> > Hi core developers,
+> > 
+> > Sorry, I have to raise this from user list because there is no response.
+> > 
+> > I reformat the disks to increase osd journal size. During the process, I
+> > lost 9 pgs.
+> > 
+> > The incomplete pgs belong to the pool .rgw.buckets, which causes slow
+> > requests and make RGW unusable.
+> > I have to restart the OSDs and RGWs time to time, to make RGW responsible.
+> > 
+> > The most scary things happen. I cannot recovery the incomplete pgs.
+> > 
+> > [force_create_pg](http://tracker.ceph.com/issues/10098) marks it a
+> > feature to handle this.
+> > 
+> > The [blog](https://ceph.com/community/incomplete-pgs-oh-my/) is not
+> > working, either.
+> > 
+> > And finally I give up the recovery, and use 'rados cppool' to copy our
+> > huge pool, it's STUCK...
+> > 
+> > I'm very frustrated, and very surprised that Ceph doesn't offer a way to
+> > just let the lost data lost.
+> > 
+> > Could anyone give any advise on this? Thanks!
+> > 
+> > Sincerely,
+> > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
