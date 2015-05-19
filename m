@@ -1,35 +1,117 @@
-From: Andrey Korolyov <andrey@xdel.ru>
-Subject: Snap operation throttling (again)
-Date: Tue, 19 May 2015 18:06:08 +0300
-Message-ID: <CABYiri-V7rmF=WdTek5V8TopG8gOR_H+3XC+cV6B+OUQ5er4cA@mail.gmail.com>
+From: flisky <yinjifeng@lianjia.com>
+Subject: Re: [EMG]incomplete pgs make RGW unusable
+Date: Tue, 19 May 2015 23:30:59 +0800
+Message-ID: <mjfkvj$a4$1@ger.gmane.org>
+References: <mjdupr$jtu$1@ger.gmane.org> <mjettq$dj6$1@ger.gmane.org> <alpine.DEB.2.00.1505190741450.9510@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f44.google.com ([209.85.215.44]:34438 "EHLO
-	mail-la0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751290AbbESPGb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 May 2015 11:06:31 -0400
-Received: by laat2 with SMTP id t2so28701073laa.1
-        for <ceph-devel@vger.kernel.org>; Tue, 19 May 2015 08:06:29 -0700 (PDT)
+Received: from plane.gmane.org ([80.91.229.3]:36337 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753683AbbESPbN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 19 May 2015 11:31:13 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1YujU3-0001Mz-6b
+	for ceph-devel@vger.kernel.org; Tue, 19 May 2015 17:31:07 +0200
+Received: from 101.254.26.15 ([101.254.26.15])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Tue, 19 May 2015 17:31:07 +0200
+Received: from yinjifeng by 101.254.26.15 with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Tue, 19 May 2015 17:31:07 +0200
+In-Reply-To: <alpine.DEB.2.00.1505190741450.9510@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-users <ceph-users@ceph.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hello,
+Thanks, sage!
 
-this question was brought many times before, and also solved in a
-various ways - snap trimmer, scheduler` priorities and persistent fix
-(for a ReplicatedPG issue), but it seems that the current Ceph
-versions may suffer as well during the rollback operations on large
-images and on large scale. Given CFQ scheduler for rotating media and
-~10 percentage of an utilization as an initial preconditions, the
-rollback operation of an one-fourth terabyte image over 100 OSDs may
-result in a significant latency impact and, for such configuration,
-breakage of a 30s request completion barrier. Although recent
-improvements did very well in means of the congestion control for a
-slow media for many kind of non-client ops, this exact issue remains.
-I think it can be solved by another sleeper knob but unsure where its
-proper place should be.
+On 2015=E5=B9=B405=E6=9C=8819=E6=97=A5 22:42, Sage Weil wrote:
+> On Tue, 19 May 2015, flisky wrote:
+>> I follow the instruction from http://tracker.ceph.com/issues/10411#n=
+ote-4, and
+>> finally get force_create_pg work.
+>>
+>> Thanks, Brian Rak. It helps a lot.
+>>
+>> And, it would be great if the [feature](http://tracker.ceph.com/issu=
+es/10098)
+>> is implemented.
+>
+> I've bumped this up toward the top of the backlog.. it shouldn't be
+> terribly difficult to implement!
+>
+> sage
+>
+>
+>>
+>> BR,
+>>
+>> On 2015?05?19? 08:06, flisky wrote:
+>>> Hi core developers,
+>>>
+>>> Sorry, I have to raise this from user list because there is no resp=
+onse.
+>>>
+>>> I reformat the disks to increase osd journal size. During the proce=
+ss, I
+>>> lost 9 pgs.
+>>>
+>>> The incomplete pgs belong to the pool .rgw.buckets, which causes sl=
+ow
+>>> requests and make RGW unusable.
+>>> I have to restart the OSDs and RGWs time to time, to make RGW respo=
+nsible.
+>>>
+>>> The most scary things happen. I cannot recovery the incomplete pgs.
+>>>
+>>> [force_create_pg](http://tracker.ceph.com/issues/10098) marks it a
+>>> feature to handle this.
+>>>
+>>> The [blog](https://ceph.com/community/incomplete-pgs-oh-my/) is not
+>>> working, either.
+>>>
+>>> And finally I give up the recovery, and use 'rados cppool' to copy =
+our
+>>> huge pool, it's STUCK...
+>>>
+>>> I'm very frustrated, and very surprised that Ceph doesn't offer a w=
+ay to
+>>> just let the lost data lost.
+>>>
+>>> Could anyone give any advise on this? Thanks!
+>>>
+>>> Sincerely,
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
+l" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
 
-Thanks for suggestions!
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
