@@ -1,104 +1,51 @@
-From: Artem Elkin <Artem.Elkin@icl-services.com>
-Subject: RE: straw2-like algorithm
-Date: Tue, 19 May 2015 12:26:01 +0000
-Message-ID: <DB3PR03MB0684C61FF0F0755A66AB1322D4C30@DB3PR03MB0684.eurprd03.prod.outlook.com>
-References: <DB3PR03MB06841B94BC544DA1466E1E95D4C70@DB3PR03MB0684.eurprd03.prod.outlook.com>
- <CAC6JEv_+63VOuTN=PgOahWE-KZT=oRvpzux_M0MPbrEbwUeVsg@mail.gmail.com>
+From: CSa <salzmann@mi.fu-berlin.de>
+Subject: kernel BUG at .../fs/ceph/xattr.c:287!
+Date: Tue, 19 May 2015 14:39:19 +0200
+Message-ID: <mjfatn$c1e$1@ger.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7Bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-db3on0124.outbound.protection.outlook.com ([157.55.234.124]:11059
-	"EHLO emea01-db3-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1755693AbbESM0E (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 19 May 2015 08:26:04 -0400
-In-Reply-To: <CAC6JEv_+63VOuTN=PgOahWE-KZT=oRvpzux_M0MPbrEbwUeVsg@mail.gmail.com>
-Content-Language: en-US
+Received: from plane.gmane.org ([80.91.229.3]:46084 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932284AbbESMpG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 19 May 2015 08:45:06 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1YugtM-0006Eq-3q
+	for ceph-devel@vger.kernel.org; Tue, 19 May 2015 14:45:04 +0200
+Received: from mintzer.imp.fu-berlin.de ([160.45.113.19])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Tue, 19 May 2015 14:45:04 +0200
+Received: from salzmann by mintzer.imp.fu-berlin.de with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Tue, 19 May 2015 14:45:04 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@gregs42.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-WWVzLCBjdXJyZW50IGltcGxlbWVudGF0aW9uIGlzIHZlcnkgb3B0aW1pemVkIGFuZCB0cmlja3ku
-IEJ1dCBpdCB1c2VzIHR3byBsb29rdXAgdGFibGUuIFNvIHRoZSBxdWVzdGlvbiBpcyB3aGF0IHRo
-ZSBzeXN0ZW0gZG9lcyBiZXR3ZWVuIHRoZSBjaG9vc2UgZnVuY3Rpb24gY2FsbHMuIEluIGNhc2Ug
-dGhlcmUgYXJlIHNvbWUgbWVtb3J5IGludGVuc2l2ZSBvcGVyYXRpb25zIGJldHdlZW4gdGhlbSB0
-aGUgdGFibGVzIGFyZSBsaWtlbHkgdG8gYmUgZGlzcGxhY2VkIGZyb20gdGhlIENQVSBjYWNoZXMu
-IEFub3RoZXIgcXVlc3Rpb24gaXMgaWYgdGhpcyBzdHVmZiBoYXMgYW55IHZpc2libGUgaW1wYWN0
-IG9uIHRoZSBvdmVyYWxsIHBlcmZvcm1hbmNlIChob3cgb2Z0ZW4gaXMgaXQgY2FsbGVkPykuIEkn
-bSBub3QgYXdhcmUgb2Ygc3VjaCBkZXRhaWxzIHNvIHlvdSBhcmUgdGhlIG9uZXMgd2hvIHNob3Vs
-ZCBtYWtlIHRoZSBkZWNpc2lvbi4NCg0KUmVnYXJkcywNCkFydGVtDQoNCi0tLS0tT3JpZ2luYWwg
-TWVzc2FnZS0tLS0tDQpGcm9tOiBHcmVnb3J5IEZhcm51bSBbbWFpbHRvOmdyZWdAZ3JlZ3M0Mi5j
-b21dIA0KU2VudDogU2F0dXJkYXksIE1heSAxNiwgMjAxNSAxOjI4IEFNDQpUbzogQXJ0ZW0gRWxr
-aW4NCkNjOiBDZXBoIERldmVsb3BtZW50DQpTdWJqZWN0OiBSZTogc3RyYXcyLWxpa2UgYWxnb3Jp
-dGhtDQoNCk9uIEZyaSwgTWF5IDE1LCAyMDE1IGF0IDI6MzMgUE0sIEFydGVtIEVsa2luIDxBcnRl
-bS5FbGtpbkBpY2wtc2VydmljZXMuY29tPiB3cm90ZToNCj4gSGksDQo+DQo+IEkndmUgY2hlY2tl
-ZCBzdHJhdzIgYWxnb3JpdGhtLiBJdCB1c2VzIHR3byAyS2IgbG9va3VwIHRhYmxlcyB0byBkZXRl
-cm1pbmUgdGhlIGxvZyB2YWx1ZXMuIFRoZSBleHBvbmVudGlhbCBkaXN0cmlidXRpb24gY291bGQg
-YmUgYWNoaWV2ZWQgYXMgYSBzdW0gb2Ygc3F1YXJlcyBvZiBub3JtYWxseSBkaXN0cmlidXRlZCBu
-dW1iZXJzLiBBbmQgc3VtIG9mIG11bHRpcGxlIHVuaWZvcm1seSBkaXN0cmlidXRlZCB2YWx1ZXMg
-aXMgYSBnb29kIGFwcHJveGltYXRpb24gdG8gdGhlIG5vcm1hbCBkaXN0cmlidXRpb24uIEV2ZW50
-IHdpdGggNCBieXRlcyBzdW0gdGhlIHJlc3VsdCBpcyBxdWl0ZSBvay4NCj4gSSd2ZSB0cmllZCB0
-aGlzICh0aGUgY29kZSBpcyBpbiBDIywgYnV0IEkgYmVsaWV2ZSB5b3UnbGwgY2F0Y2ggdGhlIGlk
-ZWEpOg0KPg0KPiBwdWJsaWMgSXRlbSBTZWxlY3QoT2JqIG9iaiwgb3V0IGludCBpdGVycykgew0K
-PiAgICAgaXRlcnMgPSAwOw0KPiAgICAgd2hpbGUgKHRydWUpDQo+ICAgICB7DQo+ICAgICAgICAg
-KytpdGVyczsNCj4gICAgICAgICBJdGVtIHNlbGVjdGVkSXRlbSA9IG51bGw7DQo+ICAgICAgICAg
-bG9uZyBtaW4gPSBsb25nLk1heFZhbHVlOw0KPiAgICAgICAgIGZvciAoaW50IGluZGV4ID0gMDsg
-aW5kZXggPCBJdGVtcy5Db3VudDsgaW5kZXgrKykNCj4gICAgICAgICB7DQo+ICAgICAgICAgICAg
-IHZhciBpdGVtID0gSXRlbXNbaW5kZXhdOw0KPiAgICAgICAgICAgICBpZiAoaXRlbS5XZWlnaHQg
-PT0gMCkNCj4gICAgICAgICAgICAgICAgIGNvbnRpbnVlOw0KPiAgICAgICAgICAgICB2YXIgayA9
-IGluZGV4ICsgMTsNCj4gICAgICAgICAgICAgYnl0ZVtdIHJuZDEgPSBvYmouR2V0UHNldWRvUmFu
-ZG9tKGl0ZXJzICogayk7DQo+ICAgICAgICAgICAgIGJ5dGVbXSBybmQyID0gb2JqLkdldFBzZXVk
-b1JhbmRvbSgyICogaXRlcnMgKyBybmQxWzBdICogDQo+IGspOw0KPg0KPiAgICAgICAgICAgICBp
-bnQgc3VtMSA9IDI7Ly9hdmFyYWdlIHNieXRlIGlzIC0wLjU7IG1vdmUgdGhlIGNlbnRlciB0byAw
-DQo+ICAgICAgICAgICAgIGZvciAoaW50IGkgPSAwOyBpIDwgNDsgaSsrKQ0KPiAgICAgICAgICAg
-ICAgICAgc3VtMSArPSAoc2J5dGUpcm5kMVtpXTsNCj4NCj4gICAgICAgICAgICAgaW50IHN1bTIg
-PSAyOw0KPiAgICAgICAgICAgICBmb3IgKGludCBpID0gMDsgaSA8IDQ7IGkrKykNCj4gICAgICAg
-ICAgICAgICAgIHN1bTIgKz0gKHNieXRlKXJuZDJbaV07DQo+DQo+ICAgICAgICAgICAgIGxvbmcg
-cm5kID0gc3VtMSAqIHN1bTEgKyBzdW0yICogc3VtMjsgLy9hcHByb3ggZXhwb25lbnRpYWwNCj4g
-ICAgICAgICAgICAgcm5kIDw8PSAzMDsNCj4gICAgICAgICAgICAgcm5kIC89IGl0ZW0uV2VpZ2h0
-Ow0KPiAgICAgICAgICAgICBpZiAocm5kIDwgbWluKQ0KPiAgICAgICAgICAgICB7DQo+ICAgICAg
-ICAgICAgICAgICBtaW4gPSBybmQ7DQo+ICAgICAgICAgICAgICAgICBzZWxlY3RlZEl0ZW0gPSBp
-dGVtOw0KPiAgICAgICAgICAgICB9DQo+ICAgICAgICAgfQ0KPg0KPiAgICAgICAgIGlmICghc2Vs
-ZWN0ZWRJdGVtLmRpc2FibGVkKQ0KPiAgICAgICAgICAgICByZXR1cm4gc2VsZWN0ZWRJdGVtOw0K
-PiAgICAgfQ0KPiB9DQo+ICggDQo+IGh0dHBzOi8vZ2l0aHViLmNvbS9hcnRlbGsvQ1JVU0hfU2Vs
-ZWN0aW9uX0FsZ29yaXRobV9UZXN0L2Jsb2IvbWFzdGVyL1ANCj4gcm9ncmFtLmNzICkNCj4NCj4g
-V2l0aCAxMCBpdGVtcyAod2l0aCB3ZWlnaHRzIDEuLjIpIHdpdGhpbiB0aGUgYnVja2V0IGFuZCAx
-MF41IG9iamVjdHMgdGhlIG9iamVjdCBkaXN0cmlidXRpb24gaXMgbGlrZSB0aGlzOg0KPg0KPiBX
-ZWlnaHQ6MSwgdzowLjA2MjUsIGRpZmY6LTEuMzglLCBjb3VudDo2MTY0IFdlaWdodDoyLCB3OjAu
-MTI1MCwgDQo+IGRpZmY6LTEuNjUlLCBjb3VudDoxMjI5NCBXZWlnaHQ6MSwgdzowLjA2MjUsIGRp
-ZmY6MS41NyUsIGNvdW50OjYzNDggDQo+IFdlaWdodDoxLCB3OjAuMDYyNSwgZGlmZjotMC4xOCUs
-IGNvdW50OjYyMzkgV2VpZ2h0OjIsIHc6MC4xMjUwLCANCj4gZGlmZjowLjE5JSwgY291bnQ6MTI1
-MjQgV2VpZ2h0OjIsIHc6MC4xMjUwLCBkaWZmOjEuNDMlLCBjb3VudDoxMjY3OSANCj4gV2VpZ2h0
-OjIsIHc6MC4xMjUwLCBkaWZmOjAuOTIlLCBjb3VudDoxMjYxNSBXZWlnaHQ6MiwgdzowLjEyNTAs
-IA0KPiBkaWZmOjAuNzclLCBjb3VudDoxMjU5NiBXZWlnaHQ6MSwgdzowLjA2MjUsIGRpZmY6MC41
-OSUsIGNvdW50OjYyODcgDQo+IFdlaWdodDoyLCB3OjAuMTI1MCwgZGlmZjotMS45NyUsIGNvdW50
-OjEyMjU0DQo+DQo+IFNvIHRoZSBkZXZpYXRpb24gZnJvbSB0aGUgZXhwZWN0ZWQgbnVtYmVycyBp
-cyBxdWl0ZSBzbWFsbC4gV2l0aCAxMF42IG9iamVjdHMgdGhlIGRldmlhdGlvbiBiZWNvbWVzIGxl
-c3NlciB0aGFuIDElLiBJJ3ZlIHRyaWVkIHRvIGFkZCBtb3JlIGJ1Y2tldCBpdGVtcyB3aXRoIGRp
-ZmZlcmVudCB3ZWlnaHRzIGFuZCB0cmllZCB0byBjaGFuZ2UgdGhlIHdlaWdodHMgb2YgYXJiaXRy
-YXJ5IGl0ZW1zLiBUaGUgYW1vdW50IG9mIG1vdmVkIG9iamVjdHMgaXMgdmVyeSBjbG9zZSB0byBv
-cHRpbWFsIG9uZS4NCj4gV2hhdCBkbyB5b3UgdGhpbmsgb2YgdGhhdD8NCj4NCj4gQnR3LCBJJ3Zl
-IHRyaWVkIGFub3RoZXIgYWxnb3JpdGhtLiBUaGF0IGlzIG9mIE8oMSkgY29tcGxleGl0eS4gQnV0
-IGl0IHJlcXVpcmVzIGEgZmV3IHNlY29uZHMgZm9yIGluaXRpYWxpemF0aW9uICh0aGlzIGNhbiBi
-ZSBvcHRpbWl6ZWQpIGFuZCBjcmVhdGVzIGEgc2V2ZXJhbCBtZWdhYnl0ZSBhcnJheSB3aGljaCBp
-cyBjYWNoZWQgdW50aWwgdGhlIG5leHQgY2hhbmdlcyBpbiBjcnVzaCBtYXAgYW5kXG9yIG9zZCB3
-ZWlnaHRzLiBDb3VsZCB5b3UgdGVsbCBtZSBpZiB0aGUgc2VsZWN0aW9uIGFsZ29yaXRobXMgKHN0
-cmF3XHRyZWVcbGlzdFwuLi4pIGFyZSBjYWxsZWQgZXZlcnkgdGltZSB0aGUgb2JqZWN0IGlzIHJl
-YWRcd3JpdHRlbiBvciB0aGVyZSBpcyBzb21lIG1lbW9yeSBjYWNoZWQge3BnX2lkLT5bb3NkIGxp
-c3RdfSB0YWJsZSB0aGF0IGlzIHVzZWQgZm9yIHRoZSBwbGFjZW1lbnQgZGVjaXNpb24/DQoNCk1h
-eWJlIEknbSBtaXN1bmRlcnN0YW5kaW5nIHdoYXQgeW91J3JlIHNheWluZyBoZXJlLCBhbmQgaXQn
-cyBkZWZpbml0ZWx5IGFuIGludGVyZXN0aW5nIHRvcGljLCBidXQ6DQoNClRoZSBjdXJyZW50IGlt
-cGxlbWVudGF0aW9uIGlzIHByZXR0eSBoZWF2aWx5LW9wdGltaXplZC4gSWYgSSB1bmRlcnN0YW5k
-IGFuZCByZW1lbWJlciBjb3JyZWN0bHksIHdlIGFyZSBjdXJyZW50bHkgdXNpbmcgdHdvIHNtYWxs
-IGxvb2t1cCB0YWJsZXMgdG8gZG8gdGhlIGNhbGN1bGF0aW9ucy4gV2Ugc3RhcnRlZCBvdXQgd2l0
-aCB0aGUgdGhlIHN1bSBvZiBzcXVhcmVzIHRoaW5nIChtYXRoZW1hdGljYWxseSBhdCBsZWFzdCkg
-YW5kIHRoZW4gd2VyZSB1c2luZyB0aGUgc3RhbmRhcmQgbWV0aG9kcyB0byBjb21wdXRlIHRoYXQs
-IGJ1dCBpdCB3YXMgc2xvd2VyIHRoYW4gd2Ugd2FudGVkLg0KVGhlIGZ1bGwtc2l6ZWQgbG9va3Vw
-IHRhYmxlIHdhcyB0aGUgbmV4dCBzdGVwIChhbmQgd2UgY291bGQgZW5jb2RlIGl0IGludG8gdGhl
-IHNvdXJjZSBpZiB3ZSB3YW50ZWQpLCBidXQgZHVlIHRvIHR5cGljYWwgY2FjaGUgc2l6ZSB0cmFk
-ZW9mZnMgdGhlIGNvbWJpbmVkIGxvb2t1cCB0YWJsZSBhbmQgY29tcHV0YXRpb24gd2UncmUgZG9p
-bmcgbm93IGlzIHVzdWFsbHkgZmFzdGVyLg0KDQpBdCBsZWFzdCwgdGhpcyBpcyBob3cgSSByZW1l
-bWJlciBpdC4gU29tZWJvZHkgd2hvIGFjdHVhbGx5IGRpZCB0aGUgd29yayBtaWdodCBiZSBhYmxl
-IHRvIGNvbnRyYWRpY3QgbWUuIDspDQo=
+Hi,
+
+we are encountering a bug in the cephfs client kernel module:
+
+
+May 18 11:02:04 allegro kernel: [1020094.145209] ------------[ cut here 
+]------------
+May 18 11:02:04 allegro kernel: [1020094.149127] kernel BUG at /build/linux-
+RGM_Ed/linux-3.16.7-ckt9/fs/ceph/xattr.c:287!
+May 18 11:02:04 allegro kernel: [1020094.149127] invalid opcode: 0000 [#1] 
+SMP 
+[...]
+May 18 11:02:04 allegro kernel: [1020094.149127] CPU: 2 PID: 1359 Comm: mv 
+Not tainted 3.16.0-4-amd64 #1 Debian 3.16.7-ckt9-3~deb8u1
+[...]
+
+(see full log at http://paste.debian.net/180292)
+
+
+has anybody been hit by this so far?
+
+ciao
+Christian
+
