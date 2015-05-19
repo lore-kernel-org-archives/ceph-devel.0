@@ -1,33 +1,22 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: straw2-like algorithm
-Date: Tue, 19 May 2015 16:13:21 +0300
-Message-ID: <CAOi1vP89u3MZrCzyeL54aSRZX=qT+Uju1K3Xo+td6_irrWBmrg@mail.gmail.com>
-References: <DB3PR03MB06841B94BC544DA1466E1E95D4C70@DB3PR03MB0684.eurprd03.prod.outlook.com>
-	<CAC6JEv_+63VOuTN=PgOahWE-KZT=oRvpzux_M0MPbrEbwUeVsg@mail.gmail.com>
-	<DB3PR03MB0684C61FF0F0755A66AB1322D4C30@DB3PR03MB0684.eurprd03.prod.outlook.com>
+From: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
+Subject: Jobs of a teuthology run
+Date: Tue, 19 May 2015 13:17:25 +0000
+Message-ID: <06E7D85B3BA36C4DB207FEDE871C53489E8212@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f182.google.com ([209.85.212.182]:33881 "EHLO
-	mail-wi0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750771AbbESNNW convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 May 2015 09:13:22 -0400
-Received: by wicmc15 with SMTP id mc15so116400677wic.1
-        for <ceph-devel@vger.kernel.org>; Tue, 19 May 2015 06:13:21 -0700 (PDT)
-In-Reply-To: <DB3PR03MB0684C61FF0F0755A66AB1322D4C30@DB3PR03MB0684.eurprd03.prod.outlook.com>
+Received: from mga01.intel.com ([192.55.52.88]:47205 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755819AbbESNRv convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 May 2015 09:17:51 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Artem Elkin <Artem.Elkin@icl-services.com>
-Cc: Gregory Farnum <greg@gregs42.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, May 19, 2015 at 3:26 PM, Artem Elkin
-<Artem.Elkin@icl-services.com> wrote:
-> Yes, current implementation is very optimized and tricky. But it uses two lookup table. So the question is what the system does between the choose function calls. In case there are some memory intensive operations between them the tables are likely to be displaced from the CPU caches. Another question is if this stuff has any visible impact on the overall performance (how often is it called?). I'm not aware of such details so you are the ones who should make the decision.
+Hi all,
 
-It may be called more than once for every request going to the OSDs,
-so it certainly has a visible impact on the overall performance.
+I was running teuthology on sepia to test proxy write. I used the command like below to start the run. Somehow it generated 1143 jobs. I see from pulpit that there are usually no more than 300 jobs in other people's run. So my question is that should I go ahead with the 1000+ jobs? Or Is there some way to filter out some, so that I just need to run 200+ jobs?
 
-Thanks,
-
-                Ilya
+./virtualenv/bin/teuthology-suite --filter-out btrfs,ext4 --suite rados --suite-branch hammer --machine-type plana,burnupi,mira --distro ubuntu --email zhiqiang.wang@intel.com --owner zhiqiang.wang@intel.com --ceph wip-proxy-write
