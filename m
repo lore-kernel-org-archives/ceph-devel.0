@@ -1,56 +1,32 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: kernel BUG at .../fs/ceph/xattr.c:287!
-Date: Tue, 19 May 2015 16:10:50 +0300
-Message-ID: <CAOi1vP8kMTuteHfd-0kwmnouELRCB4prFOu8=aTKsDiLP5=iKw@mail.gmail.com>
-References: <mjfatn$c1e$1@ger.gmane.org>
-	<555B3185.8010304@ieee.org>
+Subject: Re: straw2-like algorithm
+Date: Tue, 19 May 2015 16:13:21 +0300
+Message-ID: <CAOi1vP89u3MZrCzyeL54aSRZX=qT+Uju1K3Xo+td6_irrWBmrg@mail.gmail.com>
+References: <DB3PR03MB06841B94BC544DA1466E1E95D4C70@DB3PR03MB0684.eurprd03.prod.outlook.com>
+	<CAC6JEv_+63VOuTN=PgOahWE-KZT=oRvpzux_M0MPbrEbwUeVsg@mail.gmail.com>
+	<DB3PR03MB0684C61FF0F0755A66AB1322D4C30@DB3PR03MB0684.eurprd03.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f176.google.com ([209.85.212.176]:34361 "EHLO
-	mail-wi0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752663AbbESNKv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 May 2015 09:10:51 -0400
-Received: by wicmc15 with SMTP id mc15so116314597wic.1
-        for <ceph-devel@vger.kernel.org>; Tue, 19 May 2015 06:10:50 -0700 (PDT)
-In-Reply-To: <555B3185.8010304@ieee.org>
+Received: from mail-wi0-f182.google.com ([209.85.212.182]:33881 "EHLO
+	mail-wi0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750771AbbESNNW convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 May 2015 09:13:22 -0400
+Received: by wicmc15 with SMTP id mc15so116400677wic.1
+        for <ceph-devel@vger.kernel.org>; Tue, 19 May 2015 06:13:21 -0700 (PDT)
+In-Reply-To: <DB3PR03MB0684C61FF0F0755A66AB1322D4C30@DB3PR03MB0684.eurprd03.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@ieee.org>
-Cc: CSa <salzmann@mi.fu-berlin.de>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Artem Elkin <Artem.Elkin@icl-services.com>
+Cc: Gregory Farnum <greg@gregs42.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Tue, May 19, 2015 at 3:50 PM, Alex Elder <elder@ieee.org> wrote:
-> On 05/19/2015 07:39 AM, CSa wrote:
->> Hi,
->>
->> we are encountering a bug in the cephfs client kernel module:
->>
->>
->> May 18 11:02:04 allegro kernel: [1020094.145209] ------------[ cut here
->> ]------------
->> May 18 11:02:04 allegro kernel: [1020094.149127] kernel BUG at /build/linux-
->> RGM_Ed/linux-3.16.7-ckt9/fs/ceph/xattr.c:287!
->> May 18 11:02:04 allegro kernel: [1020094.149127] invalid opcode: 0000 [#1]
->> SMP
->> [...]
->> May 18 11:02:04 allegro kernel: [1020094.149127] CPU: 2 PID: 1359 Comm: mv
->> Not tainted 3.16.0-4-amd64 #1 Debian 3.16.7-ckt9-3~deb8u1
->> [...]
->>
->> (see full log at http://paste.debian.net/180292)
->
-> Based on a quick look at the code, I think this must be
-> a use-after-free.
->
-> The bug occurs if ceph_vxattrs_name_size() is given a non-NULL
-> vxattrs pointer that is neither ceph_dir_vxattrs nor ceph_file_vxattrs.
-> There is only one caller of ceph_vxattrs_name_size(), and it is
-> passed a value that's a result of a call to ceph_inode_vxattrs().
-> That function returns only three possible values: ceph_dir_vxattrs,
-> ceph_file_vxattrs, or NULL.
+On Tue, May 19, 2015 at 3:26 PM, Artem Elkin
+<Artem.Elkin@icl-services.com> wrote:
+> Yes, current implementation is very optimized and tricky. But it uses two lookup table. So the question is what the system does between the choose function calls. In case there are some memory intensive operations between them the tables are likely to be displaced from the CPU caches. Another question is if this stuff has any visible impact on the overall performance (how often is it called?). I'm not aware of such details so you are the ones who should make the decision.
 
-Is there a symlink involved by any chance?  Probably fixed by
-0abb43dcacb5 "ceph: fix llistxattr on symlink" in 3.18.
+It may be called more than once for every request going to the OSDs,
+so it certainly has a visible impact on the overall performance.
 
 Thanks,
 
