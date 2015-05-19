@@ -1,113 +1,71 @@
-From: Robert LeBlanc <robert@leblancnet.us>
-Subject: Need help compiling 0.94.1 with jemalloc
-Date: Mon, 18 May 2015 22:23:55 -0600
-Message-ID: <CAANLjFq1xNGms4q811oJp7TtzLjqWRQO9t-gcNdkvr5vWHP5GQ@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: What crush ruleset for a given SHEC configuration ?
+Date: Tue, 19 May 2015 08:38:39 +0200
+Message-ID: <555ADA6F.7000702@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="5FlRTtDqngwcccTPM4VRV0w37eIVdCQwM"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f178.google.com ([209.85.212.178]:36606 "EHLO
-	mail-wi0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750722AbbESEX5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 May 2015 00:23:57 -0400
-Received: by wizk4 with SMTP id k4so101843401wiz.1
-        for <ceph-devel@vger.kernel.org>; Mon, 18 May 2015 21:23:55 -0700 (PDT)
+Received: from mail2.dachary.org ([91.121.57.175]:37590 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1755205AbbESGip (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 May 2015 02:38:45 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA256
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--5FlRTtDqngwcccTPM4VRV0w37eIVdCQwM
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-I'm trying to build Ceph 0.94.1 with jemalloc and without tcmalloc.
-I've downloaded rocksdb from their master branch (to get the jemalloc
-option) and built rocksdb with the shared libraries. When I try and
-build Ceph, it fails on:
+Hi Takeshi,
 
-os/RocksDBStore.cc: In member function 'int
-RocksDBStore::do_open(std::ostream&, bool)':
-os/RocksDBStore.cc:65:15: error: 'struct rocksdb::Options' has no
-member named 'block_cache'
-     ldoptions.block_cache = rocksdb::NewLRUCache(options.cache_size);
-               ^
-os/RocksDBStore.cc:68:15: error: 'struct rocksdb::Options' has no
-member named 'block_size'
-     ldoptions.block_size = options.block_size;
-               ^
-os/RocksDBStore.cc:72:15: error: 'struct rocksdb::Options' has no
-member named 'filter_policy'
-     ldoptions.filter_policy = _filterpolicy;
-               ^
-os/RocksDBStore.cc:86:15: error: 'struct rocksdb::Options' has no
-member named 'block_restart_interval'
-     ldoptions.block_restart_interval = options.block_restart_interval;
-               ^
+In the context of http://ceph.com/docs/master/rados/operations/erasure-co=
+de-shec/ it would be useful to have a more detailed explanation of why SH=
+EC is more efficient during recovery (in the introduction).=20
 
-I can see in the config.log that it is finding the shared rockdb
-libraries ok. I've configured with:
+Am I correct to assume that SHEC does not provide a way to control the lo=
+cality of the chunks ? For instance in the following scenario:
 
-./configure $(for i in /usr/{lib64,lib}/jvm/java/include{,/linux}; do
-[ -d $i ] && java_inc="$java_inc -I$i"; done) --prefix=/usr
---localstatedir=/var --sysconfdir=/etc --docdir=/usr/share/doc/ceph
---with-nss --without-cryptopp --with-rest-bench --with-debug
---enable-cephfs-java --with-librocksdb-static=no --with-radosgw
---with-jemalloc --without-tcmalloc --with-librocksdb
+rack 1 has 10 OSDs
+rack 2 has 10 OSDs
 
-There is one warning in the config.log, but it seems to happily move
-right along.
+a crush ruleset is made to provide 15 OSDs with 7 in the first rack, 8 in=
+ the last rack: the first 7 are in rack 1, the last 8 in rack 2. When SHE=
+C is used with such a crush ruleset, it cannot guarantee that the loss of=
+ one chunk in rack 2 can always be recovered with chunks from rack 2. Whe=
+n reading at figure 3 of
 
-configure:21346: checking for LIBROCKSDB
-configure:21353: $PKG_CONFIG --exists --print-errors "rocksdb"
-Package rocksdb was not found in the pkg-config search path.
-Perhaps you should add the directory containing `rocksdb.pc'
-to the PKG_CONFIG_PATH environment variable
-No package 'rocksdb' found
-configure:21356: $? = 1
-configure:21370: $PKG_CONFIG --exists --print-errors "rocksdb"
-Package rocksdb was not found in the pkg-config search path.
-Perhaps you should add the directory containing `rocksdb.pc'
-to the PKG_CONFIG_PATH environment variable
-No package 'rocksdb' found
-configure:21373: $? = 1
-configure:21387: result: no
-No package 'rocksdb' found
-configure:21417: checking for open in -lrocksdb
-configure:21442: gcc -o conftest -g -O2   conftest.c -lrocksdb   >&5
-configure:21442: $? = 0
-configure:21451: result: yes
-configure:21678: checking for io_submit in -laio
-configure:21703: gcc -o conftest -g -O2   conftest.c -laio  -lrocksdb  >&5
-configure:21703: $? = 0
-configure:21712: result: yes
+https://wiki.ceph.com/Planning/Blueprints/Hammer/Shingled_Erasure_Code_%2=
+8SHEC%29
 
-I don't have a rocksdb.pc from my build of it, so I'm not sure what
-exactly it is talking about.
+with D1 to D5, P1 and P2 in rack 1 and D6 to D10, P3, P4, P5 in rack 2, m=
+y understanding is that to recover D6 which is in rack 2 it may be necess=
+ary to use P2 from rack 1. And to recover D5 which is in rack 1 it may be=
+ necessary to use P3 from rack 2.
 
-I've had some very interesting results from preloading different
-memory allocators and I'd like to try a complete jemalloc install then
-share my results. So any push in the right direction would be much
-appreciated.
+Maybe I'm missing something ? Thanks in advance for your explanations :-)=
 
-Thank you,
 
-- ----------------
-Robert LeBlanc
-GPG Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
+Cheers
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--5FlRTtDqngwcccTPM4VRV0w37eIVdCQwM
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
 -----BEGIN PGP SIGNATURE-----
-Version: Mailvelope v0.13.1
-Comment: https://www.mailvelope.com
+Version: GnuPG v2.0.22 (GNU/Linux)
 
-wsFcBAEBCAAQBQJVWrrJCRDmVDuy+mK58QAAB/wQALwcHp7ylok1aWTB1BxB
-4lPXb6SJFd/NMPq3VIcz9/2u8l1uSzerNDT9LmZ0tlmAU7nUmZ5FyhB6jM1T
-RsYro3kyuBgdMgimNnAYjqgvNs/t1s6DBhiG/pZuXPbSGyILNemgQf5IIXNH
-CFgZL8bJzo/ZZlYD9tAt+Xn92WX/R6ZwIa2k0rqvhxDzRXqao5jDURDQUc93
-KItckuhdVTg1ElzB/1Yuhu8AT0dUPiL0elijlh6ktvgc4N5+sI9Gjsj6VU4m
-EpHz/w7Vgt75SIpetF5p7gb1fzaOqfc3VFmiJuPLM908/lhLMp7qNczPM3op
-usjKbN3tQcH5l38kYBBEmhj+Duqn99efOrC91MsdHsCMLzuUp1TbhaIUSZ2g
-Urel1wfp6vA0AFORA6QrPEecfG1Q7Mldt5l4TVl9nNMq7FvzrYJBDIbFerLI
-bh/Y9m5fTqrtTmNb1GuDLBHNsBMl/0wuT1ZYrb/zKzhMBdwz4BINdBZYkeCJ
-MmrSuoXh1R9BMTV4aeyBdqsmsb1LMRsnzbsk0MW5Tb2AFMRrm/MvFZo/0D2Q
-Lzm+xp3jeKjj/NO5yMZWhnQHdRjKiVl5lraRo83CjD1OQVip17hwbv4oM1Bv
-FT2QQPXFVQJvmnyf6rZIsox9JjI8StBJ3jcd9GrewMVuZuaPBcOnqqKAYsYt
-i902
-=EXv4
+iEYEARECAAYFAlVa2m8ACgkQ8dLMyEl6F20SaQCfWFyehRKRDVLQ/nIhTg5vlHGf
+jaUAn1uZzwKvhYxpCrwAIqggY3keSoYx
+=LT/m
 -----END PGP SIGNATURE-----
+
+--5FlRTtDqngwcccTPM4VRV0w37eIVdCQwM--
