@@ -1,76 +1,121 @@
-From: Andreas Bluemle <andreas.bluemle@itxperts.de>
-Subject: ceph-osd: microbenchmark for 4k read operations
-Date: Wed, 20 May 2015 18:13:39 +0200
-Message-ID: <20150520181339.0a630c07@doppio>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: [PATCH 1/2] libceph: request a new osdmap if lingering request
+ maps to no osd
+Date: Wed, 20 May 2015 10:29:56 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1505201025220.22256@cobra.newdream.net>
+References: <1431529052-13932-1-git-send-email-idryomov@gmail.com> <1431529052-13932-2-git-send-email-idryomov@gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="MP_/w=58XcmZO/F3uDvtNOAzHsi"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.itxperts.de ([212.202.108.166]:30618 "EHLO
-	mail.itxperts.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753271AbbETQnI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 May 2015 12:43:08 -0400
-Received: from itxmail.itxperts.de (qgate_dmz.itxperts.de [192.168.160.1])
-	by mail.itxperts.de (8.14.0/8.14.0) with ESMTP id t4KGDfWg025170
-	for <ceph-devel@vger.kernel.org>; Wed, 20 May 2015 18:13:41 +0200
-Received: from doppio (doppio.itxperts.de [192.168.140.7])
-	by itxmail.itxperts.de (Postfix) with ESMTP id 3B79D13F02
-	for <ceph-devel@vger.kernel.org>; Wed, 20 May 2015 18:05:05 +0200 (CEST)
+Received: from cobra.newdream.net ([66.33.216.30]:51938 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751882AbbETR35 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 May 2015 13:29:57 -0400
+In-Reply-To: <1431529052-13932-2-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: ceph-devel@vger.kernel.org, Alex Elder <elder@linaro.org>
 
---MP_/w=58XcmZO/F3uDvtNOAzHsi
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+On Wed, 13 May 2015, Ilya Dryomov wrote:
+> This commit does two things.  First, if there are any homeless
+> lingering requests, we now request a new osdmap even if the osdmap that
+> is being processed brought no changes, i.e. if a given lingering
+> request turned homeless in one of the previous epochs and remained
+> homeless in the current epoch.  Not doing so leaves us with a stale
+> osdmap and as a result we may miss our window for reestablishing the
+> watch and lose notifies.
+> 
+> MON=1 OSD=1:
+> 
+>     # cat linger-needmap.sh
+>     #!/bin/bash
+>     rbd create --size 1 test
+>     DEV=$(rbd map test)
+>     ceph osd out 0
+>     rbd map dne/dne # obtain a new osdmap as a side effect (!)
+>     sleep 1
+>     ceph osd in 0
+>     rbd resize --size 2 test
+>     # rbd info test | grep size -> 2M
+>     # blockdev --getsize $DEV -> 1M
+> 
+> N.B.: Not obtaining a new osdmap in between "osd out" and "osd in"
+> above is enough to make it miss that resize notify, but that is a
+> bug^Wlimitation of ceph watch/notify v1.
+> 
+> Second, homeless lingering requests are now kicked just like those
+> lingering requests whose mapping has changed.  This is mainly to
+> recognize that a homeless lingering request makes no sense and to
+> preserve the invariant that a registered lingering request is not
+> sitting on any of r_req_lru_item lists.  This spares us a WARN_ON,
+> which commit ba9d114ec557 ("libceph: clear r_req_lru_item in
+> __unregister_linger_request()") tried to fix the _wrong_ way.
+> 
+> Cc: stable@vger.kernel.org # 3.10+
+> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+> ---
+>  net/ceph/osd_client.c | 31 ++++++++++++++++++++-----------
+>  1 file changed, 20 insertions(+), 11 deletions(-)
+> 
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index 41a4abc7e98e..31d4b1ebff01 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -2017,20 +2017,29 @@ static void kick_requests(struct ceph_osd_client *osdc, bool force_resend,
+>  		err = __map_request(osdc, req,
+>  				    force_resend || force_resend_writes);
+>  		dout("__map_request returned %d\n", err);
+> -		if (err == 0)
+> -			continue;  /* no change and no osd was specified */
+>  		if (err < 0)
+>  			continue;  /* hrm! */
+> -		if (req->r_osd == NULL) {
+> -			dout("tid %llu maps to no valid osd\n", req->r_tid);
+> -			needmap++;  /* request a newer map */
+> -			continue;
+> -		}
+> +		if (req->r_osd == NULL || err > 0) {
+> +			if (req->r_osd == NULL) {
+> +				dout("lingering %p tid %llu maps to no osd\n",
+> +				     req, req->r_tid);
+> +				/*
+> +				 * A homeless lingering request makes
+> +				 * no sense, as it's job is to keep
+> +				 * a particular OSD connection open.
+> +				 * Request a newer map and kick the
+> +				 * request, knowing that it won't be
+> +				 * resent until we actually get a map
+> +				 * that can tell us where to send it.
+> +				 */
+> +				needmap++;
+> +			}
+>  
+> -		dout("kicking lingering %p tid %llu osd%d\n", req, req->r_tid,
+> -		     req->r_osd ? req->r_osd->o_osd : -1);
+> -		__register_request(osdc, req);
+> -		__unregister_linger_request(osdc, req);
+> +			dout("kicking lingering %p tid %llu osd%d\n", req,
+> +			     req->r_tid, req->r_osd ? req->r_osd->o_osd : -1);
+> +			__register_request(osdc, req);
+> +			__unregister_linger_request(osdc, req);
+> +		}
 
-Hi,
+Am I misreading this, or could you accomplish the same thing by just 
+dropping the 'continue' statement in the NULL check block?  No real 
+opinion either way if this is a style change, just wondering...
 
-as discussed on todays performance meeting: find attached the
-spreadsheet which I had shown during the meeting.
+sage
 
-@Sam: your are right concerning the make_blist part: this
-probably is expensive due to message signing being turned on.
-For the osd daemon which I took the benchmarks, I see
-    "cephx_sign_messages": "true"
-
-
-Regards
-
-Andreas
-
--- 
-Andreas Bluemle                     mailto:Andreas.Bluemle@itxperts.de
-ITXperts GmbH                       http://www.itxperts.de
-Balanstrasse 73, Geb. 08            Phone: (+49) 89 89044917
-D-81541 Muenchen (Germany)          Fax:   (+49) 89 89044910
-
-Company details: http://www.itxperts.de/imprint.htm
-
---MP_/w=58XcmZO/F3uDvtNOAzHsi
-Content-Type: text/csv
-Content-Transfer-Encoding: 7bit
-Content-Disposition: attachment; filename=summary-rr-transactions-32.csv
-
-
-summary; samples; averages; min; max
-
-PrimaryRead; 165889; 186; 103; 655
-PrimaryRead-1.1 Pipe::reader:duration_0; 165889; 64; 29; 597
-PrimaryRead-1.3 Pipe::read_message:duration_0; 165889; 9; 4; 171
-PrimaryRead-1.4 Pipe::read_message:receive_0; 165889; 2; 1; 133
-PrimaryRead-1.5 Pipe::read_message:decode_0; 165889; 5; 2; 166
-PrimaryRead-1.6 Pipe::read_message:authenticate_0; 165889; 0; 0; 102
-PrimaryRead-1.8 OSD::ms_fast_dispatch:duration_0; 165889; 33; 17; 482
-
-PrimaryRead-2.2 ShardedOpWQ::_process:duration; 165889; 66; 25; 419
-PrimaryRead-2.2.2 ReplicatedPG::do_op:duration; 165889; 49; 20; 397
-PrimaryRead-2.2.3 ReplicatedPG::do_op:find_ctx; 165889; 2; 2; 140
-PrimaryRead-2.2.4 ReplicatedPG::do_op:execute_ctx; 165889; 38; 13; 388
-
-PrimaryRead-4.2 Pipe::writer:duration_4096; 165888; 52; 24; 322
-PrimaryRead-4.3 Pipe::writer:encode_4096; 165888; 6; 3; 172
-PrimaryRead-4.4 Pipe::writer:make blist_4096; 165888; 23; 14; 193
-PrimaryRead-4.5 Pipe::writer:write_message_4096; 165888; 20; 6; 268
-
---MP_/w=58XcmZO/F3uDvtNOAzHsi--
+>  	}
+>  	reset_changed_osds(osdc);
+>  	mutex_unlock(&osdc->request_mutex);
+> -- 
+> 1.9.3
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
