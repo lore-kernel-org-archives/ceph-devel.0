@@ -1,68 +1,50 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [PATCH 2/2] Revert "libceph: clear r_req_lru_item in
- __unregister_linger_request()"
-Date: Wed, 20 May 2015 10:50:53 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1505201050350.22256@cobra.newdream.net>
-References: <1431529052-13932-1-git-send-email-idryomov@gmail.com> <1431529052-13932-3-git-send-email-idryomov@gmail.com>
+From: Barclay Jameson <almightybeeij@gmail.com>
+Subject: Slow file creating and deleting using bonnie ++ on Hammer
+Date: Wed, 20 May 2015 13:15:02 -0500
+Message-ID: <CAMzumdYUsO2jh8Xk1bpQLrOR7NiLcR5FzL15ve9=jiQ9Bz64wQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:52104 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754274AbbETRux (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 May 2015 13:50:53 -0400
-In-Reply-To: <1431529052-13932-3-git-send-email-idryomov@gmail.com>
+Received: from mail-yh0-f49.google.com ([209.85.213.49]:34844 "EHLO
+	mail-yh0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753731AbbETSPD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 May 2015 14:15:03 -0400
+Received: by yhda23 with SMTP id a23so15129117yhd.2
+        for <ceph-devel@vger.kernel.org>; Wed, 20 May 2015 11:15:02 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: ceph-devel@vger.kernel.org, Alex Elder <elder@linaro.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, 13 May 2015, Ilya Dryomov wrote:
-> This reverts commit ba9d114ec5578e6e99a4dfa37ff8ae688040fd64.
-> 
-> .. which introduced a regression that prevented all lingering requests
-> requeued in kick_requests() from ever being sent to the OSDs, resulting
-> in a lot of missed notifies.  In retrospect it's pretty obvious that
-> r_req_lru_item item in the case of lingering requests can be used not
-> only for notarget, but also for unsent linkage due to how tightly
-> actual map and enqueue operations are coupled in __map_request().
-> 
-> The assertion that was being silenced is taken care of in the previous
-> ("libceph: request a new osdmap if lingering request maps to no osd")
-> commit: by always kicking homeless lingering requests we ensure that
-> none of them ends up on the notarget list outside of the critical
-> section guarded by request_mutex.
-> 
-> Cc: stable@vger.kernel.org # 3.18+, needs 3d8c73c93605 "libceph: request a new osdmap if lingering request maps to no osd"
-> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+I am trying to find out why boniee++ is choking at the creating files
+sequentially and deleting sequentially on cephfs.
+I enabled mds debug for about 30 seconds and I find a bunch of lines
+like the following:
 
-Reviewed-by: Sage Weil <sage@redhat.com>
+2015-05-19 15:54:12.930829 7f6de4ecf700  1 -- 192.168.40.3:6800/461756
+--> 192.168.40.100:0/1741116310 -- client_caps(grant ino 10000004ca9
+19656 seq 2 caps=pAsxLsXsxFsxcrwb dirty=- wanted=pAsxXsxFxwb follows 0
+size 0/4194304 ts 1 mtime 2015-05-19 15:54:09.098825) v5 -- ?+0
+0x557a800 con 0x4fdeca0
 
+Is this statement showing that it takes 4 seconds to create an inode?
 
+Watching ( watch --interval=.2 -d 'ceph df') ceph df, rados df, and
+ceph osd pool stats seems to show that an object is being created or
+deleted about every 4 seconds.
 
-> ---
->  net/ceph/osd_client.c | 2 --
->  1 file changed, 2 deletions(-)
-> 
-> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> index 31d4b1ebff01..c4ec9239249a 100644
-> --- a/net/ceph/osd_client.c
-> +++ b/net/ceph/osd_client.c
-> @@ -1306,8 +1306,6 @@ static void __unregister_linger_request(struct ceph_osd_client *osdc,
->  		if (list_empty(&req->r_osd_item))
->  			req->r_osd = NULL;
->  	}
-> -
-> -	list_del_init(&req->r_req_lru_item); /* can be on notarget */
->  	ceph_osdc_put_request(req);
->  }
->  
-> -- 
-> 1.9.3
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+The test is now running for over 24 hours with the following bonnie++ comand:
+
+~/bonnie++-1.03e/bonnie++ -u root:root -s 256g -r 131072 -d /cephfs/
+-m CephBench -f -b
+
+I can give more log output if needed.
+
+OSD + MON/MDS
+CentOS 7
+ceph version 0.94.1 (e4bfad3a3c51054df7e537a724c8d0bf9be972ff)
+kernel version : 3.10.0-229.el7.x86_64
+
+Client
+CentOS 6
+ceph version 0.94.1 (e4bfad3a3c51054df7e537a724c8d0bf9be972ff)
+kernel version : 4.0.0-1.el6.elrepo.x86_64
