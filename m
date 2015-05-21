@@ -1,51 +1,132 @@
-From: Li Wang <liwang@ubuntukylin.com>
-Subject: [PATCH] Rbd: support copy-on-read option
-Date: Thu, 21 May 2015 15:16:05 +0800
-Message-ID: <1432192565-11811-1-git-send-email-liwang@ubuntukylin.com>
+From: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>
+Subject: RE: teuthology timeout error
+Date: Thu, 21 May 2015 08:32:45 +0000
+Message-ID: <870DE8DBB716524BAE51B2D499EC81E40AAFDE74@g01jpexmbyt24>
+References: <870DE8DBB716524BAE51B2D499EC81E40AAF9237@g01jpexmbyt24>
+ <555C3C67.6080905@dachary.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m199-177.yeah.net ([123.58.177.199]:45618 "EHLO
-	m199-177.yeah.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754888AbbEUHXj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 May 2015 03:23:39 -0400
+Received: from mgwym04.jp.fujitsu.com ([211.128.242.43]:53562 "EHLO
+	mgwym04.jp.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752456AbbEUImz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 May 2015 04:42:55 -0400
+Received: from g01jpfmpwyt02.exch.g01.fujitsu.local (g01jpfmpwyt02.exch.g01.fujitsu.local [10.128.193.56])
+	by yt-mxauth.gw.nic.fujitsu.com (Postfix) with ESMTP id 435A1AC073A
+	for <ceph-devel@vger.kernel.org>; Thu, 21 May 2015 17:32:47 +0900 (JST)
+In-Reply-To: <555C3C67.6080905@dachary.org>
+Content-Language: ja-JP
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: ceph-devel@vger.kernel.org, Min Chen <minchen@ubuntukylin.com>
+To: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
+Cc: "Kawaguchi, Shotaro" <kawaguchi.s@jp.fujitsu.com>, "Imai, Hiroki" <imai.hiroki@jp.fujitsu.com>, "Nakao, Takanori" <nakao.takanori@jp.fujitsu.com>, "Shiozawa, Kensuke" <shiozawa.kennsu@jp.fujitsu.com>
 
-From: Min Chen <minchen@ubuntukylin.com>
-
-Signed-off-by: Min Chen <minchen@ubuntukylin.com>
-Reviewed-by: Li Wang <liwang@ubuntukylin.com>
----
- doc/man/8/rbd.rst | 1 +
- src/rbd.cc        | 2 ++
- 2 files changed, 3 insertions(+)
-
-diff --git a/doc/man/8/rbd.rst b/doc/man/8/rbd.rst
-index 4552951..3fb747f 100644
---- a/doc/man/8/rbd.rst
-+++ b/doc/man/8/rbd.rst
-@@ -430,6 +430,7 @@ the running kernel.
- 
- * ro - Map the image read-only.  Equivalent to --read-only.
- 
-+* ro - Map the image with copy-on-read turned on.
- 
- Examples
- ========
-diff --git a/src/rbd.cc b/src/rbd.cc
-index 4355c4f..fdc35ba 100644
---- a/src/rbd.cc
-+++ b/src/rbd.cc
-@@ -2545,6 +2545,8 @@ static int parse_map_options(char *options)
-         return 1;
-     } else if (!strcmp(this_char, "rw") || !strcmp(this_char, "ro")) {
-       put_map_option("rw", this_char);
-+    } else if (!strcmp(this_char, "cor")) {
-+      put_map_option("cor", this_char);
-     } else {
-       cerr << "rbd: unknown map option '" << this_char << "'" << std::endl;
-       return 1;
--- 
-1.9.1
-
+SGkgTG9pYywNCg0KPiBDb3VsZCB5b3UgcGxlYXNlIHNoYXJlIHRoZSB0ZXV0
+aG9sb2d5L2NlcGgtcWEtc3VpdGUgcmVwb3NpdG9yeSB5b3UgYXJlIHVzaW5n
+IHRvIHJ1biB0aGVzZSB0ZXN0cw0KPiBzbyBJIGNhbiB0cnkgdG8gcmVwcm9k
+dWNlIC8gZGlhZ25vc2UgdGhlIHByb2JsZW0gPw0KDQpodHRwczovL2dpdGh1
+Yi5jb20va2F3YWd1Y2hpLXMvdGV1dGhvbG9neS90cmVlL3dpcC0xMDg4Ng0K
+aHR0cHM6Ly9naXRodWIuY29tL2thd2FndWNoaS1zL2NlcGgtcWEtc3VpdGUv
+dHJlZS93aXAtMTA4ODYNCg0KSGVyZSBhcmUgb3VyIHRldXRob2xvZ3kvY2Vw
+aC1xYS1zdWl0ZSByZXBvc2l0b3JpZXMuIFRoYW5rcyBpbiBhZHZhbmNlLg0K
+DQpCZXN0IHJlZ2FyZHMsDQpUYWtlc2hpIE1peWFtYWUNCg0KLS0tLS1Pcmln
+aW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IExvaWMgRGFjaGFyeSBbbWFpbHRv
+OmxvaWNAZGFjaGFyeS5vcmddIA0KU2VudDogV2VkbmVzZGF5LCBNYXkgMjAs
+IDIwMTUgNDo0OSBQTQ0KVG86IE1peWFtYWUsIFRha2VzaGkv5a6u5YmNIOWJ
+mzsgQ2VwaCBEZXZlbG9wbWVudA0KQ2M6IEthd2FndWNoaSwgU2hvdGFyby/l
+t53lj6Mg57+U5aSq5pyXOyBJbWFpLCBIaXJva2kv5LuK5LqVIOWuj+aouTsg
+TmFrYW8sIFRha2Fub3JpL+S4reWwviDpt7noqZQ7IFNoaW96YXdhLCBLZW5z
+dWtlL+WhqeayoiDos6LovJQNClN1YmplY3Q6IFJlOiB0ZXV0aG9sb2d5IHRp
+bWVvdXQgZXJyb3INCg0KSGksDQoNCk9uIDIwLzA1LzIwMTUgMDQ6MjAsIE1p
+eWFtYWUsIFRha2VzaGkgd3JvdGU6DQo+IEhpIExvaWMsDQo+IA0KPiBXaGVu
+IHdlIGZpeGVkIG91ciBvd24gaXNzdWUgYW5kIHJlc3RhcnRlZCB0ZXV0aG9s
+b2d5LCANCg0KR3JlYXQgIQ0KDQo+IHdlIGVuY291bnRlcmVkIGFub3RoZXIg
+aXNzdWUgKHRpbWVvdXQgZXJyb3IpIHdoaWNoIG9jY3VycyBpbiBjYXNlIG9m
+IExSQyBhcyB3ZWxsLg0KPiBEbyB5b3UgaGF2ZSBhbnkgaW5mb3JtYXRpb24g
+YWJvdXQgdGhhdCA/DQoNCkNvdWxkIHlvdSBwbGVhc2Ugc2hhcmUgdGhlIHRl
+dXRob2xvZ3kvY2VwaC1xYS1zdWl0ZSByZXBvc2l0b3J5IHlvdSBhcmUgdXNp
+bmcgdG8gcnVuIHRoZXNlIHRlc3RzIHNvIEkgY2FuIHRyeSB0byByZXByb2R1
+Y2UgLyBkaWFnbm9zZSB0aGUgcHJvYmxlbSA/DQoNClRoYW5rcw0KDQo+IA0K
+PiBbZXJyb3IgbWVzc2FnZXMgKGluIGNhc2Ugb2YgTFJDIHBvb2wpXQ0KPiAN
+Cj4gMjAxNS0wNC0yOCAxMjozODo1NCwxMjguMTI4IElORk86dGV1dGhvbG9n
+eS5vcmNoZXN0cmEucnVuLlJYMzUtMTpSdW5uaW5nOiAnYWRqdXN0LXVsaW1p
+dHMgY2VwaC1jb3ZlcmFnZSAvaG9tZS91YnVudHUvY2VwaHRlc3QvYXJjaGl2
+ZS9jb3ZlcmFnZSBjZXBoIHN0YXR1cyAtLWZvcm1hdD1qc29uLXByZXR0eScN
+Cj4gMjAxNS0wNC0yOCAxMjozODo1NCw1MTYuNTE2IElORk86dGFza3MuY2Vw
+aC5jZXBoX21hbmFnZXI6bm8gcHJvZ3Jlc3Mgc2Vlbiwga2VlcGluZyB0aW1l
+b3V0IGZvciBub3cNCj4gMjAxNS0wNC0yOCAxMjozODo1NCw1MTYuNTE2IElO
+Rk86dGFza3MudGhyYXNob3Nkcy50aHJhc2hlcjpUcmFjZWJhY2sgKG1vc3Qg
+cmVjZW50IGNhbGwgbGFzdCk6DQo+ICAgRmlsZSAiL3Jvb3Qvc3JjL2NlcGgt
+cWEtc3VpdGVfbWFzdGVyL3Rhc2tzL2NlcGhfbWFuYWdlci5weSIsIGxpbmUg
+NjMyLCBpbiB3cmFwcGVyDQo+ICAgICByZXR1cm4gZnVuYyhzZWxmKQ0KPiAg
+IEZpbGUgIi9yb290L3NyYy9jZXBoLXFhLXN1aXRlX21hc3Rlci90YXNrcy9j
+ZXBoX21hbmFnZXIucHkiLCBsaW5lIDY2NSwgaW4gZG9fdGhyYXNoDQo+ICAg
+ICB0aW1lb3V0PXNlbGYuY29uZmlnLmdldCgndGltZW91dCcpDQo+ICAgRmls
+ZSAiL3Jvb3Qvc3JjL2NlcGgtcWEtc3VpdGVfbWFzdGVyL3Rhc2tzL2NlcGhf
+bWFuYWdlci5weSIsIGxpbmUgMTU2NiwgaW4gd2FpdF9mb3JfcmVjb3ZlcnkN
+Cj4gICAgICdmYWlsZWQgdG8gcmVjb3ZlciBiZWZvcmUgdGltZW91dCBleHBp
+cmVkJw0KPiBBc3NlcnRpb25FcnJvcjogZmFpbGVkIHRvIHJlY292ZXIgYmVm
+b3JlIHRpbWVvdXQgZXhwaXJlZA0KPiANCj4gVHJhY2ViYWNrIChtb3N0IHJl
+Y2VudCBjYWxsIGxhc3QpOg0KPiAgIEZpbGUgIi9yb290L3dvcmsvdGV1dGhv
+bG9neS92aXJ0dWFsZW52L2xpYi9weXRob24yLjcvc2l0ZS1wYWNrYWdlcy9n
+ZXZlbnQvZ3JlZW5sZXQucHkiLCBsaW5lIDM5MCwgaW4gcnVuDQo+ICAgICBy
+ZXN1bHQgPSBzZWxmLl9ydW4oKnNlbGYuYXJncywgKipzZWxmLmt3YXJncykN
+Cj4gICBGaWxlICIvcm9vdC9zcmMvY2VwaC1xYS1zdWl0ZV9tYXN0ZXIvdGFz
+a3MvY2VwaF9tYW5hZ2VyLnB5IiwgbGluZSA2MzIsIGluIHdyYXBwZXINCj4g
+ICAgIHJldHVybiBmdW5jKHNlbGYpDQo+ICAgRmlsZSAiL3Jvb3Qvc3JjL2Nl
+cGgtcWEtc3VpdGVfbWFzdGVyL3Rhc2tzL2NlcGhfbWFuYWdlci5weSIsIGxp
+bmUgNjY1LCBpbiBkb190aHJhc2gNCj4gICAgIHRpbWVvdXQ9c2VsZi5jb25m
+aWcuZ2V0KCd0aW1lb3V0JykNCj4gICBGaWxlICIvcm9vdC9zcmMvY2VwaC1x
+YS1zdWl0ZV9tYXN0ZXIvdGFza3MvY2VwaF9tYW5hZ2VyLnB5IiwgbGluZSAx
+NTY2LCBpbiB3YWl0X2Zvcl9yZWNvdmVyeQ0KPiAgICAgJ2ZhaWxlZCB0byBy
+ZWNvdmVyIGJlZm9yZSB0aW1lb3V0IGV4cGlyZWQnDQo+IEFzc2VydGlvbkVy
+cm9yOiBmYWlsZWQgdG8gcmVjb3ZlciBiZWZvcmUgdGltZW91dCBleHBpcmVk
+IDxHcmVlbmxldCBhdCAweDJhN2Q1NTA6IDxib3VuZCBtZXRob2QgVGhyYXNo
+ZXIuZG9fdGhyYXNoIG9mIDx0YXNrcy5jZXBoX21hbmFnZXIuVGhyYXNoZXIg
+aW5zdGFuY2UgYXQgMHgyYmQxMmQ4Pj4+IGZhaWxlZCB3aXRoIEFzc2VydGlv
+bkVycm9yDQo+IA0KPiBbY2VwaCB2ZXJzaW9uXQ0KPiAwLjkzLTk1Mi1nZmUy
+OGRhYQ0KPiANCj4gW3RldXRob2xvZ3ksIGNlcGgtcWEtc3VpdGVdDQo+IG5l
+d2VzdCB2ZXJzaW9uIGF0IDMvMjUvMjAxNQ0KPiANCj4gW2NvbmZpZ3VyYXRp
+b25zXQ0KPiAgIGNoZWNrLWxvY2tzOiBmYWxzZQ0KPiAgIG92ZXJyaWRlczoN
+Cj4gICAgIGNlcGg6DQo+ICAgICAgIGNvbmY6DQo+ICAgICAgICAgZ2xvYmFs
+Og0KPiAgICAgICAgICAgbXMgaW5qZWN0IHNvY2tldCBmYWlsdXJlczogNTAw
+MA0KPiAgICAgICAgIG9zZDoNCj4gICAgICAgICAgIG9zZCBoZWFydGJlYXQg
+dXNlIG1pbiBkZWxheSBzb2NrZXQ6IHRydWUNCj4gICAgICAgICAgIG9zZCBz
+bG9wcHkgY3JjOiB0cnVlDQo+ICAgICAgIGZzOiB4ZnMNCj4gICByb2xlczoN
+Cj4gICAtIC0gbW9uLmENCj4gICAgIC0gb3NkLjANCj4gICAgIC0gb3NkLjQN
+Cj4gICAgIC0gb3NkLjgNCj4gICAgIC0gb3NkLjEyDQo+ICAgLSAtIG1vbi5i
+DQo+ICAgICAtIG9zZC4xDQo+ICAgICAtIG9zZC41DQo+ICAgICAtIG9zZC45
+DQo+ICAgICAtIG9zZC4xMw0KPiAgIC0gLSBtb24uYw0KPiAgICAgLSBvc2Qu
+Mg0KPiAgICAgLSBvc2QuNg0KPiAgICAgLSBvc2QuMTANCj4gICAgIC0gb3Nk
+LjE0DQo+ICAgLSAtIG9zZC4zDQo+ICAgICAtIG9zZC43DQo+ICAgICAtIG9z
+ZC4xMQ0KPiAgICAgLSBvc2QuMTUNCj4gICAgIC0gY2xpZW50LjANCj4gICB0
+YXJnZXRzOg0KPiAgICAgdWJ1bnR1QFJYMzUtMS5wcmltYXJ5LmNlcGgtcG9j
+LmZzYy5uZXQ6DQo+ICAgICB1YnVudHVAUlgzNS0yLnByaW1hcnkuY2VwaC1w
+b2MuZnNjLm5ldDoNCj4gICAgIHVidW50dUBSWDM1LTMucHJpbWFyeS5jZXBo
+LXBvYy5mc2MubmV0Og0KPiAgICAgdWJ1bnR1QFJYMzUtNC5wcmltYXJ5LmNl
+cGgtcG9jLmZzYy5uZXQ6DQo+ICAgdGFza3M6DQo+ICAgLSBjZXBoOg0KPiAg
+ICAgICBjb25mOg0KPiAgICAgICAgIG9zZDoNCj4gICAgICAgICAgIG9zZCBk
+ZWJ1ZyByZWplY3QgYmFja2ZpbGwgcHJvYmFiaWxpdHk6IDAuMw0KPiAgICAg
+ICAgICAgb3NkIG1heCBiYWNrZmlsbHM6IDENCj4gICAgICAgICAgIG9zZCBz
+Y3J1YiBtYXggaW50ZXJ2YWw6IDEyMA0KPiAgICAgICAgICAgb3NkIHNjcnVi
+IG1pbiBpbnRlcnZhbDogNjANCj4gICAgICAgbG9nLXdoaXRlbGlzdDoNCj4g
+ICAgICAgLSB3cm9uZ2x5IG1hcmtlZCBtZSBkb3duDQo+ICAgICAgIC0gb2Jq
+ZWN0cyB1bmZvdW5kIGFuZCBhcHBhcmVudGx5IGxvc3QNCj4gICAtIHRocmFz
+aG9zZHM6DQo+ICAgICAgIGNoYW5jZV9wZ251bV9ncm93OiAxDQo+ICAgICAg
+IGNoYW5jZV9wZ3BudW1fZml4OiAxDQo+ICAgICAgIG1pbl9pbjogNA0KPiAg
+ICAgICB0aW1lb3V0OiAxMjAwDQo+ICAgLSByYWRvczoNCj4gICAgICAgY2xp
+ZW50czoNCj4gICAgICAgLSBjbGllbnQuMA0KPiAgICAgICBlY19wb29sOiB0
+cnVlDQo+ICAgICAgIGVyYXN1cmVfY29kZV9wcm9maWxlOg0KPiAgICAgICAg
+IGs6IDQNCj4gICAgICAgICBsOiAzDQo+ICAgICAgICAgbTogMg0KPiAgICAg
+ICAgIG5hbWU6IGxyY3Byb2ZpbGUNCj4gICAgICAgICBwbHVnaW46IGxyYw0K
+PiAgICAgICAgIHJ1bGVzZXQtZmFpbHVyZS1kb21haW46IG9zZA0KPiAgICAg
+ICBvYmplY3RzOiA1MA0KPiAgICAgICBvcF93ZWlnaHRzOg0KPiAgICAgICAg
+IGFwcGVuZDogMTAwDQo+ICAgICAgICAgY29weV9mcm9tOiA1MA0KPiAgICAg
+ICAgIGRlbGV0ZTogNTANCj4gICAgICAgICByZWFkOiAxMDANCj4gICAgICAg
+ICBybWF0dHI6IDI1DQo+ICAgICAgICAgcm9sbGJhY2s6IDUwDQo+ICAgICAg
+ICAgc2V0YXR0cjogMjUNCj4gICAgICAgICBzbmFwX2NyZWF0ZTogNTANCj4g
+ICAgICAgICBzbmFwX3JlbW92ZTogNTANCj4gICAgICAgICB3cml0ZTogMA0K
+PiAgICAgICBvcHM6IDE5MDAwMA0KPiANCj4gQmVzdCByZWdhcmRzLA0KPiBU
+YWtlc2hpIE1peWFtYWUNCj4gDQoNCi0tIA0KTG/Dr2MgRGFjaGFyeSwgQXJ0
+aXNhbiBMb2dpY2llbCBMaWJyZQ0KDQo=
