@@ -1,92 +1,63 @@
-From: Alex Elder <elder@ieee.org>
-Subject: Re: [PATCH 3/5] libceph: a couple tweaks for wait loops
-Date: Thu, 21 May 2015 08:29:10 -0500
-Message-ID: <555DDDA6.3050409@ieee.org>
-References: <1432211706-10473-1-git-send-email-idryomov@gmail.com> <1432211706-10473-4-git-send-email-idryomov@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 8bit
+From: Li Wang <liwang@ubuntukylin.com>
+Subject: [PATCH] Osd: temperature based object eviction for cache tiering
+Date: Thu, 21 May 2015 21:34:05 +0800
+Message-ID: <cover.1432214851.git.liwang@ubuntukylin.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f176.google.com ([209.85.213.176]:35571 "EHLO
-	mail-ig0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756316AbbEUN3M (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 May 2015 09:29:12 -0400
-Received: by igbyr2 with SMTP id yr2so9634303igb.0
-        for <ceph-devel@vger.kernel.org>; Thu, 21 May 2015 06:29:11 -0700 (PDT)
-In-Reply-To: <1432211706-10473-4-git-send-email-idryomov@gmail.com>
+Received: from m59-178.qiye.163.com ([123.58.178.59]:58857 "EHLO
+	m59-178.qiye.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755093AbbEUNfn (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 May 2015 09:35:43 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
-Cc: Zheng Yan <zyan@redhat.com>
+To: Sage Weil <sweil@redhat.com>
+Cc: ceph-devel@vger.kernel.org, MingXin Liu <mingxinliu@ubuntukylin.com>, Li Wang <liwang@ubuntukylin.com>
 
-On 05/21/2015 07:35 AM, Ilya Dryomov wrote:
-> - return -ETIMEDOUT instead of -EIO in case of timeout
-> - wait_event_interruptible_timeout() returns time left until timeout
->   and since it can be almost LONG_MAX we had better assign it to long
+This is an implementation of temperature based object 
+eviction policy for cache tiering. The current eviction 
+policy is based only on the latest access time, without 
+considering the access frequency in the history. This 
+policy is apt to leave the just-accessed object in the 
+cache pool, even it will no longer be accessed. Obviously, 
+this policy will make bad choices in some scenarios. 
+This motivates us to present temperature based object 
+eviction policy, which makes eviction decision by considering 
+both latest access time and access frequency, while keeping 
+the simplicity of the current algorithm framework, and 
+making minimal revision to it. The algorithm is simple, 
+associate each hitset with a weight, the latest hitset 
+with the heaviest weight, say, 1000000. And the least 
+latest hitset with a lighter weight, decayed by an 
+user-defined factor, say, 50, then the least latest 
+hitset has a weight of 1000000*(100-50)/100=500000, 
+and so on. Each object in the cache pool will be calculated 
+a total weight according to its appearance in all the 
+hitsets, then those objects with the least total weights 
+are chosen as the eviction candidates. In fact, the 
+algorithm reduces to the current atime based eviction 
+policy by setting decay rate be 100.
 
-Any error returned by wait_event_interruptible_timeout()
-can now be returned by __ceph_open_session().  It looks
-like that may, in fact, be only -EINTR and -ERESTARTSYS.
-But it's a change you could note in the log message.
+The patches:
+https://github.com/ceph/ceph/pull/4737
 
-It turns out the only caller ignores the return value of
-ceph_monc_wait_osdmap() anyway.  That should maybe be fixed.
+MingXin Liu (5):
+  Osd: add three fields to pg_pool_t
+  Mon: expose commands for temperature related setting
+  Osd: add a temperature based object eviction policy for cache tiering
+  Mon: add temperature support for existing cache related commands
+  Doc: add temperature related stuff in documents and test scripts
 
-In any case, this looks good.
+ doc/dev/cache-pool.rst         |   4 ++
+ doc/man/8/ceph.rst             |  12 +++--
+ doc/rados/operations/pools.rst |   7 +++
+ qa/workunits/cephtool/test.sh  |  14 ++++++
+ src/common/config_opts.h       |   2 +
+ src/mon/MonCommands.h          |   8 ++-
+ src/mon/OSDMonitor.cc          | 101 ++++++++++++++++++++++++++++++++++---
+ src/osd/ReplicatedPG.cc        | 110 ++++++++++++++++++++++-------------------
+ src/osd/osd_types.cc           |  32 +++++++++++-
+ src/osd/osd_types.h            |  49 ++++++++++++++++++
+ 10 files changed, 274 insertions(+), 65 deletions(-)
 
-Reviewed-by: Alex Elder <elder@linaro.org>
-
-> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
-> ---
->  net/ceph/ceph_common.c | 7 +++----
->  net/ceph/mon_client.c  | 2 +-
->  2 files changed, 4 insertions(+), 5 deletions(-)
-> 
-> diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
-> index a80e91c2c9a3..925d0c890b80 100644
-> --- a/net/ceph/ceph_common.c
-> +++ b/net/ceph/ceph_common.c
-> @@ -647,8 +647,8 @@ static int have_mon_and_osd_map(struct ceph_client *client)
->   */
->  int __ceph_open_session(struct ceph_client *client, unsigned long started)
->  {
-> -	int err;
->  	unsigned long timeout = client->options->mount_timeout;
-> +	long err;
->  
->  	/* open session, and wait for mon and osd maps */
->  	err = ceph_monc_open_session(&client->monc);
-> @@ -656,16 +656,15 @@ int __ceph_open_session(struct ceph_client *client, unsigned long started)
->  		return err;
->  
->  	while (!have_mon_and_osd_map(client)) {
-> -		err = -EIO;
->  		if (timeout && time_after_eq(jiffies, started + timeout))
-> -			return err;
-> +			return -ETIMEDOUT;
->  
->  		/* wait */
->  		dout("mount waiting for mon_map\n");
->  		err = wait_event_interruptible_timeout(client->auth_wq,
->  			have_mon_and_osd_map(client) || (client->auth_err < 0),
->  			ceph_timeout_jiffies(timeout));
-> -		if (err == -EINTR || err == -ERESTARTSYS)
-> +		if (err < 0)
->  			return err;
->  		if (client->auth_err < 0)
->  			return client->auth_err;
-> diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
-> index 0da3bdc116f7..9d6ff1215928 100644
-> --- a/net/ceph/mon_client.c
-> +++ b/net/ceph/mon_client.c
-> @@ -308,7 +308,7 @@ int ceph_monc_wait_osdmap(struct ceph_mon_client *monc, u32 epoch,
->  			  unsigned long timeout)
->  {
->  	unsigned long started = jiffies;
-> -	int ret;
-> +	long ret;
->  
->  	mutex_lock(&monc->mutex);
->  	while (monc->have_osdmap < epoch) {
-> 
+-- 
+1.9.1
 
