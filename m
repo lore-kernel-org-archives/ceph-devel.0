@@ -1,17 +1,17 @@
 From: Loic Dachary <loic@dachary.org>
 Subject: Re: teuthology timeout error
-Date: Thu, 21 May 2015 11:30:48 +0200
-Message-ID: <555DA5C8.5040703@dachary.org>
+Date: Thu, 21 May 2015 11:37:36 +0200
+Message-ID: <555DA760.50604@dachary.org>
 References: <870DE8DBB716524BAE51B2D499EC81E40AAF9237@g01jpexmbyt24> <555C3C67.6080905@dachary.org> <870DE8DBB716524BAE51B2D499EC81E40AAFDE74@g01jpexmbyt24>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="SB0tM3XhPXc3qDFQsGGLm6k5PB72prOFH"
+ boundary="Kf6LWfGqK8TvJdKx0SVNCOnAIFBDOdLit"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:48224 "EHLO
+Received: from mail2.dachary.org ([91.121.57.175]:48238 "EHLO
 	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753328AbbEUJav (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 May 2015 05:30:51 -0400
+	with ESMTP id S1751656AbbEUJhn (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 May 2015 05:37:43 -0400
 In-Reply-To: <870DE8DBB716524BAE51B2D499EC81E40AAFDE74@g01jpexmbyt24>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -19,11 +19,13 @@ To: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>, Ceph Development <ceph-
 Cc: "Kawaguchi, Shotaro" <kawaguchi.s@jp.fujitsu.com>, "Imai, Hiroki" <imai.hiroki@jp.fujitsu.com>, "Nakao, Takanori" <nakao.takanori@jp.fujitsu.com>, "Shiozawa, Kensuke" <shiozawa.kennsu@jp.fujitsu.com>
 
 This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---SB0tM3XhPXc3qDFQsGGLm6k5PB72prOFH
+--Kf6LWfGqK8TvJdKx0SVNCOnAIFBDOdLit
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
 
+Hi,
 
+[sorry the previous mail was sent by accident, here is the full mail]
 
 On 21/05/2015 10:32, Miyamae, Takeshi wrote:
 > Hi Loic,
@@ -46,6 +48,31 @@ https://github.com/ceph/ceph-qa-suite/compare/master...kawaguchi-s:wip-10=
 
 I think the teuthology commit on top of wip-10886 is a mistake
 
+https://github.com/kawaguchi-s/teuthology/commit/348e54931f89c9b0ae7a84eb=
+931576f8414017b5
+
+do you really need to modify teuthology ? It should just be necessary to =
+use the latest master branch.
+
+It looks like the
+
+https://github.com/kawaguchi-s/ceph-qa-suite/commit/f2e3ca5d12ceef742eae2=
+a9cf4057c436e9040c3
+
+commit in your ceph-qa-suite is not what you intended. However
+
+https://github.com/kawaguchi-s/ceph-qa-suite/commit/4b39d6d4862f9091a849d=
+224e880795be406815d
+https://github.com/kawaguchi-s/ceph-qa-suite/commit/d16b4b058ae1189319285=
+41a2c8acd68f9703a44
+
+look ok :-) Instead of naming the test 4nodes16osds3mons1client.yaml it w=
+ould be better to use the same kind of naming you see at https://github.c=
+om/ceph/ceph-qa-suite/tree/master/suites/rados/thrash-erasure-code/worklo=
+ads. That is a file name made of the distinctive parameters for the shec =
+plugin (the parameters that are the default can be omited).
+
+Cheers
 
 > Here are our teuthology/ceph-qa-suite repositories. Thanks in advance.
 >=20
@@ -212,7 +239,9 @@ er instance at 0x2bd12d8>>> failed with AssertionError
 Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
 
---SB0tM3XhPXc3qDFQsGGLm6k5PB72prOFH
+
+
+--Kf6LWfGqK8TvJdKx0SVNCOnAIFBDOdLit
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -220,9 +249,9 @@ Content-Disposition: attachment; filename="signature.asc"
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2.0.22 (GNU/Linux)
 
-iEYEARECAAYFAlVdpckACgkQ8dLMyEl6F20yQQCgg6ZgltKactazDhYxnaosY6k5
-MQAAn0QytarT11tPEMJycaGjXHkq2arW
-=IKvY
+iEYEARECAAYFAlVdp2AACgkQ8dLMyEl6F201vQCghphI534sd9x991LnVyDyG+vz
+g+QAmgNmcPUYKDbZ5O9X1ESEzr3zqSei
+=hEKd
 -----END PGP SIGNATURE-----
 
---SB0tM3XhPXc3qDFQsGGLm6k5PB72prOFH--
+--Kf6LWfGqK8TvJdKx0SVNCOnAIFBDOdLit--
