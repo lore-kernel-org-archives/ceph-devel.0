@@ -1,97 +1,93 @@
-From: Li Wang <liwang@ubuntukylin.com>
-Subject: [PATCH 4/5] Mon: add temperature support for existing cache related commands
-Date: Thu, 21 May 2015 21:34:09 +0800
-Message-ID: <09ccb9b25477f32636a07878e6922fc8feb2445c.1432214851.git.liwang@ubuntukylin.com>
-References: <cover.1432214851.git.liwang@ubuntukylin.com>
+From: Alex Elder <elder@ieee.org>
+Subject: Re: [PATCH 4/5] ceph: simplify two mount_timeout sites
+Date: Thu, 21 May 2015 08:39:30 -0500
+Message-ID: <555DE012.4090601@ieee.org>
+References: <1432211706-10473-1-git-send-email-idryomov@gmail.com> <1432211706-10473-5-git-send-email-idryomov@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m59-178.qiye.163.com ([123.58.178.59]:58926 "EHLO
-	m59-178.qiye.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755830AbbEUNgB (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 May 2015 09:36:01 -0400
-In-Reply-To: <cover.1432214851.git.liwang@ubuntukylin.com>
-In-Reply-To: <cover.1432214851.git.liwang@ubuntukylin.com>
-References: <cover.1432214851.git.liwang@ubuntukylin.com>
+Received: from mail-ig0-f175.google.com ([209.85.213.175]:33042 "EHLO
+	mail-ig0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756172AbbEUNjb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 May 2015 09:39:31 -0400
+Received: by igbpi8 with SMTP id pi8so10187533igb.0
+        for <ceph-devel@vger.kernel.org>; Thu, 21 May 2015 06:39:31 -0700 (PDT)
+In-Reply-To: <1432211706-10473-5-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: ceph-devel@vger.kernel.org, MingXin Liu <mingxinliu@ubuntukylin.com>
+To: Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
+Cc: Zheng Yan <zyan@redhat.com>
 
-From: MingXin Liu <mingxinliu@ubuntukylin.com>
+On 05/21/2015 07:35 AM, Ilya Dryomov wrote:
+> No need to bifurcate wait now that we've got ceph_timeout_jiffies().
 
-Signed-off-by: MingXin Liu <mingxinliu@ubuntukylin.com>
-Reviewed-by: Li Wang <liwang@ubuntukylin.com>
----
- src/common/config_opts.h |  2 ++
- src/mon/OSDMonitor.cc    | 14 +++++++++++++-
- 2 files changed, 15 insertions(+), 1 deletion(-)
+Looks good.
 
-diff --git a/src/common/config_opts.h b/src/common/config_opts.h
-index e79eeaa..f661cbc 100644
---- a/src/common/config_opts.h
-+++ b/src/common/config_opts.h
-@@ -550,10 +550,12 @@ OPTION(osd_hit_set_max_size, OPT_INT, 100000)  // max target size for a HitSet
- OPTION(osd_hit_set_namespace, OPT_STR, ".ceph-internal") // rados namespace for hit_set tracking
- 
- OPTION(osd_tier_default_cache_mode, OPT_STR, "writeback")
-+OPTION(osd_tier_default_cache_measure, OPT_STR, "atime")
- OPTION(osd_tier_default_cache_hit_set_count, OPT_INT, 4)
- OPTION(osd_tier_default_cache_hit_set_period, OPT_INT, 1200)
- OPTION(osd_tier_default_cache_hit_set_type, OPT_STR, "bloom")
- OPTION(osd_tier_default_cache_min_read_recency_for_promote, OPT_INT, 1) // number of recent HitSets the object must appear in to be promoted (on read)
-+OPTION(osd_tier_default_cache_hit_set_grade_decay_rate, OPT_INT, 50)
- 
- OPTION(osd_map_dedup, OPT_BOOL, true)
- OPTION(osd_map_max_advance, OPT_INT, 200) // make this < cache_size!
-diff --git a/src/mon/OSDMonitor.cc b/src/mon/OSDMonitor.cc
-index 0374778..ac84b56 100644
---- a/src/mon/OSDMonitor.cc
-+++ b/src/mon/OSDMonitor.cc
-@@ -2723,13 +2723,15 @@ void OSDMonitor::get_health(list<pair<health_status_t,string> >& summary,
- 	   p != osdmap.pools.end();
- 	   ++p) {
- 	const pg_pool_t& info = p->second;
--	if (info.cache_mode_requires_hit_set() &&
-+	if ((info.cache_mode_requires_hit_set() ||
-+        info.cache_measure == pg_pool_t::CACHEMEASURE_TEMP) &&
- 	    info.hit_set_params.get_type() == HitSet::TYPE_NONE) {
- 	  ++problem_cache_pools;
- 	  if (detail) {
- 	    ostringstream ss;
- 	    ss << "pool '" << osdmap.get_pool_name(p->first)
- 	       << "' with cache_mode " << info.get_cache_mode_name()
-+           << " cache_measure " << info.get_cache_measure_name()
- 	       << " needs hit_set_type to be set but it is not";
- 	    detail->push_back(make_pair(HEALTH_WARN, ss.str()));
- 	  }
-@@ -6874,6 +6876,13 @@ done:
-       err = -EINVAL;
-       goto reply;
-     }
-+    string measurestr = g_conf->osd_tier_default_cache_measure;
-+    pg_pool_t::cache_measure_t measure = pg_pool_t::get_cache_measure_from_str(measurestr);
-+    if (measure < 0) {
-+      ss << "osd tier cache default measure '" << measurestr << "' is not a valid cache measure";
-+      err = -EINVAL;
-+      goto reply;
-+    }
-     HitSet::Params hsp;
-     if (g_conf->osd_tier_default_cache_hit_set_type == "bloom") {
-       BloomHitSet::Params *bsp = new BloomHitSet::Params;
-@@ -6902,11 +6911,14 @@ done:
-     np->set_snap_epoch(pending_inc.epoch); // tier will update to our snap info
-     ntp->tier_of = pool_id;
-     ntp->cache_mode = mode;
-+    ntp->cache_measure = measure;
-     ntp->hit_set_count = g_conf->osd_tier_default_cache_hit_set_count;
-     ntp->hit_set_period = g_conf->osd_tier_default_cache_hit_set_period;
-     ntp->min_read_recency_for_promote = g_conf->osd_tier_default_cache_min_read_recency_for_promote;
-+    ntp->hit_set_grade_decay_rate = g_conf->osd_tier_default_cache_hit_set_grade_decay_rate;
-     ntp->hit_set_params = hsp;
-     ntp->target_max_bytes = size;
-+    ntp->set_grade(ntp->hit_set_grade_decay_rate, ntp->hit_set_count);
-     ss << "pool '" << tierpoolstr << "' is now (or already was) a cache tier of '" << poolstr << "'";
-     wait_for_finished_proposal(new Monitor::C_Command(mon, m, 0, ss.str(),
- 					      get_last_committed() + 1));
--- 
-1.9.1
+Reviewed-by: Alex Elder <elder@linaro.org>
+
+> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+> ---
+>  fs/ceph/dir.c        | 14 ++++----------
+>  fs/ceph/mds_client.c | 18 ++++++++++--------
+>  2 files changed, 14 insertions(+), 18 deletions(-)
+> 
+> diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+> index 173dd4b58c71..3dec27e36417 100644
+> --- a/fs/ceph/dir.c
+> +++ b/fs/ceph/dir.c
+> @@ -1257,17 +1257,11 @@ static int ceph_dir_fsync(struct file *file, loff_t start, loff_t end,
+>  
+>  		dout("dir_fsync %p wait on tid %llu (until %llu)\n",
+>  		     inode, req->r_tid, last_tid);
+> -		if (req->r_timeout) {
+> -			unsigned long time_left = wait_for_completion_timeout(
+> -					&req->r_safe_completion,
+> +		ret = !wait_for_completion_timeout(&req->r_safe_completion,
+>  					ceph_timeout_jiffies(req->r_timeout));
+> -			if (time_left > 0)
+> -				ret = 0;
+> -			else
+> -				ret = -EIO;  /* timed out */
+> -		} else {
+> -			wait_for_completion(&req->r_safe_completion);
+> -		}
+> +		if (ret)
+> +			ret = -EIO;  /* timed out */
+> +
+>  		ceph_mdsc_put_request(req);
+>  
+>  		spin_lock(&ci->i_unsafe_lock);
+> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+> index 0b0e0a9a81c0..5be2d287a26c 100644
+> --- a/fs/ceph/mds_client.c
+> +++ b/fs/ceph/mds_client.c
+> @@ -2266,16 +2266,18 @@ int ceph_mdsc_do_request(struct ceph_mds_client *mdsc,
+>  	/* wait */
+>  	mutex_unlock(&mdsc->mutex);
+>  	dout("do_request waiting\n");
+> -	if (req->r_timeout) {
+> -		err = (long)wait_for_completion_killable_timeout(
+> -					&req->r_completion,
+> -					ceph_timeout_jiffies(req->r_timeout));
+> -		if (err == 0)
+> -			err = -EIO;
+> -	} else if (req->r_wait_for_completion) {
+> +	if (!req->r_timeout && req->r_wait_for_completion) {
+>  		err = req->r_wait_for_completion(mdsc, req);
+>  	} else {
+> -		err = wait_for_completion_killable(&req->r_completion);
+> +		long timeleft = wait_for_completion_killable_timeout(
+> +					&req->r_completion,
+> +					ceph_timeout_jiffies(req->r_timeout));
+> +		if (timeleft > 0)
+> +			err = 0;
+> +		else if (!timeleft)
+> +			err = -EIO;  /* timed out */
+> +		else
+> +			err = timeleft;  /* killed */
+>  	}
+>  	dout("do_request waited, got %d\n", err);
+>  	mutex_lock(&mdsc->mutex);
+> 
 
