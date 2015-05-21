@@ -1,51 +1,42 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Experimental Backport issue
-Date: Thu, 21 May 2015 21:07:55 +0200
-Message-ID: <555E2D0B.9000403@dachary.org>
+From: Ken Dreyer <kdreyer@redhat.com>
+Subject: Re: firewall questions
+Date: Thu, 21 May 2015 14:33:36 -0600
+Message-ID: <555E4120.2040603@redhat.com>
+References: <555CE992.10703@redhat.com> <alpine.DEB.2.00.1505201551450.23818@cobra.newdream.net> <555DFB71.6050602@redhat.com> <alpine.DEB.2.00.1505210837480.23818@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="k4G7HbLN3X55HV6apmQhhMRK0Pa28Is7s"
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:48585 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1755739AbbEUTH6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 May 2015 15:07:58 -0400
+Received: from mx1.redhat.com ([209.132.183.28]:45140 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756505AbbEUUdh (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 21 May 2015 16:33:37 -0400
+Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+	by mx1.redhat.com (Postfix) with ESMTPS id 0A02FA10A7
+	for <ceph-devel@vger.kernel.org>; Thu, 21 May 2015 20:33:37 +0000 (UTC)
+Received: from mbp.ktdreyer.com (vpn-62-245.rdu2.redhat.com [10.10.62.245])
+	by int-mx10.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t4LKXa6X014226
+	for <ceph-devel@vger.kernel.org>; Thu, 21 May 2015 16:33:36 -0400
+In-Reply-To: <alpine.DEB.2.00.1505210837480.23818@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Abhishek L <abhishek.lekshmanan@gmail.com>, Nathan Cutler <ncutler@suse.cz>, "Shu, Xinxin" <xinxin.shu@intel.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---k4G7HbLN3X55HV6apmQhhMRK0Pa28Is7s
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+On 05/21/2015 09:37 AM, Sage Weil wrote:
+> On Thu, 21 May 2015, Ken Dreyer wrote:
+>> I think that would mean we'd want to open 6800-7300 by default?
+>>
+>> And for this firewalld service name, I was thinking of naming this
+>> 6800-7300 rule "ceph", since it encompasses both the OSD and MDS
+>> services. Does that name sound ok? (And I'd name the 6789 rule "ceph-mon".)
+> 
+> Yep, sounds good to me!
+> 
 
-Hi,
+Cool. New Ceph configs submitted to firewalld at
+https://github.com/t-woerner/firewalld/pull/22
 
-I created http://tracker.ceph.com/issues/11699, the first issue of the Ba=
-ckport tracker. As a member of the Backporter team you should have extens=
-ive permissions to edit this issue, including the description. Could you =
-please confirm it's the case ? The permission system of redmine is someti=
-me tricky and maybe I got something wrong...
+I've also updated our own docs re: iptables, at
+https://github.com/ceph/ceph/pull/4740
 
-Cheers
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---k4G7HbLN3X55HV6apmQhhMRK0Pa28Is7s
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlVeLQsACgkQ8dLMyEl6F21myACdEgJ8RTv1c92cVSaeN50EZjCe
-Q1MAn1xNVo01xhH/MSxrBx2m5vDjnDV8
-=XgT1
------END PGP SIGNATURE-----
-
---k4G7HbLN3X55HV6apmQhhMRK0Pa28Is7s--
+- Ken
