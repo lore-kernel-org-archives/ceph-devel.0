@@ -1,98 +1,117 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: [PATCH 4/5] ceph: simplify two mount_timeout sites
-Date: Thu, 21 May 2015 21:45:24 +0800
-Message-ID: <CAAM7YA=DEV7s7Vse-=E2MUcQW1gyTGqrjSonxCQZM-PZBS-yTg@mail.gmail.com>
-References: <1432211706-10473-1-git-send-email-idryomov@gmail.com>
-	<1432211706-10473-5-git-send-email-idryomov@gmail.com>
+From: Alex Elder <elder@ieee.org>
+Subject: Re: [PATCH v2 5/5] rbd: timeout watch teardown on unmap with mount_timeout
+Date: Thu, 21 May 2015 08:55:13 -0500
+Message-ID: <555DE3C1.4080609@ieee.org>
+References: <1432211706-10473-1-git-send-email-idryomov@gmail.com> <1432211706-10473-6-git-send-email-idryomov@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f47.google.com ([209.85.215.47]:33121 "EHLO
-	mail-la0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754095AbbEUNpZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 May 2015 09:45:25 -0400
-Received: by lagr1 with SMTP id r1so102837036lag.0
-        for <ceph-devel@vger.kernel.org>; Thu, 21 May 2015 06:45:24 -0700 (PDT)
-In-Reply-To: <1432211706-10473-5-git-send-email-idryomov@gmail.com>
+Received: from mail-ig0-f171.google.com ([209.85.213.171]:36081 "EHLO
+	mail-ig0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753638AbbEUNzP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 May 2015 09:55:15 -0400
+Received: by igbpi8 with SMTP id pi8so10253369igb.1
+        for <ceph-devel@vger.kernel.org>; Thu, 21 May 2015 06:55:14 -0700 (PDT)
+In-Reply-To: <1432211706-10473-6-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Zheng Yan <zyan@redhat.com>
+To: Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
+Cc: Zheng Yan <zyan@redhat.com>
 
-On Thu, May 21, 2015 at 8:35 PM, Ilya Dryomov <idryomov@gmail.com> wrote:
-> No need to bifurcate wait now that we've got ceph_timeout_jiffies().
->
+On 05/21/2015 07:35 AM, Ilya Dryomov wrote:
+> As part of unmap sequence, kernel client has to talk to the OSDs to
+> teardown watch on the header object.  If none of the OSDs are available
+> it would hang forever, until interrupted by a signal - when that
+> happens we follow through with the rest of unmap procedure (i.e.
+> unregister the device and put all the data structures) and the unmap is
+> still considired successful (rbd cli tool exits with 0).  The watch on
+> the userspace side should eventually timeout so that's fine.
+> 
+> This isn't very nice, because various userspace tools (pacemaker rbd
+> resource agent, for example) then have to worry about setting up their
+> own timeouts.  Timeout it with mount_timeout (60 seconds by default).
+> 
 > Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+> Reviewed-by: Sage Weil <sage@redhat.com>
+
+You can now add:
+
+Reviewed-by: Alex Elder <elder@linaro.org>
+
 > ---
->  fs/ceph/dir.c        | 14 ++++----------
->  fs/ceph/mds_client.c | 18 ++++++++++--------
->  2 files changed, 14 insertions(+), 18 deletions(-)
->
-> diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-> index 173dd4b58c71..3dec27e36417 100644
-> --- a/fs/ceph/dir.c
-> +++ b/fs/ceph/dir.c
-> @@ -1257,17 +1257,11 @@ static int ceph_dir_fsync(struct file *file, loff_t start, loff_t end,
->
->                 dout("dir_fsync %p wait on tid %llu (until %llu)\n",
->                      inode, req->r_tid, last_tid);
-> -               if (req->r_timeout) {
-> -                       unsigned long time_left = wait_for_completion_timeout(
-> -                                       &req->r_safe_completion,
-> +               ret = !wait_for_completion_timeout(&req->r_safe_completion,
->                                         ceph_timeout_jiffies(req->r_timeout));
-> -                       if (time_left > 0)
-> -                               ret = 0;
-> -                       else
-> -                               ret = -EIO;  /* timed out */
-> -               } else {
-> -                       wait_for_completion(&req->r_safe_completion);
-> -               }
-> +               if (ret)
-> +                       ret = -EIO;  /* timed out */
+>  drivers/block/rbd.c | 38 ++++++++++++++++++++++++++++----------
+>  1 file changed, 28 insertions(+), 10 deletions(-)
+> 
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index 992683b6b299..89fe8a4bc02e 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -1563,22 +1563,39 @@ static void rbd_obj_request_end(struct rbd_obj_request *obj_request)
+>  /*
+>   * Wait for an object request to complete.  If interrupted, cancel the
+>   * underlying osd request.
+> + *
+> + * @timeout: in jiffies, 0 means "wait forever"
+>   */
+> -static int rbd_obj_request_wait(struct rbd_obj_request *obj_request)
+> +static int __rbd_obj_request_wait(struct rbd_obj_request *obj_request,
+> +				  unsigned long timeout)
+>  {
+> -	int ret;
+> +	long ret;
+>  
+>  	dout("%s %p\n", __func__, obj_request);
+> -
+> -	ret = wait_for_completion_interruptible(&obj_request->completion);
+> -	if (ret < 0) {
+> -		dout("%s %p interrupted\n", __func__, obj_request);
+> +	ret = wait_for_completion_interruptible_timeout(
+> +					&obj_request->completion,
+> +					ceph_timeout_jiffies(timeout));
+> +	if (ret <= 0) {
+> +		if (ret == 0)
+> +			ret = -ETIMEDOUT;
+>  		rbd_obj_request_end(obj_request);
+> -		return ret;
+> +	} else {
+> +		ret = 0;
+>  	}
+>  
+> -	dout("%s %p done\n", __func__, obj_request);
+> -	return 0;
+> +	dout("%s %p ret %d\n", __func__, obj_request, (int)ret);
+> +	return ret;
+> +}
 > +
->                 ceph_mdsc_put_request(req);
->
->                 spin_lock(&ci->i_unsafe_lock);
-> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index 0b0e0a9a81c0..5be2d287a26c 100644
-> --- a/fs/ceph/mds_client.c
-> +++ b/fs/ceph/mds_client.c
-> @@ -2266,16 +2266,18 @@ int ceph_mdsc_do_request(struct ceph_mds_client *mdsc,
->         /* wait */
->         mutex_unlock(&mdsc->mutex);
->         dout("do_request waiting\n");
-> -       if (req->r_timeout) {
-> -               err = (long)wait_for_completion_killable_timeout(
-> -                                       &req->r_completion,
-> -                                       ceph_timeout_jiffies(req->r_timeout));
-> -               if (err == 0)
-> -                       err = -EIO;
-> -       } else if (req->r_wait_for_completion) {
-> +       if (!req->r_timeout && req->r_wait_for_completion) {
->                 err = req->r_wait_for_completion(mdsc, req);
->         } else {
-> -               err = wait_for_completion_killable(&req->r_completion);
-> +               long timeleft = wait_for_completion_killable_timeout(
-> +                                       &req->r_completion,
-> +                                       ceph_timeout_jiffies(req->r_timeout));
-> +               if (timeleft > 0)
-> +                       err = 0;
-> +               else if (!timeleft)
-> +                       err = -EIO;  /* timed out */
-> +               else
-> +                       err = timeleft;  /* killed */
->         }
->         dout("do_request waited, got %d\n", err);
->         mutex_lock(&mdsc->mutex);
-> --
-> 1.9.3
->
+> +static int rbd_obj_request_wait(struct rbd_obj_request *obj_request)
+> +{
+> +	return __rbd_obj_request_wait(obj_request, 0);
+> +}
+> +
+> +static int rbd_obj_request_wait_timeout(struct rbd_obj_request *obj_request,
+> +					unsigned long timeout)
+> +{
+> +	return __rbd_obj_request_wait(obj_request, timeout);
+>  }
+>  
+>  static void rbd_img_request_complete(struct rbd_img_request *img_request)
+> @@ -3122,6 +3139,7 @@ static struct rbd_obj_request *rbd_obj_watch_request_helper(
+>  						bool watch)
+>  {
+>  	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
+> +	struct ceph_options *opts = osdc->client->options;
+>  	struct rbd_obj_request *obj_request;
+>  	int ret;
+>  
+> @@ -3148,7 +3166,7 @@ static struct rbd_obj_request *rbd_obj_watch_request_helper(
+>  	if (ret)
+>  		goto out;
+>  
+> -	ret = rbd_obj_request_wait(obj_request);
+> +	ret = rbd_obj_request_wait_timeout(obj_request, opts->mount_timeout);
+>  	if (ret)
+>  		goto out;
+>  
+> 
 
-Reviewed-by: Yan, Zheng <zyan@redhat.com>
-
-
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
