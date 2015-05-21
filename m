@@ -1,117 +1,230 @@
-From: Alex Elder <elder@ieee.org>
-Subject: Re: [PATCH v2 5/5] rbd: timeout watch teardown on unmap with mount_timeout
-Date: Thu, 21 May 2015 08:55:13 -0500
-Message-ID: <555DE3C1.4080609@ieee.org>
-References: <1432211706-10473-1-git-send-email-idryomov@gmail.com> <1432211706-10473-6-git-send-email-idryomov@gmail.com>
+From: Joao Eduardo Luis <joao@suse.de>
+Subject: Re: [PATCH 2/5] Mon: expose commands for temperature related setting
+Date: Thu, 21 May 2015 15:29:31 +0100
+Message-ID: <555DEBCB.6070005@suse.de>
+References: <cover.1432214851.git.liwang@ubuntukylin.com> <6826e84a012cff2bd1a2a8741a8bfddc002da8dd.1432214851.git.liwang@ubuntukylin.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f171.google.com ([209.85.213.171]:36081 "EHLO
-	mail-ig0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753638AbbEUNzP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 May 2015 09:55:15 -0400
-Received: by igbpi8 with SMTP id pi8so10253369igb.1
-        for <ceph-devel@vger.kernel.org>; Thu, 21 May 2015 06:55:14 -0700 (PDT)
-In-Reply-To: <1432211706-10473-6-git-send-email-idryomov@gmail.com>
+Received: from cantor2.suse.de ([195.135.220.15]:51420 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754083AbbEUO3e (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 21 May 2015 10:29:34 -0400
+In-Reply-To: <6826e84a012cff2bd1a2a8741a8bfddc002da8dd.1432214851.git.liwang@ubuntukylin.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
-Cc: Zheng Yan <zyan@redhat.com>
+To: Li Wang <liwang@ubuntukylin.com>, Sage Weil <sweil@redhat.com>
+Cc: ceph-devel@vger.kernel.org, MingXin Liu <mingxinliu@ubuntukylin.com>
 
-On 05/21/2015 07:35 AM, Ilya Dryomov wrote:
-> As part of unmap sequence, kernel client has to talk to the OSDs to
-> teardown watch on the header object.  If none of the OSDs are available
-> it would hang forever, until interrupted by a signal - when that
-> happens we follow through with the rest of unmap procedure (i.e.
-> unregister the device and put all the data structures) and the unmap is
-> still considired successful (rbd cli tool exits with 0).  The watch on
-> the userspace side should eventually timeout so that's fine.
+As far as I can tell, this patch can be split in two different patches:
+
+- add hit_set_grade_decay_rate option to 'osd pool set/get'
+- add 'osd tier cache-measure'
+
+Also, for the latter we could also use an explanatory commit message.
+
+Aside from that, I don't see anything obviously wrong with the patch.
+
+  -Joao
+
+On 05/21/2015 02:34 PM, Li Wang wrote:
+> From: MingXin Liu <mingxinliu@ubuntukylin.com>
 > 
-> This isn't very nice, because various userspace tools (pacemaker rbd
-> resource agent, for example) then have to worry about setting up their
-> own timeouts.  Timeout it with mount_timeout (60 seconds by default).
-> 
-> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
-> Reviewed-by: Sage Weil <sage@redhat.com>
-
-You can now add:
-
-Reviewed-by: Alex Elder <elder@linaro.org>
-
+> Signed-off-by: MingXin Liu <mingxinliu@ubuntukylin.com>
+> Reviewed-by: Li Wang <liwang@ubuntukylin.com>
 > ---
->  drivers/block/rbd.c | 38 ++++++++++++++++++++++++++++----------
->  1 file changed, 28 insertions(+), 10 deletions(-)
+>  src/mon/MonCommands.h |  8 +++--
+>  src/mon/OSDMonitor.cc | 87 ++++++++++++++++++++++++++++++++++++++++++++++++---
+>  2 files changed, 88 insertions(+), 7 deletions(-)
 > 
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 992683b6b299..89fe8a4bc02e 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -1563,22 +1563,39 @@ static void rbd_obj_request_end(struct rbd_obj_request *obj_request)
->  /*
->   * Wait for an object request to complete.  If interrupted, cancel the
->   * underlying osd request.
-> + *
-> + * @timeout: in jiffies, 0 means "wait forever"
->   */
-> -static int rbd_obj_request_wait(struct rbd_obj_request *obj_request)
-> +static int __rbd_obj_request_wait(struct rbd_obj_request *obj_request,
-> +				  unsigned long timeout)
->  {
-> -	int ret;
-> +	long ret;
+> diff --git a/src/mon/MonCommands.h b/src/mon/MonCommands.h
+> index 8a36807..b26834d 100644
+> --- a/src/mon/MonCommands.h
+> +++ b/src/mon/MonCommands.h
+> @@ -639,11 +639,11 @@ COMMAND("osd pool rename " \
+>  	"rename <srcpool> to <destpool>", "osd", "rw", "cli,rest")
+>  COMMAND("osd pool get " \
+>  	"name=pool,type=CephPoolname " \
+> -	"name=var,type=CephChoices,strings=size|min_size|crash_replay_interval|pg_num|pgp_num|crush_ruleset|hit_set_type|hit_set_period|hit_set_count|hit_set_fpp|auid|target_max_objects|target_max_bytes|cache_target_dirty_ratio|cache_target_full_ratio|cache_min_flush_age|cache_min_evict_age|erasure_code_profile|min_read_recency_for_promote|write_fadvise_dontneed|all", \
+> +	"name=var,type=CephChoices,strings=size|min_size|crash_replay_interval|pg_num|pgp_num|crush_ruleset|hit_set_type|hit_set_period|hit_set_count|hit_set_fpp|auid|target_max_objects|target_max_bytes|cache_target_dirty_ratio|cache_target_full_ratio|cache_min_flush_age|cache_min_evict_age|erasure_code_profile|min_read_recency_for_promote|write_fadvise_dontneed|hit_set_grade_decay_rate|all", \
+>  	"get pool parameter <var>", "osd", "r", "cli,rest")
+>  COMMAND("osd pool set " \
+>  	"name=pool,type=CephPoolname " \
+> -	"name=var,type=CephChoices,strings=size|min_size|crash_replay_interval|pg_num|pgp_num|crush_ruleset|hashpspool|nodelete|nopgchange|nosizechange|hit_set_type|hit_set_period|hit_set_count|hit_set_fpp|debug_fake_ec_pool|target_max_bytes|target_max_objects|cache_target_dirty_ratio|cache_target_full_ratio|cache_min_flush_age|cache_min_evict_age|auid|min_read_recency_for_promote|write_fadvise_dontneed " \
+> +	"name=var,type=CephChoices,strings=size|min_size|crash_replay_interval|pg_num|pgp_num|crush_ruleset|hashpspool|nodelete|nopgchange|nosizechange|hit_set_type|hit_set_period|hit_set_count|hit_set_fpp|debug_fake_ec_pool|target_max_bytes|target_max_objects|cache_target_dirty_ratio|cache_target_full_ratio|cache_min_flush_age|cache_min_evict_age|auid|min_read_recency_for_promote|write_fadvise_dontneed|hit_set_grade_decay_rate " \
+>  	"name=val,type=CephString " \
+>  	"name=force,type=CephChoices,strings=--yes-i-really-mean-it,req=false", \
+>  	"set pool parameter <var> to <val>", "osd", "rw", "cli,rest")
+> @@ -695,6 +695,10 @@ COMMAND("osd tier cache-mode " \
+>  	"name=pool,type=CephPoolname " \
+>  	"name=mode,type=CephChoices,strings=none|writeback|forward|readonly|readforward|readproxy", \
+>  	"specify the caching mode for cache tier <pool>", "osd", "rw", "cli,rest")
+> +COMMAND("osd tier cache-measure " \
+> +        "name=pool,type=CephPoolname " \
+> +        "name=measure,type=CephChoices,strings=atime|temperature", \
+> +        "specify the caching measure to judge hot objects for cache tier <pool>", "osd", "rw", "cli,rest")
+>  COMMAND("osd tier set-overlay " \
+>  	"name=pool,type=CephPoolname " \
+>  	"name=overlaypool,type=CephPoolname", \
+> diff --git a/src/mon/OSDMonitor.cc b/src/mon/OSDMonitor.cc
+> index 10597d0..0374778 100644
+> --- a/src/mon/OSDMonitor.cc
+> +++ b/src/mon/OSDMonitor.cc
+> @@ -2803,7 +2803,7 @@ namespace {
+>      CACHE_TARGET_DIRTY_RATIO, CACHE_TARGET_FULL_RATIO,
+>      CACHE_MIN_FLUSH_AGE, CACHE_MIN_EVICT_AGE,
+>      ERASURE_CODE_PROFILE, MIN_READ_RECENCY_FOR_PROMOTE,
+> -    WRITE_FADVISE_DONTNEED};
+> +    WRITE_FADVISE_DONTNEED, HIT_SET_GRADE_DECAY_RATE};
 >  
->  	dout("%s %p\n", __func__, obj_request);
+>    std::set<osd_pool_get_choices>
+>      subtract_second_from_first(const std::set<osd_pool_get_choices>& first,
+> @@ -3251,7 +3251,8 @@ bool OSDMonitor::preprocess_command(MMonCommand *m)
+>        ("cache_min_evict_age", CACHE_MIN_EVICT_AGE)
+>        ("erasure_code_profile", ERASURE_CODE_PROFILE)
+>        ("min_read_recency_for_promote", MIN_READ_RECENCY_FOR_PROMOTE)
+> -      ("write_fadvise_dontneed", WRITE_FADVISE_DONTNEED);
+> +      ("write_fadvise_dontneed", WRITE_FADVISE_DONTNEED)
+> +      ("hit_set_grade_decay_rate", HIT_SET_GRADE_DECAY_RATE);
+>  
+>      typedef std::set<osd_pool_get_choices> choices_set_t;
+>  
+> @@ -3259,7 +3260,7 @@ bool OSDMonitor::preprocess_command(MMonCommand *m)
+>        (HIT_SET_TYPE)(HIT_SET_PERIOD)(HIT_SET_COUNT)(HIT_SET_FPP)
+>        (TARGET_MAX_OBJECTS)(TARGET_MAX_BYTES)(CACHE_TARGET_FULL_RATIO)
+>        (CACHE_TARGET_DIRTY_RATIO)(CACHE_MIN_FLUSH_AGE)(CACHE_MIN_EVICT_AGE)
+> -      (MIN_READ_RECENCY_FOR_PROMOTE);
+> +      (MIN_READ_RECENCY_FOR_PROMOTE)(HIT_SET_GRADE_DECAY_RATE);
+>  
+>      const choices_set_t ONLY_ERASURE_CHOICES = boost::assign::list_of
+>        (ERASURE_CODE_PROFILE);
+> @@ -3389,6 +3390,10 @@ bool OSDMonitor::preprocess_command(MMonCommand *m)
+>  	    f->dump_int("min_read_recency_for_promote",
+>  			p->min_read_recency_for_promote);
+>  	    break;
+> +	  case HIT_SET_GRADE_DECAY_RATE:
+> +	    f->dump_int("hit_set_priority_decacy_rate",
+> +			p->hit_set_grade_decay_rate);
+> +	    break;
+>  	  case WRITE_FADVISE_DONTNEED:
+>  	    f->dump_string("write_fadvise_dontneed",
+>  			   p->has_flag(pg_pool_t::FLAG_WRITE_FADVISE_DONTNEED) ?
+> @@ -3476,6 +3481,10 @@ bool OSDMonitor::preprocess_command(MMonCommand *m)
+>  	    ss << "min_read_recency_for_promote: " <<
+>  	      p->min_read_recency_for_promote << "\n";
+>  	    break;
+> +	  case HIT_SET_GRADE_DECAY_RATE:
+> +	    ss << "hit_set_grade_decay_rate: " <<
+> +	      p->hit_set_grade_decay_rate << "\n";
+> +	    break;
+>  	  case WRITE_FADVISE_DONTNEED:
+>  	    ss << "write_fadvise_dontneed: " <<
+>  	      (p->has_flag(pg_pool_t::FLAG_WRITE_FADVISE_DONTNEED) ?
+> @@ -4466,7 +4475,8 @@ int OSDMonitor::prepare_command_pool_set(map<string,cmd_vartype> &cmdmap,
+>         var == "hit_set_count" || var == "hit_set_fpp" ||
+>         var == "target_max_objects" || var == "target_max_bytes" ||
+>         var == "cache_target_full_ratio" || var == "cache_target_dirty_ratio" ||
+> -       var == "cache_min_flush_age" || var == "cache_min_evict_age")) {
+> +       var == "cache_min_flush_age" || var == "cache_min_evict_age" ||
+> +       var == "hit_set_grade_decay_rate")) {
+>      ss << "pool '" << poolstr << "' is not a tier pool: variable not applicable";
+>      return -EACCES;
+>    }
+> @@ -4652,12 +4662,12 @@ int OSDMonitor::prepare_command_pool_set(map<string,cmd_vartype> &cmdmap,
+>      }
+>      p.hit_set_period = n;
+>    } else if (var == "hit_set_count") {
 > -
-> -	ret = wait_for_completion_interruptible(&obj_request->completion);
-> -	if (ret < 0) {
-> -		dout("%s %p interrupted\n", __func__, obj_request);
-> +	ret = wait_for_completion_interruptible_timeout(
-> +					&obj_request->completion,
-> +					ceph_timeout_jiffies(timeout));
-> +	if (ret <= 0) {
-> +		if (ret == 0)
-> +			ret = -ETIMEDOUT;
->  		rbd_obj_request_end(obj_request);
-> -		return ret;
-> +	} else {
-> +		ret = 0;
->  	}
->  
-> -	dout("%s %p done\n", __func__, obj_request);
-> -	return 0;
-> +	dout("%s %p ret %d\n", __func__, obj_request, (int)ret);
-> +	return ret;
-> +}
+>      if (interr.length()) {
+>        ss << "error parsing integer value '" << val << "': " << interr;
+>        return -EINVAL;
+>      }
+>      p.hit_set_count = n;
+> +    p.set_grade(p.hit_set_grade_decay_rate, n);
+>    } else if (var == "hit_set_fpp") {
+>      if (floaterr.length()) {
+>        ss << "error parsing floating point value '" << val << "': " << floaterr;
+> @@ -4723,6 +4733,17 @@ int OSDMonitor::prepare_command_pool_set(map<string,cmd_vartype> &cmdmap,
+>        return -EINVAL;
+>      }
+>      p.min_read_recency_for_promote = n;
+> +  } else if (var == "hit_set_grade_decay_rate") {
+> +    if (interr.length()) {
+> +      ss << "error parsing integer value '" << val << "': " << interr;
+> +      return -EINVAL;
+> +    }
+> +    if (n > 100 || n < 0) {
+> +      ss << "value out of range,valid range is 0 - 100";
+> +      return -EINVAL;
+> +    }
+> +    p.hit_set_grade_decay_rate = n;
+> +    p.set_grade(n, p.hit_set_count);
+>    } else if (var == "write_fadvise_dontneed") {
+>      if (val == "true" || (interr.empty() && n == 1)) {
+>        p.flags |= pg_pool_t::FLAG_WRITE_FADVISE_DONTNEED;
+> @@ -6744,6 +6765,62 @@ done:
+>      wait_for_finished_proposal(new Monitor::C_Command(mon, m, 0, ss.str(),
+>  					      get_last_committed() + 1));
+>      return true;
+> +  } else if (prefix == "osd tier cache-measure") {
+> +    err = check_cluster_features(CEPH_FEATURE_OSD_CACHEPOOL, ss);
+> +    if (err == -EAGAIN)
+> +      goto wait;
+> +    if (err)
+> +      goto reply;
+> +    string poolstr;
+> +    cmd_getval(g_ceph_context, cmdmap, "pool", poolstr);
+> +    int64_t pool_id = osdmap.lookup_pg_pool_name(poolstr);
+> +    if (pool_id < 0) {
+> +      ss << "unrecognized pool '" << poolstr << "'";
+> +      err = -ENOENT;
+> +      goto reply;
+> +    }
+> +    const pg_pool_t *p = osdmap.get_pg_pool(pool_id);
+> +    assert(p);
+> +    if (!p->is_tier()) {
+> +      ss << "pool '" << poolstr << "' is not a tier";
+> +      err = -EINVAL;
+> +      goto reply;
+> +    }
+> +    string measurestr;
+> +    cmd_getval(g_ceph_context, cmdmap, "measure", measurestr);
+> +    pg_pool_t::cache_measure_t measure = pg_pool_t::get_cache_measure_from_str(measurestr);
+> +    if (measure < 0) {
+> +      ss << "'" << measurestr << "' is not a valid cache measure";
+> +      err = -EINVAL;
+> +      goto reply;
+> +    }
+> +    if (p->grade_table.empty()) {
+> +      ss << "grade_table is empty,set hit_set and hit_set_decay_rate first";
+> +      err = -EINVAL;
+> +      goto reply;
+> +    }
+> +    if (p->hit_set_params.get_type() == HitSet::TYPE_NONE) {
+> +      ss << "hit_set_type cannot be none";
+> +      err = -EINVAL;
+> +      goto reply;
+> +    }
 > +
-> +static int rbd_obj_request_wait(struct rbd_obj_request *obj_request)
-> +{
-> +	return __rbd_obj_request_wait(obj_request, 0);
-> +}
-> +
-> +static int rbd_obj_request_wait_timeout(struct rbd_obj_request *obj_request,
-> +					unsigned long timeout)
-> +{
-> +	return __rbd_obj_request_wait(obj_request, timeout);
->  }
->  
->  static void rbd_img_request_complete(struct rbd_img_request *img_request)
-> @@ -3122,6 +3139,7 @@ static struct rbd_obj_request *rbd_obj_watch_request_helper(
->  						bool watch)
->  {
->  	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
-> +	struct ceph_options *opts = osdc->client->options;
->  	struct rbd_obj_request *obj_request;
->  	int ret;
->  
-> @@ -3148,7 +3166,7 @@ static struct rbd_obj_request *rbd_obj_watch_request_helper(
->  	if (ret)
->  		goto out;
->  
-> -	ret = rbd_obj_request_wait(obj_request);
-> +	ret = rbd_obj_request_wait_timeout(obj_request, opts->mount_timeout);
->  	if (ret)
->  		goto out;
->  
+> +    //pool already had this cache-measure set and there are no pending changes
+> +    if (p->cache_measure == measure &&
+> +    (pending_inc.new_pools.count(pool_id) == 0 ||
+> +     pending_inc.new_pools[pool_id].cache_measure == p->cache_measure)) {
+> +      ss << "set cache-measure for pool '" << poolstr << "'"
+> +         << " to " << pg_pool_t::get_cache_measure_name(measure);
+> +      err = 0;
+> +      goto reply;
+> +    }
+> +    pg_pool_t *np = pending_inc.get_new_pool(pool_id, p);
+> +    np->cache_measure = measure;
+> +    ss << "set cache-measure for pool '" << poolstr
+> +	<< "' to " << pg_pool_t::get_cache_measure_name(measure);
+> +    wait_for_finished_proposal(new Monitor::C_Command(mon, m, 0, ss.str(),
+> +					      get_last_committed() + 1));
+> +    return true;
+>    } else if (prefix == "osd tier add-cache") {
+>      err = check_cluster_features(CEPH_FEATURE_OSD_CACHEPOOL, ss);
+>      if (err == -EAGAIN)
 > 
 
