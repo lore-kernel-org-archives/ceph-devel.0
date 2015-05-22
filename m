@@ -1,137 +1,109 @@
-From: Barclay Jameson <almightybeeij@gmail.com>
-Subject: Re: Slow file creating and deleting using bonnie ++ on Hammer
-Date: Fri, 22 May 2015 12:34:45 -0500
-Message-ID: <CAMzumdYaQ1sZUQPbb-42ZSLZgYxLY7CWWoyE5DsUpryd3s6mhQ@mail.gmail.com>
-References: <CAMzumdYUsO2jh8Xk1bpQLrOR7NiLcR5FzL15ve9=jiQ9Bz64wQ@mail.gmail.com>
-	<CAC6JEv9ZjK6nn0tK7HpQWMkMcYhn=Kbg77_+J1NxKTq0WWfJOQ@mail.gmail.com>
-	<CAMzumdYw_13u2nYDohMRbtD-tcKOTmJNn-x+mEFh2__hpf8XKw@mail.gmail.com>
-	<CAMzumdZgmsmBYHci2qq1qDs2nWmXq3StR9FbPT3FfHy_zi9qeA@mail.gmail.com>
-	<555F4C78.7060601@redhat.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: should we prepare to release firefly v0.80.10 ?
+Date: Fri, 22 May 2015 10:34:00 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1505221033570.6462@cobra.newdream.net>
+References: <55362279.5060105@dachary.org> <alpine.DEB.2.00.1504210851130.18547@cobra.newdream.net> <5555F85B.3000407@dachary.org> <alpine.DEB.2.00.1505151205220.10788@cobra.newdream.net> <555654E8.1030806@dachary.org> <5559DF5E.4090706@dachary.org>
+ <555F083C.9080700@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1991210280-1432316043=:6462"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yh0-f42.google.com ([209.85.213.42]:36216 "EHLO
-	mail-yh0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757206AbbEVRep (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 May 2015 13:34:45 -0400
-Received: by yhrr66 with SMTP id r66so6060819yhr.3
-        for <ceph-devel@vger.kernel.org>; Fri, 22 May 2015 10:34:45 -0700 (PDT)
-In-Reply-To: <555F4C78.7060601@redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:55681 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757407AbbEVRfG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 22 May 2015 13:35:06 -0400
+In-Reply-To: <555F083C.9080700@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <john.spray@redhat.com>
-Cc: Gregory Farnum <greg@gregs42.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Here are some more info :
-rados bench -p cephfs_data 100 write --no-cleanup
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-Total time run:         100.096473
-Total writes made:      21900
-Write size:             4194304
-Bandwidth (MB/sec):     875.156
+--557981400-1991210280-1432316043=:6462
+Content-Type: TEXT/PLAIN; charset=utf-8
+Content-Transfer-Encoding: 8BIT
 
-Stddev Bandwidth:       96.1234
-Max bandwidth (MB/sec): 932
-Min bandwidth (MB/sec): 0
-Average Latency:        0.0731273
-Stddev Latency:         0.0439909
-Max latency:            1.23972
-Min latency:            0.0306901
+Let's do it!
 
-(Again the numbers from bench don't match what is listed in client io.
-Ceph -s shows anywhere from 200 MB/s to 1700 MB/s even when the max
-bandwidth lists 932 as the highest)
+On Fri, 22 May 2015, Loic Dachary wrote:
 
-rados bench -p cephfs_data 100 seq
-
-Total time run:        29.460172
-Total reads made:     21900
-Read size:            4194304
-Bandwidth (MB/sec):    2973.506
-
-Average Latency:       0.0215173
-Max latency:           0.693831
-Min latency:           0.00519763
-
-
-
-On client:
-
-[root@blarg cephfs]# time for i in {1..100000}; do mkdir blarg"$i" ; done
-
-real    10m36.794s
-user    1m45.329s
-sys    6m29.982s
-[root@blarg cephfs]# time for i in {1..100000}; do touch yadda"$i" ; done
-
-real    13m29.155s
-user    3m55.256s
-sys    7m50.301s
-
-What variables are most important in the perf dump?
-I would like to grep out the vars (ceph daemon
-/var/run/ceph-mds.cephnautilus01.asok perf dump | jq '.') that are of
-meaning while running the bonnie++ test again with -s 0.
-
-Thanks,
-BJ
-
-On Fri, May 22, 2015 at 10:34 AM, John Spray <john.spray@redhat.com> wrote:
->
->
-> On 22/05/2015 16:25, Barclay Jameson wrote:
->>
->> The Bonnie++ job _FINALLY_ finished. If I am reading this correctly it
->> took days to create, stat, and delete 16 files??
->> [root@blarg cephfs]# ~/bonnie++-1.03e/bonnie++ -u root:root -s 256g -r
->> 131072 -d /cephfs/ -m CephBench -f -b
->> Using uid:0, gid:0.
->> Writing intelligently...done
->> Rewriting...done
->> Reading intelligently...done
->> start 'em...done...done...done...
->> Create files in sequential order...done.
->> Stat files in sequential order...done.
->> Delete files in sequential order...done.
->> Create files in random order...done.
->> Stat files in random order...done.
->> Delete files in random order...done.
->> Version 1.03e       ------Sequential Output------ --Sequential Input-
->> --Random-
->>                      -Per Chr- --Block-- -Rewrite- -Per Chr- --Block--
->> --Seeks--
->> Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP
->> /sec %CP
->> CephBench      256G           1006417  76 90114  13           137110
->> 8 329.8   7
->>                      ------Sequential Create------ --------Random
->> Create--------
->>                      -Create-- --Read--- -Delete-- -Create-- --Read---
->> -Delete--
->>                files  /sec %CP  /sec %CP  /sec %CP  /sec %CP  /sec %CP
->> /sec %CP
->>                   16     0   0 +++++ +++     0   0     0   0  5267  19
->> 0   0
->>
->> CephBench,256G,,,1006417,76,90114,13,,,137110,8,329.8,7,16,0,0,+++++,+++,0,0,0,0,5267,19,0,0
->>
->> Any thoughts?
->>
-> It's 16000 files by default (not 16), but this usually takes only a few
-> minutes.
->
-> FWIW I tried running a quick bonnie++ (with -s 0 to skip the IO phase) on a
-> development (vstart.sh) cluster with a fuse client, and it readily handles
-> several hundred client requests per second (checked with "ceph daemonperf
-> mds.<id>")
->
-> Nothing immediately leapt out at me from a quick look at the log you posted,
-> but with issues like these it is always worth trying to narrow it down by
-> trying the fuse client instead of the kernel client, and/or different kernel
-> versions.
->
-> You may also want to check that your underlying RADOS cluster is performing
-> reasonably by doing a rados bench too.
->
-> Cheers,
-> John
+> Ping ?
+> 
+> On 18/05/2015 14:47, Loic Dachary wrote:
+> > Hi Sage,
+> > 
+> > The following are now in the firefly branch. 
+> > 
+> > https://github.com/ceph/ceph/pull/4697 which includes fixes for http://tracker.ceph.com/issues/11622 and http://tracker.ceph.com/issues/11604
+> > https://github.com/ceph/ceph/pull/4556 OSD::load_pgs: we need to handle the case where an upgrade from earlier versions which ignored non-existent pgs resurrects a pg with a prehistoric osdmap  
+> > 
+> > Do you think we should prepare to release firefly v0.80.10 ? If yes the branch will be handed over to QE for further testing.
+> > 
+> > Cheers
+> > 
+> > On 15/05/2015 22:19, Loic Dachary wrote:
+> >>
+> >>
+> >> On 15/05/2015 21:05, Sage Weil wrote:
+> >>> On Fri, 15 May 2015, Loic Dachary wrote:
+> >>>> Hi Sage,
+> >>>>
+> >>>> On 21/04/2015 17:52, Sage Weil wrote:
+> >>>>> The bulk of it is ceph-objectstore-tool, which is important to get into a 
+> >>>>> release, IMO.  David, are these being tested in the firefly thrashing 
+> >>>>> tests yet?
+> >>>>>
+> >>>>> The only other one I'm worried about is
+> >>>>>
+> >>>>> 6fd3dfa osd: do not ignore deleted pgs on startup
+> >>>>>
+> >>>>> Sam, I assume the recent hammer upgrade issue is would bite firefly folks 
+> >>>>> who upgrade too?
+> >>>>
+> >>>> A backport of "OSD::load_pgs: we need to handle the case where an upgrade from earlier versions which ignored non-existent pgs resurrects a pg with a prehistoric osdmap" http://tracker.ceph.com/issues/11429 found at https://github.com/ceph/ceph/pull/4556 has been successfully tested on firefly at http://pulpito.ceph.com/loic-2015-05-13_00:01:26-rados-firefly-backports---basic-multi/ and in a rados suite run that completed today http://tracker.ceph.com/issues/11090#rados.
+> >>>>
+> >>>> Provided https://github.com/ceph/ceph/pull/4556 is merged, do you think we should prepare to release firefly v0.80.10 ?
+> >>>
+> >>> As Yehuda mentioned the other open issue is the rgw multipart corruption.  
+> >>> I'm guessing we want to include that?
+> >>
+> >> Yes, we will include and test the http://tracker.ceph.com/issues/11622 and http://tracker.ceph.com/issues/11604 backports.
+> >>
+> >> Cheers
+> >>
+> >>>
+> >>> sage
+> >>>
+> >>>>
+> >>>> Cheers
+> >>>>
+> >>>>>
+> >>>>> sage
+> >>>>>
+> >>>>>
+> >>>>> On Tue, 21 Apr 2015, Loic Dachary wrote:
+> >>>>>
+> >>>>>> Hi Sage,
+> >>>>>>
+> >>>>>> The firefly branch has a number of fixes ( http://tracker.ceph.com/issues/11090#Release-information ) and has been used for upgrade tests in the past few weeks. A few other issues have been backported since and are being tested in the integration branch ( http://tracker.ceph.com/issues/11090#teuthology-run-commitb91bbb434e6363a99a632cf3841f70f1f2549f79-integration-branch-april-2015 ). 
+> >>>>>>
+> >>>>>> Do you think these changes deserve a firefly v0.80.10 release ? Should we ask each lead for their approval ? Or is it better to keep backporting what needs to be and wait a few weeks ?
+> >>>>>>
+> >>>>>> Cheers
+> >>>>>>
+> >>>>>> -- 
+> >>>>>> Loïc Dachary, Artisan Logiciel Libre
+> >>>>>>
+> >>>>
+> >>>> -- 
+> >>>> Loïc Dachary, Artisan Logiciel Libre
+> >>>>
+> >>
+> > 
+> 
+> -- 
+> Loïc Dachary, Artisan Logiciel Libre
+> 
+> 
+--557981400-1991210280-1432316043=:6462--
