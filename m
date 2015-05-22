@@ -1,101 +1,143 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Proposal for a Backport tracker
-Date: Fri, 22 May 2015 12:50:51 +0200
-Message-ID: <555F0A0B.2040006@dachary.org>
-References: <555DC080.8050508@dachary.org> <555ED569.2090604@suse.cz> <555ED98F.8020402@dachary.org> <555EE989.5070009@suse.cz> <555F0694.1060209@suse.de>
+From: Barclay Jameson <almightybeeij@gmail.com>
+Subject: Re: Slow file creating and deleting using bonnie ++ on Hammer
+Date: Fri, 22 May 2015 10:25:51 -0500
+Message-ID: <CAMzumdZgmsmBYHci2qq1qDs2nWmXq3StR9FbPT3FfHy_zi9qeA@mail.gmail.com>
+References: <CAMzumdYUsO2jh8Xk1bpQLrOR7NiLcR5FzL15ve9=jiQ9Bz64wQ@mail.gmail.com>
+	<CAC6JEv9ZjK6nn0tK7HpQWMkMcYhn=Kbg77_+J1NxKTq0WWfJOQ@mail.gmail.com>
+	<CAMzumdYw_13u2nYDohMRbtD-tcKOTmJNn-x+mEFh2__hpf8XKw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="u9Gh5K75lnuuldKDNsFDpcqggnLOb5TIV"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:49112 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1756570AbbEVKuz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 May 2015 06:50:55 -0400
-In-Reply-To: <555F0694.1060209@suse.de>
+Received: from mail-yh0-f43.google.com ([209.85.213.43]:34470 "EHLO
+	mail-yh0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757058AbbEVPZw convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 May 2015 11:25:52 -0400
+Received: by yhom41 with SMTP id m41so5156012yho.1
+        for <ceph-devel@vger.kernel.org>; Fri, 22 May 2015 08:25:51 -0700 (PDT)
+In-Reply-To: <CAMzumdYw_13u2nYDohMRbtD-tcKOTmJNn-x+mEFh2__hpf8XKw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Joao Eduardo Luis <joao@suse.de>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <greg@gregs42.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---u9Gh5K75lnuuldKDNsFDpcqggnLOb5TIV
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+The Bonnie++ job _FINALLY_ finished. If I am reading this correctly it
+took days to create, stat, and delete 16 files??
+[root@blarg cephfs]# ~/bonnie++-1.03e/bonnie++ -u root:root -s 256g -r
+131072 -d /cephfs/ -m CephBench -f -b
+Using uid:0, gid:0.
+Writing intelligently...done
+Rewriting...done
+Reading intelligently...done
+start 'em...done...done...done...
+Create files in sequential order...done.
+Stat files in sequential order...done.
+Delete files in sequential order...done.
+Create files in random order...done.
+Stat files in random order...done.
+Delete files in random order...done.
+Version 1.03e       ------Sequential Output------ --Sequential Input- -=
+-Random-
+                    -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- -=
+-Seeks--
+Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  =
+/sec %CP
+CephBench      256G           1006417  76 90114  13           137110
+8 329.8   7
+                    ------Sequential Create------ --------Random Create=
+--------
+                    -Create-- --Read--- -Delete-- -Create-- --Read--- -=
+Delete--
+              files  /sec %CP  /sec %CP  /sec %CP  /sec %CP  /sec %CP  =
+/sec %CP
+                 16     0   0 +++++ +++     0   0     0   0  5267  19  =
+   0   0
+CephBench,256G,,,1006417,76,90114,13,,,137110,8,329.8,7,16,0,0,+++++,++=
++,0,0,0,0,5267,19,0,0
 
+Any thoughts?
 
-
-On 22/05/2015 12:36, Joao Eduardo Luis wrote:
-> On 05/22/2015 09:32 AM, Nathan Cutler wrote:
->>> We can probably keep the original ticket in the "Pending Backport"
->>> status until all backports are resolved, as we currently do.
->>>
->>>> So the question is, what will the original ticket's status be change=
-d
->>>> to? Resolved?
->>>
->>> When all backports are resolved, then we can also resolve the origina=
-l
->>> ticket. Do you forsee a problem with that ?
->>>
->>
->> Yes and no. It's a scripting problem, not a workflow problem. I'll try=
-
->> to describe the scenario I'm envisioning:
->>
->> We have a simple script that loops over all tickets with status "Pendi=
-ng
->> Backport". We run it once per week. The first week we run it, the scri=
-pt
->> finds 3 such tickets. For each one it creates a ticket in the Backport=
-
->> tracker.
->>
->> A week goes by, during which developers marked 4 more tickets "Pending=
-
->> Backport". It's time to run the script again. Since it is looping over=
-
->> all tickets marked "Pending Backport", it now finds 7 such tickets: 3
->> from last week and the 4 new ones. For each one it dutifully creates a=
-
->> new ticket in the Backport tracker. Now we have duplicate Backport
->> tickets for 3 bugfixes.
->>
->> But I guess it will be trivial to make the script check if a Backport
->> ticket is already open and refrain from opening a new one in this case=
+On Wed, May 20, 2015 at 2:00 PM, Barclay Jameson
+<almightybeeij@gmail.com> wrote:
+> I dumped it out into my github wiki under the pages ceph MDS Log and
+> Ceph s output:
+>
+> https://github.com/almightybeeij/Debug/wiki
+>
+> Let me know if you would like anything else or if you can't get to it=
 =2E
->=20
-> Alternatively, adding a new state to the tracker that distinguishes
-> between tickets that are pending being picked up on by the stable
-> releases team vs those that are just pending the backport.  Say, "Mark
-> for Backport" vs "Pending Backport".
->=20
-
-I liked the idea, wrote a reply and then realized: that won't save the sc=
-ript from checking if the reality matches the status. Sometimes the "back=
-ports" field is updated to remove or add a new backport target. It may me=
-an closing or creating the corresponding issue and for that the script wi=
-ll have to query the backport tracker.
-
->   -Joao
->=20
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---u9Gh5K75lnuuldKDNsFDpcqggnLOb5TIV
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlVfCgsACgkQ8dLMyEl6F215pACfQFLt4y7t+PYvB3WPbB9If4Gv
-KHkAn1qjqyLLdgmMY61M8xzEeFY4CR0e
-=h1kh
------END PGP SIGNATURE-----
-
---u9Gh5K75lnuuldKDNsFDpcqggnLOb5TIV--
+>
+> Thanks Greg!
+>
+> On Wed, May 20, 2015 at 1:22 PM, Gregory Farnum <greg@gregs42.com> wr=
+ote:
+>> On Wed, May 20, 2015 at 11:15 AM, Barclay Jameson
+>> <almightybeeij@gmail.com> wrote:
+>>> I am trying to find out why boniee++ is choking at the creating fil=
+es
+>>> sequentially and deleting sequentially on cephfs.
+>>> I enabled mds debug for about 30 seconds and I find a bunch of line=
+s
+>>> like the following:
+>>>
+>>> 2015-05-19 15:54:12.930829 7f6de4ecf700  1 -- 192.168.40.3:6800/461=
+756
+>>> --> 192.168.40.100:0/1741116310 -- client_caps(grant ino 10000004ca=
+9
+>>> 19656 seq 2 caps=3DpAsxLsXsxFsxcrwb dirty=3D- wanted=3DpAsxXsxFxwb =
+follows 0
+>>> size 0/4194304 ts 1 mtime 2015-05-19 15:54:09.098825) v5 -- ?+0
+>>> 0x557a800 con 0x4fdeca0
+>>>
+>>> Is this statement showing that it takes 4 seconds to create an inod=
+e?
+>>
+>> I'm not sure where you're getting that from just this line =E2=80=94=
+ are you
+>> comparing mtime and the log timestamp?
+>> This particular message is just a message going to the client about
+>> what access capabilities (caps) it has on that inode.
+>>
+>>>
+>>> Watching ( watch --interval=3D.2 -d 'ceph df') ceph df, rados df, a=
+nd
+>>> ceph osd pool stats seems to show that an object is being created o=
+r
+>>> deleted about every 4 seconds.
+>>
+>> A 4 second file create sounds much slower than it should be. What do=
+es
+>> your cluster look like? Can you upload the output of ceph -s and you=
+r
+>> MDS log somewhere?
+>> -Greg
+>>
+>>>
+>>> The test is now running for over 24 hours with the following bonnie=
+++ comand:
+>>>
+>>> ~/bonnie++-1.03e/bonnie++ -u root:root -s 256g -r 131072 -d /cephfs=
+/
+>>> -m CephBench -f -b
+>>>
+>>> I can give more log output if needed.
+>>>
+>>> OSD + MON/MDS
+>>> CentOS 7
+>>> ceph version 0.94.1 (e4bfad3a3c51054df7e537a724c8d0bf9be972ff)
+>>> kernel version : 3.10.0-229.el7.x86_64
+>>>
+>>> Client
+>>> CentOS 6
+>>> ceph version 0.94.1 (e4bfad3a3c51054df7e537a724c8d0bf9be972ff)
+>>> kernel version : 4.0.0-1.el6.elrepo.x86_64
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
+l" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
