@@ -1,49 +1,69 @@
-From: Nathan Cutler <ncutler@suse.cz>
-Subject: Re: Proposal for a Backport tracker
-Date: Fri, 22 May 2015 10:32:09 +0200
-Message-ID: <555EE989.5070009@suse.cz>
-References: <555DC080.8050508@dachary.org> <555ED569.2090604@suse.cz> <555ED98F.8020402@dachary.org>
+From: Loic Dachary <loic@dachary.org>
+Subject: Backport tracker migration complete
+Date: Fri, 22 May 2015 10:43:44 +0200
+Message-ID: <555EEC40.3040106@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="oXaO3iB3hrEc5TQsRFmPUiEiCEUu3kxdQ"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cantor2.suse.de ([195.135.220.15]:47875 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757006AbbEVIcL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 22 May 2015 04:32:11 -0400
-In-Reply-To: <555ED98F.8020402@dachary.org>
+Received: from mail2.dachary.org ([91.121.57.175]:49019 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751355AbbEVIns (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 May 2015 04:43:48 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
+To: "Shu, Xinxin" <xinxin.shu@intel.com>, Abhishek L <abhishek.lekshmanan@gmail.com>, Nathan Cutler <ncutler@suse.cz>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-> We can probably keep the original ticket in the "Pending Backport" status until all backports are resolved, as we currently do.
->
->> So the question is, what will the original ticket's status be changed to? Resolved?
->
-> When all backports are resolved, then we can also resolve the original ticket. Do you forsee a problem with that ?
->
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--oXaO3iB3hrEc5TQsRFmPUiEiCEUu3kxdQ
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-Yes and no. It's a scripting problem, not a workflow problem. I'll try 
-to describe the scenario I'm envisioning:
+Hi,
 
-We have a simple script that loops over all tickets with status "Pending 
-Backport". We run it once per week. The first week we run it, the script 
-finds 3 such tickets. For each one it creates a ticket in the Backport 
-tracker.
+The Backport tracker should now be fully populated. There are new custom =
+queries for:
 
-A week goes by, during which developers marked 4 more tickets "Pending 
-Backport". It's time to run the script again. Since it is looping over 
-all tickets marked "Pending Backport", it now finds 7 such tickets: 3 
-from last week and the 4 new ones. For each one it dutifully creates a 
-new ticket in the Backport tracker. Now we have duplicate Backport 
-tickets for 3 bugfixes.
+  hammer backports http://tracker.ceph.com/projects/ceph/issues?query_id=3D=
+78
+  firefly backports http://tracker.ceph.com/projects/ceph/issues?query_id=
+=3D79
 
-But I guess it will be trivial to make the script check if a Backport 
-ticket is already open and refrain from opening a new one in this case.
+and you can quickly see which one are assigned or not, scheduled for the =
+next point release or not etc.=20
 
-The same script could also check further: if Backport tickets already 
-exist for the bugfix and all of them are marked Resolved, then 
-automatically mark the original ticket Resolved as well.
+To see all issues that are Pending Backport, the former queries still wor=
+k:
 
-Nathan
+  hammer http://tracker.ceph.com/projects/ceph/issues?query_id=3D77
+  firefly http://tracker.ceph.com/projects/ceph/issues?query_id=3D75
+
+but you can now see links to the corresponding backports in the "Related =
+issues" column. It makes it convenient to visually check which issues hav=
+e been backported to all desired targets: there related issues are closed=
+=2E
+
+I'll update the documentation at http://tracker.ceph.com/projects/ceph-re=
+leases/wiki/HOWTO accordingly.
+
+Cheers
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--oXaO3iB3hrEc5TQsRFmPUiEiCEUu3kxdQ
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlVe7EAACgkQ8dLMyEl6F22wSwCfWLq5pN2cE7m46ySovZFZjCvD
+FpUAn2B+O6PQqZE4SMF6r5nsn0H2tGqB
+=LjCL
+-----END PGP SIGNATURE-----
+
+--oXaO3iB3hrEc5TQsRFmPUiEiCEUu3kxdQ--
