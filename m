@@ -1,96 +1,98 @@
-From: John Spray <john.spray@redhat.com>
-Subject: Re: MDS auth caps for cephfs
-Date: Fri, 22 May 2015 10:28:48 +0100
-Message-ID: <555EF6D0.5000903@redhat.com>
-References: <alpine.DEB.2.00.1505201651260.23818@cobra.newdream.net>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Backport tracker migration complete
+Date: Fri, 22 May 2015 12:31:01 +0200
+Message-ID: <555F0565.6010704@dachary.org>
+References: <555EEC40.3040106@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="PcuHjjtndqimujrrsbK59cnmEOdt8VakG"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:58413 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757259AbbEVJ2u (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 22 May 2015 05:28:50 -0400
-In-Reply-To: <alpine.DEB.2.00.1505201651260.23818@cobra.newdream.net>
+Received: from mail2.dachary.org ([91.121.57.175]:49094 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1945985AbbEVKbG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 May 2015 06:31:06 -0400
+In-Reply-To: <555EEC40.3040106@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
-Cc: nishtha3rai@gmail.com
+To: "Shu, Xinxin" <xinxin.shu@intel.com>, Abhishek L <abhishek.lekshmanan@gmail.com>, Nathan Cutler <ncutler@suse.cz>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
+
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--PcuHjjtndqimujrrsbK59cnmEOdt8VakG
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
 
 
-On 21/05/2015 01:14, Sage Weil wrote:
-> Looking at the MDSAuthCaps again, I think there are a few things we might
-> need to clean up first.  The way it is currently structured, the idea is
-> that you have an array of grants (MDSCapGrant).  For any operation, you'd
-> look at each grant until one that says what you're trying to do is okay.
-> If non match, you fail.  (i.e., they're additive only.)
->
-> Each MDSCapGrant has a 'spec' and a 'match'.  The 'match' is a check
-> to see if the current grant applies to a given operation, and the 'spec'
-> says what you're allowed to do.
->
-> Currently MDSCapMatch is just
->
->    int uid;  // Require UID to be equal to this, if !=MDS_AUTH_UID_ANY
->    std::string path;  // Require path to be child of this (may be "/" for any)
->
-> I think path is clearly right.  UID I'm not sure makes sense here... I'm
-> inclined to ignore it (instead of removing it) until we decide
-> how to restrict a mount to be a single user.
->
-> The spec is
->
->    bool read;
->    bool write;
->    bool any;
->
-> I'm not quite sure what 'any' means, but read/write are pretty clear.
+On 22/05/2015 10:43, Loic Dachary wrote:
+> Hi,
+>=20
+> The Backport tracker should now be fully populated. There are new custo=
+m queries for:
+>=20
+>   hammer backports http://tracker.ceph.com/projects/ceph/issues?query_i=
+d=3D78
+>   firefly backports http://tracker.ceph.com/projects/ceph/issues?query_=
+id=3D79
+>=20
+> and you can quickly see which one are assigned or not, scheduled for th=
+e next point release or not etc.=20
+>=20
+> To see all issues that are Pending Backport, the former queries still w=
+ork:
+>=20
+>   hammer http://tracker.ceph.com/projects/ceph/issues?query_id=3D77
+>   firefly http://tracker.ceph.com/projects/ceph/issues?query_id=3D75
+>=20
+> but you can now see links to the corresponding backports in the "Relate=
+d issues" column. It makes it convenient to visually check which issues h=
+ave been backported to all desired targets: there related issues are clos=
+ed.
+>=20
+> I'll update the documentation at http://tracker.ceph.com/projects/ceph-=
+releases/wiki/HOWTO accordingly.
+>=20
 
-Ah, I added that when implementing 'tell' -- 'any' is checked when 
-handling incoming MCommand in MDS, so it's effectively the admin permission.
+The backporter manual has been updated at http://tracker.ceph.com/project=
+s/ceph-releases/wiki/HOWTO and deserves proofreading. The most significan=
+t changes are at:
 
-> The root_squash option clearly belongs in spec, and Nistha's first patch
-> adds it there.  What about the other NFS options.. should be mirror those
-> too?
->
-> root_squash
->   Map requests from uid/gid 0 to the anonymous uid/gid. Note that this does
->   not apply to any other uids or gids that might be equally sensitive, such
->   as user bin or group staff.
-> no_root_squash
->   Turn off root squashing. This option is mainly useful for diskless
->   clients.
-> all_squash
->   Map all uids and gids to the anonymous user. Useful for NFS-exported
->   public FTP directories, news spool directories, etc. The opposite option
->   is no_all_squash, which is the default setting.
-> anonuid and anongid
->   These options explicitly set the uid and gid of the anonymous account.
->   This option is primarily useful for PC/NFS clients, where you might want
->   all requests appear to be from one user. As an example, consider the
->   export entry for /home/joe in the example section below, which maps all
->   requests to uid 150 (which is supposedly that of user joe).
+HOWTO schedule an issue for backporting http://tracker.ceph.com/projects/=
+ceph-releases/wiki/HOWTO_schedule_an_issue_for_backporting in which there=
+ now is the part where we need to create additional issues. It won't burd=
+en the developer but I think we'll get tired of it quickly and we'll need=
+ a snippet to do it for us ;-)
 
-Yes, I think we should.  Part of me wants to say that people who want 
-NFS-like behaviour should be using NFS gateways.  However, these are all 
-probably straightforward enough to implement that it's worth maintaining 
-them in cephfs too.
+HOWTO backport commits http://tracker.ceph.com/projects/ceph-releases/wik=
+i/HOWTO_backport_commits changes very little: instead of adding a link to=
+ the pull request as a comment to the original issue, we set the URL as t=
+he description of the issue, in the same way we set the URL to the issue =
+in the description of the pull request.
 
-We probably need to mirror these in our mount options too, so that e.g. 
-someone with an admin key can still enable root_squash at will, rather 
-than having to craft an authentication token with the desired behaviour.
+HOWTO resolve issues that are Pending Backport http://tracker.ceph.com/pr=
+ojects/ceph-releases/wiki/HOWTO_resolve_issues_that_are_Pending_Backport =
+is the step that benefits most from the change. It was tedious and is cou=
+ld now trivially be automated via a snippet.
 
-> We could also do an all_squash bool at the same time (or a flags field for
-> more efficient encoding), and anonuid/gid so that we don't hard-code
-> 65534.
->
-> In order to add these to the grammer, I suspect we should go back to
-> root_squash (not squash_root), and add an 'optoins' tag.  e.g.,
->
->   allow path /foo rw options no_root_squash anonuid=123 anongid=123
->
-> (having them live next to rw was breaking the spirit parser, bah).
-Looks good to me.
+> Cheers
+>=20
 
-John
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--PcuHjjtndqimujrrsbK59cnmEOdt8VakG
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlVfBWUACgkQ8dLMyEl6F22xJgCfVEPuMBBvp+3ldY8lT9Jtc+s8
+hxcAnAuhDEu9LDSXlsGrmE81HmVxvyzk
+=o5Iy
+-----END PGP SIGNATURE-----
+
+--PcuHjjtndqimujrrsbK59cnmEOdt8VakG--
