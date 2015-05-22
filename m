@@ -1,75 +1,49 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: rados bench : multiple parralel bench increase total iops results ?
-Date: Fri, 22 May 2015 09:35:06 +0200 (CEST)
-Message-ID: <797273899.89295271.1432280106396.JavaMail.zimbra@oxygem.tv>
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: Re: Proposal for a Backport tracker
+Date: Fri, 22 May 2015 10:32:09 +0200
+Message-ID: <555EE989.5070009@suse.cz>
+References: <555DC080.8050508@dachary.org> <555ED569.2090604@suse.cz> <555ED98F.8020402@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:38163 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751355AbbEVHfJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 May 2015 03:35:09 -0400
-Received: from localhost (localhost [127.0.0.1])
-	by mailpro.odiso.net (Postfix) with ESMTP id 2B13044E2DC95
-	for <ceph-devel@vger.kernel.org>; Fri, 22 May 2015 09:35:07 +0200 (CEST)
-Received: from mailpro.odiso.net ([127.0.0.1])
-	by localhost (mailpro.odiso.net [127.0.0.1]) (amavisd-new, port 10032)
-	with ESMTP id V7KFsGmIETG1 for <ceph-devel@vger.kernel.org>;
-	Fri, 22 May 2015 09:35:07 +0200 (CEST)
-Received: from localhost (localhost [127.0.0.1])
-	by mailpro.odiso.net (Postfix) with ESMTP id F2DD244DF779C
-	for <ceph-devel@vger.kernel.org>; Fri, 22 May 2015 09:35:06 +0200 (CEST)
-Received: from mailpro.odiso.net ([127.0.0.1])
-	by localhost (mailpro.odiso.net [127.0.0.1]) (amavisd-new, port 10026)
-	with ESMTP id v3PyBgsBpqv6 for <ceph-devel@vger.kernel.org>;
-	Fri, 22 May 2015 09:35:06 +0200 (CEST)
-Received: from mailpro.odiso.net (mailpro.odiso.net [10.1.31.112])
-	by mailpro.odiso.net (Postfix) with ESMTP id CC68C40034B85
-	for <ceph-devel@vger.kernel.org>; Fri, 22 May 2015 09:35:06 +0200 (CEST)
+Received: from cantor2.suse.de ([195.135.220.15]:47875 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757006AbbEVIcL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 22 May 2015 04:32:11 -0400
+In-Reply-To: <555ED98F.8020402@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi,
+> We can probably keep the original ticket in the "Pending Backport" status until all backports are resolved, as we currently do.
+>
+>> So the question is, what will the original ticket's status be changed to? Resolved?
+>
+> When all backports are resolved, then we can also resolve the original ticket. Do you forsee a problem with that ?
+>
 
-I'm currently compare results of "rados bench" vs fio-librbd,
+Yes and no. It's a scripting problem, not a workflow problem. I'll try 
+to describe the scenario I'm envisioning:
 
-and I notice that with rados bench (4k randread, 1osd)
+We have a simple script that loops over all tickets with status "Pending 
+Backport". We run it once per week. The first week we run it, the script 
+finds 3 such tickets. For each one it creates a ticket in the Backport 
+tracker.
 
-"rados bench -p pooltest 300 rand -t 128"
+A week goes by, during which developers marked 4 more tickets "Pending 
+Backport". It's time to run the script again. Since it is looping over 
+all tickets marked "Pending Backport", it now finds 7 such tickets: 3 
+from last week and the 4 new ones. For each one it dutifully creates a 
+new ticket in the Backport tracker. Now we have duplicate Backport 
+tickets for 3 bugfixes.
 
-Bandwidth (MB/sec):   284
-Average IOPS:         72750
+But I guess it will be trivial to make the script check if a Backport 
+ticket is already open and refrain from opening a new one in this case.
 
-Increasing threads number don't improve results after 128 threads
+The same script could also check further: if Backport tickets already 
+exist for the bugfix and all of them are marked Resolved, then 
+automatically mark the original ticket Resolved as well.
 
-
-but launching the same rados bench twice in parallel, give me
-
-rados bench1:
-Bandwidth (MB/sec):   247
-Average IOPS:         63203
-
-rados bench2:
-Bandwidth (MB/sec):   251
-Average IOPS:         64175
-
-Is it expected ?
-
-
-If I compare with fio, it seem like that threads number is related to iodepth in fio
-
-with fio, I got around 
-  70000 iops with 1 job iodepth=128
-  121000 iops with 2 jobs iodepth=128
-
-
-
-Could it be possible to improve rados bench to run it multiple time in parallel and aggregate results ?
-It could be usefull to compare with fio.
-
-Regards,
-
-Alexandre
-
+Nathan
