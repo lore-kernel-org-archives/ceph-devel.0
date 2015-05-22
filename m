@@ -1,98 +1,56 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Backport tracker migration complete
-Date: Fri, 22 May 2015 12:31:01 +0200
-Message-ID: <555F0565.6010704@dachary.org>
-References: <555EEC40.3040106@dachary.org>
+From: Joao Eduardo Luis <joao@suse.de>
+Subject: Re: Proposal for a Backport tracker
+Date: Fri, 22 May 2015 11:36:04 +0100
+Message-ID: <555F0694.1060209@suse.de>
+References: <555DC080.8050508@dachary.org> <555ED569.2090604@suse.cz> <555ED98F.8020402@dachary.org> <555EE989.5070009@suse.cz>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="PcuHjjtndqimujrrsbK59cnmEOdt8VakG"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:49094 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1945985AbbEVKbG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 May 2015 06:31:06 -0400
-In-Reply-To: <555EEC40.3040106@dachary.org>
+Received: from cantor2.suse.de ([195.135.220.15]:55292 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754067AbbEVKgH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 22 May 2015 06:36:07 -0400
+In-Reply-To: <555EE989.5070009@suse.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Shu, Xinxin" <xinxin.shu@intel.com>, Abhishek L <abhishek.lekshmanan@gmail.com>, Nathan Cutler <ncutler@suse.cz>
+To: Nathan Cutler <ncutler@suse.cz>, Loic Dachary <loic@dachary.org>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---PcuHjjtndqimujrrsbK59cnmEOdt8VakG
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+On 05/22/2015 09:32 AM, Nathan Cutler wrote:
+>> We can probably keep the original ticket in the "Pending Backport"
+>> status until all backports are resolved, as we currently do.
+>>
+>>> So the question is, what will the original ticket's status be changed
+>>> to? Resolved?
+>>
+>> When all backports are resolved, then we can also resolve the original
+>> ticket. Do you forsee a problem with that ?
+>>
+> 
+> Yes and no. It's a scripting problem, not a workflow problem. I'll try
+> to describe the scenario I'm envisioning:
+> 
+> We have a simple script that loops over all tickets with status "Pending
+> Backport". We run it once per week. The first week we run it, the script
+> finds 3 such tickets. For each one it creates a ticket in the Backport
+> tracker.
+> 
+> A week goes by, during which developers marked 4 more tickets "Pending
+> Backport". It's time to run the script again. Since it is looping over
+> all tickets marked "Pending Backport", it now finds 7 such tickets: 3
+> from last week and the 4 new ones. For each one it dutifully creates a
+> new ticket in the Backport tracker. Now we have duplicate Backport
+> tickets for 3 bugfixes.
+> 
+> But I guess it will be trivial to make the script check if a Backport
+> ticket is already open and refrain from opening a new one in this case.
+
+Alternatively, adding a new state to the tracker that distinguishes
+between tickets that are pending being picked up on by the stable
+releases team vs those that are just pending the backport.  Say, "Mark
+for Backport" vs "Pending Backport".
+
+  -Joao
 
 
-
-On 22/05/2015 10:43, Loic Dachary wrote:
-> Hi,
->=20
-> The Backport tracker should now be fully populated. There are new custo=
-m queries for:
->=20
->   hammer backports http://tracker.ceph.com/projects/ceph/issues?query_i=
-d=3D78
->   firefly backports http://tracker.ceph.com/projects/ceph/issues?query_=
-id=3D79
->=20
-> and you can quickly see which one are assigned or not, scheduled for th=
-e next point release or not etc.=20
->=20
-> To see all issues that are Pending Backport, the former queries still w=
-ork:
->=20
->   hammer http://tracker.ceph.com/projects/ceph/issues?query_id=3D77
->   firefly http://tracker.ceph.com/projects/ceph/issues?query_id=3D75
->=20
-> but you can now see links to the corresponding backports in the "Relate=
-d issues" column. It makes it convenient to visually check which issues h=
-ave been backported to all desired targets: there related issues are clos=
-ed.
->=20
-> I'll update the documentation at http://tracker.ceph.com/projects/ceph-=
-releases/wiki/HOWTO accordingly.
->=20
-
-The backporter manual has been updated at http://tracker.ceph.com/project=
-s/ceph-releases/wiki/HOWTO and deserves proofreading. The most significan=
-t changes are at:
-
-HOWTO schedule an issue for backporting http://tracker.ceph.com/projects/=
-ceph-releases/wiki/HOWTO_schedule_an_issue_for_backporting in which there=
- now is the part where we need to create additional issues. It won't burd=
-en the developer but I think we'll get tired of it quickly and we'll need=
- a snippet to do it for us ;-)
-
-HOWTO backport commits http://tracker.ceph.com/projects/ceph-releases/wik=
-i/HOWTO_backport_commits changes very little: instead of adding a link to=
- the pull request as a comment to the original issue, we set the URL as t=
-he description of the issue, in the same way we set the URL to the issue =
-in the description of the pull request.
-
-HOWTO resolve issues that are Pending Backport http://tracker.ceph.com/pr=
-ojects/ceph-releases/wiki/HOWTO_resolve_issues_that_are_Pending_Backport =
-is the step that benefits most from the change. It was tedious and is cou=
-ld now trivially be automated via a snippet.
-
-> Cheers
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---PcuHjjtndqimujrrsbK59cnmEOdt8VakG
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlVfBWUACgkQ8dLMyEl6F22xJgCfVEPuMBBvp+3ldY8lT9Jtc+s8
-hxcAnAuhDEu9LDSXlsGrmE81HmVxvyzk
-=o5Iy
------END PGP SIGNATURE-----
-
---PcuHjjtndqimujrrsbK59cnmEOdt8VakG--
