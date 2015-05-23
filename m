@@ -1,67 +1,58 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: Will the number of objects that have ever existed be infinite?
-Date: Sat, 23 May 2015 10:55:38 +0200
-Message-ID: <5560408A.5000906@42on.com>
-References: <CAPS90kgipTtHpamtsT6C3ZBugn4djmDW7jXrveEf9FjKY1yoUQ@mail.gmail.com>
+From: Joao Eduardo Luis <joao@suse.de>
+Subject: Re: ceph-ci.git?
+Date: Sat, 23 May 2015 10:34:49 +0100
+Message-ID: <556049B9.9080906@suse.de>
+References: <alpine.DEB.2.00.1505172130440.8350@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from websrv.42on.com ([31.25.102.167]:46875 "EHLO websrv.42on.com"
+Received: from cantor2.suse.de ([195.135.220.15]:47287 "EHLO mx2.suse.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750967AbbEWIzm (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 23 May 2015 04:55:42 -0400
-In-Reply-To: <CAPS90kgipTtHpamtsT6C3ZBugn4djmDW7jXrveEf9FjKY1yoUQ@mail.gmail.com>
+	id S1757850AbbEWJez (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 23 May 2015 05:34:55 -0400
+In-Reply-To: <alpine.DEB.2.00.1505172130440.8350@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?B?5p2O5rKb5Lym?= <lpl6338236@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
 
-On 05/23/2015 08:58 AM, =E6=9D=8E=E6=B2=9B=E4=BC=A6 wrote:
-> Hello!
->=20
-> I'm a GSoC student this year and my job is to introduce Missing Rate
-> Curve (or reuse distance exactly) of objects into OSD. Now I'm trying
-> to find a proper algorithm to implement but there is a problem: Shoul=
-d
-> I take the number of objects tracked in an OSD as infinite or
-> constant?
->=20
+On 18/05/15 05:40, Sage Weil wrote:
+> As the number of people contributing code grows, we've added more and more
+> people to the github ceph org who have write access to ceph.git.  Those
+> people can merge pull requests and can also push branches directly to the
+> repo.
+>
+> We also use ceph.git as a source for the test build infrastrucure
+> (gitbuilders) to generate packages for QA or hot fixes and make check
+> tests.  This leads to an every-growing body of wip-* branches in the repo
+> (which is annoying), and also means that in order to build something to
+> test in QA you also get the ability to (say) push directly to master.
+>
+> How about we instead
+>
+>   - create a second repo named something like ceph-ci.git (that's the best
+> I can come up with at the moment)
+>   - add this as a second source for all gitbuilders (they can poll a list)
+>   - move all wip-* branches here
+>   - create a new github team with contributing developers who can push to
+> this repo and are trusted not to wreak havoc on the builders
+>   - remove all the cruft from ceph.git, so that it's just master, next, the
+> stable branches, release tags, and anything else similarly important.
+>   - restrict ceph.git write access to core developers
+>
+> This will improve security somewhat and reduce the risk of an accidental
+> push to an important branch.
+>
+> It may also reduce the risk associated with accidental force pushes
+> (something we've hemmed and hawed about recently) by limiting the circle
+> of people who can write to ceph.git and also changing workflows so that it
+> is almost never used directly...
 
-A OSD doesn't track on a per-object basis, but it keeps track of
-Placement Groups (PGs). A OSD can have a X number of PGs.
+I think this is a great idea!
 
-Technically the number of PGs might be infinite, but in practice you ar=
-e
-bound to CPU and Memory limits.
+'ceph-ci' also looks like a simple enough name conveying its purpose, 
+even though the 'continuous' part is not necessarily true (but it's 
+trivial to type, so it gets my vote).
 
-So I would be careful with the word "infinite", since nothing is really
-infinite, eg size of a int/long might be the limitation for something.
+   -Joao
 
-But in theory there is no object or PG limit per OSD.
-
-> The point is that there is an algorithm that use hash to sample only
-> constant number of references to do the analysis and is proved to be
-> accurate, which makes it possible to do online MRC construction. That
-> accuracy is supported by the fact that the memory addresses is
-> bounded, while objects can be deleted and created again and again in
-> Ceph. Is is reasonable to think that an OSD only serves bounded numbe=
-r
-> of objects in its life time (or the time period that we want to
-> compute MRC)?
->=20
-> Any other comment about this project is also welcomed :)
->=20
-
-
---=20
-Wido den Hollander
-42on B.V.
-Ceph trainer and consultant
-
-Phone: +31 (0)20 700 9902
-Skype: contact42on
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
