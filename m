@@ -1,53 +1,67 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Will the number of objects that have ever existed be infinite?
-Date: Sun, 24 May 2015 08:47:54 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1505240840090.6462@cobra.newdream.net>
-References: <CAPS90kgipTtHpamtsT6C3ZBugn4djmDW7jXrveEf9FjKY1yoUQ@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: ceph-ci.git?
+Date: Sun, 24 May 2015 08:49:54 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1505240848300.6462@cobra.newdream.net>
+References: <alpine.DEB.2.00.1505172130440.8350@cobra.newdream.net> <556049B9.9080906@suse.de>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:40855 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751101AbbEXPry (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 24 May 2015 11:47:54 -0400
-In-Reply-To: <CAPS90kgipTtHpamtsT6C3ZBugn4djmDW7jXrveEf9FjKY1yoUQ@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:40782 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751101AbbEXPt4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 24 May 2015 11:49:56 -0400
+In-Reply-To: <556049B9.9080906@suse.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?GB2312?B?wO7F5sLX?= <lpl6338236@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Joao Eduardo Luis <joao@suse.de>
+Cc: ceph-devel@vger.kernel.org
 
-Hi Li!
-
-On Sat, 23 May 2015, ??? wrote:
-> Hello!
+On Sat, 23 May 2015, Joao Eduardo Luis wrote:
+> On 18/05/15 05:40, Sage Weil wrote:
+> > As the number of people contributing code grows, we've added more and more
+> > people to the github ceph org who have write access to ceph.git.  Those
+> > people can merge pull requests and can also push branches directly to the
+> > repo.
+> > 
+> > We also use ceph.git as a source for the test build infrastrucure
+> > (gitbuilders) to generate packages for QA or hot fixes and make check
+> > tests.  This leads to an every-growing body of wip-* branches in the repo
+> > (which is annoying), and also means that in order to build something to
+> > test in QA you also get the ability to (say) push directly to master.
+> > 
+> > How about we instead
+> > 
+> >   - create a second repo named something like ceph-ci.git (that's the best
+> > I can come up with at the moment)
+> >   - add this as a second source for all gitbuilders (they can poll a list)
+> >   - move all wip-* branches here
+> >   - create a new github team with contributing developers who can push to
+> > this repo and are trusted not to wreak havoc on the builders
+> >   - remove all the cruft from ceph.git, so that it's just master, next, the
+> > stable branches, release tags, and anything else similarly important.
+> >   - restrict ceph.git write access to core developers
+> > 
+> > This will improve security somewhat and reduce the risk of an accidental
+> > push to an important branch.
+> > 
+> > It may also reduce the risk associated with accidental force pushes
+> > (something we've hemmed and hawed about recently) by limiting the circle
+> > of people who can write to ceph.git and also changing workflows so that it
+> > is almost never used directly...
 > 
-> I'm a GSoC student this year and my job is to introduce Missing Rate
-> Curve (or reuse distance exactly) of objects into OSD. Now I'm trying
-> to find a proper algorithm to implement but there is a problem: Should
-> I take the number of objects tracked in an OSD as infinite or
-> constant?
+> I think this is a great idea!
 > 
-> The point is that there is an algorithm that use hash to sample only
-> constant number of references to do the analysis and is proved to be
-> accurate, which makes it possible to do online MRC construction. That
-> accuracy is supported by the fact that the memory addresses is
-> bounded, while objects can be deleted and created again and again in
-> Ceph. Is is reasonable to think that an OSD only serves bounded number
-> of objects in its life time (or the time period that we want to
-> compute MRC)?
+> 'ceph-ci' also looks like a simple enough name conveying its purpose, even
+> though the 'continuous' part is not necessarily true (but it's trivial to
+> type, so it gets my vote).
 
-I don't remember how the object count affects the MRC, but I suspect we 
-will want to use a strategy similar to what the HitSets do:
+I've created the ceph-gi repository.  I think the next step is to redo all 
+the gitbuilders to pull form both sources.
 
- - a new HitSet is generated on a periodic basis
- - each time a new one is started, we size it based on the previous 
-iteration: we can compare the number of HitSet (bloom filter) insertions 
-we've done with the resulting filter density.
+	http://tracker.ceph.com/issues/11747
 
-I think we'll want to build periodic MRCs anyway since the workload will 
-shift over time.  Ceph explicitly tracks the number of objects within each 
-PG (see pg_stats_t).
+And then we'll need to change up the github groups and permissions
 
-Does that help?
+	http://tracker.ceph.com/issues/11748
 
 sage
