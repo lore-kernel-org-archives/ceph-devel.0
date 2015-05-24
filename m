@@ -1,95 +1,53 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: Perfomance CPU and IOPS
-Date: Sun, 24 May 2015 07:09:08 -0500
-Message-ID: <5561BF64.5080509@redhat.com>
-References: <5561B444.6060108@gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Will the number of objects that have ever existed be infinite?
+Date: Sun, 24 May 2015 08:47:54 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1505240840090.6462@cobra.newdream.net>
+References: <CAPS90kgipTtHpamtsT6C3ZBugn4djmDW7jXrveEf9FjKY1yoUQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:42510 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751054AbbEXMJN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 24 May 2015 08:09:13 -0400
-In-Reply-To: <5561B444.6060108@gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:40855 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751101AbbEXPry (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 24 May 2015 11:47:54 -0400
+In-Reply-To: <CAPS90kgipTtHpamtsT6C3ZBugn4djmDW7jXrveEf9FjKY1yoUQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Casier David <casierdavid@gmail.com>, ceph-devel@vger.kernel.org
+To: =?GB2312?B?wO7F5sLX?= <lpl6338236@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
+Hi Li!
 
+On Sat, 23 May 2015, ??? wrote:
+> Hello!
+> 
+> I'm a GSoC student this year and my job is to introduce Missing Rate
+> Curve (or reuse distance exactly) of objects into OSD. Now I'm trying
+> to find a proper algorithm to implement but there is a problem: Should
+> I take the number of objects tracked in an OSD as infinite or
+> constant?
+> 
+> The point is that there is an algorithm that use hash to sample only
+> constant number of references to do the analysis and is proved to be
+> accurate, which makes it possible to do online MRC construction. That
+> accuracy is supported by the fact that the memory addresses is
+> bounded, while objects can be deleted and created again and again in
+> Ceph. Is is reasonable to think that an OSD only serves bounded number
+> of objects in its life time (or the time period that we want to
+> compute MRC)?
 
-On 05/24/2015 06:21 AM, Casier David wrote:
-> Hello everybody,
-> I have some suggestions to improve the Ceph performance with in case of
-> using Rados Block Device.
->
-> On FileStore :
->   - Remove all metadata in HDD and used omap on SSD. This reduce IOPS
-> and increases throughput.
+I don't remember how the object count affects the MRC, but I suspect we 
+will want to use a strategy similar to what the HitSets do:
 
-This may matter more now that we've been removing other bottlenecks. In 
-the past when we've tested this with filestore on spinning disks it 
-hasn't made a huge difference.  Having said that Sam recently committed 
-a change that should make it safer to use leveldb/rocksdb on alternate 
-disks:
+ - a new HitSet is generated on a periodic basis
+ - each time a new one is started, we size it based on the previous 
+iteration: we can compare the number of HitSet (bloom filter) insertions 
+we've done with the resulting filter density.
 
-https://github.com/ceph/ceph/pull/4718
+I think we'll want to build periodic MRCs anyway since the workload will 
+shift over time.  Ceph explicitly tracks the number of objects within each 
+PG (see pg_stats_t).
 
->   - Remove journal, thread "sync_entry", and write directly in
-> queue_transaction.
->
-> To compensate journal, you could use Cache Tier Ceph.
+Does that help?
 
-Cache teiring isn't really a good solution for general Ceph workloads 
-right now.  The overhead of object promotions (4MB be default) into the 
-cache tier is just too heavy when the hot/cold distribution is not 
-highly skewed.
-
-Instead I'd suggest reading up on Sage's newstore project:
-
-http://www.spinics.net/lists/ceph-devel/msg22712.html
-https://wiki.ceph.com/Planning/Blueprints/Infernalis/NewStore_%28new_osd_backend%29
-
-Specifically note that the WAL is used during overwrites but for full 
-object writes we can simply write out the new object using libaio and 
-remove the old one.
-
-Here's our latest performance results vs filestore.  The biggest area we 
-need to improve is large object object partial overwrites on fast 
-devices (ie SSDs):
-
-http://nhm.ceph.com/newstore/8c8c5903_rbd_rados_tests.pdf
-
-We may be able to split objects up into ~512k fragments to help deal 
-with large partial object overwites.  It may also be that we could help 
-the rocksdb folks change the way the WAL works (dedicated portion of the 
-disk like Ceph journals rather than log files that get created/deleted 
-on the disk)
-
->
-> ceph-osd must be with less Thread and Lock.
-> With 1 OSD for 1 HDD, i think Lock is necessary only for scrub, recovery
-> or other background job.
-> And only one thread with the use of libaio.
-
-Which locks do you think could be safely removed?
-
->
-> I think Ceph-OSD should be very light.
-> Potentially with direct writing aftergiven the transmitted data to other
-> OSD from map.
-> In this case, a lot of ceph-osd could work on the same server.
->
-> Actually, i work on the repository https://www.github.com/dcasier/ceph.
-> You could see start works on FileStore.*
-> But potentially not safe.
-
-I'd highly suggest getting feedback from Sam/Sage before going too far 
-down this rabbit hole. :)
-
->
-> David.
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+sage
