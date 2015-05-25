@@ -1,39 +1,37 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: Cache pool on top of ec base pool teuthology test
-Date: Mon, 25 May 2015 08:04:14 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1505250801290.6462@cobra.newdream.net>
-References: <06E7D85B3BA36C4DB207FEDE871C53489E8DE1@SHSMSX101.ccr.corp.intel.com>
+From: Christoph Hellwig <hch@lst.de>
+Subject: Re: [PATCH v4 08/11] block: kill merge_bvec_fn() completely
+Date: Mon, 25 May 2015 17:08:27 +0200
+Message-ID: <20150525150827.GA27012@lst.de>
+References: <1432318723-18829-1-git-send-email-mlin@kernel.org> <1432318723-18829-9-git-send-email-mlin@kernel.org> <20150525140413.GA26065@lst.de> <CAOi1vP8vNEXw2e1eWa4LqKD14SA7XtSQ_C8+4d_sz20t4nfEng@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:50621 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751779AbbEYPET (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 25 May 2015 11:04:19 -0400
-In-Reply-To: <06E7D85B3BA36C4DB207FEDE871C53489E8DE1@SHSMSX101.ccr.corp.intel.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAOi1vP8vNEXw2e1eWa4LqKD14SA7XtSQ_C8+4d_sz20t4nfEng@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Ming Lin <mlin@kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Kent Overstreet <kent.overstreet@gmail.com>, Jens Axboe <axboe@kernel.dk>, Dongsu Park <dpark@posteo.net>, Lars Ellenberg <drbd-dev@lists.linbit.com>, drbd-user@lists.linbit.com, Jiri Kosina <jkosina@suse.cz>, Yehuda Sadeh <yehuda@inktank.com>, Sage Weil <sage@inktank.com>, Alex Elder <elder@kernel.org>, Ceph Development <ceph-devel@vger.kernel.org>, Alasdair Kergon <agk@redhat.com>, Mike Snitzer <snitzer@redhat.com>, dm-devel@redhat.com, Neil Brown <neilb@suse.de>, linux-raid@vger.kernel.org, "Martin K. Petersen" <martin.petersen@oracle.com>, Alex Elder <elder@linaro.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Mon, 25 May 2015, Wang, Zhiqiang wrote:
-> We have a bunch of teuthology tests which build cache pool on top of an 
-> ec base pool, and do partial object write. This is ok with the current 
-> cache tiering implementation. But with proxy write, this won't work. In 
-> my testing, the error message is something like below:
+On Mon, May 25, 2015 at 06:02:30PM +0300, Ilya Dryomov wrote:
+> I'm not Alex, but yeah, we have all the clone/split machinery and so we
+> can handle a spanning case just fine.  I think rbd_merge_bvec() exists
+> to make sure we don't have to do that unless it's really necessary -
+> like when a single page gets submitted at an inconvenient offset.
 > 
-> 2015-05-20 05:51:42.896828 7f682eed4700 10 osd.5 pg_epoch: 183 pg[2.1( v 183'7978 (179'7799,183'7978] local-les=172 n=1258 ec=8 les/c 172/172 170/171/171) [5,0] r=0 lpr=171 luod=183'7975 crt=183'7974 lcod 183'7974 mlcod 183'7974 active+clean] do_proxy_write Start proxy write for osd_op(client.4130.0:32967 plana4222147-6594 [write 733117~408660] 2.3ed99ff9 ack+ondisk+write+known_if_redirected e183) v5
-> 2015-05-20 05:51:42.899958 7f682c6cf700  1 -- 10.214.132.32:6808/20666 --> 10.214.132.32:0/20666 -- osd_op_reply(17556 plana4222147-6594 [write 733117~408660] v0'0 uv0 ondisk = -95 ((95) Operation not supported)) v6 -- ?+0 0xa2e23c0 con 0x9355760
-> 
-> What should we do with these tests?
+> I have a patch that adds a blk_queue_chunk_sectors(object_size) call to
+> rbd_init_disk() but I haven't had a chance to play with it yet.  In any
+> case, we should be fine with getting rid of rbd_merge_bvec().  If this
+> ends up a per-driver patchset, I can make rbd_merge_bvec() ->
+> blk_queue_chunk_sectors() a single patch and push it through
+> ceph-client.git.
 
-I think the test is fine.. but the OSD should refuse to proxy the write if 
-the base tier won't support the write operation in question.  I believe we 
-recently renamed one of the helpers supports_omap()... we probably need a 
-similar set of helpers for object overwrites?
+Hmm, looks like the new blk_queue_split_bio ignore the chunk_sectors
+value, another thing that needs updating.  I forgot how many weird
+merging hacks we had to add for nvme..
 
-Or, we can make a method like "should_proxy_to_ec()" that scans through 
-the op vector and makes a conservative judgement of whether it is safe 
-to proxy...
-
-sage
+While I'd like to see per-driver patches we'd still need to merge
+them together through the block tree.  Note that with this series
+there won't be any benefit of using blk_queue_chunk_sectors over just
+doing the split in rbd.  Maybe we can even remove it again and do
+that work in the drivers in the future.
