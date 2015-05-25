@@ -1,49 +1,25 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: preparing v0.80.11
-Date: Mon, 25 May 2015 10:35:56 +0200
-Message-ID: <5562DEEC.5060602@dachary.org>
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: Re: preparing v0.80.11
+Date: Mon, 25 May 2015 12:04:09 +0200
+Message-ID: <5562F399.7000508@suse.cz>
+References: <5562DEEC.5060602@dachary.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="pPV2F9mchU05Lpq2JKa8SAOCaB2Ca4qNi"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:50265 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1750947AbbEYIgB (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 25 May 2015 04:36:01 -0400
+Received: from cantor2.suse.de ([195.135.220.15]:47151 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752023AbbEYKEM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 25 May 2015 06:04:12 -0400
+In-Reply-To: <5562DEEC.5060602@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nathan Cutler <ncutler@suse.cz>
+To: Loic Dachary <loic@dachary.org>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---pPV2F9mchU05Lpq2JKa8SAOCaB2Ca4qNi
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+> Although v0.80.10 is not out yet, the odds of a discovering a problem that would require an additional backport are low. I think you can start with v0.80.11 without further delay :-)
 
-Hi Nathan,
+As soon as I get over the flu :-(
 
-Although v0.80.10 is not out yet, the odds of a discovering a problem tha=
-t would require an additional backport are low. I think you can start wit=
-h v0.80.11 without further delay :-)
+Nathan
 
-Cheers
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---pPV2F9mchU05Lpq2JKa8SAOCaB2Ca4qNi
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlVi3uwACgkQ8dLMyEl6F21mmQCfaimjB9PfiOa1B5uA5TKNAaQI
-ptQAoI+ImdeFKdgmtKCL/7cS37sX6N/5
-=bjqy
------END PGP SIGNATURE-----
-
---pPV2F9mchU05Lpq2JKa8SAOCaB2Ca4qNi--
