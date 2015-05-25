@@ -1,23 +1,49 @@
-From: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
-Subject: Cache pool on top of ec base pool teuthology test
-Date: Mon, 25 May 2015 08:16:44 +0000
-Message-ID: <06E7D85B3BA36C4DB207FEDE871C53489E8DE1@SHSMSX101.ccr.corp.intel.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: preparing v0.80.11
+Date: Mon, 25 May 2015 10:35:56 +0200
+Message-ID: <5562DEEC.5060602@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="pPV2F9mchU05Lpq2JKa8SAOCaB2Ca4qNi"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:32525 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751552AbbEYIQt convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 25 May 2015 04:16:49 -0400
-Content-Language: en-US
+Received: from mail2.dachary.org ([91.121.57.175]:50265 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1750947AbbEYIgB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 25 May 2015 04:36:01 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Nathan Cutler <ncutler@suse.cz>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-We have a bunch of teuthology tests which build cache pool on top of an ec base pool, and do partial object write. This is ok with the current cache tiering implementation. But with proxy write, this won't work. In my testing, the error message is something like below:
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--pPV2F9mchU05Lpq2JKa8SAOCaB2Ca4qNi
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-2015-05-20 05:51:42.896828 7f682eed4700 10 osd.5 pg_epoch: 183 pg[2.1( v 183'7978 (179'7799,183'7978] local-les=172 n=1258 ec=8 les/c 172/172 170/171/171) [5,0] r=0 lpr=171 luod=183'7975 crt=183'7974 lcod 183'7974 mlcod 183'7974 active+clean] do_proxy_write Start proxy write for osd_op(client.4130.0:32967 plana4222147-6594 [write 733117~408660] 2.3ed99ff9 ack+ondisk+write+known_if_redirected e183) v5
-2015-05-20 05:51:42.899958 7f682c6cf700  1 -- 10.214.132.32:6808/20666 --> 10.214.132.32:0/20666 -- osd_op_reply(17556 plana4222147-6594 [write 733117~408660] v0'0 uv0 ondisk = -95 ((95) Operation not supported)) v6 -- ?+0 0xa2e23c0 con 0x9355760
+Hi Nathan,
 
-What should we do with these tests?
+Although v0.80.10 is not out yet, the odds of a discovering a problem tha=
+t would require an additional backport are low. I think you can start wit=
+h v0.80.11 without further delay :-)
+
+Cheers
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--pPV2F9mchU05Lpq2JKa8SAOCaB2Ca4qNi
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlVi3uwACgkQ8dLMyEl6F21mmQCfaimjB9PfiOa1B5uA5TKNAaQI
+ptQAoI+ImdeFKdgmtKCL/7cS37sX6N/5
+=bjqy
+-----END PGP SIGNATURE-----
+
+--pPV2F9mchU05Lpq2JKa8SAOCaB2Ca4qNi--
