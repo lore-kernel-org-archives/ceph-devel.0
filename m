@@ -1,119 +1,58 @@
-From: Alex Elder <elder@linaro.org>
-Subject: Re: [PATCH v4 08/11] block: kill merge_bvec_fn() completely
-Date: Mon, 25 May 2015 10:35:24 -0500
-Message-ID: <5563413C.3060906@linaro.org>
-References: <1432318723-18829-1-git-send-email-mlin@kernel.org>	<1432318723-18829-9-git-send-email-mlin@kernel.org>	<20150525140413.GA26065@lst.de> <CAOi1vP8vNEXw2e1eWa4LqKD14SA7XtSQ_C8+4d_sz20t4nfEng@mail.gmail.com>
+From: Alex Elder <elder@ieee.org>
+Subject: Re: [PATCH 3/5] libceph: a couple tweaks for wait loops
+Date: Mon, 25 May 2015 10:40:48 -0500
+Message-ID: <55634280.70309@ieee.org>
+References: <1432211706-10473-1-git-send-email-idryomov@gmail.com>	<1432211706-10473-4-git-send-email-idryomov@gmail.com>	<555DDDA6.3050409@ieee.org> <CAOi1vP9JYRUfXv9hpGgVyBr0xsD6U4ocxMHRuiNEr=b+HTzzeg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-raid-owner@vger.kernel.org>
-In-Reply-To: <CAOi1vP8vNEXw2e1eWa4LqKD14SA7XtSQ_C8+4d_sz20t4nfEng@mail.gmail.com>
-Sender: linux-raid-owner@vger.kernel.org
-To: Ilya Dryomov <idryomov@gmail.com>, Christoph Hellwig <hch@lst.de>
-Cc: Ming Lin <mlin@kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Kent Overstreet <kent.overstreet@gmail.com>, Jens Axboe <axboe@kernel.dk>, Dongsu Park <dpark@posteo.net>, Lars Ellenberg <drbd-dev@lists.linbit.com>, drbd-user@lists.linbit.com, Jiri Kosina <jkosina@suse.cz>, Yehuda Sadeh <yehuda@inktank.com>, Sage Weil <sage@inktank.com>, Alex Elder <elder@kernel.org>, Ceph Development <ceph-devel@vger.kernel.org>, Alasdair Kergon <agk@redhat.com>, Mike Snitzer <snitzer@redhat.com>, dm-devel@redhat.com, Neil Brown <neilb@suse.de>, linux-raid@vger.kernel.org, Christoph Hellwig <hch@infradead.org>, "Martin K. Petersen" <martin.petersen@oracle.com>
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ie0-f182.google.com ([209.85.223.182]:34544 "EHLO
+	mail-ie0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750843AbbEYPkt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 25 May 2015 11:40:49 -0400
+Received: by ieczm2 with SMTP id zm2so74735021iec.1
+        for <ceph-devel@vger.kernel.org>; Mon, 25 May 2015 08:40:49 -0700 (PDT)
+In-Reply-To: <CAOi1vP9JYRUfXv9hpGgVyBr0xsD6U4ocxMHRuiNEr=b+HTzzeg@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Zheng Yan <zyan@redhat.com>
 
-On 05/25/2015 10:02 AM, Ilya Dryomov wrote:
-> On Mon, May 25, 2015 at 5:04 PM, Christoph Hellwig <hch@lst.de> wrote:
->> On Fri, May 22, 2015 at 11:18:40AM -0700, Ming Lin wrote:
->>> From: Kent Overstreet <kent.overstreet@gmail.com>
->>>
->>> As generic_make_request() is now able to handle arbitrarily sized bios,
->>> it's no longer necessary for each individual block driver to define its
->>> own ->merge_bvec_fn() callback. Remove every invocation completely.
+On 05/25/2015 05:38 AM, Ilya Dryomov wrote:
+> On Thu, May 21, 2015 at 4:29 PM, Alex Elder <elder@ieee.org> wrote:
+>> On 05/21/2015 07:35 AM, Ilya Dryomov wrote:
+>>> - return -ETIMEDOUT instead of -EIO in case of timeout
+>>> - wait_event_interruptible_timeout() returns time left until timeout
+>>>   and since it can be almost LONG_MAX we had better assign it to long
 >>
->> It might be good to replace patch 1 and this one by a patch per driver
->> to remove the merge_bvec_fn instance and add the blk_queue_split call
->> for all those drivers that actually had a ->merge_bvec_fn.  As some
->> of them were non-trivial attention from the maintainers would be helpful,
->> and a patch per driver might help with that.
->>
->>> -/* This is called by bio_add_page().
->>> - *
->>> - * q->max_hw_sectors and other global limits are already enforced there.
->>> - *
->>> - * We need to call down to our lower level device,
->>> - * in case it has special restrictions.
->>> - *
->>> - * We also may need to enforce configured max-bio-bvecs limits.
->>> - *
->>> - * As long as the BIO is empty we have to allow at least one bvec,
->>> - * regardless of size and offset, so no need to ask lower levels.
->>> - */
->>> -int drbd_merge_bvec(struct request_queue *q, struct bvec_merge_data *bvm, struct bio_vec *bvec)
->>
->>
->> This just checks the lower device, so it looks obviously fine.
->>
->>> -static int pkt_merge_bvec(struct request_queue *q, struct bvec_merge_data *bmd,
->>> -                       struct bio_vec *bvec)
->>> -{
->>> -     struct pktcdvd_device *pd = q->queuedata;
->>> -     sector_t zone = get_zone(bmd->bi_sector, pd);
->>> -     int used = ((bmd->bi_sector - zone) << 9) + bmd->bi_size;
->>> -     int remaining = (pd->settings.size << 9) - used;
->>> -     int remaining2;
->>> -
->>> -     /*
->>> -      * A bio <= PAGE_SIZE must be allowed. If it crosses a packet
->>> -      * boundary, pkt_make_request() will split the bio.
->>> -      */
->>> -     remaining2 = PAGE_SIZE - bmd->bi_size;
->>> -     remaining = max(remaining, remaining2);
->>> -
->>> -     BUG_ON(remaining < 0);
->>> -     return remaining;
->>> -}
->>
->> As mentioned in the comment pkt_make_request will split the bio so pkt
->> looks fine.
->>
->>> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
->>> index ec6c5c6..f50edb3 100644
->>> --- a/drivers/block/rbd.c
->>> +++ b/drivers/block/rbd.c
->>> @@ -3440,52 +3440,6 @@ static int rbd_queue_rq(struct blk_mq_hw_ctx *hctx,
->>>       return BLK_MQ_RQ_QUEUE_OK;
->>>  }
->>>
->>> -/*
->>> - * a queue callback. Makes sure that we don't create a bio that spans across
->>> - * multiple osd objects. One exception would be with a single page bios,
->>> - * which we handle later at bio_chain_clone_range()
->>> - */
->>> -static int rbd_merge_bvec(struct request_queue *q, struct bvec_merge_data *bmd,
->>> -                       struct bio_vec *bvec)
->>
->> It seems rbd handles requests spanning objects just fine, so I don't
->> really understand why rbd_merge_bvec even exists.  Getting some form
->> of ACK from the ceph folks would be useful.
+>> Any error returned by wait_event_interruptible_timeout()
+>> can now be returned by __ceph_open_session().  It looks
+>> like that may, in fact, be only -EINTR and -ERESTARTSYS.
+>> But it's a change you could note in the log message.
 > 
-> I'm not Alex, but yeah, we have all the clone/split machinery and so we
-> can handle a spanning case just fine.  I think rbd_merge_bvec() exists
-> to make sure we don't have to do that unless it's really necessary -
-> like when a single page gets submitted at an inconvenient offset.
+> I think it's just -ERESTARTSYS so I didn't bother.
 
-I am Alex.  This is something I never removed.  I haven't
-looked at it closely now, but it seems to me that after I
-created a function that split stuff properly up *before*
-the BIO layer got to it (which has since been replaced by
-code related to Kent's immutable BIO work), there has been
-no need for this function.  Removing this was on a long-ago
-to-do list--but I didn't want to do it without spending some
-time ensuring it wouldn't break anything.
+My point was almost a little more philosophical.  It's conceivable
+(though not likely) that wait_event_interruptible_timeout() could
+be changed to return a value that your caller here does not expect.
 
-If you want me to work through it in more detail so I can
-give a more certain response, let me know and I will do so.
+>> It turns out the only caller ignores the return value of
+>> ceph_monc_wait_osdmap() anyway.  That should maybe be fixed.
+> 
+> That's on purpose - rbd map tries to wait for a new enough osdmap only
+> if the pool that the image is supposed to be in doesn't exist and we
+> know we have a stale osdmap.  We ignore wait retval because if we
+> timeout we should return "this pool doesn't exist", not -ETIMEDOUT.
+
+Yes I realize that.  This second part of my response was
+following on to my previous thought.  That is, the caller
+might get a different return value that it didn't expect;
+but since the only caller ignores what gets returned, it's
+a moot point.
 
 					-Alex
 
-> I have a patch that adds a blk_queue_chunk_sectors(object_size) call to
-> rbd_init_disk() but I haven't had a chance to play with it yet.  In any
-> case, we should be fine with getting rid of rbd_merge_bvec().  If this
-> ends up a per-driver patchset, I can make rbd_merge_bvec() ->
-> blk_queue_chunk_sectors() a single patch and push it through
-> ceph-client.git.
-> 
 > Thanks,
 > 
 >                 Ilya
