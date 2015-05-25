@@ -1,105 +1,39 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH v4 08/11] block: kill merge_bvec_fn() completely
-Date: Mon, 25 May 2015 18:02:30 +0300
-Message-ID: <CAOi1vP8vNEXw2e1eWa4LqKD14SA7XtSQ_C8+4d_sz20t4nfEng@mail.gmail.com>
-References: <1432318723-18829-1-git-send-email-mlin@kernel.org>
-	<1432318723-18829-9-git-send-email-mlin@kernel.org>
-	<20150525140413.GA26065@lst.de>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: Cache pool on top of ec base pool teuthology test
+Date: Mon, 25 May 2015 08:04:14 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1505250801290.6462@cobra.newdream.net>
+References: <06E7D85B3BA36C4DB207FEDE871C53489E8DE1@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20150525140413.GA26065@lst.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Christoph Hellwig <hch@lst.de>
-Cc: Ming Lin <mlin@kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Kent Overstreet <kent.overstreet@gmail.com>, Jens Axboe <axboe@kernel.dk>, Dongsu Park <dpark@posteo.net>, Lars Ellenberg <drbd-dev@lists.linbit.com>, drbd-user@lists.linbit.com, Jiri Kosina <jkosina@suse.cz>, Yehuda Sadeh <yehuda@inktank.com>, Sage Weil <sage@inktank.com>, Alex Elder <elder@kernel.org>, Ceph Development <ceph-devel@vger.kernel.org>, Alasdair Kergon <agk@redhat.com>, Mike Snitzer <snitzer@redhat.com>, dm-devel@redhat.com, Neil Brown <neilb@suse.de>, linux-raid@vger.kernel.org, Christoph Hellwig <hch@infradead.org>, "Martin K. Petersen" <martin.petersen@oracle.com>, Alex Elder <elder@linaro.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:50621 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751779AbbEYPET (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 25 May 2015 11:04:19 -0400
+In-Reply-To: <06E7D85B3BA36C4DB207FEDE871C53489E8DE1@SHSMSX101.ccr.corp.intel.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, May 25, 2015 at 5:04 PM, Christoph Hellwig <hch@lst.de> wrote:
-> On Fri, May 22, 2015 at 11:18:40AM -0700, Ming Lin wrote:
->> From: Kent Overstreet <kent.overstreet@gmail.com>
->>
->> As generic_make_request() is now able to handle arbitrarily sized bios,
->> it's no longer necessary for each individual block driver to define its
->> own ->merge_bvec_fn() callback. Remove every invocation completely.
->
-> It might be good to replace patch 1 and this one by a patch per driver
-> to remove the merge_bvec_fn instance and add the blk_queue_split call
-> for all those drivers that actually had a ->merge_bvec_fn.  As some
-> of them were non-trivial attention from the maintainers would be helpful,
-> and a patch per driver might help with that.
->
->> -/* This is called by bio_add_page().
->> - *
->> - * q->max_hw_sectors and other global limits are already enforced there.
->> - *
->> - * We need to call down to our lower level device,
->> - * in case it has special restrictions.
->> - *
->> - * We also may need to enforce configured max-bio-bvecs limits.
->> - *
->> - * As long as the BIO is empty we have to allow at least one bvec,
->> - * regardless of size and offset, so no need to ask lower levels.
->> - */
->> -int drbd_merge_bvec(struct request_queue *q, struct bvec_merge_data *bvm, struct bio_vec *bvec)
->
->
-> This just checks the lower device, so it looks obviously fine.
->
->> -static int pkt_merge_bvec(struct request_queue *q, struct bvec_merge_data *bmd,
->> -                       struct bio_vec *bvec)
->> -{
->> -     struct pktcdvd_device *pd = q->queuedata;
->> -     sector_t zone = get_zone(bmd->bi_sector, pd);
->> -     int used = ((bmd->bi_sector - zone) << 9) + bmd->bi_size;
->> -     int remaining = (pd->settings.size << 9) - used;
->> -     int remaining2;
->> -
->> -     /*
->> -      * A bio <= PAGE_SIZE must be allowed. If it crosses a packet
->> -      * boundary, pkt_make_request() will split the bio.
->> -      */
->> -     remaining2 = PAGE_SIZE - bmd->bi_size;
->> -     remaining = max(remaining, remaining2);
->> -
->> -     BUG_ON(remaining < 0);
->> -     return remaining;
->> -}
->
-> As mentioned in the comment pkt_make_request will split the bio so pkt
-> looks fine.
->
->> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
->> index ec6c5c6..f50edb3 100644
->> --- a/drivers/block/rbd.c
->> +++ b/drivers/block/rbd.c
->> @@ -3440,52 +3440,6 @@ static int rbd_queue_rq(struct blk_mq_hw_ctx *hctx,
->>       return BLK_MQ_RQ_QUEUE_OK;
->>  }
->>
->> -/*
->> - * a queue callback. Makes sure that we don't create a bio that spans across
->> - * multiple osd objects. One exception would be with a single page bios,
->> - * which we handle later at bio_chain_clone_range()
->> - */
->> -static int rbd_merge_bvec(struct request_queue *q, struct bvec_merge_data *bmd,
->> -                       struct bio_vec *bvec)
->
-> It seems rbd handles requests spanning objects just fine, so I don't
-> really understand why rbd_merge_bvec even exists.  Getting some form
-> of ACK from the ceph folks would be useful.
+On Mon, 25 May 2015, Wang, Zhiqiang wrote:
+> We have a bunch of teuthology tests which build cache pool on top of an 
+> ec base pool, and do partial object write. This is ok with the current 
+> cache tiering implementation. But with proxy write, this won't work. In 
+> my testing, the error message is something like below:
+> 
+> 2015-05-20 05:51:42.896828 7f682eed4700 10 osd.5 pg_epoch: 183 pg[2.1( v 183'7978 (179'7799,183'7978] local-les=172 n=1258 ec=8 les/c 172/172 170/171/171) [5,0] r=0 lpr=171 luod=183'7975 crt=183'7974 lcod 183'7974 mlcod 183'7974 active+clean] do_proxy_write Start proxy write for osd_op(client.4130.0:32967 plana4222147-6594 [write 733117~408660] 2.3ed99ff9 ack+ondisk+write+known_if_redirected e183) v5
+> 2015-05-20 05:51:42.899958 7f682c6cf700  1 -- 10.214.132.32:6808/20666 --> 10.214.132.32:0/20666 -- osd_op_reply(17556 plana4222147-6594 [write 733117~408660] v0'0 uv0 ondisk = -95 ((95) Operation not supported)) v6 -- ?+0 0xa2e23c0 con 0x9355760
+> 
+> What should we do with these tests?
 
-I'm not Alex, but yeah, we have all the clone/split machinery and so we
-can handle a spanning case just fine.  I think rbd_merge_bvec() exists
-to make sure we don't have to do that unless it's really necessary -
-like when a single page gets submitted at an inconvenient offset.
+I think the test is fine.. but the OSD should refuse to proxy the write if 
+the base tier won't support the write operation in question.  I believe we 
+recently renamed one of the helpers supports_omap()... we probably need a 
+similar set of helpers for object overwrites?
 
-I have a patch that adds a blk_queue_chunk_sectors(object_size) call to
-rbd_init_disk() but I haven't had a chance to play with it yet.  In any
-case, we should be fine with getting rid of rbd_merge_bvec().  If this
-ends up a per-driver patchset, I can make rbd_merge_bvec() ->
-blk_queue_chunk_sectors() a single patch and push it through
-ceph-client.git.
+Or, we can make a method like "should_proxy_to_ec()" that scans through 
+the op vector and makes a conservative judgement of whether it is safe 
+to proxy...
 
-Thanks,
-
-                Ilya
+sage
