@@ -1,36 +1,48 @@
-From: Sage Weil <sweil@redhat.com>
+From: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
 Subject: RE: Cache pool on top of ec base pool teuthology test
-Date: Mon, 25 May 2015 19:19:01 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1505251917350.19787@cobra.newdream.net>
-References: <06E7D85B3BA36C4DB207FEDE871C53489E8DE1@SHSMSX101.ccr.corp.intel.com> <alpine.DEB.2.00.1505250801290.6462@cobra.newdream.net> <06E7D85B3BA36C4DB207FEDE871C53489E9FBC@SHSMSX101.ccr.corp.intel.com>
+Date: Tue, 26 May 2015 02:22:33 +0000
+Message-ID: <06E7D85B3BA36C4DB207FEDE871C53489E9FED@SHSMSX101.ccr.corp.intel.com>
+References: <06E7D85B3BA36C4DB207FEDE871C53489E8DE1@SHSMSX101.ccr.corp.intel.com>
+ <alpine.DEB.2.00.1505250801290.6462@cobra.newdream.net>
+ <06E7D85B3BA36C4DB207FEDE871C53489E9FBC@SHSMSX101.ccr.corp.intel.com>
+ <alpine.DEB.2.00.1505251917350.19787@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:33481 "EHLO mx1.redhat.com"
+Received: from mga14.intel.com ([192.55.52.115]:28832 "EHLO mga14.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751057AbbEZCTD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 25 May 2015 22:19:03 -0400
-In-Reply-To: <06E7D85B3BA36C4DB207FEDE871C53489E9FBC@SHSMSX101.ccr.corp.intel.com>
+	id S1751057AbbEZCWh convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 25 May 2015 22:22:37 -0400
+In-Reply-To: <alpine.DEB.2.00.1505251917350.19787@cobra.newdream.net>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
+To: Sage Weil <sweil@redhat.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+Yes, we can do the force promotion check in init_op_flags, as we did before.
+
+-----Original Message-----
+From: Sage Weil [mailto:sweil@redhat.com] 
+Sent: Tuesday, May 26, 2015 10:19 AM
+To: Wang, Zhiqiang
+Cc: ceph-devel@vger.kernel.org
+Subject: RE: Cache pool on top of ec base pool teuthology test
 
 On Tue, 26 May 2015, Wang, Zhiqiang wrote:
 > OK, so the cache tier OSD checks if it's able to proxy the write op, if not, then forces a promotion.
 > 
 > Btw, I don't find the supports_omap helps in the current master. Do you mean the 'CEPH_OSD_COPY_GET_FLAG_NOTSUPP_OMAP' flag?
 
-Yeah, that isn't helpful.  I think what we need is the helper to check the 
-op, and make that dependent on is_erasure()?  That shoudl be good enough 
-for now.
+Yeah, that isn't helpful.  I think what we need is the helper to check the op, and make that dependent on is_erasure()?  That shoudl be good enough for now.
 
 sage
 
 
 > 
 > -----Original Message-----
-> From: Sage Weil [mailto:sweil@redhat.com] 
+> From: Sage Weil [mailto:sweil@redhat.com]
 > Sent: Monday, May 25, 2015 11:04 PM
 > To: Wang, Zhiqiang
 > Cc: ceph-devel@vger.kernel.org
@@ -39,18 +51,21 @@ sage
 > On Mon, 25 May 2015, Wang, Zhiqiang wrote:
 > > We have a bunch of teuthology tests which build cache pool on top of 
 > > an ec base pool, and do partial object write. This is ok with the 
-> > current cache tiering implementation. But with proxy write, this won't 
-> > work. In my testing, the error message is something like below:
+> > current cache tiering implementation. But with proxy write, this 
+> > won't work. In my testing, the error message is something like below:
 > > 
-> > 2015-05-20 05:51:42.896828 7f682eed4700 10 osd.5 pg_epoch: 183 pg[2.1( 
-> > v 183'7978 (179'7799,183'7978] local-les=172 n=1258 ec=8 les/c 172/172 
-> > 170/171/171) [5,0] r=0 lpr=171 luod=183'7975 crt=183'7974 lcod 
-> > 183'7974 mlcod 183'7974 active+clean] do_proxy_write Start proxy write 
-> > for osd_op(client.4130.0:32967 plana4222147-6594 [write 733117~408660] 
+> > 2015-05-20 05:51:42.896828 7f682eed4700 10 osd.5 pg_epoch: 183 
+> > pg[2.1( v 183'7978 (179'7799,183'7978] local-les=172 n=1258 ec=8 
+> > les/c 172/172
+> > 170/171/171) [5,0] r=0 lpr=171 luod=183'7975 crt=183'7974 lcod
+> > 183'7974 mlcod 183'7974 active+clean] do_proxy_write Start proxy 
+> > write for osd_op(client.4130.0:32967 plana4222147-6594 [write 
+> > 733117~408660]
 > > 2.3ed99ff9 ack+ondisk+write+known_if_redirected e183) v5
-> > 2015-05-20 05:51:42.899958 7f682c6cf700  1 -- 10.214.132.32:6808/20666 
-> > --> 10.214.132.32:0/20666 -- osd_op_reply(17556 plana4222147-6594 
-> > [write 733117~408660] v0'0 uv0 ondisk = -95 ((95) Operation not 
+> > 2015-05-20 05:51:42.899958 7f682c6cf700  1 -- 
+> > 10.214.132.32:6808/20666
+> > --> 10.214.132.32:0/20666 -- osd_op_reply(17556 plana4222147-6594
+> > [write 733117~408660] v0'0 uv0 ondisk = -95 ((95) Operation not
 > > supported)) v6 -- ?+0 0xa2e23c0 con 0x9355760
 > > 
 > > What should we do with these tests?
@@ -61,8 +76,8 @@ sage
 > 
 > sage
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> in the body of a message to majordomo@vger.kernel.org More majordomo 
+> info at  http://vger.kernel.org/majordomo-info.html
 > 
 > 
