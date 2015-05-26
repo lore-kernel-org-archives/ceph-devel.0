@@ -1,58 +1,338 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Perfomance CPU and IOPS
-Date: Tue, 26 May 2015 08:34:21 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD91986@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <5561B444.6060108@gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: teuthology timeout error
+Date: Tue, 26 May 2015 10:59:12 +0200
+Message-ID: <556435E0.7030502@dachary.org>
+References: <870DE8DBB716524BAE51B2D499EC81E40AAF9237@g01jpexmbyt24> <555C3C67.6080905@dachary.org> <870DE8DBB716524BAE51B2D499EC81E40AAFDE74@g01jpexmbyt24> <555DA760.50604@dachary.org> <870DE8DBB716524BAE51B2D499EC81E40AB19A89@g01jpexmbyt24>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="j3OSBF73DsXNNTWmrFB6MBJVQMKMtdcdM"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from [157.56.111.98] ([157.56.111.98]:42240 "EHLO
-	na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751060AbbEZIx5 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 26 May 2015 04:53:57 -0400
-In-Reply-To: <5561B444.6060108@gmail.com>
-Content-Language: en-US
+Received: from mail2.dachary.org ([91.121.57.175]:50787 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751275AbbEZI7Q (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 May 2015 04:59:16 -0400
+In-Reply-To: <870DE8DBB716524BAE51B2D499EC81E40AB19A89@g01jpexmbyt24>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Casier David <casierdavid@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>, Ceph Development <ceph-devel@vger.kernel.org>
+Cc: "Kawaguchi, Shotaro" <kawaguchi.s@jp.fujitsu.com>, "Imai, Hiroki" <imai.hiroki@jp.fujitsu.com>, "Nakao, Takanori" <nakao.takanori@jp.fujitsu.com>, "Shiozawa, Kensuke" <shiozawa.kennsu@jp.fujitsu.com>
 
-Q2VwaCBqb3VybmFsIGluIGNhc2Ugb2YgZmlsZXN0b3JlIGlzIHByb3ZpZGluZyB0cmFuc2FjdGlv
-bmFsIHdyaXRlcywgc28sIHlvdSBjYW4ndCByZW1vdmUgam91cm5hbC4NCg0KVGhhbmtzICYgUmVn
-YXJkcw0KU29tbmF0aA0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogY2VwaC1k
-ZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIu
-a2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIENhc2llciBEYXZpZA0KU2VudDogU3VuZGF5LCBNYXkg
-MjQsIDIwMTUgNDoyMiBBTQ0KVG86IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0
-OiBQZXJmb21hbmNlIENQVSBhbmQgSU9QUw0KDQpIZWxsbyBldmVyeWJvZHksDQpJIGhhdmUgc29t
-ZSBzdWdnZXN0aW9ucyB0byBpbXByb3ZlIHRoZSBDZXBoIHBlcmZvcm1hbmNlIHdpdGggaW4gY2Fz
-ZSBvZiB1c2luZyBSYWRvcyBCbG9jayBEZXZpY2UuDQoNCk9uIEZpbGVTdG9yZSA6DQogIC0gUmVt
-b3ZlIGFsbCBtZXRhZGF0YSBpbiBIREQgYW5kIHVzZWQgb21hcCBvbiBTU0QuIFRoaXMgcmVkdWNl
-IElPUFMgYW5kIGluY3JlYXNlcyB0aHJvdWdocHV0Lg0KICAtIFJlbW92ZSBqb3VybmFsLCB0aHJl
-YWQgInN5bmNfZW50cnkiLCBhbmQgd3JpdGUgZGlyZWN0bHkgaW4gcXVldWVfdHJhbnNhY3Rpb24u
-DQoNClRvIGNvbXBlbnNhdGUgam91cm5hbCwgeW91IGNvdWxkIHVzZSBDYWNoZSBUaWVyIENlcGgu
-DQoNCmNlcGgtb3NkIG11c3QgYmUgd2l0aCBsZXNzIFRocmVhZCBhbmQgTG9jay4NCldpdGggMSBP
-U0QgZm9yIDEgSERELCBpIHRoaW5rIExvY2sgaXMgbmVjZXNzYXJ5IG9ubHkgZm9yIHNjcnViLCBy
-ZWNvdmVyeSBvciBvdGhlciBiYWNrZ3JvdW5kIGpvYi4NCkFuZCBvbmx5IG9uZSB0aHJlYWQgd2l0
-aCB0aGUgdXNlIG9mIGxpYmFpby4NCg0KSSB0aGluayBDZXBoLU9TRCBzaG91bGQgYmUgdmVyeSBs
-aWdodC4NClBvdGVudGlhbGx5IHdpdGggZGlyZWN0IHdyaXRpbmcgYWZ0ZXJnaXZlbiB0aGUgdHJh
-bnNtaXR0ZWQgZGF0YSB0byBvdGhlciBPU0QgZnJvbSBtYXAuDQpJbiB0aGlzIGNhc2UsIGEgbG90
-IG9mIGNlcGgtb3NkIGNvdWxkIHdvcmsgb24gdGhlIHNhbWUgc2VydmVyLg0KDQpBY3R1YWxseSwg
-aSB3b3JrIG9uIHRoZSByZXBvc2l0b3J5IGh0dHBzOi8vd3d3LmdpdGh1Yi5jb20vZGNhc2llci9j
-ZXBoLg0KWW91IGNvdWxkIHNlZSBzdGFydCB3b3JrcyBvbiBGaWxlU3RvcmUuKiBCdXQgcG90ZW50
-aWFsbHkgbm90IHNhZmUuDQoNCkRhdmlkLg0KLS0NClRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBs
-aXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbiB0aGUgYm9keSBv
-ZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBp
-bmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg0KX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCg0KUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1h
-dGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRl
-ZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBh
-Ym92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCBy
-ZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQg
-dGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24s
-IGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJv
-aGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9y
-LCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hv
-d24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0
-aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVs
-ZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KDQo=
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--j3OSBF73DsXNNTWmrFB6MBJVQMKMtdcdM
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+Hi Takeshi,
+
+I'm trying to repeat your problem at https://github.com/ceph/ceph-qa-suit=
+e/pull/445. To be continued :-)
+
+Cheers
+
+On 26/05/2015 04:39, Miyamae, Takeshi wrote:
+> Hi Loic,
+>=20
+> We rebased our teuthology/ceph-qa-suite and retried the test toward LRC=
+ on current master.
+> However, we unfortunately got the same result as before (timeout error)=
+=2E
+>=20
+> [test conditions]
+> Target : Ceph-9.0.0-971-gd49d816
+> https://github.com/kawaguchi-s/teuthology
+> https://github.com/kawaguchi-s/ceph-qa-suite/tree/wip-10886-lrc
+>=20
+> [teuthology log]
+>=20
+> 2015-05-25 10:18:23	# start
+>=20
+> 2015-05-25 11:59:52,106.106 INFO:teuthology.orchestra.run.RX35-1:Runnin=
+g: 'adjust-ulimits ceph-coverage /home/ubuntu/cephtest/archive/coverage c=
+eph status -- format=3Djson-pretty'
+> 2015-05-25 11:59:52,564.564 INFO:tasks.ceph.ceph_manager:no progress se=
+en, keeping timeout for now
+> 2015-05-25 11:59:52,565.565 INFO:tasks.thrashosds.thrasher:Traceback (m=
+ost recent call last):
+>   File "/root/src/ceph-qa-suite_master/tasks/ceph_manager.py", line 635=
+, in wrapper
+>     return func(self)
+>   File "/root/src/ceph-qa-suite_master/tasks/ceph_manager.py", line 668=
+, in do_thrash
+>     timeout=3Dself.config.get('timeout')
+>   File "/root/src/ceph-qa-suite_master/tasks/ceph_manager.py", line 156=
+9, in wait_for_recovery
+>     'failed to recover before timeout expired'
+> AssertionError: failed to recover before timeout expired
+>=20
+> Traceback (most recent call last):
+>   File "/root/work/teuthology/virtualenv/lib/python2.7/site-packages/ge=
+vent/greenlet.py", line 390, in run
+>     result =3D self._run(*self.args, **self.kwargs)
+>   File "/root/src/ceph-qa-suite_master/tasks/ceph_manager.py", line 635=
+, in wrapper
+>     return func(self)
+>   File "/root/src/ceph-qa-suite_master/tasks/ceph_manager.py", line 668=
+, in do_thrash
+>     timeout=3Dself.config.get('timeout')
+>   File "/root/src/ceph-qa-suite_master/tasks/ceph_manager.py", line 156=
+9, in wait_for_recovery
+>     'failed to recover before timeout expired'
+> AssertionError: failed to recover before timeout expired <Greenlet at 0=
+x36cacd0: <bound method Thrasher.do_thrash of <tasks.ceph_manager.Thrashe=
+r instance at 0x36df3f8>>> failed with AssertionError
+>=20
+> Best regards,
+> Takeshi Miyamae
+>=20
+> -----Original Message-----
+> From: Loic Dachary [mailto:loic@dachary.org]=20
+> Sent: Thursday, May 21, 2015 6:38 PM
+> To: Miyamae, Takeshi/=E5=AE=AE=E5=89=8D =E5=89=9B; Ceph Development
+> Cc: Kawaguchi, Shotaro/=E5=B7=9D=E5=8F=A3 =E7=BF=94=E5=A4=AA=E6=9C=97; =
+Imai, Hiroki/=E4=BB=8A=E4=BA=95 =E5=AE=8F=E6=A8=B9; Nakao, Takanori/=E4=B8=
+=AD=E5=B0=BE =E9=B7=B9=E8=A9=94; Shiozawa, Kensuke/=E5=A1=A9=E6=B2=A2 =E8=
+=B3=A2=E8=BC=94
+> Subject: Re: teuthology timeout error
+>=20
+> Hi,
+>=20
+> [sorry the previous mail was sent by accident, here is the full mail]
+>=20
+> On 21/05/2015 10:32, Miyamae, Takeshi wrote:
+>> Hi Loic,
+>>
+>>> Could you please share the teuthology/ceph-qa-suite repository you=20
+>>> are using to run these tests so I can try to reproduce / diagnose the=
+ problem ?
+>>
+>> https://github.com/kawaguchi-s/teuthology/tree/wip-10886
+>> https://github.com/kawaguchi-s/ceph-qa-suite/tree/wip-10886
+>>
+>=20
+> When compared against master they show differences that indicate it wou=
+ld be good to rebase:
+>=20
+> https://github.com/ceph/teuthology/compare/master...kawaguchi-s:wip-108=
+86
+> https://github.com/ceph/ceph-qa-suite/compare/master...kawaguchi-s:wip-=
+10886
+>=20
+> I think the teuthology commit on top of wip-10886 is a mistake
+>=20
+> https://github.com/kawaguchi-s/teuthology/commit/348e54931f89c9b0ae7a84=
+eb931576f8414017b5
+>=20
+> do you really need to modify teuthology ? It should just be necessary t=
+o use the latest master branch.
+>=20
+> It looks like the
+>=20
+> https://github.com/kawaguchi-s/ceph-qa-suite/commit/f2e3ca5d12ceef742ea=
+e2a9cf4057c436e9040c3
+>=20
+> commit in your ceph-qa-suite is not what you intended. However
+>=20
+> https://github.com/kawaguchi-s/ceph-qa-suite/commit/4b39d6d4862f9091a84=
+9d224e880795be406815d
+> https://github.com/kawaguchi-s/ceph-qa-suite/commit/d16b4b058ae11893192=
+8541a2c8acd68f9703a44
+>=20
+> look ok :-) Instead of naming the test 4nodes16osds3mons1client.yaml it=
+ would be better to use the same kind of naming you see at https://github=
+=2Ecom/ceph/ceph-qa-suite/tree/master/suites/rados/thrash-erasure-code/wo=
+rkloads. That is a file name made of the distinctive parameters for the s=
+hec plugin (the parameters that are the default can be omited).
+>=20
+> Cheers
+>=20
+>> Here are our teuthology/ceph-qa-suite repositories. Thanks in advance.=
+
+>>
+>> Best regards,
+>> Takeshi Miyamae
+>>
+>> -----Original Message-----
+>> From: Loic Dachary [mailto:loic@dachary.org]
+>> Sent: Wednesday, May 20, 2015 4:49 PM
+>> To: Miyamae, Takeshi/=E5=AE=AE=E5=89=8D =E5=89=9B; Ceph Development
+>> Cc: Kawaguchi, Shotaro/=E5=B7=9D=E5=8F=A3 =E7=BF=94=E5=A4=AA=E6=9C=97;=
+ Imai, Hiroki/=E4=BB=8A=E4=BA=95 =E5=AE=8F=E6=A8=B9; Nakao, Takanori/=E4=B8=
+=AD=E5=B0=BE=20
+>> =E9=B7=B9=E8=A9=94; Shiozawa, Kensuke/=E5=A1=A9=E6=B2=A2 =E8=B3=A2=E8=BC=
+=94
+>> Subject: Re: teuthology timeout error
+>>
+>> Hi,
+>>
+>> On 20/05/2015 04:20, Miyamae, Takeshi wrote:
+>>> Hi Loic,
+>>>
+>>> When we fixed our own issue and restarted teuthology,
+>>
+>> Great !
+>>
+>>> we encountered another issue (timeout error) which occurs in case of =
+LRC as well.
+>>> Do you have any information about that ?
+>>
+>> Could you please share the teuthology/ceph-qa-suite repository you are=
+ using to run these tests so I can try to reproduce / diagnose the proble=
+m ?
+>>
+>> Thanks
+>>
+>>>
+>>> [error messages (in case of LRC pool)]
+>>>
+>>> 2015-04-28 12:38:54,128.128 INFO:teuthology.orchestra.run.RX35-1:Runn=
+ing: 'adjust-ulimits ceph-coverage /home/ubuntu/cephtest/archive/coverage=
+ ceph status --format=3Djson-pretty'
+>>> 2015-04-28 12:38:54,516.516 INFO:tasks.ceph.ceph_manager:no progress =
+
+>>> seen, keeping timeout for now
+>>> 2015-04-28 12:38:54,516.516 INFO:tasks.thrashosds.thrasher:Traceback =
+(most recent call last):
+>>>   File "/root/src/ceph-qa-suite_master/tasks/ceph_manager.py", line 6=
+32, in wrapper
+>>>     return func(self)
+>>>   File "/root/src/ceph-qa-suite_master/tasks/ceph_manager.py", line 6=
+65, in do_thrash
+>>>     timeout=3Dself.config.get('timeout')
+>>>   File "/root/src/ceph-qa-suite_master/tasks/ceph_manager.py", line 1=
+566, in wait_for_recovery
+>>>     'failed to recover before timeout expired'
+>>> AssertionError: failed to recover before timeout expired
+>>>
+>>> Traceback (most recent call last):
+>>>   File "/root/work/teuthology/virtualenv/lib/python2.7/site-packages/=
+gevent/greenlet.py", line 390, in run
+>>>     result =3D self._run(*self.args, **self.kwargs)
+>>>   File "/root/src/ceph-qa-suite_master/tasks/ceph_manager.py", line 6=
+32, in wrapper
+>>>     return func(self)
+>>>   File "/root/src/ceph-qa-suite_master/tasks/ceph_manager.py", line 6=
+65, in do_thrash
+>>>     timeout=3Dself.config.get('timeout')
+>>>   File "/root/src/ceph-qa-suite_master/tasks/ceph_manager.py", line 1=
+566, in wait_for_recovery
+>>>     'failed to recover before timeout expired'
+>>> AssertionError: failed to recover before timeout expired <Greenlet at=
+=20
+>>> 0x2a7d550: <bound method Thrasher.do_thrash of=20
+>>> <tasks.ceph_manager.Thrasher instance at 0x2bd12d8>>> failed with=20
+>>> AssertionError
+>>>
+>>> [ceph version]
+>>> 0.93-952-gfe28daa
+>>>
+>>> [teuthology, ceph-qa-suite]
+>>> newest version at 3/25/2015
+>>>
+>>> [configurations]
+>>>   check-locks: false
+>>>   overrides:
+>>>     ceph:
+>>>       conf:
+>>>         global:
+>>>           ms inject socket failures: 5000
+>>>         osd:
+>>>           osd heartbeat use min delay socket: true
+>>>           osd sloppy crc: true
+>>>       fs: xfs
+>>>   roles:
+>>>   - - mon.a
+>>>     - osd.0
+>>>     - osd.4
+>>>     - osd.8
+>>>     - osd.12
+>>>   - - mon.b
+>>>     - osd.1
+>>>     - osd.5
+>>>     - osd.9
+>>>     - osd.13
+>>>   - - mon.c
+>>>     - osd.2
+>>>     - osd.6
+>>>     - osd.10
+>>>     - osd.14
+>>>   - - osd.3
+>>>     - osd.7
+>>>     - osd.11
+>>>     - osd.15
+>>>     - client.0
+>>>   targets:
+>>>     ubuntu@RX35-1.primary.ceph-poc.fsc.net:
+>>>     ubuntu@RX35-2.primary.ceph-poc.fsc.net:
+>>>     ubuntu@RX35-3.primary.ceph-poc.fsc.net:
+>>>     ubuntu@RX35-4.primary.ceph-poc.fsc.net:
+>>>   tasks:
+>>>   - ceph:
+>>>       conf:
+>>>         osd:
+>>>           osd debug reject backfill probability: 0.3
+>>>           osd max backfills: 1
+>>>           osd scrub max interval: 120
+>>>           osd scrub min interval: 60
+>>>       log-whitelist:
+>>>       - wrongly marked me down
+>>>       - objects unfound and apparently lost
+>>>   - thrashosds:
+>>>       chance_pgnum_grow: 1
+>>>       chance_pgpnum_fix: 1
+>>>       min_in: 4
+>>>       timeout: 1200
+>>>   - rados:
+>>>       clients:
+>>>       - client.0
+>>>       ec_pool: true
+>>>       erasure_code_profile:
+>>>         k: 4
+>>>         l: 3
+>>>         m: 2
+>>>         name: lrcprofile
+>>>         plugin: lrc
+>>>         ruleset-failure-domain: osd
+>>>       objects: 50
+>>>       op_weights:
+>>>         append: 100
+>>>         copy_from: 50
+>>>         delete: 50
+>>>         read: 100
+>>>         rmattr: 25
+>>>         rollback: 50
+>>>         setattr: 25
+>>>         snap_create: 50
+>>>         snap_remove: 50
+>>>         write: 0
+>>>       ops: 190000
+>>>
+>>> Best regards,
+>>> Takeshi Miyamae
+>>>
+>>
+>=20
+> --
+> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>=20
+>=20
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--j3OSBF73DsXNNTWmrFB6MBJVQMKMtdcdM
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlVkNeEACgkQ8dLMyEl6F21LDgCeMpVFWW/O10G15whCqo30C35G
+HrEAmwRw9oMj4l8GHfRsZTp/SBfTBKjG
+=2cTF
+-----END PGP SIGNATURE-----
+
+--j3OSBF73DsXNNTWmrFB6MBJVQMKMtdcdM--
