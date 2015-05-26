@@ -1,154 +1,58 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: Slow file creating and deleting using bonnie ++ on Hammer
-Date: Tue, 26 May 2015 14:55:05 +0800
-Message-ID: <CAAM7YAnxOp3Yo+F=mP4AvZBM1-7xD_N8A8h_H0cVNjOZ=S=cfg@mail.gmail.com>
-References: <CAMzumdYUsO2jh8Xk1bpQLrOR7NiLcR5FzL15ve9=jiQ9Bz64wQ@mail.gmail.com>
-	<CAC6JEv9ZjK6nn0tK7HpQWMkMcYhn=Kbg77_+J1NxKTq0WWfJOQ@mail.gmail.com>
-	<CAMzumdYw_13u2nYDohMRbtD-tcKOTmJNn-x+mEFh2__hpf8XKw@mail.gmail.com>
-	<CAMzumdZgmsmBYHci2qq1qDs2nWmXq3StR9FbPT3FfHy_zi9qeA@mail.gmail.com>
-	<555F4C78.7060601@redhat.com>
-	<CAMzumdYaQ1sZUQPbb-42ZSLZgYxLY7CWWoyE5DsUpryd3s6mhQ@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Perfomance CPU and IOPS
+Date: Tue, 26 May 2015 08:34:21 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD91986@SACMBXIP01.sdcorp.global.sandisk.com>
+References: <5561B444.6060108@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f54.google.com ([209.85.215.54]:35926 "EHLO
-	mail-la0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751220AbbEZGzG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 May 2015 02:55:06 -0400
-Received: by lagv1 with SMTP id v1so60894571lag.3
-        for <ceph-devel@vger.kernel.org>; Mon, 25 May 2015 23:55:05 -0700 (PDT)
-In-Reply-To: <CAMzumdYaQ1sZUQPbb-42ZSLZgYxLY7CWWoyE5DsUpryd3s6mhQ@mail.gmail.com>
+Received: from [157.56.111.98] ([157.56.111.98]:42240 "EHLO
+	na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751060AbbEZIx5 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 26 May 2015 04:53:57 -0400
+In-Reply-To: <5561B444.6060108@gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Barclay Jameson <almightybeeij@gmail.com>
-Cc: John Spray <john.spray@redhat.com>, Gregory Farnum <greg@gregs42.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Casier David <casierdavid@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Sat, May 23, 2015 at 1:34 AM, Barclay Jameson
-<almightybeeij@gmail.com> wrote:
-> Here are some more info :
-> rados bench -p cephfs_data 100 write --no-cleanup
->
-> Total time run:         100.096473
-> Total writes made:      21900
-> Write size:             4194304
-> Bandwidth (MB/sec):     875.156
->
-> Stddev Bandwidth:       96.1234
-> Max bandwidth (MB/sec): 932
-> Min bandwidth (MB/sec): 0
-> Average Latency:        0.0731273
-> Stddev Latency:         0.0439909
-> Max latency:            1.23972
-> Min latency:            0.0306901
->
-> (Again the numbers from bench don't match what is listed in client io.
-> Ceph -s shows anywhere from 200 MB/s to 1700 MB/s even when the max
-> bandwidth lists 932 as the highest)
->
-> rados bench -p cephfs_data 100 seq
->
-> Total time run:        29.460172
-> Total reads made:     21900
-> Read size:            4194304
-> Bandwidth (MB/sec):    2973.506
->
-> Average Latency:       0.0215173
-> Max latency:           0.693831
-> Min latency:           0.00519763
->
->
->
-> On client:
->
-> [root@blarg cephfs]# time for i in {1..100000}; do mkdir blarg"$i" ; done
->
-> real    10m36.794s
-> user    1m45.329s
-> sys    6m29.982s
-> [root@blarg cephfs]# time for i in {1..100000}; do touch yadda"$i" ; done
->
-> real    13m29.155s
-> user    3m55.256s
-> sys    7m50.301s
->
-> What variables are most important in the perf dump?
-> I would like to grep out the vars (ceph daemon
-> /var/run/ceph-mds.cephnautilus01.asok perf dump | jq '.') that are of
-> meaning while running the bonnie++ test again with -s 0.
->
-> Thanks,
-> BJ
->
-> On Fri, May 22, 2015 at 10:34 AM, John Spray <john.spray@redhat.com> wrote:
->>
->>
->> On 22/05/2015 16:25, Barclay Jameson wrote:
->>>
->>> The Bonnie++ job _FINALLY_ finished. If I am reading this correctly it
->>> took days to create, stat, and delete 16 files??
->>> [root@blarg cephfs]# ~/bonnie++-1.03e/bonnie++ -u root:root -s 256g -r
->>> 131072 -d /cephfs/ -m CephBench -f -b
->>> Using uid:0, gid:0.
->>> Writing intelligently...done
->>> Rewriting...done
->>> Reading intelligently...done
->>> start 'em...done...done...done...
->>> Create files in sequential order...done.
->>> Stat files in sequential order...done.
->>> Delete files in sequential order...done.
->>> Create files in random order...done.
->>> Stat files in random order...done.
->>> Delete files in random order...done.
->>> Version 1.03e       ------Sequential Output------ --Sequential Input-
->>> --Random-
->>>                      -Per Chr- --Block-- -Rewrite- -Per Chr- --Block--
->>> --Seeks--
->>> Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP
->>> /sec %CP
->>> CephBench      256G           1006417  76 90114  13           137110
->>> 8 329.8   7
->>>                      ------Sequential Create------ --------Random
->>> Create--------
->>>                      -Create-- --Read--- -Delete-- -Create-- --Read---
->>> -Delete--
->>>                files  /sec %CP  /sec %CP  /sec %CP  /sec %CP  /sec %CP
->>> /sec %CP
->>>                   16     0   0 +++++ +++     0   0     0   0  5267  19
->>> 0   0
->>>
->>> CephBench,256G,,,1006417,76,90114,13,,,137110,8,329.8,7,16,0,0,+++++,+++,0,0,0,0,5267,19,0,0
->>>
->>> Any thoughts?
->>>
->> It's 16000 files by default (not 16), but this usually takes only a few
->> minutes.
->>
->> FWIW I tried running a quick bonnie++ (with -s 0 to skip the IO phase) on a
->> development (vstart.sh) cluster with a fuse client, and it readily handles
->> several hundred client requests per second (checked with "ceph daemonperf
->> mds.<id>")
->>
->> Nothing immediately leapt out at me from a quick look at the log you posted,
->> but with issues like these it is always worth trying to narrow it down by
->> trying the fuse client instead of the kernel client, and/or different kernel
->> versions.
->>
->> You may also want to check that your underlying RADOS cluster is performing
->> reasonably by doing a rados bench too.
->>
->> Cheers,
->> John
-> --
-
-the reason for slow file creations is that bonnie++ call fsync(2)
-after each creat(2). fsync() wait for safe replies of the create
-requests.  MDS sends safe reply when log event for the request gets
-journaled safely. MDS flush the journal every 5 seconds
-(mds_tick_interval). So the speed of file creation for bonnie++ is one
-file every file seconds.
-
-
-
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Q2VwaCBqb3VybmFsIGluIGNhc2Ugb2YgZmlsZXN0b3JlIGlzIHByb3ZpZGluZyB0cmFuc2FjdGlv
+bmFsIHdyaXRlcywgc28sIHlvdSBjYW4ndCByZW1vdmUgam91cm5hbC4NCg0KVGhhbmtzICYgUmVn
+YXJkcw0KU29tbmF0aA0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogY2VwaC1k
+ZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIu
+a2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIENhc2llciBEYXZpZA0KU2VudDogU3VuZGF5LCBNYXkg
+MjQsIDIwMTUgNDoyMiBBTQ0KVG86IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0
+OiBQZXJmb21hbmNlIENQVSBhbmQgSU9QUw0KDQpIZWxsbyBldmVyeWJvZHksDQpJIGhhdmUgc29t
+ZSBzdWdnZXN0aW9ucyB0byBpbXByb3ZlIHRoZSBDZXBoIHBlcmZvcm1hbmNlIHdpdGggaW4gY2Fz
+ZSBvZiB1c2luZyBSYWRvcyBCbG9jayBEZXZpY2UuDQoNCk9uIEZpbGVTdG9yZSA6DQogIC0gUmVt
+b3ZlIGFsbCBtZXRhZGF0YSBpbiBIREQgYW5kIHVzZWQgb21hcCBvbiBTU0QuIFRoaXMgcmVkdWNl
+IElPUFMgYW5kIGluY3JlYXNlcyB0aHJvdWdocHV0Lg0KICAtIFJlbW92ZSBqb3VybmFsLCB0aHJl
+YWQgInN5bmNfZW50cnkiLCBhbmQgd3JpdGUgZGlyZWN0bHkgaW4gcXVldWVfdHJhbnNhY3Rpb24u
+DQoNClRvIGNvbXBlbnNhdGUgam91cm5hbCwgeW91IGNvdWxkIHVzZSBDYWNoZSBUaWVyIENlcGgu
+DQoNCmNlcGgtb3NkIG11c3QgYmUgd2l0aCBsZXNzIFRocmVhZCBhbmQgTG9jay4NCldpdGggMSBP
+U0QgZm9yIDEgSERELCBpIHRoaW5rIExvY2sgaXMgbmVjZXNzYXJ5IG9ubHkgZm9yIHNjcnViLCBy
+ZWNvdmVyeSBvciBvdGhlciBiYWNrZ3JvdW5kIGpvYi4NCkFuZCBvbmx5IG9uZSB0aHJlYWQgd2l0
+aCB0aGUgdXNlIG9mIGxpYmFpby4NCg0KSSB0aGluayBDZXBoLU9TRCBzaG91bGQgYmUgdmVyeSBs
+aWdodC4NClBvdGVudGlhbGx5IHdpdGggZGlyZWN0IHdyaXRpbmcgYWZ0ZXJnaXZlbiB0aGUgdHJh
+bnNtaXR0ZWQgZGF0YSB0byBvdGhlciBPU0QgZnJvbSBtYXAuDQpJbiB0aGlzIGNhc2UsIGEgbG90
+IG9mIGNlcGgtb3NkIGNvdWxkIHdvcmsgb24gdGhlIHNhbWUgc2VydmVyLg0KDQpBY3R1YWxseSwg
+aSB3b3JrIG9uIHRoZSByZXBvc2l0b3J5IGh0dHBzOi8vd3d3LmdpdGh1Yi5jb20vZGNhc2llci9j
+ZXBoLg0KWW91IGNvdWxkIHNlZSBzdGFydCB3b3JrcyBvbiBGaWxlU3RvcmUuKiBCdXQgcG90ZW50
+aWFsbHkgbm90IHNhZmUuDQoNCkRhdmlkLg0KLS0NClRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBs
+aXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbiB0aGUgYm9keSBv
+ZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBp
+bmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg0KX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCg0KUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1h
+dGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRl
+ZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBh
+Ym92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCBy
+ZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQg
+dGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24s
+IGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJv
+aGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9y
+LCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hv
+d24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0
+aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVs
+ZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KDQo=
