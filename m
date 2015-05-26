@@ -1,221 +1,154 @@
-From: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>
-Subject: RE: teuthology timeout error
-Date: Tue, 26 May 2015 02:39:22 +0000
-Message-ID: <870DE8DBB716524BAE51B2D499EC81E40AB19A89@g01jpexmbyt24>
-References: <870DE8DBB716524BAE51B2D499EC81E40AAF9237@g01jpexmbyt24>
- <555C3C67.6080905@dachary.org>
- <870DE8DBB716524BAE51B2D499EC81E40AAFDE74@g01jpexmbyt24>
- <555DA760.50604@dachary.org>
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: Slow file creating and deleting using bonnie ++ on Hammer
+Date: Tue, 26 May 2015 14:55:05 +0800
+Message-ID: <CAAM7YAnxOp3Yo+F=mP4AvZBM1-7xD_N8A8h_H0cVNjOZ=S=cfg@mail.gmail.com>
+References: <CAMzumdYUsO2jh8Xk1bpQLrOR7NiLcR5FzL15ve9=jiQ9Bz64wQ@mail.gmail.com>
+	<CAC6JEv9ZjK6nn0tK7HpQWMkMcYhn=Kbg77_+J1NxKTq0WWfJOQ@mail.gmail.com>
+	<CAMzumdYw_13u2nYDohMRbtD-tcKOTmJNn-x+mEFh2__hpf8XKw@mail.gmail.com>
+	<CAMzumdZgmsmBYHci2qq1qDs2nWmXq3StR9FbPT3FfHy_zi9qeA@mail.gmail.com>
+	<555F4C78.7060601@redhat.com>
+	<CAMzumdYaQ1sZUQPbb-42ZSLZgYxLY7CWWoyE5DsUpryd3s6mhQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mgwkm02.jp.fujitsu.com ([202.219.69.169]:17889 "EHLO
-	mgwkm02.jp.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751143AbbEZCj2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 25 May 2015 22:39:28 -0400
-Received: from g01jpfmpwyt01.exch.g01.fujitsu.local (g01jpfmpwyt01.exch.g01.fujitsu.local [10.128.193.38])
-	by kw-mxauth.gw.nic.fujitsu.com (Postfix) with ESMTP id 2E612AC02AD
-	for <ceph-devel@vger.kernel.org>; Tue, 26 May 2015 11:39:25 +0900 (JST)
-In-Reply-To: <555DA760.50604@dachary.org>
-Content-Language: ja-JP
+Received: from mail-la0-f54.google.com ([209.85.215.54]:35926 "EHLO
+	mail-la0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751220AbbEZGzG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 May 2015 02:55:06 -0400
+Received: by lagv1 with SMTP id v1so60894571lag.3
+        for <ceph-devel@vger.kernel.org>; Mon, 25 May 2015 23:55:05 -0700 (PDT)
+In-Reply-To: <CAMzumdYaQ1sZUQPbb-42ZSLZgYxLY7CWWoyE5DsUpryd3s6mhQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
-Cc: "Kawaguchi, Shotaro" <kawaguchi.s@jp.fujitsu.com>, "Imai, Hiroki" <imai.hiroki@jp.fujitsu.com>, "Nakao, Takanori" <nakao.takanori@jp.fujitsu.com>, "Shiozawa, Kensuke" <shiozawa.kennsu@jp.fujitsu.com>
+To: Barclay Jameson <almightybeeij@gmail.com>
+Cc: John Spray <john.spray@redhat.com>, Gregory Farnum <greg@gregs42.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SGkgTG9pYywNCg0KV2UgcmViYXNlZCBvdXIgdGV1dGhvbG9neS9jZXBoLXFh
-LXN1aXRlIGFuZCByZXRyaWVkIHRoZSB0ZXN0IHRvd2FyZCBMUkMgb24gY3Vy
-cmVudCBtYXN0ZXIuDQpIb3dldmVyLCB3ZSB1bmZvcnR1bmF0ZWx5IGdvdCB0
-aGUgc2FtZSByZXN1bHQgYXMgYmVmb3JlICh0aW1lb3V0IGVycm9yKS4NCg0K
-W3Rlc3QgY29uZGl0aW9uc10NClRhcmdldCA6IENlcGgtOS4wLjAtOTcxLWdk
-NDlkODE2DQpodHRwczovL2dpdGh1Yi5jb20va2F3YWd1Y2hpLXMvdGV1dGhv
-bG9neQ0KaHR0cHM6Ly9naXRodWIuY29tL2thd2FndWNoaS1zL2NlcGgtcWEt
-c3VpdGUvdHJlZS93aXAtMTA4ODYtbHJjDQoNClt0ZXV0aG9sb2d5IGxvZ10N
-Cg0KMjAxNS0wNS0yNSAxMDoxODoyMwkjIHN0YXJ0DQoNCjIwMTUtMDUtMjUg
-MTE6NTk6NTIsMTA2LjEwNiBJTkZPOnRldXRob2xvZ3kub3JjaGVzdHJhLnJ1
-bi5SWDM1LTE6UnVubmluZzogJ2FkanVzdC11bGltaXRzIGNlcGgtY292ZXJh
-Z2UgL2hvbWUvdWJ1bnR1L2NlcGh0ZXN0L2FyY2hpdmUvY292ZXJhZ2UgY2Vw
-aCBzdGF0dXMgLS0gZm9ybWF0PWpzb24tcHJldHR5Jw0KMjAxNS0wNS0yNSAx
-MTo1OTo1Miw1NjQuNTY0IElORk86dGFza3MuY2VwaC5jZXBoX21hbmFnZXI6
-bm8gcHJvZ3Jlc3Mgc2Vlbiwga2VlcGluZyB0aW1lb3V0IGZvciBub3cNCjIw
-MTUtMDUtMjUgMTE6NTk6NTIsNTY1LjU2NSBJTkZPOnRhc2tzLnRocmFzaG9z
-ZHMudGhyYXNoZXI6VHJhY2ViYWNrIChtb3N0IHJlY2VudCBjYWxsIGxhc3Qp
-Og0KICBGaWxlICIvcm9vdC9zcmMvY2VwaC1xYS1zdWl0ZV9tYXN0ZXIvdGFz
-a3MvY2VwaF9tYW5hZ2VyLnB5IiwgbGluZSA2MzUsIGluIHdyYXBwZXINCiAg
-ICByZXR1cm4gZnVuYyhzZWxmKQ0KICBGaWxlICIvcm9vdC9zcmMvY2VwaC1x
-YS1zdWl0ZV9tYXN0ZXIvdGFza3MvY2VwaF9tYW5hZ2VyLnB5IiwgbGluZSA2
-NjgsIGluIGRvX3RocmFzaA0KICAgIHRpbWVvdXQ9c2VsZi5jb25maWcuZ2V0
-KCd0aW1lb3V0JykNCiAgRmlsZSAiL3Jvb3Qvc3JjL2NlcGgtcWEtc3VpdGVf
-bWFzdGVyL3Rhc2tzL2NlcGhfbWFuYWdlci5weSIsIGxpbmUgMTU2OSwgaW4g
-d2FpdF9mb3JfcmVjb3ZlcnkNCiAgICAnZmFpbGVkIHRvIHJlY292ZXIgYmVm
-b3JlIHRpbWVvdXQgZXhwaXJlZCcNCkFzc2VydGlvbkVycm9yOiBmYWlsZWQg
-dG8gcmVjb3ZlciBiZWZvcmUgdGltZW91dCBleHBpcmVkDQoNClRyYWNlYmFj
-ayAobW9zdCByZWNlbnQgY2FsbCBsYXN0KToNCiAgRmlsZSAiL3Jvb3Qvd29y
-ay90ZXV0aG9sb2d5L3ZpcnR1YWxlbnYvbGliL3B5dGhvbjIuNy9zaXRlLXBh
-Y2thZ2VzL2dldmVudC9ncmVlbmxldC5weSIsIGxpbmUgMzkwLCBpbiBydW4N
-CiAgICByZXN1bHQgPSBzZWxmLl9ydW4oKnNlbGYuYXJncywgKipzZWxmLmt3
-YXJncykNCiAgRmlsZSAiL3Jvb3Qvc3JjL2NlcGgtcWEtc3VpdGVfbWFzdGVy
-L3Rhc2tzL2NlcGhfbWFuYWdlci5weSIsIGxpbmUgNjM1LCBpbiB3cmFwcGVy
-DQogICAgcmV0dXJuIGZ1bmMoc2VsZikNCiAgRmlsZSAiL3Jvb3Qvc3JjL2Nl
-cGgtcWEtc3VpdGVfbWFzdGVyL3Rhc2tzL2NlcGhfbWFuYWdlci5weSIsIGxp
-bmUgNjY4LCBpbiBkb190aHJhc2gNCiAgICB0aW1lb3V0PXNlbGYuY29uZmln
-LmdldCgndGltZW91dCcpDQogIEZpbGUgIi9yb290L3NyYy9jZXBoLXFhLXN1
-aXRlX21hc3Rlci90YXNrcy9jZXBoX21hbmFnZXIucHkiLCBsaW5lIDE1Njks
-IGluIHdhaXRfZm9yX3JlY292ZXJ5DQogICAgJ2ZhaWxlZCB0byByZWNvdmVy
-IGJlZm9yZSB0aW1lb3V0IGV4cGlyZWQnDQpBc3NlcnRpb25FcnJvcjogZmFp
-bGVkIHRvIHJlY292ZXIgYmVmb3JlIHRpbWVvdXQgZXhwaXJlZCA8R3JlZW5s
-ZXQgYXQgMHgzNmNhY2QwOiA8Ym91bmQgbWV0aG9kIFRocmFzaGVyLmRvX3Ro
-cmFzaCBvZiA8dGFza3MuY2VwaF9tYW5hZ2VyLlRocmFzaGVyIGluc3RhbmNl
-IGF0IDB4MzZkZjNmOD4+PiBmYWlsZWQgd2l0aCBBc3NlcnRpb25FcnJvcg0K
-DQpCZXN0IHJlZ2FyZHMsDQpUYWtlc2hpIE1peWFtYWUNCg0KLS0tLS1Pcmln
-aW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IExvaWMgRGFjaGFyeSBbbWFpbHRv
-OmxvaWNAZGFjaGFyeS5vcmddIA0KU2VudDogVGh1cnNkYXksIE1heSAyMSwg
-MjAxNSA2OjM4IFBNDQpUbzogTWl5YW1hZSwgVGFrZXNoaS/lrq7liY0g5Ymb
-OyBDZXBoIERldmVsb3BtZW50DQpDYzogS2F3YWd1Y2hpLCBTaG90YXJvL+W3
-neWPoyDnv5TlpKrmnJc7IEltYWksIEhpcm9raS/ku4rkupUg5a6P5qi5OyBO
-YWthbywgVGFrYW5vcmkv5Lit5bC+IOm3ueiplDsgU2hpb3phd2EsIEtlbnN1
-a2Uv5aGp5rKiIOizoui8lA0KU3ViamVjdDogUmU6IHRldXRob2xvZ3kgdGlt
-ZW91dCBlcnJvcg0KDQpIaSwNCg0KW3NvcnJ5IHRoZSBwcmV2aW91cyBtYWls
-IHdhcyBzZW50IGJ5IGFjY2lkZW50LCBoZXJlIGlzIHRoZSBmdWxsIG1haWxd
-DQoNCk9uIDIxLzA1LzIwMTUgMTA6MzIsIE1peWFtYWUsIFRha2VzaGkgd3Jv
-dGU6DQo+IEhpIExvaWMsDQo+IA0KPj4gQ291bGQgeW91IHBsZWFzZSBzaGFy
-ZSB0aGUgdGV1dGhvbG9neS9jZXBoLXFhLXN1aXRlIHJlcG9zaXRvcnkgeW91
-IA0KPj4gYXJlIHVzaW5nIHRvIHJ1biB0aGVzZSB0ZXN0cyBzbyBJIGNhbiB0
-cnkgdG8gcmVwcm9kdWNlIC8gZGlhZ25vc2UgdGhlIHByb2JsZW0gPw0KPiAN
-Cj4gaHR0cHM6Ly9naXRodWIuY29tL2thd2FndWNoaS1zL3RldXRob2xvZ3kv
-dHJlZS93aXAtMTA4ODYNCj4gaHR0cHM6Ly9naXRodWIuY29tL2thd2FndWNo
-aS1zL2NlcGgtcWEtc3VpdGUvdHJlZS93aXAtMTA4ODYNCj4gDQoNCldoZW4g
-Y29tcGFyZWQgYWdhaW5zdCBtYXN0ZXIgdGhleSBzaG93IGRpZmZlcmVuY2Vz
-IHRoYXQgaW5kaWNhdGUgaXQgd291bGQgYmUgZ29vZCB0byByZWJhc2U6DQoN
-Cmh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL3RldXRob2xvZ3kvY29tcGFyZS9t
-YXN0ZXIuLi5rYXdhZ3VjaGktczp3aXAtMTA4ODYNCmh0dHBzOi8vZ2l0aHVi
-LmNvbS9jZXBoL2NlcGgtcWEtc3VpdGUvY29tcGFyZS9tYXN0ZXIuLi5rYXdh
-Z3VjaGktczp3aXAtMTA4ODYNCg0KSSB0aGluayB0aGUgdGV1dGhvbG9neSBj
-b21taXQgb24gdG9wIG9mIHdpcC0xMDg4NiBpcyBhIG1pc3Rha2UNCg0KaHR0
-cHM6Ly9naXRodWIuY29tL2thd2FndWNoaS1zL3RldXRob2xvZ3kvY29tbWl0
-LzM0OGU1NDkzMWY4OWM5YjBhZTdhODRlYjkzMTU3NmY4NDE0MDE3YjUNCg0K
-ZG8geW91IHJlYWxseSBuZWVkIHRvIG1vZGlmeSB0ZXV0aG9sb2d5ID8gSXQg
-c2hvdWxkIGp1c3QgYmUgbmVjZXNzYXJ5IHRvIHVzZSB0aGUgbGF0ZXN0IG1h
-c3RlciBicmFuY2guDQoNCkl0IGxvb2tzIGxpa2UgdGhlDQoNCmh0dHBzOi8v
-Z2l0aHViLmNvbS9rYXdhZ3VjaGktcy9jZXBoLXFhLXN1aXRlL2NvbW1pdC9m
-MmUzY2E1ZDEyY2VlZjc0MmVhZTJhOWNmNDA1N2M0MzZlOTA0MGMzDQoNCmNv
-bW1pdCBpbiB5b3VyIGNlcGgtcWEtc3VpdGUgaXMgbm90IHdoYXQgeW91IGlu
-dGVuZGVkLiBIb3dldmVyDQoNCmh0dHBzOi8vZ2l0aHViLmNvbS9rYXdhZ3Vj
-aGktcy9jZXBoLXFhLXN1aXRlL2NvbW1pdC80YjM5ZDZkNDg2MmY5MDkxYTg0
-OWQyMjRlODgwNzk1YmU0MDY4MTVkDQpodHRwczovL2dpdGh1Yi5jb20va2F3
-YWd1Y2hpLXMvY2VwaC1xYS1zdWl0ZS9jb21taXQvZDE2YjRiMDU4YWUxMTg5
-MzE5Mjg1NDFhMmM4YWNkNjhmOTcwM2E0NA0KDQpsb29rIG9rIDotKSBJbnN0
-ZWFkIG9mIG5hbWluZyB0aGUgdGVzdCA0bm9kZXMxNm9zZHMzbW9uczFjbGll
-bnQueWFtbCBpdCB3b3VsZCBiZSBiZXR0ZXIgdG8gdXNlIHRoZSBzYW1lIGtp
-bmQgb2YgbmFtaW5nIHlvdSBzZWUgYXQgaHR0cHM6Ly9naXRodWIuY29tL2Nl
-cGgvY2VwaC1xYS1zdWl0ZS90cmVlL21hc3Rlci9zdWl0ZXMvcmFkb3MvdGhy
-YXNoLWVyYXN1cmUtY29kZS93b3JrbG9hZHMuIFRoYXQgaXMgYSBmaWxlIG5h
-bWUgbWFkZSBvZiB0aGUgZGlzdGluY3RpdmUgcGFyYW1ldGVycyBmb3IgdGhl
-IHNoZWMgcGx1Z2luICh0aGUgcGFyYW1ldGVycyB0aGF0IGFyZSB0aGUgZGVm
-YXVsdCBjYW4gYmUgb21pdGVkKS4NCg0KQ2hlZXJzDQoNCj4gSGVyZSBhcmUg
-b3VyIHRldXRob2xvZ3kvY2VwaC1xYS1zdWl0ZSByZXBvc2l0b3JpZXMuIFRo
-YW5rcyBpbiBhZHZhbmNlLg0KPiANCj4gQmVzdCByZWdhcmRzLA0KPiBUYWtl
-c2hpIE1peWFtYWUNCj4gDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0t
-DQo+IEZyb206IExvaWMgRGFjaGFyeSBbbWFpbHRvOmxvaWNAZGFjaGFyeS5v
-cmddDQo+IFNlbnQ6IFdlZG5lc2RheSwgTWF5IDIwLCAyMDE1IDQ6NDkgUE0N
-Cj4gVG86IE1peWFtYWUsIFRha2VzaGkv5a6u5YmNIOWJmzsgQ2VwaCBEZXZl
-bG9wbWVudA0KPiBDYzogS2F3YWd1Y2hpLCBTaG90YXJvL+W3neWPoyDnv5Tl
-pKrmnJc7IEltYWksIEhpcm9raS/ku4rkupUg5a6P5qi5OyBOYWthbywgVGFr
-YW5vcmkv5Lit5bC+IA0KPiDpt7noqZQ7IFNoaW96YXdhLCBLZW5zdWtlL+Wh
-qeayoiDos6LovJQNCj4gU3ViamVjdDogUmU6IHRldXRob2xvZ3kgdGltZW91
-dCBlcnJvcg0KPiANCj4gSGksDQo+IA0KPiBPbiAyMC8wNS8yMDE1IDA0OjIw
-LCBNaXlhbWFlLCBUYWtlc2hpIHdyb3RlOg0KPj4gSGkgTG9pYywNCj4+DQo+
-PiBXaGVuIHdlIGZpeGVkIG91ciBvd24gaXNzdWUgYW5kIHJlc3RhcnRlZCB0
-ZXV0aG9sb2d5LA0KPiANCj4gR3JlYXQgIQ0KPiANCj4+IHdlIGVuY291bnRl
-cmVkIGFub3RoZXIgaXNzdWUgKHRpbWVvdXQgZXJyb3IpIHdoaWNoIG9jY3Vy
-cyBpbiBjYXNlIG9mIExSQyBhcyB3ZWxsLg0KPj4gRG8geW91IGhhdmUgYW55
-IGluZm9ybWF0aW9uIGFib3V0IHRoYXQgPw0KPiANCj4gQ291bGQgeW91IHBs
-ZWFzZSBzaGFyZSB0aGUgdGV1dGhvbG9neS9jZXBoLXFhLXN1aXRlIHJlcG9z
-aXRvcnkgeW91IGFyZSB1c2luZyB0byBydW4gdGhlc2UgdGVzdHMgc28gSSBj
-YW4gdHJ5IHRvIHJlcHJvZHVjZSAvIGRpYWdub3NlIHRoZSBwcm9ibGVtID8N
-Cj4gDQo+IFRoYW5rcw0KPiANCj4+DQo+PiBbZXJyb3IgbWVzc2FnZXMgKGlu
-IGNhc2Ugb2YgTFJDIHBvb2wpXQ0KPj4NCj4+IDIwMTUtMDQtMjggMTI6Mzg6
-NTQsMTI4LjEyOCBJTkZPOnRldXRob2xvZ3kub3JjaGVzdHJhLnJ1bi5SWDM1
-LTE6UnVubmluZzogJ2FkanVzdC11bGltaXRzIGNlcGgtY292ZXJhZ2UgL2hv
-bWUvdWJ1bnR1L2NlcGh0ZXN0L2FyY2hpdmUvY292ZXJhZ2UgY2VwaCBzdGF0
-dXMgLS1mb3JtYXQ9anNvbi1wcmV0dHknDQo+PiAyMDE1LTA0LTI4IDEyOjM4
-OjU0LDUxNi41MTYgSU5GTzp0YXNrcy5jZXBoLmNlcGhfbWFuYWdlcjpubyBw
-cm9ncmVzcyANCj4+IHNlZW4sIGtlZXBpbmcgdGltZW91dCBmb3Igbm93DQo+
-PiAyMDE1LTA0LTI4IDEyOjM4OjU0LDUxNi41MTYgSU5GTzp0YXNrcy50aHJh
-c2hvc2RzLnRocmFzaGVyOlRyYWNlYmFjayAobW9zdCByZWNlbnQgY2FsbCBs
-YXN0KToNCj4+ICAgRmlsZSAiL3Jvb3Qvc3JjL2NlcGgtcWEtc3VpdGVfbWFz
-dGVyL3Rhc2tzL2NlcGhfbWFuYWdlci5weSIsIGxpbmUgNjMyLCBpbiB3cmFw
-cGVyDQo+PiAgICAgcmV0dXJuIGZ1bmMoc2VsZikNCj4+ICAgRmlsZSAiL3Jv
-b3Qvc3JjL2NlcGgtcWEtc3VpdGVfbWFzdGVyL3Rhc2tzL2NlcGhfbWFuYWdl
-ci5weSIsIGxpbmUgNjY1LCBpbiBkb190aHJhc2gNCj4+ICAgICB0aW1lb3V0
-PXNlbGYuY29uZmlnLmdldCgndGltZW91dCcpDQo+PiAgIEZpbGUgIi9yb290
-L3NyYy9jZXBoLXFhLXN1aXRlX21hc3Rlci90YXNrcy9jZXBoX21hbmFnZXIu
-cHkiLCBsaW5lIDE1NjYsIGluIHdhaXRfZm9yX3JlY292ZXJ5DQo+PiAgICAg
-J2ZhaWxlZCB0byByZWNvdmVyIGJlZm9yZSB0aW1lb3V0IGV4cGlyZWQnDQo+
-PiBBc3NlcnRpb25FcnJvcjogZmFpbGVkIHRvIHJlY292ZXIgYmVmb3JlIHRp
-bWVvdXQgZXhwaXJlZA0KPj4NCj4+IFRyYWNlYmFjayAobW9zdCByZWNlbnQg
-Y2FsbCBsYXN0KToNCj4+ICAgRmlsZSAiL3Jvb3Qvd29yay90ZXV0aG9sb2d5
-L3ZpcnR1YWxlbnYvbGliL3B5dGhvbjIuNy9zaXRlLXBhY2thZ2VzL2dldmVu
-dC9ncmVlbmxldC5weSIsIGxpbmUgMzkwLCBpbiBydW4NCj4+ICAgICByZXN1
-bHQgPSBzZWxmLl9ydW4oKnNlbGYuYXJncywgKipzZWxmLmt3YXJncykNCj4+
-ICAgRmlsZSAiL3Jvb3Qvc3JjL2NlcGgtcWEtc3VpdGVfbWFzdGVyL3Rhc2tz
-L2NlcGhfbWFuYWdlci5weSIsIGxpbmUgNjMyLCBpbiB3cmFwcGVyDQo+PiAg
-ICAgcmV0dXJuIGZ1bmMoc2VsZikNCj4+ICAgRmlsZSAiL3Jvb3Qvc3JjL2Nl
-cGgtcWEtc3VpdGVfbWFzdGVyL3Rhc2tzL2NlcGhfbWFuYWdlci5weSIsIGxp
-bmUgNjY1LCBpbiBkb190aHJhc2gNCj4+ICAgICB0aW1lb3V0PXNlbGYuY29u
-ZmlnLmdldCgndGltZW91dCcpDQo+PiAgIEZpbGUgIi9yb290L3NyYy9jZXBo
-LXFhLXN1aXRlX21hc3Rlci90YXNrcy9jZXBoX21hbmFnZXIucHkiLCBsaW5l
-IDE1NjYsIGluIHdhaXRfZm9yX3JlY292ZXJ5DQo+PiAgICAgJ2ZhaWxlZCB0
-byByZWNvdmVyIGJlZm9yZSB0aW1lb3V0IGV4cGlyZWQnDQo+PiBBc3NlcnRp
-b25FcnJvcjogZmFpbGVkIHRvIHJlY292ZXIgYmVmb3JlIHRpbWVvdXQgZXhw
-aXJlZCA8R3JlZW5sZXQgYXQgDQo+PiAweDJhN2Q1NTA6IDxib3VuZCBtZXRo
-b2QgVGhyYXNoZXIuZG9fdGhyYXNoIG9mIA0KPj4gPHRhc2tzLmNlcGhfbWFu
-YWdlci5UaHJhc2hlciBpbnN0YW5jZSBhdCAweDJiZDEyZDg+Pj4gZmFpbGVk
-IHdpdGggDQo+PiBBc3NlcnRpb25FcnJvcg0KPj4NCj4+IFtjZXBoIHZlcnNp
-b25dDQo+PiAwLjkzLTk1Mi1nZmUyOGRhYQ0KPj4NCj4+IFt0ZXV0aG9sb2d5
-LCBjZXBoLXFhLXN1aXRlXQ0KPj4gbmV3ZXN0IHZlcnNpb24gYXQgMy8yNS8y
-MDE1DQo+Pg0KPj4gW2NvbmZpZ3VyYXRpb25zXQ0KPj4gICBjaGVjay1sb2Nr
-czogZmFsc2UNCj4+ICAgb3ZlcnJpZGVzOg0KPj4gICAgIGNlcGg6DQo+PiAg
-ICAgICBjb25mOg0KPj4gICAgICAgICBnbG9iYWw6DQo+PiAgICAgICAgICAg
-bXMgaW5qZWN0IHNvY2tldCBmYWlsdXJlczogNTAwMA0KPj4gICAgICAgICBv
-c2Q6DQo+PiAgICAgICAgICAgb3NkIGhlYXJ0YmVhdCB1c2UgbWluIGRlbGF5
-IHNvY2tldDogdHJ1ZQ0KPj4gICAgICAgICAgIG9zZCBzbG9wcHkgY3JjOiB0
-cnVlDQo+PiAgICAgICBmczogeGZzDQo+PiAgIHJvbGVzOg0KPj4gICAtIC0g
-bW9uLmENCj4+ICAgICAtIG9zZC4wDQo+PiAgICAgLSBvc2QuNA0KPj4gICAg
-IC0gb3NkLjgNCj4+ICAgICAtIG9zZC4xMg0KPj4gICAtIC0gbW9uLmINCj4+
-ICAgICAtIG9zZC4xDQo+PiAgICAgLSBvc2QuNQ0KPj4gICAgIC0gb3NkLjkN
-Cj4+ICAgICAtIG9zZC4xMw0KPj4gICAtIC0gbW9uLmMNCj4+ICAgICAtIG9z
-ZC4yDQo+PiAgICAgLSBvc2QuNg0KPj4gICAgIC0gb3NkLjEwDQo+PiAgICAg
-LSBvc2QuMTQNCj4+ICAgLSAtIG9zZC4zDQo+PiAgICAgLSBvc2QuNw0KPj4g
-ICAgIC0gb3NkLjExDQo+PiAgICAgLSBvc2QuMTUNCj4+ICAgICAtIGNsaWVu
-dC4wDQo+PiAgIHRhcmdldHM6DQo+PiAgICAgdWJ1bnR1QFJYMzUtMS5wcmlt
-YXJ5LmNlcGgtcG9jLmZzYy5uZXQ6DQo+PiAgICAgdWJ1bnR1QFJYMzUtMi5w
-cmltYXJ5LmNlcGgtcG9jLmZzYy5uZXQ6DQo+PiAgICAgdWJ1bnR1QFJYMzUt
-My5wcmltYXJ5LmNlcGgtcG9jLmZzYy5uZXQ6DQo+PiAgICAgdWJ1bnR1QFJY
-MzUtNC5wcmltYXJ5LmNlcGgtcG9jLmZzYy5uZXQ6DQo+PiAgIHRhc2tzOg0K
-Pj4gICAtIGNlcGg6DQo+PiAgICAgICBjb25mOg0KPj4gICAgICAgICBvc2Q6
-DQo+PiAgICAgICAgICAgb3NkIGRlYnVnIHJlamVjdCBiYWNrZmlsbCBwcm9i
-YWJpbGl0eTogMC4zDQo+PiAgICAgICAgICAgb3NkIG1heCBiYWNrZmlsbHM6
-IDENCj4+ICAgICAgICAgICBvc2Qgc2NydWIgbWF4IGludGVydmFsOiAxMjAN
-Cj4+ICAgICAgICAgICBvc2Qgc2NydWIgbWluIGludGVydmFsOiA2MA0KPj4g
-ICAgICAgbG9nLXdoaXRlbGlzdDoNCj4+ICAgICAgIC0gd3JvbmdseSBtYXJr
-ZWQgbWUgZG93bg0KPj4gICAgICAgLSBvYmplY3RzIHVuZm91bmQgYW5kIGFw
-cGFyZW50bHkgbG9zdA0KPj4gICAtIHRocmFzaG9zZHM6DQo+PiAgICAgICBj
-aGFuY2VfcGdudW1fZ3JvdzogMQ0KPj4gICAgICAgY2hhbmNlX3BncG51bV9m
-aXg6IDENCj4+ICAgICAgIG1pbl9pbjogNA0KPj4gICAgICAgdGltZW91dDog
-MTIwMA0KPj4gICAtIHJhZG9zOg0KPj4gICAgICAgY2xpZW50czoNCj4+ICAg
-ICAgIC0gY2xpZW50LjANCj4+ICAgICAgIGVjX3Bvb2w6IHRydWUNCj4+ICAg
-ICAgIGVyYXN1cmVfY29kZV9wcm9maWxlOg0KPj4gICAgICAgICBrOiA0DQo+
-PiAgICAgICAgIGw6IDMNCj4+ICAgICAgICAgbTogMg0KPj4gICAgICAgICBu
-YW1lOiBscmNwcm9maWxlDQo+PiAgICAgICAgIHBsdWdpbjogbHJjDQo+PiAg
-ICAgICAgIHJ1bGVzZXQtZmFpbHVyZS1kb21haW46IG9zZA0KPj4gICAgICAg
-b2JqZWN0czogNTANCj4+ICAgICAgIG9wX3dlaWdodHM6DQo+PiAgICAgICAg
-IGFwcGVuZDogMTAwDQo+PiAgICAgICAgIGNvcHlfZnJvbTogNTANCj4+ICAg
-ICAgICAgZGVsZXRlOiA1MA0KPj4gICAgICAgICByZWFkOiAxMDANCj4+ICAg
-ICAgICAgcm1hdHRyOiAyNQ0KPj4gICAgICAgICByb2xsYmFjazogNTANCj4+
-ICAgICAgICAgc2V0YXR0cjogMjUNCj4+ICAgICAgICAgc25hcF9jcmVhdGU6
-IDUwDQo+PiAgICAgICAgIHNuYXBfcmVtb3ZlOiA1MA0KPj4gICAgICAgICB3
-cml0ZTogMA0KPj4gICAgICAgb3BzOiAxOTAwMDANCj4+DQo+PiBCZXN0IHJl
-Z2FyZHMsDQo+PiBUYWtlc2hpIE1peWFtYWUNCj4+DQo+IA0KDQotLQ0KTG/D
-r2MgRGFjaGFyeSwgQXJ0aXNhbiBMb2dpY2llbCBMaWJyZQ0KDQoNCg0K
+On Sat, May 23, 2015 at 1:34 AM, Barclay Jameson
+<almightybeeij@gmail.com> wrote:
+> Here are some more info :
+> rados bench -p cephfs_data 100 write --no-cleanup
+>
+> Total time run:         100.096473
+> Total writes made:      21900
+> Write size:             4194304
+> Bandwidth (MB/sec):     875.156
+>
+> Stddev Bandwidth:       96.1234
+> Max bandwidth (MB/sec): 932
+> Min bandwidth (MB/sec): 0
+> Average Latency:        0.0731273
+> Stddev Latency:         0.0439909
+> Max latency:            1.23972
+> Min latency:            0.0306901
+>
+> (Again the numbers from bench don't match what is listed in client io.
+> Ceph -s shows anywhere from 200 MB/s to 1700 MB/s even when the max
+> bandwidth lists 932 as the highest)
+>
+> rados bench -p cephfs_data 100 seq
+>
+> Total time run:        29.460172
+> Total reads made:     21900
+> Read size:            4194304
+> Bandwidth (MB/sec):    2973.506
+>
+> Average Latency:       0.0215173
+> Max latency:           0.693831
+> Min latency:           0.00519763
+>
+>
+>
+> On client:
+>
+> [root@blarg cephfs]# time for i in {1..100000}; do mkdir blarg"$i" ; done
+>
+> real    10m36.794s
+> user    1m45.329s
+> sys    6m29.982s
+> [root@blarg cephfs]# time for i in {1..100000}; do touch yadda"$i" ; done
+>
+> real    13m29.155s
+> user    3m55.256s
+> sys    7m50.301s
+>
+> What variables are most important in the perf dump?
+> I would like to grep out the vars (ceph daemon
+> /var/run/ceph-mds.cephnautilus01.asok perf dump | jq '.') that are of
+> meaning while running the bonnie++ test again with -s 0.
+>
+> Thanks,
+> BJ
+>
+> On Fri, May 22, 2015 at 10:34 AM, John Spray <john.spray@redhat.com> wrote:
+>>
+>>
+>> On 22/05/2015 16:25, Barclay Jameson wrote:
+>>>
+>>> The Bonnie++ job _FINALLY_ finished. If I am reading this correctly it
+>>> took days to create, stat, and delete 16 files??
+>>> [root@blarg cephfs]# ~/bonnie++-1.03e/bonnie++ -u root:root -s 256g -r
+>>> 131072 -d /cephfs/ -m CephBench -f -b
+>>> Using uid:0, gid:0.
+>>> Writing intelligently...done
+>>> Rewriting...done
+>>> Reading intelligently...done
+>>> start 'em...done...done...done...
+>>> Create files in sequential order...done.
+>>> Stat files in sequential order...done.
+>>> Delete files in sequential order...done.
+>>> Create files in random order...done.
+>>> Stat files in random order...done.
+>>> Delete files in random order...done.
+>>> Version 1.03e       ------Sequential Output------ --Sequential Input-
+>>> --Random-
+>>>                      -Per Chr- --Block-- -Rewrite- -Per Chr- --Block--
+>>> --Seeks--
+>>> Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP
+>>> /sec %CP
+>>> CephBench      256G           1006417  76 90114  13           137110
+>>> 8 329.8   7
+>>>                      ------Sequential Create------ --------Random
+>>> Create--------
+>>>                      -Create-- --Read--- -Delete-- -Create-- --Read---
+>>> -Delete--
+>>>                files  /sec %CP  /sec %CP  /sec %CP  /sec %CP  /sec %CP
+>>> /sec %CP
+>>>                   16     0   0 +++++ +++     0   0     0   0  5267  19
+>>> 0   0
+>>>
+>>> CephBench,256G,,,1006417,76,90114,13,,,137110,8,329.8,7,16,0,0,+++++,+++,0,0,0,0,5267,19,0,0
+>>>
+>>> Any thoughts?
+>>>
+>> It's 16000 files by default (not 16), but this usually takes only a few
+>> minutes.
+>>
+>> FWIW I tried running a quick bonnie++ (with -s 0 to skip the IO phase) on a
+>> development (vstart.sh) cluster with a fuse client, and it readily handles
+>> several hundred client requests per second (checked with "ceph daemonperf
+>> mds.<id>")
+>>
+>> Nothing immediately leapt out at me from a quick look at the log you posted,
+>> but with issues like these it is always worth trying to narrow it down by
+>> trying the fuse client instead of the kernel client, and/or different kernel
+>> versions.
+>>
+>> You may also want to check that your underlying RADOS cluster is performing
+>> reasonably by doing a rados bench too.
+>>
+>> Cheers,
+>> John
+> --
+
+the reason for slow file creations is that bonnie++ call fsync(2)
+after each creat(2). fsync() wait for safe replies of the create
+requests.  MDS sends safe reply when log event for the request gets
+journaled safely. MDS flush the journal every 5 seconds
+(mds_tick_interval). So the speed of file creation for bonnie++ is one
+file every file seconds.
+
+
+
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
