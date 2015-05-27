@@ -1,103 +1,46 @@
-From: Yuri Weinstein <yweinste@redhat.com>
-Subject: Re: hammer branch for v0.94.2 ready for QE
-Date: Wed, 27 May 2015 17:12:56 -0400 (EDT)
-Message-ID: <694044148.7711595.1432761176105.JavaMail.zimbra@redhat.com>
-References: <5559DE24.4010601@dachary.org>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Some thoughts regarding the new store
+Date: Wed, 27 May 2015 14:14:20 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1505271411430.6462@cobra.newdream.net>
+References: <55658320.3060907@ubuntukylin.com> <CACJqLyZzw+2ZbX6zDN_x6SZ4kCk+NJ6bty_yu+s_6gCACYRvww@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx6-phx2.redhat.com ([209.132.183.39]:57884 "EHLO
-	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751486AbbE0VOC convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 May 2015 17:14:02 -0400
-In-Reply-To: <5559DE24.4010601@dachary.org>
+Received: from cobra.newdream.net ([66.33.216.30]:57833 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751592AbbE0VOU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 May 2015 17:14:20 -0400
+In-Reply-To: <CACJqLyZzw+2ZbX6zDN_x6SZ4kCk+NJ6bty_yu+s_6gCACYRvww@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Abhishek L <abhishek.lekshmanan@gmail.com>
+To: Haomai Wang <haomaiwang@gmail.com>
+Cc: Li Wang <liwang@ubuntukylin.com>, Samuel Just <sjust@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-QE validation status.
+On Wed, 27 May 2015, Haomai Wang wrote:
+> On Wed, May 27, 2015 at 4:41 PM, Li Wang <liwang@ubuntukylin.com> wrote:
+> > I have just noticed the new store development, and had a
+> > look at the idea behind it (http://www.spinics.net/lists/ceph-
+> > devel/msg22712.html), so my understanding, we wanna avoid the
+> > double-write penalty of WRITE_AHEAD_LOGGING journal mechanism,
+> > the straightforward thought is to optimize CREATE, APPEND and
+> > FULL-OBJECT-OVERWRITE by writing into new files directly,
+> > then update the metadata in a transaction. Other changes include:
+> > move the object metadata from filesystem extend attrbutes into
+> > key value database; map an object into possibly multiple files.
+> >
+> > If my understanding is correct, then it seems there follows some issues,
+> >
+> > 1 Garbage collection is needed to reclaim orphan files generated
+> > from crashing;
+> 
+> Yes, but still now we haven't dive into this problem. Because
+> currently newstore only allow one object one file.
+> 
+> Anyway I guess GC isn't a big problem. journal keys should be help, is
+> something I missed here?
 
-All detailed information is summarized in http://tracker.ceph.com/issue=
-s/11492
+Currently we are sloppy.  We could add an additional key on each commit to 
+make sure that we don't leak fragments on crash, but honestly I'm not sure 
+it's worth the effort given that it's such a tiny amount of space.
 
-Team leads pls review for do "go"-"no-go" decision.
-
-Issues to be considered:
-
-rados - passed ~2.8K jobs, listed issues (#11660, #11661) are not block=
-ers=20
-(NOTE: we also agreed to use the "0/7th" rule for future point releases=
-, e.g. passing "--subset 0/7" will be sufficient for release)
-
-knfs - #11789, #11790 - per Sage - not blockers; Greg, John - agreed?
-
-samba - I assumed that failured in http://pulpito.ceph.com/teuthology-2=
-015-05-18_13:46:55-samba-hammer-testing-basic-multi/ due to #6613, Greg=
- pls confirm.
-
-upgrade/client-upgrade - blocked by #11546 (3 jobs passed)
-upgrade/firefly-x - blocked by #11546
-upgrade/dumpling-firefly-x - blocked by #11546
-
-Sage, Loic are you willing to push this release out without upgrade sui=
-tes run due to packaging issues (NOTE: upgrade/giant-x -> hammer passed=
- on all distros)?
-
-Thx
-YuriW
-
------ Original Message -----
-=46rom: "Loic Dachary" <loic@dachary.org>
-To: "Yuri Weinstein" <yweinste@redhat.com>
-Cc: "Ceph Development" <ceph-devel@vger.kernel.org>, "Abhishek L" <abhi=
-shek.lekshmanan@gmail.com>
-Sent: Monday, May 18, 2015 5:42:12 AM
-Subject: hammer branch for v0.94.2 ready for QE
-
-Hi Yuri,
-
-The hammer branch for v0.94.2 as found at https://github.com/ceph/ceph/=
-commits/hammer has been approved by Greg, Yehuda, Josh and Sam and is r=
-eady for QE. For the record, the head is https://github.com/ceph/ceph/c=
-ommit/63832d4039889b6b704b88b86eaba4aadcfceb2e and the details of the t=
-ests run are at http://tracker.ceph.com/issues/11492
-
-Note that it has two more commits compared to what you tested before:
-
-https://github.com/ceph/ceph/commit/293affe992118ed6e04f685030b2d83a794=
-ca624 fixing http://tracker.ceph.com/issues/11622
-https://github.com/ceph/ceph/commit/a43d24861089a02f3b42061e482e05016a0=
-021f6 fixing http://tracker.ceph.com/issues/11604
-
-which address two blockers that you listed at http://tracker.ceph.com/i=
-ssues/11492#QE-Validation
-
-These two new commits only have influence, directly or indirectly, on r=
-gw. They do not require or deserve a new run of the rados, fs or rbd su=
-ite because none of them depend on rgw, directly or indirectly.
-
-The other two issues listed as blockers are
-
-http://tracker.ceph.com/issues/11613#note-4 do not need a backport to h=
-ammer
-http://tracker.ceph.com/issues/11591 is a teuthology related issue that=
- can be worked around and does not need to be a blocker for hammer
-
-Cheers
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
-
-
-
-
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+sage
