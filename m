@@ -1,39 +1,57 @@
 From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: ceph-osd: microbenchmark for 4k read operations
-Date: Wed, 27 May 2015 09:03:18 -0500
-Message-ID: <5565CEA6.8090903@redhat.com>
-References: <20150520181339.0a630c07@doppio>
+Subject: 05/27/2015 Weekly Ceph Performance Meeting IS ON!
+Date: Wed, 27 May 2015 09:14:08 -0500
+Message-ID: <5565D130.4020609@redhat.com>
+Reply-To: mnelson@redhat.com
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:59440 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:34454 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751322AbbE0ODY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 27 May 2015 10:03:24 -0400
-In-Reply-To: <20150520181339.0a630c07@doppio>
+	id S1751527AbbE0OOM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 27 May 2015 10:14:12 -0400
+Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t4REECQK008742
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
+	for <ceph-devel@vger.kernel.org>; Wed, 27 May 2015 10:14:12 -0400
+Received: from [10.3.112.82] (ovpn-112-82.phx2.redhat.com [10.3.112.82])
+	by int-mx14.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t4REE9Vp001310
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+	for <ceph-devel@vger.kernel.org>; Wed, 27 May 2015 10:14:11 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andreas Bluemle <andreas.bluemle@itxperts.de>, Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 05/20/2015 11:13 AM, Andreas Bluemle wrote:
-> Hi,
->
-> as discussed on todays performance meeting: find attached the
-> spreadsheet which I had shown during the meeting.
->
-> @Sam: your are right concerning the make_blist part: this
-> probably is expensive due to message signing being turned on.
-> For the osd daemon which I took the benchmarks, I see
->      "cephx_sign_messages": "true"
->
->
-> Regards
->
-> Andreas
->
+8AM PST as usual! Discussion topics include:  Xiaoxi's newstore latency 
+tests, Andrea's microbenchmark results, Cache tiering.  Please feel free 
+to add your own!
 
-Thank you Andreas!  Looking forward to hearing how much 
-cephx_sign_messages is affecting things.
+Here's the links:
+
+Etherpad URL:
+http://pad.ceph.com/p/performance_weekly
+
+To join the Meeting:
+https://bluejeans.com/268261044
+
+To join via Browser:
+https://bluejeans.com/268261044/browser
+
+To join with Lync:
+https://bluejeans.com/268261044/lync
+
+
+To join via Room System:
+Video Conferencing System: bjn.vc -or- 199.48.152.152
+Meeting ID: 268261044
+
+To join via Phone:
+1) Dial:
+           +1 408 740 7256
+           +1 888 240 2560(US Toll Free)
+           +1 408 317 9253(Alternate Number)
+           (see all numbers - http://bluejeans.com/numbers)
+2) Enter Conference ID: 268261044
 
 Mark
