@@ -1,106 +1,103 @@
-From: Robert LeBlanc <robert-4JaGZRWAfWbajFs6igw21g@public.gmane.org>
-Subject: Re: Memory Allocators and Ceph
-Date: Wed, 27 May 2015 15:00:52 -0600
-Message-ID: <CAANLjFr=f=o4_2admJ9rxdxrB5XBcDy8i2mYzVtEYP_mFZb_Aw@mail.gmail.com>
-References: <CAANLjFpErC4xbwgJgZGWFdMaWQ1Q4otBksyRqP0jfWKnqVacog@mail.gmail.com>
-	<556623AB.9030804@redhat.com>
+From: Yuri Weinstein <yweinste@redhat.com>
+Subject: Re: hammer branch for v0.94.2 ready for QE
+Date: Wed, 27 May 2015 17:12:56 -0400 (EDT)
+Message-ID: <694044148.7711595.1432761176105.JavaMail.zimbra@redhat.com>
+References: <5559DE24.4010601@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <556623AB.9030804-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Mark Nelson <mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx6-phx2.redhat.com ([209.132.183.39]:57884 "EHLO
+	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751486AbbE0VOC convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 May 2015 17:14:02 -0400
+In-Reply-To: <5559DE24.4010601@dachary.org>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Abhishek L <abhishek.lekshmanan@gmail.com>
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA256
+QE validation status.
+
+All detailed information is summarized in http://tracker.ceph.com/issue=
+s/11492
+
+Team leads pls review for do "go"-"no-go" decision.
+
+Issues to be considered:
+
+rados - passed ~2.8K jobs, listed issues (#11660, #11661) are not block=
+ers=20
+(NOTE: we also agreed to use the "0/7th" rule for future point releases=
+, e.g. passing "--subset 0/7" will be sufficient for release)
+
+knfs - #11789, #11790 - per Sage - not blockers; Greg, John - agreed?
+
+samba - I assumed that failured in http://pulpito.ceph.com/teuthology-2=
+015-05-18_13:46:55-samba-hammer-testing-basic-multi/ due to #6613, Greg=
+ pls confirm.
+
+upgrade/client-upgrade - blocked by #11546 (3 jobs passed)
+upgrade/firefly-x - blocked by #11546
+upgrade/dumpling-firefly-x - blocked by #11546
+
+Sage, Loic are you willing to push this release out without upgrade sui=
+tes run due to packaging issues (NOTE: upgrade/giant-x -> hammer passed=
+ on all distros)?
+
+Thx
+YuriW
+
+----- Original Message -----
+=46rom: "Loic Dachary" <loic@dachary.org>
+To: "Yuri Weinstein" <yweinste@redhat.com>
+Cc: "Ceph Development" <ceph-devel@vger.kernel.org>, "Abhishek L" <abhi=
+shek.lekshmanan@gmail.com>
+Sent: Monday, May 18, 2015 5:42:12 AM
+Subject: hammer branch for v0.94.2 ready for QE
+
+Hi Yuri,
+
+The hammer branch for v0.94.2 as found at https://github.com/ceph/ceph/=
+commits/hammer has been approved by Greg, Yehuda, Josh and Sam and is r=
+eady for QE. For the record, the head is https://github.com/ceph/ceph/c=
+ommit/63832d4039889b6b704b88b86eaba4aadcfceb2e and the details of the t=
+ests run are at http://tracker.ceph.com/issues/11492
+
+Note that it has two more commits compared to what you tested before:
+
+https://github.com/ceph/ceph/commit/293affe992118ed6e04f685030b2d83a794=
+ca624 fixing http://tracker.ceph.com/issues/11622
+https://github.com/ceph/ceph/commit/a43d24861089a02f3b42061e482e05016a0=
+021f6 fixing http://tracker.ceph.com/issues/11604
+
+which address two blockers that you listed at http://tracker.ceph.com/i=
+ssues/11492#QE-Validation
+
+These two new commits only have influence, directly or indirectly, on r=
+gw. They do not require or deserve a new run of the rados, fs or rbd su=
+ite because none of them depend on rgw, directly or indirectly.
+
+The other two issues listed as blockers are
+
+http://tracker.ceph.com/issues/11613#note-4 do not need a backport to h=
+ammer
+http://tracker.ceph.com/issues/11591 is a teuthology related issue that=
+ can be worked around and does not need to be a blocker for hammer
+
+Cheers
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
 
-On Wed, May 27, 2015 at 2:06 PM, Mark Nelson  wrote:
->> Compiling Ceph entirely with jemalloc overall had a negative
->> performance impact. This may be due to dynamically linking to RocksDB
->> instead of the default static linking.
->
->
-> Is it possible that there were any other differences?  A 30% gain turning
-> into a 30% loss with pre-loading vs compiling seems pretty crazy!
-
-I tried hard to minimize the differences by backporting the Ceph
-jemalloc feature into 0.94.1 that was used in the other testing. I did
-have to get RocksDB from master to get it to compile against jemalloc
-so there is some difference there. When preloading Ceph with jemalloc,
-parts of Ceph still used tcmalloc because it was statically linked to
-by RocksDB, so it was using both allocators during those tests.
-Programming is not my forte so it is likely that I may have botched
-something with that test.
-
-The goal of the test was to see if and where these allocators may
-help/hinder performance. It could also provide some feedback to Ceph
-devs on how to leverage one or the other or both. I don't consider
-this test to be extremely reliable as there is some variability in
-this pre-production system even though I tried to remove the
-variability to an extent.
-
-I hope others can build on this as a jumping off point and at least
-have some interesting places to look instead of having to scope out a
-large section of the space.
 
 
-> Might be worth trying to reproduce the results and grab perf data or some
-> other kind of trace data during the tests.  There's so much variability here
-> it's really tough to get an idea of why the performance swings so
-> dramatically.
-
-I'm not very familiar with the perf tools (can you use them with
-jemalloc?) and what would be useful. If you would like to tell me some
-configurations and tests you are interested in and let me know how you
-want perf to generate the data, I can see what I can do to provide
-that. Each test suite takes about 9 hours to run so it is pretty
-intensive.
-
-Each "sub-test" (i.e. 4K seq read) takes 5 minutes, so it is much
-easier to run selections of those if there are specific tests you are
-interested in. I'm happy to provide data, but given the time to run
-these tests if we can focus on specific areas it would provide
-data/benefits much faster.
-
->
-> Still, excellent testing!  We definitely need more of this so we can
-> determine if jemalloc is something that would be worth switching to
-> eventually.
->
->
 
 
-- ----------------
-Robert LeBlanc
-GPG Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
------BEGIN PGP SIGNATURE-----
-Version: Mailvelope v0.13.1
-Comment: https://www.mailvelope.com
 
-wsFcBAEBCAAQBQJVZjCACRDmVDuy+mK58QAAsHIQAImJWLkGix2sDKCZgcME
-0RHmelyEBtFFjIUNJvrwC0PvUKqQ/sffdtC+QLLcFYKOO2G5lrojKhCdwhXI
-OP0O1IqMcXUCBcq5yNJf8O6uzQ56Q4qCHWJmg49JRHx4gQLNK9VtGLRevL96
-JNrwhllpI5v+ewuQR/P2uD/NAXhFWDjEXLO4xHQGylOQOOVRQBlWeq+3QLqX
-4Zz+yiY4VIdhSe/z3aQYxes12snyjF2zP2Zo/BS47KBtVbmOJ7wGBGIFy8nw
-T4r7HYapCX3sqAN/fHEvwgcunYaW4y8aZT2a3Lv0PZKz23d6zcOUBPEFJ86W
-DzZyqqmDq7QJLtUnAb1yyQj23bWntI/zoT83zWCUvPHU7odmlBvSWZ8w7ToC
-mpOYjPw5CBVvztCFM2gwnmEXdM0qtmtdv/NhfQVu5+FNhQDSlhOPMCXdM3wf
-2JjuygdfRg4kGE6KyX4nYSZxfacsvX3SIkLnKYsdeWMNMZwGC6TvulApY61s
-sedwbe+hyFqlfGlbM+QCtW495Wr9EcfFdM/PWUDkXtfmfE20UdqAKYzIeJfC
-F8HS5sZz6GtiLb1Dbiq69hNmUUtfDEIDVssARKbMtmZ30bPdNe42grBttzDG
-3aNc05TwFe72HMjAhtvQrkrq1C+4XZA3mpNnosiXCUJT9WeOAOJbzWQS0mUS
-Yrtb
-=+ESo
------END PGP SIGNATURE-----
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
