@@ -1,13 +1,14 @@
-From: Mark Nelson <mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+From: Robert LeBlanc <robert-4JaGZRWAfWbajFs6igw21g@public.gmane.org>
 Subject: Re: Memory Allocators and Ceph
-Date: Wed, 27 May 2015 15:06:03 -0500
-Message-ID: <556623AB.9030804@redhat.com>
+Date: Wed, 27 May 2015 15:00:52 -0600
+Message-ID: <CAANLjFr=f=o4_2admJ9rxdxrB5XBcDy8i2mYzVtEYP_mFZb_Aw@mail.gmail.com>
 References: <CAANLjFpErC4xbwgJgZGWFdMaWQ1Q4otBksyRqP0jfWKnqVacog@mail.gmail.com>
+	<556623AB.9030804@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAANLjFpErC4xbwgJgZGWFdMaWQ1Q4otBksyRqP0jfWKnqVacog-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <556623AB.9030804-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -17,110 +18,89 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Robert LeBlanc <robert-4JaGZRWAfWbajFs6igw21g@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Mark Nelson <mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On 05/27/2015 12:40 PM, Robert LeBlanc wrote:
-> -----BEGIN PGP SIGNED MESSAGE-----
-> Hash: SHA256
->
-> With all the talk of tcmalloc and jemalloc, I decided to do some
-> testing og the different memory allocating technologies between KVM
-> and Ceph. These tests were done a pre-production system so I've tried
-> to remove some the variance with many runs and averages. The details
-> are as follows:
->
-> Ceph v0.94.1 (I backported a branch from master to get full jemalloc
-> support for part of the tests)
-> tcmalloc v2.4-3
-> jemalloc v3.6.0-1
-> QEMU v0.12.1.2-2 (I understand the latest version for RH6/CentOS6)
-> OSDs are only spindles with SSD journals, no SSD tiering
->
-> The 11 Ceph nodes are:
-> CentOS 7.1
-> Linux 3.18.9
-> 1 x Intel E5-2640
-> 64 GB RAM
-> 40 Gb Intel NIC bonded with LACP using jumbo frames
-> 10 x Toshiba MG03ACA400 4 TB 7200 RPM drives
-> 2 x Intel SSDSC2BB240G4 240GB SSD
-> 1 x 32 GB SATADOM for OS
->
-> The KVM node is:
-> CentOS 6.6
-> Linux 3.12.39
-> QEMU v0.12.1.2-2 cache mode none
->
-> The VM is:
-> CentOS 6.6
-> Linux 2.6.32-504
-> fio v2.1.10
->
-> On average preloading Ceph with either tcmalloc or jemalloc showed an
-> increase of performance of about 30% with most performance gains for
-> smaller I/O. Although preloading QEMU with jemalloc provided about a
-> 6% increase on a lightly loaded server, it did not add or subtract a
-> noticeable performance difference combined with Ceph using either
-> tcmalloc or jemalloc.
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
 
-Very interesting tests Robert!
 
+On Wed, May 27, 2015 at 2:06 PM, Mark Nelson  wrote:
+>> Compiling Ceph entirely with jemalloc overall had a negative
+>> performance impact. This may be due to dynamically linking to RocksDB
+>> instead of the default static linking.
 >
-> Compiling Ceph entirely with jemalloc overall had a negative
-> performance impact. This may be due to dynamically linking to RocksDB
-> instead of the default static linking.
+>
+> Is it possible that there were any other differences?  A 30% gain turning
+> into a 30% loss with pre-loading vs compiling seems pretty crazy!
 
-Is it possible that there were any other differences?  A 30% gain 
-turning into a 30% loss with pre-loading vs compiling seems pretty crazy!
+I tried hard to minimize the differences by backporting the Ceph
+jemalloc feature into 0.94.1 that was used in the other testing. I did
+have to get RocksDB from master to get it to compile against jemalloc
+so there is some difference there. When preloading Ceph with jemalloc,
+parts of Ceph still used tcmalloc because it was statically linked to
+by RocksDB, so it was using both allocators during those tests.
+Programming is not my forte so it is likely that I may have botched
+something with that test.
+
+The goal of the test was to see if and where these allocators may
+help/hinder performance. It could also provide some feedback to Ceph
+devs on how to leverage one or the other or both. I don't consider
+this test to be extremely reliable as there is some variability in
+this pre-production system even though I tried to remove the
+variability to an extent.
+
+I hope others can build on this as a jumping off point and at least
+have some interesting places to look instead of having to scope out a
+large section of the space.
+
+
+> Might be worth trying to reproduce the results and grab perf data or some
+> other kind of trace data during the tests.  There's so much variability here
+> it's really tough to get an idea of why the performance swings so
+> dramatically.
+
+I'm not very familiar with the perf tools (can you use them with
+jemalloc?) and what would be useful. If you would like to tell me some
+configurations and tests you are interested in and let me know how you
+want perf to generate the data, I can see what I can do to provide
+that. Each test suite takes about 9 hours to run so it is pretty
+intensive.
+
+Each "sub-test" (i.e. 4K seq read) takes 5 minutes, so it is much
+easier to run selections of those if there are specific tests you are
+interested in. I'm happy to provide data, but given the time to run
+these tests if we can focus on specific areas it would provide
+data/benefits much faster.
 
 >
-> Preloading QEMU with tcmalloc in all cases overall showed very
-> negative results, however it showed the most improvement of any tests
-> in the 1MB tests up to almost 2.5x performance of the baseline. If
-> your workload is guaranteed to be of 1MB I/O (and possibly larger),
-> then this option may be useful.
+> Still, excellent testing!  We definitely need more of this so we can
+> determine if jemalloc is something that would be worth switching to
+> eventually.
 >
-> Based on the architecture of jemalloc, it is possible that with it
-> loaded on the QEMU host may provide more benefit on servers that are
-> closer to memory capacity, but I did not test this scenario.
 >
-> Any feedback regarding this exercise is welcome.
 
-Might be worth trying to reproduce the results and grab perf data or 
-some other kind of trace data during the tests.  There's so much 
-variability here it's really tough to get an idea of why the performance 
-swings so dramatically.
 
-Still, excellent testing!  We definitely need more of this so we can 
-determine if jemalloc is something that would be worth switching to 
-eventually.
+- ----------------
+Robert LeBlanc
+GPG Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
+-----BEGIN PGP SIGNATURE-----
+Version: Mailvelope v0.13.1
+Comment: https://www.mailvelope.com
 
->
-> Data: https://docs.google.com/a/leblancnet.us/spreadsheets/d/1n12IqAOuH2wH-A7Sq5boU8kSEYg_Pl20sPmM0idjj00/edit?usp=sharing
-> Test script is multitest. The real world test is based off of the disk
-> stats of about 100 of our servers which have uptimes of many months.
->
-> - - ----------------
-> Robert LeBlanc
-> GPG Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
-> -----BEGIN PGP SIGNATURE-----
-> Version: Mailvelope v0.13.1
-> Comment: https://www.mailvelope.com
->
-> wsFcBAEBCAAQBQJVZgGRCRDmVDuy+mK58QAAM20QAJh0rR0NIQABCkMjiluP
-> f/mcIiy4MQfFd5RJ9/ZlMRDQ0KDwW7haRm58QE0S/l6ZZ3+z7MqsQOW8KHJE
-> Y75YjEdsl7zrLLcB4wNnUKJXZrPwzFReTtLbXsNB8h73tbzaLp3y9711gbNf
-> EQQujiSp5XDiOK+d+H0FVGp4AfVmFvlO5gjQMSUcUt58qN6BsnD8NbRLEvKf
-> S2WzvJjFO7g1HqWr5QssKGb+1rvze2Z2xByURU8yKVpdX59EIhfzPdgadp/n
-> AJGR2pXWGgW2CQ3ce7gN7cr32cjjWbmzpdr0djgVB5/Y1ERU8FvwNFIwFa6N
-> eFUKCohW5UjMw8CcO9CzUQtQxgKnqeHcyVe6Loamd2eZ+epIupFLI3lQF6NU
-> GSdBV/8Ale1SJuhShY6QnEJFav8nLTvNvlDF/NiBoSUMtnsl5fDTpLH3KA2w
-> o8sT2dcDEJEc9+kzUrugUBElinjOacFcINU3osYZJ0NNi4t1PDtPTUiWChvT
-> jZdpWVGVpxZ3w46csACJZxY0lP/Kd6JoSH+78q7wNivCHeHT7c3uy8KGbKA7
-> fecFaHBAsCYliX1tDN/abZFVhEvdb8AuTGqGkZ7xHj0PAUyddObYGjkStVUw
-> dGOH+nurnFZ5Qqct/gvcbxggbOTGunHLGwtALT5EAtTB1ThlfpVQImy5vKl0
-> aOER
-> =YTTi
-> -----END PGP SIGNATURE-----
->
+wsFcBAEBCAAQBQJVZjCACRDmVDuy+mK58QAAsHIQAImJWLkGix2sDKCZgcME
+0RHmelyEBtFFjIUNJvrwC0PvUKqQ/sffdtC+QLLcFYKOO2G5lrojKhCdwhXI
+OP0O1IqMcXUCBcq5yNJf8O6uzQ56Q4qCHWJmg49JRHx4gQLNK9VtGLRevL96
+JNrwhllpI5v+ewuQR/P2uD/NAXhFWDjEXLO4xHQGylOQOOVRQBlWeq+3QLqX
+4Zz+yiY4VIdhSe/z3aQYxes12snyjF2zP2Zo/BS47KBtVbmOJ7wGBGIFy8nw
+T4r7HYapCX3sqAN/fHEvwgcunYaW4y8aZT2a3Lv0PZKz23d6zcOUBPEFJ86W
+DzZyqqmDq7QJLtUnAb1yyQj23bWntI/zoT83zWCUvPHU7odmlBvSWZ8w7ToC
+mpOYjPw5CBVvztCFM2gwnmEXdM0qtmtdv/NhfQVu5+FNhQDSlhOPMCXdM3wf
+2JjuygdfRg4kGE6KyX4nYSZxfacsvX3SIkLnKYsdeWMNMZwGC6TvulApY61s
+sedwbe+hyFqlfGlbM+QCtW495Wr9EcfFdM/PWUDkXtfmfE20UdqAKYzIeJfC
+F8HS5sZz6GtiLb1Dbiq69hNmUUtfDEIDVssARKbMtmZ30bPdNe42grBttzDG
+3aNc05TwFe72HMjAhtvQrkrq1C+4XZA3mpNnosiXCUJT9WeOAOJbzWQS0mUS
+Yrtb
+=+ESo
+-----END PGP SIGNATURE-----
