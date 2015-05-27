@@ -1,47 +1,57 @@
-From: Travis Rhoden <trhoden@gmail.com>
-Subject: [ANN] ceph-deploy 1.5.25 released
-Date: Tue, 26 May 2015 20:48:18 -0400
-Message-ID: <CACkq2mosAGa+2CW4QeGXsU6m5_7HH-FiBZOe3=rrTd_A1WUrYQ@mail.gmail.com>
+From: Li Wang <liwang@ubuntukylin.com>
+Subject: Some thoughts regarding the new store
+Date: Wed, 27 May 2015 16:41:04 +0800
+Message-ID: <55658320.3060907@ubuntukylin.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f170.google.com ([209.85.214.170]:32837 "EHLO
-	mail-ob0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751364AbbE0Asj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 May 2015 20:48:39 -0400
-Received: by obbnx5 with SMTP id nx5so87806968obb.0
-        for <ceph-devel@vger.kernel.org>; Tue, 26 May 2015 17:48:38 -0700 (PDT)
+Received: from m59-178.qiye.163.com ([123.58.178.59]:47497 "EHLO
+	m59-178.qiye.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752440AbbE0IlW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 May 2015 04:41:22 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>, ceph-announce@lists.ceph.com
+To: Sage Weil <sweil@redhat.com>, Samuel Just <sjust@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi everyone,
+I have just noticed the new store development, and had a
+look at the idea behind it (http://www.spinics.net/lists/ceph-
+devel/msg22712.html), so my understanding, we wanna avoid the
+double-write penalty of WRITE_AHEAD_LOGGING journal mechanism,
+the straightforward thought is to optimize CREATE, APPEND and
+FULL-OBJECT-OVERWRITE by writing into new files directly,
+then update the metadata in a transaction. Other changes include:
+move the object metadata from filesystem extend attrbutes into
+key value database; map an object into possibly multiple files.
 
-This is announcing a new release of ceph-deploy that fixes a security
-related issue, improves SUSE support, and improves support for RGW on
-RPM systems.  ceph-deploy can be installed from ceph.com hosted repos
-for Firefly, Giant, Hammer, and testing, and is also available on
-PyPI.
+If my understanding is correct, then it seems there follows some issues,
 
-Eagle-eyed readers may notice that there was not an announcement for
-1.5.24 -- this was due to package build infrastructure issues that
-prevented the creation of RPM and DEB packages.  By the time the
-issues were resolved, 1.5.25 was imminent, so 1.5.24 packages were not
-created even though 1.5.24 was available through PyPI.
+1 Garbage collection is needed to reclaim orphan files generated
+from crashing;
 
-Full changelog is available at [1], but here are the highlights for
-both 1.5.25 and 1.5.24:
+2 On spinning disks, it loses the advantages that journal makes random
+  writes into sequential writes, then commits them in groups and
+leverages another disk to hide the committing delay.
 
- - Fix CVE where 'ceph-deploy admin' command resulted in admin keyring
-being pushed to remote nodes with world readable (0644) permissions.
- - Fix reference to package name "ceph-radosgw" on RPM systems
- - Fix possible truncated output of "ceph-deploy disk list"
- - More robust deployment of RGW on RPM systems
+3 OVERWRITE theoretically does not benefit from this design, and the
+introducing of fragment, increases the object metadata overhead. The 
+possibly mapping of multiple files may also slow down the object
+read/write performance. OVERWRITE is the major scenario for RBD,
+consequently, for cloud environment.
 
-Please update!
+4 By mapping an object into multiple files, potentially we can optimize
+OVERWRITE by turning it also into APPEND by using small fragments,
+that, actually mimic Btrfs. However, for many small writes, it may
+leave many small files in the backend local file system, that may slow
+down the object read/write performance, especially on spinning
+disk. More importantly, I think it, to some extent, against the
+philosophy of object storage, which uses a big object to store data to
+reduce the metadata cost, and leaves the block management for local
+file system. For a local file system, big file performance is generally
+better than small file. If we introduce fragment, it looks like the
+object storage self cares about the object data allocation now.
+
+What is the community's option?
 
 Cheers,
-
- - Travis
-
-[1] http://ceph.com/ceph-deploy/docs/changelog.html#id2
+Li Wang
