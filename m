@@ -1,41 +1,58 @@
-From: Marcel Lauhoff <ml@irq0.org>
-Subject: Re: OSD-Based Object Stubs
-Date: Thu, 28 May 2015 11:45:12 +0200
-Message-ID: <877frtc9xz.fsf@irq0.org>
-References: <87a8wqct38.fsf@irq0.org> <CAANLjFriAw_RcWvkGBvt_2EwzicTQCF1ygymyDwbi8z4H-i3jQ@mail.gmail.com>
+From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Subject: Re: rgw release notes for hammer v0.94.2 (issue 11570)
+Date: Thu, 28 May 2015 05:58:11 -0400 (EDT)
+Message-ID: <1478009800.5403371.1432807091239.JavaMail.zimbra@redhat.com>
+References: <556638A7.9000802@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cpu0.net ([37.187.2.217]:37549 "EHLO cpu0.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751548AbbE1JpK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 28 May 2015 05:45:10 -0400
-Received: from janelane.irq0.org (x5d82518d.dyn.telefonica.de [93.130.81.141])
-	by ks3366964.kimsufi.com (Postfix) with ESMTPSA id 307878029A
-	for <ceph-devel@vger.kernel.org>; Thu, 28 May 2015 09:45:08 +0000 (UTC)
-In-reply-to: <CAANLjFriAw_RcWvkGBvt_2EwzicTQCF1ygymyDwbi8z4H-i3jQ@mail.gmail.com>
+Received: from mx6-phx2.redhat.com ([209.132.183.39]:54200 "EHLO
+	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751673AbbE1J7O convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 May 2015 05:59:14 -0400
+In-Reply-To: <556638A7.9000802@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Robert LeBlanc <robert@leblancnet.us>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
+I updated the release notes and sent a pull request.
 
-Robert LeBlanc <robert@leblancnet.us> writes:
+Thanks,
+Yehuda
 
-> -----BEGIN PGP SIGNED MESSAGE-----
-> Hash: SHA256
->
-> At first I thought this was to allow the OSDs to stub the location of
-> the real data after a CRUSH map change so that it didn't have to
-> relocate the data right away (or at all) and reduce the  number of map
-> changes. Then I realized it was for cold storage tiering. Is the idea
-> to be able to move data off to near-line storage like tape?
-
-Yes, cold storage. Basically, let the OSD move data elsewhere like tape or some
-archive system.
-
-~marcel
+----- Original Message -----
+> From: "Loic Dachary" <loic@dachary.org>
+> To: "Yehuda Sadeh" <yehuda@redhat.com>
+> Cc: "Ceph Development" <ceph-devel@vger.kernel.org>
+> Sent: Wednesday, May 27, 2015 2:35:35 PM
+> Subject: rgw release notes for hammer v0.94.2 (issue 11570)
+>=20
+> Hi Yehuda,
+>=20
+> Reading http://tracker.ceph.com/issues/11570#note-6 it looks like it =
+would be
+> good to include something in the release notes for hammer v0.94.2. Wo=
+uld you
+> mind updating http://ceph.com/docs/master/release-notes/#hammer-draft=
+ if you
+> think it's relevant ?
+>=20
+> Note that we're still conducting tests on v0.94.2 so this is not the =
+only
+> blocker: there is no immediate urgency ;-) I hope tests will complete=
+ by the
+> end of the week though.
+>=20
+> Cheers
+>=20
+> --
+> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>=20
+>=20
 --
-Marcel Lauhoff
-Mail/XMPP: ml@irq0.org
-http://irq0.org
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
