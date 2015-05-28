@@ -1,65 +1,63 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: preparing v0.80.11
-Date: Thu, 28 May 2015 06:53:47 +0200
-Message-ID: <55669F5B.8050309@42on.com>
-References: <5562DEEC.5060602@dachary.org> <5564D772.9080909@suse.cz>
+From: kefu chai <tchaikov@gmail.com>
+Subject: Re: Chinese Language List
+Date: Thu, 28 May 2015 12:59:21 +0800
+Message-ID: <CAJE9aONwE7zcsS55jZwDMraPE8UEg+AoFGhG14ULXR6wMk80aA@mail.gmail.com>
+References: <CAAZbbf3UwBtVm-aFM8JwseKjFjvLa0W34z-YEd0cb=xRjYo4Ag@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from websrv.42on.com ([31.25.102.167]:33204 "EHLO websrv.42on.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750716AbbE1Ext (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 28 May 2015 00:53:49 -0400
-In-Reply-To: <5564D772.9080909@suse.cz>
+Received: from mail-ig0-f176.google.com ([209.85.213.176]:36626 "EHLO
+	mail-ig0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751109AbbE1E7W (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 May 2015 00:59:22 -0400
+Received: by igbpi8 with SMTP id pi8so102758400igb.1
+        for <ceph-devel@vger.kernel.org>; Wed, 27 May 2015 21:59:22 -0700 (PDT)
+In-Reply-To: <CAAZbbf3UwBtVm-aFM8JwseKjFjvLa0W34z-YEd0cb=xRjYo4Ag@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nathan Cutler <ncutler@suse.cz>, Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Patrick McGarry <pmcgarry@redhat.com>
+Cc: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
 
-On 05/26/2015 10:28 PM, Nathan Cutler wrote:
-> Hi Loic:
-> 
-> The first round of 0.80.11 backports, including all trivial backports
-> (where "trivial" is defined as those I was able to do by myself without
-> help), is now ready for integration testing in the "firefly-backports"
-> branch of the SUSE fork:
-> 
+On Wed, May 27, 2015 at 3:36 AM, Patrick McGarry <pmcgarry@redhat.com> wrote:
+> Due to popular demand we are expanding the Ceph lists to include a
+> Chinese-language list to allow for direct communications for all of
+> our friends in China.
+>
+> ceph-cn@lists.ceph.com
+>
+> It was decided that there are many fragmented discussions going on in
+> the region due to unfamiliarity or discomfort with English. Hopefully
+> this will allow for smooth communications between anyone in China that
+> is interested in Ceph!
 
-Would it be possible to backport this as well to 0.80.11:
+that's a great news ! Patrick, could you please also update
+https://ceph.com/resources/mailing-list-irc/ ?
 
-http://tracker.ceph.com/issues/9792#change-46498
+>
+> I would greatly appreciate it if important
+> messages/announcements/questions could be translated and forwarded by
+> anyone that is able to translate them so that the greater community
+> can still benefit. Thanks.
 
-And I think this commit would be the easiest to backport:
-https://github.com/ceph/ceph/commit/6b982e4cc00f9f201d7fbffa0282f8f3295f2309
+will try to proxy some of the traffic here =)
 
-This way we add a simple safeguard against pool removal into Firefly as
-well.
-
-Wido
-
-> https://github.com/SUSE/ceph/commits/firefly-backports
-> 
-> The non-trivial backports (on which I hereby solicit help) are:
-> 
-> http://tracker.ceph.com/issues/11699 Objecter: resend linger ops on split
-> http://tracker.ceph.com/issues/11700 make the all osd/filestore thread
-> pool suicide timeouts separately configurable
-> http://tracker.ceph.com/issues/11704 erasure-code: misalignment
-> http://tracker.ceph.com/issues/11720 rgw deleting S3 objects leaves
-> __shadow_ objects behind
-> 
-> Nathan
-> -- 
+>
+>
+> --
+>
+> Best Regards,
+>
+> Patrick McGarry
+> Director Ceph Community || Red Hat
+> http://ceph.com  ||  http://community.redhat.com
+> @scuttlemonkey || @ceph
+> --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 
--- 
-Wido den Hollander
-42on B.V.
-Ceph trainer and consultant
 
-Phone: +31 (0)20 700 9902
-Skype: contact42on
+-- 
+Regards
+Kefu Chai
