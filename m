@@ -1,23 +1,23 @@
 From: Dan van der Ster <dan@vanderster.com>
-Subject: selinux scanning all OSD objects
-Date: Thu, 28 May 2015 14:30:31 +0200
-Message-ID: <CABZ+qq=-rGfsk4MJo-PWm2-9PzxxfocpH=b1CRMW1aUsF=vqbQ@mail.gmail.com>
+Subject: python-ceph centos7 epel issues
+Date: Thu, 28 May 2015 15:38:51 +0200
+Message-ID: <CABZ+qq==Dr-VAmnNjUSK5vyGhHZFw88pBFiVGBQxLS=JMAt_MA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f176.google.com ([209.85.214.176]:33860 "EHLO
-	mail-ob0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932103AbbE1MbO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 May 2015 08:31:14 -0400
-Received: by obew15 with SMTP id w15so31403043obe.1
-        for <ceph-devel@vger.kernel.org>; Thu, 28 May 2015 05:31:13 -0700 (PDT)
-Received: from mail-ob0-f179.google.com (mail-ob0-f179.google.com. [209.85.214.179])
-        by mx.google.com with ESMTPSA id t20sm1124070oie.22.2015.05.28.05.31.12
+Received: from mail-ob0-f182.google.com ([209.85.214.182]:34578 "EHLO
+	mail-ob0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751556AbbE1Nje (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 May 2015 09:39:34 -0400
+Received: by obew15 with SMTP id w15so32939593obe.1
+        for <ceph-devel@vger.kernel.org>; Thu, 28 May 2015 06:39:33 -0700 (PDT)
+Received: from mail-oi0-f50.google.com (mail-oi0-f50.google.com. [209.85.218.50])
+        by mx.google.com with ESMTPSA id qx8sm1189679oeb.15.2015.05.28.06.39.32
         for <ceph-devel@vger.kernel.org>
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 28 May 2015 05:31:12 -0700 (PDT)
-Received: by obew15 with SMTP id w15so31402389obe.1
-        for <ceph-devel@vger.kernel.org>; Thu, 28 May 2015 05:31:11 -0700 (PDT)
+        Thu, 28 May 2015 06:39:32 -0700 (PDT)
+Received: by oifu123 with SMTP id u123so32328995oif.1
+        for <ceph-devel@vger.kernel.org>; Thu, 28 May 2015 06:39:31 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Ken Dreyer <kdreyer@redhat.com>
@@ -25,15 +25,19 @@ Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
 Hi Ken,
 
-I had forgotten about this issue:
+I'm having trouble installing ceph cleanly on CentOS 7 -- I guess this
+is related to https://bugzilla.redhat.com/1193182.
 
-  http://tracker.ceph.com/issues/9927
+(1) If I disable epel-testing, and have check_obsoletes = 1, then the
+install works [ http://pastebin.com/gvHbRJ3T ].
 
-(as you see, it's similar to the updatedb indexing issue you recently
-inquired about)
+(2) With epel-testing enabled -- to get your new -0.5 "fixed"
+python-ceph rpms -- the install fails in two different ways, depending
+on check_obsoletes. With check_obsoletes = 1 [
+http://pastebin.com/AWRdP2Hh ] and without it [
+http://pastebin.com/8Uxj6N1s ]
 
-I didn't check, but I suspect this still affects major version
-upgrades also in RHEL7. Do you think this should also be sent
-upstream?
+Do you understand what's happening with the -0.5 package? In the
+meantime we're doing (1) above to install ceph.
 
-Cheers, Dan
+Thanks, Dan
