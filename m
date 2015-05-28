@@ -1,57 +1,69 @@
-From: Ken Dreyer <kdreyer@redhat.com>
-Subject: Re: python-ceph centos7 epel issues
-Date: Thu, 28 May 2015 12:02:44 -0400 (EDT)
-Message-ID: <1595601325.6118136.1432828964873.JavaMail.zimbra@redhat.com>
-References: <CABZ+qq==Dr-VAmnNjUSK5vyGhHZFw88pBFiVGBQxLS=JMAt_MA@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: rados and the next firefly release v0.80.10
+Date: Thu, 28 May 2015 18:09:49 +0200
+Message-ID: <55673DCD.7030903@dachary.org>
+References: <555F89CA.8080005@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="BLmlGgONRhINA82PGfxiaGKr1weUxIOxf"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx5-phx2.redhat.com ([209.132.183.37]:45133 "EHLO
-	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754384AbbE1QCr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 May 2015 12:02:47 -0400
-In-Reply-To: <CABZ+qq==Dr-VAmnNjUSK5vyGhHZFw88pBFiVGBQxLS=JMAt_MA@mail.gmail.com>
+Received: from mail2.dachary.org ([91.121.57.175]:52537 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1753291AbbE1QJx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 May 2015 12:09:53 -0400
+In-Reply-To: <555F89CA.8080005@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan van der Ster <dan@vanderster.com>
-Cc: ceph-devel@vger.kernel.org
+To: Samuel Just <sjust@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, "Shu, Xinxin" <xinxin.shu@intel.com>
 
-I've been trying to debug this issue, and it's why I haven't pushed that epel-testing package to stable yet. Your email is helping to illuminate a bit more what is happening. Today I've unpushed -0.5 from epel-testing in Bodhi because it's clear -0.5 doesn't resolve the situation and just makes it worse for you guys. We need more fixes in a -0.6 EPEL release.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--BLmlGgONRhINA82PGfxiaGKr1weUxIOxf
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-My hunch is that we need to do two separate things to resolve this situation:
+For the record:
 
-1) Bump the RPM Epoch in Firefly upstream to "1", to bring sanity to the version number comparisons that the EPEL packages are doing,
+[28.05 18:09] <sjusthm> loicd: you have my ack
 
-2) Add additional version numbers to the Obsoletes that ceph-devel-compat and python-ceph-compat packages in EPEL are doing.
+On 22/05/2015 21:55, Loic Dachary wrote:
+> Hi Sam,
+>=20
+> The next firefly release as found at https://github.com/ceph/ceph/tree/=
+firefly (68211f695941ee128eb9a7fd0d80b615c0ded6cf) passed the rados suite=
+ (http://tracker.ceph.com/issues/11090#rados). It includes https://github=
+=2Ecom/ceph/ceph/pull/4556 which is the pull request backporting the fix =
+for "OSD::load_pgs: we need to handle the case where an upgrade from earl=
+ier versions which ignored non-existent pgs resurrects a pg with a prehis=
+toric osdmap" http://tracker.ceph.com/issues/11429 to firefly (the corres=
+ponding ceph-qa-suite pull request https://github.com/ceph/ceph-qa-suite/=
+pull/435 has also been tested and merged).
+>=20
+> Do you think it is ready for QE to start their own round of testing ?
+>=20
+> Cheers
+>=20
+> P.S. http://tracker.ceph.com/issues/11090#Release-information has direc=
+t links to the pull requests merged into firefly since v0.80.9 in case yo=
+u need more context about one of them.
+>=20
 
-I'll try testing this combination with some scratch builds.
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
-- Ken
 
------ Original Message -----
-> From: "Dan van der Ster" <dan@vanderster.com>
-> To: "Ken Dreyer" <kdreyer@redhat.com>
-> Cc: ceph-devel@vger.kernel.org
-> Sent: Thursday, May 28, 2015 7:38:51 AM
-> Subject: python-ceph centos7 epel issues
-> 
-> Hi Ken,
-> 
-> I'm having trouble installing ceph cleanly on CentOS 7 -- I guess this
-> is related to https://bugzilla.redhat.com/1193182.
-> 
-> (1) If I disable epel-testing, and have check_obsoletes = 1, then the
-> install works [ http://pastebin.com/gvHbRJ3T ].
-> 
-> (2) With epel-testing enabled -- to get your new -0.5 "fixed"
-> python-ceph rpms -- the install fails in two different ways, depending
-> on check_obsoletes. With check_obsoletes = 1 [
-> http://pastebin.com/AWRdP2Hh ] and without it [
-> http://pastebin.com/8Uxj6N1s ]
-> 
-> Do you understand what's happening with the -0.5 package? In the
-> meantime we're doing (1) above to install ceph.
-> 
-> Thanks, Dan
-> 
+--BLmlGgONRhINA82PGfxiaGKr1weUxIOxf
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlVnPc0ACgkQ8dLMyEl6F21XiACgqjubjOK3fRFZHYfy7A4O/9lF
+r4UAoKAAxB6XuwNjX737MgekDhNju4Nf
+=c0d8
+-----END PGP SIGNATURE-----
+
+--BLmlGgONRhINA82PGfxiaGKr1weUxIOxf--
