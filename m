@@ -1,71 +1,65 @@
-From: Andrew Bartlett <abartlet@catalyst.net.nz>
-Subject: Interested in ceph OSD encryption and key management
-Date: Thu, 28 May 2015 16:23:25 +1200
-Message-ID: <1432787005.11787.33.camel@catalyst.net.nz>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: preparing v0.80.11
+Date: Thu, 28 May 2015 06:53:47 +0200
+Message-ID: <55669F5B.8050309@42on.com>
+References: <5562DEEC.5060602@dachary.org> <5564D772.9080909@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from bertrand.catalyst.net.nz ([202.78.240.40]:49805 "EHLO
-	mail.catalyst.net.nz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750886AbbE1EbC (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 May 2015 00:31:02 -0400
-Received: from localhost (localhost [127.0.0.1])
-	by mail.catalyst.net.nz (Postfix) with ESMTP id E55A232C74
-	for <ceph-devel@vger.kernel.org>; Thu, 28 May 2015 16:23:26 +1200 (NZST)
-Received: from mail.catalyst.net.nz ([127.0.0.1])
-	by localhost (bertrand.catalyst.net.nz [127.0.0.1]) (amavisd-new, port 10024)
-	with ESMTP id w5OJ4XtXS-mX for <ceph-devel@vger.kernel.org>;
-	Thu, 28 May 2015 16:23:25 +1200 (NZST)
-Received: from ruth (unknown [IPv6:2404:130:0:1000:7254:d2ff:feab:168d])
-	(Authenticated sender: abartlet)
-	by mail.catalyst.net.nz (Postfix) with ESMTPSA id 5DD5432C17
-	for <ceph-devel@vger.kernel.org>; Thu, 28 May 2015 16:23:25 +1200 (NZST)
+Received: from websrv.42on.com ([31.25.102.167]:33204 "EHLO websrv.42on.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750716AbbE1Ext (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 28 May 2015 00:53:49 -0400
+In-Reply-To: <5564D772.9080909@suse.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Nathan Cutler <ncutler@suse.cz>, Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-David Disseldorp was good enough to point me at this proposal for ceph
-OSD key management:
-https://wiki.ceph.com/Planning/Blueprints/Infernalis/osd%3A_simple_ceph-mon_dm-crypt_key_management
+On 05/26/2015 10:28 PM, Nathan Cutler wrote:
+> Hi Loic:
+> 
+> The first round of 0.80.11 backports, including all trivial backports
+> (where "trivial" is defined as those I was able to do by myself without
+> help), is now ready for integration testing in the "firefly-backports"
+> branch of the SUSE fork:
+> 
 
-I'm really interested in improving ceph on-disk encryption, and am
-really glad folks are taking this beyond the local key storage we have
-managed so far. 
+Would it be possible to backport this as well to 0.80.11:
 
-So I can be part of the discussion, how do I get a login to the wiki?  I
-would like to indicate my interest there.
+http://tracker.ceph.com/issues/9792#change-46498
 
-Regarding the proposal:
+And I think this commit would be the easiest to backport:
+https://github.com/ceph/ceph/commit/6b982e4cc00f9f201d7fbffa0282f8f3295f2309
 
-In the default mode suggested in the wiki, my primary concern is that
-I'm told, in a number of deployments, the monitor node is the same
-server that also holds the OSDs, so we don't gain anything for those
-cases over the /etc storage.
+This way we add a simple safeguard against pool removal into Firefly as
+well.
 
-In those cases, the hooks suggested in the wiki will be key, as will be
-having those configurable in ceph.conf, so ceph-deploy can just pass it
-down to all the nodes as they are built, just as the other dmcrypt
-options are.  
+Wido
 
-I would like to see three things hookable:
- - the command to obtain the key (on stdout)
- - to encrypt the key (so we can additionally pass it
-via gpg, a HSM or remote encrypt/decrypt service)
- - to decrypt the key
-
-
-Thanks,
-
-Andrew Bartlett
+> https://github.com/SUSE/ceph/commits/firefly-backports
+> 
+> The non-trivial backports (on which I hereby solicit help) are:
+> 
+> http://tracker.ceph.com/issues/11699 Objecter: resend linger ops on split
+> http://tracker.ceph.com/issues/11700 make the all osd/filestore thread
+> pool suicide timeouts separately configurable
+> http://tracker.ceph.com/issues/11704 erasure-code: misalignment
+> http://tracker.ceph.com/issues/11720 rgw deleting S3 objects leaves
+> __shadow_ objects behind
+> 
+> Nathan
+> -- 
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 
 -- 
-Andrew Bartlett
-http://samba.org/~abartlet/
-Authentication Developer, Samba Team  http://samba.org
-Samba Developer, Catalyst IT          http://catalyst.net.nz/services/samba
+Wido den Hollander
+42on B.V.
+Ceph trainer and consultant
 
-
-
-
+Phone: +31 (0)20 700 9902
+Skype: contact42on
