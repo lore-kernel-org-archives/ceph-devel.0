@@ -1,101 +1,133 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Interested in ceph OSD encryption and key management
-Date: Thu, 28 May 2015 13:03:59 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1505281257490.6462@cobra.newdream.net>
-References: <1432787005.11787.33.camel@catalyst.net.nz>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: LRC ec pool behaviour
+Date: Thu, 28 May 2015 22:54:54 +0200
+Message-ID: <5567809E.3010103@dachary.org>
+References: <CAMxOGo2Te_jSVMEp6FeE9VdbjFi-WaY3Ud498V3g_QEtPq1hPQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="tEQNWeand80m2wEaAX9h7rulbTjSiwalX"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:35911 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751303AbbE1UEA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 May 2015 16:04:00 -0400
-In-Reply-To: <1432787005.11787.33.camel@catalyst.net.nz>
+Received: from mail2.dachary.org ([91.121.57.175]:52692 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1754006AbbE1Uy5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 May 2015 16:54:57 -0400
+In-Reply-To: <CAMxOGo2Te_jSVMEp6FeE9VdbjFi-WaY3Ud498V3g_QEtPq1hPQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andrew Bartlett <abartlet@catalyst.net.nz>, mbroz@redhat.com
+To: shylesh kumar <shylesh.mohan@gmail.com>
 Cc: ceph-devel@vger.kernel.org
 
-Hi Andrew,
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--tEQNWeand80m2wEaAX9h7rulbTjSiwalX
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-I'm copying Milan Broz, who has looked at this ome. There was some 
-subsequent off-list discussion in Red Hat about using Petera[1] for the 
-key management, but this'll require a bit more effort than what was 
-described in that blueprint.
+Hi Shylesh,
 
-On Thu, 28 May 2015, Andrew Bartlett wrote:
-> David Disseldorp was good enough to point me at this proposal for ceph
-> OSD key management:
-> https://wiki.ceph.com/Planning/Blueprints/Infernalis/osd%3A_simple_ceph-mon_dm-crypt_key_management
-> 
-> I'm really interested in improving ceph on-disk encryption, and am
-> really glad folks are taking this beyond the local key storage we have
-> managed so far. 
-> 
-> So I can be part of the discussion, how do I get a login to the wiki?  I
-> would like to indicate my interest there.
+On 28/05/2015 21:25, shylesh kumar wrote:
+> Hi,
+>=20
+> I created a LRC ec pool with the configuration
+>=20
+> # ceph osd erasure-code-profile get  mylrc
+> directory=3D/usr/lib64/ceph/erasure-code
+> k=3D4
+> l=3D3
+> m=3D2
+> plugin=3Dlrc
+> ruleset-failure-domain=3Dosd
+>=20
+>=20
+>=20
+>=20
+> One of the pg mapping looks like
+> ----------------
+> 11.4    579     0       0       0       0       11204014080     6      =
+ 6       active+clean    2015-05-28 10:14:40.937902      6771'15221      =
+6771:16093      [0,1,9,2,8,6,7,4]       0       [0,1,9,2,8,6,7,4]       0=
+       6746'2718       2015-05-28 03:07:01.864631      0'0     2015-05-21=
+ 03:37:24.438653
+>=20
+>=20
+> I am appending data  to an object in the above pg with the follwoing sn=
+ippet using librados
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>   {
+>                 char hello[4096] =3D {0,};
+>                 (void) memcpy (hello, "hello world", 11);
+>                 librados::bufferlist bl;
+>                 bl.append(hello, 4096);
+>=20
+>                 int i=3D5000;
+>                 while (i > 0)    {
+>                 ret =3D io_ctx.append("another2", bl, 4096);
+>                 if (ret < 0) {
+>                         std::cerr << "Couldn't write object! error " <<=
+ ret << std::endl;
+>                 //        exit(EXIT_FAILURE);
+>                 } else {
+>                         std::cout << "Wrote new object 'newobj' " << st=
+d::endl;
+>                 }
+>                 i--;
+>                 }
+>         }
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>=20
+>=20
+> I could see that stripe_0 is on osd.0 , till now I wrote data nearly 7M=
+B , all the data is going to osd.0 and stripe_1 is on osd.1 with just a t=
+runcated file with no data ..osd.9 has global parity etc..
 
-The wiki logins are broken, but ignore that.. we're moving to 
-tracker.ceph.com's wiki shortly anyway.  Email is best in the meantime!
+That does not seem right.=20
 
-> Regarding the proposal:
-> 
-> In the default mode suggested in the wiki, my primary concern is that
-> I'm told, in a number of deployments, the monitor node is the same
-> server that also holds the OSDs, so we don't gain anything for those
-> cases over the /etc storage.
-> 
-> In those cases, the hooks suggested in the wiki will be key, as will be
-> having those configurable in ceph.conf, so ceph-deploy can just pass it
-> down to all the nodes as they are built, just as the other dmcrypt
-> options are.  
-> 
-> I would like to see three things hookable:
->  - the command to obtain the key (on stdout)
-
-- a command to publish/store a new key (from ceph-disk create)
-
->  - to encrypt the key (so we can additionally pass it
-> via gpg, a HSM or remote encrypt/decrypt service)
->  - to decrypt the key
-
-Not quite sure what you have in mind here?
-
-I think the key things I'd like to see in any effort here is
-
- 1- keep the actual decryption key in LUKS and store the LUKS key in the 
-key escrow location.  The original dm-crypt stuff kept the actual key 
-in /etc/ceph/keys, but that makes it hard to track key provenance, and 
-also fixes the encryption algorithm... LUKS is more robust.
-
- 2- make the key management pluggable, so that we can use petera, 
-/etc/ceph/keys, the ceph mons, or something else.
-
-Thanks!
-sage
+> I was wondering is there any chunk size limit in LRC so that it will no=
+t write to other stripes till it fills upto the chunk size in one stripe.=
 
 
-[1] https://github.com/npmccallum/petera
+To assert if you have discovered a problem, I wrote a test case that look=
+ similar to what you describe. You can repeat it with https://github.com/=
+ceph/ceph/pull/4797 as follows:
 
-> 
-> 
-> Thanks,
-> 
-> Andrew Bartlett
-> 
-> 
-> -- 
-> Andrew Bartlett
-> http://samba.org/~abartlet/
-> Authentication Developer, Samba Team  http://samba.org
-> Samba Developer, Catalyst IT          http://catalyst.net.nz/services/samba
-> 
-> 
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+  git clone -b wip-11665-erasure-code-lrc https://github.com/dachary/ceph=
+ ceph
+  cd ceph
+  ./run-make-check.sh
+
+and repeat it after that with
+
+  cd ceph/src
+  test/osd/osd-scrub-repair.sh TEST_corrupt_and_repair_lrc
+
+I would be happy to repeat the problem you had if you provide me with spe=
+cific instructions to do so.=20
+
+Cheers
+
+>=20
+>=20
+>=20
+> --=20
+> Thanks=20
+> Shylesh
+> =20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--tEQNWeand80m2wEaAX9h7rulbTjSiwalX
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlVngJ4ACgkQ8dLMyEl6F20OagCgp+0kLUyJi/KCuJDSrJneaoke
+QZ0AoIFwFIydohDT7wU01cLQJXICJg4G
+=d1Po
+-----END PGP SIGNATURE-----
+
+--tEQNWeand80m2wEaAX9h7rulbTjSiwalX--
