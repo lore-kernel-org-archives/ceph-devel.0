@@ -1,42 +1,41 @@
-From: Ugis <ugis22@gmail.com>
-Subject: ceph recovery policy
-Date: Thu, 28 May 2015 12:43:00 +0300
-Message-ID: <CAE63xUPYX=d-Xq4Qq1nnw_JvYBda3DtQYKrn_BkeN8baOxmoZw@mail.gmail.com>
+From: Marcel Lauhoff <ml@irq0.org>
+Subject: Re: OSD-Based Object Stubs
+Date: Thu, 28 May 2015 11:45:12 +0200
+Message-ID: <877frtc9xz.fsf@irq0.org>
+References: <87a8wqct38.fsf@irq0.org> <CAANLjFriAw_RcWvkGBvt_2EwzicTQCF1ygymyDwbi8z4H-i3jQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f175.google.com ([209.85.213.175]:37930 "EHLO
-	mail-ig0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752150AbbE1JnA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 May 2015 05:43:00 -0400
-Received: by igbjd9 with SMTP id jd9so19605875igb.1
-        for <ceph-devel@vger.kernel.org>; Thu, 28 May 2015 02:43:00 -0700 (PDT)
+Received: from cpu0.net ([37.187.2.217]:37549 "EHLO cpu0.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751548AbbE1JpK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 28 May 2015 05:45:10 -0400
+Received: from janelane.irq0.org (x5d82518d.dyn.telefonica.de [93.130.81.141])
+	by ks3366964.kimsufi.com (Postfix) with ESMTPSA id 307878029A
+	for <ceph-devel@vger.kernel.org>; Thu, 28 May 2015 09:45:08 +0000 (UTC)
+In-reply-to: <CAANLjFriAw_RcWvkGBvt_2EwzicTQCF1ygymyDwbi8z4H-i3jQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Robert LeBlanc <robert@leblancnet.us>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi!
 
-I have been watching changes in "ceph -s" output for a while and
-noticed that in this line:
- 3324/7888981 objects degraded (0.042%); 1995972/7888981 objects
-misplaced (25.301%)
-rather misplaced object count drops constantly, but degraded object
-count drops just occasionally.
+Robert LeBlanc <robert@leblancnet.us> writes:
 
-Quick googling did not reveal any mention of recovery/rebalancing
-policy(except client vs recovery io).
-Is there any?
-I mean - it would be reasonable to recover degraded objects in first
-place and only then to rebalance misplaced objects as that would
-reduce risk of losing data.
+> -----BEGIN PGP SIGNED MESSAGE-----
+> Hash: SHA256
+>
+> At first I thought this was to allow the OSDs to stub the location of
+> the real data after a CRUSH map change so that it didn't have to
+> relocate the data right away (or at all) and reduce the  number of map
+> changes. Then I realized it was for cold storage tiering. Is the idea
+> to be able to move data off to near-line storage like tape?
 
-That could be default recovey policy, but if other policy needed -
-that could be specifyable via some recovery variable, like it is now
-in recovery section here:
-http://dachary.org/loic/ceph-doc/rados/configuration/osd-config-ref/
+Yes, cold storage. Basically, let the OSD move data elsewhere like tape or some
+archive system.
 
-P.S. no active client I/O currently present.
-
-Best regards,
-Ugis
+~marcel
+--
+Marcel Lauhoff
+Mail/XMPP: ml@irq0.org
+http://irq0.org
