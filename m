@@ -1,55 +1,90 @@
-From: "Deneau, Tom" <tom.deneau@amd.com>
-Subject: RE: rados bench throughput with no disk or network activity
-Date: Thu, 28 May 2015 23:50:39 +0000
-Message-ID: <BC97738F8E7C8742BABED7F06FB9DF9166995BA6@satlexdag04.amd.com>
+From: Milosz Tanski <milosz@adfin.com>
+Subject: Re: rados bench throughput with no disk or network activity
+Date: Thu, 28 May 2015 20:41:30 -0400
+Message-ID: <CANP1eJGdzNJJEH8eBLrCCi5iRySSK7h6EQ-+3=7KfwpTLDG6kA@mail.gmail.com>
 References: <BC97738F8E7C8742BABED7F06FB9DF9166995A9B@satlexdag04.amd.com>
- <CAC6JEv82uAz2kwZM9iRfkMSdtUx=AJ03ZBDW4v598sWE-7B53Q@mail.gmail.com>
+	<CAC6JEv82uAz2kwZM9iRfkMSdtUx=AJ03ZBDW4v598sWE-7B53Q@mail.gmail.com>
+	<BC97738F8E7C8742BABED7F06FB9DF9166995BA6@satlexdag04.amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1bon0114.outbound.protection.outlook.com ([157.56.111.114]:52993
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1754677AbbE2AFQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 28 May 2015 20:05:16 -0400
-In-Reply-To: <CAC6JEv82uAz2kwZM9iRfkMSdtUx=AJ03ZBDW4v598sWE-7B53Q@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-lb0-f181.google.com ([209.85.217.181]:33359 "EHLO
+	mail-lb0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752079AbbE2Alc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 May 2015 20:41:32 -0400
+Received: by lbcue7 with SMTP id ue7so38994763lbc.0
+        for <ceph-devel@vger.kernel.org>; Thu, 28 May 2015 17:41:30 -0700 (PDT)
+In-Reply-To: <BC97738F8E7C8742BABED7F06FB9DF9166995BA6@satlexdag04.amd.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@gregs42.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: "Deneau, Tom" <tom.deneau@amd.com>
+Cc: Gregory Farnum <greg@gregs42.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogR3JlZ29yeSBGYXJudW0g
-W21haWx0bzpncmVnQGdyZWdzNDIuY29tXQ0KPiBTZW50OiBUaHVyc2RheSwgTWF5IDI4LCAyMDE1
-IDY6MTggUE0NCj4gVG86IERlbmVhdSwgVG9tDQo+IENjOiBjZXBoLWRldmVsDQo+IFN1YmplY3Q6
-IFJlOiByYWRvcyBiZW5jaCB0aHJvdWdocHV0IHdpdGggbm8gZGlzayBvciBuZXR3b3JrIGFjdGl2
-aXR5DQo+IA0KPiBPbiBUaHUsIE1heSAyOCwgMjAxNSBhdCA0OjA5IFBNLCBEZW5lYXUsIFRvbSA8
-dG9tLmRlbmVhdUBhbWQuY29tPiB3cm90ZToNCj4gPiBJJ3ZlIG5vdGljZWQgdGhhdA0KPiA+ICAg
-ICogd2l0aCBhIHNpbmdsZSBub2RlIGNsdXN0ZXIgd2l0aCA0IG9zZHMNCj4gPiAgICAqIGFuZCBy
-dW5uaW5nIHJhZG9zIGJlbmNoIHJhbmQgb24gdGhhdCBzYW1lIG5vZGUgc28gbm8gbmV0d29yayB0
-cmFmZmljDQo+ID4gICAgKiB3aXRoIGEgbnVtYmVyIG9mIG9iamVjdHMgc21hbGwgZW5vdWdoIHNv
-IHRoYXQgZXZlcnl0aGluZyBpcyBpbg0KPiA+IHRoZSBjYWNoZSBzbyBubyBkaXNrIHRyYWZmaWMN
-Cj4gPg0KPiA+IHdlIHN0aWxsIHBlYWsgb3V0IGF0IGFib3V0IDE2MDAgTUIvc2VjLg0KPiA+DQo+
-ID4gQW5kIHRoZSBjcHUgaXMgNDAlIGlkbGUuIChhbmQgYSBnb29kIGNodW5rIG9mIHRoZSBjcHUg
-YWN0aXZpdHkgaXMgdGhlDQo+ID4gcmFkb3MgYmVuY2htYXJrIGl0c2VsZikNCj4gPg0KPiA+IFdo
-YXQgaXMgbGlrZWx5IGNhdXNpbmcgdGhlIHRocm90dGxpbmcgaGVyZT8NCj4gDQo+IFdlbGwsIHJh
-ZG9zIGJlbmNoIGl0c2VsZiBpcyBlc3NlbnRpYWxseSBzaW5nbGUtdGhyZWFkZWQsIHNvIGlmIGl0
-J3MgdXNpbmcNCj4gMTAwJSBDUFUgdGhhdCdzIHByb2JhYmx5IHRoZSBib3R0bGVuZWNrIHlvdSdy
-ZSBoaXR0aW5nLg0KPiANCj4gT3RoZXJ3aXNlLCBieSBkZWZhdWx0IGl0IHdpbGwgbGltaXQgaXRz
-ZWxmIHRvIDEwME1CIG9mIG91dHN0YW5kaW5nIElPDQo+ICh0aGVyZSdzIGFuIG9iamVjdGVyIGNv
-bmZpZyB2YWx1ZSB5b3UgY2FuIGNoYW5nZSBmb3IgdGhpczsgaXQncyBiZWVuDQo+IGRpc2N1c3Nl
-ZCByZWNlbnRseSkgYW5kIHRoYXQgbWlnaHQgbm90IGJlIGVub3VnaCBnaXZlbiB0aGUgbGF0ZW5j
-aWVzIG9mDQo+IGhvcHBpbmcgcGFja2V0cyBhY3Jvc3MgZGlmZmVyZW50IENQVXMsIGFuZCB0aGUg
-T1NEcyBoYXZlIGEgc2xpZ2h0bHktDQo+IGVtYmFycmFzc2luZyBhbW91bnQgb2YgQ1BVIGNvbXB1
-dGF0aW9uIGFuZCB0aHJlYWQgaG9wcGluZyB0aGV5IGhhdmUgdG8NCj4gcGVyZm9ybSBvbiBldmVy
-eSBvcCAoYXJvdW5kIGhhbGYgYSBtaWxsaXNlY29uZCdzIHdvcnRoIG9uIGVhY2ggcmVhZCwgSQ0K
-PiB0aGluaz8pLg0KPiAtR2VyZw0KDQpSaWdodC4gIEkgd2FzIGludm9sdmVkIGluIHRoZSBvYmpl
-Y3RlciBjb25maWcgZGlzY3Vzc2lvbiA6KSBhbmQgDQpJIGhhdmUgc2V0IHRoZSBsaW1pdHMgaGln
-aGVyLiAgIEFuZCB0aGlzIDE2MDAgTUIvc2VjIGxpbWl0IHNlZW1zIHRvIGJlDQp0aGUgc2FtZSB3
-aGF0ZXZlciB0aGUgc2l6ZSBvZiB0aGUgb2JqZWN0cy4NCg0KcmFkb3MgYmVuY2ggaXMgdXNpbmcg
-YWJvdXQgMzAlIG9mIHRoZSBjcHUgYW5kIHRoZSB0b3RhbCBjcHUgdXNhZ2UgaXMgYWJvdXQgNjAl
-DQoodGhlIHJlc3QgYmVpbmcgbW9zdGx5IGZyb20gdGhlIDQgb3NkcykuDQoNCkhtbSwgSSBqdXN0
-IHRyaWVkIHJ1bm5pbmcgNCBjb3BpZXMgb2YgcmFkb3MgYmVuY2ggcmFuZCwgYW5kIEkgY2FuIGdl
-dCBhIGxpdHRsZSBiaXQNCmhpZ2hlciBjb21iaW5lZCB0b3RhbHMsIGJ1dCBub3QgbXVjaCBoaWdo
-ZXIgbWF5YmUgMTgwMCBNQi9zZWMuDQogDQotLSBUb20NCg0K
+On Thu, May 28, 2015 at 7:50 PM, Deneau, Tom <tom.deneau@amd.com> wrote:
+>
+>
+>> -----Original Message-----
+>> From: Gregory Farnum [mailto:greg@gregs42.com]
+>> Sent: Thursday, May 28, 2015 6:18 PM
+>> To: Deneau, Tom
+>> Cc: ceph-devel
+>> Subject: Re: rados bench throughput with no disk or network activity
+>>
+>> On Thu, May 28, 2015 at 4:09 PM, Deneau, Tom <tom.deneau@amd.com> wrote:
+>> > I've noticed that
+>> >    * with a single node cluster with 4 osds
+>> >    * and running rados bench rand on that same node so no network traffic
+>> >    * with a number of objects small enough so that everything is in
+>> > the cache so no disk traffic
+>> >
+>> > we still peak out at about 1600 MB/sec.
+>> >
+>> > And the cpu is 40% idle. (and a good chunk of the cpu activity is the
+>> > rados benchmark itself)
+>> >
+>> > What is likely causing the throttling here?
+>>
+>> Well, rados bench itself is essentially single-threaded, so if it's using
+>> 100% CPU that's probably the bottleneck you're hitting.
+>>
+>> Otherwise, by default it will limit itself to 100MB of outstanding IO
+>> (there's an objecter config value you can change for this; it's been
+>> discussed recently) and that might not be enough given the latencies of
+>> hopping packets across different CPUs, and the OSDs have a slightly-
+>> embarrassing amount of CPU computation and thread hopping they have to
+>> perform on every op (around half a millisecond's worth on each read, I
+>> think?).
+>> -Gerg
+>
+> Right.  I was involved in the objecter config discussion :) and
+> I have set the limits higher.   And this 1600 MB/sec limit seems to be
+> the same whatever the size of the objects.
+>
+> rados bench is using about 30% of the cpu and the total cpu usage is about 60%
+> (the rest being mostly from the 4 osds).
+>
+> Hmm, I just tried running 4 copies of rados bench rand, and I can get a little bit
+> higher combined totals, but not much higher maybe 1800 MB/sec.
+
+I take it you have multiple different CPUs/cores and you mean 60%
+average across all the CPUs/cores? Not 60% of a single core? Just
+wanting to be explicit.
+
+In any case, I wonder if what you're seeing is some kind of
+serialization (contention) either in the kernel or somewhere in the
+OSD.
+
+>
+> -- Tom
+>
+
+
+
+-- 
+Milosz Tanski
+CTO
+16 East 34th Street, 15th floor
+New York, NY 10016
+
+p: 646-253-9055
+e: milosz@adfin.com
