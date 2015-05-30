@@ -1,41 +1,30 @@
-From: Gregory Farnum <greg-3KCAGdo1P2hBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: Discuss: New default recovery config settings
-Date: Fri, 29 May 2015 16:17:52 -0700
-Message-ID: <CAC6JEv8LyM1SRsOszDCj6tLxhZ=hvrEkinDARW8BvyQHDCz+LQ@mail.gmail.com>
-References: <1939533999.9756941.1432935747903.JavaMail.zimbra@redhat.com>
-	<1394947829.9758745.1432936033017.JavaMail.zimbra@redhat.com>
+From: shylesh kumar <shylesh.mohan@gmail.com>
+Subject: Adding "chance_test_backfill_full" thrasher in the ec tasks
+Date: Sat, 30 May 2015 20:57:20 +0530
+Message-ID: <CAMxOGo076WPLnvo+peo=KmDpZUY2Qt34_vXMzgMQqF_TAcEWEA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <1394947829.9758745.1432936033017.JavaMail.zimbra-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Samuel Just <sjust-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "'ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org' (ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org)" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-wi0-f173.google.com ([209.85.212.173]:37696 "EHLO
+	mail-wi0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754733AbbE3P1W (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 30 May 2015 11:27:22 -0400
+Received: by wifw1 with SMTP id w1so56400127wif.0
+        for <ceph-devel@vger.kernel.org>; Sat, 30 May 2015 08:27:21 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Samuel Just <sjust@redhat.com>, loic@dachary.org
+Cc: ceph-devel@vger.kernel.org
 
-On Fri, May 29, 2015 at 2:47 PM, Samuel Just <sjust-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> Many people have reported that they need to lower the osd recovery config options to minimize the impact of recovery on client io.  We are talking about changing the defaults as follows:
->
-> osd_max_backfills to 1 (from 10)
-> osd_recovery_max_active to 3 (from 15)
-> osd_recovery_op_priority to 1 (from 10)
-> osd_recovery_max_single_start to 1 (from 5)
+Hi ,
 
-I'm under the (possibly erroneous) impression that reducing the number
-of max backfills doesn't actually reduce recovery speed much (but will
-reduce memory use), but that dropping the op priority can. I'd rather
-we make users manually adjust values which can have a material impact
-on their data safety, even if most of them choose to do so.
+As per discussion with loic none of the ec tests have
+"chance_test_backfill_full" thrasher in the tasks, do you think it
+would be a good idea to add it which can simulate disk space
+scenarios.
 
-After all, even under our worst behavior we're still doing a lot
-better than a resilvering RAID array. ;)
--Greg
+
+
+-- 
+Thanks
+Shylesh
