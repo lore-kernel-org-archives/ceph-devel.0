@@ -1,128 +1,46 @@
-From: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>
-Subject: Re: Interested in ceph OSD encryption and key management
-Date: Sun, 31 May 2015 10:01:19 -0400
-Message-ID: <CAGbvivJ=wEw1gQDx_Kfsa+E9yu4dC2GR79iFApF=An2DrRfqHg@mail.gmail.com>
-References: <1432787005.11787.33.camel@catalyst.net.nz>
-	<alpine.DEB.2.00.1505281257490.6462@cobra.newdream.net>
+From: Justin Erenkrantz <justin@erenkrantz.com>
+Subject: Re: Discuss: New default recovery config settings
+Date: Sun, 31 May 2015 10:29:06 -0400
+Message-ID: <CAOGLoJOZ2ua3UNdWSb+kTkcsm5PrxtSZgjro9HRvL6i4DJjtJg@mail.gmail.com>
+References: <1939533999.9756941.1432935747903.JavaMail.zimbra@redhat.com>
+	<1394947829.9758745.1432936033017.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f173.google.com ([209.85.213.173]:37412 "EHLO
-	mail-ig0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753707AbbEaOBT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 31 May 2015 10:01:19 -0400
-Received: by igbsb11 with SMTP id sb11so44650883igb.0
-        for <ceph-devel@vger.kernel.org>; Sun, 31 May 2015 07:01:19 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1505281257490.6462@cobra.newdream.net>
+Received: from mail-oi0-f44.google.com ([209.85.218.44]:33805 "EHLO
+	mail-oi0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756380AbbEaO3G convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 31 May 2015 10:29:06 -0400
+Received: by oifu123 with SMTP id u123so85674024oif.1
+        for <ceph-devel@vger.kernel.org>; Sun, 31 May 2015 07:29:06 -0700 (PDT)
+In-Reply-To: <1394947829.9758745.1432936033017.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Andrew Bartlett <abartlet@catalyst.net.nz>, mbroz@redhat.com, ceph-devel@vger.kernel.org
+To: Samuel Just <sjust@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, "'ceph-users@lists.ceph.com' (ceph-users@lists.ceph.com)" <ceph-users@lists.ceph.com>
 
-Also consider key management services like Barbican or using an external
-Key Mgmt server for managing the master keys (wrapping keys,
-key-encrypting-keys, etc etc).
+On Fri, May 29, 2015 at 5:47 PM, Samuel Just <sjust@redhat.com> wrote:
+> Many people have reported that they need to lower the osd recovery config options to minimize the impact of recovery on client io.  We are talking about changing the defaults as follows:
+>
+> osd_max_backfills to 1 (from 10)
+> osd_recovery_max_active to 3 (from 15)
+> osd_recovery_op_priority to 1 (from 10)
+> osd_recovery_max_single_start to 1 (from 5)
+>
+> We'd like a bit of feedback first though.  Is anyone happy with the current configs?  Is anyone using something between these values and the current defaults?  What kind of workload?  I'd guess that lowering osd_max_backfills to 1 is probably a good idea, but I wonder whether lowering osd_recovery_max_active and osd_recovery_max_single_start will cause small objects to recover unacceptably slowly.
+>
+> Thoughts?
 
-One can store the wrapping key externally, and fetch it via KMIP or other
-standard/secure protocol when the disks come online.  The keys in
-/etc/ceph/keys can be wrapped on disk and then unwrapped with the external
-key to a ram disk when the disks come online. That way the raw dm-crypt
-keys don't persist on the disk and are only available as long as the drive
-is active and the system is up.
+When we enable explicit rebalancing, we set the parameters as such to
+reduce the impact on client I/O:
 
-Just one possibility.  Switching to LUKS or something more robust is
-probably better long term solution.
+osd_recovery_max_active = 1
+osd_max_backfills = 1
+osd_op_threads = 10
+osd_recovery_op_priority = 1
+osd_mon_report_interval_min = 30
 
+See https://github.com/bloomberg/chef-bcpc/blob/master/cookbooks/bcpc/templates/default/ceph.conf.erb
 
-Orthogonal to FDE, but possibly nice to have would be the ability to
-encrypt individual pools using different keys (or none at all), but thats
-probably a different conversation...
-
-On Thu, May 28, 2015 at 4:03 PM, Sage Weil <sage@newdream.net> wrote:
-> Hi Andrew,
->
-> I'm copying Milan Broz, who has looked at this ome. There was some
-> subsequent off-list discussion in Red Hat about using Petera[1] for the
-> key management, but this'll require a bit more effort than what was
-> described in that blueprint.
->
-> On Thu, 28 May 2015, Andrew Bartlett wrote:
->> David Disseldorp was good enough to point me at this proposal for ceph
->> OSD key management:
->> https://wiki.ceph.com/Planning/Blueprints/Infernalis/osd%3A_simple_ceph-mon_dm-crypt_key_management
->>
->> I'm really interested in improving ceph on-disk encryption, and am
->> really glad folks are taking this beyond the local key storage we have
->> managed so far.
->>
->> So I can be part of the discussion, how do I get a login to the wiki?  I
->> would like to indicate my interest there.
->
-> The wiki logins are broken, but ignore that.. we're moving to
-> tracker.ceph.com's wiki shortly anyway.  Email is best in the meantime!
->
->> Regarding the proposal:
->>
->> In the default mode suggested in the wiki, my primary concern is that
->> I'm told, in a number of deployments, the monitor node is the same
->> server that also holds the OSDs, so we don't gain anything for those
->> cases over the /etc storage.
->>
->> In those cases, the hooks suggested in the wiki will be key, as will be
->> having those configurable in ceph.conf, so ceph-deploy can just pass it
->> down to all the nodes as they are built, just as the other dmcrypt
->> options are.
->>
->> I would like to see three things hookable:
->>  - the command to obtain the key (on stdout)
->
-> - a command to publish/store a new key (from ceph-disk create)
->
->>  - to encrypt the key (so we can additionally pass it
->> via gpg, a HSM or remote encrypt/decrypt service)
->>  - to decrypt the key
->
-> Not quite sure what you have in mind here?
->
-> I think the key things I'd like to see in any effort here is
->
->  1- keep the actual decryption key in LUKS and store the LUKS key in the
-> key escrow location.  The original dm-crypt stuff kept the actual key
-> in /etc/ceph/keys, but that makes it hard to track key provenance, and
-> also fixes the encryption algorithm... LUKS is more robust.
->
->  2- make the key management pluggable, so that we can use petera,
-> /etc/ceph/keys, the ceph mons, or something else.
->
-> Thanks!
-> sage
->
->
-> [1] https://github.com/npmccallum/petera
->
->>
->>
->> Thanks,
->>
->> Andrew Bartlett
->>
->>
->> --
->> Andrew Bartlett
->> http://samba.org/~abartlet/
->> Authentication Developer, Samba Team  http://samba.org
->> Samba Developer, Catalyst IT          http://catalyst.net.nz/services/samba
->>
->>
->>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Cheers.  -- justin
