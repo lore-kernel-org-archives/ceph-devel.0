@@ -1,49 +1,39 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: hammer branch for v0.94.2 ready for QE
-Date: Sun, 31 May 2015 15:48:23 -0400 (EDT)
-Message-ID: <1075864657.6869209.1433101703417.JavaMail.zimbra@redhat.com>
-References: <5559DE24.4010601@dachary.org> <322852770.9958799.1433026361754.JavaMail.zimbra@redhat.com>
+From: Gregory Farnum <greg@gregs42.com>
+Subject: Nightly "Kernel branch not found" errors
+Date: Sun, 31 May 2015 12:54:58 -0700
+Message-ID: <CAC6JEv_oJzokLL-QvJ6VTNC43kSp9s4Vf=cY47Ug+Gqy0BBApw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx6-phx2.redhat.com ([209.132.183.39]:54812 "EHLO
-	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751142AbbEaTtc convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 31 May 2015 15:49:32 -0400
-In-Reply-To: <322852770.9958799.1433026361754.JavaMail.zimbra@redhat.com>
+Received: from mail-qk0-f176.google.com ([209.85.220.176]:35757 "EHLO
+	mail-qk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751079AbbEaTzA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 31 May 2015 15:55:00 -0400
+Received: by qkhq76 with SMTP id q76so45653842qkh.2
+        for <ceph-devel@vger.kernel.org>; Sun, 31 May 2015 12:54:59 -0700 (PDT)
+Received: from mail-qg0-f50.google.com (mail-qg0-f50.google.com. [209.85.192.50])
+        by mx.google.com with ESMTPSA id c80sm5424835qge.49.2015.05.31.12.54.58
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Sun, 31 May 2015 12:54:59 -0700 (PDT)
+Received: by qgdy38 with SMTP id y38so17316279qgd.1
+        for <ceph-devel@vger.kernel.org>; Sun, 31 May 2015 12:54:58 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yuri Weinstein <yweinste@redhat.com>
-Cc: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>, Abhishek L <abhishek.lekshmanan@gmail.com>, Alfredo Deza <adeza@redhat.com>, Loic Dachary <ldachary@redhat.com>, Sage Weil <sweil@redhat.com>, Ian Colle <icolle@redhat.com>
+To: idryomov@gmail.com, Zack Cerza <zack@redhat.com>, Andrew Schoen <aschoen@redhat.com>
+Cc: ceph-qa <ceph-qa@ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
------ Original Message -----
-> From: "Yuri Weinstein" <yweinste@redhat.com>
-> To: "Loic Dachary" <loic@dachary.org>
-> Cc: "Ceph Development" <ceph-devel@vger.kernel.org>, "Abhishek L" <ab=
-hishek.lekshmanan@gmail.com>, "Alfredo Deza"
-> <adeza@redhat.com>, "Loic Dachary" <ldachary@redhat.com>, "Gregory Fa=
-rnum" <gfarnum@redhat.com>, "Sage Weil"
-> <sweil@redhat.com>, "Ian Colle" <icolle@redhat.com>
-> Sent: Saturday, May 30, 2015 3:52:41 PM
-> Subject: Re: hammer branch for v0.94.2 ready for QE
->=20
-> QE validation is complete and this release is ready for publishing.
->=20
-> (Greg, I assumed that you approved this release with failures in knfs=
- suite
-> re: unresolved #11789, marked for v0.94.3 backport)
-
-Yeah...So I have no idea what we could have changed to cause these, and=
- I bet it's some kind of environment issue (or perhaps a change in the =
-kernel?). Nonetheless we've not seen them previously and I am uncomfort=
-able doing a release with them =E2=80=94 if something like this happene=
-d in RADOS I would not approve it. But given CephFS' current status and=
- the fact that I don't know of anybody who's actually using knfs on top=
- it's probably okay.
+We are getting this error in what looks like everything that specifies
+the testing kernel. (That turns out to be almost all of the FS tests
+and a surprising number of the non-rados runs; e.g. rgw.) I've checked
+that the testing branch of ceph-client.git still exists and when
+looking at the teuthology git logs the recent ping-pong of commits on
+kernel flavors et al stand out. Any ideas? :)
 -Greg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+On Fri, May 29, 2015 at 11:10 PM,  <teuthology@ceph.com> wrote:
+> Kernel branch 'testing' not found
+> _______________________________________________
+> Ceph-qa mailing list
+> Ceph-qa@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-qa-ceph.com
