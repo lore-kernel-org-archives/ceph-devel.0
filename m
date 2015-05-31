@@ -1,46 +1,51 @@
-From: Justin Erenkrantz <justin@erenkrantz.com>
-Subject: Re: Discuss: New default recovery config settings
-Date: Sun, 31 May 2015 10:29:06 -0400
-Message-ID: <CAOGLoJOZ2ua3UNdWSb+kTkcsm5PrxtSZgjro9HRvL6i4DJjtJg@mail.gmail.com>
-References: <1939533999.9756941.1432935747903.JavaMail.zimbra@redhat.com>
-	<1394947829.9758745.1432936033017.JavaMail.zimbra@redhat.com>
+From: Abhishek L <abhishek.lekshmanan@gmail.com>
+Subject: Hammer v0.94.2 ready for release
+Date: Sun, 31 May 2015 20:44:39 +0530
+Message-ID: <87iob8dbj4.fsf@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: multipart/signed; boundary="=-=-=";
+	micalg=pgp-sha1; protocol="application/pgp-signature"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f44.google.com ([209.85.218.44]:33805 "EHLO
-	mail-oi0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756380AbbEaO3G convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 31 May 2015 10:29:06 -0400
-Received: by oifu123 with SMTP id u123so85674024oif.1
-        for <ceph-devel@vger.kernel.org>; Sun, 31 May 2015 07:29:06 -0700 (PDT)
-In-Reply-To: <1394947829.9758745.1432936033017.JavaMail.zimbra@redhat.com>
+Received: from mail-pa0-f45.google.com ([209.85.220.45]:33620 "EHLO
+	mail-pa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758662AbbEaPRU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 31 May 2015 11:17:20 -0400
+Received: by padj3 with SMTP id j3so26102925pad.0
+        for <ceph-devel@vger.kernel.org>; Sun, 31 May 2015 08:17:19 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sjust@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, "'ceph-users@lists.ceph.com' (ceph-users@lists.ceph.com)" <ceph-users@lists.ceph.com>
+To: Sage Weil <sage@redhat.com>, Alfredo Deza <adeza@redhat.com>
+Cc: Loic Dachary <loic@dachary.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Yuri Weinstein <yweinste@redhat.com>
 
-On Fri, May 29, 2015 at 5:47 PM, Samuel Just <sjust@redhat.com> wrote:
-> Many people have reported that they need to lower the osd recovery config options to minimize the impact of recovery on client io.  We are talking about changing the defaults as follows:
->
-> osd_max_backfills to 1 (from 10)
-> osd_recovery_max_active to 3 (from 15)
-> osd_recovery_op_priority to 1 (from 10)
-> osd_recovery_max_single_start to 1 (from 5)
->
-> We'd like a bit of feedback first though.  Is anyone happy with the current configs?  Is anyone using something between these values and the current defaults?  What kind of workload?  I'd guess that lowering osd_max_backfills to 1 is probably a good idea, but I wonder whether lowering osd_recovery_max_active and osd_recovery_max_single_start will cause small objects to recover unacceptably slowly.
->
-> Thoughts?
+--=-=-=
+Content-Type: text/plain
 
-When we enable explicit rebalancing, we set the parameters as such to
-reduce the impact on client I/O:
+Hi
 
-osd_recovery_max_active = 1
-osd_max_backfills = 1
-osd_op_threads = 10
-osd_recovery_op_priority = 1
-osd_mon_report_interval_min = 30
+Hammer v0.94.2 has passed the QE validations[1], and is ready to be
+published. A draft of the release notes is available at the git master
+[2]. The entire summary of activities have been captured at the tracker
+at http://tracker.ceph.com/issues/11492
 
-See https://github.com/bloomberg/chef-bcpc/blob/master/cookbooks/bcpc/templates/default/ceph.conf.erb
+[1]: http://tracker.ceph.com/issues/11492#QE-Validation
+[2]: https://github.com/ceph/ceph/blob/master/doc/release-notes.rst#0942-hammer-draft
 
-Cheers.  -- justin
+--
+Regards
+Abhishek
+
+--=-=-=
+Content-Type: application/pgp-signature; name="signature.asc"; name="signature.asc"; description="Digital signature"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iQEcBAEBAgAGBQJVayVpAAoJEPnwZB8bZe1fGz0H/AhgTZurqGYeAlz++QzURAFZ
+Verdsqb5lOsZGOx6GqNhfXAung15Pgszy0JYM5FN3GoO5tAuSQJuHhtsZnr9nr9M
+HAmwI6v7mBKM8CoLtXT27ICDHpw3C6v9SnZionAyOAniERKJfMAaFZBsaka+gSK9
++pNuHF6QU/+Z+HSzNM5dwbO3h3S3S7lGWDfJZe0yAH3zEvYk2Rlm0wKKHr5XqMQz
+nd4ARFE4Cfq3iyG/KftJjIQ3DMZLsKCUHvpehUJZeDfEWvaajhqSQSb6L7spiO/g
+YHv2G+4psvTh3w4bqNG/MXINQv2n83+Nfw6kvAPD24P3IpyuOsHkqc9q3Tp3EMk=
+=/FIg
+-----END PGP SIGNATURE-----
+--=-=-=--
