@@ -1,43 +1,47 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH] libceph: use kvfree() in ceph_put_page_vector()
-Date: Mon, 1 Jun 2015 18:03:18 +0300
-Message-ID: <CAOi1vP9k4UUJ_Dus6xpN+7GGEA=X4SbaD3WxHy5cVE9S8WtmYA@mail.gmail.com>
-References: <1433169361-18667-1-git-send-email-geliangtang@163.com>
+From: Samuel Just <sjust@redhat.com>
+Subject: Re: Adding "chance_test_backfill_full" thrasher in the ec tasks
+Date: Mon, 1 Jun 2015 11:18:39 -0400 (EDT)
+Message-ID: <1131392043.10604321.1433171919792.JavaMail.zimbra@redhat.com>
+References: <CAMxOGo076WPLnvo+peo=KmDpZUY2Qt34_vXMzgMQqF_TAcEWEA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1433169361-18667-1-git-send-email-geliangtang@163.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Geliang Tang <geliangtang@163.com>
-Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, "David S. Miller" <davem@davemloft.net>, Ceph Development <ceph-devel@vger.kernel.org>, netdev <netdev@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx5-phx2.redhat.com ([209.132.183.37]:57246 "EHLO
+	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751596AbbFAPTq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 1 Jun 2015 11:19:46 -0400
+In-Reply-To: <CAMxOGo076WPLnvo+peo=KmDpZUY2Qt34_vXMzgMQqF_TAcEWEA@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: shylesh kumar <shylesh.mohan@gmail.com>
+Cc: loic@dachary.org, ceph-devel@vger.kernel.org
 
-On Mon, Jun 1, 2015 at 5:36 PM, Geliang Tang <geliangtang@163.com> wrote:
-> Use kvfree() instead of open-coding it.
->
-> Signed-off-by: Geliang Tang <geliangtang@163.com>
-> ---
->  net/ceph/pagevec.c | 5 +----
->  1 file changed, 1 insertion(+), 4 deletions(-)
->
-> diff --git a/net/ceph/pagevec.c b/net/ceph/pagevec.c
-> index 096d914..d4f5f22 100644
-> --- a/net/ceph/pagevec.c
-> +++ b/net/ceph/pagevec.c
-> @@ -51,10 +51,7 @@ void ceph_put_page_vector(struct page **pages, int num_pages, bool dirty)
->                         set_page_dirty_lock(pages[i]);
->                 put_page(pages[i]);
->         }
-> -       if (is_vmalloc_addr(pages))
-> -               vfree(pages);
-> -       else
-> -               kfree(pages);
-> +       kvfree(pages);
->  }
->  EXPORT_SYMBOL(ceph_put_page_vector);
+Yep, that should be included in the ec thrashing tests.
+-Sam
 
-Already fixed in testing, wasn't pushed to linux-next though, sorry!
+----- Original Message -----
+From: "shylesh kumar" <shylesh.mohan@gmail.com>
+To: "Samuel Just" <sjust@redhat.com>, loic@dachary.org
+Cc: ceph-devel@vger.kernel.org
+Sent: Saturday, May 30, 2015 8:27:20 AM
+Subject: Adding "chance_test_backfill_full" thrasher in the ec tasks
 
-Thanks,
+Hi ,
 
-                Ilya
+As per discussion with loic none of the ec tests have
+"chance_test_backfill_full" thrasher in the tasks, do you think it
+would be a good idea to add it which can simulate disk space
+scenarios.
+
+
+
+-- 
+Thanks
+Shylesh
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
