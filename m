@@ -1,72 +1,62 @@
-From: Gregory Farnum <greg@gregs42.com>
-Subject: Re: Nightly "Kernel branch not found" errors
-Date: Sun, 31 May 2015 15:28:57 -0700
-Message-ID: <CAC6JEv-v+jq6ba1TeyknBqQD9Lb2DiF5LNeh8pcxJt1sJFeJUg@mail.gmail.com>
-References: <CAC6JEv_oJzokLL-QvJ6VTNC43kSp9s4Vf=cY47Ug+Gqy0BBApw@mail.gmail.com>
-	<CAOi1vP-63Qya7JQcPhr62a5ffufaYSd9WwqLY-hMFYs7MmHS8g@mail.gmail.com>
-	<CAC6JEv8CCThYLNa73ufOo7C8U42fVPTaW8r6CNOQxXHx_04=qg@mail.gmail.com>
-	<alpine.DEB.2.00.1505311518340.6462@cobra.newdream.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f181.google.com ([209.85.216.181]:34646 "EHLO
-	mail-qc0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751272AbbEaW27 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 31 May 2015 18:28:59 -0400
-Received: by qcbhb1 with SMTP id hb1so41964583qcb.1
-        for <ceph-devel@vger.kernel.org>; Sun, 31 May 2015 15:28:58 -0700 (PDT)
-Received: from mail-qg0-f47.google.com (mail-qg0-f47.google.com. [209.85.192.47])
-        by mx.google.com with ESMTPSA id v13sm5493752qhd.31.2015.05.31.15.28.57
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Sun, 31 May 2015 15:28:58 -0700 (PDT)
-Received: by qgfa63 with SMTP id a63so42740360qgf.0
-        for <ceph-devel@vger.kernel.org>; Sun, 31 May 2015 15:28:57 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1505311518340.6462@cobra.newdream.net>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Ilya Dryomov <idryomov@gmail.com>, Zack Cerza <zack@redhat.com>, Andrew Schoen <aschoen@redhat.com>, ceph-qa <ceph-qa@ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+From: Jan Schermer <jan-SB6/BxVxTjHtwjQa/ONI9g@public.gmane.org>
+Subject: Re: Discuss: New default recovery config settings
+Date: Mon, 1 Jun 2015 09:43:03 +0200
+Message-ID: <9555849C-7C6E-485E-B60C-BB4996F96E32@schermer.cz>
+References: <1939533999.9756941.1432935747903.JavaMail.zimbra@redhat.com>
+	<1394947829.9758745.1432936033017.JavaMail.zimbra@redhat.com>
+	<CAC6JEv8LyM1SRsOszDCj6tLxhZ=hvrEkinDARW8BvyQHDCz+LQ@mail.gmail.com>
+Mime-Version: 1.0 (Mac OS X Mail 8.2 \(2098\))
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAC6JEv8LyM1SRsOszDCj6tLxhZ=hvrEkinDARW8BvyQHDCz+LQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Gregory Farnum <greg-3KCAGdo1P2hBDgjK7y7TUQ@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Sun, May 31, 2015 at 3:19 PM, Sage Weil <sage@newdream.net> wrote:
-> On Sun, 31 May 2015, Gregory Farnum wrote:
->> On Sun, May 31, 2015 at 1:40 PM, Ilya Dryomov <idryomov@gmail.com> wrote:
->> > On Sun, May 31, 2015 at 10:54 PM, Gregory Farnum <greg@gregs42.com> wrote:
->> >> We are getting this error in what looks like everything that specifies
->> >> the testing kernel. (That turns out to be almost all of the FS tests
->> >> and a surprising number of the non-rados runs; e.g. rgw.) I've checked
->> >> that the testing branch of ceph-client.git still exists and when
->> >> looking at the teuthology git logs the recent ping-pong of commits on
->> >> kernel flavors et al stand out. Any ideas? :)
->> >
->> > Which lab is this in?  Latest rgw and fs in sepia look fine.
->> >
->> > Kernel task was broken the entire last week but in a different way -
->> > when scheduled with teuthology-suite it wouldn't install anything even
->> > if you told it to install e.g. testing.  I fixed that on Friday.
->> >
->> > Looks like this is coming from create_initial_config().  Could be an
->> > environment issue, like down gitbuilders or a problem with requests
->> > module?  Kernel branch is checked before the others so it may not have
->> > anything to do with it at all.
->>
->> It's happening across labs for tests that were supposed to be
->> scheduled starting on the 29 (at least, that I've noticed). I think
->> this issue is before they get into pulpito, which is why the latest fs
->> suite run there was scheduled on May 27. :(
->> Looking at the gitbuliders I do see that the CentOS6 testing branch is
->> red and rhel7 appears to be down...maybe we're checking on more of
->> them now and then failing when those don't appear? :/
->
-> We're half-way through creating the centos7 kernel builder to replace the
-> rhel ones so I expect things are broken on the rpm side.  Not sure if
-> that is the root cause here, but we can probably wait for that to get
-> fixed first before looking further
-
-*None* of our FS tests are running while this problem persists (and
-they're not alone). That's not the sort of thing we can wait on...
-Maybe we have some gratuitous non-use of the testing kernel we can
-remove (I'm not sure), but that's the sort of thing that needs to be
-discussed across teams so we can deal with it proactively instead of
-just finding out when the nightlies start failing.
--Greg
+V2UgaGFkIHRvIGRpc2FibGUgZGVlcCBzY3J1YiBvciB0aGUgY2x1c3RlciB3b3VsZCBtZSB1bnVz
+YWJsZSAtIHdlIG5lZWQgdG8gdHVybiBpdCBiYWNrIG9uIHNvb25lciBvciBsYXRlciwgdGhvdWdo
+LgpXaXRoIG1pbmltYWwgc2NydWJiaW5nIGFuZCByZWNvdmVyeSBzZXR0aW5ncywgZXZlcnl0aGlu
+ZyBpcyBtb3N0bHkgZ29vZC4gVHVybmVkIG91dCBtYW55IGlzc3VlcyB3ZSBoYWQgd2VyZSBkdWUg
+dG8gdG9vIGZldyBQR3MgLSBvbmNlIHdlIGluY3JlYXNlZCB0aGVtIGZyb20gNEsgdG8gMTZLIGV2
+ZXJ5dGhpbmcgc3BlZCB1cCBuaWNlbHkgKGJlY2F1c2UgdGhlIGNodW5rcyBhcmUgc21hbGxlciks
+IGJ1dCBkdXJpbmcgaGVhdnkgYWN0aXZpdHkgd2UgYXJlIHN0aWxsIGdldHRpbmcgc29tZSDigJxz
+bG93IElPc+KAnS4KSSBiZWxpZXZlIHRoZXJlIGlzIGFuIGlvbmljZSBrbm9iIGluIG5ld2VyIHZl
+cnNpb25zICh3ZSBzdGlsbCBydW4gRHVtcGxpbmcpLCBhbmQgdGhhdCBzaG91bGQgZG8gdGhlIHRy
+aWNrIG5vIG1hdHRlciBob3cgbXVjaCBhZGRpdGlvbmFsIOKAnGxvYWTigJ0gaXMgcHV0IG9uIHRo
+ZSBPU0RzLgpFdmVyeWJvZHnigJlzIGJvdHRsZW5lY2sgd2lsbCBiZSBkaWZmZXJlbnQgLSB3ZSBy
+dW4gYWxsIGZsYXNoIHNvIGRpc2sgSU8gaXMgbm90IGEgcHJvYmxlbSBidXQgYW4gT1NEIGRhZW1v
+biBpcyAtIG5vIGlvbmljZSBzZXR0aW5nIHdpbGwgaGVscCB3aXRoIHRoYXQsIGl0IGp1c3QgbmVl
+ZHMgdG8gYmUgZmFzdGVyIDstKQoKSmFuCgoKPiBPbiAzMCBNYXkgMjAxNSwgYXQgMDE6MTcsIEdy
+ZWdvcnkgRmFybnVtIDxncmVnQGdyZWdzNDIuY29tPiB3cm90ZToKPiAKPiBPbiBGcmksIE1heSAy
+OSwgMjAxNSBhdCAyOjQ3IFBNLCBTYW11ZWwgSnVzdCA8c2p1c3RAcmVkaGF0LmNvbT4gd3JvdGU6
+Cj4+IE1hbnkgcGVvcGxlIGhhdmUgcmVwb3J0ZWQgdGhhdCB0aGV5IG5lZWQgdG8gbG93ZXIgdGhl
+IG9zZCByZWNvdmVyeSBjb25maWcgb3B0aW9ucyB0byBtaW5pbWl6ZSB0aGUgaW1wYWN0IG9mIHJl
+Y292ZXJ5IG9uIGNsaWVudCBpby4gIFdlIGFyZSB0YWxraW5nIGFib3V0IGNoYW5naW5nIHRoZSBk
+ZWZhdWx0cyBhcyBmb2xsb3dzOgo+PiAKPj4gb3NkX21heF9iYWNrZmlsbHMgdG8gMSAoZnJvbSAx
+MCkKPj4gb3NkX3JlY292ZXJ5X21heF9hY3RpdmUgdG8gMyAoZnJvbSAxNSkKPj4gb3NkX3JlY292
+ZXJ5X29wX3ByaW9yaXR5IHRvIDEgKGZyb20gMTApCj4+IG9zZF9yZWNvdmVyeV9tYXhfc2luZ2xl
+X3N0YXJ0IHRvIDEgKGZyb20gNSkKPiAKPiBJJ20gdW5kZXIgdGhlIChwb3NzaWJseSBlcnJvbmVv
+dXMpIGltcHJlc3Npb24gdGhhdCByZWR1Y2luZyB0aGUgbnVtYmVyCj4gb2YgbWF4IGJhY2tmaWxs
+cyBkb2Vzbid0IGFjdHVhbGx5IHJlZHVjZSByZWNvdmVyeSBzcGVlZCBtdWNoIChidXQgd2lsbAo+
+IHJlZHVjZSBtZW1vcnkgdXNlKSwgYnV0IHRoYXQgZHJvcHBpbmcgdGhlIG9wIHByaW9yaXR5IGNh
+bi4gSSdkIHJhdGhlcgo+IHdlIG1ha2UgdXNlcnMgbWFudWFsbHkgYWRqdXN0IHZhbHVlcyB3aGlj
+aCBjYW4gaGF2ZSBhIG1hdGVyaWFsIGltcGFjdAo+IG9uIHRoZWlyIGRhdGEgc2FmZXR5LCBldmVu
+IGlmIG1vc3Qgb2YgdGhlbSBjaG9vc2UgdG8gZG8gc28uCj4gCj4gQWZ0ZXIgYWxsLCBldmVuIHVu
+ZGVyIG91ciB3b3JzdCBiZWhhdmlvciB3ZSdyZSBzdGlsbCBkb2luZyBhIGxvdAo+IGJldHRlciB0
+aGFuIGEgcmVzaWx2ZXJpbmcgUkFJRCBhcnJheS4gOykKPiAtR3JlZwo+IF9fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCj4gY2VwaC11c2VycyBtYWlsaW5nIGxp
+c3QKPiBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCj4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xp
+c3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCgpfX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJz
+QGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11
+c2Vycy1jZXBoLmNvbQo=
