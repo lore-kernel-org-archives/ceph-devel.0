@@ -1,66 +1,58 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Adding "chance_test_backfill_full" thrasher in the ec tasks
-Date: Mon, 01 Jun 2015 17:31:12 +0200
-Message-ID: <556C7AC0.6040209@dachary.org>
-References: <CAMxOGo076WPLnvo+peo=KmDpZUY2Qt34_vXMzgMQqF_TAcEWEA@mail.gmail.com> <1131392043.10604321.1433171919792.JavaMail.zimbra@redhat.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: MDS auth caps for cephfs
+Date: Mon, 1 Jun 2015 12:39:32 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1506011131270.10340@cobra.newdream.net>
+References: <alpine.DEB.2.00.1505201651260.23818@cobra.newdream.net> <alpine.DEB.2.00.1505271508020.6462@cobra.newdream.net> <CAC6JEv_Kpkgra-w=yrfyNh_WEdy5ouCOyx-hosup69h0VaxVzQ@mail.gmail.com> <alpine.DEB.2.00.1505271542410.6462@cobra.newdream.net>
+ <CAC6JEv8BfMX+jHq8PCONFM4sMN81Nk+YfYkHJbHWK90kKnC+TQ@mail.gmail.com> <alpine.DEB.2.00.1505271646360.6462@cobra.newdream.net> <CAC6JEv_Jw5S94E2yiW-g-t1Ro3gjiYXnoRKGNf=721CjoLESkA@mail.gmail.com> <alpine.DEB.2.00.1505271728250.6462@cobra.newdream.net>
+ <CAC6JEv8pmJ-PhMUVqoP_VNsGR-STyjiyfcPqqpEQRv8x=UTjwA@mail.gmail.com> <CAANLjFqA+X7WYQ6NX_-L--vZorerSCQs6YcNSfUrurjsQFOsYA@mail.gmail.com> <CAC6JEv-MH=1uJD1HudhHJ=8wfg+dP3d9euhwLNEB-idsogGu+Q@mail.gmail.com> <alpine.DEB.2.00.1505280957450.6462@cobra.newdream.net>
+ <CAANLjFrs6xrQXJHu-Z7bqw_FWmGbqbc-HT1SKBxi0=Ls2SmBbg@mail.gmail.com> <alpine.DEB.2.00.1505281024560.6462@cobra.newdream.net> <CAANLjFqoZ0hBjXEHAcc4VLygCuzwzxtKpNH+nJHE3X00dvfKqQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="LxPGFB9UN1jTgBEeJGXMS66BiDmimRORI"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:54497 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751461AbbFAPbQ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 1 Jun 2015 11:31:16 -0400
-In-Reply-To: <1131392043.10604321.1433171919792.JavaMail.zimbra@redhat.com>
+Received: from cobra.newdream.net ([66.33.216.30]:54016 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753227AbbFATjd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 1 Jun 2015 15:39:33 -0400
+In-Reply-To: <CAANLjFqoZ0hBjXEHAcc4VLygCuzwzxtKpNH+nJHE3X00dvfKqQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sjust@redhat.com>, shylesh kumar <shylesh.mohan@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Robert LeBlanc <robert@leblancnet.us>
+Cc: Gregory Farnum <greg@gregs42.com>, John Spray <john.spray@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Nishtha Rai <nishtha3rai@gmail.com>, jashan kamboj <jashank42@gmail.com>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---LxPGFB9UN1jTgBEeJGXMS66BiDmimRORI
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+I have a pull request posted at
 
-I filed http://tracker.ceph.com/issues/11831 and will work on it
+	https://github.com/ceph/ceph/pull/4809
 
-On 01/06/2015 17:18, Samuel Just wrote:
-> Yep, that should be included in the ec thrashing tests.
-> -Sam
->=20
-> ----- Original Message -----
-> From: "shylesh kumar" <shylesh.mohan@gmail.com>
-> To: "Samuel Just" <sjust@redhat.com>, loic@dachary.org
-> Cc: ceph-devel@vger.kernel.org
-> Sent: Saturday, May 30, 2015 8:27:20 AM
-> Subject: Adding "chance_test_backfill_full" thrasher in the ec tasks
->=20
-> Hi ,
->=20
-> As per discussion with loic none of the ec tests have
-> "chance_test_backfill_full" thrasher in the tasks, do you think it
-> would be a good idea to add it which can simulate disk space
-> scenarios.
->=20
->=20
->=20
+that updates the mds cap parser and defines a check method.  Please take 
+a look and see if this makes sense.
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+For the path restrictions, I think the next steps are something like
 
+ - generate a path string and pass it in to that method
+ - write some simple tests
+ - make sure the hook is called from everywhere it needs to be (all of the 
+other request handlers in Server.cc)
+ - call the hook from the cap writeback path (tricky)
+ - figure out how to handle files in the stray dir (tricky)
 
---LxPGFB9UN1jTgBEeJGXMS66BiDmimRORI
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+For the user-based restrictions,
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
+ - I think we need to expand the allows() method so that it has a couple 
+output arguments (uid and gid list) that subsequent permissions should be 
+validated against.  Then we can change the function in Server.cc so 
+that when those are populated it does an actually unix permissions check.  
+This seems like the simplest thing to me, although it does have the 
+slightly-odd property that if you are doing an operation that requires 
+permission on two inodes (directory and file, say) you might have to 
+different 'allow ...' lines granting access to each.  (I think this is 
+both painful to avoid and also harmless?)
+ - same items above to call into the check method in the appropriate 
+places.
+ - extend client/mds protocol to pass credential struct.  This should 
+piggyback on Goldwyn's work to fix up these structures for namespaces.
+ - mark caps with credentials on clients, fix writeback order, etc.
 
-iEYEARECAAYFAlVsesAACgkQ8dLMyEl6F20dAwCfYvAdeaE9mUD2wtolkIo/cPn1
-hlsAnRqt3MfeBKYxqY4gshvGx5LvCox4
-=ViDV
------END PGP SIGNATURE-----
+In any case, the first item on both those lists seems like the place 
+to start.
 
---LxPGFB9UN1jTgBEeJGXMS66BiDmimRORI--
+sage
