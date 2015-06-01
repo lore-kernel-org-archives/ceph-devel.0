@@ -1,58 +1,61 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: MDS auth caps for cephfs
-Date: Mon, 1 Jun 2015 12:39:32 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1506011131270.10340@cobra.newdream.net>
-References: <alpine.DEB.2.00.1505201651260.23818@cobra.newdream.net> <alpine.DEB.2.00.1505271508020.6462@cobra.newdream.net> <CAC6JEv_Kpkgra-w=yrfyNh_WEdy5ouCOyx-hosup69h0VaxVzQ@mail.gmail.com> <alpine.DEB.2.00.1505271542410.6462@cobra.newdream.net>
- <CAC6JEv8BfMX+jHq8PCONFM4sMN81Nk+YfYkHJbHWK90kKnC+TQ@mail.gmail.com> <alpine.DEB.2.00.1505271646360.6462@cobra.newdream.net> <CAC6JEv_Jw5S94E2yiW-g-t1Ro3gjiYXnoRKGNf=721CjoLESkA@mail.gmail.com> <alpine.DEB.2.00.1505271728250.6462@cobra.newdream.net>
- <CAC6JEv8pmJ-PhMUVqoP_VNsGR-STyjiyfcPqqpEQRv8x=UTjwA@mail.gmail.com> <CAANLjFqA+X7WYQ6NX_-L--vZorerSCQs6YcNSfUrurjsQFOsYA@mail.gmail.com> <CAC6JEv-MH=1uJD1HudhHJ=8wfg+dP3d9euhwLNEB-idsogGu+Q@mail.gmail.com> <alpine.DEB.2.00.1505280957450.6462@cobra.newdream.net>
- <CAANLjFrs6xrQXJHu-Z7bqw_FWmGbqbc-HT1SKBxi0=Ls2SmBbg@mail.gmail.com> <alpine.DEB.2.00.1505281024560.6462@cobra.newdream.net> <CAANLjFqoZ0hBjXEHAcc4VLygCuzwzxtKpNH+nJHE3X00dvfKqQ@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: A bug in rolling back to a degraded object
+Date: Mon, 1 Jun 2015 16:41:30 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1506011629530.20600@cobra.newdream.net>
+References: <06E7D85B3BA36C4DB207FEDE871C53489EBE1F@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54016 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753227AbbFATjd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 1 Jun 2015 15:39:33 -0400
-In-Reply-To: <CAANLjFqoZ0hBjXEHAcc4VLygCuzwzxtKpNH+nJHE3X00dvfKqQ@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:57511 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751902AbbFAXld (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 1 Jun 2015 19:41:33 -0400
+In-Reply-To: <06E7D85B3BA36C4DB207FEDE871C53489EBE1F@SHSMSX101.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Robert LeBlanc <robert@leblancnet.us>
-Cc: Gregory Farnum <greg@gregs42.com>, John Spray <john.spray@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Nishtha Rai <nishtha3rai@gmail.com>, jashan kamboj <jashank42@gmail.com>
+To: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-I have a pull request posted at
+Hi Zhiqiang,
 
-	https://github.com/ceph/ceph/pull/4809
+On Mon, 1 Jun 2015, Wang, Zhiqiang wrote:
+> Hi Sage and all,
+> 
+> Another bug discovered during the proxy write teuthology testing is when 
+> rolling back to a degraded object. This doesn't seem specific to proxy 
+> write. I see a scenario like below from the log file:
+> 
+>  - A rollback op comes in, and is enqueued.
+>  - Several other ops on the same object come in, and are enqueued.
+>  - The rollback op dispatches, and finds the object which it rollbacks 
+> to is degraded, then this op is pushbacked into a list to wait for the 
+> degraded object to recover.
+>  - The later ops are handled and responded back to client.
+>  - The degraded object recovers. The rollback op is enqueued again and 
+> finally responded to client.
 
-that updates the mds cap parser and defines a check method.  Please take 
-a look and see if this makes sense.
+Yep!
+ 
+> This breaks the op order. A fix for this is to maintain a map to track 
+> the <source, destination> pair. And when an op on the source dispatches, 
+> if such a pair exists, queue the op in the destination's degraded 
+> waiting list. A drawback of this approach is that some entries in the ' 
+> waiting_for_degraded_object' list of the destination object may not be 
+> actually accessing the destination, but the source. Does this make 
+> sense?
 
-For the path restrictions, I think the next steps are something like
+Yeah, and I think it's fine for the op to appear in the other object's 
+list.  In fact there is already a mechanism in place that does something 
+similar: obc->blocked_by.  It was added for the clone operation, which 
+nfortunately I don't think it's not exercised in any of our test.. but 
+I think it does exactly what you need.  If you set the head's blocked_by 
+to the clone (and the clone's blocks set to include the head) then anybody 
+trying to write to the head will queue up on the clone's degraded 
+list (see the check for this in ReplicatedPG::do_op()).
 
- - generate a path string and pass it in to that method
- - write some simple tests
- - make sure the hook is called from everywhere it needs to be (all of the 
-other request handlers in Server.cc)
- - call the hook from the cap writeback path (tricky)
- - figure out how to handle files in the stray dir (tricky)
+I think this mostl amounts to making the _rollback_to() method get the 
+clone's obc, set up the blocked_by/blocks relationship, start recovery of 
+that object immediately, and queue itself on the waiting list.
 
-For the user-based restrictions,
-
- - I think we need to expand the allows() method so that it has a couple 
-output arguments (uid and gid list) that subsequent permissions should be 
-validated against.  Then we can change the function in Server.cc so 
-that when those are populated it does an actually unix permissions check.  
-This seems like the simplest thing to me, although it does have the 
-slightly-odd property that if you are doing an operation that requires 
-permission on two inodes (directory and file, say) you might have to 
-different 'allow ...' lines granting access to each.  (I think this is 
-both painful to avoid and also harmless?)
- - same items above to call into the check method in the appropriate 
-places.
- - extend client/mds protocol to pass credential struct.  This should 
-piggyback on Goldwyn's work to fix up these structures for namespaces.
- - mark caps with credentials on clients, fix writeback order, etc.
-
-In any case, the first item on both those lists seems like the place 
-to start.
-
+Does that make sense?
 sage
