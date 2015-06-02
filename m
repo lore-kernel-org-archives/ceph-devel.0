@@ -1,138 +1,132 @@
-From: Srikanth Madugundi <srikanth.madugundi@gmail.com>
-Subject: Re: osd crash with object store set to newstore
-Date: Mon, 1 Jun 2015 22:25:40 -0700
-Message-ID: <CACAg-u81zF+QJm6-pMDMHSqjFw8DrkdpOAgc9nB6YUQdtt8EFw@mail.gmail.com>
-References: <CACAg-u_4mdrj=eCwwYzMzk-RDjCkAWYT6KwaAvUSNJK52gcO6g@mail.gmail.com>
-	<alpine.DEB.2.00.1506012053340.9814@cobra.newdream.net>
-	<CACAg-u8jU0Jf56ZCf38DpDaW1bvW=ff-goOiFriqqDo8uA31vA@mail.gmail.com>
-	<alpine.DEB.2.00.1506012206110.9814@cobra.newdream.net>
+From: Li Wang <liwang@ubuntukylin.com>
+Subject: Re: [RFC] Implement a new journal mode
+Date: Tue, 02 Jun 2015 17:28:46 +0800
+Message-ID: <556D774E.4050702@ubuntukylin.com>
+References: <55683011.7000307@ubuntukylin.com> <alpine.DEB.2.00.1505290840180.6462@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qg0-f50.google.com ([209.85.192.50]:33132 "EHLO
-	mail-qg0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751514AbbFBFZl (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Jun 2015 01:25:41 -0400
-Received: by qgfa63 with SMTP id a63so55357442qgf.0
-        for <ceph-devel@vger.kernel.org>; Mon, 01 Jun 2015 22:25:40 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1506012206110.9814@cobra.newdream.net>
+Received: from m53-178.qiye.163.com ([123.58.178.53]:54605 "EHLO
+	m53-178.qiye.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754368AbbFBJ3H (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Jun 2015 05:29:07 -0400
+In-Reply-To: <alpine.DEB.2.00.1505290840180.6462@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+To: Sage Weil <sweil@redhat.com>
+Cc: Samuel Just <sjust@redhat.com>, Josh Durgin <jdurgin@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Sage,
+I think for scrub, we have a relatively easy way to solve it,
+add a field to object metadata with the value being either UNSTABLE
+or STABLE, the algorithm is as below,
+1 Mark the object be UNSTABLE
+2 Perform object data write
+3 Perform metadata write and MARK the object STABLE
+The order of the three steps are enforced, and the step 1 and 3 are
+written into journal, while step 2 is performed directly on the object.
+For scrub, it could now distinguish this situation, and one feasible
+policy could be to find the copy with the latest metadata, and
+synchronize the data of that copy to others.
 
-Unfortunately I purged the cluster yesterday and restarted the
-backfill tool. I did not see the osd crash yet on the cluster. I am
-monitoring the OSDs and will update you once I see the crash.
+For this metadata-only journal mode, I think it does not contradict
+with new store, since they address different scenarios. Metadata-only
+journal mode mainly focuses on the scenarios that data consistency
+does not need be ensured by RADOS itself. And it is especially appealing
+for the scenarios with many random small OVERWRITES, for example, RBD
+in cloud environment. While new store is great for CREATE and APPEND,
+for many random small OVERWRITES, new store is not
+very easy to optimize. It seems the only way is to introduce small size
+of fragments and turn those OVERWRITES into APPEND. However, in that
+case, many small OVERWRITES could cause many small files on the local
+file system, it will slow down the subsequent read/write performance of
+the object, so it seems not worthy. Of course, a small-file-merge
+process could be introduced, but that complicates the design.
 
-With the new backfill run I have reduced the rps by half, not sure if
-this is the reason for not seeing the crash yet.
+So basically, I think new store is great for some of the scenarios,
+while metadata-only is desirable for some others, they do not
+contradict with each other, what do you think?
 
-Regards
-Srikanth
+Cheers,
+Li Wang
 
 
-On Mon, Jun 1, 2015 at 10:06 PM, Sage Weil <sage@newdream.net> wrote:
-> I pushed a commit to wip-newstore-debuglist.. can you reproduce the crash
-> with that branch with 'debug newstore = 20' and send us the log?
-> (You can just do 'ceph-post-file <filename>'.)
+
+On 2015/6/1 8:39, Sage Weil wrote:
+> On Fri, 29 May 2015, Li Wang wrote:
+>> An important usage of Ceph is to integrate with cloud computing platform
+>> to provide the storage for VM images and instances. In such scenario,
+>> qemu maps RBD as virtual block devices, i.e., disks to a VM, and
+>> the guest operating system will format the disks and create file
+>> systems on them. In this case, RBD mostly resembles a 'dumb' disk.  In
+>> other words, it is enough for RBD to implement exactly the semantics of
+>> a disk controller driver. Typically, the disk controller itself does
+>> not provide a transactional mechanism to ensure a write operation done
+>> atomically. Instead, it is up to the file system, who manages the disk,
+>> to adopt some techniques such as journaling to prevent inconsistency,
+>> if necessary. Consequently, RBD does not need to provide the
+>> atomic mechanism to ensure a data write operation done atomically,
+>> since the guest file system will guarantee that its write operations to
+>> RBD will remain consistent by using journaling if needed. Another
+>> scenario is for the cache tiering, while cache pool has already
+>> provided the durability, when dirty objects are written back, they
+>> theoretically need not go through the journaling process of base pool,
+>> since the flusher could replay the write operation. These motivate us
+>> to implement a new journal mode, metadata-only journal mode, which
+>> resembles the data=ordered journal mode in ext4. With such journal mode
+>> is on, object data are written directly to their ultimate location,
+>> when data written finished, metadata are written into the journal, then
+>> the write returns to caller. This will avoid the double-write penalty
+>> of object data due to the WRITE-AHEAD-LOGGING, potentially greatly
+>> improve the RBD and cache tiering performance.
+>>
+>> The algorithm is straightforward, as before, the master send
+>> transaction to slave, then they extract the object data write
+>> operations and apply them to objects directly, next they write the
+>> remaining part of the transaction into journal, then slave ack master,
+>> master ack client. For some special operations such as 'clone', they
+>> can be processed as before by throwing the entire transaction into
+>> journal, which makes this approach an absolutely-better optimization
+>> in terms of performance.
+>>
+>> In terms of consistency, metadata consistency is ensured, and
+>> the data consistency of CREATE and APPEND are also ensured, just for
+>> OVERWRITE, it relies on the caller, i.e., guest file system for RBD,
+>> cache flusher for cache tiering to ensure the consistency. In addition,
+>> there remains a problem to be discussed that how to interact with the
+>> scrub process while the object data consistency may not ensured now.
 >
-> Thanks!
+> Right.  This is appealing from a performance perspective, but I'm worried
+> it will throw out too many other assumptions in RADOS that will cause
+> pain.  The big one is that RADOS will no longer know if the version on the
+> object metadata matches the data.  This will be most noticeable from
+> scrub, which will have no idea whether the inconsistency is from a partial
+> write or from a disk error.  And when that happens, it would have to guess
+> which object is the right one--a guess that can easily be wrong if there
+> is rebalancing or recovery that may replicate the partially updated
+> object.
+>
+> Maybe we can journal metadata before applying the write to indicate the
+> object is 'unstable' (undergoing an overwrite) to help out?
+>
+> I'm not sure.  Honestly, I would be more interested in investing our time
+> in making the new OSD backends handle overwrite more efficiently, by
+> avoiding write-ahead in the easy cases (append, create) as newstore
+> does, and/or by doing some sort of COW when we do overwrite, or some other
+> magic that does an atomic swap-data-into-position (e.g., by abusing the
+> xfs defrag ioctl).
+>
+> What do you think?
 > sage
 >
-> On Mon, 1 Jun 2015, Srikanth Madugundi wrote:
 >
->> Hi Sage,
+>   >
+>> We are actively working on it and have done part of the implementation,
+>> want to hear the feedback of the community, and we may submit it as a
+>> blueprint to under discussion in coming CDS.
 >>
->> The assertion failed at line 1639, here is the log message
->>
->>
->> 2015-05-30 23:17:55.141388 7f0891be0700 -1 os/newstore/NewStore.cc: In
->> function 'virtual int NewStore::collection_list_partial(coll_t,
->> ghobject_t, int, int, snapid_t, std::vector<ghobject_t>*,
->> ghobject_t*)' thread 7f0891be0700 time 2015-05-30 23:17:55.137174
->>
->> os/newstore/NewStore.cc: 1639: FAILED assert(k >= start_key && k < end_key)
+>> Cheers,
+>> Li Wang
 >>
 >>
->> Just before the crash the here are the debug statements printed by the
->> method (collection_list_partial)
->>
->> 2015-05-30 22:49:23.607232 7f1681934700 15
->> newstore(/var/lib/ceph/osd/ceph-7) collection_list_partial 75.0_head
->> start -1/0//0/0 min/max 1024/1024 snap head
->> 2015-05-30 22:49:23.607251 7f1681934700 20
->> newstore(/var/lib/ceph/osd/ceph-7) collection_list_partial range
->> --.7fffffffffffffb4.00000000. to --.7fffffffffffffb4.08000000. and
->> --.800000000000004b.00000000. to --.800000000000004b.08000000. start
->> -1/0//0/0
->>
->>
->> Regards
->> Srikanth
->>
->> On Mon, Jun 1, 2015 at 8:54 PM, Sage Weil <sage@newdream.net> wrote:
->> > On Mon, 1 Jun 2015, Srikanth Madugundi wrote:
->> >> Hi Sage and all,
->> >>
->> >> I build ceph code from wip-newstore on RHEL7 and running performance
->> >> tests to compare with filestore. After few hours of running the tests
->> >> the osd daemons started to crash. Here is the stack trace, the osd
->> >> crashes immediately after the restart. So I could not get the osd up
->> >> and running.
->> >>
->> >> ceph version b8e22893f44979613738dfcdd40dada2b513118
->> >> (eb8e22893f44979613738dfcdd40dada2b513118)
->> >> 1: /usr/bin/ceph-osd() [0xb84652]
->> >> 2: (()+0xf130) [0x7f915f84f130]
->> >> 3: (gsignal()+0x39) [0x7f915e2695c9]
->> >> 4: (abort()+0x148) [0x7f915e26acd8]
->> >> 5: (__gnu_cxx::__verbose_terminate_handler()+0x165) [0x7f915eb6d9d5]
->> >> 6: (()+0x5e946) [0x7f915eb6b946]
->> >> 7: (()+0x5e973) [0x7f915eb6b973]
->> >> 8: (()+0x5eb9f) [0x7f915eb6bb9f]
->> >> 9: (ceph::__ceph_assert_fail(char const*, char const*, int, char
->> >> const*)+0x27a) [0xc84c5a]
->> >> 10: (NewStore::collection_list_partial(coll_t, ghobject_t, int, int,
->> >> snapid_t, std::vector<ghobject_t, std::allocator<ghobject_t> >*,
->> >> ghobject_t*)+0x13c9) [0xa08639]
->> >> 11: (PGBackend::objects_list_partial(hobject_t const&, int, int,
->> >> snapid_t, std::vector<hobject_t, std::allocator<hobject_t> >*,
->> >> hobject_t*)+0x352) [0x918a02]
->> >> 12: (ReplicatedPG::do_pg_op(std::tr1::shared_ptr<OpRequest>)+0x1066) [0x8aa906]
->> >> 13: (ReplicatedPG::do_op(std::tr1::shared_ptr<OpRequest>&)+0x1eb) [0x8cd06b]
->> >> 14: (ReplicatedPG::do_request(std::tr1::shared_ptr<OpRequest>&,
->> >> ThreadPool::TPHandle&)+0x68a) [0x85dbea]
->> >> 15: (OSD::dequeue_op(boost::intrusive_ptr<PG>,
->> >> std::tr1::shared_ptr<OpRequest>, ThreadPool::TPHandle&)+0x3ed)
->> >> [0x6c3f5d]
->> >> 16: (OSD::ShardedOpWQ::_process(unsigned int,
->> >> ceph::heartbeat_handle_d*)+0x2e9) [0x6c4449]
->> >> 17: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x86f) [0xc746bf]
->> >> 18: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0xc767f0]
->> >> 19: (()+0x7df3) [0x7f915f847df3]
->> >> 20: (clone()+0x6d) [0x7f915e32a01d]
->> >> NOTE: a copy of the executable, or `objdump -rdS <executable>` is
->> >> needed to interpret this.
->> >>
->> >> Please let me know the cause of this crash, when this crash happens I
->> >> noticed that two osds on separate machines are down. I can bring one
->> >> osd up but restarting the other osd causes both OSDs to crash. My
->> >> understanding is the crash seems to happen when two OSDs try to
->> >> communicate and replicate a particular PG.
->> >
->> > Can you include the log lines that preceed the dump above?  In particular,
->> > there should be a line that tells you what assertion failed in what
->> > function and at what line number.  I haven't seen this crash so I'm not
->> > sure offhand what it is.
->> >
->> > Thanks!
->> > sage
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
+>
