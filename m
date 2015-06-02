@@ -1,67 +1,53 @@
-From: Srikanth Madugundi <srikanth.madugundi@gmail.com>
-Subject: osd crash with object store set to newstore
-Date: Mon, 1 Jun 2015 18:40:22 -0700
-Message-ID: <CACAg-u_4mdrj=eCwwYzMzk-RDjCkAWYT6KwaAvUSNJK52gcO6g@mail.gmail.com>
+From: Paul Von-Stamwitz <PVonStamwitz@us.fujitsu.com>
+Subject: RE: Discuss: New default recovery config settings
+Date: Mon, 1 Jun 2015 18:39:40 -0700
+Message-ID: <622F4407872BA447A16110F65453358C03DFB21C4B5F@FMSAMAIL.fmsa.local>
+References: <1939533999.9756941.1432935747903.JavaMail.zimbra@redhat.com>
+	<1394947829.9758745.1432936033017.JavaMail.zimbra@redhat.com>
+ <CAC6JEv8LyM1SRsOszDCj6tLxhZ=hvrEkinDARW8BvyQHDCz+LQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f178.google.com ([209.85.220.178]:35173 "EHLO
-	mail-qk0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754598AbbFBBkX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 1 Jun 2015 21:40:23 -0400
-Received: by qkhq76 with SMTP id q76so65153457qkh.2
-        for <ceph-devel@vger.kernel.org>; Mon, 01 Jun 2015 18:40:23 -0700 (PDT)
+Received: from fujitsu24.fnanic.fujitsu.com ([192.240.6.14]:38045 "EHLO
+	fujitsu24.fnanic.fujitsu.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751930AbbFBCYB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 1 Jun 2015 22:24:01 -0400
+In-Reply-To: <CAC6JEv8LyM1SRsOszDCj6tLxhZ=hvrEkinDARW8BvyQHDCz+LQ@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Gregory Farnum <greg@gregs42.com>, Samuel Just <sjust@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, "'ceph-users@lists.ceph.com' (ceph-users@lists.ceph.com)" <ceph-users@lists.ceph.com>
 
-Hi Sage and all,
-
-I build ceph code from wip-newstore on RHEL7 and running performance
-tests to compare with filestore. After few hours of running the tests
-the osd daemons started to crash. Here is the stack trace, the osd
-crashes immediately after the restart. So I could not get the osd up
-and running.
-
-ceph version b8e22893f44979613738dfcdd40dada2b513118
-(eb8e22893f44979613738dfcdd40dada2b513118)
-1: /usr/bin/ceph-osd() [0xb84652]
-2: (()+0xf130) [0x7f915f84f130]
-3: (gsignal()+0x39) [0x7f915e2695c9]
-4: (abort()+0x148) [0x7f915e26acd8]
-5: (__gnu_cxx::__verbose_terminate_handler()+0x165) [0x7f915eb6d9d5]
-6: (()+0x5e946) [0x7f915eb6b946]
-7: (()+0x5e973) [0x7f915eb6b973]
-8: (()+0x5eb9f) [0x7f915eb6bb9f]
-9: (ceph::__ceph_assert_fail(char const*, char const*, int, char
-const*)+0x27a) [0xc84c5a]
-10: (NewStore::collection_list_partial(coll_t, ghobject_t, int, int,
-snapid_t, std::vector<ghobject_t, std::allocator<ghobject_t> >*,
-ghobject_t*)+0x13c9) [0xa08639]
-11: (PGBackend::objects_list_partial(hobject_t const&, int, int,
-snapid_t, std::vector<hobject_t, std::allocator<hobject_t> >*,
-hobject_t*)+0x352) [0x918a02]
-12: (ReplicatedPG::do_pg_op(std::tr1::shared_ptr<OpRequest>)+0x1066) [0x8aa906]
-13: (ReplicatedPG::do_op(std::tr1::shared_ptr<OpRequest>&)+0x1eb) [0x8cd06b]
-14: (ReplicatedPG::do_request(std::tr1::shared_ptr<OpRequest>&,
-ThreadPool::TPHandle&)+0x68a) [0x85dbea]
-15: (OSD::dequeue_op(boost::intrusive_ptr<PG>,
-std::tr1::shared_ptr<OpRequest>, ThreadPool::TPHandle&)+0x3ed)
-[0x6c3f5d]
-16: (OSD::ShardedOpWQ::_process(unsigned int,
-ceph::heartbeat_handle_d*)+0x2e9) [0x6c4449]
-17: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x86f) [0xc746bf]
-18: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0xc767f0]
-19: (()+0x7df3) [0x7f915f847df3]
-20: (clone()+0x6d) [0x7f915e32a01d]
-NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-needed to interpret this.
-
-Please let me know the cause of this crash, when this crash happens I
-noticed that two osds on separate machines are down. I can bring one
-osd up but restarting the other osd causes both OSDs to crash. My
-understanding is the crash seems to happen when two OSDs try to
-communicate and replicate a particular PG.
-
-Regards
-Srikanth
+T24gRnJpLCBNYXkgMjksIDIwMTUgYXQgNDoxOCBQTSwgR3JlZ29yeSBGYXJudW0gPGdyZWdAZ3Jl
+Z3M0Mi5jb20+IHdyb3RlOg0KPiBPbiBGcmksIE1heSAyOSwgMjAxNSBhdCAyOjQ3IFBNLCBTYW11
+ZWwgSnVzdCA8c2p1c3RAcmVkaGF0LmNvbT4gd3JvdGU6DQo+ID4gTWFueSBwZW9wbGUgaGF2ZSBy
+ZXBvcnRlZCB0aGF0IHRoZXkgbmVlZCB0byBsb3dlciB0aGUgb3NkIHJlY292ZXJ5IGNvbmZpZyBv
+cHRpb25zIHRvIG1pbmltaXplIHRoZSBpbXBhY3Qgb2YgcmVjb3Zlcnkgb24gY2xpZW50IGlvLiAg
+V2UgYXJlIHRhbGtpbmcgYWJvdXQgY2hhbmdpbmcgdGhlIGRlZmF1bHRzIGFzIGZvbGxvd3M6DQo+
+ID4NCj4gPiBvc2RfbWF4X2JhY2tmaWxscyB0byAxIChmcm9tIDEwKQ0KPiA+IG9zZF9yZWNvdmVy
+eV9tYXhfYWN0aXZlIHRvIDMgKGZyb20gMTUpDQo+ID4gb3NkX3JlY292ZXJ5X29wX3ByaW9yaXR5
+IHRvIDEgKGZyb20gMTApDQo+ID4gb3NkX3JlY292ZXJ5X21heF9zaW5nbGVfc3RhcnQgdG8gMSAo
+ZnJvbSA1KQ0KPiANCj4gSSdtIHVuZGVyIHRoZSAocG9zc2libHkgZXJyb25lb3VzKSBpbXByZXNz
+aW9uIHRoYXQgcmVkdWNpbmcgdGhlIG51bWJlciBvZiBtYXggYmFja2ZpbGxzIGRvZXNuJ3QgYWN0
+dWFsbHkgcmVkdWNlIHJlY292ZXJ5IHNwZWVkIG11Y2ggKGJ1dCB3aWxsIHJlZHVjZSBtZW1vcnkg
+dXNlKSwgYnV0IHRoYXQgZHJvcHBpbmcgdGhlIG9wIHByaW9yaXR5IGNhbi4gSSdkIHJhdGhlciB3
+ZSBtYWtlIHVzZXJzIG1hbnVhbGx5IGFkanVzdCB2YWx1ZXMgd2hpY2ggY2FuIGhhdmUgYSBtYXRl
+cmlhbCBpbXBhY3Qgb24gdGhlaXIgZGF0YSBzYWZldHksIGV2ZW4gaWYgbW9zdCBvZiB0aGVtIGNo
+b29zZSB0byBkbyBzby4NCj4gDQo+IEFmdGVyIGFsbCwgZXZlbiB1bmRlciBvdXIgd29yc3QgYmVo
+YXZpb3Igd2UncmUgc3RpbGwgZG9pbmcgYSBsb3QgYmV0dGVyIHRoYW4gYSByZXNpbHZlcmluZyBS
+QUlEIGFycmF5LiA7KSAtR3JlZw0KPiAtLQ0KDQoNCkdyZWcsDQpXaGVuIHdlIHNldC4uLg0KDQpv
+c2QgcmVjb3ZlcnkgbWF4IGFjdGl2ZSA9IDENCm9zZCBtYXggYmFja2ZpbGxzID0gMQ0KDQpXZSBz
+ZWUgcmViYWxhbmNlIHRpbWVzIGdvIGRvd24gYnkgbW9yZSB0aGFuIGhhbGYgYW5kIGNsaWVudCB3
+cml0ZSBwZXJmb3JtYW5jZSBpbmNyZWFzZSBzaWduaWZpY2FudGx5IHdoaWxlIHJlYmFsYW5jaW5n
+LiBXZSBpbml0aWFsbHkgcGxheWVkIHdpdGggdGhlc2Ugc2V0dGluZ3MgdG8gaW1wcm92ZSBjbGll
+bnQgSU8gZXhwZWN0aW5nIHJlY292ZXJ5IHRpbWUgdG8gZ2V0IHdvcnNlLCBidXQgd2UgZ290IGEg
+Mi1mb3ItMS4gDQpUaGlzIHdhcyB3aXRoIGZpcmVmbHkgdXNpbmcgcmVwbGljYXRpb24sIGRvd25p
+bmcgYW4gZW50aXJlIG5vZGUgd2l0aCBsb3RzIG9mIFNBUyBkcml2ZXMuIFdlIGxlZnQgb3NkX3Jl
+Y292ZXJ5X3RocmVhZHMsIG9zZF9yZWNvdmVyeV9vcF9wcmlvcml0eSwgYW5kIG9zZF9yZWNvdmVy
+eV9tYXhfc2luZ2xlX3N0YXJ0IGRlZmF1bHQuDQoNCldlIGRyb3BwZWQgb3NkX3JlY292ZXJ5X21h
+eF9hY3RpdmUgYW5kIG9zZF9tYXhfYmFja2ZpbGxzIHRvZ2V0aGVyLiBJZiB5b3UncmUgcmlnaHQs
+IGRvIHlvdSB0aGluayBvc2RfcmVjb3ZlcnlfbWF4X2FjdGl2ZT0xIGlzIHByaW1hcnkgcmVhc29u
+IGZvciB0aGUgaW1wcm92ZW1lbnQ/IChoaWdoZXIgb3NkX21heF9iYWNrZmlsbHMgaGVscHMgcmVj
+b3ZlcnkgdGltZSB3aXRoIGVyYXN1cmUgY29kaW5nLikNCg0KLVBhdWwNCg==
