@@ -1,85 +1,150 @@
-From: Jason Dillaman <dillaman@redhat.com>
-Subject: RBD journal draft design
-Date: Tue, 2 Jun 2015 11:11:51 -0400 (EDT)
-Message-ID: <1346174854.9391994.1433257911870.JavaMail.zimbra@redhat.com>
-References: <1574383603.9391063.1433257824183.JavaMail.zimbra@redhat.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: [RFC] Implement a new journal mode
+Date: Tue, 2 Jun 2015 08:17:08 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1506020759440.9814@cobra.newdream.net>
+References: <55683011.7000307@ubuntukylin.com> <alpine.DEB.2.00.1505290840180.6462@cobra.newdream.net> <556D774E.4050702@ubuntukylin.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx3-phx2.redhat.com ([209.132.183.24]:50139 "EHLO
-	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759064AbbFBPLw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Jun 2015 11:11:52 -0400
-Received: from zmail12.collab.prod.int.phx2.redhat.com (zmail12.collab.prod.int.phx2.redhat.com [10.5.83.14])
-	by mx3-phx2.redhat.com (8.13.8/8.13.8) with ESMTP id t52FBqeS029390
-	for <ceph-devel@vger.kernel.org>; Tue, 2 Jun 2015 11:11:52 -0400
-In-Reply-To: <1574383603.9391063.1433257824183.JavaMail.zimbra@redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:37174 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1759269AbbFBPRN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 2 Jun 2015 11:17:13 -0400
+In-Reply-To: <556D774E.4050702@ubuntukylin.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Li Wang <liwang@ubuntukylin.com>
+Cc: Samuel Just <sjust@redhat.com>, Josh Durgin <jdurgin@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-I am posting to get wider review/feedback on this draft design.  In support of the RBD mirroring feature [1], a new client-side journaling class will be developed for use by librbd.  The implementation is designed to carry opaque journal entry payloads so it will be possible to be re-used in other applications as well in the future.  It will also use the librados API for all operations.  At a high level, a single journal will be composed of a journal header to store metadata and multiple journal objects to contain the individual journal entries.
+On Tue, 2 Jun 2015, Li Wang wrote:
+> I think for scrub, we have a relatively easy way to solve it,
+> add a field to object metadata with the value being either UNSTABLE
+> or STABLE, the algorithm is as below,
+> 1 Mark the object be UNSTABLE
+> 2 Perform object data write
+> 3 Perform metadata write and MARK the object STABLE
+> The order of the three steps are enforced, and the step 1 and 3 are
+> written into journal, while step 2 is performed directly on the object.
+> For scrub, it could now distinguish this situation, and one feasible
+> policy could be to find the copy with the latest metadata, and
+> synchronize the data of that copy to others.
 
-Journal objects will be named "<journal object prefix>.<journal id>.<object number>".  An individual journal object will hold one or more journal entries, appended one after another.  Journal objects will have a configurable soft maximum size.  After the size has been exceeded, a new journal object (numbered current object + number of journal objects) will be created for future journal entries and the header active set will be updated so that other clients know that a new journal object was created.
+If you have some failure and some copies are unstable and some are stable, 
+then sure, you can recover.  What do you do if all copies are unstable?  
+You can arbitrarily sync them up (just pick a copy), but if you mark it 
+stable, you have to pick a version to go with it... is it new or old?
 
-In contrast to the current journal code used by CephFS, the new journal code will use sequence numbers to identify journal entries, instead of offsets within the journal.  Additionally, a given journal entry will not be striped across multiple journal objects.  Journal entries will be mapped to journal objects using the sequence number: <sequence number> mod <splay count> == <object number> mod <splay count> for active journal objects.
+> For this metadata-only journal mode, I think it does not contradict
+> with new store, since they address different scenarios. Metadata-only
+> journal mode mainly focuses on the scenarios that data consistency
+> does not need be ensured by RADOS itself. And it is especially appealing
+> for the scenarios with many random small OVERWRITES, for example, RBD
+> in cloud environment. While new store is great for CREATE and APPEND,
+> for many random small OVERWRITES, new store is not
+> very easy to optimize. It seems the only way is to introduce small size
+> of fragments and turn those OVERWRITES into APPEND. However, in that
+> case, many small OVERWRITES could cause many small files on the local
+> file system, it will slow down the subsequent read/write performance of
+> the object, so it seems not worthy. Of course, a small-file-merge
+> process could be introduced, but that complicates the design.
 
-The rationale for this difference is to facilitate parallelism for appends as journal entries will be splayed across a configurable number of journal objects.  The journal API for appending a new journal entry will return a future which can be used to retrieve the assigned sequence number for the submitted journal entry payload once committed to disk. The use of a future allows for asynchronous journal entry submissions by default and can be used to simplify integration with the client-side cache writeback handler (and as a potential future enhacement to delay appends to the journal in order to satisfy EC-pool alignment requirements).
+Yeah, I see the use-case.  I'm just worried about what else is would 
+affect.
 
-Sequence numbers are treated as a monotonically increasing integer for a given value of journal entry tag.  This allows for the possibility for multiple clients to concurrently use the same journal (e.g. all RBD disks within a given VM could use the same journal).  This will provide a loose coupling of operations between different clients using the same journal.
+This would take the form of... a flag on ObjectStore's write, indicating 
+it is allowed to be leave the object in some nondeterministic state?  Is 
+the rule that only the bytes indicated by the write may be changed (to 
+either new or old values), or is allowed to corrupt the entire object?
 
-A new journal object class method will be used to submit journal entry append requests.  This will act as a gatekeeper for the concurrent client case.  A successful append will indicate whether or not the journal is now full (larger than the max object size), indicating to the client that a new journal object should be used.  If the journal is too large, an error code responce would alert the client that it needs to write to the current active journal object.  In practice, the only time the journaler should expect to see such a response would be in the case where multiple clients are using the same journal and the active object update notification has yet to be received.  
-
-All the journal objects will be tied together by means of a journal header object, named "<journal header prefix>.<journal id>".  This object will contain the current committed journal entry positions of all registered clients.  In librbd's case, each mirrored copy of an image would be a new registered client.  OSD class methods would be used to create/manipulate the journal header to serialize modifications from multiple clients.
-
-Journal recovery / playback will iterate through each journal entry from the journal, in sequence order.  Journal objects will be prefetched (where possible) to a configurable amount to improve the latency.  Journal entry playback can use an optional client-specified filter to only iterate over entries with a matching journal entry tag.  The API will need to support the use case of an external client periodically testing the journal for new data. 
- 
-Journal trimming will be accomplished by removing a whole journal object.  Only after all registered users of the journal have indicated that they have committed all journal entries within the journal object (via an update to the journal header metadata) will the journal object be deleted and the header updated to indicate the new starting object number.
-
-Since the journal is designed to be append-only, there needs to be support for cases where journal entry needs to be updated out-of-band (e.g. fixing a corrupt entry similar to CephFS's current journal recovery tools).  The proposed solution is to just append a new journal entry with the same sequence number as the record to be replaced to the end of the journal (i.e. last entry for a given sequence number wins).  This also protects against accidental replays of the original append operation.  An alternative suggestion would be to use a compare-and-swap mechanism to update the full journal object with the updated contents.
-
-Journal Header
-~~~~~~~~~~~~~~
-
-omap
-* soft max object size
-* journal objects splay count
-* min object number
-* most recent active journal objects (could be out-of-date)
-* registered clients
-  * client description (i.e. zone)
-  * journal entry tag
-  * last committed sequence number
-
-Journal Object
-~~~~~~~~~~~~~~~
-
-Data
-* 1..N: <Journal Entry>
-
-Journal Entries
-~~~~~~~~~~~~~~~
-
-Header
-* version
-* tag
-* sequence number
-* data size
-
-Data
-* raw payload
-
-Footer
-* CRC of journal entry header + data
-
-[1] http://comments.gmane.org/gmane.comp.file-systems.ceph.devel/24929
-
--- 
-
-Jason Dillaman 
-Red Hat 
-dillaman@redhat.com 
-http://www.redhat.com 
+sage
 
 
+> So basically, I think new store is great for some of the scenarios,
+> while metadata-only is desirable for some others, they do not
+> contradict with each other, what do you think?
+> 
+> Cheers,
+> Li Wang
+> 
+> 
+> 
+> On 2015/6/1 8:39, Sage Weil wrote:
+> > On Fri, 29 May 2015, Li Wang wrote:
+> > > An important usage of Ceph is to integrate with cloud computing platform
+> > > to provide the storage for VM images and instances. In such scenario,
+> > > qemu maps RBD as virtual block devices, i.e., disks to a VM, and
+> > > the guest operating system will format the disks and create file
+> > > systems on them. In this case, RBD mostly resembles a 'dumb' disk.  In
+> > > other words, it is enough for RBD to implement exactly the semantics of
+> > > a disk controller driver. Typically, the disk controller itself does
+> > > not provide a transactional mechanism to ensure a write operation done
+> > > atomically. Instead, it is up to the file system, who manages the disk,
+> > > to adopt some techniques such as journaling to prevent inconsistency,
+> > > if necessary. Consequently, RBD does not need to provide the
+> > > atomic mechanism to ensure a data write operation done atomically,
+> > > since the guest file system will guarantee that its write operations to
+> > > RBD will remain consistent by using journaling if needed. Another
+> > > scenario is for the cache tiering, while cache pool has already
+> > > provided the durability, when dirty objects are written back, they
+> > > theoretically need not go through the journaling process of base pool,
+> > > since the flusher could replay the write operation. These motivate us
+> > > to implement a new journal mode, metadata-only journal mode, which
+> > > resembles the data=ordered journal mode in ext4. With such journal mode
+> > > is on, object data are written directly to their ultimate location,
+> > > when data written finished, metadata are written into the journal, then
+> > > the write returns to caller. This will avoid the double-write penalty
+> > > of object data due to the WRITE-AHEAD-LOGGING, potentially greatly
+> > > improve the RBD and cache tiering performance.
+> > > 
+> > > The algorithm is straightforward, as before, the master send
+> > > transaction to slave, then they extract the object data write
+> > > operations and apply them to objects directly, next they write the
+> > > remaining part of the transaction into journal, then slave ack master,
+> > > master ack client. For some special operations such as 'clone', they
+> > > can be processed as before by throwing the entire transaction into
+> > > journal, which makes this approach an absolutely-better optimization
+> > > in terms of performance.
+> > > 
+> > > In terms of consistency, metadata consistency is ensured, and
+> > > the data consistency of CREATE and APPEND are also ensured, just for
+> > > OVERWRITE, it relies on the caller, i.e., guest file system for RBD,
+> > > cache flusher for cache tiering to ensure the consistency. In addition,
+> > > there remains a problem to be discussed that how to interact with the
+> > > scrub process while the object data consistency may not ensured now.
+> > 
+> > Right.  This is appealing from a performance perspective, but I'm worried
+> > it will throw out too many other assumptions in RADOS that will cause
+> > pain.  The big one is that RADOS will no longer know if the version on the
+> > object metadata matches the data.  This will be most noticeable from
+> > scrub, which will have no idea whether the inconsistency is from a partial
+> > write or from a disk error.  And when that happens, it would have to guess
+> > which object is the right one--a guess that can easily be wrong if there
+> > is rebalancing or recovery that may replicate the partially updated
+> > object.
+> > 
+> > Maybe we can journal metadata before applying the write to indicate the
+> > object is 'unstable' (undergoing an overwrite) to help out?
+> > 
+> > I'm not sure.  Honestly, I would be more interested in investing our time
+> > in making the new OSD backends handle overwrite more efficiently, by
+> > avoiding write-ahead in the easy cases (append, create) as newstore
+> > does, and/or by doing some sort of COW when we do overwrite, or some other
+> > magic that does an atomic swap-data-into-position (e.g., by abusing the
+> > xfs defrag ioctl).
+> > 
+> > What do you think?
+> > sage
+> > 
+> > 
+> >   >
+> > > We are actively working on it and have done part of the implementation,
+> > > want to hear the feedback of the community, and we may submit it as a
+> > > blueprint to under discussion in coming CDS.
+> > > 
+> > > Cheers,
+> > > Li Wang
+> > > 
+> > > 
+> > 
+> 
+> 
