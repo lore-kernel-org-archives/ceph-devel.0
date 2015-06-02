@@ -1,73 +1,74 @@
-From: Gregory Farnum <greg-3KCAGdo1P2hBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: Discuss: New default recovery config settings
-Date: Mon, 1 Jun 2015 20:43:10 -0700
-Message-ID: <CAC6JEv-i6tOwPBDjP++EW4FxAKZ_X_prEZ8YZOpLq-RTP1ZguQ@mail.gmail.com>
-References: <1939533999.9756941.1432935747903.JavaMail.zimbra@redhat.com>
-	<1394947829.9758745.1432936033017.JavaMail.zimbra@redhat.com>
-	<CAC6JEv8LyM1SRsOszDCj6tLxhZ=hvrEkinDARW8BvyQHDCz+LQ@mail.gmail.com>
-	<622F4407872BA447A16110F65453358C03DFB21C4B5F@FMSAMAIL.fmsa.local>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: osd crash with object store set to newstore
+Date: Mon, 1 Jun 2015 20:54:19 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1506012053340.9814@cobra.newdream.net>
+References: <CACAg-u_4mdrj=eCwwYzMzk-RDjCkAWYT6KwaAvUSNJK52gcO6g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <622F4407872BA447A16110F65453358C03DFB21C4B5F-Y+un6SQecilYCZvkXUWeucM6rOWSkUom@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Paul Von-Stamwitz <PVonStamwitz-gkcJ3tX5bYHQFUHtdCDX3A@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "'ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org' (ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org)" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:55553 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754724AbbFBDyU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 1 Jun 2015 23:54:20 -0400
+In-Reply-To: <CACAg-u_4mdrj=eCwwYzMzk-RDjCkAWYT6KwaAvUSNJK52gcO6g@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Srikanth Madugundi <srikanth.madugundi@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-T24gTW9uLCBKdW4gMSwgMjAxNSBhdCA2OjM5IFBNLCBQYXVsIFZvbi1TdGFtd2l0ego8UFZvblN0
-YW13aXR6QHVzLmZ1aml0c3UuY29tPiB3cm90ZToKPiBPbiBGcmksIE1heSAyOSwgMjAxNSBhdCA0
-OjE4IFBNLCBHcmVnb3J5IEZhcm51bSA8Z3JlZ0BncmVnczQyLmNvbT4gd3JvdGU6Cj4+IE9uIEZy
-aSwgTWF5IDI5LCAyMDE1IGF0IDI6NDcgUE0sIFNhbXVlbCBKdXN0IDxzanVzdEByZWRoYXQuY29t
-PiB3cm90ZToKPj4gPiBNYW55IHBlb3BsZSBoYXZlIHJlcG9ydGVkIHRoYXQgdGhleSBuZWVkIHRv
-IGxvd2VyIHRoZSBvc2QgcmVjb3ZlcnkgY29uZmlnIG9wdGlvbnMgdG8gbWluaW1pemUgdGhlIGlt
-cGFjdCBvZiByZWNvdmVyeSBvbiBjbGllbnQgaW8uICBXZSBhcmUgdGFsa2luZyBhYm91dCBjaGFu
-Z2luZyB0aGUgZGVmYXVsdHMgYXMgZm9sbG93czoKPj4gPgo+PiA+IG9zZF9tYXhfYmFja2ZpbGxz
-IHRvIDEgKGZyb20gMTApCj4+ID4gb3NkX3JlY292ZXJ5X21heF9hY3RpdmUgdG8gMyAoZnJvbSAx
-NSkKPj4gPiBvc2RfcmVjb3Zlcnlfb3BfcHJpb3JpdHkgdG8gMSAoZnJvbSAxMCkKPj4gPiBvc2Rf
-cmVjb3ZlcnlfbWF4X3NpbmdsZV9zdGFydCB0byAxIChmcm9tIDUpCj4+Cj4+IEknbSB1bmRlciB0
-aGUgKHBvc3NpYmx5IGVycm9uZW91cykgaW1wcmVzc2lvbiB0aGF0IHJlZHVjaW5nIHRoZSBudW1i
-ZXIgb2YgbWF4IGJhY2tmaWxscyBkb2Vzbid0IGFjdHVhbGx5IHJlZHVjZSByZWNvdmVyeSBzcGVl
-ZCBtdWNoIChidXQgd2lsbCByZWR1Y2UgbWVtb3J5IHVzZSksIGJ1dCB0aGF0IGRyb3BwaW5nIHRo
-ZSBvcCBwcmlvcml0eSBjYW4uIEknZCByYXRoZXIgd2UgbWFrZSB1c2VycyBtYW51YWxseSBhZGp1
-c3QgdmFsdWVzIHdoaWNoIGNhbiBoYXZlIGEgbWF0ZXJpYWwgaW1wYWN0IG9uIHRoZWlyIGRhdGEg
-c2FmZXR5LCBldmVuIGlmIG1vc3Qgb2YgdGhlbSBjaG9vc2UgdG8gZG8gc28uCj4+Cj4+IEFmdGVy
-IGFsbCwgZXZlbiB1bmRlciBvdXIgd29yc3QgYmVoYXZpb3Igd2UncmUgc3RpbGwgZG9pbmcgYSBs
-b3QgYmV0dGVyIHRoYW4gYSByZXNpbHZlcmluZyBSQUlEIGFycmF5LiA7KSAtR3JlZwo+PiAtLQo+
-Cj4KPiBHcmVnLAo+IFdoZW4gd2Ugc2V0Li4uCj4KPiBvc2QgcmVjb3ZlcnkgbWF4IGFjdGl2ZSA9
-IDEKPiBvc2QgbWF4IGJhY2tmaWxscyA9IDEKPgo+IFdlIHNlZSByZWJhbGFuY2UgdGltZXMgZ28g
-ZG93biBieSBtb3JlIHRoYW4gaGFsZiBhbmQgY2xpZW50IHdyaXRlIHBlcmZvcm1hbmNlIGluY3Jl
-YXNlIHNpZ25pZmljYW50bHkgd2hpbGUgcmViYWxhbmNpbmcuIFdlIGluaXRpYWxseSBwbGF5ZWQg
-d2l0aCB0aGVzZSBzZXR0aW5ncyB0byBpbXByb3ZlIGNsaWVudCBJTyBleHBlY3RpbmcgcmVjb3Zl
-cnkgdGltZSB0byBnZXQgd29yc2UsIGJ1dCB3ZSBnb3QgYSAyLWZvci0xLgo+IFRoaXMgd2FzIHdp
-dGggZmlyZWZseSB1c2luZyByZXBsaWNhdGlvbiwgZG93bmluZyBhbiBlbnRpcmUgbm9kZSB3aXRo
-IGxvdHMgb2YgU0FTIGRyaXZlcy4gV2UgbGVmdCBvc2RfcmVjb3ZlcnlfdGhyZWFkcywgb3NkX3Jl
-Y292ZXJ5X29wX3ByaW9yaXR5LCBhbmQgb3NkX3JlY292ZXJ5X21heF9zaW5nbGVfc3RhcnQgZGVm
-YXVsdC4KPgo+IFdlIGRyb3BwZWQgb3NkX3JlY292ZXJ5X21heF9hY3RpdmUgYW5kIG9zZF9tYXhf
-YmFja2ZpbGxzIHRvZ2V0aGVyLiBJZiB5b3UncmUgcmlnaHQsIGRvIHlvdSB0aGluayBvc2RfcmVj
-b3ZlcnlfbWF4X2FjdGl2ZT0xIGlzIHByaW1hcnkgcmVhc29uIGZvciB0aGUgaW1wcm92ZW1lbnQ/
-IChoaWdoZXIgb3NkX21heF9iYWNrZmlsbHMgaGVscHMgcmVjb3ZlcnkgdGltZSB3aXRoIGVyYXN1
-cmUgY29kaW5nLikKCldlbGwsIHJlY292ZXJ5IG1heCBhY3RpdmUgYW5kIG1heCBiYWNrZmlsbHMg
-YXJlIHNpbWlsYXIgaW4gbWFueSB3YXlzLgpCb3RoIGFyZSBhYm91dCBtb3ZpbmcgZGF0YSBpbnRv
-IGEgbmV3IG9yIG91dGRhdGVkIGNvcHkgb2YgdGhlIFBHIOKAlCB0aGUKZGlmZmVyZW5jZSBpcyB0
-aGF0IHJlY292ZXJ5IHJlZmVycyB0byBvdXIgbG9nLWJhc2VkIHJlY292ZXJ5ICh3aGVyZSB3ZQpj
-b21wYXJlIHRoZSBQRyBsb2dzIGFuZCBtb3ZlIG92ZXIgdGhlIG9iamVjdHMgd2hpY2ggaGF2ZSBj
-aGFuZ2VkKQp3aGVyZWFzIGJhY2tmaWxsIHJlcXVpcmVzIHVzIHRvIGluY3JlbWVudGFsbHkgbW92
-ZSB0aHJvdWdoIHRoZSBlbnRpcmUKUEcncyBoYXNoIHNwYWNlIGFuZCBjb21wYXJlLgpJIHN1c3Bl
-Y3QgZHJvcHBpbmcgZG93biBtYXggYmFja2ZpbGxzIGlzIG1vcmUgaW1wb3J0YW50IHRoYW4gcmVk
-dWNpbmcKbWF4IHJlY292ZXJ5IChnYXRoZXJpbmcgcmVjb3ZlcnkgbWV0YWRhdGEgaGFwcGVucyBs
-YXJnZWx5IGluIG1lbW9yeSkKYnV0IEkgZG9uJ3QgcmVhbGx5IGtub3cgZWl0aGVyIHdheS4KCk15
-IGNvbW1lbnQgd2FzIG1lYW50IHRvIGNvbnZleSB0aGF0IEknZCBwcmVmZXIgd2Ugbm90IHJlZHVj
-ZSB0aGUKcmVjb3Zlcnkgb3AgcHJpb3JpdHkgbGV2ZWxzLiA6KQotR3JlZwpfX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlz
-dApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5m
-by5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
+On Mon, 1 Jun 2015, Srikanth Madugundi wrote:
+> Hi Sage and all,
+> 
+> I build ceph code from wip-newstore on RHEL7 and running performance
+> tests to compare with filestore. After few hours of running the tests
+> the osd daemons started to crash. Here is the stack trace, the osd
+> crashes immediately after the restart. So I could not get the osd up
+> and running.
+> 
+> ceph version b8e22893f44979613738dfcdd40dada2b513118
+> (eb8e22893f44979613738dfcdd40dada2b513118)
+> 1: /usr/bin/ceph-osd() [0xb84652]
+> 2: (()+0xf130) [0x7f915f84f130]
+> 3: (gsignal()+0x39) [0x7f915e2695c9]
+> 4: (abort()+0x148) [0x7f915e26acd8]
+> 5: (__gnu_cxx::__verbose_terminate_handler()+0x165) [0x7f915eb6d9d5]
+> 6: (()+0x5e946) [0x7f915eb6b946]
+> 7: (()+0x5e973) [0x7f915eb6b973]
+> 8: (()+0x5eb9f) [0x7f915eb6bb9f]
+> 9: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+> const*)+0x27a) [0xc84c5a]
+> 10: (NewStore::collection_list_partial(coll_t, ghobject_t, int, int,
+> snapid_t, std::vector<ghobject_t, std::allocator<ghobject_t> >*,
+> ghobject_t*)+0x13c9) [0xa08639]
+> 11: (PGBackend::objects_list_partial(hobject_t const&, int, int,
+> snapid_t, std::vector<hobject_t, std::allocator<hobject_t> >*,
+> hobject_t*)+0x352) [0x918a02]
+> 12: (ReplicatedPG::do_pg_op(std::tr1::shared_ptr<OpRequest>)+0x1066) [0x8aa906]
+> 13: (ReplicatedPG::do_op(std::tr1::shared_ptr<OpRequest>&)+0x1eb) [0x8cd06b]
+> 14: (ReplicatedPG::do_request(std::tr1::shared_ptr<OpRequest>&,
+> ThreadPool::TPHandle&)+0x68a) [0x85dbea]
+> 15: (OSD::dequeue_op(boost::intrusive_ptr<PG>,
+> std::tr1::shared_ptr<OpRequest>, ThreadPool::TPHandle&)+0x3ed)
+> [0x6c3f5d]
+> 16: (OSD::ShardedOpWQ::_process(unsigned int,
+> ceph::heartbeat_handle_d*)+0x2e9) [0x6c4449]
+> 17: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x86f) [0xc746bf]
+> 18: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0xc767f0]
+> 19: (()+0x7df3) [0x7f915f847df3]
+> 20: (clone()+0x6d) [0x7f915e32a01d]
+> NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+> needed to interpret this.
+> 
+> Please let me know the cause of this crash, when this crash happens I
+> noticed that two osds on separate machines are down. I can bring one
+> osd up but restarting the other osd causes both OSDs to crash. My
+> understanding is the crash seems to happen when two OSDs try to
+> communicate and replicate a particular PG.
+
+Can you include the log lines that preceed the dump above?  In particular, 
+there should be a line that tells you what assertion failed in what 
+function and at what line number.  I haven't seen this crash so I'm not 
+sure offhand what it is.
+
+Thanks!
+sage
