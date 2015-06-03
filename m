@@ -1,56 +1,65 @@
-From: John Spray <john.spray@redhat.com>
-Subject: Re: RBD journal draft design
-Date: Wed, 03 Jun 2015 11:47:56 +0100
-Message-ID: <556EDB5C.6000602@redhat.com>
-References: <1346174854.9391994.1433257911870.JavaMail.zimbra@redhat.com>
+From: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
+Subject: RE: 'Racing read got wrong version' during proxy write testing
+Date: Wed, 3 Jun 2015 13:24:39 +0000
+Message-ID: <06E7D85B3BA36C4DB207FEDE871C53489EE0F9@SHSMSX101.ccr.corp.intel.com>
+References: <06E7D85B3BA36C4DB207FEDE871C53489E8D8C@SHSMSX101.ccr.corp.intel.com>
+ <alpine.DEB.2.00.1505250924080.19787@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:49315 "EHLO mx1.redhat.com"
+Received: from mga11.intel.com ([192.55.52.93]:18624 "EHLO mga11.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752551AbbFCKr6 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 3 Jun 2015 06:47:58 -0400
-Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
-	by mx1.redhat.com (Postfix) with ESMTPS id 906272B787F
-	for <ceph-devel@vger.kernel.org>; Wed,  3 Jun 2015 10:47:58 +0000 (UTC)
-In-Reply-To: <1346174854.9391994.1433257911870.JavaMail.zimbra@redhat.com>
+	id S1753384AbbFCNYu convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Jun 2015 09:24:50 -0400
+In-Reply-To: <alpine.DEB.2.00.1505250924080.19787@cobra.newdream.net>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jason Dillaman <dillaman@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
+I ran into the 'op not idempotent' problem during the testing today. There is one bug in the previous fix. In that fix, we copy the reqids in the final step of 'fill_in_copy_get'. If the object is deleted, since the 'copy get' op is a read op, it returns earlier with ENOENT in do_op. No reqids will be copied during promotion in this case. This again leads to the 'op not idempotent' problem. We need a 'smart' way to detect the op is a 'copy get' op (looping the ops vector doesn't seem smart?) and copy the reqids in this case.
 
+-----Original Message-----
+From: Sage Weil [mailto:sweil@redhat.com] 
+Sent: Tuesday, May 26, 2015 12:27 AM
+To: Wang, Zhiqiang
+Cc: ceph-devel@vger.kernel.org
+Subject: Re: 'Racing read got wrong version' during proxy write testing
 
-On 02/06/2015 16:11, Jason Dillaman wrote:
-> I am posting to get wider review/feedback on this draft design.  In support of the RBD mirroring feature [1], a new client-side journaling class will be developed for use by librbd.  The implementation is designed to carry opaque journal entry payloads so it will be possible to be re-used in other applications as well in the future.  It will also use the librados API for all operations.  At a high level, a single journal will be composed of a journal header to store metadata and multiple journal objects to contain the individual journal entries.
->
-> ...
-> A new journal object class method will be used to submit journal entry append requests.  This will act as a gatekeeper for the concurrent client case.  A successful append will indicate whether or not the journal is now full (larger than the max object size), indicating to the client that a new journal object should be used.  If the journal is too large, an error code responce would alert the client that it needs to write to the current active journal object.  In practice, the only time the journaler should expect to see such a response would be in the case where multiple clients are using the same journal and the active object update notification has yet to be received.
+On Mon, 25 May 2015, Wang, Zhiqiang wrote:
+> Hi all,
+> 
+> I ran into a problem during the teuthology test of proxy write. It is like this:
+> 
+> - Client sends 3 writes and a read on the same object to base tier
+> - Set up cache tiering
+> - Client retries ops and sends the 3 writes and 1 read to the cache 
+> tier
+> - The 3 writes finished on the base tier, say with versions v1, v2 and 
+> v3
+> - Cache tier proxies the 1st write, and start to promote the object 
+> for the 2nd write, the 2nd and 3rd writes and the read are blocked
+> - The proxied 1st write finishes on the base tier with version v4, and 
+> returns to cache tier. But somehow the cache tier fails to send the 
+> reply due to socket failure injecting
+> - Client retries the writes and the read again, the writes are 
+> identified as dup ops
+> - The promotion finishes, it copies the pg_log entries from the base 
+> tier and put it in the cache tier's pg_log. This includes the 3 writes 
+> on the base tier and the proxied write
+> - The writes dispatches after the promotion, they are identified as 
+> completed dup ops. Cache tier replies these write ops with the version 
+> from the base tier (v1, v2 and v3)
+> - In the last, the read dispatches, it reads the version of the 
+> proxied write (v4) and replies to client
+> - Client complains that 'racing read got wrong version'
+> 
+> In a previous discussion of the 'ops not idempotent' problem, we solved it by copying the pg_log entries in the base tier to cache tier during promotion. Seems like there is still a problem with this approach in the above scenario. My first thought is that when proxying the write, the cache tier should use the original reqid from the client. But currently we don't have a way to pass the original reqid from cache to base. Any ideas?
 
-Can you clarify the procedure when a client write gets a "I'm full" 
-return code from a journal object?  The key part I'm not clear on is 
-whether the client will first update the header to add an object to the 
-active set (and then write it) or whether it goes ahead and writes 
-objects and then lazily updates the header.
-* If it's object first, header later, what bounds how far ahead of the 
-active set we have to scan when doing recovery?
-* If it's header first, object later, thats an uncomfortable bit of 
-latency whenever we cross and object bound
+I agree--I think the correct fix here is to make the proxied op be recognized as a dup.  We can either do that by passing in an optional reqid to the Objecter, or extending the op somehow so that both reqids are listed.  I think the first option will be cleaner, but I think we will also need to make sure the 'retry' count is preserved as (I think) we skip the dup check if retry==0.  And we probably want to preserve the behavior that a given (reqid, retry) only exists once in the system.
 
-Nothing intractable about mitigating either case, just wondering what 
-the idea is in this design.
+This probably means adding more optional args to Objecter::read()...?
 
-
-> In contrast to the current journal code used by CephFS, the new journal code will use sequence numbers to identify journal entries, instead of offsets within the journal.  Additionally, a given journal entry will not be striped across multiple journal objects.  Journal entries will be mapped to journal objects using the sequence number: <sequence number> mod <splay count> == <object number> mod <splay count> for active journal objects.
->
-> The rationale for this difference is to facilitate parallelism for appends as journal entries will be splayed across a configurable number of journal objects.  The journal API for appending a new journal entry will return a future which can be used to retrieve the assigned sequence number for the submitted journal entry payload once committed to disk. The use of a future allows for asynchronous journal entry submissions by default and can be used to simplify integration with the client-side cache writeback handler (and as a potential future enhacement to delay appends to the journal in order to satisfy EC-pool alignment requirements).
-
-When two clients are both doing splayed writes, and they both send writes in parallel, it seems like the per-object fullness check via the object class could result in the writes getting staggered across different objects.  E.g. if we have two objects that both only have one slot left, then A could end up taking the slot in one (call it 1) and B could end up taking the slot in the other (call it 2).  Then when B's write lands at to object 1, it gets a "I'm full" response and has to send the entry... where?  I guess to some arbitrarily-higher-numbered journal object depending on how many other writes landed in the meantime.
-
-This potentially leads to the stripes (splays?) of a given journal entry being separated arbitrarily far across different journal objects, which would be fine as long as everything was well formed, but will make detecting issues during replay harder (would have to remember partially-read entries when looking for their remaining stripes through rest of journal).
-
-You could apply the object class behaviour only to the object containing the 0th splay, but then you'd have to wait for the write there to complete before writing to the rest of the splays, so the latency benefit would go away.  Or its equally possible that there's a trick in the design that has gone over my head :-)
-
-Cheers,
-John
-
+sage
