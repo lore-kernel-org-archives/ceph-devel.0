@@ -1,70 +1,52 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: make check bot paused
-Date: Wed, 03 Jun 2015 01:48:25 +0200
-Message-ID: <556E40C9.90900@dachary.org>
+From: Andrew Bartlett <abartlet@catalyst.net.nz>
+Subject: Re: Interested in ceph OSD encryption and key management
+Date: Wed, 03 Jun 2015 12:07:21 +1200
+Message-ID: <1433290041.11787.127.camel@catalyst.net.nz>
+References: <1432787005.11787.33.camel@catalyst.net.nz>
+	 <alpine.DEB.2.00.1505281257490.6462@cobra.newdream.net>
+	 <CAGbvivJ=wEw1gQDx_Kfsa+E9yu4dC2GR79iFApF=An2DrRfqHg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="XfLvdemJ7ovpQk58cRDt795Xku5txtr2b"
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:55338 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751105AbbFBXsc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Jun 2015 19:48:32 -0400
-Received: from [10.9.0.6] (unknown [10.0.2.28])
-	by smtp.dmail.dachary.org (Postfix) with ESMTP id 008A842B3E
-	for <ceph-devel@vger.kernel.org>; Wed,  3 Jun 2015 01:48:25 +0200 (CEST)
+Received: from bertrand.catalyst.net.nz ([202.78.240.40]:33327 "EHLO
+	mail.catalyst.net.nz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751158AbbFCAHZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Jun 2015 20:07:25 -0400
+In-Reply-To: <CAGbvivJ=wEw1gQDx_Kfsa+E9yu4dC2GR79iFApF=An2DrRfqHg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>
+Cc: Sage Weil <sage@newdream.net>, mbroz@redhat.com, ceph-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---XfLvdemJ7ovpQk58cRDt795Xku5txtr2b
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+On Sun, 2015-05-31 at 10:01 -0400, Wyllys Ingersoll wrote:
+> Also consider key management services like Barbican or using an external
+> Key Mgmt server for managing the master keys (wrapping keys,
+> key-encrypting-keys, etc etc).
+> 
+> One can store the wrapping key externally, and fetch it via KMIP or other
+> standard/secure protocol when the disks come online.  The keys in
+> /etc/ceph/keys can be wrapped on disk and then unwrapped with the external
+> key to a ram disk when the disks come online. That way the raw dm-crypt
+> keys don't persist on the disk and are only available as long as the drive
+> is active and the system is up.
+> 
+> Just one possibility.  Switching to LUKS or something more robust is
+> probably better long term solution.
 
-Hi,
+Indeed, and that is why we have done that :-)
 
-The bot that reports unit tests and functional tests results from run-mak=
-e-check.sh[1] on pull requests[2] will be paused tomorrow and resume in a=
- few days. The same verification can be done from sources by running the =
-script with:
+The proposal as written is confusing, because what it calls a 'wrapper
+key' is really a key access key, it doesn't even encrypt it. 
 
-   git clone http://github.com/ceph/ceph
-   cd ceph
-   bash run-make-check.sh
+Andrew Bartlett
 
-Feel free to ping me if you experience problems. The most common cause of=
- trouble is low ulimits[3] which can lead to mysterious errors and proces=
-s left overs. The minimum configuration is:
-
-  4 cores
-  16GB RAM
-  30GB disk
-
-Cheers
-
-[1] run-make-check.sh http://workbench.dachary.org/ceph/ceph/blob/master/=
-run-make-check.sh
-[2] see https://github.com/ceph/ceph/pull/4833#issuecomment-108114267 for=
- instance
-[3] ulimit verifications before make check http://workbench.dachary.org/c=
-eph/ceph/blob/master/Makefile.am#L44
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+-- 
+Andrew Bartlett
+http://samba.org/~abartlet/
+Authentication Developer, Samba Team  http://samba.org
+Samba Developer, Catalyst IT          http://catalyst.net.nz/services/samba
 
 
---XfLvdemJ7ovpQk58cRDt795Xku5txtr2b
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
 
-iEYEARECAAYFAlVuQMkACgkQ8dLMyEl6F22yjQCaA8P7tSsEP7PURprYlle2I2II
-m2AAn34EFC+c1HB7C/K+UMAkg4IYGMdF
-=03B7
------END PGP SIGNATURE-----
-
---XfLvdemJ7ovpQk58cRDt795Xku5txtr2b--
