@@ -1,65 +1,55 @@
-From: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
-Subject: RE: 'Racing read got wrong version' during proxy write testing
-Date: Wed, 3 Jun 2015 13:24:39 +0000
-Message-ID: <06E7D85B3BA36C4DB207FEDE871C53489EE0F9@SHSMSX101.ccr.corp.intel.com>
-References: <06E7D85B3BA36C4DB207FEDE871C53489E8D8C@SHSMSX101.ccr.corp.intel.com>
- <alpine.DEB.2.00.1505250924080.19787@cobra.newdream.net>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: 06/03/2015 Weekly Ceph Performance Meeting IS ON!
+Date: Wed, 03 Jun 2015 09:23:28 -0500
+Message-ID: <556F0DE0.208@redhat.com>
+Reply-To: mnelson@redhat.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:18624 "EHLO mga11.intel.com"
+Received: from mx1.redhat.com ([209.132.183.28]:33678 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753384AbbFCNYu convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Jun 2015 09:24:50 -0400
-In-Reply-To: <alpine.DEB.2.00.1505250924080.19787@cobra.newdream.net>
-Content-Language: en-US
+	id S932727AbbFCOXb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 3 Jun 2015 10:23:31 -0400
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+	by mx1.redhat.com (Postfix) with ESMTPS id 12FB1C6586
+	for <ceph-devel@vger.kernel.org>; Wed,  3 Jun 2015 14:23:31 +0000 (UTC)
+Received: from [10.3.112.48] (ovpn-112-48.phx2.redhat.com [10.3.112.48])
+	by int-mx11.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t53ENS2P000943
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+	for <ceph-devel@vger.kernel.org>; Wed, 3 Jun 2015 10:23:30 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-I ran into the 'op not idempotent' problem during the testing today. There is one bug in the previous fix. In that fix, we copy the reqids in the final step of 'fill_in_copy_get'. If the object is deleted, since the 'copy get' op is a read op, it returns earlier with ENOENT in do_op. No reqids will be copied during promotion in this case. This again leads to the 'op not idempotent' problem. We need a 'smart' way to detect the op is a 'copy get' op (looping the ops vector doesn't seem smart?) and copy the reqids in this case.
+8AM PST as usual! Discussion topics include:  cache tiering update. 
+Please feel free to add your own!
 
------Original Message-----
-From: Sage Weil [mailto:sweil@redhat.com] 
-Sent: Tuesday, May 26, 2015 12:27 AM
-To: Wang, Zhiqiang
-Cc: ceph-devel@vger.kernel.org
-Subject: Re: 'Racing read got wrong version' during proxy write testing
+Here's the links:
 
-On Mon, 25 May 2015, Wang, Zhiqiang wrote:
-> Hi all,
-> 
-> I ran into a problem during the teuthology test of proxy write. It is like this:
-> 
-> - Client sends 3 writes and a read on the same object to base tier
-> - Set up cache tiering
-> - Client retries ops and sends the 3 writes and 1 read to the cache 
-> tier
-> - The 3 writes finished on the base tier, say with versions v1, v2 and 
-> v3
-> - Cache tier proxies the 1st write, and start to promote the object 
-> for the 2nd write, the 2nd and 3rd writes and the read are blocked
-> - The proxied 1st write finishes on the base tier with version v4, and 
-> returns to cache tier. But somehow the cache tier fails to send the 
-> reply due to socket failure injecting
-> - Client retries the writes and the read again, the writes are 
-> identified as dup ops
-> - The promotion finishes, it copies the pg_log entries from the base 
-> tier and put it in the cache tier's pg_log. This includes the 3 writes 
-> on the base tier and the proxied write
-> - The writes dispatches after the promotion, they are identified as 
-> completed dup ops. Cache tier replies these write ops with the version 
-> from the base tier (v1, v2 and v3)
-> - In the last, the read dispatches, it reads the version of the 
-> proxied write (v4) and replies to client
-> - Client complains that 'racing read got wrong version'
-> 
-> In a previous discussion of the 'ops not idempotent' problem, we solved it by copying the pg_log entries in the base tier to cache tier during promotion. Seems like there is still a problem with this approach in the above scenario. My first thought is that when proxying the write, the cache tier should use the original reqid from the client. But currently we don't have a way to pass the original reqid from cache to base. Any ideas?
+Etherpad URL:
+http://pad.ceph.com/p/performance_weekly
 
-I agree--I think the correct fix here is to make the proxied op be recognized as a dup.  We can either do that by passing in an optional reqid to the Objecter, or extending the op somehow so that both reqids are listed.  I think the first option will be cleaner, but I think we will also need to make sure the 'retry' count is preserved as (I think) we skip the dup check if retry==0.  And we probably want to preserve the behavior that a given (reqid, retry) only exists once in the system.
+To join the Meeting:
+https://bluejeans.com/268261044
 
-This probably means adding more optional args to Objecter::read()...?
+To join via Browser:
+https://bluejeans.com/268261044/browser
 
-sage
+To join with Lync:
+https://bluejeans.com/268261044/lync
+
+
+To join via Room System:
+Video Conferencing System: bjn.vc -or- 199.48.152.152
+Meeting ID: 268261044
+
+To join via Phone:
+1) Dial:
+           +1 408 740 7256
+           +1 888 240 2560(US Toll Free)
+           +1 408 317 9253(Alternate Number)
+           (see all numbers - http://bluejeans.com/numbers)
+2) Enter Conference ID: 268261044
+
+Mark
