@@ -1,80 +1,111 @@
-From: Jason Dillaman <dillaman@redhat.com>
-Subject: Re: RBD journal draft design
-Date: Wed, 3 Jun 2015 12:24:53 -0400 (EDT)
-Message-ID: <1853832694.10279926.1433348693431.JavaMail.zimbra@redhat.com>
-References: <1346174854.9391994.1433257911870.JavaMail.zimbra@redhat.com> <556EDB5C.6000602@redhat.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: packaging init systems in a more autoools style way.
+Date: Wed, 3 Jun 2015 09:26:05 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1506030919460.9814@cobra.newdream.net>
+References: <556F1E19.6080704@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; CHARSET=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx6-phx2.redhat.com ([209.132.183.39]:33228 "EHLO
-	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756107AbbFCQYx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Jun 2015 12:24:53 -0400
-In-Reply-To: <556EDB5C.6000602@redhat.com>
+Received: from cobra.newdream.net ([66.33.216.30]:36502 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753284AbbFCQ0G (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Jun 2015 12:26:06 -0400
+In-Reply-To: <556F1E19.6080704@suse.com>
+Content-ID: <alpine.DEB.2.00.1506030919531.9814@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <john.spray@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Owen Synge <osynge@suse.com>
+Cc: ceph-devel@vger.kernel.org
 
-> > A new journal object class method will be used to submit journal entry
-> > append requests.  This will act as a gatekeeper for the concurrent client
-> > case.  A successful append will indicate whether or not the journal is now
-> > full (larger than the max object size), indicating to the client that a
-> > new journal object should be used.  If the journal is too large, an error
-> > code responce would alert the client that it needs to write to the current
-> > active journal object.  In practice, the only time the journaler should
-> > expect to see such a response would be in the case where multiple clients
-> > are using the same journal and the active object update notification has
-> > yet to be received.
+On Wed, 3 Jun 2015, Owen Synge wrote:
+> Dear ceph-devel,
 > 
-> Can you clarify the procedure when a client write gets a "I'm full"
-> return code from a journal object?  The key part I'm not clear on is
-> whether the client will first update the header to add an object to the
-> active set (and then write it) or whether it goes ahead and writes
-> objects and then lazily updates the header.
-> * If it's object first, header later, what bounds how far ahead of the
-> active set we have to scan when doing recovery?
-> * If it's header first, object later, thats an uncomfortable bit of
-> latency whenever we cross and object bound
+> Linux has more than one init systems.
 > 
-> Nothing intractable about mitigating either case, just wondering what
-> the idea is in this design.
-
-I was thinking object first, header later.  As I mentioned in my response to Greg, I now think this "I'm full" should only be used as a guide to kick future (un-submitted) requests over to a new journal object.  For example, if you submitted 16 4K AIO journal entry append requests, it's possible that the first request filled the journal -- so now your soft max size will include an extra 15 4K journal entries before the response to the first request indicates that the journal object is full and future requests should use a new journal object.
-
-> > The rationale for this difference is to facilitate parallelism for appends
-> > as journal entries will be splayed across a configurable number of journal
-> > objects.  The journal API for appending a new journal entry will return a
-> > future which can be used to retrieve the assigned sequence number for the
-> > submitted journal entry payload once committed to disk. The use of a
-> > future allows for asynchronous journal entry submissions by default and
-> > can be used to simplify integration with the client-side cache writeback
-> > handler (and as a potential future enhacement to delay appends to the
-> > journal in order to satisfy EC-pool alignment requirements).
+> We in SUSE are in the process of up streaming our spec files, and all
+> our releases are systemd based.
 > 
-> When two clients are both doing splayed writes, and they both send writes in
-> parallel, it seems like the per-object fullness check via the object class
-> could result in the writes getting staggered across different objects.  E.g.
-> if we have two objects that both only have one slot left, then A could end
-> up taking the slot in one (call it 1) and B could end up taking the slot in
-> the other (call it 2).  Then when B's write lands at to object 1, it gets a
-> "I'm full" response and has to send the entry... where?  I guess to some
-> arbitrarily-higher-numbered journal object depending on how many other
-> writes landed in the meantime.
-
-In this case, assuming B sent the request to journal object 0, it would send the re-request to journal object 0 + <splay width> since the request <sequence number> mod <splay width> must equal <object number> mod <splay width>.  However, at this point I think it would be better to eliminate the "I'm full" error code and stick with "extra" soft max object size.
-
-> This potentially leads to the stripes (splays?) of a given journal entry
-> being separated arbitrarily far across different journal objects, which
-> would be fine as long as everything was well formed, but will make detecting
-> issues during replay harder (would have to remember partially-read entries
-> when looking for their remaining stripes through rest of journal).
+> Ceph seems more tested with sysVinit upstream.
 > 
-> You could apply the object class behaviour only to the object containing the
-> 0th splay, but then you'd have to wait for the write there to complete
-> before writing to the rest of the splays, so the latency benefit would go
-> away.  Or its equally possible that there's a trick in the design that has
-> gone over my head :-)
+> We have 3 basic options for doing this in a packaged upstream system.
+> 
+> 1) We dont install init scripts/config as part of "make install" and
+> "install all the init components via conditionals in the spec file.
+> 
+> 2) We install all init scripts/config for all flavours of init using
+> make install and delete unwanted init systems via conditionals in the
+> spec file.
+> 
+> 3) We add autotools an conditional for each init system, and only
+> install with make install enabled init systems scripts/config.
+> 
+> ------
+> 
+> We are currently following policy (1)
+> 
+> I propose we follow policy (3) because (1) makes many distribution
+> specific conditionals and requires duplication for each platform for all
+> files not installed with "make install".
+> 
+> -----
+> 
+> Their are many ways to follow policy 3 so I would propose that when no
+> init system is followed, policy (1) and policy (3) should appear identical.
+> 
+> -----
 
-I'm probably missing something here.  A journal entry won't be partially striped across multiple journal objects.  The journal entry in its entirety would be written to one of the <splay width> active journal objects.
+Let's do it!
+
+> For a transition period between following policy (1) to policy (3)
+> 
+> phase (1)
+> 
+> I would expect we would add a conditional to ceph.spec for suse to add
+> to the configure step:
+> 
+> 	--with-init-systemd
+> 
+> And when other distributions want to move to a full systemd flavour they
+> also add a similar conditional.
+> 
+> phase (2)
+> 
+> We add a new configure level conditional:
+> 
+> 	--with-init-sysv
+> 
+> All sysV init installs are removed from from the spec file and added to
+> the "make install" process.
+> 
+> phase (3)
+> 
+> Distributions with more than one init system, or init systems that can
+> emulate sysVinit, can build packages with either init system and so
+> migration can be tested.
+> 
+> -----
+> 
+> Does anyone object to this plan?
+> Does anyone agree with this plan?
+> Does anyone see difficulties with the plan?
+
+I'm hoping that phase 3 can be avoided entirely.  The upgrade/conversion 
+path (at least for upstream packages) will be firefly -> infernalis; I'm 
+don't think it will be that useful to build infernalis packages that do 
+sysvinit for systemd distros.  (Maybe this situation gets more 
+complicated if we backport this transition to hammer or downstream does 
+the same, but even then the transition will be an upgrade one.)
+
+Ken and I talked a bit about this yesterday and he convinced me that 
+catering to multiple init systems w/in a single distro (e.g., by letting 
+sysvinit and systemd files coexist) is not worth our time.  This has the 
+nice benefit of letting us sunset the 
+/var/lib/ceph/*/*/{sysvinit,upstart,systemd} files.
+
+Also, I think we should do 1 and 2 basically at the same time.  I don't 
+think it's worth spending any effort trying to make things behave with 
+just 1 (and not 2).
+
+Am I talking sense?  I can never tell with this stuff.  :)
+
+sage
