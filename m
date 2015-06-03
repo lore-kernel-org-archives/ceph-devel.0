@@ -1,60 +1,90 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: preparing v0.80.11
-Date: Wed, 03 Jun 2015 20:22:01 +0200
-Message-ID: <556F45C9.7080003@42on.com>
-References: <5562DEEC.5060602@dachary.org> <5564D772.9080909@suse.cz>
+From: Owen Synge <osynge@suse.com>
+Subject: Re: packaging init systems in a more autoools style way.
+Date: Wed, 03 Jun 2015 22:33:04 +0200
+Message-ID: <556F6480.1090901@suse.com>
+References: <556F1E19.6080704@suse.com> <alpine.DEB.2.00.1506030919460.9814@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from websrv.42on.com ([31.25.102.167]:49384 "EHLO websrv.42on.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753728AbbFCSWE (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 3 Jun 2015 14:22:04 -0400
-In-Reply-To: <5564D772.9080909@suse.cz>
+Received: from mail.emea.novell.com ([130.57.118.101]:60187 "EHLO
+	mail.emea.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932421AbbFCUeb (ORCPT
+	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+	Wed, 3 Jun 2015 16:34:31 -0400
+In-Reply-To: <alpine.DEB.2.00.1506030919460.9814@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nathan Cutler <ncutler@suse.cz>, Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel@vger.kernel.org
 
-On 05/26/2015 10:28 PM, Nathan Cutler wrote:
-> Hi Loic:
+On 06/03/2015 06:26 PM, Sage Weil wrote:
+> On Wed, 3 Jun 2015, Owen Synge wrote:
+>> Dear ceph-devel,
+>>
+>> Linux has more than one init systems.
+>>
+>> We in SUSE are in the process of up streaming our spec files, and all
+>> our releases are systemd based.
+>>
+>> Ceph seems more tested with sysVinit upstream.
+>>
+>> We have 3 basic options for doing this in a packaged upstream system.
+>>
+>> 1) We dont install init scripts/config as part of "make install" and
+>> "install all the init components via conditionals in the spec file.
+>>
+>> 2) We install all init scripts/config for all flavours of init using
+>> make install and delete unwanted init systems via conditionals in the
+>> spec file.
+>>
+>> 3) We add autotools an conditional for each init system, and only
+>> install with make install enabled init systems scripts/config.
+
+<snip/>
+
+>>
+>> Their are many ways to follow policy 3 so I would propose that when no
+>> init system is followed, policy (1) and policy (3) should appear identical.
+>>
+>> -----
 > 
-> The first round of 0.80.11 backports, including all trivial backports
-> (where "trivial" is defined as those I was able to do by myself without
-> help), is now ready for integration testing in the "firefly-backports"
-> branch of the SUSE fork:
+> Let's do it!
+
+Great :)
+
+<snip/>
+
+
+> I'm hoping that phase 3 can be avoided entirely.  The upgrade/conversion 
+> path (at least for upstream packages) will be firefly -> infernalis; I'm 
+> don't think it will be that useful to build infernalis packages that do 
+> sysvinit for systemd distros.  (Maybe this situation gets more 
+> complicated if we backport this transition to hammer or downstream does 
+> the same, but even then the transition will be an upgrade one.)
+
+Agreed,
+
+<snip/>
+
+> Also, I think we should do 1 and 2 basically at the same time.  I don't 
+> think it's worth spending any effort trying to make things behave with 
+> just 1 (and not 2).
 > 
-> https://github.com/SUSE/ceph/commits/firefly-backports
+> Am I talking sense?  I can never tell with this stuff.  :)
 > 
-> The non-trivial backports (on which I hereby solicit help) are:
-> 
-> http://tracker.ceph.com/issues/11699 Objecter: resend linger ops on split
-> http://tracker.ceph.com/issues/11700 make the all osd/filestore thread
-> pool suicide timeouts separately configurable
-> http://tracker.ceph.com/issues/11704 erasure-code: misalignment
-> http://tracker.ceph.com/issues/11720 rgw deleting S3 objects leaves
-> __shadow_ objects behind
-> 
+> sage
 
-Could I also ask for this one to be backported?
+I think you speak sense,
 
-https://github.com/ceph/ceph/pull/4844
+If I underwstand right you favor the user interface as:
 
-It breaks a couple of setups I know of. It's not in master yet, but it's
-a very trivial fix.
+	--with-init=systemd
+	--with-init=sysv
+	--with-init=upstart
+	--with-init=bsd
 
-> Nathan
-> -- 
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+This is wiser when you start adding up all the possible init systems
+that can exist.
 
-
--- 
-Wido den Hollander
-42on B.V.
-Ceph trainer and consultant
-
-Phone: +31 (0)20 700 9902
-Skype: contact42on
+Owen
