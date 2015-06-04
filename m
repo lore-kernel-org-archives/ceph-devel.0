@@ -1,201 +1,98 @@
-From: Gregory Farnum <greg@gregs42.com>
-Subject: Re: RBD journal draft design
-Date: Wed, 3 Jun 2015 17:01:42 -0700
-Message-ID: <CAC6JEv_M5jKk+FSDZja15Rmyf3W2x5-yeg9LRukKCHLnYq-j+w@mail.gmail.com>
-References: <1574383603.9391063.1433257824183.JavaMail.zimbra@redhat.com>
-	<1346174854.9391994.1433257911870.JavaMail.zimbra@redhat.com>
-	<CAC6JEv98=49tW0S4g=QiT28Pffdji=6S95J4aNLUXUDB2BEs+A@mail.gmail.com>
-	<1679134333.10270211.1433348013379.JavaMail.zimbra@redhat.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: RE: 'Racing read got wrong version' during proxy write testing
+Date: Wed, 3 Jun 2015 18:13:58 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1506031808170.26591@cobra.newdream.net>
+References: <06E7D85B3BA36C4DB207FEDE871C53489E8D8C@SHSMSX101.ccr.corp.intel.com> <alpine.DEB.2.00.1505250924080.19787@cobra.newdream.net> <06E7D85B3BA36C4DB207FEDE871C53489EE0F9@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f182.google.com ([209.85.217.182]:35793 "EHLO
-	mail-lb0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752452AbbFDABp convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Jun 2015 20:01:45 -0400
-Received: by lbbtu8 with SMTP id tu8so1183588lbb.2
-        for <ceph-devel@vger.kernel.org>; Wed, 03 Jun 2015 17:01:44 -0700 (PDT)
-Received: from mail-la0-f43.google.com (mail-la0-f43.google.com. [209.85.215.43])
-        by mx.google.com with ESMTPSA id f2sm110217lah.39.2015.06.03.17.01.42
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 03 Jun 2015 17:01:43 -0700 (PDT)
-Received: by laei3 with SMTP id i3so20059378lae.3
-        for <ceph-devel@vger.kernel.org>; Wed, 03 Jun 2015 17:01:42 -0700 (PDT)
-In-Reply-To: <1679134333.10270211.1433348013379.JavaMail.zimbra@redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:56866 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752624AbbFDBOA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 3 Jun 2015 21:14:00 -0400
+In-Reply-To: <06E7D85B3BA36C4DB207FEDE871C53489EE0F9@SHSMSX101.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jason Dillaman <dillaman@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, Jun 3, 2015 at 9:13 AM, Jason Dillaman <dillaman@redhat.com> wr=
-ote:
->> > In contrast to the current journal code used by CephFS, the new jo=
-urnal
->> > code will use sequence numbers to identify journal entries, instea=
-d of
->> > offsets within the journal.
->>
->> Am I misremembering what actually got done with our journal v2 forma=
-t?
->> I think this is done =E2=80=94 or at least we made a move in this di=
-rection.
->
-> Assuming journal v2 is the code in osdc/Journaler.cc, there is a new =
-"resilient" format that helps in detecting corruption, but it appears t=
-o be still largely based upon offsets and using the Filer/Striper for I=
-/O.  This does remind me that I probably want to include a magic preamb=
-le value at the start of each journal entry to facilitate recovery.
+On Wed, 3 Jun 2015, Wang, Zhiqiang wrote:
+> I ran into the 'op not idempotent' problem during the testing today. 
+> There is one bug in the previous fix. In that fix, we copy the reqids in 
+> the final step of 'fill_in_copy_get'. If the object is deleted, since 
+> the 'copy get' op is a read op, it returns earlier with ENOENT in do_op. 
+> No reqids will be copied during promotion in this case. This again leads 
+> to the 'op not idempotent' problem. We need a 'smart' way to detect the 
+> op is a 'copy get' op (looping the ops vector doesn't seem smart?) and 
+> copy the reqids in this case.
 
-Ah yeah, I was confusing the changes we did there and in our MDLog
-wrapper bits. Ignore me on this bit.
+Hmm.  I think the idea here is/was that that ENOENT would somehow include 
+the reqid list from PGLog::get_object_reqids().
 
->
->> > A new journal object class method will be used to submit journal e=
-ntry
->> > append requests.  This will act as a gatekeeper for the concurrent=
- client
->> > case.
->>
->> The object class is going to be a big barrier to using EC pools;
->> unless you want to block the use of EC pools on EC pools supporting
->> object classes. :(
->
-> Josh mentioned (via Sam) that reads were not currently supported by o=
-bject classes on EC pools.  Are appends not supported either?
+I think teh trick is getting it past the generic check in do_op:
 
-We discussed this briefly and certain object class functions might
-work "by mistake" on EC pools, but you should assume nothing does (is
-my recollection of the conclusions). For instance, even if it's
-technically possible, the append thing is really hard for this sort of
-write; I think I mentioned in Josh's thread about needing to have an
-entire stripe at a time (and the smallest you could even think about
-doing reasonably is 4KB * N, and really that's not big enough given
-metadata overheads).
+  if (!op->may_write() &&
+      !op->may_cache() &&
+      (!obc->obs.exists ||
+       ((m->get_snapid() != CEPH_SNAPDIR) &&
+	obc->obs.oi.is_whiteout()))) {
+    reply_ctx(ctx, -ENOENT);
+    return;
+  }
 
->
->> >A successful append will indicate whether or not the journal is now=
- full
->> >(larger than the max object size), indicating to the client that a =
-new
->> >journal object should be used.  If the journal is too large, an err=
-or code
->> >responce would alert the client that it needs to write to the curre=
-nt
->> >active journal object.  In practice, the only time the journaler sh=
-ould
->> >expect to see such a response would be in the case where multiple c=
-lients
->> >are using the same journal and the active object update notificatio=
-n has
->> >yet to be received.
->>
->> I'm confused. How does this work with the splay count thing you
->> mentioned above? Can you define <splay count>?
->
-> Similar to the stripe width.
+Maybe we mark these as cache operations so that may_cache is true?
 
-Okay, that sort of makes sense but I don't see how you could legally
-be writing to different "sets" so why not just make it an explicit
-striping thing and move all journal entries for that "set" at once?
+Sam, what do you think?
 
-=2E..Actually, doesn't *not* forcing a coordinated move from one object
-set to another mean that you don't actually have an ordering guarantee
-across tags if you replay the journal objects in order?
+sage
 
 
->
->> What happens if users submit sequenced entries substantially out of
->> order? It sounds like if you have multiple writers (or even just a
->> misbehaving client) it would not be hard for one of them to grab
->> sequence value N, for another to fill up one of the journal entry
->> objects with sequences in the range [N+1]...[N+x] and then for the
->> user of N to get an error response.
->
-> I was thinking that when a client submits their journal entry payload=
-, the journaler will allocate the next available sequence number, compu=
-te which active journal object that sequence should be submitted to, an=
-d start an AIO append op to write the journal entry.  The next journal =
-entry to be appended to the same journal object would be <splay count/w=
-idth> entries later.  This does bring up a good point that if you are g=
-enerating journal entries fast enough, the delayed response saying the =
-object is full could cause multiple later journal entry ops to need to =
-be resent to the new (non-full) object.  Given that, it might be best t=
-o scrap the hard error when the journal object gets full and just let t=
-he journaler eventually switch to a new object when it receives a respo=
-nse saying the object is now full.
-
-I was misunderstanding where the seqs came from and that they were
-associated with the tag, not the journal. So this shouldn't be such a
-problem.
-
->
->> >
->> > Since the journal is designed to be append-only, there needs to be=
- support
->> > for cases where journal entry needs to be updated out-of-band (e.g=
-=2E fixing
->> > a corrupt entry similar to CephFS's current journal recovery tools=
-).  The
->> > proposed solution is to just append a new journal entry with the s=
-ame
->> > sequence number as the record to be replaced to the end of the jou=
-rnal
->> > (i.e. last entry for a given sequence number wins).  This also pro=
-tects
->> > against accidental replays of the original append operation.  An
->> > alternative suggestion would be to use a compare-and-swap mechanis=
-m to
->> > update the full journal object with the updated contents.
->>
->> I'm confused by this bit. It seems to imply that fetching a single
->> entry requires checking the entire object to make sure there's no
->> replacement. Certainly if we were doing replay we couldn't just appl=
-y
->> each entry sequentially any more because an overwritten entry might
->> have its value replaced by a later (by sequence number) entry that
->> occurs earlier (by offset) in the journal.
->
-> The goal would be to use prefetching on the replay.  Since the whole =
-object is already in-memory, scanning for duplicates would be fairly tr=
-ivial.  If there is a way to prevent the OSDs from potentially replayin=
-g a duplicate append journal entry message, the CAS update technique co=
-uld be used.
-
-Actually don't you need to keep <splay count> objects prefetched in
-memory, because the ops round-robin across them?
-
->
->> I'd also like it if we could organize a single Journal implementatio=
-n
->> within the Ceph project, or at least have a blessed one going forwar=
-d
->> that we use for new stuff and might plausibly migrate existing users
->> to. The big things I see different from osdc/Journaler are:
->
-> Agreed.  While librbd will be the first user of this, I wasn't planni=
-ng to locate it within the librbd library.
->
->> 1) (design) class-based
->> 2) (design) uses librados instead of Objecter (hurray)
->> 3) (need) should allow multiple writers
->> 4) (fallout of other choices?) does not stripe entries across multip=
-le
->> objects
->
-> For striping, I assume this is a function of how large MDS journal en=
-tries are expected to be.  The largest RBD journal entries would be blo=
-ck write operations, so in the low kilobytes.  It would be possible to =
-add a higher layer to this design that could break-up large client jour=
-nal entries into multiple, smaller entries.
-
-Really we just picked up the striping for free by making use of the
-=46iler to handle our data layout. ;) We don't ever enable it ourself
-and I don't think it matters.
--Greg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> -----Original Message-----
+> From: Sage Weil [mailto:sweil@redhat.com] 
+> Sent: Tuesday, May 26, 2015 12:27 AM
+> To: Wang, Zhiqiang
+> Cc: ceph-devel@vger.kernel.org
+> Subject: Re: 'Racing read got wrong version' during proxy write testing
+> 
+> On Mon, 25 May 2015, Wang, Zhiqiang wrote:
+> > Hi all,
+> > 
+> > I ran into a problem during the teuthology test of proxy write. It is like this:
+> > 
+> > - Client sends 3 writes and a read on the same object to base tier
+> > - Set up cache tiering
+> > - Client retries ops and sends the 3 writes and 1 read to the cache 
+> > tier
+> > - The 3 writes finished on the base tier, say with versions v1, v2 and 
+> > v3
+> > - Cache tier proxies the 1st write, and start to promote the object 
+> > for the 2nd write, the 2nd and 3rd writes and the read are blocked
+> > - The proxied 1st write finishes on the base tier with version v4, and 
+> > returns to cache tier. But somehow the cache tier fails to send the 
+> > reply due to socket failure injecting
+> > - Client retries the writes and the read again, the writes are 
+> > identified as dup ops
+> > - The promotion finishes, it copies the pg_log entries from the base 
+> > tier and put it in the cache tier's pg_log. This includes the 3 writes 
+> > on the base tier and the proxied write
+> > - The writes dispatches after the promotion, they are identified as 
+> > completed dup ops. Cache tier replies these write ops with the version 
+> > from the base tier (v1, v2 and v3)
+> > - In the last, the read dispatches, it reads the version of the 
+> > proxied write (v4) and replies to client
+> > - Client complains that 'racing read got wrong version'
+> > 
+> > In a previous discussion of the 'ops not idempotent' problem, we solved it by copying the pg_log entries in the base tier to cache tier during promotion. Seems like there is still a problem with this approach in the above scenario. My first thought is that when proxying the write, the cache tier should use the original reqid from the client. But currently we don't have a way to pass the original reqid from cache to base. Any ideas?
+> 
+> I agree--I think the correct fix here is to make the proxied op be recognized as a dup.  We can either do that by passing in an optional reqid to the Objecter, or extending the op somehow so that both reqids are listed.  I think the first option will be cleaner, but I think we will also need to make sure the 'retry' count is preserved as (I think) we skip the dup check if retry==0.  And we probably want to preserve the behavior that a given (reqid, retry) only exists once in the system.
+> 
+> This probably means adding more optional args to Objecter::read()...?
+> 
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
