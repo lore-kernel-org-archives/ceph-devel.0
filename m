@@ -1,181 +1,76 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: 'Racing read got wrong version' during proxy write testing
-Date: Thu, 4 Jun 2015 11:23:10 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1506041122250.1217@cobra.newdream.net>
-References: <06E7D85B3BA36C4DB207FEDE871C53489E8D8C@SHSMSX101.ccr.corp.intel.com> <alpine.DEB.2.00.1505250924080.19787@cobra.newdream.net> <06E7D85B3BA36C4DB207FEDE871C53489EE0F9@SHSMSX101.ccr.corp.intel.com> <alpine.DEB.2.00.1506031808170.26591@cobra.newdream.net>
- <06E7D85B3BA36C4DB207FEDE871C53489EE2D3@SHSMSX101.ccr.corp.intel.com> <556FADE4.3080305@redhat.com> <06E7D85B3BA36C4DB207FEDE871C53489EE309@SHSMSX101.ccr.corp.intel.com> <695825089.14140061.1433441534199.JavaMail.zimbra@redhat.com>
- <386643982.14151101.1433442012365.JavaMail.zimbra@redhat.com>
+From: Gregory Farnum <greg@gregs42.com>
+Subject: Re: RBD journal draft design
+Date: Thu, 4 Jun 2015 13:25:32 -0700
+Message-ID: <CAC6JEv8v9Wzx094E5pReJE47=d2wbP8rR=FJcU+BNJcT7H488w@mail.gmail.com>
+References: <1574383603.9391063.1433257824183.JavaMail.zimbra@redhat.com>
+	<1346174854.9391994.1433257911870.JavaMail.zimbra@redhat.com>
+	<CAC6JEv98=49tW0S4g=QiT28Pffdji=6S95J4aNLUXUDB2BEs+A@mail.gmail.com>
+	<1679134333.10270211.1433348013379.JavaMail.zimbra@redhat.com>
+	<CAC6JEv_M5jKk+FSDZja15Rmyf3W2x5-yeg9LRukKCHLnYq-j+w@mail.gmail.com>
+	<1628237419.11058538.1433430488520.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:42372 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752433AbbFDSXL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Jun 2015 14:23:11 -0400
-In-Reply-To: <386643982.14151101.1433442012365.JavaMail.zimbra@redhat.com>
+Received: from mail-qg0-f53.google.com ([209.85.192.53]:35330 "EHLO
+	mail-qg0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932085AbbFDUZe convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Jun 2015 16:25:34 -0400
+Received: by qgh73 with SMTP id 73so7628184qgh.2
+        for <ceph-devel@vger.kernel.org>; Thu, 04 Jun 2015 13:25:34 -0700 (PDT)
+Received: from mail-qc0-f178.google.com (mail-qc0-f178.google.com. [209.85.216.178])
+        by mx.google.com with ESMTPSA id 139sm2932141qhx.22.2015.06.04.13.25.33
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 04 Jun 2015 13:25:33 -0700 (PDT)
+Received: by qcxw10 with SMTP id w10so22529418qcx.3
+        for <ceph-devel@vger.kernel.org>; Thu, 04 Jun 2015 13:25:32 -0700 (PDT)
+In-Reply-To: <1628237419.11058538.1433430488520.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sjust@redhat.com>
-Cc: Zhiqiang Wang <zhiqiang.wang@intel.com>, David Zafman <dzafman@redhat.com>, ceph-devel@vger.kernel.org
+To: Jason Dillaman <dillaman@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Thu, 4 Jun 2015, Samuel Just wrote:
-> Yeah, I think the right answer is to remove that check and restructure 
-> all of the existing reader ops which rely on it to return ENOENT from 
-> do_osd_ops.  For copy_get, we instead return 0 and indicate in the 
-> structured payload that the object logically does not exist (along with 
-> the relevant log entries).
+On Thu, Jun 4, 2015 at 8:08 AM, Jason Dillaman <dillaman@redhat.com> wrote:
+>> >> >A successful append will indicate whether or not the journal is now full
+>> >> >(larger than the max object size), indicating to the client that a new
+>> >> >journal object should be used.  If the journal is too large, an error
+>> >> >code
+>> >> >responce would alert the client that it needs to write to the current
+>> >> >active journal object.  In practice, the only time the journaler should
+>> >> >expect to see such a response would be in the case where multiple clients
+>> >> >are using the same journal and the active object update notification has
+>> >> >yet to be received.
+>> >>
+>> >> I'm confused. How does this work with the splay count thing you
+>> >> mentioned above? Can you define <splay count>?
+>> >
+>> > Similar to the stripe width.
+>>
+>> Okay, that sort of makes sense but I don't see how you could legally
+>> be writing to different "sets" so why not just make it an explicit
+>> striping thing and move all journal entries for that "set" at once?
+>>
+>> ...Actually, doesn't *not* forcing a coordinated move from one object
+>> set to another mean that you don't actually have an ordering guarantee
+>> across tags if you replay the journal objects in order?
+>
+> The ordering between tags was meant to be a soft ordering guarantee (since any number of delays could throw off the actual order as delivered from the OS).  In the case of a VM using multiple RBD images sharing the same journal, this provides an ordering guarantee per device but not between devices.
+>
+> This is no worse than the case of each RBD image using its own journal instead of sharing a journal and the behavior doesn't seem too different from a non-RBD case when submitting requests to two different physical devices (e.g. a SSD device and a NAS device will commit data at different latencies).
 
-We'll need a feature bit so that an old cache tier OSD talking to a new 
-base tier OSD will still get an ENOENT that it can understand.
+Yes, it's exactly the same. But I thought the point was that if you
+commingle the journals then you actually have the appropriate ordering
+across clients/disks (if there's enough ordering and synchronization)
+that you can stream the journal off-site and know that if there's any
+kind of disaster you are always at least crash-consistent. If there's
+arbitrary re-ordering of different volume writes at object boundaries
+then I don't see what benefit there is to having a commingled journal
+at all.
 
-sage
-
-
-> -Sam
-> 
-> ----- Original Message -----
-> From: "Samuel Just" <sjust@redhat.com>
-> To: "Zhiqiang Wang" <zhiqiang.wang@intel.com>
-> Cc: "David Zafman" <dzafman@redhat.com>, "Sage Weil" <sweil@redhat.com>, ceph-devel@vger.kernel.org
-> Sent: Thursday, June 4, 2015 11:12:14 AM
-> Subject: Re: 'Racing read got wrong version' during proxy write testing
-> 
-> copy_get can happen outside of the context of a cache op, so we can't (shouldn't) just flag it as a cache op.  I wonder whether it wouldn't be better to live without that check at all and let all of the ops in do_osd_ops individually return ENOENT as appropriate.
-> -Sam
-> 
-> ----- Original Message -----
-> From: "Zhiqiang Wang" <zhiqiang.wang@intel.com>
-> To: "David Zafman" <dzafman@redhat.com>, "Sage Weil" <sweil@redhat.com>
-> Cc: ceph-devel@vger.kernel.org
-> Sent: Wednesday, June 3, 2015 7:08:35 PM
-> Subject: RE: 'Racing read got wrong version' during proxy write testing
-> 
-> Hi David,
-> 
-> Proxy write hasn't been merge into master yet. It's not likely this is causing #11511.
-> 
-> -----Original Message-----
-> From: David Zafman [mailto:dzafman@redhat.com] 
-> Sent: Thursday, June 4, 2015 9:46 AM
-> To: Wang, Zhiqiang; Sage Weil
-> Cc: ceph-devel@vger.kernel.org
-> Subject: Re: 'Racing read got wrong version' during proxy write testing
-> 
-> 
-> I'm wonder if this issue could be the cause of #11511.  Could a proxy write have raced with the fill_in_copy_get() so object_info_t size doesn't correspond with the size of the object in the filestore?
-> 
-> David
-> 
-> 
-> On 6/3/15 6:22 PM, Wang, Zhiqiang wrote:
-> > Making the 'copy get' op to be a cache op seems like a good idea.
-> >
-> > -----Original Message-----
-> > From: Sage Weil [mailto:sweil@redhat.com]
-> > Sent: Thursday, June 4, 2015 9:14 AM
-> > To: Wang, Zhiqiang
-> > Cc: ceph-devel@vger.kernel.org
-> > Subject: RE: 'Racing read got wrong version' during proxy write 
-> > testing
-> >
-> > On Wed, 3 Jun 2015, Wang, Zhiqiang wrote:
-> >> I ran into the 'op not idempotent' problem during the testing today.
-> >> There is one bug in the previous fix. In that fix, we copy the reqids 
-> >> in the final step of 'fill_in_copy_get'. If the object is deleted, 
-> >> since the 'copy get' op is a read op, it returns earlier with ENOENT in do_op.
-> >> No reqids will be copied during promotion in this case. This again 
-> >> leads to the 'op not idempotent' problem. We need a 'smart' way to 
-> >> detect the op is a 'copy get' op (looping the ops vector doesn't seem
-> >> smart?) and copy the reqids in this case.
-> > Hmm.  I think the idea here is/was that that ENOENT would somehow include the reqid list from PGLog::get_object_reqids().
-> >
-> > I think teh trick is getting it past the generic check in do_op:
-> >
-> >    if (!op->may_write() &&
-> >        !op->may_cache() &&
-> >        (!obc->obs.exists ||
-> >         ((m->get_snapid() != CEPH_SNAPDIR) &&
-> > 	obc->obs.oi.is_whiteout()))) {
-> >      reply_ctx(ctx, -ENOENT);
-> >      return;
-> >    }
-> >
-> > Maybe we mark these as cache operations so that may_cache is true?
-> >
-> > Sam, what do you think?
-> >
-> > sage
-> >
-> >
-> >> -----Original Message-----
-> >> From: Sage Weil [mailto:sweil@redhat.com]
-> >> Sent: Tuesday, May 26, 2015 12:27 AM
-> >> To: Wang, Zhiqiang
-> >> Cc: ceph-devel@vger.kernel.org
-> >> Subject: Re: 'Racing read got wrong version' during proxy write 
-> >> testing
-> >>
-> >> On Mon, 25 May 2015, Wang, Zhiqiang wrote:
-> >>> Hi all,
-> >>>
-> >>> I ran into a problem during the teuthology test of proxy write. It is like this:
-> >>>
-> >>> - Client sends 3 writes and a read on the same object to base tier
-> >>> - Set up cache tiering
-> >>> - Client retries ops and sends the 3 writes and 1 read to the cache 
-> >>> tier
-> >>> - The 3 writes finished on the base tier, say with versions v1, v2 
-> >>> and
-> >>> v3
-> >>> - Cache tier proxies the 1st write, and start to promote the object 
-> >>> for the 2nd write, the 2nd and 3rd writes and the read are blocked
-> >>> - The proxied 1st write finishes on the base tier with version v4, 
-> >>> and returns to cache tier. But somehow the cache tier fails to send 
-> >>> the reply due to socket failure injecting
-> >>> - Client retries the writes and the read again, the writes are 
-> >>> identified as dup ops
-> >>> - The promotion finishes, it copies the pg_log entries from the base 
-> >>> tier and put it in the cache tier's pg_log. This includes the 3 
-> >>> writes on the base tier and the proxied write
-> >>> - The writes dispatches after the promotion, they are identified as 
-> >>> completed dup ops. Cache tier replies these write ops with the 
-> >>> version from the base tier (v1, v2 and v3)
-> >>> - In the last, the read dispatches, it reads the version of the 
-> >>> proxied write (v4) and replies to client
-> >>> - Client complains that 'racing read got wrong version'
-> >>>
-> >>> In a previous discussion of the 'ops not idempotent' problem, we solved it by copying the pg_log entries in the base tier to cache tier during promotion. Seems like there is still a problem with this approach in the above scenario. My first thought is that when proxying the write, the cache tier should use the original reqid from the client. But currently we don't have a way to pass the original reqid from cache to base. Any ideas?
-> >> I agree--I think the correct fix here is to make the proxied op be recognized as a dup.  We can either do that by passing in an optional reqid to the Objecter, or extending the op somehow so that both reqids are listed.  I think the first option will be cleaner, but I think we will also need to make sure the 'retry' count is preserved as (I think) we skip the dup check if retry==0.  And we probably want to preserve the behavior that a given (reqid, retry) only exists once in the system.
-> >>
-> >> This probably means adding more optional args to Objecter::read()...?
-> >>
-> >> sage
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> >> in the body of a message to majordomo@vger.kernel.org More majordomo 
-> >> info at  http://vger.kernel.org/majordomo-info.html
-> >>
-> >>
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> > in the body of a message to majordomo@vger.kernel.org More majordomo 
-> > info at  http://vger.kernel.org/majordomo-info.html
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+I think there's a thing called a "consistency group" in various
+storage platforms that is sort of similar to this, where you can take
+a snapshot of a related group of volumes at once. I presume the
+commingled journal is an attempt at basically having an ongoing
+snapshot of the whole consistency group.
+-Greg
