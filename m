@@ -1,21 +1,31 @@
 From: Samuel Just <sjust@redhat.com>
 Subject: Re: 'Racing read got wrong version' during proxy write testing
-Date: Thu, 4 Jun 2015 14:12:14 -0400 (EDT)
-Message-ID: <695825089.14140061.1433441534199.JavaMail.zimbra@redhat.com>
-References: <06E7D85B3BA36C4DB207FEDE871C53489E8D8C@SHSMSX101.ccr.corp.intel.com> <alpine.DEB.2.00.1505250924080.19787@cobra.newdream.net> <06E7D85B3BA36C4DB207FEDE871C53489EE0F9@SHSMSX101.ccr.corp.intel.com> <alpine.DEB.2.00.1506031808170.26591@cobra.newdream.net> <06E7D85B3BA36C4DB207FEDE871C53489EE2D3@SHSMSX101.ccr.corp.intel.com> <556FADE4.3080305@redhat.com> <06E7D85B3BA36C4DB207FEDE871C53489EE309@SHSMSX101.ccr.corp.intel.com>
+Date: Thu, 4 Jun 2015 14:20:12 -0400 (EDT)
+Message-ID: <386643982.14151101.1433442012365.JavaMail.zimbra@redhat.com>
+References: <06E7D85B3BA36C4DB207FEDE871C53489E8D8C@SHSMSX101.ccr.corp.intel.com> <alpine.DEB.2.00.1505250924080.19787@cobra.newdream.net> <06E7D85B3BA36C4DB207FEDE871C53489EE0F9@SHSMSX101.ccr.corp.intel.com> <alpine.DEB.2.00.1506031808170.26591@cobra.newdream.net> <06E7D85B3BA36C4DB207FEDE871C53489EE2D3@SHSMSX101.ccr.corp.intel.com> <556FADE4.3080305@redhat.com> <06E7D85B3BA36C4DB207FEDE871C53489EE309@SHSMSX101.ccr.corp.intel.com> <695825089.14140061.1433441534199.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx5-phx2.redhat.com ([209.132.183.37]:45446 "EHLO
-	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753216AbbFDSMP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Jun 2015 14:12:15 -0400
-In-Reply-To: <06E7D85B3BA36C4DB207FEDE871C53489EE309@SHSMSX101.ccr.corp.intel.com>
+Received: from mx3-phx2.redhat.com ([209.132.183.24]:49250 "EHLO
+	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751632AbbFDSUN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Jun 2015 14:20:13 -0400
+In-Reply-To: <695825089.14140061.1433441534199.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Zhiqiang Wang <zhiqiang.wang@intel.com>
 Cc: David Zafman <dzafman@redhat.com>, Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
+
+Yeah, I think the right answer is to remove that check and restructure all of the existing reader ops which rely on it to return ENOENT from do_osd_ops.  For copy_get, we instead return 0 and indicate in the structured payload that the object logically does not exist (along with the relevant log entries).
+-Sam
+
+----- Original Message -----
+From: "Samuel Just" <sjust@redhat.com>
+To: "Zhiqiang Wang" <zhiqiang.wang@intel.com>
+Cc: "David Zafman" <dzafman@redhat.com>, "Sage Weil" <sweil@redhat.com>, ceph-devel@vger.kernel.org
+Sent: Thursday, June 4, 2015 11:12:14 AM
+Subject: Re: 'Racing read got wrong version' during proxy write testing
 
 copy_get can happen outside of the context of a cache op, so we can't (shouldn't) just flag it as a cache op.  I wonder whether it wouldn't be better to live without that check at all and let all of the ops in do_osd_ops individually return ENOENT as appropriate.
 -Sam
@@ -137,6 +147,12 @@ On 6/3/15 6:22 PM, Wang, Zhiqiang wrote:
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
 > in the body of a message to majordomo@vger.kernel.org More majordomo 
 > info at  http://vger.kernel.org/majordomo-info.html
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
 
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
