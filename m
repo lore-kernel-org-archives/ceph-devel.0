@@ -1,76 +1,111 @@
-From: Gregory Farnum <greg@gregs42.com>
-Subject: Re: RBD journal draft design
-Date: Thu, 4 Jun 2015 13:25:32 -0700
-Message-ID: <CAC6JEv8v9Wzx094E5pReJE47=d2wbP8rR=FJcU+BNJcT7H488w@mail.gmail.com>
-References: <1574383603.9391063.1433257824183.JavaMail.zimbra@redhat.com>
-	<1346174854.9391994.1433257911870.JavaMail.zimbra@redhat.com>
-	<CAC6JEv98=49tW0S4g=QiT28Pffdji=6S95J4aNLUXUDB2BEs+A@mail.gmail.com>
-	<1679134333.10270211.1433348013379.JavaMail.zimbra@redhat.com>
-	<CAC6JEv_M5jKk+FSDZja15Rmyf3W2x5-yeg9LRukKCHLnYq-j+w@mail.gmail.com>
-	<1628237419.11058538.1433430488520.JavaMail.zimbra@redhat.com>
+From: Mike Dawson <mike.dawson-ffsCFlcjuZBWk0Htik3J/w@public.gmane.org>
+Subject: Re: Discuss: New default recovery config settings
+Date: Thu, 04 Jun 2015 17:01:34 -0400
+Message-ID: <5570BCAE.5050509@cloudapt.com>
+References: <1939533999.9756941.1432935747903.JavaMail.zimbra@redhat.com>	<1394947829.9758745.1432936033017.JavaMail.zimbra@redhat.com>	<CAC6JEv8LyM1SRsOszDCj6tLxhZ=hvrEkinDARW8BvyQHDCz+LQ@mail.gmail.com>	<622F4407872BA447A16110F65453358C03DFB21C4B5F@FMSAMAIL.fmsa.local>	<CAC6JEv-i6tOwPBDjP++EW4FxAKZ_X_prEZ8YZOpLq-RTP1ZguQ@mail.gmail.com>
+	<alpine.DEB.2.00.1506031541200.26591@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qg0-f53.google.com ([209.85.192.53]:35330 "EHLO
-	mail-qg0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932085AbbFDUZe convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Jun 2015 16:25:34 -0400
-Received: by qgh73 with SMTP id 73so7628184qgh.2
-        for <ceph-devel@vger.kernel.org>; Thu, 04 Jun 2015 13:25:34 -0700 (PDT)
-Received: from mail-qc0-f178.google.com (mail-qc0-f178.google.com. [209.85.216.178])
-        by mx.google.com with ESMTPSA id 139sm2932141qhx.22.2015.06.04.13.25.33
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 04 Jun 2015 13:25:33 -0700 (PDT)
-Received: by qcxw10 with SMTP id w10so22529418qcx.3
-        for <ceph-devel@vger.kernel.org>; Thu, 04 Jun 2015 13:25:32 -0700 (PDT)
-In-Reply-To: <1628237419.11058538.1433430488520.JavaMail.zimbra@redhat.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Jason Dillaman <dillaman@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.00.1506031541200.26591-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>, Gregory Farnum <greg-3KCAGdo1P2hBDgjK7y7TUQ@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Paul Von-Stamwitz <PVonStamwitz-gkcJ3tX5bYHQFUHtdCDX3A@public.gmane.org>, "'ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org' (ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org)" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Thu, Jun 4, 2015 at 8:08 AM, Jason Dillaman <dillaman@redhat.com> wrote:
->> >> >A successful append will indicate whether or not the journal is now full
->> >> >(larger than the max object size), indicating to the client that a new
->> >> >journal object should be used.  If the journal is too large, an error
->> >> >code
->> >> >responce would alert the client that it needs to write to the current
->> >> >active journal object.  In practice, the only time the journaler should
->> >> >expect to see such a response would be in the case where multiple clients
->> >> >are using the same journal and the active object update notification has
->> >> >yet to be received.
->> >>
->> >> I'm confused. How does this work with the splay count thing you
->> >> mentioned above? Can you define <splay count>?
->> >
->> > Similar to the stripe width.
+With a write-heavy RBD workload, I add the following to ceph.conf:
+
+osd_max_backfills = 2
+osd_recovery_max_active = 2
+
+If things are going well during recovery (i.e. guests happy and no slow 
+requests), I will often bump both up to three:
+
+# ceph tell osd.* injectargs '--osd-max-backfills 3 
+--osd-recovery-max-active 3'
+
+If I see slow requests, I drop them down.
+
+The biggest downside to setting either to 1 seems to be the long tail 
+issue detailed in:
+
+http://tracker.ceph.com/issues/9566
+
+Thanks,
+Mike Dawson
+
+
+On 6/3/2015 6:44 PM, Sage Weil wrote:
+> On Mon, 1 Jun 2015, Gregory Farnum wrote:
+>> On Mon, Jun 1, 2015 at 6:39 PM, Paul Von-Stamwitz
+>> <PVonStamwitz-gkcJ3tX5bYHQFUHtdCDX3A@public.gmane.org> wrote:
+>>> On Fri, May 29, 2015 at 4:18 PM, Gregory Farnum <greg-3KCAGdo1P2hBDgjK7y7TUQ@public.gmane.org> wrote:
+>>>> On Fri, May 29, 2015 at 2:47 PM, Samuel Just <sjust-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+>>>>> Many people have reported that they need to lower the osd recovery config options to minimize the impact of recovery on client io.  We are talking about changing the defaults as follows:
+>>>>>
+>>>>> osd_max_backfills to 1 (from 10)
+>>>>> osd_recovery_max_active to 3 (from 15)
+>>>>> osd_recovery_op_priority to 1 (from 10)
+>>>>> osd_recovery_max_single_start to 1 (from 5)
+>>>>
+>>>> I'm under the (possibly erroneous) impression that reducing the number of max backfills doesn't actually reduce recovery speed much (but will reduce memory use), but that dropping the op priority can. I'd rather we make users manually adjust values which can have a material impact on their data safety, even if most of them choose to do so.
+>>>>
+>>>> After all, even under our worst behavior we're still doing a lot better than a resilvering RAID array. ;) -Greg
+>>>> --
+>>>
+>>>
+>>> Greg,
+>>> When we set...
+>>>
+>>> osd recovery max active = 1
+>>> osd max backfills = 1
+>>>
+>>> We see rebalance times go down by more than half and client write performance increase significantly while rebalancing. We initially played with these settings to improve client IO expecting recovery time to get worse, but we got a 2-for-1.
+>>> This was with firefly using replication, downing an entire node with lots of SAS drives. We left osd_recovery_threads, osd_recovery_op_priority, and osd_recovery_max_single_start default.
+>>>
+>>> We dropped osd_recovery_max_active and osd_max_backfills together. If you're right, do you think osd_recovery_max_active=1 is primary reason for the improvement? (higher osd_max_backfills helps recovery time with erasure coding.)
 >>
->> Okay, that sort of makes sense but I don't see how you could legally
->> be writing to different "sets" so why not just make it an explicit
->> striping thing and move all journal entries for that "set" at once?
+>> Well, recovery max active and max backfills are similar in many ways.
+>> Both are about moving data into a new or outdated copy of the PG ? the
+>> difference is that recovery refers to our log-based recovery (where we
+>> compare the PG logs and move over the objects which have changed)
+>> whereas backfill requires us to incrementally move through the entire
+>> PG's hash space and compare.
+>> I suspect dropping down max backfills is more important than reducing
+>> max recovery (gathering recovery metadata happens largely in memory)
+>> but I don't really know either way.
 >>
->> ...Actually, doesn't *not* forcing a coordinated move from one object
->> set to another mean that you don't actually have an ordering guarantee
->> across tags if you replay the journal objects in order?
+>> My comment was meant to convey that I'd prefer we not reduce the
+>> recovery op priority levels. :)
 >
-> The ordering between tags was meant to be a soft ordering guarantee (since any number of delays could throw off the actual order as delivered from the OS).  In the case of a VM using multiple RBD images sharing the same journal, this provides an ordering guarantee per device but not between devices.
+> We could make a less extreme move than to 1, but IMO we have to reduce it
+> one way or another.  Every major operator I've talked to does this, our PS
+> folks have been recommending it for years, and I've yet to see a single
+> complaint about recovery times... meanwhile we're drowning in a sea of
+> complaints about the impact on clients.
 >
-> This is no worse than the case of each RBD image using its own journal instead of sharing a journal and the behavior doesn't seem too different from a non-RBD case when submitting requests to two different physical devices (e.g. a SSD device and a NAS device will commit data at different latencies).
-
-Yes, it's exactly the same. But I thought the point was that if you
-commingle the journals then you actually have the appropriate ordering
-across clients/disks (if there's enough ordering and synchronization)
-that you can stream the journal off-site and know that if there's any
-kind of disaster you are always at least crash-consistent. If there's
-arbitrary re-ordering of different volume writes at object boundaries
-then I don't see what benefit there is to having a commingled journal
-at all.
-
-I think there's a thing called a "consistency group" in various
-storage platforms that is sort of similar to this, where you can take
-a snapshot of a related group of volumes at once. I presume the
-commingled journal is an attempt at basically having an ongoing
-snapshot of the whole consistency group.
--Greg
+> How about
+>
+>   osd_max_backfills to 1 (from 10)
+>   osd_recovery_max_active to 3 (from 15)
+>   osd_recovery_op_priority to 3 (from 10)
+>   osd_recovery_max_single_start to 1 (from 5)
+>
+> (same as above, but 1/3rd the recovery op prio instead of 1/10th)
+> ?
+>
+> sage
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>
