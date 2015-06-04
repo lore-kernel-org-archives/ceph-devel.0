@@ -1,33 +1,46 @@
-From: Sage Weil <sweil@redhat.com>
+From: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
 Subject: RE: 'Racing read got wrong version' during proxy write testing
-Date: Wed, 3 Jun 2015 18:13:58 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1506031808170.26591@cobra.newdream.net>
-References: <06E7D85B3BA36C4DB207FEDE871C53489E8D8C@SHSMSX101.ccr.corp.intel.com> <alpine.DEB.2.00.1505250924080.19787@cobra.newdream.net> <06E7D85B3BA36C4DB207FEDE871C53489EE0F9@SHSMSX101.ccr.corp.intel.com>
+Date: Thu, 4 Jun 2015 01:22:17 +0000
+Message-ID: <06E7D85B3BA36C4DB207FEDE871C53489EE2D3@SHSMSX101.ccr.corp.intel.com>
+References: <06E7D85B3BA36C4DB207FEDE871C53489E8D8C@SHSMSX101.ccr.corp.intel.com>
+ <alpine.DEB.2.00.1505250924080.19787@cobra.newdream.net>
+ <06E7D85B3BA36C4DB207FEDE871C53489EE0F9@SHSMSX101.ccr.corp.intel.com>
+ <alpine.DEB.2.00.1506031808170.26591@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:56866 "EHLO mx1.redhat.com"
+Received: from mga14.intel.com ([192.55.52.115]:32929 "EHLO mga14.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752624AbbFDBOA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 3 Jun 2015 21:14:00 -0400
-In-Reply-To: <06E7D85B3BA36C4DB207FEDE871C53489EE0F9@SHSMSX101.ccr.corp.intel.com>
+	id S1753131AbbFDBZD convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Jun 2015 21:25:03 -0400
+In-Reply-To: <alpine.DEB.2.00.1506031808170.26591@cobra.newdream.net>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
+To: Sage Weil <sweil@redhat.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+Making the 'copy get' op to be a cache op seems like a good idea.
+
+-----Original Message-----
+From: Sage Weil [mailto:sweil@redhat.com] 
+Sent: Thursday, June 4, 2015 9:14 AM
+To: Wang, Zhiqiang
+Cc: ceph-devel@vger.kernel.org
+Subject: RE: 'Racing read got wrong version' during proxy write testing
 
 On Wed, 3 Jun 2015, Wang, Zhiqiang wrote:
 > I ran into the 'op not idempotent' problem during the testing today. 
-> There is one bug in the previous fix. In that fix, we copy the reqids in 
-> the final step of 'fill_in_copy_get'. If the object is deleted, since 
-> the 'copy get' op is a read op, it returns earlier with ENOENT in do_op. 
-> No reqids will be copied during promotion in this case. This again leads 
-> to the 'op not idempotent' problem. We need a 'smart' way to detect the 
-> op is a 'copy get' op (looping the ops vector doesn't seem smart?) and 
-> copy the reqids in this case.
+> There is one bug in the previous fix. In that fix, we copy the reqids 
+> in the final step of 'fill_in_copy_get'. If the object is deleted, 
+> since the 'copy get' op is a read op, it returns earlier with ENOENT in do_op.
+> No reqids will be copied during promotion in this case. This again 
+> leads to the 'op not idempotent' problem. We need a 'smart' way to 
+> detect the op is a 'copy get' op (looping the ops vector doesn't seem 
+> smart?) and copy the reqids in this case.
 
-Hmm.  I think the idea here is/was that that ENOENT would somehow include 
-the reqid list from PGLog::get_object_reqids().
+Hmm.  I think the idea here is/was that that ENOENT would somehow include the reqid list from PGLog::get_object_reqids().
 
 I think teh trick is getting it past the generic check in do_op:
 
@@ -49,11 +62,12 @@ sage
 
 > 
 > -----Original Message-----
-> From: Sage Weil [mailto:sweil@redhat.com] 
+> From: Sage Weil [mailto:sweil@redhat.com]
 > Sent: Tuesday, May 26, 2015 12:27 AM
 > To: Wang, Zhiqiang
 > Cc: ceph-devel@vger.kernel.org
-> Subject: Re: 'Racing read got wrong version' during proxy write testing
+> Subject: Re: 'Racing read got wrong version' during proxy write 
+> testing
 > 
 > On Mon, 25 May 2015, Wang, Zhiqiang wrote:
 > > Hi all,
@@ -64,21 +78,22 @@ sage
 > > - Set up cache tiering
 > > - Client retries ops and sends the 3 writes and 1 read to the cache 
 > > tier
-> > - The 3 writes finished on the base tier, say with versions v1, v2 and 
+> > - The 3 writes finished on the base tier, say with versions v1, v2 
+> > and
 > > v3
 > > - Cache tier proxies the 1st write, and start to promote the object 
 > > for the 2nd write, the 2nd and 3rd writes and the read are blocked
-> > - The proxied 1st write finishes on the base tier with version v4, and 
-> > returns to cache tier. But somehow the cache tier fails to send the 
-> > reply due to socket failure injecting
+> > - The proxied 1st write finishes on the base tier with version v4, 
+> > and returns to cache tier. But somehow the cache tier fails to send 
+> > the reply due to socket failure injecting
 > > - Client retries the writes and the read again, the writes are 
 > > identified as dup ops
 > > - The promotion finishes, it copies the pg_log entries from the base 
-> > tier and put it in the cache tier's pg_log. This includes the 3 writes 
-> > on the base tier and the proxied write
+> > tier and put it in the cache tier's pg_log. This includes the 3 
+> > writes on the base tier and the proxied write
 > > - The writes dispatches after the promotion, they are identified as 
-> > completed dup ops. Cache tier replies these write ops with the version 
-> > from the base tier (v1, v2 and v3)
+> > completed dup ops. Cache tier replies these write ops with the 
+> > version from the base tier (v1, v2 and v3)
 > > - In the last, the read dispatches, it reads the version of the 
 > > proxied write (v4) and replies to client
 > > - Client complains that 'racing read got wrong version'
@@ -91,8 +106,8 @@ sage
 > 
 > sage
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> in the body of a message to majordomo@vger.kernel.org More majordomo 
+> info at  http://vger.kernel.org/majordomo-info.html
 > 
 > 
