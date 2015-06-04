@@ -1,60 +1,143 @@
 From: Samuel Just <sjust@redhat.com>
-Subject: Re: Teuthology error 'exception on parallel execution'
-Date: Thu, 4 Jun 2015 14:06:59 -0400 (EDT)
-Message-ID: <24753397.14123463.1433441219627.JavaMail.zimbra@redhat.com>
-References: <06E7D85B3BA36C4DB207FEDE871C53489EE05D@SHSMSX101.ccr.corp.intel.com>
+Subject: Re: 'Racing read got wrong version' during proxy write testing
+Date: Thu, 4 Jun 2015 14:12:14 -0400 (EDT)
+Message-ID: <695825089.14140061.1433441534199.JavaMail.zimbra@redhat.com>
+References: <06E7D85B3BA36C4DB207FEDE871C53489E8D8C@SHSMSX101.ccr.corp.intel.com> <alpine.DEB.2.00.1505250924080.19787@cobra.newdream.net> <06E7D85B3BA36C4DB207FEDE871C53489EE0F9@SHSMSX101.ccr.corp.intel.com> <alpine.DEB.2.00.1506031808170.26591@cobra.newdream.net> <06E7D85B3BA36C4DB207FEDE871C53489EE2D3@SHSMSX101.ccr.corp.intel.com> <556FADE4.3080305@redhat.com> <06E7D85B3BA36C4DB207FEDE871C53489EE309@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx3-phx2.redhat.com ([209.132.183.24]:48622 "EHLO
-	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752650AbbFDSHA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Jun 2015 14:07:00 -0400
-In-Reply-To: <06E7D85B3BA36C4DB207FEDE871C53489EE05D@SHSMSX101.ccr.corp.intel.com>
+Received: from mx5-phx2.redhat.com ([209.132.183.37]:45446 "EHLO
+	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753216AbbFDSMP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Jun 2015 14:12:15 -0400
+In-Reply-To: <06E7D85B3BA36C4DB207FEDE871C53489EE309@SHSMSX101.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Zhiqiang Wang <zhiqiang.wang@intel.com>
-Cc: ceph-devel@vger.kernel.org
+Cc: David Zafman <dzafman@redhat.com>, Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
 
-If you look farther up in the logs, you'll probably find an earlier failure of something under the parallel task.
+copy_get can happen outside of the context of a cache op, so we can't (shouldn't) just flag it as a cache op.  I wonder whether it wouldn't be better to live without that check at all and let all of the ops in do_osd_ops individually return ENOENT as appropriate.
 -Sam
 
 ----- Original Message -----
 From: "Zhiqiang Wang" <zhiqiang.wang@intel.com>
-To: ceph-devel@vger.kernel.org
-Sent: Wednesday, June 3, 2015 12:38:04 AM
-Subject: Teuthology error 'exception on parallel execution'
+To: "David Zafman" <dzafman@redhat.com>, "Sage Weil" <sweil@redhat.com>
+Cc: ceph-devel@vger.kernel.org
+Sent: Wednesday, June 3, 2015 7:08:35 PM
+Subject: RE: 'Racing read got wrong version' during proxy write testing
 
-Hi all,
+Hi David,
 
-Several teuthology jobs fail with the error 'exception on parallel execution' in my testing. I don't see any failures/errors/assertions in the mon/osd logs. And these failed jobs always have 'sentry event' log. However, I'm not able to open the sentry link.
+Proxy write hasn't been merge into master yet. It's not likely this is causing #11511.
 
-Here is an example:
-http://pulpito.ceph.com/yuan-2015-06-02_20:18:44-rados-wip-proxy-write---basic-multi/918584/
-Log: http://qa-proxy.ceph.com/teuthology/yuan-2015-06-02_20:18:44-rados-wip-proxy-write---basic-multi/918584/teuthology.log
-Sentry event: http://sentry.ceph.com/sepia/teuthology/search?q=38a00a22270748e79e8f0dd69a624ab4
+-----Original Message-----
+From: David Zafman [mailto:dzafman@redhat.com] 
+Sent: Thursday, June 4, 2015 9:46 AM
+To: Wang, Zhiqiang; Sage Weil
+Cc: ceph-devel@vger.kernel.org
+Subject: Re: 'Racing read got wrong version' during proxy write testing
 
-2015-06-02T20:27:18.149 ERROR:teuthology.parallel:Exception in parallel execution
-Traceback (most recent call last):
-  File "/home/teuthworker/src/teuthology_master/teuthology/parallel.py", line 82, in __exit__
-    for result in self:
-  File "/home/teuthworker/src/teuthology_master/teuthology/parallel.py", line 101, in next
-    resurrect_traceback(result)
-  File "/home/teuthworker/src/teuthology_master/teuthology/parallel.py", line 19, in capture_traceback
-    return func(*args, **kwargs)
-  File "/var/lib/teuthworker/src/ceph-qa-suite_master/tasks/workunit.py", line 361, in _run_tests
-    label="workunit test {workunit}".format(workunit=workunit)
-  File "/home/teuthworker/src/teuthology_master/teuthology/orchestra/remote.py", line 156, in run
-    r = self._runner(client=self.ssh, name=self.shortname, **kwargs)
-  File "/home/teuthworker/src/teuthology_master/teuthology/orchestra/run.py", line 378, in run
-    r.wait()
-  File "/home/teuthworker/src/teuthology_master/teuthology/orchestra/run.py", line 114, in wait
-    label=self.label)
-CommandFailedError: Command failed (workunit test cephtool/test.sh) on plana52 with status 1: 'mkdir -p -- /home/ubuntu/cephtest/mnt.0/client.0/tmp && cd -- /home/ubuntu/cephtest/mnt.0/client.0/tmp && CEPH_CLI_TEST_DUP_COMMAND=1 CEPH_REF=d5a52869dd23ae1fbdf3e80d54e855560e467ff6 TESTDIR="/home/ubuntu/cephtest" CEPH_ID="0" PATH=$PATH:/usr/sbin adjust-ulimits ceph-coverage /home/ubuntu/cephtest/archive/coverage timeout 3h /home/ubuntu/cephtest/workunit.client.0/cephtool/test.sh'
-2015-06-02T20:27:18.150 ERROR:teuthology.run_tasks:Saw exception from tasks.
 
-Is this something wrong with the teuthology itself? Anyone has experience with this? Any hints are welcomed~
+I'm wonder if this issue could be the cause of #11511.  Could a proxy write have raced with the fill_in_copy_get() so object_info_t size doesn't correspond with the size of the object in the filestore?
+
+David
+
+
+On 6/3/15 6:22 PM, Wang, Zhiqiang wrote:
+> Making the 'copy get' op to be a cache op seems like a good idea.
+>
+> -----Original Message-----
+> From: Sage Weil [mailto:sweil@redhat.com]
+> Sent: Thursday, June 4, 2015 9:14 AM
+> To: Wang, Zhiqiang
+> Cc: ceph-devel@vger.kernel.org
+> Subject: RE: 'Racing read got wrong version' during proxy write 
+> testing
+>
+> On Wed, 3 Jun 2015, Wang, Zhiqiang wrote:
+>> I ran into the 'op not idempotent' problem during the testing today.
+>> There is one bug in the previous fix. In that fix, we copy the reqids 
+>> in the final step of 'fill_in_copy_get'. If the object is deleted, 
+>> since the 'copy get' op is a read op, it returns earlier with ENOENT in do_op.
+>> No reqids will be copied during promotion in this case. This again 
+>> leads to the 'op not idempotent' problem. We need a 'smart' way to 
+>> detect the op is a 'copy get' op (looping the ops vector doesn't seem
+>> smart?) and copy the reqids in this case.
+> Hmm.  I think the idea here is/was that that ENOENT would somehow include the reqid list from PGLog::get_object_reqids().
+>
+> I think teh trick is getting it past the generic check in do_op:
+>
+>    if (!op->may_write() &&
+>        !op->may_cache() &&
+>        (!obc->obs.exists ||
+>         ((m->get_snapid() != CEPH_SNAPDIR) &&
+> 	obc->obs.oi.is_whiteout()))) {
+>      reply_ctx(ctx, -ENOENT);
+>      return;
+>    }
+>
+> Maybe we mark these as cache operations so that may_cache is true?
+>
+> Sam, what do you think?
+>
+> sage
+>
+>
+>> -----Original Message-----
+>> From: Sage Weil [mailto:sweil@redhat.com]
+>> Sent: Tuesday, May 26, 2015 12:27 AM
+>> To: Wang, Zhiqiang
+>> Cc: ceph-devel@vger.kernel.org
+>> Subject: Re: 'Racing read got wrong version' during proxy write 
+>> testing
+>>
+>> On Mon, 25 May 2015, Wang, Zhiqiang wrote:
+>>> Hi all,
+>>>
+>>> I ran into a problem during the teuthology test of proxy write. It is like this:
+>>>
+>>> - Client sends 3 writes and a read on the same object to base tier
+>>> - Set up cache tiering
+>>> - Client retries ops and sends the 3 writes and 1 read to the cache 
+>>> tier
+>>> - The 3 writes finished on the base tier, say with versions v1, v2 
+>>> and
+>>> v3
+>>> - Cache tier proxies the 1st write, and start to promote the object 
+>>> for the 2nd write, the 2nd and 3rd writes and the read are blocked
+>>> - The proxied 1st write finishes on the base tier with version v4, 
+>>> and returns to cache tier. But somehow the cache tier fails to send 
+>>> the reply due to socket failure injecting
+>>> - Client retries the writes and the read again, the writes are 
+>>> identified as dup ops
+>>> - The promotion finishes, it copies the pg_log entries from the base 
+>>> tier and put it in the cache tier's pg_log. This includes the 3 
+>>> writes on the base tier and the proxied write
+>>> - The writes dispatches after the promotion, they are identified as 
+>>> completed dup ops. Cache tier replies these write ops with the 
+>>> version from the base tier (v1, v2 and v3)
+>>> - In the last, the read dispatches, it reads the version of the 
+>>> proxied write (v4) and replies to client
+>>> - Client complains that 'racing read got wrong version'
+>>>
+>>> In a previous discussion of the 'ops not idempotent' problem, we solved it by copying the pg_log entries in the base tier to cache tier during promotion. Seems like there is still a problem with this approach in the above scenario. My first thought is that when proxying the write, the cache tier should use the original reqid from the client. But currently we don't have a way to pass the original reqid from cache to base. Any ideas?
+>> I agree--I think the correct fix here is to make the proxied op be recognized as a dup.  We can either do that by passing in an optional reqid to the Objecter, or extending the op somehow so that both reqids are listed.  I think the first option will be cleaner, but I think we will also need to make sure the 'retry' count is preserved as (I think) we skip the dup check if retry==0.  And we probably want to preserve the behavior that a given (reqid, retry) only exists once in the system.
+>>
+>> This probably means adding more optional args to Objecter::read()...?
+>>
+>> sage
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>> in the body of a message to majordomo@vger.kernel.org More majordomo 
+>> info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> in the body of a message to majordomo@vger.kernel.org More majordomo 
+> info at  http://vger.kernel.org/majordomo-info.html
+
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 the body of a message to majordomo@vger.kernel.org
