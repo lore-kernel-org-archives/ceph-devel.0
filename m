@@ -1,92 +1,172 @@
-From: Gregory Meno <gmeno@redhat.com>
-Subject: Re: Thoughts about metadata exposure in Calamari
-Date: Fri, 5 Jun 2015 22:33:52 +0000
-Message-ID: <20150605223352.GA1769@brown-thrasher.redhat.com>
-References: <2C438B34CAC8264398F5C7AF7411910A6349D1E2@G4W3206.americas.hpqcorp.net>
- <alpine.DEB.2.00.1506051221440.1217@cobra.newdream.net>
- <73364EFF-DAC3-41F1-816A-DCE5426D4F2B@hp.com>
+From: Srikanth Madugundi <srikanth.madugundi@gmail.com>
+Subject: Re: osd crash with object store set to newstore
+Date: Fri, 5 Jun 2015 15:41:17 -0700
+Message-ID: <CACAg-u80rnxtM=V8A1-+aSEaR_uMeHxt+J+6-9YgcaDVKArTgw@mail.gmail.com>
+References: <CACAg-u_4mdrj=eCwwYzMzk-RDjCkAWYT6KwaAvUSNJK52gcO6g@mail.gmail.com>
+	<alpine.DEB.2.00.1506012053340.9814@cobra.newdream.net>
+	<CACAg-u8jU0Jf56ZCf38DpDaW1bvW=ff-goOiFriqqDo8uA31vA@mail.gmail.com>
+	<alpine.DEB.2.00.1506012206110.9814@cobra.newdream.net>
+	<CACAg-u81zF+QJm6-pMDMHSqjFw8DrkdpOAgc9nB6YUQdtt8EFw@mail.gmail.com>
+	<CACAg-u-XWNp_JOQS35wvjyCk_t6cYqmSVg5+A+=z2CeiyZ9QZA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:58538 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750869AbbFEWdy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 5 Jun 2015 18:33:54 -0400
-Content-Disposition: inline
-In-Reply-To: <73364EFF-DAC3-41F1-816A-DCE5426D4F2B@hp.com>
+Received: from mail-qc0-f175.google.com ([209.85.216.175]:36533 "EHLO
+	mail-qc0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752062AbbFEWlS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Jun 2015 18:41:18 -0400
+Received: by qcxw10 with SMTP id w10so35335133qcx.3
+        for <ceph-devel@vger.kernel.org>; Fri, 05 Jun 2015 15:41:17 -0700 (PDT)
+In-Reply-To: <CACAg-u-XWNp_JOQS35wvjyCk_t6cYqmSVg5+A+=z2CeiyZ9QZA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Handzik, Joe" <joseph.t.handzik@hp.com>
-Cc: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "Dan Mick (dmick@redhat.com)" <dmick@redhat.com>
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel@vger.kernel.org
 
-On Fri, Jun 05, 2015 at 07:33:44PM +0000, Handzik, Joe wrote:
-> I err in the direction of calling 'osd metadata' too, but it does mean that Calamari will need to add that call in (I'll leave it to Gregory to say if that is particularly undesirable). Do you think it would be worthwhile to better define the metadata bundle into a structure, or is it ok to leave it as a set of string pairs?
-> 
-No problem asking for osd metadata from a calamari perspective.
+Hi Sage,
 
-G
+Did you get a chance to look at the crash?
 
-> Joe
-> 
-> 
-> 
-> > On Jun 5, 2015, at 2:24 PM, Sage Weil <sweil@redhat.com> wrote:
-> > 
-> >> On Fri, 5 Jun 2015, Handzik, Joe wrote:
-> >> Adding in ceph-devel, this time without html formatting...
-> >> 
-> >> Rest-of-community,
-> >> 
-> >> After talking to Gregory, we can see any of the solutions in the original email being acceptable, but it depends on what others are using and how changes would affect them. 
-> >> 
-> >> 1. Is anyone actively using the 'osd metadata' monitor command?
-> >> 2. Would anyone be upset if the data from 'osd metadata' came along for the ride in 'osd dump'? (see: https://github.com/ceph/ceph/blob/master/src/mon/OSDMonitor.cc#L3006 and https://github.com/ceph/ceph/blob/master/src/mon/OSDMonitor.cc#L2910 )
-> >> 3. Or, would a better solution be to push device, partition, and filesystem information into the 'osd dump' dataset, and leave 'osd metadata' out of it? (some of this stuff would move elsewhere: https://github.com/ceph/ceph/blob/master/src/osd/OSD.cc#L4521 )
-> >> a. Some of the data in the metadata bundle looked interesting, that's another motivating factor behind carrying it with the device and partition data in my current PR: https://github.com/ceph/ceph/pull/4699. Might be a better fit for a different location though, seems overkill for every OSD to push this much system data up.
-> >> 4. Or, is everything so fragile that we should just add an 'osd metadata' call into Calamari (alongside the 'osd dump' call: https://github.com/ceph/calamari/blob/0964ec9b82c1182e97f00b13dc157f328f75e294/salt/srv/salt/_modules/ceph.py#L367 )
-> > 
-> > It is perhaps an implementation artifact, but: 'osd dump' is dumping 
-> > (just) the contents of the OSDMap structure, and matches what you would 
-> > get from
-> > 
-> > ceph osd getmap -o foo
-> > osdmaptool --print foo  (or --print-json)
-> > 
-> > We definitely don't want the 'osd metadata' stuff to go in the OSDMap.
-> > 
-> > Exposing 'osd metadata' seems like the simplest thing?
-> > 
-> > sage
-> > 
-> > 
-> >> Sorry for the link explosion, just trying to carry some context along. Any (well, most) opinions would be appreciated!
-> >> 
-> >> Joe
-> >> 
-> >> From: Handzik, Joe 
-> >> Sent: Friday, June 05, 2015 10:28 AM
-> >> To: gmeno@redhat.com
-> >> Cc: Dan Mick (dmick@redhat.com)
-> >> Subject: Thoughts about metadata exposure in Calamari
-> >> 
-> >> Hey guys,
-> >> 
-> >> I finally feel like I have my head wrapped around how this works. I feel like I have two general paths that I could go down now:
-> >> 
-> >> 1. In calamari, use the 'osd metadata' command to pull the metadata up. The task here would be to figure out the right way to arrange that data (this might actually kickoff the start of Gregory's hardware API concept). 
-> >> a. My concern here is that metadata is a poorly-defined blob of string pairs. It's not a well-defined structure like some of the other data that is exposed today via other commands ('osd dump').
-> >> 2. Speaking of 'osd dump', another option would be to make the metadata bundle a first-class citizen of the dataset that is exposed via 'osd dump'. This would obviously require changes in OSDMap and probably OSD itself, but then the data would come along for free via the existing 'osd dump' command.
-> >> 3. A hybrid of these two would be to define the metadata via a structure instead of the set of string pairs that it is today, but still plan to add an 'osd metadata' call into Calamari like in option #1.
-> >> a. This might be the best option, but requires changes in both Ceph and Calamari. I'd probably make the Ceph changes first, so I don't need to implement option #1 first and then move something more like #3.
-> >> 
-> >> Lemme know if any of this seems off. No need to reply now, this is intended as background information to clarify my thought process in the meeting today. Still waiting on Sage to approve my existing pull request, but after a rocky hour earlier in the week (hadn't tested -with-debug, apparently), I believe I'm done.
-> >> 
-> >> Joe
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Regards
+Srikanth
+
+On Wed, Jun 3, 2015 at 1:38 PM, Srikanth Madugundi
+<srikanth.madugundi@gmail.com> wrote:
+> Hi Sage,
+>
+> I saw the crash again here is the output after adding the debug
+> message from wip-newstore-debuglist
+>
+>
+>    -31> 2015-06-03 20:28:18.864496 7fd95976b700 -1
+> newstore(/var/lib/ceph/osd/ceph-19) start is -1/0//0/0 ... k is
+> --.7fffffffffffffff.00000000.!!!0000000000000000.0000000000000000
+>
+>
+> Here is the id of the file I posted.
+>
+> ceph-post-file: ddfcf940-8c13-4913-a7b9-436c1a7d0804
+>
+> Let me know if you need anything else.
+>
+> Regards
+> Srikanth
+>
+>
+> On Mon, Jun 1, 2015 at 10:25 PM, Srikanth Madugundi
+> <srikanth.madugundi@gmail.com> wrote:
+>> Hi Sage,
+>>
+>> Unfortunately I purged the cluster yesterday and restarted the
+>> backfill tool. I did not see the osd crash yet on the cluster. I am
+>> monitoring the OSDs and will update you once I see the crash.
+>>
+>> With the new backfill run I have reduced the rps by half, not sure if
+>> this is the reason for not seeing the crash yet.
+>>
+>> Regards
+>> Srikanth
+>>
+>>
+>> On Mon, Jun 1, 2015 at 10:06 PM, Sage Weil <sage@newdream.net> wrote:
+>>> I pushed a commit to wip-newstore-debuglist.. can you reproduce the crash
+>>> with that branch with 'debug newstore = 20' and send us the log?
+>>> (You can just do 'ceph-post-file <filename>'.)
+>>>
+>>> Thanks!
+>>> sage
+>>>
+>>> On Mon, 1 Jun 2015, Srikanth Madugundi wrote:
+>>>
+>>>> Hi Sage,
+>>>>
+>>>> The assertion failed at line 1639, here is the log message
+>>>>
+>>>>
+>>>> 2015-05-30 23:17:55.141388 7f0891be0700 -1 os/newstore/NewStore.cc: In
+>>>> function 'virtual int NewStore::collection_list_partial(coll_t,
+>>>> ghobject_t, int, int, snapid_t, std::vector<ghobject_t>*,
+>>>> ghobject_t*)' thread 7f0891be0700 time 2015-05-30 23:17:55.137174
+>>>>
+>>>> os/newstore/NewStore.cc: 1639: FAILED assert(k >= start_key && k < end_key)
+>>>>
+>>>>
+>>>> Just before the crash the here are the debug statements printed by the
+>>>> method (collection_list_partial)
+>>>>
+>>>> 2015-05-30 22:49:23.607232 7f1681934700 15
+>>>> newstore(/var/lib/ceph/osd/ceph-7) collection_list_partial 75.0_head
+>>>> start -1/0//0/0 min/max 1024/1024 snap head
+>>>> 2015-05-30 22:49:23.607251 7f1681934700 20
+>>>> newstore(/var/lib/ceph/osd/ceph-7) collection_list_partial range
+>>>> --.7fffffffffffffb4.00000000. to --.7fffffffffffffb4.08000000. and
+>>>> --.800000000000004b.00000000. to --.800000000000004b.08000000. start
+>>>> -1/0//0/0
+>>>>
+>>>>
+>>>> Regards
+>>>> Srikanth
+>>>>
+>>>> On Mon, Jun 1, 2015 at 8:54 PM, Sage Weil <sage@newdream.net> wrote:
+>>>> > On Mon, 1 Jun 2015, Srikanth Madugundi wrote:
+>>>> >> Hi Sage and all,
+>>>> >>
+>>>> >> I build ceph code from wip-newstore on RHEL7 and running performance
+>>>> >> tests to compare with filestore. After few hours of running the tests
+>>>> >> the osd daemons started to crash. Here is the stack trace, the osd
+>>>> >> crashes immediately after the restart. So I could not get the osd up
+>>>> >> and running.
+>>>> >>
+>>>> >> ceph version b8e22893f44979613738dfcdd40dada2b513118
+>>>> >> (eb8e22893f44979613738dfcdd40dada2b513118)
+>>>> >> 1: /usr/bin/ceph-osd() [0xb84652]
+>>>> >> 2: (()+0xf130) [0x7f915f84f130]
+>>>> >> 3: (gsignal()+0x39) [0x7f915e2695c9]
+>>>> >> 4: (abort()+0x148) [0x7f915e26acd8]
+>>>> >> 5: (__gnu_cxx::__verbose_terminate_handler()+0x165) [0x7f915eb6d9d5]
+>>>> >> 6: (()+0x5e946) [0x7f915eb6b946]
+>>>> >> 7: (()+0x5e973) [0x7f915eb6b973]
+>>>> >> 8: (()+0x5eb9f) [0x7f915eb6bb9f]
+>>>> >> 9: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+>>>> >> const*)+0x27a) [0xc84c5a]
+>>>> >> 10: (NewStore::collection_list_partial(coll_t, ghobject_t, int, int,
+>>>> >> snapid_t, std::vector<ghobject_t, std::allocator<ghobject_t> >*,
+>>>> >> ghobject_t*)+0x13c9) [0xa08639]
+>>>> >> 11: (PGBackend::objects_list_partial(hobject_t const&, int, int,
+>>>> >> snapid_t, std::vector<hobject_t, std::allocator<hobject_t> >*,
+>>>> >> hobject_t*)+0x352) [0x918a02]
+>>>> >> 12: (ReplicatedPG::do_pg_op(std::tr1::shared_ptr<OpRequest>)+0x1066) [0x8aa906]
+>>>> >> 13: (ReplicatedPG::do_op(std::tr1::shared_ptr<OpRequest>&)+0x1eb) [0x8cd06b]
+>>>> >> 14: (ReplicatedPG::do_request(std::tr1::shared_ptr<OpRequest>&,
+>>>> >> ThreadPool::TPHandle&)+0x68a) [0x85dbea]
+>>>> >> 15: (OSD::dequeue_op(boost::intrusive_ptr<PG>,
+>>>> >> std::tr1::shared_ptr<OpRequest>, ThreadPool::TPHandle&)+0x3ed)
+>>>> >> [0x6c3f5d]
+>>>> >> 16: (OSD::ShardedOpWQ::_process(unsigned int,
+>>>> >> ceph::heartbeat_handle_d*)+0x2e9) [0x6c4449]
+>>>> >> 17: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x86f) [0xc746bf]
+>>>> >> 18: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0xc767f0]
+>>>> >> 19: (()+0x7df3) [0x7f915f847df3]
+>>>> >> 20: (clone()+0x6d) [0x7f915e32a01d]
+>>>> >> NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+>>>> >> needed to interpret this.
+>>>> >>
+>>>> >> Please let me know the cause of this crash, when this crash happens I
+>>>> >> noticed that two osds on separate machines are down. I can bring one
+>>>> >> osd up but restarting the other osd causes both OSDs to crash. My
+>>>> >> understanding is the crash seems to happen when two OSDs try to
+>>>> >> communicate and replicate a particular PG.
+>>>> >
+>>>> > Can you include the log lines that preceed the dump above?  In particular,
+>>>> > there should be a line that tells you what assertion failed in what
+>>>> > function and at what line number.  I haven't seen this crash so I'm not
+>>>> > sure offhand what it is.
+>>>> >
+>>>> > Thanks!
+>>>> > sage
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>
+>>>>
