@@ -1,181 +1,181 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: osd crash with object store set to newstore
-Date: Fri, 5 Jun 2015 15:50:18 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1506051549190.26591@cobra.newdream.net>
-References: <CACAg-u_4mdrj=eCwwYzMzk-RDjCkAWYT6KwaAvUSNJK52gcO6g@mail.gmail.com> <alpine.DEB.2.00.1506012053340.9814@cobra.newdream.net> <CACAg-u8jU0Jf56ZCf38DpDaW1bvW=ff-goOiFriqqDo8uA31vA@mail.gmail.com> <alpine.DEB.2.00.1506012206110.9814@cobra.newdream.net>
- <CACAg-u81zF+QJm6-pMDMHSqjFw8DrkdpOAgc9nB6YUQdtt8EFw@mail.gmail.com> <CACAg-u-XWNp_JOQS35wvjyCk_t6cYqmSVg5+A+=z2CeiyZ9QZA@mail.gmail.com> <CACAg-u80rnxtM=V8A1-+aSEaR_uMeHxt+J+6-9YgcaDVKArTgw@mail.gmail.com>
+From: Robert LeBlanc <robert@leblancnet.us>
+Subject: Looking to improve small I/O performance
+Date: Fri, 5 Jun 2015 17:17:25 -0600
+Message-ID: <CAANLjFrL_KcmiCkbKjqMNoCY3hByEap2JYBFRJFeH3MG41qWrg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54400 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751742AbbFEWuS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Jun 2015 18:50:18 -0400
-In-Reply-To: <CACAg-u80rnxtM=V8A1-+aSEaR_uMeHxt+J+6-9YgcaDVKArTgw@mail.gmail.com>
+Received: from mail-wg0-f48.google.com ([74.125.82.48]:36646 "EHLO
+	mail-wg0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750836AbbFEXR1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Jun 2015 19:17:27 -0400
+Received: by wgbgq6 with SMTP id gq6so66790332wgb.3
+        for <ceph-devel@vger.kernel.org>; Fri, 05 Jun 2015 16:17:25 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Srikanth Madugundi <srikanth.madugundi@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Fri, 5 Jun 2015, Srikanth Madugundi wrote:
-> Hi Sage,
-> 
-> Did you get a chance to look at the crash?
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
 
-Not yet--I am still focusing on getting wip-temp (and other newstore 
-prerequisite code) working before turning back to newstore.  I'll look at 
-this once I get back to newstore... hopefully in the next week or so!
+I'm digging into perf and the code to see here/how I might be able to
+improve performance for small I/O around 16K.
 
-sage
+I ran fio with rados and used perf to record. Looking through the
+report, there is a very substantial amount of time creating threads
+(or so it looks, but I'm really new to perf). It seems to point to
+messenger, so I looked in the code. From perf if looks like thread
+pooling isn't happening, but from what I can gather from the code, it
+should.
 
+I then ran perf on the QEMU process and most time was in
+_raw_spin_lock_irqsave so I thought that it might be fio threading not
+interacting well with librados and it may be causing the extra thread
+creation.
 
-> 
-> Regards
-> Srikanth
-> 
-> On Wed, Jun 3, 2015 at 1:38 PM, Srikanth Madugundi
-> <srikanth.madugundi@gmail.com> wrote:
-> > Hi Sage,
-> >
-> > I saw the crash again here is the output after adding the debug
-> > message from wip-newstore-debuglist
-> >
-> >
-> >    -31> 2015-06-03 20:28:18.864496 7fd95976b700 -1
-> > newstore(/var/lib/ceph/osd/ceph-19) start is -1/0//0/0 ... k is
-> > --.7fffffffffffffff.00000000.!!!0000000000000000.0000000000000000
-> >
-> >
-> > Here is the id of the file I posted.
-> >
-> > ceph-post-file: ddfcf940-8c13-4913-a7b9-436c1a7d0804
-> >
-> > Let me know if you need anything else.
-> >
-> > Regards
-> > Srikanth
-> >
-> >
-> > On Mon, Jun 1, 2015 at 10:25 PM, Srikanth Madugundi
-> > <srikanth.madugundi@gmail.com> wrote:
-> >> Hi Sage,
-> >>
-> >> Unfortunately I purged the cluster yesterday and restarted the
-> >> backfill tool. I did not see the osd crash yet on the cluster. I am
-> >> monitoring the OSDs and will update you once I see the crash.
-> >>
-> >> With the new backfill run I have reduced the rps by half, not sure if
-> >> this is the reason for not seeing the crash yet.
-> >>
-> >> Regards
-> >> Srikanth
-> >>
-> >>
-> >> On Mon, Jun 1, 2015 at 10:06 PM, Sage Weil <sage@newdream.net> wrote:
-> >>> I pushed a commit to wip-newstore-debuglist.. can you reproduce the crash
-> >>> with that branch with 'debug newstore = 20' and send us the log?
-> >>> (You can just do 'ceph-post-file <filename>'.)
-> >>>
-> >>> Thanks!
-> >>> sage
-> >>>
-> >>> On Mon, 1 Jun 2015, Srikanth Madugundi wrote:
-> >>>
-> >>>> Hi Sage,
-> >>>>
-> >>>> The assertion failed at line 1639, here is the log message
-> >>>>
-> >>>>
-> >>>> 2015-05-30 23:17:55.141388 7f0891be0700 -1 os/newstore/NewStore.cc: In
-> >>>> function 'virtual int NewStore::collection_list_partial(coll_t,
-> >>>> ghobject_t, int, int, snapid_t, std::vector<ghobject_t>*,
-> >>>> ghobject_t*)' thread 7f0891be0700 time 2015-05-30 23:17:55.137174
-> >>>>
-> >>>> os/newstore/NewStore.cc: 1639: FAILED assert(k >= start_key && k < end_key)
-> >>>>
-> >>>>
-> >>>> Just before the crash the here are the debug statements printed by the
-> >>>> method (collection_list_partial)
-> >>>>
-> >>>> 2015-05-30 22:49:23.607232 7f1681934700 15
-> >>>> newstore(/var/lib/ceph/osd/ceph-7) collection_list_partial 75.0_head
-> >>>> start -1/0//0/0 min/max 1024/1024 snap head
-> >>>> 2015-05-30 22:49:23.607251 7f1681934700 20
-> >>>> newstore(/var/lib/ceph/osd/ceph-7) collection_list_partial range
-> >>>> --.7fffffffffffffb4.00000000. to --.7fffffffffffffb4.08000000. and
-> >>>> --.800000000000004b.00000000. to --.800000000000004b.08000000. start
-> >>>> -1/0//0/0
-> >>>>
-> >>>>
-> >>>> Regards
-> >>>> Srikanth
-> >>>>
-> >>>> On Mon, Jun 1, 2015 at 8:54 PM, Sage Weil <sage@newdream.net> wrote:
-> >>>> > On Mon, 1 Jun 2015, Srikanth Madugundi wrote:
-> >>>> >> Hi Sage and all,
-> >>>> >>
-> >>>> >> I build ceph code from wip-newstore on RHEL7 and running performance
-> >>>> >> tests to compare with filestore. After few hours of running the tests
-> >>>> >> the osd daemons started to crash. Here is the stack trace, the osd
-> >>>> >> crashes immediately after the restart. So I could not get the osd up
-> >>>> >> and running.
-> >>>> >>
-> >>>> >> ceph version b8e22893f44979613738dfcdd40dada2b513118
-> >>>> >> (eb8e22893f44979613738dfcdd40dada2b513118)
-> >>>> >> 1: /usr/bin/ceph-osd() [0xb84652]
-> >>>> >> 2: (()+0xf130) [0x7f915f84f130]
-> >>>> >> 3: (gsignal()+0x39) [0x7f915e2695c9]
-> >>>> >> 4: (abort()+0x148) [0x7f915e26acd8]
-> >>>> >> 5: (__gnu_cxx::__verbose_terminate_handler()+0x165) [0x7f915eb6d9d5]
-> >>>> >> 6: (()+0x5e946) [0x7f915eb6b946]
-> >>>> >> 7: (()+0x5e973) [0x7f915eb6b973]
-> >>>> >> 8: (()+0x5eb9f) [0x7f915eb6bb9f]
-> >>>> >> 9: (ceph::__ceph_assert_fail(char const*, char const*, int, char
-> >>>> >> const*)+0x27a) [0xc84c5a]
-> >>>> >> 10: (NewStore::collection_list_partial(coll_t, ghobject_t, int, int,
-> >>>> >> snapid_t, std::vector<ghobject_t, std::allocator<ghobject_t> >*,
-> >>>> >> ghobject_t*)+0x13c9) [0xa08639]
-> >>>> >> 11: (PGBackend::objects_list_partial(hobject_t const&, int, int,
-> >>>> >> snapid_t, std::vector<hobject_t, std::allocator<hobject_t> >*,
-> >>>> >> hobject_t*)+0x352) [0x918a02]
-> >>>> >> 12: (ReplicatedPG::do_pg_op(std::tr1::shared_ptr<OpRequest>)+0x1066) [0x8aa906]
-> >>>> >> 13: (ReplicatedPG::do_op(std::tr1::shared_ptr<OpRequest>&)+0x1eb) [0x8cd06b]
-> >>>> >> 14: (ReplicatedPG::do_request(std::tr1::shared_ptr<OpRequest>&,
-> >>>> >> ThreadPool::TPHandle&)+0x68a) [0x85dbea]
-> >>>> >> 15: (OSD::dequeue_op(boost::intrusive_ptr<PG>,
-> >>>> >> std::tr1::shared_ptr<OpRequest>, ThreadPool::TPHandle&)+0x3ed)
-> >>>> >> [0x6c3f5d]
-> >>>> >> 16: (OSD::ShardedOpWQ::_process(unsigned int,
-> >>>> >> ceph::heartbeat_handle_d*)+0x2e9) [0x6c4449]
-> >>>> >> 17: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x86f) [0xc746bf]
-> >>>> >> 18: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0xc767f0]
-> >>>> >> 19: (()+0x7df3) [0x7f915f847df3]
-> >>>> >> 20: (clone()+0x6d) [0x7f915e32a01d]
-> >>>> >> NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-> >>>> >> needed to interpret this.
-> >>>> >>
-> >>>> >> Please let me know the cause of this crash, when this crash happens I
-> >>>> >> noticed that two osds on separate machines are down. I can bring one
-> >>>> >> osd up but restarting the other osd causes both OSDs to crash. My
-> >>>> >> understanding is the crash seems to happen when two OSDs try to
-> >>>> >> communicate and replicate a particular PG.
-> >>>> >
-> >>>> > Can you include the log lines that preceed the dump above?  In particular,
-> >>>> > there should be a line that tells you what assertion failed in what
-> >>>> > function and at what line number.  I haven't seen this crash so I'm not
-> >>>> > sure offhand what it is.
-> >>>> >
-> >>>> > Thanks!
-> >>>> > sage
-> >>>> --
-> >>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >>>> the body of a message to majordomo@vger.kernel.org
-> >>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>>>
-> >>>>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+I ran perf on one of the OSD processes and again saw a lot of time in
+what seems like thread creation.
+
+It looks like there is code in simple messenger to log when threads
+are created, but I couldn't figure out how to expose it (debug_msgr
+doesn't exist) in the logs.
+
+Any pointers on how to narrow this down? If I'm totally chasing after
+a red herring, please let me know (I seem to be good at that).
+
+Here is an example from the OSD perf:
+
+Samples: 40K of event 'cycles', Event count (approx.): 656365744585
+  Children      Self  Command   Shared Object         Symbol
+- -   89.00%     0.00%  ceph-osd  libpthread-2.17.so    [.] start_thread
+   - start_thread
+        __clone
+- -   88.42%     0.00%  ceph-osd  libc-2.17.so          [.] __clone
+     __clone
+- -   30.22%     0.16%  ceph-osd  ceph-osd              [.] Pipe::reader
+   - Pipe::reader
+      - Pipe::Reader::entry
+        start_thread
+        __clone
+- -   30.22%     0.00%  ceph-osd  ceph-osd              [.] Pipe::Reader::entry
+     Pipe::Reader::entry
+     start_thread
+     __clone
+- -   29.17%     0.49%  ceph-osd  ceph-osd              [.] Pipe::writer
+   - Pipe::writer
+      - Pipe::Writer::entry
+        start_thread
+        __clone
+- -   29.11%     0.00%  ceph-osd  ceph-osd              [.] Pipe::Writer::entry
+     Pipe::Writer::entry
+     start_thread
+     __clone
+- -   22.12%     0.00%  ceph-osd  [kernel.kallsyms]     [k] system_call_fastpath
+   - system_call_fastpath
+      + 30.23% 0x7fca77f637bd
+      + 16.06% pthread_cond_wait@@GLIBC_2.3.2
+      + 14.46% 0x7fca76a34b7d
+      + 8.75% __libc_recv
+        7.68% pthread_cond_broadcast@@GLIBC_2.3.2
+      + 4.27% __lll_unlock_wake
+      + 2.42% __lll_lock_wait
+      + 2.35% base::internal::SpinLockDelay
+      + 2.16% base::internal::SpinLockWake
+        1.70% pthread_cond_signal@@GLIBC_2.3.2
+      + 1.51% __madvise
+      + 1.09% posix_fadvise64
+      + 1.09% base::internal::SpinLockDelay
+      + 1.02% __xstat64
+      + 0.81% 0x7fca76a36b2d
+      + 0.71% fsetxattr
+      + 0.63% __libc_writev
+      + 0.62% syncfs
+      + 0.53% io_submit
++   19.01%     1.71%  ceph-osd  libtcmalloc.so.4.2.6  [.] operator delete
++   18.06%     0.11%  ceph-osd  ceph-osd              [.] encode_encrypt
++   16.98%     7.58%  ceph-osd  libtcmalloc.so.4.2.6  [.]
+tcmalloc::ThreadCache::ReleaseToCentralCache
++   15.83%     0.00%  ceph-osd  ceph-osd              [.]
+OSD::ShardedOpWQ::_process
++   15.76%     0.11%  ceph-osd  libtcmalloc.so.4.2.6  [.]
+tcmalloc::ThreadCache::Scavenge
++   15.31%     0.16%  ceph-osd  ceph-osd              [.] CryptoKey::encrypt
++   15.30%     0.00%  ceph-osd  ceph-osd              [.] OSD::dequeue_op
++   15.30%     0.00%  ceph-osd  ceph-osd              [.]
+ShardedThreadPool::shardedthreadpool_worker
++   15.07%     0.00%  ceph-osd  ceph-osd              [.]
+ReplicatedPG::do_request
++   14.93%     0.43%  ceph-osd  ceph-osd              [.] Pipe::read_message
++   13.38%     0.00%  ceph-osd  ceph-osd              [.]
+ShardedThreadPool::WorkThreadSharded::entry
++   12.77%     2.23%  ceph-osd  libtcmalloc.so.4.2.6  [.] operator new
++   11.49%     0.37%  ceph-osd  ceph-osd              [.]
+std::_List_base >::_M_clear
++   11.00%     0.06%  ceph-osd  libtcmalloc.so.4.2.6  [.]
+tcmalloc::ThreadCache::FetchFromCentralCache
++   10.96%     0.13%  ceph-osd  libtcmalloc.so.4.2.6  [.]
+tcmalloc::CentralFreeList::RemoveRange
++   10.58%     0.02%  ceph-osd  ceph-osd              [.]
+FileStore::_do_transaction
++   10.56%     9.99%  ceph-osd  libtcmalloc.so.4.2.6  [.]
+tcmalloc::CentralFreeList::FetchFromOneSpans
++   10.31%     0.07%  ceph-osd  ceph-osd              [.]
+CephxSessionHandler::sign_message
++    9.88%     0.00%  ceph-osd  ceph-osd              [.] ThreadPool::worker
++    9.85%     0.00%  ceph-osd  ceph-osd              [.]
+ThreadPool::WorkThread::entry
++    9.80%     0.01%  ceph-osd  ceph-osd              [.] FileStore::_do_op
++    9.79%     0.00%  ceph-osd  ceph-osd              [.]
+FileStore::_do_transactions
++    8.95%     0.00%  ceph-osd  ceph-osd              [.]
+ReplicatedBackend::handle_message
++    8.94%     0.04%  ceph-osd  ceph-osd              [.]
+CephxSessionHandler::check_message_signature
++    8.89%     0.00%  ceph-osd  ceph-osd              [.]
+ReplicatedBackend::sub_op_modify
++    8.89%     0.00%  ceph-osd  ceph-osd              [.]
+ReplicatedBackend::sub_op_modify_impl
++    8.66%     0.21%  ceph-osd  libtcmalloc.so.4.2.6  [.]
+tcmalloc::CentralFreeList::InsertRange
++    8.55%     0.22%  ceph-osd  [kernel.kallsyms]     [k] sys_futex
++    8.33%     0.15%  ceph-osd  [kernel.kallsyms]     [k] do_futex
++    8.19%     0.01%  ceph-osd  ceph-osd              [.]
+FileStore::_omap_setkeys
++    7.39%     0.93%  ceph-osd  libtcmalloc.so.4.2.6  [.]
+tcmalloc::CentralFreeList::ReleaseListToSpans
++    7.26%     0.15%  ceph-osd  ceph-osd              [.] Pipe::do_sendmsg
++    7.00%     0.00%  ceph-osd  libpthread-2.17.so    [.] 0x000000000000e7bd
++    6.69%     0.06%  ceph-osd  [kernel.kallsyms]     [k] sys_sendmsg
++    6.61%     5.93%  ceph-osd  libtcmalloc.so.4.2.6  [.]
+tcmalloc::CentralFreeList::ReleaseToSpans
++    6.57%     0.08%  ceph-osd  [kernel.kallsyms]     [k] __sys_sendmsg
++    6.32%     0.01%  ceph-osd  ceph-osd              [.] ReplicatedPG::do_op
++    6.14%     0.00%  ceph-osd  ceph-osd              [.]
+ReplicatedPG::execute_ctx
++    6.09%     0.15%  ceph-osd  [kernel.kallsyms]     [k] ___sys_sendmsg
++    5.68%     0.00%  ceph-osd  [kernel.kallsyms]     [k] do_sock_sendmsg
+
+Thanks for humoring me,
+
+- ----------------
+Robert LeBlanc
+GPG Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
+-----BEGIN PGP SIGNATURE-----
+Version: Mailvelope v0.13.1
+Comment: https://www.mailvelope.com
+
+wsFcBAEBCAAQBQJVci31CRDmVDuy+mK58QAAWFYQAKI2KIh3UmwtWF588M/2
+H8yNujq/30I/VSbnkP328Kx6h/W88bL47SmF7wB9oSZgXRHiK45Rw5kH8H90
+RwFWWtqwtPT1JBhA6k7eeIABqKQopTdYo+yMa0DWwNks0zPnDD37S3M8Xe0D
+Wt+RvIRb6qDfj5VsUTDSFMUSNBW4/vSE0Gx7RssIUgf5QUPIqV254Frid39T
+e10IPFtprWSzFvFSQwn3uGhhlkjyNO2/tO0veMj+Tm4TYGBu40+DjGFWf9SU
+rAjfSVrD2XCAbSUOWlFjC9kDMMSR6pvbawrYAYfRbRILiL1c9/SDSLeH4AyL
+zmHxCud6AVBUKi6kQZOINGlbN68mcNJPPHhfmFBT+OvY+A8RQ1FDrBSaaznR
+CM043wc0+49YwyDpeDyCxjuCMcK7LhQTjAcYQcuCgzLi/R78k3emkmxcJlxC
+2dAfa5bzh7xltQxhvMKVq97BvxMnd5dLfXfCAtxVE+ruNc+FaoYVMnwLMAhJ
+eYTiM0vwBcWfv2qvbal6ZlaWfERfDRjjKkCkUp29uGmy4thRu/VwL0vhadsJ
+29dpFPG5uzRshCxV2V4fxxlgKoCU10pnd1sqAcyTwDdVWQ/yYLGNffplIW7a
+Awuspjb9l6qZNJ+hB6m9j6dq+rnzcUpYULJ7wbgLtEW9/FKZSJw6eLCEG4o0
+qFIV
+=5+P+
+-----END PGP SIGNATURE-----
