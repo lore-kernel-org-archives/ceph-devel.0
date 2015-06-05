@@ -1,53 +1,49 @@
-From: "Handzik, Joe" <joseph.t.handzik@hp.com>
-Subject: RE: Thoughts about metadata exposure in Calamari
-Date: Fri, 5 Jun 2015 18:39:55 +0000
-Message-ID: <2C438B34CAC8264398F5C7AF7411910A6349D1E2@G4W3206.americas.hpqcorp.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from g4t3425.houston.hp.com ([15.201.208.53]:46349 "EHLO
-	g4t3425.houston.hp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754106AbbFESlb convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Jun 2015 14:41:31 -0400
-Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "gmeno@redhat.com" <gmeno@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-Cc: "Dan Mick (dmick@redhat.com)" <dmick@redhat.com>
+From: Fabian Frederick <fabf@skynet.be>
+Subject: [PATCH 1/1 linux-next] ceph: use standard Opt_err
+Date: Fri,  5 Jun 2015 21:12:46 +0200
+Message-ID: <1433531567-3948-1-git-send-email-fabf@skynet.be>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: Fabian Frederick <fabf@skynet.be>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, ceph-devel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-Adding in ceph-devel, this time without html formatting...
+ceph used -1 for the last match_table_t option.
+Use Opt_err enum like other FS
 
-Rest-of-community,
+match_token() is based on the pattern (NULL)
+so behavior should remain the same.
 
-After talking to Gregory, we can see any of the solutions in the original email being acceptable, but it depends on what others are using and how changes would affect them. 
+Signed-off-by: Fabian Frederick <fabf@skynet.be>
+---
+This is untested. If this one is ok, I can send the same update
+for rbd and net/ceph.
 
-1. Is anyone actively using the 'osd metadata' monitor command?
-2. Would anyone be upset if the data from 'osd metadata' came along for the ride in 'osd dump'? (see: https://github.com/ceph/ceph/blob/master/src/mon/OSDMonitor.cc#L3006 and https://github.com/ceph/ceph/blob/master/src/mon/OSDMonitor.cc#L2910 )
-3. Or, would a better solution be to push device, partition, and filesystem information into the 'osd dump' dataset, and leave 'osd metadata' out of it? (some of this stuff would move elsewhere: https://github.com/ceph/ceph/blob/master/src/osd/OSD.cc#L4521 )
-a. Some of the data in the metadata bundle looked interesting, that's another motivating factor behind carrying it with the device and partition data in my current PR: https://github.com/ceph/ceph/pull/4699. Might be a better fit for a different location though, seems overkill for every OSD to push this much system data up.
-4. Or, is everything so fragile that we should just add an 'osd metadata' call into Calamari (alongside the 'osd dump' call: https://github.com/ceph/calamari/blob/0964ec9b82c1182e97f00b13dc157f328f75e294/salt/srv/salt/_modules/ceph.py#L367 )
+ fs/ceph/super.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
 
-Sorry for the link explosion, just trying to carry some context along. Any (well, most) opinions would be appreciated!
-
-Joe
-
-From: Handzik, Joe 
-Sent: Friday, June 05, 2015 10:28 AM
-To: gmeno@redhat.com
-Cc: Dan Mick (dmick@redhat.com)
-Subject: Thoughts about metadata exposure in Calamari
-
-Hey guys,
-
-I finally feel like I have my head wrapped around how this works. I feel like I have two general paths that I could go down now:
-
-1. In calamari, use the 'osd metadata' command to pull the metadata up. The task here would be to figure out the right way to arrange that data (this might actually kickoff the start of Gregory's hardware API concept). 
-a. My concern here is that metadata is a poorly-defined blob of string pairs. It's not a well-defined structure like some of the other data that is exposed today via other commands ('osd dump').
-2. Speaking of 'osd dump', another option would be to make the metadata bundle a first-class citizen of the dataset that is exposed via 'osd dump'. This would obviously require changes in OSDMap and probably OSD itself, but then the data would come along for free via the existing 'osd dump' command.
-3. A hybrid of these two would be to define the metadata via a structure instead of the set of string pairs that it is today, but still plan to add an 'osd metadata' call into Calamari like in option #1.
-a. This might be the best option, but requires changes in both Ceph and Calamari. I'd probably make the Ceph changes first, so I don't need to implement option #1 first and then move something more like #3.
-
-Lemme know if any of this seems off. No need to reply now, this is intended as background information to clarify my thought process in the meeting today. Still waiting on Sage to approve my existing pull request, but after a rocky hour earlier in the week (hadn't tested -with-debug, apparently), I believe I'm done.
-
-Joe
+diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+index 4e99053..35ef692 100644
+--- a/fs/ceph/super.c
++++ b/fs/ceph/super.c
+@@ -137,7 +137,8 @@ enum {
+ #ifdef CONFIG_CEPH_FS_POSIX_ACL
+ 	Opt_acl,
+ #endif
+-	Opt_noacl
++	Opt_noacl,
++	Opt_err
+ };
+ 
+ static match_table_t fsopt_tokens = {
+@@ -169,7 +170,7 @@ static match_table_t fsopt_tokens = {
+ 	{Opt_acl, "acl"},
+ #endif
+ 	{Opt_noacl, "noacl"},
+-	{-1, NULL}
++	{Opt_err, NULL}
+ };
+ 
+ static int parse_fsopt_token(char *c, void *private)
+-- 
+2.4.2
