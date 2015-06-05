@@ -1,74 +1,63 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: RE: Thoughts about metadata exposure in Calamari
-Date: Fri, 5 Jun 2015 12:24:21 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1506051221440.1217@cobra.newdream.net>
-References: <2C438B34CAC8264398F5C7AF7411910A6349D1E2@G4W3206.americas.hpqcorp.net>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Generating debug packages
+Date: Fri, 05 Jun 2015 21:27:41 +0200
+Message-ID: <5571F82D.1000204@dachary.org>
+References: <CAANLjFpFGb2e3V1q+z=E-a6KbiR7emG3X+WJyLW9dp6XW-Kw4w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="TCXXbBiF6aRMRAMrfV7VEb479j0cSMJg6"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:56010 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751909AbbFETYY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 5 Jun 2015 15:24:24 -0400
-In-Reply-To: <2C438B34CAC8264398F5C7AF7411910A6349D1E2@G4W3206.americas.hpqcorp.net>
+Received: from mail2.dachary.org ([91.121.57.175]:57094 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751422AbbFET1n (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Jun 2015 15:27:43 -0400
+In-Reply-To: <CAANLjFpFGb2e3V1q+z=E-a6KbiR7emG3X+WJyLW9dp6XW-Kw4w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Handzik, Joe" <joseph.t.handzik@hp.com>
-Cc: "gmeno@redhat.com" <gmeno@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "Dan Mick (dmick@redhat.com)" <dmick@redhat.com>
+To: Robert LeBlanc <robert@leblancnet.us>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Fri, 5 Jun 2015, Handzik, Joe wrote:
-> Adding in ceph-devel, this time without html formatting...
-> 
-> Rest-of-community,
-> 
-> After talking to Gregory, we can see any of the solutions in the original email being acceptable, but it depends on what others are using and how changes would affect them. 
-> 
-> 1. Is anyone actively using the 'osd metadata' monitor command?
-> 2. Would anyone be upset if the data from 'osd metadata' came along for the ride in 'osd dump'? (see: https://github.com/ceph/ceph/blob/master/src/mon/OSDMonitor.cc#L3006 and https://github.com/ceph/ceph/blob/master/src/mon/OSDMonitor.cc#L2910 )
-> 3. Or, would a better solution be to push device, partition, and filesystem information into the 'osd dump' dataset, and leave 'osd metadata' out of it? (some of this stuff would move elsewhere: https://github.com/ceph/ceph/blob/master/src/osd/OSD.cc#L4521 )
-> a. Some of the data in the metadata bundle looked interesting, that's another motivating factor behind carrying it with the device and partition data in my current PR: https://github.com/ceph/ceph/pull/4699. Might be a better fit for a different location though, seems overkill for every OSD to push this much system data up.
-> 4. Or, is everything so fragile that we should just add an 'osd metadata' call into Calamari (alongside the 'osd dump' call: https://github.com/ceph/calamari/blob/0964ec9b82c1182e97f00b13dc157f328f75e294/salt/srv/salt/_modules/ceph.py#L367 )
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--TCXXbBiF6aRMRAMrfV7VEb479j0cSMJg6
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-It is perhaps an implementation artifact, but: 'osd dump' is dumping 
-(just) the contents of the OSDMap structure, and matches what you would 
-get from
 
- ceph osd getmap -o foo
- osdmaptool --print foo  (or --print-json)
 
-We definitely don't want the 'osd metadata' stuff to go in the OSDMap.
+On 05/06/2015 21:16, Robert LeBlanc wrote:
+> What is the feeling about generating debug packages along with the
+> standard packages? Seems like it could be useful. That and even though
+> I enjoying building my own packages, I am lazy.
 
-Exposing 'osd metadata' seems like the simplest thing?
+There are -dbg packages, are you thinking of something else ?
 
-sage
-
- 
-> Sorry for the link explosion, just trying to carry some context along. Any (well, most) opinions would be appreciated!
-> 
-> Joe
-> 
-> From: Handzik, Joe 
-> Sent: Friday, June 05, 2015 10:28 AM
-> To: gmeno@redhat.com
-> Cc: Dan Mick (dmick@redhat.com)
-> Subject: Thoughts about metadata exposure in Calamari
-> 
-> Hey guys,
-> 
-> I finally feel like I have my head wrapped around how this works. I feel like I have two general paths that I could go down now:
-> 
-> 1. In calamari, use the 'osd metadata' command to pull the metadata up. The task here would be to figure out the right way to arrange that data (this might actually kickoff the start of Gregory's hardware API concept). 
-> a. My concern here is that metadata is a poorly-defined blob of string pairs. It's not a well-defined structure like some of the other data that is exposed today via other commands ('osd dump').
-> 2. Speaking of 'osd dump', another option would be to make the metadata bundle a first-class citizen of the dataset that is exposed via 'osd dump'. This would obviously require changes in OSDMap and probably OSD itself, but then the data would come along for free via the existing 'osd dump' command.
-> 3. A hybrid of these two would be to define the metadata via a structure instead of the set of string pairs that it is today, but still plan to add an 'osd metadata' call into Calamari like in option #1.
-> a. This might be the best option, but requires changes in both Ceph and Calamari. I'd probably make the Ceph changes first, so I don't need to implement option #1 first and then move something more like #3.
-> 
-> Lemme know if any of this seems off. No need to reply now, this is intended as background information to clarify my thought process in the meeting today. Still waiting on Sage to approve my existing pull request, but after a rocky hour earlier in the week (hadn't tested -with-debug, apparently), I believe I'm done.
-> 
-> Joe
+>=20
+> Thanks,
+> ----------------
+> Robert LeBlanc
+> GPG Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--TCXXbBiF6aRMRAMrfV7VEb479j0cSMJg6
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlVx+C0ACgkQ8dLMyEl6F20IjgCfV96EZjZNpLe51oHlu4bmHOSG
+Dt4AmwWLvOHDBaDPM0Iq/r5BNn63fz1u
+=AbBW
+-----END PGP SIGNATURE-----
+
+--TCXXbBiF6aRMRAMrfV7VEb479j0cSMJg6--
