@@ -1,76 +1,45 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: Looking to improve small I/O performance
-Date: Sat, 6 Jun 2015 17:38:43 +0800
-Message-ID: <CACJqLyb-o+8kC_UWX8nBKohkV=C_ySAMe1UADGTMWyxfSN24iA@mail.gmail.com>
-References: <CAANLjFrL_KcmiCkbKjqMNoCY3hByEap2JYBFRJFeH3MG41qWrg@mail.gmail.com>
-	<90559C83A9C7FA45B5846C975DFA612DDB4B031512@ABGEX73E.FSC.NET>
+From: Alex Elsayed <eternaleye@gmail.com>
+Subject: Re: packaging init systems in a more autoools style way.
+Date: Sat, 06 Jun 2015 03:37:54 -0700
+Message-ID: <mkuii5$o9s$1@ger.gmane.org>
+References: <556F1E19.6080704@suse.com> <alpine.DEB.2.00.1506030919460.9814@cobra.newdream.net> <556F6480.1090901@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7Bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f41.google.com ([209.85.220.41]:34027 "EHLO
-	mail-pa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751148AbbFFJio convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 6 Jun 2015 05:38:44 -0400
-Received: by payr10 with SMTP id r10so64800130pay.1
-        for <ceph-devel@vger.kernel.org>; Sat, 06 Jun 2015 02:38:44 -0700 (PDT)
-In-Reply-To: <90559C83A9C7FA45B5846C975DFA612DDB4B031512@ABGEX73E.FSC.NET>
+Received: from plane.gmane.org ([80.91.229.3]:50878 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750736AbbFFKiM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 6 Jun 2015 06:38:12 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1Z1BUP-0005Tb-G1
+	for ceph-devel@vger.kernel.org; Sat, 06 Jun 2015 12:38:09 +0200
+Received: from 66.87.139.119 ([66.87.139.119])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Sat, 06 Jun 2015 12:38:09 +0200
+Received: from eternaleye by 66.87.139.119 with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Sat, 06 Jun 2015 12:38:09 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?Q?Da=C5=82ek=2C_Piotr?= <Piotr.Dalek@ts.fujitsu.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Sat, Jun 6, 2015 at 2:07 PM, Da=C5=82ek, Piotr <Piotr.Dalek@ts.fujit=
-su.com> wrote:
->> -----Original Message-----
->> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
->>
->> I'm digging into perf and the code to see here/how I might be able t=
-o
->> improve performance for small I/O around 16K.
->>
->> I ran fio with rados and used perf to record. Looking through the re=
-port,
->> there is a very substantial amount of time creating threads (or so i=
-t looks, but
->> I'm really new to perf). It seems to point to messenger, so I looked=
- in the
->> code. From perf if looks like thread pooling isn't happening, but fr=
-om what I
->> can gather from the code, it should.
->> [..]
->
-> This is so because you use SimpleMessenger, which can't handle small =
-I/O well.
-> Indeed, threads are problematic with it, as well as memory allocation=
-=2E I did some
-> benchmarking some time ago and the gist of it is that you could try g=
-oing for
-> AsyncMessenger and see if it helps. You can also see my results here:
-> http://stuff.predictor.org.pl/chunksize.xlsx
-> From there you can see that most of the time of small I/Os in SimpleM=
-essenger
-> Is spent in tcmalloc code, and also there's a performance drop around=
- 64k
-> Blocksize in Async Messenger.
->
+Owen Synge wrote:
 
-Thanks for your benchmark, I submit new performance enhanced patchset
-for AsyncMessenger. It should solve original stress test performance
-degraded problem :-)
+<snip>
 
-> With best regards / Pozdrawiam
-> Piotr Da=C5=82ek
->
+> If I underwstand right you favor the user interface as:
+> 
+> --with-init=systemd
+> --with-init=sysv
+> --with-init=upstart
+> --with-init=bsd
+
+Please do be sure to make --with-init=systemd respect the
+--with-systemdsystemunitdir=PATH option, as some distros rely on that to 
+properly place the unit files. (It's a near-universal feature in autoconf-
+based packages that use systemd; rsyslog and dbus are examples)
 
 
-
---=20
-Best Regards,
-
-Wheat
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
