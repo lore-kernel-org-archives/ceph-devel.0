@@ -1,45 +1,40 @@
-From: Alex Elsayed <eternaleye@gmail.com>
-Subject: Re: packaging init systems in a more autoools style way.
-Date: Sat, 06 Jun 2015 03:37:54 -0700
-Message-ID: <mkuii5$o9s$1@ger.gmane.org>
-References: <556F1E19.6080704@suse.com> <alpine.DEB.2.00.1506030919460.9814@cobra.newdream.net> <556F6480.1090901@suse.com>
+From: =?utf-8?B?RGHFgmVrLCBQaW90cg==?= <Piotr.Dalek@ts.fujitsu.com>
+Subject: RE: Looking to improve small I/O performance
+Date: Sat, 6 Jun 2015 13:13:25 +0200
+Message-ID: <90559C83A9C7FA45B5846C975DFA612DDB4B03151D@ABGEX73E.FSC.NET>
+References: <CAANLjFrL_KcmiCkbKjqMNoCY3hByEap2JYBFRJFeH3MG41qWrg@mail.gmail.com>
+	<90559C83A9C7FA45B5846C975DFA612DDB4B031512@ABGEX73E.FSC.NET>
+ <CACJqLyb-o+8kC_UWX8nBKohkV=C_ySAMe1UADGTMWyxfSN24iA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:50878 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750736AbbFFKiM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 6 Jun 2015 06:38:12 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1Z1BUP-0005Tb-G1
-	for ceph-devel@vger.kernel.org; Sat, 06 Jun 2015 12:38:09 +0200
-Received: from 66.87.139.119 ([66.87.139.119])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Sat, 06 Jun 2015 12:38:09 +0200
-Received: from eternaleye by 66.87.139.119 with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Sat, 06 Jun 2015 12:38:09 +0200
+Received: from dgate20.ts.fujitsu.com ([80.70.172.51]:38571 "EHLO
+	dgate20.ts.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751551AbbFFLN2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 6 Jun 2015 07:13:28 -0400
+In-Reply-To: <CACJqLyb-o+8kC_UWX8nBKohkV=C_ySAMe1UADGTMWyxfSN24iA@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Owen Synge wrote:
-
-<snip>
-
-> If I underwstand right you favor the user interface as:
-> 
-> --with-init=systemd
-> --with-init=sysv
-> --with-init=upstart
-> --with-init=bsd
-
-Please do be sure to make --with-init=systemd respect the
---with-systemdsystemunitdir=PATH option, as some distros rely on that to 
-properly place the unit files. (It's a near-universal feature in autoconf-
-based packages that use systemd; rsyslog and dbus are examples)
-
-
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZn
+ZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtDQo+IG93bmVyQHZnZXIua2VybmVsLm9y
+Z10gT24gQmVoYWxmIE9mIEhhb21haSBXYW5nDQo+IA0KPiA+IFRoaXMgaXMgc28gYmVjYXVzZSB5
+b3UgdXNlIFNpbXBsZU1lc3Nlbmdlciwgd2hpY2ggY2FuJ3QgaGFuZGxlIHNtYWxsIEkvTw0KPiB3
+ZWxsLg0KPiA+IEluZGVlZCwgdGhyZWFkcyBhcmUgcHJvYmxlbWF0aWMgd2l0aCBpdCwgYXMgd2Vs
+bCBhcyBtZW1vcnkgYWxsb2NhdGlvbi4NCj4gPiBJIGRpZCBzb21lIGJlbmNobWFya2luZyBzb21l
+IHRpbWUgYWdvIGFuZCB0aGUgZ2lzdCBvZiBpdCBpcyB0aGF0IHlvdQ0KPiA+IGNvdWxkIHRyeSBn
+b2luZyBmb3IgQXN5bmNNZXNzZW5nZXIgYW5kIHNlZSBpZiBpdCBoZWxwcy4gWW91IGNhbiBhbHNv
+IHNlZSBteQ0KPiByZXN1bHRzIGhlcmU6DQo+ID4gaHR0cDovL3N0dWZmLnByZWRpY3Rvci5vcmcu
+cGwvY2h1bmtzaXplLnhsc3gNCj4gPiBGcm9tIHRoZXJlIHlvdSBjYW4gc2VlIHRoYXQgbW9zdCBv
+ZiB0aGUgdGltZSBvZiBzbWFsbCBJL09zIGluDQo+ID4gU2ltcGxlTWVzc2VuZ2VyIElzIHNwZW50
+IGluIHRjbWFsbG9jIGNvZGUsIGFuZCBhbHNvIHRoZXJlJ3MgYQ0KPiA+IHBlcmZvcm1hbmNlIGRy
+b3AgYXJvdW5kIDY0ayBCbG9ja3NpemUgaW4gQXN5bmMgTWVzc2VuZ2VyLg0KPiA+DQo+IA0KPiBU
+aGFua3MgZm9yIHlvdXIgYmVuY2htYXJrLCBJIHN1Ym1pdCBuZXcgcGVyZm9ybWFuY2UgZW5oYW5j
+ZWQgcGF0Y2hzZXQNCj4gZm9yIEFzeW5jTWVzc2VuZ2VyLiBJdCBzaG91bGQgc29sdmUgb3JpZ2lu
+YWwgc3RyZXNzIHRlc3QgcGVyZm9ybWFuY2UNCj4gZGVncmFkZWQgcHJvYmxlbSA6LSkNCg0KVGhh
+bmtzISBJJ2xsIGNoZWNrIGl0IG91dCBuZXh0IHdlZWsgYW5kIGhvcGVmdWxseSBnb3Qgc29tZSBy
+ZXN1bHRzIHRvIHNoYXJlDQpvbiBXZWRuZXNkYXkuDQoNCldpdGggYmVzdCByZWdhcmRzIC8gUG96
+ZHJhd2lhbQ0KUGlvdHIgRGHFgmVrDQo=
