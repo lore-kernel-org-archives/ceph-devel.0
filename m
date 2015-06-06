@@ -1,56 +1,40 @@
-From: Ugis <ugis22-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: rbd delete operation hangs, ops blocked
-Date: Sat, 6 Jun 2015 09:06:15 +0300
-Message-ID: <CAE63xUNPSDxt8Xd3Y-a-d+DoiAW-xQwF4gM1bQZ6WZDLvnJf1g@mail.gmail.com>
-References: <CAE63xUOybtrxaJCb0UyGfgcWnFfDUBjm=QrNPZ15rGGBb8-AYg@mail.gmail.com>
+From: =?utf-8?B?RGHFgmVrLCBQaW90cg==?= <Piotr.Dalek@ts.fujitsu.com>
+Subject: RE: Looking to improve small I/O performance
+Date: Sat, 6 Jun 2015 08:07:41 +0200
+Message-ID: <90559C83A9C7FA45B5846C975DFA612DDB4B031512@ABGEX73E.FSC.NET>
+References: <CAANLjFrL_KcmiCkbKjqMNoCY3hByEap2JYBFRJFeH3MG41qWrg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAE63xUOybtrxaJCb0UyGfgcWnFfDUBjm=QrNPZ15rGGBb8-AYg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from dgate20.ts.fujitsu.com ([80.70.172.51]:13490 "EHLO
+	dgate20.ts.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751422AbbFFGHr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 6 Jun 2015 02:07:47 -0400
+In-Reply-To: <CAANLjFrL_KcmiCkbKjqMNoCY3hByEap2JYBFRJFeH3MG41qWrg@mail.gmail.com>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Update: I wonder if I cah follow advice here:
-http://cephnotes.ksperis.com/blog/2014/07/04/remove-big-rbd-image
-
-There is shown how to delete rbd objects directly via rados:
-$rados -p rbd rm rbd_id.rbdname
-$rados -p rbd rm rbd_header.18b3c2ae8944a
-$rados -p temp1 ls | grep '^rbd_data.18b3c2ae8944a.'
-
-Could that help and can I run this in parallel with stuck "rbd rm"?
-I can reboot client that issued rbd rm command(if rbd rm is not simply
-killable proces)  but would ceph cluster drop that operation there or
-I would get some hanged forever operations internal to cluster? I need
-to delete that rbd anyway.
-
-Ugis
-
-
-2015-06-06 8:53 GMT+03:00 Ugis <ugis22-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>:
-> Hi,
->
-> I had recent problem with flapping hdd and in result I need to delete
-> broken rbd.
-> Problem is all operations towards this rbd stuck. I even cannot delete
-> rbd - it sits on 6% done and I found this line in one of osds logs:
-> 2015-06-06 08:03:31.770812 7fe5002c2700  0 log_channel(default) log
-> [WRN] : slow request 30720.717642 seconds old, received at 2015-06-05
-> 23:31:31.032740: osd_op(client.2457394.0:8430
-> rbd_data.18b3c2ae8944a.00000000000020e5 [delete] 4.fac8e26
-> ack+ondisk+write+known_if_redirected e136905) currently reached_pg
->
-> How can I remove broken rbd? Fast way would be desirable, but any way
-> will do that eventually helps to delete that rbd.
->
-> Ugis
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZn
+ZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtDQo+DQo+IEknbSBkaWdnaW5nIGludG8g
+cGVyZiBhbmQgdGhlIGNvZGUgdG8gc2VlIGhlcmUvaG93IEkgbWlnaHQgYmUgYWJsZSB0bw0KPiBp
+bXByb3ZlIHBlcmZvcm1hbmNlIGZvciBzbWFsbCBJL08gYXJvdW5kIDE2Sy4NCj4gDQo+IEkgcmFu
+IGZpbyB3aXRoIHJhZG9zIGFuZCB1c2VkIHBlcmYgdG8gcmVjb3JkLiBMb29raW5nIHRocm91Z2gg
+dGhlIHJlcG9ydCwNCj4gdGhlcmUgaXMgYSB2ZXJ5IHN1YnN0YW50aWFsIGFtb3VudCBvZiB0aW1l
+IGNyZWF0aW5nIHRocmVhZHMgKG9yIHNvIGl0IGxvb2tzLCBidXQNCj4gSSdtIHJlYWxseSBuZXcg
+dG8gcGVyZikuIEl0IHNlZW1zIHRvIHBvaW50IHRvIG1lc3Nlbmdlciwgc28gSSBsb29rZWQgaW4g
+dGhlDQo+IGNvZGUuIEZyb20gcGVyZiBpZiBsb29rcyBsaWtlIHRocmVhZCBwb29saW5nIGlzbid0
+IGhhcHBlbmluZywgYnV0IGZyb20gd2hhdCBJDQo+IGNhbiBnYXRoZXIgZnJvbSB0aGUgY29kZSwg
+aXQgc2hvdWxkLg0KPiBbLi5dDQoNClRoaXMgaXMgc28gYmVjYXVzZSB5b3UgdXNlIFNpbXBsZU1l
+c3Nlbmdlciwgd2hpY2ggY2FuJ3QgaGFuZGxlIHNtYWxsIEkvTyB3ZWxsLg0KSW5kZWVkLCB0aHJl
+YWRzIGFyZSBwcm9ibGVtYXRpYyB3aXRoIGl0LCBhcyB3ZWxsIGFzIG1lbW9yeSBhbGxvY2F0aW9u
+LiBJIGRpZCBzb21lDQpiZW5jaG1hcmtpbmcgc29tZSB0aW1lIGFnbyBhbmQgdGhlIGdpc3Qgb2Yg
+aXQgaXMgdGhhdCB5b3UgY291bGQgdHJ5IGdvaW5nIGZvcg0KQXN5bmNNZXNzZW5nZXIgYW5kIHNl
+ZSBpZiBpdCBoZWxwcy4gWW91IGNhbiBhbHNvIHNlZSBteSByZXN1bHRzIGhlcmU6DQpodHRwOi8v
+c3R1ZmYucHJlZGljdG9yLm9yZy5wbC9jaHVua3NpemUueGxzeCANCkZyb20gdGhlcmUgeW91IGNh
+biBzZWUgdGhhdCBtb3N0IG9mIHRoZSB0aW1lIG9mIHNtYWxsIEkvT3MgaW4gU2ltcGxlTWVzc2Vu
+Z2VyDQpJcyBzcGVudCBpbiB0Y21hbGxvYyBjb2RlLCBhbmQgYWxzbyB0aGVyZSdzIGEgcGVyZm9y
+bWFuY2UgZHJvcCBhcm91bmQgNjRrDQpCbG9ja3NpemUgaW4gQXN5bmMgTWVzc2VuZ2VyLg0KDQpX
+aXRoIGJlc3QgcmVnYXJkcyAvIFBvemRyYXdpYW0NClBpb3RyIERhxYJlaw0KDQo=
