@@ -1,37 +1,33 @@
-From: John Spray <john.spray@redhat.com>
-Subject: Re: Thoughts about metadata exposure in Calamari
-Date: Sat, 06 Jun 2015 01:38:38 +0100
-Message-ID: <5572410E.9060806@redhat.com>
-References: <2C438B34CAC8264398F5C7AF7411910A6349D1E2@G4W3206.americas.hpqcorp.net>,<alpine.DEB.2.00.1506051221440.1217@cobra.newdream.net> <73364EFF-DAC3-41F1-816A-DCE5426D4F2B@hp.com>
+From: Ugis <ugis22@gmail.com>
+Subject: rbd delete operation hangs, ops blocked
+Date: Sat, 6 Jun 2015 08:53:03 +0300
+Message-ID: <CAE63xUOybtrxaJCb0UyGfgcWnFfDUBjm=QrNPZ15rGGBb8-AYg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:38314 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751948AbbFFAik (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 5 Jun 2015 20:38:40 -0400
-In-Reply-To: <73364EFF-DAC3-41F1-816A-DCE5426D4F2B@hp.com>
+Received: from mail-ig0-f172.google.com ([209.85.213.172]:37110 "EHLO
+	mail-ig0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750834AbbFFFxE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 6 Jun 2015 01:53:04 -0400
+Received: by igbsb11 with SMTP id sb11so28611371igb.0
+        for <ceph-devel@vger.kernel.org>; Fri, 05 Jun 2015 22:53:03 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Handzik, Joe" <joseph.t.handzik@hp.com>, Sage Weil <sweil@redhat.com>
-Cc: "gmeno@redhat.com" <gmeno@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "Dan Mick (dmick@redhat.com)" <dmick@redhat.com>
+To: "ceph-users@ceph.com" <ceph-users@ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
+Hi,
 
+I had recent problem with flapping hdd and in result I need to delete
+broken rbd.
+Problem is all operations towards this rbd stuck. I even cannot delete
+rbd - it sits on 6% done and I found this line in one of osds logs:
+2015-06-06 08:03:31.770812 7fe5002c2700  0 log_channel(default) log
+[WRN] : slow request 30720.717642 seconds old, received at 2015-06-05
+23:31:31.032740: osd_op(client.2457394.0:8430
+rbd_data.18b3c2ae8944a.00000000000020e5 [delete] 4.fac8e26
+ack+ondisk+write+known_if_redirected e136905) currently reached_pg
 
-On 05/06/2015 20:33, Handzik, Joe wrote:
-> I err in the direction of calling 'osd metadata' too, but it does mean that Calamari will need to add that call in (I'll leave it to Gregory to say if that is particularly undesirable). Do you think it would be worthwhile to better define the metadata bundle into a structure, or is it ok to leave it as a set of string pairs?
+How can I remove broken rbd? Fast way would be desirable, but any way
+will do that eventually helps to delete that rbd.
 
-Versioning of the metadata is something to consider. The "osd metadata" 
-stuff is outside the osdmap epochs, so anything that is consuming 
-updates to it is stuck with doing some kind of full polling as it 
-stands.  It might be that some better interface with versions+deltas is 
-needed for a management layer to efficiently consume it.
-
-A version concept where the version is incremented when an OSD starts or 
-updates its metadata could make synchronization with a management layer 
-much more efficient.  Efficiency matters here when we're calling on the 
-mons to serialize data for potentially 10000s of OSDs into JSON whenever 
-the management layer wants an update.
-
-John
+Ugis
