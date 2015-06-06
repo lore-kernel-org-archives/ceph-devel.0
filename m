@@ -1,140 +1,107 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: Looking to improve small I/O performance
-Date: Sun, 7 Jun 2015 00:44:28 +0800
-Message-ID: <CACJqLyZdm-hgR0Z9b=08mnbMJdxiNWd1OfkAsC7+nVg3xM74hA@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Looking to improve small I/O performance
+Date: Sat, 6 Jun 2015 16:44:35 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD9BF3A@SACMBXIP01.sdcorp.global.sandisk.com>
 References: <CAANLjFrL_KcmiCkbKjqMNoCY3hByEap2JYBFRJFeH3MG41qWrg@mail.gmail.com>
 	<90559C83A9C7FA45B5846C975DFA612DDB4B031512@ABGEX73E.FSC.NET>
-	<CAANLjFqtyQEDQXWF-sC-Qc2ewWyNyfEMSxiH9QBm=Q-Pi=zhTA@mail.gmail.com>
+ <CAANLjFqtyQEDQXWF-sC-Qc2ewWyNyfEMSxiH9QBm=Q-Pi=zhTA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f45.google.com ([209.85.220.45]:33063 "EHLO
-	mail-pa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752219AbbFFQo2 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 6 Jun 2015 12:44:28 -0400
-Received: by padev16 with SMTP id ev16so10563952pad.0
-        for <ceph-devel@vger.kernel.org>; Sat, 06 Jun 2015 09:44:28 -0700 (PDT)
+Received: from mail-bn1bon0072.outbound.protection.outlook.com ([157.56.111.72]:19744
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752663AbbFFQom (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 6 Jun 2015 12:44:42 -0400
 In-Reply-To: <CAANLjFqtyQEDQXWF-sC-Qc2ewWyNyfEMSxiH9QBm=Q-Pi=zhTA@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Robert LeBlanc <robert@leblancnet.us>
-Cc: =?UTF-8?Q?Da=C5=82ek=2C_Piotr?= <Piotr.Dalek@ts.fujitsu.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Robert LeBlanc <robert@leblancnet.us>, =?utf-8?B?RGHFgmVrLCBQaW90cg==?= <Piotr.Dalek@ts.fujitsu.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-We could wait for the next benchmark until this
-PR(https://github.com/ceph/ceph/pull/4775) merged
-
-On Sat, Jun 6, 2015 at 11:06 PM, Robert LeBlanc <robert@leblancnet.us> =
-wrote:
-> -----BEGIN PGP SIGNED MESSAGE-----
-> Hash: SHA256
->
-> I found similar results in my testing as well. Ceph is certainly grea=
-t
-> at large I/O, but our workloads are in the small I/O range. I
-> understand that latency plays a huge role when I/O is small. Since we
-> have 10 and 40 Gb Ethernet, we can't get much lower in latency that
-> way (Infiniband is not an option right now). So I was poking around t=
-o
-> see if there was some code optimizations that might reduce latency
-> (not that I'm smart enough to do the coding myself).
->
-> I was surprised when enabling QEMU writeback cache and set the cache
-> to the working set size, I really didn't get any additional
-> performance. After the first run the QEMU process allocated almost al=
-l
-> the memory. I believe after several runs, there was some improvement,
-> but not what I expected.
->
-> What is the status of the async messenger, it looks like it is
-> experimental in the code? How do you enable it, I can't seem to find =
-a
-> config option, does Ceph have to be compiled with it? I would like to
-> test it on my dev cluster.
-
-Yes, it's a experimental and you only need to enable this in config
-value. No other need to do for compiling.
-
-
-
->
-> Thanks,
-> -----BEGIN PGP SIGNATURE-----
-> Version: Mailvelope v0.13.1
-> Comment: https://www.mailvelope.com
->
-> wsFcBAEBCAAQBQJVcwxfCRDmVDuy+mK58QAAIJ0P/iz05KKuNw1Ypk3xsg/v
-> 7MzrSw70+RZMJd4qOs8OFrBC+IiX1KBOlgrrtAjKRygWgYgK3Aqzw5DEu1RN
-> 2tJiGai9e5Vch/wl+OHhP7S07Q2eN7fJJS+OFtA481XBNeFGhdywhOYenJjk
-> RcDSJcVPgcrPB5SI90UqycwxLjH+XBotFHycuwyHj4LqkHXf4tM4Nbi4A1RV
-> xOhVPQxWlaregwOaS8b8kwFUzkLQic1mMNgSMizpSiPnLuXUnfI7pjtvjOYU
-> ld6QmZgu+xKC/qIJm8ToOJUVD3IkSbpv8Ngs73K12h/3C8mj4+uY4qJWouG4
-> RU3sFMfKgVeNDPSIsjO7Zy9s5/lp64RqPcblj72+3yYC+YJ4ZhLAwRyhtSvO
-> VXkLheZRtMemWbrOCQKinWAlH+m0dwAHv816oFFvkFdOYl/xmmiTo9ctNBqC
-> MVK9tm01DRqA23MFFNQ25lvHzFv3zZ7aPWLeqRin8F7dddwBauva/J7GyFC0
-> bk0mPi83++LQt3r+PUMYCOS+aG+0f8oM8/uValUfEGr4+pcjyI/dZk1k0Q6c
-> cImb2cmy16OgrfzN7isYt7z37dUlQT/2rC74LvTscIIdf1dZQHWwXHelRm49
-> y1pxq07V7LlL6gM+zA6Zskm9QwlJ3D81mH7QpiaixKX8cEzcVifD7WUzP/YV
-> Go8K
-> =3DgB4o
-> -----END PGP SIGNATURE-----
-> ----------------
-> Robert LeBlanc
-> GPG Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
->
->
-> On Sat, Jun 6, 2015 at 12:07 AM, Da=C5=82ek, Piotr
-> <Piotr.Dalek@ts.fujitsu.com> wrote:
->>> -----Original Message-----
->>> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
->>>
->>> I'm digging into perf and the code to see here/how I might be able =
-to
->>> improve performance for small I/O around 16K.
->>>
->>> I ran fio with rados and used perf to record. Looking through the r=
-eport,
->>> there is a very substantial amount of time creating threads (or so =
-it looks, but
->>> I'm really new to perf). It seems to point to messenger, so I looke=
-d in the
->>> code. From perf if looks like thread pooling isn't happening, but f=
-rom what I
->>> can gather from the code, it should.
->>> [..]
->>
->> This is so because you use SimpleMessenger, which can't handle small=
- I/O well.
->> Indeed, threads are problematic with it, as well as memory allocatio=
-n. I did some
->> benchmarking some time ago and the gist of it is that you could try =
-going for
->> AsyncMessenger and see if it helps. You can also see my results here=
-:
->> http://stuff.predictor.org.pl/chunksize.xlsx
->> From there you can see that most of the time of small I/Os in Simple=
-Messenger
->> Is spent in tcmalloc code, and also there's a performance drop aroun=
-d 64k
->> Blocksize in Async Messenger.
->>
->> With best regards / Pozdrawiam
->> Piotr Da=C5=82ek
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
---=20
-Best Regards,
-
-Wheat
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Um9iZXJ0LA0KWW91IGNhbiB0cnkgdGhlIGZvbGxvd2luZyBjb25maWcgb3B0aW9uIHRvIGVuYWJs
+ZSBhc3luIG1lc3Nlbmdlci4NCg0KbXNfdHlwZSA9IGFzeW5jDQplbmFibGVfZXhwZXJpbWVudGFs
+X3VucmVjb3ZlcmFibGVfZGF0YV9jb3JydXB0aW5nX2ZlYXR1cmVzID0gbXMtdHlwZS1hc3luYw0K
+DQpCVFcsIHdoYXQga2luZCBvZiB3b3JrbG9hZCB5b3UgYXJlIHRyeWluZyAsIHJhbmRvbSByZWFk
+IG9yIHdyaXRlID8NCkFsc28sIGlzIHRoaXMgU1NEIG9yIEhERCBjbHVzdGVyID8NCg0KVGhhbmtz
+ICYgUmVnYXJkcw0KU29tbmF0aA0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IGNl
+cGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2
+Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBSb2JlcnQgTGVCbGFuYw0KU2VudDogU2F0dXJk
+YXksIEp1bmUgMDYsIDIwMTUgODowNiBBTQ0KVG86IERhxYJlaywgUGlvdHINCkNjOiBjZXBoLWRl
+dmVsDQpTdWJqZWN0OiBSZTogTG9va2luZyB0byBpbXByb3ZlIHNtYWxsIEkvTyBwZXJmb3JtYW5j
+ZQ0KDQotLS0tLUJFR0lOIFBHUCBTSUdORUQgTUVTU0FHRS0tLS0tDQpIYXNoOiBTSEEyNTYNCg0K
+SSBmb3VuZCBzaW1pbGFyIHJlc3VsdHMgaW4gbXkgdGVzdGluZyBhcyB3ZWxsLiBDZXBoIGlzIGNl
+cnRhaW5seSBncmVhdCBhdCBsYXJnZSBJL08sIGJ1dCBvdXIgd29ya2xvYWRzIGFyZSBpbiB0aGUg
+c21hbGwgSS9PIHJhbmdlLiBJIHVuZGVyc3RhbmQgdGhhdCBsYXRlbmN5IHBsYXlzIGEgaHVnZSBy
+b2xlIHdoZW4gSS9PIGlzIHNtYWxsLiBTaW5jZSB3ZSBoYXZlIDEwIGFuZCA0MCBHYiBFdGhlcm5l
+dCwgd2UgY2FuJ3QgZ2V0IG11Y2ggbG93ZXIgaW4gbGF0ZW5jeSB0aGF0IHdheSAoSW5maW5pYmFu
+ZCBpcyBub3QgYW4gb3B0aW9uIHJpZ2h0IG5vdykuIFNvIEkgd2FzIHBva2luZyBhcm91bmQgdG8g
+c2VlIGlmIHRoZXJlIHdhcyBzb21lIGNvZGUgb3B0aW1pemF0aW9ucyB0aGF0IG1pZ2h0IHJlZHVj
+ZSBsYXRlbmN5IChub3QgdGhhdCBJJ20gc21hcnQgZW5vdWdoIHRvIGRvIHRoZSBjb2RpbmcgbXlz
+ZWxmKS4NCg0KSSB3YXMgc3VycHJpc2VkIHdoZW4gZW5hYmxpbmcgUUVNVSB3cml0ZWJhY2sgY2Fj
+aGUgYW5kIHNldCB0aGUgY2FjaGUgdG8gdGhlIHdvcmtpbmcgc2V0IHNpemUsIEkgcmVhbGx5IGRp
+ZG4ndCBnZXQgYW55IGFkZGl0aW9uYWwgcGVyZm9ybWFuY2UuIEFmdGVyIHRoZSBmaXJzdCBydW4g
+dGhlIFFFTVUgcHJvY2VzcyBhbGxvY2F0ZWQgYWxtb3N0IGFsbCB0aGUgbWVtb3J5LiBJIGJlbGll
+dmUgYWZ0ZXIgc2V2ZXJhbCBydW5zLCB0aGVyZSB3YXMgc29tZSBpbXByb3ZlbWVudCwgYnV0IG5v
+dCB3aGF0IEkgZXhwZWN0ZWQuDQoNCldoYXQgaXMgdGhlIHN0YXR1cyBvZiB0aGUgYXN5bmMgbWVz
+c2VuZ2VyLCBpdCBsb29rcyBsaWtlIGl0IGlzIGV4cGVyaW1lbnRhbCBpbiB0aGUgY29kZT8gSG93
+IGRvIHlvdSBlbmFibGUgaXQsIEkgY2FuJ3Qgc2VlbSB0byBmaW5kIGEgY29uZmlnIG9wdGlvbiwg
+ZG9lcyBDZXBoIGhhdmUgdG8gYmUgY29tcGlsZWQgd2l0aCBpdD8gSSB3b3VsZCBsaWtlIHRvIHRl
+c3QgaXQgb24gbXkgZGV2IGNsdXN0ZXIuDQoNClRoYW5rcywNCi0tLS0tQkVHSU4gUEdQIFNJR05B
+VFVSRS0tLS0tDQpWZXJzaW9uOiBNYWlsdmVsb3BlIHYwLjEzLjENCkNvbW1lbnQ6IGh0dHBzOi8v
+d3d3Lm1haWx2ZWxvcGUuY29tDQoNCndzRmNCQUVCQ0FBUUJRSlZjd3hmQ1JEbVZEdXkrbUs1OFFB
+QUlKMFAvaXowNUtLdU53MVlwazN4c2cvdg0KN016clN3NzArUlpNSmQ0cU9zOE9GckJDK0lpWDFL
+Qk9sZ3JydEFqS1J5Z1dnWWdLM0Fxenc1REV1MVJODQoydEppR2FpOWU1VmNoL3dsK09IaFA3UzA3
+UTJlTjdmSkpTK09GdEE0ODFYQk5lRkdoZHl3aE9ZZW5KamsNClJjRFNKY1ZQZ2NyUEI1U0k5MFVx
+eWN3eExqSCtYQm90Rkh5Y3V3eUhqNExxa0hYZjR0TTROYmk0QTFSVg0KeE9oVlBReFdsYXJlZ3dP
+YVM4Yjhrd0ZVemtMUWljMW1NTmdTTWl6cFNpUG5MdVhVbmZJN3BqdHZqT1lVDQpsZDZRbVpndSt4
+S0MvcUlKbThUb09KVVZEM0lrU2JwdjhOZ3M3M0sxMmgvM0M4bWo0K3VZNHFKV291RzQNClJVM3NG
+TWZLZ1ZlTkRQU0lzak83Wnk5czUvbHA2NFJxUGNibGo3MiszeVlDK1lKNFpoTEF3UnlodFN2Tw0K
+VlhrTGhlWlJ0TWVtV2JyT0NRS2luV0FsSCttMGR3QUh2ODE2b0ZGdmtGZE9ZbC94bW1pVG85Y3RO
+QnFDDQpNVks5dG0wMURScUEyM01GRk5RMjVsdkh6RnYzelo3YVBXTGVxUmluOEY3ZGRkd0JhdXZh
+L0o3R3lGQzANCmJrMG1QaTgzKytMUXQzcitQVU1ZQ09TK2FHKzBmOG9NOC91VmFsVWZFR3I0K3Bj
+anlJL2RaazFrMFE2Yw0KY0ltYjJjbXkxNk9ncmZ6Tjdpc1l0N3ozN2RVbFFULzJyQzc0THZUc2NJ
+SWRmMWRaUUhXd1hIZWxSbTQ5DQp5MXB4cTA3VjdMbEw2Z00rekE2WnNrbTlRd2xKM0Q4MW1IN1Fw
+aWFpeEtYOGNFemNWaWZEN1dVelAvWVYNCkdvOEsNCj1nQjRvDQotLS0tLUVORCBQR1AgU0lHTkFU
+VVJFLS0tLS0NCi0tLS0tLS0tLS0tLS0tLS0NClJvYmVydCBMZUJsYW5jDQpHUEcgRmluZ2VycHJp
+bnQgNzlBMiA5Q0E0IDZDQzQgNDVERCBBOTA0ICBDNzBFIEU2NTQgM0JCMiBGQTYyIEI5RjENCg0K
+DQpPbiBTYXQsIEp1biA2LCAyMDE1IGF0IDEyOjA3IEFNLCBEYcWCZWssIFBpb3RyIDxQaW90ci5E
+YWxla0B0cy5mdWppdHN1LmNvbT4gd3JvdGU6DQo+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0t
+LQ0KPj4gRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBo
+LWRldmVsLQ0KPj4NCj4+IEknbSBkaWdnaW5nIGludG8gcGVyZiBhbmQgdGhlIGNvZGUgdG8gc2Vl
+IGhlcmUvaG93IEkgbWlnaHQgYmUgYWJsZSB0bw0KPj4gaW1wcm92ZSBwZXJmb3JtYW5jZSBmb3Ig
+c21hbGwgSS9PIGFyb3VuZCAxNksuDQo+Pg0KPj4gSSByYW4gZmlvIHdpdGggcmFkb3MgYW5kIHVz
+ZWQgcGVyZiB0byByZWNvcmQuIExvb2tpbmcgdGhyb3VnaCB0aGUNCj4+IHJlcG9ydCwgdGhlcmUg
+aXMgYSB2ZXJ5IHN1YnN0YW50aWFsIGFtb3VudCBvZiB0aW1lIGNyZWF0aW5nIHRocmVhZHMNCj4+
+IChvciBzbyBpdCBsb29rcywgYnV0IEknbSByZWFsbHkgbmV3IHRvIHBlcmYpLiBJdCBzZWVtcyB0
+byBwb2ludCB0bw0KPj4gbWVzc2VuZ2VyLCBzbyBJIGxvb2tlZCBpbiB0aGUgY29kZS4gRnJvbSBw
+ZXJmIGlmIGxvb2tzIGxpa2UgdGhyZWFkDQo+PiBwb29saW5nIGlzbid0IGhhcHBlbmluZywgYnV0
+IGZyb20gd2hhdCBJIGNhbiBnYXRoZXIgZnJvbSB0aGUgY29kZSwgaXQgc2hvdWxkLg0KPj4gWy4u
+XQ0KPg0KPiBUaGlzIGlzIHNvIGJlY2F1c2UgeW91IHVzZSBTaW1wbGVNZXNzZW5nZXIsIHdoaWNo
+IGNhbid0IGhhbmRsZSBzbWFsbCBJL08gd2VsbC4NCj4gSW5kZWVkLCB0aHJlYWRzIGFyZSBwcm9i
+bGVtYXRpYyB3aXRoIGl0LCBhcyB3ZWxsIGFzIG1lbW9yeSBhbGxvY2F0aW9uLg0KPiBJIGRpZCBz
+b21lIGJlbmNobWFya2luZyBzb21lIHRpbWUgYWdvIGFuZCB0aGUgZ2lzdCBvZiBpdCBpcyB0aGF0
+IHlvdQ0KPiBjb3VsZCB0cnkgZ29pbmcgZm9yIEFzeW5jTWVzc2VuZ2VyIGFuZCBzZWUgaWYgaXQg
+aGVscHMuIFlvdSBjYW4gYWxzbyBzZWUgbXkgcmVzdWx0cyBoZXJlOg0KPiBodHRwOi8vc3R1ZmYu
+cHJlZGljdG9yLm9yZy5wbC9jaHVua3NpemUueGxzeA0KPiBGcm9tIHRoZXJlIHlvdSBjYW4gc2Vl
+IHRoYXQgbW9zdCBvZiB0aGUgdGltZSBvZiBzbWFsbCBJL09zIGluDQo+IFNpbXBsZU1lc3Nlbmdl
+ciBJcyBzcGVudCBpbiB0Y21hbGxvYyBjb2RlLCBhbmQgYWxzbyB0aGVyZSdzIGENCj4gcGVyZm9y
+bWFuY2UgZHJvcCBhcm91bmQgNjRrIEJsb2Nrc2l6ZSBpbiBBc3luYyBNZXNzZW5nZXIuDQo+DQo+
+IFdpdGggYmVzdCByZWdhcmRzIC8gUG96ZHJhd2lhbQ0KPiBQaW90ciBEYcWCZWsNCj4NCi0tDQpU
+byB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUg
+Y2VwaC1kZXZlbCIgaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtl
+cm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9t
+YWpvcmRvbW8taW5mby5odG1sDQoNCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQoN
+ClBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25p
+YyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWdu
+YXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNz
+YWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmll
+ZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBh
+bnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhp
+cyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRo
+aXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRl
+bGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJv
+eSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAo
+d2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCg0K
