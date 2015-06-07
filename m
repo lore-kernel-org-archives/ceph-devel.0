@@ -1,98 +1,56 @@
-From: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
-Subject: RE: Caching the erasure code decoding matrix
-Date: Sun, 7 Jun 2015 12:30:03 +0000
-Message-ID: <3472A07E6605974CBC9BC573F1BC02E4AF075313@CERNXCHG43.cern.ch>
-References: <55511543.3040603@dachary.org>,<5573774E.9010105@dachary.org>
+From: Loic Dachary <loic@dachary.org>
+Subject: provisioning teuthology targets with OpenStack
+Date: Sun, 07 Jun 2015 19:04:52 +0200
+Message-ID: <557479B4.9060207@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="OHE3K3EctTUoR75INLnH2IS9hpmA4OrpR"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cernmx13.cern.ch ([188.184.36.46]:21622 "EHLO CERNMX13.cern.ch"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751019AbbFGMfd convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 7 Jun 2015 08:35:33 -0400
-In-Reply-To: <5573774E.9010105@dachary.org>
-Content-Language: en-GB
+Received: from mail2.dachary.org ([91.121.57.175]:57837 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751722AbbFGRFA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 7 Jun 2015 13:05:00 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
+To: Zack Cerza <zcerza@redhat.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Loic,
-ec_init_table is not the function to invert the matrix!
-The loop to construct the inverted matrix is in isa_decode.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--OHE3K3EctTUoR75INLnH2IS9hpmA4OrpR
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-Or maybe I don't understand your email.
+Hi Zack,
 
-The performance of the jerasure plug-in for decoding was already very g=
-ood and probably they construct and therefore invert the matrix in a di=
-fferent way than in the INTEL library. Without caching the decoding mat=
-rix the performance of the ISA library was a desaster using the benchma=
-rk tool.
+I'm motivated by my recent experience with hacking teuthology and contain=
+ers :-) I'd like to give
 
-Cheers Andreas.
-________________________________________
-=46rom: Loic Dachary [loic@dachary.org]
-Sent: 07 June 2015 00:42
-To: Andreas Joachim Peters
-Cc: Ceph Development
-Subject: Re: Caching the erasure code decoding matrix
+http://tracker.ceph.com/issues/6502 "provision targets using a cloud API"=
 
-Hi Andreas,
 
-After discussing this a little with a few people, I'm tempted to conclu=
-de caching the decoding matrix is probably not worth the complexity. It=
-'s even difficult for me to know if maintaining the cache is cheaper th=
-an computing the decoding matrix.
+a shot with OpenStack in mind (because I know nothing of EC2 really). The=
+ idea is to make it relatively easy for someone with access to an OpenSta=
+ck tenant to using instead of downburst. Not only would that simplify the=
+ development process for people without access to the lab, it would also =
+allow the addition of more horsepower to the lab. What do you think ?
 
 Cheers
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
-On 11/05/2015 22:46, Loic Dachary wrote:
-> Hi Andreas,
->
-> I gave a shot at implementing a cache to avoid computing the decoding=
- matrix every time a 4KB stripe needs it, for the jerasure plugin, in t=
-he same way you did it for the ISA plugin.
->
-> The draft is at https://github.com/dachary/ceph/commit/a6fb5257fabd81=
-0704405c8bc13743d1592ecc54 if you're curious. Then I did some benchmark=
-ing and was quite disappointed. It looks like whenever the matrix needs=
- to be computed jerasure_invert_matrix needs ~4000 cycles. Compared to =
-the cost of galois_w08_region_multiply (~4 millions cycles), it is very=
- small [1].
->
-> With the ISA plugin ec_init_table is less expensive than jerasure_inv=
-ert_matrix with ~1200 cycles as well as the the function ec_encode_data=
-_avx (1.5 millions cycles) [2].
->
-> In both cases though the order of magnitude remains (1000 to 1) and m=
-akes me wonder if I'm not missing something.
->
-> What do you think ?
->
-> Cheers
->
-> [1] jerasure profiling: make -j4 ceph_erasure_code_benchmark && rm be=
-nch.callgrind &&  valgrind --tool=3Dcallgrind --callgrind-out-file=3Dbe=
-nch.callgrind      ./ceph_erasure_code_benchmark      --plugin jerasure=
-      --parameter directory=3D.libs --workload decode --verbose      --=
-parameter technique=3Dreed_sol_van      --parameter k=3D4      --parame=
-ter m=3D2      --iterations 1024 --erased 1 --erased 2 && kcachegrind b=
-ench.callgrind
-> [2] isa profiling: make -j4 ceph_erasure_code_benchmark && rm bench.c=
-allgrind &&  valgrind --tool=3Dcallgrind --callgrind-out-file=3Dbench.c=
-allgrind      ./ceph_erasure_code_benchmark      --plugin isa      --pa=
-rameter directory=3D.libs --workload decode --verbose      --parameter =
-technique=3Dreed_sol_van      --parameter k=3D4      --parameter m=3D2 =
-     --iterations 1024 --erased 1 --erased 2 && kcachegrind bench.callg=
-rind
->
 
---
-Lo=EFc Dachary, Artisan Logiciel Libre
+--OHE3K3EctTUoR75INLnH2IS9hpmA4OrpR
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlV0ebQACgkQ8dLMyEl6F23FzwCgxKJDAdmEAb05TClhqEIUJfxx
+w88AmgOZPRi01xQLn6e8QfRV9Wk9Nqdy
+=2lPv
+-----END PGP SIGNATURE-----
+
+--OHE3K3EctTUoR75INLnH2IS9hpmA4OrpR--
