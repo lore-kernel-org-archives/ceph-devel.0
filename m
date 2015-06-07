@@ -1,158 +1,98 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Looking to improve small I/O performance
-Date: Sun, 7 Jun 2015 08:47:47 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD9C3C1@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <CAANLjFrL_KcmiCkbKjqMNoCY3hByEap2JYBFRJFeH3MG41qWrg@mail.gmail.com>
-	<90559C83A9C7FA45B5846C975DFA612DDB4B031512@ABGEX73E.FSC.NET>
-	<CAANLjFqtyQEDQXWF-sC-Qc2ewWyNyfEMSxiH9QBm=Q-Pi=zhTA@mail.gmail.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F2CD9BF3A@SACMBXIP01.sdcorp.global.sandisk.com>
- <CAANLjFpJHR0RmHF4TfS1H4YRSQmyH20Sfh7kwOv7JKeD0mNYGg@mail.gmail.com>
+From: Andreas Joachim Peters <Andreas.Joachim.Peters@cern.ch>
+Subject: RE: Caching the erasure code decoding matrix
+Date: Sun, 7 Jun 2015 12:30:03 +0000
+Message-ID: <3472A07E6605974CBC9BC573F1BC02E4AF075313@CERNXCHG43.cern.ch>
+References: <55511543.3040603@dachary.org>,<5573774E.9010105@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0063.outbound.protection.outlook.com ([207.46.100.63]:59520
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S932654AbbFGIuB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 7 Jun 2015 04:50:01 -0400
-In-Reply-To: <CAANLjFpJHR0RmHF4TfS1H4YRSQmyH20Sfh7kwOv7JKeD0mNYGg@mail.gmail.com>
-Content-Language: en-US
+Received: from cernmx13.cern.ch ([188.184.36.46]:21622 "EHLO CERNMX13.cern.ch"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751019AbbFGMfd convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 7 Jun 2015 08:35:33 -0400
+In-Reply-To: <5573774E.9010105@dachary.org>
+Content-Language: en-GB
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Robert LeBlanc <robert@leblancnet.us>
-Cc: =?utf-8?B?RGHFgmVrLCBQaW90cg==?= <Piotr.Dalek@ts.fujitsu.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-SSB3b3VsZCBzYXkgc3RpY2sgd2l0aCBIYW1tZXIuLkFsc28sIGhvcGUgeW91IGFyZSBtYWtpbmcg
-c3VyZSB5b3UgaGF2ZSBzdWZmaWNpZW50bHkgbGFyZ2UgbnVtYmVyIG9mIFBHcyBvbiB0aGUgcG9v
-bCB5b3UgYXJlIHRlc3Rpbmcgd2l0aC4NCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZy
-b206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC1v
-d25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBSb2JlcnQgTGVCbGFuYw0KU2VudDog
-U2F0dXJkYXksIEp1bmUgMDYsIDIwMTUgMTE6MDYgUE0NClRvOiBTb21uYXRoIFJveQ0KQ2M6IERh
-xYJlaywgUGlvdHI7IGNlcGgtZGV2ZWwNClN1YmplY3Q6IFJlOiBMb29raW5nIHRvIGltcHJvdmUg
-c21hbGwgSS9PIHBlcmZvcm1hbmNlDQoNCi0tLS0tQkVHSU4gUEdQIFNJR05FRCBNRVNTQUdFLS0t
-LS0NCkhhc2g6IFNIQTI1Ng0KDQpUaGlzIGlzIHRoZSB0ZXN0IHRoYXQgd2UgYXJlIHJ1bm5pbmcg
-dGhhdCBzaW11bGF0ZXMgdGhlIHdvcmtsb2FkIHNpemUgYW5kIHJhdGlvcyBvZiBvdXIgdHlwaWNh
-bCBzZXJ2ZXJzLiBPZiBjb3Vyc2Ugd2UgYXJlIG5vdCBkb2luZyBkaXJlY3QgSS9PIG9uIG91ciBy
-ZWFsIHdvcmtsb2FkcyBhbmQgdGhlIHRocmVhZHMgYW5kIGpvYnMgaXMgYXJiaXRyYXJ5LCBidXQg
-aXQgZ2l2ZXMgdXMgYW4gaWRlYSBvZiB0aGUgcGVyZm9ybWFuY2Ugd2UgY291bGQgZXhwZWN0Lg0K
-DQpmaW8gLS1uYW1lIGZpb190ZXN0IC0tcncgcmFuZHJ3IC0tYnNzcGxpdA0KNGsvODU6MzJrLzEx
-OjUxMi8zOjFtLzEsNGsvODk6MzJrLzEwOjUxMmsvMSAtLWlvZW5naW5lIGxpYmFpbyAtLWlvZGVw
-dGggOCAtLW51bWpvYnMgOCAtLWRpcmVjdCAxIC0tcndtaXhyZWFkIDcyIC0tbm9yYW5kb21tYXAg
-LS1taW5pbWFsIC0tc2l6ZT0yNTAwTUIgLS1ydW50aW1lPTMwMCAtLXRpbWVfYmFzZWQgLS10aHJl
-YWQNCg0KUmlnaHQgbm93IHdlIGFyZSBzcGluZGxlIHdpdGggU1NEIGpvdXJuYWxzLiBXZSBoYXZl
-IG5vdCBjb25maWd1cmVkIFNTRCB0aWVyaW5nLCBidXQgSSdtIG5vdCBzdXJlIGl0IHdpbGwgaGVs
-cCBtdWNoIGdpdmVuIHRoZSBsb3cgcmF0aW8gb2YgU1NEIHRvIHNwaW5kbGUuDQoNCkknbGwgZG8g
-c29tZSB0ZXN0cyBvbiBvdXIgZGV2IGNsdXN0ZXIgYW5kIHNlZSB3aGF0IEkgY29tZSB1cCB3aXRo
-Lg0KV291bGQgZG9pbmcgdGhpcyB0ZXN0IGJlIHByZXR0eSBwb2ludGxlc3Mgd2l0aCAwLjk0LjEs
-IHNob3VsZCBJIGJlIGxvb2tpbmcgYXQgbWFzdGVyIGJlY2F1c2UgdGhlcmUgYXJlIHNpZ25pZmlj
-YW50IGltcHJvdmVtZW50cz8NCg0KVGhhbmtzLA0KLS0tLS1CRUdJTiBQR1AgU0lHTkFUVVJFLS0t
-LS0NClZlcnNpb246IE1haWx2ZWxvcGUgdjAuMTMuMQ0KQ29tbWVudDogaHR0cHM6Ly93d3cubWFp
-bHZlbG9wZS5jb20NCg0Kd3NGY0JBRUJDQUFRQlFKVmM5OVpDUkRtVkR1eSttSzU4UUFBTEo4UC9q
-RG9obnpiNlBCK094SFNqd3F4DQpNUEJ1aGRna0V6RmEzczBLazdQR1IvWktRVWcrS1I2bkFXeThK
-YThFZTBUb01OOXZPalpPWHRLY2RJM2ENCkVFWmgzQmRteUFyak92SWRaaVVQOURrbDl3UWhrSmdE
-bkEvU3NnMXMrM0trYW1GaDdNZlMrcnpqMEtpWA0KaXZnKzBTWm9zM1kzSjFMdDFNRmJiQ1JBYmpN
-cXVIaERPZTFZZ1BnK3VFVEpsT2tSanRneFRNTjhGQ1dJDQpWWllXbjN1elNlTU9vR0dMTWZFNkgy
-cDRXTU1UUFFkVEVZejFvZmkyaFlDOUdiQW5VZGs4aEhVajVOcDcNCmtxQTluSlVaK1RJTVMzc0Zn
-NjJWeTAxaUJsay8vVFVKSWV4YW5wcnpSc2pRVDAzc2p1L1FJY3NBcWtzeQ0KQ3Z0YytWRjhISmdy
-OWVXcnl5VlMxazV0cG1QNmJrK2wzdjF6SWpCdWdUZ3hGajBwM2ZyaXpoVlhtejJzDQpPMDBic2dl
-bnJkcnp1L1c3bEs0M1YySmhydDhVTTJxVmZaZkpLWWZwbytWR0x2QS9GU3hZZnBQSktiZDMNCmdT
-Mm9FNGxkUkRqZzdrMCtHYWZPNGJPTkJvOU1tU213UnpqaUJsL1JTY3FuMUd6WDJtcWFhb2tyMTIr
-RQ0KSDlaSjRCOHUzVWtJK1Z5TGRSQ09ZeFR1UHRuQnl2T2xrSVFSUXZHL3AyQXU4ZlFQdXpWMGlC
-MmQxWnU4DQpCRWNJMkxwRHh6enNYSEk2SFhuTXFFa1h0Sy9Yb0VoWURjNFJMMmNkQnlRb2NzcUNV
-WlU0UktXS29VRUoNCndPS0RHQ2g2Nmc1QnlubnZvUm82ZHgvTmNONXoxMEExWWtJUDB2MHJCZ0sr
-WDgwZFoveVpNcjNqQjVvNg0KN0doag0KPXAzSXENCi0tLS0tRU5EIFBHUCBTSUdOQVRVUkUtLS0t
-LQ0KLS0tLS0tLS0tLS0tLS0tLQ0KUm9iZXJ0IExlQmxhbmMNCkdQRyBGaW5nZXJwcmludCA3OUEy
-IDlDQTQgNkNDNCA0NUREIEE5MDQgIEM3MEUgRTY1NCAzQkIyIEZBNjIgQjlGMQ0KDQoNCk9uIFNh
-dCwgSnVuIDYsIDIwMTUgYXQgMTA6NDQgQU0sIFNvbW5hdGggUm95IDxTb21uYXRoLlJveUBzYW5k
-aXNrLmNvbT4gd3JvdGU6DQo+IFJvYmVydCwNCj4gWW91IGNhbiB0cnkgdGhlIGZvbGxvd2luZyBj
-b25maWcgb3B0aW9uIHRvIGVuYWJsZSBhc3luIG1lc3Nlbmdlci4NCj4NCj4gbXNfdHlwZSA9IGFz
-eW5jDQo+IGVuYWJsZV9leHBlcmltZW50YWxfdW5yZWNvdmVyYWJsZV9kYXRhX2NvcnJ1cHRpbmdf
-ZmVhdHVyZXMgPSANCj4gbXMtdHlwZS1hc3luYw0KPg0KPiBCVFcsIHdoYXQga2luZCBvZiB3b3Jr
-bG9hZCB5b3UgYXJlIHRyeWluZyAsIHJhbmRvbSByZWFkIG9yIHdyaXRlID8NCj4gQWxzbywgaXMg
-dGhpcyBTU0Qgb3IgSEREIGNsdXN0ZXIgPw0KPg0KPiBUaGFua3MgJiBSZWdhcmRzDQo+IFNvbW5h
-dGgNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogY2VwaC1kZXZlbC1vd25l
-ckB2Z2VyLmtlcm5lbC5vcmcgDQo+IFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5l
-bC5vcmddIE9uIEJlaGFsZiBPZiBSb2JlcnQgTGVCbGFuYw0KPiBTZW50OiBTYXR1cmRheSwgSnVu
-ZSAwNiwgMjAxNSA4OjA2IEFNDQo+IFRvOiBEYcWCZWssIFBpb3RyDQo+IENjOiBjZXBoLWRldmVs
-DQo+IFN1YmplY3Q6IFJlOiBMb29raW5nIHRvIGltcHJvdmUgc21hbGwgSS9PIHBlcmZvcm1hbmNl
-DQo+DQo+IC0tLS0tQkVHSU4gUEdQIFNJR05FRCBNRVNTQUdFLS0tLS0NCj4gSGFzaDogU0hBMjU2
-DQo+DQo+IEkgZm91bmQgc2ltaWxhciByZXN1bHRzIGluIG15IHRlc3RpbmcgYXMgd2VsbC4gQ2Vw
-aCBpcyBjZXJ0YWlubHkgZ3JlYXQgYXQgbGFyZ2UgSS9PLCBidXQgb3VyIHdvcmtsb2FkcyBhcmUg
-aW4gdGhlIHNtYWxsIEkvTyByYW5nZS4gSSB1bmRlcnN0YW5kIHRoYXQgbGF0ZW5jeSBwbGF5cyBh
-IGh1Z2Ugcm9sZSB3aGVuIEkvTyBpcyBzbWFsbC4gU2luY2Ugd2UgaGF2ZSAxMCBhbmQgNDAgR2Ig
-RXRoZXJuZXQsIHdlIGNhbid0IGdldCBtdWNoIGxvd2VyIGluIGxhdGVuY3kgdGhhdCB3YXkgKElu
-ZmluaWJhbmQgaXMgbm90IGFuIG9wdGlvbiByaWdodCBub3cpLiBTbyBJIHdhcyBwb2tpbmcgYXJv
-dW5kIHRvIHNlZSBpZiB0aGVyZSB3YXMgc29tZSBjb2RlIG9wdGltaXphdGlvbnMgdGhhdCBtaWdo
-dCByZWR1Y2UgbGF0ZW5jeSAobm90IHRoYXQgSSdtIHNtYXJ0IGVub3VnaCB0byBkbyB0aGUgY29k
-aW5nIG15c2VsZikuDQo+DQo+IEkgd2FzIHN1cnByaXNlZCB3aGVuIGVuYWJsaW5nIFFFTVUgd3Jp
-dGViYWNrIGNhY2hlIGFuZCBzZXQgdGhlIGNhY2hlIHRvIHRoZSB3b3JraW5nIHNldCBzaXplLCBJ
-IHJlYWxseSBkaWRuJ3QgZ2V0IGFueSBhZGRpdGlvbmFsIHBlcmZvcm1hbmNlLiBBZnRlciB0aGUg
-Zmlyc3QgcnVuIHRoZSBRRU1VIHByb2Nlc3MgYWxsb2NhdGVkIGFsbW9zdCBhbGwgdGhlIG1lbW9y
-eS4gSSBiZWxpZXZlIGFmdGVyIHNldmVyYWwgcnVucywgdGhlcmUgd2FzIHNvbWUgaW1wcm92ZW1l
-bnQsIGJ1dCBub3Qgd2hhdCBJIGV4cGVjdGVkLg0KPg0KPiBXaGF0IGlzIHRoZSBzdGF0dXMgb2Yg
-dGhlIGFzeW5jIG1lc3NlbmdlciwgaXQgbG9va3MgbGlrZSBpdCBpcyBleHBlcmltZW50YWwgaW4g
-dGhlIGNvZGU/IEhvdyBkbyB5b3UgZW5hYmxlIGl0LCBJIGNhbid0IHNlZW0gdG8gZmluZCBhIGNv
-bmZpZyBvcHRpb24sIGRvZXMgQ2VwaCBoYXZlIHRvIGJlIGNvbXBpbGVkIHdpdGggaXQ/IEkgd291
-bGQgbGlrZSB0byB0ZXN0IGl0IG9uIG15IGRldiBjbHVzdGVyLg0KPg0KPiBUaGFua3MsDQo+IC0t
-LS0tQkVHSU4gUEdQIFNJR05BVFVSRS0tLS0tDQo+IFZlcnNpb246IE1haWx2ZWxvcGUgdjAuMTMu
-MQ0KPiBDb21tZW50OiBodHRwczovL3d3dy5tYWlsdmVsb3BlLmNvbQ0KPg0KPiB3c0ZjQkFFQkNB
-QVFCUUpWY3d4ZkNSRG1WRHV5K21LNThRQUFJSjBQL2l6MDVLS3VOdzFZcGszeHNnL3YNCj4gN016
-clN3NzArUlpNSmQ0cU9zOE9GckJDK0lpWDFLQk9sZ3JydEFqS1J5Z1dnWWdLM0Fxenc1REV1MVJO
-DQo+IDJ0SmlHYWk5ZTVWY2gvd2wrT0hoUDdTMDdRMmVON2ZKSlMrT0Z0QTQ4MVhCTmVGR2hkeXdo
-T1llbkpqaw0KPiBSY0RTSmNWUGdjclBCNVNJOTBVcXljd3hMakgrWEJvdEZIeWN1d3lIajRMcWtI
-WGY0dE00TmJpNEExUlYNCj4geE9oVlBReFdsYXJlZ3dPYVM4Yjhrd0ZVemtMUWljMW1NTmdTTWl6
-cFNpUG5MdVhVbmZJN3BqdHZqT1lVDQo+IGxkNlFtWmd1K3hLQy9xSUptOFRvT0pVVkQzSWtTYnB2
-OE5nczczSzEyaC8zQzhtajQrdVk0cUpXb3VHNA0KPiBSVTNzRk1mS2dWZU5EUFNJc2pPN1p5OXM1
-L2xwNjRScVBjYmxqNzIrM3lZQytZSjRaaExBd1J5aHRTdk8NCj4gVlhrTGhlWlJ0TWVtV2JyT0NR
-S2luV0FsSCttMGR3QUh2ODE2b0ZGdmtGZE9ZbC94bW1pVG85Y3ROQnFDDQo+IE1WSzl0bTAxRFJx
-QTIzTUZGTlEyNWx2SHpGdjN6WjdhUFdMZXFSaW44RjdkZGR3QmF1dmEvSjdHeUZDMA0KPiBiazBt
-UGk4MysrTFF0M3IrUFVNWUNPUythRyswZjhvTTgvdVZhbFVmRUdyNCtwY2p5SS9kWmsxazBRNmMN
-Cj4gY0ltYjJjbXkxNk9ncmZ6Tjdpc1l0N3ozN2RVbFFULzJyQzc0THZUc2NJSWRmMWRaUUhXd1hI
-ZWxSbTQ5DQo+IHkxcHhxMDdWN0xsTDZnTSt6QTZac2ttOVF3bEozRDgxbUg3UXBpYWl4S1g4Y0V6
-Y1ZpZkQ3V1V6UC9ZVg0KPiBHbzhLDQo+ID1nQjRvDQo+IC0tLS0tRU5EIFBHUCBTSUdOQVRVUkUt
-LS0tLQ0KPiAtLS0tLS0tLS0tLS0tLS0tDQo+IFJvYmVydCBMZUJsYW5jDQo+IEdQRyBGaW5nZXJw
-cmludCA3OUEyIDlDQTQgNkNDNCA0NUREIEE5MDQgIEM3MEUgRTY1NCAzQkIyIEZBNjIgQjlGMQ0K
-Pg0KPg0KPiBPbiBTYXQsIEp1biA2LCAyMDE1IGF0IDEyOjA3IEFNLCBEYcWCZWssIFBpb3RyIDxQ
-aW90ci5EYWxla0B0cy5mdWppdHN1LmNvbT4gd3JvdGU6DQo+Pj4gLS0tLS1PcmlnaW5hbCBNZXNz
-YWdlLS0tLS0NCj4+PiBGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFp
-bHRvOmNlcGgtZGV2ZWwtDQo+Pj4NCj4+PiBJJ20gZGlnZ2luZyBpbnRvIHBlcmYgYW5kIHRoZSBj
-b2RlIHRvIHNlZSBoZXJlL2hvdyBJIG1pZ2h0IGJlIGFibGUgDQo+Pj4gdG8gaW1wcm92ZSBwZXJm
-b3JtYW5jZSBmb3Igc21hbGwgSS9PIGFyb3VuZCAxNksuDQo+Pj4NCj4+PiBJIHJhbiBmaW8gd2l0
-aCByYWRvcyBhbmQgdXNlZCBwZXJmIHRvIHJlY29yZC4gTG9va2luZyB0aHJvdWdoIHRoZSANCj4+
-PiByZXBvcnQsIHRoZXJlIGlzIGEgdmVyeSBzdWJzdGFudGlhbCBhbW91bnQgb2YgdGltZSBjcmVh
-dGluZyB0aHJlYWRzIA0KPj4+IChvciBzbyBpdCBsb29rcywgYnV0IEknbSByZWFsbHkgbmV3IHRv
-IHBlcmYpLiBJdCBzZWVtcyB0byBwb2ludCB0byANCj4+PiBtZXNzZW5nZXIsIHNvIEkgbG9va2Vk
-IGluIHRoZSBjb2RlLiBGcm9tIHBlcmYgaWYgbG9va3MgbGlrZSB0aHJlYWQgDQo+Pj4gcG9vbGlu
-ZyBpc24ndCBoYXBwZW5pbmcsIGJ1dCBmcm9tIHdoYXQgSSBjYW4gZ2F0aGVyIGZyb20gdGhlIGNv
-ZGUsIGl0IHNob3VsZC4NCj4+PiBbLi5dDQo+Pg0KPj4gVGhpcyBpcyBzbyBiZWNhdXNlIHlvdSB1
-c2UgU2ltcGxlTWVzc2VuZ2VyLCB3aGljaCBjYW4ndCBoYW5kbGUgc21hbGwgSS9PIHdlbGwuDQo+
-PiBJbmRlZWQsIHRocmVhZHMgYXJlIHByb2JsZW1hdGljIHdpdGggaXQsIGFzIHdlbGwgYXMgbWVt
-b3J5IGFsbG9jYXRpb24uDQo+PiBJIGRpZCBzb21lIGJlbmNobWFya2luZyBzb21lIHRpbWUgYWdv
-IGFuZCB0aGUgZ2lzdCBvZiBpdCBpcyB0aGF0IHlvdSANCj4+IGNvdWxkIHRyeSBnb2luZyBmb3Ig
-QXN5bmNNZXNzZW5nZXIgYW5kIHNlZSBpZiBpdCBoZWxwcy4gWW91IGNhbiBhbHNvIHNlZSBteSBy
-ZXN1bHRzIGhlcmU6DQo+PiBodHRwOi8vc3R1ZmYucHJlZGljdG9yLm9yZy5wbC9jaHVua3NpemUu
-eGxzeA0KPj4gRnJvbSB0aGVyZSB5b3UgY2FuIHNlZSB0aGF0IG1vc3Qgb2YgdGhlIHRpbWUgb2Yg
-c21hbGwgSS9PcyBpbiANCj4+IFNpbXBsZU1lc3NlbmdlciBJcyBzcGVudCBpbiB0Y21hbGxvYyBj
-b2RlLCBhbmQgYWxzbyB0aGVyZSdzIGEgDQo+PiBwZXJmb3JtYW5jZSBkcm9wIGFyb3VuZCA2NGsg
-QmxvY2tzaXplIGluIEFzeW5jIE1lc3Nlbmdlci4NCj4+DQo+PiBXaXRoIGJlc3QgcmVnYXJkcyAv
-IFBvemRyYXdpYW0NCj4+IFBpb3RyIERhxYJlaw0KPj4NCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUg
-ZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIA0K
-PiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBN
-b3JlIG1ham9yZG9tbyANCj4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRv
-bW8taW5mby5odG1sDQo+DQo+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQo+DQo+
-IFBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25p
-YyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWdu
-YXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNz
-YWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmll
-ZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBh
-bnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhp
-cyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRo
-aXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRl
-bGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJv
-eSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAo
-d2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCj4N
-Ci0tDQpUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJz
-Y3JpYmUgY2VwaC1kZXZlbCIgaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2
-Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVs
-Lm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo=
+Hi Loic,
+ec_init_table is not the function to invert the matrix!
+The loop to construct the inverted matrix is in isa_decode.
+
+Or maybe I don't understand your email.
+
+The performance of the jerasure plug-in for decoding was already very g=
+ood and probably they construct and therefore invert the matrix in a di=
+fferent way than in the INTEL library. Without caching the decoding mat=
+rix the performance of the ISA library was a desaster using the benchma=
+rk tool.
+
+Cheers Andreas.
+________________________________________
+=46rom: Loic Dachary [loic@dachary.org]
+Sent: 07 June 2015 00:42
+To: Andreas Joachim Peters
+Cc: Ceph Development
+Subject: Re: Caching the erasure code decoding matrix
+
+Hi Andreas,
+
+After discussing this a little with a few people, I'm tempted to conclu=
+de caching the decoding matrix is probably not worth the complexity. It=
+'s even difficult for me to know if maintaining the cache is cheaper th=
+an computing the decoding matrix.
+
+Cheers
+
+On 11/05/2015 22:46, Loic Dachary wrote:
+> Hi Andreas,
+>
+> I gave a shot at implementing a cache to avoid computing the decoding=
+ matrix every time a 4KB stripe needs it, for the jerasure plugin, in t=
+he same way you did it for the ISA plugin.
+>
+> The draft is at https://github.com/dachary/ceph/commit/a6fb5257fabd81=
+0704405c8bc13743d1592ecc54 if you're curious. Then I did some benchmark=
+ing and was quite disappointed. It looks like whenever the matrix needs=
+ to be computed jerasure_invert_matrix needs ~4000 cycles. Compared to =
+the cost of galois_w08_region_multiply (~4 millions cycles), it is very=
+ small [1].
+>
+> With the ISA plugin ec_init_table is less expensive than jerasure_inv=
+ert_matrix with ~1200 cycles as well as the the function ec_encode_data=
+_avx (1.5 millions cycles) [2].
+>
+> In both cases though the order of magnitude remains (1000 to 1) and m=
+akes me wonder if I'm not missing something.
+>
+> What do you think ?
+>
+> Cheers
+>
+> [1] jerasure profiling: make -j4 ceph_erasure_code_benchmark && rm be=
+nch.callgrind &&  valgrind --tool=3Dcallgrind --callgrind-out-file=3Dbe=
+nch.callgrind      ./ceph_erasure_code_benchmark      --plugin jerasure=
+      --parameter directory=3D.libs --workload decode --verbose      --=
+parameter technique=3Dreed_sol_van      --parameter k=3D4      --parame=
+ter m=3D2      --iterations 1024 --erased 1 --erased 2 && kcachegrind b=
+ench.callgrind
+> [2] isa profiling: make -j4 ceph_erasure_code_benchmark && rm bench.c=
+allgrind &&  valgrind --tool=3Dcallgrind --callgrind-out-file=3Dbench.c=
+allgrind      ./ceph_erasure_code_benchmark      --plugin isa      --pa=
+rameter directory=3D.libs --workload decode --verbose      --parameter =
+technique=3Dreed_sol_van      --parameter k=3D4      --parameter m=3D2 =
+     --iterations 1024 --erased 1 --erased 2 && kcachegrind bench.callg=
+rind
+>
+
+--
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
