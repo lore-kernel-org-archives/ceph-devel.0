@@ -1,21 +1,38 @@
-From: Dan Mick <dmick@redhat.com>
-Subject: Re: Thoughts about metadata exposure in Calamari
-Date: Mon, 08 Jun 2015 13:07:29 -0700
-Message-ID: <5575F601.70101@redhat.com>
-References: <2C438B34CAC8264398F5C7AF7411910A6349D1E2@G4W3206.americas.hpqcorp.net>,<alpine.DEB.2.00.1506051221440.1217@cobra.newdream.net> <73364EFF-DAC3-41F1-816A-DCE5426D4F2B@hp.com> <5572410E.9060806@redhat.com> <2C438B34CAC8264398F5C7AF7411910A634A8A0E@G9W0731.americas.hpqcorp.net> <5575F2DE.7010306@redhat.com> <2C438B34CAC8264398F5C7AF7411910A634A8A5F@G9W0731.americas.hpqcorp.net>
+From: "Handzik, Joe" <joseph.t.handzik@hp.com>
+Subject: RE: Thoughts about metadata exposure in Calamari
+Date: Mon, 8 Jun 2015 20:10:25 +0000
+Message-ID: <2C438B34CAC8264398F5C7AF7411910A634A8A8B@G9W0731.americas.hpqcorp.net>
+References: <2C438B34CAC8264398F5C7AF7411910A6349D1E2@G4W3206.americas.hpqcorp.net>,<alpine.DEB.2.00.1506051221440.1217@cobra.newdream.net>
+ <73364EFF-DAC3-41F1-816A-DCE5426D4F2B@hp.com> <5572410E.9060806@redhat.com>
+ <2C438B34CAC8264398F5C7AF7411910A634A8A0E@G9W0731.americas.hpqcorp.net>
+ <5575F2DE.7010306@redhat.com>
+ <2C438B34CAC8264398F5C7AF7411910A634A8A5F@G9W0731.americas.hpqcorp.net>
+ <5575F601.70101@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:57991 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752838AbbFHUH3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 8 Jun 2015 16:07:29 -0400
-In-Reply-To: <2C438B34CAC8264398F5C7AF7411910A634A8A5F@G9W0731.americas.hpqcorp.net>
+Received: from g9t5009.houston.hp.com ([15.240.92.67]:39146 "EHLO
+	g9t5009.houston.hp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752706AbbFHUL0 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Jun 2015 16:11:26 -0400
+In-Reply-To: <5575F601.70101@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Handzik, Joe" <joseph.t.handzik@hp.com>, John Spray <john.spray@redhat.com>, Sage Weil <sweil@redhat.com>
+To: Dan Mick <dmick@redhat.com>, John Spray <john.spray@redhat.com>, Sage Weil <sweil@redhat.com>
 Cc: "gmeno@redhat.com" <gmeno@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+Ok, fair enough on all fronts. Thanks for the quick feedback!
+
+Joe
+
+-----Original Message-----
+From: Dan Mick [mailto:dmick@redhat.com] 
+Sent: Monday, June 08, 2015 3:07 PM
+To: Handzik, Joe; John Spray; Sage Weil
+Cc: gmeno@redhat.com; ceph-devel@vger.kernel.org
+Subject: Re: Thoughts about metadata exposure in Calamari
 
 On 06/08/2015 01:02 PM, Handzik, Joe wrote:
 > Ok. The code/comment I'm referring to is here: https://github.com/joehandzik/calamari/blob/master/salt/srv/salt/_modules/ceph.py#L393
