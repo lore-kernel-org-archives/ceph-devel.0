@@ -1,56 +1,60 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: provisioning teuthology targets with OpenStack
-Date: Sun, 07 Jun 2015 19:04:52 +0200
-Message-ID: <557479B4.9060207@dachary.org>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH 1/1 linux-next] ceph: use standard Opt_err
+Date: Mon, 8 Jun 2015 10:49:13 +0300
+Message-ID: <CAOi1vP8Bm05VQFy-fcZmaZS9N=_k6WcfOK5D4Wpw3zgtwfVoBw@mail.gmail.com>
+References: <1433531567-3948-1-git-send-email-fabf@skynet.be>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="OHE3K3EctTUoR75INLnH2IS9hpmA4OrpR"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:57837 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751722AbbFGRFA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 7 Jun 2015 13:05:00 -0400
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Zack Cerza <zcerza@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1433531567-3948-1-git-send-email-fabf@skynet.be>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Fabian Frederick <fabf@skynet.be>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---OHE3K3EctTUoR75INLnH2IS9hpmA4OrpR
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+On Fri, Jun 5, 2015 at 10:12 PM, Fabian Frederick <fabf@skynet.be> wrote:
+> ceph used -1 for the last match_table_t option.
+> Use Opt_err enum like other FS
+>
+> match_token() is based on the pattern (NULL)
+> so behavior should remain the same.
+>
+> Signed-off-by: Fabian Frederick <fabf@skynet.be>
+> ---
+> This is untested. If this one is ok, I can send the same update
+> for rbd and net/ceph.
+>
+>  fs/ceph/super.c | 5 +++--
+>  1 file changed, 3 insertions(+), 2 deletions(-)
+>
+> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+> index 4e99053..35ef692 100644
+> --- a/fs/ceph/super.c
+> +++ b/fs/ceph/super.c
+> @@ -137,7 +137,8 @@ enum {
+>  #ifdef CONFIG_CEPH_FS_POSIX_ACL
+>         Opt_acl,
+>  #endif
+> -       Opt_noacl
+> +       Opt_noacl,
+> +       Opt_err
+>  };
+>
+>  static match_table_t fsopt_tokens = {
+> @@ -169,7 +170,7 @@ static match_table_t fsopt_tokens = {
+>         {Opt_acl, "acl"},
+>  #endif
+>         {Opt_noacl, "noacl"},
+> -       {-1, NULL}
+> +       {Opt_err, NULL}
+>  };
+>
+>  static int parse_fsopt_token(char *c, void *private)
 
-Hi Zack,
+This would result in a BUG on any unknown option - match_token->token
+is what match_token() returns and parse_fsopt_token() clearly expects
+that to be a negative value.
 
-I'm motivated by my recent experience with hacking teuthology and contain=
-ers :-) I'd like to give
+Thanks,
 
-http://tracker.ceph.com/issues/6502 "provision targets using a cloud API"=
-
-
-a shot with OpenStack in mind (because I know nothing of EC2 really). The=
- idea is to make it relatively easy for someone with access to an OpenSta=
-ck tenant to using instead of downburst. Not only would that simplify the=
- development process for people without access to the lab, it would also =
-allow the addition of more horsepower to the lab. What do you think ?
-
-Cheers
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---OHE3K3EctTUoR75INLnH2IS9hpmA4OrpR
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlV0ebQACgkQ8dLMyEl6F23FzwCgxKJDAdmEAb05TClhqEIUJfxx
-w88AmgOZPRi01xQLn6e8QfRV9Wk9Nqdy
-=2lPv
------END PGP SIGNATURE-----
-
---OHE3K3EctTUoR75INLnH2IS9hpmA4OrpR--
+                Ilya
