@@ -1,21 +1,40 @@
-From: Dan Mick <dmick@redhat.com>
-Subject: Re: Thoughts about metadata exposure in Calamari
-Date: Mon, 08 Jun 2015 12:54:06 -0700
-Message-ID: <5575F2DE.7010306@redhat.com>
-References: <2C438B34CAC8264398F5C7AF7411910A6349D1E2@G4W3206.americas.hpqcorp.net>,<alpine.DEB.2.00.1506051221440.1217@cobra.newdream.net> <73364EFF-DAC3-41F1-816A-DCE5426D4F2B@hp.com> <5572410E.9060806@redhat.com> <2C438B34CAC8264398F5C7AF7411910A634A8A0E@G9W0731.americas.hpqcorp.net>
+From: "Handzik, Joe" <joseph.t.handzik@hp.com>
+Subject: RE: Thoughts about metadata exposure in Calamari
+Date: Mon, 8 Jun 2015 20:02:40 +0000
+Message-ID: <2C438B34CAC8264398F5C7AF7411910A634A8A5F@G9W0731.americas.hpqcorp.net>
+References: <2C438B34CAC8264398F5C7AF7411910A6349D1E2@G4W3206.americas.hpqcorp.net>,<alpine.DEB.2.00.1506051221440.1217@cobra.newdream.net>
+ <73364EFF-DAC3-41F1-816A-DCE5426D4F2B@hp.com> <5572410E.9060806@redhat.com>
+ <2C438B34CAC8264398F5C7AF7411910A634A8A0E@G9W0731.americas.hpqcorp.net>
+ <5575F2DE.7010306@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:54015 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752206AbbFHTyG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 8 Jun 2015 15:54:06 -0400
-In-Reply-To: <2C438B34CAC8264398F5C7AF7411910A634A8A0E@G9W0731.americas.hpqcorp.net>
+Received: from g9t5008.houston.hp.com ([15.240.92.66]:55634 "EHLO
+	g9t5008.houston.hp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753059AbbFHUDY convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Jun 2015 16:03:24 -0400
+In-Reply-To: <5575F2DE.7010306@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Handzik, Joe" <joseph.t.handzik@hp.com>, John Spray <john.spray@redhat.com>, Sage Weil <sweil@redhat.com>
+To: Dan Mick <dmick@redhat.com>, John Spray <john.spray@redhat.com>, Sage Weil <sweil@redhat.com>
 Cc: "gmeno@redhat.com" <gmeno@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+Ok. The code/comment I'm referring to is here: https://github.com/joehandzik/calamari/blob/master/salt/srv/salt/_modules/ceph.py#L393
+
+I guess your point is that this is all grafted to the OSDMap data anyway, so the osdmap version is the relevant version anyway, yes? If so, is that comment just a slightly paranoid observation?
+
+Just to make sure I'm understanding everyone correctly, are we saying that I shouldn't bother with the 'osd metadata' call until I have a solid solution to an epoch implementation for osd metadata, or just that I should target a fix for that eventually?
+
+Joe
+
+-----Original Message-----
+From: Dan Mick [mailto:dmick@redhat.com] 
+Sent: Monday, June 08, 2015 2:54 PM
+To: Handzik, Joe; John Spray; Sage Weil
+Cc: gmeno@redhat.com; ceph-devel@vger.kernel.org
+Subject: Re: Thoughts about metadata exposure in Calamari
 
 The crush map changing causes a change in the osdmap version, I'm pretty
 sure.
