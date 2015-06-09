@@ -1,71 +1,43 @@
-From: Zack Cerza <zack@redhat.com>
-Subject: Re: provisioning teuthology targets with OpenStack
-Date: Tue, 9 Jun 2015 12:25:45 -0400 (EDT)
-Message-ID: <837976248.11945956.1433867145523.JavaMail.zimbra@redhat.com>
-References: <557479B4.9060207@dachary.org>
+From: "Robin H. Johnson" <robbat2@gentoo.org>
+Subject: Re: rgw static-website hosting design WIP: how S3-like should we be
+ with endpoint types?
+Date: Tue, 9 Jun 2015 16:28:11 +0000
+Message-ID: <robbat2-20150609T161412-670559280Z@orbis-terrarum.net>
+References: <20150609035221.GA2868@orbis-terrarum.net>
+ <919435330.11886213.1433865573139.JavaMail.zimbra@redhat.com>
+Reply-To: ceph-devel@vger.kernel.org, jonathan.lacour@dreamhost.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx6-phx2.redhat.com ([209.132.183.39]:51952 "EHLO
-	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753844AbbFIQ0u convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Jun 2015 12:26:50 -0400
-In-Reply-To: <557479B4.9060207@dachary.org>
+Received: from smtp.gentoo.org ([140.211.166.183]:33669 "EHLO smtp.gentoo.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752355AbbFIQ2M convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Jun 2015 12:28:12 -0400
+Received: from grubbs.orbis-terrarum.net (localhost [127.0.0.1])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by smtp.gentoo.org (Postfix) with ESMTPS id A2215340817
+	for <ceph-devel@vger.kernel.org>; Tue,  9 Jun 2015 16:28:11 +0000 (UTC)
+Content-Disposition: inline
+In-Reply-To: <919435330.11886213.1433865573139.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>, jonathan lacour <jonathan.lacour@dreamhost.com>
 
-Hi Loic!
+On Tue, Jun 09, 2015 at 11:59:33AM -0400,  Yehuda Sadeh-Weinraub wrote:
+> A few options (not necessarily mutual exclusive):
+>  - anonymous access gets the website endpoint handling, authenticated gets the REST
+>  - read operations returns website, write operations handle REST
+I have a hybrid of this now:
+- non-authenticated GET/HEAD return website.
+- everything else is REST as before.
 
-I'm really happy to hear you have the time and motivation to work on th=
-is! It's something I've wanted to get to for a while, but other things =
-keep getting in the way.
+>  - configurable (whether gateway handles either, or which)
+Yeah, maybe will do that in a later pass.
 
-I'd suggest looking at teuthology.provision.Downburst to investigate ma=
-ybe pulling some of its functionality into a base class that a potentia=
-l OpenStack subclass could also benefit from. I'd love to see us using =
-a common interface for all of our provisioning. If that seems like a lo=
-t of work, I'd be willing to be the one to create the base class and wo=
-rk with you to make sure its API was useful for OpenStack as well.
-
-Thanks,
-Zack
-
------ Original Message -----
-> From: "Loic Dachary" <loic@dachary.org>
-> To: "Zack Cerza" <zcerza@redhat.com>
-> Cc: "Ceph Development" <ceph-devel@vger.kernel.org>
-> Sent: Sunday, June 7, 2015 11:04:52 AM
-> Subject: provisioning teuthology targets with OpenStack
->=20
-> Hi Zack,
->=20
-> I'm motivated by my recent experience with hacking teuthology and con=
-tainers
-> :-) I'd like to give
->=20
-> http://tracker.ceph.com/issues/6502 "provision targets using a cloud =
-API"
->=20
-> a shot with OpenStack in mind (because I know nothing of EC2 really).=
- The
-> idea is to make it relatively easy for someone with access to an Open=
-Stack
-> tenant to using instead of downburst. Not only would that simplify th=
-e
-> development process for people without access to the lab, it would al=
-so
-> allow the addition of more horsepower to the lab. What do you think ?
->=20
-> Cheers
-> --
-> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->=20
->=20
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-- 
+Robin Hugh Johnson
+Gentoo Linux: Developer, Infrastructure Lead
+E-Mail     : robbat2@gentoo.org
+GnuPG FP   : 11ACBA4F 4778E3F6 E4EDF38E B27B944E 34884E85
