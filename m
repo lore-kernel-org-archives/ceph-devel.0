@@ -1,29 +1,41 @@
-From: Jason Dillaman <dillaman@redhat.com>
-Subject: Re: [ceph-users] rbd_cache, limiting read on high iops around 40k
-Date: Tue, 9 Jun 2015 09:39:50 -0400 (EDT)
-Message-ID: <1569135212.13362835.1433857190455.JavaMail.zimbra@redhat.com>
-References: <1684793881.1564583.1433829106394.JavaMail.zimbra@oxygem.tv> <CAMc8nAWo-jnAHS5cLw5gDt57T3vZpiN79vFXc=pz=+Cjm6Ra6A@mail.gmail.com> <959572886.1627596.1433834901443.JavaMail.zimbra@oxygem.tv> <1897614581.1694878.1433838989184.JavaMail.zimbra@oxygem.tv> <5576CFBF.1070405@redhat.com>
+From: Josh Durgin <jdurgin@redhat.com>
+Subject: Re: Checking on wip-blkin branch
+Date: Tue, 09 Jun 2015 07:44:58 -0700
+Message-ID: <5576FBEA.8030805@redhat.com>
+References: <C8CF870384EBCF4CAB89D2041A5C80B304B99DEA@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx3-phx2.redhat.com ([209.132.183.24]:50234 "EHLO
-	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751583AbbFINj4 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Jun 2015 09:39:56 -0400
-In-Reply-To: <5576CFBF.1070405@redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:37095 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932950AbbFIOpA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 9 Jun 2015 10:45:00 -0400
+In-Reply-To: <C8CF870384EBCF4CAB89D2041A5C80B304B99DEA@SHSMSX101.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>
-Cc: Alexandre DERUMIER <aderumier@odiso.com>, pushpesh sharma <pushpesh.eck@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@lists.ceph.com>
+To: "Xue, Chendi" <chendi.xue@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Andrew Shewmaker <agshew@gmail.com>
 
-> In the past we've hit some performance issues with RBD cache that we've
-> fixed, but we've never really tried pushing a single VM beyond 40+K read
-> IOPS in testing (or at least I never have).  I suspect there's a couple
-> of possibilities as to why it might be slower, but perhaps joshd can
-> chime in as he's more familiar with what that code looks like.
-> 
+Hi Chendi,
 
-At high queue-depths and high IOPS, I would suspect that the bottleneck is the single, coarse-grained mutex protecting the cache data structures.  It's been a back burner item to refactor the current cache mutex into finer-grained locks.
+On 06/09/2015 04:59 AM, Xue, Chendi wrote:
+> Hi, Josh and Andrew
+>
+> Today, I applied wip-blkin branch to my 4 nodes ceph setup, and created zipkin-based lttng results successfully.
+>
+> Since we wanna using this latency analyzing methodology on further release or on keyvalue store and newstore.
+> I am wondering what is the gap to merge blkin into master? Can I help to rebase to master, so we can merge this branch?
 
-Jason
+That'd be great! Andrew and I simply haven't had time to finish fixing
+up the remaining issues. Running it through a rados suite showed some
+more changes were necessary to handle more complicated osd usage -
+you'll see several osd crashes in this rados suite run [1].
+
+The code was looking fine to me, it just needs rebasing and debugging
+so it can pass the rados test suite.
+
+Thanks!
+Josh
+
+[1] 
+http://pulpito.ceph.com/joshd-2015-03-25_17:29:16-rados-wip-blkin---blkin-multi/
