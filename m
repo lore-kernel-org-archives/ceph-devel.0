@@ -1,80 +1,70 @@
-From: Robert LeBlanc <robert@leblancnet.us>
-Subject: Build RPMs from git
-Date: Tue, 9 Jun 2015 15:15:17 -0600
-Message-ID: <CAANLjFqtNxo=CPwar3OYP9es-+5LgTbmiNgd_4RSCcndb_iCNA@mail.gmail.com>
+From: Gregory Farnum <greg@gregs42.com>
+Subject: Re: RBD journal draft design
+Date: Tue, 9 Jun 2015 15:30:45 -0700
+Message-ID: <CAC6JEv_oYpWYd61t3w5MtLYEaw6cd91btffJQ1eP5DEmkoHzFg@mail.gmail.com>
+References: <1574383603.9391063.1433257824183.JavaMail.zimbra@redhat.com>
+	<CAC6JEv98=49tW0S4g=QiT28Pffdji=6S95J4aNLUXUDB2BEs+A@mail.gmail.com>
+	<1679134333.10270211.1433348013379.JavaMail.zimbra@redhat.com>
+	<CAC6JEv_M5jKk+FSDZja15Rmyf3W2x5-yeg9LRukKCHLnYq-j+w@mail.gmail.com>
+	<1628237419.11058538.1433430488520.JavaMail.zimbra@redhat.com>
+	<CAC6JEv8v9Wzx094E5pReJE47=d2wbP8rR=FJcU+BNJcT7H488w@mail.gmail.com>
+	<810657134.11416115.1433464573115.JavaMail.zimbra@redhat.com>
+	<CAC6JEv-RnsXqYZ215WZHcy8Fhyz2H7PPEJSjWVfj4P=gnTCP2A@mail.gmail.com>
+	<838188530.13777348.1433876914558.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f53.google.com ([74.125.82.53]:35550 "EHLO
-	mail-wg0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753813AbbFIVPS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Jun 2015 17:15:18 -0400
-Received: by wgme6 with SMTP id e6so21577721wgm.2
-        for <ceph-devel@vger.kernel.org>; Tue, 09 Jun 2015 14:15:17 -0700 (PDT)
+Received: from mail-ig0-f174.google.com ([209.85.213.174]:38843 "EHLO
+	mail-ig0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752246AbbFIWar convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Jun 2015 18:30:47 -0400
+Received: by igblz2 with SMTP id lz2so21198622igb.1
+        for <ceph-devel@vger.kernel.org>; Tue, 09 Jun 2015 15:30:47 -0700 (PDT)
+Received: from mail-ie0-f170.google.com (mail-ie0-f170.google.com. [209.85.223.170])
+        by mx.google.com with ESMTPSA id i7sm2073793igt.18.2015.06.09.15.30.46
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 09 Jun 2015 15:30:46 -0700 (PDT)
+Received: by iesa3 with SMTP id a3so22954589ies.2
+        for <ceph-devel@vger.kernel.org>; Tue, 09 Jun 2015 15:30:45 -0700 (PDT)
+In-Reply-To: <838188530.13777348.1433876914558.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Jason Dillaman <dillaman@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA256
+On Tue, Jun 9, 2015 at 12:08 PM, Jason Dillaman <dillaman@redhat.com> wrote:
+>> I must not be being clear. Tell me if this scenario is possible:
+>>
+>> * Client A writes to file foo many times and it is journaled to object set 1.
+>> * Client B writes to file bar many times and it starts journaling to
+>> object set 1, but hits the end and moves on to object set 2.
+>> * Client A hits a synchronization point in its higher-level logic.
+>> * Client A fsyncs file foo to object set 1 and then
+>> * Client B hits the synchronization point, fsyncs file bar to object
+>> set 2, and sends data back to Client A.
+>> * Client A fsyncs the receipt of its data stream to object set 1, and
+>> only then gets sent on to object set 2.
+>> * The journal copier runs and migrates object set 1 to a remote data
+>> center, then the data center explodes.
+>> * In the remote data center they fail over and client A thinks it has
+>> reached a synchronization point and gotten an acknowledgement that
+>> client B has never heard of.
+>>
+>> Does that being a problem make sense? I don't think handling it is
+>> overly complicated and it's kind of important.
+>> -Greg
+>
+> Seems this case is solved if you delay the completion of client B's flush (fsync) until the "active set updated" notification is successfully delivered.  In that case, client A would know that it needs to re-read the active set collection and thus needs to now write to object set 2.  Thoughts?
 
-OK, easy question...
-
-Building Debian packages from git is wonderfully easy, RPMs seem ....
-not so easy.
-
-I got it to kind of work, but I feel like I'm doing it the "Hard Way" (tm).
-
-mkdir -p ~/ceph && pushd ~/ceph
-git clone https://github.com/ceph/ceph.git
-./autogen.sh
-./configure
-echo "--- /root/ceph/ceph/ceph.spec   2015-06-09 13:03:08.240099443 -0600
-+++ /root/rpmbuild/SPECS/ceph.spec      2015-06-09 13:12:54.145061355 -0600
-@@ -464,12 +464,14 @@
- # common
- #################################################################################
- %prep
-- -%setup -q
-+#%setup -q
-+cd %{buildroot}
- %if 0%{?fedora} || 0%{?rhel}
- %patch0 -p1 -b .init
- %endif
-
- %build
-+cd %{buildroot}
- # Find jni.h
- for i in /usr/{lib64,lib}/jvm/java/include{,/linux}; do
-     [ -d $i ] && java_inc="$java_inc -I$i"" | patch
-rpmbuild -ba ceph.spec --define 'buildroot `pwd/ceph`'
-
-It coughs at the install/RPM package part.
-
-Any help with preventing the whole tar/untar process which I can't
-seem to get exactly right either would be very helpful.
-
-Thanks,
-
-- ----------------
-Robert LeBlanc
-GPG Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
------BEGIN PGP SIGNATURE-----
-Version: Mailvelope v0.13.1
-Comment: https://www.mailvelope.com
-
-wsFcBAEBCAAQBQJVd1diCRDmVDuy+mK58QAAlMQP/AlbiMj72J/r4rgvPCSv
-6EVzFLCZOVewtmeV+/pnltzQgbj42/MRNC5wfJjPasAEn7Ctj0PgnzNA9LYy
-m4vkrS2Lc4BiRc5dkI31my6T51LxMswZjKecy9yiCDUoUW7cD15PMvyoq27G
-+JpeNbrrCvl6Sxfx7S4IjvgnP1Xko2qSi17GoYxJzxwAZJ0LwNUSzvhlQnab
-fEswyO1af3uWUmTGWUKML8jGYSyLnjNa43t2DmEKG5o4yWaXFx0UcUiUdk4v
-gLxHZvUxuNVIb862aoP4gXUC4V508Vu8nnfXx7BuAYXSN0w+Yh2XYU/2T4gL
-Ikqo2ASi3kZoMRoxjX0S/kSn0OdrJkJCkI0fJmYxoBrULqDPu/EslKSX8IGZ
-MN9jGPNrr6G7US25aPPWM1MH4Ikmb0M8/wsmiU60yfQz7bFqxzmIUgoetwHS
-gKSJnu7DyovrGkPTD4nc8yCuFohcIqtD47hh1NLgpQbikGhEIpa//W5A9ikL
-ZO/ke3EMVT+2wWRikQv9QLBx8hkXazEq3ko5KNXK+m+CtJr0Ae56xKPZUu+R
-4gFZyqO+P5bHk51j2V63n+M0bAxQpjTB7j3YV7oToezbJwhELVXATNfVwB8g
-PixgthHIkFhbPM606qBW48XVVJ+QxV61prUgEp0Sni7oy22yMtaoso5sdGjn
-cCtC
-=QqbH
------END PGP SIGNATURE-----
+Honestly at this point my head's a little wrapped around itself and
+I'm not sure. :) I think that however it's set up we want to switch
+from one object set to the next coherently (ie, no writing to object
+set 2 for write N and object set 1 for write N+1) and that we force
+each client to switch at the same point. I guess in general the
+penalty for having to re-send ops when we find out late that the
+object set is full probably wouldn't be a big deal? But I'm not sure
+if if sending notifies on the objects is the best option or if
+something else is.
+-Greg
