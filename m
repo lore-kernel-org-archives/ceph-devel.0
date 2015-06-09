@@ -1,98 +1,102 @@
-From: "Handzik, Joe" <joseph.t.handzik@hp.com>
-Subject: RE: Thoughts about metadata exposure in Calamari
-Date: Mon, 8 Jun 2015 20:10:25 +0000
-Message-ID: <2C438B34CAC8264398F5C7AF7411910A634A8A8B@G9W0731.americas.hpqcorp.net>
-References: <2C438B34CAC8264398F5C7AF7411910A6349D1E2@G4W3206.americas.hpqcorp.net>,<alpine.DEB.2.00.1506051221440.1217@cobra.newdream.net>
- <73364EFF-DAC3-41F1-816A-DCE5426D4F2B@hp.com> <5572410E.9060806@redhat.com>
- <2C438B34CAC8264398F5C7AF7411910A634A8A0E@G9W0731.americas.hpqcorp.net>
- <5575F2DE.7010306@redhat.com>
- <2C438B34CAC8264398F5C7AF7411910A634A8A5F@G9W0731.americas.hpqcorp.net>
- <5575F601.70101@redhat.com>
+From: "Robin H. Johnson" <robbat2@gentoo.org>
+Subject: rgw static-website hosting design WIP: how S3-like should we be with
+ endpoint types?
+Date: Tue, 9 Jun 2015 03:52:21 +0000
+Message-ID: <20150609035221.GA2868@orbis-terrarum.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="sHrvAb52M6C8blB9"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from g9t5009.houston.hp.com ([15.240.92.67]:39146 "EHLO
-	g9t5009.houston.hp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752706AbbFHUL0 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Jun 2015 16:11:26 -0400
-In-Reply-To: <5575F601.70101@redhat.com>
-Content-Language: en-US
+Received: from smtp.gentoo.org ([140.211.166.183]:42938 "EHLO smtp.gentoo.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932706AbbFIDwX (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 8 Jun 2015 23:52:23 -0400
+Received: from grubbs.orbis-terrarum.net (localhost [127.0.0.1])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by smtp.gentoo.org (Postfix) with ESMTPS id 079CB3409D0
+	for <ceph-devel@vger.kernel.org>; Tue,  9 Jun 2015 03:52:22 +0000 (UTC)
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan Mick <dmick@redhat.com>, John Spray <john.spray@redhat.com>, Sage Weil <sweil@redhat.com>
-Cc: "gmeno@redhat.com" <gmeno@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
+Cc: jonathan.lacour@dreamhost.com
 
-Ok, fair enough on all fronts. Thanks for the quick feedback!
 
-Joe
+--sHrvAb52M6C8blB9
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
------Original Message-----
-From: Dan Mick [mailto:dmick@redhat.com] 
-Sent: Monday, June 08, 2015 3:07 PM
-To: Handzik, Joe; John Spray; Sage Weil
-Cc: gmeno@redhat.com; ceph-devel@vger.kernel.org
-Subject: Re: Thoughts about metadata exposure in Calamari
+Hi,
 
-On 06/08/2015 01:02 PM, Handzik, Joe wrote:
-> Ok. The code/comment I'm referring to is here: https://github.com/joehandzik/calamari/blob/master/salt/srv/salt/_modules/ceph.py#L393
-> 
-> I guess your point is that this is all grafted to the OSDMap data anyway, so the osdmap version is the relevant version anyway, yes? If so, is that comment just a slightly paranoid observation?
+I'm working on implementing S3 Static Website hosting on top of RGW,
+based on the initial work that Yehuda did (wip-static-website branch).
 
-I just meant "in terms of not having to poll it until the epoch/version
-changes, for efficiency".  It would be good also to add an epoch arg to
-crush dump to address the fixme.
+I have a scratchpad here:
+https://github.com/robbat2/temp-ceph-rgw-static-website-wiki/wiki
+WIP Codebase here:
+https://github.com/robbat2/ceph/tree/wip-static-website-robbat2-master
 
-> Just to make sure I'm understanding everyone correctly, are we saying that I shouldn't bother with the 'osd metadata' call until I have a solid solution to an epoch implementation for osd metadata, or just that I should target a fix for that eventually?
+As part of writing up a full design for it, I'm wondering if we should
+try to be "as close to S3 as possible", or try to improve the experience
+for the administrator rather.
 
-I think the fixes can be independent, but I agree with John that it
-would be nice to add an epoch/version to metadata as well (that would
-probably be independent of the other versions, unless I'm missing some
-coordination).  It ends up being an optimization, but probably a very
-useful one.
+In S3, they explicitly add some DNS endpoints that are used for
+accessing the bucket in website mode. Via those special endpoints, there
+are MANY constraints applied [1], and you pretty much can't use them for
+anything else.
 
-> Joe
-> 
-> -----Original Message-----
-> From: Dan Mick [mailto:dmick@redhat.com] 
-> Sent: Monday, June 08, 2015 2:54 PM
-> To: Handzik, Joe; John Spray; Sage Weil
-> Cc: gmeno@redhat.com; ceph-devel@vger.kernel.org
-> Subject: Re: Thoughts about metadata exposure in Calamari
-> 
-> The crush map changing causes a change in the osdmap version, I'm pretty
-> sure.
-> 
-> On 06/08/2015 12:50 PM, Handzik, Joe wrote:
->> From what I see in the source file, we'd want to fix 'osd crush dump' somehow too, right? I can take a look while I'm working in this area to see what I can accomplish. 
->>
->> Joe
->>
->> -----Original Message-----
->> From: John Spray [mailto:john.spray@redhat.com] 
->> Sent: Friday, June 05, 2015 7:39 PM
->> To: Handzik, Joe; Sage Weil
->> Cc: gmeno@redhat.com; ceph-devel@vger.kernel.org; Dan Mick (dmick@redhat.com)
->> Subject: Re: Thoughts about metadata exposure in Calamari
->>
->>
->>
->> On 05/06/2015 20:33, Handzik, Joe wrote:
->>> I err in the direction of calling 'osd metadata' too, but it does mean that Calamari will need to add that call in (I'll leave it to Gregory to say if that is particularly undesirable). Do you think it would be worthwhile to better define the metadata bundle into a structure, or is it ok to leave it as a set of string pairs?
->>
->> Versioning of the metadata is something to consider. The "osd metadata" 
->> stuff is outside the osdmap epochs, so anything that is consuming 
->> updates to it is stuck with doing some kind of full polling as it 
->> stands.  It might be that some better interface with versions+deltas is 
->> needed for a management layer to efficiently consume it.
->>
->> A version concept where the version is incremented when an OSD starts or 
->> updates its metadata could make synchronization with a management layer 
->> much more efficient.  Efficiency matters here when we're calling on the 
->> mons to serialize data for potentially 10000s of OSDs into JSON whenever 
->> the management layer wants an update.
->>
->> John
->>
-> 
+At this point in early implementation, it seems possible that rather
+than requiring organizations to have a separate DNS subdomain/wildcard
+scope for websites, that we can make the decision based on headers:
+If(bucket has website metadata set) {
+  if(request has auth headers) {
+    use normal REST mode
+  } else {
+    use website mode
+  }=20
+}
 
+I've got it mostly working to make this behavior, but I'm wondering
+about fallout/breakage, and unintended consequences. The codebase is
+pretty ready for plugging the alternative logic with hostnames in as
+well.
+
+The most notable one so far, is that under Amazon's S3, the website
+endpoint will server up only fixed pages for directories (no listing);
+and the regular REST endpoint will serve listings if the
+bucket/directory has a public ACL.
+
+Another side-effect, and I think that's an improvement, is that if you
+use a browser to just access a bucket this way, you'll automatically get
+HTML error pages, instead of the XML blobs (as an admin of a RGW install
+previously, the non-technical users telling me the rendered HTML from
+their errors would have been a huge help instead of them being scared of
+the XML).
+
+[1] The list of S3 website endpoint constraints is here:
+http://docs.aws.amazon.com/AmazonS3/latest/dev/WebsiteEndpoints.html
+
+--=20
+Robin Hugh Johnson
+Gentoo Linux: Developer, Infrastructure Lead
+E-Mail     : robbat2@gentoo.org
+GnuPG FP   : 11ACBA4F 4778E3F6 E4EDF38E B27B944E 34884E85
+
+--sHrvAb52M6C8blB9
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.1
+Comment: Robbat2 @ Orbis-Terrarum Networks - The text below is a digital signature. If it doesn't make any sense to you, ignore it.
+
+iKYEARECAGYFAlV2YvRfFIAAAAAALgAoaXNzdWVyLWZwckBub3RhdGlvbnMub3Bl
+bnBncC5maWZ0aGhvcnNlbWFuLm5ldDc1OTQwNEJFQkQ0MUY3MTIzODIzODZFRjNF
+OTIyQzIyMzIzM0MyMkMACgkQPpIsIjIzwizWiwCfc/5r500e6eNgxw+bAdOa2aLK
+6wwAoOQDuBsowty0f8VxY3MFmbmCAxJF
+=JCOr
+-----END PGP SIGNATURE-----
+
+--sHrvAb52M6C8blB9--
