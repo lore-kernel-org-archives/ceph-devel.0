@@ -1,56 +1,157 @@
-From: Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
-Subject: Re: rbd_cache, limiting read on high iops around 40k
-Date: Tue, 9 Jun 2015 18:52:22 +0200 (CEST)
-Message-ID: <1469171236.2037081.1433868742164.JavaMail.zimbra@oxygem.tv>
-References: <1684793881.1564583.1433829106394.JavaMail.zimbra@oxygem.tv>
-	<CAMc8nAWo-jnAHS5cLw5gDt57T3vZpiN79vFXc=pz=+Cjm6Ra6A@mail.gmail.com>
-	<959572886.1627596.1433834901443.JavaMail.zimbra@oxygem.tv>
-	<1897614581.1694878.1433838989184.JavaMail.zimbra@oxygem.tv>
-	<5576CFBF.1070405@redhat.com>
-	<1569135212.13362835.1433857190455.JavaMail.zimbra@redhat.com>
+From: Owen Synge <osynge@suse.com>
+Subject: Re: Configure dependencies can be the same as make dependencies
+Date: Tue, 09 Jun 2015 19:11:12 +0200
+Message-ID: <55771E30.8070308@suse.com>
+References: <5548807A.6060103@dachary.org> <CAC6JEv_s1i9vw8zt16iW1WBe9JRfpG_cg2npnvuvmzpoUYxuYg@mail.gmail.com> <5548D57E.3050406@dachary.org> <55491307.8010203@redhat.com> <554914EC.6000102@dachary.org> <alpine.DEB.2.00.1505051231040.13336@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <1569135212.13362835.1433857190455.JavaMail.zimbra-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Jason Dillaman <dillaman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, pushpesh sharma <pushpesh.eck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail.emea.novell.com ([130.57.118.101]:47938 "EHLO
+	mail.emea.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752335AbbFIRMj (ORCPT
+	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+	Tue, 9 Jun 2015 13:12:39 -0400
+In-Reply-To: <alpine.DEB.2.00.1505051231040.13336@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, Loic Dachary <loic@dachary.org>
+Cc: Ken Dreyer <kdreyer@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Pj5BdCBoaWdoIHF1ZXVlLWRlcHRocyBhbmQgaGlnaCBJT1BTLCBJIHdvdWxkIHN1c3BlY3QgdGhh
-dCB0aGUgYm90dGxlbmVjayBpcyB0aGUgc2luZ2xlLCBjb2Fyc2UtZ3JhaW5lZCBtdXRleCBwcm90
-ZWN0aW5nIHRoZSBjYWNoZSBkYXRhIHN0cnVjdHVyZXMuIEl0J3MgYmVlbiBhIGJhY2sgYnVybmVy
-IGl0ZW0gdG8gcmVmYWN0b3IgdGhlIGN1cnJlbnQgY2FjaGUgbXV0ZXggaW50byBmaW5lci0+Pmdy
-YWluZWQgbG9ja3MuIAo+Pgo+Pkphc29uIAoKVGhhbmtzIGZvciB0aGUgZXhwbGFpbiBKYXNvbi4K
-CkFueXdheSwgaW5zaWRlIHFlbXUsIEknbSBhcm91bmQgMzUtNDBrIHdpdGggb3Igd2l0aG91dCBy
-YmRfY2FjaGUsIHNvIGl0J3MgbWFrZSBub3QgdG9vIG11Y2ggZGlmZmVyZW5jZSBjdXJyZW50bHku
-CihtYXliZSBzb21lIG90aGVyIHFlbXUgYm90dGxlbmVjaykuCiAKCi0tLS0tIE1haWwgb3JpZ2lu
-YWwgLS0tLS0KRGU6ICJKYXNvbiBEaWxsYW1hbiIgPGRpbGxhbWFuQHJlZGhhdC5jb20+CsOAOiAi
-TWFyayBOZWxzb24iIDxtbmVsc29uQHJlZGhhdC5jb20+CkNjOiAiYWRlcnVtaWVyIiA8YWRlcnVt
-aWVyQG9kaXNvLmNvbT4sICJwdXNocGVzaCBzaGFybWEiIDxwdXNocGVzaC5lY2tAZ21haWwuY29t
-PiwgImNlcGgtZGV2ZWwiIDxjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZz4sICJjZXBoLXVzZXJz
-IiA8Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbT4KRW52b3nDqTogTWFyZGkgOSBKdWluIDIwMTUg
-MTU6Mzk6NTAKT2JqZXQ6IFJlOiBbY2VwaC11c2Vyc10gcmJkX2NhY2hlLCBsaW1pdGluZyByZWFk
-IG9uIGhpZ2ggaW9wcyBhcm91bmQgNDBrCgo+IEluIHRoZSBwYXN0IHdlJ3ZlIGhpdCBzb21lIHBl
-cmZvcm1hbmNlIGlzc3VlcyB3aXRoIFJCRCBjYWNoZSB0aGF0IHdlJ3ZlIAo+IGZpeGVkLCBidXQg
-d2UndmUgbmV2ZXIgcmVhbGx5IHRyaWVkIHB1c2hpbmcgYSBzaW5nbGUgVk0gYmV5b25kIDQwK0sg
-cmVhZCAKPiBJT1BTIGluIHRlc3RpbmcgKG9yIGF0IGxlYXN0IEkgbmV2ZXIgaGF2ZSkuIEkgc3Vz
-cGVjdCB0aGVyZSdzIGEgY291cGxlIAo+IG9mIHBvc3NpYmlsaXRpZXMgYXMgdG8gd2h5IGl0IG1p
-Z2h0IGJlIHNsb3dlciwgYnV0IHBlcmhhcHMgam9zaGQgY2FuIAo+IGNoaW1lIGluIGFzIGhlJ3Mg
-bW9yZSBmYW1pbGlhciB3aXRoIHdoYXQgdGhhdCBjb2RlIGxvb2tzIGxpa2UuIAo+IAoKQXQgaGln
-aCBxdWV1ZS1kZXB0aHMgYW5kIGhpZ2ggSU9QUywgSSB3b3VsZCBzdXNwZWN0IHRoYXQgdGhlIGJv
-dHRsZW5lY2sgaXMgdGhlIHNpbmdsZSwgY29hcnNlLWdyYWluZWQgbXV0ZXggcHJvdGVjdGluZyB0
-aGUgY2FjaGUgZGF0YSBzdHJ1Y3R1cmVzLiBJdCdzIGJlZW4gYSBiYWNrIGJ1cm5lciBpdGVtIHRv
-IHJlZmFjdG9yIHRoZSBjdXJyZW50IGNhY2hlIG11dGV4IGludG8gZmluZXItZ3JhaW5lZCBsb2Nr
-cy4gCgpKYXNvbiAKCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0
-cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
+Sorry to catch this thread late.
+
+I come here via patch
+
+https://github.com/ceph/ceph/pull/4911#issuecomment-110422312
+
+I think you guys are missing that configure is doing some thing here.
+
+(1) Configure is generating the spec file.
+(2) It could also generate the deb files.
+
+What no one has done is to:
+
+(A) Use configure to eliminate the differences between OS's.
+
+If any one had done (A) you would not be considering this I hope.
+
+This impact is particularly felt in the ceph.spec.in file where because
+of the lack of (A) in the process we are plagued with OS specific
+conditionals.
+
+If the path of say:
+
+	src/ceph-osd-prestart.sh
+
+is ether:
+
+	/usr/libexec/ceph
+
+or:
+
+	/usr/lib/ceph
+
+
+Is purely distribution specific.
+
+Having conditionals in
+
+	ceph.sepc.in
+
+defeats the point of generating it via autotools.
+
+we can be remove many hard coded values replaced with variable and that
+probably will only grow in number for example
+
+	%if 0%{?rhel} || 0%{?fedora}
+		--with-systemd-libexec-dir=3D/usr/libexec/ceph \
+	%endif
+	%if 0%{?opensuse} || 0%{?suse_version}
+		--with-systemd-libexec-dir=3D/usr/lib/ceph/ \
+	%endif
+
+some wont need distribution specific locations like:
+
+	--with-systemd-unit-dir=3D%_unitdir
+
+In the long term replaced all these path variables could be replaced by
+single parameter.
+
+	./configure --with-distro-defaults=3Dredhat
+	make rpm
+	./configure --with-distro-defaults=3Dsuse
+	make rpm
+	./configure --with-distro-defaults=3Ddebian
+	make deb
+	./configure --with-distro-defaults=3Dubuntu
+	make deb
+
+Very easily.
+
+In summary, please reconsider this decision as if you follow this polic=
+y
+we are left with conditionals all over the ceph.spec.in file.
+
+
+Best regards
+
+Owen
+
+
+
+
+
+
+On 05/05/2015 09:31 PM, Sage Weil wrote:
+> On Tue, 5 May 2015, Loic Dachary wrote:
+>>> I think the long-term solution to Kefu's issue is that we need to
+>>> remove the requirement to run through a full "./configure" invocati=
+on
+>>> just to get a tarball. All the RPM and Debian packages internally r=
+un
+>>> ./configure, so running it a second time slows things down. I think=
+ it
+>>> makes sense to implement the tarball-generation functionality using=
+ a
+>>> simpler script at the root of the ceph.git tree. The operation shou=
+ld
+>>> be about as fast as "git archive".
+>>
+>> I agree. It's going to be significant work but it's worth it.
+>=20
+> Yep!
+>=20
+>>> The "ceph.spec.in" -> "ceph.spec" suffers from a similar issue. It
+>>> takes a full "./configure" run to get to a point where Make can wri=
+te
+>>> the proper version numbers into that file. Ideally we could skip al=
+l
+>>> of that and simply do the variable interpolation with sed or someth=
+ing.
+>=20
+> Yep!
+>=20
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+
+--=20
+SUSE LINUX GmbH, GF: Jeff Hawn, Jennifer Guild, Felix Imend=F6rffer, HR=
+B
+21284 (AG
+N=FCrnberg)
+
+Maxfeldstra=DFe 5
+
+90409 N=FCrnberg
+
+Germany
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
