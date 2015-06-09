@@ -1,48 +1,86 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH] crush:Make the function crush_ln static
-Date: Tue, 9 Jun 2015 11:00:10 +0300
-Message-ID: <CAOi1vP_G6eVwRW4coey4-gUEx3Y2k-pnDfJxMk6Va+C0aTLG-w@mail.gmail.com>
-References: <1433803863-9241-1-git-send-email-xerofoify@gmail.com>
+From: Chaitanya Huilgol <Chaitanya.Huilgol@sandisk.com>
+Subject: RE: [ceph-users] Blueprint Submission Open for CDS Jewel
+Date: Tue, 9 Jun 2015 06:42:51 +0000
+Message-ID: <9E914F5BD7F48A4782456CEB550A422824E86D96@SACMBXIP02.sdcorp.global.sandisk.com>
+References: <CAAZbbf3b1gAF4WrObJ1BuKqW-5_yMMs5J8UXoJA2gnJY0SgfGg@mail.gmail.com>
+ <CACJqLyabmPWnCgED0P2xDNFng2zEwfXLeFz=UFDhr=tzWLtSNg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f177.google.com ([209.85.212.177]:33290 "EHLO
-	mail-wi0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752240AbbFIIAM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Jun 2015 04:00:12 -0400
-In-Reply-To: <1433803863-9241-1-git-send-email-xerofoify@gmail.com>
+Received: from mail-bn1bon0077.outbound.protection.outlook.com ([157.56.111.77]:49110
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S932154AbbFIIPj convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Jun 2015 04:15:39 -0400
+In-Reply-To: <CACJqLyabmPWnCgED0P2xDNFng2zEwfXLeFz=UFDhr=tzWLtSNg@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nicholas Krause <xerofoify@gmail.com>
-Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, "David S. Miller" <davem@davemloft.net>, Ceph Development <ceph-devel@vger.kernel.org>, netdev <netdev@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Patrick McGarry <pmcgarry@redhat.com>, Ceph Devel <ceph-devel@vger.kernel.org>
 
-On Tue, Jun 9, 2015 at 1:51 AM, Nicholas Krause <xerofoify@gmail.com> wrote:
-> This makes the function, crush_ln static now due to having
-> only one caller in its own definition and declaration file
-> of mapper.c
+Hi Patrick,
+
+Unable to add new blueprint for jewel via
+
+http://tracker.ceph.com/projects/ceph/wiki/Jewel/edit
+
+Getting  '403 - You are not authorized to access this page.' , Do we need to do anything more than logging into to the ceph traker?
+
+
+Regards,
+Chaitanya
+
+
+
+-----Original Message-----
+From: ceph-users [mailto:ceph-users-bounces@lists.ceph.com] On Behalf Of Haomai Wang
+Sent: Monday, June 08, 2015 10:16 PM
+To: Patrick McGarry
+Cc: Ceph Devel; Ceph-User; ceph-announce@ceph.com
+Subject: Re: [ceph-users] Blueprint Submission Open for CDS Jewel
+
+Hi Partick,
+
+It looks confusing to use this. Is it need that we upload a txt file to describe blueprint instead of editing directly online?
+
+On Wed, May 27, 2015 at 5:05 AM, Patrick McGarry <pmcgarry@redhat.com> wrote:
+> It's that time again, time to gird up our loins and submit blueprints
+> for all work slated for the Jewel release of Ceph.
 >
-> Signed-off-by: Nicholas Krause <xerofoify@gmail.com>
-> ---
->  net/ceph/crush/mapper.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+> http://ceph.com/uncategorized/ceph-developer-summit-jewel/
 >
-> diff --git a/net/ceph/crush/mapper.c b/net/ceph/crush/mapper.c
-> index 5b47736..86778d4 100644
-> --- a/net/ceph/crush/mapper.c
-> +++ b/net/ceph/crush/mapper.c
-> @@ -239,7 +239,7 @@ static int bucket_straw_choose(struct crush_bucket_straw *bucket,
->  }
+> The one notable change for this CDS is that we'll be using the new
+> wiki (on tracker.ceph.com) that is still undergoing migration from the
+> old wiki. I have outlined the procedure in the announcement above, but
+> please feel free to hit me with any questions or issues you may have.
+> Thanks.
 >
->  // compute 2^44*log2(input+1)
-> -uint64_t crush_ln(unsigned xin)
-> +static uint64_t crush_ln(unsigned xin)
->  {
->      unsigned x=xin, x1;
->      int iexpon, index1, index2;
+>
+> --
+>
+> Best Regards,
+>
+> Patrick McGarry
+> Director Ceph Community || Red Hat
+> http://ceph.com  ||  http://community.redhat.com @scuttlemonkey ||
+> @ceph _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
-This is tied up with a bunch of style cleanups, I'll apply it after
-they are sorted out.
 
-Thanks,
 
-                Ilya
+--
+Best Regards,
+
+Wheat
+_______________________________________________
+ceph-users mailing list
+ceph-users@lists.ceph.com
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+________________________________
+
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+
