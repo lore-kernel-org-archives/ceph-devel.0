@@ -1,42 +1,99 @@
-From: Ken Dreyer <kdreyer@redhat.com>
-Subject: Re: what this would look like if the system is with templates.
-Date: Tue, 09 Jun 2015 17:06:12 -0600
-Message-ID: <55777164.6090201@redhat.com>
-References: <5548807A.6060103@dachary.org> <CAC6JEv_s1i9vw8zt16iW1WBe9JRfpG_cg2npnvuvmzpoUYxuYg@mail.gmail.com> <5548D57E.3050406@dachary.org> <55491307.8010203@redhat.com> <554914EC.6000102@dachary.org> <alpine.DEB.2.00.1505051231040.13336@cobra.newdream.net> <55771E30.8070308@suse.com> <5577202D.2040007@suse.com>
+From: Gregory Farnum <greg@gregs42.com>
+Subject: Re: OSD-Based Object Stubs
+Date: Tue, 9 Jun 2015 16:58:46 -0700
+Message-ID: <CAC6JEv_oZ2x6AbQSJzJ5==R+8KSZMbpfqk=WZnd-HGcMRYzSoA@mail.gmail.com>
+References: <87a8wqct38.fsf@irq0.org>
+	<CAC6JEv8KPsi1w37-XvNg00s4gC6hv=N5p5NWty56dFv3=e3eQA@mail.gmail.com>
+	<87617dc965.fsf@irq0.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:37134 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752009AbbFIXGO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 9 Jun 2015 19:06:14 -0400
-In-Reply-To: <5577202D.2040007@suse.com>
+Received: from mail-ie0-f178.google.com ([209.85.223.178]:36249 "EHLO
+	mail-ie0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751380AbbFIX6s (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Jun 2015 19:58:48 -0400
+Received: by ieclw1 with SMTP id lw1so23940446iec.3
+        for <ceph-devel@vger.kernel.org>; Tue, 09 Jun 2015 16:58:47 -0700 (PDT)
+Received: from mail-ig0-f175.google.com (mail-ig0-f175.google.com. [209.85.213.175])
+        by mx.google.com with ESMTPSA id lq3sm2241482igb.3.2015.06.09.16.58.46
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 09 Jun 2015 16:58:46 -0700 (PDT)
+Received: by igbsb11 with SMTP id sb11so22228165igb.0
+        for <ceph-devel@vger.kernel.org>; Tue, 09 Jun 2015 16:58:46 -0700 (PDT)
+In-Reply-To: <87617dc965.fsf@irq0.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Owen Synge <osynge@suse.com>, Sage Weil <sweil@redhat.com>, Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Marcel Lauhoff <ml@irq0.org>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 06/09/2015 11:19 AM, Owen Synge wrote:
-> 
->> we can be remove many hard coded values replaced with variable and that
->> probably will only grow in number for example
+On Thu, May 28, 2015 at 3:01 AM, Marcel Lauhoff <ml@irq0.org> wrote:
+>
+> Gregory Farnum <greg@gregs42.com> writes:
+>
+>> On Wed, May 27, 2015 at 1:39 AM, Marcel Lauhoff <ml@irq0.org> wrote:
+>>> Hi,
+>>>
+>>> I wrote a prototype for an OSD-based object stub feature. An object stub
+>>> being an object with it's data moved /elsewhere/. I hope to get some
+>>> feedback, especially whether I'm on the right path here and if it
+>>> is a feature you are interested in.
+>>>
+>>>
+>>>
+>>> Code is in my "osd-stubs" branch:
+>>>  https://github.com/ceph/ceph/compare/master...irq0:osd-stubs
+>>>  https://github.com/irq0/ceph/tree/osd-stubs
+>>>
+>>>  Tools to toy around with osd-stubs + web server to send stubs to:
+>>>  https://github.com/irq0/ceph_osd-stub_tools
+>>>
+>>>
+>>>
+>>> Related:
+>>> - https://wiki.ceph.com/Planning/Blueprints/%3CSIDEBOARD%3E/osd:_tiering:_object_redirects
 >>
->> 	%if 0%{?rhel} || 0%{?fedora}
->> 		--with-systemd-libexec-dir=/usr/libexec/ceph \
->> 	%endif
->> 	%if 0%{?opensuse} || 0%{?suse_version}
->> 		--with-systemd-libexec-dir=/usr/lib/ceph/ \
->> 	%endif
-> 
-> 	--with-systemd-libexec-dir=@systemd_libexec_dir@ \
-> 
-> No OS distribution specific rubbish needed :)
+>> Do you have a shorter summary than the code of how these stub and
+>> unstub operations relate to the object redirects? We didn't make a
+>> great deal of use of them but the basic data structures are mostly
+>> present in the codebase, are interpreted in at least some of the right
+>> places, and were definitely intended to cover this kind of use case.
+>> :)
+>> -Greg
+>
+>
+> As far as I understood the redirect feature it is about pointing to
+> other objects inside the Ceph cluster. The stubs feature allows
+> pointing to anything. An HTTP server in concept code.
+>
+> Then stubs use an IMHO simpler approach to getting objects back: It's
+> the task of the OSD. Stubbed objects just take longer to access, due to
+> unstubbing it first.
+> Redirects on the other hand leave this to the client: Object redirected
+> -> Tell client to retrieve it elsewhere.
 
-Passing an autoconf variable (@systemd_libexec_dir@) to an autoconf
-argument (--with-systemd-libexec-dir) seems really over-complicated to me.
+Ah, of course.
 
-I don't see the issues with putting os-specific things in the .spec
-file; that's how many other (non-Ceph) projects do it.
+I got a chance to look at this briefly today. Some notes:
 
-- Ken
+* You're using synchronous reads. That will prevent use of stubbing on
+EC pools (which only do async reads, as they might need to hit another
+OSD for the data), which seems sad.
+* There seems to be a race if you need to unstub an op for two
+separate requests that come in simultaneously, with nothing preventing
+both of them from initiating the unstub.
+* You can inject an unstub for read ops, but that turns them into a
+write. That will cause problems in various cases where the object
+isn't writeable yet.
+* Why does a delete need the object data?
+* You definitely wouldn't want to unstub data for scrubbing.
+* There's a CEPH_OSD_OP_STAT which looks at what's in the object info;
+that is broken here because you're using the normal truncation path.
+There probably needs to be more cleverness or machinery distinguishing
+between the "local" size used and the size of the object represented.
+* I am concerned about recovery, but I think as long as the stub is
+just a normal zero-sized object with an extra flag in the object info
+that shouldn't be a big deal.
+* I think snapshots are probably busted with this; did you check how
+they interact?
+-Greg
