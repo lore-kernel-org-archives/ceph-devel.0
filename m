@@ -1,208 +1,168 @@
-From: Hong Zhiguo <honkiko@gmail.com>
-Subject: [PATCH] libceph: allow custom network namespaces
-Date: Wed, 10 Jun 2015 22:34:16 +0800
-Message-ID: <1433946856-26824-1-git-send-email-zhiguohong@tencent.com>
-References: <1433941284-12984-1-git-send-email-zhiguohong@tencent.com>
+From: Robert LeBlanc <robert@leblancnet.us>
+Subject: Fwd: Build RPMs from git
+Date: Wed, 10 Jun 2015 09:37:25 -0600
+Message-ID: <CAANLjFpmJ0iCW4Qd3LejurwoWfRhEX65S8XUbH65dQ5kYcEFeg@mail.gmail.com>
+References: <CAANLjFqtNxo=CPwar3OYP9es-+5LgTbmiNgd_4RSCcndb_iCNA@mail.gmail.com>
+	<55780B84.1080306@redhat.com>
+	<CAANLjFrgBDiVsRRUEfE3yvzieR7+4a0EBxxG8s9+buXi0T6HZg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f173.google.com ([209.85.192.173]:36779 "EHLO
-	mail-pd0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965152AbbFJOeb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Jun 2015 10:34:31 -0400
-Received: by pdjm12 with SMTP id m12so39108383pdj.3
-        for <ceph-devel@vger.kernel.org>; Wed, 10 Jun 2015 07:34:31 -0700 (PDT)
-In-Reply-To: <1433941284-12984-1-git-send-email-zhiguohong@tencent.com>
+Received: from mail-wi0-f170.google.com ([209.85.212.170]:35555 "EHLO
+	mail-wi0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933557AbbFJPh1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Jun 2015 11:37:27 -0400
+Received: by wiga1 with SMTP id a1so52659643wig.0
+        for <ceph-devel@vger.kernel.org>; Wed, 10 Jun 2015 08:37:25 -0700 (PDT)
+In-Reply-To: <CAANLjFrgBDiVsRRUEfE3yvzieR7+4a0EBxxG8s9+buXi0T6HZg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: sage@redhat.com, idryomov@gmail.com, Hong Zhiguo <zhiguohong@tencent.com>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-in current implementaion init_net is always used.
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
 
-But in most cases, if a user does a rbd map or ceph mount in
-a container, it's expected to use the container network namespace.
+Brad,
 
-This patch saves the container's netns in ceph_options on a rbd map
-or ceph mount. And use the netns other than init_net when creating
-socket. Ref count of the netns is only taken by the ceph_options
-in ceph_client since lifetime of osds and mon is within that of
-ceph_client.
+I've been able to do this just fine. I'm looking for a way to build
+right out of a git branch where the tarball isn't on the downloads
+page.
 
-I've tested this patch in docker container with below operations:
-- rbd map
-- write/read on the rbd
-- rbd unmap
+- ----------------
+Robert LeBlanc
+GPG Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
 
-Signed-off-by: Hong Zhiguo <zhiguohong@tencent.com>
----
- fs/ceph/mds_client.c           |  3 ++-
- include/linux/ceph/libceph.h   |  3 +++
- include/linux/ceph/messenger.h |  4 +++-
- net/ceph/ceph_common.c         |  7 ++++---
- net/ceph/messenger.c           | 12 +++++++++---
- net/ceph/mon_client.c          |  2 +-
- net/ceph/osd_client.c          |  3 ++-
- 7 files changed, 24 insertions(+), 10 deletions(-)
+On Wed, Jun 10, 2015 at 4:03 AM, Brad Hubbard  wrote:
+On 06/10/2015 07:15 AM, Robert LeBlanc wrote:
+- -----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
 
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 8080d48..3fb0976 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -440,7 +440,8 @@ static struct ceph_mds_session *register_session(struct ceph_mds_client *mdsc,
- 	s->s_seq = 0;
- 	mutex_init(&s->s_mutex);
- 
--	ceph_con_init(&s->s_con, s, &mds_con_ops, &mdsc->fsc->client->msgr);
-+	ceph_con_init(&s->s_con, s, &mds_con_ops, &mdsc->fsc->client->msgr,
-+			mdsc->fsc->client->options->netns);
- 
- 	spin_lock_init(&s->s_gen_ttl_lock);
- 	s->s_cap_gen = 0;
-diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
-index d73a569..442d9f3 100644
---- a/include/linux/ceph/libceph.h
-+++ b/include/linux/ceph/libceph.h
-@@ -22,6 +22,8 @@
- #include <linux/ceph/osd_client.h>
- #include <linux/ceph/ceph_fs.h>
- 
-+struct net;
-+
- /*
-  * mount options
-  */
-@@ -46,6 +48,7 @@ struct ceph_options {
- 	unsigned long mount_timeout;		/* jiffies */
- 	unsigned long osd_idle_ttl;		/* jiffies */
- 	unsigned long osd_keepalive_timeout;	/* jiffies */
-+	struct net *netns;
- 
- 	/*
- 	 * any type that can't be simply compared or doesn't need need
-diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
-index e154994..3b0a314 100644
---- a/include/linux/ceph/messenger.h
-+++ b/include/linux/ceph/messenger.h
-@@ -14,6 +14,7 @@
- 
- struct ceph_msg;
- struct ceph_connection;
-+struct net;
- 
- /*
-  * Ceph defines these callbacks for handling connection events.
-@@ -189,6 +190,7 @@ struct ceph_connection {
- 	struct ceph_messenger *msgr;
- 
- 	atomic_t sock_state;
-+	struct net *netns;
- 	struct socket *sock;
- 	struct ceph_entity_addr peer_addr; /* peer address */
- 	struct ceph_entity_addr peer_addr_for_me;
-@@ -270,7 +272,7 @@ extern void ceph_messenger_init(struct ceph_messenger *msgr,
- 
- extern void ceph_con_init(struct ceph_connection *con, void *private,
- 			const struct ceph_connection_operations *ops,
--			struct ceph_messenger *msgr);
-+			struct ceph_messenger *msgr, struct net *netns);
- extern void ceph_con_open(struct ceph_connection *con,
- 			  __u8 entity_type, __u64 entity_num,
- 			  struct ceph_entity_addr *addr);
-diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
-index 925d0c8..1c42d96 100644
---- a/net/ceph/ceph_common.c
-+++ b/net/ceph/ceph_common.c
-@@ -269,6 +269,9 @@ static match_table_t opt_tokens = {
- void ceph_destroy_options(struct ceph_options *opt)
- {
- 	dout("destroy_options %p\n", opt);
-+	if (opt->netns) {
-+		put_net(opt->netns);
-+	}
- 	kfree(opt->name);
- 	if (opt->key) {
- 		ceph_crypto_key_destroy(opt->key);
-@@ -335,9 +338,6 @@ ceph_parse_options(char *options, const char *dev_name,
- 	int err = -ENOMEM;
- 	substring_t argstr[MAX_OPT_ARGS];
- 
--	if (current->nsproxy->net_ns != &init_net)
--		return ERR_PTR(-EINVAL);
--
- 	opt = kzalloc(sizeof(*opt), GFP_KERNEL);
- 	if (!opt)
- 		return ERR_PTR(-ENOMEM);
-@@ -501,6 +501,7 @@ ceph_parse_options(char *options, const char *dev_name,
- 	}
- 
- 	/* success */
-+	opt->netns = get_net(current->nsproxy->net_ns);
- 	return opt;
- 
- out:
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index 967080a..0a62905 100644
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -480,8 +480,8 @@ static int ceph_tcp_connect(struct ceph_connection *con)
- 	int ret;
- 
- 	BUG_ON(con->sock);
--	ret = sock_create_kern(con->peer_addr.in_addr.ss_family, SOCK_STREAM,
--			       IPPROTO_TCP, &sock);
-+	ret = __sock_create(con->netns, con->peer_addr.in_addr.ss_family, SOCK_STREAM,
-+			       IPPROTO_TCP, &sock, 0);
- 	if (ret)
- 		return ret;
- 	sock->sk->sk_allocation = GFP_NOFS;
-@@ -736,7 +736,7 @@ bool ceph_con_opened(struct ceph_connection *con)
-  */
- void ceph_con_init(struct ceph_connection *con, void *private,
- 	const struct ceph_connection_operations *ops,
--	struct ceph_messenger *msgr)
-+	struct ceph_messenger *msgr, struct net *netns)
- {
- 	dout("con_init %p\n", con);
- 	memset(con, 0, sizeof(*con));
-@@ -744,6 +744,12 @@ void ceph_con_init(struct ceph_connection *con, void *private,
- 	con->ops = ops;
- 	con->msgr = msgr;
- 
-+	/*
-+	 * don't take extra refcnt of netns here since both mon and osds
-+	 * have lifetime within that of ceph_client
-+	 */
-+	con->netns = netns;
-+
- 	con_sock_state_init(con);
- 
- 	mutex_init(&con->mutex);
-diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
-index 9d6ff12..04128af 100644
---- a/net/ceph/mon_client.c
-+++ b/net/ceph/mon_client.c
-@@ -832,7 +832,7 @@ int ceph_monc_init(struct ceph_mon_client *monc, struct ceph_client *cl)
- 		goto out_auth_reply;
- 
- 	ceph_con_init(&monc->con, monc, &mon_con_ops,
--		      &monc->client->msgr);
-+		      &monc->client->msgr, monc->client->options->netns);
- 
- 	monc->cur_mon = -1;
- 	monc->hunting = true;
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 5003367..32d9fa9 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -1022,7 +1022,8 @@ static struct ceph_osd *create_osd(struct ceph_osd_client *osdc, int onum)
- 	INIT_LIST_HEAD(&osd->o_osd_lru);
- 	osd->o_incarnation = 1;
- 
--	ceph_con_init(&osd->o_con, osd, &osd_con_ops, &osdc->client->msgr);
-+	ceph_con_init(&osd->o_con, osd, &osd_con_ops, &osdc->client->msgr,
-+			osdc->client->options->netns);
- 
- 	INIT_LIST_HEAD(&osd->o_keepalive_item);
- 	return osd;
--- 
-1.9.1
+OK, easy question...
 
+Building Debian packages from git is wonderfully easy, RPMs seem ....
+not so easy.
+
+I got it to kind of work, but I feel like I'm doing it the "Hard Way" (tm).
+
+mkdir -p ~/ceph && pushd ~/ceph
+git clone https://github.com/ceph/ceph.git
+./autogen.sh
+./configure
+echo "--- /root/ceph/ceph/ceph.spec   2015-06-09 13:03:08.240099443 -0600
++++ /root/rpmbuild/SPECS/ceph.spec      2015-06-09 13:12:54.145061355 -0600
+@@ -464,12 +464,14 @@
+  # common
+  #################################################################################
+  %prep
+- - -%setup -q
++#%setup -q
++cd %{buildroot}
+  %if 0%{?fedora} || 0%{?rhel}
+  %patch0 -p1 -b .init
+  %endif
+
+  %build
++cd %{buildroot}
+  # Find jni.h
+  for i in /usr/{lib64,lib}/jvm/java/include{,/linux}; do
+      [ -d $i ] && java_inc="$java_inc -I$i"" | patch
+rpmbuild -ba ceph.spec --define 'buildroot `pwd/ceph`'
+
+It coughs at the install/RPM package part.
+
+Any help with preventing the whole tar/untar process which I can't
+seem to get exactly right either would be very helpful.
+
+On F20 the instructions in doc/install/build-ceph.rst worked fine for
+me with one extra step.
+
+$ wget -P ~/rpmbuild/SOURCES/ http://ceph.com/download/ceph-9.0.0.tar.bz2
+$ tar --strip-components=1 -C ~/rpmbuild/SPECS/ --no-anchored -xvjf
+~/rpmbuild/SOURCES/ceph-9.0.0.tar.bz2 "ceph.spec"
+
+$ cp rpm/init-ceph.in-fedora.patch ~/rpmbuild/SOURCES/
+
+$ rpmbuild -ba ~/rpmbuild/SPECS/ceph.spec
+
+$ ls ~/rpmbuild/RPMS/x86_64/
+ceph-9.0.0-0.fc20.x86_64.rpm
+ceph-fuse-9.0.0-0.fc20.x86_64.rpm
+libcephfs1-devel-9.0.0-0.fc20.x86_64.rpm
+libradosstriper1-9.0.0-0.fc20.x86_64.rpm
+python-cephfs-9.0.0-0.fc20.x86_64.rpm
+ceph-common-9.0.0-0.fc20.x86_64.rpm
+ceph-libs-compat-9.0.0-0.fc20.x86_64.rpm
+libcephfs_jni1-9.0.0-0.fc20.x86_64.rpm
+libradosstriper1-devel-9.0.0-0.fc20.x86_64.rpm
+python-rados-9.0.0-0.fc20.x86_64.rpm
+ceph-debuginfo-9.0.0-0.fc20.x86_64.rpm
+ceph-radosgw-9.0.0-0.fc20.x86_64.rpm
+libcephfs_jni1-devel-9.0.0-0.fc20.x86_64.rpm
+librbd1-9.0.0-0.fc20.x86_64.rpm
+python-rbd-9.0.0-0.fc20.x86_64.rpm
+ceph-devel-compat-9.0.0-0.fc20.x86_64.rpm
+ceph-test-9.0.0-0.fc20.x86_64.rpm
+librados2-9.0.0-0.fc20.x86_64.rpm
+librbd1-devel-9.0.0-0.fc20.x86_64.rpm
+rbd-fuse-9.0.0-0.fc20.x86_64.rpm
+cephfs-java-9.0.0-0.fc20.x86_64.rpm
+libcephfs1-9.0.0-0.fc20.x86_64.rpm
+librados2-devel-9.0.0-0.fc20.x86_64.rpm
+python-ceph-compat-9.0.0-0.fc20.x86_64.rpm
+rest-bench-9.0.0-0.fc20.x86_
+64.rpm
+
+What OS are you using and what problems do you face following the above steps?
+
+Cheers,
+Brad
+
+
+Thanks,
+
+- - ----------------
+Robert LeBlanc
+GPG Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
+- -----BEGIN PGP SIGNATURE-----
+Version: Mailvelope v0.13.1
+Comment: https://www.mailvelope.com
+
+wsFcBAEBCAAQBQJVd1diCRDmVDuy+mK58QAAlMQP/AlbiMj72J/r4rgvPCSv
+6EVzFLCZOVewtmeV+/pnltzQgbj42/MRNC5wfJjPasAEn7Ctj0PgnzNA9LYy
+m4vkrS2Lc4BiRc5dkI31my6T51LxMswZjKecy9yiCDUoUW7cD15PMvyoq27G
++JpeNbrrCvl6Sxfx7S4IjvgnP1Xko2qSi17GoYxJzxwAZJ0LwNUSzvhlQnab
+fEswyO1af3uWUmTGWUKML8jGYSyLnjNa43t2DmEKG5o4yWaXFx0UcUiUdk4v
+gLxHZvUxuNVIb862aoP4gXUC4V508Vu8nnfXx7BuAYXSN0w+Yh2XYU/2T4gL
+Ikqo2ASi3kZoMRoxjX0S/kSn0OdrJkJCkI0fJmYxoBrULqDPu/EslKSX8IGZ
+MN9jGPNrr6G7US25aPPWM1MH4Ikmb0M8/wsmiU60yfQz7bFqxzmIUgoetwHS
+gKSJnu7DyovrGkPTD4nc8yCuFohcIqtD47hh1NLgpQbikGhEIpa//W5A9ikL
+ZO/ke3EMVT+2wWRikQv9QLBx8hkXazEq3ko5KNXK+m+CtJr0Ae56xKPZUu+R
+4gFZyqO+P5bHk51j2V63n+M0bAxQpjTB7j3YV7oToezbJwhELVXATNfVwB8g
+PixgthHIkFhbPM606qBW48XVVJ+QxV61prUgEp0Sni7oy22yMtaoso5sdGjn
+cCtC
+=QqbH
+- -----END PGP SIGNATURE-----
+- --
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+-----BEGIN PGP SIGNATURE-----
+Version: Mailvelope v0.13.1
+Comment: https://www.mailvelope.com
+
+wsFcBAEBCAAQBQJVeFl4CRDmVDuy+mK58QAAzYMP/1ImmG3tRbS0dh+2bwkm
+wFfJSqtDbGOwqG+gumrRnbYBXUP48LBgywfWC4ekpe2j83EX39C0YW5tWBZa
+timz7cv9gXn7lqTfpDybRQ0aVCT52EmgJcnxyPLJwc2GNVAZBbHs3SnzmMR2
+cEfMqz+oF0qwXwyPBFfKtdd9Caw60QB5AyLGub3o0D6g5kvrs9XQHFpPTP5A
+bvDeBoCp9gu429Qw6g22OJTzlSjDyzd4VmZ16QpweQ9ChD606om4oJ4Am+6R
+q9MoH7RJITvRsWJVZPj9nAZwa2Y5bpKlBghn23lcAGUdidi/c71V7ww3mlDu
+M+P09WfjokIBklLQdjBjdbnOGJcSYS15IPoMpFP2HQKD74xchWL581ywN5M7
+r3MN3Z9d+Ez7r4D7wyjoP0Z7mMTZvchehL2Wf+UH4pnyX7LLi+FiQpRfr6L4
+1PdWRBF/x1BQPMeCnw3qrWsNGPuahgFlDdl6ao4eS8qFD4qVGeywtU2PqfQf
+PYlx6+AdxOvRim3AH8zvA+Qp2Z2StTRZRTFAo6by/kgq81u3cx2WSlAPUWFP
+VOdU+/axOj5hpEmbeEOo6kHKlyDynon0FlSuF8HXQvdwaAarCPLGUv08vYwd
+MbXMsZfan+wFnXmWvsy+swKD4J8T74YaF6Tfui9xOazIsaqTxHO00dE3rkvI
+/gG1
+=N/Hh
+-----END PGP SIGNATURE-----
