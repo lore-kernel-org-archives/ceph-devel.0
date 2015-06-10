@@ -1,20 +1,20 @@
-From: Irek Fasikhov <malmyzh-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+From: Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
 Subject: Re: rbd_cache, limiting read on high iops around 40k
-Date: Wed, 10 Jun 2015 08:21:42 +0300
-Message-ID: <CAF-rypxjbsH3GdUG474OgSZVjdzKyf_0n8-zAkAuGhk83TXQhA@mail.gmail.com>
+Date: Wed, 10 Jun 2015 07:41:58 +0200 (CEST)
+Message-ID: <2010200873.2102614.1433914918985.JavaMail.zimbra@oxygem.tv>
 References: <1684793881.1564583.1433829106394.JavaMail.zimbra@oxygem.tv>
-	<CAMc8nAWo-jnAHS5cLw5gDt57T3vZpiN79vFXc=pz=+Cjm6Ra6A@mail.gmail.com>
-	<959572886.1627596.1433834901443.JavaMail.zimbra@oxygem.tv>
 	<1897614581.1694878.1433838989184.JavaMail.zimbra@oxygem.tv>
 	<5576CFBF.1070405@redhat.com>
 	<1208111516.1790161.1433851367996.JavaMail.zimbra@oxygem.tv>
 	<CAANLjFo5qNmWPdOvVo83W10q7xkww7+vjG3BLKArZ3RqmmaMNg@mail.gmail.com>
 	<1058039366.2034449.1433868447253.JavaMail.zimbra@oxygem.tv>
 	<284297771.2095666.1433909407567.JavaMail.zimbra@oxygem.tv>
+	<CAF-rypxjbsH3GdUG474OgSZVjdzKyf_0n8-zAkAuGhk83TXQhA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============2106350416=="
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <284297771.2095666.1433909407567.JavaMail.zimbra-M8QNeUgB6UTyG1zEObXtfA@public.gmane.org>
+In-Reply-To: <CAF-rypxjbsH3GdUG474OgSZVjdzKyf_0n8-zAkAuGhk83TXQhA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -24,1848 +24,534 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
+To: Irek Fasikhov <malmyzh-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, pushpesh sharma <pushpesh.eck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
---===============2106350416==
-Content-Type: multipart/alternative; boundary=001a1134d8b0142e700518230e78
-
---001a1134d8b0142e700518230e78
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-Hi, Alexandre.
-
-Very good work!
-Do you have a rpm-file?
-Thanks.
-
-2015-06-10 7:10 GMT+03:00 Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>:
-
-> Hi,
->
-> I have tested qemu with last tcmalloc 2.4, and the improvement is huge
-> with iothread: 50k iops (+45%) !
->
->
->
-> qemu : no iothread : glibc : iops=3D33395
-> qemu : no-iothread : tcmalloc (2.2.1) : iops=3D34516 (+3%)
-> qemu : no-iothread : jemmaloc : iops=3D42226 (+26%)
-> qemu : no-iothread : tcmalloc (2.4) : iops=3D35974 (+7%)
->
->
-> qemu : iothread : glibc : iops=3D34516
-> qemu : iothread : tcmalloc : iops=3D38676 (+12%)
-> qemu : iothread : jemmaloc : iops=3D28023 (-19%)
-> qemu : iothread : tcmalloc (2.4) : iops=3D50276 (+45%)
->
->
->
->
->
-> qemu : iothread : tcmalloc (2.4) : iops=3D50276 (+45%)
-> ------------------------------------------------------
-> rbd_iodepth32-test: (g=3D0): rw=3Drandread, bs=3D4K-4K/4K-4K/4K-4K,
-> ioengine=3Dlibaio, iodepth=3D32
-> fio-2.1.11
-> Starting 1 process
-> Jobs: 1 (f=3D1): [r(1)] [100.0% done] [214.7MB/0KB/0KB /s] [54.1K/0/0 iop=
-s]
-> [eta 00m:00s]
-> rbd_iodepth32-test: (groupid=3D0, jobs=3D1): err=3D 0: pid=3D894: Wed Jun=
- 10
-> 05:54:24 2015
->   read : io=3D5120.0MB, bw=3D201108KB/s, iops=3D50276, runt=3D 26070msec
->     slat (usec): min=3D1, max=3D1136, avg=3D 3.54, stdev=3D 3.58
->     clat (usec): min=3D128, max=3D6262, avg=3D631.41, stdev=3D197.71
->      lat (usec): min=3D149, max=3D6265, avg=3D635.27, stdev=3D197.40
->     clat percentiles (usec):
->      |  1.00th=3D[  318],  5.00th=3D[  378], 10.00th=3D[  418], 20.00th=
-=3D[  474],
->      | 30.00th=3D[  516], 40.00th=3D[  564], 50.00th=3D[  612], 60.00th=
-=3D[  652],
->      | 70.00th=3D[  700], 80.00th=3D[  756], 90.00th=3D[  860], 95.00th=
-=3D[  980],
->      | 99.00th=3D[ 1272], 99.50th=3D[ 1384], 99.90th=3D[ 1688], 99.95th=
-=3D[ 1896],
->      | 99.99th=3D[ 3760]
->     bw (KB  /s): min=3D145608, max=3D249688, per=3D100.00%, avg=3D201108.=
-00,
-> stdev=3D21718.87
->     lat (usec) : 250=3D0.04%, 500=3D25.84%, 750=3D53.00%, 1000=3D16.63%
->     lat (msec) : 2=3D4.46%, 4=3D0.03%, 10=3D0.01%
->   cpu          : usr=3D9.73%, sys=3D24.93%, ctx=3D66417, majf=3D0, minf=
-=3D38
->   IO depths    : 1=3D0.1%, 2=3D0.1%, 4=3D0.1%, 8=3D0.1%, 16=3D0.1%, 32=3D=
-100.0%,
-> >=3D64=3D0.0%
->      submit    : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, 64=
-=3D0.0%,
-> >=3D64=3D0.0%
->      complete  : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.1%, 64=
-=3D0.0%,
-> >=3D64=3D0.0%
->      issued    : total=3Dr=3D1310720/w=3D0/d=3D0, short=3Dr=3D0/w=3D0/d=
-=3D0
->      latency   : target=3D0, window=3D0, percentile=3D100.00%, depth=3D32
->
-> Run status group 0 (all jobs):
->    READ: io=3D5120.0MB, aggrb=3D201107KB/s, minb=3D201107KB/s, maxb=3D201=
-107KB/s,
-> mint=3D26070msec, maxt=3D26070msec
->
-> Disk stats (read/write):
->   vdb: ios=3D1302555/0, merge=3D0/0, ticks=3D715176/0, in_queue=3D714840,
-> util=3D99.73%
->
->
->
->
->
->
-> rbd_iodepth32-test: (g=3D0): rw=3Drandread, bs=3D4K-4K/4K-4K/4K-4K,
-> ioengine=3Dlibaio, iodepth=3D32
-> fio-2.1.11
-> Starting 1 process
-> Jobs: 1 (f=3D1): [r(1)] [100.0% done] [158.7MB/0KB/0KB /s] [40.6K/0/0 iop=
-s]
-> [eta 00m:00s]
-> rbd_iodepth32-test: (groupid=3D0, jobs=3D1): err=3D 0: pid=3D889: Wed Jun=
- 10
-> 06:05:06 2015
->   read : io=3D5120.0MB, bw=3D143897KB/s, iops=3D35974, runt=3D 36435msec
->     slat (usec): min=3D1, max=3D710, avg=3D 3.31, stdev=3D 3.35
->     clat (usec): min=3D191, max=3D4740, avg=3D884.66, stdev=3D315.65
->      lat (usec): min=3D289, max=3D4743, avg=3D888.31, stdev=3D315.51
->     clat percentiles (usec):
->      |  1.00th=3D[  462],  5.00th=3D[  516], 10.00th=3D[  548], 20.00th=
-=3D[  596],
->      | 30.00th=3D[  652], 40.00th=3D[  764], 50.00th=3D[  868], 60.00th=
-=3D[  940],
->      | 70.00th=3D[ 1004], 80.00th=3D[ 1096], 90.00th=3D[ 1256], 95.00th=
-=3D[ 1416],
->      | 99.00th=3D[ 2024], 99.50th=3D[ 2224], 99.90th=3D[ 2544], 99.95th=
-=3D[ 2640],
->      | 99.99th=3D[ 3632]
->     bw (KB  /s): min=3D98352, max=3D177328, per=3D99.91%, avg=3D143772.11=
-,
-> stdev=3D21782.39
->     lat (usec) : 250=3D0.01%, 500=3D3.48%, 750=3D35.69%, 1000=3D30.01%
->     lat (msec) : 2=3D29.74%, 4=3D1.07%, 10=3D0.01%
->   cpu          : usr=3D7.10%, sys=3D16.90%, ctx=3D54855, majf=3D0, minf=
-=3D38
->   IO depths    : 1=3D0.1%, 2=3D0.1%, 4=3D0.1%, 8=3D0.1%, 16=3D0.1%, 32=3D=
-100.0%,
-> >=3D64=3D0.0%
->      submit    : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, 64=
-=3D0.0%,
-> >=3D64=3D0.0%
->      complete  : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.1%, 64=
-=3D0.0%,
-> >=3D64=3D0.0%
->      issued    : total=3Dr=3D1310720/w=3D0/d=3D0, short=3Dr=3D0/w=3D0/d=
-=3D0
->      latency   : target=3D0, window=3D0, percentile=3D100.00%, depth=3D32
->
-> Run status group 0 (all jobs):
->    READ: io=3D5120.0MB, aggrb=3D143896KB/s, minb=3D143896KB/s, maxb=3D143=
-896KB/s,
-> mint=3D36435msec, maxt=3D36435msec
->
-> Disk stats (read/write):
->   vdb: ios=3D1301357/0, merge=3D0/0, ticks=3D1033036/0, in_queue=3D103271=
-6,
-> util=3D99.85%
->
->
-> ----- Mail original -----
-> De: "aderumier" <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
-> =C3=80: "Robert LeBlanc" <robert-4JaGZRWAfWbajFs6igw21g@public.gmane.org>
-> Cc: "Mark Nelson" <mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "ceph-devel" <
-> ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "pushpesh sharma" <pushpesh.eck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>,
-> "ceph-users" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-> Envoy=C3=A9: Mardi 9 Juin 2015 18:47:27
-> Objet: Re: [ceph-users] rbd_cache, limiting read on high iops around 40k
->
-> Hi Robert,
->
-> >>What I found was that Ceph OSDs performed well with either
-> >>tcmalloc or jemalloc (except when RocksDB was built with jemalloc
-> >>instead of tcmalloc, I'm still working to dig into why that might be
-> >>the case).
-> yes,from my test, for osd tcmalloc is a little faster (but very little)
-> than jemalloc.
->
->
->
-> >>However, I found that tcmalloc with QEMU/KVM was very detrimental to
-> >>small I/O, but provided huge gains in I/O >=3D1MB. Jemalloc was much
-> >>better for QEMU/KVM in the tests that we ran. [1]
->
->
-> Just have done qemu test (4k randread - rbd_cache=3Doff), I don't see spe=
-ed
-> regression with tcmalloc.
-> with qemu iothread, tcmalloc have a speed increase over glib
-> with qemu iothread, jemalloc have a speed decrease
->
-> without iothread, jemalloc have a big speed increase
->
-> this is with
-> -qemu 2.3
-> -tcmalloc 2.2.1
-> -jemmaloc 3.6
-> -libc6 2.19
->
->
-> qemu : no iothread : glibc : iops=3D33395
-> qemu : no-iothread : tcmalloc : iops=3D34516 (+3%)
-> qemu : no-iothread : jemmaloc : iops=3D42226 (+26%)
->
-> qemu : iothread : glibc : iops=3D34516
-> qemu : iothread : tcmalloc : iops=3D38676 (+12%)
-> qemu : iothread : jemmaloc : iops=3D28023 (-19%)
->
->
-> (The benefit of iothreads is that we can scale with more disks in 1vm)
->
->
-> fio results:
-> ------------
->
-> qemu : iothread : tcmalloc : iops=3D38676
-> -----------------------------------------
-> rbd_iodepth32-test: (g=3D0): rw=3Drandread, bs=3D4K-4K/4K-4K/4K-4K,
-> ioengine=3Dlibaio, iodepth=3D32
-> fio-2.1.11
-> Starting 1 process
-> Jobs: 1 (f=3D0): [r(1)] [100.0% done] [123.5MB/0KB/0KB /s] [31.6K/0/0 iop=
-s]
-> [eta 00m:00s]
-> rbd_iodepth32-test: (groupid=3D0, jobs=3D1): err=3D 0: pid=3D1265: Tue Ju=
-n 9
-> 18:16:53 2015
-> read : io=3D5120.0MB, bw=3D154707KB/s, iops=3D38676, runt=3D 33889msec
-> slat (usec): min=3D1, max=3D715, avg=3D 3.63, stdev=3D 3.42
-> clat (usec): min=3D152, max=3D5736, avg=3D822.12, stdev=3D289.34
-> lat (usec): min=3D231, max=3D5740, avg=3D826.10, stdev=3D289.08
-> clat percentiles (usec):
-> | 1.00th=3D[ 402], 5.00th=3D[ 466], 10.00th=3D[ 510], 20.00th=3D[ 572],
-> | 30.00th=3D[ 636], 40.00th=3D[ 716], 50.00th=3D[ 780], 60.00th=3D[ 852],
-> | 70.00th=3D[ 932], 80.00th=3D[ 1020], 90.00th=3D[ 1160], 95.00th=3D[ 135=
-2],
-> | 99.00th=3D[ 1800], 99.50th=3D[ 1944], 99.90th=3D[ 2256], 99.95th=3D[ 24=
-48],
-> | 99.99th=3D[ 3888]
-> bw (KB /s): min=3D123888, max=3D198584, per=3D100.00%, avg=3D154824.40,
-> stdev=3D16978.03
-> lat (usec) : 250=3D0.01%, 500=3D8.91%, 750=3D36.44%, 1000=3D32.63%
-> lat (msec) : 2=3D21.65%, 4=3D0.37%, 10=3D0.01%
-> cpu : usr=3D8.29%, sys=3D19.76%, ctx=3D55882, majf=3D0, minf=3D39
-> IO depths : 1=3D0.1%, 2=3D0.1%, 4=3D0.1%, 8=3D0.1%, 16=3D0.1%, 32=3D100.0=
-%, >=3D64=3D0.0%
-> submit : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, 64=3D0.0%,=
- >=3D64=3D0.0%
-> complete : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.1%, 64=3D0.0=
-%, >=3D64=3D0.0%
-> issued : total=3Dr=3D1310720/w=3D0/d=3D0, short=3Dr=3D0/w=3D0/d=3D0
-> latency : target=3D0, window=3D0, percentile=3D100.00%, depth=3D32
->
-> Run status group 0 (all jobs):
-> READ: io=3D5120.0MB, aggrb=3D154707KB/s, minb=3D154707KB/s, maxb=3D154707=
-KB/s,
-> mint=3D33889msec, maxt=3D33889msec
->
-> Disk stats (read/write):
-> vdb: ios=3D1302739/0, merge=3D0/0, ticks=3D934444/0, in_queue=3D934096, u=
-til=3D99.77%
->
->
->
-> qemu : no-iothread : tcmalloc : iops=3D34516
-> ---------------------------------------------
-> Jobs: 1 (f=3D1): [r(1)] [100.0% done] [163.2MB/0KB/0KB /s] [41.8K/0/0 iop=
-s]
-> [eta 00m:00s]
-> rbd_iodepth32-test: (groupid=3D0, jobs=3D1): err=3D 0: pid=3D896: Tue Jun=
- 9
-> 18:19:08 2015
-> read : io=3D5120.0MB, bw=3D138065KB/s, iops=3D34516, runt=3D 37974msec
-> slat (usec): min=3D1, max=3D708, avg=3D 3.98, stdev=3D 3.57
-> clat (usec): min=3D208, max=3D11858, avg=3D921.43, stdev=3D333.61
-> lat (usec): min=3D266, max=3D11862, avg=3D925.77, stdev=3D333.40
-> clat percentiles (usec):
-> | 1.00th=3D[ 434], 5.00th=3D[ 510], 10.00th=3D[ 564], 20.00th=3D[ 652],
-> | 30.00th=3D[ 732], 40.00th=3D[ 812], 50.00th=3D[ 876], 60.00th=3D[ 940],
-> | 70.00th=3D[ 1020], 80.00th=3D[ 1112], 90.00th=3D[ 1320], 95.00th=3D[ 15=
-76],
-> | 99.00th=3D[ 1992], 99.50th=3D[ 2128], 99.90th=3D[ 2736], 99.95th=3D[ 32=
-48],
-> | 99.99th=3D[ 4320]
-> bw (KB /s): min=3D77312, max=3D185576, per=3D99.74%, avg=3D137709.88,
-> stdev=3D16883.77
-> lat (usec) : 250=3D0.01%, 500=3D4.36%, 750=3D27.61%, 1000=3D35.60%
-> lat (msec) : 2=3D31.49%, 4=3D0.92%, 10=3D0.02%, 20=3D0.01%
-> cpu : usr=3D7.19%, sys=3D19.52%, ctx=3D55903, majf=3D0, minf=3D38
-> IO depths : 1=3D0.1%, 2=3D0.1%, 4=3D0.1%, 8=3D0.1%, 16=3D0.1%, 32=3D100.0=
-%, >=3D64=3D0.0%
-> submit : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, 64=3D0.0%,=
- >=3D64=3D0.0%
-> complete : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.1%, 64=3D0.0=
-%, >=3D64=3D0.0%
-> issued : total=3Dr=3D1310720/w=3D0/d=3D0, short=3Dr=3D0/w=3D0/d=3D0
-> latency : target=3D0, window=3D0, percentile=3D100.00%, depth=3D32
->
-> Run status group 0 (all jobs):
-> READ: io=3D5120.0MB, aggrb=3D138064KB/s, minb=3D138064KB/s, maxb=3D138064=
-KB/s,
-> mint=3D37974msec, maxt=3D37974msec
->
-> Disk stats (read/write):
-> vdb: ios=3D1309902/0, merge=3D0/0, ticks=3D1068768/0, in_queue=3D1068396,
-> util=3D99.86%
->
->
->
-> qemu : iothread : glibc : iops=3D34516
-> -------------------------------------
->
-> rbd_iodepth32-test: (g=3D0): rw=3Drandread, bs=3D4K-4K/4K-4K/4K-4K,
-> ioengine=3Dlibaio, iodepth=3D32
-> fio-2.1.11
-> Starting 1 process
-> Jobs: 1 (f=3D1): [r(1)] [100.0% done] [133.4MB/0KB/0KB /s] [34.2K/0/0 iop=
-s]
-> [eta 00m:00s]
-> rbd_iodepth32-test: (groupid=3D0, jobs=3D1): err=3D 0: pid=3D876: Tue Jun=
- 9
-> 18:24:01 2015
-> read : io=3D5120.0MB, bw=3D137786KB/s, iops=3D34446, runt=3D 38051msec
-> slat (usec): min=3D1, max=3D496, avg=3D 3.88, stdev=3D 3.66
-> clat (usec): min=3D283, max=3D7515, avg=3D923.34, stdev=3D300.28
-> lat (usec): min=3D286, max=3D7519, avg=3D927.58, stdev=3D300.02
-> clat percentiles (usec):
-> | 1.00th=3D[ 506], 5.00th=3D[ 564], 10.00th=3D[ 596], 20.00th=3D[ 652],
-> | 30.00th=3D[ 724], 40.00th=3D[ 804], 50.00th=3D[ 884], 60.00th=3D[ 964],
-> | 70.00th=3D[ 1048], 80.00th=3D[ 1144], 90.00th=3D[ 1304], 95.00th=3D[ 14=
-48],
-> | 99.00th=3D[ 1896], 99.50th=3D[ 2096], 99.90th=3D[ 2480], 99.95th=3D[ 26=
-40],
-> | 99.99th=3D[ 3984]
-> bw (KB /s): min=3D102680, max=3D171112, per=3D100.00%, avg=3D137877.78,
-> stdev=3D15521.30
-> lat (usec) : 500=3D0.84%, 750=3D32.97%, 1000=3D30.82%
-> lat (msec) : 2=3D34.65%, 4=3D0.71%, 10=3D0.01%
-> cpu : usr=3D7.42%, sys=3D19.47%, ctx=3D52455, majf=3D0, minf=3D38
-> IO depths : 1=3D0.1%, 2=3D0.1%, 4=3D0.1%, 8=3D0.1%, 16=3D0.1%, 32=3D100.0=
-%, >=3D64=3D0.0%
-> submit : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, 64=3D0.0%,=
- >=3D64=3D0.0%
-> complete : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.1%, 64=3D0.0=
-%, >=3D64=3D0.0%
-> issued : total=3Dr=3D1310720/w=3D0/d=3D0, short=3Dr=3D0/w=3D0/d=3D0
-> latency : target=3D0, window=3D0, percentile=3D100.00%, depth=3D32
->
-> Run status group 0 (all jobs):
-> READ: io=3D5120.0MB, aggrb=3D137785KB/s, minb=3D137785KB/s, maxb=3D137785=
-KB/s,
-> mint=3D38051msec, maxt=3D38051msec
->
-> Disk stats (read/write):
-> vdb: ios=3D1307426/0, merge=3D0/0, ticks=3D1051416/0, in_queue=3D1050972,
-> util=3D99.85%
->
->
->
-> qemu : no iothread : glibc : iops=3D33395
-> -----------------------------------------
-> rbd_iodepth32-test: (g=3D0): rw=3Drandread, bs=3D4K-4K/4K-4K/4K-4K,
-> ioengine=3Dlibaio, iodepth=3D32
-> fio-2.1.11
-> Starting 1 process
-> Jobs: 1 (f=3D1): [r(1)] [100.0% done] [125.4MB/0KB/0KB /s] [32.9K/0/0 iop=
-s]
-> [eta 00m:00s]
-> rbd_iodepth32-test: (groupid=3D0, jobs=3D1): err=3D 0: pid=3D886: Tue Jun=
- 9
-> 18:27:18 2015
-> read : io=3D5120.0MB, bw=3D133583KB/s, iops=3D33395, runt=3D 39248msec
-> slat (usec): min=3D1, max=3D1054, avg=3D 3.86, stdev=3D 4.29
-> clat (usec): min=3D139, max=3D12635, avg=3D952.85, stdev=3D335.51
-> lat (usec): min=3D303, max=3D12638, avg=3D957.01, stdev=3D335.29
-> clat percentiles (usec):
-> | 1.00th=3D[ 516], 5.00th=3D[ 564], 10.00th=3D[ 596], 20.00th=3D[ 652],
-> | 30.00th=3D[ 724], 40.00th=3D[ 820], 50.00th=3D[ 924], 60.00th=3D[ 996],
-> | 70.00th=3D[ 1080], 80.00th=3D[ 1176], 90.00th=3D[ 1336], 95.00th=3D[ 15=
-28],
-> | 99.00th=3D[ 2096], 99.50th=3D[ 2320], 99.90th=3D[ 2672], 99.95th=3D[ 29=
-28],
-> | 99.99th=3D[ 4832]
-> bw (KB /s): min=3D98136, max=3D171624, per=3D100.00%, avg=3D133682.64,
-> stdev=3D19121.91
-> lat (usec) : 250=3D0.01%, 500=3D0.57%, 750=3D32.57%, 1000=3D26.98%
-> lat (msec) : 2=3D38.59%, 4=3D1.28%, 10=3D0.01%, 20=3D0.01%
-> cpu : usr=3D9.24%, sys=3D15.92%, ctx=3D51219, majf=3D0, minf=3D38
-> IO depths : 1=3D0.1%, 2=3D0.1%, 4=3D0.1%, 8=3D0.1%, 16=3D0.1%, 32=3D100.0=
-%, >=3D64=3D0.0%
-> submit : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, 64=3D0.0%,=
- >=3D64=3D0.0%
-> complete : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.1%, 64=3D0.0=
-%, >=3D64=3D0.0%
-> issued : total=3Dr=3D1310720/w=3D0/d=3D0, short=3Dr=3D0/w=3D0/d=3D0
-> latency : target=3D0, window=3D0, percentile=3D100.00%, depth=3D32
->
-> Run status group 0 (all jobs):
-> READ: io=3D5120.0MB, aggrb=3D133583KB/s, minb=3D133583KB/s, maxb=3D133583=
-KB/s,
-> mint=3D39248msec, maxt=3D39248msec
->
-> Disk stats (read/write):
-> vdb: ios=3D1304526/0, merge=3D0/0, ticks=3D1075020/0, in_queue=3D1074536,
-> util=3D99.84%
->
->
->
-> qemu : iothread : jemmaloc : iops=3D28023
-> ----------------------------------------
-> rbd_iodepth32-test: (g=3D0): rw=3Drandread, bs=3D4K-4K/4K-4K/4K-4K,
-> ioengine=3Dlibaio, iodepth=3D32
-> fio-2.1.11
-> Starting 1 process
-> Jobs: 1 (f=3D1): [r(1)] [97.9% done] [155.2MB/0KB/0KB /s] [39.1K/0/0 iops=
-]
-> [eta 00m:01s]
-> rbd_iodepth32-test: (groupid=3D0, jobs=3D1): err=3D 0: pid=3D899: Tue Jun=
- 9
-> 18:30:26 2015
-> read : io=3D5120.0MB, bw=3D112094KB/s, iops=3D28023, runt=3D 46772msec
-> slat (usec): min=3D1, max=3D467, avg=3D 4.33, stdev=3D 4.77
-> clat (usec): min=3D253, max=3D11307, avg=3D1135.63, stdev=3D346.55
-> lat (usec): min=3D256, max=3D11309, avg=3D1140.39, stdev=3D346.22
-> clat percentiles (usec):
-> | 1.00th=3D[ 510], 5.00th=3D[ 628], 10.00th=3D[ 700], 20.00th=3D[ 820],
-> | 30.00th=3D[ 924], 40.00th=3D[ 1032], 50.00th=3D[ 1128], 60.00th=3D[ 122=
-4],
-> | 70.00th=3D[ 1320], 80.00th=3D[ 1416], 90.00th=3D[ 1560], 95.00th=3D[ 16=
-88],
-> | 99.00th=3D[ 2096], 99.50th=3D[ 2224], 99.90th=3D[ 2544], 99.95th=3D[ 28=
-32],
-> | 99.99th=3D[ 3760]
-> bw (KB /s): min=3D91792, max=3D174416, per=3D99.90%, avg=3D111985.27,
-> stdev=3D17381.70
-> lat (usec) : 500=3D0.80%, 750=3D13.10%, 1000=3D23.33%
-> lat (msec) : 2=3D61.30%, 4=3D1.46%, 10=3D0.01%, 20=3D0.01%
-> cpu : usr=3D7.12%, sys=3D17.43%, ctx=3D54507, majf=3D0, minf=3D38
-> IO depths : 1=3D0.1%, 2=3D0.1%, 4=3D0.1%, 8=3D0.1%, 16=3D0.1%, 32=3D100.0=
-%, >=3D64=3D0.0%
-> submit : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, 64=3D0.0%,=
- >=3D64=3D0.0%
-> complete : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.1%, 64=3D0.0=
-%, >=3D64=3D0.0%
-> issued : total=3Dr=3D1310720/w=3D0/d=3D0, short=3Dr=3D0/w=3D0/d=3D0
-> latency : target=3D0, window=3D0, percentile=3D100.00%, depth=3D32
->
-> Run status group 0 (all jobs):
-> READ: io=3D5120.0MB, aggrb=3D112094KB/s, minb=3D112094KB/s, maxb=3D112094=
-KB/s,
-> mint=3D46772msec, maxt=3D46772msec
->
-> Disk stats (read/write):
-> vdb: ios=3D1309169/0, merge=3D0/0, ticks=3D1305796/0, in_queue=3D1305376,
-> util=3D98.68%
->
->
->
-> qemu : non-iothread : jemmaloc : iops=3D42226
-> --------------------------------------------
-> rbd_iodepth32-test: (g=3D0): rw=3Drandread, bs=3D4K-4K/4K-4K/4K-4K,
-> ioengine=3Dlibaio, iodepth=3D32
-> fio-2.1.11
-> Starting 1 process
-> Jobs: 1 (f=3D1): [r(1)] [100.0% done] [171.2MB/0KB/0KB /s] [43.9K/0/0 iop=
-s]
-> [eta 00m:00s]
-> rbd_iodepth32-test: (groupid=3D0, jobs=3D1): err=3D 0: pid=3D892: Tue Jun=
- 9
-> 18:34:11 2015
-> read : io=3D5120.0MB, bw=3D177130KB/s, iops=3D44282, runt=3D 29599msec
-> slat (usec): min=3D1, max=3D527, avg=3D 3.80, stdev=3D 3.74
-> clat (usec): min=3D174, max=3D3841, avg=3D717.08, stdev=3D237.53
-> lat (usec): min=3D210, max=3D3844, avg=3D721.23, stdev=3D237.22
-> clat percentiles (usec):
-> | 1.00th=3D[ 354], 5.00th=3D[ 422], 10.00th=3D[ 462], 20.00th=3D[ 516],
-> | 30.00th=3D[ 572], 40.00th=3D[ 628], 50.00th=3D[ 684], 60.00th=3D[ 740],
-> | 70.00th=3D[ 804], 80.00th=3D[ 884], 90.00th=3D[ 1004], 95.00th=3D[ 1128=
-],
-> | 99.00th=3D[ 1544], 99.50th=3D[ 1672], 99.90th=3D[ 1928], 99.95th=3D[ 20=
-64],
-> | 99.99th=3D[ 2608]
-> bw (KB /s): min=3D138120, max=3D230816, per=3D100.00%, avg=3D177192.14,
-> stdev=3D23440.79
-> lat (usec) : 250=3D0.01%, 500=3D16.24%, 750=3D45.93%, 1000=3D27.46%
-> lat (msec) : 2=3D10.30%, 4=3D0.07%
-> cpu : usr=3D10.14%, sys=3D23.84%, ctx=3D60938, majf=3D0, minf=3D39
-> IO depths : 1=3D0.1%, 2=3D0.1%, 4=3D0.1%, 8=3D0.1%, 16=3D0.1%, 32=3D100.0=
-%, >=3D64=3D0.0%
-> submit : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, 64=3D0.0%,=
- >=3D64=3D0.0%
-> complete : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.1%, 64=3D0.0=
-%, >=3D64=3D0.0%
-> issued : total=3Dr=3D1310720/w=3D0/d=3D0, short=3Dr=3D0/w=3D0/d=3D0
-> latency : target=3D0, window=3D0, percentile=3D100.00%, depth=3D32
->
-> Run status group 0 (all jobs):
-> READ: io=3D5120.0MB, aggrb=3D177130KB/s, minb=3D177130KB/s, maxb=3D177130=
-KB/s,
-> mint=3D29599msec, maxt=3D29599msec
->
-> Disk stats (read/write):
-> vdb: ios=3D1303992/0, merge=3D0/0, ticks=3D798008/0, in_queue=3D797636, u=
-til=3D99.80%
->
->
->
-> ----- Mail original -----
-> De: "Robert LeBlanc" <robert-4JaGZRWAfWbajFs6igw21g@public.gmane.org>
-> =C3=80: "aderumier" <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
-> Cc: "Mark Nelson" <mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "ceph-devel" <
-> ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "pushpesh sharma" <pushpesh.eck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>,
-> "ceph-users" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-> Envoy=C3=A9: Mardi 9 Juin 2015 18:00:29
-> Objet: Re: [ceph-users] rbd_cache, limiting read on high iops around 40k
->
-> -----BEGIN PGP SIGNED MESSAGE-----
-> Hash: SHA256
->
-> I also saw a similar performance increase by using alternative memory
-> allocators. What I found was that Ceph OSDs performed well with either
-> tcmalloc or jemalloc (except when RocksDB was built with jemalloc
-> instead of tcmalloc, I'm still working to dig into why that might be
-> the case).
->
-> However, I found that tcmalloc with QEMU/KVM was very detrimental to
-> small I/O, but provided huge gains in I/O >=3D1MB. Jemalloc was much
-> better for QEMU/KVM in the tests that we ran. [1]
->
-> I'm currently looking into I/O bottlenecks around the 16KB range and
-> I'm seeing a lot of time in thread creation and destruction, the
-> memory allocators are quite a bit down the list (both fio with
-> ioengine rbd and on the OSDs). I wonder what the difference can be.
-> I've tried using the async messenger but there wasn't a huge
-> difference. [2]
->
-> Further down the rabbit hole....
->
-> [1] https://www.mail-archive.com/ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org/msg20197.html
-> [2] https://www.mail-archive.com/ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org/msg23982.html
-> -----BEGIN PGP SIGNATURE-----
-> Version: Mailvelope v0.13.1
-> Comment: https://www.mailvelope.com
->
-> wsFcBAEBCAAQBQJVdw2ZCRDmVDuy+mK58QAA4MwP/1vt65cvTyyVGGSGRrE8
-> unuWjafMHzl486XH+EaVrDVTXFVFOoncJ6kugSpD7yavtCpZNdhsIaTRZguU
-> YpfAppNAJU5biSwNv9QPI7kPP2q2+I7Z8ZkvhcVnkjIythoeNnSjV7zJrw87
-> afq46GhPHqEXdjp3rOB4RRPniOMnub5oU6QRnKn3HPW8Dx9ZqTeCofRDnCY2
-> S695Dt1gzt0ERUOgrUUkt0FQJdkkV6EURcUschngjtEd5727VTLp02HivVl3
-> vDYWxQHPK8oS6Xe8GOW0JjulwiqlYotSlrqSU5FMU5gozbk9zMFPIUW1e+51
-> 9ART8Ta2ItMhPWtAhRwwvxgy51exCy9kBc+m+ptKW5XRUXOImGcOQxszPGOO
-> qIIOG1vVG/GBmo/0i6tliqBFYdXmw1qFV7tFiIbisZRH7Q/1NahjYTHqHhu3
-> Dv61T6WrerD+9N6S1Lrz1QYe2Fqa56BHhHSXM82NE86SVxEvUkoGegQU+c7b
-> 6rY1JvuJHJzva7+M2XHApYCchCs4a1Yyd1qWB7yThJD57RIyX1TOg0+siV13
-> R+v6wxhQU0vBovH+5oAWmCZaPNT+F0Uvs3xWAxxaIR9r83wMj9qQeBZTKVzQ
-> 1aFIi15KqAwOp12yWCmrqKTeXhjwYQNd8viCQCGN7AQyPglmzfbuEHalVjz4
-> oSJX
-> =3Dk281
-> -----END PGP SIGNATURE-----
-> ----------------
-> Robert LeBlanc
-> GPG Fingerprint 79A2 9CA4 6CC4 45DD A904 C70E E654 3BB2 FA62 B9F1
->
->
-> On Tue, Jun 9, 2015 at 6:02 AM, Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
-> wrote:
-> >>>Frankly, I'm a little impressed that without RBD cache we can hit 80K
-> >>>IOPS from 1 VM!
-> >
-> > Note that theses result are not in a vm (fio-rbd on host), so in a vm
-> we'll have overhead.
-> > (I'm planning to send results in qemu soon)
-> >
-> >>>How fast are the SSDs in those 3 OSDs?
-> >
-> > Theses results are with datas in buffer memory of osd nodes.
-> >
-> > When reading fulling on ssd (intel s3500),
-> >
-> > For 1 client,
-> >
-> > I'm around 33k iops without cache and 32k iops with cache, with 1 osd.
-> > I'm around 55k iops without cache and 38k iops with cache, with 3 osd.
-> >
-> > with multiple clients jobs, I can reach around 70kiops by osd , and 250=
-k
-> iops by osd when datas are in buffer.
-> >
-> > (cpus servers/clients are 2x 10 cores 3,1ghz e5 xeon)
-> >
-> >
-> >
-> > small tip :
-> > I'm using tcmalloc for fio-rbd or rados bench to improve latencies by
-> around 20%
-> >
-> > LD_PRELOAD=3D/usr/lib/libtcmalloc_minimal.so.4 fio ...
-> > LD_PRELOAD=3D/usr/lib/libtcmalloc_minimal.so.4 rados bench ...
-> >
-> > as a lot of time is spent in malloc/free
-> >
-> >
-> > (qemu support also tcmalloc since some months , I'll bench it too
-> > https://lists.gnu.org/archive/html/qemu-devel/2015-03/msg05372.html)
-> >
-> >
-> >
-> > I'll try to send full bench results soon, from 1 to 18 ssd osd.
-> >
-> >
-> >
-> >
-> > ----- Mail original -----
-> > De: "Mark Nelson" <mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> > =C3=80: "aderumier" <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>, "pushpesh sharma" <
-> pushpesh.eck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-> > Cc: "ceph-devel" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users" <
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-> > Envoy=C3=A9: Mardi 9 Juin 2015 13:36:31
-> > Objet: Re: [ceph-users] rbd_cache, limiting read on high iops around 40=
-k
-> >
-> > Hi All,
-> >
-> > In the past we've hit some performance issues with RBD cache that we've
-> > fixed, but we've never really tried pushing a single VM beyond 40+K rea=
-d
-> > IOPS in testing (or at least I never have). I suspect there's a couple
-> > of possibilities as to why it might be slower, but perhaps joshd can
-> > chime in as he's more familiar with what that code looks like.
-> >
-> > Frankly, I'm a little impressed that without RBD cache we can hit 80K
-> > IOPS from 1 VM! How fast are the SSDs in those 3 OSDs?
-> >
-> > Mark
-> >
-> > On 06/09/2015 03:36 AM, Alexandre DERUMIER wrote:
-> >> It's seem that the limit is mainly going in high queue depth (+- > 16)
-> >>
-> >> Here the result in iops with 1client- 4krandread- 3osd - with
-> differents queue depth size.
-> >> rbd_cache is almost the same than without cache with queue depth <16
-> >>
-> >>
-> >> cache
-> >> -----
-> >> qd1: 1651
-> >> qd2: 3482
-> >> qd4: 7958
-> >> qd8: 17912
-> >> qd16: 36020
-> >> qd32: 42765
-> >> qd64: 46169
-> >>
-> >> no cache
-> >> --------
-> >> qd1: 1748
-> >> qd2: 3570
-> >> qd4: 8356
-> >> qd8: 17732
-> >> qd16: 41396
-> >> qd32: 78633
-> >> qd64: 79063
-> >> qd128: 79550
-> >>
-> >>
-> >> ----- Mail original -----
-> >> De: "aderumier" <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
-> >> =C3=80: "pushpesh sharma" <pushpesh.eck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-> >> Cc: "ceph-devel" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users" <
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-> >> Envoy=C3=A9: Mardi 9 Juin 2015 09:28:21
-> >> Objet: Re: [ceph-users] rbd_cache, limiting read on high iops around 4=
-0k
-> >>
-> >> Hi,
-> >>
-> >>>> We tried adding more RBDs to single VM, but no luck.
-> >>
-> >> If you want to scale with more disks in a single qemu vm, you need to
-> use iothread feature from qemu and assign 1 iothread by disk (works with
-> virtio-blk).
-> >> It's working for me, I can scale with adding more disks.
-> >>
-> >>
-> >> My bench here are done with fio-rbd on host.
-> >> I can scale up to 400k iops with 10clients-rbd_cache=3Doff on a single
-> host and around 250kiops 10clients-rbdcache=3Don.
-> >>
-> >>
-> >> I just wonder why I don't have performance decrease around 30k iops
-> with 1osd.
-> >>
-> >> I'm going to see if this tracker
-> >> http://tracker.ceph.com/issues/11056
-> >>
-> >> could be the cause.
-> >>
-> >> (My master build was done some week ago)
-> >>
-> >>
-> >>
-> >> ----- Mail original -----
-> >> De: "pushpesh sharma" <pushpesh.eck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-> >> =C3=80: "aderumier" <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
-> >> Cc: "ceph-devel" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users" <
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-> >> Envoy=C3=A9: Mardi 9 Juin 2015 09:21:04
-> >> Objet: Re: rbd_cache, limiting read on high iops around 40k
-> >>
-> >> Hi Alexandre,
-> >>
-> >> We have also seen something very similar on Hammer(0.94-1). We were
-> doing some benchmarking for VMs hosted on hypervisor (QEMU-KVM,
-> openstack-juno). Each Ubuntu-VM has a RBD as root disk, and 1 RBD as
-> additional storage. For some strange reason it was not able to scale 4K- =
-RR
-> iops on each VM beyond 35-40k. We tried adding more RBDs to single VM, bu=
-t
-> no luck. However increasing number of VMs to 4 on a single hypervisor did
-> scale to some extent. After this there was no much benefit we got from
-> adding more VMs.
-> >>
-> >> Here is the trend we have seen, x-axis is number of hypervisor, each
-> hypervisor has 4 VM, each VM has 1 RBD:-
-> >>
-> >>
-> >>
-> >>
-> >> VDbench is used as benchmarking tool. We were not saturating network
-> and CPUs at OSD nodes. We were not able to saturate CPUs at hypervisors,
-> and that is where we were suspecting of some throttling effect. However w=
-e
-> haven't setted any such limits from nova or kvm end. We tried some CPU
-> pinning and other KVM related tuning as well, but no luck.
-> >>
-> >> We tried the same experiment on a bare metal. It was 4K RR IOPs were
-> scaling from 40K(1 RBD) to 180K(4 RBDs). But after that rather than scali=
-ng
-> beyond that point the numbers were actually degrading. (Single pipe more
-> congestion effect)
-> >>
-> >> We never suspected that rbd cache enable could be detrimental to
-> performance. It would nice to route cause the problem if that is the case=
-.
-> >>
-> >> On Tue, Jun 9, 2015 at 11:21 AM, Alexandre DERUMIER <
-> aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org > wrote:
-> >>
-> >>
-> >> Hi,
-> >>
-> >> I'm doing benchmark (ceph master branch), with randread 4k qdepth=3D32=
-,
-> >> and rbd_cache=3Dtrue seem to limit the iops around 40k
-> >>
-> >>
-> >> no cache
-> >> --------
-> >> 1 client - rbd_cache=3Dfalse - 1osd : 38300 iops
-> >> 1 client - rbd_cache=3Dfalse - 2osd : 69073 iops
-> >> 1 client - rbd_cache=3Dfalse - 3osd : 78292 iops
-> >>
-> >>
-> >> cache
-> >> -----
-> >> 1 client - rbd_cache=3Dtrue - 1osd : 38100 iops
-> >> 1 client - rbd_cache=3Dtrue - 2osd : 42457 iops
-> >> 1 client - rbd_cache=3Dtrue - 3osd : 45823 iops
-> >>
-> >>
-> >>
-> >> Is it expected ?
-> >>
-> >>
-> >>
-> >> fio result rbd_cache=3Dfalse 3 osd
-> >> --------------------------------
-> >> rbd_iodepth32-test: (g=3D0): rw=3Drandread, bs=3D4K-4K/4K-4K/4K-4K,
-> ioengine=3Drbd, iodepth=3D32
-> >> fio-2.1.11
-> >> Starting 1 process
-> >> rbd engine: RBD version: 0.1.9
-> >> Jobs: 1 (f=3D1): [r(1)] [100.0% done] [307.5MB/0KB/0KB /s] [78.8K/0/0
-> iops] [eta 00m:00s]
-> >> rbd_iodepth32-test: (groupid=3D0, jobs=3D1): err=3D 0: pid=3D113548: T=
-ue Jun 9
-> 07:48:42 2015
-> >> read : io=3D10000MB, bw=3D313169KB/s, iops=3D78292, runt=3D 32698msec
-> >> slat (usec): min=3D5, max=3D530, avg=3D11.77, stdev=3D 6.77
-> >> clat (usec): min=3D70, max=3D2240, avg=3D336.08, stdev=3D94.82
-> >> lat (usec): min=3D101, max=3D2247, avg=3D347.84, stdev=3D95.49
-> >> clat percentiles (usec):
-> >> | 1.00th=3D[ 173], 5.00th=3D[ 209], 10.00th=3D[ 231], 20.00th=3D[ 262]=
-,
-> >> | 30.00th=3D[ 282], 40.00th=3D[ 302], 50.00th=3D[ 322], 60.00th=3D[ 34=
-6],
-> >> | 70.00th=3D[ 370], 80.00th=3D[ 402], 90.00th=3D[ 454], 95.00th=3D[ 50=
-6],
-> >> | 99.00th=3D[ 628], 99.50th=3D[ 692], 99.90th=3D[ 860], 99.95th=3D[ 94=
-8],
-> >> | 99.99th=3D[ 1176]
-> >> bw (KB /s): min=3D238856, max=3D360448, per=3D100.00%, avg=3D313402.34=
-,
-> stdev=3D25196.21
-> >> lat (usec) : 100=3D0.01%, 250=3D15.94%, 500=3D78.60%, 750=3D5.19%, 100=
-0=3D0.23%
-> >> lat (msec) : 2=3D0.03%, 4=3D0.01%
-> >> cpu : usr=3D74.48%, sys=3D13.25%, ctx=3D703225, majf=3D0, minf=3D12452
-> >> IO depths : 1=3D0.1%, 2=3D0.1%, 4=3D0.1%, 8=3D0.8%, 16=3D87.0%, 32=3D1=
-2.1%,
-> >=3D64=3D0.0%
-> >> submit : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, 64=3D0.=
-0%, >=3D64=3D0.0%
-> >> complete : 0=3D0.0%, 4=3D91.6%, 8=3D3.4%, 16=3D4.5%, 32=3D0.4%, 64=3D0=
-.0%, >=3D64=3D0.0%
-> >> issued : total=3Dr=3D2560000/w=3D0/d=3D0, short=3Dr=3D0/w=3D0/d=3D0
-> >> latency : target=3D0, window=3D0, percentile=3D100.00%, depth=3D32
-> >>
-> >> Run status group 0 (all jobs):
-> >> READ: io=3D10000MB, aggrb=3D313169KB/s, minb=3D313169KB/s, maxb=3D3131=
-69KB/s,
-> mint=3D32698msec, maxt=3D32698msec
-> >>
-> >> Disk stats (read/write):
-> >> dm-0: ios=3D0/45, merge=3D0/0, ticks=3D0/0, in_queue=3D0, util=3D0.00%=
-,
-> aggrios=3D0/24, aggrmerge=3D0/21, aggrticks=3D0/0, aggrin_queue=3D0, aggr=
-util=3D0.00%
-> >> sda: ios=3D0/24, merge=3D0/21, ticks=3D0/0, in_queue=3D0, util=3D0.00%
-> >>
-> >>
-> >>
-> >>
-> >> fio result rbd_cache=3Dtrue 3osd
-> >> ------------------------------
-> >>
-> >> rbd_iodepth32-test: (g=3D0): rw=3Drandread, bs=3D4K-4K/4K-4K/4K-4K,
-> ioengine=3Drbd, iodepth=3D32
-> >> fio-2.1.11
-> >> Starting 1 process
-> >> rbd engine: RBD version: 0.1.9
-> >> Jobs: 1 (f=3D1): [r(1)] [100.0% done] [171.6MB/0KB/0KB /s] [43.1K/0/0
-> iops] [eta 00m:00s]
-> >> rbd_iodepth32-test: (groupid=3D0, jobs=3D1): err=3D 0: pid=3D113389: T=
-ue Jun 9
-> 07:47:30 2015
-> >> read : io=3D10000MB, bw=3D183296KB/s, iops=3D45823, runt=3D 55866msec
-> >> slat (usec): min=3D7, max=3D805, avg=3D21.26, stdev=3D15.84
-> >> clat (usec): min=3D101, max=3D4602, avg=3D478.55, stdev=3D143.73
-> >> lat (usec): min=3D123, max=3D4669, avg=3D499.80, stdev=3D146.03
-> >> clat percentiles (usec):
-> >> | 1.00th=3D[ 227], 5.00th=3D[ 274], 10.00th=3D[ 306], 20.00th=3D[ 350]=
-,
-> >> | 30.00th=3D[ 390], 40.00th=3D[ 430], 50.00th=3D[ 470], 60.00th=3D[ 50=
-6],
-> >> | 70.00th=3D[ 548], 80.00th=3D[ 596], 90.00th=3D[ 660], 95.00th=3D[ 72=
-4],
-> >> | 99.00th=3D[ 844], 99.50th=3D[ 908], 99.90th=3D[ 1112], 99.95th=3D[ 1=
-288],
-> >> | 99.99th=3D[ 2192]
-> >> bw (KB /s): min=3D115280, max=3D204416, per=3D100.00%, avg=3D183315.10=
-,
-> stdev=3D15079.93
-> >> lat (usec) : 250=3D2.42%, 500=3D55.61%, 750=3D38.48%, 1000=3D3.28%
-> >> lat (msec) : 2=3D0.19%, 4=3D0.01%, 10=3D0.01%
-> >> cpu : usr=3D60.27%, sys=3D12.01%, ctx=3D2995393, majf=3D0, minf=3D1410=
-0
-> >> IO depths : 1=3D0.1%, 2=3D0.1%, 4=3D0.2%, 8=3D13.5%, 16=3D81.0%, 32=3D=
-5.3%,
-> >=3D64=3D0.0%
-> >> submit : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, 64=3D0.=
-0%, >=3D64=3D0.0%
-> >> complete : 0=3D0.0%, 4=3D95.0%, 8=3D0.1%, 16=3D1.0%, 32=3D4.0%, 64=3D0=
-.0%, >=3D64=3D0.0%
-> >> issued : total=3Dr=3D2560000/w=3D0/d=3D0, short=3Dr=3D0/w=3D0/d=3D0
-> >> latency : target=3D0, window=3D0, percentile=3D100.00%, depth=3D32
-> >>
-> >> Run status group 0 (all jobs):
-> >> READ: io=3D10000MB, aggrb=3D183295KB/s, minb=3D183295KB/s, maxb=3D1832=
-95KB/s,
-> mint=3D55866msec, maxt=3D55866msec
-> >>
-> >> Disk stats (read/write):
-> >> dm-0: ios=3D0/61, merge=3D0/0, ticks=3D0/8, in_queue=3D8, util=3D0.01%=
-,
-> aggrios=3D0/29, aggrmerge=3D0/32, aggrticks=3D0/8, aggrin_queue=3D8, aggr=
-util=3D0.01%
-> >> sda: ios=3D0/29, merge=3D0/32, ticks=3D0/8, in_queue=3D8, util=3D0.01%
-> >>
-> > _______________________________________________
-> > ceph-users mailing list
-> > ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->
-
-
-
---=20
-=D0=A1 =D1=83=D0=B2=D0=B0=D0=B6=D0=B5=D0=BD=D0=B8=D0=B5=D0=BC, =D0=A4=D0=B0=
-=D1=81=D0=B8=D1=85=D0=BE=D0=B2 =D0=98=D1=80=D0=B5=D0=BA =D0=9D=D1=83=D1=80=
-=D0=B3=D0=B0=D1=8F=D0=B7=D0=BE=D0=B2=D0=B8=D1=87
-=D0=9C=D0=BE=D0=B1.: +79229045757
-
---001a1134d8b0142e700518230e78
-Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr">Hi, Alexandre.<div><br><div>Very good work!<br></div><div>=
-Do you have a rpm-file?<br></div><div>Thanks.</div></div></div><div class=
-=3D"gmail_extra"><br><div class=3D"gmail_quote">2015-06-10 7:10 GMT+03:00 A=
-lexandre DERUMIER <span dir=3D"ltr">&lt;<a href=3D"mailto:aderumier@odiso.c=
-om" target=3D"_blank">aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org</a>&gt;</span>:<br><blockquote cl=
-ass=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;p=
-adding-left:1ex">Hi,<br>
-<br>
-I have tested qemu with last tcmalloc 2.4, and the improvement is huge with=
- iothread: 50k iops (+45%) !<br>
-<span class=3D""><br>
-<br>
-<br>
-qemu : no iothread : glibc : iops=3D33395<br>
-</span>qemu : no-iothread : tcmalloc (2.2.1) : iops=3D34516 (+3%)<br>
-<span class=3D"">qemu : no-iothread : jemmaloc : iops=3D42226 (+26%)<br>
-</span>qemu : no-iothread : tcmalloc (2.4) : iops=3D35974 (+7%)<br>
-<span class=3D""><br>
-<br>
-qemu : iothread : glibc : iops=3D34516<br>
-qemu : iothread : tcmalloc : iops=3D38676 (+12%)<br>
-qemu : iothread : jemmaloc : iops=3D28023 (-19%)<br>
-</span>qemu : iothread : tcmalloc (2.4) : iops=3D50276 (+45%)<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-qemu : iothread : tcmalloc (2.4) : iops=3D50276 (+45%)<br>
-------------------------------------------------------<br>
-<span class=3D"">rbd_iodepth32-test: (g=3D0): rw=3Drandread, bs=3D4K-4K/4K-=
-4K/4K-4K, ioengine=3Dlibaio, iodepth=3D32<br>
-fio-2.1.11<br>
-Starting 1 process<br>
-</span>Jobs: 1 (f=3D1): [r(1)] [100.0% done] [214.7MB/0KB/0KB /s] [54.1K/0/=
-0 iops] [eta 00m:00s]<br>
-rbd_iodepth32-test: (groupid=3D0, jobs=3D1): err=3D 0: pid=3D894: Wed Jun 1=
-0 05:54:24 2015<br>
-=C2=A0 read : io=3D5120.0MB, bw=3D201108KB/s, iops=3D50276, runt=3D 26070ms=
-ec<br>
-=C2=A0 =C2=A0 slat (usec): min=3D1, max=3D1136, avg=3D 3.54, stdev=3D 3.58<=
-br>
-=C2=A0 =C2=A0 clat (usec): min=3D128, max=3D6262, avg=3D631.41, stdev=3D197=
-.71<br>
-=C2=A0 =C2=A0 =C2=A0lat (usec): min=3D149, max=3D6265, avg=3D635.27, stdev=
-=3D197.40<br>
-=C2=A0 =C2=A0 clat percentiles (usec):<br>
-=C2=A0 =C2=A0 =C2=A0|=C2=A0 1.00th=3D[=C2=A0 318],=C2=A0 5.00th=3D[=C2=A0 3=
-78], 10.00th=3D[=C2=A0 418], 20.00th=3D[=C2=A0 474],<br>
-=C2=A0 =C2=A0 =C2=A0| 30.00th=3D[=C2=A0 516], 40.00th=3D[=C2=A0 564], 50.00=
-th=3D[=C2=A0 612], 60.00th=3D[=C2=A0 652],<br>
-=C2=A0 =C2=A0 =C2=A0| 70.00th=3D[=C2=A0 700], 80.00th=3D[=C2=A0 756], 90.00=
-th=3D[=C2=A0 860], 95.00th=3D[=C2=A0 980],<br>
-=C2=A0 =C2=A0 =C2=A0| 99.00th=3D[ 1272], 99.50th=3D[ 1384], 99.90th=3D[ 168=
-8], 99.95th=3D[ 1896],<br>
-=C2=A0 =C2=A0 =C2=A0| 99.99th=3D[ 3760]<br>
-=C2=A0 =C2=A0 bw (KB=C2=A0 /s): min=3D145608, max=3D249688, per=3D100.00%, =
-avg=3D201108.00, stdev=3D21718.87<br>
-=C2=A0 =C2=A0 lat (usec) : 250=3D0.04%, 500=3D25.84%, 750=3D53.00%, 1000=3D=
-16.63%<br>
-=C2=A0 =C2=A0 lat (msec) : 2=3D4.46%, 4=3D0.03%, 10=3D0.01%<br>
-=C2=A0 cpu=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 : usr=3D9.73%, sys=3D24.93%, c=
-tx=3D66417, majf=3D0, minf=3D38<br>
-<span class=3D"">=C2=A0 IO depths=C2=A0 =C2=A0 : 1=3D0.1%, 2=3D0.1%, 4=3D0.=
-1%, 8=3D0.1%, 16=3D0.1%, 32=3D100.0%, &gt;=3D64=3D0.0%<br>
-=C2=A0 =C2=A0 =C2=A0submit=C2=A0 =C2=A0 : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 1=
-6=3D0.0%, 32=3D0.0%, 64=3D0.0%, &gt;=3D64=3D0.0%<br>
-=C2=A0 =C2=A0 =C2=A0complete=C2=A0 : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0=
-.0%, 32=3D0.1%, 64=3D0.0%, &gt;=3D64=3D0.0%<br>
-=C2=A0 =C2=A0 =C2=A0issued=C2=A0 =C2=A0 : total=3Dr=3D1310720/w=3D0/d=3D0, =
-short=3Dr=3D0/w=3D0/d=3D0<br>
-=C2=A0 =C2=A0 =C2=A0latency=C2=A0 =C2=A0: target=3D0, window=3D0, percentil=
-e=3D100.00%, depth=3D32<br>
-<br>
-Run status group 0 (all jobs):<br>
-</span>=C2=A0 =C2=A0READ: io=3D5120.0MB, aggrb=3D201107KB/s, minb=3D201107K=
-B/s, maxb=3D201107KB/s, mint=3D26070msec, maxt=3D26070msec<br>
-<br>
-Disk stats (read/write):<br>
-=C2=A0 vdb: ios=3D1302555/0, merge=3D0/0, ticks=3D715176/0, in_queue=3D7148=
-40, util=3D99.73%<br>
-<span class=3D""><br>
-<br>
-<br>
-<br>
-<br>
-<br>
-rbd_iodepth32-test: (g=3D0): rw=3Drandread, bs=3D4K-4K/4K-4K/4K-4K, ioengin=
-e=3Dlibaio, iodepth=3D32<br>
-fio-2.1.11<br>
-Starting 1 process<br>
-</span>Jobs: 1 (f=3D1): [r(1)] [100.0% done] [158.7MB/0KB/0KB /s] [40.6K/0/=
-0 iops] [eta 00m:00s]<br>
-rbd_iodepth32-test: (groupid=3D0, jobs=3D1): err=3D 0: pid=3D889: Wed Jun 1=
-0 06:05:06 2015<br>
-=C2=A0 read : io=3D5120.0MB, bw=3D143897KB/s, iops=3D35974, runt=3D 36435ms=
-ec<br>
-=C2=A0 =C2=A0 slat (usec): min=3D1, max=3D710, avg=3D 3.31, stdev=3D 3.35<b=
-r>
-=C2=A0 =C2=A0 clat (usec): min=3D191, max=3D4740, avg=3D884.66, stdev=3D315=
-.65<br>
-=C2=A0 =C2=A0 =C2=A0lat (usec): min=3D289, max=3D4743, avg=3D888.31, stdev=
-=3D315.51<br>
-=C2=A0 =C2=A0 clat percentiles (usec):<br>
-=C2=A0 =C2=A0 =C2=A0|=C2=A0 1.00th=3D[=C2=A0 462],=C2=A0 5.00th=3D[=C2=A0 5=
-16], 10.00th=3D[=C2=A0 548], 20.00th=3D[=C2=A0 596],<br>
-=C2=A0 =C2=A0 =C2=A0| 30.00th=3D[=C2=A0 652], 40.00th=3D[=C2=A0 764], 50.00=
-th=3D[=C2=A0 868], 60.00th=3D[=C2=A0 940],<br>
-=C2=A0 =C2=A0 =C2=A0| 70.00th=3D[ 1004], 80.00th=3D[ 1096], 90.00th=3D[ 125=
-6], 95.00th=3D[ 1416],<br>
-=C2=A0 =C2=A0 =C2=A0| 99.00th=3D[ 2024], 99.50th=3D[ 2224], 99.90th=3D[ 254=
-4], 99.95th=3D[ 2640],<br>
-=C2=A0 =C2=A0 =C2=A0| 99.99th=3D[ 3632]<br>
-=C2=A0 =C2=A0 bw (KB=C2=A0 /s): min=3D98352, max=3D177328, per=3D99.91%, av=
-g=3D143772.11, stdev=3D21782.39<br>
-=C2=A0 =C2=A0 lat (usec) : 250=3D0.01%, 500=3D3.48%, 750=3D35.69%, 1000=3D3=
-0.01%<br>
-=C2=A0 =C2=A0 lat (msec) : 2=3D29.74%, 4=3D1.07%, 10=3D0.01%<br>
-=C2=A0 cpu=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 : usr=3D7.10%, sys=3D16.90%, c=
-tx=3D54855, majf=3D0, minf=3D38<br>
-<span class=3D"">=C2=A0 IO depths=C2=A0 =C2=A0 : 1=3D0.1%, 2=3D0.1%, 4=3D0.=
-1%, 8=3D0.1%, 16=3D0.1%, 32=3D100.0%, &gt;=3D64=3D0.0%<br>
-=C2=A0 =C2=A0 =C2=A0submit=C2=A0 =C2=A0 : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 1=
-6=3D0.0%, 32=3D0.0%, 64=3D0.0%, &gt;=3D64=3D0.0%<br>
-=C2=A0 =C2=A0 =C2=A0complete=C2=A0 : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0=
-.0%, 32=3D0.1%, 64=3D0.0%, &gt;=3D64=3D0.0%<br>
-=C2=A0 =C2=A0 =C2=A0issued=C2=A0 =C2=A0 : total=3Dr=3D1310720/w=3D0/d=3D0, =
-short=3Dr=3D0/w=3D0/d=3D0<br>
-=C2=A0 =C2=A0 =C2=A0latency=C2=A0 =C2=A0: target=3D0, window=3D0, percentil=
-e=3D100.00%, depth=3D32<br>
-<br>
-Run status group 0 (all jobs):<br>
-</span>=C2=A0 =C2=A0READ: io=3D5120.0MB, aggrb=3D143896KB/s, minb=3D143896K=
-B/s, maxb=3D143896KB/s, mint=3D36435msec, maxt=3D36435msec<br>
-<br>
-Disk stats (read/write):<br>
-=C2=A0 vdb: ios=3D1301357/0, merge=3D0/0, ticks=3D1033036/0, in_queue=3D103=
-2716, util=3D99.85%<br>
-<span class=3D""><br>
-<br>
------ Mail original -----<br>
-De: &quot;aderumier&quot; &lt;<a href=3D"mailto:aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org">aderum=
-ier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org</a>&gt;<br>
-</span>=C3=80: &quot;Robert LeBlanc&quot; &lt;<a href=3D"mailto:robert@lebl=
-ancnet.us">robert-4JaGZRWAfWbajFs6igw21g@public.gmane.org</a>&gt;<br>
-<span class=3D"">Cc: &quot;Mark Nelson&quot; &lt;<a href=3D"mailto:mnelson@=
-redhat.com">mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org</a>&gt;, &quot;ceph-devel&quot; &lt;<a href=
-=3D"mailto:ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org">ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org</a>&gt;, =
-&quot;pushpesh sharma&quot; &lt;<a href=3D"mailto:pushpesh.eck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org">p=
-ushpesh.eck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt;, &quot;ceph-users&quot; &lt;<a href=3D"mailto=
-:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a>&gt;<br>
-</span>Envoy=C3=A9: Mardi 9 Juin 2015 18:47:27<br>
-<div class=3D"HOEnZb"><div class=3D"h5">Objet: Re: [ceph-users] rbd_cache, =
-limiting read on high iops around 40k<br>
-<br>
-Hi Robert,<br>
-<br>
-&gt;&gt;What I found was that Ceph OSDs performed well with either<br>
-&gt;&gt;tcmalloc or jemalloc (except when RocksDB was built with jemalloc<b=
-r>
-&gt;&gt;instead of tcmalloc, I&#39;m still working to dig into why that mig=
-ht be<br>
-&gt;&gt;the case).<br>
-yes,from my test, for osd tcmalloc is a little faster (but very little) tha=
-n jemalloc.<br>
-<br>
-<br>
-<br>
-&gt;&gt;However, I found that tcmalloc with QEMU/KVM was very detrimental t=
-o<br>
-&gt;&gt;small I/O, but provided huge gains in I/O &gt;=3D1MB. Jemalloc was =
-much<br>
-&gt;&gt;better for QEMU/KVM in the tests that we ran. [1]<br>
-<br>
-<br>
-Just have done qemu test (4k randread - rbd_cache=3Doff), I don&#39;t see s=
-peed regression with tcmalloc.<br>
-with qemu iothread, tcmalloc have a speed increase over glib<br>
-with qemu iothread, jemalloc have a speed decrease<br>
-<br>
-without iothread, jemalloc have a big speed increase<br>
-<br>
-this is with<br>
--qemu 2.3<br>
--tcmalloc 2.2.1<br>
--jemmaloc 3.6<br>
--libc6 2.19<br>
-<br>
-<br>
-qemu : no iothread : glibc : iops=3D33395<br>
-qemu : no-iothread : tcmalloc : iops=3D34516 (+3%)<br>
-qemu : no-iothread : jemmaloc : iops=3D42226 (+26%)<br>
-<br>
-qemu : iothread : glibc : iops=3D34516<br>
-qemu : iothread : tcmalloc : iops=3D38676 (+12%)<br>
-qemu : iothread : jemmaloc : iops=3D28023 (-19%)<br>
-<br>
-<br>
-(The benefit of iothreads is that we can scale with more disks in 1vm)<br>
-<br>
-<br>
-fio results:<br>
-------------<br>
-<br>
-qemu : iothread : tcmalloc : iops=3D38676<br>
------------------------------------------<br>
-rbd_iodepth32-test: (g=3D0): rw=3Drandread, bs=3D4K-4K/4K-4K/4K-4K, ioengin=
-e=3Dlibaio, iodepth=3D32<br>
-fio-2.1.11<br>
-Starting 1 process<br>
-Jobs: 1 (f=3D0): [r(1)] [100.0% done] [123.5MB/0KB/0KB /s] [31.6K/0/0 iops]=
- [eta 00m:00s]<br>
-rbd_iodepth32-test: (groupid=3D0, jobs=3D1): err=3D 0: pid=3D1265: Tue Jun =
-9 18:16:53 2015<br>
-read : io=3D5120.0MB, bw=3D154707KB/s, iops=3D38676, runt=3D 33889msec<br>
-slat (usec): min=3D1, max=3D715, avg=3D 3.63, stdev=3D 3.42<br>
-clat (usec): min=3D152, max=3D5736, avg=3D822.12, stdev=3D289.34<br>
-lat (usec): min=3D231, max=3D5740, avg=3D826.10, stdev=3D289.08<br>
-clat percentiles (usec):<br>
-| 1.00th=3D[ 402], 5.00th=3D[ 466], 10.00th=3D[ 510], 20.00th=3D[ 572],<br>
-| 30.00th=3D[ 636], 40.00th=3D[ 716], 50.00th=3D[ 780], 60.00th=3D[ 852],<b=
-r>
-| 70.00th=3D[ 932], 80.00th=3D[ 1020], 90.00th=3D[ 1160], 95.00th=3D[ 1352]=
-,<br>
-| 99.00th=3D[ 1800], 99.50th=3D[ 1944], 99.90th=3D[ 2256], 99.95th=3D[ 2448=
-],<br>
-| 99.99th=3D[ 3888]<br>
-bw (KB /s): min=3D123888, max=3D198584, per=3D100.00%, avg=3D154824.40, std=
-ev=3D16978.03<br>
-lat (usec) : 250=3D0.01%, 500=3D8.91%, 750=3D36.44%, 1000=3D32.63%<br>
-lat (msec) : 2=3D21.65%, 4=3D0.37%, 10=3D0.01%<br>
-cpu : usr=3D8.29%, sys=3D19.76%, ctx=3D55882, majf=3D0, minf=3D39<br>
-IO depths : 1=3D0.1%, 2=3D0.1%, 4=3D0.1%, 8=3D0.1%, 16=3D0.1%, 32=3D100.0%,=
- &gt;=3D64=3D0.0%<br>
-submit : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, 64=3D0.0%, &=
-gt;=3D64=3D0.0%<br>
-complete : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.1%, 64=3D0.0%,=
- &gt;=3D64=3D0.0%<br>
-issued : total=3Dr=3D1310720/w=3D0/d=3D0, short=3Dr=3D0/w=3D0/d=3D0<br>
-latency : target=3D0, window=3D0, percentile=3D100.00%, depth=3D32<br>
-<br>
-Run status group 0 (all jobs):<br>
-READ: io=3D5120.0MB, aggrb=3D154707KB/s, minb=3D154707KB/s, maxb=3D154707KB=
-/s, mint=3D33889msec, maxt=3D33889msec<br>
-<br>
-Disk stats (read/write):<br>
-vdb: ios=3D1302739/0, merge=3D0/0, ticks=3D934444/0, in_queue=3D934096, uti=
-l=3D99.77%<br>
-<br>
-<br>
-<br>
-qemu : no-iothread : tcmalloc : iops=3D34516<br>
----------------------------------------------<br>
-Jobs: 1 (f=3D1): [r(1)] [100.0% done] [163.2MB/0KB/0KB /s] [41.8K/0/0 iops]=
- [eta 00m:00s]<br>
-rbd_iodepth32-test: (groupid=3D0, jobs=3D1): err=3D 0: pid=3D896: Tue Jun 9=
- 18:19:08 2015<br>
-read : io=3D5120.0MB, bw=3D138065KB/s, iops=3D34516, runt=3D 37974msec<br>
-slat (usec): min=3D1, max=3D708, avg=3D 3.98, stdev=3D 3.57<br>
-clat (usec): min=3D208, max=3D11858, avg=3D921.43, stdev=3D333.61<br>
-lat (usec): min=3D266, max=3D11862, avg=3D925.77, stdev=3D333.40<br>
-clat percentiles (usec):<br>
-| 1.00th=3D[ 434], 5.00th=3D[ 510], 10.00th=3D[ 564], 20.00th=3D[ 652],<br>
-| 30.00th=3D[ 732], 40.00th=3D[ 812], 50.00th=3D[ 876], 60.00th=3D[ 940],<b=
-r>
-| 70.00th=3D[ 1020], 80.00th=3D[ 1112], 90.00th=3D[ 1320], 95.00th=3D[ 1576=
-],<br>
-| 99.00th=3D[ 1992], 99.50th=3D[ 2128], 99.90th=3D[ 2736], 99.95th=3D[ 3248=
-],<br>
-| 99.99th=3D[ 4320]<br>
-bw (KB /s): min=3D77312, max=3D185576, per=3D99.74%, avg=3D137709.88, stdev=
-=3D16883.77<br>
-lat (usec) : 250=3D0.01%, 500=3D4.36%, 750=3D27.61%, 1000=3D35.60%<br>
-lat (msec) : 2=3D31.49%, 4=3D0.92%, 10=3D0.02%, 20=3D0.01%<br>
-cpu : usr=3D7.19%, sys=3D19.52%, ctx=3D55903, majf=3D0, minf=3D38<br>
-IO depths : 1=3D0.1%, 2=3D0.1%, 4=3D0.1%, 8=3D0.1%, 16=3D0.1%, 32=3D100.0%,=
- &gt;=3D64=3D0.0%<br>
-submit : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, 64=3D0.0%, &=
-gt;=3D64=3D0.0%<br>
-complete : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.1%, 64=3D0.0%,=
- &gt;=3D64=3D0.0%<br>
-issued : total=3Dr=3D1310720/w=3D0/d=3D0, short=3Dr=3D0/w=3D0/d=3D0<br>
-latency : target=3D0, window=3D0, percentile=3D100.00%, depth=3D32<br>
-<br>
-Run status group 0 (all jobs):<br>
-READ: io=3D5120.0MB, aggrb=3D138064KB/s, minb=3D138064KB/s, maxb=3D138064KB=
-/s, mint=3D37974msec, maxt=3D37974msec<br>
-<br>
-Disk stats (read/write):<br>
-vdb: ios=3D1309902/0, merge=3D0/0, ticks=3D1068768/0, in_queue=3D1068396, u=
-til=3D99.86%<br>
-<br>
-<br>
-<br>
-qemu : iothread : glibc : iops=3D34516<br>
--------------------------------------<br>
-<br>
-rbd_iodepth32-test: (g=3D0): rw=3Drandread, bs=3D4K-4K/4K-4K/4K-4K, ioengin=
-e=3Dlibaio, iodepth=3D32<br>
-fio-2.1.11<br>
-Starting 1 process<br>
-Jobs: 1 (f=3D1): [r(1)] [100.0% done] [133.4MB/0KB/0KB /s] [34.2K/0/0 iops]=
- [eta 00m:00s]<br>
-rbd_iodepth32-test: (groupid=3D0, jobs=3D1): err=3D 0: pid=3D876: Tue Jun 9=
- 18:24:01 2015<br>
-read : io=3D5120.0MB, bw=3D137786KB/s, iops=3D34446, runt=3D 38051msec<br>
-slat (usec): min=3D1, max=3D496, avg=3D 3.88, stdev=3D 3.66<br>
-clat (usec): min=3D283, max=3D7515, avg=3D923.34, stdev=3D300.28<br>
-lat (usec): min=3D286, max=3D7519, avg=3D927.58, stdev=3D300.02<br>
-clat percentiles (usec):<br>
-| 1.00th=3D[ 506], 5.00th=3D[ 564], 10.00th=3D[ 596], 20.00th=3D[ 652],<br>
-| 30.00th=3D[ 724], 40.00th=3D[ 804], 50.00th=3D[ 884], 60.00th=3D[ 964],<b=
-r>
-| 70.00th=3D[ 1048], 80.00th=3D[ 1144], 90.00th=3D[ 1304], 95.00th=3D[ 1448=
-],<br>
-| 99.00th=3D[ 1896], 99.50th=3D[ 2096], 99.90th=3D[ 2480], 99.95th=3D[ 2640=
-],<br>
-| 99.99th=3D[ 3984]<br>
-bw (KB /s): min=3D102680, max=3D171112, per=3D100.00%, avg=3D137877.78, std=
-ev=3D15521.30<br>
-lat (usec) : 500=3D0.84%, 750=3D32.97%, 1000=3D30.82%<br>
-lat (msec) : 2=3D34.65%, 4=3D0.71%, 10=3D0.01%<br>
-cpu : usr=3D7.42%, sys=3D19.47%, ctx=3D52455, majf=3D0, minf=3D38<br>
-IO depths : 1=3D0.1%, 2=3D0.1%, 4=3D0.1%, 8=3D0.1%, 16=3D0.1%, 32=3D100.0%,=
- &gt;=3D64=3D0.0%<br>
-submit : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, 64=3D0.0%, &=
-gt;=3D64=3D0.0%<br>
-complete : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.1%, 64=3D0.0%,=
- &gt;=3D64=3D0.0%<br>
-issued : total=3Dr=3D1310720/w=3D0/d=3D0, short=3Dr=3D0/w=3D0/d=3D0<br>
-latency : target=3D0, window=3D0, percentile=3D100.00%, depth=3D32<br>
-<br>
-Run status group 0 (all jobs):<br>
-READ: io=3D5120.0MB, aggrb=3D137785KB/s, minb=3D137785KB/s, maxb=3D137785KB=
-/s, mint=3D38051msec, maxt=3D38051msec<br>
-<br>
-Disk stats (read/write):<br>
-vdb: ios=3D1307426/0, merge=3D0/0, ticks=3D1051416/0, in_queue=3D1050972, u=
-til=3D99.85%<br>
-<br>
-<br>
-<br>
-qemu : no iothread : glibc : iops=3D33395<br>
------------------------------------------<br>
-rbd_iodepth32-test: (g=3D0): rw=3Drandread, bs=3D4K-4K/4K-4K/4K-4K, ioengin=
-e=3Dlibaio, iodepth=3D32<br>
-fio-2.1.11<br>
-Starting 1 process<br>
-Jobs: 1 (f=3D1): [r(1)] [100.0% done] [125.4MB/0KB/0KB /s] [32.9K/0/0 iops]=
- [eta 00m:00s]<br>
-rbd_iodepth32-test: (groupid=3D0, jobs=3D1): err=3D 0: pid=3D886: Tue Jun 9=
- 18:27:18 2015<br>
-read : io=3D5120.0MB, bw=3D133583KB/s, iops=3D33395, runt=3D 39248msec<br>
-slat (usec): min=3D1, max=3D1054, avg=3D 3.86, stdev=3D 4.29<br>
-clat (usec): min=3D139, max=3D12635, avg=3D952.85, stdev=3D335.51<br>
-lat (usec): min=3D303, max=3D12638, avg=3D957.01, stdev=3D335.29<br>
-clat percentiles (usec):<br>
-| 1.00th=3D[ 516], 5.00th=3D[ 564], 10.00th=3D[ 596], 20.00th=3D[ 652],<br>
-| 30.00th=3D[ 724], 40.00th=3D[ 820], 50.00th=3D[ 924], 60.00th=3D[ 996],<b=
-r>
-| 70.00th=3D[ 1080], 80.00th=3D[ 1176], 90.00th=3D[ 1336], 95.00th=3D[ 1528=
-],<br>
-| 99.00th=3D[ 2096], 99.50th=3D[ 2320], 99.90th=3D[ 2672], 99.95th=3D[ 2928=
-],<br>
-| 99.99th=3D[ 4832]<br>
-bw (KB /s): min=3D98136, max=3D171624, per=3D100.00%, avg=3D133682.64, stde=
-v=3D19121.91<br>
-lat (usec) : 250=3D0.01%, 500=3D0.57%, 750=3D32.57%, 1000=3D26.98%<br>
-lat (msec) : 2=3D38.59%, 4=3D1.28%, 10=3D0.01%, 20=3D0.01%<br>
-cpu : usr=3D9.24%, sys=3D15.92%, ctx=3D51219, majf=3D0, minf=3D38<br>
-IO depths : 1=3D0.1%, 2=3D0.1%, 4=3D0.1%, 8=3D0.1%, 16=3D0.1%, 32=3D100.0%,=
- &gt;=3D64=3D0.0%<br>
-submit : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, 64=3D0.0%, &=
-gt;=3D64=3D0.0%<br>
-complete : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.1%, 64=3D0.0%,=
- &gt;=3D64=3D0.0%<br>
-issued : total=3Dr=3D1310720/w=3D0/d=3D0, short=3Dr=3D0/w=3D0/d=3D0<br>
-latency : target=3D0, window=3D0, percentile=3D100.00%, depth=3D32<br>
-<br>
-Run status group 0 (all jobs):<br>
-READ: io=3D5120.0MB, aggrb=3D133583KB/s, minb=3D133583KB/s, maxb=3D133583KB=
-/s, mint=3D39248msec, maxt=3D39248msec<br>
-<br>
-Disk stats (read/write):<br>
-vdb: ios=3D1304526/0, merge=3D0/0, ticks=3D1075020/0, in_queue=3D1074536, u=
-til=3D99.84%<br>
-<br>
-<br>
-<br>
-qemu : iothread : jemmaloc : iops=3D28023<br>
-----------------------------------------<br>
-rbd_iodepth32-test: (g=3D0): rw=3Drandread, bs=3D4K-4K/4K-4K/4K-4K, ioengin=
-e=3Dlibaio, iodepth=3D32<br>
-fio-2.1.11<br>
-Starting 1 process<br>
-Jobs: 1 (f=3D1): [r(1)] [97.9% done] [155.2MB/0KB/0KB /s] [39.1K/0/0 iops] =
-[eta 00m:01s]<br>
-rbd_iodepth32-test: (groupid=3D0, jobs=3D1): err=3D 0: pid=3D899: Tue Jun 9=
- 18:30:26 2015<br>
-read : io=3D5120.0MB, bw=3D112094KB/s, iops=3D28023, runt=3D 46772msec<br>
-slat (usec): min=3D1, max=3D467, avg=3D 4.33, stdev=3D 4.77<br>
-clat (usec): min=3D253, max=3D11307, avg=3D1135.63, stdev=3D346.55<br>
-lat (usec): min=3D256, max=3D11309, avg=3D1140.39, stdev=3D346.22<br>
-clat percentiles (usec):<br>
-| 1.00th=3D[ 510], 5.00th=3D[ 628], 10.00th=3D[ 700], 20.00th=3D[ 820],<br>
-| 30.00th=3D[ 924], 40.00th=3D[ 1032], 50.00th=3D[ 1128], 60.00th=3D[ 1224]=
-,<br>
-| 70.00th=3D[ 1320], 80.00th=3D[ 1416], 90.00th=3D[ 1560], 95.00th=3D[ 1688=
-],<br>
-| 99.00th=3D[ 2096], 99.50th=3D[ 2224], 99.90th=3D[ 2544], 99.95th=3D[ 2832=
-],<br>
-| 99.99th=3D[ 3760]<br>
-bw (KB /s): min=3D91792, max=3D174416, per=3D99.90%, avg=3D111985.27, stdev=
-=3D17381.70<br>
-lat (usec) : 500=3D0.80%, 750=3D13.10%, 1000=3D23.33%<br>
-lat (msec) : 2=3D61.30%, 4=3D1.46%, 10=3D0.01%, 20=3D0.01%<br>
-cpu : usr=3D7.12%, sys=3D17.43%, ctx=3D54507, majf=3D0, minf=3D38<br>
-IO depths : 1=3D0.1%, 2=3D0.1%, 4=3D0.1%, 8=3D0.1%, 16=3D0.1%, 32=3D100.0%,=
- &gt;=3D64=3D0.0%<br>
-submit : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, 64=3D0.0%, &=
-gt;=3D64=3D0.0%<br>
-complete : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.1%, 64=3D0.0%,=
- &gt;=3D64=3D0.0%<br>
-issued : total=3Dr=3D1310720/w=3D0/d=3D0, short=3Dr=3D0/w=3D0/d=3D0<br>
-latency : target=3D0, window=3D0, percentile=3D100.00%, depth=3D32<br>
-<br>
-Run status group 0 (all jobs):<br>
-READ: io=3D5120.0MB, aggrb=3D112094KB/s, minb=3D112094KB/s, maxb=3D112094KB=
-/s, mint=3D46772msec, maxt=3D46772msec<br>
-<br>
-Disk stats (read/write):<br>
-vdb: ios=3D1309169/0, merge=3D0/0, ticks=3D1305796/0, in_queue=3D1305376, u=
-til=3D98.68%<br>
-<br>
-<br>
-<br>
-qemu : non-iothread : jemmaloc : iops=3D42226<br>
---------------------------------------------<br>
-rbd_iodepth32-test: (g=3D0): rw=3Drandread, bs=3D4K-4K/4K-4K/4K-4K, ioengin=
-e=3Dlibaio, iodepth=3D32<br>
-fio-2.1.11<br>
-Starting 1 process<br>
-Jobs: 1 (f=3D1): [r(1)] [100.0% done] [171.2MB/0KB/0KB /s] [43.9K/0/0 iops]=
- [eta 00m:00s]<br>
-rbd_iodepth32-test: (groupid=3D0, jobs=3D1): err=3D 0: pid=3D892: Tue Jun 9=
- 18:34:11 2015<br>
-read : io=3D5120.0MB, bw=3D177130KB/s, iops=3D44282, runt=3D 29599msec<br>
-slat (usec): min=3D1, max=3D527, avg=3D 3.80, stdev=3D 3.74<br>
-clat (usec): min=3D174, max=3D3841, avg=3D717.08, stdev=3D237.53<br>
-lat (usec): min=3D210, max=3D3844, avg=3D721.23, stdev=3D237.22<br>
-clat percentiles (usec):<br>
-| 1.00th=3D[ 354], 5.00th=3D[ 422], 10.00th=3D[ 462], 20.00th=3D[ 516],<br>
-| 30.00th=3D[ 572], 40.00th=3D[ 628], 50.00th=3D[ 684], 60.00th=3D[ 740],<b=
-r>
-| 70.00th=3D[ 804], 80.00th=3D[ 884], 90.00th=3D[ 1004], 95.00th=3D[ 1128],=
-<br>
-| 99.00th=3D[ 1544], 99.50th=3D[ 1672], 99.90th=3D[ 1928], 99.95th=3D[ 2064=
-],<br>
-| 99.99th=3D[ 2608]<br>
-bw (KB /s): min=3D138120, max=3D230816, per=3D100.00%, avg=3D177192.14, std=
-ev=3D23440.79<br>
-lat (usec) : 250=3D0.01%, 500=3D16.24%, 750=3D45.93%, 1000=3D27.46%<br>
-lat (msec) : 2=3D10.30%, 4=3D0.07%<br>
-cpu : usr=3D10.14%, sys=3D23.84%, ctx=3D60938, majf=3D0, minf=3D39<br>
-IO depths : 1=3D0.1%, 2=3D0.1%, 4=3D0.1%, 8=3D0.1%, 16=3D0.1%, 32=3D100.0%,=
- &gt;=3D64=3D0.0%<br>
-submit : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, 64=3D0.0%, &=
-gt;=3D64=3D0.0%<br>
-complete : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.1%, 64=3D0.0%,=
- &gt;=3D64=3D0.0%<br>
-issued : total=3Dr=3D1310720/w=3D0/d=3D0, short=3Dr=3D0/w=3D0/d=3D0<br>
-latency : target=3D0, window=3D0, percentile=3D100.00%, depth=3D32<br>
-<br>
-Run status group 0 (all jobs):<br>
-READ: io=3D5120.0MB, aggrb=3D177130KB/s, minb=3D177130KB/s, maxb=3D177130KB=
-/s, mint=3D29599msec, maxt=3D29599msec<br>
-<br>
-Disk stats (read/write):<br>
-vdb: ios=3D1303992/0, merge=3D0/0, ticks=3D798008/0, in_queue=3D797636, uti=
-l=3D99.80%<br>
-<br>
-<br>
-<br>
------ Mail original -----<br>
-De: &quot;Robert LeBlanc&quot; &lt;<a href=3D"mailto:robert-4JaGZRWAfWbajFs6igw21g@public.gmane.org">=
-robert-4JaGZRWAfWbajFs6igw21g@public.gmane.org</a>&gt;<br>
-=C3=80: &quot;aderumier&quot; &lt;<a href=3D"mailto:aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org">ad=
-erumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org</a>&gt;<br>
-Cc: &quot;Mark Nelson&quot; &lt;<a href=3D"mailto:mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org">mnels=
-on-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org</a>&gt;, &quot;ceph-devel&quot; &lt;<a href=3D"mailto:ceph-de=
-vel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org">ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org</a>&gt;, &quot;pushpesh sha=
-rma&quot; &lt;<a href=3D"mailto:pushpesh.eck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org">pushpesh.eck@gmail.=
-com</a>&gt;, &quot;ceph-users&quot; &lt;<a href=3D"mailto:ceph-users@lists.=
-ceph.com">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a>&gt;<br>
-Envoy=C3=A9: Mardi 9 Juin 2015 18:00:29<br>
-Objet: Re: [ceph-users] rbd_cache, limiting read on high iops around 40k<br=
->
-<br>
------BEGIN PGP SIGNED MESSAGE-----<br>
-Hash: SHA256<br>
-<br>
-I also saw a similar performance increase by using alternative memory<br>
-allocators. What I found was that Ceph OSDs performed well with either<br>
-tcmalloc or jemalloc (except when RocksDB was built with jemalloc<br>
-instead of tcmalloc, I&#39;m still working to dig into why that might be<br=
->
-the case).<br>
-<br>
-However, I found that tcmalloc with QEMU/KVM was very detrimental to<br>
-small I/O, but provided huge gains in I/O &gt;=3D1MB. Jemalloc was much<br>
-better for QEMU/KVM in the tests that we ran. [1]<br>
-<br>
-I&#39;m currently looking into I/O bottlenecks around the 16KB range and<br=
->
-I&#39;m seeing a lot of time in thread creation and destruction, the<br>
-memory allocators are quite a bit down the list (both fio with<br>
-ioengine rbd and on the OSDs). I wonder what the difference can be.<br>
-I&#39;ve tried using the async messenger but there wasn&#39;t a huge<br>
-difference. [2]<br>
-<br>
-Further down the rabbit hole....<br>
-<br>
-[1] <a href=3D"https://www.mail-archive.com/ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org/msg20=
-197.html" target=3D"_blank">https://www.mail-archive.com/ceph-users@lists.c=
-eph.com/msg20197.html</a><br>
-[2] <a href=3D"https://www.mail-archive.com/ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org/msg2=
-3982.html" target=3D"_blank">https://www.mail-archive.com/ceph-devel@vger.k=
-ernel.org/msg23982.html</a><br>
------BEGIN PGP SIGNATURE-----<br>
-Version: Mailvelope v0.13.1<br>
-Comment: <a href=3D"https://www.mailvelope.com" target=3D"_blank">https://w=
-ww.mailvelope.com</a><br>
-<br>
-wsFcBAEBCAAQBQJVdw2ZCRDmVDuy+mK58QAA4MwP/1vt65cvTyyVGGSGRrE8<br>
-unuWjafMHzl486XH+EaVrDVTXFVFOoncJ6kugSpD7yavtCpZNdhsIaTRZguU<br>
-YpfAppNAJU5biSwNv9QPI7kPP2q2+I7Z8ZkvhcVnkjIythoeNnSjV7zJrw87<br>
-afq46GhPHqEXdjp3rOB4RRPniOMnub5oU6QRnKn3HPW8Dx9ZqTeCofRDnCY2<br>
-S695Dt1gzt0ERUOgrUUkt0FQJdkkV6EURcUschngjtEd5727VTLp02HivVl3<br>
-vDYWxQHPK8oS6Xe8GOW0JjulwiqlYotSlrqSU5FMU5gozbk9zMFPIUW1e+51<br>
-9ART8Ta2ItMhPWtAhRwwvxgy51exCy9kBc+m+ptKW5XRUXOImGcOQxszPGOO<br>
-qIIOG1vVG/GBmo/0i6tliqBFYdXmw1qFV7tFiIbisZRH7Q/1NahjYTHqHhu3<br>
-Dv61T6WrerD+9N6S1Lrz1QYe2Fqa56BHhHSXM82NE86SVxEvUkoGegQU+c7b<br>
-6rY1JvuJHJzva7+M2XHApYCchCs4a1Yyd1qWB7yThJD57RIyX1TOg0+siV13<br>
-R+v6wxhQU0vBovH+5oAWmCZaPNT+F0Uvs3xWAxxaIR9r83wMj9qQeBZTKVzQ<br>
-1aFIi15KqAwOp12yWCmrqKTeXhjwYQNd8viCQCGN7AQyPglmzfbuEHalVjz4<br>
-oSJX<br>
-=3Dk281<br>
------END PGP SIGNATURE-----<br>
-----------------<br>
-Robert LeBlanc<br>
-GPG Fingerprint 79A2 9CA4 6CC4 45DD A904 C70E E654 3BB2 FA62 B9F1<br>
-<br>
-<br>
-On Tue, Jun 9, 2015 at 6:02 AM, Alexandre DERUMIER &lt;<a href=3D"mailto:ad=
-erumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org">aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org</a>&gt; wrote:<br>
-&gt;&gt;&gt;Frankly, I&#39;m a little impressed that without RBD cache we c=
-an hit 80K<br>
-&gt;&gt;&gt;IOPS from 1 VM!<br>
-&gt;<br>
-&gt; Note that theses result are not in a vm (fio-rbd on host), so in a vm =
-we&#39;ll have overhead.<br>
-&gt; (I&#39;m planning to send results in qemu soon)<br>
-&gt;<br>
-&gt;&gt;&gt;How fast are the SSDs in those 3 OSDs?<br>
-&gt;<br>
-&gt; Theses results are with datas in buffer memory of osd nodes.<br>
-&gt;<br>
-&gt; When reading fulling on ssd (intel s3500),<br>
-&gt;<br>
-&gt; For 1 client,<br>
-&gt;<br>
-&gt; I&#39;m around 33k iops without cache and 32k iops with cache, with 1 =
-osd.<br>
-&gt; I&#39;m around 55k iops without cache and 38k iops with cache, with 3 =
-osd.<br>
-&gt;<br>
-&gt; with multiple clients jobs, I can reach around 70kiops by osd , and 25=
-0k iops by osd when datas are in buffer.<br>
-&gt;<br>
-&gt; (cpus servers/clients are 2x 10 cores 3,1ghz e5 xeon)<br>
-&gt;<br>
-&gt;<br>
-&gt;<br>
-&gt; small tip :<br>
-&gt; I&#39;m using tcmalloc for fio-rbd or rados bench to improve latencies=
- by around 20%<br>
-&gt;<br>
-&gt; LD_PRELOAD=3D/usr/lib/libtcmalloc_minimal.so.4 fio ...<br>
-&gt; LD_PRELOAD=3D/usr/lib/libtcmalloc_minimal.so.4 rados bench ...<br>
-&gt;<br>
-&gt; as a lot of time is spent in malloc/free<br>
-&gt;<br>
-&gt;<br>
-&gt; (qemu support also tcmalloc since some months , I&#39;ll bench it too<=
-br>
-&gt; <a href=3D"https://lists.gnu.org/archive/html/qemu-devel/2015-03/msg05=
-372.html" target=3D"_blank">https://lists.gnu.org/archive/html/qemu-devel/2=
-015-03/msg05372.html</a>)<br>
-&gt;<br>
-&gt;<br>
-&gt;<br>
-&gt; I&#39;ll try to send full bench results soon, from 1 to 18 ssd osd.<br=
->
-&gt;<br>
-&gt;<br>
-&gt;<br>
-&gt;<br>
-&gt; ----- Mail original -----<br>
-&gt; De: &quot;Mark Nelson&quot; &lt;<a href=3D"mailto:mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org">=
-mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org</a>&gt;<br>
-&gt; =C3=80: &quot;aderumier&quot; &lt;<a href=3D"mailto:aderumier-U/x3PoR4x10@public.gmane.org=
-m">aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org</a>&gt;, &quot;pushpesh sharma&quot; &lt;<a href=3D"=
-mailto:pushpesh.eck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org">pushpesh.eck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt;<br>
-&gt; Cc: &quot;ceph-devel&quot; &lt;<a href=3D"mailto:ceph-devel-u79uwXL29TZNg+MwTxZMZA@public.gmane.org=
-l.org">ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org</a>&gt;, &quot;ceph-users&quot; &lt;<a hr=
-ef=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a>&gt;<b=
-r>
-&gt; Envoy=C3=A9: Mardi 9 Juin 2015 13:36:31<br>
-&gt; Objet: Re: [ceph-users] rbd_cache, limiting read on high iops around 4=
-0k<br>
-&gt;<br>
-&gt; Hi All,<br>
-&gt;<br>
-&gt; In the past we&#39;ve hit some performance issues with RBD cache that =
-we&#39;ve<br>
-&gt; fixed, but we&#39;ve never really tried pushing a single VM beyond 40+=
-K read<br>
-&gt; IOPS in testing (or at least I never have). I suspect there&#39;s a co=
-uple<br>
-&gt; of possibilities as to why it might be slower, but perhaps joshd can<b=
-r>
-&gt; chime in as he&#39;s more familiar with what that code looks like.<br>
-&gt;<br>
-&gt; Frankly, I&#39;m a little impressed that without RBD cache we can hit =
-80K<br>
-&gt; IOPS from 1 VM! How fast are the SSDs in those 3 OSDs?<br>
-&gt;<br>
-&gt; Mark<br>
-&gt;<br>
-&gt; On 06/09/2015 03:36 AM, Alexandre DERUMIER wrote:<br>
-&gt;&gt; It&#39;s seem that the limit is mainly going in high queue depth (=
-+- &gt; 16)<br>
-&gt;&gt;<br>
-&gt;&gt; Here the result in iops with 1client- 4krandread- 3osd - with diff=
-erents queue depth size.<br>
-&gt;&gt; rbd_cache is almost the same than without cache with queue depth &=
-lt;16<br>
-&gt;&gt;<br>
-&gt;&gt;<br>
-&gt;&gt; cache<br>
-&gt;&gt; -----<br>
-&gt;&gt; qd1: 1651<br>
-&gt;&gt; qd2: 3482<br>
-&gt;&gt; qd4: 7958<br>
-&gt;&gt; qd8: 17912<br>
-&gt;&gt; qd16: 36020<br>
-&gt;&gt; qd32: 42765<br>
-&gt;&gt; qd64: 46169<br>
-&gt;&gt;<br>
-&gt;&gt; no cache<br>
-&gt;&gt; --------<br>
-&gt;&gt; qd1: 1748<br>
-&gt;&gt; qd2: 3570<br>
-&gt;&gt; qd4: 8356<br>
-&gt;&gt; qd8: 17732<br>
-&gt;&gt; qd16: 41396<br>
-&gt;&gt; qd32: 78633<br>
-&gt;&gt; qd64: 79063<br>
-&gt;&gt; qd128: 79550<br>
-&gt;&gt;<br>
-&gt;&gt;<br>
-&gt;&gt; ----- Mail original -----<br>
-&gt;&gt; De: &quot;aderumier&quot; &lt;<a href=3D"mailto:aderumier-U/x3PoR4x10@public.gmane.org=
-m">aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org</a>&gt;<br>
-&gt;&gt; =C3=80: &quot;pushpesh sharma&quot; &lt;<a href=3D"mailto:pushpesh=
-.eck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org">pushpesh.eck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt;<br>
-&gt;&gt; Cc: &quot;ceph-devel&quot; &lt;<a href=3D"mailto:ceph-devel@vger.k=
-ernel.org">ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org</a>&gt;, &quot;ceph-users&quot; &lt;<=
-a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a>&g=
-t;<br>
-&gt;&gt; Envoy=C3=A9: Mardi 9 Juin 2015 09:28:21<br>
-&gt;&gt; Objet: Re: [ceph-users] rbd_cache, limiting read on high iops arou=
-nd 40k<br>
-&gt;&gt;<br>
-&gt;&gt; Hi,<br>
-&gt;&gt;<br>
-&gt;&gt;&gt;&gt; We tried adding more RBDs to single VM, but no luck.<br>
-&gt;&gt;<br>
-&gt;&gt; If you want to scale with more disks in a single qemu vm, you need=
- to use iothread feature from qemu and assign 1 iothread by disk (works wit=
-h virtio-blk).<br>
-&gt;&gt; It&#39;s working for me, I can scale with adding more disks.<br>
-&gt;&gt;<br>
-&gt;&gt;<br>
-&gt;&gt; My bench here are done with fio-rbd on host.<br>
-&gt;&gt; I can scale up to 400k iops with 10clients-rbd_cache=3Doff on a si=
-ngle host and around 250kiops 10clients-rbdcache=3Don.<br>
-&gt;&gt;<br>
-&gt;&gt;<br>
-&gt;&gt; I just wonder why I don&#39;t have performance decrease around 30k=
- iops with 1osd.<br>
-&gt;&gt;<br>
-&gt;&gt; I&#39;m going to see if this tracker<br>
-&gt;&gt; <a href=3D"http://tracker.ceph.com/issues/11056" target=3D"_blank"=
->http://tracker.ceph.com/issues/11056</a><br>
-&gt;&gt;<br>
-&gt;&gt; could be the cause.<br>
-&gt;&gt;<br>
-&gt;&gt; (My master build was done some week ago)<br>
-&gt;&gt;<br>
-&gt;&gt;<br>
-&gt;&gt;<br>
-&gt;&gt; ----- Mail original -----<br>
-&gt;&gt; De: &quot;pushpesh sharma&quot; &lt;<a href=3D"mailto:pushpesh.eck=
-@gmail.com">pushpesh.eck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt;<br>
-&gt;&gt; =C3=80: &quot;aderumier&quot; &lt;<a href=3D"mailto:aderumier@odis=
-o.com">aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org</a>&gt;<br>
-&gt;&gt; Cc: &quot;ceph-devel&quot; &lt;<a href=3D"mailto:ceph-devel@vger.k=
-ernel.org">ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org</a>&gt;, &quot;ceph-users&quot; &lt;<=
-a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a>&g=
-t;<br>
-&gt;&gt; Envoy=C3=A9: Mardi 9 Juin 2015 09:21:04<br>
-&gt;&gt; Objet: Re: rbd_cache, limiting read on high iops around 40k<br>
-&gt;&gt;<br>
-&gt;&gt; Hi Alexandre,<br>
-&gt;&gt;<br>
-&gt;&gt; We have also seen something very similar on Hammer(0.94-1). We wer=
-e doing some benchmarking for VMs hosted on hypervisor (QEMU-KVM, openstack=
--juno). Each Ubuntu-VM has a RBD as root disk, and 1 RBD as additional stor=
-age. For some strange reason it was not able to scale 4K- RR iops on each V=
-M beyond 35-40k. We tried adding more RBDs to single VM, but no luck. Howev=
-er increasing number of VMs to 4 on a single hypervisor did scale to some e=
-xtent. After this there was no much benefit we got from adding more VMs.<br=
->
-&gt;&gt;<br>
-&gt;&gt; Here is the trend we have seen, x-axis is number of hypervisor, ea=
-ch hypervisor has 4 VM, each VM has 1 RBD:-<br>
-&gt;&gt;<br>
-&gt;&gt;<br>
-&gt;&gt;<br>
-&gt;&gt;<br>
-&gt;&gt; VDbench is used as benchmarking tool. We were not saturating netwo=
-rk and CPUs at OSD nodes. We were not able to saturate CPUs at hypervisors,=
- and that is where we were suspecting of some throttling effect. However we=
- haven&#39;t setted any such limits from nova or kvm end. We tried some CPU=
- pinning and other KVM related tuning as well, but no luck.<br>
-&gt;&gt;<br>
-&gt;&gt; We tried the same experiment on a bare metal. It was 4K RR IOPs we=
-re scaling from 40K(1 RBD) to 180K(4 RBDs). But after that rather than scal=
-ing beyond that point the numbers were actually degrading. (Single pipe mor=
-e congestion effect)<br>
-&gt;&gt;<br>
-&gt;&gt; We never suspected that rbd cache enable could be detrimental to p=
-erformance. It would nice to route cause the problem if that is the case.<b=
-r>
-&gt;&gt;<br>
-&gt;&gt; On Tue, Jun 9, 2015 at 11:21 AM, Alexandre DERUMIER &lt; <a href=
-=3D"mailto:aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org">aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org</a> &gt; wrote:<br>
-&gt;&gt;<br>
-&gt;&gt;<br>
-&gt;&gt; Hi,<br>
-&gt;&gt;<br>
-&gt;&gt; I&#39;m doing benchmark (ceph master branch), with randread 4k qde=
-pth=3D32,<br>
-&gt;&gt; and rbd_cache=3Dtrue seem to limit the iops around 40k<br>
-&gt;&gt;<br>
-&gt;&gt;<br>
-&gt;&gt; no cache<br>
-&gt;&gt; --------<br>
-&gt;&gt; 1 client - rbd_cache=3Dfalse - 1osd : 38300 iops<br>
-&gt;&gt; 1 client - rbd_cache=3Dfalse - 2osd : 69073 iops<br>
-&gt;&gt; 1 client - rbd_cache=3Dfalse - 3osd : 78292 iops<br>
-&gt;&gt;<br>
-&gt;&gt;<br>
-&gt;&gt; cache<br>
-&gt;&gt; -----<br>
-&gt;&gt; 1 client - rbd_cache=3Dtrue - 1osd : 38100 iops<br>
-&gt;&gt; 1 client - rbd_cache=3Dtrue - 2osd : 42457 iops<br>
-&gt;&gt; 1 client - rbd_cache=3Dtrue - 3osd : 45823 iops<br>
-&gt;&gt;<br>
-&gt;&gt;<br>
-&gt;&gt;<br>
-&gt;&gt; Is it expected ?<br>
-&gt;&gt;<br>
-&gt;&gt;<br>
-&gt;&gt;<br>
-&gt;&gt; fio result rbd_cache=3Dfalse 3 osd<br>
-&gt;&gt; --------------------------------<br>
-&gt;&gt; rbd_iodepth32-test: (g=3D0): rw=3Drandread, bs=3D4K-4K/4K-4K/4K-4K=
-, ioengine=3Drbd, iodepth=3D32<br>
-&gt;&gt; fio-2.1.11<br>
-&gt;&gt; Starting 1 process<br>
-&gt;&gt; rbd engine: RBD version: 0.1.9<br>
-&gt;&gt; Jobs: 1 (f=3D1): [r(1)] [100.0% done] [307.5MB/0KB/0KB /s] [78.8K/=
-0/0 iops] [eta 00m:00s]<br>
-&gt;&gt; rbd_iodepth32-test: (groupid=3D0, jobs=3D1): err=3D 0: pid=3D11354=
-8: Tue Jun 9 07:48:42 2015<br>
-&gt;&gt; read : io=3D10000MB, bw=3D313169KB/s, iops=3D78292, runt=3D 32698m=
-sec<br>
-&gt;&gt; slat (usec): min=3D5, max=3D530, avg=3D11.77, stdev=3D 6.77<br>
-&gt;&gt; clat (usec): min=3D70, max=3D2240, avg=3D336.08, stdev=3D94.82<br>
-&gt;&gt; lat (usec): min=3D101, max=3D2247, avg=3D347.84, stdev=3D95.49<br>
-&gt;&gt; clat percentiles (usec):<br>
-&gt;&gt; | 1.00th=3D[ 173], 5.00th=3D[ 209], 10.00th=3D[ 231], 20.00th=3D[ =
-262],<br>
-&gt;&gt; | 30.00th=3D[ 282], 40.00th=3D[ 302], 50.00th=3D[ 322], 60.00th=3D=
-[ 346],<br>
-&gt;&gt; | 70.00th=3D[ 370], 80.00th=3D[ 402], 90.00th=3D[ 454], 95.00th=3D=
-[ 506],<br>
-&gt;&gt; | 99.00th=3D[ 628], 99.50th=3D[ 692], 99.90th=3D[ 860], 99.95th=3D=
-[ 948],<br>
-&gt;&gt; | 99.99th=3D[ 1176]<br>
-&gt;&gt; bw (KB /s): min=3D238856, max=3D360448, per=3D100.00%, avg=3D31340=
-2.34, stdev=3D25196.21<br>
-&gt;&gt; lat (usec) : 100=3D0.01%, 250=3D15.94%, 500=3D78.60%, 750=3D5.19%,=
- 1000=3D0.23%<br>
-&gt;&gt; lat (msec) : 2=3D0.03%, 4=3D0.01%<br>
-&gt;&gt; cpu : usr=3D74.48%, sys=3D13.25%, ctx=3D703225, majf=3D0, minf=3D1=
-2452<br>
-&gt;&gt; IO depths : 1=3D0.1%, 2=3D0.1%, 4=3D0.1%, 8=3D0.8%, 16=3D87.0%, 32=
-=3D12.1%, &gt;=3D64=3D0.0%<br>
-&gt;&gt; submit : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, 64=
-=3D0.0%, &gt;=3D64=3D0.0%<br>
-&gt;&gt; complete : 0=3D0.0%, 4=3D91.6%, 8=3D3.4%, 16=3D4.5%, 32=3D0.4%, 64=
-=3D0.0%, &gt;=3D64=3D0.0%<br>
-&gt;&gt; issued : total=3Dr=3D2560000/w=3D0/d=3D0, short=3Dr=3D0/w=3D0/d=3D=
-0<br>
-&gt;&gt; latency : target=3D0, window=3D0, percentile=3D100.00%, depth=3D32=
-<br>
-&gt;&gt;<br>
-&gt;&gt; Run status group 0 (all jobs):<br>
-&gt;&gt; READ: io=3D10000MB, aggrb=3D313169KB/s, minb=3D313169KB/s, maxb=3D=
-313169KB/s, mint=3D32698msec, maxt=3D32698msec<br>
-&gt;&gt;<br>
-&gt;&gt; Disk stats (read/write):<br>
-&gt;&gt; dm-0: ios=3D0/45, merge=3D0/0, ticks=3D0/0, in_queue=3D0, util=3D0=
-.00%, aggrios=3D0/24, aggrmerge=3D0/21, aggrticks=3D0/0, aggrin_queue=3D0, =
-aggrutil=3D0.00%<br>
-&gt;&gt; sda: ios=3D0/24, merge=3D0/21, ticks=3D0/0, in_queue=3D0, util=3D0=
-.00%<br>
-&gt;&gt;<br>
-&gt;&gt;<br>
-&gt;&gt;<br>
-&gt;&gt;<br>
-&gt;&gt; fio result rbd_cache=3Dtrue 3osd<br>
-&gt;&gt; ------------------------------<br>
-&gt;&gt;<br>
-&gt;&gt; rbd_iodepth32-test: (g=3D0): rw=3Drandread, bs=3D4K-4K/4K-4K/4K-4K=
-, ioengine=3Drbd, iodepth=3D32<br>
-&gt;&gt; fio-2.1.11<br>
-&gt;&gt; Starting 1 process<br>
-&gt;&gt; rbd engine: RBD version: 0.1.9<br>
-&gt;&gt; Jobs: 1 (f=3D1): [r(1)] [100.0% done] [171.6MB/0KB/0KB /s] [43.1K/=
-0/0 iops] [eta 00m:00s]<br>
-&gt;&gt; rbd_iodepth32-test: (groupid=3D0, jobs=3D1): err=3D 0: pid=3D11338=
-9: Tue Jun 9 07:47:30 2015<br>
-&gt;&gt; read : io=3D10000MB, bw=3D183296KB/s, iops=3D45823, runt=3D 55866m=
-sec<br>
-&gt;&gt; slat (usec): min=3D7, max=3D805, avg=3D21.26, stdev=3D15.84<br>
-&gt;&gt; clat (usec): min=3D101, max=3D4602, avg=3D478.55, stdev=3D143.73<b=
-r>
-&gt;&gt; lat (usec): min=3D123, max=3D4669, avg=3D499.80, stdev=3D146.03<br=
->
-&gt;&gt; clat percentiles (usec):<br>
-&gt;&gt; | 1.00th=3D[ 227], 5.00th=3D[ 274], 10.00th=3D[ 306], 20.00th=3D[ =
-350],<br>
-&gt;&gt; | 30.00th=3D[ 390], 40.00th=3D[ 430], 50.00th=3D[ 470], 60.00th=3D=
-[ 506],<br>
-&gt;&gt; | 70.00th=3D[ 548], 80.00th=3D[ 596], 90.00th=3D[ 660], 95.00th=3D=
-[ 724],<br>
-&gt;&gt; | 99.00th=3D[ 844], 99.50th=3D[ 908], 99.90th=3D[ 1112], 99.95th=
-=3D[ 1288],<br>
-&gt;&gt; | 99.99th=3D[ 2192]<br>
-&gt;&gt; bw (KB /s): min=3D115280, max=3D204416, per=3D100.00%, avg=3D18331=
-5.10, stdev=3D15079.93<br>
-&gt;&gt; lat (usec) : 250=3D2.42%, 500=3D55.61%, 750=3D38.48%, 1000=3D3.28%=
-<br>
-&gt;&gt; lat (msec) : 2=3D0.19%, 4=3D0.01%, 10=3D0.01%<br>
-&gt;&gt; cpu : usr=3D60.27%, sys=3D12.01%, ctx=3D2995393, majf=3D0, minf=3D=
-14100<br>
-&gt;&gt; IO depths : 1=3D0.1%, 2=3D0.1%, 4=3D0.2%, 8=3D13.5%, 16=3D81.0%, 3=
-2=3D5.3%, &gt;=3D64=3D0.0%<br>
-&gt;&gt; submit : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, 64=
-=3D0.0%, &gt;=3D64=3D0.0%<br>
-&gt;&gt; complete : 0=3D0.0%, 4=3D95.0%, 8=3D0.1%, 16=3D1.0%, 32=3D4.0%, 64=
-=3D0.0%, &gt;=3D64=3D0.0%<br>
-&gt;&gt; issued : total=3Dr=3D2560000/w=3D0/d=3D0, short=3Dr=3D0/w=3D0/d=3D=
-0<br>
-&gt;&gt; latency : target=3D0, window=3D0, percentile=3D100.00%, depth=3D32=
-<br>
-&gt;&gt;<br>
-&gt;&gt; Run status group 0 (all jobs):<br>
-&gt;&gt; READ: io=3D10000MB, aggrb=3D183295KB/s, minb=3D183295KB/s, maxb=3D=
-183295KB/s, mint=3D55866msec, maxt=3D55866msec<br>
-&gt;&gt;<br>
-&gt;&gt; Disk stats (read/write):<br>
-&gt;&gt; dm-0: ios=3D0/61, merge=3D0/0, ticks=3D0/8, in_queue=3D8, util=3D0=
-.01%, aggrios=3D0/29, aggrmerge=3D0/32, aggrticks=3D0/8, aggrin_queue=3D8, =
-aggrutil=3D0.01%<br>
-&gt;&gt; sda: ios=3D0/29, merge=3D0/32, ticks=3D0/8, in_queue=3D8, util=3D0=
-.01%<br>
-&gt;&gt;<br>
-&gt; _______________________________________________<br>
-&gt; ceph-users mailing list<br>
-&gt; <a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org=
-</a><br>
-&gt; <a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" tar=
-get=3D"_blank">http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com</a><b=
-r>
-_______________________________________________<br>
-ceph-users mailing list<br>
-<a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a><=
-br>
-<a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" target=
-=3D"_blank">http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com</a><br>
-</div></div></blockquote></div><br><br clear=3D"all"><div><br></div>-- <br>=
-<div class=3D"gmail_signature"><div dir=3D"ltr">=D0=A1 =D1=83=D0=B2=D0=B0=
-=D0=B6=D0=B5=D0=BD=D0=B8=D0=B5=D0=BC, =D0=A4=D0=B0=D1=81=D0=B8=D1=85=D0=BE=
-=D0=B2 =D0=98=D1=80=D0=B5=D0=BA =D0=9D=D1=83=D1=80=D0=B3=D0=B0=D1=8F=D0=B7=
-=D0=BE=D0=B2=D0=B8=D1=87<div>=D0=9C=D0=BE=D0=B1.: +79229045757</div></div><=
-/div>
-</div>
-
---001a1134d8b0142e700518230e78--
-
---===============2106350416==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============2106350416==--
+Pj5WZXJ5IGdvb2Qgd29yayEgCj4+RG8geW91IGhhdmUgYSBycG0tZmlsZT8gCj4+VGhhbmtzLiAK
+bm8gc29ycnksIEknbSBoYXZlIGNvbXBpbGVkIGl0IG1hbnVhbGx5IChhbmQgSSdtIHVzaW5nIGRl
+YmlhbiBqZXNzaWUgYXMgY2xpZW50KQoKCgotLS0tLSBNYWlsIG9yaWdpbmFsIC0tLS0tCkRlOiAi
+SXJlayBGYXNpa2hvdiIgPG1hbG15emhAZ21haWwuY29tPgrDgDogImFkZXJ1bWllciIgPGFkZXJ1
+bWllckBvZGlzby5jb20+CkNjOiAiUm9iZXJ0IExlQmxhbmMiIDxyb2JlcnRAbGVibGFuY25ldC51
+cz4sICJjZXBoLWRldmVsIiA8Y2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc+LCAicHVzaHBlc2gg
+c2hhcm1hIiA8cHVzaHBlc2guZWNrQGdtYWlsLmNvbT4sICJjZXBoLXVzZXJzIiA8Y2VwaC11c2Vy
+c0BsaXN0cy5jZXBoLmNvbT4KRW52b3nDqTogTWVyY3JlZGkgMTAgSnVpbiAyMDE1IDA3OjIxOjQy
+Ck9iamV0OiBSZTogW2NlcGgtdXNlcnNdIHJiZF9jYWNoZSwgbGltaXRpbmcgcmVhZCBvbiBoaWdo
+IGlvcHMgYXJvdW5kIDQwawoKSGksIEFsZXhhbmRyZS4gCgpWZXJ5IGdvb2Qgd29yayEgCkRvIHlv
+dSBoYXZlIGEgcnBtLWZpbGU/IApUaGFua3MuIAoKMjAxNS0wNi0xMCA3OjEwIEdNVCswMzowMCBB
+bGV4YW5kcmUgREVSVU1JRVIgPCBhZGVydW1pZXJAb2Rpc28uY29tID4gOiAKCgpIaSwgCgpJIGhh
+dmUgdGVzdGVkIHFlbXUgd2l0aCBsYXN0IHRjbWFsbG9jIDIuNCwgYW5kIHRoZSBpbXByb3ZlbWVu
+dCBpcyBodWdlIHdpdGggaW90aHJlYWQ6IDUwayBpb3BzICgrNDUlKSAhIAoKCgpxZW11IDogbm8g
+aW90aHJlYWQgOiBnbGliYyA6IGlvcHM9MzMzOTUgCnFlbXUgOiBuby1pb3RocmVhZCA6IHRjbWFs
+bG9jICgyLjIuMSkgOiBpb3BzPTM0NTE2ICgrMyUpIApxZW11IDogbm8taW90aHJlYWQgOiBqZW1t
+YWxvYyA6IGlvcHM9NDIyMjYgKCsyNiUpIApxZW11IDogbm8taW90aHJlYWQgOiB0Y21hbGxvYyAo
+Mi40KSA6IGlvcHM9MzU5NzQgKCs3JSkgCgoKcWVtdSA6IGlvdGhyZWFkIDogZ2xpYmMgOiBpb3Bz
+PTM0NTE2IApxZW11IDogaW90aHJlYWQgOiB0Y21hbGxvYyA6IGlvcHM9Mzg2NzYgKCsxMiUpIApx
+ZW11IDogaW90aHJlYWQgOiBqZW1tYWxvYyA6IGlvcHM9MjgwMjMgKC0xOSUpIApxZW11IDogaW90
+aHJlYWQgOiB0Y21hbGxvYyAoMi40KSA6IGlvcHM9NTAyNzYgKCs0NSUpIAoKCgoKCnFlbXUgOiBp
+b3RocmVhZCA6IHRjbWFsbG9jICgyLjQpIDogaW9wcz01MDI3NiAoKzQ1JSkgCi0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSAKcmJkX2lvZGVwdGgz
+Mi10ZXN0OiAoZz0wKTogcnc9cmFuZHJlYWQsIGJzPTRLLTRLLzRLLTRLLzRLLTRLLCBpb2VuZ2lu
+ZT1saWJhaW8sIGlvZGVwdGg9MzIgCmZpby0yLjEuMTEgClN0YXJ0aW5nIDEgcHJvY2VzcyAKSm9i
+czogMSAoZj0xKTogW3IoMSldIFsxMDAuMCUgZG9uZV0gWzIxNC43TUIvMEtCLzBLQiAvc10gWzU0
+LjFLLzAvMCBpb3BzXSBbZXRhIDAwbTowMHNdIApyYmRfaW9kZXB0aDMyLXRlc3Q6IChncm91cGlk
+PTAsIGpvYnM9MSk6IGVycj0gMDogcGlkPTg5NDogV2VkIEp1biAxMCAwNTo1NDoyNCAyMDE1IApy
+ZWFkIDogaW89NTEyMC4wTUIsIGJ3PTIwMTEwOEtCL3MsIGlvcHM9NTAyNzYsIHJ1bnQ9IDI2MDcw
+bXNlYyAKc2xhdCAodXNlYyk6IG1pbj0xLCBtYXg9MTEzNiwgYXZnPSAzLjU0LCBzdGRldj0gMy41
+OCAKY2xhdCAodXNlYyk6IG1pbj0xMjgsIG1heD02MjYyLCBhdmc9NjMxLjQxLCBzdGRldj0xOTcu
+NzEgCmxhdCAodXNlYyk6IG1pbj0xNDksIG1heD02MjY1LCBhdmc9NjM1LjI3LCBzdGRldj0xOTcu
+NDAgCmNsYXQgcGVyY2VudGlsZXMgKHVzZWMpOiAKfCAxLjAwdGg9WyAzMThdLCA1LjAwdGg9WyAz
+NzhdLCAxMC4wMHRoPVsgNDE4XSwgMjAuMDB0aD1bIDQ3NF0sIAp8IDMwLjAwdGg9WyA1MTZdLCA0
+MC4wMHRoPVsgNTY0XSwgNTAuMDB0aD1bIDYxMl0sIDYwLjAwdGg9WyA2NTJdLCAKfCA3MC4wMHRo
+PVsgNzAwXSwgODAuMDB0aD1bIDc1Nl0sIDkwLjAwdGg9WyA4NjBdLCA5NS4wMHRoPVsgOTgwXSwg
+CnwgOTkuMDB0aD1bIDEyNzJdLCA5OS41MHRoPVsgMTM4NF0sIDk5LjkwdGg9WyAxNjg4XSwgOTku
+OTV0aD1bIDE4OTZdLCAKfCA5OS45OXRoPVsgMzc2MF0gCmJ3IChLQiAvcyk6IG1pbj0xNDU2MDgs
+IG1heD0yNDk2ODgsIHBlcj0xMDAuMDAlLCBhdmc9MjAxMTA4LjAwLCBzdGRldj0yMTcxOC44NyAK
+bGF0ICh1c2VjKSA6IDI1MD0wLjA0JSwgNTAwPTI1Ljg0JSwgNzUwPTUzLjAwJSwgMTAwMD0xNi42
+MyUgCmxhdCAobXNlYykgOiAyPTQuNDYlLCA0PTAuMDMlLCAxMD0wLjAxJSAKY3B1IDogdXNyPTku
+NzMlLCBzeXM9MjQuOTMlLCBjdHg9NjY0MTcsIG1hamY9MCwgbWluZj0zOCAKSU8gZGVwdGhzIDog
+MT0wLjElLCAyPTAuMSUsIDQ9MC4xJSwgOD0wLjElLCAxNj0wLjElLCAzMj0xMDAuMCUsID49NjQ9
+MC4wJSAKc3VibWl0IDogMD0wLjAlLCA0PTEwMC4wJSwgOD0wLjAlLCAxNj0wLjAlLCAzMj0wLjAl
+LCA2ND0wLjAlLCA+PTY0PTAuMCUgCmNvbXBsZXRlIDogMD0wLjAlLCA0PTEwMC4wJSwgOD0wLjAl
+LCAxNj0wLjAlLCAzMj0wLjElLCA2ND0wLjAlLCA+PTY0PTAuMCUgCmlzc3VlZCA6IHRvdGFsPXI9
+MTMxMDcyMC93PTAvZD0wLCBzaG9ydD1yPTAvdz0wL2Q9MCAKbGF0ZW5jeSA6IHRhcmdldD0wLCB3
+aW5kb3c9MCwgcGVyY2VudGlsZT0xMDAuMDAlLCBkZXB0aD0zMiAKClJ1biBzdGF0dXMgZ3JvdXAg
+MCAoYWxsIGpvYnMpOiAKUkVBRDogaW89NTEyMC4wTUIsIGFnZ3JiPTIwMTEwN0tCL3MsIG1pbmI9
+MjAxMTA3S0IvcywgbWF4Yj0yMDExMDdLQi9zLCBtaW50PTI2MDcwbXNlYywgbWF4dD0yNjA3MG1z
+ZWMgCgpEaXNrIHN0YXRzIChyZWFkL3dyaXRlKTogCnZkYjogaW9zPTEzMDI1NTUvMCwgbWVyZ2U9
+MC8wLCB0aWNrcz03MTUxNzYvMCwgaW5fcXVldWU9NzE0ODQwLCB1dGlsPTk5LjczJSAKCgoKCgoK
+cmJkX2lvZGVwdGgzMi10ZXN0OiAoZz0wKTogcnc9cmFuZHJlYWQsIGJzPTRLLTRLLzRLLTRLLzRL
+LTRLLCBpb2VuZ2luZT1saWJhaW8sIGlvZGVwdGg9MzIgCmZpby0yLjEuMTEgClN0YXJ0aW5nIDEg
+cHJvY2VzcyAKSm9iczogMSAoZj0xKTogW3IoMSldIFsxMDAuMCUgZG9uZV0gWzE1OC43TUIvMEtC
+LzBLQiAvc10gWzQwLjZLLzAvMCBpb3BzXSBbZXRhIDAwbTowMHNdIApyYmRfaW9kZXB0aDMyLXRl
+c3Q6IChncm91cGlkPTAsIGpvYnM9MSk6IGVycj0gMDogcGlkPTg4OTogV2VkIEp1biAxMCAwNjow
+NTowNiAyMDE1IApyZWFkIDogaW89NTEyMC4wTUIsIGJ3PTE0Mzg5N0tCL3MsIGlvcHM9MzU5NzQs
+IHJ1bnQ9IDM2NDM1bXNlYyAKc2xhdCAodXNlYyk6IG1pbj0xLCBtYXg9NzEwLCBhdmc9IDMuMzEs
+IHN0ZGV2PSAzLjM1IApjbGF0ICh1c2VjKTogbWluPTE5MSwgbWF4PTQ3NDAsIGF2Zz04ODQuNjYs
+IHN0ZGV2PTMxNS42NSAKbGF0ICh1c2VjKTogbWluPTI4OSwgbWF4PTQ3NDMsIGF2Zz04ODguMzEs
+IHN0ZGV2PTMxNS41MSAKY2xhdCBwZXJjZW50aWxlcyAodXNlYyk6IAp8IDEuMDB0aD1bIDQ2Ml0s
+IDUuMDB0aD1bIDUxNl0sIDEwLjAwdGg9WyA1NDhdLCAyMC4wMHRoPVsgNTk2XSwgCnwgMzAuMDB0
+aD1bIDY1Ml0sIDQwLjAwdGg9WyA3NjRdLCA1MC4wMHRoPVsgODY4XSwgNjAuMDB0aD1bIDk0MF0s
+IAp8IDcwLjAwdGg9WyAxMDA0XSwgODAuMDB0aD1bIDEwOTZdLCA5MC4wMHRoPVsgMTI1Nl0sIDk1
+LjAwdGg9WyAxNDE2XSwgCnwgOTkuMDB0aD1bIDIwMjRdLCA5OS41MHRoPVsgMjIyNF0sIDk5Ljkw
+dGg9WyAyNTQ0XSwgOTkuOTV0aD1bIDI2NDBdLCAKfCA5OS45OXRoPVsgMzYzMl0gCmJ3IChLQiAv
+cyk6IG1pbj05ODM1MiwgbWF4PTE3NzMyOCwgcGVyPTk5LjkxJSwgYXZnPTE0Mzc3Mi4xMSwgc3Rk
+ZXY9MjE3ODIuMzkgCmxhdCAodXNlYykgOiAyNTA9MC4wMSUsIDUwMD0zLjQ4JSwgNzUwPTM1LjY5
+JSwgMTAwMD0zMC4wMSUgCmxhdCAobXNlYykgOiAyPTI5Ljc0JSwgND0xLjA3JSwgMTA9MC4wMSUg
+CmNwdSA6IHVzcj03LjEwJSwgc3lzPTE2LjkwJSwgY3R4PTU0ODU1LCBtYWpmPTAsIG1pbmY9Mzgg
+CklPIGRlcHRocyA6IDE9MC4xJSwgMj0wLjElLCA0PTAuMSUsIDg9MC4xJSwgMTY9MC4xJSwgMzI9
+MTAwLjAlLCA+PTY0PTAuMCUgCnN1Ym1pdCA6IDA9MC4wJSwgND0xMDAuMCUsIDg9MC4wJSwgMTY9
+MC4wJSwgMzI9MC4wJSwgNjQ9MC4wJSwgPj02ND0wLjAlIApjb21wbGV0ZSA6IDA9MC4wJSwgND0x
+MDAuMCUsIDg9MC4wJSwgMTY9MC4wJSwgMzI9MC4xJSwgNjQ9MC4wJSwgPj02ND0wLjAlIAppc3N1
+ZWQgOiB0b3RhbD1yPTEzMTA3MjAvdz0wL2Q9MCwgc2hvcnQ9cj0wL3c9MC9kPTAgCmxhdGVuY3kg
+OiB0YXJnZXQ9MCwgd2luZG93PTAsIHBlcmNlbnRpbGU9MTAwLjAwJSwgZGVwdGg9MzIgCgpSdW4g
+c3RhdHVzIGdyb3VwIDAgKGFsbCBqb2JzKTogClJFQUQ6IGlvPTUxMjAuME1CLCBhZ2dyYj0xNDM4
+OTZLQi9zLCBtaW5iPTE0Mzg5NktCL3MsIG1heGI9MTQzODk2S0IvcywgbWludD0zNjQzNW1zZWMs
+IG1heHQ9MzY0MzVtc2VjIAoKRGlzayBzdGF0cyAocmVhZC93cml0ZSk6IAp2ZGI6IGlvcz0xMzAx
+MzU3LzAsIG1lcmdlPTAvMCwgdGlja3M9MTAzMzAzNi8wLCBpbl9xdWV1ZT0xMDMyNzE2LCB1dGls
+PTk5Ljg1JSAKCgotLS0tLSBNYWlsIG9yaWdpbmFsIC0tLS0tIApEZTogImFkZXJ1bWllciIgPCBh
+ZGVydW1pZXJAb2Rpc28uY29tID4gCsOAOiAiUm9iZXJ0IExlQmxhbmMiIDwgcm9iZXJ0QGxlYmxh
+bmNuZXQudXMgPiAKQ2M6ICJNYXJrIE5lbHNvbiIgPCBtbmVsc29uQHJlZGhhdC5jb20gPiwgImNl
+cGgtZGV2ZWwiIDwgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcgPiwgInB1c2hwZXNoIHNoYXJt
+YSIgPCBwdXNocGVzaC5lY2tAZ21haWwuY29tID4sICJjZXBoLXVzZXJzIiA8IGNlcGgtdXNlcnNA
+bGlzdHMuY2VwaC5jb20gPiAKRW52b3nDqTogTWFyZGkgOSBKdWluIDIwMTUgMTg6NDc6MjcgCk9i
+amV0OiBSZTogW2NlcGgtdXNlcnNdIHJiZF9jYWNoZSwgbGltaXRpbmcgcmVhZCBvbiBoaWdoIGlv
+cHMgYXJvdW5kIDQwayAKCkhpIFJvYmVydCwgCgo+PldoYXQgSSBmb3VuZCB3YXMgdGhhdCBDZXBo
+IE9TRHMgcGVyZm9ybWVkIHdlbGwgd2l0aCBlaXRoZXIgCj4+dGNtYWxsb2Mgb3IgamVtYWxsb2Mg
+KGV4Y2VwdCB3aGVuIFJvY2tzREIgd2FzIGJ1aWx0IHdpdGggamVtYWxsb2MgCj4+aW5zdGVhZCBv
+ZiB0Y21hbGxvYywgSSdtIHN0aWxsIHdvcmtpbmcgdG8gZGlnIGludG8gd2h5IHRoYXQgbWlnaHQg
+YmUgCj4+dGhlIGNhc2UpLiAKeWVzLGZyb20gbXkgdGVzdCwgZm9yIG9zZCB0Y21hbGxvYyBpcyBh
+IGxpdHRsZSBmYXN0ZXIgKGJ1dCB2ZXJ5IGxpdHRsZSkgdGhhbiBqZW1hbGxvYy4gCgoKCj4+SG93
+ZXZlciwgSSBmb3VuZCB0aGF0IHRjbWFsbG9jIHdpdGggUUVNVS9LVk0gd2FzIHZlcnkgZGV0cmlt
+ZW50YWwgdG8gCj4+c21hbGwgSS9PLCBidXQgcHJvdmlkZWQgaHVnZSBnYWlucyBpbiBJL08gPj0x
+TUIuIEplbWFsbG9jIHdhcyBtdWNoIAo+PmJldHRlciBmb3IgUUVNVS9LVk0gaW4gdGhlIHRlc3Rz
+IHRoYXQgd2UgcmFuLiBbMV0gCgoKSnVzdCBoYXZlIGRvbmUgcWVtdSB0ZXN0ICg0ayByYW5kcmVh
+ZCAtIHJiZF9jYWNoZT1vZmYpLCBJIGRvbid0IHNlZSBzcGVlZCByZWdyZXNzaW9uIHdpdGggdGNt
+YWxsb2MuIAp3aXRoIHFlbXUgaW90aHJlYWQsIHRjbWFsbG9jIGhhdmUgYSBzcGVlZCBpbmNyZWFz
+ZSBvdmVyIGdsaWIgCndpdGggcWVtdSBpb3RocmVhZCwgamVtYWxsb2MgaGF2ZSBhIHNwZWVkIGRl
+Y3JlYXNlIAoKd2l0aG91dCBpb3RocmVhZCwgamVtYWxsb2MgaGF2ZSBhIGJpZyBzcGVlZCBpbmNy
+ZWFzZSAKCnRoaXMgaXMgd2l0aCAKLXFlbXUgMi4zIAotdGNtYWxsb2MgMi4yLjEgCi1qZW1tYWxv
+YyAzLjYgCi1saWJjNiAyLjE5IAoKCnFlbXUgOiBubyBpb3RocmVhZCA6IGdsaWJjIDogaW9wcz0z
+MzM5NSAKcWVtdSA6IG5vLWlvdGhyZWFkIDogdGNtYWxsb2MgOiBpb3BzPTM0NTE2ICgrMyUpIApx
+ZW11IDogbm8taW90aHJlYWQgOiBqZW1tYWxvYyA6IGlvcHM9NDIyMjYgKCsyNiUpIAoKcWVtdSA6
+IGlvdGhyZWFkIDogZ2xpYmMgOiBpb3BzPTM0NTE2IApxZW11IDogaW90aHJlYWQgOiB0Y21hbGxv
+YyA6IGlvcHM9Mzg2NzYgKCsxMiUpIApxZW11IDogaW90aHJlYWQgOiBqZW1tYWxvYyA6IGlvcHM9
+MjgwMjMgKC0xOSUpIAoKCihUaGUgYmVuZWZpdCBvZiBpb3RocmVhZHMgaXMgdGhhdCB3ZSBjYW4g
+c2NhbGUgd2l0aCBtb3JlIGRpc2tzIGluIDF2bSkgCgoKZmlvIHJlc3VsdHM6IAotLS0tLS0tLS0t
+LS0gCgpxZW11IDogaW90aHJlYWQgOiB0Y21hbGxvYyA6IGlvcHM9Mzg2NzYgCi0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tIApyYmRfaW9kZXB0aDMyLXRlc3Q6IChnPTAp
+OiBydz1yYW5kcmVhZCwgYnM9NEstNEsvNEstNEsvNEstNEssIGlvZW5naW5lPWxpYmFpbywgaW9k
+ZXB0aD0zMiAKZmlvLTIuMS4xMSAKU3RhcnRpbmcgMSBwcm9jZXNzIApKb2JzOiAxIChmPTApOiBb
+cigxKV0gWzEwMC4wJSBkb25lXSBbMTIzLjVNQi8wS0IvMEtCIC9zXSBbMzEuNksvMC8wIGlvcHNd
+IFtldGEgMDBtOjAwc10gCnJiZF9pb2RlcHRoMzItdGVzdDogKGdyb3VwaWQ9MCwgam9icz0xKTog
+ZXJyPSAwOiBwaWQ9MTI2NTogVHVlIEp1biA5IDE4OjE2OjUzIDIwMTUgCnJlYWQgOiBpbz01MTIw
+LjBNQiwgYnc9MTU0NzA3S0IvcywgaW9wcz0zODY3NiwgcnVudD0gMzM4ODltc2VjIApzbGF0ICh1
+c2VjKTogbWluPTEsIG1heD03MTUsIGF2Zz0gMy42Mywgc3RkZXY9IDMuNDIgCmNsYXQgKHVzZWMp
+OiBtaW49MTUyLCBtYXg9NTczNiwgYXZnPTgyMi4xMiwgc3RkZXY9Mjg5LjM0IApsYXQgKHVzZWMp
+OiBtaW49MjMxLCBtYXg9NTc0MCwgYXZnPTgyNi4xMCwgc3RkZXY9Mjg5LjA4IApjbGF0IHBlcmNl
+bnRpbGVzICh1c2VjKTogCnwgMS4wMHRoPVsgNDAyXSwgNS4wMHRoPVsgNDY2XSwgMTAuMDB0aD1b
+IDUxMF0sIDIwLjAwdGg9WyA1NzJdLCAKfCAzMC4wMHRoPVsgNjM2XSwgNDAuMDB0aD1bIDcxNl0s
+IDUwLjAwdGg9WyA3ODBdLCA2MC4wMHRoPVsgODUyXSwgCnwgNzAuMDB0aD1bIDkzMl0sIDgwLjAw
+dGg9WyAxMDIwXSwgOTAuMDB0aD1bIDExNjBdLCA5NS4wMHRoPVsgMTM1Ml0sIAp8IDk5LjAwdGg9
+WyAxODAwXSwgOTkuNTB0aD1bIDE5NDRdLCA5OS45MHRoPVsgMjI1Nl0sIDk5Ljk1dGg9WyAyNDQ4
+XSwgCnwgOTkuOTl0aD1bIDM4ODhdIApidyAoS0IgL3MpOiBtaW49MTIzODg4LCBtYXg9MTk4NTg0
+LCBwZXI9MTAwLjAwJSwgYXZnPTE1NDgyNC40MCwgc3RkZXY9MTY5NzguMDMgCmxhdCAodXNlYykg
+OiAyNTA9MC4wMSUsIDUwMD04LjkxJSwgNzUwPTM2LjQ0JSwgMTAwMD0zMi42MyUgCmxhdCAobXNl
+YykgOiAyPTIxLjY1JSwgND0wLjM3JSwgMTA9MC4wMSUgCmNwdSA6IHVzcj04LjI5JSwgc3lzPTE5
+Ljc2JSwgY3R4PTU1ODgyLCBtYWpmPTAsIG1pbmY9MzkgCklPIGRlcHRocyA6IDE9MC4xJSwgMj0w
+LjElLCA0PTAuMSUsIDg9MC4xJSwgMTY9MC4xJSwgMzI9MTAwLjAlLCA+PTY0PTAuMCUgCnN1Ym1p
+dCA6IDA9MC4wJSwgND0xMDAuMCUsIDg9MC4wJSwgMTY9MC4wJSwgMzI9MC4wJSwgNjQ9MC4wJSwg
+Pj02ND0wLjAlIApjb21wbGV0ZSA6IDA9MC4wJSwgND0xMDAuMCUsIDg9MC4wJSwgMTY9MC4wJSwg
+MzI9MC4xJSwgNjQ9MC4wJSwgPj02ND0wLjAlIAppc3N1ZWQgOiB0b3RhbD1yPTEzMTA3MjAvdz0w
+L2Q9MCwgc2hvcnQ9cj0wL3c9MC9kPTAgCmxhdGVuY3kgOiB0YXJnZXQ9MCwgd2luZG93PTAsIHBl
+cmNlbnRpbGU9MTAwLjAwJSwgZGVwdGg9MzIgCgpSdW4gc3RhdHVzIGdyb3VwIDAgKGFsbCBqb2Jz
+KTogClJFQUQ6IGlvPTUxMjAuME1CLCBhZ2dyYj0xNTQ3MDdLQi9zLCBtaW5iPTE1NDcwN0tCL3Ms
+IG1heGI9MTU0NzA3S0IvcywgbWludD0zMzg4OW1zZWMsIG1heHQ9MzM4ODltc2VjIAoKRGlzayBz
+dGF0cyAocmVhZC93cml0ZSk6IAp2ZGI6IGlvcz0xMzAyNzM5LzAsIG1lcmdlPTAvMCwgdGlja3M9
+OTM0NDQ0LzAsIGluX3F1ZXVlPTkzNDA5NiwgdXRpbD05OS43NyUgCgoKCnFlbXUgOiBuby1pb3Ro
+cmVhZCA6IHRjbWFsbG9jIDogaW9wcz0zNDUxNiAKLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tIApKb2JzOiAxIChmPTEpOiBbcigxKV0gWzEwMC4wJSBkb25lXSBb
+MTYzLjJNQi8wS0IvMEtCIC9zXSBbNDEuOEsvMC8wIGlvcHNdIFtldGEgMDBtOjAwc10gCnJiZF9p
+b2RlcHRoMzItdGVzdDogKGdyb3VwaWQ9MCwgam9icz0xKTogZXJyPSAwOiBwaWQ9ODk2OiBUdWUg
+SnVuIDkgMTg6MTk6MDggMjAxNSAKcmVhZCA6IGlvPTUxMjAuME1CLCBidz0xMzgwNjVLQi9zLCBp
+b3BzPTM0NTE2LCBydW50PSAzNzk3NG1zZWMgCnNsYXQgKHVzZWMpOiBtaW49MSwgbWF4PTcwOCwg
+YXZnPSAzLjk4LCBzdGRldj0gMy41NyAKY2xhdCAodXNlYyk6IG1pbj0yMDgsIG1heD0xMTg1OCwg
+YXZnPTkyMS40Mywgc3RkZXY9MzMzLjYxIApsYXQgKHVzZWMpOiBtaW49MjY2LCBtYXg9MTE4NjIs
+IGF2Zz05MjUuNzcsIHN0ZGV2PTMzMy40MCAKY2xhdCBwZXJjZW50aWxlcyAodXNlYyk6IAp8IDEu
+MDB0aD1bIDQzNF0sIDUuMDB0aD1bIDUxMF0sIDEwLjAwdGg9WyA1NjRdLCAyMC4wMHRoPVsgNjUy
+XSwgCnwgMzAuMDB0aD1bIDczMl0sIDQwLjAwdGg9WyA4MTJdLCA1MC4wMHRoPVsgODc2XSwgNjAu
+MDB0aD1bIDk0MF0sIAp8IDcwLjAwdGg9WyAxMDIwXSwgODAuMDB0aD1bIDExMTJdLCA5MC4wMHRo
+PVsgMTMyMF0sIDk1LjAwdGg9WyAxNTc2XSwgCnwgOTkuMDB0aD1bIDE5OTJdLCA5OS41MHRoPVsg
+MjEyOF0sIDk5LjkwdGg9WyAyNzM2XSwgOTkuOTV0aD1bIDMyNDhdLCAKfCA5OS45OXRoPVsgNDMy
+MF0gCmJ3IChLQiAvcyk6IG1pbj03NzMxMiwgbWF4PTE4NTU3NiwgcGVyPTk5Ljc0JSwgYXZnPTEz
+NzcwOS44OCwgc3RkZXY9MTY4ODMuNzcgCmxhdCAodXNlYykgOiAyNTA9MC4wMSUsIDUwMD00LjM2
+JSwgNzUwPTI3LjYxJSwgMTAwMD0zNS42MCUgCmxhdCAobXNlYykgOiAyPTMxLjQ5JSwgND0wLjky
+JSwgMTA9MC4wMiUsIDIwPTAuMDElIApjcHUgOiB1c3I9Ny4xOSUsIHN5cz0xOS41MiUsIGN0eD01
+NTkwMywgbWFqZj0wLCBtaW5mPTM4IApJTyBkZXB0aHMgOiAxPTAuMSUsIDI9MC4xJSwgND0wLjEl
+LCA4PTAuMSUsIDE2PTAuMSUsIDMyPTEwMC4wJSwgPj02ND0wLjAlIApzdWJtaXQgOiAwPTAuMCUs
+IDQ9MTAwLjAlLCA4PTAuMCUsIDE2PTAuMCUsIDMyPTAuMCUsIDY0PTAuMCUsID49NjQ9MC4wJSAK
+Y29tcGxldGUgOiAwPTAuMCUsIDQ9MTAwLjAlLCA4PTAuMCUsIDE2PTAuMCUsIDMyPTAuMSUsIDY0
+PTAuMCUsID49NjQ9MC4wJSAKaXNzdWVkIDogdG90YWw9cj0xMzEwNzIwL3c9MC9kPTAsIHNob3J0
+PXI9MC93PTAvZD0wIApsYXRlbmN5IDogdGFyZ2V0PTAsIHdpbmRvdz0wLCBwZXJjZW50aWxlPTEw
+MC4wMCUsIGRlcHRoPTMyIAoKUnVuIHN0YXR1cyBncm91cCAwIChhbGwgam9icyk6IApSRUFEOiBp
+bz01MTIwLjBNQiwgYWdncmI9MTM4MDY0S0IvcywgbWluYj0xMzgwNjRLQi9zLCBtYXhiPTEzODA2
+NEtCL3MsIG1pbnQ9Mzc5NzRtc2VjLCBtYXh0PTM3OTc0bXNlYyAKCkRpc2sgc3RhdHMgKHJlYWQv
+d3JpdGUpOiAKdmRiOiBpb3M9MTMwOTkwMi8wLCBtZXJnZT0wLzAsIHRpY2tzPTEwNjg3NjgvMCwg
+aW5fcXVldWU9MTA2ODM5NiwgdXRpbD05OS44NiUgCgoKCnFlbXUgOiBpb3RocmVhZCA6IGdsaWJj
+IDogaW9wcz0zNDUxNiAKLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSAKCnJi
+ZF9pb2RlcHRoMzItdGVzdDogKGc9MCk6IHJ3PXJhbmRyZWFkLCBicz00Sy00Sy80Sy00Sy80Sy00
+SywgaW9lbmdpbmU9bGliYWlvLCBpb2RlcHRoPTMyIApmaW8tMi4xLjExIApTdGFydGluZyAxIHBy
+b2Nlc3MgCkpvYnM6IDEgKGY9MSk6IFtyKDEpXSBbMTAwLjAlIGRvbmVdIFsxMzMuNE1CLzBLQi8w
+S0IgL3NdIFszNC4ySy8wLzAgaW9wc10gW2V0YSAwMG06MDBzXSAKcmJkX2lvZGVwdGgzMi10ZXN0
+OiAoZ3JvdXBpZD0wLCBqb2JzPTEpOiBlcnI9IDA6IHBpZD04NzY6IFR1ZSBKdW4gOSAxODoyNDow
+MSAyMDE1IApyZWFkIDogaW89NTEyMC4wTUIsIGJ3PTEzNzc4NktCL3MsIGlvcHM9MzQ0NDYsIHJ1
+bnQ9IDM4MDUxbXNlYyAKc2xhdCAodXNlYyk6IG1pbj0xLCBtYXg9NDk2LCBhdmc9IDMuODgsIHN0
+ZGV2PSAzLjY2IApjbGF0ICh1c2VjKTogbWluPTI4MywgbWF4PTc1MTUsIGF2Zz05MjMuMzQsIHN0
+ZGV2PTMwMC4yOCAKbGF0ICh1c2VjKTogbWluPTI4NiwgbWF4PTc1MTksIGF2Zz05MjcuNTgsIHN0
+ZGV2PTMwMC4wMiAKY2xhdCBwZXJjZW50aWxlcyAodXNlYyk6IAp8IDEuMDB0aD1bIDUwNl0sIDUu
+MDB0aD1bIDU2NF0sIDEwLjAwdGg9WyA1OTZdLCAyMC4wMHRoPVsgNjUyXSwgCnwgMzAuMDB0aD1b
+IDcyNF0sIDQwLjAwdGg9WyA4MDRdLCA1MC4wMHRoPVsgODg0XSwgNjAuMDB0aD1bIDk2NF0sIAp8
+IDcwLjAwdGg9WyAxMDQ4XSwgODAuMDB0aD1bIDExNDRdLCA5MC4wMHRoPVsgMTMwNF0sIDk1LjAw
+dGg9WyAxNDQ4XSwgCnwgOTkuMDB0aD1bIDE4OTZdLCA5OS41MHRoPVsgMjA5Nl0sIDk5LjkwdGg9
+WyAyNDgwXSwgOTkuOTV0aD1bIDI2NDBdLCAKfCA5OS45OXRoPVsgMzk4NF0gCmJ3IChLQiAvcyk6
+IG1pbj0xMDI2ODAsIG1heD0xNzExMTIsIHBlcj0xMDAuMDAlLCBhdmc9MTM3ODc3Ljc4LCBzdGRl
+dj0xNTUyMS4zMCAKbGF0ICh1c2VjKSA6IDUwMD0wLjg0JSwgNzUwPTMyLjk3JSwgMTAwMD0zMC44
+MiUgCmxhdCAobXNlYykgOiAyPTM0LjY1JSwgND0wLjcxJSwgMTA9MC4wMSUgCmNwdSA6IHVzcj03
+LjQyJSwgc3lzPTE5LjQ3JSwgY3R4PTUyNDU1LCBtYWpmPTAsIG1pbmY9MzggCklPIGRlcHRocyA6
+IDE9MC4xJSwgMj0wLjElLCA0PTAuMSUsIDg9MC4xJSwgMTY9MC4xJSwgMzI9MTAwLjAlLCA+PTY0
+PTAuMCUgCnN1Ym1pdCA6IDA9MC4wJSwgND0xMDAuMCUsIDg9MC4wJSwgMTY9MC4wJSwgMzI9MC4w
+JSwgNjQ9MC4wJSwgPj02ND0wLjAlIApjb21wbGV0ZSA6IDA9MC4wJSwgND0xMDAuMCUsIDg9MC4w
+JSwgMTY9MC4wJSwgMzI9MC4xJSwgNjQ9MC4wJSwgPj02ND0wLjAlIAppc3N1ZWQgOiB0b3RhbD1y
+PTEzMTA3MjAvdz0wL2Q9MCwgc2hvcnQ9cj0wL3c9MC9kPTAgCmxhdGVuY3kgOiB0YXJnZXQ9MCwg
+d2luZG93PTAsIHBlcmNlbnRpbGU9MTAwLjAwJSwgZGVwdGg9MzIgCgpSdW4gc3RhdHVzIGdyb3Vw
+IDAgKGFsbCBqb2JzKTogClJFQUQ6IGlvPTUxMjAuME1CLCBhZ2dyYj0xMzc3ODVLQi9zLCBtaW5i
+PTEzNzc4NUtCL3MsIG1heGI9MTM3Nzg1S0IvcywgbWludD0zODA1MW1zZWMsIG1heHQ9MzgwNTFt
+c2VjIAoKRGlzayBzdGF0cyAocmVhZC93cml0ZSk6IAp2ZGI6IGlvcz0xMzA3NDI2LzAsIG1lcmdl
+PTAvMCwgdGlja3M9MTA1MTQxNi8wLCBpbl9xdWV1ZT0xMDUwOTcyLCB1dGlsPTk5Ljg1JSAKCgoK
+cWVtdSA6IG5vIGlvdGhyZWFkIDogZ2xpYmMgOiBpb3BzPTMzMzk1IAotLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSAKcmJkX2lvZGVwdGgzMi10ZXN0OiAoZz0wKTogcnc9
+cmFuZHJlYWQsIGJzPTRLLTRLLzRLLTRLLzRLLTRLLCBpb2VuZ2luZT1saWJhaW8sIGlvZGVwdGg9
+MzIgCmZpby0yLjEuMTEgClN0YXJ0aW5nIDEgcHJvY2VzcyAKSm9iczogMSAoZj0xKTogW3IoMSld
+IFsxMDAuMCUgZG9uZV0gWzEyNS40TUIvMEtCLzBLQiAvc10gWzMyLjlLLzAvMCBpb3BzXSBbZXRh
+IDAwbTowMHNdIApyYmRfaW9kZXB0aDMyLXRlc3Q6IChncm91cGlkPTAsIGpvYnM9MSk6IGVycj0g
+MDogcGlkPTg4NjogVHVlIEp1biA5IDE4OjI3OjE4IDIwMTUgCnJlYWQgOiBpbz01MTIwLjBNQiwg
+Ync9MTMzNTgzS0IvcywgaW9wcz0zMzM5NSwgcnVudD0gMzkyNDhtc2VjIApzbGF0ICh1c2VjKTog
+bWluPTEsIG1heD0xMDU0LCBhdmc9IDMuODYsIHN0ZGV2PSA0LjI5IApjbGF0ICh1c2VjKTogbWlu
+PTEzOSwgbWF4PTEyNjM1LCBhdmc9OTUyLjg1LCBzdGRldj0zMzUuNTEgCmxhdCAodXNlYyk6IG1p
+bj0zMDMsIG1heD0xMjYzOCwgYXZnPTk1Ny4wMSwgc3RkZXY9MzM1LjI5IApjbGF0IHBlcmNlbnRp
+bGVzICh1c2VjKTogCnwgMS4wMHRoPVsgNTE2XSwgNS4wMHRoPVsgNTY0XSwgMTAuMDB0aD1bIDU5
+Nl0sIDIwLjAwdGg9WyA2NTJdLCAKfCAzMC4wMHRoPVsgNzI0XSwgNDAuMDB0aD1bIDgyMF0sIDUw
+LjAwdGg9WyA5MjRdLCA2MC4wMHRoPVsgOTk2XSwgCnwgNzAuMDB0aD1bIDEwODBdLCA4MC4wMHRo
+PVsgMTE3Nl0sIDkwLjAwdGg9WyAxMzM2XSwgOTUuMDB0aD1bIDE1MjhdLCAKfCA5OS4wMHRoPVsg
+MjA5Nl0sIDk5LjUwdGg9WyAyMzIwXSwgOTkuOTB0aD1bIDI2NzJdLCA5OS45NXRoPVsgMjkyOF0s
+IAp8IDk5Ljk5dGg9WyA0ODMyXSAKYncgKEtCIC9zKTogbWluPTk4MTM2LCBtYXg9MTcxNjI0LCBw
+ZXI9MTAwLjAwJSwgYXZnPTEzMzY4Mi42NCwgc3RkZXY9MTkxMjEuOTEgCmxhdCAodXNlYykgOiAy
+NTA9MC4wMSUsIDUwMD0wLjU3JSwgNzUwPTMyLjU3JSwgMTAwMD0yNi45OCUgCmxhdCAobXNlYykg
+OiAyPTM4LjU5JSwgND0xLjI4JSwgMTA9MC4wMSUsIDIwPTAuMDElIApjcHUgOiB1c3I9OS4yNCUs
+IHN5cz0xNS45MiUsIGN0eD01MTIxOSwgbWFqZj0wLCBtaW5mPTM4IApJTyBkZXB0aHMgOiAxPTAu
+MSUsIDI9MC4xJSwgND0wLjElLCA4PTAuMSUsIDE2PTAuMSUsIDMyPTEwMC4wJSwgPj02ND0wLjAl
+IApzdWJtaXQgOiAwPTAuMCUsIDQ9MTAwLjAlLCA4PTAuMCUsIDE2PTAuMCUsIDMyPTAuMCUsIDY0
+PTAuMCUsID49NjQ9MC4wJSAKY29tcGxldGUgOiAwPTAuMCUsIDQ9MTAwLjAlLCA4PTAuMCUsIDE2
+PTAuMCUsIDMyPTAuMSUsIDY0PTAuMCUsID49NjQ9MC4wJSAKaXNzdWVkIDogdG90YWw9cj0xMzEw
+NzIwL3c9MC9kPTAsIHNob3J0PXI9MC93PTAvZD0wIApsYXRlbmN5IDogdGFyZ2V0PTAsIHdpbmRv
+dz0wLCBwZXJjZW50aWxlPTEwMC4wMCUsIGRlcHRoPTMyIAoKUnVuIHN0YXR1cyBncm91cCAwIChh
+bGwgam9icyk6IApSRUFEOiBpbz01MTIwLjBNQiwgYWdncmI9MTMzNTgzS0IvcywgbWluYj0xMzM1
+ODNLQi9zLCBtYXhiPTEzMzU4M0tCL3MsIG1pbnQ9MzkyNDhtc2VjLCBtYXh0PTM5MjQ4bXNlYyAK
+CkRpc2sgc3RhdHMgKHJlYWQvd3JpdGUpOiAKdmRiOiBpb3M9MTMwNDUyNi8wLCBtZXJnZT0wLzAs
+IHRpY2tzPTEwNzUwMjAvMCwgaW5fcXVldWU9MTA3NDUzNiwgdXRpbD05OS44NCUgCgoKCnFlbXUg
+OiBpb3RocmVhZCA6IGplbW1hbG9jIDogaW9wcz0yODAyMyAKLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLSAKcmJkX2lvZGVwdGgzMi10ZXN0OiAoZz0wKTogcnc9cmFuZHJl
+YWQsIGJzPTRLLTRLLzRLLTRLLzRLLTRLLCBpb2VuZ2luZT1saWJhaW8sIGlvZGVwdGg9MzIgCmZp
+by0yLjEuMTEgClN0YXJ0aW5nIDEgcHJvY2VzcyAKSm9iczogMSAoZj0xKTogW3IoMSldIFs5Ny45
+JSBkb25lXSBbMTU1LjJNQi8wS0IvMEtCIC9zXSBbMzkuMUsvMC8wIGlvcHNdIFtldGEgMDBtOjAx
+c10gCnJiZF9pb2RlcHRoMzItdGVzdDogKGdyb3VwaWQ9MCwgam9icz0xKTogZXJyPSAwOiBwaWQ9
+ODk5OiBUdWUgSnVuIDkgMTg6MzA6MjYgMjAxNSAKcmVhZCA6IGlvPTUxMjAuME1CLCBidz0xMTIw
+OTRLQi9zLCBpb3BzPTI4MDIzLCBydW50PSA0Njc3Mm1zZWMgCnNsYXQgKHVzZWMpOiBtaW49MSwg
+bWF4PTQ2NywgYXZnPSA0LjMzLCBzdGRldj0gNC43NyAKY2xhdCAodXNlYyk6IG1pbj0yNTMsIG1h
+eD0xMTMwNywgYXZnPTExMzUuNjMsIHN0ZGV2PTM0Ni41NSAKbGF0ICh1c2VjKTogbWluPTI1Niwg
+bWF4PTExMzA5LCBhdmc9MTE0MC4zOSwgc3RkZXY9MzQ2LjIyIApjbGF0IHBlcmNlbnRpbGVzICh1
+c2VjKTogCnwgMS4wMHRoPVsgNTEwXSwgNS4wMHRoPVsgNjI4XSwgMTAuMDB0aD1bIDcwMF0sIDIw
+LjAwdGg9WyA4MjBdLCAKfCAzMC4wMHRoPVsgOTI0XSwgNDAuMDB0aD1bIDEwMzJdLCA1MC4wMHRo
+PVsgMTEyOF0sIDYwLjAwdGg9WyAxMjI0XSwgCnwgNzAuMDB0aD1bIDEzMjBdLCA4MC4wMHRoPVsg
+MTQxNl0sIDkwLjAwdGg9WyAxNTYwXSwgOTUuMDB0aD1bIDE2ODhdLCAKfCA5OS4wMHRoPVsgMjA5
+Nl0sIDk5LjUwdGg9WyAyMjI0XSwgOTkuOTB0aD1bIDI1NDRdLCA5OS45NXRoPVsgMjgzMl0sIAp8
+IDk5Ljk5dGg9WyAzNzYwXSAKYncgKEtCIC9zKTogbWluPTkxNzkyLCBtYXg9MTc0NDE2LCBwZXI9
+OTkuOTAlLCBhdmc9MTExOTg1LjI3LCBzdGRldj0xNzM4MS43MCAKbGF0ICh1c2VjKSA6IDUwMD0w
+LjgwJSwgNzUwPTEzLjEwJSwgMTAwMD0yMy4zMyUgCmxhdCAobXNlYykgOiAyPTYxLjMwJSwgND0x
+LjQ2JSwgMTA9MC4wMSUsIDIwPTAuMDElIApjcHUgOiB1c3I9Ny4xMiUsIHN5cz0xNy40MyUsIGN0
+eD01NDUwNywgbWFqZj0wLCBtaW5mPTM4IApJTyBkZXB0aHMgOiAxPTAuMSUsIDI9MC4xJSwgND0w
+LjElLCA4PTAuMSUsIDE2PTAuMSUsIDMyPTEwMC4wJSwgPj02ND0wLjAlIApzdWJtaXQgOiAwPTAu
+MCUsIDQ9MTAwLjAlLCA4PTAuMCUsIDE2PTAuMCUsIDMyPTAuMCUsIDY0PTAuMCUsID49NjQ9MC4w
+JSAKY29tcGxldGUgOiAwPTAuMCUsIDQ9MTAwLjAlLCA4PTAuMCUsIDE2PTAuMCUsIDMyPTAuMSUs
+IDY0PTAuMCUsID49NjQ9MC4wJSAKaXNzdWVkIDogdG90YWw9cj0xMzEwNzIwL3c9MC9kPTAsIHNo
+b3J0PXI9MC93PTAvZD0wIApsYXRlbmN5IDogdGFyZ2V0PTAsIHdpbmRvdz0wLCBwZXJjZW50aWxl
+PTEwMC4wMCUsIGRlcHRoPTMyIAoKUnVuIHN0YXR1cyBncm91cCAwIChhbGwgam9icyk6IApSRUFE
+OiBpbz01MTIwLjBNQiwgYWdncmI9MTEyMDk0S0IvcywgbWluYj0xMTIwOTRLQi9zLCBtYXhiPTEx
+MjA5NEtCL3MsIG1pbnQ9NDY3NzJtc2VjLCBtYXh0PTQ2NzcybXNlYyAKCkRpc2sgc3RhdHMgKHJl
+YWQvd3JpdGUpOiAKdmRiOiBpb3M9MTMwOTE2OS8wLCBtZXJnZT0wLzAsIHRpY2tzPTEzMDU3OTYv
+MCwgaW5fcXVldWU9MTMwNTM3NiwgdXRpbD05OC42OCUgCgoKCnFlbXUgOiBub24taW90aHJlYWQg
+OiBqZW1tYWxvYyA6IGlvcHM9NDIyMjYgCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tIApyYmRfaW9kZXB0aDMyLXRlc3Q6IChnPTApOiBydz1yYW5kcmVhZCwgYnM9
+NEstNEsvNEstNEsvNEstNEssIGlvZW5naW5lPWxpYmFpbywgaW9kZXB0aD0zMiAKZmlvLTIuMS4x
+MSAKU3RhcnRpbmcgMSBwcm9jZXNzIApKb2JzOiAxIChmPTEpOiBbcigxKV0gWzEwMC4wJSBkb25l
+XSBbMTcxLjJNQi8wS0IvMEtCIC9zXSBbNDMuOUsvMC8wIGlvcHNdIFtldGEgMDBtOjAwc10gCnJi
+ZF9pb2RlcHRoMzItdGVzdDogKGdyb3VwaWQ9MCwgam9icz0xKTogZXJyPSAwOiBwaWQ9ODkyOiBU
+dWUgSnVuIDkgMTg6MzQ6MTEgMjAxNSAKcmVhZCA6IGlvPTUxMjAuME1CLCBidz0xNzcxMzBLQi9z
+LCBpb3BzPTQ0MjgyLCBydW50PSAyOTU5OW1zZWMgCnNsYXQgKHVzZWMpOiBtaW49MSwgbWF4PTUy
+NywgYXZnPSAzLjgwLCBzdGRldj0gMy43NCAKY2xhdCAodXNlYyk6IG1pbj0xNzQsIG1heD0zODQx
+LCBhdmc9NzE3LjA4LCBzdGRldj0yMzcuNTMgCmxhdCAodXNlYyk6IG1pbj0yMTAsIG1heD0zODQ0
+LCBhdmc9NzIxLjIzLCBzdGRldj0yMzcuMjIgCmNsYXQgcGVyY2VudGlsZXMgKHVzZWMpOiAKfCAx
+LjAwdGg9WyAzNTRdLCA1LjAwdGg9WyA0MjJdLCAxMC4wMHRoPVsgNDYyXSwgMjAuMDB0aD1bIDUx
+Nl0sIAp8IDMwLjAwdGg9WyA1NzJdLCA0MC4wMHRoPVsgNjI4XSwgNTAuMDB0aD1bIDY4NF0sIDYw
+LjAwdGg9WyA3NDBdLCAKfCA3MC4wMHRoPVsgODA0XSwgODAuMDB0aD1bIDg4NF0sIDkwLjAwdGg9
+WyAxMDA0XSwgOTUuMDB0aD1bIDExMjhdLCAKfCA5OS4wMHRoPVsgMTU0NF0sIDk5LjUwdGg9WyAx
+NjcyXSwgOTkuOTB0aD1bIDE5MjhdLCA5OS45NXRoPVsgMjA2NF0sIAp8IDk5Ljk5dGg9WyAyNjA4
+XSAKYncgKEtCIC9zKTogbWluPTEzODEyMCwgbWF4PTIzMDgxNiwgcGVyPTEwMC4wMCUsIGF2Zz0x
+NzcxOTIuMTQsIHN0ZGV2PTIzNDQwLjc5IApsYXQgKHVzZWMpIDogMjUwPTAuMDElLCA1MDA9MTYu
+MjQlLCA3NTA9NDUuOTMlLCAxMDAwPTI3LjQ2JSAKbGF0IChtc2VjKSA6IDI9MTAuMzAlLCA0PTAu
+MDclIApjcHUgOiB1c3I9MTAuMTQlLCBzeXM9MjMuODQlLCBjdHg9NjA5MzgsIG1hamY9MCwgbWlu
+Zj0zOSAKSU8gZGVwdGhzIDogMT0wLjElLCAyPTAuMSUsIDQ9MC4xJSwgOD0wLjElLCAxNj0wLjEl
+LCAzMj0xMDAuMCUsID49NjQ9MC4wJSAKc3VibWl0IDogMD0wLjAlLCA0PTEwMC4wJSwgOD0wLjAl
+LCAxNj0wLjAlLCAzMj0wLjAlLCA2ND0wLjAlLCA+PTY0PTAuMCUgCmNvbXBsZXRlIDogMD0wLjAl
+LCA0PTEwMC4wJSwgOD0wLjAlLCAxNj0wLjAlLCAzMj0wLjElLCA2ND0wLjAlLCA+PTY0PTAuMCUg
+Cmlzc3VlZCA6IHRvdGFsPXI9MTMxMDcyMC93PTAvZD0wLCBzaG9ydD1yPTAvdz0wL2Q9MCAKbGF0
+ZW5jeSA6IHRhcmdldD0wLCB3aW5kb3c9MCwgcGVyY2VudGlsZT0xMDAuMDAlLCBkZXB0aD0zMiAK
+ClJ1biBzdGF0dXMgZ3JvdXAgMCAoYWxsIGpvYnMpOiAKUkVBRDogaW89NTEyMC4wTUIsIGFnZ3Ji
+PTE3NzEzMEtCL3MsIG1pbmI9MTc3MTMwS0IvcywgbWF4Yj0xNzcxMzBLQi9zLCBtaW50PTI5NTk5
+bXNlYywgbWF4dD0yOTU5OW1zZWMgCgpEaXNrIHN0YXRzIChyZWFkL3dyaXRlKTogCnZkYjogaW9z
+PTEzMDM5OTIvMCwgbWVyZ2U9MC8wLCB0aWNrcz03OTgwMDgvMCwgaW5fcXVldWU9Nzk3NjM2LCB1
+dGlsPTk5LjgwJSAKCgoKLS0tLS0gTWFpbCBvcmlnaW5hbCAtLS0tLSAKRGU6ICJSb2JlcnQgTGVC
+bGFuYyIgPCByb2JlcnRAbGVibGFuY25ldC51cyA+IArDgDogImFkZXJ1bWllciIgPCBhZGVydW1p
+ZXJAb2Rpc28uY29tID4gCkNjOiAiTWFyayBOZWxzb24iIDwgbW5lbHNvbkByZWRoYXQuY29tID4s
+ICJjZXBoLWRldmVsIiA8IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnID4sICJwdXNocGVzaCBz
+aGFybWEiIDwgcHVzaHBlc2guZWNrQGdtYWlsLmNvbSA+LCAiY2VwaC11c2VycyIgPCBjZXBoLXVz
+ZXJzQGxpc3RzLmNlcGguY29tID4gCkVudm95w6k6IE1hcmRpIDkgSnVpbiAyMDE1IDE4OjAwOjI5
+IApPYmpldDogUmU6IFtjZXBoLXVzZXJzXSByYmRfY2FjaGUsIGxpbWl0aW5nIHJlYWQgb24gaGln
+aCBpb3BzIGFyb3VuZCA0MGsgCgotLS0tLUJFR0lOIFBHUCBTSUdORUQgTUVTU0FHRS0tLS0tIApI
+YXNoOiBTSEEyNTYgCgpJIGFsc28gc2F3IGEgc2ltaWxhciBwZXJmb3JtYW5jZSBpbmNyZWFzZSBi
+eSB1c2luZyBhbHRlcm5hdGl2ZSBtZW1vcnkgCmFsbG9jYXRvcnMuIFdoYXQgSSBmb3VuZCB3YXMg
+dGhhdCBDZXBoIE9TRHMgcGVyZm9ybWVkIHdlbGwgd2l0aCBlaXRoZXIgCnRjbWFsbG9jIG9yIGpl
+bWFsbG9jIChleGNlcHQgd2hlbiBSb2Nrc0RCIHdhcyBidWlsdCB3aXRoIGplbWFsbG9jIAppbnN0
+ZWFkIG9mIHRjbWFsbG9jLCBJJ20gc3RpbGwgd29ya2luZyB0byBkaWcgaW50byB3aHkgdGhhdCBt
+aWdodCBiZSAKdGhlIGNhc2UpLiAKCkhvd2V2ZXIsIEkgZm91bmQgdGhhdCB0Y21hbGxvYyB3aXRo
+IFFFTVUvS1ZNIHdhcyB2ZXJ5IGRldHJpbWVudGFsIHRvIApzbWFsbCBJL08sIGJ1dCBwcm92aWRl
+ZCBodWdlIGdhaW5zIGluIEkvTyA+PTFNQi4gSmVtYWxsb2Mgd2FzIG11Y2ggCmJldHRlciBmb3Ig
+UUVNVS9LVk0gaW4gdGhlIHRlc3RzIHRoYXQgd2UgcmFuLiBbMV0gCgpJJ20gY3VycmVudGx5IGxv
+b2tpbmcgaW50byBJL08gYm90dGxlbmVja3MgYXJvdW5kIHRoZSAxNktCIHJhbmdlIGFuZCAKSSdt
+IHNlZWluZyBhIGxvdCBvZiB0aW1lIGluIHRocmVhZCBjcmVhdGlvbiBhbmQgZGVzdHJ1Y3Rpb24s
+IHRoZSAKbWVtb3J5IGFsbG9jYXRvcnMgYXJlIHF1aXRlIGEgYml0IGRvd24gdGhlIGxpc3QgKGJv
+dGggZmlvIHdpdGggCmlvZW5naW5lIHJiZCBhbmQgb24gdGhlIE9TRHMpLiBJIHdvbmRlciB3aGF0
+IHRoZSBkaWZmZXJlbmNlIGNhbiBiZS4gCkkndmUgdHJpZWQgdXNpbmcgdGhlIGFzeW5jIG1lc3Nl
+bmdlciBidXQgdGhlcmUgd2Fzbid0IGEgaHVnZSAKZGlmZmVyZW5jZS4gWzJdIAoKRnVydGhlciBk
+b3duIHRoZSByYWJiaXQgaG9sZS4uLi4gCgpbMV0gaHR0cHM6Ly93d3cubWFpbC1hcmNoaXZlLmNv
+bS9jZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tL21zZzIwMTk3Lmh0bWwgClsyXSBodHRwczovL3d3
+dy5tYWlsLWFyY2hpdmUuY29tL2NlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnL21zZzIzOTgyLmh0
+bWwgCi0tLS0tQkVHSU4gUEdQIFNJR05BVFVSRS0tLS0tIApWZXJzaW9uOiBNYWlsdmVsb3BlIHYw
+LjEzLjEgCkNvbW1lbnQ6IGh0dHBzOi8vd3d3Lm1haWx2ZWxvcGUuY29tIAoKd3NGY0JBRUJDQUFR
+QlFKVmR3MlpDUkRtVkR1eSttSzU4UUFBNE13UC8xdnQ2NWN2VHl5VkdHU0dSckU4IAp1bnVXamFm
+TUh6bDQ4NlhIK0VhVnJEVlRYRlZGT29uY0o2a3VnU3BEN3lhdnRDcFpOZGhzSWFUUlpndVUgCllw
+ZkFwcE5BSlU1YmlTd052OVFQSTdrUFAycTIrSTdaOFprdmhjVm5rakl5dGhvZU5uU2pWN3pKcnc4
+NyAKYWZxNDZHaFBIcUVYZGpwM3JPQjRSUlBuaU9NbnViNW9VNlFSbktuM0hQVzhEeDlacVRlQ29m
+UkRuQ1kyIApTNjk1RHQxZ3p0MEVSVU9nclVVa3QwRlFKZGtrVjZFVVJjVXNjaG5nanRFZDU3MjdW
+VExwMDJIaXZWbDMgCnZEWVd4UUhQSzhvUzZYZThHT1cwSmp1bHdpcWxZb3RTbHJxU1U1Rk1VNWdv
+emJrOXpNRlBJVVcxZSs1MSAKOUFSVDhUYTJJdE1oUFd0QWhSd3d2eGd5NTFleEN5OWtCYyttK3B0
+S1c1WFJVWE9JbUdjT1F4c3pQR09PIApxSUlPRzF2VkcvR0Jtby8waTZ0bGlxQkZZZFhtdzFxRlY3
+dEZpSWJpc1pSSDdRLzFOYWhqWVRIcUhodTMgCkR2NjFUNldyZXJEKzlONlMxTHJ6MVFZZTJGcWE1
+NkJIaEhTWE04Mk5FODZTVnhFdlVrb0dlZ1FVK2M3YiAKNnJZMUp2dUpISnp2YTcrTTJYSEFwWUNj
+aENzNGExWXlkMXFXQjd5VGhKRDU3Ukl5WDFUT2cwK3NpVjEzIApSK3Y2d3hoUVUwdkJvdkgrNW9B
+V21DWmFQTlQrRjBVdnMzeFdBeHhhSVI5cjgzd01qOXFRZUJaVEtWelEgCjFhRklpMTVLcUF3T3Ax
+MnlXQ21ycUtUZVhoandZUU5kOHZpQ1FDR043QVF5UGdsbXpmYnVFSGFsVmp6NCAKb1NKWCAKPWsy
+ODEgCi0tLS0tRU5EIFBHUCBTSUdOQVRVUkUtLS0tLSAKLS0tLS0tLS0tLS0tLS0tLSAKUm9iZXJ0
+IExlQmxhbmMgCkdQRyBGaW5nZXJwcmludCA3OUEyIDlDQTQgNkNDNCA0NUREIEE5MDQgQzcwRSBF
+NjU0IDNCQjIgRkE2MiBCOUYxIAoKCk9uIFR1ZSwgSnVuIDksIDIwMTUgYXQgNjowMiBBTSwgQWxl
+eGFuZHJlIERFUlVNSUVSIDwgYWRlcnVtaWVyQG9kaXNvLmNvbSA+IHdyb3RlOiAKPj4+RnJhbmts
+eSwgSSdtIGEgbGl0dGxlIGltcHJlc3NlZCB0aGF0IHdpdGhvdXQgUkJEIGNhY2hlIHdlIGNhbiBo
+aXQgODBLIAo+Pj5JT1BTIGZyb20gMSBWTSEgCj4gCj4gTm90ZSB0aGF0IHRoZXNlcyByZXN1bHQg
+YXJlIG5vdCBpbiBhIHZtIChmaW8tcmJkIG9uIGhvc3QpLCBzbyBpbiBhIHZtIHdlJ2xsIGhhdmUg
+b3ZlcmhlYWQuIAo+IChJJ20gcGxhbm5pbmcgdG8gc2VuZCByZXN1bHRzIGluIHFlbXUgc29vbikg
+Cj4gCj4+PkhvdyBmYXN0IGFyZSB0aGUgU1NEcyBpbiB0aG9zZSAzIE9TRHM/IAo+IAo+IFRoZXNl
+cyByZXN1bHRzIGFyZSB3aXRoIGRhdGFzIGluIGJ1ZmZlciBtZW1vcnkgb2Ygb3NkIG5vZGVzLiAK
+PiAKPiBXaGVuIHJlYWRpbmcgZnVsbGluZyBvbiBzc2QgKGludGVsIHMzNTAwKSwgCj4gCj4gRm9y
+IDEgY2xpZW50LCAKPiAKPiBJJ20gYXJvdW5kIDMzayBpb3BzIHdpdGhvdXQgY2FjaGUgYW5kIDMy
+ayBpb3BzIHdpdGggY2FjaGUsIHdpdGggMSBvc2QuIAo+IEknbSBhcm91bmQgNTVrIGlvcHMgd2l0
+aG91dCBjYWNoZSBhbmQgMzhrIGlvcHMgd2l0aCBjYWNoZSwgd2l0aCAzIG9zZC4gCj4gCj4gd2l0
+aCBtdWx0aXBsZSBjbGllbnRzIGpvYnMsIEkgY2FuIHJlYWNoIGFyb3VuZCA3MGtpb3BzIGJ5IG9z
+ZCAsIGFuZCAyNTBrIGlvcHMgYnkgb3NkIHdoZW4gZGF0YXMgYXJlIGluIGJ1ZmZlci4gCj4gCj4g
+KGNwdXMgc2VydmVycy9jbGllbnRzIGFyZSAyeCAxMCBjb3JlcyAzLDFnaHogZTUgeGVvbikgCj4g
+Cj4gCj4gCj4gc21hbGwgdGlwIDogCj4gSSdtIHVzaW5nIHRjbWFsbG9jIGZvciBmaW8tcmJkIG9y
+IHJhZG9zIGJlbmNoIHRvIGltcHJvdmUgbGF0ZW5jaWVzIGJ5IGFyb3VuZCAyMCUgCj4gCj4gTERf
+UFJFTE9BRD0vdXNyL2xpYi9saWJ0Y21hbGxvY19taW5pbWFsLnNvLjQgZmlvIC4uLiAKPiBMRF9Q
+UkVMT0FEPS91c3IvbGliL2xpYnRjbWFsbG9jX21pbmltYWwuc28uNCByYWRvcyBiZW5jaCAuLi4g
+Cj4gCj4gYXMgYSBsb3Qgb2YgdGltZSBpcyBzcGVudCBpbiBtYWxsb2MvZnJlZSAKPiAKPiAKPiAo
+cWVtdSBzdXBwb3J0IGFsc28gdGNtYWxsb2Mgc2luY2Ugc29tZSBtb250aHMgLCBJJ2xsIGJlbmNo
+IGl0IHRvbyAKPiBodHRwczovL2xpc3RzLmdudS5vcmcvYXJjaGl2ZS9odG1sL3FlbXUtZGV2ZWwv
+MjAxNS0wMy9tc2cwNTM3Mi5odG1sICkgCj4gCj4gCj4gCj4gSSdsbCB0cnkgdG8gc2VuZCBmdWxs
+IGJlbmNoIHJlc3VsdHMgc29vbiwgZnJvbSAxIHRvIDE4IHNzZCBvc2QuIAo+IAo+IAo+IAo+IAo+
+IC0tLS0tIE1haWwgb3JpZ2luYWwgLS0tLS0gCj4gRGU6ICJNYXJrIE5lbHNvbiIgPCBtbmVsc29u
+QHJlZGhhdC5jb20gPiAKPiDDgDogImFkZXJ1bWllciIgPCBhZGVydW1pZXJAb2Rpc28uY29tID4s
+ICJwdXNocGVzaCBzaGFybWEiIDwgcHVzaHBlc2guZWNrQGdtYWlsLmNvbSA+IAo+IENjOiAiY2Vw
+aC1kZXZlbCIgPCBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZyA+LCAiY2VwaC11c2VycyIgPCBj
+ZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tID4gCj4gRW52b3nDqTogTWFyZGkgOSBKdWluIDIwMTUg
+MTM6MzY6MzEgCj4gT2JqZXQ6IFJlOiBbY2VwaC11c2Vyc10gcmJkX2NhY2hlLCBsaW1pdGluZyBy
+ZWFkIG9uIGhpZ2ggaW9wcyBhcm91bmQgNDBrIAo+IAo+IEhpIEFsbCwgCj4gCj4gSW4gdGhlIHBh
+c3Qgd2UndmUgaGl0IHNvbWUgcGVyZm9ybWFuY2UgaXNzdWVzIHdpdGggUkJEIGNhY2hlIHRoYXQg
+d2UndmUgCj4gZml4ZWQsIGJ1dCB3ZSd2ZSBuZXZlciByZWFsbHkgdHJpZWQgcHVzaGluZyBhIHNp
+bmdsZSBWTSBiZXlvbmQgNDArSyByZWFkIAo+IElPUFMgaW4gdGVzdGluZyAob3IgYXQgbGVhc3Qg
+SSBuZXZlciBoYXZlKS4gSSBzdXNwZWN0IHRoZXJlJ3MgYSBjb3VwbGUgCj4gb2YgcG9zc2liaWxp
+dGllcyBhcyB0byB3aHkgaXQgbWlnaHQgYmUgc2xvd2VyLCBidXQgcGVyaGFwcyBqb3NoZCBjYW4g
+Cj4gY2hpbWUgaW4gYXMgaGUncyBtb3JlIGZhbWlsaWFyIHdpdGggd2hhdCB0aGF0IGNvZGUgbG9v
+a3MgbGlrZS4gCj4gCj4gRnJhbmtseSwgSSdtIGEgbGl0dGxlIGltcHJlc3NlZCB0aGF0IHdpdGhv
+dXQgUkJEIGNhY2hlIHdlIGNhbiBoaXQgODBLIAo+IElPUFMgZnJvbSAxIFZNISBIb3cgZmFzdCBh
+cmUgdGhlIFNTRHMgaW4gdGhvc2UgMyBPU0RzPyAKPiAKPiBNYXJrIAo+IAo+IE9uIDA2LzA5LzIw
+MTUgMDM6MzYgQU0sIEFsZXhhbmRyZSBERVJVTUlFUiB3cm90ZTogCj4+IEl0J3Mgc2VlbSB0aGF0
+IHRoZSBsaW1pdCBpcyBtYWlubHkgZ29pbmcgaW4gaGlnaCBxdWV1ZSBkZXB0aCAoKy0gPiAxNikg
+Cj4+IAo+PiBIZXJlIHRoZSByZXN1bHQgaW4gaW9wcyB3aXRoIDFjbGllbnQtIDRrcmFuZHJlYWQt
+IDNvc2QgLSB3aXRoIGRpZmZlcmVudHMgcXVldWUgZGVwdGggc2l6ZS4gCj4+IHJiZF9jYWNoZSBp
+cyBhbG1vc3QgdGhlIHNhbWUgdGhhbiB3aXRob3V0IGNhY2hlIHdpdGggcXVldWUgZGVwdGggPDE2
+IAo+PiAKPj4gCj4+IGNhY2hlIAo+PiAtLS0tLSAKPj4gcWQxOiAxNjUxIAo+PiBxZDI6IDM0ODIg
+Cj4+IHFkNDogNzk1OCAKPj4gcWQ4OiAxNzkxMiAKPj4gcWQxNjogMzYwMjAgCj4+IHFkMzI6IDQy
+NzY1IAo+PiBxZDY0OiA0NjE2OSAKPj4gCj4+IG5vIGNhY2hlIAo+PiAtLS0tLS0tLSAKPj4gcWQx
+OiAxNzQ4IAo+PiBxZDI6IDM1NzAgCj4+IHFkNDogODM1NiAKPj4gcWQ4OiAxNzczMiAKPj4gcWQx
+NjogNDEzOTYgCj4+IHFkMzI6IDc4NjMzIAo+PiBxZDY0OiA3OTA2MyAKPj4gcWQxMjg6IDc5NTUw
+IAo+PiAKPj4gCj4+IC0tLS0tIE1haWwgb3JpZ2luYWwgLS0tLS0gCj4+IERlOiAiYWRlcnVtaWVy
+IiA8IGFkZXJ1bWllckBvZGlzby5jb20gPiAKPj4gw4A6ICJwdXNocGVzaCBzaGFybWEiIDwgcHVz
+aHBlc2guZWNrQGdtYWlsLmNvbSA+IAo+PiBDYzogImNlcGgtZGV2ZWwiIDwgY2VwaC1kZXZlbEB2
+Z2VyLmtlcm5lbC5vcmcgPiwgImNlcGgtdXNlcnMiIDwgY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNv
+bSA+IAo+PiBFbnZvecOpOiBNYXJkaSA5IEp1aW4gMjAxNSAwOToyODoyMSAKPj4gT2JqZXQ6IFJl
+OiBbY2VwaC11c2Vyc10gcmJkX2NhY2hlLCBsaW1pdGluZyByZWFkIG9uIGhpZ2ggaW9wcyBhcm91
+bmQgNDBrIAo+PiAKPj4gSGksIAo+PiAKPj4+PiBXZSB0cmllZCBhZGRpbmcgbW9yZSBSQkRzIHRv
+IHNpbmdsZSBWTSwgYnV0IG5vIGx1Y2suIAo+PiAKPj4gSWYgeW91IHdhbnQgdG8gc2NhbGUgd2l0
+aCBtb3JlIGRpc2tzIGluIGEgc2luZ2xlIHFlbXUgdm0sIHlvdSBuZWVkIHRvIHVzZSBpb3RocmVh
+ZCBmZWF0dXJlIGZyb20gcWVtdSBhbmQgYXNzaWduIDEgaW90aHJlYWQgYnkgZGlzayAod29ya3Mg
+d2l0aCB2aXJ0aW8tYmxrKS4gCj4+IEl0J3Mgd29ya2luZyBmb3IgbWUsIEkgY2FuIHNjYWxlIHdp
+dGggYWRkaW5nIG1vcmUgZGlza3MuIAo+PiAKPj4gCj4+IE15IGJlbmNoIGhlcmUgYXJlIGRvbmUg
+d2l0aCBmaW8tcmJkIG9uIGhvc3QuIAo+PiBJIGNhbiBzY2FsZSB1cCB0byA0MDBrIGlvcHMgd2l0
+aCAxMGNsaWVudHMtcmJkX2NhY2hlPW9mZiBvbiBhIHNpbmdsZSBob3N0IGFuZCBhcm91bmQgMjUw
+a2lvcHMgMTBjbGllbnRzLXJiZGNhY2hlPW9uLiAKPj4gCj4+IAo+PiBJIGp1c3Qgd29uZGVyIHdo
+eSBJIGRvbid0IGhhdmUgcGVyZm9ybWFuY2UgZGVjcmVhc2UgYXJvdW5kIDMwayBpb3BzIHdpdGgg
+MW9zZC4gCj4+IAo+PiBJJ20gZ29pbmcgdG8gc2VlIGlmIHRoaXMgdHJhY2tlciAKPj4gaHR0cDov
+L3RyYWNrZXIuY2VwaC5jb20vaXNzdWVzLzExMDU2IAo+PiAKPj4gY291bGQgYmUgdGhlIGNhdXNl
+LiAKPj4gCj4+IChNeSBtYXN0ZXIgYnVpbGQgd2FzIGRvbmUgc29tZSB3ZWVrIGFnbykgCj4+IAo+
+PiAKPj4gCj4+IC0tLS0tIE1haWwgb3JpZ2luYWwgLS0tLS0gCj4+IERlOiAicHVzaHBlc2ggc2hh
+cm1hIiA8IHB1c2hwZXNoLmVja0BnbWFpbC5jb20gPiAKPj4gw4A6ICJhZGVydW1pZXIiIDwgYWRl
+cnVtaWVyQG9kaXNvLmNvbSA+IAo+PiBDYzogImNlcGgtZGV2ZWwiIDwgY2VwaC1kZXZlbEB2Z2Vy
+Lmtlcm5lbC5vcmcgPiwgImNlcGgtdXNlcnMiIDwgY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbSA+
+IAo+PiBFbnZvecOpOiBNYXJkaSA5IEp1aW4gMjAxNSAwOToyMTowNCAKPj4gT2JqZXQ6IFJlOiBy
+YmRfY2FjaGUsIGxpbWl0aW5nIHJlYWQgb24gaGlnaCBpb3BzIGFyb3VuZCA0MGsgCj4+IAo+PiBI
+aSBBbGV4YW5kcmUsIAo+PiAKPj4gV2UgaGF2ZSBhbHNvIHNlZW4gc29tZXRoaW5nIHZlcnkgc2lt
+aWxhciBvbiBIYW1tZXIoMC45NC0xKS4gV2Ugd2VyZSBkb2luZyBzb21lIGJlbmNobWFya2luZyBm
+b3IgVk1zIGhvc3RlZCBvbiBoeXBlcnZpc29yIChRRU1VLUtWTSwgb3BlbnN0YWNrLWp1bm8pLiBF
+YWNoIFVidW50dS1WTSBoYXMgYSBSQkQgYXMgcm9vdCBkaXNrLCBhbmQgMSBSQkQgYXMgYWRkaXRp
+b25hbCBzdG9yYWdlLiBGb3Igc29tZSBzdHJhbmdlIHJlYXNvbiBpdCB3YXMgbm90IGFibGUgdG8g
+c2NhbGUgNEstIFJSIGlvcHMgb24gZWFjaCBWTSBiZXlvbmQgMzUtNDBrLiBXZSB0cmllZCBhZGRp
+bmcgbW9yZSBSQkRzIHRvIHNpbmdsZSBWTSwgYnV0IG5vIGx1Y2suIEhvd2V2ZXIgaW5jcmVhc2lu
+ZyBudW1iZXIgb2YgVk1zIHRvIDQgb24gYSBzaW5nbGUgaHlwZXJ2aXNvciBkaWQgc2NhbGUgdG8g
+c29tZSBleHRlbnQuIEFmdGVyIHRoaXMgdGhlcmUgd2FzIG5vIG11Y2ggYmVuZWZpdCB3ZSBnb3Qg
+ZnJvbSBhZGRpbmcgbW9yZSBWTXMuIAo+PiAKPj4gSGVyZSBpcyB0aGUgdHJlbmQgd2UgaGF2ZSBz
+ZWVuLCB4LWF4aXMgaXMgbnVtYmVyIG9mIGh5cGVydmlzb3IsIGVhY2ggaHlwZXJ2aXNvciBoYXMg
+NCBWTSwgZWFjaCBWTSBoYXMgMSBSQkQ6LSAKPj4gCj4+IAo+PiAKPj4gCj4+IFZEYmVuY2ggaXMg
+dXNlZCBhcyBiZW5jaG1hcmtpbmcgdG9vbC4gV2Ugd2VyZSBub3Qgc2F0dXJhdGluZyBuZXR3b3Jr
+IGFuZCBDUFVzIGF0IE9TRCBub2Rlcy4gV2Ugd2VyZSBub3QgYWJsZSB0byBzYXR1cmF0ZSBDUFVz
+IGF0IGh5cGVydmlzb3JzLCBhbmQgdGhhdCBpcyB3aGVyZSB3ZSB3ZXJlIHN1c3BlY3Rpbmcgb2Yg
+c29tZSB0aHJvdHRsaW5nIGVmZmVjdC4gSG93ZXZlciB3ZSBoYXZlbid0IHNldHRlZCBhbnkgc3Vj
+aCBsaW1pdHMgZnJvbSBub3ZhIG9yIGt2bSBlbmQuIFdlIHRyaWVkIHNvbWUgQ1BVIHBpbm5pbmcg
+YW5kIG90aGVyIEtWTSByZWxhdGVkIHR1bmluZyBhcyB3ZWxsLCBidXQgbm8gbHVjay4gCj4+IAo+
+PiBXZSB0cmllZCB0aGUgc2FtZSBleHBlcmltZW50IG9uIGEgYmFyZSBtZXRhbC4gSXQgd2FzIDRL
+IFJSIElPUHMgd2VyZSBzY2FsaW5nIGZyb20gNDBLKDEgUkJEKSB0byAxODBLKDQgUkJEcykuIEJ1
+dCBhZnRlciB0aGF0IHJhdGhlciB0aGFuIHNjYWxpbmcgYmV5b25kIHRoYXQgcG9pbnQgdGhlIG51
+bWJlcnMgd2VyZSBhY3R1YWxseSBkZWdyYWRpbmcuIChTaW5nbGUgcGlwZSBtb3JlIGNvbmdlc3Rp
+b24gZWZmZWN0KSAKPj4gCj4+IFdlIG5ldmVyIHN1c3BlY3RlZCB0aGF0IHJiZCBjYWNoZSBlbmFi
+bGUgY291bGQgYmUgZGV0cmltZW50YWwgdG8gcGVyZm9ybWFuY2UuIEl0IHdvdWxkIG5pY2UgdG8g
+cm91dGUgY2F1c2UgdGhlIHByb2JsZW0gaWYgdGhhdCBpcyB0aGUgY2FzZS4gCj4+IAo+PiBPbiBU
+dWUsIEp1biA5LCAyMDE1IGF0IDExOjIxIEFNLCBBbGV4YW5kcmUgREVSVU1JRVIgPCBhZGVydW1p
+ZXJAb2Rpc28uY29tID4gd3JvdGU6IAo+PiAKPj4gCj4+IEhpLCAKPj4gCj4+IEknbSBkb2luZyBi
+ZW5jaG1hcmsgKGNlcGggbWFzdGVyIGJyYW5jaCksIHdpdGggcmFuZHJlYWQgNGsgcWRlcHRoPTMy
+LCAKPj4gYW5kIHJiZF9jYWNoZT10cnVlIHNlZW0gdG8gbGltaXQgdGhlIGlvcHMgYXJvdW5kIDQw
+ayAKPj4gCj4+IAo+PiBubyBjYWNoZSAKPj4gLS0tLS0tLS0gCj4+IDEgY2xpZW50IC0gcmJkX2Nh
+Y2hlPWZhbHNlIC0gMW9zZCA6IDM4MzAwIGlvcHMgCj4+IDEgY2xpZW50IC0gcmJkX2NhY2hlPWZh
+bHNlIC0gMm9zZCA6IDY5MDczIGlvcHMgCj4+IDEgY2xpZW50IC0gcmJkX2NhY2hlPWZhbHNlIC0g
+M29zZCA6IDc4MjkyIGlvcHMgCj4+IAo+PiAKPj4gY2FjaGUgCj4+IC0tLS0tIAo+PiAxIGNsaWVu
+dCAtIHJiZF9jYWNoZT10cnVlIC0gMW9zZCA6IDM4MTAwIGlvcHMgCj4+IDEgY2xpZW50IC0gcmJk
+X2NhY2hlPXRydWUgLSAyb3NkIDogNDI0NTcgaW9wcyAKPj4gMSBjbGllbnQgLSByYmRfY2FjaGU9
+dHJ1ZSAtIDNvc2QgOiA0NTgyMyBpb3BzIAo+PiAKPj4gCj4+IAo+PiBJcyBpdCBleHBlY3RlZCA/
+IAo+PiAKPj4gCj4+IAo+PiBmaW8gcmVzdWx0IHJiZF9jYWNoZT1mYWxzZSAzIG9zZCAKPj4gLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0gCj4+IHJiZF9pb2RlcHRoMzItdGVzdDogKGc9
+MCk6IHJ3PXJhbmRyZWFkLCBicz00Sy00Sy80Sy00Sy80Sy00SywgaW9lbmdpbmU9cmJkLCBpb2Rl
+cHRoPTMyIAo+PiBmaW8tMi4xLjExIAo+PiBTdGFydGluZyAxIHByb2Nlc3MgCj4+IHJiZCBlbmdp
+bmU6IFJCRCB2ZXJzaW9uOiAwLjEuOSAKPj4gSm9iczogMSAoZj0xKTogW3IoMSldIFsxMDAuMCUg
+ZG9uZV0gWzMwNy41TUIvMEtCLzBLQiAvc10gWzc4LjhLLzAvMCBpb3BzXSBbZXRhIDAwbTowMHNd
+IAo+PiByYmRfaW9kZXB0aDMyLXRlc3Q6IChncm91cGlkPTAsIGpvYnM9MSk6IGVycj0gMDogcGlk
+PTExMzU0ODogVHVlIEp1biA5IDA3OjQ4OjQyIDIwMTUgCj4+IHJlYWQgOiBpbz0xMDAwME1CLCBi
+dz0zMTMxNjlLQi9zLCBpb3BzPTc4MjkyLCBydW50PSAzMjY5OG1zZWMgCj4+IHNsYXQgKHVzZWMp
+OiBtaW49NSwgbWF4PTUzMCwgYXZnPTExLjc3LCBzdGRldj0gNi43NyAKPj4gY2xhdCAodXNlYyk6
+IG1pbj03MCwgbWF4PTIyNDAsIGF2Zz0zMzYuMDgsIHN0ZGV2PTk0LjgyIAo+PiBsYXQgKHVzZWMp
+OiBtaW49MTAxLCBtYXg9MjI0NywgYXZnPTM0Ny44NCwgc3RkZXY9OTUuNDkgCj4+IGNsYXQgcGVy
+Y2VudGlsZXMgKHVzZWMpOiAKPj4gfCAxLjAwdGg9WyAxNzNdLCA1LjAwdGg9WyAyMDldLCAxMC4w
+MHRoPVsgMjMxXSwgMjAuMDB0aD1bIDI2Ml0sIAo+PiB8IDMwLjAwdGg9WyAyODJdLCA0MC4wMHRo
+PVsgMzAyXSwgNTAuMDB0aD1bIDMyMl0sIDYwLjAwdGg9WyAzNDZdLCAKPj4gfCA3MC4wMHRoPVsg
+MzcwXSwgODAuMDB0aD1bIDQwMl0sIDkwLjAwdGg9WyA0NTRdLCA5NS4wMHRoPVsgNTA2XSwgCj4+
+IHwgOTkuMDB0aD1bIDYyOF0sIDk5LjUwdGg9WyA2OTJdLCA5OS45MHRoPVsgODYwXSwgOTkuOTV0
+aD1bIDk0OF0sIAo+PiB8IDk5Ljk5dGg9WyAxMTc2XSAKPj4gYncgKEtCIC9zKTogbWluPTIzODg1
+NiwgbWF4PTM2MDQ0OCwgcGVyPTEwMC4wMCUsIGF2Zz0zMTM0MDIuMzQsIHN0ZGV2PTI1MTk2LjIx
+IAo+PiBsYXQgKHVzZWMpIDogMTAwPTAuMDElLCAyNTA9MTUuOTQlLCA1MDA9NzguNjAlLCA3NTA9
+NS4xOSUsIDEwMDA9MC4yMyUgCj4+IGxhdCAobXNlYykgOiAyPTAuMDMlLCA0PTAuMDElIAo+PiBj
+cHUgOiB1c3I9NzQuNDglLCBzeXM9MTMuMjUlLCBjdHg9NzAzMjI1LCBtYWpmPTAsIG1pbmY9MTI0
+NTIgCj4+IElPIGRlcHRocyA6IDE9MC4xJSwgMj0wLjElLCA0PTAuMSUsIDg9MC44JSwgMTY9ODcu
+MCUsIDMyPTEyLjElLCA+PTY0PTAuMCUgCj4+IHN1Ym1pdCA6IDA9MC4wJSwgND0xMDAuMCUsIDg9
+MC4wJSwgMTY9MC4wJSwgMzI9MC4wJSwgNjQ9MC4wJSwgPj02ND0wLjAlIAo+PiBjb21wbGV0ZSA6
+IDA9MC4wJSwgND05MS42JSwgOD0zLjQlLCAxNj00LjUlLCAzMj0wLjQlLCA2ND0wLjAlLCA+PTY0
+PTAuMCUgCj4+IGlzc3VlZCA6IHRvdGFsPXI9MjU2MDAwMC93PTAvZD0wLCBzaG9ydD1yPTAvdz0w
+L2Q9MCAKPj4gbGF0ZW5jeSA6IHRhcmdldD0wLCB3aW5kb3c9MCwgcGVyY2VudGlsZT0xMDAuMDAl
+LCBkZXB0aD0zMiAKPj4gCj4+IFJ1biBzdGF0dXMgZ3JvdXAgMCAoYWxsIGpvYnMpOiAKPj4gUkVB
+RDogaW89MTAwMDBNQiwgYWdncmI9MzEzMTY5S0IvcywgbWluYj0zMTMxNjlLQi9zLCBtYXhiPTMx
+MzE2OUtCL3MsIG1pbnQ9MzI2OThtc2VjLCBtYXh0PTMyNjk4bXNlYyAKPj4gCj4+IERpc2sgc3Rh
+dHMgKHJlYWQvd3JpdGUpOiAKPj4gZG0tMDogaW9zPTAvNDUsIG1lcmdlPTAvMCwgdGlja3M9MC8w
+LCBpbl9xdWV1ZT0wLCB1dGlsPTAuMDAlLCBhZ2dyaW9zPTAvMjQsIGFnZ3JtZXJnZT0wLzIxLCBh
+Z2dydGlja3M9MC8wLCBhZ2dyaW5fcXVldWU9MCwgYWdncnV0aWw9MC4wMCUgCj4+IHNkYTogaW9z
+PTAvMjQsIG1lcmdlPTAvMjEsIHRpY2tzPTAvMCwgaW5fcXVldWU9MCwgdXRpbD0wLjAwJSAKPj4g
+Cj4+IAo+PiAKPj4gCj4+IGZpbyByZXN1bHQgcmJkX2NhY2hlPXRydWUgM29zZCAKPj4gLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tIAo+PiAKPj4gcmJkX2lvZGVwdGgzMi10ZXN0OiAoZz0w
+KTogcnc9cmFuZHJlYWQsIGJzPTRLLTRLLzRLLTRLLzRLLTRLLCBpb2VuZ2luZT1yYmQsIGlvZGVw
+dGg9MzIgCj4+IGZpby0yLjEuMTEgCj4+IFN0YXJ0aW5nIDEgcHJvY2VzcyAKPj4gcmJkIGVuZ2lu
+ZTogUkJEIHZlcnNpb246IDAuMS45IAo+PiBKb2JzOiAxIChmPTEpOiBbcigxKV0gWzEwMC4wJSBk
+b25lXSBbMTcxLjZNQi8wS0IvMEtCIC9zXSBbNDMuMUsvMC8wIGlvcHNdIFtldGEgMDBtOjAwc10g
+Cj4+IHJiZF9pb2RlcHRoMzItdGVzdDogKGdyb3VwaWQ9MCwgam9icz0xKTogZXJyPSAwOiBwaWQ9
+MTEzMzg5OiBUdWUgSnVuIDkgMDc6NDc6MzAgMjAxNSAKPj4gcmVhZCA6IGlvPTEwMDAwTUIsIGJ3
+PTE4MzI5NktCL3MsIGlvcHM9NDU4MjMsIHJ1bnQ9IDU1ODY2bXNlYyAKPj4gc2xhdCAodXNlYyk6
+IG1pbj03LCBtYXg9ODA1LCBhdmc9MjEuMjYsIHN0ZGV2PTE1Ljg0IAo+PiBjbGF0ICh1c2VjKTog
+bWluPTEwMSwgbWF4PTQ2MDIsIGF2Zz00NzguNTUsIHN0ZGV2PTE0My43MyAKPj4gbGF0ICh1c2Vj
+KTogbWluPTEyMywgbWF4PTQ2NjksIGF2Zz00OTkuODAsIHN0ZGV2PTE0Ni4wMyAKPj4gY2xhdCBw
+ZXJjZW50aWxlcyAodXNlYyk6IAo+PiB8IDEuMDB0aD1bIDIyN10sIDUuMDB0aD1bIDI3NF0sIDEw
+LjAwdGg9WyAzMDZdLCAyMC4wMHRoPVsgMzUwXSwgCj4+IHwgMzAuMDB0aD1bIDM5MF0sIDQwLjAw
+dGg9WyA0MzBdLCA1MC4wMHRoPVsgNDcwXSwgNjAuMDB0aD1bIDUwNl0sIAo+PiB8IDcwLjAwdGg9
+WyA1NDhdLCA4MC4wMHRoPVsgNTk2XSwgOTAuMDB0aD1bIDY2MF0sIDk1LjAwdGg9WyA3MjRdLCAK
+Pj4gfCA5OS4wMHRoPVsgODQ0XSwgOTkuNTB0aD1bIDkwOF0sIDk5LjkwdGg9WyAxMTEyXSwgOTku
+OTV0aD1bIDEyODhdLCAKPj4gfCA5OS45OXRoPVsgMjE5Ml0gCj4+IGJ3IChLQiAvcyk6IG1pbj0x
+MTUyODAsIG1heD0yMDQ0MTYsIHBlcj0xMDAuMDAlLCBhdmc9MTgzMzE1LjEwLCBzdGRldj0xNTA3
+OS45MyAKPj4gbGF0ICh1c2VjKSA6IDI1MD0yLjQyJSwgNTAwPTU1LjYxJSwgNzUwPTM4LjQ4JSwg
+MTAwMD0zLjI4JSAKPj4gbGF0IChtc2VjKSA6IDI9MC4xOSUsIDQ9MC4wMSUsIDEwPTAuMDElIAo+
+PiBjcHUgOiB1c3I9NjAuMjclLCBzeXM9MTIuMDElLCBjdHg9Mjk5NTM5MywgbWFqZj0wLCBtaW5m
+PTE0MTAwIAo+PiBJTyBkZXB0aHMgOiAxPTAuMSUsIDI9MC4xJSwgND0wLjIlLCA4PTEzLjUlLCAx
+Nj04MS4wJSwgMzI9NS4zJSwgPj02ND0wLjAlIAo+PiBzdWJtaXQgOiAwPTAuMCUsIDQ9MTAwLjAl
+LCA4PTAuMCUsIDE2PTAuMCUsIDMyPTAuMCUsIDY0PTAuMCUsID49NjQ9MC4wJSAKPj4gY29tcGxl
+dGUgOiAwPTAuMCUsIDQ9OTUuMCUsIDg9MC4xJSwgMTY9MS4wJSwgMzI9NC4wJSwgNjQ9MC4wJSwg
+Pj02ND0wLjAlIAo+PiBpc3N1ZWQgOiB0b3RhbD1yPTI1NjAwMDAvdz0wL2Q9MCwgc2hvcnQ9cj0w
+L3c9MC9kPTAgCj4+IGxhdGVuY3kgOiB0YXJnZXQ9MCwgd2luZG93PTAsIHBlcmNlbnRpbGU9MTAw
+LjAwJSwgZGVwdGg9MzIgCj4+IAo+PiBSdW4gc3RhdHVzIGdyb3VwIDAgKGFsbCBqb2JzKTogCj4+
+IFJFQUQ6IGlvPTEwMDAwTUIsIGFnZ3JiPTE4MzI5NUtCL3MsIG1pbmI9MTgzMjk1S0IvcywgbWF4
+Yj0xODMyOTVLQi9zLCBtaW50PTU1ODY2bXNlYywgbWF4dD01NTg2Nm1zZWMgCj4+IAo+PiBEaXNr
+IHN0YXRzIChyZWFkL3dyaXRlKTogCj4+IGRtLTA6IGlvcz0wLzYxLCBtZXJnZT0wLzAsIHRpY2tz
+PTAvOCwgaW5fcXVldWU9OCwgdXRpbD0wLjAxJSwgYWdncmlvcz0wLzI5LCBhZ2dybWVyZ2U9MC8z
+MiwgYWdncnRpY2tzPTAvOCwgYWdncmluX3F1ZXVlPTgsIGFnZ3J1dGlsPTAuMDElIAo+PiBzZGE6
+IGlvcz0wLzI5LCBtZXJnZT0wLzMyLCB0aWNrcz0wLzgsIGluX3F1ZXVlPTgsIHV0aWw9MC4wMSUg
+Cj4+IAo+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fIAo+
+IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0IAo+IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20gCj4g
+aHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tIApf
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXyAKY2VwaC11c2Vy
+cyBtYWlsaW5nIGxpc3QgCmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20gCmh0dHA6Ly9saXN0cy5j
+ZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbSAKCgoKCgoKLS0gCtChINGD
+0LLQsNC20LXQvdC40LXQvCwg0KTQsNGB0LjRhdC+0LIg0JjRgNC10Log0J3Rg9GA0LPQsNGP0LfQ
+vtCy0LjRhyAK0JzQvtCxLjogKzc5MjI5MDQ1NzU3IApfX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJz
+QGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11
+c2Vycy1jZXBoLmNvbQo=
