@@ -1,207 +1,37 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH] libceph: allow custom network namespaces
-Date: Wed, 10 Jun 2015 16:30:40 +0300
-Message-ID: <CAOi1vP9pL9eekJTP-=-8hv5YRu3p-j7CSPcpMFa8=8pRbUF0Mw@mail.gmail.com>
-References: <1433941284-12984-1-git-send-email-zhiguohong@tencent.com>
+From: Patrick McGarry <pmcgarry@redhat.com>
+Subject: Blueprints
+Date: Wed, 10 Jun 2015 09:36:16 -0400
+Message-ID: <CAAZbbf30M4GBseC2e-hp1KPKXz5fMWE0xuLC82bdbzvUquZ1SA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f44.google.com ([74.125.82.44]:36094 "EHLO
-	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S964909AbbFJNam (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Jun 2015 09:30:42 -0400
-Received: by wgbgq6 with SMTP id gq6so35924185wgb.3
-        for <ceph-devel@vger.kernel.org>; Wed, 10 Jun 2015 06:30:40 -0700 (PDT)
-In-Reply-To: <1433941284-12984-1-git-send-email-zhiguohong@tencent.com>
+Received: from mail-lb0-f179.google.com ([209.85.217.179]:34899 "EHLO
+	mail-lb0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754208AbbFJNgS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Jun 2015 09:36:18 -0400
+Received: by lbbtu8 with SMTP id tu8so28921987lbb.2
+        for <ceph-devel@vger.kernel.org>; Wed, 10 Jun 2015 06:36:16 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Hong Zhiguo <honkiko@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, Hong Zhiguo <zhiguohong@tencent.com>
+To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
 
-On Wed, Jun 10, 2015 at 4:01 PM, Hong Zhiguo <honkiko@gmail.com> wrote:
-> in current implementaion init_net is always used.
->
-> But in most cases, if user do a rbd map or ceph mount in
-> a container, it's expected to use the container network namespace.
->
-> This patch saves the container's netns in ceph_options on a rbd map
-> or ceph mount. And use the netns other than init_net when creating
-> socket. Ref count of the netns is only taken by the ceph_options
-> in ceph_client since lifetime of osds and mon is within that of
-> ceph_client.
->
-> I've tested this patch in docker container with below operations:
-> - rbd map
-> - write/read on the rbd
-> - rbd unmap
->
-> Signed-off-by: Hong Zhiguo <zhiguohong@tencent.com>
-> ---
->  fs/ceph/mds_client.c           | 3 ++-
->  include/linux/ceph/libceph.h   | 3 +++
->  include/linux/ceph/messenger.h | 4 +++-
->  net/ceph/ceph_common.c         | 7 ++++---
->  net/ceph/messenger.c           | 8 +++++++-
->  net/ceph/mon_client.c          | 2 +-
->  net/ceph/osd_client.c          | 3 ++-
->  7 files changed, 22 insertions(+), 8 deletions(-)
->
-> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index 8080d48..3fb0976 100644
-> --- a/fs/ceph/mds_client.c
-> +++ b/fs/ceph/mds_client.c
-> @@ -440,7 +440,8 @@ static struct ceph_mds_session *register_session(struct ceph_mds_client *mdsc,
->         s->s_seq = 0;
->         mutex_init(&s->s_mutex);
->
-> -       ceph_con_init(&s->s_con, s, &mds_con_ops, &mdsc->fsc->client->msgr);
-> +       ceph_con_init(&s->s_con, s, &mds_con_ops, &mdsc->fsc->client->msgr,
-> +                       mdsc->fsc->client->options->netns);
->
->         spin_lock_init(&s->s_gen_ttl_lock);
->         s->s_cap_gen = 0;
-> diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
-> index d73a569..442d9f3 100644
-> --- a/include/linux/ceph/libceph.h
-> +++ b/include/linux/ceph/libceph.h
-> @@ -22,6 +22,8 @@
->  #include <linux/ceph/osd_client.h>
->  #include <linux/ceph/ceph_fs.h>
->
-> +struct net;
-> +
->  /*
->   * mount options
->   */
-> @@ -46,6 +48,7 @@ struct ceph_options {
->         unsigned long mount_timeout;            /* jiffies */
->         unsigned long osd_idle_ttl;             /* jiffies */
->         unsigned long osd_keepalive_timeout;    /* jiffies */
-> +       struct net *netns;
->
->         /*
->          * any type that can't be simply compared or doesn't need need
-> diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
-> index e154994..3b0a314 100644
-> --- a/include/linux/ceph/messenger.h
-> +++ b/include/linux/ceph/messenger.h
-> @@ -14,6 +14,7 @@
->
->  struct ceph_msg;
->  struct ceph_connection;
-> +struct net;
->
->  /*
->   * Ceph defines these callbacks for handling connection events.
-> @@ -189,6 +190,7 @@ struct ceph_connection {
->         struct ceph_messenger *msgr;
->
->         atomic_t sock_state;
-> +       struct net *netns;
->         struct socket *sock;
->         struct ceph_entity_addr peer_addr; /* peer address */
->         struct ceph_entity_addr peer_addr_for_me;
-> @@ -270,7 +272,7 @@ extern void ceph_messenger_init(struct ceph_messenger *msgr,
->
->  extern void ceph_con_init(struct ceph_connection *con, void *private,
->                         const struct ceph_connection_operations *ops,
-> -                       struct ceph_messenger *msgr);
-> +                       struct ceph_messenger *msgr, struct net *netns);
->  extern void ceph_con_open(struct ceph_connection *con,
->                           __u8 entity_type, __u64 entity_num,
->                           struct ceph_entity_addr *addr);
-> diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
-> index 925d0c8..1c42d96 100644
-> --- a/net/ceph/ceph_common.c
-> +++ b/net/ceph/ceph_common.c
-> @@ -269,6 +269,9 @@ static match_table_t opt_tokens = {
->  void ceph_destroy_options(struct ceph_options *opt)
->  {
->         dout("destroy_options %p\n", opt);
-> +       if (opt->netns) {
-> +               put_net(opt->netns);
-> +       }
->         kfree(opt->name);
->         if (opt->key) {
->                 ceph_crypto_key_destroy(opt->key);
-> @@ -335,9 +338,6 @@ ceph_parse_options(char *options, const char *dev_name,
->         int err = -ENOMEM;
->         substring_t argstr[MAX_OPT_ARGS];
->
-> -       if (current->nsproxy->net_ns != &init_net)
-> -               return ERR_PTR(-EINVAL);
-> -
->         opt = kzalloc(sizeof(*opt), GFP_KERNEL);
->         if (!opt)
->                 return ERR_PTR(-ENOMEM);
-> @@ -501,6 +501,7 @@ ceph_parse_options(char *options, const char *dev_name,
->         }
->
->         /* success */
-> +       opt->netns = get_net(current->nsproxy->net_ns);
->         return opt;
->
->  out:
-> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-> index 967080a..43ec07d 100644
-> --- a/net/ceph/messenger.c
-> +++ b/net/ceph/messenger.c
-> @@ -736,7 +736,7 @@ bool ceph_con_opened(struct ceph_connection *con)
->   */
->  void ceph_con_init(struct ceph_connection *con, void *private,
->         const struct ceph_connection_operations *ops,
-> -       struct ceph_messenger *msgr)
-> +       struct ceph_messenger *msgr, struct net *netns)
->  {
->         dout("con_init %p\n", con);
->         memset(con, 0, sizeof(*con));
-> @@ -744,6 +744,12 @@ void ceph_con_init(struct ceph_connection *con, void *private,
->         con->ops = ops;
->         con->msgr = msgr;
->
-> +       /*
-> +        * don't take extra refcnt of netns here since both mon and osds
-> +        * have lifetime within that of ceph_client
-> +        */
-> +       con->netns = netns;
-> +
->         con_sock_state_init(con);
->
->         mutex_init(&con->mutex);
-> diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
-> index 9d6ff12..04128af 100644
-> --- a/net/ceph/mon_client.c
-> +++ b/net/ceph/mon_client.c
-> @@ -832,7 +832,7 @@ int ceph_monc_init(struct ceph_mon_client *monc, struct ceph_client *cl)
->                 goto out_auth_reply;
->
->         ceph_con_init(&monc->con, monc, &mon_con_ops,
-> -                     &monc->client->msgr);
-> +                     &monc->client->msgr, monc->client->options->netns);
->
->         monc->cur_mon = -1;
->         monc->hunting = true;
-> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> index 5003367..32d9fa9 100644
-> --- a/net/ceph/osd_client.c
-> +++ b/net/ceph/osd_client.c
-> @@ -1022,7 +1022,8 @@ static struct ceph_osd *create_osd(struct ceph_osd_client *osdc, int onum)
->         INIT_LIST_HEAD(&osd->o_osd_lru);
->         osd->o_incarnation = 1;
->
-> -       ceph_con_init(&osd->o_con, osd, &osd_con_ops, &osdc->client->msgr);
-> +       ceph_con_init(&osd->o_con, osd, &osd_con_ops, &osdc->client->msgr,
-> +                       osdc->client->options->netns);
->
->         INIT_LIST_HEAD(&osd->o_keepalive_item);
->         return osd;
+Hey all,
 
-It seems to me your patch boils down to killing the init_ns check and
-adding a netns field to struct ceph_connection, which is assigned to
-but never used.  Given that, can you elaborate on the "And use the
-netns other than init_net when creating socket" part and explain in
-a little bit more detail what is accomplished here?
+Given that there was some confusion and difficulty surrounding
+Blueprint submission, I'm going to leave the submission window open
+until the end of the week. Please get your blueprints added to the new
+tracker wiki by then so I can build a schedule and release it next
+week. Many requests have been made to have a schedule published
+earlier so they can arrange their schedules to attend. Thanks.
 
-Thanks,
+http://tracker.ceph.com/projects/ceph/wiki/Jewel
 
-                Ilya
+
+-- 
+
+Best Regards,
+
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
