@@ -1,59 +1,42 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: 06/10/2015 Weekly Ceph Performance Meeting IS ON!
-Date: Wed, 10 Jun 2015 07:18:11 -0500
-Message-ID: <55782B03.2050507@redhat.com>
-Reply-To: mnelson@redhat.com
+From: Harshal Gupta <harshal.gupta001@gmail.com>
+Subject: Duplicate bucket creation Response in RGW
+Date: Wed, 10 Jun 2015 17:52:51 +0530
+Message-ID: <CAPRac-a9gp1B9J3L-_TjkkP3-M9ZkvF-HwQ505NvJaqhEC392w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:47659 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751318AbbFJMSO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 10 Jun 2015 08:18:14 -0400
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-	by mx1.redhat.com (Postfix) with ESMTPS id F17253627D9
-	for <ceph-devel@vger.kernel.org>; Wed, 10 Jun 2015 12:18:13 +0000 (UTC)
-Received: from [10.3.112.48] (ovpn-112-48.phx2.redhat.com [10.3.112.48])
-	by int-mx14.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t5ACIBKY029007
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-	for <ceph-devel@vger.kernel.org>; Wed, 10 Jun 2015 08:18:13 -0400
+Received: from mail-wi0-f181.google.com ([209.85.212.181]:33108 "EHLO
+	mail-wi0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753594AbbFJMXN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Jun 2015 08:23:13 -0400
+Received: by wiwd19 with SMTP id d19so46603611wiw.0
+        for <ceph-devel@vger.kernel.org>; Wed, 10 Jun 2015 05:23:12 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-8AM PST as usual!  Discussion topics for this week include:
+Hi,
 
-- Throttling cache tier promotion.
-- SimpleMessenger fastpath.
+I was comparing response of S3 and Ceph RGW for when we try to create
+a bucket which already exists for the same account.
 
-Please feel free to add your own!
+S3 (non-default region) throws an error with:
+HTTP response code : 409 Conflict
+error code : BucketAlreadyOwnedByYou
 
-Here's the links:
+but on the other hand ceph gives a 200 OK while keeping the original
+bucket as it is.
 
-Etherpad URL:
-http://pad.ceph.com/p/performance_weekly
+I am thinking to match the functionality of Ceph RGW same as s3
+(non-default regions), as the one given by S3 seems more appropriate.
 
-To join the Meeting:
-https://bluejeans.com/268261044
+For this, I have added a new error code "BucketAlreadyOwnedByYou"
+which will be thrown in the above mentioned
+case.
 
-To join via Browser:
-https://bluejeans.com/268261044/browser
+Please give your opinion about it.
 
-To join with Lync:
-https://bluejeans.com/268261044/lync
+Thanks
 
-
-To join via Room System:
-Video Conferencing System: bjn.vc -or- 199.48.152.152
-Meeting ID: 268261044
-
-To join via Phone:
-1) Dial:
-           +1 408 740 7256
-           +1 888 240 2560(US Toll Free)
-           +1 408 317 9253(Alternate Number)
-           (see all numbers - http://bluejeans.com/numbers)
-2) Enter Conference ID: 268261044
-
-Mark
+-- 
+HARSHAL GUPTA
