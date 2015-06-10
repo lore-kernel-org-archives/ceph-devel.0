@@ -1,99 +1,107 @@
-From: Gregory Farnum <greg@gregs42.com>
-Subject: Re: OSD-Based Object Stubs
-Date: Tue, 9 Jun 2015 16:58:46 -0700
-Message-ID: <CAC6JEv_oZ2x6AbQSJzJ5==R+8KSZMbpfqk=WZnd-HGcMRYzSoA@mail.gmail.com>
-References: <87a8wqct38.fsf@irq0.org>
-	<CAC6JEv8KPsi1w37-XvNg00s4gC6hv=N5p5NWty56dFv3=e3eQA@mail.gmail.com>
-	<87617dc965.fsf@irq0.org>
+From: Chaitanya Huilgol <Chaitanya.Huilgol@sandisk.com>
+Subject: RE: [ceph-users] Blueprint Submission Open for CDS Jewel
+Date: Wed, 10 Jun 2015 02:30:22 +0000
+Message-ID: <9E914F5BD7F48A4782456CEB550A422824E8732C@SACMBXIP02.sdcorp.global.sandisk.com>
+References: <CAAZbbf3b1gAF4WrObJ1BuKqW-5_yMMs5J8UXoJA2gnJY0SgfGg@mail.gmail.com>
+	<CACJqLyabmPWnCgED0P2xDNFng2zEwfXLeFz=UFDhr=tzWLtSNg@mail.gmail.com>
+	<9E914F5BD7F48A4782456CEB550A422824E86D96@SACMBXIP02.sdcorp.global.sandisk.com>
+	<87y4jtqobu.fsf@gmail.com>
+	<9E914F5BD7F48A4782456CEB550A422824E86E37@SACMBXIP02.sdcorp.global.sandisk.com>
+ <CAAZbbf2XLXG+tp7GMMGLF66rYZZ4vtakgsjyF8=urj4Kr4f4FA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f178.google.com ([209.85.223.178]:36249 "EHLO
-	mail-ie0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751380AbbFIX6s (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Jun 2015 19:58:48 -0400
-Received: by ieclw1 with SMTP id lw1so23940446iec.3
-        for <ceph-devel@vger.kernel.org>; Tue, 09 Jun 2015 16:58:47 -0700 (PDT)
-Received: from mail-ig0-f175.google.com (mail-ig0-f175.google.com. [209.85.213.175])
-        by mx.google.com with ESMTPSA id lq3sm2241482igb.3.2015.06.09.16.58.46
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 09 Jun 2015 16:58:46 -0700 (PDT)
-Received: by igbsb11 with SMTP id sb11so22228165igb.0
-        for <ceph-devel@vger.kernel.org>; Tue, 09 Jun 2015 16:58:46 -0700 (PDT)
-In-Reply-To: <87617dc965.fsf@irq0.org>
+Received: from mail-bl2on0076.outbound.protection.outlook.com ([65.55.169.76]:12256
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751475AbbFJCa0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 9 Jun 2015 22:30:26 -0400
+In-Reply-To: <CAAZbbf2XLXG+tp7GMMGLF66rYZZ4vtakgsjyF8=urj4Kr4f4FA@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Marcel Lauhoff <ml@irq0.org>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Patrick McGarry <pmcgarry@redhat.com>
+Cc: Abhishek L <abhishek.lekshmanan@gmail.com>, Ceph Devel <ceph-devel@vger.kernel.org>
 
-On Thu, May 28, 2015 at 3:01 AM, Marcel Lauhoff <ml@irq0.org> wrote:
->
-> Gregory Farnum <greg@gregs42.com> writes:
->
->> On Wed, May 27, 2015 at 1:39 AM, Marcel Lauhoff <ml@irq0.org> wrote:
->>> Hi,
->>>
->>> I wrote a prototype for an OSD-based object stub feature. An object stub
->>> being an object with it's data moved /elsewhere/. I hope to get some
->>> feedback, especially whether I'm on the right path here and if it
->>> is a feature you are interested in.
->>>
->>>
->>>
->>> Code is in my "osd-stubs" branch:
->>>  https://github.com/ceph/ceph/compare/master...irq0:osd-stubs
->>>  https://github.com/irq0/ceph/tree/osd-stubs
->>>
->>>  Tools to toy around with osd-stubs + web server to send stubs to:
->>>  https://github.com/irq0/ceph_osd-stub_tools
->>>
->>>
->>>
->>> Related:
->>> - https://wiki.ceph.com/Planning/Blueprints/%3CSIDEBOARD%3E/osd:_tiering:_object_redirects
->>
->> Do you have a shorter summary than the code of how these stub and
->> unstub operations relate to the object redirects? We didn't make a
->> great deal of use of them but the basic data structures are mostly
->> present in the codebase, are interpreted in at least some of the right
->> places, and were definitely intended to cover this kind of use case.
->> :)
->> -Greg
->
->
-> As far as I understood the redirect feature it is about pointing to
-> other objects inside the Ceph cluster. The stubs feature allows
-> pointing to anything. An HTTP server in concept code.
->
-> Then stubs use an IMHO simpler approach to getting objects back: It's
-> the task of the OSD. Stubbed objects just take longer to access, due to
-> unstubbing it first.
-> Redirects on the other hand leave this to the client: Object redirected
-> -> Tell client to retrieve it elsewhere.
-
-Ah, of course.
-
-I got a chance to look at this briefly today. Some notes:
-
-* You're using synchronous reads. That will prevent use of stubbing on
-EC pools (which only do async reads, as they might need to hit another
-OSD for the data), which seems sad.
-* There seems to be a race if you need to unstub an op for two
-separate requests that come in simultaneously, with nothing preventing
-both of them from initiating the unstub.
-* You can inject an unstub for read ops, but that turns them into a
-write. That will cause problems in various cases where the object
-isn't writeable yet.
-* Why does a delete need the object data?
-* You definitely wouldn't want to unstub data for scrubbing.
-* There's a CEPH_OSD_OP_STAT which looks at what's in the object info;
-that is broken here because you're using the normal truncation path.
-There probably needs to be more cleverness or machinery distinguishing
-between the "local" size used and the size of the object represented.
-* I am concerned about recovery, but I think as long as the stub is
-just a normal zero-sized object with an extra flag in the object info
-that shouldn't be a big deal.
-* I think snapshots are probably busted with this; did you check how
-they interact?
--Greg
+VGhhbmtzIFBhdHJpY2ssIFdlIGFyZSBub3cgYWJsZSB0byBhZGQgbmV3IGJsdWVwcmludHMgZm9y
+IGpld2VsIHJlbGVhc2UuDQoNClJlZ2FyZHMsDQpDaGFpdGFueWENCg0KLS0tLS1PcmlnaW5hbCBN
+ZXNzYWdlLS0tLS0NCkZyb206IFBhdHJpY2sgTWNHYXJyeSBbbWFpbHRvOnBtY2dhcnJ5QHJlZGhh
+dC5jb21dIA0KU2VudDogV2VkbmVzZGF5LCBKdW5lIDEwLCAyMDE1IDEyOjI2IEFNDQpUbzogQ2hh
+aXRhbnlhIEh1aWxnb2wNCkNjOiBBYmhpc2hlayBMOyBDZXBoIERldmVsDQpTdWJqZWN0OiBSZTog
+W2NlcGgtdXNlcnNdIEJsdWVwcmludCBTdWJtaXNzaW9uIE9wZW4gZm9yIENEUyBKZXdlbA0KDQpI
+ZXkgYWxsLA0KDQpTb3JyeSB3YXMgdHJhdmVsaW5nIGluIENoaW5hIHdpdGhvdXQgYWNjZXNzIHRv
+IG15IG1haWwuIEkgaGF2ZSByZW1vdmVkIHRoZSBkaXJlY3QgZWRpdCBsaW5rIGZyb20gdGhlIGJs
+b2cgcG9zdCBbMF0uIFNvIG5vdyB5b3UganVzdCBuZWVkIHRvIGJlIGxvZ2dlZCBpbiBhbmQgZ28g
+dG8gdGhlIGJsdWVwcmludCBwYWdlIGxpbmsgYW5kIGVkaXQgaW4gdGhlIG5hbWUgb2YgeW91ciBi
+bHVlcHJpbnQgKFtCbHVlcHJpbnQgTmFtZV0pLCBzYXZlIHRoZSBwYWdlLCBhbmQgdGhlbiBjbGlj
+ayB0aGUgbGluayB0byBlZGl0IHlvdXIgYmx1ZXByaW50Lg0KDQpJIGFtIGhhcHB5IHRvIGZ1cnRo
+ZXIgdHJvdWJsZXNob290IGFueSBpc3N1ZXMgZGlyZWN0bHkgaWYgeW91IHdvdWxkIGxpa2UgdG8g
+ZW1haWwgbWUuIEkga25vdyBpdCdzIGEgbGl0dGxlIHJvdWdoIHNpbmNlIHdlJ3JlIHN0aWxsIG1p
+Z3JhdGluZyBhbGwgb2YgdGhlIG1lY2hhbmljcyBmcm9tIHRoZSBvbGQgd2lraS4gSG93ZXZlciwg
+aWYgeW91IHdvdWxkIHByZWZlciB0byBqdXN0IGVtYWlsIG1lIGEgdHh0IGZpbGUgKG9yIGp1c3Qg
+dXNlIHRoZSBib2R5IG9mIHRoZQ0KZW1haWwpIEkgY2FuIHBvc3QgeW91ciBibHVlcHJpbnQgZm9y
+IHlvdS4gVGhhbmtzLg0KDQoNClswXSBodHRwOi8vY2VwaC5jb20vdW5jYXRlZ29yaXplZC9jZXBo
+LWRldmVsb3Blci1zdW1taXQtamV3ZWwvDQoNCg0KT24gVHVlLCBKdW4gOSwgMjAxNSBhdCA0OjM3
+IEFNLCBDaGFpdGFueWEgSHVpbGdvbCA8Q2hhaXRhbnlhLkh1aWxnb2xAc2FuZGlzay5jb20+IHdy
+b3RlOg0KPg0KPiBXb25kZXJpbmcgaG93IHRvIGVkaXQgdGhlIHdpa2kgcGFnZSBhbmQgYWRkIGEg
+bmV3IGJsdWVwcmludD8gSSBkb24ndCBzZWUgYW55IHdheSB0byBkbyB0aGlzIGFmdGVyIGRyb3Bw
+aW5nIHRoZSAnZWRpdCcgZnJvbSB0aGUgbGluay4NCj4NCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdl
+LS0tLS0NCj4gRnJvbTogQWJoaXNoZWsgTCBbbWFpbHRvOmFiaGlzaGVrLmxla3NobWFuYW5AZ21h
+aWwuY29tXQ0KPiBTZW50OiBUdWVzZGF5LCBKdW5lIDA5LCAyMDE1IDE6NTcgUE0NCj4gVG86IENo
+YWl0YW55YSBIdWlsZ29sDQo+IENjOiBQYXRyaWNrIE1jR2Fycnk7IENlcGggRGV2ZWwNCj4gU3Vi
+amVjdDogUmU6IFtjZXBoLXVzZXJzXSBCbHVlcHJpbnQgU3VibWlzc2lvbiBPcGVuIGZvciBDRFMg
+SmV3ZWwNCj4NCj4NCj4gQ2hhaXRhbnlhIEh1aWxnb2wgd3JpdGVzOg0KPg0KPj4gSGkgUGF0cmlj
+aywNCj4+DQo+PiBVbmFibGUgdG8gYWRkIG5ldyBibHVlcHJpbnQgZm9yIGpld2VsIHZpYQ0KPj4N
+Cj4+IGh0dHA6Ly90cmFja2VyLmNlcGguY29tL3Byb2plY3RzL2NlcGgvd2lraS9KZXdlbC9lZGl0
+DQo+Pg0KPj4gR2V0dGluZyAgJzQwMyAtIFlvdSBhcmUgbm90IGF1dGhvcml6ZWQgdG8gYWNjZXNz
+IHRoaXMgcGFnZS4nICwgRG8gd2UgbmVlZCB0byBkbyBhbnl0aGluZyBtb3JlIHRoYW4gbG9nZ2lu
+ZyBpbnRvIHRvIHRoZSBjZXBoIHRyYWtlcj8NCj4+DQo+Pg0KPj4gUmVnYXJkcywNCj4+IENoYWl0
+YW55YQ0KPg0KPiBJIGZhY2VkIHRoZSBzYW1lIGlzc3VlIHdpdGggdGhlIGxpbmsgYmVmb3JlLCBJ
+IGd1ZXNzIGRyb3BwaW5nIHRoZSANCj4gYGVkaXQnIGluIHVybCBzaG91bGQgd29yay4gaWUgDQo+
+IGh0dHA6Ly90cmFja2VyLmNlcGguY29tL3Byb2plY3RzL2NlcGgvd2lraS9KZXdlbA0KPg0KPj4N
+Cj4+DQo+Pg0KPj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4+IEZyb206IGNlcGgtdXNl
+cnMgW21haWx0bzpjZXBoLXVzZXJzLWJvdW5jZXNAbGlzdHMuY2VwaC5jb21dIE9uIEJlaGFsZiAN
+Cj4+IE9mIEhhb21haSBXYW5nDQo+PiBTZW50OiBNb25kYXksIEp1bmUgMDgsIDIwMTUgMTA6MTYg
+UE0NCj4+IFRvOiBQYXRyaWNrIE1jR2FycnkNCj4+IENjOiBDZXBoIERldmVsOyBDZXBoLVVzZXI7
+IGNlcGgtYW5ub3VuY2VAY2VwaC5jb20NCj4+IFN1YmplY3Q6IFJlOiBbY2VwaC11c2Vyc10gQmx1
+ZXByaW50IFN1Ym1pc3Npb24gT3BlbiBmb3IgQ0RTIEpld2VsDQo+Pg0KPj4gSGkgUGFydGljaywN
+Cj4+DQo+PiBJdCBsb29rcyBjb25mdXNpbmcgdG8gdXNlIHRoaXMuIElzIGl0IG5lZWQgdGhhdCB3
+ZSB1cGxvYWQgYSB0eHQgZmlsZSB0byBkZXNjcmliZSBibHVlcHJpbnQgaW5zdGVhZCBvZiBlZGl0
+aW5nIGRpcmVjdGx5IG9ubGluZT8NCj4+DQo+PiBPbiBXZWQsIE1heSAyNywgMjAxNSBhdCA1OjA1
+IEFNLCBQYXRyaWNrIE1jR2FycnkgPHBtY2dhcnJ5QHJlZGhhdC5jb20+IHdyb3RlOg0KPj4+IEl0
+J3MgdGhhdCB0aW1lIGFnYWluLCB0aW1lIHRvIGdpcmQgdXAgb3VyIGxvaW5zIGFuZCBzdWJtaXQg
+DQo+Pj4gYmx1ZXByaW50cyBmb3IgYWxsIHdvcmsgc2xhdGVkIGZvciB0aGUgSmV3ZWwgcmVsZWFz
+ZSBvZiBDZXBoLg0KPj4+DQo+Pj4gaHR0cDovL2NlcGguY29tL3VuY2F0ZWdvcml6ZWQvY2VwaC1k
+ZXZlbG9wZXItc3VtbWl0LWpld2VsLw0KPj4+DQo+Pj4gVGhlIG9uZSBub3RhYmxlIGNoYW5nZSBm
+b3IgdGhpcyBDRFMgaXMgdGhhdCB3ZSdsbCBiZSB1c2luZyB0aGUgbmV3IA0KPj4+IHdpa2kgKG9u
+IHRyYWNrZXIuY2VwaC5jb20pIHRoYXQgaXMgc3RpbGwgdW5kZXJnb2luZyBtaWdyYXRpb24gZnJv
+bSANCj4+PiB0aGUgb2xkIHdpa2kuIEkgaGF2ZSBvdXRsaW5lZCB0aGUgcHJvY2VkdXJlIGluIHRo
+ZSBhbm5vdW5jZW1lbnQgDQo+Pj4gYWJvdmUsIGJ1dCBwbGVhc2UgZmVlbCBmcmVlIHRvIGhpdCBt
+ZSB3aXRoIGFueSBxdWVzdGlvbnMgb3IgaXNzdWVzIHlvdSBtYXkgaGF2ZS4NCj4+PiBUaGFua3Mu
+DQo+Pj4NCj4+Pg0KPj4+IC0tDQo+Pj4NCj4+PiBCZXN0IFJlZ2FyZHMsDQo+Pj4NCj4+PiBQYXRy
+aWNrIE1jR2FycnkNCj4+PiBEaXJlY3RvciBDZXBoIENvbW11bml0eSB8fCBSZWQgSGF0DQo+Pj4g
+aHR0cDovL2NlcGguY29tICB8fCAgaHR0cDovL2NvbW11bml0eS5yZWRoYXQuY29tIEBzY3V0dGxl
+bW9ua2V5IHx8IA0KPj4+IEBjZXBoIF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fDQo+Pj4gY2VwaC11c2VycyBtYWlsaW5nIGxpc3QNCj4+PiBjZXBoLXVzZXJz
+QGxpc3RzLmNlcGguY29tDQo+Pj4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9j
+ZXBoLXVzZXJzLWNlcGguY29tDQo+Pg0KPj4NCj4+DQo+PiAtLQ0KPj4gQmVzdCBSZWdhcmRzLA0K
+Pj4NCj4+IFdoZWF0DQo+PiBfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fXw0KPj4gY2VwaC11c2VycyBtYWlsaW5nIGxpc3QNCj4+IGNlcGgtdXNlcnNAbGlzdHMu
+Y2VwaC5jb20NCj4+IGh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vy
+cy1jZXBoLmNvbQ0KPj4NCj4+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQo+Pg0K
+Pj4gUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJv
+bmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNp
+Z25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1l
+c3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlm
+aWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0
+IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0
+aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQg
+dGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkg
+dGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0
+cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9u
+ICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0K
+Pg0KPiAtLQ0KPiBBYmhpc2hlaw0KDQoNCg0KLS0gDQoNCkJlc3QgUmVnYXJkcywNCg0KUGF0cmlj
+ayBNY0dhcnJ5DQpEaXJlY3RvciBDZXBoIENvbW11bml0eSB8fCBSZWQgSGF0DQpodHRwOi8vY2Vw
+aC5jb20gIHx8ICBodHRwOi8vY29tbXVuaXR5LnJlZGhhdC5jb20gQHNjdXR0bGVtb25rZXkgfHwg
+QGNlcGgNCg==
