@@ -1,127 +1,220 @@
-From: Ken Dreyer <kdreyer@redhat.com>
-Subject: Re: Build RPMs from git
-Date: Wed, 10 Jun 2015 10:30:27 -0400 (EDT)
-Message-ID: <581259457.12927282.1433946627668.JavaMail.zimbra@redhat.com>
-References: <CAANLjFqtNxo=CPwar3OYP9es-+5LgTbmiNgd_4RSCcndb_iCNA@mail.gmail.com>
+From: Hong zhi guo <honkiko@gmail.com>
+Subject: Re: [PATCH] libceph: allow custom network namespaces
+Date: Wed, 10 Jun 2015 22:32:03 +0800
+Message-ID: <CAA7+ByXp_Fqa80SF6vOz66_aHON5LtxPChPJbmGKpvDmta+tDQ@mail.gmail.com>
+References: <1433941284-12984-1-git-send-email-zhiguohong@tencent.com>
+	<CAOi1vP9pL9eekJTP-=-8hv5YRu3p-j7CSPcpMFa8=8pRbUF0Mw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx4-phx2.redhat.com ([209.132.183.25]:53320 "EHLO
-	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S964837AbbFJOa3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Jun 2015 10:30:29 -0400
-In-Reply-To: <CAANLjFqtNxo=CPwar3OYP9es-+5LgTbmiNgd_4RSCcndb_iCNA@mail.gmail.com>
+Received: from mail-qg0-f42.google.com ([209.85.192.42]:33356 "EHLO
+	mail-qg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S964931AbbFJOcE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Jun 2015 10:32:04 -0400
+Received: by qgfa66 with SMTP id a66so16762764qgf.0
+        for <ceph-devel@vger.kernel.org>; Wed, 10 Jun 2015 07:32:03 -0700 (PDT)
+In-Reply-To: <CAOi1vP9pL9eekJTP-=-8hv5YRu3p-j7CSPcpMFa8=8pRbUF0Mw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Robert LeBlanc <robert@leblancnet.us>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, Hong Zhiguo <zhiguohong@tencent.com>
 
-Here's how I do it.
+sorry, I missed the __sock_create hunk during my merge from our 3.13
+kernel tree.
+Now I took it and tested rbd map/write/read/unmap in docker container again.
+I'll post the updated patch again.
 
-1. Git clone
-
-2. ./do_autogen.sh
-
-3. ./configure --without-radosgw --without-fuse --without-tcmalloc --without-libatomic-ops --without-libxfs 
-
-4. # The "configure" step above creates a ceph.spec with the proper version number, which you can then copy:
-   cp ceph.spec ~/rpmbuild/SPECS/
-
-5. # The "configure" step above also creates a Makefile, so you can run "make dist-bzip2" to get a properly-versioned tarball:
-   make dist-bzip2
-
-6. # Now move the tarball in to place, along with the .patch file:
-   rm ~/rpmbuild/SOURCES/*
-   mv *.bz2 ~/rpmbuild/SOURCES/
-   cp rpm/*.patch ~/rpmbuild/SOURCES/
-
-7. # Build a source RPM:
-   rpmbuild -bs ~/rpmbuild/SPECS/ceph.spec
-
-8. # Lastly, rebuild that SRPM in mock:
-   mock -r epel-7-x86_64 rebuild ~/rpmbuild/SRPMS/ceph-....src.rpm
-
-
-This whole process needs to be improved :) We're moving towards getting rid of the ./configure operation in step #3 since that is only done in order to figure out the right version number for steps #4 and #5.
-
-Also, the .patch file in step #6 could be implemented in some other way. We could use sed during %prep to make the changes, which would avoid using a .patch file. Or, since src/init-ceph.in is an autoconf template anyway, we could conditionalize this with autoconf to print "Default-Start: 2 3 4 5" and "Default-Stop: 0 1 6" on Debian, and leave the values blank on Red Hat.
-
-- Ken
-
-
-
------ Original Message -----
-> From: "Robert LeBlanc" <robert@leblancnet.us>
-> To: "ceph-devel" <ceph-devel@vger.kernel.org>
-> Sent: Tuesday, June 9, 2015 3:15:17 PM
-> Subject: Build RPMs from git
-> 
-> -----BEGIN PGP SIGNED MESSAGE-----
-> Hash: SHA256
-> 
-> OK, easy question...
-> 
-> Building Debian packages from git is wonderfully easy, RPMs seem ....
-> not so easy.
-> 
-> I got it to kind of work, but I feel like I'm doing it the "Hard Way" (tm).
-> 
-> mkdir -p ~/ceph && pushd ~/ceph
-> git clone https://github.com/ceph/ceph.git
-> ./autogen.sh
-> ./configure
-> echo "--- /root/ceph/ceph/ceph.spec   2015-06-09 13:03:08.240099443 -0600
-> +++ /root/rpmbuild/SPECS/ceph.spec      2015-06-09 13:12:54.145061355 -0600
-> @@ -464,12 +464,14 @@
->  # common
->  #################################################################################
->  %prep
-> - -%setup -q
-> +#%setup -q
-> +cd %{buildroot}
->  %if 0%{?fedora} || 0%{?rhel}
->  %patch0 -p1 -b .init
->  %endif
-> 
->  %build
-> +cd %{buildroot}
->  # Find jni.h
->  for i in /usr/{lib64,lib}/jvm/java/include{,/linux}; do
->      [ -d $i ] && java_inc="$java_inc -I$i"" | patch
-> rpmbuild -ba ceph.spec --define 'buildroot `pwd/ceph`'
-> 
-> It coughs at the install/RPM package part.
-> 
-> Any help with preventing the whole tar/untar process which I can't
-> seem to get exactly right either would be very helpful.
-> 
+On Wed, Jun 10, 2015 at 9:30 PM, Ilya Dryomov <idryomov@gmail.com> wrote:
+> On Wed, Jun 10, 2015 at 4:01 PM, Hong Zhiguo <honkiko@gmail.com> wrote:
+>> in current implementaion init_net is always used.
+>>
+>> But in most cases, if user do a rbd map or ceph mount in
+>> a container, it's expected to use the container network namespace.
+>>
+>> This patch saves the container's netns in ceph_options on a rbd map
+>> or ceph mount. And use the netns other than init_net when creating
+>> socket. Ref count of the netns is only taken by the ceph_options
+>> in ceph_client since lifetime of osds and mon is within that of
+>> ceph_client.
+>>
+>> I've tested this patch in docker container with below operations:
+>> - rbd map
+>> - write/read on the rbd
+>> - rbd unmap
+>>
+>> Signed-off-by: Hong Zhiguo <zhiguohong@tencent.com>
+>> ---
+>>  fs/ceph/mds_client.c           | 3 ++-
+>>  include/linux/ceph/libceph.h   | 3 +++
+>>  include/linux/ceph/messenger.h | 4 +++-
+>>  net/ceph/ceph_common.c         | 7 ++++---
+>>  net/ceph/messenger.c           | 8 +++++++-
+>>  net/ceph/mon_client.c          | 2 +-
+>>  net/ceph/osd_client.c          | 3 ++-
+>>  7 files changed, 22 insertions(+), 8 deletions(-)
+>>
+>> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+>> index 8080d48..3fb0976 100644
+>> --- a/fs/ceph/mds_client.c
+>> +++ b/fs/ceph/mds_client.c
+>> @@ -440,7 +440,8 @@ static struct ceph_mds_session *register_session(struct ceph_mds_client *mdsc,
+>>         s->s_seq = 0;
+>>         mutex_init(&s->s_mutex);
+>>
+>> -       ceph_con_init(&s->s_con, s, &mds_con_ops, &mdsc->fsc->client->msgr);
+>> +       ceph_con_init(&s->s_con, s, &mds_con_ops, &mdsc->fsc->client->msgr,
+>> +                       mdsc->fsc->client->options->netns);
+>>
+>>         spin_lock_init(&s->s_gen_ttl_lock);
+>>         s->s_cap_gen = 0;
+>> diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
+>> index d73a569..442d9f3 100644
+>> --- a/include/linux/ceph/libceph.h
+>> +++ b/include/linux/ceph/libceph.h
+>> @@ -22,6 +22,8 @@
+>>  #include <linux/ceph/osd_client.h>
+>>  #include <linux/ceph/ceph_fs.h>
+>>
+>> +struct net;
+>> +
+>>  /*
+>>   * mount options
+>>   */
+>> @@ -46,6 +48,7 @@ struct ceph_options {
+>>         unsigned long mount_timeout;            /* jiffies */
+>>         unsigned long osd_idle_ttl;             /* jiffies */
+>>         unsigned long osd_keepalive_timeout;    /* jiffies */
+>> +       struct net *netns;
+>>
+>>         /*
+>>          * any type that can't be simply compared or doesn't need need
+>> diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
+>> index e154994..3b0a314 100644
+>> --- a/include/linux/ceph/messenger.h
+>> +++ b/include/linux/ceph/messenger.h
+>> @@ -14,6 +14,7 @@
+>>
+>>  struct ceph_msg;
+>>  struct ceph_connection;
+>> +struct net;
+>>
+>>  /*
+>>   * Ceph defines these callbacks for handling connection events.
+>> @@ -189,6 +190,7 @@ struct ceph_connection {
+>>         struct ceph_messenger *msgr;
+>>
+>>         atomic_t sock_state;
+>> +       struct net *netns;
+>>         struct socket *sock;
+>>         struct ceph_entity_addr peer_addr; /* peer address */
+>>         struct ceph_entity_addr peer_addr_for_me;
+>> @@ -270,7 +272,7 @@ extern void ceph_messenger_init(struct ceph_messenger *msgr,
+>>
+>>  extern void ceph_con_init(struct ceph_connection *con, void *private,
+>>                         const struct ceph_connection_operations *ops,
+>> -                       struct ceph_messenger *msgr);
+>> +                       struct ceph_messenger *msgr, struct net *netns);
+>>  extern void ceph_con_open(struct ceph_connection *con,
+>>                           __u8 entity_type, __u64 entity_num,
+>>                           struct ceph_entity_addr *addr);
+>> diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
+>> index 925d0c8..1c42d96 100644
+>> --- a/net/ceph/ceph_common.c
+>> +++ b/net/ceph/ceph_common.c
+>> @@ -269,6 +269,9 @@ static match_table_t opt_tokens = {
+>>  void ceph_destroy_options(struct ceph_options *opt)
+>>  {
+>>         dout("destroy_options %p\n", opt);
+>> +       if (opt->netns) {
+>> +               put_net(opt->netns);
+>> +       }
+>>         kfree(opt->name);
+>>         if (opt->key) {
+>>                 ceph_crypto_key_destroy(opt->key);
+>> @@ -335,9 +338,6 @@ ceph_parse_options(char *options, const char *dev_name,
+>>         int err = -ENOMEM;
+>>         substring_t argstr[MAX_OPT_ARGS];
+>>
+>> -       if (current->nsproxy->net_ns != &init_net)
+>> -               return ERR_PTR(-EINVAL);
+>> -
+>>         opt = kzalloc(sizeof(*opt), GFP_KERNEL);
+>>         if (!opt)
+>>                 return ERR_PTR(-ENOMEM);
+>> @@ -501,6 +501,7 @@ ceph_parse_options(char *options, const char *dev_name,
+>>         }
+>>
+>>         /* success */
+>> +       opt->netns = get_net(current->nsproxy->net_ns);
+>>         return opt;
+>>
+>>  out:
+>> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+>> index 967080a..43ec07d 100644
+>> --- a/net/ceph/messenger.c
+>> +++ b/net/ceph/messenger.c
+>> @@ -736,7 +736,7 @@ bool ceph_con_opened(struct ceph_connection *con)
+>>   */
+>>  void ceph_con_init(struct ceph_connection *con, void *private,
+>>         const struct ceph_connection_operations *ops,
+>> -       struct ceph_messenger *msgr)
+>> +       struct ceph_messenger *msgr, struct net *netns)
+>>  {
+>>         dout("con_init %p\n", con);
+>>         memset(con, 0, sizeof(*con));
+>> @@ -744,6 +744,12 @@ void ceph_con_init(struct ceph_connection *con, void *private,
+>>         con->ops = ops;
+>>         con->msgr = msgr;
+>>
+>> +       /*
+>> +        * don't take extra refcnt of netns here since both mon and osds
+>> +        * have lifetime within that of ceph_client
+>> +        */
+>> +       con->netns = netns;
+>> +
+>>         con_sock_state_init(con);
+>>
+>>         mutex_init(&con->mutex);
+>> diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+>> index 9d6ff12..04128af 100644
+>> --- a/net/ceph/mon_client.c
+>> +++ b/net/ceph/mon_client.c
+>> @@ -832,7 +832,7 @@ int ceph_monc_init(struct ceph_mon_client *monc, struct ceph_client *cl)
+>>                 goto out_auth_reply;
+>>
+>>         ceph_con_init(&monc->con, monc, &mon_con_ops,
+>> -                     &monc->client->msgr);
+>> +                     &monc->client->msgr, monc->client->options->netns);
+>>
+>>         monc->cur_mon = -1;
+>>         monc->hunting = true;
+>> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+>> index 5003367..32d9fa9 100644
+>> --- a/net/ceph/osd_client.c
+>> +++ b/net/ceph/osd_client.c
+>> @@ -1022,7 +1022,8 @@ static struct ceph_osd *create_osd(struct ceph_osd_client *osdc, int onum)
+>>         INIT_LIST_HEAD(&osd->o_osd_lru);
+>>         osd->o_incarnation = 1;
+>>
+>> -       ceph_con_init(&osd->o_con, osd, &osd_con_ops, &osdc->client->msgr);
+>> +       ceph_con_init(&osd->o_con, osd, &osd_con_ops, &osdc->client->msgr,
+>> +                       osdc->client->options->netns);
+>>
+>>         INIT_LIST_HEAD(&osd->o_keepalive_item);
+>>         return osd;
+>
+> It seems to me your patch boils down to killing the init_ns check and
+> adding a netns field to struct ceph_connection, which is assigned to
+> but never used.  Given that, can you elaborate on the "And use the
+> netns other than init_net when creating socket" part and explain in
+> a little bit more detail what is accomplished here?
+>
 > Thanks,
-> 
-> - ----------------
-> Robert LeBlanc
-> GPG Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
-> -----BEGIN PGP SIGNATURE-----
-> Version: Mailvelope v0.13.1
-> Comment: https://www.mailvelope.com
-> 
-> wsFcBAEBCAAQBQJVd1diCRDmVDuy+mK58QAAlMQP/AlbiMj72J/r4rgvPCSv
-> 6EVzFLCZOVewtmeV+/pnltzQgbj42/MRNC5wfJjPasAEn7Ctj0PgnzNA9LYy
-> m4vkrS2Lc4BiRc5dkI31my6T51LxMswZjKecy9yiCDUoUW7cD15PMvyoq27G
-> +JpeNbrrCvl6Sxfx7S4IjvgnP1Xko2qSi17GoYxJzxwAZJ0LwNUSzvhlQnab
-> fEswyO1af3uWUmTGWUKML8jGYSyLnjNa43t2DmEKG5o4yWaXFx0UcUiUdk4v
-> gLxHZvUxuNVIb862aoP4gXUC4V508Vu8nnfXx7BuAYXSN0w+Yh2XYU/2T4gL
-> Ikqo2ASi3kZoMRoxjX0S/kSn0OdrJkJCkI0fJmYxoBrULqDPu/EslKSX8IGZ
-> MN9jGPNrr6G7US25aPPWM1MH4Ikmb0M8/wsmiU60yfQz7bFqxzmIUgoetwHS
-> gKSJnu7DyovrGkPTD4nc8yCuFohcIqtD47hh1NLgpQbikGhEIpa//W5A9ikL
-> ZO/ke3EMVT+2wWRikQv9QLBx8hkXazEq3ko5KNXK+m+CtJr0Ae56xKPZUu+R
-> 4gFZyqO+P5bHk51j2V63n+M0bAxQpjTB7j3YV7oToezbJwhELVXATNfVwB8g
-> PixgthHIkFhbPM606qBW48XVVJ+QxV61prUgEp0Sni7oy22yMtaoso5sdGjn
-> cCtC
-> =QqbH
-> -----END PGP SIGNATURE-----
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+>
+>                 Ilya
+
+
+
+-- 
+best regards
+Hong Zhiguo
