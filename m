@@ -1,42 +1,195 @@
-From: Harshal Gupta <harshal.gupta001@gmail.com>
-Subject: Duplicate bucket creation Response in RGW
-Date: Wed, 10 Jun 2015 17:52:51 +0530
-Message-ID: <CAPRac-a9gp1B9J3L-_TjkkP3-M9ZkvF-HwQ505NvJaqhEC392w@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Hong Zhiguo <honkiko@gmail.com>
+Subject: [PATCH] libceph: allow custom network namespaces
+Date: Wed, 10 Jun 2015 21:01:24 +0800
+Message-ID: <1433941284-12984-1-git-send-email-zhiguohong@tencent.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f181.google.com ([209.85.212.181]:33108 "EHLO
-	mail-wi0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753594AbbFJMXN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Jun 2015 08:23:13 -0400
-Received: by wiwd19 with SMTP id d19so46603611wiw.0
-        for <ceph-devel@vger.kernel.org>; Wed, 10 Jun 2015 05:23:12 -0700 (PDT)
+Received: from mail-pd0-f173.google.com ([209.85.192.173]:35858 "EHLO
+	mail-pd0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933479AbbFJNBu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Jun 2015 09:01:50 -0400
+Received: by pdjm12 with SMTP id m12so37506722pdj.3
+        for <ceph-devel@vger.kernel.org>; Wed, 10 Jun 2015 06:01:49 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: sage@redhat.com, idryomov@gmail.com, Hong Zhiguo <zhiguohong@tencent.com>
 
-Hi,
+in current implementaion init_net is always used.
 
-I was comparing response of S3 and Ceph RGW for when we try to create
-a bucket which already exists for the same account.
+But in most cases, if user do a rbd map or ceph mount in
+a container, it's expected to use the container network namespace.
 
-S3 (non-default region) throws an error with:
-HTTP response code : 409 Conflict
-error code : BucketAlreadyOwnedByYou
+This patch saves the container's netns in ceph_options on a rbd map
+or ceph mount. And use the netns other than init_net when creating
+socket. Ref count of the netns is only taken by the ceph_options
+in ceph_client since lifetime of osds and mon is within that of
+ceph_client.
 
-but on the other hand ceph gives a 200 OK while keeping the original
-bucket as it is.
+I've tested this patch in docker container with below operations:
+- rbd map
+- write/read on the rbd
+- rbd unmap
 
-I am thinking to match the functionality of Ceph RGW same as s3
-(non-default regions), as the one given by S3 seems more appropriate.
+Signed-off-by: Hong Zhiguo <zhiguohong@tencent.com>
+---
+ fs/ceph/mds_client.c           | 3 ++-
+ include/linux/ceph/libceph.h   | 3 +++
+ include/linux/ceph/messenger.h | 4 +++-
+ net/ceph/ceph_common.c         | 7 ++++---
+ net/ceph/messenger.c           | 8 +++++++-
+ net/ceph/mon_client.c          | 2 +-
+ net/ceph/osd_client.c          | 3 ++-
+ 7 files changed, 22 insertions(+), 8 deletions(-)
 
-For this, I have added a new error code "BucketAlreadyOwnedByYou"
-which will be thrown in the above mentioned
-case.
-
-Please give your opinion about it.
-
-Thanks
-
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index 8080d48..3fb0976 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -440,7 +440,8 @@ static struct ceph_mds_session *register_session(struct ceph_mds_client *mdsc,
+ 	s->s_seq = 0;
+ 	mutex_init(&s->s_mutex);
+ 
+-	ceph_con_init(&s->s_con, s, &mds_con_ops, &mdsc->fsc->client->msgr);
++	ceph_con_init(&s->s_con, s, &mds_con_ops, &mdsc->fsc->client->msgr,
++			mdsc->fsc->client->options->netns);
+ 
+ 	spin_lock_init(&s->s_gen_ttl_lock);
+ 	s->s_cap_gen = 0;
+diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
+index d73a569..442d9f3 100644
+--- a/include/linux/ceph/libceph.h
++++ b/include/linux/ceph/libceph.h
+@@ -22,6 +22,8 @@
+ #include <linux/ceph/osd_client.h>
+ #include <linux/ceph/ceph_fs.h>
+ 
++struct net;
++
+ /*
+  * mount options
+  */
+@@ -46,6 +48,7 @@ struct ceph_options {
+ 	unsigned long mount_timeout;		/* jiffies */
+ 	unsigned long osd_idle_ttl;		/* jiffies */
+ 	unsigned long osd_keepalive_timeout;	/* jiffies */
++	struct net *netns;
+ 
+ 	/*
+ 	 * any type that can't be simply compared or doesn't need need
+diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
+index e154994..3b0a314 100644
+--- a/include/linux/ceph/messenger.h
++++ b/include/linux/ceph/messenger.h
+@@ -14,6 +14,7 @@
+ 
+ struct ceph_msg;
+ struct ceph_connection;
++struct net;
+ 
+ /*
+  * Ceph defines these callbacks for handling connection events.
+@@ -189,6 +190,7 @@ struct ceph_connection {
+ 	struct ceph_messenger *msgr;
+ 
+ 	atomic_t sock_state;
++	struct net *netns;
+ 	struct socket *sock;
+ 	struct ceph_entity_addr peer_addr; /* peer address */
+ 	struct ceph_entity_addr peer_addr_for_me;
+@@ -270,7 +272,7 @@ extern void ceph_messenger_init(struct ceph_messenger *msgr,
+ 
+ extern void ceph_con_init(struct ceph_connection *con, void *private,
+ 			const struct ceph_connection_operations *ops,
+-			struct ceph_messenger *msgr);
++			struct ceph_messenger *msgr, struct net *netns);
+ extern void ceph_con_open(struct ceph_connection *con,
+ 			  __u8 entity_type, __u64 entity_num,
+ 			  struct ceph_entity_addr *addr);
+diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
+index 925d0c8..1c42d96 100644
+--- a/net/ceph/ceph_common.c
++++ b/net/ceph/ceph_common.c
+@@ -269,6 +269,9 @@ static match_table_t opt_tokens = {
+ void ceph_destroy_options(struct ceph_options *opt)
+ {
+ 	dout("destroy_options %p\n", opt);
++	if (opt->netns) {
++		put_net(opt->netns);
++	}
+ 	kfree(opt->name);
+ 	if (opt->key) {
+ 		ceph_crypto_key_destroy(opt->key);
+@@ -335,9 +338,6 @@ ceph_parse_options(char *options, const char *dev_name,
+ 	int err = -ENOMEM;
+ 	substring_t argstr[MAX_OPT_ARGS];
+ 
+-	if (current->nsproxy->net_ns != &init_net)
+-		return ERR_PTR(-EINVAL);
+-
+ 	opt = kzalloc(sizeof(*opt), GFP_KERNEL);
+ 	if (!opt)
+ 		return ERR_PTR(-ENOMEM);
+@@ -501,6 +501,7 @@ ceph_parse_options(char *options, const char *dev_name,
+ 	}
+ 
+ 	/* success */
++	opt->netns = get_net(current->nsproxy->net_ns);
+ 	return opt;
+ 
+ out:
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index 967080a..43ec07d 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -736,7 +736,7 @@ bool ceph_con_opened(struct ceph_connection *con)
+  */
+ void ceph_con_init(struct ceph_connection *con, void *private,
+ 	const struct ceph_connection_operations *ops,
+-	struct ceph_messenger *msgr)
++	struct ceph_messenger *msgr, struct net *netns)
+ {
+ 	dout("con_init %p\n", con);
+ 	memset(con, 0, sizeof(*con));
+@@ -744,6 +744,12 @@ void ceph_con_init(struct ceph_connection *con, void *private,
+ 	con->ops = ops;
+ 	con->msgr = msgr;
+ 
++	/*
++	 * don't take extra refcnt of netns here since both mon and osds
++	 * have lifetime within that of ceph_client
++	 */
++	con->netns = netns;
++
+ 	con_sock_state_init(con);
+ 
+ 	mutex_init(&con->mutex);
+diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+index 9d6ff12..04128af 100644
+--- a/net/ceph/mon_client.c
++++ b/net/ceph/mon_client.c
+@@ -832,7 +832,7 @@ int ceph_monc_init(struct ceph_mon_client *monc, struct ceph_client *cl)
+ 		goto out_auth_reply;
+ 
+ 	ceph_con_init(&monc->con, monc, &mon_con_ops,
+-		      &monc->client->msgr);
++		      &monc->client->msgr, monc->client->options->netns);
+ 
+ 	monc->cur_mon = -1;
+ 	monc->hunting = true;
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 5003367..32d9fa9 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -1022,7 +1022,8 @@ static struct ceph_osd *create_osd(struct ceph_osd_client *osdc, int onum)
+ 	INIT_LIST_HEAD(&osd->o_osd_lru);
+ 	osd->o_incarnation = 1;
+ 
+-	ceph_con_init(&osd->o_con, osd, &osd_con_ops, &osdc->client->msgr);
++	ceph_con_init(&osd->o_con, osd, &osd_con_ops, &osdc->client->msgr,
++			osdc->client->options->netns);
+ 
+ 	INIT_LIST_HEAD(&osd->o_keepalive_item);
+ 	return osd;
 -- 
-HARSHAL GUPTA
+1.9.1
+
