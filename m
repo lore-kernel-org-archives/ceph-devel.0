@@ -1,109 +1,83 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Regarding hadoop over RGW blueprint
-Date: Thu, 11 Jun 2015 03:51:25 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD9FE36@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD9FACB@SACMBXIP01.sdcorp.global.sandisk.com>
- <51FC7A40FB29414D88A121A7FFEF9A471114DC78@SHSMSX104.ccr.corp.intel.com>
- <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD9FE16@SACMBXIP01.sdcorp.global.sandisk.com>
- <06681238D8946F44A60AA400760A1CBF01FCED84@SHSMSX104.ccr.corp.intel.com>
+From: Shishir Gowda <Shishir.Gowda@sandisk.com>
+Subject: =?utf-8?B?UkU6IENlcGggdGllcuKAmWluZyBlbmhhbmNlbWVudHMgYmx1ZSBwcmludCBm?=
+ =?utf-8?Q?or_jewel?=
+Date: Thu, 11 Jun 2015 08:14:23 +0000
+Message-ID: <EA545303A8F8E842820A172C3D641D6E1B0635D8@SACMBXIP01.sdcorp.global.sandisk.com>
+References: <EA545303A8F8E842820A172C3D641D6E1B0628FD@SACMBXIP01.sdcorp.global.sandisk.com>
+ <CAC6JEv9OPeAETB4M6fdouXLwQ_ocgsPswDXw2Vdntbd7n=uKHg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1on0060.outbound.protection.outlook.com ([157.56.110.60]:60185
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+Received: from mail-by2on0072.outbound.protection.outlook.com ([207.46.100.72]:17820
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751398AbbFKDvb convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Jun 2015 23:51:31 -0400
-In-Reply-To: <06681238D8946F44A60AA400760A1CBF01FCED84@SHSMSX104.ccr.corp.intel.com>
+	id S1751114AbbFKIO1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 11 Jun 2015 04:14:27 -0400
+In-Reply-To: <CAC6JEv9OPeAETB4M6fdouXLwQ_ocgsPswDXw2Vdntbd7n=uKHg@mail.gmail.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Zhou, Yuan" <yuan.zhou@intel.com>, "Zhang, Jian" <jian.zhang@intel.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <greg@gregs42.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Thanks Yuan ! This is helpful.
-
-Regards
-Somnath
-
------Original Message-----
-From: Zhou, Yuan [mailto:yuan.zhou@intel.com] 
-Sent: Wednesday, June 10, 2015 8:44 PM
-To: Somnath Roy; Zhang, Jian; ceph-devel
-Subject: RE: Regarding hadoop over RGW blueprint
-
-Hi Somnath,
-
-The background was a bit complicated. This was part of the MOC project, which aims to setup an open-exchange cloud between several private cloud inside several universities.
-https://www.openstack.org/summit/openstack-summit-atlanta-2014/session-videos/presentation/the-massachusetts-open-cloud-moc-a-new-model-to-operate-and-innovate-in-a-vendor-neutral-cloud
-
-There was a strong requirement of multi-tenancy, which is lack in S3 interface. So we actually go to the SwiftFS approach. Currently SwiftFS only support one proxy-server, which is not able to scale to some rack level, this is a big gap. SwiftFS supports locality-awareness but this is  restricted to single proxy.
-
-During our tests, we also find there's some bug when the data set goes to >20GB. SwiftFS is not able to support large data sets. We have some patches but not full ready.
-
-In conclusion, there was some new requirements that S3/SwiftFS cannot meet. So we just propose the new plugin for Ceph RGW. 
-
-thanks, -yuan
-
------Original Message-----
-From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
-Sent: Thursday, June 11, 2015 11:02 AM
-To: Zhang, Jian; ceph-devel
-Subject: RE: Regarding hadoop over RGW blueprint
-
-Thanks Jian !
-What about my first question :-) ? Are you seeing any shortcomings with that ?
-Dumb question may be (not much knowledge on Hadoop front ) , but I was asking why to write a new filesystem interface to plugin with Hadoop, why not plug in RGWProxy somewhere in between may be like Hadoop + S3 + RGWProxy + RGW ?
-
-Regards
-Somnath
-
------Original Message-----
-From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Zhang, Jian
-Sent: Wednesday, June 10, 2015 7:06 PM
-To: Somnath Roy; ceph-devel
-Cc: Zhang, Jian
-Subject: RE: Regarding hadoop over RGW blueprint
-
-Somnath,
-For you second question, our blueprint is targeting to solve the scenario that people trying to run multiple cluster (geographically distributed), which only has a dedicated proxy server have access to the storage cluster, that's one of the biggest advantage of this blueprints. 
-For the third question, I think most end users still have concerns on CephFS, currently we don't have plan to benchmark this solution against CephFS. 
-
-Jian
-
-
-
------Original Message-----
-From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
-Sent: Thursday, June 11, 2015 8:54 AM
-To: ceph-devel
-Subject: Regarding hadoop over RGW blueprint
-
-Hi Yuan/Jian
-
-I was going through your following blueprint.
-
-http://tracker.ceph.com/projects/ceph/wiki/Hadoop_over_Ceph_RGW_status_update
-
-This is very interesting. I have some query though.
-
-1. Did you guys benchmark RGW + S3 interface integrated with Hadoop. This should work as is today. Are you seeing some shortcomings with this solution other than localization ?
-
-2. The only advantage with your solution is to get locality with RGW proxy ? Or there are other advantages as well ?
-
-3. Hadoop with CephFs is the preferred solution from RedHat. Are you going to benchmark your solution against this as well ?
-
-Thanks & Regards
-Somnath
-
-
-________________________________
-
-PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGkgR3JlZywNCg0KUGxlYXNlIGZpbmQgcmVzcG9uc2VzIGlubGluZS4NCg0KV2l0aCByZWdhcmRz
+LA0KU2hpc2hpcg0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IEdyZWdv
+cnkgRmFybnVtIFttYWlsdG86Z3JlZ0BncmVnczQyLmNvbV0NCj4gU2VudDogV2VkbmVzZGF5LCBK
+dW5lIDEwLCAyMDE1IDEyOjE3IFBNDQo+IFRvOiBTaGlzaGlyIEdvd2RhDQo+IENjOiBjZXBoLWRl
+dmVsQHZnZXIua2VybmVsLm9yZw0KPiBTdWJqZWN0OiBSZTogQ2VwaCB0aWVy4oCZaW5nIGVuaGFu
+Y2VtZW50cyBibHVlIHByaW50IGZvciBqZXdlbA0KPg0KPiBPbiBUdWUsIEp1biA5LCAyMDE1IGF0
+IDc6NTIgUE0sIFNoaXNoaXIgR293ZGENCj4gPFNoaXNoaXIuR293ZGFAc2FuZGlzay5jb20+IHdy
+b3RlOg0KPiA+IEhpIEFsbCwNCj4gPg0KPiA+IFdlIGhhdmUgdXBsb2FkZWQgdGhlIGJsdWVwcmlu
+dCBmb3IgdGhlIGVuaGFuY2VtZW50cyB3ZSBhcmUgcHJvcG9zaW5nDQo+ID4gZm9yIGNlcGggdGll
+cuKAmWluZyBmdW5jdGlvbmFsaXR5IGZvciBKZXdlbCByZWxlYXNlIEANCj4gPg0KPiA+IGh0dHA6
+Ly90cmFja2VyLmNlcGguY29tL3Byb2plY3RzL2NlcGgvd2lraS9UaWVyaW5nLWVuaGFjZW1lbnQN
+Cj4gPg0KPiA+IFNvbGljaXRpbmcgY29tbWVudHMvZmVlZGJhY2sgZm9yIHRoZSBzYW1lLg0KPg0K
+PiBCeSBhbmQgbGFyZ2UgdGhpcyBsb29rcyBwcmV0dHkgc2Vuc2libGUgdG8gbWUgaW4gYSBxdWlj
+ayByZWFkLiBUaGUgdGhpbmdzIEkNCj4gbm90aWNlZDoNCj4gMSkgVGhlcmUncyBhIHJlZmVyZW5j
+ZSB0byB0aGUgcG9saWN5IGZ1bmN0aW9uIGdldHRpbmcgcGFzc2VkIGluIGRhdGEgYWJvdXQNCj4g
+aG93IGZ1bGwgdGhlIHBvb2wgaXMuIE5vdGUgdGhhdCB3aGlsZSB3ZSBleHBvc2Ugc3R1ZmYgdG8g
+Y2FjaGUgcG9vbCB1c2VycyBpbg0KPiB0ZXJtcyBvZiBwb29scywgaW4gdGhlIGludGVybmFsIGlt
+cGxlbWVudGF0aW9ucyB0aGUgZmx1c2hpbmcgZnVuY3Rpb25zIGFyZQ0KPiBiYXNlZCBvbiBob3cg
+ZnVsbCB0aGUgbG9jYWwgUEcgaXMg4oCUIHRoYXQncyBiZWNhdXNlIHdlIGRvbid0IGhhdmUgYW55
+IHVwLXRvLQ0KPiBkYXRlIGluZm9ybWF0aW9uIGFib3V0IHRoZSBnbG9iYWwgcG9vbCAoYW5kIHdl
+IHJlYWxseSBjYW4ndCkuIEkgaW1hZ2luZSBqdXN0DQo+IHN1YnN0aXR1dGluZyBQRyBmb3IgcG9v
+bCBpbiB5b3VyIGRlc2NyaXB0aW9uIHNob3VsZCB3b3JrLCBidXQgaWYgbm90IHRoYXQncw0KPiBz
+b21ldGhpbmcgdG8gYWRkcmVzcy4NCj4NClN1cmUsIHdlIHdpbGwga2VlcCB0aGlzIGluIG1pbmQu
+DQoNCj4gMikgQXJlIHlvdSBzdXJlIHlvdSB3YW50IHRvIGV4cG9zZSB0aGVzZSBwb2xpY2llcyB2
+aWEgUkdXPyBUaGF0IHNvdW5kcw0KPiBib3RoIGV4Y2Vzc2l2ZWx5IGNvbXBsaWNhdGVkIChmcm9t
+IHRoZSBVSSBwZXJzcGVjdGl2ZSkgYW5kIGxpYWJsZSB0byBhYnVzZQ0KPiBieSB1c2Vycy4gUGx1
+cyBpdCBzZWVtcyBhIGxpdHRsZSByZWR1bmRhbnQg4oCUIEkgY291bGQgaW1hZ2luZSBwZW9wbGUg
+d2FudGluZw0KPiB0aGUgdmVyeSBmYXN0ZXN0IHN0b3JhZ2UsIGJ1dCB0aGVuIHRoZXkgc2hvdWxk
+IGp1c3Qgc3RvcmUgdGhvc2Ugb2JqZWN0cyBpbg0KPiBSR1cgYnVja2V0cyB3aGljaCBhcmUgc3Rv
+cmVkIG9uIHBvb2xzIHdpdGggYXBwcm9wcmlhdGUgcG9saWNpZXMgKEkgZm9yZ2V0DQo+IHdoYXQg
+dGhpcyBtZWNoYW5pc20gaXMgY2FsbGVkLCBidXQgdGhlcmUncyBzb21lIHNvcnQgb2YgcGxhY2Vt
+ZW50IHRoaW5nDQo+IHdoZW4gY3JlYXRpbmcgYnVja2V0cykuIE90aGVyd2lzZSB0aGUgZW5oYW5j
+ZW1lbnRzIGZvciB0aGluZ3MgbGlrZSBkaXJlY3QtDQo+IHJlYWQtZnJvbS1FQy1zaGFyZHMgZXRj
+IHNlZW0gdG8gY292ZXIgUkdXJ3MgcGVyZm9ybWFuY2UgbmVlZHMgcHJldHR5DQo+IHdlbGwuDQo+
+DQoNCkkgYWdyZWUgdGhhdCBleHBvc2luZyB0aGVzZSBwb2xpY2VzIHZpYSBSR1cgaXMgcHJvbmUg
+dG8gYmUgYWJ1c2VkLCBidXQgaXQgZG9lcyBwcm92aWRlIHVzZXJzIGEgZmluZSBnYWluZWQgY29u
+dHJvbC4NCkFkZGl0aW9uYWxseSwgd2hhdCB3ZSBoYXZlIGluIG1pbmQgaXMgYW4gYWxsIGZsYXNo
+IGFycmF5IGFzIGNhY2hlIHRpZXIsIHNvIGl0IGhlbHBzIGluIHJlZHVjaW5nIHdyaXRlIGFtcGxp
+ZmljYXRpb24uDQoNCj4gMykgV2hpbGUgYSBidW5jaCBvZiB0aGUgZG9jcyBhbmQgcG9zc2libHkg
+c29tZSBvZiB0aGUgY29kZSBpbXBseSB0aGF0IHlvdQ0KPiBoYXZlIGEgc2luZ2xlIGNhY2hlIGFu
+ZCBhIHNpbmdsZSBiYXNlIHRpZXIsIEkgdGhpbmsgaW4gZ2VuZXJhbCB5b3UgY2FuIHNldCB1cA0K
+PiB0aWVyIGNoYWlucy4gV2Ugd2FudCB0byBwcmVzZXJ2ZSB0aGF0LCBzbyB0aGUgJENBQ0hFIGFu
+ZCAkQkFTRSBsYW5ndWFnZQ0KPiB1c2VkIGluIHRoZSB0aWVyIGZ1bmN0aW9ucyBuZWVkcyB0byBi
+ZSBjYXBhYmxlIG9mIHRoYXQuDQoNCkFncmVlZCwgdGhhdCBpcyB3aHkgdXNpbmcgcG9vbHMgbmFt
+ZXMgYXJlIGFsc28gbWVudGlvbmVkLCB3aGljaCB3b3VsZCBhbGxvdyBtdWx0aXBsZSB0aWVycyB0
+byBleGlzdHMuIElmIHRoZSByZXNvbHV0aW9uL2xvb2t1cCBvZiB0aGUgcG9vbCBmYWlscywgdGhl
+biB3ZSB3b3VsZCBmYWlsIHRoZSBpL28sIGJ1dCBpbiB0aGUgZnV0dXJlIGJlIG1vdmVkIHRvIGEg
+ZGVmYXVsdCBwb29sLg0KDQo+IC1HcmVnDQoNCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fDQoNClBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxl
+Y3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUg
+ZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhp
+cyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBu
+b3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQg
+dGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcg
+b2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2Vp
+dmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVy
+IGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQg
+ZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vz
+c2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVz
+KS4NCg0K
