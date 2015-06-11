@@ -1,63 +1,58 @@
-From: Li Wang <liwang@ubuntukylin.com>
-Subject: Re: Ceph =?windows-1252?Q?tier=92ing_enhancements_blue_pri?=
- =?windows-1252?Q?nt_for_jewel?=
-Date: Thu, 11 Jun 2015 09:42:14 +0800
-Message-ID: <5578E776.4020609@ubuntukylin.com>
-References: <EA545303A8F8E842820A172C3D641D6E1B0628FD@SACMBXIP01.sdcorp.global.sandisk.com>
+From: "Zhang, Jian" <jian.zhang@intel.com>
+Subject: RE: Regarding hadoop over RGW blueprint
+Date: Thu, 11 Jun 2015 02:06:20 +0000
+Message-ID: <51FC7A40FB29414D88A121A7FFEF9A471114DC78@SHSMSX104.ccr.corp.intel.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD9FACB@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m53-178.qiye.163.com ([123.58.178.53]:45083 "EHLO
-	m53-178.qiye.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751806AbbFKBmd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Jun 2015 21:42:33 -0400
-In-Reply-To: <EA545303A8F8E842820A172C3D641D6E1B0628FD@SACMBXIP01.sdcorp.global.sandisk.com>
+Received: from mga01.intel.com ([192.55.52.88]:15989 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751797AbbFKCHN convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Jun 2015 22:07:13 -0400
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD9FACB@SACMBXIP01.sdcorp.global.sandisk.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Shishir Gowda <Shishir.Gowda@sandisk.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Cc: "Zhang, Jian" <jian.zhang@intel.com>
 
-Just had a quick look, the idea behind it seems to want to give
-a flexible, very fine-grained object-level behavior control,
-for example, how long an object will stay in a pool.
-however, it is not very convincing that whether it worth the
-effort to do this fine-grained control, the benefit may not
-offset the introduce algorithm overhead
+Somnath, 
+For you second question, our blueprint is targeting to solve the scenario that people trying to run multiple cluster (geographically distributed), which only has a dedicated proxy server have access to the storage cluster, that's one of the biggest advantage of this blueprints. 
+For the third question, I think most end users still have concerns on CephFS, currently we don't have plan to benchmark this solution against CephFS. 
 
-On 2015/6/10 11:11, Shishir Gowda wrote:
-> Hi All,
->
-> We have uploaded the blueprint for the enhancements we are proposing =
-for ceph tier=92ing functionality for Jewel release @
->
-> http://tracker.ceph.com/projects/ceph/wiki/Tiering-enhacement
->
-> Soliciting comments/feedback for the same.
->
-> With regards,
-> Shishir
->
-> ________________________________
->
-> PLEASE NOTE: The information contained in this electronic mail messag=
-e is intended only for the use of the designated recipient(s) named abo=
-ve. If the reader of this message is not the intended recipient, you ar=
-e hereby notified that you have received this message in error and that=
- any review, dissemination, distribution, or copying of this message is=
- strictly prohibited. If you have received this communication in error,=
- please notify the sender by telephone or e-mail (as shown above) immed=
-iately and destroy any and all copies of this message in your possessio=
-n (whether hard copies or electronically stored copies).
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+Jian
+
+
+
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
+Sent: Thursday, June 11, 2015 8:54 AM
+To: ceph-devel
+Subject: Regarding hadoop over RGW blueprint
+
+Hi Yuan/Jian
+
+I was going through your following blueprint.
+
+http://tracker.ceph.com/projects/ceph/wiki/Hadoop_over_Ceph_RGW_status_update
+
+This is very interesting. I have some query though.
+
+1. Did you guys benchmark RGW + S3 interface integrated with Hadoop. This should work as is today. Are you seeing some shortcomings with this solution other than localization ?
+
+2. The only advantage with your solution is to get locality with RGW proxy ? Or there are other advantages as well ?
+
+3. Hadoop with CephFs is the preferred solution from RedHat. Are you going to benchmark your solution against this as well ?
+
+Thanks & Regards
+Somnath
+
+
+________________________________
+
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+
 --
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
