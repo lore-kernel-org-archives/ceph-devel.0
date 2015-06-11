@@ -1,69 +1,42 @@
-From: Robert LeBlanc <robert@leblancnet.us>
-Subject: rbd top
-Date: Thu, 11 Jun 2015 13:33:01 -0600
-Message-ID: <CAANLjFp4+tkSj5=we88nGDFh0NtmX4jYc+sE__1N8L_4X30dfw@mail.gmail.com>
+From: Kyle Bader <kyle.bader@gmail.com>
+Subject: Re: Duplicate bucket creation Response in RGW
+Date: Thu, 11 Jun 2015 14:22:56 -0700
+Message-ID: <CAFMfnwqsxGyQSE64G6_MsQMdN5PD-yoBsfrujpKxXj2zOQUUsA@mail.gmail.com>
+References: <CAPRac-a9gp1B9J3L-_TjkkP3-M9ZkvF-HwQ505NvJaqhEC392w@mail.gmail.com>
+	<1875013920.12639009.1433959710332.JavaMail.zimbra@redhat.com>
+	<CAPRac-b9O0Dx4mGnMDfe5NjW5gGmAqp7zN6k9DcTdceHK5AS8Q@mail.gmail.com>
+	<1688384556.13183297.1434040012831.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f45.google.com ([74.125.82.45]:34557 "EHLO
-	mail-wg0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751370AbbFKTdD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Jun 2015 15:33:03 -0400
-Received: by wgv5 with SMTP id 5so10686161wgv.1
-        for <ceph-devel@vger.kernel.org>; Thu, 11 Jun 2015 12:33:01 -0700 (PDT)
+Received: from mail-yh0-f49.google.com ([209.85.213.49]:34804 "EHLO
+	mail-yh0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755097AbbFKVW5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 11 Jun 2015 17:22:57 -0400
+Received: by yhid80 with SMTP id d80so6970759yhi.1
+        for <ceph-devel@vger.kernel.org>; Thu, 11 Jun 2015 14:22:56 -0700 (PDT)
+In-Reply-To: <1688384556.13183297.1434040012831.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Cc: Harshal Gupta <harshal.gupta001@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA256
+> I don't see a compelling reason why to change our current behaviour. The fact that Amazon itself is inconsistent makes me think that it just an artifact of their architecture, rather than a carefully designed api.
 
-One feature we would like is an "rbd top" command that would be like
-top, but show usage of RBD volumes so that we can quickly identify
-high demand RBDs.
+Interesting.. if we look at the Amazon S3 FAQ we can understand the
+differences in API responses:
 
-Since I haven't done any programming for Ceph, I'm trying to think
-through the best way to approach this. I don't know if there are
-already perf counters that I can query that are at the client, RBD or
-the Rados layers. If these counters don't exist would it be best to
-implement them at the client layer and look for watchers on the RBD
-and query them? Is it better to handle it at the Rados layer and
-aggregate the I/O from all chunks? Of course this would need to scale
-out very large.
+"Q: What data consistency model does Amazon S3 employ?
 
-It seems that if the client running rbd top requests the top 'X'
-number of objects from each OSD, then it would cut down on the data
-that the has to be moved around and processed. It wouldn't be an
-extremely accurate view, but might be enough.
+Amazon S3 buckets in the US Standard region provide eventual
+consistency. Amazon S3 buckets in all other regions provide
+read-after-write consistency for PUTS of new objects and eventual
+consistency for overwrite PUTS and DELETES."
 
-What are your thoughts?
+If we consider buckets in our implementation to be eventually
+consistent, we should probably return 200. If we can provide
+read-after-write consistency, then we should probably return 209.
 
-Also, what is the best way to get into the Ceph code? I've looked at
-several things and I find myself doing a lot of searching to find
-connecting pieces. My primary focus is not programming so picking up a
-new code base takes me a long time because I don't know many of the
-tricks that help people get to speed quickly.
+-- 
 
-Thanks,
-- ----------------
-Robert LeBlanc
-GPG Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
------BEGIN PGP SIGNATURE-----
-Version: Mailvelope v0.13.1
-Comment: https://www.mailvelope.com
-
-wsFcBAEBCAAQBQJVeeJoCRDmVDuy+mK58QAAYNUQAMQW1zB7FB7L1ahFdTU5
-zt2K3AM+oJv/tl4TPtn1C8YXksHYAlzKK28r6boUszoINb+54c+RxZ8pbstL
-JwS10w0H6K/vZP0UOn03MNm3IkOYqJooiL84NT6HGBjAQLUwY6QwDWQ/5Cdl
-nhHuH4UDUVX8ydQYQCv7QDx4l5I8NVoUAno7dwXQ8LN6cTrNinQGYeYOXwFE
-nyM1u6Fj0mpaOD4OUpHfSkCl/qx6FATv9EM99alNrgBJqgLlp/wi31cSGL7c
-4///valIk5Bndt6Qk002uxzB898WD50Tvqkk3rVNDtnO7SKJ6tcMfy8JUfm0
-sPy+VU9sBECNxot5zmenvIPxfUIhfmfsY7hzj1wzlw8tP6bUV2T3pdsliOmD
-g7fQChmzHl6yUnugYShPCkCysrJa4V9xVQgCPfMUz6Tmacf82BpktZCU1ixX
-J+lDYoHqzeReBoRO5+O8DN5kPzwNg/JbwjDW4ZQfBBdBeZxOiUvpfCKv9Y7O
-43iqFsbvj6JJye4GahdpgzjgYW1m8k/hKNlw5eS0+/9qkBw4wl+WISiXchsJ
-kaAf0IGWbFxskf8KxVgJR7LMin7cq+ehb+Vfxl+PL5qo8hj+j8iZWFLcHzgI
-SUAL4hcGjgGTaysnck4cCOk4eWaSwzbYsKEMjtpfzLIZ1PcAgIr52Id6p8gL
-YRnR
-=oPko
------END PGP SIGNATURE-----
+Kyle
