@@ -1,24 +1,39 @@
-From: "Zhang, Jian" <jian.zhang@intel.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
 Subject: RE: Regarding hadoop over RGW blueprint
-Date: Thu, 11 Jun 2015 02:06:20 +0000
-Message-ID: <51FC7A40FB29414D88A121A7FFEF9A471114DC78@SHSMSX104.ccr.corp.intel.com>
+Date: Thu, 11 Jun 2015 03:02:08 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD9FE16@SACMBXIP01.sdcorp.global.sandisk.com>
 References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD9FACB@SACMBXIP01.sdcorp.global.sandisk.com>
+ <51FC7A40FB29414D88A121A7FFEF9A471114DC78@SHSMSX104.ccr.corp.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:15989 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751797AbbFKCHN convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Jun 2015 22:07:13 -0400
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD9FACB@SACMBXIP01.sdcorp.global.sandisk.com>
+Received: from mail-bn1on0085.outbound.protection.outlook.com ([157.56.110.85]:52575
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751484AbbFKDCN convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Jun 2015 23:02:13 -0400
+In-Reply-To: <51FC7A40FB29414D88A121A7FFEF9A471114DC78@SHSMSX104.ccr.corp.intel.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
-Cc: "Zhang, Jian" <jian.zhang@intel.com>
+To: "Zhang, Jian" <jian.zhang@intel.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Somnath, 
+Thanks Jian !
+What about my first question :-) ? Are you seeing any shortcomings with that ?
+Dumb question may be (not much knowledge on Hadoop front ) , but I was asking why to write a new filesystem interface to plugin with Hadoop, why not plug in RGWProxy somewhere in between may be like Hadoop + S3 + RGWProxy + RGW ?
+
+Regards
+Somnath
+
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Zhang, Jian
+Sent: Wednesday, June 10, 2015 7:06 PM
+To: Somnath Roy; ceph-devel
+Cc: Zhang, Jian
+Subject: RE: Regarding hadoop over RGW blueprint
+
+Somnath,
 For you second question, our blueprint is targeting to solve the scenario that people trying to run multiple cluster (geographically distributed), which only has a dedicated proxy server have access to the storage cluster, that's one of the biggest advantage of this blueprints. 
 For the third question, I think most end users still have concerns on CephFS, currently we don't have plan to benchmark this solution against CephFS. 
 
@@ -54,5 +69,7 @@ ________________________________
 
 PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
 
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
