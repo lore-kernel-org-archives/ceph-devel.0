@@ -1,23 +1,36 @@
-From: "Zhou, Yuan" <yuan.zhou@intel.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
 Subject: RE: Regarding hadoop over RGW blueprint
-Date: Thu, 11 Jun 2015 03:44:06 +0000
-Message-ID: <06681238D8946F44A60AA400760A1CBF01FCED84@SHSMSX104.ccr.corp.intel.com>
+Date: Thu, 11 Jun 2015 03:51:25 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD9FE36@SACMBXIP01.sdcorp.global.sandisk.com>
 References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD9FACB@SACMBXIP01.sdcorp.global.sandisk.com>
  <51FC7A40FB29414D88A121A7FFEF9A471114DC78@SHSMSX104.ccr.corp.intel.com>
  <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD9FE16@SACMBXIP01.sdcorp.global.sandisk.com>
+ <06681238D8946F44A60AA400760A1CBF01FCED84@SHSMSX104.ccr.corp.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:32541 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751850AbbFKDoL convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Jun 2015 23:44:11 -0400
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CD9FE16@SACMBXIP01.sdcorp.global.sandisk.com>
+Received: from mail-bn1on0060.outbound.protection.outlook.com ([157.56.110.60]:60185
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751398AbbFKDvb convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Jun 2015 23:51:31 -0400
+In-Reply-To: <06681238D8946F44A60AA400760A1CBF01FCED84@SHSMSX104.ccr.corp.intel.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>, "Zhang, Jian" <jian.zhang@intel.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: "Zhou, Yuan" <yuan.zhou@intel.com>, "Zhang, Jian" <jian.zhang@intel.com>, ceph-devel <ceph-devel@vger.kernel.org>
+
+Thanks Yuan ! This is helpful.
+
+Regards
+Somnath
+
+-----Original Message-----
+From: Zhou, Yuan [mailto:yuan.zhou@intel.com] 
+Sent: Wednesday, June 10, 2015 8:44 PM
+To: Somnath Roy; Zhang, Jian; ceph-devel
+Subject: RE: Regarding hadoop over RGW blueprint
 
 Hi Somnath,
 
