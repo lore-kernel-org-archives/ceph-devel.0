@@ -1,62 +1,123 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Rados multi-object transaction use cases
-Date: Fri, 12 Jun 2015 22:28:45 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CDA1074@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <1235935092.20915764.1434147302334.JavaMail.zimbra@redhat.com>
- <1019086990.13871273.1434147667441.JavaMail.zimbra@redhat.com>
+From: "Robin H. Johnson" <robbat2@gentoo.org>
+Subject: Re: Bucket name restrictions in RGW
+Date: Fri, 12 Jun 2015 22:50:48 +0000
+Message-ID: <robbat2-20150612T220814-235406925Z@orbis-terrarum.net>
+References: <CAPRac-aj5YrKXrxxd_YTM-VJcNmS8j1zw_BToSwSdmd5nhv9cQ@mail.gmail.com>
+ <557B2875.1090505@42on.com>
+Reply-To: ceph-devel@vger.kernel.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0066.outbound.protection.outlook.com ([65.55.169.66]:64096
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751590AbbFLW2t (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 12 Jun 2015 18:28:49 -0400
-In-Reply-To: <1019086990.13871273.1434147667441.JavaMail.zimbra@redhat.com>
-Content-Language: en-US
+Received: from smtp.gentoo.org ([140.211.166.183]:59712 "EHLO smtp.gentoo.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750753AbbFLWut (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 12 Jun 2015 18:50:49 -0400
+Received: from grubbs.orbis-terrarum.net (localhost [127.0.0.1])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by smtp.gentoo.org (Postfix) with ESMTPS id 07A3B340AEF
+	for <ceph-devel@vger.kernel.org>; Fri, 12 Jun 2015 22:50:49 +0000 (UTC)
+Content-Disposition: inline
+In-Reply-To: <557B2875.1090505@42on.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>, Samuel Just <sjust@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-QWxzbywgd291bGRuJ3QgdGhpcyBoZWxwIGluIGNhc2Ugb2Ygc29tZSBraW5kIG9mIHdyaXRlIGNv
-YWxlc2NpbmcgZm9yIGxpYnJiZC9saWJyYWRvcyBhbmQgc2VuZGluZyBvbmUgdHJhbnNhY3Rpb24g
-ZG93biBpbiBjYXNlIG9mIG11bHRpcGxlID8NCg0KVGhhbmtzICYgUmVnYXJkcw0KU29tbmF0aA0K
-DQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZn
-ZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnXSBP
-biBCZWhhbGYgT2YgWWVodWRhIFNhZGVoLVdlaW5yYXViDQpTZW50OiBGcmlkYXksIEp1bmUgMTIs
-IDIwMTUgMzoyMSBQTQ0KVG86IFNhbXVlbCBKdXN0DQpDYzogY2VwaC1kZXZlbA0KU3ViamVjdDog
-UmU6IFJhZG9zIG11bHRpLW9iamVjdCB0cmFuc2FjdGlvbiB1c2UgY2FzZXMNCg0KDQoNCi0tLS0t
-IE9yaWdpbmFsIE1lc3NhZ2UgLS0tLS0NCj4gRnJvbTogIlNhbXVlbCBKdXN0IiA8c2p1c3RAcmVk
-aGF0LmNvbT4NCj4gVG86ICJjZXBoLWRldmVsIiA8Y2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc+
-DQo+IFNlbnQ6IEZyaWRheSwgSnVuZSAxMiwgMjAxNSAzOjE1OjAyIFBNDQo+IFN1YmplY3Q6IFJh
-ZG9zIG11bHRpLW9iamVjdCB0cmFuc2FjdGlvbiB1c2UgY2FzZXMNCj4NCj4gSW4gdGhlIEluZmVy
-bmFsaXMgQ0RTLCB3ZSBoYWQgYSBzZXNzaW9uIG9uIFJBRE9TIG11bHRpLW9iamVjdCB0cmFuc2Fj
-dGlvbnMuDQo+IEknZCBsaWtlIHRvIGNvbnRpbnVlIHRoZSBkaXNjdXNzaW9uIGF0IHRoZSB1cGNv
-bWluZyBKZXdlbCBDRFMuICBJDQo+IHRob3VnaHQgSSdkIHByaW1lIHRoZSBkaXNjdXNzaW9uIGJ5
-IGFza2luZzogaWYgbGlicmFkb3Mgc3VwcG9ydGVkDQo+IG11bHRpLW9iamVjdCByZWFkIGFuZCB3
-cml0ZSB0cmFuc2FjdGlvbnMsIHdoYXQgd291bGQgeW91IHVzZSB0aGVtIGZvcj8NCj4gU29tZSBp
-ZGVhIG9mIHVzZSBjYXNlcyB3b3VsZCBiZSB2YWx1YWJsZSB3aGVuIGNvbnNpZGVyaW5nIHRoaW5n
-cyBsaWtlIGRlYWRsb2NrIGNvcGluZyBzdHJhdGVnaWVzLg0KDQpIZXJlIGFyZSBhIGZldyBmb3Ig
-cmd3Og0KIC0gdXBkYXRlIGJ1Y2tldCBpbmRleCB3aGVuIGNyZWF0aW5nIC8gbW9kaWZ5aW5nIC8g
-ZGVsZXRpbmcgYW4gb2JqZWN0DQogLSBzdG9yZSBtdWx0aXBsZSBtZXRhZGF0YSBvYmplY3RzIGF0
-b21pY2FsbHk6IGUuZy4sIHVzZXIgaW5mbyArIHVzZXIgYWNjZXNzIGtleXMgKyB1c2VyIGVtYWls
-IChjdXJyZW50bHkgbm90IGF0b21pYykNCiAtIHN0b3JlIGJ1Y2tldCBlbnRyeSBwb2ludCArIGJ1
-Y2tldCBpbnN0YW5jZSBpbmZvIGF0b21pY2FsbHkNCiAtIGNyZWF0aW5nIGEgYnVja2V0IGFuZCBh
-ZGRpbmcgaXQgdG8gdGhlIHVzZXIncyBsaXN0IG9mIGJ1Y2tldHMNCg0KWWVodWRhDQotLQ0KVG8g
-dW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNl
-cGgtZGV2ZWwiIGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJu
-ZWwub3JnIE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFq
-b3Jkb21vLWluZm8uaHRtbA0KDQpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXw0KDQpQ
-TEVBU0UgTk9URTogVGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMg
-bWFpbCBtZXNzYWdlIGlzIGludGVuZGVkIG9ubHkgZm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0
-ZWQgcmVjaXBpZW50KHMpIG5hbWVkIGFib3ZlLiBJZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2Fn
-ZSBpcyBub3QgdGhlIGludGVuZGVkIHJlY2lwaWVudCwgeW91IGFyZSBoZXJlYnkgbm90aWZpZWQg
-dGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55
-IHJldmlldywgZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMg
-bWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlz
-IGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxl
-cGhvbmUgb3IgZS1tYWlsIChhcyBzaG93biBhYm92ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kg
-YW55IGFuZCBhbGwgY29waWVzIG9mIHRoaXMgbWVzc2FnZSBpbiB5b3VyIHBvc3Nlc3Npb24gKHdo
-ZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkgc3RvcmVkIGNvcGllcykuDQoNCg==
+On Fri, Jun 12, 2015 at 08:44:05PM +0200,  Wido den Hollander wrote:
+> > In case we plan to support website hosting in future on RGW,
+Yes, I'm working on this presently. You can find the work in my fork on
+Github, and the scratchpad documentation here:
+https://github.com/robbat2/temp-ceph-rgw-static-website-wiki/wiki
+
+> > need to make bucket names DNS compliant. Keeping that in mind, I am
+> > thinking about modifying the bucket name rules and applying more
+> > restrictions to make them more towards DNS compliant.
+> > 
+> > Please share your opinion about this.
+> I'm in favor. I would even like more strict bucket names, eg a setting
+> where you can force all names to lowercase or refuse names with
+> uppercase in it. This sometimes gives conflicts with DNS names when
+> using lower and uppercase mixed.
+Some of the below will be known to the existing posters on this thread,
+but as it's probably novel to some people on the list, I include it
+anyway. Feel free to jump to the 'Questions' section for the moment.
+
+Background:
+-----------
+AmazonS3 bucket names were originally used in path style, as the first
+argument in the path. Ability to use them in as prefix in the hostname
+came later.
+
+In the US-Standard region, you can still create such names even, you
+just can't use them with hostname-style access. In other regions, they
+are much stricter than the Ceph S3 code presently:
+http://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html
+
+Path-style access is still valid, and expected for some cases, esp when
+SSL is being used.
+
+Details:
+--------
+The existing RGW code has 3 sets of validation:
+RGWHandler_ObjStore::validate_bucket_name
+- length 3..255
+
+RGWHandler_ObjStore_SWIFT::validate_bucket_name
+- RGWHandler_ObjStore::validate_bucket_name AND
+- does not start with '.' AND
+- is valid UTF8 AND
+- does not contain any 0xFF bytes
+
+RGWHandler_ObjStore_S3::validate_bucket_name(relaxed_names = true)
+- RGWHandler_ObjStore::validate_bucket_name AND
+- starts with [a-z0-9] AND
+- contains only [-._A-Za-z0-9] AND
+- is not an IPv4 address [2]
+
+RGWHandler_ObjStore_S3::validate_bucket_name(relaxed_names = false)
+- RGWHandler_ObjStore::validate_bucket_name AND
+- starts with [0_-9A-Za-z0-9] AND
+- contains only [-._A-Za-z0-9] AND
+- is not an IPv4 address [2]
+
+Right now, the AmazonS3 constraints, for new buckets [1] in regions
+other than US-Standard, or created via the management console are: (if
+they already exist, you can continue to use them)
+- length 3..63
+- one or more labels, separated with exactly one single period '.'
+  - each label must start and end with [a-z0-9]
+  - must contain only [-a-z0-9]
+- is not an IPv4 address [3]
+
+Questions:
+----------
+
+Now that we've got both Ceph's current behavior and currently enforced
+S3 constraints documented, we have some questions to decide on.
+- Since we've allowed such flexibility in the past, how should we handle
+  access to existing non-complaint buckets in future? Right now
+  RGWHandler_ObjStore_S3 will reject ANY access to a non-compliant
+  bucket name, even if it was created before the restrictions were so
+  tight.
+- This also applies to creating buckets with 'rgw relaxed s3 bucket
+  names' enabled, then turning it off, and trying to access the bucket.
+- What happens if you create a bucket via Swift, compliant with Swift
+  constraints, and then try to access it via S3? What SHOULD happen?
+  I don't use swift at all, so I'm really unsure about this.
+
+Footnotes:
+----------
+1. I include them because I've seen the older versions, and there
+doesn't seem to be way to easily see those again, archive.org doesn't
+have it. 
+2. looks_like_ip_address will actually reject anything that matches the
+   regex of /^([0-9]+\.){3}[0-9]+$/, so if each element is larger than
+   255, it will reject it as well.
+3. They just say "Bucket names must not be formatted as an IP address
+   (e.g., 192.168.5.4)"; they don't clarify edge cases.
+
+-- 
+Robin Hugh Johnson
+Gentoo Linux: Developer, Infrastructure Lead
+E-Mail     : robbat2@gentoo.org
+GnuPG FP   : 11ACBA4F 4778E3F6 E4EDF38E B27B944E 34884E85
