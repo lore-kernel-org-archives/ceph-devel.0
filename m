@@ -1,117 +1,60 @@
-From: Abhishek L <abhishek.lekshmanan@gmail.com>
-Subject: Re: Hammer Backports integration branch population
-Date: Sat, 13 Jun 2015 21:41:26 +0530
-Message-ID: <87616ra8r5.fsf@gmail.com>
-References: <877fr89mtr.fsf@gmail.com> <557BF658.7050408@dachary.org>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: Bucket name restrictions in RGW
+Date: Sat, 13 Jun 2015 22:24:37 +0200
+Message-ID: <557C9185.1050305@42on.com>
+References: <CAPRac-aj5YrKXrxxd_YTM-VJcNmS8j1zw_BToSwSdmd5nhv9cQ@mail.gmail.com> <557B2875.1090505@42on.com> <robbat2-20150612T220814-235406925Z@orbis-terrarum.net> <1505040171.13879951.1434150828495.JavaMail.zimbra@redhat.com> <robbat2-20150612T232131-467242919Z@orbis-terrarum.net>
 Mime-Version: 1.0
-Content-Type: multipart/signed; boundary="=-=-=";
-	micalg=pgp-sha1; protocol="application/pgp-signature"
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f41.google.com ([209.85.220.41]:36213 "EHLO
-	mail-pa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751721AbbFMQOV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 13 Jun 2015 12:14:21 -0400
-Received: by pabqy3 with SMTP id qy3so39036455pab.3
-        for <ceph-devel@vger.kernel.org>; Sat, 13 Jun 2015 09:14:20 -0700 (PDT)
-In-reply-to: <557BF658.7050408@dachary.org>
+Received: from websrv.42on.com ([31.25.102.167]:47974 "EHLO websrv.42on.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751125AbbFMUYl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 13 Jun 2015 16:24:41 -0400
+Received: from [IPv6:2a02:f6e:8007:0:2959:506:f3ac:544b] (unknown [IPv6:2a02:f6e:8007:0:2959:506:f3ac:544b])
+	by websrv.42on.com (Postfix) with ESMTPSA id F1029C4B60
+	for <ceph-devel@vger.kernel.org>; Sat, 13 Jun 2015 22:24:37 +0200 (CEST)
+In-Reply-To: <robbat2-20150612T232131-467242919Z@orbis-terrarum.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
---=-=-=
-Content-Type: text/plain
-Content-Transfer-Encoding: quoted-printable
+On 06/13/2015 01:29 AM, Robin H. Johnson wrote:
+> On Fri, Jun 12, 2015 at 07:13:48PM -0400,  Yehuda Sadeh-Weinraub wrote:
+>> Whatever we end up doing, we need to make it configurable, and also
+>> keep backward compatibility, so that buckets that were created prior
+>> to such a change will still remain accessible. Some setups would not
+>> need this limitation and will find it too restricting so I'm not sure
+>> that it's really that needed. In short, make it configurable.
+> Configurable:
+> - Can we obsolete 'rgw relaxed s3 bucket names', and convert it to a new
+>   option: 'rgw s3 bucket name create strictness'
+>   Value '0' => existing 'rgw relaxed s3 bucket names = true' logic
+>   Value '1' => existing 'rgw relaxed s3 bucket names = false' logic
+>   Value '2' => compliance with AmazonS3 DNS rules
+> 
+> Backwards-Compatibility:
+> - Make a new option 'rgw s3 bucket name access strictness'
+>   Same values as above, but used to access buckets, not create new ones.
+> - Proposed default values:
+>   rgw s3 bucket name create strictness = 2
+>   rgw s3 bucket name access strictness = 1
+> 
+> So you can only create DNS-compliant buckets, but still access your
+> existing non-compliant buckets. Maybe also have keywords of major
+> releases and 'relaxed' supported in addition to the integer values.
+> 
+> I don't like the names of the config keys, but I'm coming up blank on
+> something that is shorter while still being immediately clear.
+> 
 
+Seems like a good plan to me. I would like to restrict them as much as
+possible, but we shouldn't break anything which is online now.
 
-Loic Dachary writes:
+-- 
+Wido den Hollander
+42on B.V.
+Ceph trainer and consultant
 
-> [cc'ing ceph-devel for Nathan and Xinxin to read]
->
-> Hi Abhishek,
->
-> On 13/06/2015 07:52, Abhishek L wrote:
->> Hi Loic,
->>=20
->> I've populated the integration branch for my fork[1], with pending pull
->> requests in queue against hammer milestone. Can you push it against the
->> official repo (ceph-ci ?) so that the gitbuilders can start
->> building.
->
-> $ git --no-pager log --oneline --merges ceph/hammer..theanalyst/hammer-ba=
-ckports
-> 3677fd2 Merge 4657: DNM: common/admin_socket: close socket descriptor in =
-destructor
-> 6f89359 Merge 4667: ceph.spec: update OpenSUSE BuildRequires
-> 7d50492 Merge 4687: utf8 and old gcc breakage on RHEL6.5
-> 26c1f8a Merge 4776: ceph: cli interactive mode does not understand quotes
-> b9b015a Merge 4846: missing man pages for ceph-create-keys, ceph-disk-*
-> ae2a2cb Merge 4862: Bucket header is enclosed by quotes
-> e82807f Merge 4868: Clock skew causes missing summary and confuses Calama=
-ri
-> f0ae884 Merge 4875: librbd: aio calls may block
-> c840979 Merge 4877: admin/build-doc: script fails silently under certain =
-circumstances
-> c5f51fe Merge 4883: ceph.spec.in: ceph-common subpackage def needs tweaki=
-ng for SUSE/openSUSE
-> 8e3662e Merge 4884: Keystone PKI token expiration is not enforced
-> 5fdace1 Merge 4885: Object copy bug
-> 29c563a Merge 4886: MDS is crashed (mds/CDir.cc: 1391: FAILED assert(!is_=
-complete()))
-> 43eb346 Merge 4889: OPT_INT option interprets 3221225472 as -1073741824, =
-and crashes in Throttle::Throttle()
-> 7768fb2 Merge 4891: crush: take crashes due to invalid arg
-> a5885bc Merge 4892: ceph-disk: get_partition_type fails on /dev/cciss...
-> 8b79288 Merge 4899: start_flush: filter out removed snaps before determin=
-ing snapc's
-> 59c4d78 Merge 4902: Fixes for rados ops with snaps
-> b0e083e Merge 4936: mon crashes when "ceph osd tree 85 --format json"
->
-> I see a DNM here: is it intentional ?
->
-> http://ceph.com/gitbuilder.cgi is building https://github.com/ceph/ceph/t=
-ree/hammer-backports
-
-Since I used a script to extract the PR's, I guess this commit got
-pulled in as well. However looking at the particular PR [1], it looks
-like DNM was only marked because it shouldn't be making it to the last
-hammer, (and you marked it as DNM ;) So no harm done.
-
-[1]: https://github.com/ceph/ceph/pull/4657
-
->
->>=20
->> Also, for finding out PR's against a milestone, I've used the github's
->> api to get the relevant PR numbers, I've updated the wiki for populating
->> the integration branch[2] Let me know if this looks okay to you.=20
->
-> Very convenient, great addition the snippets collection !
->
-> Cheers
->
->> [1] https://github.com/theanalyst/ceph/tree/hammer-backports
->> [2] http://tracker.ceph.com/projects/ceph-releases/wiki/HOWTO_populate_t=
-he_integration_branch
->>=20
->> Cheers,=20
->> Abhishek
->>=20
-
-=2D-=20
-Abhishek
-
---=-=-=
-Content-Type: application/pgp-signature; name="signature.asc"; name="signature.asc"; description="Digital signature"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iQEcBAEBAgAGBQJVfFY4AAoJEPnwZB8bZe1fjjwH/jt/CCDztUEftY/mi4UeuhtV
-H1ZA/aweiqDlqULNJ7sRGb3h+3BIx/MXOasYnt2c6iQNuFoM6j09kBgNMbF6lZxq
-0/SpLTmcmsZZc1590wB8+kbS3LUWal0xm3WUayrhILqDA6uB0lO+eavZbmKPbioa
-qwqoyOBFFOmuzaYZDcNB3LZfd4Z7Ble8Oj4XWUmWWqZKqh5k6nV2Cy+k2xVfbqlY
-eUR5+NmNJWOSGnV6oCrb1MoV3eulJUDYoQ7ytkw1e3ElGRzntZVCA6pfYghWXtjo
-aoqm7cThXeGpTugUrEfzLs+1eAF15oYBkd7atcddUOE0F0Ixd/GPCrJE7JbP95U=
-=QVuZ
------END PGP SIGNATURE-----
---=-=-=--
+Phone: +31 (0)20 700 9902
+Skype: contact42on
