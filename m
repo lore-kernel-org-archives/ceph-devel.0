@@ -1,35 +1,33 @@
-From: Yuri Weinstein <yweinste@redhat.com>
-Subject: firefly v0.80.10 QE validation status 6/15/2015
-Date: Mon, 15 Jun 2015 12:37:20 -0400 (EDT)
-Message-ID: <887573759.22073065.1434386240075.JavaMail.zimbra@redhat.com>
-References: <515457523.22063779.1434385426136.JavaMail.zimbra@redhat.com>
+From: GuangYang <yguang11-1ViLX0X+lBJBDgjK7y7TUQ@public.gmane.org>
+Subject: unfound object(s)
+Date: Mon, 15 Jun 2015 16:46:53 +0000
+Message-ID: <BLU175-W2A75458A25F97027D0105DFB80@phx.gbl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx5-phx2.redhat.com ([209.132.183.37]:51580 "EHLO
-	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750734AbbFOQhV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 15 Jun 2015 12:37:21 -0400
-In-Reply-To: <515457523.22063779.1434385426136.JavaMail.zimbra@redhat.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
-Cc: Loic Dachary <ldachary@redhat.com>, Xinxin Shu <xinxin.shu@intel.com>
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-QE validation is almost completed (there are a couple of jobs that are still running)
+Hello Cephers,
+On one of our production clusters, there is one *unfound* object reported w=
+hich make the PG stuck at recovering. While trying to recover the object, I=
+ failed to find a way to tell which object is unfound.
 
-All statis details were summarized in http://tracker.ceph.com/issues/11090
+I tried:
+=A0 1> PG query
+=A0 2> Grep from monitor log
 
-Highlights (by suite/issue):
+Did I miss anything? =A0
 
-rados #11914 needs Sam's approval
-kcephfs n/a needs Greg's approval
-samba #6613 needs Greg's approval
-
-Nice to have fixes (no blockers):
-upgrade/firefly(distros) #11957	(env noise)
-
-
-Thx
-YuriW
+Thanks,
+Guang 		 	   		  =
