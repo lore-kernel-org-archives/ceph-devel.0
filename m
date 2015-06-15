@@ -1,26 +1,62 @@
-From: Li Wang <liwang@ubuntukylin.com>
-Subject: Multi-object transaction support update
-Date: Mon, 15 Jun 2015 20:18:00 +0800
-Message-ID: <557EC278.3070200@ubuntukylin.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH RFC] storage:rbd: make the size of request is equal to
+ the, size of the object
+Date: Mon, 15 Jun 2015 16:03:25 +0300
+Message-ID: <CAOi1vP9iF6LVGrHsORoYGUkx_Ttqr7gsBUMz7EM--b7asOUPCA@mail.gmail.com>
+References: <557EB47F.6090708@unitedstack.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m53-178.qiye.163.com ([123.58.178.53]:39459 "EHLO
-	m53-178.qiye.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754031AbbFOMSG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 15 Jun 2015 08:18:06 -0400
+Received: from mail-wi0-f177.google.com ([209.85.212.177]:38225 "EHLO
+	mail-wi0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752083AbbFOND1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 15 Jun 2015 09:03:27 -0400
+In-Reply-To: <557EB47F.6090708@unitedstack.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, Samuel Just <sjust@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: juncheng bai <baijuncheng@unitedstack.com>
+Cc: idryomov@redhat.com, Alex Elder <elder@linaro.org>, Josh Durgin <josh.durgin@inktank.com>, lucienchao@gmail.com, jeff@garzik.org, yehuda@hq.newdream.net, Sage Weil <sage@newdream.net>, elder@inktank.com, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Sage and Samuel,
-   We have updated the status of our design and implementation of
-multi-object transaction support at 
-http://tracker.ceph.com/projects/ceph/wiki/Rados_-_multi-object_transaction_support, 
-your comments
-are appreciated.
+On Mon, Jun 15, 2015 at 2:18 PM, juncheng bai
+<baijuncheng@unitedstack.com> wrote:
+> From 6213215bd19926d1063d4e01a248107dab8a899b Mon Sep 17 00:00:00 2001
+> From: juncheng bai <baijuncheng@unitedstack.com>
+> Date: Mon, 15 Jun 2015 18:34:00 +0800
+> Subject: [PATCH] storage:rbd: make the size of request is equal to the
+>  size of the object
+>
+> ensures that the merged size of request can achieve the size of
+> the object.
+> when merge a bio to request or merge a request to request, the
+> sum of the segment number of the current request and the segment
+> number of the bio is not greater than the max segments of the request,
+> so the max size of request is 512k if the max segments of request is
+> BLK_MAX_SEGMENTS.
+>
+> Signed-off-by: juncheng bai <baijuncheng@unitedstack.com>
+> ---
+>  drivers/block/rbd.c | 2 ++
+>  1 file changed, 2 insertions(+)
+>
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index 0a54c58..dec6045 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -3757,6 +3757,8 @@ static int rbd_init_disk(struct rbd_device *rbd_dev)
+>         segment_size = rbd_obj_bytes(&rbd_dev->header);
+>         blk_queue_max_hw_sectors(q, segment_size / SECTOR_SIZE);
+>         blk_queue_max_segment_size(q, segment_size);
+> +       if (segment_size > BLK_MAX_SEGMENTS * PAGE_SIZE)
+> +               blk_queue_max_segments(q, segment_size / PAGE_SIZE);
+>         blk_queue_io_min(q, segment_size);
+>         blk_queue_io_opt(q, segment_size);
 
-Cheers,
-Li Wang
+I made a similar patch on Friday, investigating blk-mq plugging issue
+reported by Nick.  My patch sets it to BIO_MAX_PAGES unconditionally -
+AFAIU there is no point in setting to anything bigger since the bios
+will be clipped to that number of vecs.  Given that BIO_MAX_PAGES is
+256, this gives is 1M direct I/Os.
+
+Thanks,
+
+                Ilya
