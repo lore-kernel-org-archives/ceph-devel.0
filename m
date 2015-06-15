@@ -1,47 +1,76 @@
-From: juncheng bai <baijuncheng@unitedstack.com>
-Subject: [PATCH RFC]  storage:rbd: make the size of request is equal to the,
- size of the object
-Date: Mon, 15 Jun 2015 19:18:23 +0800
-Message-ID: <557EB47F.6090708@unitedstack.com>
+From: Gregory Farnum <greg@gregs42.com>
+Subject: Re: rbd top
+Date: Mon, 15 Jun 2015 04:52:06 -0700
+Message-ID: <CAC6JEv8qB6xStrp1EL+gyDWAzVo91DvtDQKyMs9VDB2KtoVR6A@mail.gmail.com>
+References: <CAANLjFp4+tkSj5=we88nGDFh0NtmX4jYc+sE__1N8L_4X30dfw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: idryomov@redhat.com, elder@linaro.org, josh.durgin@inktank.com, lucienchao@gmail.com
-Cc: jeff@garzik.org, yehuda@hq.newdream.net, sage@newdream.net, elder@inktank.com, linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ig0-f170.google.com ([209.85.213.170]:35951 "EHLO
+	mail-ig0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753987AbbFOLwH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 15 Jun 2015 07:52:07 -0400
+Received: by igbiq7 with SMTP id iq7so16139852igb.1
+        for <ceph-devel@vger.kernel.org>; Mon, 15 Jun 2015 04:52:07 -0700 (PDT)
+Received: from mail-ig0-f179.google.com (mail-ig0-f179.google.com. [209.85.213.179])
+        by mx.google.com with ESMTPSA id p17sm7411043igr.15.2015.06.15.04.52.06
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Mon, 15 Jun 2015 04:52:06 -0700 (PDT)
+Received: by igbos3 with SMTP id os3so16495910igb.0
+        for <ceph-devel@vger.kernel.org>; Mon, 15 Jun 2015 04:52:06 -0700 (PDT)
+In-Reply-To: <CAANLjFp4+tkSj5=we88nGDFh0NtmX4jYc+sE__1N8L_4X30dfw@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Robert LeBlanc <robert@leblancnet.us>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
- From 6213215bd19926d1063d4e01a248107dab8a899b Mon Sep 17 00:00:00 2001
-From: juncheng bai <baijuncheng@unitedstack.com>
-Date: Mon, 15 Jun 2015 18:34:00 +0800
-Subject: [PATCH] storage:rbd: make the size of request is equal to the
-  size of the object
+On Thu, Jun 11, 2015 at 12:33 PM, Robert LeBlanc <robert@leblancnet.us> wrote:
+> -----BEGIN PGP SIGNED MESSAGE-----
+> Hash: SHA256
+>
+> One feature we would like is an "rbd top" command that would be like
+> top, but show usage of RBD volumes so that we can quickly identify
+> high demand RBDs.
+>
+> Since I haven't done any programming for Ceph, I'm trying to think
+> through the best way to approach this. I don't know if there are
+> already perf counters that I can query that are at the client, RBD or
+> the Rados layers. If these counters don't exist would it be best to
+> implement them at the client layer and look for watchers on the RBD
+> and query them? Is it better to handle it at the Rados layer and
+> aggregate the I/O from all chunks? Of course this would need to scale
+> out very large.
+>
+> It seems that if the client running rbd top requests the top 'X'
+> number of objects from each OSD, then it would cut down on the data
+> that the has to be moved around and processed. It wouldn't be an
+> extremely accurate view, but might be enough.
+>
+> What are your thoughts?
+>
+> Also, what is the best way to get into the Ceph code? I've looked at
+> several things and I find myself doing a lot of searching to find
+> connecting pieces. My primary focus is not programming so picking up a
+> new code base takes me a long time because I don't know many of the
+> tricks that help people get to speed quickly.
 
-ensures that the merged size of request can achieve the size of
-the object.
-when merge a bio to request or merge a request to request, the
-sum of the segment number of the current request and the segment
-number of the bio is not greater than the max segments of the request,
-so the max size of request is 512k if the max segments of request is
-BLK_MAX_SEGMENTS.
+The basic problem with a tool like this is that it requires gathering
+real-time data from either all the OSDs, or all the clients. We do
+something similar in order to display approximate IO going through the
+system as a whole, but that is based on PGStat messages which come in
+periodically and is both laggy and an approximation.
 
-Signed-off-by: juncheng bai <baijuncheng@unitedstack.com>
----
-  drivers/block/rbd.c | 2 ++
-  1 file changed, 2 insertions(+)
+To do this, we'd need to get less-laggy data, and instead of scaling
+with the number of OSDs/PGs it would scale with the number of RBD
+volumes. You certainly couldn't send that through the monitor and I
+shudder to think about the extra load it would invoke at all layers.
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 0a54c58..dec6045 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -3757,6 +3757,8 @@ static int rbd_init_disk(struct rbd_device *rbd_dev)
-  	segment_size = rbd_obj_bytes(&rbd_dev->header);
-  	blk_queue_max_hw_sectors(q, segment_size / SECTOR_SIZE);
-  	blk_queue_max_segment_size(q, segment_size);
-+	if (segment_size > BLK_MAX_SEGMENTS * PAGE_SIZE)
-+		blk_queue_max_segments(q, segment_size / PAGE_SIZE);
-  	blk_queue_io_min(q, segment_size);
-  	blk_queue_io_opt(q, segment_size);
-
--- 
+How up-to-date do you need the info to be, and how accurate? Does it
+need to be queryable in the future or only online? You could perhaps
+hook into one of the more precise HitSet implementations we
+have...otherwise I think you'd need to add an online querying
+framework, perhaps through the perfcounters (which...might scale to
+something like this?) or a monitoring service (hopefully attached to
+Calamari) that receives continuous updates.
+-Greg
