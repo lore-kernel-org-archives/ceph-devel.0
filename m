@@ -1,112 +1,84 @@
-From: Abhishek Dixit <dixitabhi@gmail.com>
-Subject: Re: Multipart Upload : Limit on no of parts
-Date: Sun, 14 Jun 2015 23:43:55 +0530
-Message-ID: <CAGoDY9kLTKCH6ArJO3UxXETy=Gt3ayevkTKYEy=mdijDrZyUNg@mail.gmail.com>
-References: <CAGoDY9mQJLW99FvNP-JrM-NGHs3k=Fn9BGJBpXRHFvwP5xg=HQ@mail.gmail.com>
- <1525576271.13174633.1434039312262.JavaMail.zimbra@redhat.com>
- <CAGoDY9=Npb-fa5y7tfi4JOcPusT=w4bZQe86BDM491a1ifJ9zQ@mail.gmail.com> <1482089904.13190159.1434040792915.JavaMail.zimbra@redhat.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH 1/1 linux-next] ceph: use standard Opt_err
+Date: Mon, 15 Jun 2015 12:30:42 +0300
+Message-ID: <CAOi1vP9+_ZQi9kGhXzwxWm30MsYN9f0yucgXdigqxfOGWKAJWQ@mail.gmail.com>
+References: <1433531567-3948-1-git-send-email-fabf@skynet.be>
+	<CAOi1vP8Bm05VQFy-fcZmaZS9N=_k6WcfOK5D4Wpw3zgtwfVoBw@mail.gmail.com>
+	<515133145.119252.1434272729936.open-xchange@webmail.nmp.proximus.be>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f179.google.com ([209.85.192.179]:35531 "EHLO
-	mail-pd0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751961AbbFNSOQ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 14 Jun 2015 14:14:16 -0400
-Received: by pdbnf5 with SMTP id nf5so56689135pdb.2
-        for <ceph-devel@vger.kernel.org>; Sun, 14 Jun 2015 11:14:15 -0700 (PDT)
-In-Reply-To: <1482089904.13190159.1434040792915.JavaMail.zimbra@redhat.com>
+Received: from mail-wi0-f171.google.com ([209.85.212.171]:32770 "EHLO
+	mail-wi0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753243AbbFOJan (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 15 Jun 2015 05:30:43 -0400
+In-Reply-To: <515133145.119252.1434272729936.open-xchange@webmail.nmp.proximus.be>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Fabian Frederick <fabf@skynet.be>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Thu, Jun 11, 2015 at 10:09 PM, Yehuda Sadeh-Weinraub
-<yehuda@redhat.com> wrote:
+On Sun, Jun 14, 2015 at 12:05 PM, Fabian Frederick <fabf@skynet.be> wrote:
 >
 >
-> ----- Original Message -----
->> From: "Abhishek Dixit" <dixitabhi@gmail.com>
->> To: "Yehuda Sadeh-Weinraub" <yehuda@redhat.com>
->> Sent: Thursday, June 11, 2015 9:35:57 AM
->> Subject: Re: Multipart Upload : Limit on no of parts
+>> On 08 June 2015 at 09:49 Ilya Dryomov <idryomov@gmail.com> wrote:
 >>
->> On Thu, Jun 11, 2015 at 9:45 PM, Yehuda Sadeh-Weinraub
->> <yehuda@redhat.com> wrote:
->> >
->> >
->> > ----- Original Message -----
->> >> From: "Abhishek Dixit" <dixitabhi@gmail.com>
->> >> To: "ceph-devel" <ceph-devel@vger.kernel.org>
->> >> Sent: Thursday, June 11, 2015 8:28:14 AM
->> >> Subject: Multipart Upload : Limit on no of parts
->> >>
->> >> Hi,
->> >>
->> >> I was looking into limit imposed on no of uploads for multipart upload.
->> >> The way it works currently seems as below:
->> >> 1. RGWCompleteMultipart::get_params does following
->> >> ______________________________________________
->> >> #define COMPLETE_MULTIPART_MAX_LEN (1024 * 1024) /* api defines max
->> >> 10,000 parts, this should be enough */
->> >>    ret = rgw_rest_read_all_input(s, &data, &len,
->> >>    COMPLETE_MULTIPART_MAX_LEN);
->> >> ___________________________________________________________
->> >>
->> >> 2. rgw_rest_read_all_input compares cl with max_len where
->> >> cl is Content Length value from POST multipart complete request header and
->> >> max_len is COMPLETE_MULTIPART_MAX_LEN as defined above.
->> >>
->> >> 3. For chunked input, again the length read is compared with
->> >> COMPLETE_MULTIPART_MAX_LEN.
->> >>
->> >> For 10104 parts POST request, we had cl:1039762 and max_len:1048576
->> >> which worked.
->> >> Limit on no of parts seems to be imposed by this mechanism rather than
->> >> an explicit parts check.
->> >>
->> >> Kindly let me know if the understanding is correct.
->> >> In case it is, should we not impose a limit via explicit checking for
->> >> total no of parts?
->> >> Also, can we make this parts limit a configurable option via config_opts?
->> >>
->> >
->> > I thought we had an explicit check for that, but I can't really find it, so
->> > I might have gotten it wrong. We should enforce some limit on that number.
->> > First, the way we index the parts in the omap assumes a certain max so it
->> > pads the keys with a specific amount of zeros. Second, in the case where
->> > users are uploading parts with different sizes, the created manifest will
->> > be too large. Is there a real need to have more than 10k parts?
->> >
->> > Yehuda
 >>
->> My initial requirement was to bring down the no of the parts allowed
->> and to make it configurable. But since it was not configurable, I had
->> to dig the code to see how part limit is enforced.
->> Also, current implementation is not enforcing it accurately as more
->> than 10000 parts goes through.
+>> On Fri, Jun 5, 2015 at 10:12 PM, Fabian Frederick <fabf@skynet.be> wrote:
+>> > ceph used -1 for the last match_table_t option.
+>> > Use Opt_err enum like other FS
+>> >
+>> > match_token() is based on the pattern (NULL)
+>> > so behavior should remain the same.
+>> >
+>> > Signed-off-by: Fabian Frederick <fabf@skynet.be>
+>> > ---
+>> > This is untested. If this one is ok, I can send the same update
+>> > for rbd and net/ceph.
+>> >
+>> >  fs/ceph/super.c | 5 +++--
+>> >  1 file changed, 3 insertions(+), 2 deletions(-)
+>> >
+>> > diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+>> > index 4e99053..35ef692 100644
+>> > --- a/fs/ceph/super.c
+>> > +++ b/fs/ceph/super.c
+>> > @@ -137,7 +137,8 @@ enum {
+>> >  #ifdef CONFIG_CEPH_FS_POSIX_ACL
+>> >         Opt_acl,
+>> >  #endif
+>> > -       Opt_noacl
+>> > +       Opt_noacl,
+>> > +       Opt_err
+>> >  };
+>> >
+>> >  static match_table_t fsopt_tokens = {
+>> > @@ -169,7 +170,7 @@ static match_table_t fsopt_tokens = {
+>> >         {Opt_acl, "acl"},
+>> >  #endif
+>> >         {Opt_noacl, "noacl"},
+>> > -       {-1, NULL}
+>> > +       {Opt_err, NULL}
+>> >  };
+>> >
+>> >  static int parse_fsopt_token(char *c, void *private)
 >>
->> I think we can make a check on parts->part.size map to be 10000 and we
->> can configure it via config_opts. In this case, final POST call to
->> complete upload would mention all part nos which we can check to be
->> less than allowed limit which could be configurable
->> Please let me know if we can proceed to implement same or if you see
->> some issue in this approach.
+>> This would result in a BUG on any unknown option - match_token->token
+>> is what match_token() returns and parse_fsopt_token() clearly expects
+>> that to be a negative value.
+>>
+>> Thanks,
 >
-> Sounds good.
+> Maybe we could remove the following test ?
+>
+> token = match_token((char *)c, fsopt_tokens, argstr);
+> if (token < 0)
+>         return -EINVAL;
+>
+> and return -EINVAL in switch default case ?
 
-Pull request https://github.com/ceph/ceph/pull/4953 created for above.
-Please review
+Sounds good.
 
-Thanks
-Abhishek
+Thanks,
 
->
->
->>
->> Also, can you please review one pull request #4900 for Transaction Id.
->> #4277 got closed due to some git cmd issue from my side.
->>
->
-> Sure, I'll get to that soon.
->
-> Thanks,
-> Yehuda
+                Ilya
