@@ -1,33 +1,74 @@
-From: GuangYang <yguang11-1ViLX0X+lBJBDgjK7y7TUQ@public.gmane.org>
-Subject: unfound object(s)
-Date: Mon, 15 Jun 2015 16:46:53 +0000
-Message-ID: <BLU175-W2A75458A25F97027D0105DFB80@phx.gbl>
+From: John Spray <john.spray@redhat.com>
+Subject: Re: rbd top
+Date: Mon, 15 Jun 2015 17:52:41 +0100
+Message-ID: <557F02D9.1040303@redhat.com>
+References: <CAANLjFp4+tkSj5=we88nGDFh0NtmX4jYc+sE__1N8L_4X30dfw@mail.gmail.com>	<CAC6JEv8qB6xStrp1EL+gyDWAzVo91DvtDQKyMs9VDB2KtoVR6A@mail.gmail.com>	<alpine.DEB.2.00.1506150647030.18741@cobra.newdream.net>	<557EE94C.10108@redhat.com> <CAANLjFpCt9tMhkkZ+eECXpvpXOgTCoS8wu6OEuA6S89Vbdfv_Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:45009 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755681AbbFOQwn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 15 Jun 2015 12:52:43 -0400
+In-Reply-To: <CAANLjFpCt9tMhkkZ+eECXpvpXOgTCoS8wu6OEuA6S89Vbdfv_Q@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Robert LeBlanc <robert@leblancnet.us>
+Cc: Sage Weil <sage@newdream.net>, Gregory Farnum <greg@gregs42.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hello Cephers,
-On one of our production clusters, there is one *unfound* object reported w=
-hich make the PG stuck at recovering. While trying to recover the object, I=
- failed to find a way to tell which object is unfound.
 
-I tried:
-=A0 1> PG query
-=A0 2> Grep from monitor log
 
-Did I miss anything? =A0
+On 15/06/2015 17:10, Robert LeBlanc wrote:
+> -----BEGIN PGP SIGNED MESSAGE-----
+> Hash: SHA256
+>
+> John, let me see if I understand what you are saying...
+>
+> When a person runs `rbd top`, each OSD would receive a message saying
+> please capture all the performance, grouped by RBD and limit it to
+> 'X'. That way the OSD doesn't have to constantly update performance
+> for each object, but when it is requested it starts tracking it?
 
-Thanks,
-Guang 		 	   		  =
+Right, initially the OSD isn't collecting anything, it starts as soon as 
+it sees a query get loaded up (published via OSDMap or some other 
+mechanism).
+
+That said, in practice I can see people having some set of queries that 
+they always have loaded and feeding into graphite in the background.
+>
+> If so, that is an interesting idea. I wonder if that would be simpler
+> than tracking the performance of each/MRU objects in some format like
+> /proc/diskstats where it is in memory and not necessarily consistent.
+> The benefit is that you could have "lifelong" stats that show up like
+> iostat and it would be a simple operation.
+
+Hmm, not sure we're on the same page about this part, what I'm talking 
+about is all in memory and would be lost across daemon restarts.  Some 
+other component would be responsible for gathering the stats across all 
+the daemons in one place (that central part could persist stats if desired).
+
+> Each object should be able
+> to reference back to RBD/CephFS upon request and the client could even
+> be responsible for that load. Client performance data would need stats
+> in addition to the object stats.
+
+You could extend the mechanism to clients.  However, as much as possible 
+it's a good thing to keep it server side, as servers are generally fewer 
+(still have to reduce these stats across N servers to present to user), 
+and we have multiple client implementations (kernel/userspace).  What 
+kind of thing do you want to get from clients?
+> My concern is that adding additional SQL like logic to each op is
+> going to get very expensive. I guess if we could push that to another
+> thread early in the op, then it might not be too bad. I'm enjoying the
+> discussion and new ideas.
+
+Hopefully in most cases the query can be applied very cheaply, for 
+operations like comparing pool ID or grouping by client ID. However, I 
+would also envisage an optional sampling number, such that e.g. only 1 
+in every 100 ops would go through the query processing.  Useful for 
+systems where keeping highest throughput is paramount, and the numbers 
+will still be useful if clients are doing many thousands of ops per second.
+
+Cheers,
+John
