@@ -1,330 +1,169 @@
-From: Josh Durgin <jdurgin@redhat.com>
-Subject: Re: [PATCH 3/6] ceph/rbd: update watch-notify ceph_osd_op
-Date: Tue, 16 Jun 2015 15:00:48 -0700
-Message-ID: <55809C90.7020603@redhat.com>
-References: <cover.1434124007.git.dfuller@redhat.com> <96898cca8886822f7b639150316999e8af839ec3.1434124007.git.dfuller@redhat.com>
+From: Yuri Weinstein <yweinste@redhat.com>
+Subject: Re: v9.0.1 released
+Date: Tue, 16 Jun 2015 18:31:05 -0400 (EDT)
+Message-ID: <1782017004.23812002.1434493865647.JavaMail.zimbra@redhat.com>
+References: <alpine.DEB.2.00.1506111005050.7086@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:52844 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752367AbbFPWAp (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 16 Jun 2015 18:00:45 -0400
-Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
-	by mx1.redhat.com (Postfix) with ESMTPS id 2191A2D4516
-	for <ceph-devel@vger.kernel.org>; Tue, 16 Jun 2015 22:00:45 +0000 (UTC)
-In-Reply-To: <96898cca8886822f7b639150316999e8af839ec3.1434124007.git.dfuller@redhat.com>
+Received: from mx3-phx2.redhat.com ([209.132.183.24]:47368 "EHLO
+	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757120AbbFPWbH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Jun 2015 18:31:07 -0400
+In-Reply-To: <alpine.DEB.2.00.1506111005050.7086@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Douglas Fuller <dfuller@redhat.com>, ceph-devel@vger.kernel.org
+To: Sage Weil <sweil@redhat.com>
+Cc: ceph-announce@ceph.com, ceph-devel@vger.kernel.org, ceph-users@ceph.com, ceph-maintainers@ceph.com
 
-On 06/12/2015 08:56 AM, Douglas Fuller wrote:
-> From: Mike Christie <michaelc@cs.wisc.edu>
->
-> This syncs the ceph_osd_op struct with the current version of ceph
-> where the watch struct has been updated to support more ops and
-> the notify-ack support has been broken out of the watch struct.
->
-> Ceph commits
-> 1a82cc3926fc7bc4cfbdd2fd4dfee8660d5107a1
-> 2288f318e1b1f6a1c42b185fc1b4c41f23995247
-> 73720130c34424bf1fe36058ebe8da66976f40fb
->
-> It still has us use the legacy watch op for now. I will add support
-> later. It is mostly a prepartion patch for more advanced notify support.
->
-> Questions:
->
-> 1. Should linger also be set for CEPH_OSD_WATCH_OP_RECONNECT?
-> 2. Not sure what watch.gen is used for. Is that for our internal
-> use or does the osd do something with it.
->
-> djf: removed changes to rbd.c for SCSI
->
-> Signed-off-by: Mike Christie <michaelc@cs.wisc.edu>
-> ---
->   drivers/block/rbd.c             | 19 +++++++-----
->   include/linux/ceph/osd_client.h | 23 +++++++++++----
->   include/linux/ceph/rados.h      | 24 +++++++++++++--
->   net/ceph/osd_client.c           | 65 ++++++++++++++++++++++++++++++++++++-----
->   4 files changed, 109 insertions(+), 22 deletions(-)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 65421eb..ed170b1 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -3089,8 +3089,8 @@ static int rbd_obj_notify_ack_sync(struct rbd_device *rbd_dev, u64 notify_id)
->   	if (!obj_request->osd_req)
->   		goto out;
->
-> -	osd_req_op_watch_init(obj_request->osd_req, 0, CEPH_OSD_OP_NOTIFY_ACK,
-> -					notify_id, 0, 0);
-> +	osd_req_op_watch_init(obj_request->osd_req, 0,
-> +			      CEPH_OSD_OP_NOTIFY_ACK, 0, notify_id);
->   	rbd_osd_req_format_read(obj_request);
->
->   	ret = rbd_obj_request_submit(osdc, obj_request);
-> @@ -3138,7 +3138,7 @@ static void rbd_watch_cb(u64 ver, u64 notify_id, u8 opcode, s32 return_code,
->    */
->   static struct rbd_obj_request *rbd_obj_watch_request_helper(
->   						struct rbd_device *rbd_dev,
-> -						bool watch)
-> +						u8 watch_opcode)
->   {
->   	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
->   	struct ceph_options *opts = osdc->client->options;
-> @@ -3158,10 +3158,11 @@ static struct rbd_obj_request *rbd_obj_watch_request_helper(
->   	}
->
->   	osd_req_op_watch_init(obj_request->osd_req, 0, CEPH_OSD_OP_WATCH,
-> -			      rbd_dev->watch_event->cookie, 0, watch);
-> +			      watch_opcode, rbd_dev->watch_event->cookie);
->   	rbd_osd_req_format_write(obj_request);
->
-> -	if (watch)
-> +	if (watch_opcode == CEPH_OSD_WATCH_OP_LEGACY_WATCH ||
-> +	    watch_opcode == CEPH_OSD_WATCH_OP_WATCH)
->   		ceph_osdc_set_request_linger(osdc, obj_request->osd_req);
->
->   	ret = rbd_obj_request_submit(osdc, obj_request);
-> @@ -3174,7 +3175,7 @@ static struct rbd_obj_request *rbd_obj_watch_request_helper(
->
->   	ret = obj_request->result;
->   	if (ret) {
-> -		if (watch)
-> +		if (watch_opcode != CEPH_OSD_WATCH_OP_UNWATCH)
->   			rbd_obj_request_end(obj_request);
->   		goto out;
->   	}
-> @@ -3203,7 +3204,8 @@ static int rbd_dev_header_watch_sync(struct rbd_device *rbd_dev)
->   	if (ret < 0)
->   		return ret;
->
-> -	obj_request = rbd_obj_watch_request_helper(rbd_dev, true);
-> +	obj_request = rbd_obj_watch_request_helper(rbd_dev,
-> +						CEPH_OSD_WATCH_OP_LEGACY_WATCH);
->   	if (IS_ERR(obj_request)) {
->   		ceph_osdc_cancel_event(rbd_dev->watch_event);
->   		rbd_dev->watch_event = NULL;
-> @@ -3237,7 +3239,8 @@ static void rbd_dev_header_unwatch_sync(struct rbd_device *rbd_dev)
->   	rbd_obj_request_put(rbd_dev->watch_request);
->   	rbd_dev->watch_request = NULL;
->
-> -	obj_request = rbd_obj_watch_request_helper(rbd_dev, false);
-> +	obj_request = rbd_obj_watch_request_helper(rbd_dev,
-> +						   CEPH_OSD_WATCH_OP_UNWATCH);
->   	if (!IS_ERR(obj_request))
->   		rbd_obj_request_put(obj_request);
->   	else
-> diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
-> index 1c4e472..12732d3 100644
-> --- a/include/linux/ceph/osd_client.h
-> +++ b/include/linux/ceph/osd_client.h
-> @@ -106,11 +106,15 @@ struct ceph_osd_req_op {
->   		struct {
->   			u64 cookie;
->   			u64 ver;
-> -			u32 prot_ver;
-> -			u32 timeout;
-> -			__u8 flag;
-> +			__u8 op;
-> +			u32 gen;
->   		} watch;
->   		struct {
-> +			u64 cookie;
-> +			struct ceph_osd_data request_data;
-> +			struct ceph_osd_data response_data;
-> +		} notify;
-> +		struct {
->   			u64 expected_object_size;
->   			u64 expected_write_size;
->   		} alloc_hint;
-> @@ -302,7 +306,16 @@ extern void osd_req_op_cls_response_data_pages(struct ceph_osd_request *,
->   					struct page **pages, u64 length,
->   					u32 alignment, bool pages_from_pool,
->   					bool own_pages);
-> -
-> +extern void osd_req_op_notify_request_data_pagelist(struct ceph_osd_request *,
-> +					unsigned int which,
-> +					struct ceph_pagelist *pagelist);
-> +extern void osd_req_op_notify_response_data_pages(struct ceph_osd_request *,
-> +					unsigned int which,
-> +					struct page **pages, u64 length,
-> +					u32 alignment, bool pages_from_pool,
-> +					bool own_pages);
-> +extern void osd_req_op_notify_init(struct ceph_osd_request *osd_req,
-> +				   unsigned int which, u16 opcode, u64 cookie);
->   extern void osd_req_op_cls_init(struct ceph_osd_request *osd_req,
->   					unsigned int which, u16 opcode,
->   					const char *class, const char *method);
-> @@ -311,7 +324,7 @@ extern int osd_req_op_xattr_init(struct ceph_osd_request *osd_req, unsigned int
->   				 size_t size, u8 cmp_op, u8 cmp_mode);
->   extern void osd_req_op_watch_init(struct ceph_osd_request *osd_req,
->   					unsigned int which, u16 opcode,
-> -					u64 cookie, u64 version, int flag);
-> +					u8 watch_opcode, u64 cookie);
->   extern void osd_req_op_alloc_hint_init(struct ceph_osd_request *osd_req,
->   				       unsigned int which,
->   				       u64 expected_object_size,
-> diff --git a/include/linux/ceph/rados.h b/include/linux/ceph/rados.h
-> index 2f822dc..cae82b36 100644
-> --- a/include/linux/ceph/rados.h
-> +++ b/include/linux/ceph/rados.h
-> @@ -417,6 +417,22 @@ enum {
->
->   #define RADOS_NOTIFY_VER	1
->
-> +enum {
-> +	CEPH_OSD_WATCH_OP_UNWATCH = 0,
-> +	CEPH_OSD_WATCH_OP_LEGACY_WATCH = 1,
-> +	/* note: use only ODD ids to prevent pre-giant code from
-> +	 * interpreting the op as UNWATCH */
-> +	CEPH_OSD_WATCH_OP_WATCH = 3,
-> +	CEPH_OSD_WATCH_OP_RECONNECT = 5,
-> +	CEPH_OSD_WATCH_OP_PING = 7,
-> +};
-> +
-> +enum {
-> +	CEPH_WATCH_EVENT_NOTIFY			= 1, /* notifying watcher */
-> +	CEPH_WATCH_EVENT_NOTIFY_COMPLETE	= 2, /* notifier notified when done */
-> +	CEPH_WATCH_EVENT_DISCONNECT		= 3, /* we were disconnected */
-> +};
+Sage
 
-CEPH_WATCH_EVENT_* live in ceph_fs.h already. No need to add it here.
-These are meant to stay in sync with the same headers in userspace, so
-I'd rather reorganize things there first if you want to clean up things
-that should be in rados.h rather than ceph_fs.h. With that dropped,
+We still running nightlies on next and branches.
 
-Reviewed-by: Josh Durgin <jdurgin@redhat.com>
+Just wanted to reaffirm that this is not time yet to start scheduling suites on "infernalis"?
 
->   /*
->    * an individual object operation.  each may be accompanied by some data
->    * payload
-> @@ -450,10 +466,14 @@ struct ceph_osd_op {
->   	        } __attribute__ ((packed)) snap;
->   		struct {
->   			__le64 cookie;
-> -			__le64 ver;
-> -			__u8 flag;	/* 0 = unwatch, 1 = watch */
-> +			__le64 ver;	/* no longer used */
-> +			__u8 op;	/* CEPH_OSD_WATCH_OP_* */
-> +			__u32 gen;	/* registration generation */
->   		} __attribute__ ((packed)) watch;
->   		struct {
-> +			__le64 cookie;
-> +		} __attribute__ ((packed)) notify;
-> +		struct {
->   			__le64 offset, length;
->   			__le64 src_offset;
->   		} __attribute__ ((packed)) clonerange;
-> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> index 590cf9c..74650e1 100644
-> --- a/net/ceph/osd_client.c
-> +++ b/net/ceph/osd_client.c
-> @@ -243,6 +243,29 @@ void osd_req_op_cls_response_data_pages(struct ceph_osd_request *osd_req,
->   }
->   EXPORT_SYMBOL(osd_req_op_cls_response_data_pages);
->
-> +void osd_req_op_notify_response_data_pages(struct ceph_osd_request *osd_req,
-> +			unsigned int which, struct page **pages, u64 length,
-> +			u32 alignment, bool pages_from_pool, bool own_pages)
-> +{
-> +	struct ceph_osd_data *osd_data;
-> +
-> +	osd_data = osd_req_op_data(osd_req, which, notify, response_data);
-> +	ceph_osd_data_pages_init(osd_data, pages, length, alignment,
-> +				pages_from_pool, own_pages);
-> +}
-> +EXPORT_SYMBOL(osd_req_op_notify_response_data_pages);
-> +
-> +void osd_req_op_notify_request_data_pagelist(
-> +			struct ceph_osd_request *osd_req,
-> +			unsigned int which, struct ceph_pagelist *pagelist)
-> +{
-> +	struct ceph_osd_data *osd_data;
-> +
-> +	osd_data = osd_req_op_data(osd_req, which, notify, request_data);
-> +	ceph_osd_data_pagelist_init(osd_data, pagelist);
-> +}
-> +EXPORT_SYMBOL(osd_req_op_notify_request_data_pagelist);
-> +
->   static u64 ceph_osd_data_length(struct ceph_osd_data *osd_data)
->   {
->   	switch (osd_data->type) {
-> @@ -292,6 +315,10 @@ static void osd_req_op_data_release(struct ceph_osd_request *osd_req,
->   		ceph_osd_data_release(&op->cls.request_data);
->   		ceph_osd_data_release(&op->cls.response_data);
->   		break;
-> +	case CEPH_OSD_OP_NOTIFY:
-> +		ceph_osd_data_release(&op->notify.request_data);
-> +		ceph_osd_data_release(&op->notify.response_data);
-> +		break;
->   	case CEPH_OSD_OP_SETXATTR:
->   	case CEPH_OSD_OP_CMPXATTR:
->   		ceph_osd_data_release(&op->xattr.osd_data);
-> @@ -588,9 +615,18 @@ int osd_req_op_xattr_init(struct ceph_osd_request *osd_req, unsigned int which,
->   }
->   EXPORT_SYMBOL(osd_req_op_xattr_init);
->
-> -void osd_req_op_watch_init(struct ceph_osd_request *osd_req,
-> -				unsigned int which, u16 opcode,
-> -				u64 cookie, u64 version, int flag)
-> +void osd_req_op_notify_init(struct ceph_osd_request *osd_req, unsigned int which,
-> +			    u16 opcode, u64 cookie)
-> +{
-> +	struct ceph_osd_req_op *op = _osd_req_op_init(osd_req, which, opcode);
-> +
-> +	BUG_ON(opcode != CEPH_OSD_OP_NOTIFY);
-> +	op->watch.cookie = cookie;
-> +}
-> +EXPORT_SYMBOL(osd_req_op_notify_init);
-> +
-> +void osd_req_op_watch_init(struct ceph_osd_request *osd_req, unsigned int which,
-> +			   u16 opcode, u8 watch_opcode, u64 cookie)
->   {
->   	struct ceph_osd_req_op *op = _osd_req_op_init(osd_req, which,
->   						      opcode, 0);
-> @@ -598,9 +634,9 @@ void osd_req_op_watch_init(struct ceph_osd_request *osd_req,
->   	BUG_ON(opcode != CEPH_OSD_OP_NOTIFY_ACK && opcode != CEPH_OSD_OP_WATCH);
->
->   	op->watch.cookie = cookie;
-> -	op->watch.ver = version;
-> -	if (opcode == CEPH_OSD_OP_WATCH && flag)
-> -		op->watch.flag = (u8)1;
-> +	op->watch.ver = 0;
-> +	op->watch.op = watch_opcode;
-> +	op->watch.gen = 0;
->   }
->   EXPORT_SYMBOL(osd_req_op_watch_init);
->
-> @@ -708,11 +744,26 @@ static u64 osd_req_encode_op(struct ceph_osd_request *req,
->   		break;
->   	case CEPH_OSD_OP_STARTSYNC:
->   		break;
-> +	case CEPH_OSD_OP_NOTIFY:
-> +		dst->notify.cookie = cpu_to_le64(src->notify.cookie);
-> +
-> +		osd_data = &src->notify.request_data;
-> +		data_length = ceph_osd_data_length(osd_data);
-> +		if (data_length) {
-> +			BUG_ON(osd_data->type == CEPH_OSD_DATA_TYPE_NONE);
-> +			ceph_osdc_msg_data_add(req->r_request, osd_data);
-> +			src->payload_len += data_length;
-> +			request_data_len += data_length;
-> +		}
-> +		osd_data = &src->notify.response_data;
-> +		ceph_osdc_msg_data_add(req->r_reply, osd_data);
-> +		break;
->   	case CEPH_OSD_OP_NOTIFY_ACK:
->   	case CEPH_OSD_OP_WATCH:
->   		dst->watch.cookie = cpu_to_le64(src->watch.cookie);
->   		dst->watch.ver = cpu_to_le64(src->watch.ver);
-> -		dst->watch.flag = src->watch.flag;
-> +		dst->watch.op = src->watch.op;
-> +		dst->watch.gen = cpu_to_le32(src->watch.gen);
->   		break;
->   	case CEPH_OSD_OP_SETALLOCHINT:
->   		dst->alloc_hint.expected_object_size =
->
+Thx
+YuriW
 
+----- Original Message -----
+From: "Sage Weil" <sweil@redhat.com>
+To: ceph-announce@ceph.com, ceph-devel@vger.kernel.org, ceph-users@ceph.com, ceph-maintainers@ceph.com
+Sent: Thursday, June 11, 2015 10:06:38 AM
+Subject: v9.0.1 released
+
+This development release is delayed a bit due to tooling changes in the 
+build environment.  As a result the next one (v9.0.2) will have a bit more 
+work than is usual.
+
+Highlights here include lots of RGW Swift fixes, RBD feature work 
+surrounding the new object map feature, more CephFS snapshot fixes, and a 
+few important CRUSH fixes.
+
+Notable Changes
+---------------
+
+* auth: cache/reuse crypto lib key objects, optimize msg signature check 
+  (Sage Weil)
+* build: allow tcmalloc-minimal (Thorsten Behrens)
+* build: do not build ceph-dencoder with tcmalloc (#10691 Boris Ranto)
+* build: fix pg ref disabling (William A. Kennington III)
+* build: install-deps.sh improvements (Loic Dachary)
+* build: misc fixes (Boris Ranto, Ken Dreyer, Owen Synge)
+* ceph-authtool: fix return code on error (Gerhard Muntingh)
+* ceph-disk: fix zap sgdisk invocation (Owen Synge, Thorsten Behrens)
+* ceph-disk: pass --cluster arg on prepare subcommand (Kefu Chai)
+* ceph-fuse, libcephfs: drop inode when rmdir finishes (#11339 Yan, Zheng)
+* ceph-fuse,libcephfs: fix uninline (#11356 Yan, Zheng)
+* ceph-monstore-tool: fix store-copy (Huangjun)
+* common: add perf counter descriptions (Alyona Kiseleva)
+* common: fix throttle max change (Henry Chang)
+* crush: fix crash from invalid 'take' argument (#11602 Shiva Rkreddy, 
+  Sage Weil)
+* crush: fix divide-by-2 in straw2 (#11357 Yann Dupont, Sage Weil)
+* deb: fix rest-bench-dbg and ceph-test-dbg dependendies (Ken Dreyer)
+* doc: document region hostnames (Robin H. Johnson)
+* doc: update release schedule docs (Loic Dachary)
+* init-radosgw: run radosgw as root (#11453 Ken Dreyer)
+* librados: fadvise flags per op (Jianpeng Ma)
+* librbd: allow additional metadata to be stored with the image (Haomai 
+  Wang)
+* librbd: better handling for dup flatten requests (#11370 Jason Dillaman)
+* librbd: cancel in-flight ops on watch error (#11363 Jason Dillaman)
+* librbd: default new images to format 2 (#11348 Jason Dillaman)
+* librbd: fast diff implementation that leverages object map (Jason 
+  Dillaman)
+* librbd: fix snapshot creation when other snap is active (#11475 Jason 
+  Dillaman)
+* librbd: new diff_iterate2 API (Jason Dillaman)
+* librbd: object map rebuild support (Jason Dillaman)
+* logrotate.d: prefer service over invoke-rc.d (#11330 Win Hierman, Sage 
+  Weil)
+* mds: avoid getting stuck in XLOCKDONE (#11254 Yan, Zheng)
+* mds: fix integer truncateion on large client ids (Henry Chang)
+* mds: many snapshot and stray fixes (Yan, Zheng)
+* mds: persist completed_requests reliably (#11048 John Spray)
+* mds: separate safe_pos in Journaler (#10368 John Spray)
+* mds: snapshot rename support (#3645 Yan, Zheng)
+* mds: warn when clients fail to advance oldest_client_tid (#10657 Yan, 
+  Zheng)
+* misc cleanups and fixes (Danny Al-Gaaf)
+* mon: fix average utilization calc for 'osd df' (Mykola Golub)
+* mon: fix variance calc in 'osd df' (Sage Weil)
+* mon: improve callout to crushtool (Mykola Golub)
+* mon: prevent bucket deletion when referenced by a crush rule (#11602 
+  Sage Weil)
+* mon: prime pg_temp when CRUSH map changes (Sage Weil)
+* monclient: flush_log (John Spray)
+* msgr: async: many many fixes (Haomai Wang)
+* msgr: simple: fix clear_pipe (#11381 Haomai Wang)
+* osd: add latency perf counters for tier operations (Xinze Chi)
+* osd: avoid multiple hit set insertions (Zhiqiang Wang)
+* osd: break PG removal into multiple iterations (#10198 Guang Yang)
+* osd: check scrub state when handling map (Jianpeng Ma)
+* osd: fix endless repair when object is unrecoverable (Jianpeng Ma, Kefu 
+  Chai)
+* osd: fix pg resurrection (#11429 Samuel Just)
+* osd: ignore non-existent osds in unfound calc (#10976 Mykola Golub)
+* osd: increase default max open files (Owen Synge)
+* osd: prepopulate needs_recovery_map when only one peer has missing 
+  (#9558 Guang Yang)
+* osd: relax reply order on proxy read (#11211 Zhiqiang Wang)
+* osd: skip promotion for flush/evict op (Zhiqiang Wang)
+* osd: write journal header on clean shutdown (Xinze Chi)
+* qa: run-make-check.sh script (Loic Dachary)
+* rados bench: misc fixes (Dmitry Yatsushkevich)
+* rados: fix error message on failed pool removal (Wido den Hollander)
+* radosgw-admin: add 'bucket check' function to repair bucket index 
+  (Yehuda Sadeh)
+* rbd: allow unmapping by spec (Ilya Dryomov)
+* rbd: deprecate --new-format option (Jason Dillman)
+* rgw: do not set content-type if length is 0 (#11091 Orit Wasserman)
+* rgw: don't use end_marker for namespaced object listing (#11437 Yehuda 
+  Sadeh)
+* rgw: fail if parts not specified on multipart upload (#11435 Yehuda 
+  Sadeh)
+* rgw: fix GET on swift account when limit == 0 (#10683 Radoslaw 
+  Zarzynski)
+* rgw: fix broken stats in container listing (#11285 Radoslaw Zarzynski)
+* rgw: fix bug in domain/subdomain splitting (Robin H. Johnson)
+* rgw: fix civetweb max threads (#10243 Yehuda Sadeh)
+* rgw: fix copy metadata, support X-Copied-From for swift (#10663 Radoslaw 
+  Zarzynski)
+* rgw: fix locator for objects starting with _ (#11442 Yehuda Sadeh)
+* rgw: fix mulitipart upload in retry path (#11604 Yehuda Sadeh)
+* rgw: fix quota enforcement on POST (#11323 Sergey Arkhipov)
+* rgw: fix return code on missing upload (#11436 Yehuda Sadeh)
+* rgw: force content type header on responses with no body (#11438 Orit 
+  Wasserman)
+* rgw: generate new object tag when setting attrs (#11256 Yehuda Sadeh)
+* rgw: issue aio for first chunk before flush cached data (#11322 Guang 
+  Yang)
+* rgw: make read user buckets backward compat (#10683 Radoslaw Zarzynski)
+* rgw: merge manifests properly with prefix override (#11622 Yehuda Sadeh)
+* rgw: return 412 on bad limit when listing buckets (#11613 Yehuda Sadeh)
+* rgw: send ETag, Last-Modified for swift (#11087 Radoslaw Zarzynski)
+* rgw: set content length on container GET, PUT, DELETE, HEAD (#10971, 
+  #11036 Radoslaw Zarzynski)
+* rgw: support end marker on swift container GET (#10682 Radoslaw 
+  Zarzynski)
+* rgw: swift: fix account listing (#11501 Radoslaw Zarzynski)
+* rgw: swift: set content-length on keystone tokens (#11473 Herv Rousseau)
+* rgw: use correct oid for gc chains (#11447 Yehuda Sadeh)
+* rgw: use unique request id for civetweb (#10295 Orit Wasserman)
+* rocksdb, leveldb: fix compact_on_mount (Xiaoxi Chen)
+* rocksdb: add perf counters for get/put latency (Xinxin Shu)
+* rpm: add suse firewall files (Tim Serong)
+* rpm: misc systemd and suse fixes (Owen Synge, Nathan Cutler)
+
+Getting Ceph
+------------
+
+* Git at git://github.com/ceph/ceph.git
+* Tarball at http://ceph.com/download/ceph-9.0.1.tar.gz
+* For packages, see http://ceph.com/docs/master/install/get-packages
+* For ceph-deploy, see http://ceph.com/docs/master/install/install-ceph-deploy
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
