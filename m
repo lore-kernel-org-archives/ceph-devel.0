@@ -1,81 +1,47 @@
-From: Josh Durgin <jdurgin@redhat.com>
-Subject: Re: Checking on wip-blkin branch
-Date: Tue, 16 Jun 2015 10:13:49 -0700
-Message-ID: <5580594D.8040809@redhat.com>
-References: <C8CF870384EBCF4CAB89D2041A5C80B304B99DEA@SHSMSX101.ccr.corp.intel.com> <5576FBEA.8030805@redhat.com> <C8CF870384EBCF4CAB89D2041A5C80B304BAAAE6@SHSMSX101.ccr.corp.intel.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH] crush:Make the function crush_ln static
+Date: Tue, 16 Jun 2015 20:15:31 +0300
+Message-ID: <CAOi1vP9DayWYXw+KSFghjVvaK2pMT6MK4cvY96=D=tApdC08uw@mail.gmail.com>
+References: <1433803863-9241-1-git-send-email-xerofoify@gmail.com>
+	<CAOi1vP_G6eVwRW4coey4-gUEx3Y2k-pnDfJxMk6Va+C0aTLG-w@mail.gmail.com>
+	<CAOi1vP8xL=ZdEH5fcGaMOkKbs5Hdjg9BLe6FxdRGVezdiighyQ@mail.gmail.com>
+	<55804C64.3070702@gmail.com>
+	<CAOi1vP84CnY+-0RvR=LJ3v-w_ZYBEuW4=AJ8xZUhKEjsLe0WdQ@mail.gmail.com>
+	<55805563.6000101@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:43127 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754805AbbFPRNq (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 16 Jun 2015 13:13:46 -0400
-In-Reply-To: <C8CF870384EBCF4CAB89D2041A5C80B304BAAAE6@SHSMSX101.ccr.corp.intel.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "Xue, Chendi" <chendi.xue@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Andrew Shewmaker <agshew@gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <55805563.6000101@gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: nick <xerofoify@gmail.com>
+Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, "David S. Miller" <davem@davemloft.net>, Ceph Development <ceph-devel@vger.kernel.org>, netdev <netdev@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On 06/16/2015 12:02 AM, Xue, Chendi wrote:
-> HI, Josh and Andrew
+On Tue, Jun 16, 2015 at 7:57 PM, nick <xerofoify@gmail.com> wrote:
 >
-> I just rebase the wip-blkin branch to 9.0.1, and did a rados bench test on that
 >
-> https://github.com/ceph/ceph/pull/4963
-
-Thanks! Reset the branch in ceph.git.
-
-> Lttng result is collected successfully
->
-> Considering on rados testsuits failing issues, I don't have a test environment, any suggests?
-
-You should be able to reproduce the failures without teuthology. Try
-running these scripts from the ceph tree with
-
-ms inject socket failures = 5000
-
-in the [global] section of ceph.conf:
-
-qa/workunits/rados/test.sh
-qa/workunits/rados/test_pool_quota.sh
-qa/workunits/rados/cls.sh
-
-These resulted in osd crashes in the last rados suite run linked
-earlier in the thread.
-
-Josh
-
-> Best Regards,
-> -Chendi
->
-> -----Original Message-----
-> From: Josh Durgin [mailto:jdurgin@redhat.com]
-> Sent: Tuesday, June 9, 2015 10:45 PM
-> To: Xue, Chendi; ceph-devel@vger.kernel.org; Andrew Shewmaker
-> Subject: Re: Checking on wip-blkin branch
->
-> Hi Chendi,
->
-> On 06/09/2015 04:59 AM, Xue, Chendi wrote:
->> Hi, Josh and Andrew
+> On 2015-06-16 12:47 PM, Ilya Dryomov wrote:
+>> On Tue, Jun 16, 2015 at 7:18 PM, nick <xerofoify@gmail.com> wrote:
+>>> Ilya,
+>>> That's fine I do have a unrelated question through. I have over 90 patches lying around in terms of cleanups/
+>>> fixes and need help getting them merged. Should I just resend them or wait until the end of this merge window.
 >>
->> Today, I applied wip-blkin branch to my 4 nodes ceph setup, and created zipkin-based lttng results successfully.
+>> Are all of those ceph patches?
 >>
->> Since we wanna using this latency analyzing methodology on further release or on keyvalue store and newstore.
->> I am wondering what is the gap to merge blkin into master? Can I help to rebase to master, so we can merge this branch?
->
-> That'd be great! Andrew and I simply haven't had time to finish fixing up the remaining issues. Running it through a rados suite showed some more changes were necessary to handle more complicated osd usage - you'll see several osd crashes in this rados suite run [1].
->
-> The code was looking fine to me, it just needs rebasing and debugging so it can pass the rados test suite.
->
-> Thanks!
-> Josh
->
-> [1]
-> http://pulpito.ceph.com/joshd-2015-03-25_17:29:16-rados-wip-blkin---blkin-multi/
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+>> Thanks,
+>>
+>>                 Ilya
+>>
+> No there all over networking stack including drivers.
 
+I'd suggest reaching out to the respective maintainers, especially if
+those ~90 patches can be broken into a few chunks that a small number
+of people can deal with.
+
+If that doesn't get you anywhere, try resending the whole batch to
+trivial@kernel.org.  Jiri may be able to merge it through his trivial
+tree.
+
+Thanks,
+
+                Ilya
