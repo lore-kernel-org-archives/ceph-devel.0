@@ -1,60 +1,63 @@
-From: Sebastien Han <seb@redhat.com>
-Subject: Re: Move RBD Cache on clients from RAM to SSD.
-Date: Tue, 16 Jun 2015 11:54:03 +0200
-Message-ID: <9F993C58-6380-4132-A87F-850A84A397DB@redhat.com>
-References: <557FD76C.9070905@gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 8.2 \(2098\))
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Gregory Farnum <greg@gregs42.com>
+Subject: Re: [PATCH] Allow CRLF in config files
+Date: Tue, 16 Jun 2015 02:54:13 -0700
+Message-ID: <CAC6JEv8oSYP_vZoDw62cQ3U-WNQAfa-5BjqF2K8-q6EUMuS-3g@mail.gmail.com>
+References: <1434412418-32247-1-git-send-email-fxmulder@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:50352 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754572AbbFPJyH convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Jun 2015 05:54:07 -0400
-In-Reply-To: <557FD76C.9070905@gmail.com>
+Received: from mail-ig0-f171.google.com ([209.85.213.171]:34907 "EHLO
+	mail-ig0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755547AbbFPJyP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Jun 2015 05:54:15 -0400
+Received: by igbzc4 with SMTP id zc4so74742795igb.0
+        for <ceph-devel@vger.kernel.org>; Tue, 16 Jun 2015 02:54:14 -0700 (PDT)
+Received: from mail-ie0-f172.google.com (mail-ie0-f172.google.com. [209.85.223.172])
+        by mx.google.com with ESMTPSA id b15sm9562857igm.12.2015.06.16.02.54.14
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 16 Jun 2015 02:54:14 -0700 (PDT)
+Received: by iecrd14 with SMTP id rd14so9291055iec.3
+        for <ceph-devel@vger.kernel.org>; Tue, 16 Jun 2015 02:54:14 -0700 (PDT)
+In-Reply-To: <1434412418-32247-1-git-send-email-fxmulder@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mike <mike.almateia@gmail.com>
+To: James Devine <fxmulder@gmail.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is not possible at the moment but long ago a BP was register to al=
-low a multiple backend functionality. (can=E2=80=99t find it anymore)
-Unfortunately I don=E2=80=99t think this BP got much attention :/
+Can you submit this as a Github pull request?
+We can take patches to userspace code over the mailing list but
+they're more likely to get lost if you go that route.
+-Greg
 
-> On 16 Jun 2015, at 09:59, Mike <mike.almateia@gmail.com> wrote:
->=20
-> Hello.
->=20
-> By now rbd_cache uses RAM, can we store cache on disk (SSD, SSD NVE)?
-> In this way I look some benefits:
-> * Don't waste a RAM for cache
-> * Can make a big cache on SSD: 2-8Gb per cache
-> * If you use Cache Tier - don't waste space on them
-> * No need addition Ceph servers - use Compute with SSD.
->=20
-> Yes it's for write-through and read-only cache strategies mostly.
->=20
-> Any ideas? My be I am blind and this idea totally stupid?
->=20
+On Mon, Jun 15, 2015 at 4:53 PM, James Devine <fxmulder@gmail.com> wrote:
+> Change config fopen to binary mode, allowing LF and CRLF EOL characters so
+> ceph-dokan can work with native windows configuration files going forward.
+> The carriage return is ignored and trimmed as whitespace during parsing via
+> isspace().
+>
+> Signed-off-by: James Devine <fxmulder@gmail.com>
+> ---
+>  src/common/ConfUtils.cc | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/src/common/ConfUtils.cc b/src/common/ConfUtils.cc
+> index 1ae5df5..a717077 100644
+> --- a/src/common/ConfUtils.cc
+> +++ b/src/common/ConfUtils.cc
+> @@ -99,7 +99,7 @@ parse_file(const std::string &fname, std::deque<std::string> *errors,
+>    int ret = 0;
+>    size_t sz;
+>    char *buf = NULL;
+> -  FILE *fp = fopen(fname.c_str(), "r");
+> +  FILE *fp = fopen(fname.c_str(), "rb");
+>    if (!fp) {
+>      ret = -errno;
+>      return ret;
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
+> 1.9.1
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-Cheers.
-=E2=80=93=E2=80=93=E2=80=93=E2=80=93=20
-S=C3=A9bastien Han=20
-Senior Cloud Architect=20
-
-"Always give 100%. Unless you're giving blood."
-
-Mail: seb@redhat.com=20
-Address: 11 bis, rue Roqu=C3=A9pine - 75008 Paris
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
