@@ -1,108 +1,104 @@
-From: Gregory Farnum <greg@gregs42.com>
+From: Wido den Hollander <wido@42on.com>
 Subject: Re: rbd top
-Date: Tue, 16 Jun 2015 03:04:31 -0700
-Message-ID: <CAC6JEv-f1CsoXZKK5etzOXeM-Kvn7y_u_ViKjsvrRz8QiGPgtQ@mail.gmail.com>
-References: <CAANLjFp4+tkSj5=we88nGDFh0NtmX4jYc+sE__1N8L_4X30dfw@mail.gmail.com>
-	<CAC6JEv8qB6xStrp1EL+gyDWAzVo91DvtDQKyMs9VDB2KtoVR6A@mail.gmail.com>
-	<alpine.DEB.2.00.1506150647030.18741@cobra.newdream.net>
-	<557EE94C.10108@redhat.com>
+Date: Tue, 16 Jun 2015 13:05:20 +0200
+Message-ID: <558002F0.5060607@42on.com>
+References: <CAANLjFp4+tkSj5=we88nGDFh0NtmX4jYc+sE__1N8L_4X30dfw@mail.gmail.com>	<CAC6JEv8qB6xStrp1EL+gyDWAzVo91DvtDQKyMs9VDB2KtoVR6A@mail.gmail.com>	<alpine.DEB.2.00.1506150647030.18741@cobra.newdream.net>	<557EE94C.10108@redhat.com> <CAANLjFpCt9tMhkkZ+eECXpvpXOgTCoS8wu6OEuA6S89Vbdfv_Q@mail.gmail.com> <557F02D9.1040303@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f169.google.com ([209.85.213.169]:34440 "EHLO
-	mail-ig0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932926AbbFPKEd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Jun 2015 06:04:33 -0400
-Received: by igboe5 with SMTP id oe5so50948315igb.1
-        for <ceph-devel@vger.kernel.org>; Tue, 16 Jun 2015 03:04:32 -0700 (PDT)
-Received: from mail-ig0-f180.google.com (mail-ig0-f180.google.com. [209.85.213.180])
-        by mx.google.com with ESMTPSA id v3sm826475igk.1.2015.06.16.03.04.31
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 16 Jun 2015 03:04:31 -0700 (PDT)
-Received: by igbos3 with SMTP id os3so39702702igb.0
-        for <ceph-devel@vger.kernel.org>; Tue, 16 Jun 2015 03:04:31 -0700 (PDT)
-In-Reply-To: <557EE94C.10108@redhat.com>
+Received: from websrv.42on.com ([31.25.102.167]:53172 "EHLO websrv.42on.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752817AbbFPLFY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 16 Jun 2015 07:05:24 -0400
+In-Reply-To: <557F02D9.1040303@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <john.spray@redhat.com>, "sjust@redhat.com" <sjust@redhat.com>
-Cc: Sage Weil <sage@newdream.net>, Robert LeBlanc <robert@leblancnet.us>, ceph-devel <ceph-devel@vger.kernel.org>
+To: John Spray <john.spray@redhat.com>, Robert LeBlanc <robert@leblancnet.us>
+Cc: Sage Weil <sage@newdream.net>, Gregory Farnum <greg@gregs42.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, Jun 15, 2015 at 8:03 AM, John Spray <john.spray@redhat.com> wrote:
->
->
-> On 15/06/2015 14:52, Sage Weil wrote:
+On 06/15/2015 06:52 PM, John Spray wrote:
+> 
+> 
+> On 15/06/2015 17:10, Robert LeBlanc wrote:
+>> -----BEGIN PGP SIGNED MESSAGE-----
+>> Hash: SHA256
 >>
+>> John, let me see if I understand what you are saying...
 >>
->> I seem to remember having a short conversation about something like this a
->> few CDS's back... although I think it was 'rados top'.  IIRC the basic
->> idea we had was for each OSD to track it's top clients (using some
->> approximate LRU type algorithm) and then either feed this relatively small
->> amount of info (say, top 10-100 clients) back to the mon for summation,
->> or dump via the admin socket for calamari to aggregate.
->>
->> This doesn't give you the rbd image name, but I bet we could infer that
->> without too much trouble (e.g., include a recent object or two with the
->> client).  Or, just assume that client id is enough (it'll include an IP
->> and PID... enough info to find the /var/run/ceph admin socket or the VM
->> process.
->>
->> If we were going to do top clients, I think it'd make sense to also have a
->> top objects list as well, so you can see what the hottest objects in the
->> cluster are.
->
->
-> The following is a bit of a tangent...
->
-> A few weeks ago I was thinking about general solutions to this problem (for
-> the filesystem).  I played with (very briefly on wip-live-query) the idea of
-> publishing a list of queries to the MDSs/OSDs, that would allow runtime
-> configuration of what kind of thing we're interested in and how we want it
-> broken down.
->
-> If we think of it as an SQL-like syntax, then for the RBD case we would have
-> something like:
->   SELECT read_bytes, write_bytes WHERE pool=rbd GROUP BY rbd_image
->
-> (You'd need a protocol-specific module of some kind to define what
-> "rbd_image" meant here, which would do a simple mapping from object
-> attributes to an identifier (similar would exist for e.g. cephfs inode))
->
-> Each time an OSD does an operation, it consults the list of active
-> "performance queries" and updates counters according to the value of the
-> GROUP BY parameter for the query (so the above example each OSD would be
-> keeping a result row for each rbd image touchd).
->
-> The LRU part could be implemented as LIMIT BY + SORT parameters, such that
-> the result rows would be periodically sorted and the least-touched results
-> would drop off the list.  That would probably be used in conjunction with a
-> decay operator on the sorted-by field, like:
->   SELECT read_bytes, write_bytes,ops WHERE pool=rbd GROUP BY rbd_image SORT
-> BY movingAverage(derivative(ops)) LIMIT 100
->
-> Combining WHERE clauses would let the user "drill down" (apologies for
-> buzzword) by doing things like identifying the most busy clients, and then
-> for each of those clients identify which images/files/objects the client is
-> most active on, or vice versa identify busy objects and then see which
-> clients are hitting them. Usually keeping around enough stats to enable this
-> is prohibitive at scale, but it's fine when you're actively creating custom
-> queries for the results you're really interested in, instead of keeping
-> N_clients*N_objects stats, and when you have the LIMIT part to ensure
-> results never get oversized.
->
-> The GROUP BY options would also include metadata sent from clients, e.g. the
-> obvious cases like VM instance names, or rack IDs, or HPC job IDs.  Maybe
-> also some less obvious ones like decorating cephfs IOs with the inode of the
-> directory containing the file, so that OSDs could accumulate per-directory
-> bandwidth numbers, and user could ask "which directory is
-> bandwidth-hottest?" as well as "which file is bandwidth-hottest?".
->
-> Then, after implementing all that craziness, you get some kind of wild
-> multicolored GUI that shows you where the action is in your system at a
-> cephfs/rgw/rbd level.
+>> When a person runs `rbd top`, each OSD would receive a message saying
+>> please capture all the performance, grouped by RBD and limit it to
+>> 'X'. That way the OSD doesn't have to constantly update performance
+>> for each object, but when it is requested it starts tracking it?
+> 
+> Right, initially the OSD isn't collecting anything, it starts as soon as
+> it sees a query get loaded up (published via OSDMap or some other
+> mechanism).
+> 
 
-I *like* that idea. We should discuss with Sam before doing too much
-though as I know he's thought about various online computations in
-RADOS before. Something like this is also interesting in comparison to
-our long-theorized "PG classes", etc.
--Greg
+I like that idea very much. Currently the OSDs are already CPU bound, a
+lot of time is used by processing a request while it's not waiting on
+the disk.
+
+Although tracking IOps might seem like a small and cheap thing to do,
+it's yet more CPU time spent by the system on something else then
+processing the I/O.
+
+So I'm in favor of not always collecting, but only on demand.
+
+Go for performance, low-latency and high IOps.
+
+Wido
+
+> That said, in practice I can see people having some set of queries that
+> they always have loaded and feeding into graphite in the background.
+>>
+>> If so, that is an interesting idea. I wonder if that would be simpler
+>> than tracking the performance of each/MRU objects in some format like
+>> /proc/diskstats where it is in memory and not necessarily consistent.
+>> The benefit is that you could have "lifelong" stats that show up like
+>> iostat and it would be a simple operation.
+> 
+> Hmm, not sure we're on the same page about this part, what I'm talking
+> about is all in memory and would be lost across daemon restarts.  Some
+> other component would be responsible for gathering the stats across all
+> the daemons in one place (that central part could persist stats if
+> desired).
+> 
+>> Each object should be able
+>> to reference back to RBD/CephFS upon request and the client could even
+>> be responsible for that load. Client performance data would need stats
+>> in addition to the object stats.
+> 
+> You could extend the mechanism to clients.  However, as much as possible
+> it's a good thing to keep it server side, as servers are generally fewer
+> (still have to reduce these stats across N servers to present to user),
+> and we have multiple client implementations (kernel/userspace).  What
+> kind of thing do you want to get from clients?
+>> My concern is that adding additional SQL like logic to each op is
+>> going to get very expensive. I guess if we could push that to another
+>> thread early in the op, then it might not be too bad. I'm enjoying the
+>> discussion and new ideas.
+> 
+> Hopefully in most cases the query can be applied very cheaply, for
+> operations like comparing pool ID or grouping by client ID. However, I
+> would also envisage an optional sampling number, such that e.g. only 1
+> in every 100 ops would go through the query processing.  Useful for
+> systems where keeping highest throughput is paramount, and the numbers
+> will still be useful if clients are doing many thousands of ops per second.
+> 
+> Cheers,
+> John
+> -- 
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+-- 
+Wido den Hollander
+42on B.V.
+Ceph trainer and consultant
+
+Phone: +31 (0)20 700 9902
+Skype: contact42on
