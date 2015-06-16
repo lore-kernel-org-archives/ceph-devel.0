@@ -1,258 +1,221 @@
-From: juncheng bai <baijuncheng@unitedstack.com>
-Subject: Re: [PATCH RFC] storage:rbd: make the size of request is equal to
- the, size of the object
-Date: Tue, 16 Jun 2015 22:14:30 +0800
-Message-ID: <55802F46.7020804@unitedstack.com>
-References: <557EB47F.6090708@unitedstack.com>	<CAOi1vP9iF6LVGrHsORoYGUkx_Ttqr7gsBUMz7EM--b7asOUPCA@mail.gmail.com>	<557ED1D4.20605@unitedstack.com>	<CAOi1vP_VLVVhoFrJ+ETRa7+o+sAjyHquZR_g2kYdO9n-8jxdoQ@mail.gmail.com>	<557F97CB.6070608@unitedstack.com>	<CAOi1vP-2dqn_FmgCK-1O6M10FHGpEPVxkAKs6SMoUB_kU9X5TQ@mail.gmail.com>	<55800F24.6060100@unitedstack.com> <CAOi1vP-jnE+1-TA5P2=rGx9Bdoc4fTyp7u0g+QDpksm9RTxAqA@mail.gmail.com>
+From: Mike Christie <mchristi@redhat.com>
+Subject: Re: [PATCH 4/6] osd_client, rbd: update event interface for watch/notify2
+Date: Tue, 16 Jun 2015 09:58:07 -0500
+Message-ID: <5580397F.9060306@redhat.com>
+References: <cover.1434124007.git.dfuller@redhat.com> <1e922f4d9ba0ea00be5a387247866f44cb0b6488.1434124007.git.dfuller@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtpbg303.qq.com ([184.105.206.26]:35101 "EHLO smtpbg303.qq.com"
+Received: from mx1.redhat.com ([209.132.183.28]:33826 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754384AbbFPOOu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 16 Jun 2015 10:14:50 -0400
-In-Reply-To: <CAOi1vP-jnE+1-TA5P2=rGx9Bdoc4fTyp7u0g+QDpksm9RTxAqA@mail.gmail.com>
+	id S1754814AbbFPO6I (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 16 Jun 2015 10:58:08 -0400
+Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
+	by mx1.redhat.com (Postfix) with ESMTPS id 3CF71C1F6B
+	for <ceph-devel@vger.kernel.org>; Tue, 16 Jun 2015 14:58:08 +0000 (UTC)
+In-Reply-To: <1e922f4d9ba0ea00be5a387247866f44cb0b6488.1434124007.git.dfuller@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: idryomov@redhat.com, Alex Elder <elder@linaro.org>, Josh Durgin <josh.durgin@inktank.com>, Guangliang Zhao <lucienchao@gmail.com>, jeff@garzik.org, yehuda@hq.newdream.net, Sage Weil <sage@newdream.net>, elder@inktank.com, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Douglas Fuller <dfuller@redhat.com>, ceph-devel@vger.kernel.org
+
+On 06/12/2015 10:56 AM, Douglas Fuller wrote:
+> +static void rbd_watch_error_cb(void *arg, u64 cookie, int err)
+> +{
+> +	struct rbd_device *rbd_dev = (struct rbd_device *)arg;
+> +	int ret;
+> +
+> +	dout("%s: watch error %d on cookie %llu\n", rbd_dev->header_name,
+> +		err, cookie);
+> +	rbd_warn(rbd_dev, "%s: watch error %d on cookie %llu\n",
+> +	         rbd_dev->header_name, err, cookie);
+> +
+> +	/* reset watch */
+> +	rbd_dev_refresh(rbd_dev);
+> +	rbd_dev_header_unwatch_sync(rbd_dev);
+> +	ret = rbd_dev_header_watch_sync(rbd_dev);
+> +	BUG_ON(ret); /* XXX: was the image deleted? can we be more graceful? */
+
+Is this for debugging only? BUG()/BUG_ON() can kill the system. We
+normally use it for cases where proceeding might cause something like
+data corruption or where we want to catch programming bugs early on like
+passing incorrect args to a function.
+
+The other caller if this function does not escalate like this function.
+Are you sure you need to here? The code below will not run if we BUG
+above, so if you did want to BUG, you would want to move the rbd_warn
+before it.
+
+> +	rbd_dev_refresh(rbd_dev);
+> +	if (ret)
+> +		rbd_warn(rbd_dev, "refresh failed: %d", ret);
+> +}
+> +
+>  /*
 
 
 
-On 2015/6/16 21:30, Ilya Dryomov wrote:
-> On Tue, Jun 16, 2015 at 2:57 PM, juncheng bai
-> <baijuncheng@unitedstack.com> wrote:
->>
->>
->> On 2015/6/16 16:37, Ilya Dryomov wrote:
->>>
->>> On Tue, Jun 16, 2015 at 6:28 AM, juncheng bai
->>> <baijuncheng@unitedstack.com> wrote:
->>>>
->>>>
->>>>
->>>> On 2015/6/15 22:27, Ilya Dryomov wrote:
->>>>>
->>>>>
->>>>> On Mon, Jun 15, 2015 at 4:23 PM, juncheng bai
->>>>> <baijuncheng@unitedstack.com> wrote:
->>>>>>
->>>>>>
->>>>>>
->>>>>>
->>>>>> On 2015/6/15 21:03, Ilya Dryomov wrote:
->>>>>>>
->>>>>>>
->>>>>>>
->>>>>>> On Mon, Jun 15, 2015 at 2:18 PM, juncheng bai
->>>>>>> <baijuncheng@unitedstack.com> wrote:
->>>>>>>>
->>>>>>>>
->>>>>>>>
->>>>>>>>     From 6213215bd19926d1063d4e01a248107dab8a899b Mon Sep 17 00:00:00
->>>>>>>> 2001
->>>>>>>> From: juncheng bai <baijuncheng@unitedstack.com>
->>>>>>>> Date: Mon, 15 Jun 2015 18:34:00 +0800
->>>>>>>> Subject: [PATCH] storage:rbd: make the size of request is equal to
->>>>>>>> the
->>>>>>>>      size of the object
->>>>>>>>
->>>>>>>> ensures that the merged size of request can achieve the size of
->>>>>>>> the object.
->>>>>>>> when merge a bio to request or merge a request to request, the
->>>>>>>> sum of the segment number of the current request and the segment
->>>>>>>> number of the bio is not greater than the max segments of the
->>>>>>>> request,
->>>>>>>> so the max size of request is 512k if the max segments of request is
->>>>>>>> BLK_MAX_SEGMENTS.
->>>>>>>>
->>>>>>>> Signed-off-by: juncheng bai <baijuncheng@unitedstack.com>
->>>>>>>> ---
->>>>>>>>      drivers/block/rbd.c | 2 ++
->>>>>>>>      1 file changed, 2 insertions(+)
->>>>>>>>
->>>>>>>> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
->>>>>>>> index 0a54c58..dec6045 100644
->>>>>>>> --- a/drivers/block/rbd.c
->>>>>>>> +++ b/drivers/block/rbd.c
->>>>>>>> @@ -3757,6 +3757,8 @@ static int rbd_init_disk(struct rbd_device
->>>>>>>> *rbd_dev)
->>>>>>>>             segment_size = rbd_obj_bytes(&rbd_dev->header);
->>>>>>>>             blk_queue_max_hw_sectors(q, segment_size / SECTOR_SIZE);
->>>>>>>>             blk_queue_max_segment_size(q, segment_size);
->>>>>>>> +       if (segment_size > BLK_MAX_SEGMENTS * PAGE_SIZE)
->>>>>>>> +               blk_queue_max_segments(q, segment_size / PAGE_SIZE);
->>>>>>>>             blk_queue_io_min(q, segment_size);
->>>>>>>>             blk_queue_io_opt(q, segment_size);
->>>>>>>
->>>>>>>
->>>>>>>
->>>>>>>
->>>>>>> I made a similar patch on Friday, investigating blk-mq plugging issue
->>>>>>> reported by Nick.  My patch sets it to BIO_MAX_PAGES unconditionally -
->>>>>>> AFAIU there is no point in setting to anything bigger since the bios
->>>>>>> will be clipped to that number of vecs.  Given that BIO_MAX_PAGES is
->>>>>>> 256, this gives is 1M direct I/Os.
->>>>>>
->>>>>>
->>>>>>
->>>>>> Hi. For signal bio, the max number of bio_vec is BIO_MAX_PAGES, but a
->>>>>> request can be merged from multiple bios. We can see the below
->>>>>> function:
->>>>>> ll_back_merge_fn, ll_front_merge_fn and etc.
->>>>>> And I test in kernel 3.18 use this patch, and do:
->>>>>> echo 4096 > /sys/block/rbd0/queue/max_sectors_kb
->>>>>> We use systemtap to trace the request size, It is upto 4M.
->>>>>
->>>>>
->>>>>
->>>>> Kernel 3.18 is pre rbd blk-mq transition, which happened in 4.0.  You
->>>>> should test whatever patches you have with at least 4.0.
->>>>>
->>>>> Putting that aside, I must be missing something.  You'll get 4M
->>>>> requests on 3.18 both with your patch and without it, the only
->>>>> difference would be the size of bios being merged - 512k vs 1M.  Can
->>>>> you describe your test workload and provide before and after traces?
->>>>>
->>>> Hi. I update kernel version to 4.0.5. The test information as shown
->>>> below:
->>>> The base information:
->>>> 03:28:13-root@server-186:~$uname -r
->>>> 4.0.5
->>>>
->>>> My simple systemtap script:
->>>> probe module("rbd").function("rbd_img_request_create")
->>>> {
->>>>       printf("offset:%lu length:%lu\n", ulong_arg(2), ulong_arg(3));
->>>> }
->>>>
->>>> I use dd to execute the test case:
->>>> dd if=/dev/zero  of=/dev/rbd0 bs=4M count=1 oflag=direct
->>>>
->>>> Case one: Without patch
->>>> 03:30:23-root@server-186:~$cat /sys/block/rbd0/queue/max_sectors_kb
->>>> 4096
->>>> 03:30:35-root@server-186:~$cat /sys/block/rbd0/queue/max_segments
->>>> 128
->>>>
->>>> The output of systemtap for nornal data:
->>>> offset:0 length:524288
->>>> offset:524288 length:524288
->>>> offset:1048576 length:524288
->>>> offset:1572864 length:524288
->>>> offset:2097152 length:524288
->>>> offset:2621440 length:524288
->>>> offset:3145728 length:524288
->>>> offset:3670016 length:524288
->>>>
->>>> Case two:With patch
->>>> cat /sys/block/rbd0/queue/max_sectors_kb
->>>> 4096
->>>> 03:49:14-root@server-186:linux-4.0.5$cat
->>>> /sys/block/rbd0/queue/max_segments
->>>> 1024
->>>> The output of systemtap for nornal data:
->>>> offset:0 length:1048576
->>>> offset:1048576 length:1048576
->>>> offset:2097152 length:1048576
->>>> offset:3145728 length:1048576
->>>>
->>>> According to the test, you are right.
->>>> Because the blk-mq doesn't use any scheduling policy.
->>>> 03:52:13-root@server-186:linux-4.0.5$cat /sys/block/rbd0/queue/scheduler
->>>> none
->>>>
->>>> In previous versions of the kernel 4.0, the rbd use the defualt
->>>> scheduler:cfq
->>>>
->>>> So, I think that the blk-mq need to do more?
->>>
->>>
->>> There is no scheduler support in blk-mq as of now but your numbers
->>> don't have anything to do with that.  The current behaviour is a result
->>> of a bug in blk-mq.  It's fixed by [1], if you apply it you should see
->>> 4M requests with your stap script.
->>>
->>> [1] http://article.gmane.org/gmane.linux.kernel/1941750
->>>
->> Hi.
->> First, Let's look at the result in the kernel version 3.18
->> The function blk_limits_max_hw_sectors different implemention between 3.18
->> and 4.0+. We need do:
->> echo 4094 >/sys/block/rbd0/queue/max_sectors_kb
->>
->> The rbd device information:
->> 11:13:18-root@server-186:~$cat /sys/block/rbd0/queue/max_sectors_kb
->> 4094
->> 11:15:28-root@server-186:~$cat /sys/block/rbd0/queue/max_segments
->> 1024
->>
->> The test command:
->> dd if=/dev/zero of=/dev/rbd0 bs=4M count=1
->>
->> The simple stap script:
->> probe module("rbd").function("rbd_img_request_create")
->> {
->>      printf("offset:%lu length:%lu\n", ulong_arg(2), ulong_arg(3));
->> }
->>
->> The output from stap:
->> offset:0 length:4190208
->> offset:21474770944 length:4096
->>
->> Second, thanks for your patch [1].
->> I use the patch [1], and recompile the kernel.
->> The test information as shown below:
->> 12:26:12-root@server-186:$cat /sys/block/rbd0/queue/max_segments
->> 1024
->> 12:26:23-root@server-186:$cat /sys/block/rbd0/queue/max_sectors_kb
->> 4096
->>
->> The test command:
->> dd if=/dev/zero  of=/dev/rbd0 bs=4M count=2 oflag=direct
->>
->> The simple systemtap script:
->> probe module("rbd").function("rbd_img_request_create")
->> {
->>      printf("offset:%lu length:%lu\n", ulong_arg(2), ulong_arg(3));
->> }
->>
->> The output of systemtap for nornal data:
->> offset:0 length:4194304
->> offset:4194304 length:4194304
->> offset:21474770944 length:4096
->
-> Sorry, I fail to see the purpose of the above tests.  The test commands
-> differ, the kernels differ and it looks like you had your patch applied
-> for both tests.  What I'm trying to get you to do is to show me some
-> data that will back your claim (which your patch is based on):
->
->>
->> So, I think that the max_segments of request_limits should be divide the
->> object size by PAGE_SIZE.
->
-> For that you need to use the same kernel and run the same workload.
-> The only difference should be whether your patch is applied or not.
-> I still think that setting rbd max_segments to anything above
-> BIO_MAX_PAGES is bogus, but I'd be happy to be shown wrong on that
-> since that would mean better performance, at least in some
-> workloads.
->
-Hi.
-For cloned image, it will avoid doing copyup if the request size is
-equal to the object size, I think that it is the key effect of this
-patch.
-The big request would result in overtime if the ceph backend is busy
-or the network bandwidth is too low.
-I suggest that add a module parameter to control the value which
-decided by the user settings.
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index 74650e1..d435bf2 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -36,7 +36,13 @@ static void __unregister_linger_request(struct ceph_osd_client *osdc,
+>  					struct ceph_osd_request *req);
+>  static void __enqueue_request(struct ceph_osd_request *req);
+>  static void __send_request(struct ceph_osd_client *osdc,
+> -			   struct ceph_osd_request *req);
+> +                           struct ceph_osd_request *req);
+> +static struct ceph_osd_event *__find_event(struct ceph_osd_client *osdc,
+> +                                           u64 cookie);
+> +static void __do_event(struct ceph_osd_client *osdc, u8 opcode,
+> +                       u64 cookie, u64 notify_id, u32 payload_len,
+> +                       void *payload, s32 return_code, u64 notifier_gid,
+> +                       struct ceph_msg_data *data);
 
-Thanks.
-----
-juncheng bai
+We should not be adding these declarations if they are not needed.
 
-> Thanks,
->
->                  Ilya
->
+
+> +}
+> +
+> +int ceph_osdc_create_watch_event (struct ceph_osd_client *osdc,
+
+Not sure if it is my mailer, but there seem to be several places where
+there are extra spaces between the function namd and initial "(" like above.
+
+> +                         void (*watchcb)(void *, u64, u64, u64, void *, size_t),
+> +                         void (*errcb)(void *, u64, int),
+> +                         void *data, struct ceph_osd_event **pevent)
+> +{
+> +	struct ceph_osd_event *event;
+> +	
+> +	event = __alloc_event(osdc, data);
+> +	if (!event)
+> +		return -ENOMEM;
+> +
+> +	event->watch.watchcb = watchcb;
+> +	event->watch.errcb = errcb;
+> +
+> +	spin_lock(&osdc->event_lock);
+> +	event->cookie = ++osdc->event_count;
+> +	__insert_event(osdc, event);
+> +	spin_unlock(&osdc->event_lock);
+> +	*pevent = event;
+> +	return 0;
+> +}
+> +EXPORT_SYMBOL(ceph_osdc_create_watch_event);
+> +
+> +int ceph_osdc_create_notify_event(struct ceph_osd_client *osdc,
+> +                                  struct ceph_osd_event **pevent)
+> +{
+> +	struct ceph_osd_event *event;
+> +	
+> +	event = __alloc_event(osdc, NULL);
+> +	if (!event)
+> +		return -ENOMEM;
+> +
+> +	init_completion(&event->notify.complete);
+> +
+>  	spin_lock(&osdc->event_lock);
+>  	event->cookie = ++osdc->event_count;
+>  	__insert_event(osdc, event);
+> @@ -2356,7 +2397,15 @@ int ceph_osdc_create_event(struct ceph_osd_client *osdc,
+>  	*pevent = event;
+>  	return 0;
+>  }
+> -EXPORT_SYMBOL(ceph_osdc_create_event);
+> +EXPORT_SYMBOL(ceph_osdc_create_notify_event);
+> +
+> +int ceph_osdc_wait_event (struct ceph_osd_client *osdc,
+> +                          struct ceph_osd_event *event)
+> +{
+> +	wait_for_completion(&event->notify.complete);
+> +	return 0;
+
+If it's not a interruptible or timed wait then I think you can just kill
+the return value.
+
+> +}
+> +EXPORT_SYMBOL(ceph_osdc_wait_event);
+>  
+>  void ceph_osdc_cancel_event(struct ceph_osd_event *event)
+>  {
+> @@ -2376,20 +2425,79 @@ static void do_event_work(struct work_struct *work)
+>  	struct ceph_osd_event_work *event_work =
+>  		container_of(work, struct ceph_osd_event_work, work);
+>  	struct ceph_osd_event *event = event_work->event;
+> -	u64 ver = event_work->ver;
+>  	u64 notify_id = event_work->notify_id;
+>  	u8 opcode = event_work->opcode;
+>  	s32 return_code = event_work->return_code;
+>  	u64 notifier_gid = event_work->notifier_gid;
+>  
+>  	dout("do_event_work completing %p\n", event);
+> -	event->cb(ver, notify_id, opcode, return_code, notifier_gid,
+> -		  event->data, event_work->payload, event_work->payload_len);
+> +	if (opcode == CEPH_WATCH_EVENT_NOTIFY)
+> +		event->watch.watchcb(event->data, notify_id,
+> +		                     event->cookie, notifier_gid,
+> +		                     event_work->payload,
+> +		                     event_work->payload_len);
+> +	else if (opcode == CEPH_WATCH_EVENT_DISCONNECT && event->watch.errcb)
+> +		event->watch.errcb(event->data, event->cookie, return_code);
+>  	dout("do_event_work completed %p\n", event);
+>  	ceph_osdc_put_event(event);
+>  	kfree(event_work);
+>  }
+>  
+> +static void __do_event(struct ceph_osd_client *osdc, u8 opcode,
+> +                       u64 cookie, u64 notify_id, u32 payload_len,
+> +                       void *payload, s32 return_code, u64 notifier_gid,
+> +                       struct ceph_msg_data *data)
+> +{
+> +	struct ceph_osd_event *event;
+> +	struct ceph_osd_event_work *event_work;
+> +
+> +	spin_lock(&osdc->event_lock);
+> +	event = __find_event(osdc, cookie);
+> +	if (event)
+> +		get_event(event);
+> +	spin_unlock(&osdc->event_lock);
+> +
+> +	dout("handle_watch_notify cookie %lld event %p notify id %llu payload "
+> +	     "len %u return code %d notifier gid %llu\n",
+> +             cookie, event, notify_id, payload_len, return_code, notifier_gid);
+> +	switch(opcode) {
+> +		case CEPH_WATCH_EVENT_NOTIFY:
+> +		case CEPH_WATCH_EVENT_DISCONNECT:
+> +			if (event) {
+> +				event_work = kmalloc(sizeof(*event_work),
+> +				                     GFP_NOIO);
+> +				if (!event_work) {
+> +					pr_err("couldn't allocate event_work\n");
+> +					ceph_osdc_put_event(event);
+> +					return;
+> +				}
+> +				INIT_WORK(&event_work->work, do_event_work);
+> +				event_work->event = event;
+> +				event_work->notify_id = notify_id;
+> +				event_work->opcode = opcode;
+> +				event_work->return_code = return_code;
+> +				event_work->notifier_gid = notifier_gid;
+> +				event_work->payload = payload;
+> +				event_work->payload_len = payload_len;
+> +
+> +				queue_work(osdc->notify_wq, &event_work->work);
+> +			}
+> +			break;
+> +		case CEPH_WATCH_EVENT_NOTIFY_COMPLETE:
+> +			if (event) {
+> +				event->notify.notify_data = data;
+> +				if (event->osd_req) {
+> +					ceph_osdc_cancel_request(event->osd_req);
+> +					event->osd_req = NULL;
+> +				}
+> +				complete_all(&event->notify.complete);
+> +			}
+> +			break;
+> +		default:
+> +			BUG();
+> +			break;
+
+No need to break after BUG()ing.
