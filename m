@@ -1,59 +1,36 @@
-From: "Xue, Chendi" <chendi.xue@intel.com>
-Subject: RE: Checking on wip-blkin branch
-Date: Tue, 16 Jun 2015 07:02:59 +0000
-Message-ID: <C8CF870384EBCF4CAB89D2041A5C80B304BAAAE6@SHSMSX101.ccr.corp.intel.com>
-References: <C8CF870384EBCF4CAB89D2041A5C80B304B99DEA@SHSMSX101.ccr.corp.intel.com>
- <5576FBEA.8030805@redhat.com>
+From: Mike <mike.almateia@gmail.com>
+Subject: Move RBD Cache on clients from RAM to SSD.
+Date: Tue, 16 Jun 2015 10:59:40 +0300
+Message-ID: <557FD76C.9070905@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:33560 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753126AbbFPHDk convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Jun 2015 03:03:40 -0400
-In-Reply-To: <5576FBEA.8030805@redhat.com>
-Content-Language: en-US
+Received: from mail-lb0-f178.google.com ([209.85.217.178]:36105 "EHLO
+	mail-lb0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753800AbbFPH7o (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Jun 2015 03:59:44 -0400
+Received: by lbbqq2 with SMTP id qq2so5458824lbb.3
+        for <ceph-devel@vger.kernel.org>; Tue, 16 Jun 2015 00:59:43 -0700 (PDT)
+Received: from mike.0xFFF ([212.34.43.122])
+        by mx.google.com with ESMTPSA id oq2sm57005lbb.34.2015.06.16.00.59.41
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 16 Jun 2015 00:59:42 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <jdurgin@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Andrew Shewmaker <agshew@gmail.com>
+To: ceph-devel@vger.kernel.org
 
-HI, Josh and Andrew
+Hello.
 
-I just rebase the wip-blkin branch to 9.0.1, and did a rados bench test on that
+By now rbd_cache uses RAM, can we store cache on disk (SSD, SSD NVE)?
+In this way I look some benefits:
+* Don't waste a RAM for cache
+* Can make a big cache on SSD: 2-8Gb per cache
+* If you use Cache Tier - don't waste space on them
+* No need addition Ceph servers - use Compute with SSD.
 
-https://github.com/ceph/ceph/pull/4963
+Yes it's for write-through and read-only cache strategies mostly.
 
+Any ideas? My be I am blind and this idea totally stupid?
 
-Lttng result is collected successfully
-
-Considering on rados testsuits failing issues, I don't have a test environment, any suggests?
-
-Best Regards,
--Chendi
-
------Original Message-----
-From: Josh Durgin [mailto:jdurgin@redhat.com] 
-Sent: Tuesday, June 9, 2015 10:45 PM
-To: Xue, Chendi; ceph-devel@vger.kernel.org; Andrew Shewmaker
-Subject: Re: Checking on wip-blkin branch
-
-Hi Chendi,
-
-On 06/09/2015 04:59 AM, Xue, Chendi wrote:
-> Hi, Josh and Andrew
->
-> Today, I applied wip-blkin branch to my 4 nodes ceph setup, and created zipkin-based lttng results successfully.
->
-> Since we wanna using this latency analyzing methodology on further release or on keyvalue store and newstore.
-> I am wondering what is the gap to merge blkin into master? Can I help to rebase to master, so we can merge this branch?
-
-That'd be great! Andrew and I simply haven't had time to finish fixing up the remaining issues. Running it through a rados suite showed some more changes were necessary to handle more complicated osd usage - you'll see several osd crashes in this rados suite run [1].
-
-The code was looking fine to me, it just needs rebasing and debugging so it can pass the rados test suite.
-
-Thanks!
-Josh
-
-[1]
-http://pulpito.ceph.com/joshd-2015-03-25_17:29:16-rados-wip-blkin---blkin-multi/
