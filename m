@@ -1,375 +1,195 @@
-From: juncheng bai <baijuncheng@unitedstack.com>
-Subject: Re: [PATCH RFC] storage:rbd: make the size of request is equal to
- the, size of the object
-Date: Wed, 17 Jun 2015 11:04:00 +0800
-Message-ID: <5580E3A0.6050504@unitedstack.com>
-References: <557EB47F.6090708@unitedstack.com>	<CAOi1vP9iF6LVGrHsORoYGUkx_Ttqr7gsBUMz7EM--b7asOUPCA@mail.gmail.com>	<557ED1D4.20605@unitedstack.com>	<CAOi1vP_VLVVhoFrJ+ETRa7+o+sAjyHquZR_g2kYdO9n-8jxdoQ@mail.gmail.com>	<557F97CB.6070608@unitedstack.com>	<CAOi1vP-2dqn_FmgCK-1O6M10FHGpEPVxkAKs6SMoUB_kU9X5TQ@mail.gmail.com>	<55800F24.6060100@unitedstack.com>	<CAOi1vP-jnE+1-TA5P2=rGx9Bdoc4fTyp7u0g+QDpksm9RTxAqA@mail.gmail.com>	<55802F46.7020804@unitedstack.com> <CAOi1vP8=kMQR0=nXC-QtfGPvZGOnByKt4NpSod5HKP57spfN5Q@mail.gmail.com>
+From: GuangYang <yguang11-1ViLX0X+lBJBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: xattrs vs. omap with radosgw
+Date: Tue, 16 Jun 2015 20:56:49 -0700
+Message-ID: <BLU175-W6593B39DBB27CF9E30CF2DFA60@phx.gbl>
+References: <BLU175-W13D5737A24429707F8F978DFA70@phx.gbl>,
+	<alpine.DEB.2.00.1506161241060.15556@cobra.newdream.net>
+	<BLU175-W260DE8E197D05B0951BEBDDFA70@phx.gbl>,
+	<55808C60.8000706@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAOi1vP8=kMQR0=nXC-QtfGPvZGOnByKt4NpSod5HKP57spfN5Q@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: idryomov@redhat.com, Alex Elder <elder@linaro.org>, Josh Durgin <josh.durgin@inktank.com>, Guangliang Zhao <lucienchao@gmail.com>, jeff@garzik.org, yehuda@hq.newdream.net, Sage Weil <sage@newdream.net>, elder@inktank.com, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: multipart/mixed; boundary="===============1347022934=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <55808C60.8000706-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Mark Nelson <mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
+--===============1347022934==
+Content-Type: multipart/alternative;
+	boundary="_53969eca-044c-4ef7-ad06-e1c9994b3466_"
 
+--_53969eca-044c-4ef7-ad06-e1c9994b3466_
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
 
-On 2015/6/16 23:51, Ilya Dryomov wrote:
-> On Tue, Jun 16, 2015 at 5:14 PM, juncheng bai
-> <baijuncheng@unitedstack.com> wrote:
->>
->>
->> On 2015/6/16 21:30, Ilya Dryomov wrote:
->>>
->>> On Tue, Jun 16, 2015 at 2:57 PM, juncheng bai
->>> <baijuncheng@unitedstack.com> wrote:
->>>>
->>>>
->>>>
->>>> On 2015/6/16 16:37, Ilya Dryomov wrote:
->>>>>
->>>>>
->>>>> On Tue, Jun 16, 2015 at 6:28 AM, juncheng bai
->>>>> <baijuncheng@unitedstack.com> wrote:
->>>>>>
->>>>>>
->>>>>>
->>>>>>
->>>>>> On 2015/6/15 22:27, Ilya Dryomov wrote:
->>>>>>>
->>>>>>>
->>>>>>>
->>>>>>> On Mon, Jun 15, 2015 at 4:23 PM, juncheng bai
->>>>>>> <baijuncheng@unitedstack.com> wrote:
->>>>>>>>
->>>>>>>>
->>>>>>>>
->>>>>>>>
->>>>>>>>
->>>>>>>> On 2015/6/15 21:03, Ilya Dryomov wrote:
->>>>>>>>>
->>>>>>>>>
->>>>>>>>>
->>>>>>>>>
->>>>>>>>> On Mon, Jun 15, 2015 at 2:18 PM, juncheng bai
->>>>>>>>> <baijuncheng@unitedstack.com> wrote:
->>>>>>>>>>
->>>>>>>>>>
->>>>>>>>>>
->>>>>>>>>>
->>>>>>>>>>      From 6213215bd19926d1063d4e01a248107dab8a899b Mon Sep 17
->>>>>>>>>> 00:00:00
->>>>>>>>>> 2001
->>>>>>>>>> From: juncheng bai <baijuncheng@unitedstack.com>
->>>>>>>>>> Date: Mon, 15 Jun 2015 18:34:00 +0800
->>>>>>>>>> Subject: [PATCH] storage:rbd: make the size of request is equal to
->>>>>>>>>> the
->>>>>>>>>>       size of the object
->>>>>>>>>>
->>>>>>>>>> ensures that the merged size of request can achieve the size of
->>>>>>>>>> the object.
->>>>>>>>>> when merge a bio to request or merge a request to request, the
->>>>>>>>>> sum of the segment number of the current request and the segment
->>>>>>>>>> number of the bio is not greater than the max segments of the
->>>>>>>>>> request,
->>>>>>>>>> so the max size of request is 512k if the max segments of request
->>>>>>>>>> is
->>>>>>>>>> BLK_MAX_SEGMENTS.
->>>>>>>>>>
->>>>>>>>>> Signed-off-by: juncheng bai <baijuncheng@unitedstack.com>
->>>>>>>>>> ---
->>>>>>>>>>       drivers/block/rbd.c | 2 ++
->>>>>>>>>>       1 file changed, 2 insertions(+)
->>>>>>>>>>
->>>>>>>>>> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
->>>>>>>>>> index 0a54c58..dec6045 100644
->>>>>>>>>> --- a/drivers/block/rbd.c
->>>>>>>>>> +++ b/drivers/block/rbd.c
->>>>>>>>>> @@ -3757,6 +3757,8 @@ static int rbd_init_disk(struct rbd_device
->>>>>>>>>> *rbd_dev)
->>>>>>>>>>              segment_size = rbd_obj_bytes(&rbd_dev->header);
->>>>>>>>>>              blk_queue_max_hw_sectors(q, segment_size /
->>>>>>>>>> SECTOR_SIZE);
->>>>>>>>>>              blk_queue_max_segment_size(q, segment_size);
->>>>>>>>>> +       if (segment_size > BLK_MAX_SEGMENTS * PAGE_SIZE)
->>>>>>>>>> +               blk_queue_max_segments(q, segment_size /
->>>>>>>>>> PAGE_SIZE);
->>>>>>>>>>              blk_queue_io_min(q, segment_size);
->>>>>>>>>>              blk_queue_io_opt(q, segment_size);
->>>>>>>>>
->>>>>>>>>
->>>>>>>>>
->>>>>>>>>
->>>>>>>>>
->>>>>>>>> I made a similar patch on Friday, investigating blk-mq plugging
->>>>>>>>> issue
->>>>>>>>> reported by Nick.  My patch sets it to BIO_MAX_PAGES unconditionally
->>>>>>>>> -
->>>>>>>>> AFAIU there is no point in setting to anything bigger since the bios
->>>>>>>>> will be clipped to that number of vecs.  Given that BIO_MAX_PAGES is
->>>>>>>>> 256, this gives is 1M direct I/Os.
->>>>>>>>
->>>>>>>>
->>>>>>>>
->>>>>>>>
->>>>>>>> Hi. For signal bio, the max number of bio_vec is BIO_MAX_PAGES, but a
->>>>>>>> request can be merged from multiple bios. We can see the below
->>>>>>>> function:
->>>>>>>> ll_back_merge_fn, ll_front_merge_fn and etc.
->>>>>>>> And I test in kernel 3.18 use this patch, and do:
->>>>>>>> echo 4096 > /sys/block/rbd0/queue/max_sectors_kb
->>>>>>>> We use systemtap to trace the request size, It is upto 4M.
->>>>>>>
->>>>>>>
->>>>>>>
->>>>>>>
->>>>>>> Kernel 3.18 is pre rbd blk-mq transition, which happened in 4.0.  You
->>>>>>> should test whatever patches you have with at least 4.0.
->>>>>>>
->>>>>>> Putting that aside, I must be missing something.  You'll get 4M
->>>>>>> requests on 3.18 both with your patch and without it, the only
->>>>>>> difference would be the size of bios being merged - 512k vs 1M.  Can
->>>>>>> you describe your test workload and provide before and after traces?
->>>>>>>
->>>>>> Hi. I update kernel version to 4.0.5. The test information as shown
->>>>>> below:
->>>>>> The base information:
->>>>>> 03:28:13-root@server-186:~$uname -r
->>>>>> 4.0.5
->>>>>>
->>>>>> My simple systemtap script:
->>>>>> probe module("rbd").function("rbd_img_request_create")
->>>>>> {
->>>>>>        printf("offset:%lu length:%lu\n", ulong_arg(2), ulong_arg(3));
->>>>>> }
->>>>>>
->>>>>> I use dd to execute the test case:
->>>>>> dd if=/dev/zero  of=/dev/rbd0 bs=4M count=1 oflag=direct
->>>>>>
->>>>>> Case one: Without patch
->>>>>> 03:30:23-root@server-186:~$cat /sys/block/rbd0/queue/max_sectors_kb
->>>>>> 4096
->>>>>> 03:30:35-root@server-186:~$cat /sys/block/rbd0/queue/max_segments
->>>>>> 128
->>>>>>
->>>>>> The output of systemtap for nornal data:
->>>>>> offset:0 length:524288
->>>>>> offset:524288 length:524288
->>>>>> offset:1048576 length:524288
->>>>>> offset:1572864 length:524288
->>>>>> offset:2097152 length:524288
->>>>>> offset:2621440 length:524288
->>>>>> offset:3145728 length:524288
->>>>>> offset:3670016 length:524288
->>>>>>
->>>>>> Case two:With patch
->>>>>> cat /sys/block/rbd0/queue/max_sectors_kb
->>>>>> 4096
->>>>>> 03:49:14-root@server-186:linux-4.0.5$cat
->>>>>> /sys/block/rbd0/queue/max_segments
->>>>>> 1024
->>>>>> The output of systemtap for nornal data:
->>>>>> offset:0 length:1048576
->>>>>> offset:1048576 length:1048576
->>>>>> offset:2097152 length:1048576
->>>>>> offset:3145728 length:1048576
->>>>>>
->>>>>> According to the test, you are right.
->>>>>> Because the blk-mq doesn't use any scheduling policy.
->>>>>> 03:52:13-root@server-186:linux-4.0.5$cat
->>>>>> /sys/block/rbd0/queue/scheduler
->>>>>> none
->>>>>>
->>>>>> In previous versions of the kernel 4.0, the rbd use the defualt
->>>>>> scheduler:cfq
->>>>>>
->>>>>> So, I think that the blk-mq need to do more?
->>>>>
->>>>>
->>>>>
->>>>> There is no scheduler support in blk-mq as of now but your numbers
->>>>> don't have anything to do with that.  The current behaviour is a result
->>>>> of a bug in blk-mq.  It's fixed by [1], if you apply it you should see
->>>>> 4M requests with your stap script.
->>>>>
->>>>> [1] http://article.gmane.org/gmane.linux.kernel/1941750
->>>>>
->>>> Hi.
->>>> First, Let's look at the result in the kernel version 3.18
->>>> The function blk_limits_max_hw_sectors different implemention between
->>>> 3.18
->>>> and 4.0+. We need do:
->>>> echo 4094 >/sys/block/rbd0/queue/max_sectors_kb
->>>>
->>>> The rbd device information:
->>>> 11:13:18-root@server-186:~$cat /sys/block/rbd0/queue/max_sectors_kb
->>>> 4094
->>>> 11:15:28-root@server-186:~$cat /sys/block/rbd0/queue/max_segments
->>>> 1024
->>>>
->>>> The test command:
->>>> dd if=/dev/zero of=/dev/rbd0 bs=4M count=1
->>>>
->>>> The simple stap script:
->>>> probe module("rbd").function("rbd_img_request_create")
->>>> {
->>>>       printf("offset:%lu length:%lu\n", ulong_arg(2), ulong_arg(3));
->>>> }
->>>>
->>>> The output from stap:
->>>> offset:0 length:4190208
->>>> offset:21474770944 length:4096
->>>>
->>>> Second, thanks for your patch [1].
->>>> I use the patch [1], and recompile the kernel.
->>>> The test information as shown below:
->>>> 12:26:12-root@server-186:$cat /sys/block/rbd0/queue/max_segments
->>>> 1024
->>>> 12:26:23-root@server-186:$cat /sys/block/rbd0/queue/max_sectors_kb
->>>> 4096
->>>>
->>>> The test command:
->>>> dd if=/dev/zero  of=/dev/rbd0 bs=4M count=2 oflag=direct
->>>>
->>>> The simple systemtap script:
->>>> probe module("rbd").function("rbd_img_request_create")
->>>> {
->>>>       printf("offset:%lu length:%lu\n", ulong_arg(2), ulong_arg(3));
->>>> }
->>>>
->>>> The output of systemtap for nornal data:
->>>> offset:0 length:4194304
->>>> offset:4194304 length:4194304
->>>> offset:21474770944 length:4096
->>>
->>>
->>> Sorry, I fail to see the purpose of the above tests.  The test commands
->>> differ, the kernels differ and it looks like you had your patch applied
->>> for both tests.  What I'm trying to get you to do is to show me some
->>> data that will back your claim (which your patch is based on):
->>>
->>>>
->>>> So, I think that the max_segments of request_limits should be divide the
->>>> object size by PAGE_SIZE.
->>>
->>>
->>> For that you need to use the same kernel and run the same workload.
->>> The only difference should be whether your patch is applied or not.
->>> I still think that setting rbd max_segments to anything above
->>> BIO_MAX_PAGES is bogus, but I'd be happy to be shown wrong on that
->>> since that would mean better performance, at least in some
->>> workloads.
->>>
->> Hi.
->> For cloned image, it will avoid doing copyup if the request size is
->> equal to the object size, I think that it is the key effect of this
->> patch.
->> The big request would result in overtime if the ceph backend is busy
->> or the network bandwidth is too low.
->
-> You are right, but then again: we get rbd object size sized requests
-> even with the default max_segments.  This is true for both < 4.0 and
->> = 4.0 kernels (with the plugging fix applied).
-Hi.
-Yeah, you are right, use the default max_segments, the request size can
-be the object size, because the bi_phys_segments of bio could be 
-recount, there's just a possibility.
+QWZ0ZXIgYmFjay1wb3J0aW5nIFNhZ2UncyBwYXRjaCB0byBHaWFudCwgd2l0aCByYWRvc2d3LCB0
+aGUgeGF0dHJzIGNhbiBnZXQgaW5saW5lLiBJIGhhdmVuJ3QgcnVuIGV4dGVuc2l2ZSB0ZXN0aW5n
+IHlldCwgd2lsbCB1cGRhdGUgb25jZSBJIGhhdmUgc29tZSBwZXJmb3JtYW5jZSBkYXRhIHRvIHNo
+YXJlLg0KDQpUaGFua3MsDQpHdWFuZw0KDQo+IERhdGU6IFR1ZSwgMTYgSnVuIDIwMTUgMTU6NTE6
+NDQgLTA1MDANCj4gRnJvbTogbW5lbHNvbkByZWRoYXQuY29tDQo+IFRvOiB5Z3VhbmcxMUBvdXRs
+b29rLmNvbTsgc2FnZUBuZXdkcmVhbS5uZXQNCj4gQ0M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwu
+b3JnOyBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tDQo+IFN1YmplY3Q6IFJlOiB4YXR0cnMgdnMu
+IG9tYXAgd2l0aCByYWRvc2d3DQo+IA0KPiANCj4gDQo+IE9uIDA2LzE2LzIwMTUgMDM6NDggUE0s
+IEd1YW5nWWFuZyB3cm90ZToNCj4gPiBUaGFua3MgU2FnZSBmb3IgdGhlIHF1aWNrIHJlc3BvbnNl
+Lg0KPiA+DQo+ID4gSXQgaXMgb24gRmlyZWZseSB2MC44MC40Lg0KPiA+DQo+ID4gV2hpbGUgdHJ5
+aW5nIHRvIHB1dCB3aXRoICpyYWRvcyogZGlyZWN0bHksIHRoZSB4YXR0cnMgY2FuIGJlIGlubGlu
+ZS4gVGhlIHByb2JsZW0gY29tZXMgdG8gbGlnaHQgd2hlbiB1c2luZyByYWRvc2d3LCBzaW5jZSB3
+ZSBoYXZlIGEgYnVuY2ggb2YgbWV0YWRhdGEgdG8ga2VlcCB2aWEgeGF0dHJzLCBpbmNsdWRpbmc6
+DQo+ID4gICAgIHJndy5pZHRhZyAgOiAxNSBieXRlcw0KPiA+ICAgICByZ3cubWFuaWZlc3QgOiAg
+MzgxIGJ5dGVzDQo+IA0KPiBBaCwgdGhhdCBtYW5pZmVzdCB3aWxsIHB1c2ggdXMgb3ZlciB0aGUg
+bGltaXQgYWZhaWsgcmVzdWx0aW5nIGluIGV2ZXJ5IA0KPiBpbm9kZSBnZXR0aW5nIGEgbmV3IGV4
+dGVudC4NCj4gDQo+ID4gICAgIHJndy5hY2wgOiAxMjEgYnl0ZXMNCj4gPiAgICAgcmd3LmV0YWcg
+OiAzMyBieXRlcw0KPiA+DQo+ID4gR2l2ZW4gdGhlIGJhY2tncm91bmQsIGl0IGxvb2tzIGxpa2Ug
+dGhlIHByb2JsZW0gaXMgdGhhdCB0aGUgcmd3Lm1hbmlmZXN0IGlzIHRvbyBsYXJnZSBzbyB0aGF0
+IFhGUyBtYWtlIGl0IGV4dGVudHMuIElmIEkgdW5kZXJzdGFuZCBjb3JyZWN0bHksIGlmIHdlIHBv
+cnQgdGhlIGNoYW5nZSB0byBGaXJlZmx5LCB3ZSBzaG91bGQgYmUgYWJsZSB0byBpbmxpbmUgdGhl
+IGlub2RlIHNpbmNlIHRoZSBhY2N1bXVsYXRlZCBzaXplIGlzIHN0aWxsIGxlc3MgdGhhbiAySyAo
+cGxlYXNlIGNvcnJlY3QgbWUgaWYgSSBhbSB3cm9uZyBoZXJlKS4NCj4gDQo+IEkgdGhpbmsgeW91
+IGFyZSBjb3JyZWN0IHNvIGxvbmcgYXMgdGhlIHBhdGNoIGJyZWFrcyB0aGF0IG1hbmlmZXN0IGRv
+d24gDQo+IGludG8gMjU0IGJ5dGUgb3Igc21hbGxlciBjaHVua3MuDQo+IA0KPiA+DQo+ID4gVGhh
+bmtzLA0KPiA+IEd1YW5nDQo+ID4NCj4gPg0KPiA+IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0NCj4gPj4gRGF0ZTogVHVlLCAxNiBKdW4gMjAxNSAxMjo0MzowOCAtMDcw
+MA0KPiA+PiBGcm9tOiBzYWdlQG5ld2RyZWFtLm5ldA0KPiA+PiBUbzogeWd1YW5nMTFAb3V0bG9v
+ay5jb20NCj4gPj4gQ0M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnOyBjZXBoLXVzZXJzQGxp
+c3RzLmNlcGguY29tDQo+ID4+IFN1YmplY3Q6IFJlOiB4YXR0cnMgdnMuIG9tYXAgd2l0aCByYWRv
+c2d3DQo+ID4+DQo+ID4+IE9uIFR1ZSwgMTYgSnVuIDIwMTUsIEd1YW5nWWFuZyB3cm90ZToNCj4g
+Pj4+IEhpIENlcGhlcnMsDQo+ID4+PiBXaGlsZSBsb29raW5nIGF0IGRpc2sgdXRpbGl6YXRpb24g
+b24gT1NELCBJIG5vdGljZWQgdGhlIGRpc2sgd2FzIGNvbnN0YW50bHkgYnVzeSB3aXRoIGxhcmdl
+IG51bWJlciBvZiBzbWFsbCB3cml0ZXMsIGZ1cnRoZXIgaW52ZXN0aWdhdGlvbiBzaG93ZWQgdGhh
+dCwgYXMgcmFkb3NndyB1c2VzIHhhdHRycyB0byBzdG9yZSBtZXRhZGF0YSAoZS5nLiBldGFnLCBj
+b250ZW50LXR5cGUsIGV0Yy4pLCB3aGljaCBtYWRlIHRoZSB4YXR0cnMgZ2V0IGZyb20gbG9jYWwg
+dG8gZXh0ZW50cywgd2hpY2ggaW5jdXJyZWQgZXh0cmEgSS9PLg0KPiA+Pj4NCj4gPj4+IEkgd291
+bGQgbGlrZSB0byBjaGVjayBpZiBhbnlib2R5IGhhcyBleHBlcmllbmNlIHdpdGggb2ZmbG9hZGlu
+ZyB0aGUgbWV0YWRhdGEgdG8gb21hcDoNCj4gPj4+IDE+IE9mZmxvYWQgZXZlcnl0aGluZyB0byBv
+bWFwPyBJZiB0aGlzIGlzIHRoZSBjYXNlLCBzaG91bGQgd2UgbWFrZSB0aGUgaW5vZGUgc2l6ZSBh
+cyA1MTIgKGluc3RlYWQgb2YgMmspPw0KPiA+Pj4gMj4gUGFydGlhbCBvZmZsb2FkIHRoZSBtZXRh
+ZGF0YSB0byBvbWFwLCBlLmcuIG9ubHkgb2ZmbG9hZGluZyB0aGUgcmd3IHNwZWNpZmllZCBtZXRh
+ZGF0YSB0byBvbWFwLg0KPiA+Pj4NCj4gPj4+IEFueSBzaGFyaW5nIGlzIGRlZXBseSBhcHByZWNp
+YXRlZC4gVGhhbmtzIQ0KPiA+Pg0KPiA+PiBIaSBHdWFuZywNCj4gPj4NCj4gPj4gSXMgdGhpcyBo
+YW1tZXIgb3IgZmlyZWZseT8NCj4gPj4NCj4gPj4gV2l0aCBoYW1tZXIgdGhlIHNpemUgb2Ygb2Jq
+ZWN0X2luZm9fdCBjcm9zc2VkIHRoZSAyNTUgYnl0ZSBib3VuZGFyeSwgd2hpY2gNCj4gPj4gaXMg
+dGhlIG1heCB4YXR0ciB2YWx1ZSB0aGF0IFhGUyBjYW4gaW5saW5lLiBXZSd2ZSBzaW5jZSBtZXJn
+ZWQgc29tZXRoaW5nDQo+ID4+IHRoYXQgc3RyaXBlcyBvdmVyIHNldmVyYWwgc21hbGwgeGF0dHJz
+IHNvIHRoYXQgd2UgY2FuIGtlZXAgdGhpbmdzIGlubGluZSwNCj4gPj4gYnV0IGl0IGhhc24ndCBi
+ZWVuIGJhY2twb3J0ZWQgdG8gaGFtbWVyIHlldC4gU2VlDQo+ID4+IGM2Y2RiNDA4MWUzNjZmNDcx
+YjM3MjEwMjkwNWExMTkyOTEwYWIyZGEuIFBlcmhhcHMgdGhpcyBpcyB3aGF0IHlvdSdyZQ0KPiA+
+PiBzZWVpbmc/DQo+ID4+DQo+ID4+IEkgdGhpbmsgd2UncmUgc3RpbGwgYmV0dGVyIG9mZiB3aXRo
+IGxhcmdlciBYRlMgaW5vZGVzIGFuZCBpbmxpbmUgeGF0dHJzIGlmDQo+ID4+IGl0IG1lYW5zIHdl
+IGF2b2lkIGxldmVsZGIgYXQgYWxsIGZvciBtb3N0IG9iamVjdHMuDQo+ID4+DQo+ID4+IHNhZ2UN
+Cj4gPiAgIAkJIAkgICAJCSAgLS0NCj4gPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDog
+c2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4NCj4gPiB0aGUgYm9keSBv
+ZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZw0KPiA+IE1vcmUgbWFqb3Jk
+b21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
+PiA+DQo+IC0tDQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5l
+ICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbg0KPiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8g
+bWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZw0KPiBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRw
+Oi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCiAJCSAJICAgCQkgIA==
 
-I want to fully understand the bi_phys_segments, hope you can give me 
-some information, thanks.
+--_53969eca-044c-4ef7-ad06-e1c9994b3466_
+Content-Type: text/html; charset="gb2312"
+Content-Transfer-Encoding: base64
 
-The test information as shown below:
-The systemtap script:
-global greq=0;
-probe kernel.function("bio_attempt_back_merge")
-{
-     greq=pointer_arg(2);
-}
+PGh0bWw+DQo8aGVhZD4NCjxzdHlsZT48IS0tDQouaG1tZXNzYWdlIFANCnsNCm1hcmdpbjowcHg7
+DQpwYWRkaW5nOjBweA0KfQ0KYm9keS5obW1lc3NhZ2UNCnsNCmZvbnQtc2l6ZTogMTJwdDsNCmZv
+bnQtZmFtaWx5Os6iyO3RxbraDQp9DQotLT48L3N0eWxlPjwvaGVhZD4NCjxib2R5IGNsYXNzPSdo
+bW1lc3NhZ2UnPjxkaXYgZGlyPSdsdHInPjxmb250IGZhY2U9IlZlcmRhbmEsc2Fucy1zZXJpZiIg
+c2l6ZT0iMyIgc3R5bGU9ImZvbnQtc2l6ZToxMnB0OyIgY29sb3I9IiMwMDAwMDAiPkFmdGVyIGJh
+Y2stcG9ydGluZyBTYWdlJ3MgcGF0Y2ggdG8gR2lhbnQsIHdpdGggcmFkb3NndywgdGhlIHhhdHRy
+cyBjYW4gZ2V0IGlubGluZS4gSSBoYXZlbid0IHJ1biBleHRlbnNpdmUgdGVzdGluZyB5ZXQsIHdp
+bGwgdXBkYXRlIG9uY2UgSSBoYXZlIHNvbWUgcGVyZm9ybWFuY2UgZGF0YSB0byBzaGFyZS48L2Zv
+bnQ+PGJyPjxicj5UaGFua3MsPGJyPkd1YW5nPGJyPjxicj48ZGl2PiZndDsgRGF0ZTogVHVlLCAx
+NiBKdW4gMjAxNSAxNTo1MTo0NCAtMDUwMDxicj4mZ3Q7IEZyb206IG1uZWxzb25AcmVkaGF0LmNv
+bTxicj4mZ3Q7IFRvOiB5Z3VhbmcxMUBvdXRsb29rLmNvbTsgc2FnZUBuZXdkcmVhbS5uZXQ8YnI+
+Jmd0OyBDQzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc7IGNlcGgtdXNlcnNAbGlzdHMuY2Vw
+aC5jb208YnI+Jmd0OyBTdWJqZWN0OiBSZTogeGF0dHJzIHZzLiBvbWFwIHdpdGggcmFkb3Nndzxi
+cj4mZ3Q7IDxicj4mZ3Q7IDxicj4mZ3Q7IDxicj4mZ3Q7IE9uIDA2LzE2LzIwMTUgMDM6NDggUE0s
+IEd1YW5nWWFuZyB3cm90ZTo8YnI+Jmd0OyAmZ3Q7IFRoYW5rcyBTYWdlIGZvciB0aGUgcXVpY2sg
+cmVzcG9uc2UuPGJyPiZndDsgJmd0Ozxicj4mZ3Q7ICZndDsgSXQgaXMgb24gRmlyZWZseSB2MC44
+MC40Ljxicj4mZ3Q7ICZndDs8YnI+Jmd0OyAmZ3Q7IFdoaWxlIHRyeWluZyB0byBwdXQgd2l0aCAq
+cmFkb3MqIGRpcmVjdGx5LCB0aGUgeGF0dHJzIGNhbiBiZSBpbmxpbmUuIFRoZSBwcm9ibGVtIGNv
+bWVzIHRvIGxpZ2h0IHdoZW4gdXNpbmcgcmFkb3Nndywgc2luY2Ugd2UgaGF2ZSBhIGJ1bmNoIG9m
+IG1ldGFkYXRhIHRvIGtlZXAgdmlhIHhhdHRycywgaW5jbHVkaW5nOjxicj4mZ3Q7ICZndDsgICAg
+IHJndy5pZHRhZyAgOiAxNSBieXRlczxicj4mZ3Q7ICZndDsgICAgIHJndy5tYW5pZmVzdCA6ICAz
+ODEgYnl0ZXM8YnI+Jmd0OyA8YnI+Jmd0OyBBaCwgdGhhdCBtYW5pZmVzdCB3aWxsIHB1c2ggdXMg
+b3ZlciB0aGUgbGltaXQgYWZhaWsgcmVzdWx0aW5nIGluIGV2ZXJ5IDxicj4mZ3Q7IGlub2RlIGdl
+dHRpbmcgYSBuZXcgZXh0ZW50Ljxicj4mZ3Q7IDxicj4mZ3Q7ICZndDsgICAgIHJndy5hY2wgOiAx
+MjEgYnl0ZXM8YnI+Jmd0OyAmZ3Q7ICAgICByZ3cuZXRhZyA6IDMzIGJ5dGVzPGJyPiZndDsgJmd0
+Ozxicj4mZ3Q7ICZndDsgR2l2ZW4gdGhlIGJhY2tncm91bmQsIGl0IGxvb2tzIGxpa2UgdGhlIHBy
+b2JsZW0gaXMgdGhhdCB0aGUgcmd3Lm1hbmlmZXN0IGlzIHRvbyBsYXJnZSBzbyB0aGF0IFhGUyBt
+YWtlIGl0IGV4dGVudHMuIElmIEkgdW5kZXJzdGFuZCBjb3JyZWN0bHksIGlmIHdlIHBvcnQgdGhl
+IGNoYW5nZSB0byBGaXJlZmx5LCB3ZSBzaG91bGQgYmUgYWJsZSB0byBpbmxpbmUgdGhlIGlub2Rl
+IHNpbmNlIHRoZSBhY2N1bXVsYXRlZCBzaXplIGlzIHN0aWxsIGxlc3MgdGhhbiAySyAocGxlYXNl
+IGNvcnJlY3QgbWUgaWYgSSBhbSB3cm9uZyBoZXJlKS48YnI+Jmd0OyA8YnI+Jmd0OyBJIHRoaW5r
+IHlvdSBhcmUgY29ycmVjdCBzbyBsb25nIGFzIHRoZSBwYXRjaCBicmVha3MgdGhhdCBtYW5pZmVz
+dCBkb3duIDxicj4mZ3Q7IGludG8gMjU0IGJ5dGUgb3Igc21hbGxlciBjaHVua3MuPGJyPiZndDsg
+PGJyPiZndDsgJmd0Ozxicj4mZ3Q7ICZndDsgVGhhbmtzLDxicj4mZ3Q7ICZndDsgR3Vhbmc8YnI+
+Jmd0OyAmZ3Q7PGJyPiZndDsgJmd0Ozxicj4mZ3Q7ICZndDsgLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLTxicj4mZ3Q7ICZndDsmZ3Q7IERhdGU6IFR1ZSwgMTYgSnVuIDIw
+MTUgMTI6NDM6MDggLTA3MDA8YnI+Jmd0OyAmZ3Q7Jmd0OyBGcm9tOiBzYWdlQG5ld2RyZWFtLm5l
+dDxicj4mZ3Q7ICZndDsmZ3Q7IFRvOiB5Z3VhbmcxMUBvdXRsb29rLmNvbTxicj4mZ3Q7ICZndDsm
+Z3Q7IENDOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZzsgY2VwaC11c2Vyc0BsaXN0cy5jZXBo
+LmNvbTxicj4mZ3Q7ICZndDsmZ3Q7IFN1YmplY3Q6IFJlOiB4YXR0cnMgdnMuIG9tYXAgd2l0aCBy
+YWRvc2d3PGJyPiZndDsgJmd0OyZndDs8YnI+Jmd0OyAmZ3Q7Jmd0OyBPbiBUdWUsIDE2IEp1biAy
+MDE1LCBHdWFuZ1lhbmcgd3JvdGU6PGJyPiZndDsgJmd0OyZndDsmZ3Q7IEhpIENlcGhlcnMsPGJy
+PiZndDsgJmd0OyZndDsmZ3Q7IFdoaWxlIGxvb2tpbmcgYXQgZGlzayB1dGlsaXphdGlvbiBvbiBP
+U0QsIEkgbm90aWNlZCB0aGUgZGlzayB3YXMgY29uc3RhbnRseSBidXN5IHdpdGggbGFyZ2UgbnVt
+YmVyIG9mIHNtYWxsIHdyaXRlcywgZnVydGhlciBpbnZlc3RpZ2F0aW9uIHNob3dlZCB0aGF0LCBh
+cyByYWRvc2d3IHVzZXMgeGF0dHJzIHRvIHN0b3JlIG1ldGFkYXRhIChlLmcuIGV0YWcsIGNvbnRl
+bnQtdHlwZSwgZXRjLiksIHdoaWNoIG1hZGUgdGhlIHhhdHRycyBnZXQgZnJvbSBsb2NhbCB0byBl
+eHRlbnRzLCB3aGljaCBpbmN1cnJlZCBleHRyYSBJL08uPGJyPiZndDsgJmd0OyZndDsmZ3Q7PGJy
+PiZndDsgJmd0OyZndDsmZ3Q7IEkgd291bGQgbGlrZSB0byBjaGVjayBpZiBhbnlib2R5IGhhcyBl
+eHBlcmllbmNlIHdpdGggb2ZmbG9hZGluZyB0aGUgbWV0YWRhdGEgdG8gb21hcDo8YnI+Jmd0OyAm
+Z3Q7Jmd0OyZndDsgMSZndDsgT2ZmbG9hZCBldmVyeXRoaW5nIHRvIG9tYXA/IElmIHRoaXMgaXMg
+dGhlIGNhc2UsIHNob3VsZCB3ZSBtYWtlIHRoZSBpbm9kZSBzaXplIGFzIDUxMiAoaW5zdGVhZCBv
+ZiAyayk/PGJyPiZndDsgJmd0OyZndDsmZ3Q7IDImZ3Q7IFBhcnRpYWwgb2ZmbG9hZCB0aGUgbWV0
+YWRhdGEgdG8gb21hcCwgZS5nLiBvbmx5IG9mZmxvYWRpbmcgdGhlIHJndyBzcGVjaWZpZWQgbWV0
+YWRhdGEgdG8gb21hcC48YnI+Jmd0OyAmZ3Q7Jmd0OyZndDs8YnI+Jmd0OyAmZ3Q7Jmd0OyZndDsg
+QW55IHNoYXJpbmcgaXMgZGVlcGx5IGFwcHJlY2lhdGVkLiBUaGFua3MhPGJyPiZndDsgJmd0OyZn
+dDs8YnI+Jmd0OyAmZ3Q7Jmd0OyBIaSBHdWFuZyw8YnI+Jmd0OyAmZ3Q7Jmd0Ozxicj4mZ3Q7ICZn
+dDsmZ3Q7IElzIHRoaXMgaGFtbWVyIG9yIGZpcmVmbHk/PGJyPiZndDsgJmd0OyZndDs8YnI+Jmd0
+OyAmZ3Q7Jmd0OyBXaXRoIGhhbW1lciB0aGUgc2l6ZSBvZiBvYmplY3RfaW5mb190IGNyb3NzZWQg
+dGhlIDI1NSBieXRlIGJvdW5kYXJ5LCB3aGljaDxicj4mZ3Q7ICZndDsmZ3Q7IGlzIHRoZSBtYXgg
+eGF0dHIgdmFsdWUgdGhhdCBYRlMgY2FuIGlubGluZS4gV2UndmUgc2luY2UgbWVyZ2VkIHNvbWV0
+aGluZzxicj4mZ3Q7ICZndDsmZ3Q7IHRoYXQgc3RyaXBlcyBvdmVyIHNldmVyYWwgc21hbGwgeGF0
+dHJzIHNvIHRoYXQgd2UgY2FuIGtlZXAgdGhpbmdzIGlubGluZSw8YnI+Jmd0OyAmZ3Q7Jmd0OyBi
+dXQgaXQgaGFzbid0IGJlZW4gYmFja3BvcnRlZCB0byBoYW1tZXIgeWV0LiBTZWU8YnI+Jmd0OyAm
+Z3Q7Jmd0OyBjNmNkYjQwODFlMzY2ZjQ3MWIzNzIxMDI5MDVhMTE5MjkxMGFiMmRhLiBQZXJoYXBz
+IHRoaXMgaXMgd2hhdCB5b3UncmU8YnI+Jmd0OyAmZ3Q7Jmd0OyBzZWVpbmc/PGJyPiZndDsgJmd0
+OyZndDs8YnI+Jmd0OyAmZ3Q7Jmd0OyBJIHRoaW5rIHdlJ3JlIHN0aWxsIGJldHRlciBvZmYgd2l0
+aCBsYXJnZXIgWEZTIGlub2RlcyBhbmQgaW5saW5lIHhhdHRycyBpZjxicj4mZ3Q7ICZndDsmZ3Q7
+IGl0IG1lYW5zIHdlIGF2b2lkIGxldmVsZGIgYXQgYWxsIGZvciBtb3N0IG9iamVjdHMuPGJyPiZn
+dDsgJmd0OyZndDs8YnI+Jmd0OyAmZ3Q7Jmd0OyBzYWdlPGJyPiZndDsgJmd0OyAgIAkJIAkgICAJ
+CSAgLS08YnI+Jmd0OyAmZ3Q7IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRo
+ZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbjxicj4mZ3Q7ICZndDsgdGhlIGJvZHkg
+b2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmc8YnI+Jmd0OyAmZ3Q7IE1v
+cmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWlu
+Zm8uaHRtbDxicj4mZ3Q7ICZndDs8YnI+Jmd0OyAtLTxicj4mZ3Q7IFRvIHVuc3Vic2NyaWJlIGZy
+b20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbjxi
+cj4mZ3Q7IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3Jn
+PGJyPiZndDsgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9t
+YWpvcmRvbW8taW5mby5odG1sPGJyPjwvZGl2PiAJCSAJICAgCQkgIDwvZGl2PjwvYm9keT4NCjwv
+aHRtbD4=
 
-probe kernel.function("bio_attempt_back_merge").return
-{
-     printf("after req addr:%p req segments:%d req offset:%lu req 
-length:%lu\n",
-         greq,
-         @cast(greq, "request")->nr_phys_segments,
-         @cast(greq, "request")->__sector * 512,
-         @cast(greq, "request")->__data_len);
-}
+--_53969eca-044c-4ef7-ad06-e1c9994b3466_--
 
-probe kernel.function("blk_mq_start_request")
-{
-     printf("req addr:%p nr_phys_segments:%d, offset:%lu len:%lu\n",
-         pointer_arg(1),
-         @cast(pointer_arg(1), "request")->nr_phys_segments,
-         @cast(pointer_arg(1), "request")->__sector * 512,
-         @cast(pointer_arg(1), "request")->__data_len);
-}
+--===============1347022934==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
 
-Test command:
-dd if=/dev/zero  of=/dev/rbd0 bs=4M count=2 oflag=direct seek=100
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
-Cast one:
-blk_queue_max_segments(q, 256);
-
-The output of stap:
-after req addr:0xffff880ff60a08c0 req segments:73 req offset:419430400 
-req length:2097152
-after req addr:0xffff880ff60a08c0 req segments:73 req offset:419430400 
-req length:2097152
-after req addr:0xffff880ff60a0a80 req segments:186 req offset:421527552 
-req length:1048576
-req addr:0xffff880ff60a08c0 nr_phys_segments:73, offset:419430400 
-len:2097152
-req addr:0xffff880ff60a0a80 nr_phys_segments:186, offset:421527552 
-len:1048576
-req addr:0xffff880ff60a0c40 nr_phys_segments:232, offset:422576128 
-len:1048576
-
-after req addr:0xffff880ff60a0c40 req segments:73 req offset:423624704 
-req length:2097152
-after req addr:0xffff880ff60a0c40 req segments:73 req offset:423624704 
-req length:2097152
-after req addr:0xffff880ff60a0e00 req segments:186 req offset:425721856 
-req length:1048576
-req addr:0xffff880ff60a0c40 nr_phys_segments:73, offset:423624704 
-len:2097152
-req addr:0xffff880ff60a0e00 nr_phys_segments:186, offset:425721856 
-len:1048576
-req addr:0xffff880ff60a0fc0 nr_phys_segments:232, offset:426770432 
-len:1048576
-
-Case two:
-blk_queue_max_segments(q, segment_size / PAGE_SIZE);
-
-The output of stap:
-after req addr:0xffff88101c9a0000 req segments:478 req offset:419430400 
-req length:4194304
-req addr:0xffff88101c9a0000 nr_phys_segments:478, offset:419430400 
-len:4194304
-
-after req addr:0xffff88101c9a0000 req segments:478 req offset:423624704 
-req length:4194304
-req addr:0xffff88101c9a0000 nr_phys_segments:478, offset:423624704 
-len:4194304
-
-1.Based on the setting of max_sectors and max_segments, decides the
-   size of a request.
-2.We have already set max_sectors to an object's size, so we should try
-   to ensure that a request to the size as possible as merge bio.
-
-Thanks.
-----
-juncheng bai
->
->> I suggest that add a module parameter to control the value which
->> decided by the user settings.
->
-> A module parameter for what exactly?
-It likes the single_major of module rbd.
->
-> Thanks,
->
->                  Ilya
->
+--===============1347022934==--
