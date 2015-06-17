@@ -1,72 +1,95 @@
-From: "Zhou, Yuan" <yuan.zhou@intel.com>
-Subject: RE: xattrs vs. omap with radosgw
-Date: Wed, 17 Jun 2015 01:32:35 +0000
-Message-ID: <06681238D8946F44A60AA400760A1CBF01FDC834@SHSMSX104.ccr.corp.intel.com>
-References: <BLU175-W13D5737A24429707F8F978DFA70@phx.gbl>
- <alpine.DEB.2.00.1506161241060.15556@cobra.newdream.net>
+From: Allen Samuels <Allen.Samuels@sandisk.com>
+Subject: =?utf-8?B?UkU6IENlcGggdGllcuKAmWluZyBlbmhhbmNlbWVudHMgYmx1ZSBwcmludCBm?=
+ =?utf-8?Q?or_jewel?=
+Date: Wed, 17 Jun 2015 00:56:37 +0000
+Message-ID: <7334B4281E425749B85E08CF7EC6F853437705D9@SACMBXIP03.sdcorp.global.sandisk.com>
+References: <EA545303A8F8E842820A172C3D641D6E1B0628FD@SACMBXIP01.sdcorp.global.sandisk.com>
+ <CAC6JEv9OPeAETB4M6fdouXLwQ_ocgsPswDXw2Vdntbd7n=uKHg@mail.gmail.com>
+ <EA545303A8F8E842820A172C3D641D6E1B0635D8@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:11821 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753231AbbFQBcj convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Jun 2015 21:32:39 -0400
-In-Reply-To: <alpine.DEB.2.00.1506161241060.15556@cobra.newdream.net>
+Received: from mail-bn1on0085.outbound.protection.outlook.com ([157.56.110.85]:4665
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750899AbbFQCaV (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 16 Jun 2015 22:30:21 -0400
+In-Reply-To: <EA545303A8F8E842820A172C3D641D6E1B0635D8@SACMBXIP01.sdcorp.global.sandisk.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, GuangYang <yguang11@outlook.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
+To: Shishir Gowda <Shishir.Gowda@sandisk.com>, Gregory Farnum <greg@gregs42.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-=46WIW, there was some discussion in OpenStack Swift and their performa=
-nce tests showed 255 is not the best in recent XFS. They decided to use=
- large xattr boundary size(65535).
-
-https://gist.github.com/smerritt/5e7e650abaa20599ff34
-
-
------Original Message-----
-=46rom: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.=
-kernel.org] On Behalf Of Sage Weil
-Sent: Wednesday, June 17, 2015 3:43 AM
-To: GuangYang
-Cc: ceph-devel@vger.kernel.org; ceph-users@lists.ceph.com
-Subject: Re: xattrs vs. omap with radosgw
-
-On Tue, 16 Jun 2015, GuangYang wrote:
-> Hi Cephers,
-> While looking at disk utilization on OSD, I noticed the disk was cons=
-tantly busy with large number of small writes, further investigation sh=
-owed that, as radosgw uses xattrs to store metadata (e.g. etag, content=
--type, etc.), which made the xattrs get from local to extents, which in=
-curred extra I/O.
->=20
-> I would like to check if anybody has experience with offloading the m=
-etadata to omap:
-> =A0 1> Offload everything to omap? If this is the case, should we mak=
-e the inode size as 512 (instead of 2k)?
-> =A0 2> Partial offload the metadata to omap, e.g. only offloading the=
- rgw specified metadata to omap.
->=20
-> Any sharing is deeply appreciated. Thanks!
-
-Hi Guang,
-
-Is this hammer or firefly?
-
-With hammer the size of object_info_t crossed the 255 byte boundary, wh=
-ich is the max xattr value that XFS can inline.  We've since merged som=
-ething that stripes over several small xattrs so that we can keep thing=
-s inline, but it hasn't been backported to hammer yet.  See c6cdb4081e3=
-66f471b372102905a1192910ab2da.  Perhaps this is what you're seeing?
-
-I think we're still better off with larger XFS inodes and inline xattrs=
- if it means we avoid leveldb at all for most objects.
-
-sage
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBHcmVnb3J5IEZhcm51bSBbbWFp
+bHRvOmdyZWdAZ3JlZ3M0Mi5jb21dDQo+IFNlbnQ6IFdlZG5lc2RheSwgSnVuZSAxMCwgMjAxNSAx
+MjoxNyBQTQ0KPiBUbzogU2hpc2hpciBHb3dkYQ0KPiBDYzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5l
+bC5vcmcNCj4gU3ViamVjdDogUmU6IENlcGggdGllcuKAmWluZyBlbmhhbmNlbWVudHMgYmx1ZSBw
+cmludCBmb3IgamV3ZWwNCj4NCj4gT24gVHVlLCBKdW4gOSwgMjAxNSBhdCA3OjUyIFBNLCBTaGlz
+aGlyIEdvd2RhIA0KPiA8U2hpc2hpci5Hb3dkYUBzYW5kaXNrLmNvbT4gd3JvdGU6DQo+ID4gSGkg
+QWxsLA0KPiA+DQo+ID4gV2UgaGF2ZSB1cGxvYWRlZCB0aGUgYmx1ZXByaW50IGZvciB0aGUgZW5o
+YW5jZW1lbnRzIHdlIGFyZSBwcm9wb3NpbmcgDQo+ID4gZm9yIGNlcGggdGllcuKAmWluZyBmdW5j
+dGlvbmFsaXR5IGZvciBKZXdlbCByZWxlYXNlIEANCj4gPg0KPiA+IGh0dHA6Ly90cmFja2VyLmNl
+cGguY29tL3Byb2plY3RzL2NlcGgvd2lraS9UaWVyaW5nLWVuaGFjZW1lbnQNCj4gPg0KPiA+IFNv
+bGljaXRpbmcgY29tbWVudHMvZmVlZGJhY2sgZm9yIHRoZSBzYW1lLg0KPg0KPiBCeSBhbmQgbGFy
+Z2UgdGhpcyBsb29rcyBwcmV0dHkgc2Vuc2libGUgdG8gbWUgaW4gYSBxdWljayByZWFkLiBUaGUg
+DQo+IHRoaW5ncyBJDQo+IG5vdGljZWQ6DQo+IDEpIFRoZXJlJ3MgYSByZWZlcmVuY2UgdG8gdGhl
+IHBvbGljeSBmdW5jdGlvbiBnZXR0aW5nIHBhc3NlZCBpbiBkYXRhIA0KPiBhYm91dCBob3cgZnVs
+bCB0aGUgcG9vbCBpcy4gTm90ZSB0aGF0IHdoaWxlIHdlIGV4cG9zZSBzdHVmZiB0byBjYWNoZSAN
+Cj4gcG9vbCB1c2VycyBpbiB0ZXJtcyBvZiBwb29scywgaW4gdGhlIGludGVybmFsIGltcGxlbWVu
+dGF0aW9ucyB0aGUgDQo+IGZsdXNoaW5nIGZ1bmN0aW9ucyBhcmUgYmFzZWQgb24gaG93IGZ1bGwg
+dGhlIGxvY2FsIFBHIGlzIOKAlCB0aGF0J3MgDQo+IGJlY2F1c2Ugd2UgZG9uJ3QgaGF2ZSBhbnkg
+dXAtdG8tIGRhdGUgaW5mb3JtYXRpb24gYWJvdXQgdGhlIGdsb2JhbCANCj4gcG9vbCAoYW5kIHdl
+IHJlYWxseSBjYW4ndCkuIEkgaW1hZ2luZSBqdXN0IHN1YnN0aXR1dGluZyBQRyBmb3IgcG9vbCBp
+biANCj4geW91ciBkZXNjcmlwdGlvbiBzaG91bGQgd29yaywgYnV0IGlmIG5vdCB0aGF0J3Mgc29t
+ZXRoaW5nIHRvIGFkZHJlc3MuDQo+DQpTdXJlLCB3ZSB3aWxsIGtlZXAgdGhpcyBpbiBtaW5kLg0K
+DQpbQWxsZW5dIFBHIGxldmVsIG9jY3VwYW5jeSBzaG91bGQgYmUgYSBnb29kIGVub3VnaCBzdGFu
+ZC1pbiBmb3IgcG9vbCBsZXZlbC4gSSBkb24ndCBzZWUgdGhpcyBhcyBhIHByb2JsZW0gYXQgYWxs
+Lg0KDQo+IDIpIEFyZSB5b3Ugc3VyZSB5b3Ugd2FudCB0byBleHBvc2UgdGhlc2UgcG9saWNpZXMg
+dmlhIFJHVz8gVGhhdCBzb3VuZHMgDQo+IGJvdGggZXhjZXNzaXZlbHkgY29tcGxpY2F0ZWQgKGZy
+b20gdGhlIFVJIHBlcnNwZWN0aXZlKSBhbmQgbGlhYmxlIHRvIA0KPiBhYnVzZSBieSB1c2Vycy4g
+UGx1cyBpdCBzZWVtcyBhIGxpdHRsZSByZWR1bmRhbnQg4oCUIEkgY291bGQgaW1hZ2luZSANCj4g
+cGVvcGxlIHdhbnRpbmcgdGhlIHZlcnkgZmFzdGVzdCBzdG9yYWdlLCBidXQgdGhlbiB0aGV5IHNo
+b3VsZCBqdXN0IA0KPiBzdG9yZSB0aG9zZSBvYmplY3RzIGluIFJHVyBidWNrZXRzIHdoaWNoIGFy
+ZSBzdG9yZWQgb24gcG9vbHMgd2l0aCANCj4gYXBwcm9wcmlhdGUgcG9saWNpZXMgKEkgZm9yZ2V0
+IHdoYXQgdGhpcyBtZWNoYW5pc20gaXMgY2FsbGVkLCBidXQgDQo+IHRoZXJlJ3Mgc29tZSBzb3J0
+IG9mIHBsYWNlbWVudCB0aGluZyB3aGVuIGNyZWF0aW5nIGJ1Y2tldHMpLiBPdGhlcndpc2UgDQo+
+IHRoZSBlbmhhbmNlbWVudHMgZm9yIHRoaW5ncyBsaWtlIGRpcmVjdC0gcmVhZC1mcm9tLUVDLXNo
+YXJkcyBldGMgc2VlbSANCj4gdG8gY292ZXIgUkdXJ3MgcGVyZm9ybWFuY2UgbmVlZHMgcHJldHR5
+IHdlbGwuDQo+DQoNCkkgYWdyZWUgdGhhdCBleHBvc2luZyB0aGVzZSBwb2xpY2VzIHZpYSBSR1cg
+aXMgcHJvbmUgdG8gYmUgYWJ1c2VkLCBidXQgaXQgZG9lcyBwcm92aWRlIHVzZXJzIGEgZmluZSBn
+YWluZWQgY29udHJvbC4NCkFkZGl0aW9uYWxseSwgd2hhdCB3ZSBoYXZlIGluIG1pbmQgaXMgYW4g
+YWxsIGZsYXNoIGFycmF5IGFzIGNhY2hlIHRpZXIsIHNvIGl0IGhlbHBzIGluIHJlZHVjaW5nIHdy
+aXRlIGFtcGxpZmljYXRpb24uDQoNCltBbGxlbl0gTm8gcmVhc29uIG5vdCB0byBoYXZlIGEgdG9n
+Z2xlIG9mIHNvbWUga2luZCB0byBzdXBwcmVzcyBpbi1iYW5kIGFsdGVyYXRpb24gb2YgdGhlIHBv
+bGljaWVzLiBXaGlsZSBpdCdzIG5vdCBkaXNjdXNzZWQsIGl0J3MgYXNzdW1lZCB0aGF0IG91dC1v
+Zi1iYW5kIG1lY2hhbmlzbXMgKGNsaSBiYXNlZCkgYXJlIGFsc28gYXZhaWxhYmxlLg0KDQo+IDMp
+IFdoaWxlIGEgYnVuY2ggb2YgdGhlIGRvY3MgYW5kIHBvc3NpYmx5IHNvbWUgb2YgdGhlIGNvZGUg
+aW1wbHkgdGhhdCANCj4geW91IGhhdmUgYSBzaW5nbGUgY2FjaGUgYW5kIGEgc2luZ2xlIGJhc2Ug
+dGllciwgSSB0aGluayBpbiBnZW5lcmFsIHlvdSANCj4gY2FuIHNldCB1cCB0aWVyIGNoYWlucy4g
+V2Ugd2FudCB0byBwcmVzZXJ2ZSB0aGF0LCBzbyB0aGUgJENBQ0hFIGFuZCANCj4gJEJBU0UgbGFu
+Z3VhZ2UgdXNlZCBpbiB0aGUgdGllciBmdW5jdGlvbnMgbmVlZHMgdG8gYmUgY2FwYWJsZSBvZiB0
+aGF0Lg0KDQpBZ3JlZWQsIHRoYXQgaXMgd2h5IHVzaW5nIHBvb2xzIG5hbWVzIGFyZSBhbHNvIG1l
+bnRpb25lZCwgd2hpY2ggd291bGQgYWxsb3cgbXVsdGlwbGUgdGllcnMgdG8gZXhpc3RzLiBJZiB0
+aGUgcmVzb2x1dGlvbi9sb29rdXAgb2YgdGhlIHBvb2wgZmFpbHMsIHRoZW4gd2Ugd291bGQgZmFp
+bCB0aGUgaS9vLCBidXQgaW4gdGhlIGZ1dHVyZSBiZSBtb3ZlZCB0byBhIGRlZmF1bHQgcG9vbC4N
+Cg0KW0FsbGVuXSB0aGUgIiQiIG5hbWluZyBzdHVmZiB3YXMgaW50ZW5kZWQgdG8gYWxsb3cgc29t
+ZSBsZXZlbCBvZiBpbmRpcmVjdGlvbiwgdGhlIHRhYmxlIG9mICQgbmFtZXMgc2hvdWxkIGJlIHZh
+cmlhYmxlIChwZXItcG9vbCkuIEVzc2VudGlhbGx5IHRoaXMgaXMgdGhlIHNhbWUgYXMgc2hlbGwg
+c3Vic3RpdHV0aW9uLiBObyByZWFzb24gdGhhdCB0aGUgbGlzdCBvZiBuYW1lcyBpcyBsaW1pdGVk
+IHRvIDIuDQoNCj4gLUdyZWcNCg0KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCg0K
+UExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmlj
+IG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25h
+dGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3Nh
+Z2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVk
+IHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFu
+eSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlz
+IG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhp
+cyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVs
+ZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95
+IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3
+aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KDQpO
+ICAgICByICB5ICAgYiBYICDHp3YgXiAp3rp7Lm4gKyAgIHogXXogICB7YXkgHcqH2pkgLGogICBm
+ICAgaCAgIHogHiB3ICAgICAgIGo6K3YgICB3IGogbSAgICAgICAgIHpaKyAgICAg3aJqIiAgISBp
+DQo=
