@@ -1,12 +1,12 @@
-From: GuangYang <yguang11-1ViLX0X+lBJBDgjK7y7TUQ@public.gmane.org>
+From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
 Subject: Re: xattrs vs. omap with radosgw
-Date: Tue, 16 Jun 2015 21:08:04 -0700
-Message-ID: <BLU175-W5846B3C1C95DA0037137BDFA60@phx.gbl>
-References: <BLU175-W13D5737A24429707F8F978DFA70@phx.gbl>,
-	<alpine.DEB.2.00.1506161241060.15556@cobra.newdream.net>,
+Date: Tue, 16 Jun 2015 21:11:01 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1506162109220.16406@cobra.newdream.net>
+References: <BLU175-W13D5737A24429707F8F978DFA70@phx.gbl>
+	<alpine.DEB.2.00.1506161241060.15556@cobra.newdream.net>
 	<06681238D8946F44A60AA400760A1CBF01FDC834@SHSMSX104.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1623447590=="
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-681950229-1434514261=:16406"
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 In-Reply-To: <06681238D8946F44A60AA400760A1CBF01FDC834-0J0gbvR4kTg/UvCtAeCM4rfspsVTdybXVpNB7YpNyf8@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
@@ -18,123 +18,89 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: "Zhou, Yuan" <yuan.zhou-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+To: "Zhou, Yuan" <yuan.zhou-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
---===============1623447590==
-Content-Type: multipart/alternative;
-	boundary="_c77b4969-8ccd-4e29-a0c1-0bf8d92a3119_"
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
---_c77b4969-8ccd-4e29-a0c1-0bf8d92a3119_
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+--557981400-681950229-1434514261=:16406
+Content-Type: TEXT/PLAIN; charset=iso-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-SGkgWXVhbiwKVGhhbmtzIGZvciBzaGFyaW5nIHRoZSBsaW5rLCBpdCBpcyBpbnRlcmVzdGluZyB0
-byByZWFkLiBNeSB1bmRlcnN0YW5kaW5nIG9mIHRoZSB0ZXN0IHJlc3VsdHMsIGlzIHRoYXQgd2l0
-aCBhIGZpeGVkIHNpemUgb2YgeGF0dHJzLCB1c2luZyBzbWFsbGVyIHN0cmlwZSBzaXplIHdpbGwg
-aW5jdXIgbGFyZ2VyIGxhdGVuY3kgZm9yIHJlYWQsIHdoaWNoIGtpbmQgb2YgbWFrZXMgc2Vuc2Ug
-c2luY2UgdGhlcmUgYXJlIG1vcmUgay12IHBhaXJzLCBhbmQgd2l0aCB0aGUgc2l6ZSwgaXQgbmVl
-ZHMgdG8gZ2V0IGV4dGVudHMgYW55d2F5LiAKCkNvcnJlY3QgbWUgaWYgSSBhbSB3cm9uZyBoZXJl
-Li4uCgpUaGFua3MsCkd1YW5nCgo+IEZyb206IHl1YW4uemhvdUBpbnRlbC5jb20KPiBUbzogc2Fn
-ZUBuZXdkcmVhbS5uZXQ7IHlndWFuZzExQG91dGxvb2suY29tCj4gQ0M6IGNlcGgtZGV2ZWxAdmdl
-ci5rZXJuZWwub3JnOyBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCj4gU3ViamVjdDogUkU6IHhh
-dHRycyB2cy4gb21hcCB3aXRoIHJhZG9zZ3cKPiBEYXRlOiBXZWQsIDE3IEp1biAyMDE1IDAxOjMy
-OjM1ICswMDAwCj4gCj4gRldJVywgdGhlcmUgd2FzIHNvbWUgZGlzY3Vzc2lvbiBpbiBPcGVuU3Rh
-Y2sgU3dpZnQgYW5kIHRoZWlyIHBlcmZvcm1hbmNlIHRlc3RzIHNob3dlZCAyNTUgaXMgbm90IHRo
-ZSBiZXN0IGluIHJlY2VudCBYRlMuIFRoZXkgZGVjaWRlZCB0byB1c2UgbGFyZ2UgeGF0dHIgYm91
-bmRhcnkgc2l6ZSg2NTUzNSkuCj4gCj4gaHR0cHM6Ly9naXN0LmdpdGh1Yi5jb20vc21lcnJpdHQv
-NWU3ZTY1MGFiYWEyMDU5OWZmMzQKPiAKPiAKPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQo+
-IEZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZl
-bC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBTYWdlIFdlaWwKPiBTZW50OiBX
-ZWRuZXNkYXksIEp1bmUgMTcsIDIwMTUgMzo0MyBBTQo+IFRvOiBHdWFuZ1lhbmcKPiBDYzogY2Vw
-aC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc7IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KPiBTdWJq
-ZWN0OiBSZTogeGF0dHJzIHZzLiBvbWFwIHdpdGggcmFkb3Nndwo+IAo+IE9uIFR1ZSwgMTYgSnVu
-IDIwMTUsIEd1YW5nWWFuZyB3cm90ZToKPj4gSGkgQ2VwaGVycywKPj4gV2hpbGUgbG9va2luZyBh
-dCBkaXNrIHV0aWxpemF0aW9uIG9uIE9TRCwgSSBub3RpY2VkIHRoZSBkaXNrIHdhcyBjb25zdGFu
-dGx5IGJ1c3kgd2l0aCBsYXJnZSBudW1iZXIgb2Ygc21hbGwgd3JpdGVzLCBmdXJ0aGVyIGludmVz
-dGlnYXRpb24gc2hvd2VkIHRoYXQsIGFzIHJhZG9zZ3cgdXNlcyB4YXR0cnMgdG8gc3RvcmUgbWV0
-YWRhdGEgKGUuZy4gZXRhZywgY29udGVudC10eXBlLCBldGMuKSwgd2hpY2ggbWFkZSB0aGUgeGF0
-dHJzIGdldCBmcm9tIGxvY2FsIHRvIGV4dGVudHMsIHdoaWNoIGluY3VycmVkIGV4dHJhIEkvTy4K
-Pj4gCj4+IEkgd291bGQgbGlrZSB0byBjaGVjayBpZiBhbnlib2R5IGhhcyBleHBlcmllbmNlIHdp
-dGggb2ZmbG9hZGluZyB0aGUgbWV0YWRhdGEgdG8gb21hcDoKPj4gICAxPiBPZmZsb2FkIGV2ZXJ5
-dGhpbmcgdG8gb21hcD8gSWYgdGhpcyBpcyB0aGUgY2FzZSwgc2hvdWxkIHdlIG1ha2UgdGhlIGlu
-b2RlIHNpemUgYXMgNTEyIChpbnN0ZWFkIG9mIDJrKT8KPj4gICAyPiBQYXJ0aWFsIG9mZmxvYWQg
-dGhlIG1ldGFkYXRhIHRvIG9tYXAsIGUuZy4gb25seSBvZmZsb2FkaW5nIHRoZSByZ3cgc3BlY2lm
-aWVkIG1ldGFkYXRhIHRvIG9tYXAuCj4+IAo+PiBBbnkgc2hhcmluZyBpcyBkZWVwbHkgYXBwcmVj
-aWF0ZWQuIFRoYW5rcyEKPiAKPiBIaSBHdWFuZywKPiAKPiBJcyB0aGlzIGhhbW1lciBvciBmaXJl
-Zmx5Pwo+IAo+IFdpdGggaGFtbWVyIHRoZSBzaXplIG9mIG9iamVjdF9pbmZvX3QgY3Jvc3NlZCB0
-aGUgMjU1IGJ5dGUgYm91bmRhcnksIHdoaWNoIGlzIHRoZSBtYXggeGF0dHIgdmFsdWUgdGhhdCBY
-RlMgY2FuIGlubGluZS4gV2UndmUgc2luY2UgbWVyZ2VkIHNvbWV0aGluZyB0aGF0IHN0cmlwZXMg
-b3ZlciBzZXZlcmFsIHNtYWxsIHhhdHRycyBzbyB0aGF0IHdlIGNhbiBrZWVwIHRoaW5ncyBpbmxp
-bmUsIGJ1dCBpdCBoYXNuJ3QgYmVlbiBiYWNrcG9ydGVkIHRvIGhhbW1lciB5ZXQuIFNlZSBjNmNk
-YjQwODFlMzY2ZjQ3MWIzNzIxMDI5MDVhMTE5MjkxMGFiMmRhLiBQZXJoYXBzIHRoaXMgaXMgd2hh
-dCB5b3UncmUgc2VlaW5nPwo+IAo+IEkgdGhpbmsgd2UncmUgc3RpbGwgYmV0dGVyIG9mZiB3aXRo
-IGxhcmdlciBYRlMgaW5vZGVzIGFuZCBpbmxpbmUgeGF0dHJzIGlmIGl0IG1lYW5zIHdlIGF2b2lk
-IGxldmVsZGIgYXQgYWxsIGZvciBtb3N0IG9iamVjdHMuCj4gCj4gc2FnZQo+IC0tCj4gVG8gdW5z
-dWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgt
-ZGV2ZWwiIGluCj4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5l
-bC5vcmcKPiBNb3JlIG1ham9yZG9tbyBpbmZvIGF0IGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFq
-b3Jkb21vLWluZm8uaHRtbAogCQkgCSAgIAkJICA=
+On Wed, 17 Jun 2015, Zhou, Yuan wrote:
+> FWIW, there was some discussion in OpenStack Swift and their performanc=
+e tests showed 255 is not the best in recent XFS. They decided to use lar=
+ge xattr boundary size(65535).
+>=20
+> https://gist.github.com/smerritt/5e7e650abaa20599ff34
 
---_c77b4969-8ccd-4e29-a0c1-0bf8d92a3119_
-Content-Type: text/html; charset="gb2312"
-Content-Transfer-Encoding: base64
+If I read this correctly the total metadata they are setting is pretty=20
+big:
 
-PGh0bWw+DQo8aGVhZD4NCjxzdHlsZT48IS0tDQouaG1tZXNzYWdlIFANCnsNCm1hcmdpbjowcHg7
-DQpwYWRkaW5nOjBweA0KfQ0KYm9keS5obW1lc3NhZ2UNCnsNCmZvbnQtc2l6ZTogMTJwdDsNCmZv
-bnQtZmFtaWx5Os6iyO3RxbraDQp9DQotLT48L3N0eWxlPjwvaGVhZD4NCjxib2R5IGNsYXNzPSdo
-bW1lc3NhZ2UnPjxkaXYgZGlyPSdsdHInPkhpIFl1YW4sClRoYW5rcyBmb3Igc2hhcmluZyB0aGUg
-bGluaywgaXQgaXMgaW50ZXJlc3RpbmcgdG8gcmVhZC4gTXkgdW5kZXJzdGFuZGluZyBvZiB0aGUg
-dGVzdCByZXN1bHRzLCBpcyB0aGF0IHdpdGggYSBmaXhlZCBzaXplIG9mIHhhdHRycywgdXNpbmcg
-c21hbGxlciBzdHJpcGUgc2l6ZSB3aWxsIGluY3VyIGxhcmdlciBsYXRlbmN5IGZvciByZWFkLCB3
-aGljaCBraW5kIG9mIG1ha2VzIHNlbnNlIHNpbmNlIHRoZXJlIGFyZSBtb3JlIGstdiBwYWlycywg
-YW5kIHdpdGggdGhlIHNpemUsIGl0IG5lZWRzIHRvIGdldCBleHRlbnRzIGFueXdheS4/CgpDb3Jy
-ZWN0IG1lIGlmIEkgYW0gd3JvbmcgaGVyZS4uLgoKVGhhbmtzLApHdWFuZwoKPiBGcm9tOiB5dWFu
-Lnpob3VAaW50ZWwuY29tCj4gVG86IHNhZ2VAbmV3ZHJlYW0ubmV0OyB5Z3VhbmcxMUBvdXRsb29r
-LmNvbQo+IENDOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZzsgY2VwaC11c2Vyc0BsaXN0cy5j
-ZXBoLmNvbQo+IFN1YmplY3Q6IFJFOiB4YXR0cnMgdnMuIG9tYXAgd2l0aCByYWRvc2d3Cj4gRGF0
-ZTogV2VkLCAxNyBKdW4gMjAxNSAwMTozMjozNSArMDAwMAo+IAo+IEZXSVcsIHRoZXJlIHdhcyBz
-b21lIGRpc2N1c3Npb24gaW4gT3BlblN0YWNrIFN3aWZ0IGFuZCB0aGVpciBwZXJmb3JtYW5jZSB0
-ZXN0cyBzaG93ZWQgMjU1IGlzIG5vdCB0aGUgYmVzdCBpbiByZWNlbnQgWEZTLiBUaGV5IGRlY2lk
-ZWQgdG8gdXNlIGxhcmdlIHhhdHRyIGJvdW5kYXJ5IHNpemUoNjU1MzUpLgo+IAo+IGh0dHBzOi8v
-Z2lzdC5naXRodWIuY29tL3NtZXJyaXR0LzVlN2U2NTBhYmFhMjA1OTlmZjM0Cj4gCj4gCj4gLS0t
-LS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0KPiBGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZnZXIua2Vy
-bmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhh
-bGYgT2YgU2FnZSBXZWlsCj4gU2VudDogV2VkbmVzZGF5LCBKdW5lIDE3LCAyMDE1IDM6NDMgQU0K
-PiBUbzogR3VhbmdZYW5nCj4gQ2M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnOyBjZXBoLXVz
-ZXJzQGxpc3RzLmNlcGguY29tCj4gU3ViamVjdDogUmU6IHhhdHRycyB2cy4gb21hcCB3aXRoIHJh
-ZG9zZ3cKPiAKPiBPbiBUdWUsIDE2IEp1biAyMDE1LCBHdWFuZ1lhbmcgd3JvdGU6Cj4+IEhpIENl
-cGhlcnMsCj4+IFdoaWxlIGxvb2tpbmcgYXQgZGlzayB1dGlsaXphdGlvbiBvbiBPU0QsIEkgbm90
-aWNlZCB0aGUgZGlzayB3YXMgY29uc3RhbnRseSBidXN5IHdpdGggbGFyZ2UgbnVtYmVyIG9mIHNt
-YWxsIHdyaXRlcywgZnVydGhlciBpbnZlc3RpZ2F0aW9uIHNob3dlZCB0aGF0LCBhcyByYWRvc2d3
-IHVzZXMgeGF0dHJzIHRvIHN0b3JlIG1ldGFkYXRhIChlLmcuIGV0YWcsIGNvbnRlbnQtdHlwZSwg
-ZXRjLiksIHdoaWNoIG1hZGUgdGhlIHhhdHRycyBnZXQgZnJvbSBsb2NhbCB0byBleHRlbnRzLCB3
-aGljaCBpbmN1cnJlZCBleHRyYSBJL08uCj4+IAo+PiBJIHdvdWxkIGxpa2UgdG8gY2hlY2sgaWYg
-YW55Ym9keSBoYXMgZXhwZXJpZW5jZSB3aXRoIG9mZmxvYWRpbmcgdGhlIG1ldGFkYXRhIHRvIG9t
-YXA6Cj4+ID8gMT4gT2ZmbG9hZCBldmVyeXRoaW5nIHRvIG9tYXA/IElmIHRoaXMgaXMgdGhlIGNh
-c2UsIHNob3VsZCB3ZSBtYWtlIHRoZSBpbm9kZSBzaXplIGFzIDUxMiAoaW5zdGVhZCBvZiAyayk/
-Cj4+ID8gMj4gUGFydGlhbCBvZmZsb2FkIHRoZSBtZXRhZGF0YSB0byBvbWFwLCBlLmcuIG9ubHkg
-b2ZmbG9hZGluZyB0aGUgcmd3IHNwZWNpZmllZCBtZXRhZGF0YSB0byBvbWFwLgo+PiAKPj4gQW55
-IHNoYXJpbmcgaXMgZGVlcGx5IGFwcHJlY2lhdGVkLiBUaGFua3MhCj4gCj4gSGkgR3VhbmcsCj4g
-Cj4gSXMgdGhpcyBoYW1tZXIgb3IgZmlyZWZseT8KPiAKPiBXaXRoIGhhbW1lciB0aGUgc2l6ZSBv
-ZiBvYmplY3RfaW5mb190IGNyb3NzZWQgdGhlIDI1NSBieXRlIGJvdW5kYXJ5LCB3aGljaCBpcyB0
-aGUgbWF4IHhhdHRyIHZhbHVlIHRoYXQgWEZTIGNhbiBpbmxpbmUuIFdlJ3ZlIHNpbmNlIG1lcmdl
-ZCBzb21ldGhpbmcgdGhhdCBzdHJpcGVzIG92ZXIgc2V2ZXJhbCBzbWFsbCB4YXR0cnMgc28gdGhh
-dCB3ZSBjYW4ga2VlcCB0aGluZ3MgaW5saW5lLCBidXQgaXQgaGFzbid0IGJlZW4gYmFja3BvcnRl
-ZCB0byBoYW1tZXIgeWV0LiBTZWUgYzZjZGI0MDgxZTM2NmY0NzFiMzcyMTAyOTA1YTExOTI5MTBh
-YjJkYS4gUGVyaGFwcyB0aGlzIGlzIHdoYXQgeW91J3JlIHNlZWluZz8KPiAKPiBJIHRoaW5rIHdl
-J3JlIHN0aWxsIGJldHRlciBvZmYgd2l0aCBsYXJnZXIgWEZTIGlub2RlcyBhbmQgaW5saW5lIHhh
-dHRycyBpZiBpdCBtZWFucyB3ZSBhdm9pZCBsZXZlbGRiIGF0IGFsbCBmb3IgbW9zdCBvYmplY3Rz
-Lgo+IAo+IHNhZ2UKPiAtLQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRo
-ZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbgo+IHRoZSBib2R5IG9mIGEgbWVzc2Fn
-ZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnCj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCBo
-dHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwKIAkJIAkgICAJCSAgPC9k
-aXY+PC9ib2R5Pg0KPC9odG1sPg==
+PILE_O_METADATA =3D pickle.dumps(dict(
+    ("attribute%d" % i, hashlib.sha512("thingy %d" % i).hexdigest())
+    for i in range(200)))
 
---_c77b4969-8ccd-4e29-a0c1-0bf8d92a3119_--
+So lots of small attrs won't really help since they'll have to spill out=20
+into other extents eventually no matter what.
 
---===============1623447590==
+In our case, we have big (2k) inodes and can easily fit everything in=20
+there.. as long as it is in <255 byte pieces.
+
+sage
+
+
+>=20
+>=20
+> -----Original Message-----
+> From: ceph-devel-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org [mailto:ceph-devel-owner-fy+rA21nqHI@public.gmane.org=
+rnel.org] On Behalf Of Sage Weil
+> Sent: Wednesday, June 17, 2015 3:43 AM
+> To: GuangYang
+> Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> Subject: Re: xattrs vs. omap with radosgw
+>=20
+> On Tue, 16 Jun 2015, GuangYang wrote:
+> > Hi Cephers,
+> > While looking at disk utilization on OSD, I noticed the disk was cons=
+tantly busy with large number of small writes, further investigation show=
+ed that, as radosgw uses xattrs to store metadata (e.g. etag, content-typ=
+e, etc.), which made the xattrs get from local to extents, which incurred=
+ extra I/O.
+> >=20
+> > I would like to check if anybody has experience with offloading the m=
+etadata to omap:
+> > =A0 1> Offload everything to omap? If this is the case, should we mak=
+e the inode size as 512 (instead of 2k)?
+> > =A0 2> Partial offload the metadata to omap, e.g. only offloading the=
+ rgw specified metadata to omap.
+> >=20
+> > Any sharing is deeply appreciated. Thanks!
+>=20
+> Hi Guang,
+>=20
+> Is this hammer or firefly?
+>=20
+> With hammer the size of object_info_t crossed the 255 byte boundary, wh=
+ich is the max xattr value that XFS can inline.  We've since merged somet=
+hing that stripes over several small xattrs so that we can keep things in=
+line, but it hasn't been backported to hammer yet.  See c6cdb4081e366f471=
+b372102905a1192910ab2da.  Perhaps this is what you're seeing?
+>=20
+> I think we're still better off with larger XFS inodes and inline xattrs=
+ if it means we avoid leveldb at all for most objects.
+>=20
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+>=20
+--557981400-681950229-1434514261=:16406
 Content-Type: text/plain; charset="us-ascii"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
@@ -145,4 +111,4 @@ ceph-users mailing list
 ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
---===============1623447590==--
+--557981400-681950229-1434514261=:16406--
