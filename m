@@ -1,84 +1,132 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Interested in ceph OSD encryption and key management
-Date: Thu, 18 Jun 2015 07:31:05 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1506180716260.23826@cobra.newdream.net>
-References: <1432787005.11787.33.camel@catalyst.net.nz> <alpine.DEB.2.00.1505281257490.6462@cobra.newdream.net> <1434508656.26942.19.camel@catalyst.net.nz> <alpine.DEB.2.00.1506162115350.16406@cobra.newdream.net> <5582C8F2.2010604@redhat.com>
+From: Harshal Gupta <harshal.gupta001@gmail.com>
+Subject: Re: Duplicate bucket creation Response in RGW
+Date: Thu, 18 Jun 2015 22:20:11 +0530
+Message-ID: <CAPRac-af4GSMe4ETF7ivKzXscbTN9o=9qGShm6HcfbLLLdmtBA@mail.gmail.com>
+References: <CAPRac-a9gp1B9J3L-_TjkkP3-M9ZkvF-HwQ505NvJaqhEC392w@mail.gmail.com>
+ <1875013920.12639009.1433959710332.JavaMail.zimbra@redhat.com>
+ <CAPRac-b9O0Dx4mGnMDfe5NjW5gGmAqp7zN6k9DcTdceHK5AS8Q@mail.gmail.com>
+ <1688384556.13183297.1434040012831.JavaMail.zimbra@redhat.com>
+ <CAFMfnwqsxGyQSE64G6_MsQMdN5PD-yoBsfrujpKxXj2zOQUUsA@mail.gmail.com>
+ <724456735.13364839.1434066715855.JavaMail.zimbra@redhat.com> <CAPRac-Y04yTjmxDF=BTi5bSuwmqSoXTckRLok+3TWnxLWVTz7A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:35181 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753463AbbFRObG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Jun 2015 10:31:06 -0400
-In-Reply-To: <5582C8F2.2010604@redhat.com>
+Received: from mail-wi0-f174.google.com ([209.85.212.174]:34164 "EHLO
+	mail-wi0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751674AbbFRQud convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Jun 2015 12:50:33 -0400
+Received: by wicnd19 with SMTP id nd19so28607087wic.1
+        for <ceph-devel@vger.kernel.org>; Thu, 18 Jun 2015 09:50:31 -0700 (PDT)
+In-Reply-To: <CAPRac-Y04yTjmxDF=BTi5bSuwmqSoXTckRLok+3TWnxLWVTz7A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Milan Broz <mbroz@redhat.com>
-Cc: Andrew Bartlett <abartlet@catalyst.net.nz>, ceph-devel@vger.kernel.org
+To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Cc: Kyle Bader <kyle.bader@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Milan-
+Hi Yehuda, Kyle,
 
-On Thu, 18 Jun 2015, Milan Broz wrote:
-> On 06/17/2015 06:16 AM, Sage Weil wrote:
-> >>> The wiki logins are broken, but ignore that.. we're moving to 
-> >>> tracker.ceph.com's wiki shortly anyway.  Email is best in the meantime!
-> >>
-> >> This proposal seems not have to have it to the new wiki.  Is it still
-> >> alive?  What do we need to do to keep this moving?
-> 
-> I am not able to even login to wiki, seems logins are still completely broken.
-> Probably nobody can edit it now?
+Based on previous discussions regarding Response for Bucket Creation
+by user which is already owned by him, I have come up with following
+scenario and proposed solution:
 
-The old wiki is frozen.. see the new wiki at 
-http://tracker.ceph.com/projects/ceph/wiki (not much there yet).  Jewel 
-CDS blueprints are at
+We are trying to match RGW S3 responses with AWS S3 responses.
+AWS S3 gives/shows different responses/behaviors based on the region
+of location of bucket.
 
-	http://tracker.ceph.com/projects/ceph/wiki/Jewel
+For users of AWS S3 in region US Standard, 200 OK is desired or used
+to response but for users of other regions, 409 conflict is expected.
+We propose to provide configurable response via config_opts option
+where by we can configure our installation/set up to either give US
+Standard region response or other one.
+This we will be able to set up per region. By default, this will be
+set to current response.
 
-> > I can create a placeholder session.  Can you two hash out a proposal over 
-> > the next week or so to discuss?  I think there are some tricky questions 
-> > if petera is used if we want it to integrate with the monitors as well 
-> > (e.g., leverage the monitors for updating/distributing the petera 
-> > certs/keys).
-> 
-> Yes, but later please. We have a lot of fun with selinux and other things,
-> this feature could follow later.
-> 
-> BTW Petera is now renamed to Deo (and should be in Fedora packaged already).
+Let me know if above solution looks acceptable or if we can approach
+in any other way.
 
-(Good to hear--petera had bad google mojo.)
+We have looked into the issue from AWS region point of view. I agree
+we have valid points for keeping response same also but we see some
+merit in other response as well from use case point of view also along
+with making responses similar to other regions AWS S3 behavior.
 
-> The idea was:
-> 
-> - use LUKS as the encryption format
-> 
-> - use Deo to map OSD, for more info see
->   https://github.com/npmccallum/deo
-> 
->   In short, Deo will connect to MON node and negotiate key and directly
->   unlock LUKS device.
->   (New version now uses libcryptsetup direcly, so it is really one client binary.)
-> 
->   There must be a service listening on MONs nodes (Deo server).
-> 
->   I have no idea yet how problematic will be handling certificates here, but
->   because it ensures authentication and encrypts communication, it seems like
->   a nice design.
+In any case, kindly let me know your views.
 
-I think the ceph-mon piece is that we would need a monitor service that is 
-responsible for storing/distributing the certs/keys.  In order to make 
-them visible to Deo, we'd need them to be stored in plaintext in a simple 
-directory structure in /var/lib/ceph/mon/$cluster-$id/ somewhere.  If 
-we simply co-opt config-key to do this, or do this for a subset of the 
-config-key namespace, this should be pretty simple.
+Thanks
 
-Do you know what the server-side file/directory should look like for Deo?
+On Wed, Jun 17, 2015 at 1:54 AM, Harshal Gupta
+<harshal.gupta001@gmail.com> wrote:
+> I understand here the major concern is for the clients who have
+> developed their apps keeping in mind 200 OK as the response in
+> duplicate bucket creation. However 409 can be useful in a scenario
+> which can be derived as below:
+>
+> A customer belonging to a company account creates a bucket and fill it with some
+> files. A colleague of his then tries to create a bucket with the same
+> name as above with the same keys which are shared by the employees of
+> that company or a team in particular. Now since he gets 200 OK, he
+> thinks the bucket is created anew and tries to use it to upload some
+> modified versions of the previously uploaded files in that bucket, for
+> his own use. Now the original files will be lost.
+>
+> In case if he gets 409, he will actually know that there may be some
+> data in the already created bucket and might check on it before
+> overriding it.
+>
+> Since Changing the response to 409 might cause a problem to the
+> existing customers, we can instead provide a option (boolean probably)
+> 'use_aws_standard_region_responses' which checks whether the region is
+> standard or different. Default can be true. Existing users can go with
+> true and we can give option to configure for new users. This flag
+> might as well used for fixing for other region based discrepancies in
+> AWS S3.
+>
+> Thanks,
+>
+> On Fri, Jun 12, 2015 at 5:21 AM, Yehuda Sadeh-Weinraub
+> <yehuda@redhat.com> wrote:
+>>
+>>
+>> ----- Original Message -----
+>>> From: "Kyle Bader" <kyle.bader@gmail.com>
+>>> To: "Yehuda Sadeh-Weinraub" <yehuda@redhat.com>
+>>> Cc: "Harshal Gupta" <harshal.gupta001@gmail.com>, "ceph-devel" <ceph-devel@vger.kernel.org>
+>>> Sent: Thursday, June 11, 2015 2:22:56 PM
+>>> Subject: Re: Duplicate bucket creation Response in RGW
+>>>
+>>> > I don't see a compelling reason why to change our current behaviour. The
+>>> > fact that Amazon itself is inconsistent makes me think that it just an
+>>> > artifact of their architecture, rather than a carefully designed api.
+>>>
+>>> Interesting.. if we look at the Amazon S3 FAQ we can understand the
+>>> differences in API responses:
+>>>
+>>> "Q: What data consistency model does Amazon S3 employ?
+>>>
+>>> Amazon S3 buckets in the US Standard region provide eventual
+>>> consistency. Amazon S3 buckets in all other regions provide
+>>> read-after-write consistency for PUTS of new objects and eventual
+>>> consistency for overwrite PUTS and DELETES."
+>>>
+>>> If we consider buckets in our implementation to be eventually
+>>> consistent, we should probably return 200. If we can provide
+>>> read-after-write consistency, then we should probably return 209.
+>>>
+>>
+>> Do they tie the different responses to the different consistency models in the different regions? We're strongly consistent, however, I still think that bucket creation should be idempotent. Impatient client applications tend to retry operations and end up with error responses that can be avoided.
+>>
+>> Yehuda
+>
+>
+>
+> --
+> HARSHAL GUPTA
+> Software Engineer
+> KIWI Inc.
 
->   Anyway, delegating this task to one simple tool (maintained independently
->   of Ceph) is IMHO a good idea and the whole integration should not be complicated.
->   (Moreover it will allow easy integration with FreeIPA and similar tools later.)
 
-Yeah.  My assumption is that this is essentially swapping out the bits 
-that use the ceph mons to install keys?
 
-sage
+-- 
+HARSHAL GUPTA
+Software Engineer
+KIWI Inc.
