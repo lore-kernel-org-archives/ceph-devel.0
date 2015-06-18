@@ -1,58 +1,32 @@
-From: Yuri Weinstein <yweinste@redhat.com>
-Subject: firefly v0.80.10 QE validation completed
-Date: Wed, 17 Jun 2015 21:33:27 -0400 (EDT)
-Message-ID: <628525610.25137687.1434591207216.JavaMail.zimbra@redhat.com>
-References: <887573759.22073065.1434386240075.JavaMail.zimbra@redhat.com>
+From: Sage Weil <sage@newdream.net>
+Subject: VPS memory
+Date: Wed, 17 Jun 2015 20:13:17 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1506172011510.23826@cobra.newdream.net>
+References: <887573759.22073065.1434386240075.JavaMail.zimbra@redhat.com> <628525610.25137687.1434591207216.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx3-phx2.redhat.com ([209.132.183.24]:33752 "EHLO
-	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750807AbbFRBd2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Jun 2015 21:33:28 -0400
-In-Reply-To: <887573759.22073065.1434386240075.JavaMail.zimbra@redhat.com>
+Received: from cobra.newdream.net ([66.33.216.30]:57742 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750867AbbFRDNS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Jun 2015 23:13:18 -0400
+In-Reply-To: <628525610.25137687.1434591207216.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
-Cc: Loic Dachary <ldachary@redhat.com>, Xinxin Shu <xinxin.shu@intel.com>, Alfredo Deza <adeza@redhat.com>, Sage Weil <sweil@redhat.com>
+To: Yuri Weinstein <yweinste@redhat.com>
+Cc: "sepia@ceph.com" <sepia@ceph.com>, ceph-devel@vger.kernel.org, Loic Dachary <ldachary@redhat.com>, Xinxin Shu <xinxin.shu@intel.com>, Alfredo Deza <adeza@redhat.com>
 
-firefly v0.80.10 is ready for publishing (Sage, Alfredo, Loic, Xinxin FYI)
+On Wed, 17 Jun 2015, Yuri Weinstein wrote:
+> - upgrade/dumpling-firefly-x (to hammer)(distros) - runs out of memory on vps and unreliable
 
-All results details were summarized in http://tracker.ceph.com/issues/11090
+How about we
 
-Note:
+- half the number of vps's per node.
+- double the default ram per vps instance
+- double the cpu?
 
-- upgrade/dumpling-firefly-x (to hammer)(distros) - runs out of memory on vps and unreliable
-- #11957 fixed (thanks Ilya, Zack!) and tested
+It'll mean lower test throughput, but (hopefully) reliable test results.  
+Given the amount of time we waste sifting through noisy results that seems 
+like a better path?
 
-Thx
-YuriW
-
------ Original Message -----
-From: "Yuri Weinstein" <yweinste@redhat.com>
-To: "Ceph Development" <ceph-devel@vger.kernel.org>
-Cc: "Loic Dachary" <ldachary@redhat.com>, "Xinxin Shu" <xinxin.shu@intel.com>
-Sent: Monday, June 15, 2015 9:37:20 AM
-Subject: firefly v0.80.10 QE validation status 6/15/2015
-
-QE validation is almost completed (there are a couple of jobs that are still running)
-
-All statis details were summarized in http://tracker.ceph.com/issues/11090
-
-Highlights (by suite/issue):
-
-rados #11914 needs Sam's approval
-kcephfs n/a needs Greg's approval
-samba #6613 needs Greg's approval
-
-Nice to have fixes (no blockers):
-upgrade/firefly(distros) #11957	(env noise)
-
-
-Thx
-YuriW
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+sage
