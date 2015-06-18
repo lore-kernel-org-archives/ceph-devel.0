@@ -1,50 +1,42 @@
-From: Yuri Weinstein <yweinste@redhat.com>
-Subject: Re: VPS memory
-Date: Thu, 18 Jun 2015 00:49:18 -0400 (EDT)
-Message-ID: <913834281.25220323.1434602958096.JavaMail.zimbra@redhat.com>
-References: <887573759.22073065.1434386240075.JavaMail.zimbra@redhat.com> <628525610.25137687.1434591207216.JavaMail.zimbra@redhat.com> <alpine.DEB.2.00.1506172011510.23826@cobra.newdream.net>
+From: Dan van der Ster <dan@vanderster.com>
+Subject: unit test for messaging crc32c
+Date: Thu, 18 Jun 2015 09:36:00 +0200
+Message-ID: <CABZ+qqndvbGM-nK8FDsyaC=iEV_B6-WxR87ndOuJu6oZ=qXcXA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx4-phx2.redhat.com ([209.132.183.25]:55754 "EHLO
-	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751071AbbFREtU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Jun 2015 00:49:20 -0400
-In-Reply-To: <alpine.DEB.2.00.1506172011510.23826@cobra.newdream.net>
+Received: from mail-la0-f44.google.com ([209.85.215.44]:36567 "EHLO
+	mail-la0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752409AbbFRHgo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Jun 2015 03:36:44 -0400
+Received: by lacny3 with SMTP id ny3so48891747lac.3
+        for <ceph-devel@vger.kernel.org>; Thu, 18 Jun 2015 00:36:42 -0700 (PDT)
+Received: from mail-la0-f51.google.com (mail-la0-f51.google.com. [209.85.215.51])
+        by mx.google.com with ESMTPSA id ky7sm1557295lab.37.2015.06.18.00.36.41
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 18 Jun 2015 00:36:41 -0700 (PDT)
+Received: by labbc20 with SMTP id bc20so48919966lab.1
+        for <ceph-devel@vger.kernel.org>; Thu, 18 Jun 2015 00:36:41 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: sepia@ceph.com, ceph-devel@vger.kernel.org, Loic Dachary <ldachary@redhat.com>, Xinxin Shu <xinxin.shu@intel.com>, Alfredo Deza <adeza@redhat.com>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-I am all for it!
+Hi all,
 
+We've recently experienced a broken router than was corrupting packets
+in way that the tcp checksums were still valid. There has been some
+resulting data corruption -- thus far the confirmed corruptions were
+outside of Ceph communications -- but it has made us want to double
+check the Ceph messenger crc32c code.
 
-Thx
-YuriW
+We have crc32c enabled (as default), and I expected to find some "bad
+crc" messages logged on the clients and/or osds, but thus far we
+haven't found any.
 
------ Original Message -----
-From: "Sage Weil" <sage@newdream.net>
-To: "Yuri Weinstein" <yweinste@redhat.com>
-Cc: sepia@ceph.com, ceph-devel@vger.kernel.org, "Loic Dachary" <ldachary@redhat.com>, "Xinxin Shu" <xinxin.shu@intel.com>, "Alfredo Deza" <adeza@redhat.com>
-Sent: Wednesday, June 17, 2015 8:13:17 PM
-Subject: VPS memory
+Is there a unit test which validates this mechanism, e.g. one which
+intentionally corrupts a Message then confirms that the crc code drops
+it? I didn't find anything relevant in src/test/, but I'm not too
+familiar with the framework.
 
-On Wed, 17 Jun 2015, Yuri Weinstein wrote:
-> - upgrade/dumpling-firefly-x (to hammer)(distros) - runs out of memory on vps and unreliable
-
-How about we
-
-- half the number of vps's per node.
-- double the default ram per vps instance
-- double the cpu?
-
-It'll mean lower test throughput, but (hopefully) reliable test results.  
-Given the amount of time we waste sifting through noisy results that seems 
-like a better path?
-
-sage
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thanks in advance, Dan
