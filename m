@@ -1,213 +1,84 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: [RFC] Implement a new journal mode
-Date: Thu, 18 Jun 2015 07:14:17 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1506180708590.23826@cobra.newdream.net>
-References: <55683011.7000307@ubuntukylin.com> <alpine.DEB.2.00.1505290840180.6462@cobra.newdream.net> <556D774E.4050702@ubuntukylin.com> <alpine.DEB.2.00.1506020759440.9814@cobra.newdream.net> <5582C8D7.6090201@ubuntukylin.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Interested in ceph OSD encryption and key management
+Date: Thu, 18 Jun 2015 07:31:05 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1506180716260.23826@cobra.newdream.net>
+References: <1432787005.11787.33.camel@catalyst.net.nz> <alpine.DEB.2.00.1505281257490.6462@cobra.newdream.net> <1434508656.26942.19.camel@catalyst.net.nz> <alpine.DEB.2.00.1506162115350.16406@cobra.newdream.net> <5582C8F2.2010604@redhat.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:57674 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755299AbbFROOU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 18 Jun 2015 10:14:20 -0400
-In-Reply-To: <5582C8D7.6090201@ubuntukylin.com>
+Received: from cobra.newdream.net ([66.33.216.30]:35181 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753463AbbFRObG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Jun 2015 10:31:06 -0400
+In-Reply-To: <5582C8F2.2010604@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Li Wang <liwang@ubuntukylin.com>
-Cc: Samuel Just <sjust@redhat.com>, Josh Durgin <jdurgin@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Milan Broz <mbroz@redhat.com>
+Cc: Andrew Bartlett <abartlet@catalyst.net.nz>, ceph-devel@vger.kernel.org
 
-On Thu, 18 Jun 2015, Li Wang wrote:
-> Hi Sage,
->   I think we can process the write in the following steps,
-> (1) Submit transaction A to journal, include a PGLog update and a
-> write zero operation at <offset, length>
-> (2) Write the object at <offset, length>
-> (3) Submit a transaction B to journal, include a PGLog update and the metadata
-> update, if successfully submitted, it will disable the write
-> zero operation at <offset, length> in Step (1)
-> 
-> The steps are ordered. In fact, if all done successfully, the object will be
-> updated for two versions.
-> 
-> Fault Tolerance
-> 1 Crash before (1) done, nothing will happen
-> 2 Crash before (3) done, the object will be updated for one version on at
-> least one copy, the local journal replay plus peering will recover the PG to a
-> consistent state: with the written area on all copies are zero
-> 3 Crash after at least one copy has done (3), then local journal replay
-> and peering will recover the PG to a consistent state
-> 
-> With this process, it is transparent to scrub. We will describe it in
-> detail at the blueprint page later.
-> 
-> What do you think?
+Hi Milan-
 
-It solves the scrub issue nicely.  However, it think it breaks the client 
-behavior.  The overwrite-in-place works from RBD's perspective because 
-block device semantics are such that we are happy with either old or new 
-content on an interrupted write.  With the above, a crash will result in a 
-zeroed region.  If the client though the request was acked it won't 
-resend.. and even if it does, we don't handle the case where the client 
-also fails and can't resend.
+On Thu, 18 Jun 2015, Milan Broz wrote:
+> On 06/17/2015 06:16 AM, Sage Weil wrote:
+> >>> The wiki logins are broken, but ignore that.. we're moving to 
+> >>> tracker.ceph.com's wiki shortly anyway.  Email is best in the meantime!
+> >>
+> >> This proposal seems not have to have it to the new wiki.  Is it still
+> >> alive?  What do we need to do to keep this moving?
+> 
+> I am not able to even login to wiki, seems logins are still completely broken.
+> Probably nobody can edit it now?
 
-I think that the old-or-new semantic requirement is at odds with the 
-zeroing strategy.  It seems like the only way to make this work is to 
-have RADOS ignore scrub errors within that region (or on the whole object) 
-if it is marked unstable.  :/
+The old wiki is frozen.. see the new wiki at 
+http://tracker.ceph.com/projects/ceph/wiki (not much there yet).  Jewel 
+CDS blueprints are at
+
+	http://tracker.ceph.com/projects/ceph/wiki/Jewel
+
+> > I can create a placeholder session.  Can you two hash out a proposal over 
+> > the next week or so to discuss?  I think there are some tricky questions 
+> > if petera is used if we want it to integrate with the monitors as well 
+> > (e.g., leverage the monitors for updating/distributing the petera 
+> > certs/keys).
+> 
+> Yes, but later please. We have a lot of fun with selinux and other things,
+> this feature could follow later.
+> 
+> BTW Petera is now renamed to Deo (and should be in Fedora packaged already).
+
+(Good to hear--petera had bad google mojo.)
+
+> The idea was:
+> 
+> - use LUKS as the encryption format
+> 
+> - use Deo to map OSD, for more info see
+>   https://github.com/npmccallum/deo
+> 
+>   In short, Deo will connect to MON node and negotiate key and directly
+>   unlock LUKS device.
+>   (New version now uses libcryptsetup direcly, so it is really one client binary.)
+> 
+>   There must be a service listening on MONs nodes (Deo server).
+> 
+>   I have no idea yet how problematic will be handling certificates here, but
+>   because it ensures authentication and encrypts communication, it seems like
+>   a nice design.
+
+I think the ceph-mon piece is that we would need a monitor service that is 
+responsible for storing/distributing the certs/keys.  In order to make 
+them visible to Deo, we'd need them to be stored in plaintext in a simple 
+directory structure in /var/lib/ceph/mon/$cluster-$id/ somewhere.  If 
+we simply co-opt config-key to do this, or do this for a subset of the 
+config-key namespace, this should be pretty simple.
+
+Do you know what the server-side file/directory should look like for Deo?
+
+>   Anyway, delegating this task to one simple tool (maintained independently
+>   of Ceph) is IMHO a good idea and the whole integration should not be complicated.
+>   (Moreover it will allow easy integration with FreeIPA and similar tools later.)
+
+Yeah.  My assumption is that this is essentially swapping out the bits 
+that use the ceph mons to install keys?
 
 sage
-
-> 
-> Cheers,
-> Li Wang
-> 
-> On 2015/6/3 8:49, Sage Weil wrote:
-> > On Tue, 2 Jun 2015, Li Wang wrote:
-> > > I think for scrub, we have a relatively easy way to solve it,
-> > > add a field to object metadata with the value being either UNSTABLE
-> > > or STABLE, the algorithm is as below,
-> > > 1 Mark the object be UNSTABLE
-> > > 2 Perform object data write
-> > > 3 Perform metadata write and MARK the object STABLE
-> > > The order of the three steps are enforced, and the step 1 and 3 are
-> > > written into journal, while step 2 is performed directly on the object.
-> > > For scrub, it could now distinguish this situation, and one feasible
-> > > policy could be to find the copy with the latest metadata, and
-> > > synchronize the data of that copy to others.
-> > 
-> > If you have some failure and some copies are unstable and some are stable,
-> > then sure, you can recover.  What do you do if all copies are unstable?
-> > You can arbitrarily sync them up (just pick a copy), but if you mark it
-> > stable, you have to pick a version to go with it... is it new or old?
-> > 
-> > > For this metadata-only journal mode, I think it does not contradict
-> > > with new store, since they address different scenarios. Metadata-only
-> > > journal mode mainly focuses on the scenarios that data consistency
-> > > does not need be ensured by RADOS itself. And it is especially appealing
-> > > for the scenarios with many random small OVERWRITES, for example, RBD
-> > > in cloud environment. While new store is great for CREATE and APPEND,
-> > > for many random small OVERWRITES, new store is not
-> > > very easy to optimize. It seems the only way is to introduce small size
-> > > of fragments and turn those OVERWRITES into APPEND. However, in that
-> > > case, many small OVERWRITES could cause many small files on the local
-> > > file system, it will slow down the subsequent read/write performance of
-> > > the object, so it seems not worthy. Of course, a small-file-merge
-> > > process could be introduced, but that complicates the design.
-> > 
-> > Yeah, I see the use-case.  I'm just worried about what else is would
-> > affect.
-> > 
-> > This would take the form of... a flag on ObjectStore's write, indicating
-> > it is allowed to be leave the object in some nondeterministic state?  Is
-> > the rule that only the bytes indicated by the write may be changed (to
-> > either new or old values), or is allowed to corrupt the entire object?
-> > 
-> > sage
-> > 
-> > 
-> > > So basically, I think new store is great for some of the scenarios,
-> > > while metadata-only is desirable for some others, they do not
-> > > contradict with each other, what do you think?
-> > > 
-> > > Cheers,
-> > > Li Wang
-> > > 
-> > > 
-> > > 
-> > > On 2015/6/1 8:39, Sage Weil wrote:
-> > > > On Fri, 29 May 2015, Li Wang wrote:
-> > > > > An important usage of Ceph is to integrate with cloud computing
-> > > > > platform
-> > > > > to provide the storage for VM images and instances. In such scenario,
-> > > > > qemu maps RBD as virtual block devices, i.e., disks to a VM, and
-> > > > > the guest operating system will format the disks and create file
-> > > > > systems on them. In this case, RBD mostly resembles a 'dumb' disk.  In
-> > > > > other words, it is enough for RBD to implement exactly the semantics
-> > > > > of
-> > > > > a disk controller driver. Typically, the disk controller itself does
-> > > > > not provide a transactional mechanism to ensure a write operation done
-> > > > > atomically. Instead, it is up to the file system, who manages the
-> > > > > disk,
-> > > > > to adopt some techniques such as journaling to prevent inconsistency,
-> > > > > if necessary. Consequently, RBD does not need to provide the
-> > > > > atomic mechanism to ensure a data write operation done atomically,
-> > > > > since the guest file system will guarantee that its write operations
-> > > > > to
-> > > > > RBD will remain consistent by using journaling if needed. Another
-> > > > > scenario is for the cache tiering, while cache pool has already
-> > > > > provided the durability, when dirty objects are written back, they
-> > > > > theoretically need not go through the journaling process of base pool,
-> > > > > since the flusher could replay the write operation. These motivate us
-> > > > > to implement a new journal mode, metadata-only journal mode, which
-> > > > > resembles the data=ordered journal mode in ext4. With such journal
-> > > > > mode
-> > > > > is on, object data are written directly to their ultimate location,
-> > > > > when data written finished, metadata are written into the journal,
-> > > > > then
-> > > > > the write returns to caller. This will avoid the double-write penalty
-> > > > > of object data due to the WRITE-AHEAD-LOGGING, potentially greatly
-> > > > > improve the RBD and cache tiering performance.
-> > > > > 
-> > > > > The algorithm is straightforward, as before, the master send
-> > > > > transaction to slave, then they extract the object data write
-> > > > > operations and apply them to objects directly, next they write the
-> > > > > remaining part of the transaction into journal, then slave ack master,
-> > > > > master ack client. For some special operations such as 'clone', they
-> > > > > can be processed as before by throwing the entire transaction into
-> > > > > journal, which makes this approach an absolutely-better optimization
-> > > > > in terms of performance.
-> > > > > 
-> > > > > In terms of consistency, metadata consistency is ensured, and
-> > > > > the data consistency of CREATE and APPEND are also ensured, just for
-> > > > > OVERWRITE, it relies on the caller, i.e., guest file system for RBD,
-> > > > > cache flusher for cache tiering to ensure the consistency. In
-> > > > > addition,
-> > > > > there remains a problem to be discussed that how to interact with the
-> > > > > scrub process while the object data consistency may not ensured now.
-> > > > 
-> > > > Right.  This is appealing from a performance perspective, but I'm
-> > > > worried
-> > > > it will throw out too many other assumptions in RADOS that will cause
-> > > > pain.  The big one is that RADOS will no longer know if the version on
-> > > > the
-> > > > object metadata matches the data.  This will be most noticeable from
-> > > > scrub, which will have no idea whether the inconsistency is from a
-> > > > partial
-> > > > write or from a disk error.  And when that happens, it would have to
-> > > > guess
-> > > > which object is the right one--a guess that can easily be wrong if there
-> > > > is rebalancing or recovery that may replicate the partially updated
-> > > > object.
-> > > > 
-> > > > Maybe we can journal metadata before applying the write to indicate the
-> > > > object is 'unstable' (undergoing an overwrite) to help out?
-> > > > 
-> > > > I'm not sure.  Honestly, I would be more interested in investing our
-> > > > time
-> > > > in making the new OSD backends handle overwrite more efficiently, by
-> > > > avoiding write-ahead in the easy cases (append, create) as newstore
-> > > > does, and/or by doing some sort of COW when we do overwrite, or some
-> > > > other
-> > > > magic that does an atomic swap-data-into-position (e.g., by abusing the
-> > > > xfs defrag ioctl).
-> > > > 
-> > > > What do you think?
-> > > > sage
-> > > > 
-> > > > 
-> > > >    >
-> > > > > We are actively working on it and have done part of the
-> > > > > implementation,
-> > > > > want to hear the feedback of the community, and we may submit it as a
-> > > > > blueprint to under discussion in coming CDS.
-> > > > > 
-> > > > > Cheers,
-> > > > > Li Wang
-> > > > > 
-> > > > > 
-> > > > 
-> > > 
-> > > 
-> > 
-> 
-> 
