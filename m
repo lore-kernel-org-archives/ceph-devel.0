@@ -1,63 +1,132 @@
-From: Milan Broz <mbroz@redhat.com>
-Subject: Re: Interested in ceph OSD encryption and key management
-Date: Thu, 18 Jun 2015 15:34:42 +0200
-Message-ID: <5582C8F2.2010604@redhat.com>
-References: <1432787005.11787.33.camel@catalyst.net.nz> <alpine.DEB.2.00.1505281257490.6462@cobra.newdream.net> <1434508656.26942.19.camel@catalyst.net.nz> <alpine.DEB.2.00.1506162115350.16406@cobra.newdream.net>
+From: Owen Synge <osynge@suse.com>
+Subject: Re: Build RPMs from git
+Date: Thu, 18 Jun 2015 15:44:36 +0200
+Message-ID: <5582CB44.1060001@suse.com>
+References: <CAANLjFqtNxo=CPwar3OYP9es-+5LgTbmiNgd_4RSCcndb_iCNA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:59059 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755985AbbFRNep (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 18 Jun 2015 09:34:45 -0400
-In-Reply-To: <alpine.DEB.2.00.1506162115350.16406@cobra.newdream.net>
+Received: from mail.emea.novell.com ([130.57.118.101]:58732 "EHLO
+	mail.emea.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752262AbbFRNqH (ORCPT
+	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+	Thu, 18 Jun 2015 09:46:07 -0400
+In-Reply-To: <CAANLjFqtNxo=CPwar3OYP9es-+5LgTbmiNgd_4RSCcndb_iCNA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, Andrew Bartlett <abartlet@catalyst.net.nz>
-Cc: ceph-devel@vger.kernel.org
+To: Robert LeBlanc <robert@leblancnet.us>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On 06/17/2015 06:16 AM, Sage Weil wrote:
->>> The wiki logins are broken, but ignore that.. we're moving to 
->>> tracker.ceph.com's wiki shortly anyway.  Email is best in the meantime!
->>
->> This proposal seems not have to have it to the new wiki.  Is it still
->> alive?  What do we need to do to keep this moving?
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
 
-I am not able to even login to wiki, seems logins are still completely broken.
-Probably nobody can edit it now?
+Hi Robert,
 
-> I can create a placeholder session.  Can you two hash out a proposal over 
-> the next week or so to discuss?  I think there are some tricky questions 
-> if petera is used if we want it to integrate with the monitors as well 
-> (e.g., leverage the monitors for updating/distributing the petera 
-> certs/keys).
+I have a pull request open for exactly this use case.
 
-Yes, but later please. We have a lot of fun with selinux and other things,
-this feature could follow later.
+    https://github.com/ceph/ceph/pull/4911
 
-BTW Petera is now renamed to Deo (and should be in Fedora packaged already).
+I find it particularly useful for debugging spec file issues when
+running on other operating systems than suse.
 
-The idea was:
+The pull request gives two new "make' targets.
 
-- use LUKS as the encryption format
+    make srpm
+    make rpm
 
-- use Deo to map OSD, for more info see
-  https://github.com/npmccallum/deo
+I hope this helps.
 
-  In short, Deo will connect to MON node and negotiate key and directly
-  unlock LUKS device.
-  (New version now uses libcryptsetup direcly, so it is really one client binary.)
+(1) merge this pull request to make it all work.
 
-  There must be a service listening on MONs nodes (Deo server).
+(2) sh autogen.sh
 
-  I have no idea yet how problematic will be handling certificates here, but
-  because it ensures authentication and encrypts communication, it seems like
-  a nice design.
+(3) ./configure
 
-  Anyway, delegating this task to one simple tool (maintained independently
-  of Ceph) is IMHO a good idea and the whole integration should not be complicated.
-  (Moreover it will allow easy integration with FreeIPA and similar tools later.)
+(4) make rpm
 
-Milan
+Your done :)
 
+best regards
+
+Owen
+
+On 06/09/2015 11:15 PM, Robert LeBlanc wrote:
+> OK, easy question...
+>=20
+> Building Debian packages from git is wonderfully easy, RPMs seem ....
+> not so easy.
+>=20
+> I got it to kind of work, but I feel like I'm doing it the "Hard Way"=
+ (tm).
+>=20
+> mkdir -p ~/ceph && pushd ~/ceph
+> git clone https://github.com/ceph/ceph.git
+> ./autogen.sh
+> ./configure
+> echo "--- /root/ceph/ceph/ceph.spec   2015-06-09 13:03:08.240099443 -=
+0600
+> +++ /root/rpmbuild/SPECS/ceph.spec      2015-06-09 13:12:54.145061355=
+ -0600
+> @@ -464,12 +464,14 @@
+>  # common
+>  ####################################################################=
+#############
+>  %prep
+> -%setup -q
+> +#%setup -q
+> +cd %{buildroot}
+>  %if 0%{?fedora} || 0%{?rhel}
+>  %patch0 -p1 -b .init
+>  %endif
+>=20
+>  %build
+> +cd %{buildroot}
+>  # Find jni.h
+>  for i in /usr/{lib64,lib}/jvm/java/include{,/linux}; do
+>      [ -d $i ] && java_inc=3D"$java_inc -I$i"" | patch
+> rpmbuild -ba ceph.spec --define 'buildroot `pwd/ceph`'
+>=20
+> It coughs at the install/RPM package part.
+>=20
+> Any help with preventing the whole tar/untar process which I can't
+> seem to get exactly right either would be very helpful.
+>=20
+> Thanks,
+>=20
+> ----------------
+> Robert LeBlanc
+> GPG Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+
+- --=20
+SUSE LINUX GmbH, GF: Jeff Hawn, Jennifer Guild, Felix Imend=F6rffer, HR=
+B
+21284 (AG
+N=FCrnberg)
+
+Maxfeldstra=DFe 5
+
+90409 N=FCrnberg
+
+Germany
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
+
+iQEcBAEBAgAGBQJVgstEAAoJECe/2BuiZiboGrAH/jqGIE5yGAgrSIRGJ+TonzjY
+vUNTQz9wR0P1MUWPV3WeEQaX5tiUPGJZ9i7DkLq+sUiOojHDda37sePm1vx68uiO
+C1+Ea8FN7Rw4L+M2eqQbwNbOfLjLakxotudZxMWuUhm9NDKF218BLUZpyFJJfJYK
+sBm4GEWp++r3cOXtzMJck4Pet4KIrr34vhS+6SyUo5inivJzw0SApF4ro2Zz13m7
+WzfyxJDf83VbQvZ0jgucZZz44lBD5804lEGOBXVX6fzFI2Mr7UhL+jJqCIJ2rzOr
+94zSz4vpP1Sv2dbgGXEDRJtMZZay7shPQ4hpiPwZTtdgBYPC5h6kLZUestowUfA=3D
+=3DqfrD
+-----END PGP SIGNATURE-----
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
