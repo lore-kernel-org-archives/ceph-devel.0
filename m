@@ -1,42 +1,42 @@
-From: Dan van der Ster <dan@vanderster.com>
-Subject: unit test for messaging crc32c
-Date: Thu, 18 Jun 2015 09:36:00 +0200
-Message-ID: <CABZ+qqndvbGM-nK8FDsyaC=iEV_B6-WxR87ndOuJu6oZ=qXcXA@mail.gmail.com>
+From: =?utf-8?B?RGHFgmVrLCBQaW90cg==?= <Piotr.Dalek@ts.fujitsu.com>
+Subject: RE: unit test for messaging crc32c
+Date: Thu, 18 Jun 2015 09:53:49 +0200
+Message-ID: <90559C83A9C7FA45B5846C975DFA612DDB4C1843F0@ABGEX73E.FSC.NET>
+References: <CABZ+qqndvbGM-nK8FDsyaC=iEV_B6-WxR87ndOuJu6oZ=qXcXA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f44.google.com ([209.85.215.44]:36567 "EHLO
-	mail-la0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752409AbbFRHgo (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Jun 2015 03:36:44 -0400
-Received: by lacny3 with SMTP id ny3so48891747lac.3
-        for <ceph-devel@vger.kernel.org>; Thu, 18 Jun 2015 00:36:42 -0700 (PDT)
-Received: from mail-la0-f51.google.com (mail-la0-f51.google.com. [209.85.215.51])
-        by mx.google.com with ESMTPSA id ky7sm1557295lab.37.2015.06.18.00.36.41
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 18 Jun 2015 00:36:41 -0700 (PDT)
-Received: by labbc20 with SMTP id bc20so48919966lab.1
-        for <ceph-devel@vger.kernel.org>; Thu, 18 Jun 2015 00:36:41 -0700 (PDT)
+Received: from dgate10.ts.fujitsu.com ([80.70.172.49]:52474 "EHLO
+	dgate10.ts.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752783AbbFRHxx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Jun 2015 03:53:53 -0400
+In-Reply-To: <CABZ+qqndvbGM-nK8FDsyaC=iEV_B6-WxR87ndOuJu6oZ=qXcXA@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi all,
-
-We've recently experienced a broken router than was corrupting packets
-in way that the tcp checksums were still valid. There has been some
-resulting data corruption -- thus far the confirmed corruptions were
-outside of Ceph communications -- but it has made us want to double
-check the Ceph messenger crc32c code.
-
-We have crc32c enabled (as default), and I expected to find some "bad
-crc" messages logged on the clients and/or osds, but thus far we
-haven't found any.
-
-Is there a unit test which validates this mechanism, e.g. one which
-intentionally corrupts a Message then confirms that the crc code drops
-it? I didn't find anything relevant in src/test/, but I'm not too
-familiar with the framework.
-
-Thanks in advance, Dan
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZn
+ZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtDQo+IG93bmVyQHZnZXIua2VybmVsLm9y
+Z10gT24gQmVoYWxmIE9mIERhbiB2YW4gZGVyIFN0ZXINCj4gDQo+IEhpIGFsbCwNCj4gDQo+IFdl
+J3ZlIHJlY2VudGx5IGV4cGVyaWVuY2VkIGEgYnJva2VuIHJvdXRlciB0aGFuIHdhcyBjb3JydXB0
+aW5nIHBhY2tldHMgaW4NCj4gd2F5IHRoYXQgdGhlIHRjcCBjaGVja3N1bXMgd2VyZSBzdGlsbCB2
+YWxpZC4gVGhlcmUgaGFzIGJlZW4gc29tZSByZXN1bHRpbmcNCj4gZGF0YSBjb3JydXB0aW9uIC0t
+IHRodXMgZmFyIHRoZSBjb25maXJtZWQgY29ycnVwdGlvbnMgd2VyZSBvdXRzaWRlIG9mIENlcGgN
+Cj4gY29tbXVuaWNhdGlvbnMgLS0gYnV0IGl0IGhhcyBtYWRlIHVzIHdhbnQgdG8gZG91YmxlIGNo
+ZWNrIHRoZSBDZXBoDQo+IG1lc3NlbmdlciBjcmMzMmMgY29kZS4NCj4gDQo+IFdlIGhhdmUgY3Jj
+MzJjIGVuYWJsZWQgKGFzIGRlZmF1bHQpLCBhbmQgSSBleHBlY3RlZCB0byBmaW5kIHNvbWUgImJh
+ZCBjcmMiDQo+IG1lc3NhZ2VzIGxvZ2dlZCBvbiB0aGUgY2xpZW50cyBhbmQvb3Igb3NkcywgYnV0
+IHRodXMgZmFyIHdlIGhhdmVuJ3QgZm91bmQNCj4gYW55Lg0KPiANCj4gSXMgdGhlcmUgYSB1bml0
+IHRlc3Qgd2hpY2ggdmFsaWRhdGVzIHRoaXMgbWVjaGFuaXNtLCBlLmcuIG9uZSB3aGljaA0KPiBp
+bnRlbnRpb25hbGx5IGNvcnJ1cHRzIGEgTWVzc2FnZSB0aGVuIGNvbmZpcm1zIHRoYXQgdGhlIGNy
+YyBjb2RlIGRyb3BzIGl0PyBJDQo+IGRpZG4ndCBmaW5kIGFueXRoaW5nIHJlbGV2YW50IGluIHNy
+Yy90ZXN0LywgYnV0IEknbSBub3QgdG9vIGZhbWlsaWFyIHdpdGggdGhlDQo+IGZyYW1ld29yay4N
+Cg0KQWN0dWFsbHksIGFsbCBpdCB0YWtlcyBpcyBqdXN0IHRvIGRpc2FibGUgQ1JDIGluIGNvbmZp
+Z3VyYXRpb24gb24gb25lIG5vZGUgKG9yIGV2ZW4gDQpkYWVtb24pLiBJdCdsbCBjYXVzZSB0byBw
+dXQgemVyb3MgaW4gQ1JDIGZpZWxkcyBpbiBhbGwgbWVzc2FnZXMgc2VudCwgdHJpZ2dlcmluZw0K
+Q1JDIGNoZWNrIGZhaWx1cmVzIGNsdXN0ZXItd2lkZSAob24gcmVtYWluaW5nLCB1bmFmZmVjdGVk
+IG5vZGVzL2RhZW1vbnMpLg0KDQpUaGVyZSdzIGFsc28gaW50ZXJuYWwgQ1JDMzIgY2FsY3VsYXRv
+ciB0ZXN0IGluIHNyYy90ZXN0L2NvbW1vbi90ZXN0X2NyYzMyYy5jYy4NCg0KV2l0aCBiZXN0IHJl
+Z2FyZHMgLyBQb3pkcmF3aWFtDQpQaW90ciBEYcWCZWsNCg0K
