@@ -1,36 +1,30 @@
-From: David Zafman <dzafman@redhat.com>
-Subject: rsyslogd
-Date: Thu, 18 Jun 2015 16:13:07 -0700
-Message-ID: <55835083.9040908@redhat.com>
+From: Sage Weil <sage@newdream.net>
+Subject: wip-systemd
+Date: Thu, 18 Jun 2015 17:10:57 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1506181653300.15981@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:50437 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:48797 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751467AbbFRXNJ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 18 Jun 2015 19:13:09 -0400
-Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
-	by mx1.redhat.com (Postfix) with ESMTPS id 49C22319839
-	for <ceph-devel@vger.kernel.org>; Thu, 18 Jun 2015 23:13:09 +0000 (UTC)
+	id S1750791AbbFSALA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 18 Jun 2015 20:11:00 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>, ceph-devel@vger.kernel.org
+To: osynge@suse.com, ceph-devel@vger.kernel.org
 
+Hey Owen,
 
-Greg,
+I suggest we create a wip-systemd branch where we pile in all of the fixes 
+around getting systemd working properly.  Right now we're super 
+conservative about merging into master to avoid breaking things but it'll 
+be easier to test everything all at once and it'll help me get packages 
+prepared that I can play with on this end.
 
-Have you changed anything (log rotation related?) that would uninstall 
-or  cause rsyslog to not be able to start?
+What do you think?
 
-I'm sometimes seeing machines fail with this error probably in 
-teuthology/nuke.py reset_syslog_dir().
+The other pile is wip-user... I'm inclined to get systemd going 
+first before adding this complexity, though!
 
-CommandFailedError: Command failed on plana94 with status 1: 'sudo rm -f 
--- /etc/rsyslog.d/80-cephtest.conf && sudo service rsyslog restart'
-
-
-David
-
-
+sage
 
