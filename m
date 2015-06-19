@@ -1,237 +1,196 @@
-From: Li Wang <liwang@ubuntukylin.com>
-Subject: Re: [RFC] Implement a new journal mode
-Date: Fri, 19 Jun 2015 11:45:46 +0800
-Message-ID: <5583906A.4090500@ubuntukylin.com>
-References: <55683011.7000307@ubuntukylin.com> <alpine.DEB.2.00.1505290840180.6462@cobra.newdream.net> <556D774E.4050702@ubuntukylin.com> <alpine.DEB.2.00.1506020759440.9814@cobra.newdream.net> <5582C8D7.6090201@ubuntukylin.com> <alpine.DEB.2.00.1506180708590.23826@cobra.newdream.net>
+From: Harshal Gupta <harshal.gupta001@gmail.com>
+Subject: Re: Bucket name restrictions in RGW
+Date: Fri, 19 Jun 2015 09:43:53 +0530
+Message-ID: <CAPRac-aaq-8eaxrH2D3SUAiKg9UGDEwrCKkuE2X5Mk0E=QknjA@mail.gmail.com>
+References: <CAPRac-aj5YrKXrxxd_YTM-VJcNmS8j1zw_BToSwSdmd5nhv9cQ@mail.gmail.com>
+ <557B2875.1090505@42on.com> <robbat2-20150612T220814-235406925Z@orbis-terrarum.net>
+ <1505040171.13879951.1434150828495.JavaMail.zimbra@redhat.com>
+ <robbat2-20150612T232131-467242919Z@orbis-terrarum.net> <557C9185.1050305@42on.com>
+ <87lhfmx3f4.fsf@gmail.com> <CAPRac-a=Z=y2ViuHCzVUE1uAMXv+vAH3w05ApojoByCsMkUtXA@mail.gmail.com>
+ <CAPRac-Z7QvMTmsj-CyQZwmxgBnrydxXomQmddvX8SgUkdGphzQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m59-178.qiye.163.com ([123.58.178.59]:60014 "EHLO
-	m59-178.qiye.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932078AbbFSDq3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 18 Jun 2015 23:46:29 -0400
-In-Reply-To: <alpine.DEB.2.00.1506180708590.23826@cobra.newdream.net>
+Received: from mail-wg0-f48.google.com ([74.125.82.48]:35955 "EHLO
+	mail-wg0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751384AbbFSEOP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Jun 2015 00:14:15 -0400
+Received: by wguu7 with SMTP id u7so7060203wgu.3
+        for <ceph-devel@vger.kernel.org>; Thu, 18 Jun 2015 21:14:13 -0700 (PDT)
+In-Reply-To: <CAPRac-Z7QvMTmsj-CyQZwmxgBnrydxXomQmddvX8SgUkdGphzQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Samuel Just <sjust@redhat.com>, Josh Durgin <jdurgin@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Abhishek L <abhishek.lekshmanan@gmail.com>, Wido den Hollander <wido@42on.com>, "Robin H. Johnson" <robbat2@gentoo.org>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-1  Submit transaction A into journal, mark a <offset, length>
-non-journaling data write in pglog (peering) or omap/xattrs(scrub)
-2 Write data to object
-3 Submit transaction B into journal, to update the metadata as well as
-pglog as usual
+Hi,
+I will be raising a pull request. Please merge the code if you feel
+everything fine.
 
-I think the problem is far from severe, as long as one OSD in the PG
-has succeeded, the PG will be recovered to a consistent and correct
-state by peering; The only problematical situation is the PG down as a
-whole, and none of the OSDs has finished Step (3), and at least one of
-the OSDs has finished Step (1). In that case, we revise peering or
-scrub to make them realize the semantics of transaction A, and randomly
-choose one osd to synchronize its content of written area to other
-copies. We prefer to leave it the scrub's job. Since scrub is done
-asynchronously, and maybe be scheduled to run late, during this period, 
-client's resend may have recovered the content to consistent.
+On Thu, Jun 18, 2015 at 11:28 PM, Harshal Gupta
+<harshal.gupta001@gmail.com> wrote:
+> Hi,
+> I collaborated with Robin on this and finally came with the
+> implementation which will provide backward compatibility for the
+> existing users and is configurable for new users.
+>
+> Also the strictness levels can be further extended if we wish to
+> further impose more restrictions over naming convention of buckets.
+> The current solutions is as follows:
+>
+> 1. Created two configurable options.
+> a. rgw_s3_bucket_name_access_strictness b. rgw_s3_bucket_name_create_strictness
+> Both can have values 0, 1 and 2 which signifies :
+> 0 - Follows same validation rules as already present with flag
+> relaxed_name=true.
+> 1 - Follows same validation rules as already present with flag
+> relaxed_names=false.
+> 2 - Follows new naming rules as per DNS compliance. (similar to what S3 follows)
+>
+> 2. Users can configure both flags independently so as to access
+> already created buckets and to create new buckets, with creation
+> always more or equally stricter than access. and can pass those
+> options in existing
+> RGWHandler_ObjStore_s3::validate_bucket_name(bucket, relaxed_names) in
+> place of 'relaxed_names' and appropriate checks will be then applied
+> to bucket name depending upon the value of strictness option.
+>
+> 3. Implemented a new method call to
+> RGWHandler_ObjStore_s3::validate_bucket_name(bucket, name_strictness)
+> from RGWCreateBucket::pre_exec() so as to avoid interference with
+> already running functionality. This call will pass create strictness
+> option for further validation of bucket name specifically for
+> creation, based on the configured create strictness level
+>
+> 4. Added virtual method validate_bucket_name(const string&, int) in
+> RGWHandler for polymorphism and compile time check.
+>
+> You can find the changes here :
+>
+> https://github.com/ceph/ceph/compare/master...harshalgupta:wip-bucket_name_restrictions
+>
+> Please review it and let me know your concerns and suggestions. I am
+> thinking about raising a pull request by EOD.
+>
+> Thanks,
+>
+> On Mon, Jun 15, 2015 at 10:56 PM, Harshal Gupta
+> <harshal.gupta001@gmail.com> wrote:
+>> Hi, according to the inputs from the thread, I have included following
+>> changes for adding more restrictions to the RGW bucket name :
+>>
+>> 1. removed previous boolean flag for specifying bucket naming rule and
+>> added a int option with values 0,1,2
+>>
+>> -OPTION(rgw_relaxed_s3_bucket_names, OPT_BOOL, false) // enable
+>> relaxed bucket name rules for US region buckets
+>> +
+>> +/*
+>> + * RGW Bucket name restriction option. values can be {0,1,2). Default
+>> value is 1.
+>> + * Setting value as 0 : enable relaxed bucket name rules for US region buckets.
+>> + * Setting as 1 : name can't start with a non-alphanumeric. rest same
+>> as value =1.
+>> + * Setting as 2 : further restricts name so as to follow AWS S3
+>> bucket naming conventions for non-standard regions.
+>> + */
+>> +OPTION(rgw_s3_bucket_names_strictness, OPT_INT, 1)
+>>
+>> As per my understanding existing users can change the options in
+>> configuration file anytime, so just by giving an update in
+>> documentation for this, we can enable old users to continue as it is.
+>> Please correct me if I am wrong.
+>>
+>> 2. As suggested by Robin, added two functions which will take care of
+>> validating bucket name according to the above 3 values, to avoid
+>> repetitive code in
+>> RGWHandler_ObjStore_S3::validate_bucket_name(const string& bucket, int
+>> name_strictness)
+>>
+>> You can find the changes here :
+>>
+>> https://github.com/ceph/ceph/commit/ae33e144a10d170823641bdf750628857912f656?diff=split
+>>
+>> Please review it and if you find it OK, I will go ahead and raise a
+>> pull request.
+>>
+>> @Abhishek, I think instead of having two boolean flags with almost
+>> same function, it is better to have only an integer one. With an int
+>> Option, we can further configure more rules in future, if needed. What
+>> is your opinion about it.
+>>
+>> Thanks,
+>>
+>> On Sun, Jun 14, 2015 at 11:00 AM, Abhishek L
+>> <abhishek.lekshmanan@gmail.com> wrote:
+>>>
+>>> Wido den Hollander writes:
+>>>
+>>>> On 06/13/2015 01:29 AM, Robin H. Johnson wrote:
+>>>>> On Fri, Jun 12, 2015 at 07:13:48PM -0400,  Yehuda Sadeh-Weinraub wrote:
+>>>>>> Whatever we end up doing, we need to make it configurable, and also
+>>>>>> keep backward compatibility, so that buckets that were created prior
+>>>>>> to such a change will still remain accessible. Some setups would not
+>>>>>> need this limitation and will find it too restricting so I'm not sure
+>>>>>> that it's really that needed. In short, make it configurable.
+>>>>> Configurable:
+>>>>> - Can we obsolete 'rgw relaxed s3 bucket names', and convert it to a new
+>>>>>   option: 'rgw s3 bucket name create strictness'
+>>>>>   Value '0' => existing 'rgw relaxed s3 bucket names = true' logic
+>>>>>   Value '1' => existing 'rgw relaxed s3 bucket names = false' logic
+>>>>>   Value '2' => compliance with AmazonS3 DNS rules
+>>>
+>>> Alternatively we could just add an opt `rgw s3 bucket name create
+>>> strictness` (maybe `rgw s3 bucket dns comply` instead) as a bool which
+>>> would set your value '2' logic when both `relaxed s3 bucket names` and
+>>> this value are set, so that we dont break backwards compatibility?
+>>>>>
+>>>>> Backwards-Compatibility:
+>>>>> - Make a new option 'rgw s3 bucket name access strictness'
+>>>>>   Same values as above, but used to access buckets, not create new ones.
+>>>>> - Proposed default values:
+>>>>>   rgw s3 bucket name create strictness = 2
+>>>>>   rgw s3 bucket name access strictness = 1
+>>>>>
+>>>>> So you can only create DNS-compliant buckets, but still access your
+>>>>> existing non-compliant buckets. Maybe also have keywords of major
+>>>>> releases and 'relaxed' supported in addition to the integer values.
+>>>>>
+>>>>> I don't like the names of the config keys, but I'm coming up blank on
+>>>>> something that is shorter while still being immediately clear.
+>>>>>
+>>>>
+>>>> Seems like a good plan to me. I would like to restrict them as much as
+>>>> possible, but we shouldn't break anything which is online now.
+>>>>
+>>>> --
+>>>> Wido den Hollander
+>>>> 42on B.V.
+>>>> Ceph trainer and consultant
+>>>>
+>>>> Phone: +31 (0)20 700 9902
+>>>> Skype: contact42on
+>>>
+>>> --
+>>> Abhishek
+>>
+>>
+>>
+>> --
+>> HARSHAL GUPTA
+>> Software Engineer
+>> KIWI Inc.
+>
+>
+>
+> --
+> HARSHAL GUPTA
+> Software Engineer
+> KIWI Inc.
 
-Cheers,
-Li Wang
 
 
-On 2015/6/18 22:14, Sage Weil wrote:
-> On Thu, 18 Jun 2015, Li Wang wrote:
->> Hi Sage,
->>    I think we can process the write in the following steps,
->> (1) Submit transaction A to journal, include a PGLog update and a
->> write zero operation at <offset, length>
->> (2) Write the object at <offset, length>
->> (3) Submit a transaction B to journal, include a PGLog update and the metadata
->> update, if successfully submitted, it will disable the write
->> zero operation at <offset, length> in Step (1)
->>
->> The steps are ordered. In fact, if all done successfully, the object will be
->> updated for two versions.
->>
->> Fault Tolerance
->> 1 Crash before (1) done, nothing will happen
->> 2 Crash before (3) done, the object will be updated for one version on at
->> least one copy, the local journal replay plus peering will recover the PG to a
->> consistent state: with the written area on all copies are zero
->> 3 Crash after at least one copy has done (3), then local journal replay
->> and peering will recover the PG to a consistent state
->>
->> With this process, it is transparent to scrub. We will describe it in
->> detail at the blueprint page later.
->>
->> What do you think?
->
-> It solves the scrub issue nicely.  However, it think it breaks the client
-> behavior.  The overwrite-in-place works from RBD's perspective because
-> block device semantics are such that we are happy with either old or new
-> content on an interrupted write.  With the above, a crash will result in a
-> zeroed region.  If the client though the request was acked it won't
-> resend.. and even if it does, we don't handle the case where the client
-> also fails and can't resend.
->
-> I think that the old-or-new semantic requirement is at odds with the
-> zeroing strategy.  It seems like the only way to make this work is to
-> have RADOS ignore scrub errors within that region (or on the whole object)
-> if it is marked unstable.  :/
->
-> sage
->
->>
->> Cheers,
->> Li Wang
->>
->> On 2015/6/3 8:49, Sage Weil wrote:
->>> On Tue, 2 Jun 2015, Li Wang wrote:
->>>> I think for scrub, we have a relatively easy way to solve it,
->>>> add a field to object metadata with the value being either UNSTABLE
->>>> or STABLE, the algorithm is as below,
->>>> 1 Mark the object be UNSTABLE
->>>> 2 Perform object data write
->>>> 3 Perform metadata write and MARK the object STABLE
->>>> The order of the three steps are enforced, and the step 1 and 3 are
->>>> written into journal, while step 2 is performed directly on the object.
->>>> For scrub, it could now distinguish this situation, and one feasible
->>>> policy could be to find the copy with the latest metadata, and
->>>> synchronize the data of that copy to others.
->>>
->>> If you have some failure and some copies are unstable and some are stable,
->>> then sure, you can recover.  What do you do if all copies are unstable?
->>> You can arbitrarily sync them up (just pick a copy), but if you mark it
->>> stable, you have to pick a version to go with it... is it new or old?
->>>
->>>> For this metadata-only journal mode, I think it does not contradict
->>>> with new store, since they address different scenarios. Metadata-only
->>>> journal mode mainly focuses on the scenarios that data consistency
->>>> does not need be ensured by RADOS itself. And it is especially appealing
->>>> for the scenarios with many random small OVERWRITES, for example, RBD
->>>> in cloud environment. While new store is great for CREATE and APPEND,
->>>> for many random small OVERWRITES, new store is not
->>>> very easy to optimize. It seems the only way is to introduce small size
->>>> of fragments and turn those OVERWRITES into APPEND. However, in that
->>>> case, many small OVERWRITES could cause many small files on the local
->>>> file system, it will slow down the subsequent read/write performance of
->>>> the object, so it seems not worthy. Of course, a small-file-merge
->>>> process could be introduced, but that complicates the design.
->>>
->>> Yeah, I see the use-case.  I'm just worried about what else is would
->>> affect.
->>>
->>> This would take the form of... a flag on ObjectStore's write, indicating
->>> it is allowed to be leave the object in some nondeterministic state?  Is
->>> the rule that only the bytes indicated by the write may be changed (to
->>> either new or old values), or is allowed to corrupt the entire object?
->>>
->>> sage
->>>
->>>
->>>> So basically, I think new store is great for some of the scenarios,
->>>> while metadata-only is desirable for some others, they do not
->>>> contradict with each other, what do you think?
->>>>
->>>> Cheers,
->>>> Li Wang
->>>>
->>>>
->>>>
->>>> On 2015/6/1 8:39, Sage Weil wrote:
->>>>> On Fri, 29 May 2015, Li Wang wrote:
->>>>>> An important usage of Ceph is to integrate with cloud computing
->>>>>> platform
->>>>>> to provide the storage for VM images and instances. In such scenario,
->>>>>> qemu maps RBD as virtual block devices, i.e., disks to a VM, and
->>>>>> the guest operating system will format the disks and create file
->>>>>> systems on them. In this case, RBD mostly resembles a 'dumb' disk.  In
->>>>>> other words, it is enough for RBD to implement exactly the semantics
->>>>>> of
->>>>>> a disk controller driver. Typically, the disk controller itself does
->>>>>> not provide a transactional mechanism to ensure a write operation done
->>>>>> atomically. Instead, it is up to the file system, who manages the
->>>>>> disk,
->>>>>> to adopt some techniques such as journaling to prevent inconsistency,
->>>>>> if necessary. Consequently, RBD does not need to provide the
->>>>>> atomic mechanism to ensure a data write operation done atomically,
->>>>>> since the guest file system will guarantee that its write operations
->>>>>> to
->>>>>> RBD will remain consistent by using journaling if needed. Another
->>>>>> scenario is for the cache tiering, while cache pool has already
->>>>>> provided the durability, when dirty objects are written back, they
->>>>>> theoretically need not go through the journaling process of base pool,
->>>>>> since the flusher could replay the write operation. These motivate us
->>>>>> to implement a new journal mode, metadata-only journal mode, which
->>>>>> resembles the data=ordered journal mode in ext4. With such journal
->>>>>> mode
->>>>>> is on, object data are written directly to their ultimate location,
->>>>>> when data written finished, metadata are written into the journal,
->>>>>> then
->>>>>> the write returns to caller. This will avoid the double-write penalty
->>>>>> of object data due to the WRITE-AHEAD-LOGGING, potentially greatly
->>>>>> improve the RBD and cache tiering performance.
->>>>>>
->>>>>> The algorithm is straightforward, as before, the master send
->>>>>> transaction to slave, then they extract the object data write
->>>>>> operations and apply them to objects directly, next they write the
->>>>>> remaining part of the transaction into journal, then slave ack master,
->>>>>> master ack client. For some special operations such as 'clone', they
->>>>>> can be processed as before by throwing the entire transaction into
->>>>>> journal, which makes this approach an absolutely-better optimization
->>>>>> in terms of performance.
->>>>>>
->>>>>> In terms of consistency, metadata consistency is ensured, and
->>>>>> the data consistency of CREATE and APPEND are also ensured, just for
->>>>>> OVERWRITE, it relies on the caller, i.e., guest file system for RBD,
->>>>>> cache flusher for cache tiering to ensure the consistency. In
->>>>>> addition,
->>>>>> there remains a problem to be discussed that how to interact with the
->>>>>> scrub process while the object data consistency may not ensured now.
->>>>>
->>>>> Right.  This is appealing from a performance perspective, but I'm
->>>>> worried
->>>>> it will throw out too many other assumptions in RADOS that will cause
->>>>> pain.  The big one is that RADOS will no longer know if the version on
->>>>> the
->>>>> object metadata matches the data.  This will be most noticeable from
->>>>> scrub, which will have no idea whether the inconsistency is from a
->>>>> partial
->>>>> write or from a disk error.  And when that happens, it would have to
->>>>> guess
->>>>> which object is the right one--a guess that can easily be wrong if there
->>>>> is rebalancing or recovery that may replicate the partially updated
->>>>> object.
->>>>>
->>>>> Maybe we can journal metadata before applying the write to indicate the
->>>>> object is 'unstable' (undergoing an overwrite) to help out?
->>>>>
->>>>> I'm not sure.  Honestly, I would be more interested in investing our
->>>>> time
->>>>> in making the new OSD backends handle overwrite more efficiently, by
->>>>> avoiding write-ahead in the easy cases (append, create) as newstore
->>>>> does, and/or by doing some sort of COW when we do overwrite, or some
->>>>> other
->>>>> magic that does an atomic swap-data-into-position (e.g., by abusing the
->>>>> xfs defrag ioctl).
->>>>>
->>>>> What do you think?
->>>>> sage
->>>>>
->>>>>
->>>>>     >
->>>>>> We are actively working on it and have done part of the
->>>>>> implementation,
->>>>>> want to hear the feedback of the community, and we may submit it as a
->>>>>> blueprint to under discussion in coming CDS.
->>>>>>
->>>>>> Cheers,
->>>>>> Li Wang
->>>>>>
->>>>>>
->>>>>
->>>>
->>>>
->>>
->>
->>
->
+-- 
+HARSHAL GUPTA
+Software Engineer
+KIWI Inc.
