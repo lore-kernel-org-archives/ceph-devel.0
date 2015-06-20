@@ -1,90 +1,111 @@
-From: David Zafman <dzafman@redhat.com>
-Subject: Re: ceph-objectstore-tool import failures
-Date: Fri, 19 Jun 2015 20:16:30 -0700
-Message-ID: <5584DB0E.3000503@redhat.com>
-References: <alpine.DEB.2.00.1506191923200.31501@cobra.newdream.net> <5584D213.80405@redhat.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: osd pool erasure code stripe width
+Date: Sat, 20 Jun 2015 08:27:23 +0200
+Message-ID: <558507CB.4080303@dachary.org>
+References: <BC97738F8E7C8742BABED7F06FB9DF91669A8E8B@SATLEXDAG01.amd.com> <55849BF7.5050603@dachary.org> <BC97738F8E7C8742BABED7F06FB9DF91669A8FEC@SATLEXDAG01.amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="vBvv1BMDoG8dbQ7fUk5iX9jTfkWTUsW24"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:36182 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753369AbbFTDQc (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 19 Jun 2015 23:16:32 -0400
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-	by mx1.redhat.com (Postfix) with ESMTPS id ABD72C2FED
-	for <ceph-devel@vger.kernel.org>; Sat, 20 Jun 2015 03:16:32 +0000 (UTC)
-In-Reply-To: <5584D213.80405@redhat.com>
+Received: from mail2.dachary.org ([91.121.57.175]:37301 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751122AbbFTG13 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 20 Jun 2015 02:27:29 -0400
+In-Reply-To: <BC97738F8E7C8742BABED7F06FB9DF91669A8FEC@SATLEXDAG01.amd.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
+To: "Deneau, Tom" <tom.deneau@amd.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--vBvv1BMDoG8dbQ7fUk5iX9jTfkWTUsW24
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: quoted-printable
 
-This ghobject_t which has a pool of -3 is part of the export.   This 
-caused the assert:
+Hi Tom,
 
-Read -3/1c/temp_recovering_1.1c_33'50_39_head/head
+On 20/06/2015 03:18, Deneau, Tom wrote:
+> So if I am looking at the performance of a system with
+> ceph_erasure_code_benchmark, does this mean I should concentrate
+> on the performance with --size 4096 (or whatever stripe width my
+> ec pools are going to use)?
 
-This was added by "osd: use per-pool temp poolid for temp objects" 
-18eb2a5fea9b0af74a171c3717d1c91766b15f0c in your branch.
+Yes. But the erasure code plugin encoding speed is not the only factor. Y=
+ou probably want to try a rados bench instead to get more realistic numbe=
+rs.
 
-You should skip it on export or recreate it on import with special handling.
+Cheers
 
-David
-
-On 6/19/15 7:38 PM, David Zafman wrote:
->
-> Have not seen this as an assert before.  Given the code below in 
-> do_import() of master branch the assert is impossible (?).
->
->   if (!curmap.have_pg_pool(pgid.pgid.m_pool)) {
->     cerr << "Pool " << pgid.pgid.m_pool << " no longer exists" << 
-> std::endl;
->     // Special exit code for this error, used by test code
->     return 10;  // Positive return means exit status
->   }
->
->
-> David
->
-> On 6/19/15 7:25 PM, Sage Weil wrote:
->> Hey David,
+>=20
+> -- Tom
+>=20
+>> -----Original Message-----
+>> From: Loic Dachary [mailto:loic@dachary.org]
+>> Sent: Friday, June 19, 2015 5:47 PM
+>> To: Deneau, Tom; ceph-devel
+>> Subject: Re: osd pool erasure code stripe width
 >>
->> On this run
+>> Hi Tom,
 >>
->>     /a/sage-2015-06-18_15:51:18-rados-wip-temp---basic-multi/939648
+>> A stripe width of 4KB (the default) means the object is encoded 4KB at=
+ a
+>> time. It does not show in the file written to disk.
 >>
->> ceph-objectstore-tool is failing to import a pg because the pool doesn't
->> exist.  It looks like the thrasher is doing an export+import and racing
->> with a test that is tearing down a pool.  The crash is
+>> Cheers
 >>
->>   ceph version 9.0.1-955-ge274efa
->> (e274efa450e99a68c02bcb713c8837d7809f1ec3)
->>   1: ceph-objectstore-tool() [0xa26335]
->>   2: (()+0xfcb0) [0x7f10cef18cb0]
->>   3: (gsignal()+0x35) [0x7f10cd5af425]
->>   4: (abort()+0x17b) [0x7f10cd5b2b8b]
->>   5: (__gnu_cxx::__verbose_terminate_handler()+0x11d) [0x7f10cdf0269d]
->>   6: (()+0xb5846) [0x7f10cdf00846]
->>   7: (()+0xb5873) [0x7f10cdf00873]
->>   8: (()+0xb596e) [0x7f10cdf0096e]
->>   9: (ceph::__ceph_assert_fail(char const*, char const*, int, char
->> const*)+0x259) [0xb0ce09]
->>   10: (ObjectStoreTool::get_object(ObjectStore*, coll_t,
->> ceph::buffer::list&, OSDMap&, bool*)+0x143f) [0x64829f]
->>   11: (ObjectStoreTool::do_import(ObjectStore*, OSDSuperblock&, bool,
->> std::string)+0x13dd) [0x64a62d]
->>   12: (main()+0x3017) [0x632037]
->>   13: (__libc_start_main()+0xed) [0x7f10cd59a76d]
->>   14: ceph-objectstore-tool() [0x639119]
->>
->> I don't think this is related to my branch.. but maybe?  Have you seen
->> this?  I rebased onto latest master yesterday.
->>
->> sage
->
-> -- 
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> On 19/06/2015 22:11, Deneau, Tom wrote:
+>>> I am trying to understand the use of "osd pool erasure code stripe wi=
+dth"
+>>> For example, I have a single-node system with a k=3D2,m=3D1 ec pool a=
+nd I
+>>> write a single 40M object to this pool using rados bench.
+>>> But when I look on the disk, I still see only the 3 20M pieces for th=
+is
+>> object.
+>>> Where does the striping get used?
+>>>
+>>> -- Tom Deneau, AMD
+>>>
+>>>
+>>> Description:
+>>> Sets the desired size, in bytes, of an object stripe on every erasure=
+ coded
+>> pools. Every object if size S will be stored as N stripes and each str=
+ipe
+>> will be encoded/decoded individually.
+>>> Type:
+>>> Unsigned 32-bit Integer
+>>> Default:
+>>> 4096
+>>>
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
 
+>>> in
+>>>
+>>
+>> --
+>> Lo=EFc Dachary, Artisan Logiciel Libre
+>=20
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+--vBvv1BMDoG8dbQ7fUk5iX9jTfkWTUsW24
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlWFB8sACgkQ8dLMyEl6F23UBgCgnPMDGW3uXaA21MtpTYhtQ3UM
+Ok4AniMBkkvxFY9sirNbGu09/5GaMwlJ
+=TdK/
+-----END PGP SIGNATURE-----
+
+--vBvv1BMDoG8dbQ7fUk5iX9jTfkWTUsW24--
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
