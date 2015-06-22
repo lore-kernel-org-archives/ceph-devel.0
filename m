@@ -1,71 +1,93 @@
-From: Barclay Jameson <almightybeeij@gmail.com>
-Subject: Ceph hard lock Hammer 9.2
-Date: Mon, 22 Jun 2015 15:45:36 -0500
-Message-ID: <CAMzumda0cMjMphp2B-u5hcPKsF9K26YQRGg4tKYJL5VPXX2AJQ@mail.gmail.com>
+From: Bill Sharer <bsharer@sharerland.com>
+Subject: cephfs "obsolescence" and object location
+Date: Mon, 22 Jun 2015 17:18:21 -0400
+Message-ID: <55887B9D.4040605@sharerland.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f178.google.com ([209.85.214.178]:34742 "EHLO
-	mail-ob0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751613AbbFVUph (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Jun 2015 16:45:37 -0400
-Received: by obbkm3 with SMTP id km3so28271189obb.1
-        for <ceph-devel@vger.kernel.org>; Mon, 22 Jun 2015 13:45:37 -0700 (PDT)
+Received: from static-72-66-110-237.washdc.fios.verizon.net ([72.66.110.237]:48237
+	"EHLO refurb.sharerland.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752840AbbFVVYI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 22 Jun 2015 17:24:08 -0400
+Received: from [192.168.11.13] (thufir.sharerland.com [192.168.11.13])
+	by refurb.sharerland.com (Postfix) with ESMTP id 34F469E029B
+	for <ceph-devel@vger.kernel.org>; Mon, 22 Jun 2015 17:18:21 -0400 (EDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Has anyone seen this?
+I'm currently running giant on gentoo and was wondering about the 
+stability of the api for mapping MDS files to rados objects.  The cephfs 
+binary complains that it is obsolete for getting layout information, but 
+it also provides object location info.  AFAICT this is the only way to 
+map files in a cephfs filesystem to object locations if I want to take 
+advantage of the "UFO" nature of ceph's stores in order to access via 
+both cephfs and rados methods.
 
-Jun 22 15:09:27 node kernel: Call Trace:
-Jun 22 15:09:27 node kernel: [<ffffffff816803ee>] schedule+0x3e/0x90
-Jun 22 15:09:27 node kernel: [<ffffffff8168062e>]
-schedule_preempt_disabled+0xe/0x10
-Jun 22 15:09:27 node kernel: [<ffffffff81681ce3>]
-__mutex_lock_slowpath+0x93/0x100
-Jun 22 15:09:27 node kernel: [<ffffffffa060def8>] ?
-__cap_is_valid+0x58/0x70 [ceph]
-Jun 22 15:09:27 node kernel: [<ffffffff81681d73>] mutex_lock+0x23/0x40
-Jun 22 15:09:27 node kernel: [<ffffffffa0610f2d>]
-ceph_check_caps+0x38d/0x780 [ceph]
-Jun 22 15:09:27 node kernel: [<ffffffff812f5a9b>] ?
-__radix_tree_delete_node+0x7b/0x130
-Jun 22 15:09:27 node kernel: [<ffffffffa0612637>]
-ceph_put_wrbuffer_cap_refs+0xf7/0x240 [ceph]
-Jun 22 15:09:27 node kernel: [<ffffffffa060b170>]
-writepages_finish+0x200/0x290 [ceph]
-Jun 22 15:09:27 node kernel: [<ffffffffa05e2731>]
-handle_reply+0x4f1/0x640 [libceph]
-Jun 22 15:09:27 node kernel: [<ffffffffa05e3065>] dispatch+0x85/0xa0 [libceph]
-Jun 22 15:09:27 node kernel: [<ffffffffa05d7ceb>]
-process_message+0xab/0xd0 [libceph]
-Jun 22 15:09:27 node kernel: [<ffffffffa05db052>] try_read+0x2d2/0x430 [libceph]
-Jun 22 15:09:27 node kernel: [<ffffffffa05db7e8>] con_work+0x78/0x220 [libceph]
-Jun 22 15:09:27 node kernel: [<ffffffff8108c475>] process_one_work+0x145/0x460
-Jun 22 15:09:27 node kernel: [<ffffffff8108c8b2>] worker_thread+0x122/0x420
-Jun 22 15:09:27 node kernel: [<ffffffff8167fdb8>] ? __schedule+0x398/0x840
-Jun 22 15:09:27 node kernel: [<ffffffff8108c790>] ? process_one_work+0x460/0x460
-Jun 22 15:09:27 node kernel: [<ffffffff8108c790>] ? process_one_work+0x460/0x460
-Jun 22 15:09:27 node kernel: [<ffffffff8109170e>] kthread+0xce/0xf0
-Jun 22 15:09:27 node kernel: [<ffffffff81091640>] ?
-kthread_freezable_should_stop+0x70/0x70
-Jun 22 15:09:27 node kernel: [<ffffffff81683dd8>] ret_from_fork+0x58/0x90
-Jun 22 15:09:27 node kernel: [<ffffffff81091640>] ?
-kthread_freezable_should_stop+0x70/0x70
-Jun 22 15:11:27 node kernel: INFO: task kworker/2:1:40 blocked for
-more than 120 seconds.
-Jun 22 15:11:27 node kernel:      Tainted: G          I
-4.0.4-1.el6.elrepo.x86_64 #1
-Jun 22 15:11:27 node kernel: "echo 0 >
-/proc/sys/kernel/hung_task_timeout_secs" disables this message.
-Jun 22 15:11:27 node kernel: kworker/2:1     D ffff881ff279f7f8     0
-  40      2 0x00000000
-Jun 22 15:11:27 node kernel: Workqueue: ceph-msgr con_work [libceph]
-Jun 22 15:11:27 node kernel: ffff881ff279f7f8 ffff881ff261c010
-ffff881ff2b67050 ffff88207fd95270
-Jun 22 15:11:27 node kernel: ffff881ff279c010 ffff88207fd15200
-7fffffffffffffff 0000000000000002
-Jun 22 15:11:27 node kernel: ffffffff81680ae0 ffff881ff279f818
-ffffffff816803ee ffffffff810ae63b
+I have a content store that scans files, calculates their sha1hash and 
+then stores them on a cephfs filesystem tree with their filenames set to 
+their sha1hash name.  I can then build views of this content using an 
+external local filesystem and symlinks pointing into the cephfs store.  
+At the same time, I want to be able to use this store via rados either 
+through the gateway or my own software that is rados aware.  The store 
+is being treated as a write-once, read-many style system.
+
+Towards this end, I started writing a QT4 based library that includes 
+this little Location routine (which currently works) to grab the rados 
+object location from a hash object in this store. I'm just wondering 
+whether this is all going to break horribly in the future when ongoing 
+MDS development decides to break the code I borrowed from cephfs :-)
+
+
+
+QString Shastore::Location(const QString hash) {
+     QString result = "";
+     QString cache_path = this->dbcache + "/" + hash.left(2) + "/" + 
+hash.mid(2,2) + "/" + hash;
+     QFile cache_file(cache_path);
+     if (cache_file.exists()) {
+         if (cache_file.open(QIODevice::ReadOnly)) {
+             /*
+              * Ripped from cephfs code, grab the handle and use the 
+ceph version of ioctl to
+              * rummage through the file's xattrs for rados location.  
+cephfs whines about being
+              * obsolete to get layout this way, but this appears to be 
+only way to get location.
+              * This may all break horribly in a future release since 
+MDS is undergoing heavy development
+              *
+              *  cephfs lets user pass file_offset in argv but it 
+defaults to 0.  Presumably this is the "first"
+              *  extent of the pile of extents (4mb each?) and shards 
+for the file.  If user wants to jump
+              *  elsewhere with a non-zero offset, the resulting rados 
+object location may be different
+              */
+             int fd = cache_file.handle();
+             struct ceph_ioctl_dataloc location;
+             location.file_offset = 0;
+             int err = ioctl(fd, CEPH_IOC_GET_DATALOC, (unsigned 
+long)&location);
+             if (err) {
+                 qDebug() << "Location: Error getting rados location for 
+" << cache_path;
+             } else {
+                 result = QString(location.object_name);
+             }
+             cache_file.close();
+         } else {
+             qDebug() << "Location: unable to open " << cache_path << " 
+readonly";
+         }
+     } else {
+         qDebug() << "Location: cache file " << cache_path << " does not 
+exist";
+     }
+     return result;
+}
+
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
