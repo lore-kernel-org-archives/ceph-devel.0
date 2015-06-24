@@ -1,55 +1,114 @@
-From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Subject: Re: RGW S3 Website hosting, non-clean code for early review
-Date: Tue, 23 Jun 2015 19:07:44 -0400 (EDT)
-Message-ID: <854662566.18884035.1435100864177.JavaMail.zimbra@redhat.com>
-References: <20150623093325.GH10754@orbis-terrarum.net> <1739382408.18844114.1435091419238.JavaMail.zimbra@redhat.com> <robbat2-20150623T230410-006258787Z@orbis-terrarum.net>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: provisioning teuthology targets with OpenStack
+Date: Tue, 23 Jun 2015 20:46:12 -0400
+Message-ID: <5589FDD4.3020301@dachary.org>
+References: <557479B4.9060207@dachary.org> <837976248.11945956.1433867145523.JavaMail.zimbra@redhat.com> <55773738.1090701@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="18feMqh9osMa7gJWkO3w9sXDUqNmdLtCg"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx3-phx2.redhat.com ([209.132.183.24]:38357 "EHLO
-	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754477AbbFWXHq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Jun 2015 19:07:46 -0400
-In-Reply-To: <robbat2-20150623T230410-006258787Z@orbis-terrarum.net>
+Received: from mail2.dachary.org ([91.121.57.175]:39089 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1754891AbbFXAqQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Jun 2015 20:46:16 -0400
+In-Reply-To: <55773738.1090701@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Robin H. Johnson" <robbat2@gentoo.org>
-Cc: ceph-devel@vger.kernel.org, Jonathan LaCour <jonathan.lacour@dreamhost.com>
+To: Zack Cerza <zack@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
+
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--18feMqh9osMa7gJWkO3w9sXDUqNmdLtCg
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+Hi Zack,
+
+I think it works and I'll start using it. For the record
+
+https://github.com/ceph/teuthology/compare/master...dachary:wip-6502-open=
+stack?expand=3D1#diff-88b99bb28683bd5b7e3a204826ead112R318
+
+is what I have right now. There are a few things that need cleaning but n=
+othing major I hope. I'll clean them up after you had time to review the =
+preliminary pull requests at https://github.com/ceph/teuthology/pulls.
+
+Cheers
+
+On 09/06/2015 14:58, Loic Dachary wrote:
+>=20
+>=20
+> On 09/06/2015 18:25, Zack Cerza wrote:
+>> Hi Loic!
+>>
+>> I'm really happy to hear you have the time and motivation to work on t=
+his! It's something I've wanted to get to for a while, but other things k=
+eep getting in the way.
+>>
+>> I'd suggest looking at teuthology.provision.Downburst to investigate m=
+aybe pulling some of its functionality into a base class that a potential=
+ OpenStack subclass could also benefit from. I'd love to see us using a c=
+ommon interface for all of our provisioning. If that seems like a lot of =
+work, I'd be willing to be the one to create the base class and work with=
+ you to make sure its API was useful for OpenStack as well.
+>>
+>=20
+> Thanks for the pointers. I'll write something that works and get back t=
+o you to make it acceptable :-)
+>=20
+>> Thanks,
+>> Zack
+>>
+>> ----- Original Message -----
+>>> From: "Loic Dachary" <loic@dachary.org>
+>>> To: "Zack Cerza" <zcerza@redhat.com>
+>>> Cc: "Ceph Development" <ceph-devel@vger.kernel.org>
+>>> Sent: Sunday, June 7, 2015 11:04:52 AM
+>>> Subject: provisioning teuthology targets with OpenStack
+>>>
+>>> Hi Zack,
+>>>
+>>> I'm motivated by my recent experience with hacking teuthology and con=
+tainers
+>>> :-) I'd like to give
+>>>
+>>> http://tracker.ceph.com/issues/6502 "provision targets using a cloud =
+API"
+>>>
+>>> a shot with OpenStack in mind (because I know nothing of EC2 really).=
+ The
+>>> idea is to make it relatively easy for someone with access to an Open=
+Stack
+>>> tenant to using instead of downburst. Not only would that simplify th=
+e
+>>> development process for people without access to the lab, it would al=
+so
+>>> allow the addition of more horsepower to the lab. What do you think ?=
+
+>>>
+>>> Cheers
+>>> --
+>>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>>>
+>>>
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
 
+--18feMqh9osMa7gJWkO3w9sXDUqNmdLtCg
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
------ Original Message -----
-> From: "Robin H. Johnson" <robbat2@gentoo.org>
-> To: "Yehuda Sadeh-Weinraub" <yehuda@redhat.com>
-> Cc: ceph-devel@vger.kernel.org, "Jonathan LaCour" <jonathan.lacour@dreamhost.com>
-> Sent: Tuesday, June 23, 2015 4:04:49 PM
-> Subject: Re: RGW S3 Website hosting, non-clean code for early review
-> 
-> 
-> On Tue, Jun 23, 2015 at 04:30:19PM -0400, Yehuda Sadeh-Weinraub wrote:
-> > > Either I have to repeat a lot of code for it, which I'm not happy about,
-> > > or I have to refactor RGWGetObj* to more safely made the second GET
-> > > request for the error object (and make sure range headers etc are NOT
-> > > used for the get of the error object). I'm leaning to the latter.
-> > Is generating a new req_state a possibility? E.g., you catch the error
-> > at the top level, and restart most of the request processing with a
-> > newly created req_state?
-> That was the path I was trying, but not completely succeeding.
-> I think need to step it back further and have a partially customized
-> copy of the RGWEnv from client_io->get_env(), so that I can build the
-> modified req_info for req_state.
-> 
-> It isn't a full new GET really, it's really just custom content for the
-> body as well as some headers (mostly Content-Length, Content-Type), but
-> ignore EPERM/EACCESS on trying to fetch that custom content, and if they
-> are detected, consider that a success but with different HTML content.
-> 
-> > Great! I'll wait for the cleaned up pull request.
-> Do you want pull requests per logical change of my proposed series
-> split, or rather just one pull request with the full series?
-> 
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
 
-One pull request for the full series.
+iEYEARECAAYFAlWJ/dQACgkQ8dLMyEl6F23+jgCgvE5nBV/B8EmotEHi9uAZmhNe
+/bsAnA26tjp6kni4F2sccWfzpvfYfxWg
+=wzC8
+-----END PGP SIGNATURE-----
 
-Yehuda
+--18feMqh9osMa7gJWkO3w9sXDUqNmdLtCg--
