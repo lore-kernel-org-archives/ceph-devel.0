@@ -1,43 +1,35 @@
-From: GuangYang <yguang11@outlook.com>
-Subject: radosgw crash within libfcgi
-Date: Wed, 24 Jun 2015 10:09:58 -0700
-Message-ID: <BLU175-W1310E96C473E9ABED62D65DFAF0@phx.gbl>
+From: Alphe Salas <asalas@kepler.cl>
+Subject: ceph v0.94.2 source package comes without debian directory
+Date: Wed, 24 Jun 2015 14:28:27 -0300
+Message-ID: <558AE8BB.8030607@kepler.cl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from blu004-omc4s9.hotmail.com ([65.55.111.148]:54028 "EHLO
-	BLU004-OMC4S9.hotmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752536AbbFXRJ7 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Jun 2015 13:09:59 -0400
+Received: from mail-qg0-f43.google.com ([209.85.192.43]:34603 "EHLO
+	mail-qg0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753616AbbFXR2b (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Jun 2015 13:28:31 -0400
+Received: by qgev13 with SMTP id v13so16417729qge.1
+        for <ceph-devel@vger.kernel.org>; Wed, 24 Jun 2015 10:28:30 -0700 (PDT)
+Received: from [192.168.0.44] ([200.111.172.141])
+        by mx.google.com with ESMTPSA id w67sm3445249qha.7.2015.06.24.10.28.28
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 24 Jun 2015 10:28:30 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, "yehuda@redhat.com" <yehuda@redhat.com>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hello Cephers,
-Recently we have several radosgw daemon crashes with the same following=
- kernel log:
+Hello,
+debian directory is missing in the ceph 0.94.2 tar.gz file.
+So dpkg-buildpackages doesn t work.
+I tryed taking the debian directory from github repo and it doesn t go 
+through  I don t get the debian built due to a weird error
+I tryed taking the debian directory from v0.94.1 but same as previous
+I get weird error.
 
-Jun 23 14:17:38 xxx kernel: radosgw[68180]: segfault at f0 ip 00007ffa0=
-69996f2 sp 00007ff55c432710 error 6 in libfcgi.so.0.0.0[7ffa06995000+a0=
-00] in libfcgi.so.0.0.0[7ffa06995000+a000]
-
-Looking at the assembly, it seems crashing at this point - http://githu=
-b.com/sknown/fcgi/blob/master/libfcgi/fcgiapp.c#L2035, which confused m=
-e. I tried to see if there is any other reference holding the FCGX_Requ=
-est which release the handle without any luck.
-
-There are also other observations:
-=A01> Several radosgw daemon across different hosts crashed around the =
-same time.
-=A02> Apache's error log has some fcgi error complaining ##idle timeout=
-## during the time.
-
-Does anyone experience similar issue?=A0
-
-Thanks,
-Guang=A0 		 	   		  --
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Regards.
+-- 
+Alphe Salas
+I.T ingeneer
