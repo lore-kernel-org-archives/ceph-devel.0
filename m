@@ -1,115 +1,119 @@
-From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Subject: Re: radosgw crash within libfcgi
-Date: Wed, 24 Jun 2015 17:04:05 -0400 (EDT)
-Message-ID: <463953216.19442278.1435179845477.JavaMail.zimbra@redhat.com>
-References: <BLU175-W1310E96C473E9ABED62D65DFAF0@phx.gbl> <460832233.19349487.1435171225932.JavaMail.zimbra@redhat.com> <BLU175-W467685E9DD4BACB37D7AB3DFAF0@phx.gbl>
+From: GuangYang <yguang11@outlook.com>
+Subject: RE: radosgw crash within libfcgi
+Date: Wed, 24 Jun 2015 14:12:23 -0700
+Message-ID: <BLU175-W7F6E88F53F4EF4DF45248DFAF0@phx.gbl>
+References: <BLU175-W1310E96C473E9ABED62D65DFAF0@phx.gbl>
+ <460832233.19349487.1435171225932.JavaMail.zimbra@redhat.com>
+ <BLU175-W467685E9DD4BACB37D7AB3DFAF0@phx.gbl>,<463953216.19442278.1435179845477.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx6-phx2.redhat.com ([209.132.183.39]:41402 "EHLO
-	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750780AbbFXVEH convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Jun 2015 17:04:07 -0400
-In-Reply-To: <BLU175-W467685E9DD4BACB37D7AB3DFAF0@phx.gbl>
+Received: from blu004-omc3s31.hotmail.com ([65.55.116.106]:58090 "EHLO
+	BLU004-OMC3S31.hotmail.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751055AbbFXVMY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 24 Jun 2015 17:12:24 -0400
+In-Reply-To: <463953216.19442278.1435179845477.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: GuangYang <yguang11@outlook.com>
-Cc: ceph-devel@vger.kernel.org, ceph-users@lists.ceph.com
+To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
 
-
-
------ Original Message -----
-> From: "GuangYang" <yguang11@outlook.com>
-> To: "Yehuda Sadeh-Weinraub" <yehuda@redhat.com>
-> Cc: ceph-devel@vger.kernel.org, ceph-users@lists.ceph.com
-> Sent: Wednesday, June 24, 2015 1:53:20 PM
-> Subject: RE: radosgw crash within libfcgi
->=20
-> Thanks Yehuda for the response.
->=20
-> We already patched libfcgi to use poll instead of select to overcome =
-the
-> limitation.
->=20
-> Thanks,
-> Guang
->=20
->=20
-> ----------------------------------------
-> > Date: Wed, 24 Jun 2015 14:40:25 -0400
-> > From: yehuda@redhat.com
-> > To: yguang11@outlook.com
-> > CC: ceph-devel@vger.kernel.org; ceph-users@lists.ceph.com
-> > Subject: Re: radosgw crash within libfcgi
-> >
-> >
-> >
-> > ----- Original Message -----
-> >> From: "GuangYang" <yguang11@outlook.com>
-> >> To: ceph-devel@vger.kernel.org, ceph-users@lists.ceph.com,
-> >> yehuda@redhat.com
-> >> Sent: Wednesday, June 24, 2015 10:09:58 AM
-> >> Subject: radosgw crash within libfcgi
-> >>
-> >> Hello Cephers,
-> >> Recently we have several radosgw daemon crashes with the same foll=
-owing
-> >> kernel log:
-> >>
-> >> Jun 23 14:17:38 xxx kernel: radosgw[68180]: segfault at f0 ip
-> >> 00007ffa069996f2 sp 00007ff55c432710 error 6 in
-
-error 6 is sigabrt, right? With invalid pointer I'd expect to get segfa=
-ult. Is the pointer actually invalid?
-
-Yehuda
-
-
-> >> libfcgi.so.0.0.0[7ffa06995000+a000] in libfcgi.so.0.0.0[7ffa069950=
-00+a000]
-> >>
-> >> Looking at the assembly, it seems crashing at this point -
-> >> http://github.com/sknown/fcgi/blob/master/libfcgi/fcgiapp.c#L2035,=
- which
-> >> confused me. I tried to see if there is any other reference holdin=
-g the
-> >> FCGX_Request which release the handle without any luck.
-> >>
-> >> There are also other observations:
-> >> 1> Several radosgw daemon across different hosts crashed around th=
-e same
-> >> time.
-> >> 2> Apache's error log has some fcgi error complaining ##idle timeo=
-ut##
-> >> during the time.
-> >>
-> >> Does anyone experience similar issue?
-> >>
-> >
-> > In the past we've had issues with libfcgi that were related to the =
-number
-> > of open fds on the process (> 1024). The issue was a buggy libfcgi =
-that
-> > was using select() instead of poll(), so this might be the issue yo=
-u're
-> > noticing.
-> >
-> > Yehuda
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-deve=
-l" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at http://vger.kernel.org/majordomo-info.html
->  		 	   		  N=E5=AB=A5=E5=8F=89=E9=9D=A3=E7=AC=A1y=EE=8C=B7=E6=B0=8Ab=
-=E7=9E=82=EE=83=91=E5=8D=83v=E8=B1=9D=EF=BF=BD=E8=97=93{.n=EF=BF=BD=E5=A3=
-=8F=E6=B8=AE=E6=A6=8Fz=E9=B3=90=E5=A6=A0ay=EF=BF=BD=E8=95=A0=E8=B7=88=EF=
-=BF=BDj=EE=84=9Bf=EF=BC=82=E7=A9=90=E6=AE=9D=E9=84=97=EF=BF=BD=E7=95=90=
-=E3=82=A2=EF=BF=BD=E2=92=8E=EE=9B=90:+v=E5=A2=BE=E5=A6=9B=E9=91=9A=E8=B1=
-=B0=E7=A8=9B=EF=BF=BD=E7=8F=A3=E8=B5=99zZ+=E5=87=92=E6=AE=A0=E5=A8=B8=EE=
-=95=90"=E6=BF=9F!=E7=A7=88
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQo+IERhdGU6IFdlZCwgMjQg
+SnVuIDIwMTUgMTc6MDQ6MDUgLTA0MDAKPiBGcm9tOiB5ZWh1ZGFAcmVkaGF0LmNvbQo+IFRvOiB5
+Z3VhbmcxMUBvdXRsb29rLmNvbQo+IENDOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZzsgY2Vw
+aC11c2Vyc0BsaXN0cy5jZXBoLmNvbQo+IFN1YmplY3Q6IFJlOiByYWRvc2d3IGNyYXNoIHdpdGhp
+biBsaWJmY2dpCj4KPgo+Cj4gLS0tLS0gT3JpZ2luYWwgTWVzc2FnZSAtLS0tLQo+PiBGcm9tOiAi
+R3VhbmdZYW5nIiA8eWd1YW5nMTFAb3V0bG9vay5jb20+Cj4+IFRvOiAiWWVodWRhIFNhZGVoLVdl
+aW5yYXViIiA8eWVodWRhQHJlZGhhdC5jb20+Cj4+IENjOiBjZXBoLWRldmVsQHZnZXIua2VybmVs
+Lm9yZywgY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQo+PiBTZW50OiBXZWRuZXNkYXksIEp1bmUg
+MjQsIDIwMTUgMTo1MzoyMCBQTQo+PiBTdWJqZWN0OiBSRTogcmFkb3NndyBjcmFzaCB3aXRoaW4g
+bGliZmNnaQo+Pgo+PiBUaGFua3MgWWVodWRhIGZvciB0aGUgcmVzcG9uc2UuCj4+Cj4+IFdlIGFs
+cmVhZHkgcGF0Y2hlZCBsaWJmY2dpIHRvIHVzZSBwb2xsIGluc3RlYWQgb2Ygc2VsZWN0IHRvIG92
+ZXJjb21lIHRoZQo+PiBsaW1pdGF0aW9uLgo+Pgo+PiBUaGFua3MsCj4+IEd1YW5nCj4+Cj4+Cj4+
+IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KPj4+IERhdGU6IFdlZCwg
+MjQgSnVuIDIwMTUgMTQ6NDA6MjUgLTA0MDAKPj4+IEZyb206IHllaHVkYUByZWRoYXQuY29tCj4+
+PiBUbzogeWd1YW5nMTFAb3V0bG9vay5jb20KPj4+IENDOiBjZXBoLWRldmVsQHZnZXIua2VybmVs
+Lm9yZzsgY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQo+Pj4gU3ViamVjdDogUmU6IHJhZG9zZ3cg
+Y3Jhc2ggd2l0aGluIGxpYmZjZ2kKPj4+Cj4+Pgo+Pj4KPj4+IC0tLS0tIE9yaWdpbmFsIE1lc3Nh
+Z2UgLS0tLS0KPj4+PiBGcm9tOiAiR3VhbmdZYW5nIiA8eWd1YW5nMTFAb3V0bG9vay5jb20+Cj4+
+Pj4gVG86IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnLCBjZXBoLXVzZXJzQGxpc3RzLmNlcGgu
+Y29tLAo+Pj4+IHllaHVkYUByZWRoYXQuY29tCj4+Pj4gU2VudDogV2VkbmVzZGF5LCBKdW5lIDI0
+LCAyMDE1IDEwOjA5OjU4IEFNCj4+Pj4gU3ViamVjdDogcmFkb3NndyBjcmFzaCB3aXRoaW4gbGli
+ZmNnaQo+Pj4+Cj4+Pj4gSGVsbG8gQ2VwaGVycywKPj4+PiBSZWNlbnRseSB3ZSBoYXZlIHNldmVy
+YWwgcmFkb3NndyBkYWVtb24gY3Jhc2hlcyB3aXRoIHRoZSBzYW1lIGZvbGxvd2luZwo+Pj4+IGtl
+cm5lbCBsb2c6Cj4+Pj4KPj4+PiBKdW4gMjMgMTQ6MTc6MzggeHh4IGtlcm5lbDogcmFkb3Nnd1s2
+ODE4MF06IHNlZ2ZhdWx0IGF0IGYwIGlwCj4+Pj4gMDAwMDdmZmEwNjk5OTZmMiBzcCAwMDAwN2Zm
+NTVjNDMyNzEwIGVycm9yIDYgaW4KPgo+IGVycm9yIDYgaXMgc2lnYWJydCwgcmlnaHQ/IFdpdGgg
+aW52YWxpZCBwb2ludGVyIEknZCBleHBlY3QgdG8gZ2V0IHNlZ2ZhdWx0LiBJcyB0aGUgcG9pbnRl
+ciBhY3R1YWxseSBpbnZhbGlkPwpXaXRoIChpcCAtIHthZGRyZXNzX2xvYWRfdGhlX3NoYXJkZWRf
+bGlicmFyeX0pIHRvIGdldCB0aGUgaW5zdHJ1Y3Rpb24gd2hpY2ggY2F1c2VkIHRoaXMgY3Jhc2gs
+IHRoZSBvYmpkdW1wIHNob3dzIHRoZSBjcmFzaCBoYXBwZW5lZCBhdCBpbnN0cnVjdGlvbiA0NmYy
+IChzZWUgYmVsb3cpLCB3aGljaCB3YXMgdG8gYXNzaWduICctMScgdG8gdGhlIENHWF9SZXF1ZXN0
+OjppcGNGZCB0byAtMSwgYnV0IEkgZG9uJ3QgcXVpdGUgdW5kZXJzdGFuZCBob3cvd2h5IGl0IGNv
+dWxkIGNyYXNoIHRoZXJlLgoKMDAwMDAwMDAwMDAwNDY5MCA8RkNHWF9GcmVlPjoKwqAgwqAgNDY5
+MDogwqAgwqAgwqAgNDggODkgNWMgMjQgZjDCoCDCoCDCoCDCoCDCoCBtb3bCoCDCoCAlcmJ4LC0w
+eDEwKCVyc3ApCsKgIMKgIDQ2OTU6IMKgIMKgIMKgIDQ4IDg5IDZjIDI0IGY4wqAgwqAgwqAgwqAg
+wqAgbW92wqAgwqAgJXJicCwtMHg4KCVyc3ApCsKgIMKgIDQ2OWE6IMKgIMKgIMKgIDQ4IDgzIGVj
+IDE4IMKgIMKgIMKgIMKgIMKgIMKgIHN1YsKgIMKgICQweDE4LCVyc3AKwqAgwqAgNDY5ZTogwqAg
+wqAgwqAgNDggODUgZmbCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCB0ZXN0IMKgICVyZGksJXJkaQrC
+oCDCoCA0NmExOiDCoCDCoCDCoCA0OCA4OSBmYsKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIG1vdsKg
+IMKgICVyZGksJXJieArCoCDCoCA0NmE0OiDCoCDCoCDCoCA4OSBmNSDCoCDCoCDCoCDCoCDCoCDC
+oCDCoCDCoCDCoCBtb3bCoCDCoCAlZXNpLCVlYnAKwqAgwqAgNDZhNjogwqAgwqAgwqAgNzQgMjgg
+wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgamUgwqAgwqAgNDZkMCA8RkNHWF9GcmVlKzB4NDA+
+CsKgIMKgIDQ2YTg6IMKgIMKgIMKgIDQ4IDhkIDdmIDA4IMKgIMKgIMKgIMKgIMKgIMKgIGxlYcKg
+IMKgIDB4OCglcmRpKSwlcmRpCsKgIMKgIDQ2YWM6IMKgIMKgIMKgIGU4IDY3IGUzIGZmIGZmwqAg
+wqAgwqAgwqAgwqAgY2FsbHHCoCAyYTE4IDxGQ0dYX0ZyZWVTdHJlYW1AcGx0PgrCoCDCoCA0NmIx
+OiDCoCDCoCDCoCA0OCA4ZCA3YiAxMCDCoCDCoCDCoCDCoCDCoCDCoCBsZWHCoCDCoCAweDEwKCVy
+YngpLCVyZGkKwqAgwqAgNDZiNTogwqAgwqAgwqAgZTggNWUgZTMgZmYgZmbCoCDCoCDCoCDCoCDC
+oCBjYWxsccKgIDJhMTggPEZDR1hfRnJlZVN0cmVhbUBwbHQ+CsKgIMKgIDQ2YmE6IMKgIMKgIMKg
+IDQ4IDhkIDdiIDE4IMKgIMKgIMKgIMKgIMKgIMKgIGxlYcKgIMKgIDB4MTgoJXJieCksJXJkaQrC
+oCDCoCA0NmJlOiDCoCDCoCDCoCBlOCA1NSBlMyBmZiBmZsKgIMKgIMKgIMKgIMKgIGNhbGxxwqAg
+MmExOCA8RkNHWF9GcmVlU3RyZWFtQHBsdD4KwqAgwqAgNDZjMzogwqAgwqAgwqAgNDggOGQgN2Ig
+MjggwqAgwqAgwqAgwqAgwqAgwqAgbGVhwqAgwqAgMHgyOCglcmJ4KSwlcmRpCsKgIMKgIDQ2Yzc6
+IMKgIMKgIMKgIGU4IGQ0IGY0IGZmIGZmwqAgwqAgwqAgwqAgwqAgY2FsbHHCoCAzYmEwIDxGQ0dY
+X1B1dFMrMHg0MD4KwqAgwqAgNDZjYzogwqAgwqAgwqAgODUgZWQgwqAgwqAgwqAgwqAgwqAgwqAg
+wqAgwqAgwqAgdGVzdCDCoCAlZWJwLCVlYnAKwqAgwqAgNDZjZTogwqAgwqAgwqAgNzUgMTAgwqAg
+wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgam5lwqAgwqAgNDZlMCA8RkNHWF9GcmVlKzB4NTA+CsKg
+IMKgIDQ2ZDA6IMKgIMKgIMKgIDQ4IDhiIDVjIDI0IDA4wqAgwqAgwqAgwqAgwqAgbW92wqAgwqAg
+MHg4KCVyc3ApLCVyYngKwqAgwqAgNDZkNTogwqAgwqAgwqAgNDggOGIgNmMgMjQgMTDCoCDCoCDC
+oCDCoCDCoCBtb3bCoCDCoCAweDEwKCVyc3ApLCVyYnAKwqAgwqAgNDZkYTogwqAgwqAgwqAgNDgg
+ODMgYzQgMTggwqAgwqAgwqAgwqAgwqAgwqAgYWRkwqAgwqAgJDB4MTgsJXJzcArCoCDCoCA0NmRl
+OiDCoCDCoCDCoCBjM8KgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIHJldHHCoCDCoArC
+oCDCoCA0NmRmOiDCoCDCoCDCoCA5MMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIG5v
+cArCoCDCoCA0NmUwOiDCoCDCoCDCoCAzMSBmNiDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCB4
+b3LCoCDCoCAlZXNpLCVlc2kKwqAgwqAgNDZlMjogwqAgwqAgwqAgODMgN2IgNGMgMDAgwqAgwqAg
+wqAgwqAgwqAgwqAgY21wbCDCoCAkMHgwLDB4NGMoJXJieCkKwqAgwqAgNDZlNjogwqAgwqAgwqAg
+OGIgN2IgMzDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBtb3bCoCDCoCAweDMwKCVyYngpLCVlZGkK
+wqAgwqAgNDZlOTogwqAgwqAgwqAgNDAgMGYgOTQgYzYgwqAgwqAgwqAgwqAgwqAgwqAgc2V0ZSDC
+oCAlc2lsCsKgIMKgIDQ2ZWQ6IMKgIMKgIMKgIGU4IDg2IGU2IGZmIGZmwqAgwqAgwqAgwqAgwqAg
+Y2FsbHHCoCAyZDc4IDxPU19JcGNDbG9zZUBwbHQ+CsKgIMKgIDQ2ZjI6IMKgIMKgIMKgIGM3IDQz
+IDMwIGZmIGZmIGZmIGZmwqAgwqAgbW92bCDCoCAkMHhmZmZmZmZmZiwweDMwKCVyYngpCj4KPiBZ
+ZWh1ZGEKPgo+Cj4+Pj4gbGliZmNnaS5zby4wLjAuMFs3ZmZhMDY5OTUwMDArYTAwMF0gaW4gbGli
+ZmNnaS5zby4wLjAuMFs3ZmZhMDY5OTUwMDArYTAwMF0KPj4+Pgo+Pj4+IExvb2tpbmcgYXQgdGhl
+IGFzc2VtYmx5LCBpdCBzZWVtcyBjcmFzaGluZyBhdCB0aGlzIHBvaW50IC0KPj4+PiBodHRwOi8v
+Z2l0aHViLmNvbS9za25vd24vZmNnaS9ibG9iL21hc3Rlci9saWJmY2dpL2ZjZ2lhcHAuYyNMMjAz
+NSwgd2hpY2gKPj4+PiBjb25mdXNlZCBtZS4gSSB0cmllZCB0byBzZWUgaWYgdGhlcmUgaXMgYW55
+IG90aGVyIHJlZmVyZW5jZSBob2xkaW5nIHRoZQo+Pj4+IEZDR1hfUmVxdWVzdCB3aGljaCByZWxl
+YXNlIHRoZSBoYW5kbGUgd2l0aG91dCBhbnkgbHVjay4KPj4+Pgo+Pj4+IFRoZXJlIGFyZSBhbHNv
+IG90aGVyIG9ic2VydmF0aW9uczoKPj4+PiAxPiBTZXZlcmFsIHJhZG9zZ3cgZGFlbW9uIGFjcm9z
+cyBkaWZmZXJlbnQgaG9zdHMgY3Jhc2hlZCBhcm91bmQgdGhlIHNhbWUKPj4+PiB0aW1lLgo+Pj4+
+IDI+IEFwYWNoZSdzIGVycm9yIGxvZyBoYXMgc29tZSBmY2dpIGVycm9yIGNvbXBsYWluaW5nICMj
+aWRsZSB0aW1lb3V0IyMKPj4+PiBkdXJpbmcgdGhlIHRpbWUuCj4+Pj4KPj4+PiBEb2VzIGFueW9u
+ZSBleHBlcmllbmNlIHNpbWlsYXIgaXNzdWU/Cj4+Pj4KPj4+Cj4+PiBJbiB0aGUgcGFzdCB3ZSd2
+ZSBoYWQgaXNzdWVzIHdpdGggbGliZmNnaSB0aGF0IHdlcmUgcmVsYXRlZCB0byB0aGUgbnVtYmVy
+Cj4+PiBvZiBvcGVuIGZkcyBvbiB0aGUgcHJvY2VzcyAoPiAxMDI0KS4gVGhlIGlzc3VlIHdhcyBh
+IGJ1Z2d5IGxpYmZjZ2kgdGhhdAo+Pj4gd2FzIHVzaW5nIHNlbGVjdCgpIGluc3RlYWQgb2YgcG9s
+bCgpLCBzbyB0aGlzIG1pZ2h0IGJlIHRoZSBpc3N1ZSB5b3UncmUKPj4+IG5vdGljaW5nLgo+Pj4K
+Pj4+IFllaHVkYQo+Pj4gLS0KPj4+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5k
+IHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbgo+Pj4gdGhlIGJvZHkgb2YgYSBt
+ZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcKPj4+IE1vcmUgbWFqb3Jkb21vIGlu
+Zm8gYXQgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sCj4+IE7lq6Xl
+j4npnaPnrKF57oy35rCKYueegu6DkeWNg3bosZ3vv73ol5N7Lm7vv73lo4/muK7mpo966bOQ5aag
+YXnvv73olaDot4jvv71q7oSbZu+8guepkOaunemEl++/veeVkOOCou+/veKSju6bkDorduWivuWm
+m+mRmuixsOeom++/veePo+i1mXpaK+WHkuauoOWouO6VkCLmv58h56eICj4gLS0KPiBUbyB1bnN1
+YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1k
+ZXZlbCIgaW4KPiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVs
+Lm9yZwo+IE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpv
+cmRvbW8taW5mby5odG1sCiAJCSAJICAgCQkgIA==
