@@ -1,278 +1,56 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH 4/4] Rbd: implement the copy-on-read logic
-Date: Wed, 24 Jun 2015 11:50:02 +0300
-Message-ID: <CAOi1vP9W9V1rwuwobM_QAHYJSnMVazu6DS+d=AuF6Xddw7MtKw@mail.gmail.com>
-References: <cover.1432177493.git.liwang@ubuntukylin.com>
-	<447c0db42cc71e92b1c2209f80e0e419628c3a9c.1432177493.git.liwang@ubuntukylin.com>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: 06/24/2015 Weekly Ceph Performance Meeting IS ON!
+Date: Wed, 24 Jun 2015 08:28:44 -0500
+Message-ID: <558AB08C.4090504@redhat.com>
+Reply-To: mnelson@redhat.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f176.google.com ([209.85.212.176]:37378 "EHLO
-	mail-wi0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750787AbbFXIuD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Jun 2015 04:50:03 -0400
-Received: by wicgi11 with SMTP id gi11so39477032wic.0
-        for <ceph-devel@vger.kernel.org>; Wed, 24 Jun 2015 01:50:02 -0700 (PDT)
-In-Reply-To: <447c0db42cc71e92b1c2209f80e0e419628c3a9c.1432177493.git.liwang@ubuntukylin.com>
+Received: from mx1.redhat.com ([209.132.183.28]:56261 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752913AbbFXN2s (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 24 Jun 2015 09:28:48 -0400
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+	by mx1.redhat.com (Postfix) with ESMTPS id 3C3D1B82DB
+	for <ceph-devel@vger.kernel.org>; Wed, 24 Jun 2015 13:28:48 +0000 (UTC)
+Received: from [10.3.112.25] (ovpn-112-25.phx2.redhat.com [10.3.112.25])
+	by int-mx11.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t5ODSioW021377
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+	for <ceph-devel@vger.kernel.org>; Wed, 24 Jun 2015 09:28:47 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Li Wang <liwang@ubuntukylin.com>
-Cc: Sage Weil <sweil@redhat.com>, Alex Elder <elder@kernel.org>, Josh Durgin <josh.durgin@inktank.com>, Ceph Development <ceph-devel@vger.kernel.org>, Min Chen <minchen@ubuntukylin.com>, Yunchuan Wen <yunchuanwen@ubuntukylin.com>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, May 21, 2015 at 12:19 PM, Li Wang <liwang@ubuntukylin.com> wrote:
-> From: Min Chen <minchen@ubuntukylin.com>
->
-> Signed-off-by: Min Chen <minchen@ubuntukylin.com>
-> Signed-off-by: Li Wang <liwang@ubuntukylin.com>
-> Signed-off-by: Yunchuan Wen <yunchuanwen@ubuntukylin.com>
-> ---
->  drivers/block/rbd.c | 186 +++++++++++++++++++++++++++++++++++++++++++++++++++-
->  1 file changed, 183 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 99a3a556..51d8398 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -1851,12 +1851,16 @@ static void rbd_osd_read_callback(struct rbd_obj_request *obj_request)
->                 obj_request, img_request, obj_request->result,
->                 obj_request->xferred, obj_request->length);
->         if (layered && obj_request->result == -ENOENT &&
-> -                       obj_request->img_offset < rbd_dev->parent_overlap)
-> +                       obj_request->img_offset < rbd_dev->parent_overlap) {
->                 rbd_img_parent_read(obj_request);
-> -       else if (img_request)
-> +               rbd_assert(obj_request->img_request);
-> +               if(is_copy_on_read(obj_request->img_request->rbd_dev))
-> +                       rbd_img_copyup_start(obj_request->img_request, obj_request->object_name);
-> +       } else if (img_request) {
->                 rbd_img_obj_request_read_callback(obj_request);
-> -       else
-> +       } else {
->                 obj_request_done_set(obj_request);
-> +       }
->  }
->
->  static void rbd_osd_write_callback(struct rbd_obj_request *obj_request)
-> @@ -2915,6 +2919,182 @@ out_err:
->         return result;
->  }
->
-> +static void rbd_img_copyup_end(struct rbd_copyup_request *copyup_request)
-> +{
-> +       struct rbd_img_request *img_request = NULL;
-> +       rbd_assert(copyup_request);
-> +       img_request = copyup_request->img_request;
-> +       rbd_img_copyup_request_del(img_request, copyup_request);
-> +       rbd_copyup_request_destroy(&copyup_request->kref);
-> +       rbd_img_request_put(img_request);
-> +}
-> +
-> +static void rbd_osd_req_copyup_callback(struct ceph_osd_request *osd_req,
-> +                                       struct ceph_msg *msg)
-> +{
-> +       struct rbd_copyup_request *copyup_request = NULL;
-> +       rbd_assert(osd_req);
-> +       copyup_request = osd_req->r_priv;
-> +       copyup_request->result = osd_req->r_result;
-> +       if(copyup_request->callback)
-> +               copyup_request->callback(copyup_request);
-> +       else
-> +               complete_all(&copyup_request->completion);
-> +}
-> +
-> +static void rbd_img_copyup_write_async(struct rbd_copyup_request *copyup_request)
-> +{
-> +       struct rbd_img_request *img_request = NULL;
-> +       struct ceph_snap_context *snapc = NULL;
-> +       struct ceph_osd_request *osd_req = NULL;
-> +       struct ceph_osd_client *osdc = NULL;
-> +       struct rbd_device *rbd_dev = NULL;
-> +       struct page **pages = NULL;
-> +       struct timespec mtime = CURRENT_TIME;
-> +       u32 page_count = 0;
-> +       u64 object_size = 0;
-> +       int result = 0;
-> +
-> +       /* if copyup_request read from parent failed, just end it */
-> +       if (copyup_request->result < 0) {
-> +               rbd_img_copyup_end(copyup_request);
-> +               goto out;
-> +       }
-> +
-> +       img_request = copyup_request->img_request;
-> +       rbd_assert(img_request);
-> +       rbd_dev = img_request->rbd_dev;
-> +       rbd_assert(rbd_dev);
-> +       osdc = &rbd_dev->rbd_client->client->osdc;
-> +       rbd_assert(osdc);
-> +       snapc = rbd_dev->header.snapc;
-> +
-> +       ceph_osdc_put_request(copyup_request->osd_req);
-> +
-> +       copyup_request->osd_req = NULL;
-> +       osd_req = ceph_osdc_alloc_request(osdc, snapc, 1, false, GFP_ATOMIC);
-> +       if (!osd_req)
-> +               goto out;
-> +
-> +       pages = copyup_request->copyup_pages;
-> +       page_count = copyup_request->copyup_page_count;
-> +       object_size = (u64)1 << rbd_dev->header.obj_order;
-> +
-> +       /* Initialize copyup op */
-> +       osd_req_op_cls_init(osd_req, 0, CEPH_OSD_OP_CALL, "rbd", "copyup");
-> +       osd_req_op_cls_request_data_pages(osd_req, 0, pages, object_size, 0, false, false);
-> +       osd_req->r_flags = CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK;
-> +       osd_req->r_callback = rbd_osd_req_copyup_callback;
-> +       osd_req->r_priv = copyup_request;
-> +
-> +       osd_req->r_base_oloc.pool = ceph_file_layout_pg_pool(rbd_dev->layout);
-> +       ceph_oid_set_name(&osd_req->r_base_oid, copyup_request->object_name);
-> +
-> +       copyup_request->osd_req = osd_req;
-> +       copyup_request->callback = rbd_img_copyup_end;
-> +
-> +       ceph_osdc_build_request(osd_req, 0, snapc, CEPH_NOSNAP, &mtime);
-> +       result = ceph_osdc_start_request(osdc, osd_req, false);
-> +       if(!result)
-> +               goto out;
-> +
-> +       ceph_osdc_put_request(osd_req);
-> +out:
-> +       return;
-> +}
-> +
-> +static void rbd_img_copyup_start(struct rbd_img_request *img_request,
-> +                               const char *object_name)
-> +{
-> +       struct rbd_copyup_request *copyup_request = NULL;
-> +       struct rbd_device *rbd_dev = NULL;
-> +       struct ceph_snap_context *snapc = NULL;
-> +       struct ceph_osd_client *osdc = NULL;
-> +       struct ceph_osd_request *osd_req = NULL;
-> +               const char *parent_object_name = NULL;
-> +
-> +       int result = 0;
-> +       u64 object_no = (u64)-1;
-> +       u64 object_size = 0;
-> +       u64 snap_id = 0;
-> +       __u8 obj_order = 0;
-> +       bool is_read = false;
-> +
-> +       rbd_assert(img_request != NULL);
-> +       rbd_assert(object_name != NULL);
-> +
-> +       rbd_dev = img_request->rbd_dev;
-> +       rbd_assert(rbd_dev != NULL);
-> +
-> +       is_read = !img_request_write_test(img_request) &&
-> +                       !img_request_discard_test(img_request);
-> +
-> +       object_no = rbd_object_no(rbd_dev, object_name);
-> +       obj_order = rbd_dev->header.obj_order;
-> +       object_size = (u64)1 << obj_order;
-> +
-> +       spin_lock(&img_request->copyup_list_lock);
-> +       /* Find if object_no exists in copyup_list */
-> +       for_each_copyup_request(img_request, copyup_request) {
-> +               /* Found, just return */
-> +               if(copyup_request->object_no == object_no) {
-> +                       spin_unlock(&img_request->copyup_list_lock);
-> +                       return;
-> +               }
-> +       }
-> +       spin_unlock(&img_request->copyup_list_lock);
-> +
-> +       /* Not found, send new copyup request */
-> +       copyup_request = NULL;
-> +       osdc = &rbd_dev->rbd_client->client->osdc;
-> +       parent_object_name = rbd_segment_name(rbd_dev->parent, object_no << obj_order);
-> +       if (!parent_object_name)
-> +               goto out;
-> +       osd_req = ceph_osdc_alloc_request(osdc, snapc, 1, false, GFP_ATOMIC);
-> +       if (!osd_req)
-> +               goto out;
-> +       copyup_request = rbd_copyup_request_create(object_name, rbd_dev);
-> +       if (!copyup_request) {
-> +               ceph_osdc_put_request(osd_req);
-> +               goto out;
-> +       }
-> +
-> +       /* Init osd_req */
-> +       osd_req_op_extent_init(osd_req, 0, CEPH_OSD_OP_READ, 0, object_size, 0, 0);
-> +       osd_req_op_extent_osd_data_pages(osd_req, 0, copyup_request->copyup_pages, object_size,
-> +                                       0, false, false);
-> +
-> +       osd_req->r_flags = CEPH_OSD_FLAG_READ;
-> +       osd_req->r_callback = rbd_osd_req_copyup_callback;
-> +       osd_req->r_priv = copyup_request;
-> +
-> +       osd_req->r_base_oloc.pool = ceph_file_layout_pg_pool(rbd_dev->parent->layout);
-> +       ceph_oid_set_name(&osd_req->r_base_oid, parent_object_name);
-> +       rbd_segment_name_free(parent_object_name);
-> +
-> +       /* Init copyup request */
-> +       rbd_assert(copyup_request->osd_req == NULL);
-> +       copyup_request->osd_req = osd_req;
-> +       copyup_request->callback = rbd_img_copyup_write_async;
-> +
-> +       /* Encode osd_req data */
-> +       snap_id = img_request ? img_request->snap_id : CEPH_NOSNAP;
-> +       ceph_osdc_build_request(osd_req, 0, NULL, snap_id, NULL);
-> +
-> +       /* Add copyup request to img_request->copyup_list */
-> +       rbd_img_copyup_request_add(img_request, copyup_request);
-> +
-> +       rbd_img_request_get(img_request);
-> +
-> +       /* Send osd_req */
-> +       result = ceph_osdc_start_request(osdc, osd_req, false);
-> +       if (!result)
-> +               goto out;
-> +out:
-> +       return;
-> +}
-> +
-> +
->  static void rbd_img_obj_exists_callback(struct rbd_obj_request *obj_request)
->  {
->         struct rbd_obj_request *orig_request;
+8AM PST as usual!
 
-Hi,
+Please feel free to add discussion topics to the etherpad!
 
-Sorry for late feedback, I thought I had sent this..
+Here's the links:
 
-I have a number of high-level issues with this.  First and foremost,
-the lifetime rules are unclear.  It looks to me like there is nothing
-preventing a bunch of async copyup requests from hanging around after
-rbd unmap completes.  These copyups bump img_request refcount, which
-means that img_requests along with rbd_device, rbd_client and
-ceph_client will also hang in there after rbd unmap, waiting for late
-replies.  This is wrong: if there are no images mapped, there should be
-no rbd or libceph state around.  I'm pretty sure async copyup requests
-don't need an osd_client callback at all - you can just send and
-forget.
+Etherpad URL:
+http://pad.ceph.com/p/performance_weekly
 
-Second, I think sync (copy-on-write) and async (copy-on-read) copyups
-should be coordinated with each other.  If there is an async copyup in
-progress, a sync copyup can just wait for it to complete.
+To join the Meeting:
+https://bluejeans.com/268261044
 
-Related to the above is the copyup request list.  I think it should be
-a per image rather than a per img_request thing - copyup_list in struct
-rbd_img_request doesn't make much sense to me.  What exactly is it's
-use there?
+To join via Browser:
+https://bluejeans.com/268261044/browser
 
-Fourth, unless I'm missing something, the following
+To join with Lync:
+https://bluejeans.com/268261044/lync
 
-    rbd_img_parent_read(obj_request);
-    rbd_assert(obj_request->img_request);
-    if(is_copy_on_read(obj_request->img_request->rbd_dev))
-        rbd_img_copyup_start(...);
 
-in rbd_osd_read_callback() means that async copyup requests will be
-issued for objects that don't exist in the parent.  I think the correct
-way to handle this is to wait for a parent read request to complete and
-issue a copyup only if it completes successfully.
+To join via Room System:
+Video Conferencing System: bjn.vc -or- 199.48.152.152
+Meeting ID: 268261044
 
-Thanks,
+To join via Phone:
+1) Dial:
+           +1 408 740 7256
+           +1 888 240 2560(US Toll Free)
+           +1 408 317 9253(Alternate Number)
+           (see all numbers - http://bluejeans.com/numbers)
+2) Enter Conference ID: 268261044
 
-                Ilya
+Mark
