@@ -1,65 +1,81 @@
-From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Subject: Re: radosgw crash within libfcgi
-Date: Wed, 24 Jun 2015 14:40:25 -0400 (EDT)
-Message-ID: <460832233.19349487.1435171225932.JavaMail.zimbra@redhat.com>
-References: <BLU175-W1310E96C473E9ABED62D65DFAF0@phx.gbl>
+From: "Deneau, Tom" <tom.deneau@amd.com>
+Subject: RE: deleting objects from a pool
+Date: Wed, 24 Jun 2015 20:22:11 +0000
+Message-ID: <BC97738F8E7C8742BABED7F06FB9DF91669ACA7B@SATLEXDAG01.amd.com>
+References: <BC97738F8E7C8742BABED7F06FB9DF91669AC8C2@SATLEXDAG01.amd.com>
+ <90559C83A9C7FA45B5846C975DFA612DDB4C3F7250@ABGEX73E.FSC.NET>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=iso-8859-2
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx3-phx2.redhat.com ([209.132.183.24]:59957 "EHLO
-	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752443AbbFXSk2 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Jun 2015 14:40:28 -0400
-In-Reply-To: <BLU175-W1310E96C473E9ABED62D65DFAF0@phx.gbl>
+Received: from mail-bn1on0116.outbound.protection.outlook.com ([157.56.110.116]:3936
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753781AbbFXUWS convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Jun 2015 16:22:18 -0400
+In-Reply-To: <90559C83A9C7FA45B5846C975DFA612DDB4C3F7250@ABGEX73E.FSC.NET>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: GuangYang <yguang11@outlook.com>
-Cc: ceph-devel@vger.kernel.org, ceph-users@lists.ceph.com
+To: =?iso-8859-2?Q?Da=B3ek=2C_Piotr?= <Piotr.Dalek@ts.fujitsu.com>, ceph-devel <ceph-devel@vger.kernel.org>
+
+I've noticed that deleting objects from a basic k=3D2 m=3D1 erasure poo=
+l is much much slower than deleting a similar number of objects from a =
+replicated size 3 pool (so the same number of files to be deleted).   I=
+t looked like the ec pool object deletion was almost 20x slower.  Is th=
+ere a lot more work to be done to delete an ec pool object?
+
+-- Tom
 
 
 
------ Original Message -----
-> From: "GuangYang" <yguang11@outlook.com>
-> To: ceph-devel@vger.kernel.org, ceph-users@lists.ceph.com, yehuda@red=
-hat.com
-> Sent: Wednesday, June 24, 2015 10:09:58 AM
-> Subject: radosgw crash within libfcgi
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
+> owner@vger.kernel.org] On Behalf Of Dalek, Piotr
+> Sent: Wednesday, June 24, 2015 11:56 AM
+> To: ceph-devel
+> Subject: Re: deleting objects from a pool
 >=20
-> Hello Cephers,
-> Recently we have several radosgw daemon crashes with the same followi=
-ng
-> kernel log:
+> > -----Original Message-----
+> > From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
+> > owner@vger.kernel.org] On Behalf Of Deneau, Tom
+> > Sent: Wednesday, June 24, 2015 6:44 PM
+> >
+> > I have benchmarking situations where I want to leave a pool around =
+but
+> > delete a lot of objects from the pool.  Is there any really fast wa=
+y to do
+> that?
+> > I noticed rados rmpool is fast but I don't want to remove the pool.
+> >
+> > I have been spawning multiple threads, each deleting a subset of th=
+e
+> objects
+> > (which I believe is what rados bench write does) but even that can =
+be very
+> > slow.
 >=20
-> Jun 23 14:17:38 xxx kernel: radosgw[68180]: segfault at f0 ip
-> 00007ffa069996f2 sp 00007ff55c432710 error 6 in
-> libfcgi.so.0.0.0[7ffa06995000+a000] in libfcgi.so.0.0.0[7ffa06995000+=
-a000]
+> For now, apart from "rados -p <poolname> cleanup" (which doesn't purg=
+e the
+> pool, but merely removes objects written during last benchmark run), =
+the only
+> option is by brute force:
 >=20
-> Looking at the assembly, it seems crashing at this point -
-> http://github.com/sknown/fcgi/blob/master/libfcgi/fcgiapp.c#L2035, wh=
-ich
-> confused me. I tried to see if there is any other reference holding t=
-he
-> FCGX_Request which release the handle without any luck.
+> for i in $(rados -p <poolname> ls); do (rados -p <poolname> rm $i &>/=
+dev/null
+> &); done;
 >=20
-> There are also other observations:
-> =C2=A01> Several radosgw daemon across different hosts crashed around=
- the same
-> =C2=A0time.
-> =C2=A02> Apache's error log has some fcgi error complaining ##idle ti=
-meout##
-> =C2=A0during the time.
+> There's no "purge pool" command in rados -- not yet, at least. I was =
+thinking
+> about one, but never really had time to implement one.
 >=20
-> Does anyone experience similar issue?
->=20
-
-In the past we've had issues with libfcgi that were related to the numb=
-er of open fds on the process (> 1024). The issue was a buggy libfcgi t=
-hat was using select() instead of poll(), so this might be the issue yo=
-u're noticing.
-
-Yehuda
+> With best regards / Pozdrawiam
+> Piotr Da=B3ek
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
