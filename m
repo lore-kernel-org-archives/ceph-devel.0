@@ -1,83 +1,54 @@
-From: "Deneau, Tom" <tom.deneau@amd.com>
-Subject: RE: deleting objects from a pool
-Date: Wed, 24 Jun 2015 20:22:11 +0000
-Message-ID: <BC97738F8E7C8742BABED7F06FB9DF91669ACA7B@SATLEXDAG01.amd.com>
-References: <BC97738F8E7C8742BABED7F06FB9DF91669AC8C2@SATLEXDAG01.amd.com>
- <90559C83A9C7FA45B5846C975DFA612DDB4C3F7250@ABGEX73E.FSC.NET>
+From: GuangYang <yguang11@outlook.com>
+Subject: RE: radosgw crash within libfcgi
+Date: Wed, 24 Jun 2015 13:53:20 -0700
+Message-ID: <BLU175-W467685E9DD4BACB37D7AB3DFAF0@phx.gbl>
+References: <BLU175-W1310E96C473E9ABED62D65DFAF0@phx.gbl>,<460832233.19349487.1435171225932.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-2
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1on0116.outbound.protection.outlook.com ([157.56.110.116]:3936
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753781AbbFXUWS convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Jun 2015 16:22:18 -0400
-In-Reply-To: <90559C83A9C7FA45B5846C975DFA612DDB4C3F7250@ABGEX73E.FSC.NET>
-Content-Language: en-US
+Received: from blu004-omc3s28.hotmail.com ([65.55.116.103]:58614 "EHLO
+	BLU004-OMC3S28.hotmail.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751699AbbFXUxV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 24 Jun 2015 16:53:21 -0400
+In-Reply-To: <460832233.19349487.1435171225932.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?iso-8859-2?Q?Da=B3ek=2C_Piotr?= <Piotr.Dalek@ts.fujitsu.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
 
-I've noticed that deleting objects from a basic k=3D2 m=3D1 erasure poo=
-l is much much slower than deleting a similar number of objects from a =
-replicated size 3 pool (so the same number of files to be deleted).   I=
-t looked like the ec pool object deletion was almost 20x slower.  Is th=
-ere a lot more work to be done to delete an ec pool object?
-
--- Tom
-
-
-
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
-> owner@vger.kernel.org] On Behalf Of Dalek, Piotr
-> Sent: Wednesday, June 24, 2015 11:56 AM
-> To: ceph-devel
-> Subject: Re: deleting objects from a pool
->=20
-> > -----Original Message-----
-> > From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
-> > owner@vger.kernel.org] On Behalf Of Deneau, Tom
-> > Sent: Wednesday, June 24, 2015 6:44 PM
-> >
-> > I have benchmarking situations where I want to leave a pool around =
-but
-> > delete a lot of objects from the pool.  Is there any really fast wa=
-y to do
-> that?
-> > I noticed rados rmpool is fast but I don't want to remove the pool.
-> >
-> > I have been spawning multiple threads, each deleting a subset of th=
-e
-> objects
-> > (which I believe is what rados bench write does) but even that can =
-be very
-> > slow.
->=20
-> For now, apart from "rados -p <poolname> cleanup" (which doesn't purg=
-e the
-> pool, but merely removes objects written during last benchmark run), =
-the only
-> option is by brute force:
->=20
-> for i in $(rados -p <poolname> ls); do (rados -p <poolname> rm $i &>/=
-dev/null
-> &); done;
->=20
-> There's no "purge pool" command in rados -- not yet, at least. I was =
-thinking
-> about one, but never really had time to implement one.
->=20
-> With best regards / Pozdrawiam
-> Piotr Da=B3ek
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+VGhhbmtzIFllaHVkYSBmb3IgdGhlIHJlc3BvbnNlLgoKV2UgYWxyZWFkeSBwYXRjaGVkIGxpYmZj
+Z2kgdG8gdXNlIHBvbGwgaW5zdGVhZCBvZiBzZWxlY3QgdG8gb3ZlcmNvbWUgdGhlIGxpbWl0YXRp
+b24uCgpUaGFua3MsCkd1YW5nCgoKLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLQo+IERhdGU6IFdlZCwgMjQgSnVuIDIwMTUgMTQ6NDA6MjUgLTA0MDAKPiBGcm9tOiB5ZWh1
+ZGFAcmVkaGF0LmNvbQo+IFRvOiB5Z3VhbmcxMUBvdXRsb29rLmNvbQo+IENDOiBjZXBoLWRldmVs
+QHZnZXIua2VybmVsLm9yZzsgY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQo+IFN1YmplY3Q6IFJl
+OiByYWRvc2d3IGNyYXNoIHdpdGhpbiBsaWJmY2dpCj4KPgo+Cj4gLS0tLS0gT3JpZ2luYWwgTWVz
+c2FnZSAtLS0tLQo+PiBGcm9tOiAiR3VhbmdZYW5nIiA8eWd1YW5nMTFAb3V0bG9vay5jb20+Cj4+
+IFRvOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZywgY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNv
+bSwgeWVodWRhQHJlZGhhdC5jb20KPj4gU2VudDogV2VkbmVzZGF5LCBKdW5lIDI0LCAyMDE1IDEw
+OjA5OjU4IEFNCj4+IFN1YmplY3Q6IHJhZG9zZ3cgY3Jhc2ggd2l0aGluIGxpYmZjZ2kKPj4KPj4g
+SGVsbG8gQ2VwaGVycywKPj4gUmVjZW50bHkgd2UgaGF2ZSBzZXZlcmFsIHJhZG9zZ3cgZGFlbW9u
+IGNyYXNoZXMgd2l0aCB0aGUgc2FtZSBmb2xsb3dpbmcKPj4ga2VybmVsIGxvZzoKPj4KPj4gSnVu
+IDIzIDE0OjE3OjM4IHh4eCBrZXJuZWw6IHJhZG9zZ3dbNjgxODBdOiBzZWdmYXVsdCBhdCBmMCBp
+cAo+PiAwMDAwN2ZmYTA2OTk5NmYyIHNwIDAwMDA3ZmY1NWM0MzI3MTAgZXJyb3IgNiBpbgo+PiBs
+aWJmY2dpLnNvLjAuMC4wWzdmZmEwNjk5NTAwMCthMDAwXSBpbiBsaWJmY2dpLnNvLjAuMC4wWzdm
+ZmEwNjk5NTAwMCthMDAwXQo+Pgo+PiBMb29raW5nIGF0IHRoZSBhc3NlbWJseSwgaXQgc2VlbXMg
+Y3Jhc2hpbmcgYXQgdGhpcyBwb2ludCAtCj4+IGh0dHA6Ly9naXRodWIuY29tL3Nrbm93bi9mY2dp
+L2Jsb2IvbWFzdGVyL2xpYmZjZ2kvZmNnaWFwcC5jI0wyMDM1LCB3aGljaAo+PiBjb25mdXNlZCBt
+ZS4gSSB0cmllZCB0byBzZWUgaWYgdGhlcmUgaXMgYW55IG90aGVyIHJlZmVyZW5jZSBob2xkaW5n
+IHRoZQo+PiBGQ0dYX1JlcXVlc3Qgd2hpY2ggcmVsZWFzZSB0aGUgaGFuZGxlIHdpdGhvdXQgYW55
+IGx1Y2suCj4+Cj4+IFRoZXJlIGFyZSBhbHNvIG90aGVyIG9ic2VydmF0aW9uczoKPj4gMT4gU2V2
+ZXJhbCByYWRvc2d3IGRhZW1vbiBhY3Jvc3MgZGlmZmVyZW50IGhvc3RzIGNyYXNoZWQgYXJvdW5k
+IHRoZSBzYW1lCj4+IHRpbWUuCj4+IDI+IEFwYWNoZSdzIGVycm9yIGxvZyBoYXMgc29tZSBmY2dp
+IGVycm9yIGNvbXBsYWluaW5nICMjaWRsZSB0aW1lb3V0IyMKPj4gZHVyaW5nIHRoZSB0aW1lLgo+
+Pgo+PiBEb2VzIGFueW9uZSBleHBlcmllbmNlIHNpbWlsYXIgaXNzdWU/Cj4+Cj4KPiBJbiB0aGUg
+cGFzdCB3ZSd2ZSBoYWQgaXNzdWVzIHdpdGggbGliZmNnaSB0aGF0IHdlcmUgcmVsYXRlZCB0byB0
+aGUgbnVtYmVyIG9mIG9wZW4gZmRzIG9uIHRoZSBwcm9jZXNzICg+IDEwMjQpLiBUaGUgaXNzdWUg
+d2FzIGEgYnVnZ3kgbGliZmNnaSB0aGF0IHdhcyB1c2luZyBzZWxlY3QoKSBpbnN0ZWFkIG9mIHBv
+bGwoKSwgc28gdGhpcyBtaWdodCBiZSB0aGUgaXNzdWUgeW91J3JlIG5vdGljaW5nLgo+Cj4gWWVo
+dWRhCj4gLS0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAi
+dW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4KPiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFq
+b3Jkb21vQHZnZXIua2VybmVsLm9yZwo+IE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgaHR0cDovL3Zn
+ZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sCiAJCSAJICAgCQkgIA==
