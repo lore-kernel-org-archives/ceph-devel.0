@@ -1,54 +1,115 @@
-From: GuangYang <yguang11@outlook.com>
-Subject: RE: radosgw crash within libfcgi
-Date: Wed, 24 Jun 2015 13:53:20 -0700
-Message-ID: <BLU175-W467685E9DD4BACB37D7AB3DFAF0@phx.gbl>
-References: <BLU175-W1310E96C473E9ABED62D65DFAF0@phx.gbl>,<460832233.19349487.1435171225932.JavaMail.zimbra@redhat.com>
+From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Subject: Re: radosgw crash within libfcgi
+Date: Wed, 24 Jun 2015 17:04:05 -0400 (EDT)
+Message-ID: <463953216.19442278.1435179845477.JavaMail.zimbra@redhat.com>
+References: <BLU175-W1310E96C473E9ABED62D65DFAF0@phx.gbl> <460832233.19349487.1435171225932.JavaMail.zimbra@redhat.com> <BLU175-W467685E9DD4BACB37D7AB3DFAF0@phx.gbl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from blu004-omc3s28.hotmail.com ([65.55.116.103]:58614 "EHLO
-	BLU004-OMC3S28.hotmail.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751699AbbFXUxV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 24 Jun 2015 16:53:21 -0400
-In-Reply-To: <460832233.19349487.1435171225932.JavaMail.zimbra@redhat.com>
+Received: from mx6-phx2.redhat.com ([209.132.183.39]:41402 "EHLO
+	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750780AbbFXVEH convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 24 Jun 2015 17:04:07 -0400
+In-Reply-To: <BLU175-W467685E9DD4BACB37D7AB3DFAF0@phx.gbl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
+To: GuangYang <yguang11@outlook.com>
+Cc: ceph-devel@vger.kernel.org, ceph-users@lists.ceph.com
 
-VGhhbmtzIFllaHVkYSBmb3IgdGhlIHJlc3BvbnNlLgoKV2UgYWxyZWFkeSBwYXRjaGVkIGxpYmZj
-Z2kgdG8gdXNlIHBvbGwgaW5zdGVhZCBvZiBzZWxlY3QgdG8gb3ZlcmNvbWUgdGhlIGxpbWl0YXRp
-b24uCgpUaGFua3MsCkd1YW5nCgoKLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLQo+IERhdGU6IFdlZCwgMjQgSnVuIDIwMTUgMTQ6NDA6MjUgLTA0MDAKPiBGcm9tOiB5ZWh1
-ZGFAcmVkaGF0LmNvbQo+IFRvOiB5Z3VhbmcxMUBvdXRsb29rLmNvbQo+IENDOiBjZXBoLWRldmVs
-QHZnZXIua2VybmVsLm9yZzsgY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQo+IFN1YmplY3Q6IFJl
-OiByYWRvc2d3IGNyYXNoIHdpdGhpbiBsaWJmY2dpCj4KPgo+Cj4gLS0tLS0gT3JpZ2luYWwgTWVz
-c2FnZSAtLS0tLQo+PiBGcm9tOiAiR3VhbmdZYW5nIiA8eWd1YW5nMTFAb3V0bG9vay5jb20+Cj4+
-IFRvOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZywgY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNv
-bSwgeWVodWRhQHJlZGhhdC5jb20KPj4gU2VudDogV2VkbmVzZGF5LCBKdW5lIDI0LCAyMDE1IDEw
-OjA5OjU4IEFNCj4+IFN1YmplY3Q6IHJhZG9zZ3cgY3Jhc2ggd2l0aGluIGxpYmZjZ2kKPj4KPj4g
-SGVsbG8gQ2VwaGVycywKPj4gUmVjZW50bHkgd2UgaGF2ZSBzZXZlcmFsIHJhZG9zZ3cgZGFlbW9u
-IGNyYXNoZXMgd2l0aCB0aGUgc2FtZSBmb2xsb3dpbmcKPj4ga2VybmVsIGxvZzoKPj4KPj4gSnVu
-IDIzIDE0OjE3OjM4IHh4eCBrZXJuZWw6IHJhZG9zZ3dbNjgxODBdOiBzZWdmYXVsdCBhdCBmMCBp
-cAo+PiAwMDAwN2ZmYTA2OTk5NmYyIHNwIDAwMDA3ZmY1NWM0MzI3MTAgZXJyb3IgNiBpbgo+PiBs
-aWJmY2dpLnNvLjAuMC4wWzdmZmEwNjk5NTAwMCthMDAwXSBpbiBsaWJmY2dpLnNvLjAuMC4wWzdm
-ZmEwNjk5NTAwMCthMDAwXQo+Pgo+PiBMb29raW5nIGF0IHRoZSBhc3NlbWJseSwgaXQgc2VlbXMg
-Y3Jhc2hpbmcgYXQgdGhpcyBwb2ludCAtCj4+IGh0dHA6Ly9naXRodWIuY29tL3Nrbm93bi9mY2dp
-L2Jsb2IvbWFzdGVyL2xpYmZjZ2kvZmNnaWFwcC5jI0wyMDM1LCB3aGljaAo+PiBjb25mdXNlZCBt
-ZS4gSSB0cmllZCB0byBzZWUgaWYgdGhlcmUgaXMgYW55IG90aGVyIHJlZmVyZW5jZSBob2xkaW5n
-IHRoZQo+PiBGQ0dYX1JlcXVlc3Qgd2hpY2ggcmVsZWFzZSB0aGUgaGFuZGxlIHdpdGhvdXQgYW55
-IGx1Y2suCj4+Cj4+IFRoZXJlIGFyZSBhbHNvIG90aGVyIG9ic2VydmF0aW9uczoKPj4gMT4gU2V2
-ZXJhbCByYWRvc2d3IGRhZW1vbiBhY3Jvc3MgZGlmZmVyZW50IGhvc3RzIGNyYXNoZWQgYXJvdW5k
-IHRoZSBzYW1lCj4+IHRpbWUuCj4+IDI+IEFwYWNoZSdzIGVycm9yIGxvZyBoYXMgc29tZSBmY2dp
-IGVycm9yIGNvbXBsYWluaW5nICMjaWRsZSB0aW1lb3V0IyMKPj4gZHVyaW5nIHRoZSB0aW1lLgo+
-Pgo+PiBEb2VzIGFueW9uZSBleHBlcmllbmNlIHNpbWlsYXIgaXNzdWU/Cj4+Cj4KPiBJbiB0aGUg
-cGFzdCB3ZSd2ZSBoYWQgaXNzdWVzIHdpdGggbGliZmNnaSB0aGF0IHdlcmUgcmVsYXRlZCB0byB0
-aGUgbnVtYmVyIG9mIG9wZW4gZmRzIG9uIHRoZSBwcm9jZXNzICg+IDEwMjQpLiBUaGUgaXNzdWUg
-d2FzIGEgYnVnZ3kgbGliZmNnaSB0aGF0IHdhcyB1c2luZyBzZWxlY3QoKSBpbnN0ZWFkIG9mIHBv
-bGwoKSwgc28gdGhpcyBtaWdodCBiZSB0aGUgaXNzdWUgeW91J3JlIG5vdGljaW5nLgo+Cj4gWWVo
-dWRhCj4gLS0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAi
-dW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4KPiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFq
-b3Jkb21vQHZnZXIua2VybmVsLm9yZwo+IE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgaHR0cDovL3Zn
-ZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sCiAJCSAJICAgCQkgIA==
+
+
+----- Original Message -----
+> From: "GuangYang" <yguang11@outlook.com>
+> To: "Yehuda Sadeh-Weinraub" <yehuda@redhat.com>
+> Cc: ceph-devel@vger.kernel.org, ceph-users@lists.ceph.com
+> Sent: Wednesday, June 24, 2015 1:53:20 PM
+> Subject: RE: radosgw crash within libfcgi
+>=20
+> Thanks Yehuda for the response.
+>=20
+> We already patched libfcgi to use poll instead of select to overcome =
+the
+> limitation.
+>=20
+> Thanks,
+> Guang
+>=20
+>=20
+> ----------------------------------------
+> > Date: Wed, 24 Jun 2015 14:40:25 -0400
+> > From: yehuda@redhat.com
+> > To: yguang11@outlook.com
+> > CC: ceph-devel@vger.kernel.org; ceph-users@lists.ceph.com
+> > Subject: Re: radosgw crash within libfcgi
+> >
+> >
+> >
+> > ----- Original Message -----
+> >> From: "GuangYang" <yguang11@outlook.com>
+> >> To: ceph-devel@vger.kernel.org, ceph-users@lists.ceph.com,
+> >> yehuda@redhat.com
+> >> Sent: Wednesday, June 24, 2015 10:09:58 AM
+> >> Subject: radosgw crash within libfcgi
+> >>
+> >> Hello Cephers,
+> >> Recently we have several radosgw daemon crashes with the same foll=
+owing
+> >> kernel log:
+> >>
+> >> Jun 23 14:17:38 xxx kernel: radosgw[68180]: segfault at f0 ip
+> >> 00007ffa069996f2 sp 00007ff55c432710 error 6 in
+
+error 6 is sigabrt, right? With invalid pointer I'd expect to get segfa=
+ult. Is the pointer actually invalid?
+
+Yehuda
+
+
+> >> libfcgi.so.0.0.0[7ffa06995000+a000] in libfcgi.so.0.0.0[7ffa069950=
+00+a000]
+> >>
+> >> Looking at the assembly, it seems crashing at this point -
+> >> http://github.com/sknown/fcgi/blob/master/libfcgi/fcgiapp.c#L2035,=
+ which
+> >> confused me. I tried to see if there is any other reference holdin=
+g the
+> >> FCGX_Request which release the handle without any luck.
+> >>
+> >> There are also other observations:
+> >> 1> Several radosgw daemon across different hosts crashed around th=
+e same
+> >> time.
+> >> 2> Apache's error log has some fcgi error complaining ##idle timeo=
+ut##
+> >> during the time.
+> >>
+> >> Does anyone experience similar issue?
+> >>
+> >
+> > In the past we've had issues with libfcgi that were related to the =
+number
+> > of open fds on the process (> 1024). The issue was a buggy libfcgi =
+that
+> > was using select() instead of poll(), so this might be the issue yo=
+u're
+> > noticing.
+> >
+> > Yehuda
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-deve=
+l" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at http://vger.kernel.org/majordomo-info.html
+>  		 	   		  N=E5=AB=A5=E5=8F=89=E9=9D=A3=E7=AC=A1y=EE=8C=B7=E6=B0=8Ab=
+=E7=9E=82=EE=83=91=E5=8D=83v=E8=B1=9D=EF=BF=BD=E8=97=93{.n=EF=BF=BD=E5=A3=
+=8F=E6=B8=AE=E6=A6=8Fz=E9=B3=90=E5=A6=A0ay=EF=BF=BD=E8=95=A0=E8=B7=88=EF=
+=BF=BDj=EE=84=9Bf=EF=BC=82=E7=A9=90=E6=AE=9D=E9=84=97=EF=BF=BD=E7=95=90=
+=E3=82=A2=EF=BF=BD=E2=92=8E=EE=9B=90:+v=E5=A2=BE=E5=A6=9B=E9=91=9A=E8=B1=
+=B0=E7=A8=9B=EF=BF=BD=E7=8F=A3=E8=B5=99zZ+=E5=87=92=E6=AE=A0=E5=A8=B8=EE=
+=95=90"=E6=BF=9F!=E7=A7=88
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
