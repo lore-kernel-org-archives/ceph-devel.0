@@ -1,62 +1,27 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Setting up teuthology with OpenStack
-Date: Tue, 23 Jun 2015 21:12:01 -0400
-Message-ID: <558A03E1.7010903@dachary.org>
+From: "Zhou, Yuan" <yuan.zhou@intel.com>
+Subject: Monitor clock skew on Teuthology testing
+Date: Wed, 24 Jun 2015 01:53:16 +0000
+Message-ID: <06681238D8946F44A60AA400760A1CBF01FE85AF@SHSMSX104.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="xDjODsjwBM6BuAbfVAoDk3wu36Vm9b7S1"
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:39096 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751985AbbFXBML (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Jun 2015 21:12:11 -0400
-Received: from [10.9.0.6] (unknown [10.0.2.28])
-	by smtp.dmail.dachary.org (Postfix) with ESMTP id 4154242B2B
-	for <ceph-devel@vger.kernel.org>; Wed, 24 Jun 2015 03:12:02 +0200 (CEST)
+Received: from mga03.intel.com ([134.134.136.65]:27661 "EHLO mga03.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S933826AbbFXBxY convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Jun 2015 21:53:24 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: "sepia@lists.ceph.com" <sepia@lists.ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Zack Cerza <zack@redhat.com>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---xDjODsjwBM6BuAbfVAoDk3wu36Vm9b7S1
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Hi Zack,
 
-Hi Ceph,
+I was testing on some home-made Teuthology cluster. Till now I can use the teuthology-suite to submit the test cases and start some workers to do the tests. From the Pulpito logs I can see most of the tests are passed except there was some error when aggregating the results in the last step. The error message was like:
 
-There is an experimental OpenStack backend[1] for teuthology[2] (the Ceph=
- integration tests toolbox) with instructions to set it up[3] and some in=
-tegration tests to verify it works as it should. I've run them successful=
-ly on two different OpenStack clusters (http://the.re/ and https://enterc=
-loudsuite.com/). It would be great if someone was brave enough to give it=
- a try at this very early stage :-) If you don't have access to an OpenSt=
-ack cluster, https://entercloudsuite.com/ can provide an OpenStack tenant=
- within the hour (I had a few weird glitches during the registration but =
-they went away magically).
+"2015-06-24 08:41:33.334317 mon.1 192.168.13.117:6789/0 4 : cluster [WRN] message from mon.0 was stamped 0.709253s in the future, clocks not synchronized" in cluster log  
 
-Cheers
+This was due to the time lag between monitors to my knowledge. I checked the clock settings in Teuthology and find the NTP server are defined in ceph-qa-chef/cookbooks/ceph-qa/files/default/ntp.conf. Is there any other settings on the clock side there?
 
-[1] teuthology OpenStack backend http://tracker.ceph.com/issues/6502
-[2] teuthology https://github.com/ceph/teuthology/
-[3] setting up teuthology with OpenStack https://github.com/dachary/teuth=
-ology/tree/wip-6502-openstack#openstack-backend
+Thanks, -yuan
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---xDjODsjwBM6BuAbfVAoDk3wu36Vm9b7S1
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlWKA+EACgkQ8dLMyEl6F23lNACgt3QiBUz7UC/GJEJu0p+CAlyx
-3AAAn2YAEyv9GvN+kprezuJrBQOx+/Nw
-=VMoV
------END PGP SIGNATURE-----
-
---xDjODsjwBM6BuAbfVAoDk3wu36Vm9b7S1--
