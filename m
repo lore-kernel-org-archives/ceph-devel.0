@@ -1,104 +1,52 @@
 From: Loic Dachary <loic@dachary.org>
-Subject: Re: provisioning teuthology targets with OpenStack
-Date: Tue, 23 Jun 2015 20:46:12 -0400
-Message-ID: <5589FDD4.3020301@dachary.org>
-References: <557479B4.9060207@dachary.org> <837976248.11945956.1433867145523.JavaMail.zimbra@redhat.com> <55773738.1090701@dachary.org>
+Subject: Setting up teuthology with OpenStack
+Date: Tue, 23 Jun 2015 21:12:01 -0400
+Message-ID: <558A03E1.7010903@dachary.org>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="18feMqh9osMa7gJWkO3w9sXDUqNmdLtCg"
+ boundary="xDjODsjwBM6BuAbfVAoDk3wu36Vm9b7S1"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:39089 "EHLO
+Received: from mail2.dachary.org ([91.121.57.175]:39096 "EHLO
 	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1754891AbbFXAqQ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Jun 2015 20:46:16 -0400
-In-Reply-To: <55773738.1090701@dachary.org>
+	with ESMTP id S1751985AbbFXBML (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Jun 2015 21:12:11 -0400
+Received: from [10.9.0.6] (unknown [10.0.2.28])
+	by smtp.dmail.dachary.org (Postfix) with ESMTP id 4154242B2B
+	for <ceph-devel@vger.kernel.org>; Wed, 24 Jun 2015 03:12:02 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Zack Cerza <zack@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
 This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---18feMqh9osMa7gJWkO3w9sXDUqNmdLtCg
+--xDjODsjwBM6BuAbfVAoDk3wu36Vm9b7S1
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
 
-Hi Zack,
+Hi Ceph,
 
-I think it works and I'll start using it. For the record
-
-https://github.com/ceph/teuthology/compare/master...dachary:wip-6502-open=
-stack?expand=3D1#diff-88b99bb28683bd5b7e3a204826ead112R318
-
-is what I have right now. There are a few things that need cleaning but n=
-othing major I hope. I'll clean them up after you had time to review the =
-preliminary pull requests at https://github.com/ceph/teuthology/pulls.
+There is an experimental OpenStack backend[1] for teuthology[2] (the Ceph=
+ integration tests toolbox) with instructions to set it up[3] and some in=
+tegration tests to verify it works as it should. I've run them successful=
+ly on two different OpenStack clusters (http://the.re/ and https://enterc=
+loudsuite.com/). It would be great if someone was brave enough to give it=
+ a try at this very early stage :-) If you don't have access to an OpenSt=
+ack cluster, https://entercloudsuite.com/ can provide an OpenStack tenant=
+ within the hour (I had a few weird glitches during the registration but =
+they went away magically).
 
 Cheers
 
-On 09/06/2015 14:58, Loic Dachary wrote:
->=20
->=20
-> On 09/06/2015 18:25, Zack Cerza wrote:
->> Hi Loic!
->>
->> I'm really happy to hear you have the time and motivation to work on t=
-his! It's something I've wanted to get to for a while, but other things k=
-eep getting in the way.
->>
->> I'd suggest looking at teuthology.provision.Downburst to investigate m=
-aybe pulling some of its functionality into a base class that a potential=
- OpenStack subclass could also benefit from. I'd love to see us using a c=
-ommon interface for all of our provisioning. If that seems like a lot of =
-work, I'd be willing to be the one to create the base class and work with=
- you to make sure its API was useful for OpenStack as well.
->>
->=20
-> Thanks for the pointers. I'll write something that works and get back t=
-o you to make it acceptable :-)
->=20
->> Thanks,
->> Zack
->>
->> ----- Original Message -----
->>> From: "Loic Dachary" <loic@dachary.org>
->>> To: "Zack Cerza" <zcerza@redhat.com>
->>> Cc: "Ceph Development" <ceph-devel@vger.kernel.org>
->>> Sent: Sunday, June 7, 2015 11:04:52 AM
->>> Subject: provisioning teuthology targets with OpenStack
->>>
->>> Hi Zack,
->>>
->>> I'm motivated by my recent experience with hacking teuthology and con=
-tainers
->>> :-) I'd like to give
->>>
->>> http://tracker.ceph.com/issues/6502 "provision targets using a cloud =
-API"
->>>
->>> a shot with OpenStack in mind (because I know nothing of EC2 really).=
- The
->>> idea is to make it relatively easy for someone with access to an Open=
-Stack
->>> tenant to using instead of downburst. Not only would that simplify th=
-e
->>> development process for people without access to the lab, it would al=
-so
->>> allow the addition of more horsepower to the lab. What do you think ?=
-
->>>
->>> Cheers
->>> --
->>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->>>
->>>
->=20
+[1] teuthology OpenStack backend http://tracker.ceph.com/issues/6502
+[2] teuthology https://github.com/ceph/teuthology/
+[3] setting up teuthology with OpenStack https://github.com/dachary/teuth=
+ology/tree/wip-6502-openstack#openstack-backend
 
 --=20
 Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
 
---18feMqh9osMa7gJWkO3w9sXDUqNmdLtCg
+--xDjODsjwBM6BuAbfVAoDk3wu36Vm9b7S1
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -106,9 +54,9 @@ Content-Disposition: attachment; filename="signature.asc"
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2.0.22 (GNU/Linux)
 
-iEYEARECAAYFAlWJ/dQACgkQ8dLMyEl6F23+jgCgvE5nBV/B8EmotEHi9uAZmhNe
-/bsAnA26tjp6kni4F2sccWfzpvfYfxWg
-=wzC8
+iEYEARECAAYFAlWKA+EACgkQ8dLMyEl6F23lNACgt3QiBUz7UC/GJEJu0p+CAlyx
+3AAAn2YAEyv9GvN+kprezuJrBQOx+/Nw
+=VMoV
 -----END PGP SIGNATURE-----
 
---18feMqh9osMa7gJWkO3w9sXDUqNmdLtCg--
+--xDjODsjwBM6BuAbfVAoDk3wu36Vm9b7S1--
