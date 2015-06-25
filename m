@@ -1,100 +1,54 @@
-From: "Podoski, Igor" <Igor.Podoski@ts.fujitsu.com>
-Subject: RE: deleting objects from a pool
-Date: Thu, 25 Jun 2015 08:06:05 +0200
-Message-ID: <66EBB02ADA308B4F8273E99FC000126C6BEA0BD5C8@ABGEX70E.FSC.NET>
-References: <BC97738F8E7C8742BABED7F06FB9DF91669AC8C2@SATLEXDAG01.amd.com>
- <90559C83A9C7FA45B5846C975DFA612DDB4C3F7250@ABGEX73E.FSC.NET>
- <BC97738F8E7C8742BABED7F06FB9DF91669ACA7B@SATLEXDAG01.amd.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-2
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: [PATCH] rbd: bump queue_max_segments
+Date: Thu, 25 Jun 2015 12:01:08 +0300
+Message-ID: <1435222868-34966-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from dgate10.ts.fujitsu.com ([80.70.172.49]:44947 "EHLO
-	dgate10.ts.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751426AbbFYGGI convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Jun 2015 02:06:08 -0400
-In-Reply-To: <BC97738F8E7C8742BABED7F06FB9DF91669ACA7B@SATLEXDAG01.amd.com>
-Content-Language: en-US
+Received: from mail-la0-f43.google.com ([209.85.215.43]:34226 "EHLO
+	mail-la0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750968AbbFYJBT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Jun 2015 05:01:19 -0400
+Received: by lagx9 with SMTP id x9so40864636lag.1
+        for <ceph-devel@vger.kernel.org>; Thu, 25 Jun 2015 02:01:17 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Deneau, Tom" <tom.deneau@amd.com>, =?iso-8859-2?Q?Da=B3ek=2C_Piotr?= <Piotr.Dalek@ts.fujitsu.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: Alex Elder <elder@linaro.org>
 
-Hi,
+The default queue_limits::max_segments value (BLK_MAX_SEGMENTS = 128)
+unnecessarily limits bio sizes to 512k (assuming 4k pages).  rbd, being
+a virtual block device, doesn't have any restrictions on the number of
+physical segments, so bump max_segments to max_hw_sectors, in theory
+allowing a sector per segment (although the only case this matters that
+I can think of is some readv/writev style thing).  In practice this is
+going to give us 1M bios - the number of segments in a bio is limited
+in bio_get_nr_vecs() by BIO_MAX_PAGES = 256.
 
-It appears, that cleanup can be used as a purge:
+Note that this doesn't result in any improvement on a typical direct
+sequential test.  This is because on a box with a not too badly
+fragmented memory the default BLK_MAX_SEGMENTS is enough to see nice
+rbd object size sized requests.  The only difference is the size of
+bios being merged - 512k vs 1M for something like
 
-rados -p <poolname> cleanup  --prefix ""
+    $ dd if=/dev/zero of=/dev/rbd0 oflag=direct bs=$RBD_OBJ_SIZE
+    $ dd if=/dev/rbd0 iflag=direct of=/dev/null bs=$RBD_OBJ_SIZE
 
-Regards,
-Igor.
+Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+---
+ drivers/block/rbd.c | 1 +
+ 1 file changed, 1 insertion(+)
 
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 89fe8a4bc02e..bc88fbcb9715 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -3791,6 +3791,7 @@ static int rbd_init_disk(struct rbd_device *rbd_dev)
+ 	/* set io sizes to object size */
+ 	segment_size = rbd_obj_bytes(&rbd_dev->header);
+ 	blk_queue_max_hw_sectors(q, segment_size / SECTOR_SIZE);
++	blk_queue_max_segments(q, segment_size / SECTOR_SIZE);
+ 	blk_queue_max_segment_size(q, segment_size);
+ 	blk_queue_io_min(q, segment_size);
+ 	blk_queue_io_opt(q, segment_size);
+-- 
+1.9.3
 
------Original Message-----
-=46rom: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.=
-kernel.org] On Behalf Of Deneau, Tom
-Sent: Wednesday, June 24, 2015 10:22 PM
-To: Da=B3ek, Piotr; ceph-devel
-Subject: RE: deleting objects from a pool
-
-I've noticed that deleting objects from a basic k=3D2 m=3D1 erasure poo=
-l is much much slower than deleting a similar number of objects from a =
-replicated size 3 pool (so the same number of files to be deleted).   I=
-t looked like the ec pool object deletion was almost 20x slower.  Is th=
-ere a lot more work to be done to delete an ec pool object?
-
--- Tom
-
-
-
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-=20
-> owner@vger.kernel.org] On Behalf Of Dalek, Piotr
-> Sent: Wednesday, June 24, 2015 11:56 AM
-> To: ceph-devel
-> Subject: Re: deleting objects from a pool
->=20
-> > -----Original Message-----
-> > From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-=20
-> > owner@vger.kernel.org] On Behalf Of Deneau, Tom
-> > Sent: Wednesday, June 24, 2015 6:44 PM
-> >
-> > I have benchmarking situations where I want to leave a pool around=20
-> > but delete a lot of objects from the pool.  Is there any really fas=
-t=20
-> > way to do
-> that?
-> > I noticed rados rmpool is fast but I don't want to remove the pool.
-> >
-> > I have been spawning multiple threads, each deleting a subset of th=
-e
-> objects
-> > (which I believe is what rados bench write does) but even that can=20
-> > be very slow.
->=20
-> For now, apart from "rados -p <poolname> cleanup" (which doesn't purg=
-e=20
-> the pool, but merely removes objects written during last benchmark=20
-> run), the only option is by brute force:
->=20
-> for i in $(rados -p <poolname> ls); do (rados -p <poolname> rm $i=20
-> &>/dev/null &); done;
->=20
-> There's no "purge pool" command in rados -- not yet, at least. I was=20
-> thinking about one, but never really had time to implement one.
->=20
-> With best regards / Pozdrawiam
-> Piotr Da=B3ek
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
-=20
-> in the body of a message to majordomo@vger.kernel.org More majordomo=20
-> info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n the body of a message to majordomo@vger.kernel.org More majordomo inf=
-o at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
