@@ -1,71 +1,35 @@
-From: =?UTF-8?q?Beno=C3=AEt=20Canet?= <benoit.canet@nodalink.com>
-Subject: [PATCH] libceph: Avoid holding the zero page on ceph_msgr_slab_init errors
-Date: Thu, 25 Jun 2015 03:27:56 +0200
-Message-ID: <1435195676-2873-2-git-send-email-benoit.canet@nodalink.com>
-References: <1435195676-2873-1-git-send-email-benoit.canet@nodalink.com>
+From: Pete Zaitcev <zaitcev@redhat.com>
+Subject: Re: xattrs vs. omap with radosgw
+Date: Wed, 24 Jun 2015 23:46:23 -0600
+Message-ID: <20150624234623.464e3292@guren.zaitcev.lan>
+References: <BLU175-W13D5737A24429707F8F978DFA70@phx.gbl>
+	<alpine.DEB.2.00.1506161241060.15556@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from 28-113-190-109.dsl.ovh.fr ([109.190.113.28]:32945 "EHLO ariel"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753263AbbFYB14 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 24 Jun 2015 21:27:56 -0400
-In-Reply-To: <1435195676-2873-1-git-send-email-benoit.canet@nodalink.com>
+Received: from mx1.redhat.com ([209.132.183.28]:36885 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751267AbbFYFq0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 25 Jun 2015 01:46:26 -0400
+In-Reply-To: <alpine.DEB.2.00.1506161241060.15556@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: idryomov@gmail.com, elder@ieee.org, =?UTF-8?q?Beno=C3=AEt=20Canet?= <benoit.canet@nodalink.com>
+To: Sage Weil <sage@newdream.net>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-ceph_msgr_slab_init may fail due to a temporary ENOMEM.
+On Tue, 16 Jun 2015 12:43:08 -0700 (PDT)
+Sage Weil <sage@newdream.net> wrote:
 
-Delay a bit the initialization of zero_page in ceph_msgr_init and
-reorder it's cleanup in _ceph_msgr_exit for readability sake.
+> With hammer the size of object_info_t crossed the 255 byte boundary, which 
+> is the max xattr value that XFS can inline.  We've since merged something 
+> that stripes over several small xattrs so that we can keep things inline, 
+> but it hasn't been backported to hammer yet.  See
+> c6cdb4081e366f471b372102905a1192910ab2da.
 
-BUG_ON() will not suffer to be postponed in case it is triggered.
+Meanwhile, Swift stopped striping altogether:
+ https://github.com/openstack/swift/commit/cc2f0f4ed6f12554b7d8e8cb61e14f2b103445a0
 
-Signed-off-by: Beno=C3=AEt Canet <benoit.canet@nodalink.com>
----
- net/ceph/messenger.c | 10 +++++-----
- 1 file changed, 5 insertions(+), 5 deletions(-)
+(but yes, it's still advantageous to fit into an inode)
 
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index 38f06a4..ec68cd3 100644
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -275,22 +275,22 @@ static void _ceph_msgr_exit(void)
- 		ceph_msgr_wq =3D NULL;
- 	}
-=20
--	ceph_msgr_slab_exit();
--
- 	BUG_ON(zero_page =3D=3D NULL);
- 	page_cache_release(zero_page);
- 	zero_page =3D NULL;
-+
-+	ceph_msgr_slab_exit();
- }
-=20
- int ceph_msgr_init(void)
- {
-+	if (ceph_msgr_slab_init())
-+		return -ENOMEM;
-+
- 	BUG_ON(zero_page !=3D NULL);
- 	zero_page =3D ZERO_PAGE(0);
- 	page_cache_get(zero_page);
-=20
--	if (ceph_msgr_slab_init())
--		return -ENOMEM;
--
- 	/*
- 	 * The number of active work items is limited by the number of
- 	 * connections, so leave @max_active at default.
---=20
-2.1.4
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-- Pete
