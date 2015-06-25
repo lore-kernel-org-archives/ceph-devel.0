@@ -1,112 +1,106 @@
-From: Barclay Jameson <almightybeeij@gmail.com>
-Subject: Re: Ceph hard lock Hammer 9.2
-Date: Thu, 25 Jun 2015 09:11:26 -0500
-Message-ID: <CAMzumdYPpqDQZYqGcxSPbUKM2HOCvQeev24ZPs7dd7nJvO+sZA@mail.gmail.com>
-References: <CAMzumda0cMjMphp2B-u5hcPKsF9K26YQRGg4tKYJL5VPXX2AJQ@mail.gmail.com>
-	<CAC6JEv_=gWCvanpkwqcrDpKYX0Wb8cV=aE6S-uHgT_c1-76gtw@mail.gmail.com>
-	<CAMzumdaTn5NX9g3J_ea0wAzPVDt2tsMDFsafjECDuzN9OOWa=w@mail.gmail.com>
-	<CAAM7YAnFhtYXvrz+kb6ADGnqoTh7rtHcn7qA5wAivrxkAbyj2A@mail.gmail.com>
+From: Alex Elder <elder@ieee.org>
+Subject: Re: [PATCH 1/3] rbd: terminate rbd_opts_tokens with Opt_err
+Date: Thu, 25 Jun 2015 09:22:46 -0500
+Message-ID: <558C0EB6.20708@ieee.org>
+References: <1435223480-35238-1-git-send-email-idryomov@gmail.com> <1435223480-35238-2-git-send-email-idryomov@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f52.google.com ([209.85.218.52]:34533 "EHLO
-	mail-oi0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751233AbbFYOL1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Jun 2015 10:11:27 -0400
-Received: by oigx81 with SMTP id x81so53269482oig.1
-        for <ceph-devel@vger.kernel.org>; Thu, 25 Jun 2015 07:11:26 -0700 (PDT)
-In-Reply-To: <CAAM7YAnFhtYXvrz+kb6ADGnqoTh7rtHcn7qA5wAivrxkAbyj2A@mail.gmail.com>
+Received: from mail-pa0-f43.google.com ([209.85.220.43]:33145 "EHLO
+	mail-pa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751837AbbFYOWs (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Jun 2015 10:22:48 -0400
+Received: by padev16 with SMTP id ev16so50826567pad.0
+        for <ceph-devel@vger.kernel.org>; Thu, 25 Jun 2015 07:22:48 -0700 (PDT)
+In-Reply-To: <1435223480-35238-2-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <ukernel@gmail.com>
-Cc: Gregory Farnum <greg@gregs42.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, =?UTF-8?B?5Lil5q2j?= <zyan@redhat.com>
+To: Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
 
-If I get it to happen again I will send you the kernel message.
-Thanks again Zheng!
+On 06/25/2015 04:11 AM, Ilya Dryomov wrote:
+> Also nuke useless Opt_last_bool and don't break lines unnecessarily.
+>
+> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 
-On Wed, Jun 24, 2015 at 8:48 AM, Yan, Zheng <ukernel@gmail.com> wrote:
-> Could you please run "echo 1 > /proc/sys/kernel/sysrq;  echo t >
-> /proc/sysrq-trigger" when this warning happens again.  then send the
-> kernel message to us.
+Good idea.
+
+Reviewed-by: Alex Elder <elder@linaro.org>
+
+> ---
+>   drivers/block/rbd.c | 24 ++++++++----------------
+>   1 file changed, 8 insertions(+), 16 deletions(-)
 >
-> Regards
-> Yan, Zheng
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index bc88fbcb9715..4de8c9167c4b 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -724,7 +724,7 @@ static struct rbd_client *rbd_client_find(struct ceph_options *ceph_opts)
+>   }
 >
-> On Tue, Jun 23, 2015 at 10:25 PM, Barclay Jameson
-> <almightybeeij@gmail.com> wrote:
->> Sure,
->> I guess it's actually a soft kernel lock since it's only the
->> filesystem that is hung with high IO wait.
->> The kernel is 4.0.4-1.el6.elrepo.x86.
->> The Ceph version is 0.94.2 (Sorry about the confusion I missed a 4
->> when I typed in the subject line).
->> I was testing copying 100,000 files from directory (dir1) to
->> (dir1-`hostname`) on three septate hosts.
->> 2 of the hosts completed the job and the third one hung with the stack
->> trace in /var/log/messages.
->>
->> On Tue, Jun 23, 2015 at 6:54 AM, Gregory Farnum <greg@gregs42.com> wrote:
->>> On Mon, Jun 22, 2015 at 9:45 PM, Barclay Jameson
->>> <almightybeeij@gmail.com> wrote:
->>>> Has anyone seen this?
->>>
->>> Can you describe the kernel you're using, the workload you were
->>> running, the Ceph cluster you're running against, etc?
->>>
->>>>
->>>> Jun 22 15:09:27 node kernel: Call Trace:
->>>> Jun 22 15:09:27 node kernel: [<ffffffff816803ee>] schedule+0x3e/0x90
->>>> Jun 22 15:09:27 node kernel: [<ffffffff8168062e>]
->>>> schedule_preempt_disabled+0xe/0x10
->>>> Jun 22 15:09:27 node kernel: [<ffffffff81681ce3>]
->>>> __mutex_lock_slowpath+0x93/0x100
->>>> Jun 22 15:09:27 node kernel: [<ffffffffa060def8>] ?
->>>> __cap_is_valid+0x58/0x70 [ceph]
->>>> Jun 22 15:09:27 node kernel: [<ffffffff81681d73>] mutex_lock+0x23/0x40
->>>> Jun 22 15:09:27 node kernel: [<ffffffffa0610f2d>]
->>>> ceph_check_caps+0x38d/0x780 [ceph]
->>>> Jun 22 15:09:27 node kernel: [<ffffffff812f5a9b>] ?
->>>> __radix_tree_delete_node+0x7b/0x130
->>>> Jun 22 15:09:27 node kernel: [<ffffffffa0612637>]
->>>> ceph_put_wrbuffer_cap_refs+0xf7/0x240 [ceph]
->>>> Jun 22 15:09:27 node kernel: [<ffffffffa060b170>]
->>>> writepages_finish+0x200/0x290 [ceph]
->>>> Jun 22 15:09:27 node kernel: [<ffffffffa05e2731>]
->>>> handle_reply+0x4f1/0x640 [libceph]
->>>> Jun 22 15:09:27 node kernel: [<ffffffffa05e3065>] dispatch+0x85/0xa0 [libceph]
->>>> Jun 22 15:09:27 node kernel: [<ffffffffa05d7ceb>]
->>>> process_message+0xab/0xd0 [libceph]
->>>> Jun 22 15:09:27 node kernel: [<ffffffffa05db052>] try_read+0x2d2/0x430 [libceph]
->>>> Jun 22 15:09:27 node kernel: [<ffffffffa05db7e8>] con_work+0x78/0x220 [libceph]
->>>> Jun 22 15:09:27 node kernel: [<ffffffff8108c475>] process_one_work+0x145/0x460
->>>> Jun 22 15:09:27 node kernel: [<ffffffff8108c8b2>] worker_thread+0x122/0x420
->>>> Jun 22 15:09:27 node kernel: [<ffffffff8167fdb8>] ? __schedule+0x398/0x840
->>>> Jun 22 15:09:27 node kernel: [<ffffffff8108c790>] ? process_one_work+0x460/0x460
->>>> Jun 22 15:09:27 node kernel: [<ffffffff8108c790>] ? process_one_work+0x460/0x460
->>>> Jun 22 15:09:27 node kernel: [<ffffffff8109170e>] kthread+0xce/0xf0
->>>> Jun 22 15:09:27 node kernel: [<ffffffff81091640>] ?
->>>> kthread_freezable_should_stop+0x70/0x70
->>>> Jun 22 15:09:27 node kernel: [<ffffffff81683dd8>] ret_from_fork+0x58/0x90
->>>> Jun 22 15:09:27 node kernel: [<ffffffff81091640>] ?
->>>> kthread_freezable_should_stop+0x70/0x70
->>>> Jun 22 15:11:27 node kernel: INFO: task kworker/2:1:40 blocked for
->>>> more than 120 seconds.
->>>> Jun 22 15:11:27 node kernel:      Tainted: G          I
->>>> 4.0.4-1.el6.elrepo.x86_64 #1
->>>> Jun 22 15:11:27 node kernel: "echo 0 >
->>>> /proc/sys/kernel/hung_task_timeout_secs" disables this message.
->>>> Jun 22 15:11:27 node kernel: kworker/2:1     D ffff881ff279f7f8     0
->>>>   40      2 0x00000000
->>>> Jun 22 15:11:27 node kernel: Workqueue: ceph-msgr con_work [libceph]
->>>> Jun 22 15:11:27 node kernel: ffff881ff279f7f8 ffff881ff261c010
->>>> ffff881ff2b67050 ffff88207fd95270
->>>> Jun 22 15:11:27 node kernel: ffff881ff279c010 ffff88207fd15200
->>>> 7fffffffffffffff 0000000000000002
->>>> Jun 22 15:11:27 node kernel: ffffffff81680ae0 ffff881ff279f818
->>>> ffffffff816803ee ffffffff810ae63b
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>   /*
+> - * mount options
+> + * (Per device) rbd map options
+>    */
+>   enum {
+>   	Opt_last_int,
+> @@ -733,8 +733,7 @@ enum {
+>   	/* string args above */
+>   	Opt_read_only,
+>   	Opt_read_write,
+> -	/* Boolean args above */
+> -	Opt_last_bool,
+> +	Opt_err
+>   };
+>
+>   static match_table_t rbd_opts_tokens = {
+> @@ -744,8 +743,7 @@ static match_table_t rbd_opts_tokens = {
+>   	{Opt_read_only, "ro"},		/* Alternate spelling */
+>   	{Opt_read_write, "read_write"},
+>   	{Opt_read_write, "rw"},		/* Alternate spelling */
+> -	/* Boolean args above */
+> -	{-1, NULL}
+> +	{Opt_err, NULL}
+>   };
+>
+>   struct rbd_options {
+> @@ -761,22 +759,15 @@ static int parse_rbd_opts_token(char *c, void *private)
+>   	int token, intval, ret;
+>
+>   	token = match_token(c, rbd_opts_tokens, argstr);
+> -	if (token < 0)
+> -		return -EINVAL;
+> -
+>   	if (token < Opt_last_int) {
+>   		ret = match_int(&argstr[0], &intval);
+>   		if (ret < 0) {
+> -			pr_err("bad mount option arg (not int) "
+> -			       "at '%s'\n", c);
+> +			pr_err("bad mount option arg (not int) at '%s'\n", c);
+>   			return ret;
+>   		}
+>   		dout("got int token %d val %d\n", token, intval);
+>   	} else if (token > Opt_last_int && token < Opt_last_string) {
+> -		dout("got string token %d val %s\n", token,
+> -		     argstr[0].from);
+> -	} else if (token > Opt_last_string && token < Opt_last_bool) {
+> -		dout("got Boolean token %d\n", token);
+> +		dout("got string token %d val %s\n", token, argstr[0].from);
+>   	} else {
+>   		dout("got token %d\n", token);
+>   	}
+> @@ -789,9 +780,10 @@ static int parse_rbd_opts_token(char *c, void *private)
+>   		rbd_opts->read_only = false;
+>   		break;
+>   	default:
+> -		rbd_assert(false);
+> -		break;
+> +		/* libceph prints "bad option" msg */
+> +		return -EINVAL;
+>   	}
+> +
+>   	return 0;
+>   }
+>
+>
+
