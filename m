@@ -1,133 +1,63 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: Re: 06/24/2015 Weekly Ceph Performance Meeting IS ON!
-Date: Thu, 25 Jun 2015 18:39:42 +0200 (CEST)
-Message-ID: <1826832134.2145034.1435250382264.JavaMail.zimbra@oxygem.tv>
-References: <558AB08C.4090504@redhat.com> <CAANLjFokJM-peyLhw=QP_iU2=i++sfahujZaFnqxD3yZFarrnA@mail.gmail.com> <1909889154.2118177.1435248787542.JavaMail.zimbra@oxygem.tv> <558C2E1D.8050307@redhat.com>
+From: =?UTF-8?q?Beno=C3=AEt=20Canet?= <benoit.canet@nodalink.com>
+Subject: [PATCH] libceph: Fix ceph_tcp_sendpage()'s more boolean usage
+Date: Thu, 25 Jun 2015 18:56:26 +0200
+Message-ID: <1435251386-25108-1-git-send-email-benoit.canet@nodalink.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:54865 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751171AbbFYQjn convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Jun 2015 12:39:43 -0400
-In-Reply-To: <558C2E1D.8050307@redhat.com>
+Received: from 28-113-190-109.dsl.ovh.fr ([109.190.113.28]:33453 "EHLO ariel"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752076AbbFYQ41 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 25 Jun 2015 12:56:27 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>
-Cc: Robert LeBlanc <robert@leblancnet.us>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: idryomov@gmail.com, elder@ieee.org, =?UTF-8?q?Beno=C3=AEt=20Canet?= <benoit.canet@nodalink.com>
 
-Thanks Mark !
+Spotted while hunting http://tracker.ceph.com/issues/10905.
 
------ Mail original -----
-De: "Mark Nelson" <mnelson@redhat.com>
-=C3=80: "aderumier" <aderumier@odiso.com>, "Robert LeBlanc" <robert@leb=
-lancnet.us>
-Cc: "ceph-devel" <ceph-devel@vger.kernel.org>
-Envoy=C3=A9: Jeudi 25 Juin 2015 18:36:45
-Objet: Re: 06/24/2015 Weekly Ceph Performance Meeting IS ON!
+=46rom struct ceph_msg_data_cursor in include/linux/ceph/messenger.h:
 
-Hi Guys,=20
+bool	last_piece;	/* current is last piece */
 
-I've updated the etherpad with links to the new recordings. Sorry these=
-=20
-get backlogged. It takes a little while for the recording to become=20
-available and then I have to manually go in and mark each of them publi=
-c=20
-and available for download. There doesn't seem to be any way to set=20
-defaults as far as I can tell. If I get behind just give me a poke (or=20
-public shaming works!) and I'll make sure they get posted. ;)=20
+In ceph_msg_data_next():
 
-Mark=20
+*last_piece =3D cursor->last_piece;
 
-On 06/25/2015 11:13 AM, Alexandre DERUMIER wrote:=20
-> I would like to have them too ;)=20
->=20
-> I have missed the yesterday session,=20
->=20
-> I would like to have infos about this=20
->=20
->>> Fujitsu presenting on bufferlist tuning=20
->>> - about 2X savings in overall CPU Time with new code.=20
->=20
-> ----- Mail original -----=20
-> De: "Robert LeBlanc" <robert@leblancnet.us>=20
-> =C3=80: "Mark Nelson" <mnelson@redhat.com>=20
-> Cc: "ceph-devel" <ceph-devel@vger.kernel.org>=20
-> Envoy=C3=A9: Jeudi 25 Juin 2015 17:58:10=20
-> Objet: Re: 06/24/2015 Weekly Ceph Performance Meeting IS ON!=20
->=20
-> -----BEGIN PGP SIGNED MESSAGE-----=20
-> Hash: SHA256=20
->=20
-> Any update on the recorded sessions? Last I see is 10 Jun 2015 in the=
- Etherpad.=20
->=20
-> Thanks,=20
->=20
-> - ----------------=20
-> Robert LeBlanc=20
-> GPG Fingerprint 79A2 9CA4 6CC4 45DD A904 C70E E654 3BB2 FA62 B9F1=20
->=20
-> On Wed, Jun 24, 2015 at 7:28 AM, Mark Nelson wrote:=20
-> 8AM PST as usual!=20
->=20
-> Please feel free to add discussion topics to the etherpad!=20
->=20
-> Here's the links:=20
->=20
-> Etherpad URL:=20
-> http://pad.ceph.com/p/performance_weekly=20
->=20
-> To join the Meeting:=20
-> https://bluejeans.com/268261044=20
->=20
-> To join via Browser:=20
-> https://bluejeans.com/268261044/browser=20
->=20
-> To join with Lync:=20
-> https://bluejeans.com/268261044/lync=20
->=20
->=20
-> To join via Room System:=20
-> Video Conferencing System: bjn.vc -or- 199.48.152.152=20
-> Meeting ID: 268261044=20
->=20
-> To join via Phone:=20
-> 1) Dial:=20
-> +1 408 740 7256=20
-> +1 888 240 2560(US Toll Free)=20
-> +1 408 317 9253(Alternate Number)=20
-> (see all numbers - http://bluejeans.com/numbers)=20
-> 2) Enter Conference ID: 268261044=20
->=20
-> Mark=20
-> - --=20
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in=20
-> the body of a message to majordomo@vger.kernel.org=20
-> More majordomo info at http://vger.kernel.org/majordomo-info.html=20
->=20
-> -----BEGIN PGP SIGNATURE-----=20
-> Version: Mailvelope v0.13.1=20
-> Comment: https://www.mailvelope.com=20
->=20
-> wsFcBAEBCAAQBQJVjCUMCRDmVDuy+mK58QAAY9AQAJRTqUKALhsH9FyLN4hN=20
-> DAZeLWTKKlryMTgejvUIAHC5CLMtMDa4GnFFJNO6d9cJanpGyZBQhJcrojM/=20
-> 2rzMYFiFPu9WGnpxr8Z9C1T0CHXYgP/o148VBWj9cBhEPn4BsHlJJicPLaES=20
-> FJxzV0zxFFbH1xPEPVvV7LCMQOKkijbdyMRXf3cxe4rS8IjLWqKgPQz9sBfU=20
-> KLN4Mdh1JnDMiLrrW/dgUbBBOhKVKNctvYAPSYhfYL/PaaPAxkwvNXmCYD6e=20
-> ku3clkbYj8RpOBIT+rPWGJlqo2TCmw1/j0ozqrCVr3VnSdIcQ6IWvwErGUOg=20
-> fFFa0xVDdacE1785IrLCHq6u1VTu2ZVXu3nNehUlPNBjNcF8kc1+qRO1QFxp=20
-> F2+3ntMDw/AmLGGF+gu+Z8ME4ViVYoGzp1IPc2d9/+nNj8GKbEgZHp4B3ITV=20
-> 7DSEdYRx+zQk/I1PuCSU0/MNvdE5nc929HiMSSpavU2fymXcCTYxRHAn5Nqq=20
-> M3hwViLPXSDkz3Blv4WBQvqPbEohUFtVhgBqoYSZ7GvvIwHVO9B3lZsnlnHp=20
-> 2Vx5tpCMUFPNOyjCdQQxK0D9WRt7X1E7uiEThKDw894cKHYN30JyKMkfiCb+=20
-> DCYCYJWmt/UIjVDIHYwY5342gJWIJgRjEw0NelpiOlBvlX4CC3zuxFwwV66z=20
-> iaTX=20
-> =3Dbrvv=20
-> -----END PGP SIGNATURE-----=20
->=20
+A call to ceph_msg_data_next() is followed by:
+
+ret =3D ceph_tcp_sendpage(con->sock, page, page_offset,
+			length, last_piece);
+
+while ceph_tcp_sendpage() is:
+
+static int ceph_tcp_sendpage(struct socket *sock, struct page *page,i
+			     int offset, size_t size, bool more)
+
+The logic is inverted: correct it.
+
+Signed-off-by: Beno=C3=AEt Canet <benoit.canet@nodalink.com>
+---
+ net/ceph/messenger.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index ec68cd3..eda06fd 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -1544,7 +1544,7 @@ static int write_partial_message_data(struct ceph=
+_connection *con)
+ 		page =3D ceph_msg_data_next(&msg->cursor, &page_offset, &length,
+ 							&last_piece);
+ 		ret =3D ceph_tcp_sendpage(con->sock, page, page_offset,
+-				      length, last_piece);
++				      length, !last_piece);
+ 		if (ret <=3D 0) {
+ 			if (do_datacrc)
+ 				msg->footer.data_crc =3D cpu_to_le32(crc);
+--=20
+2.1.4
 
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
