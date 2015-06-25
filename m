@@ -1,128 +1,88 @@
-From: "Deneau, Tom" <tom.deneau@amd.com>
-Subject: RE: deleting objects from a pool
-Date: Thu, 25 Jun 2015 15:40:46 +0000
-Message-ID: <BC97738F8E7C8742BABED7F06FB9DF91669AD048@SATLEXDAG01.amd.com>
-References: <BC97738F8E7C8742BABED7F06FB9DF91669AC8C2@SATLEXDAG01.amd.com>
- <90559C83A9C7FA45B5846C975DFA612DDB4C3F7250@ABGEX73E.FSC.NET>
- <BC97738F8E7C8742BABED7F06FB9DF91669ACA7B@SATLEXDAG01.amd.com>
- <66EBB02ADA308B4F8273E99FC000126C6BEA0BD5C8@ABGEX70E.FSC.NET>
+From: Robert LeBlanc <robert@leblancnet.us>
+Subject: Re: 06/24/2015 Weekly Ceph Performance Meeting IS ON!
+Date: Thu, 25 Jun 2015 09:58:10 -0600
+Message-ID: <CAANLjFokJM-peyLhw=QP_iU2=i++sfahujZaFnqxD3yZFarrnA@mail.gmail.com>
+References: <558AB08C.4090504@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-2
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0147.outbound.protection.outlook.com ([207.46.100.147]:40784
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751395AbbFYPzu convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Jun 2015 11:55:50 -0400
-In-Reply-To: <66EBB02ADA308B4F8273E99FC000126C6BEA0BD5C8@ABGEX70E.FSC.NET>
-Content-Language: en-US
+Received: from mail-wi0-f174.google.com ([209.85.212.174]:38565 "EHLO
+	mail-wi0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751764AbbFYP6L (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Jun 2015 11:58:11 -0400
+Received: by wibdq8 with SMTP id dq8so80349918wib.1
+        for <ceph-devel@vger.kernel.org>; Thu, 25 Jun 2015 08:58:10 -0700 (PDT)
+In-Reply-To: <558AB08C.4090504@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Podoski, Igor" <Igor.Podoski@ts.fujitsu.com>, =?iso-8859-2?Q?Da=B3ek=2C_Piotr?= <Piotr.Dalek@ts.fujitsu.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mnelson@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Igor --
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
 
-Good command to know, but this is still very slow on an erasure pool.
-=46or example, on my cluster it took 10 seconds with rados bench to wri=
-te 10,000 40K size objects to an ecpool.
-And it took almost 6 minutes to delete them using the command below.
+Any update on the recorded sessions? Last I see is 10 Jun 2015 in the Etherpad.
 
--- Tom
+Thanks,
+
+- ----------------
+Robert LeBlanc
+GPG Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
+
+On Wed, Jun 24, 2015 at 7:28 AM, Mark Nelson  wrote:
+8AM PST as usual!
+
+Please feel free to add discussion topics to the etherpad!
+
+Here's the links:
+
+Etherpad URL:
+http://pad.ceph.com/p/performance_weekly
+
+To join the Meeting:
+https://bluejeans.com/268261044
+
+To join via Browser:
+https://bluejeans.com/268261044/browser
+
+To join with Lync:
+https://bluejeans.com/268261044/lync
 
 
-> -----Original Message-----
-> From: Podoski, Igor [mailto:Igor.Podoski@ts.fujitsu.com]
-> Sent: Thursday, June 25, 2015 1:06 AM
-> To: Deneau, Tom; Da=B3ek, Piotr; ceph-devel
-> Subject: RE: deleting objects from a pool
->=20
-> Hi,
->=20
-> It appears, that cleanup can be used as a purge:
->=20
-> rados -p <poolname> cleanup  --prefix ""
->=20
-> Regards,
-> Igor.
->=20
->=20
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
-> owner@vger.kernel.org] On Behalf Of Deneau, Tom
-> Sent: Wednesday, June 24, 2015 10:22 PM
-> To: Da=B3ek, Piotr; ceph-devel
-> Subject: RE: deleting objects from a pool
->=20
-> I've noticed that deleting objects from a basic k=3D2 m=3D1 erasure p=
-ool is much
-> much slower than deleting a similar number of objects from a replicat=
-ed size
-> 3 pool (so the same number of files to be deleted).   It looked like =
-the ec
-> pool object deletion was almost 20x slower.  Is there a lot more work=
- to be
-> done to delete an ec pool object?
->=20
-> -- Tom
->=20
->=20
->=20
-> > -----Original Message-----
-> > From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
-> > owner@vger.kernel.org] On Behalf Of Dalek, Piotr
-> > Sent: Wednesday, June 24, 2015 11:56 AM
-> > To: ceph-devel
-> > Subject: Re: deleting objects from a pool
-> >
-> > > -----Original Message-----
-> > > From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
-> > > owner@vger.kernel.org] On Behalf Of Deneau, Tom
-> > > Sent: Wednesday, June 24, 2015 6:44 PM
-> > >
-> > > I have benchmarking situations where I want to leave a pool aroun=
-d
-> > > but delete a lot of objects from the pool.  Is there any really f=
-ast
-> > > way to do
-> > that?
-> > > I noticed rados rmpool is fast but I don't want to remove the poo=
-l.
-> > >
-> > > I have been spawning multiple threads, each deleting a subset of =
-the
-> > objects
-> > > (which I believe is what rados bench write does) but even that ca=
-n
-> > > be very slow.
-> >
-> > For now, apart from "rados -p <poolname> cleanup" (which doesn't pu=
-rge
-> > the pool, but merely removes objects written during last benchmark
-> > run), the only option is by brute force:
-> >
-> > for i in $(rados -p <poolname> ls); do (rados -p <poolname> rm $i
-> > &>/dev/null &); done;
-> >
-> > There's no "purge pool" command in rados -- not yet, at least. I wa=
-s
-> > thinking about one, but never really had time to implement one.
-> >
-> > With best regards / Pozdrawiam
-> > Piotr Da=B3ek
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-deve=
-l"
-> > in the body of a message to majordomo@vger.kernel.org More majordom=
-o
-> > info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in the
-> body of a message to majordomo@vger.kernel.org More majordomo info at
-> http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
+To join via Room System:
+Video Conferencing System: bjn.vc -or- 199.48.152.152
+Meeting ID: 268261044
+
+To join via Phone:
+1) Dial:
+          +1 408 740 7256
+          +1 888 240 2560(US Toll Free)
+          +1 408 317 9253(Alternate Number)
+          (see all numbers - http://bluejeans.com/numbers)
+2) Enter Conference ID: 268261044
+
+Mark
+- --
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 the body of a message to majordomo@vger.kernel.org
 More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+-----BEGIN PGP SIGNATURE-----
+Version: Mailvelope v0.13.1
+Comment: https://www.mailvelope.com
+
+wsFcBAEBCAAQBQJVjCUMCRDmVDuy+mK58QAAY9AQAJRTqUKALhsH9FyLN4hN
+DAZeLWTKKlryMTgejvUIAHC5CLMtMDa4GnFFJNO6d9cJanpGyZBQhJcrojM/
+2rzMYFiFPu9WGnpxr8Z9C1T0CHXYgP/o148VBWj9cBhEPn4BsHlJJicPLaES
+FJxzV0zxFFbH1xPEPVvV7LCMQOKkijbdyMRXf3cxe4rS8IjLWqKgPQz9sBfU
+KLN4Mdh1JnDMiLrrW/dgUbBBOhKVKNctvYAPSYhfYL/PaaPAxkwvNXmCYD6e
+ku3clkbYj8RpOBIT+rPWGJlqo2TCmw1/j0ozqrCVr3VnSdIcQ6IWvwErGUOg
+fFFa0xVDdacE1785IrLCHq6u1VTu2ZVXu3nNehUlPNBjNcF8kc1+qRO1QFxp
+F2+3ntMDw/AmLGGF+gu+Z8ME4ViVYoGzp1IPc2d9/+nNj8GKbEgZHp4B3ITV
+7DSEdYRx+zQk/I1PuCSU0/MNvdE5nc929HiMSSpavU2fymXcCTYxRHAn5Nqq
+M3hwViLPXSDkz3Blv4WBQvqPbEohUFtVhgBqoYSZ7GvvIwHVO9B3lZsnlnHp
+2Vx5tpCMUFPNOyjCdQQxK0D9WRt7X1E7uiEThKDw894cKHYN30JyKMkfiCb+
+DCYCYJWmt/UIjVDIHYwY5342gJWIJgRjEw0NelpiOlBvlX4CC3zuxFwwV66z
+iaTX
+=brvv
+-----END PGP SIGNATURE-----
