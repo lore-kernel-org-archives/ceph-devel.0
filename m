@@ -1,35 +1,51 @@
 From: Pete Zaitcev <zaitcev@redhat.com>
-Subject: Re: xattrs vs. omap with radosgw
-Date: Wed, 24 Jun 2015 23:46:23 -0600
-Message-ID: <20150624234623.464e3292@guren.zaitcev.lan>
-References: <BLU175-W13D5737A24429707F8F978DFA70@phx.gbl>
-	<alpine.DEB.2.00.1506161241060.15556@cobra.newdream.net>
+Subject: What is omap
+Date: Wed, 24 Jun 2015 23:47:28 -0600
+Message-ID: <20150624234728.79c29b49@guren.zaitcev.lan>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:36885 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:49069 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751267AbbFYFq0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 25 Jun 2015 01:46:26 -0400
-In-Reply-To: <alpine.DEB.2.00.1506161241060.15556@cobra.newdream.net>
+	id S1751396AbbFYFra (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 25 Jun 2015 01:47:30 -0400
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+	by mx1.redhat.com (Postfix) with ESMTPS id 2812A373BDE
+	for <ceph-devel@vger.kernel.org>; Thu, 25 Jun 2015 05:47:30 +0000 (UTC)
+Received: from guren.zaitcev.lan (vpn-58-189.rdu2.redhat.com [10.10.58.189])
+	by int-mx11.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t5P5lTTl009941
+	for <ceph-devel@vger.kernel.org>; Thu, 25 Jun 2015 01:47:29 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, 16 Jun 2015 12:43:08 -0700 (PDT)
-Sage Weil <sage@newdream.net> wrote:
+Dear All:
 
-> With hammer the size of object_info_t crossed the 255 byte boundary, which 
-> is the max xattr value that XFS can inline.  We've since merged something 
-> that stripes over several small xattrs so that we can keep things inline, 
-> but it hasn't been backported to hammer yet.  See
-> c6cdb4081e366f471b372102905a1192910ab2da.
+I am a complete beginner in Ceph and due to various circumstances I became
+curious about omap. I made some quick web searches and read some random
+writings about it, but I still have basic questions.
 
-Meanwhile, Swift stopped striping altogether:
- https://github.com/openstack/swift/commit/cc2f0f4ed6f12554b7d8e8cb61e14f2b103445a0
+ - If I had to refer to omap in a doc/foo.rst, is there a canonical
+   web-page, blog post, mailing list thread, or a (white)paper that
+   serves to explain what it is?
 
-(but yes, it's still advantageous to fit into an inode)
+   So far the best explanation I found was in ceph-devel archives
+   by Gregory Farnum.
 
+ - Every casual explanation I found presumes that "an omap" (a set
+   of K/V) is associated with an object. But it is not physically in
+   the object. So, is there a free-standing omap (set of keys)?
+   Or an omap associated with something else, like a pool?
+
+ - Greg says " The on-disk layout for these is more complicated
+   (read about leveldb if you're interested)". Fair enough... But would
+   someone be willing to shortcut this for me by explaining how this
+   works in concert with OSD. In particular, does OSD replicate
+   the files that LevelDB uses (like, for instance, Swift replicates
+   SQLite files), or does it rely on LevelDB's own replication?
+   Or perhaps OSD replicates upper level view of K/V provided by
+   LevelDB in a node and ignores its actual on-disk layout?
+
+Thanks in advance,
 -- Pete
