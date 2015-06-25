@@ -1,54 +1,40 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH] rbd: bump queue_max_segments
-Date: Thu, 25 Jun 2015 12:01:08 +0300
-Message-ID: <1435222868-34966-1-git-send-email-idryomov@gmail.com>
+Subject: [PATCH 0/3] rbd: queue_depth map option
+Date: Thu, 25 Jun 2015 12:11:17 +0300
+Message-ID: <1435223480-35238-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f43.google.com ([209.85.215.43]:34226 "EHLO
+Received: from mail-la0-f43.google.com ([209.85.215.43]:33965 "EHLO
 	mail-la0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750968AbbFYJBT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Jun 2015 05:01:19 -0400
-Received: by lagx9 with SMTP id x9so40864636lag.1
-        for <ceph-devel@vger.kernel.org>; Thu, 25 Jun 2015 02:01:17 -0700 (PDT)
+	with ESMTP id S1751137AbbFYJLj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Jun 2015 05:11:39 -0400
+Received: by lagx9 with SMTP id x9so41037255lag.1
+        for <ceph-devel@vger.kernel.org>; Thu, 25 Jun 2015 02:11:38 -0700 (PDT)
+Received: from localhost.localdomain ([109.110.66.238])
+        by mx.google.com with ESMTPSA id ew11sm7055678lac.31.2015.06.25.02.11.36
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 25 Jun 2015 02:11:37 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
-Cc: Alex Elder <elder@linaro.org>
 
-The default queue_limits::max_segments value (BLK_MAX_SEGMENTS = 128)
-unnecessarily limits bio sizes to 512k (assuming 4k pages).  rbd, being
-a virtual block device, doesn't have any restrictions on the number of
-physical segments, so bump max_segments to max_hw_sectors, in theory
-allowing a sector per segment (although the only case this matters that
-I can think of is some readv/writev style thing).  In practice this is
-going to give us 1M bios - the number of segments in a bio is limited
-in bio_get_nr_vecs() by BIO_MAX_PAGES = 256.
+Hi,
 
-Note that this doesn't result in any improvement on a typical direct
-sequential test.  This is because on a box with a not too badly
-fragmented memory the default BLK_MAX_SEGMENTS is enough to see nice
-rbd object size sized requests.  The only difference is the size of
-bios being merged - 512k vs 1M for something like
+See 3/3.  I'll patch rbd cli tool once this is in.
 
-    $ dd if=/dev/zero of=/dev/rbd0 oflag=direct bs=$RBD_OBJ_SIZE
-    $ dd if=/dev/rbd0 iflag=direct of=/dev/null bs=$RBD_OBJ_SIZE
+Thanks,
 
-Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
----
- drivers/block/rbd.c | 1 +
- 1 file changed, 1 insertion(+)
+                Ilya
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 89fe8a4bc02e..bc88fbcb9715 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -3791,6 +3791,7 @@ static int rbd_init_disk(struct rbd_device *rbd_dev)
- 	/* set io sizes to object size */
- 	segment_size = rbd_obj_bytes(&rbd_dev->header);
- 	blk_queue_max_hw_sectors(q, segment_size / SECTOR_SIZE);
-+	blk_queue_max_segments(q, segment_size / SECTOR_SIZE);
- 	blk_queue_max_segment_size(q, segment_size);
- 	blk_queue_io_min(q, segment_size);
- 	blk_queue_io_opt(q, segment_size);
+
+Ilya Dryomov (3):
+  rbd: terminate rbd_opts_tokens with Opt_err
+  rbd: store rbd_options in rbd_device
+  rbd: queue_depth map option
+
+ drivers/block/rbd.c | 59 ++++++++++++++++++++++++++++++-----------------------
+ 1 file changed, 33 insertions(+), 26 deletions(-)
+
 -- 
 1.9.3
 
