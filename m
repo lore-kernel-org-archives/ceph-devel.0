@@ -1,109 +1,46 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH 3/3] rbd: queue_depth map option
-Date: Thu, 25 Jun 2015 12:11:20 +0300
-Message-ID: <1435223480-35238-4-git-send-email-idryomov@gmail.com>
-References: <1435223480-35238-1-git-send-email-idryomov@gmail.com>
+Subject: Re: [PATCH] libceph: Remove spurious kunmap() of the zero page
+Date: Thu, 25 Jun 2015 12:12:32 +0300
+Message-ID: <CAOi1vP-mSkuw5WHbV3ON7ipY8HG8tUd9O8Prs8fLpHFn0rCaFQ@mail.gmail.com>
+References: <1435180719-12000-1-git-send-email-benoit.canet@nodalink.com>
+	<1435180719-12000-2-git-send-email-benoit.canet@nodalink.com>
+	<558B4CB9.3000907@ieee.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f46.google.com ([209.85.215.46]:32989 "EHLO
-	mail-la0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751743AbbFYJLn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Jun 2015 05:11:43 -0400
-Received: by laka10 with SMTP id a10so41051629lak.0
-        for <ceph-devel@vger.kernel.org>; Thu, 25 Jun 2015 02:11:42 -0700 (PDT)
-Received: from localhost.localdomain ([109.110.66.238])
-        by mx.google.com with ESMTPSA id ew11sm7055678lac.31.2015.06.25.02.11.40
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 25 Jun 2015 02:11:41 -0700 (PDT)
-In-Reply-To: <1435223480-35238-1-git-send-email-idryomov@gmail.com>
+Received: from mail-wi0-f171.google.com ([209.85.212.171]:33546 "EHLO
+	mail-wi0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751256AbbFYJMe convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Jun 2015 05:12:34 -0400
+Received: by wiwl6 with SMTP id l6so11667964wiw.0
+        for <ceph-devel@vger.kernel.org>; Thu, 25 Jun 2015 02:12:33 -0700 (PDT)
+In-Reply-To: <558B4CB9.3000907@ieee.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Alex Elder <elder@ieee.org>
+Cc: =?UTF-8?Q?Beno=C3=AEt_Canet?= <benoit.canet@nodalink.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-nr_requests (/sys/block/rbd<id>/queue/nr_requests) is pretty much
-irrelevant in blk-mq case because each driver sets its own max depth
-that it can handle and that's the number of tags that gets preallocated
-on setup.  Users can't increase queue depth beyond that value via
-writing to nr_requests.
+On Thu, Jun 25, 2015 at 3:35 AM, Alex Elder <elder@ieee.org> wrote:
+> On 06/24/2015 04:18 PM, Beno=C3=AEt Canet wrote:
+>>
+>> ceph_tcp_sendpage already does the work of mapping/unmapping
+>> the zero page if needed.
+>>
+>> Signed-off-by: Beno=C3=AEt Canet <benoit.canet@nodalink.com>
+>
+>
+> This looks good.
+>
+> Reviewed-by: Alex Elder <elder@linaro.org>
 
-For rbd we are happy with the default BLKDEV_MAX_RQ (128) for most
-cases but we want to give users the opportunity to increase it.
-Introduce a new per-device queue_depth option to do just that:
+Applied.
 
-    $ sudo rbd map -o queue_depth=1024 ...
+Thanks,
 
-Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
----
- drivers/block/rbd.c | 17 ++++++++++++++---
- 1 file changed, 14 insertions(+), 3 deletions(-)
-
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index e502bce02d2c..b316ee48a30b 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -728,6 +728,7 @@ static struct rbd_client *rbd_client_find(struct ceph_options *ceph_opts)
-  * (Per device) rbd map options
-  */
- enum {
-+	Opt_queue_depth,
- 	Opt_last_int,
- 	/* int args above */
- 	Opt_last_string,
-@@ -738,6 +739,7 @@ enum {
- };
- 
- static match_table_t rbd_opts_tokens = {
-+	{Opt_queue_depth, "queue_depth=%d"},
- 	/* int args above */
- 	/* string args above */
- 	{Opt_read_only, "read_only"},
-@@ -748,9 +750,11 @@ static match_table_t rbd_opts_tokens = {
- };
- 
- struct rbd_options {
-+	int	queue_depth;
- 	bool	read_only;
- };
- 
-+#define RBD_QUEUE_DEPTH_DEFAULT	BLKDEV_MAX_RQ
- #define RBD_READ_ONLY_DEFAULT	false
- 
- static int parse_rbd_opts_token(char *c, void *private)
-@@ -774,6 +778,13 @@ static int parse_rbd_opts_token(char *c, void *private)
- 	}
- 
- 	switch (token) {
-+	case Opt_queue_depth:
-+		if (intval < 1) {
-+			pr_err("queue_depth out of range\n");
-+			return -EINVAL;
-+		}
-+		rbd_opts->queue_depth = intval;
-+		break;
- 	case Opt_read_only:
- 		rbd_opts->read_only = true;
- 		break;
-@@ -3761,10 +3772,9 @@ static int rbd_init_disk(struct rbd_device *rbd_dev)
- 
- 	memset(&rbd_dev->tag_set, 0, sizeof(rbd_dev->tag_set));
- 	rbd_dev->tag_set.ops = &rbd_mq_ops;
--	rbd_dev->tag_set.queue_depth = BLKDEV_MAX_RQ;
-+	rbd_dev->tag_set.queue_depth = rbd_dev->opts->queue_depth;
- 	rbd_dev->tag_set.numa_node = NUMA_NO_NODE;
--	rbd_dev->tag_set.flags =
--		BLK_MQ_F_SHOULD_MERGE | BLK_MQ_F_SG_MERGE;
-+	rbd_dev->tag_set.flags = BLK_MQ_F_SHOULD_MERGE | BLK_MQ_F_SG_MERGE;
- 	rbd_dev->tag_set.nr_hw_queues = 1;
- 	rbd_dev->tag_set.cmd_size = sizeof(struct work_struct);
- 
-@@ -4948,6 +4958,7 @@ static int rbd_add_parse_args(const char *buf,
- 		goto out_mem;
- 
- 	rbd_opts->read_only = RBD_READ_ONLY_DEFAULT;
-+	rbd_opts->queue_depth = RBD_QUEUE_DEPTH_DEFAULT;
- 
- 	copts = ceph_parse_options(options, mon_addrs,
- 					mon_addrs + mon_addrs_size - 1,
--- 
-1.9.3
-
+                Ilya
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
