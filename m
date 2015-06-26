@@ -1,49 +1,96 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: CRC32 of messages
-Date: Fri, 26 Jun 2015 17:51:45 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CDAE1C3@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <a07cdfc20b95e8fd166d4d14adeb27a1.squirrel@www.erikburrows.com>
+From: "Handzik, Joe" <joseph.t.handzik@hp.com>
+Subject: RE: Inline dedup/compression
+Date: Fri, 26 Jun 2015 18:21:20 +0000
+Message-ID: <2C438B34CAC8264398F5C7AF7411910A6D96047A@G4W3206.americas.hpqcorp.net>
+References: <99767EA2E27DD44DB4E9F9B9ACA458C03B319727@SSIEXCH-MB3.ssi.samsung.com>
+ <CACJqLybMy1Tfr8baZMbv268gbmeBpG7uJuvbkrnQ9pjdn-AOvA@mail.gmail.com>
+ <99767EA2E27DD44DB4E9F9B9ACA458C03B3198B4@SSIEXCH-MB3.ssi.samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0057.outbound.protection.outlook.com ([207.46.100.57]:29440
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752337AbbFZSKB convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Jun 2015 14:10:01 -0400
-In-Reply-To: <a07cdfc20b95e8fd166d4d14adeb27a1.squirrel@www.erikburrows.com>
+Received: from g9t5008.houston.hp.com ([15.240.92.66]:58263 "EHLO
+	g9t5008.houston.hp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752007AbbFZSWe (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Jun 2015 14:22:34 -0400
+In-Reply-To: <99767EA2E27DD44DB4E9F9B9ACA458C03B3198B4@SSIEXCH-MB3.ssi.samsung.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Erik G. Burrows" <erik@erikburrows.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>, Haomai Wang <haomaiwang@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-ceph_crc32c_intel_fast is ~6 times faster than ceph_crc32c_sctp. If you are not using intel cpus or you have older intel cpus where this sse4 instruction sets are not enabled , the performance will be badly impacted as you saw. If you are building ceph yourself, make sure you have 'yasm' installed to enable ceph to detect the cpu architecture properly. BTW, hope you are aware that this crc calculation can be turned off by 'ms_nocrc = true' with giant and 'ms_crc_data = false' / 'ms_crc_header = false' post giant.
-
-Thanks & Regards
-Somnath
-
------Original Message-----
-From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Erik G. Burrows
-Sent: Friday, June 26, 2015 9:49 AM
-To: ceph-devel@vger.kernel.org
-Subject: CRC32 of messages
-
-All,
-Can someone explain to me the rationale for performing in-software CRC32 hashes of all messages through the Pipe and AsyncMessage classes?
-
-On my servers, operf shows that 20% of the total CPU time in my benchmark tests are being spent in the librados ceph_crc32c_sctp function. I can see that the library is trying to use CPU accelerations if available, but what I'd like to understand is: why checksum the messages at all?
-
-If the messages are local, there should not be any corruption at all, and if they are coming in over IP, then the kernel and NIC should do Layer-2/3 CRCs and reject any corrupted packets. So why re-CRC the messages at the Ceph layer?
-
-Thanks,
-  Erik Burrows
-
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-________________________________
-
-PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-
+TWlnaHQgYmUgaW50ZXJlc3RpbmcgdG8gaW1wbGVtZW50IGNvbXByZXNzaW9uIGZvciBhIHN1YnNl
+dCBvZiByZXBsaWNhcyAoZm9yIGV4YW1wbGUsIGluIGEgM3ggcmVwbGljYXRlZCBydWxlc2V0LCBs
+ZWF2ZSBhIHByaW1hcnkgdmVyc2lvbiB1bmNvbXByZXNzZWQgYnV0IGNvbXByZXNzIHRoZSBvdGhl
+ciB0d28pLiBTbywgaW4gYSBwZXJmZWN0bHkgaGVhbHRoeSBjbHVzdGVyIHRoZXJlIGNvdWxkIGJl
+IG9iamVjdCBvcGVyYXRpb25zIHRoYXQgYXZvaWQgYSBwZW5hbHR5IGZvciBjb21wcmVzc2lvbi4g
+DQoNCldvdWxkIHNvbWVvbmUgYXR0ZW1wdCB0byB3cml0ZSBhIGNvbXByZXNzaW9uIGVuZ2luZSBm
+cm9tIHNjcmF0Y2gsIG9yIHJldXNlIHNvbWV0aGluZyBsaWtlIHNuYXBweT8gaHR0cHM6Ly9lbi53
+aWtpcGVkaWEub3JnL3dpa2kvU25hcHB5Xyhzb2Z0d2FyZSkNCg0KSSBkb24ndCBrbm93IHRoYXQg
+dGhlcmUgYXJlIGFueSBvYnZpb3VzICJjb25zIiB0byBpbXBsZW1lbnRpbmcgaXQsIGp1c3Qgc2lk
+ZSBlZmZlY3RzIG9mIHVzaW5nIGl0IChsaWtlIHlvdSBwb2ludGVkIG91dCkuIA0KDQpKb2UNCg0K
+LS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5r
+ZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJl
+aGFsZiBPZiBKYW1lcyAoRmVpKSBMaXUtU1NJDQpTZW50OiBGcmlkYXksIEp1bmUgMjYsIDIwMTUg
+MTowMyBQTQ0KVG86IEhhb21haSBXYW5nDQpDYzogY2VwaC1kZXZlbA0KU3ViamVjdDogUkU6IElu
+bGluZSBkZWR1cC9jb21wcmVzc2lvbg0KDQpIaSBIYW9tYWksDQogIFRoYW5rcyBmb3IgeW91ciBy
+ZXNwb25zZSBhcyBhbHdheXMuIEkgYWdyZWUgY29tcHJlc3Npb24gaXMgY29tcGFyYWJsZSBlYXNp
+ZXIgdGFzayBidXQgc3RpbGwgdmVyeSBjaGFsbGVuZ2UgaW4gdGVybXMgb2YgaW1wbGVtZW50YXRp
+b24gbm8gbWF0dGVyIHdoZXJlIHdlIHNob3VsZCBpbXBsZW1lbnQgLiBDbGllbnQgc2lkZSBsaWtl
+IFJCRCwgb3IgUkRCR1cgb3IgQ2VwaEZTLCBvciBQRyBzaG91bGQgYmUgYSBsaXR0bGUgYml0IGJl
+dHRlciBwbGFjZSB0byBpbXBsZW1lbnRhdGlvbiBpbiB0ZXJtcyBvZiBlZmZpY2llbmN5IGFuZCBj
+b3N0IHJlZHVjdGlvbiBiZWZvcmUgdGhlIGRhdGEgd2VyZSBkdXBsaWNhdGVkIHRvIG90aGVyIE9T
+RHMuIEl0IGhhcyAgdHdvIHJlYXNvbnMgOg0KMS4gS2VlcCB0aGUgZGF0YSBjb25zaXN0ZW5jeSBh
+bW9uZyBPU0RzIGluIG9uZSBQRyAyLiBTYXZpbmcgdGhlIGNvbXB1dGluZyByZXNvdXJjZXMgIA0K
+DQpJTUhPICwgVGhlIGNvbXByZXNzaW9uIHNob3VsZCBiZSBhY2NvbXBsaXNoZWQgYmVmb3JlIHRo
+ZSByZXBsaWNhdGlvbiBjb21lIGludG8gcGxheSBpbiBwb29sIGxldmVsLiBIb3dldmVyLCB3ZSBj
+YW4gYWxzbyBoYXZlIHNlY29uZCBsZXZlbCBvZiBjb21wcmVzc2lvbiBpbiB0aGUgbG9jYWwgb2Jq
+ZWN0c3RvcmUuICBJbiB0ZXJtIG9mIHVuaXQgc2l6ZSBvZiBjb21wcmVzc2lvbiAsIEl0IHJlYWxs
+eSBkZXBlbmRzIHdvcmtsb2FkIGFuZCBpbiB3aGljaCBsYXllciB3ZSBzaG91bGQgaW1wbGVtZW50
+Lg0KDQpBYm91dCBpbmxpbmUgZGVkdXBsaWNhdGlvbiwgaXQgd2lsbCBkcmFtYXRpY2FsbHkgaW5j
+cmVhc2UgdGhlIGNvbXBsZXhpdGllcyBpZiB3ZSBicmluZyBpbiB0aGUgcmVwbGljYXRpb24gYW5k
+IEVyYXN1cmUgQ29kaW5nIGZvciBjb25zaWRlcmF0aW9uLiANCg0KSG93ZXZlciwgQmVmb3JlIHdl
+IHRhbGsgYWJvdXQgaW1wbGVtZW50YXRpb24sIEl0IHdvdWxkIGJlIGdyZWF0IGlmIHdlIGNhbiB1
+bmRlcnN0YW5kIHRoZSBwcm9zIGFuZCBjb25zIHRvIGltcGxlbWVudCBpbmxpbmUgZGVkdXBlL2Nv
+bXByZXNzaW9uLiBXZSBhbGwgdW5kZXJzdGFuZCB0aGUgYmVuZWZpdHMgb2YgZGVkdXBlL2NvbXBy
+ZXNzaW9uLiBIb3dldmVyLCB0aGUgc2lkZSBlZmZlY3QgaXMgcGVyZm9ybWFuY2UgaHVydCBhbmQg
+bmVlZCBtb3JlIGNvbXB1dGluZyByZXNvdXJjZXMuIEl0IHdvdWxkIGJlIGdyZWF0IGlmIHdlIGNh
+biB1bmRlcnN0YW5kIHRoZSBwcm9ibGVtcyBmcm9tIDMwLDAwMCBmZWV0IGhpZ2ggZm9yIHRoZSB3
+aG9sZSBwaWN0dXJlIGFib3V0IHRoZSBDZXBoLiBQbGVhc2UgY29ycmVjdCBtZSBpZiBJIHdlcmUg
+d3JvbmcuICANCg0KQnkgdGhlIHdheSwgQm90aCBvZiBzb2Z0d2FyZSBkZWZpbmVkIHN0b3JhZ2Ug
+c29sdXRpb24gc3RhcnR1cHMgbGlrZSBIZGV2aWcgYW5kIFNwcmluZ3BhdGggcHJvdmlkZSBpbmxp
+bmUgZGVkdXBlL2NvbXByZXNzaW9uLiAgSXQgaXMgbm90IGFwcGxlIHRvIGFwcGxlIGNvbXBhcmlz
+b24uIEJ1dCBpdCBpcyBnb29kIHJlZmVyZW5jZS4gVGhlIGRhdGFjZW50ZXJzIG5lZWQgY29zdCBl
+ZmZlY3RpdmUgc29sdXRpb24uDQoNClJlZ2FyZHMsDQpKYW1lcw0KDQoNCg0KLS0tLS1PcmlnaW5h
+bCBNZXNzYWdlLS0tLS0NCkZyb206IEhhb21haSBXYW5nIFttYWlsdG86aGFvbWFpd2FuZ0BnbWFp
+bC5jb21dDQpTZW50OiBUaHVyc2RheSwgSnVuZSAyNSwgMjAxNSA4OjA4IFBNDQpUbzogSmFtZXMg
+KEZlaSkgTGl1LVNTSQ0KQ2M6IGNlcGgtZGV2ZWwNClN1YmplY3Q6IFJlOiBJbmxpbmUgZGVkdXAv
+Y29tcHJlc3Npb24NCg0KT24gRnJpLCBKdW4gMjYsIDIwMTUgYXQgNjowMSBBTSwgSmFtZXMgKEZl
+aSkgTGl1LVNTSSA8amFtZXMubGl1QHNzaS5zYW1zdW5nLmNvbT4gd3JvdGU6DQo+IEhpIENlcGhl
+cnMsDQo+ICAgICBJdCBpcyBub3QgZWFzeSB0byBhc2sgd2hlbiBDZXBoIGlzIGdvaW5nIHRvIHN1
+cHBvcnQgaW5saW5lIGRlZHVwL2NvbXByZXNzaW9uIGFjcm9zcyBPU0RzIGluIFJBRE9TIGJlY2F1
+c2UgaXQgaXMgbm90IGVhc3kgdGFzayBhbmQgYW5zd2VyZWQuIENlcGggaXMgcHJvdmlkaW5nIHJl
+cGxpY2F0aW9uIGFuZCBFQyBmb3IgcGVyZm9ybWFuY2UgYW5kIGZhaWx1cmUgcmVjb3ZlcnkuIEJ1
+dCB3ZSBhbHNvIGxvc2UgdGhlIGVmZmljaWVuY3kgIG9mIHN0b3JhZ2Ugc3RvcmUgYW5kIGNvc3Qg
+YXNzb2NpYXRlIHdpdGggaXQuIEl0IGlzIGtpbmQgb2YgY29udHJhZGljdGVkIHdpdGggZWFjaCBv
+dGhlci4gQnV0IEkgYW0gY3VyaW91cyBob3cgb3RoZXIgQ2VwaGVycyB0aGluayBhYm91dCB0aGlz
+IHF1ZXN0aW9uLg0KPiAgICBBbnkgcGxhbiBmb3IgQ2VwaGVycyB0byBkbyBhbnl0aGluZyByZWdh
+cmRpbmcgdG8gaW5saW5lIGRlZHVwZS9jb21wcmVzc2lvbiBleGNlcHQgdGhlIGZlYXR1cmVzIGJy
+b3VnaHQgYnkgbG9jYWwgbm9kZSBpdHNlbGYgbGlrZSBCUlRGUz8NCg0KQ29tcHJlc3Npb24gaXMg
+ZWFzaWVyIHRvIGltcGxlbWVudCBpbiByYWRvcyB0aGFuIGRlZHVwLiBUaGUgbW9zdCBpbXBvcnRh
+bnQgdGhpbmcgYWJvdXQgY29tcHJlc3Npb24gaXMgd2hlcmUgd2UgYmVnaW4gdG8gY29tcHJlc3Ms
+IGNsaWVudCwgcGcgb3Igb2JqZWN0c3RvcmUuIFRoZW4gd2UgbmVlZCB0byBkZWNpZGUgaG93IG11
+Y2ggdGhlIGNvbXByZXNzIHVuaXQgaXMuIE9mIGNvdXJzZSwgY29tcHJlc3MgYW5kIGRlZHVwIGJv
+dGggbGlrZSB0byB1c2Uga2V5dmFsdWUtYWxpa2Ugc3RvcmFnZSBhcGkgdG8gdXNlLCBidXQgSSB0
+aGluayBpdCdzIG5vdCBkaWZmaWN1bHQgdG8gdXNlIGV4aXN0aW5nIG9iamVjdHN0b3JlIGFwaS4N
+Cg0KRGVkdXAgaXMgbW9yZSBwb3NzaWJsZSB0byBpbXBsZW1lbnQgaW4gbG9jYWwgb3NkIGluc3Rl
+YWQgb2YgdGhlIHdob2xlIHBvb2wgb3IgY2x1c3RlciwgYW5kIGlmIHdlIHdhbnQgdG8gZG8gZGVk
+dXAgZm9yIHRoZSBwb29sIGxldmVsLCB3ZSBuZWVkIHRvIGRvIGRlZHVwIGZyb20gY2xpZW50Lg0K
+DQo+DQo+ICAgUmVnYXJkcywNCj4gICBKYW1lcw0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9t
+IHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgDQo+IGlu
+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUg
+bWFqb3Jkb21vIA0KPiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1p
+bmZvLmh0bWwNCg0KDQoNCi0tDQpCZXN0IFJlZ2FyZHMsDQoNCldoZWF0DQoTICDsubscICYgfiAm
+IBggICstICDdthcgIHcgIMubICAgbSAeIBdeICBiICBebiByICAgeiAaICBoICAgICYgIB4gRyAg
+IGggAygg6ZqOIN2iaiIgIBogG20gICAgIHog3pYgICBmICAgaCAgIH4gbSANCg==
