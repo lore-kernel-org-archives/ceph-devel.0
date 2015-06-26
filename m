@@ -1,53 +1,66 @@
-From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Subject: Re: rgw - Object Lifecycle Management
-Date: Fri, 26 Jun 2015 16:27:28 -0400 (EDT)
-Message-ID: <1727226091.20572909.1435350448528.JavaMail.zimbra@redhat.com>
-References: <BLU175-W40A39950CB80A4B1D3D838DFAD0@phx.gbl>
+From: John Spray <john.spray@redhat.com>
+Subject: Re: Preferred location for utility execution
+Date: Fri, 26 Jun 2015 23:23:56 +0100
+Message-ID: <558DD0FC.8080608@redhat.com>
+References: <2C438B34CAC8264398F5C7AF7411910A6D9605F5@G4W3206.americas.hpqcorp.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx4-phx2.redhat.com ([209.132.183.25]:52934 "EHLO
-	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751897AbbFZU13 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Jun 2015 16:27:29 -0400
-In-Reply-To: <BLU175-W40A39950CB80A4B1D3D838DFAD0@phx.gbl>
+Received: from mx1.redhat.com ([209.132.183.28]:39197 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752635AbbFZWX6 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 26 Jun 2015 18:23:58 -0400
+In-Reply-To: <2C438B34CAC8264398F5C7AF7411910A6D9605F5@G4W3206.americas.hpqcorp.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: GuangYang <yguang11@outlook.com>
-Cc: ceph-devel@vger.kernel.org
+To: "Handzik, Joe" <joseph.t.handzik@hp.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Cc: "gmeno@redhat.com" <gmeno@redhat.com>
 
-We discussed this, and it's relatively high in our priority, but we nee=
-d to get the new multi site done first. At the moment there is some bac=
-kground work that is being done by the community to support swift objec=
-t expiration (see PR #4739). The bigger S3-like lifecycle management is=
- yet to leave the drawing board.
 
-Yehuda
 
------ Original Message -----
-> From: "GuangYang" <yguang11@outlook.com>
-> To: yehuda@redhat.com
-> Cc: ceph-devel@vger.kernel.org
-> Sent: Friday, June 26, 2015 1:19:37 PM
-> Subject: rgw - Object Lifecycle Management
->=20
-> Hi Yehuda,
-> Is there any plan to add bucket/object lifecycle management to radosg=
-w?
->=20
->=20
-> Thanks,
-> Guang
-> 		 	   		  N=E5=AB=A5=E5=8F=89=E9=9D=A3=E7=AC=A1y=EE=8C=B7=E6=B0=8Ab=E7=
-=9E=82=EE=83=91=E5=8D=83v=E8=B1=9D=EF=BF=BD=E8=97=93{.n=EF=BF=BD=E5=A3=8F=
-=E6=B8=AE=E6=A6=8Fz=E9=B3=90=E5=A6=A0ay=EF=BF=BD=E8=95=A0=E8=B7=88=EF=BF=
-=BDj=EE=84=9Bf=EF=BC=82=E7=A9=90=E6=AE=9D=E9=84=97=EF=BF=BD=E7=95=90=E3=
-=82=A2=EF=BF=BD=E2=92=8E=EE=9B=90:+v=E5=A2=BE=E5=A6=9B=E9=91=9A=E8=B1=B0=
-=E7=A8=9B=EF=BF=BD=E7=8F=A3=E8=B5=99zZ+=E5=87=92=E6=AE=A0=E5=A8=B8=EE=95=
-=90"=E6=BF=9F!=E7=A7=88
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On 26/06/2015 21:14, Handzik, Joe wrote:
+> Hey ceph-devel,
+>
+> Gregory Meno (of Calamari fame) and I are working on what is now officially a blueprint for Jewel ( http://tracker.ceph.com/projects/ceph/wiki/Calamariapihardwarestorage ), and we'd like some feedback.
+>
+> Some of this has been addressed via separate conversations about the feature that some of this work started out as (identifying drives in a cluster by toggling their LED states), but we wanted to ask a more direct question: What is the preferred location/mechanism to execute operations on storage hardware?
+>
+> We see two clear options:
+>
+> 1. Make Calamari responsible for executing commands using various linux utilities (and /sys, when applicable).
+> 2. Build a command set into RADOS to execute commands using various linux utilities. These commands could then be executed by Calamari using the rest api.
+>
+> The big win for #1 is the ability to rapidly iterate on the capabilities of the Calamari toolset (it is almost certainly going to be faster to create a set of scripts similar to Gregory's initial commit for SMART polling than to add that functionality inside RADOS. See: https://github.com/ceph/calamari/pull/267 ). For #2, we'd pick up the ability to run those same commands via the cli, which would give users a lot more flexibility in how they troubleshoot their cluster (Calamari wouldn't be required, it would just make life easier).
+
+Hi Joe,
+
+I'd reiterate my earlier comments[1] in favour of option 2.
+
+I would be cautious about implementing any of this in Calamari until 
+there are at least upstream packages available for folks to use, and 
+broader uptake.  In the current situation, it's hard to ask people to 
+try something out in Calamari, and much more straightforward to 
+distribute something as part of Ceph.  Hardware is pretty varied, I 
+would expect you'll need help from others in the community to ensure any 
+hardware handling works as expected in diverse environments, which will 
+be much simpler with ceph than calamari.
+
+The part where some central python (calamari or otherwise) would really 
+come into its own is in the fusion of information from multiple hosts, 
+and exposing it to a user interface.  On that aspect, I left some 
+comments last time this came up: 
+http://lists.ceph.com/pipermail/ceph-calamari-ceph.com/2015-May/000073.html
+
+Ceph itself is getting a bit smarter with some of this stuff, e.g. the 
+new "node ls" stuff gives you metadata about hosts and services without 
+the need for calamari.  Hanging device info off these new structures 
+would be a pretty reasonable thing to do, and if someone later has a GUI 
+that they want to pipe that into, they can grab it via the mon along 
+with everything else.
+
+Cheers,
+John
+
+
+1. https://www.mail-archive.com/ceph-devel@vger.kernel.org/msg23186.html
