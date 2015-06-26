@@ -1,79 +1,49 @@
-From: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
-Subject: RE: Inline dedup/compression
-Date: Fri, 26 Jun 2015 18:03:17 +0000
-Message-ID: <99767EA2E27DD44DB4E9F9B9ACA458C03B3198B4@SSIEXCH-MB3.ssi.samsung.com>
-References: <99767EA2E27DD44DB4E9F9B9ACA458C03B319727@SSIEXCH-MB3.ssi.samsung.com>
- <CACJqLybMy1Tfr8baZMbv268gbmeBpG7uJuvbkrnQ9pjdn-AOvA@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: CRC32 of messages
+Date: Fri, 26 Jun 2015 17:51:45 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CDAE1C3@SACMBXIP01.sdcorp.global.sandisk.com>
+References: <a07cdfc20b95e8fd166d4d14adeb27a1.squirrel@www.erikburrows.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.ssi.samsung.com ([207.140.43.206]:58083 "EHLO
-	mx2.ssi.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752200AbbFZSDT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Jun 2015 14:03:19 -0400
-In-Reply-To: <CACJqLybMy1Tfr8baZMbv268gbmeBpG7uJuvbkrnQ9pjdn-AOvA@mail.gmail.com>
+Received: from mail-by2on0057.outbound.protection.outlook.com ([207.46.100.57]:29440
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752337AbbFZSKB convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Jun 2015 14:10:01 -0400
+In-Reply-To: <a07cdfc20b95e8fd166d4d14adeb27a1.squirrel@www.erikburrows.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomaiwang@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: "Erik G. Burrows" <erik@erikburrows.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SGkgSGFvbWFpLA0KICBUaGFua3MgZm9yIHlvdXIgcmVzcG9uc2UgYXMgYWx3YXlzLiBJIGFncmVl
-IGNvbXByZXNzaW9uIGlzIGNvbXBhcmFibGUgZWFzaWVyIHRhc2sgYnV0IHN0aWxsIHZlcnkgY2hh
-bGxlbmdlIGluIHRlcm1zIG9mIGltcGxlbWVudGF0aW9uIG5vIG1hdHRlciB3aGVyZSB3ZSBzaG91
-bGQgaW1wbGVtZW50IC4gQ2xpZW50IHNpZGUgbGlrZSBSQkQsIG9yIFJEQkdXIG9yIENlcGhGUywg
-b3IgUEcgc2hvdWxkIGJlIGEgbGl0dGxlIGJpdCBiZXR0ZXIgcGxhY2UgdG8gaW1wbGVtZW50YXRp
-b24gaW4gdGVybXMgb2YgZWZmaWNpZW5jeSBhbmQgY29zdCByZWR1Y3Rpb24gYmVmb3JlIHRoZSBk
-YXRhIHdlcmUgZHVwbGljYXRlZCB0byBvdGhlciBPU0RzLiBJdCBoYXMgIHR3byByZWFzb25zIDoN
-CjEuIEtlZXAgdGhlIGRhdGEgY29uc2lzdGVuY3kgYW1vbmcgT1NEcyBpbiBvbmUgUEcNCjIuIFNh
-dmluZyB0aGUgY29tcHV0aW5nIHJlc291cmNlcyAgDQoNCklNSE8gLCBUaGUgY29tcHJlc3Npb24g
-c2hvdWxkIGJlIGFjY29tcGxpc2hlZCBiZWZvcmUgdGhlIHJlcGxpY2F0aW9uIGNvbWUgaW50byBw
-bGF5IGluIHBvb2wgbGV2ZWwuIEhvd2V2ZXIsIHdlIGNhbiBhbHNvIGhhdmUgc2Vjb25kIGxldmVs
-IG9mIGNvbXByZXNzaW9uIGluIHRoZSBsb2NhbCBvYmplY3RzdG9yZS4gIEluIHRlcm0gb2YgdW5p
-dCBzaXplIG9mIGNvbXByZXNzaW9uICwgSXQgcmVhbGx5IGRlcGVuZHMgd29ya2xvYWQgYW5kIGlu
-IHdoaWNoIGxheWVyIHdlIHNob3VsZCBpbXBsZW1lbnQuDQoNCkFib3V0IGlubGluZSBkZWR1cGxp
-Y2F0aW9uLCBpdCB3aWxsIGRyYW1hdGljYWxseSBpbmNyZWFzZSB0aGUgY29tcGxleGl0aWVzIGlm
-IHdlIGJyaW5nIGluIHRoZSByZXBsaWNhdGlvbiBhbmQgRXJhc3VyZSBDb2RpbmcgZm9yIGNvbnNp
-ZGVyYXRpb24uIA0KDQpIb3dldmVyLCBCZWZvcmUgd2UgdGFsayBhYm91dCBpbXBsZW1lbnRhdGlv
-biwgSXQgd291bGQgYmUgZ3JlYXQgaWYgd2UgY2FuIHVuZGVyc3RhbmQgdGhlIHByb3MgYW5kIGNv
-bnMgdG8gaW1wbGVtZW50IGlubGluZSBkZWR1cGUvY29tcHJlc3Npb24uIFdlIGFsbCB1bmRlcnN0
-YW5kIHRoZSBiZW5lZml0cyBvZiBkZWR1cGUvY29tcHJlc3Npb24uIEhvd2V2ZXIsIHRoZSBzaWRl
-IGVmZmVjdCBpcyBwZXJmb3JtYW5jZSBodXJ0IGFuZCBuZWVkIG1vcmUgY29tcHV0aW5nIHJlc291
-cmNlcy4gSXQgd291bGQgYmUgZ3JlYXQgaWYgd2UgY2FuIHVuZGVyc3RhbmQgdGhlIHByb2JsZW1z
-IGZyb20gMzAsMDAwIGZlZXQgaGlnaCBmb3IgdGhlIHdob2xlIHBpY3R1cmUgYWJvdXQgdGhlIENl
-cGguIFBsZWFzZSBjb3JyZWN0IG1lIGlmIEkgd2VyZSB3cm9uZy4gIA0KDQpCeSB0aGUgd2F5LCBC
-b3RoIG9mIHNvZnR3YXJlIGRlZmluZWQgc3RvcmFnZSBzb2x1dGlvbiBzdGFydHVwcyBsaWtlIEhk
-ZXZpZyBhbmQgU3ByaW5ncGF0aCBwcm92aWRlIGlubGluZSBkZWR1cGUvY29tcHJlc3Npb24uICBJ
-dCBpcyBub3QgYXBwbGUgdG8gYXBwbGUgY29tcGFyaXNvbi4gQnV0IGl0IGlzIGdvb2QgcmVmZXJl
-bmNlLiBUaGUgZGF0YWNlbnRlcnMgbmVlZCBjb3N0IGVmZmVjdGl2ZSBzb2x1dGlvbi4NCg0KUmVn
-YXJkcywNCkphbWVzDQoNCg0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogSGFv
-bWFpIFdhbmcgW21haWx0bzpoYW9tYWl3YW5nQGdtYWlsLmNvbV0gDQpTZW50OiBUaHVyc2RheSwg
-SnVuZSAyNSwgMjAxNSA4OjA4IFBNDQpUbzogSmFtZXMgKEZlaSkgTGl1LVNTSQ0KQ2M6IGNlcGgt
-ZGV2ZWwNClN1YmplY3Q6IFJlOiBJbmxpbmUgZGVkdXAvY29tcHJlc3Npb24NCg0KT24gRnJpLCBK
-dW4gMjYsIDIwMTUgYXQgNjowMSBBTSwgSmFtZXMgKEZlaSkgTGl1LVNTSSA8amFtZXMubGl1QHNz
-aS5zYW1zdW5nLmNvbT4gd3JvdGU6DQo+IEhpIENlcGhlcnMsDQo+ICAgICBJdCBpcyBub3QgZWFz
-eSB0byBhc2sgd2hlbiBDZXBoIGlzIGdvaW5nIHRvIHN1cHBvcnQgaW5saW5lIGRlZHVwL2NvbXBy
-ZXNzaW9uIGFjcm9zcyBPU0RzIGluIFJBRE9TIGJlY2F1c2UgaXQgaXMgbm90IGVhc3kgdGFzayBh
-bmQgYW5zd2VyZWQuIENlcGggaXMgcHJvdmlkaW5nIHJlcGxpY2F0aW9uIGFuZCBFQyBmb3IgcGVy
-Zm9ybWFuY2UgYW5kIGZhaWx1cmUgcmVjb3ZlcnkuIEJ1dCB3ZSBhbHNvIGxvc2UgdGhlIGVmZmlj
-aWVuY3kgIG9mIHN0b3JhZ2Ugc3RvcmUgYW5kIGNvc3QgYXNzb2NpYXRlIHdpdGggaXQuIEl0IGlz
-IGtpbmQgb2YgY29udHJhZGljdGVkIHdpdGggZWFjaCBvdGhlci4gQnV0IEkgYW0gY3VyaW91cyBo
-b3cgb3RoZXIgQ2VwaGVycyB0aGluayBhYm91dCB0aGlzIHF1ZXN0aW9uLg0KPiAgICBBbnkgcGxh
-biBmb3IgQ2VwaGVycyB0byBkbyBhbnl0aGluZyByZWdhcmRpbmcgdG8gaW5saW5lIGRlZHVwZS9j
-b21wcmVzc2lvbiBleGNlcHQgdGhlIGZlYXR1cmVzIGJyb3VnaHQgYnkgbG9jYWwgbm9kZSBpdHNl
-bGYgbGlrZSBCUlRGUz8NCg0KQ29tcHJlc3Npb24gaXMgZWFzaWVyIHRvIGltcGxlbWVudCBpbiBy
-YWRvcyB0aGFuIGRlZHVwLiBUaGUgbW9zdCBpbXBvcnRhbnQgdGhpbmcgYWJvdXQgY29tcHJlc3Np
-b24gaXMgd2hlcmUgd2UgYmVnaW4gdG8gY29tcHJlc3MsIGNsaWVudCwgcGcgb3Igb2JqZWN0c3Rv
-cmUuIFRoZW4gd2UgbmVlZCB0byBkZWNpZGUgaG93IG11Y2ggdGhlIGNvbXByZXNzIHVuaXQgaXMu
-IE9mIGNvdXJzZSwgY29tcHJlc3MgYW5kIGRlZHVwIGJvdGggbGlrZSB0byB1c2Uga2V5dmFsdWUt
-YWxpa2Ugc3RvcmFnZSBhcGkgdG8gdXNlLCBidXQgSSB0aGluayBpdCdzIG5vdCBkaWZmaWN1bHQg
-dG8gdXNlIGV4aXN0aW5nIG9iamVjdHN0b3JlIGFwaS4NCg0KRGVkdXAgaXMgbW9yZSBwb3NzaWJs
-ZSB0byBpbXBsZW1lbnQgaW4gbG9jYWwgb3NkIGluc3RlYWQgb2YgdGhlIHdob2xlIHBvb2wgb3Ig
-Y2x1c3RlciwgYW5kIGlmIHdlIHdhbnQgdG8gZG8gZGVkdXAgZm9yIHRoZSBwb29sIGxldmVsLCB3
-ZSBuZWVkIHRvIGRvIGRlZHVwIGZyb20gY2xpZW50Lg0KDQo+DQo+ICAgUmVnYXJkcywNCj4gICBK
-YW1lcw0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGlu
-ZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgDQo+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0
-byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIA0KPiBpbmZvIGF0ICBo
-dHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg0KDQoNCi0tDQpCZXN0
-IFJlZ2FyZHMsDQoNCldoZWF0DQo=
+ceph_crc32c_intel_fast is ~6 times faster than ceph_crc32c_sctp. If you are not using intel cpus or you have older intel cpus where this sse4 instruction sets are not enabled , the performance will be badly impacted as you saw. If you are building ceph yourself, make sure you have 'yasm' installed to enable ceph to detect the cpu architecture properly. BTW, hope you are aware that this crc calculation can be turned off by 'ms_nocrc = true' with giant and 'ms_crc_data = false' / 'ms_crc_header = false' post giant.
+
+Thanks & Regards
+Somnath
+
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Erik G. Burrows
+Sent: Friday, June 26, 2015 9:49 AM
+To: ceph-devel@vger.kernel.org
+Subject: CRC32 of messages
+
+All,
+Can someone explain to me the rationale for performing in-software CRC32 hashes of all messages through the Pipe and AsyncMessage classes?
+
+On my servers, operf shows that 20% of the total CPU time in my benchmark tests are being spent in the librados ceph_crc32c_sctp function. I can see that the library is trying to use CPU accelerations if available, but what I'd like to understand is: why checksum the messages at all?
+
+If the messages are local, there should not be any corruption at all, and if they are coming in over IP, then the kernel and NIC should do Layer-2/3 CRCs and reject any corrupted packets. So why re-CRC the messages at the Ceph layer?
+
+Thanks,
+  Erik Burrows
+
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+________________________________
+
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+
