@@ -1,183 +1,77 @@
-From: Varada Kari <Varada.Kari@sandisk.com>
-Subject: RE: loadable objectstore
-Date: Fri, 26 Jun 2015 10:03:52 +0000
-Message-ID: <C226B0AB34511445928D9882AA519F601C436F7A@SACMBXIP03.sdcorp.global.sandisk.com>
-References: <1615100301.29.1434984131967.JavaMail.root@thunderbeast.private.linuxbox.com>
- <46879752.37.1434985621131.JavaMail.root@thunderbeast.private.linuxbox.com>
- <C226B0AB34511445928D9882AA519F601C434076@SACMBXIP03.sdcorp.global.sandisk.com>
+From: Gregory Farnum <greg@gregs42.com>
+Subject: Re: What is omap
+Date: Fri, 26 Jun 2015 14:48:15 +0100
+Message-ID: <CAJY_B6RCA+3s3r+7B=s8pYomrrnTscSsd77PSL8QsJFbeOG6jQ@mail.gmail.com>
+References: <20150624234728.79c29b49@guren.zaitcev.lan>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0070.outbound.protection.outlook.com ([207.46.100.70]:1280
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751680AbbFZKox (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 26 Jun 2015 06:44:53 -0400
-In-Reply-To: <C226B0AB34511445928D9882AA519F601C434076@SACMBXIP03.sdcorp.global.sandisk.com>
-Content-Language: en-US
+Received: from mail-ig0-f182.google.com ([209.85.213.182]:35707 "EHLO
+	mail-ig0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752454AbbFZNsQ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Jun 2015 09:48:16 -0400
+Received: by igblr2 with SMTP id lr2so13648002igb.0
+        for <ceph-devel@vger.kernel.org>; Fri, 26 Jun 2015 06:48:15 -0700 (PDT)
+In-Reply-To: <20150624234728.79c29b49@guren.zaitcev.lan>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Loic Dachary <loic@dachary.org>, ceph-devel <ceph-devel@vger.kernel.org>, "Matt W. Benjamin" <matt@cohortfs.com>
+To: Pete Zaitcev <zaitcev@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SGksDQoNCk1hZGUgc29tZSBtb3JlIGNoYW5nZXMgdG8gcmVzb2x2ZSBsdHRuZyBwcm9ibGVtcyBh
-dCBodHRwczovL2dpdGh1Yi5jb20vdmFyYWRha2FyaS9jZXBoL2NvbW1pdHMvd2lwLXBsdWdpbi4N
-CkJ1dCBjb3VsZG7igJl0IGJ5IHBhc3MgdGhlIGlzc3Vlcy4gRmFjaW5nIHNvbWUgaXNzdWVzIGxp
-a2UgbWVudGlvbmVkIGJlbG93Lg0KDQouLy5saWJzL2xpYmNlcGhfZmlsZXN0b3JlLnNvOiB1bmRl
-ZmluZWQgcmVmZXJlbmNlIHRvIGB0cmFjZXBvaW50X2Rsb3BlbicNCg0KQ29tcGlsaW5nIHdpdGgg
-LWxsdHRuZy11c3QgaXMgbm90IHJlc29sdmluZyB0aGUgcHJvYmxlbS4gU2VlbiBzb21lIHRocmVh
-ZHMgaW4gZGV2ZWwgbGlzdCBiZWZvcmUsIG1lbnRpb25pbmcgdGhpcyBwcm9ibGVtLiANCkNhbiBh
-bnlvbmUgdGFrZSBhIGxvb2sgYW5kIGd1aWRlIG1lIHRvIGZpeCB0aGlzIHByb2JsZW0/DQoNCkhh
-dmVuJ3QgbWFkZSB0aGUgY2hhbmdlcyB0byBjaGFuZ2UgdGhlIHBsdWdpbiBuYW1lIGV0Yy4uLiB3
-aWxsIGJlIG1ha2luZyB0aGVtIGFzIHBhcnQgb2YgY2xlYW51cC4NCg0KVGhhbmtzLA0KVmFyYWRh
-DQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZn
-ZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnXSBP
-biBCZWhhbGYgT2YgVmFyYWRhIEthcmkNClNlbnQ6IE1vbmRheSwgSnVuZSAyMiwgMjAxNSA4OjU3
-IFBNDQpUbzogTWF0dCBXLiBCZW5qYW1pbg0KQ2M6IExvaWMgRGFjaGFyeTsgY2VwaC1kZXZlbDsg
-U2FnZSBXZWlsDQpTdWJqZWN0OiBSRTogbG9hZGFibGUgb2JqZWN0c3RvcmUNCg0KSGkgTWF0dCwN
-Cg0KTWFqb3JpdHkgb2YgdGhlIGNoYW5nZXMgYXJlIHNlZ3JlZ2F0aW5nIHRoZSBmaWxlcyB0byBj
-b3JyZXNwb25kaW5nIHNoYXJlZCBvYmplY3QgYW5kIGNyZWF0aW5nIGEgZmFjdG9yeSBvYmplY3Qu
-IEFuZCB0aGUgbmFtaW5nIGlzIG1vc3RseSB0YWtlbiBmcm9tIEVyYXN1cmUtY29kaW5nIHBsdWdp
-bnMuIFdhbnQgYSBnb29kIG5hbWluZyBjb252ZW50aW9uIDotKSwgaGVuY2UgYSBwcmVsaW1pbmFy
-eSByZXZpZXcuIERvIGFncmVlLCB3ZSBoYXZlIGxvdCBvZiBsb2FkYWJsZSBpbnRlcmZhY2VzLCBh
-bmQgSSB0aGluayB3ZSBhcmUgaW4gdGhlIHdheSBvZiBtYWtpbmcgdGhlbSBvbi1kZW1hbmQgKGlm
-IHBvc3NpYmxlKSBsb2FkYWJsZSBtb2R1bGVzLg0KDQpWYXJhZGENCg0KLS0tLS1PcmlnaW5hbCBN
-ZXNzYWdlLS0tLS0NCkZyb206IE1hdHQgVy4gQmVuamFtaW4gW21haWx0bzptYXR0QGNvaG9ydGZz
-LmNvbV0NClNlbnQ6IE1vbmRheSwgSnVuZSAyMiwgMjAxNSA4OjM3IFBNDQpUbzogVmFyYWRhIEth
-cmkNCkNjOiBMb2ljIERhY2hhcnk7IGNlcGgtZGV2ZWw7IFNhZ2UgV2VpbA0KU3ViamVjdDogUmU6
-IGxvYWRhYmxlIG9iamVjdHN0b3JlDQoNCkhpLA0KDQpJdCdzIGp1c3QgYWVzdGhldGljLCBidXQg
-aXQgZmVlbHMgY2x1bmt5IHRvIGNoYW5nZSB0aGUgbmFtZXMgb2Ygd2VsbCBrbm93biBtb2R1bGVz
-IHRvIDxzb21ldGhpbmc+UGx1Z2luLS1lc3AuIGlmIHRoYXQgZ2VuZXJhbGl6ZXMgZm9yd2FyZCB0
-byBuZXcgbG9hZGFibGUgbW9kdWxlcyAoYW5kIHdlIGhhdmUgYSBsb3Qgb2YgbG9hZGFibGUgaW50
-ZXJmYWNlcykuDQoNCk1hdHQNCg0KLS0tLS0gIlZhcmFkYSBLYXJpIiA8VmFyYWRhLkthcmlAc2Fu
-ZGlzay5jb20+IHdyb3RlOg0KDQo+IEhpIFNhZ2UsDQo+DQo+IFBsZWFzZSBmaW5kIHRoZSBpbml0
-aWFsIGltcGxlbWVudGF0aW9uIG9mIG9iamVjdHMgc3RvcmUgZmFjdG9yeSANCj4gKGluaXRpYWwg
-Y3V0KSBhdCANCj4gaHR0cHM6Ly9naXRodWIuY29tL3ZhcmFkYWthcmkvY2VwaC9jb21taXQvOWQ1
-ZmUyZmVjZjM4YmExMDZjN2M3YjdhM2VkZQ0KPiA0ZjE4OWVjN2UxYzgNCj4NCj4gVGhpcyBpcyBz
-dGlsbCB3b3JrIGluIHByb2dyZXNzIGJyYW5jaC4gUmlnaHQgbm93IEkgYW0gZmFjaW5nIEx0dG5n
-IA0KPiBpc3N1ZXMsDQo+IExUVG5nLVVTVDogRXJyb3IgKC0xNykgd2hpbGUgcmVnaXN0ZXJpbmcg
-dHJhY2Vwb2ludCBwcm9iZS4gRHVwbGljYXRlIA0KPiByZWdpc3RyYXRpb24gb2YgdHJhY2Vwb2lu
-dCBwcm9iZXMgaGF2aW5nIHRoZSBzYW1lIG5hbWUgaXMgbm90IGFsbG93ZWQuDQo+DQo+IE1pZ2h0
-IGJlIGFuIGlzc3VlIHdpdGggbGliY29tbW9uIGluY2x1c2lvbi4gVHJ5aW5nIHJlc29sdmluZyB0
-aGUgaXNzdWUgDQo+IG5vdy4gU2VlbXMgSSBuZWVkIHRvIG1ha2UgbGliY29tbW9uIGFsc28gYXMg
-YSBzaGFyZWQgb2JqZWN0IHRvIGF2b2lkIA0KPiB0aGUgZHVwbGljYXRlcywgc3RhdGljIGxpbmtp
-bmcgaXMgYSBwcm9ibGVtIGhlcmUuDQo+IEFueSBzdWdnZXN0aW9ucyBvciBjb21tZW50cyBvbiB0
-aGlzIHByb2JsZW0/DQo+DQo+DQo+IEkgaGF2ZSBjb21tZW50ZWQgb3V0IHRlc3QgYmluYXJ5IChj
-ZXBoX3Rlc3Rfa2V5dmFsdWVkYl9hdG9taWNpdHkpIA0KPiBjb21waWxhdGlvbiwgZHVlIHRvIHVu
-cmVzb2x2ZWQgc3ltYm9scyBmb3IgZ19jZXBoX2NvbnRleHQgYW5kIGdfY29uZi4NCj4gTm90IGFi
-bGUgdG8gZml4L3dvcmthcm91bmQgdGhlIHByb2JsZW0gc28gZmFyLg0KPg0KPiBDYW4geW91IHBs
-ZWFzZSByZXZpZXcgaWYgdGhpcyBpcyB3aGF0IGluIHlvdXIgbWluZCBmb3IgdGhlIGZhY3Rvcnkg
-DQo+IGltcGxlbWVudGF0aW9uPw0KPg0KPiBXZSBjYW4gZXh0ZW5kIHRoaXMgaW1wbGVtZW50YXRp
-b24gdG8gbWVzc2VuZ2VyIGFuZCBkaWZmZXJlbnQgYmFja2VuZCANCj4gb2YgdGhlIE9TRC4gV2ls
-bCBtYWtlIHRob3NlIGluY3JlbWVudGFsIG9uY2UgdGhlIGJhc2UgZnJhbWV3b3JrIGlzIA0KPiBh
-cHByb3ZlZC4NCj4NCj4gVGhhbmtzLA0KPiBWYXJhZGENCj4NCj4NCj4NCj4gLS0tLS1PcmlnaW5h
-bCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogU2FnZSBXZWlsIFttYWlsdG86c2FnZUBuZXdkcmVhbS5u
-ZXRdDQo+IFNlbnQ6IFR1ZXNkYXksIE1heSAxMiwgMjAxNSA1OjExIEFNDQo+IFRvOiBWYXJhZGEg
-S2FyaQ0KPiBDYzogTG9pYyBEYWNoYXJ5OyBNYXR0IFcuIEJlbmphbWluOyBjZXBoLWRldmVsDQo+
-IFN1YmplY3Q6IFJFOiBsb2FkYWJsZSBvYmplY3RzdG9yZQ0KPg0KPiBIaSBWYXJhZGEsDQo+DQo+
-IEFueSBwcm9ncmVzcyBvbiB0aGlzPw0KPg0KPiBUaGFua3MhDQo+IHNhZ2UNCj4NCj4gT24gU2F0
-LCAxMSBBcHIgMjAxNSwgVmFyYWRhIEthcmkgd3JvdGU6DQo+DQo+ID4gVGhhbmtzIFNhZ2UgYW5k
-IExvaWMuIFdpbGwgYWRkIHRoZSBtaXNzaW5nIHBpZWNlcyBhbmQgaW50ZWdyYXRlIHRoZQ0KPiBv
-YmplY3QgZmFjdG9yeSBhbmQgcGx1Z2luIGNoYW5nZXMuDQo+ID4NCj4gPiBWYXJhZGENCj4gPg0K
-PiA+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+ID4gRnJvbTogU2FnZSBXZWlsIFttYWls
-dG86c2FnZUBuZXdkcmVhbS5uZXRdDQo+ID4gU2VudDogU2F0dXJkYXksIEFwcmlsIDExLCAyMDE1
-IDk6MTkgUE0NCj4gPiBUbzogTG9pYyBEYWNoYXJ5DQo+ID4gQ2M6IFZhcmFkYSBLYXJpOyBNYXR0
-IFcuIEJlbmphbWluOyBjZXBoLWRldmVsDQo+ID4gU3ViamVjdDogUmU6IGxvYWRhYmxlIG9iamVj
-dHN0b3JlDQo+ID4NCj4gPiBPbiBTYXQsIDExIEFwciAyMDE1LCBMb2ljIERhY2hhcnkgd3JvdGU6
-DQo+ID4gPiBIaSBTYWdlLA0KPiA+ID4NCj4gPiA+IEl0IGxvb2tzIGxpa2UgY29tbW9uL1BsdWdp
-blJlZ2lzdHJ5LntoLGNjfSBhcmUgbWlzc2luZyBmcm9tIA0KPiA+ID4gMThhZDhkZjEwOTRkYjUy
-YzgzOWRjNmIyZGM2ODlmYzg4MjIzMGFjYg0KPiA+DQo+ID4gd2hvb3BzIHB1c2hlZCEgOikNCj4g
-Pg0KPiA+IHNhZ2UNCj4gPg0KPiA+ID4NCj4gPiA+IENoZWVycw0KPiA+ID4NCj4gPiA+IE9uIDEx
-LzA0LzIwMTUgMTY6NTEsIFNhZ2UgV2VpbCB3cm90ZToNCj4gPiA+ID4gT24gU2F0LCAxMSBBcHIg
-MjAxNSwgVmFyYWRhIEthcmkgd3JvdGU6DQo+ID4gPiA+PiBIaSBNYXR0LyBTYWdlLA0KPiA+ID4g
-Pj4NCj4gPiA+ID4+IFRoYW5rcyBmb3Igc2hhcmluZyB0aGUgcHVsbCByZXF1ZXN0LiBXaWxsIHdv
-cmsgb24gdGhlIGl0ZW1zDQo+IHdoYXQNCj4gPiA+ID4+IHNhZ2Ugd2FzIG1lbnRpb25pbmcgaW4g
-dGhlIGNvbW1lbnRzIGFsb25nIHdpdGggdGhlIGl0ZW1zIGluIHRoZQ0KPiB0cmFja2VyLg0KPiA+
-ID4gPg0KPiA+ID4gPiBJIHB1c2hlZCBhIHdpcC1wbHVnaW4gYnJhbmNoIHdpdGggdGhlIHBhdHRl
-cm4gSSBoYWQgaW4gbWluZC4uLg0KPiA+ID4gPiBkb2VzIHRoaXMgbWFrZSBzZW5zZT8gIEl0J3Mg
-b25seSBjb21waWxlIHRlc3RlZCwgYW5kIHN0aWxsDQo+IG5lZWRzDQo+ID4gPiA+IHByZWxvYWQo
-KSBtZXRob2RzIGltcGxlbWVudGVkIHNvIHRoYXQgbG9uZy1ydW5uaW5nIGRhZW1vbnMgKG9yIA0K
-PiA+ID4gPiBwZXJoYXBzIG90aGVycz8pIGNhbiBwcmVsb2FkIGl0IGFsbCBhdCBvbmNlLg0KPiA+
-ID4gPg0KPiA+ID4gPiBJZGVhbGx5IHdlIHdvdWxkIHJlcGxhY2UgRXJhc3VyZVBsdWdpblJlZ2lz
-dHJ5IHdpdGggdGhpcyB0b28sIA0KPiA+ID4gPiB3aGljaCBtZWFucyB0aGUgbmFtaW5nIG9mIHRo
-ZSAuc28ncyBuZWVkcyB0byBiZSBhIGJpdCBtb3JlIA0KPiA+ID4gPiBmbGV4aWJsZSBhcyB0aGUg
-RUMgcGx1Z2luIHNjaGVtZSBpcyBzb21ldGhpbmcgbGlrZSANCj4gPiA+ID4gL3Vzci9saWIvY2Vw
-aC9lcmFzdXJlLWNvZGUvbGliZWNfJG5hbWUuc28gKG5vdCBhIHN0cmljdCBmdW5jdGlvbg0KPg0K
-PiA+ID4gPiBvZiB0eXBlIGFuZCBuYW1lKS4gIE9yIGFjdHVhbGx5LCB3ZSBjYW4ganVzdCByZW5h
-bWUgdGhlIEVDIC5zbydzDQo+DQo+ID4gPiA+IHdoZW4gdGhpcyBnb2VzIGluPyAgU2luY2UgdGhl
-eSdyZSBleHBsaWNpdGx5IGluY29tcGF0aWJsZQ0KPiBiZXR3ZWVuDQo+ID4gPiA+IHZlcnNpb25z
-IHRoZXJlIGlzIG5vIHJlYXNvbiB0aGUgbmFtZXMgbmVlZCB0byByZW1haW4NCj4gY29uc2lzdGVu
-dC4uLg0KPiA+ID4gPg0KPiA+ID4gPiBzYWdlDQo+ID4gPiA+DQo+ID4gPiA+Pg0KPiA+ID4gPj4g
-VmFyYWRhDQo+ID4gPiA+Pg0KPiA+ID4gPj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4g
-PiA+ID4+IEZyb206IFNhZ2UgV2VpbCBbbWFpbHRvOnNhZ2VAbmV3ZHJlYW0ubmV0XQ0KPiA+ID4g
-Pj4gU2VudDogU2F0dXJkYXksIEFwcmlsIDExLCAyMDE1IDQ6MTYgQU0NCj4gPiA+ID4+IFRvOiBN
-YXR0IFcuIEJlbmphbWluDQo+ID4gPiA+PiBDYzogVmFyYWRhIEthcmk7IGNlcGgtZGV2ZWwNCj4g
-PiA+ID4+IFN1YmplY3Q6IFJlOiBsb2FkYWJsZSBvYmplY3RzdG9yZQ0KPiA+ID4gPj4NCj4gPiA+
-ID4+IE9uIEZyaSwgMTAgQXByIDIwMTUsIE1hdHQgVy4gQmVuamFtaW4gd3JvdGU6DQo+ID4gPiA+
-Pj4gSGkgVmFyYWRhLA0KPiA+ID4gPj4+DQo+ID4gPiA+Pj4gSSBwdXNoZWQgYnJhbmNoIGhhbW1l
-ci1vc2ZhY3RvcnkgdG8gDQo+ID4gPiA+Pj4gaHR0cHM6Ly9naXRodWIuY29tL2xpbnV4Ym94Mi9j
-ZXBoLmdpdA0KPiA+ID4gPj4+DQo+ID4gPiA+Pj4gSXQgY2FuIGF0IGxlYXN0IHByb3ZpZGUgYSBz
-dGFydGluZyBwb2ludCBmb3IgZGlzY3Vzc2lvbiwgaWYNCj4gbm90DQo+ID4gPiA+Pj4gYSBqdW1w
-aW5nIG9mZiBwb2ludDsgIEkgZG8gdGhpbmsgaXQncyBiYXNpY2FsbHkgd2hhdCBTYWdlDQo+IGRl
-c2NyaWJlZC4NCj4gPiA+ID4+DQo+ID4gPiA+PiBJIG1hZGUgYSBmZXcgY29tbWVudHMgb24gdGhl
-IHB1bGwgcmVxdWVzdC4gIEkgdGhpbmsgYSBmYWN0b3J5DQo+IGNsYXNzIGlzIHRoZSB3YXkgdG8g
-Z28sIGJ1dCB3ZSBzaG91bGQgYmUgYWJsZSB0byBtYWtlIHRoZSBwbHVnaW4gDQo+IGxvYWRpbmcg
-cGFydCBnZW5lcmljIGFuZCBub3QgaW50ZXJmYWNlIHNwZWNpZmljIGF0IGFsbC4uLg0KPiA+ID4g
-Pj4NCj4gPiA+ID4+IHNhZ2UNCj4gPiA+ID4+DQo+ID4gPiA+Pj4NCj4gPiA+ID4+PiBJIHdhcyBh
-YmxlIHRvIHVwZGF0ZSB0aGUgQ01ha2UgYnVpbGQgc3lzdGVtIHRvIGJ1aWxkIHRoZSB0cmVlLA0K
-PiBJDQo+ID4gPiA+Pj4gaGF2ZW4ndCBhdHRlbXB0ZWQgQXV0b3Rvb2xzLiA6KA0KPiA+ID4gPj4+
-DQo+ID4gPiA+Pj4gUmVnYXJkcywNCj4gPiA+ID4+Pg0KPiA+ID4gPj4+IE1hdHQNCj4gPiA+ID4+
-Pg0KPiA+ID4gPj4+IC0tDQo+ID4gPiA+Pj4gTWF0dCBCZW5qYW1pbg0KPiA+ID4gPj4+IENvaG9y
-dEZTLCBMTEMuDQo+ID4gPiA+Pj4gMzE1IFdlc3QgSHVyb24gU3RyZWV0LCBTdWl0ZSAxNDBBIEFu
-biBBcmJvciwgTWljaGlnYW4gNDgxMDMNCj4gPiA+ID4+Pg0KPiA+ID4gPj4+IGh0dHA6Ly9jb2hv
-cnRmcy5jb20NCj4gPiA+ID4+Pg0KPiA+ID4gPj4+IHRlbC4gIDczNC03NjEtNDY4OQ0KPiA+ID4g
-Pj4+IGZheC4gIDczNC03NjktODkzOA0KPiA+ID4gPj4+IGNlbC4gIDczNC0yMTYtNTMwOQ0KPiA+
-ID4gPj4+IC0tDQo+ID4gPiA+Pj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQg
-dGhlIGxpbmUgInVuc3Vic2NyaWJlDQo+IGNlcGgtZGV2ZWwiDQo+ID4gPiA+Pj4gaW4gdGhlIGJv
-ZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSANCj4gPiA+
-ID4+PiBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8t
-aW5mby5odG1sDQo+ID4gPiA+Pj4NCj4gPiA+ID4+Pg0KPiA+ID4gPj4NCj4gPiA+ID4+IF9fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fDQo+ID4gPiA+Pg0KPiA+ID4gPj4gUExFQVNFIE5P
-VEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwNCj4g
-bWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJl
-Y2lwaWVudChzKSANCj4gbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdl
-IGlzIG5vdCB0aGUgaW50ZW5kZWQgDQo+IHJlY2lwaWVudCwgeW91IGFyZSBoZXJlYnkgbm90aWZp
-ZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2UgDQo+IGluIGVycm9yIGFuZCB0
-aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyAN
-Cj4gb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJl
-Y2VpdmVkIHRoaXMgDQo+IGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhl
-IHNlbmRlciBieSB0ZWxlcGhvbmUgb3IgDQo+IGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVk
-aWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiANCj4gdGhpcyBtZXNzYWdl
-IGluIHlvdXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxs
-eSANCj4gc3RvcmVkIGNvcGllcykuDQo+ID4gPiA+Pg0KPiA+ID4gPj4gLS0NCj4gPiA+ID4+IFRv
-IHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSAN
-Cj4gPiA+ID4+IGNlcGgtZGV2ZWwiIGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0bw0KPiBtYWpv
-cmRvbW9Admdlci5rZXJuZWwub3JnDQo+ID4gPiA+PiBNb3JlIG1ham9yZG9tbyBpbmZvIGF0DQo+
-ID4gPiA+PiBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4gPiA+
-ID4+DQo+ID4gPiA+Pg0KPiA+ID4gPiAtLQ0KPiA+ID4gPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRo
-aXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgDQo+ID4gPiA+IGNlcGgtZGV2ZWwi
-IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0bw0KPiBtYWpvcmRvbW9Admdlci5rZXJuZWwub3Jn
-DQo+ID4gPiA+IE1vcmUgbWFqb3Jkb21vIGluZm8gYXQNCj4gaHR0cDovL3ZnZXIua2VybmVsLm9y
-Zy9tYWpvcmRvbW8taW5mby5odG1sDQo+ID4gPiA+DQo+ID4gPg0KPiA+ID4gLS0NCj4gPiA+IExv
-w69jIERhY2hhcnksIEFydGlzYW4gTG9naWNpZWwgTGlicmUNCj4gPiA+DQo+ID4gPg0KPiA+IC0t
-DQo+ID4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vi
-c2NyaWJlDQo+IGNlcGgtZGV2ZWwiDQo+ID4gaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1h
-am9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8NCj4NCj4gPiBpbmZvIGF0ICBo
-dHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4gPg0KPiA+DQoNCi0t
-DQpNYXR0IEJlbmphbWluDQpDb2hvcnRGUywgTExDLg0KMzE1IFdlc3QgSHVyb24gU3RyZWV0LCBT
-dWl0ZSAxNDBBDQpBbm4gQXJib3IsIE1pY2hpZ2FuIDQ4MTAzDQoNCmh0dHA6Ly9jb2hvcnRmcy5j
-b20NCg0KdGVsLiAgNzM0LTc2MS00Njg5DQpmYXguICA3MzQtNzY5LTg5MzgNCmNlbC4gIDczNC0y
-MTYtNTMwOQ0KDQpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXw0KDQpQTEVBU0UgTk9U
-RTogVGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNz
-YWdlIGlzIGludGVuZGVkIG9ubHkgZm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBp
-ZW50KHMpIG5hbWVkIGFib3ZlLiBJZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3Qg
-dGhlIGludGVuZGVkIHJlY2lwaWVudCwgeW91IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5b3Ug
-aGF2ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywg
-ZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBp
-cyBzdHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11bmlj
-YXRpb24gaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3Ig
-ZS1tYWlsIChhcyBzaG93biBhYm92ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBh
-bGwgY29waWVzIG9mIHRoaXMgbWVzc2FnZSBpbiB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFy
-ZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkgc3RvcmVkIGNvcGllcykuDQoNCk4gICAgIHIgIHkg
-ICBiIFggIMendiBeICneunsubiArICAgeiBdeiAgIA0K
+[ Re-send to include the ceph-devel list; sorry for the double mail. ]
+
+On Thu, Jun 25, 2015 at 6:47 AM, Pete Zaitcev <zaitcev@redhat.com> wrot=
+e:
+> Dear All:
+>
+> I am a complete beginner in Ceph and due to various circumstances I b=
+ecame
+> curious about omap. I made some quick web searches and read some rand=
+om
+> writings about it, but I still have basic questions.
+>
+>  - If I had to refer to omap in a doc/foo.rst, is there a canonical
+>    web-page, blog post, mailing list thread, or a (white)paper that
+>    serves to explain what it is?
+>
+>    So far the best explanation I found was in ceph-devel archives
+>    by Gregory Farnum.
+>
+>  - Every casual explanation I found presumes that "an omap" (a set
+>    of K/V) is associated with an object. But it is not physically in
+>    the object. So, is there a free-standing omap (set of keys)?
+>    Or an omap associated with something else, like a pool?
+>
+>  - Greg says " The on-disk layout for these is more complicated
+>    (read about leveldb if you're interested)". Fair enough... But wou=
+ld
+>    someone be willing to shortcut this for me by explaining how this
+>    works in concert with OSD. In particular, does OSD replicate
+>    the files that LevelDB uses (like, for instance, Swift replicates
+>    SQLite files), or does it rely on LevelDB's own replication?
+>    Or perhaps OSD replicates upper level view of K/V provided by
+>    LevelDB in a node and ignores its actual on-disk layout?
+
+Each object consists of three different data storage areas, all of
+which are 100% optional: the "bundle of bits" object data, the object
+xattrs, and the object omap key-value store. It might help you to
+think of each of these as a different kind of resource fork or stream.
+
+The object data is most commonly stored as a single file in a local
+filesystem on the OSD; the xattrs are most commonly stored as xattrs
+on that file, and the omap is most commonly stored within a leveldb
+instance. Each OSD has its *own* local leveldb where all that data
+goes; there's no cross-OSD LevelDB replication or communication. We
+tell you that the omap data is stored in LevelDB to give you an idea
+what kind of data is good to put in it, but we don't want you to get
+too hung up on the fact that it's using LevelDB =E2=80=94 it could chan=
+ge in
+the future! omap is just an optimized region for storing key-value
+data.
+-Greg
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
