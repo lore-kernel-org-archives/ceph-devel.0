@@ -1,66 +1,103 @@
-From: "Patelczyk, Maciej" <maciej.patelczyk@intel.com>
-Subject: RE: librbd cacher lock protection?
-Date: Fri, 26 Jun 2015 16:00:15 +0000
-Message-ID: <679865E03F4C71419D9847EA3AACB1632A88B261@IRSMSX102.ger.corp.intel.com>
-References: <679865E03F4C71419D9847EA3AACB1632A889519@IRSMSX102.ger.corp.intel.com>
- <885563429.22721443.1435074049868.JavaMail.zimbra@redhat.com>
+From: Jason Dillaman <dillaman@redhat.com>
+Subject: Re: librbd cacher lock protection?
+Date: Fri, 26 Jun 2015 12:22:23 -0400 (EDT)
+Message-ID: <452241726.25180132.1435335743503.JavaMail.zimbra@redhat.com>
+References: <679865E03F4C71419D9847EA3AACB1632A889519@IRSMSX102.ger.corp.intel.com> <885563429.22721443.1435074049868.JavaMail.zimbra@redhat.com> <679865E03F4C71419D9847EA3AACB1632A88B261@IRSMSX102.ger.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:57982 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751954AbbFZQAS (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 26 Jun 2015 12:00:18 -0400
-In-Reply-To: <885563429.22721443.1435074049868.JavaMail.zimbra@redhat.com>
-Content-Language: en-US
+Received: from mx6-phx2.redhat.com ([209.132.183.39]:52083 "EHLO
+	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751802AbbFZQWZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 26 Jun 2015 12:22:25 -0400
+In-Reply-To: <679865E03F4C71419D9847EA3AACB1632A88B261@IRSMSX102.ger.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jason Dillaman <dillaman@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Maciej Patelczyk <maciej.patelczyk@intel.com>
+Cc: ceph-devel@vger.kernel.org
 
-VGhhbmsgeW91Lg0KDQpNb3JlIHF1ZXN0aW9ucyBpZiBJIG1heS4NCkxpYnJiZCBpbnRlcmZhY2Ug
-aGFzIHJiZF8gcmVhZC93cml0ZSBhaW9fcmVhZC9haW9fd3JpdGUgZnVuY3Rpb25zIHdoaWNoIHRh
-a2Ugb2Zmc2V0LCBsZW4uDQpSZWFkcy9haW9fcmVhZHMgYXJlIGluIGludGVybmFsLmNjIHRyYW5z
-Zm9ybWVkIGZyb20gb2ZmL2xlbiBpbnRvIGltYWdlX2V4dGVudHMgcGFpcnMuIEhvd2V2ZXIgdGhl
-IGNvbW1vbiBmdW5jdGlvbiBhaW9fcmVhZCBpcyBub3QgY2FsbGVkIGFueXdoZXJlIGFwYXJ0IGZy
-b20gQVBJIGZ1bmN0aW9ucy4gSXQgbG9va3MgbGlrZSB0aGUgaW1hZ2VfZXh0ZW50cyBpcyBhbHdh
-eXMgcGFpciBvZiBzaW1wbGUgb2Zmc2V0L2xlbiBhbmQgdGhlcmUgaXMgb25seSBvbmUgcGFpciBp
-biB2ZWN0b3IuIElzIHRoYXQgY29ycmVjdD8NCldyaXRlL2Fpb193cml0ZSBrZWVwcyBwYWlyIG9m
-Zi9sZW4gdGlsbCBsYXN0IGNhbGwgaW4gdGhlIGNhbGxpbmcgY2hhaW4uDQoNCklzIHRoZXJlIGEg
-dmFsaWQgc2NlbmFyaW8gaW4gd2hpY2ggaW4gYWlvX3JlYWQgdGhlcmUgd2lsbCBiZSBtb3JlIHRo
-YW4gc2luZ2xlIGltYWdlX2V4dGVudD8gSWYgc28gd2hpY2ggb25lIChleGNlcHQgdW5pdCB0ZXN0
-cyBvZiBjb3Vyc2UpPw0KDQpUaGFua3MsDQptYWNpZWoNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdl
-LS0tLS0NCkZyb206IEphc29uIERpbGxhbWFuIFttYWlsdG86ZGlsbGFtYW5AcmVkaGF0LmNvbV0g
-DQpTZW50OiBUdWVzZGF5LCBKdW5lIDIzLCAyMDE1IDU6NDEgUE0NClRvOiBQYXRlbGN6eWssIE1h
-Y2llag0KQ2M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0OiBSZTogbGlicmJk
-IGNhY2hlciBsb2NrIHByb3RlY3Rpb24/DQoNCllvdSBhcmUgY29ycmVjdCB0aGF0IGEgcnggQkgg
-Y2FuIGJlIG92ZXJ3cml0dGVuIGJ5IGEgd3JpdGUgcmVxdWVzdCAtLSB0aGlzIHdpbGwgdGhlbiBt
-YXJrIHRoZSBCSCBhcyBkaXJ0eS4gIElmIGl0J3MgYSBwYXJ0aWFsIG92ZXJ3cml0ZSwgdGhlIEJI
-IHdpbGwgYmUgc3BsaXQgYW5kIG9ubHkgdGhlIGFmZmVjdGVkIHNlY3Rpb24ncyBzdGF0ZSB3aWxs
-IGJlIGNoYW5nZWQgdG8gZGlydHkuICBXaGVuIHRoZSBvdXRzdGFuZGluZyByZWFkIHJlcXVlc3Qg
-Y29tcGxldGVzLCBpdCB3aWxsIGludm9rZSAnT2JqZWN0Q2FjaGVyOjpiaF9yZWFkX2ZpbmlzaCcs
-IHdoaWNoIHZlcmlmaWVzIHRoYXQgdGhlIEJIIGlzIHN0aWxsIGluIHRoZSByeCBzdGF0ZSAoYW5k
-IHRoYXQgdGhlIHRyYW5zYWN0aW9uIGlkcyBtYXRjaCkgYmVmb3JlIG92ZXJ3cml0aW5nIHRoZSBk
-YXRhLiAgVGhlIHBlbmRpbmcgY2xpZW50IHJlYWQgcmVxdWVzdCB3aWxsIHRoZW4gY29tcGxldGUg
-YW5kIHdpbGwgYmUgcHJvdmlkZWQgdGhlIGxhdGVzdCBjb250ZW50cyBvZiB0aGUgQkgocykuDQoN
-Ci0tIA0KDQpKYXNvbiBEaWxsYW1hbg0KUmVkIEhhdA0KZGlsbGFtYW5AcmVkaGF0LmNvbQ0KaHR0
-cDovL3d3dy5yZWRoYXQuY29tIA0KDQoNCi0tLS0tIE9yaWdpbmFsIE1lc3NhZ2UgLS0tLS0NCj4g
-RnJvbTogIk1hY2llaiBQYXRlbGN6eWsiIDxtYWNpZWoucGF0ZWxjenlrQGludGVsLmNvbT4NCj4g
-VG86IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQo+IFNlbnQ6IFR1ZXNkYXksIEp1bmUgMjMs
-IDIwMTUgMTE6MjE6MzIgQU0NCj4gU3ViamVjdDogbGlicmJkIGNhY2hlciBsb2NrIHByb3RlY3Rp
-b24/DQo+IA0KPiBIaSBBbGwsDQo+IA0KPiBJJ20gaW52ZXN0aWdhdGluZyBsaWJyYmQgY29kZSBy
-ZWxhdGVkIHRvIGNhY2hpbmcgKE9iamVjdENhY2hlcikuDQo+IFdoYXQgSSBjYW5ub3QgZmluZCBp
-cyB0aGUgZGF0YSBpbnRlZ3JpdHkgcHJvdGVjdGlvbiB3aGlsZSB0aGVyZSBpcyBhIA0KPiAnY2Fj
-aGUgbWlzcycgKGZ1bGwgb3IgcGFydGlhbCkuIEl0IGxvb2tzIGxpa2UgX3JlYWR4IGV4aXRzIHdp
-dGggDQo+ICdkZWZlcicgYW5kIGNhY2hlX2xvY2sgaXMgcmVsZWFzZWQgKGFuZCBsb2NrZWQgYWdh
-aW4gaW4gTGliV3JpdGViYWNrKS4gDQo+IFRoZSBCdWZmZXJIZWFkJ3MgYXJlIG1hcmtlZCBhcyAn
-cngnIGJ1dCBub3QgcHJvdGVjdGVkIGFnYWluc3Qgd3JpdGUuIA0KPiBXcml0ZXggaXMgbm90IHNr
-aXBwaW5nIG5vciBjaGVja2luZyBmb3IgYW55IEJILiBJdCdzIGp1c3QgcG9wdWxhdGluZyBkYXRh
-IGluIGNhY2hlLg0KPiBUaGF0IGNvbmZ1c2VzIG1lLiBTbyB3aGVyZSBpcyB0aGUgcHJvdGVjdGlv
-bj8gSG93IGRvZXMgdGhlIGNhY2hlIA0KPiBpbnRlZ3JpdHkgcHJvdGVjdGlvbiBhY3R1YWxseSB3
-b3JrPw0KPiANCj4gVGhhbmtzLA0KPiBtYWNpZWoNCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJv
-bSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIA0KPiBp
-biB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3Jl
-IG1ham9yZG9tbyANCj4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8t
-aW5mby5odG1sDQo+IA0K
+Yes, with RBD striping enabled, it is possible for the image_extent passed to aio_read to contain more than one pair.  For example, if I have a clone of a striped parent image, a simple offset/length read request from the clone could result in an aio_read from the parent with multiple image extents populated.
+
+-- 
+
+Jason Dillaman 
+Red Hat 
+dillaman@redhat.com 
+http://www.redhat.com 
+
+
+----- Original Message -----
+> From: "Maciej Patelczyk" <maciej.patelczyk@intel.com>
+> To: "Jason Dillaman" <dillaman@redhat.com>
+> Cc: ceph-devel@vger.kernel.org
+> Sent: Friday, June 26, 2015 12:00:15 PM
+> Subject: RE: librbd cacher lock protection?
+> 
+> Thank you.
+> 
+> More questions if I may.
+> Librbd interface has rbd_ read/write aio_read/aio_write functions which take
+> offset, len.
+> Reads/aio_reads are in internal.cc transformed from off/len into
+> image_extents pairs. However the common function aio_read is not called
+> anywhere apart from API functions. It looks like the image_extents is always
+> pair of simple offset/len and there is only one pair in vector. Is that
+> correct?
+> Write/aio_write keeps pair off/len till last call in the calling chain.
+> 
+> Is there a valid scenario in which in aio_read there will be more than single
+> image_extent? If so which one (except unit tests of course)?
+> 
+> Thanks,
+> maciej
+> 
+> -----Original Message-----
+> From: Jason Dillaman [mailto:dillaman@redhat.com]
+> Sent: Tuesday, June 23, 2015 5:41 PM
+> To: Patelczyk, Maciej
+> Cc: ceph-devel@vger.kernel.org
+> Subject: Re: librbd cacher lock protection?
+> 
+> You are correct that a rx BH can be overwritten by a write request -- this
+> will then mark the BH as dirty.  If it's a partial overwrite, the BH will be
+> split and only the affected section's state will be changed to dirty.  When
+> the outstanding read request completes, it will invoke
+> 'ObjectCacher::bh_read_finish', which verifies that the BH is still in the
+> rx state (and that the transaction ids match) before overwriting the data.
+> The pending client read request will then complete and will be provided the
+> latest contents of the BH(s).
+> 
+> --
+> 
+> Jason Dillaman
+> Red Hat
+> dillaman@redhat.com
+> http://www.redhat.com
+> 
+> 
+> ----- Original Message -----
+> > From: "Maciej Patelczyk" <maciej.patelczyk@intel.com>
+> > To: ceph-devel@vger.kernel.org
+> > Sent: Tuesday, June 23, 2015 11:21:32 AM
+> > Subject: librbd cacher lock protection?
+> > 
+> > Hi All,
+> > 
+> > I'm investigating librbd code related to caching (ObjectCacher).
+> > What I cannot find is the data integrity protection while there is a
+> > 'cache miss' (full or partial). It looks like _readx exits with
+> > 'defer' and cache_lock is released (and locked again in LibWriteback).
+> > The BufferHead's are marked as 'rx' but not protected against write.
+> > Writex is not skipping nor checking for any BH. It's just populating data
+> > in cache.
+> > That confuses me. So where is the protection? How does the cache
+> > integrity protection actually work?
+> > 
+> > Thanks,
+> > maciej
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+> > in the body of a message to majordomo@vger.kernel.org More majordomo
+> > info at  http://vger.kernel.org/majordomo-info.html
+> > 
