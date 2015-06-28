@@ -1,42 +1,83 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: Probable memory leak in Hammer write path ?
-Date: Sun, 28 Jun 2015 00:57:03 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CDAF9DF@SACMBXIP01.sdcorp.global.sandisk.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Setting up teuthology with OpenStack
+Date: Sun, 28 Jun 2015 12:51:43 +0200
+Message-ID: <558FD1BF.4010404@dachary.org>
+References: <558A03E1.7010903@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="uX3VGLsW3wQW1WnHIeJ0hsGitlnbgWd2N"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1on0090.outbound.protection.outlook.com ([157.56.110.90]:12800
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752056AbbF1A5H convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 27 Jun 2015 20:57:07 -0400
-Content-Language: en-US
+Received: from mail2.dachary.org ([91.121.57.175]:41421 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752282AbbF1Kvx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 28 Jun 2015 06:51:53 -0400
+Received: from [10.9.0.6] (unknown [10.0.2.28])
+	by smtp.dmail.dachary.org (Postfix) with ESMTP id 18E86420B1
+	for <ceph-devel@vger.kernel.org>; Sun, 28 Jun 2015 12:51:44 +0200 (CEST)
+In-Reply-To: <558A03E1.7010903@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
+
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--uX3VGLsW3wQW1WnHIeJ0hsGitlnbgWd2N
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
 Hi,
-I am chasing a substantial memory leak in latest Hammer code base in the write path since yesterday and wanted to know if anybody else is also observing this or not. This is as simple as running a fio-rbd random_write workload in my single OSD server with say block size 16K and num_jobs = 8. I am seeing memory is increasing very substantially and eventually OSD stopped responding.
-I tried it on two different servers (just to make sure since I was playing with lot of kernel param of late), but results are similar.
-Digging down the code and short circuiting different layers, I got the following.
 
-1. Seeing the nature of leak, it seems the entire transaction is leaking.
+The OpenStack backend is being reworked to not require the neutron API, b=
+ecause most OpenStack cluster do not provide it. Until it is complete the=
+ neutron based backend can be found at
 
-2.  Code is deleting the transaction with a help of C_DeleteTransaction context and commenting out the following line and deleting the transaction (op_t) from submit_transaction(), seems resolved the leak.
+ https://github.com/dachary/teuthology/tree/wip-6502-openstack-neutron#op=
+enstack-backend
 
-  /*op_t->register_on_applied(
-    new ObjectStore::C_DeleteTransaction(op_t));*/
+The difference is that neutron allows to create an isolated network and t=
+euthology can assume ownership of the IPv4 addresses. Without neutron, th=
+e OpenStack backend has to adapt to whatever IPv4 is assigned to the inst=
+ances created. It is not a significant problem, only the logic is quite d=
+ifferent.
+
+Cheers
+
+On 24/06/2015 03:12, Loic Dachary wrote:
+> Hi Ceph,
+>=20
+> There is an experimental OpenStack backend[1] for teuthology[2] (the Ce=
+ph integration tests toolbox) with instructions to set it up[3] and some =
+integration tests to verify it works as it should. I've run them successf=
+ully on two different OpenStack clusters (http://the.re/ and https://ente=
+rcloudsuite.com/). It would be great if someone was brave enough to give =
+it a try at this very early stage :-) If you don't have access to an Open=
+Stack cluster, https://entercloudsuite.com/ can provide an OpenStack tena=
+nt within the hour (I had a few weird glitches during the registration bu=
+t they went away magically).
+>=20
+> Cheers
+>=20
+> [1] teuthology OpenStack backend http://tracker.ceph.com/issues/6502
+> [2] teuthology https://github.com/ceph/teuthology/
+> [3] setting up teuthology with OpenStack https://github.com/dachary/teu=
+thology/tree/wip-6502-openstack#openstack-backend
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
 
-3. In my case, I short circuited the queue_transaction and that's why it is working, but in reality, we can't delete the transaction from submit_transaction(). Code seems to be doing proper way , but I am not able to find out yet why it is leaking memory during deleting it async way.
+--uX3VGLsW3wQW1WnHIeJ0hsGitlnbgWd2N
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
-Appreciate if anybody try out latest hammer building from source and confirm the behavior.
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
 
-Thanks & Regards
-Somnath
+iEYEARECAAYFAlWP0b8ACgkQ8dLMyEl6F22kRgCfaKQH8acJ2t8hINYI+QZtFwqq
+AfkAn0YBF34tbaxM/gRgyBr08k3x6ePz
+=oHUI
+-----END PGP SIGNATURE-----
 
-________________________________
-
-PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-
+--uX3VGLsW3wQW1WnHIeJ0hsGitlnbgWd2N--
