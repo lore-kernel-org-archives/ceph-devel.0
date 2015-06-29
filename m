@@ -1,56 +1,50 @@
-From: Harshal Gupta <harshal.gupta001@gmail.com>
-Subject: Re: Error Messages in S3 API calls
-Date: Mon, 29 Jun 2015 22:35:12 +0530
-Message-ID: <CAPRac-awN3mfwVmjgRCge0zS95Ff0bqMSyfwGA+49JzdF9Kjrw@mail.gmail.com>
-References: <CAPRac-aU_W7uV-L_HQrz_uy1Je4t65AeGf+VO6avbnwnuwzKoQ@mail.gmail.com>
- <CAPRac-ZXhhWhMAs93VgjJfDpC_C8boAZ2+SwfYN9TiF0bwU44w@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: [PATCH] crush: fix a bug in tree bucket decode
+Date: Mon, 29 Jun 2015 20:17:52 +0300
+Message-ID: <1435598272-44621-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f172.google.com ([209.85.213.172]:33344 "EHLO
-	mail-ig0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752284AbbF2RFb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Jun 2015 13:05:31 -0400
-Received: by igcur8 with SMTP id ur8so42210992igc.0
-        for <ceph-devel@vger.kernel.org>; Mon, 29 Jun 2015 10:05:31 -0700 (PDT)
-In-Reply-To: <CAPRac-ZXhhWhMAs93VgjJfDpC_C8boAZ2+SwfYN9TiF0bwU44w@mail.gmail.com>
+Received: from mail-la0-f45.google.com ([209.85.215.45]:34519 "EHLO
+	mail-la0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752755AbbF2RSN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Jun 2015 13:18:13 -0400
+Received: by lagx9 with SMTP id x9so133838470lag.1
+        for <ceph-devel@vger.kernel.org>; Mon, 29 Jun 2015 10:18:11 -0700 (PDT)
+Received: from localhost.localdomain ([109.110.66.238])
+        by mx.google.com with ESMTPSA id o8sm10876316laf.7.2015.06.29.10.18.10
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Mon, 29 Jun 2015 10:18:10 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-I have raised a pull request as there is not a major code change. You
-can check the code here :
+struct crush_bucket_tree::num_nodes is u8, so ceph_decode_8_safe()
+should be used.  -Wconversion catches this, but I guess it went
+unnoticed in all the noise it spews.  The actual problem (at least for
+common crushmaps) isn't the u32 -> u8 truncation though - it's the
+advancement by 4 bytes insead of 1 in the crushmap buffer.
 
-https://github.com/ceph/ceph/pull/5101
+Fixes: http://tracker.ceph.com/issues/2759
 
-On Mon, Jun 29, 2015 at 10:23 PM, Harshal Gupta
-<harshal.gupta001@gmail.com> wrote:
-> Hi,
-> AWS S3 provides descriptive error messages in xml body whenever
-> there is an error wile making a REST API call. (e.g. in case of
-> BucketNotFound; there is message "The bucket you tried to delete is
-> not empty.") which helps the end user who are non technical to
-> understand what went wrong.
-> Such Error messages are not there in RGW.
->
-> Also S3 provides a request id in XML body for each error response.
-> This id can be used for debugging purposes.This is already implemented
-> as "Trans_id" in master branch.
->
-> Since many applications parse XML body for information, It will be
-> beneficial to add both of these in xml error response.
->
-> I am going to add those in error response. Please share your thoughts about it.
->
-> Thanks
-> --
-> HARSHAL GUPTA
-> Software Engineer
-> Rilance JioCloud
+Cc: stable@vger.kernel.org
+Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+---
+ net/ceph/osdmap.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-
-
+diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
+index 15796696d64e..4a3125836b64 100644
+--- a/net/ceph/osdmap.c
++++ b/net/ceph/osdmap.c
+@@ -89,7 +89,7 @@ static int crush_decode_tree_bucket(void **p, void *end,
+ {
+ 	int j;
+ 	dout("crush_decode_tree_bucket %p to %p\n", *p, end);
+-	ceph_decode_32_safe(p, end, b->num_nodes, bad);
++	ceph_decode_8_safe(p, end, b->num_nodes, bad);
+ 	b->node_weights = kcalloc(b->num_nodes, sizeof(u32), GFP_NOFS);
+ 	if (b->node_weights == NULL)
+ 		return -ENOMEM;
 -- 
-HARSHAL GUPTA
-Software Engineer
-Rilance JioCloud
+1.9.3
+
