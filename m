@@ -1,51 +1,63 @@
-From: Gregory Farnum <greg@gregs42.com>
-Subject: Re: CRC32 of messages
-Date: Mon, 29 Jun 2015 12:37:13 +0100
-Message-ID: <CAC6JEv8bpF4bmCnd5Z=Dv9MiUT4_rgStP49yOuEnULW8pGctRw@mail.gmail.com>
+From: =?utf-8?B?RGHFgmVrLCBQaW90cg==?= <Piotr.Dalek@ts.fujitsu.com>
+Subject: RE: CRC32 of messages
+Date: Mon, 29 Jun 2015 14:20:18 +0200
+Message-ID: <90559C83A9C7FA45B5846C975DFA612DDB4C4DC7F2@ABGEX73E.FSC.NET>
 References: <a07cdfc20b95e8fd166d4d14adeb27a1.squirrel@www.erikburrows.com>
 	<90559C83A9C7FA45B5846C975DFA612DDB4C4DC457@ABGEX73E.FSC.NET>
 	<CABZ+qqkjYQBQJEjHGA8xs78d59khNLf9oDjA0ORTpFG0QiGtTQ@mail.gmail.com>
-	<CAC6JEv938Os5jcNoV08vQJ6tLnR8y1kKLHR_z1iNRHXitQkMmw@mail.gmail.com>
-	<mmra8n$ifi$1@ger.gmane.org>
+ <CAC6JEv938Os5jcNoV08vQJ6tLnR8y1kKLHR_z1iNRHXitQkMmw@mail.gmail.com>
+ <mmra8n$ifi$1@ger.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f51.google.com ([209.85.215.51]:33002 "EHLO
-	mail-la0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752670AbbF2LhR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Jun 2015 07:37:17 -0400
-Received: by laar3 with SMTP id r3so59798569laa.0
-        for <ceph-devel@vger.kernel.org>; Mon, 29 Jun 2015 04:37:16 -0700 (PDT)
-Received: from mail-la0-f51.google.com (mail-la0-f51.google.com. [209.85.215.51])
-        by mx.google.com with ESMTPSA id s8sm10719218las.29.2015.06.29.04.37.14
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 29 Jun 2015 04:37:14 -0700 (PDT)
-Received: by lagh6 with SMTP id h6so49939910lag.2
-        for <ceph-devel@vger.kernel.org>; Mon, 29 Jun 2015 04:37:13 -0700 (PDT)
+Received: from dgate10.ts.fujitsu.com ([80.70.172.49]:46277 "EHLO
+	dgate10.ts.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751159AbbF2MUV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Jun 2015 08:20:21 -0400
 In-Reply-To: <mmra8n$ifi$1@ger.gmane.org>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Daniel Swarbrick <daniel.swarbrick@profitbricks.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, Jun 29, 2015 at 12:30 PM, Daniel Swarbrick
-<daniel.swarbrick@profitbricks.com> wrote:
-> On 29/06/15 12:51, Gregory Farnum wrote:
->>
->> Yes, we have our own CRC32 checksum because loooong ago (before I
->> started!) Sage saw a lot of network corruption that wasn't being
->> caught by the TCP checksums so he added some to the Ceph message
->> stream. I can't tell you with any authority whatsoever how common that
->> problem is, but I don't think we're turning them off by default in
->> upstream. :)
->
-> If the CRC32 implementation in Ceph is that dated (particularly the
-> software implementations that will be used on AMD hardware), would it be
-> worth checking out some of the updated implementations, such as the
-> slice-by-16 or chunked methods?
-
-Possibly? I really don't know anything about this. :) There have been
-several changes to add new implementations (aarch64 and intel) since
-then; pull requests welcome!
--Greg
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZn
+ZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtDQo+IG93bmVyQHZnZXIua2VybmVsLm9y
+Z10gT24gQmVoYWxmIE9mIERhbmllbCBTd2FyYnJpY2sNCj4gU2VudDogTW9uZGF5LCBKdW5lIDI5
+LCAyMDE1IDE6MzEgUE0NCg0KPiA+IFllcywgd2UgaGF2ZSBvdXIgb3duIENSQzMyIGNoZWNrc3Vt
+IGJlY2F1c2UgbG9vb29uZyBhZ28gKGJlZm9yZSBJDQo+ID4gc3RhcnRlZCEpIFNhZ2Ugc2F3IGEg
+bG90IG9mIG5ldHdvcmsgY29ycnVwdGlvbiB0aGF0IHdhc24ndCBiZWluZw0KPiA+IGNhdWdodCBi
+eSB0aGUgVENQIGNoZWNrc3VtcyBzbyBoZSBhZGRlZCBzb21lIHRvIHRoZSBDZXBoIG1lc3NhZ2UN
+Cj4gPiBzdHJlYW0uIEkgY2FuJ3QgdGVsbCB5b3Ugd2l0aCBhbnkgYXV0aG9yaXR5IHdoYXRzb2V2
+ZXIgaG93IGNvbW1vbiB0aGF0DQo+ID4gcHJvYmxlbSBpcywgYnV0IEkgZG9uJ3QgdGhpbmsgd2Un
+cmUgdHVybmluZyB0aGVtIG9mZiBieSBkZWZhdWx0IGluDQo+ID4gdXBzdHJlYW0uIDopDQo+IA0K
+PiBJZiB0aGUgQ1JDMzIgaW1wbGVtZW50YXRpb24gaW4gQ2VwaCBpcyB0aGF0IGRhdGVkIChwYXJ0
+aWN1bGFybHkgdGhlIHNvZnR3YXJlDQo+IGltcGxlbWVudGF0aW9ucyB0aGF0IHdpbGwgYmUgdXNl
+ZCBvbiBBTUQgaGFyZHdhcmUpLCB3b3VsZCBpdCBiZSB3b3J0aA0KPiBjaGVja2luZyBvdXQgc29t
+ZSBvZiB0aGUgdXBkYXRlZCBpbXBsZW1lbnRhdGlvbnMsIHN1Y2ggYXMgdGhlDQo+IHNsaWNlLWJ5
+LTE2IG9yIGNodW5rZWQgbWV0aG9kcz8NCj4gSSBmb3VuZCB0aGlzIGxpbmsgaHR0cDovL2NyZWF0
+ZS5zdGVwaGFuLWJydW1tZS5jb20vY3JjMzIvIGFuZCB0cmllZCBydW5uaW5nDQo+IHRoZSBiZW5j
+aG1hcmsgb24gYW4gQU1EIE9wdGVyb24gNjM4NiBTRSBzeXN0ZW0sIHdpdGggdGhlIGZvbGxvd2lu
+Zw0KPiByZXN1bHRzOg0KDQpGaXJzdCBvZiBhbGwsIHRoaXMgcHJvY2Vzc29yIGFjdHVhbGx5IHN1
+cHBvcnRzIFNTRSA0LjIuIFNlZSBoZXJlOg0KaHR0cDovL3d3dy5jcHUtd29ybGQuY29tL0NQVXMv
+QnVsbGRvemVyL0FNRC1PcHRlcm9uJTIwNjM4NiUyMFNFJTIwLSUyME9TNjM4NllFVEdHSEsuaHRt
+bA0KSW4gb3RoZXIgd29yZHMsIGl0ICpkb2VzKiBzdXBwb3J0IGhhcmR3YXJlIENSQzMyIGNhbGN1
+bGF0aW9uLg0KDQo+IGJpdHdpc2UgICAgICAgICAgOiBDUkM9MjIxRjM5MEYsIDQ3LjUyNXMsIDIx
+LjU0NiBNQi9zDQo+IGhhbGYtYnl0ZSAgICAgICAgOiBDUkM9MjIxRjM5MEYsIDExLjgyOHMsIDg2
+LjU3NiBNQi9zDQo+ICAgMSBieXRlICBhdCBvbmNlOiBDUkM9MjIxRjM5MEYsIDYuMzQ3cywgMTYx
+LjMzMiBNQi9zDQo+ICAgNCBieXRlcyBhdCBvbmNlOiBDUkM9MjIxRjM5MEYsIDIuODc1cywgMzU2
+LjE3OCBNQi9zDQo+ICAgOCBieXRlcyBhdCBvbmNlOiBDUkM9MjIxRjM5MEYsIDIuMDA0cywgNTEw
+LjkzMiBNQi9zDQo+IDR4OCBieXRlcyBhdCBvbmNlOiBDUkM9MjIxRjM5MEYsIDEuOTI5cywgNTMw
+LjgxMSBNQi9zDQo+ICAxNiBieXRlcyBhdCBvbmNlOiBDUkM9MjIxRjM5MEYsIDEuODkycywgNTQx
+LjE3OSBNQi9zDQo+ICAxNiBieXRlcyBhdCBvbmNlOiBDUkM9MjIxRjM5MEYsIDEuOTI2cywgNTMx
+Ljc5NyBNQi9zIChpbmNsdWRpbmcNCj4gcHJlZmV0Y2hpbmcpDQo+ICAgICBjaHVua2VkICAgICAg
+OiBDUkM9MjIxRjM5MEYsIDEuOTE5cywgNTMzLjY1NiBNQi9zDQo+IA0KPiBBRkFJSywgQ2VwaCB1
+c2VzIHRoZSBzbGljZS1ieS04IG1ldGhvZCBpZiBubyBoYXJkd2FyZSBjcmMzMiBpcyBmb3VuZC4N
+Cg0KU2xpY2luZy1ieS0xNiBtYWtlcyB1c2Ugb2YgbGFyZ2UgKDE2ayBjb250cmFyeSB0byA4ayB1
+c2VkIGJ5IHNsaWNpbmctYnktOCkgc28gc3dpdGNoaW5nIHRvIHNsaWNpbmctYnktMTYgd291bGQg
+Y2F1c2UgbW9yZSBjYWNoZSB0cmFzaGluZyB0aGFuIHdpdGggc2xpY2luZy1ieS04IGFuZCBpbiB0
+dXJuLCBkZWNyZWFzZSBvdmVyYWxsIENlcGggcGVyZm9ybWFuY2UuIE5vdCB0byBtZW50aW9uIHRo
+YXQgaW4geW91ciBjYXNlLCBzbGljaW5nLWJ5LTE2IHdhcyBqdXN0IH4zMU1CL3MgZmFzdGVyLCB3
+aGljaCBpcyBqdXN0IDYlIGZhc3Rlci4gSU1ITywgaW5jcmVhc2VkIG1lbW9yeSB1c2FnZSBpcyBk
+ZWZpbml0ZWx5IG5vdCB3b3J0aCBpdC4NCg0KDQoNCldpdGggYmVzdCByZWdhcmRzIC8gUG96ZHJh
+d2lhbQ0KUGlvdHIgRGHFgmVrDQoNCg0K
