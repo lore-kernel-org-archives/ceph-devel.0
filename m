@@ -1,80 +1,70 @@
-From: Dan van der Ster <dan@vanderster.com>
-Subject: Re: CRC32 of messages
-Date: Mon, 29 Jun 2015 08:55:23 +0200
-Message-ID: <CABZ+qqkjYQBQJEjHGA8xs78d59khNLf9oDjA0ORTpFG0QiGtTQ@mail.gmail.com>
-References: <a07cdfc20b95e8fd166d4d14adeb27a1.squirrel@www.erikburrows.com> <90559C83A9C7FA45B5846C975DFA612DDB4C4DC457@ABGEX73E.FSC.NET>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: CRC32 of messages
+Date: Mon, 29 Jun 2015 07:00:50 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CDB05D9@SACMBXIP01.sdcorp.global.sandisk.com>
+References: <a07cdfc20b95e8fd166d4d14adeb27a1.squirrel@www.erikburrows.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F2CDAE1C3@SACMBXIP01.sdcorp.global.sandisk.com>
+ <90559C83A9C7FA45B5846C975DFA612DDB4C4DC44D@ABGEX73E.FSC.NET>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=iso-8859-2
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f44.google.com ([209.85.215.44]:32918 "EHLO
-	mail-la0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751790AbbF2G4G convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Jun 2015 02:56:06 -0400
-Received: by laar3 with SMTP id r3so51737100laa.0
-        for <ceph-devel@vger.kernel.org>; Sun, 28 Jun 2015 23:56:04 -0700 (PDT)
-Received: from mail-la0-f52.google.com (mail-la0-f52.google.com. [209.85.215.52])
-        by mx.google.com with ESMTPSA id v16sm6321896lal.41.2015.06.28.23.56.03
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Sun, 28 Jun 2015 23:56:03 -0700 (PDT)
-Received: by lacny3 with SMTP id ny3so113524596lac.3
-        for <ceph-devel@vger.kernel.org>; Sun, 28 Jun 2015 23:56:02 -0700 (PDT)
-In-Reply-To: <90559C83A9C7FA45B5846C975DFA612DDB4C4DC457@ABGEX73E.FSC.NET>
+Received: from mail-bn1bon0092.outbound.protection.outlook.com ([157.56.111.92]:39456
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750809AbbF2HAy convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Jun 2015 03:00:54 -0400
+In-Reply-To: <90559C83A9C7FA45B5846C975DFA612DDB4C4DC44D@ABGEX73E.FSC.NET>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?Q?Da=C5=82ek=2C_Piotr?= <Piotr.Dalek@ts.fujitsu.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: =?iso-8859-2?Q?Da=B3ek=2C_Piotr?= <Piotr.Dalek@ts.fujitsu.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, Jun 29, 2015 at 8:31 AM, Da=C5=82ek, Piotr
-<Piotr.Dalek@ts.fujitsu.com> wrote:
->> -----Original Message-----
->> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
->> owner@vger.kernel.org] On Behalf Of Erik G. Burrows
->> Sent: Friday, June 26, 2015 6:49 PM
->>
->> All,
->> Can someone explain to me the rationale for performing in-software C=
-RC32
->> hashes of all messages through the Pipe and AsyncMessage classes?
->>
->> On my servers, operf shows that 20% of the total CPU time in my benc=
-hmark
->> tests are being spent in the librados ceph_crc32c_sctp function. I c=
-an see that
->> the library is trying to use CPU accelerations if available, but wha=
-t I'd like to
->> understand is: why checksum the messages at all?
->
-> As Somnath already wrote, you can disable CRC checking for messages. =
-But they're also used for journals, among other things, so you'll alway=
-s see some CPU usage spent on CRC32 calculations.
->
->> If the messages are local, there should not be any corruption at all=
-, and if
->> they are coming in over IP, then the kernel and NIC should do Layer-=
-2/3 CRCs
->> and reject any corrupted packets. So why re-CRC the messages at the =
-Ceph
->> layer?
->
-> I can imagine data corruption coming from Ceph itself and not caught =
-by IP layers, for example due to bug in Ceph code or mainboard/RAM fail=
-ure. And it's a nice debug feature you can use when dealing with low-le=
-vel code.
->
+Thanks Piotr for the info, but I am not sure the asm instructions ceph =
+is using for probing cpu is compatible to AMD or not.
 
-That's not to mention that the TCP checksum is remarkably weak. We've
-just had an incident where a broken router was quite efficiently
-corrupting something like 1/66 packets in a way which was invisible to
-the TCP checksum. Some example corruptions are here our report -- note
-that it's still a work in progress:
-https://cds.cern.ch/record/2026187/files/Adler32_Data_Corruption.pdf
+Regards
+Somnath
 
-Thankfully CRC32-C /probably/ prevented this broken router from
-corrupting our Ceph volumes.
+-----Original Message-----
+=46rom: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.=
+kernel.org] On Behalf Of Dalek, Piotr
+Sent: Sunday, June 28, 2015 11:27 PM
+To: ceph-devel@vger.kernel.org
+Subject: RE: CRC32 of messages
 
-Cheers, Dan
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
+> owner@vger.kernel.org] On Behalf Of Somnath Roy
+> Sent: Friday, June 26, 2015 7:52 PM
+>
+> ceph_crc32c_intel_fast is ~6 times faster than ceph_crc32c_sctp. If
+> you are not using intel cpus or you have older intel cpus where this
+> sse4 instruction
+
+Not exactly true, AMD CPUs released after October 2011 support SSE 4.2 =
+(which include CRC32 instructions) as well.
+See this: http://www.cpu-world.com/Glossary/S/SSE4.2.html
+
+With best regards / Pozdrawiam
+Piotr Da=B3ek
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n the body of a message to majordomo@vger.kernel.org More majordomo inf=
+o at  http://vger.kernel.org/majordomo-info.html
+
+________________________________
+
+PLEASE NOTE: The information contained in this electronic mail message =
+is intended only for the use of the designated recipient(s) named above=
+=2E If the reader of this message is not the intended recipient, you ar=
+e hereby notified that you have received this message in error and that=
+ any review, dissemination, distribution, or copying of this message is=
+ strictly prohibited. If you have received this communication in error,=
+ please notify the sender by telephone or e-mail (as shown above) immed=
+iately and destroy any and all copies of this message in your possessio=
+n (whether hard copies or electronically stored copies).
+
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
