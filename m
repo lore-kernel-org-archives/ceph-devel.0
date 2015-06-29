@@ -1,80 +1,140 @@
 From: Gregory Farnum <greg@gregs42.com>
-Subject: Re: Probable memory leak in Hammer write path ?
-Date: Mon, 29 Jun 2015 11:52:54 +0100
-Message-ID: <CAC6JEv9sfdLtMKjpSJzRxgOjLOMH-kvj0MtA1i4jnCne4FtStA@mail.gmail.com>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CDB0142@SACMBXIP01.sdcorp.global.sandisk.com>
+Subject: Re: Inline dedup/compression
+Date: Mon, 29 Jun 2015 12:01:01 +0100
+Message-ID: <CAC6JEv-3K5UEzTrrgT_BPSPGg3gXxE0kXhh9fyOLRWF3oweFNw@mail.gmail.com>
+References: <99767EA2E27DD44DB4E9F9B9ACA458C03B319727@SSIEXCH-MB3.ssi.samsung.com>
+	<CACJqLybMy1Tfr8baZMbv268gbmeBpG7uJuvbkrnQ9pjdn-AOvA@mail.gmail.com>
+	<99767EA2E27DD44DB4E9F9B9ACA458C03B3198B4@SSIEXCH-MB3.ssi.samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f42.google.com ([209.85.215.42]:36368 "EHLO
-	mail-la0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752401AbbF2Kw6 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Jun 2015 06:52:58 -0400
-Received: by lagc2 with SMTP id c2so4833288lag.3
-        for <ceph-devel@vger.kernel.org>; Mon, 29 Jun 2015 03:52:56 -0700 (PDT)
-Received: from mail-la0-f42.google.com (mail-la0-f42.google.com. [209.85.215.42])
-        by mx.google.com with ESMTPSA id xl7sm10688715lbb.42.2015.06.29.03.52.55
+Received: from mail-la0-f45.google.com ([209.85.215.45]:33188 "EHLO
+	mail-la0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752882AbbF2LBF convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Jun 2015 07:01:05 -0400
+Received: by laar3 with SMTP id r3so58725778laa.0
+        for <ceph-devel@vger.kernel.org>; Mon, 29 Jun 2015 04:01:04 -0700 (PDT)
+Received: from mail-la0-f45.google.com (mail-la0-f45.google.com. [209.85.215.45])
+        by mx.google.com with ESMTPSA id ox10sm10674936lbc.30.2015.06.29.04.01.02
         for <ceph-devel@vger.kernel.org>
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 29 Jun 2015 03:52:55 -0700 (PDT)
-Received: by lagh6 with SMTP id h6so48648602lag.2
-        for <ceph-devel@vger.kernel.org>; Mon, 29 Jun 2015 03:52:54 -0700 (PDT)
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CDB0142@SACMBXIP01.sdcorp.global.sandisk.com>
+        Mon, 29 Jun 2015 04:01:03 -0700 (PDT)
+Received: by lagh6 with SMTP id h6so48880452lag.2
+        for <ceph-devel@vger.kernel.org>; Mon, 29 Jun 2015 04:01:02 -0700 (PDT)
+In-Reply-To: <99767EA2E27DD44DB4E9F9B9ACA458C03B3198B4@SSIEXCH-MB3.ssi.samsung.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
+Cc: Haomai Wang <haomaiwang@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-I'm confused. Changing the kernel you're using is changing the
-apparent memory usage of a userspace application (Ceph)?
+We discuss this periodically but not in any great depth. Compression
+and dedupe are both best performed at a single point with some sort of
+global knowledge, which is very antithetical to Ceph's design.
+Blue-sky discussions for dedupe generally center around trying out
+some kind of CAS system with redirects from named objects that are
+just indexes of CAS-addressed objects which store the actual object
+data, but that introduces the redirect latency and I'm not
+super-confident that we'd get much saving outside of scenarios like
+RBD where we already capture most of the benefit with the gold master
+"parent" images. :/
 
-Are you changing the compiler when you change kernel versions?
+Compression we discuss less often =E2=80=94 you can do it:
+a) on the level of an OSD, in which case why would we bother
+implementing it ourselves instead of just stacking on top of some
+other compression system?
+b) on the next level of clients (RBD, RGW, CephFS) ahead of the RADOS
+object transition. But that means you generally can't do stuff like
+reading portions of an object to satisfy partial reads, and ideas like
+striping strategies stop making much sense.
 -Greg
 
-On Mon, Jun 29, 2015 at 3:35 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
-> Some more data point..
+On Fri, Jun 26, 2015 at 7:03 PM, James (Fei) Liu-SSI
+<james.liu@ssi.samsung.com> wrote:
+> Hi Haomai,
+>   Thanks for your response as always. I agree compression is comparab=
+le easier task but still very challenge in terms of implementation no m=
+atter where we should implement . Client side like RBD, or RDBGW or Cep=
+hFS, or PG should be a little bit better place to implementation in ter=
+ms of efficiency and cost reduction before the data were duplicated to =
+other OSDs. It has  two reasons :
+> 1. Keep the data consistency among OSDs in one PG
+> 2. Saving the computing resources
 >
-> 1. I am not seeing this in 3.13.0-24-generic
+> IMHO , The compression should be accomplished before the replication =
+come into play in pool level. However, we can also have second level of=
+ compression in the local objectstore.  In term of unit size of compres=
+sion , It really depends workload and in which layer we should implemen=
+t.
 >
-> 2. Seeing this in 3.16.0-23-generic , 3.19.0-21-generic
+> About inline deduplication, it will dramatically increase the complex=
+ities if we bring in the replication and Erasure Coding for considerati=
+on.
 >
-> Could this be related to gcc 4.9.* ?
+> However, Before we talk about implementation, It would be great if we=
+ can understand the pros and cons to implement inline dedupe/compressio=
+n. We all understand the benefits of dedupe/compression. However, the s=
+ide effect is performance hurt and need more computing resources. It wo=
+uld be great if we can understand the problems from 30,000 feet high fo=
+r the whole picture about the Ceph. Please correct me if I were wrong.
 >
-> Thanks & Regards
-> Somnath
+> By the way, Both of software defined storage solution startups like H=
+devig and Springpath provide inline dedupe/compression.  It is not appl=
+e to apple comparison. But it is good reference. The datacenters need c=
+ost effective solution.
+>
+> Regards,
+> James
+>
+>
 >
 > -----Original Message-----
-> From: Somnath Roy
-> Sent: Saturday, June 27, 2015 5:57 PM
-> To: ceph-devel@vger.kernel.org
-> Subject: Probable memory leak in Hammer write path ?
+> From: Haomai Wang [mailto:haomaiwang@gmail.com]
+> Sent: Thursday, June 25, 2015 8:08 PM
+> To: James (Fei) Liu-SSI
+> Cc: ceph-devel
+> Subject: Re: Inline dedup/compression
 >
-> Hi,
-> I am chasing a substantial memory leak in latest Hammer code base in the write path since yesterday and wanted to know if anybody else is also observing this or not. This is as simple as running a fio-rbd random_write workload in my single OSD server with say block size 16K and num_jobs = 8. I am seeing memory is increasing very substantially and eventually OSD stopped responding.
-> I tried it on two different servers (just to make sure since I was playing with lot of kernel param of late), but results are similar.
-> Digging down the code and short circuiting different layers, I got the following.
+> On Fri, Jun 26, 2015 at 6:01 AM, James (Fei) Liu-SSI <james.liu@ssi.s=
+amsung.com> wrote:
+>> Hi Cephers,
+>>     It is not easy to ask when Ceph is going to support inline dedup=
+/compression across OSDs in RADOS because it is not easy task and answe=
+red. Ceph is providing replication and EC for performance and failure r=
+ecovery. But we also lose the efficiency  of storage store and cost ass=
+ociate with it. It is kind of contradicted with each other. But I am cu=
+rious how other Cephers think about this question.
+>>    Any plan for Cephers to do anything regarding to inline dedupe/co=
+mpression except the features brought by local node itself like BRTFS?
 >
-> 1. Seeing the nature of leak, it seems the entire transaction is leaking.
+> Compression is easier to implement in rados than dedup. The most impo=
+rtant thing about compression is where we begin to compress, client, pg=
+ or objectstore. Then we need to decide how much the compress unit is. =
+Of course, compress and dedup both like to use keyvalue-alike storage a=
+pi to use, but I think it's not difficult to use existing objectstore a=
+pi.
 >
-> 2.  Code is deleting the transaction with a help of C_DeleteTransaction context and commenting out the following line and deleting the transaction (op_t) from submit_transaction(), seems resolved the leak.
+> Dedup is more possible to implement in local osd instead of the whole=
+ pool or cluster, and if we want to do dedup for the pool level, we nee=
+d to do dedup from client.
 >
->   /*op_t->register_on_applied(
->     new ObjectStore::C_DeleteTransaction(op_t));*/
+>>
+>>   Regards,
+>>   James
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+"
+>> in the body of a message to majordomo@vger.kernel.org More majordomo
+>> info at  http://vger.kernel.org/majordomo-info.html
 >
 >
-> 3. In my case, I short circuited the queue_transaction and that's why it is working, but in reality, we can't delete the transaction from submit_transaction(). Code seems to be doing proper way , but I am not able to find out yet why it is leaking memory during deleting it async way.
->
-> Appreciate if anybody try out latest hammer building from source and confirm the behavior.
->
-> Thanks & Regards
-> Somnath
->
-> ________________________________
->
-> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
 >
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Best Regards,
+>
+> Wheat
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
