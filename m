@@ -1,129 +1,68 @@
-From: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
-Subject: RE: Inline dedup/compression
-Date: Mon, 29 Jun 2015 18:42:52 +0000
-Message-ID: <99767EA2E27DD44DB4E9F9B9ACA458C03B319B44@SSIEXCH-MB3.ssi.samsung.com>
-References: <99767EA2E27DD44DB4E9F9B9ACA458C03B319727@SSIEXCH-MB3.ssi.samsung.com>
-	<CACJqLybMy1Tfr8baZMbv268gbmeBpG7uJuvbkrnQ9pjdn-AOvA@mail.gmail.com>
-	<99767EA2E27DD44DB4E9F9B9ACA458C03B3198B4@SSIEXCH-MB3.ssi.samsung.com>
- <CAC6JEv-3K5UEzTrrgT_BPSPGg3gXxE0kXhh9fyOLRWF3oweFNw@mail.gmail.com>
+From: "Handzik, Joe" <joseph.t.handzik@hp.com>
+Subject: RE: Preferred location for utility execution
+Date: Mon, 29 Jun 2015 18:44:36 +0000
+Message-ID: <2C438B34CAC8264398F5C7AF7411910A6D961A4B@G4W3206.americas.hpqcorp.net>
+References: <2C438B34CAC8264398F5C7AF7411910A6D9605F5@G4W3206.americas.hpqcorp.net>
+ <558DD0FC.8080608@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.ssi.samsung.com ([207.140.43.206]:35513 "EHLO
-	mx2.ssi.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753827AbbF2Sm6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Jun 2015 14:42:58 -0400
-In-Reply-To: <CAC6JEv-3K5UEzTrrgT_BPSPGg3gXxE0kXhh9fyOLRWF3oweFNw@mail.gmail.com>
+Received: from g9t5009.houston.hp.com ([15.240.92.67]:46261 "EHLO
+	g9t5009.houston.hp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752491AbbF2SpM convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Jun 2015 14:45:12 -0400
+In-Reply-To: <558DD0FC.8080608@redhat.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@gregs42.com>
-Cc: Haomai Wang <haomaiwang@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: John Spray <john.spray@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Cc: "gmeno@redhat.com" <gmeno@redhat.com>
 
-SGkgR3JlZywNCiAgVGhhbmtzIGZvciB5b3VyIHJlcGx5LiAgRm9yIHN1cmUsIHRoZSBjbG9uZSBm
-ZWF0dXJlIHNvbWVob3cgaW1wbGVtZW50cyBzb21lIG9mIGZ1bmN0aW9uIG9mIGRlZHVwZSBpbiB0
-aGUgImltYWdlIiBsZXZlbC4gSXQgbWFrZSBhIGxvdCBvZiBzZW5zZSB0byBWTXMgYW5kIHNhdmUg
-aHVnZSBhbW91bnQgb2Ygc3BhY2UgZm9yIGNlcnRhaW4gd29ya2xvYWQgbGlrZSBWRElzLiBJbiBh
-ZGRpdGlvbiwgRG9pbmcgZGF0YSByZWR1Y3Rpb24gaXRzZWxmIGlzbuKAmXQgaGFyZCwgYnV0IGRv
-aW5nIGl0IGF0IGxhcmdlIHNjYWxlIHJlbGlhYmx5IHdpdGhvdXQgc2FjcmlmaWNpbmcgcGVyZm9y
-bWFuY2UgdHVybnMgb3V0IHRvIGJlIHJlYWxseSwgcmVhbGx5IGhhcmQuIEl0IG5vcm1hbGx5IHJl
-cXVpcmVzIHlvdSB0byBkZWFsIHdpdGggYmVsb3cgaXNzdWVzOg0KMS4gUmFuZG9tIElPDQoyLiBE
-ZWR1cGUvQ29tcHJlc3Npb24gc2xvd3Mgd3JpdGVzDQozLiBNYXNzaXZlIFZpcnR1YWxpemF0aW9u
-IHdpdGggaW5kZXggdHJlZSBidWlsdCBmb3IgbWFwcGluZyBwdXJwb3NlDQo0LiBDb21wcmVzc2lv
-biBtYWtlIGRhdGEgdXBkYXRlIHN1cGVyIGV4cGVuc2l2ZS4NCg0KVGhlIHF1ZXN0aW9uIHRvIHVz
-IGlzIHNob3VsZCB3ZSBkbyBiZXR0ZXIgZGVkdXBlIGluc2lkZSBvZiBpbWFnZS9wZyBncm91cHMv
-T1NEIHdpdGggcmVzb2x2aW5nIGFib3ZlIGlzc3Vlcz8gSGVyZSBhcmUgbWlnaHQgYmUgc29sdXRp
-b25zOg0KMS4gRmxhc2goU1NEKSBoZWxwcyBhIGxvdCB0byByZXNvbHZlIFJhbmRvbSBJTyBpc3N1
-ZXMNCjIuIENvbXByZXNzaW9uL2RlZHVwZSB0YWtlIG1vcmUgY3B1IGN5Y2xlcyBidXQgdGFrZSBs
-ZXNzIHRpbWUgdG8gd3JpdGUuIFdlIG5lZWQgdG8gYWNjdXJhdGVseSBjb3VudCB0aGUgcHJvcyBh
-bmQgY29ucy4NCjMuQ29tcHJlc3Npb24gaXMgYmVzdCBzdWl0ZWQgZm9yIGRhdGEgdGhhdCBpcyBs
-YXJnZWx5IGluYWN0aXZlLiBXZSBjYW4gY2hvb3NlIHRoZSBjb21wcmVzc2lvbiBhbGdvcml0aG0g
-YmFzZWQgb24gd29ya2xvYWQgZnJvbSBjbGllbnQgc2lkZS4NCg0KQWJvdmUgYXJlIGp1c3QgbXkg
-dHdvIGNlbnRzLCBJTUhPLCBFbnRlcnByaXNlIHdvcmxkIHByb2JhYmx5IGNhcmUgbW9yZSBhYm91
-dCB0aGUgZGVkdXBlL2NvbXByZXNzaW9uIGZlYXR1cmVzIHRoZW4gY2xvdWQgd29ybGQuIEJ1dCBl
-dmVyeWJvZHkgd2FudCB0byBzYXZlIHNwYWNlL2Nvc3QgYXMgZGF0YSBncm93cy4NCg0KUmVnYXJk
-cywNCkphbWVzDQoNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IEdyZWdvcnkg
-RmFybnVtIFttYWlsdG86Z3JlZ0BncmVnczQyLmNvbV0gDQpTZW50OiBNb25kYXksIEp1bmUgMjks
-IDIwMTUgNDowMSBBTQ0KVG86IEphbWVzIChGZWkpIExpdS1TU0kNCkNjOiBIYW9tYWkgV2FuZzsg
-Y2VwaC1kZXZlbA0KU3ViamVjdDogUmU6IElubGluZSBkZWR1cC9jb21wcmVzc2lvbg0KDQpXZSBk
-aXNjdXNzIHRoaXMgcGVyaW9kaWNhbGx5IGJ1dCBub3QgaW4gYW55IGdyZWF0IGRlcHRoLiBDb21w
-cmVzc2lvbiBhbmQgZGVkdXBlIGFyZSBib3RoIGJlc3QgcGVyZm9ybWVkIGF0IGEgc2luZ2xlIHBv
-aW50IHdpdGggc29tZSBzb3J0IG9mIGdsb2JhbCBrbm93bGVkZ2UsIHdoaWNoIGlzIHZlcnkgYW50
-aXRoZXRpY2FsIHRvIENlcGgncyBkZXNpZ24uDQpCbHVlLXNreSBkaXNjdXNzaW9ucyBmb3IgZGVk
-dXBlIGdlbmVyYWxseSBjZW50ZXIgYXJvdW5kIHRyeWluZyBvdXQgc29tZSBraW5kIG9mIENBUyBz
-eXN0ZW0gd2l0aCByZWRpcmVjdHMgZnJvbSBuYW1lZCBvYmplY3RzIHRoYXQgYXJlIGp1c3QgaW5k
-ZXhlcyBvZiBDQVMtYWRkcmVzc2VkIG9iamVjdHMgd2hpY2ggc3RvcmUgdGhlIGFjdHVhbCBvYmpl
-Y3QgZGF0YSwgYnV0IHRoYXQgaW50cm9kdWNlcyB0aGUgcmVkaXJlY3QgbGF0ZW5jeSBhbmQgSSdt
-IG5vdCBzdXBlci1jb25maWRlbnQgdGhhdCB3ZSdkIGdldCBtdWNoIHNhdmluZyBvdXRzaWRlIG9m
-IHNjZW5hcmlvcyBsaWtlIFJCRCB3aGVyZSB3ZSBhbHJlYWR5IGNhcHR1cmUgbW9zdCBvZiB0aGUg
-YmVuZWZpdCB3aXRoIHRoZSBnb2xkIG1hc3RlciAicGFyZW50IiBpbWFnZXMuIDovDQoNCkNvbXBy
-ZXNzaW9uIHdlIGRpc2N1c3MgbGVzcyBvZnRlbiDigJQgeW91IGNhbiBkbyBpdDoNCmEpIG9uIHRo
-ZSBsZXZlbCBvZiBhbiBPU0QsIGluIHdoaWNoIGNhc2Ugd2h5IHdvdWxkIHdlIGJvdGhlciBpbXBs
-ZW1lbnRpbmcgaXQgb3Vyc2VsdmVzIGluc3RlYWQgb2YganVzdCBzdGFja2luZyBvbiB0b3Agb2Yg
-c29tZSBvdGhlciBjb21wcmVzc2lvbiBzeXN0ZW0/DQpiKSBvbiB0aGUgbmV4dCBsZXZlbCBvZiBj
-bGllbnRzIChSQkQsIFJHVywgQ2VwaEZTKSBhaGVhZCBvZiB0aGUgUkFET1Mgb2JqZWN0IHRyYW5z
-aXRpb24uIEJ1dCB0aGF0IG1lYW5zIHlvdSBnZW5lcmFsbHkgY2FuJ3QgZG8gc3R1ZmYgbGlrZSBy
-ZWFkaW5nIHBvcnRpb25zIG9mIGFuIG9iamVjdCB0byBzYXRpc2Z5IHBhcnRpYWwgcmVhZHMsIGFu
-ZCBpZGVhcyBsaWtlIHN0cmlwaW5nIHN0cmF0ZWdpZXMgc3RvcCBtYWtpbmcgbXVjaCBzZW5zZS4N
-Ci1HcmVnDQoNCk9uIEZyaSwgSnVuIDI2LCAyMDE1IGF0IDc6MDMgUE0sIEphbWVzIChGZWkpIExp
-dS1TU0kgPGphbWVzLmxpdUBzc2kuc2Ftc3VuZy5jb20+IHdyb3RlOg0KPiBIaSBIYW9tYWksDQo+
-ICAgVGhhbmtzIGZvciB5b3VyIHJlc3BvbnNlIGFzIGFsd2F5cy4gSSBhZ3JlZSBjb21wcmVzc2lv
-biBpcyBjb21wYXJhYmxlIGVhc2llciB0YXNrIGJ1dCBzdGlsbCB2ZXJ5IGNoYWxsZW5nZSBpbiB0
-ZXJtcyBvZiBpbXBsZW1lbnRhdGlvbiBubyBtYXR0ZXIgd2hlcmUgd2Ugc2hvdWxkIGltcGxlbWVu
-dCAuIENsaWVudCBzaWRlIGxpa2UgUkJELCBvciBSREJHVyBvciBDZXBoRlMsIG9yIFBHIHNob3Vs
-ZCBiZSBhIGxpdHRsZSBiaXQgYmV0dGVyIHBsYWNlIHRvIGltcGxlbWVudGF0aW9uIGluIHRlcm1z
-IG9mIGVmZmljaWVuY3kgYW5kIGNvc3QgcmVkdWN0aW9uIGJlZm9yZSB0aGUgZGF0YSB3ZXJlIGR1
-cGxpY2F0ZWQgdG8gb3RoZXIgT1NEcy4gSXQgaGFzICB0d28gcmVhc29ucyA6DQo+IDEuIEtlZXAg
-dGhlIGRhdGEgY29uc2lzdGVuY3kgYW1vbmcgT1NEcyBpbiBvbmUgUEcgMi4gU2F2aW5nIHRoZSAN
-Cj4gY29tcHV0aW5nIHJlc291cmNlcw0KPg0KPiBJTUhPICwgVGhlIGNvbXByZXNzaW9uIHNob3Vs
-ZCBiZSBhY2NvbXBsaXNoZWQgYmVmb3JlIHRoZSByZXBsaWNhdGlvbiBjb21lIGludG8gcGxheSBp
-biBwb29sIGxldmVsLiBIb3dldmVyLCB3ZSBjYW4gYWxzbyBoYXZlIHNlY29uZCBsZXZlbCBvZiBj
-b21wcmVzc2lvbiBpbiB0aGUgbG9jYWwgb2JqZWN0c3RvcmUuICBJbiB0ZXJtIG9mIHVuaXQgc2l6
-ZSBvZiBjb21wcmVzc2lvbiAsIEl0IHJlYWxseSBkZXBlbmRzIHdvcmtsb2FkIGFuZCBpbiB3aGlj
-aCBsYXllciB3ZSBzaG91bGQgaW1wbGVtZW50Lg0KPg0KPiBBYm91dCBpbmxpbmUgZGVkdXBsaWNh
-dGlvbiwgaXQgd2lsbCBkcmFtYXRpY2FsbHkgaW5jcmVhc2UgdGhlIGNvbXBsZXhpdGllcyBpZiB3
-ZSBicmluZyBpbiB0aGUgcmVwbGljYXRpb24gYW5kIEVyYXN1cmUgQ29kaW5nIGZvciBjb25zaWRl
-cmF0aW9uLg0KPg0KPiBIb3dldmVyLCBCZWZvcmUgd2UgdGFsayBhYm91dCBpbXBsZW1lbnRhdGlv
-biwgSXQgd291bGQgYmUgZ3JlYXQgaWYgd2UgY2FuIHVuZGVyc3RhbmQgdGhlIHByb3MgYW5kIGNv
-bnMgdG8gaW1wbGVtZW50IGlubGluZSBkZWR1cGUvY29tcHJlc3Npb24uIFdlIGFsbCB1bmRlcnN0
-YW5kIHRoZSBiZW5lZml0cyBvZiBkZWR1cGUvY29tcHJlc3Npb24uIEhvd2V2ZXIsIHRoZSBzaWRl
-IGVmZmVjdCBpcyBwZXJmb3JtYW5jZSBodXJ0IGFuZCBuZWVkIG1vcmUgY29tcHV0aW5nIHJlc291
-cmNlcy4gSXQgd291bGQgYmUgZ3JlYXQgaWYgd2UgY2FuIHVuZGVyc3RhbmQgdGhlIHByb2JsZW1z
-IGZyb20gMzAsMDAwIGZlZXQgaGlnaCBmb3IgdGhlIHdob2xlIHBpY3R1cmUgYWJvdXQgdGhlIENl
-cGguIFBsZWFzZSBjb3JyZWN0IG1lIGlmIEkgd2VyZSB3cm9uZy4NCj4NCj4gQnkgdGhlIHdheSwg
-Qm90aCBvZiBzb2Z0d2FyZSBkZWZpbmVkIHN0b3JhZ2Ugc29sdXRpb24gc3RhcnR1cHMgbGlrZSBI
-ZGV2aWcgYW5kIFNwcmluZ3BhdGggcHJvdmlkZSBpbmxpbmUgZGVkdXBlL2NvbXByZXNzaW9uLiAg
-SXQgaXMgbm90IGFwcGxlIHRvIGFwcGxlIGNvbXBhcmlzb24uIEJ1dCBpdCBpcyBnb29kIHJlZmVy
-ZW5jZS4gVGhlIGRhdGFjZW50ZXJzIG5lZWQgY29zdCBlZmZlY3RpdmUgc29sdXRpb24uDQo+DQo+
-IFJlZ2FyZHMsDQo+IEphbWVzDQo+DQo+DQo+DQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0t
-DQo+IEZyb206IEhhb21haSBXYW5nIFttYWlsdG86aGFvbWFpd2FuZ0BnbWFpbC5jb21dDQo+IFNl
-bnQ6IFRodXJzZGF5LCBKdW5lIDI1LCAyMDE1IDg6MDggUE0NCj4gVG86IEphbWVzIChGZWkpIExp
-dS1TU0kNCj4gQ2M6IGNlcGgtZGV2ZWwNCj4gU3ViamVjdDogUmU6IElubGluZSBkZWR1cC9jb21w
-cmVzc2lvbg0KPg0KPiBPbiBGcmksIEp1biAyNiwgMjAxNSBhdCA2OjAxIEFNLCBKYW1lcyAoRmVp
-KSBMaXUtU1NJIDxqYW1lcy5saXVAc3NpLnNhbXN1bmcuY29tPiB3cm90ZToNCj4+IEhpIENlcGhl
-cnMsDQo+PiAgICAgSXQgaXMgbm90IGVhc3kgdG8gYXNrIHdoZW4gQ2VwaCBpcyBnb2luZyB0byBz
-dXBwb3J0IGlubGluZSBkZWR1cC9jb21wcmVzc2lvbiBhY3Jvc3MgT1NEcyBpbiBSQURPUyBiZWNh
-dXNlIGl0IGlzIG5vdCBlYXN5IHRhc2sgYW5kIGFuc3dlcmVkLiBDZXBoIGlzIHByb3ZpZGluZyBy
-ZXBsaWNhdGlvbiBhbmQgRUMgZm9yIHBlcmZvcm1hbmNlIGFuZCBmYWlsdXJlIHJlY292ZXJ5LiBC
-dXQgd2UgYWxzbyBsb3NlIHRoZSBlZmZpY2llbmN5ICBvZiBzdG9yYWdlIHN0b3JlIGFuZCBjb3N0
-IGFzc29jaWF0ZSB3aXRoIGl0LiBJdCBpcyBraW5kIG9mIGNvbnRyYWRpY3RlZCB3aXRoIGVhY2gg
-b3RoZXIuIEJ1dCBJIGFtIGN1cmlvdXMgaG93IG90aGVyIENlcGhlcnMgdGhpbmsgYWJvdXQgdGhp
-cyBxdWVzdGlvbi4NCj4+ICAgIEFueSBwbGFuIGZvciBDZXBoZXJzIHRvIGRvIGFueXRoaW5nIHJl
-Z2FyZGluZyB0byBpbmxpbmUgZGVkdXBlL2NvbXByZXNzaW9uIGV4Y2VwdCB0aGUgZmVhdHVyZXMg
-YnJvdWdodCBieSBsb2NhbCBub2RlIGl0c2VsZiBsaWtlIEJSVEZTPw0KPg0KPiBDb21wcmVzc2lv
-biBpcyBlYXNpZXIgdG8gaW1wbGVtZW50IGluIHJhZG9zIHRoYW4gZGVkdXAuIFRoZSBtb3N0IGlt
-cG9ydGFudCB0aGluZyBhYm91dCBjb21wcmVzc2lvbiBpcyB3aGVyZSB3ZSBiZWdpbiB0byBjb21w
-cmVzcywgY2xpZW50LCBwZyBvciBvYmplY3RzdG9yZS4gVGhlbiB3ZSBuZWVkIHRvIGRlY2lkZSBo
-b3cgbXVjaCB0aGUgY29tcHJlc3MgdW5pdCBpcy4gT2YgY291cnNlLCBjb21wcmVzcyBhbmQgZGVk
-dXAgYm90aCBsaWtlIHRvIHVzZSBrZXl2YWx1ZS1hbGlrZSBzdG9yYWdlIGFwaSB0byB1c2UsIGJ1
-dCBJIHRoaW5rIGl0J3Mgbm90IGRpZmZpY3VsdCB0byB1c2UgZXhpc3Rpbmcgb2JqZWN0c3RvcmUg
-YXBpLg0KPg0KPiBEZWR1cCBpcyBtb3JlIHBvc3NpYmxlIHRvIGltcGxlbWVudCBpbiBsb2NhbCBv
-c2QgaW5zdGVhZCBvZiB0aGUgd2hvbGUgcG9vbCBvciBjbHVzdGVyLCBhbmQgaWYgd2Ugd2FudCB0
-byBkbyBkZWR1cCBmb3IgdGhlIHBvb2wgbGV2ZWwsIHdlIG5lZWQgdG8gZG8gZGVkdXAgZnJvbSBj
-bGllbnQuDQo+DQo+Pg0KPj4gICBSZWdhcmRzLA0KPj4gICBKYW1lcw0KPj4gLS0NCj4+IFRvIHVu
-c3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBo
-LWRldmVsIg0KPj4gaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtl
-cm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gDQo+PiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwu
-b3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4NCj4NCj4NCj4gLS0NCj4gQmVzdCBSZWdhcmRzLA0K
-Pg0KPiBXaGVhdA0K
+Thanks for the reply, John. I knew where you stood. :)
+
+I tend to agree with you for much of this, I should be able to pull a fair amount of drive metadata out of /sys, and now that I've added the device node to bootstrap off of, that sort of data collection should be easy to initiate alongside the rest of the metadata collection here: https://github.com/ceph/ceph/blob/master/src/osd/OSD.cc#L4566
+
+Something I'm not sure of is, say, Gregory's commit to Calamari. Does your opinion extend to functionality like that? Should SMART be collected within Ceph, rather than via a salt script initiated by Calamari?
+
+Joe
+
+-----Original Message-----
+From: John Spray [mailto:john.spray@redhat.com] 
+Sent: Friday, June 26, 2015 5:24 PM
+To: Handzik, Joe; ceph-devel
+Cc: gmeno@redhat.com
+Subject: Re: Preferred location for utility execution
+
+
+
+On 26/06/2015 21:14, Handzik, Joe wrote:
+> Hey ceph-devel,
+>
+> Gregory Meno (of Calamari fame) and I are working on what is now officially a blueprint for Jewel ( http://tracker.ceph.com/projects/ceph/wiki/Calamariapihardwarestorage ), and we'd like some feedback.
+>
+> Some of this has been addressed via separate conversations about the feature that some of this work started out as (identifying drives in a cluster by toggling their LED states), but we wanted to ask a more direct question: What is the preferred location/mechanism to execute operations on storage hardware?
+>
+> We see two clear options:
+>
+> 1. Make Calamari responsible for executing commands using various linux utilities (and /sys, when applicable).
+> 2. Build a command set into RADOS to execute commands using various linux utilities. These commands could then be executed by Calamari using the rest api.
+>
+> The big win for #1 is the ability to rapidly iterate on the capabilities of the Calamari toolset (it is almost certainly going to be faster to create a set of scripts similar to Gregory's initial commit for SMART polling than to add that functionality inside RADOS. See: https://github.com/ceph/calamari/pull/267 ). For #2, we'd pick up the ability to run those same commands via the cli, which would give users a lot more flexibility in how they troubleshoot their cluster (Calamari wouldn't be required, it would just make life easier).
+
+Hi Joe,
+
+I'd reiterate my earlier comments[1] in favour of option 2.
+
+I would be cautious about implementing any of this in Calamari until there are at least upstream packages available for folks to use, and broader uptake.  In the current situation, it's hard to ask people to try something out in Calamari, and much more straightforward to distribute something as part of Ceph.  Hardware is pretty varied, I would expect you'll need help from others in the community to ensure any hardware handling works as expected in diverse environments, which will be much simpler with ceph than calamari.
+
+The part where some central python (calamari or otherwise) would really come into its own is in the fusion of information from multiple hosts, and exposing it to a user interface.  On that aspect, I left some comments last time this came up: 
+http://lists.ceph.com/pipermail/ceph-calamari-ceph.com/2015-May/000073.html
+
+Ceph itself is getting a bit smarter with some of this stuff, e.g. the new "node ls" stuff gives you metadata about hosts and services without the need for calamari.  Hanging device info off these new structures would be a pretty reasonable thing to do, and if someone later has a GUI that they want to pipe that into, they can grab it via the mon along with everything else.
+
+Cheers,
+John
+
+
+1. https://www.mail-archive.com/ceph-devel@vger.kernel.org/msg23186.html
