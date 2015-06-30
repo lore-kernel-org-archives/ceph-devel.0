@@ -1,66 +1,61 @@
-From: Casey Bodley <cbodley@gmail.com>
-Subject: Re: About Fio backend with ObjectStore API
-Date: Tue, 30 Jun 2015 17:15:58 -0400
-Message-ID: <CAMeBU_3ty6ae5VXP=_D8py1_Pk4rLKxCa4Larz0oKnyTYDtz8w@mail.gmail.com>
+From: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
+Subject: RE: About Fio backend with ObjectStore API
+Date: Tue, 30 Jun 2015 21:19:18 +0000
+Message-ID: <99767EA2E27DD44DB4E9F9B9ACA458C03B319DF2@SSIEXCH-MB3.ssi.samsung.com>
 References: <CACJqLyZcAzb5wocrN8b8WoK6j3ynWF-_3=T+1aQkDko4Mv_SmQ@mail.gmail.com>
 	<99767EA2E27DD44DB4E9F9B9ACA458C03B319D0D@SSIEXCH-MB3.ssi.samsung.com>
+ <CAMeBU_3ty6ae5VXP=_D8py1_Pk4rLKxCa4Larz0oKnyTYDtz8w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qg0-f45.google.com ([209.85.192.45]:34973 "EHLO
-	mail-qg0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752475AbbF3VQA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Jun 2015 17:16:00 -0400
-Received: by qget71 with SMTP id t71so10303129qge.2
-        for <ceph-devel@vger.kernel.org>; Tue, 30 Jun 2015 14:15:58 -0700 (PDT)
-In-Reply-To: <99767EA2E27DD44DB4E9F9B9ACA458C03B319D0D@SSIEXCH-MB3.ssi.samsung.com>
+Received: from mx2.ssi.samsung.com ([207.140.43.206]:43366 "EHLO
+	mx2.ssi.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752479AbbF3VTV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Jun 2015 17:19:21 -0400
+In-Reply-To: <CAMeBU_3ty6ae5VXP=_D8py1_Pk4rLKxCa4Larz0oKnyTYDtz8w@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
+To: Casey Bodley <cbodley@gmail.com>
 Cc: Haomai Wang <haomaiwang@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
-
-When Danny Al-Gaaf & Daniel Gollub published "Ceph Performance
-Analysis: fio and RBD" at
-https://telekomcloud.github.io/ceph/2014/02/26/ceph-performance-analysis_fio_rbd.html,
-they also mentioned a fio engine that linked directly into ceph's
-FileStore. I was able to find Daniel's branch on github at
-https://github.com/gollub/ceph/tree/fio_filestore_v2, and did some
-more work on it at the time.
-
-I just rebased that work onto the latest ceph master branch, and
-pushed to our github at
-https://github.com/linuxbox2/linuxbox-ceph/tree/fio-objectstore. You
-can find the source in src/test/fio_ceph_filestore.cc, and run fio
-with the provided example fio job file in src/test/filestore.fio.
-
-I didn't have a chance to confirm that it builds with automake, but
-the cmake version built for me. I'm happy to help if you run into
-problems,
-Casey
-
-On Tue, Jun 30, 2015 at 2:31 PM, James (Fei) Liu-SSI
-<james.liu@ssi.samsung.com> wrote:
-> Hi Haomai,
->   What are you trying to ask is to benchmark local objectstore(like kvstore/filestore/newstore) locally with FIO(ObjectStore engine)? You want to purely compare the performance locally for these objectstores, right?
->
->   Regards,
->   James
->
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Haomai Wang
-> Sent: Tuesday, June 30, 2015 9:06 AM
-> To: ceph-devel@vger.kernel.org
-> Subject: About Fio backend with ObjectStore API
->
-> Hi all,
->
-> Long long ago, is there someone said about fio backend with Ceph ObjectStore API? So we could use the existing mature fio facility to benchmark ceph objectstore.
->
-> --
-> Best Regards,
->
-> Wheat
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGkgQ2FzZXksDQoNCiAgVGhhbmtzIGEgbG90Lg0KDQogIFJlZ2FyZHMsDQogIEphbWVzDQoNCi0t
+LS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBDYXNleSBCb2RsZXkgW21haWx0bzpjYm9k
+bGV5QGdtYWlsLmNvbV0gDQpTZW50OiBUdWVzZGF5LCBKdW5lIDMwLCAyMDE1IDI6MTYgUE0NClRv
+OiBKYW1lcyAoRmVpKSBMaXUtU1NJDQpDYzogSGFvbWFpIFdhbmc7IGNlcGgtZGV2ZWxAdmdlci5r
+ZXJuZWwub3JnDQpTdWJqZWN0OiBSZTogQWJvdXQgRmlvIGJhY2tlbmQgd2l0aCBPYmplY3RTdG9y
+ZSBBUEkNCg0KSGksDQoNCldoZW4gRGFubnkgQWwtR2FhZiAmIERhbmllbCBHb2xsdWIgcHVibGlz
+aGVkICJDZXBoIFBlcmZvcm1hbmNlDQpBbmFseXNpczogZmlvIGFuZCBSQkQiIGF0DQpodHRwczov
+L3RlbGVrb21jbG91ZC5naXRodWIuaW8vY2VwaC8yMDE0LzAyLzI2L2NlcGgtcGVyZm9ybWFuY2Ut
+YW5hbHlzaXNfZmlvX3JiZC5odG1sLA0KdGhleSBhbHNvIG1lbnRpb25lZCBhIGZpbyBlbmdpbmUg
+dGhhdCBsaW5rZWQgZGlyZWN0bHkgaW50byBjZXBoJ3MgRmlsZVN0b3JlLiBJIHdhcyBhYmxlIHRv
+IGZpbmQgRGFuaWVsJ3MgYnJhbmNoIG9uIGdpdGh1YiBhdCBodHRwczovL2dpdGh1Yi5jb20vZ29s
+bHViL2NlcGgvdHJlZS9maW9fZmlsZXN0b3JlX3YyLCBhbmQgZGlkIHNvbWUgbW9yZSB3b3JrIG9u
+IGl0IGF0IHRoZSB0aW1lLg0KDQpJIGp1c3QgcmViYXNlZCB0aGF0IHdvcmsgb250byB0aGUgbGF0
+ZXN0IGNlcGggbWFzdGVyIGJyYW5jaCwgYW5kIHB1c2hlZCB0byBvdXIgZ2l0aHViIGF0IGh0dHBz
+Oi8vZ2l0aHViLmNvbS9saW51eGJveDIvbGludXhib3gtY2VwaC90cmVlL2Zpby1vYmplY3RzdG9y
+ZS4gWW91IGNhbiBmaW5kIHRoZSBzb3VyY2UgaW4gc3JjL3Rlc3QvZmlvX2NlcGhfZmlsZXN0b3Jl
+LmNjLCBhbmQgcnVuIGZpbyB3aXRoIHRoZSBwcm92aWRlZCBleGFtcGxlIGZpbyBqb2IgZmlsZSBp
+biBzcmMvdGVzdC9maWxlc3RvcmUuZmlvLg0KDQpJIGRpZG4ndCBoYXZlIGEgY2hhbmNlIHRvIGNv
+bmZpcm0gdGhhdCBpdCBidWlsZHMgd2l0aCBhdXRvbWFrZSwgYnV0IHRoZSBjbWFrZSB2ZXJzaW9u
+IGJ1aWx0IGZvciBtZS4gSSdtIGhhcHB5IHRvIGhlbHAgaWYgeW91IHJ1biBpbnRvIHByb2JsZW1z
+LCBDYXNleQ0KDQpPbiBUdWUsIEp1biAzMCwgMjAxNSBhdCAyOjMxIFBNLCBKYW1lcyAoRmVpKSBM
+aXUtU1NJIDxqYW1lcy5saXVAc3NpLnNhbXN1bmcuY29tPiB3cm90ZToNCj4gSGkgSGFvbWFpLA0K
+PiAgIFdoYXQgYXJlIHlvdSB0cnlpbmcgdG8gYXNrIGlzIHRvIGJlbmNobWFyayBsb2NhbCBvYmpl
+Y3RzdG9yZShsaWtlIGt2c3RvcmUvZmlsZXN0b3JlL25ld3N0b3JlKSBsb2NhbGx5IHdpdGggRklP
+KE9iamVjdFN0b3JlIGVuZ2luZSk/IFlvdSB3YW50IHRvIHB1cmVseSBjb21wYXJlIHRoZSBwZXJm
+b3JtYW5jZSBsb2NhbGx5IGZvciB0aGVzZSBvYmplY3RzdG9yZXMsIHJpZ2h0Pw0KPg0KPiAgIFJl
+Z2FyZHMsDQo+ICAgSmFtZXMNCj4NCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJv
+bTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgDQo+IFttYWlsdG86Y2VwaC1kZXZl
+bC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBIYW9tYWkgV2FuZw0KPiBTZW50
+OiBUdWVzZGF5LCBKdW5lIDMwLCAyMDE1IDk6MDYgQU0NCj4gVG86IGNlcGgtZGV2ZWxAdmdlci5r
+ZXJuZWwub3JnDQo+IFN1YmplY3Q6IEFib3V0IEZpbyBiYWNrZW5kIHdpdGggT2JqZWN0U3RvcmUg
+QVBJDQo+DQo+IEhpIGFsbCwNCj4NCj4gTG9uZyBsb25nIGFnbywgaXMgdGhlcmUgc29tZW9uZSBz
+YWlkIGFib3V0IGZpbyBiYWNrZW5kIHdpdGggQ2VwaCBPYmplY3RTdG9yZSBBUEk/IFNvIHdlIGNv
+dWxkIHVzZSB0aGUgZXhpc3RpbmcgbWF0dXJlIGZpbyBmYWNpbGl0eSB0byBiZW5jaG1hcmsgY2Vw
+aCBvYmplY3RzdG9yZS4NCj4NCj4gLS0NCj4gQmVzdCBSZWdhcmRzLA0KPg0KPiBXaGVhdA0KPiAt
+LQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJz
+Y3JpYmUgY2VwaC1kZXZlbCIgDQo+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRv
+bW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIA0KPiBpbmZvIGF0ICBodHRwOi8vdmdl
+ci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg==
