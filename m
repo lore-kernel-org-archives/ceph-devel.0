@@ -1,18 +1,18 @@
 From: Douglas Fuller <dfuller@redhat.com>
-Subject: [PATCH RFC 5/6] cls_lock: add rados locking
-Date: Tue, 30 Jun 2015 13:28:00 -0700
-Message-ID: <d3d4e1af951e668b3a88619f5c92d94ee190657e.1435695881.git.dfuller@redhat.com>
+Subject: [PATCH RFC 6/6] cls_lock: add support for lock_info
+Date: Tue, 30 Jun 2015 13:28:01 -0700
+Message-ID: <cd1180e893cd1a3bbebdf947b5dde39248128ac2.1435695881.git.dfuller@redhat.com>
 References: <cover.1435695881.git.dfuller@redhat.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:46080 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:60475 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752479AbbF3U35 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	id S1752531AbbF3U35 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
 	Tue, 30 Jun 2015 16:29:57 -0400
 Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-	by mx1.redhat.com (Postfix) with ESMTPS id 635C08E7A1
+	by mx1.redhat.com (Postfix) with ESMTPS id 7F3AF2CD80A
 	for <ceph-devel@vger.kernel.org>; Tue, 30 Jun 2015 20:29:57 +0000 (UTC)
 Received: from rex001.front.sepia.ceph.com ([10.17.112.1])
-	by int-mx10.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t5UKTrtm018417
+	by int-mx10.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t5UKTrtn018417
 	for <ceph-devel@vger.kernel.org>; Tue, 30 Jun 2015 16:29:57 -0400
 In-Reply-To: <cover.1435695881.git.dfuller@redhat.com>
 In-Reply-To: <cover.1435695881.git.dfuller@redhat.com>
@@ -21,232 +21,228 @@ Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-This patch adds support for rados lock, unlock and break lock.
-This will be used to sync up scsi pr info manipulation and
-TMF execution.
+Add an interface for the lock.lock_info method and associated data
+structures.
 
-Signed-off-by: Mike Christie <michaelc@cs.wisc.edu>
-[djf: broke out lock functions and moved to new source file]
-[djf: changed interface to make use of osd_client utility functions]
-[djf: snipped paragraph from commit message related to rbd code not moved]
+Based heavily on Mike Christie's code originally authored for the previous
+commit.
+
 Signed-off-by: Douglas Fuller <dfuller@redhat.com>
 ---
- include/linux/ceph/cls_lock.h |  12 +++
- net/ceph/Makefile             |   1 +
- net/ceph/cls_lock.c           | 173 ++++++++++++++++++++++++++++++++++++++++++
- 3 files changed, 186 insertions(+)
- create mode 100644 include/linux/ceph/cls_lock.h
- create mode 100644 net/ceph/cls_lock.c
+ include/linux/ceph/cls_lock.h |  27 ++++++++
+ net/ceph/cls_lock.c           | 156 ++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 183 insertions(+)
 
 diff --git a/include/linux/ceph/cls_lock.h b/include/linux/ceph/cls_lock.h
-new file mode 100644
-index 0000000..2c24eb2
---- /dev/null
+index 2c24eb2..d6d3636 100644
+--- a/include/linux/ceph/cls_lock.h
 +++ b/include/linux/ceph/cls_lock.h
-@@ -0,0 +1,12 @@
-+#ifndef _NET_CEPH_RADOS_LOCK_H
-+#define _NET_CEPH_RADOS_LOCK_H
-+
-+int ceph_cls_lock(struct ceph_osd_client *osdc, int poolid, char *obj_name,
-+		  char *lock_name, u8 type, char *cookie, char *tag, char *desc,
-+		  u8 flags);
-+int ceph_cls_unlock(struct ceph_osd_client *osdc, int poolid, char *obj_name,
-+		    char *lock_name, char *cookie);
-+int ceph_cls_break_lock(struct ceph_osd_client *osdc, int poolid,
-+			char *obj_name, char *lock_name, u8 entity_type,
-+			u64 num, char *cookie);
-+#endif
-diff --git a/net/ceph/Makefile b/net/ceph/Makefile
-index 958d9856..f76ee18 100644
---- a/net/ceph/Makefile
-+++ b/net/ceph/Makefile
-@@ -5,6 +5,7 @@ obj-$(CONFIG_CEPH_LIB) += libceph.o
+@@ -1,6 +1,33 @@
+ #ifndef _NET_CEPH_RADOS_LOCK_H
+ #define _NET_CEPH_RADOS_LOCK_H
  
- libceph-y := ceph_common.o messenger.o msgpool.o buffer.o pagelist.o \
- 	mon_client.o \
-+	cls_lock.o \
- 	osd_client.o osdmap.o crush/crush.o crush/mapper.o crush/hash.o \
- 	debugfs.o \
- 	auth.o auth_none.o \
-diff --git a/net/ceph/cls_lock.c b/net/ceph/cls_lock.c
-new file mode 100644
-index 0000000..4eff868
---- /dev/null
-+++ b/net/ceph/cls_lock.c
-@@ -0,0 +1,173 @@
-+#include <linux/ceph/ceph_debug.h>
-+
-+#include <linux/types.h>
-+#include <linux/slab.h>
-+
-+#include <linux/ceph/decode.h>
-+#include <linux/ceph/messenger.h>
++#include <linux/ceph/types.h>
 +#include <linux/ceph/msgpool.h>
++#include <linux/ceph/messenger.h>
++#include <linux/ceph/osdmap.h>
 +#include <linux/ceph/osd_client.h>
 +
-+/**
-+ * ceph_cls_lock - grab rados lock for object
-+ *  @osdc, @poolid, @obj_name: object to lock
-+ *  @lock_name: the name of the lock
-+ *  @type: lock type (RADOS_LOCK_EXCLUSIVE or RADOS_LOCK_SHARED)
-+ *  @cookie: user-defined identifier for this instance of the lock
-+ *  @tag: if RADOS_LOCK_SHARED, tag of the lock. NULL if non shared.
-+ *  @desc: user-defined lock description
-+ *  @flags: lock flags
-+ */
-+int ceph_cls_lock(struct ceph_osd_client *osdc, int poolid, char *obj_name,
-+		  char *lock_name, u8 type, char *cookie, char *tag, char *desc,
-+		  u8 flags)
++struct ceph_locker_id {
++	struct ceph_entity_name name;
++	size_t cookie_len;
++	char *cookie;
++};
++
++struct ceph_locker_info {
++	struct timespec ts;
++	struct ceph_entity_addr addr;
++	size_t desc_len;
++	char *desc;
++};
++
++struct ceph_locker {
++	struct ceph_locker_id id;
++	struct ceph_locker_info info;
++};
++
++int ceph_cls_lock_info(struct ceph_osd_client *osdc, int poolid, char *obj_name,
++		       char * lock_name, int *num_lockers,
++		       struct ceph_locker **lockers, u8 *lock_type, char **tag);
+ int ceph_cls_lock(struct ceph_osd_client *osdc, int poolid, char *obj_name,
+ 		  char *lock_name, u8 type, char *cookie, char *tag, char *desc,
+ 		  u8 flags);
+diff --git a/net/ceph/cls_lock.c b/net/ceph/cls_lock.c
+index 4eff868..415a41b 100644
+--- a/net/ceph/cls_lock.c
++++ b/net/ceph/cls_lock.c
+@@ -3,11 +3,167 @@
+ #include <linux/types.h>
+ #include <linux/slab.h>
+ 
++#include <linux/ceph/cls_lock.h>
++#include <linux/ceph/auth.h>
+ #include <linux/ceph/decode.h>
+ #include <linux/ceph/messenger.h>
+ #include <linux/ceph/msgpool.h>
+ #include <linux/ceph/osd_client.h>
+ 
++static int __decode_locker(struct ceph_locker *locker, void **p, void *end)
 +{
-+	int lock_op_buf_size;
-+	int name_len = strlen(lock_name);
-+	int cookie_len = strlen(cookie);
-+	int tag_len = strlen(tag);
-+	int desc_len = strlen(desc);
-+	void *p, *end;
-+	struct page *lock_op_page;
-+	struct timespec mtime;
++	/*
++	 * struct cls_lock_get_info_reply {
++	 * 	map {
++	 * 		struct locker_id_t {
++	 * 			struct entity_name_t {
++	 * 				__u8 type;
++	 * 				int64_t num;
++	 * 			}
++	 * 			string cookie;
++	 * 		}
++	 * 		struct locker_info_t {
++	 * 			struct timespec ts;
++	 *			struct ceph_entity_addr addr;
++	 *			string description;
++	 *		}
++	 *	}
++	 *	uint8_t lock_type;
++	 *	string tag;
++	 * }
++	 */
 +	int ret;
++	u32 len;
 +
-+	lock_op_buf_size = name_len + sizeof(__le32) +
-+				cookie_len + sizeof(__le32) +
-+				tag_len + sizeof(__le32) +
-+				desc_len + sizeof(__le32) +
-+				sizeof(mtime) +
-+				/* flag and type */
-+				sizeof(u8) + sizeof(u8) +
-+				CEPH_ENCODING_START_BLK_LEN;
-+	BUG_ON(lock_op_buf_size > PAGE_SIZE);
-+	lock_op_page = alloc_page(GFP_NOIO);
-+	if (!lock_op_page)
-+		return -ENOMEM;
++	/* locker_id_t */
++	ret = ceph_start_decoding_compat(p, end, 1, 1, 1, &len);
++	if (ret)
++		return ret;
 +
-+	p = page_address(lock_op_page);
-+	end = p + lock_op_buf_size;
++	ret = ceph_entity_name_decode(&locker->id.name, p, end);
++	if (ret)
++		return ret;
 +
-+	ceph_start_encoding(&p, 1, 1,
-+			    lock_op_buf_size - CEPH_ENCODING_START_BLK_LEN);
-+	/* encode cls_lock_lock_op struct */
-+	ceph_encode_string(&p, end, lock_name, name_len);
-+	ceph_encode_8(&p, type);
-+	ceph_encode_string(&p, end, cookie, cookie_len);
-+	ceph_encode_string(&p, end, tag, tag_len);
-+	ceph_encode_string(&p, end, desc, desc_len);
-+	/* only support infinite duration */
-+	memset(&mtime, 0, sizeof(mtime));
-+	ceph_encode_timespec(p, &mtime);
-+	p += sizeof(struct ceph_timespec);
-+	ceph_encode_8(&p, flags);
++	locker->id.cookie = ceph_extract_encoded_string(p, end,
++						        &locker->id.cookie_len,
++						        GFP_NOIO);
++	if (IS_ERR(locker->id.cookie))
++		return PTR_ERR(locker->id.cookie);
 +
-+	dout("%s: %s %d %s %s %s %d\n", __func__,
-+	     lock_name, type, cookie, tag, desc, flags);
++	/* locker_info_t */
++	ret = ceph_start_decoding_compat(p, end, 1, 1, 1, &len);
++	if (ret)
++		goto free_cookie;
 +
-+	ret = ceph_osd_op_cls_call(osdc, poolid, obj_name, "lock", "lock",
-+				   CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
-+				   &lock_op_page, lock_op_buf_size,
-+				   NULL, 0);
-+	dout("%s: status %d\n", __func__, ret);
-+	__free_page(lock_op_page);
++	ceph_decode_timespec(&locker->info.ts, *p);
++	*p += sizeof(struct ceph_timespec);
++
++	ret = -ERANGE;
++	ceph_decode_copy_safe(p, end, &locker->info.addr,
++			      sizeof(locker->info.addr), free_cookie);
++	ceph_decode_addr(&locker->info.addr);
++
++	locker->info.desc = ceph_extract_encoded_string(p, end,
++							&locker->info.desc_len,
++							GFP_NOIO);
++	if (IS_ERR(locker->info.desc)) {
++		ret = PTR_ERR(locker->info.desc);
++		goto free_cookie;
++	}
++
++	return 0;
++
++free_cookie:
++	kfree(locker->id.cookie);
 +	return ret;
 +}
-+EXPORT_SYMBOL(ceph_cls_lock);
-+
-+/**
-+ * ceph_cls_unlock - release rados lock for object
-+ *  @osdc, @poolid, @obj_name: object to lock
-+ *  @lock_name: the name of the lock
-+ *  @cookie: user-defined identifier for this instance of the lock
-+ */
-+int ceph_cls_unlock(struct ceph_osd_client *osdc, int poolid, char *obj_name,
-+		    char *lock_name, char *cookie)
++	
++int ceph_cls_lock_info(struct ceph_osd_client *osdc, int poolid, char *obj_name,
++		       char *lock_name, int *num_lockers,
++		       struct ceph_locker **lockers, u8 *lock_type, char **tag)
 +{
-+	int unlock_op_buf_size;
++	int get_info_op_buf_size;
 +	int name_len = strlen(lock_name);
-+	int cookie_len = strlen(cookie);
-+	void *p, *end;
-+	struct page *unlock_op_page;
-+	int ret;
-+
-+	unlock_op_buf_size = name_len + sizeof(__le32) +
-+			     cookie_len + sizeof(__le32) +
-+			     CEPH_ENCODING_START_BLK_LEN;
-+	BUG_ON(unlock_op_buf_size > PAGE_SIZE);
-+	unlock_op_page = alloc_page(GFP_NOIO);
-+	if (!unlock_op_page)
-+		return -ENOMEM;
-+
-+	p = page_address(unlock_op_page);
-+	end = p + unlock_op_buf_size;
-+
-+	ceph_start_encoding(&p, 1, 1,
-+			    unlock_op_buf_size - CEPH_ENCODING_START_BLK_LEN);
-+	/* encode cls_lock_unlock_op struct */
-+	ceph_encode_string(&p, end, lock_name, name_len);
-+	ceph_encode_string(&p, end, cookie, cookie_len);
-+
-+	dout("%s: %s %s\n", __func__, lock_name, cookie);
-+	ret = ceph_osd_op_cls_call(osdc, poolid, obj_name, "lock", "unlock",
-+				   CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
-+				   &unlock_op_page, unlock_op_buf_size,
-+				   NULL, 0);
-+
-+	dout("%s: status %d\n", __func__, ret);
-+	__free_page(unlock_op_page);
-+	return ret;
-+}
-+EXPORT_SYMBOL(ceph_cls_unlock);
-+
-+/**
-+ * ceph_cls_break_lock - release rados lock for object for specified client
-+ *  @osdc, @poolid, @obj_name: object to lock
-+ *  @lock_name: the name of the lock
-+ *  @entity_type: ceph entity type (CEPH_ENTITY_TYPE_*)
-+ *  @num: ceph entity id
-+ *  @cookie: user-defined identifier for this instance of the lock
-+ */
-+int ceph_cls_break_lock(struct ceph_osd_client *osdc, int poolid,
-+			char *obj_name, char *lock_name, u8 entity_type,
-+			u64 num, char *cookie)
-+{
-+	int break_lock_op_buf_size;
-+	int name_len = strlen(lock_name);
-+	int cookie_len = strlen(cookie);
-+	struct page *break_lock_op_page;
++	struct page *get_info_page;
++	struct page *reply_page;
++	size_t reply_len;
++	int len;
++	u32 num;
 +	void *p, *end;
 +	int ret;
++	int i;
 +
-+	break_lock_op_buf_size = name_len + sizeof(__le32) +
-+				 cookie_len + sizeof(__le32) +
-+				 sizeof(u8) + sizeof(__le64) +
-+				 CEPH_ENCODING_START_BLK_LEN;
-+	BUG_ON(break_lock_op_buf_size > PAGE_SIZE);
-+	break_lock_op_page = alloc_page(GFP_NOIO);
-+	if (!break_lock_op_page)
++	get_info_op_buf_size = name_len + sizeof(__le32) +
++			       CEPH_ENCODING_START_BLK_LEN;
++	BUG_ON(get_info_op_buf_size > PAGE_SIZE);
++
++	get_info_page = alloc_page(GFP_NOIO);
++	if (!get_info_page)
 +		return -ENOMEM;
 +
-+	p = page_address(break_lock_op_page);
-+	end = p + break_lock_op_buf_size;
++	reply_page = alloc_page(GFP_NOIO);
++	if (!reply_page) {
++		__free_page(get_info_page);
++		return -ENOMEM;
++	}
++
++	p = page_address(get_info_page);
++	end = p + get_info_op_buf_size;
 +
 +	ceph_start_encoding(&p, 1, 1,
-+			break_lock_op_buf_size - CEPH_ENCODING_START_BLK_LEN);
-+	/* encode cls_lock_break_op struct */
++			    get_info_op_buf_size - CEPH_ENCODING_START_BLK_LEN);
++
 +	ceph_encode_string(&p, end, lock_name, name_len);
-+	ceph_encode_8(&p, entity_type);
-+	ceph_encode_64(&p, num);
-+	ceph_encode_string(&p, end, cookie, cookie_len);
 +
-+	dout("%s: lock %s entity_type %hu id %llu cookie %s\n",
-+	     __func__, lock_name, entity_type, num, cookie);
++	dout("%s: lock info for %s on object %s\n",
++	     __func__, lock_name, obj_name);
 +
-+	ret = ceph_osd_op_cls_call(osdc, poolid, obj_name, "lock", "break_lock",
-+				   CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
-+				   &break_lock_op_page, break_lock_op_buf_size,
-+				   NULL, 0);
++	ret = ceph_osd_op_cls_call(osdc, poolid, obj_name, "lock", "get_info",
++				   CEPH_OSD_FLAG_READ | CEPH_OSD_FLAG_ACK,
++				   &get_info_page, get_info_op_buf_size,
++				   &reply_page, &reply_len);
++
 +	dout("%s: status %d\n", __func__, ret);
-+	__free_page(break_lock_op_page);
++	if (ret < 0)
++		goto err;
++
++	p = page_address(reply_page);
++	end = p + reply_len;
++
++	ret = ceph_start_decoding_compat(&p, end, 1, 1, 1, &len);
++	if (ret)
++		goto err;
++
++	ret = -ERANGE;
++	ceph_decode_32_safe(&p, end, num, err);
++	*num_lockers = (int)num;
++
++	*lockers = kzalloc(num * sizeof(**lockers), GFP_NOIO);
++	if (!*lockers) {
++		ret = -ENOMEM;
++		goto err;
++	}
++
++	for (i = 0; i < num; i++) {
++		ret = __decode_locker(*lockers + i, &p, end);
++		if (ret)
++			goto free_lockers;
++	}
++
++	ceph_decode_8_safe(&p, end, *lock_type, free_lockers);
++	*tag = ceph_extract_encoded_string(&p, end, NULL, GFP_NOIO);
++
++	return 0;
++
++free_lockers:
++	kfree(*lockers);
++err:
++	__free_page(get_info_page);
++	__free_page(reply_page);
 +	return ret;
 +}
-+EXPORT_SYMBOL(ceph_cls_break_lock);
++EXPORT_SYMBOL(ceph_cls_lock_info);
++
+ /**
+  * ceph_cls_lock - grab rados lock for object
+  *  @osdc, @poolid, @obj_name: object to lock
 -- 
 1.9.3
 
