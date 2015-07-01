@@ -1,40 +1,51 @@
-From: Josh Durgin <jdurgin@redhat.com>
-Subject: Re: About Fio backend with ObjectStore API
-Date: Tue, 30 Jun 2015 16:21:19 -0700
-Message-ID: <5593246F.2030201@redhat.com>
-References: <CACJqLyZcAzb5wocrN8b8WoK6j3ynWF-_3=T+1aQkDko4Mv_SmQ@mail.gmail.com>	<99767EA2E27DD44DB4E9F9B9ACA458C03B319D0D@SSIEXCH-MB3.ssi.samsung.com> <CAMeBU_3ty6ae5VXP=_D8py1_Pk4rLKxCa4Larz0oKnyTYDtz8w@mail.gmail.com> <99767EA2E27DD44DB4E9F9B9ACA458C03B319DF2@SSIEXCH-MB3.ssi.samsung.com> <55931A5E.5000408@redhat.com> <55931EEE.9070604@kernel.dk> <559323CC.1000003@redhat.com>
+From: "Zhou, Yuan" <yuan.zhou-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: Re: CDS Jewel Wed/Thurs
+Date: Wed, 1 Jul 2015 08:04:10 +0000
+Message-ID: <06681238D8946F44A60AA400760A1CBF01FF6BD1@SHSMSX104.ccr.corp.intel.com>
+References: <CAAZbbf305NpRg-zNn=-UP=w0q9aiS37M-eWMtvvb-mSD8p6Cug@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:52705 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751772AbbF3XVT (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 30 Jun 2015 19:21:19 -0400
-In-Reply-To: <559323CC.1000003@redhat.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Jens Axboe <axboe@kernel.dk>, Mark Nelson <mnelson@redhat.com>, "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>, Casey Bodley <cbodley@gmail.com>
-Cc: Haomai Wang <haomaiwang@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, daniel.gollub@gmail.com
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAAZbbf305NpRg-zNn=-UP=w0q9aiS37M-eWMtvvb-mSD8p6Cug-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On 06/30/2015 04:18 PM, Josh Durgin wrote:
-> Note that ceph's ObjectStore api is internal, and not stable. Maybe not
-> the best thing to include in packages, though keeping it as an option
-> at build time might make sense. The api itself isn't that prone to
-> change, but internal symbols (hooray c++...) certainly are, so any
-> update of ceph would likely need a recompile of the backend.
+Hey Patrick, 
 
-And now I see the ObjectStore is included statically, so it is doable.
-It just won't be updated for new ceph without recompiling the backend,
-which seems fine to me.
+Looks like the GMT+8 time for the 1st day is wrong, should be 10:00 pm - 7:30 am?
 
->
-> Josh
->
-> On 06/30/2015 03:57 PM, Jens Axboe wrote:
->> I'd be more than happy to include it. Daniel has contributed to fio
->> before.
->>
->> Daniel (CC'ed), was it your intent to get this upstream? How do we make
->> this happen?
+-----Original Message-----
+From: ceph-devel-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org [mailto:ceph-devel-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org] On Behalf Of Patrick McGarry
+Sent: Tuesday, June 30, 2015 11:28 PM
+To: Ceph Devel; Ceph-User
+Subject: CDS Jewel Wed/Thurs
 
+Hey cephers,
+
+Just a friendly reminder that our Ceph Developer Summit for Jewel planning is set to run tomorrow and Thursday. The schedule and dial in information is available on the new wiki:
+
+http://tracker.ceph.com/projects/ceph/wiki/CDS_Jewel
+
+Please let me know if you have any questions. Thanks!
+
+
+-- 
+
+Best Regards,
+
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com @scuttlemonkey || @ceph
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
