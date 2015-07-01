@@ -1,52 +1,61 @@
-From: Ivo Jimenez <ivo@redhat.com>
-Subject: Re: Docker task for teuthology
-Date: Wed, 1 Jul 2015 19:39:48 -0400 (EDT)
-Message-ID: <1354525906.4673455.1435793988737.JavaMail.zimbra@redhat.com>
-References: <971548538.4673346.1435793765362.JavaMail.zimbra@redhat.com>
-Reply-To: Ivo Jimenez <ivo@redhat.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Probable memory leak in Hammer write path ?
+Date: Wed, 1 Jul 2015 23:57:39 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CDB42B5@SACMBXIP01.sdcorp.global.sandisk.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CDB0142@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CAC6JEv9sfdLtMKjpSJzRxgOjLOMH-kvj0MtA1i4jnCne4FtStA@mail.gmail.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F2CDB08F9@SACMBXIP01.sdcorp.global.sandisk.com>
+ <CAC6JEv9WmQ5=5Z=bZmMEjMF5o34WkUeabjEzsZujKVS4TNxQ5w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx6-phx2.redhat.com ([209.132.183.39]:54663 "EHLO
-	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750935AbbGAXjs convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Jul 2015 19:39:48 -0400
-In-Reply-To: <971548538.4673346.1435793765362.JavaMail.zimbra@redhat.com>
+Received: from mail-by2on0093.outbound.protection.outlook.com ([207.46.100.93]:39648
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752440AbbGAX5m (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 1 Jul 2015 19:57:42 -0400
+In-Reply-To: <CAC6JEv9WmQ5=5Z=bZmMEjMF5o34WkUeabjEzsZujKVS4TNxQ5w@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <ldachary@redhat.com>
-Cc: ceph-devel@vger.kernel.org
+To: Gregory Farnum <greg@gregs42.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Re-sending in plain text (original HTML message bounced)
-
------ Original Message -----=20
-=46rom: "Ivo Jimenez" <ivo@redhat.com>=20
-To: "Loic Dachary" <ldachary@redhat.com>=20
-Cc: ceph-devel@vger.kernel.org=20
-Sent: Wednesday, July 1, 2015 4:36:05 PM=20
-Subject: Docker task for teuthology=20
-
-
-Hi Lo=C3=AFc,
-
-I=E2=80=99m a summer intern working at Red Hat on a project to bring no=
-n-functional testing to Ceph [1]. Zack mentioned that you worked on hav=
-ing teuthology use containers to deploy ceph and run tests. I found you=
-r blog posts and corresponding branches. Would it be possible for you t=
-o share your experience and the reason why you stopped working on that?=
- Also, if you have time, could you please take a look at the initial co=
-de additions [2] that I=E2=80=99m working on? Any feedback would me muc=
-h appreciated.
-
-thanks!=20
-
-[1]: http://tracker.ceph.com/projects/ceph/wiki/Testing_-_non-functiona=
-l_tests
-[2]: https://github.com/ceph/teuthology/pull/558=20
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+VGhhbmtzIEdyZWchDQpZZWFoLCBJIHdpbGwgZG91YmxlIGNoZWNrLi5CdXQsIEkgYnVpbHQgdGhl
+IGNvZGUgd2l0aG91dCB0Y21hbGxvYyAod2l0aCBnbGliYykgYW5kIGl0IHdhcyBhbHNvIHNob3dp
+bmcgdGhlIHNpbWlsYXIgYmVoYXZpb3IuDQoNClRoYW5rcyAmIFJlZ2FyZHMNClNvbW5hdGgNCg0K
+LS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IEdyZWdvcnkgRmFybnVtIFttYWlsdG86
+Z3JlZ0BncmVnczQyLmNvbV0NClNlbnQ6IFdlZG5lc2RheSwgSnVseSAwMSwgMjAxNSA5OjA3IEFN
+DQpUbzogU29tbmF0aCBSb3kNCkNjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KU3ViamVj
+dDogUmU6IFByb2JhYmxlIG1lbW9yeSBsZWFrIGluIEhhbW1lciB3cml0ZSBwYXRoID8NCg0KT24g
+TW9uLCBKdW4gMjksIDIwMTUgYXQgNDozOSBQTSwgU29tbmF0aCBSb3kgPFNvbW5hdGguUm95QHNh
+bmRpc2suY29tPiB3cm90ZToNCj4gR3JlZywNCj4gVXBkYXRpbmcgdG8gdGhlIG5ldyBrZXJuZWwg
+dXBkYXRpbmcgdGhlIGdjYyB2ZXJzaW9uIHRvby4gUmVjZW50IGtlcm5lbCBpcyBjaGFuZ2luZyB0
+Y21hbGxvYyB2ZXJzaW9uIHRvbywgYnV0LCAzLjE2IGhhcyBvbGQgdGNtYWxsb2MgYnV0IHN0aWxs
+IGV4aGliaXRpbmcgdGhlIGlzc3VlLg0KPiBZZXMsIHRoZSBiZWhhdmlvciBpcyB2ZXJ5IGNvbmZ1
+c2luZyBhbmQgY29tcGlsZXIgaXMgbWFpbiB2YXJpYWJsZSBJIGNvdWxkIHRoaW5rIG9mIGZyb20g
+YXBwbGljYXRpb24gcGVyc3BlY3RpdmUuDQo+IElmIHlvdSBoYXZlIGEgMy4xNi8zLjE5IGtlcm5l
+bCwgeW91IGNvdWxkIHJlcHJvZHVjZSB0aGlzIGZvbGxvd2luZyB0aGVzZSBzdGVwcy4NCj4NCj4g
+MS4gQnVpbGQgY2VwaC1oYW1tZXIgY29kZSBiYXNlDQo+DQo+IDIuIFJ1biB3aXRoIHNpbmdsZSBP
+U0QuDQo+DQo+IDMuIENyZWF0ZSBhbiBpbWFnZSBhbmQgcnVuIGEgZmlvLWJlZCB3b3JrbG9hZCBm
+cm9tIGNsaWVudCAoc2F5IDE2SyBicywNCj4gOCBudW1fam9icykNCj4NCj4gNC4gcnVuICdkc3Rh
+dCAtbScgYW5kIG9ic2VydmUgdGhlIG1lbW9yeSB1c2FnZS4NCj4NCj4gV2hhdCBJIGFtIHRoaW5r
+aW5nIG9mIGRvaW5nIGlzIHRvIGluc3RhbGwgY2VwaCBmcm9tIGNlcGguY29tIGFuZCBzZWUgdGhl
+IGJlaGF2aW9yLg0KDQpJbiBhZGRpdGlvbiB0byB0aGF0LCBJJ2QgbG9vayBmb3IgaWYgdGhlcmUg
+YXJlIGFueSBrbm93biBidWdzIGluIHRoZSB0Y21hbGxvYyB2ZXJzaW9uIHlvdSdyZSB1c2luZyBv
+biB0aGUgbGVha3kgc3lzdGVtcywgYW5kIGNoZWNrIHRoZSB0Y21hbGxvYyBzdGF0cyB0byBzZWUg
+aWYgdGhleSBoYXZlIGEgYnVuY2ggb2YgZnJlZSBtZW1vcnkgd2hpY2ggaGFzbid0IGJlZW4gcmVs
+ZWFzZWQgdG8gdGhlIE9TIHlldC4NCi1HcmVnDQoNCl9fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fDQoNClBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMg
+ZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0
+aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2Yg
+dGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVi
+eSBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBh
+bmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlp
+bmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJl
+Y2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2Vu
+ZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBh
+bmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9z
+c2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29w
+aWVzKS4NCg0K
