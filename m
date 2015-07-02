@@ -1,107 +1,171 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Probable memory leak in Hammer write path ?
-Date: Thu, 2 Jul 2015 03:38:24 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CDB4992@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CDB0142@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CAC6JEv9sfdLtMKjpSJzRxgOjLOMH-kvj0MtA1i4jnCne4FtStA@mail.gmail.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F2CDB08F9@SACMBXIP01.sdcorp.global.sandisk.com>
- <CAC6JEv9WmQ5=5Z=bZmMEjMF5o34WkUeabjEzsZujKVS4TNxQ5w@mail.gmail.com>
+From: Alexandre DERUMIER <aderumier@odiso.com>
+Subject: Re: Probable memory leak in Hammer write path ?
+Date: Thu, 2 Jul 2015 08:36:22 +0200 (CEST)
+Message-ID: <354713508.5068184.1435818982240.JavaMail.zimbra@oxygem.tv>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CDB0142@SACMBXIP01.sdcorp.global.sandisk.com> <CAC6JEv9sfdLtMKjpSJzRxgOjLOMH-kvj0MtA1i4jnCne4FtStA@mail.gmail.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F2CDB08F9@SACMBXIP01.sdcorp.global.sandisk.com> <CAC6JEv9WmQ5=5Z=bZmMEjMF5o34WkUeabjEzsZujKVS4TNxQ5w@mail.gmail.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F2CDB4992@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1on0066.outbound.protection.outlook.com ([157.56.110.66]:34942
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751318AbbGBDi2 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 1 Jul 2015 23:38:28 -0400
-Content-Language: en-US
+Received: from mailpro.odiso.net ([89.248.209.98]:42963 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750808AbbGBGgY convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Jul 2015 02:36:24 -0400
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CDB4992@SACMBXIP01.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@gregs42.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: Gregory Farnum <greg@gregs42.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-SGksDQpJIHRoaW5rIEkgYW0gZXZlbnR1YWxseSBhYmxlIHRvIGZpZ3VyZSBvdXQgd2hhdCBpcyBo
-YXBwZW5pbmcuLiBGaXJzdCwgaGVyZSBpcyB0aGUgc3RlcCB0byByZXByb2R1Y2UgaXQgaW4gYW55
-IGtlcm5lbCAobm90IHNwZWNpZmljIHRvIDMuMTYvMy4xOCBhcyBJIHNhaWQgZWFybGllcikNCg0K
-MS4gSW4gYSBTU0QgY3JlYXRlIGEgYmlnIGpvdXJuYWwgcGFydGl0aW9uIHNheSA+IDIwIEdCIG9y
-IHNvLg0KDQoyLiBNYWtlIGFsbCB0aGUgZmlsZXN0b3JlL2pvdXJuYWwgcGFyYW1ldGVyIGRlZmF1
-bHQgb3RoZXIgdGhhbiB0aGUgZm9sbG93aW5nLiBTZXQgdGhlc2UgdmFsdWUgaW4geW91ciBjb25m
-IGZpbGUuIFRoaXMgaXMganVzdCB0byBtYWtlIHN1cmUgam91cm5hbCB3cml0ZXMgYXJlIG5vdCB0
-aHJvdHRsZWQgYW5kIGdvaW5nIGZhciBhaGVhZCB0aGFuIGJhY2tlbmQgd3JpdGVzLg0KDQogICAg
-ICAgIGZpbGVzdG9yZV9xdWV1ZV9tYXhfb3BzID0gNTAwMDAwMA0KICAgICAgICBmaWxlc3RvcmVf
-cXVldWVfbWF4X2J5dGVzID0gMTAwMDAwMDAwMDAwMA0KICAgICAgICBmaWxlc3RvcmVfcXVldWVf
-Y29tbWl0dGluZ19tYXhfb3BzID0gNTAwMDAwMA0KICAgICAgICBmaWxlc3RvcmVfcXVldWVfY29t
-bWl0dGluZ19tYXhfYnl0ZXMgPSAxMDAwMDAwMDAwMDAwDQoNCjMuIFJ1biBhbnkgcmVsZWFzZSBz
-YXkgRmlyZWZseS9HaWFudC9IYW1tZXIgYW5kIGNyZWF0ZSBhIHNpbmdsZSBPU0QgY2x1c3RlciBn
-aXZpbmcgcmVzdCBvZiB0aGUgU1NEIGFzIGRhdGEgcGFydGl0aW9uLg0KDQo0LiBSdW4gc2F5IGZp
-b19yYmQgcmFuZG9tIHdyaXRlICB3b3JrbG9hZCBhcyAxNkssIFFEIDY0ICwgbnVtX2pvYnM9OA0K
-DQo1LiBydW4gJ2RzdGF0IC1tJyBhbmQgc2VlIGhvdyB1c2VkIG1lbW9yeSBpcyByaXNpbmcgIQ0K
-DQpOb3csIHRoaXMgYmVoYXZpb3IgSSBmb3VuZCB3aXRoIGdsaWJjbWFsbG9jL3RjbWFsbG9jL2pl
-bWFsbG9jIGFuZCB0aGF0IEkgY29tbXVuaWNhdGVkIGVhcmxpZXIuIEJ1dCwgSSBkaWRuJ3Qgd2Fp
-dCBlbm91Z2ggZWFybGllciB0byBzZWUgaWYgbWVtb3J5IGlzIGNvbWluZyBkb3duIHdoZW4gSU8g
-c3RvcHBlZCA6LSkNCkkgc2F3IGluIGNhc2Ugb2YgdGNtYWxsb2MgaXQgaXMgbm90IGNvbWluZyBk
-b3duICwgKmJ1dCogaW4gY2FzZSBvZiBqZW1hbGxvYyBpdCBpcyAqY29taW5nIGRvd24qIHRoZSBm
-b2xsb3dpbmcgd2F5IHRvIHRoZSBvbGQgcGxhY2UuIEkgZGlkbid0IGdvIGJhY2sgdG8gZ2xpYmNt
-YWxsb2MgYWdhaW4sIGJ1dCwgaXQgc2hvdWxkIGJlIHJlbGVhc2luZyBhbHNvLi4NCg0KMS4gSWYg
-SSBzdG9wIElPLCBqb3VybmFsIHdyaXRlIHN0b3BzLCBidXQgYmFja2VuZCBmbGFzaCBpcyBjYXRj
-aGluZyB1cCBhbmQgdGhlIG1lbW9yeSBpcyBjb21pbmcgZG93biBhY2NvcmRpbmdseS4gVGhpcyBp
-cyBleHBlY3RlZCBiZWNhdXNlIGFsbCB0aGUgdHJhbnNhY3Rpb25zIGFyZSBwaWxpbmcgdXAgaW4g
-d29ya1Egd2hpbGUgam91cm5hbCBpcyB3YXkgYWhlYWQsIGJ1dCwgdGhlIG1vbWVudCBpdCBpcyBw
-cm9jZXNzZWQgdGhlIHRyYW5zYWN0aW9ucyBhcmUgZGVsZXRlZCBhbmQgbWVtb3J5IHVzYWdlIGNv
-bWluZyBkb3duLg0KDQoyLiBBZnRlciBqb3VybmFsIGlzIGZ1bGwsIGl0IHN0YXJ0ZWQgdGhyb3R0
-bGluZyBhbmQgdGhlIG92ZXJhbGwgSU8gcmF0ZSBpcyBjb21pbmcgZG93bi4gIFRoZSBiYWNrZW5k
-IGZsYXNoIG5vdyBoYXMgdGhlIG9wcG9ydHVuaXR5IHRvIGNhdGNoIHVwIGFuZCB0aHVzIHJlbGVh
-c2luZyB0aGUgbWVtb3J5Lg0KDQpOb25lIG9mIHRoZSBhYm92ZSBpcyBoYXBwZW5pbmcgaW4gY2Fz
-ZSBvZiB0Y21hbGxvYy4gVGhlcmUgaXQgaXMgbm90IHJlbGVhc2luZyB0aGUgbWVtb3J5IGF0IGFs
-bC4uRGlnZ2luZyBkb3duIHNvbWUgb2YgdGhlIGRvYyBJIGZvdW5kIG91dCB0aGlzIGNhbiBoYXBw
-ZW4gYW5kIHRoZXJlIGlzIGEgZmxhZyB0byBjb250cm9sIHRoZSByZWxlYXNlIHJhdGUuLkJ1dCwg
-bm8gbHVjayBhZnRlciBjaGFuZ2luZyB0aGF0IGFzIHdlbGwuLkRpZG4ndCBpbnZlc3QgbXVjaCB0
-aW1lIG9uIHRoYXQgdGhvdWdoLg0KV2hhdCBJIHNhdyBuZXh0IHRpbWUgd2hlbiBJIHJhbiBJTywg
-aW4gY2FzZSBvZiB0Y21hbGxvYyB0aGUgbWVtb3J5IGlzIG5vdCByaXNpbmcgYXQgdGhlIGJlZ2lu
-bmluZywgcHJvYmFibHksIGl0IGlzIHJldXNpbmcgdGhvc2UgbWVtb3J5IGFuZCBzdGFydGVkIHJp
-c2luZyBhZ2FpbiBhZnRlciBzb21lIHRpbWUuLi5CdXQsIEkgZG91YnQgdGhpcyBiZWhhdmlvciBp
-cyBnb29kLi4NCg0KU28sIHRoaXMgY291bGQgYmUgYW5vdGhlciBzdGVwIGFoZWFkIG9mIHJlbW92
-aW5nIHRjbWFsbG9jIGFzIENlcGgncyBkZWZhdWx0IGFsbG9jYXRvciBhbmQgbW92aW5nIHRvIGpl
-bWFsbG9jLg0KDQpUaGFua3MgR3JlZyBmb3IgYXNraW5nIG1lIHRvIHJlbG9vayBhdCB0Y21hbGxv
-YyBvdGhlcndpc2UgSSB3YXMga2luZCBvZiBvdXQgb2Ygb3B0aW9uIDotKS4uDQoNClJlZ2FyZHMN
-ClNvbW5hdGgNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IFNvbW5hdGggUm95
-DQpTZW50OiBXZWRuZXNkYXksIEp1bHkgMDEsIDIwMTUgNDo1OCBQTQ0KVG86ICdHcmVnb3J5IEZh
-cm51bScNCkNjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KU3ViamVjdDogUkU6IFByb2Jh
-YmxlIG1lbW9yeSBsZWFrIGluIEhhbW1lciB3cml0ZSBwYXRoID8NCg0KVGhhbmtzIEdyZWchDQpZ
-ZWFoLCBJIHdpbGwgZG91YmxlIGNoZWNrLi5CdXQsIEkgYnVpbHQgdGhlIGNvZGUgd2l0aG91dCB0
-Y21hbGxvYyAod2l0aCBnbGliYykgYW5kIGl0IHdhcyBhbHNvIHNob3dpbmcgdGhlIHNpbWlsYXIg
-YmVoYXZpb3IuDQoNClRoYW5rcyAmIFJlZ2FyZHMNClNvbW5hdGgNCg0KLS0tLS1PcmlnaW5hbCBN
-ZXNzYWdlLS0tLS0NCkZyb206IEdyZWdvcnkgRmFybnVtIFttYWlsdG86Z3JlZ0BncmVnczQyLmNv
-bV0NClNlbnQ6IFdlZG5lc2RheSwgSnVseSAwMSwgMjAxNSA5OjA3IEFNDQpUbzogU29tbmF0aCBS
-b3kNCkNjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KU3ViamVjdDogUmU6IFByb2JhYmxl
-IG1lbW9yeSBsZWFrIGluIEhhbW1lciB3cml0ZSBwYXRoID8NCg0KT24gTW9uLCBKdW4gMjksIDIw
-MTUgYXQgNDozOSBQTSwgU29tbmF0aCBSb3kgPFNvbW5hdGguUm95QHNhbmRpc2suY29tPiB3cm90
-ZToNCj4gR3JlZywNCj4gVXBkYXRpbmcgdG8gdGhlIG5ldyBrZXJuZWwgdXBkYXRpbmcgdGhlIGdj
-YyB2ZXJzaW9uIHRvby4gUmVjZW50IGtlcm5lbCBpcyBjaGFuZ2luZyB0Y21hbGxvYyB2ZXJzaW9u
-IHRvbywgYnV0LCAzLjE2IGhhcyBvbGQgdGNtYWxsb2MgYnV0IHN0aWxsIGV4aGliaXRpbmcgdGhl
-IGlzc3VlLg0KPiBZZXMsIHRoZSBiZWhhdmlvciBpcyB2ZXJ5IGNvbmZ1c2luZyBhbmQgY29tcGls
-ZXIgaXMgbWFpbiB2YXJpYWJsZSBJIGNvdWxkIHRoaW5rIG9mIGZyb20gYXBwbGljYXRpb24gcGVy
-c3BlY3RpdmUuDQo+IElmIHlvdSBoYXZlIGEgMy4xNi8zLjE5IGtlcm5lbCwgeW91IGNvdWxkIHJl
-cHJvZHVjZSB0aGlzIGZvbGxvd2luZyB0aGVzZSBzdGVwcy4NCj4NCj4gMS4gQnVpbGQgY2VwaC1o
-YW1tZXIgY29kZSBiYXNlDQo+DQo+IDIuIFJ1biB3aXRoIHNpbmdsZSBPU0QuDQo+DQo+IDMuIENy
-ZWF0ZSBhbiBpbWFnZSBhbmQgcnVuIGEgZmlvLWJlZCB3b3JrbG9hZCBmcm9tIGNsaWVudCAoc2F5
-IDE2SyBicywNCj4gOCBudW1fam9icykNCj4NCj4gNC4gcnVuICdkc3RhdCAtbScgYW5kIG9ic2Vy
-dmUgdGhlIG1lbW9yeSB1c2FnZS4NCj4NCj4gV2hhdCBJIGFtIHRoaW5raW5nIG9mIGRvaW5nIGlz
-IHRvIGluc3RhbGwgY2VwaCBmcm9tIGNlcGguY29tIGFuZCBzZWUgdGhlIGJlaGF2aW9yLg0KDQpJ
-biBhZGRpdGlvbiB0byB0aGF0LCBJJ2QgbG9vayBmb3IgaWYgdGhlcmUgYXJlIGFueSBrbm93biBi
-dWdzIGluIHRoZSB0Y21hbGxvYyB2ZXJzaW9uIHlvdSdyZSB1c2luZyBvbiB0aGUgbGVha3kgc3lz
-dGVtcywgYW5kIGNoZWNrIHRoZSB0Y21hbGxvYyBzdGF0cyB0byBzZWUgaWYgdGhleSBoYXZlIGEg
-YnVuY2ggb2YgZnJlZSBtZW1vcnkgd2hpY2ggaGFzbid0IGJlZW4gcmVsZWFzZWQgdG8gdGhlIE9T
-IHlldC4NCi1HcmVnDQoNCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQoNClBMRUFT
-RSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWls
-IG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCBy
-ZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlz
-IG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0
-IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkgcmV2
-aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNz
-YWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgY29t
-bXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9u
-ZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkg
-YW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hldGhl
-ciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCg0K
+>>So, this could be another step ahead of removing tcmalloc as Ceph's d=
+efault allocator and moving to jemalloc.
+
++1 for this.
+
+I begin to be worried by all theses tcmalloc problems.
+
+
+----- Mail original -----
+De: "Somnath Roy" <Somnath.Roy@sandisk.com>
+=C3=80: "Gregory Farnum" <greg@gregs42.com>
+Cc: "ceph-devel" <ceph-devel@vger.kernel.org>
+Envoy=C3=A9: Jeudi 2 Juillet 2015 05:38:24
+Objet: RE: Probable memory leak in Hammer write path ?
+
+Hi,=20
+I think I am eventually able to figure out what is happening.. First, h=
+ere is the step to reproduce it in any kernel (not specific to 3.16/3.1=
+8 as I said earlier)=20
+
+1. In a SSD create a big journal partition say > 20 GB or so.=20
+
+2. Make all the filestore/journal parameter default other than the foll=
+owing. Set these value in your conf file. This is just to make sure jou=
+rnal writes are not throttled and going far ahead than backend writes.=20
+
+filestore_queue_max_ops =3D 5000000=20
+filestore_queue_max_bytes =3D 1000000000000=20
+filestore_queue_committing_max_ops =3D 5000000=20
+filestore_queue_committing_max_bytes =3D 1000000000000=20
+
+3. Run any release say Firefly/Giant/Hammer and create a single OSD clu=
+ster giving rest of the SSD as data partition.=20
+
+4. Run say fio_rbd random write workload as 16K, QD 64 , num_jobs=3D8=20
+
+5. run 'dstat -m' and see how used memory is rising !=20
+
+Now, this behavior I found with glibcmalloc/tcmalloc/jemalloc and that =
+I communicated earlier. But, I didn't wait enough earlier to see if mem=
+ory is coming down when IO stopped :-)=20
+I saw in case of tcmalloc it is not coming down , *but* in case of jema=
+lloc it is *coming down* the following way to the old place. I didn't g=
+o back to glibcmalloc again, but, it should be releasing also..=20
+
+1. If I stop IO, journal write stops, but backend flash is catching up =
+and the memory is coming down accordingly. This is expected because all=
+ the transactions are piling up in workQ while journal is way ahead, bu=
+t, the moment it is processed the transactions are deleted and memory u=
+sage coming down.=20
+
+2. After journal is full, it started throttling and the overall IO rate=
+ is coming down. The backend flash now has the opportunity to catch up =
+and thus releasing the memory.=20
+
+None of the above is happening in case of tcmalloc. There it is not rel=
+easing the memory at all..Digging down some of the doc I found out this=
+ can happen and there is a flag to control the release rate..But, no lu=
+ck after changing that as well..Didn't invest much time on that though.=
+=20
+What I saw next time when I ran IO, in case of tcmalloc the memory is n=
+ot rising at the beginning, probably, it is reusing those memory and st=
+arted rising again after some time...But, I doubt this behavior is good=
+=2E.=20
+
+So, this could be another step ahead of removing tcmalloc as Ceph's def=
+ault allocator and moving to jemalloc.=20
+
+Thanks Greg for asking me to relook at tcmalloc otherwise I was kind of=
+ out of option :-)..=20
+
+Regards=20
+Somnath=20
+
+-----Original Message-----=20
+=46rom: Somnath Roy=20
+Sent: Wednesday, July 01, 2015 4:58 PM=20
+To: 'Gregory Farnum'=20
+Cc: ceph-devel@vger.kernel.org=20
+Subject: RE: Probable memory leak in Hammer write path ?=20
+
+Thanks Greg!=20
+Yeah, I will double check..But, I built the code without tcmalloc (with=
+ glibc) and it was also showing the similar behavior.=20
+
+Thanks & Regards=20
+Somnath=20
+
+-----Original Message-----=20
+=46rom: Gregory Farnum [mailto:greg@gregs42.com]=20
+Sent: Wednesday, July 01, 2015 9:07 AM=20
+To: Somnath Roy=20
+Cc: ceph-devel@vger.kernel.org=20
+Subject: Re: Probable memory leak in Hammer write path ?=20
+
+On Mon, Jun 29, 2015 at 4:39 PM, Somnath Roy <Somnath.Roy@sandisk.com> =
+wrote:=20
+> Greg,=20
+> Updating to the new kernel updating the gcc version too. Recent kerne=
+l is changing tcmalloc version too, but, 3.16 has old tcmalloc but stil=
+l exhibiting the issue.=20
+> Yes, the behavior is very confusing and compiler is main variable I c=
+ould think of from application perspective.=20
+> If you have a 3.16/3.19 kernel, you could reproduce this following th=
+ese steps.=20
+>=20
+> 1. Build ceph-hammer code base=20
+>=20
+> 2. Run with single OSD.=20
+>=20
+> 3. Create an image and run a fio-bed workload from client (say 16K bs=
+,=20
+> 8 num_jobs)=20
+>=20
+> 4. run 'dstat -m' and observe the memory usage.=20
+>=20
+> What I am thinking of doing is to install ceph from ceph.com and see =
+the behavior.=20
+
+In addition to that, I'd look for if there are any known bugs in the tc=
+malloc version you're using on the leaky systems, and check the tcmallo=
+c stats to see if they have a bunch of free memory which hasn't been re=
+leased to the OS yet.=20
+-Greg=20
+
+________________________________=20
+
+PLEASE NOTE: The information contained in this electronic mail message =
+is intended only for the use of the designated recipient(s) named above=
+=2E If the reader of this message is not the intended recipient, you ar=
+e hereby notified that you have received this message in error and that=
+ any review, dissemination, distribution, or copying of this message is=
+ strictly prohibited. If you have received this communication in error,=
+ please notify the sender by telephone or e-mail (as shown above) immed=
+iately and destroy any and all copies of this message in your possessio=
+n (whether hard copies or electronically stored copies).=20
+
+N=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDr=EF=BF=BD=EF=BF=BDy=EF=BF=
+=BD=EF=BF=BD=EF=BF=BDb=EF=BF=BDX=EF=BF=BD=EF=BF=BD=C7=A7v=EF=BF=BD^=EF=BF=
+=BD)=DE=BA{.n=EF=BF=BD+=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD]z=EF=BF=BD=
+=EF=BF=BD=EF=BF=BD{ay=EF=BF=BD=CA=87=DA=99=EF=BF=BD,j=EF=BF=BD=EF=BF=BD=
+f=EF=BF=BD=EF=BF=BD=EF=BF=BDh=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD=EF=BF=
+=BDw=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDj:+v=EF=BF=BD=
+=EF=BF=BD=EF=BF=BDw=EF=BF=BDj=EF=BF=BDm=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=
+=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDzZ+=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=
+=BF=BD=EF=BF=BD=DD=A2j"=EF=BF=BD=EF=BF=BD!=EF=BF=BDi=20
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
