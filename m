@@ -1,119 +1,72 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: [GIT PULL] Ceph updates for -rc1
-Date: Thu, 2 Jul 2015 09:29:18 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1507020923540.13991@cobra.newdream.net>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: Transaction struct Op
+Date: Fri, 3 Jul 2015 01:26:24 +0800
+Message-ID: <CACJqLyYweQX3hR6gowr_jy3v20OHjmLe+ORpzF7UdV1qH9ASSw@mail.gmail.com>
+References: <90559C83A9C7FA45B5846C975DFA612DDB4DD4E133@ABGEX73E.FSC.NET>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1594059033-1435854560=:13991"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:51377 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753282AbbGBQ3V (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 2 Jul 2015 12:29:21 -0400
+Received: from mail-yk0-f182.google.com ([209.85.160.182]:34747 "EHLO
+	mail-yk0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753059AbbGBR0Z convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Jul 2015 13:26:25 -0400
+Received: by ykfy125 with SMTP id y125so74638819ykf.1
+        for <ceph-devel@vger.kernel.org>; Thu, 02 Jul 2015 10:26:24 -0700 (PDT)
+In-Reply-To: <90559C83A9C7FA45B5846C975DFA612DDB4DD4E133@ABGEX73E.FSC.NET>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: torvalds@linux-foundation.org
-Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
+To: =?UTF-8?Q?Da=C5=82ek=2C_Piotr?= <Piotr.Dalek@ts.fujitsu.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Yes, some fields only used for special ops. But union may increase the
+complexity of stuct.
 
---557981400-1594059033-1435854560=:13991
-Content-Type: TEXT/PLAIN; charset=ISO-8859-15
-Content-Transfer-Encoding: 8BIT
+And the extra memory may not a problem because "Ops"  in one
+transaction should be within ten.
 
-Hi Linus,
+On Thu, Jul 2, 2015 at 10:05 PM, Da=C5=82ek, Piotr
+<Piotr.Dalek@ts.fujitsu.com> wrote:
+> Hello,
+>
+> In ObjectStore.h we have the following stuct:
+>
+>     struct Op {
+>       __le32 op;
+>       __le32 cid;
+>       __le32 oid;
+>       __le64 off;
+>       __le64 len;
+>       __le32 dest_cid;
+>       __le32 dest_oid;                  //OP_CLONE, OP_CLONERANGE
+>       __le64 dest_off;                  //OP_CLONERANGE
+>       __le32 hint_type;                 //OP_COLL_HINT
+>       __le64 expected_object_size;      //OP_SETALLOCHINT
+>       __le64 expected_write_size;       //OP_SETALLOCHINT
+>       __le32 split_bits;                //OP_SPLIT_COLLECTION2
+>       __le32 split_rem;                 //OP_SPLIT_COLLECTION2
+>     } __attribute__ ((packed)) ;
+>
+> Some of the fields (like hint_type and split_rem) are totally unused =
+in certain ops, and they eat up space anyway. Maybe we should use union=
+s here, and re-use some of the fields for other purposes? Right now the=
+ structure is 72 bytes in size, and for most ops, at least 32 bytes are=
+ always wasted.
+>
+>
+> With best regards / Pozdrawiam
+> Piotr Da=C5=82ek
+>
+>
 
-Please pull the following Ceph updates from
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
-
-We have a pile of bug fixes from Ilya, including a few patches that sync 
-up the CRUSH code with the latest from userspace.  There is also a long 
-series from Zheng that fixes various issues with snapshots, inline data, 
-and directory fsync, some simplification and improvement in the cap 
-release code, and a rework of the caching of directory contents.  To top 
-it off there are a few small fixes and cleanups from Benoit and Hong.
-
-Thanks!
-sage
 
 
-----------------------------------------------------------------
-Benoît Canet (2):
-      libceph: Remove spurious kunmap() of the zero page
-      libceph: Fix ceph_tcp_sendpage()'s more boolean usage
+--=20
+Best Regards,
 
-Hong Zhiguo (1):
-      libceph: fix wrong name "Ceph filesystem for Linux"
-
-Ilya Dryomov (14):
-      libceph: use kvfree() instead of open-coding it
-      libceph: nuke time_sub()
-      libceph: store timeouts in jiffies, verify user input
-      libceph: a couple tweaks for wait loops
-      ceph: simplify two mount_timeout sites
-      rbd: timeout watch teardown on unmap with mount_timeout
-      crush: fix crash from invalid 'take' argument
-      crush: sync up with userspace
-      rbd: bump queue_max_segments
-      rbd: terminate rbd_opts_tokens with Opt_err
-      rbd: store rbd_options in rbd_device
-      rbd: queue_depth map option
-      crush: fix a bug in tree bucket decode
-      rbd: use GFP_NOIO in rbd_obj_request_create()
-
-Yan, Zheng (23):
-      libceph: properly release STAT request's raw_data_in
-      libceph: allow setting osd_req_op's flags
-      ceph: check OSD caps before read/write
-      ceph: use empty snap context for uninline_data and get_pool_perm
-      ceph: set i_head_snapc when getting CEPH_CAP_FILE_WR reference
-      ceph: avoid sending unnessesary FLUSHSNAP message
-      ceph: take snap_rwsem when accessing snap realm's cached_context
-      ceph: don't trim auth cap when there are cap snaps
-      ceph: make sure syncfs flushes all cap snaps
-      ceph: don't pre-allocate space for cap release messages
-      ceph: exclude setfilelock requests when calculating oldest tid
-      ceph: ratelimit warn messages for MDS closes session
-      ceph: don't include used caps in cap_wanted
-      ceph: fix flushing caps
-      ceph: fix directory fsync
-      ceph: track pending caps flushing accurately
-      ceph: track pending caps flushing globally
-      ceph: send TID of the oldest pending caps flush to MDS
-      ceph: re-send flushing caps (which are revoked) in reconnect stage
-      ceph: pre-allocate data structure that tracks caps flushing
-      ceph: switch some GFP_NOFS memory allocation to GFP_KERNEL
-      ceph: rework dcache readdir
-      ceph: fix ceph_writepages_start()
-
- drivers/block/rbd.c             | 111 ++++--
- fs/ceph/acl.c                   |   4 +-
- fs/ceph/addr.c                  | 308 ++++++++++++---
- fs/ceph/caps.c                  | 836 +++++++++++++++++++++++++++-------------
- fs/ceph/dir.c                   | 383 ++++++++----------
- fs/ceph/file.c                  |  61 ++-
- fs/ceph/inode.c                 | 155 ++++++--
- fs/ceph/mds_client.c            | 425 +++++++++++---------
- fs/ceph/mds_client.h            |  23 +-
- fs/ceph/snap.c                  | 173 +++++----
- fs/ceph/super.c                 |  25 +-
- fs/ceph/super.h                 | 125 +++---
- fs/ceph/xattr.c                 |  65 +++-
- include/linux/ceph/libceph.h    |  21 +-
- include/linux/ceph/osd_client.h |   2 +-
- include/linux/crush/crush.h     |  40 +-
- include/linux/crush/hash.h      |   6 +
- include/linux/crush/mapper.h    |   2 +-
- net/ceph/ceph_common.c          |  50 ++-
- net/ceph/crush/crush.c          |  13 +-
- net/ceph/crush/crush_ln_table.h |  32 +-
- net/ceph/crush/hash.c           |   8 +-
- net/ceph/crush/mapper.c         | 148 ++++---
- net/ceph/messenger.c            |   3 +-
- net/ceph/mon_client.c           |  13 +-
- net/ceph/osd_client.c           |  42 +-
- net/ceph/osdmap.c               |   2 +-
- net/ceph/pagevec.c              |   5 +-
- 28 files changed, 2010 insertions(+), 1071 deletions(-)
---557981400-1594059033-1435854560=:13991--
+Wheat
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
