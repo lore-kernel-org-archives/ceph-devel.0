@@ -1,86 +1,97 @@
-From: =?UTF-8?Q?=C5=81ukasz_Redynk?= <lukas.redynk@gmail.com>
-Subject: Memstore & fio + librbd crash on 0.94.1
-Date: Thu, 2 Jul 2015 10:30:01 +0200
-Message-ID: <CADkk3is4aYX-KBtZdAQ+pPXu=_ECCFnS4+y4q1HoJ5E-vz-ufw@mail.gmail.com>
+From: Z Zhang <zhangz.david-1ViLX0X+lBJBDgjK7y7TUQ@public.gmane.org>
+Subject: Timeout mechanism in ceph client tick
+Date: Thu, 2 Jul 2015 17:57:45 +0800
+Message-ID: <SNT146-W90253F78F21C12AD45FC48C970@phx.gbl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f47.google.com ([209.85.215.47]:33754 "EHLO
-	mail-la0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753327AbbGBIae (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Jul 2015 04:30:34 -0400
-Received: by laar3 with SMTP id r3so56251591laa.0
-        for <ceph-devel@vger.kernel.org>; Thu, 02 Jul 2015 01:30:31 -0700 (PDT)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+Content-Type: multipart/mixed; boundary="===============0885171397=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi,
+--===============0885171397==
+Content-Type: multipart/alternative;
+	boundary="_380ddb18-d5be-4861-923d-1ebe00fe50db_"
 
-My setup:
-- 5 physical nodes
-- 1 MON
-- 4 OSD
-- OS: CentOS 7
-- Ceph: 0.94.1
-- rbd_cache = false
+--_380ddb18-d5be-4861-923d-1ebe00fe50db_
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
 
-Lately I was benchmarking Ceph 0.94.1 rbd devices created in Memstore
-with fio + librbd and I encountered intersting crash:
+SGkgR3V5cywNCkJ5IHJlYWRpbmcgdGhyb3VnaCBjZXBoIGNsaWVudCBjb2RlcywgdGhlcmUgaXMg
+dGltZW91dCBtZWNoYW5pc20gaW4gdGljayB3aGVuIGRvaW5nIG1vdW50LiBSZWNlbnRseSB3ZSBt
+ZXQgc29tZSBjbGllbnQgcmVxdWVzdHMgdG8gbWRzIHNwZW5kaW5nIGxvbmcgdGltZSB0byByZXBs
+eSB3aGVuIGRvaW5nIG1hc3NpdmUgdGVzdCB0byBjZXBoZnMuIEFuZCBpZiB3ZSB3YW50IGNlcGhm
+cyB1c2VyIHRvIGtub3cgdGhlIHRpbWVvdXQgaW5zdGVhZCBvZiB3YWl0aW5nIGZvciB0aGUgcmVw
+bHksIGNhbiB3ZSBtYWtlIGZvbGxvd2luZyBjaGFuZ2UgdG8gbGV2ZXJhZ2Ugc3VjaCB0aW1lb3V0
+IG1lY2hhbmlzbT8gSXMgdGhlcmUgYW55IG90aGVyIGNvbmNlcm4gdGhhdCB3ZSBkaWRuJ3QgZW5h
+YmxlIGNsaWVudCByZXF1ZXN0J3MgdGltZW91dCBpbiB0aWNrIGFmdGVyIG1vdW50IHN1Y2NlZWRz
+PyAgICANCklmIHRoaXMgd29ya3MsIHdlIGNhbiBlaXRoZXIgdXNlIGNsaWVudF9tb3VudF90aW1l
+b3V0LCBvciBpbnRyb2R1Y2UgYW5vdGhlciBwYXJhbWV0ZXIgZm9yIG5vcm1hbCBjbGllbnQgcmVx
+dWVzdCdzIHRpbWVvdXQgdmFsdWUuDQoNCmRpZmYgLS1naXQgYS9zcmMvY2xpZW50L0NsaWVudC5j
+YyBiL3NyYy9jbGllbnQvQ2xpZW50LmNjaW5kZXggNjNhOWZhYS4uOTFhOGNjOSAxMDA2NDQtLS0g
+YS9zcmMvY2xpZW50L0NsaWVudC5jYysrKyBiL3NyYy9jbGllbnQvQ2xpZW50LmNjQEAgLTQ4NTAs
+NyArNDg1MCw3IEBAIHZvaWQgQ2xpZW50Ojp0aWNrKCkgICAgdXRpbWVfdCBub3cgPSBjZXBoX2Ns
+b2NrX25vdyhjY3QpOyAtICBpZiAoIW1vdW50ZWQgJiYgIW1kc19yZXF1ZXN0cy5lbXB0eSgpKSB7
+KyAgaWYgKCFtZHNfcmVxdWVzdHMuZW1wdHkoKSkgeyAgICAgTWV0YVJlcXVlc3QgKnJlcSA9IG1k
+c19yZXF1ZXN0cy5iZWdpbigpLT5zZWNvbmQ7ICAgICBpZiAocmVxLT5vcF9zdGFtcCArIGNjdC0+
+X2NvbmYtPmNsaWVudF9tb3VudF90aW1lb3V0IDwgbm93KSB7ICAgICAgIHJlcS0+YWJvcnRlZCA9
+IHRydWU7DQoNClRoYW5rcy4NCkRhdmlkIFpoYW5nIAkJIAkgICAJCSAg
 
- 1: /usr/bin/ceph-osd() [0xb81872]
- 2: (()+0xf130) [0x7f02fba00130]
- 3: (gsignal()+0x39) [0x7f02fa41a989]
- 4: (abort()+0x148) [0x7f02fa41c098]
- 5: (__gnu_cxx::__verbose_terminate_handler()+0x165) [0x7f02fad1e9d5]
- 6: (()+0x5e946) [0x7f02fad1c946]
- 7: (()+0x5e973) [0x7f02fad1c973]
- 8: (()+0x5eb9f) [0x7f02fad1cb9f]
- 9: (ceph::buffer::list::iterator::copy(unsigned int, char*)+0x137) [0xcf6057]
- 10: (void decode<unsigned long, unsigned long>(std::map<unsigned
-long, unsigned long, std::less<unsigned long>, std::allocator<std::
-pair<unsigned long const, unsigned long> > >&,
-ceph::buffer::list::iterator&)+0x3e) [0x96c65e]
- 11: (ReplicatedPG::do_osd_ops(ReplicatedPG::OpContext*,
-std::vector<OSDOp, std::allocator<OSDOp> >&)+0x7018) [0x930588]
- 12: (ReplicatedPG::prepare_transaction(ReplicatedPG::OpContext*)+0xbf)
-[0x93e59f]
- 13: (ReplicatedPG::execute_ctx(ReplicatedPG::OpContext*)+0x5f1) [0x93ee11]
- 14: (ReplicatedPG::do_op(std::tr1::shared_ptr<OpRequest>&)+0x45d7) [0x944bc7]
- 15: (ReplicatedPG::do_request(std::tr1::shared_ptr<OpRequest>&,
-ThreadPool::TPHandle&)+0x68a) [0x8dd2fa]
- 16: (OSD::dequeue_op(boost::intrusive_ptr<PG>,
-std::tr1::shared_ptr<OpRequest>, ThreadPool::TPHandle&)+0x409)
-[0x6cf3d9]
- 17: (OSD::ShardedOpWQ::_process(unsigned int,
-ceph::heartbeat_handle_d*)+0x32f) [0x6cf9ef]
- 18: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x86f)
-[0xc70f6f]
- 19: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0xc730a0]
- 20: (()+0x7df3) [0x7f02fb9f8df3]
- 21: (clone()+0x6d) [0x7f02fa4db3dd]
+--_380ddb18-d5be-4861-923d-1ebe00fe50db_
+Content-Type: text/html; charset="gb2312"
+Content-Transfer-Encoding: base64
 
-It was related to the implementation of Memstore::fiemap function
-called in ReplicatedPG::do_osd_op for sparse read command: when offset
-was bigger then object size then Memstore::fiemap was just returning
-'0', ReplicatedPG::do_osd_ops was interpreting it as "ok" and starting
-to decode bufferlist of extents, which was empty, and this was main
-cause of crash.
+PGh0bWw+DQo8aGVhZD4NCjxzdHlsZT48IS0tDQouaG1tZXNzYWdlIFANCnsNCm1hcmdpbjowcHg7
+DQpwYWRkaW5nOjBweA0KfQ0KYm9keS5obW1lc3NhZ2UNCnsNCmZvbnQtc2l6ZTogMTJwdDsNCmZv
+bnQtZmFtaWx5OkNhbGlicmkNCn0NCi0tPjwvc3R5bGU+PC9oZWFkPg0KPGJvZHkgY2xhc3M9J2ht
+bWVzc2FnZSc+PGRpdiBkaXI9J2x0cic+PGRpdj5IaSBHdXlzLDwvZGl2PjxkaXY+PGJyPjwvZGl2
+PjxkaXY+QnkgcmVhZGluZyB0aHJvdWdoIGNlcGggY2xpZW50IGNvZGVzLCB0aGVyZSBpcyB0aW1l
+b3V0IG1lY2hhbmlzbSBpbiB0aWNrIHdoZW4gZG9pbmcgbW91bnQuIFJlY2VudGx5IHdlIG1ldCBz
+b21lIGNsaWVudCByZXF1ZXN0cyB0byBtZHMgc3BlbmRpbmcgbG9uZyB0aW1lIHRvIHJlcGx5IHdo
+ZW4gZG9pbmcgbWFzc2l2ZSB0ZXN0IHRvIGNlcGhmcy4gQW5kIGlmIHdlIHdhbnQgY2VwaGZzIHVz
+ZXIgdG8ga25vdyB0aGUgdGltZW91dCBpbnN0ZWFkIG9mIHdhaXRpbmcgZm9yIHRoZSByZXBseSwg
+Y2FuIHdlIG1ha2UgZm9sbG93aW5nIGNoYW5nZSB0byBsZXZlcmFnZSBzdWNoIHRpbWVvdXQgbWVj
+aGFuaXNtPyBJcyB0aGVyZSBhbnkgb3RoZXIgY29uY2VybiB0aGF0IHdlIGRpZG4ndCBlbmFibGUg
+Y2xpZW50IHJlcXVlc3QncyB0aW1lb3V0IGluIHRpY2sgYWZ0ZXIgbW91bnQgc3VjY2VlZHM/ICZu
+YnNwOyAmbmJzcDs8L2Rpdj48ZGl2Pjxicj48L2Rpdj48ZGl2PklmIHRoaXMgd29ya3MsIHdlIGNh
+biBlaXRoZXIgdXNlJm5ic3A7PHNwYW4gc3R5bGU9ImZvbnQtc2l6ZTogMTJwdDsiPmNsaWVudF9t
+b3VudF90aW1lb3V0LCBvciBpbnRyb2R1Y2UgYW5vdGhlciBwYXJhbWV0ZXIgZm9yIG5vcm1hbCBj
+bGllbnQgcmVxdWVzdCdzIHRpbWVvdXQgdmFsdWUuPC9zcGFuPjwvZGl2PjxkaXY+PGJyPjwvZGl2
+PjxkaXY+PGJyPjwvZGl2PjxkaXY+ZGlmZiAtLWdpdCBhL3NyYy9jbGllbnQvQ2xpZW50LmNjIGIv
+c3JjL2NsaWVudC9DbGllbnQuY2M8L2Rpdj48ZGl2PmluZGV4IDYzYTlmYWEuLjkxYThjYzkgMTAw
+NjQ0PC9kaXY+PGRpdj4tLS0gYS9zcmMvY2xpZW50L0NsaWVudC5jYzwvZGl2PjxkaXY+KysrIGIv
+c3JjL2NsaWVudC9DbGllbnQuY2M8L2Rpdj48ZGl2PkBAIC00ODUwLDcgKzQ4NTAsNyBAQCB2b2lk
+IENsaWVudDo6dGljaygpPC9kaXY+PGRpdj4mbmJzcDs8L2Rpdj48ZGl2PiZuYnNwOyAmbmJzcDt1
+dGltZV90IG5vdyA9IGNlcGhfY2xvY2tfbm93KGNjdCk7PC9kaXY+PGRpdj4mbmJzcDs8L2Rpdj48
+ZGl2Pi0gJm5ic3A7aWYgKCFtb3VudGVkICZhbXA7JmFtcDsgIW1kc19yZXF1ZXN0cy5lbXB0eSgp
+KSB7PC9kaXY+PGRpdj4rICZuYnNwO2lmICghbWRzX3JlcXVlc3RzLmVtcHR5KCkpIHs8L2Rpdj48
+ZGl2PiZuYnNwOyAmbmJzcDsgJm5ic3A7TWV0YVJlcXVlc3QgKnJlcSA9IG1kc19yZXF1ZXN0cy5i
+ZWdpbigpLSZndDtzZWNvbmQ7PC9kaXY+PGRpdj4mbmJzcDsgJm5ic3A7ICZuYnNwO2lmIChyZXEt
+Jmd0O29wX3N0YW1wICsgY2N0LSZndDtfY29uZi0mZ3Q7Y2xpZW50X21vdW50X3RpbWVvdXQgJmx0
+OyBub3cpIHs8L2Rpdj48ZGl2PiZuYnNwOyAmbmJzcDsgJm5ic3A7ICZuYnNwO3JlcS0mZ3Q7YWJv
+cnRlZCA9IHRydWU7PC9kaXY+PGRpdj48YnI+PC9kaXY+PGJyPlRoYW5rcy48ZGl2Pjxicj48L2Rp
+dj48ZGl2PkRhdmlkIFpoYW5nPC9kaXY+IAkJIAkgICAJCSAgPC9kaXY+PC9ib2R5Pg0KPC9odG1s
+Pg==
 
-It looks like Filestore isn't affected by this issue, fiemap syscall
-is returning with error, or when fiemap is not available it's just
-encoding [offset,length] (without *any* validation of input
-parameters).
+--_380ddb18-d5be-4861-923d-1ebe00fe50db_--
 
-Now I'm wondering about best way to fix it, mimic behavior of fiemap
-(the long way)? Or implement it similar to the Filestore (with backend
-not supporting fiemap, the fast way)?
+--===============0885171397==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
 
-Other thing is should OSD try to read past object's boundary?
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
-And my other question: I'm encountering this issue *every* time on
-physical cluster and I'm not able to reproduce it even *once* on
-vstart cluster with the same configuration. Is there any way to force
-sparse reads with librbd?
-
--Lukas
+--===============0885171397==--
