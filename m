@@ -1,171 +1,86 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: Re: Probable memory leak in Hammer write path ?
-Date: Thu, 2 Jul 2015 08:36:22 +0200 (CEST)
-Message-ID: <354713508.5068184.1435818982240.JavaMail.zimbra@oxygem.tv>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CDB0142@SACMBXIP01.sdcorp.global.sandisk.com> <CAC6JEv9sfdLtMKjpSJzRxgOjLOMH-kvj0MtA1i4jnCne4FtStA@mail.gmail.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F2CDB08F9@SACMBXIP01.sdcorp.global.sandisk.com> <CAC6JEv9WmQ5=5Z=bZmMEjMF5o34WkUeabjEzsZujKVS4TNxQ5w@mail.gmail.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F2CDB4992@SACMBXIP01.sdcorp.global.sandisk.com>
+From: =?UTF-8?Q?=C5=81ukasz_Redynk?= <lukas.redynk@gmail.com>
+Subject: Memstore & fio + librbd crash on 0.94.1
+Date: Thu, 2 Jul 2015 10:30:01 +0200
+Message-ID: <CADkk3is4aYX-KBtZdAQ+pPXu=_ECCFnS4+y4q1HoJ5E-vz-ufw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:42963 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750808AbbGBGgY convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Jul 2015 02:36:24 -0400
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CDB4992@SACMBXIP01.sdcorp.global.sandisk.com>
+Received: from mail-la0-f47.google.com ([209.85.215.47]:33754 "EHLO
+	mail-la0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753327AbbGBIae (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Jul 2015 04:30:34 -0400
+Received: by laar3 with SMTP id r3so56251591laa.0
+        for <ceph-devel@vger.kernel.org>; Thu, 02 Jul 2015 01:30:31 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: Gregory Farnum <greg@gregs42.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
->>So, this could be another step ahead of removing tcmalloc as Ceph's d=
-efault allocator and moving to jemalloc.
+Hi,
 
-+1 for this.
+My setup:
+- 5 physical nodes
+- 1 MON
+- 4 OSD
+- OS: CentOS 7
+- Ceph: 0.94.1
+- rbd_cache = false
 
-I begin to be worried by all theses tcmalloc problems.
+Lately I was benchmarking Ceph 0.94.1 rbd devices created in Memstore
+with fio + librbd and I encountered intersting crash:
 
+ 1: /usr/bin/ceph-osd() [0xb81872]
+ 2: (()+0xf130) [0x7f02fba00130]
+ 3: (gsignal()+0x39) [0x7f02fa41a989]
+ 4: (abort()+0x148) [0x7f02fa41c098]
+ 5: (__gnu_cxx::__verbose_terminate_handler()+0x165) [0x7f02fad1e9d5]
+ 6: (()+0x5e946) [0x7f02fad1c946]
+ 7: (()+0x5e973) [0x7f02fad1c973]
+ 8: (()+0x5eb9f) [0x7f02fad1cb9f]
+ 9: (ceph::buffer::list::iterator::copy(unsigned int, char*)+0x137) [0xcf6057]
+ 10: (void decode<unsigned long, unsigned long>(std::map<unsigned
+long, unsigned long, std::less<unsigned long>, std::allocator<std::
+pair<unsigned long const, unsigned long> > >&,
+ceph::buffer::list::iterator&)+0x3e) [0x96c65e]
+ 11: (ReplicatedPG::do_osd_ops(ReplicatedPG::OpContext*,
+std::vector<OSDOp, std::allocator<OSDOp> >&)+0x7018) [0x930588]
+ 12: (ReplicatedPG::prepare_transaction(ReplicatedPG::OpContext*)+0xbf)
+[0x93e59f]
+ 13: (ReplicatedPG::execute_ctx(ReplicatedPG::OpContext*)+0x5f1) [0x93ee11]
+ 14: (ReplicatedPG::do_op(std::tr1::shared_ptr<OpRequest>&)+0x45d7) [0x944bc7]
+ 15: (ReplicatedPG::do_request(std::tr1::shared_ptr<OpRequest>&,
+ThreadPool::TPHandle&)+0x68a) [0x8dd2fa]
+ 16: (OSD::dequeue_op(boost::intrusive_ptr<PG>,
+std::tr1::shared_ptr<OpRequest>, ThreadPool::TPHandle&)+0x409)
+[0x6cf3d9]
+ 17: (OSD::ShardedOpWQ::_process(unsigned int,
+ceph::heartbeat_handle_d*)+0x32f) [0x6cf9ef]
+ 18: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x86f)
+[0xc70f6f]
+ 19: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0xc730a0]
+ 20: (()+0x7df3) [0x7f02fb9f8df3]
+ 21: (clone()+0x6d) [0x7f02fa4db3dd]
 
------ Mail original -----
-De: "Somnath Roy" <Somnath.Roy@sandisk.com>
-=C3=80: "Gregory Farnum" <greg@gregs42.com>
-Cc: "ceph-devel" <ceph-devel@vger.kernel.org>
-Envoy=C3=A9: Jeudi 2 Juillet 2015 05:38:24
-Objet: RE: Probable memory leak in Hammer write path ?
+It was related to the implementation of Memstore::fiemap function
+called in ReplicatedPG::do_osd_op for sparse read command: when offset
+was bigger then object size then Memstore::fiemap was just returning
+'0', ReplicatedPG::do_osd_ops was interpreting it as "ok" and starting
+to decode bufferlist of extents, which was empty, and this was main
+cause of crash.
 
-Hi,=20
-I think I am eventually able to figure out what is happening.. First, h=
-ere is the step to reproduce it in any kernel (not specific to 3.16/3.1=
-8 as I said earlier)=20
+It looks like Filestore isn't affected by this issue, fiemap syscall
+is returning with error, or when fiemap is not available it's just
+encoding [offset,length] (without *any* validation of input
+parameters).
 
-1. In a SSD create a big journal partition say > 20 GB or so.=20
+Now I'm wondering about best way to fix it, mimic behavior of fiemap
+(the long way)? Or implement it similar to the Filestore (with backend
+not supporting fiemap, the fast way)?
 
-2. Make all the filestore/journal parameter default other than the foll=
-owing. Set these value in your conf file. This is just to make sure jou=
-rnal writes are not throttled and going far ahead than backend writes.=20
+Other thing is should OSD try to read past object's boundary?
 
-filestore_queue_max_ops =3D 5000000=20
-filestore_queue_max_bytes =3D 1000000000000=20
-filestore_queue_committing_max_ops =3D 5000000=20
-filestore_queue_committing_max_bytes =3D 1000000000000=20
+And my other question: I'm encountering this issue *every* time on
+physical cluster and I'm not able to reproduce it even *once* on
+vstart cluster with the same configuration. Is there any way to force
+sparse reads with librbd?
 
-3. Run any release say Firefly/Giant/Hammer and create a single OSD clu=
-ster giving rest of the SSD as data partition.=20
-
-4. Run say fio_rbd random write workload as 16K, QD 64 , num_jobs=3D8=20
-
-5. run 'dstat -m' and see how used memory is rising !=20
-
-Now, this behavior I found with glibcmalloc/tcmalloc/jemalloc and that =
-I communicated earlier. But, I didn't wait enough earlier to see if mem=
-ory is coming down when IO stopped :-)=20
-I saw in case of tcmalloc it is not coming down , *but* in case of jema=
-lloc it is *coming down* the following way to the old place. I didn't g=
-o back to glibcmalloc again, but, it should be releasing also..=20
-
-1. If I stop IO, journal write stops, but backend flash is catching up =
-and the memory is coming down accordingly. This is expected because all=
- the transactions are piling up in workQ while journal is way ahead, bu=
-t, the moment it is processed the transactions are deleted and memory u=
-sage coming down.=20
-
-2. After journal is full, it started throttling and the overall IO rate=
- is coming down. The backend flash now has the opportunity to catch up =
-and thus releasing the memory.=20
-
-None of the above is happening in case of tcmalloc. There it is not rel=
-easing the memory at all..Digging down some of the doc I found out this=
- can happen and there is a flag to control the release rate..But, no lu=
-ck after changing that as well..Didn't invest much time on that though.=
-=20
-What I saw next time when I ran IO, in case of tcmalloc the memory is n=
-ot rising at the beginning, probably, it is reusing those memory and st=
-arted rising again after some time...But, I doubt this behavior is good=
-=2E.=20
-
-So, this could be another step ahead of removing tcmalloc as Ceph's def=
-ault allocator and moving to jemalloc.=20
-
-Thanks Greg for asking me to relook at tcmalloc otherwise I was kind of=
- out of option :-)..=20
-
-Regards=20
-Somnath=20
-
------Original Message-----=20
-=46rom: Somnath Roy=20
-Sent: Wednesday, July 01, 2015 4:58 PM=20
-To: 'Gregory Farnum'=20
-Cc: ceph-devel@vger.kernel.org=20
-Subject: RE: Probable memory leak in Hammer write path ?=20
-
-Thanks Greg!=20
-Yeah, I will double check..But, I built the code without tcmalloc (with=
- glibc) and it was also showing the similar behavior.=20
-
-Thanks & Regards=20
-Somnath=20
-
------Original Message-----=20
-=46rom: Gregory Farnum [mailto:greg@gregs42.com]=20
-Sent: Wednesday, July 01, 2015 9:07 AM=20
-To: Somnath Roy=20
-Cc: ceph-devel@vger.kernel.org=20
-Subject: Re: Probable memory leak in Hammer write path ?=20
-
-On Mon, Jun 29, 2015 at 4:39 PM, Somnath Roy <Somnath.Roy@sandisk.com> =
-wrote:=20
-> Greg,=20
-> Updating to the new kernel updating the gcc version too. Recent kerne=
-l is changing tcmalloc version too, but, 3.16 has old tcmalloc but stil=
-l exhibiting the issue.=20
-> Yes, the behavior is very confusing and compiler is main variable I c=
-ould think of from application perspective.=20
-> If you have a 3.16/3.19 kernel, you could reproduce this following th=
-ese steps.=20
->=20
-> 1. Build ceph-hammer code base=20
->=20
-> 2. Run with single OSD.=20
->=20
-> 3. Create an image and run a fio-bed workload from client (say 16K bs=
-,=20
-> 8 num_jobs)=20
->=20
-> 4. run 'dstat -m' and observe the memory usage.=20
->=20
-> What I am thinking of doing is to install ceph from ceph.com and see =
-the behavior.=20
-
-In addition to that, I'd look for if there are any known bugs in the tc=
-malloc version you're using on the leaky systems, and check the tcmallo=
-c stats to see if they have a bunch of free memory which hasn't been re=
-leased to the OS yet.=20
--Greg=20
-
-________________________________=20
-
-PLEASE NOTE: The information contained in this electronic mail message =
-is intended only for the use of the designated recipient(s) named above=
-=2E If the reader of this message is not the intended recipient, you ar=
-e hereby notified that you have received this message in error and that=
- any review, dissemination, distribution, or copying of this message is=
- strictly prohibited. If you have received this communication in error,=
- please notify the sender by telephone or e-mail (as shown above) immed=
-iately and destroy any and all copies of this message in your possessio=
-n (whether hard copies or electronically stored copies).=20
-
-N=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDr=EF=BF=BD=EF=BF=BDy=EF=BF=
-=BD=EF=BF=BD=EF=BF=BDb=EF=BF=BDX=EF=BF=BD=EF=BF=BD=C7=A7v=EF=BF=BD^=EF=BF=
-=BD)=DE=BA{.n=EF=BF=BD+=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD]z=EF=BF=BD=
-=EF=BF=BD=EF=BF=BD{ay=EF=BF=BD=CA=87=DA=99=EF=BF=BD,j=EF=BF=BD=EF=BF=BD=
-f=EF=BF=BD=EF=BF=BD=EF=BF=BDh=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD=EF=BF=
-=BDw=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDj:+v=EF=BF=BD=
-=EF=BF=BD=EF=BF=BDw=EF=BF=BDj=EF=BF=BDm=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=
-=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDzZ+=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=
-=BF=BD=EF=BF=BD=DD=A2j"=EF=BF=BD=EF=BF=BD!=EF=BF=BDi=20
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-Lukas
