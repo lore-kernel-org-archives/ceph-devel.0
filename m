@@ -1,70 +1,53 @@
-From: "Matt W. Benjamin" <matt@cohortfs.com>
-Subject: Re: Transaction struct Op
-Date: Fri, 3 Jul 2015 10:52:19 -0400 (EDT)
-Message-ID: <1440963926.6.1435935139406.JavaMail.root@thunderbeast.private.linuxbox.com>
-References: <90559C83A9C7FA45B5846C975DFA612DDB4DD4E243@ABGEX73E.FSC.NET>
+From: Loic Dachary <loic@dachary.org>
+Subject: systemd support
+Date: Sat, 04 Jul 2015 00:21:51 +0200
+Message-ID: <55970AFF.3020603@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="sW96AdcKpweNeWxkAJPabWkvam5ligQWv"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from aa.linuxbox.com ([69.128.83.226]:1024 "EHLO aa.linuxbox.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755460AbbGCOwY convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Jul 2015 10:52:24 -0400
-In-Reply-To: <90559C83A9C7FA45B5846C975DFA612DDB4DD4E243@ABGEX73E.FSC.NET>
+Received: from mail2.dachary.org ([91.121.57.175]:44490 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1755516AbbGCWVx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Jul 2015 18:21:53 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?utf-8?Q?Piotr_Da=C5=82ek?= <Piotr.Dalek@ts.fujitsu.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Ken Dreyer <kdreyer@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-I tend to support (++)
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--sW96AdcKpweNeWxkAJPabWkvam5ligQWv
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
------ "Piotr Da=C5=82ek" <Piotr.Dalek@ts.fujitsu.com> wrote:
+[cc'ing ceph-devel in case someone else has the answer]
 
-> > -----Original Message-----
-> > From: Haomai Wang [mailto:haomaiwang@gmail.com]
-> > Sent: Thursday, July 02, 2015 7:26 PM
-> >=20
-> > Yes, some fields only used for special ops. But union may increase
-> the
-> > complexity of stuct.
->=20
-> Not by that much, actual changes would be only in coding and encoding=
-,
-> rest of the code should remain the same.
-> =20
-> > And the extra memory may not a problem because "Ops"  in one
-> transaction
-> > should be within ten.
->=20
-> This equals to at least around 720 bytes that must be stored in RAM
-> and transferred through the wire.=20
->=20
-> With best regards / Pozdrawiam
-> Piotr Da=C5=82ek
-> N=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDr=EF=BF=BD=EF=BF=BDy=EF=
-=BF=BD=EF=BF=BD=EF=BF=BDb=EF=BF=BDX=EF=BF=BD=EF=BF=BD=C7=A7v=EF=BF=BD^=EF=
-=BF=BD)=DE=BA{.n=EF=BF=BD+=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD]z=EF=BF=
-=BD=EF=BF=BD=EF=BF=BD{ay=EF=BF=BD=CA=87=DA=99=EF=BF=BD,j=EF=BF=BD=EF=BF=
-=BDf=EF=BF=BD=EF=BF=BD=EF=BF=BDh=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD=EF=
-=BF=BDw=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDj:+v=EF=BF=
-=BD=EF=BF=BD=EF=BF=BDw=EF=BF=BDj=EF=BF=BDm=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=
-=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDzZ+=EF=BF=BD=EF=BF=BD=DD=A2j"=
-=EF=BF=BD=EF=BF=BD
+Hi Ken,
 
+I know very little about systemd and I'd like to learn more. My understan=
+ding is that we have some support in the current master branch, but it is=
+ incomplete. Are there differences with what I would find in the Red Hat =
+Storage 1.3 packages ? If I'm not mistaken RHEL7 uses systemd, therefore =
+I guess there may be a better support there. Unless it's using the legacy=
+ sysvinit files ?
+
+Cheers
 --=20
-Matt Benjamin
-CohortFS, LLC.
-315 West Huron Street, Suite 140A
-Ann Arbor, Michigan 48103
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
-http://cohortfs.com
 
-tel.  734-761-4689=20
-fax.  734-769-8938=20
-cel.  734-216-5309=20
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--sW96AdcKpweNeWxkAJPabWkvam5ligQWv
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlWXCv8ACgkQ8dLMyEl6F20p+QCfamw1lcLMzggrFstyRsVKYWEF
+yq8AoIGUCZ4ToM8MpnaWrwFb9S8KeGD9
+=L/kC
+-----END PGP SIGNATURE-----
+
+--sW96AdcKpweNeWxkAJPabWkvam5ligQWv--
