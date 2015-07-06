@@ -1,89 +1,111 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: osd aborts, sync entry timeout and suicide timeout
-Date: Mon, 6 Jul 2015 13:06:21 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1507061304330.13991@cobra.newdream.net>
-References: <BC97738F8E7C8742BABED7F06FB9DF91669B13F5@SATLEXDAG01.amd.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: ceph-objectstore-tool import failures
+Date: Mon, 6 Jul 2015 13:28:35 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1507061324440.27973@cobra.newdream.net>
+References: <alpine.DEB.2.00.1506191923200.31501@cobra.newdream.net> <5584D213.80405@redhat.com> <5584DB0E.3000503@redhat.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:36300 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753847AbbGFUGW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Jul 2015 16:06:22 -0400
-In-Reply-To: <BC97738F8E7C8742BABED7F06FB9DF91669B13F5@SATLEXDAG01.amd.com>
+Received: from mx1.redhat.com ([209.132.183.28]:51414 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754620AbbGFU2i (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 6 Jul 2015 16:28:38 -0400
+Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
+	by mx1.redhat.com (Postfix) with ESMTPS id 014979158D
+	for <ceph-devel@vger.kernel.org>; Mon,  6 Jul 2015 20:28:37 +0000 (UTC)
+In-Reply-To: <5584DB0E.3000503@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Deneau, Tom" <tom.deneau@amd.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: David Zafman <dzafman@redhat.com>, sjust@redhat.com
+Cc: ceph-devel@vger.kernel.org
 
-On Mon, 6 Jul 2015, Deneau, Tom wrote:
-> I had a small (4 nodes, 19 OSDs) cluster that I was running a sort of
-> stress test on over the weekend.  Let's call the 4 nodes, A, B, C and
-> D.  (Node A had the monitor running on it).
+On Fri, 19 Jun 2015, David Zafman wrote:
+> This ghobject_t which has a pool of -3 is part of the export.   This caused
+> the assert:
 > 
-> Anyway, node C died with a hardware problem, and, I think at about
-> that same time two of the 5 osds on node B aborted with asserts.  The
-> other 3 OSDS on node B carried on without problem as did the OSDS on
-> nodes A and D.  And the client tests continued to run without error.
+> Read -3/1c/temp_recovering_1.1c_33'50_39_head/head
 > 
-> I attached the stack traces below from the aborting OSDs below.  If
-> necessary, I can send the full osd logs (which include the dump of the
-> 10000 most recent events).
+> This was added by "osd: use per-pool temp poolid for temp objects"
+> 18eb2a5fea9b0af74a171c3717d1c91766b15f0c in your branch.
 > 
-> I don't know enough about the ceph internals to know what these aborts
-> really mean.  Have others seen these kinds of aborts before?  (I would
-> assume these kinds of aborts are not normal).  Are they an indication
-> of some kind of ceph configuration problem or build problem?  As can
-> be seen I am running 9.0.1 which I built from sources for the aarch64
-> platform.
-> 
-> -- Tom Deneau, AMD
-> 
-> 
-> Aborting OSD #1
-> ----------------
-> 2015-07-03 20:27:47.013337 3ff7255efd0 -1 FileStore: sync_entry timed out after 600 seconds.
->  ceph version 9.0.1 (997b3f998d565a744bfefaaf34b08b891f8dbf64)
->  1: (Context::complete(int)+0x1c) [0x6cdbe4]
->  2: (SafeTimer::timer_thread()+0x320) [0xbfed58]
->  3: (SafeTimerThread::entry()+0x10) [0xc00af8]
->  4: (()+0x6ed4) [0x3ff7f456ed4]
->  5: (()+0xe08b0) [0x3ff7f0408b0]
+> You should skip it on export or recreate it on import with special handling.
 
-There was a timeout when calling syncfs(2).  Looks like the disk 
-connection or some other part of the IO subsystem gave out.  Check dmesg?
+Ah, that makes sense.  I think we should include these temp objects in the 
+export, though, and make cot understand that they are part of the pool.  
+We moved the "clear temp objects on startup" logic into teh OSD, which I 
+think will be useful for e.g. multiobject transactions (where we'll want 
+some objects that are internal/hidden to persist across peering intervals 
+and restarts).
 
-> 2015-07-03 20:27:47.022743 3ff7255efd0 -1 os/FileStore.cc: In function 'virtual void SyncEntryTimeout::finish(int)' thread 3ff7255efd0 time 2015-07-03 20:27:47.013404
-> os/FileStore.cc: 3524: FAILED assert(0)
-> 
->  ceph version 9.0.1 (997b3f998d565a744bfefaaf34b08b891f8dbf64)
->  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0x8c) [0xc14b9c]
->  2: (SyncEntryTimeout::finish(int)+0xc4) [0x91552c]
->  3: (Context::complete(int)+0x1c) [0x6cdbe4]
->  4: (SafeTimer::timer_thread()+0x320) [0xbfed58]
->  5: (SafeTimerThread::entry()+0x10) [0xc00af8]
->  6: (()+0x6ed4) [0x3ff7f456ed4]
->  7: (()+0xe08b0) [0x3ff7f0408b0]
-> 
-> 
-> Aborting OSD #2
-> ----------------
-> 2015-07-03 20:28:14.693496 3ff6d2eefd0 -1 common/HeartbeatMap.cc: In function 'bool ceph::HeartbeatMap::_check(const ceph::heartbeat_handle_d*, const char*, time_t)' thread 3ff6d2eefd0 time 2015-07-03 20:28:14.665989
-> common/HeartbeatMapX.cc: 79: FAILED assert(0 == "hit suicide timeout")
-> 
->  ceph version 9.0.1 (997b3f998d565a744bfefaaf34b08b891f8dbf64)
->  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0x8c) [0xc14b9c]
->  2: (ceph::HeartbeatMap::_check(ceph::heartbeat_handle_d const*, char const*, long)+0x328) [0xb5afc0]
->  3: (ceph::HeartbeatMap::reset_timeout(ceph::heartbeat_handle_d*, long, long)+0x19c) [0xb5b2b4]
->  4: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x6fc) [0xc06fdc]
->  5: (ShardedThreadPool::WorkThreadSharded::entry()+0x18) [0xc07a98]
->  6: (()+0x6ed4) [0x3ff85696ed4]
->  7: (()+0xe08b0) [0x3ff852808b0]
+Looking at your wip-temp-zafman, I think the first patch needs to be 
+dropped: include the temp objects, and I assume the meta one (which 
+has the pg log and other critical pg metadata).
 
-This is as similar stall/timeout: the worker thread got stuck doing 
-something and didn't make any progress.  If you look at the core file 
-you'll probably find it is blocked on a write(2) or fsync(2).  Again, 
-check dmesg for block layer errors...
+Not sure where to change cot to handle the temp objects though?
 
+Thanks!
 sage
 
+
+
+
+> 
+> David
+> 
+> On 6/19/15 7:38 PM, David Zafman wrote:
+> > 
+> > Have not seen this as an assert before.  Given the code below in do_import()
+> > of master branch the assert is impossible (?).
+> > 
+> >   if (!curmap.have_pg_pool(pgid.pgid.m_pool)) {
+> >     cerr << "Pool " << pgid.pgid.m_pool << " no longer exists" << std::endl;
+> >     // Special exit code for this error, used by test code
+> >     return 10;  // Positive return means exit status
+> >   }
+> > 
+> > 
+> > David
+> > 
+> > On 6/19/15 7:25 PM, Sage Weil wrote:
+> > > Hey David,
+> > > 
+> > > On this run
+> > > 
+> > >     /a/sage-2015-06-18_15:51:18-rados-wip-temp---basic-multi/939648
+> > > 
+> > > ceph-objectstore-tool is failing to import a pg because the pool doesn't
+> > > exist.  It looks like the thrasher is doing an export+import and racing
+> > > with a test that is tearing down a pool.  The crash is
+> > > 
+> > >   ceph version 9.0.1-955-ge274efa
+> > > (e274efa450e99a68c02bcb713c8837d7809f1ec3)
+> > >   1: ceph-objectstore-tool() [0xa26335]
+> > >   2: (()+0xfcb0) [0x7f10cef18cb0]
+> > >   3: (gsignal()+0x35) [0x7f10cd5af425]
+> > >   4: (abort()+0x17b) [0x7f10cd5b2b8b]
+> > >   5: (__gnu_cxx::__verbose_terminate_handler()+0x11d) [0x7f10cdf0269d]
+> > >   6: (()+0xb5846) [0x7f10cdf00846]
+> > >   7: (()+0xb5873) [0x7f10cdf00873]
+> > >   8: (()+0xb596e) [0x7f10cdf0096e]
+> > >   9: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+> > > const*)+0x259) [0xb0ce09]
+> > >   10: (ObjectStoreTool::get_object(ObjectStore*, coll_t,
+> > > ceph::buffer::list&, OSDMap&, bool*)+0x143f) [0x64829f]
+> > >   11: (ObjectStoreTool::do_import(ObjectStore*, OSDSuperblock&, bool,
+> > > std::string)+0x13dd) [0x64a62d]
+> > >   12: (main()+0x3017) [0x632037]
+> > >   13: (__libc_start_main()+0xed) [0x7f10cd59a76d]
+> > >   14: ceph-objectstore-tool() [0x639119]
+> > > 
+> > > I don't think this is related to my branch.. but maybe?  Have you seen
+> > > this?  I rebased onto latest master yesterday.
+> > > 
+> > > sage
+> > 
+> > -- 
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> 
+> 
