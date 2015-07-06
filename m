@@ -1,61 +1,89 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: systemd support
-Date: Mon, 6 Jul 2015 12:46:37 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1507061242300.13991@cobra.newdream.net>
-References: <55970AFF.3020603@dachary.org> <559AD11F.4050100@redhat.com>
+Subject: Re: osd aborts, sync entry timeout and suicide timeout
+Date: Mon, 6 Jul 2015 13:06:21 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1507061304330.13991@cobra.newdream.net>
+References: <BC97738F8E7C8742BABED7F06FB9DF91669B13F5@SATLEXDAG01.amd.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:36173 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:36300 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754440AbbGFTqh (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Jul 2015 15:46:37 -0400
-In-Reply-To: <559AD11F.4050100@redhat.com>
+	with ESMTP id S1753847AbbGFUGW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Jul 2015 16:06:22 -0400
+In-Reply-To: <BC97738F8E7C8742BABED7F06FB9DF91669B13F5@SATLEXDAG01.amd.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ken Dreyer <kdreyer@redhat.com>
-Cc: Loic Dachary <loic@dachary.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Deneau, Tom" <tom.deneau@amd.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, 6 Jul 2015, Ken Dreyer wrote:
-> On 07/03/2015 04:21 PM, Loic Dachary wrote:
-> > [cc'ing ceph-devel in case someone else has the answer]
-> > 
-> > Hi Ken,
-> > 
-> > I know very little about systemd and I'd like to learn more. My understanding
-> > is that we have some support in the current master branch, but it is
-> > incomplete. Are there differences with what I would find in the Red Hat
-> > Storage 1.3 packages ? If I'm not mistaken RHEL7 uses systemd, therefore I
-> > guess there may be a better support there. Unless it's using the legacy
-> > sysvinit files ?
+On Mon, 6 Jul 2015, Deneau, Tom wrote:
+> I had a small (4 nodes, 19 OSDs) cluster that I was running a sort of
+> stress test on over the weekend.  Let's call the 4 nodes, A, B, C and
+> D.  (Node A had the monitor running on it).
 > 
-> Hi Loic,
+> Anyway, node C died with a hardware problem, and, I think at about
+> that same time two of the 5 osds on node B aborted with asserts.  The
+> other 3 OSDS on node B carried on without problem as did the OSDS on
+> nodes A and D.  And the client tests continued to run without error.
 > 
-> The RHCS product is using the legacy sysvinit scripts that are upstream.
-> I doubt we'll use systemd unit files to manage the services in RHCS
-> until those land upstream and get a lot of testing there.
+> I attached the stack traces below from the aborting OSDs below.  If
+> necessary, I can send the full osd logs (which include the dump of the
+> 10000 most recent events).
 > 
-> There is a ticket to track the incorporation of systemd unit files for
-> the services, here: http://tracker.ceph.com/issues/11344 . That ticket
-> has some more details regarding the current situation upstream.
+> I don't know enough about the ceph internals to know what these aborts
+> really mean.  Have others seen these kinds of aborts before?  (I would
+> assume these kinds of aborts are not normal).  Are they an indication
+> of some kind of ceph configuration problem or build problem?  As can
+> be seen I am running 9.0.1 which I built from sources for the aarch64
+> platform.
 > 
-> >From what I recall, both SUSE and Ubuntu have implemented systemd unit
-> files downstream for the Ceph MON/OSD/MDS services.
+> -- Tom Deneau, AMD
+> 
+> 
+> Aborting OSD #1
+> ----------------
+> 2015-07-03 20:27:47.013337 3ff7255efd0 -1 FileStore: sync_entry timed out after 600 seconds.
+>  ceph version 9.0.1 (997b3f998d565a744bfefaaf34b08b891f8dbf64)
+>  1: (Context::complete(int)+0x1c) [0x6cdbe4]
+>  2: (SafeTimer::timer_thread()+0x320) [0xbfed58]
+>  3: (SafeTimerThread::entry()+0x10) [0xc00af8]
+>  4: (()+0x6ed4) [0x3ff7f456ed4]
+>  5: (()+0xe08b0) [0x3ff7f0408b0]
 
-I really really wanted to make this land for infernalis, but it'll have to 
-happen quickly if that's to happen.  My suggestion (before I got sick) was 
-to merge all of the systemd related changes into a wip-systemd branch and 
-test/fix the integrated pile.  I'd start by just grabbing a few downburst 
-VMs, instaling simple clusters with ceph-deploy, and geting used to the 
-user experience of starting/stopping daemons, making sure things behave on 
-boot, updating some of the docs, and so forth.  I suspect there are some 
-minor ceph-deploy changes need to systemtl enable the mon and mds daemons
-(osds would start indirectly via udev).
+There was a timeout when calling syncfs(2).  Looks like the disk 
+connection or some other part of the IO subsystem gave out.  Check dmesg?
 
-...but I would *love* it if infernalis used systemd natively for fc22 
-(which has a gitbuilder now) and rhel/centos7.  I'm not sure what is 
-downstream for ubuntu, but that could be pulled in as well.  We aren't 
-building upstream suse packages so nothing to do there at this point 
-except merge whatever Owen sends us :)
+> 2015-07-03 20:27:47.022743 3ff7255efd0 -1 os/FileStore.cc: In function 'virtual void SyncEntryTimeout::finish(int)' thread 3ff7255efd0 time 2015-07-03 20:27:47.013404
+> os/FileStore.cc: 3524: FAILED assert(0)
+> 
+>  ceph version 9.0.1 (997b3f998d565a744bfefaaf34b08b891f8dbf64)
+>  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0x8c) [0xc14b9c]
+>  2: (SyncEntryTimeout::finish(int)+0xc4) [0x91552c]
+>  3: (Context::complete(int)+0x1c) [0x6cdbe4]
+>  4: (SafeTimer::timer_thread()+0x320) [0xbfed58]
+>  5: (SafeTimerThread::entry()+0x10) [0xc00af8]
+>  6: (()+0x6ed4) [0x3ff7f456ed4]
+>  7: (()+0xe08b0) [0x3ff7f0408b0]
+> 
+> 
+> Aborting OSD #2
+> ----------------
+> 2015-07-03 20:28:14.693496 3ff6d2eefd0 -1 common/HeartbeatMap.cc: In function 'bool ceph::HeartbeatMap::_check(const ceph::heartbeat_handle_d*, const char*, time_t)' thread 3ff6d2eefd0 time 2015-07-03 20:28:14.665989
+> common/HeartbeatMapX.cc: 79: FAILED assert(0 == "hit suicide timeout")
+> 
+>  ceph version 9.0.1 (997b3f998d565a744bfefaaf34b08b891f8dbf64)
+>  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0x8c) [0xc14b9c]
+>  2: (ceph::HeartbeatMap::_check(ceph::heartbeat_handle_d const*, char const*, long)+0x328) [0xb5afc0]
+>  3: (ceph::HeartbeatMap::reset_timeout(ceph::heartbeat_handle_d*, long, long)+0x19c) [0xb5b2b4]
+>  4: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x6fc) [0xc06fdc]
+>  5: (ShardedThreadPool::WorkThreadSharded::entry()+0x18) [0xc07a98]
+>  6: (()+0x6ed4) [0x3ff85696ed4]
+>  7: (()+0xe08b0) [0x3ff852808b0]
+
+This is as similar stall/timeout: the worker thread got stuck doing 
+something and didn't make any progress.  If you look at the core file 
+you'll probably find it is blocked on a write(2) or fsync(2).  Again, 
+check dmesg for block layer errors...
 
 sage
+
