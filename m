@@ -1,24 +1,31 @@
-From: David Zafman <dzafman@redhat.com>
+From: Samuel Just <sjust@redhat.com>
 Subject: Re: ceph-objectstore-tool import failures
-Date: Tue, 07 Jul 2015 13:56:36 -0700
-Message-ID: <559C3D04.50308@redhat.com>
-References: <alpine.DEB.2.00.1506191923200.31501@cobra.newdream.net> <5584D213.80405@redhat.com> <5584DB0E.3000503@redhat.com> <alpine.DEB.2.00.1507061324440.27973@cobra.newdream.net> <559B0FFD.4090306@redhat.com> <alpine.DEB.2.00.1507070958230.13176@cobra.newdream.net> <1261554654.41092991.1436289138746.JavaMail.zimbra@redhat.com> <alpine.DEB.2.00.1507071020350.13176@cobra.newdream.net> <89086658.41109782.1436290441538.JavaMail.zimbra@redhat.com>
+Date: Tue, 7 Jul 2015 17:10:28 -0400 (EDT)
+Message-ID: <1722214544.41342870.1436303428770.JavaMail.zimbra@redhat.com>
+References: <alpine.DEB.2.00.1506191923200.31501@cobra.newdream.net> <alpine.DEB.2.00.1507061324440.27973@cobra.newdream.net> <559B0FFD.4090306@redhat.com> <alpine.DEB.2.00.1507070958230.13176@cobra.newdream.net> <1261554654.41092991.1436289138746.JavaMail.zimbra@redhat.com> <alpine.DEB.2.00.1507071020350.13176@cobra.newdream.net> <89086658.41109782.1436290441538.JavaMail.zimbra@redhat.com> <559C3D04.50308@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:35787 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932816AbbGGU4h (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 7 Jul 2015 16:56:37 -0400
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-	by mx1.redhat.com (Postfix) with ESMTPS id 5DFA355
-	for <ceph-devel@vger.kernel.org>; Tue,  7 Jul 2015 20:56:37 +0000 (UTC)
-In-Reply-To: <89086658.41109782.1436290441538.JavaMail.zimbra@redhat.com>
+Received: from mx4-phx2.redhat.com ([209.132.183.25]:58595 "EHLO
+	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754468AbbGGVK3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Jul 2015 17:10:29 -0400
+In-Reply-To: <559C3D04.50308@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sjust@redhat.com>, Sage Weil <sweil@redhat.com>
+To: David Zafman <dzafman@redhat.com>
+Cc: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
+
+Sounds reasonable to me.
+-Sam
+
+----- Original Message -----
+From: "David Zafman" <dzafman@redhat.com>
+To: "Samuel Just" <sjust@redhat.com>, "Sage Weil" <sweil@redhat.com>
 Cc: ceph-devel@vger.kernel.org
+Sent: Tuesday, July 7, 2015 1:56:36 PM
+Subject: Re: ceph-objectstore-tool import failures
 
 
 I'm going to skip exporting of temp objects in a new wip-temp-zafman 
@@ -210,4 +217,10 @@ On 7/7/15 10:34 AM, Samuel Just wrote:
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
 
