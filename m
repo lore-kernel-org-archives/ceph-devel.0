@@ -1,23 +1,33 @@
-From: Sage Weil <sweil@redhat.com>
+From: Samuel Just <sjust@redhat.com>
 Subject: Re: ceph-objectstore-tool import failures
-Date: Tue, 7 Jul 2015 10:00:09 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1507070958230.13176@cobra.newdream.net>
-References: <alpine.DEB.2.00.1506191923200.31501@cobra.newdream.net> <5584D213.80405@redhat.com> <5584DB0E.3000503@redhat.com> <alpine.DEB.2.00.1507061324440.27973@cobra.newdream.net> <559B0FFD.4090306@redhat.com>
+Date: Tue, 7 Jul 2015 13:12:18 -0400 (EDT)
+Message-ID: <1261554654.41092991.1436289138746.JavaMail.zimbra@redhat.com>
+References: <alpine.DEB.2.00.1506191923200.31501@cobra.newdream.net> <5584D213.80405@redhat.com> <5584DB0E.3000503@redhat.com> <alpine.DEB.2.00.1507061324440.27973@cobra.newdream.net> <559B0FFD.4090306@redhat.com> <alpine.DEB.2.00.1507070958230.13176@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:34870 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932198AbbGGRAN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 7 Jul 2015 13:00:13 -0400
-Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-	by mx1.redhat.com (Postfix) with ESMTPS id 342213CB273
-	for <ceph-devel@vger.kernel.org>; Tue,  7 Jul 2015 17:00:13 +0000 (UTC)
-In-Reply-To: <559B0FFD.4090306@redhat.com>
+Received: from mx5-phx2.redhat.com ([209.132.183.37]:40111 "EHLO
+	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932378AbbGGRMU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Jul 2015 13:12:20 -0400
+In-Reply-To: <alpine.DEB.2.00.1507070958230.13176@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: David Zafman <dzafman@redhat.com>
+To: Sage Weil <sweil@redhat.com>
+Cc: David Zafman <dzafman@redhat.com>, ceph-devel@vger.kernel.org
+
+If we think we'll want to persist some temp objects later on, probably better to go ahead and export/import them now.
+
+Replay isn't relevant here since it happens at a lower level.  The ceph_objectstore_tool does do a kind of split during import since it needs to be able to handle the case where the pg was split between the import and the export.  In the event that temp objects need to persist across intervals, we'll have to solve the problem of splitting the temp objects in the osd as well as in the objectstore tool -- probably by creating a class of persistent temp objects with non-fake hashes taken from the corresponding non-temp object.
+-Sam
+
+----- Original Message -----
+From: "Sage Weil" <sweil@redhat.com>
+To: "David Zafman" <dzafman@redhat.com>
 Cc: sjust@redhat.com, ceph-devel@vger.kernel.org
+Sent: Tuesday, July 7, 2015 10:00:09 AM
+Subject: Re: ceph-objectstore-tool import failures
 
 On Mon, 6 Jul 2015, David Zafman wrote:
 > Why import temp objects when clear_temp_objects() will just remove it on osd
@@ -145,3 +155,8 @@ sage
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
 > 
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
