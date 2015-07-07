@@ -1,111 +1,205 @@
-From: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
-Subject: RE: About Fio backend with ObjectStore API
-Date: Tue, 7 Jul 2015 17:25:47 +0000
-Message-ID: <99767EA2E27DD44DB4E9F9B9ACA458C03B31A40C@SSIEXCH-MB3.ssi.samsung.com>
-References: <CACJqLyZcAzb5wocrN8b8WoK6j3ynWF-_3=T+1aQkDko4Mv_SmQ@mail.gmail.com>
-	<99767EA2E27DD44DB4E9F9B9ACA458C03B319D0D@SSIEXCH-MB3.ssi.samsung.com>
-	<CAMeBU_3ty6ae5VXP=_D8py1_Pk4rLKxCa4Larz0oKnyTYDtz8w@mail.gmail.com>
-	<99767EA2E27DD44DB4E9F9B9ACA458C03B319DF2@SSIEXCH-MB3.ssi.samsung.com>
-	<55931A5E.5000408@redhat.com>	<55931EEE.9070604@kernel.dk>
-	<CAHAfqgPMyfVtYrAp8ox11uA=q+zEDKP7Zoc2WveuYat=0hD8zg@mail.gmail.com>
- <CACJqLyZVLKEAS7+CTXHxDymXTzk2dZVQQkZrjx40pDRz=rStow@mail.gmail.com>
+From: Samuel Just <sjust@redhat.com>
+Subject: Re: ceph-objectstore-tool import failures
+Date: Tue, 7 Jul 2015 13:34:01 -0400 (EDT)
+Message-ID: <89086658.41109782.1436290441538.JavaMail.zimbra@redhat.com>
+References: <alpine.DEB.2.00.1506191923200.31501@cobra.newdream.net> <5584D213.80405@redhat.com> <5584DB0E.3000503@redhat.com> <alpine.DEB.2.00.1507061324440.27973@cobra.newdream.net> <559B0FFD.4090306@redhat.com> <alpine.DEB.2.00.1507070958230.13176@cobra.newdream.net> <1261554654.41092991.1436289138746.JavaMail.zimbra@redhat.com> <alpine.DEB.2.00.1507071020350.13176@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.ssi.samsung.com ([207.140.43.206]:42692 "EHLO
-	mx2.ssi.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932379AbbGGRZw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Jul 2015 13:25:52 -0400
-In-Reply-To: <CACJqLyZVLKEAS7+CTXHxDymXTzk2dZVQQkZrjx40pDRz=rStow@mail.gmail.com>
-Content-Language: en-US
+Received: from mx3-phx2.redhat.com ([209.132.183.24]:51764 "EHLO
+	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932804AbbGGReC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Jul 2015 13:34:02 -0400
+In-Reply-To: <alpine.DEB.2.00.1507071020350.13176@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomaiwang@gmail.com>, Daniel Gollub <daniel.gollub@gmail.com>
-Cc: Jens Axboe <axboe@kernel.dk>, Josh Durgin <jdurgin@redhat.com>, Mark Nelson <mnelson@redhat.com>, Casey Bodley <cbodley@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+To: Sage Weil <sweil@redhat.com>
+Cc: David Zafman <dzafman@redhat.com>, ceph-devel@vger.kernel.org
 
-SGkgRGFuaWVsIGFuZCBIYW9tYWksDQogTGV0IG1lIGtub3cgaWYgeW91IG5lZWQgYW55IGhlbHAg
-aW4gdGVybXMgb2YgZGV2ZWxvcG1lbnQgYW5kIHRlc3RpbmcuDQoNClJlZ2FyZHMsDQpKYW1lcw0K
-DQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogSGFvbWFpIFdhbmcgW21haWx0bzpo
-YW9tYWl3YW5nQGdtYWlsLmNvbV0gDQpTZW50OiBUdWVzZGF5LCBKdWx5IDA3LCAyMDE1IDE6MTgg
-QU0NClRvOiBEYW5pZWwgR29sbHViDQpDYzogSmVucyBBeGJvZTsgSm9zaCBEdXJnaW47IE1hcmsg
-TmVsc29uOyBKYW1lcyAoRmVpKSBMaXUtU1NJOyBDYXNleSBCb2RsZXk7IGNlcGgtZGV2ZWxAdmdl
-ci5rZXJuZWwub3JnOyBEYW5ueSBBbC1HYWFmDQpTdWJqZWN0OiBSZTogQWJvdXQgRmlvIGJhY2tl
-bmQgd2l0aCBPYmplY3RTdG9yZSBBUEkNCg0KT24gV2VkLCBKdWwgMSwgMjAxNSBhdCAxOjU4IFBN
-LCBEYW5pZWwgR29sbHViIDxkYW5pZWwuZ29sbHViQGdtYWlsLmNvbT4gd3JvdGU6DQo+IEhpIEpl
-bnMsDQo+DQo+IGFzIEpvc2ggYWxyZWFkeSBtZW50aW9uZWQgdGhlIGVuZ2luZSB3b3VsZCB1c2Ug
-Q2VwaCBpbnRlcm5hbCANCj4gT2JqZWN0U3RvcmUgQVBJIC4uLiB3aGljaCBpcyBub3Qgc3RhYmxl
-Lg0KPiBTbyBhcyBKb3NoIHByb3Bvc2VkLCBteSBpZGVhIHdhcyB0byBidWlsZCB0aGlzIEMrKyBP
-YmplY3RTdG9yYWdlIA0KPiBlbmdpbmUgYXMgYW4gZXh0ZXJuYWwgRklPIGVuZ2luZSBpbnNpZGUg
-Q2VwaCAob3B0aW9uYWxseSkuDQo+DQo+IFdlIGp1c3QgbmVlZCB0byBrZWVwIGZpbyB3b3JraW5n
-IHdpdGggZm9yIGV4dGVybmFsIEMrKyBlbmdpbmVzIC0gc28gDQo+IHRoaXMgZXh0ZXJuYWwgZW5n
-aW5lIGNhbiBleGlzdHMuDQo+IFRoYXQgd2FzIHRoZSBpbnRlbmQgd2hlbiBJIGRpZCBwdXNoIHZh
-cmlvdXMgImJ1aWxkIi1maXhlcyBmb3IgQysrIGZpbyANCj4gaGVhZGVycywgdG8gZ2V0IHRoZSBl
-eHRlcm5hbCBPYmplY3RTdG9yYWdlIGZpbyBlbmdpbmUgYnVpbGRpbmcsIA0KPiBiZWNhdXNlIGl0
-J3Mgd3JpdHRlbiBpbiBDKysuDQo+DQo+IEkgYW0gbm8gbG9uZ2VyIHdpdGggRFQsIHNvIEkgZG9u
-J3QgaGF2ZSBhIENlcGggY2x1c3RlciByaWdodCBub3cgdG8gDQo+IHRlc3QgdGhpbmdzLiBCdXQg
-SSdtIGhhcHB5IHRvIGhlbHAgdG8gZ2V0IHRoZSBPYmplY3RTdG9yYWdlIGZpbyBlbmdpbmUgDQo+
-IHVwc3RyZWFtIGludG8gQ2VwaC4gSm9zaCwgQ2FzZXkgZG8geW91IG5lZWQgYW55IGhlbHAgb24g
-dGhpcz8gSSBndWVzcyANCj4gaHR0cHM6Ly9naXRodWIuY29tL2xpbnV4Ym94Mi9saW51eGJveC1j
-ZXBoL3RyZWUvZmlvLW9iamVjdHN0b3JlIGlzICANCj4gZ29vZCBiYXNlIHRvIGNvbnRpbnVlLiBD
-YXNleSwgdGhhbmsgeW91IGZvciBjbGVhbmluZyB0aGluZ3MgdXAgOykNCj4NCg0KQ29vbCwgZG8g
-eW91IGhhdmUgcGxhbiB0byBkbyB0aGlzIHJlY2VudGx5PyBJZiBub3QsIEknbSB3aWxsaW5nIHRv
-IGhlbHAgOi0pDQoNCj4NCj4gQmVzdCBSZWdhcmRzLA0KPiBEYW5pZWwNCj4NCj4NCj4gT24gV2Vk
-LCBKdWwgMSwgMjAxNSBhdCAxMjo1NyBBTSwgSmVucyBBeGJvZSA8YXhib2VAa2VybmVsLmRrPiB3
-cm90ZToNCj4+DQo+PiBJJ2QgYmUgbW9yZSB0aGFuIGhhcHB5IHRvIGluY2x1ZGUgaXQuIERhbmll
-bCBoYXMgY29udHJpYnV0ZWQgdG8gZmlvIA0KPj4gYmVmb3JlLg0KPj4NCj4+IERhbmllbCAoQ0Mn
-ZWQpLCB3YXMgaXQgeW91ciBpbnRlbnQgdG8gZ2V0IHRoaXMgdXBzdHJlYW0/IEhvdyBkbyB3ZSAN
-Cj4+IG1ha2UgdGhpcyBoYXBwZW4/DQo+Pg0KPj4NCj4+IE9uIDA2LzMwLzIwMTUgMDQ6MzggUE0s
-IE1hcmsgTmVsc29uIHdyb3RlOg0KPj4+DQo+Pj4gSXQgd291bGQgYmUgZmFudGFzdGljIGlmIGZv
-bGtzIGRlY2lkZWQgdG8gd29yayBvbiB0aGlzIGFuZCBnb3QgaXQgDQo+Pj4gcHVzaGVkIHVwc3Ry
-ZWFtIGludG8gZmlvIHByb3Blci4gOkQNCj4+Pg0KPj4+IE1hcmsNCj4+Pg0KPj4+IE9uIDA2LzMw
-LzIwMTUgMDQ6MTkgUE0sIEphbWVzIChGZWkpIExpdS1TU0kgd3JvdGU6DQo+Pj4+DQo+Pj4+IEhp
-IENhc2V5LA0KPj4+Pg0KPj4+PiAgICBUaGFua3MgYSBsb3QuDQo+Pj4+DQo+Pj4+ICAgIFJlZ2Fy
-ZHMsDQo+Pj4+ICAgIEphbWVzDQo+Pj4+DQo+Pj4+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0t
-DQo+Pj4+IEZyb206IENhc2V5IEJvZGxleSBbbWFpbHRvOmNib2RsZXlAZ21haWwuY29tXQ0KPj4+
-PiBTZW50OiBUdWVzZGF5LCBKdW5lIDMwLCAyMDE1IDI6MTYgUE0NCj4+Pj4gVG86IEphbWVzIChG
-ZWkpIExpdS1TU0kNCj4+Pj4gQ2M6IEhhb21haSBXYW5nOyBjZXBoLWRldmVsQHZnZXIua2VybmVs
-Lm9yZw0KPj4+PiBTdWJqZWN0OiBSZTogQWJvdXQgRmlvIGJhY2tlbmQgd2l0aCBPYmplY3RTdG9y
-ZSBBUEkNCj4+Pj4NCj4+Pj4gSGksDQo+Pj4+DQo+Pj4+IFdoZW4gRGFubnkgQWwtR2FhZiAmIERh
-bmllbCBHb2xsdWIgcHVibGlzaGVkICJDZXBoIFBlcmZvcm1hbmNlDQo+Pj4+IEFuYWx5c2lzOiBm
-aW8gYW5kIFJCRCIgYXQNCj4+Pj4NCj4+Pj4gaHR0cHM6Ly90ZWxla29tY2xvdWQuZ2l0aHViLmlv
-L2NlcGgvMjAxNC8wMi8yNi9jZXBoLXBlcmZvcm1hbmNlLWFuYQ0KPj4+PiBseXNpc19maW9fcmJk
-Lmh0bWwsDQo+Pj4+DQo+Pj4+IHRoZXkgYWxzbyBtZW50aW9uZWQgYSBmaW8gZW5naW5lIHRoYXQg
-bGlua2VkIGRpcmVjdGx5IGludG8gY2VwaCdzIA0KPj4+PiBGaWxlU3RvcmUuIEkgd2FzIGFibGUg
-dG8gZmluZCBEYW5pZWwncyBicmFuY2ggb24gZ2l0aHViIGF0IA0KPj4+PiBodHRwczovL2dpdGh1
-Yi5jb20vZ29sbHViL2NlcGgvdHJlZS9maW9fZmlsZXN0b3JlX3YyLCBhbmQgZGlkIHNvbWUgDQo+
-Pj4+IG1vcmUgd29yayBvbiBpdCBhdCB0aGUgdGltZS4NCj4+Pj4NCj4+Pj4gSSBqdXN0IHJlYmFz
-ZWQgdGhhdCB3b3JrIG9udG8gdGhlIGxhdGVzdCBjZXBoIG1hc3RlciBicmFuY2gsIGFuZCANCj4+
-Pj4gcHVzaGVkIHRvIG91ciBnaXRodWIgYXQgDQo+Pj4+IGh0dHBzOi8vZ2l0aHViLmNvbS9saW51
-eGJveDIvbGludXhib3gtY2VwaC90cmVlL2Zpby1vYmplY3RzdG9yZS4gDQo+Pj4+IFlvdSBjYW4g
-ZmluZCB0aGUgc291cmNlIGluIHNyYy90ZXN0L2Zpb19jZXBoX2ZpbGVzdG9yZS5jYywgYW5kIHJ1
-biANCj4+Pj4gZmlvIHdpdGggdGhlIHByb3ZpZGVkIGV4YW1wbGUgZmlvIGpvYiBmaWxlIGluIHNy
-Yy90ZXN0L2ZpbGVzdG9yZS5maW8uDQo+Pj4+DQo+Pj4+IEkgZGlkbid0IGhhdmUgYSBjaGFuY2Ug
-dG8gY29uZmlybSB0aGF0IGl0IGJ1aWxkcyB3aXRoIGF1dG9tYWtlLCBidXQgDQo+Pj4+IHRoZSBj
-bWFrZSB2ZXJzaW9uIGJ1aWx0IGZvciBtZS4gSSdtIGhhcHB5IHRvIGhlbHAgaWYgeW91IHJ1biBp
-bnRvIA0KPj4+PiBwcm9ibGVtcywgQ2FzZXkNCj4+Pj4NCj4+Pj4gT24gVHVlLCBKdW4gMzAsIDIw
-MTUgYXQgMjozMSBQTSwgSmFtZXMgKEZlaSkgTGl1LVNTSSANCj4+Pj4gPGphbWVzLmxpdUBzc2ku
-c2Ftc3VuZy5jb20+IHdyb3RlOg0KPj4+Pj4NCj4+Pj4+IEhpIEhhb21haSwNCj4+Pj4+ICAgIFdo
-YXQgYXJlIHlvdSB0cnlpbmcgdG8gYXNrIGlzIHRvIGJlbmNobWFyayBsb2NhbCANCj4+Pj4+IG9i
-amVjdHN0b3JlKGxpa2UNCj4+Pj4+IGt2c3RvcmUvZmlsZXN0b3JlL25ld3N0b3JlKSBsb2NhbGx5
-IHdpdGggRklPKE9iamVjdFN0b3JlIGVuZ2luZSk/IA0KPj4+Pj4gWW91IHdhbnQgdG8gcHVyZWx5
-IGNvbXBhcmUgdGhlIHBlcmZvcm1hbmNlIGxvY2FsbHkgZm9yIHRoZXNlIA0KPj4+Pj4gb2JqZWN0
-c3RvcmVzLCByaWdodD8NCj4+Pj4+DQo+Pj4+PiAgICBSZWdhcmRzLA0KPj4+Pj4gICAgSmFtZXMN
-Cj4+Pj4+DQo+Pj4+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPj4+Pj4gRnJvbTogY2Vw
-aC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgDQo+Pj4+PiBbbWFpbHRvOmNlcGgtZGV2ZWwt
-b3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgSGFvbWFpIFdhbmcNCj4+Pj4+IFNl
-bnQ6IFR1ZXNkYXksIEp1bmUgMzAsIDIwMTUgOTowNiBBTQ0KPj4+Pj4gVG86IGNlcGgtZGV2ZWxA
-dmdlci5rZXJuZWwub3JnDQo+Pj4+PiBTdWJqZWN0OiBBYm91dCBGaW8gYmFja2VuZCB3aXRoIE9i
-amVjdFN0b3JlIEFQSQ0KPj4+Pj4NCj4+Pj4+IEhpIGFsbCwNCj4+Pj4+DQo+Pj4+PiBMb25nIGxv
-bmcgYWdvLCBpcyB0aGVyZSBzb21lb25lIHNhaWQgYWJvdXQgZmlvIGJhY2tlbmQgd2l0aCBDZXBo
-IA0KPj4+Pj4gT2JqZWN0U3RvcmUgQVBJPyBTbyB3ZSBjb3VsZCB1c2UgdGhlIGV4aXN0aW5nIG1h
-dHVyZSBmaW8gZmFjaWxpdHkgDQo+Pj4+PiB0byBiZW5jaG1hcmsgY2VwaCBvYmplY3RzdG9yZS4N
-Cj4+Pj4+DQo+Pj4+PiAtLQ0KPj4+Pj4gQmVzdCBSZWdhcmRzLA0KPj4+Pj4NCj4+Pj4+IFdoZWF0
-DQo+Pj4+PiAtLQ0KPj4+Pj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhl
-IGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiDQo+Pj4+PiBpbiB0aGUgYm9keSBvZiBhIG1l
-c3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIA0KPj4+Pj4gbWFqb3Jkb21v
-IGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPj4+
-Pg0KPj4+PiBOICAgICByICB5ICAgYiBYICDHp3YgXiAp3rp7Lm4gKyAgIHogXXogICB7YXkgIMqH
-2pkgLGogICBmICAgaCAgIHogIA0KPj4+PiAgdyAgICAgICBqOit2ICAgdyBqIG0gICAgICAgICB6
-WisgICAgIN2iaiIgICF0bWw9DQo+Pj4+DQo+Pj4+DQo+Pg0KPj4NCj4+IC0tDQo+PiBKZW5zIEF4
-Ym9lDQo+Pg0KPg0KDQoNCg0KLS0NCkJlc3QgUmVnYXJkcywNCg0KV2hlYXQNCg==
+In the sense that the osd will still clear them, sure.  I've changed my mind though, probably best to not import or export them for now, and update the code to handle the persistent-temp objects when they exist (by looking at the hash).  We don't record anything about the in progress push, so the recovery temp objects at least aren't valuable to keep around.
+-Sam
+
+----- Original Message -----
+From: "Sage Weil" <sweil@redhat.com>
+To: "Samuel Just" <sjust@redhat.com>
+Cc: "David Zafman" <dzafman@redhat.com>, ceph-devel@vger.kernel.org
+Sent: Tuesday, July 7, 2015 10:22:32 AM
+Subject: Re: ceph-objectstore-tool import failures
+
+On Tue, 7 Jul 2015, Samuel Just wrote:
+> If we think we'll want to persist some temp objects later on, probably 
+> better to go ahead and export/import them now.
+> 
+> Replay isn't relevant here since it happens at a lower level.  The 
+> ceph_objectstore_tool does do a kind of split during import since it 
+> needs to be able to handle the case where the pg was split between the 
+> import and the export.  In the event that temp objects need to persist 
+> across intervals, we'll have to solve the problem of splitting the temp 
+> objects in the osd as well as in the objectstore tool -- probably by 
+> creating a class of persistent temp objects with non-fake hashes taken 
+> from the corresponding non-temp object.
+
+Yeah.. I suspect the right thing to do is make the temp object hash match 
+the eventual target hash.  We can do this now for the temp recovery 
+objects (even though they'll be deleted by the OSD).  Presumably the same 
+trick will work for recorded transaction objects too, or whatever 
+else...
+
+In any case, for now the cot split can just look at hash like it does with 
+the non-temp objects and we're good, right?
+
+sage
+
+
+> -Sam
+> 
+> ----- Original Message -----
+> From: "Sage Weil" <sweil@redhat.com>
+> To: "David Zafman" <dzafman@redhat.com>
+> Cc: sjust@redhat.com, ceph-devel@vger.kernel.org
+> Sent: Tuesday, July 7, 2015 10:00:09 AM
+> Subject: Re: ceph-objectstore-tool import failures
+> 
+> On Mon, 6 Jul 2015, David Zafman wrote:
+> > Why import temp objects when clear_temp_objects() will just remove it on osd
+> > start-up?
+> 
+> For now we could get away with skipping them, but I suspect in the future 
+> there will be cases where we want to preserve them across restarts (for 
+> example, when recording multi-object transactions that are not yet 
+> committed).
+> 
+> > If we need the temp objects for replay purposes, does it matter if a split has
+> > occurred after the original export happened?
+> 
+> The replay should happen before the export... it's below the ObjectStore 
+> interface, so I don't think it matters here.  I'm not sure about the split 
+> implications, though.  Does the export/import have to do a split, or does 
+> it let the OSD do that after it's imported?
+> 
+> sage
+> 
+> > Or can we  just import all temporary objects without regards to split and
+> > assume that after replay the clear_temp_objects() will
+> > clean them up?
+> > 
+> > David
+> > 
+> > 
+> > On 7/6/15 1:28 PM, Sage Weil wrote:
+> > > On Fri, 19 Jun 2015, David Zafman wrote:
+> > > > This ghobject_t which has a pool of -3 is part of the export.   This
+> > > > caused
+> > > > the assert:
+> > > > 
+> > > > Read -3/1c/temp_recovering_1.1c_33'50_39_head/head
+> > > > 
+> > > > This was added by "osd: use per-pool temp poolid for temp objects"
+> > > > 18eb2a5fea9b0af74a171c3717d1c91766b15f0c in your branch.
+> > > > 
+> > > > You should skip it on export or recreate it on import with special
+> > > > handling.
+> > > Ah, that makes sense.  I think we should include these temp objects in the
+> > > export, though, and make cot understand that they are part of the pool.
+> > > We moved the "clear temp objects on startup" logic into teh OSD, which I
+> > > think will be useful for e.g. multiobject transactions (where we'll want
+> > > some objects that are internal/hidden to persist across peering intervals
+> > > and restarts).
+> > > 
+> > > Looking at your wip-temp-zafman, I think the first patch needs to be
+> > > dropped: include the temp objects, and I assume the meta one (which
+> > > has the pg log and other critical pg metadata).
+> > > 
+> > > Not sure where to change cot to handle the temp objects though?
+> > > 
+> > > Thanks!
+> > > sage
+> > > 
+> > > 
+> > > 
+> > > 
+> > > > David
+> > > > 
+> > > > On 6/19/15 7:38 PM, David Zafman wrote:
+> > > > > Have not seen this as an assert before.  Given the code below in
+> > > > > do_import()
+> > > > > of master branch the assert is impossible (?).
+> > > > > 
+> > > > >    if (!curmap.have_pg_pool(pgid.pgid.m_pool)) {
+> > > > >      cerr << "Pool " << pgid.pgid.m_pool << " no longer exists" <<
+> > > > > std::endl;
+> > > > >      // Special exit code for this error, used by test code
+> > > > >      return 10;  // Positive return means exit status
+> > > > >    }
+> > > > > 
+> > > > > 
+> > > > > David
+> > > > > 
+> > > > > On 6/19/15 7:25 PM, Sage Weil wrote:
+> > > > > > Hey David,
+> > > > > > 
+> > > > > > On this run
+> > > > > > 
+> > > > > >      /a/sage-2015-06-18_15:51:18-rados-wip-temp---basic-multi/939648
+> > > > > > 
+> > > > > > ceph-objectstore-tool is failing to import a pg because the pool
+> > > > > > doesn't
+> > > > > > exist.  It looks like the thrasher is doing an export+import and
+> > > > > > racing
+> > > > > > with a test that is tearing down a pool.  The crash is
+> > > > > > 
+> > > > > >    ceph version 9.0.1-955-ge274efa
+> > > > > > (e274efa450e99a68c02bcb713c8837d7809f1ec3)
+> > > > > >    1: ceph-objectstore-tool() [0xa26335]
+> > > > > >    2: (()+0xfcb0) [0x7f10cef18cb0]
+> > > > > >    3: (gsignal()+0x35) [0x7f10cd5af425]
+> > > > > >    4: (abort()+0x17b) [0x7f10cd5b2b8b]
+> > > > > >    5: (__gnu_cxx::__verbose_terminate_handler()+0x11d)
+> > > > > > [0x7f10cdf0269d]
+> > > > > >    6: (()+0xb5846) [0x7f10cdf00846]
+> > > > > >    7: (()+0xb5873) [0x7f10cdf00873]
+> > > > > >    8: (()+0xb596e) [0x7f10cdf0096e]
+> > > > > >    9: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+> > > > > > const*)+0x259) [0xb0ce09]
+> > > > > >    10: (ObjectStoreTool::get_object(ObjectStore*, coll_t,
+> > > > > > ceph::buffer::list&, OSDMap&, bool*)+0x143f) [0x64829f]
+> > > > > >    11: (ObjectStoreTool::do_import(ObjectStore*, OSDSuperblock&, bool,
+> > > > > > std::string)+0x13dd) [0x64a62d]
+> > > > > >    12: (main()+0x3017) [0x632037]
+> > > > > >    13: (__libc_start_main()+0xed) [0x7f10cd59a76d]
+> > > > > >    14: ceph-objectstore-tool() [0x639119]
+> > > > > > 
+> > > > > > I don't think this is related to my branch.. but maybe?  Have you seen
+> > > > > > this?  I rebased onto latest master yesterday.
+> > > > > > 
+> > > > > > sage
+> > > > > -- 
+> > > > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > > > --
+> > > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > > > 
+> > > > 
+> > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> > 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
