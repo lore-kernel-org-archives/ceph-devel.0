@@ -1,110 +1,111 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Cloud images for OpenStack & libvirt
-Date: Tue, 07 Jul 2015 19:25:04 +0200
-Message-ID: <559C0B70.2060400@dachary.org>
-References: <559C0923.7000202@dachary.org>
+From: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
+Subject: RE: About Fio backend with ObjectStore API
+Date: Tue, 7 Jul 2015 17:25:47 +0000
+Message-ID: <99767EA2E27DD44DB4E9F9B9ACA458C03B31A40C@SSIEXCH-MB3.ssi.samsung.com>
+References: <CACJqLyZcAzb5wocrN8b8WoK6j3ynWF-_3=T+1aQkDko4Mv_SmQ@mail.gmail.com>
+	<99767EA2E27DD44DB4E9F9B9ACA458C03B319D0D@SSIEXCH-MB3.ssi.samsung.com>
+	<CAMeBU_3ty6ae5VXP=_D8py1_Pk4rLKxCa4Larz0oKnyTYDtz8w@mail.gmail.com>
+	<99767EA2E27DD44DB4E9F9B9ACA458C03B319DF2@SSIEXCH-MB3.ssi.samsung.com>
+	<55931A5E.5000408@redhat.com>	<55931EEE.9070604@kernel.dk>
+	<CAHAfqgPMyfVtYrAp8ox11uA=q+zEDKP7Zoc2WveuYat=0hD8zg@mail.gmail.com>
+ <CACJqLyZVLKEAS7+CTXHxDymXTzk2dZVQQkZrjx40pDRz=rStow@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="IPjdkDPxgnbX8XMROpRRJAwtE7LXRDcVs"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:46171 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1757746AbbGGRZW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Jul 2015 13:25:22 -0400
-In-Reply-To: <559C0923.7000202@dachary.org>
+Received: from mx2.ssi.samsung.com ([207.140.43.206]:42692 "EHLO
+	mx2.ssi.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932379AbbGGRZw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Jul 2015 13:25:52 -0400
+In-Reply-To: <CACJqLyZVLKEAS7+CTXHxDymXTzk2dZVQQkZrjx40pDRz=rStow@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Haomai Wang <haomaiwang@gmail.com>, Daniel Gollub <daniel.gollub@gmail.com>
+Cc: Jens Axboe <axboe@kernel.dk>, Josh Durgin <jdurgin@redhat.com>, Mark Nelson <mnelson@redhat.com>, Casey Bodley <cbodley@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---IPjdkDPxgnbX8XMROpRRJAwtE7LXRDcVs
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-Hi Alexandre,
-
-You found that the Debian GNU/Linux 8 official image had a race condition=
- causing problems with systemd. You fixed it by building your own image a=
-t
-
-http://odisoweb1.odiso.net/debian-jessie-amd64-150620.raw
-
-but maybe the problem is fixed in the most recent image (dated june 6 201=
-5) ?
-
-Cheers
-
-On 07/07/2015 19:15, Loic Dachary wrote:
-> Hi Ceph,
->=20
-> Here is a summary of how to acquire cloud images where we presumably wa=
-nt Ceph to build. I did not research Debian GNU/Linux squeeze nor OpenSUS=
-E 12. And I added a few (Fedora 21, OpenSUSE 13.2 and Ubuntu 15.04).
->=20
-> glance image-download --file debian-7.4.qcow2 --progress 'GNU/Linux Deb=
-ian 7.4 Wheezy x64' # http://www.entercloudsuite.com/
-> wget -O debian-8.0.qcow2  http://cdimage.debian.org/cdimage/openstack/c=
-urrent/debian-8.1.0-openstack-amd64.qcow2
-> wget -O ubuntu-12.04.qcow2 https://cloud-images.ubuntu.com/precise/curr=
-ent/precise-server-cloudimg-amd64-disk1.img
-> wget -O ubuntu-12.04-i386.qcow2 https://cloud-images.ubuntu.com/precise=
-/current/precise-server-cloudimg-i386-disk1.img
-> wget -O ubuntu-14.04.qcow2 https://cloud-images.ubuntu.com/trusty/curre=
-nt/trusty-server-cloudimg-amd64-disk1.img
-> wget -O ubuntu-14.04-i386.qcow2 https://cloud-images.ubuntu.com/trusty/=
-current/trusty-server-cloudimg-i386-disk1.img
-> wget -O ubuntu-15.04.qcow2 https://cloud-images.ubuntu.com/vivid/curren=
-t/vivid-server-cloudimg-arm64-disk1.img
-> wget -O ubuntu-15.04-i386.qcow2 https://cloud-images.ubuntu.com/vivid/c=
-urrent/vivid-server-cloudimg-i386-disk1.img
-> wget -O opensuse-13.2 http://download.opensuse.org/repositories/Cloud:/=
-Images:/openSUSE_13.2/images/openSUSE-13.2-OpenStack-Guest.x86_64.qcow2
-> glance image-download --file centos-7.0.qcow2 --progress 'GNU/Linux Cen=
-tOS 7 x64' # http://www.entercloudsuite.com/
-> wget -O centos-7.0.qcow2 http://cloud.centos.org/centos/7/images/CentOS=
--7-x86_64-GenericCloud.qcow2                                             =
-                                                                   =20
-> glance image-download --file centos-6.5.qcow2 --progress 'GNU/Linux Cen=
-tOS 6.5 x64' # http://www.entercloudsuite.com/
-> wget -O fedora-22.qcow2 https://download.fedoraproject.org/pub/fedora/l=
-inux/releases/22/Cloud/x86_64/Images/Fedora-Cloud-Base-22-20150521.x86_64=
-=2Eqcow2
-> wget -O fedora-21.qcow2 http://fedora.mirrors.ovh.net/linux/releases/21=
-/Cloud/Images/x86_64/Fedora-Cloud-Base-20141203-21.x86_64.qcow2
-> wget -O fedora-20.qcow2 http://fedora.mirrors.ovh.net/linux/releases/20=
-/Images/x86_64/Fedora-x86_64-20-20131211.1-sda.qcow2
->=20
-> If you don't have access to an ttp://www.entercloudsuite.com/ OpenStack=
- tenant, you can find a copy at http://ecs.dachary.org/images/. Note howe=
-ver that you can also create an account there and run the glance command,=
- you won't be charged for it.
->=20
-> These images can be used with kvm from the command line as explained at=
- http://dachary.org/?p=3D3625 (Using a cloud image with kvm) or libvirt. =
-The OpenStack documentation has an inventory of locations where more imag=
-es can be found : http://docs.openstack.org/image-guide/content/ch_obtain=
-ing_images.html
->=20
-> Cheers
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---IPjdkDPxgnbX8XMROpRRJAwtE7LXRDcVs
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlWcC3AACgkQ8dLMyEl6F23SwQCfVKlPzn+ljAunNjLCZRLTPJIY
-qlIAn28ZElcPwOFflUiNMaGEI8zmYkfn
-=hY8q
------END PGP SIGNATURE-----
-
---IPjdkDPxgnbX8XMROpRRJAwtE7LXRDcVs--
+SGkgRGFuaWVsIGFuZCBIYW9tYWksDQogTGV0IG1lIGtub3cgaWYgeW91IG5lZWQgYW55IGhlbHAg
+aW4gdGVybXMgb2YgZGV2ZWxvcG1lbnQgYW5kIHRlc3RpbmcuDQoNClJlZ2FyZHMsDQpKYW1lcw0K
+DQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogSGFvbWFpIFdhbmcgW21haWx0bzpo
+YW9tYWl3YW5nQGdtYWlsLmNvbV0gDQpTZW50OiBUdWVzZGF5LCBKdWx5IDA3LCAyMDE1IDE6MTgg
+QU0NClRvOiBEYW5pZWwgR29sbHViDQpDYzogSmVucyBBeGJvZTsgSm9zaCBEdXJnaW47IE1hcmsg
+TmVsc29uOyBKYW1lcyAoRmVpKSBMaXUtU1NJOyBDYXNleSBCb2RsZXk7IGNlcGgtZGV2ZWxAdmdl
+ci5rZXJuZWwub3JnOyBEYW5ueSBBbC1HYWFmDQpTdWJqZWN0OiBSZTogQWJvdXQgRmlvIGJhY2tl
+bmQgd2l0aCBPYmplY3RTdG9yZSBBUEkNCg0KT24gV2VkLCBKdWwgMSwgMjAxNSBhdCAxOjU4IFBN
+LCBEYW5pZWwgR29sbHViIDxkYW5pZWwuZ29sbHViQGdtYWlsLmNvbT4gd3JvdGU6DQo+IEhpIEpl
+bnMsDQo+DQo+IGFzIEpvc2ggYWxyZWFkeSBtZW50aW9uZWQgdGhlIGVuZ2luZSB3b3VsZCB1c2Ug
+Q2VwaCBpbnRlcm5hbCANCj4gT2JqZWN0U3RvcmUgQVBJIC4uLiB3aGljaCBpcyBub3Qgc3RhYmxl
+Lg0KPiBTbyBhcyBKb3NoIHByb3Bvc2VkLCBteSBpZGVhIHdhcyB0byBidWlsZCB0aGlzIEMrKyBP
+YmplY3RTdG9yYWdlIA0KPiBlbmdpbmUgYXMgYW4gZXh0ZXJuYWwgRklPIGVuZ2luZSBpbnNpZGUg
+Q2VwaCAob3B0aW9uYWxseSkuDQo+DQo+IFdlIGp1c3QgbmVlZCB0byBrZWVwIGZpbyB3b3JraW5n
+IHdpdGggZm9yIGV4dGVybmFsIEMrKyBlbmdpbmVzIC0gc28gDQo+IHRoaXMgZXh0ZXJuYWwgZW5n
+aW5lIGNhbiBleGlzdHMuDQo+IFRoYXQgd2FzIHRoZSBpbnRlbmQgd2hlbiBJIGRpZCBwdXNoIHZh
+cmlvdXMgImJ1aWxkIi1maXhlcyBmb3IgQysrIGZpbyANCj4gaGVhZGVycywgdG8gZ2V0IHRoZSBl
+eHRlcm5hbCBPYmplY3RTdG9yYWdlIGZpbyBlbmdpbmUgYnVpbGRpbmcsIA0KPiBiZWNhdXNlIGl0
+J3Mgd3JpdHRlbiBpbiBDKysuDQo+DQo+IEkgYW0gbm8gbG9uZ2VyIHdpdGggRFQsIHNvIEkgZG9u
+J3QgaGF2ZSBhIENlcGggY2x1c3RlciByaWdodCBub3cgdG8gDQo+IHRlc3QgdGhpbmdzLiBCdXQg
+SSdtIGhhcHB5IHRvIGhlbHAgdG8gZ2V0IHRoZSBPYmplY3RTdG9yYWdlIGZpbyBlbmdpbmUgDQo+
+IHVwc3RyZWFtIGludG8gQ2VwaC4gSm9zaCwgQ2FzZXkgZG8geW91IG5lZWQgYW55IGhlbHAgb24g
+dGhpcz8gSSBndWVzcyANCj4gaHR0cHM6Ly9naXRodWIuY29tL2xpbnV4Ym94Mi9saW51eGJveC1j
+ZXBoL3RyZWUvZmlvLW9iamVjdHN0b3JlIGlzICANCj4gZ29vZCBiYXNlIHRvIGNvbnRpbnVlLiBD
+YXNleSwgdGhhbmsgeW91IGZvciBjbGVhbmluZyB0aGluZ3MgdXAgOykNCj4NCg0KQ29vbCwgZG8g
+eW91IGhhdmUgcGxhbiB0byBkbyB0aGlzIHJlY2VudGx5PyBJZiBub3QsIEknbSB3aWxsaW5nIHRv
+IGhlbHAgOi0pDQoNCj4NCj4gQmVzdCBSZWdhcmRzLA0KPiBEYW5pZWwNCj4NCj4NCj4gT24gV2Vk
+LCBKdWwgMSwgMjAxNSBhdCAxMjo1NyBBTSwgSmVucyBBeGJvZSA8YXhib2VAa2VybmVsLmRrPiB3
+cm90ZToNCj4+DQo+PiBJJ2QgYmUgbW9yZSB0aGFuIGhhcHB5IHRvIGluY2x1ZGUgaXQuIERhbmll
+bCBoYXMgY29udHJpYnV0ZWQgdG8gZmlvIA0KPj4gYmVmb3JlLg0KPj4NCj4+IERhbmllbCAoQ0Mn
+ZWQpLCB3YXMgaXQgeW91ciBpbnRlbnQgdG8gZ2V0IHRoaXMgdXBzdHJlYW0/IEhvdyBkbyB3ZSAN
+Cj4+IG1ha2UgdGhpcyBoYXBwZW4/DQo+Pg0KPj4NCj4+IE9uIDA2LzMwLzIwMTUgMDQ6MzggUE0s
+IE1hcmsgTmVsc29uIHdyb3RlOg0KPj4+DQo+Pj4gSXQgd291bGQgYmUgZmFudGFzdGljIGlmIGZv
+bGtzIGRlY2lkZWQgdG8gd29yayBvbiB0aGlzIGFuZCBnb3QgaXQgDQo+Pj4gcHVzaGVkIHVwc3Ry
+ZWFtIGludG8gZmlvIHByb3Blci4gOkQNCj4+Pg0KPj4+IE1hcmsNCj4+Pg0KPj4+IE9uIDA2LzMw
+LzIwMTUgMDQ6MTkgUE0sIEphbWVzIChGZWkpIExpdS1TU0kgd3JvdGU6DQo+Pj4+DQo+Pj4+IEhp
+IENhc2V5LA0KPj4+Pg0KPj4+PiAgICBUaGFua3MgYSBsb3QuDQo+Pj4+DQo+Pj4+ICAgIFJlZ2Fy
+ZHMsDQo+Pj4+ICAgIEphbWVzDQo+Pj4+DQo+Pj4+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0t
+DQo+Pj4+IEZyb206IENhc2V5IEJvZGxleSBbbWFpbHRvOmNib2RsZXlAZ21haWwuY29tXQ0KPj4+
+PiBTZW50OiBUdWVzZGF5LCBKdW5lIDMwLCAyMDE1IDI6MTYgUE0NCj4+Pj4gVG86IEphbWVzIChG
+ZWkpIExpdS1TU0kNCj4+Pj4gQ2M6IEhhb21haSBXYW5nOyBjZXBoLWRldmVsQHZnZXIua2VybmVs
+Lm9yZw0KPj4+PiBTdWJqZWN0OiBSZTogQWJvdXQgRmlvIGJhY2tlbmQgd2l0aCBPYmplY3RTdG9y
+ZSBBUEkNCj4+Pj4NCj4+Pj4gSGksDQo+Pj4+DQo+Pj4+IFdoZW4gRGFubnkgQWwtR2FhZiAmIERh
+bmllbCBHb2xsdWIgcHVibGlzaGVkICJDZXBoIFBlcmZvcm1hbmNlDQo+Pj4+IEFuYWx5c2lzOiBm
+aW8gYW5kIFJCRCIgYXQNCj4+Pj4NCj4+Pj4gaHR0cHM6Ly90ZWxla29tY2xvdWQuZ2l0aHViLmlv
+L2NlcGgvMjAxNC8wMi8yNi9jZXBoLXBlcmZvcm1hbmNlLWFuYQ0KPj4+PiBseXNpc19maW9fcmJk
+Lmh0bWwsDQo+Pj4+DQo+Pj4+IHRoZXkgYWxzbyBtZW50aW9uZWQgYSBmaW8gZW5naW5lIHRoYXQg
+bGlua2VkIGRpcmVjdGx5IGludG8gY2VwaCdzIA0KPj4+PiBGaWxlU3RvcmUuIEkgd2FzIGFibGUg
+dG8gZmluZCBEYW5pZWwncyBicmFuY2ggb24gZ2l0aHViIGF0IA0KPj4+PiBodHRwczovL2dpdGh1
+Yi5jb20vZ29sbHViL2NlcGgvdHJlZS9maW9fZmlsZXN0b3JlX3YyLCBhbmQgZGlkIHNvbWUgDQo+
+Pj4+IG1vcmUgd29yayBvbiBpdCBhdCB0aGUgdGltZS4NCj4+Pj4NCj4+Pj4gSSBqdXN0IHJlYmFz
+ZWQgdGhhdCB3b3JrIG9udG8gdGhlIGxhdGVzdCBjZXBoIG1hc3RlciBicmFuY2gsIGFuZCANCj4+
+Pj4gcHVzaGVkIHRvIG91ciBnaXRodWIgYXQgDQo+Pj4+IGh0dHBzOi8vZ2l0aHViLmNvbS9saW51
+eGJveDIvbGludXhib3gtY2VwaC90cmVlL2Zpby1vYmplY3RzdG9yZS4gDQo+Pj4+IFlvdSBjYW4g
+ZmluZCB0aGUgc291cmNlIGluIHNyYy90ZXN0L2Zpb19jZXBoX2ZpbGVzdG9yZS5jYywgYW5kIHJ1
+biANCj4+Pj4gZmlvIHdpdGggdGhlIHByb3ZpZGVkIGV4YW1wbGUgZmlvIGpvYiBmaWxlIGluIHNy
+Yy90ZXN0L2ZpbGVzdG9yZS5maW8uDQo+Pj4+DQo+Pj4+IEkgZGlkbid0IGhhdmUgYSBjaGFuY2Ug
+dG8gY29uZmlybSB0aGF0IGl0IGJ1aWxkcyB3aXRoIGF1dG9tYWtlLCBidXQgDQo+Pj4+IHRoZSBj
+bWFrZSB2ZXJzaW9uIGJ1aWx0IGZvciBtZS4gSSdtIGhhcHB5IHRvIGhlbHAgaWYgeW91IHJ1biBp
+bnRvIA0KPj4+PiBwcm9ibGVtcywgQ2FzZXkNCj4+Pj4NCj4+Pj4gT24gVHVlLCBKdW4gMzAsIDIw
+MTUgYXQgMjozMSBQTSwgSmFtZXMgKEZlaSkgTGl1LVNTSSANCj4+Pj4gPGphbWVzLmxpdUBzc2ku
+c2Ftc3VuZy5jb20+IHdyb3RlOg0KPj4+Pj4NCj4+Pj4+IEhpIEhhb21haSwNCj4+Pj4+ICAgIFdo
+YXQgYXJlIHlvdSB0cnlpbmcgdG8gYXNrIGlzIHRvIGJlbmNobWFyayBsb2NhbCANCj4+Pj4+IG9i
+amVjdHN0b3JlKGxpa2UNCj4+Pj4+IGt2c3RvcmUvZmlsZXN0b3JlL25ld3N0b3JlKSBsb2NhbGx5
+IHdpdGggRklPKE9iamVjdFN0b3JlIGVuZ2luZSk/IA0KPj4+Pj4gWW91IHdhbnQgdG8gcHVyZWx5
+IGNvbXBhcmUgdGhlIHBlcmZvcm1hbmNlIGxvY2FsbHkgZm9yIHRoZXNlIA0KPj4+Pj4gb2JqZWN0
+c3RvcmVzLCByaWdodD8NCj4+Pj4+DQo+Pj4+PiAgICBSZWdhcmRzLA0KPj4+Pj4gICAgSmFtZXMN
+Cj4+Pj4+DQo+Pj4+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPj4+Pj4gRnJvbTogY2Vw
+aC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgDQo+Pj4+PiBbbWFpbHRvOmNlcGgtZGV2ZWwt
+b3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgSGFvbWFpIFdhbmcNCj4+Pj4+IFNl
+bnQ6IFR1ZXNkYXksIEp1bmUgMzAsIDIwMTUgOTowNiBBTQ0KPj4+Pj4gVG86IGNlcGgtZGV2ZWxA
+dmdlci5rZXJuZWwub3JnDQo+Pj4+PiBTdWJqZWN0OiBBYm91dCBGaW8gYmFja2VuZCB3aXRoIE9i
+amVjdFN0b3JlIEFQSQ0KPj4+Pj4NCj4+Pj4+IEhpIGFsbCwNCj4+Pj4+DQo+Pj4+PiBMb25nIGxv
+bmcgYWdvLCBpcyB0aGVyZSBzb21lb25lIHNhaWQgYWJvdXQgZmlvIGJhY2tlbmQgd2l0aCBDZXBo
+IA0KPj4+Pj4gT2JqZWN0U3RvcmUgQVBJPyBTbyB3ZSBjb3VsZCB1c2UgdGhlIGV4aXN0aW5nIG1h
+dHVyZSBmaW8gZmFjaWxpdHkgDQo+Pj4+PiB0byBiZW5jaG1hcmsgY2VwaCBvYmplY3RzdG9yZS4N
+Cj4+Pj4+DQo+Pj4+PiAtLQ0KPj4+Pj4gQmVzdCBSZWdhcmRzLA0KPj4+Pj4NCj4+Pj4+IFdoZWF0
+DQo+Pj4+PiAtLQ0KPj4+Pj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhl
+IGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiDQo+Pj4+PiBpbiB0aGUgYm9keSBvZiBhIG1l
+c3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIA0KPj4+Pj4gbWFqb3Jkb21v
+IGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPj4+
+Pg0KPj4+PiBOICAgICByICB5ICAgYiBYICDHp3YgXiAp3rp7Lm4gKyAgIHogXXogICB7YXkgIMqH
+2pkgLGogICBmICAgaCAgIHogIA0KPj4+PiAgdyAgICAgICBqOit2ICAgdyBqIG0gICAgICAgICB6
+WisgICAgIN2iaiIgICF0bWw9DQo+Pj4+DQo+Pj4+DQo+Pg0KPj4NCj4+IC0tDQo+PiBKZW5zIEF4
+Ym9lDQo+Pg0KPg0KDQoNCg0KLS0NCkJlc3QgUmVnYXJkcywNCg0KV2hlYXQNCg==
