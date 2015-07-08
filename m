@@ -1,29 +1,56 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: librados clone_range
-Date: Wed, 8 Jul 2015 06:22:51 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1507080622380.27973@cobra.newdream.net>
-References: <14671826.29748867.1435083472672.JavaMail.zimbra@redhat.com>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: 07/08/2015 Weekly Ceph Performance Meeting IS ON!
+Date: Wed, 08 Jul 2015 09:30:10 -0500
+Message-ID: <559D33F2.3080308@redhat.com>
+Reply-To: mnelson@redhat.com
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44208 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751757AbbGHNWw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Jul 2015 09:22:52 -0400
-In-Reply-To: <14671826.29748867.1435083472672.JavaMail.zimbra@redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:46556 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1758240AbbGHOaN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 8 Jul 2015 10:30:13 -0400
+Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
+	by mx1.redhat.com (Postfix) with ESMTPS id 2DBD08F256
+	for <ceph-devel@vger.kernel.org>; Wed,  8 Jul 2015 14:30:13 +0000 (UTC)
+Received: from [10.3.112.31] (ovpn-112-31.phx2.redhat.com [10.3.112.31])
+	by int-mx13.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t68EUAZ5011297
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+	for <ceph-devel@vger.kernel.org>; Wed, 8 Jul 2015 10:30:12 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sjust@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, "'ceph-users@lists.ceph.com' (ceph-users@lists.ceph.com)" <ceph-users@lists.ceph.com>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, 23 Jun 2015, Samuel Just wrote:
-> ObjectWriteOperations currently allow you to perform a clone_range from 
-> another object with the same object locator.  Years ago, rgw used this 
-> as part of multipart upload.  Today, the implementation complicates the 
-> OSD considerably, and it doesn't appear to have any users left.  Is 
-> there anyone who would be sad to see it removed from the librados 
-> interface?
+8AM PST as usual!  Let's discuss the topics that we didn't cover last 
+week due to CDS: New cache teiring promote probability investigation and 
+wbthrottle auto-tuning.  Please feel free to add your own!
 
-I won't miss it.
+Here's the links:
 
-sage
+Etherpad URL:
+http://pad.ceph.com/p/performance_weekly
+
+To join the Meeting:
+https://bluejeans.com/268261044
+
+To join via Browser:
+https://bluejeans.com/268261044/browser
+
+To join with Lync:
+https://bluejeans.com/268261044/lync
+
+
+To join via Room System:
+Video Conferencing System: bjn.vc -or- 199.48.152.152
+Meeting ID: 268261044
+
+To join via Phone:
+1) Dial:
+           +1 408 740 7256
+           +1 888 240 2560(US Toll Free)
+           +1 408 317 9253(Alternate Number)
+           (see all numbers - http://bluejeans.com/numbers)
+2) Enter Conference ID: 268261044
+
+Mark
