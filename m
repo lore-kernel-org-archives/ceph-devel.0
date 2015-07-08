@@ -1,90 +1,63 @@
-From: Owen Synge <osynge@suse.com>
-Subject: Re: systemd support
-Date: Wed, 08 Jul 2015 17:28:55 +0200
-Message-ID: <559D41B7.5020705@suse.com>
-References: <55970AFF.3020603@dachary.org>
+From: "Deneau, Tom" <tom.deneau@amd.com>
+Subject: RE: load-gen from an osd node
+Date: Wed, 8 Jul 2015 16:17:47 +0000
+Message-ID: <BC97738F8E7C8742BABED7F06FB9DF91669B1F9A@SATLEXDAG01.amd.com>
+References: <BC97738F8E7C8742BABED7F06FB9DF91669AEA37@SATLEXDAG01.amd.com>
+ <CAC6JEv_pNYxaWs3SFxqYMrYyaWei79x_61g5Nt6D=uQxQh7qnQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.emea.novell.com ([130.57.118.101]:59281 "EHLO
-	mail.emea.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932857AbbGHPaa (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-	Wed, 8 Jul 2015 11:30:30 -0400
-In-Reply-To: <55970AFF.3020603@dachary.org>
+Received: from mail-bl2on0104.outbound.protection.outlook.com ([65.55.169.104]:63936
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1758611AbbGHQRw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 8 Jul 2015 12:17:52 -0400
+In-Reply-To: <CAC6JEv_pNYxaWs3SFxqYMrYyaWei79x_61g5Nt6D=uQxQh7qnQ@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>, Ken Dreyer <kdreyer@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <greg@gregs42.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Dear All,
-
-We have working SUSE systemd support using the master systemd files.
-
-The only things that prove tricky is merging it to master.
-
-You can find it working here
-
-https://github.com/SUSE/ceph/tree/distro/suse-0-80-9
-
-We also have a release for hammer.
-
-The problem is that nearly every change also requires a synchronised
-change with the spec file.
-
-Since I cant test on the same platform as upstream, (Due to silly side
-effects of using EPEL) and quiet reasonable upstream insist that no
-change breaks their current system moving this upstream had to be
-blocked until master could build suse for my tests.
-
-I have some 3 pull requests this in particular that contains a nearly
-working system:
-
-https://github.com/ceph/ceph/pull/5029
-
-BUt the (quiet reasonable) demands of the spec file reviewers caused th=
-e
-delay, and level of changes to be too geate for me to get this task don=
-e
-in the desired window of time.
-
-At this moment I need to work on ceph-deploy and will be at least a wee=
-k
-before I can get back to tidying the pull requests for master.
-
-Best regards
-
-Owen
-
-On 07/04/2015 12:21 AM, Loic Dachary wrote:
-> [cc'ing ceph-devel in case someone else has the answer]
->=20
-> Hi Ken,
->=20
-> I know very little about systemd and I'd like to learn more. My under=
-standing is that we have some support in the current master branch, but=
- it is incomplete. Are there differences with what I would find in the =
-Red Hat Storage 1.3 packages ? If I'm not mistaken RHEL7 uses systemd, =
-therefore I guess there may be a better support there. Unless it's usin=
-g the legacy sysvinit files ?
->=20
-> Cheers
->=20
-
---=20
-SUSE LINUX GmbH, GF: Jeff Hawn, Jennifer Guild, Felix Imend=C3=B6rffer,=
- HRB
-21284 (AG
-N=C3=BCrnberg)
-
-Maxfeldstra=C3=9Fe 5
-
-90409 N=C3=BCrnberg
-
-Germany
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+V2l0aCB0aGUgbmV3ZXIgcmFkb3MsIGp1c3QgcnVubmluZyAgcmFkb3MgLXAgc29tZXBvb2wgbG9h
+ZC1nZW4sIHdlIGdldA0KDQpwcmVwYXJpbmcgMjAwIG9iamVjdHMNCmxvYWQtZ2VuIHdpbGwgcnVu
+IDYwIHNlY29uZHMNCiAgICAxOiB0aHJvdWdocHV0PTBNQi9zZWMgcGVuZGluZyBkYXRhPTANCiAg
+ICAyOiB0aHJvdWdocHV0PTBNQi9zZWMgcGVuZGluZyBkYXRhPTANCiAgICAzOiB0aHJvdWdocHV0
+PTBNQi9zZWMgcGVuZGluZyBkYXRhPTANCiAgICA0OiB0aHJvdWdocHV0PTBNQi9zZWMgcGVuZGlu
+ZyBkYXRhPTANCiAgICA1OiB0aHJvdWdocHV0PTBNQi9zZWMgcGVuZGluZyBkYXRhPTANCiAgICA2
+OiB0aHJvdWdocHV0PTBNQi9zZWMgcGVuZGluZyBkYXRhPTANCg0KQnV0IEkgc2VlIHRoZSBjaGFu
+Z2UgdGhhdCBjYXVzZWQgdGhpcyBiZWhhdmlvciB3YXMgZXhwbGljaXRseSBpbml0aWFsaXppbmcg
+bGcubWF4X29wcyB0byAwLg0KQmVmb3JlIHRoaXMsIG1heF9vcHMgd2FzIGp1c3Qgd2hhdGV2ZXIg
+aGFwcGVuZWQgdG8gYmUgaW4gbWVtb3J5Lg0KDQpTbyB0aGUgbmV3ZXIgbG9hZC1nZW4gd29ya3Mg
+ZmluZSBhcyBsb25nIGFzIHlvdSBleHBsaWNpdGx5IHNldCAtLW1heC1vcHMgb24gdGhlIGNvbW1h
+bmQgbGluZS4NCg0KLS0gVG9tIERlbmVhdQ0KDQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0t
+LS0NCj4gRnJvbTogR3JlZ29yeSBGYXJudW0gW21haWx0bzpncmVnQGdyZWdzNDIuY29tXQ0KPiBT
+ZW50OiBXZWRuZXNkYXksIEp1bHkgMDEsIDIwMTUgMTE6MDUgQU0NCj4gVG86IERlbmVhdSwgVG9t
+DQo+IENjOiBjZXBoLWRldmVsDQo+IFN1YmplY3Q6IFJlOiBsb2FkLWdlbiBmcm9tIGFuIG9zZCBu
+b2RlDQo+IA0KPiBIbW0sIHRoZSBvbmx5IGNoYW5nZXMgSSBzZWUgYmV0d2VlbiB0aG9zZSB0d28g
+dmVyc2lvbnMgYXJlIHNvbWUgcHJldHR5DQo+IHByZWNpc2UgY2xlYW51cHMgd2hpY2ggc2hvdWxk
+bid0IGNhdXNlIHRoaXMuIEJ1dCBpdCBtZWFucyB0aGF0IGEgYmlzZWN0IG9yDQo+IGRldGVybWlu
+ZWQgbG9vayBzaG91bGQgYmUgZWFzeS4gQ2FuIHlvdSBjcmVhdGUgYSB0aWNrZXQgd2hpY2ggaW5j
+bHVkZXMgdGhlDQo+IGV4YWN0IG91dHB1dCB5b3UncmUgc2VlaW5nIGFuZCB0aGUgZXhhY3QgdmVy
+c2lvbnMgeW91J3JlIHJ1bm5pbmc/DQo+IC1HcmVnDQo+IA0KPiBPbiBNb24sIEp1biAyOSwgMjAx
+NSBhdCAxMToyNyBQTSwgRGVuZWF1LCBUb20gPHRvbS5kZW5lYXVAYW1kLmNvbT4gd3JvdGU6DQo+
+ID4gT2gsIEkganVzdCBub3RpY2VkIHRoYXQgdGhlIGNsaWVudCBub2RlcyBJIHNwb2tlIG9mIHdo
+ZXJlIGxvYWQtZ2VuDQo+ID4gYWN0dWFsbHkgd29ya2VkIHdlcmUgcnVubmluZyAwLjk0LCBub3Qg
+OS4wLjEuICBBbmQgd2hlbiBJIHVwZ3JhZGUgdGhlbSB0bw0KPiA5LjAuMSwgbG9hZC1nZW4gbm8g
+bG9uZ2VyIHdvcmtzLg0KPiA+DQo+ID4gU28gbW9yZSBsaWtlbHkgdGhpcyBpcyBqdXN0IGEgcHJv
+YmxlbSB3aXRoIG5ld2VyIHJhZG9zIGxvYWQtZ2Vucw0KPiA+DQo+ID4gLS0gVG9tDQo+ID4NCj4g
+Pg0KPiA+DQo+ID4+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+ID4+IEZyb206IERlbmVh
+dSwgVG9tDQo+ID4+IFNlbnQ6IEZyaWRheSwgSnVuZSAyNiwgMjAxNSA3OjQ4IFBNDQo+ID4+IFRv
+OiBjZXBoLWRldmVsDQo+ID4+IFN1YmplY3Q6IGxvYWQtZ2VuIGZyb20gYW4gb3NkIG5vZGUNCj4g
+Pj4NCj4gPj4gSSBhbSBydW5uaW5nIDkuMC4xIGFuZCBJIG5vdGljZWQgd2hlbiBJIHJ1biByYWRv
+cyBsb2FkLWdlbiBmcm9tIG9uZQ0KPiA+PiBvZiB0aGUgb3NkIG5vZGVzLCBpdCBjcmVhdGVzIHRo
+ZSBvYmplY3RzIGJ1dCB0aGVuIGFsd2F5cyByZXBvcnRzIGENCj4gPj4gdGhyb3VnaHB1dCBvZiAw
+IE1CL3NlYy4NCj4gPj4NCj4gPj4gQnV0IGlmIEkgcnVuIGl0IGZyb20gYSBzZXBhcmF0ZSBjbGll
+bnQgbm9kZSwgaXQgd29ya3MgZmluZS4NCj4gPj4gV2h5IHdvdWxkIHRoaXMgYmU/DQo+ID4+DQo+
+ID4+IEknbSBub3Qgc3VyZSBidXQgSSB0aG91Z2h0IGluIGVhcmxpZXIgdmVyc2lvbnMgbG9hZC1n
+ZW4gY291bGQgYmUgcnVuDQo+ID4+IGZyb20gYW4gb3NkIG5vZGUuDQo+ID4+DQo+ID4+IC0tIFRv
+bSBEZW5lYXUNCj4gPiAtLQ0KPiA+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5k
+IHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIg0KPiA+IGluIHRoZSBib2R5IG9mIGEg
+bWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vDQo+ID4g
+aW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo=
