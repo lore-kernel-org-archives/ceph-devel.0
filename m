@@ -1,63 +1,55 @@
-From: "Deneau, Tom" <tom.deneau@amd.com>
-Subject: RE: load-gen from an osd node
-Date: Wed, 8 Jul 2015 16:17:47 +0000
-Message-ID: <BC97738F8E7C8742BABED7F06FB9DF91669B1F9A@SATLEXDAG01.amd.com>
-References: <BC97738F8E7C8742BABED7F06FB9DF91669AEA37@SATLEXDAG01.amd.com>
- <CAC6JEv_pNYxaWs3SFxqYMrYyaWei79x_61g5Nt6D=uQxQh7qnQ@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: preparing firefly v0.80.11
+Date: Wed, 08 Jul 2015 19:49:35 +0200
+Message-ID: <559D62AF.6090107@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="Iu6f2rovc8TT3AsoAiBCbpCgIDROfhw3B"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0104.outbound.protection.outlook.com ([65.55.169.104]:63936
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1758611AbbGHQRw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 8 Jul 2015 12:17:52 -0400
-In-Reply-To: <CAC6JEv_pNYxaWs3SFxqYMrYyaWei79x_61g5Nt6D=uQxQh7qnQ@mail.gmail.com>
-Content-Language: en-US
+Received: from mail2.dachary.org ([91.121.57.175]:46832 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1758785AbbGHRth (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Jul 2015 13:49:37 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@gregs42.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Nathan Cutler <ncutler@suse.cz>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-V2l0aCB0aGUgbmV3ZXIgcmFkb3MsIGp1c3QgcnVubmluZyAgcmFkb3MgLXAgc29tZXBvb2wgbG9h
-ZC1nZW4sIHdlIGdldA0KDQpwcmVwYXJpbmcgMjAwIG9iamVjdHMNCmxvYWQtZ2VuIHdpbGwgcnVu
-IDYwIHNlY29uZHMNCiAgICAxOiB0aHJvdWdocHV0PTBNQi9zZWMgcGVuZGluZyBkYXRhPTANCiAg
-ICAyOiB0aHJvdWdocHV0PTBNQi9zZWMgcGVuZGluZyBkYXRhPTANCiAgICAzOiB0aHJvdWdocHV0
-PTBNQi9zZWMgcGVuZGluZyBkYXRhPTANCiAgICA0OiB0aHJvdWdocHV0PTBNQi9zZWMgcGVuZGlu
-ZyBkYXRhPTANCiAgICA1OiB0aHJvdWdocHV0PTBNQi9zZWMgcGVuZGluZyBkYXRhPTANCiAgICA2
-OiB0aHJvdWdocHV0PTBNQi9zZWMgcGVuZGluZyBkYXRhPTANCg0KQnV0IEkgc2VlIHRoZSBjaGFu
-Z2UgdGhhdCBjYXVzZWQgdGhpcyBiZWhhdmlvciB3YXMgZXhwbGljaXRseSBpbml0aWFsaXppbmcg
-bGcubWF4X29wcyB0byAwLg0KQmVmb3JlIHRoaXMsIG1heF9vcHMgd2FzIGp1c3Qgd2hhdGV2ZXIg
-aGFwcGVuZWQgdG8gYmUgaW4gbWVtb3J5Lg0KDQpTbyB0aGUgbmV3ZXIgbG9hZC1nZW4gd29ya3Mg
-ZmluZSBhcyBsb25nIGFzIHlvdSBleHBsaWNpdGx5IHNldCAtLW1heC1vcHMgb24gdGhlIGNvbW1h
-bmQgbGluZS4NCg0KLS0gVG9tIERlbmVhdQ0KDQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0t
-LS0NCj4gRnJvbTogR3JlZ29yeSBGYXJudW0gW21haWx0bzpncmVnQGdyZWdzNDIuY29tXQ0KPiBT
-ZW50OiBXZWRuZXNkYXksIEp1bHkgMDEsIDIwMTUgMTE6MDUgQU0NCj4gVG86IERlbmVhdSwgVG9t
-DQo+IENjOiBjZXBoLWRldmVsDQo+IFN1YmplY3Q6IFJlOiBsb2FkLWdlbiBmcm9tIGFuIG9zZCBu
-b2RlDQo+IA0KPiBIbW0sIHRoZSBvbmx5IGNoYW5nZXMgSSBzZWUgYmV0d2VlbiB0aG9zZSB0d28g
-dmVyc2lvbnMgYXJlIHNvbWUgcHJldHR5DQo+IHByZWNpc2UgY2xlYW51cHMgd2hpY2ggc2hvdWxk
-bid0IGNhdXNlIHRoaXMuIEJ1dCBpdCBtZWFucyB0aGF0IGEgYmlzZWN0IG9yDQo+IGRldGVybWlu
-ZWQgbG9vayBzaG91bGQgYmUgZWFzeS4gQ2FuIHlvdSBjcmVhdGUgYSB0aWNrZXQgd2hpY2ggaW5j
-bHVkZXMgdGhlDQo+IGV4YWN0IG91dHB1dCB5b3UncmUgc2VlaW5nIGFuZCB0aGUgZXhhY3QgdmVy
-c2lvbnMgeW91J3JlIHJ1bm5pbmc/DQo+IC1HcmVnDQo+IA0KPiBPbiBNb24sIEp1biAyOSwgMjAx
-NSBhdCAxMToyNyBQTSwgRGVuZWF1LCBUb20gPHRvbS5kZW5lYXVAYW1kLmNvbT4gd3JvdGU6DQo+
-ID4gT2gsIEkganVzdCBub3RpY2VkIHRoYXQgdGhlIGNsaWVudCBub2RlcyBJIHNwb2tlIG9mIHdo
-ZXJlIGxvYWQtZ2VuDQo+ID4gYWN0dWFsbHkgd29ya2VkIHdlcmUgcnVubmluZyAwLjk0LCBub3Qg
-OS4wLjEuICBBbmQgd2hlbiBJIHVwZ3JhZGUgdGhlbSB0bw0KPiA5LjAuMSwgbG9hZC1nZW4gbm8g
-bG9uZ2VyIHdvcmtzLg0KPiA+DQo+ID4gU28gbW9yZSBsaWtlbHkgdGhpcyBpcyBqdXN0IGEgcHJv
-YmxlbSB3aXRoIG5ld2VyIHJhZG9zIGxvYWQtZ2Vucw0KPiA+DQo+ID4gLS0gVG9tDQo+ID4NCj4g
-Pg0KPiA+DQo+ID4+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+ID4+IEZyb206IERlbmVh
-dSwgVG9tDQo+ID4+IFNlbnQ6IEZyaWRheSwgSnVuZSAyNiwgMjAxNSA3OjQ4IFBNDQo+ID4+IFRv
-OiBjZXBoLWRldmVsDQo+ID4+IFN1YmplY3Q6IGxvYWQtZ2VuIGZyb20gYW4gb3NkIG5vZGUNCj4g
-Pj4NCj4gPj4gSSBhbSBydW5uaW5nIDkuMC4xIGFuZCBJIG5vdGljZWQgd2hlbiBJIHJ1biByYWRv
-cyBsb2FkLWdlbiBmcm9tIG9uZQ0KPiA+PiBvZiB0aGUgb3NkIG5vZGVzLCBpdCBjcmVhdGVzIHRo
-ZSBvYmplY3RzIGJ1dCB0aGVuIGFsd2F5cyByZXBvcnRzIGENCj4gPj4gdGhyb3VnaHB1dCBvZiAw
-IE1CL3NlYy4NCj4gPj4NCj4gPj4gQnV0IGlmIEkgcnVuIGl0IGZyb20gYSBzZXBhcmF0ZSBjbGll
-bnQgbm9kZSwgaXQgd29ya3MgZmluZS4NCj4gPj4gV2h5IHdvdWxkIHRoaXMgYmU/DQo+ID4+DQo+
-ID4+IEknbSBub3Qgc3VyZSBidXQgSSB0aG91Z2h0IGluIGVhcmxpZXIgdmVyc2lvbnMgbG9hZC1n
-ZW4gY291bGQgYmUgcnVuDQo+ID4+IGZyb20gYW4gb3NkIG5vZGUuDQo+ID4+DQo+ID4+IC0tIFRv
-bSBEZW5lYXUNCj4gPiAtLQ0KPiA+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5k
-IHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIg0KPiA+IGluIHRoZSBib2R5IG9mIGEg
-bWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vDQo+ID4g
-aW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo=
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--Iu6f2rovc8TT3AsoAiBCbpCgIDROfhw3B
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+Hi Nathan,
+
+You were right : there has been a few issues merging all pull requests in=
+to the firefly integration branch. But not that much : four pull requests=
+ were set aside because they conflict with each other and mark as DNM.=20
+
+I've pushed the rest in the firefly-backports integration branch and upda=
+ted http://tracker.ceph.com/issues/11644#teuthology-run-commit4f3faaa1faf=
+5f3b7fe8c7c9050eeed808d0e787c-firefly-backports-july-2015 accordingly.
+
+Let me know if you need anything from me to move forward. I suppose the n=
+ext step will be to schedule a teuthology run, right ?
+
+Cheers
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--Iu6f2rovc8TT3AsoAiBCbpCgIDROfhw3B
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlWdYq8ACgkQ8dLMyEl6F20+0QCgs1ltcnvdsM3P5W2qn7Eo3JwO
+f9oAnRsuFp6v8KUTe4UVJi/Rl2G2f1Yz
+=MCK7
+-----END PGP SIGNATURE-----
+
+--Iu6f2rovc8TT3AsoAiBCbpCgIDROfhw3B--
