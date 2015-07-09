@@ -1,126 +1,55 @@
-From: Casey Bodley <cbodley@gmail.com>
-Subject: Re: About Fio backend with ObjectStore API
-Date: Thu, 9 Jul 2015 12:19:27 -0400
-Message-ID: <CAMeBU_3eyRiEvgG=sPe3m=QiQiRBkeVquBpo+XpJ4GtTq4K+8Q@mail.gmail.com>
-References: <CACJqLyZcAzb5wocrN8b8WoK6j3ynWF-_3=T+1aQkDko4Mv_SmQ@mail.gmail.com>
-	<99767EA2E27DD44DB4E9F9B9ACA458C03B319D0D@SSIEXCH-MB3.ssi.samsung.com>
-	<CAMeBU_3ty6ae5VXP=_D8py1_Pk4rLKxCa4Larz0oKnyTYDtz8w@mail.gmail.com>
-	<99767EA2E27DD44DB4E9F9B9ACA458C03B319DF2@SSIEXCH-MB3.ssi.samsung.com>
-	<99767EA2E27DD44DB4E9F9B9ACA458C03B31A700@SSIEXCH-MB3.ssi.samsung.com>
+From: Owen Synge <osynge@suse.com>
+Subject: Re: python facade pattern implementation in ceph and ceph-deploy
+ is bad practice?
+Date: Thu, 09 Jul 2015 18:28:55 +0200
+Message-ID: <559EA147.8090201@suse.com>
+References: <559E4814.8030007@suse.com> <559E50F2.7030801@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f174.google.com ([209.85.220.174]:34958 "EHLO
-	mail-qk0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751876AbbGIQT2 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Jul 2015 12:19:28 -0400
-Received: by qkbp125 with SMTP id p125so189098256qkb.2
-        for <ceph-devel@vger.kernel.org>; Thu, 09 Jul 2015 09:19:27 -0700 (PDT)
-In-Reply-To: <99767EA2E27DD44DB4E9F9B9ACA458C03B31A700@SSIEXCH-MB3.ssi.samsung.com>
+Received: from mail.emea.novell.com ([130.57.118.101]:40906 "EHLO
+	mail.emea.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751326AbbGIQas (ORCPT
+	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+	Thu, 9 Jul 2015 12:30:48 -0400
+In-Reply-To: <559E50F2.7030801@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
-Cc: Haomai Wang <haomaiwang@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: John Spray <john.spray@redhat.com>, ceph-devel@vger.kernel.org, Loic Dachary <loic@dachary.org>, Travis Rhoden <trhoden@redhat.com>
 
-Hi James,
+Dear all,
 
-In the job file src/test/filestore.fio, you can modify the line
-"objectstore=3Dfilestore" to use any objectstore type supported by the
-ObjectStore::create() factory.
+Lets put a positive spin on this thread and set all misunderstandings on
+my side :)
 
-Casey
+I propose that John clarified and I misunderstood the others in upstream
+ceph-deploy's position, the style guide includes:
 
-On Wed, Jul 8, 2015 at 8:02 PM, James (Fei) Liu-SSI
-<james.liu@ssi.samsung.com> wrote:
-> Hi Casey,
->   Quick questions, The code in the trunk only cover the test for file=
-store. I was wondering do you have any plan to cover the test for kvsto=
-re and newstore?
->
->   Thanks,
->   James
->
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.=
-kernel.org] On Behalf Of James (Fei) Liu-SSI
-> Sent: Tuesday, June 30, 2015 2:19 PM
-> To: Casey Bodley
-> Cc: Haomai Wang; ceph-devel@vger.kernel.org
-> Subject: RE: About Fio backend with ObjectStore API
->
-> Hi Casey,
->
->   Thanks a lot.
->
->   Regards,
->   James
->
-> -----Original Message-----
-> From: Casey Bodley [mailto:cbodley@gmail.com]
-> Sent: Tuesday, June 30, 2015 2:16 PM
-> To: James (Fei) Liu-SSI
-> Cc: Haomai Wang; ceph-devel@vger.kernel.org
-> Subject: Re: About Fio backend with ObjectStore API
->
-> Hi,
->
-> When Danny Al-Gaaf & Daniel Gollub published "Ceph Performance
-> Analysis: fio and RBD" at
-> https://telekomcloud.github.io/ceph/2014/02/26/ceph-performance-analy=
-sis_fio_rbd.html,
-> they also mentioned a fio engine that linked directly into ceph's Fil=
-eStore. I was able to find Daniel's branch on github at https://github.=
-com/gollub/ceph/tree/fio_filestore_v2, and did some more work on it at =
-the time.
->
-> I just rebased that work onto the latest ceph master branch, and push=
-ed to our github at https://github.com/linuxbox2/linuxbox-ceph/tree/fio=
--objectstore. You can find the source in src/test/fio_ceph_filestore.cc=
-, and run fio with the provided example fio job file in src/test/filest=
-ore.fio.
->
-> I didn't have a chance to confirm that it builds with automake, but t=
-he cmake version built for me. I'm happy to help if you run into proble=
-ms, Casey
->
-> On Tue, Jun 30, 2015 at 2:31 PM, James (Fei) Liu-SSI <james.liu@ssi.s=
-amsung.com> wrote:
->> Hi Haomai,
->>   What are you trying to ask is to benchmark local objectstore(like =
-kvstore/filestore/newstore) locally with FIO(ObjectStore engine)? You w=
-ant to purely compare the performance locally for these objectstores, r=
-ight?
->>
->>   Regards,
->>   James
->>
->> -----Original Message-----
->> From: ceph-devel-owner@vger.kernel.org
->> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Haomai Wang
->> Sent: Tuesday, June 30, 2015 9:06 AM
->> To: ceph-devel@vger.kernel.org
->> Subject: About Fio backend with ObjectStore API
->>
->> Hi all,
->>
->> Long long ago, is there someone said about fio backend with Ceph Obj=
-ectStore API? So we could use the existing mature fio facility to bench=
-mark ceph objectstore.
->>
->> --
->> Best Regards,
->>
->> Wheat
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-"
->> in the body of a message to majordomo@vger.kernel.org More majordomo
->> info at  http://vger.kernel.org/majordomo-info.html
->   {.n +       +%  lzwm  b =EB=A7=B2  r  y=C7=A9 =D7=AFzX     =DC=A8} =
-  =C6=A0z &j:+v        zZ+  +zf   h   ~    i   z   w   ?    & )=DF=A2 f
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+(0) Opposes duplication of code.
+(1) Opposes duplication of code for each platform making up more than a
+minimum of code.
+(2) Allowing the use of objects in python.
+(3) Allowing the use of objects with properties.
+(4) Allowing the use of some standard design patterns not already in
+ceph-deploy.
+(5) Allowing that a change in style (such as use of 3 objects in a
+facade) has to be propagated in all parts of ceph and tested for all
+platforms before they can reach master even if the migration can be staged.
+
+Hopefully this can be agreed.
+
+On 07/09/2015 12:46 PM, John Spray wrote:
+
+> I had not seen your wip_services_abstraction branch before, I've just
+> taken a quick look now.  More comments would probably have made it
+> easier to read, as would following PEP8.  I don't think there's anything
+> problematic about having a class that knows how to start and stop a
+> service, but I don't know what comments you've received elsewhere (there
+> aren't any on the PR).
+
+If this is not agreeable to all, please speak up.
+
+Best regards
+
+Owen
