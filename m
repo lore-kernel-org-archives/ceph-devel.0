@@ -1,243 +1,122 @@
-From: Travis Rhoden <trhoden@redhat.com>
-Subject: Re: python facade pattern implementation in ceph and ceph-deploy is bad practice?
-Date: Thu, 9 Jul 2015 10:00:01 -0700
-Message-ID: <6E87029C-274C-4223-83AA-88CA5B0F59EC@redhat.com>
-References: <559E4814.8030007@suse.com>
-Mime-Version: 1.0 (Mac OS X Mail 8.2 \(2102\))
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
+Subject: RE: About Fio backend with ObjectStore API
+Date: Thu, 9 Jul 2015 18:01:55 +0000
+Message-ID: <99767EA2E27DD44DB4E9F9B9ACA458C03B31A865@SSIEXCH-MB3.ssi.samsung.com>
+References: <CACJqLyZcAzb5wocrN8b8WoK6j3ynWF-_3=T+1aQkDko4Mv_SmQ@mail.gmail.com>
+	<99767EA2E27DD44DB4E9F9B9ACA458C03B319D0D@SSIEXCH-MB3.ssi.samsung.com>
+	<CAMeBU_3ty6ae5VXP=_D8py1_Pk4rLKxCa4Larz0oKnyTYDtz8w@mail.gmail.com>
+	<99767EA2E27DD44DB4E9F9B9ACA458C03B319DF2@SSIEXCH-MB3.ssi.samsung.com>
+	<99767EA2E27DD44DB4E9F9B9ACA458C03B31A700@SSIEXCH-MB3.ssi.samsung.com>
+ <CAMeBU_3eyRiEvgG=sPe3m=QiQiRBkeVquBpo+XpJ4GtTq4K+8Q@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:42477 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751866AbbGIRAD convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Jul 2015 13:00:03 -0400
-In-Reply-To: <559E4814.8030007@suse.com>
+Received: from mx2.ssi.samsung.com ([207.140.43.206]:42323 "EHLO
+	mx2.ssi.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753803AbbGISB5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Jul 2015 14:01:57 -0400
+In-Reply-To: <CAMeBU_3eyRiEvgG=sPe3m=QiQiRBkeVquBpo+XpJ4GtTq4K+8Q@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Owen Synge <osynge@suse.com>
-Cc: ceph-devel@vger.kernel.org
+To: Casey Bodley <cbodley@gmail.com>
+Cc: Haomai Wang <haomaiwang@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Owen,
-
-There are quite a few emails in this thread already, but there are poin=
-ts in each of them I would like to address.
-
-Up front let me say I hear and recognize your frustration.  If you=E2=80=
-=99ve felt ignored, I apologize.  I think you=E2=80=99ve turned around =
-a lot of patches, PR comments, and emails faster then I=E2=80=99ve been=
- able to look at them all.  It=E2=80=99s completely been =E2=80=9CI hav=
-en=E2=80=99t gotten there yet=E2=80=9D and none of =E2=80=9CI=E2=80=99m=
- ignoring you=E2=80=9D.
-
-> On Jul 9, 2015, at 3:08 AM, Owen Synge <osynge@suse.com> wrote:
->=20
-> Dear all,
->=20
-> The facade pattern (or fa=C3=A7ade pattern) is a software design patt=
-ern
-> commonly used with object-oriented programming. The name is by analog=
-y
-> to an architectural facade. (wikipedia)
->=20
-> I am frustrated with the desire to "standardise" on the one bad pract=
-ice
-> implementations of the facade pattern in python that is used in
-> ceph-deploy even in ceph.
->=20
-> The current "standard" of selectively calling modules with functions =
-has
-> a series of complexities to it.
->=20
-> Ceph example:
->=20
-> 	https://github.com/ceph/ceph/tree/master/src/ceph-detect-init/ceph_d=
-etect_init
->=20
-> ceph-deploy example:
->=20
-> 	https://github.com/ceph/ceph-deploy/tree/master/ceph_deploy/hosts
->=20
-> SO I guess _some_ of you dont immediately see why this is VERY bad
-> practice, and wonder why this makes me feel like the orange in this s=
-tory:
->=20
-> http://www.dailymail.co.uk/news/article-2540670/The-perfect-half-time=
--oranges-five-football-matches-Farmers-create-pentagon-shaped-fruit.htm=
-l
->=20
-> when I try to code with ceph-deploy in particular.
-
-I=E2=80=99ve never heard the facade name attached to it.  For our modes=
-t goals with ceph-deploy we have found it be quite flexilble, as it all=
-ows us to do have distro specific code only where it is needed, and to =
-pull all common code into common places, all behind a consistent abstra=
-cted interface.  I think this actually leads to less code duplication, =
-but there are plenty of places in ceph-deploy where this is not the cas=
-e and the code could be cleaned up to bring more code into common place=
-s.
-
-Let me also say that specific to one of the comments I made in your PR,=
- when I brought up this facade idea, I was just talking out loud.  The =
-comment I was going to leave today (and still will) is that my point th=
-ere was unrelated to your PR.  It sent us off in a wrong direction, and=
- was not relevant to the code under discussion.  It was more a note to =
-myself that this was something that was still on our plate, but it did =
-not/does not need to change what you were looking at specifically.
-
->=20
-> The ceph/ceph-deploy way of implementing a facade in python causes th=
-is
-> list the problems:
->=20
-> 1) facade cannot be instantiated twice.
->=20
-> 2) facade requires code layout inflexibility.
->=20
-> 3) facade implementation can have side effects when implementation is
-> changed.
->=20
-> And probably others I have not thought of.
->=20
-> In consequence from points above.
->=20
-> From (1)
->=20
-> (1A) no concurrency, so you cant configure more than one ceph-node at=
- a
-> time.
-> (1A) You have to close one facade to start anouther, eg in ceph-deplo=
-y
-> you have to close each connection before connecting to the next serve=
-r
-> so making it slow to use as all state has to be gathered.
-
-concurrency has come up before in ceph-deploy.  It has been our explici=
-t goal to make ceph-deploy as simple and *clear* as possible for users,=
- with one of the main purposes to be extremely verbose and essentially =
-*teach* a user how to deploy a Ceph cluster.  That=E2=80=99s why it pri=
-nts everything it does by default, shows every remote command, and prin=
-ts the output back in order.  Concurrency would muddy those waters, tho=
-ugh we do all want things to go faster.
-
-It is not necessarily the facade pattern that is the limitation there =E2=
-=80=94 it is the implementation within ceph-deploy.  We simply do a =E2=
-=80=9Cfor host is hostnames=E2=80=A6=E2=80=9D loop everywhere =E2=80=94=
- it doesn=E2=80=99t matter what we are using underneath, we are doing o=
-ne SSH connection at a time.
-
-=46urthermore, I don=E2=80=99t think it=E2=80=99s the facade paradigm t=
-hat would limit you to one host at a time at all.  It=E2=80=99s one hos=
-t module (facade) instantiated per host.  You could do many of these at=
- once =E2=80=94 I don=E2=80=99t see any reason why you couldn=E2=80=99t=
-=2E  I=E2=80=99ve never tried it out, and I don=E2=80=99t know if pytho=
-n-remoto handles concurrency, but I don=E2=80=99t think the facade para=
-digm prevents it.
-
->=20
-> From (2)
->=20
-> (2A) No nesting of facades without code duplication. EG reuse of syst=
-emd
-> support between distributions.
-> (2B) inflexible / complex include paths for shared code between facad=
-e
-> implementations.
->=20
-
-I disagree here.  There are plenty of places to put code that is common=
- and does not have to be duplicated.  I definitely don=E2=80=99t want c=
-ode in each host module that knows how to deal with systemd. The code t=
-hat does have to be in each host module is how to detect/assign what in=
-it system is being used, and how to call into the appropriate (common) =
-module to do what it needs.
-
-As for complex include paths, I=E2=80=99m not sure I have much of an ar=
-gument here other than to say that all frameworks have their convention=
-s.  I don=E2=80=99t see what we are doing as anything different than wh=
-at is enforced/recommended by many frameworks/scaffolds popular in Web =
-app and MVC paradigms like RoR, Pyramid, Django, etc.  It=E2=80=99s jus=
-t convention to learn.
-
-> From (3)
->=20
-> (3A) Since all variables in a facade implementation are global, but
-> isolated to an implementation, we cannot have variables in the
-> implementation, any cross function variables that are not passed as
-> parameters or return values will return will lead to side effects tha=
-t
-> are difficult to test.
-
-I admit I don=E2=80=99t follow this one completely.
-
->=20
-> So this set of general points will have complex side effects that mak=
-e
-> you feel like an the pictured orange when developing that are related=
- to
-> wear the facade is implemented.
->=20
-> About this point you will say well its open source so fix it ?
->=20
-> My answer to this is that when I try to do this, as in this patch:
->=20
-> https://github.com/osynge/ceph-deploy/commit/b82f89f35b27814ed4aba108=
-2efd134c24ecf21f
->=20
-> More than once, seem to suggest I should use the much more complex mu=
-lti
-> file implementation of a fa=C3=A7ade.
->=20
-> The only advantages of implementing fa=C3=A7ades in the "standard" ce=
-ph /
-> ceph-deploy way that I can see is:
->=20
-> (I) how ceph-deploy has always done this way.
-> (II) It allows you to continue using nearly no custom objects in pyth=
-on.
-> (III) We like our oranges in funny shapes.
-
-Again, I have more to say here in the actual PR, but do give me some ti=
-me.  I can tell you it will be at least 1.5 hrs from now before I will =
-get to go read it all again.
-In short, yes I would like to continue to use what we have, but I think=
- the classes you=E2=80=99ve created to handle systemd and sysv can fit =
-into that very nicely.
-
->=20
-> It seems to me the current implementation could have been created due=
- to
-> the misunderstanding that modules are like objects, when intact they =
-are
-> like classes. Issues (1) and (3) can be solved simply by importing
-> methods as objects rather than classes, but this does nothing to solv=
-e
-> the bigger issue (2) which is more serious, but its a simple step
-> forward that might very simple to patch, but their is little point in=
- a
-> POC unless people agree that issues (1) (2) and (3) are serious.
->=20
-> Please can we not spread this boat anchor* implementation of a facade=
-,
-> further around the code base, and ideally migrate away from this bad
-> practice, and help us all feel like happy round oranges.
->=20
-
-John touched on this a bit already, about the real question here being =
-about ultimate goals and intentions.  I=E2=80=99ll come back to this in=
- another email, but I have a couple of other scheduled events to attend=
- to first.  Again, do please give me the time to reply properly.
-
-> Best regards
->=20
-> Owen
->=20
->=20
-> boat anchor
->=20
-> https://en.wikipedia.org/wiki/Boat_anchor_%28metaphor%29
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGkgQ2FzZXksDQogIEhlcmUgaXMgdGhlIGNvZGUgaW4gdGhlIGZpb19jZXBoX2ZpbGVzdG9yZS5j
+Yy4gQmFzaWNhbGx5LCBpdCBjcmVhdGVzIGEgZmlsZXN0b3JlIGFzIGJhY2tlbmQgZW5naW5lIGZv
+ciBJTyBleGVyY2lzZXMuIElmIHdlIGdvdCB0byBzZW5kIElPIGNvbW1hbmRzIHRvIEtleVZhbHVl
+IFN0b3JlIG9yIE5ld3N0b3JlLCB3ZSBnb3QgdG8gY2hhbmdlIHRoZSBjb2RlIGFjY29yZGluZ2x5
+LCByaWdodD8gIEkgZGlkIG5vdCBzZWUgYW55IG90aGVyIGZpbGVzIGxpa2UgZmlvX2NlcGhfa2V5
+dmFsdWVzdG9yZS5jYyBvciBmaW9fY2VwaF9uZXdzdG9yZS5jYy4gSW4gbXkgaHVtYmxlIG9waW5p
+b24sIHdlIG1pZ2h0IG5lZWQgdG8gY3JlYXRlIG90aGVyIHR3byBmaW8gZW5naW5lcyBmb3Iga2V5
+dmFsdWVzdG9yZSBhbmQgbmV3c3RvcmUgaWYgd2Ugd2FudCB0byBleGVyY2lzZSB0aGVzZSB0d28s
+IHJpZ2h0Pw0KDQpSZWdhcmRzLA0KSmFtZXMNCg0Kc3RhdGljIGludCBmaW9fY2VwaF9maWxlc3Rv
+cmVfaW5pdChzdHJ1Y3QgdGhyZWFkX2RhdGEgKnRkKSANCjIwOSB7IA0KMjEwIAl2ZWN0b3I8Y29u
+c3QgY2hhcio+IGFyZ3M7IA0KMjExIAlzdHJ1Y3QgY2VwaF9maWxlc3RvcmVfZGF0YSAqY2VwaF9m
+aWxlc3RvcmVfZGF0YSA9IChzdHJ1Y3QgY2VwaF9maWxlc3RvcmVfZGF0YSAqKSB0ZC0+aW9fb3Bz
+LT5kYXRhOyANCjIxMiAJT2JqZWN0U3RvcmU6OlRyYW5zYWN0aW9uIGZ0OyANCjIxMyANCiANCjIx
+NCAJZ2xvYmFsX2luaXQoTlVMTCwgYXJncywgQ0VQSF9FTlRJVFlfVFlQRV9PU0QsIENPREVfRU5W
+SVJPTk1FTlRfVVRJTElUWSwgMCk7IA0KMjE1IAkvL2dfY29uZi0+am91cm5hbF9kaW8gPSBmYWxz
+ZTsgDQoyMTYgCWNvbW1vbl9pbml0X2ZpbmlzaChnX2NlcGhfY29udGV4dCk7IA0KMjE3IAkvL2df
+Y2VwaF9jb250ZXh0LT5fY29uZi0+c2V0X3ZhbCgiZGVidWdfZmlsZXN0b3JlIiwgIjIwIik7IA0K
+MjE4IAkvL2dfY2VwaF9jb250ZXh0LT5fY29uZi0+c2V0X3ZhbCgiZGVidWdfdGhyb3R0bGUiLCAi
+MjAiKTsgDQoyMTkgCWdfY2VwaF9jb250ZXh0LT5fY29uZi0+YXBwbHlfY2hhbmdlcyhOVUxMKTsg
+DQoyMjAgDQogDQoyMjEgCWNlcGhfZmlsZXN0b3JlX2RhdGEtPm9zZF9wYXRoID0gc3RyZHVwKCIv
+bW50L2Zpb19jZXBoX2ZpbGVzdG9yZS5YWFhYWFhYIik7IA0KMjIyIAljZXBoX2ZpbGVzdG9yZV9k
+YXRhLT5qb3VybmFsX3BhdGggPSBzdHJkdXAoIi92YXIvbGliL2NlcGgvb3NkL2pvdXJuYWwtcmFt
+L2Zpb19jZXBoX2ZpbGVzdG9yZS5YWFhYWFhYIik7IA0KMjIzIA0KIA0KMjI0IAlpZiAoIW1rZHRl
+bXAoY2VwaF9maWxlc3RvcmVfZGF0YS0+b3NkX3BhdGgpKSB7IA0KMjI1IAkJY291dCA8PCAibWtk
+dGVtcCBmYWlsZWQ6ICIgPDwgc3RyZXJyb3IoZXJybm8pIDw8IHN0ZDo6ZW5kbDsgDQoyMjYgCQly
+ZXR1cm4gMTsgDQoyMjcgCX0gDQoyMjggCS8vbWt0ZW1wKGNlcGhfZmlsZXN0b3JlX2RhdGEtPmpv
+dXJuYWxfcGF0aCk7IC8vIE5PU1BDIGlzc3VlIA0KMjI5IA0KIA0KMjMwICAgCU9iamVjdFN0b3Jl
+ICpmcyA9IG5ldyBGaWxlU3RvcmUoY2VwaF9maWxlc3RvcmVfZGF0YS0+b3NkX3BhdGgsIGNlcGhf
+ZmlsZXN0b3JlX2RhdGEtPmpvdXJuYWxfcGF0aCk7IA0KMjMxIAljZXBoX2ZpbGVzdG9yZV9kYXRh
+LT5mcyA9IGZzOyANCjIzMiANCiANCjIzMyAJaWYgKGZzLT5ta2ZzKCkgPCAwKSB7IA0KMjM0IAkJ
+Y291dCA8PCAibWtmcyBmYWlsZWQiIDw8IHN0ZDo6ZW5kbDsgDQoyMzUgCQlnb3RvIGZhaWxlZDsg
+DQoyMzYgCX0gDQoyMzcgCSANCjIzOCAJaWYgKGZzLT5tb3VudCgpIDwgMCkgeyANCjIzOSAJCWNv
+dXQgPDwgIm1vdW50IGZhaWxlZCIgPDwgc3RkOjplbmRsOyANCjI0MCAJCWdvdG8gZmFpbGVkOyAN
+CjI0MSAJfSANCjI0MiANCiANCjI0MyAJZnQuY3JlYXRlX2NvbGxlY3Rpb24oY29sbF90KCkpOyAN
+CjI0NCAJZnMtPmFwcGx5X3RyYW5zYWN0aW9uKGZ0KTsgDQoyNDUgDQogDQoyNDYgDQogDQoyNDcg
+CXJldHVybiAwOyANCjI0OCANCiANCjI0OSBmYWlsZWQ6IA0KMjUwIAlyZXR1cm4gMTsgDQoyNTEg
+DQogDQoyNTIgfQ0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IENhc2V5IEJvZGxl
+eSBbbWFpbHRvOmNib2RsZXlAZ21haWwuY29tXSANClNlbnQ6IFRodXJzZGF5LCBKdWx5IDA5LCAy
+MDE1IDk6MTkgQU0NClRvOiBKYW1lcyAoRmVpKSBMaXUtU1NJDQpDYzogSGFvbWFpIFdhbmc7IGNl
+cGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0OiBSZTogQWJvdXQgRmlvIGJhY2tlbmQg
+d2l0aCBPYmplY3RTdG9yZSBBUEkNCg0KSGkgSmFtZXMsDQoNCkluIHRoZSBqb2IgZmlsZSBzcmMv
+dGVzdC9maWxlc3RvcmUuZmlvLCB5b3UgY2FuIG1vZGlmeSB0aGUgbGluZSAib2JqZWN0c3RvcmU9
+ZmlsZXN0b3JlIiB0byB1c2UgYW55IG9iamVjdHN0b3JlIHR5cGUgc3VwcG9ydGVkIGJ5IHRoZQ0K
+T2JqZWN0U3RvcmU6OmNyZWF0ZSgpIGZhY3RvcnkuDQoNCkNhc2V5DQoNCk9uIFdlZCwgSnVsIDgs
+IDIwMTUgYXQgODowMiBQTSwgSmFtZXMgKEZlaSkgTGl1LVNTSSA8amFtZXMubGl1QHNzaS5zYW1z
+dW5nLmNvbT4gd3JvdGU6DQo+IEhpIENhc2V5LA0KPiAgIFF1aWNrIHF1ZXN0aW9ucywgVGhlIGNv
+ZGUgaW4gdGhlIHRydW5rIG9ubHkgY292ZXIgdGhlIHRlc3QgZm9yIGZpbGVzdG9yZS4gSSB3YXMg
+d29uZGVyaW5nIGRvIHlvdSBoYXZlIGFueSBwbGFuIHRvIGNvdmVyIHRoZSB0ZXN0IGZvciBrdnN0
+b3JlIGFuZCBuZXdzdG9yZT8NCj4NCj4gICBUaGFua3MsDQo+ICAgSmFtZXMNCj4NCj4gLS0tLS1P
+cmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5l
+bC5vcmcgDQo+IFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJl
+aGFsZiBPZiBKYW1lcyAoRmVpKSANCj4gTGl1LVNTSQ0KPiBTZW50OiBUdWVzZGF5LCBKdW5lIDMw
+LCAyMDE1IDI6MTkgUE0NCj4gVG86IENhc2V5IEJvZGxleQ0KPiBDYzogSGFvbWFpIFdhbmc7IGNl
+cGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQo+IFN1YmplY3Q6IFJFOiBBYm91dCBGaW8gYmFja2Vu
+ZCB3aXRoIE9iamVjdFN0b3JlIEFQSQ0KPg0KPiBIaSBDYXNleSwNCj4NCj4gICBUaGFua3MgYSBs
+b3QuDQo+DQo+ICAgUmVnYXJkcywNCj4gICBKYW1lcw0KPg0KPiAtLS0tLU9yaWdpbmFsIE1lc3Nh
+Z2UtLS0tLQ0KPiBGcm9tOiBDYXNleSBCb2RsZXkgW21haWx0bzpjYm9kbGV5QGdtYWlsLmNvbV0N
+Cj4gU2VudDogVHVlc2RheSwgSnVuZSAzMCwgMjAxNSAyOjE2IFBNDQo+IFRvOiBKYW1lcyAoRmVp
+KSBMaXUtU1NJDQo+IENjOiBIYW9tYWkgV2FuZzsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcN
+Cj4gU3ViamVjdDogUmU6IEFib3V0IEZpbyBiYWNrZW5kIHdpdGggT2JqZWN0U3RvcmUgQVBJDQo+
+DQo+IEhpLA0KPg0KPiBXaGVuIERhbm55IEFsLUdhYWYgJiBEYW5pZWwgR29sbHViIHB1Ymxpc2hl
+ZCAiQ2VwaCBQZXJmb3JtYW5jZQ0KPiBBbmFseXNpczogZmlvIGFuZCBSQkQiIGF0DQo+IGh0dHBz
+Oi8vdGVsZWtvbWNsb3VkLmdpdGh1Yi5pby9jZXBoLzIwMTQvMDIvMjYvY2VwaC1wZXJmb3JtYW5j
+ZS1hbmFseXMNCj4gaXNfZmlvX3JiZC5odG1sLCB0aGV5IGFsc28gbWVudGlvbmVkIGEgZmlvIGVu
+Z2luZSB0aGF0IGxpbmtlZCBkaXJlY3RseSANCj4gaW50byBjZXBoJ3MgRmlsZVN0b3JlLiBJIHdh
+cyBhYmxlIHRvIGZpbmQgRGFuaWVsJ3MgYnJhbmNoIG9uIGdpdGh1YiBhdCBodHRwczovL2dpdGh1
+Yi5jb20vZ29sbHViL2NlcGgvdHJlZS9maW9fZmlsZXN0b3JlX3YyLCBhbmQgZGlkIHNvbWUgbW9y
+ZSB3b3JrIG9uIGl0IGF0IHRoZSB0aW1lLg0KPg0KPiBJIGp1c3QgcmViYXNlZCB0aGF0IHdvcmsg
+b250byB0aGUgbGF0ZXN0IGNlcGggbWFzdGVyIGJyYW5jaCwgYW5kIHB1c2hlZCB0byBvdXIgZ2l0
+aHViIGF0IGh0dHBzOi8vZ2l0aHViLmNvbS9saW51eGJveDIvbGludXhib3gtY2VwaC90cmVlL2Zp
+by1vYmplY3RzdG9yZS4gWW91IGNhbiBmaW5kIHRoZSBzb3VyY2UgaW4gc3JjL3Rlc3QvZmlvX2Nl
+cGhfZmlsZXN0b3JlLmNjLCBhbmQgcnVuIGZpbyB3aXRoIHRoZSBwcm92aWRlZCBleGFtcGxlIGZp
+byBqb2IgZmlsZSBpbiBzcmMvdGVzdC9maWxlc3RvcmUuZmlvLg0KPg0KPiBJIGRpZG4ndCBoYXZl
+IGEgY2hhbmNlIHRvIGNvbmZpcm0gdGhhdCBpdCBidWlsZHMgd2l0aCBhdXRvbWFrZSwgYnV0IA0K
+PiB0aGUgY21ha2UgdmVyc2lvbiBidWlsdCBmb3IgbWUuIEknbSBoYXBweSB0byBoZWxwIGlmIHlv
+dSBydW4gaW50byANCj4gcHJvYmxlbXMsIENhc2V5DQo+DQo+IE9uIFR1ZSwgSnVuIDMwLCAyMDE1
+IGF0IDI6MzEgUE0sIEphbWVzIChGZWkpIExpdS1TU0kgPGphbWVzLmxpdUBzc2kuc2Ftc3VuZy5j
+b20+IHdyb3RlOg0KPj4gSGkgSGFvbWFpLA0KPj4gICBXaGF0IGFyZSB5b3UgdHJ5aW5nIHRvIGFz
+ayBpcyB0byBiZW5jaG1hcmsgbG9jYWwgb2JqZWN0c3RvcmUobGlrZSBrdnN0b3JlL2ZpbGVzdG9y
+ZS9uZXdzdG9yZSkgbG9jYWxseSB3aXRoIEZJTyhPYmplY3RTdG9yZSBlbmdpbmUpPyBZb3Ugd2Fu
+dCB0byBwdXJlbHkgY29tcGFyZSB0aGUgcGVyZm9ybWFuY2UgbG9jYWxseSBmb3IgdGhlc2Ugb2Jq
+ZWN0c3RvcmVzLCByaWdodD8NCj4+DQo+PiAgIFJlZ2FyZHMsDQo+PiAgIEphbWVzDQo+Pg0KPj4g
+LS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4+IEZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdl
+ci5rZXJuZWwub3JnIA0KPj4gW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9y
+Z10gT24gQmVoYWxmIE9mIEhhb21haSBXYW5nDQo+PiBTZW50OiBUdWVzZGF5LCBKdW5lIDMwLCAy
+MDE1IDk6MDYgQU0NCj4+IFRvOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KPj4gU3ViamVj
+dDogQWJvdXQgRmlvIGJhY2tlbmQgd2l0aCBPYmplY3RTdG9yZSBBUEkNCj4+DQo+PiBIaSBhbGws
+DQo+Pg0KPj4gTG9uZyBsb25nIGFnbywgaXMgdGhlcmUgc29tZW9uZSBzYWlkIGFib3V0IGZpbyBi
+YWNrZW5kIHdpdGggQ2VwaCBPYmplY3RTdG9yZSBBUEk/IFNvIHdlIGNvdWxkIHVzZSB0aGUgZXhp
+c3RpbmcgbWF0dXJlIGZpbyBmYWNpbGl0eSB0byBiZW5jaG1hcmsgY2VwaCBvYmplY3RzdG9yZS4N
+Cj4+DQo+PiAtLQ0KPj4gQmVzdCBSZWdhcmRzLA0KPj4NCj4+IFdoZWF0DQo+PiAtLQ0KPj4gVG8g
+dW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNl
+cGgtZGV2ZWwiDQo+PiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIu
+a2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyANCj4+IGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5l
+bC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPiAgIHsubiArICAgICAgICslICBsendtICBiIOun
+siAgciAgecepINevelggICAgINyofSAgIMageiAmajordiAgICAgICAgelorICAremYgICBoICAg
+fiAgICBpICAgeiAgIHcgICA/ICAgICYgKd+iIGYNCg==
