@@ -1,122 +1,223 @@
-From: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
-Subject: RE: About Fio backend with ObjectStore API
-Date: Thu, 9 Jul 2015 18:01:55 +0000
-Message-ID: <99767EA2E27DD44DB4E9F9B9ACA458C03B31A865@SSIEXCH-MB3.ssi.samsung.com>
+From: Casey Bodley <cbodley@gmail.com>
+Subject: Re: About Fio backend with ObjectStore API
+Date: Thu, 9 Jul 2015 15:32:00 -0400
+Message-ID: <CAMeBU_0CvWZ1S7VatNrUCbHS65WOcP=xx3RZh1A3YFoLgv+aUQ@mail.gmail.com>
 References: <CACJqLyZcAzb5wocrN8b8WoK6j3ynWF-_3=T+1aQkDko4Mv_SmQ@mail.gmail.com>
 	<99767EA2E27DD44DB4E9F9B9ACA458C03B319D0D@SSIEXCH-MB3.ssi.samsung.com>
 	<CAMeBU_3ty6ae5VXP=_D8py1_Pk4rLKxCa4Larz0oKnyTYDtz8w@mail.gmail.com>
 	<99767EA2E27DD44DB4E9F9B9ACA458C03B319DF2@SSIEXCH-MB3.ssi.samsung.com>
 	<99767EA2E27DD44DB4E9F9B9ACA458C03B31A700@SSIEXCH-MB3.ssi.samsung.com>
- <CAMeBU_3eyRiEvgG=sPe3m=QiQiRBkeVquBpo+XpJ4GtTq4K+8Q@mail.gmail.com>
+	<CAMeBU_3eyRiEvgG=sPe3m=QiQiRBkeVquBpo+XpJ4GtTq4K+8Q@mail.gmail.com>
+	<99767EA2E27DD44DB4E9F9B9ACA458C03B31A865@SSIEXCH-MB3.ssi.samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.ssi.samsung.com ([207.140.43.206]:42323 "EHLO
-	mx2.ssi.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753803AbbGISB5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Jul 2015 14:01:57 -0400
-In-Reply-To: <CAMeBU_3eyRiEvgG=sPe3m=QiQiRBkeVquBpo+XpJ4GtTq4K+8Q@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-qk0-f177.google.com ([209.85.220.177]:33265 "EHLO
+	mail-qk0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752144AbbGITcB convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Jul 2015 15:32:01 -0400
+Received: by qkhu186 with SMTP id u186so193020077qkh.0
+        for <ceph-devel@vger.kernel.org>; Thu, 09 Jul 2015 12:32:00 -0700 (PDT)
+In-Reply-To: <99767EA2E27DD44DB4E9F9B9ACA458C03B31A865@SSIEXCH-MB3.ssi.samsung.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Casey Bodley <cbodley@gmail.com>
+To: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
 Cc: Haomai Wang <haomaiwang@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SGkgQ2FzZXksDQogIEhlcmUgaXMgdGhlIGNvZGUgaW4gdGhlIGZpb19jZXBoX2ZpbGVzdG9yZS5j
-Yy4gQmFzaWNhbGx5LCBpdCBjcmVhdGVzIGEgZmlsZXN0b3JlIGFzIGJhY2tlbmQgZW5naW5lIGZv
-ciBJTyBleGVyY2lzZXMuIElmIHdlIGdvdCB0byBzZW5kIElPIGNvbW1hbmRzIHRvIEtleVZhbHVl
-IFN0b3JlIG9yIE5ld3N0b3JlLCB3ZSBnb3QgdG8gY2hhbmdlIHRoZSBjb2RlIGFjY29yZGluZ2x5
-LCByaWdodD8gIEkgZGlkIG5vdCBzZWUgYW55IG90aGVyIGZpbGVzIGxpa2UgZmlvX2NlcGhfa2V5
-dmFsdWVzdG9yZS5jYyBvciBmaW9fY2VwaF9uZXdzdG9yZS5jYy4gSW4gbXkgaHVtYmxlIG9waW5p
-b24sIHdlIG1pZ2h0IG5lZWQgdG8gY3JlYXRlIG90aGVyIHR3byBmaW8gZW5naW5lcyBmb3Iga2V5
-dmFsdWVzdG9yZSBhbmQgbmV3c3RvcmUgaWYgd2Ugd2FudCB0byBleGVyY2lzZSB0aGVzZSB0d28s
-IHJpZ2h0Pw0KDQpSZWdhcmRzLA0KSmFtZXMNCg0Kc3RhdGljIGludCBmaW9fY2VwaF9maWxlc3Rv
-cmVfaW5pdChzdHJ1Y3QgdGhyZWFkX2RhdGEgKnRkKSANCjIwOSB7IA0KMjEwIAl2ZWN0b3I8Y29u
-c3QgY2hhcio+IGFyZ3M7IA0KMjExIAlzdHJ1Y3QgY2VwaF9maWxlc3RvcmVfZGF0YSAqY2VwaF9m
-aWxlc3RvcmVfZGF0YSA9IChzdHJ1Y3QgY2VwaF9maWxlc3RvcmVfZGF0YSAqKSB0ZC0+aW9fb3Bz
-LT5kYXRhOyANCjIxMiAJT2JqZWN0U3RvcmU6OlRyYW5zYWN0aW9uIGZ0OyANCjIxMyANCiANCjIx
-NCAJZ2xvYmFsX2luaXQoTlVMTCwgYXJncywgQ0VQSF9FTlRJVFlfVFlQRV9PU0QsIENPREVfRU5W
-SVJPTk1FTlRfVVRJTElUWSwgMCk7IA0KMjE1IAkvL2dfY29uZi0+am91cm5hbF9kaW8gPSBmYWxz
-ZTsgDQoyMTYgCWNvbW1vbl9pbml0X2ZpbmlzaChnX2NlcGhfY29udGV4dCk7IA0KMjE3IAkvL2df
-Y2VwaF9jb250ZXh0LT5fY29uZi0+c2V0X3ZhbCgiZGVidWdfZmlsZXN0b3JlIiwgIjIwIik7IA0K
-MjE4IAkvL2dfY2VwaF9jb250ZXh0LT5fY29uZi0+c2V0X3ZhbCgiZGVidWdfdGhyb3R0bGUiLCAi
-MjAiKTsgDQoyMTkgCWdfY2VwaF9jb250ZXh0LT5fY29uZi0+YXBwbHlfY2hhbmdlcyhOVUxMKTsg
-DQoyMjAgDQogDQoyMjEgCWNlcGhfZmlsZXN0b3JlX2RhdGEtPm9zZF9wYXRoID0gc3RyZHVwKCIv
-bW50L2Zpb19jZXBoX2ZpbGVzdG9yZS5YWFhYWFhYIik7IA0KMjIyIAljZXBoX2ZpbGVzdG9yZV9k
-YXRhLT5qb3VybmFsX3BhdGggPSBzdHJkdXAoIi92YXIvbGliL2NlcGgvb3NkL2pvdXJuYWwtcmFt
-L2Zpb19jZXBoX2ZpbGVzdG9yZS5YWFhYWFhYIik7IA0KMjIzIA0KIA0KMjI0IAlpZiAoIW1rZHRl
-bXAoY2VwaF9maWxlc3RvcmVfZGF0YS0+b3NkX3BhdGgpKSB7IA0KMjI1IAkJY291dCA8PCAibWtk
-dGVtcCBmYWlsZWQ6ICIgPDwgc3RyZXJyb3IoZXJybm8pIDw8IHN0ZDo6ZW5kbDsgDQoyMjYgCQly
-ZXR1cm4gMTsgDQoyMjcgCX0gDQoyMjggCS8vbWt0ZW1wKGNlcGhfZmlsZXN0b3JlX2RhdGEtPmpv
-dXJuYWxfcGF0aCk7IC8vIE5PU1BDIGlzc3VlIA0KMjI5IA0KIA0KMjMwICAgCU9iamVjdFN0b3Jl
-ICpmcyA9IG5ldyBGaWxlU3RvcmUoY2VwaF9maWxlc3RvcmVfZGF0YS0+b3NkX3BhdGgsIGNlcGhf
-ZmlsZXN0b3JlX2RhdGEtPmpvdXJuYWxfcGF0aCk7IA0KMjMxIAljZXBoX2ZpbGVzdG9yZV9kYXRh
-LT5mcyA9IGZzOyANCjIzMiANCiANCjIzMyAJaWYgKGZzLT5ta2ZzKCkgPCAwKSB7IA0KMjM0IAkJ
-Y291dCA8PCAibWtmcyBmYWlsZWQiIDw8IHN0ZDo6ZW5kbDsgDQoyMzUgCQlnb3RvIGZhaWxlZDsg
-DQoyMzYgCX0gDQoyMzcgCSANCjIzOCAJaWYgKGZzLT5tb3VudCgpIDwgMCkgeyANCjIzOSAJCWNv
-dXQgPDwgIm1vdW50IGZhaWxlZCIgPDwgc3RkOjplbmRsOyANCjI0MCAJCWdvdG8gZmFpbGVkOyAN
-CjI0MSAJfSANCjI0MiANCiANCjI0MyAJZnQuY3JlYXRlX2NvbGxlY3Rpb24oY29sbF90KCkpOyAN
-CjI0NCAJZnMtPmFwcGx5X3RyYW5zYWN0aW9uKGZ0KTsgDQoyNDUgDQogDQoyNDYgDQogDQoyNDcg
-CXJldHVybiAwOyANCjI0OCANCiANCjI0OSBmYWlsZWQ6IA0KMjUwIAlyZXR1cm4gMTsgDQoyNTEg
-DQogDQoyNTIgfQ0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IENhc2V5IEJvZGxl
-eSBbbWFpbHRvOmNib2RsZXlAZ21haWwuY29tXSANClNlbnQ6IFRodXJzZGF5LCBKdWx5IDA5LCAy
-MDE1IDk6MTkgQU0NClRvOiBKYW1lcyAoRmVpKSBMaXUtU1NJDQpDYzogSGFvbWFpIFdhbmc7IGNl
-cGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0OiBSZTogQWJvdXQgRmlvIGJhY2tlbmQg
-d2l0aCBPYmplY3RTdG9yZSBBUEkNCg0KSGkgSmFtZXMsDQoNCkluIHRoZSBqb2IgZmlsZSBzcmMv
-dGVzdC9maWxlc3RvcmUuZmlvLCB5b3UgY2FuIG1vZGlmeSB0aGUgbGluZSAib2JqZWN0c3RvcmU9
-ZmlsZXN0b3JlIiB0byB1c2UgYW55IG9iamVjdHN0b3JlIHR5cGUgc3VwcG9ydGVkIGJ5IHRoZQ0K
-T2JqZWN0U3RvcmU6OmNyZWF0ZSgpIGZhY3RvcnkuDQoNCkNhc2V5DQoNCk9uIFdlZCwgSnVsIDgs
-IDIwMTUgYXQgODowMiBQTSwgSmFtZXMgKEZlaSkgTGl1LVNTSSA8amFtZXMubGl1QHNzaS5zYW1z
-dW5nLmNvbT4gd3JvdGU6DQo+IEhpIENhc2V5LA0KPiAgIFF1aWNrIHF1ZXN0aW9ucywgVGhlIGNv
-ZGUgaW4gdGhlIHRydW5rIG9ubHkgY292ZXIgdGhlIHRlc3QgZm9yIGZpbGVzdG9yZS4gSSB3YXMg
-d29uZGVyaW5nIGRvIHlvdSBoYXZlIGFueSBwbGFuIHRvIGNvdmVyIHRoZSB0ZXN0IGZvciBrdnN0
-b3JlIGFuZCBuZXdzdG9yZT8NCj4NCj4gICBUaGFua3MsDQo+ICAgSmFtZXMNCj4NCj4gLS0tLS1P
-cmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5l
-bC5vcmcgDQo+IFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJl
-aGFsZiBPZiBKYW1lcyAoRmVpKSANCj4gTGl1LVNTSQ0KPiBTZW50OiBUdWVzZGF5LCBKdW5lIDMw
-LCAyMDE1IDI6MTkgUE0NCj4gVG86IENhc2V5IEJvZGxleQ0KPiBDYzogSGFvbWFpIFdhbmc7IGNl
-cGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQo+IFN1YmplY3Q6IFJFOiBBYm91dCBGaW8gYmFja2Vu
-ZCB3aXRoIE9iamVjdFN0b3JlIEFQSQ0KPg0KPiBIaSBDYXNleSwNCj4NCj4gICBUaGFua3MgYSBs
-b3QuDQo+DQo+ICAgUmVnYXJkcywNCj4gICBKYW1lcw0KPg0KPiAtLS0tLU9yaWdpbmFsIE1lc3Nh
-Z2UtLS0tLQ0KPiBGcm9tOiBDYXNleSBCb2RsZXkgW21haWx0bzpjYm9kbGV5QGdtYWlsLmNvbV0N
-Cj4gU2VudDogVHVlc2RheSwgSnVuZSAzMCwgMjAxNSAyOjE2IFBNDQo+IFRvOiBKYW1lcyAoRmVp
-KSBMaXUtU1NJDQo+IENjOiBIYW9tYWkgV2FuZzsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcN
-Cj4gU3ViamVjdDogUmU6IEFib3V0IEZpbyBiYWNrZW5kIHdpdGggT2JqZWN0U3RvcmUgQVBJDQo+
-DQo+IEhpLA0KPg0KPiBXaGVuIERhbm55IEFsLUdhYWYgJiBEYW5pZWwgR29sbHViIHB1Ymxpc2hl
-ZCAiQ2VwaCBQZXJmb3JtYW5jZQ0KPiBBbmFseXNpczogZmlvIGFuZCBSQkQiIGF0DQo+IGh0dHBz
-Oi8vdGVsZWtvbWNsb3VkLmdpdGh1Yi5pby9jZXBoLzIwMTQvMDIvMjYvY2VwaC1wZXJmb3JtYW5j
-ZS1hbmFseXMNCj4gaXNfZmlvX3JiZC5odG1sLCB0aGV5IGFsc28gbWVudGlvbmVkIGEgZmlvIGVu
-Z2luZSB0aGF0IGxpbmtlZCBkaXJlY3RseSANCj4gaW50byBjZXBoJ3MgRmlsZVN0b3JlLiBJIHdh
-cyBhYmxlIHRvIGZpbmQgRGFuaWVsJ3MgYnJhbmNoIG9uIGdpdGh1YiBhdCBodHRwczovL2dpdGh1
-Yi5jb20vZ29sbHViL2NlcGgvdHJlZS9maW9fZmlsZXN0b3JlX3YyLCBhbmQgZGlkIHNvbWUgbW9y
-ZSB3b3JrIG9uIGl0IGF0IHRoZSB0aW1lLg0KPg0KPiBJIGp1c3QgcmViYXNlZCB0aGF0IHdvcmsg
-b250byB0aGUgbGF0ZXN0IGNlcGggbWFzdGVyIGJyYW5jaCwgYW5kIHB1c2hlZCB0byBvdXIgZ2l0
-aHViIGF0IGh0dHBzOi8vZ2l0aHViLmNvbS9saW51eGJveDIvbGludXhib3gtY2VwaC90cmVlL2Zp
-by1vYmplY3RzdG9yZS4gWW91IGNhbiBmaW5kIHRoZSBzb3VyY2UgaW4gc3JjL3Rlc3QvZmlvX2Nl
-cGhfZmlsZXN0b3JlLmNjLCBhbmQgcnVuIGZpbyB3aXRoIHRoZSBwcm92aWRlZCBleGFtcGxlIGZp
-byBqb2IgZmlsZSBpbiBzcmMvdGVzdC9maWxlc3RvcmUuZmlvLg0KPg0KPiBJIGRpZG4ndCBoYXZl
-IGEgY2hhbmNlIHRvIGNvbmZpcm0gdGhhdCBpdCBidWlsZHMgd2l0aCBhdXRvbWFrZSwgYnV0IA0K
-PiB0aGUgY21ha2UgdmVyc2lvbiBidWlsdCBmb3IgbWUuIEknbSBoYXBweSB0byBoZWxwIGlmIHlv
-dSBydW4gaW50byANCj4gcHJvYmxlbXMsIENhc2V5DQo+DQo+IE9uIFR1ZSwgSnVuIDMwLCAyMDE1
-IGF0IDI6MzEgUE0sIEphbWVzIChGZWkpIExpdS1TU0kgPGphbWVzLmxpdUBzc2kuc2Ftc3VuZy5j
-b20+IHdyb3RlOg0KPj4gSGkgSGFvbWFpLA0KPj4gICBXaGF0IGFyZSB5b3UgdHJ5aW5nIHRvIGFz
-ayBpcyB0byBiZW5jaG1hcmsgbG9jYWwgb2JqZWN0c3RvcmUobGlrZSBrdnN0b3JlL2ZpbGVzdG9y
-ZS9uZXdzdG9yZSkgbG9jYWxseSB3aXRoIEZJTyhPYmplY3RTdG9yZSBlbmdpbmUpPyBZb3Ugd2Fu
-dCB0byBwdXJlbHkgY29tcGFyZSB0aGUgcGVyZm9ybWFuY2UgbG9jYWxseSBmb3IgdGhlc2Ugb2Jq
-ZWN0c3RvcmVzLCByaWdodD8NCj4+DQo+PiAgIFJlZ2FyZHMsDQo+PiAgIEphbWVzDQo+Pg0KPj4g
-LS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4+IEZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdl
-ci5rZXJuZWwub3JnIA0KPj4gW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9y
-Z10gT24gQmVoYWxmIE9mIEhhb21haSBXYW5nDQo+PiBTZW50OiBUdWVzZGF5LCBKdW5lIDMwLCAy
-MDE1IDk6MDYgQU0NCj4+IFRvOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KPj4gU3ViamVj
-dDogQWJvdXQgRmlvIGJhY2tlbmQgd2l0aCBPYmplY3RTdG9yZSBBUEkNCj4+DQo+PiBIaSBhbGws
-DQo+Pg0KPj4gTG9uZyBsb25nIGFnbywgaXMgdGhlcmUgc29tZW9uZSBzYWlkIGFib3V0IGZpbyBi
-YWNrZW5kIHdpdGggQ2VwaCBPYmplY3RTdG9yZSBBUEk/IFNvIHdlIGNvdWxkIHVzZSB0aGUgZXhp
-c3RpbmcgbWF0dXJlIGZpbyBmYWNpbGl0eSB0byBiZW5jaG1hcmsgY2VwaCBvYmplY3RzdG9yZS4N
-Cj4+DQo+PiAtLQ0KPj4gQmVzdCBSZWdhcmRzLA0KPj4NCj4+IFdoZWF0DQo+PiAtLQ0KPj4gVG8g
-dW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNl
-cGgtZGV2ZWwiDQo+PiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIu
-a2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyANCj4+IGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5l
-bC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPiAgIHsubiArICAgICAgICslICBsendtICBiIOun
-siAgciAgecepINevelggICAgINyofSAgIMageiAmajordiAgICAgICAgelorICAremYgICBoICAg
-fiAgICBpICAgeiAgIHcgICA/ICAgICYgKd+iIGYNCg==
+Hi James,
+
+Are you looking at the code from
+https://github.com/linuxbox2/linuxbox-ceph/tree/fio-objectstore? It
+uses ObjectStore::create() instead of new FileStore(). This allows us
+to exercise all of the object stores with the same code.
+
+Casey
+
+On Thu, Jul 9, 2015 at 2:01 PM, James (Fei) Liu-SSI
+<james.liu@ssi.samsung.com> wrote:
+> Hi Casey,
+>   Here is the code in the fio_ceph_filestore.cc. Basically, it create=
+s a filestore as backend engine for IO exercises. If we got to send IO =
+commands to KeyValue Store or Newstore, we got to change the code accor=
+dingly, right?  I did not see any other files like fio_ceph_keyvaluesto=
+re.cc or fio_ceph_newstore.cc. In my humble opinion, we might need to c=
+reate other two fio engines for keyvaluestore and newstore if we want t=
+o exercise these two, right?
+>
+> Regards,
+> James
+>
+> static int fio_ceph_filestore_init(struct thread_data *td)
+> 209 {
+> 210     vector<const char*> args;
+> 211     struct ceph_filestore_data *ceph_filestore_data =3D (struct c=
+eph_filestore_data *) td->io_ops->data;
+> 212     ObjectStore::Transaction ft;
+> 213
+>
+> 214     global_init(NULL, args, CEPH_ENTITY_TYPE_OSD, CODE_ENVIRONMEN=
+T_UTILITY, 0);
+> 215     //g_conf->journal_dio =3D false;
+> 216     common_init_finish(g_ceph_context);
+> 217     //g_ceph_context->_conf->set_val("debug_filestore", "20");
+> 218     //g_ceph_context->_conf->set_val("debug_throttle", "20");
+> 219     g_ceph_context->_conf->apply_changes(NULL);
+> 220
+>
+> 221     ceph_filestore_data->osd_path =3D strdup("/mnt/fio_ceph_files=
+tore.XXXXXXX");
+> 222     ceph_filestore_data->journal_path =3D strdup("/var/lib/ceph/o=
+sd/journal-ram/fio_ceph_filestore.XXXXXXX");
+> 223
+>
+> 224     if (!mkdtemp(ceph_filestore_data->osd_path)) {
+> 225             cout << "mkdtemp failed: " << strerror(errno) << std:=
+:endl;
+> 226             return 1;
+> 227     }
+> 228     //mktemp(ceph_filestore_data->journal_path); // NOSPC issue
+> 229
+>
+> 230     ObjectStore *fs =3D new FileStore(ceph_filestore_data->osd_pa=
+th, ceph_filestore_data->journal_path);
+> 231     ceph_filestore_data->fs =3D fs;
+> 232
+>
+> 233     if (fs->mkfs() < 0) {
+> 234             cout << "mkfs failed" << std::endl;
+> 235             goto failed;
+> 236     }
+> 237
+> 238     if (fs->mount() < 0) {
+> 239             cout << "mount failed" << std::endl;
+> 240             goto failed;
+> 241     }
+> 242
+>
+> 243     ft.create_collection(coll_t());
+> 244     fs->apply_transaction(ft);
+> 245
+>
+> 246
+>
+> 247     return 0;
+> 248
+>
+> 249 failed:
+> 250     return 1;
+> 251
+>
+> 252 }
+> -----Original Message-----
+> From: Casey Bodley [mailto:cbodley@gmail.com]
+> Sent: Thursday, July 09, 2015 9:19 AM
+> To: James (Fei) Liu-SSI
+> Cc: Haomai Wang; ceph-devel@vger.kernel.org
+> Subject: Re: About Fio backend with ObjectStore API
+>
+> Hi James,
+>
+> In the job file src/test/filestore.fio, you can modify the line "obje=
+ctstore=3Dfilestore" to use any objectstore type supported by the
+> ObjectStore::create() factory.
+>
+> Casey
+>
+> On Wed, Jul 8, 2015 at 8:02 PM, James (Fei) Liu-SSI <james.liu@ssi.sa=
+msung.com> wrote:
+>> Hi Casey,
+>>   Quick questions, The code in the trunk only cover the test for fil=
+estore. I was wondering do you have any plan to cover the test for kvst=
+ore and newstore?
+>>
+>>   Thanks,
+>>   James
+>>
+>> -----Original Message-----
+>> From: ceph-devel-owner@vger.kernel.org
+>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of James (Fei)
+>> Liu-SSI
+>> Sent: Tuesday, June 30, 2015 2:19 PM
+>> To: Casey Bodley
+>> Cc: Haomai Wang; ceph-devel@vger.kernel.org
+>> Subject: RE: About Fio backend with ObjectStore API
+>>
+>> Hi Casey,
+>>
+>>   Thanks a lot.
+>>
+>>   Regards,
+>>   James
+>>
+>> -----Original Message-----
+>> From: Casey Bodley [mailto:cbodley@gmail.com]
+>> Sent: Tuesday, June 30, 2015 2:16 PM
+>> To: James (Fei) Liu-SSI
+>> Cc: Haomai Wang; ceph-devel@vger.kernel.org
+>> Subject: Re: About Fio backend with ObjectStore API
+>>
+>> Hi,
+>>
+>> When Danny Al-Gaaf & Daniel Gollub published "Ceph Performance
+>> Analysis: fio and RBD" at
+>> https://telekomcloud.github.io/ceph/2014/02/26/ceph-performance-anal=
+ys
+>> is_fio_rbd.html, they also mentioned a fio engine that linked direct=
+ly
+>> into ceph's FileStore. I was able to find Daniel's branch on github =
+at https://github.com/gollub/ceph/tree/fio_filestore_v2, and did some m=
+ore work on it at the time.
+>>
+>> I just rebased that work onto the latest ceph master branch, and pus=
+hed to our github at https://github.com/linuxbox2/linuxbox-ceph/tree/fi=
+o-objectstore. You can find the source in src/test/fio_ceph_filestore.c=
+c, and run fio with the provided example fio job file in src/test/files=
+tore.fio.
+>>
+>> I didn't have a chance to confirm that it builds with automake, but
+>> the cmake version built for me. I'm happy to help if you run into
+>> problems, Casey
+>>
+>> On Tue, Jun 30, 2015 at 2:31 PM, James (Fei) Liu-SSI <james.liu@ssi.=
+samsung.com> wrote:
+>>> Hi Haomai,
+>>>   What are you trying to ask is to benchmark local objectstore(like=
+ kvstore/filestore/newstore) locally with FIO(ObjectStore engine)? You =
+want to purely compare the performance locally for these objectstores, =
+right?
+>>>
+>>>   Regards,
+>>>   James
+>>>
+>>> -----Original Message-----
+>>> From: ceph-devel-owner@vger.kernel.org
+>>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Haomai Wang
+>>> Sent: Tuesday, June 30, 2015 9:06 AM
+>>> To: ceph-devel@vger.kernel.org
+>>> Subject: About Fio backend with ObjectStore API
+>>>
+>>> Hi all,
+>>>
+>>> Long long ago, is there someone said about fio backend with Ceph Ob=
+jectStore API? So we could use the existing mature fio facility to benc=
+hmark ceph objectstore.
+>>>
+>>> --
+>>> Best Regards,
+>>>
+>>> Wheat
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
+l"
+>>> in the body of a message to majordomo@vger.kernel.org More majordom=
+o
+>>> info at  http://vger.kernel.org/majordomo-info.html
+>>   {.n +       +%  lzwm  b =EB=A7=B2  r  y=C7=A9 =D7=AFzX     =DC=A8}=
+   =C6=A0z &j:+v        zZ+  +zf   h   ~    i   z   w   ?    & )=DF=A2 =
+f
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
