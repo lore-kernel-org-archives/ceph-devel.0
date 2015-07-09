@@ -1,273 +1,69 @@
-From: "Matt W. Benjamin" <matt@cohortfs.com>
-Subject: Re: About Fio backend with ObjectStore API
-Date: Thu, 9 Jul 2015 16:26:48 -0400 (EDT)
-Message-ID: <814413230.286.1436473608097.JavaMail.root@thunderbeast.private.linuxbox.com>
-References: <99767EA2E27DD44DB4E9F9B9ACA458C03B31A8D8@SSIEXCH-MB3.ssi.samsung.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: Strange issue with CRUSH
+Date: Thu, 9 Jul 2015 15:06:00 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1507091501570.20547@cobra.newdream.net>
+References: <CAOWwpMJv4N0BvdEy2Y-WpDqqZ6R=f_5_+2j1dWeVe-Xk1fg1bQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from aa.linuxbox.com ([69.128.83.226]:3467 "EHLO aa.linuxbox.com"
+Received: from mx1.redhat.com ([209.132.183.28]:56046 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751619AbbGIU0y convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Jul 2015 16:26:54 -0400
-In-Reply-To: <99767EA2E27DD44DB4E9F9B9ACA458C03B31A8D8@SSIEXCH-MB3.ssi.samsung.com>
+	id S1754161AbbGIWGC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 9 Jul 2015 18:06:02 -0400
+In-Reply-To: <CAOWwpMJv4N0BvdEy2Y-WpDqqZ6R=f_5_+2j1dWeVe-Xk1fg1bQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
-Cc: Haomai Wang <haomaiwang@gmail.com>, ceph-devel@vger.kernel.org, Casey Bodley <cbodley@gmail.com>
+To: Gleb Borisov <borisov.gleb@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-That makes sense.
+On Fri, 10 Jul 2015, Gleb Borisov wrote:
+> Hi Sage,
+> 
+> Sorry for mailing you in person, I realize that you're quite busy at redhat,
+> but I wanted you have a look on an issue with CRUSH map.
 
-Matt
+No problem. I hope you don't mind I've added ceph-devel to the cc list.
 
------ "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com> wrote:
+> I've described very first insights here:
+> http://lists.ceph.com/pipermail/ceph-users-ceph.com/2015-July/002897.html
+> 
+> We are continue our research and found that distribution of PG count by OSD
+> is very strange and after digging into CRUSH source code found rjenkins1
+> hash function.
+> 
+> After some testing we realized that rjenkins1's value distribution is
+> exponential, and this can cause our disbalance.
 
-> Hi Casey,
->   Got it. I was directed to the old code base. By the way, Since the
-> testing case was used to exercise all of object stores.  Strongly
-> recommend to change the name from fio_ceph_filestore.cc to
-> fio_ceph_objectstore.cc . And the code in fio_ceph_filestore.cc shoul=
-d
-> be refactored to reflect that the whole objectstore will be supported
-> by fio_ceph_objectstore.cc. what you think?
->=20
-> Let me know if you need any help from my side.
->=20
->=20
-> Regards,
-> James
->=20
-> =20
->=20
-> -----Original Message-----
-> From: Casey Bodley [mailto:cbodley@gmail.com]=20
-> Sent: Thursday, July 09, 2015 12:32 PM
-> To: James (Fei) Liu-SSI
-> Cc: Haomai Wang; ceph-devel@vger.kernel.org
-> Subject: Re: About Fio backend with ObjectStore API
->=20
-> Hi James,
->=20
-> Are you looking at the code from
-> https://github.com/linuxbox2/linuxbox-ceph/tree/fio-objectstore? It
-> uses ObjectStore::create() instead of new FileStore(). This allows us
-> to exercise all of the object stores with the same code.
->=20
-> Casey
->=20
-> On Thu, Jul 9, 2015 at 2:01 PM, James (Fei) Liu-SSI
-> <james.liu@ssi.samsung.com> wrote:
-> > Hi Casey,
-> >   Here is the code in the fio_ceph_filestore.cc. Basically, it
-> creates a filestore as backend engine for IO exercises. If we got to
-> send IO commands to KeyValue Store or Newstore, we got to change the
-> code accordingly, right?  I did not see any other files like
-> fio_ceph_keyvaluestore.cc or fio_ceph_newstore.cc. In my humble
-> opinion, we might need to create other two fio engines for
-> keyvaluestore and newstore if we want to exercise these two, right?
-> >
-> > Regards,
-> > James
-> >
-> > static int fio_ceph_filestore_init(struct thread_data *td)
-> > 209 {
-> > 210     vector<const char*> args;
-> > 211     struct ceph_filestore_data *ceph_filestore_data =3D (struct
-> ceph_filestore_data *) td->io_ops->data;
-> > 212     ObjectStore::Transaction ft;
-> > 213
-> >
-> > 214     global_init(NULL, args, CEPH_ENTITY_TYPE_OSD,
-> CODE_ENVIRONMENT_UTILITY, 0);
-> > 215     //g_conf->journal_dio =3D false;
-> > 216     common_init_finish(g_ceph_context);
-> > 217     //g_ceph_context->_conf->set_val("debug_filestore", "20");
-> > 218     //g_ceph_context->_conf->set_val("debug_throttle", "20");
-> > 219     g_ceph_context->_conf->apply_changes(NULL);
-> > 220
-> >
-> > 221     ceph_filestore_data->osd_path =3D
-> strdup("/mnt/fio_ceph_filestore.XXXXXXX");
-> > 222     ceph_filestore_data->journal_path =3D
-> strdup("/var/lib/ceph/osd/journal-ram/fio_ceph_filestore.XXXXXXX");
-> > 223
-> >
-> > 224     if (!mkdtemp(ceph_filestore_data->osd_path)) {
-> > 225             cout << "mkdtemp failed: " << strerror(errno) <<
-> std::endl;
-> > 226             return 1;
-> > 227     }
-> > 228     //mktemp(ceph_filestore_data->journal_path); // NOSPC issue
-> > 229
-> >
-> > 230     ObjectStore *fs =3D new
-> FileStore(ceph_filestore_data->osd_path,
-> ceph_filestore_data->journal_path);
-> > 231     ceph_filestore_data->fs =3D fs;
-> > 232
-> >
-> > 233     if (fs->mkfs() < 0) {
-> > 234             cout << "mkfs failed" << std::endl;
-> > 235             goto failed;
-> > 236     }
-> > 237
-> > 238     if (fs->mount() < 0) {
-> > 239             cout << "mount failed" << std::endl;
-> > 240             goto failed;
-> > 241     }
-> > 242
-> >
-> > 243     ft.create_collection(coll_t());
-> > 244     fs->apply_transaction(ft);
-> > 245
-> >
-> > 246
-> >
-> > 247     return 0;
-> > 248
-> >
-> > 249 failed:
-> > 250     return 1;
-> > 251
-> >
-> > 252 }
-> > -----Original Message-----
-> > From: Casey Bodley [mailto:cbodley@gmail.com]
-> > Sent: Thursday, July 09, 2015 9:19 AM
-> > To: James (Fei) Liu-SSI
-> > Cc: Haomai Wang; ceph-devel@vger.kernel.org
-> > Subject: Re: About Fio backend with ObjectStore API
-> >
-> > Hi James,
-> >
-> > In the job file src/test/filestore.fio, you can modify the line=20
-> > "objectstore=3Dfilestore" to use any objectstore type supported by
-> the
-> > ObjectStore::create() factory.
-> >
-> > Casey
-> >
-> > On Wed, Jul 8, 2015 at 8:02 PM, James (Fei) Liu-SSI
-> <james.liu@ssi.samsung.com> wrote:
-> >> Hi Casey,
-> >>   Quick questions, The code in the trunk only cover the test for
-> filestore. I was wondering do you have any plan to cover the test for
-> kvstore and newstore?
-> >>
-> >>   Thanks,
-> >>   James
-> >>
-> >> -----Original Message-----
-> >> From: ceph-devel-owner@vger.kernel.org=20
-> >> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of James (Fei)
->=20
-> >> Liu-SSI
-> >> Sent: Tuesday, June 30, 2015 2:19 PM
-> >> To: Casey Bodley
-> >> Cc: Haomai Wang; ceph-devel@vger.kernel.org
-> >> Subject: RE: About Fio backend with ObjectStore API
-> >>
-> >> Hi Casey,
-> >>
-> >>   Thanks a lot.
-> >>
-> >>   Regards,
-> >>   James
-> >>
-> >> -----Original Message-----
-> >> From: Casey Bodley [mailto:cbodley@gmail.com]
-> >> Sent: Tuesday, June 30, 2015 2:16 PM
-> >> To: James (Fei) Liu-SSI
-> >> Cc: Haomai Wang; ceph-devel@vger.kernel.org
-> >> Subject: Re: About Fio backend with ObjectStore API
-> >>
-> >> Hi,
-> >>
-> >> When Danny Al-Gaaf & Daniel Gollub published "Ceph Performance
-> >> Analysis: fio and RBD" at
-> >>
-> https://telekomcloud.github.io/ceph/2014/02/26/ceph-performance-analy
-> >> s is_fio_rbd.html, they also mentioned a fio engine that linked=20
-> >> directly into ceph's FileStore. I was able to find Daniel's branch
-> on=20
-> >> github at https://github.com/gollub/ceph/tree/fio_filestore_v2, an=
-d
-> did some more work on it at the time.
-> >>
-> >> I just rebased that work onto the latest ceph master branch, and
-> pushed to our github at
-> https://github.com/linuxbox2/linuxbox-ceph/tree/fio-objectstore. You
-> can find the source in src/test/fio_ceph_filestore.cc, and run fio
-> with the provided example fio job file in src/test/filestore.fio.
-> >>
-> >> I didn't have a chance to confirm that it builds with automake, bu=
-t
->=20
-> >> the cmake version built for me. I'm happy to help if you run into=20
-> >> problems, Casey
-> >>
-> >> On Tue, Jun 30, 2015 at 2:31 PM, James (Fei) Liu-SSI
-> <james.liu@ssi.samsung.com> wrote:
-> >>> Hi Haomai,
-> >>>   What are you trying to ask is to benchmark local
-> objectstore(like kvstore/filestore/newstore) locally with
-> FIO(ObjectStore engine)? You want to purely compare the performance
-> locally for these objectstores, right?
-> >>>
-> >>>   Regards,
-> >>>   James
-> >>>
-> >>> -----Original Message-----
-> >>> From: ceph-devel-owner@vger.kernel.org=20
-> >>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Haomai
-> Wang
-> >>> Sent: Tuesday, June 30, 2015 9:06 AM
-> >>> To: ceph-devel@vger.kernel.org
-> >>> Subject: About Fio backend with ObjectStore API
-> >>>
-> >>> Hi all,
-> >>>
-> >>> Long long ago, is there someone said about fio backend with Ceph
-> ObjectStore API? So we could use the existing mature fio facility to
-> benchmark ceph objectstore.
-> >>>
-> >>> --
-> >>> Best Regards,
-> >>>
-> >>> Wheat
-> >>> --
-> >>> To unsubscribe from this list: send the line "unsubscribe
-> ceph-devel"
-> >>> in the body of a message to majordomo@vger.kernel.org More
-> majordomo=20
-> >>> info at  http://vger.kernel.org/majordomo-info.html
-> >>   {.n +       +%  lzwm  b =EB=A7=B2  r  y=C7=A9 =D7=AFzX     =DC=A8=
-}   =C6=A0z &j:+v        zZ+
->  +zf   h   ~    i   z   w   ?    & )=DF=A2 f
-> N=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDr=EF=BF=BD=EF=BF=BDy=EF=
-=BF=BD=EF=BF=BD=EF=BF=BDb=EF=BF=BDX=EF=BF=BD=EF=BF=BD=C7=A7v=EF=BF=BD^=EF=
-=BF=BD)=DE=BA{.n=EF=BF=BD+=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD]z=EF=BF=
-=BD=EF=BF=BD=EF=BF=BD{ay=EF=BF=BD=CA=87=DA=99=EF=BF=BD,j=EF=BF=BD=EF=BF=
-=BDf=EF=BF=BD=EF=BF=BD=EF=BF=BDh=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD=EF=
-=BF=BDw=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDj:+v=EF=BF=
-=BD=EF=BF=BD=EF=BF=BDw=EF=BF=BDj=EF=BF=BDm=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=
-=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDzZ+=EF=BF=BD=EF=BF=BD=DD=A2j"=
-=EF=BF=BD=EF=BF=BD
+Any issue with rjenkins1's hash function is very interesting and 
+concerning.  Can you describe your analysis and what you mean by the 
+distribution being exponential?
 
---=20
-Matt Benjamin
-CohortFS, LLC.
-315 West Huron Street, Suite 140A
-Ann Arbor, Michigan 48103
+> What do you think about adding additional hashing algorithm to CRUSH? It
+> seems that it could improve distribution.
 
-http://cohortfs.com
+I am definitely open to adding new hash functions, especially if the 
+current ones are flawed.  The current hash was created by making ad hoc 
+combinations of rjenkins' mix function with various numbers of 
+arguments--hardly scientific or methodical.  We did an analysis a couple 
+years back and found that it effectively modeled a uniform distribution, 
+but if we missed something or were wrong we should definitely correct it!
 
-tel.  734-761-4689=20
-fax.  734-769-8938=20
-cel.  734-216-5309=20
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+In any case, the important step is to quantify what is wrong with the 
+current hash so that we can ensure any new one is not flawed in the same 
+way.
+
+Thanks-
+sage
+
+
+> We have also tried to generate some syntetic crushmaps (another bucket
+> types, more OSDs per host, more/less hosts by rack, different cound of
+> racks, linear osd ids, random osd ids, etc), but didn't found any
+> combination with better distribution of PG across OSD.
+> 
+> Thanks and one more sorry for bothering you in person.
+> --
+> Best regards,
+> Gleb M Borisov
+> 
+> 
