@@ -1,20 +1,33 @@
-From: Sage Weil <sweil@redhat.com>
+From: Samuel Just <sjust@redhat.com>
 Subject: Re: Strange issue with CRUSH
-Date: Thu, 9 Jul 2015 15:06:00 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1507091501570.20547@cobra.newdream.net>
-References: <CAOWwpMJv4N0BvdEy2Y-WpDqqZ6R=f_5_+2j1dWeVe-Xk1fg1bQ@mail.gmail.com>
+Date: Thu, 9 Jul 2015 19:03:11 -0400 (EDT)
+Message-ID: <1736665041.43352077.1436482991363.JavaMail.zimbra@redhat.com>
+References: <CAOWwpMJv4N0BvdEy2Y-WpDqqZ6R=f_5_+2j1dWeVe-Xk1fg1bQ@mail.gmail.com> <alpine.DEB.2.00.1507091501570.20547@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:56046 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754161AbbGIWGC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 9 Jul 2015 18:06:02 -0400
-In-Reply-To: <CAOWwpMJv4N0BvdEy2Y-WpDqqZ6R=f_5_+2j1dWeVe-Xk1fg1bQ@mail.gmail.com>
+Received: from mx6-phx2.redhat.com ([209.132.183.39]:44530 "EHLO
+	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750995AbbGIXDO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Jul 2015 19:03:14 -0400
+In-Reply-To: <alpine.DEB.2.00.1507091501570.20547@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gleb Borisov <borisov.gleb@gmail.com>
+To: Sage Weil <sweil@redhat.com>
+Cc: Gleb Borisov <borisov.gleb@gmail.com>, ceph-devel@vger.kernel.org
+
+I've seen some odd teuthology in the last week or two which seems to be anomalous rjenkins hash behavior as well.
+
+http://tracker.ceph.com/issues/12231
+-Sam
+
+----- Original Message -----
+From: "Sage Weil" <sweil@redhat.com>
+To: "Gleb Borisov" <borisov.gleb@gmail.com>
 Cc: ceph-devel@vger.kernel.org
+Sent: Thursday, July 9, 2015 3:06:00 PM
+Subject: Re: Strange issue with CRUSH
 
 On Fri, 10 Jul 2015, Gleb Borisov wrote:
 > Hi Sage,
@@ -67,3 +80,8 @@ sage
 > Gleb M Borisov
 > 
 > 
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
