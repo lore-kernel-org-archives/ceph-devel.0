@@ -1,68 +1,75 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH] libceph: treat sockaddr_storage with uninitialized family as blank
-Date: Thu,  9 Jul 2015 16:49:14 +0300
-Message-ID: <1436449754-34910-1-git-send-email-idryomov@gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: dealing with conflicting pull requests
+Date: Thu, 09 Jul 2015 16:00:56 +0200
+Message-ID: <559E7E98.70605@dachary.org>
+References: <559E4F52.9070007@dachary.org>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="j8t6gXNfLxeXEj4P85nANXf0itlODEpud"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f41.google.com ([209.85.215.41]:36130 "EHLO
-	mail-la0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752128AbbGINtW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Jul 2015 09:49:22 -0400
-Received: by lagc2 with SMTP id c2so243754921lag.3
-        for <ceph-devel@vger.kernel.org>; Thu, 09 Jul 2015 06:49:21 -0700 (PDT)
-Received: from localhost.localdomain ([109.110.66.238])
-        by smtp.gmail.com with ESMTPSA id t15sm1538071lbk.0.2015.07.09.06.49.20
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 09 Jul 2015 06:49:20 -0700 (PDT)
+Received: from mail2.dachary.org ([91.121.57.175]:47393 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751257AbbGIOBD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Jul 2015 10:01:03 -0400
+In-Reply-To: <559E4F52.9070007@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: "Shu, Xinxin" <xinxin.shu@intel.com>, Nathan Cutler <ncutler@suse.cz>, Abhishek L <abhishek.lekshmanan@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-addr_is_blank() should return true if family is neither AF_INET nor
-AF_INET6.  This is what its counterpart entity_addr_t::is_blank_ip() is
-doing and it is the right thing to do: in process_banner() we check if
-our address is blank and if it is "learn" it from our peer.  As it is,
-we never learn our address and always send out a blank one.  This goes
-way back to ceph.git commit dd732cbfc1c9 ("use sockaddr_storage; and
-some ipv6 support groundwork") from 2009.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--j8t6gXNfLxeXEj4P85nANXf0itlODEpud
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-While at at, do not open-code ipv6_addr_any() and use INADDR_ANY
-constant instead of 0.
 
-Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
----
- net/ceph/messenger.c | 14 +++++++-------
- 1 file changed, 7 insertions(+), 7 deletions(-)
 
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index 726a57af760f..101ab6285fba 100644
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -1732,17 +1732,17 @@ static int verify_hello(struct ceph_connection *con)
- 
- static bool addr_is_blank(struct sockaddr_storage *ss)
- {
-+	struct in_addr *addr = &((struct sockaddr_in *)ss)->sin_addr;
-+	struct in6_addr *addr6 = &((struct sockaddr_in6 *)ss)->sin6_addr;
-+
- 	switch (ss->ss_family) {
- 	case AF_INET:
--		return ((struct sockaddr_in *)ss)->sin_addr.s_addr == 0;
-+		return addr->s_addr == htonl(INADDR_ANY);
- 	case AF_INET6:
--		return
--		     ((struct sockaddr_in6 *)ss)->sin6_addr.s6_addr32[0] == 0 &&
--		     ((struct sockaddr_in6 *)ss)->sin6_addr.s6_addr32[1] == 0 &&
--		     ((struct sockaddr_in6 *)ss)->sin6_addr.s6_addr32[2] == 0 &&
--		     ((struct sockaddr_in6 *)ss)->sin6_addr.s6_addr32[3] == 0;
-+		return ipv6_addr_any(addr6);
-+	default:
-+		return true;
- 	}
--	return false;
- }
- 
- static int addr_port(struct sockaddr_storage *ss)
--- 
-1.9.3
+On 09/07/2015 12:39, Loic Dachary wrote:
+> Dear co-backporters,
+>=20
+> For the first time we have a few conflicting pull requests that prevent=
+ merging all in the integration branch.
+>=20
+> https://github.com/ceph/ceph/pull/4597
+> https://github.com/ceph/ceph/pull/5043
+> https://github.com/ceph/ceph/pull/4788
+> https://github.com/ceph/ceph/pull/4636
+> https://github.com/ceph/ceph/pull/4635
 
+I'll merge
+
+https://github.com/ceph/ceph/pull/4636
+https://github.com/ceph/ceph/pull/4635
+https://github.com/ceph/ceph/pull/4597
+
+and keep the other two as DNM for later then.
+
+>=20
+> I think the simplest way to deal with that is to arbitrarily pick a few=
+ that apply cleanly and just DNM the others so they wait for the next rou=
+nd of integration testing. After the first round of integration test, the=
+ chosen one will be merged and the DNM will have to be rebased to resolve=
+ the conflict, but that's what we do routinely.
+>=20
+> What do you think ?
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--j8t6gXNfLxeXEj4P85nANXf0itlODEpud
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlWefpgACgkQ8dLMyEl6F20nxwCfUBJqHma5wh4H1PPx/8xeM6WX
+i1YAn0qRvS5CtBI/DgU0VTL14dV0dHuH
+=vHc0
+-----END PGP SIGNATURE-----
+
+--j8t6gXNfLxeXEj4P85nANXf0itlODEpud--
