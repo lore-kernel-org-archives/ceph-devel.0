@@ -1,79 +1,126 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [PATCH] libceph: treat sockaddr_storage with uninitialized family
- as blank
-Date: Thu, 9 Jul 2015 08:58:46 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1507090858360.29886@cobra.newdream.net>
-References: <1436449754-34910-1-git-send-email-idryomov@gmail.com>
+From: Casey Bodley <cbodley@gmail.com>
+Subject: Re: About Fio backend with ObjectStore API
+Date: Thu, 9 Jul 2015 12:19:27 -0400
+Message-ID: <CAMeBU_3eyRiEvgG=sPe3m=QiQiRBkeVquBpo+XpJ4GtTq4K+8Q@mail.gmail.com>
+References: <CACJqLyZcAzb5wocrN8b8WoK6j3ynWF-_3=T+1aQkDko4Mv_SmQ@mail.gmail.com>
+	<99767EA2E27DD44DB4E9F9B9ACA458C03B319D0D@SSIEXCH-MB3.ssi.samsung.com>
+	<CAMeBU_3ty6ae5VXP=_D8py1_Pk4rLKxCa4Larz0oKnyTYDtz8w@mail.gmail.com>
+	<99767EA2E27DD44DB4E9F9B9ACA458C03B319DF2@SSIEXCH-MB3.ssi.samsung.com>
+	<99767EA2E27DD44DB4E9F9B9ACA458C03B31A700@SSIEXCH-MB3.ssi.samsung.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:50548 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752765AbbGIP6r (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Jul 2015 11:58:47 -0400
-In-Reply-To: <1436449754-34910-1-git-send-email-idryomov@gmail.com>
+Received: from mail-qk0-f174.google.com ([209.85.220.174]:34958 "EHLO
+	mail-qk0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751876AbbGIQT2 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Jul 2015 12:19:28 -0400
+Received: by qkbp125 with SMTP id p125so189098256qkb.2
+        for <ceph-devel@vger.kernel.org>; Thu, 09 Jul 2015 09:19:27 -0700 (PDT)
+In-Reply-To: <99767EA2E27DD44DB4E9F9B9ACA458C03B31A700@SSIEXCH-MB3.ssi.samsung.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
+Cc: Haomai Wang <haomaiwang@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, 9 Jul 2015, Ilya Dryomov wrote:
-> addr_is_blank() should return true if family is neither AF_INET nor
-> AF_INET6.  This is what its counterpart entity_addr_t::is_blank_ip() is
-> doing and it is the right thing to do: in process_banner() we check if
-> our address is blank and if it is "learn" it from our peer.  As it is,
-> we never learn our address and always send out a blank one.  This goes
-> way back to ceph.git commit dd732cbfc1c9 ("use sockaddr_storage; and
-> some ipv6 support groundwork") from 2009.
-> 
-> While at at, do not open-code ipv6_addr_any() and use INADDR_ANY
-> constant instead of 0.
-> 
-> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+Hi James,
 
-Reviewed-by: Sage Weil <sage@redhat.com>
+In the job file src/test/filestore.fio, you can modify the line
+"objectstore=3Dfilestore" to use any objectstore type supported by the
+ObjectStore::create() factory.
 
+Casey
 
-
-> ---
->  net/ceph/messenger.c | 14 +++++++-------
->  1 file changed, 7 insertions(+), 7 deletions(-)
-> 
-> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-> index 726a57af760f..101ab6285fba 100644
-> --- a/net/ceph/messenger.c
-> +++ b/net/ceph/messenger.c
-> @@ -1732,17 +1732,17 @@ static int verify_hello(struct ceph_connection *con)
->  
->  static bool addr_is_blank(struct sockaddr_storage *ss)
->  {
-> +	struct in_addr *addr = &((struct sockaddr_in *)ss)->sin_addr;
-> +	struct in6_addr *addr6 = &((struct sockaddr_in6 *)ss)->sin6_addr;
-> +
->  	switch (ss->ss_family) {
->  	case AF_INET:
-> -		return ((struct sockaddr_in *)ss)->sin_addr.s_addr == 0;
-> +		return addr->s_addr == htonl(INADDR_ANY);
->  	case AF_INET6:
-> -		return
-> -		     ((struct sockaddr_in6 *)ss)->sin6_addr.s6_addr32[0] == 0 &&
-> -		     ((struct sockaddr_in6 *)ss)->sin6_addr.s6_addr32[1] == 0 &&
-> -		     ((struct sockaddr_in6 *)ss)->sin6_addr.s6_addr32[2] == 0 &&
-> -		     ((struct sockaddr_in6 *)ss)->sin6_addr.s6_addr32[3] == 0;
-> +		return ipv6_addr_any(addr6);
-> +	default:
-> +		return true;
->  	}
-> -	return false;
->  }
->  
->  static int addr_port(struct sockaddr_storage *ss)
-> -- 
-> 1.9.3
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+On Wed, Jul 8, 2015 at 8:02 PM, James (Fei) Liu-SSI
+<james.liu@ssi.samsung.com> wrote:
+> Hi Casey,
+>   Quick questions, The code in the trunk only cover the test for file=
+store. I was wondering do you have any plan to cover the test for kvsto=
+re and newstore?
+>
+>   Thanks,
+>   James
+>
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.=
+kernel.org] On Behalf Of James (Fei) Liu-SSI
+> Sent: Tuesday, June 30, 2015 2:19 PM
+> To: Casey Bodley
+> Cc: Haomai Wang; ceph-devel@vger.kernel.org
+> Subject: RE: About Fio backend with ObjectStore API
+>
+> Hi Casey,
+>
+>   Thanks a lot.
+>
+>   Regards,
+>   James
+>
+> -----Original Message-----
+> From: Casey Bodley [mailto:cbodley@gmail.com]
+> Sent: Tuesday, June 30, 2015 2:16 PM
+> To: James (Fei) Liu-SSI
+> Cc: Haomai Wang; ceph-devel@vger.kernel.org
+> Subject: Re: About Fio backend with ObjectStore API
+>
+> Hi,
+>
+> When Danny Al-Gaaf & Daniel Gollub published "Ceph Performance
+> Analysis: fio and RBD" at
+> https://telekomcloud.github.io/ceph/2014/02/26/ceph-performance-analy=
+sis_fio_rbd.html,
+> they also mentioned a fio engine that linked directly into ceph's Fil=
+eStore. I was able to find Daniel's branch on github at https://github.=
+com/gollub/ceph/tree/fio_filestore_v2, and did some more work on it at =
+the time.
+>
+> I just rebased that work onto the latest ceph master branch, and push=
+ed to our github at https://github.com/linuxbox2/linuxbox-ceph/tree/fio=
+-objectstore. You can find the source in src/test/fio_ceph_filestore.cc=
+, and run fio with the provided example fio job file in src/test/filest=
+ore.fio.
+>
+> I didn't have a chance to confirm that it builds with automake, but t=
+he cmake version built for me. I'm happy to help if you run into proble=
+ms, Casey
+>
+> On Tue, Jun 30, 2015 at 2:31 PM, James (Fei) Liu-SSI <james.liu@ssi.s=
+amsung.com> wrote:
+>> Hi Haomai,
+>>   What are you trying to ask is to benchmark local objectstore(like =
+kvstore/filestore/newstore) locally with FIO(ObjectStore engine)? You w=
+ant to purely compare the performance locally for these objectstores, r=
+ight?
+>>
+>>   Regards,
+>>   James
+>>
+>> -----Original Message-----
+>> From: ceph-devel-owner@vger.kernel.org
+>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Haomai Wang
+>> Sent: Tuesday, June 30, 2015 9:06 AM
+>> To: ceph-devel@vger.kernel.org
+>> Subject: About Fio backend with ObjectStore API
+>>
+>> Hi all,
+>>
+>> Long long ago, is there someone said about fio backend with Ceph Obj=
+ectStore API? So we could use the existing mature fio facility to bench=
+mark ceph objectstore.
+>>
+>> --
+>> Best Regards,
+>>
+>> Wheat
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+"
+>> in the body of a message to majordomo@vger.kernel.org More majordomo
+>> info at  http://vger.kernel.org/majordomo-info.html
+>   {.n +       +%  lzwm  b =EB=A7=B2  r  y=C7=A9 =D7=AFzX     =DC=A8} =
+  =C6=A0z &j:+v        zZ+  +zf   h   ~    i   z   w   ?    & )=DF=A2 f
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
