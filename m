@@ -1,73 +1,54 @@
-From: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
-Subject: RE: About Fio backend with ObjectStore API
-Date: Thu, 9 Jul 2015 00:02:06 +0000
-Message-ID: <99767EA2E27DD44DB4E9F9B9ACA458C03B31A700@SSIEXCH-MB3.ssi.samsung.com>
-References: <CACJqLyZcAzb5wocrN8b8WoK6j3ynWF-_3=T+1aQkDko4Mv_SmQ@mail.gmail.com>
-	<99767EA2E27DD44DB4E9F9B9ACA458C03B319D0D@SSIEXCH-MB3.ssi.samsung.com>
- <CAMeBU_3ty6ae5VXP=_D8py1_Pk4rLKxCa4Larz0oKnyTYDtz8w@mail.gmail.com>
- <99767EA2E27DD44DB4E9F9B9ACA458C03B319DF2@SSIEXCH-MB3.ssi.samsung.com>
+From: Varada Kari <Varada.Kari@sandisk.com>
+Subject: Patches for review on keyvaluestore
+Date: Thu, 9 Jul 2015 08:31:31 +0000
+Message-ID: <C226B0AB34511445928D9882AA519F601C4400B3@SACMBXIP03.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.ssi.samsung.com ([207.140.43.206]:60138 "EHLO
-	mx2.ssi.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750814AbbGIACa (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Jul 2015 20:02:30 -0400
-In-Reply-To: <99767EA2E27DD44DB4E9F9B9ACA458C03B319DF2@SSIEXCH-MB3.ssi.samsung.com>
+Received: from mail-bn1bon0060.outbound.protection.outlook.com ([157.56.111.60]:30912
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750936AbbGIKFa convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Jul 2015 06:05:30 -0400
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>, Casey Bodley <cbodley@gmail.com>
-Cc: Haomai Wang <haomaiwang@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, Samuel Just <sam.just@inktank.com>, Haomai Wang <haomaiwang@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-SGkgQ2FzZXksDQogIFF1aWNrIHF1ZXN0aW9ucywgVGhlIGNvZGUgaW4gdGhlIHRydW5rIG9ubHkg
-Y292ZXIgdGhlIHRlc3QgZm9yIGZpbGVzdG9yZS4gSSB3YXMgd29uZGVyaW5nIGRvIHlvdSBoYXZl
-IGFueSBwbGFuIHRvIGNvdmVyIHRoZSB0ZXN0IGZvciBrdnN0b3JlIGFuZCBuZXdzdG9yZT8NCg0K
-ICBUaGFua3MsDQogIEphbWVzDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBj
-ZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJA
-dmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgSmFtZXMgKEZlaSkgTGl1LVNTSQ0KU2VudDog
-VHVlc2RheSwgSnVuZSAzMCwgMjAxNSAyOjE5IFBNDQpUbzogQ2FzZXkgQm9kbGV5DQpDYzogSGFv
-bWFpIFdhbmc7IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0OiBSRTogQWJvdXQg
-RmlvIGJhY2tlbmQgd2l0aCBPYmplY3RTdG9yZSBBUEkNCg0KSGkgQ2FzZXksDQoNCiAgVGhhbmtz
-IGEgbG90Lg0KDQogIFJlZ2FyZHMsDQogIEphbWVzDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0t
-LS0tDQpGcm9tOiBDYXNleSBCb2RsZXkgW21haWx0bzpjYm9kbGV5QGdtYWlsLmNvbV0NClNlbnQ6
-IFR1ZXNkYXksIEp1bmUgMzAsIDIwMTUgMjoxNiBQTQ0KVG86IEphbWVzIChGZWkpIExpdS1TU0kN
-CkNjOiBIYW9tYWkgV2FuZzsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNClN1YmplY3Q6IFJl
-OiBBYm91dCBGaW8gYmFja2VuZCB3aXRoIE9iamVjdFN0b3JlIEFQSQ0KDQpIaSwNCg0KV2hlbiBE
-YW5ueSBBbC1HYWFmICYgRGFuaWVsIEdvbGx1YiBwdWJsaXNoZWQgIkNlcGggUGVyZm9ybWFuY2UN
-CkFuYWx5c2lzOiBmaW8gYW5kIFJCRCIgYXQNCmh0dHBzOi8vdGVsZWtvbWNsb3VkLmdpdGh1Yi5p
-by9jZXBoLzIwMTQvMDIvMjYvY2VwaC1wZXJmb3JtYW5jZS1hbmFseXNpc19maW9fcmJkLmh0bWws
-DQp0aGV5IGFsc28gbWVudGlvbmVkIGEgZmlvIGVuZ2luZSB0aGF0IGxpbmtlZCBkaXJlY3RseSBp
-bnRvIGNlcGgncyBGaWxlU3RvcmUuIEkgd2FzIGFibGUgdG8gZmluZCBEYW5pZWwncyBicmFuY2gg
-b24gZ2l0aHViIGF0IGh0dHBzOi8vZ2l0aHViLmNvbS9nb2xsdWIvY2VwaC90cmVlL2Zpb19maWxl
-c3RvcmVfdjIsIGFuZCBkaWQgc29tZSBtb3JlIHdvcmsgb24gaXQgYXQgdGhlIHRpbWUuDQoNCkkg
-anVzdCByZWJhc2VkIHRoYXQgd29yayBvbnRvIHRoZSBsYXRlc3QgY2VwaCBtYXN0ZXIgYnJhbmNo
-LCBhbmQgcHVzaGVkIHRvIG91ciBnaXRodWIgYXQgaHR0cHM6Ly9naXRodWIuY29tL2xpbnV4Ym94
-Mi9saW51eGJveC1jZXBoL3RyZWUvZmlvLW9iamVjdHN0b3JlLiBZb3UgY2FuIGZpbmQgdGhlIHNv
-dXJjZSBpbiBzcmMvdGVzdC9maW9fY2VwaF9maWxlc3RvcmUuY2MsIGFuZCBydW4gZmlvIHdpdGgg
-dGhlIHByb3ZpZGVkIGV4YW1wbGUgZmlvIGpvYiBmaWxlIGluIHNyYy90ZXN0L2ZpbGVzdG9yZS5m
-aW8uDQoNCkkgZGlkbid0IGhhdmUgYSBjaGFuY2UgdG8gY29uZmlybSB0aGF0IGl0IGJ1aWxkcyB3
-aXRoIGF1dG9tYWtlLCBidXQgdGhlIGNtYWtlIHZlcnNpb24gYnVpbHQgZm9yIG1lLiBJJ20gaGFw
-cHkgdG8gaGVscCBpZiB5b3UgcnVuIGludG8gcHJvYmxlbXMsIENhc2V5DQoNCk9uIFR1ZSwgSnVu
-IDMwLCAyMDE1IGF0IDI6MzEgUE0sIEphbWVzIChGZWkpIExpdS1TU0kgPGphbWVzLmxpdUBzc2ku
-c2Ftc3VuZy5jb20+IHdyb3RlOg0KPiBIaSBIYW9tYWksDQo+ICAgV2hhdCBhcmUgeW91IHRyeWlu
-ZyB0byBhc2sgaXMgdG8gYmVuY2htYXJrIGxvY2FsIG9iamVjdHN0b3JlKGxpa2Uga3ZzdG9yZS9m
-aWxlc3RvcmUvbmV3c3RvcmUpIGxvY2FsbHkgd2l0aCBGSU8oT2JqZWN0U3RvcmUgZW5naW5lKT8g
-WW91IHdhbnQgdG8gcHVyZWx5IGNvbXBhcmUgdGhlIHBlcmZvcm1hbmNlIGxvY2FsbHkgZm9yIHRo
-ZXNlIG9iamVjdHN0b3JlcywgcmlnaHQ/DQo+DQo+ICAgUmVnYXJkcywNCj4gICBKYW1lcw0KPg0K
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZn
-ZXIua2VybmVsLm9yZyANCj4gW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9y
-Z10gT24gQmVoYWxmIE9mIEhhb21haSBXYW5nDQo+IFNlbnQ6IFR1ZXNkYXksIEp1bmUgMzAsIDIw
-MTUgOTowNiBBTQ0KPiBUbzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCj4gU3ViamVjdDog
-QWJvdXQgRmlvIGJhY2tlbmQgd2l0aCBPYmplY3RTdG9yZSBBUEkNCj4NCj4gSGkgYWxsLA0KPg0K
-PiBMb25nIGxvbmcgYWdvLCBpcyB0aGVyZSBzb21lb25lIHNhaWQgYWJvdXQgZmlvIGJhY2tlbmQg
-d2l0aCBDZXBoIE9iamVjdFN0b3JlIEFQST8gU28gd2UgY291bGQgdXNlIHRoZSBleGlzdGluZyBt
-YXR1cmUgZmlvIGZhY2lsaXR5IHRvIGJlbmNobWFyayBjZXBoIG9iamVjdHN0b3JlLg0KPg0KPiAt
-LQ0KPiBCZXN0IFJlZ2FyZHMsDQo+DQo+IFdoZWF0DQo+IC0tDQo+IFRvIHVuc3Vic2NyaWJlIGZy
-b20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiANCj4g
-aW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9y
-ZSBtYWpvcmRvbW8gDQo+IGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21v
-LWluZm8uaHRtbA0KBCB7Lm4gKyAgICAgICArJSAgbHp3bSAgYiDrp7IgIHIgIHnHqSDXr3pYICAX
-ICDcqH0gICDGoHogJmo6K3YgICAgICAgIHpaKyAgK3pmICAgaCAgIH4gICAgaSAgIHogHiB3ICAg
-PyAgICAmICnfohtmDQo=
+Hi Sage/Sam/Haomai,
+
+Sent pull requests for two enhancement for key value store. Can you please review the changes?
+
+https://github.com/ceph/ceph/pull/5136
+
+Contains changes for short circuiting op_wq and osr in key value store. We have observed good performance gains with the above pull request. Not sure if it breaks any assumptions or design constraints. Need your comments on the approach.
+
+https://github.com/ceph/ceph/pull/5169
+
+Contains changes for adding a generic framework to add any keyvaluedb as a backend.  There are code made for initial proposal on the infernalis blueprint. Other enhancement proposed are being worked on as loadable object store using a factory approach.
+
+Gist of the implementation sent for review:
+
+1. A new class is derived from KeyValueDB (Derived from ObjectStore) called PluggableDBStore, which honors the semantics of KeyvalueStore and KeyValueDB. This class acts as mediator between CEPH and loadable shim (a shared library).  This class transforms the ceph related bufferlist etc... to const char pointers for the shim to understand.
+2. Shim layer is assumed to be a shared library.
+3. PluggableDBStore, loads (dlopen) the key value database wrapper/shim needed for Ceph integration.  The loadable shim library location is specified in ceph.conf. Not added any checks to validate the sanity or compatibility of shared object as of now. We can impose certain checks to be honored by the shim layer to be compatible with the ceph version.
+4. Interfaces that needs to be implemented in shim, are added in a new header called PluggableDBInterfaces.h.  This header contains the signatures for the necessary interfaces like init(), close(), submit_transaction(), get() and get_iterator(). PluggableDBStore caches these handles in a table during the initialization time of the backend db.
+5. Similarly for Iterator functionality, PluggableDBIterator.h, contains the functionality to be implemented by the shim layer.
+6. ceph-disk is modified to make two partitions of the osd disk given, one for osd metadata and other for the pluggable DB, similar to existing functionality like journal and osd data partition. Two partitions are created only when PluggableDBstore is selected as backed for OSD.  DB's can work off a raw partition as well, having a partition can enable to them use it. May be we can add additional parameters or conf options to have a file system also on the newly created partition, which can be implemented by ceph-disk.
+7. Partition information and other information needed like osd id etc... are passed to shim layer at the time of initializing the store.
+8. Additional script modification is get correct stats from the backend.
+
+Please share your comments on the pull requests.
+
+Thanks,
+Varada
+
+
+
+
+________________________________
+
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+
