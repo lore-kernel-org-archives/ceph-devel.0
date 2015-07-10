@@ -1,144 +1,297 @@
-From: Travis Rhoden <trhoden@redhat.com>
-Subject: Re: Pentagon Orange redefined in ceph-deploy
-Date: Thu, 9 Jul 2015 22:03:06 -0700
-Message-ID: <1DC6F8CB-2A8D-4541-A974-1871A313BF03@redhat.com>
-References: <559E4814.8030007@suse.com> <6E87029C-274C-4223-83AA-88CA5B0F59EC@redhat.com> <559ECD70.9080700@suse.com> <559ECF4E.6040705@suse.com>
-Mime-Version: 1.0 (Mac OS X Mail 8.2 \(2102\))
-Content-Type: text/plain; charset=utf-8
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: About Fio backend with ObjectStore API
+Date: Fri, 10 Jul 2015 15:51:03 +0800
+Message-ID: <CACJqLyYb2xf8TN+HXiON8G8ojob1OwedFusSnY25p53a7aiyiA@mail.gmail.com>
+References: <99767EA2E27DD44DB4E9F9B9ACA458C03B31A8D8@SSIEXCH-MB3.ssi.samsung.com>
+	<814413230.286.1436473608097.JavaMail.root@thunderbeast.private.linuxbox.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:54209 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751532AbbGJFDI convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Jul 2015 01:03:08 -0400
-In-Reply-To: <559ECF4E.6040705@suse.com>
+Received: from mail-yk0-f176.google.com ([209.85.160.176]:35991 "EHLO
+	mail-yk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752771AbbGJHvE convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Jul 2015 03:51:04 -0400
+Received: by ykey15 with SMTP id y15so60466046yke.3
+        for <ceph-devel@vger.kernel.org>; Fri, 10 Jul 2015 00:51:03 -0700 (PDT)
+In-Reply-To: <814413230.286.1436473608097.JavaMail.root@thunderbeast.private.linuxbox.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Owen Synge <osynge@suse.com>
-Cc: ceph-devel@vger.kernel.org
+To: "Matt W. Benjamin" <matt@cohortfs.com>
+Cc: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Casey Bodley <cbodley@gmail.com>
 
+I have rebased the branch with master, and push it to ceph upstream
+repo. https://github.com/ceph/ceph/compare/fio-objectstore?expand=3D1
 
-> On Jul 9, 2015, at 12:45 PM, Owen Synge <osynge@suse.com> wrote:
->=20
-> Typo:
->=20
-> On 07/09/2015 09:37 PM, Owen Synge wrote:
->> Dear all,
->>=20
->> Their are other details to be discussed, and hopefully lead to
->> agreement, but lets get to issue #1. The style issues still apply to
->> ceph and ceph-deploy.
->>=20
->> From what you said, in my opinion the "boat anchor" in ceph-deploy i=
+Plz let me know if who is working on this. Otherwise, I would like to
+improve this to be merge ready.
+
+On Fri, Jul 10, 2015 at 4:26 AM, Matt W. Benjamin <matt@cohortfs.com> w=
+rote:
+> That makes sense.
+>
+> Matt
+>
+> ----- "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com> wrote:
+>
+>> Hi Casey,
+>>   Got it. I was directed to the old code base. By the way, Since the
+>> testing case was used to exercise all of object stores.  Strongly
+>> recommend to change the name from fio_ceph_filestore.cc to
+>> fio_ceph_objectstore.cc . And the code in fio_ceph_filestore.cc shou=
+ld
+>> be refactored to reflect that the whole objectstore will be supporte=
+d
+>> by fio_ceph_objectstore.cc. what you think?
+>>
+>> Let me know if you need any help from my side.
+>>
+>>
+>> Regards,
+>> James
+>>
+>>
+>>
+>> -----Original Message-----
+>> From: Casey Bodley [mailto:cbodley@gmail.com]
+>> Sent: Thursday, July 09, 2015 12:32 PM
+>> To: James (Fei) Liu-SSI
+>> Cc: Haomai Wang; ceph-devel@vger.kernel.org
+>> Subject: Re: About Fio backend with ObjectStore API
+>>
+>> Hi James,
+>>
+>> Are you looking at the code from
+>> https://github.com/linuxbox2/linuxbox-ceph/tree/fio-objectstore? It
+>> uses ObjectStore::create() instead of new FileStore(). This allows u=
 s
->> redefined, as coupling of facade pattern, where all data is availabl=
-e,
->> to the ssh loop in a connection. This is probably the biggest single
->> architectural issue in ceph-deploy.
->>=20
->> Travis Rhoden stated that the modules are imported as objects as the=
+>> to exercise all of the object stores with the same code.
+>>
+>> Casey
+>>
+>> On Thu, Jul 9, 2015 at 2:01 PM, James (Fei) Liu-SSI
+>> <james.liu@ssi.samsung.com> wrote:
+>> > Hi Casey,
+>> >   Here is the code in the fio_ceph_filestore.cc. Basically, it
+>> creates a filestore as backend engine for IO exercises. If we got to
+>> send IO commands to KeyValue Store or Newstore, we got to change the
+>> code accordingly, right?  I did not see any other files like
+>> fio_ceph_keyvaluestore.cc or fio_ceph_newstore.cc. In my humble
+>> opinion, we might need to create other two fio engines for
+>> keyvaluestore and newstore if we want to exercise these two, right?
+>> >
+>> > Regards,
+>> > James
+>> >
+>> > static int fio_ceph_filestore_init(struct thread_data *td)
+>> > 209 {
+>> > 210     vector<const char*> args;
+>> > 211     struct ceph_filestore_data *ceph_filestore_data =3D (struc=
+t
+>> ceph_filestore_data *) td->io_ops->data;
+>> > 212     ObjectStore::Transaction ft;
+>> > 213
+>> >
+>> > 214     global_init(NULL, args, CEPH_ENTITY_TYPE_OSD,
+>> CODE_ENVIRONMENT_UTILITY, 0);
+>> > 215     //g_conf->journal_dio =3D false;
+>> > 216     common_init_finish(g_ceph_context);
+>> > 217     //g_ceph_context->_conf->set_val("debug_filestore", "20");
+>> > 218     //g_ceph_context->_conf->set_val("debug_throttle", "20");
+>> > 219     g_ceph_context->_conf->apply_changes(NULL);
+>> > 220
+>> >
+>> > 221     ceph_filestore_data->osd_path =3D
+>> strdup("/mnt/fio_ceph_filestore.XXXXXXX");
+>> > 222     ceph_filestore_data->journal_path =3D
+>> strdup("/var/lib/ceph/osd/journal-ram/fio_ceph_filestore.XXXXXXX");
+>> > 223
+>> >
+>> > 224     if (!mkdtemp(ceph_filestore_data->osd_path)) {
+>> > 225             cout << "mkdtemp failed: " << strerror(errno) <<
+>> std::endl;
+>> > 226             return 1;
+>> > 227     }
+>> > 228     //mktemp(ceph_filestore_data->journal_path); // NOSPC issu=
+e
+>> > 229
+>> >
+>> > 230     ObjectStore *fs =3D new
+>> FileStore(ceph_filestore_data->osd_path,
+>> ceph_filestore_data->journal_path);
+>> > 231     ceph_filestore_data->fs =3D fs;
+>> > 232
+>> >
+>> > 233     if (fs->mkfs() < 0) {
+>> > 234             cout << "mkfs failed" << std::endl;
+>> > 235             goto failed;
+>> > 236     }
+>> > 237
+>> > 238     if (fs->mount() < 0) {
+>> > 239             cout << "mount failed" << std::endl;
+>> > 240             goto failed;
+>> > 241     }
+>> > 242
+>> >
+>> > 243     ft.create_collection(coll_t());
+>> > 244     fs->apply_transaction(ft);
+>> > 245
+>> >
+>> > 246
+>> >
+>> > 247     return 0;
+>> > 248
+>> >
+>> > 249 failed:
+>> > 250     return 1;
+>> > 251
+>> >
+>> > 252 }
+>> > -----Original Message-----
+>> > From: Casey Bodley [mailto:cbodley@gmail.com]
+>> > Sent: Thursday, July 09, 2015 9:19 AM
+>> > To: James (Fei) Liu-SSI
+>> > Cc: Haomai Wang; ceph-devel@vger.kernel.org
+>> > Subject: Re: About Fio backend with ObjectStore API
+>> >
+>> > Hi James,
+>> >
+>> > In the job file src/test/filestore.fio, you can modify the line
+>> > "objectstore=3Dfilestore" to use any objectstore type supported by
+>> the
+>> > ObjectStore::create() factory.
+>> >
+>> > Casey
+>> >
+>> > On Wed, Jul 8, 2015 at 8:02 PM, James (Fei) Liu-SSI
+>> <james.liu@ssi.samsung.com> wrote:
+>> >> Hi Casey,
+>> >>   Quick questions, The code in the trunk only cover the test for
+>> filestore. I was wondering do you have any plan to cover the test fo=
+r
+>> kvstore and newstore?
+>> >>
+>> >>   Thanks,
+>> >>   James
+>> >>
+>> >> -----Original Message-----
+>> >> From: ceph-devel-owner@vger.kernel.org
+>> >> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of James (Fei=
+)
+>>
+>> >> Liu-SSI
+>> >> Sent: Tuesday, June 30, 2015 2:19 PM
+>> >> To: Casey Bodley
+>> >> Cc: Haomai Wang; ceph-devel@vger.kernel.org
+>> >> Subject: RE: About Fio backend with ObjectStore API
+>> >>
+>> >> Hi Casey,
+>> >>
+>> >>   Thanks a lot.
+>> >>
+>> >>   Regards,
+>> >>   James
+>> >>
+>> >> -----Original Message-----
+>> >> From: Casey Bodley [mailto:cbodley@gmail.com]
+>> >> Sent: Tuesday, June 30, 2015 2:16 PM
+>> >> To: James (Fei) Liu-SSI
+>> >> Cc: Haomai Wang; ceph-devel@vger.kernel.org
+>> >> Subject: Re: About Fio backend with ObjectStore API
+>> >>
+>> >> Hi,
+>> >>
+>> >> When Danny Al-Gaaf & Daniel Gollub published "Ceph Performance
+>> >> Analysis: fio and RBD" at
+>> >>
+>> https://telekomcloud.github.io/ceph/2014/02/26/ceph-performance-anal=
 y
->> are "instantiated", I should check this, this is very good news and
->> removes many objections to the outcome.
+>> >> s is_fio_rbd.html, they also mentioned a fio engine that linked
+>> >> directly into ceph's FileStore. I was able to find Daniel's branc=
+h
+>> on
+>> >> github at https://github.com/gollub/ceph/tree/fio_filestore_v2, a=
+nd
+>> did some more work on it at the time.
+>> >>
+>> >> I just rebased that work onto the latest ceph master branch, and
+>> pushed to our github at
+>> https://github.com/linuxbox2/linuxbox-ceph/tree/fio-objectstore. You
+>> can find the source in src/test/fio_ceph_filestore.cc, and run fio
+>> with the provided example fio job file in src/test/filestore.fio.
+>> >>
+>> >> I didn't have a chance to confirm that it builds with automake, b=
+ut
+>>
+>> >> the cmake version built for me. I'm happy to help if you run into
+>> >> problems, Casey
+>> >>
+>> >> On Tue, Jun 30, 2015 at 2:31 PM, James (Fei) Liu-SSI
+>> <james.liu@ssi.samsung.com> wrote:
+>> >>> Hi Haomai,
+>> >>>   What are you trying to ask is to benchmark local
+>> objectstore(like kvstore/filestore/newstore) locally with
+>> FIO(ObjectStore engine)? You want to purely compare the performance
+>> locally for these objectstores, right?
+>> >>>
+>> >>>   Regards,
+>> >>>   James
+>> >>>
+>> >>> -----Original Message-----
+>> >>> From: ceph-devel-owner@vger.kernel.org
+>> >>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Haomai
+>> Wang
+>> >>> Sent: Tuesday, June 30, 2015 9:06 AM
+>> >>> To: ceph-devel@vger.kernel.org
+>> >>> Subject: About Fio backend with ObjectStore API
+>> >>>
+>> >>> Hi all,
+>> >>>
+>> >>> Long long ago, is there someone said about fio backend with Ceph
+>> ObjectStore API? So we could use the existing mature fio facility to
+>> benchmark ceph objectstore.
+>> >>>
+>> >>> --
+>> >>> Best Regards,
+>> >>>
+>> >>> Wheat
+>> >>> --
+>> >>> To unsubscribe from this list: send the line "unsubscribe
+>> ceph-devel"
+>> >>> in the body of a message to majordomo@vger.kernel.org More
+>> majordomo
+>> >>> info at  http://vger.kernel.org/majordomo-info.html
+>> >>   {.n +       +%  lzwm  b =EB=A7=B2  r  y=C7=A9 =D7=AFzX     =DC=A8=
+}   =C6=A0z &j:+v        zZ+
+>>  +zf   h   ~    i   z   w   ?    & )=DF=A2 f
+>> N=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDr=EF=BF=BD=EF=BF=BDy=EF=
+=BF=BD=EF=BF=BD=EF=BF=BDb=EF=BF=BDX=EF=BF=BD=EF=BF=BD=C7=A7v=EF=BF=BD^=EF=
+=BF=BD)=DE=BA{.n=EF=BF=BD+=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD]z=EF=BF=
+=BD=EF=BF=BD=EF=BF=BD{ay=EF=BF=BD=CA=87=DA=99=EF=BF=BD,j=EF=BF=BD=EF=BF=
+=BDf=EF=BF=BD=EF=BF=BD=EF=BF=BDh=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD=EF=
+=BF=BDw=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDj:+v=EF=BF=
+=BD=EF=BF=BD=EF=BF=BDw=EF=BF=BDj=EF=BF=BDm=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=
+=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDzZ+=EF=BF=BD=EF=BF=BD=DD=A2j"=
+=EF=BF=BD=EF=BF=BD
+>
+> --
+> Matt Benjamin
+> CohortFS, LLC.
+> 315 West Huron Street, Suite 140A
+> Ann Arbor, Michigan 48103
+>
+> http://cohortfs.com
+>
+> tel.  734-761-4689
+> fax.  734-769-8938
+> cel.  734-216-5309
 
-I went back through my previous messages to make sure I knew what I sai=
-d.  What I found was:
 
-> Furthermore, I don=E2=80=99t think it=E2=80=99s the facade paradigm t=
-hat would limit you to one host at a time at all.  It=E2=80=99s one hos=
-t module (facade) instantiated per host.  You could do many of these at=
- once =E2=80=94 I don=E2=80=99t see any reason why you couldn=E2=80=99t=
-=2E  I=E2=80=99ve never tried it out, and I don=E2=80=99t know if pytho=
-n-remoto handles concurrency, but I don=E2=80=99t think the facade para=
-digm prevents it.
 
-As you say, it would be very good news if things were indeed instantiat=
-ed, but I am afraid it is not good news and that I was wrong. As I=E2=80=
-=99ve started to re-familiarize myself with this bit of the code base (=
-it has been a while), I=E2=80=99m starting to better understand your po=
-ints.  Each remote connection is indeed handled by a direct assignment =
-of the needed module (be it CentOS, Debian, etc), and the module is use=
-d directly.  It is not an instance of a class.
+--=20
+Best Regards,
 
-This does have the drawbacks that you=E2=80=99ve mentioned =E2=80=94 th=
-at you can only do one at a time, that variables would not be thread sa=
-fe, etc.  This has not been an issue thusfar since adding concurrency t=
-o ceph-deploy hasn=E2=80=99t really been on the road map.  As far as be=
-ing an =E2=80=9Carchitectural issue=E2=80=9D, it depends on where ceph-=
-deploy is going.  When the current host module paradigm was put in plac=
-e, it was a *vast* improvement of what was there before, but that does =
-not mean it now always has to be that way.
-
-I would be against making any major changes in the current 1.5.x series=
-, but we could start to talk about an improved 1.6.x series.  There are=
- other non-backwards compatible changes that I=E2=80=99ve been consider=
-ing as well, in addition to wanting to remove some deprecated code.
-
->>=20
->> The discussion of point=20
->=20
-> 	2) fa=C3=A7ade requires code layout inflexibility.
->=20
->> is still worth continuing though in a
->> separate thread as it is still important enough to require discussio=
-n,
->> but it is of a style and good practice discussion rather than Boat
->> Anchor problem level.
->>=20
->> Many other topics are unaffected.
-
-I think the biggest challenge that you and I may run into is an impedan=
-ce mismatch on priority for getting architectural changes into ceph-dep=
-loy. It=E2=80=99s pretty low priority for me, job-wise, and would be so=
-mething that would happen over the course of a few months, with a few c=
-hanges here and there.  Getting bug fixes in, keeping pace with new fea=
-tures in upstream Ceph, and improving usability in the 1.5.x series doe=
-s get much more attention from me since we have community users (and do=
-wnstream products) using it every day.
-
->>=20
->> On 07/09/2015 07:00 PM, Travis Rhoden wrote:
->>>> (1A) You have to close one facade to start anouther, eg in ceph-de=
-ploy
->>>>> you have to close each connection before connecting to the next s=
-erver
->>>>> so making it slow to use as all state has to be gathered.
->>> concurrency has come up before in ceph-deploy.  It has been our exp=
-licit goal to make ceph-deploy as simple and *clear* as possible for us=
-ers, with one of the main purposes to be extremely verbose and essentia=
-lly *teach* a user how to deploy a Ceph cluster.  That=E2=80=99s why it=
- prints everything it does by default, shows every remote command, and =
-prints the output back in order.  Concurrency would muddy those waters,=
- though we do all want things to go faster.
->>>=20
->>> It is not necessarily the facade pattern that is the limitation the=
-re =E2=80=94 it is the implementation within ceph-deploy.  We simply do=
- a =E2=80=9Cfor host is hostnames=E2=80=A6=E2=80=9D loop everywhere =E2=
-=80=94 it doesn=E2=80=99t matter what we are using underneath, we are d=
-oing one SSH connection at a time.
->>=20
->> Best regards
->>=20
->> Owen
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>=20
->=20
-> --=20
-> SUSE LINUX GmbH, GF: Jeff Hawn, Jennifer Guild, Felix Imend=C3=B6rffe=
-r, HRB
-> 21284 (AG
-> N=C3=BCrnberg)
->=20
-> Maxfeldstra=C3=9Fe 5
->=20
-> 90409 N=C3=BCrnberg
->=20
-> Germany
-
+Wheat
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
