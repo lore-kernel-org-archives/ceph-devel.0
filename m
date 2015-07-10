@@ -1,59 +1,47 @@
 From: Loic Dachary <loic@dachary.org>
-Subject: Re: Duplicate issues?
-Date: Fri, 10 Jul 2015 23:21:25 +0200
-Message-ID: <55A03755.6000900@dachary.org>
-References: <55A0326C.2090303@suse.cz>
+Subject: Re: [IANA #826907] Application for a Port Number and/or Service Name
+ "ceph" (Completed) (fwd)
+Date: Fri, 10 Jul 2015 23:32:10 +0200
+Message-ID: <55A039DA.8020206@dachary.org>
+References: <alpine.DEB.2.00.1507101406390.20547@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="nuTrsPcOrALcuujkB9S3NM5cWf6E75iTk"
+ boundary="iQ7QQjaDTbK3FogFVmnVwhl5QqnScgp0D"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:48254 "EHLO
+Received: from mail2.dachary.org ([91.121.57.175]:48262 "EHLO
 	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S932641AbbGJVV2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Jul 2015 17:21:28 -0400
-In-Reply-To: <55A0326C.2090303@suse.cz>
+	with ESMTP id S932644AbbGJVcM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Jul 2015 17:32:12 -0400
+In-Reply-To: <alpine.DEB.2.00.1507101406390.20547@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nathan Cutler <ncutler@suse.cz>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
 
 This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---nuTrsPcOrALcuujkB9S3NM5cWf6E75iTk
-Content-Type: text/plain; charset=utf-8
+--iQ7QQjaDTbK3FogFVmnVwhl5QqnScgp0D
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: quoted-printable
 
-For the record, here is the conclusion of the IRC chat: tracker.ceph.com/=
-issues/9064#note-18
+We're lucky to have a nice looking number :-)
 
-On 10/07/2015 23:00, Nathan Cutler wrote:
-> Hi Loic:
+On 10/07/2015 23:08, Sage Weil wrote:
+> It's official!  We have a new port number for the monitor:
 >=20
-> Please look at the following two issues that are earmarked for backport=
- to firefly:
+> 	3300	(that's CE4h, or 0xCE4).
 >=20
-> http://tracker.ceph.com/issues/8674 osd: cache tier: avoid promotion on=
- first read
-> http://tracker.ceph.com/issues/9064 RadosModel assertion failure
+> Sometime in the next cycle we'll need to make a transition plan to move=
+=20
+> from 6789.
 >=20
-> They both seem to be fixed by the same commit, namely:
+> sage
 >=20
-> https://github.com/ceph/ceph/commit/0ed3adc1e0a74bf9548d1d956aece11f019=
-afee0
->=20
-> . . . which would mean that the corresponding backport tracker issues a=
-re duplicates?
->=20
-> Can you confirm/deny this?
->=20
-> Thanks,
-> Nathan
 
 --=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+Lo=EFc Dachary, Artisan Logiciel Libre
 
 
---nuTrsPcOrALcuujkB9S3NM5cWf6E75iTk
+--iQ7QQjaDTbK3FogFVmnVwhl5QqnScgp0D
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -61,9 +49,9 @@ Content-Disposition: attachment; filename="signature.asc"
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2.0.22 (GNU/Linux)
 
-iEYEARECAAYFAlWgN1UACgkQ8dLMyEl6F20QJACfROyCkR6McMU0PSwefiygwMMy
-YrAAoJszhPBJxnArP6DOrE2S2k6pfKIV
-=/6ZA
+iEYEARECAAYFAlWgOdoACgkQ8dLMyEl6F22PDgCgvMyBoI7pCofJ+f4+uq3onMcr
++IQAoMaCrOsdi2ktSinjRPpyhO73Camq
+=QA3w
 -----END PGP SIGNATURE-----
 
---nuTrsPcOrALcuujkB9S3NM5cWf6E75iTk--
+--iQ7QQjaDTbK3FogFVmnVwhl5QqnScgp0D--
