@@ -1,99 +1,83 @@
-From: Gregory Farnum <greg@gregs42.com>
-Subject: Re: load-gen from an osd node
-Date: Fri, 10 Jul 2015 11:25:15 +0100
-Message-ID: <CAC6JEv_YqVb4m8BiTxwwawHxAYmJW36m3kH-ZTdAN34p8=ZGjA@mail.gmail.com>
-References: <BC97738F8E7C8742BABED7F06FB9DF91669AEA37@SATLEXDAG01.amd.com>
-	<CAC6JEv_pNYxaWs3SFxqYMrYyaWei79x_61g5Nt6D=uQxQh7qnQ@mail.gmail.com>
-	<BC97738F8E7C8742BABED7F06FB9DF91669B1F9A@SATLEXDAG01.amd.com>
+From: kefu chai <tchaikov@gmail.com>
+Subject: Re: debian packaging for wip-10587-split-servers
+Date: Fri, 10 Jul 2015 22:21:16 +0800
+Message-ID: <CAJE9aOO5Wfxgtgvuj=Mx20C_ToVpY4VU37tS+7uGRbEjKZYEww@mail.gmail.com>
+References: <559E99D8.9060208@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ie0-f175.google.com ([209.85.223.175]:35904 "EHLO
-	mail-ie0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753334AbbGJKZR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Jul 2015 06:25:17 -0400
-Received: by iecvh10 with SMTP id vh10so193882872iec.3
-        for <ceph-devel@vger.kernel.org>; Fri, 10 Jul 2015 03:25:16 -0700 (PDT)
-Received: from mail-ie0-f170.google.com (mail-ie0-f170.google.com. [209.85.223.170])
-        by smtp.gmail.com with ESMTPSA id j2sm6181264ioo.43.2015.07.10.03.25.16
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 10 Jul 2015 03:25:16 -0700 (PDT)
-Received: by iebmu5 with SMTP id mu5so193087268ieb.1
-        for <ceph-devel@vger.kernel.org>; Fri, 10 Jul 2015 03:25:15 -0700 (PDT)
-In-Reply-To: <BC97738F8E7C8742BABED7F06FB9DF91669B1F9A@SATLEXDAG01.amd.com>
+Received: from mail-qk0-f181.google.com ([209.85.220.181]:33707 "EHLO
+	mail-qk0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932211AbbGJOVR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Jul 2015 10:21:17 -0400
+Received: by qkhu186 with SMTP id u186so207775842qkh.0
+        for <ceph-devel@vger.kernel.org>; Fri, 10 Jul 2015 07:21:16 -0700 (PDT)
+In-Reply-To: <559E99D8.9060208@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Deneau, Tom" <tom.deneau@amd.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Ken Dreyer <kdreyer@redhat.com>
+Cc: ceph-maintainers@ceph.com, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, Jul 8, 2015 at 5:17 PM, Deneau, Tom <tom.deneau@amd.com> wrote:
-> With the newer rados, just running  rados -p somepool load-gen, we get
+On Thu, Jul 9, 2015 at 11:57 PM, Ken Dreyer <kdreyer@redhat.com> wrote:
+> I need some Debian packaging help :)
 >
-> preparing 200 objects
-> load-gen will run 60 seconds
->     1: throughput=0MB/sec pending data=0
->     2: throughput=0MB/sec pending data=0
->     3: throughput=0MB/sec pending data=0
->     4: throughput=0MB/sec pending data=0
->     5: throughput=0MB/sec pending data=0
->     6: throughput=0MB/sec pending data=0
+> For http://tracker.ceph.com/issues/10587 I'm working to split out the
+> "ceph-mon" and "ceph-osd" servers from the main "ceph" package. The goal
+> is to allow someone to "apt-get install" only a monitor or an OSD
+> without having to install the binaries for both. (ceph-mds is already
+> split out in this fashion.)
 >
-> But I see the change that caused this behavior was explicitly initializing lg.max_ops to 0.
-> Before this, max_ops was just whatever happened to be in memory.
+> Here's what I'd like the process to look like for users:
 >
-> So the newer load-gen works fine as long as you explicitly set --max-ops on the command line.
+> 1) User installs a Hammer MON/OSD with "apt-get install ceph".
+> 2) User adjusts the sources.list to point to a newer Ceph version with
+>    the server split.
+> 3) User runs "apt-get update"
+> 4) Apt installs all three packages onto the user's system: "ceph",
+>    "ceph-mon", and "ceph-osd".
+> 5) User then has the freedom to uninstall "ceph-mon" or "ceph-osd" as
+>    appropriate.
+>
+> I've gotten about 90% of the way there with the Debian changes, but I
+> can't make "apt-get upgrade" do what I want in step 4. The only way I
+> can make Apt pull in all three (ceph/ceph-mon/ceph-osd) during an
+> "upgrade" operation is to make the "ceph" package depend on the -mon and
+> -osd sub-packages. That option means that step 5 above doesn't work.
 
-Can you create a ticket on the tracker describing this issue? That's
-the kind of thing we'll want to fix. ;)
--Greg
+can we
+- have another package named "ceph-base" which packages whatever ceph
+currently has now.
+- make the "ceph" a meta package which only offers the dependencies to
+ceph-mon, ceph-osd, ceph-mds? and let ceph-{mon,osd,mds} Depends on
+"ceph-base" instead?
 
 >
-> -- Tom Deneau
+> I must be missing something in ./debian/control to make this work.
 >
+> For the RPMs, I was able to make this work by introducing a
+> "ceph-compat" metapackage that used RPM's "Obsoletes" to replace the old
+> "ceph" and require "ceph-mon" and "ceph-osd" (which in turn required the
+> new "ceph"). But I'm not sure how to do that with Debian.
 >
->> -----Original Message-----
->> From: Gregory Farnum [mailto:greg@gregs42.com]
->> Sent: Wednesday, July 01, 2015 11:05 AM
->> To: Deneau, Tom
->> Cc: ceph-devel
->> Subject: Re: load-gen from an osd node
->>
->> Hmm, the only changes I see between those two versions are some pretty
->> precise cleanups which shouldn't cause this. But it means that a bisect or
->> determined look should be easy. Can you create a ticket which includes the
->> exact output you're seeing and the exact versions you're running?
->> -Greg
->>
->> On Mon, Jun 29, 2015 at 11:27 PM, Deneau, Tom <tom.deneau@amd.com> wrote:
->> > Oh, I just noticed that the client nodes I spoke of where load-gen
->> > actually worked were running 0.94, not 9.0.1.  And when I upgrade them to
->> 9.0.1, load-gen no longer works.
->> >
->> > So more likely this is just a problem with newer rados load-gens
->> >
->> > -- Tom
->> >
->> >
->> >
->> >> -----Original Message-----
->> >> From: Deneau, Tom
->> >> Sent: Friday, June 26, 2015 7:48 PM
->> >> To: ceph-devel
->> >> Subject: load-gen from an osd node
->> >>
->> >> I am running 9.0.1 and I noticed when I run rados load-gen from one
->> >> of the osd nodes, it creates the objects but then always reports a
->> >> throughput of 0 MB/sec.
->> >>
->> >> But if I run it from a separate client node, it works fine.
->> >> Why would this be?
->> >>
->> >> I'm not sure but I thought in earlier versions load-gen could be run
->> >> from an osd node.
->> >>
->> >> -- Tom Deneau
->> > --
->> > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->> > in the body of a message to majordomo@vger.kernel.org More majordomo
->> > info at  http://vger.kernel.org/majordomo-info.html
+> Should I use a ceph-compat package? Something else?
+
+Ken, i commented on your commit of https://github.com/ceph/ceph/commit/25766b
+
+HTH.
+
+>
+> My WIP branch in GitHub is
+> https://github.com/ceph/ceph/tree/wip-10587-split-servers . Any tips
+> appreciated!
+>
+> - Ken
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+-- 
+Regards
+Kefu Chai
