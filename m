@@ -1,57 +1,53 @@
-From: kernel neophyte <neophyte.hacker001@gmail.com>
-Subject: Ceph-mon crashing FAILED assert(addr_name.count(p->second) == 0)
-Date: Fri, 10 Jul 2015 15:31:47 -0700
-Message-ID: <CAFkUHxe8Qw4-5ggCm51shQdp8aYzdvEp9Bt9Fq11sur2vUf5oQ@mail.gmail.com>
+From: Ken Dreyer <kdreyer@redhat.com>
+Subject: Re: debian packaging for wip-10587-split-servers
+Date: Fri, 10 Jul 2015 16:54:16 -0600
+Message-ID: <55A04D18.70202@redhat.com>
+References: <559E99D8.9060208@redhat.com>
+ <CAJE9aOO5Wfxgtgvuj=Mx20C_ToVpY4VU37tS+7uGRbEjKZYEww@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f46.google.com ([209.85.218.46]:34578 "EHLO
-	mail-oi0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751635AbbGJWbr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Jul 2015 18:31:47 -0400
-Received: by oiab3 with SMTP id b3so102526559oia.1
-        for <ceph-devel@vger.kernel.org>; Fri, 10 Jul 2015 15:31:47 -0700 (PDT)
+Received: from mx1.redhat.com ([209.132.183.28]:53978 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752162AbbGJWyS (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 10 Jul 2015 18:54:18 -0400
+In-Reply-To: <CAJE9aOO5Wfxgtgvuj=Mx20C_ToVpY4VU37tS+7uGRbEjKZYEww@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: kefu chai <tchaikov@gmail.com>
+Cc: ceph-maintainers@ceph.com, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
+On 07/10/2015 08:21 AM, kefu chai wrote:
+> can we
+> - have another package named "ceph-base" which packages whatever ceph
+> currently has now.
+> - make the "ceph" a meta package which only offers the dependencies to
+> ceph-mon, ceph-osd, ceph-mds? and let ceph-{mon,osd,mds} Depends on
+> "ceph-base" instead?
 
-I am seeing the following error every time I am trying to manually
-deploy ceph cluster and do a ceph -s :
+I was hoping to avoid this route because it seemed complex, but the
+further I dig on this, I think your suggestion is going to be the best
+way forward.
 
-mon/MonMap.h: In function 'void MonMap::calc_ranks()' thread
-7fb3ccfb6700 time 2015-07-10 15:27:56.004148
+So to re-state the plan: Files that are shared between multiple servers
+will move into "ceph-base", and then:
 
-mon/MonMap.h: 47: FAILED assert(addr_name.count(p->second) == 0)
+For RPMs:
+- "ceph-{mon,osd,mds}" Require: ceph-base.
+- "ceph" will become a metapackage that Requires: ceph-{mon,osd,mds}.
 
- ceph version 9.0.1-1445-g4a179ee (4a179eea527f7cbcf45eed4a63ad0fa8f744fc4a)
+For DEBs:
+- "ceph-{mon,osd,mds}" will Depends: ceph-base.
+- "ceph" will become a metapackage that Depends: ceph-{mon,osd}.
+- "ceph" will continue to Recommends: ceph-mds
 
- 1: (()+0x12716b) [0x7fb3d53ec16b]
+I've done some testing with a dummy package and this works. "apt-get
+upgrade" kept the update back, since there were new packages introduced,
+but "apt-get dist-upgrade" worked. Is that expected? (... newbie Debian
+user here :D )
 
- 2: (()+0x1c0a6d) [0x7fb3d5485a6d]
+I've pushed this approach to
+https://github.com/ceph/ceph/tree/wip-10587-split-servers.
 
- 3: (()+0x1b7909) [0x7fb3d547c909]
-
- 4: (()+0x1b8377) [0x7fb3d547d377]
-
- 5: (()+0x2fbbe7) [0x7fb3d55c0be7]
-
- 6: (()+0x310f1d) [0x7fb3d55d5f1d]
-
- 7: (()+0x3112a0) [0x7fb3d55d62a0]
-
- 8: (()+0x8182) [0x7fb3d9e05182]
-
- 9: (clone()+0x6d) [0x7fb3d9b3247d]
-
- NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-needed to interpret this.
-
-terminate called after throwing an instance of 'ceph::FailedAssertion'
-
-Aborted (core dumped)
-
-Any help greatly appreciated :-)
-
--Neo
+- Ken
