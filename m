@@ -1,83 +1,33 @@
-From: kefu chai <tchaikov@gmail.com>
-Subject: Re: debian packaging for wip-10587-split-servers
-Date: Fri, 10 Jul 2015 22:21:16 +0800
-Message-ID: <CAJE9aOO5Wfxgtgvuj=Mx20C_ToVpY4VU37tS+7uGRbEjKZYEww@mail.gmail.com>
-References: <559E99D8.9060208@redhat.com>
+From: icq2206241@gmail.com
+Subject: Re: RADOS + deep scrubbing performance issues in production
+ environment
+Date: Fri, 10 Jul 2015 06:52:35 -0700 (PDT)
+Message-ID: <452198cc-4ed9-4d72-8daf-d70405c41ac8@googlegroups.com>
+References: <20140127151321.GD26390@philipgian-mac> <CAFMfnwp4u-O8m3gZko35y5t3r05kAgt9zUWOew_pmHSJjmLPmA@mail.gmail.com> <alpine.DEB.2.00.1401271045160.2149@cobra.newdream.net> <20140128181306.GC11532@philipgian-mac> <066498EC-D137-472A-85DB-93751E85C753@yahoo.com>
+ <ECAD21C4-A342-48ED-BE40-9562B8CCDA08@yahoo.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/mixed;
+	boundary="----=_Part_2031_1137473278.1436536355267"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f181.google.com ([209.85.220.181]:33707 "EHLO
-	mail-qk0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932211AbbGJOVR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Jul 2015 10:21:17 -0400
-Received: by qkhu186 with SMTP id u186so207775842qkh.0
-        for <ceph-devel@vger.kernel.org>; Fri, 10 Jul 2015 07:21:16 -0700 (PDT)
-In-Reply-To: <559E99D8.9060208@redhat.com>
+Received: from mail-yk0-f183.google.com ([209.85.160.183]:33046 "EHLO
+	mail-yk0-f183.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932524AbbGJPay (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Jul 2015 11:30:54 -0400
+Received: by ykuu83 with SMTP id u83so17176786yku.0
+        for <ceph-devel@vger.kernel.org>; Fri, 10 Jul 2015 08:30:52 -0700 (PDT)
+In-Reply-To: <ECAD21C4-A342-48ED-BE40-9562B8CCDA08@yahoo.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ken Dreyer <kdreyer@redhat.com>
-Cc: ceph-maintainers@ceph.com, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: synnefo-devel@googlegroups.com
+Cc: ceph-users@lists.ceph.com, kyle.bader@gmail.com, sage@inktank.com, guangyy@gmail.com, ceph-devel@vger.kernel.org, philipgian@grnet.gr
 
-On Thu, Jul 9, 2015 at 11:57 PM, Ken Dreyer <kdreyer@redhat.com> wrote:
-> I need some Debian packaging help :)
->
-> For http://tracker.ceph.com/issues/10587 I'm working to split out the
-> "ceph-mon" and "ceph-osd" servers from the main "ceph" package. The goal
-> is to allow someone to "apt-get install" only a monitor or an OSD
-> without having to install the binaries for both. (ceph-mds is already
-> split out in this fashion.)
->
-> Here's what I'd like the process to look like for users:
->
-> 1) User installs a Hammer MON/OSD with "apt-get install ceph".
-> 2) User adjusts the sources.list to point to a newer Ceph version with
->    the server split.
-> 3) User runs "apt-get update"
-> 4) Apt installs all three packages onto the user's system: "ceph",
->    "ceph-mon", and "ceph-osd".
-> 5) User then has the freedom to uninstall "ceph-mon" or "ceph-osd" as
->    appropriate.
->
-> I've gotten about 90% of the way there with the Debian changes, but I
-> can't make "apt-get upgrade" do what I want in step 4. The only way I
-> can make Apt pull in all three (ceph/ceph-mon/ceph-osd) during an
-> "upgrade" operation is to make the "ceph" package depend on the -mon and
-> -osd sub-packages. That option means that step 5 above doesn't work.
+------=_Part_2031_1137473278.1436536355267
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-can we
-- have another package named "ceph-base" which packages whatever ceph
-currently has now.
-- make the "ceph" a meta package which only offers the dependencies to
-ceph-mon, ceph-osd, ceph-mds? and let ceph-{mon,osd,mds} Depends on
-"ceph-base" instead?
+All IO drops to ZERO IOPS for 1-15 minutes during the deep-scrub on my cluster. There is clearly a locking bug! 
 
->
-> I must be missing something in ./debian/control to make this work.
->
-> For the RPMs, I was able to make this work by introducing a
-> "ceph-compat" metapackage that used RPM's "Obsoletes" to replace the old
-> "ceph" and require "ceph-mon" and "ceph-osd" (which in turn required the
-> new "ceph"). But I'm not sure how to do that with Debian.
->
-> Should I use a ceph-compat package? Something else?
+I have VMs - every day, several times, sometime on all of them disk IO _completely_ stops. Disk queue is growing, 0 IOPS are performed, services are dying with timeouts... At the same time the CEPH (where the VM images are stored) is doing a deep scrub. No fiddling with priorities and number of different threads are helping. Actually, making the scrub slower makes those delays longer - so there is clearly a bug with locking. 
 
-Ken, i commented on your commit of https://github.com/ceph/ceph/commit/25766b
-
-HTH.
-
->
-> My WIP branch in GitHub is
-> https://github.com/ceph/ceph/tree/wip-10587-split-servers . Any tips
-> appreciated!
->
-> - Ken
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
--- 
-Regards
-Kefu Chai
+I am experiencing this for two years already, since then we tried everything and upgraded our cluster several times! Nothing helps!
+------=_Part_2031_1137473278.1436536355267--
