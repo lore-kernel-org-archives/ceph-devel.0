@@ -1,57 +1,38 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: [IANA #826907] Application for a Port Number and/or Service Name
- "ceph" (Completed) (fwd)
-Date: Fri, 10 Jul 2015 23:32:10 +0200
-Message-ID: <55A039DA.8020206@dachary.org>
-References: <alpine.DEB.2.00.1507101406390.20547@cobra.newdream.net>
+From: "Deneau, Tom" <tom.deneau@amd.com>
+Subject: osd suicide timeout
+Date: Fri, 10 Jul 2015 21:45:02 +0000
+Message-ID: <BC97738F8E7C8742BABED7F06FB9DF91669B3BFF@SATLEXDAG01.amd.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="iQ7QQjaDTbK3FogFVmnVwhl5QqnScgp0D"
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:48262 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S932644AbbGJVcM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Jul 2015 17:32:12 -0400
-In-Reply-To: <alpine.DEB.2.00.1507101406390.20547@cobra.newdream.net>
+Received: from mail-bn1bon0143.outbound.protection.outlook.com ([157.56.111.143]:60768
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751635AbbGJVpI convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Jul 2015 17:45:08 -0400
+Received: from satlvexedge01.amd.com (satlvexedge01.amd.com [10.177.96.28])
+	(using TLSv1 with cipher AES128-SHA (128/128 bits))
+	(No client certificate requested)
+	by atltwp01.amd.com (Axway MailGate 5.3.1) with ESMTPS id 25999CAE627
+	for <ceph-devel@vger.kernel.org>; Fri, 10 Jul 2015 17:45:03 -0400 (EDT)
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---iQ7QQjaDTbK3FogFVmnVwhl5QqnScgp0D
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: quoted-printable
+I have an osd log file from an osd that hit a suicide timeout (with the previous 10000 events logged). 
+(On this node I have also seen this suicide timeout happen once before and also a sync_entry timeout.
 
-We're lucky to have a nice looking number :-)
+I can see that 6 minutes or so before that osd died, other osds on the same node were logging
+messages such as
+    heartbeat_check: no reply from osd.8
+so it appears that osd8 stopped responding quite some time before it died.
 
-On 10/07/2015 23:08, Sage Weil wrote:
-> It's official!  We have a new port number for the monitor:
->=20
-> 	3300	(that's CE4h, or 0xCE4).
->=20
-> Sometime in the next cycle we'll need to make a transition plan to move=
-=20
-> from 6789.
->=20
-> sage
->=20
+I'm wondering if there is enough information in the osd8 log file to deduce why osd 8 stopped responding?
+I don't know enough to figure it out myself.
 
---=20
-Lo=EFc Dachary, Artisan Logiciel Libre
+Is there any expert who would be willing to take a look at the log file?
 
+-- Tom Deneau, AMD
 
---iQ7QQjaDTbK3FogFVmnVwhl5QqnScgp0D
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlWgOdoACgkQ8dLMyEl6F22PDgCgvMyBoI7pCofJ+f4+uq3onMcr
-+IQAoMaCrOsdi2ktSinjRPpyhO73Camq
-=QA3w
------END PGP SIGNATURE-----
-
---iQ7QQjaDTbK3FogFVmnVwhl5QqnScgp0D--
