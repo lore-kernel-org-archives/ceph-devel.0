@@ -1,87 +1,114 @@
-From: Samuel Just <sjust@redhat.com>
-Subject: Re: Strange issue with CRUSH
-Date: Thu, 9 Jul 2015 19:03:11 -0400 (EDT)
-Message-ID: <1736665041.43352077.1436482991363.JavaMail.zimbra@redhat.com>
-References: <CAOWwpMJv4N0BvdEy2Y-WpDqqZ6R=f_5_+2j1dWeVe-Xk1fg1bQ@mail.gmail.com> <alpine.DEB.2.00.1507091501570.20547@cobra.newdream.net>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: About Adding eventfd support for LibRBD
+Date: Fri, 10 Jul 2015 11:16:14 +0800
+Message-ID: <CACJqLyaNuS0=9r9kg0M5m67xVO6nrzs1Dz6xsDij-yvs8-e0mQ@mail.gmail.com>
+References: <CACJqLyb5spgWuxAc-rLctp6RapKuWmmdNwg42CbRNOEcxW5XGw@mail.gmail.com>
+	<559C9422.8010403@redhat.com>
+	<CACJqLyaj4sxmN9R+m8xY6v=isdh53qGDotKAn_2QW0SVkmOeQg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx6-phx2.redhat.com ([209.132.183.39]:44530 "EHLO
-	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750995AbbGIXDO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Jul 2015 19:03:14 -0400
-In-Reply-To: <alpine.DEB.2.00.1507091501570.20547@cobra.newdream.net>
+Received: from mail-yk0-f170.google.com ([209.85.160.170]:34200 "EHLO
+	mail-yk0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751293AbbGJDQO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Jul 2015 23:16:14 -0400
+Received: by ykax123 with SMTP id x123so5418733yka.1
+        for <ceph-devel@vger.kernel.org>; Thu, 09 Jul 2015 20:16:14 -0700 (PDT)
+In-Reply-To: <CACJqLyaj4sxmN9R+m8xY6v=isdh53qGDotKAn_2QW0SVkmOeQg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Gleb Borisov <borisov.gleb@gmail.com>, ceph-devel@vger.kernel.org
+To: Josh Durgin <jdurgin@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Jason Dillaman <dillaman@redhat.com>
 
-I've seen some odd teuthology in the last week or two which seems to be anomalous rjenkins hash behavior as well.
+I made a simple draft about adding async event notification support for librbd:
 
-http://tracker.ceph.com/issues/12231
--Sam
+The initial idea is try to avoid much change to existing apis. So we
+could add a new api like:
 
------ Original Message -----
-From: "Sage Weil" <sweil@redhat.com>
-To: "Gleb Borisov" <borisov.gleb@gmail.com>
-Cc: ceph-devel@vger.kernel.org
-Sent: Thursday, July 9, 2015 3:06:00 PM
-Subject: Re: Strange issue with CRUSH
+struct {
+  int result;
+  void *userdata;
+  ......
+} rbd_aio_event;
 
-On Fri, 10 Jul 2015, Gleb Borisov wrote:
-> Hi Sage,
-> 
-> Sorry for mailing you in person, I realize that you're quite busy at redhat,
-> but I wanted you have a look on an issue with CRUSH map.
+int poll_io_events(ImageCtx *ictx, rbd_aio_event *events, int
+numevents, struct timespec *timeout);
 
-No problem. I hope you don't mind I've added ceph-devel to the cc list.
+int set_image_notification(ImageCtx *ictx, void *handler, enum
+notification_type);
 
-> I've described very first insights here:
-> http://lists.ceph.com/pipermail/ceph-users-ceph.com/2015-July/002897.html
-> 
-> We are continue our research and found that distribution of PG count by OSD
-> is very strange and after digging into CRUSH source code found rjenkins1
-> hash function.
-> 
-> After some testing we realized that rjenkins1's value distribution is
-> exponential, and this can cause our disbalance.
+It seemed a little tricky, if user call "set_image_notification"
+successfully, user can call aio_write/read with specified
+userdata(original callback argument pointer). Librbd internal thread
+will post async event to the "eventfd" using the specified
+way(notification_type) when io finished. For example, linux/bsd will
+use [eventfd])(http://man7.org/linux/man-pages/man2/eventfd.2.html),
+solaris could use
+[port_send](http://docs.oracle.com/cd/E23823_01/html/816-5168/port-send-3c.html#scrolltoc),
+windows could use iocp method
+[PostQueuedCompletionStatus](https://msdn.microsoft.com/en-us/library/windows/desktop/aa365458(v=vs.85).aspx).
 
-Any issue with rjenkins1's hash function is very interesting and 
-concerning.  Can you describe your analysis and what you mean by the 
-distribution being exponential?
-
-> What do you think about adding additional hashing algorithm to CRUSH? It
-> seems that it could improve distribution.
-
-I am definitely open to adding new hash functions, especially if the 
-current ones are flawed.  The current hash was created by making ad hoc 
-combinations of rjenkins' mix function with various numbers of 
-arguments--hardly scientific or methodical.  We did an analysis a couple 
-years back and found that it effectively modeled a uniform distribution, 
-but if we missed something or were wrong we should definitely correct it!
-
-In any case, the important step is to quantify what is wrong with the 
-current hash so that we can ensure any new one is not flawed in the same 
-way.
-
-Thanks-
-sage
+If client call rbd without "set_image_notification", user could call
+"poll_io_events" will get -EOPNOTSUPP.
 
 
-> We have also tried to generate some syntetic crushmaps (another bucket
-> types, more OSDs per host, more/less hosts by rack, different cound of
-> racks, linear osd ids, random osd ids, etc), but didn't found any
-> combination with better distribution of PG across OSD.
-> 
-> Thanks and one more sorry for bothering you in person.
+
+On Wed, Jul 8, 2015 at 11:46 AM, Haomai Wang <haomaiwang@gmail.com> wrote:
+> On Wed, Jul 8, 2015 at 11:08 AM, Josh Durgin <jdurgin@redhat.com> wrote:
+>> On 07/07/2015 08:18 AM, Haomai Wang wrote:
+>>>
+>>> Hi All,
+>>>
+>>> Currently librbd support aio_read/write with specified
+>>> callback(AioCompletion). It would be nice for simple caller logic, but
+>>> it also has some problems:
+>>>
+>>> 1. Performance bottleneck: Create/Free AioCompletion and librbd
+>>> internal finisher thread complete "callback" isn't a *very
+>>> littleweight" job, especially when "callback" need to update some
+>>> status with lock hold
+>>>
+>>> 2. Call logic: Usually like fio rbd engine, caller will maintain some
+>>> status with io and rbd callback isn't enough to finish all the jobs
+>>> related to io. For example, caller need to check each queued io
+>>> stupidly again when rbd callback finished.
+>>>
+>>> So maybe we could add new api which support eventfd, so caller could
+>>> add eventfd to its event loop and batch reap finished io event and
+>>> update status or do more things.
+>>>
+>>> Any feedback is appreciated!
+>>
+>>
+>> It seems like a good idea to me. I'm not sure how much overhead it
+>> avoids, but letting the callers check status from their own threads
+>> is much nicer in general.
+>>
+>> I'd be curious how much overhead the callback + finisher add. If it's
+>> significant, it might make sense to add similar eventfd interfaces
+>> lower in the stack too.
+>
+> From intuition if we do high iodepth benchmark, noncallback way could
+> reduce lots of "extra callback latency" because new way could batch
+> them. Another performance benefit I think from caller side, new way
+> could let complexity io finished job avoid "callback lock" and reduce
+> extra logic. Finally, mostly callback need to wakeup caller thread to
+> do next thing, it would be great that with new way we can do it in
+> librbd via eventfd.
+>
+>>
+>> Josh
+>
+>
+>
 > --
-> Best regards,
-> Gleb M Borisov
-> 
-> 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Best Regards,
+>
+> Wheat
 
+
+
+-- 
+Best Regards,
+
+Wheat
