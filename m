@@ -1,299 +1,68 @@
 From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: About Fio backend with ObjectStore API
-Date: Fri, 10 Jul 2015 15:51:03 +0800
-Message-ID: <CACJqLyYb2xf8TN+HXiON8G8ojob1OwedFusSnY25p53a7aiyiA@mail.gmail.com>
-References: <99767EA2E27DD44DB4E9F9B9ACA458C03B31A8D8@SSIEXCH-MB3.ssi.samsung.com>
-	<814413230.286.1436473608097.JavaMail.root@thunderbeast.private.linuxbox.com>
+Subject: Re: Patches for review on keyvaluestore
+Date: Fri, 10 Jul 2015 16:26:53 +0800
+Message-ID: <CACJqLyb7txzQP9BabAqi2-g_9DC4w7qWX6vr1XXqFOKsPvPNCg@mail.gmail.com>
+References: <C226B0AB34511445928D9882AA519F601C4400B3@SACMBXIP03.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yk0-f176.google.com ([209.85.160.176]:35991 "EHLO
-	mail-yk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752771AbbGJHvE convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Jul 2015 03:51:04 -0400
-Received: by ykey15 with SMTP id y15so60466046yke.3
-        for <ceph-devel@vger.kernel.org>; Fri, 10 Jul 2015 00:51:03 -0700 (PDT)
-In-Reply-To: <814413230.286.1436473608097.JavaMail.root@thunderbeast.private.linuxbox.com>
+Received: from mail-yk0-f173.google.com ([209.85.160.173]:33270 "EHLO
+	mail-yk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752890AbbGJI0x convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Jul 2015 04:26:53 -0400
+Received: by ykeo3 with SMTP id o3so136850732yke.0
+        for <ceph-devel@vger.kernel.org>; Fri, 10 Jul 2015 01:26:53 -0700 (PDT)
+In-Reply-To: <C226B0AB34511445928D9882AA519F601C4400B3@SACMBXIP03.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Matt W. Benjamin" <matt@cohortfs.com>
-Cc: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Casey Bodley <cbodley@gmail.com>
+To: Varada Kari <Varada.Kari@sandisk.com>
+Cc: Sage Weil <sweil@redhat.com>, Samuel Just <sam.just@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-I have rebased the branch with master, and push it to ceph upstream
-repo. https://github.com/ceph/ceph/compare/fio-objectstore?expand=3D1
+I suggest we could split this PR into plugindb impl and
+ceph-disk,init-script things. So I think it will be more easier to be
+merge ready.
 
-Plz let me know if who is working on this. Otherwise, I would like to
-improve this to be merge ready.
-
-On Fri, Jul 10, 2015 at 4:26 AM, Matt W. Benjamin <matt@cohortfs.com> w=
-rote:
-> That makes sense.
+On Thu, Jul 9, 2015 at 4:31 PM, Varada Kari <Varada.Kari@sandisk.com> wrote:
+> Hi Sage/Sam/Haomai,
 >
-> Matt
+> Sent pull requests for two enhancement for key value store. Can you please review the changes?
 >
-> ----- "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com> wrote:
+> https://github.com/ceph/ceph/pull/5136
 >
->> Hi Casey,
->>   Got it. I was directed to the old code base. By the way, Since the
->> testing case was used to exercise all of object stores.  Strongly
->> recommend to change the name from fio_ceph_filestore.cc to
->> fio_ceph_objectstore.cc . And the code in fio_ceph_filestore.cc shou=
-ld
->> be refactored to reflect that the whole objectstore will be supporte=
-d
->> by fio_ceph_objectstore.cc. what you think?
->>
->> Let me know if you need any help from my side.
->>
->>
->> Regards,
->> James
->>
->>
->>
->> -----Original Message-----
->> From: Casey Bodley [mailto:cbodley@gmail.com]
->> Sent: Thursday, July 09, 2015 12:32 PM
->> To: James (Fei) Liu-SSI
->> Cc: Haomai Wang; ceph-devel@vger.kernel.org
->> Subject: Re: About Fio backend with ObjectStore API
->>
->> Hi James,
->>
->> Are you looking at the code from
->> https://github.com/linuxbox2/linuxbox-ceph/tree/fio-objectstore? It
->> uses ObjectStore::create() instead of new FileStore(). This allows u=
-s
->> to exercise all of the object stores with the same code.
->>
->> Casey
->>
->> On Thu, Jul 9, 2015 at 2:01 PM, James (Fei) Liu-SSI
->> <james.liu@ssi.samsung.com> wrote:
->> > Hi Casey,
->> >   Here is the code in the fio_ceph_filestore.cc. Basically, it
->> creates a filestore as backend engine for IO exercises. If we got to
->> send IO commands to KeyValue Store or Newstore, we got to change the
->> code accordingly, right?  I did not see any other files like
->> fio_ceph_keyvaluestore.cc or fio_ceph_newstore.cc. In my humble
->> opinion, we might need to create other two fio engines for
->> keyvaluestore and newstore if we want to exercise these two, right?
->> >
->> > Regards,
->> > James
->> >
->> > static int fio_ceph_filestore_init(struct thread_data *td)
->> > 209 {
->> > 210     vector<const char*> args;
->> > 211     struct ceph_filestore_data *ceph_filestore_data =3D (struc=
-t
->> ceph_filestore_data *) td->io_ops->data;
->> > 212     ObjectStore::Transaction ft;
->> > 213
->> >
->> > 214     global_init(NULL, args, CEPH_ENTITY_TYPE_OSD,
->> CODE_ENVIRONMENT_UTILITY, 0);
->> > 215     //g_conf->journal_dio =3D false;
->> > 216     common_init_finish(g_ceph_context);
->> > 217     //g_ceph_context->_conf->set_val("debug_filestore", "20");
->> > 218     //g_ceph_context->_conf->set_val("debug_throttle", "20");
->> > 219     g_ceph_context->_conf->apply_changes(NULL);
->> > 220
->> >
->> > 221     ceph_filestore_data->osd_path =3D
->> strdup("/mnt/fio_ceph_filestore.XXXXXXX");
->> > 222     ceph_filestore_data->journal_path =3D
->> strdup("/var/lib/ceph/osd/journal-ram/fio_ceph_filestore.XXXXXXX");
->> > 223
->> >
->> > 224     if (!mkdtemp(ceph_filestore_data->osd_path)) {
->> > 225             cout << "mkdtemp failed: " << strerror(errno) <<
->> std::endl;
->> > 226             return 1;
->> > 227     }
->> > 228     //mktemp(ceph_filestore_data->journal_path); // NOSPC issu=
-e
->> > 229
->> >
->> > 230     ObjectStore *fs =3D new
->> FileStore(ceph_filestore_data->osd_path,
->> ceph_filestore_data->journal_path);
->> > 231     ceph_filestore_data->fs =3D fs;
->> > 232
->> >
->> > 233     if (fs->mkfs() < 0) {
->> > 234             cout << "mkfs failed" << std::endl;
->> > 235             goto failed;
->> > 236     }
->> > 237
->> > 238     if (fs->mount() < 0) {
->> > 239             cout << "mount failed" << std::endl;
->> > 240             goto failed;
->> > 241     }
->> > 242
->> >
->> > 243     ft.create_collection(coll_t());
->> > 244     fs->apply_transaction(ft);
->> > 245
->> >
->> > 246
->> >
->> > 247     return 0;
->> > 248
->> >
->> > 249 failed:
->> > 250     return 1;
->> > 251
->> >
->> > 252 }
->> > -----Original Message-----
->> > From: Casey Bodley [mailto:cbodley@gmail.com]
->> > Sent: Thursday, July 09, 2015 9:19 AM
->> > To: James (Fei) Liu-SSI
->> > Cc: Haomai Wang; ceph-devel@vger.kernel.org
->> > Subject: Re: About Fio backend with ObjectStore API
->> >
->> > Hi James,
->> >
->> > In the job file src/test/filestore.fio, you can modify the line
->> > "objectstore=3Dfilestore" to use any objectstore type supported by
->> the
->> > ObjectStore::create() factory.
->> >
->> > Casey
->> >
->> > On Wed, Jul 8, 2015 at 8:02 PM, James (Fei) Liu-SSI
->> <james.liu@ssi.samsung.com> wrote:
->> >> Hi Casey,
->> >>   Quick questions, The code in the trunk only cover the test for
->> filestore. I was wondering do you have any plan to cover the test fo=
-r
->> kvstore and newstore?
->> >>
->> >>   Thanks,
->> >>   James
->> >>
->> >> -----Original Message-----
->> >> From: ceph-devel-owner@vger.kernel.org
->> >> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of James (Fei=
-)
->>
->> >> Liu-SSI
->> >> Sent: Tuesday, June 30, 2015 2:19 PM
->> >> To: Casey Bodley
->> >> Cc: Haomai Wang; ceph-devel@vger.kernel.org
->> >> Subject: RE: About Fio backend with ObjectStore API
->> >>
->> >> Hi Casey,
->> >>
->> >>   Thanks a lot.
->> >>
->> >>   Regards,
->> >>   James
->> >>
->> >> -----Original Message-----
->> >> From: Casey Bodley [mailto:cbodley@gmail.com]
->> >> Sent: Tuesday, June 30, 2015 2:16 PM
->> >> To: James (Fei) Liu-SSI
->> >> Cc: Haomai Wang; ceph-devel@vger.kernel.org
->> >> Subject: Re: About Fio backend with ObjectStore API
->> >>
->> >> Hi,
->> >>
->> >> When Danny Al-Gaaf & Daniel Gollub published "Ceph Performance
->> >> Analysis: fio and RBD" at
->> >>
->> https://telekomcloud.github.io/ceph/2014/02/26/ceph-performance-anal=
-y
->> >> s is_fio_rbd.html, they also mentioned a fio engine that linked
->> >> directly into ceph's FileStore. I was able to find Daniel's branc=
-h
->> on
->> >> github at https://github.com/gollub/ceph/tree/fio_filestore_v2, a=
-nd
->> did some more work on it at the time.
->> >>
->> >> I just rebased that work onto the latest ceph master branch, and
->> pushed to our github at
->> https://github.com/linuxbox2/linuxbox-ceph/tree/fio-objectstore. You
->> can find the source in src/test/fio_ceph_filestore.cc, and run fio
->> with the provided example fio job file in src/test/filestore.fio.
->> >>
->> >> I didn't have a chance to confirm that it builds with automake, b=
-ut
->>
->> >> the cmake version built for me. I'm happy to help if you run into
->> >> problems, Casey
->> >>
->> >> On Tue, Jun 30, 2015 at 2:31 PM, James (Fei) Liu-SSI
->> <james.liu@ssi.samsung.com> wrote:
->> >>> Hi Haomai,
->> >>>   What are you trying to ask is to benchmark local
->> objectstore(like kvstore/filestore/newstore) locally with
->> FIO(ObjectStore engine)? You want to purely compare the performance
->> locally for these objectstores, right?
->> >>>
->> >>>   Regards,
->> >>>   James
->> >>>
->> >>> -----Original Message-----
->> >>> From: ceph-devel-owner@vger.kernel.org
->> >>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Haomai
->> Wang
->> >>> Sent: Tuesday, June 30, 2015 9:06 AM
->> >>> To: ceph-devel@vger.kernel.org
->> >>> Subject: About Fio backend with ObjectStore API
->> >>>
->> >>> Hi all,
->> >>>
->> >>> Long long ago, is there someone said about fio backend with Ceph
->> ObjectStore API? So we could use the existing mature fio facility to
->> benchmark ceph objectstore.
->> >>>
->> >>> --
->> >>> Best Regards,
->> >>>
->> >>> Wheat
->> >>> --
->> >>> To unsubscribe from this list: send the line "unsubscribe
->> ceph-devel"
->> >>> in the body of a message to majordomo@vger.kernel.org More
->> majordomo
->> >>> info at  http://vger.kernel.org/majordomo-info.html
->> >>   {.n +       +%  lzwm  b =EB=A7=B2  r  y=C7=A9 =D7=AFzX     =DC=A8=
-}   =C6=A0z &j:+v        zZ+
->>  +zf   h   ~    i   z   w   ?    & )=DF=A2 f
->> N=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDr=EF=BF=BD=EF=BF=BDy=EF=
-=BF=BD=EF=BF=BD=EF=BF=BDb=EF=BF=BDX=EF=BF=BD=EF=BF=BD=C7=A7v=EF=BF=BD^=EF=
-=BF=BD)=DE=BA{.n=EF=BF=BD+=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD]z=EF=BF=
-=BD=EF=BF=BD=EF=BF=BD{ay=EF=BF=BD=CA=87=DA=99=EF=BF=BD,j=EF=BF=BD=EF=BF=
-=BDf=EF=BF=BD=EF=BF=BD=EF=BF=BDh=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD=EF=
-=BF=BDw=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDj:+v=EF=BF=
-=BD=EF=BF=BD=EF=BF=BDw=EF=BF=BDj=EF=BF=BDm=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=
-=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDzZ+=EF=BF=BD=EF=BF=BD=DD=A2j"=
-=EF=BF=BD=EF=BF=BD
+> Contains changes for short circuiting op_wq and osr in key value store. We have observed good performance gains with the above pull request. Not sure if it breaks any assumptions or design constraints. Need your comments on the approach.
 >
-> --
-> Matt Benjamin
-> CohortFS, LLC.
-> 315 West Huron Street, Suite 140A
-> Ann Arbor, Michigan 48103
+> https://github.com/ceph/ceph/pull/5169
 >
-> http://cohortfs.com
+> Contains changes for adding a generic framework to add any keyvaluedb as a backend.  There are code made for initial proposal on the infernalis blueprint. Other enhancement proposed are being worked on as loadable object store using a factory approach.
 >
-> tel.  734-761-4689
-> fax.  734-769-8938
-> cel.  734-216-5309
+> Gist of the implementation sent for review:
+>
+> 1. A new class is derived from KeyValueDB (Derived from ObjectStore) called PluggableDBStore, which honors the semantics of KeyvalueStore and KeyValueDB. This class acts as mediator between CEPH and loadable shim (a shared library).  This class transforms the ceph related bufferlist etc... to const char pointers for the shim to understand.
+> 2. Shim layer is assumed to be a shared library.
+> 3. PluggableDBStore, loads (dlopen) the key value database wrapper/shim needed for Ceph integration.  The loadable shim library location is specified in ceph.conf. Not added any checks to validate the sanity or compatibility of shared object as of now. We can impose certain checks to be honored by the shim layer to be compatible with the ceph version.
+> 4. Interfaces that needs to be implemented in shim, are added in a new header called PluggableDBInterfaces.h.  This header contains the signatures for the necessary interfaces like init(), close(), submit_transaction(), get() and get_iterator(). PluggableDBStore caches these handles in a table during the initialization time of the backend db.
+> 5. Similarly for Iterator functionality, PluggableDBIterator.h, contains the functionality to be implemented by the shim layer.
+> 6. ceph-disk is modified to make two partitions of the osd disk given, one for osd metadata and other for the pluggable DB, similar to existing functionality like journal and osd data partition. Two partitions are created only when PluggableDBstore is selected as backed for OSD.  DB's can work off a raw partition as well, having a partition can enable to them use it. May be we can add additional parameters or conf options to have a file system also on the newly created partition, which can be implemented by ceph-disk.
+> 7. Partition information and other information needed like osd id etc... are passed to shim layer at the time of initializing the store.
+> 8. Additional script modification is get correct stats from the backend.
+>
+> Please share your comments on the pull requests.
+>
+> Thanks,
+> Varada
+>
+>
+>
+>
+> ________________________________
+>
+> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+>
 
 
 
---=20
+-- 
 Best Regards,
 
 Wheat
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
