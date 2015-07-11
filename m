@@ -1,37 +1,46 @@
-From: Ken Dreyer <kdreyer@redhat.com>
-Subject: Re: debian packaging for wip-10587-split-servers
-Date: Fri, 10 Jul 2015 16:56:48 -0600
-Message-ID: <55A04DB0.1070400@redhat.com>
-References: <559E99D8.9060208@redhat.com>
- <CAJE9aOO5Wfxgtgvuj=Mx20C_ToVpY4VU37tS+7uGRbEjKZYEww@mail.gmail.com>
- <55A04D18.70202@redhat.com>
+From: Konstantin Danilov <kdanilov@mirantis.com>
+Subject: Block storage performance test tool - would like to merge into cbt
+Date: Sat, 11 Jul 2015 11:02:51 +0300
+Message-ID: <CACxKWazeKFOoebysNJ4XajwEmBf2kk6Asw0WVAAKLo=hCp32sA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:40985 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752009AbbGJW4u (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 10 Jul 2015 18:56:50 -0400
-In-Reply-To: <55A04D18.70202@redhat.com>
+Received: from mail-la0-f48.google.com ([209.85.215.48]:35005 "EHLO
+	mail-la0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752860AbbGKICw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 11 Jul 2015 04:02:52 -0400
+Received: by labgy5 with SMTP id gy5so124610857lab.2
+        for <ceph-devel@vger.kernel.org>; Sat, 11 Jul 2015 01:02:51 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>
-Cc: ceph-maintainers@ceph.com, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On 07/10/2015 04:54 PM, Ken Dreyer wrote:
-> I've done some testing with a dummy package and this works. "apt-get
-> upgrade" kept the update back, since there were new packages introduced,
-> but "apt-get dist-upgrade" worked. Is that expected? (... newbie Debian
-> user here :D )
-> 
-> I've pushed this approach to
-> https://github.com/ceph/ceph/tree/wip-10587-split-servers.
+Hi all,
 
-Whoops, I lied, there's nothing new on that branch yet. I'll have to
-pick this back up on Monday :)
+We(Mirantis ceph team) have a tool for block storage performance test,
+called 'wally' -
+https://github.com/Mirantis/disk_perf_test_tool.
 
-Hopefully my reasoning above sounds correct, though?
+It has some nice features, like:
 
-- Ken
+* Openstack and FUEL integration (can spawn VM for tests, gather HW info, etc)
+* Set of tests, joined into suit, which measures different performnce
+aspects and
+creates joined report, as example -
+http://koder-ua.github.io/6.1GA/cinder_volume_iscsi.html,
+VM running on ceph drives report example -
+http://koder-ua.github.io/random/ceph_example.html
+* Data postrocessing - confidence intervals, etc
 
+We would like to merge our code into cbt. Do you interesting in it?
+Can we discuss a way to merge?
+
+Thanks
+
+-- 
+Kostiantyn Danilov aka koder.ua
+Principal software engineer, Mirantis
+
+skype:koder.ua
+http://koder-ua.blogspot.com/
+http://mirantis.com
