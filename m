@@ -1,102 +1,85 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Inventory of public teuthology clusters
-Date: Sat, 11 Jul 2015 15:24:48 +0200
-Message-ID: <55A11920.90609@dachary.org>
+From: Jiwan N <jiwan.ninglekhu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Block Storage Image Creation Process
+Date: Sat, 11 Jul 2015 15:44:51 -0500
+Message-ID: <CAJe5gkBvJUuQQ08PtBB_dEp5bXZZHyeVw-7zCyOfLFid8vsqGA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="d4dUCu0D6W3vT6MVi01ckf8f206A5C89O"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:48506 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1750799AbbGKNZC (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 11 Jul 2015 09:25:02 -0400
-Received: from [10.9.0.6] (unknown [10.0.2.28])
-	by smtp.dmail.dachary.org (Postfix) with ESMTP id 152BF420B1
-	for <ceph-devel@vger.kernel.org>; Sat, 11 Jul 2015 15:24:49 +0200 (CEST)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: multipart/mixed; boundary="===============0976491083=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---d4dUCu0D6W3vT6MVi01ckf8f206A5C89O
-Content-Type: text/plain; charset=utf-8
+--===============0976491083==
+Content-Type: multipart/alternative; boundary=001a113ce92466492c051a9f8f41
+
+--001a113ce92466492c051a9f8f41
+Content-Type: text/plain; charset=UTF-8
+
+Hi  Ceph-Users,
+
+I am quite new to Ceph Storage (storage tech in general). I have been
+investigating Ceph to understand the precise process clearly.
+
+*Q: What actually happens When I create a block image of certain size?*
+
+The ceph documentation from  http://docs.ceph.com/docs/v0.67.9/man/8/rbd/
+says, the block devices (images)
+are stripped over objects and stored in a RADOS object store.
+
+This is the process of storage allocation. So, do objects that are broken
+down allocate space (themselves) where they reside? Or are these objects
+(state and behavior ) information kept (scattered) into the OSDs
+(eventually into the disks)? Or does the monitor server keep these info and
+allocate those positions (locations) in Object storage disks so that later
+on some data can be put into those locations?
+
+Any precise documentation or explanation will help.
+
+-- 
+Sincerely,
+Jiwan Ninglekhu
+
+--001a113ce92466492c051a9f8f41
+Content-Type: text/html; charset=UTF-8
 Content-Transfer-Encoding: quoted-printable
 
-Hi Ceph,
+<div dir=3D"ltr">Hi =C2=A0Ceph-Users,<div><br></div><div>I am quite new to =
+Ceph Storage (storage tech in general). I have been investigating Ceph to u=
+nderstand the precise process clearly.=C2=A0</div><div><br></div><div><b>Q:=
+ What actually happens When I create a block image of certain size?</b></di=
+v><div><br></div><div>The ceph documentation from =C2=A0<a href=3D"http://d=
+ocs.ceph.com/docs/v0.67.9/man/8/rbd/">http://docs.ceph.com/docs/v0.67.9/man=
+/8/rbd/</a> says, the block devices (images)</div><div><div>are stripped ov=
+er objects and stored in a RADOS object store.</div><div><br></div><div>Thi=
+s is the process of storage allocation. So, do objects that are broken down=
+ allocate space (themselves) where they reside? Or are these objects (state=
+ and behavior ) information kept (scattered) into the OSDs (eventually into=
+ the disks)? Or does the monitor server keep these info and allocate those =
+positions (locations) in Object storage disks so that later on some data ca=
+n be put into those locations?</div><div><br></div><div>Any precise documen=
+tation or explanation will help.</div><div><br></div>-- <br><div class=3D"g=
+mail_signature">Sincerely,<div>Jiwan Ninglekhu</div></div>
+</div></div>
 
-With the teuthology OpenStack backend[1] and OpenStack public cloud provi=
-ders[2], operating your own teuthology cluster is a few hours of work[3].=
- It is useful to developers who can test their modification even if they =
-don't have access to the community lab and without waiting for more impor=
-tant jobs to complete. It is also import for non profit organizations suc=
-h as http://tetaneutral.net/ who routinely deploy their own Ceph packages=
-, to make sure the set of patches they chose to include on top of a Ceph =
-stable release does not introduce a regression. It helps Ceph core develo=
-pers when reviewing contributions that fail integration tests: the author=
- of the contribution can reproduce the problem by running the job.
+--001a113ce92466492c051a9f8f41--
 
-Although some organizations are expected to run their teuthology lab behi=
-nd firewalls[4], we could see more and more teuthology clusters with resu=
-lts publicly available. The Ceph community lab[5] which runs hundreds of =
-machines will hopefully be joined by other, more modest, clusters sharing=
- their results in public. It would be great to have an inventory looking =
-like this:
+--===============0976491083==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
 
-   URL: http://pulpito.ceph.com/
-   Organization: Ceph
-   Sponsors: Red Hat
-   Contact: Ceph Development <ceph-devel@vger.kernel.org>
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
-   URL: http://ceph.aevoo.fr:8081/
-   Organization: Aevoo
-   Sponsors: Aevoo
-   Contact: David Casier <contact@aevoo.fr>
-
-   URL: http://integration.ceph.dachary.org:8081/
-   Organization: None
-   Sponsors: Red Hat
-   Contact: Loic Dachary <ldachary@redhat.com>
-
-   etc.
-
-I'm not sure where such a list could be hosted. The http://tracker.ceph.c=
-om/projects/lab/ wiki and http://ceph.github.io/sepia/ are dedicated to t=
-he Sepia lab, the other projects are dedicated to development. Any ideas =
-?
-
-Maybe in a few months from now, if there are enough public facing teuthol=
-ogy clusters, we will be able to harvest and compare their result to redu=
-ce the redundancy and improve coverage. But I'm getting ahead of myself :=
--)=20
-
-Cheers
-
-[1] teuthology OpenStack backend https://github.com/dachary/teuthology/tr=
-ee/wip-6502-openstack/
-[2] Public OpenStack providers useable within the hour http://dachary.org=
-/?p=3D3741
-[3] Running your own Ceph integration tests with OpenStack http://dachary=
-=2Eorg/?p=3D3767
-[4] Red Hat, SUSE, Fujitsu, Intel have teuthology clusters behind firewal=
-ls, for instance
-[5] Sepia lab http://ceph.github.io/sepia/
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---d4dUCu0D6W3vT6MVi01ckf8f206A5C89O
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlWhGSAACgkQ8dLMyEl6F20fHQCgoFNSIuZrWSFN6eLV0vjy1VBV
-eJ0AnAxDIvfMQREPJiNiFh2kGEn4S13S
-=IciF
------END PGP SIGNATURE-----
-
---d4dUCu0D6W3vT6MVi01ckf8f206A5C89O--
+--===============0976491083==--
