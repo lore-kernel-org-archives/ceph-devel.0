@@ -1,49 +1,49 @@
 From: Loic Dachary <loic@dachary.org>
-Subject: New member in the stable releases team
-Date: Sun, 12 Jul 2015 13:48:30 +0200
-Message-ID: <55A2540E.8090604@dachary.org>
+Subject: teuthology integration tests on OpenStack
+Date: Mon, 13 Jul 2015 01:59:45 +0200
+Message-ID: <55A2FF71.7080408@dachary.org>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="TCldXsAxC9gDt0c9eLFIJOA1nkWWtmGC4"
+ boundary="031fOuVIvVk6hfu7dHf4m1JwUjq25MSII"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:48755 "EHLO
+Received: from mail2.dachary.org ([91.121.57.175]:48883 "EHLO
 	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751131AbbGLLsd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 12 Jul 2015 07:48:33 -0400
+	with ESMTP id S1751216AbbGLX75 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 12 Jul 2015 19:59:57 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Abhishek L <abhishek.lekshmanan@gmail.com>, Nathan Cutler <ncutler@suse.cz>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, David Casier <david.casier@aevoo.fr>
+To: Andrew Schoen <aschoen@redhat.com>, Zack Cerza <zack@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
 This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---TCldXsAxC9gDt0c9eLFIJOA1nkWWtmGC4
+--031fOuVIvVk6hfu7dHf4m1JwUjq25MSII
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
 
-Hi Nathan & Abhishek,
+Hi Zack & Andrew,
 
-Let me introduce you to David Casier who agreed to help us with the stabl=
-e releases by running the hammer upgrade suite for Ubuntu 14.04 on his te=
-uthology setup at http://ceph.aevoo.fr:8081/ (using the OpenStack / teuth=
-ology installation run by his company).
+It turns out the simplest way to install teuthology on OpenStack (the one=
+liner described at http://dachary.org/?p=3D3790) is also the simplest way=
+ to run integration tests. Last Friday we discussed the fact that the teu=
+thology installation is intrusive: it modifies system files, runs a web s=
+ervice, reset ~/.teuthology.yaml etc. But it can conveniently be containe=
+d in a dedicated, all in one (paddles, pulpito, workers, client) virtual =
+machine.
 
-The idea we discussed this morning is that David will watch the hammer br=
-anch and run the upgrade suite whenever there is a new commit. I suppose =
-he could also run the suite on hammer-backports when it is needed. This i=
-s the first time someone is committed to help by running teuthology suite=
-s, we'll need to figure out the details as we go.
+Assuming a jenkins slave has access to an OpenStack tenant, it could be s=
+omething like:
 
-Although this is a small part of the stable release workflow, this is a n=
-ovel way of contributing and I'm glad it's happening. It also made me rea=
-lize that there is no place where the roles of each member of the stable =
-release team is listed. I've added a who's who section at:
+    . openrc.sh
+    teuthology/openstack-bootstrap.sh ovh
+    ssh -i $HOME/teuthology-admin teuthology grep -qq 'openstack-integrat=
+ion: commands succeeded' /var/log/cloud-init.log
+    nova delete teuthology
 
-    http://tracker.ceph.com/projects/ceph-releases/wiki/HOWTO#Whos-who
-
-which reflects my view of the roles we have. Although it requires a littl=
-e maintenance, the roles do not vary that much and I expect it won't requ=
-ire an update more than a dozen time a year.=20
+The http://tracker.ceph.com/issues/12295 feature request was created for =
+that purpose. At this point it is primarily about creating the jenkins sl=
+ave and since I know nothing about that (rather I forgot the little I lea=
+rnt a few month ago ;-), I'm hoping someone will take care of it.
 
 Cheers
 
@@ -51,7 +51,7 @@ Cheers
 Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
 
---TCldXsAxC9gDt0c9eLFIJOA1nkWWtmGC4
+--031fOuVIvVk6hfu7dHf4m1JwUjq25MSII
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -59,9 +59,9 @@ Content-Disposition: attachment; filename="signature.asc"
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2.0.22 (GNU/Linux)
 
-iEYEARECAAYFAlWiVA4ACgkQ8dLMyEl6F217oACfUlCnsRLfmTfhA8RjFZp6EHls
-X7EAoMRL4q0sfL2dgkmzrUPJc2FDBZHO
-=9Abz
+iEYEARECAAYFAlWi/3EACgkQ8dLMyEl6F22xXACbBxoa9FeGRSoiAvty2gi30Ctd
+Y2sAn3l/nv4k0X2XtzIsSJTah/cV4uz7
+=+nxa
 -----END PGP SIGNATURE-----
 
---TCldXsAxC9gDt0c9eLFIJOA1nkWWtmGC4--
+--031fOuVIvVk6hfu7dHf4m1JwUjq25MSII--
