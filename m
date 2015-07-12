@@ -1,94 +1,75 @@
-From: Varada Kari <Varada.Kari@sandisk.com>
-Subject: RE: Patches for review on keyvaluestore
-Date: Sun, 12 Jul 2015 04:28:29 +0000
-Message-ID: <C226B0AB34511445928D9882AA519F601C44C048@SACMBXIP03.sdcorp.global.sandisk.com>
-References: <C226B0AB34511445928D9882AA519F601C4400B3@SACMBXIP03.sdcorp.global.sandisk.com>
- <CACJqLyb7txzQP9BabAqi2-g_9DC4w7qWX6vr1XXqFOKsPvPNCg@mail.gmail.com>
+From: Joao Eduardo Luis <joao@suse.de>
+Subject: Re: Ceph-mon crashing FAILED assert(addr_name.count(p->second) ==
+ 0)
+Date: Sun, 12 Jul 2015 09:25:24 +0100
+Message-ID: <55A22474.2040501@suse.de>
+References: <CAFkUHxe8Qw4-5ggCm51shQdp8aYzdvEp9Bt9Fq11sur2vUf5oQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0092.outbound.protection.outlook.com ([207.46.100.92]:43136
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750812AbbGLE2f (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 12 Jul 2015 00:28:35 -0400
-In-Reply-To: <CACJqLyb7txzQP9BabAqi2-g_9DC4w7qWX6vr1XXqFOKsPvPNCg@mail.gmail.com>
-Content-Language: en-US
+Received: from cantor2.suse.de ([195.135.220.15]:53800 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751011AbbGLIZ0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 12 Jul 2015 04:25:26 -0400
+In-Reply-To: <CAFkUHxe8Qw4-5ggCm51shQdp8aYzdvEp9Bt9Fq11sur2vUf5oQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomaiwang@gmail.com>
-Cc: Sage Weil <sweil@redhat.com>, Samuel Just <sam.just@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: kernel neophyte <neophyte.hacker001@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-U3VyZS4gV2lsbCBicmVhayB0aGVtIGludG8gbXVsdGlwbGUgcGF0Y2hlcyBmb3IgZWFzeSByZXZp
-ZXcgYW5kIG1lcmdlLg0KDQpWYXJhZGENCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZy
-b206IEhhb21haSBXYW5nIFttYWlsdG86aGFvbWFpd2FuZ0BnbWFpbC5jb21dIA0KU2VudDogRnJp
-ZGF5LCBKdWx5IDEwLCAyMDE1IDE6NTcgUE0NClRvOiBWYXJhZGEgS2FyaQ0KQ2M6IFNhZ2UgV2Vp
-bDsgU2FtdWVsIEp1c3Q7IGNlcGgtZGV2ZWwNClN1YmplY3Q6IFJlOiBQYXRjaGVzIGZvciByZXZp
-ZXcgb24ga2V5dmFsdWVzdG9yZQ0KDQpJIHN1Z2dlc3Qgd2UgY291bGQgc3BsaXQgdGhpcyBQUiBp
-bnRvIHBsdWdpbmRiIGltcGwgYW5kIGNlcGgtZGlzayxpbml0LXNjcmlwdCB0aGluZ3MuIFNvIEkg
-dGhpbmsgaXQgd2lsbCBiZSBtb3JlIGVhc2llciB0byBiZSBtZXJnZSByZWFkeS4NCg0KT24gVGh1
-LCBKdWwgOSwgMjAxNSBhdCA0OjMxIFBNLCBWYXJhZGEgS2FyaSA8VmFyYWRhLkthcmlAc2FuZGlz
-ay5jb20+IHdyb3RlOg0KPiBIaSBTYWdlL1NhbS9IYW9tYWksDQo+DQo+IFNlbnQgcHVsbCByZXF1
-ZXN0cyBmb3IgdHdvIGVuaGFuY2VtZW50IGZvciBrZXkgdmFsdWUgc3RvcmUuIENhbiB5b3UgcGxl
-YXNlIHJldmlldyB0aGUgY2hhbmdlcz8NCj4NCj4gaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2Vw
-aC9wdWxsLzUxMzYNCj4NCj4gQ29udGFpbnMgY2hhbmdlcyBmb3Igc2hvcnQgY2lyY3VpdGluZyBv
-cF93cSBhbmQgb3NyIGluIGtleSB2YWx1ZSBzdG9yZS4gV2UgaGF2ZSBvYnNlcnZlZCBnb29kIHBl
-cmZvcm1hbmNlIGdhaW5zIHdpdGggdGhlIGFib3ZlIHB1bGwgcmVxdWVzdC4gTm90IHN1cmUgaWYg
-aXQgYnJlYWtzIGFueSBhc3N1bXB0aW9ucyBvciBkZXNpZ24gY29uc3RyYWludHMuIE5lZWQgeW91
-ciBjb21tZW50cyBvbiB0aGUgYXBwcm9hY2guDQo+DQo+IGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBo
-L2NlcGgvcHVsbC81MTY5DQo+DQo+IENvbnRhaW5zIGNoYW5nZXMgZm9yIGFkZGluZyBhIGdlbmVy
-aWMgZnJhbWV3b3JrIHRvIGFkZCBhbnkga2V5dmFsdWVkYiBhcyBhIGJhY2tlbmQuICBUaGVyZSBh
-cmUgY29kZSBtYWRlIGZvciBpbml0aWFsIHByb3Bvc2FsIG9uIHRoZSBpbmZlcm5hbGlzIGJsdWVw
-cmludC4gT3RoZXIgZW5oYW5jZW1lbnQgcHJvcG9zZWQgYXJlIGJlaW5nIHdvcmtlZCBvbiBhcyBs
-b2FkYWJsZSBvYmplY3Qgc3RvcmUgdXNpbmcgYSBmYWN0b3J5IGFwcHJvYWNoLg0KPg0KPiBHaXN0
-IG9mIHRoZSBpbXBsZW1lbnRhdGlvbiBzZW50IGZvciByZXZpZXc6DQo+DQo+IDEuIEEgbmV3IGNs
-YXNzIGlzIGRlcml2ZWQgZnJvbSBLZXlWYWx1ZURCIChEZXJpdmVkIGZyb20gT2JqZWN0U3RvcmUp
-IGNhbGxlZCBQbHVnZ2FibGVEQlN0b3JlLCB3aGljaCBob25vcnMgdGhlIHNlbWFudGljcyBvZiBL
-ZXl2YWx1ZVN0b3JlIGFuZCBLZXlWYWx1ZURCLiBUaGlzIGNsYXNzIGFjdHMgYXMgbWVkaWF0b3Ig
-YmV0d2VlbiBDRVBIIGFuZCBsb2FkYWJsZSBzaGltIChhIHNoYXJlZCBsaWJyYXJ5KS4gIFRoaXMg
-Y2xhc3MgdHJhbnNmb3JtcyB0aGUgY2VwaCByZWxhdGVkIGJ1ZmZlcmxpc3QgZXRjLi4uIHRvIGNv
-bnN0IGNoYXIgcG9pbnRlcnMgZm9yIHRoZSBzaGltIHRvIHVuZGVyc3RhbmQuDQo+IDIuIFNoaW0g
-bGF5ZXIgaXMgYXNzdW1lZCB0byBiZSBhIHNoYXJlZCBsaWJyYXJ5Lg0KPiAzLiBQbHVnZ2FibGVE
-QlN0b3JlLCBsb2FkcyAoZGxvcGVuKSB0aGUga2V5IHZhbHVlIGRhdGFiYXNlIHdyYXBwZXIvc2hp
-bSBuZWVkZWQgZm9yIENlcGggaW50ZWdyYXRpb24uICBUaGUgbG9hZGFibGUgc2hpbSBsaWJyYXJ5
-IGxvY2F0aW9uIGlzIHNwZWNpZmllZCBpbiBjZXBoLmNvbmYuIE5vdCBhZGRlZCBhbnkgY2hlY2tz
-IHRvIHZhbGlkYXRlIHRoZSBzYW5pdHkgb3IgY29tcGF0aWJpbGl0eSBvZiBzaGFyZWQgb2JqZWN0
-IGFzIG9mIG5vdy4gV2UgY2FuIGltcG9zZSBjZXJ0YWluIGNoZWNrcyB0byBiZSBob25vcmVkIGJ5
-IHRoZSBzaGltIGxheWVyIHRvIGJlIGNvbXBhdGlibGUgd2l0aCB0aGUgY2VwaCB2ZXJzaW9uLg0K
-PiA0LiBJbnRlcmZhY2VzIHRoYXQgbmVlZHMgdG8gYmUgaW1wbGVtZW50ZWQgaW4gc2hpbSwgYXJl
-IGFkZGVkIGluIGEgbmV3IGhlYWRlciBjYWxsZWQgUGx1Z2dhYmxlREJJbnRlcmZhY2VzLmguICBU
-aGlzIGhlYWRlciBjb250YWlucyB0aGUgc2lnbmF0dXJlcyBmb3IgdGhlIG5lY2Vzc2FyeSBpbnRl
-cmZhY2VzIGxpa2UgaW5pdCgpLCBjbG9zZSgpLCBzdWJtaXRfdHJhbnNhY3Rpb24oKSwgZ2V0KCkg
-YW5kIGdldF9pdGVyYXRvcigpLiBQbHVnZ2FibGVEQlN0b3JlIGNhY2hlcyB0aGVzZSBoYW5kbGVz
-IGluIGEgdGFibGUgZHVyaW5nIHRoZSBpbml0aWFsaXphdGlvbiB0aW1lIG9mIHRoZSBiYWNrZW5k
-IGRiLg0KPiA1LiBTaW1pbGFybHkgZm9yIEl0ZXJhdG9yIGZ1bmN0aW9uYWxpdHksIFBsdWdnYWJs
-ZURCSXRlcmF0b3IuaCwgY29udGFpbnMgdGhlIGZ1bmN0aW9uYWxpdHkgdG8gYmUgaW1wbGVtZW50
-ZWQgYnkgdGhlIHNoaW0gbGF5ZXIuDQo+IDYuIGNlcGgtZGlzayBpcyBtb2RpZmllZCB0byBtYWtl
-IHR3byBwYXJ0aXRpb25zIG9mIHRoZSBvc2QgZGlzayBnaXZlbiwgb25lIGZvciBvc2QgbWV0YWRh
-dGEgYW5kIG90aGVyIGZvciB0aGUgcGx1Z2dhYmxlIERCLCBzaW1pbGFyIHRvIGV4aXN0aW5nIGZ1
-bmN0aW9uYWxpdHkgbGlrZSBqb3VybmFsIGFuZCBvc2QgZGF0YSBwYXJ0aXRpb24uIFR3byBwYXJ0
-aXRpb25zIGFyZSBjcmVhdGVkIG9ubHkgd2hlbiBQbHVnZ2FibGVEQnN0b3JlIGlzIHNlbGVjdGVk
-IGFzIGJhY2tlZCBmb3IgT1NELiAgREIncyBjYW4gd29yayBvZmYgYSByYXcgcGFydGl0aW9uIGFz
-IHdlbGwsIGhhdmluZyBhIHBhcnRpdGlvbiBjYW4gZW5hYmxlIHRvIHRoZW0gdXNlIGl0LiBNYXkg
-YmUgd2UgY2FuIGFkZCBhZGRpdGlvbmFsIHBhcmFtZXRlcnMgb3IgY29uZiBvcHRpb25zIHRvIGhh
-dmUgYSBmaWxlIHN5c3RlbSBhbHNvIG9uIHRoZSBuZXdseSBjcmVhdGVkIHBhcnRpdGlvbiwgd2hp
-Y2ggY2FuIGJlIGltcGxlbWVudGVkIGJ5IGNlcGgtZGlzay4NCj4gNy4gUGFydGl0aW9uIGluZm9y
-bWF0aW9uIGFuZCBvdGhlciBpbmZvcm1hdGlvbiBuZWVkZWQgbGlrZSBvc2QgaWQgZXRjLi4uIGFy
-ZSBwYXNzZWQgdG8gc2hpbSBsYXllciBhdCB0aGUgdGltZSBvZiBpbml0aWFsaXppbmcgdGhlIHN0
-b3JlLg0KPiA4LiBBZGRpdGlvbmFsIHNjcmlwdCBtb2RpZmljYXRpb24gaXMgZ2V0IGNvcnJlY3Qg
-c3RhdHMgZnJvbSB0aGUgYmFja2VuZC4NCj4NCj4gUGxlYXNlIHNoYXJlIHlvdXIgY29tbWVudHMg
-b24gdGhlIHB1bGwgcmVxdWVzdHMuDQo+DQo+IFRoYW5rcywNCj4gVmFyYWRhDQo+DQo+DQo+DQo+
-DQo+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQo+DQo+IFBMRUFTRSBOT1RFOiBU
-aGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2Ug
-aXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQo
-cykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUg
-aW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBoYXZl
-IHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNz
-ZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0
-cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlv
-biBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1h
-aWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBj
-b3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNv
-cGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCj4NCg0KDQoNCi0tDQpCZXN0
-IFJlZ2FyZHMsDQoNCldoZWF0DQo=
+On 07/10/2015 11:31 PM, kernel neophyte wrote:
+> Hi,
+> 
+> I am seeing the following error every time I am trying to manually
+> deploy ceph cluster and do a ceph -s :
+> 
+> mon/MonMap.h: In function 'void MonMap::calc_ranks()' thread
+> 7fb3ccfb6700 time 2015-07-10 15:27:56.004148
+> 
+> mon/MonMap.h: 47: FAILED assert(addr_name.count(p->second) == 0)
+
+Please send us a copy of your monmap and ceph.conf.
+
+You should also open a ticket on the tracker.
+
+Thanks!
+
+  -Joao
+
+> 
+>  ceph version 9.0.1-1445-g4a179ee (4a179eea527f7cbcf45eed4a63ad0fa8f744fc4a)
+> 
+>  1: (()+0x12716b) [0x7fb3d53ec16b]
+> 
+>  2: (()+0x1c0a6d) [0x7fb3d5485a6d]
+> 
+>  3: (()+0x1b7909) [0x7fb3d547c909]
+> 
+>  4: (()+0x1b8377) [0x7fb3d547d377]
+> 
+>  5: (()+0x2fbbe7) [0x7fb3d55c0be7]
+> 
+>  6: (()+0x310f1d) [0x7fb3d55d5f1d]
+> 
+>  7: (()+0x3112a0) [0x7fb3d55d62a0]
+> 
+>  8: (()+0x8182) [0x7fb3d9e05182]
+> 
+>  9: (clone()+0x6d) [0x7fb3d9b3247d]
+> 
+>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+> needed to interpret this.
+> 
+> terminate called after throwing an instance of 'ceph::FailedAssertion'
+> 
+> Aborted (core dumped)
+> 
+> Any help greatly appreciated :-)
+> 
+> -Neo
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
