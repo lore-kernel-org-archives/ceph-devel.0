@@ -1,130 +1,94 @@
-From: Alex Gorbachev <ag-VxEtxStO0vCD5NdjQRoWIEEOCMrvLtNR@public.gmane.org>
-Subject: Re: Block Storage Image Creation Process
-Date: Sat, 11 Jul 2015 23:35:25 -0400
-Message-ID: <CADb9450nrCzSQAAfvvcAOzC3-mgRsxetWdUtMP2y7u3jxMtLyw@mail.gmail.com>
-References: <CAJe5gkBvJUuQQ08PtBB_dEp5bXZZHyeVw-7zCyOfLFid8vsqGA@mail.gmail.com>
+From: Varada Kari <Varada.Kari@sandisk.com>
+Subject: RE: Patches for review on keyvaluestore
+Date: Sun, 12 Jul 2015 04:28:29 +0000
+Message-ID: <C226B0AB34511445928D9882AA519F601C44C048@SACMBXIP03.sdcorp.global.sandisk.com>
+References: <C226B0AB34511445928D9882AA519F601C4400B3@SACMBXIP03.sdcorp.global.sandisk.com>
+ <CACJqLyb7txzQP9BabAqi2-g_9DC4w7qWX6vr1XXqFOKsPvPNCg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1930426819=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAJe5gkBvJUuQQ08PtBB_dEp5bXZZHyeVw-7zCyOfLFid8vsqGA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Jiwan N <jiwan.ninglekhu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-by2on0092.outbound.protection.outlook.com ([207.46.100.92]:43136
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750812AbbGLE2f (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 12 Jul 2015 00:28:35 -0400
+In-Reply-To: <CACJqLyb7txzQP9BabAqi2-g_9DC4w7qWX6vr1XXqFOKsPvPNCg@mail.gmail.com>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Haomai Wang <haomaiwang@gmail.com>
+Cc: Sage Weil <sweil@redhat.com>, Samuel Just <sam.just@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
---===============1930426819==
-Content-Type: multipart/alternative; boundary=001a113f9048b9c055051aa54bac
-
---001a113f9048b9c055051aa54bac
-Content-Type: text/plain; charset=UTF-8
-
-Hi Jiwan,
-
-On Sat, Jul 11, 2015 at 4:44 PM, Jiwan N <jiwan.ninglekhu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-
-> Hi  Ceph-Users,
->
-> I am quite new to Ceph Storage (storage tech in general). I have been
-> investigating Ceph to understand the precise process clearly.
->
-> *Q: What actually happens When I create a block image of certain size?*
->
-> The ceph documentation from  http://docs.ceph.com/docs/v0.67.9/man/8/rbd/
-> says, the block devices (images)
-> are stripped over objects and stored in a RADOS object store.
->
-> This is the process of storage allocation. So, do objects that are broken
-> down allocate space (themselves) where they reside? Or are these objects
-> (state and behavior ) information kept (scattered) into the OSDs
-> (eventually into the disks)? Or does the monitor server keep these info and
-> allocate those positions (locations) in Object storage disks so that later
-> on some data can be put into those locations?
->
-> Any precise documentation or explanation will help.
->
-
-I found this description of the internal architecture most helpful:
-
-http://ceph.com/docs/master/architecture/
-
-Best regards,
-Alex
-
-
->
-> --
-> Sincerely,
-> Jiwan Ninglekhu
->
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->
->
-
---001a113f9048b9c055051aa54bac
-Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr">Hi Jiwan,<div><br></div><div class=3D"gmail_extra"><div cl=
-ass=3D"gmail_quote">On Sat, Jul 11, 2015 at 4:44 PM, Jiwan N <span dir=3D"l=
-tr">&lt;<a href=3D"mailto:jiwan.ninglekhu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org" target=3D"_blank">jiwa=
-n.ninglekhu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt;</span> wrote:<br><blockquote class=3D"gmail_q=
-uote" style=3D"margin:0px 0px 0px 0.8ex;border-left-width:1px;border-left-c=
-olor:rgb(204,204,204);border-left-style:solid;padding-left:1ex"><div dir=3D=
-"ltr">Hi =C2=A0Ceph-Users,<div><br></div><div>I am quite new to Ceph Storag=
-e (storage tech in general). I have been investigating Ceph to understand t=
-he precise process clearly.=C2=A0</div><div><br></div><div><b>Q: What actua=
-lly happens When I create a block image of certain size?</b></div><div><br>=
-</div><div>The ceph documentation from =C2=A0<a href=3D"http://docs.ceph.co=
-m/docs/v0.67.9/man/8/rbd/" target=3D"_blank">http://docs.ceph.com/docs/v0.6=
-7.9/man/8/rbd/</a> says, the block devices (images)</div><div><div>are stri=
-pped over objects and stored in a RADOS object store.</div><div><br></div><=
-div>This is the process of storage allocation. So, do objects that are brok=
-en down allocate space (themselves) where they reside? Or are these objects=
- (state and behavior ) information kept (scattered) into the OSDs (eventual=
-ly into the disks)? Or does the monitor server keep these info and allocate=
- those positions (locations) in Object storage disks so that later on some =
-data can be put into those locations?</div><div><br></div><div>Any precise =
-documentation or explanation will help.</div></div></div></blockquote><div>=
-<br></div><div>I found this description of the internal architecture most h=
-elpful:</div><div><br></div><div><a href=3D"http://ceph.com/docs/master/arc=
-hitecture/">http://ceph.com/docs/master/architecture/</a><br></div><div><br=
-></div><div>Best regards,</div><div>Alex</div><div>=C2=A0</div><blockquote =
-class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-left-width:1=
-px;border-left-color:rgb(204,204,204);border-left-style:solid;padding-left:=
-1ex"><div dir=3D"ltr"><div><span class=3D""><font color=3D"#888888"><div><b=
-r></div>-- <br><div>Sincerely,<div>Jiwan Ninglekhu</div></div>
-</font></span></div></div>
-<br>_______________________________________________<br>
-ceph-users mailing list<br>
-<a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a><=
-br>
-<a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" rel=3D"n=
-oreferrer" target=3D"_blank">http://lists.ceph.com/listinfo.cgi/ceph-users-=
-ceph.com</a><br>
-<br></blockquote></div><br></div></div>
-
---001a113f9048b9c055051aa54bac--
-
---===============1930426819==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============1930426819==--
+U3VyZS4gV2lsbCBicmVhayB0aGVtIGludG8gbXVsdGlwbGUgcGF0Y2hlcyBmb3IgZWFzeSByZXZp
+ZXcgYW5kIG1lcmdlLg0KDQpWYXJhZGENCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZy
+b206IEhhb21haSBXYW5nIFttYWlsdG86aGFvbWFpd2FuZ0BnbWFpbC5jb21dIA0KU2VudDogRnJp
+ZGF5LCBKdWx5IDEwLCAyMDE1IDE6NTcgUE0NClRvOiBWYXJhZGEgS2FyaQ0KQ2M6IFNhZ2UgV2Vp
+bDsgU2FtdWVsIEp1c3Q7IGNlcGgtZGV2ZWwNClN1YmplY3Q6IFJlOiBQYXRjaGVzIGZvciByZXZp
+ZXcgb24ga2V5dmFsdWVzdG9yZQ0KDQpJIHN1Z2dlc3Qgd2UgY291bGQgc3BsaXQgdGhpcyBQUiBp
+bnRvIHBsdWdpbmRiIGltcGwgYW5kIGNlcGgtZGlzayxpbml0LXNjcmlwdCB0aGluZ3MuIFNvIEkg
+dGhpbmsgaXQgd2lsbCBiZSBtb3JlIGVhc2llciB0byBiZSBtZXJnZSByZWFkeS4NCg0KT24gVGh1
+LCBKdWwgOSwgMjAxNSBhdCA0OjMxIFBNLCBWYXJhZGEgS2FyaSA8VmFyYWRhLkthcmlAc2FuZGlz
+ay5jb20+IHdyb3RlOg0KPiBIaSBTYWdlL1NhbS9IYW9tYWksDQo+DQo+IFNlbnQgcHVsbCByZXF1
+ZXN0cyBmb3IgdHdvIGVuaGFuY2VtZW50IGZvciBrZXkgdmFsdWUgc3RvcmUuIENhbiB5b3UgcGxl
+YXNlIHJldmlldyB0aGUgY2hhbmdlcz8NCj4NCj4gaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2Vw
+aC9wdWxsLzUxMzYNCj4NCj4gQ29udGFpbnMgY2hhbmdlcyBmb3Igc2hvcnQgY2lyY3VpdGluZyBv
+cF93cSBhbmQgb3NyIGluIGtleSB2YWx1ZSBzdG9yZS4gV2UgaGF2ZSBvYnNlcnZlZCBnb29kIHBl
+cmZvcm1hbmNlIGdhaW5zIHdpdGggdGhlIGFib3ZlIHB1bGwgcmVxdWVzdC4gTm90IHN1cmUgaWYg
+aXQgYnJlYWtzIGFueSBhc3N1bXB0aW9ucyBvciBkZXNpZ24gY29uc3RyYWludHMuIE5lZWQgeW91
+ciBjb21tZW50cyBvbiB0aGUgYXBwcm9hY2guDQo+DQo+IGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBo
+L2NlcGgvcHVsbC81MTY5DQo+DQo+IENvbnRhaW5zIGNoYW5nZXMgZm9yIGFkZGluZyBhIGdlbmVy
+aWMgZnJhbWV3b3JrIHRvIGFkZCBhbnkga2V5dmFsdWVkYiBhcyBhIGJhY2tlbmQuICBUaGVyZSBh
+cmUgY29kZSBtYWRlIGZvciBpbml0aWFsIHByb3Bvc2FsIG9uIHRoZSBpbmZlcm5hbGlzIGJsdWVw
+cmludC4gT3RoZXIgZW5oYW5jZW1lbnQgcHJvcG9zZWQgYXJlIGJlaW5nIHdvcmtlZCBvbiBhcyBs
+b2FkYWJsZSBvYmplY3Qgc3RvcmUgdXNpbmcgYSBmYWN0b3J5IGFwcHJvYWNoLg0KPg0KPiBHaXN0
+IG9mIHRoZSBpbXBsZW1lbnRhdGlvbiBzZW50IGZvciByZXZpZXc6DQo+DQo+IDEuIEEgbmV3IGNs
+YXNzIGlzIGRlcml2ZWQgZnJvbSBLZXlWYWx1ZURCIChEZXJpdmVkIGZyb20gT2JqZWN0U3RvcmUp
+IGNhbGxlZCBQbHVnZ2FibGVEQlN0b3JlLCB3aGljaCBob25vcnMgdGhlIHNlbWFudGljcyBvZiBL
+ZXl2YWx1ZVN0b3JlIGFuZCBLZXlWYWx1ZURCLiBUaGlzIGNsYXNzIGFjdHMgYXMgbWVkaWF0b3Ig
+YmV0d2VlbiBDRVBIIGFuZCBsb2FkYWJsZSBzaGltIChhIHNoYXJlZCBsaWJyYXJ5KS4gIFRoaXMg
+Y2xhc3MgdHJhbnNmb3JtcyB0aGUgY2VwaCByZWxhdGVkIGJ1ZmZlcmxpc3QgZXRjLi4uIHRvIGNv
+bnN0IGNoYXIgcG9pbnRlcnMgZm9yIHRoZSBzaGltIHRvIHVuZGVyc3RhbmQuDQo+IDIuIFNoaW0g
+bGF5ZXIgaXMgYXNzdW1lZCB0byBiZSBhIHNoYXJlZCBsaWJyYXJ5Lg0KPiAzLiBQbHVnZ2FibGVE
+QlN0b3JlLCBsb2FkcyAoZGxvcGVuKSB0aGUga2V5IHZhbHVlIGRhdGFiYXNlIHdyYXBwZXIvc2hp
+bSBuZWVkZWQgZm9yIENlcGggaW50ZWdyYXRpb24uICBUaGUgbG9hZGFibGUgc2hpbSBsaWJyYXJ5
+IGxvY2F0aW9uIGlzIHNwZWNpZmllZCBpbiBjZXBoLmNvbmYuIE5vdCBhZGRlZCBhbnkgY2hlY2tz
+IHRvIHZhbGlkYXRlIHRoZSBzYW5pdHkgb3IgY29tcGF0aWJpbGl0eSBvZiBzaGFyZWQgb2JqZWN0
+IGFzIG9mIG5vdy4gV2UgY2FuIGltcG9zZSBjZXJ0YWluIGNoZWNrcyB0byBiZSBob25vcmVkIGJ5
+IHRoZSBzaGltIGxheWVyIHRvIGJlIGNvbXBhdGlibGUgd2l0aCB0aGUgY2VwaCB2ZXJzaW9uLg0K
+PiA0LiBJbnRlcmZhY2VzIHRoYXQgbmVlZHMgdG8gYmUgaW1wbGVtZW50ZWQgaW4gc2hpbSwgYXJl
+IGFkZGVkIGluIGEgbmV3IGhlYWRlciBjYWxsZWQgUGx1Z2dhYmxlREJJbnRlcmZhY2VzLmguICBU
+aGlzIGhlYWRlciBjb250YWlucyB0aGUgc2lnbmF0dXJlcyBmb3IgdGhlIG5lY2Vzc2FyeSBpbnRl
+cmZhY2VzIGxpa2UgaW5pdCgpLCBjbG9zZSgpLCBzdWJtaXRfdHJhbnNhY3Rpb24oKSwgZ2V0KCkg
+YW5kIGdldF9pdGVyYXRvcigpLiBQbHVnZ2FibGVEQlN0b3JlIGNhY2hlcyB0aGVzZSBoYW5kbGVz
+IGluIGEgdGFibGUgZHVyaW5nIHRoZSBpbml0aWFsaXphdGlvbiB0aW1lIG9mIHRoZSBiYWNrZW5k
+IGRiLg0KPiA1LiBTaW1pbGFybHkgZm9yIEl0ZXJhdG9yIGZ1bmN0aW9uYWxpdHksIFBsdWdnYWJs
+ZURCSXRlcmF0b3IuaCwgY29udGFpbnMgdGhlIGZ1bmN0aW9uYWxpdHkgdG8gYmUgaW1wbGVtZW50
+ZWQgYnkgdGhlIHNoaW0gbGF5ZXIuDQo+IDYuIGNlcGgtZGlzayBpcyBtb2RpZmllZCB0byBtYWtl
+IHR3byBwYXJ0aXRpb25zIG9mIHRoZSBvc2QgZGlzayBnaXZlbiwgb25lIGZvciBvc2QgbWV0YWRh
+dGEgYW5kIG90aGVyIGZvciB0aGUgcGx1Z2dhYmxlIERCLCBzaW1pbGFyIHRvIGV4aXN0aW5nIGZ1
+bmN0aW9uYWxpdHkgbGlrZSBqb3VybmFsIGFuZCBvc2QgZGF0YSBwYXJ0aXRpb24uIFR3byBwYXJ0
+aXRpb25zIGFyZSBjcmVhdGVkIG9ubHkgd2hlbiBQbHVnZ2FibGVEQnN0b3JlIGlzIHNlbGVjdGVk
+IGFzIGJhY2tlZCBmb3IgT1NELiAgREIncyBjYW4gd29yayBvZmYgYSByYXcgcGFydGl0aW9uIGFz
+IHdlbGwsIGhhdmluZyBhIHBhcnRpdGlvbiBjYW4gZW5hYmxlIHRvIHRoZW0gdXNlIGl0LiBNYXkg
+YmUgd2UgY2FuIGFkZCBhZGRpdGlvbmFsIHBhcmFtZXRlcnMgb3IgY29uZiBvcHRpb25zIHRvIGhh
+dmUgYSBmaWxlIHN5c3RlbSBhbHNvIG9uIHRoZSBuZXdseSBjcmVhdGVkIHBhcnRpdGlvbiwgd2hp
+Y2ggY2FuIGJlIGltcGxlbWVudGVkIGJ5IGNlcGgtZGlzay4NCj4gNy4gUGFydGl0aW9uIGluZm9y
+bWF0aW9uIGFuZCBvdGhlciBpbmZvcm1hdGlvbiBuZWVkZWQgbGlrZSBvc2QgaWQgZXRjLi4uIGFy
+ZSBwYXNzZWQgdG8gc2hpbSBsYXllciBhdCB0aGUgdGltZSBvZiBpbml0aWFsaXppbmcgdGhlIHN0
+b3JlLg0KPiA4LiBBZGRpdGlvbmFsIHNjcmlwdCBtb2RpZmljYXRpb24gaXMgZ2V0IGNvcnJlY3Qg
+c3RhdHMgZnJvbSB0aGUgYmFja2VuZC4NCj4NCj4gUGxlYXNlIHNoYXJlIHlvdXIgY29tbWVudHMg
+b24gdGhlIHB1bGwgcmVxdWVzdHMuDQo+DQo+IFRoYW5rcywNCj4gVmFyYWRhDQo+DQo+DQo+DQo+
+DQo+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQo+DQo+IFBMRUFTRSBOT1RFOiBU
+aGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2Ug
+aXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQo
+cykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUg
+aW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBoYXZl
+IHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNz
+ZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0
+cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlv
+biBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1h
+aWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBj
+b3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNv
+cGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCj4NCg0KDQoNCi0tDQpCZXN0
+IFJlZ2FyZHMsDQoNCldoZWF0DQo=
