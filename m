@@ -1,104 +1,42 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: Strange issue with CRUSH
-Date: Mon, 13 Jul 2015 10:20:00 -0500
-Message-ID: <55A3D720.7070006@redhat.com>
-References: <CAOWwpMJv4N0BvdEy2Y-WpDqqZ6R=f_5_+2j1dWeVe-Xk1fg1bQ@mail.gmail.com> <alpine.DEB.2.00.1507091501570.20547@cobra.newdream.net> <1736665041.43352077.1436482991363.JavaMail.zimbra@redhat.com>
+From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Subject: Re: head object read with range get on RGW
+Date: Mon, 13 Jul 2015 11:42:41 -0400 (EDT)
+Message-ID: <196456041.6274298.1436802161081.JavaMail.zimbra@redhat.com>
+References: <06681238D8946F44A60AA400760A1CBF0200C12F@SHSMSX104.ccr.corp.intel.com> <06681238D8946F44A60AA400760A1CBF0200C61C@SHSMSX104.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:42846 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751115AbbGMPUD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 13 Jul 2015 11:20:03 -0400
-In-Reply-To: <1736665041.43352077.1436482991363.JavaMail.zimbra@redhat.com>
+Received: from mx5-phx2.redhat.com ([209.132.183.37]:59552 "EHLO
+	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750787AbbGMPmm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Jul 2015 11:42:42 -0400
+In-Reply-To: <06681238D8946F44A60AA400760A1CBF0200C61C@SHSMSX104.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sjust@redhat.com>, Sage Weil <sweil@redhat.com>
-Cc: Gleb Borisov <borisov.gleb@gmail.com>, ceph-devel@vger.kernel.org
+To: Yuan Zhou <yuan.zhou@intel.com>
+Cc: Ceph Devel <ceph-devel@vger.kernel.org>
 
-FWIW,
 
-It would be very interesting to see the output of:
 
-https://github.com/ceph/cbt/blob/master/tools/readpgdump.py
+----- Original Message -----
+> From: "Yuan Zhou" <yuan.zhou@intel.com>
+> To: "Ceph Devel" <ceph-devel@vger.kernel.org>, "Yehuda Sadeh-Weinraub" <yehuda@redhat.com>
+> Sent: Monday, July 13, 2015 4:46:20 AM
+> Subject: head object read with range get on RGW
+> 
+> Hi Yehuda,
+> 
+> I trace the code and the read op seems happen at RGWRados::raw_obj_stat()?
+> This looks like some unnecessary if the range does not fall on to the head
+> object.
+> I tried to set the rgw_max_chunk_size = 0 and it's not working on the PUT
+> side.
+> Do you have any ideas on how to avoid this read?
+> 
 
-If you see something that looks anomalous.  I'd like to make sure that 
-I'm detecting issues like this.
+There's a call to RGWRados::set_prefetch_data() in RGWGetObj::verify_permission(), probably need to limit it there.
 
-Mark
+I also think you could come up with a system that will remove the need to completely read the head object's metadata, so that you won't need to access the remote osd if accessing the tail. The idea is from your proxy to send the object's metadata with the GET request in a special header, and then update the internal rgw structure that caches this data. Will require some special tweaking but might be worth it.
 
-On 07/09/2015 06:03 PM, Samuel Just wrote:
-> I've seen some odd teuthology in the last week or two which seems to be anomalous rjenkins hash behavior as well.
->
-> http://tracker.ceph.com/issues/12231
-> -Sam
->
-> ----- Original Message -----
-> From: "Sage Weil" <sweil@redhat.com>
-> To: "Gleb Borisov" <borisov.gleb@gmail.com>
-> Cc: ceph-devel@vger.kernel.org
-> Sent: Thursday, July 9, 2015 3:06:00 PM
-> Subject: Re: Strange issue with CRUSH
->
-> On Fri, 10 Jul 2015, Gleb Borisov wrote:
->> Hi Sage,
->>
->> Sorry for mailing you in person, I realize that you're quite busy at redhat,
->> but I wanted you have a look on an issue with CRUSH map.
->
-> No problem. I hope you don't mind I've added ceph-devel to the cc list.
->
->> I've described very first insights here:
->> http://lists.ceph.com/pipermail/ceph-users-ceph.com/2015-July/002897.html
->>
->> We are continue our research and found that distribution of PG count by OSD
->> is very strange and after digging into CRUSH source code found rjenkins1
->> hash function.
->>
->> After some testing we realized that rjenkins1's value distribution is
->> exponential, and this can cause our disbalance.
->
-> Any issue with rjenkins1's hash function is very interesting and
-> concerning.  Can you describe your analysis and what you mean by the
-> distribution being exponential?
->
->> What do you think about adding additional hashing algorithm to CRUSH? It
->> seems that it could improve distribution.
->
-> I am definitely open to adding new hash functions, especially if the
-> current ones are flawed.  The current hash was created by making ad hoc
-> combinations of rjenkins' mix function with various numbers of
-> arguments--hardly scientific or methodical.  We did an analysis a couple
-> years back and found that it effectively modeled a uniform distribution,
-> but if we missed something or were wrong we should definitely correct it!
->
-> In any case, the important step is to quantify what is wrong with the
-> current hash so that we can ensure any new one is not flawed in the same
-> way.
->
-> Thanks-
-> sage
->
->
->> We have also tried to generate some syntetic crushmaps (another bucket
->> types, more OSDs per host, more/less hosts by rack, different cound of
->> racks, linear osd ids, random osd ids, etc), but didn't found any
->> combination with better distribution of PG across OSD.
->>
->> Thanks and one more sorry for bothering you in person.
->> --
->> Best regards,
->> Gleb M Borisov
->>
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+Yehuda
