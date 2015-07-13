@@ -1,53 +1,27 @@
-From: Gregory Farnum <greg@gregs42.com>
-Subject: Re: osd suicide timeout
-Date: Mon, 13 Jul 2015 11:07:04 +0100
-Message-ID: <CAC6JEv9GJFAyQBXU398Na=RfHROPoakbzcM6sFUCh_Cg6bE7Zw@mail.gmail.com>
-References: <BC97738F8E7C8742BABED7F06FB9DF91669B3BFF@SATLEXDAG01.amd.com>
+From: "Zhou, Yuan" <yuan.zhou@intel.com>
+Subject: head object read with range get on RGW
+Date: Mon, 13 Jul 2015 11:46:20 +0000
+Message-ID: <06681238D8946F44A60AA400760A1CBF0200C61C@SHSMSX104.ccr.corp.intel.com>
+References: <06681238D8946F44A60AA400760A1CBF0200C12F@SHSMSX104.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f171.google.com ([209.85.213.171]:37531 "EHLO
-	mail-ig0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750777AbbGMKHG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Jul 2015 06:07:06 -0400
-Received: by igpy18 with SMTP id y18so52680525igp.0
-        for <ceph-devel@vger.kernel.org>; Mon, 13 Jul 2015 03:07:05 -0700 (PDT)
-Received: from mail-ie0-f169.google.com (mail-ie0-f169.google.com. [209.85.223.169])
-        by smtp.gmail.com with ESMTPSA id j20sm5393675igt.5.2015.07.13.03.07.05
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 13 Jul 2015 03:07:05 -0700 (PDT)
-Received: by ietj16 with SMTP id j16so58428675iet.0
-        for <ceph-devel@vger.kernel.org>; Mon, 13 Jul 2015 03:07:04 -0700 (PDT)
-In-Reply-To: <BC97738F8E7C8742BABED7F06FB9DF91669B3BFF@SATLEXDAG01.amd.com>
+Received: from mga02.intel.com ([134.134.136.20]:46731 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750970AbbGMLqY convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Jul 2015 07:46:24 -0400
+In-Reply-To: <06681238D8946F44A60AA400760A1CBF0200C12F@SHSMSX104.ccr.corp.intel.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Deneau, Tom" <tom.deneau@amd.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: 'Ceph Devel' <ceph-devel@vger.kernel.org>, 'Yehuda Sadeh-Weinraub' <yehuda@redhat.com>
 
-On Fri, Jul 10, 2015 at 10:45 PM, Deneau, Tom <tom.deneau@amd.com> wrote:
-> I have an osd log file from an osd that hit a suicide timeout (with the previous 10000 events logged).
-> (On this node I have also seen this suicide timeout happen once before and also a sync_entry timeout.
->
-> I can see that 6 minutes or so before that osd died, other osds on the same node were logging
-> messages such as
->     heartbeat_check: no reply from osd.8
-> so it appears that osd8 stopped responding quite some time before it died.
+Hi Yehuda,
 
-It does this deliberately when its disk threads look like they might be stuck.
+I trace the code and the read op seems happen at RGWRados::raw_obj_stat()? This looks like some unnecessary if the range does not fall on to the head object. 
+I tried to set the rgw_max_chunk_size = 0 and it's not working on the PUT side.
+Do you have any ideas on how to avoid this read? 
 
->
-> I'm wondering if there is enough information in the osd8 log file to deduce why osd 8 stopped responding?
-> I don't know enough to figure it out myself.
->
-> Is there any expert who would be willing to take a look at the log file?
+Thanks, -yuan
 
-The logs will have a backtrace in them; if you can include that and
-the last hundred lines or so prior in a pastebin that you email the
-list with several people can give you a pretty good idea of what's
-going on.
-
-In general though, it's just going to be that the disk can't keep up
-with the load being applied to it. That could be because it's failing,
-or because you're pushing too much work on to it in some fashion.
--Greg
