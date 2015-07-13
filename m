@@ -1,132 +1,216 @@
-From: "Deneau, Tom" <tom.deneau@amd.com>
-Subject: RE: osd suicide timeout
-Date: Mon, 13 Jul 2015 16:04:36 +0000
-Message-ID: <BC97738F8E7C8742BABED7F06FB9DF91669B4DDC@SATLEXDAG01.amd.com>
-References: <BC97738F8E7C8742BABED7F06FB9DF91669B3BFF@SATLEXDAG01.amd.com>
- <CAC6JEv9GJFAyQBXU398Na=RfHROPoakbzcM6sFUCh_Cg6bE7Zw@mail.gmail.com>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: Re: Strange issue with CRUSH
+Date: Mon, 13 Jul 2015 11:28:07 -0500
+Message-ID: <55A3E717.5080604@redhat.com>
+References: <CAOWwpMJv4N0BvdEy2Y-WpDqqZ6R=f_5_+2j1dWeVe-Xk1fg1bQ@mail.gmail.com>	<alpine.DEB.2.00.1507091501570.20547@cobra.newdream.net>	<1736665041.43352077.1436482991363.JavaMail.zimbra@redhat.com>	<55A3D720.7070006@redhat.com>	<CAOWwpMKN3YtACUj181K2Wqg539EibuUfh5UZPceoYr2rBLxOEQ@mail.gmail.com> <CAOWwpMKeQyx+PQdNMqGvXAtamg4mMGSZrEw96X9D5KWGnaQa9A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1bon0145.outbound.protection.outlook.com ([157.56.111.145]:43456
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751595AbbGMQEm (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 13 Jul 2015 12:04:42 -0400
-In-Reply-To: <CAC6JEv9GJFAyQBXU398Na=RfHROPoakbzcM6sFUCh_Cg6bE7Zw@mail.gmail.com>
-Content-Language: en-US
+Received: from mx1.redhat.com ([209.132.183.28]:56979 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751140AbbGMQ2K (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 13 Jul 2015 12:28:10 -0400
+In-Reply-To: <CAOWwpMKeQyx+PQdNMqGvXAtamg4mMGSZrEw96X9D5KWGnaQa9A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@gregs42.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Gleb Borisov <borisov.gleb@gmail.com>
+Cc: Samuel Just <sjust@redhat.com>, Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
 
-R3JlZyAtLQ0KDQpUaGFua3MuICBJIHB1dCB0aGUgb3NkLmxvZyBmaWxlIGF0DQoNCmh0dHBzOi8v
-ZHJpdmUuZ29vZ2xlLmNvbS9maWxlL2QvMEJfcmZ3V2g0MGtQd1FqWjNPWGRqTFVaTlJWVS92aWV3
-P3VzcD1zaGFyaW5nDQoNCkkgbm90aWNlZCB0aGUgZm9sbG93aW5nIGZyb20gam91cm5hbGN0bCBv
-dXRwdXQgYXJvdW5kIHRoYXQgdGltZSwgc28gb3RoZXIgbm9kZXMgd2VyZSBjb21wbGFpbmluZyB0
-aGV5IGNvdWxkIG5vdCByZWFjaCBvc2QuOC4NCg0KSnVsIDA5IDE1OjUzOjA0IHNlYXR0bGUtMDQt
-YXVzaXN2IGJhc2hbODQ4Nl06IDIwMTUtMDctMDkgMTU6NTM6MDMuOTA1Mzg2IDNmZmEwZDllZmQw
-IC0xIG9zZC45IDI0ODcgaGVhcnRiZWF0X2NoZWNrOiBubyByZXBseSBmcm9tIG9zZC44IHNpbmNl
-IGJhY2sgMjAxNS0wNy0wOSAxNTo1Mjo0My4yNTY1ODEgZnJvbnQgMjAxNS0wNy0wOSAxNTo1Mjo0
-My4yNTY1ODEgKGN1dG9mZiAyMDE1LTA3LTA5IDE1OjUyOjQzLjkwNTM4NCkNCkp1bCAwOSAxNTo1
-MzowNiBzZWF0dGxlLTA0LWF1c2lzdiBiYXNoWzEwNjBdOiAyMDE1LTA3LTA5IDE1OjUzOjA2Ljc4
-NDA2OSAzZmY5MTZmZWZkMCAtMSBvc2QuNyAyNDg3IGhlYXJ0YmVhdF9jaGVjazogbm8gcmVwbHkg
-ZnJvbSBvc2QuOCBzaW5jZSBiYWNrIDIwMTUtMDctMDkgMTU6NTI6NDYuNDc0MjczIGZyb250IDIw
-MTUtMDctMDkgMTU6NTI6NDYuNDc0MjczIChjdXRvZmYgMjAxNS0wNy0wOSAxNTo1Mjo0Ni43ODQw
-NjYpDQoNCmFuZCBoZXJlIGlzIHNvbWUgc2FyIGRhdGEgZm9yIHRoZSBkaXNrIHRoYXQgb3NkLjgg
-d2FzIGNvbnRyb2xsaW5nIChzZGUxPWpvdXJuYWwgcGFydGl0aW9uLCBzZGUyPWRhdGEgcGFydGl0
-aW9uKQ0KDQowMzo0MDowMiBQTSAgICAgICBERVYgICAgICAgdHBzICByZF9zZWMvcyAgd3Jfc2Vj
-L3MgIGF2Z3JxLXN6ICBhdmdxdS1zeiAgICAgYXdhaXQgICAgIHN2Y3RtICAgICAldXRpbA0KMDM6
-NTA6MTcgUE0gICAgICBzZGUxICAgICAgOS42NyAgICAgIDAuMDAgIDE5MDQ2LjQwICAgMTk3MC4z
-MiAgICAgIDAuMzUgICAgIDM1Ljg2ICAgICAzMC42MiAgICAgMjkuNjANCjAzOjUwOjE3IFBNICAg
-ICAgc2RlMiAgICAgNjAuNDcgICAxNTI0LjI3ICAxNDU5Ny42NyAgICAyNjYuNjMgICAgIDI0LjQ1
-ICAgIDQwNC4zMCAgICAgIDguNTQgICAgIDUxLjY3DQowMzo1MDozMiBQTSAgICAgIHNkZTEgICAg
-IDEyLjEzICAgICAgMC4wMCAgMTgxNTguOTMgICAxNDk2LjYyICAgICAgMC4yNSAgICAgMjAuNjYg
-ICAgIDE3LjU4ICAgICAyMS4zMw0KMDM6NTA6MzIgUE0gICAgICBzZGUyICAgICAyOC4wMCAgIDE1
-NTAuOTMgIDE3OTU4LjMzICAgIDY5Ni43NiAgICAgMTAuNTQgICAgMzc2LjUwICAgICAxMy41MiAg
-ICAgMzcuODcNCjAzOjUwOjQ3IFBNICAgICAgc2RlMSAgICAgMTIuNzMgICAgICAwLjAwICAyNTQ0
-Ni40MCAgIDE5OTguNDEgICAgICAwLjMxICAgICAyNC4xOSAgICAgMjIuMzAgICAgIDI4LjQwDQow
-Mzo1MDo0NyBQTSAgICAgIHNkZTIgICAgIDUxLjYwICAgIDMzOC42NyAgMTgwOTEuNzMgICAgMzU3
-LjE4ICAgICAxMy4wNSAgICAyNTIuOTEgICAgICA4LjAyICAgICA0MS40MA0KMDM6NTE6MDIgUE0g
-ICAgICBzZGUxICAgICAxMi4yNyAgICAgIDAuMDAgIDE4NzkwLjQwICAgMTUzMS44MyAgICAgIDAu
-MzEgICAgIDI1LjMzICAgICAxOC41MyAgICAgMjIuNzMNCjAzOjUxOjAyIFBNICAgICAgc2RlMiAg
-ICAgMzMuMTMgICAyNjM1LjIwICAxODAyNi42NyAgICA2MjMuNjAgICAgICA1LjAyICAgIDE1MS41
-NyAgICAgMTAuOTkgICAgIDM2LjQwDQowMzo1MToxNyBQTSAgICAgIHNkZTEgICAgIDEwLjEzICAg
-ICAgMC4wMCAgMTQ1NTcuODcgICAxNDM2LjYzICAgICAgMC4xNiAgICAgMTYuMTggICAgIDEyLjc2
-ICAgICAxMi45Mw0KMDM6NTE6MTcgUE0gICAgICBzZGUyICAgICA0Ni43MyAgIDExMDcuNzMgIDEy
-MDY3LjAwICAgIDI4MS45MSAgICAgIDguNTUgICAgMTgyLjg4ICAgICAgNS40NiAgICAgMjUuNTMN
-CjAzOjUxOjMyIFBNICAgICAgc2RlMSAgICAgMTEuOTMgICAgICAwLjAwICAxODU5NC4xMyAgIDE1
-NTguMTcgICAgICAwLjM1ICAgICAyOS4yNyAgICAgMTYuNDIgICAgIDE5LjYwDQowMzo1MTozMiBQ
-TSAgICAgIHNkZTIgICAgIDIyLjIwICAgIDU1NS4yMCAgMTg4MzQuMzMgICAgODczLjQwICAgICAg
-NC4yNCAgICAxOTEuMDggICAgIDEzLjUxICAgICAzMC4wMA0KMDM6NTE6NDcgUE0gICAgICBzZGUx
-ICAgICAxOC4wMCAgICAgIDAuMDAgIDEzOTI2LjQwICAgIDc3My42OSAgICAgIDAuMTkgICAgIDEw
-Ljc4ICAgICAxMC4wNyAgICAgMTguMTMNCjAzOjUxOjQ3IFBNICAgICAgc2RlMiAgICAgNDcuMjcg
-ICAxNjUyLjgwICAxMDc3NS41MyAgICAyNjIuOTQgICAgIDEyLjI0ICAgIDI1OS4wMSAgICAgIDYu
-NjYgICAgIDMxLjQ3DQowMzo1MjowMiBQTSAgICAgIHNkZTEgICAgIDIxLjYwICAgICAgMC4wMCAg
-MTA4NDUuODcgICAgNTAyLjEyICAgICAgMC4yNCAgICAgMTEuMDggICAgICA5Ljc1ICAgICAyMS4w
-Nw0KMDM6NTI6MDIgUE0gICAgICBzZGUyICAgICAzNC4zMyAgIDE2NTIuODAgICA5MDg5LjEzICAg
-IDMxMi44NyAgICAgIDcuNDMgICAgMjE2LjQxICAgICAgOC40NSAgICAgMjkuMDANCjAzOjUyOjE3
-IFBNICAgICAgc2RlMSAgICAgMTkuODcgICAgICAwLjAwICAyMDE5OC40MCAgIDEwMTYuNzAgICAg
-ICAwLjMzICAgICAxNi44NSAgICAgMTMuNDYgICAgIDI2LjczDQowMzo1MjoxNyBQTSAgICAgIHNk
-ZTIgICAgIDM1LjYwICAgMjc1Mi41MyAgMTYzNTUuNTMgICAgNTM2Ljc0ICAgICAxMS45MCAgICAz
-MzMuMzMgICAgIDEwLjkwICAgICAzOC44MA0KMDM6NTI6MzIgUE0gICAgICBzZGUxICAgICAyMi41
-NCAgICAgIDAuMDAgICA4NDM0LjA0ICAgIDM3NC4xOCAgICAgIDAuMTUgICAgICA2LjY3ICAgICAg
-Ni4xNyAgICAgMTMuOTANCjAzOjUyOjMyIFBNICAgICAgc2RlMiAgICAgMzUuODQgICAyNzM4LjMw
-ICAgNDU4Ni4zMCAgICAyMDQuMzggICAgICAyLjAxICAgICAyOC4xMSAgICAgIDYuNTMgICAgIDIz
-LjQwDQowMzo1Mjo0NyBQTSAgICAgIHNkZTEgICAgICAwLjAwICAgICAgMC4wMCAgICAgIDAuMDAg
-ICAgICAwLjAwICAgICAgMC4wMCAgICAgIDAuMDAgICAgICAwLjAwICAgICAgMC4wMA0KMDM6NTI6
-NDcgUE0gICAgICBzZGUyICAgICAxMy4zNyAgICAgMzUuODMgICAxMTAxLjgwICAgICA4NS4wOSAg
-ICAgIDEuODcgICAgMjE4LjY1ICAgICAgNS43NSAgICAgIDcuNjkNCjAzOjUzOjAyIFBNICAgICAg
-c2RlMSAgICAgIDAuMDAgICAgICAwLjAwICAgICAgMC4wMCAgICAgIDAuMDAgICAgICAwLjAwICAg
-ICAgMC4wMCAgICAgIDAuMDAgICAgICAwLjAwDQowMzo1MzowMiBQTSAgICAgIHNkZTIgICAgICAw
-LjAwICAgICAgMC4wMCAgICAgIDAuMDAgICAgICAwLjAwICAgICAgMC4wMCAgICAgIDAuMDAgICAg
-ICAwLjAwICAgICAgMC4wMA0KMDM6NTM6MTcgUE0gICAgICBzZGUxICAgICAgMC4wMCAgICAgIDAu
-MDAgICAgICAwLjAwICAgICAgMC4wMCAgICAgIDAuMDAgICAgICAwLjAwICAgICAgMC4wMCAgICAg
-IDAuMDANCjAzOjUzOjE3IFBNICAgICAgc2RlMiAgICAgIDAuMTMgICAgICAwLjAwICAgICAgMC4y
-MCAgICAgIDEuNTAgICAgICAwLjAwICAgICAyMC4wMCAgICAgMjAuMDAgICAgICAwLjI3DQowMzo1
-MzozMiBQTSAgICAgIHNkZTEgICAgICAwLjAwICAgICAgMC4wMCAgICAgIDAuMDAgICAgICAwLjAw
-ICAgICAgMC4wMCAgICAgIDAuMDAgICAgICAwLjAwICAgICAgMC4wMA0KMDM6NTM6MzIgUE0gICAg
-ICBzZGUyICAgICAgMC4wMCAgICAgIDAuMDAgICAgICAwLjAwICAgICAgMC4wMCAgICAgIDAuMDAg
-ICAgICAwLjAwICAgICAgMC4wMCAgICAgIDAuMDANCjAzOjUzOjQ3IFBNICAgICAgc2RlMSAgICAg
-IDAuMDAgICAgICAwLjAwICAgICAgMC4wMCAgICAgIDAuMDAgICAgICAwLjAwICAgICAgMC4wMCAg
-ICAgIDAuMDAgICAgICAwLjAwDQowMzo1Mzo0NyBQTSAgICAgIHNkZTIgICAgICAwLjEzICAgICAg
-MC4wMCAgICAgIDAuMjAgICAgICAxLjUwICAgICAgMC4wMCAgICAgIDUuMDAgICAgICA1LjAwICAg
-ICAgMC4wNw0KMDM6NTQ6MDIgUE0gICAgICBzZGUxICAgICAgMC4wMCAgICAgIDAuMDAgICAgICAw
-LjAwICAgICAgMC4wMCAgICAgIDAuMDAgICAgICAwLjAwICAgICAgMC4wMCAgICAgIDAuMDANCjAz
-OjU0OjAyIFBNICAgICAgc2RlMiAgICAgIDAuMDAgICAgICAwLjAwICAgICAgMC4wMCAgICAgIDAu
-MDAgICAgICAwLjAwICAgICAgMC4wMCAgICAgIDAuMDAgICAgICAwLjAwDQowMzo1NDoxNyBQTSAg
-ICAgIHNkZTEgICAgICAwLjAwICAgICAgMC4wMCAgICAgIDAuMDAgICAgICAwLjAwICAgICAgMC4w
-MCAgICAgIDAuMDAgICAgICAwLjAwICAgICAgMC4wMA0KMDM6NTQ6MTcgUE0gICAgICBzZGUyICAg
-ICAgMC4wMCAgICAgIDAuMDAgICAgICAwLjAwICAgICAgMC4wMCAgICAgIDAuMDAgICAgICAwLjAw
-ICAgICAgMC4wMCAgICAgIDAuMDANCjAzOjU0OjMyIFBNICAgICAgc2RlMSAgICAgIDAuMDAgICAg
-ICAwLjAwICAgICAgMC4wMCAgICAgIDAuMDAgICAgICAwLjAwICAgICAgMC4wMCAgICAgIDAuMDAg
-ICAgICAwLjAwDQowMzo1NDozMiBQTSAgICAgIHNkZTIgICAgICAwLjAwICAgICAgMC4wMCAgICAg
-IDAuMDAgICAgICAwLjAwICAgICAgMC4wMCAgICAgIDAuMDAgICAgICAwLjAwICAgICAgMC4wMA0K
-DQotLSBUb20NCg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBHcmVnb3J5
-IEZhcm51bSBbbWFpbHRvOmdyZWdAZ3JlZ3M0Mi5jb21dDQo+IFNlbnQ6IE1vbmRheSwgSnVseSAx
-MywgMjAxNSA1OjA3IEFNDQo+IFRvOiBEZW5lYXUsIFRvbQ0KPiBDYzogY2VwaC1kZXZlbA0KPiBT
-dWJqZWN0OiBSZTogb3NkIHN1aWNpZGUgdGltZW91dA0KPiANCj4gT24gRnJpLCBKdWwgMTAsIDIw
-MTUgYXQgMTA6NDUgUE0sIERlbmVhdSwgVG9tIDx0b20uZGVuZWF1QGFtZC5jb20+IHdyb3RlOg0K
-PiA+IEkgaGF2ZSBhbiBvc2QgbG9nIGZpbGUgZnJvbSBhbiBvc2QgdGhhdCBoaXQgYSBzdWljaWRl
-IHRpbWVvdXQgKHdpdGggdGhlDQo+IHByZXZpb3VzIDEwMDAwIGV2ZW50cyBsb2dnZWQpLg0KPiA+
-IChPbiB0aGlzIG5vZGUgSSBoYXZlIGFsc28gc2VlbiB0aGlzIHN1aWNpZGUgdGltZW91dCBoYXBw
-ZW4gb25jZSBiZWZvcmUgYW5kDQo+IGFsc28gYSBzeW5jX2VudHJ5IHRpbWVvdXQuDQo+ID4NCj4g
-PiBJIGNhbiBzZWUgdGhhdCA2IG1pbnV0ZXMgb3Igc28gYmVmb3JlIHRoYXQgb3NkIGRpZWQsIG90
-aGVyIG9zZHMgb24gdGhlDQo+ID4gc2FtZSBub2RlIHdlcmUgbG9nZ2luZyBtZXNzYWdlcyBzdWNo
-IGFzDQo+ID4gICAgIGhlYXJ0YmVhdF9jaGVjazogbm8gcmVwbHkgZnJvbSBvc2QuOCBzbyBpdCBh
-cHBlYXJzIHRoYXQgb3NkOA0KPiA+IHN0b3BwZWQgcmVzcG9uZGluZyBxdWl0ZSBzb21lIHRpbWUg
-YmVmb3JlIGl0IGRpZWQuDQo+IA0KPiBJdCBkb2VzIHRoaXMgZGVsaWJlcmF0ZWx5IHdoZW4gaXRz
-IGRpc2sgdGhyZWFkcyBsb29rIGxpa2UgdGhleSBtaWdodCBiZQ0KPiBzdHVjay4NCj4gDQo+ID4N
-Cj4gPiBJJ20gd29uZGVyaW5nIGlmIHRoZXJlIGlzIGVub3VnaCBpbmZvcm1hdGlvbiBpbiB0aGUg
-b3NkOCBsb2cgZmlsZSB0byBkZWR1Y2UNCj4gd2h5IG9zZCA4IHN0b3BwZWQgcmVzcG9uZGluZz8N
-Cj4gPiBJIGRvbid0IGtub3cgZW5vdWdoIHRvIGZpZ3VyZSBpdCBvdXQgbXlzZWxmLg0KPiA+DQo+
-ID4gSXMgdGhlcmUgYW55IGV4cGVydCB3aG8gd291bGQgYmUgd2lsbGluZyB0byB0YWtlIGEgbG9v
-ayBhdCB0aGUgbG9nIGZpbGU/DQo+IA0KPiBUaGUgbG9ncyB3aWxsIGhhdmUgYSBiYWNrdHJhY2Ug
-aW4gdGhlbTsgaWYgeW91IGNhbiBpbmNsdWRlIHRoYXQgYW5kIHRoZSBsYXN0DQo+IGh1bmRyZWQg
-bGluZXMgb3Igc28gcHJpb3IgaW4gYSBwYXN0ZWJpbiB0aGF0IHlvdSBlbWFpbCB0aGUgbGlzdCB3
-aXRoIHNldmVyYWwNCj4gcGVvcGxlIGNhbiBnaXZlIHlvdSBhIHByZXR0eSBnb29kIGlkZWEgb2Yg
-d2hhdCdzIGdvaW5nIG9uLg0KPiANCj4gSW4gZ2VuZXJhbCB0aG91Z2gsIGl0J3MganVzdCBnb2lu
-ZyB0byBiZSB0aGF0IHRoZSBkaXNrIGNhbid0IGtlZXAgdXAgd2l0aCB0aGUNCj4gbG9hZCBiZWlu
-ZyBhcHBsaWVkIHRvIGl0LiBUaGF0IGNvdWxkIGJlIGJlY2F1c2UgaXQncyBmYWlsaW5nLCBvciBi
-ZWNhdXNlDQo+IHlvdSdyZSBwdXNoaW5nIHRvbyBtdWNoIHdvcmsgb24gdG8gaXQgaW4gc29tZSBm
-YXNoaW9uLg0KPiAtR3JlZw0K
+Looking at the output, it looks like even pool 19 has a pretty small 
+number of PGs for that many OSDs:
+
++----------------------------------------------------------------------------+
+| Pool ID: 19 |
++----------------------------------------------------------------------------+
+| Participating OSDs: 1056 |
+| Participating PGs: 16404 |
++----------------------------------------------------------------------------+ 
+
+
+And as you say, the distribution looks a little better than a totally 
+random distribution:
+
+| OSDs in All Roles (Up) |
+| Expected PGs Per OSD: Min: 20, Max: 71, Mean: 46.6, Std Dev: 12.7 |
+| Actual PGs Per OSD: Min: 24, Max: 69, Mean: 46.6, Std Dev: 6.9 |
+| 5 Most Subscribed OSDs: 791(69), 977(69), 211(68), 536(67), 37(65) |
+| 5 Least Subscribed OSDs: 1074(24), 1042(28), 215(29), 139(30), 205(30) |
+
+But there's still a lot of variance between the most and least 
+subscribed OSDs.  It's worse if you look at OSDs acting in a primary 
+role (ie servicing reads):
+
+| OSDs in Primary Role (Up) |
+| Expected PGs Per OSD: Min: 0, Max: 29, Mean: 15.5, Std Dev: 7.4 |
+| Actual PGs Per OSD: Min: 5, Max: 32, Mean: 15.5, Std Dev: 3.8 |
+| 5 Most Subscribed OSDs: 606(32), 211(30), 1065(27), 956(26), 228(25) |
+| 5 Least Subscribed OSDs: 317(5), 550(5), 215(6), 473(6), 19(7) |
+
+It may be worth increasing the PG count for that pool at least!
+
+Mark
+
+
+On 07/13/2015 11:11 AM, Gleb Borisov wrote:
+> Hi,
+>
+> Forget about exponential distribution. It was kind of raving of a madman
+> :) seems that it's really uniform.
+>
+>
+> I run tool mentioned above and saved output to gist:
+> https://gist.github.com/anonymous/d228fe9340825f33310b
+>
+> We've one big pool for rgw (19) and several smaller pools (control pools
+> and few for testing) and also have two roots (default with 1056 osds and
+> ssd_default with 30 osds).
+>
+> It seems that our distribution is slightly better than expected in your
+> code.
+>
+> Thanks.
+>
+> On Mon, Jul 13, 2015 at 7:11 PM, Gleb Borisov <borisov.gleb@gmail.com
+> <mailto:borisov.gleb@gmail.com>> wrote:
+>  >
+>  > Hi,
+>  >
+>  > Forget about exponential distribution. It was kind of raving of a
+> madman :) seems that it's really uniform.
+>  >
+>  >
+>  > I run tool mentioned above and saved output to gist:
+> https://gist.github.com/anonymous/d228fe9340825f33310b
+>  >
+>  > We've one big pool for rgw (19) and several smaller pools (control
+> pools and few for testing) and also have two roots (default with 1056
+> osds and ssd_default with 30 osds).
+>  >
+>  > It seems that our distribution is slightly better than expected in
+> your code.
+>  >
+>  > Thanks.
+>  >
+>  > On Mon, Jul 13, 2015 at 6:20 PM, Mark Nelson <mnelson@redhat.com
+> <mailto:mnelson@redhat.com>> wrote:
+>  >>
+>  >> FWIW,
+>  >>
+>  >> It would be very interesting to see the output of:
+>  >>
+>  >> https://github.com/ceph/cbt/blob/master/tools/readpgdump.py
+>  >>
+>  >> If you see something that looks anomalous.  I'd like to make sure
+> that I'm detecting issues like this.
+>  >>
+>  >> Mark
+>  >>
+>  >>
+>  >> On 07/09/2015 06:03 PM, Samuel Just wrote:
+>  >>>
+>  >>> I've seen some odd teuthology in the last week or two which seems
+> to be anomalous rjenkins hash behavior as well.
+>  >>>
+>  >>> http://tracker.ceph.com/issues/12231
+>  >>> -Sam
+>  >>>
+>  >>> ----- Original Message -----
+>  >>> From: "Sage Weil" <sweil@redhat.com <mailto:sweil@redhat.com>>
+>  >>> To: "Gleb Borisov" <borisov.gleb@gmail.com
+> <mailto:borisov.gleb@gmail.com>>
+>  >>> Cc: ceph-devel@vger.kernel.org <mailto:ceph-devel@vger.kernel.org>
+>  >>> Sent: Thursday, July 9, 2015 3:06:00 PM
+>  >>> Subject: Re: Strange issue with CRUSH
+>  >>>
+>  >>> On Fri, 10 Jul 2015, Gleb Borisov wrote:
+>  >>>>
+>  >>>> Hi Sage,
+>  >>>>
+>  >>>> Sorry for mailing you in person, I realize that you're quite busy
+> at redhat,
+>  >>>> but I wanted you have a look on an issue with CRUSH map.
+>  >>>
+>  >>>
+>  >>> No problem. I hope you don't mind I've added ceph-devel to the cc list.
+>  >>>
+>  >>>> I've described very first insights here:
+>  >>>>
+> http://lists.ceph.com/pipermail/ceph-users-ceph.com/2015-July/002897.html
+>  >>>>
+>  >>>> We are continue our research and found that distribution of PG
+> count by OSD
+>  >>>> is very strange and after digging into CRUSH source code found
+> rjenkins1
+>  >>>> hash function.
+>  >>>>
+>  >>>> After some testing we realized that rjenkins1's value distribution is
+>  >>>> exponential, and this can cause our disbalance.
+>  >>>
+>  >>>
+>  >>> Any issue with rjenkins1's hash function is very interesting and
+>  >>> concerning.  Can you describe your analysis and what you mean by the
+>  >>> distribution being exponential?
+>  >>>
+>  >>>> What do you think about adding additional hashing algorithm to
+> CRUSH? It
+>  >>>> seems that it could improve distribution.
+>  >>>
+>  >>>
+>  >>> I am definitely open to adding new hash functions, especially if the
+>  >>> current ones are flawed.  The current hash was created by making ad hoc
+>  >>> combinations of rjenkins' mix function with various numbers of
+>  >>> arguments--hardly scientific or methodical.  We did an analysis a
+> couple
+>  >>> years back and found that it effectively modeled a uniform
+> distribution,
+>  >>> but if we missed something or were wrong we should definitely
+> correct it!
+>  >>>
+>  >>> In any case, the important step is to quantify what is wrong with the
+>  >>> current hash so that we can ensure any new one is not flawed in the
+> same
+>  >>> way.
+>  >>>
+>  >>> Thanks-
+>  >>> sage
+>  >>>
+>  >>>
+>  >>>> We have also tried to generate some syntetic crushmaps (another bucket
+>  >>>> types, more OSDs per host, more/less hosts by rack, different cound of
+>  >>>> racks, linear osd ids, random osd ids, etc), but didn't found any
+>  >>>> combination with better distribution of PG across OSD.
+>  >>>>
+>  >>>> Thanks and one more sorry for bothering you in person.
+>  >>>> --
+>  >>>> Best regards,
+>  >>>> Gleb M Borisov
+>  >>>>
+>  >>>>
+>  >>> --
+>  >>> To unsubscribe from this list: send the line "unsubscribe
+> ceph-devel" in
+>  >>> the body of a message to majordomo@vger.kernel.org
+> <mailto:majordomo@vger.kernel.org>
+>  >>> More majordomo info at http://vger.kernel.org/majordomo-info.html
+>  >>>
+>  >>> --
+>  >>> To unsubscribe from this list: send the line "unsubscribe
+> ceph-devel" in
+>  >>> the body of a message to majordomo@vger.kernel.org
+> <mailto:majordomo@vger.kernel.org>
+>  >>> More majordomo info at http://vger.kernel.org/majordomo-info.html
+>  >>>
+>  >
+>  >
+>  >
+>  > --
+>  > Best regards,
+>  > Gleb M Borisov
+>
+>
+>
+>
+> --
+> Best regards,
+> Gleb M Borisov
