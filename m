@@ -1,216 +1,135 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: Strange issue with CRUSH
-Date: Mon, 13 Jul 2015 11:28:07 -0500
-Message-ID: <55A3E717.5080604@redhat.com>
-References: <CAOWwpMJv4N0BvdEy2Y-WpDqqZ6R=f_5_+2j1dWeVe-Xk1fg1bQ@mail.gmail.com>	<alpine.DEB.2.00.1507091501570.20547@cobra.newdream.net>	<1736665041.43352077.1436482991363.JavaMail.zimbra@redhat.com>	<55A3D720.7070006@redhat.com>	<CAOWwpMKN3YtACUj181K2Wqg539EibuUfh5UZPceoYr2rBLxOEQ@mail.gmail.com> <CAOWwpMKeQyx+PQdNMqGvXAtamg4mMGSZrEw96X9D5KWGnaQa9A@mail.gmail.com>
+From: Gregory Farnum <greg@gregs42.com>
+Subject: Re: osd suicide timeout
+Date: Mon, 13 Jul 2015 17:45:10 +0100
+Message-ID: <CAC6JEv-=z3c+Awyz_YpWKO=g_Vf31iFb7s4eSFToiLtSkXKGyQ@mail.gmail.com>
+References: <BC97738F8E7C8742BABED7F06FB9DF91669B3BFF@SATLEXDAG01.amd.com>
+	<CAC6JEv9GJFAyQBXU398Na=RfHROPoakbzcM6sFUCh_Cg6bE7Zw@mail.gmail.com>
+	<BC97738F8E7C8742BABED7F06FB9DF91669B4DDC@SATLEXDAG01.amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:56979 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751140AbbGMQ2K (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 13 Jul 2015 12:28:10 -0400
-In-Reply-To: <CAOWwpMKeQyx+PQdNMqGvXAtamg4mMGSZrEw96X9D5KWGnaQa9A@mail.gmail.com>
+Received: from mail-ig0-f182.google.com ([209.85.213.182]:36139 "EHLO
+	mail-ig0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751267AbbGMQpL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Jul 2015 12:45:11 -0400
+Received: by igbij6 with SMTP id ij6so26189627igb.1
+        for <ceph-devel@vger.kernel.org>; Mon, 13 Jul 2015 09:45:11 -0700 (PDT)
+Received: from mail-ig0-f179.google.com (mail-ig0-f179.google.com. [209.85.213.179])
+        by smtp.gmail.com with ESMTPSA id q187sm12863007ioe.37.2015.07.13.09.45.10
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Mon, 13 Jul 2015 09:45:10 -0700 (PDT)
+Received: by igvi1 with SMTP id i1so35773300igv.1
+        for <ceph-devel@vger.kernel.org>; Mon, 13 Jul 2015 09:45:10 -0700 (PDT)
+In-Reply-To: <BC97738F8E7C8742BABED7F06FB9DF91669B4DDC@SATLEXDAG01.amd.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gleb Borisov <borisov.gleb@gmail.com>
-Cc: Samuel Just <sjust@redhat.com>, Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
+To: "Deneau, Tom" <tom.deneau@amd.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Looking at the output, it looks like even pool 19 has a pretty small 
-number of PGs for that many OSDs:
+heartbeat_map reset_timeout 'OSD::osd_op_tp thread 0x3ff6eb0efd0' had
+suicide timed out after 150
 
-+----------------------------------------------------------------------------+
-| Pool ID: 19 |
-+----------------------------------------------------------------------------+
-| Participating OSDs: 1056 |
-| Participating PGs: 16404 |
-+----------------------------------------------------------------------------+ 
+So that's the OSD's "op thread", which is the one that does most of
+the work. You often see the FileStore::op_tp when it's the disk or
+filesystem breaking, but I do see the line
 
+waiting 51 > 50 ops || 57248008 > 104857600
 
-And as you say, the distribution looks a little better than a totally 
-random distribution:
-
-| OSDs in All Roles (Up) |
-| Expected PGs Per OSD: Min: 20, Max: 71, Mean: 46.6, Std Dev: 12.7 |
-| Actual PGs Per OSD: Min: 24, Max: 69, Mean: 46.6, Std Dev: 6.9 |
-| 5 Most Subscribed OSDs: 791(69), 977(69), 211(68), 536(67), 37(65) |
-| 5 Least Subscribed OSDs: 1074(24), 1042(28), 215(29), 139(30), 205(30) |
-
-But there's still a lot of variance between the most and least 
-subscribed OSDs.  It's worse if you look at OSDs acting in a primary 
-role (ie servicing reads):
-
-| OSDs in Primary Role (Up) |
-| Expected PGs Per OSD: Min: 0, Max: 29, Mean: 15.5, Std Dev: 7.4 |
-| Actual PGs Per OSD: Min: 5, Max: 32, Mean: 15.5, Std Dev: 3.8 |
-| 5 Most Subscribed OSDs: 606(32), 211(30), 1065(27), 956(26), 228(25) |
-| 5 Least Subscribed OSDs: 317(5), 550(5), 215(6), 473(6), 19(7) |
-
-It may be worth increasing the PG count for that pool at least!
-
-Mark
+which leaves me feeling pretty confident that the disk is just getting
+more work than it can keep up with. It looks like there was some
+rebalancing happening around this time?
+-Greg
 
 
-On 07/13/2015 11:11 AM, Gleb Borisov wrote:
-> Hi,
+
+On Mon, Jul 13, 2015 at 5:04 PM, Deneau, Tom <tom.deneau@amd.com> wrote:
+> Greg --
 >
-> Forget about exponential distribution. It was kind of raving of a madman
-> :) seems that it's really uniform.
+> Thanks.  I put the osd.log file at
 >
+> https://drive.google.com/file/d/0B_rfwWh40kPwQjZ3OXdjLUZNRVU/view?usp=sharing
 >
-> I run tool mentioned above and saved output to gist:
-> https://gist.github.com/anonymous/d228fe9340825f33310b
+> I noticed the following from journalctl output around that time, so other nodes were complaining they could not reach osd.8.
 >
-> We've one big pool for rgw (19) and several smaller pools (control pools
-> and few for testing) and also have two roots (default with 1056 osds and
-> ssd_default with 30 osds).
+> Jul 09 15:53:04 seattle-04-ausisv bash[8486]: 2015-07-09 15:53:03.905386 3ffa0d9efd0 -1 osd.9 2487 heartbeat_check: no reply from osd.8 since back 2015-07-09 15:52:43.256581 front 2015-07-09 15:52:43.256581 (cutoff 2015-07-09 15:52:43.905384)
+> Jul 09 15:53:06 seattle-04-ausisv bash[1060]: 2015-07-09 15:53:06.784069 3ff916fefd0 -1 osd.7 2487 heartbeat_check: no reply from osd.8 since back 2015-07-09 15:52:46.474273 front 2015-07-09 15:52:46.474273 (cutoff 2015-07-09 15:52:46.784066)
 >
-> It seems that our distribution is slightly better than expected in your
-> code.
+> and here is some sar data for the disk that osd.8 was controlling (sde1=journal partition, sde2=data partition)
 >
-> Thanks.
+> 03:40:02 PM       DEV       tps  rd_sec/s  wr_sec/s  avgrq-sz  avgqu-sz     await     svctm     %util
+> 03:50:17 PM      sde1      9.67      0.00  19046.40   1970.32      0.35     35.86     30.62     29.60
+> 03:50:17 PM      sde2     60.47   1524.27  14597.67    266.63     24.45    404.30      8.54     51.67
+> 03:50:32 PM      sde1     12.13      0.00  18158.93   1496.62      0.25     20.66     17.58     21.33
+> 03:50:32 PM      sde2     28.00   1550.93  17958.33    696.76     10.54    376.50     13.52     37.87
+> 03:50:47 PM      sde1     12.73      0.00  25446.40   1998.41      0.31     24.19     22.30     28.40
+> 03:50:47 PM      sde2     51.60    338.67  18091.73    357.18     13.05    252.91      8.02     41.40
+> 03:51:02 PM      sde1     12.27      0.00  18790.40   1531.83      0.31     25.33     18.53     22.73
+> 03:51:02 PM      sde2     33.13   2635.20  18026.67    623.60      5.02    151.57     10.99     36.40
+> 03:51:17 PM      sde1     10.13      0.00  14557.87   1436.63      0.16     16.18     12.76     12.93
+> 03:51:17 PM      sde2     46.73   1107.73  12067.00    281.91      8.55    182.88      5.46     25.53
+> 03:51:32 PM      sde1     11.93      0.00  18594.13   1558.17      0.35     29.27     16.42     19.60
+> 03:51:32 PM      sde2     22.20    555.20  18834.33    873.40      4.24    191.08     13.51     30.00
+> 03:51:47 PM      sde1     18.00      0.00  13926.40    773.69      0.19     10.78     10.07     18.13
+> 03:51:47 PM      sde2     47.27   1652.80  10775.53    262.94     12.24    259.01      6.66     31.47
+> 03:52:02 PM      sde1     21.60      0.00  10845.87    502.12      0.24     11.08      9.75     21.07
+> 03:52:02 PM      sde2     34.33   1652.80   9089.13    312.87      7.43    216.41      8.45     29.00
+> 03:52:17 PM      sde1     19.87      0.00  20198.40   1016.70      0.33     16.85     13.46     26.73
+> 03:52:17 PM      sde2     35.60   2752.53  16355.53    536.74     11.90    333.33     10.90     38.80
+> 03:52:32 PM      sde1     22.54      0.00   8434.04    374.18      0.15      6.67      6.17     13.90
+> 03:52:32 PM      sde2     35.84   2738.30   4586.30    204.38      2.01     28.11      6.53     23.40
+> 03:52:47 PM      sde1      0.00      0.00      0.00      0.00      0.00      0.00      0.00      0.00
+> 03:52:47 PM      sde2     13.37     35.83   1101.80     85.09      1.87    218.65      5.75      7.69
+> 03:53:02 PM      sde1      0.00      0.00      0.00      0.00      0.00      0.00      0.00      0.00
+> 03:53:02 PM      sde2      0.00      0.00      0.00      0.00      0.00      0.00      0.00      0.00
+> 03:53:17 PM      sde1      0.00      0.00      0.00      0.00      0.00      0.00      0.00      0.00
+> 03:53:17 PM      sde2      0.13      0.00      0.20      1.50      0.00     20.00     20.00      0.27
+> 03:53:32 PM      sde1      0.00      0.00      0.00      0.00      0.00      0.00      0.00      0.00
+> 03:53:32 PM      sde2      0.00      0.00      0.00      0.00      0.00      0.00      0.00      0.00
+> 03:53:47 PM      sde1      0.00      0.00      0.00      0.00      0.00      0.00      0.00      0.00
+> 03:53:47 PM      sde2      0.13      0.00      0.20      1.50      0.00      5.00      5.00      0.07
+> 03:54:02 PM      sde1      0.00      0.00      0.00      0.00      0.00      0.00      0.00      0.00
+> 03:54:02 PM      sde2      0.00      0.00      0.00      0.00      0.00      0.00      0.00      0.00
+> 03:54:17 PM      sde1      0.00      0.00      0.00      0.00      0.00      0.00      0.00      0.00
+> 03:54:17 PM      sde2      0.00      0.00      0.00      0.00      0.00      0.00      0.00      0.00
+> 03:54:32 PM      sde1      0.00      0.00      0.00      0.00      0.00      0.00      0.00      0.00
+> 03:54:32 PM      sde2      0.00      0.00      0.00      0.00      0.00      0.00      0.00      0.00
 >
-> On Mon, Jul 13, 2015 at 7:11 PM, Gleb Borisov <borisov.gleb@gmail.com
-> <mailto:borisov.gleb@gmail.com>> wrote:
->  >
->  > Hi,
->  >
->  > Forget about exponential distribution. It was kind of raving of a
-> madman :) seems that it's really uniform.
->  >
->  >
->  > I run tool mentioned above and saved output to gist:
-> https://gist.github.com/anonymous/d228fe9340825f33310b
->  >
->  > We've one big pool for rgw (19) and several smaller pools (control
-> pools and few for testing) and also have two roots (default with 1056
-> osds and ssd_default with 30 osds).
->  >
->  > It seems that our distribution is slightly better than expected in
-> your code.
->  >
->  > Thanks.
->  >
->  > On Mon, Jul 13, 2015 at 6:20 PM, Mark Nelson <mnelson@redhat.com
-> <mailto:mnelson@redhat.com>> wrote:
->  >>
->  >> FWIW,
->  >>
->  >> It would be very interesting to see the output of:
->  >>
->  >> https://github.com/ceph/cbt/blob/master/tools/readpgdump.py
->  >>
->  >> If you see something that looks anomalous.  I'd like to make sure
-> that I'm detecting issues like this.
->  >>
->  >> Mark
->  >>
->  >>
->  >> On 07/09/2015 06:03 PM, Samuel Just wrote:
->  >>>
->  >>> I've seen some odd teuthology in the last week or two which seems
-> to be anomalous rjenkins hash behavior as well.
->  >>>
->  >>> http://tracker.ceph.com/issues/12231
->  >>> -Sam
->  >>>
->  >>> ----- Original Message -----
->  >>> From: "Sage Weil" <sweil@redhat.com <mailto:sweil@redhat.com>>
->  >>> To: "Gleb Borisov" <borisov.gleb@gmail.com
-> <mailto:borisov.gleb@gmail.com>>
->  >>> Cc: ceph-devel@vger.kernel.org <mailto:ceph-devel@vger.kernel.org>
->  >>> Sent: Thursday, July 9, 2015 3:06:00 PM
->  >>> Subject: Re: Strange issue with CRUSH
->  >>>
->  >>> On Fri, 10 Jul 2015, Gleb Borisov wrote:
->  >>>>
->  >>>> Hi Sage,
->  >>>>
->  >>>> Sorry for mailing you in person, I realize that you're quite busy
-> at redhat,
->  >>>> but I wanted you have a look on an issue with CRUSH map.
->  >>>
->  >>>
->  >>> No problem. I hope you don't mind I've added ceph-devel to the cc list.
->  >>>
->  >>>> I've described very first insights here:
->  >>>>
-> http://lists.ceph.com/pipermail/ceph-users-ceph.com/2015-July/002897.html
->  >>>>
->  >>>> We are continue our research and found that distribution of PG
-> count by OSD
->  >>>> is very strange and after digging into CRUSH source code found
-> rjenkins1
->  >>>> hash function.
->  >>>>
->  >>>> After some testing we realized that rjenkins1's value distribution is
->  >>>> exponential, and this can cause our disbalance.
->  >>>
->  >>>
->  >>> Any issue with rjenkins1's hash function is very interesting and
->  >>> concerning.  Can you describe your analysis and what you mean by the
->  >>> distribution being exponential?
->  >>>
->  >>>> What do you think about adding additional hashing algorithm to
-> CRUSH? It
->  >>>> seems that it could improve distribution.
->  >>>
->  >>>
->  >>> I am definitely open to adding new hash functions, especially if the
->  >>> current ones are flawed.  The current hash was created by making ad hoc
->  >>> combinations of rjenkins' mix function with various numbers of
->  >>> arguments--hardly scientific or methodical.  We did an analysis a
-> couple
->  >>> years back and found that it effectively modeled a uniform
-> distribution,
->  >>> but if we missed something or were wrong we should definitely
-> correct it!
->  >>>
->  >>> In any case, the important step is to quantify what is wrong with the
->  >>> current hash so that we can ensure any new one is not flawed in the
-> same
->  >>> way.
->  >>>
->  >>> Thanks-
->  >>> sage
->  >>>
->  >>>
->  >>>> We have also tried to generate some syntetic crushmaps (another bucket
->  >>>> types, more OSDs per host, more/less hosts by rack, different cound of
->  >>>> racks, linear osd ids, random osd ids, etc), but didn't found any
->  >>>> combination with better distribution of PG across OSD.
->  >>>>
->  >>>> Thanks and one more sorry for bothering you in person.
->  >>>> --
->  >>>> Best regards,
->  >>>> Gleb M Borisov
->  >>>>
->  >>>>
->  >>> --
->  >>> To unsubscribe from this list: send the line "unsubscribe
-> ceph-devel" in
->  >>> the body of a message to majordomo@vger.kernel.org
-> <mailto:majordomo@vger.kernel.org>
->  >>> More majordomo info at http://vger.kernel.org/majordomo-info.html
->  >>>
->  >>> --
->  >>> To unsubscribe from this list: send the line "unsubscribe
-> ceph-devel" in
->  >>> the body of a message to majordomo@vger.kernel.org
-> <mailto:majordomo@vger.kernel.org>
->  >>> More majordomo info at http://vger.kernel.org/majordomo-info.html
->  >>>
->  >
->  >
->  >
->  > --
->  > Best regards,
->  > Gleb M Borisov
+> -- Tom
 >
->
->
->
-> --
-> Best regards,
-> Gleb M Borisov
+>> -----Original Message-----
+>> From: Gregory Farnum [mailto:greg@gregs42.com]
+>> Sent: Monday, July 13, 2015 5:07 AM
+>> To: Deneau, Tom
+>> Cc: ceph-devel
+>> Subject: Re: osd suicide timeout
+>>
+>> On Fri, Jul 10, 2015 at 10:45 PM, Deneau, Tom <tom.deneau@amd.com> wrote:
+>> > I have an osd log file from an osd that hit a suicide timeout (with the
+>> previous 10000 events logged).
+>> > (On this node I have also seen this suicide timeout happen once before and
+>> also a sync_entry timeout.
+>> >
+>> > I can see that 6 minutes or so before that osd died, other osds on the
+>> > same node were logging messages such as
+>> >     heartbeat_check: no reply from osd.8 so it appears that osd8
+>> > stopped responding quite some time before it died.
+>>
+>> It does this deliberately when its disk threads look like they might be
+>> stuck.
+>>
+>> >
+>> > I'm wondering if there is enough information in the osd8 log file to deduce
+>> why osd 8 stopped responding?
+>> > I don't know enough to figure it out myself.
+>> >
+>> > Is there any expert who would be willing to take a look at the log file?
+>>
+>> The logs will have a backtrace in them; if you can include that and the last
+>> hundred lines or so prior in a pastebin that you email the list with several
+>> people can give you a pretty good idea of what's going on.
+>>
+>> In general though, it's just going to be that the disk can't keep up with the
+>> load being applied to it. That could be because it's failing, or because
+>> you're pushing too much work on to it in some fashion.
+>> -Greg
