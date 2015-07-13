@@ -1,67 +1,41 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: teuthology integration tests on OpenStack
-Date: Mon, 13 Jul 2015 01:59:45 +0200
-Message-ID: <55A2FF71.7080408@dachary.org>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="031fOuVIvVk6hfu7dHf4m1JwUjq25MSII"
+From: =?utf-8?B?546LIOWBpQ==?= <jason.jianwang@gmail.com>
+Subject: rads gateway Parallel Uploads
+Date: Mon, 13 Jul 2015 02:07:22 -0400
+Message-ID: <0142046B-030E-4E7D-96FB-C7C519E4B0FC@gmail.com>
+Mime-Version: 1.0 (Mac OS X Mail 8.0 \(1990.1\))
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:48883 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751216AbbGLX75 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 12 Jul 2015 19:59:57 -0400
+Received: from mail-pd0-f169.google.com ([209.85.192.169]:34733 "EHLO
+	mail-pd0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751117AbbGMGHa convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Jul 2015 02:07:30 -0400
+Received: by pdbep18 with SMTP id ep18so219494663pdb.1
+        for <ceph-devel@vger.kernel.org>; Sun, 12 Jul 2015 23:07:30 -0700 (PDT)
+Received: from [10.49.129.61] (c-98-210-180-117.hsd1.ca.comcast.net. [98.210.180.117])
+        by smtp.gmail.com with ESMTPSA id c6sm17517841pas.39.2015.07.12.23.07.29
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
+        Sun, 12 Jul 2015 23:07:29 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andrew Schoen <aschoen@redhat.com>, Zack Cerza <zack@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---031fOuVIvVk6hfu7dHf4m1JwUjq25MSII
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Hello Cepher,
+I am working on prorting Google Cloud Storage API to rados gateway and =
+I notice that Google Cloud Storage support parallel uploads as below:
+"Object composition enables a simple mechanism for uploading an object =
+in parallel: simply divide your data into as many chunks as required to=
+ fully utilize your available bandwidth, upload each chunk to a distinc=
+t object, compose your final object, and delete any temporary objects. =
+=E2=80=9C
+So I am wondering whether radios gateway support the similar feature to=
+ let user parallel upload large objects?
+Thanks
+Jian
 
-Hi Zack & Andrew,
-
-It turns out the simplest way to install teuthology on OpenStack (the one=
-liner described at http://dachary.org/?p=3D3790) is also the simplest way=
- to run integration tests. Last Friday we discussed the fact that the teu=
-thology installation is intrusive: it modifies system files, runs a web s=
-ervice, reset ~/.teuthology.yaml etc. But it can conveniently be containe=
-d in a dedicated, all in one (paddles, pulpito, workers, client) virtual =
-machine.
-
-Assuming a jenkins slave has access to an OpenStack tenant, it could be s=
-omething like:
-
-    . openrc.sh
-    teuthology/openstack-bootstrap.sh ovh
-    ssh -i $HOME/teuthology-admin teuthology grep -qq 'openstack-integrat=
-ion: commands succeeded' /var/log/cloud-init.log
-    nova delete teuthology
-
-The http://tracker.ceph.com/issues/12295 feature request was created for =
-that purpose. At this point it is primarily about creating the jenkins sl=
-ave and since I know nothing about that (rather I forgot the little I lea=
-rnt a few month ago ;-), I'm hoping someone will take care of it.
-
-Cheers
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---031fOuVIvVk6hfu7dHf4m1JwUjq25MSII
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlWi/3EACgkQ8dLMyEl6F22xXACbBxoa9FeGRSoiAvty2gi30Ctd
-Y2sAn3l/nv4k0X2XtzIsSJTah/cV4uz7
-=+nxa
------END PGP SIGNATURE-----
-
---031fOuVIvVk6hfu7dHf4m1JwUjq25MSII--
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
