@@ -1,215 +1,326 @@
-From: huang jun <hjwsm1989@gmail.com>
-Subject: Re: osd suicide timeout
-Date: Tue, 14 Jul 2015 08:42:08 +0800
-Message-ID: <CABAwU-bJh5a8fTcr01D72pbk7ZPW7+jw58tvrkFX5B75iXh-7g@mail.gmail.com>
-References: <BC97738F8E7C8742BABED7F06FB9DF91669B3BFF@SATLEXDAG01.amd.com>
-	<CAC6JEv9GJFAyQBXU398Na=RfHROPoakbzcM6sFUCh_Cg6bE7Zw@mail.gmail.com>
-	<BC97738F8E7C8742BABED7F06FB9DF91669B4DDC@SATLEXDAG01.amd.com>
-	<CAC6JEv-=z3c+Awyz_YpWKO=g_Vf31iFb7s4eSFToiLtSkXKGyQ@mail.gmail.com>
-	<BC97738F8E7C8742BABED7F06FB9DF91669B4FFB@SATLEXDAG01.amd.com>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: About Fio backend with ObjectStore API
+Date: Tue, 14 Jul 2015 14:45:30 +0800
+Message-ID: <CACJqLyZYZja8nchW5=tB1AL7BdkDAALQynpCm1N-bnpBixdmew@mail.gmail.com>
+References: <99767EA2E27DD44DB4E9F9B9ACA458C03B31A8D8@SSIEXCH-MB3.ssi.samsung.com>
+	<814413230.286.1436473608097.JavaMail.root@thunderbeast.private.linuxbox.com>
+	<CACJqLyYb2xf8TN+HXiON8G8ojob1OwedFusSnY25p53a7aiyiA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f172.google.com ([209.85.217.172]:35047 "EHLO
-	mail-lb0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752117AbbGNAmK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Jul 2015 20:42:10 -0400
-Received: by lblf12 with SMTP id f12so62311379lbl.2
-        for <ceph-devel@vger.kernel.org>; Mon, 13 Jul 2015 17:42:08 -0700 (PDT)
-In-Reply-To: <BC97738F8E7C8742BABED7F06FB9DF91669B4FFB@SATLEXDAG01.amd.com>
+Received: from mail-yk0-f174.google.com ([209.85.160.174]:35135 "EHLO
+	mail-yk0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751018AbbGNGpb convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Jul 2015 02:45:31 -0400
+Received: by ykdu72 with SMTP id u72so476303ykd.2
+        for <ceph-devel@vger.kernel.org>; Mon, 13 Jul 2015 23:45:30 -0700 (PDT)
+In-Reply-To: <CACJqLyYb2xf8TN+HXiON8G8ojob1OwedFusSnY25p53a7aiyiA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Deneau, Tom" <tom.deneau@amd.com>
-Cc: Gregory Farnum <greg@gregs42.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: "Matt W. Benjamin" <matt@cohortfs.com>
+Cc: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Casey Bodley <cbodley@gmail.com>
 
-hi,Deneau
-we set the filestore_max_queue_ops=1000, unlucky we alse meet the osd suicide.
-we test random 4K writes, the osd_op_tp thread suicide event if we set
-osd_op_thread_timeout=120,
-the threads in osd_op_tp will reset the timeout handle after submit op
-to FileJournal's workqueue,
-so we have no idea why the thread blocked so long. the debug log
-showed during that time, other threads in osd_op_tp
-works fine.
+Anyone who have successfully ran the fio with this external io engine
+ceph_objectstore?
 
-2015-07-14 7:12 GMT+08:00 Deneau, Tom <tom.deneau@amd.com>:
-> Greg --
+It's strange that it alwasys hit segment fault when entering
+"_fio_setup_ceph_filestore_data", gdb tells "td->io_ops" is NULL but
+when I up the stack, the "td->io_ops" is not null. Maybe it's related
+to dlopen?
+
+On Fri, Jul 10, 2015 at 3:51 PM, Haomai Wang <haomaiwang@gmail.com> wro=
+te:
+> I have rebased the branch with master, and push it to ceph upstream
+> repo. https://github.com/ceph/ceph/compare/fio-objectstore?expand=3D1
 >
-> Not sure how to tell whether rebalancing occurred at that time.
-> I do see in other osd logs complaints that they do not get a reply from
-> osd.8 starting around 15:52 on that day.
+> Plz let me know if who is working on this. Otherwise, I would like to
+> improve this to be merge ready.
 >
-> I see the deep-scrub of pool 14 but that was almost 30 minutes earlier.
+> On Fri, Jul 10, 2015 at 4:26 AM, Matt W. Benjamin <matt@cohortfs.com>=
+ wrote:
+>> That makes sense.
+>>
+>> Matt
+>>
+>> ----- "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com> wrote:
+>>
+>>> Hi Casey,
+>>>   Got it. I was directed to the old code base. By the way, Since th=
+e
+>>> testing case was used to exercise all of object stores.  Strongly
+>>> recommend to change the name from fio_ceph_filestore.cc to
+>>> fio_ceph_objectstore.cc . And the code in fio_ceph_filestore.cc sho=
+uld
+>>> be refactored to reflect that the whole objectstore will be support=
+ed
+>>> by fio_ceph_objectstore.cc. what you think?
+>>>
+>>> Let me know if you need any help from my side.
+>>>
+>>>
+>>> Regards,
+>>> James
+>>>
+>>>
+>>>
+>>> -----Original Message-----
+>>> From: Casey Bodley [mailto:cbodley@gmail.com]
+>>> Sent: Thursday, July 09, 2015 12:32 PM
+>>> To: James (Fei) Liu-SSI
+>>> Cc: Haomai Wang; ceph-devel@vger.kernel.org
+>>> Subject: Re: About Fio backend with ObjectStore API
+>>>
+>>> Hi James,
+>>>
+>>> Are you looking at the code from
+>>> https://github.com/linuxbox2/linuxbox-ceph/tree/fio-objectstore? It
+>>> uses ObjectStore::create() instead of new FileStore(). This allows =
+us
+>>> to exercise all of the object stores with the same code.
+>>>
+>>> Casey
+>>>
+>>> On Thu, Jul 9, 2015 at 2:01 PM, James (Fei) Liu-SSI
+>>> <james.liu@ssi.samsung.com> wrote:
+>>> > Hi Casey,
+>>> >   Here is the code in the fio_ceph_filestore.cc. Basically, it
+>>> creates a filestore as backend engine for IO exercises. If we got t=
+o
+>>> send IO commands to KeyValue Store or Newstore, we got to change th=
+e
+>>> code accordingly, right?  I did not see any other files like
+>>> fio_ceph_keyvaluestore.cc or fio_ceph_newstore.cc. In my humble
+>>> opinion, we might need to create other two fio engines for
+>>> keyvaluestore and newstore if we want to exercise these two, right?
+>>> >
+>>> > Regards,
+>>> > James
+>>> >
+>>> > static int fio_ceph_filestore_init(struct thread_data *td)
+>>> > 209 {
+>>> > 210     vector<const char*> args;
+>>> > 211     struct ceph_filestore_data *ceph_filestore_data =3D (stru=
+ct
+>>> ceph_filestore_data *) td->io_ops->data;
+>>> > 212     ObjectStore::Transaction ft;
+>>> > 213
+>>> >
+>>> > 214     global_init(NULL, args, CEPH_ENTITY_TYPE_OSD,
+>>> CODE_ENVIRONMENT_UTILITY, 0);
+>>> > 215     //g_conf->journal_dio =3D false;
+>>> > 216     common_init_finish(g_ceph_context);
+>>> > 217     //g_ceph_context->_conf->set_val("debug_filestore", "20")=
+;
+>>> > 218     //g_ceph_context->_conf->set_val("debug_throttle", "20");
+>>> > 219     g_ceph_context->_conf->apply_changes(NULL);
+>>> > 220
+>>> >
+>>> > 221     ceph_filestore_data->osd_path =3D
+>>> strdup("/mnt/fio_ceph_filestore.XXXXXXX");
+>>> > 222     ceph_filestore_data->journal_path =3D
+>>> strdup("/var/lib/ceph/osd/journal-ram/fio_ceph_filestore.XXXXXXX");
+>>> > 223
+>>> >
+>>> > 224     if (!mkdtemp(ceph_filestore_data->osd_path)) {
+>>> > 225             cout << "mkdtemp failed: " << strerror(errno) <<
+>>> std::endl;
+>>> > 226             return 1;
+>>> > 227     }
+>>> > 228     //mktemp(ceph_filestore_data->journal_path); // NOSPC iss=
+ue
+>>> > 229
+>>> >
+>>> > 230     ObjectStore *fs =3D new
+>>> FileStore(ceph_filestore_data->osd_path,
+>>> ceph_filestore_data->journal_path);
+>>> > 231     ceph_filestore_data->fs =3D fs;
+>>> > 232
+>>> >
+>>> > 233     if (fs->mkfs() < 0) {
+>>> > 234             cout << "mkfs failed" << std::endl;
+>>> > 235             goto failed;
+>>> > 236     }
+>>> > 237
+>>> > 238     if (fs->mount() < 0) {
+>>> > 239             cout << "mount failed" << std::endl;
+>>> > 240             goto failed;
+>>> > 241     }
+>>> > 242
+>>> >
+>>> > 243     ft.create_collection(coll_t());
+>>> > 244     fs->apply_transaction(ft);
+>>> > 245
+>>> >
+>>> > 246
+>>> >
+>>> > 247     return 0;
+>>> > 248
+>>> >
+>>> > 249 failed:
+>>> > 250     return 1;
+>>> > 251
+>>> >
+>>> > 252 }
+>>> > -----Original Message-----
+>>> > From: Casey Bodley [mailto:cbodley@gmail.com]
+>>> > Sent: Thursday, July 09, 2015 9:19 AM
+>>> > To: James (Fei) Liu-SSI
+>>> > Cc: Haomai Wang; ceph-devel@vger.kernel.org
+>>> > Subject: Re: About Fio backend with ObjectStore API
+>>> >
+>>> > Hi James,
+>>> >
+>>> > In the job file src/test/filestore.fio, you can modify the line
+>>> > "objectstore=3Dfilestore" to use any objectstore type supported b=
+y
+>>> the
+>>> > ObjectStore::create() factory.
+>>> >
+>>> > Casey
+>>> >
+>>> > On Wed, Jul 8, 2015 at 8:02 PM, James (Fei) Liu-SSI
+>>> <james.liu@ssi.samsung.com> wrote:
+>>> >> Hi Casey,
+>>> >>   Quick questions, The code in the trunk only cover the test for
+>>> filestore. I was wondering do you have any plan to cover the test f=
+or
+>>> kvstore and newstore?
+>>> >>
+>>> >>   Thanks,
+>>> >>   James
+>>> >>
+>>> >> -----Original Message-----
+>>> >> From: ceph-devel-owner@vger.kernel.org
+>>> >> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of James (Fe=
+i)
+>>>
+>>> >> Liu-SSI
+>>> >> Sent: Tuesday, June 30, 2015 2:19 PM
+>>> >> To: Casey Bodley
+>>> >> Cc: Haomai Wang; ceph-devel@vger.kernel.org
+>>> >> Subject: RE: About Fio backend with ObjectStore API
+>>> >>
+>>> >> Hi Casey,
+>>> >>
+>>> >>   Thanks a lot.
+>>> >>
+>>> >>   Regards,
+>>> >>   James
+>>> >>
+>>> >> -----Original Message-----
+>>> >> From: Casey Bodley [mailto:cbodley@gmail.com]
+>>> >> Sent: Tuesday, June 30, 2015 2:16 PM
+>>> >> To: James (Fei) Liu-SSI
+>>> >> Cc: Haomai Wang; ceph-devel@vger.kernel.org
+>>> >> Subject: Re: About Fio backend with ObjectStore API
+>>> >>
+>>> >> Hi,
+>>> >>
+>>> >> When Danny Al-Gaaf & Daniel Gollub published "Ceph Performance
+>>> >> Analysis: fio and RBD" at
+>>> >>
+>>> https://telekomcloud.github.io/ceph/2014/02/26/ceph-performance-ana=
+ly
+>>> >> s is_fio_rbd.html, they also mentioned a fio engine that linked
+>>> >> directly into ceph's FileStore. I was able to find Daniel's bran=
+ch
+>>> on
+>>> >> github at https://github.com/gollub/ceph/tree/fio_filestore_v2, =
+and
+>>> did some more work on it at the time.
+>>> >>
+>>> >> I just rebased that work onto the latest ceph master branch, and
+>>> pushed to our github at
+>>> https://github.com/linuxbox2/linuxbox-ceph/tree/fio-objectstore. Yo=
+u
+>>> can find the source in src/test/fio_ceph_filestore.cc, and run fio
+>>> with the provided example fio job file in src/test/filestore.fio.
+>>> >>
+>>> >> I didn't have a chance to confirm that it builds with automake, =
+but
+>>>
+>>> >> the cmake version built for me. I'm happy to help if you run int=
+o
+>>> >> problems, Casey
+>>> >>
+>>> >> On Tue, Jun 30, 2015 at 2:31 PM, James (Fei) Liu-SSI
+>>> <james.liu@ssi.samsung.com> wrote:
+>>> >>> Hi Haomai,
+>>> >>>   What are you trying to ask is to benchmark local
+>>> objectstore(like kvstore/filestore/newstore) locally with
+>>> FIO(ObjectStore engine)? You want to purely compare the performance
+>>> locally for these objectstores, right?
+>>> >>>
+>>> >>>   Regards,
+>>> >>>   James
+>>> >>>
+>>> >>> -----Original Message-----
+>>> >>> From: ceph-devel-owner@vger.kernel.org
+>>> >>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Haomai
+>>> Wang
+>>> >>> Sent: Tuesday, June 30, 2015 9:06 AM
+>>> >>> To: ceph-devel@vger.kernel.org
+>>> >>> Subject: About Fio backend with ObjectStore API
+>>> >>>
+>>> >>> Hi all,
+>>> >>>
+>>> >>> Long long ago, is there someone said about fio backend with Cep=
+h
+>>> ObjectStore API? So we could use the existing mature fio facility t=
+o
+>>> benchmark ceph objectstore.
+>>> >>>
+>>> >>> --
+>>> >>> Best Regards,
+>>> >>>
+>>> >>> Wheat
+>>> >>> --
+>>> >>> To unsubscribe from this list: send the line "unsubscribe
+>>> ceph-devel"
+>>> >>> in the body of a message to majordomo@vger.kernel.org More
+>>> majordomo
+>>> >>> info at  http://vger.kernel.org/majordomo-info.html
+>>> >>   {.n +       +%  lzwm  b =EB=A7=B2  r  y=C7=A9 =D7=AFzX     =DC=
+=A8}   =C6=A0z &j:+v        zZ+
+>>>  +zf   h   ~    i   z   w   ?    & )=DF=A2 f
+>>> N=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDr=EF=BF=BD=EF=BF=BDy=EF=
+=BF=BD=EF=BF=BD=EF=BF=BDb=EF=BF=BDX=EF=BF=BD=EF=BF=BD=C7=A7v=EF=BF=BD^=EF=
+=BF=BD)=DE=BA{.n=EF=BF=BD+=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD]z=EF=BF=
+=BD=EF=BF=BD=EF=BF=BD{ay=EF=BF=BD=CA=87=DA=99=EF=BF=BD,j=EF=BF=BD=EF=BF=
+=BDf=EF=BF=BD=EF=BF=BD=EF=BF=BDh=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD=EF=
+=BF=BDw=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDj:+v=EF=BF=
+=BD=EF=BF=BD=EF=BF=BDw=EF=BF=BDj=EF=BF=BDm=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=
+=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDzZ+=EF=BF=BD=EF=BF=BD=DD=A2j"=
+=EF=BF=BD=EF=BF=BD
+>>
+>> --
+>> Matt Benjamin
+>> CohortFS, LLC.
+>> 315 West Huron Street, Suite 140A
+>> Ann Arbor, Michigan 48103
+>>
+>> http://cohortfs.com
+>>
+>> tel.  734-761-4689
+>> fax.  734-769-8938
+>> cel.  734-216-5309
 >
-> -- Tom
 >
 >
->> -----Original Message-----
->> From: Gregory Farnum [mailto:greg@gregs42.com]
->> Sent: Monday, July 13, 2015 11:45 AM
->> To: Deneau, Tom
->> Cc: ceph-devel
->> Subject: Re: osd suicide timeout
->>
->> heartbeat_map reset_timeout 'OSD::osd_op_tp thread 0x3ff6eb0efd0' had suicide
->> timed out after 150
->>
->> So that's the OSD's "op thread", which is the one that does most of the work.
->> You often see the FileStore::op_tp when it's the disk or filesystem breaking,
->> but I do see the line
->>
->> waiting 51 > 50 ops || 57248008 > 104857600
->>
->> which leaves me feeling pretty confident that the disk is just getting more
->> work than it can keep up with. It looks like there was some rebalancing
->> happening around this time?
->> -Greg
->>
->>
->>
->> On Mon, Jul 13, 2015 at 5:04 PM, Deneau, Tom <tom.deneau@amd.com> wrote:
->> > Greg --
->> >
->> > Thanks.  I put the osd.log file at
->> >
->> > https://drive.google.com/file/d/0B_rfwWh40kPwQjZ3OXdjLUZNRVU/view?usp=
->> > sharing
->> >
->> > I noticed the following from journalctl output around that time, so other
->> nodes were complaining they could not reach osd.8.
->> >
->> > Jul 09 15:53:04 seattle-04-ausisv bash[8486]: 2015-07-09
->> > 15:53:03.905386 3ffa0d9efd0 -1 osd.9 2487 heartbeat_check: no reply
->> > from osd.8 since back 2015-07-09 15:52:43.256581 front 2015-07-09
->> > 15:52:43.256581 (cutoff 2015-07-09 15:52:43.905384) Jul 09 15:53:06
->> > seattle-04-ausisv bash[1060]: 2015-07-09 15:53:06.784069 3ff916fefd0
->> > -1 osd.7 2487 heartbeat_check: no reply from osd.8 since back
->> > 2015-07-09 15:52:46.474273 front 2015-07-09 15:52:46.474273 (cutoff
->> > 2015-07-09 15:52:46.784066)
->> >
->> > and here is some sar data for the disk that osd.8 was controlling
->> > (sde1=journal partition, sde2=data partition)
->> >
->> > 03:40:02 PM       DEV       tps  rd_sec/s  wr_sec/s  avgrq-sz  avgqu-sz
->> await     svctm     %util
->> > 03:50:17 PM      sde1      9.67      0.00  19046.40   1970.32      0.35
->> 35.86     30.62     29.60
->> > 03:50:17 PM      sde2     60.47   1524.27  14597.67    266.63     24.45
->> 404.30      8.54     51.67
->> > 03:50:32 PM      sde1     12.13      0.00  18158.93   1496.62      0.25
->> 20.66     17.58     21.33
->> > 03:50:32 PM      sde2     28.00   1550.93  17958.33    696.76     10.54
->> 376.50     13.52     37.87
->> > 03:50:47 PM      sde1     12.73      0.00  25446.40   1998.41      0.31
->> 24.19     22.30     28.40
->> > 03:50:47 PM      sde2     51.60    338.67  18091.73    357.18     13.05
->> 252.91      8.02     41.40
->> > 03:51:02 PM      sde1     12.27      0.00  18790.40   1531.83      0.31
->> 25.33     18.53     22.73
->> > 03:51:02 PM      sde2     33.13   2635.20  18026.67    623.60      5.02
->> 151.57     10.99     36.40
->> > 03:51:17 PM      sde1     10.13      0.00  14557.87   1436.63      0.16
->> 16.18     12.76     12.93
->> > 03:51:17 PM      sde2     46.73   1107.73  12067.00    281.91      8.55
->> 182.88      5.46     25.53
->> > 03:51:32 PM      sde1     11.93      0.00  18594.13   1558.17      0.35
->> 29.27     16.42     19.60
->> > 03:51:32 PM      sde2     22.20    555.20  18834.33    873.40      4.24
->> 191.08     13.51     30.00
->> > 03:51:47 PM      sde1     18.00      0.00  13926.40    773.69      0.19
->> 10.78     10.07     18.13
->> > 03:51:47 PM      sde2     47.27   1652.80  10775.53    262.94     12.24
->> 259.01      6.66     31.47
->> > 03:52:02 PM      sde1     21.60      0.00  10845.87    502.12      0.24
->> 11.08      9.75     21.07
->> > 03:52:02 PM      sde2     34.33   1652.80   9089.13    312.87      7.43
->> 216.41      8.45     29.00
->> > 03:52:17 PM      sde1     19.87      0.00  20198.40   1016.70      0.33
->> 16.85     13.46     26.73
->> > 03:52:17 PM      sde2     35.60   2752.53  16355.53    536.74     11.90
->> 333.33     10.90     38.80
->> > 03:52:32 PM      sde1     22.54      0.00   8434.04    374.18      0.15
->> 6.67      6.17     13.90
->> > 03:52:32 PM      sde2     35.84   2738.30   4586.30    204.38      2.01
->> 28.11      6.53     23.40
->> > 03:52:47 PM      sde1      0.00      0.00      0.00      0.00      0.00
->> 0.00      0.00      0.00
->> > 03:52:47 PM      sde2     13.37     35.83   1101.80     85.09      1.87
->> 218.65      5.75      7.69
->> > 03:53:02 PM      sde1      0.00      0.00      0.00      0.00      0.00
->> 0.00      0.00      0.00
->> > 03:53:02 PM      sde2      0.00      0.00      0.00      0.00      0.00
->> 0.00      0.00      0.00
->> > 03:53:17 PM      sde1      0.00      0.00      0.00      0.00      0.00
->> 0.00      0.00      0.00
->> > 03:53:17 PM      sde2      0.13      0.00      0.20      1.50      0.00
->> 20.00     20.00      0.27
->> > 03:53:32 PM      sde1      0.00      0.00      0.00      0.00      0.00
->> 0.00      0.00      0.00
->> > 03:53:32 PM      sde2      0.00      0.00      0.00      0.00      0.00
->> 0.00      0.00      0.00
->> > 03:53:47 PM      sde1      0.00      0.00      0.00      0.00      0.00
->> 0.00      0.00      0.00
->> > 03:53:47 PM      sde2      0.13      0.00      0.20      1.50      0.00
->> 5.00      5.00      0.07
->> > 03:54:02 PM      sde1      0.00      0.00      0.00      0.00      0.00
->> 0.00      0.00      0.00
->> > 03:54:02 PM      sde2      0.00      0.00      0.00      0.00      0.00
->> 0.00      0.00      0.00
->> > 03:54:17 PM      sde1      0.00      0.00      0.00      0.00      0.00
->> 0.00      0.00      0.00
->> > 03:54:17 PM      sde2      0.00      0.00      0.00      0.00      0.00
->> 0.00      0.00      0.00
->> > 03:54:32 PM      sde1      0.00      0.00      0.00      0.00      0.00
->> 0.00      0.00      0.00
->> > 03:54:32 PM      sde2      0.00      0.00      0.00      0.00      0.00
->> 0.00      0.00      0.00
->> >
->> > -- Tom
->> >
->> >> -----Original Message-----
->> >> From: Gregory Farnum [mailto:greg@gregs42.com]
->> >> Sent: Monday, July 13, 2015 5:07 AM
->> >> To: Deneau, Tom
->> >> Cc: ceph-devel
->> >> Subject: Re: osd suicide timeout
->> >>
->> >> On Fri, Jul 10, 2015 at 10:45 PM, Deneau, Tom <tom.deneau@amd.com> wrote:
->> >> > I have an osd log file from an osd that hit a suicide timeout (with
->> >> > the
->> >> previous 10000 events logged).
->> >> > (On this node I have also seen this suicide timeout happen once
->> >> > before and
->> >> also a sync_entry timeout.
->> >> >
->> >> > I can see that 6 minutes or so before that osd died, other osds on
->> >> > the same node were logging messages such as
->> >> >     heartbeat_check: no reply from osd.8 so it appears that osd8
->> >> > stopped responding quite some time before it died.
->> >>
->> >> It does this deliberately when its disk threads look like they might
->> >> be stuck.
->> >>
->> >> >
->> >> > I'm wondering if there is enough information in the osd8 log file
->> >> > to deduce
->> >> why osd 8 stopped responding?
->> >> > I don't know enough to figure it out myself.
->> >> >
->> >> > Is there any expert who would be willing to take a look at the log file?
->> >>
->> >> The logs will have a backtrace in them; if you can include that and
->> >> the last hundred lines or so prior in a pastebin that you email the
->> >> list with several people can give you a pretty good idea of what's going
->> on.
->> >>
->> >> In general though, it's just going to be that the disk can't keep up
->> >> with the load being applied to it. That could be because it's
->> >> failing, or because you're pushing too much work on to it in some fashion.
->> >> -Greg
+> --
+> Best Regards,
+>
+> Wheat
 
 
 
--- 
-thanks
-huangjun
+--=20
+Best Regards,
+
+Wheat
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
