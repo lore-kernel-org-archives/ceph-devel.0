@@ -1,111 +1,40 @@
-From: Konstantin Danilov <kdanilov@mirantis.com>
-Subject: Re: Block storage performance test tool - would like to merge into cbt
-Date: Tue, 14 Jul 2015 15:54:48 +0300
-Message-ID: <CACxKWawjp_fU8rwFjMFx04a-BuTodh-nsw5iW6=pRXmY3KS+7A@mail.gmail.com>
-References: <CACxKWazeKFOoebysNJ4XajwEmBf2kk6Asw0WVAAKLo=hCp32sA@mail.gmail.com>
-	<55A3D647.1050703@redhat.com>
-	<CACxKWaw_YA=SNKuA47emK1_QVwsrehWtYaLL7no9dQEPaZ3YaA@mail.gmail.com>
-	<55A4F0F7.20204@redhat.com>
+From: Gregory Farnum <greg@gregs42.com>
+Subject: Client: what is supposed to protect racing readdirs and unlinks?
+Date: Tue, 14 Jul 2015 18:11:06 +0100
+Message-ID: <CAC6JEv9VFv2ywGLOfHpcW=yodWCX_VMX22YMFvjnqQhsrfCJdg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f173.google.com ([209.85.217.173]:36161 "EHLO
-	mail-lb0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751277AbbGNMyu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Jul 2015 08:54:50 -0400
-Received: by lbbpo10 with SMTP id po10so5532367lbb.3
-        for <ceph-devel@vger.kernel.org>; Tue, 14 Jul 2015 05:54:49 -0700 (PDT)
-In-Reply-To: <55A4F0F7.20204@redhat.com>
+Received: from mail-ig0-f174.google.com ([209.85.213.174]:37097 "EHLO
+	mail-ig0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751958AbbGNRLH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Jul 2015 13:11:07 -0400
+Received: by igbpg9 with SMTP id pg9so17172318igb.0
+        for <ceph-devel@vger.kernel.org>; Tue, 14 Jul 2015 10:11:06 -0700 (PDT)
+Received: from mail-ig0-f174.google.com (mail-ig0-f174.google.com. [209.85.213.174])
+        by smtp.gmail.com with ESMTPSA id v82sm941480ioi.11.2015.07.14.10.11.06
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 14 Jul 2015 10:11:06 -0700 (PDT)
+Received: by iggf3 with SMTP id f3so17135773igg.1
+        for <ceph-devel@vger.kernel.org>; Tue, 14 Jul 2015 10:11:06 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>
-Cc: ceph-devel@vger.kernel.org, Ben England <bengland@redhat.com>, Ben Turner <bturner@redhat.com>, Kyle Bader <kbader@redhat.com>, tyler Brekke <tbrekke@redhat.com>, cbt <cbt@ceph.com>
+To: Sage Weil <sweil@redhat.com>, =?UTF-8?B?5Lil5q2j?= <zyan@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-I think better to discuss after the meeting
+I spent a bunch of today looking at http://tracker.ceph.com/issues/12297.
 
-On Tue, Jul 14, 2015 at 2:22 PM, Mark Nelson <mnelson@redhat.com> wrote:
-> Probably depends how much time it will take.  I'd say if we think it might
-> be more than 15 minutes of discussion we should wait until the end of the
-> performance meeting and then talk about it.  If it's fairly quick though we
-> could probably add it to the perf meeting itself.
->
-> Mark
->
->
-> On 07/14/2015 03:11 AM, Konstantin Danilov wrote:
->>
->> Mark,
->>
->> does Wednesday performance meeting is a good place for discussion, or
->> we need a separated one?
->>
->> On Mon, Jul 13, 2015 at 6:16 PM, Mark Nelson <mnelson@redhat.com> wrote:
->>>
->>> Hi Konstantin,
->>>
->>> I'm definitely interested in looking at your tools and seeing if we can
->>> merge them into cbt!  One of the things we lack right now in cbt is any
->>> kind
->>> of real openstack integration.  Right now CBT basically just assumes
->>> you've
->>> already launched VMs and specified them as clients in the yaml, so being
->>> able to spin up VMs in a standard way would be very useful.  It might be
->>> worth exploring if we can use your tool to make the cluster base class
->>> "openstack aware" so that any of the eventual cluster classes (ceph, and
->>> maybe some day gluster, swift, etc) can use it to launch VMs or do other
->>> things.  I'd really love to be able to create a cbt yaml config file and
->>> iterate through parametric configuration parameters building multiple
->>> different clusters and running tests against them with system monitoring
->>> and
->>> data post processing happening automatically.
->>>
->>> The data post processing is also something that will be very useful.  We
->>> have a couple of folks really interested in this area as well.
->>>
->>> Mark
->>>
->>>
->>>
->>>
->>> On 07/11/2015 03:02 AM, Konstantin Danilov wrote:
->>>>
->>>>
->>>> Hi all,
->>>>
->>>> We(Mirantis ceph team) have a tool for block storage performance test,
->>>> called 'wally' -
->>>> https://github.com/Mirantis/disk_perf_test_tool.
->>>>
->>>> It has some nice features, like:
->>>>
->>>> * Openstack and FUEL integration (can spawn VM for tests, gather HW
->>>> info,
->>>> etc)
->>>> * Set of tests, joined into suit, which measures different performnce
->>>> aspects and
->>>> creates joined report, as example -
->>>> http://koder-ua.github.io/6.1GA/cinder_volume_iscsi.html,
->>>> VM running on ceph drives report example -
->>>> http://koder-ua.github.io/random/ceph_example.html
->>>> * Data postrocessing - confidence intervals, etc
->>>>
->>>> We would like to merge our code into cbt. Do you interesting in it?
->>>> Can we discuss a way to merge?
->>>>
->>>> Thanks
->>>>
->>>
->>
->>
->>
->
+Long story short: the workload is doing a readdir at the same time as
+it's unlinking files. The readdir functions (in this case,
+_readdir_cache_cb) drop the client_lock each time they invoke the
+callback (for obvious reasons). There is some effort in
+_readdir_cache_cb to try and keep the iterator valid (we check on each
+loop that we aren't at end; we increment the iterator before dropping
+the lock), but it's not sufficient.
 
-
-
--- 
-Kostiantyn Danilov aka koder.ua
-Principal software engineer, Mirantis
-
-skype:koder.ua
-http://koder-ua.blogspot.com/
-http://mirantis.com
+Is there supposed to be something preventing this kind of race? If not
+I can work something out in the code but I've not done much work in
+that bit and there are enough pieces that I wonder if I'm missing some
+other issue.
+-Greg
