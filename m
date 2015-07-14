@@ -1,90 +1,159 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: Client: what is supposed to protect racing readdirs and
- unlinks?
-Date: Tue, 14 Jul 2015 12:18:57 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1507141216510.8849@cobra.newdream.net>
-References: <CAC6JEv9VFv2ywGLOfHpcW=yodWCX_VMX22YMFvjnqQhsrfCJdg@mail.gmail.com> <alpine.DEB.2.00.1507141134000.8878@cobra.newdream.net> <CAC6JEv9i2J_XAyDdWZRe1RsN9VNaikaKtBiAYMb_YEvRSV3w0A@mail.gmail.com>
+From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Subject: Re: s3test firefly failing
+Date: Tue, 14 Jul 2015 15:47:30 -0400 (EDT)
+Message-ID: <750240441.7103382.1436903250651.JavaMail.zimbra@redhat.com>
+References: <55A4C004.4000205@dachary.org>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1185338307-1436901539=:8849"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:34294 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753220AbbGNTTA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 14 Jul 2015 15:19:00 -0400
-In-Reply-To: <CAC6JEv9i2J_XAyDdWZRe1RsN9VNaikaKtBiAYMb_YEvRSV3w0A@mail.gmail.com>
+Received: from mx4-phx2.redhat.com ([209.132.183.25]:53515 "EHLO
+	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753626AbbGNTsd convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Jul 2015 15:48:33 -0400
+In-Reply-To: <55A4C004.4000205@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@gregs42.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, =?GB2312?B?0c/V/Q==?= <zyan@redhat.com>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Doesn't ring a bell. There should be a config file it uses to determine=
+ where to connect to.
 
---557981400-1185338307-1436901539=:8849
-Content-Type: TEXT/PLAIN; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
-
-On Tue, 14 Jul 2015, Gregory Farnum wrote:
-> The following dentry. When it gets unlinked it also gets removed from the
-> xlist we're using to traverse the directory contents. We could add some kind
-> of refcounting to try and make it do a NULL or similat but I don't think
-> anything like that exists yet.
-
-Yeah that sounds likely.  I think that's the fix, though.. and I have some 
-recollection of conditions where we favor making the dentry null instead 
-of removing it, so hopefully it's not to involved.
-
-It's probably a better behavior anyway for caching reasons, in case the 
-directory isn't complete?
-
-> (Sorry this is probably going to get bounced from the list, I'm on my phone
-> and haven't found an html-free way to send from it...)
-
-My reply should go through at least :)
-
-sage
-
-> 
-> 
-> On Tue, Jul 14, 2015, 7:36 PM Sage Weil <sweil@redhat.com> wrote:
->       On Tue, 14 Jul 2015, Gregory Farnum wrote:
->       > I spent a bunch of today looking at
->       http://tracker.ceph.com/issues/12297.
->       >
->       > Long story short: the workload is doing a readdir at the same
->       time as
->       > it's unlinking files. The readdir functions (in this case,
->       > _readdir_cache_cb) drop the client_lock each time they invoke
->       the
->       > callback (for obvious reasons). There is some effort in
->       > _readdir_cache_cb to try and keep the iterator valid (we check
->       on each
->       > loop that we aren't at end; we increment the iterator before
->       dropping
->       > the lock), but it's not sufficient.
->       >
->       > Is there supposed to be something preventing this kind of
->       race? If not
->       > I can work something out in the code but I've not done much
->       work in
->       > that bit and there are enough pieces that I wonder if I'm
->       missing some
->       > other issue.
-> 
->       What is the race you're worried about?  Unlinking the file that
->       we're
->       doing the callback on, or the one that follows it (where the
->       iterator now
->       points)?
-> 
->       My guess is that in this case unlink should see that there is a
->       reference
->       on the dentry and should make it NULL instead of unlinking it
->       from the
->       directory entirely...
-> 
->       sage
-> 
-> 
-> 
---557981400-1185338307-1436901539=:8849--
+----- Original Message -----
+> From: "Loic Dachary" <loic@dachary.org>
+> To: "Yehuda Sadeh" <yehuda@redhat.com>
+> Cc: "Ceph Development" <ceph-devel@vger.kernel.org>
+> Sent: Tuesday, July 14, 2015 12:53:40 AM
+> Subject: s3test firefly failing
+>=20
+> Hi Yehuda,
+>=20
+> When running the firefly rgw suite in a teuthology setup outside of t=
+he Ceph
+> community lab, I'm seeing a lot of errors like the following. Althoug=
+h the
+> traceback does not give any indication as to what domain name could n=
+ot be
+> resolved, I suspect it is a hardcoded value somewhere that needs to b=
+e
+> defined in the DNS in order to work. I kind of remember S3 has all ki=
+nds of
+> hardcoded domain names since it's not supposed to be used outside of =
+AWS.
+>=20
+> Does that ring a bell ?
+>=20
+> Cheers
+>=20
+> http://integration.ceph.dachary.org:8081/ubuntu-2015-07-13_23:33:20-r=
+gw-firefly-backports---basic-openstack/
+> has
+> http://integration.ceph.dachary.org/ubuntu-2015-07-13_23:33:20-rgw-fi=
+refly-backports---basic-openstack/79/teuthology.log
+>=20
+> 2015-07-14T04:35:42.762 INFO:teuthology.orchestra.run.ovh237095:Runni=
+ng:
+> '/home/ubuntu/cephtest/s3-tests/virtualenv/bin/s3tests-test-readwrite=
+'
+> 2015-07-14T04:35:42.899 INFO:teuthology.orchestra.run.ovh237095.stder=
+r:Using
+> random seeds: {'writer': 3920086541, 'main': 1490942677, 'names': 905=
+270384,
+> 'contents': 501048982, 'reader': 823656287}
+> 2015-07-14T04:35:45.306
+> INFO:teuthology.orchestra.run.ovh237095.stderr:Created bucket: rwtest
+> 2015-07-14T04:35:45.311
+> INFO:teuthology.orchestra.run.ovh237095.stderr:Creating random file n=
+ames
+> 2015-07-14T04:35:45.312
+> INFO:teuthology.orchestra.run.ovh237095.stderr:Uploading initial set =
+of 10
+> files
+> 2015-07-14T04:36:15.542
+> INFO:teuthology.orchestra.run.ovh237095.stderr:Traceback (most recent=
+ call
+> last):
+> 2015-07-14T04:36:15.547 INFO:teuthology.orchestra.run.ovh237095.stder=
+r:  File
+> "/home/ubuntu/cephtest/s3-tests/virtualenv/local/lib/python2.7/site-p=
+ackages/gevent/greenlet.py",
+> line 390, in run
+> 2015-07-14T04:36:15.548 INFO:teuthology.orchestra.run.ovh237095.stder=
+r:
+> result =3D self._run(*self.args, **self.kwargs)
+> 2015-07-14T04:36:15.548 INFO:teuthology.orchestra.run.ovh237095.stder=
+r:  File
+> "/home/ubuntu/cephtest/s3-tests/s3tests/readwrite.py", line 126, in
+> write_file
+> 2015-07-14T04:36:15.548 INFO:teuthology.orchestra.run.ovh237095.stder=
+r:
+> key.set_contents_from_file(fp)
+> 2015-07-14T04:36:15.548 INFO:teuthology.orchestra.run.ovh237095.stder=
+r:  File
+> "/home/ubuntu/cephtest/s3-tests/virtualenv/local/lib/python2.7/site-p=
+ackages/boto/s3/key.py",
+> line 1293, in set_contents_from_file
+> 2015-07-14T04:36:15.549 INFO:teuthology.orchestra.run.ovh237095.stder=
+r:
+> chunked_transfer=3Dchunked_transfer, size=3Dsize)
+> 2015-07-14T04:36:15.549 INFO:teuthology.orchestra.run.ovh237095.stder=
+r:  File
+> "/home/ubuntu/cephtest/s3-tests/virtualenv/local/lib/python2.7/site-p=
+ackages/boto/s3/key.py",
+> line 750, in send_file
+> 2015-07-14T04:36:15.549 INFO:teuthology.orchestra.run.ovh237095.stder=
+r:
+> chunked_transfer=3Dchunked_transfer, size=3Dsize)
+> 2015-07-14T04:36:15.555 INFO:teuthology.orchestra.run.ovh237095.stder=
+r:  File
+> "/home/ubuntu/cephtest/s3-tests/virtualenv/local/lib/python2.7/site-p=
+ackages/boto/s3/key.py",
+> line 951, in _send_file_internal
+> 2015-07-14T04:36:15.555 INFO:teuthology.orchestra.run.ovh237095.stder=
+r:
+> query_args=3Dquery_args
+> 2015-07-14T04:36:15.555 INFO:teuthology.orchestra.run.ovh237095.stder=
+r:  File
+> "/home/ubuntu/cephtest/s3-tests/virtualenv/local/lib/python2.7/site-p=
+ackages/boto/s3/connection.py",
+> line 664, in make_request
+> 2015-07-14T04:36:15.556 INFO:teuthology.orchestra.run.ovh237095.stder=
+r:
+> retry_handler=3Dretry_handler
+> 2015-07-14T04:36:15.556 INFO:teuthology.orchestra.run.ovh237095.stder=
+r:  File
+> "/home/ubuntu/cephtest/s3-tests/virtualenv/local/lib/python2.7/site-p=
+ackages/boto/connection.py",
+> line 1071, in make_request
+> 2015-07-14T04:36:15.556 INFO:teuthology.orchestra.run.ovh237095.stder=
+r:
+> retry_handler=3Dretry_handler)
+> 2015-07-14T04:36:15.556 INFO:teuthology.orchestra.run.ovh237095.stder=
+r:  File
+> "/home/ubuntu/cephtest/s3-tests/virtualenv/local/lib/python2.7/site-p=
+ackages/boto/connection.py",
+> line 1030, in _mexe
+> 2015-07-14T04:36:15.556 INFO:teuthology.orchestra.run.ovh237095.stder=
+r:
+> raise ex
+> 2015-07-14T04:36:15.556
+> INFO:teuthology.orchestra.run.ovh237095.stderr:DNSError: [Errno 3] na=
+me does
+> not exist
+> 2015-07-14T04:36:15.556
+> INFO:teuthology.orchestra.run.ovh237095.stderr:<Greenlet at 0x7fbd8f8=
+c64b0:
+> write_file(fp=3D<tempfile.SpooledTemporaryFile instance at 0x7fbd8,
+> file_name=3D'ctygneslkqtdbzs', bucket=3D<Bucket: rwtest>)> failed wit=
+h DNSError
+>=20
+> --
+> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>=20
+>=20
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
