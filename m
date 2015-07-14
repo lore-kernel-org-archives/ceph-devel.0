@@ -1,159 +1,215 @@
-From: "Deneau, Tom" <tom.deneau@amd.com>
-Subject: RE: osd suicide timeout
-Date: Mon, 13 Jul 2015 23:12:24 +0000
-Message-ID: <BC97738F8E7C8742BABED7F06FB9DF91669B4FFB@SATLEXDAG01.amd.com>
+From: huang jun <hjwsm1989@gmail.com>
+Subject: Re: osd suicide timeout
+Date: Tue, 14 Jul 2015 08:42:08 +0800
+Message-ID: <CABAwU-bJh5a8fTcr01D72pbk7ZPW7+jw58tvrkFX5B75iXh-7g@mail.gmail.com>
 References: <BC97738F8E7C8742BABED7F06FB9DF91669B3BFF@SATLEXDAG01.amd.com>
 	<CAC6JEv9GJFAyQBXU398Na=RfHROPoakbzcM6sFUCh_Cg6bE7Zw@mail.gmail.com>
 	<BC97738F8E7C8742BABED7F06FB9DF91669B4DDC@SATLEXDAG01.amd.com>
- <CAC6JEv-=z3c+Awyz_YpWKO=g_Vf31iFb7s4eSFToiLtSkXKGyQ@mail.gmail.com>
+	<CAC6JEv-=z3c+Awyz_YpWKO=g_Vf31iFb7s4eSFToiLtSkXKGyQ@mail.gmail.com>
+	<BC97738F8E7C8742BABED7F06FB9DF91669B4FFB@SATLEXDAG01.amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0144.outbound.protection.outlook.com ([207.46.100.144]:10784
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751491AbbGMXM3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 13 Jul 2015 19:12:29 -0400
-In-Reply-To: <CAC6JEv-=z3c+Awyz_YpWKO=g_Vf31iFb7s4eSFToiLtSkXKGyQ@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-lb0-f172.google.com ([209.85.217.172]:35047 "EHLO
+	mail-lb0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752117AbbGNAmK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Jul 2015 20:42:10 -0400
+Received: by lblf12 with SMTP id f12so62311379lbl.2
+        for <ceph-devel@vger.kernel.org>; Mon, 13 Jul 2015 17:42:08 -0700 (PDT)
+In-Reply-To: <BC97738F8E7C8742BABED7F06FB9DF91669B4FFB@SATLEXDAG01.amd.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@gregs42.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: "Deneau, Tom" <tom.deneau@amd.com>
+Cc: Gregory Farnum <greg@gregs42.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-R3JlZyAtLQ0KDQpOb3Qgc3VyZSBob3cgdG8gdGVsbCB3aGV0aGVyIHJlYmFsYW5jaW5nIG9jY3Vy
-cmVkIGF0IHRoYXQgdGltZS4NCkkgZG8gc2VlIGluIG90aGVyIG9zZCBsb2dzIGNvbXBsYWludHMg
-dGhhdCB0aGV5IGRvIG5vdCBnZXQgYSByZXBseSBmcm9tDQpvc2QuOCBzdGFydGluZyBhcm91bmQg
-MTU6NTIgb24gdGhhdCBkYXkuDQoNCkkgc2VlIHRoZSBkZWVwLXNjcnViIG9mIHBvb2wgMTQgYnV0
-IHRoYXQgd2FzIGFsbW9zdCAzMCBtaW51dGVzIGVhcmxpZXIuDQoNCi0tIFRvbQ0KDQoNCj4gLS0t
-LS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogR3JlZ29yeSBGYXJudW0gW21haWx0bzpn
-cmVnQGdyZWdzNDIuY29tXQ0KPiBTZW50OiBNb25kYXksIEp1bHkgMTMsIDIwMTUgMTE6NDUgQU0N
-Cj4gVG86IERlbmVhdSwgVG9tDQo+IENjOiBjZXBoLWRldmVsDQo+IFN1YmplY3Q6IFJlOiBvc2Qg
-c3VpY2lkZSB0aW1lb3V0DQo+IA0KPiBoZWFydGJlYXRfbWFwIHJlc2V0X3RpbWVvdXQgJ09TRDo6
-b3NkX29wX3RwIHRocmVhZCAweDNmZjZlYjBlZmQwJyBoYWQgc3VpY2lkZQ0KPiB0aW1lZCBvdXQg
-YWZ0ZXIgMTUwDQo+IA0KPiBTbyB0aGF0J3MgdGhlIE9TRCdzICJvcCB0aHJlYWQiLCB3aGljaCBp
-cyB0aGUgb25lIHRoYXQgZG9lcyBtb3N0IG9mIHRoZSB3b3JrLg0KPiBZb3Ugb2Z0ZW4gc2VlIHRo
-ZSBGaWxlU3RvcmU6Om9wX3RwIHdoZW4gaXQncyB0aGUgZGlzayBvciBmaWxlc3lzdGVtIGJyZWFr
-aW5nLA0KPiBidXQgSSBkbyBzZWUgdGhlIGxpbmUNCj4gDQo+IHdhaXRpbmcgNTEgPiA1MCBvcHMg
-fHwgNTcyNDgwMDggPiAxMDQ4NTc2MDANCj4gDQo+IHdoaWNoIGxlYXZlcyBtZSBmZWVsaW5nIHBy
-ZXR0eSBjb25maWRlbnQgdGhhdCB0aGUgZGlzayBpcyBqdXN0IGdldHRpbmcgbW9yZQ0KPiB3b3Jr
-IHRoYW4gaXQgY2FuIGtlZXAgdXAgd2l0aC4gSXQgbG9va3MgbGlrZSB0aGVyZSB3YXMgc29tZSBy
-ZWJhbGFuY2luZw0KPiBoYXBwZW5pbmcgYXJvdW5kIHRoaXMgdGltZT8NCj4gLUdyZWcNCj4gDQo+
-IA0KPiANCj4gT24gTW9uLCBKdWwgMTMsIDIwMTUgYXQgNTowNCBQTSwgRGVuZWF1LCBUb20gPHRv
-bS5kZW5lYXVAYW1kLmNvbT4gd3JvdGU6DQo+ID4gR3JlZyAtLQ0KPiA+DQo+ID4gVGhhbmtzLiAg
-SSBwdXQgdGhlIG9zZC5sb2cgZmlsZSBhdA0KPiA+DQo+ID4gaHR0cHM6Ly9kcml2ZS5nb29nbGUu
-Y29tL2ZpbGUvZC8wQl9yZndXaDQwa1B3UWpaM09YZGpMVVpOUlZVL3ZpZXc/dXNwPQ0KPiA+IHNo
-YXJpbmcNCj4gPg0KPiA+IEkgbm90aWNlZCB0aGUgZm9sbG93aW5nIGZyb20gam91cm5hbGN0bCBv
-dXRwdXQgYXJvdW5kIHRoYXQgdGltZSwgc28gb3RoZXINCj4gbm9kZXMgd2VyZSBjb21wbGFpbmlu
-ZyB0aGV5IGNvdWxkIG5vdCByZWFjaCBvc2QuOC4NCj4gPg0KPiA+IEp1bCAwOSAxNTo1MzowNCBz
-ZWF0dGxlLTA0LWF1c2lzdiBiYXNoWzg0ODZdOiAyMDE1LTA3LTA5DQo+ID4gMTU6NTM6MDMuOTA1
-Mzg2IDNmZmEwZDllZmQwIC0xIG9zZC45IDI0ODcgaGVhcnRiZWF0X2NoZWNrOiBubyByZXBseQ0K
-PiA+IGZyb20gb3NkLjggc2luY2UgYmFjayAyMDE1LTA3LTA5IDE1OjUyOjQzLjI1NjU4MSBmcm9u
-dCAyMDE1LTA3LTA5DQo+ID4gMTU6NTI6NDMuMjU2NTgxIChjdXRvZmYgMjAxNS0wNy0wOSAxNTo1
-Mjo0My45MDUzODQpIEp1bCAwOSAxNTo1MzowNg0KPiA+IHNlYXR0bGUtMDQtYXVzaXN2IGJhc2hb
-MTA2MF06IDIwMTUtMDctMDkgMTU6NTM6MDYuNzg0MDY5IDNmZjkxNmZlZmQwDQo+ID4gLTEgb3Nk
-LjcgMjQ4NyBoZWFydGJlYXRfY2hlY2s6IG5vIHJlcGx5IGZyb20gb3NkLjggc2luY2UgYmFjaw0K
-PiA+IDIwMTUtMDctMDkgMTU6NTI6NDYuNDc0MjczIGZyb250IDIwMTUtMDctMDkgMTU6NTI6NDYu
-NDc0MjczIChjdXRvZmYNCj4gPiAyMDE1LTA3LTA5IDE1OjUyOjQ2Ljc4NDA2NikNCj4gPg0KPiA+
-IGFuZCBoZXJlIGlzIHNvbWUgc2FyIGRhdGEgZm9yIHRoZSBkaXNrIHRoYXQgb3NkLjggd2FzIGNv
-bnRyb2xsaW5nDQo+ID4gKHNkZTE9am91cm5hbCBwYXJ0aXRpb24sIHNkZTI9ZGF0YSBwYXJ0aXRp
-b24pDQo+ID4NCj4gPiAwMzo0MDowMiBQTSAgICAgICBERVYgICAgICAgdHBzICByZF9zZWMvcyAg
-d3Jfc2VjL3MgIGF2Z3JxLXN6ICBhdmdxdS1zeg0KPiBhd2FpdCAgICAgc3ZjdG0gICAgICV1dGls
-DQo+ID4gMDM6NTA6MTcgUE0gICAgICBzZGUxICAgICAgOS42NyAgICAgIDAuMDAgIDE5MDQ2LjQw
-ICAgMTk3MC4zMiAgICAgIDAuMzUNCj4gMzUuODYgICAgIDMwLjYyICAgICAyOS42MA0KPiA+IDAz
-OjUwOjE3IFBNICAgICAgc2RlMiAgICAgNjAuNDcgICAxNTI0LjI3ICAxNDU5Ny42NyAgICAyNjYu
-NjMgICAgIDI0LjQ1DQo+IDQwNC4zMCAgICAgIDguNTQgICAgIDUxLjY3DQo+ID4gMDM6NTA6MzIg
-UE0gICAgICBzZGUxICAgICAxMi4xMyAgICAgIDAuMDAgIDE4MTU4LjkzICAgMTQ5Ni42MiAgICAg
-IDAuMjUNCj4gMjAuNjYgICAgIDE3LjU4ICAgICAyMS4zMw0KPiA+IDAzOjUwOjMyIFBNICAgICAg
-c2RlMiAgICAgMjguMDAgICAxNTUwLjkzICAxNzk1OC4zMyAgICA2OTYuNzYgICAgIDEwLjU0DQo+
-IDM3Ni41MCAgICAgMTMuNTIgICAgIDM3Ljg3DQo+ID4gMDM6NTA6NDcgUE0gICAgICBzZGUxICAg
-ICAxMi43MyAgICAgIDAuMDAgIDI1NDQ2LjQwICAgMTk5OC40MSAgICAgIDAuMzENCj4gMjQuMTkg
-ICAgIDIyLjMwICAgICAyOC40MA0KPiA+IDAzOjUwOjQ3IFBNICAgICAgc2RlMiAgICAgNTEuNjAg
-ICAgMzM4LjY3ICAxODA5MS43MyAgICAzNTcuMTggICAgIDEzLjA1DQo+IDI1Mi45MSAgICAgIDgu
-MDIgICAgIDQxLjQwDQo+ID4gMDM6NTE6MDIgUE0gICAgICBzZGUxICAgICAxMi4yNyAgICAgIDAu
-MDAgIDE4NzkwLjQwICAgMTUzMS44MyAgICAgIDAuMzENCj4gMjUuMzMgICAgIDE4LjUzICAgICAy
-Mi43Mw0KPiA+IDAzOjUxOjAyIFBNICAgICAgc2RlMiAgICAgMzMuMTMgICAyNjM1LjIwICAxODAy
-Ni42NyAgICA2MjMuNjAgICAgICA1LjAyDQo+IDE1MS41NyAgICAgMTAuOTkgICAgIDM2LjQwDQo+
-ID4gMDM6NTE6MTcgUE0gICAgICBzZGUxICAgICAxMC4xMyAgICAgIDAuMDAgIDE0NTU3Ljg3ICAg
-MTQzNi42MyAgICAgIDAuMTYNCj4gMTYuMTggICAgIDEyLjc2ICAgICAxMi45Mw0KPiA+IDAzOjUx
-OjE3IFBNICAgICAgc2RlMiAgICAgNDYuNzMgICAxMTA3LjczICAxMjA2Ny4wMCAgICAyODEuOTEg
-ICAgICA4LjU1DQo+IDE4Mi44OCAgICAgIDUuNDYgICAgIDI1LjUzDQo+ID4gMDM6NTE6MzIgUE0g
-ICAgICBzZGUxICAgICAxMS45MyAgICAgIDAuMDAgIDE4NTk0LjEzICAgMTU1OC4xNyAgICAgIDAu
-MzUNCj4gMjkuMjcgICAgIDE2LjQyICAgICAxOS42MA0KPiA+IDAzOjUxOjMyIFBNICAgICAgc2Rl
-MiAgICAgMjIuMjAgICAgNTU1LjIwICAxODgzNC4zMyAgICA4NzMuNDAgICAgICA0LjI0DQo+IDE5
-MS4wOCAgICAgMTMuNTEgICAgIDMwLjAwDQo+ID4gMDM6NTE6NDcgUE0gICAgICBzZGUxICAgICAx
-OC4wMCAgICAgIDAuMDAgIDEzOTI2LjQwICAgIDc3My42OSAgICAgIDAuMTkNCj4gMTAuNzggICAg
-IDEwLjA3ICAgICAxOC4xMw0KPiA+IDAzOjUxOjQ3IFBNICAgICAgc2RlMiAgICAgNDcuMjcgICAx
-NjUyLjgwICAxMDc3NS41MyAgICAyNjIuOTQgICAgIDEyLjI0DQo+IDI1OS4wMSAgICAgIDYuNjYg
-ICAgIDMxLjQ3DQo+ID4gMDM6NTI6MDIgUE0gICAgICBzZGUxICAgICAyMS42MCAgICAgIDAuMDAg
-IDEwODQ1Ljg3ICAgIDUwMi4xMiAgICAgIDAuMjQNCj4gMTEuMDggICAgICA5Ljc1ICAgICAyMS4w
-Nw0KPiA+IDAzOjUyOjAyIFBNICAgICAgc2RlMiAgICAgMzQuMzMgICAxNjUyLjgwICAgOTA4OS4x
-MyAgICAzMTIuODcgICAgICA3LjQzDQo+IDIxNi40MSAgICAgIDguNDUgICAgIDI5LjAwDQo+ID4g
-MDM6NTI6MTcgUE0gICAgICBzZGUxICAgICAxOS44NyAgICAgIDAuMDAgIDIwMTk4LjQwICAgMTAx
-Ni43MCAgICAgIDAuMzMNCj4gMTYuODUgICAgIDEzLjQ2ICAgICAyNi43Mw0KPiA+IDAzOjUyOjE3
-IFBNICAgICAgc2RlMiAgICAgMzUuNjAgICAyNzUyLjUzICAxNjM1NS41MyAgICA1MzYuNzQgICAg
-IDExLjkwDQo+IDMzMy4zMyAgICAgMTAuOTAgICAgIDM4LjgwDQo+ID4gMDM6NTI6MzIgUE0gICAg
-ICBzZGUxICAgICAyMi41NCAgICAgIDAuMDAgICA4NDM0LjA0ICAgIDM3NC4xOCAgICAgIDAuMTUN
-Cj4gNi42NyAgICAgIDYuMTcgICAgIDEzLjkwDQo+ID4gMDM6NTI6MzIgUE0gICAgICBzZGUyICAg
-ICAzNS44NCAgIDI3MzguMzAgICA0NTg2LjMwICAgIDIwNC4zOCAgICAgIDIuMDENCj4gMjguMTEg
-ICAgICA2LjUzICAgICAyMy40MA0KPiA+IDAzOjUyOjQ3IFBNICAgICAgc2RlMSAgICAgIDAuMDAg
-ICAgICAwLjAwICAgICAgMC4wMCAgICAgIDAuMDAgICAgICAwLjAwDQo+IDAuMDAgICAgICAwLjAw
-ICAgICAgMC4wMA0KPiA+IDAzOjUyOjQ3IFBNICAgICAgc2RlMiAgICAgMTMuMzcgICAgIDM1Ljgz
-ICAgMTEwMS44MCAgICAgODUuMDkgICAgICAxLjg3DQo+IDIxOC42NSAgICAgIDUuNzUgICAgICA3
-LjY5DQo+ID4gMDM6NTM6MDIgUE0gICAgICBzZGUxICAgICAgMC4wMCAgICAgIDAuMDAgICAgICAw
-LjAwICAgICAgMC4wMCAgICAgIDAuMDANCj4gMC4wMCAgICAgIDAuMDAgICAgICAwLjAwDQo+ID4g
-MDM6NTM6MDIgUE0gICAgICBzZGUyICAgICAgMC4wMCAgICAgIDAuMDAgICAgICAwLjAwICAgICAg
-MC4wMCAgICAgIDAuMDANCj4gMC4wMCAgICAgIDAuMDAgICAgICAwLjAwDQo+ID4gMDM6NTM6MTcg
-UE0gICAgICBzZGUxICAgICAgMC4wMCAgICAgIDAuMDAgICAgICAwLjAwICAgICAgMC4wMCAgICAg
-IDAuMDANCj4gMC4wMCAgICAgIDAuMDAgICAgICAwLjAwDQo+ID4gMDM6NTM6MTcgUE0gICAgICBz
-ZGUyICAgICAgMC4xMyAgICAgIDAuMDAgICAgICAwLjIwICAgICAgMS41MCAgICAgIDAuMDANCj4g
-MjAuMDAgICAgIDIwLjAwICAgICAgMC4yNw0KPiA+IDAzOjUzOjMyIFBNICAgICAgc2RlMSAgICAg
-IDAuMDAgICAgICAwLjAwICAgICAgMC4wMCAgICAgIDAuMDAgICAgICAwLjAwDQo+IDAuMDAgICAg
-ICAwLjAwICAgICAgMC4wMA0KPiA+IDAzOjUzOjMyIFBNICAgICAgc2RlMiAgICAgIDAuMDAgICAg
-ICAwLjAwICAgICAgMC4wMCAgICAgIDAuMDAgICAgICAwLjAwDQo+IDAuMDAgICAgICAwLjAwICAg
-ICAgMC4wMA0KPiA+IDAzOjUzOjQ3IFBNICAgICAgc2RlMSAgICAgIDAuMDAgICAgICAwLjAwICAg
-ICAgMC4wMCAgICAgIDAuMDAgICAgICAwLjAwDQo+IDAuMDAgICAgICAwLjAwICAgICAgMC4wMA0K
-PiA+IDAzOjUzOjQ3IFBNICAgICAgc2RlMiAgICAgIDAuMTMgICAgICAwLjAwICAgICAgMC4yMCAg
-ICAgIDEuNTAgICAgICAwLjAwDQo+IDUuMDAgICAgICA1LjAwICAgICAgMC4wNw0KPiA+IDAzOjU0
-OjAyIFBNICAgICAgc2RlMSAgICAgIDAuMDAgICAgICAwLjAwICAgICAgMC4wMCAgICAgIDAuMDAg
-ICAgICAwLjAwDQo+IDAuMDAgICAgICAwLjAwICAgICAgMC4wMA0KPiA+IDAzOjU0OjAyIFBNICAg
-ICAgc2RlMiAgICAgIDAuMDAgICAgICAwLjAwICAgICAgMC4wMCAgICAgIDAuMDAgICAgICAwLjAw
-DQo+IDAuMDAgICAgICAwLjAwICAgICAgMC4wMA0KPiA+IDAzOjU0OjE3IFBNICAgICAgc2RlMSAg
-ICAgIDAuMDAgICAgICAwLjAwICAgICAgMC4wMCAgICAgIDAuMDAgICAgICAwLjAwDQo+IDAuMDAg
-ICAgICAwLjAwICAgICAgMC4wMA0KPiA+IDAzOjU0OjE3IFBNICAgICAgc2RlMiAgICAgIDAuMDAg
-ICAgICAwLjAwICAgICAgMC4wMCAgICAgIDAuMDAgICAgICAwLjAwDQo+IDAuMDAgICAgICAwLjAw
-ICAgICAgMC4wMA0KPiA+IDAzOjU0OjMyIFBNICAgICAgc2RlMSAgICAgIDAuMDAgICAgICAwLjAw
-ICAgICAgMC4wMCAgICAgIDAuMDAgICAgICAwLjAwDQo+IDAuMDAgICAgICAwLjAwICAgICAgMC4w
-MA0KPiA+IDAzOjU0OjMyIFBNICAgICAgc2RlMiAgICAgIDAuMDAgICAgICAwLjAwICAgICAgMC4w
-MCAgICAgIDAuMDAgICAgICAwLjAwDQo+IDAuMDAgICAgICAwLjAwICAgICAgMC4wMA0KPiA+DQo+
-ID4gLS0gVG9tDQo+ID4NCj4gPj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gPj4gRnJv
-bTogR3JlZ29yeSBGYXJudW0gW21haWx0bzpncmVnQGdyZWdzNDIuY29tXQ0KPiA+PiBTZW50OiBN
-b25kYXksIEp1bHkgMTMsIDIwMTUgNTowNyBBTQ0KPiA+PiBUbzogRGVuZWF1LCBUb20NCj4gPj4g
-Q2M6IGNlcGgtZGV2ZWwNCj4gPj4gU3ViamVjdDogUmU6IG9zZCBzdWljaWRlIHRpbWVvdXQNCj4g
-Pj4NCj4gPj4gT24gRnJpLCBKdWwgMTAsIDIwMTUgYXQgMTA6NDUgUE0sIERlbmVhdSwgVG9tIDx0
-b20uZGVuZWF1QGFtZC5jb20+IHdyb3RlOg0KPiA+PiA+IEkgaGF2ZSBhbiBvc2QgbG9nIGZpbGUg
-ZnJvbSBhbiBvc2QgdGhhdCBoaXQgYSBzdWljaWRlIHRpbWVvdXQgKHdpdGgNCj4gPj4gPiB0aGUN
-Cj4gPj4gcHJldmlvdXMgMTAwMDAgZXZlbnRzIGxvZ2dlZCkuDQo+ID4+ID4gKE9uIHRoaXMgbm9k
-ZSBJIGhhdmUgYWxzbyBzZWVuIHRoaXMgc3VpY2lkZSB0aW1lb3V0IGhhcHBlbiBvbmNlDQo+ID4+
-ID4gYmVmb3JlIGFuZA0KPiA+PiBhbHNvIGEgc3luY19lbnRyeSB0aW1lb3V0Lg0KPiA+PiA+DQo+
-ID4+ID4gSSBjYW4gc2VlIHRoYXQgNiBtaW51dGVzIG9yIHNvIGJlZm9yZSB0aGF0IG9zZCBkaWVk
-LCBvdGhlciBvc2RzIG9uDQo+ID4+ID4gdGhlIHNhbWUgbm9kZSB3ZXJlIGxvZ2dpbmcgbWVzc2Fn
-ZXMgc3VjaCBhcw0KPiA+PiA+ICAgICBoZWFydGJlYXRfY2hlY2s6IG5vIHJlcGx5IGZyb20gb3Nk
-Ljggc28gaXQgYXBwZWFycyB0aGF0IG9zZDgNCj4gPj4gPiBzdG9wcGVkIHJlc3BvbmRpbmcgcXVp
-dGUgc29tZSB0aW1lIGJlZm9yZSBpdCBkaWVkLg0KPiA+Pg0KPiA+PiBJdCBkb2VzIHRoaXMgZGVs
-aWJlcmF0ZWx5IHdoZW4gaXRzIGRpc2sgdGhyZWFkcyBsb29rIGxpa2UgdGhleSBtaWdodA0KPiA+
-PiBiZSBzdHVjay4NCj4gPj4NCj4gPj4gPg0KPiA+PiA+IEknbSB3b25kZXJpbmcgaWYgdGhlcmUg
-aXMgZW5vdWdoIGluZm9ybWF0aW9uIGluIHRoZSBvc2Q4IGxvZyBmaWxlDQo+ID4+ID4gdG8gZGVk
-dWNlDQo+ID4+IHdoeSBvc2QgOCBzdG9wcGVkIHJlc3BvbmRpbmc/DQo+ID4+ID4gSSBkb24ndCBr
-bm93IGVub3VnaCB0byBmaWd1cmUgaXQgb3V0IG15c2VsZi4NCj4gPj4gPg0KPiA+PiA+IElzIHRo
-ZXJlIGFueSBleHBlcnQgd2hvIHdvdWxkIGJlIHdpbGxpbmcgdG8gdGFrZSBhIGxvb2sgYXQgdGhl
-IGxvZyBmaWxlPw0KPiA+Pg0KPiA+PiBUaGUgbG9ncyB3aWxsIGhhdmUgYSBiYWNrdHJhY2UgaW4g
-dGhlbTsgaWYgeW91IGNhbiBpbmNsdWRlIHRoYXQgYW5kDQo+ID4+IHRoZSBsYXN0IGh1bmRyZWQg
-bGluZXMgb3Igc28gcHJpb3IgaW4gYSBwYXN0ZWJpbiB0aGF0IHlvdSBlbWFpbCB0aGUNCj4gPj4g
-bGlzdCB3aXRoIHNldmVyYWwgcGVvcGxlIGNhbiBnaXZlIHlvdSBhIHByZXR0eSBnb29kIGlkZWEg
-b2Ygd2hhdCdzIGdvaW5nDQo+IG9uLg0KPiA+Pg0KPiA+PiBJbiBnZW5lcmFsIHRob3VnaCwgaXQn
-cyBqdXN0IGdvaW5nIHRvIGJlIHRoYXQgdGhlIGRpc2sgY2FuJ3Qga2VlcCB1cA0KPiA+PiB3aXRo
-IHRoZSBsb2FkIGJlaW5nIGFwcGxpZWQgdG8gaXQuIFRoYXQgY291bGQgYmUgYmVjYXVzZSBpdCdz
-DQo+ID4+IGZhaWxpbmcsIG9yIGJlY2F1c2UgeW91J3JlIHB1c2hpbmcgdG9vIG11Y2ggd29yayBv
-biB0byBpdCBpbiBzb21lIGZhc2hpb24uDQo+ID4+IC1HcmVnDQo=
+hi,Deneau
+we set the filestore_max_queue_ops=1000, unlucky we alse meet the osd suicide.
+we test random 4K writes, the osd_op_tp thread suicide event if we set
+osd_op_thread_timeout=120,
+the threads in osd_op_tp will reset the timeout handle after submit op
+to FileJournal's workqueue,
+so we have no idea why the thread blocked so long. the debug log
+showed during that time, other threads in osd_op_tp
+works fine.
+
+2015-07-14 7:12 GMT+08:00 Deneau, Tom <tom.deneau@amd.com>:
+> Greg --
+>
+> Not sure how to tell whether rebalancing occurred at that time.
+> I do see in other osd logs complaints that they do not get a reply from
+> osd.8 starting around 15:52 on that day.
+>
+> I see the deep-scrub of pool 14 but that was almost 30 minutes earlier.
+>
+> -- Tom
+>
+>
+>> -----Original Message-----
+>> From: Gregory Farnum [mailto:greg@gregs42.com]
+>> Sent: Monday, July 13, 2015 11:45 AM
+>> To: Deneau, Tom
+>> Cc: ceph-devel
+>> Subject: Re: osd suicide timeout
+>>
+>> heartbeat_map reset_timeout 'OSD::osd_op_tp thread 0x3ff6eb0efd0' had suicide
+>> timed out after 150
+>>
+>> So that's the OSD's "op thread", which is the one that does most of the work.
+>> You often see the FileStore::op_tp when it's the disk or filesystem breaking,
+>> but I do see the line
+>>
+>> waiting 51 > 50 ops || 57248008 > 104857600
+>>
+>> which leaves me feeling pretty confident that the disk is just getting more
+>> work than it can keep up with. It looks like there was some rebalancing
+>> happening around this time?
+>> -Greg
+>>
+>>
+>>
+>> On Mon, Jul 13, 2015 at 5:04 PM, Deneau, Tom <tom.deneau@amd.com> wrote:
+>> > Greg --
+>> >
+>> > Thanks.  I put the osd.log file at
+>> >
+>> > https://drive.google.com/file/d/0B_rfwWh40kPwQjZ3OXdjLUZNRVU/view?usp=
+>> > sharing
+>> >
+>> > I noticed the following from journalctl output around that time, so other
+>> nodes were complaining they could not reach osd.8.
+>> >
+>> > Jul 09 15:53:04 seattle-04-ausisv bash[8486]: 2015-07-09
+>> > 15:53:03.905386 3ffa0d9efd0 -1 osd.9 2487 heartbeat_check: no reply
+>> > from osd.8 since back 2015-07-09 15:52:43.256581 front 2015-07-09
+>> > 15:52:43.256581 (cutoff 2015-07-09 15:52:43.905384) Jul 09 15:53:06
+>> > seattle-04-ausisv bash[1060]: 2015-07-09 15:53:06.784069 3ff916fefd0
+>> > -1 osd.7 2487 heartbeat_check: no reply from osd.8 since back
+>> > 2015-07-09 15:52:46.474273 front 2015-07-09 15:52:46.474273 (cutoff
+>> > 2015-07-09 15:52:46.784066)
+>> >
+>> > and here is some sar data for the disk that osd.8 was controlling
+>> > (sde1=journal partition, sde2=data partition)
+>> >
+>> > 03:40:02 PM       DEV       tps  rd_sec/s  wr_sec/s  avgrq-sz  avgqu-sz
+>> await     svctm     %util
+>> > 03:50:17 PM      sde1      9.67      0.00  19046.40   1970.32      0.35
+>> 35.86     30.62     29.60
+>> > 03:50:17 PM      sde2     60.47   1524.27  14597.67    266.63     24.45
+>> 404.30      8.54     51.67
+>> > 03:50:32 PM      sde1     12.13      0.00  18158.93   1496.62      0.25
+>> 20.66     17.58     21.33
+>> > 03:50:32 PM      sde2     28.00   1550.93  17958.33    696.76     10.54
+>> 376.50     13.52     37.87
+>> > 03:50:47 PM      sde1     12.73      0.00  25446.40   1998.41      0.31
+>> 24.19     22.30     28.40
+>> > 03:50:47 PM      sde2     51.60    338.67  18091.73    357.18     13.05
+>> 252.91      8.02     41.40
+>> > 03:51:02 PM      sde1     12.27      0.00  18790.40   1531.83      0.31
+>> 25.33     18.53     22.73
+>> > 03:51:02 PM      sde2     33.13   2635.20  18026.67    623.60      5.02
+>> 151.57     10.99     36.40
+>> > 03:51:17 PM      sde1     10.13      0.00  14557.87   1436.63      0.16
+>> 16.18     12.76     12.93
+>> > 03:51:17 PM      sde2     46.73   1107.73  12067.00    281.91      8.55
+>> 182.88      5.46     25.53
+>> > 03:51:32 PM      sde1     11.93      0.00  18594.13   1558.17      0.35
+>> 29.27     16.42     19.60
+>> > 03:51:32 PM      sde2     22.20    555.20  18834.33    873.40      4.24
+>> 191.08     13.51     30.00
+>> > 03:51:47 PM      sde1     18.00      0.00  13926.40    773.69      0.19
+>> 10.78     10.07     18.13
+>> > 03:51:47 PM      sde2     47.27   1652.80  10775.53    262.94     12.24
+>> 259.01      6.66     31.47
+>> > 03:52:02 PM      sde1     21.60      0.00  10845.87    502.12      0.24
+>> 11.08      9.75     21.07
+>> > 03:52:02 PM      sde2     34.33   1652.80   9089.13    312.87      7.43
+>> 216.41      8.45     29.00
+>> > 03:52:17 PM      sde1     19.87      0.00  20198.40   1016.70      0.33
+>> 16.85     13.46     26.73
+>> > 03:52:17 PM      sde2     35.60   2752.53  16355.53    536.74     11.90
+>> 333.33     10.90     38.80
+>> > 03:52:32 PM      sde1     22.54      0.00   8434.04    374.18      0.15
+>> 6.67      6.17     13.90
+>> > 03:52:32 PM      sde2     35.84   2738.30   4586.30    204.38      2.01
+>> 28.11      6.53     23.40
+>> > 03:52:47 PM      sde1      0.00      0.00      0.00      0.00      0.00
+>> 0.00      0.00      0.00
+>> > 03:52:47 PM      sde2     13.37     35.83   1101.80     85.09      1.87
+>> 218.65      5.75      7.69
+>> > 03:53:02 PM      sde1      0.00      0.00      0.00      0.00      0.00
+>> 0.00      0.00      0.00
+>> > 03:53:02 PM      sde2      0.00      0.00      0.00      0.00      0.00
+>> 0.00      0.00      0.00
+>> > 03:53:17 PM      sde1      0.00      0.00      0.00      0.00      0.00
+>> 0.00      0.00      0.00
+>> > 03:53:17 PM      sde2      0.13      0.00      0.20      1.50      0.00
+>> 20.00     20.00      0.27
+>> > 03:53:32 PM      sde1      0.00      0.00      0.00      0.00      0.00
+>> 0.00      0.00      0.00
+>> > 03:53:32 PM      sde2      0.00      0.00      0.00      0.00      0.00
+>> 0.00      0.00      0.00
+>> > 03:53:47 PM      sde1      0.00      0.00      0.00      0.00      0.00
+>> 0.00      0.00      0.00
+>> > 03:53:47 PM      sde2      0.13      0.00      0.20      1.50      0.00
+>> 5.00      5.00      0.07
+>> > 03:54:02 PM      sde1      0.00      0.00      0.00      0.00      0.00
+>> 0.00      0.00      0.00
+>> > 03:54:02 PM      sde2      0.00      0.00      0.00      0.00      0.00
+>> 0.00      0.00      0.00
+>> > 03:54:17 PM      sde1      0.00      0.00      0.00      0.00      0.00
+>> 0.00      0.00      0.00
+>> > 03:54:17 PM      sde2      0.00      0.00      0.00      0.00      0.00
+>> 0.00      0.00      0.00
+>> > 03:54:32 PM      sde1      0.00      0.00      0.00      0.00      0.00
+>> 0.00      0.00      0.00
+>> > 03:54:32 PM      sde2      0.00      0.00      0.00      0.00      0.00
+>> 0.00      0.00      0.00
+>> >
+>> > -- Tom
+>> >
+>> >> -----Original Message-----
+>> >> From: Gregory Farnum [mailto:greg@gregs42.com]
+>> >> Sent: Monday, July 13, 2015 5:07 AM
+>> >> To: Deneau, Tom
+>> >> Cc: ceph-devel
+>> >> Subject: Re: osd suicide timeout
+>> >>
+>> >> On Fri, Jul 10, 2015 at 10:45 PM, Deneau, Tom <tom.deneau@amd.com> wrote:
+>> >> > I have an osd log file from an osd that hit a suicide timeout (with
+>> >> > the
+>> >> previous 10000 events logged).
+>> >> > (On this node I have also seen this suicide timeout happen once
+>> >> > before and
+>> >> also a sync_entry timeout.
+>> >> >
+>> >> > I can see that 6 minutes or so before that osd died, other osds on
+>> >> > the same node were logging messages such as
+>> >> >     heartbeat_check: no reply from osd.8 so it appears that osd8
+>> >> > stopped responding quite some time before it died.
+>> >>
+>> >> It does this deliberately when its disk threads look like they might
+>> >> be stuck.
+>> >>
+>> >> >
+>> >> > I'm wondering if there is enough information in the osd8 log file
+>> >> > to deduce
+>> >> why osd 8 stopped responding?
+>> >> > I don't know enough to figure it out myself.
+>> >> >
+>> >> > Is there any expert who would be willing to take a look at the log file?
+>> >>
+>> >> The logs will have a backtrace in them; if you can include that and
+>> >> the last hundred lines or so prior in a pastebin that you email the
+>> >> list with several people can give you a pretty good idea of what's going
+>> on.
+>> >>
+>> >> In general though, it's just going to be that the disk can't keep up
+>> >> with the load being applied to it. That could be because it's
+>> >> failing, or because you're pushing too much work on to it in some fashion.
+>> >> -Greg
+
+
+
+-- 
+thanks
+huangjun
