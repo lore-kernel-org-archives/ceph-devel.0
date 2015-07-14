@@ -1,121 +1,86 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: s3test firefly failing
-Date: Tue, 14 Jul 2015 09:53:40 +0200
-Message-ID: <55A4C004.4000205@dachary.org>
+From: Konstantin Danilov <kdanilov@mirantis.com>
+Subject: Re: Block storage performance test tool - would like to merge into cbt
+Date: Tue, 14 Jul 2015 11:11:01 +0300
+Message-ID: <CACxKWaw_YA=SNKuA47emK1_QVwsrehWtYaLL7no9dQEPaZ3YaA@mail.gmail.com>
+References: <CACxKWazeKFOoebysNJ4XajwEmBf2kk6Asw0WVAAKLo=hCp32sA@mail.gmail.com>
+	<55A3D647.1050703@redhat.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="UjFdarnGs8nPea7gjHNae26d3JfjBqc9x"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:49634 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751277AbbGNHxv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Jul 2015 03:53:51 -0400
+Received: from mail-lb0-f173.google.com ([209.85.217.173]:32791 "EHLO
+	mail-lb0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751673AbbGNILD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Jul 2015 04:11:03 -0400
+Received: by lbbyj8 with SMTP id yj8so1528265lbb.0
+        for <ceph-devel@vger.kernel.org>; Tue, 14 Jul 2015 01:11:01 -0700 (PDT)
+In-Reply-To: <55A3D647.1050703@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mnelson@redhat.com>
+Cc: ceph-devel@vger.kernel.org, Ben England <bengland@redhat.com>, Ben Turner <bturner@redhat.com>, Kyle Bader <kbader@redhat.com>, tyler Brekke <tbrekke@redhat.com>, cbt <cbt@ceph.com>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---UjFdarnGs8nPea7gjHNae26d3JfjBqc9x
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Mark,
 
-Hi Yehuda,
+does Wednesday performance meeting is a good place for discussion, or
+we need a separated one?
 
-When running the firefly rgw suite in a teuthology setup outside of the C=
-eph community lab, I'm seeing a lot of errors like the following. Althoug=
-h the traceback does not give any indication as to what domain name could=
- not be resolved, I suspect it is a hardcoded value somewhere that needs =
-to be defined in the DNS in order to work. I kind of remember S3 has all =
-kinds of hardcoded domain names since it's not supposed to be used outsid=
-e of AWS.
-
-Does that ring a bell ?=20
-
-Cheers
-
-http://integration.ceph.dachary.org:8081/ubuntu-2015-07-13_23:33:20-rgw-f=
-irefly-backports---basic-openstack/
-has
-http://integration.ceph.dachary.org/ubuntu-2015-07-13_23:33:20-rgw-firefl=
-y-backports---basic-openstack/79/teuthology.log
-
-2015-07-14T04:35:42.762 INFO:teuthology.orchestra.run.ovh237095:Running: =
-'/home/ubuntu/cephtest/s3-tests/virtualenv/bin/s3tests-test-readwrite'
-2015-07-14T04:35:42.899 INFO:teuthology.orchestra.run.ovh237095.stderr:Us=
-ing random seeds: {'writer': 3920086541, 'main': 1490942677, 'names': 905=
-270384, 'contents': 501048982, 'reader': 823656287}
-2015-07-14T04:35:45.306 INFO:teuthology.orchestra.run.ovh237095.stderr:Cr=
-eated bucket: rwtest
-2015-07-14T04:35:45.311 INFO:teuthology.orchestra.run.ovh237095.stderr:Cr=
-eating random file names
-2015-07-14T04:35:45.312 INFO:teuthology.orchestra.run.ovh237095.stderr:Up=
-loading initial set of 10 files
-2015-07-14T04:36:15.542 INFO:teuthology.orchestra.run.ovh237095.stderr:Tr=
-aceback (most recent call last):
-2015-07-14T04:36:15.547 INFO:teuthology.orchestra.run.ovh237095.stderr:  =
-File "/home/ubuntu/cephtest/s3-tests/virtualenv/local/lib/python2.7/site-=
-packages/gevent/greenlet.py", line 390, in run
-2015-07-14T04:36:15.548 INFO:teuthology.orchestra.run.ovh237095.stderr:  =
-  result =3D self._run(*self.args, **self.kwargs)
-2015-07-14T04:36:15.548 INFO:teuthology.orchestra.run.ovh237095.stderr:  =
-File "/home/ubuntu/cephtest/s3-tests/s3tests/readwrite.py", line 126, in =
-write_file
-2015-07-14T04:36:15.548 INFO:teuthology.orchestra.run.ovh237095.stderr:  =
-  key.set_contents_from_file(fp)
-2015-07-14T04:36:15.548 INFO:teuthology.orchestra.run.ovh237095.stderr:  =
-File "/home/ubuntu/cephtest/s3-tests/virtualenv/local/lib/python2.7/site-=
-packages/boto/s3/key.py", line 1293, in set_contents_from_file
-2015-07-14T04:36:15.549 INFO:teuthology.orchestra.run.ovh237095.stderr:  =
-  chunked_transfer=3Dchunked_transfer, size=3Dsize)
-2015-07-14T04:36:15.549 INFO:teuthology.orchestra.run.ovh237095.stderr:  =
-File "/home/ubuntu/cephtest/s3-tests/virtualenv/local/lib/python2.7/site-=
-packages/boto/s3/key.py", line 750, in send_file
-2015-07-14T04:36:15.549 INFO:teuthology.orchestra.run.ovh237095.stderr:  =
-  chunked_transfer=3Dchunked_transfer, size=3Dsize)
-2015-07-14T04:36:15.555 INFO:teuthology.orchestra.run.ovh237095.stderr:  =
-File "/home/ubuntu/cephtest/s3-tests/virtualenv/local/lib/python2.7/site-=
-packages/boto/s3/key.py", line 951, in _send_file_internal
-2015-07-14T04:36:15.555 INFO:teuthology.orchestra.run.ovh237095.stderr:  =
-  query_args=3Dquery_args
-2015-07-14T04:36:15.555 INFO:teuthology.orchestra.run.ovh237095.stderr:  =
-File "/home/ubuntu/cephtest/s3-tests/virtualenv/local/lib/python2.7/site-=
-packages/boto/s3/connection.py", line 664, in make_request
-2015-07-14T04:36:15.556 INFO:teuthology.orchestra.run.ovh237095.stderr:  =
-  retry_handler=3Dretry_handler
-2015-07-14T04:36:15.556 INFO:teuthology.orchestra.run.ovh237095.stderr:  =
-File "/home/ubuntu/cephtest/s3-tests/virtualenv/local/lib/python2.7/site-=
-packages/boto/connection.py", line 1071, in make_request
-2015-07-14T04:36:15.556 INFO:teuthology.orchestra.run.ovh237095.stderr:  =
-  retry_handler=3Dretry_handler)
-2015-07-14T04:36:15.556 INFO:teuthology.orchestra.run.ovh237095.stderr:  =
-File "/home/ubuntu/cephtest/s3-tests/virtualenv/local/lib/python2.7/site-=
-packages/boto/connection.py", line 1030, in _mexe
-2015-07-14T04:36:15.556 INFO:teuthology.orchestra.run.ovh237095.stderr:  =
-  raise ex
-2015-07-14T04:36:15.556 INFO:teuthology.orchestra.run.ovh237095.stderr:DN=
-SError: [Errno 3] name does not exist
-2015-07-14T04:36:15.556 INFO:teuthology.orchestra.run.ovh237095.stderr:<G=
-reenlet at 0x7fbd8f8c64b0: write_file(fp=3D<tempfile.SpooledTemporaryFile=
- instance at 0x7fbd8, file_name=3D'ctygneslkqtdbzs', bucket=3D<Bucket: rw=
-test>)> failed with DNSError
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+On Mon, Jul 13, 2015 at 6:16 PM, Mark Nelson <mnelson@redhat.com> wrote:
+> Hi Konstantin,
+>
+> I'm definitely interested in looking at your tools and seeing if we can
+> merge them into cbt!  One of the things we lack right now in cbt is any kind
+> of real openstack integration.  Right now CBT basically just assumes you've
+> already launched VMs and specified them as clients in the yaml, so being
+> able to spin up VMs in a standard way would be very useful.  It might be
+> worth exploring if we can use your tool to make the cluster base class
+> "openstack aware" so that any of the eventual cluster classes (ceph, and
+> maybe some day gluster, swift, etc) can use it to launch VMs or do other
+> things.  I'd really love to be able to create a cbt yaml config file and
+> iterate through parametric configuration parameters building multiple
+> different clusters and running tests against them with system monitoring and
+> data post processing happening automatically.
+>
+> The data post processing is also something that will be very useful.  We
+> have a couple of folks really interested in this area as well.
+>
+> Mark
+>
+>
+>
+>
+> On 07/11/2015 03:02 AM, Konstantin Danilov wrote:
+>>
+>> Hi all,
+>>
+>> We(Mirantis ceph team) have a tool for block storage performance test,
+>> called 'wally' -
+>> https://github.com/Mirantis/disk_perf_test_tool.
+>>
+>> It has some nice features, like:
+>>
+>> * Openstack and FUEL integration (can spawn VM for tests, gather HW info,
+>> etc)
+>> * Set of tests, joined into suit, which measures different performnce
+>> aspects and
+>> creates joined report, as example -
+>> http://koder-ua.github.io/6.1GA/cinder_volume_iscsi.html,
+>> VM running on ceph drives report example -
+>> http://koder-ua.github.io/random/ceph_example.html
+>> * Data postrocessing - confidence intervals, etc
+>>
+>> We would like to merge our code into cbt. Do you interesting in it?
+>> Can we discuss a way to merge?
+>>
+>> Thanks
+>>
+>
 
 
---UjFdarnGs8nPea7gjHNae26d3JfjBqc9x
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
+-- 
+Kostiantyn Danilov aka koder.ua
+Principal software engineer, Mirantis
 
-iEYEARECAAYFAlWkwAQACgkQ8dLMyEl6F21C/QCfUmkhKzJ6gAVWB/CVf3/JW5L1
-LjUAn19uImvo8cbU5qk3mD543y+jfYNX
-=sOht
------END PGP SIGNATURE-----
-
---UjFdarnGs8nPea7gjHNae26d3JfjBqc9x--
+skype:koder.ua
+http://koder-ua.blogspot.com/
+http://mirantis.com
