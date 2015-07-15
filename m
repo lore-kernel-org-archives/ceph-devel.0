@@ -1,587 +1,359 @@
-From: kernel neophyte <neophyte.hacker001@gmail.com>
+From: Vu Pham <vuhuong@mellanox.com>
 Subject: Re: Ceph-mon crashing FAILED assert(addr_name.count(p->second) == 0)
-Date: Wed, 15 Jul 2015 10:12:03 -0700
-Message-ID: <CAFkUHxcbV29rsHcqCU2bZhf-PcEa=stqyyC-zDx3=vC0FUS-Pg@mail.gmail.com>
-References: <CAFkUHxe8Qw4-5ggCm51shQdp8aYzdvEp9Bt9Fq11sur2vUf5oQ@mail.gmail.com>
-	<55A22474.2040501@suse.de>
+Date: Wed, 15 Jul 2015 19:19:50 +0000
+Message-ID: <emb415027b-9a25-48f7-a320-3e56458979ed@lt-vu-6500>
+References: <CAFkUHxcbV29rsHcqCU2bZhf-PcEa=stqyyC-zDx3=vC0FUS-Pg@mail.gmail.com>
+Reply-To: Vu Pham <vuhuong@mellanox.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f170.google.com ([209.85.214.170]:34628 "EHLO
-	mail-ob0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752390AbbGORME (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 15 Jul 2015 13:12:04 -0400
-Received: by obre1 with SMTP id e1so30787035obr.1
-        for <ceph-devel@vger.kernel.org>; Wed, 15 Jul 2015 10:12:03 -0700 (PDT)
-In-Reply-To: <55A22474.2040501@suse.de>
+Received: from mail-am1on0076.outbound.protection.outlook.com ([157.56.112.76]:5408
+	"EHLO emea01-am1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752084AbbGOTd7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 15 Jul 2015 15:33:59 -0400
+In-Reply-To: <CAFkUHxcbV29rsHcqCU2bZhf-PcEa=stqyyC-zDx3=vC0FUS-Pg@mail.gmail.com>
+Content-Language: en-US
+Content-ID: <4F08E0EFC210CB4A97FDC8D6020BBD75@eurprd05.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: raju.kurunkad@sandisk.com, vu@mellanox.com, Sage Weil <sage@newdream.net>
+To: kernel neophyte <neophyte.hacker001@gmail.com>, "raju.kurunkad@sandisk.com" <raju.kurunkad@sandisk.com>, Sage Weil <sage@newdream.net>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Joao Eduardo Luis <joao@suse.de>
 
-I was able to dig bit further, I see this happening when using XIO as
-messenger (Simple & Async works fine).
-
-My Stack details are:
-
-Linux Distro: Ubuntu
-Kernel:  3.13.0-24-generic
-OFED: I see it happen in both
-MLNX_OFED_LINUX-2.4-1.0.4-ubuntu14.04-x86_64 &
-MLNX_OFED_LINUX-3.0-1.0.1-ubuntu14.04-x86_64
-Accelio: I see it happen in both https://github.com/accelio/accelio
-Branch: master & https://github.com/vuhuong/accelio Branch:
-master-v1.3-fix
-
-
-monmap:
-
-monmaptool -p /tmp/monmap
-
-monmaptool: monmap file /tmp/monmap
-
-epoch 0
-
-fsid 41e024e8-b224-41c7-ab13-9d9b681f3b61
-
-last_changed 2015-07-15 09:48:38.037222
-
-created 2015-07-15 09:48:38.037222
-
-0: 10.13.10.189:6789/0 mon.abc-def-ghij07
-
-
-
-Debug/Log:
-
-ceph -s
-
-2015-07-15 09:54:07.763512 7f6df0c12700 -1 WARNING: the following
-dangerous and experimental features are enabled: ms-type-xio
-
-2015-07-15 09:54:07.766830 7f6df0c12700 -1 WARNING: the following
-dangerous and experimental features are enabled: ms-type-xio
-
-2015-07-15 09:54:07.766864 7f6df0c12700 -1 WARNING: experimental
-feature 'ms-type-xio' is enabled
-
-Please be aware that this feature is experimental, untested,
-
-unsupported, and may result in data corruption, data loss,
-
-and/or irreparable damage to your cluster.  Do not use
-
-feature with important data.
-
-
-2015-07-15 09:54:07.767331 7f6df0c12700  2 [debug] xio_mempool.c:500
-xio_mempool_create - mempool: using regular allocator
-
-
-2015-07-15 09:54:07.768458 7f6df0c12700  4 XioMessenger 0x7f6de4018040
-get_connection: xio_uri rdma://10.13.10.189:6789
-
-2015-07-15 09:54:07.768466 7f6df0c12700  4 Peer type: mon
-throttle_msgs: 1024 throttle_bytes: 536870912
-
-2015-07-15 09:54:07.768483 7f6df0c12700  2 [debug] xio_mempool.c:494
-xio_mempool_create - mempool: using huge pages allocator
-
-
-2015-07-15 09:54:07.768581 7f6df0c12700 20 [trace]
-xio_rdma_management.c:2646 xio_rdma_open - xio_rdma_open: [new]
-handle:0x7f6de4055d40
-
-
-2015-07-15 09:54:07.768587 7f6df0c12700 20 [trace] xio_nexus.c:1903
-xio_nexus_open - nexus: [new] nexus:0x7f6de4055b20,
-transport_hndl:0x7f6de4055d40
-
-
-2015-07-15 09:54:07.768595 7f6df0c12700 20 [trace] xio_nexus.c:1993
-xio_nexus_connect - xio_nexus_connect: nexus:0x7f6de4055b20,
-rdma_hndl:0x7f6de4055d40, portal:rdma://10.13.10.189:6789
-
-
-2015-07-15 09:54:07.768759 7f6df0c12700  2 [debug]
-xio_session_client.c:1022 xio_connect - xio_connect:
-session:0x7f6de40558f0, connection:0x7f6de4056e20, ctx:0x7f6de40179d0,
-nexus:0x7f6de4055b20
-
-
-2015-07-15 09:54:07.768767 7f6df0c12700  2 new connection xcon:
-0x7f6de4055460 up_ready on session 0x7f6de40558f0
-
-2015-07-15 09:54:07.768860 7f6df0c12700  4 _send_message_impl
-0x7f6de40578e0 new XioMsg 0x7f6df014f040 req_0 0x7f6df014f160 msg type
-17 features: 0 conn 0x7f6de4056e20 sess 0x7f6de40558f0
-
-2015-07-15 09:54:07.768867 7f6df0c12700 10 ex_cnt 0, req_off -1, msg_cnt 1
-
-2015-07-15 09:54:07.768863 7f6de9ac4700  2 [debug]
-xio_rdma_management.c:2386 xio_handle_cm_event - cm event:
-[RDMA_CM_EVENT_ADDR_RESOLVED], hndl:0x7f6de4055d40, status:0
-
-
-2015-07-15 09:54:07.769112 7f6de9ac4700  2 [debug]
-xio_rdma_management.c:2386 xio_handle_cm_event - cm event:
-[RDMA_CM_EVENT_ROUTE_RESOLVED], hndl:0x7f6de4055d40, status:0
-
-
-2015-07-15 09:54:07.769707 7f6de9ac4700 20 [trace]
-xio_rdma_management.c:469 xio_cq_get - comp_vec:17
-
-
-2015-07-15 09:54:07.770201 7f6de9ac4700  2 [debug]
-xio_rdma_management.c:961 xio_qp_create - rdma qp: [new]
-handle:0x7f6de4055d40, qp:0x260, max inline:448
-
-
-2015-07-15 09:54:07.770231 7f6de9ac4700  4 xio_send_msg xio msg: sn: 0
-timestamp: 256752506178532
-
-2015-07-15 09:54:07.770232 7f6de9ac4700  4 xio_send_msg ceph header:
-front_len: 60 seq: 1 tid: 0 type: 17 prio: 0 name type: 8 name num: -1
-version: 1 compat_version: 1 front_len: 60 middle_len: 0 data_len: 0
-xio header:  msg_cnt: 1
-
-2015-07-15 09:54:07.770235 7f6de9ac4700  4 xio_send_msg ceph footer:
-front_crc: 0 middle_crc: 0 data_crc: 0 sig: 0 flags: 3
-
-2015-07-15 09:54:07.778297 7f6de9ac4700  2 [debug]
-xio_rdma_management.c:2386 xio_handle_cm_event - cm event:
-[RDMA_CM_EVENT_ESTABLISHED], hndl:0x7f6de4055d40, status:0
-
-
-2015-07-15 09:54:07.778308 7f6de9ac4700  2 [debug] xio_nexus.c:1632
-xio_nexus_on_transport_event - nexus: [notification] - transport
-established. nexus:0x7f6de4055b20, transport:0x7f6de4055d40
-
-
-2015-07-15 09:54:07.778330 7f6de9ac4700 20 [trace]
-xio_rdma_verbs.c:240 xio_reg_mr_ex_dev - before ibv_reg_mr
-
-
-2015-07-15 09:54:07.778399 7f6de9ac4700 20 [trace]
-xio_rdma_verbs.c:242 xio_reg_mr_ex_dev - after ibv_reg_mr
-
-
-2015-07-15 09:54:07.778404 7f6de9ac4700 20 [trace]
-xio_rdma_verbs.c:240 xio_reg_mr_ex_dev - before ibv_reg_mr
-
-
-2015-07-15 09:54:07.778462 7f6de9ac4700 20 [trace]
-xio_rdma_verbs.c:242 xio_reg_mr_ex_dev - after ibv_reg_mr
-
-
-2015-07-15 09:54:07.778480 7f6de9ac4700  2 [debug]
-xio_rdma_management.c:1274 xio_rdma_initial_pool_post_create -
-post_recv conn_setup rx task:0x7f6ddc009400
-
-
-2015-07-15 09:54:07.778489 7f6de9ac4700 20 [trace] xio_nexus.c:384
-xio_nexus_send_setup_req - send setup request
-
-
-2015-07-15 09:54:07.778492 7f6de9ac4700 20 [trace] xio_nexus.c:426
-xio_nexus_send_setup_req - xio_nexus_send_setup_req:
-nexus:0x7f6de4055b20, rdma_hndl:0x7f6de4055d40
-
-
-2015-07-15 09:54:07.778497 7f6de9ac4700 20 [trace]
-xio_rdma_datapath.c:4180 xio_rdma_send_setup_req - rdma send setup
-request
-
-
-2015-07-15 09:54:07.782250 7f6de9ac4700 20 [trace]
-xio_rdma_datapath.c:4319 xio_rdma_on_setup_msg - setup complete.
-send_buf_sz:17408
-
-
-2015-07-15 09:54:07.782258 7f6de9ac4700 20 [trace] xio_nexus.c:661
-xio_nexus_on_recv_setup_rsp - receiving setup response.
-nexus:0x7f6de4055b20
-
-
-2015-07-15 09:54:07.782261 7f6de9ac4700 20 [trace] xio_nexus.c:714
-xio_nexus_on_recv_setup_rsp - xio_nexus_on_recv_setup_rsp:
-nexus:0x7f6de4055b20, trans_hndl:0x7f6de4055d40
-
-
-2015-07-15 09:54:07.782866 7f6de9ac4700 20 [trace]
-xio_rdma_verbs.c:240 xio_reg_mr_ex_dev - before ibv_reg_mr
-
-
-2015-07-15 09:54:07.785038 7f6de9ac4700 20 [trace]
-xio_rdma_verbs.c:242 xio_reg_mr_ex_dev - after ibv_reg_mr
-
-
-2015-07-15 09:54:07.785045 7f6de9ac4700 20 [trace]
-xio_rdma_verbs.c:240 xio_reg_mr_ex_dev - before ibv_reg_mr
-
-
-2015-07-15 09:54:07.785247 7f6de9ac4700 20 [trace]
-xio_rdma_verbs.c:242 xio_reg_mr_ex_dev - after ibv_reg_mr
-
-
-2015-07-15 09:54:07.785257 7f6de9ac4700  2 [debug]
-xio_rdma_management.c:1572 xio_rdma_primary_pool_slab_pre_create -
-pool buf:0x7f6de31e7000, mr:0x7f6ddc0093b0
-
-
-2015-07-15 09:54:07.785495 7f6de9ac4700  2 [debug]
-xio_session_client.c:793 xio_client_on_nexus_event - session:
-[notification] - nexus established. session:0x7f6de40558f0,
-nexus:0x7f6de4055b20
-
-
-2015-07-15 09:54:07.785692 7f6de9ac4700  2 [debug]
-xio_session_client.c:503 xio_on_setup_rsp_recv - task recycled
-
-
-2015-07-15 09:54:07.785700 7f6de9ac4700 20 [trace]
-xio_session_client.c:517 xio_on_setup_rsp_recv - session state is now
-ONLINE. session:0x7f6de40558f0
-
-
-2015-07-15 09:54:07.785703 7f6de9ac4700 20 [trace]
-xio_session_client.c:547 xio_on_setup_rsp_recv - session state is now
-ACCEPT. session:0x7f6de40558f0
-
-
-2015-07-15 09:54:07.785711 7f6de9ac4700  2 [debug]
-xio_connection.c:1719 xio_disconnect_initial_connection - send fin
-request. session:0x7f6de40558f0, connection:0x7f6ddc015aa0
-
-
-2015-07-15 09:54:07.785715 7f6de9ac4700 20 [trace]
-xio_connection.c:1726 xio_disconnect_initial_connection - connection
-0x7f6ddc015aa0 state change: current_state:ONLINE,
-next_state:FIN_WAIT_1
-
-
-2015-07-15 09:54:07.785725 7f6de9ac4700 20 [trace]
-xio_rdma_management.c:2646 xio_rdma_open - xio_rdma_open: [new]
-handle:0x7f6ddc0162d0
-
-
-2015-07-15 09:54:07.785727 7f6de9ac4700 20 [trace] xio_nexus.c:1903
-xio_nexus_open - nexus: [new] nexus:0x7f6ddc0160b0,
-transport_hndl:0x7f6ddc0162d0
-
-
-2015-07-15 09:54:07.785728 7f6de9ac4700  2 [debug]
-xio_session_client.c:196 xio_session_accept_connections - reconnecting
-to rdma://10.13.10.189:6800. connection:0x7f6de4056e20,
-nexus:0x7f6ddc0160b0
-
-
-2015-07-15 09:54:07.785734 7f6de9ac4700 20 [trace] xio_nexus.c:1993
-xio_nexus_connect - xio_nexus_connect: nexus:0x7f6ddc0160b0,
-rdma_hndl:0x7f6ddc0162d0, portal:rdma://10.13.10.189:6800
-
-
-2015-07-15 09:54:07.785761 7f6de9ac4700  2 [debug]
-xio_connection.c:2526 xio_on_fin_req_recv - fin request received.
-session:0x7f6de40558f0, connection:0x7f6ddc015aa0
-
-
-2015-07-15 09:54:07.785764 7f6de9ac4700  2 [debug]
-xio_connection.c:1682 xio_send_fin_ack - send fin response.
-session:0x7f6de40558f0, connection:0x7f6ddc015aa0
-
-
-2015-07-15 09:54:07.785767 7f6de9ac4700  2 [debug]
-xio_connection.c:2367 xio_on_fin_req_send_comp - got fin request send
-completion. session:0x7f6de40558f0, connection:0x7f6ddc015aa0
-
-
-2015-07-15 09:54:07.785769 7f6de9ac4700  2 [debug]
-xio_connection.c:2454 xio_on_fin_ack_recv - got fin ack.
-session:0x7f6de40558f0, connection:0x7f6ddc015aa0
-
-
-2015-07-15 09:54:07.785771 7f6de9ac4700  2 [debug]
-xio_connection.c:2495 xio_on_fin_ack_recv - connection 0x7f6ddc015aa0
-state change: current_state:FIN_WAIT_1, next_state:FIN_WAIT_2
-
-
-2015-07-15 09:54:07.785772 7f6de9ac4700  2 [debug]
-xio_connection.c:2560 xio_on_fin_ack_send_comp - fin ack send
-completion received. session:0x7f6de40558f0, connection:0x7f6ddc015aa0
-
-
-2015-07-15 09:54:07.785773 7f6de9ac4700  2 [debug]
-xio_connection.c:2583 xio_on_fin_ack_send_comp - connection
-0x7f6ddc015aa0 state change: current_state:FIN_WAIT_2,
-next_state:TIME_WAIT
-
-
-2015-07-15 09:54:07.785784 7f6de9ac4700  2 [debug]
-xio_rdma_management.c:2386 xio_handle_cm_event - cm event:
-[RDMA_CM_EVENT_ADDR_RESOLVED], hndl:0x7f6ddc0162d0, status:0
-
-
-2015-07-15 09:54:07.786008 7f6de9ac4700  2 [debug]
-xio_rdma_management.c:2386 xio_handle_cm_event - cm event:
-[RDMA_CM_EVENT_ROUTE_RESOLVED], hndl:0x7f6ddc0162d0, status:0
-
-
-2015-07-15 09:54:07.786468 7f6de9ac4700  2 [debug]
-xio_rdma_management.c:961 xio_qp_create - rdma qp: [new]
-handle:0x7f6ddc0162d0, qp:0x262, max inline:448
-
-
-2015-07-15 09:54:07.787793 7f6de9ac4700  2 [debug]
-xio_connection.c:2383 xio_close_time_wait - connection 0x7f6ddc015aa0
-state change: current_state:TIME_WAIT, next_state:CLOSED
-
-
-2015-07-15 09:54:07.787804 7f6de9ac4700  2 [debug]
-xio_connection.c:2183 xio_connection_destroy - xio_connection_destroy.
-session:0x7f6de40558f0, connection:0x7f6ddc015aa0 nexus:0x7f6de4055b20
-nr:1, state:CLOSED
-
-
-2015-07-15 09:54:07.787807 7f6de9ac4700  2 [debug]
-xio_connection.c:2108 xio_connection_post_destroy -
-xio_connection_post_destroy. session:0x7f6de40558f0,
-connection:0x7f6ddc015aa0 conn:0x7f6de4055b20 nr:1
-
-
-2015-07-15 09:54:07.787810 7f6de9ac4700 20 [trace] xio_nexus.c:2139
-xio_nexus_close - nexus: [putref] ptr:0x7f6de4055b20, refcnt:1
-
-
-2015-07-15 09:54:07.787812 7f6de9ac4700  2 [debug]
-xio_session_client.c:808 xio_client_on_nexus_event - session:
-[notification] - nexus closed. session:0x7f6de40558f0,
-nexus:0x7f6de4055b20
-
-
-2015-07-15 09:54:07.787814 7f6de9ac4700 20 [trace] xio_session.c:987
-xio_on_nexus_closed - session:0x7f6de40558f0 - nexus:0x7f6de4055b20
-close complete
-
-
-2015-07-15 09:54:07.787816 7f6de9ac4700 20 [trace] xio_nexus.c:2111
-xio_nexus_delayed_close - xio_nexus_deleyed close.
-nexus:0x7f6de4055b20, state:4
-
-
-2015-07-15 09:54:07.787817 7f6de9ac4700 20 [trace]
-xio_connection.c:2122 xio_connection_post_destroy - lead connection is
-closed
-
-
-2015-07-15 09:54:07.790664 7f6de9ac4700  2 [debug]
-xio_rdma_management.c:2386 xio_handle_cm_event - cm event:
-[RDMA_CM_EVENT_ESTABLISHED], hndl:0x7f6ddc0162d0, status:0
-
-
-2015-07-15 09:54:07.790672 7f6de9ac4700  2 [debug] xio_nexus.c:1632
-xio_nexus_on_transport_event - nexus: [notification] - transport
-established. nexus:0x7f6ddc0160b0, transport:0x7f6ddc0162d0
-
-
-2015-07-15 09:54:07.790675 7f6de9ac4700  2 [debug]
-xio_rdma_management.c:1274 xio_rdma_initial_pool_post_create -
-post_recv conn_setup rx task:0x7f6ddc009400
-
-
-2015-07-15 09:54:07.790680 7f6de9ac4700 20 [trace] xio_nexus.c:384
-xio_nexus_send_setup_req - send setup request
-
-
-2015-07-15 09:54:07.790682 7f6de9ac4700 20 [trace] xio_nexus.c:426
-xio_nexus_send_setup_req - xio_nexus_send_setup_req:
-nexus:0x7f6ddc0160b0, rdma_hndl:0x7f6ddc0162d0
-
-
-2015-07-15 09:54:07.790683 7f6de9ac4700 20 [trace]
-xio_rdma_datapath.c:4180 xio_rdma_send_setup_req - rdma send setup
-request
-
-
-2015-07-15 09:54:07.794359 7f6de9ac4700 20 [trace]
-xio_rdma_datapath.c:4319 xio_rdma_on_setup_msg - setup complete.
-send_buf_sz:17408
-
-
-2015-07-15 09:54:07.794367 7f6de9ac4700 20 [trace] xio_nexus.c:661
-xio_nexus_on_recv_setup_rsp - receiving setup response.
-nexus:0x7f6ddc0160b0
-
-
-2015-07-15 09:54:07.794369 7f6de9ac4700 20 [trace] xio_nexus.c:714
-xio_nexus_on_recv_setup_rsp - xio_nexus_on_recv_setup_rsp:
-nexus:0x7f6ddc0160b0, trans_hndl:0x7f6ddc0162d0
-
-
-2015-07-15 09:54:07.795445 7f6de9ac4700 20 [trace]
-xio_rdma_verbs.c:240 xio_reg_mr_ex_dev - before ibv_reg_mr
-
-
-2015-07-15 09:54:07.798625 7f6de9ac4700 20 [trace]
-xio_rdma_verbs.c:242 xio_reg_mr_ex_dev - after ibv_reg_mr
-
-
-2015-07-15 09:54:07.798633 7f6de9ac4700 20 [trace]
-xio_rdma_verbs.c:240 xio_reg_mr_ex_dev - before ibv_reg_mr
-
-
-2015-07-15 09:54:07.798929 7f6de9ac4700 20 [trace]
-xio_rdma_verbs.c:242 xio_reg_mr_ex_dev - after ibv_reg_mr
-
-
-2015-07-15 09:54:07.798940 7f6de9ac4700  2 [debug]
-xio_rdma_management.c:1572 xio_rdma_primary_pool_slab_pre_create -
-pool buf:0x7f6de25a1000, mr:0x7f6ddc015d40
-
-
-2015-07-15 09:54:07.799371 7f6de9ac4700  2 [debug]
-xio_session_client.c:793 xio_client_on_nexus_event - session:
-[notification] - nexus established. session:0x7f6de40558f0,
-nexus:0x7f6ddc0160b0
-
-
-2015-07-15 09:54:07.799376 7f6de9ac4700  2 [debug]
-xio_connection.c:2030 xio_connection_send_hello_req - send hello
-request. session:0x7f6de40558f0, connection:0x7f6de4056e20
-
-
-2015-07-15 09:54:07.799522 7f6de9ac4700  2 [debug]
-xio_connection.c:2643 xio_on_connection_hello_rsp_recv - recv hello
-response. session:0x7f6de40558f0, connection:0x7f6de4056e20
-
-
-2015-07-15 09:54:07.799530 7f6de9ac4700  2 [debug]
-xio_connection.c:2647 xio_on_connection_hello_rsp_recv - got hello
-response. session:0x7f6de40558f0, connection:0x7f6de4056e20
-
-
-2015-07-15 09:54:07.799533 7f6de9ac4700  4 session event: connection
-established. reason: Success
-
-2015-07-15 09:54:07.799538 7f6de9ac4700  2 connection established
-0x7f6de4056e20 session 0x7f6de40558f0 xcon 0x7f6de4055460
-
-2015-07-15 09:54:07.799541 7f6de9ac4700  2 learned my addr
-10.13.10.189:0/1003368
-
-2015-07-15 09:54:07.799546 7f6de9ac4700  2 client: connected from
-10.13.10.189:49134/0 to 10.13.10.189:6800/0
-
-2015-07-15 09:54:07.799576 7f6de9ac4700 11 on_msg_delivered xcon:
-0x7f6de4055460 session: 0x7f6de40558f0 msg: 0x7f6df014f160 sn: 0 type:
-17 tid: 0 seq: 1
-
-2015-07-15 09:54:07.804553 7f6de9ac4700 10 on_msg_req receive req treq
-0x7f6de8162598 msg_cnt 1 iov_base 0x7f6de31f1060 iov_len 216 nents 1
-conn 0x7f6de4056e20 sess 0x7f6de40558f0 sn 0
-
-2015-07-15 09:54:07.804564 7f6de9ac4700  4 on_msg_req msg_seq.size()=1
-
-2015-07-15 09:54:07.804590 7f6de9ac4700 10 on_msg_req receive req treq
-0x7f6de8160178 msg_cnt 1 iov_base 0x7f6de31e7060 iov_len 216 nents 1
-conn 0x7f6de4056e20 sess 0x7f6de40558f0 sn 1
-
-2015-07-15 09:54:07.804594 7f6de9ac4700  4 on_msg_req msg_seq.size()=1
-
-mon/MonMap.h: In function 'void MonMap::calc_ranks()' thread
-7f6de92c3700 time 2015-07-15 09:54:07.804654
-
-mon/MonMap.h: 47: FAILED assert(addr_name.count(p->second) == 0)
-
- ceph version 9.0.1-1494-g8fc0496 (8fc049664bc798432e1750da86b1f216f85a842d)
-
- 1: (()+0x12637b) [0x7f6df585037b]
-
- 2: (()+0x1bf86d) [0x7f6df58e986d]
-
- 3: (()+0x1b6709) [0x7f6df58e0709]
-
- 4: (()+0x1b7177) [0x7f6df58e1177]
-
- 5: (()+0x2faa27) [0x7f6df5a24a27]
-
- 6: (()+0x30fd2d) [0x7f6df5a39d2d]
-
- 7: (()+0x3100b0) [0x7f6df5a3a0b0]
-
- 8: (()+0x8182) [0x7f6dfa785182]
-
- 9: (clone()+0x6d) [0x7f6dfa4b247d]
-
- NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-needed to interpret this.
-
-terminate called after throwing an instance of 'ceph::FailedAssertion'
-
-Aborted (core dumped) -> No Idea where this core is! looked at PWD, & /var/crash
-
-
-
-Any help / pointers greatly appreciated (-:
-
--Neo
-
-
-
-On Sun, Jul 12, 2015 at 1:25 AM, Joao Eduardo Luis <joao@suse.de> wrote:
-> On 07/10/2015 11:31 PM, kernel neophyte wrote:
->> Hi,
->>
->> I am seeing the following error every time I am trying to manually
->> deploy ceph cluster and do a ceph -s :
->>
->> mon/MonMap.h: In function 'void MonMap::calc_ranks()' thread
->> 7fb3ccfb6700 time 2015-07-10 15:27:56.004148
->>
->> mon/MonMap.h: 47: FAILED assert(addr_name.count(p->second) == 0)
->
-> Please send us a copy of your monmap and ceph.conf.
->
-> You should also open a ticket on the tracker.
->
-> Thanks!
->
->   -Joao
->
->>
->>  ceph version 9.0.1-1445-g4a179ee (4a179eea527f7cbcf45eed4a63ad0fa8f744fc4a)
->>
->>  1: (()+0x12716b) [0x7fb3d53ec16b]
->>
->>  2: (()+0x1c0a6d) [0x7fb3d5485a6d]
->>
->>  3: (()+0x1b7909) [0x7fb3d547c909]
->>
->>  4: (()+0x1b8377) [0x7fb3d547d377]
->>
->>  5: (()+0x2fbbe7) [0x7fb3d55c0be7]
->>
->>  6: (()+0x310f1d) [0x7fb3d55d5f1d]
->>
->>  7: (()+0x3112a0) [0x7fb3d55d62a0]
->>
->>  8: (()+0x8182) [0x7fb3d9e05182]
->>
->>  9: (clone()+0x6d) [0x7fb3d9b3247d]
->>
->>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
->> needed to interpret this.
->>
->> terminate called after throwing an instance of 'ceph::FailedAssertion'
->>
->> Aborted (core dumped)
->>
->> Any help greatly appreciated :-)
->>
->> -Neo
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->
+TG9va2luZyBhdCBkZWJ1ZyBsb2csIEkgZG9uJ3Qgc2VlIGFueSB1bnVzdWFsIHRoaW5nIGluIGFj
+Y2VsaW8gJiB4aW8gDQptZXNzZW5nZXIuDQoNCkkgZ3Vlc3MgdGhlIHByb2JsZW0gaGFwcGVuZWQg
+YmVjYXVzZSB5b3UgaW5zdGFsbGVkIE1MTlhfT0ZFRF9MSU5VWCANCnBhY2thZ2VzIGFmdGVyIGNv
+bXBpbGluZyAmIGluc3RhbGxpbmcgYWNjZWxpbyBhbmQgY2VwaA0KDQpJbnN0YWxsaW5nIE1MTlhf
+T0ZFRCBwYWNrYWdlICh3aXRoIHhlbiAmIGtkbSBzdXBwb3J0cykgd2lsbCBsb29rIGZvciBhbmQg
+DQppbnN0YWxsIChyZS1pbnN0YWxsKSBkaXN0cmlidXRpb25zIGRlZmF1bHQgbGlicmFkb3MgYW5k
+IGxpYnJiZC4gVGhpcyANCndpbGwgbWVzcyB1cCB5b3VyIGxpYnJhZG9zICYgbGlicmJkIGZyb20g
+Y2VwaCB2OS4wLjEgcGFja2FnZS4NCkNvdWxkIHlvdSByZS1jb21waWxlICYgcmUtaW5zdGFsbCBh
+Y2NlbGlvICYgY2VwaCB2OS4wLjEgYWdhaW4gYW5kIA0KcmVwcm9kdWNlPw0KDQotdnUNCg0KT24g
+Ny8xNS8yMDE1IDEwOjEyOjAzIEFNLCAia2VybmVsIG5lb3BoeXRlIiANCjxuZW9waHl0ZS5oYWNr
+ZXIwMDFAZ21haWwuY29tPiB3cm90ZToNCg0KPkkgd2FzIGFibGUgdG8gZGlnIGJpdCBmdXJ0aGVy
+LCBJIHNlZSB0aGlzIGhhcHBlbmluZyB3aGVuIHVzaW5nIFhJTyBhcw0KPm1lc3NlbmdlciAoU2lt
+cGxlICYgQXN5bmMgd29ya3MgZmluZSkuDQo+DQo+TXkgU3RhY2sgZGV0YWlscyBhcmU6DQo+DQo+
+TGludXggRGlzdHJvOiBVYnVudHUNCj5LZXJuZWw6ICAzLjEzLjAtMjQtZ2VuZXJpYw0KPk9GRUQ6
+IEkgc2VlIGl0IGhhcHBlbiBpbiBib3RoDQo+TUxOWF9PRkVEX0xJTlVYLTIuNC0xLjAuNC11YnVu
+dHUxNC4wNC14ODZfNjQgJg0KPk1MTlhfT0ZFRF9MSU5VWC0zLjAtMS4wLjEtdWJ1bnR1MTQuMDQt
+eDg2XzY0DQo+QWNjZWxpbzogSSBzZWUgaXQgaGFwcGVuIGluIGJvdGggaHR0cHM6Ly9naXRodWIu
+Y29tL2FjY2VsaW8vYWNjZWxpbw0KPkJyYW5jaDogbWFzdGVyICYgaHR0cHM6Ly9naXRodWIuY29t
+L3Z1aHVvbmcvYWNjZWxpbyBCcmFuY2g6DQo+bWFzdGVyLXYxLjMtZml4DQo+DQo+DQo+bW9ubWFw
+Og0KPg0KPm1vbm1hcHRvb2wgLXAgL3RtcC9tb25tYXANCj4NCj5tb25tYXB0b29sOiBtb25tYXAg
+ZmlsZSAvdG1wL21vbm1hcA0KPg0KPmVwb2NoIDANCj4NCj5mc2lkIDQxZTAyNGU4LWIyMjQtNDFj
+Ny1hYjEzLTlkOWI2ODFmM2I2MQ0KPg0KPmxhc3RfY2hhbmdlZCAyMDE1LTA3LTE1IDA5OjQ4OjM4
+LjAzNzIyMg0KPg0KPmNyZWF0ZWQgMjAxNS0wNy0xNSAwOTo0ODozOC4wMzcyMjINCj4NCj4wOiAx
+MC4xMy4xMC4xODk6Njc4OS8wIG1vbi5hYmMtZGVmLWdoaWowNw0KPg0KPg0KPg0KPkRlYnVnL0xv
+ZzoNCj4NCj5jZXBoIC1zDQo+DQo+MjAxNS0wNy0xNSAwOTo1NDowNy43NjM1MTIgN2Y2ZGYwYzEy
+NzAwIC0xIFdBUk5JTkc6IHRoZSBmb2xsb3dpbmcNCj5kYW5nZXJvdXMgYW5kIGV4cGVyaW1lbnRh
+bCBmZWF0dXJlcyBhcmUgZW5hYmxlZDogbXMtdHlwZS14aW8NCj4NCj4yMDE1LTA3LTE1IDA5OjU0
+OjA3Ljc2NjgzMCA3ZjZkZjBjMTI3MDAgLTEgV0FSTklORzogdGhlIGZvbGxvd2luZw0KPmRhbmdl
+cm91cyBhbmQgZXhwZXJpbWVudGFsIGZlYXR1cmVzIGFyZSBlbmFibGVkOiBtcy10eXBlLXhpbw0K
+Pg0KPjIwMTUtMDctMTUgMDk6NTQ6MDcuNzY2ODY0IDdmNmRmMGMxMjcwMCAtMSBXQVJOSU5HOiBl
+eHBlcmltZW50YWwNCj5mZWF0dXJlICdtcy10eXBlLXhpbycgaXMgZW5hYmxlZA0KPg0KPlBsZWFz
+ZSBiZSBhd2FyZSB0aGF0IHRoaXMgZmVhdHVyZSBpcyBleHBlcmltZW50YWwsIHVudGVzdGVkLA0K
+Pg0KPnVuc3VwcG9ydGVkLCBhbmQgbWF5IHJlc3VsdCBpbiBkYXRhIGNvcnJ1cHRpb24sIGRhdGEg
+bG9zcywNCj4NCj5hbmQvb3IgaXJyZXBhcmFibGUgZGFtYWdlIHRvIHlvdXIgY2x1c3Rlci4gIERv
+IG5vdCB1c2UNCj4NCj5mZWF0dXJlIHdpdGggaW1wb3J0YW50IGRhdGEuDQo+DQo+DQo+MjAxNS0w
+Ny0xNSAwOTo1NDowNy43NjczMzEgN2Y2ZGYwYzEyNzAwICAyIFtkZWJ1Z10geGlvX21lbXBvb2wu
+Yzo1MDANCj54aW9fbWVtcG9vbF9jcmVhdGUgLSBtZW1wb29sOiB1c2luZyByZWd1bGFyIGFsbG9j
+YXRvcg0KPg0KPg0KPjIwMTUtMDctMTUgMDk6NTQ6MDcuNzY4NDU4IDdmNmRmMGMxMjcwMCAgNCBY
+aW9NZXNzZW5nZXIgMHg3ZjZkZTQwMTgwNDANCj5nZXRfY29ubmVjdGlvbjogeGlvX3VyaSByZG1h
+Oi8vMTAuMTMuMTAuMTg5OjY3ODkNCj4NCj4yMDE1LTA3LTE1IDA5OjU0OjA3Ljc2ODQ2NiA3ZjZk
+ZjBjMTI3MDAgIDQgUGVlciB0eXBlOiBtb24NCj50aHJvdHRsZV9tc2dzOiAxMDI0IHRocm90dGxl
+X2J5dGVzOiA1MzY4NzA5MTINCj4NCj4yMDE1LTA3LTE1IDA5OjU0OjA3Ljc2ODQ4MyA3ZjZkZjBj
+MTI3MDAgIDIgW2RlYnVnXSB4aW9fbWVtcG9vbC5jOjQ5NA0KPnhpb19tZW1wb29sX2NyZWF0ZSAt
+IG1lbXBvb2w6IHVzaW5nIGh1Z2UgcGFnZXMgYWxsb2NhdG9yDQo+DQo+DQo+MjAxNS0wNy0xNSAw
+OTo1NDowNy43Njg1ODEgN2Y2ZGYwYzEyNzAwIDIwIFt0cmFjZV0NCj54aW9fcmRtYV9tYW5hZ2Vt
+ZW50LmM6MjY0NiB4aW9fcmRtYV9vcGVuIC0geGlvX3JkbWFfb3BlbjogW25ld10NCj5oYW5kbGU6
+MHg3ZjZkZTQwNTVkNDANCj4NCj4NCj4yMDE1LTA3LTE1IDA5OjU0OjA3Ljc2ODU4NyA3ZjZkZjBj
+MTI3MDAgMjAgW3RyYWNlXSB4aW9fbmV4dXMuYzoxOTAzDQo+eGlvX25leHVzX29wZW4gLSBuZXh1
+czogW25ld10gbmV4dXM6MHg3ZjZkZTQwNTViMjAsDQo+dHJhbnNwb3J0X2huZGw6MHg3ZjZkZTQw
+NTVkNDANCj4NCj4NCj4yMDE1LTA3LTE1IDA5OjU0OjA3Ljc2ODU5NSA3ZjZkZjBjMTI3MDAgMjAg
+W3RyYWNlXSB4aW9fbmV4dXMuYzoxOTkzDQo+eGlvX25leHVzX2Nvbm5lY3QgLSB4aW9fbmV4dXNf
+Y29ubmVjdDogbmV4dXM6MHg3ZjZkZTQwNTViMjAsDQo+cmRtYV9obmRsOjB4N2Y2ZGU0MDU1ZDQw
+LCBwb3J0YWw6cmRtYTovLzEwLjEzLjEwLjE4OTo2Nzg5DQo+DQo+DQo+MjAxNS0wNy0xNSAwOTo1
+NDowNy43Njg3NTkgN2Y2ZGYwYzEyNzAwICAyIFtkZWJ1Z10NCj54aW9fc2Vzc2lvbl9jbGllbnQu
+YzoxMDIyIHhpb19jb25uZWN0IC0geGlvX2Nvbm5lY3Q6DQo+c2Vzc2lvbjoweDdmNmRlNDA1NThm
+MCwgY29ubmVjdGlvbjoweDdmNmRlNDA1NmUyMCwgY3R4OjB4N2Y2ZGU0MDE3OWQwLA0KPm5leHVz
+OjB4N2Y2ZGU0MDU1YjIwDQo+DQo+DQo+MjAxNS0wNy0xNSAwOTo1NDowNy43Njg3NjcgN2Y2ZGYw
+YzEyNzAwICAyIG5ldyBjb25uZWN0aW9uIHhjb246DQo+MHg3ZjZkZTQwNTU0NjAgdXBfcmVhZHkg
+b24gc2Vzc2lvbiAweDdmNmRlNDA1NThmMA0KPg0KPjIwMTUtMDctMTUgMDk6NTQ6MDcuNzY4ODYw
+IDdmNmRmMGMxMjcwMCAgNCBfc2VuZF9tZXNzYWdlX2ltcGwNCj4weDdmNmRlNDA1NzhlMCBuZXcg
+WGlvTXNnIDB4N2Y2ZGYwMTRmMDQwIHJlcV8wIDB4N2Y2ZGYwMTRmMTYwIG1zZyB0eXBlDQo+MTcg
+ZmVhdHVyZXM6IDAgY29ubiAweDdmNmRlNDA1NmUyMCBzZXNzIDB4N2Y2ZGU0MDU1OGYwDQo+DQo+
+MjAxNS0wNy0xNSAwOTo1NDowNy43Njg4NjcgN2Y2ZGYwYzEyNzAwIDEwIGV4X2NudCAwLCByZXFf
+b2ZmIC0xLCANCj5tc2dfY250IDENCj4NCj4yMDE1LTA3LTE1IDA5OjU0OjA3Ljc2ODg2MyA3ZjZk
+ZTlhYzQ3MDAgIDIgW2RlYnVnXQ0KPnhpb19yZG1hX21hbmFnZW1lbnQuYzoyMzg2IHhpb19oYW5k
+bGVfY21fZXZlbnQgLSBjbSBldmVudDoNCj5bUkRNQV9DTV9FVkVOVF9BRERSX1JFU09MVkVEXSwg
+aG5kbDoweDdmNmRlNDA1NWQ0MCwgc3RhdHVzOjANCj4NCj4NCj4yMDE1LTA3LTE1IDA5OjU0OjA3
+Ljc2OTExMiA3ZjZkZTlhYzQ3MDAgIDIgW2RlYnVnXQ0KPnhpb19yZG1hX21hbmFnZW1lbnQuYzoy
+Mzg2IHhpb19oYW5kbGVfY21fZXZlbnQgLSBjbSBldmVudDoNCj5bUkRNQV9DTV9FVkVOVF9ST1VU
+RV9SRVNPTFZFRF0sIGhuZGw6MHg3ZjZkZTQwNTVkNDAsIHN0YXR1czowDQo+DQo+DQo+MjAxNS0w
+Ny0xNSAwOTo1NDowNy43Njk3MDcgN2Y2ZGU5YWM0NzAwIDIwIFt0cmFjZV0NCj54aW9fcmRtYV9t
+YW5hZ2VtZW50LmM6NDY5IHhpb19jcV9nZXQgLSBjb21wX3ZlYzoxNw0KPg0KPg0KPjIwMTUtMDct
+MTUgMDk6NTQ6MDcuNzcwMjAxIDdmNmRlOWFjNDcwMCAgMiBbZGVidWddDQo+eGlvX3JkbWFfbWFu
+YWdlbWVudC5jOjk2MSB4aW9fcXBfY3JlYXRlIC0gcmRtYSBxcDogW25ld10NCj5oYW5kbGU6MHg3
+ZjZkZTQwNTVkNDAsIHFwOjB4MjYwLCBtYXggaW5saW5lOjQ0OA0KPg0KPg0KPjIwMTUtMDctMTUg
+MDk6NTQ6MDcuNzcwMjMxIDdmNmRlOWFjNDcwMCAgNCB4aW9fc2VuZF9tc2cgeGlvIG1zZzogc246
+IDANCj50aW1lc3RhbXA6IDI1Njc1MjUwNjE3ODUzMg0KPg0KPjIwMTUtMDctMTUgMDk6NTQ6MDcu
+NzcwMjMyIDdmNmRlOWFjNDcwMCAgNCB4aW9fc2VuZF9tc2cgY2VwaCBoZWFkZXI6DQo+ZnJvbnRf
+bGVuOiA2MCBzZXE6IDEgdGlkOiAwIHR5cGU6IDE3IHByaW86IDAgbmFtZSB0eXBlOiA4IG5hbWUg
+bnVtOiAtMQ0KPnZlcnNpb246IDEgY29tcGF0X3ZlcnNpb246IDEgZnJvbnRfbGVuOiA2MCBtaWRk
+bGVfbGVuOiAwIGRhdGFfbGVuOiAwDQo+eGlvIGhlYWRlcjogIG1zZ19jbnQ6IDENCj4NCj4yMDE1
+LTA3LTE1IDA5OjU0OjA3Ljc3MDIzNSA3ZjZkZTlhYzQ3MDAgIDQgeGlvX3NlbmRfbXNnIGNlcGgg
+Zm9vdGVyOg0KPmZyb250X2NyYzogMCBtaWRkbGVfY3JjOiAwIGRhdGFfY3JjOiAwIHNpZzogMCBm
+bGFnczogMw0KPg0KPjIwMTUtMDctMTUgMDk6NTQ6MDcuNzc4Mjk3IDdmNmRlOWFjNDcwMCAgMiBb
+ZGVidWddDQo+eGlvX3JkbWFfbWFuYWdlbWVudC5jOjIzODYgeGlvX2hhbmRsZV9jbV9ldmVudCAt
+IGNtIGV2ZW50Og0KPltSRE1BX0NNX0VWRU5UX0VTVEFCTElTSEVEXSwgaG5kbDoweDdmNmRlNDA1
+NWQ0MCwgc3RhdHVzOjANCj4NCj4NCj4yMDE1LTA3LTE1IDA5OjU0OjA3Ljc3ODMwOCA3ZjZkZTlh
+YzQ3MDAgIDIgW2RlYnVnXSB4aW9fbmV4dXMuYzoxNjMyDQo+eGlvX25leHVzX29uX3RyYW5zcG9y
+dF9ldmVudCAtIG5leHVzOiBbbm90aWZpY2F0aW9uXSAtIHRyYW5zcG9ydA0KPmVzdGFibGlzaGVk
+LiBuZXh1czoweDdmNmRlNDA1NWIyMCwgdHJhbnNwb3J0OjB4N2Y2ZGU0MDU1ZDQwDQo+DQo+DQo+
+MjAxNS0wNy0xNSAwOTo1NDowNy43NzgzMzAgN2Y2ZGU5YWM0NzAwIDIwIFt0cmFjZV0NCj54aW9f
+cmRtYV92ZXJicy5jOjI0MCB4aW9fcmVnX21yX2V4X2RldiAtIGJlZm9yZSBpYnZfcmVnX21yDQo+
+DQo+DQo+MjAxNS0wNy0xNSAwOTo1NDowNy43NzgzOTkgN2Y2ZGU5YWM0NzAwIDIwIFt0cmFjZV0N
+Cj54aW9fcmRtYV92ZXJicy5jOjI0MiB4aW9fcmVnX21yX2V4X2RldiAtIGFmdGVyIGlidl9yZWdf
+bXINCj4NCj4NCj4yMDE1LTA3LTE1IDA5OjU0OjA3Ljc3ODQwNCA3ZjZkZTlhYzQ3MDAgMjAgW3Ry
+YWNlXQ0KPnhpb19yZG1hX3ZlcmJzLmM6MjQwIHhpb19yZWdfbXJfZXhfZGV2IC0gYmVmb3JlIGli
+dl9yZWdfbXINCj4NCj4NCj4yMDE1LTA3LTE1IDA5OjU0OjA3Ljc3ODQ2MiA3ZjZkZTlhYzQ3MDAg
+MjAgW3RyYWNlXQ0KPnhpb19yZG1hX3ZlcmJzLmM6MjQyIHhpb19yZWdfbXJfZXhfZGV2IC0gYWZ0
+ZXIgaWJ2X3JlZ19tcg0KPg0KPg0KPjIwMTUtMDctMTUgMDk6NTQ6MDcuNzc4NDgwIDdmNmRlOWFj
+NDcwMCAgMiBbZGVidWddDQo+eGlvX3JkbWFfbWFuYWdlbWVudC5jOjEyNzQgeGlvX3JkbWFfaW5p
+dGlhbF9wb29sX3Bvc3RfY3JlYXRlIC0NCj5wb3N0X3JlY3YgY29ubl9zZXR1cCByeCB0YXNrOjB4
+N2Y2ZGRjMDA5NDAwDQo+DQo+DQo+MjAxNS0wNy0xNSAwOTo1NDowNy43Nzg0ODkgN2Y2ZGU5YWM0
+NzAwIDIwIFt0cmFjZV0geGlvX25leHVzLmM6Mzg0DQo+eGlvX25leHVzX3NlbmRfc2V0dXBfcmVx
+IC0gc2VuZCBzZXR1cCByZXF1ZXN0DQo+DQo+DQo+MjAxNS0wNy0xNSAwOTo1NDowNy43Nzg0OTIg
+N2Y2ZGU5YWM0NzAwIDIwIFt0cmFjZV0geGlvX25leHVzLmM6NDI2DQo+eGlvX25leHVzX3NlbmRf
+c2V0dXBfcmVxIC0geGlvX25leHVzX3NlbmRfc2V0dXBfcmVxOg0KPm5leHVzOjB4N2Y2ZGU0MDU1
+YjIwLCByZG1hX2huZGw6MHg3ZjZkZTQwNTVkNDANCj4NCj4NCj4yMDE1LTA3LTE1IDA5OjU0OjA3
+Ljc3ODQ5NyA3ZjZkZTlhYzQ3MDAgMjAgW3RyYWNlXQ0KPnhpb19yZG1hX2RhdGFwYXRoLmM6NDE4
+MCB4aW9fcmRtYV9zZW5kX3NldHVwX3JlcSAtIHJkbWEgc2VuZCBzZXR1cA0KPnJlcXVlc3QNCj4N
+Cj4NCj4yMDE1LTA3LTE1IDA5OjU0OjA3Ljc4MjI1MCA3ZjZkZTlhYzQ3MDAgMjAgW3RyYWNlXQ0K
+Pnhpb19yZG1hX2RhdGFwYXRoLmM6NDMxOSB4aW9fcmRtYV9vbl9zZXR1cF9tc2cgLSBzZXR1cCBj
+b21wbGV0ZS4NCj5zZW5kX2J1Zl9zejoxNzQwOA0KPg0KPg0KPjIwMTUtMDctMTUgMDk6NTQ6MDcu
+NzgyMjU4IDdmNmRlOWFjNDcwMCAyMCBbdHJhY2VdIHhpb19uZXh1cy5jOjY2MQ0KPnhpb19uZXh1
+c19vbl9yZWN2X3NldHVwX3JzcCAtIHJlY2VpdmluZyBzZXR1cCByZXNwb25zZS4NCj5uZXh1czow
+eDdmNmRlNDA1NWIyMA0KPg0KPg0KPjIwMTUtMDctMTUgMDk6NTQ6MDcuNzgyMjYxIDdmNmRlOWFj
+NDcwMCAyMCBbdHJhY2VdIHhpb19uZXh1cy5jOjcxNA0KPnhpb19uZXh1c19vbl9yZWN2X3NldHVw
+X3JzcCAtIHhpb19uZXh1c19vbl9yZWN2X3NldHVwX3JzcDoNCj5uZXh1czoweDdmNmRlNDA1NWIy
+MCwgdHJhbnNfaG5kbDoweDdmNmRlNDA1NWQ0MA0KPg0KPg0KPjIwMTUtMDctMTUgMDk6NTQ6MDcu
+NzgyODY2IDdmNmRlOWFjNDcwMCAyMCBbdHJhY2VdDQo+eGlvX3JkbWFfdmVyYnMuYzoyNDAgeGlv
+X3JlZ19tcl9leF9kZXYgLSBiZWZvcmUgaWJ2X3JlZ19tcg0KPg0KPg0KPjIwMTUtMDctMTUgMDk6
+NTQ6MDcuNzg1MDM4IDdmNmRlOWFjNDcwMCAyMCBbdHJhY2VdDQo+eGlvX3JkbWFfdmVyYnMuYzoy
+NDIgeGlvX3JlZ19tcl9leF9kZXYgLSBhZnRlciBpYnZfcmVnX21yDQo+DQo+DQo+MjAxNS0wNy0x
+NSAwOTo1NDowNy43ODUwNDUgN2Y2ZGU5YWM0NzAwIDIwIFt0cmFjZV0NCj54aW9fcmRtYV92ZXJi
+cy5jOjI0MCB4aW9fcmVnX21yX2V4X2RldiAtIGJlZm9yZSBpYnZfcmVnX21yDQo+DQo+DQo+MjAx
+NS0wNy0xNSAwOTo1NDowNy43ODUyNDcgN2Y2ZGU5YWM0NzAwIDIwIFt0cmFjZV0NCj54aW9fcmRt
+YV92ZXJicy5jOjI0MiB4aW9fcmVnX21yX2V4X2RldiAtIGFmdGVyIGlidl9yZWdfbXINCj4NCj4N
+Cj4yMDE1LTA3LTE1IDA5OjU0OjA3Ljc4NTI1NyA3ZjZkZTlhYzQ3MDAgIDIgW2RlYnVnXQ0KPnhp
+b19yZG1hX21hbmFnZW1lbnQuYzoxNTcyIHhpb19yZG1hX3ByaW1hcnlfcG9vbF9zbGFiX3ByZV9j
+cmVhdGUgLQ0KPnBvb2wgYnVmOjB4N2Y2ZGUzMWU3MDAwLCBtcjoweDdmNmRkYzAwOTNiMA0KPg0K
+Pg0KPjIwMTUtMDctMTUgMDk6NTQ6MDcuNzg1NDk1IDdmNmRlOWFjNDcwMCAgMiBbZGVidWddDQo+
+eGlvX3Nlc3Npb25fY2xpZW50LmM6NzkzIHhpb19jbGllbnRfb25fbmV4dXNfZXZlbnQgLSBzZXNz
+aW9uOg0KPltub3RpZmljYXRpb25dIC0gbmV4dXMgZXN0YWJsaXNoZWQuIHNlc3Npb246MHg3ZjZk
+ZTQwNTU4ZjAsDQo+bmV4dXM6MHg3ZjZkZTQwNTViMjANCj4NCj4NCj4yMDE1LTA3LTE1IDA5OjU0
+OjA3Ljc4NTY5MiA3ZjZkZTlhYzQ3MDAgIDIgW2RlYnVnXQ0KPnhpb19zZXNzaW9uX2NsaWVudC5j
+OjUwMyB4aW9fb25fc2V0dXBfcnNwX3JlY3YgLSB0YXNrIHJlY3ljbGVkDQo+DQo+DQo+MjAxNS0w
+Ny0xNSAwOTo1NDowNy43ODU3MDAgN2Y2ZGU5YWM0NzAwIDIwIFt0cmFjZV0NCj54aW9fc2Vzc2lv
+bl9jbGllbnQuYzo1MTcgeGlvX29uX3NldHVwX3JzcF9yZWN2IC0gc2Vzc2lvbiBzdGF0ZSBpcyBu
+b3cNCj5PTkxJTkUuIHNlc3Npb246MHg3ZjZkZTQwNTU4ZjANCj4NCj4NCj4yMDE1LTA3LTE1IDA5
+OjU0OjA3Ljc4NTcwMyA3ZjZkZTlhYzQ3MDAgMjAgW3RyYWNlXQ0KPnhpb19zZXNzaW9uX2NsaWVu
+dC5jOjU0NyB4aW9fb25fc2V0dXBfcnNwX3JlY3YgLSBzZXNzaW9uIHN0YXRlIGlzIG5vdw0KPkFD
+Q0VQVC4gc2Vzc2lvbjoweDdmNmRlNDA1NThmMA0KPg0KPg0KPjIwMTUtMDctMTUgMDk6NTQ6MDcu
+Nzg1NzExIDdmNmRlOWFjNDcwMCAgMiBbZGVidWddDQo+eGlvX2Nvbm5lY3Rpb24uYzoxNzE5IHhp
+b19kaXNjb25uZWN0X2luaXRpYWxfY29ubmVjdGlvbiAtIHNlbmQgZmluDQo+cmVxdWVzdC4gc2Vz
+c2lvbjoweDdmNmRlNDA1NThmMCwgY29ubmVjdGlvbjoweDdmNmRkYzAxNWFhMA0KPg0KPg0KPjIw
+MTUtMDctMTUgMDk6NTQ6MDcuNzg1NzE1IDdmNmRlOWFjNDcwMCAyMCBbdHJhY2VdDQo+eGlvX2Nv
+bm5lY3Rpb24uYzoxNzI2IHhpb19kaXNjb25uZWN0X2luaXRpYWxfY29ubmVjdGlvbiAtIGNvbm5l
+Y3Rpb24NCj4weDdmNmRkYzAxNWFhMCBzdGF0ZSBjaGFuZ2U6IGN1cnJlbnRfc3RhdGU6T05MSU5F
+LA0KPm5leHRfc3RhdGU6RklOX1dBSVRfMQ0KPg0KPg0KPjIwMTUtMDctMTUgMDk6NTQ6MDcuNzg1
+NzI1IDdmNmRlOWFjNDcwMCAyMCBbdHJhY2VdDQo+eGlvX3JkbWFfbWFuYWdlbWVudC5jOjI2NDYg
+eGlvX3JkbWFfb3BlbiAtIHhpb19yZG1hX29wZW46IFtuZXddDQo+aGFuZGxlOjB4N2Y2ZGRjMDE2
+MmQwDQo+DQo+DQo+MjAxNS0wNy0xNSAwOTo1NDowNy43ODU3MjcgN2Y2ZGU5YWM0NzAwIDIwIFt0
+cmFjZV0geGlvX25leHVzLmM6MTkwMw0KPnhpb19uZXh1c19vcGVuIC0gbmV4dXM6IFtuZXddIG5l
+eHVzOjB4N2Y2ZGRjMDE2MGIwLA0KPnRyYW5zcG9ydF9obmRsOjB4N2Y2ZGRjMDE2MmQwDQo+DQo+
+DQo+MjAxNS0wNy0xNSAwOTo1NDowNy43ODU3MjggN2Y2ZGU5YWM0NzAwICAyIFtkZWJ1Z10NCj54
+aW9fc2Vzc2lvbl9jbGllbnQuYzoxOTYgeGlvX3Nlc3Npb25fYWNjZXB0X2Nvbm5lY3Rpb25zIC0g
+cmVjb25uZWN0aW5nDQo+dG8gcmRtYTovLzEwLjEzLjEwLjE4OTo2ODAwLiBjb25uZWN0aW9uOjB4
+N2Y2ZGU0MDU2ZTIwLA0KPm5leHVzOjB4N2Y2ZGRjMDE2MGIwDQo+DQo+DQo+MjAxNS0wNy0xNSAw
+OTo1NDowNy43ODU3MzQgN2Y2ZGU5YWM0NzAwIDIwIFt0cmFjZV0geGlvX25leHVzLmM6MTk5Mw0K
+Pnhpb19uZXh1c19jb25uZWN0IC0geGlvX25leHVzX2Nvbm5lY3Q6IG5leHVzOjB4N2Y2ZGRjMDE2
+MGIwLA0KPnJkbWFfaG5kbDoweDdmNmRkYzAxNjJkMCwgcG9ydGFsOnJkbWE6Ly8xMC4xMy4xMC4x
+ODk6NjgwMA0KPg0KPg0KPjIwMTUtMDctMTUgMDk6NTQ6MDcuNzg1NzYxIDdmNmRlOWFjNDcwMCAg
+MiBbZGVidWddDQo+eGlvX2Nvbm5lY3Rpb24uYzoyNTI2IHhpb19vbl9maW5fcmVxX3JlY3YgLSBm
+aW4gcmVxdWVzdCByZWNlaXZlZC4NCj5zZXNzaW9uOjB4N2Y2ZGU0MDU1OGYwLCBjb25uZWN0aW9u
+OjB4N2Y2ZGRjMDE1YWEwDQo+DQo+DQo+MjAxNS0wNy0xNSAwOTo1NDowNy43ODU3NjQgN2Y2ZGU5
+YWM0NzAwICAyIFtkZWJ1Z10NCj54aW9fY29ubmVjdGlvbi5jOjE2ODIgeGlvX3NlbmRfZmluX2Fj
+ayAtIHNlbmQgZmluIHJlc3BvbnNlLg0KPnNlc3Npb246MHg3ZjZkZTQwNTU4ZjAsIGNvbm5lY3Rp
+b246MHg3ZjZkZGMwMTVhYTANCj4NCj4NCj4yMDE1LTA3LTE1IDA5OjU0OjA3Ljc4NTc2NyA3ZjZk
+ZTlhYzQ3MDAgIDIgW2RlYnVnXQ0KPnhpb19jb25uZWN0aW9uLmM6MjM2NyB4aW9fb25fZmluX3Jl
+cV9zZW5kX2NvbXAgLSBnb3QgZmluIHJlcXVlc3Qgc2VuZA0KPmNvbXBsZXRpb24uIHNlc3Npb246
+MHg3ZjZkZTQwNTU4ZjAsIGNvbm5lY3Rpb246MHg3ZjZkZGMwMTVhYTANCj4NCj4NCj4yMDE1LTA3
+LTE1IDA5OjU0OjA3Ljc4NTc2OSA3ZjZkZTlhYzQ3MDAgIDIgW2RlYnVnXQ0KPnhpb19jb25uZWN0
+aW9uLmM6MjQ1NCB4aW9fb25fZmluX2Fja19yZWN2IC0gZ290IGZpbiBhY2suDQo+c2Vzc2lvbjow
+eDdmNmRlNDA1NThmMCwgY29ubmVjdGlvbjoweDdmNmRkYzAxNWFhMA0KPg0KPg0KPjIwMTUtMDct
+MTUgMDk6NTQ6MDcuNzg1NzcxIDdmNmRlOWFjNDcwMCAgMiBbZGVidWddDQo+eGlvX2Nvbm5lY3Rp
+b24uYzoyNDk1IHhpb19vbl9maW5fYWNrX3JlY3YgLSBjb25uZWN0aW9uIDB4N2Y2ZGRjMDE1YWEw
+DQo+c3RhdGUgY2hhbmdlOiBjdXJyZW50X3N0YXRlOkZJTl9XQUlUXzEsIG5leHRfc3RhdGU6RklO
+X1dBSVRfMg0KPg0KPg0KPjIwMTUtMDctMTUgMDk6NTQ6MDcuNzg1NzcyIDdmNmRlOWFjNDcwMCAg
+MiBbZGVidWddDQo+eGlvX2Nvbm5lY3Rpb24uYzoyNTYwIHhpb19vbl9maW5fYWNrX3NlbmRfY29t
+cCAtIGZpbiBhY2sgc2VuZA0KPmNvbXBsZXRpb24gcmVjZWl2ZWQuIHNlc3Npb246MHg3ZjZkZTQw
+NTU4ZjAsIGNvbm5lY3Rpb246MHg3ZjZkZGMwMTVhYTANCj4NCj4NCj4yMDE1LTA3LTE1IDA5OjU0
+OjA3Ljc4NTc3MyA3ZjZkZTlhYzQ3MDAgIDIgW2RlYnVnXQ0KPnhpb19jb25uZWN0aW9uLmM6MjU4
+MyB4aW9fb25fZmluX2Fja19zZW5kX2NvbXAgLSBjb25uZWN0aW9uDQo+MHg3ZjZkZGMwMTVhYTAg
+c3RhdGUgY2hhbmdlOiBjdXJyZW50X3N0YXRlOkZJTl9XQUlUXzIsDQo+bmV4dF9zdGF0ZTpUSU1F
+X1dBSVQNCj4NCj4NCj4yMDE1LTA3LTE1IDA5OjU0OjA3Ljc4NTc4NCA3ZjZkZTlhYzQ3MDAgIDIg
+W2RlYnVnXQ0KPnhpb19yZG1hX21hbmFnZW1lbnQuYzoyMzg2IHhpb19oYW5kbGVfY21fZXZlbnQg
+LSBjbSBldmVudDoNCj5bUkRNQV9DTV9FVkVOVF9BRERSX1JFU09MVkVEXSwgaG5kbDoweDdmNmRk
+YzAxNjJkMCwgc3RhdHVzOjANCj4NCj4NCj4yMDE1LTA3LTE1IDA5OjU0OjA3Ljc4NjAwOCA3ZjZk
+ZTlhYzQ3MDAgIDIgW2RlYnVnXQ0KPnhpb19yZG1hX21hbmFnZW1lbnQuYzoyMzg2IHhpb19oYW5k
+bGVfY21fZXZlbnQgLSBjbSBldmVudDoNCj5bUkRNQV9DTV9FVkVOVF9ST1VURV9SRVNPTFZFRF0s
+IGhuZGw6MHg3ZjZkZGMwMTYyZDAsIHN0YXR1czowDQo+DQo+DQo+MjAxNS0wNy0xNSAwOTo1NDow
+Ny43ODY0NjggN2Y2ZGU5YWM0NzAwICAyIFtkZWJ1Z10NCj54aW9fcmRtYV9tYW5hZ2VtZW50LmM6
+OTYxIHhpb19xcF9jcmVhdGUgLSByZG1hIHFwOiBbbmV3XQ0KPmhhbmRsZToweDdmNmRkYzAxNjJk
+MCwgcXA6MHgyNjIsIG1heCBpbmxpbmU6NDQ4DQo+DQo+DQo+MjAxNS0wNy0xNSAwOTo1NDowNy43
+ODc3OTMgN2Y2ZGU5YWM0NzAwICAyIFtkZWJ1Z10NCj54aW9fY29ubmVjdGlvbi5jOjIzODMgeGlv
+X2Nsb3NlX3RpbWVfd2FpdCAtIGNvbm5lY3Rpb24gMHg3ZjZkZGMwMTVhYTANCj5zdGF0ZSBjaGFu
+Z2U6IGN1cnJlbnRfc3RhdGU6VElNRV9XQUlULCBuZXh0X3N0YXRlOkNMT1NFRA0KPg0KPg0KPjIw
+MTUtMDctMTUgMDk6NTQ6MDcuNzg3ODA0IDdmNmRlOWFjNDcwMCAgMiBbZGVidWddDQo+eGlvX2Nv
+bm5lY3Rpb24uYzoyMTgzIHhpb19jb25uZWN0aW9uX2Rlc3Ryb3kgLSB4aW9fY29ubmVjdGlvbl9k
+ZXN0cm95Lg0KPnNlc3Npb246MHg3ZjZkZTQwNTU4ZjAsIGNvbm5lY3Rpb246MHg3ZjZkZGMwMTVh
+YTAgbmV4dXM6MHg3ZjZkZTQwNTViMjANCj5ucjoxLCBzdGF0ZTpDTE9TRUQNCj4NCj4NCj4yMDE1
+LTA3LTE1IDA5OjU0OjA3Ljc4NzgwNyA3ZjZkZTlhYzQ3MDAgIDIgW2RlYnVnXQ0KPnhpb19jb25u
+ZWN0aW9uLmM6MjEwOCB4aW9fY29ubmVjdGlvbl9wb3N0X2Rlc3Ryb3kgLQ0KPnhpb19jb25uZWN0
+aW9uX3Bvc3RfZGVzdHJveS4gc2Vzc2lvbjoweDdmNmRlNDA1NThmMCwNCj5jb25uZWN0aW9uOjB4
+N2Y2ZGRjMDE1YWEwIGNvbm46MHg3ZjZkZTQwNTViMjAgbnI6MQ0KPg0KPg0KPjIwMTUtMDctMTUg
+MDk6NTQ6MDcuNzg3ODEwIDdmNmRlOWFjNDcwMCAyMCBbdHJhY2VdIHhpb19uZXh1cy5jOjIxMzkN
+Cj54aW9fbmV4dXNfY2xvc2UgLSBuZXh1czogW3B1dHJlZl0gcHRyOjB4N2Y2ZGU0MDU1YjIwLCBy
+ZWZjbnQ6MQ0KPg0KPg0KPjIwMTUtMDctMTUgMDk6NTQ6MDcuNzg3ODEyIDdmNmRlOWFjNDcwMCAg
+MiBbZGVidWddDQo+eGlvX3Nlc3Npb25fY2xpZW50LmM6ODA4IHhpb19jbGllbnRfb25fbmV4dXNf
+ZXZlbnQgLSBzZXNzaW9uOg0KPltub3RpZmljYXRpb25dIC0gbmV4dXMgY2xvc2VkLiBzZXNzaW9u
+OjB4N2Y2ZGU0MDU1OGYwLA0KPm5leHVzOjB4N2Y2ZGU0MDU1YjIwDQo+DQo+DQo+MjAxNS0wNy0x
+NSAwOTo1NDowNy43ODc4MTQgN2Y2ZGU5YWM0NzAwIDIwIFt0cmFjZV0geGlvX3Nlc3Npb24uYzo5
+ODcNCj54aW9fb25fbmV4dXNfY2xvc2VkIC0gc2Vzc2lvbjoweDdmNmRlNDA1NThmMCAtIG5leHVz
+OjB4N2Y2ZGU0MDU1YjIwDQo+Y2xvc2UgY29tcGxldGUNCj4NCj4NCj4yMDE1LTA3LTE1IDA5OjU0
+OjA3Ljc4NzgxNiA3ZjZkZTlhYzQ3MDAgMjAgW3RyYWNlXSB4aW9fbmV4dXMuYzoyMTExDQo+eGlv
+X25leHVzX2RlbGF5ZWRfY2xvc2UgLSB4aW9fbmV4dXNfZGVsZXllZCBjbG9zZS4NCj5uZXh1czow
+eDdmNmRlNDA1NWIyMCwgc3RhdGU6NA0KPg0KPg0KPjIwMTUtMDctMTUgMDk6NTQ6MDcuNzg3ODE3
+IDdmNmRlOWFjNDcwMCAyMCBbdHJhY2VdDQo+eGlvX2Nvbm5lY3Rpb24uYzoyMTIyIHhpb19jb25u
+ZWN0aW9uX3Bvc3RfZGVzdHJveSAtIGxlYWQgY29ubmVjdGlvbiBpcw0KPmNsb3NlZA0KPg0KPg0K
+PjIwMTUtMDctMTUgMDk6NTQ6MDcuNzkwNjY0IDdmNmRlOWFjNDcwMCAgMiBbZGVidWddDQo+eGlv
+X3JkbWFfbWFuYWdlbWVudC5jOjIzODYgeGlvX2hhbmRsZV9jbV9ldmVudCAtIGNtIGV2ZW50Og0K
+PltSRE1BX0NNX0VWRU5UX0VTVEFCTElTSEVEXSwgaG5kbDoweDdmNmRkYzAxNjJkMCwgc3RhdHVz
+OjANCj4NCj4NCj4yMDE1LTA3LTE1IDA5OjU0OjA3Ljc5MDY3MiA3ZjZkZTlhYzQ3MDAgIDIgW2Rl
+YnVnXSB4aW9fbmV4dXMuYzoxNjMyDQo+eGlvX25leHVzX29uX3RyYW5zcG9ydF9ldmVudCAtIG5l
+eHVzOiBbbm90aWZpY2F0aW9uXSAtIHRyYW5zcG9ydA0KPmVzdGFibGlzaGVkLiBuZXh1czoweDdm
+NmRkYzAxNjBiMCwgdHJhbnNwb3J0OjB4N2Y2ZGRjMDE2MmQwDQo+DQo+DQo+MjAxNS0wNy0xNSAw
+OTo1NDowNy43OTA2NzUgN2Y2ZGU5YWM0NzAwICAyIFtkZWJ1Z10NCj54aW9fcmRtYV9tYW5hZ2Vt
+ZW50LmM6MTI3NCB4aW9fcmRtYV9pbml0aWFsX3Bvb2xfcG9zdF9jcmVhdGUgLQ0KPnBvc3RfcmVj
+diBjb25uX3NldHVwIHJ4IHRhc2s6MHg3ZjZkZGMwMDk0MDANCj4NCj4NCj4yMDE1LTA3LTE1IDA5
+OjU0OjA3Ljc5MDY4MCA3ZjZkZTlhYzQ3MDAgMjAgW3RyYWNlXSB4aW9fbmV4dXMuYzozODQNCj54
+aW9fbmV4dXNfc2VuZF9zZXR1cF9yZXEgLSBzZW5kIHNldHVwIHJlcXVlc3QNCj4NCj4NCj4yMDE1
+LTA3LTE1IDA5OjU0OjA3Ljc5MDY4MiA3ZjZkZTlhYzQ3MDAgMjAgW3RyYWNlXSB4aW9fbmV4dXMu
+Yzo0MjYNCj54aW9fbmV4dXNfc2VuZF9zZXR1cF9yZXEgLSB4aW9fbmV4dXNfc2VuZF9zZXR1cF9y
+ZXE6DQo+bmV4dXM6MHg3ZjZkZGMwMTYwYjAsIHJkbWFfaG5kbDoweDdmNmRkYzAxNjJkMA0KPg0K
+Pg0KPjIwMTUtMDctMTUgMDk6NTQ6MDcuNzkwNjgzIDdmNmRlOWFjNDcwMCAyMCBbdHJhY2VdDQo+
+eGlvX3JkbWFfZGF0YXBhdGguYzo0MTgwIHhpb19yZG1hX3NlbmRfc2V0dXBfcmVxIC0gcmRtYSBz
+ZW5kIHNldHVwDQo+cmVxdWVzdA0KPg0KPg0KPjIwMTUtMDctMTUgMDk6NTQ6MDcuNzk0MzU5IDdm
+NmRlOWFjNDcwMCAyMCBbdHJhY2VdDQo+eGlvX3JkbWFfZGF0YXBhdGguYzo0MzE5IHhpb19yZG1h
+X29uX3NldHVwX21zZyAtIHNldHVwIGNvbXBsZXRlLg0KPnNlbmRfYnVmX3N6OjE3NDA4DQo+DQo+
+DQo+MjAxNS0wNy0xNSAwOTo1NDowNy43OTQzNjcgN2Y2ZGU5YWM0NzAwIDIwIFt0cmFjZV0geGlv
+X25leHVzLmM6NjYxDQo+eGlvX25leHVzX29uX3JlY3Zfc2V0dXBfcnNwIC0gcmVjZWl2aW5nIHNl
+dHVwIHJlc3BvbnNlLg0KPm5leHVzOjB4N2Y2ZGRjMDE2MGIwDQo+DQo+DQo+MjAxNS0wNy0xNSAw
+OTo1NDowNy43OTQzNjkgN2Y2ZGU5YWM0NzAwIDIwIFt0cmFjZV0geGlvX25leHVzLmM6NzE0DQo+
+eGlvX25leHVzX29uX3JlY3Zfc2V0dXBfcnNwIC0geGlvX25leHVzX29uX3JlY3Zfc2V0dXBfcnNw
+Og0KPm5leHVzOjB4N2Y2ZGRjMDE2MGIwLCB0cmFuc19obmRsOjB4N2Y2ZGRjMDE2MmQwDQo+DQo+
+DQo+MjAxNS0wNy0xNSAwOTo1NDowNy43OTU0NDUgN2Y2ZGU5YWM0NzAwIDIwIFt0cmFjZV0NCj54
+aW9fcmRtYV92ZXJicy5jOjI0MCB4aW9fcmVnX21yX2V4X2RldiAtIGJlZm9yZSBpYnZfcmVnX21y
+DQo+DQo+DQo+MjAxNS0wNy0xNSAwOTo1NDowNy43OTg2MjUgN2Y2ZGU5YWM0NzAwIDIwIFt0cmFj
+ZV0NCj54aW9fcmRtYV92ZXJicy5jOjI0MiB4aW9fcmVnX21yX2V4X2RldiAtIGFmdGVyIGlidl9y
+ZWdfbXINCj4NCj4NCj4yMDE1LTA3LTE1IDA5OjU0OjA3Ljc5ODYzMyA3ZjZkZTlhYzQ3MDAgMjAg
+W3RyYWNlXQ0KPnhpb19yZG1hX3ZlcmJzLmM6MjQwIHhpb19yZWdfbXJfZXhfZGV2IC0gYmVmb3Jl
+IGlidl9yZWdfbXINCj4NCj4NCj4yMDE1LTA3LTE1IDA5OjU0OjA3Ljc5ODkyOSA3ZjZkZTlhYzQ3
+MDAgMjAgW3RyYWNlXQ0KPnhpb19yZG1hX3ZlcmJzLmM6MjQyIHhpb19yZWdfbXJfZXhfZGV2IC0g
+YWZ0ZXIgaWJ2X3JlZ19tcg0KPg0KPg0KPjIwMTUtMDctMTUgMDk6NTQ6MDcuNzk4OTQwIDdmNmRl
+OWFjNDcwMCAgMiBbZGVidWddDQo+eGlvX3JkbWFfbWFuYWdlbWVudC5jOjE1NzIgeGlvX3JkbWFf
+cHJpbWFyeV9wb29sX3NsYWJfcHJlX2NyZWF0ZSAtDQo+cG9vbCBidWY6MHg3ZjZkZTI1YTEwMDAs
+IG1yOjB4N2Y2ZGRjMDE1ZDQwDQo+DQo+DQo+MjAxNS0wNy0xNSAwOTo1NDowNy43OTkzNzEgN2Y2
+ZGU5YWM0NzAwICAyIFtkZWJ1Z10NCj54aW9fc2Vzc2lvbl9jbGllbnQuYzo3OTMgeGlvX2NsaWVu
+dF9vbl9uZXh1c19ldmVudCAtIHNlc3Npb246DQo+W25vdGlmaWNhdGlvbl0gLSBuZXh1cyBlc3Rh
+Ymxpc2hlZC4gc2Vzc2lvbjoweDdmNmRlNDA1NThmMCwNCj5uZXh1czoweDdmNmRkYzAxNjBiMA0K
+Pg0KPg0KPjIwMTUtMDctMTUgMDk6NTQ6MDcuNzk5Mzc2IDdmNmRlOWFjNDcwMCAgMiBbZGVidWdd
+DQo+eGlvX2Nvbm5lY3Rpb24uYzoyMDMwIHhpb19jb25uZWN0aW9uX3NlbmRfaGVsbG9fcmVxIC0g
+c2VuZCBoZWxsbw0KPnJlcXVlc3QuIHNlc3Npb246MHg3ZjZkZTQwNTU4ZjAsIGNvbm5lY3Rpb246
+MHg3ZjZkZTQwNTZlMjANCj4NCj4NCj4yMDE1LTA3LTE1IDA5OjU0OjA3Ljc5OTUyMiA3ZjZkZTlh
+YzQ3MDAgIDIgW2RlYnVnXQ0KPnhpb19jb25uZWN0aW9uLmM6MjY0MyB4aW9fb25fY29ubmVjdGlv
+bl9oZWxsb19yc3BfcmVjdiAtIHJlY3YgaGVsbG8NCj5yZXNwb25zZS4gc2Vzc2lvbjoweDdmNmRl
+NDA1NThmMCwgY29ubmVjdGlvbjoweDdmNmRlNDA1NmUyMA0KPg0KPg0KPjIwMTUtMDctMTUgMDk6
+NTQ6MDcuNzk5NTMwIDdmNmRlOWFjNDcwMCAgMiBbZGVidWddDQo+eGlvX2Nvbm5lY3Rpb24uYzoy
+NjQ3IHhpb19vbl9jb25uZWN0aW9uX2hlbGxvX3JzcF9yZWN2IC0gZ290IGhlbGxvDQo+cmVzcG9u
+c2UuIHNlc3Npb246MHg3ZjZkZTQwNTU4ZjAsIGNvbm5lY3Rpb246MHg3ZjZkZTQwNTZlMjANCj4N
+Cj4NCj4yMDE1LTA3LTE1IDA5OjU0OjA3Ljc5OTUzMyA3ZjZkZTlhYzQ3MDAgIDQgc2Vzc2lvbiBl
+dmVudDogY29ubmVjdGlvbg0KPmVzdGFibGlzaGVkLiByZWFzb246IFN1Y2Nlc3MNCj4NCj4yMDE1
+LTA3LTE1IDA5OjU0OjA3Ljc5OTUzOCA3ZjZkZTlhYzQ3MDAgIDIgY29ubmVjdGlvbiBlc3RhYmxp
+c2hlZA0KPjB4N2Y2ZGU0MDU2ZTIwIHNlc3Npb24gMHg3ZjZkZTQwNTU4ZjAgeGNvbiAweDdmNmRl
+NDA1NTQ2MA0KPg0KPjIwMTUtMDctMTUgMDk6NTQ6MDcuNzk5NTQxIDdmNmRlOWFjNDcwMCAgMiBs
+ZWFybmVkIG15IGFkZHINCj4xMC4xMy4xMC4xODk6MC8xMDAzMzY4DQo+DQo+MjAxNS0wNy0xNSAw
+OTo1NDowNy43OTk1NDYgN2Y2ZGU5YWM0NzAwICAyIGNsaWVudDogY29ubmVjdGVkIGZyb20NCj4x
+MC4xMy4xMC4xODk6NDkxMzQvMCB0byAxMC4xMy4xMC4xODk6NjgwMC8wDQo+DQo+MjAxNS0wNy0x
+NSAwOTo1NDowNy43OTk1NzYgN2Y2ZGU5YWM0NzAwIDExIG9uX21zZ19kZWxpdmVyZWQgeGNvbjoN
+Cj4weDdmNmRlNDA1NTQ2MCBzZXNzaW9uOiAweDdmNmRlNDA1NThmMCBtc2c6IDB4N2Y2ZGYwMTRm
+MTYwIHNuOiAwIHR5cGU6DQo+MTcgdGlkOiAwIHNlcTogMQ0KPg0KPjIwMTUtMDctMTUgMDk6NTQ6
+MDcuODA0NTUzIDdmNmRlOWFjNDcwMCAxMCBvbl9tc2dfcmVxIHJlY2VpdmUgcmVxIHRyZXENCj4w
+eDdmNmRlODE2MjU5OCBtc2dfY250IDEgaW92X2Jhc2UgMHg3ZjZkZTMxZjEwNjAgaW92X2xlbiAy
+MTYgbmVudHMgMQ0KPmNvbm4gMHg3ZjZkZTQwNTZlMjAgc2VzcyAweDdmNmRlNDA1NThmMCBzbiAw
+DQo+DQo+MjAxNS0wNy0xNSAwOTo1NDowNy44MDQ1NjQgN2Y2ZGU5YWM0NzAwICA0IG9uX21zZ19y
+ZXEgbXNnX3NlcS5zaXplKCk9MQ0KPg0KPjIwMTUtMDctMTUgMDk6NTQ6MDcuODA0NTkwIDdmNmRl
+OWFjNDcwMCAxMCBvbl9tc2dfcmVxIHJlY2VpdmUgcmVxIHRyZXENCj4weDdmNmRlODE2MDE3OCBt
+c2dfY250IDEgaW92X2Jhc2UgMHg3ZjZkZTMxZTcwNjAgaW92X2xlbiAyMTYgbmVudHMgMQ0KPmNv
+bm4gMHg3ZjZkZTQwNTZlMjAgc2VzcyAweDdmNmRlNDA1NThmMCBzbiAxDQo+DQo+MjAxNS0wNy0x
+NSAwOTo1NDowNy44MDQ1OTQgN2Y2ZGU5YWM0NzAwICA0IG9uX21zZ19yZXEgbXNnX3NlcS5zaXpl
+KCk9MQ0KPg0KPm1vbi9Nb25NYXAuaDogSW4gZnVuY3Rpb24gJ3ZvaWQgTW9uTWFwOjpjYWxjX3Jh
+bmtzKCknIHRocmVhZA0KPjdmNmRlOTJjMzcwMCB0aW1lIDIwMTUtMDctMTUgMDk6NTQ6MDcuODA0
+NjU0DQo+DQo+bW9uL01vbk1hcC5oOiA0NzogRkFJTEVEIGFzc2VydChhZGRyX25hbWUuY291bnQo
+cC0+c2Vjb25kKSA9PSAwKQ0KPg0KPiAgY2VwaCB2ZXJzaW9uIDkuMC4xLTE0OTQtZzhmYzA0OTYg
+DQo+KDhmYzA0OTY2NGJjNzk4NDMyZTE3NTBkYTg2YjFmMjE2Zjg1YTg0MmQpDQo+DQo+ICAxOiAo
+KCkrMHgxMjYzN2IpIFsweDdmNmRmNTg1MDM3Yl0NCj4NCj4gIDI6ICgoKSsweDFiZjg2ZCkgWzB4
+N2Y2ZGY1OGU5ODZkXQ0KPg0KPiAgMzogKCgpKzB4MWI2NzA5KSBbMHg3ZjZkZjU4ZTA3MDldDQo+
+DQo+ICA0OiAoKCkrMHgxYjcxNzcpIFsweDdmNmRmNThlMTE3N10NCj4NCj4gIDU6ICgoKSsweDJm
+YWEyNykgWzB4N2Y2ZGY1YTI0YTI3XQ0KPg0KPiAgNjogKCgpKzB4MzBmZDJkKSBbMHg3ZjZkZjVh
+MzlkMmRdDQo+DQo+ICA3OiAoKCkrMHgzMTAwYjApIFsweDdmNmRmNWEzYTBiMF0NCj4NCj4gIDg6
+ICgoKSsweDgxODIpIFsweDdmNmRmYTc4NTE4Ml0NCj4NCj4gIDk6IChjbG9uZSgpKzB4NmQpIFsw
+eDdmNmRmYTRiMjQ3ZF0NCj4NCj4gIE5PVEU6IGEgY29weSBvZiB0aGUgZXhlY3V0YWJsZSwgb3Ig
+YG9iamR1bXAgLXJkUyA8ZXhlY3V0YWJsZT5gIGlzDQo+bmVlZGVkIHRvIGludGVycHJldCB0aGlz
+Lg0KPg0KPnRlcm1pbmF0ZSBjYWxsZWQgYWZ0ZXIgdGhyb3dpbmcgYW4gaW5zdGFuY2Ugb2YgJ2Nl
+cGg6OkZhaWxlZEFzc2VydGlvbicNCj4NCj5BYm9ydGVkIChjb3JlIGR1bXBlZCkgLT4gTm8gSWRl
+YSB3aGVyZSB0aGlzIGNvcmUgaXMhIGxvb2tlZCBhdCBQV0QsICYgDQo+L3Zhci9jcmFzaA0KPg0K
+Pg0KPg0KPkFueSBoZWxwIC8gcG9pbnRlcnMgZ3JlYXRseSBhcHByZWNpYXRlZCAoLToNCj4NCj4t
+TmVvDQo+DQo+DQo+DQo+T24gU3VuLCBKdWwgMTIsIDIwMTUgYXQgMToyNSBBTSwgSm9hbyBFZHVh
+cmRvIEx1aXMgPGpvYW9Ac3VzZS5kZT4gDQo+d3JvdGU6DQo+PiAgT24gMDcvMTAvMjAxNSAxMToz
+MSBQTSwga2VybmVsIG5lb3BoeXRlIHdyb3RlOg0KPj4+ICBIaSwNCj4+Pg0KPj4+ICBJIGFtIHNl
+ZWluZyB0aGUgZm9sbG93aW5nIGVycm9yIGV2ZXJ5IHRpbWUgSSBhbSB0cnlpbmcgdG8gbWFudWFs
+bHkNCj4+PiAgZGVwbG95IGNlcGggY2x1c3RlciBhbmQgZG8gYSBjZXBoIC1zIDoNCj4+Pg0KPj4+
+ICBtb24vTW9uTWFwLmg6IEluIGZ1bmN0aW9uICd2b2lkIE1vbk1hcDo6Y2FsY19yYW5rcygpJyB0
+aHJlYWQNCj4+PiAgN2ZiM2NjZmI2NzAwIHRpbWUgMjAxNS0wNy0xMCAxNToyNzo1Ni4wMDQxNDgN
+Cj4+Pg0KPj4+ICBtb24vTW9uTWFwLmg6IDQ3OiBGQUlMRUQgYXNzZXJ0KGFkZHJfbmFtZS5jb3Vu
+dChwLT5zZWNvbmQpID09IDApDQo+Pg0KPj4gIFBsZWFzZSBzZW5kIHVzIGEgY29weSBvZiB5b3Vy
+IG1vbm1hcCBhbmQgY2VwaC5jb25mLg0KPj4NCj4+ICBZb3Ugc2hvdWxkIGFsc28gb3BlbiBhIHRp
+Y2tldCBvbiB0aGUgdHJhY2tlci4NCj4+DQo+PiAgVGhhbmtzIQ0KPj4NCj4+ICAgIC1Kb2FvDQo+
+Pg0KPj4+DQo+Pj4gICBjZXBoIHZlcnNpb24gOS4wLjEtMTQ0NS1nNGExNzllZSANCj4+Pig0YTE3
+OWVlYTUyN2Y3Y2JjZjQ1ZWVkNGE2M2FkMGZhOGY3NDRmYzRhKQ0KPj4+DQo+Pj4gICAxOiAoKCkr
+MHgxMjcxNmIpIFsweDdmYjNkNTNlYzE2Yl0NCj4+Pg0KPj4+ICAgMjogKCgpKzB4MWMwYTZkKSBb
+MHg3ZmIzZDU0ODVhNmRdDQo+Pj4NCj4+PiAgIDM6ICgoKSsweDFiNzkwOSkgWzB4N2ZiM2Q1NDdj
+OTA5XQ0KPj4+DQo+Pj4gICA0OiAoKCkrMHgxYjgzNzcpIFsweDdmYjNkNTQ3ZDM3N10NCj4+Pg0K
+Pj4+ICAgNTogKCgpKzB4MmZiYmU3KSBbMHg3ZmIzZDU1YzBiZTddDQo+Pj4NCj4+PiAgIDY6ICgo
+KSsweDMxMGYxZCkgWzB4N2ZiM2Q1NWQ1ZjFkXQ0KPj4+DQo+Pj4gICA3OiAoKCkrMHgzMTEyYTAp
+IFsweDdmYjNkNTVkNjJhMF0NCj4+Pg0KPj4+ICAgODogKCgpKzB4ODE4MikgWzB4N2ZiM2Q5ZTA1
+MTgyXQ0KPj4+DQo+Pj4gICA5OiAoY2xvbmUoKSsweDZkKSBbMHg3ZmIzZDliMzI0N2RdDQo+Pj4N
+Cj4+PiAgIE5PVEU6IGEgY29weSBvZiB0aGUgZXhlY3V0YWJsZSwgb3IgYG9iamR1bXAgLXJkUyA8
+ZXhlY3V0YWJsZT5gIGlzDQo+Pj4gIG5lZWRlZCB0byBpbnRlcnByZXQgdGhpcy4NCj4+Pg0KPj4+
+ICB0ZXJtaW5hdGUgY2FsbGVkIGFmdGVyIHRocm93aW5nIGFuIGluc3RhbmNlIG9mIA0KPj4+J2Nl
+cGg6OkZhaWxlZEFzc2VydGlvbicNCj4+Pg0KPj4+ICBBYm9ydGVkIChjb3JlIGR1bXBlZCkNCj4+
+Pg0KPj4+ICBBbnkgaGVscCBncmVhdGx5IGFwcHJlY2lhdGVkIDotKQ0KPj4+DQo+Pj4gIC1OZW8N
+Cj4+PiAgLS0NCj4+PiAgVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxp
+bmUgInVuc3Vic2NyaWJlIA0KPj4+Y2VwaC1kZXZlbCIgaW4NCj4+PiAgdGhlIGJvZHkgb2YgYSBt
+ZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcNCj4+PiAgTW9yZSBtYWpvcmRvbW8g
+aW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+Pj4N
+Cj4+
