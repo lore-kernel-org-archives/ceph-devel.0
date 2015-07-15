@@ -1,46 +1,55 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: Client: what is supposed to protect racing readdirs and unlinks?
-Date: Wed, 15 Jul 2015 20:57:06 +0800
-Message-ID: <CAAM7YAnYtez9HqpMx16pC_DTSt=yBKgr22qvgKE+5sR2k0ZpNQ@mail.gmail.com>
-References: <CAC6JEv9VFv2ywGLOfHpcW=yodWCX_VMX22YMFvjnqQhsrfCJdg@mail.gmail.com>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: 07/15/2015 Weekly Ceph Performance Meeting IS ON!
+Date: Wed, 15 Jul 2015 09:41:55 -0500
+Message-ID: <55A67133.1060000@redhat.com>
+Reply-To: mnelson@redhat.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f174.google.com ([209.85.217.174]:36212 "EHLO
-	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752566AbbGOM5I (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 15 Jul 2015 08:57:08 -0400
-Received: by lbbpo10 with SMTP id po10so24191577lbb.3
-        for <ceph-devel@vger.kernel.org>; Wed, 15 Jul 2015 05:57:06 -0700 (PDT)
-In-Reply-To: <CAC6JEv9VFv2ywGLOfHpcW=yodWCX_VMX22YMFvjnqQhsrfCJdg@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:48967 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751918AbbGOOl6 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 15 Jul 2015 10:41:58 -0400
+Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
+	by mx1.redhat.com (Postfix) with ESMTPS id 34168AB12E
+	for <ceph-devel@vger.kernel.org>; Wed, 15 Jul 2015 14:41:58 +0000 (UTC)
+Received: from [10.3.112.77] (ovpn-112-77.phx2.redhat.com [10.3.112.77])
+	by int-mx14.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t6FEfuvo025299
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+	for <ceph-devel@vger.kernel.org>; Wed, 15 Jul 2015 10:41:57 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@gregs42.com>
-Cc: Sage Weil <sweil@redhat.com>, =?UTF-8?B?5Lil5q2j?= <zyan@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, Jul 15, 2015 at 1:11 AM, Gregory Farnum <greg@gregs42.com> wrote:
-> I spent a bunch of today looking at http://tracker.ceph.com/issues/12297.
->
-> Long story short: the workload is doing a readdir at the same time as
-> it's unlinking files. The readdir functions (in this case,
-> _readdir_cache_cb) drop the client_lock each time they invoke the
-> callback (for obvious reasons). There is some effort in
-> _readdir_cache_cb to try and keep the iterator valid (we check on each
-> loop that we aren't at end; we increment the iterator before dropping
-> the lock), but it's not sufficient.
->
-> Is there supposed to be something preventing this kind of race? If not
-> I can work something out in the code but I've not done much work in
-> that bit and there are enough pieces that I wonder if I'm missing some
-> other issue.
+8AM PST as usual!  Topics today include proposed additions to cbt by 
+Mirantis!  Please feel free to add your own!
 
-I think calling (*pd)->get() before release the client_lock should work.
+Here's the links:
 
-Regards
-Yan, Zheng
+Etherpad URL:
+http://pad.ceph.com/p/performance_weekly
 
-> -Greg
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+To join the Meeting:
+https://bluejeans.com/268261044
+
+To join via Browser:
+https://bluejeans.com/268261044/browser
+
+To join with Lync:
+https://bluejeans.com/268261044/lync
+
+
+To join via Room System:
+Video Conferencing System: bjn.vc -or- 199.48.152.152
+Meeting ID: 268261044
+
+To join via Phone:
+1) Dial:
+           +1 408 740 7256
+           +1 888 240 2560(US Toll Free)
+           +1 408 317 9253(Alternate Number)
+           (see all numbers - http://bluejeans.com/numbers)
+2) Enter Conference ID: 268261044
+
+Mark
