@@ -1,36 +1,60 @@
-From: Andrew Woodward <xarses@gmail.com>
-Subject: CephX key/secret generation
-Date: Wed, 15 Jul 2015 14:44:09 -0700
-Message-ID: <CACEfbZhXSNp0_WxyX2mwSeg2rdEdYSfVbGDZsrHKqPvAGa7oBQ@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: hammer-backports  branch is ready to schedule suites (v0.94.3)
+Date: Thu, 16 Jul 2015 01:28:47 +0200
+Message-ID: <55A6ECAF.4020402@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="UdgkOjcQg8u5nGlri31AAMrHbLbOGJe3m"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f182.google.com ([209.85.213.182]:33320 "EHLO
-	mail-ig0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751270AbbGOVoK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 15 Jul 2015 17:44:10 -0400
-Received: by iggp10 with SMTP id p10so267325igg.0
-        for <ceph-devel@vger.kernel.org>; Wed, 15 Jul 2015 14:44:09 -0700 (PDT)
+Received: from mail2.dachary.org ([91.121.57.175]:50797 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1753606AbbGOX2z (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 15 Jul 2015 19:28:55 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Abhishek L <abhishek.lekshmanan@gmail.com>
+Cc: Nathan Cutler <ncutler@suse.cz>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi, I'm looking for help understanding how the cephx auth keys are
-generated. I want to pre-create the keys for the cluster within my
-deployment engine. It appears that we can use `ceph-athtool
---gen-print-key` in order to generate the keys and use them, however
-the application runs inside a container and it seems silly to 150mb of
-deps to get access to ceph-authtool.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--UdgkOjcQg8u5nGlri31AAMrHbLbOGJe3m
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-Looking through the code at a basic level, I see that it's calling
-some AES functions, however it quickly goes over my ability to read C.
+Hi Abhishek,
 
-Can some one go over the key construction requirements? Can we use any
-string encoded with base64? Is the AES encoding needed? What is the
-correct formula for the AES generation? It looks like the have the
-same seed but I'm having problems reading it out of the code.
+The last pull request from the previous integration branch was merged ( h=
+ttps://github.com/ceph/ceph/pull/4891 ).
 
--- 
-Andrew
-Mirantis
-Fuel community ambassador
+http://tracker.ceph.com/issues/11990#teuthology-run-commit-0c435d3974c9aa=
+215ea10c6e9eed30ada6dbc390-hammer-backports-July-15
+
+The ceph.spec.in pull request are not included (I made it so all of them =
+have ceph.spec.in in the pull request title) because they conflict and th=
+e suite use debian packages.=20
+
+https://github.com/ceph/ceph/pulls?utf8=3D%E2%9C%93&q=3Dis%3Aopen+is%3Apr=
++milestone%3Ahammer+ceph.spec.in+in%3Atitle
+
+I believe running them one by one through the gitbuilders is the best we =
+can do right now.
+
+Cheers
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--UdgkOjcQg8u5nGlri31AAMrHbLbOGJe3m
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlWm7K8ACgkQ8dLMyEl6F208sACgwaG2bKqdse/wzlTK2HQ1tXhs
+QogAoKHUa18aD0l16Ohatl/Jv5LZQdkk
+=F2Pa
+-----END PGP SIGNATURE-----
+
+--UdgkOjcQg8u5nGlri31AAMrHbLbOGJe3m--
