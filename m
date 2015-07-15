@@ -1,21 +1,39 @@
-From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+From: Tamil Muthamizhan <tmuthami@redhat.com>
 Subject: Re: s3test firefly failing
-Date: Tue, 14 Jul 2015 15:47:30 -0400 (EDT)
-Message-ID: <750240441.7103382.1436903250651.JavaMail.zimbra@redhat.com>
-References: <55A4C004.4000205@dachary.org>
+Date: Wed, 15 Jul 2015 00:44:37 -0400 (EDT)
+Message-ID: <1272169661.45947518.1436935476950.JavaMail.zimbra@redhat.com>
+References: <55A4C004.4000205@dachary.org> <750240441.7103382.1436903250651.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx4-phx2.redhat.com ([209.132.183.25]:53515 "EHLO
-	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753626AbbGNTsd convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Jul 2015 15:48:33 -0400
-In-Reply-To: <55A4C004.4000205@dachary.org>
+Received: from mx5-phx2.redhat.com ([209.132.183.37]:34583 "EHLO
+	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750972AbbGOEpm convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 15 Jul 2015 00:45:42 -0400
+In-Reply-To: <750240441.7103382.1436903250651.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: loic@dachary.org
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+
+Hi Loic,
+
+I looked into the failing cases and looks like the failures are mostly =
+from the independent perl scripts which has the domain name and port no=
+ hard coded to host_fqdn of the current host on which script is running=
+  and "7280" respectively.=20
+
+Regards,
+Tamil
+
+
+----- Original Message -----
+=46rom: "Yehuda Sadeh-Weinraub" <yehuda@redhat.com>
+To: "Loic Dachary" <loic@dachary.org>
+Cc: "Ceph Development" <ceph-devel@vger.kernel.org>
+Sent: Tuesday, July 14, 2015 12:47:30 PM
+Subject: Re: s3test firefly failing
 
 Doesn't ring a bell. There should be a config file it uses to determine=
  where to connect to.
@@ -152,6 +170,11 @@ h DNSError
 > Lo=C3=AFc Dachary, Artisan Logiciel Libre
 >=20
 >=20
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
