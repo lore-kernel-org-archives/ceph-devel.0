@@ -1,40 +1,43 @@
-From: Nathan Cutler <ncutler@suse.cz>
-Subject: Firefly 0.80.11 integration testing summary
-Date: Thu, 16 Jul 2015 13:55:22 +0200
-Message-ID: <55A79BAA.3000803@suse.cz>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: CephX key/secret generation
+Date: Thu, 16 Jul 2015 07:46:40 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1507160745010.8878@cobra.newdream.net>
+References: <CACEfbZhXSNp0_WxyX2mwSeg2rdEdYSfVbGDZsrHKqPvAGa7oBQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cantor2.suse.de ([195.135.220.15]:33619 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752293AbbGPLzZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 16 Jul 2015 07:55:25 -0400
+Received: from cobra.newdream.net ([66.33.216.30]:53773 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752174AbbGPOqn (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Jul 2015 10:46:43 -0400
+In-Reply-To: <CACEfbZhXSNp0_WxyX2mwSeg2rdEdYSfVbGDZsrHKqPvAGa7oBQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
+To: Andrew Woodward <xarses@gmail.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Loic:
+Hi Andrew,
 
-Current status of integration testing for the upcoming firefly 0.80.11 
-release is as follows:
+On Wed, 15 Jul 2015, Andrew Woodward wrote:
+> Hi, I'm looking for help understanding how the cephx auth keys are
+> generated. I want to pre-create the keys for the cluster within my
+> deployment engine. It appears that we can use `ceph-athtool
+> --gen-print-key` in order to generate the keys and use them, however
+> the application runs inside a container and it seems silly to 150mb of
+> deps to get access to ceph-authtool.
+> 
+> Looking through the code at a basic level, I see that it's calling
+> some AES functions, however it quickly goes over my ability to read C.
+> 
+> Can some one go over the key construction requirements? Can we use any
+> string encoded with base64? Is the AES encoding needed? What is the
+> correct formula for the AES generation? It looks like the have the
+> same seed but I'm having problems reading it out of the code.
 
-* rados: all green
-* rgw: currently re-running 11 tests (known bug that has since been fixed)
-* fs: currently re-running 4 tests that failed (probably 
-environment-related)
-* rbd: encountered test failures that I was unable to debug -- opened 
-http://tracker.ceph.com/issues/12336
-* powercycle: all green
-* upgrade: encountered similar-looking test failures as in rbd
+Here's a bit of python to do it:
 
-For details, see http://tracker.ceph.com/issues/11644
+	https://github.com/ceph/ceph-deploy/blob/master/ceph_deploy/new.py#L21
 
-Regards
+Hope that helps!
+sage
 
--- 
-Nathan Cutler
-Software Engineer Distributed Storage
-SUSE LINUX, s.r.o.
-Tel.: +420 284 084 037
