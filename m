@@ -1,221 +1,272 @@
-From: Travis Rhoden <trhoden@redhat.com>
-Subject: Re: Difference between convention and enforcement.
-Date: Thu, 16 Jul 2015 22:10:08 -0700
-Message-ID: <3370BF97-5059-4B12-927F-522C77E70E7B@redhat.com>
-References: <559E4814.8030007@suse.com> <6E87029C-274C-4223-83AA-88CA5B0F59EC@redhat.com> <55A4E756.7090206@suse.com>
-Mime-Version: 1.0 (Mac OS X Mail 8.2 \(2102\))
+From: Abhishek L <abhishek.lekshmanan@gmail.com>
+Subject: v9.0.2 Contributor credits
+Date: Fri, 17 Jul 2015 11:28:25 +0530
+Message-ID: <87io9jfhq6.fsf@gmail.com>
+Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:53102 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750742AbbGQFKJ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 17 Jul 2015 01:10:09 -0400
-In-Reply-To: <55A4E756.7090206@suse.com>
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:35584 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751850AbbGQGCK convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 17 Jul 2015 02:02:10 -0400
+Received: by pactm7 with SMTP id tm7so55586659pac.2
+        for <ceph-devel@vger.kernel.org>; Thu, 16 Jul 2015 23:02:10 -0700 (PDT)
+Received: from trusty ([49.32.0.131])
+        by smtp.gmail.com with ESMTPSA id ys3sm9806886pbb.96.2015.07.16.23.02.07
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=RC4-SHA bits=128/128);
+        Thu, 16 Jul 2015 23:02:09 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Owen Synge <osynge@suse.com>
-Cc: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
+Hi Ceph,
+
+Here is a sorted list of authors and organizations who contributed to
+v9.0.2, by number of commits or reviews back to v9.0.1. The affiliation=
+ of
+authors to organizations can be updated by submitting a patch to
+https://github.com/ceph/ceph/blob/master/.organizationmap
+
+All commits are reviewed but the number of reviews is a fraction of the
+number of commits. More often than not, the reviewer(s) is only
+mentioned in the message of the merge although it means that all
+associated commits have been reviewed. If you are curious about how it
+is done, do checkout the wiki entry at https://wiki.ceph.com/Community/=
+Ceph_contributors_list_maintenance_guide
 
 
-> On Jul 14, 2015, at 3:41 AM, Owen Synge <osynge@suse.com> wrote:
->=20
-> Dear Travis,
->=20
-> We clearly disagree in this area.
->=20
-> I hope me explaining my perspective is not seen as unhelpful.
->=20
-> On 07/09/2015 07:00 PM, Travis Rhoden wrote:
->>> (2B) inflexible / complex include paths for shared code between fac=
-ade
->>>> implementations.
->>>>=20
->> I disagree here.  There are plenty of places to put code that is com=
-mon and does not have to be duplicated.  I definitely don=E2=80=99t wan=
-t code in each host module that knows how to deal with systemd. The cod=
-e that does have to be in each host module is how to detect/assign what=
- init system is being used, and how to call into the appropriate (commo=
-n) module to do what it needs.
->>=20
->> As for complex include paths, I=E2=80=99m not sure I have much of an=
- argument here other than to say that all frameworks have their convent=
-ions.  I don=E2=80=99t see what we are doing as anything different than=
- what is enforced/recommended by many frameworks/scaffolds popular in W=
-eb app and MVC paradigms like RoR, Pyramid, Django, etc.  It=E2=80=99s =
-just convention to learn.
->=20
-> I don't understand why you chose to defend this. Please expand your
-> argument.
+Number of lines added and removed, by authors
+     1	  9065 Loic Dachary <ldachary@redhat.com>
+     2	  4859 Jason Dillaman <dillaman@redhat.com>
+     3	  4563 Haomai Wang <haomaiwang@gmail.com>
+     4	  3679 Sage Weil <sweil@redhat.com>
+     5	  2976 David Zafman <dzafman@redhat.com>
+     6	  1999 Kefu Chai <kchai@redhat.com>
+     7	  1376 Samuel Just <sjust@redhat.com>
+     8	   859 John Spray <jspray@redhat.com>
+     9	   554 Yan, Zheng <zyan@redhat.com>
+    10	   546 Xiaoxi Chen <xiaoxi.chen@intel.com>
+    11	   317 Yehuda Sadeh <ysadehwe@redhat.com>
+    12	   255 Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+    13	   206 Pavan Rallabhandi <pavan.rallabhandi@sandisk.com>
+    14	   204 Michal Jarzabek <stiopa@gmail.com>
+    15	   180 Ilya Dryomov <idryomov@redhat.com>
+    16	   154 Owen Synge <osynge@suse.com>
+    17	   135 Abhishek Lekshmanan <abhishek.lekshmanan@ril.com>
+    18	   115 Mykola Golub <mgolub@mirantis.com>
+    19	   107 Casey Bodley <casey@cohortfs.com>
+    20	   101 Ma Jianpeng <jianpeng.ma@intel.com>
+    21	    86 Raju Kurunkad <raju.kurunkad@sandisk.com>
+    22	    84 Piotr Da=C5=82ek <piotr.dalek@ts.fujitsu.com>
+    23	    83 Robin H. Johnson <robbat2@gentoo.org>
+    24	    82 Ken Dreyer <kdreyer@redhat.com>
+    25	    52 Nathan Cutler <ncutler@suse.com>
+    26	    51 Jon Bernard <jbernard@tuxion.com>
+    27	    49 Tim Serong <tserong@suse.com>
+    28	    46 Josh Durgin <jdurgin@redhat.com>
+    29	    34 Nilamdyuti Goswami <ngoswami@redhat.com>
+    30	    30 Zhiqiang Wang <zhiqiang.wang@intel.com>
+    31	    30 Dmitry Yatsushkevich <dyatsushkevich@mirantis.com>
+    32	    24 Orit Wasserman <owasserm@redhat.com>
+    33	    21 Vasu Kulkarni <vasu@redhat.com>
+    34	    21 Fran=C3=A7ois Lafont <flafdivers@free.fr>
+    35	    20 Varada Kari <varada.kari@sandisk.com>
+    36	    20 Joseph McDonald <joseph.mcdonald@alcatel-lucent.com>
+    37	    18 Shu, Xinxin <xinxin.shu@intel.com>
+    38	    14 Ilja Slepnev <islepnev@gmail.com>
+    39	    13 Yuri Weinstein <yuri.weinstein@redhat.com>
+    40	    11 Huang Jun <hjwsm1989@gmail.com>
+    41	    10 Greg Farnum <gfarnum@redhat.com>
+    42	     8 Jenkins <jenkins@inktank.com>
+    43	     7 Douglas Fuller <dfuller@redhat.com>
+    44	     6 David Disseldorp <ddiss@suse.de>
+    45	     5 Travis Rhoden <trhoden@redhat.com>
+    46	     5 Anton Aksola <anton.aksola@nebula.fi>
+    47	     4 Xinze Chi <xmdxcxz@gmail.com>
+    48	     4 Radoslaw Zarzynski <rzarzynski@mirantis.com>
+    49	     4 Henry Chang <henry@bigtera.com>
+    50	     4 Boris Ranto <branto@redhat.com>
+    51	     4 Alistair Strachan <alistair.strachan@imgtec.com>
+    52	     3 Vu Pham <vu@mellanox.com>
+    53	     3 Pete Zaitcev <zaitcev@redhat.com>
+    54	     2 Zhe Zhang <zzxuanyuan@gmail.com>
+    55	     2 Wido den Hollander <wido@42on.com>
+    56	     2 Joaquim Rocha <joaquim.rocha@cern.ch>
+    57	     2 Ismael Serrano <ismael.serrano@gmail.com>
+    58	     1 Ketor Meng <d.ketor@gmail.com>
+    59	     1 Javier M. Mellid <jmunhoz@igalia.com>
 
-Truthfully I=E2=80=99m not sure how to, because I=E2=80=99m not sure I =
-agree that code location is enforced at all.  I don=E2=80=99t think tha=
-t it is.  There is nothing =E2=80=9Cenforcing=E2=80=9D where code lives=
-=2E  By that I mean that as long is once class/function/module is impor=
-table into another module, it works. There is a general style that has =
-fallen out as development has happened over time, but like most project=
-s there are bits and pieces scattered throughout in places that probabl=
-y made logical sense at the time, but no longer is the best fit.
+Number of lines added and removed, by organization
+     1	 26098 Red Hat <contact@redhat.com>
+     2	  4877 Unaffiliated <no@organization.net>
+     3	   695 Intel <contact@intel.com>
+     4	   312 SanDisk <contact@sandisk.com>
+     5	   261 SUSE <contact@suse.com>
+     6	   255 Deutsche Telekom <contact@telekom.de>
+     7	   149 Mirantis <contact@mirantis.com>
+     8	   135 Reliance Jio Infocomm Ltd. <contact@ril.com>
+     9	   107 CohortFS, LLC <contact@cohortfs.com>
+    10	    84 Fujitsu <contact@fujitsu.com>
+    11	    83 Gentoo <contact@gentoo.org>
+    12	    21 Inktank <contact@inktank.com>
+    13	    20 Alcatel Lucent <contact@alcatel-lucent.com>
+    14	     5 Nebula <info@nebula.com>
+    15	     4 Imagination Technologies Ltd. <contact@imgtec.com>
+    16	     3 Mellanox <contact@mellanox.com>
+    17	     2 Wido 42on <contact@42on.com>
+    18	     2 Cloudwatt <libre.licensing@cloudwatt.com>
+    19	     2 CERN <contact@cern.ch>
+    20	     1 Igalia <contact@igalia.com>
 
-I say nothing is =E2=80=9Cenforcing=E2=80=9D locations because it=E2=80=
-=99s not like the code won=E2=80=99t work if the code is some place els=
-e.  As long you can import what you need, things should be good.  There=
- used to be relative imports in ceph_deploy (e.g. =E2=80=9Cimport ..uti=
-ls; import .helpers=E2=80=9D), but I believe all of that has been gone =
-for a while.
+Commits, by authors
+     1	    121 Loic Dachary <ldachary@redhat.com>
+     2	    100 Jason Dillaman <dillaman@redhat.com>
+     3	     56 David Zafman <dzafman@redhat.com>
+     4	     47 Kefu Chai <kchai@redhat.com>
+     5	     41 Haomai Wang <haomaiwang@gmail.com>
+     6	     38 Sage Weil <sweil@redhat.com>
+     7	     38 John Spray <jspray@redhat.com>
+     8	     32 Samuel Just <sjust@redhat.com>
+     9	     22 Yan, Zheng <zyan@redhat.com>
+    10	     21 Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+    11	     11 Xiaoxi Chen <xiaoxi.chen@intel.com>
+    12	     11 Owen Synge <osynge@suse.com>
+    13	     11 Ma Jianpeng <jianpeng.ma@intel.com>
+    14	      8 Ken Dreyer <kdreyer@redhat.com>
+    15	      8 Casey Bodley <casey@cohortfs.com>
+    16	      7 Yehuda Sadeh <ysadehwe@redhat.com>
+    17	      7 Nathan Cutler <ncutler@suse.com>
+    18	      7 Ilya Dryomov <idryomov@redhat.com>
+    19	      6 Michal Jarzabek <stiopa@gmail.com>
+    20	      6 Dmitry Yatsushkevich <dyatsushkevich@mirantis.com>
+    21	      5 Abhishek Lekshmanan <abhishek.lekshmanan@ril.com>
+    22	      4 Zhiqiang Wang <zhiqiang.wang@intel.com>
+    23	      4 Orit Wasserman <owasserm@redhat.com>
+    24	      4 Josh Durgin <jdurgin@redhat.com>
+    25	      3 Varada Kari <varada.kari@sandisk.com>
+    26	      3 Douglas Fuller <dfuller@redhat.com>
+    27	      2 Vu Pham <vu@mellanox.com>
+    28	      2 Travis Rhoden <trhoden@redhat.com>
+    29	      2 Shu, Xinxin <xinxin.shu@intel.com>
+    30	      2 Robin H. Johnson <robbat2@gentoo.org>
+    31	      2 Pavan Rallabhandi <pavan.rallabhandi@sandisk.com>
+    32	      2 Joseph McDonald <joseph.mcdonald@alcatel-lucent.com>
+    33	      2 Huang Jun <hjwsm1989@gmail.com>
+    34	      2 David Disseldorp <ddiss@suse.de>
+    35	      1 Zhe Zhang <zzxuanyuan@gmail.com>
+    36	      1 Yuri Weinstein <yuri.weinstein@redhat.com>
+    37	      1 Xinze Chi <xmdxcxz@gmail.com>
+    38	      1 Wido den Hollander <wido@42on.com>
+    39	      1 Vasu Kulkarni <vasu@redhat.com>
+    40	      1 Tim Serong <tserong@suse.com>
+    41	      1 Raju Kurunkad <raju.kurunkad@sandisk.com>
+    42	      1 Radoslaw Zarzynski <rzarzynski@mirantis.com>
+    43	      1 Piotr Da=C5=82ek <piotr.dalek@ts.fujitsu.com>
+    44	      1 Pete Zaitcev <zaitcev@redhat.com>
+    45	      1 Nilamdyuti Goswami <ngoswami@redhat.com>
+    46	      1 Mykola Golub <mgolub@mirantis.com>
+    47	      1 Ketor Meng <d.ketor@gmail.com>
+    48	      1 Jon Bernard <jbernard@tuxion.com>
+    49	      1 Joaquim Rocha <joaquim.rocha@cern.ch>
+    50	      1 Jenkins <jenkins@inktank.com>
+    51	      1 Javier M. Mellid <jmunhoz@igalia.com>
+    52	      1 Ismael Serrano <ismael.serrano@gmail.com>
+    53	      1 Ilja Slepnev <islepnev@gmail.com>
+    54	      1 Henry Chang <henry@bigtera.com>
+    55	      1 Greg Farnum <gfarnum@redhat.com>
+    56	      1 Fran=C3=A7ois Lafont <flafdivers@free.fr>
+    57	      1 Boris Ranto <branto@redhat.com>
+    58	      1 Anton Aksola <anton.aksola@nebula.fi>
+    59	      1 Alistair Strachan <alistair.strachan@imgtec.com>
 
-=46or the most part it=E2=80=99s really up to the author of new code to=
- put it where they think is best, and for the reviewers to agree or be =
-indifferent about it.  :)  Along those lines, if code were to get moved=
- in a PR with a description of =E2=80=9Cthis makes a lot more sense=E2=80=
-=9D, that would be seen as a positive contribution.
+Commits, by organizations
+     1	    493 Red Hat <contact@redhat.com>
+     2	     57 Unaffiliated <no@organization.net>
+     3	     28 Intel <contact@intel.com>
+     4	     21 SUSE <contact@suse.com>
+     5	     21 Deutsche Telekom <contact@telekom.de>
+     6	      8 Mirantis <contact@mirantis.com>
+     7	      8 CohortFS, LLC <contact@cohortfs.com>
+     8	      6 SanDisk <contact@sandisk.com>
+     9	      5 Reliance Jio Infocomm Ltd. <contact@ril.com>
+    10	      2 Mellanox <contact@mellanox.com>
+    11	      2 Inktank <contact@inktank.com>
+    12	      2 Gentoo <contact@gentoo.org>
+    13	      2 Alcatel Lucent <contact@alcatel-lucent.com>
+    14	      1 Wido 42on <contact@42on.com>
+    15	      1 Nebula <info@nebula.com>
+    16	      1 Imagination Technologies Ltd. <contact@imgtec.com>
+    17	      1 Igalia <contact@igalia.com>
+    18	      1 Fujitsu <contact@fujitsu.com>
+    19	      1 Cloudwatt <libre.licensing@cloudwatt.com>
+    20	      1 CERN <contact@cern.ch>
 
-Most of the =E2=80=9Crigid=E2=80=9D layout is in the hosts modules.  It=
- makes sense that we have hosts/centos, hosts/debian, etc.  But then ev=
-en inside to those top levels, they import things from all over the pla=
-ce.  One example I can think of is ceph_deploy.hosts.remotes, the conte=
-nts of which magically (except, not magic) appear as distro.conn.remote=
-_module.  This is using a capability of python-remoto, and is an area o=
-f code I=E2=80=99ve spent very little time with it.  I=E2=80=99m not su=
-re if this is perhaps what you are concerned about.
+Reviews, by authors (one review spans multiple commits)
+     1	     47 Loic Dachary <ldachary@redhat.com>
+     2	     35 Kefu Chai <kchai@redhat.com>
+     3	     32 Sage Weil <sweil@redhat.com>
+     4	     28 Josh Durgin <jdurgin@redhat.com>
+     5	     20 Greg Farnum <gfarnum@redhat.com>
+     6	     10 Samuel Just <sjust@redhat.com>
+     7	     10 Joao Eduardo Luis <joao@suse.de>
+     8	      9 Yehuda Sadeh <ysadehwe@redhat.com>
+     9	      9 Ken Dreyer <kdreyer@redhat.com>
+    10	      8 John Spray <jspray@redhat.com>
+    11	      8 Haomai Wang <haomaiwang@gmail.com>
+    12	      5 Andreas Peters <andreas.joachim.peters@cern.ch>
+    13	      4 Nathan Cutler <ncutler@suse.com>
+    14	      4 Jason Dillaman <dillaman@redhat.com>
+    15	      2 Travis Rhoden <trhoden@redhat.com>
+    16	      2 David Zafman <dzafman@redhat.com>
+    17	      2 Abhishek Lekshmanan <abhishek.lekshmanan@ril.com>
+    18	      1 Yuan Zhou <yuan.zhou@intel.com>
+    19	      1 Varada Kari <varada.kari@sandisk.com>
+    20	      1 Takeshi Miyamae <miyamae.takeshi@jp.fujitsu.com>
+    21	      1 Shylesh Kumar <shmohan@redhat.com>
+    22	      1 Rajesh Nambiar <rajesh.n@msystechnologies.com>
+    23	      1 Ning Yao <yaoning@ruijie.com.cn>
+    24	      1 Michal Jarzabek <stiopa@gmail.com>
+    25	      1 Ma Jianpeng <jianpeng.ma@intel.com>
+    26	      1 Kernel Neophyte <neophyte.hacker001@gmail.com>
+    27	      1 Ilya Dryomov <idryomov@redhat.com>
+    28	      1 Dmitry Yatsushkevich <dyatsushkevich@mirantis.com>
+    29	      1 Dan Mick <dmick@redhat.com>
+    30	      1 Boris Ranto <branto@redhat.com>
 
->=20
-> I will not go into the negative side effects of importing modules as
-> objects in the include paths, as a work around for potential side
-> effects of our current fa=C3=A7ade model, as this topic is more compl=
-ex than
-> the points I do raise in this email, but I will expand them should th=
-ese
-> arguments not be valid, as I would like to understand where we intend=
- to
-> go, and how we minimise long term maintenance and maximise extensibil=
-ity.
->=20
-> Here are the simpler reasons why I don't agree:
->=20
-> I hate the enforced code structures used my many "popular" frameworks
-> especially common in web frameworks but I accept that these enforce v=
-ery
-> clear standard design patterns that are known to scale and be extensi=
-ble
-> and you acknowledge this difference to the ceph-deploy code base simp=
-ly
-> by calling them MVC. *
->=20
-> Having enforced relative paths between code files defined by the
-> implementation of the code is a great limitation.
->=20
-> While one can place code modules in the correct location if only one
-> thing defines the correct location, one can easily get into difficult=
-ies
-> 2 obvious limitations in tolerating this are:
->=20
-> (1) by having two parts of the code base enforcing relative paths
-> between modules.
+Reviews, by organizations (one review spans multiple commits)
+     1	    210 Red Hat <contact@redhat.com>
+     2	     14 SUSE <contact@suse.com>
+     3	     10 Unaffiliated <no@organization.net>
+     4	      5 CERN <contact@cern.ch>
+     5	      2 Reliance Jio Infocomm Ltd. <contact@ril.com>
+     6	      2 Intel <contact@intel.com>
+     7	      1 SanDisk <contact@sandisk.com>
+     8	      1 Ruijie Networks <contact@ruijie.com.cn>
+     9	      1 MSys Technologies <contact@msystechnologies.com>
+    10	      1 Mirantis <contact@mirantis.com>
+    11	      1 Fujitsu <contact@fujitsu.com>
 
-I hope that I=E2=80=99ve made it clear that I don=E2=80=99t think anyth=
-ing is actually enforcing any relative paths between modules.  That doe=
-sn=E2=80=99t mean I=E2=80=99m not missing something, so do please point=
- it out if I am.
+Thanks everyone for contributing
 
->=20
-> (2) by having relationships between modules become needlessly complex
-> because the enforced relationship says the code must go in a place th=
-at
-> is not correct to solve the problem. (this is analogous to the death =
-of
-> hierarchical databases and their replacement with relational database=
-s)
->=20
-> So since the issue is most serious if you have 2 components in the co=
-de
-> base that "enforce" module layout, and we only have one, we are only
-> preventing further components that "enforce" module layout.
->=20
-> Admittedly neither of these issues has _prevented_ development on
-> ceph-deploy so far, or led to duplication now you withdrew your comme=
-nts
-> about all fa=C3=A7ades being the same.
->=20
-> Due to the fa=C3=A7ade defining module location we so far have, some =
-things
-> have become confused in where the module can be placed that are clear=
-ly
-> OS specific.
->=20
-> Examples include:
->=20
-> 	ceph_deploy/util/constants.py which is clearly includes constants th=
-at
-> are OS specific, such as package names.
+Cheers=20
+Abhishek
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
 
-I get your point, but really these could be anywhere.  For all the OS=E2=
-=80=99s we=E2=80=99ve been supporting, most of this is *not* OS specifi=
-c, really.  They are indeed constants across all Linux distros.  There=E2=
-=80=99s been new additions to deal with downstream package splits, and =
-there very well be better ways of handling that.  Those pieces are rela=
-tively new (just a few months), and I highly suspect that will be impro=
-ved more over time.  I also fully accept that while perhaps these were =
-simple/universal contstants in the past, the variety of packaging we su=
-pport, distros, and init systems may not make that the case (systemd co=
-mes to mind).  However it is important to keep in mind that ceph-deploy=
- is only intended to support installing Ceph from upstream Ceph release=
-/testing packages, or downstream packages that follow the same location=
-s about where to install things to, not homegrown or locally compiled b=
-inaries.  ceph-deploy is purposely a highly opinionated tool.
-
->=20
-> 	ceph_deploy/util/pkg_managers.py which clearly is a set of OS specif=
-ic
-> implementations.
-
-Not so much OS specific, as packager specific (yum, apt, etc.)  This ar=
-ea is ripe for improvement, and is actually something I=E2=80=99ve star=
-ted on already in order to support DNF on Fedora.  I have a branch I ca=
-n point you at if interested.  But I want to make sure I truly understa=
-nd your concern here.  If there were classes in ceph_deploy.util.pkg_ma=
-nagers, one for each type of of manager we use (dnf, yum, apt, zypper),=
- and these were imported as needed by host modules in ceph_deploy.hosts=
-=2E*, would you see that as a problem?  It doesn=E2=80=99t matter to me=
- where the code is.  It=E2=80=99s more important to me that the module =
-names are clear, so I don=E2=80=99t have to find package manager code i=
-n a file named =E2=80=9Cdecorators=E2=80=9D or something.
-
->=20
-> Both of these lead to unnecessary complications, when they could be
-> fa=C3=A7ades in their own right and should have the modules moved if =
-we
-> continue to have this enforced module location in the fa=C3=A7ade imp=
-lementation.
-
-Totally agree that it can be improved.  ceph-deploy is growing organica=
-lly and has had a lot of different developers on as you would expect fr=
-om any project of this nature.
-
->=20
-> This inconsistency will not effect customers but does effect the clar=
-ity
-> of the code, and leads to more conditionals than we might have if we
-> took in my opinion a cleaner implementation to our model.
->=20
-> I will _not_ provide sample code of improvements, as this may lead to
-> people discussing irrelevant issues, until this point is resolved as =
-my
-> mistake, or an area that is agreed can be improved.
->=20
-> Best regards
->=20
-> Owen
->=20
->=20
-> * It is one the many reasons I abandoned django in favour of Pyramid =
-for
-> my personal projects, even though django only enforced separation of
-> components Model View and controller, pyramid to my recollection (its
-> been 3 years at least) only recommended a module relationship path  .
-
-I rather enjoyed working with Pyramid as well, and it=E2=80=99s precurs=
-or pylons.--
+iQEcBAEBAgAGBQJVqJmKAAoJEPnwZB8bZe1fK9EH/1oOvrrVRe3yIcTnAIAImiiW
+2N+AeMFFRktOrEfjoV+06CJlm3+sf3clz1tqhKd7/8HLslTIGajyzR3BILhK7EJa
+UgVDGAU7Sh20+1jzghw0GmoVn2yTt43IUFbGs+6ifTfwgvJ6LAc3yWqhQbfeFaBT
+AkFj6q6JDgqUJi0saSh2w9afU5gfU/5q1XlwahhpYMys96gdC4nN9UgHrW2YKWTI
+xtZ74Ncn8jWDppUBn0aw4UtG0eEVVtNyRGWO945Tf40iK8T/+G+kkTgbCFriUYTC
+u6Gs/lKS7DRE0e6S7EIH/o7RcuPr4hGAjeUmzzCnpOQ2wY9xxYqZ7206KXcSewo=3D
+=3DNezT
+-----END PGP SIGNATURE-----
+--
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
 the body of a message to majordomo@vger.kernel.org
