@@ -1,289 +1,142 @@
-From: Owen Synge <osynge@suse.com>
-Subject: Re: MVC in ceph-deploy.
-Date: Fri, 17 Jul 2015 11:31:26 +0200
-Message-ID: <55A8CB6E.9040508@suse.com>
-References: <55A4F165.4060402@suse.com> <CACkq2mph0_rOpUu5peAq_4AJ1aa3N0E2=-i_XxcR1eyxF4kkow@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: [PATCH] rbd: fix copyup completion race
+Date: Fri, 17 Jul 2015 13:36:40 +0300
+Message-ID: <1437129400-12392-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.emea.novell.com ([130.57.118.101]:38986 "EHLO
-	mail.emea.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757329AbbGQJc5 (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-	Fri, 17 Jul 2015 05:32:57 -0400
-In-Reply-To: <CACkq2mph0_rOpUu5peAq_4AJ1aa3N0E2=-i_XxcR1eyxF4kkow@mail.gmail.com>
+Received: from mail-wg0-f43.google.com ([74.125.82.43]:33431 "EHLO
+	mail-wg0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757588AbbGQKgz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 17 Jul 2015 06:36:55 -0400
+Received: by wgmn9 with SMTP id n9so78998081wgm.0
+        for <ceph-devel@vger.kernel.org>; Fri, 17 Jul 2015 03:36:54 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Travis Rhoden <trhoden@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: Alex Elder <elder@linaro.org>
 
-On 07/17/2015 08:16 AM, Travis Rhoden wrote:
-> Hi Owen,
->=20
-> I'm still giving this one some thought. I've gone back and reviewed
-> https://github.com/ceph/ceph-deploy/pull/320 a few more times.  I do
-> understand how it works (it took a couple times through it), and
-> cosmetic things notwithstanding I can appreciate what it is doing.  I
-> also fully get that the choice of sqlalchemy vs <choice of data store=
->
-> makes no difference to the merit of the idea.  I'm still formulating
-> my opinion, however, but wanted to let you know I was thinking about
-> it.
+For write/discard obj_requests that involved a copyup method call, the
+opcode of the first op is CEPH_OSD_OP_CALL and the ->callback is
+rbd_img_obj_copyup_callback().  The latter frees copyup pages, sets
+->xferred and delegates to rbd_img_obj_callback(), the "normal" image
+object callback, for reporting to block layer and putting refs.
 
-Thanks for this reply, but please don't get too focused on the patch.
+rbd_osd_req_callback() however treats CEPH_OSD_OP_CALL as a trivial op,
+which means obj_request is marked done in rbd_osd_trivial_callback(),
+*before* ->callback is invoked and rbd_img_obj_copyup_callback() has
+a chance to run.  Marking obj_request done essentially means giving
+rbd_img_obj_callback() a license to end it at any moment, so if another
+obj_request from the same img_request is being completed concurrently,
+rbd_img_obj_end_request() may very well be called on such prematurally
+marked done request:
 
-At the time of writing this patch I thought MVC would be completely
-uncontentious. It was never intended to illustrate the benefits of MVC.
-That is more work than this patch was intended to achieve.
+<obj_request-1/2 reply>
+handle_reply()
+  rbd_osd_req_callback()
+    rbd_osd_trivial_callback()
+    rbd_obj_request_complete()
+    rbd_img_obj_copyup_callback()
+    rbd_img_obj_callback()
+                                    <obj_request-2/2 reply>
+                                    handle_reply()
+                                      rbd_osd_req_callback()
+                                        rbd_osd_trivial_callback()
+      for_each_obj_request(obj_request->img_request) {
+        rbd_img_obj_end_request(obj_request-1/2)
+        rbd_img_obj_end_request(obj_request-2/2) <--
+      }
 
-It was written to show a model can be practically done with a sqlalchem=
-y
-implementation of an MVC's model with no important deployment overhead,
-and illustrate how SQL queries can be mapped easily as an advantage of
-using a RDBMS model, rather than illustrating MVC best practice.
+Calling rbd_img_obj_end_request() on such a request leads to trouble,
+in particular because its ->xfferred is 0.  We report 0 to the block
+layer with blk_update_request(), get back 1 for "this request has more
+data in flight" and then trip on
 
-The rest of the email tries to show horn the patch into the discussion
-of the validity of MVC with respect to the patch:
+    rbd_assert(more ^ (which == img_request->obj_request_count));
 
-	https://github.com/ceph/ceph-deploy/pull/320
+with rhs (which == ...) being 1 because rbd_img_obj_end_request() has
+been called for both requests and lhs (more) being 1 because we haven't
+got a chance to set ->xfferred in rbd_img_obj_copyup_callback() yet.
 
-Its a nights work and only a discussion point, its half existing code I
-already have (for rgw setup), and half MVC in its self.
+To fix this, leverage that rbd wants to call class methods in only two
+cases: one is a generic method call wrapper (obj_request is standalone)
+and the other is a copyup (obj_request is part of an img_request).  So
+make a dedicated handler for CEPH_OSD_OP_CALL and directly invoke
+rbd_img_obj_copyup_callback() from it if obj_request is part of an
+img_request, similar to how CEPH_OSD_OP_READ handler invokes
+rbd_img_obj_request_read_callback().
 
-Please think of it more as an aid to a conversation (like slides) rathe=
-r
-than as final or a good example of MVC best practice. It would need mor=
-e
-work to be this, and its probably a days work to be close to a good exa=
-mple.
+Cc: Alex Elder <elder@linaro.org>
+Cc: stable@vger.kernel.org # 3.10+, needs backporting for < 3.18
+Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+---
+ drivers/block/rbd.c | 20 ++++++++++++++++----
+ 1 file changed, 16 insertions(+), 4 deletions(-)
 
-The model is clear, but the views could be clearer in the way they are
-abstracted, and can be extended in consistent ways, so I made a few
-comment on the patch showing where I think the code is not very MVC.
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index d94529d5c8e9..007e5d0cadaf 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -523,6 +523,7 @@ void rbd_warn(struct rbd_device *rbd_dev, const char *fmt, ...)
+ #  define rbd_assert(expr)	((void) 0)
+ #endif /* !RBD_DEBUG */
+ 
++static void rbd_img_obj_copyup_callback(struct rbd_obj_request *obj_request);
+ static int rbd_img_obj_request_submit(struct rbd_obj_request *obj_request);
+ static void rbd_img_parent_read(struct rbd_obj_request *obj_request);
+ static void rbd_dev_remove_parent(struct rbd_device *rbd_dev);
+@@ -1818,6 +1819,16 @@ static void rbd_osd_stat_callback(struct rbd_obj_request *obj_request)
+ 	obj_request_done_set(obj_request);
+ }
+ 
++static void rbd_osd_call_callback(struct rbd_obj_request *obj_request)
++{
++	dout("%s: obj %p\n", __func__, obj_request);
++
++	if (obj_request_img_data_test(obj_request))
++		rbd_img_obj_copyup_callback(obj_request);
++	else
++		obj_request_done_set(obj_request);
++}
++
+ static void rbd_osd_req_callback(struct ceph_osd_request *osd_req,
+ 				struct ceph_msg *msg)
+ {
+@@ -1866,6 +1877,8 @@ static void rbd_osd_req_callback(struct ceph_osd_request *osd_req,
+ 		rbd_osd_discard_callback(obj_request);
+ 		break;
+ 	case CEPH_OSD_OP_CALL:
++		rbd_osd_call_callback(obj_request);
++		break;
+ 	case CEPH_OSD_OP_NOTIFY_ACK:
+ 	case CEPH_OSD_OP_WATCH:
+ 		rbd_osd_trivial_callback(obj_request);
+@@ -2537,6 +2550,8 @@ rbd_img_obj_copyup_callback(struct rbd_obj_request *obj_request)
+ 	struct page **pages;
+ 	u32 page_count;
+ 
++	dout("%s: obj %p\n", __func__, obj_request);
++
+ 	rbd_assert(obj_request->type == OBJ_REQUEST_BIO ||
+ 		obj_request->type == OBJ_REQUEST_NODATA);
+ 	rbd_assert(obj_request_img_data_test(obj_request));
+@@ -2563,9 +2578,7 @@ rbd_img_obj_copyup_callback(struct rbd_obj_request *obj_request)
+ 	if (!obj_request->result)
+ 		obj_request->xferred = obj_request->length;
+ 
+-	/* Finish up with the normal image object callback */
+-
+-	rbd_img_obj_callback(obj_request);
++	obj_request_done_set(obj_request);
+ }
+ 
+ static void
+@@ -2650,7 +2663,6 @@ rbd_img_obj_parent_read_full_callback(struct rbd_img_request *img_request)
+ 
+ 	/* All set, send it off. */
+ 
+-	orig_request->callback = rbd_img_obj_copyup_callback;
+ 	osdc = &rbd_dev->rbd_client->client->osdc;
+ 	img_result = rbd_obj_request_submit(osdc, orig_request);
+ 	if (!img_result)
+-- 
+1.9.3
 
-A good example in how its not MVC enough to be an MVC example is the
-"set" operations that should be in a controller method, and comparing
-data in the model, the data in the model should be loaded via views. In
-addition if the model is based on a RDBMS, the set operations would be
-performed by the RDBMS and not in python.
-
-The first post in this thread is more stand alone in where I would see
-us going if we went MVC. The development of the patch helped me see man=
-y
-places where we could add consistency by being more MVC, rather than
-actually following the design pattern enough to show best practice.
-
-I would be happy to chat about the code face to face but reviewing this
-code directly without comments does not show the benefits of MVC.
-
-In summary about this patch:
-
-(1) It is intended to be a point of interactive discussion, rather than
-left stand alone, and could do with more functions illustrating how
-similar these can be.
-
-(2) It is far from fully MVC, both as a discussion point it includes no=
-t
-very MVC code, partially to show how the code could be made more MVC,
-and as I time boxed the effort and run out of time.
-
-(3) It must be understood as its more correct in model, than it is in
-view separation, and controller clarity.
-
-(4) I rather enjoyed making a Relational model of all complete ceph
-clusters, and this code is more expanded than needed at this point (but
-it was fun).
-
-(5) In the relational  model I have not followed complete "3rd normal
-form" as I feel that for cluster models in an MVC context its nice to
-have entities map closely with reality, (and help make touples map
-closely to tasks) rather than use more complexity, for the sake of less
-data in the database which I don't think is an important objective.
-
-(6) the model was also expanded to be more "complete" than needed for
-this discussion, in part for some new members of the SUSE ceph team to
-understand the constraints and structure of a ceph cluster deployment.
-
-Best regards
-
-Owen
-
-
-
->=20
->  - Travis
->=20
-> On Tue, Jul 14, 2015 at 4:24 AM, Owen Synge <osynge@suse.com> wrote:
->> Dear all,
->>
->> ceph-deploy is to quote
->>
->> <quote>
->> It is not a generic deployment system, it is only for Ceph, and is
->> designed for users who want to quickly get Ceph running with sensibl=
-e
->> initial settings without the overhead of installing Chef, Puppet or =
-Juju.
->>
->> It does not handle client configuration beyond pushing the Ceph conf=
-ig
->> file and users who want fine-control over security settings, partiti=
-ons
->> or directory locations should use a tool such as Chef or Puppet.
->> </quote>
->>
->> What we have currently in ceph-deploy is mixing cluster state discov=
-ery,
->> cluster state modification, in many functions with no attempt to reu=
-se
->> state discovery code. I see no consistent design pattern, but can se=
-e
->> code that is production grade. Being production grade code I oppose
->> major code changes that might break functionality happening all at o=
-nce.
->>
->> I propose with some small changes for finding out what is to be done=
-,
->> storing it in one place, finding out what state the cluster is and
->> storing it in one place. Then comparing these two stored states, the=
-n
->> making changes as needed to the clusters state as just general good
->> practice. This is can be called MVC in design pattern terminology if=
- all
->> the state gathering code is separated from all the state changing co=
-de,
->> these would then be View parts to MVC. The controller would be the
->> component that directs the interaction between the model and the vie=
-ws
->> which also should be separate.
->>
->> From experience I have found that MVC has 5 major benefits compared =
-to
->> the way ALL of the code base is in ceph-deploy for a project like
->> ceph-deploy when I have made similar incremental changes toward this
->> design pattern in the past on the YAIM project for deploying dcache.
->> (which was more complex than ceph deployment and I had to write it i=
-n BASH)
->>
->> (1) Cluster state discovery code only has to be developed tested and
->> used once as it is placed in model.
->>
->> (2) the MVC model can be nested, so potentially removing the need to
->> iterate across nodes, in more than one place in the code base.
->>
->> (3) Making the code MVC will allow the model and the view that is
->> involved in state gathering code to be reused the functionality and
->> validation of ceph-deploy in general will improve siginifcantly.
->>
->> (4) The command line to desired model state, "view" code can be shar=
-ed
->> by all ceph-deploy components.
->>
->> (5) By discovering the state of the cluster before changing any clus=
-ter
->> state, things such as needing a change of ceph.conf, which requires =
-a
->> flag argument to allow this, can be detected at the start of an
->> operation so the user can get a clear and early error, rather than
->> failing at a later stage for configuration. Making cluster configura=
-tion
->> closer to atomic, and following the good practice of failing fast.
->>
->> For me this clearly sates why MVC is a good standard approach to clu=
-ster
->> management that will reduce code duplication in many areas of the co=
-de
->> base and simple way to keep the code base extensible.
->>
->> Considering we do not have this model, some may consider moving to t=
-his
->> model a major re-factor. I think this is invalid because I think its
->> reasonable to see it from this perspective:
->>
->> (A) we can start on an area of the code base that is under new
->> development. eg rgw support in ceph-deploy.
->>
->> (B) I can see removing code duplication as a incremental process tha=
-t
->> will each have its own change.
->>
->> (C) I do not see the need to move all code to an MVC model at the sa=
-me time.
->>
->> (D) I do not see splitting your code into discovery , storing state =
-and
->> applying changes to significantly increase the work for any one chan=
-ge.
->>
->> Now my points are made I have a couple of final misunderstandings to
->> clear up in any discussion of MVC:
->>
->> (I) I would be happy for the model to be based upon python objects.
->>
->> (II) While I like the idea of using sqlalcamy and sqllite as a nice =
-way
->> to get a type safe model with firm constraints, I do not see this as=
- the
->> only way we can make a model for MVC. I demonstrated in a code sampl=
-e
->> with a draft of a complete relational model to ceph cluster deployme=
-nt
->> using sqllite in memory, that made use of the flexibility of setupto=
-ols
->> the deployment issues people raised with this approach where not
->> present. This said it is essential to understand I do not see this a=
-s
->> more than a potential implementation, or in any way other than as a
->> potential implementation, of a model for the use by the MVC design p=
-atten.
->>
->> So to summarise:
->>
->> I think we should go toward an MVC pattern in ceph-deploy for new
->> development (such as rgw), in preference to code consistency across
->> ceph-deploy.
->>
->> I think we should re-factor existing code to use a shared model in a=
-n
->> MVC pattern only after the model has matured with new development wo=
-rk
->> based upon it.
->>
->> I think even if ceph-deploy never gets any new functionality, beyond
->> what is currently planned, moving to MVC will reduce the support bur=
-den
->> in the long/medium term and potentially in the short term.
->>
->> Should further features ever be commissioned from ceph-deploy I thin=
-k
->> any work already done towards building an MVC pattern will be reused=
- and
->> result in less work.
->>
->> Best regards
->>
->> Owen
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
---=20
-SUSE LINUX GmbH, GF: Jeff Hawn, Jennifer Guild, Felix Imend=C3=B6rffer,=
- HRB
-21284 (AG
-N=C3=BCrnberg)
-
-Maxfeldstra=C3=9Fe 5
-
-90409 N=C3=BCrnberg
-
-Germany
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
