@@ -1,30 +1,49 @@
-From: david.wei@asia.com
-Subject: Letter of Intent.
-Date: Fri, 17 Jul 2015 16:23:11 +0200
-Message-ID: <20150717143546.D217C5591F@mail-iae.iae.cta.br>
-Reply-To: david.wei@asia.com
+From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Subject: Re: RGW object versioning status
+Date: Fri, 17 Jul 2015 13:08:21 -0400 (EDT)
+Message-ID: <1368361459.8906899.1437152901958.JavaMail.zimbra@redhat.com>
+References: <06681238D8946F44A60AA400760A1CBF020147BE@SHSMSX104.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from t00-pc98.iae.cta.br ([161.24.47.98]:35619 "EHLO
-	mail-iae.iae.cta.br" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752156AbbGQPns convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 17 Jul 2015 11:43:48 -0400
-Content-Description: Mail message body
+Received: from mx4-phx2.redhat.com ([209.132.183.25]:55754 "EHLO
+	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752664AbbGQRIY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 17 Jul 2015 13:08:24 -0400
+In-Reply-To: <06681238D8946F44A60AA400760A1CBF020147BE@SHSMSX104.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Recipients <david.wei@asia.com>
-
-I am David Wei .I am involved with the Guiyang Intellectual property bureau which is in the Guizhou province of mainland China. I am getting in touch with you regarding property investment that was facilitated by myself and my colleagues a few years ago.
-
-
-We had started this process with a gentleman by the name of Mr. Norman Gerr a while back but had to suspend same due to unfortunate events concerning Mr. Norman . I would respectfully request that you keep the contents of this mail confidential and respect the integrity of the information you come by as a result of this mail. I contact you independently and no one is informed of this communication.
+To: Yuan Zhou <yuan.zhou@intel.com>
+Cc: Ceph Devel <ceph-devel@vger.kernel.org>
 
 
-We contact you however because you share a similar surname with Norman, please get back to me once you get this letter regardless of being related to Mr. Norman in anyway as this can be very beneficial for all involved.
 
-I  await your response.
+----- Original Message -----
+> From: "Yuan Zhou" <yuan.zhou@intel.com>
+> To: "Yehuda Sadeh-Weinraub" <yehuda@redhat.com>
+> Cc: "Ceph Devel" <ceph-devel@vger.kernel.org>
+> Sent: Thursday, July 16, 2015 9:06:29 PM
+> Subject: RGW object versioning status
+> 
+> Hi Yehuda,
+> 
+> I see there's a wiki page on RGW object versioning. And from the code looks
+> like it's already there.
+> https://wiki.ceph.com/Development/RGW_Object_Versioning
 
-David Wei.
-david.wei@asia.com
+Right, object versioning (S3) went into hammer.
+
+> 
+> But the RGW doc tells me Swift/S3 object version is not supported.
+> 
+> http://ceph.com/docs/master/radosgw/swift/
+> http://ceph.com/docs/master/radosgw/s3/
+> 
+> 
+> What is the status of this feature? Is there any doc on this?
+> 
+
+The docs are not up to date. The feature follows the S3 versioning api.
+
+Yehuda
