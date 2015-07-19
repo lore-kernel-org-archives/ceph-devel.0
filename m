@@ -1,36 +1,67 @@
-From: David Casier AEVOO <david.casier@aevoo.fr>
-Subject: [Documentation] Hardware recommandation : RAM and PGLog
-Date: Sun, 19 Jul 2015 18:07:37 +0200
-Message-ID: <55ABCB49.1080304@aevoo.fr>
-References: <55ABC8E5.1030304@aevoo.fr>
+From: Loic Dachary <loic@dachary.org>
+Subject: pulpito slowness
+Date: Sun, 19 Jul 2015 18:56:12 +0200
+Message-ID: <55ABD6AC.3030903@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="lkUf0OtrdTCV2VOGwGaJIv3v2X45kbiC6"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from 62-210-192-203.rev.poneytelecom.eu ([62.210.192.203]:41925 "EHLO
-	aevoo.fr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753212AbbGSQId (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 19 Jul 2015 12:08:33 -0400
-Received: from [192.168.1.97] (84.197.151.77.rev.sfr.net [77.151.197.84])
-	by aevoo.fr (Postfix) with ESMTPSA id 0DD75401EC
-	for <ceph-devel@vger.kernel.org>; Sun, 19 Jul 2015 18:08:32 +0200 (CEST)
-In-Reply-To: <55ABC8E5.1030304@aevoo.fr>
+Received: from mail2.dachary.org ([91.121.57.175]:52577 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752822AbbGSQ4O (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 19 Jul 2015 12:56:14 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Alfredo Deza <adeza@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi,
-I have a question about PGLog and RAM consumption.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--lkUf0OtrdTCV2VOGwGaJIv3v2X45kbiC6
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-In the documentation, we read "OSDs do not require as much RAM for 
-regular operations (e.g., 500MB of RAM per daemon instance); however, 
-during recovery they need significantly more RAM (e.g., ~1GB per 1TB of 
-storage per daemon)"
+Hi Alfredo,
 
-But in fact, all pg log are read in the start of ceph-osd daemon and put 
-in RAM ( pg->read_state(store, bl); )
+After installing pulpito and run from sources with:
 
-Is this normal behavior or I have a defect in my environment?
+        virtualenv ./virtualenv
+        source ./virtualenv/bin/activate
+        pip install -r requirements.txt
+        python run.py &
 
-Cordialement,
-David Casier.
+I run a rados suite with 40 workers and 218 jobs. All is well except a sl=
+owness from pulpito that I don't quite understand. It takes 9 seconds to =
+load although the load average of the machine is low, the CPU are not all=
+ busy, there is plenty of free ram.
+
+ubuntu@teuthology:~$ curl http://localhost:8081/ubuntu-2015-07-19_15:57:1=
+3-rados-hammer---basic-openstack/ > /dev/null  % Total    % Received % Xf=
+erd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  S=
+peed
+100  391k  100  391k    0     0  42774      0  0:00:09  0:00:09 --:--:-- =
+96305
+
+Do you have an idea of the reason for this slowness ?=20
+
+Cheers
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--lkUf0OtrdTCV2VOGwGaJIv3v2X45kbiC6
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlWr1qwACgkQ8dLMyEl6F20BoQCfQcHW1vYhM9SPeAlGXLeFijNP
+LrEAoMQ3KiS61fz4GS3o5gTRA4mbNEWF
+=JYWU
+-----END PGP SIGNATURE-----
+
+--lkUf0OtrdTCV2VOGwGaJIv3v2X45kbiC6--
