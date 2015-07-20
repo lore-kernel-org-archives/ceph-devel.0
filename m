@@ -1,49 +1,46 @@
-From: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
-Subject: The design of the eviction improvement
-Date: Mon, 20 Jul 2015 08:47:04 +0000
-Message-ID: <06E7D85B3BA36C4DB207FEDE871C53489FFC64@SHSMSX101.ccr.corp.intel.com>
+From: Pavan Rallabhandi <Pavan.Rallabhandi@sandisk.com>
+Subject: start-stop-daemon radosgw
+Date: Mon, 20 Jul 2015 09:58:57 +0000
+Message-ID: <68A06213B74F1742A2C48216AE1BB6B8088009A6@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:49989 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756397AbbGTIrJ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Jul 2015 04:47:09 -0400
+Received: from mail-bn1on0074.outbound.protection.outlook.com ([157.56.110.74]:7751
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751612AbbGTKOp convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Jul 2015 06:14:45 -0400
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, "sjust@redhat.com" <sjust@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: Srinivasula Maram <Srinivasula.Maram@sandisk.com>, Yehuda Sadeh-Weinraub <yehuda@redhat.com>, Sage Weil <sweil@redhat.com>
 
-Hi all,
+[Resending in plain text format, apologies for the spam]
 
-This is a follow-up of one of the CDS session at http://tracker.ceph.com/projects/ceph/wiki/Improvement_on_the_cache_tiering_eviction. We discussed the drawbacks of the current eviction algorithm and several ways to improve it. Seems like the LRU variants is the right way to go. I come up with some design points after the CDS, and want to discuss it with you. It is an approximate 2Q algorithm, combining some benefits of the clock algorithm, similar to what the linux kernel does for the page cache.
+Hi,
 
-# Design points:
+This is with reference to the commit https://github.com/ceph/ceph/commit/f30fa4a364602fb9412babf7319140eca4c64995 and tracker http://tracker.ceph.com/issues/11453
 
-## LRU lists
-- Maintain LRU lists at the PG level.
-The SharedLRU and SimpleLRU implementation in the current code have a max_size, which limits the max number of elements in the list. This mostly looks like a MRU, though its name implies they are LRUs. Since the object size may vary in a PG, it's not possible to caculate the total number of objects which the cache tier can hold ahead of time. We need a new LRU implementation with no limit on the size.
-- Two lists for each PG: active and inactive
-Objects are first put into the inactive list when they are accessed, and moved between these two lists based on some criteria.
-Object flag: active, referenced, unevictable, dirty.
-- When an object is accessed:
-1) If it's not in both of the lists, it's put on the top of the inactive list
-2) If it's in the inactive list, and the referenced flag is not set, the referenced flag is set, and it's moved to the top of the inactive list.
-3) If it's in the inactive list, and the referenced flag is set, the referenced flag is cleared, and it's removed from the inactive list, and put on top of the active list.
-4) If it's in the active list, and the referenced flag is not set, the referenced flag is set, and it's moved to the top of the active list.
-5) If it's in the active list, and the referenced flag is set, it's moved to the top of the active list.
-- When selecting objects to evict:
-1) Objects at the bottom of the inactive list are selected to evict. They are removed from the inactive list.
-2) If the number of the objects in the inactive list becomes low, some of the objects at the bottom of the active list are moved to the inactive list. For those objects which have the referenced flag set, they are given one more chance in the active list. They are moved to the top of the active list with the referenced flag cleared. For those objects which don't have the referenced flag set, they are moved to the inactive list, with the referenced flag set. So that they can be quickly promoted to the active list when necessary.
+On Hammer binaries, we are finding this fix has regressed to have multiple RGW instances to be run on a single machine. Meaning, with no user specified under 'client.radosgw.gateway' sections, and by having the default user to be assumed as 'root', we are unable to get multiple RGW daemons run on a client machine.
 
-## Combine flush with eviction
-- When evicting an object, if it's dirty, it's flushed first. After flushing, it's evicted. If not dirty, it's evicted directly.
-- This means that we won't have separate activities and won't set different ratios for flush and evict. Is there a need to do so?
-- Number of objects to evict at a time. 'evict_effort' acts as the priority, which is used to calculate the number of objects to evict.
+The start-stop-daemon complains than an instance of 'radosgw' is already running, by starting the first daemon in the configuration and bails out from starting further instances:
 
-## LRU lists Snapshotting
-- The two lists are snapshotted persisted periodically.
-- Only one copy needs to be saved. The old copy is removed when persisting the lists. The saved lists are used to restore the LRU lists when OSD reboots.
+<snip>
 
-Any comments/feedbacks are welcomed.
++ start-stop-daemon --start -u root -x /usr/bin/radosgw -- -n client.radosgw.gateway-3
+/usr/bin/radosgw already running.
+
+<\snip>
+
+However, by having a user specified in the relevant 'client.radosgw.gateway' sections, one can get around this issue. Wanted to confirm if this is indeed a regression or was it expected to behave so from the fix.
+
+Thanks,
+-Pavan.
+
+
+________________________________
+
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+
