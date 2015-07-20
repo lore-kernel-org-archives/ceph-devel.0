@@ -1,46 +1,22 @@
-From: Pavan Rallabhandi <Pavan.Rallabhandi@sandisk.com>
-Subject: start-stop-daemon radosgw
-Date: Mon, 20 Jul 2015 09:58:57 +0000
-Message-ID: <68A06213B74F1742A2C48216AE1BB6B8088009A6@SACMBXIP02.sdcorp.global.sandisk.com>
+From: David Casier AEVOO <david.casier@aevoo.fr>
+Subject: [Teuthology] Upgrade hammer on ubuntu : all passed
+Date: Mon, 20 Jul 2015 12:56:27 +0200
+Message-ID: <55ACD3DB.2050606@aevoo.fr>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1on0074.outbound.protection.outlook.com ([157.56.110.74]:7751
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751612AbbGTKOp convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Jul 2015 06:14:45 -0400
-Content-Language: en-US
+Received: from 62-210-192-203.rev.poneytelecom.eu ([62.210.192.203]:41931 "EHLO
+	aevoo.fr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753255AbbGTK51 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 20 Jul 2015 06:57:27 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-Cc: Srinivasula Maram <Srinivasula.Maram@sandisk.com>, Yehuda Sadeh-Weinraub <yehuda@redhat.com>, Sage Weil <sweil@redhat.com>
+To: yweinste@redhat.com, ceph-devel@vger.kernel.org
 
-[Resending in plain text format, apologies for the spam]
+Hi all,
+Good news for upgrade hammer on Ubuntu :
+http://ceph.aevoo.fr:8081/ubuntu-2015-07-19_05:44:18-upgrade:hammer-hammer---basic-openstack/
+All jobs are passed.
 
-Hi,
-
-This is with reference to the commit https://github.com/ceph/ceph/commit/f30fa4a364602fb9412babf7319140eca4c64995 and tracker http://tracker.ceph.com/issues/11453
-
-On Hammer binaries, we are finding this fix has regressed to have multiple RGW instances to be run on a single machine. Meaning, with no user specified under 'client.radosgw.gateway' sections, and by having the default user to be assumed as 'root', we are unable to get multiple RGW daemons run on a client machine.
-
-The start-stop-daemon complains than an instance of 'radosgw' is already running, by starting the first daemon in the configuration and bails out from starting further instances:
-
-<snip>
-
-+ start-stop-daemon --start -u root -x /usr/bin/radosgw -- -n client.radosgw.gateway-3
-/usr/bin/radosgw already running.
-
-<\snip>
-
-However, by having a user specified in the relevant 'client.radosgw.gateway' sections, one can get around this issue. Wanted to confirm if this is indeed a regression or was it expected to behave so from the fix.
-
-Thanks,
--Pavan.
-
-
-________________________________
-
-PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-
+David
