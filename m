@@ -1,69 +1,70 @@
-From: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>
-Subject: Re: dmcrypt with luks keys in hammer
-Date: Mon, 20 Jul 2015 18:23:47 -0400
-Message-ID: <CAGbvivJHpzvFDpNo4ZYZL5W1uzG2pMNHM+VjzSsH-2oyV7LZ-A@mail.gmail.com>
-References: <CAGbvivJH4UJtkcHmgvA7c88YJ6hgmm86fArqJJOszrtBh=kgrg@mail.gmail.com>
-	<alpine.DEB.2.00.1507201419330.8878@cobra.newdream.net>
-	<CAGbviv+2O1z-=9WWSFAFzox=B5dgsASNpYpi5jinmgPW=VTVVw@mail.gmail.com>
-	<alpine.DEB.2.00.1507201521000.8878@cobra.newdream.net>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: [Teuthology] Upgrade hammer on ubuntu : all passed
+Date: Tue, 21 Jul 2015 00:24:05 +0200
+Message-ID: <55AD7505.2070907@dachary.org>
+References: <55ACD3DB.2050606@aevoo.fr>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="QDQL03niJ7BWCt8TFv3spPWk3su6w0WeL"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f170.google.com ([209.85.213.170]:38743 "EHLO
-	mail-ig0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755882AbbGTWXr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Jul 2015 18:23:47 -0400
-Received: by iggf3 with SMTP id f3so92650760igg.1
-        for <ceph-devel@vger.kernel.org>; Mon, 20 Jul 2015 15:23:47 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1507201521000.8878@cobra.newdream.net>
+Received: from mail2.dachary.org ([91.121.57.175]:53280 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1757060AbbGTWYJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Jul 2015 18:24:09 -0400
+In-Reply-To: <55ACD3DB.2050606@aevoo.fr>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+To: David Casier AEVOO <david.casier@aevoo.fr>, ceph-devel@vger.kernel.org
 
-On Mon, Jul 20, 2015 at 6:21 PM, Sage Weil <sage@newdream.net> wrote:
-> On Mon, 20 Jul 2015, Wyllys Ingersoll wrote:
->> No luck with ceph-disk-activate (all or just one device).
->>
->> $ sudo ceph-disk-activate /dev/sdv1
->> mount: unknown filesystem type 'crypto_LUKS'
->> ceph-disk: Mounting filesystem failed: Command '['/bin/mount', '-t',
->> 'crypto_LUKS', '-o', '', '--', '/dev/sdv1',
->> '/var/lib/ceph/tmp/mnt.QHe3zK']' returned non-zero exit status 32
->>
->>
->> Its odd that it should complain about the "crypto_LUKS" filesystem not
->> being recognized, because it did mount some of the LUKS systems
->> successfully, though not sometimes just the data and not the journal
->> (or vice versa).
->>
->> $ lsblk /dev/sdb
->> NAME                                            MAJ:MIN RM   SIZE RO
->> TYPE  MOUNTPOINT
->> sdb                                               8:16   0   3.7T  0 disk
->> ??sdb1                                            8:17   0   3.6T  0 part
->> ? ??e8bc1531-a187-4fd2-9e3f-cf90255f89d0 (dm-0) 252:0    0   3.6T  0
->> crypt /var/lib/ceph/osd/ceph-54
->> ??sdb2                                            8:18   0    10G  0 part
->>   ??temporary-cryptsetup-1235 (dm-6)            252:6    0   125K  1 crypt
->>
->>
->> $ blkid /dev/sdb1
->> /dev/sdb1: UUID="d6194096-a219-4732-8d61-d0c125c49393" TYPE="crypto_LUKS"
->>
->>
->> A race condition (or other issue) with udev seems likely given that
->> its rather random which ones come up and which ones don't.
->
-> A race condition during creation or activation?  If it's activation I
-> would expect ceph-disk activate ... to work reasonably reliably when
-> called manually (on a single device at a time).
->
-> sage
->
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--QDQL03niJ7BWCt8TFv3spPWk3su6w0WeL
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+Hi David,
+
+Would you agree to run a similar suite against the hammer-backports branc=
+h ? It already is scheduled http://pulpito.ceph.com/loic-2015-07-20_16:52=
+:10-upgrade:hammer-x-hammer-backports-distro-basic-multi/ but maybe you c=
+an complete it faster. The command is:
+
+teuthology-suite --ceph hammer-backports --machine-type openstack --suite=
+ upgrade/hammer-x --filter ubuntu_14.04 $HOME/src/ceph-qa-suite_master/ma=
+chine_types/vps.yaml $(pwd)/teuthology/test/integration/archive-on-error.=
+yaml
+
+Cheers
+
+On 20/07/2015 12:56, David Casier AEVOO wrote:
+> Hi all,
+> Good news for upgrade hammer on Ubuntu :
+> http://ceph.aevoo.fr:8081/ubuntu-2015-07-19_05:44:18-upgrade:hammer-ham=
+mer---basic-openstack/
+> All jobs are passed.
+>=20
+> David
+> --=20
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
 
-Im not sure. I do know that all of the disks *did* work after the
-initial installation and activation, but they fail after reboot, and
-the failures are non-deterministic.  Im not really sure how to debug
-it any further.
+--QDQL03niJ7BWCt8TFv3spPWk3su6w0WeL
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlWtdQUACgkQ8dLMyEl6F20TdACfbQsi5/hT8qiluZUTAkztm6b8
+tO4AnidGhF/Yj6N13Jv9VsRGBuVUC/cp
+=Mjlb
+-----END PGP SIGNATURE-----
+
+--QDQL03niJ7BWCt8TFv3spPWk3su6w0WeL--
