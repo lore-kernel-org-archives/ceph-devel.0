@@ -1,67 +1,54 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: pulpito slowness
-Date: Sun, 19 Jul 2015 18:56:12 +0200
-Message-ID: <55ABD6AC.3030903@dachary.org>
+From: huang jun <hjwsm1989@gmail.com>
+Subject: Re: [Documentation] Hardware recommandation : RAM and PGLog
+Date: Mon, 20 Jul 2015 08:50:33 +0800
+Message-ID: <CABAwU-ZsWJn-rUW9nGAoZUaQ9W7VL3y9cK6=YRRAU3NuCbKcGA@mail.gmail.com>
+References: <55ABC8E5.1030304@aevoo.fr>
+	<55ABCB49.1080304@aevoo.fr>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="lkUf0OtrdTCV2VOGwGaJIv3v2X45kbiC6"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:52577 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752822AbbGSQ4O (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 19 Jul 2015 12:56:14 -0400
+Received: from mail-la0-f51.google.com ([209.85.215.51]:36100 "EHLO
+	mail-la0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753605AbbGTAuf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 19 Jul 2015 20:50:35 -0400
+Received: by lagw2 with SMTP id w2so88300292lag.3
+        for <ceph-devel@vger.kernel.org>; Sun, 19 Jul 2015 17:50:34 -0700 (PDT)
+In-Reply-To: <55ABCB49.1080304@aevoo.fr>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alfredo Deza <adeza@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: David Casier AEVOO <david.casier@aevoo.fr>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---lkUf0OtrdTCV2VOGwGaJIv3v2X45kbiC6
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+hi, i don't think the pg log can  be 500MB in size, may be the osd
+daemon hold the data of PULL messages in memory during recovery,
+there are some options to configure it, like
+"osd_client_message_size_cap" and "osd_client_message_cap".
+In our test environment, the OSD daemon can consume as mush as 8GB
+memory when we add new osd to the cluster.
 
-Hi Alfredo,
-
-After installing pulpito and run from sources with:
-
-        virtualenv ./virtualenv
-        source ./virtualenv/bin/activate
-        pip install -r requirements.txt
-        python run.py &
-
-I run a rados suite with 40 workers and 218 jobs. All is well except a sl=
-owness from pulpito that I don't quite understand. It takes 9 seconds to =
-load although the load average of the machine is low, the CPU are not all=
- busy, there is plenty of free ram.
-
-ubuntu@teuthology:~$ curl http://localhost:8081/ubuntu-2015-07-19_15:57:1=
-3-rados-hammer---basic-openstack/ > /dev/null  % Total    % Received % Xf=
-erd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  S=
-peed
-100  391k  100  391k    0     0  42774      0  0:00:09  0:00:09 --:--:-- =
-96305
-
-Do you have an idea of the reason for this slowness ?=20
-
-Cheers
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+2015-07-20 0:07 GMT+08:00 David Casier AEVOO <david.casier@aevoo.fr>:
+> Hi,
+> I have a question about PGLog and RAM consumption.
+>
+> In the documentation, we read "OSDs do not require as much RAM for regular
+> operations (e.g., 500MB of RAM per daemon instance); however, during
+> recovery they need significantly more RAM (e.g., ~1GB per 1TB of storage per
+> daemon)"
+>
+> But in fact, all pg log are read in the start of ceph-osd daemon and put in
+> RAM ( pg->read_state(store, bl); )
+>
+> Is this normal behavior or I have a defect in my environment?
+>
+> Cordialement,
+> David Casier.
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 
---lkUf0OtrdTCV2VOGwGaJIv3v2X45kbiC6
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlWr1qwACgkQ8dLMyEl6F20BoQCfQcHW1vYhM9SPeAlGXLeFijNP
-LrEAoMQ3KiS61fz4GS3o5gTRA4mbNEWF
-=JYWU
------END PGP SIGNATURE-----
-
---lkUf0OtrdTCV2VOGwGaJIv3v2X45kbiC6--
+-- 
+thanks
+huangjun
