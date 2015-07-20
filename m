@@ -1,47 +1,43 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: [Documentation] Hardware recommandation : RAM and PGLog
-Date: Mon, 20 Jul 2015 06:13:33 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1507200610310.8878@cobra.newdream.net>
-References: <55ABC8E5.1030304@aevoo.fr> <55ABCB49.1080304@aevoo.fr>
+Subject: Re: start-stop-daemon radosgw
+Date: Mon, 20 Jul 2015 06:49:20 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1507200648210.8878@cobra.newdream.net>
+References: <68A06213B74F1742A2C48216AE1BB6B8088009A6@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:43969 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:44075 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932126AbbGTNNd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Jul 2015 09:13:33 -0400
-In-Reply-To: <55ABCB49.1080304@aevoo.fr>
+	with ESMTP id S1755387AbbGTNtV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Jul 2015 09:49:21 -0400
+In-Reply-To: <68A06213B74F1742A2C48216AE1BB6B8088009A6@SACMBXIP02.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: David Casier AEVOO <david.casier@aevoo.fr>
-Cc: ceph-devel@vger.kernel.org
+To: Pavan Rallabhandi <Pavan.Rallabhandi@sandisk.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Srinivasula Maram <Srinivasula.Maram@sandisk.com>, Yehuda Sadeh-Weinraub <yehuda@redhat.com>
 
-On Sun, 19 Jul 2015, David Casier AEVOO wrote:
+On Mon, 20 Jul 2015, Pavan Rallabhandi wrote:
+> [Resending in plain text format, apologies for the spam]
+> 
 > Hi,
-> I have a question about PGLog and RAM consumption.
 > 
-> In the documentation, we read "OSDs do not require as much RAM for regular
-> operations (e.g., 500MB of RAM per daemon instance); however, during recovery
-> they need significantly more RAM (e.g., ~1GB per 1TB of storage per daemon)"
+> This is with reference to the commit https://github.com/ceph/ceph/commit/f30fa4a364602fb9412babf7319140eca4c64995 and tracker http://tracker.ceph.com/issues/11453
 > 
-> But in fact, all pg log are read in the start of ceph-osd daemon and put in
-> RAM ( pg->read_state(store, bl); )
+> On Hammer binaries, we are finding this fix has regressed to have multiple RGW instances to be run on a single machine. Meaning, with no user specified under 'client.radosgw.gateway' sections, and by having the default user to be assumed as 'root', we are unable to get multiple RGW daemons run on a client machine.
 > 
-> Is this normal behavior or I have a defect in my environment?
+> The start-stop-daemon complains than an instance of 'radosgw' is already running, by starting the first daemon in the configuration and bails out from starting further instances:
+> 
+> <snip>
+> 
+> + start-stop-daemon --start -u root -x /usr/bin/radosgw -- -n client.radosgw.gateway-3
+> /usr/bin/radosgw already running.
+> 
+> <\snip>
+> 
+> However, by having a user specified in the relevant 'client.radosgw.gateway' sections, one can get around this issue. Wanted to confirm if this is indeed a regression or was it expected to behave so from the fix.
 
-There are two tunables that control how many pg log entries we keep 
-around.  When teh PG is healthy, we keep ~1000, and when the PG is 
-degraded, we keep more, to expand the time window over which a recovering 
-OSD will be able to do regular log-based recovery instead of a more 
-expensive backfill.  This is one source of additional memory.
+This was not intentional. Can you open a tracker ticket?
 
-Others are the missing sets (lists of missing/degraded objects) and 
-messages/data/state associated with objcts that are being 
-recovered/copied.
-
-Note that the numbers in teh documentation are pretty rough rules of 
-thumb.  At some point it would be great to build a model for how much RAM 
-the osd consumes as a function of the various configurables (pg log size, 
-pg count, avg object size, etc.).
-
+Thanks!
 sage
+
