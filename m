@@ -1,43 +1,64 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: start-stop-daemon radosgw
-Date: Mon, 20 Jul 2015 06:49:20 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1507200648210.8878@cobra.newdream.net>
+From: Pavan Rallabhandi <Pavan.Rallabhandi@sandisk.com>
+Subject: RE: start-stop-daemon radosgw
+Date: Mon, 20 Jul 2015 14:00:40 +0000
+Message-ID: <68A06213B74F1742A2C48216AE1BB6B808800AF5@SACMBXIP02.sdcorp.global.sandisk.com>
 References: <68A06213B74F1742A2C48216AE1BB6B8088009A6@SACMBXIP02.sdcorp.global.sandisk.com>
+ <alpine.DEB.2.00.1507200648210.8878@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44075 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755387AbbGTNtV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Jul 2015 09:49:21 -0400
-In-Reply-To: <68A06213B74F1742A2C48216AE1BB6B8088009A6@SACMBXIP02.sdcorp.global.sandisk.com>
+Received: from mail-bn1bon0055.outbound.protection.outlook.com ([157.56.111.55]:31343
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753539AbbGTOQa convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Jul 2015 10:16:30 -0400
+In-Reply-To: <alpine.DEB.2.00.1507200648210.8878@cobra.newdream.net>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Pavan Rallabhandi <Pavan.Rallabhandi@sandisk.com>
+To: Sage Weil <sage@newdream.net>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Srinivasula Maram <Srinivasula.Maram@sandisk.com>, Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+
+http://tracker.ceph.com/issues/12407
+
+Thanks,
+-Pavan.
+
+-----Original Message-----
+From: Sage Weil [mailto:sage@newdream.net]
+Sent: Monday, July 20, 2015 7:19 PM
+To: Pavan Rallabhandi
+Cc: ceph-devel@vger.kernel.org; Srinivasula Maram; Yehuda Sadeh-Weinraub
+Subject: Re: start-stop-daemon radosgw
 
 On Mon, 20 Jul 2015, Pavan Rallabhandi wrote:
 > [Resending in plain text format, apologies for the spam]
-> 
+>
 > Hi,
-> 
+>
 > This is with reference to the commit https://github.com/ceph/ceph/commit/f30fa4a364602fb9412babf7319140eca4c64995 and tracker http://tracker.ceph.com/issues/11453
-> 
+>
 > On Hammer binaries, we are finding this fix has regressed to have multiple RGW instances to be run on a single machine. Meaning, with no user specified under 'client.radosgw.gateway' sections, and by having the default user to be assumed as 'root', we are unable to get multiple RGW daemons run on a client machine.
-> 
+>
 > The start-stop-daemon complains than an instance of 'radosgw' is already running, by starting the first daemon in the configuration and bails out from starting further instances:
-> 
+>
 > <snip>
-> 
+>
 > + start-stop-daemon --start -u root -x /usr/bin/radosgw -- -n client.radosgw.gateway-3
 > /usr/bin/radosgw already running.
-> 
+>
 > <\snip>
-> 
+>
 > However, by having a user specified in the relevant 'client.radosgw.gateway' sections, one can get around this issue. Wanted to confirm if this is indeed a regression or was it expected to behave so from the fix.
 
 This was not intentional. Can you open a tracker ticket?
 
 Thanks!
 sage
+
+
+________________________________
+
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
 
