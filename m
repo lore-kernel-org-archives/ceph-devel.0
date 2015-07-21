@@ -1,24 +1,28 @@
 From: Stefan Priebe <s.priebe@profihost.ag>
 Subject: Re: upstream/firefly exporting the same snap 2 times results in different
  exports
-Date: Tue, 21 Jul 2015 21:48:01 +0200
-Message-ID: <55AEA1F1.8030400@profihost.ag>
+Date: Tue, 21 Jul 2015 21:52:38 +0200
+Message-ID: <55AEA306.6000809@profihost.ag>
 References: <55AE3B3A.2040902@profihost.ag> <1431119614.1353345.1437489164103.JavaMail.zimbra@redhat.com> <55AE798F.1010206@profihost.ag> <1828157940.1473499.1437499191528.JavaMail.zimbra@redhat.com> <55AE9BD9.6010801@profihost.ag> <55AEA17A.8040901@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ph.de-nserver.de ([85.158.179.214]:49027 "EHLO
+Received: from mail-ph.de-nserver.de ([85.158.179.214]:11239 "EHLO
 	mail-ph.de-nserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932103AbbGUTsC (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 Jul 2015 15:48:02 -0400
+	with ESMTP id S1752207AbbGUTwp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 Jul 2015 15:52:45 -0400
 In-Reply-To: <55AEA17A.8040901@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Josh Durgin <jdurgin@redhat.com>, Jason Dillaman <dillaman@redhat.com>
 Cc: ceph-devel@vger.kernel.org
 
+So this is really this old bug?
 
+http://tracker.ceph.com/issues/9806
+
+Stefan
 Am 21.07.2015 um 21:46 schrieb Josh Durgin:
 > On 07/21/2015 12:22 PM, Stefan Priebe wrote:
 >>
@@ -43,15 +47,9 @@ Am 21.07.2015 um 21:46 schrieb Josh Durgin:
 >
 > That sounds very odd. Could you verify via 'rados listwatchers' on an
 > in-use rbd image's header object that there's still a watch established?
-
-How can i do this exactly?
-
+>
 > Have you increased pgs in all those clusters recently?
-
-Yes i bumped from 2048 to 4096 as i doubled the osds.
-
-Stefan
-
+>
 > Josh
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
