@@ -1,55 +1,33 @@
-From: Gregory Farnum <greg@gregs42.com>
-Subject: Re: timeout 120 teuthology-killl is highly recommended
-Date: Tue, 21 Jul 2015 17:29:34 +0100
-Message-ID: <CAC6JEv9E20XRpc0Y_egivj+N-KQdLEnGwGbHGGyqcOwt9fAczA@mail.gmail.com>
-References: <55AE6F90.3070503@dachary.org>
+From: "Deneau, Tom" <tom.deneau@amd.com>
+Subject: 9.0.2 test/perf_local.cc on non-x86 architectures
+Date: Tue, 21 Jul 2015 16:34:03 +0000
+Message-ID: <BC97738F8E7C8742BABED7F06FB9DF91669B9E68@SATLEXDAG01.amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f172.google.com ([209.85.213.172]:37388 "EHLO
-	mail-ig0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933316AbbGUQ3f convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 Jul 2015 12:29:35 -0400
-Received: by igbpg9 with SMTP id pg9so111571546igb.0
-        for <ceph-devel@vger.kernel.org>; Tue, 21 Jul 2015 09:29:35 -0700 (PDT)
-Received: from mail-ie0-f177.google.com (mail-ie0-f177.google.com. [209.85.223.177])
-        by smtp.gmail.com with ESMTPSA id h138sm16089800ioe.2.2015.07.21.09.29.34
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 21 Jul 2015 09:29:34 -0700 (PDT)
-Received: by ietj16 with SMTP id j16so146816777iet.0
-        for <ceph-devel@vger.kernel.org>; Tue, 21 Jul 2015 09:29:34 -0700 (PDT)
-In-Reply-To: <55AE6F90.3070503@dachary.org>
+Received: from mail-by2on0105.outbound.protection.outlook.com ([207.46.100.105]:22400
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1755091AbbGUQeL convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 Jul 2015 12:34:11 -0400
+Received: from satlvexedge02.amd.com (satlvexedge02.amd.com [10.177.96.29])
+	(using TLSv1 with cipher AES128-SHA (128/128 bits))
+	(No client certificate requested)
+	by atltwp02.amd.com (Axway MailGate 5.3.1) with ESMTPS id 21996D16045
+	for <ceph-devel@vger.kernel.org>; Tue, 21 Jul 2015 12:34:01 -0400 (EDT)
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, Jul 21, 2015 at 5:13 PM, Loic Dachary <loic@dachary.org> wrote:
-> Hi Ceph,
->
-> Today I did something wrong and that blocked the lab for a good half =
-hour.
->
-> a) I ran two teuthology-kill simultaneously and that makes them deadl=
-ock each other
-> b) I let them run unattended only to come back to the terminal 30 min=
-utes later and see them stuck.
->
-> Sure, two teuthology-kill simultaneously should not deadlock and that=
- needs to be fixed. But the easy workaround to avoid that trouble is to=
- just not let it run forever. Even for ~200 jobs it takes at most a min=
-ute or two.
+I was trying to do an rpmbuild of v9.0.2 for aarch64 and got the following error:
 
-Mmm, I'm not sure that's correct if you're killing jobs which are
-actually running =E2=80=94 teuthology-nuke (which it will invoke) can t=
-ake a
-while and you definitely don't want to time that out! So beware for
-in-process runs.
--Greg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+test/perf_local.cc: In function 'double div32()':
+test/perf_local.cc:396:31: error: impossible constraint in 'asm'
+                          "cc");
+
+Probably should have an if defined (__i386__) around it.
+
+-- Tom
+
