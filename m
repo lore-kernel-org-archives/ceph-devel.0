@@ -1,33 +1,65 @@
-From: "Deneau, Tom" <tom.deneau@amd.com>
-Subject: 9.0.2 test/perf_local.cc on non-x86 architectures
-Date: Tue, 21 Jul 2015 16:34:03 +0000
-Message-ID: <BC97738F8E7C8742BABED7F06FB9DF91669B9E68@SATLEXDAG01.amd.com>
+From: Yuri Weinstein <yweinste@redhat.com>
+Subject: Re: timeout 120 teuthology-killl is highly recommended
+Date: Tue, 21 Jul 2015 12:33:26 -0400 (EDT)
+Message-ID: <1312196360.1870726.1437496406379.JavaMail.zimbra@redhat.com>
+References: <55AE6F90.3070503@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0105.outbound.protection.outlook.com ([207.46.100.105]:22400
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1755091AbbGUQeL convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 Jul 2015 12:34:11 -0400
-Received: from satlvexedge02.amd.com (satlvexedge02.amd.com [10.177.96.29])
-	(using TLSv1 with cipher AES128-SHA (128/128 bits))
-	(No client certificate requested)
-	by atltwp02.amd.com (Axway MailGate 5.3.1) with ESMTPS id 21996D16045
-	for <ceph-devel@vger.kernel.org>; Tue, 21 Jul 2015 12:34:01 -0400 (EDT)
-Content-Language: en-US
+Received: from mx4-phx2.redhat.com ([209.132.183.25]:51887 "EHLO
+	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932313AbbGUQe2 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 Jul 2015 12:34:28 -0400
+In-Reply-To: <55AE6F90.3070503@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-I was trying to do an rpmbuild of v9.0.2 for aarch64 and got the following error:
+Loic
 
-test/perf_local.cc: In function 'double div32()':
-test/perf_local.cc:396:31: error: impossible constraint in 'asm'
-                          "cc");
+I don't use teuthology-kill simultaneously only sequentially.
+As far as run time, just as a note, when we use 'stale' arg and it invo=
+kes ipmitool interface it does take awhile to finish.=20
 
-Probably should have an if defined (__i386__) around it.
 
--- Tom
+Thx
+YuriW
 
+----- Original Message -----
+=46rom: "Loic Dachary" <loic@dachary.org>
+To: "Ceph Development" <ceph-devel@vger.kernel.org>
+Sent: Tuesday, July 21, 2015 9:13:04 AM
+Subject: timeout 120 teuthology-killl is highly recommended
+
+Hi Ceph,
+
+Today I did something wrong and that blocked the lab for a good half ho=
+ur.=20
+
+a) I ran two teuthology-kill simultaneously and that makes them deadloc=
+k each other
+b) I let them run unattended only to come back to the terminal 30 minut=
+es later and see them stuck.
+
+Sure, two teuthology-kill simultaneously should not deadlock and that n=
+eeds to be fixed. But the easy workaround to avoid that trouble is to j=
+ust not let it run forever. Even for ~200 jobs it takes at most a minut=
+e or two. And if it takes longer it probably means another teuthology-k=
+ill competes and it should be interrupted and restarted later. From now=
+ on I'll do
+
+timeout 120 teuthology-kill .... || echo FAIL!
+
+as a generic safeguard.
+
+Apologies for the troubles.
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
