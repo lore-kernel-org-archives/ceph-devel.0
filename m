@@ -1,31 +1,36 @@
-From: Stefan Priebe <s.priebe@profihost.ag>
-Subject: Re: upstream/firefly exporting the same snap 2 times results in different
- exports
-Date: Tue, 21 Jul 2015 18:55:43 +0200
-Message-ID: <55AE798F.1010206@profihost.ag>
-References: <55AE3B3A.2040902@profihost.ag> <1431119614.1353345.1437489164103.JavaMail.zimbra@redhat.com>
+From: Patrick McGarry <pmcgarry@redhat.com>
+Subject: Ceph Tech Talk next week
+Date: Tue, 21 Jul 2015 13:09:38 -0400
+Message-ID: <CAAZbbf1PhQoZX-_jjY+cjpL3UO8wNEuheF7P21f7T2ajpdyJWg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ph.de-nserver.de ([85.158.179.214]:59311 "EHLO
-	mail-ph.de-nserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933270AbbGUQzq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 Jul 2015 12:55:46 -0400
-In-Reply-To: <1431119614.1353345.1437489164103.JavaMail.zimbra@redhat.com>
+Received: from mail-lb0-f178.google.com ([209.85.217.178]:35545 "EHLO
+	mail-lb0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933021AbbGURJj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 Jul 2015 13:09:39 -0400
+Received: by lblf12 with SMTP id f12so120277246lbl.2
+        for <ceph-devel@vger.kernel.org>; Tue, 21 Jul 2015 10:09:38 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jason Dillaman <dillaman@redhat.com>
-Cc: ceph-devel@vger.kernel.org
+To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
+
+Hey cephers,
+
+Just a reminder that the Ceph Tech Talk on CephFS that was scheduled
+for last month (and cancelled due to technical difficulties) has been
+rescheduled for this month's talk. It will be happening next Thurs at
+17:00 UTC (1p EST) on our Blue Jeans conferencing system. If you have
+any questions feel free to let me know. Thanks.
+
+http://ceph.com/ceph-tech-talks/
 
 
-Am 21.07.2015 um 16:32 schrieb Jason Dillaman:
-> Any chance that the snapshot was just created prior to the first export and you have a process actively writing to the image?
->
+-- 
 
-Sadly not. I executed those commands exactly as i've posted manually at 
-bash.
+Best Regards,
 
-I can reproduce this at 5 different ceph cluster and 500 vms each.
-
-Stefan
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
