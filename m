@@ -1,223 +1,143 @@
-From: "Matt W. Benjamin" <matt@cohortfs.com>
-Subject: Re: The design of the eviction improvement
-Date: Tue, 21 Jul 2015 10:15:57 -0400 (EDT)
-Message-ID: <1004223530.51.1437488157119.JavaMail.root@thunderbeast.private.linuxbox.com>
-References: <1539008200.49.1437488109510.JavaMail.root@thunderbeast.private.linuxbox.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: hdparm -W redux, bug in _check_disk_write_cache for RHEL6?
+Date: Tue, 21 Jul 2015 17:20:55 +0300
+Message-ID: <CAOi1vP-dFaquVYvSSVX_L3P8R6fFz0M5taUXG6bjzUO2tiMwjQ@mail.gmail.com>
+References: <CABZ+qq=NDjKsQfqshVTzoPoC7PW2MPW1Q8MgvvmJfNGqhp0feQ@mail.gmail.com>
+	<alpine.DEB.2.00.1507210646120.8878@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from aa.linuxbox.com ([69.128.83.226]:3933 "EHLO aa.linuxbox.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932094AbbGUOQG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 21 Jul 2015 10:16:06 -0400
-In-Reply-To: <1539008200.49.1437488109510.JavaMail.root@thunderbeast.private.linuxbox.com>
+Received: from mail-wg0-f48.google.com ([74.125.82.48]:33786 "EHLO
+	mail-wg0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753238AbbGUOU5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 Jul 2015 10:20:57 -0400
+Received: by wgmn9 with SMTP id n9so157987547wgm.0
+        for <ceph-devel@vger.kernel.org>; Tue, 21 Jul 2015 07:20:56 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1507210646120.8878@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Zhiqiang Wang <zhiqiang.wang@intel.com>
-Cc: sjust@redhat.com, ceph-devel@vger.kernel.org, Sage Weil <sweil@redhat.com>
+To: Sage Weil <sage@newdream.net>
+Cc: Dan van der Ster <dan@vanderster.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Ric Wheeler <rwheeler@redhat.com>
 
-Hi,
+On Tue, Jul 21, 2015 at 4:54 PM, Sage Weil <sage@newdream.net> wrote:
+> On Tue, 21 Jul 2015, Dan van der Ster wrote:
+>> Hi,
+>>
+>> Following the sf.net corruption report I've been checking our config
+>> w.r.t data consistency. AFAIK the two main recommendations are:
+>>
+>>   1) don't mount FileStores with nobarrier
+>>   2) disable write-caching (hdparm -W 0 /dev/sdX) when using block dev
+>> journals and your kernel is < 2.6.33
+>>
+>> Obviously we don't do (1) because that would be crazy, but for (2) we
+>> didn't disable yet write-caching, probably because we didn't notice
+>> the doc.
+>>
+>> But my lame excuse is that apparently _check_disk_write_cache in
+>> FileJournal.cc doesn't print a warning when it should, because hdparm
+>> -W doesn't always work on partitions rather than whole block devices.
+>> See:
+>>
+>> GOOD: ceph 0.94.2, kernel 3.10.0-229.7.2.el7.x86_64, hdparm v9.43:
+>>
+>>    10 journal _open_block_device: ignoring osd journal size. We'll use
+>> the entire block device (size: 21474836480)
+>>    20 journal _check_disk_write_cache: disk write cache is on, but
+>> your kernel is new enough to handle it correctly.
+>> (fn:/var/lib/ceph/osd/ceph-96/journal)
+>>     1 journal _open /var/lib/ceph/osd/ceph-96/journal fd 20:
+>> 21474836480 bytes, block size 4096 bytes, directio = 1, aio = 1
+>>
+>>
+>> BAD: ceph 0.94.2, kernel 2.6.32-431.29.2.el6.x86_64, hdparm v9.43:
+>>
+>>    10 journal _open_block_device: ignoring osd journal size. We'll use
+>> the entire block device (size: 21474836480)
+>>     1 journal _open /var/lib/ceph/osd/ceph-56/journal fd 19:
+>> 21474836480 bytes, block size 4096 bytes, directio = 1, aio = 1
+>>
+>>
+>> In other words, running hammer on EL6, _check_disk_write_cache exits
+>> without printing anything, but actually it should log the scary
+>> "WARNING: disk write cache is ON".
+>>
+>> I guess it's because of this:
+>>
+>> GOOD # uname -r && hdparm -W /dev/sda && hdparm -W /dev/sda1
+>> 3.10.0-229.7.2.el7.x86_64
+>>
+>> /dev/sda1:
+>>  write-caching =  1 (on)
+>>
+>> /dev/sda:
+>>  write-caching =  1 (on)
+>>
+>>
+>> BAD # uname -r && hdparm -W /dev/sda && hdparm -W /dev/sda1
+>> 2.6.32-431.23.3.el6.x86_64
+>>
+>> /dev/sda:
+>>  write-caching =  1 (on)
+>>
+>> /dev/sda1:
+>>  HDIO_DRIVE_CMD(identify) failed: Inappropriate ioctl for device
+>>
+>>
+>> (in both cases /dev/sda is an INTEL SSDSC2BA20).
+>>
+>> So a few questions to end this:
+>>   1) What was the magic patch in 2.6.33 which made write-caching safe?
+>
+> The specific behavior is that we want fsync or fdatasync to flush the
+> write cache on the underlying device.  Unfortunately I've lost track of
+> which commit led me to the magic 2.6.33 number.  However, this reference
+> seems to confirm that 2.6.33 is a safe upper bound:
+>
+>         http://monolight.cc/2011/06/barriers-caches-filesystems/
 
-Couple of points.
+This one, I think:
 
-1) a successor to 2Q is MQ (Li et al).  We have an intrusive MQ LRU implementation
-with 2 levels currently, plus a pinned queue, that addresses stuff like partitioning ("sharding"), scan resistance, and coordination w/lookup tables.  We might extend/re-use it.
+commit ab0a9735e06914ce4d2a94ffa41497dbc142fe7f
+Author: Christoph Hellwig <hch@lst.de>
+Date:   Thu Oct 29 14:14:04 2009 +0100
 
-2) I'm a bit confused by active/inactive vocabulary, dimensioning of cache
-segments (are you proposing to/do we now always cache whole objects?), and cost
-of "looking for" dirty objects;  I suspect that it makes sense to amortize the
-cost of locating segments eligible to be flushed, rather than minimize
-bookkeeping.
+    blkdev: flush disk cache on ->fsync
 
-Matt
+    Currently there is no barrier support in the block device code.  That
+    means we cannot guarantee any sort of data integerity when using the
+    block device node with dis kwrite caches enabled.  Using the raw block
+    device node is a typical use case for virtualization (and I assume
+    databases, too).  This patch changes block_fsync to issue a cache flush
+    and thus make fsync on block device nodes actually useful.
 
------ "Zhiqiang Wang" <zhiqiang.wang@intel.com> wrote:
+    Note that in mainline we would also need to add such code to the
+    ->aio_write method for O_SYNC handling, but assuming that Jan's patch
+    series for the O_SYNC rewrite goes in it will also call into ->fsync
+    for 2.6.32.
 
-> > -----Original Message-----
-> > From: ceph-devel-owner@vger.kernel.org
-> > [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
-> > Sent: Tuesday, July 21, 2015 6:38 AM
-> > To: Wang, Zhiqiang
-> > Cc: sjust@redhat.com; ceph-devel@vger.kernel.org
-> > Subject: Re: The design of the eviction improvement
-> > 
-> > On Mon, 20 Jul 2015, Wang, Zhiqiang wrote:
-> > > Hi all,
-> > >
-> > > This is a follow-up of one of the CDS session at
-> >
-> http://tracker.ceph.com/projects/ceph/wiki/Improvement_on_the_cache_tieri
-> > ng_eviction. We discussed the drawbacks of the current eviction
-> algorithm and
-> > several ways to improve it. Seems like the LRU variants is the right
-> way to go. I
-> > come up with some design points after the CDS, and want to discuss
-> it with you.
-> > It is an approximate 2Q algorithm, combining some benefits of the
-> clock
-> > algorithm, similar to what the linux kernel does for the page
-> cache.
-> > 
-> > Unfortunately I missed this last CDS so I'm behind on the
-> discussion.  I have a
-> > few questions though...
-> > 
-> > > # Design points:
-> > >
-> > > ## LRU lists
-> > > - Maintain LRU lists at the PG level.
-> > > The SharedLRU and SimpleLRU implementation in the current code
-> have a
-> > > max_size, which limits the max number of elements in the list.
-> This
-> > > mostly looks like a MRU, though its name implies they are LRUs.
-> Since
-> > > the object size may vary in a PG, it's not possible to caculate
-> the
-> > > total number of objects which the cache tier can hold ahead of
-> time.
-> > > We need a new LRU implementation with no limit on the size.
-> > 
-> > This last sentence seems to me to be the crux of it.  Assuming we
-> have an
-> > OSD based by flash storing O(n) objects, we need a way to maintain
-> an LRU of
-> > O(n) objects in memory.  The current hitset-based approach was taken
-> based
-> > on the assumption that this wasn't feasible--or at least we didn't
-> know how to
-> > implmement such a thing.  If it is, or we simply want to stipulate
-> that cache
-> > tier OSDs get gobs of RAM to make it possible, then lots of better
-> options
-> > become possible...
-> > 
-> > Let's say you have a 1TB SSD, with an average object size of 1MB --
-> that's
-> > 1 million objects.  At maybe ~100bytes per object of RAM for an LRU
-> entry
-> > that's 100MB... so not so unreasonable, perhaps!
-> 
-> I was having the same question before proposing this. I did the
-> similar calculation and thought it would be ok to use this many memory
-> :-)
-> 
-> > 
-> > > - Two lists for each PG: active and inactive Objects are first
-> put
-> > > into the inactive list when they are accessed, and moved between
-> these two
-> > lists based on some criteria.
-> > > Object flag: active, referenced, unevictable, dirty.
-> > > - When an object is accessed:
-> > > 1) If it's not in both of the lists, it's put on the top of the
-> > > inactive list
-> > > 2) If it's in the inactive list, and the referenced flag is not
-> set, the referenced
-> > flag is set, and it's moved to the top of the inactive list.
-> > > 3) If it's in the inactive list, and the referenced flag is set,
-> the referenced flag
-> > is cleared, and it's removed from the inactive list, and put on top
-> of the active
-> > list.
-> > > 4) If it's in the active list, and the referenced flag is not set,
-> the referenced
-> > flag is set, and it's moved to the top of the active list.
-> > > 5) If it's in the active list, and the referenced flag is set,
-> it's moved to the top
-> > of the active list.
-> > > - When selecting objects to evict:
-> > > 1) Objects at the bottom of the inactive list are selected to
-> evict. They are
-> > removed from the inactive list.
-> > > 2) If the number of the objects in the inactive list becomes low,
-> some of the
-> > objects at the bottom of the active list are moved to the inactive
-> list. For those
-> > objects which have the referenced flag set, they are given one more
-> chance in
-> > the active list. They are moved to the top of the active list with
-> the referenced
-> > flag cleared. For those objects which don't have the referenced flag
-> set, they
-> > are moved to the inactive list, with the referenced flag set. So
-> that they can be
-> > quickly promoted to the active list when necessary.
-> > >
-> > > ## Combine flush with eviction
-> > > - When evicting an object, if it's dirty, it's flushed first.
-> After flushing, it's
-> > evicted. If not dirty, it's evicted directly.
-> > > - This means that we won't have separate activities and won't set
-> different
-> > ratios for flush and evict. Is there a need to do so?
-> > > - Number of objects to evict at a time. 'evict_effort' acts as the
-> priority, which
-> > is used to calculate the number of objects to evict.
-> > 
-> > As someone else mentioned in a follow-up, the reason we let the
-> dirty level be
-> > set lower than the full level is that it provides headroom so that
-> objects can be
-> > quickly evicted (delete, no flush) to make room for new writes or
-> new
-> > promotions.
-> > 
-> > That said, we probably can/should streamline the flush so that an
-> evict can
-> > immediately follow without waiting for the agent to come around
-> again.
-> > (I don't think we do that now?)
-> 
-> I was afraid of having to maintain different lists for flush/evict. So
-> I proposed to combine flush with evict. But seems like we don't need
-> to. When reaching the dirty ratio and selecting objects to flush, we
-> look for dirty objects from the inactive list. The objects are marked
-> clean and kept in the same position in the LRU list after flushing.
-> When evicting objects, clean objects in the inactive list are
-> selected. Dirty objects are ignored. This will keep the flush/evict
-> the same as current implementation. Make sense?
-> 
-> > 
-> > sage
-> > 
-> > 
-> > > ## LRU lists Snapshotting
-> > > - The two lists are snapshotted persisted periodically.
-> > > - Only one copy needs to be saved. The old copy is removed when
-> persisting
-> > the lists. The saved lists are used to restore the LRU lists when
-> OSD reboots.
-> > >
-> > > Any comments/feedbacks are welcomed.
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe
-> ceph-devel"
-> > > in the body of a message to majordomo@vger.kernel.org More
-> majordomo
-> > > info at  http://vger.kernel.org/majordomo-info.html
-> > >
-> > >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe
-> ceph-devel" in the body
-> > of a message to majordomo@vger.kernel.org More majordomo info at
-> > http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+    Signed-off-by: Christoph Hellwig <hch@lst.de>
+    Signed-off-by: Jens Axboe <jens.axboe@oracle.com>
 
--- 
-Matt Benjamin
-CohortFS, LLC.
-315 West Huron Street, Suite 140A
-Ann Arbor, Michigan 48103
+>
+>>   2) What's the recommended recourse here: hopefully Red Hat
+>> backported the necessary to their 2.6.32 kernel, but if not should we
+>> fix _check_disk_write_cache and make some publicity for people to
+>> check their configs?
+>
+> I have no doubt that any and all patches related to flushing caches on
+> fsync are part of the el6 kernel.
+>
+> What's embarassing is that hdparm fails on kernels old enough to fail the
+> test :).  The fix is probably to strip off the partition number (ideally
+> using the helpers in blkdev.cc so that it works even for weirdly-named
+> devices) and run hdparm on that.
 
-http://cohortfs.com
+We should look into using libblkid for this and nuking blkdev.cc.  rbd
+unmap supports unmap by partition and already relies on libblkid to do
+the partition -> whole disk thing.  I can't remember if that function
+is old enough to be in el6 base, I can take a stab at this if it is...
 
-tel.  734-761-4689 
-fax.  734-769-8938 
-cel.  734-216-5309 
+Thanks,
+
+                Ilya
