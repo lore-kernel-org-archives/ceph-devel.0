@@ -1,81 +1,36 @@
-From: Josh Durgin <jdurgin@redhat.com>
-Subject: Re: upstream/firefly exporting the same snap 2 times results in different
- exports
-Date: Tue, 21 Jul 2015 13:50:57 -0700
-Message-ID: <55AEB0B1.6040500@redhat.com>
-References: <55AE3B3A.2040902@profihost.ag> <1431119614.1353345.1437489164103.JavaMail.zimbra@redhat.com> <55AE798F.1010206@profihost.ag> <1828157940.1473499.1437499191528.JavaMail.zimbra@redhat.com> <55AE9BD9.6010801@profihost.ag> <55AEA17A.8040901@redhat.com> <55AEA306.6000809@profihost.ag>
+From: Gregory Farnum <greg@gregs42.com>
+Subject: Re: Ceph Tech Talk next week
+Date: Tue, 21 Jul 2015 23:03:00 +0100
+Message-ID: <CAC6JEv9fcKgBgZuxHk-+iNaNoL8tKqQBgUH_cLG17qADXNgNCA@mail.gmail.com>
+References: <CAAZbbf1PhQoZX-_jjY+cjpL3UO8wNEuheF7P21f7T2ajpdyJWg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:42527 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932653AbbGUUuw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 21 Jul 2015 16:50:52 -0400
-In-Reply-To: <55AEA306.6000809@profihost.ag>
+Received: from mail-ig0-f172.google.com ([209.85.213.172]:37588 "EHLO
+	mail-ig0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933673AbbGUWDB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 Jul 2015 18:03:01 -0400
+Received: by igbpg9 with SMTP id pg9so118664593igb.0
+        for <ceph-devel@vger.kernel.org>; Tue, 21 Jul 2015 15:03:01 -0700 (PDT)
+Received: from mail-ig0-f171.google.com (mail-ig0-f171.google.com. [209.85.213.171])
+        by smtp.gmail.com with ESMTPSA id j20sm8164525igt.5.2015.07.21.15.03.00
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 21 Jul 2015 15:03:00 -0700 (PDT)
+Received: by igbij6 with SMTP id ij6so121556827igb.1
+        for <ceph-devel@vger.kernel.org>; Tue, 21 Jul 2015 15:03:00 -0700 (PDT)
+In-Reply-To: <CAAZbbf1PhQoZX-_jjY+cjpL3UO8wNEuheF7P21f7T2ajpdyJWg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe <s.priebe@profihost.ag>, Jason Dillaman <dillaman@redhat.com>
-Cc: ceph-devel@vger.kernel.org
+To: Patrick McGarry <pmcgarry@redhat.com>
+Cc: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
 
-Yes, I'm afraid it sounds like it is. You can double check whether the
-watch exists on an image by getting the id of the image from 'rbd info
-$pool/$image | grep block_name_prefix':
-
-     block_name_prefix: rbd_data.105674b0dc51
-
-The id is the hex number there. Append that to 'rbd_header.' and you
-have the header object name. Check whether it has watchers with:
-
-     rados listwatchers -p $pool rbd_header.105674b0dc51
-
-If that doesn't show any watchers while the image is in use by a vm,
-it's #9806.
-
-I just merged the backport for firefly, so it'll be in 0.80.11.
-Sorry it took so long to get to firefly :(. We'll need to be
-more vigilant about checking non-trivial backports when we're
-going through all the bugs periodically.
-
-Josh
-
-On 07/21/2015 12:52 PM, Stefan Priebe wrote:
-> So this is really this old bug?
+On Tue, Jul 21, 2015 at 6:09 PM, Patrick McGarry <pmcgarry@redhat.com> wrote:
+> Hey cephers,
 >
-> http://tracker.ceph.com/issues/9806
->
-> Stefan
-> Am 21.07.2015 um 21:46 schrieb Josh Durgin:
->> On 07/21/2015 12:22 PM, Stefan Priebe wrote:
->>>
->>> Am 21.07.2015 um 19:19 schrieb Jason Dillaman:
->>>> Does this still occur if you export the images to the console (i.e.
->>>> "rbd export cephstor/disk-116@snap - > dump_file")?
->>>>
->>>> Would it be possible for you to provide logs from the two "rbd export"
->>>> runs on your smallest VM image?  If so, please add the following to
->>>> the "[client]" section of your ceph.conf:
->>>>
->>>>    log file = /valid/path/to/logs/$name.$pid.log
->>>>    debug rbd = 20
->>>>
->>>> I opened a ticket [1] where you can attach the logs (if they aren't
->>>> too large).
->>>>
->>>> [1] http://tracker.ceph.com/issues/12422
->>>
->>> Will post some more details to the tracker in a few hours. It seems it
->>> is related to using discard inside guest but not on the FS the osd is
->>> on.
->>
->> That sounds very odd. Could you verify via 'rados listwatchers' on an
->> in-use rbd image's header object that there's still a watch established?
->>
->> Have you increased pgs in all those clusters recently?
->>
->> Josh
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Just a reminder that the Ceph Tech Talk on CephFS that was scheduled
+> for last month (and cancelled due to technical difficulties) has been
+> rescheduled for this month's talk. It will be happening next Thurs at
+> 17:00 UTC (1p EST)
 
+So that's July 30, according to the website, right? :)
