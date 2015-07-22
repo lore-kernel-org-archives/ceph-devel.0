@@ -1,401 +1,190 @@
-From: Casey Bodley <cbodley@redhat.com>
-Subject: Re: About Fio backend with ObjectStore API
-Date: Wed, 22 Jul 2015 16:56:40 -0400 (EDT)
-Message-ID: <327699266.948920.1437598600219.JavaMail.zimbra@redhat.com>
-References: <99767EA2E27DD44DB4E9F9B9ACA458C03B31A8D8@SSIEXCH-MB3.ssi.samsung.com> <814413230.286.1436473608097.JavaMail.root@thunderbeast.private.linuxbox.com> <CACJqLyYb2xf8TN+HXiON8G8ojob1OwedFusSnY25p53a7aiyiA@mail.gmail.com> <CACJqLyZYZja8nchW5=tB1AL7BdkDAALQynpCm1N-bnpBixdmew@mail.gmail.com> <CAMeBU_3uWeLMVbhdqRvPzuLZgUrCrTzhVbOR=cwJHuARHduuWw@mail.gmail.com> <CACJqLya8KW2gknveX-m+a262y8TXHqwi8As=Wi1cwh2dpnq=0A@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: RE: The design of the eviction improvement
+Date: Wed, 22 Jul 2015 14:53:05 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1507221448140.7829@cobra.newdream.net>
+References: <06E7D85B3BA36C4DB207FEDE871C53489FFC64@SHSMSX101.ccr.corp.intel.com> <alpine.DEB.2.00.1507201530200.8878@cobra.newdream.net> <06E7D85B3BA36C4DB207FEDE871C53489FFF18@SHSMSX101.ccr.corp.intel.com> <alpine.DEB.2.00.1507210620270.8878@cobra.newdream.net>
+ <06E7D85B3BA36C4DB207FEDE871C5348A001B4@SHSMSX101.ccr.corp.intel.com> <alpine.DEB.2.00.1507220551290.8878@cobra.newdream.net> <7334B4281E425749B85E08CF7EC6F853437A9AB3@SACMBXIP03.sdcorp.global.sandisk.com> <alpine.DEB.2.00.1507221145530.18181@cobra.newdream.net>
+ <7334B4281E425749B85E08CF7EC6F853437A9D62@SACMBXIP03.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx5-phx2.redhat.com ([209.132.183.37]:50690 "EHLO
-	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751924AbbGVU4q convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 22 Jul 2015 16:56:46 -0400
-In-Reply-To: <CACJqLya8KW2gknveX-m+a262y8TXHqwi8As=Wi1cwh2dpnq=0A@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:37102 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752763AbbGVVxK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 22 Jul 2015 17:53:10 -0400
+In-Reply-To: <7334B4281E425749B85E08CF7EC6F853437A9D62@SACMBXIP03.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomaiwang@gmail.com>
-Cc: Casey Bodley <cbodley@gmail.com>, "Matt W. Benjamin" <matt@cohortfs.com>, "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>, ceph-devel@vger.kernel.org
+To: Allen Samuels <Allen.Samuels@sandisk.com>
+Cc: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>, "sjust@redhat.com" <sjust@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Haomai,
+On Wed, 22 Jul 2015, Allen Samuels wrote:
+> Don't we need to double-index the data structure?
+> 
+> We need it indexed by atime for the purposes of eviction, but we need it 
+> indexed by object name for the purposes of updating the list upon a 
+> usage.
 
-Sorry for the late response, I was out of the office. I'm afraid I have=
-n't run into that segfault. The io_ops should be set at the very beginn=
-ing when it calls get_ioengine(). All I can suggest is that you verify =
-that your job file is pointing to the correct fio_ceph_objectstore.so. =
-If you've made any other interesting changes to the job file, could you=
- share it here?
+If you use the same approach the agent uses now (iterate over items, 
+evict/trim anything in bottom end of observed age distribution) you can 
+get away without the double-index.  Iterating over the LSM should be quite 
+cheap.  I'd be more worried about the cost of the insertions.
 
-Casey
+I'm also not sure the simplistic approach below can be generalized to 
+something like 2Q (and certainly not something like MQ).  Maybe...
 
------ Original Message -----
-=46rom: "Haomai Wang" <haomaiwang@gmail.com>
-To: "Casey Bodley" <cbodley@gmail.com>
-Cc: "Matt W. Benjamin" <matt@cohortfs.com>, "James (Fei) Liu-SSI" <jame=
-s.liu@ssi.samsung.com>, ceph-devel@vger.kernel.org
-Sent: Tuesday, July 21, 2015 7:50:32 AM
-Subject: Re: About Fio backend with ObjectStore API
+On the other hand, I'm not sure it is the end of the world if at the end 
+of the day the memory requirements for a cache-tier OSD are higher and 
+inversely proportional to the object size.  We can make the OSD 
+flush/evict more aggressively if the memory utilization (due to a high 
+object count) gets out of hand as a safety mechanism.  Paying a few extra 
+$$ for RAM isn't the end of the world I'm guessing when the performance 
+payoff is significant...
 
-Hi Casey,
-
-I check your commits and know what you fixed. I cherry-picked your new
-commits but I still met the same problem.
-
-"""
-It's strange that it alwasys hit segment fault when entering
-"_fio_setup_ceph_filestore_data", gdb tells "td->io_ops" is NULL but
-when I up the stack, the "td->io_ops" is not null. Maybe it's related
-to dlopen?
-"""
-
-Do you have any hint about this?
-
-On Thu, Jul 16, 2015 at 5:23 AM, Casey Bodley <cbodley@gmail.com> wrote=
-:
-> Hi Haomai,
->
-> I was able to run this after a couple changes to the filestore.fio jo=
-b
-> file. Two of the config options were using the wrong names. I pushed =
-a
-> fix for the job file, as well as a patch that renames everything from
-> filestore to objectstore (thanks James), to
-> https://github.com/linuxbox2/linuxbox-ceph/commits/fio-objectstore.
->
-> I found that the read support doesn't appear to work anymore, so give
-> "rw=3Dwrite" a try. And because it does a mkfs(), make sure you're
-> pointing it to an empty xfs directory with the "directory=3D" option.
->
-> Casey
->
-> On Tue, Jul 14, 2015 at 2:45 AM, Haomai Wang <haomaiwang@gmail.com> w=
-rote:
->> Anyone who have successfully ran the fio with this external io engin=
-e
->> ceph_objectstore?
->>
->> It's strange that it alwasys hit segment fault when entering
->> "_fio_setup_ceph_filestore_data", gdb tells "td->io_ops" is NULL but
->> when I up the stack, the "td->io_ops" is not null. Maybe it's relate=
-d
->> to dlopen?
->>
->> On Fri, Jul 10, 2015 at 3:51 PM, Haomai Wang <haomaiwang@gmail.com> =
-wrote:
->>> I have rebased the branch with master, and push it to ceph upstream
->>> repo. https://github.com/ceph/ceph/compare/fio-objectstore?expand=3D=
-1
->>>
->>> Plz let me know if who is working on this. Otherwise, I would like =
-to
->>> improve this to be merge ready.
->>>
->>> On Fri, Jul 10, 2015 at 4:26 AM, Matt W. Benjamin <matt@cohortfs.co=
-m> wrote:
->>>> That makes sense.
->>>>
->>>> Matt
->>>>
->>>> ----- "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com> wrote:
->>>>
->>>>> Hi Casey,
->>>>>   Got it. I was directed to the old code base. By the way, Since =
-the
->>>>> testing case was used to exercise all of object stores.  Strongly
->>>>> recommend to change the name from fio_ceph_filestore.cc to
->>>>> fio_ceph_objectstore.cc . And the code in fio_ceph_filestore.cc s=
-hould
->>>>> be refactored to reflect that the whole objectstore will be suppo=
-rted
->>>>> by fio_ceph_objectstore.cc. what you think?
->>>>>
->>>>> Let me know if you need any help from my side.
->>>>>
->>>>>
->>>>> Regards,
->>>>> James
->>>>>
->>>>>
->>>>>
->>>>> -----Original Message-----
->>>>> From: Casey Bodley [mailto:cbodley@gmail.com]
->>>>> Sent: Thursday, July 09, 2015 12:32 PM
->>>>> To: James (Fei) Liu-SSI
->>>>> Cc: Haomai Wang; ceph-devel@vger.kernel.org
->>>>> Subject: Re: About Fio backend with ObjectStore API
->>>>>
->>>>> Hi James,
->>>>>
->>>>> Are you looking at the code from
->>>>> https://github.com/linuxbox2/linuxbox-ceph/tree/fio-objectstore? =
-It
->>>>> uses ObjectStore::create() instead of new FileStore(). This allow=
-s us
->>>>> to exercise all of the object stores with the same code.
->>>>>
->>>>> Casey
->>>>>
->>>>> On Thu, Jul 9, 2015 at 2:01 PM, James (Fei) Liu-SSI
->>>>> <james.liu@ssi.samsung.com> wrote:
->>>>> > Hi Casey,
->>>>> >   Here is the code in the fio_ceph_filestore.cc. Basically, it
->>>>> creates a filestore as backend engine for IO exercises. If we got=
- to
->>>>> send IO commands to KeyValue Store or Newstore, we got to change =
-the
->>>>> code accordingly, right?  I did not see any other files like
->>>>> fio_ceph_keyvaluestore.cc or fio_ceph_newstore.cc. In my humble
->>>>> opinion, we might need to create other two fio engines for
->>>>> keyvaluestore and newstore if we want to exercise these two, righ=
-t?
->>>>> >
->>>>> > Regards,
->>>>> > James
->>>>> >
->>>>> > static int fio_ceph_filestore_init(struct thread_data *td)
->>>>> > 209 {
->>>>> > 210     vector<const char*> args;
->>>>> > 211     struct ceph_filestore_data *ceph_filestore_data =3D (st=
-ruct
->>>>> ceph_filestore_data *) td->io_ops->data;
->>>>> > 212     ObjectStore::Transaction ft;
->>>>> > 213
->>>>> >
->>>>> > 214     global_init(NULL, args, CEPH_ENTITY_TYPE_OSD,
->>>>> CODE_ENVIRONMENT_UTILITY, 0);
->>>>> > 215     //g_conf->journal_dio =3D false;
->>>>> > 216     common_init_finish(g_ceph_context);
->>>>> > 217     //g_ceph_context->_conf->set_val("debug_filestore", "20=
-");
->>>>> > 218     //g_ceph_context->_conf->set_val("debug_throttle", "20"=
-);
->>>>> > 219     g_ceph_context->_conf->apply_changes(NULL);
->>>>> > 220
->>>>> >
->>>>> > 221     ceph_filestore_data->osd_path =3D
->>>>> strdup("/mnt/fio_ceph_filestore.XXXXXXX");
->>>>> > 222     ceph_filestore_data->journal_path =3D
->>>>> strdup("/var/lib/ceph/osd/journal-ram/fio_ceph_filestore.XXXXXXX"=
-);
->>>>> > 223
->>>>> >
->>>>> > 224     if (!mkdtemp(ceph_filestore_data->osd_path)) {
->>>>> > 225             cout << "mkdtemp failed: " << strerror(errno) <=
-<
->>>>> std::endl;
->>>>> > 226             return 1;
->>>>> > 227     }
->>>>> > 228     //mktemp(ceph_filestore_data->journal_path); // NOSPC i=
-ssue
->>>>> > 229
->>>>> >
->>>>> > 230     ObjectStore *fs =3D new
->>>>> FileStore(ceph_filestore_data->osd_path,
->>>>> ceph_filestore_data->journal_path);
->>>>> > 231     ceph_filestore_data->fs =3D fs;
->>>>> > 232
->>>>> >
->>>>> > 233     if (fs->mkfs() < 0) {
->>>>> > 234             cout << "mkfs failed" << std::endl;
->>>>> > 235             goto failed;
->>>>> > 236     }
->>>>> > 237
->>>>> > 238     if (fs->mount() < 0) {
->>>>> > 239             cout << "mount failed" << std::endl;
->>>>> > 240             goto failed;
->>>>> > 241     }
->>>>> > 242
->>>>> >
->>>>> > 243     ft.create_collection(coll_t());
->>>>> > 244     fs->apply_transaction(ft);
->>>>> > 245
->>>>> >
->>>>> > 246
->>>>> >
->>>>> > 247     return 0;
->>>>> > 248
->>>>> >
->>>>> > 249 failed:
->>>>> > 250     return 1;
->>>>> > 251
->>>>> >
->>>>> > 252 }
->>>>> > -----Original Message-----
->>>>> > From: Casey Bodley [mailto:cbodley@gmail.com]
->>>>> > Sent: Thursday, July 09, 2015 9:19 AM
->>>>> > To: James (Fei) Liu-SSI
->>>>> > Cc: Haomai Wang; ceph-devel@vger.kernel.org
->>>>> > Subject: Re: About Fio backend with ObjectStore API
->>>>> >
->>>>> > Hi James,
->>>>> >
->>>>> > In the job file src/test/filestore.fio, you can modify the line
->>>>> > "objectstore=3Dfilestore" to use any objectstore type supported=
- by
->>>>> the
->>>>> > ObjectStore::create() factory.
->>>>> >
->>>>> > Casey
->>>>> >
->>>>> > On Wed, Jul 8, 2015 at 8:02 PM, James (Fei) Liu-SSI
->>>>> <james.liu@ssi.samsung.com> wrote:
->>>>> >> Hi Casey,
->>>>> >>   Quick questions, The code in the trunk only cover the test f=
-or
->>>>> filestore. I was wondering do you have any plan to cover the test=
- for
->>>>> kvstore and newstore?
->>>>> >>
->>>>> >>   Thanks,
->>>>> >>   James
->>>>> >>
->>>>> >> -----Original Message-----
->>>>> >> From: ceph-devel-owner@vger.kernel.org
->>>>> >> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of James (=
-=46ei)
->>>>>
->>>>> >> Liu-SSI
->>>>> >> Sent: Tuesday, June 30, 2015 2:19 PM
->>>>> >> To: Casey Bodley
->>>>> >> Cc: Haomai Wang; ceph-devel@vger.kernel.org
->>>>> >> Subject: RE: About Fio backend with ObjectStore API
->>>>> >>
->>>>> >> Hi Casey,
->>>>> >>
->>>>> >>   Thanks a lot.
->>>>> >>
->>>>> >>   Regards,
->>>>> >>   James
->>>>> >>
->>>>> >> -----Original Message-----
->>>>> >> From: Casey Bodley [mailto:cbodley@gmail.com]
->>>>> >> Sent: Tuesday, June 30, 2015 2:16 PM
->>>>> >> To: James (Fei) Liu-SSI
->>>>> >> Cc: Haomai Wang; ceph-devel@vger.kernel.org
->>>>> >> Subject: Re: About Fio backend with ObjectStore API
->>>>> >>
->>>>> >> Hi,
->>>>> >>
->>>>> >> When Danny Al-Gaaf & Daniel Gollub published "Ceph Performance
->>>>> >> Analysis: fio and RBD" at
->>>>> >>
->>>>> https://telekomcloud.github.io/ceph/2014/02/26/ceph-performance-a=
-naly
->>>>> >> s is_fio_rbd.html, they also mentioned a fio engine that linke=
-d
->>>>> >> directly into ceph's FileStore. I was able to find Daniel's br=
-anch
->>>>> on
->>>>> >> github at https://github.com/gollub/ceph/tree/fio_filestore_v2=
-, and
->>>>> did some more work on it at the time.
->>>>> >>
->>>>> >> I just rebased that work onto the latest ceph master branch, a=
-nd
->>>>> pushed to our github at
->>>>> https://github.com/linuxbox2/linuxbox-ceph/tree/fio-objectstore. =
-You
->>>>> can find the source in src/test/fio_ceph_filestore.cc, and run fi=
-o
->>>>> with the provided example fio job file in src/test/filestore.fio.
->>>>> >>
->>>>> >> I didn't have a chance to confirm that it builds with automake=
-, but
->>>>>
->>>>> >> the cmake version built for me. I'm happy to help if you run i=
-nto
->>>>> >> problems, Casey
->>>>> >>
->>>>> >> On Tue, Jun 30, 2015 at 2:31 PM, James (Fei) Liu-SSI
->>>>> <james.liu@ssi.samsung.com> wrote:
->>>>> >>> Hi Haomai,
->>>>> >>>   What are you trying to ask is to benchmark local
->>>>> objectstore(like kvstore/filestore/newstore) locally with
->>>>> FIO(ObjectStore engine)? You want to purely compare the performan=
-ce
->>>>> locally for these objectstores, right?
->>>>> >>>
->>>>> >>>   Regards,
->>>>> >>>   James
->>>>> >>>
->>>>> >>> -----Original Message-----
->>>>> >>> From: ceph-devel-owner@vger.kernel.org
->>>>> >>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Haomai
->>>>> Wang
->>>>> >>> Sent: Tuesday, June 30, 2015 9:06 AM
->>>>> >>> To: ceph-devel@vger.kernel.org
->>>>> >>> Subject: About Fio backend with ObjectStore API
->>>>> >>>
->>>>> >>> Hi all,
->>>>> >>>
->>>>> >>> Long long ago, is there someone said about fio backend with C=
-eph
->>>>> ObjectStore API? So we could use the existing mature fio facility=
- to
->>>>> benchmark ceph objectstore.
->>>>> >>>
->>>>> >>> --
->>>>> >>> Best Regards,
->>>>> >>>
->>>>> >>> Wheat
->>>>> >>> --
->>>>> >>> To unsubscribe from this list: send the line "unsubscribe
->>>>> ceph-devel"
->>>>> >>> in the body of a message to majordomo@vger.kernel.org More
->>>>> majordomo
->>>>> >>> info at  http://vger.kernel.org/majordomo-info.html
->>>>> >>   {.n +       +%  lzwm  b =EB=A7=B2  r  y=C7=A9 =D7=AFzX     =DC=
-=A8}   =C6=A0z &j:+v        zZ+
->>>>>  +zf   h   ~    i   z   w   ?    & )=DF=A2 f
->>>>> N=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDr=EF=BF=BD=EF=BF=BD=
-y=EF=BF=BD=EF=BF=BD=EF=BF=BDb=EF=BF=BDX=EF=BF=BD=EF=BF=BD=C7=A7v=EF=BF=BD=
-^=EF=BF=BD)=DE=BA{.n=EF=BF=BD+=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD]z=EF=
-=BF=BD=EF=BF=BD=EF=BF=BD{ay=EF=BF=BD=CA=87=DA=99=EF=BF=BD,j=EF=BF=BD=EF=
-=BF=BDf=EF=BF=BD=EF=BF=BD=EF=BF=BDh=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD=
-=EF=BF=BDw=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDj:+v=EF=
-=BF=BD=EF=BF=BD=EF=BF=BDw=EF=BF=BDj=EF=BF=BDm=EF=BF=BD=EF=BF=BD=EF=BF=BD=
-=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDzZ+=EF=BF=BD=EF=BF=BD=DD=A2=
-j"=EF=BF=BD=EF=BF=BD
->>>>
->>>> --
->>>> Matt Benjamin
->>>> CohortFS, LLC.
->>>> 315 West Huron Street, Suite 140A
->>>> Ann Arbor, Michigan 48103
->>>>
->>>> http://cohortfs.com
->>>>
->>>> tel.  734-761-4689
->>>> fax.  734-769-8938
->>>> cel.  734-216-5309
->>>
->>>
->>>
->>> --
->>> Best Regards,
->>>
->>> Wheat
->>
->>
->>
->> --
->> Best Regards,
->>
->> Wheat
+sage
 
 
-
---=20
-Best Regards,
-
-Wheat
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+ > 
+> 
+> 
+> 
+> Allen Samuels
+> Software Architect, Systems and Software Solutions 
+> 
+> 2880 Junction Avenue, San Jose, CA 95134
+> T: +1 408 801 7030| M: +1 408 780 6416
+> allen.samuels@SanDisk.com
+> 
+> 
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
+> Sent: Wednesday, July 22, 2015 11:51 AM
+> To: Allen Samuels
+> Cc: Wang, Zhiqiang; sjust@redhat.com; ceph-devel@vger.kernel.org
+> Subject: RE: The design of the eviction improvement
+> 
+> On Wed, 22 Jul 2015, Allen Samuels wrote:
+> > I'm very concerned about designing around the assumption that objects 
+> > are ~1MB in size. That's probably a good assumption for block and HDFS 
+> > dominated systems, but likely a very poor assumption about many object 
+> > and file dominated systems.
+> > 
+> > If I understand the proposals that have been discussed, each of them 
+> > assumes in in-memory data structure with an entry per object (the 
+> > exact size of the entry varies with the different proposals).
+> > 
+> > Under that assumption, I have another concern which is the lack of 
+> > graceful degradation as the object counts grow and the in-memory data 
+> > structures get larger. Everything seems fine until just a few objects 
+> > get added then the system starts to page and performance drops 
+> > dramatically (likely) to the point where Linux will start killing OSDs.
+> > 
+> > What's really needed is some kind of way to extend the lists into 
+> > storage in way that's doesn't cause a zillion I/O operations.
+> > 
+> > I have some vague idea that some data structure like the LSM mechanism 
+> > ought to be able to accomplish what we want. Some amount of the data 
+> > structure (the most likely to be used) is held in DRAM [and backed to 
+> > storage for restart] and the least likely to be used is flushed to 
+> > storage with some mechanism that allows batched updates.
+> 
+> How about this:
+> 
+> The basic mapping we want is object -> atime.
+> 
+> We keep a simple LRU of the top N objects in memory with the object->atime values.  When an object is accessed, it is moved or added to the top of the list.
+> 
+> Periodically, or when the LRU size reaches N * (1.x), we flush:
+> 
+>  - write the top N items to a compact object that can be quickly loaded
+>  - write our records for the oldest items (N .. N*1.x) to leveldb/rocksdb in a simple object -> atime fashion
+> 
+> When the agent runs, we just walk across that key range of the db the same way we currently enumerate objects.  For each record we use either the stored atime or the value in the in-memory LRU (it'll need to be dual-indexed by both a list and a hash map), whichever is newer.  We can use the same histogram estimation approach we do now to determine if the object in question is below the flush/evict threshold.
+> 
+> The LSM does the work of sorting/compacting the atime info, while we avoid touching it at all for the hottest objects to keep the amount of work it has to do in check.
+> 
+> sage
+> 
+> > 
+> > Allen Samuels
+> > Software Architect, Systems and Software Solutions
+> > 
+> > 2880 Junction Avenue, San Jose, CA 95134
+> > T: +1 408 801 7030| M: +1 408 780 6416 allen.samuels@SanDisk.com
+> > 
+> > -----Original Message-----
+> > From: ceph-devel-owner@vger.kernel.org 
+> > [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
+> > Sent: Wednesday, July 22, 2015 5:57 AM
+> > To: Wang, Zhiqiang
+> > Cc: sjust@redhat.com; ceph-devel@vger.kernel.org
+> > Subject: RE: The design of the eviction improvement
+> > 
+> > On Wed, 22 Jul 2015, Wang, Zhiqiang wrote:
+> > > > The part that worries me now is the speed with which we can load 
+> > > > and manage such a list.  Assuming it is several hundred MB, it'll 
+> > > > take a while to load that into memory and set up all the pointers 
+> > > > (assuming a conventional linked list structure).  Maybe tens of seconds...
+> > >
+> > > I'm thinking of maintaining the lists at the PG level. That's to 
+> > > say, we have an active/inactive list for every PG. We can load the 
+> > > lists in parallel during rebooting. Also, the ~100 MB lists are 
+> > > split among different OSD nodes. Perhaps it does not need such long 
+> > > time to load them?
+> > >
+> > > >
+> > > > I wonder if instead we should construct some sort of flat model 
+> > > > where we load slabs of contiguous memory, 10's of MB each, and 
+> > > > have the next/previous pointers be a (slab,position) pair.  That 
+> > > > way we can load it into memory in big chunks, quickly, and be able 
+> > > > to operate on it (adjust links) immediately.
+> > > >
+> > > > Another thought: currently we use the hobject_t hash only instead 
+> > > > of the full object name.  We could continue to do the same, or we 
+> > > > could do a hash pair (hobject_t hash + a different hash of the 
+> > > > rest of the
+> > > > object) to keep the representation compact.  With a model lke the 
+> > > > above, that could get the object representation down to 2 u32's.  
+> > > > A link could be a slab + position (2 more u32's), and if we have 
+> > > > prev
+> > > > + next that'd be just 6x4=24 bytes per object.
+> > >
+> > > Looks like for an object, the head and the snapshot version have the 
+> > > same hobject hash. Thus we have to use the hash pair instead of just 
+> > > the hobject hash. But I still have two questions if we use the hash 
+> > > pair to represent an object.
+> > >
+> > > 1) Does the hash pair uniquely identify an object? That's to say, is 
+> > > it possible for two objects to have the same hash pair?
+> > 
+> > With two hashes collisions would be rare but could happen
+> > 
+> > > 2) We need a way to get the full object name from the hash pair, so 
+> > > that we know what objects to evict. But seems like we don't have a 
+> > > good way to do this?
+> > 
+> > Ah, yeah--I'm a little stuck in the current hitset view of things.  I think we can either embed the full ghobject_t (which means we lose the fixed-size property, and the per-object overhead goes way up.. probably from ~24 bytes to more like 80 or 100).  Or, we can enumerate objects starting at the (hobject_t) hash position to find the object.  That's somewhat inefficient for FileStore (it'll list a directory of a hundred or so objects, probably, and iterate over them to find the right one), but for NewStore it will be quite fast (NewStore has all objects sorted into keys in rocksdb, so we just start listing at the right offset).  Usually we'll get the object right off, unless there are hobject_t hash collisions (already reasonably rare since it's a 2^32 space for the pool).
+> > 
+> > Given that, I would lean toward the 2-hash fixed-sized records (of these 2 options)...
+> > 
+> > sage
+> > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> > in the body of a message to majordomo@vger.kernel.org More majordomo 
+> > info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> > ________________________________
+> > 
+> > PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+> > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> > in the body of a message to majordomo@vger.kernel.org More majordomo 
+> > info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> > 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
