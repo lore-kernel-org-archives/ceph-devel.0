@@ -1,128 +1,77 @@
-From: =?UTF-8?B?QmFydMWCb21pZWogxZp3acSZY2tp?=
-	<bartlomiej.swiecki@corp.ovh.com>
-Subject: Re: quick way to rebuild deb packages
-Date: Wed, 22 Jul 2015 14:14:38 +0200
-Message-ID: <20150722141438.6564a034ef183ff652119573@corp.ovh.com>
-References: <20150721181507.138bc9380985439e49ac05ab@corp.ovh.com>
-	<55AF38D0.8090303@dachary.org>
-	<06681238D8946F44A60AA400760A1CBF0201DC4C@SHSMSX104.ccr.corp.intel.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: RE: The design of the eviction improvement
+Date: Wed, 22 Jul 2015 05:56:30 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1507220551290.8878@cobra.newdream.net>
+References: <06E7D85B3BA36C4DB207FEDE871C53489FFC64@SHSMSX101.ccr.corp.intel.com> <alpine.DEB.2.00.1507201530200.8878@cobra.newdream.net> <06E7D85B3BA36C4DB207FEDE871C53489FFF18@SHSMSX101.ccr.corp.intel.com> <alpine.DEB.2.00.1507210620270.8878@cobra.newdream.net>
+ <06E7D85B3BA36C4DB207FEDE871C5348A001B4@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from 5.mo69.mail-out.ovh.net ([46.105.43.105]:48556 "EHLO
-	5.mo69.mail-out.ovh.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934035AbbGVMOo (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 22 Jul 2015 08:14:44 -0400
-Received: from mail139.ha.ovh.net (b9.ovh.net [213.186.33.59])
-	by mo69.mail-out.ovh.net (Postfix) with SMTP id D56D41000FD4
-	for <ceph-devel@vger.kernel.org>; Wed, 22 Jul 2015 14:14:41 +0200 (CEST)
-In-Reply-To: <06681238D8946F44A60AA400760A1CBF0201DC4C@SHSMSX104.ccr.corp.intel.com>
+Received: from mx1.redhat.com ([209.132.183.28]:56773 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751756AbbGVM4d (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 22 Jul 2015 08:56:33 -0400
+In-Reply-To: <06E7D85B3BA36C4DB207FEDE871C5348A001B4@SHSMSX101.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Zhou, Yuan" <yuan.zhou@intel.com>
-Cc: Loic Dachary <loic@dachary.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
+Cc: "sjust@redhat.com" <sjust@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-I'll definitely take a look at make-debs.sh, looks promising. Thanks fo=
-r the hint.
+On Wed, 22 Jul 2015, Wang, Zhiqiang wrote:
+> > The part that worries me now is the speed with which we can load and 
+> > manage such a list.  Assuming it is several hundred MB, it'll take a 
+> > while to load that into memory and set up all the pointers (assuming a 
+> > conventional linked list structure).  Maybe tens of seconds...
+> 
+> I'm thinking of maintaining the lists at the PG level. That's to say, we 
+> have an active/inactive list for every PG. We can load the lists in 
+> parallel during rebooting. Also, the ~100 MB lists are split among 
+> different OSD nodes. Perhaps it does not need such long time to load 
+> them?
+> 
+> > 
+> > I wonder if instead we should construct some sort of flat model where 
+> > we load slabs of contiguous memory, 10's of MB each, and have the 
+> > next/previous pointers be a (slab,position) pair.  That way we can 
+> > load it into memory in big chunks, quickly, and be able to operate on 
+> > it (adjust links) immediately.
+> > 
+> > Another thought: currently we use the hobject_t hash only instead of 
+> > the full object name.  We could continue to do the same, or we could 
+> > do a hash pair (hobject_t hash + a different hash of the rest of the 
+> > object) to keep the representation compact.  With a model lke the 
+> > above, that could get the object representation down to 2 u32's.  A 
+> > link could be a slab + position (2 more u32's), and if we have prev + 
+> > next that'd be just 6x4=24 bytes per object.
+> 
+> Looks like for an object, the head and the snapshot version have the 
+> same hobject hash. Thus we have to use the hash pair instead of just the 
+> hobject hash. But I still have two questions if we use the hash pair to 
+> represent an object.
+>
+> 1) Does the hash pair uniquely identify an object? That's to say, is it 
+> possible for two objects to have the same hash pair?
 
-I can see it's using ccache, let's see how fast it is :) What build tim=
-es are you experiencing ?
+With two hashes collisions would be rare but could happen
 
-On Wed, 22 Jul 2015 08:04:44 +0000
-"Zhou, Yuan" <yuan.zhou@intel.com> wrote:
+> 2) We need a way to get the full object name from the hash pair, so that 
+> we know what objects to evict. But seems like we don't have a good way 
+> to do this?
 
-> I'm also using make-debs.sh to generate the binaries for some local d=
-eployment. Note that if you need the *tests.deb you'll need to change t=
-his scripts a bit.
->=20
-> @@ -58,8 +58,8 @@ tar -C $releasedir -zxf $releasedir/ceph_$vers.orig=
-=2Etar.gz
->  #
->  cp -a debian $releasedir/ceph-$vers/debian
->  cd $releasedir
-> -perl -ni -e 'print if(!(/^Package: .*-dbg$/../^$/))' ceph-$vers/debi=
-an/control
-> -perl -pi -e 's/--dbg-package.*//' ceph-$vers/debian/rules
-> +#perl -ni -e 'print if(!(/^Package: .*-dbg$/../^$/))' ceph-$vers/deb=
-ian/control
-> +#perl -pi -e 's/--dbg-package.*//' ceph-$vers/debian/rules
->  #
->  # always set the debian version to 1 which is ok because the debian
->  # directory is included in the sources and the upstream version will=
-=20
->=20
->=20
->=20
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.=
-kernel.org] On Behalf Of Loic Dachary
-> Sent: Wednesday, July 22, 2015 2:32 PM
-> To: Bart=C5=82omiej =C5=9Awi=C4=99cki; ceph-devel@vger.kernel.org
-> Subject: Re: quick way to rebuild deb packages
->=20
-> Hi,
->=20
-> Did you try https://github.com/ceph/ceph/blob/master/make-debs.sh ? I=
- would recommend running https://github.com/ceph/ceph/blob/master/run-m=
-ake-check.sh first to make sure you can build and test: this will insta=
-ll the dependencies you're missing at the same time.
->=20
-> Cheers
->=20
-> On 21/07/2015 18:15, Bart=C5=82omiej =C5=9Awi=C4=99cki wrote:
-> > Hi all,
-> >=20
-> > I'm currently working on a test environment for ceph where we're us=
-ing deb files to deploy new version on test cluster.
-> > To make this work efficiently I'd have to quckly build deb packages=
-=2E
-> >=20
-> > I tried dpkg-buildpackages -nc which should keep the results of pre=
-vious build but it ends up in a linking error:
-> >=20
-> >> ...
-> >>   CXXLD    ceph_rgw_jsonparser
-> >> ./.libs/libglobal.a(json_spirit_reader.o): In function `~thread_sp=
-ecific_ptr':
-> >> /usr/include/boost/thread/tss.hpp:79: undefined reference to `boos=
-t::detail::set_tss_data(void const*, boost::shared_ptr<boost::detail::t=
-ss_cleanup_function>, void*, bool)'
-> >> /usr/include/boost/thread/tss.hpp:79: undefined reference to `boos=
-t::detail::set_tss_data(void const*, boost::shared_ptr<boost::detail::t=
-ss_cleanup_function>, void*, bool)'
-> >> /usr/include/boost/thread/tss.hpp:79: undefined reference to `boos=
-t::detail::set_tss_data(void const*, boost::shared_ptr<boost::detail::t=
-ss_cleanup_function>, void*, bool)'
-> >> /usr/include/boost/thread/tss.hpp:79: undefined reference to `boos=
-t::detail::set_tss_data(void const*, boost::shared_ptr<boost::detail::t=
-ss_cleanup_function>, void*, bool)'
-> >> /usr/include/boost/thread/tss.hpp:79: undefined reference to `boos=
-t::detail::set_tss_data(void const*, boost::shared_ptr<boost::detail::t=
-ss_cleanup_function>, void*, bool)'
-> >> ./.libs/libglobal.a(json_spirit_reader.o):/usr/include/boost/threa=
-d/tss.hpp:79: more undefined references to `boost::detail::set_tss_data=
-(void const*, boost::shared_ptr<boost::detail::tss_cleanup_function>, v=
-oid*, bool)' follow
-> >> ./.libs/libglobal.a(json_spirit_reader.o): In function `call_once<=
-void (*)()>':
-> >> ...
-> >=20
-> > Any ideas on what could go wrong here ?
-> >=20
-> > Version I'm compiling is v0.94.1 but I've observed same results wit=
-h 9.0.1.
-> >=20
->=20
-> --=20
-> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->=20
+Ah, yeah--I'm a little stuck in the current hitset view of things.  I 
+think we can either embed the full ghobject_t (which means we lose the 
+fixed-size property, and the per-object overhead goes way up.. probably 
+from ~24 bytes to more like 80 or 100).  Or, we can enumerate objects 
+starting at the (hobject_t) hash position to find the object.  That's 
+somewhat inefficient for FileStore (it'll list a directory of a hundred or 
+so objects, probably, and iterate over them to find the right one), but 
+for NewStore it will be quite fast (NewStore has all objects sorted into 
+keys in rocksdb, so we just start listing at the right offset).  Usually 
+we'll get the object right off, unless there are hobject_t hash collisions 
+(already reasonably rare since it's a 2^32 space for the pool).
 
+Given that, I would lean toward the 2-hash fixed-sized records (of these 2 
+options)...
 
---=20
-Bartlomiej Swiecki <bartlomiej.swiecki@corp.ovh.com>
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+sage
+
