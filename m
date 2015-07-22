@@ -1,183 +1,179 @@
 From: "Wang, Zhiqiang" <zhiqiang.wang@intel.com>
 Subject: RE: The design of the eviction improvement
-Date: Wed, 22 Jul 2015 03:34:47 +0000
-Message-ID: <06E7D85B3BA36C4DB207FEDE871C5348A001B4@SHSMSX101.ccr.corp.intel.com>
-References: <06E7D85B3BA36C4DB207FEDE871C53489FFC64@SHSMSX101.ccr.corp.intel.com>
- <alpine.DEB.2.00.1507201530200.8878@cobra.newdream.net>
- <06E7D85B3BA36C4DB207FEDE871C53489FFF18@SHSMSX101.ccr.corp.intel.com>
- <alpine.DEB.2.00.1507210620270.8878@cobra.newdream.net>
+Date: Wed, 22 Jul 2015 03:57:41 +0000
+Message-ID: <06E7D85B3BA36C4DB207FEDE871C5348A001D9@SHSMSX101.ccr.corp.intel.com>
+References: <1539008200.49.1437488109510.JavaMail.root@thunderbeast.private.linuxbox.com>
+ <1004223530.51.1437488157119.JavaMail.root@thunderbeast.private.linuxbox.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:9291 "EHLO mga11.intel.com"
+Received: from mga02.intel.com ([134.134.136.20]:55243 "EHLO mga02.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754399AbbGVDe6 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 Jul 2015 23:34:58 -0400
-In-Reply-To: <alpine.DEB.2.00.1507210620270.8878@cobra.newdream.net>
+	id S932256AbbGVD5q (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 21 Jul 2015 23:57:46 -0400
+In-Reply-To: <1004223530.51.1437488157119.JavaMail.root@thunderbeast.private.linuxbox.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: "sjust@redhat.com" <sjust@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Matt W. Benjamin" <matt@cohortfs.com>
+Cc: "sjust@redhat.com" <sjust@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>
 
-
-> -----Original Message-----
-> From: Sage Weil [mailto:sweil@redhat.com]
-> Sent: Tuesday, July 21, 2015 9:29 PM
-> To: Wang, Zhiqiang
-> Cc: sjust@redhat.com; ceph-devel@vger.kernel.org
-> Subject: RE: The design of the eviction improvement
-> 
-> On Tue, 21 Jul 2015, Wang, Zhiqiang wrote:
-> > > -----Original Message-----
-> > > From: ceph-devel-owner@vger.kernel.org
-> > > [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
-> > > Sent: Tuesday, July 21, 2015 6:38 AM
-> > > To: Wang, Zhiqiang
-> > > Cc: sjust@redhat.com; ceph-devel@vger.kernel.org
-> > > Subject: Re: The design of the eviction improvement
-> > >
-> > > On Mon, 20 Jul 2015, Wang, Zhiqiang wrote:
-> > > > Hi all,
-> > > >
-> > > > This is a follow-up of one of the CDS session at
-> > > http://tracker.ceph.com/projects/ceph/wiki/Improvement_on_the_cache_
-> > > tieri ng_eviction. We discussed the drawbacks of the current
-> > > eviction algorithm and several ways to improve it. Seems like the
-> > > LRU variants is the right way to go. I come up with some design
-> > > points after the CDS, and want to discuss it with you.
-> > > It is an approximate 2Q algorithm, combining some benefits of the
-> > > clock algorithm, similar to what the linux kernel does for the page cache.
-> > >
-> > > Unfortunately I missed this last CDS so I'm behind on the
-> > > discussion.  I have a few questions though...
-> > >
-> > > > # Design points:
-> > > >
-> > > > ## LRU lists
-> > > > - Maintain LRU lists at the PG level.
-> > > > The SharedLRU and SimpleLRU implementation in the current code
-> > > > have a max_size, which limits the max number of elements in the
-> > > > list. This mostly looks like a MRU, though its name implies they
-> > > > are LRUs. Since the object size may vary in a PG, it's not
-> > > > possible to caculate the total number of objects which the cache tier can
-> hold ahead of time.
-> > > > We need a new LRU implementation with no limit on the size.
-> > >
-> > > This last sentence seems to me to be the crux of it.  Assuming we
-> > > have an OSD based by flash storing O(n) objects, we need a way to
-> > > maintain an LRU of
-> > > O(n) objects in memory.  The current hitset-based approach was taken
-> > > based on the assumption that this wasn't feasible--or at least we
-> > > didn't know how to implmement such a thing.  If it is, or we simply
-> > > want to stipulate that cache tier OSDs get gobs of RAM to make it
-> > > possible, then lots of better options become possible...
-> > >
-> > > Let's say you have a 1TB SSD, with an average object size of 1MB --
-> > > that's
-> > > 1 million objects.  At maybe ~100bytes per object of RAM for an LRU
-> > > entry that's 100MB... so not so unreasonable, perhaps!
-> >
-> > I was having the same question before proposing this. I did the
-> > similar calculation and thought it would be ok to use this many memory
-> > :-)
-> 
-> The part that worries me now is the speed with which we can load and manage
-> such a list.  Assuming it is several hundred MB, it'll take a while to load that
-> into memory and set up all the pointers (assuming a conventional linked list
-> structure).  Maybe tens of seconds...
-
-I'm thinking of maintaining the lists at the PG level. That's to say, we have an active/inactive list for every PG. We can load the lists in parallel during rebooting. Also, the ~100 MB lists are split among different OSD nodes. Perhaps it does not need such long time to load them?
-
-> 
-> I wonder if instead we should construct some sort of flat model where we load
-> slabs of contiguous memory, 10's of MB each, and have the next/previous
-> pointers be a (slab,position) pair.  That way we can load it into memory in big
-> chunks, quickly, and be able to operate on it (adjust
-> links) immediately.
-> 
-> Another thought: currently we use the hobject_t hash only instead of the full
-> object name.  We could continue to do the same, or we could do a hash pair
-> (hobject_t hash + a different hash of the rest of the object) to keep the
-> representation compact.  With a model lke the above, that could get the
-> object representation down to 2 u32's.  A link could be a slab + position (2
-> more u32's), and if we have prev + next that'd be just 6x4=24 bytes per object.
-
-Looks like for an object, the head and the snapshot version have the same hobject hash. Thus we have to use the hash pair instead of just the hobject hash. But I still have two questions if we use the hash pair to represent an object.
-1) Does the hash pair uniquely identify an object? That's to say, is it possible for two objects to have the same hash pair?
-2) We need a way to get the full object name from the hash pair, so that we know what objects to evict. But seems like we don't have a good way to do this?
-
-> 
-> With fixed-sized slots on the slabs, the slab allocator could be very simple..
-> maybe just a bitmap, a free counter, and any other trivial optimizations to
-> make finding a slab's next free a slot nice and quick.
-> 
-> > > > - Two lists for each PG: active and inactive Objects are first put
-> > > > into the inactive list when they are accessed, and moved between
-> > > > these two
-> > > lists based on some criteria.
-> > > > Object flag: active, referenced, unevictable, dirty.
-> > > > - When an object is accessed:
-> > > > 1) If it's not in both of the lists, it's put on the top of the
-> > > > inactive list
-> > > > 2) If it's in the inactive list, and the referenced flag is not
-> > > > set, the referenced
-> > > flag is set, and it's moved to the top of the inactive list.
-> > > > 3) If it's in the inactive list, and the referenced flag is set,
-> > > > the referenced flag
-> > > is cleared, and it's removed from the inactive list, and put on top
-> > > of the active list.
-> > > > 4) If it's in the active list, and the referenced flag is not set,
-> > > > the referenced
-> > > flag is set, and it's moved to the top of the active list.
-> > > > 5) If it's in the active list, and the referenced flag is set,
-> > > > it's moved to the top
-> > > of the active list.
-> > > > - When selecting objects to evict:
-> > > > 1) Objects at the bottom of the inactive list are selected to
-> > > > evict. They are
-> > > removed from the inactive list.
-> > > > 2) If the number of the objects in the inactive list becomes low,
-> > > > some of the
-> > > objects at the bottom of the active list are moved to the inactive
-> > > list. For those objects which have the referenced flag set, they are
-> > > given one more chance in the active list. They are moved to the top
-> > > of the active list with the referenced flag cleared. For those
-> > > objects which don't have the referenced flag set, they are moved to
-> > > the inactive list, with the referenced flag set. So that they can be quickly
-> promoted to the active list when necessary.
-> > > >
-> > > > ## Combine flush with eviction
-> > > > - When evicting an object, if it's dirty, it's flushed first.
-> > > > After flushing, it's
-> > > evicted. If not dirty, it's evicted directly.
-> > > > - This means that we won't have separate activities and won't set
-> > > > different
-> > > ratios for flush and evict. Is there a need to do so?
-> > > > - Number of objects to evict at a time. 'evict_effort' acts as the
-> > > > priority, which
-> > > is used to calculate the number of objects to evict.
-> > >
-> > > As someone else mentioned in a follow-up, the reason we let the
-> > > dirty level be set lower than the full level is that it provides
-> > > headroom so that objects can be quickly evicted (delete, no flush)
-> > > to make room for new writes or new promotions.
-> > >
-> > > That said, we probably can/should streamline the flush so that an
-> > > evict can immediately follow without waiting for the agent to come around
-> again.
-> > > (I don't think we do that now?)
-> >
-> > I was afraid of having to maintain different lists for flush/evict. So
-> > I proposed to combine flush with evict. But seems like we don't need to.
-> > When reaching the dirty ratio and selecting objects to flush, we look
-> > for dirty objects from the inactive list. The objects are marked clean
-> > and kept in the same position in the LRU list after flushing. When
-> > evicting objects, clean objects in the inactive list are selected.
-> > Dirty objects are ignored. This will keep the flush/evict the same as
-> > current implementation. Make sense?
-> 
-> Yep!
-> 
-> sage
+SGkgTWF0dCwNCg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBNYXR0IFcu
+IEJlbmphbWluIFttYWlsdG86bWF0dEBjb2hvcnRmcy5jb21dDQo+IFNlbnQ6IFR1ZXNkYXksIEp1
+bHkgMjEsIDIwMTUgMTA6MTYgUE0NCj4gVG86IFdhbmcsIFpoaXFpYW5nDQo+IENjOiBzanVzdEBy
+ZWRoYXQuY29tOyBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZzsgU2FnZSBXZWlsDQo+IFN1Ympl
+Y3Q6IFJlOiBUaGUgZGVzaWduIG9mIHRoZSBldmljdGlvbiBpbXByb3ZlbWVudA0KPiANCj4gSGks
+DQo+IA0KPiBDb3VwbGUgb2YgcG9pbnRzLg0KPiANCj4gMSkgYSBzdWNjZXNzb3IgdG8gMlEgaXMg
+TVEgKExpIGV0IGFsKS4gIFdlIGhhdmUgYW4gaW50cnVzaXZlIE1RIExSVQ0KPiBpbXBsZW1lbnRh
+dGlvbiB3aXRoIDIgbGV2ZWxzIGN1cnJlbnRseSwgcGx1cyBhIHBpbm5lZCBxdWV1ZSwgdGhhdCBh
+ZGRyZXNzZXMNCj4gc3R1ZmYgbGlrZSBwYXJ0aXRpb25pbmcgKCJzaGFyZGluZyIpLCBzY2FuIHJl
+c2lzdGFuY2UsIGFuZCBjb29yZGluYXRpb24gdy9sb29rdXANCj4gdGFibGVzLiAgV2UgbWlnaHQg
+ZXh0ZW5kL3JlLXVzZSBpdC4NCg0KVGhlIE1RIGFsZ29yaXRobSBpcyBtb3JlIGNvbXBsZXgsIGFu
+ZCBzZWVtcyBsaWtlIGl0IGhhcyBtb3JlIG92ZXJoZWFkIHRoYW4gMlEuIFRoZSBhcHByb3hpbWF0
+ZSAyUSBhbGdvcml0aG0gaGVyZSBjb21iaW5lcyBzb21lIGJlbmVmaXRzIG9mIHRoZSBjbG9jayBh
+bGdvcml0aG0sIGFuZCB3b3JrcyB3ZWxsIG9uIHRoZSBsaW51eCBrZXJuZWwuIE1RIGNvdWxkIGJl
+IGFub3RoZXIgY2hvaWNlLiBUaGVyZSBhcmUgc29tZSBvdGhlciBjYW5kaWRhdGVzIGxpa2UgTElS
+UywgQVJDLCBldGMuLCB3aGljaCBoYXZlIGJlZW4gZGVwbG95ZWQgaW4gc29tZSBwcmFjdGljYWwg
+c3lzdGVtcy4NCg0KPiANCj4gMikgSSdtIGEgYml0IGNvbmZ1c2VkIGJ5IGFjdGl2ZS9pbmFjdGl2
+ZSB2b2NhYnVsYXJ5LCBkaW1lbnNpb25pbmcgb2YgY2FjaGUNCj4gc2VnbWVudHMgKGFyZSB5b3Ug
+cHJvcG9zaW5nIHRvL2RvIHdlIG5vdyBhbHdheXMgY2FjaGUgd2hvbGUgb2JqZWN0cz8pLCBhbmQN
+Cj4gY29zdCBvZiAibG9va2luZyBmb3IiIGRpcnR5IG9iamVjdHM7ICBJIHN1c3BlY3QgdGhhdCBp
+dCBtYWtlcyBzZW5zZSB0byBhbW9ydGl6ZQ0KPiB0aGUgY29zdCBvZiBsb2NhdGluZyBzZWdtZW50
+cyBlbGlnaWJsZSB0byBiZSBmbHVzaGVkLCByYXRoZXIgdGhhbiBtaW5pbWl6ZQ0KPiBib29ra2Vl
+cGluZy4NCg0KVGhvdWdoIGN1cnJlbnRseSB0aGUgY2FjaGluZyBkZWNpc2lvbnMgYXJlIG1hZGUg
+aW4gdGhlIHVuaXQgb2Ygb2JqZWN0IGFzIEdyZWcgcG9pbnRlZCBvdXQgaW4gYW5vdGhlciBtYWls
+LCBJIHRoaW5rIHdlIHN0aWxsIGhhdmUgc29tZXRoaW5nIHRvIGltcHJvdmUgaGVyZS4gSSdsbCBj
+b21lIGJhY2sgdG8gdGhpcyBzb21lIHRpbWUgbGF0ZXIuDQoNCj4gDQo+IE1hdHQNCj4gDQo+IC0t
+LS0tICJaaGlxaWFuZyBXYW5nIiA8emhpcWlhbmcud2FuZ0BpbnRlbC5jb20+IHdyb3RlOg0KPiAN
+Cj4gPiA+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+ID4gPiBGcm9tOiBjZXBoLWRldmVs
+LW93bmVyQHZnZXIua2VybmVsLm9yZw0KPiA+ID4gW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZn
+ZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIFNhZ2UgV2VpbA0KPiA+ID4gU2VudDogVHVlc2Rh
+eSwgSnVseSAyMSwgMjAxNSA2OjM4IEFNDQo+ID4gPiBUbzogV2FuZywgWmhpcWlhbmcNCj4gPiA+
+IENjOiBzanVzdEByZWRoYXQuY29tOyBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KPiA+ID4g
+U3ViamVjdDogUmU6IFRoZSBkZXNpZ24gb2YgdGhlIGV2aWN0aW9uIGltcHJvdmVtZW50DQo+ID4g
+Pg0KPiA+ID4gT24gTW9uLCAyMCBKdWwgMjAxNSwgV2FuZywgWmhpcWlhbmcgd3JvdGU6DQo+ID4g
+PiA+IEhpIGFsbCwNCj4gPiA+ID4NCj4gPiA+ID4gVGhpcyBpcyBhIGZvbGxvdy11cCBvZiBvbmUg
+b2YgdGhlIENEUyBzZXNzaW9uIGF0DQo+ID4gPg0KPiA+IGh0dHA6Ly90cmFja2VyLmNlcGguY29t
+L3Byb2plY3RzL2NlcGgvd2lraS9JbXByb3ZlbWVudF9vbl90aGVfY2FjaGVfdGkNCj4gPiBlcmkN
+Cj4gPiA+IG5nX2V2aWN0aW9uLiBXZSBkaXNjdXNzZWQgdGhlIGRyYXdiYWNrcyBvZiB0aGUgY3Vy
+cmVudCBldmljdGlvbg0KPiA+IGFsZ29yaXRobSBhbmQNCj4gPiA+IHNldmVyYWwgd2F5cyB0byBp
+bXByb3ZlIGl0LiBTZWVtcyBsaWtlIHRoZSBMUlUgdmFyaWFudHMgaXMgdGhlIHJpZ2h0DQo+ID4g
+d2F5IHRvIGdvLiBJDQo+ID4gPiBjb21lIHVwIHdpdGggc29tZSBkZXNpZ24gcG9pbnRzIGFmdGVy
+IHRoZSBDRFMsIGFuZCB3YW50IHRvIGRpc2N1c3MNCj4gPiBpdCB3aXRoIHlvdS4NCj4gPiA+IEl0
+IGlzIGFuIGFwcHJveGltYXRlIDJRIGFsZ29yaXRobSwgY29tYmluaW5nIHNvbWUgYmVuZWZpdHMg
+b2YgdGhlDQo+ID4gY2xvY2sNCj4gPiA+IGFsZ29yaXRobSwgc2ltaWxhciB0byB3aGF0IHRoZSBs
+aW51eCBrZXJuZWwgZG9lcyBmb3IgdGhlIHBhZ2UNCj4gPiBjYWNoZS4NCj4gPiA+DQo+ID4gPiBV
+bmZvcnR1bmF0ZWx5IEkgbWlzc2VkIHRoaXMgbGFzdCBDRFMgc28gSSdtIGJlaGluZCBvbiB0aGUN
+Cj4gPiBkaXNjdXNzaW9uLiAgSSBoYXZlIGENCj4gPiA+IGZldyBxdWVzdGlvbnMgdGhvdWdoLi4u
+DQo+ID4gPg0KPiA+ID4gPiAjIERlc2lnbiBwb2ludHM6DQo+ID4gPiA+DQo+ID4gPiA+ICMjIExS
+VSBsaXN0cw0KPiA+ID4gPiAtIE1haW50YWluIExSVSBsaXN0cyBhdCB0aGUgUEcgbGV2ZWwuDQo+
+ID4gPiA+IFRoZSBTaGFyZWRMUlUgYW5kIFNpbXBsZUxSVSBpbXBsZW1lbnRhdGlvbiBpbiB0aGUg
+Y3VycmVudCBjb2RlDQo+ID4gaGF2ZSBhDQo+ID4gPiA+IG1heF9zaXplLCB3aGljaCBsaW1pdHMg
+dGhlIG1heCBudW1iZXIgb2YgZWxlbWVudHMgaW4gdGhlIGxpc3QuDQo+ID4gVGhpcw0KPiA+ID4g
+PiBtb3N0bHkgbG9va3MgbGlrZSBhIE1SVSwgdGhvdWdoIGl0cyBuYW1lIGltcGxpZXMgdGhleSBh
+cmUgTFJVcy4NCj4gPiBTaW5jZQ0KPiA+ID4gPiB0aGUgb2JqZWN0IHNpemUgbWF5IHZhcnkgaW4g
+YSBQRywgaXQncyBub3QgcG9zc2libGUgdG8gY2FjdWxhdGUNCj4gPiB0aGUNCj4gPiA+ID4gdG90
+YWwgbnVtYmVyIG9mIG9iamVjdHMgd2hpY2ggdGhlIGNhY2hlIHRpZXIgY2FuIGhvbGQgYWhlYWQg
+b2YNCj4gPiB0aW1lLg0KPiA+ID4gPiBXZSBuZWVkIGEgbmV3IExSVSBpbXBsZW1lbnRhdGlvbiB3
+aXRoIG5vIGxpbWl0IG9uIHRoZSBzaXplLg0KPiA+ID4NCj4gPiA+IFRoaXMgbGFzdCBzZW50ZW5j
+ZSBzZWVtcyB0byBtZSB0byBiZSB0aGUgY3J1eCBvZiBpdC4gIEFzc3VtaW5nIHdlDQo+ID4gaGF2
+ZSBhbg0KPiA+ID4gT1NEIGJhc2VkIGJ5IGZsYXNoIHN0b3JpbmcgTyhuKSBvYmplY3RzLCB3ZSBu
+ZWVkIGEgd2F5IHRvIG1haW50YWluDQo+ID4gYW4gTFJVIG9mDQo+ID4gPiBPKG4pIG9iamVjdHMg
+aW4gbWVtb3J5LiAgVGhlIGN1cnJlbnQgaGl0c2V0LWJhc2VkIGFwcHJvYWNoIHdhcyB0YWtlbg0K
+PiA+IGJhc2VkDQo+ID4gPiBvbiB0aGUgYXNzdW1wdGlvbiB0aGF0IHRoaXMgd2Fzbid0IGZlYXNp
+YmxlLS1vciBhdCBsZWFzdCB3ZSBkaWRuJ3QNCj4gPiBrbm93IGhvdyB0bw0KPiA+ID4gaW1wbG1l
+bWVudCBzdWNoIGEgdGhpbmcuICBJZiBpdCBpcywgb3Igd2Ugc2ltcGx5IHdhbnQgdG8gc3RpcHVs
+YXRlDQo+ID4gdGhhdCBjYWNoZQ0KPiA+ID4gdGllciBPU0RzIGdldCBnb2JzIG9mIFJBTSB0byBt
+YWtlIGl0IHBvc3NpYmxlLCB0aGVuIGxvdHMgb2YgYmV0dGVyDQo+ID4gb3B0aW9ucw0KPiA+ID4g
+YmVjb21lIHBvc3NpYmxlLi4uDQo+ID4gPg0KPiA+ID4gTGV0J3Mgc2F5IHlvdSBoYXZlIGEgMVRC
+IFNTRCwgd2l0aCBhbiBhdmVyYWdlIG9iamVjdCBzaXplIG9mIDFNQiAtLQ0KPiA+IHRoYXQncw0K
+PiA+ID4gMSBtaWxsaW9uIG9iamVjdHMuICBBdCBtYXliZSB+MTAwYnl0ZXMgcGVyIG9iamVjdCBv
+ZiBSQU0gZm9yIGFuIExSVQ0KPiA+IGVudHJ5DQo+ID4gPiB0aGF0J3MgMTAwTUIuLi4gc28gbm90
+IHNvIHVucmVhc29uYWJsZSwgcGVyaGFwcyENCj4gPg0KPiA+IEkgd2FzIGhhdmluZyB0aGUgc2Ft
+ZSBxdWVzdGlvbiBiZWZvcmUgcHJvcG9zaW5nIHRoaXMuIEkgZGlkIHRoZQ0KPiA+IHNpbWlsYXIg
+Y2FsY3VsYXRpb24gYW5kIHRob3VnaHQgaXQgd291bGQgYmUgb2sgdG8gdXNlIHRoaXMgbWFueSBt
+ZW1vcnkNCj4gPiA6LSkNCj4gPg0KPiA+ID4NCj4gPiA+ID4gLSBUd28gbGlzdHMgZm9yIGVhY2gg
+UEc6IGFjdGl2ZSBhbmQgaW5hY3RpdmUgT2JqZWN0cyBhcmUgZmlyc3QNCj4gPiBwdXQNCj4gPiA+
+ID4gaW50byB0aGUgaW5hY3RpdmUgbGlzdCB3aGVuIHRoZXkgYXJlIGFjY2Vzc2VkLCBhbmQgbW92
+ZWQgYmV0d2Vlbg0KPiA+IHRoZXNlIHR3bw0KPiA+ID4gbGlzdHMgYmFzZWQgb24gc29tZSBjcml0
+ZXJpYS4NCj4gPiA+ID4gT2JqZWN0IGZsYWc6IGFjdGl2ZSwgcmVmZXJlbmNlZCwgdW5ldmljdGFi
+bGUsIGRpcnR5Lg0KPiA+ID4gPiAtIFdoZW4gYW4gb2JqZWN0IGlzIGFjY2Vzc2VkOg0KPiA+ID4g
+PiAxKSBJZiBpdCdzIG5vdCBpbiBib3RoIG9mIHRoZSBsaXN0cywgaXQncyBwdXQgb24gdGhlIHRv
+cCBvZiB0aGUNCj4gPiA+ID4gaW5hY3RpdmUgbGlzdA0KPiA+ID4gPiAyKSBJZiBpdCdzIGluIHRo
+ZSBpbmFjdGl2ZSBsaXN0LCBhbmQgdGhlIHJlZmVyZW5jZWQgZmxhZyBpcyBub3QNCj4gPiBzZXQs
+IHRoZSByZWZlcmVuY2VkDQo+ID4gPiBmbGFnIGlzIHNldCwgYW5kIGl0J3MgbW92ZWQgdG8gdGhl
+IHRvcCBvZiB0aGUgaW5hY3RpdmUgbGlzdC4NCj4gPiA+ID4gMykgSWYgaXQncyBpbiB0aGUgaW5h
+Y3RpdmUgbGlzdCwgYW5kIHRoZSByZWZlcmVuY2VkIGZsYWcgaXMgc2V0LA0KPiA+IHRoZSByZWZl
+cmVuY2VkIGZsYWcNCj4gPiA+IGlzIGNsZWFyZWQsIGFuZCBpdCdzIHJlbW92ZWQgZnJvbSB0aGUg
+aW5hY3RpdmUgbGlzdCwgYW5kIHB1dCBvbiB0b3ANCj4gPiBvZiB0aGUgYWN0aXZlDQo+ID4gPiBs
+aXN0Lg0KPiA+ID4gPiA0KSBJZiBpdCdzIGluIHRoZSBhY3RpdmUgbGlzdCwgYW5kIHRoZSByZWZl
+cmVuY2VkIGZsYWcgaXMgbm90IHNldCwNCj4gPiB0aGUgcmVmZXJlbmNlZA0KPiA+ID4gZmxhZyBp
+cyBzZXQsIGFuZCBpdCdzIG1vdmVkIHRvIHRoZSB0b3Agb2YgdGhlIGFjdGl2ZSBsaXN0Lg0KPiA+
+ID4gPiA1KSBJZiBpdCdzIGluIHRoZSBhY3RpdmUgbGlzdCwgYW5kIHRoZSByZWZlcmVuY2VkIGZs
+YWcgaXMgc2V0LA0KPiA+IGl0J3MgbW92ZWQgdG8gdGhlIHRvcA0KPiA+ID4gb2YgdGhlIGFjdGl2
+ZSBsaXN0Lg0KPiA+ID4gPiAtIFdoZW4gc2VsZWN0aW5nIG9iamVjdHMgdG8gZXZpY3Q6DQo+ID4g
+PiA+IDEpIE9iamVjdHMgYXQgdGhlIGJvdHRvbSBvZiB0aGUgaW5hY3RpdmUgbGlzdCBhcmUgc2Vs
+ZWN0ZWQgdG8NCj4gPiBldmljdC4gVGhleSBhcmUNCj4gPiA+IHJlbW92ZWQgZnJvbSB0aGUgaW5h
+Y3RpdmUgbGlzdC4NCj4gPiA+ID4gMikgSWYgdGhlIG51bWJlciBvZiB0aGUgb2JqZWN0cyBpbiB0
+aGUgaW5hY3RpdmUgbGlzdCBiZWNvbWVzIGxvdywNCj4gPiBzb21lIG9mIHRoZQ0KPiA+ID4gb2Jq
+ZWN0cyBhdCB0aGUgYm90dG9tIG9mIHRoZSBhY3RpdmUgbGlzdCBhcmUgbW92ZWQgdG8gdGhlIGlu
+YWN0aXZlDQo+ID4gbGlzdC4gRm9yIHRob3NlDQo+ID4gPiBvYmplY3RzIHdoaWNoIGhhdmUgdGhl
+IHJlZmVyZW5jZWQgZmxhZyBzZXQsIHRoZXkgYXJlIGdpdmVuIG9uZSBtb3JlDQo+ID4gY2hhbmNl
+IGluDQo+ID4gPiB0aGUgYWN0aXZlIGxpc3QuIFRoZXkgYXJlIG1vdmVkIHRvIHRoZSB0b3Agb2Yg
+dGhlIGFjdGl2ZSBsaXN0IHdpdGgNCj4gPiB0aGUgcmVmZXJlbmNlZA0KPiA+ID4gZmxhZyBjbGVh
+cmVkLiBGb3IgdGhvc2Ugb2JqZWN0cyB3aGljaCBkb24ndCBoYXZlIHRoZSByZWZlcmVuY2VkIGZs
+YWcNCj4gPiBzZXQsIHRoZXkNCj4gPiA+IGFyZSBtb3ZlZCB0byB0aGUgaW5hY3RpdmUgbGlzdCwg
+d2l0aCB0aGUgcmVmZXJlbmNlZCBmbGFnIHNldC4gU28NCj4gPiB0aGF0IHRoZXkgY2FuIGJlDQo+
+ID4gPiBxdWlja2x5IHByb21vdGVkIHRvIHRoZSBhY3RpdmUgbGlzdCB3aGVuIG5lY2Vzc2FyeS4N
+Cj4gPiA+ID4NCj4gPiA+ID4gIyMgQ29tYmluZSBmbHVzaCB3aXRoIGV2aWN0aW9uDQo+ID4gPiA+
+IC0gV2hlbiBldmljdGluZyBhbiBvYmplY3QsIGlmIGl0J3MgZGlydHksIGl0J3MgZmx1c2hlZCBm
+aXJzdC4NCj4gPiBBZnRlciBmbHVzaGluZywgaXQncw0KPiA+ID4gZXZpY3RlZC4gSWYgbm90IGRp
+cnR5LCBpdCdzIGV2aWN0ZWQgZGlyZWN0bHkuDQo+ID4gPiA+IC0gVGhpcyBtZWFucyB0aGF0IHdl
+IHdvbid0IGhhdmUgc2VwYXJhdGUgYWN0aXZpdGllcyBhbmQgd29uJ3Qgc2V0DQo+ID4gZGlmZmVy
+ZW50DQo+ID4gPiByYXRpb3MgZm9yIGZsdXNoIGFuZCBldmljdC4gSXMgdGhlcmUgYSBuZWVkIHRv
+IGRvIHNvPw0KPiA+ID4gPiAtIE51bWJlciBvZiBvYmplY3RzIHRvIGV2aWN0IGF0IGEgdGltZS4g
+J2V2aWN0X2VmZm9ydCcgYWN0cyBhcyB0aGUNCj4gPiBwcmlvcml0eSwgd2hpY2gNCj4gPiA+IGlz
+IHVzZWQgdG8gY2FsY3VsYXRlIHRoZSBudW1iZXIgb2Ygb2JqZWN0cyB0byBldmljdC4NCj4gPiA+
+DQo+ID4gPiBBcyBzb21lb25lIGVsc2UgbWVudGlvbmVkIGluIGEgZm9sbG93LXVwLCB0aGUgcmVh
+c29uIHdlIGxldCB0aGUNCj4gPiBkaXJ0eSBsZXZlbCBiZQ0KPiA+ID4gc2V0IGxvd2VyIHRoYW4g
+dGhlIGZ1bGwgbGV2ZWwgaXMgdGhhdCBpdCBwcm92aWRlcyBoZWFkcm9vbSBzbyB0aGF0DQo+ID4g
+b2JqZWN0cyBjYW4gYmUNCj4gPiA+IHF1aWNrbHkgZXZpY3RlZCAoZGVsZXRlLCBubyBmbHVzaCkg
+dG8gbWFrZSByb29tIGZvciBuZXcgd3JpdGVzIG9yDQo+ID4gbmV3DQo+ID4gPiBwcm9tb3Rpb25z
+Lg0KPiA+ID4NCj4gPiA+IFRoYXQgc2FpZCwgd2UgcHJvYmFibHkgY2FuL3Nob3VsZCBzdHJlYW1s
+aW5lIHRoZSBmbHVzaCBzbyB0aGF0IGFuDQo+ID4gZXZpY3QgY2FuDQo+ID4gPiBpbW1lZGlhdGVs
+eSBmb2xsb3cgd2l0aG91dCB3YWl0aW5nIGZvciB0aGUgYWdlbnQgdG8gY29tZSBhcm91bmQNCj4g
+PiBhZ2Fpbi4NCj4gPiA+IChJIGRvbid0IHRoaW5rIHdlIGRvIHRoYXQgbm93PykNCj4gPg0KPiA+
+IEkgd2FzIGFmcmFpZCBvZiBoYXZpbmcgdG8gbWFpbnRhaW4gZGlmZmVyZW50IGxpc3RzIGZvciBm
+bHVzaC9ldmljdC4gU28NCj4gPiBJIHByb3Bvc2VkIHRvIGNvbWJpbmUgZmx1c2ggd2l0aCBldmlj
+dC4gQnV0IHNlZW1zIGxpa2Ugd2UgZG9uJ3QgbmVlZA0KPiA+IHRvLiBXaGVuIHJlYWNoaW5nIHRo
+ZSBkaXJ0eSByYXRpbyBhbmQgc2VsZWN0aW5nIG9iamVjdHMgdG8gZmx1c2gsIHdlDQo+ID4gbG9v
+ayBmb3IgZGlydHkgb2JqZWN0cyBmcm9tIHRoZSBpbmFjdGl2ZSBsaXN0LiBUaGUgb2JqZWN0cyBh
+cmUgbWFya2VkDQo+ID4gY2xlYW4gYW5kIGtlcHQgaW4gdGhlIHNhbWUgcG9zaXRpb24gaW4gdGhl
+IExSVSBsaXN0IGFmdGVyIGZsdXNoaW5nLg0KPiA+IFdoZW4gZXZpY3Rpbmcgb2JqZWN0cywgY2xl
+YW4gb2JqZWN0cyBpbiB0aGUgaW5hY3RpdmUgbGlzdCBhcmUNCj4gPiBzZWxlY3RlZC4gRGlydHkg
+b2JqZWN0cyBhcmUgaWdub3JlZC4gVGhpcyB3aWxsIGtlZXAgdGhlIGZsdXNoL2V2aWN0DQo+ID4g
+dGhlIHNhbWUgYXMgY3VycmVudCBpbXBsZW1lbnRhdGlvbi4gTWFrZSBzZW5zZT8NCj4gPg0KPiA+
+ID4NCj4gPiA+IHNhZ2UNCj4gPiA+DQo+ID4gPg0KPiA+ID4gPiAjIyBMUlUgbGlzdHMgU25hcHNo
+b3R0aW5nDQo+ID4gPiA+IC0gVGhlIHR3byBsaXN0cyBhcmUgc25hcHNob3R0ZWQgcGVyc2lzdGVk
+IHBlcmlvZGljYWxseS4NCj4gPiA+ID4gLSBPbmx5IG9uZSBjb3B5IG5lZWRzIHRvIGJlIHNhdmVk
+LiBUaGUgb2xkIGNvcHkgaXMgcmVtb3ZlZCB3aGVuDQo+ID4gcGVyc2lzdGluZw0KPiA+ID4gdGhl
+IGxpc3RzLiBUaGUgc2F2ZWQgbGlzdHMgYXJlIHVzZWQgdG8gcmVzdG9yZSB0aGUgTFJVIGxpc3Rz
+IHdoZW4NCj4gPiBPU0QgcmVib290cy4NCj4gPiA+ID4NCj4gPiA+ID4gQW55IGNvbW1lbnRzL2Zl
+ZWRiYWNrcyBhcmUgd2VsY29tZWQuDQo+ID4gPiA+IC0tDQo+ID4gPiA+IFRvIHVuc3Vic2NyaWJl
+IGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZQ0KPiA+IGNlcGgtZGV2
+ZWwiDQo+ID4gPiA+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5r
+ZXJuZWwub3JnIE1vcmUNCj4gPiBtYWpvcmRvbW8NCj4gPiA+ID4gaW5mbyBhdCAgaHR0cDovL3Zn
+ZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+ID4gPiA+DQo+ID4gPiA+DQo+ID4g
+PiAtLQ0KPiA+ID4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUg
+InVuc3Vic2NyaWJlDQo+ID4gY2VwaC1kZXZlbCIgaW4gdGhlIGJvZHkNCj4gPiA+IG9mIGEgbWVz
+c2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGluZm8gYXQN
+Cj4gPiA+IGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPiA+IC0t
+DQo+ID4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vi
+c2NyaWJlIGNlcGgtZGV2ZWwiDQo+ID4gaW4NCj4gPiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8g
+bWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvDQo+ID4gYXQgIGh0
+dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPiANCj4gLS0NCj4gTWF0
+dCBCZW5qYW1pbg0KPiBDb2hvcnRGUywgTExDLg0KPiAzMTUgV2VzdCBIdXJvbiBTdHJlZXQsIFN1
+aXRlIDE0MEENCj4gQW5uIEFyYm9yLCBNaWNoaWdhbiA0ODEwMw0KPiANCj4gaHR0cDovL2NvaG9y
+dGZzLmNvbQ0KPiANCj4gdGVsLiAgNzM0LTc2MS00Njg5DQo+IGZheC4gIDczNC03NjktODkzOA0K
+PiBjZWwuICA3MzQtMjE2LTUzMDkNCg==
