@@ -1,45 +1,53 @@
-From: =?UTF-8?Q?Bart=C5=82omiej_=C5=9Awi=C4=99cki?=
-	<bartlomiej.swiecki@corp.ovh.com>
-Subject: quick way to rebuild deb packages
-Date: Tue, 21 Jul 2015 18:15:07 +0200
-Message-ID: <20150721181507.138bc9380985439e49ac05ab@corp.ovh.com>
+From: "Zhou, Yuan" <yuan.zhou@intel.com>
+Subject: RE: local teuthology testing
+Date: Wed, 22 Jul 2015 02:24:49 +0000
+Message-ID: <06681238D8946F44A60AA400760A1CBF0201D486@SHSMSX104.ccr.corp.intel.com>
+References: <06681238D8946F44A60AA400760A1CBF0201AC21@SHSMSX104.ccr.corp.intel.com>
+	<06681238D8946F44A60AA400760A1CBF0201B37F@SHSMSX104.ccr.corp.intel.com>
+ <CAFdRU71=-huVv_x75NcSGdLjL_2k2uZ905Yjd+z-ean5Bk3Rog@mail.gmail.com>
+ <55AE69AA.7010601@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from 2.mo1.mail-out.ovh.net ([178.32.119.250]:46581 "EHLO
-	2.mo1.mail-out.ovh.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933095AbbGUWMF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 Jul 2015 18:12:05 -0400
-Received: from mail612.ha.ovh.net (b6.ovh.net [213.186.33.56])
-	by mo1.mail-out.ovh.net (Postfix) with SMTP id 27FE310700B9
-	for <ceph-devel@vger.kernel.org>; Tue, 21 Jul 2015 18:15:14 +0200 (CEST)
+Received: from mga01.intel.com ([192.55.52.88]:21956 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751769AbbGVCYy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 21 Jul 2015 22:24:54 -0400
+In-Reply-To: <55AE69AA.7010601@dachary.org>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Loic Dachary <loic@dachary.org>, "shinobu@linux.com" <shinobu@linux.com>
+Cc: David Casier AEVOO <david.casier@aevoo.fr>, Ceph Devel <ceph-devel@vger.kernel.org>, "sepia@lists.ceph.com" <sepia@lists.ceph.com>
 
-Hi all,
-
-I'm currently working on a test environment for ceph where we're using deb files to deploy new version on test cluster.
-To make this work efficiently I'd have to quckly build deb packages.
-
-I tried dpkg-buildpackages -nc which should keep the results of previous build but it ends up in a linking error:
-
-> ...
->   CXXLD    ceph_rgw_jsonparser
-> ./.libs/libglobal.a(json_spirit_reader.o): In function `~thread_specific_ptr':
-> /usr/include/boost/thread/tss.hpp:79: undefined reference to `boost::detail::set_tss_data(void const*, boost::shared_ptr<boost::detail::tss_cleanup_function>, void*, bool)'
-> /usr/include/boost/thread/tss.hpp:79: undefined reference to `boost::detail::set_tss_data(void const*, boost::shared_ptr<boost::detail::tss_cleanup_function>, void*, bool)'
-> /usr/include/boost/thread/tss.hpp:79: undefined reference to `boost::detail::set_tss_data(void const*, boost::shared_ptr<boost::detail::tss_cleanup_function>, void*, bool)'
-> /usr/include/boost/thread/tss.hpp:79: undefined reference to `boost::detail::set_tss_data(void const*, boost::shared_ptr<boost::detail::tss_cleanup_function>, void*, bool)'
-> /usr/include/boost/thread/tss.hpp:79: undefined reference to `boost::detail::set_tss_data(void const*, boost::shared_ptr<boost::detail::tss_cleanup_function>, void*, bool)'
-> ./.libs/libglobal.a(json_spirit_reader.o):/usr/include/boost/thread/tss.hpp:79: more undefined references to `boost::detail::set_tss_data(void const*, boost::shared_ptr<boost::detail::tss_cleanup_function>, void*, bool)' follow
-> ./.libs/libglobal.a(json_spirit_reader.o): In function `call_once<void (*)()>':
-> ...
-
-Any ideas on what could go wrong here ?
-
-Version I'm compiling is v0.94.1 but I've observed same results with 9.0.1.
-
--- 
-Bartlomiej Swiecki <bartlomiej.swiecki@corp.ovh.com>
+TG9pYywgdGhhbmtzIGZvciB0aGUgbm90ZXMhIFdpbGwgdHJ5IHRoZSBuZXcgY29kZSBhbmQgcmVw
+b3J0IG91dCB0aGUgaXNzdWUgSSBtZXQuDQoNClRoYW5rcywgLXl1YW4NCg0KLS0tLS1PcmlnaW5h
+bCBNZXNzYWdlLS0tLS0NCkZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIFtt
+YWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBMb2lj
+IERhY2hhcnkNClNlbnQ6IFR1ZXNkYXksIEp1bHkgMjEsIDIwMTUgMTE6NDggUE0NClRvOiBzaGlu
+b2J1QGxpbnV4LmNvbTsgWmhvdSwgWXVhbg0KQ2M6IERhdmlkIENhc2llciBBRVZPTzsgQ2VwaCBE
+ZXZlbDsgc2VwaWFAbGlzdHMuY2VwaC5jb20NClN1YmplY3Q6IFJlOiBsb2NhbCB0ZXV0aG9sb2d5
+IHRlc3RpbmcNCg0KSGksDQoNClNpbmNlIEp1bHkgMTh0aCB0ZXV0aG9sb2d5IG5vIGxvbmdlciB1
+c2VzIGNoZWYsIHRoaXMgaXNzdWUgaGFzIGJlZW4gcmVzb2x2ZWQgISBVc2luZyBhbnNpYmxlIHJl
+cXVpcmVzIGNvbmZpZ3VyYXRpb24gKCBodHRwOi8vZGFjaGFyeS5vcmcvP3A9Mzc1MiBleHBsYWlu
+cyBpdCBzaG9ydGx5LCBtYXliZSB0aGVyZSBpcyBzb21ldGhpbmcgaW4gdGhlIGRvY3VtZW50YXRp
+b24gYnV0IEkgZGlkIG5vdCBwYXkgZW5vdWdoIGF0dGVudGlvbiB0byBiZSBzdXJlICkuIEF0IHRo
+ZSBlbmQgb2YgaHR0cDovL2RhY2hhcnkub3JnLz9wPTM3NTIgeW91IHdpbGwgc2VlIGEgbGlzdCBv
+ZiBjb25maWd1cmFibGUgdmFsdWVzIGFuZCBJIHN1c3BlY3QgQW5kcmV3ICYgWmFjayB3b3VsZCBi
+ZSBtb3JlIHRoYW4gaGFwcHkgdG8gZXhwbGFpbiBob3cgYW55IGhhcmRjb2RlZCBsZWZ0b3ZlciBj
+YW4gYmUgc3RyaXBwZWQgOi0pDQoNCkNoZWVycw0KDQpPbiAyMS8wNy8yMDE1IDE0OjU4LCBTaGlu
+b2J1IEtpbmpvIHdyb3RlOg0KPiBIaSwNCj4gDQo+IEkgdGhpbmsgdGhhdCB5b3UgaGF2ZSB0byBz
+aG93IHVzIHN1Y2ggYSBVUkxzIGZvciBhbnlvbmUgd2hvIHdvdWxkIGhhdmUgc2FtZSBiaWdnZXN0
+IGlzc3VlLg0KPiANCj4gU2luY2VyZWx5LA0KPiBLaW5qbw0KPiANCj4gT24gVHVlLCBKdWwgMjEs
+IDIwMTUgYXQgOTo1MiBQTSwgWmhvdSwgWXVhbiA8eXVhbi56aG91QGludGVsLmNvbSA8bWFpbHRv
+Onl1YW4uemhvdUBpbnRlbC5jb20+PiB3cm90ZToNCj4gDQo+ICAgICBIaSBEYXZpZC9Mb2ljLA0K
+PiANCj4gICAgIEkgd2FzIGFsc28gdHJ5aW5nIHRvIG1ha2Ugc29tZSBsb2NhbCBUZXV0aG9sb2d5
+IGNsdXN0ZXJzIGhlcmUuIFRoZSBiaWdnZXN0IGlzc3VlIEkgbWV0IGlzIGluIHRoZSBjZXBoLXFh
+LWNoZWYgLSB0aGVyZSdyZSBsb3RzIG9mIGhhcmRjb2RlZCBVUkwgcmVsYXRlZCB3aXRoIHRoZSBz
+ZXBpYSBsYWIuIEkgaGF2ZSB0byB0cmFjZSB0aGUgY29kZSBhbmQgY2hhbmdlIHRoZW0gbGluZSBi
+eSBsaW5lLg0KPiANCj4gICAgIENhbiB5b3UgcGxlYXNlIGtpbmRseSBzaGFyZSBtZSBob3cgZGlk
+IHlvdSBnZXQgdGhpcyB3b3JrPyBJcyB0aGVyZSBhbiBlYXN5IHdheSB0byBmaXggdGhpcz8NCj4g
+DQo+ICAgICBUaGFua3MsIC15dWFuDQo+IA0KPiANCj4gDQo+IA0KPiAtLSANCj4gTGlmZSB3LyBM
+aW51eCA8aHR0cDovL2ktc2hpbm9idS5oYXRlbmFibG9nLmNvbS8+DQoNCi0tIA0KTG/Dr2MgRGFj
+aGFyeSwgQXJ0aXNhbiBMb2dpY2llbCBMaWJyZQ0KDQo=
