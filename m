@@ -1,55 +1,30 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: 07/22/2015 Weekly Ceph Performance Meeting IS ON!
-Date: Wed, 22 Jul 2015 09:30:35 -0500
-Message-ID: <55AFA90B.6050900@redhat.com>
-Reply-To: mnelson@redhat.com
+From: Ken Dreyer <kdreyer@redhat.com>
+Subject: Re: Breaks & Replaces in debian/control in backports
+Date: Wed, 22 Jul 2015 10:47:43 -0600
+Message-ID: <55AFC92F.60101@redhat.com>
+References: <55AB89C4.50503@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:44889 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:51631 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S933142AbbGVOah (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 22 Jul 2015 10:30:37 -0400
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-	by mx1.redhat.com (Postfix) with ESMTPS id B76F036D07E
-	for <ceph-devel@vger.kernel.org>; Wed, 22 Jul 2015 14:30:37 +0000 (UTC)
-Received: from [10.3.112.34] (ovpn-112-34.phx2.redhat.com [10.3.112.34])
-	by int-mx14.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t6MEUZMn031587
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-	for <ceph-devel@vger.kernel.org>; Wed, 22 Jul 2015 10:30:37 -0400
+	id S934322AbbGVQro (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 22 Jul 2015 12:47:44 -0400
+In-Reply-To: <55AB89C4.50503@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-8AM PST as usual!  Topics today include a new ceph_test_rados benchmark 
-being added to CBT.  Please feel free to add your own!
+On 07/19/2015 05:28 AM, Loic Dachary wrote:
 
-Here's the links:
+> I think it achieves the same thing and is less error prone in the case of backports. The risk is that upgrading from v0.94.2-34 to the version with this change will fail because the conditions are satisified (it thinks all versions after v0.94.2 have the change). But the odds of having a test machine with this specific version already installed are close to non-existent. The odds of us picking the wrong number and ending up with something that's either too high or too small are higher.
+> 
+> What do you think ?
+> 
 
-Etherpad URL:
-http://pad.ceph.com/p/performance_weekly
+I think this is great, thanks for proposing it. We should also write our
+convention down someplace (SubmittingPatches, or the wiki, or something)
 
-To join the Meeting:
-https://bluejeans.com/268261044
-
-To join via Browser:
-https://bluejeans.com/268261044/browser
-
-To join with Lync:
-https://bluejeans.com/268261044/lync
-
-
-To join via Room System:
-Video Conferencing System: bjn.vc -or- 199.48.152.152
-Meeting ID: 268261044
-
-To join via Phone:
-1) Dial:
-           +1 408 740 7256
-           +1 888 240 2560(US Toll Free)
-           +1 408 317 9253(Alternate Number)
-           (see all numbers - http://bluejeans.com/numbers)
-2) Enter Conference ID: 268261044
-
-Mark
+- Ken
