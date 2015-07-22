@@ -1,95 +1,77 @@
-From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Subject: Re: upstream/firefly exporting the same snap 2 times results in different
- exports
-Date: Wed, 22 Jul 2015 09:03:55 +0200
-Message-ID: <55AF405B.4050602@profihost.ag>
-References: <55AE3B3A.2040902@profihost.ag> <1431119614.1353345.1437489164103.JavaMail.zimbra@redhat.com> <55AE798F.1010206@profihost.ag> <1828157940.1473499.1437499191528.JavaMail.zimbra@redhat.com> <55AE9BD9.6010801@profihost.ag> <55AEA17A.8040901@redhat.com> <55AEA306.6000809@profihost.ag> <55AEB0B1.6040500@redhat.com>
+From: "Zhou, Yuan" <yuan.zhou@intel.com>
+Subject: RE: quick way to rebuild deb packages
+Date: Wed, 22 Jul 2015 08:04:44 +0000
+Message-ID: <06681238D8946F44A60AA400760A1CBF0201DC4C@SHSMSX104.ccr.corp.intel.com>
+References: <20150721181507.138bc9380985439e49ac05ab@corp.ovh.com>
+ <55AF38D0.8090303@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ph.de-nserver.de ([85.158.179.214]:42986 "EHLO
-	mail-ph.de-nserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753882AbbGVHD6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 22 Jul 2015 03:03:58 -0400
-In-Reply-To: <55AEB0B1.6040500@redhat.com>
+Received: from mga02.intel.com ([134.134.136.20]:31624 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756006AbbGVIEy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 22 Jul 2015 04:04:54 -0400
+In-Reply-To: <55AF38D0.8090303@dachary.org>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <jdurgin@redhat.com>, Jason Dillaman <dillaman@redhat.com>
-Cc: ceph-devel@vger.kernel.org
+To: Loic Dachary <loic@dachary.org>, Bartlomiej Swiecki <bartlomiej.swiecki@corp.ovh.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-
-Am 21.07.2015 um 22:50 schrieb Josh Durgin:
-> Yes, I'm afraid it sounds like it is. You can double check whether the
-> watch exists on an image by getting the id of the image from 'rbd info
-> $pool/$image | grep block_name_prefix':
-> 
->     block_name_prefix: rbd_data.105674b0dc51
-> 
-> The id is the hex number there. Append that to 'rbd_header.' and you
-> have the header object name. Check whether it has watchers with:
-> 
->     rados listwatchers -p $pool rbd_header.105674b0dc51
-> 
-> If that doesn't show any watchers while the image is in use by a vm,
-> it's #9806.
-
-Yes it does not show any watchers.
-
-> I just merged the backport for firefly, so it'll be in 0.80.11.
-> Sorry it took so long to get to firefly :(. We'll need to be
-> more vigilant about checking non-trivial backports when we're
-> going through all the bugs periodically.
-
-That would be really important. I've seen that this one was already in
-upstream/firefly-backports. What's the purpose of that branch?
-
-Greets,
-Stefan
-
-> Josh
-> 
-> On 07/21/2015 12:52 PM, Stefan Priebe wrote:
->> So this is really this old bug?
->>
->> http://tracker.ceph.com/issues/9806
->>
->> Stefan
->> Am 21.07.2015 um 21:46 schrieb Josh Durgin:
->>> On 07/21/2015 12:22 PM, Stefan Priebe wrote:
->>>>
->>>> Am 21.07.2015 um 19:19 schrieb Jason Dillaman:
->>>>> Does this still occur if you export the images to the console (i.e.
->>>>> "rbd export cephstor/disk-116@snap - > dump_file")?
->>>>>
->>>>> Would it be possible for you to provide logs from the two "rbd export"
->>>>> runs on your smallest VM image?  If so, please add the following to
->>>>> the "[client]" section of your ceph.conf:
->>>>>
->>>>>    log file = /valid/path/to/logs/$name.$pid.log
->>>>>    debug rbd = 20
->>>>>
->>>>> I opened a ticket [1] where you can attach the logs (if they aren't
->>>>> too large).
->>>>>
->>>>> [1] http://tracker.ceph.com/issues/12422
->>>>
->>>> Will post some more details to the tracker in a few hours. It seems it
->>>> is related to using discard inside guest but not on the FS the osd is
->>>> on.
->>>
->>> That sounds very odd. Could you verify via 'rados listwatchers' on an
->>> in-use rbd image's header object that there's still a watch established?
->>>
->>> Have you increased pgs in all those clusters recently?
->>>
->>> Josh
->>> -- 
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> -- 
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SSdtIGFsc28gdXNpbmcgbWFrZS1kZWJzLnNoIHRvIGdlbmVyYXRlIHRoZSBiaW5hcmllcyBmb3Ig
+c29tZSBsb2NhbCBkZXBsb3ltZW50LiBOb3RlIHRoYXQgaWYgeW91IG5lZWQgdGhlICp0ZXN0cy5k
+ZWIgeW91J2xsIG5lZWQgdG8gY2hhbmdlIHRoaXMgc2NyaXB0cyBhIGJpdC4NCg0KQEAgLTU4LDgg
+KzU4LDggQEAgdGFyIC1DICRyZWxlYXNlZGlyIC16eGYgJHJlbGVhc2VkaXIvY2VwaF8kdmVycy5v
+cmlnLnRhci5neg0KICMNCiBjcCAtYSBkZWJpYW4gJHJlbGVhc2VkaXIvY2VwaC0kdmVycy9kZWJp
+YW4NCiBjZCAkcmVsZWFzZWRpcg0KLXBlcmwgLW5pIC1lICdwcmludCBpZighKC9eUGFja2FnZTog
+LiotZGJnJC8uLi9eJC8pKScgY2VwaC0kdmVycy9kZWJpYW4vY29udHJvbA0KLXBlcmwgLXBpIC1l
+ICdzLy0tZGJnLXBhY2thZ2UuKi8vJyBjZXBoLSR2ZXJzL2RlYmlhbi9ydWxlcw0KKyNwZXJsIC1u
+aSAtZSAncHJpbnQgaWYoISgvXlBhY2thZ2U6IC4qLWRiZyQvLi4vXiQvKSknIGNlcGgtJHZlcnMv
+ZGViaWFuL2NvbnRyb2wNCisjcGVybCAtcGkgLWUgJ3MvLS1kYmctcGFja2FnZS4qLy8nIGNlcGgt
+JHZlcnMvZGViaWFuL3J1bGVzDQogIw0KICMgYWx3YXlzIHNldCB0aGUgZGViaWFuIHZlcnNpb24g
+dG8gMSB3aGljaCBpcyBvayBiZWNhdXNlIHRoZSBkZWJpYW4NCiAjIGRpcmVjdG9yeSBpcyBpbmNs
+dWRlZCBpbiB0aGUgc291cmNlcyBhbmQgdGhlIHVwc3RyZWFtIHZlcnNpb24gd2lsbCANCg0KDQoN
+Ci0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZnZXIu
+a2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBC
+ZWhhbGYgT2YgTG9pYyBEYWNoYXJ5DQpTZW50OiBXZWRuZXNkYXksIEp1bHkgMjIsIDIwMTUgMjoz
+MiBQTQ0KVG86IEJhcnTFgm9taWVqIMWad2nEmWNraTsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5v
+cmcNClN1YmplY3Q6IFJlOiBxdWljayB3YXkgdG8gcmVidWlsZCBkZWIgcGFja2FnZXMNCg0KSGks
+DQoNCkRpZCB5b3UgdHJ5IGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgvYmxvYi9tYXN0ZXIv
+bWFrZS1kZWJzLnNoID8gSSB3b3VsZCByZWNvbW1lbmQgcnVubmluZyBodHRwczovL2dpdGh1Yi5j
+b20vY2VwaC9jZXBoL2Jsb2IvbWFzdGVyL3J1bi1tYWtlLWNoZWNrLnNoIGZpcnN0IHRvIG1ha2Ug
+c3VyZSB5b3UgY2FuIGJ1aWxkIGFuZCB0ZXN0OiB0aGlzIHdpbGwgaW5zdGFsbCB0aGUgZGVwZW5k
+ZW5jaWVzIHlvdSdyZSBtaXNzaW5nIGF0IHRoZSBzYW1lIHRpbWUuDQoNCkNoZWVycw0KDQpPbiAy
+MS8wNy8yMDE1IDE4OjE1LCBCYXJ0xYJvbWllaiDFmndpxJlja2kgd3JvdGU6DQo+IEhpIGFsbCwN
+Cj4gDQo+IEknbSBjdXJyZW50bHkgd29ya2luZyBvbiBhIHRlc3QgZW52aXJvbm1lbnQgZm9yIGNl
+cGggd2hlcmUgd2UncmUgdXNpbmcgZGViIGZpbGVzIHRvIGRlcGxveSBuZXcgdmVyc2lvbiBvbiB0
+ZXN0IGNsdXN0ZXIuDQo+IFRvIG1ha2UgdGhpcyB3b3JrIGVmZmljaWVudGx5IEknZCBoYXZlIHRv
+IHF1Y2tseSBidWlsZCBkZWIgcGFja2FnZXMuDQo+IA0KPiBJIHRyaWVkIGRwa2ctYnVpbGRwYWNr
+YWdlcyAtbmMgd2hpY2ggc2hvdWxkIGtlZXAgdGhlIHJlc3VsdHMgb2YgcHJldmlvdXMgYnVpbGQg
+YnV0IGl0IGVuZHMgdXAgaW4gYSBsaW5raW5nIGVycm9yOg0KPiANCj4+IC4uLg0KPj4gICBDWFhM
+RCAgICBjZXBoX3Jnd19qc29ucGFyc2VyDQo+PiAuLy5saWJzL2xpYmdsb2JhbC5hKGpzb25fc3Bp
+cml0X3JlYWRlci5vKTogSW4gZnVuY3Rpb24gYH50aHJlYWRfc3BlY2lmaWNfcHRyJzoNCj4+IC91
+c3IvaW5jbHVkZS9ib29zdC90aHJlYWQvdHNzLmhwcDo3OTogdW5kZWZpbmVkIHJlZmVyZW5jZSB0
+byBgYm9vc3Q6OmRldGFpbDo6c2V0X3Rzc19kYXRhKHZvaWQgY29uc3QqLCBib29zdDo6c2hhcmVk
+X3B0cjxib29zdDo6ZGV0YWlsOjp0c3NfY2xlYW51cF9mdW5jdGlvbj4sIHZvaWQqLCBib29sKScN
+Cj4+IC91c3IvaW5jbHVkZS9ib29zdC90aHJlYWQvdHNzLmhwcDo3OTogdW5kZWZpbmVkIHJlZmVy
+ZW5jZSB0byBgYm9vc3Q6OmRldGFpbDo6c2V0X3Rzc19kYXRhKHZvaWQgY29uc3QqLCBib29zdDo6
+c2hhcmVkX3B0cjxib29zdDo6ZGV0YWlsOjp0c3NfY2xlYW51cF9mdW5jdGlvbj4sIHZvaWQqLCBi
+b29sKScNCj4+IC91c3IvaW5jbHVkZS9ib29zdC90aHJlYWQvdHNzLmhwcDo3OTogdW5kZWZpbmVk
+IHJlZmVyZW5jZSB0byBgYm9vc3Q6OmRldGFpbDo6c2V0X3Rzc19kYXRhKHZvaWQgY29uc3QqLCBi
+b29zdDo6c2hhcmVkX3B0cjxib29zdDo6ZGV0YWlsOjp0c3NfY2xlYW51cF9mdW5jdGlvbj4sIHZv
+aWQqLCBib29sKScNCj4+IC91c3IvaW5jbHVkZS9ib29zdC90aHJlYWQvdHNzLmhwcDo3OTogdW5k
+ZWZpbmVkIHJlZmVyZW5jZSB0byBgYm9vc3Q6OmRldGFpbDo6c2V0X3Rzc19kYXRhKHZvaWQgY29u
+c3QqLCBib29zdDo6c2hhcmVkX3B0cjxib29zdDo6ZGV0YWlsOjp0c3NfY2xlYW51cF9mdW5jdGlv
+bj4sIHZvaWQqLCBib29sKScNCj4+IC91c3IvaW5jbHVkZS9ib29zdC90aHJlYWQvdHNzLmhwcDo3
+OTogdW5kZWZpbmVkIHJlZmVyZW5jZSB0byBgYm9vc3Q6OmRldGFpbDo6c2V0X3Rzc19kYXRhKHZv
+aWQgY29uc3QqLCBib29zdDo6c2hhcmVkX3B0cjxib29zdDo6ZGV0YWlsOjp0c3NfY2xlYW51cF9m
+dW5jdGlvbj4sIHZvaWQqLCBib29sKScNCj4+IC4vLmxpYnMvbGliZ2xvYmFsLmEoanNvbl9zcGly
+aXRfcmVhZGVyLm8pOi91c3IvaW5jbHVkZS9ib29zdC90aHJlYWQvdHNzLmhwcDo3OTogbW9yZSB1
+bmRlZmluZWQgcmVmZXJlbmNlcyB0byBgYm9vc3Q6OmRldGFpbDo6c2V0X3Rzc19kYXRhKHZvaWQg
+Y29uc3QqLCBib29zdDo6c2hhcmVkX3B0cjxib29zdDo6ZGV0YWlsOjp0c3NfY2xlYW51cF9mdW5j
+dGlvbj4sIHZvaWQqLCBib29sKScgZm9sbG93DQo+PiAuLy5saWJzL2xpYmdsb2JhbC5hKGpzb25f
+c3Bpcml0X3JlYWRlci5vKTogSW4gZnVuY3Rpb24gYGNhbGxfb25jZTx2b2lkICgqKSgpPic6DQo+
+PiAuLi4NCj4gDQo+IEFueSBpZGVhcyBvbiB3aGF0IGNvdWxkIGdvIHdyb25nIGhlcmUgPw0KPiAN
+Cj4gVmVyc2lvbiBJJ20gY29tcGlsaW5nIGlzIHYwLjk0LjEgYnV0IEkndmUgb2JzZXJ2ZWQgc2Ft
+ZSByZXN1bHRzIHdpdGggOS4wLjEuDQo+IA0KDQotLSANCkxvw69jIERhY2hhcnksIEFydGlzYW4g
+TG9naWNpZWwgTGlicmUNCg0K
