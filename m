@@ -1,46 +1,29 @@
-From: Patrick McGarry <pmcgarry@redhat.com>
-Subject: Re: Ceph Tech Talk next week
-Date: Thu, 23 Jul 2015 10:53:00 -0400
-Message-ID: <CAP8Oy=++pmbiz5evVfBzQL7QY3eZ34mh+X3Y=P0K1_V=-=nHfg@mail.gmail.com>
-References: <CAAZbbf1PhQoZX-_jjY+cjpL3UO8wNEuheF7P21f7T2ajpdyJWg@mail.gmail.com>
-	<CAC6JEv9fcKgBgZuxHk-+iNaNoL8tKqQBgUH_cLG17qADXNgNCA@mail.gmail.com>
+From: "Deneau, Tom" <tom.deneau@amd.com>
+Subject: registering for tracker.ceph.com
+Date: Thu, 23 Jul 2015 16:14:59 +0000
+Message-ID: <BC97738F8E7C8742BABED7F06FB9DF91669BAC63@SATLEXDAG01.amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yk0-f176.google.com ([209.85.160.176]:34756 "EHLO
-	mail-yk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752909AbbGWOxA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Jul 2015 10:53:00 -0400
-Received: by ykax123 with SMTP id x123so222069161yka.1
-        for <ceph-devel@vger.kernel.org>; Thu, 23 Jul 2015 07:53:00 -0700 (PDT)
-In-Reply-To: <CAC6JEv9fcKgBgZuxHk-+iNaNoL8tKqQBgUH_cLG17qADXNgNCA@mail.gmail.com>
+Received: from mail-bn1on0146.outbound.protection.outlook.com ([157.56.110.146]:29422
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752923AbbGWQPF convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Jul 2015 12:15:05 -0400
+Received: from satlvexedge02.amd.com (satlvexedge02.amd.com [10.177.96.29])
+	(using TLSv1 with cipher AES128-SHA (128/128 bits))
+	(No client certificate requested)
+	by atltwp02.amd.com (Axway MailGate 5.3.1) with ESMTPS id 29C54D16007
+	for <ceph-devel@vger.kernel.org>; Thu, 23 Jul 2015 12:14:58 -0400 (EDT)
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@gregs42.com>
-Cc: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-correct.
+I wanted to register for tracker.ceph.com to enter a few issues but never
+got the confirming email and my registration is now in some stuck state
+(not complete but name/email in use so can't re-register).  Any suggestions?
 
+-- Tom Deneau
 
-Best Regards,
-
-Patrick McGarry
-Director Ceph Community || Red Hat
-http://ceph.com  ||  http://community.redhat.com
-@scuttlemonkey || @ceph
-
-
-On Tue, Jul 21, 2015 at 6:03 PM, Gregory Farnum <greg@gregs42.com> wrote:
-> On Tue, Jul 21, 2015 at 6:09 PM, Patrick McGarry <pmcgarry@redhat.com> wrote:
->> Hey cephers,
->>
->> Just a reminder that the Ceph Tech Talk on CephFS that was scheduled
->> for last month (and cancelled due to technical difficulties) has been
->> rescheduled for this month's talk. It will be happening next Thurs at
->> 17:00 UTC (1p EST)
->
-> So that's July 30, according to the website, right? :)
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
