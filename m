@@ -1,87 +1,90 @@
-From: Jason Dillaman <dillaman@redhat.com>
-Subject: Re: hello, I am confused about a question of rbd
-Date: Thu, 23 Jul 2015 09:03:26 -0400 (EDT)
-Message-ID: <1804564100.2788995.1437656606063.JavaMail.zimbra@redhat.com>
-References: <7B5C2F2226F8AF419D625C6097AD814C5E265628@H3CMLB12-EX.srv.huawei-3com.com>
+From: "Podoski, Igor" <Igor.Podoski@ts.fujitsu.com>
+Subject: RE: vstart runner for cephfs tests
+Date: Thu, 23 Jul 2015 15:38:54 +0200
+Message-ID: <66EBB02ADA308B4F8273E99FC000126C7E634D0ED9@ABGEX70E.FSC.NET>
+References: <55B0BB59.7010806@redhat.com> <55B0D687.1040403@redhat.com>
+ <55B0DFFF.7010402@redhat.com> <55B0E34C.5010908@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx5-phx2.redhat.com ([209.132.183.37]:54811 "EHLO
-	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753129AbbGWNDa convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Jul 2015 09:03:30 -0400
-In-Reply-To: <7B5C2F2226F8AF419D625C6097AD814C5E265628@H3CMLB12-EX.srv.huawei-3com.com>
+Received: from dgate20.ts.fujitsu.com ([80.70.172.51]:51512 "EHLO
+	dgate20.ts.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751785AbbGWNi6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Jul 2015 09:38:58 -0400
+In-Reply-To: <55B0E34C.5010908@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: zhengbin 08747 <zhengbin.08747@h3c.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mnelson@redhat.com>, John Spray <john.spray@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-According to the git history, support for zero MB images for the create=
-/resize commands was explicitly added by commit 08f47a4.  Dan Mick or J=
-osh Durgin could probably better explain the history behind the change =
-since it was before my time.
-
---=20
-
-Jason Dillaman=20
-Red Hat=20
-dillaman@redhat.com=20
-http://www.redhat.com=20
-
-
------ Original Message -----=20
-
-> From: "zhengbin 08747" <zhengbin.08747@h3c.com>
-> To: dillaman@redhat.com
-> Sent: Thursday, July 23, 2015 7:52:16 AM
-> Subject: hello, I am confused about a question of rbd
-
-> When I create a rbd block, its size can be zero, why?I think it shoul=
-d not be
-> zero, If it should not be zero, I will report a bug and fix it,thank =
-you
-
-> Like this, I create a rbd block name foo2, it can not be use
-
-> ---------------------------------------------------------------------=
-----------------------------------------------------------------
-> =E6=9C=AC=E9=82=AE=E4=BB=B6=E5=8F=8A=E5=85=B6=E9=99=84=E4=BB=B6=E5=90=
-=AB=E6=9C=89=E6=9D=AD=E5=B7=9E=E5=8D=8E=E4=B8=89=E9=80=9A=E4=BF=A1=E6=8A=
-=80=E6=9C=AF=E6=9C=89=E9=99=90=E5=85=AC=E5=8F=B8=E7=9A=84=E4=BF=9D=E5=AF=
-=86=E4=BF=A1=E6=81=AF=EF=BC=8C=E4=BB=85=E9=99=90=E4=BA=8E=E5=8F=91=E9=80=
-=81=E7=BB=99=E4=B8=8A=E9=9D=A2=E5=9C=B0=E5=9D=80=E4=B8=AD=E5=88=97=E5=87=
-=BA
-> =E7=9A=84=E4=B8=AA=E4=BA=BA=E6=88=96=E7=BE=A4=E7=BB=84=E3=80=82=E7=A6=
-=81=E6=AD=A2=E4=BB=BB=E4=BD=95=E5=85=B6=E4=BB=96=E4=BA=BA=E4=BB=A5=E4=BB=
-=BB=E4=BD=95=E5=BD=A2=E5=BC=8F=E4=BD=BF=E7=94=A8=EF=BC=88=E5=8C=85=E6=8B=
-=AC=E4=BD=86=E4=B8=8D=E9=99=90=E4=BA=8E=E5=85=A8=E9=83=A8=E6=88=96=E9=83=
-=A8=E5=88=86=E5=9C=B0=E6=B3=84=E9=9C=B2=E3=80=81=E5=A4=8D=E5=88=B6=E3=80=
-=81
-> =E6=88=96=E6=95=A3=E5=8F=91=EF=BC=89=E6=9C=AC=E9=82=AE=E4=BB=B6=E4=B8=
-=AD=E7=9A=84=E4=BF=A1=E6=81=AF=E3=80=82=E5=A6=82=E6=9E=9C=E6=82=A8=E9=94=
-=99=E6=94=B6=E4=BA=86=E6=9C=AC=E9=82=AE=E4=BB=B6=EF=BC=8C=E8=AF=B7=E6=82=
-=A8=E7=AB=8B=E5=8D=B3=E7=94=B5=E8=AF=9D=E6=88=96=E9=82=AE=E4=BB=B6=E9=80=
-=9A=E7=9F=A5=E5=8F=91=E4=BB=B6=E4=BA=BA=E5=B9=B6=E5=88=A0=E9=99=A4=E6=9C=
-=AC
-> =E9=82=AE=E4=BB=B6=EF=BC=81
-> This e-mail and its attachments contain confidential information from=
- H3C,
-> which is
-> intended only for the person or entity whose address is listed above.=
- Any use
-> of the
-> information contained herein in any way (including, but not limited t=
-o, total
-> or partial
-> disclosure, reproduction, or dissemination) by persons other than the
-> intended
-> recipient(s) is prohibited. If you receive this e-mail in error, plea=
-se
-> notify the sender
-> by phone or email immediately and delete it!
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZn
+ZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtDQo+IG93bmVyQHZnZXIua2VybmVsLm9y
+Z10gT24gQmVoYWxmIE9mIE1hcmsgTmVsc29uDQo+IFNlbnQ6IFRodXJzZGF5LCBKdWx5IDIzLCAy
+MDE1IDI6NTEgUE0NCj4gVG86IEpvaG4gU3ByYXk7IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3Jn
+DQo+IFN1YmplY3Q6IFJlOiB2c3RhcnQgcnVubmVyIGZvciBjZXBoZnMgdGVzdHMNCj4gDQo+IA0K
+PiANCj4gT24gMDcvMjMvMjAxNSAwNzozNyBBTSwgSm9obiBTcHJheSB3cm90ZToNCj4gPg0KPiA+
+DQo+ID4gT24gMjMvMDcvMTUgMTI6NTYsIE1hcmsgTmVsc29uIHdyb3RlOg0KPiA+PiBJIGhhZCBz
+aW1pbGFyIHRob3VnaHRzIG9uIHRoZSBiZW5jaG1hcmtpbmcgc2lkZSwgd2hpY2ggaXMgd2h5IEkN
+Cj4gPj4gc3RhcnRlZCB3cml0aW5nIGNidCBhIGNvdXBsZSB5ZWFycyBhZ28uICBJIG5lZWRlZCB0
+aGUgYWJpbGl0eSB0bw0KPiA+PiBxdWlja2x5IHNwaW4gdXAgY2x1c3RlcnMgYW5kIHJ1biBiZW5j
+aG1hcmtzIG9uIGFyYml0cmFyeSBzZXRzIG9mDQo+ID4+IGhhcmR3YXJlLiAgVGhlIG91dGNvbWUg
+aXNuJ3QgcGVyZmVjdCwgYnV0IGl0J3MgYmVlbiBleHRyZW1lbHkgdXNlZnVsDQo+ID4+IGZvciBy
+dW5uaW5nIGJlbmNobWFya3MgYW5kIHNvcnQgb2YgZXhpc3RzIGFzIGEgaGFsZi13YXkgcG9pbnQg
+YmV0d2Vlbg0KPiA+PiB2c3RhcnQgYW5kIHRldXRob2xvZ3kuDQo+ID4+DQo+ID4+IFRoZSBiYXNp
+YyBpZGVhIGlzIHRoYXQgeW91IGdpdmUgaXQgYSB5YW1sIGZpbGUgdGhhdCBsb29rcyBhIGxpdHRs
+ZQ0KPiA+PiBiaXQgbGlrZSBhIHRldXRob2xvZ3kgeWFtbCBmaWxlIGFuZCBjYnQgd2lsbCAob3B0
+aW9uYWxseSkgYnVpbGQgYQ0KPiA+PiBjbHVzdGVyIGFjcm9zcyBhIG51bWJlciBvZiB1c2VyIGRl
+ZmluZWQgbm9kZXMgd2l0aCBwZHNoLCBzdGFydA0KPiA+PiB2YXJpb3VzIG1vbml0b3JpbmcgdG9v
+bHMgKHRoaXMgaXMgdWdseSByaWdodCBub3csIEknbSB3b3JraW5nIG9uDQo+ID4+IG1ha2luZyBp
+dCBtb2R1bGFyKSwgYW5kIHRoZW4gc3dlZXAgdGhyb3VnaCB1c2VyIGRlZmluZWQgYmVuY2htYXJr
+cw0KPiA+PiBhbmQgc2V0cyBvZiBwYXJhbWV0ZXIgc3BhY2VzLiAgSSBoYXZlIGEgc2VwYXJhdGUg
+dG9vbCB0aGF0IHdpbGwgc3dlZXANCj4gPj4gdGhyb3VnaCBjZXBoIHBhcmFtZXRlcnMsIGNyZWF0
+ZSBjZXBoLmNvbmYgZmlsZXMgZm9yIGVhY2ggc3BhY2UsIGFuZA0KPiA+PiBydW4gY2J0IHdpdGgg
+ZWFjaCBvbmUsIGJ1dCB0aGUgZXZlbnR1YWwgZ29hbCBpcyB0byBpbnRlZ3JhdGUgdGhhdCBpbnRv
+IGNidA0KPiBpdHNlbGYuDQo+ID4+DQo+ID4+IFRob3VnaCBJIG5ldmVyIHJlYWxseSBpbnRlbmRl
+ZCBpdCB0byBydW4gZnVuY3Rpb25hbCB0ZXN0cywgSSBqdXN0DQo+ID4+IGFkZGVkIHNvbWV0aGlu
+ZyBsaWtlIGxvb2tzIHZlcnkgc2ltaWxhciB0byB0aGUgcmFkb3Mgc3VpdGUgc28gSSBjYW4NCj4g
+Pj4gYmVuY2htYXJrIGNlcGhfdGVzdF9yYWRvcyBmb3IgdGhlIG5ldyBjb21tdW5pdHkgbGFiIGhh
+cmR3YXJlLiBJDQo+ID4+IGFscmVhZHkgaGFkIGEgbWVjaGFuaXNtIHRvIGluamVjdCBPU0QgZG93
+bi9vdXQgdXAvaW4gZXZlbnRzLCBzbyB3aXRoDQo+ID4+IGEgYml0IG9mIHNxdWludGluZyBpdCBj
+YW4gZ2l2ZSB5b3UgYSB2ZXJ5IHJvdWdoIGFwcHJveGltYXRpb24gb2YgYQ0KPiA+PiB3b3JrbG9h
+ZCB1c2luZyB0aGUgb3NkIHRocmFzaGVyLiAgSWYgeW91IGFyZSBpbnRlcmVzdGVkLCBJJ2QgYmUg
+Z2FtZQ0KPiA+PiB0byBzZWUgaWYgd2UgY291bGQgaW50ZWdyYXRlIHlvdXIgY2VwaGZzIHRlc3Rz
+IGFzIHdlbGwgKEkgZXZlbnR1YWxseQ0KPiA+PiB3YW50ZWQgdG8gYWRkIGNlcGhmcyBiZW5jaG1h
+cmsgY2FwYWJpbGl0aWVzIGFueXdheSkuDQo+ID4NCj4gPiBDb29sIC0gbXkgZm9jdXMgaXMgdmVy
+eSBtdWNoIG9uIHRpZ2h0ZW5pbmcgdGhlIGNvZGUtYnVpbGQtdGVzdCBsb29wDQo+ID4gZm9yIGRl
+dmVsb3BlcnMsIGJ1dCBJIGNhbiBzZWUgdXMgbmVlZGluZyB0byBleHRlbmQgdGhhdCBpbnRvIGEN
+Cj4gPiBjb2RlLWJ1aWxkLXRlc3QtYmVuY2ggbG9vcCBhcyB3ZSBkbyBwZXJmb3JtYW5jZSB3b3Jr
+IG9uIGNlcGhmcyBpbiB0aGUNCj4gPiBmdXR1cmUuICBEb2VzIGNidCByZWx5IG9uIGhhdmluZyBj
+ZXBoIHBhY2thZ2VzIGJ1aWx0LCBvciBkb2VzIGl0IGJsYXN0DQo+ID4gdGhlIGJpbmFyaWVzIGRp
+cmVjdGx5IGZyb20gc3JjLyBvbnRvIHRoZSB0ZXN0IG5vZGVzPw0KPiANCj4gY2J0IGRvZXNuJ3Qg
+aGFuZGxlIGJ1aWxkcy9pbnN0YWxscyBhdCBhbGwsIHNvIGl0J3MgcHJvYmFibHkgbm90IHBhcnRp
+Y3VsYXJseSBoZWxwZnVsDQo+IGluIHRoaXMgcmVnYXJkLiAgQnkgZGVmYXVsdCBpdCBhc3N1bWVz
+IGJpbmFyaWVzIGFyZSBpbiAvdXNyL2JpbiwgYnV0IHlvdSBjYW4NCj4gb3B0aW9uYWxseSBvdmVy
+cmlkZSB0aGF0IGluIHRoZSB5YW1sLiAgTXkgd29ya2Zsb3cgaXMgdXN1YWxseSB0bzoNCj4gDQo+
+IDFhKSBidWlsZCBjZXBoIGZyb20gc3JjIGFuZCBkaXN0cmlidXRlIHRvIG90aGVyIG5vZGVzICht
+YW51YWxseSkNCj4gMWIpIHJ1biBhIHNoZWxsIHNjcmlwdCB0aGF0IGluc3RhbGxzIGEgZ2l2ZW4g
+cmVsZWFzZSBmcm9tIGdpdGJ1aWxkZXIgb24gYWxsIG5vZGVzDQo+IDIpIHJ1biBhIGNidCB5YW1s
+IGZpbGUgdGhhdCB0YXJnZXRzIC91c3IvbG9jYWwsIHRoZSBidWlsZCBkaXIsIC91c3IvYmluLCBl
+dGMuDQo+IA0KPiBEZWZpbml0ZWx5IHdvdWxkIGJlIHVzZWZ1bCB0byBoYXZlIHNvbWV0aGluZyB0
+aGF0IG1ha2VzIDFhKSBiZXR0ZXIuDQo+IFByb2JhYmx5IG5vdCBjYnQncyBqb2IgdGhvdWdoLg0K
+DQpBYm91dCAxYSkNCg0KSW4gbXkgdGVzdCBjbHVzdGVyIEkgaGF2ZSBORlMgc2VydmVyIChvbiBv
+bmUgbm9kZSkgc2hhcmluZyAvaG9tZS9jZXBoIHdpdGggb3RoZXJzLCB3aXRoIG1hbnkgdmVyc2lv
+bnMgaW4gaXQuIEluIGV2ZXJ5IHN1YmRpcmVjdG9yeSBJIHJ1biBtYWtlIGluc3RhbGwgd2l0aCBE
+RVNURElSIHBvaW50aW5nIHRvIGFub3RoZXIgbmV3bHkgY3JlYXRlZCBCSU4gc3ViZGlyLg0KDQpT
+byBpdCBsb29rcyBsaWtlIHRoaXM6DQovaG9tZS9jZXBoL2NlcGgtMC45NC4xL0JJTiANCmxzIEJJ
+Tg0KZXRjDQpzYmluDQp1c3INCnZhcg0KDQpUaGVuIEkgcmVtb3ZlIHZhciwgYW5kIHJ1biAic3Rv
+dyIgb24gZXZlcnkgbm9kZSB0byBsaW5rIGJpbmFyaWVzIGFuZCBsaWJzIGZyb20gc2hhcmVkIC9o
+b21lL2NlcGgvY2VwaC12ZXJzaW9uL0JJTiB0byAnLycgYW5kICdsZGNvbmZpZycgYXQgdGhlIGVu
+ZC4gQmFzaWNhbGx5IEkgY2FuIGRvIGNoYW5nZXMgb25seSBvbiBvbmUgbm9kZSwgYW5kIHZlcnkg
+cXVpY2tseSBzd2l0Y2ggYmV0d2VlbiBjZXBoIHZlcnNpb25zLiBTbyB0aGVyZSBpcyBubyBjZXBo
+IGluc3RhbGxlZCBhdCBhbnkgbm9kZSwgY2VwaCBzdHVmZiBpcyBvbmx5IGF0IC92YXIgZGlyZWN0
+b3J5Lg0KDQpPZiBjb3Vyc2Ugd2hlbiBORlMgbm9kZSBmYWlscywgZmFpbHMgZXZlcnl0aGluZyAu
+Li4gYnV0IEknbSBhd2FyZSBvZiB0aGF0Lg0KDQpDaGVjayBvdXQgInN0b3ciLg0KDQo+ID4NCj4g
+PiBKb2huDQo+IC0tDQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBs
+aW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbiB0aGUNCj4gYm9keSBvZiBhIG1lc3NhZ2Ug
+dG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0DQo+IGh0
+dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KDQoNClJlZ2FyZHMsDQpJ
+Z29yLg0KDQo=
