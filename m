@@ -1,102 +1,73 @@
-From: Mark Nelson <mnelson@redhat.com>
+From: John Spray <john.spray@redhat.com>
 Subject: Re: vstart runner for cephfs tests
-Date: Thu, 23 Jul 2015 06:56:55 -0500
-Message-ID: <55B0D687.1040403@redhat.com>
-References: <55B0BB59.7010806@redhat.com>
+Date: Thu, 23 Jul 2015 13:34:15 +0100
+Message-ID: <55B0DF47.3040704@redhat.com>
+References: <55B0BB59.7010806@redhat.com> <55B0CEA0.80008@dachary.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:60299 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:51734 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752406AbbGWL46 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 23 Jul 2015 07:56:58 -0400
-Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-	by mx1.redhat.com (Postfix) with ESMTPS id 0ADE92D4507
-	for <ceph-devel@vger.kernel.org>; Thu, 23 Jul 2015 11:56:58 +0000 (UTC)
-In-Reply-To: <55B0BB59.7010806@redhat.com>
+	id S1752153AbbGWMeR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 23 Jul 2015 08:34:17 -0400
+In-Reply-To: <55B0CEA0.80008@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <john.spray@redhat.com>, ceph-devel@vger.kernel.org
+To: Loic Dachary <loic@dachary.org>, ceph-devel@vger.kernel.org
 
-Hi John,
 
-I had similar thoughts on the benchmarking side, which is why I started 
-writing cbt a couple years ago.  I needed the ability to quickly spin up 
-clusters and run benchmarks on arbitrary sets of hardware.  The outcome 
-isn't perfect, but it's been extremely useful for running benchmarks and 
-sort of exists as a half-way point between vstart and teuthology.
 
-The basic idea is that you give it a yaml file that looks a little bit 
-like a teuthology yaml file and cbt will (optionally) build a cluster 
-across a number of user defined nodes with pdsh, start various 
-monitoring tools (this is ugly right now, I'm working on making it 
-modular), and then sweep through user defined benchmarks and sets of 
-parameter spaces.  I have a separate tool that will sweep through ceph 
-parameters, create ceph.conf files for each space, and run cbt with each 
-one, but the eventual goal is to integrate that into cbt itself.
+On 23/07/15 12:23, Loic Dachary wrote:
+> You may be interested by
+>
+> https://github.com/ceph/ceph/blob/master/src/test/ceph-disk-root.sh
+>
+> which is conditionally included
+>
+> https://github.com/ceph/ceph/blob/master/src/test/Makefile.am#L86
+>
+> by --enable-root-make-check
+>
+> https://github.com/ceph/ceph/blob/master/configure.ac#L414
+>
+> If you're reckless and trust the tests not to break (a crazy proposition by definition IMHO ;-), you can
+>
+> make TESTS=test/ceph-disk-root.sh check
+>
+> If you want protection, you do the same in a docker container with
+>
+> test/docker-test.sh --os-type centos --os-version 7 --dev make TESTS=test/ceph-disk-root.sh check
+>
+> I tried various strategies to make tests requiring root access more accessible and less scary and that's the best compromise I found. test/docker-test.sh is what the make check bot uses.
 
-Though I never really intended it to run functional tests, I just added 
-something like looks very similar to the rados suite so I can benchmark 
-ceph_test_rados for the new community lab hardware. I already had a 
-mechanism to inject OSD down/out up/in events, so with a bit of 
-squinting it can give you a very rough approximation of a workload using 
-the osd thrasher.  If you are interested, I'd be game to see if we could 
-integrate your cephfs tests as well (I eventually wanted to add cephfs 
-benchmark capabilities anyway).
+Interesting, I didn't realise we already had root-ish tests in there.
 
-Mark
+At some stage the need for root may go away in ceph-fuse, as in 
+principle fuse mount/unmounts shouldn't require root.  If not then 
+putting an outer docker wrapper around this could make sense, if we 
+publish the built binaries into the docker container via a volume or 
+somesuch.  I am behind on familiarizing myself with the dockerised tests.
 
-On 07/23/2015 05:00 AM, John Spray wrote:
+> When a test can be used both from sources and from teuthology, I found it more convenient to have it in the qa/workunits directory which is available in both environments. Who knows, maybe you will want a vstart based cephfs test to run as part of make check, in the same way
 >
-> Audience: anyone working on cephfs, general testing interest.
+> https://github.com/ceph/ceph/blob/master/src/test/cephtool-test-mds.sh
 >
-> The tests in ceph-qa-suite/tasks/cephfs are growing in number, but kind
-> of inconvenient to run because they require teuthology (and therefore
-> require built packages, locked nodes, etc).  Most of them don't actually
-> require anything beyond what you already have in a vstart cluster, so
-> I've adapted them to optionally run that way.
->
-> The idea is that we can iterate a lot faster when writing new tests (one
-> less excuse not to write them) and get better use out of the tests when
-> debugging things and testing fixes.  teuthology is fine for mass-running
-> the nightlies etc, but it's overkill for testing individual bits of
-> MDS/client functionality.
->
-> The code is currently on the wip-vstart-runner ceph-qa-suite branch, and
-> the two magic commands are:
->
-> 1. Start a vstart cluster with a couple of MDSs, as your normal user:
-> $ make -j4 rados ceph-fuse ceph-mds ceph-mon ceph-osd cephfs-data-scan
-> cephfs-journal-tool cephfs-table-tool && ./stop.sh ; rm -rf out dev ;
-> MDS=2 OSD=3 MON=1 ./vstart.sh -d -n
->
-> 2. Invoke the test runner, as root (replace paths, test name as
-> appropriate.  Leave of test name to run everything):
-> #
-> PYTHONPATH=/home/jspray/git/teuthology/:/home/jspray/git/ceph-qa-suite/
-> python /home/jspray/git/ceph-qa-suite/tasks/cephfs/vstart_runner.py
-> tasks.cephfs.test_strays.TestStrays.test_migration_on_shutdown
->
-> test_migration_on_shutdown (tasks.cephfs.test_strays.TestStrays) ... ok
->
-> ----------------------------------------------------------------------
-> Ran 1 test in 121.982s
->
-> OK
->
->
-> ^^^ see!  two minutes, and no waiting for gitbuilders!
->
-> The main caveat here is that it needs to run as root in order to
-> mount/unmount things, which is a little scary.  My plan is to split it
-> out into a little root service for doing mount operations, and then let
-> the main test part run as a normal user and call out to the mounter
-> service when needed.
->
-> Cheers,
-> John
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> does.
+
+Yes, this crossed my mind.  At the moment, even many of the "quick" 
+tests/cephfs tests take tens of seconds, so they are probably a bit too 
+big to go in a default make check, but for some of the really simple 
+things that are currently done in cephtool/test.sh, I would be temped to 
+move them into the python world to make them a bit less fiddly.
+
+The test location is a bit challenging, because we essentially have two 
+not-completely-stable interfaces here, vstart and teuthology. Because 
+teuthology is the more complicated, for the moment it makes sense for 
+the tests to live in that git repo.  Long term it would be nice if 
+fine-grained functional tests lived in the same git repo as the code 
+they're testing, but I don't really have a plan for that right now 
+outside of the probably-too-radical step of merging ceph-qa-suite into 
+the ceph repo.
+
+John
