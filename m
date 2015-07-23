@@ -1,56 +1,110 @@
-From: John Spray <john.spray@redhat.com>
+From: Loic Dachary <loic@dachary.org>
 Subject: Re: vstart runner for cephfs tests
-Date: Thu, 23 Jul 2015 13:37:19 +0100
-Message-ID: <55B0DFFF.7010402@redhat.com>
-References: <55B0BB59.7010806@redhat.com> <55B0D687.1040403@redhat.com>
+Date: Thu, 23 Jul 2015 14:37:44 +0200
+Message-ID: <55B0E018.9040204@dachary.org>
+References: <55B0BB59.7010806@redhat.com> <55B0CEA0.80008@dachary.org> <55B0DF47.3040704@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="dPRsA0lCR8Qm1VcwVMajEINppb0CgCSQo"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:52862 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752436AbbGWMhU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 23 Jul 2015 08:37:20 -0400
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-	by mx1.redhat.com (Postfix) with ESMTPS id 77D82C300F
-	for <ceph-devel@vger.kernel.org>; Thu, 23 Jul 2015 12:37:20 +0000 (UTC)
-In-Reply-To: <55B0D687.1040403@redhat.com>
+Received: from mail2.dachary.org ([91.121.57.175]:54890 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752204AbbGWMhv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Jul 2015 08:37:51 -0400
+In-Reply-To: <55B0DF47.3040704@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>, ceph-devel@vger.kernel.org
+To: John Spray <john.spray@redhat.com>, ceph-devel@vger.kernel.org
+
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--dPRsA0lCR8Qm1VcwVMajEINppb0CgCSQo
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
 
 
-On 23/07/15 12:56, Mark Nelson wrote:
-> I had similar thoughts on the benchmarking side, which is why I 
-> started writing cbt a couple years ago.  I needed the ability to 
-> quickly spin up clusters and run benchmarks on arbitrary sets of 
-> hardware.  The outcome isn't perfect, but it's been extremely useful 
-> for running benchmarks and sort of exists as a half-way point between 
-> vstart and teuthology.
->
-> The basic idea is that you give it a yaml file that looks a little bit 
-> like a teuthology yaml file and cbt will (optionally) build a cluster 
-> across a number of user defined nodes with pdsh, start various 
-> monitoring tools (this is ugly right now, I'm working on making it 
-> modular), and then sweep through user defined benchmarks and sets of 
-> parameter spaces.  I have a separate tool that will sweep through ceph 
-> parameters, create ceph.conf files for each space, and run cbt with 
-> each one, but the eventual goal is to integrate that into cbt itself.
->
-> Though I never really intended it to run functional tests, I just 
-> added something like looks very similar to the rados suite so I can 
-> benchmark ceph_test_rados for the new community lab hardware. I 
-> already had a mechanism to inject OSD down/out up/in events, so with a 
-> bit of squinting it can give you a very rough approximation of a 
-> workload using the osd thrasher.  If you are interested, I'd be game 
-> to see if we could integrate your cephfs tests as well (I eventually 
-> wanted to add cephfs benchmark capabilities anyway).
+On 23/07/2015 14:34, John Spray wrote:>=20
+>=20
+> On 23/07/15 12:23, Loic Dachary wrote:
+>> You may be interested by
+>>
+>> https://github.com/ceph/ceph/blob/master/src/test/ceph-disk-root.sh
+>>
+>> which is conditionally included
+>>
+>> https://github.com/ceph/ceph/blob/master/src/test/Makefile.am#L86
+>>
+>> by --enable-root-make-check
+>>
+>> https://github.com/ceph/ceph/blob/master/configure.ac#L414
+>>
+>> If you're reckless and trust the tests not to break (a crazy propositi=
+on by definition IMHO ;-), you can
+>>
+>> make TESTS=3Dtest/ceph-disk-root.sh check
+>>
+>> If you want protection, you do the same in a docker container with
+>>
+>> test/docker-test.sh --os-type centos --os-version 7 --dev make TESTS=3D=
+test/ceph-disk-root.sh check
+>>
+>> I tried various strategies to make tests requiring root access more ac=
+cessible and less scary and that's the best compromise I found. test/dock=
+er-test.sh is what the make check bot uses.
+>=20
+> Interesting, I didn't realise we already had root-ish tests in there.
+>=20
+> At some stage the need for root may go away in ceph-fuse, as in princip=
+le fuse mount/unmounts shouldn't require root.  If not then putting an ou=
+ter docker wrapper around this could make sense, if we publish the built =
+binaries into the docker container via a volume or somesuch.  I am behind=
+ on familiarizing myself with the dockerised tests.
 
-Cool - my focus is very much on tightening the code-build-test loop for 
-developers, but I can see us needing to extend that into a 
-code-build-test-bench loop as we do performance work on cephfs in the 
-future.  Does cbt rely on having ceph packages built, or does it blast 
-the binaries directly from src/ onto the test nodes?
+The docker container runs from sources, not from packages.=20
 
-John
+>=20
+>> When a test can be used both from sources and from teuthology, I found=
+ it more convenient to have it in the qa/workunits directory which is ava=
+ilable in both environments. Who knows, maybe you will want a vstart base=
+d cephfs test to run as part of make check, in the same way
+>>
+>> https://github.com/ceph/ceph/blob/master/src/test/cephtool-test-mds.sh=
+
+>>
+>> does.
+>=20
+> Yes, this crossed my mind.  At the moment, even many of the "quick" tes=
+ts/cephfs tests take tens of seconds, so they are probably a bit too big =
+to go in a default make check, but for some of the really simple things t=
+hat are currently done in cephtool/test.sh, I would be temped to move the=
+m into the python world to make them a bit less fiddly.
+>=20
+> The test location is a bit challenging, because we essentially have two=
+ not-completely-stable interfaces here, vstart and teuthology. Because te=
+uthology is the more complicated, for the moment it makes sense for the t=
+ests to live in that git repo.  Long term it would be nice if fine-graine=
+d functional tests lived in the same git repo as the code they're testing=
+, but I don't really have a plan for that right now outside of the probab=
+ly-too-radical step of merging ceph-qa-suite into the ceph repo.
+>=20
+> John
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--dPRsA0lCR8Qm1VcwVMajEINppb0CgCSQo
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlWw4BkACgkQ8dLMyEl6F21LSACgkmZr3B18+2eFN5xadM/v4SM+
+ts4An2qRqavoqUF2yxpESkQZZ778hF0d
+=wD7j
+-----END PGP SIGNATURE-----
+
+--dPRsA0lCR8Qm1VcwVMajEINppb0CgCSQo--
