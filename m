@@ -1,39 +1,61 @@
-From: Ken Dreyer <kdreyer@redhat.com>
-Subject: Re: reconciliation between firefly and v0.80.8.2
-Date: Fri, 24 Jul 2015 11:43:44 -0600
-Message-ID: <55B27950.9070409@redhat.com>
-References: <55B2708B.1020705@dachary.org>
+From: Pete Zaitcev <zaitcev@redhat.com>
+Subject: Re: Moving away from Yum/DNF repo priorities for Ceph and
+ ceph-deploy
+Date: Fri, 24 Jul 2015 17:24:00 -0600
+Message-ID: <20150724172400.77454881@guren.zaitcev.lan>
+References: <0FA51B40-C040-4A64-A2BF-266083E740B6@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:41227 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:51873 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752968AbbGXRnp (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 24 Jul 2015 13:43:45 -0400
-In-Reply-To: <55B2708B.1020705@dachary.org>
+	id S1752193AbbGXXYB convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Jul 2015 19:24:01 -0400
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+	by mx1.redhat.com (Postfix) with ESMTPS id 88A5DC1F71
+	for <ceph-devel@vger.kernel.org>; Fri, 24 Jul 2015 23:24:01 +0000 (UTC)
+Received: from guren.zaitcev.lan (vpn-58-48.rdu2.redhat.com [10.10.58.48])
+	by int-mx11.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t6ONO01q024288
+	for <ceph-devel@vger.kernel.org>; Fri, 24 Jul 2015 19:24:01 -0400
+In-Reply-To: <0FA51B40-C040-4A64-A2BF-266083E740B6@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 07/24/2015 11:06 AM, Loic Dachary wrote:
-> * build: remove LIBPERFGLUE from LIBMDS 
->   is unique to v0.80.8.2 and it is unclear why it was found to be usefu in
->   isolation. An issue for firefly backport of
->   http://tracker.ceph.com/issues/10691 was open at
->   http://tracker.ceph.com/issues/12461#note-1
+On Thu, 23 Jul 2015 16:12:59 -0700
+Travis Rhoden <trhoden@redhat.com> wrote:
 
-Yeah, to shed more light why we found that patch to be important downstream:
+> I=E2=80=99m working on ways to improve Ceph installation with ceph-de=
+ploy, and
+> a common hurdle we have hit involves dependency issues between ceph.c=
+om
+> hosted RPM repos, and packages within EPEL.  For a while we were able=
+ to
+> managed this with the priorities plugin, but then EPEL shipped packag=
+es
+> that included changes that weren=E2=80=99t available on the ceph.com =
+packages,
+> and the EPEL packages =E2=80=9Cobsoleted=E2=80=9D the ceph.com ones. =
+[...]
 
-The RHEL product has strict requirements about support, stability, ABI
-guarantees, etc. Our team's able to support the gperftools-libs package
-for the Ceph product, but not for all of RHEL. Since
-/usr/bin/ceph-dencoder was only thing in ceph-common that links again
-libtcmalloc, if we could fix the over-linking there, then we avoid the
-whole issue.
+This happens every time repos want to conflict with packages provided
+by the base distro or EPEL. I think the only sensible way to manage it =
+is
+not to conflict and rely on the base packages. That means getting the r=
+ight
+versions in. In old EPEL/CentOS/RHEL this may mean versioned names or o=
+ther
+tricks, but the point is to get them in. You have access to experienced
+packagers such as Haikel G., who can help you.
 
-The downstream BZ that corresponds to that ceph.com Redmine ticket is
-https://bugzilla.redhat.com/1186953 in case anyone's interested.
+So, I'm just curious, what are the specific pain points that we're hitt=
+ing,
+which prevent using EPEL packages? What are you duplicating and why?
 
-- Ken
+-- Pete
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
