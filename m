@@ -1,159 +1,63 @@
-From: Li Wang <liwang@ubuntukylin.com>
-Subject: Re: [PATCH] Osd: write back throttling for cache tiering
-Date: Tue, 28 Jul 2015 16:04:32 +0800
-Message-ID: <55B73790.9090002@ubuntukylin.com>
-References: <cover.1432819956.git.liwang@ubuntukylin.com>
- <alpine.DEB.2.00.1505280936550.6462@cobra.newdream.net>
+From: Gregory Farnum <greg@gregs42.com>
+Subject: Re: Criteria to become a Ceph project
+Date: Tue, 28 Jul 2015 09:44:09 +0100
+Message-ID: <CAC6JEv9wTCkb6XEtSSN0e-9MNuLF=2V_OEk_AnxP33t=3nG+tw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m59-178.qiye.163.com ([123.58.178.59]:56679 "EHLO
-	m59-178.qiye.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754920AbbG1IEx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Jul 2015 04:04:53 -0400
-In-Reply-To: <alpine.DEB.2.00.1505280936550.6462@cobra.newdream.net>
+Received: from mail-ig0-f176.google.com ([209.85.213.176]:35948 "EHLO
+	mail-ig0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752778AbbG1IoL convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Jul 2015 04:44:11 -0400
+Received: by igbij6 with SMTP id ij6so106589029igb.1
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Jul 2015 01:44:10 -0700 (PDT)
+Received: from mail-ig0-f174.google.com (mail-ig0-f174.google.com. [209.85.213.174])
+        by smtp.gmail.com with ESMTPSA id vk8sm8095813igb.4.2015.07.28.01.44.10
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 28 Jul 2015 01:44:10 -0700 (PDT)
+Received: by igbpg9 with SMTP id pg9so112023125igb.0
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Jul 2015 01:44:09 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: ceph-devel@vger.kernel.org, Nick Fisk <nick@fisk.me.uk>, MingXin Liu <mingxinliu@ubuntukylin.com>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Sage,
-   Thanks for the reminder. I think mailing list is better for
-publishing and discussing idea and potentially has more audience,
-while github is more suitable for code reviewing, and cared only
-by the developers. So I think for the patch to implement a new
-feature, it is desirable to publish the motivation and idea behind
-on the mailing list as well, hope that is not annoying :)
+On Tue, Jul 28, 2015 at 7:38 AM, Loic Dachary <loic@dachary.org> wrote:
+> Hi Ceph,
+>
+> The title sounds a little strange (Citerias to become a Ceph project) because I'm not aware of projects initiated by someone external to Ceph that later became part of the Ceph nebula of projects (as found at http://tracker.ceph.com/projects/ or http://github.com/ceph/). I can however imagine that a piece of software developed with no interaction with the Ceph development community could be contributed and become a valuable addition (port to non GNU/Linux Operating Systems, monitoring applications for mobile devices etc.).
+>
+> Although publishing the code of such a component under a Free Software license is a natural first step, there is more to do before it becomes part of what we (the community of Ceph developers) care for on a regular basis. Borrowing the OpenStack requirements ( at http://governance.openstack.org/reference/new-projects-requirements.html ), it could be expressed as:
+>
+>     Free Software:
+>         The proposed project uses a Free Software license as published at http://www.gnu.org/licenses/license-list.html#SoftwareLicenses
+>         Project must have no library dependencies which effectively restrict how the project may be distributed or deployed
+>     Open Community:
+>         The leadership is chosen by the contributors to the project
+>         The project has regular public meetings on IRC and those meetings are logged and published
+>     Open Development:
+>         The project uses public code reviews
+>         The project has core reviewers and adopts a test-driven gate
+>         The project provides liaisons that serve as contacts for the work of cross-project teams in Ceph
+>         Where it makes sense, the project cooperates with existing projects rather than gratuitously competing or reinventing the wheel
+>         Where appropriate, the project adopts technology and patterns used by existing Ceph projects
+>     Open Design:
+>         The project direction is discussed at the Ceph Design Summit and/or on public forums
+>         The project uses the ceph-devel ML to discuss issues
+>
+> These requirements are formal in the case of OpenStack but they could also be used in the context of Ceph, not as requirements but as a guideline.
+>
+> What do you think ?
 
-Cheers,
-Li Wang
+Several small projects have been added to the Ceph constellation
+despite being initially implemented outside of our systems. Mostly
+things like rados-java and phprados.
 
-On 2015/6/13 10:06, Sage Weil wrote:
-> Hi Li,
->
-> Reviewing this now!  See comments on the PR.
->
-> Just FYI, the current convention is to send kernel patches to the list,
-> and to use github for the userland stuff.  Emails like this are helpful to
-> get people's attention but not strictly needed--we'll notice the PR either
-> way!
->
-> Thanks-
-> sage
->
-> On Thu, 28 May 2015, Li Wang wrote:
->
->> This patch is to do write back throttling for cache tiering,
->> which is similar to what the Linux kernel does for
->> page cache write back. The motivation and original idea are
->> proposed by Nick Fisk, detailed in his email as below. In our
->> implementation, we introduce a paramter 'cache_target_dirty_high_ratio'
->> (default 0.6) as the high speed threshold, while leave the
->> 'cache_target_dirty_ratio' (default 0.4) to represent the low speed
->> threshold, we control the flush speed by limiting the parallelism of
->> flushing. The maximum parallelism under low speed is half of the
->> parallelism under high speed. If there is at least one PG such that
->> the dirty ratio beyond the high threshold, full speed mode is entered;
->> If there is no PG such that dirty ratio beyond the low threshold,
->> idle mode is entered; In other cases, slow speed mode is entered.
->>
->> -------- Original Message --------
->> Subject: 	Ceph Tiering Idea
->> Date: 	Fri, 22 May 2015 16:07:46 +0100
->> From: 	Nick Fisk <nick@fisk.me.uk>
->> To: 	liwang@ubuntukylin.com
->>
->> Hi,
->>
->> I??ve just seen your post to the Ceph Dev Mailing list regarding
->> adding temperature based eviction to the cache eviction logic.
->> I think this is a much needed enhancement and can??t wait to test
->> it out once it hits the next release.
->>
->> I have been testing Ceph Cache Tiering for a number of months now
->> and another enhancement which I think would greatly enhance the
->> performance would be high and low thresholds for flushing and
->> eviction. I have tried looking through the Ceph source, but with
->> my limited programming skills I was unable to make any progress
->> and so thought I would share my idea with you and get your thoughts.
->>
->> Currently as soon as you exceed the flush/eviction threshold, Ceph
->> starts aggressively flushing to the base tier which impacts performance.
->> For long running write operations this is probably unavoidable, however
->> most workloads are normally quite bursty and my idea of having high and
->> low thresholds would hopefully improve performance where the writes
->> come in bursts.
->>
->> When the cache tier approaches the low threshold, Ceph would start
->> flushing/evicting with a low priority, so performance is not affected.
->> If the high threshold is reached, Ceph will flush more aggressively,
->> similar to the current behaviour. Hopefully during the quiet periods
->> in-between bursts of writes, the cache would slowly be reduced down to
->> the low threshold meaning it is ready for the next burst.
->>
->> For example:-
->>
->> 1TB Cache Tier
->>
->> Low Dirty=0.4
->>
->> High Dirty=0.6
->>
->> Cache tier would contain 400GB of dirty data at idle, as dirty data
->> rises above 400GB, Ceph would flush with a low priority or throttled
->> MB/s rate.
->>
->> If Cache tier raises above 600GB, Ceph will aggressively flush to keep
->> dirty data below 60%
->>
->> The above should give you 200GB capacity of bursty writes before
->> performance becomes impacted
->>
->> Does this make sense?
->>
->> Many Thanks,
->>
->> Nick
->>
->> The patches:
->> https://github.com/ceph/ceph/pull/4792
->>
->> Mingxin Liu (6):
->>    Osd: classify flush mode into low speed and high speed modes
->>    osd: add new field in pg_pool_t
->>    Mon: add cache_target_dirty_high_ratio related configuration and
->>      commands
->>    Osd: revise agent_choose_mode() to track the flush mode
->>    Osd: implement low speed flush
->>    Doc: add write back throttling stuff in document and test scripts
->>
->>   ceph-erasure-code-corpus               |  2 +-
->>   doc/dev/cache-pool.rst                 |  1 +
->>   doc/man/8/ceph.rst                     |  3 ++-
->>   doc/rados/operations/cache-tiering.rst | 11 +++++++++++
->>   doc/rados/operations/pools.rst         | 19 +++++++++++++++++++
->>   qa/workunits/cephtool/test.sh          |  9 +++++++++
->>   src/common/config_opts.h               |  2 ++
->>   src/mon/MonCommands.h                  |  4 ++--
->>   src/mon/OSDMonitor.cc                  | 31 ++++++++++++++++++++++++++++---
->>   src/osd/OSD.cc                         |  7 ++++++-
->>   src/osd/OSD.h                          | 11 +++++++++++
->>   src/osd/PG.h                           |  1 +
->>   src/osd/ReplicatedPG.cc                | 22 +++++++++++++++++-----
->>   src/osd/ReplicatedPG.h                 |  6 +++++-
->>   src/osd/TierAgentState.h               |  6 ++++--
->>   src/osd/osd_types.cc                   | 13 +++++++++++--
->>   src/osd/osd_types.h                    |  3 +++
->>   17 files changed, 133 insertions(+), 18 deletions(-)
->>
->> --
->> 1.9.1
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
->
+Obviously those are small and related to Ceph, and the process was
+"let's add this to the Ceph Github?" "Okay." I think if we need more
+formal rules we can invent them as we go; Ceph is not OpenStack and
+isn't going to be supervising the same volume nor breadth of
+individual groups.
+-Greg
