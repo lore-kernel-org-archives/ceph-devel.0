@@ -1,127 +1,157 @@
-From: =?UTF-8?Q?=C5=81ukasz_Redynk?= <lukas.redynk@gmail.com>
-Subject: Re: Ceph write path optimization
-Date: Tue, 28 Jul 2015 23:46:06 +0200
-Message-ID: <CADkk3ivd=35oDHVTQihW7DnPsY9063LrJFQKvc1ayiyBri3Btw@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Ceph write path optimization
+Date: Tue, 28 Jul 2015 22:03:48 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CDE7B98@SACMBXIP01.sdcorp.global.sandisk.com>
 References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CDE784B@SACMBXIP01.sdcorp.global.sandisk.com>
+ <CADkk3ivd=35oDHVTQihW7DnPsY9063LrJFQKvc1ayiyBri3Btw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f170.google.com ([209.85.217.170]:35235 "EHLO
-	mail-lb0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750741AbbG1Vqh convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Jul 2015 17:46:37 -0400
-Received: by lblf12 with SMTP id f12so83670213lbl.2
-        for <ceph-devel@vger.kernel.org>; Tue, 28 Jul 2015 14:46:35 -0700 (PDT)
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CDE784B@SACMBXIP01.sdcorp.global.sandisk.com>
+Received: from mail-bn1bon0096.outbound.protection.outlook.com ([157.56.111.96]:23474
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750744AbbG1WDx (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 28 Jul 2015 18:03:53 -0400
+In-Reply-To: <CADkk3ivd=35oDHVTQihW7DnPsY9063LrJFQKvc1ayiyBri3Btw@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
+To: =?utf-8?B?xYF1a2FzeiBSZWR5bms=?= <lukas.redynk@gmail.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
-
-Have you tried to tune XFS mkfs options? From mkfs.xfs(8)
-a) (log section, -l)
-lazy-count=value // by default is 0
-
-This changes the method of logging various persistent counters in the
-superblock. Under metadata intensive workloads, these counters are
-updated and logged frequently enough that the superblock updates
-become a serialisation point in the filesystem. The value can be
-either 0 or 1.
-
-and b) (data section, -d)
-
-agcount=value // by default is 2 (?)
-
-This is used to specify the number of allocation groups. The data
-section of the filesystem is divided into allocation groups to improve
-the performance of XFS. More allocation groups imply that more
-parallelism can be achieved when allocating blocks and inodes. The
-minimum allocation group size is 16 MiB; the maximum size is just
-under 1 TiB. The data section of the filesystem is divided into value
-allocation groups (default value is scaled automatically based on the
-underlying device size).
-
-Lately I was experimenting with this two and appeared to setting
-lazy-count to 1 and increasing agcount shows positive impact on IOPS,
-but unfortunately I don't have any performance numbers on this.
-
--Lukas
-
-
-2015-07-28 23:08 GMT+02:00 Somnath Roy <Somnath.Roy@sandisk.com>:
-> Hi,
-> Eventually, I have a working prototype and able to gather some performance comparison data with the changes I was talking about in the last performance meeting. Mark's suggestion of a write up was long pending, so, trying to summarize what I am trying to do.
->
-> Objective:
-> -----------
->
-> 1. Is to saturate SSD write bandwidth with ceph + filestore.
->      Most of the deployment of ceph + all flash so far (as far as I know) is having both data and journal on the same SSD. SSDs are far from saturate and the write performance of ceph is dismal (compare to HW). Can we improve that ?
->
-> 2. Ceph write performance in most of the cases are not stable, can we have a stable performance out most of the time ?
->
->
-> Findings/Optimization so far..
-> ------------------------------------
->
-> 1. I saw in flash environment you need to reduce the filestore_max_sync_interval a lot (from default 5min) and thus the benefit of syncfs coalescing and writing is going away.
->
-> 2. We have some logic to determine the max sequence number it can commit. That is adding some latency (>1 ms or so).
->
-> 3. This delay is filling up journals quickly if I remove all throttles from the filestore/journal.
->
-> 4. Existing throttle scheme is very difficult to tune.
->
-> 5. In case of write-ahead journaling the commit file is probably redundant as we can get the last committed seq number from journal headers during next OSD start. The fact that, the sync interval we need to reduce , this extra write will only add more to WA (also one extra fsync).
->
-> The existing scheme is well suited for HDD environment, but, probably not for flash. So, I made the following changes.
->
-> 1. First, I removed the extra commit seq file write and changed the journal replay stuff accordingly.
->
-> 2. Each filestore Op threads is now doing O_DSYNC write followed by posix_fadvise(**fd, 0, 0, POSIX_FADV_DONTNEED);
->
-> 3. I derived an algorithm that each worker thread is executing to determine the max seq it can trim the journal to.
->
-> 4. Introduced a new throttle scheme that will throttle journal write based on the % space left.
->
-> 5. I saw that this scheme is definitely emptying up the journal faster and able to saturate the SSD more.
->
-> 6. But, even if we are not saturating any resources, if we are having both data and journal on the same drive, both writes are suffering latencies.
->
-> 7. Separating out journal to different disk , the same code (and also stock)  is running faster. Not sure about the exact reason, but, something to do with underlying layer. Still investigating.
->
-> 8. Now, if we want to separate out journal, SSD is *not an option*. The reason is, after some point we will be limited by SSD BW and all writes for N osds going to that SSD will wear out that SSD very fast. Also, this will be a very expensive solution considering high end journal SSD.
->
-> 9. So, I started experimenting with small PCIe NVRAM partition (128 MB). So, If we have ~4GB NVRAM we can put ~32 OSDs in that(considering NVRAM durability is much higher).  The stock code as is (without throttle), the performance is becoming very spiky for obvious reason.
->
-> 10. But, with the above mentioned changes, I am able to make a constant high performance out most of the time.
->
-> 11. I am also trying the existing synfs codebase (without op_seq file) + the throttle scheme I mentioned in this setup to see if we can get out a stable improve performance out or not. This is still under investigation.
->
-> 12. Initial benchmark with single OSD (no replication) looks promising and you can find the draft here.
->
->        https://docs.google.com/document/d/1QYAWkBNVfSXhWbLW6nTLx81a9LpWACsGjWG8bkNwKY8/edit?usp=sharing
->
-> 13. I still need to try this out by increasing number of OSDs.
->
-> 14. Also, need to see how this scheme is helping both data/journal on the same SSD.
->
-> 15. The main challenge I am facing in both the scheme is XFS metadata flush process (xfsaild) is choking all the processes accessing the disk when it is waking up. I can delay it till max 30 sec and if there are lot of dirty metadata, there is a performance spike down for very brief amount of time. Even if we are acknowledging writes from say NVRAM journal write, still the opthreads are doing getattrs on the XFS and those threads are getting blocked. I tried with ext4 and this problem is not there since it is writing metadata synchronously by default, but, the overall performance of ext4 is much less. I am not an expert on filesystem, so, any help on this is much appreciated.
->
-> Mark,
-> If we have time, we can discuss this result in tomorrow's performance meeting.
->
-> Thanks & Regards
-> Somnath
->
-> ________________________________
->
-> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+VGhhbmtzIEx1a2FzIGZvciB0aGUgcmVzcG9uc2UuDQpJIGRpZG4ndCB0cnkgd2l0aCBsYXp5LWNv
+dW50ICwgYnV0LCBJIHRyaWVkIHdpdGggYWdjb3VudC4gSSBzYXcgYSBwb3N0IHRoYXQgKnJlZHVj
+aW5nKiBhZ2NvdW50IGFuZCBkaXJlY3Rvcnkgc2l6ZSBtYXkgYWxsZXZpYXRlIHhmc2FpbGQgZWZm
+ZWN0LiBJIGhhdmUgfjcuNSBUQiBkcml2ZSwgc28sIGFnY291bnQgaXMgbWluIDcuLkkgbW92ZWQg
+dG8gNCBUQiBwYXJ0aXRpb24gYW5kIG1hZGUgYWdjb3VudCA0LCBidXQgZGlkbid0IGhlbHAgbWUg
+bXVjaC4NCkFsc28sIEkgdHJpZWQgdG8gcHV0IHhmcyBqb3VybmFsIGxvZyB0byBkaWZmZXJlbnQg
+ZGV2aWNlIGFuZCB0aGF0IGRpZG4ndCBoZWxwIG1lIGVpdGhlciAodGhhdCdzIG1heSBiZSBiZWNh
+dXNlIGl0IGlzIGFsbCBhYm91dCBzeW5jaW5nIG1ldGFkYXRhIHRvIHRoZSBzYW1lIGRldmljZSku
+Lg0KQnV0LCBJIHdpbGwgdHJ5IHdpdGggbGF6eS1jb3VudD0xIGFuZCBpbmNyZWFzZWQgYWdjb3Vu
+dCBhbmQga2VlcCB5b3UgcG9zdGVkLg0KDQpSZWdhcmRzDQpTb21uYXRoDQoNCg0KLS0tLS1Pcmln
+aW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IG1yLmVyZGtAZ21haWwuY29tIFttYWlsdG86bXIuZXJk
+a0BnbWFpbC5jb21dIE9uIEJlaGFsZiBPZiBMdWthc3ogUmVkeW5rDQpTZW50OiBUdWVzZGF5LCBK
+dWx5IDI4LCAyMDE1IDI6NDYgUE0NClRvOiBTb21uYXRoIFJveQ0KQ2M6IGNlcGgtZGV2ZWxAdmdl
+ci5rZXJuZWwub3JnDQpTdWJqZWN0OiBSZTogQ2VwaCB3cml0ZSBwYXRoIG9wdGltaXphdGlvbg0K
+DQpIaSwNCg0KSGF2ZSB5b3UgdHJpZWQgdG8gdHVuZSBYRlMgbWtmcyBvcHRpb25zPyBGcm9tIG1r
+ZnMueGZzKDgpDQphKSAobG9nIHNlY3Rpb24sIC1sKQ0KbGF6eS1jb3VudD12YWx1ZSAvLyBieSBk
+ZWZhdWx0IGlzIDANCg0KVGhpcyBjaGFuZ2VzIHRoZSBtZXRob2Qgb2YgbG9nZ2luZyB2YXJpb3Vz
+IHBlcnNpc3RlbnQgY291bnRlcnMgaW4gdGhlIHN1cGVyYmxvY2suIFVuZGVyIG1ldGFkYXRhIGlu
+dGVuc2l2ZSB3b3JrbG9hZHMsIHRoZXNlIGNvdW50ZXJzIGFyZSB1cGRhdGVkIGFuZCBsb2dnZWQg
+ZnJlcXVlbnRseSBlbm91Z2ggdGhhdCB0aGUgc3VwZXJibG9jayB1cGRhdGVzIGJlY29tZSBhIHNl
+cmlhbGlzYXRpb24gcG9pbnQgaW4gdGhlIGZpbGVzeXN0ZW0uIFRoZSB2YWx1ZSBjYW4gYmUgZWl0
+aGVyIDAgb3IgMS4NCg0KYW5kIGIpIChkYXRhIHNlY3Rpb24sIC1kKQ0KDQphZ2NvdW50PXZhbHVl
+IC8vIGJ5IGRlZmF1bHQgaXMgMiAoPykNCg0KVGhpcyBpcyB1c2VkIHRvIHNwZWNpZnkgdGhlIG51
+bWJlciBvZiBhbGxvY2F0aW9uIGdyb3Vwcy4gVGhlIGRhdGEgc2VjdGlvbiBvZiB0aGUgZmlsZXN5
+c3RlbSBpcyBkaXZpZGVkIGludG8gYWxsb2NhdGlvbiBncm91cHMgdG8gaW1wcm92ZSB0aGUgcGVy
+Zm9ybWFuY2Ugb2YgWEZTLiBNb3JlIGFsbG9jYXRpb24gZ3JvdXBzIGltcGx5IHRoYXQgbW9yZSBw
+YXJhbGxlbGlzbSBjYW4gYmUgYWNoaWV2ZWQgd2hlbiBhbGxvY2F0aW5nIGJsb2NrcyBhbmQgaW5v
+ZGVzLiBUaGUgbWluaW11bSBhbGxvY2F0aW9uIGdyb3VwIHNpemUgaXMgMTYgTWlCOyB0aGUgbWF4
+aW11bSBzaXplIGlzIGp1c3QgdW5kZXIgMSBUaUIuIFRoZSBkYXRhIHNlY3Rpb24gb2YgdGhlIGZp
+bGVzeXN0ZW0gaXMgZGl2aWRlZCBpbnRvIHZhbHVlIGFsbG9jYXRpb24gZ3JvdXBzIChkZWZhdWx0
+IHZhbHVlIGlzIHNjYWxlZCBhdXRvbWF0aWNhbGx5IGJhc2VkIG9uIHRoZSB1bmRlcmx5aW5nIGRl
+dmljZSBzaXplKS4NCg0KTGF0ZWx5IEkgd2FzIGV4cGVyaW1lbnRpbmcgd2l0aCB0aGlzIHR3byBh
+bmQgYXBwZWFyZWQgdG8gc2V0dGluZyBsYXp5LWNvdW50IHRvIDEgYW5kIGluY3JlYXNpbmcgYWdj
+b3VudCBzaG93cyBwb3NpdGl2ZSBpbXBhY3Qgb24gSU9QUywgYnV0IHVuZm9ydHVuYXRlbHkgSSBk
+b24ndCBoYXZlIGFueSBwZXJmb3JtYW5jZSBudW1iZXJzIG9uIHRoaXMuDQoNCi1MdWthcw0KDQoN
+CjIwMTUtMDctMjggMjM6MDggR01UKzAyOjAwIFNvbW5hdGggUm95IDxTb21uYXRoLlJveUBzYW5k
+aXNrLmNvbT46DQo+IEhpLA0KPiBFdmVudHVhbGx5LCBJIGhhdmUgYSB3b3JraW5nIHByb3RvdHlw
+ZSBhbmQgYWJsZSB0byBnYXRoZXIgc29tZSBwZXJmb3JtYW5jZSBjb21wYXJpc29uIGRhdGEgd2l0
+aCB0aGUgY2hhbmdlcyBJIHdhcyB0YWxraW5nIGFib3V0IGluIHRoZSBsYXN0IHBlcmZvcm1hbmNl
+IG1lZXRpbmcuIE1hcmsncyBzdWdnZXN0aW9uIG9mIGEgd3JpdGUgdXAgd2FzIGxvbmcgcGVuZGlu
+Zywgc28sIHRyeWluZyB0byBzdW1tYXJpemUgd2hhdCBJIGFtIHRyeWluZyB0byBkby4NCj4NCj4g
+T2JqZWN0aXZlOg0KPiAtLS0tLS0tLS0tLQ0KPg0KPiAxLiBJcyB0byBzYXR1cmF0ZSBTU0Qgd3Jp
+dGUgYmFuZHdpZHRoIHdpdGggY2VwaCArIGZpbGVzdG9yZS4NCj4gICAgICBNb3N0IG9mIHRoZSBk
+ZXBsb3ltZW50IG9mIGNlcGggKyBhbGwgZmxhc2ggc28gZmFyIChhcyBmYXIgYXMgSSBrbm93KSBp
+cyBoYXZpbmcgYm90aCBkYXRhIGFuZCBqb3VybmFsIG9uIHRoZSBzYW1lIFNTRC4gU1NEcyBhcmUg
+ZmFyIGZyb20gc2F0dXJhdGUgYW5kIHRoZSB3cml0ZSBwZXJmb3JtYW5jZSBvZiBjZXBoIGlzIGRp
+c21hbCAoY29tcGFyZSB0byBIVykuIENhbiB3ZSBpbXByb3ZlIHRoYXQgPw0KPg0KPiAyLiBDZXBo
+IHdyaXRlIHBlcmZvcm1hbmNlIGluIG1vc3Qgb2YgdGhlIGNhc2VzIGFyZSBub3Qgc3RhYmxlLCBj
+YW4gd2UgaGF2ZSBhIHN0YWJsZSBwZXJmb3JtYW5jZSBvdXQgbW9zdCBvZiB0aGUgdGltZSA/DQo+
+DQo+DQo+IEZpbmRpbmdzL09wdGltaXphdGlvbiBzbyBmYXIuLg0KPiAtLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0NCj4NCj4gMS4gSSBzYXcgaW4gZmxhc2ggZW52aXJvbm1lbnQg
+eW91IG5lZWQgdG8gcmVkdWNlIHRoZSBmaWxlc3RvcmVfbWF4X3N5bmNfaW50ZXJ2YWwgYSBsb3Qg
+KGZyb20gZGVmYXVsdCA1bWluKSBhbmQgdGh1cyB0aGUgYmVuZWZpdCBvZiBzeW5jZnMgY29hbGVz
+Y2luZyBhbmQgd3JpdGluZyBpcyBnb2luZyBhd2F5Lg0KPg0KPiAyLiBXZSBoYXZlIHNvbWUgbG9n
+aWMgdG8gZGV0ZXJtaW5lIHRoZSBtYXggc2VxdWVuY2UgbnVtYmVyIGl0IGNhbiBjb21taXQuIFRo
+YXQgaXMgYWRkaW5nIHNvbWUgbGF0ZW5jeSAoPjEgbXMgb3Igc28pLg0KPg0KPiAzLiBUaGlzIGRl
+bGF5IGlzIGZpbGxpbmcgdXAgam91cm5hbHMgcXVpY2tseSBpZiBJIHJlbW92ZSBhbGwgdGhyb3R0
+bGVzIGZyb20gdGhlIGZpbGVzdG9yZS9qb3VybmFsLg0KPg0KPiA0LiBFeGlzdGluZyB0aHJvdHRs
+ZSBzY2hlbWUgaXMgdmVyeSBkaWZmaWN1bHQgdG8gdHVuZS4NCj4NCj4gNS4gSW4gY2FzZSBvZiB3
+cml0ZS1haGVhZCBqb3VybmFsaW5nIHRoZSBjb21taXQgZmlsZSBpcyBwcm9iYWJseSByZWR1bmRh
+bnQgYXMgd2UgY2FuIGdldCB0aGUgbGFzdCBjb21taXR0ZWQgc2VxIG51bWJlciBmcm9tIGpvdXJu
+YWwgaGVhZGVycyBkdXJpbmcgbmV4dCBPU0Qgc3RhcnQuIFRoZSBmYWN0IHRoYXQsIHRoZSBzeW5j
+IGludGVydmFsIHdlIG5lZWQgdG8gcmVkdWNlICwgdGhpcyBleHRyYSB3cml0ZSB3aWxsIG9ubHkg
+YWRkIG1vcmUgdG8gV0EgKGFsc28gb25lIGV4dHJhIGZzeW5jKS4NCj4NCj4gVGhlIGV4aXN0aW5n
+IHNjaGVtZSBpcyB3ZWxsIHN1aXRlZCBmb3IgSEREIGVudmlyb25tZW50LCBidXQsIHByb2JhYmx5
+IG5vdCBmb3IgZmxhc2guIFNvLCBJIG1hZGUgdGhlIGZvbGxvd2luZyBjaGFuZ2VzLg0KPg0KPiAx
+LiBGaXJzdCwgSSByZW1vdmVkIHRoZSBleHRyYSBjb21taXQgc2VxIGZpbGUgd3JpdGUgYW5kIGNo
+YW5nZWQgdGhlIGpvdXJuYWwgcmVwbGF5IHN0dWZmIGFjY29yZGluZ2x5Lg0KPg0KPiAyLiBFYWNo
+IGZpbGVzdG9yZSBPcCB0aHJlYWRzIGlzIG5vdyBkb2luZyBPX0RTWU5DIHdyaXRlIGZvbGxvd2Vk
+IGJ5IA0KPiBwb3NpeF9mYWR2aXNlKCoqZmQsIDAsIDAsIFBPU0lYX0ZBRFZfRE9OVE5FRUQpOw0K
+Pg0KPiAzLiBJIGRlcml2ZWQgYW4gYWxnb3JpdGhtIHRoYXQgZWFjaCB3b3JrZXIgdGhyZWFkIGlz
+IGV4ZWN1dGluZyB0byBkZXRlcm1pbmUgdGhlIG1heCBzZXEgaXQgY2FuIHRyaW0gdGhlIGpvdXJu
+YWwgdG8uDQo+DQo+IDQuIEludHJvZHVjZWQgYSBuZXcgdGhyb3R0bGUgc2NoZW1lIHRoYXQgd2ls
+bCB0aHJvdHRsZSBqb3VybmFsIHdyaXRlIGJhc2VkIG9uIHRoZSAlIHNwYWNlIGxlZnQuDQo+DQo+
+IDUuIEkgc2F3IHRoYXQgdGhpcyBzY2hlbWUgaXMgZGVmaW5pdGVseSBlbXB0eWluZyB1cCB0aGUg
+am91cm5hbCBmYXN0ZXIgYW5kIGFibGUgdG8gc2F0dXJhdGUgdGhlIFNTRCBtb3JlLg0KPg0KPiA2
+LiBCdXQsIGV2ZW4gaWYgd2UgYXJlIG5vdCBzYXR1cmF0aW5nIGFueSByZXNvdXJjZXMsIGlmIHdl
+IGFyZSBoYXZpbmcgYm90aCBkYXRhIGFuZCBqb3VybmFsIG9uIHRoZSBzYW1lIGRyaXZlLCBib3Ro
+IHdyaXRlcyBhcmUgc3VmZmVyaW5nIGxhdGVuY2llcy4NCj4NCj4gNy4gU2VwYXJhdGluZyBvdXQg
+am91cm5hbCB0byBkaWZmZXJlbnQgZGlzayAsIHRoZSBzYW1lIGNvZGUgKGFuZCBhbHNvIHN0b2Nr
+KSAgaXMgcnVubmluZyBmYXN0ZXIuIE5vdCBzdXJlIGFib3V0IHRoZSBleGFjdCByZWFzb24sIGJ1
+dCwgc29tZXRoaW5nIHRvIGRvIHdpdGggdW5kZXJseWluZyBsYXllci4gU3RpbGwgaW52ZXN0aWdh
+dGluZy4NCj4NCj4gOC4gTm93LCBpZiB3ZSB3YW50IHRvIHNlcGFyYXRlIG91dCBqb3VybmFsLCBT
+U0QgaXMgKm5vdCBhbiBvcHRpb24qLiBUaGUgcmVhc29uIGlzLCBhZnRlciBzb21lIHBvaW50IHdl
+IHdpbGwgYmUgbGltaXRlZCBieSBTU0QgQlcgYW5kIGFsbCB3cml0ZXMgZm9yIE4gb3NkcyBnb2lu
+ZyB0byB0aGF0IFNTRCB3aWxsIHdlYXIgb3V0IHRoYXQgU1NEIHZlcnkgZmFzdC4gQWxzbywgdGhp
+cyB3aWxsIGJlIGEgdmVyeSBleHBlbnNpdmUgc29sdXRpb24gY29uc2lkZXJpbmcgaGlnaCBlbmQg
+am91cm5hbCBTU0QuDQo+DQo+IDkuIFNvLCBJIHN0YXJ0ZWQgZXhwZXJpbWVudGluZyB3aXRoIHNt
+YWxsIFBDSWUgTlZSQU0gcGFydGl0aW9uICgxMjggTUIpLiBTbywgSWYgd2UgaGF2ZSB+NEdCIE5W
+UkFNIHdlIGNhbiBwdXQgfjMyIE9TRHMgaW4gdGhhdChjb25zaWRlcmluZyBOVlJBTSBkdXJhYmls
+aXR5IGlzIG11Y2ggaGlnaGVyKS4gIFRoZSBzdG9jayBjb2RlIGFzIGlzICh3aXRob3V0IHRocm90
+dGxlKSwgdGhlIHBlcmZvcm1hbmNlIGlzIGJlY29taW5nIHZlcnkgc3Bpa3kgZm9yIG9idmlvdXMg
+cmVhc29uLg0KPg0KPiAxMC4gQnV0LCB3aXRoIHRoZSBhYm92ZSBtZW50aW9uZWQgY2hhbmdlcywg
+SSBhbSBhYmxlIHRvIG1ha2UgYSBjb25zdGFudCBoaWdoIHBlcmZvcm1hbmNlIG91dCBtb3N0IG9m
+IHRoZSB0aW1lLg0KPg0KPiAxMS4gSSBhbSBhbHNvIHRyeWluZyB0aGUgZXhpc3Rpbmcgc3luZnMg
+Y29kZWJhc2UgKHdpdGhvdXQgb3Bfc2VxIGZpbGUpICsgdGhlIHRocm90dGxlIHNjaGVtZSBJIG1l
+bnRpb25lZCBpbiB0aGlzIHNldHVwIHRvIHNlZSBpZiB3ZSBjYW4gZ2V0IG91dCBhIHN0YWJsZSBp
+bXByb3ZlIHBlcmZvcm1hbmNlIG91dCBvciBub3QuIFRoaXMgaXMgc3RpbGwgdW5kZXIgaW52ZXN0
+aWdhdGlvbi4NCj4NCj4gMTIuIEluaXRpYWwgYmVuY2htYXJrIHdpdGggc2luZ2xlIE9TRCAobm8g
+cmVwbGljYXRpb24pIGxvb2tzIHByb21pc2luZyBhbmQgeW91IGNhbiBmaW5kIHRoZSBkcmFmdCBo
+ZXJlLg0KPg0KPiAgICAgICAgDQo+IGh0dHBzOi8vZG9jcy5nb29nbGUuY29tL2RvY3VtZW50L2Qv
+MVFZQVdrQk5WZlNYaFdiTFc2blRMeDgxYTlMcFdBQ3NHalcNCj4gRzhia053S1k4L2VkaXQ/dXNw
+PXNoYXJpbmcNCj4NCj4gMTMuIEkgc3RpbGwgbmVlZCB0byB0cnkgdGhpcyBvdXQgYnkgaW5jcmVh
+c2luZyBudW1iZXIgb2YgT1NEcy4NCj4NCj4gMTQuIEFsc28sIG5lZWQgdG8gc2VlIGhvdyB0aGlz
+IHNjaGVtZSBpcyBoZWxwaW5nIGJvdGggZGF0YS9qb3VybmFsIG9uIHRoZSBzYW1lIFNTRC4NCj4N
+Cj4gMTUuIFRoZSBtYWluIGNoYWxsZW5nZSBJIGFtIGZhY2luZyBpbiBib3RoIHRoZSBzY2hlbWUg
+aXMgWEZTIG1ldGFkYXRhIGZsdXNoIHByb2Nlc3MgKHhmc2FpbGQpIGlzIGNob2tpbmcgYWxsIHRo
+ZSBwcm9jZXNzZXMgYWNjZXNzaW5nIHRoZSBkaXNrIHdoZW4gaXQgaXMgd2FraW5nIHVwLiBJIGNh
+biBkZWxheSBpdCB0aWxsIG1heCAzMCBzZWMgYW5kIGlmIHRoZXJlIGFyZSBsb3Qgb2YgZGlydHkg
+bWV0YWRhdGEsIHRoZXJlIGlzIGEgcGVyZm9ybWFuY2Ugc3Bpa2UgZG93biBmb3IgdmVyeSBicmll
+ZiBhbW91bnQgb2YgdGltZS4gRXZlbiBpZiB3ZSBhcmUgYWNrbm93bGVkZ2luZyB3cml0ZXMgZnJv
+bSBzYXkgTlZSQU0gam91cm5hbCB3cml0ZSwgc3RpbGwgdGhlIG9wdGhyZWFkcyBhcmUgZG9pbmcg
+Z2V0YXR0cnMgb24gdGhlIFhGUyBhbmQgdGhvc2UgdGhyZWFkcyBhcmUgZ2V0dGluZyBibG9ja2Vk
+LiBJIHRyaWVkIHdpdGggZXh0NCBhbmQgdGhpcyBwcm9ibGVtIGlzIG5vdCB0aGVyZSBzaW5jZSBp
+dCBpcyB3cml0aW5nIG1ldGFkYXRhIHN5bmNocm9ub3VzbHkgYnkgZGVmYXVsdCwgYnV0LCB0aGUg
+b3ZlcmFsbCBwZXJmb3JtYW5jZSBvZiBleHQ0IGlzIG11Y2ggbGVzcy4gSSBhbSBub3QgYW4gZXhw
+ZXJ0IG9uIGZpbGVzeXN0ZW0sIHNvLCBhbnkgaGVscCBvbiB0aGlzIGlzIG11Y2ggYXBwcmVjaWF0
+ZWQuDQo+DQo+IE1hcmssDQo+IElmIHdlIGhhdmUgdGltZSwgd2UgY2FuIGRpc2N1c3MgdGhpcyBy
+ZXN1bHQgaW4gdG9tb3Jyb3cncyBwZXJmb3JtYW5jZSBtZWV0aW5nLg0KPg0KPiBUaGFua3MgJiBS
+ZWdhcmRzDQo+IFNvbW5hdGgNCj4NCj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18N
+Cj4NCj4gUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVj
+dHJvbmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBk
+ZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlz
+IG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5v
+dGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0
+aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBv
+ZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2
+ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIg
+YnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBk
+ZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNz
+aW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMp
+Lg0KPg0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGlu
+ZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgDQo+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0
+byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIA0KPiBpbmZvIGF0ICBo
+dHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg==
