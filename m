@@ -1,101 +1,44 @@
-From: Jiwan Ninglekhu <jiwan.ceph-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: How is Storage Object managed in Ceph Object Storage
-Date: Mon, 27 Jul 2015 20:55:43 -0500
-Message-ID: <CADxPHwJ_q6Y-1DyqCcB=Tu59qXLWvdV19znnN8LFuo+2NHWwdA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0628897277=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+From: Li Wang <liwang@ubuntukylin.com>
+Subject: [PATCH] osd: user specified flushing for cache tiering
+Date: Tue, 28 Jul 2015 12:48:29 +0800
+Message-ID: <cover.1438058480.git.liwang@ubuntukylin.com>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from m59-178.qiye.163.com ([123.58.178.59]:38738 "EHLO
+	m59-178.qiye.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751384AbbG1E6N (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Jul 2015 00:58:13 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: ceph-devel@vger.kernel.org, Nick Fisk <nick@fisk.me.uk>, Xinze Chi <xmdxcxz@gmail.com>, MingXin Liu <mingxinliu@ubuntukylin.com>, Li Wang <liwang@ubuntukylin.com>
 
---===============0628897277==
-Content-Type: multipart/alternative; boundary=001a11c0f64c94d19f051be5c4e0
+This patch implements user specified cache flushing for cache tiering. In
+many use cases, the user traffic is high in only some fixed time, fox example,
+work hour. In those cases, it is desirable that the flushing job could be scheduled
+in the idle time, and do as much as possible, to reduce the bandwidth contention
+with user traffic.
 
---001a11c0f64c94d19f051be5c4e0
-Content-Type: text/plain; charset=UTF-8
+Signed-off-by: Mingxin Liu <mingxinliu@ubuntukylin.com>
+Reviewed-by: Li Wang <liwang@ubuntukylin.com>
+Suggested-by: Xinze Chi <xmdxcxz@gmail.com>
 
-Hi:
+The codes:
+https://github.com/ceph/ceph/pull/5362
 
-I am defining Objects broken down from a file to be stored in Object
-Storage Cloud, as Storage Objects.
+Mingxin Liu (5):
+  osd: parse and queue user specified flushing
+  osd: traverse PGs and reset agent state
+  osd: set the default value of agent_timer's "safe_callbacks" be false
+  osd: add scheduled flushing work in agent logic
+  osd: handle configuration changes for user specified flushing
 
-What I know: I have read documents and papers about object storage cloud.
-Most of the time, the documents assume that storage objects from a file (to
-be stored) have been already created and rest of the storage process is
-mostly explained. A Storage Object is a container that has some fixed size
-data with a numeric ID and some metadata.
+ src/common/config_opts.h |   2 +
+ src/osd/OSD.cc           | 128 ++++++++++++++++++++++++++++++++++++++++++++++-
+ src/osd/OSD.h            |  12 +++--
+ src/osd/PG.h             |   1 +
+ src/osd/ReplicatedPG.cc  |   3 +-
+ 5 files changed, 141 insertions(+), 5 deletions(-)
 
-what I would like to know is, In Ceph Object Storage:
+-- 
+1.9.1
 
-   1. "How" are those storage objects actually created?
-   2. What is the break down process of a file into multiple storage
-   objects?
-   3. What metadata and minimum metadata is saved alongside each object?
-   4. What "key" is (extracted) required to later retrieve that storage
-   object?
-   5. Where is this "key" stored in Ceph?
-
-Thanks
-Jiwan
-
---001a11c0f64c94d19f051be5c4e0
-Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr"><p style=3D"margin:0px 0px 1em;padding:0px;border:0px;font=
--size:15px;clear:both;font-family:&#39;Helvetica Neue&#39;,Helvetica,Arial,=
-sans-serif;line-height:19.5px">Hi:</p><p style=3D"margin:0px 0px 1em;paddin=
-g:0px;border:0px;font-size:15px;clear:both;font-family:&#39;Helvetica Neue&=
-#39;,Helvetica,Arial,sans-serif;line-height:19.5px">I am defining Objects b=
-roken down from a file to be stored in Object Storage Cloud, as Storage Obj=
-ects.</p><p style=3D"margin:0px 0px 1em;padding:0px;border:0px;font-size:15=
-px;clear:both;font-family:&#39;Helvetica Neue&#39;,Helvetica,Arial,sans-ser=
-if;line-height:19.5px">What I know: I have read documents and papers about =
-object storage cloud. Most of the time, the documents assume that storage o=
-bjects from a file (to be stored) have been already created and rest of the=
- storage process is mostly explained. A Storage Object is a container that =
-has some fixed size data with a numeric ID and some metadata.</p><p style=
-=3D"margin:0px 0px 1em;padding:0px;border:0px;font-size:15px;clear:both;fon=
-t-family:&#39;Helvetica Neue&#39;,Helvetica,Arial,sans-serif;line-height:19=
-.5px">what I would like to know is, In Ceph Object Storage:</p><ol style=3D=
-"margin:0px 0px 1em 30px;padding:0px;border:0px;font-size:15px;font-family:=
-&#39;Helvetica Neue&#39;,Helvetica,Arial,sans-serif;line-height:19.5px"><li=
- style=3D"margin:0px 0px 0.5em;padding:0px;border:0px;word-wrap:break-word"=
->&quot;How&quot; are those storage objects actually created?</li><li style=
-=3D"margin:0px 0px 0.5em;padding:0px;border:0px;word-wrap:break-word">What =
-is the break down process of a file into multiple storage objects?</li><li =
-style=3D"margin:0px 0px 0.5em;padding:0px;border:0px;word-wrap:break-word">=
-What metadata and minimum metadata is saved alongside each object?</li><li =
-style=3D"margin:0px 0px 0.5em;padding:0px;border:0px;word-wrap:break-word">=
-What &quot;key&quot; is (extracted) required to later retrieve that storage=
- object?</li><li style=3D"margin:0px 0px 0.5em;padding:0px;border:0px;word-=
-wrap:break-word">Where is this &quot;key&quot; stored in Ceph?=C2=A0</li></=
-ol><div><font face=3D"Helvetica Neue, Helvetica, Arial, sans-serif"><span s=
-tyle=3D"font-size:15px;line-height:19.5px">Thanks</span></font></div><div><=
-font face=3D"Helvetica Neue, Helvetica, Arial, sans-serif"><span style=3D"f=
-ont-size:15px;line-height:19.5px">Jiwan</span></font></div></div>
-
---001a11c0f64c94d19f051be5c4e0--
-
---===============0628897277==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============0628897277==--
