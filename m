@@ -1,34 +1,43 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: can not get how many bytes read from rados_aio_read
-Date: Tue, 28 Jul 2015 15:18:13 +0300
-Message-ID: <CAOi1vP-23W2vNpT4=Q2xVUrGgYnPGTJUmROtWfF7Y-UU3We+zg@mail.gmail.com>
-References: <CAHz-cgECZvH50a7RgryWCd=+xT+8-GYwhG_fsz+2ugU=WkDQ5A@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: pre_start command not executed with upstart
+Date: Tue, 28 Jul 2015 05:29:14 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1507280528210.22099@cobra.newdream.net>
+References: <55B73581.3040501@42on.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f173.google.com ([209.85.212.173]:33224 "EHLO
-	mail-wi0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752465AbbG1MSO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Jul 2015 08:18:14 -0400
-Received: by wicmv11 with SMTP id mv11so176965885wic.0
-        for <ceph-devel@vger.kernel.org>; Tue, 28 Jul 2015 05:18:13 -0700 (PDT)
-In-Reply-To: <CAHz-cgECZvH50a7RgryWCd=+xT+8-GYwhG_fsz+2ugU=WkDQ5A@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:59252 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752499AbbG1M3P (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Jul 2015 08:29:15 -0400
+In-Reply-To: <55B73581.3040501@42on.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: deanraccoon <deanraccoon@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Wido den Hollander <wido@42on.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, Jul 28, 2015 at 2:43 PM, deanraccoon <deanraccoon@gmail.com> wrote:
-> Dear list,
->     I used the C API "rados_aio_read" to improve some read performace.
-> But it seems there is no way to get exactly how many bytes I read from rados.
-> the callback function will not return this infomation either.
->
-> so, it there anyone who could enlighten me how to do this?
+On Tue, 28 Jul 2015, Wido den Hollander wrote:
+> Hi,
+> 
+> I was trying to inject a pre_start command on a bunch of OSDs under
+> Ubuntu 14.04, but that didn't work.
+> 
+> I found out that only the sysvinit script execute pre_start commands,
+> but the upstart nor the systemd scripts do this.
+> 
+> Is this a thing which will disappear or is this just a oversight?
+> 
+> I'm actually using "sleep 30" as a pre-start to prevent all OSDs from
+> starting at the same time. Big boxes which die under the workload of all
+> OSDs starting at the same time.
+> 
+> I also try to prevent a lot of OSDMap changes by booting the OSDs slowly
+> so I tried to fix this with "pre_start".
 
-You wait for completion and get a return value from the completion,
-I think.  See rados_aio_get_return_value().
+I was hoping to let it die...
 
-Thanks,
+I would take a fresh look at systemd and see if there is a 
+different/better mechanism there to address the startup issue.  You can 
+manually add a prestart script/command to the unit file...
 
-                Ilya
+sage
