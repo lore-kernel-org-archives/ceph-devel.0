@@ -1,122 +1,106 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: systemd status
-Date: Wed, 29 Jul 2015 07:19:17 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1507290715450.22099@cobra.newdream.net>
-References: <alpine.DEB.2.00.1507281202370.22099@cobra.newdream.net> <CACkq2mr0aU+X_KDKGeQFy=sdtmRyy7CSR5tKHxYGyUFAA6kfEQ@mail.gmail.com> <mpad83$pu4$1@ger.gmane.org> <alpine.DEB.2.00.1507290550250.22099@cobra.newdream.net> <mpampk$1pq$1@ger.gmane.org>
+From: Bart Van Assche <bart.vanassche@sandisk.com>
+Subject: Re: [PATCH 17/18] target: add rbd backend
+Date: Wed, 29 Jul 2015 07:27:35 -0700
+Message-ID: <55B8E2D7.2040605@sandisk.com>
+References: <1438161835-27960-1-git-send-email-mchristi@redhat.com>
+ <1438161835-27960-17-git-send-email-mchristi@redhat.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:37139 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750962AbbG2OTS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Jul 2015 10:19:18 -0400
-In-Reply-To: <mpampk$1pq$1@ger.gmane.org>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elsayed <eternaleye@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="windows-1252"; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <target-devel-owner@vger.kernel.org>
+In-Reply-To: <1438161835-27960-17-git-send-email-mchristi@redhat.com>
+Sender: target-devel-owner@vger.kernel.org
+To: mchristi@redhat.com, ceph-devel@vger.kernel.org, target-devel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Wed, 29 Jul 2015, Alex Elsayed wrote:
-> Sage Weil wrote:
-> 
-> > On Wed, 29 Jul 2015, Alex Elsayed wrote:
-> >> Travis Rhoden wrote:
-> >> 
-> >> > On Tue, Jul 28, 2015 at 12:13 PM, Sage Weil <sweil@redhat.com> wrote:
-> >> >> Hey,
-> >> >>
-> >> >> I've finally had some time to play with the systemd integration branch
-> >> >> on
-> >> >> fedora 22.  It's in wip-systemd and my current list of issues
-> >> >> includes:
-> >> >>
-> >> >> - after mon creation ceph-create-keys isn't run automagically
-> >> >>   - Personally I kind of hate how it was always run on mon startup and
-> >> >>   not
-> >> >> just during cluster creation so I wouldn't mind *so* much if this
-> >> >> became an explicit step, maybe triggered by ceph-deploy, after mon
-> >> >> create.
-> >> > 
-> >> > I would be happy to see this become an explicit step as well.  We
-> >> > could make it conditional such that ceph-deploy only runs it if we are
-> >> > dealing with systemd, but I think re-running ceph-create-keys is
-> >> > always safe.  It just aborts if
-> >> > /etc/ceph/{cluster}.client.admin.keyring is already present.
-> >> 
-> >> Another option is to have the ceph-mon@.service have a Wants= and After=
-> >> on ceph-create-keys@.service, which has a
-> >> ConditionPathExists=!/path/to/key/from/templated/%I
-> >> 
-> >> With that, it would only run ceph-create-keys if the keys do not exist
-> >> already - otherwise, it'd be skipped-as-successful.
-> > 
-> > This sounds promising!
-> > 
-> >> >> - udev's attempt to trigger ceph-disk isn't working for me.  the osd
-> >> >> service gets started but the mount isn't present and it fails to
-> >> >> start. I'm a systemd noob and haven't sorted out how to get udev to
-> >> >> log something
-> >> >> meaningful to debug it.  Perhaps we should merge in the udev +
-> >> >> systemd revamp patches here too...
-> >> 
-> >> Personally, my opinion is that ceph-disk is doing too many things at
-> >> once, and thus fits very poorly into the systemd architecture...
-> >> 
-> >> I mean, it tries to partition, format, mount, introspect the filesystem
-> >> inside, and move the mount, depending on what the initial state was.
-> > 
-> > There is a series from David Disseldorp[1] that fixes much of this, by
-> > doing most of these steps in short-lived systemd tasks (instead of a
-> > complicated slow ceph-disk invocation directly from udev, which breaks
-> > udev).
-> > 
-> >> Now, part of the issue is that the final mountpoint depends on data
-> >> inside the filesystem - OSD id, etc. To me, that seems... mildly absurd
-> >> at least.
-> >> 
-> >> If the _mountpoint_ was only dependent on the partuuid, and the ceph OSD
-> >> self-identified from the contents of the path it's passed, that would
-> >> simplify things immensely IMO when it comes to systemd integration
-> >> because the mount logic wouldn't need any hokey double-mounting, and
-> >> could likely use the systemd mount machinery much more easily - thus
-> >> avoiding race issues like the above.
-> > 
-> > Hmm.  Well, we could name the mount point with the uuid and symlink the
-> > osd id to that.  We could also do something sneaky like embed the osd id
-> > in the least significant bits of the uuid, but that throws away a lot of
-> > entropy and doesn't capture the cluster name (which also needs to be known
-> > before mount).
-> 
-> Does it?
-> 
-> If the mount point is (say) /var/ceph/$UUID, and ceph-osd can take a --
-> datadir parameter from which it _reads_ the cluster and ID if they aren't 
-> passed on the command line, I think that'd resolve the issue rather tidily 
-> _without_ requring that be known prior to mount.
-> 
-> And if I understand correctly, that data is _already in there_ for ceph-disk 
-> to mount it in the "final location" - it's just shuffling around who reads 
-> it.
+On 07/29/15 02:23, mchristi@redhat.com wrote:
+> +static sector_t tcm_rbd_get_blocks(struct se_device *dev)
+> +{
+> +	struct tcm_rbd_dev *tcm_rbd_dev = TCM_RBD_DEV(dev);
+> +	sector_t blocks_long = tcm_rbd_dev->rbd_dev->mapping.size >>
+> +								SECTOR_SHIFT;
+> +
+> +	if (SECTOR_SIZE == dev->dev_attrib.block_size)
+> +		return blocks_long;
+> +
+> +	switch (SECTOR_SIZE) {
+> +	case 4096:
+> +		switch (dev->dev_attrib.block_size) {
+> +		case 2048:
+> +			blocks_long <<= 1;
+> +			break;
+> +		case 1024:
+> +			blocks_long <<= 2;
+> +			break;
+> +		case 512:
+> +			blocks_long <<= 3;
+> +		default:
+> +			break;
+> +		}
+> +		break;
+> +	case 2048:
+> +		switch (dev->dev_attrib.block_size) {
+> +		case 4096:
+> +			blocks_long >>= 1;
+> +			break;
+> +		case 1024:
+> +			blocks_long <<= 1;
+> +			break;
+> +		case 512:
+> +			blocks_long <<= 2;
+> +			break;
+> +		default:
+> +			break;
+> +		}
+> +		break;
+> +	case 1024:
+> +		switch (dev->dev_attrib.block_size) {
+> +		case 4096:
+> +			blocks_long >>= 2;
+> +			break;
+> +		case 2048:
+> +			blocks_long >>= 1;
+> +			break;
+> +		case 512:
+> +			blocks_long <<= 1;
+> +			break;
+> +		default:
+> +			break;
+> +		}
+> +		break;
+> +	case 512:
+> +		switch (dev->dev_attrib.block_size) {
+> +		case 4096:
+> +			blocks_long >>= 3;
+> +			break;
+> +		case 2048:
+> +			blocks_long >>= 2;
+> +			break;
+> +		case 1024:
+> +			blocks_long >>= 1;
+> +			break;
+> +		default:
+> +			break;
+> +		}
+> +		break;
+> +	default:
+> +		break;
+> +	}
+> +
+> +	return blocks_long;
+> +}
 
-So, we could do this.  It would mean either futzing with the ceph-osd 
-config variables so that they take a $uuid substitution (passed at 
-startup) -or- have ceph-disk set up a symlink from the current 
-/var/lib/ceph/osd/$cluster-$id location (instead of doing the bind mount 
-it currently does).
+Hello Mike,
 
-But, it'll come at some cost to operators, who won't be able to 'df' or 
-'mount' and see which OSD mounts are which... they'll have to poke around 
-in each directory to see what mount is which.
+Had you already considered to replace the above switch / case statement 
+by something like the following ?
 
-> > If the mounting and binding to the final location is done in a systemd job
-> > identified by the uuid, it seems like systemd would effectively handle the
-> > mutual exclusion and avoid races?
-> 
-> What I object to is the idea of a "final location" that depends on the 
-> contents of the filesystem - it's bass-ackwards IMO.
+static sector_t tcm_rbd_get_blocks(struct se_device *dev)
+{
+	return TCM_RBD_DEV(dev)->rbd_dev->mapping.size >>
+				ilog2(dev->dev_attrib.block_size);
+}
 
-It's unusual, but I think it can be made to work reliably.
+Thanks,
 
-Are there any other opinions here?
-
-sage
+Bart.
