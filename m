@@ -1,13 +1,13 @@
 From: mchristi@redhat.com
-Subject: [PATCH 16/18] rbd: move structs used by lio rbd to new header
-Date: Wed, 29 Jul 2015 04:23:53 -0500
-Message-ID: <1438161835-27960-16-git-send-email-mchristi@redhat.com>
+Subject: [PATCH 18/18] target: add lio rbd to makefile/Kconfig
+Date: Wed, 29 Jul 2015 04:23:55 -0500
+Message-ID: <1438161835-27960-18-git-send-email-mchristi@redhat.com>
 References: <1438161835-27960-1-git-send-email-mchristi@redhat.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:49907 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:47041 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752597AbbG2JYH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 29 Jul 2015 05:24:07 -0400
+	id S1752628AbbG2JYJ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 29 Jul 2015 05:24:09 -0400
 In-Reply-To: <1438161835-27960-1-git-send-email-mchristi@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -15,407 +15,43 @@ To: ceph-devel@vger.kernel.org, target-devel@vger.kernel.org
 
 From: Mike Christie <michaelc@cs.wisc.edu>
 
-This moves structs and other definitions needed by the lio rbd
-backend module to a header.
+Add lio rbd backend module to target Makefile and Kconfig.
 
 Signed-off-by: Mike Christie <michaelc@cs.wisc.edu>
 ---
- drivers/block/rbd.c         | 146 +------------------------------------
- include/linux/ceph/librbd.h | 174 ++++++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 175 insertions(+), 145 deletions(-)
- create mode 100644 include/linux/ceph/librbd.h
+ drivers/target/Kconfig  | 6 ++++++
+ drivers/target/Makefile | 1 +
+ 2 files changed, 7 insertions(+)
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index d89749c..248af2b 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -32,6 +32,7 @@
- #include <linux/ceph/osd_client.h>
- #include <linux/ceph/mon_client.h>
- #include <linux/ceph/decode.h>
-+#include <linux/ceph/librbd.h>
- #include <linux/parser.h>
- #include <linux/bsearch.h>
+diff --git a/drivers/target/Kconfig b/drivers/target/Kconfig
+index 2573612..29c51c2 100644
+--- a/drivers/target/Kconfig
++++ b/drivers/target/Kconfig
+@@ -39,6 +39,12 @@ config TCM_USER2
+ 	process to handle requests. This is version 2 of the ABI; version 1
+ 	is obsolete.
  
-@@ -51,15 +52,6 @@
- #define RBD_DEBUG	/* Activate rbd_assert() calls */
++config TCM_RBD
++	tristate "TCM/RBD Subsystem Plugin for Linux/RBD"
++	help
++	Say Y here to enable the TCM/RBD subsystem plugin for Ceph RBD
++	access.
++
+ source "drivers/target/loopback/Kconfig"
+ source "drivers/target/tcm_fc/Kconfig"
+ source "drivers/target/iscsi/Kconfig"
+diff --git a/drivers/target/Makefile b/drivers/target/Makefile
+index e619c02..6011d05 100644
+--- a/drivers/target/Makefile
++++ b/drivers/target/Makefile
+@@ -23,6 +23,7 @@ obj-$(CONFIG_TCM_IBLOCK)	+= target_core_iblock.o
+ obj-$(CONFIG_TCM_FILEIO)	+= target_core_file.o
+ obj-$(CONFIG_TCM_PSCSI)		+= target_core_pscsi.o
+ obj-$(CONFIG_TCM_USER2)		+= target_core_user.o
++obj-$(CONFIG_TCM_RBD)		+= target_core_rbd.o
  
- /*
-- * The basic unit of block I/O is a sector.  It is interpreted in a
-- * number of contexts in Linux (blk, bio, genhd), but the default is
-- * universally 512 bytes.  These symbols are just slightly more
-- * meaningful than the bare numbers they represent.
-- */
--#define	SECTOR_SHIFT	9
--#define	SECTOR_SIZE	(1ULL << SECTOR_SHIFT)
--
--/*
-  * Increment the given counter and return its updated value.
-  * If the counter is already 0 it will not be incremented.
-  * If the counter is already at its maximum value returns
-@@ -92,8 +84,6 @@ static int atomic_dec_return_safe(atomic_t *v)
- 	return -EINVAL;
- }
- 
--#define RBD_DRV_NAME "rbd"
--
- #define RBD_MINORS_PER_MAJOR		256
- #define RBD_SINGLE_MAJOR_PART_SHIFT	4
- 
-@@ -125,35 +115,6 @@ static int atomic_dec_return_safe(atomic_t *v)
- #define RBD_FEATURES_SUPPORTED	(RBD_FEATURES_ALL)
- 
- /*
-- * An RBD device name will be "rbd#", where the "rbd" comes from
-- * RBD_DRV_NAME above, and # is a unique integer identifier.
-- * MAX_INT_FORMAT_WIDTH is used in ensuring DEV_NAME_LEN is big
-- * enough to hold all possible device names.
-- */
--#define DEV_NAME_LEN		32
--#define MAX_INT_FORMAT_WIDTH	((5 * sizeof (int)) / 2 + 1)
--
--/*
-- * block device image metadata (in-memory version)
-- */
--struct rbd_image_header {
--	/* These six fields never change for a given rbd image */
--	char *object_prefix;
--	__u8 obj_order;
--	__u8 crypt_type;
--	__u8 comp_type;
--	u64 stripe_unit;
--	u64 stripe_count;
--	u64 features;		/* Might be changeable someday? */
--
--	/* The remaining fields need to be updated occasionally */
--	u64 image_size;
--	struct ceph_snap_context *snapc;
--	char *snap_names;	/* format 1 only */
--	u64 *snap_sizes;	/* format 1 only */
--};
--
--/*
-  * An rbd image specification.
-  *
-  * The tuple (pool_id, image_id, snap_id) is sufficient to uniquely
-@@ -200,26 +161,11 @@ struct rbd_client {
- 	struct list_head	node;
- };
- 
--struct rbd_img_request;
--typedef void (*rbd_img_callback_t)(struct rbd_img_request *);
--
- #define	BAD_WHICH	U32_MAX		/* Good which or bad which, which? */
- 
- struct rbd_obj_request;
- typedef void (*rbd_obj_callback_t)(struct rbd_obj_request *);
- 
--enum obj_request_type {
--	OBJ_REQUEST_NODATA, OBJ_REQUEST_BIO, OBJ_REQUEST_PAGES, OBJ_REQUEST_SG,
--};
--
--enum obj_operation_type {
--	OBJ_OP_WRITE,
--	OBJ_OP_READ,
--	OBJ_OP_DISCARD,
--	OBJ_OP_CMP_AND_WRITE,
--	OBJ_OP_WRITESAME,
--};
--
- enum obj_req_flags {
- 	OBJ_REQ_DONE,		/* completion flag: not done = 0, done = 1 */
- 	OBJ_REQ_IMG_DATA,	/* object usage: standalone = 0, image = 1 */
-@@ -295,39 +241,6 @@ enum img_req_flags {
- 	IMG_REQ_WRITESAME,	/* normal = 0, write same = 1 */
- };
- 
--struct rbd_img_request {
--	struct rbd_device	*rbd_dev;
--	u64			offset;	/* starting image byte offset */
--	u64			length;	/* byte count from offset */
--	unsigned long		flags;
--
--	u64			snap_id;	/* for reads */
--	struct ceph_snap_context *snapc;	/* for writes */
--
--	struct request		*rq;		/* block request */
--	struct rbd_obj_request	*obj_request;	/* obj req initiator */
--	void			*lio_cmd_data;	/* lio specific data */
--
--	struct page		**copyup_pages;
--	u32			copyup_page_count;
--	spinlock_t		completion_lock;/* protects next_completion */
--	u32			next_completion;
--	rbd_img_callback_t	callback;
--	/*
--	 * xferred is the bytes that have successfully been transferred.
--	 * completed is the bytes that have been accounted for and includes
--	 * both failed and successfully transffered bytes.
--	 */
--	u64			xferred;/* aggregate bytes transferred */
--	u64			completed;
--	int			result;	/* first nonzero obj_request result */
--
--	u32			obj_request_count;
--	struct list_head	obj_requests;	/* rbd_obj_request structs */
--
--	struct kref		kref;
--};
--
- #define for_each_obj_request(ireq, oreq) \
- 	list_for_each_entry(oreq, &(ireq)->obj_requests, links)
- #define for_each_obj_request_from(ireq, oreq) \
-@@ -335,61 +248,6 @@ struct rbd_img_request {
- #define for_each_obj_request_safe(ireq, oreq, n) \
- 	list_for_each_entry_safe_reverse(oreq, n, &(ireq)->obj_requests, links)
- 
--struct rbd_mapping {
--	u64                     size;
--	u64                     features;
--	bool			read_only;
--};
--
--/*
-- * a single device
-- */
--struct rbd_device {
--	int			dev_id;		/* blkdev unique id */
--
--	int			major;		/* blkdev assigned major */
--	int			minor;
--	struct gendisk		*disk;		/* blkdev's gendisk and rq */
--
--	u32			image_format;	/* Either 1 or 2 */
--	struct rbd_client	*rbd_client;
--
--	char			name[DEV_NAME_LEN]; /* blkdev name, e.g. rbd3 */
--
--	spinlock_t		lock;		/* queue, flags, open_count */
--
--	struct rbd_image_header	header;
--	unsigned long		flags;		/* possibly lock protected */
--	struct rbd_spec		*spec;
--	struct rbd_options	*opts;
--
--	char			*header_name;
--
--	struct ceph_file_layout	layout;
--
--	struct ceph_osd_event   *watch_event;
--	struct rbd_obj_request	*watch_request;
--
--	struct rbd_spec		*parent_spec;
--	u64			parent_overlap;
--	atomic_t		parent_ref;
--	struct rbd_device	*parent;
--
--	/* Block layer tags. */
--	struct blk_mq_tag_set	tag_set;
--
--	/* protects updating the header */
--	struct rw_semaphore     header_rwsem;
--
--	struct rbd_mapping	mapping;
--
--	struct list_head	node;
--
--	/* sysfs related */
--	struct device		dev;
--	unsigned long		open_count;	/* protected by lock */
--};
--
- /*
-  * Flag bits for rbd_dev->flags.  If atomicity is required,
-  * rbd_dev->lock is used to protect access.
-@@ -429,8 +287,6 @@ static bool single_major = false;
- module_param(single_major, bool, S_IRUGO);
- MODULE_PARM_DESC(single_major, "Use a single major number for all rbd devices (default: false)");
- 
--static int rbd_img_request_submit(struct rbd_img_request *img_request);
--
- static void rbd_dev_device_release(struct device *dev);
- 
- static ssize_t rbd_add(struct bus_type *bus, const char *buf,
-diff --git a/include/linux/ceph/librbd.h b/include/linux/ceph/librbd.h
-new file mode 100644
-index 0000000..6e25dfd
---- /dev/null
-+++ b/include/linux/ceph/librbd.h
-@@ -0,0 +1,174 @@
-+#ifndef _LIBRBD_H
-+#define _LIBRBD_H
-+
-+#include <linux/blk-mq.h>
-+#include <linux/device.h>
-+
-+/*
-+ * The basic unit of block I/O is a sector.  It is interpreted in a
-+ * number of contexts in Linux (blk, bio, genhd), but the default is
-+ * universally 512 bytes.  These symbols are just slightly more
-+ * meaningful than the bare numbers they represent.
-+ */
-+#define	SECTOR_SHIFT	9
-+#define	SECTOR_SIZE	(1ULL << SECTOR_SHIFT)
-+
-+#define RBD_DRV_NAME "rbd"
-+
-+/*
-+ * An RBD device name will be "rbd#", where the "rbd" comes from
-+ * RBD_DRV_NAME above, and # is a unique integer identifier.
-+ * MAX_INT_FORMAT_WIDTH is used in ensuring DEV_NAME_LEN is big
-+ * enough to hold all possible device names.
-+ */
-+#define DEV_NAME_LEN		32
-+#define MAX_INT_FORMAT_WIDTH	((5 * sizeof (int)) / 2 + 1)
-+
-+/*
-+ * block device image metadata (in-memory version)
-+ */
-+struct rbd_image_header {
-+	/* These six fields never change for a given rbd image */
-+	char *object_prefix;
-+	__u8 obj_order;
-+	__u8 crypt_type;
-+	__u8 comp_type;
-+	u64 stripe_unit;
-+	u64 stripe_count;
-+	u64 features;		/* Might be changeable someday? */
-+
-+	/* The remaining fields need to be updated occasionally */
-+	u64 image_size;
-+	struct ceph_snap_context *snapc;
-+	char *snap_names;	/* format 1 only */
-+	u64 *snap_sizes;	/* format 1 only */
-+};
-+
-+enum obj_request_type {
-+	OBJ_REQUEST_NODATA, OBJ_REQUEST_BIO, OBJ_REQUEST_PAGES, OBJ_REQUEST_SG,
-+};
-+
-+enum obj_operation_type {
-+	OBJ_OP_WRITE,
-+	OBJ_OP_READ,
-+	OBJ_OP_DISCARD,
-+	OBJ_OP_CMP_AND_WRITE,
-+	OBJ_OP_WRITESAME,
-+};
-+
-+struct rbd_img_request;
-+typedef void (*rbd_img_callback_t)(struct rbd_img_request *);
-+
-+struct rbd_obj_request;
-+
-+struct rbd_img_request {
-+	struct rbd_device	*rbd_dev;
-+	u64			offset;	/* starting image byte offset */
-+	u64			length;	/* byte count from offset */
-+	unsigned long		flags;
-+
-+	u64			snap_id;	/* for reads */
-+	struct ceph_snap_context *snapc;	/* for writes */
-+
-+	struct request		*rq;		/* block request */
-+	struct rbd_obj_request	*obj_request;	/* obj req initiator */
-+	void			*lio_cmd_data;	/* lio specific data */
-+
-+	struct page		**copyup_pages;
-+	u32			copyup_page_count;
-+	spinlock_t		completion_lock;/* protects next_completion */
-+	u32			next_completion;
-+	rbd_img_callback_t	callback;
-+        /*
-+	 * xferred is the bytes that have successfully been transferred.
-+	 * completed is the bytes that have been accounted for and includes
-+	 * failures.
-+	 */
-+	u64			xferred;/* aggregate bytes transferred */
-+	u64			completed;/* aggregate bytes completed */
-+	int			result;	/* first nonzero obj_request result */
-+
-+	u32			obj_request_count;
-+	struct list_head	obj_requests;	/* rbd_obj_request structs */
-+
-+	struct kref		kref;
-+};
-+
-+struct rbd_mapping {
-+	u64                     size;
-+	u64                     features;
-+	bool			read_only;
-+};
-+
-+struct rbd_client;
-+struct rbd_spec;
-+struct rbd_options;
-+
-+/*
-+ * a single device
-+ */
-+struct rbd_device {
-+	int			dev_id;		/* blkdev unique id */
-+
-+	int			major;		/* blkdev assigned major */
-+	int			minor;
-+	struct gendisk		*disk;		/* blkdev's gendisk and rq */
-+
-+	u32			image_format;	/* Either 1 or 2 */
-+	struct rbd_client	*rbd_client;
-+
-+	char			name[DEV_NAME_LEN]; /* blkdev name, e.g. rbd3 */
-+
-+	spinlock_t		lock;		/* queue, flags, open_count */
-+
-+	struct rbd_image_header	header;
-+	unsigned long		flags;		/* possibly lock protected */
-+	struct rbd_spec		*spec;
-+	struct rbd_options	*opts;
-+
-+	char			*header_name;
-+
-+	struct ceph_file_layout	layout;
-+
-+	struct ceph_osd_event   *watch_event;
-+	struct rbd_obj_request	*watch_request;
-+
-+	struct rbd_spec		*parent_spec;
-+	u64			parent_overlap;
-+	atomic_t		parent_ref;
-+	struct rbd_device	*parent;
-+
-+	/* Block layer tags. */
-+	struct blk_mq_tag_set	tag_set;
-+
-+	/* protects updating the header */
-+	struct rw_semaphore     header_rwsem;
-+
-+	struct rbd_mapping	mapping;
-+
-+	struct list_head	node;
-+
-+	/* sysfs related */
-+	struct device		dev;
-+	unsigned long		open_count;	/* protected by lock */
-+};
-+
-+extern struct rbd_img_request *rbd_img_request_create(
-+					struct rbd_device *rbd_dev,
-+					u64 offset, u64 length,
-+					enum obj_operation_type op_type,
-+					struct ceph_snap_context *snapc);
-+extern int rbd_img_cmp_and_write_request_fill(
-+					struct rbd_img_request *img_request,
-+					struct scatterlist *cmp_sgl,
-+					u64 cmp_length,
-+					struct scatterlist *write_sgl,
-+					u64 write_length,
-+					struct page **response_pages,
-+					u64 response_length);
-+extern int rbd_img_request_fill(struct rbd_img_request *img_request,
-+				enum obj_request_type type, void *data_desc);
-+extern int rbd_img_request_submit(struct rbd_img_request *img_request);
-+extern void rbd_img_request_put(struct rbd_img_request *img_request);
-+
-+#endif
+ # Fabric modules
+ obj-$(CONFIG_LOOPBACK_TARGET)	+= loopback/
 -- 
 1.8.3.1
 
