@@ -1,106 +1,93 @@
-From: Bart Van Assche <bart.vanassche@sandisk.com>
-Subject: Re: [PATCH 17/18] target: add rbd backend
-Date: Wed, 29 Jul 2015 07:27:35 -0700
-Message-ID: <55B8E2D7.2040605@sandisk.com>
-References: <1438161835-27960-1-git-send-email-mchristi@redhat.com>
- <1438161835-27960-17-git-send-email-mchristi@redhat.com>
+From: Alex Elsayed <eternaleye@gmail.com>
+Subject: Re: systemd status
+Date: Wed, 29 Jul 2015 07:30:20 -0700
+Message-ID: <mpao1u$pe2$1@ger.gmane.org>
+References: <alpine.DEB.2.00.1507281202370.22099@cobra.newdream.net> <CACkq2mr0aU+X_KDKGeQFy=sdtmRyy7CSR5tKHxYGyUFAA6kfEQ@mail.gmail.com> <mpad83$pu4$1@ger.gmane.org> <alpine.DEB.2.00.1507290550250.22099@cobra.newdream.net> <mpampk$1pq$1@ger.gmane.org> <alpine.DEB.2.00.1507290715450.22099@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <target-devel-owner@vger.kernel.org>
-In-Reply-To: <1438161835-27960-17-git-send-email-mchristi@redhat.com>
-Sender: target-devel-owner@vger.kernel.org
-To: mchristi@redhat.com, ceph-devel@vger.kernel.org, target-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7Bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from plane.gmane.org ([80.91.229.3]:54350 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751194AbbG2Oaf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 29 Jul 2015 10:30:35 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1ZKSNK-0002cT-59
+	for ceph-devel@vger.kernel.org; Wed, 29 Jul 2015 16:30:30 +0200
+Received: from 66-87-138-120.pools.spcsdns.net ([66-87-138-120.pools.spcsdns.net])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Wed, 29 Jul 2015 16:30:30 +0200
+Received: from eternaleye by 66-87-138-120.pools.spcsdns.net with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Wed, 29 Jul 2015 16:30:30 +0200
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On 07/29/15 02:23, mchristi@redhat.com wrote:
-> +static sector_t tcm_rbd_get_blocks(struct se_device *dev)
-> +{
-> +	struct tcm_rbd_dev *tcm_rbd_dev = TCM_RBD_DEV(dev);
-> +	sector_t blocks_long = tcm_rbd_dev->rbd_dev->mapping.size >>
-> +								SECTOR_SHIFT;
-> +
-> +	if (SECTOR_SIZE == dev->dev_attrib.block_size)
-> +		return blocks_long;
-> +
-> +	switch (SECTOR_SIZE) {
-> +	case 4096:
-> +		switch (dev->dev_attrib.block_size) {
-> +		case 2048:
-> +			blocks_long <<= 1;
-> +			break;
-> +		case 1024:
-> +			blocks_long <<= 2;
-> +			break;
-> +		case 512:
-> +			blocks_long <<= 3;
-> +		default:
-> +			break;
-> +		}
-> +		break;
-> +	case 2048:
-> +		switch (dev->dev_attrib.block_size) {
-> +		case 4096:
-> +			blocks_long >>= 1;
-> +			break;
-> +		case 1024:
-> +			blocks_long <<= 1;
-> +			break;
-> +		case 512:
-> +			blocks_long <<= 2;
-> +			break;
-> +		default:
-> +			break;
-> +		}
-> +		break;
-> +	case 1024:
-> +		switch (dev->dev_attrib.block_size) {
-> +		case 4096:
-> +			blocks_long >>= 2;
-> +			break;
-> +		case 2048:
-> +			blocks_long >>= 1;
-> +			break;
-> +		case 512:
-> +			blocks_long <<= 1;
-> +			break;
-> +		default:
-> +			break;
-> +		}
-> +		break;
-> +	case 512:
-> +		switch (dev->dev_attrib.block_size) {
-> +		case 4096:
-> +			blocks_long >>= 3;
-> +			break;
-> +		case 2048:
-> +			blocks_long >>= 2;
-> +			break;
-> +		case 1024:
-> +			blocks_long >>= 1;
-> +			break;
-> +		default:
-> +			break;
-> +		}
-> +		break;
-> +	default:
-> +		break;
-> +	}
-> +
-> +	return blocks_long;
-> +}
+Sage Weil wrote:
 
-Hello Mike,
+> On Wed, 29 Jul 2015, Alex Elsayed wrote:
+>> Sage Weil wrote:
+>> 
+>> > On Wed, 29 Jul 2015, Alex Elsayed wrote:
+<snip some>
+>> 
+>> Does it?
+>> 
+>> If the mount point is (say) /var/ceph/$UUID, and ceph-osd can take a --
+>> datadir parameter from which it _reads_ the cluster and ID if they aren't
+>> passed on the command line, I think that'd resolve the issue rather
+>> tidily _without_ requring that be known prior to mount.
+>> 
+>> And if I understand correctly, that data is _already in there_ for
+>> ceph-disk to mount it in the "final location" - it's just shuffling
+>> around who reads it.
+> 
+> So, we could do this.  It would mean either futzing with the ceph-osd
+> config variables so that they take a $uuid substitution (passed at
+> startup) -or- have ceph-disk set up a symlink from the current
+> /var/lib/ceph/osd/$cluster-$id location (instead of doing the bind mount
+> it currently does).
 
-Had you already considered to replace the above switch / case statement 
-by something like the following ?
+My thinking is more that the "osd data = " key makes a lot less sense in the 
+systemd world overall - passing the OSD the full path on the commandline via 
+some --datadir would mean you could trivially use systemd's instance 
+templating, and just do
 
-static sector_t tcm_rbd_get_blocks(struct se_device *dev)
-{
-	return TCM_RBD_DEV(dev)->rbd_dev->mapping.size >>
-				ilog2(dev->dev_attrib.block_size);
-}
+ExecStart=/usr/bin/ceph-osd -f --datadir=/var/lib/ceph/osd/%i
 
-Thanks,
+and be done with it. Could even do RequiresMountsFor=/var/lib/ceph/osd/%i 
+too, which would order it after (and make it depend on) any systemd.mount 
+units for that path.
 
-Bart.
+If the path comes from ceph.conf, then the systemd unit can't do 
+RequiresMountsFor, because it just plain doesn't have that information, and 
+so forth. You wind up giving up various systemd capabilities because ceph's 
+got its own custom-built wheel.
+
+> But, it'll come at some cost to operators, who won't be able to 'df' or
+> 'mount' and see which OSD mounts are which... they'll have to poke around
+> in each directory to see what mount is which.
+
+This is a fair point, though - however, if the symlinks just are for human 
+inspection rather than critical to the operation of the system, it takes 
+them out of the hot path and reduces the opportunities for failure due to 
+unusual usage / extra middle steps.
+
+Maybe put the UUID mounts in a uuid/ subdir, with $cluster-$id symlinks 
+pointing into it.
+
+>> > If the mounting and binding to the final location is done in a systemd
+>> > job identified by the uuid, it seems like systemd would effectively
+>> > handle the mutual exclusion and avoid races?
+>> 
+>> What I object to is the idea of a "final location" that depends on the
+>> contents of the filesystem - it's bass-ackwards IMO.
+> 
+> It's unusual, but I think it can be made to work reliably.
+> 
+> Are there any other opinions here?
+
+
