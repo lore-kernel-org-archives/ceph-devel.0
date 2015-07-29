@@ -1,145 +1,421 @@
 From: mchristi@redhat.com
-Subject: [PATCH 13/18] target: add COMPARE_AND_WRITE sg creation helper
-Date: Wed, 29 Jul 2015 04:23:50 -0500
-Message-ID: <1438161835-27960-13-git-send-email-mchristi@redhat.com>
+Subject: [PATCH 16/18] rbd: move structs used by lio rbd to new header
+Date: Wed, 29 Jul 2015 04:23:53 -0500
+Message-ID: <1438161835-27960-16-git-send-email-mchristi@redhat.com>
 References: <1438161835-27960-1-git-send-email-mchristi@redhat.com>
-Return-path: <target-devel-owner@vger.kernel.org>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:49907 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752597AbbG2JYH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 29 Jul 2015 05:24:07 -0400
 In-Reply-To: <1438161835-27960-1-git-send-email-mchristi@redhat.com>
-Sender: target-devel-owner@vger.kernel.org
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org, target-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
 
 From: Mike Christie <michaelc@cs.wisc.edu>
 
-bc core and the rbd backend driver want seperate scatterlists
-for the write phase of COMPARE_AND_WRITE. This moves the sbc
-code to a helper function.
+This moves structs and other definitions needed by the lio rbd
+backend module to a header.
 
 Signed-off-by: Mike Christie <michaelc@cs.wisc.edu>
 ---
- drivers/target/target_core_sbc.c     | 73 ++++++++++++++++++++++++------------
- include/target/target_core_backend.h |  1 +
- 2 files changed, 49 insertions(+), 25 deletions(-)
+ drivers/block/rbd.c         | 146 +------------------------------------
+ include/linux/ceph/librbd.h | 174 ++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 175 insertions(+), 145 deletions(-)
+ create mode 100644 include/linux/ceph/librbd.h
 
-diff --git a/drivers/target/target_core_sbc.c b/drivers/target/target_core_sbc.c
-index 9a001e6..f803068 100644
---- a/drivers/target/target_core_sbc.c
-+++ b/drivers/target/target_core_sbc.c
-@@ -428,12 +428,58 @@ static sense_reason_t compare_and_write_post(struct se_cmd *cmd, bool success)
- 	return TCM_NO_SENSE;
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index d89749c..248af2b 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -32,6 +32,7 @@
+ #include <linux/ceph/osd_client.h>
+ #include <linux/ceph/mon_client.h>
+ #include <linux/ceph/decode.h>
++#include <linux/ceph/librbd.h>
+ #include <linux/parser.h>
+ #include <linux/bsearch.h>
+ 
+@@ -51,15 +52,6 @@
+ #define RBD_DEBUG	/* Activate rbd_assert() calls */
+ 
+ /*
+- * The basic unit of block I/O is a sector.  It is interpreted in a
+- * number of contexts in Linux (blk, bio, genhd), but the default is
+- * universally 512 bytes.  These symbols are just slightly more
+- * meaningful than the bare numbers they represent.
+- */
+-#define	SECTOR_SHIFT	9
+-#define	SECTOR_SIZE	(1ULL << SECTOR_SHIFT)
+-
+-/*
+  * Increment the given counter and return its updated value.
+  * If the counter is already 0 it will not be incremented.
+  * If the counter is already at its maximum value returns
+@@ -92,8 +84,6 @@ static int atomic_dec_return_safe(atomic_t *v)
+ 	return -EINVAL;
  }
  
-+/**
-+ * sbc_create_compare_and_write_sg - alloc and prep a sg for the write phase
-+ * @cmd: se_cmd to copy scatterlist from.
-+ *
-+ * Takes the cmd's scatterlist and creates a new sg with only the write
-+ * portion.
-+*/
-+struct scatterlist *sbc_create_compare_and_write_sg(struct se_cmd *cmd)
-+{
-+	struct se_device *dev = cmd->se_dev;
-+	unsigned int block_size = dev->dev_attrib.block_size;
-+	unsigned int len = cmd->t_task_nolb * block_size;
-+	struct scatterlist *write_sg;
-+	struct sg_mapping_iter m;
-+	int i = 0;
-+
-+	write_sg = kmalloc(sizeof(struct scatterlist) * cmd->t_data_nents,
-+			   GFP_KERNEL);
-+	if (!write_sg) {
-+		pr_err("Unable to allocate compare_and_write sg\n");
-+		return NULL;
-+	}
-+	sg_init_table(write_sg, cmd->t_data_nents);
-+
-+	sg_miter_start(&m, cmd->t_data_sg, cmd->t_data_nents, SG_MITER_TO_SG);
-+	/*
-+	 * Currently assumes NoLB=1 and SGLs are PAGE_SIZE..
-+	 */
-+	while (len) {
-+		sg_miter_next(&m);
-+
-+		if (block_size < PAGE_SIZE) {
-+			sg_set_page(&write_sg[i], m.page, block_size,
-+				    block_size);
-+		} else {
-+			sg_miter_next(&m);
-+			sg_set_page(&write_sg[i], m.page, block_size, 0);
-+		}
-+		len -= block_size;
-+		i++;
-+	}
-+	sg_miter_stop(&m);
-+
-+	return write_sg;
-+}
-+EXPORT_SYMBOL(sbc_create_compare_and_write_sg);
-+
- static sense_reason_t compare_and_write_callback(struct se_cmd *cmd, bool success)
- {
- 	struct se_device *dev = cmd->se_dev;
- 	struct scatterlist *write_sg = NULL, *sg;
- 	unsigned char *buf = NULL, *addr;
--	struct sg_mapping_iter m;
- 	unsigned int offset = 0, len;
- 	unsigned int nlbas = cmd->t_task_nolb;
- 	unsigned int block_size = dev->dev_attrib.block_size;
-@@ -469,14 +515,12 @@ static sense_reason_t compare_and_write_callback(struct se_cmd *cmd, bool succes
- 		goto out;
- 	}
- 
--	write_sg = kmalloc(sizeof(struct scatterlist) * cmd->t_data_nents,
--			   GFP_KERNEL);
-+	write_sg = sbc_create_compare_and_write_sg(cmd);
- 	if (!write_sg) {
- 		pr_err("Unable to allocate compare_and_write sg\n");
- 		ret = TCM_OUT_OF_RESOURCES;
- 		goto out;
- 	}
--	sg_init_table(write_sg, cmd->t_data_nents);
- 	/*
- 	 * Setup verify and write data payloads from total NumberLBAs.
- 	 */
-@@ -513,27 +557,6 @@ static sense_reason_t compare_and_write_callback(struct se_cmd *cmd, bool succes
- 			break;
- 	}
- 
--	i = 0;
--	len = cmd->t_task_nolb * block_size;
--	sg_miter_start(&m, cmd->t_data_sg, cmd->t_data_nents, SG_MITER_TO_SG);
--	/*
--	 * Currently assumes NoLB=1 and SGLs are PAGE_SIZE..
--	 */
--	while (len) {
--		sg_miter_next(&m);
+-#define RBD_DRV_NAME "rbd"
 -
--		if (block_size < PAGE_SIZE) {
--			sg_set_page(&write_sg[i], m.page, block_size,
--				    block_size);
--		} else {
--			sg_miter_next(&m);
--			sg_set_page(&write_sg[i], m.page, block_size,
--				    0);
--		}
--		len -= block_size;
--		i++;
--	}
--	sg_miter_stop(&m);
- 	/*
- 	 * Save the original SGL + nents values before updating to new
- 	 * assignments, to be released in transport_free_pages() ->
-diff --git a/include/target/target_core_backend.h b/include/target/target_core_backend.h
-index c98f6e6..d8895e2 100644
---- a/include/target/target_core_backend.h
-+++ b/include/target/target_core_backend.h
-@@ -61,6 +61,7 @@ void	target_complete_cmd(struct se_cmd *, u8);
- void	target_complete_cmd_with_sense(struct se_cmd *, sense_reason_t);
- void	target_complete_cmd_with_length(struct se_cmd *, u8, int);
+ #define RBD_MINORS_PER_MAJOR		256
+ #define RBD_SINGLE_MAJOR_PART_SHIFT	4
  
-+struct scatterlist *sbc_create_compare_and_write_sg(struct se_cmd *);
- sense_reason_t	spc_parse_cdb(struct se_cmd *cmd, unsigned int *size);
- sense_reason_t	spc_emulate_report_luns(struct se_cmd *cmd);
- sense_reason_t	spc_emulate_inquiry_std(struct se_cmd *, unsigned char *);
+@@ -125,35 +115,6 @@ static int atomic_dec_return_safe(atomic_t *v)
+ #define RBD_FEATURES_SUPPORTED	(RBD_FEATURES_ALL)
+ 
+ /*
+- * An RBD device name will be "rbd#", where the "rbd" comes from
+- * RBD_DRV_NAME above, and # is a unique integer identifier.
+- * MAX_INT_FORMAT_WIDTH is used in ensuring DEV_NAME_LEN is big
+- * enough to hold all possible device names.
+- */
+-#define DEV_NAME_LEN		32
+-#define MAX_INT_FORMAT_WIDTH	((5 * sizeof (int)) / 2 + 1)
+-
+-/*
+- * block device image metadata (in-memory version)
+- */
+-struct rbd_image_header {
+-	/* These six fields never change for a given rbd image */
+-	char *object_prefix;
+-	__u8 obj_order;
+-	__u8 crypt_type;
+-	__u8 comp_type;
+-	u64 stripe_unit;
+-	u64 stripe_count;
+-	u64 features;		/* Might be changeable someday? */
+-
+-	/* The remaining fields need to be updated occasionally */
+-	u64 image_size;
+-	struct ceph_snap_context *snapc;
+-	char *snap_names;	/* format 1 only */
+-	u64 *snap_sizes;	/* format 1 only */
+-};
+-
+-/*
+  * An rbd image specification.
+  *
+  * The tuple (pool_id, image_id, snap_id) is sufficient to uniquely
+@@ -200,26 +161,11 @@ struct rbd_client {
+ 	struct list_head	node;
+ };
+ 
+-struct rbd_img_request;
+-typedef void (*rbd_img_callback_t)(struct rbd_img_request *);
+-
+ #define	BAD_WHICH	U32_MAX		/* Good which or bad which, which? */
+ 
+ struct rbd_obj_request;
+ typedef void (*rbd_obj_callback_t)(struct rbd_obj_request *);
+ 
+-enum obj_request_type {
+-	OBJ_REQUEST_NODATA, OBJ_REQUEST_BIO, OBJ_REQUEST_PAGES, OBJ_REQUEST_SG,
+-};
+-
+-enum obj_operation_type {
+-	OBJ_OP_WRITE,
+-	OBJ_OP_READ,
+-	OBJ_OP_DISCARD,
+-	OBJ_OP_CMP_AND_WRITE,
+-	OBJ_OP_WRITESAME,
+-};
+-
+ enum obj_req_flags {
+ 	OBJ_REQ_DONE,		/* completion flag: not done = 0, done = 1 */
+ 	OBJ_REQ_IMG_DATA,	/* object usage: standalone = 0, image = 1 */
+@@ -295,39 +241,6 @@ enum img_req_flags {
+ 	IMG_REQ_WRITESAME,	/* normal = 0, write same = 1 */
+ };
+ 
+-struct rbd_img_request {
+-	struct rbd_device	*rbd_dev;
+-	u64			offset;	/* starting image byte offset */
+-	u64			length;	/* byte count from offset */
+-	unsigned long		flags;
+-
+-	u64			snap_id;	/* for reads */
+-	struct ceph_snap_context *snapc;	/* for writes */
+-
+-	struct request		*rq;		/* block request */
+-	struct rbd_obj_request	*obj_request;	/* obj req initiator */
+-	void			*lio_cmd_data;	/* lio specific data */
+-
+-	struct page		**copyup_pages;
+-	u32			copyup_page_count;
+-	spinlock_t		completion_lock;/* protects next_completion */
+-	u32			next_completion;
+-	rbd_img_callback_t	callback;
+-	/*
+-	 * xferred is the bytes that have successfully been transferred.
+-	 * completed is the bytes that have been accounted for and includes
+-	 * both failed and successfully transffered bytes.
+-	 */
+-	u64			xferred;/* aggregate bytes transferred */
+-	u64			completed;
+-	int			result;	/* first nonzero obj_request result */
+-
+-	u32			obj_request_count;
+-	struct list_head	obj_requests;	/* rbd_obj_request structs */
+-
+-	struct kref		kref;
+-};
+-
+ #define for_each_obj_request(ireq, oreq) \
+ 	list_for_each_entry(oreq, &(ireq)->obj_requests, links)
+ #define for_each_obj_request_from(ireq, oreq) \
+@@ -335,61 +248,6 @@ struct rbd_img_request {
+ #define for_each_obj_request_safe(ireq, oreq, n) \
+ 	list_for_each_entry_safe_reverse(oreq, n, &(ireq)->obj_requests, links)
+ 
+-struct rbd_mapping {
+-	u64                     size;
+-	u64                     features;
+-	bool			read_only;
+-};
+-
+-/*
+- * a single device
+- */
+-struct rbd_device {
+-	int			dev_id;		/* blkdev unique id */
+-
+-	int			major;		/* blkdev assigned major */
+-	int			minor;
+-	struct gendisk		*disk;		/* blkdev's gendisk and rq */
+-
+-	u32			image_format;	/* Either 1 or 2 */
+-	struct rbd_client	*rbd_client;
+-
+-	char			name[DEV_NAME_LEN]; /* blkdev name, e.g. rbd3 */
+-
+-	spinlock_t		lock;		/* queue, flags, open_count */
+-
+-	struct rbd_image_header	header;
+-	unsigned long		flags;		/* possibly lock protected */
+-	struct rbd_spec		*spec;
+-	struct rbd_options	*opts;
+-
+-	char			*header_name;
+-
+-	struct ceph_file_layout	layout;
+-
+-	struct ceph_osd_event   *watch_event;
+-	struct rbd_obj_request	*watch_request;
+-
+-	struct rbd_spec		*parent_spec;
+-	u64			parent_overlap;
+-	atomic_t		parent_ref;
+-	struct rbd_device	*parent;
+-
+-	/* Block layer tags. */
+-	struct blk_mq_tag_set	tag_set;
+-
+-	/* protects updating the header */
+-	struct rw_semaphore     header_rwsem;
+-
+-	struct rbd_mapping	mapping;
+-
+-	struct list_head	node;
+-
+-	/* sysfs related */
+-	struct device		dev;
+-	unsigned long		open_count;	/* protected by lock */
+-};
+-
+ /*
+  * Flag bits for rbd_dev->flags.  If atomicity is required,
+  * rbd_dev->lock is used to protect access.
+@@ -429,8 +287,6 @@ static bool single_major = false;
+ module_param(single_major, bool, S_IRUGO);
+ MODULE_PARM_DESC(single_major, "Use a single major number for all rbd devices (default: false)");
+ 
+-static int rbd_img_request_submit(struct rbd_img_request *img_request);
+-
+ static void rbd_dev_device_release(struct device *dev);
+ 
+ static ssize_t rbd_add(struct bus_type *bus, const char *buf,
+diff --git a/include/linux/ceph/librbd.h b/include/linux/ceph/librbd.h
+new file mode 100644
+index 0000000..6e25dfd
+--- /dev/null
++++ b/include/linux/ceph/librbd.h
+@@ -0,0 +1,174 @@
++#ifndef _LIBRBD_H
++#define _LIBRBD_H
++
++#include <linux/blk-mq.h>
++#include <linux/device.h>
++
++/*
++ * The basic unit of block I/O is a sector.  It is interpreted in a
++ * number of contexts in Linux (blk, bio, genhd), but the default is
++ * universally 512 bytes.  These symbols are just slightly more
++ * meaningful than the bare numbers they represent.
++ */
++#define	SECTOR_SHIFT	9
++#define	SECTOR_SIZE	(1ULL << SECTOR_SHIFT)
++
++#define RBD_DRV_NAME "rbd"
++
++/*
++ * An RBD device name will be "rbd#", where the "rbd" comes from
++ * RBD_DRV_NAME above, and # is a unique integer identifier.
++ * MAX_INT_FORMAT_WIDTH is used in ensuring DEV_NAME_LEN is big
++ * enough to hold all possible device names.
++ */
++#define DEV_NAME_LEN		32
++#define MAX_INT_FORMAT_WIDTH	((5 * sizeof (int)) / 2 + 1)
++
++/*
++ * block device image metadata (in-memory version)
++ */
++struct rbd_image_header {
++	/* These six fields never change for a given rbd image */
++	char *object_prefix;
++	__u8 obj_order;
++	__u8 crypt_type;
++	__u8 comp_type;
++	u64 stripe_unit;
++	u64 stripe_count;
++	u64 features;		/* Might be changeable someday? */
++
++	/* The remaining fields need to be updated occasionally */
++	u64 image_size;
++	struct ceph_snap_context *snapc;
++	char *snap_names;	/* format 1 only */
++	u64 *snap_sizes;	/* format 1 only */
++};
++
++enum obj_request_type {
++	OBJ_REQUEST_NODATA, OBJ_REQUEST_BIO, OBJ_REQUEST_PAGES, OBJ_REQUEST_SG,
++};
++
++enum obj_operation_type {
++	OBJ_OP_WRITE,
++	OBJ_OP_READ,
++	OBJ_OP_DISCARD,
++	OBJ_OP_CMP_AND_WRITE,
++	OBJ_OP_WRITESAME,
++};
++
++struct rbd_img_request;
++typedef void (*rbd_img_callback_t)(struct rbd_img_request *);
++
++struct rbd_obj_request;
++
++struct rbd_img_request {
++	struct rbd_device	*rbd_dev;
++	u64			offset;	/* starting image byte offset */
++	u64			length;	/* byte count from offset */
++	unsigned long		flags;
++
++	u64			snap_id;	/* for reads */
++	struct ceph_snap_context *snapc;	/* for writes */
++
++	struct request		*rq;		/* block request */
++	struct rbd_obj_request	*obj_request;	/* obj req initiator */
++	void			*lio_cmd_data;	/* lio specific data */
++
++	struct page		**copyup_pages;
++	u32			copyup_page_count;
++	spinlock_t		completion_lock;/* protects next_completion */
++	u32			next_completion;
++	rbd_img_callback_t	callback;
++        /*
++	 * xferred is the bytes that have successfully been transferred.
++	 * completed is the bytes that have been accounted for and includes
++	 * failures.
++	 */
++	u64			xferred;/* aggregate bytes transferred */
++	u64			completed;/* aggregate bytes completed */
++	int			result;	/* first nonzero obj_request result */
++
++	u32			obj_request_count;
++	struct list_head	obj_requests;	/* rbd_obj_request structs */
++
++	struct kref		kref;
++};
++
++struct rbd_mapping {
++	u64                     size;
++	u64                     features;
++	bool			read_only;
++};
++
++struct rbd_client;
++struct rbd_spec;
++struct rbd_options;
++
++/*
++ * a single device
++ */
++struct rbd_device {
++	int			dev_id;		/* blkdev unique id */
++
++	int			major;		/* blkdev assigned major */
++	int			minor;
++	struct gendisk		*disk;		/* blkdev's gendisk and rq */
++
++	u32			image_format;	/* Either 1 or 2 */
++	struct rbd_client	*rbd_client;
++
++	char			name[DEV_NAME_LEN]; /* blkdev name, e.g. rbd3 */
++
++	spinlock_t		lock;		/* queue, flags, open_count */
++
++	struct rbd_image_header	header;
++	unsigned long		flags;		/* possibly lock protected */
++	struct rbd_spec		*spec;
++	struct rbd_options	*opts;
++
++	char			*header_name;
++
++	struct ceph_file_layout	layout;
++
++	struct ceph_osd_event   *watch_event;
++	struct rbd_obj_request	*watch_request;
++
++	struct rbd_spec		*parent_spec;
++	u64			parent_overlap;
++	atomic_t		parent_ref;
++	struct rbd_device	*parent;
++
++	/* Block layer tags. */
++	struct blk_mq_tag_set	tag_set;
++
++	/* protects updating the header */
++	struct rw_semaphore     header_rwsem;
++
++	struct rbd_mapping	mapping;
++
++	struct list_head	node;
++
++	/* sysfs related */
++	struct device		dev;
++	unsigned long		open_count;	/* protected by lock */
++};
++
++extern struct rbd_img_request *rbd_img_request_create(
++					struct rbd_device *rbd_dev,
++					u64 offset, u64 length,
++					enum obj_operation_type op_type,
++					struct ceph_snap_context *snapc);
++extern int rbd_img_cmp_and_write_request_fill(
++					struct rbd_img_request *img_request,
++					struct scatterlist *cmp_sgl,
++					u64 cmp_length,
++					struct scatterlist *write_sgl,
++					u64 write_length,
++					struct page **response_pages,
++					u64 response_length);
++extern int rbd_img_request_fill(struct rbd_img_request *img_request,
++				enum obj_request_type type, void *data_desc);
++extern int rbd_img_request_submit(struct rbd_img_request *img_request);
++extern void rbd_img_request_put(struct rbd_img_request *img_request);
++
++#endif
 -- 
 1.8.3.1
+
