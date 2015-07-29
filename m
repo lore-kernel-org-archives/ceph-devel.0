@@ -1,36 +1,60 @@
-From: Samuel Just <sjust@redhat.com>
-Subject: Re: hammer mon regression I think, probably shouldn't do a hammer
- release until it's sorted
-Date: Wed, 29 Jul 2015 14:20:31 -0400 (EDT)
-Message-ID: <931100884.856074.1438194031932.JavaMail.zimbra@redhat.com>
-References: <1709588025.854639.1438193897253.JavaMail.zimbra@redhat.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: hammer/firefly backports upgrade suite
+Date: Wed, 29 Jul 2015 23:34:08 +0200
+Message-ID: <55B946D0.3070308@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="NuNSpUMjnRw1iVnFv9B9sfeobb4w8sroA"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx4-phx2.redhat.com ([209.132.183.25]:40412 "EHLO
-	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752618AbbG2SUc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Jul 2015 14:20:32 -0400
-In-Reply-To: <1709588025.854639.1438193897253.JavaMail.zimbra@redhat.com>
+Received: from mail2.dachary.org ([91.121.57.175]:58434 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1754083AbbG2VeN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Jul 2015 17:34:13 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <ldachary@redhat.com>, Sage Weil <sweil@redhat.com>, Kefu Chai <kchai@redhat.com>, Joao Luis <jluis@redhat.com>
+To: Abhishek L <abhishek.lekshmanan@gmail.com>, Nathan Cutler <ncutler@suse.cz>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Could also be a next/master regression, don't actually see anything recent in the mon in hammer.
--Sam
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--NuNSpUMjnRw1iVnFv9B9sfeobb4w8sroA
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
------ Original Message -----
-From: "Samuel Just" <sjust@redhat.com>
-To: "Loic Dachary" <ldachary@redhat.com>, "Sage Weil" <sweil@redhat.com>, "Kefu Chai" <kchai@redhat.com>, "Joao Luis" <jluis@redhat.com>
-Cc: "Ceph Development" <ceph-devel@vger.kernel.org>
-Sent: Wednesday, July 29, 2015 11:18:17 AM
-Subject: hammer mon regression I think, probably shouldn't do a hammer release until it's sorted
+Hi Nathan & Abhishek,
 
-http://tracker.ceph.com/issues/12410
+It turns out the mistake was to use upgrade/firefly-x and upgrade/hammer-=
+x instead of upgrade/firelfy and upgrade/hammer. When -c hammer-backports=
+ or -c firefly-backports is given to teuthology-suite, it will upgrade to=
+ this version, from older versions of the same stable branch.
 
-Not sure what's going on yet, but the hammer mon doesn't seem to be sending the full map to the master osd properly.
--Sam
+I've updated:
+
+http://tracker.ceph.com/issues/11644#upgrade
+http://tracker.ceph.com/issues/11990#upgrade
+
+whith the fix and they are running (using the OpenStack cluster though, t=
+here may be issues with the firefly upgrade suite but the hammer upgrade =
+suite must run fine, it has run at http://ceph.aevoo.fr:8081/ enough time=
+s to suggest there are no OpenStack specific issues).
+
+Cheers
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
 
+--NuNSpUMjnRw1iVnFv9B9sfeobb4w8sroA
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlW5RtAACgkQ8dLMyEl6F20niwCghScXVwZdGmycbb4lcjFhT5SU
+UYAAn2VxekKKcWSGOPQUIBUFH2ZSHGRK
+=3VfW
+-----END PGP SIGNATURE-----
+
+--NuNSpUMjnRw1iVnFv9B9sfeobb4w8sroA--
