@@ -1,41 +1,36 @@
-From: "yangruifeng.09209@h3c.com" <yangruifeng.09209@h3c.com>
-Subject: about the strtok in the process of creating swift acl policy
-Date: Wed, 29 Jul 2015 05:27:08 +0000
-Message-ID: <0C3F6DA3760D0C4691E69E5BE224FF495E1466FC@H3CMLB12-EX.srv.huawei-3com.com>
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: Ceph write path optimization
+Date: Tue, 28 Jul 2015 23:57:08 -0700
+Message-ID: <20150729065708.GA27890@infradead.org>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CDE784B@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([60.191.123.56]:19900 "EHLO h3cmg01-ex.h3c.com"
-	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751387AbbG2Faq convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Jul 2015 01:30:46 -0400
-Content-Language: zh-CN
+Received: from bombadil.infradead.org ([198.137.202.9]:57718 "EHLO
+	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752012AbbG2G5J (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Jul 2015 02:57:09 -0400
+Content-Disposition: inline
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CDE784B@SACMBXIP01.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
+On Tue, Jul 28, 2015 at 09:08:27PM +0000, Somnath Roy wrote:
+> 2. Each filestore Op threads is now doing O_DSYNC write followed by
+> posix_fadvise(**fd, 0, 0, POSIX_FADV_DONTNEED);
 
-Is the strtok safe in this case ? why not strtok_r ?
+Where aren't you using O_DIRECT | O_DSYNC?
 
-static int parse_list(string& uid_list, vector<string>& uids)
-{
-  ...
-  const char *p = strtok(s, " ,");
-  while (p) {
-    ...
-    p = strtok(NULL, " ,");
-  }
-  ...
-}
+> 15. The main challenge I am facing in both the scheme is XFS metadata 
+> flush process (xfsaild) is choking all the processes accessing the disk
+> when it is waking up. I can delay it till max 30 sec and if there are
+> lot of dirty metadata, there is a performance spike down for very brief
+> amount of time. Even if we are acknowledging writes from say NVRAM
+> journal write, still the opthreads are doing getattrs on the XFS
+> and those threads are getting blocked.
 
-bool RGWAccessControlPolicy_SWIFT::create(RGWRados *store, string& id, string& name, string& read_list, string& write_list)
-{
-  ...
-    int r = parse_list(read_list, uids);
-  ...
-}
-
-Thanks
+Can you send a more detailed report to the XFS lists?  E.g. which locks
+your blocked on and some perf data?
 
