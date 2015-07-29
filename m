@@ -1,26 +1,22 @@
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH 01/18] libceph: add scatterlist messenger data type
-Date: Wed, 29 Jul 2015 10:55:15 -0700
-Message-ID: <20150729175515.GA16804@infradead.org>
-References: <1438161835-27960-1-git-send-email-mchristi@redhat.com>
+From: Samuel Just <sjust@redhat.com>
+Subject: hammer mon regression I think, probably shouldn't do a hammer
+ release until it's sorted
+Date: Wed, 29 Jul 2015 14:18:17 -0400 (EDT)
+Message-ID: <1709588025.854639.1438193897253.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <target-devel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1438161835-27960-1-git-send-email-mchristi@redhat.com>
-Sender: target-devel-owner@vger.kernel.org
-To: mchristi@redhat.com
-Cc: ceph-devel@vger.kernel.org, target-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx6-phx2.redhat.com ([209.132.183.39]:47564 "EHLO
+	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751371AbbG2SSR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Jul 2015 14:18:17 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Loic Dachary <ldachary@redhat.com>, Sage Weil <sweil@redhat.com>, Kefu Chai <kchai@redhat.com>, Joao Luis <jluis@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, Jul 29, 2015 at 04:23:38AM -0500, mchristi@redhat.com wrote:
-> From: Mike Christie <michaelc@cs.wisc.edu>
-> 
-> LIO uses scatterlist for its page/data management. This patch
-> adds a scatterlist messenger data type, so LIO can pass its sg
-> down directly to rbd.
+http://tracker.ceph.com/issues/12410
 
-Just as I mentioned for David's patches this is the wrong way to attack
-your problem.  The block layer already supports WRITE SAME, and COMPARE
-and WRITE nees to be supported at that level too insted of creating
-artifical bypasses.
+Not sure what's going on yet, but the hammer mon doesn't seem to be sending the full map to the master osd properly.
+-Sam
