@@ -1,116 +1,110 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Ceph write path optimization
-Date: Wed, 29 Jul 2015 16:00:23 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CDE9DFC@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CDE784B@SACMBXIP01.sdcorp.global.sandisk.com>
- <75674D092A819E4189E91166C74CB90D01590D19@shsmsx102.ccr.corp.intel.com>
+From: Vasiliy Angapov <angapov@gmail.com>
+Subject: Re: systemd status
+Date: Thu, 30 Jul 2015 00:50:54 +0800
+Message-ID: <CAGtbiz1=yV8sW7d3Jc42NgUNdHXuakzM5RyfCkgCVXpOWRYykw@mail.gmail.com>
+References: <alpine.DEB.2.00.1507281202370.22099@cobra.newdream.net>
+	<CACkq2mr0aU+X_KDKGeQFy=sdtmRyy7CSR5tKHxYGyUFAA6kfEQ@mail.gmail.com>
+	<mpad83$pu4$1@ger.gmane.org>
+	<alpine.DEB.2.00.1507290550250.22099@cobra.newdream.net>
+	<mpampk$1pq$1@ger.gmane.org>
+	<alpine.DEB.2.00.1507290715450.22099@cobra.newdream.net>
+	<mpao1u$pe2$1@ger.gmane.org>
+	<alpine.DEB.2.00.1507290748290.22099@cobra.newdream.net>
+	<mpaqqd$blm$1@ger.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0074.outbound.protection.outlook.com ([207.46.100.74]:15573
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753452AbbG2QAd convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Jul 2015 12:00:33 -0400
-In-Reply-To: <75674D092A819E4189E91166C74CB90D01590D19@shsmsx102.ccr.corp.intel.com>
-Content-Language: en-US
+Received: from mail-lb0-f181.google.com ([209.85.217.181]:33065 "EHLO
+	mail-lb0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751905AbbG2Qu4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Jul 2015 12:50:56 -0400
+Received: by lbbyj8 with SMTP id yj8so10947379lbb.0
+        for <ceph-devel@vger.kernel.org>; Wed, 29 Jul 2015 09:50:54 -0700 (PDT)
+In-Reply-To: <mpaqqd$blm$1@ger.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Shu, Xinxin" <xinxin.shu@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-
-Xinxin,
-I tried that but if you remove all the throttling the performance is very spiky and not usable. The peak performance is definitely more though.
-I tried to do throttling based on the existing options and I was able to make constant stable performance out but that performance is low (or similar to existing one today).
-
-Thanks & Regards
-Somnath
-
------Original Message-----
-From: Shu, Xinxin [mailto:xinxin.shu@intel.com] 
-Sent: Wednesday, July 29, 2015 12:50 AM
-To: Somnath Roy; ceph-devel@vger.kernel.org
-Subject: RE: Ceph write path optimization
-
-Hi Somnath,  any performance data for journal on 128M NVRAM partition with hammer release?
-
-Cheers,
-xinxin
-
------Original Message-----
-From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
-Sent: Wednesday, July 29, 2015 5:08 AM
 To: ceph-devel@vger.kernel.org
-Subject: Ceph write path optimization
 
-Hi,
-Eventually, I have a working prototype and able to gather some performance comparison data with the changes I was talking about in the last performance meeting. Mark's suggestion of a write up was long pending, so, trying to summarize what I am trying to do.
+Hi colleagues,
 
-Objective:
------------
+I see some systemd-related actions here. Can you please also have a
+look at how I managed to rule Ceph with systemd -
+https://github.com/angapov/ceph-systemd/ ?
+It uses systemd generator script, which is called every time host
+boots up or when we issue "systemctl daemon-reload". It automates all
+the routine job of adding/removing systemd unit files. It also has a
+convenient ceph-osd and ceph-mon targets, which allows to start/stop
+OSDs/MONs all at once.
+I got production cluster working with it already, so this is fine for
+me. It handles only OSD and MON daemons for the moment but RGW can be
+added in a seconds.
 
-1. Is to saturate SSD write bandwidth with ceph + filestore.
-     Most of the deployment of ceph + all flash so far (as far as I know) is having both data and journal on the same SSD. SSDs are far from saturate and the write performance of ceph is dismal (compare to HW). Can we improve that ?
+The idea of systemd generators adds much more flexibility to Ceph like
+the original init script has.
 
-2. Ceph write performance in most of the cases are not stable, can we have a stable performance out most of the time ?
+Best regards, Vasily.
 
-
-Findings/Optimization so far..
-------------------------------------
-
-1. I saw in flash environment you need to reduce the filestore_max_sync_interval a lot (from default 5min) and thus the benefit of syncfs coalescing and writing is going away.
-
-2. We have some logic to determine the max sequence number it can commit. That is adding some latency (>1 ms or so).
-
-3. This delay is filling up journals quickly if I remove all throttles from the filestore/journal.
-
-4. Existing throttle scheme is very difficult to tune.
-
-5. In case of write-ahead journaling the commit file is probably redundant as we can get the last committed seq number from journal headers during next OSD start. The fact that, the sync interval we need to reduce , this extra write will only add more to WA (also one extra fsync).
-
-The existing scheme is well suited for HDD environment, but, probably not for flash. So, I made the following changes.
-
-1. First, I removed the extra commit seq file write and changed the journal replay stuff accordingly.
-
-2. Each filestore Op threads is now doing O_DSYNC write followed by posix_fadvise(**fd, 0, 0, POSIX_FADV_DONTNEED);
-
-3. I derived an algorithm that each worker thread is executing to determine the max seq it can trim the journal to.
-
-4. Introduced a new throttle scheme that will throttle journal write based on the % space left.
-
-5. I saw that this scheme is definitely emptying up the journal faster and able to saturate the SSD more.
-
-6. But, even if we are not saturating any resources, if we are having both data and journal on the same drive, both writes are suffering latencies.
-
-7. Separating out journal to different disk , the same code (and also stock)  is running faster. Not sure about the exact reason, but, something to do with underlying layer. Still investigating.
-
-8. Now, if we want to separate out journal, SSD is *not an option*. The reason is, after some point we will be limited by SSD BW and all writes for N osds going to that SSD will wear out that SSD very fast. Also, this will be a very expensive solution considering high end journal SSD.
-
-9. So, I started experimenting with small PCIe NVRAM partition (128 MB). So, If we have ~4GB NVRAM we can put ~32 OSDs in that(considering NVRAM durability is much higher).  The stock code as is (without throttle), the performance is becoming very spiky for obvious reason.
-
-10. But, with the above mentioned changes, I am able to make a constant high performance out most of the time.
-
-11. I am also trying the existing synfs codebase (without op_seq file) + the throttle scheme I mentioned in this setup to see if we can get out a stable improve performance out or not. This is still under investigation.
-
-12. Initial benchmark with single OSD (no replication) looks promising and you can find the draft here.
-
-       https://docs.google.com/document/d/1QYAWkBNVfSXhWbLW6nTLx81a9LpWACsGjWG8bkNwKY8/edit?usp=sharing
-
-13. I still need to try this out by increasing number of OSDs.
-
-14. Also, need to see how this scheme is helping both data/journal on the same SSD.
-
-15. The main challenge I am facing in both the scheme is XFS metadata flush process (xfsaild) is choking all the processes accessing the disk when it is waking up. I can delay it till max 30 sec and if there are lot of dirty metadata, there is a performance spike down for very brief amount of time. Even if we are acknowledging writes from say NVRAM journal write, still the opthreads are doing getattrs on the XFS and those threads are getting blocked. I tried with ext4 and this problem is not there since it is writing metadata synchronously by default, but, the overall performance of ext4 is much less. I am not an expert on filesystem, so, any help on this is much appreciated.
-
-Mark,
-If we have time, we can discuss this result in tomorrow's performance meeting.
-
-Thanks & Regards
-Somnath
-
-________________________________
-
-PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On Wed, Jul 29, 2015 at 11:17 PM, Alex Elsayed <eternaleye@gmail.com> wrote:
+> Sage Weil wrote:
+>
+>> On Wed, 29 Jul 2015, Alex Elsayed wrote:
+> <snip for gmane>
+>>> My thinking is more that the "osd data = " key makes a lot less sense in
+>>> the systemd world overall - passing the OSD the full path on the
+>>> commandline via some --datadir would mean you could trivially use
+>>> systemd's instance templating, and just do
+>>>
+>>> ExecStart=/usr/bin/ceph-osd -f --datadir=/var/lib/ceph/osd/%i
+>>>
+>>> and be done with it. Could even do RequiresMountsFor=/var/lib/ceph/osd/%i
+>>> too, which would order it after (and make it depend on) any systemd.mount
+>>> units for that path.
+>>
+>> Note that there is a 1:1 equivalence between command line options and
+>> config options, so osd data = /foo and --osd-data foo are the same thing.
+>> Not that I think that matters here--although it's possible to manually
+>> specify paths in ceph.conf users can't do that if they want the udev magic
+>> to work (that's already true today, without systemd).
+>
+> Sure, though my thought was that the udev magic would work more sanely _via_
+> this. The missing part is loading the cluster and ID from the OSD data dir.
+>
+>> In any case, though, if your %i above is supposed to be the uuid, that's
+>> much less friendly than what we have now, where users can do
+>>
+>>  systemctl stop ceph-osd@12
+>>
+>> to stop osd.12.
+>>
+>> I'm not sure it's worth giving up the bind mount complexity unless it
+>> really becomes painful to support, given how much nicer the admin
+>> experience is...
+>
+> Well, that does presuppose that they've either SSHed into the machine
+> manually, or are using systemctl -H to do so via systemctl. That's already
+> not an especially nice user experience, since they need to manually consider
+> the cluster's structure.
+>
+> Something more like 'ceph tell osd.N die' or similar could work, and
+> SuccessExitStatus= could be used to make it even nicer (that even if it
+> gives a different exit status for "die" as opposed to other successes,
+> systemd can say "any of these exit codes are okay, don't autorestart")
+>
+> However, neither of those handles unmounting, and it still doesn't handle
+> starting. All of the above are still partial solutions; hopefully iteration
+> can result in something better in all ways.
+>
+> Also, note that if RequiresMountsFor= is used, unmounting the filesystem -
+> by device or by mountpoint - will stop the unit due to proper dependency
+> handling. (If RMF doesn't, BindsTo does - BindsTo will additionally do so if
+> the device is unmounted or suddenly unplugged without systemd intervention)
+>
+> systemctl stop dev-sdc.device # all OSDs running off of sdc stop
+> systemctl stop dev-sdd1.device # Just one partition this time
+>
+> Nice and tidy.
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
