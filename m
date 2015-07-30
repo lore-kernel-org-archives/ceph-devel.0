@@ -1,47 +1,38 @@
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH 01/18] libceph: add scatterlist messenger data type
-Date: Thu, 30 Jul 2015 07:55:16 -0700
-Message-ID: <20150730145516.GB12744@infradead.org>
-References: <1438161835-27960-1-git-send-email-mchristi@redhat.com>
- <20150729175515.GA16804@infradead.org>
- <55B95ACC.2030306@redhat.com>
- <55B96451.30706@redhat.com>
+From: Patrick McGarry <pmcgarry@redhat.com>
+Subject: Ceph Tech Talk Today!
+Date: Thu, 30 Jul 2015 11:08:32 -0400
+Message-ID: <CAAZbbf28BW-nPxF1FgOpxi6mPk9C7uPnugautj7W6AvSnFv1RA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <target-devel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <55B96451.30706@redhat.com>
-Sender: target-devel-owner@vger.kernel.org
-To: Mike Christie <mchristi@redhat.com>
-Cc: Christoph Hellwig <hch@infradead.org>, ceph-devel@vger.kernel.org, target-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-lb0-f176.google.com ([209.85.217.176]:34410 "EHLO
+	mail-lb0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750938AbbG3PId (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Jul 2015 11:08:33 -0400
+Received: by lbqc9 with SMTP id c9so3741813lbq.1
+        for <ceph-devel@vger.kernel.org>; Thu, 30 Jul 2015 08:08:32 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
 
-On Wed, Jul 29, 2015 at 06:40:01PM -0500, Mike Christie wrote:
-> I guess I was viewing this similar to cephfs where it does not use rbd
-> and the block layer. It just makes ceph/rados calls directly using
-> libceph. I am using rbd.c for its helper/wrapper functions around the
-> libceph ones, but I could just make libceph calls directly too.
-> 
-> Were you saying because for lio support we need to do more block
-> layer'ish operations like write same, compare and write, etc than
-> cephfs, then I should not do the lio backend and we should always go
-> through rbd for lio support?
+Hey cephers,
 
-I'd really prefer that.  We have other users for these facilities as
-well, and I'd much prefer having block layer support rather than working
-around it.
+Just sending a friendly reminder that our online CephFS Tech Talk is
+happening today at 13:00 EDT (17:00 UTC). Please stop by and hear a
+technical deep dive on CephFS and ask any questions you might have.
+Thanks!
 
-> Is that for all operations? For distributed TMFs and PRs then are you
-> thinking I should make those more block layer based (some sort of queue
-> or block deivce callouts or REQ_ types), or should those still have some
-> sort of lio callouts which could call different locking/cluster APIs
-> like libceph?
+http://ceph.com/ceph-tech-talks/
 
-Yes.  FYI, I've pushed out my WIP work for PRs here:
+direct link to the video conference:  https://bluejeans.com/172084437/browser
 
-http://git.infradead.org/users/hch/scsi.git/shortlog/refs/heads/pr-api
 
-TMFs are a bit of boderline case, but instead of needing special
-bypasses I'd rather find a way to add them.  For example we already
-have TMF ioctls for SCSI, so we might as well pull this up to the block
-layer.
+
+-- 
+
+Best Regards,
+
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
