@@ -1,129 +1,211 @@
-From: "Handzik, Joe" <joseph.t.handzik@hp.com>
-Subject: Re: [ceph-users] dropping old distros: el6, precise 12.04, debian
- wheezy?
-Date: Thu, 30 Jul 2015 14:34:17 +0000
-Message-ID: <BB7431A1-4C47-42EB-8FD9-4F2B5CA46657@hp.com>
-References: <alpine.DEB.2.00.1507300645130.22099@cobra.newdream.net>,<515A1511-3ED8-481F-8E71-C5CC8332F225@zviratko.net>
+From: Jon Meacham <jomeacha-dv/VyGpifdQAvxtiuMwx3w@public.gmane.org>
+Subject: Re: dropping old distros: el6, precise 12.04,
+ debian wheezy?
+Date: Thu, 30 Jul 2015 14:39:18 +0000
+Message-ID: <5D102546-FECE-4DE4-8A24-327DFF53F426@adobe.com>
+References: <alpine.DEB.2.00.1507300645130.22099@cobra.newdream.net>
+	<4B37EB35-008A-41DA-85DC-315314373A59@zviratko.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from g4t3426.houston.hp.com ([15.201.208.54]:38708 "EHLO
-	g4t3426.houston.hp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753886AbbG3OfE convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Jul 2015 10:35:04 -0400
-In-Reply-To: <515A1511-3ED8-481F-8E71-C5CC8332F225@zviratko.net>
+Content-Type: multipart/mixed; boundary="===============1973441677=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <4B37EB35-008A-41DA-85DC-315314373A59-9HAugxcXKGzk1uMJSBkQmQ@public.gmane.org>
 Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: =?Windows-1252?Q?Jan_=93Zviratko=94_Schermer?= <zviratko@zviratko.net>
-Cc: Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, "ceph-users@ceph.com" <ceph-users@ceph.com>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: =?utf-8?B?SmFuIOKAnFp2aXJhdGtv4oCdIFNjaGVybWVy?= <zviratko-9HAugxcXKGzk1uMJSBkQmQ@public.gmane.org>, Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-So, essentially, you'd vote that all LTS/enterprise releases be support=
-ed until their vendor's (canonical, Suse, red hat) designated EOL date?=
- Not voting either way, just trying to put a date stamp on some of this=
-=2E
+--===============1973441677==
+Content-Language: en-US
+Content-Type: multipart/alternative;
+	boundary="_000_5D102546FECE4DE48A24327DFF53F426adobecom_"
 
-Joe
+--_000_5D102546FECE4DE48A24327DFF53F426adobecom_
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 
-> On Jul 30, 2015, at 9:30 AM, Jan =93Zviratko=94 Schermer <zviratko@zv=
-iratko.net> wrote:
->=20
-> I understand your reasons, but dropping support for LTS release like =
-this
-> is not right.
->=20
-> You should lege artis support every distribution the LTS release coul=
-d have
-> ever been installed on - that=92s what the LTS label is for and what =
-we rely on
-> once we build a project on top of it
->=20
-> CentOS 6 in particular is still very widely used and even installed, =
-enterprise
-> apps rely on it to this day. Someone out there is surely maintaining =
-their LTS
-> Ceph release on this distro and not having tested packages will hurt =
-badly.
-> We don=92t want out project managers selecting EMC SAN over CEPH SDS
-> because of such uncertainty, and you should benchmark yourself to tho=
-se
-> vendors, maybe...
->=20
-> Every developer loves dropping support and concentrating on the bleed=
-ing
-> edge interesting stuff but that=92s not how it should work.
->=20
-> Just my 2 cents...
->=20
-> Jan
->=20
->> On 30 Jul 2015, at 15:54, Sage Weil <sweil@redhat.com> wrote:
->>=20
->> As time marches on it becomes increasingly difficult to maintain pro=
-per=20
->> builds and packages for older distros.  For example, as we make the=20
->> systemd transition, maintaining the kludgey sysvinit and udev suppor=
-t for=20
->> centos6/rhel6 is a pain in the butt and eats up time and energy to=20
->> maintain and test that we could be spending doing more useful work.
->>=20
->> "Dropping" them would mean:
->>=20
->> - Ongoing development on master (and future versions like infernalis=
- and=20
->> jewel) would not be tested on these distros.
->>=20
->> - We would stop building upstream release packages on ceph.com for n=
-ew=20
->> releases.
->>=20
->> - We would probably continue building hammer and firefly packages fo=
-r=20
->> future bugfix point releases.
->>=20
->> - The downstream distros would probably continue to package them, bu=
-t the=20
->> burden would be on them.  For example, if Ubuntu wanted to ship Jewe=
-l on=20
->> precise 12.04, they could, but they'd probably need to futz with the=
-=20
->> packaging and/or build environment to make it work.
->>=20
->> So... given that, I'd like to gauge user interest in these old distr=
-os. =20
->> Specifically,
->>=20
->> CentOS6 / RHEL6
->> Ubuntu precise 12.04
->> Debian wheezy
->>=20
->> Would anyone miss them?
->>=20
->> In particular, dropping these three would mean we could drop sysvini=
-t=20
->> entirely and focus on systemd (and continue maintaining the existing=
-=20
->> upstart files for just a bit longer).  That would be a relief.  (The=
-=20
->> sysvinit files wouldn't go away in the source tree, but we wouldn't =
-worry=20
->> about packaging and testing them properly.)
->>=20
->> Thanks!
->> sage
->> _______________________________________________
->> ceph-users mailing list
->> ceph-users@lists.ceph.com
->> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SWYgaGFtbWVyIGFuZCBmaXJlZmx5IGJ1Z2ZpeCByZWxlYXNlcyB3aWxsIHN0aWxsIGJlIHBhY2th
+Z2VkIGZvciB0aGVzZSBkaXN0cm9zLCBJIGRvbid0IHNlZSBhIHByb2JsZW0gd2l0aCB0aGlzLiBB
+bnlvbmUgd2hvIGlzIG9wZXJhdGluZyBhbiBleGlzdGluZyBMVFMgZGVwbG95bWVudCBvbiBDZW50
+T1MgNiwgZXRjLiB3aWxsIGNvbnRpbnVlIHRvIHJlY2VpdmUgZml4ZXMgZm9yIHNhaWQgTFRTIHJl
+bGVhc2UuDQoNCkpvbg0KDQpGcm9tOiBjZXBoLXVzZXJzIG9uIGJlaGFsZiBvZiBKYW4g4oCcWnZp
+cmF0a2/igJ0gU2NoZXJtZXINCkRhdGU6IFRodXJzZGF5LCBKdWx5IDMwLCAyMDE1IGF0IDg6Mjkg
+QU0NClRvOiBTYWdlIFdlaWwNCkNjOiBjZXBoLWRldmVsLCAiY2VwaC11c2Vyc0BjZXBoLmNvbTxt
+YWlsdG86Y2VwaC11c2Vyc0BjZXBoLmNvbT4iDQpTdWJqZWN0OiBSZTogW2NlcGgtdXNlcnNdIGRy
+b3BwaW5nIG9sZCBkaXN0cm9zOiBlbDYsIHByZWNpc2UgMTIuMDQsIGRlYmlhbiB3aGVlenk/DQoN
+CkkgdW5kZXJzdGFuZCB5b3VyIHJlYXNvbnMsIGJ1dCBkcm9wcGluZyBzdXBwb3J0IGZvciBMVFMg
+cmVsZWFzZSBsaWtlIHRoaXMNCmlzIG5vdCByaWdodC4NCg0KWW91IHNob3VsZCBsZWdlIGFydGlz
+IHN1cHBvcnQgZXZlcnkgZGlzdHJpYnV0aW9uIHRoZSBMVFMgcmVsZWFzZSBjb3VsZCBoYXZlDQpl
+dmVyIGJlZW4gaW5zdGFsbGVkIG9uIC0gdGhhdOKAmXMgd2hhdCB0aGUgTFRTIGxhYmVsIGlzIGZv
+ciBhbmQgd2hhdCB3ZSByZWx5IG9uDQpvbmNlIHdlIGJ1aWxkIGEgcHJvamVjdCBvbiB0b3Agb2Yg
+aXQNCg0KQ2VudE9TIDYgaW4gcGFydGljdWxhciBpcyBzdGlsbCB2ZXJ5IHdpZGVseSB1c2VkIGFu
+ZCBldmVuIGluc3RhbGxlZCwgZW50ZXJwcmlzZQ0KYXBwcyByZWx5IG9uIGl0IHRvIHRoaXMgZGF5
+LiBTb21lb25lIG91dCB0aGVyZSBpcyBzdXJlbHkgbWFpbnRhaW5pbmcgdGhlaXIgTFRTDQpDZXBo
+IHJlbGVhc2Ugb24gdGhpcyBkaXN0cm8gYW5kIG5vdCBoYXZpbmcgdGVzdGVkIHBhY2thZ2VzIHdp
+bGwgaHVydCBiYWRseS4NCldlIGRvbuKAmXQgd2FudCBvdXQgcHJvamVjdCBtYW5hZ2VycyBzZWxl
+Y3RpbmcgRU1DIFNBTiBvdmVyIENFUEggU0RTDQpiZWNhdXNlIG9mIHN1Y2ggdW5jZXJ0YWludHks
+IGFuZCB5b3Ugc2hvdWxkIGJlbmNobWFyayB5b3Vyc2VsZiB0byB0aG9zZQ0KdmVuZG9ycywgbWF5
+YmUuLi4NCg0KRXZlcnkgZGV2ZWxvcGVyIGxvdmVzIGRyb3BwaW5nIHN1cHBvcnQgYW5kIGNvbmNl
+bnRyYXRpbmcgb24gdGhlIGJsZWVkaW5nDQplZGdlIGludGVyZXN0aW5nIHN0dWZmIGJ1dCB0aGF0
+4oCZcyBub3QgaG93IGl0IHNob3VsZCB3b3JrLg0KDQpKdXN0IG15IDIgY2VudHMuLi4NCg0KSmFu
+DQoNCk9uIDMwIEp1bCAyMDE1LCBhdCAxNTo1NCwgU2FnZSBXZWlsIDxzd2VpbEByZWRoYXQuY29t
+PG1haWx0bzpzd2VpbEByZWRoYXQuY29tPj4gd3JvdGU6DQoNCkFzIHRpbWUgbWFyY2hlcyBvbiBp
+dCBiZWNvbWVzIGluY3JlYXNpbmdseSBkaWZmaWN1bHQgdG8gbWFpbnRhaW4gcHJvcGVyDQpidWls
+ZHMgYW5kIHBhY2thZ2VzIGZvciBvbGRlciBkaXN0cm9zLiAgRm9yIGV4YW1wbGUsIGFzIHdlIG1h
+a2UgdGhlDQpzeXN0ZW1kIHRyYW5zaXRpb24sIG1haW50YWluaW5nIHRoZSBrbHVkZ2V5IHN5c3Zp
+bml0IGFuZCB1ZGV2IHN1cHBvcnQgZm9yDQpjZW50b3M2L3JoZWw2IGlzIGEgcGFpbiBpbiB0aGUg
+YnV0dCBhbmQgZWF0cyB1cCB0aW1lIGFuZCBlbmVyZ3kgdG8NCm1haW50YWluIGFuZCB0ZXN0IHRo
+YXQgd2UgY291bGQgYmUgc3BlbmRpbmcgZG9pbmcgbW9yZSB1c2VmdWwgd29yay4NCg0KIkRyb3Bw
+aW5nIiB0aGVtIHdvdWxkIG1lYW46DQoNCi0gT25nb2luZyBkZXZlbG9wbWVudCBvbiBtYXN0ZXIg
+KGFuZCBmdXR1cmUgdmVyc2lvbnMgbGlrZSBpbmZlcm5hbGlzIGFuZA0KamV3ZWwpIHdvdWxkIG5v
+dCBiZSB0ZXN0ZWQgb24gdGhlc2UgZGlzdHJvcy4NCg0KLSBXZSB3b3VsZCBzdG9wIGJ1aWxkaW5n
+IHVwc3RyZWFtIHJlbGVhc2UgcGFja2FnZXMgb24gY2VwaC5jb208aHR0cDovL2NlcGguY29tPiBm
+b3IgbmV3DQpyZWxlYXNlcy4NCg0KLSBXZSB3b3VsZCBwcm9iYWJseSBjb250aW51ZSBidWlsZGlu
+ZyBoYW1tZXIgYW5kIGZpcmVmbHkgcGFja2FnZXMgZm9yDQpmdXR1cmUgYnVnZml4IHBvaW50IHJl
+bGVhc2VzLg0KDQotIFRoZSBkb3duc3RyZWFtIGRpc3Ryb3Mgd291bGQgcHJvYmFibHkgY29udGlu
+dWUgdG8gcGFja2FnZSB0aGVtLCBidXQgdGhlDQpidXJkZW4gd291bGQgYmUgb24gdGhlbS4gIEZv
+ciBleGFtcGxlLCBpZiBVYnVudHUgd2FudGVkIHRvIHNoaXAgSmV3ZWwgb24NCnByZWNpc2UgMTIu
+MDQsIHRoZXkgY291bGQsIGJ1dCB0aGV5J2QgcHJvYmFibHkgbmVlZCB0byBmdXR6IHdpdGggdGhl
+DQpwYWNrYWdpbmcgYW5kL29yIGJ1aWxkIGVudmlyb25tZW50IHRvIG1ha2UgaXQgd29yay4NCg0K
+U28uLi4gZ2l2ZW4gdGhhdCwgSSdkIGxpa2UgdG8gZ2F1Z2UgdXNlciBpbnRlcmVzdCBpbiB0aGVz
+ZSBvbGQgZGlzdHJvcy4NClNwZWNpZmljYWxseSwNCg0KQ2VudE9TNiAvIFJIRUw2DQpVYnVudHUg
+cHJlY2lzZSAxMi4wNA0KRGViaWFuIHdoZWV6eQ0KDQpXb3VsZCBhbnlvbmUgbWlzcyB0aGVtPw0K
+DQpJbiBwYXJ0aWN1bGFyLCBkcm9wcGluZyB0aGVzZSB0aHJlZSB3b3VsZCBtZWFuIHdlIGNvdWxk
+IGRyb3Agc3lzdmluaXQNCmVudGlyZWx5IGFuZCBmb2N1cyBvbiBzeXN0ZW1kIChhbmQgY29udGlu
+dWUgbWFpbnRhaW5pbmcgdGhlIGV4aXN0aW5nDQp1cHN0YXJ0IGZpbGVzIGZvciBqdXN0IGEgYml0
+IGxvbmdlcikuICBUaGF0IHdvdWxkIGJlIGEgcmVsaWVmLiAgKFRoZQ0Kc3lzdmluaXQgZmlsZXMg
+d291bGRuJ3QgZ28gYXdheSBpbiB0aGUgc291cmNlIHRyZWUsIGJ1dCB3ZSB3b3VsZG4ndCB3b3Jy
+eQ0KYWJvdXQgcGFja2FnaW5nIGFuZCB0ZXN0aW5nIHRoZW0gcHJvcGVybHkuKQ0KDQpUaGFua3Mh
+DQpzYWdlDQpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXw0K
+Y2VwaC11c2VycyBtYWlsaW5nIGxpc3QNCmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb208bWFpbHRv
+OmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20+DQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGlu
+Zm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20NCg0K
+
+--_000_5D102546FECE4DE48A24327DFF53F426adobecom_
+Content-Type: text/html; charset="utf-8"
+Content-ID: <52122F89CF19C542A081BFA75A3FB337-GsdMcTDXqN6cE4WynfumptQqCkab/8FMAL8bYrjMMd8@public.gmane.org>
+Content-Transfer-Encoding: base64
+
+PGh0bWw+DQo8aGVhZD4NCjxtZXRhIGh0dHAtZXF1aXY9IkNvbnRlbnQtVHlwZSIgY29udGVudD0i
+dGV4dC9odG1sOyBjaGFyc2V0PXV0Zi04Ij4NCjwvaGVhZD4NCjxib2R5IHN0eWxlPSJ3b3JkLXdy
+YXA6IGJyZWFrLXdvcmQ7IC13ZWJraXQtbmJzcC1tb2RlOiBzcGFjZTsgLXdlYmtpdC1saW5lLWJy
+ZWFrOiBhZnRlci13aGl0ZS1zcGFjZTsgY29sb3I6IHJnYigwLCAwLCAwKTsgZm9udC1zaXplOiAx
+NHB4OyBmb250LWZhbWlseTogQ2FsaWJyaSwgc2Fucy1zZXJpZjsiPg0KPGRpdj4NCjxkaXY+DQo8
+ZGl2PklmIGhhbW1lciBhbmQgZmlyZWZseSBidWdmaXggcmVsZWFzZXMgd2lsbCBzdGlsbCBiZSBw
+YWNrYWdlZCBmb3IgdGhlc2UgZGlzdHJvcywgSSBkb24ndCBzZWUgYSBwcm9ibGVtIHdpdGggdGhp
+cy4gQW55b25lIHdobyBpcyBvcGVyYXRpbmcgYW4gZXhpc3RpbmcgTFRTIGRlcGxveW1lbnQgb24g
+Q2VudE9TIDYsIGV0Yy4gd2lsbCBjb250aW51ZSB0byByZWNlaXZlIGZpeGVzIGZvciBzYWlkIExU
+UyByZWxlYXNlLjwvZGl2Pg0KPC9kaXY+DQo8L2Rpdj4NCjxkaXY+PGJyPg0KPC9kaXY+DQo8ZGl2
+PkpvbjwvZGl2Pg0KPGRpdj48YnI+DQo8L2Rpdj4NCjxzcGFuIGlkPSJPTEtfU1JDX0JPRFlfU0VD
+VElPTiI+DQo8ZGl2IHN0eWxlPSJmb250LWZhbWlseTpDYWxpYnJpOyBmb250LXNpemU6MTJwdDsg
+dGV4dC1hbGlnbjpsZWZ0OyBjb2xvcjpibGFjazsgQk9SREVSLUJPVFRPTTogbWVkaXVtIG5vbmU7
+IEJPUkRFUi1MRUZUOiBtZWRpdW0gbm9uZTsgUEFERElORy1CT1RUT006IDBpbjsgUEFERElORy1M
+RUZUOiAwaW47IFBBRERJTkctUklHSFQ6IDBpbjsgQk9SREVSLVRPUDogI2I1YzRkZiAxcHQgc29s
+aWQ7IEJPUkRFUi1SSUdIVDogbWVkaXVtIG5vbmU7IFBBRERJTkctVE9QOiAzcHQiPg0KPHNwYW4g
+c3R5bGU9ImZvbnQtd2VpZ2h0OmJvbGQiPkZyb206IDwvc3Bhbj5jZXBoLXVzZXJzIG9uIGJlaGFs
+ZiBvZiBKYW4g4oCcWnZpcmF0a2/igJ0gU2NoZXJtZXI8YnI+DQo8c3BhbiBzdHlsZT0iZm9udC13
+ZWlnaHQ6Ym9sZCI+RGF0ZTogPC9zcGFuPlRodXJzZGF5LCBKdWx5IDMwLCAyMDE1IGF0IDg6Mjkg
+QU08YnI+DQo8c3BhbiBzdHlsZT0iZm9udC13ZWlnaHQ6Ym9sZCI+VG86IDwvc3Bhbj5TYWdlIFdl
+aWw8YnI+DQo8c3BhbiBzdHlsZT0iZm9udC13ZWlnaHQ6Ym9sZCI+Q2M6IDwvc3Bhbj5jZXBoLWRl
+dmVsLCAmcXVvdDs8YSBocmVmPSJtYWlsdG86Y2VwaC11c2Vyc0BjZXBoLmNvbSI+Y2VwaC11c2Vy
+c0BjZXBoLmNvbTwvYT4mcXVvdDs8YnI+DQo8c3BhbiBzdHlsZT0iZm9udC13ZWlnaHQ6Ym9sZCI+
+U3ViamVjdDogPC9zcGFuPlJlOiBbY2VwaC11c2Vyc10gZHJvcHBpbmcgb2xkIGRpc3Ryb3M6IGVs
+NiwgcHJlY2lzZSAxMi4wNCwgZGViaWFuIHdoZWV6eT88YnI+DQo8L2Rpdj4NCjxkaXY+PGJyPg0K
+PC9kaXY+DQo8ZGl2Pg0KPGRpdiBzdHlsZT0id29yZC13cmFwOiBicmVhay13b3JkOyAtd2Via2l0
+LW5ic3AtbW9kZTogc3BhY2U7IC13ZWJraXQtbGluZS1icmVhazogYWZ0ZXItd2hpdGUtc3BhY2U7
+IiBjbGFzcz0iIj4NCjxkaXYgY2xhc3M9IiI+SSB1bmRlcnN0YW5kIHlvdXIgcmVhc29ucywgYnV0
+IGRyb3BwaW5nIHN1cHBvcnQgZm9yIExUUyByZWxlYXNlIGxpa2UgdGhpczwvZGl2Pg0KPGRpdiBj
+bGFzcz0iIj5pcyBub3QgcmlnaHQuPC9kaXY+DQo8ZGl2IGNsYXNzPSIiPjxiciBjbGFzcz0iIj4N
+CjwvZGl2Pg0KPGRpdiBjbGFzcz0iIj5Zb3Ugc2hvdWxkIDxpIGNsYXNzPSIiPmxlZ2UgYXJ0aXM8
+L2k+Jm5ic3A7c3VwcG9ydCBldmVyeSBkaXN0cmlidXRpb24gdGhlIExUUyByZWxlYXNlIGNvdWxk
+IGhhdmU8L2Rpdj4NCjxkaXYgY2xhc3M9IiI+ZXZlciBiZWVuIGluc3RhbGxlZCBvbiAtIHRoYXTi
+gJlzIHdoYXQgdGhlIExUUyBsYWJlbCBpcyBmb3IgYW5kIHdoYXQgd2UgcmVseSBvbjwvZGl2Pg0K
+PGRpdiBjbGFzcz0iIj5vbmNlIHdlIGJ1aWxkIGEgcHJvamVjdCBvbiB0b3Agb2YgaXQ8L2Rpdj4N
+CjxkaXYgY2xhc3M9IiI+PGJyIGNsYXNzPSIiPg0KPC9kaXY+DQo8ZGl2IGNsYXNzPSIiPkNlbnRP
+UyA2IGluIHBhcnRpY3VsYXIgaXMgc3RpbGwgdmVyeSB3aWRlbHkgdXNlZCBhbmQgZXZlbiBpbnN0
+YWxsZWQsIGVudGVycHJpc2U8L2Rpdj4NCjxkaXYgY2xhc3M9IiI+YXBwcyByZWx5IG9uIGl0IHRv
+IHRoaXMgZGF5LiBTb21lb25lIG91dCB0aGVyZSBpcyBzdXJlbHkgbWFpbnRhaW5pbmcgdGhlaXIg
+TFRTPC9kaXY+DQo8ZGl2IGNsYXNzPSIiPkNlcGggcmVsZWFzZSBvbiB0aGlzIGRpc3RybyBhbmQg
+bm90IGhhdmluZyB0ZXN0ZWQgcGFja2FnZXMgd2lsbCBodXJ0IGJhZGx5LjwvZGl2Pg0KPGRpdiBj
+bGFzcz0iIj5XZSBkb27igJl0IHdhbnQgb3V0IHByb2plY3QgbWFuYWdlcnMgc2VsZWN0aW5nIEVN
+QyBTQU4gb3ZlciBDRVBIIFNEUzwvZGl2Pg0KPGRpdiBjbGFzcz0iIj5iZWNhdXNlIG9mIHN1Y2gg
+dW5jZXJ0YWludHksIGFuZCB5b3Ugc2hvdWxkIGJlbmNobWFyayB5b3Vyc2VsZiB0byB0aG9zZTwv
+ZGl2Pg0KPGRpdiBjbGFzcz0iIj52ZW5kb3JzLCBtYXliZS4uLjwvZGl2Pg0KPGRpdiBjbGFzcz0i
+Ij48YnIgY2xhc3M9IiI+DQo8L2Rpdj4NCjxkaXYgY2xhc3M9IiI+RXZlcnkgZGV2ZWxvcGVyIGxv
+dmVzIGRyb3BwaW5nIHN1cHBvcnQgYW5kIGNvbmNlbnRyYXRpbmcgb24gdGhlIGJsZWVkaW5nPC9k
+aXY+DQo8ZGl2IGNsYXNzPSIiPmVkZ2UgaW50ZXJlc3Rpbmcgc3R1ZmYgYnV0IHRoYXTigJlzIG5v
+dCBob3cgaXQgc2hvdWxkIHdvcmsuPC9kaXY+DQo8ZGl2IGNsYXNzPSIiPjxiciBjbGFzcz0iIj4N
+CjwvZGl2Pg0KPGRpdiBjbGFzcz0iIj5KdXN0IG15IDIgY2VudHMuLi48L2Rpdj4NCjxkaXYgY2xh
+c3M9IiI+PGJyIGNsYXNzPSIiPg0KPC9kaXY+DQo8ZGl2IGNsYXNzPSIiPkphbjwvZGl2Pg0KPGRp
+diBjbGFzcz0iIj48YnIgY2xhc3M9IiI+DQo8YmxvY2txdW90ZSB0eXBlPSJjaXRlIiBjbGFzcz0i
+Ij5PbiAzMCBKdWwgMjAxNSwgYXQgMTU6NTQsIFNhZ2UgV2VpbCAmbHQ7PGEgaHJlZj0ibWFpbHRv
+OnN3ZWlsQHJlZGhhdC5jb20iIGNsYXNzPSIiPnN3ZWlsQHJlZGhhdC5jb208L2E+Jmd0OyB3cm90
+ZTo8YnIgY2xhc3M9IiI+DQo8YnIgY2xhc3M9IiI+DQpBcyB0aW1lIG1hcmNoZXMgb24gaXQgYmVj
+b21lcyBpbmNyZWFzaW5nbHkgZGlmZmljdWx0IHRvIG1haW50YWluIHByb3BlciZuYnNwOzxiciBj
+bGFzcz0iIj4NCmJ1aWxkcyBhbmQgcGFja2FnZXMgZm9yIG9sZGVyIGRpc3Ryb3MuICZuYnNwO0Zv
+ciBleGFtcGxlLCBhcyB3ZSBtYWtlIHRoZSZuYnNwOzxiciBjbGFzcz0iIj4NCnN5c3RlbWQgdHJh
+bnNpdGlvbiwgbWFpbnRhaW5pbmcgdGhlIGtsdWRnZXkgc3lzdmluaXQgYW5kIHVkZXYgc3VwcG9y
+dCBmb3ImbmJzcDs8YnIgY2xhc3M9IiI+DQpjZW50b3M2L3JoZWw2IGlzIGEgcGFpbiBpbiB0aGUg
+YnV0dCBhbmQgZWF0cyB1cCB0aW1lIGFuZCBlbmVyZ3kgdG8mbmJzcDs8YnIgY2xhc3M9IiI+DQpt
+YWludGFpbiBhbmQgdGVzdCB0aGF0IHdlIGNvdWxkIGJlIHNwZW5kaW5nIGRvaW5nIG1vcmUgdXNl
+ZnVsIHdvcmsuPGJyIGNsYXNzPSIiPg0KPGJyIGNsYXNzPSIiPg0KJnF1b3Q7RHJvcHBpbmcmcXVv
+dDsgdGhlbSB3b3VsZCBtZWFuOjxiciBjbGFzcz0iIj4NCjxiciBjbGFzcz0iIj4NCi0gT25nb2lu
+ZyBkZXZlbG9wbWVudCBvbiBtYXN0ZXIgKGFuZCBmdXR1cmUgdmVyc2lvbnMgbGlrZSBpbmZlcm5h
+bGlzIGFuZCZuYnNwOzxiciBjbGFzcz0iIj4NCmpld2VsKSB3b3VsZCBub3QgYmUgdGVzdGVkIG9u
+IHRoZXNlIGRpc3Ryb3MuPGJyIGNsYXNzPSIiPg0KPGJyIGNsYXNzPSIiPg0KLSBXZSB3b3VsZCBz
+dG9wIGJ1aWxkaW5nIHVwc3RyZWFtIHJlbGVhc2UgcGFja2FnZXMgb24gPGEgaHJlZj0iaHR0cDov
+L2NlcGguY29tIiBjbGFzcz0iIj4NCmNlcGguY29tPC9hPiBmb3IgbmV3Jm5ic3A7PGJyIGNsYXNz
+PSIiPg0KcmVsZWFzZXMuPGJyIGNsYXNzPSIiPg0KPGJyIGNsYXNzPSIiPg0KLSBXZSB3b3VsZCBw
+cm9iYWJseSBjb250aW51ZSBidWlsZGluZyBoYW1tZXIgYW5kIGZpcmVmbHkgcGFja2FnZXMgZm9y
+Jm5ic3A7PGJyIGNsYXNzPSIiPg0KZnV0dXJlIGJ1Z2ZpeCBwb2ludCByZWxlYXNlcy48YnIgY2xh
+c3M9IiI+DQo8YnIgY2xhc3M9IiI+DQotIFRoZSBkb3duc3RyZWFtIGRpc3Ryb3Mgd291bGQgcHJv
+YmFibHkgY29udGludWUgdG8gcGFja2FnZSB0aGVtLCBidXQgdGhlJm5ic3A7PGJyIGNsYXNzPSIi
+Pg0KYnVyZGVuIHdvdWxkIGJlIG9uIHRoZW0uICZuYnNwO0ZvciBleGFtcGxlLCBpZiBVYnVudHUg
+d2FudGVkIHRvIHNoaXAgSmV3ZWwgb24mbmJzcDs8YnIgY2xhc3M9IiI+DQpwcmVjaXNlIDEyLjA0
+LCB0aGV5IGNvdWxkLCBidXQgdGhleSdkIHByb2JhYmx5IG5lZWQgdG8gZnV0eiB3aXRoIHRoZSZu
+YnNwOzxiciBjbGFzcz0iIj4NCnBhY2thZ2luZyBhbmQvb3IgYnVpbGQgZW52aXJvbm1lbnQgdG8g
+bWFrZSBpdCB3b3JrLjxiciBjbGFzcz0iIj4NCjxiciBjbGFzcz0iIj4NClNvLi4uIGdpdmVuIHRo
+YXQsIEknZCBsaWtlIHRvIGdhdWdlIHVzZXIgaW50ZXJlc3QgaW4gdGhlc2Ugb2xkIGRpc3Ryb3Mu
+ICZuYnNwOzxiciBjbGFzcz0iIj4NClNwZWNpZmljYWxseSw8YnIgY2xhc3M9IiI+DQo8YnIgY2xh
+c3M9IiI+DQpDZW50T1M2IC8gUkhFTDY8YnIgY2xhc3M9IiI+DQpVYnVudHUgcHJlY2lzZSAxMi4w
+NDxiciBjbGFzcz0iIj4NCkRlYmlhbiB3aGVlenk8YnIgY2xhc3M9IiI+DQo8YnIgY2xhc3M9IiI+
+DQpXb3VsZCBhbnlvbmUgbWlzcyB0aGVtPzxiciBjbGFzcz0iIj4NCjxiciBjbGFzcz0iIj4NCklu
+IHBhcnRpY3VsYXIsIGRyb3BwaW5nIHRoZXNlIHRocmVlIHdvdWxkIG1lYW4gd2UgY291bGQgZHJv
+cCBzeXN2aW5pdCZuYnNwOzxiciBjbGFzcz0iIj4NCmVudGlyZWx5IGFuZCBmb2N1cyBvbiBzeXN0
+ZW1kIChhbmQgY29udGludWUgbWFpbnRhaW5pbmcgdGhlIGV4aXN0aW5nJm5ic3A7PGJyIGNsYXNz
+PSIiPg0KdXBzdGFydCBmaWxlcyBmb3IganVzdCBhIGJpdCBsb25nZXIpLiAmbmJzcDtUaGF0IHdv
+dWxkIGJlIGEgcmVsaWVmLiAmbmJzcDsoVGhlJm5ic3A7PGJyIGNsYXNzPSIiPg0Kc3lzdmluaXQg
+ZmlsZXMgd291bGRuJ3QgZ28gYXdheSBpbiB0aGUgc291cmNlIHRyZWUsIGJ1dCB3ZSB3b3VsZG4n
+dCB3b3JyeSZuYnNwOzxiciBjbGFzcz0iIj4NCmFib3V0IHBhY2thZ2luZyBhbmQgdGVzdGluZyB0
+aGVtIHByb3Blcmx5Lik8YnIgY2xhc3M9IiI+DQo8YnIgY2xhc3M9IiI+DQpUaGFua3MhPGJyIGNs
+YXNzPSIiPg0Kc2FnZTxiciBjbGFzcz0iIj4NCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fPGJyIGNsYXNzPSIiPg0KY2VwaC11c2VycyBtYWlsaW5nIGxpc3Q8
+YnIgY2xhc3M9IiI+DQo8YSBocmVmPSJtYWlsdG86Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbSIg
+Y2xhc3M9IiI+Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbTwvYT48YnIgY2xhc3M9IiI+DQo8YSBo
+cmVmPSJodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5j
+b20iPmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNv
+bTwvYT48YnIgY2xhc3M9IiI+DQo8L2Jsb2NrcXVvdGU+DQo8YnIgY2xhc3M9IiI+DQo8L2Rpdj4N
+CjwvZGl2Pg0KPC9kaXY+DQo8L3NwYW4+DQo8L2JvZHk+DQo8L2h0bWw+DQo=
+
+--_000_5D102546FECE4DE48A24327DFF53F426adobecom_--
+
+--===============1973441677==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============1973441677==--
