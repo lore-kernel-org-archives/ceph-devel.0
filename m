@@ -1,61 +1,76 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: pre_start command not executed with upstart
-Date: Thu, 30 Jul 2015 09:43:33 +0200
-Message-ID: <55B9D5A5.9060301@42on.com>
-References: <55B73581.3040501@42on.com> <alpine.DEB.2.00.1507280528210.22099@cobra.newdream.net>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: hammer/firefly backports upgrade suite
+Date: Thu, 30 Jul 2015 10:03:31 +0200
+Message-ID: <55B9DA53.9050904@dachary.org>
+References: <55B946D0.3070308@dachary.org> <55B9D0D7.607@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="fdSPFdRsrmiW9BJqE07Urjw6BMGDHQ1Wp"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from websrv.42on.com ([31.25.102.167]:55861 "EHLO websrv.42on.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751177AbbG3Hng (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 30 Jul 2015 03:43:36 -0400
-In-Reply-To: <alpine.DEB.2.00.1507280528210.22099@cobra.newdream.net>
+Received: from mail2.dachary.org ([91.121.57.175]:58672 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1750868AbbG3IDi (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Jul 2015 04:03:38 -0400
+In-Reply-To: <55B9D0D7.607@suse.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Nathan Cutler <ncutler@suse.cz>, Abhishek L <abhishek.lekshmanan@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
+
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--fdSPFdRsrmiW9BJqE07Urjw6BMGDHQ1Wp
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
 
 
-On 28-07-15 14:29, Sage Weil wrote:
-> On Tue, 28 Jul 2015, Wido den Hollander wrote:
->> Hi,
+On 30/07/2015 09:23, Nathan Cutler wrote:
+>> It turns out the mistake was to use upgrade/firefly-x and upgrade/hamm=
+er-x instead of upgrade/firelfy and upgrade/hammer. When -c hammer-backpo=
+rts or -c firefly-backports is given to teuthology-suite, it will upgrade=
+ to this version, from older versions of the same stable branch.
 >>
->> I was trying to inject a pre_start command on a bunch of OSDs under
->> Ubuntu 14.04, but that didn't work.
+>> I've updated:
 >>
->> I found out that only the sysvinit script execute pre_start commands,
->> but the upstart nor the systemd scripts do this.
+>> http://tracker.ceph.com/issues/11644#upgrade
+>> http://tracker.ceph.com/issues/11990#upgrade
 >>
->> Is this a thing which will disappear or is this just a oversight?
->>
->> I'm actually using "sleep 30" as a pre-start to prevent all OSDs from
->> starting at the same time. Big boxes which die under the workload of all
->> OSDs starting at the same time.
->>
->> I also try to prevent a lot of OSDMap changes by booting the OSDs slowly
->> so I tried to fix this with "pre_start".
-> 
-> I was hoping to let it die...
-> 
-> I would take a fresh look at systemd and see if there is a 
-> different/better mechanism there to address the startup issue.  You can 
-> manually add a prestart script/command to the unit file...
-> 
+>> whith the fix and they are running (using the OpenStack cluster though=
+, there may be issues with the firefly upgrade suite but the hammer upgra=
+de suite must run fine, it has run at http://ceph.aevoo.fr:8081/ enough t=
+imes to suggest there are no OpenStack specific issues).
+>=20
+> Hi Loic:
+>=20
+> As you predicted, the firefly upgrade suite finished with quite a few f=
+ailures. I looked at the first one and the log said:
+>=20
+> ERROR:teuthology.misc:. teuthology/test/integration/openrc.sh && openst=
+ack network show -f json unknown error ERROR: openstack No networks with =
+a name or ID of 'unknown' found
+>=20
+> Nathan
 
-Oh, it doesn't matter if it dies out. It's just that there will probably
-be scenarios where users want to do some sort of pre-start before a OSD
-is executed.
+These can be ignored. I'll fix that so it does not show in the future.
 
-The update_crush hook is one of the examples which is already executed
-for example.
+Cheers
 
-A pre_start which does a mount for example (for those without udev)
-might be useful.
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
-Wido
 
-> sage
-> 
+--fdSPFdRsrmiW9BJqE07Urjw6BMGDHQ1Wp
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlW52lMACgkQ8dLMyEl6F20v3wCdFrNQKCl6F8f3vT5NPXP6fJIl
+1H0AoKxxUBxgJQ79jp9JTm6QrvCOZvVo
+=6VOG
+-----END PGP SIGNATURE-----
+
+--fdSPFdRsrmiW9BJqE07Urjw6BMGDHQ1Wp--
