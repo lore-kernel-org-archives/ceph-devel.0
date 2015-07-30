@@ -1,98 +1,47 @@
-From: Jan Schermer <jan-SB6/BxVxTjHtwjQa/ONI9g@public.gmane.org>
-Subject: Re: dropping old distros: el6, precise 12.04,
-	debian wheezy?
-Date: Thu, 30 Jul 2015 16:42:59 +0200
-Message-ID: <173D4098-F9E9-4929-A838-1E04EC1CD50F@schermer.cz>
-References: <alpine.DEB.2.00.1507300645130.22099@cobra.newdream.net>
-	<515A1511-3ED8-481F-8E71-C5CC8332F225@zviratko.net>
-	<BB7431A1-4C47-42EB-8FD9-4F2B5CA46657@hp.com>
-Mime-Version: 1.0 (Mac OS X Mail 9.0 \(3073\))
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <BB7431A1-4C47-42EB-8FD9-4F2B5CA46657-VXdhtT5mjnY@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: "Handzik, Joe" <joseph.t.handzik-VXdhtT5mjnY@public.gmane.org>
-Cc: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jan Zviratko Schermer <zviratko-9HAugxcXKGzk1uMJSBkQmQ@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: [PATCH 01/18] libceph: add scatterlist messenger data type
+Date: Thu, 30 Jul 2015 07:55:16 -0700
+Message-ID: <20150730145516.GB12744@infradead.org>
+References: <1438161835-27960-1-git-send-email-mchristi@redhat.com>
+ <20150729175515.GA16804@infradead.org>
+ <55B95ACC.2030306@redhat.com>
+ <55B96451.30706@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <target-devel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <55B96451.30706@redhat.com>
+Sender: target-devel-owner@vger.kernel.org
+To: Mike Christie <mchristi@redhat.com>
+Cc: Christoph Hellwig <hch@infradead.org>, ceph-devel@vger.kernel.org, target-devel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-Tm90IGF0IGFsbC4KV2UgaGF2ZSB0aGlzOiBodHRwOi8vY2VwaC5jb20vZG9jcy9tYXN0ZXIvcmVs
-ZWFzZXMvCgpJIHdvdWxkIGV4cGVjdCB0aGF0IHdoYXRldmVyIGRpc3RyaWJ1dGlvbiBJIGluc3Rh
-bGwgQ2VwaCBMVFMgcmVsZWFzZSBvbiB3aWxsCmJlIHN1cHBvcnRlZCBmb3IgdGhlIHRpbWUgc3Bl
-Y2lmaWVkLgpUaGF0IG1lYW5zIGlmIEkgaW5zdGFsbCBIYW1tZXIgb24gQ2VudE9TIDYgbm93IGl0
-IHdpbGwgc3RheSBzdXBwb3J0ZWQKdW50aWwgM1EvMjAxNi4KCk9mIGNvdXJzZSBpZiBpbiB0aGUg
-bWVhbnRpbWUgdGhlIGRpc3RyaWJ1dGlvbiBpdHNlbGYgYmVjb21lcyB1bnN1cHBvcnRlZAp0aGVu
-IGl0IG1ha2VzIHNlbnNlIHRvIHN0b3Agc3VwcG9ydGluZyBpdCBmb3IgQ2VwaCBhcyB3ZWxsLCBi
-dXQgdGhhdOKAmXMKcHJvYmFibHkgbm90IHRoZSBjYXNlIGhlcmU6CgpodHRwczovL2FjY2Vzcy5y
-ZWRoYXQuY29tL3N1cHBvcnQvcG9saWN5L3VwZGF0ZXMvZXJyYXRhCgpJIGRvbuKAmXQgZXhwZWN0
-IENlcGggdG8gYmUgc3VwcG9ydGVkIHVudGlsIEVPTCBvZiB0aGUgZGlzdHJvLgoKSmFuCgoKCj4g
-T24gMzAgSnVsIDIwMTUsIGF0IDE2OjM0LCBIYW5kemlrLCBKb2UgPGpvc2VwaC50LmhhbmR6aWtA
-aHAuY29tPiB3cm90ZToKPiAKPiBTbywgZXNzZW50aWFsbHksIHlvdSdkIHZvdGUgdGhhdCBhbGwg
-TFRTL2VudGVycHJpc2UgcmVsZWFzZXMgYmUgc3VwcG9ydGVkIHVudGlsIHRoZWlyIHZlbmRvcidz
-IChjYW5vbmljYWwsIFN1c2UsIHJlZCBoYXQpIGRlc2lnbmF0ZWQgRU9MIGRhdGU/IE5vdCB2b3Rp
-bmcgZWl0aGVyIHdheSwganVzdCB0cnlpbmcgdG8gcHV0IGEgZGF0ZSBzdGFtcCBvbiBzb21lIG9m
-IHRoaXMuCj4gCj4gSm9lCj4gCj4+IE9uIEp1bCAzMCwgMjAxNSwgYXQgOTozMCBBTSwgSmFuIOKA
-nFp2aXJhdGtv4oCdIFNjaGVybWVyIDx6dmlyYXRrb0B6dmlyYXRrby5uZXQ+IHdyb3RlOgo+PiAK
-Pj4gSSB1bmRlcnN0YW5kIHlvdXIgcmVhc29ucywgYnV0IGRyb3BwaW5nIHN1cHBvcnQgZm9yIExU
-UyByZWxlYXNlIGxpa2UgdGhpcwo+PiBpcyBub3QgcmlnaHQuCj4+IAo+PiBZb3Ugc2hvdWxkIGxl
-Z2UgYXJ0aXMgc3VwcG9ydCBldmVyeSBkaXN0cmlidXRpb24gdGhlIExUUyByZWxlYXNlIGNvdWxk
-IGhhdmUKPj4gZXZlciBiZWVuIGluc3RhbGxlZCBvbiAtIHRoYXTigJlzIHdoYXQgdGhlIExUUyBs
-YWJlbCBpcyBmb3IgYW5kIHdoYXQgd2UgcmVseSBvbgo+PiBvbmNlIHdlIGJ1aWxkIGEgcHJvamVj
-dCBvbiB0b3Agb2YgaXQKPj4gCj4+IENlbnRPUyA2IGluIHBhcnRpY3VsYXIgaXMgc3RpbGwgdmVy
-eSB3aWRlbHkgdXNlZCBhbmQgZXZlbiBpbnN0YWxsZWQsIGVudGVycHJpc2UKPj4gYXBwcyByZWx5
-IG9uIGl0IHRvIHRoaXMgZGF5LiBTb21lb25lIG91dCB0aGVyZSBpcyBzdXJlbHkgbWFpbnRhaW5p
-bmcgdGhlaXIgTFRTCj4+IENlcGggcmVsZWFzZSBvbiB0aGlzIGRpc3RybyBhbmQgbm90IGhhdmlu
-ZyB0ZXN0ZWQgcGFja2FnZXMgd2lsbCBodXJ0IGJhZGx5Lgo+PiBXZSBkb27igJl0IHdhbnQgb3V0
-IHByb2plY3QgbWFuYWdlcnMgc2VsZWN0aW5nIEVNQyBTQU4gb3ZlciBDRVBIIFNEUwo+PiBiZWNh
-dXNlIG9mIHN1Y2ggdW5jZXJ0YWludHksIGFuZCB5b3Ugc2hvdWxkIGJlbmNobWFyayB5b3Vyc2Vs
-ZiB0byB0aG9zZQo+PiB2ZW5kb3JzLCBtYXliZS4uLgo+PiAKPj4gRXZlcnkgZGV2ZWxvcGVyIGxv
-dmVzIGRyb3BwaW5nIHN1cHBvcnQgYW5kIGNvbmNlbnRyYXRpbmcgb24gdGhlIGJsZWVkaW5nCj4+
-IGVkZ2UgaW50ZXJlc3Rpbmcgc3R1ZmYgYnV0IHRoYXTigJlzIG5vdCBob3cgaXQgc2hvdWxkIHdv
-cmsuCj4+IAo+PiBKdXN0IG15IDIgY2VudHMuLi4KPj4gCj4+IEphbgo+PiAKPj4+IE9uIDMwIEp1
-bCAyMDE1LCBhdCAxNTo1NCwgU2FnZSBXZWlsIDxzd2VpbEByZWRoYXQuY29tPiB3cm90ZToKPj4+
-IAo+Pj4gQXMgdGltZSBtYXJjaGVzIG9uIGl0IGJlY29tZXMgaW5jcmVhc2luZ2x5IGRpZmZpY3Vs
-dCB0byBtYWludGFpbiBwcm9wZXIgCj4+PiBidWlsZHMgYW5kIHBhY2thZ2VzIGZvciBvbGRlciBk
-aXN0cm9zLiAgRm9yIGV4YW1wbGUsIGFzIHdlIG1ha2UgdGhlIAo+Pj4gc3lzdGVtZCB0cmFuc2l0
-aW9uLCBtYWludGFpbmluZyB0aGUga2x1ZGdleSBzeXN2aW5pdCBhbmQgdWRldiBzdXBwb3J0IGZv
-ciAKPj4+IGNlbnRvczYvcmhlbDYgaXMgYSBwYWluIGluIHRoZSBidXR0IGFuZCBlYXRzIHVwIHRp
-bWUgYW5kIGVuZXJneSB0byAKPj4+IG1haW50YWluIGFuZCB0ZXN0IHRoYXQgd2UgY291bGQgYmUg
-c3BlbmRpbmcgZG9pbmcgbW9yZSB1c2VmdWwgd29yay4KPj4+IAo+Pj4gIkRyb3BwaW5nIiB0aGVt
-IHdvdWxkIG1lYW46Cj4+PiAKPj4+IC0gT25nb2luZyBkZXZlbG9wbWVudCBvbiBtYXN0ZXIgKGFu
-ZCBmdXR1cmUgdmVyc2lvbnMgbGlrZSBpbmZlcm5hbGlzIGFuZCAKPj4+IGpld2VsKSB3b3VsZCBu
-b3QgYmUgdGVzdGVkIG9uIHRoZXNlIGRpc3Ryb3MuCj4+PiAKPj4+IC0gV2Ugd291bGQgc3RvcCBi
-dWlsZGluZyB1cHN0cmVhbSByZWxlYXNlIHBhY2thZ2VzIG9uIGNlcGguY29tIGZvciBuZXcgCj4+
-PiByZWxlYXNlcy4KPj4+IAo+Pj4gLSBXZSB3b3VsZCBwcm9iYWJseSBjb250aW51ZSBidWlsZGlu
-ZyBoYW1tZXIgYW5kIGZpcmVmbHkgcGFja2FnZXMgZm9yIAo+Pj4gZnV0dXJlIGJ1Z2ZpeCBwb2lu
-dCByZWxlYXNlcy4KPj4+IAo+Pj4gLSBUaGUgZG93bnN0cmVhbSBkaXN0cm9zIHdvdWxkIHByb2Jh
-Ymx5IGNvbnRpbnVlIHRvIHBhY2thZ2UgdGhlbSwgYnV0IHRoZSAKPj4+IGJ1cmRlbiB3b3VsZCBi
-ZSBvbiB0aGVtLiAgRm9yIGV4YW1wbGUsIGlmIFVidW50dSB3YW50ZWQgdG8gc2hpcCBKZXdlbCBv
-biAKPj4+IHByZWNpc2UgMTIuMDQsIHRoZXkgY291bGQsIGJ1dCB0aGV5J2QgcHJvYmFibHkgbmVl
-ZCB0byBmdXR6IHdpdGggdGhlIAo+Pj4gcGFja2FnaW5nIGFuZC9vciBidWlsZCBlbnZpcm9ubWVu
-dCB0byBtYWtlIGl0IHdvcmsuCj4+PiAKPj4+IFNvLi4uIGdpdmVuIHRoYXQsIEknZCBsaWtlIHRv
-IGdhdWdlIHVzZXIgaW50ZXJlc3QgaW4gdGhlc2Ugb2xkIGRpc3Ryb3MuICAKPj4+IFNwZWNpZmlj
-YWxseSwKPj4+IAo+Pj4gQ2VudE9TNiAvIFJIRUw2Cj4+PiBVYnVudHUgcHJlY2lzZSAxMi4wNAo+
-Pj4gRGViaWFuIHdoZWV6eQo+Pj4gCj4+PiBXb3VsZCBhbnlvbmUgbWlzcyB0aGVtPwo+Pj4gCj4+
-PiBJbiBwYXJ0aWN1bGFyLCBkcm9wcGluZyB0aGVzZSB0aHJlZSB3b3VsZCBtZWFuIHdlIGNvdWxk
-IGRyb3Agc3lzdmluaXQgCj4+PiBlbnRpcmVseSBhbmQgZm9jdXMgb24gc3lzdGVtZCAoYW5kIGNv
-bnRpbnVlIG1haW50YWluaW5nIHRoZSBleGlzdGluZyAKPj4+IHVwc3RhcnQgZmlsZXMgZm9yIGp1
-c3QgYSBiaXQgbG9uZ2VyKS4gIFRoYXQgd291bGQgYmUgYSByZWxpZWYuICAoVGhlIAo+Pj4gc3lz
-dmluaXQgZmlsZXMgd291bGRuJ3QgZ28gYXdheSBpbiB0aGUgc291cmNlIHRyZWUsIGJ1dCB3ZSB3
-b3VsZG4ndCB3b3JyeSAKPj4+IGFib3V0IHBhY2thZ2luZyBhbmQgdGVzdGluZyB0aGVtIHByb3Bl
-cmx5LikKPj4+IAo+Pj4gVGhhbmtzIQo+Pj4gc2FnZQo+Pj4gX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX18KPj4+IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0Cj4+
-PiBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCj4+PiBodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlz
-dGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20KPj4gCj4+IC0tCj4+IFRvIHVuc3Vic2NyaWJl
-IGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBp
-bgo+PiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZwo+
-PiBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9t
-by1pbmZvLmh0bWwKCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0
-cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
+On Wed, Jul 29, 2015 at 06:40:01PM -0500, Mike Christie wrote:
+> I guess I was viewing this similar to cephfs where it does not use rbd
+> and the block layer. It just makes ceph/rados calls directly using
+> libceph. I am using rbd.c for its helper/wrapper functions around the
+> libceph ones, but I could just make libceph calls directly too.
+> 
+> Were you saying because for lio support we need to do more block
+> layer'ish operations like write same, compare and write, etc than
+> cephfs, then I should not do the lio backend and we should always go
+> through rbd for lio support?
+
+I'd really prefer that.  We have other users for these facilities as
+well, and I'd much prefer having block layer support rather than working
+around it.
+
+> Is that for all operations? For distributed TMFs and PRs then are you
+> thinking I should make those more block layer based (some sort of queue
+> or block deivce callouts or REQ_ types), or should those still have some
+> sort of lio callouts which could call different locking/cluster APIs
+> like libceph?
+
+Yes.  FYI, I've pushed out my WIP work for PRs here:
+
+http://git.infradead.org/users/hch/scsi.git/shortlog/refs/heads/pr-api
+
+TMFs are a bit of boderline case, but instead of needing special
+bypasses I'd rather find a way to add them.  For example we already
+have TMF ioctls for SCSI, so we might as well pull this up to the block
+layer.
