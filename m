@@ -1,78 +1,56 @@
-From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Subject: Re: RGW S3 Website hosting, non-clean code for early review
-Date: Thu, 30 Jul 2015 14:26:15 -0400 (EDT)
-Message-ID: <1563403567.1093721.1438280774967.JavaMail.zimbra@redhat.com>
-References: <20150623093325.GH10754@orbis-terrarum.net> <1739382408.18844114.1435091419238.JavaMail.zimbra@redhat.com> <robbat2-20150623T230410-006258787Z@orbis-terrarum.net> <854662566.18884035.1435100864177.JavaMail.zimbra@redhat.com>
+From: Ali Maredia <amaredia@redhat.com>
+Subject: Transitioning Ceph from Autotools to CMake
+Date: Thu, 30 Jul 2015 15:01:28 -0400 (EDT)
+Message-ID: <26481727.639679.1438282888566.JavaMail.zimbra@redhat.com>
+References: <568775149.634533.1438280976401.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx4-phx2.redhat.com ([209.132.183.25]:49087 "EHLO
-	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753551AbbG3S0g (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Jul 2015 14:26:36 -0400
-In-Reply-To: <854662566.18884035.1435100864177.JavaMail.zimbra@redhat.com>
+Received: from mx6-phx2.redhat.com ([209.132.183.39]:54485 "EHLO
+	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750762AbbG3TB2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Jul 2015 15:01:28 -0400
+Received: from zmail26.collab.prod.int.phx2.redhat.com (zmail26.collab.prod.int.phx2.redhat.com [10.5.83.33])
+	by mx6-phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t6UJ1Ssf023853
+	for <ceph-devel@vger.kernel.org>; Thu, 30 Jul 2015 15:01:28 -0400
+In-Reply-To: <568775149.634533.1438280976401.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Robin H. Johnson" <robbat2@gentoo.org>
-Cc: ceph-devel@vger.kernel.org, Jonathan LaCour <jonathan.lacour@dreamhost.com>
+To: ceph-devel@vger.kernel.org
 
+After discussing with several other Ceph developers and Sage, I wanted
+to start a discussion about making CMake the primary build system for Ceph.
 
+CMake works just fine as it is (make -j4 on master with CMake builds
+350% faster than autotools!), but there's more work needed to make it 
+into a first-class build system.
 
------ Original Message -----
-> From: "Yehuda Sadeh-Weinraub" <yehuda@redhat.com>
-> To: "Robin H. Johnson" <robbat2@gentoo.org>
-> Cc: ceph-devel@vger.kernel.org, "Jonathan LaCour" <jonathan.lacour@dreamhost.com>
-> Sent: Tuesday, June 23, 2015 4:07:44 PM
-> Subject: Re: RGW S3 Website hosting, non-clean code for early review
-> 
-> 
-> 
-> ----- Original Message -----
-> > From: "Robin H. Johnson" <robbat2@gentoo.org>
-> > To: "Yehuda Sadeh-Weinraub" <yehuda@redhat.com>
-> > Cc: ceph-devel@vger.kernel.org, "Jonathan LaCour"
-> > <jonathan.lacour@dreamhost.com>
-> > Sent: Tuesday, June 23, 2015 4:04:49 PM
-> > Subject: Re: RGW S3 Website hosting, non-clean code for early review
-> > 
-> > 
-> > On Tue, Jun 23, 2015 at 04:30:19PM -0400, Yehuda Sadeh-Weinraub wrote:
-> > > > Either I have to repeat a lot of code for it, which I'm not happy
-> > > > about,
-> > > > or I have to refactor RGWGetObj* to more safely made the second GET
-> > > > request for the error object (and make sure range headers etc are NOT
-> > > > used for the get of the error object). I'm leaning to the latter.
-> > > Is generating a new req_state a possibility? E.g., you catch the error
-> > > at the top level, and restart most of the request processing with a
-> > > newly created req_state?
-> > That was the path I was trying, but not completely succeeding.
-> > I think need to step it back further and have a partially customized
-> > copy of the RGWEnv from client_io->get_env(), so that I can build the
-> > modified req_info for req_state.
-> > 
-> > It isn't a full new GET really, it's really just custom content for the
-> > body as well as some headers (mostly Content-Length, Content-Type), but
-> > ignore EPERM/EACCESS on trying to fetch that custom content, and if they
-> > are detected, consider that a success but with different HTML content.
-> > 
-> > > Great! I'll wait for the cleaned up pull request.
-> > Do you want pull requests per logical change of my proposed series
-> > split, or rather just one pull request with the full series?
-> > 
-> 
-> One pull request for the full series.
-> 
-> Yehuda
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+Short term (1-2 weeks):
+ - Making sure CMake works on all supported platforms: Centos7, RHEL7,
+   Ubuntu 14.04 & 12.04, Fedora 22, Debian Jessie, Debian Wheezy are the
+   target platforms I have noted to test on already.
+ - Adding a target similar to make check
+ - Creating CMake targets that build packages (such as for rpm or debian)
+ - Writing documentation for those who haven't used CMake before to smooth the
+   transition over
+ - Making sure no targets or dependencies are missing from the
+   current CMake build, and that CMake supports all current 
+   targets, configurations and options
+ - Replacing the integration autotools has with any automated build/test
+   systems such as the gitbuilder
 
-Hi,
+Longer term (2-4 weeks):
+ - Removing the current autotools files, to avoid doubling build system
+   workload
+ - Adding more but shorter CMakeLists.txt files to a tree like structure
+   where a CMakeLists.txt would be in every subdirectory
+ 
+I'm already working on a target similar to the make check target, and plan
+on working on the other short term goals over the next weeks and beyond.
 
-just following up on this one. I don't remember seeing a pull request. Has there been any progress?
+I wanted to get feedback from the community any reasons why someone started using 
+CMake but stopped (ex: lack of functionality), and more broadly, on what other 
+obstacles there might be for the transition.
 
-Thanks,
-Yehuda
+-Ali
