@@ -1,117 +1,78 @@
-From: Brian Kroth <bpkroth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: dropping old distros: el6, precise 12.04,
- debian wheezy?
-Date: Thu, 30 Jul 2015 10:58:12 -0500
-Message-ID: <20150730155812.GE15736@gmail.com>
-References: <alpine.DEB.2.00.1507300645130.22099@cobra.newdream.net>
+From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Subject: Re: RGW S3 Website hosting, non-clean code for early review
+Date: Thu, 30 Jul 2015 14:26:15 -0400 (EDT)
+Message-ID: <1563403567.1093721.1438280774967.JavaMail.zimbra@redhat.com>
+References: <20150623093325.GH10754@orbis-terrarum.net> <1739382408.18844114.1435091419238.JavaMail.zimbra@redhat.com> <robbat2-20150623T230410-006258787Z@orbis-terrarum.net> <854662566.18884035.1435100864177.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0383945168=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.00.1507300645130.22099-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx4-phx2.redhat.com ([209.132.183.25]:49087 "EHLO
+	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753551AbbG3S0g (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Jul 2015 14:26:36 -0400
+In-Reply-To: <854662566.18884035.1435100864177.JavaMail.zimbra@redhat.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "Robin H. Johnson" <robbat2@gentoo.org>
+Cc: ceph-devel@vger.kernel.org, Jonathan LaCour <jonathan.lacour@dreamhost.com>
 
 
---===============0383945168==
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="uCPdOCrL+PnN2Vxy"
-Content-Disposition: inline
 
+----- Original Message -----
+> From: "Yehuda Sadeh-Weinraub" <yehuda@redhat.com>
+> To: "Robin H. Johnson" <robbat2@gentoo.org>
+> Cc: ceph-devel@vger.kernel.org, "Jonathan LaCour" <jonathan.lacour@dreamhost.com>
+> Sent: Tuesday, June 23, 2015 4:07:44 PM
+> Subject: Re: RGW S3 Website hosting, non-clean code for early review
+> 
+> 
+> 
+> ----- Original Message -----
+> > From: "Robin H. Johnson" <robbat2@gentoo.org>
+> > To: "Yehuda Sadeh-Weinraub" <yehuda@redhat.com>
+> > Cc: ceph-devel@vger.kernel.org, "Jonathan LaCour"
+> > <jonathan.lacour@dreamhost.com>
+> > Sent: Tuesday, June 23, 2015 4:04:49 PM
+> > Subject: Re: RGW S3 Website hosting, non-clean code for early review
+> > 
+> > 
+> > On Tue, Jun 23, 2015 at 04:30:19PM -0400, Yehuda Sadeh-Weinraub wrote:
+> > > > Either I have to repeat a lot of code for it, which I'm not happy
+> > > > about,
+> > > > or I have to refactor RGWGetObj* to more safely made the second GET
+> > > > request for the error object (and make sure range headers etc are NOT
+> > > > used for the get of the error object). I'm leaning to the latter.
+> > > Is generating a new req_state a possibility? E.g., you catch the error
+> > > at the top level, and restart most of the request processing with a
+> > > newly created req_state?
+> > That was the path I was trying, but not completely succeeding.
+> > I think need to step it back further and have a partially customized
+> > copy of the RGWEnv from client_io->get_env(), so that I can build the
+> > modified req_info for req_state.
+> > 
+> > It isn't a full new GET really, it's really just custom content for the
+> > body as well as some headers (mostly Content-Length, Content-Type), but
+> > ignore EPERM/EACCESS on trying to fetch that custom content, and if they
+> > are detected, consider that a success but with different HTML content.
+> > 
+> > > Great! I'll wait for the cleaned up pull request.
+> > Do you want pull requests per logical change of my proposed series
+> > split, or rather just one pull request with the full series?
+> > 
+> 
+> One pull request for the full series.
+> 
+> Yehuda
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 
---uCPdOCrL+PnN2Vxy
-Content-Type: text/plain; charset=us-ascii; format=flowed
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Hi,
 
-Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> 2015-07-30 06:54:
->As time marches on it becomes increasingly difficult to maintain proper
->builds and packages for older distros.  For example, as we make the
->systemd transition, maintaining the kludgey sysvinit and udev support for
->centos6/rhel6 is a pain in the butt and eats up time and energy to
->maintain and test that we could be spending doing more useful work.
->
->"Dropping" them would mean:
->
-> - Ongoing development on master (and future versions like infernalis and
->jewel) would not be tested on these distros.
->
-> - We would stop building upstream release packages on ceph.com for new
->releases.
->
-> - We would probably continue building hammer and firefly packages for
->future bugfix point releases.
->
-> - The downstream distros would probably continue to package them, but the
->burden would be on them.  For example, if Ubuntu wanted to ship Jewel on
->precise 12.04, they could, but they'd probably need to futz with the
->packaging and/or build environment to make it work.
->
->So... given that, I'd like to gauge user interest in these old distros.
->Specifically,
->
-> CentOS6 / RHEL6
-> Ubuntu precise 12.04
-> Debian wheezy
->
->Would anyone miss them?
->
->In particular, dropping these three would mean we could drop sysvinit
->entirely and focus on systemd (and continue maintaining the existing
->upstart files for just a bit longer).  That would be a relief.  (The
->sysvinit files wouldn't go away in the source tree, but we wouldn't worry
->about packaging and testing them properly.)
->
->Thanks!
->sage
-
-As I still haven't heard or seen about any upstream distros for Debian=20
-Jessie (see also [1]), I am still running Debian Wheezy and as that is=20
-supposed to be supported for another ~4 years by Debian, it would be=20
-very nice if there were at least stability and security fixes backported=20
-for the upstream ceph package repositories for that platform.
-
-Additionally, I'll note that I'm personally likely to continue to use=20
-sysvinit so long as I still can, even when I am able to make the switch=20
-to Jessie.
+just following up on this one. I don't remember seeing a pull request. Has there been any progress?
 
 Thanks,
-Brian
-
-[1] <http://www.spinics.net/lists/ceph-users/msg19959.html>
-
---uCPdOCrL+PnN2Vxy
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
-
-iEYEARECAAYFAlW6SZEACgkQdtkBin+QuSChrwCgjxjgnUAnZDdnYRP0fnfYEs8q
-KmYAn3tXn1b9b4V0Lku9Um6mIy5wm8xY
-=yw4t
------END PGP SIGNATURE-----
-
---uCPdOCrL+PnN2Vxy--
-
---===============0383945168==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============0383945168==--
+Yehuda
