@@ -1,83 +1,38 @@
-From: GuangYang <yguang11@outlook.com>
-Subject: RE: Cascading failure
-Date: Wed, 29 Jul 2015 22:34:21 -0700
-Message-ID: <BLU175-W12253B21510758758F778CDF8B0@phx.gbl>
-References: <BLU175-W41630FF0C30C4393F3B3F2DF8C0@phx.gbl>
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: Re: hammer/firefly backports upgrade suite
+Date: Thu, 30 Jul 2015 09:23:03 +0200
+Message-ID: <55B9D0D7.607@suse.cz>
+References: <55B946D0.3070308@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from blu004-omc4s35.hotmail.com ([65.55.111.174]:60285 "EHLO
-	BLU004-OMC4S35.hotmail.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751161AbbG3FeV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 30 Jul 2015 01:34:21 -0400
-In-Reply-To: <BLU175-W41630FF0C30C4393F3B3F2DF8C0@phx.gbl>
+Received: from mx2.suse.de ([195.135.220.15]:34195 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752024AbbG3HXF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 30 Jul 2015 03:23:05 -0400
+In-Reply-To: <55B946D0.3070308@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>, Abhishek L <abhishek.lekshmanan@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-TG9va3MgbGlrZSB3ZSB3ZXJlIGhpdHRpbmcgMTI1MjMsIGFuZCB3ZSBhcmUgd29ya2luZyBvbiBh
-IGZpeC4KClRoYW5rcywKR3VhbmcKCgotLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tCj4gRnJvbTogeWd1YW5nMTFAb3V0bG9vay5jb20KPiBUbzogY2VwaC1kZXZlbEB2Z2Vy
-Lmtlcm5lbC5vcmcKPiBTdWJqZWN0OiBDYXNjYWRpbmcgZmFpbHVyZQo+IERhdGU6IFdlZCwgMjkg
-SnVsIDIwMTUgMDg6NTU6NDAgLTA3MDAKPgo+IEhpIENlcGhlcnMsCj4gSSBoYXZlIGEgKHRlc3Qp
-IGNlcGggY2x1c3Rlciwgb24gd2hpY2ggSSBoYWQgc29tZSB3cm9uZyBDUlVTSCB3ZWlnaHQgKG15
-IG1pc3Rha2UgdG8gc2V0IHdyb25nIENSVVNIIHdlaWdodCksIHRoZW4gSSB0cmllZCB0byBzZXQg
-dGhlIGNvcnJlY3QgQ1JVU0ggd2VpZ2h0IChlLmcuIGNoYW5nZSB0aGUgd2VpZ2h0IGZyb20gMjAg
-dG8gNSksIHJpZ2h0IGFmdGVyIHRoYXQsIHRoZSBjbHVzdGVyIGJlY2FtZSBjYXNjYWRpbmcgZmFp
-bHVyZSBtb2RlLCBsb3RzIG9mIE9TRHMgc3RhcnRzIGdldHRpbmcgZG93biwgYW5kIGFzIEkgc3Rh
-cnRlZCBzb21lIG9mIHRoZW0sIG90aGVycyB3ZW50IGRvd24uIEkgdHJpZWQgdGhlIGZvbGxvd2lu
-ZzoKPiAxPiBTdG9wIGFsbCB0aGUgY2xpZW50IHRyYWZmaWMuIEkgY2hhbmdlZCB0aGUgd2VpZ2h0
-IHdpdGggdGhlIGNsaWVudCB0cmFmZmljLCB3aGljaCB0cmlnZ2VyZWQgdGhlIGZhaWx1cmVzLgo+
-IDI+IEluY3JlYXNlIG9zZF9vcF90aHJlYWRfdGltZW91dCB0byBtYWtlIHN1cmUgT1NEIGRvZXMg
-bm90IGNyYXNoIGl0c2VsZiBkdWUgdG8gaGVhdnkgbG9hZCAoZS5nLiBsb2FkIGZyb20gcGVlcmlu
-ZykuCj4gMz4gU2V0IG9zZCBub2Rvd24gZmxhZyBzb21ldGltZXMgdG8gYXZvaWQgdG9vIG1hbnkg
-bWFwIGNoYW5nZXMgYmFjayBhbmQgZm9ydGguCj4KPiBXaXRoIGFsbCB0aG9zZSBjaGFuZ2VzLCBJ
-IGRvbid0IHNlZSBPU0QgY3Jhc2ggYW55bW9yZSwgaG93ZXZlciwgSSBhbSBzdGlsbCBub3QgYWJs
-ZSB0byBicmluZyB0aGUgZG93biBPU0QgdXAsIGFsdGhvdWdoIHRoZSBkYWVtb24gdGhlbXNlbHZl
-cyBhcmUgYWxpdmUsIGFuZCB0aGF0IHNlZW1zIHN0dWNrIGZvcmV2ZXIuIEZvciB0aG9zZSAoZG93
-bikgT1NEcywgdGhleSBhcmUgc3RpbGwgcHJvY2Vzc2luZyB0aGUgcGVlcmluZyBldmVudCwgZnJv
-bSBteSBvYnNlcnZhdGlvbiwgdGhleSBhcmUgaW4gdGhhdCBzdGF0ZSBmb3IgYXQgbGVhc3QgMTIg
-aG91cnMsIGNvbnN0YW50bHkgbG9nIHRoZSBmb2xsb3dpbmcgbWVzc2FnZXMsIGFuZCBkbyBpdCBv
-dmVyIGFuZCBvdmVyIGFnYWluLgo+Cj4gMjAxNS0wNy0yOSAxNTo0OToxNi45NTM4MDQgN2Y0NmI3
-MjgxNzAwIDEwIG9zZC4yOTcgcGdfZXBvY2g6IDU2NDk5IHBnWzYuY2Q3czAoIHYgMzY5OSc3OTE5
-IGxjIDAnMCAoMCcwLDM2OTknNzkxOV0gbG9jYWwtbGVzPTU2NDk5IG49NzkxOSBlYz0zODcgbGVz
-L2MgNTYyMzcvMjg3MiA1NjQ5Ni81NjQ5OC81NjQ5OCkgWzI5Nyw1MTIsMSwxMTgsMTI3LDE2MSw5
-OSwxMzIsMjMsNDUxLDIxNDc0ODM2NDddIHI9MCBscHI9NTY0OTggcGk9MjYzOS01NjQ5Ny8zMTYg
-Y3J0PTM2OTknNzkxOSBtbGNvZCAwJzAgaW5hY3RpdmUgbT03OTE5IHU9NzkxOV0gc2VhcmNoX2Zv
-cl9taXNzaW5nIDJmNDAyY2Q3L2RlZmF1bHQuMTI1OTguMTY4X29zZDA0MmMwMTQuY29zLmJmMi55
-YWhvby5jb21fN2E0NmFkMTkyYzVmZGI3ZmYyMzVlZjlhMmI2ODc2MGYvaGVhZC8vNiAyOTMwJzQ2
-NDkgYWxzbyBtaXNzaW5nIG9uIG9zZC4yOTcoMCkKPiAyMDE1LTA3LTI5IDE1OjQ5OjE2Ljk2MzA2
-MSA3ZjQ2YjcyODE3MDAgMTAgb3NkLjI5NyBwZ19lcG9jaDogNTY0OTkgcGdbNi5jZDdzMCggdiAz
-Njk5Jzc5MTkgbGMgMCcwICgwJzAsMzY5OSc3OTE5XSBsb2NhbC1sZXM9NTY0OTkgbj03OTE5IGVj
-PTM4NyBsZXMvYyA1NjIzNy8yODcyIDU2NDk2LzU2NDk4LzU2NDk4KSBbMjk3LDUxMiwxLDExOCwx
-MjcsMTYxLDk5LDEzMiwyMyw0NTEsMjE0NzQ4MzY0N10gcj0wIGxwcj01NjQ5OCBwaT0yNjM5LTU2
-NDk3LzMxNiBjcnQ9MzY5OSc3OTE5IG1sY29kIDAnMCBpbmFjdGl2ZSBtPTc5MTkgdT03OTE5XSBz
-ZWFyY2hfZm9yX21pc3NpbmcgODA1MDJjZDcvZGVmYXVsdC4xMjU5OC4xMjJfb3NkMDMzYzAxNC5j
-b3MuYmYyLnlhaG9vLmNvbV9iOWQ4OWFjZTgwYjZmZjg4NDg1MjY5ZmQyMDY3NjY5Ny9oZWFkLy82
-IDI4MjknMTUxMSBhbHNvIG1pc3Npbmcgb24gb3NkLjI5NygwKQo+IDIwMTUtMDctMjkgMTU6NDk6
-MTYuOTcyMjgxIDdmNDZiNzI4MTcwMCAxMCBvc2QuMjk3IHBnX2Vwb2NoOiA1NjQ5OSBwZ1s2LmNk
-N3MwKCB2IDM2OTknNzkxOSBsYyAwJzAgKDAnMCwzNjk5Jzc5MTldIGxvY2FsLWxlcz01NjQ5OSBu
-PTc5MTkgZWM9Mzg3IGxlcy9jIDU2MjM3LzI4NzIgNTY0OTYvNTY0OTgvNTY0OTgpIFsyOTcsNTEy
-LDEsMTE4LDEyNywxNjEsOTksMTMyLDIzLDQ1MSwyMTQ3NDgzNjQ3XSByPTAgbHByPTU2NDk4IHBp
-PTI2MzktNTY0OTcvMzE2IGNydD0zNjk5Jzc5MTkgbWxjb2QgMCcwIGluYWN0aXZlIG09NzkxOSB1
-PTc5MTldIHNlYXJjaF9mb3JfbWlzc2luZyBlMTUwMmNkNy9kZWZhdWx0LjEyNTk4LjEzNV9vc2Qw
-MDRjMDE0LmNvcy5iZjIueWFob28uY29tX2ZmYzhlMGRmN2VlZTJmZjdmYjBkZGY2ZmU5MGQxOGIw
-L2hlYWQvLzYgMjc4MycxIGFsc28gbWlzc2luZyBvbiBvc2QuMjk3KDApCj4gMjAxNS0wNy0yOSAx
-NTo0OToxNi45ODE0ODcgN2Y0NmI3MjgxNzAwIDEwIG9zZC4yOTcgcGdfZXBvY2g6IDU2NDk5IHBn
-WzYuY2Q3czAoIHYgMzY5OSc3OTE5IGxjIDAnMCAoMCcwLDM2OTknNzkxOV0gbG9jYWwtbGVzPTU2
-NDk5IG49NzkxOSBlYz0zODcgbGVzL2MgNTYyMzcvMjg3MiA1NjQ5Ni81NjQ5OC81NjQ5OCkgWzI5
-Nyw1MTIsMSwxMTgsMTI3LDE2MSw5OSwxMzIsMjMsNDUxLDIxNDc0ODM2NDddIHI9MCBscHI9NTY0
-OTggcGk9MjYzOS01NjQ5Ny8zMTYgY3J0PTM2OTknNzkxOSBtbGNvZCAwJzAgaW5hY3RpdmUgbT03
-OTE5IHU9NzkxOV0gc2VhcmNoX2Zvcl9taXNzaW5nIGI0NTAyY2Q3L2RlZmF1bHQuMTQ0NjIuMjQw
-X29zZDAzMGMwMTQuY29zLmJmMi55YWhvby5jb21fY2QzYWNiNjEyNzFjZmZhNzNiOWJiNmQxNjIy
-ZmYyOTQvaGVhZC8vNiAyODQ1JzM2NjggYWxzbyBtaXNzaW5nIG9uIG9zZC4yOTcoMCkKPgo+IEkg
-aGF2ZSBzZXZlcmFsIHF1ZXN0aW9uczoKPiAxPiBXaGF0IGNvdWxkIHRyaWdnZXIgdGhhdCBPU0Qg
-ZG93biAod2hlbiB0aGUgZGFlbW9uIGlzIGFsaXZlKSwgdGhlIG9ubHkgdGhpbmcgSSBjYW4gdGhp
-bmsgb2YgaXMgdGhhdCB0aGUgT1NEIGRvZXMgbm90IHJlc3BvbmQgdG8gYSBoZWFydGJlYXQgcGlu
-ZywgYnV0IEkgZmFpbGVkIHRvIGZpbmQgc29tZSBsb2dzIGZvciB0aGF0Lgo+IDI+IEkgdGhvdWdo
-dCBzZXR0aW5nIHRoZSBub2Rvd24gZmxhZyBzaG91bGQgaGVscCBmb3Igc3VjaCBjYXNlLCBidXQg
-ZXZlbiBhZnRlciBhIGxvbmcgdGltZSwgd2hlbiBJIHJlc2V0IHRoZSBmbGFnLCB0aG9zZSBPU0Rz
-IGFyZSBraWNrZWQgZG93biBpbW1lZGlhdGVseS4gSXMgdGhhdCBleHBlY3RlZC4KPgo+IFRoYW5r
-cywKPiBHdWFuZwogCQkgCSAgIAkJICA=
+> It turns out the mistake was to use upgrade/firefly-x and upgrade/hammer-x instead of upgrade/firelfy and upgrade/hammer. When -c hammer-backports or -c firefly-backports is given to teuthology-suite, it will upgrade to this version, from older versions of the same stable branch.
+>
+> I've updated:
+>
+> http://tracker.ceph.com/issues/11644#upgrade
+> http://tracker.ceph.com/issues/11990#upgrade
+>
+> whith the fix and they are running (using the OpenStack cluster though, there may be issues with the firefly upgrade suite but the hammer upgrade suite must run fine, it has run at http://ceph.aevoo.fr:8081/ enough times to suggest there are no OpenStack specific issues).
+
+Hi Loic:
+
+As you predicted, the firefly upgrade suite finished with quite a few 
+failures. I looked at the first one and the log said:
+
+ERROR:teuthology.misc:. teuthology/test/integration/openrc.sh && 
+openstack network show -f json unknown error ERROR: openstack No 
+networks with a name or ID of 'unknown' found
+
+Nathan
