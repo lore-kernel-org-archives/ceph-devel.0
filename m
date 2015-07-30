@@ -1,19 +1,18 @@
-From: =?utf-8?Q?Jan_=E2=80=9CZviratko=E2=80=9D_Schermer?=
-	<zviratko@zviratko.net>
+From: Jan Schermer <jan@schermer.cz>
 Subject: Re: [ceph-users] dropping old distros: el6, precise 12.04, debian wheezy?
-Date: Thu, 30 Jul 2015 16:30:32 +0200
-Message-ID: <515A1511-3ED8-481F-8E71-C5CC8332F225@zviratko.net>
+Date: Thu, 30 Jul 2015 16:32:47 +0200
+Message-ID: <FECB3171-B8E6-4458-801B-3E24E3184907@schermer.cz>
 References: <alpine.DEB.2.00.1507300645130.22099@cobra.newdream.net>
 Mime-Version: 1.0 (Mac OS X Mail 9.0 \(3073\))
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f173.google.com ([209.85.212.173]:35615 "EHLO
+Received: from mail-wi0-f173.google.com ([209.85.212.173]:38316 "EHLO
 	mail-wi0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750937AbbG3Oae convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Jul 2015 10:30:34 -0400
-Received: by wibxm9 with SMTP id xm9so247484374wib.0
-        for <ceph-devel@vger.kernel.org>; Thu, 30 Jul 2015 07:30:33 -0700 (PDT)
+	with ESMTP id S1752430AbbG3Oct convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Jul 2015 10:32:49 -0400
+Received: by wibxm9 with SMTP id xm9so71542871wib.1
+        for <ceph-devel@vger.kernel.org>; Thu, 30 Jul 2015 07:32:48 -0700 (PDT)
 In-Reply-To: <alpine.DEB.2.00.1507300645130.22099@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -48,6 +47,10 @@ edge interesting stuff but that=E2=80=99s not how it should work.
 Just my 2 cents...
 
 Jan
+
+P.S. sorry if this reached your more than once, my mail client is havin=
+g a
+very baaad day
 
 > On 30 Jul 2015, at 15:54, Sage Weil <sweil@redhat.com> wrote:
 >=20
