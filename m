@@ -1,105 +1,49 @@
-From: Robert LeBlanc <robert@leblancnet.us>
-Subject: Re: [ceph-users] dropping old distros: el6, precise 12.04, debian wheezy?
-Date: Thu, 30 Jul 2015 13:31:41 -0600
-Message-ID: <CAANLjFrtH3DVB7qVF=D-Xx9jF1hqs==d8ku9JS0A3n=Fu=UgRQ@mail.gmail.com>
-References: <alpine.DEB.2.00.1507300645130.22099@cobra.newdream.net>
+From: Ken Dreyer <kdreyer@redhat.com>
+Subject: Re: Transitioning Ceph from Autotools to CMake
+Date: Thu, 30 Jul 2015 13:34:26 -0600
+Message-ID: <55BA7C42.4020404@redhat.com>
+References: <26481727.639679.1438282888566.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f169.google.com ([209.85.212.169]:36121 "EHLO
-	mail-wi0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751417AbbG3Tbm (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Jul 2015 15:31:42 -0400
-Received: by wicgb10 with SMTP id gb10so5162379wic.1
-        for <ceph-devel@vger.kernel.org>; Thu, 30 Jul 2015 12:31:41 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1507300645130.22099@cobra.newdream.net>
+Received: from mx1.redhat.com ([209.132.183.28]:55836 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751024AbbG3Te2 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 30 Jul 2015 15:34:28 -0400
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+	by mx1.redhat.com (Postfix) with ESMTPS id 1B90A1CA58E
+	for <ceph-devel@vger.kernel.org>; Thu, 30 Jul 2015 19:34:28 +0000 (UTC)
+In-Reply-To: <26481727.639679.1438282888566.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
+To: Ali Maredia <amaredia@redhat.com>, ceph-devel@vger.kernel.org
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA256
+On 07/30/2015 01:01 PM, Ali Maredia wrote:
+>  - Creating CMake targets that build packages (such as for rpm or debian)
 
-I agree that for the distros and version in question, Ceph releases
-already released on them should provide bug support until EoL of Ceph
-or the distro version, whichever is shorter.
-Since we are so far into Infernalis and Jewel development cycle, would
-it be better to make Jewel the last supported release on these
-distros/versions? It would not be as much as a surprise and give
-admins a little more time to transition (we are currently looking to
-migrate to CentOS7 on the client side, but it will take some time so
-this is also a personal request). I can understand and appreciate that
-the Ceph team is stretched thin trying to maintain such a large
-breadth of compatibility.
+There was some discussion on the list a while back about how we don't
+really need to go through the full autoconf + ./configure + "make rpm"
+routine simply to generate packages with the right version information.
+My conclusion was that we should be able to generate a release tarball
+(and even SRPM or RPM) with a shell script, rather than trying to do it
+in autotools with a make target.
 
-Thank you for reading,
+The reasoning was speed and efficiency: there's no point to running
+"./configure" to generate an SRPM when the RPM itself runs "./configure"
+during its build.
 
------BEGIN PGP SIGNATURE-----
-Version: Mailvelope v0.13.1
-Comment: https://www.mailvelope.com
+I don't know how well this maps to CMake, and whether CMake gives you
+some sort of "skip everything and immediately do <foo>"... clearly I
+need to learn more about CMake :)
 
-wsFcBAEBCAAQBQJVunuVCRDmVDuy+mK58QAAxvkP/0QqygaVYU9fV2bu3URb
-wvU4+2MT8W1zt9reYl+/42f709Us+7Abho90cMya61sIt+5t9h8oEms/5qwt
-ejx6CY3WX9x5Zobku1taUUtjtW3ZGZUcQ2JegO18WwqrSXfomd1vNvgB5JsJ
-KtDCv2/oCMLZWrFCXcAeoLkb/n3dwnctlsNs58911PERP7EAIMOVFBb5asee
-mUoyE06Nj5RUb5r2D7XfrcBxDb6eII0KLzpjbveGrUddoMgRPm2BVbab4N84
-HDM330+3vg59pKsaRjU8wEgk4yuJtbxG1SaJMDEJKWHJNe+K5MFRX/FFtfMg
-6P5ygDIn+7EK5EZLgRhJl0CTUCpXKa2/bc0tZzcwqV+YXmmAvAIHLa2hjpG9
-1llSOlzKIR7lputbFbUHKJzgAOLG/nOOoUTGmnWqiTDEPrj3gOdI2sqaNWoX
-50pT50pvkf64Pl1RXWPafveiX4pmZcK0jAYhqZTZ7Cpa0TfuyBfsDHZTzI6k
-YWunqhjqsm8mMFAr8ppjCK52e246iAdA1G7iXuPNE1yrtwhsHDc9VbqX8llT
-GaevOTQQygCZ/0b4adt+HWBQTZgLi0bxIyBEo7Pg75+f8yzawTpWWx5tM4JR
-yKkADT8+hid8PK6YwUrsaYnRhdRunAZv9BdvOulXyJ9azcCHSzlJWeYWHEwq
-krdm
-=m+W6
------END PGP SIGNATURE-----
-----------------
-Robert LeBlanc
-PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
+>  - Replacing the integration autotools has with any automated build/test
+>    systems such as the gitbuilder
 
+We hope to eventually replace gitbuilder with something more scalable
+like Jenkins, but in the meantime we're maintaining both systems :(
 
-On Thu, Jul 30, 2015 at 7:54 AM, Sage Weil <sweil@redhat.com> wrote:
-> As time marches on it becomes increasingly difficult to maintain proper
-> builds and packages for older distros.  For example, as we make the
-> systemd transition, maintaining the kludgey sysvinit and udev support for
-> centos6/rhel6 is a pain in the butt and eats up time and energy to
-> maintain and test that we could be spending doing more useful work.
->
-> "Dropping" them would mean:
->
->  - Ongoing development on master (and future versions like infernalis and
-> jewel) would not be tested on these distros.
->
->  - We would stop building upstream release packages on ceph.com for new
-> releases.
->
->  - We would probably continue building hammer and firefly packages for
-> future bugfix point releases.
->
->  - The downstream distros would probably continue to package them, but the
-> burden would be on them.  For example, if Ubuntu wanted to ship Jewel on
-> precise 12.04, they could, but they'd probably need to futz with the
-> packaging and/or build environment to make it work.
->
-> So... given that, I'd like to gauge user interest in these old distros.
-> Specifically,
->
->  CentOS6 / RHEL6
->  Ubuntu precise 12.04
->  Debian wheezy
->
-> Would anyone miss them?
->
-> In particular, dropping these three would mean we could drop sysvinit
-> entirely and focus on systemd (and continue maintaining the existing
-> upstart files for just a bit longer).  That would be a relief.  (The
-> sysvinit files wouldn't go away in the source tree, but we wouldn't worry
-> about packaging and testing them properly.)
->
-> Thanks!
-> sage
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users@lists.ceph.com
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+gitbuilder is https://github.com/ceph/autobuild-ceph
+Jenkins is https://github.com/ceph/ceph-build
+
+And then Loic also runs a make check bot in his own Jenkins instance.
