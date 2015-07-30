@@ -1,115 +1,54 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: systemd status
-Date: Thu, 30 Jul 2015 05:45:04 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1507300538210.22099@cobra.newdream.net>
-References: <alpine.DEB.2.00.1507281202370.22099@cobra.newdream.net> <CACkq2mr0aU+X_KDKGeQFy=sdtmRyy7CSR5tKHxYGyUFAA6kfEQ@mail.gmail.com> <mpad83$pu4$1@ger.gmane.org> <alpine.DEB.2.00.1507290550250.22099@cobra.newdream.net> <mpampk$1pq$1@ger.gmane.org>
- <alpine.DEB.2.00.1507290715450.22099@cobra.newdream.net> <mpao1u$pe2$1@ger.gmane.org> <alpine.DEB.2.00.1507290748290.22099@cobra.newdream.net> <mpaqqd$blm$1@ger.gmane.org>
+From: Sage Weil <sweil@redhat.com>
+Subject: dropping old distros: el6, precise 12.04, debian wheezy?
+Date: Thu, 30 Jul 2015 06:54:13 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1507300645130.22099@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:43176 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751066AbbG3MpG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Jul 2015 08:45:06 -0400
-In-Reply-To: <mpaqqd$blm$1@ger.gmane.org>
+Received: from mx1.redhat.com ([209.132.183.28]:36788 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750879AbbG3NyQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 30 Jul 2015 09:54:16 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elsayed <eternaleye@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org, ceph-users@ceph.com
 
-On Wed, 29 Jul 2015, Alex Elsayed wrote:
-> Sage Weil wrote:
-> 
-> > On Wed, 29 Jul 2015, Alex Elsayed wrote:
-> <snip for gmane>
-> >> My thinking is more that the "osd data = " key makes a lot less sense in
-> >> the systemd world overall - passing the OSD the full path on the
-> >> commandline via some --datadir would mean you could trivially use
-> >> systemd's instance templating, and just do
-> >> 
-> >> ExecStart=/usr/bin/ceph-osd -f --datadir=/var/lib/ceph/osd/%i
-> >> 
-> >> and be done with it. Could even do RequiresMountsFor=/var/lib/ceph/osd/%i
-> >> too, which would order it after (and make it depend on) any systemd.mount
-> >> units for that path.
-> > 
-> > Note that there is a 1:1 equivalence between command line options and
-> > config options, so osd data = /foo and --osd-data foo are the same thing.
-> > Not that I think that matters here--although it's possible to manually
-> > specify paths in ceph.conf users can't do that if they want the udev magic
-> > to work (that's already true today, without systemd).
-> 
-> Sure, though my thought was that the udev magic would work more sanely _via_ 
-> this. The missing part is loading the cluster and ID from the OSD data dir.
-> 
-> > In any case, though, if your %i above is supposed to be the uuid, that's
-> > much less friendly than what we have now, where users can do
-> > 
-> >  systemctl stop ceph-osd@12
-> > 
-> > to stop osd.12.
-> > 
-> > I'm not sure it's worth giving up the bind mount complexity unless it
-> > really becomes painful to support, given how much nicer the admin
-> > experience is...
-> 
-> Well, that does presuppose that they've either SSHed into the machine 
-> manually, or are using systemctl -H to do so via systemctl. That's already 
-> not an especially nice user experience, since they need to manually consider 
-> the cluster's structure.
-> 
-> Something more like 'ceph tell osd.N die' or similar could work, and 
-> SuccessExitStatus= could be used to make it even nicer (that even if it 
-> gives a different exit status for "die" as opposed to other successes, 
-> systemd can say "any of these exit codes are okay, don't autorestart")
-> 
-> However, neither of those handles unmounting, and it still doesn't handle 
-> starting. All of the above are still partial solutions; hopefully iteration 
-> can result in something better in all ways.
-> 
-> Also, note that if RequiresMountsFor= is used, unmounting the filesystem - 
-> by device or by mountpoint - will stop the unit due to proper dependency 
-> handling. (If RMF doesn't, BindsTo does - BindsTo will additionally do so if 
-> the device is unmounted or suddenly unplugged without systemd intervention)
-> 
-> systemctl stop dev-sdc.device # all OSDs running off of sdc stop
-> systemctl stop dev-sdd1.device # Just one partition this time
-> 
-> Nice and tidy.
+As time marches on it becomes increasingly difficult to maintain proper 
+builds and packages for older distros.  For example, as we make the 
+systemd transition, maintaining the kludgey sysvinit and udev support for 
+centos6/rhel6 is a pain in the butt and eats up time and energy to 
+maintain and test that we could be spending doing more useful work.
 
-So, it seems like plan B would be something like:
+"Dropping" them would mean:
 
-- mounts on /var/lib/ceph/osd/data/$uuid.  For new backends that have 
-multiple mounts (newstore likely will), we may also have something like 
-/var/lib/ceph/osd/data-fast/$uuid as an SSD partition or something.
+ - Ongoing development on master (and future versions like infernalis and 
+jewel) would not be tested on these distros.
 
-- systemd ceph-osd@$uuid task runs
-    ceph-osd --cluster ceph --id 123 --osd-uuid $uuid
+ - We would stop building upstream release packages on ceph.com for new 
+releases.
 
-- simpler udev rules
+ - We would probably continue building hammer and firefly packages for 
+future bugfix point releases.
 
-- simpler ceph-disk behavior
+ - The downstream distros would probably continue to package them, but the 
+burden would be on them.  For example, if Ubuntu wanted to ship Jewel on 
+precise 12.04, they could, but they'd probably need to futz with the 
+packaging and/or build environment to make it work.
 
-- The 'one cluster per host' restriction would go away.  This is currently 
-there because we only have a single systemd parameter for the @ services 
-and we're using the osd id (which is not unique across clusters).  The 
-uuid would be, so that's a win.
+So... given that, I'd like to gauge user interest in these old distros.  
+Specifically,
 
-But,
+ CentOS6 / RHEL6
+ Ubuntu precise 12.04
+ Debian wheezy
 
-- admin can't tell from 'systemctl | grep ceph' or from 'df' or 'mount' 
-which OSD is which, but they could from 'ps ax | grep ceph-osd'.
+Would anyone miss them?
 
-- stopping an individual osd would be done by $uuid instead of osd id:
+In particular, dropping these three would mean we could drop sysvinit 
+entirely and focus on systemd (and continue maintaining the existing 
+upstart files for just a bit longer).  That would be a relief.  (The 
+sysvinit files wouldn't go away in the source tree, but we wouldn't worry 
+about packaging and testing them properly.)
 
- systemctl stop ceph-osd@66f354f2-752e-409f-8194-be05f6b071d9
-
-For an admin this is probably a cut&paste from ps ax output?
-
-- we could perhaps make a 'ceph-disk stop' and 'ceph-disk umount' commands 
-to make this a bit simpler?
-
-What do people think?  I like simple, but I don't want to make life too 
-hard on the admin.
-
+Thanks!
 sage
