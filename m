@@ -1,51 +1,83 @@
-From: Mike Christie <mchristi@redhat.com>
-Subject: Re: [PATCH 01/18] libceph: add scatterlist messenger data type
-Date: Wed, 29 Jul 2015 18:40:01 -0500
-Message-ID: <55B96451.30706@redhat.com>
-References: <1438161835-27960-1-git-send-email-mchristi@redhat.com> <20150729175515.GA16804@infradead.org> <55B95ACC.2030306@redhat.com>
+From: GuangYang <yguang11@outlook.com>
+Subject: RE: Cascading failure
+Date: Wed, 29 Jul 2015 22:34:21 -0700
+Message-ID: <BLU175-W12253B21510758758F778CDF8B0@phx.gbl>
+References: <BLU175-W41630FF0C30C4393F3B3F2DF8C0@phx.gbl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <target-devel-owner@vger.kernel.org>
-In-Reply-To: <55B95ACC.2030306@redhat.com>
-Sender: target-devel-owner@vger.kernel.org
-To: Christoph Hellwig <hch@infradead.org>
-Cc: ceph-devel@vger.kernel.org, target-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from blu004-omc4s35.hotmail.com ([65.55.111.174]:60285 "EHLO
+	BLU004-OMC4S35.hotmail.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751161AbbG3FeV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 30 Jul 2015 01:34:21 -0400
+In-Reply-To: <BLU175-W41630FF0C30C4393F3B3F2DF8C0@phx.gbl>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 07/29/2015 05:59 PM, Mike Christie wrote:
-> On 07/29/2015 12:55 PM, Christoph Hellwig wrote:
->> On Wed, Jul 29, 2015 at 04:23:38AM -0500, mchristi@redhat.com wrote:
->>> From: Mike Christie <michaelc@cs.wisc.edu>
->>>
->>> LIO uses scatterlist for its page/data management. This patch
->>> adds a scatterlist messenger data type, so LIO can pass its sg
->>> down directly to rbd.
->>
->> Just as I mentioned for David's patches this is the wrong way to attack
->> your problem.  The block layer already supports WRITE SAME, and COMPARE
->> and WRITE nees to be supported at that level too insted of creating
->> artifical bypasses.
-> 
-> Why do I have to use the block layer? I just want to map the se_cmd to a
-> ceph request and then put it back on the wire. I don't think I need any
-> of the block layer services. We will do things like io scheduling on the
-> OSD side. We just want to use LIO as more of a passthrough.
-
-Maybe I misunderstood you.
-
-I guess I was viewing this similar to cephfs where it does not use rbd
-and the block layer. It just makes ceph/rados calls directly using
-libceph. I am using rbd.c for its helper/wrapper functions around the
-libceph ones, but I could just make libceph calls directly too.
-
-Were you saying because for lio support we need to do more block
-layer'ish operations like write same, compare and write, etc than
-cephfs, then I should not do the lio backend and we should always go
-through rbd for lio support?
-
-Is that for all operations? For distributed TMFs and PRs then are you
-thinking I should make those more block layer based (some sort of queue
-or block deivce callouts or REQ_ types), or should those still have some
-sort of lio callouts which could call different locking/cluster APIs
-like libceph?
+TG9va3MgbGlrZSB3ZSB3ZXJlIGhpdHRpbmcgMTI1MjMsIGFuZCB3ZSBhcmUgd29ya2luZyBvbiBh
+IGZpeC4KClRoYW5rcywKR3VhbmcKCgotLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tCj4gRnJvbTogeWd1YW5nMTFAb3V0bG9vay5jb20KPiBUbzogY2VwaC1kZXZlbEB2Z2Vy
+Lmtlcm5lbC5vcmcKPiBTdWJqZWN0OiBDYXNjYWRpbmcgZmFpbHVyZQo+IERhdGU6IFdlZCwgMjkg
+SnVsIDIwMTUgMDg6NTU6NDAgLTA3MDAKPgo+IEhpIENlcGhlcnMsCj4gSSBoYXZlIGEgKHRlc3Qp
+IGNlcGggY2x1c3Rlciwgb24gd2hpY2ggSSBoYWQgc29tZSB3cm9uZyBDUlVTSCB3ZWlnaHQgKG15
+IG1pc3Rha2UgdG8gc2V0IHdyb25nIENSVVNIIHdlaWdodCksIHRoZW4gSSB0cmllZCB0byBzZXQg
+dGhlIGNvcnJlY3QgQ1JVU0ggd2VpZ2h0IChlLmcuIGNoYW5nZSB0aGUgd2VpZ2h0IGZyb20gMjAg
+dG8gNSksIHJpZ2h0IGFmdGVyIHRoYXQsIHRoZSBjbHVzdGVyIGJlY2FtZSBjYXNjYWRpbmcgZmFp
+bHVyZSBtb2RlLCBsb3RzIG9mIE9TRHMgc3RhcnRzIGdldHRpbmcgZG93biwgYW5kIGFzIEkgc3Rh
+cnRlZCBzb21lIG9mIHRoZW0sIG90aGVycyB3ZW50IGRvd24uIEkgdHJpZWQgdGhlIGZvbGxvd2lu
+ZzoKPiAxPiBTdG9wIGFsbCB0aGUgY2xpZW50IHRyYWZmaWMuIEkgY2hhbmdlZCB0aGUgd2VpZ2h0
+IHdpdGggdGhlIGNsaWVudCB0cmFmZmljLCB3aGljaCB0cmlnZ2VyZWQgdGhlIGZhaWx1cmVzLgo+
+IDI+IEluY3JlYXNlIG9zZF9vcF90aHJlYWRfdGltZW91dCB0byBtYWtlIHN1cmUgT1NEIGRvZXMg
+bm90IGNyYXNoIGl0c2VsZiBkdWUgdG8gaGVhdnkgbG9hZCAoZS5nLiBsb2FkIGZyb20gcGVlcmlu
+ZykuCj4gMz4gU2V0IG9zZCBub2Rvd24gZmxhZyBzb21ldGltZXMgdG8gYXZvaWQgdG9vIG1hbnkg
+bWFwIGNoYW5nZXMgYmFjayBhbmQgZm9ydGguCj4KPiBXaXRoIGFsbCB0aG9zZSBjaGFuZ2VzLCBJ
+IGRvbid0IHNlZSBPU0QgY3Jhc2ggYW55bW9yZSwgaG93ZXZlciwgSSBhbSBzdGlsbCBub3QgYWJs
+ZSB0byBicmluZyB0aGUgZG93biBPU0QgdXAsIGFsdGhvdWdoIHRoZSBkYWVtb24gdGhlbXNlbHZl
+cyBhcmUgYWxpdmUsIGFuZCB0aGF0IHNlZW1zIHN0dWNrIGZvcmV2ZXIuIEZvciB0aG9zZSAoZG93
+bikgT1NEcywgdGhleSBhcmUgc3RpbGwgcHJvY2Vzc2luZyB0aGUgcGVlcmluZyBldmVudCwgZnJv
+bSBteSBvYnNlcnZhdGlvbiwgdGhleSBhcmUgaW4gdGhhdCBzdGF0ZSBmb3IgYXQgbGVhc3QgMTIg
+aG91cnMsIGNvbnN0YW50bHkgbG9nIHRoZSBmb2xsb3dpbmcgbWVzc2FnZXMsIGFuZCBkbyBpdCBv
+dmVyIGFuZCBvdmVyIGFnYWluLgo+Cj4gMjAxNS0wNy0yOSAxNTo0OToxNi45NTM4MDQgN2Y0NmI3
+MjgxNzAwIDEwIG9zZC4yOTcgcGdfZXBvY2g6IDU2NDk5IHBnWzYuY2Q3czAoIHYgMzY5OSc3OTE5
+IGxjIDAnMCAoMCcwLDM2OTknNzkxOV0gbG9jYWwtbGVzPTU2NDk5IG49NzkxOSBlYz0zODcgbGVz
+L2MgNTYyMzcvMjg3MiA1NjQ5Ni81NjQ5OC81NjQ5OCkgWzI5Nyw1MTIsMSwxMTgsMTI3LDE2MSw5
+OSwxMzIsMjMsNDUxLDIxNDc0ODM2NDddIHI9MCBscHI9NTY0OTggcGk9MjYzOS01NjQ5Ny8zMTYg
+Y3J0PTM2OTknNzkxOSBtbGNvZCAwJzAgaW5hY3RpdmUgbT03OTE5IHU9NzkxOV0gc2VhcmNoX2Zv
+cl9taXNzaW5nIDJmNDAyY2Q3L2RlZmF1bHQuMTI1OTguMTY4X29zZDA0MmMwMTQuY29zLmJmMi55
+YWhvby5jb21fN2E0NmFkMTkyYzVmZGI3ZmYyMzVlZjlhMmI2ODc2MGYvaGVhZC8vNiAyOTMwJzQ2
+NDkgYWxzbyBtaXNzaW5nIG9uIG9zZC4yOTcoMCkKPiAyMDE1LTA3LTI5IDE1OjQ5OjE2Ljk2MzA2
+MSA3ZjQ2YjcyODE3MDAgMTAgb3NkLjI5NyBwZ19lcG9jaDogNTY0OTkgcGdbNi5jZDdzMCggdiAz
+Njk5Jzc5MTkgbGMgMCcwICgwJzAsMzY5OSc3OTE5XSBsb2NhbC1sZXM9NTY0OTkgbj03OTE5IGVj
+PTM4NyBsZXMvYyA1NjIzNy8yODcyIDU2NDk2LzU2NDk4LzU2NDk4KSBbMjk3LDUxMiwxLDExOCwx
+MjcsMTYxLDk5LDEzMiwyMyw0NTEsMjE0NzQ4MzY0N10gcj0wIGxwcj01NjQ5OCBwaT0yNjM5LTU2
+NDk3LzMxNiBjcnQ9MzY5OSc3OTE5IG1sY29kIDAnMCBpbmFjdGl2ZSBtPTc5MTkgdT03OTE5XSBz
+ZWFyY2hfZm9yX21pc3NpbmcgODA1MDJjZDcvZGVmYXVsdC4xMjU5OC4xMjJfb3NkMDMzYzAxNC5j
+b3MuYmYyLnlhaG9vLmNvbV9iOWQ4OWFjZTgwYjZmZjg4NDg1MjY5ZmQyMDY3NjY5Ny9oZWFkLy82
+IDI4MjknMTUxMSBhbHNvIG1pc3Npbmcgb24gb3NkLjI5NygwKQo+IDIwMTUtMDctMjkgMTU6NDk6
+MTYuOTcyMjgxIDdmNDZiNzI4MTcwMCAxMCBvc2QuMjk3IHBnX2Vwb2NoOiA1NjQ5OSBwZ1s2LmNk
+N3MwKCB2IDM2OTknNzkxOSBsYyAwJzAgKDAnMCwzNjk5Jzc5MTldIGxvY2FsLWxlcz01NjQ5OSBu
+PTc5MTkgZWM9Mzg3IGxlcy9jIDU2MjM3LzI4NzIgNTY0OTYvNTY0OTgvNTY0OTgpIFsyOTcsNTEy
+LDEsMTE4LDEyNywxNjEsOTksMTMyLDIzLDQ1MSwyMTQ3NDgzNjQ3XSByPTAgbHByPTU2NDk4IHBp
+PTI2MzktNTY0OTcvMzE2IGNydD0zNjk5Jzc5MTkgbWxjb2QgMCcwIGluYWN0aXZlIG09NzkxOSB1
+PTc5MTldIHNlYXJjaF9mb3JfbWlzc2luZyBlMTUwMmNkNy9kZWZhdWx0LjEyNTk4LjEzNV9vc2Qw
+MDRjMDE0LmNvcy5iZjIueWFob28uY29tX2ZmYzhlMGRmN2VlZTJmZjdmYjBkZGY2ZmU5MGQxOGIw
+L2hlYWQvLzYgMjc4MycxIGFsc28gbWlzc2luZyBvbiBvc2QuMjk3KDApCj4gMjAxNS0wNy0yOSAx
+NTo0OToxNi45ODE0ODcgN2Y0NmI3MjgxNzAwIDEwIG9zZC4yOTcgcGdfZXBvY2g6IDU2NDk5IHBn
+WzYuY2Q3czAoIHYgMzY5OSc3OTE5IGxjIDAnMCAoMCcwLDM2OTknNzkxOV0gbG9jYWwtbGVzPTU2
+NDk5IG49NzkxOSBlYz0zODcgbGVzL2MgNTYyMzcvMjg3MiA1NjQ5Ni81NjQ5OC81NjQ5OCkgWzI5
+Nyw1MTIsMSwxMTgsMTI3LDE2MSw5OSwxMzIsMjMsNDUxLDIxNDc0ODM2NDddIHI9MCBscHI9NTY0
+OTggcGk9MjYzOS01NjQ5Ny8zMTYgY3J0PTM2OTknNzkxOSBtbGNvZCAwJzAgaW5hY3RpdmUgbT03
+OTE5IHU9NzkxOV0gc2VhcmNoX2Zvcl9taXNzaW5nIGI0NTAyY2Q3L2RlZmF1bHQuMTQ0NjIuMjQw
+X29zZDAzMGMwMTQuY29zLmJmMi55YWhvby5jb21fY2QzYWNiNjEyNzFjZmZhNzNiOWJiNmQxNjIy
+ZmYyOTQvaGVhZC8vNiAyODQ1JzM2NjggYWxzbyBtaXNzaW5nIG9uIG9zZC4yOTcoMCkKPgo+IEkg
+aGF2ZSBzZXZlcmFsIHF1ZXN0aW9uczoKPiAxPiBXaGF0IGNvdWxkIHRyaWdnZXIgdGhhdCBPU0Qg
+ZG93biAod2hlbiB0aGUgZGFlbW9uIGlzIGFsaXZlKSwgdGhlIG9ubHkgdGhpbmcgSSBjYW4gdGhp
+bmsgb2YgaXMgdGhhdCB0aGUgT1NEIGRvZXMgbm90IHJlc3BvbmQgdG8gYSBoZWFydGJlYXQgcGlu
+ZywgYnV0IEkgZmFpbGVkIHRvIGZpbmQgc29tZSBsb2dzIGZvciB0aGF0Lgo+IDI+IEkgdGhvdWdo
+dCBzZXR0aW5nIHRoZSBub2Rvd24gZmxhZyBzaG91bGQgaGVscCBmb3Igc3VjaCBjYXNlLCBidXQg
+ZXZlbiBhZnRlciBhIGxvbmcgdGltZSwgd2hlbiBJIHJlc2V0IHRoZSBmbGFnLCB0aG9zZSBPU0Rz
+IGFyZSBraWNrZWQgZG93biBpbW1lZGlhdGVseS4gSXMgdGhhdCBleHBlY3RlZC4KPgo+IFRoYW5r
+cywKPiBHdWFuZwogCQkgCSAgIAkJICA=
