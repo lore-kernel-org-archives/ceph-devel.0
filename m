@@ -1,82 +1,37 @@
-From: David Disseldorp <ddiss@suse.de>
-Subject: [PATCH 3/4] tracing: add missing tracepoints for writesame and extent_cmp
-Date: Fri, 31 Jul 2015 18:32:52 +0200
-Message-ID: <1438360373-14377-1-git-send-email-ddiss@suse.de>
-References: <1438161946-28473-1-git-send-email-mchristi@redhat.com>
+From: "Adam C. Emerson" <aemerson@redhat.com>
+Subject: Re: [ceph-users] dropping old distros: el6, precise 12.04, debian
+ wheezy?
+Date: Fri, 31 Jul 2015 12:57:37 -0400
+Message-ID: <20150731165737.GB20239@linuxbox.com>
+References: <alpine.DEB.2.00.1507300645130.22099@cobra.newdream.net>
+ <20150731114807.00cfcf6c@ghroth.non.3dart.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:56212 "EHLO mx2.suse.de"
+Received: from mx1.redhat.com ([209.132.183.28]:51633 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751659AbbGaQdH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 31 Jul 2015 12:33:07 -0400
-In-Reply-To: <1438161946-28473-1-git-send-email-mchristi@redhat.com>
+	id S1751791AbbGaQ5j (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 31 Jul 2015 12:57:39 -0400
+Content-Disposition: inline
+In-Reply-To: <20150731114807.00cfcf6c@ghroth.non.3dart.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: mchristi@redhat.com
-Cc: ceph-devel@vger.kernel.org, target-devel@vger.kernel.org, David Disseldorp <ddiss@suse.de>
+To: Mariusz Gronczewski <mariusz.gronczewski@efigence.com>
+Cc: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org, ceph-users@ceph.com
 
-Signed-off-by: David Disseldorp <ddiss@suse.de>
----
- src/tracing/osd.tp | 40 ++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 40 insertions(+)
+On 31/07/2015, Mariusz Gronczewski wrote:
+> Well, Centos 6 will be supported to 2020, and centos 7 was released a
+> year ago so I'd imagine a lot of people haven't migrated yet and
+> migration process is nontrivial if you already did some modificiations
+> to c6 (read: fix broken as fuck init scripts for few apps)
 
-diff --git a/src/tracing/osd.tp b/src/tracing/osd.tp
-index ba0fd32..a9f2d13 100644
---- a/src/tracing/osd.tp
-+++ b/src/tracing/osd.tp
-@@ -91,6 +91,28 @@ TRACEPOINT_EVENT(osd, do_osd_op_pre,
-     )
- )
- 
-+TRACEPOINT_EVENT(osd, do_osd_op_pre_extent_cmp,
-+    TP_ARGS(
-+        const char*, oid,
-+        uint64_t, snap,
-+        uint64_t, osize,
-+        uint32_t, oseq,
-+        uint64_t, offset,
-+        uint64_t, length,
-+        uint64_t, truncate_size,
-+        uint32_t, truncate_seq),
-+    TP_FIELDS(
-+        ctf_string(oid, oid)
-+        ctf_integer(uint64_t, snap, snap)
-+        ctf_integer(uint64_t, osize, osize)
-+        ctf_integer(uint32_t, oseq, oseq)
-+        ctf_integer(uint64_t, offset, offset)
-+        ctf_integer(uint64_t, length, length)
-+        ctf_integer(uint64_t, truncate_size, truncate_size)
-+        ctf_integer(uint32_t, truncate_seq, truncate_seq)
-+    )
-+)
-+
- TRACEPOINT_EVENT(osd, do_osd_op_pre_read,
-     TP_ARGS(
-         const char*, oid,
-@@ -381,6 +403,24 @@ TRACEPOINT_EVENT(osd, do_osd_op_pre_writefull,
-     )
- )
- 
-+TRACEPOINT_EVENT(osd, do_osd_op_pre_writesame,
-+    TP_ARGS(
-+        const char*, oid,
-+        uint64_t, snap,
-+        uint64_t, osize,
-+        uint64_t, offset,
-+        uint64_t, length,
-+        uint64_t, data_length),
-+    TP_FIELDS(
-+        ctf_string(oid, oid)
-+        ctf_integer(uint64_t, snap, snap)
-+        ctf_integer(uint64_t, osize, osize)
-+        ctf_integer(uint64_t, offset, offset)
-+        ctf_integer(uint64_t, length, length)
-+        ctf_integer(uint64_t, data_length, data_length)
-+    )
-+)
-+
- TRACEPOINT_EVENT(osd, do_osd_op_pre_rollback,
-     TP_ARGS(
-         const char*, oid,
--- 
-2.1.4
+If I understand, nobody is proposing to stop supporting CentOS 6 in
+Hammer. It makes perfect sense for the LTS release of Ceph to continue
+supporting the LTS releases of distributions that were current when it
+was released. But Jewel should only have to support RHEL 7 for its life
+cycle.
 
+This way newer releases of Ceph can take advantage of newer language,
+library, and kernel features and people who need the stability and
+assurance of an older, long-term support distribution can continue to
+have a stable, long-term support release of Ceph to go with it.
