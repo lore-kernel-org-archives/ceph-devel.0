@@ -1,35 +1,38 @@
-From: kernel neophyte <neophyte.hacker001@gmail.com>
-Subject: Cluster Network & Public Network w.r.t XIO ?
-Date: Thu, 30 Jul 2015 20:21:06 -0700
-Message-ID: <CAFkUHxddmOdyZHcjzCoEJYu_YkkUZ=3aq_FZ4QfJNqdKJ_xO3A@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Piyawath Boukom <boukom.p.aa@m.titech.ac.jp>
+Subject: Installing Ceph without root privilege
+Date: Fri, 31 Jul 2015 15:10:59 +0900
+Message-ID: <2C711032-0C8E-4490-85B2-2D7B89DCA153@m.titech.ac.jp>
+Mime-Version: 1.0 (Mac OS X Mail 8.2 \(2102\))
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f43.google.com ([209.85.220.43]:34005 "EHLO
-	mail-pa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750767AbbGaDVH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Jul 2015 23:21:07 -0400
-Received: by pacan13 with SMTP id an13so33869846pac.1
-        for <ceph-devel@vger.kernel.org>; Thu, 30 Jul 2015 20:21:06 -0700 (PDT)
+Received: from mail01.nap.gsic.titech.ac.jp ([131.112.13.20]:56561 "HELO
+	mail01.nap.gsic.titech.ac.jp" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1751619AbbGaGUl convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 31 Jul 2015 02:20:41 -0400
+Received: from [131.112.13.20] (mail01.nap.gsic.titech.ac.jp)
+	by drweb1.nap.gsic.titech.ac.jp (Dr.Web MailD 6.0.2.0)
+	with SMTP id 06D0AC0A for ceph-devel@vger.kernel.org; Fri, 31 Jul 2015 15:11:01
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: vu@mellanox.com, raju.kurunkad@sandisk.com, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi Vu, Raju,
+Dear Ceph-dev team,
 
-I am trying to bring up ceph cluster on a powerful dell server with
-two 40Gbe ROCEv2 NIC.
+My name is Piyawath. I=E2=80=99m trying to set up Ceph on university=E2=
+=80=99s machine.
 
-I have assigned one as my cluster network (would prefer all osd
-communications happen on that) and have assigned one as my public n/w.
-this works fine for simple messenger case. (ofcourse no rdma)
+Unfortunately, I am able to install/set up it in user mode (not root), =
+including creating Ceph user and other processes. Is it possible to do =
+set up without root privilege ?
 
-but when I try to bring this up on XIO, this gets very complicated, as
-in how do I specify two RDMA_LOCAL  ? one for cluster n/w and other
-for public ? can choose XIO for client to osd communication and simple
-for cluster n/w ?
+I=E2=80=99m quite new in this field, please forgive me if I ignorantly =
+asked you.
 
-any thoughts ?
-
-Thanks,
-Neo
+Regards,
+Piyawath--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
