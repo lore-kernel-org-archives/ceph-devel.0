@@ -1,90 +1,51 @@
-From: Mariusz Gronczewski <mariusz.gronczewski-EWQ+Go7UwTxWk0Htik3J/w@public.gmane.org>
-Subject: Re: dropping old distros: el6, precise 12.04,
- debian wheezy?
-Date: Fri, 31 Jul 2015 11:48:07 +0200
-Message-ID: <20150731114807.00cfcf6c@ghroth.non.3dart.com>
-References: <alpine.DEB.2.00.1507300645130.22099@cobra.newdream.net>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Odd QA Test Running
+Date: Fri, 31 Jul 2015 17:50:45 +0800
+Message-ID: <CACJqLyY4kocnovRH0JTNtPWuB8CKbKZ3J_sT7yJUJ99pTXak1w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0385691857=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.00.1507300645130.22099-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
-
---===============0385691857==
-Content-Type: multipart/signed; micalg=pgp-sha256;
- boundary="Sig_/lB3.dtxDByryW/VueftNttd"; protocol="application/pgp-signature"
-
---Sig_/lB3.dtxDByryW/VueftNttd
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-pd0-f174.google.com ([209.85.192.174]:36770 "EHLO
+	mail-pd0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751023AbbGaJup convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 31 Jul 2015 05:50:45 -0400
+Received: by pdjr16 with SMTP id r16so41069928pdj.3
+        for <ceph-devel@vger.kernel.org>; Fri, 31 Jul 2015 02:50:45 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, 30 Jul 2015 06:54:13 -0700 (PDT), Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-wrote:
+Hi all,
 
+I  ran a test suite(http://pulpito.ceph.com/haomai-2015-07-29_11:40:40-=
+rados-master-distro-basic-multi/)
+and found the failed jobs are failed by "2015-07-29 10:52:35.313197
+7f16ae655780 -1 unrecognized ms_type 'async'"
 
-> So... given that, I'd like to gauge user interest in these old distros. =
-=20
-> Specifically,
->=20
->  CentOS6 / RHEL6
->  Ubuntu precise 12.04
->  Debian wheezy
->=20
-> Would anyone miss them?
->=20
+Then I found the failed jobs(like
+http://pulpito.ceph.com/haomai-2015-07-29_11:40:40-rados-master-distro-=
+basic-multi/991540/)
+lack of =E2=80=9Cenable experimental unrecoverable data corrupting feat=
+ures:
+ms-type-async=E2=80=9D.
 
-Well, Centos 6 will be supported to 2020, and centos 7 was released a
-year ago so I'd imagine a lot of people haven't migrated yet and
-migration process is nontrivial if you already did some modificiations
-to c6 (read: fix broken as fuck init scripts for few apps)
+Other successful jobs(like
+http://pulpito.ceph.com/haomai-2015-07-29_11:40:40-rados-master-distro-=
+basic-multi/991517/)
+can find "enable experimental unrecoverable data corrupting features:
+ms-type-async" in yaml.
+
+So that's mean the same schedule suite will generate the different
+yaml file? Is there something tricky?
+
 --=20
-Mariusz Gronczewski, Administrator
 
-Efigence S. A.
-ul. Wo=C5=82oska 9a, 02-583 Warszawa
-T: [+48] 22 380 13 13
-F: [+48] 22 380 13 14
-E: mariusz.gronczewski-EWQ+Go7UwTxWk0Htik3J/w@public.gmane.org
-<mailto:mariusz.gronczewski-EWQ+Go7UwTxWk0Htik3J/w@public.gmane.org>
+Best Regards,
 
---Sig_/lB3.dtxDByryW/VueftNttd
-Content-Type: application/pgp-signature
-Content-Description: OpenPGP digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQEcBAEBCAAGBQJVu0RdAAoJEJa6WO31sS/Zg7cH/jtDVfUmxsQ7+l/G5hH3vP/q
-6k8jDy5z4QfaIvXTtkYAWJNOsm7pvlx2+xPWl7WXnkBBX9em83bC/VekY1qtxw5Z
-XN6H3Poyap3poEwqR6lHDXpoGMp6R7QcwQnDBlOVDFs9PXLuG4xSHMnajsJIeueS
-hXFNuuTTw2zaPUdVegO88j7hgsV9aK+jT2Q+CC9sGer78Ys6MdtDtaMtqa+vdEo/
-xjRzW2j3DDFLmgOJBA2BQcFL9pil55h79NqvUnIrioIQVM1+qlwOYi5z2m3xW7ta
-wdZWF0jTXYdAayYMr4LuEvOBsQb69hhuDAx8B4UvwMER6mQtt85BvcKY6eHiXYA=
-=imZ3
------END PGP SIGNATURE-----
-
---Sig_/lB3.dtxDByryW/VueftNttd--
-
---===============0385691857==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============0385691857==--
+Wheat
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
