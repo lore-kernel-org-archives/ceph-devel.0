@@ -1,90 +1,66 @@
-From: Matt Benjamin <mbenjamin@redhat.com>
-Subject: Re: Cluster Network & Public Network w.r.t XIO ?
-Date: Fri, 31 Jul 2015 13:04:12 -0400 (EDT)
-Message-ID: <1211289190.918749.1438362252889.JavaMail.zimbra@redhat.com>
-References: <CAFkUHxddmOdyZHcjzCoEJYu_YkkUZ=3aq_FZ4QfJNqdKJ_xO3A@mail.gmail.com> <1508871103.877228.1438354197061.JavaMail.zimbra@redhat.com> <CAFkUHxcyxHO-0OyB9-v+6TeHAXRPQVS+LFeP7K7ywvEw0g=b_A@mail.gmail.com>
+From: Travis Rhoden <trhoden@gmail.com>
+Subject: Re: changing default installed packages by ceph-deploy
+Date: Fri, 31 Jul 2015 11:26:59 -0700
+Message-ID: <CACkq2mr6ERroUfjk-sVbhJ0vPUsGKXpcNC8a2weRB7K7NtgFzA@mail.gmail.com>
+References: <CACkq2mpmFLotjC9u45YHK=fGyUT8kzgvmkX0voxXoasfrLX1ew@mail.gmail.com>
+ <20150731120930.54c5b266@g21.suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx3-phx2.redhat.com ([209.132.183.24]:35527 "EHLO
-	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754033AbbGaRES (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 31 Jul 2015 13:04:18 -0400
-In-Reply-To: <CAFkUHxcyxHO-0OyB9-v+6TeHAXRPQVS+LFeP7K7ywvEw0g=b_A@mail.gmail.com>
+Received: from mail-oi0-f54.google.com ([209.85.218.54]:33954 "EHLO
+	mail-oi0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750880AbbGaS1T (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 31 Jul 2015 14:27:19 -0400
+Received: by oigi136 with SMTP id i136so42483882oig.1
+        for <ceph-devel@vger.kernel.org>; Fri, 31 Jul 2015 11:27:19 -0700 (PDT)
+In-Reply-To: <20150731120930.54c5b266@g21.suse.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kernel neophyte <neophyte.hacker001@gmail.com>
-Cc: vu@mellanox.com, raju kurunkad <raju.kurunkad@sandisk.com>, ceph-devel@vger.kernel.org, Marcus Watts <mwatts@redhat.com>
+To: David Disseldorp <ddiss@suse.de>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Neo,
+On Fri, Jul 31, 2015 at 3:09 AM, David Disseldorp <ddiss@suse.de> wrote:
+> On Wed, 29 Jul 2015 15:41:29 -0700, Travis Rhoden wrote:
+>
+>> There are the following flags in ceph-deploy today that can control
+>> what daemons get installed:
+>>
+>>  ceph-deploy install --help
+>> ...
+>>   --mon                 install the mon component only
+>>   --mds                 install the mds component only
+>>   --rgw                 install the rgw component only
+>>   --osd                 install the osd component only
+>>   --cli, --common       install the common component only
+>>   --all                 install all ceph components (e.g. mon,osd,mds,rgw).
+>>                         This is the default
+>>
+>> So, my proposal is to change the default behavior from "ceph-deploy
+>> install --all ..." to "ceph-deploy install --mon --osd ...".
+>>
+>> Any objections?
+>
+> Sounds good to me Travis.
 
-I'm not sure of the state of current WIP, but Marcus (CC'd) is coordinating atm
-from our end.  I'm sure we'd love help, so we'll check back in with updated branch
-info--maybe next week?
+I received some feedback that while this change would make sense all
+around, it would represent a non-backwards-compatible change, and that
+is true.  There are scripts out there that presume everything is
+installed by default, and we don't want to break those...
 
-Matt
-
------ Original Message -----
-From: "kernel neophyte" <neophyte.hacker001@gmail.com>
-To: "Matt Benjamin" <mbenjamin@redhat.com>
-Cc: vu@mellanox.com, "raju kurunkad" <raju.kurunkad@sandisk.com>, ceph-devel@vger.kernel.org, "Marcus Watts" <mwatts@redhat.com>
-Sent: Friday, July 31, 2015 12:20:33 PM
-Subject: Re: Cluster Network & Public Network w.r.t XIO ?
-
-On Fri, Jul 31, 2015 at 7:49 AM, Matt Benjamin <mbenjamin@redhat.com> wrote:
-> Hi Neo,
->
-> On our formerly-internal firefly-based branch, what we did was create additional Messenger
-> instances ad infinitum, which at least let you do this, but it's not what anybody wanted for
-> upstream or long-term.  What's upstream now doesn't let you IIRC describe that.  The rdma_local
-> parameter like you say is insufficient (and actually a hack).
->
-> What we plan to do (and have in progress) is extending work Sage started on wip-address, which
-> will enable multi-homing and identify instances by their transport type(s).  We might put more
-> information there to help with future topologies.  Improved configuration language to let you
-> describe your desired network setup would be packaged with that.
-
-This is awesome! could you please point me to your WIP branch ? Also
-please let know if I could help speed up the dev/test process ?
-
--Neo
+What I *can* do, however, is build off of the work you did in
+https://github.com/ceph/ceph-deploy/pull/324/commits, and install a
+subset of packages when requested to do so.  This works even before
+the ceph->ceph-mon/ceph-osd split arrives.  Thanks for that code. :)
+I've added http://tracker.ceph.com/issues/12543 to cover that.
 
 >
-> The plan is that an improved situation might arrive as early as J.  If we need an interim method,
-> now would be a good time to start discussion.
+> For the ceph-deploy install --iscsi changes at
+> https://github.com/ceph/ceph-deploy/pull/326 I had intentionally left
+> targetcli out of the --all group so that it wouldn't be installed by
+> default, but I'll add it if your proposed changes go in.
+> Any thoughts on the install --iscsi changes?
+
+Added feedback on that pull request. Sorry for the delay!
+
 >
-> Matt
->
-> ----- Original Message -----
-> From: "kernel neophyte" <neophyte.hacker001@gmail.com>
-> To: vu@mellanox.com, "raju kurunkad" <raju.kurunkad@sandisk.com>, ceph-devel@vger.kernel.org
-> Sent: Thursday, July 30, 2015 11:21:06 PM
-> Subject: Cluster Network & Public Network w.r.t XIO ?
->
-> Hi Vu, Raju,
->
-> I am trying to bring up ceph cluster on a powerful dell server with
-> two 40Gbe ROCEv2 NIC.
->
-> I have assigned one as my cluster network (would prefer all osd
-> communications happen on that) and have assigned one as my public n/w.
-> this works fine for simple messenger case. (ofcourse no rdma)
->
-> but when I try to bring this up on XIO, this gets very complicated, as
-> in how do I specify two RDMA_LOCAL  ? one for cluster n/w and other
-> for public ? can choose XIO for client to osd communication and simple
-> for cluster n/w ?
->
-> any thoughts ?
->
-> Thanks,
-> Neo
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Cheers, David
