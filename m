@@ -1,138 +1,64 @@
-From: Brian Kroth <bpkroth@gmail.com>
-Subject: Re: [ceph-users] dropping old distros: el6, precise 12.04, debian
- wheezy?
-Date: Fri, 31 Jul 2015 09:18:26 -0500
-Message-ID: <20150731141826.GF15736@gmail.com>
-References: <alpine.DEB.2.00.1507300645130.22099@cobra.newdream.net>
- <20150730155812.GE15736@gmail.com>
- <2085249323.24865068.1438327308865.JavaMail.zimbra@oxygem.tv>
+From: Matt Benjamin <mbenjamin@redhat.com>
+Subject: Re: Cluster Network & Public Network w.r.t XIO ?
+Date: Fri, 31 Jul 2015 10:49:57 -0400 (EDT)
+Message-ID: <1508871103.877228.1438354197061.JavaMail.zimbra@redhat.com>
+References: <CAFkUHxddmOdyZHcjzCoEJYu_YkkUZ=3aq_FZ4QfJNqdKJ_xO3A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="xaMk4Io5JJdpkLEb"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f169.google.com ([209.85.223.169]:34894 "EHLO
-	mail-io0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753627AbbGaOS2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 31 Jul 2015 10:18:28 -0400
-Received: by iodd187 with SMTP id d187so86518209iod.2
-        for <ceph-devel@vger.kernel.org>; Fri, 31 Jul 2015 07:18:28 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <2085249323.24865068.1438327308865.JavaMail.zimbra@oxygem.tv>
+Received: from mx3-phx2.redhat.com ([209.132.183.24]:55225 "EHLO
+	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753674AbbGaOuE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 31 Jul 2015 10:50:04 -0400
+In-Reply-To: <CAFkUHxddmOdyZHcjzCoEJYu_YkkUZ=3aq_FZ4QfJNqdKJ_xO3A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>
-Cc: Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
+To: kernel neophyte <neophyte.hacker001@gmail.com>
+Cc: vu@mellanox.com, raju kurunkad <raju.kurunkad@sandisk.com>, ceph-devel@vger.kernel.org, Marcus Watts <mwatts@redhat.com>
 
+Hi Neo,
 
---xaMk4Io5JJdpkLEb
-Content-Type: text/plain; charset=iso-8859-1; format=flowed
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+On our formerly-internal firefly-based branch, what we did was create additional Messenger
+instances ad infinitum, which at least let you do this, but it's not what anybody wanted for
+upstream or long-term.  What's upstream now doesn't let you IIRC describe that.  The rdma_local
+parameter like you say is insufficient (and actually a hack).
 
-That's good to hear.  Thanks for the heads up.  We're going to be=20
-getting another pile of hardware in the next couple of weeks and I'd=20
-prefer to not have to start with Wheezy just to have to move to Jessie a=20
-little bit later on.  As someone said earlier, OS rollouts take some care=
-=20
-to do in large environments.  In the meantime I'll just keep refreshing=20
-http://ceph.com/debian/dists/ every couple of days :)
+What we plan to do (and have in progress) is extending work Sage started on wip-address, which
+will enable multi-homing and identify instances by their transport type(s).  We might put more
+information there to help with future topologies.  Improved configuration language to let you
+describe your desired network setup would be packaged with that.
 
-Cheers,
-Brian
+The plan is that an improved situation might arrive as early as J.  If we need an interim method,
+now would be a good time to start discussion.
 
-Alexandre DERUMIER <aderumier@odiso.com> 2015-07-31 09:21:
->>>As I still haven't heard or seen about any upstream distros for Debian
->>>Jessie (see also [1]),
->
->Gitbuilder is already done for jessie
->
->http://gitbuilder.ceph.com/ceph-deb-jessie-x86_64-basic/
->
->@Sage : Don't known if something is blocking to release package officially=
- ?
->
->
->
->----- Mail original -----
->De: "Brian Kroth" <bpkroth@gmail.com>
->=C0: "Sage Weil" <sweil@redhat.com>
->Cc: "ceph-devel" <ceph-devel@vger.kernel.org>, "ceph-users" <ceph-users@ce=
-ph.com>
->Envoy=E9: Jeudi 30 Juillet 2015 17:58:12
->Objet: Re: [ceph-users] dropping old distros: el6, precise 12.04, debian w=
-heezy?
->
->Sage Weil <sweil@redhat.com> 2015-07-30 06:54:
->>As time marches on it becomes increasingly difficult to maintain proper
->>builds and packages for older distros. For example, as we make the
->>systemd transition, maintaining the kludgey sysvinit and udev support for
->>centos6/rhel6 is a pain in the butt and eats up time and energy to
->>maintain and test that we could be spending doing more useful work.
->>
->>"Dropping" them would mean:
->>
->> - Ongoing development on master (and future versions like infernalis and
->>jewel) would not be tested on these distros.
->>
->> - We would stop building upstream release packages on ceph.com for new
->>releases.
->>
->> - We would probably continue building hammer and firefly packages for
->>future bugfix point releases.
->>
->> - The downstream distros would probably continue to package them, but the
->>burden would be on them. For example, if Ubuntu wanted to ship Jewel on
->>precise 12.04, they could, but they'd probably need to futz with the
->>packaging and/or build environment to make it work.
->>
->>So... given that, I'd like to gauge user interest in these old distros.
->>Specifically,
->>
->> CentOS6 / RHEL6
->> Ubuntu precise 12.04
->> Debian wheezy
->>
->>Would anyone miss them?
->>
->>In particular, dropping these three would mean we could drop sysvinit
->>entirely and focus on systemd (and continue maintaining the existing
->>upstart files for just a bit longer). That would be a relief. (The
->>sysvinit files wouldn't go away in the source tree, but we wouldn't worry
->>about packaging and testing them properly.)
->>
->>Thanks!
->>sage
->
->As I still haven't heard or seen about any upstream distros for Debian
->Jessie (see also [1]), I am still running Debian Wheezy and as that is
->supposed to be supported for another ~4 years by Debian, it would be
->very nice if there were at least stability and security fixes backported
->for the upstream ceph package repositories for that platform.
->
->Additionally, I'll note that I'm personally likely to continue to use
->sysvinit so long as I still can, even when I am able to make the switch
->to Jessie.
->
->Thanks,
->Brian
->
->[1] <http://www.spinics.net/lists/ceph-users/msg19959.html>
->
->_______________________________________________
->ceph-users mailing list
->ceph-users@lists.ceph.com
->http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+Matt
 
---xaMk4Io5JJdpkLEb
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
+----- Original Message -----
+From: "kernel neophyte" <neophyte.hacker001@gmail.com>
+To: vu@mellanox.com, "raju kurunkad" <raju.kurunkad@sandisk.com>, ceph-devel@vger.kernel.org
+Sent: Thursday, July 30, 2015 11:21:06 PM
+Subject: Cluster Network & Public Network w.r.t XIO ?
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
+Hi Vu, Raju,
 
-iEYEARECAAYFAlW7g7AACgkQdtkBin+QuSACsgCgy8UodciH5CaKi1VJNetz7Isl
-IdUAn3xDley3Rubyn1NNOm9/GeW0sIek
-=m0n+
------END PGP SIGNATURE-----
+I am trying to bring up ceph cluster on a powerful dell server with
+two 40Gbe ROCEv2 NIC.
 
---xaMk4Io5JJdpkLEb--
+I have assigned one as my cluster network (would prefer all osd
+communications happen on that) and have assigned one as my public n/w.
+this works fine for simple messenger case. (ofcourse no rdma)
+
+but when I try to bring this up on XIO, this gets very complicated, as
+in how do I specify two RDMA_LOCAL  ? one for cluster n/w and other
+for public ? can choose XIO for client to osd communication and simple
+for cluster n/w ?
+
+any thoughts ?
+
+Thanks,
+Neo
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
