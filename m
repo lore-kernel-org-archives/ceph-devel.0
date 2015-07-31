@@ -1,35 +1,82 @@
 From: David Disseldorp <ddiss@suse.de>
-Subject: [PATCH 4/4] osd: fix extent_cmp tracepoint call
-Date: Fri, 31 Jul 2015 18:32:53 +0200
-Message-ID: <1438360373-14377-2-git-send-email-ddiss@suse.de>
+Subject: [PATCH 3/4] tracing: add missing tracepoints for writesame and extent_cmp
+Date: Fri, 31 Jul 2015 18:32:52 +0200
+Message-ID: <1438360373-14377-1-git-send-email-ddiss@suse.de>
 References: <1438161946-28473-1-git-send-email-mchristi@redhat.com>
- <1438360373-14377-1-git-send-email-ddiss@suse.de>
-Return-path: <target-devel-owner@vger.kernel.org>
-In-Reply-To: <1438360373-14377-1-git-send-email-ddiss@suse.de>
-Sender: target-devel-owner@vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx2.suse.de ([195.135.220.15]:56212 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751659AbbGaQdH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 31 Jul 2015 12:33:07 -0400
+In-Reply-To: <1438161946-28473-1-git-send-email-mchristi@redhat.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
 To: mchristi@redhat.com
 Cc: ceph-devel@vger.kernel.org, target-devel@vger.kernel.org, David Disseldorp <ddiss@suse.de>
-List-Id: ceph-devel.vger.kernel.org
-
-The size and seq variables are out of scope.
 
 Signed-off-by: David Disseldorp <ddiss@suse.de>
 ---
- src/osd/ReplicatedPG.cc | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ src/tracing/osd.tp | 40 ++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 40 insertions(+)
 
-diff --git a/src/osd/ReplicatedPG.cc b/src/osd/ReplicatedPG.cc
-index 2890af3..aed609b 100644
---- a/src/osd/ReplicatedPG.cc
-+++ b/src/osd/ReplicatedPG.cc
-@@ -3501,7 +3501,7 @@ int ReplicatedPG::do_osd_ops(OpContext *ctx, vector<OSDOp>& ops)
-       // --- READS ---
+diff --git a/src/tracing/osd.tp b/src/tracing/osd.tp
+index ba0fd32..a9f2d13 100644
+--- a/src/tracing/osd.tp
++++ b/src/tracing/osd.tp
+@@ -91,6 +91,28 @@ TRACEPOINT_EVENT(osd, do_osd_op_pre,
+     )
+ )
  
-     case CEPH_OSD_OP_CMPEXT:
--	tracepoint(osd, do_osd_op_pre_extent_cmp, soid.oid.name.c_str(), soid.snap.val, size, seq, op.extent.offset, op.extent.length, op.extent.truncate_size, op.extent.truncate_seq);
-+	tracepoint(osd, do_osd_op_pre_extent_cmp, soid.oid.name.c_str(), soid.snap.val, oi.size, oi.truncate_seq, op.extent.offset, op.extent.length, op.extent.truncate_size, op.extent.truncate_seq);
-         // TODO: Locking - this op and the write are supposed to be atomic
- 	result = do_extent_cmp(ctx, osd_op);
- 	break;
++TRACEPOINT_EVENT(osd, do_osd_op_pre_extent_cmp,
++    TP_ARGS(
++        const char*, oid,
++        uint64_t, snap,
++        uint64_t, osize,
++        uint32_t, oseq,
++        uint64_t, offset,
++        uint64_t, length,
++        uint64_t, truncate_size,
++        uint32_t, truncate_seq),
++    TP_FIELDS(
++        ctf_string(oid, oid)
++        ctf_integer(uint64_t, snap, snap)
++        ctf_integer(uint64_t, osize, osize)
++        ctf_integer(uint32_t, oseq, oseq)
++        ctf_integer(uint64_t, offset, offset)
++        ctf_integer(uint64_t, length, length)
++        ctf_integer(uint64_t, truncate_size, truncate_size)
++        ctf_integer(uint32_t, truncate_seq, truncate_seq)
++    )
++)
++
+ TRACEPOINT_EVENT(osd, do_osd_op_pre_read,
+     TP_ARGS(
+         const char*, oid,
+@@ -381,6 +403,24 @@ TRACEPOINT_EVENT(osd, do_osd_op_pre_writefull,
+     )
+ )
+ 
++TRACEPOINT_EVENT(osd, do_osd_op_pre_writesame,
++    TP_ARGS(
++        const char*, oid,
++        uint64_t, snap,
++        uint64_t, osize,
++        uint64_t, offset,
++        uint64_t, length,
++        uint64_t, data_length),
++    TP_FIELDS(
++        ctf_string(oid, oid)
++        ctf_integer(uint64_t, snap, snap)
++        ctf_integer(uint64_t, osize, osize)
++        ctf_integer(uint64_t, offset, offset)
++        ctf_integer(uint64_t, length, length)
++        ctf_integer(uint64_t, data_length, data_length)
++    )
++)
++
+ TRACEPOINT_EVENT(osd, do_osd_op_pre_rollback,
+     TP_ARGS(
+         const char*, oid,
 -- 
 2.1.4
+
