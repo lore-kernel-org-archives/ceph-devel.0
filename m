@@ -1,76 +1,48 @@
 From: Owen Synge <osynge@suse.com>
 Subject: Re: systemd status
-Date: Fri, 31 Jul 2015 15:23:26 +0200
-Message-ID: <55BB76CE.9020009@suse.com>
-References: <alpine.DEB.2.00.1507281202370.22099@cobra.newdream.net>
+Date: Fri, 31 Jul 2015 15:29:04 +0200
+Message-ID: <55BB7820.1090006@suse.com>
+References: <alpine.DEB.2.00.1507281202370.22099@cobra.newdream.net>	<CACkq2mr0aU+X_KDKGeQFy=sdtmRyy7CSR5tKHxYGyUFAA6kfEQ@mail.gmail.com>	<mpad83$pu4$1@ger.gmane.org>	<alpine.DEB.2.00.1507290550250.22099@cobra.newdream.net>	<mpampk$1pq$1@ger.gmane.org>	<alpine.DEB.2.00.1507290715450.22099@cobra.newdream.net>	<mpao1u$pe2$1@ger.gmane.org>	<alpine.DEB.2.00.1507290748290.22099@cobra.newdream.net>	<mpaqqd$blm$1@ger.gmane.org> <CAGtbiz1=yV8sW7d3Jc42NgUNdHXuakzM5RyfCkgCVXpOWRYykw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from [89.191.203.168] ([89.191.203.168]:46858 "EHLO
+Received: from [89.191.203.168] ([89.191.203.168]:20270 "EHLO
 	mail.emea.novell.com" rhost-flags-FAIL-FAIL-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751130AbbGaNZF (ORCPT
+	by vger.kernel.org with ESMTP id S1751074AbbGaNbE (ORCPT
 	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-	Fri, 31 Jul 2015 09:25:05 -0400
-In-Reply-To: <alpine.DEB.2.00.1507281202370.22099@cobra.newdream.net>
+	Fri, 31 Jul 2015 09:31:04 -0400
+In-Reply-To: <CAGtbiz1=yV8sW7d3Jc42NgUNdHXuakzM5RyfCkgCVXpOWRYykw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
+To: Vasiliy Angapov <angapov@gmail.com>, ceph-devel@vger.kernel.org
 
-On 07/28/2015 09:13 PM, Sage Weil wrote:
-> Hey,
+
+
+On 07/29/2015 06:50 PM, Vasiliy Angapov wrote:
+> Hi colleagues,
 > 
-> I've finally had some time to play with the systemd integration branch on 
-> fedora 22.  It's in wip-systemd and my current list of issues includes:
+> I see some systemd-related actions here. Can you please also have a
+> look at how I managed to rule Ceph with systemd -
+> https://github.com/angapov/ceph-systemd/ ?
+> It uses systemd generator script, which is called every time host
+> boots up or when we issue "systemctl daemon-reload". It automates all
+> the routine job of adding/removing systemd unit files. It also has a
+> convenient ceph-osd and ceph-mon targets, which allows to start/stop
+> OSDs/MONs all at once.
+> I got production cluster working with it already, so this is fine for
+> me. It handles only OSD and MON daemons for the moment but RGW can be
+> added in a seconds.
 > 
-> - after mon creation ceph-create-keys isn't run automagically
->   - Personally I kind of hate how it was always run on mon startup and not 
-> just during cluster creation so I wouldn't mind *so* much if this became 
-> an explicit step, maybe triggered by ceph-deploy, after mon create.
+> The idea of systemd generators adds much more flexibility to Ceph like
+> the original init script has.
 
-I agree.
+I have tried to use generators some time ago, but since all generators
+where run before root was mounted, or disks where detected, this caused
+issues on rebooting.
 
-> - udev's attempt to trigger ceph-disk isn't working for me.  the osd 
-> service gets started but the mount isn't present and it fails to start.
-
-I have not had this issue with suse, I will investigate soon.
-
-> I'm a systemd noob and haven't sorted out how to get udev to log something 
-> meaningful to debug it.  Perhaps we should merge in the udev + 
-> systemd revamp patches here too...
-> 
-> - ceph-detect-init is only recently unbroken in master for fedora 22.
-
-noted. I have never yet tested the systemd patches on anything but
-opensuse and SLE12.
-
-> - ceph-deploy doesn't know that fedora should be systemd yet.
-
-One of ceph or ceph-deploy has to change this first. I propose ceph.
-
-> - ceph-deploy has a wip-systemd branch with a few things so far:
->   - on mon create, we unconditionally systemctl enable ceph.target.  
-> i think osd create and mds create and rgw create should do the same thing, 
-> since the ceph.target is a catch-all bucket for any ceph service, and i 
-> don't think we want to enable it on install?
->   - rgw create and mds create don't work yet
->   - osd create doesn't enable ceph.target
-
-rgw does work on suse, but I noticed a bug in the patches you where
-working on, I am looking at the other issues, you raise.
-
-https://github.com/SUSE/ceph/commit/08c805c18dd994d7b2c4c521a209bb50310b1bbd
-
-
-Note mds is some thing I have never tested but have never even used the mds.
-
-> - I'm guessing my ceph.spec changes to install teh systemd unit files 
-> aren't quite right... please review!  The gitbuilder turnaround is so slow 
-> it's hard to iterate and I don't really know what I'm doing here.
-
-Yes I found this too on suse, I think I am near fixing these issues for
-suse. Once they are fixed I will once again look at fedora.
-
+How did you work around this? If you didnt what OS and version of
+systemd are you using?
 
 Best regards
 
