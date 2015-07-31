@@ -1,49 +1,54 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Odd QA Test Running
-Date: Fri, 31 Jul 2015 17:50:45 +0800
-Message-ID: <CACJqLyY4kocnovRH0JTNtPWuB8CKbKZ3J_sT7yJUJ99pTXak1w@mail.gmail.com>
+From: John Spray <john.spray@redhat.com>
+Subject: Re: Installing Ceph without root privilege
+Date: Fri, 31 Jul 2015 11:09:05 +0100
+Message-ID: <55BB4941.5000004@redhat.com>
+References: <2C711032-0C8E-4490-85B2-2D7B89DCA153@m.titech.ac.jp>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8;
+	format=flowed
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f174.google.com ([209.85.192.174]:36770 "EHLO
-	mail-pd0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751023AbbGaJup convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 31 Jul 2015 05:50:45 -0400
-Received: by pdjr16 with SMTP id r16so41069928pdj.3
-        for <ceph-devel@vger.kernel.org>; Fri, 31 Jul 2015 02:50:45 -0700 (PDT)
+Received: from mx1.redhat.com ([209.132.183.28]:43343 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751029AbbGaKJI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 31 Jul 2015 06:09:08 -0400
+In-Reply-To: <2C711032-0C8E-4490-85B2-2D7B89DCA153@m.titech.ac.jp>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Piyawath Boukom <boukom.p.aa@m.titech.ac.jp>, ceph-devel@vger.kernel.org
 
-Hi all,
+On 31/07/15 07:10, Piyawath Boukom wrote:
+> Dear Ceph-dev team,
+>
+> My name is Piyawath. I=E2=80=99m trying to set up Ceph on university=E2=
+=80=99s machine.
+>
+> Unfortunately, I am able to install/set up it in user mode (not root)=
+, including creating Ceph user and other processes. Is it possible to d=
+o set up without root privilege ?
+>
+> I=E2=80=99m quite new in this field, please forgive me if I ignorantl=
+y asked you.
 
-I  ran a test suite(http://pulpito.ceph.com/haomai-2015-07-29_11:40:40-=
-rados-master-distro-basic-multi/)
-and found the failed jobs are failed by "2015-07-29 10:52:35.313197
-7f16ae655780 -1 unrecognized ms_type 'async'"
+Hi,
 
-Then I found the failed jobs(like
-http://pulpito.ceph.com/haomai-2015-07-29_11:40:40-rados-master-distro-=
-basic-multi/991540/)
-lack of =E2=80=9Cenable experimental unrecoverable data corrupting feat=
-ures:
-ms-type-async=E2=80=9D.
+I guess if you're installing as non-root then you probably just want=20
+something to experiment with a bit?
 
-Other successful jobs(like
-http://pulpito.ceph.com/haomai-2015-07-29_11:40:40-rados-master-distro-=
-basic-multi/991517/)
-can find "enable experimental unrecoverable data corrupting features:
-ms-type-async" in yaml.
+The easiest thing may be to compile from source:
+http://ceph.com/docs/next/install/build-ceph/
 
-So that's mean the same schedule suite will generate the different
-yaml file? Is there something tricky?
+=2E..and then create a temporary "vstart" cluster:
+http://ceph.com/docs/next/dev/quick_guide/
 
---=20
+This is not at all suitable for putting any real data in, but will let=20
+you play around a bit with the ceph command line etc.  If you need a=20
+more realistic system I would suggest asking your administrator for a=20
+way to create virtual machines, so that you can have root in the virtua=
+l=20
+machines and install packages there.
 
-Best Regards,
-
-Wheat
+John
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
