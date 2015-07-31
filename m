@@ -1,24 +1,35 @@
-From: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-Subject: Klientskie bazi tel +79133913837 Email: nonen22pp@gmail.com Yznaite podrobnee!!!
-Date: Fri, 31 Jul 2015 03:34:50 +0600
-Message-ID: <6A909814F1250BB86461289551CB8D69@vger.kernel.org>
-Reply-To: "ceph-devel@vger.kernel.org" <nonen22pp@gmail.com>
+From: kernel neophyte <neophyte.hacker001@gmail.com>
+Subject: Cluster Network & Public Network w.r.t XIO ?
+Date: Thu, 30 Jul 2015 20:21:06 -0700
+Message-ID: <CAFkUHxddmOdyZHcjzCoEJYu_YkkUZ=3aq_FZ4QfJNqdKJ_xO3A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	format=flowed;
-	charset="utf-8";
-	reply-type=original
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from no-rdns.free.clues.ro ([89.46.101.196]:59383 "EHLO
-	ems16.vpngeeks.net" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751478AbbG3WVf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Jul 2015 18:21:35 -0400
-Received: from 89.46.101.196 (localhost.localdomain [127.0.0.1])
-	by ems16.vpngeeks.net (Postfix) with SMTP id 820AC88FE1
-	for <ceph-devel@vger.kernel.org>; Thu, 30 Jul 2015 17:35:07 -0400 (EDT)
+Received: from mail-pa0-f43.google.com ([209.85.220.43]:34005 "EHLO
+	mail-pa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750767AbbGaDVH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Jul 2015 23:21:07 -0400
+Received: by pacan13 with SMTP id an13so33869846pac.1
+        for <ceph-devel@vger.kernel.org>; Thu, 30 Jul 2015 20:21:06 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: vu@mellanox.com, raju.kurunkad@sandisk.com, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Klientskie bazi tel +79133913837 Email: nonen22pp@gmail.com Yznaite podrobnee!!!
+Hi Vu, Raju,
+
+I am trying to bring up ceph cluster on a powerful dell server with
+two 40Gbe ROCEv2 NIC.
+
+I have assigned one as my cluster network (would prefer all osd
+communications happen on that) and have assigned one as my public n/w.
+this works fine for simple messenger case. (ofcourse no rdma)
+
+but when I try to bring this up on XIO, this gets very complicated, as
+in how do I specify two RDMA_LOCAL  ? one for cluster n/w and other
+for public ? can choose XIO for client to osd communication and simple
+for cluster n/w ?
+
+any thoughts ?
+
+Thanks,
+Neo
