@@ -1,74 +1,162 @@
-From: Patrick McGarry <pmcgarry@redhat.com>
-Subject: Re: [ceph-users] Ceph Tech Talk Today!
-Date: Mon, 3 Aug 2015 15:55:47 -0400
-Message-ID: <CAP8Oy=KMBtpER0qc4-SrU9UQ69ZnQ75eCLPKK2BKy6a+7aRnEg@mail.gmail.com>
-References: <CAAZbbf28BW-nPxF1FgOpxi6mPk9C7uPnugautj7W6AvSnFv1RA@mail.gmail.com>
-	<55BF0F45.2040805@physics.usyd.edu.au>
+From: Andras Pataki <apataki-0QEYAsm1mgjsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+Subject: Re: Inconsistent PGs that ceph pg repair does not fix
+Date: Mon, 3 Aug 2015 20:09:39 +0000
+Message-ID: <D1E543BF.8DD2%apataki@simonsfoundation.org>
+References: <D1E53A36.8DB6%apataki@simonsfoundation.org>
+	<D1E53B6A.8DC6%apataki@simonsfoundation.org>
+	<CAN=+7FUucyFUEm--jkGZWUULFGS7NHGApOG5x=wK7SM0OqTv=g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yk0-f180.google.com ([209.85.160.180]:34617 "EHLO
-	mail-yk0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755075AbbHCTzs (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Aug 2015 15:55:48 -0400
-Received: by ykax123 with SMTP id x123so120138004yka.1
-        for <ceph-devel@vger.kernel.org>; Mon, 03 Aug 2015 12:55:47 -0700 (PDT)
-In-Reply-To: <55BF0F45.2040805@physics.usyd.edu.au>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Goncalo Borges <goncalo@physics.usyd.edu.au>
-Cc: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAN=+7FUucyFUEm--jkGZWUULFGS7NHGApOG5x=wK7SM0OqTv=g@mail.gmail.com>
+Content-Language: en-US
+Content-ID: <AB3639D11EE4804292CDB86FBFEBCC9F-zOaPsT6gHtfVnzwDEOJ4zg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Samuel Just <sjust-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Yes! Sorry I forgot to publish these since I was still fighting
-technical troubles from CDS (which now seem to be mostly resolved).
-The Ceph Tech Talk should be up, and the CDS videos should be up
-within the next day or two. Thanks for reminding me.
+Done: http://tracker.ceph.com/issues/12577
+BTW, I=B9m using the latest release 0.94.2 on all machines.
 
-
-Best Regards,
-
-Patrick McGarry
-Director Ceph Community || Red Hat
-http://ceph.com  ||  http://community.redhat.com
-@scuttlemonkey || @ceph
+Andras
 
 
-On Mon, Aug 3, 2015 at 2:50 AM, Goncalo Borges
-<goncalo@physics.usyd.edu.au> wrote:
-> Hi Patrick...
+On 8/3/15, 3:38 PM, "Samuel Just" <sjust-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+
+>Hrm, that's certainly supposed to work.  Can you make a bug?  Be sure
+>to note what version you are running (output of ceph-osd -v).
+>-Sam
 >
-> Do you think it is possible to make the talk / slides available? The link is
-> still not active in the ceph-tech-talks URL
->
-> Cheers
-> Goncalo
->
-> On 07/31/2015 01:08 AM, Patrick McGarry wrote:
+>On Mon, Aug 3, 2015 at 12:34 PM, Andras Pataki
+><apataki-0QEYAsm1mgjsfHDXvbKv3WD2FQJk+8+b@public.gmane.org> wrote:
+>> Summary: I am having problems with inconsistent PG's that the 'ceph pg
+>> repair' command does not fix.  Below are the details.  Any help would be
+>> appreciated.
 >>
->> Hey cephers,
+>> # Find the inconsistent PG's
+>> ~# ceph pg dump | grep inconsistent
+>> dumped all in format plain
+>> 2.439 42080 00 017279507143 31033103 active+clean+inconsistent2015-08-03
+>> 14:49:17.29288477323'2250145 77480:890566 [78,54]78 [78,54]78
+>> 77323'22501452015-08-03 14:49:17.29253877323'2250145 2015-08-03
+>> 14:49:17.292538
+>> 2.8b9 40830 00 016669590823 30513051 active+clean+inconsistent2015-08-03
+>> 14:46:05.14006377323'2249886 77473:897325 [7,72]7 [7,72]7
+>> 77323'22498862015-08-03 14:22:47.83406377323'2249886 2015-08-03
+>> 14:22:47.834063
 >>
->> Just sending a friendly reminder that our online CephFS Tech Talk is
->> happening today at 13:00 EDT (17:00 UTC). Please stop by and hear a
->> technical deep dive on CephFS and ask any questions you might have.
->> Thanks!
+>> # Look at the first one:
+>> ~# ceph pg deep-scrub 2.439
+>> instructing pg 2.439 on osd.78 to deep-scrub
 >>
->> http://ceph.com/ceph-tech-talks/
+>> # The logs of osd.78 show:
+>> 2015-08-03 15:16:34.409738 7f09ec04a700  0 log_channel(cluster) log
+>>[INF] :
+>> 2.439 deep-scrub starts
+>> 2015-08-03 15:16:51.364229 7f09ec04a700 -1 log_channel(cluster) log
+>>[ERR] :
+>> deep-scrub 2.439 b029e439/10000022d93.00000f0c/head//2 on disk data
+>>digest
+>> 0xb3d78a6e !=3D 0xa3944ad0
+>> 2015-08-03 15:16:52.763977 7f09ec04a700 -1 log_channel(cluster) log
+>>[ERR] :
+>> 2.439 deep-scrub 1 errors
 >>
->> direct link to the video conference:
->> https://bluejeans.com/172084437/browser
+>> # Finding the object in question:
+>> ~# find ~ceph/osd/ceph-78/current/2.439_head -name
+>>10000022d93.00000f0c* -ls
+>> 21510412310 4100 -rw-r--r--   1 root     root      4194304 Jun 30 17:09
+>> =
+
+>>/var/lib/ceph/osd/ceph-78/current/2.439_head/DIR_9/DIR_3/DIR_4/DIR_E/1000
+>>0022d93.00000f0c__head_B029E439__2
+>> ~# md5sum
+>> =
+
+>>/var/lib/ceph/osd/ceph-78/current/2.439_head/DIR_9/DIR_3/DIR_4/DIR_E/1000
+>>0022d93.00000f0c__head_B029E439__2
+>> 4e4523244deec051cfe53dd48489a5db
+>> =
+
+>>/var/lib/ceph/osd/ceph-78/current/2.439_head/DIR_9/DIR_3/DIR_4/DIR_E/1000
+>>0022d93.00000f0c__head_B029E439__2
+>>
+>> # The object on the backup osd:
+>> ~# find ~ceph/osd/ceph-54/current/2.439_head -name
+>>10000022d93.00000f0c* -ls
+>> 6442614367 4100 -rw-r--r--   1 root     root      4194304 Jun 30 17:09
+>> =
+
+>>/var/lib/ceph/osd/ceph-54/current/2.439_head/DIR_9/DIR_3/DIR_4/DIR_E/1000
+>>0022d93.00000f0c__head_B029E439__2
+>> ~# md5sum
+>> =
+
+>>/var/lib/ceph/osd/ceph-54/current/2.439_head/DIR_9/DIR_3/DIR_4/DIR_E/1000
+>>0022d93.00000f0c__head_B029E439__2
+>> 4e4523244deec051cfe53dd48489a5db
+>> =
+
+>>/var/lib/ceph/osd/ceph-54/current/2.439_head/DIR_9/DIR_3/DIR_4/DIR_E/1000
+>>0022d93.00000f0c__head_B029E439__2
+>>
+>> # They don't seem to be different.
+>> # When I try repair:
+>> ~# ceph pg repair 2.439
+>> instructing pg 2.439 on osd.78 to repair
+>>
+>> # The osd.78 logs show:
+>> 2015-08-03 15:19:21.775933 7f09ec04a700  0 log_channel(cluster) log
+>>[INF] :
+>> 2.439 repair starts
+>> 2015-08-03 15:19:38.088673 7f09ec04a700 -1 log_channel(cluster) log
+>>[ERR] :
+>> repair 2.439 b029e439/10000022d93.00000f0c/head//2 on disk data digest
+>> 0xb3d78a6e !=3D 0xa3944ad0
+>> 2015-08-03 15:19:39.958019 7f09ec04a700 -1 log_channel(cluster) log
+>>[ERR] :
+>> 2.439 repair 1 errors, 0 fixed
+>> 2015-08-03 15:19:39.962406 7f09ec04a700  0 log_channel(cluster) log
+>>[INF] :
+>> 2.439 deep-scrub starts
+>> 2015-08-03 15:19:56.510874 7f09ec04a700 -1 log_channel(cluster) log
+>>[ERR] :
+>> deep-scrub 2.439 b029e439/10000022d93.00000f0c/head//2 on disk data
+>>digest
+>> 0xb3d78a6e !=3D 0xa3944ad0
+>> 2015-08-03 15:19:58.348083 7f09ec04a700 -1 log_channel(cluster) log
+>>[ERR] :
+>> 2.439 deep-scrub 1 errors
+>>
+>> The inconsistency is not fixed.  Any hints of what should be done next?
+>> I have tried  a few things:
+>>  * Stop the primary osd, remove the object from the filesystem, restart
+>>the
+>> OSD and issue a repair.  It didn't work - it sais that one object is
+>> missing, but did not copy it from the backup.
+>>  * I tried the same on the backup (remove the file) - it also didn't get
+>> copied back from the primary in a repair.
+>>
+>> Any help would be appreciated.
+>>
+>> Thanks,
+>>
+>> Andras
+>> apataki-0QEYAsm1mgjsfHDXvbKv3WD2FQJk+8+b@public.gmane.org
 >>
 >>
+>> _______________________________________________
+>> ceph-users mailing list
+>> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 >>
->
-> --
-> Goncalo Borges
-> Research Computing
-> ARC Centre of Excellence for Particle Physics at the Terascale
-> School of Physics A28 | University of Sydney, NSW  2006
-> T: +61 2 93511937
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
