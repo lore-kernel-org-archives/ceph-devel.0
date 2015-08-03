@@ -1,30 +1,68 @@
-From: Loic Dachary <ldachary@redhat.com>
-Subject: rados and the next hammer release v0.94.3
-Date: Mon, 03 Aug 2015 17:42:15 +0200
-Message-ID: <55BF8BD7.7020003@redhat.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: CephFS and the next hammer release v0.94.3
+Date: Mon, 03 Aug 2015 17:43:29 +0200
+Message-ID: <55BF8C21.5020204@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="IFd0LJ4DAbOJwgLB3txVM48wh0aIUIuuI"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:55044 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752833AbbHCPmR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 3 Aug 2015 11:42:17 -0400
-Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
-	by mx1.redhat.com (Postfix) with ESMTPS id 775BEABD
-	for <ceph-devel@vger.kernel.org>; Mon,  3 Aug 2015 15:42:17 +0000 (UTC)
+Received: from mail2.dachary.org ([91.121.57.175]:60677 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1753270AbbHCPnb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Aug 2015 11:43:31 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sjust@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <greg@gregs42.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Abhishek L <abhishek.lekshmanan@gmail.com>
 
-Hi Sam,
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--IFd0LJ4DAbOJwgLB3txVM48wh0aIUIuuI
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-We need http://tracker.ceph.com/issues/12465 in hammer v0.94.3. Is there anything else we want before publishing this release ? Should we wait for http://tracker.ceph.com/issues/12410 maybe ? And http://tracker.ceph.com/issues/12536 ?
+Hi Greg,
 
-The next hammer release as found at https://github.com/ceph/ceph/tree/hammer passed the rados suite. Provided it also contains the fixes for the above three issues, do you think it is ready for QE to start their own round of testing ?
+The next hammer release as found at https://github.com/ceph/ceph/tree/ham=
+mer passed the fs suite (http://tracker.ceph.com/issues/11990#fs). Do you=
+ think it is ready for QE to start their own round of testing ?
 
 Cheers
 
-P.S. http://tracker.ceph.com/issues/11990#Release-information has direct links to the pull requests merged into hammer since v0.94.2 in case you need more context about one of them.
+P.S. http://tracker.ceph.com/issues/11990#Release-information has direct =
+links to the pull requests merged into hammer since v0.94.2 in case you n=
+eed more context about one of them.
 
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--IFd0LJ4DAbOJwgLB3txVM48wh0aIUIuuI
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlW/jCEACgkQ8dLMyEl6F23MGgCcDrcnWsgaZyGRcEuqUuW1yeH0
+jTUAoK9+2Jk30wfsrSU4J0Gs7y8lh3BP
+=xcrX
+-----END PGP SIGNATURE-----
+
+--IFd0LJ4DAbOJwgLB3txVM48wh0aIUIuuI--
