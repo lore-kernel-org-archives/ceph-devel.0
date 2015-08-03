@@ -1,81 +1,101 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: A issue in straw2 , maybe it`s not a problem
-Date: Mon, 3 Aug 2015 10:31:18 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1508031022060.17225@cobra.newdream.net>
-References: <CAA-rZjaWe-6K7BOjT3RmqVvnoBNjheuX5xphyMY+KTGSR+PELg@mail.gmail.com>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: Signed-off-by and aliases
+Date: Mon, 03 Aug 2015 21:02:02 +0200
+Message-ID: <55BFBAAA.1050603@42on.com>
+References: <55BBD384.7030703@dachary.org> <55BC7F4E.5070003@42on.com> <55BE431B.4070202@suse.de>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:43060 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754821AbbHCRbT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Aug 2015 13:31:19 -0400
-In-Reply-To: <CAA-rZjaWe-6K7BOjT3RmqVvnoBNjheuX5xphyMY+KTGSR+PELg@mail.gmail.com>
+Received: from websrv.42on.com ([31.25.102.167]:39299 "EHLO websrv.42on.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753741AbbHCTCG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 3 Aug 2015 15:02:06 -0400
+In-Reply-To: <55BE431B.4070202@suse.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: chen kael <chenji.bupt@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Joao Eduardo Luis <joao@suse.de>, Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, 3 Aug 2015, chen kael wrote:
-> Hi,everyone
+On 08/02/2015 06:19 PM, Joao Eduardo Luis wrote:
+> On 08/01/2015 09:11 AM, Wido den Hollander wrote:
+>> On 07/31/2015 09:59 PM, Loic Dachary wrote:
+>>> Hi Ceph,
+>>>
+>>> We require that each commit has a Signed-off-by line with the name and email of the author. The general idea is that the Ceph project trusts each developer to understand what it entails[1]. There is no formal verification : the person submitting the patch could use a fake name or publish code from someone else. In reality the odds of that happening and causing problem are so low that neither Ceph nor the Linux kernel felt the need to impose a more formal process. There is no bullet proof process anyway, it's all about balancing risks and costs.
+>>>
+>>> If a contributor was using an alias that looks like a real name (for instance I could contribute under the name Louis Lavile), (s)he would go unnoticed and her/his contribution would be accepted as any other. If the same contributor was using an alias that is obviously an alias (such as A. Nonymous), it would raise the question of accepting contributions Signed-off with an alias.
+>>>
+>>> I think Ceph should accept contributions that are signed with an alias because it does not make a difference.
+>>>
+>>> From a lawyer perspective, there is a difference between an alias and a real name, of course. Should the author be in court, (s)he would have to prove (s)he is the person behind the alias. If (s)he was using her/his real name, an ID card would be enough. And probably other differences that I don't see because IANAL. However since we already accept Signed-off-by that are not formally verified, we're already in a situation where we implicitly accept aliases. Explicitly accepting aliases would not change that, therefore it is not actually something we need to run by lawyers because nothing changes from a legal standpoint.
+>>>
+>>> What do you think ?
+>>>
+>>
+>> Using an alias is just dumb since it would only make you loose the
+>> copyright since it's not you doing the commit.
 > 
->     recently,I want to migrate our on-line cluster from straw to
-> straw2,because if I add or remove some osds,too much objects are to be
-> replaced than it should be.
+> Do you have a source that corroborates this statement? I would be deeply
+> grateful if you could point me to something of the sorts :)
 > 
->     I have a confusing in using straw2, because straw2 should have a
-> character that if an item's weight was adjusted up or down, mappings
-> would either
-> move to or from the adjusted item, but never between other unmodified
-> items in the bucket.
+
+IANAL either. But using an alias would ONLY complicate things for yourself.
+
+The risk of loosing the copyright is only bigger when not using your own
+name.
+
+But like I mentioned, as a project Ceph can mandate the usage of GPG for
+signing off commits.
+
+Wido
+
+> As far as I could gather however, this doesn't seem to hold up.
 > 
->     However after I do the test below , I still find pgs move from
-> unmodified items,I am not sure whether this is normal.
-
-It is normal.  It's not really straw2's fault (it's doing what it 
-should) but an artifact of the way CRUSH works.  See below...
-
->         old                                        new
-> CRUSH rule 0 x 759 [5,2,1]                CRUSH rule 0 x 759 [0,4,3]
-
-What CRUSH actually does for the old map is:
-
- - with r=0 we pick 5 (ok)
- - with r=1 we get 5 (dup, try again)
- - with r=2 we get 5 (dup, try again)
- - with r=3 we get 2 (ok)
- - with r=4 we get 5 (dup, try again)
- - with r=5 we get 1 (ok)
- -> [5,2,1]
-
-When we do the new map, it's luckier:
-
- - with r=0 we pick 0 (ok)   (was 5 before)
- - with r=1 we pick 4 (ok)   (was 5 before)
- - with r=2 we pick 3 (ok)   (was 5 before)
- -> [0,4,3]
-
-For any given draw (r= value), we will follow the rule that item either 
-stays the same or switches to or from the reweighted item (5).  But for 
-anything later in the sequence we may be at high values of r because we've 
-had to retry (due to dups, or OSDs being marked out), and any change 
-earlier in the sequence may mean that we have a different number of 
-retries.  Here, positions 2 and 3 were r=3 and r=5 because of dups, but 
-those don't happen with the new map and those positions are r=1 and r=2.  
-
-Note that straw2's promise remains true, though: for r=0, 1, and 2, the 
-value switches away from 5 but no non-5 value changes.  If we had 
-num_rep=6, we would have seen the new map still choose 2 for r=3 
-and 1 for r=5 (although they would have landed in different positions).
-
-> Conclusion:
+> As per the Berne Convention's Article 15 [1] number (1), identification
+> of an author is possible even using a pseudonym, where said pseudonym
+> "leaves no doubt as to his identity"; number (3) further states that
 > 
-> If the osd.5 is the primary osd,or second osd in a pg, then other osd
-> behind osd.5 are still possible to be switched out,Is this what straw2
-> really want achieve?
+> "In the case of anonymous and pseudonymous works, other than those
+> referred to in paragraph (1) above, the publisher whose name appears on
+> the work shall, in the absence of proof to the contrary, be deemed to
+> represent the author, and in this capacity he shall be entitled to
+> protect and enforce the author's rights. The provisions of this
+> paragraph shall cease to apply when the author reveals his identity and
+> establishes his claim to authorship of the work."
+> 
+> So this would have me believing that, as long as the original author has
+> some means of proving he is the original author using a given pseudonym,
+> said author can at any point in time reclaim authorship.
+> 
+> IANAL, but would think this whole thing hinges however on the
+> contribution being considered a 'work' that could benefit of protection.
+> 
+>   -Joao
+> 
+> [1] -
+> http://www.wipo.int/wipolex/en/treaties/text.jsp?file_id=283698#P192_37445
+> 
+> 
+> 
+>>
+>> However, if we want to go for security, there is also a way to sign your
+>> Git commits using GPG [2].
+>>
+>> [2]: https://git-scm.com/book/tr/v2/Git-Tools-Signing-Your-Work
+>>
+>>> Cheers
+>>>
+>>> [1] SIGNING CONTRIBUTIONS https://github.com/ceph/ceph/blob/master/SubmittingPatches#L13
+>>>
+>>
+>>
+> 
 
-Correct.  It's not ideal, but I don't think it's avoidable, because it is 
-not an independent decision process for every position of the sequence... 
-our choice is constrained to items that we haven't chosen before.
 
-sage
+-- 
+Wido den Hollander
+42on B.V.
+Ceph trainer and consultant
+
+Phone: +31 (0)20 700 9902
+Skype: contact42on
