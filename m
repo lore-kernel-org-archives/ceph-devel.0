@@ -1,129 +1,60 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: Fedora 22 systemd and ceph-deploy
-Date: Mon, 3 Aug 2015 12:07:27 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1508031205360.22099@cobra.newdream.net>
-References: <alpine.DEB.2.00.1507281202370.22099@cobra.newdream.net> <55BFBA99.4070205@suse.com>
+From: John Spray <jspray@redhat.com>
+Subject: Re: Signed-off-by and aliases
+Date: Mon, 3 Aug 2015 20:18:20 +0100
+Message-ID: <CALe9h7fsi-UcQ3W0d=t4dCBpNy5vtL8q=sO902FbQN21yNGjQg@mail.gmail.com>
+References: <55BBD384.7030703@dachary.org>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1815850834-1438628848=:22099"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:55165 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753466AbbHCTH3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 3 Aug 2015 15:07:29 -0400
-In-Reply-To: <55BFBA99.4070205@suse.com>
+Received: from mail-pa0-f53.google.com ([209.85.220.53]:33831 "EHLO
+	mail-pa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754754AbbHCTSk convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Aug 2015 15:18:40 -0400
+Received: by pawu10 with SMTP id u10so19291152paw.1
+        for <ceph-devel@vger.kernel.org>; Mon, 03 Aug 2015 12:18:39 -0700 (PDT)
+In-Reply-To: <55BBD384.7030703@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Owen Synge <osynge@suse.com>
-Cc: ceph-devel@vger.kernel.org
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Fri, Jul 31, 2015 at 8:59 PM, Loic Dachary <loic@dachary.org> wrote:
+> Hi Ceph,
+>
+> We require that each commit has a Signed-off-by line with the name and email of the author. The general idea is that the Ceph project trusts each developer to understand what it entails[1]. There is no formal verification : the person submitting the patch could use a fake name or publish code from someone else. In reality the odds of that happening and causing problem are so low that neither Ceph nor the Linux kernel felt the need to impose a more formal process. There is no bullet proof process anyway, it's all about balancing risks and costs.
+>
+> If a contributor was using an alias that looks like a real name (for instance I could contribute under the name Louis Lavile), (s)he would go unnoticed and her/his contribution would be accepted as any other. If the same contributor was using an alias that is obviously an alias (such as A. Nonymous), it would raise the question of accepting contributions Signed-off with an alias.
+>
+> I think Ceph should accept contributions that are signed with an alias because it does not make a difference.
+>
+> From a lawyer perspective, there is a difference between an alias and a real name, of course. Should the author be in court, (s)he would have to prove (s)he is the person behind the alias. If (s)he was using her/his real name, an ID card would be enough. And probably other differences that I don't see because IANAL. However since we already accept Signed-off-by that are not formally verified, we're already in a situation where we implicitly accept aliases. Explicitly accepting aliases would not change that, therefore it is not actually something we need to run by lawyers because nothing changes from a legal standpoint.
+>
+> What do you think ?
 
---557981400-1815850834-1438628848=:22099
-Content-Type: TEXT/PLAIN; charset=windows-1252
-Content-Transfer-Encoding: 8BIT
+(Without any legal knowledge whatsoever, and speaking in general terms
+rather than about any particular code or vendor's practices or
+products)
 
-On Mon, 3 Aug 2015, Owen Synge wrote:
-> Dear all,
-> 
-> My plan is to make a fedora22-systemd branch. I will leave fedora 20 as
-> sysvinit.
-> 
-> Ok just done my first proper install of systemd ceph branch on fedora22.
-> 
-> I can confirm most of the issues.
-> 
-> I am giving up for the day, but so far applying SUSE/opensuse code to
-> Fedora ceph-deploy code in ceph-deploy has helped a lot.
-> 
->     cp /usr/lib/python2.7/site-packages/ceph_deploy/hosts/suse/mon/* \
->       /usr/lib/python2.7/site-packages/ceph_deploy/hosts/fedora/mon/
-> 
-> (Running on suse version patched release)
-> 
-> It can now set up the mon daemons correctly its self.
-> 
-> I will look into the udev rules, tomorrow morning, and remove some more
-> fedora hard coding to "sysvinit".
+My understanding is that projects use a Signed-off-by line for the
+contributor to certify that they agree with the "Developer's
+Certificate of Origin".
 
-There is a wip-systemd branch ceph-deploy that has enough ceph-deploy 
-changes for me to successfully do the deployment of mon, osd, mds, and 
-rgw.  The main thing it doesn't do is figure out which version of Ceph 
-you're installing to decide whether to do systemd (post-hammer) or 
-sysvinit (hammer and earlier).  That's going to be annoying, I'm afraid...
+The purpose of a certificate or origin is that if I am distributing
+AcmeProject packages, and EvilCorp says "hey, we found our highly
+patented code in your package!" then I can say "actually this was
+submitted by Elizabeth Windsor <liz@buckinghampalace.org>, who
+certified to me that she had the rights to the code.  I can thus
+demonstrate that the original infringement was by her, and any
+infringement in my distribution of the software was accidental, I
+acted in good faith."
 
-I suspect what we really want to do is abstract out the systemd behavior 
-into something that the distros opt in to so that we aren't duplicating 
-code across the suse, centos, rhel, and fedora host types...
+OTOH if I said "That code was contributed by A.Nonymous", then
+EvilCorp would say "Well, that could just as easily have been one of
+your own developers, acting anonymously, so you have not demonstrated
+that the infringement was unintentional".
 
-sage
+So in my opinion, it is necessary that any project wishing to apply a
+"certificate of origin" process also needs to have a real name policy.
 
-
-> 
-> Best regards
-> 
-> Owen
-> 
-> 
-> On 07/28/2015 09:13 PM, Sage Weil wrote:
-> > Hey,
-> > 
-> > I've finally had some time to play with the systemd integration branch on 
-> > fedora 22.  It's in wip-systemd and my current list of issues includes:
-> > 
-> > - after mon creation ceph-create-keys isn't run automagically
-> >   - Personally I kind of hate how it was always run on mon startup and not 
-> > just during cluster creation so I wouldn't mind *so* much if this became 
-> > an explicit step, maybe triggered by ceph-deploy, after mon create.
-> > 
-> > - udev's attempt to trigger ceph-disk isn't working for me.  the osd 
-> > service gets started but the mount isn't present and it fails to start.  
-> > I'm a systemd noob and haven't sorted out how to get udev to log something 
-> > meaningful to debug it.  Perhaps we should merge in the udev + 
-> > systemd revamp patches here too...
-> > 
-> > - ceph-detect-init is only recently unbroken in master for fedora 22.
-> > 
-> > - ceph-deploy doesn't know that fedora should be systemd yet.
-> > 
-> > - ceph-deploy has a wip-systemd branch with a few things so far:
-> >   - on mon create, we unconditionally systemctl enable ceph.target.  
-> > i think osd create and mds create and rgw create should do the same thing, 
-> > since the ceph.target is a catch-all bucket for any ceph service, and i 
-> > don't think we want to enable it on install?
-> >   - rgw create and mds create don't work yet
-> >   - osd create doesn't enable ceph.target
-> > 
-> > - I'm guessing my ceph.spec changes to install teh systemd unit files 
-> > aren't quite right... please review!  The gitbuilder turnaround is so slow 
-> > it's hard to iterate and I don't really know what I'm doing here.
-> > 
-> > Owen, I'd like to get this just a tad bit more functional and then merge 
-> > ASAP, then up any issues in the weeks leading up to infernalis.  What say 
-> > ye?
-> > 
-> > sage
-> > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> 
-> -- 
-> SUSE LINUX GmbH, GF: Jeff Hawn, Jennifer Guild, Felix Imendörffer, HRB
-> 21284 (AG
-> Nürnberg)
-> 
-> Maxfeldstraße 5
-> 
-> 90409 Nürnberg
-> 
-> Germany
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
---557981400-1815850834-1438628848=:22099--
+John
