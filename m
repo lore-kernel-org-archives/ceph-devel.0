@@ -1,49 +1,71 @@
-From: kernel neophyte <neophyte.hacker001@gmail.com>
-Subject: Re: Cluster Network & Public Network w.r.t XIO ?
-Date: Mon, 3 Aug 2015 09:43:42 -0700
-Message-ID: <CAFkUHxcJH1xwY2AdNYTbwhjzWjaZYjBL9i4HwwZai7zTh8k5KA@mail.gmail.com>
-References: <20150801001253.GE2358@pika.private.linuxbox.com>
-	<alpine.DEB.2.00.1507311805080.22099@cobra.newdream.net>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: Odd QA Test Running
+Date: Tue, 4 Aug 2015 00:57:12 +0800
+Message-ID: <CACJqLyb9xF2U0+b9Os7H52vxkrGmzOPBhxDvR=cmr4RgZxigCg@mail.gmail.com>
+References: <CACJqLyY4kocnovRH0JTNtPWuB8CKbKZ3J_sT7yJUJ99pTXak1w@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pd0-f178.google.com ([209.85.192.178]:33338 "EHLO
-	mail-pd0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752644AbbHCQnn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Aug 2015 12:43:43 -0400
-Received: by pdbnt7 with SMTP id nt7so75953652pdb.0
-        for <ceph-devel@vger.kernel.org>; Mon, 03 Aug 2015 09:43:43 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1507311805080.22099@cobra.newdream.net>
+Received: from mail-pd0-f180.google.com ([209.85.192.180]:35803 "EHLO
+	mail-pd0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753255AbbHCQ5M convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Aug 2015 12:57:12 -0400
+Received: by pdrg1 with SMTP id g1so76502381pdr.2
+        for <ceph-devel@vger.kernel.org>; Mon, 03 Aug 2015 09:57:12 -0700 (PDT)
+In-Reply-To: <CACJqLyY4kocnovRH0JTNtPWuB8CKbKZ3J_sT7yJUJ99pTXak1w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Marcus Watts <mwatts@redhat.com>, Matt Benjamin <mbenjamin@redhat.com>, vu@mellanox.com, raju kurunkad <raju.kurunkad@sandisk.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Thanks Marcus & Matt. I will take a look at it this week.
+I found https://github.com/ceph/ceph-qa-suite/blob/master/erasure-code/=
+ec-rados-plugin%3Dshec-k%3D4-m%3D3-c%3D2.yaml
+has override section and will override user's "enable experimental
+unrecoverable data corrupting features" config. So my jobs are
+corrupted.
 
--Neo
+I made a PR(https://github.com/ceph/ceph-qa-suite/pull/518) and hope
+fix this point.
 
-On Fri, Jul 31, 2015 at 6:07 PM, Sage Weil <sage@newdream.net> wrote:
-> On Fri, 31 Jul 2015, Marcus Watts wrote:
->> I promised information on my copy of wip-address.  It's not in as
->> good a shape as I promised-- got pulled onto something else, so
->> the last commit I made left it not building.  And it will definitely
->> need more past that.
->>
->> So here's where it lives right now,
->> repo
->> git@github.com:linuxbox2/linuxbox-ceph.git
->> branch
->> xio-firefly-mpc1
->>
->> This is definitely on my "todo" list, and I plan to work on it next week.
->>
->> I also plan to push a copy of this or something much like it, as a wip
->> branch to the main ceph git, as soon as practical.
+On Fri, Jul 31, 2015 at 5:50 PM, Haomai Wang <haomaiwang@gmail.com> wro=
+te:
+> Hi all,
 >
-> As a first step I'd rebase on master as any cleanup work done before
-> that'll probably get shredded by the rebase conflicts.  This one is
-> tedious unfortunately since every encode needs that features arg.  :(
+> I  ran a test suite(http://pulpito.ceph.com/haomai-2015-07-29_11:40:4=
+0-rados-master-distro-basic-multi/)
+> and found the failed jobs are failed by "2015-07-29 10:52:35.313197
+> 7f16ae655780 -1 unrecognized ms_type 'async'"
 >
-> Thanks, Marcus!
-> sage
+> Then I found the failed jobs(like
+> http://pulpito.ceph.com/haomai-2015-07-29_11:40:40-rados-master-distr=
+o-basic-multi/991540/)
+> lack of =E2=80=9Cenable experimental unrecoverable data corrupting fe=
+atures:
+> ms-type-async=E2=80=9D.
+>
+> Other successful jobs(like
+> http://pulpito.ceph.com/haomai-2015-07-29_11:40:40-rados-master-distr=
+o-basic-multi/991517/)
+> can find "enable experimental unrecoverable data corrupting features:
+> ms-type-async" in yaml.
+>
+> So that's mean the same schedule suite will generate the different
+> yaml file? Is there something tricky?
+>
+> --
+>
+> Best Regards,
+>
+> Wheat
+
+
+
+--=20
+Best Regards,
+
+Wheat
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
