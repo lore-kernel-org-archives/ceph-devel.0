@@ -1,61 +1,51 @@
-From: "Nicholas A. Bellinger" <nab@linux-iscsi.org>
-Subject: Re: [RFC PATCH 0/2] target/iscsi: clustered SendTargets handling
-Date: Sun, 02 Aug 2015 22:37:31 -0700
-Message-ID: <1438580251.16598.85.camel@haakon3.risingtidesystems.com>
-References: <1436958019-16937-1-git-send-email-ddiss@suse.de>
-	 <1438415118.16598.33.camel@haakon3.risingtidesystems.com>
-	 <20150803020316.4f692e56@plati.site>
+From: Goncalo Borges <goncalo-JAjqph6Yjy/r8pF6qxatHrpzq4S04n8Q@public.gmane.org>
+Subject: Re: Ceph Tech Talk Today!
+Date: Mon, 3 Aug 2015 16:50:45 +1000
+Message-ID: <55BF0F45.2040805@physics.usyd.edu.au>
+References: <CAAZbbf28BW-nPxF1FgOpxi6mPk9C7uPnugautj7W6AvSnFv1RA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
 Content-Transfer-Encoding: 7bit
-Return-path: <target-devel-owner@vger.kernel.org>
-In-Reply-To: <20150803020316.4f692e56@plati.site>
-Sender: target-devel-owner@vger.kernel.org
-To: David Disseldorp <ddiss@suse.de>
-Cc: ceph-devel@vger.kernel.org, target-devel@vger.kernel.org, mchristi@redhat.com
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAAZbbf28BW-nPxF1FgOpxi6mPk9C7uPnugautj7W6AvSnFv1RA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Mon, 2015-08-03 at 02:03 +0200, David Disseldorp wrote:
-> Hi Nicholas,
-> 
-> On Sat, 01 Aug 2015 00:45:18 -0700, Nicholas A. Bellinger wrote:
-> 
-> > Hi David,
-> > 
-> > Apologies for the delayed follow-up on your original patch.
-> 
-> No problem - thanks for the feedback!
-> 
-> > On Wed, 2015-07-15 at 13:00 +0200, David Disseldorp wrote:
-> > > For active/active clustered iSCSI targets (e.g. LIO + Ceph RBD),
-> > > SendTargets responses from any single node should include portal details
-> > > for remote cluster nodes.
-> > > 
-> > > This patch-set adds a TPG discoverable_while_disabled attribute, which
-> > > when set sees LIO include details for a disabled TPG in SendTargets
-> > > responses.
-> > > 
-> > > This allows for the use of a common configuration for cluster nodes,
-> > > with TPGT/enable set on a node specific basis.
-> > > 
-> > > A patch-set to ensure that LIO doesn't listen/accept connections via
-> > > disabled TPGs will follow once I've finished cleaning it up.
-> > > 
-> > > Feedback appreciated.
-> > 
-> > No objections to adding an attribute to allow disabled TPGs to be
-> > included in sendtargets discovery information, but I think this
-> > particular configfs attribute can use a better name..
-> 
-> Heh, yeah I also wasn't a fan of discoverable_while_disabled, but
-> couldn't think of anything better. 
-> 
-> > How about the following instead..?
-> 
-> Looks like an improvement to me.
-> 
+Hi Patrick...
 
-Applied to target-pending/for-next with your original authorship +
-signed-off-by for the patch.
+Do you think it is possible to make the talk / slides available? The 
+link is still not active in the ceph-tech-talks URL
 
-Thanks!
+Cheers
+Goncalo
+
+On 07/31/2015 01:08 AM, Patrick McGarry wrote:
+> Hey cephers,
+>
+> Just sending a friendly reminder that our online CephFS Tech Talk is
+> happening today at 13:00 EDT (17:00 UTC). Please stop by and hear a
+> technical deep dive on CephFS and ask any questions you might have.
+> Thanks!
+>
+> http://ceph.com/ceph-tech-talks/
+>
+> direct link to the video conference:  https://bluejeans.com/172084437/browser
+>
+>
+>
+
+-- 
+Goncalo Borges
+Research Computing
+ARC Centre of Excellence for Particle Physics at the Terascale
+School of Physics A28 | University of Sydney, NSW  2006
+T: +61 2 93511937
