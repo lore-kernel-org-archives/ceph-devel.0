@@ -1,162 +1,133 @@
-From: Andras Pataki <apataki-0QEYAsm1mgjsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
-Subject: Re: Inconsistent PGs that ceph pg repair does not fix
-Date: Mon, 3 Aug 2015 20:09:39 +0000
-Message-ID: <D1E543BF.8DD2%apataki@simonsfoundation.org>
-References: <D1E53A36.8DB6%apataki@simonsfoundation.org>
-	<D1E53B6A.8DC6%apataki@simonsfoundation.org>
-	<CAN=+7FUucyFUEm--jkGZWUULFGS7NHGApOG5x=wK7SM0OqTv=g@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Signed-off-by and aliases
+Date: Mon, 03 Aug 2015 22:10:19 +0200
+Message-ID: <55BFCAAB.1040707@dachary.org>
+References: <55BBD384.7030703@dachary.org> <CALe9h7fsi-UcQ3W0d=t4dCBpNy5vtL8q=sO902FbQN21yNGjQg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="RCuDk0sJqSI5BcL8G5cR7C0WPO5aoK2bm"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail2.dachary.org ([91.121.57.175]:60818 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1755352AbbHCUKV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Aug 2015 16:10:21 -0400
+In-Reply-To: <CALe9h7fsi-UcQ3W0d=t4dCBpNy5vtL8q=sO902FbQN21yNGjQg@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: John Spray <jspray@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
+
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--RCuDk0sJqSI5BcL8G5cR7C0WPO5aoK2bm
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAN=+7FUucyFUEm--jkGZWUULFGS7NHGApOG5x=wK7SM0OqTv=g@mail.gmail.com>
-Content-Language: en-US
-Content-ID: <AB3639D11EE4804292CDB86FBFEBCC9F-zOaPsT6gHtfVnzwDEOJ4zg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Samuel Just <sjust-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
-
-Done: http://tracker.ceph.com/issues/12577
-BTW, I=B9m using the latest release 0.94.2 on all machines.
-
-Andras
 
 
-On 8/3/15, 3:38 PM, "Samuel Just" <sjust-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
 
->Hrm, that's certainly supposed to work.  Can you make a bug?  Be sure
->to note what version you are running (output of ceph-osd -v).
->-Sam
->
->On Mon, Aug 3, 2015 at 12:34 PM, Andras Pataki
-><apataki-0QEYAsm1mgjsfHDXvbKv3WD2FQJk+8+b@public.gmane.org> wrote:
->> Summary: I am having problems with inconsistent PG's that the 'ceph pg
->> repair' command does not fix.  Below are the details.  Any help would be
->> appreciated.
->>
->> # Find the inconsistent PG's
->> ~# ceph pg dump | grep inconsistent
->> dumped all in format plain
->> 2.439 42080 00 017279507143 31033103 active+clean+inconsistent2015-08-03
->> 14:49:17.29288477323'2250145 77480:890566 [78,54]78 [78,54]78
->> 77323'22501452015-08-03 14:49:17.29253877323'2250145 2015-08-03
->> 14:49:17.292538
->> 2.8b9 40830 00 016669590823 30513051 active+clean+inconsistent2015-08-03
->> 14:46:05.14006377323'2249886 77473:897325 [7,72]7 [7,72]7
->> 77323'22498862015-08-03 14:22:47.83406377323'2249886 2015-08-03
->> 14:22:47.834063
->>
->> # Look at the first one:
->> ~# ceph pg deep-scrub 2.439
->> instructing pg 2.439 on osd.78 to deep-scrub
->>
->> # The logs of osd.78 show:
->> 2015-08-03 15:16:34.409738 7f09ec04a700  0 log_channel(cluster) log
->>[INF] :
->> 2.439 deep-scrub starts
->> 2015-08-03 15:16:51.364229 7f09ec04a700 -1 log_channel(cluster) log
->>[ERR] :
->> deep-scrub 2.439 b029e439/10000022d93.00000f0c/head//2 on disk data
->>digest
->> 0xb3d78a6e !=3D 0xa3944ad0
->> 2015-08-03 15:16:52.763977 7f09ec04a700 -1 log_channel(cluster) log
->>[ERR] :
->> 2.439 deep-scrub 1 errors
->>
->> # Finding the object in question:
->> ~# find ~ceph/osd/ceph-78/current/2.439_head -name
->>10000022d93.00000f0c* -ls
->> 21510412310 4100 -rw-r--r--   1 root     root      4194304 Jun 30 17:09
->> =
+On 03/08/2015 21:18, John Spray wrote:
+> On Fri, Jul 31, 2015 at 8:59 PM, Loic Dachary <loic@dachary.org> wrote:=
 
->>/var/lib/ceph/osd/ceph-78/current/2.439_head/DIR_9/DIR_3/DIR_4/DIR_E/1000
->>0022d93.00000f0c__head_B029E439__2
->> ~# md5sum
->> =
+>> Hi Ceph,
+>>
+>> We require that each commit has a Signed-off-by line with the name and=
+ email of the author. The general idea is that the Ceph project trusts ea=
+ch developer to understand what it entails[1]. There is no formal verific=
+ation : the person submitting the patch could use a fake name or publish =
+code from someone else. In reality the odds of that happening and causing=
+ problem are so low that neither Ceph nor the Linux kernel felt the need =
+to impose a more formal process. There is no bullet proof process anyway,=
+ it's all about balancing risks and costs.
+>>
+>> If a contributor was using an alias that looks like a real name (for i=
+nstance I could contribute under the name Louis Lavile), (s)he would go u=
+nnoticed and her/his contribution would be accepted as any other. If the =
+same contributor was using an alias that is obviously an alias (such as A=
+=2E Nonymous), it would raise the question of accepting contributions Sig=
+ned-off with an alias.
+>>
+>> I think Ceph should accept contributions that are signed with an alias=
+ because it does not make a difference.
+>>
+>> From a lawyer perspective, there is a difference between an alias and =
+a real name, of course. Should the author be in court, (s)he would have t=
+o prove (s)he is the person behind the alias. If (s)he was using her/his =
+real name, an ID card would be enough. And probably other differences tha=
+t I don't see because IANAL. However since we already accept Signed-off-b=
+y that are not formally verified, we're already in a situation where we i=
+mplicitly accept aliases. Explicitly accepting aliases would not change t=
+hat, therefore it is not actually something we need to run by lawyers bec=
+ause nothing changes from a legal standpoint.
+>>
+>> What do you think ?
+>=20
+> (Without any legal knowledge whatsoever, and speaking in general terms
+> rather than about any particular code or vendor's practices or
+> products)
 
->>/var/lib/ceph/osd/ceph-78/current/2.439_head/DIR_9/DIR_3/DIR_4/DIR_E/1000
->>0022d93.00000f0c__head_B029E439__2
->> 4e4523244deec051cfe53dd48489a5db
->> =
+In these matters the project lead needs to make a decision that makes sen=
+se and then ask a lawyers to implement it. We don't need to be lawyers to=
+ do that.
 
->>/var/lib/ceph/osd/ceph-78/current/2.439_head/DIR_9/DIR_3/DIR_4/DIR_E/1000
->>0022d93.00000f0c__head_B029E439__2
->>
->> # The object on the backup osd:
->> ~# find ~ceph/osd/ceph-54/current/2.439_head -name
->>10000022d93.00000f0c* -ls
->> 6442614367 4100 -rw-r--r--   1 root     root      4194304 Jun 30 17:09
->> =
+>=20
+> My understanding is that projects use a Signed-off-by line for the
+> contributor to certify that they agree with the "Developer's
+> Certificate of Origin".
+>=20
+> The purpose of a certificate or origin is that if I am distributing
+> AcmeProject packages, and EvilCorp says "hey, we found our highly
+> patented code in your package!" then I can say "actually this was
+> submitted by Elizabeth Windsor <liz@buckinghampalace.org>, who
+> certified to me that she had the rights to the code.  I can thus
+> demonstrate that the original infringement was by her, and any
+> infringement in my distribution of the software was accidental, I
+> acted in good faith."
+>=20
+> OTOH if I said "That code was contributed by A.Nonymous", then
+> EvilCorp would say "Well, that could just as easily have been one of
+> your own developers, acting anonymously, so you have not demonstrated
+> that the infringement was unintentional".
+>=20
+> So in my opinion, it is necessary that any project wishing to apply a
+> "certificate of origin" process also needs to have a real name policy.
 
->>/var/lib/ceph/osd/ceph-54/current/2.439_head/DIR_9/DIR_3/DIR_4/DIR_E/1000
->>0022d93.00000f0c__head_B029E439__2
->> ~# md5sum
->> =
+If that was indeed what a Signed-off-by does, I would also be against usi=
+ng aliases. In reality a Signed-off-by is nothing more than a convenient =
+mean to get in touch with someone who claimed to be the author of a patch=
+=2E
 
->>/var/lib/ceph/osd/ceph-54/current/2.439_head/DIR_9/DIR_3/DIR_4/DIR_E/1000
->>0022d93.00000f0c__head_B029E439__2
->> 4e4523244deec051cfe53dd48489a5db
->> =
+The companies making and distributing Free Software using Signed-off-by l=
+ike Ceph does, do not attempt to even verify that the person behind the S=
+igned-off-by really is who (s)he claims. I don't think that's because the=
+y have been careless for the past decade. I think that's because it would=
+ not make a significant difference and that it would be a burden to the p=
+roject. The company lawyers would certainly claim that it would be better=
+ to verify the identity for each Signed-off-by. But in practice they don'=
+t push for it, not even for the Linux kernel who went into more legal tro=
+ubles than any other Free Software project.
 
->>/var/lib/ceph/osd/ceph-54/current/2.439_head/DIR_9/DIR_3/DIR_4/DIR_E/1000
->>0022d93.00000f0c__head_B029E439__2
->>
->> # They don't seem to be different.
->> # When I try repair:
->> ~# ceph pg repair 2.439
->> instructing pg 2.439 on osd.78 to repair
->>
->> # The osd.78 logs show:
->> 2015-08-03 15:19:21.775933 7f09ec04a700  0 log_channel(cluster) log
->>[INF] :
->> 2.439 repair starts
->> 2015-08-03 15:19:38.088673 7f09ec04a700 -1 log_channel(cluster) log
->>[ERR] :
->> repair 2.439 b029e439/10000022d93.00000f0c/head//2 on disk data digest
->> 0xb3d78a6e !=3D 0xa3944ad0
->> 2015-08-03 15:19:39.958019 7f09ec04a700 -1 log_channel(cluster) log
->>[ERR] :
->> 2.439 repair 1 errors, 0 fixed
->> 2015-08-03 15:19:39.962406 7f09ec04a700  0 log_channel(cluster) log
->>[INF] :
->> 2.439 deep-scrub starts
->> 2015-08-03 15:19:56.510874 7f09ec04a700 -1 log_channel(cluster) log
->>[ERR] :
->> deep-scrub 2.439 b029e439/10000022d93.00000f0c/head//2 on disk data
->>digest
->> 0xb3d78a6e !=3D 0xa3944ad0
->> 2015-08-03 15:19:58.348083 7f09ec04a700 -1 log_channel(cluster) log
->>[ERR] :
->> 2.439 deep-scrub 1 errors
->>
->> The inconsistency is not fixed.  Any hints of what should be done next?
->> I have tried  a few things:
->>  * Stop the primary osd, remove the object from the filesystem, restart
->>the
->> OSD and issue a repair.  It didn't work - it sais that one object is
->> missing, but did not copy it from the backup.
->>  * I tried the same on the backup (remove the file) - it also didn't get
->> copied back from the primary in a repair.
->>
->> Any help would be appreciated.
->>
->> Thanks,
->>
->> Andras
->> apataki-0QEYAsm1mgjsfHDXvbKv3WD2FQJk+8+b@public.gmane.org
->>
->>
->> _______________________________________________
->> ceph-users mailing list
->> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
->> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>
+My point is that there could already be a dozen of aliases that look like=
+ real names in the current Signed-off-by list. Explicitly accepting alias=
+es that look like aliases would just be an acknowledgement of what we alr=
+eady do.=20
+
+Cheers
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--RCuDk0sJqSI5BcL8G5cR7C0WPO5aoK2bm
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlW/yqsACgkQ8dLMyEl6F22RhwCgm+U0YbMqwpIM0bDEquz8SQ7J
+/oUAnRnVpR6tsUKewmyaDjI8QJJq8lkQ
+=L7gr
+-----END PGP SIGNATURE-----
+
+--RCuDk0sJqSI5BcL8G5cR7C0WPO5aoK2bm--
