@@ -1,85 +1,62 @@
-From: Owen Synge <osynge@suse.com>
-Subject: Re: Fedora 22 systemd and rgw
-Date: Tue, 04 Aug 2015 18:10:18 +0200
-Message-ID: <55C0E3EA.3010607@suse.com>
-References: <alpine.DEB.2.00.1507281202370.22099@cobra.newdream.net> <55BFBA99.4070205@suse.com> <alpine.DEB.2.00.1508031205360.22099@cobra.newdream.net> <55C0904A.8010902@suse.com> <55C0B0C7.7050907@suse.com> <alpine.DEB.2.00.1508040604310.22099@cobra.newdream.net>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: More ondisk_finisher thread?
+Date: Tue, 4 Aug 2015 16:13:13 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CDF8A9C@SACMBXIP01.sdcorp.global.sandisk.com>
+References: <CANf+_kKpR6prfna20CtRfq=6QF+vpvCJu2NaO73RwuF=X+HMwA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from [89.191.203.168] ([89.191.203.168]:60479 "EHLO
-	mail.emea.novell.com" rhost-flags-FAIL-FAIL-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1752574AbbHDQL7 (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-	Tue, 4 Aug 2015 12:11:59 -0400
-In-Reply-To: <alpine.DEB.2.00.1508040604310.22099@cobra.newdream.net>
+Received: from mail-bn1bon0057.outbound.protection.outlook.com ([157.56.111.57]:61616
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752365AbbHDQNZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 4 Aug 2015 12:13:25 -0400
+In-Reply-To: <CANf+_kKpR6prfna20CtRfq=6QF+vpvCJu2NaO73RwuF=X+HMwA@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: ceph-devel@vger.kernel.org
+To: Ding Dinghua <dingdinghua85@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 08/04/2015 03:07 PM, Sage Weil wrote:
-> On Tue, 4 Aug 2015, Owen Synge wrote:
->> On 08/04/2015 12:13 PM, Owen Synge wrote:
->>> On 08/03/2015 09:07 PM, Sage Weil wrote:
->>>> On Mon, 3 Aug 2015, Owen Synge wrote:
->>
->>> I will check the rgw.
->>
->> It is not working due to missing:
->>
->> /usr/lib/ceph-radosgw/ceph-radosgw-prestart.sh
->>
->> which is a useful check tool, available in this commit:
->>
->> https://github.com/SUSE/ceph/commit/92ef2ecfe0c0c0b0df4c9349310f930057202305
-> 
-> I removed this reference from the unit file, see
-> 
-> 	https://github.com/ceph/ceph/commit/4d10dc134b817160bab6aecb9f5c08fb2d4f08e6
-> 
-> mainly because I didn't have a copy of the prestart script in my tree.  
-
-Ah ok, I lost that during my merges.
-
-> Looking at it now, though, it's not clear to me that any of those steps 
-> are necessary.
-
-You are correct, the code will run without the prestart script.
-
-the prestart script is _only_ validating that the deamon should run
-because the rgw often fails with confusing to end user errors.
-
-The prestart code shoudl in my opinion be mostly implement in C++ in rgw.
-
-
-> They might be useful in making a legacy install/config 
-> continue functioning, 
-
-No its just validation.
-
-> but I don't think any of the complexity is needed
-> for newly created rgw instances, and I'd prefer to make the upgrade 
-> process look like
-> 
->  - upgrade ceph
->  - killall radosgw
->  - [optional] rename and sanitize ceph.conf section if there are special 
-> configs
->  - ceph-deploy rgw create $hostname
-> 
-> than worry about trying to keep supporting the kludgey way we used 
-> to deploy rgw.
-
-Yes, no objections at all.
-
-> FWIW with the wip-systemd branch I was able to deploy new rgw instances 
-> on fc22 without any issues...
-
-Great news, I hope the wip-systemd branch of ceph-deploy adds hardly any
-branching, like the SUSE version adds little, so it should have no
-justification to do so, and could even reduce branching in ceph-deploy.
-
-Best regards
-
-Owen
+WWVzLCBpdCBoYXMgdG8gcmUtYWNxdWlyZSBwZ19sb2NrIHRvZGF5Li4NCkJ1dCwgYmV0d2VlbiBq
+b3VybmFsIHdyaXRlIGFuZCBpbml0aWF0aW5nIHRoZSBvbmRpc2sgYWNrLCB0aGVyZSBpcyBvbmUg
+Y29udGV4dCBzd2l0Y2hlIGluIHRoZSBjb2RlIHBhdGguIFNvLCBJIGd1ZXNzIHRoZSBwZ19sb2Nr
+IGlzIG5vdCB0aGUgb25seSBvbmUgdGhhdCBpcyBjYXVzaW5nIHRoaXMgMSBtcyBkZWxheS4uLg0K
+Tm90IHN1cmUgaW5jcmVhc2luZyB0aGUgZmluaXNoZXIgdGhyZWFkcyB3aWxsIGhlbHAgaW4gdGhl
+IHBnX2xvY2sgY2FzZSBhcyBpdCB3aWxsIGJlIG1vcmUgb3IgbGVzcyBzZXJpYWxpemVkIGJ5IHRo
+aXMgcGdfbG9jay4uDQpCdXQsIGluY3JlYXNpbmcgZmluaXNoZXIgdGhyZWFkcyBmb3IgdGhlIG90
+aGVyIGNvbnRleHQgc3dpdGNoZXMgSSB3YXMgdGFsa2luZyBhYm91dCAoc2VlIHF1ZXVlX2NvbXBs
+ZXRpb25fdGhydSkgbWF5IGhlbHAuLi4NCg0KVGhhbmtzICYgUmVnYXJkcw0KU29tbmF0aA0KDQot
+LS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtl
+cm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVo
+YWxmIE9mIERpbmcgRGluZ2h1YQ0KU2VudDogVHVlc2RheSwgQXVndXN0IDA0LCAyMDE1IDM6MDAg
+QU0NClRvOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KU3ViamVjdDogTW9yZSBvbmRpc2tf
+ZmluaXNoZXIgdGhyZWFkPw0KDQpIaToNCiAgIE5vdyB3ZSBhcmUgZG9pbmcgc29tZSBjZXBoIHBl
+cmZvcm1hbmNlIHR1bmluZyB3b3JrLCBvdXIgc2V0dXAgaGFzIHRlbiBjZXBoIG5vZGVzLCBhbmQg
+U1NEIGFzIGpvdXJuYWwsIEhERCBmb3IgZmlsZXN0b3JlLCBhbmQgY2VwaCB2ZXJzaW9uIGlzIDAu
+ODAuOS4NCiAgIFdlIHJ1biBmaW8gaW4gdmlydHVhbCBtYWNoaW5nIHdpdGggcmFuZG9tIDRLQiB3
+cml0ZSB3b3JrbG9hZCwgd2UgZmluZCB0aGF0IEl0IHRvb2sgYWJvdXQgMW1zIGluIGF2ZXJhZ2Ug
+Zm9yIG9uZGlza19maW5pc2hlciwgd2hpbGUgam91cm5hbCB3cml0ZSBvbmx5IHRvb2sgMC40bXMs
+IHNvIEkgdGhpbmsgaXQncyB1bnJlYXNvbmFibGUuDQogICAgU2luY2Ugb25kaXNrIGNhbGxiYWNr
+IHdpbGwgYmUgY2FsbGVkIHdpdGggcGcgbG9jayBoZWxkLCBJZiBwZyBsb2NrIGhhcyBiZWVuIGdy
+YWJiZWQgYnkgYW5vdGhlciB0aHJlYWQoZm9yIGV4YW1wbGUsIG9zZC0+b3Bfd3EpLCBhbGwgb25k
+aXNrIGNhbGxiYWNrIHdpbGwgYmUgZGVsYXllZCwgdGhlbiBhbGwgd3JpdGUgb3Agd2lsbCBiZSBk
+ZWxheWVkLg0KICAgICBJIGZvdW5kIHRoYXQgb3BfY29tbWl0IG11c3QgYmUgY2FsbGVkIHdpdGgg
+cGcgbG9jaywgc28gd2hhdCBhYm91dCBpbmNyZWFzZSB0aGUgb25kaXNrX2ZpbmlzaGVyIHRocmVh
+ZCBudW1iZXIsIHNvIG9uZGlzayBjYWxsYmFjayBjYW4gYmUgbGVzcyBsaWtlbHkgdG8gYmUgZGVs
+YXllZC4NCg0KLS0NCkRpbmcgRGluZ2h1YQ0KLS0NClRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBs
+aXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbiB0aGUgYm9keSBv
+ZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBp
+bmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg0KX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCg0KUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1h
+dGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRl
+ZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBh
+Ym92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCBy
+ZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQg
+dGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24s
+IGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJv
+aGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9y
+LCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hv
+d24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0
+aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVs
+ZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KDQo=
