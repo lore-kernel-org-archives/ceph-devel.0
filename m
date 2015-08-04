@@ -1,42 +1,29 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: Transitioning Ceph from Autotools to CMake
-Date: Tue, 4 Aug 2015 00:38:44 +0100
-Message-ID: <CALe9h7fuhp5ZSinJ9URnTn+x1nF+89BHYYRZhfPv5bRxG7wQKQ@mail.gmail.com>
-References: <26481727.639679.1438282888566.JavaMail.zimbra@redhat.com>
- <1438457056.20202.29.camel@redhat.com> <CALe9h7eUFQ9Ujcc6y_gPatkE=x1psdKMdSaGroav+i8XRzVSnw@mail.gmail.com>
+From: David Zafman <dzafman@redhat.com>
+Subject: Tracker 12577 repair won't fix replica with bad digest
+Date: Mon, 3 Aug 2015 17:31:45 -0700
+Message-ID: <55C007F1.3000201@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f51.google.com ([209.85.220.51]:36366 "EHLO
-	mail-pa0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751538AbbHCXjF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Aug 2015 19:39:05 -0400
-Received: by pacgq8 with SMTP id gq8so35475909pac.3
-        for <ceph-devel@vger.kernel.org>; Mon, 03 Aug 2015 16:39:04 -0700 (PDT)
-In-Reply-To: <CALe9h7eUFQ9Ujcc6y_gPatkE=x1psdKMdSaGroav+i8XRzVSnw@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:52885 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752917AbbHDAbq (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 3 Aug 2015 20:31:46 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Orit Wasserman <owasserm@redhat.com>
-Cc: Ali Maredia <amaredia@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, Samuel Just <sjust@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Loic Dachary <loic@dachary.org>
 
-OK, here are vstart+ceph.in changes that work well enough in my out of
-tree build:
-https://github.com/ceph/ceph/pull/5457
 
-John
+Sage,
 
-On Mon, Aug 3, 2015 at 11:09 AM, John Spray <jspray@redhat.com> wrote:
-> On Sat, Aug 1, 2015 at 8:24 PM, Orit Wasserman <owasserm@redhat.com> wrote:
->>
->>
->> 3. no vstart.sh , starting working on this too but have less progress
->> here. At the moment in order to use vstart I copy the exe and libs to
->> src dir.
->
-> I just started playing with CMake on Friday, adding some missing cephfs
-> bits.  I was going to fix (3) as well, but I don't want to duplicate work
-> -- do you have an existing branch at all?  Presumably this will mostly be a
-> case of adding appropriate prefixes to commands.
->
-> Cheers,
-> John
+I restored the branch wip-digest-repair which merged post-hammer in pull 
+request #4365.  Do you think that 4365 fixes the reported bug #12577?
+
+I cherry-picked the 9 commits off of hammer-backports-next as pull 
+request #5458 and assigned to Loic.
+
+David
+
+
