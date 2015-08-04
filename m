@@ -1,92 +1,47 @@
-From: Stefan Priebe <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
-Subject: Re: Is it safe to increase pg number in a production
- environment
-Date: Tue, 4 Aug 2015 21:48:10 +0200
-Message-ID: <55C116FA.3060909@profihost.ag>
-References: <CALAOqpNhquUYW5YqNDZQh4K927Xumw8GcPPoYRsmyEhSHBY-Xw@mail.gmail.com>
-	<CAN=+7FVjixrHHUZ01-5HaLd19SbjLkhqpKdKN1jDqPCk1UoR0A@mail.gmail.com>
-	<55C0ED88.2050102@profihost.ag>
-	<CAM9_UU8Mxycvk91NSrFSMQ5=jDxaXcajzB7CTGDZ2sJJ0YW7-w@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: wip-user status
+Date: Tue, 4 Aug 2015 13:53:37 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1508041335370.22099@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAM9_UU8Mxycvk91NSrFSMQ5=jDxaXcajzB7CTGDZ2sJJ0YW7-w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ketor D <d.ketor-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: =?UTF-8?B?5LmU5bu65bOw?= <scaleqiao-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, cbt-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:51382 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752128AbbHDUxj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 4 Aug 2015 16:53:39 -0400
+Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
+	by mx1.redhat.com (Postfix) with ESMTPS id BD6815F
+	for <ceph-devel@vger.kernel.org>; Tue,  4 Aug 2015 20:53:39 +0000 (UTC)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: branto@redhat.com, mbroz@redhat.com
 
-SGksCgpBbSAwNC4wOC4yMDE1IHVtIDIxOjE2IHNjaHJpZWIgS2V0b3IgRDoKPiBIaSBTdGVmYW4s
-Cj4gICAgICAgIENvdWxkIHlvdSBkZXNjcmliZSBtb3JlIGFib3V0IHRoZSBsaW5nZXIgb3BzIGJ1
-Zz8KPiAgICAgICAgSSdtIHJ1bmluZyBGaXJlZmx5IGFzIHlvdSBzYXkgc3RpbGwgaGFzIHRoaXMg
-YnVnLgoKSXQgd2lsbCBiZSBmaXhlZCBpbiBuZXh0IGZmIHJlbGVhc2UuCgpUaGlzIG9uOgpodHRw
-Oi8vdHJhY2tlci5jZXBoLmNvbS9pc3N1ZXMvOTgwNgoKU3RlZmFuCgo+Cj4gVGhhbmtzIQo+Cj4g
-T24gV2VkLCBBdWcgNSwgMjAxNSBhdCAxMjo1MSBBTSwgU3RlZmFuIFByaWViZSA8cy5wcmllYmVA
-cHJvZmlob3N0LmFnPiB3cm90ZToKPj4gV2UndmUgZG9uZSB0aGUgc3BsaXR0aW5nIHNldmVyYWwg
-dGltZXMuIFRoZSBtb3N0IGltcG9ydGFudCB0aGluZyBpcyB0byBydW4gYQo+PiBjZXBoIHZlcnNp
-b24gd2hpY2ggZG9lcyBub3QgaGF2ZSB0aGUgbGluZ2VyIG9wcyBidWcuCj4+Cj4+IFRoaXMgaXMg
-ZHVtcGxpbmcgbGF0ZXN0IHJlbGVhc2UsIGdpYW50IGFuZCBoYW1tZXIuIExhdGVzdCBmaXJlZmx5
-IHJlbGVhc2UKPj4gc3RpbGwgaGFzIHRoaXMgYnVnLiBXaGljaCByZXN1bHRzIGluIHdyb25nIHdh
-dGNoZXJzIGFuZCBubyB3b3JraW5nCj4+IHNuYXBzaG90cy4KPj4KPj4gU3RlZmFuCj4+Cj4+IEFt
-IDA0LjA4LjIwMTUgdW0gMTg6NDYgc2NocmllYiBTYW11ZWwgSnVzdDoKPj4+Cj4+PiBJdCB3aWxs
-IGNhdXNlIGEgbGFyZ2UgYW1vdW50IG9mIGRhdGEgbW92ZW1lbnQuICBFYWNoIG5ldyBwZyBhZnRl
-ciB0aGUKPj4+IHNwbGl0IHdpbGwgcmVsb2NhdGUuICBJdCBtaWdodCBiZSBvayBpZiB5b3UgZG8g
-aXQgc2xvd2x5LiAgRXhwZXJpbWVudAo+Pj4gb24gYSB0ZXN0IGNsdXN0ZXIuCj4+PiAtU2FtCj4+
-Pgo+Pj4gT24gTW9uLCBBdWcgMywgMjAxNSBhdCAxMjo1NyBBTSwg5LmU5bu65bOwIDxzY2FsZXFp
-YW9AZ21haWwuY29tPiB3cm90ZToKPj4+Pgo+Pj4+IEhpIENlcGhlcnMsCj4+Pj4KPj4+PiBUaGlz
-IGlzIGEgZ3JlZXRpbmcgZnJvbSBKZXZvbi4gQ3VycmVudGx5LCBJJ20gZXhwZXJpZW5jaW5nIGFu
-IGlzc3VlIHdoaWNoCj4+Pj4gc3VmZmVycyBtZSBhIGxvdCwgc28gSSdtIHdyaXRpbmcgdG8gYXNr
-IGZvciB5b3VyCj4+Pj4gY29tbWVudHMvaGVscC9zdWdnZXN0aW9ucy4KPj4+PiBNb3JlIGRldGFp
-bHMgYXJlIHByb3ZpZGVkIGJlbGxvdy4KPj4+Pgo+Pj4+IElzc3VlOgo+Pj4+IEkgc2V0IHVwIGEg
-Y2x1c3RlciBoYXZpbmcgMjQgT1NEcyBhbmQgY3JlYXRlZCBvbmUgcG9vbCB3aXRoIDEwMjQKPj4+
-PiBwbGFjZW1lbnQKPj4+PiBncm91cHMgb24gaXQgZm9yIGEgc21hbGwgc3RhcnR1cCBjb21wYW55
-LiBUaGUgbnVtYmVyIDEwMjQgd2FzIGNhbGN1bGF0ZWQKPj4+PiBwZXIKPj4+PiB0aGUgZXF1YXRp
-b24gJ09TRHMgKiAxMDAnL3Bvb2wgc2l6ZS4gVGhlIGNsdXN0ZXIgaGF2ZSBiZWVuIHJ1bm5pbmcg
-cXVpdGUKPj4+PiB3ZWxsIGZvciBhIGxvbmcgdGltZS4gQnV0IHJlY2VudGx5LCBvdXIgbW9uaXRv
-cmluZyBzeXN0ZW0gYWx3YXlzCj4+Pj4gY29tcGxhaW5zCj4+Pj4gdGhhdCBzb21lIGRpc2tzJyB1
-c2FnZSBleGNlZWQgODUlLiBJIGxvZyBpbnRvIHRoZSBzeXN0ZW0gYW5kIGZpbmQgb3V0Cj4+Pj4g
-dGhhdAo+Pj4+IHNvbWUgZGlza3MnIHVzYWdlIGFyZSByZWFsbHkgdmVyeSBoaWdoLCBidXQgc29t
-ZSBhcmUgbm90KGxlc3MgdGhhbiA2MCUpLgo+Pj4+IEVhY2ggdGltZSB3aGVuIHRoZSBpc3N1ZSBo
-YXBwZW5zLCBJIGhhdmUgdG8gbWFudWFsbHkgcmUtYmFsYW5jZSB0aGUKPj4+PiBkaXN0cmlidXRp
-b24uIFRoaXMgaXMgYSBzaG9ydC10ZXJtIHNvbHV0aW9uLCBJJ20gbm90IHdpbGxpbmcgdG8gZG8g
-aXQgYWxsCj4+Pj4gdGhlIHRpbWUuCj4+Pj4KPj4+PiBUd28gbG9uZy10ZXJtIHNvbHV0aW9ucyBj
-b21lIGluIG15IG1pbmQsCj4+Pj4gMSkgQXNrIHRoZSBjdXN0b21lcnMgdG8gZXhwYW5kIHRoZWly
-IGNsdXN0ZXJzIGJ5IGFkZGluZyBtb3JlIE9TRHMuIEJ1dCBJCj4+Pj4gdGhpbmsgdGhleSB3aWxs
-IGFzayBtZSB0byBleHBsYWluIHRoZSByZWFzb24gb2YgdGhlIGltYmFsYW5jZSBkYXRhCj4+Pj4g
-ZGlzdHJpYnV0aW9uLiBXZSd2ZSBhbHJlYWR5IGRvbmUgc29tZSBhbmFseXNpcyBvbiB0aGUgZW52
-aXJvbm1lbnQsIHdlCj4+Pj4gbGVhcm5lZCB0aGF0IHRoZSBtb3N0IGltYmFsYW5jZSBwYXJ0IGlu
-IHRoZSBDUlVTSCBpcyB0aGUgbWFwcGluZyBiZXR3ZWVuCj4+Pj4gb2JqZWN0IGFuZCBwZy4gVGhl
-IGJpZ2dlc3QgcGcgaGFzIDYxMyBvYmplY3RzLCB3aGlsZSB0aGUgc21hbGxlc3QgcGcgb25seQo+
-Pj4+IGhhcyAyMjYgb2JqZWN0cy4KPj4+Pgo+Pj4+IDIpIEluY3JlYXNlIHRoZSBudW1iZXIgb2Yg
-cGxhY2VtZW50IGdyb3Vwcy4gSXQgY2FuIGJlIG9mIGdyZWF0IGhlbHAgZm9yCj4+Pj4gc3RhdGlz
-dGljYWxseSB1bmlmb3JtIGRhdGEgZGlzdHJpYnV0aW9uLCBidXQgaXQgY2FuIGFsc28gaW5jdXIK
-Pj4+PiBzaWduaWZpY2FudAo+Pj4+IGRhdGEgbW92ZW1lbnQgYXMgUEdzIGFyZSBlZmZlY3RpdmUg
-YmVpbmcgc3BsaXQuIEkganVzdCBjYW5ub3QgZG8gaXQgaW4KPj4+PiBvdXIKPj4+PiBjdXN0b21l
-cnMnIGVudmlyb25tZW50IGJlZm9yZSB3ZSAxMDAlIHVuZGVyc3RhbmQgdGhlIGNvbnNlcXVlbmNl
-LiBTbwo+Pj4+IGFueW9uZQo+Pj4+IGRpZCB0aGlzIHVuZGVyIGEgcHJvZHVjdGlvbiBlbnZpcm9u
-bWVudD8gSG93IG11Y2ggZG9lcyB0aGlzIG9wZXJhdGlvbgo+Pj4+IGFmZmVjdAo+Pj4+IHRoZSBw
-ZXJmb3JtYW5jZSBvZiBDbGllbnRzPwo+Pj4+Cj4+Pj4gQW55IGNvbW1lbnRzL2hlbHAvc3VnZ2Vz
-dGlvbnMgd2lsbCBiZSBoaWdobHkgYXBwcmVjaWF0ZWQuCj4+Pj4KPj4+PiAtLQo+Pj4+IEJlc3Qg
-UmVnYXJkcwo+Pj4+IEpldm9uCj4+Pj4KPj4+PiBfX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fXwo+Pj4+IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0Cj4+Pj4gY2Vw
-aC11c2Vyc0BsaXN0cy5jZXBoLmNvbQo+Pj4+IGh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5m
-by5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo+Pj4+Cj4+PiAtLQo+Pj4gVG8gdW5zdWJzY3JpYmUg
-ZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGlu
-Cj4+PiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZwo+
-Pj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRv
-bW8taW5mby5odG1sCj4+Pgo+PiAtLQo+PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDog
-c2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4KPj4gdGhlIGJvZHkgb2Yg
-YSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcKPj4gTW9yZSBtYWpvcmRvbW8g
-aW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sCl9fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFp
-bGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29t
-L2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
+I rebased the wip-user patches from wip-selinux-policy onto 
+wip-selinux-policy-no-user + merge to master so that it sits on top of the 
+newly-merged systemd changes.
+
+Notes/issues:
+
+ - ceph-osd-prestart.sh verifies that the osd_data dir is owned by either 
+'root' or 'ceph' or else it exits with an error.  (Presumably systemd will 
+fail to start the unit in this case.)  It prints a helpful message 
+pointing the user at 'ceph-disk chown ...'.
+
+ - 'ceph-disk chown ...' is not implemented yet.  Should it take the base 
+device, like activate and prepare?  Or a mounted path?  Or either?
+
+ - Currently ceph-osd@.service unconditionally passes --setuser ceph to 
+ceph-osd... even if the data directory is owned by root.  I don't think 
+systemd is smart enough to do this conditionally unless we make an ugly 
+wrapper script that starts ceph-osd.  Alternatively, we could make 
+ceph-osd conditionally do the setuid based on the ownership of the 
+directory, but... meh.  The idea was to do the setuid *very* early in the 
+startup process so that logging and so on are opened as the ceph user.  
+Ideas?
+
+I think that's it right now...
+
+	https://github.com/ceph/ceph/commits/wip-user
+
+sage
