@@ -1,47 +1,37 @@
-From: Owen Synge <osynge@suse.com>
-Subject: Re: Fedora 22 systemd and rgw
-Date: Tue, 04 Aug 2015 14:32:07 +0200
-Message-ID: <55C0B0C7.7050907@suse.com>
-References: <alpine.DEB.2.00.1507281202370.22099@cobra.newdream.net> <55BFBA99.4070205@suse.com> <alpine.DEB.2.00.1508031205360.22099@cobra.newdream.net> <55C0904A.8010902@suse.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: C++11 and librados C++
+Date: Tue, 4 Aug 2015 05:51:33 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1508040550250.22099@cobra.newdream.net>
+References: <CAN=+7FX9Va+rxRr87E6bn6djjHSvXtVZTd+f576g=n01TJ5cRA@mail.gmail.com> <55C09812.8000704@42on.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 8bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from [89.191.203.168] ([89.191.203.168]:33209 "EHLO
-	mail.emea.novell.com" rhost-flags-FAIL-FAIL-OK-FAIL)
-	by vger.kernel.org with ESMTP id S933860AbbHDMd6 (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-	Tue, 4 Aug 2015 08:33:58 -0400
-In-Reply-To: <55C0904A.8010902@suse.com>
+Received: from mx1.redhat.com ([209.132.183.28]:39625 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755867AbbHDMvh (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 4 Aug 2015 08:51:37 -0400
+In-Reply-To: <55C09812.8000704@42on.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: ceph-devel@vger.kernel.org
+To: Wido den Hollander <wido@42on.com>
+Cc: Samuel Just <sjust@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, "Durgin, Josh" <jdurgin@redhat.com>, Casey Bodley <cbodley@redhat.com>
 
-On 08/04/2015 12:13 PM, Owen Synge wrote:
-> On 08/03/2015 09:07 PM, Sage Weil wrote:
->> On Mon, 3 Aug 2015, Owen Synge wrote:
+On Tue, 4 Aug 2015, Wido den Hollander wrote:
+> On 03-08-15 22:25, Samuel Just wrote:
+> > It seems like it's about time for us to make the jump to C++11.  This
+> > is probably going to have an impact on users of the librados C++
+> > bindings.  It seems like such users would have to recompile code using
+> > the librados C++ libraries after upgrading the librados library
+> > version.  Is that reasonable?  What do people expect here?
+> 
+> Well, some people use Qemu build by their distro, but they use librados
+> / librbd from ceph.com
+> 
+> So if they suddenly have to rebuild Qemu that would hurt them I think.
 
-> I will check the rgw.
+Qemu fortunately is using the C bindings, so it would not be affected.  
+It is only the C++ ABI (or lack thereof) that is problematic.
 
-It is not working due to missing:
+What users of the C++ bindings are there out there?
 
-/usr/lib/ceph-radosgw/ceph-radosgw-prestart.sh
-
-which is a useful check tool, available in this commit:
-
-https://github.com/SUSE/ceph/commit/92ef2ecfe0c0c0b0df4c9349310f930057202305
-
-I assume this got lost some where earlier, and should be placed in the
-systemd directory in my opinion.
-
-and some small permission issues resolved all is working fine.
-
-(core dump on failing to read the key is a bit ugly)
-
-Best regards
-
-Owen
-
-PS for other comments more important than this detail please see earlier
-emails in this thread.
+sage
