@@ -1,107 +1,41 @@
-From: Owen Synge <osynge@suse.com>
-Subject: Re: Transitioning Ceph from Autotools to CMake
-Date: Tue, 04 Aug 2015 12:42:31 +0200
-Message-ID: <55C09717.5020005@suse.com>
-References: <26481727.639679.1438282888566.JavaMail.zimbra@redhat.com>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: C++11 and librados C++
+Date: Tue, 04 Aug 2015 12:46:42 +0200
+Message-ID: <55C09812.8000704@42on.com>
+References: <CAN=+7FX9Va+rxRr87E6bn6djjHSvXtVZTd+f576g=n01TJ5cRA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from [89.191.203.168] ([89.191.203.168]:39651 "EHLO
-	mail.emea.novell.com" rhost-flags-FAIL-FAIL-OK-FAIL)
-	by vger.kernel.org with ESMTP id S932150AbbHDKo0 (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-	Tue, 4 Aug 2015 06:44:26 -0400
-In-Reply-To: <26481727.639679.1438282888566.JavaMail.zimbra@redhat.com>
+Received: from websrv.42on.com ([31.25.102.167]:41186 "EHLO websrv.42on.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932150AbbHDKqo (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 4 Aug 2015 06:46:44 -0400
+In-Reply-To: <CAN=+7FX9Va+rxRr87E6bn6djjHSvXtVZTd+f576g=n01TJ5cRA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ali Maredia <amaredia@redhat.com>, ceph-devel@vger.kernel.org
-
-Dear Ali,
-
-I am glad you are making progress.
-
-Sadly I don't yet know cmake.
-
-Please consider the systemd wip branch. It might be wise to leave
-autotools around a little longer, until all functionality is in the cma=
-ke.
-
-Best regards
-
-Owen
+To: Samuel Just <sjust@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
+Cc: "Weil, Sage" <sweil@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>, Casey Bodley <cbodley@redhat.com>
 
 
-On 07/30/2015 09:01 PM, Ali Maredia wrote:
-> After discussing with several other Ceph developers and Sage, I wante=
-d
-> to start a discussion about making CMake the primary build system for=
- Ceph.
->=20
-> CMake works just fine as it is (make -j4 on master with CMake builds
-> 350% faster than autotools!), but there's more work needed to make it=
-=20
-> into a first-class build system.
->=20
-> Short term (1-2 weeks):
->  - Making sure CMake works on all supported platforms: Centos7, RHEL7=
-,
->    Ubuntu 14.04 & 12.04, Fedora 22, Debian Jessie, Debian Wheezy are =
-the
->    target platforms I have noted to test on already.
->  - Adding a target similar to make check
->  - Creating CMake targets that build packages (such as for rpm or deb=
-ian)
->  - Writing documentation for those who haven't used CMake before to s=
-mooth the
->    transition over
->  - Making sure no targets or dependencies are missing from the
->    current CMake build, and that CMake supports all current=20
->    targets, configurations and options
->  - Replacing the integration autotools has with any automated build/t=
-est
->    systems such as the gitbuilder
->=20
-> Longer term (2-4 weeks):
->  - Removing the current autotools files, to avoid doubling build syst=
-em
->    workload
->  - Adding more but shorter CMakeLists.txt files to a tree like struct=
-ure
->    where a CMakeLists.txt would be in every subdirectory
-> =20
-> I'm already working on a target similar to the make check target, and=
- plan
-> on working on the other short term goals over the next weeks and beyo=
-nd.
->=20
-> I wanted to get feedback from the community any reasons why someone s=
-tarted using=20
-> CMake but stopped (ex: lack of functionality), and more broadly, on w=
-hat other=20
-> obstacles there might be for the transition.
->=20
-> -Ali
+
+On 03-08-15 22:25, Samuel Just wrote:
+> It seems like it's about time for us to make the jump to C++11.  This
+> is probably going to have an impact on users of the librados C++
+> bindings.  It seems like such users would have to recompile code using
+> the librados C++ libraries after upgrading the librados library
+> version.  Is that reasonable?  What do people expect here?
+
+Well, some people use Qemu build by their distro, but they use librados
+/ librbd from ceph.com
+
+So if they suddenly have to rebuild Qemu that would hurt them I think.
+
+Wido
+
+> -Sam
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
---=20
-SUSE LINUX GmbH, GF: Jeff Hawn, Jennifer Guild, Felix Imend=C3=B6rffer,=
- HRB
-21284 (AG
-N=C3=BCrnberg)
-
-Maxfeldstra=C3=9Fe 5
-
-90409 N=C3=BCrnberg
-
-Germany
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
