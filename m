@@ -1,135 +1,92 @@
-From: Ketor D <d.ketor@gmail.com>
-Subject: Re: [ceph-users] Is it safe to increase pg number in a production environment
-Date: Wed, 5 Aug 2015 03:16:48 +0800
-Message-ID: <CAM9_UU8Mxycvk91NSrFSMQ5=jDxaXcajzB7CTGDZ2sJJ0YW7-w@mail.gmail.com>
+From: Stefan Priebe <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
+Subject: Re: Is it safe to increase pg number in a production
+ environment
+Date: Tue, 4 Aug 2015 21:48:10 +0200
+Message-ID: <55C116FA.3060909@profihost.ag>
 References: <CALAOqpNhquUYW5YqNDZQh4K927Xumw8GcPPoYRsmyEhSHBY-Xw@mail.gmail.com>
- <CAN=+7FVjixrHHUZ01-5HaLd19SbjLkhqpKdKN1jDqPCk1UoR0A@mail.gmail.com> <55C0ED88.2050102@profihost.ag>
+	<CAN=+7FVjixrHHUZ01-5HaLd19SbjLkhqpKdKN1jDqPCk1UoR0A@mail.gmail.com>
+	<55C0ED88.2050102@profihost.ag>
+	<CAM9_UU8Mxycvk91NSrFSMQ5=jDxaXcajzB7CTGDZ2sJJ0YW7-w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f176.google.com ([209.85.214.176]:34669 "EHLO
-	mail-ob0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751598AbbHDTRS convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Aug 2015 15:17:18 -0400
-Received: by obre1 with SMTP id e1so14841541obr.1
-        for <ceph-devel@vger.kernel.org>; Tue, 04 Aug 2015 12:17:17 -0700 (PDT)
-In-Reply-To: <55C0ED88.2050102@profihost.ag>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe <s.priebe@profihost.ag>
-Cc: Samuel Just <sjust@redhat.com>, =?UTF-8?B?5LmU5bu65bOw?= <scaleqiao@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>, cbt@ceph.com
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAM9_UU8Mxycvk91NSrFSMQ5=jDxaXcajzB7CTGDZ2sJJ0YW7-w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Ketor D <d.ketor-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: =?UTF-8?B?5LmU5bu65bOw?= <scaleqiao-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, cbt-Qp0mS5GaXlQ@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-Hi Stefan,
-      Could you describe more about the linger ops bug?
-      I'm runing Firefly as you say still has this bug.
-
-Thanks!
-
-On Wed, Aug 5, 2015 at 12:51 AM, Stefan Priebe <s.priebe@profihost.ag> =
-wrote:
-> We've done the splitting several times. The most important thing is t=
-o run a
-> ceph version which does not have the linger ops bug.
->
-> This is dumpling latest release, giant and hammer. Latest firefly rel=
-ease
-> still has this bug. Which results in wrong watchers and no working
-> snapshots.
->
-> Stefan
->
-> Am 04.08.2015 um 18:46 schrieb Samuel Just:
->>
->> It will cause a large amount of data movement.  Each new pg after th=
-e
->> split will relocate.  It might be ok if you do it slowly.  Experimen=
-t
->> on a test cluster.
->> -Sam
->>
->> On Mon, Aug 3, 2015 at 12:57 AM, =E4=B9=94=E5=BB=BA=E5=B3=B0 <scaleq=
-iao@gmail.com> wrote:
->>>
->>> Hi Cephers,
->>>
->>> This is a greeting from Jevon. Currently, I'm experiencing an issue=
- which
->>> suffers me a lot, so I'm writing to ask for your
->>> comments/help/suggestions.
->>> More details are provided bellow.
->>>
->>> Issue:
->>> I set up a cluster having 24 OSDs and created one pool with 1024
->>> placement
->>> groups on it for a small startup company. The number 1024 was calcu=
-lated
->>> per
->>> the equation 'OSDs * 100'/pool size. The cluster have been running =
-quite
->>> well for a long time. But recently, our monitoring system always
->>> complains
->>> that some disks' usage exceed 85%. I log into the system and find o=
-ut
->>> that
->>> some disks' usage are really very high, but some are not(less than =
-60%).
->>> Each time when the issue happens, I have to manually re-balance the
->>> distribution. This is a short-term solution, I'm not willing to do =
-it all
->>> the time.
->>>
->>> Two long-term solutions come in my mind,
->>> 1) Ask the customers to expand their clusters by adding more OSDs. =
-But I
->>> think they will ask me to explain the reason of the imbalance data
->>> distribution. We've already done some analysis on the environment, =
-we
->>> learned that the most imbalance part in the CRUSH is the mapping be=
-tween
->>> object and pg. The biggest pg has 613 objects, while the smallest p=
-g only
->>> has 226 objects.
->>>
->>> 2) Increase the number of placement groups. It can be of great help=
- for
->>> statistically uniform data distribution, but it can also incur
->>> significant
->>> data movement as PGs are effective being split. I just cannot do it=
- in
->>> our
->>> customers' environment before we 100% understand the consequence. S=
-o
->>> anyone
->>> did this under a production environment? How much does this operati=
-on
->>> affect
->>> the performance of Clients?
->>>
->>> Any comments/help/suggestions will be highly appreciated.
->>>
->>> --
->>> Best Regards
->>> Jevon
->>>
->>> _______________________________________________
->>> ceph-users mailing list
->>> ceph-users@lists.ceph.com
->>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGksCgpBbSAwNC4wOC4yMDE1IHVtIDIxOjE2IHNjaHJpZWIgS2V0b3IgRDoKPiBIaSBTdGVmYW4s
+Cj4gICAgICAgIENvdWxkIHlvdSBkZXNjcmliZSBtb3JlIGFib3V0IHRoZSBsaW5nZXIgb3BzIGJ1
+Zz8KPiAgICAgICAgSSdtIHJ1bmluZyBGaXJlZmx5IGFzIHlvdSBzYXkgc3RpbGwgaGFzIHRoaXMg
+YnVnLgoKSXQgd2lsbCBiZSBmaXhlZCBpbiBuZXh0IGZmIHJlbGVhc2UuCgpUaGlzIG9uOgpodHRw
+Oi8vdHJhY2tlci5jZXBoLmNvbS9pc3N1ZXMvOTgwNgoKU3RlZmFuCgo+Cj4gVGhhbmtzIQo+Cj4g
+T24gV2VkLCBBdWcgNSwgMjAxNSBhdCAxMjo1MSBBTSwgU3RlZmFuIFByaWViZSA8cy5wcmllYmVA
+cHJvZmlob3N0LmFnPiB3cm90ZToKPj4gV2UndmUgZG9uZSB0aGUgc3BsaXR0aW5nIHNldmVyYWwg
+dGltZXMuIFRoZSBtb3N0IGltcG9ydGFudCB0aGluZyBpcyB0byBydW4gYQo+PiBjZXBoIHZlcnNp
+b24gd2hpY2ggZG9lcyBub3QgaGF2ZSB0aGUgbGluZ2VyIG9wcyBidWcuCj4+Cj4+IFRoaXMgaXMg
+ZHVtcGxpbmcgbGF0ZXN0IHJlbGVhc2UsIGdpYW50IGFuZCBoYW1tZXIuIExhdGVzdCBmaXJlZmx5
+IHJlbGVhc2UKPj4gc3RpbGwgaGFzIHRoaXMgYnVnLiBXaGljaCByZXN1bHRzIGluIHdyb25nIHdh
+dGNoZXJzIGFuZCBubyB3b3JraW5nCj4+IHNuYXBzaG90cy4KPj4KPj4gU3RlZmFuCj4+Cj4+IEFt
+IDA0LjA4LjIwMTUgdW0gMTg6NDYgc2NocmllYiBTYW11ZWwgSnVzdDoKPj4+Cj4+PiBJdCB3aWxs
+IGNhdXNlIGEgbGFyZ2UgYW1vdW50IG9mIGRhdGEgbW92ZW1lbnQuICBFYWNoIG5ldyBwZyBhZnRl
+ciB0aGUKPj4+IHNwbGl0IHdpbGwgcmVsb2NhdGUuICBJdCBtaWdodCBiZSBvayBpZiB5b3UgZG8g
+aXQgc2xvd2x5LiAgRXhwZXJpbWVudAo+Pj4gb24gYSB0ZXN0IGNsdXN0ZXIuCj4+PiAtU2FtCj4+
+Pgo+Pj4gT24gTW9uLCBBdWcgMywgMjAxNSBhdCAxMjo1NyBBTSwg5LmU5bu65bOwIDxzY2FsZXFp
+YW9AZ21haWwuY29tPiB3cm90ZToKPj4+Pgo+Pj4+IEhpIENlcGhlcnMsCj4+Pj4KPj4+PiBUaGlz
+IGlzIGEgZ3JlZXRpbmcgZnJvbSBKZXZvbi4gQ3VycmVudGx5LCBJJ20gZXhwZXJpZW5jaW5nIGFu
+IGlzc3VlIHdoaWNoCj4+Pj4gc3VmZmVycyBtZSBhIGxvdCwgc28gSSdtIHdyaXRpbmcgdG8gYXNr
+IGZvciB5b3VyCj4+Pj4gY29tbWVudHMvaGVscC9zdWdnZXN0aW9ucy4KPj4+PiBNb3JlIGRldGFp
+bHMgYXJlIHByb3ZpZGVkIGJlbGxvdy4KPj4+Pgo+Pj4+IElzc3VlOgo+Pj4+IEkgc2V0IHVwIGEg
+Y2x1c3RlciBoYXZpbmcgMjQgT1NEcyBhbmQgY3JlYXRlZCBvbmUgcG9vbCB3aXRoIDEwMjQKPj4+
+PiBwbGFjZW1lbnQKPj4+PiBncm91cHMgb24gaXQgZm9yIGEgc21hbGwgc3RhcnR1cCBjb21wYW55
+LiBUaGUgbnVtYmVyIDEwMjQgd2FzIGNhbGN1bGF0ZWQKPj4+PiBwZXIKPj4+PiB0aGUgZXF1YXRp
+b24gJ09TRHMgKiAxMDAnL3Bvb2wgc2l6ZS4gVGhlIGNsdXN0ZXIgaGF2ZSBiZWVuIHJ1bm5pbmcg
+cXVpdGUKPj4+PiB3ZWxsIGZvciBhIGxvbmcgdGltZS4gQnV0IHJlY2VudGx5LCBvdXIgbW9uaXRv
+cmluZyBzeXN0ZW0gYWx3YXlzCj4+Pj4gY29tcGxhaW5zCj4+Pj4gdGhhdCBzb21lIGRpc2tzJyB1
+c2FnZSBleGNlZWQgODUlLiBJIGxvZyBpbnRvIHRoZSBzeXN0ZW0gYW5kIGZpbmQgb3V0Cj4+Pj4g
+dGhhdAo+Pj4+IHNvbWUgZGlza3MnIHVzYWdlIGFyZSByZWFsbHkgdmVyeSBoaWdoLCBidXQgc29t
+ZSBhcmUgbm90KGxlc3MgdGhhbiA2MCUpLgo+Pj4+IEVhY2ggdGltZSB3aGVuIHRoZSBpc3N1ZSBo
+YXBwZW5zLCBJIGhhdmUgdG8gbWFudWFsbHkgcmUtYmFsYW5jZSB0aGUKPj4+PiBkaXN0cmlidXRp
+b24uIFRoaXMgaXMgYSBzaG9ydC10ZXJtIHNvbHV0aW9uLCBJJ20gbm90IHdpbGxpbmcgdG8gZG8g
+aXQgYWxsCj4+Pj4gdGhlIHRpbWUuCj4+Pj4KPj4+PiBUd28gbG9uZy10ZXJtIHNvbHV0aW9ucyBj
+b21lIGluIG15IG1pbmQsCj4+Pj4gMSkgQXNrIHRoZSBjdXN0b21lcnMgdG8gZXhwYW5kIHRoZWly
+IGNsdXN0ZXJzIGJ5IGFkZGluZyBtb3JlIE9TRHMuIEJ1dCBJCj4+Pj4gdGhpbmsgdGhleSB3aWxs
+IGFzayBtZSB0byBleHBsYWluIHRoZSByZWFzb24gb2YgdGhlIGltYmFsYW5jZSBkYXRhCj4+Pj4g
+ZGlzdHJpYnV0aW9uLiBXZSd2ZSBhbHJlYWR5IGRvbmUgc29tZSBhbmFseXNpcyBvbiB0aGUgZW52
+aXJvbm1lbnQsIHdlCj4+Pj4gbGVhcm5lZCB0aGF0IHRoZSBtb3N0IGltYmFsYW5jZSBwYXJ0IGlu
+IHRoZSBDUlVTSCBpcyB0aGUgbWFwcGluZyBiZXR3ZWVuCj4+Pj4gb2JqZWN0IGFuZCBwZy4gVGhl
+IGJpZ2dlc3QgcGcgaGFzIDYxMyBvYmplY3RzLCB3aGlsZSB0aGUgc21hbGxlc3QgcGcgb25seQo+
+Pj4+IGhhcyAyMjYgb2JqZWN0cy4KPj4+Pgo+Pj4+IDIpIEluY3JlYXNlIHRoZSBudW1iZXIgb2Yg
+cGxhY2VtZW50IGdyb3Vwcy4gSXQgY2FuIGJlIG9mIGdyZWF0IGhlbHAgZm9yCj4+Pj4gc3RhdGlz
+dGljYWxseSB1bmlmb3JtIGRhdGEgZGlzdHJpYnV0aW9uLCBidXQgaXQgY2FuIGFsc28gaW5jdXIK
+Pj4+PiBzaWduaWZpY2FudAo+Pj4+IGRhdGEgbW92ZW1lbnQgYXMgUEdzIGFyZSBlZmZlY3RpdmUg
+YmVpbmcgc3BsaXQuIEkganVzdCBjYW5ub3QgZG8gaXQgaW4KPj4+PiBvdXIKPj4+PiBjdXN0b21l
+cnMnIGVudmlyb25tZW50IGJlZm9yZSB3ZSAxMDAlIHVuZGVyc3RhbmQgdGhlIGNvbnNlcXVlbmNl
+LiBTbwo+Pj4+IGFueW9uZQo+Pj4+IGRpZCB0aGlzIHVuZGVyIGEgcHJvZHVjdGlvbiBlbnZpcm9u
+bWVudD8gSG93IG11Y2ggZG9lcyB0aGlzIG9wZXJhdGlvbgo+Pj4+IGFmZmVjdAo+Pj4+IHRoZSBw
+ZXJmb3JtYW5jZSBvZiBDbGllbnRzPwo+Pj4+Cj4+Pj4gQW55IGNvbW1lbnRzL2hlbHAvc3VnZ2Vz
+dGlvbnMgd2lsbCBiZSBoaWdobHkgYXBwcmVjaWF0ZWQuCj4+Pj4KPj4+PiAtLQo+Pj4+IEJlc3Qg
+UmVnYXJkcwo+Pj4+IEpldm9uCj4+Pj4KPj4+PiBfX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fXwo+Pj4+IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0Cj4+Pj4gY2Vw
+aC11c2Vyc0BsaXN0cy5jZXBoLmNvbQo+Pj4+IGh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5m
+by5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo+Pj4+Cj4+PiAtLQo+Pj4gVG8gdW5zdWJzY3JpYmUg
+ZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGlu
+Cj4+PiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZwo+
+Pj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRv
+bW8taW5mby5odG1sCj4+Pgo+PiAtLQo+PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDog
+c2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4KPj4gdGhlIGJvZHkgb2Yg
+YSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcKPj4gTW9yZSBtYWpvcmRvbW8g
+aW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sCl9fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFp
+bGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29t
+L2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
