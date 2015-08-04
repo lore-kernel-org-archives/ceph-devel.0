@@ -1,39 +1,32 @@
-From: Patrick McGarry <pmcgarry@redhat.com>
-Subject: CDS Videos Posted
-Date: Tue, 4 Aug 2015 09:52:03 -0400
-Message-ID: <CAAZbbf26b92=Fgvc8wFYKg8myxsP_qAxGgPQQSTxrmQUww38cg@mail.gmail.com>
+From: Casey Bodley <cbodley@redhat.com>
+Subject: Branch for C++11
+Date: Tue, 4 Aug 2015 11:01:14 -0400 (EDT)
+Message-ID: <1153187644.1670925.1438700474782.JavaMail.zimbra@redhat.com>
+References: <1035804211.1644064.1438696866303.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f54.google.com ([209.85.215.54]:35560 "EHLO
-	mail-la0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756685AbbHDNwE (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Aug 2015 09:52:04 -0400
-Received: by labsr2 with SMTP id sr2so7723080lab.2
-        for <ceph-devel@vger.kernel.org>; Tue, 04 Aug 2015 06:52:03 -0700 (PDT)
+Received: from mx5-phx2.redhat.com ([209.132.183.37]:43177 "EHLO
+	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756759AbbHDPBP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Aug 2015 11:01:15 -0400
+Received: from zmail26.collab.prod.int.phx2.redhat.com (zmail26.collab.prod.int.phx2.redhat.com [10.5.83.33])
+	by mx5-phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t74F1EJ3049767
+	for <ceph-devel@vger.kernel.org>; Tue, 4 Aug 2015 11:01:14 -0400
+In-Reply-To: <1035804211.1644064.1438696866303.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
+To: ceph-devel@vger.kernel.org
 
-Hey cephers,
+Hi,
 
-The long-awaited Ceph Developer Summit videos from CDS Jewel are now
-posted on YouTube [0] and linked from the CDS page [1]. My apologies
-for this taking so long, we had some technical problems with the
-recordings which I believe have now all been sorted out. The only
-exception is that the first session was not recoverable, so we wont
-have that one in the lineup. Thanks to all who attended to make
-another great CDS.
+I've pushed a wip-cxx11 branch to github that adds the -std=c++11 flag for both cmake and automake builds, and fixes the resulting compilation errors.
 
+The switch to c++11 has two main implications:
+* platform support: as expected, gitbuilder is reporting failures on precise and centos6 due to their older compilers
+* ABI change: Sam started a discussion on the list yesterday about how to deal with librados clients
 
-[0] : https://www.youtube.com/playlist?list=PLrBUGiINAakN_xFhkCgCa1zTRyHEcKRs6
-[1] : http://tracker.ceph.com/projects/ceph/wiki/CDS_Jewel
+I would also like to track the state of compiler support for c++14 (and beyond), so that we can adopt them as soon as it's practical.
 
--- 
-
-Best Regards,
-
-Patrick McGarry
-Director Ceph Community || Red Hat
-http://ceph.com  ||  http://community.redhat.com
-@scuttlemonkey || @ceph
+Casey
