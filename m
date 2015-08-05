@@ -1,63 +1,69 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: More ondisk_finisher thread?
-Date: Wed, 5 Aug 2015 13:23:05 +0800
-Message-ID: <CACJqLybKMi_gwOU6xxMMUWasOgGk-Y0gCLZBf3MLNb5K6JehjA@mail.gmail.com>
-References: <CANf+_kKpR6prfna20CtRfq=6QF+vpvCJu2NaO73RwuF=X+HMwA@mail.gmail.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F2CDF8A9C@SACMBXIP01.sdcorp.global.sandisk.com>
+From: Milan Broz <mbroz@redhat.com>
+Subject: Re: wip-user status
+Date: Wed, 5 Aug 2015 09:21:51 +0200
+Message-ID: <55C1B98F.2020807@redhat.com>
+References: <alpine.DEB.2.00.1508041335370.22099@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f51.google.com ([209.85.220.51]:34816 "EHLO
-	mail-pa0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750738AbbHEFXH convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Aug 2015 01:23:07 -0400
-Received: by pabxd6 with SMTP id xd6so8997431pab.2
-        for <ceph-devel@vger.kernel.org>; Tue, 04 Aug 2015 22:23:06 -0700 (PDT)
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CDF8A9C@SACMBXIP01.sdcorp.global.sandisk.com>
+Received: from mx1.redhat.com ([209.132.183.28]:40110 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751468AbbHEHVx (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 5 Aug 2015 03:21:53 -0400
+Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
+	by mx1.redhat.com (Postfix) with ESMTPS id DC0EB91D3D
+	for <ceph-devel@vger.kernel.org>; Wed,  5 Aug 2015 07:21:53 +0000 (UTC)
+In-Reply-To: <alpine.DEB.2.00.1508041335370.22099@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: Ding Dinghua <dingdinghua85@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
+Cc: branto@redhat.com
 
-It's interesting to see ondisk_finisher will occur 1ms, could you
-replay this workload and see whether exists read io from iostat. I
-guess it may help to see the cause.
+On 08/04/2015 10:53 PM, Sage Weil wrote:
+> I rebased the wip-user patches from wip-selinux-policy onto 
+> wip-selinux-policy-no-user + merge to master so that it sits on top of the 
+> newly-merged systemd changes.
 
-On Wed, Aug 5, 2015 at 12:13 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
-> Yes, it has to re-acquire pg_lock today..
-> But, between journal write and initiating the ondisk ack, there is one context switche in the code path. So, I guess the pg_lock is not the only one that is causing this 1 ms delay...
-> Not sure increasing the finisher threads will help in the pg_lock case as it will be more or less serialized by this pg_lock..
-> But, increasing finisher threads for the other context switches I was talking about (see queue_completion_thru) may help...
->
-> Thanks & Regards
-> Somnath
->
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Ding Dinghua
-> Sent: Tuesday, August 04, 2015 3:00 AM
-> To: ceph-devel@vger.kernel.org
-> Subject: More ondisk_finisher thread?
->
-> Hi:
->    Now we are doing some ceph performance tuning work, our setup has ten ceph nodes, and SSD as journal, HDD for filestore, and ceph version is 0.80.9.
->    We run fio in virtual maching with random 4KB write workload, we find that It took about 1ms in average for ondisk_finisher, while journal write only took 0.4ms, so I think it's unreasonable.
->     Since ondisk callback will be called with pg lock held, If pg lock has been grabbed by another thread(for example, osd->op_wq), all ondisk callback will be delayed, then all write op will be delayed.
->      I found that op_commit must be called with pg lock, so what about increase the ondisk_finisher thread number, so ondisk callback can be less likely to be delayed.
->
-> --
-> Ding Dinghua
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-> ________________________________
->
-> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
->
+Great, so if it is build-ready state, I can try it with our virtual cluster install.
 
+> Notes/issues:
+> 
+>  - ceph-osd-prestart.sh verifies that the osd_data dir is owned by either 
+> 'root' or 'ceph' or else it exits with an error.  (Presumably systemd will 
+> fail to start the unit in this case.)  It prints a helpful message 
+> pointing the user at 'ceph-disk chown ...'.
+> 
+>  - 'ceph-disk chown ...' is not implemented yet.  Should it take the base 
+> device, like activate and prepare?  Or a mounted path?  Or either?
 
+It should be easy to convert device/mountpoint by using findmnt so I would
+prefer what is more consistent with the user interface...
 
--- 
-Best Regards,
+IIRC, if the parameter is a base device, what should happen if device is not mounted?
+If mount path - then what about other data/journal partitions?
 
-Wheat
+It seems to me that parameter could be base OSD device and chown will simply
+handle all its partitions. (So for encrypted OSD it needs to get key to unlock it etc...)
+
+>  - Currently ceph-osd@.service unconditionally passes --setuser ceph to 
+> ceph-osd... even if the data directory is owned by root.  I don't think 
+> systemd is smart enough to do this conditionally unless we make an ugly 
+> wrapper script that starts ceph-osd.  Alternatively, we could make 
+> ceph-osd conditionally do the setuid based on the ownership of the 
+> directory, but... meh.  The idea was to do the setuid *very* early in the 
+> startup process so that logging and so on are opened as the ceph user.  
+> Ideas?
+
+Well, systemd could do that if the service is generated (like e.g. cryptsetup
+activation jobs are generated according to crypttab). But this adds complexity
+that we do not need...
+
+Maybe another option is to use environment variable (CEPH_USER or so), set it
+in service Environment=/EnvironmentFile... and ceph-osd will use that...
+
+But I think some systemd gurus will find something better here:)
+
+Thanks,
+Milan
+
