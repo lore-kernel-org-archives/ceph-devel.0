@@ -1,82 +1,76 @@
-From: "Gurjar, Unmesh" <unmesh.gurjar@hp.com>
-Subject: RE: OSD sometimes stuck in init phase
-Date: Thu, 6 Aug 2015 12:09:14 +0000
-Message-ID: <BA2282FCE1654C43BF189535A964CC9F27327A40@G4W3218.americas.hpqcorp.net>
-References: <BA2282FCE1654C43BF189535A964CC9F273279B3@G4W3218.americas.hpqcorp.net>
- <CACJqLyYCf_QBXjxAProirc3RqhYQh8Z7mDamZe7aVKwEozYtpw@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: About the Ceph erasure pool with ISA plugin on Intel xeon CPU
+Date: Thu, 06 Aug 2015 14:31:02 +0200
+Message-ID: <55C35386.6070602@dachary.org>
+References: <CAKEOLWVxuURSgYP3FLRhHs=THuYK0Qy084hNxZAqERyAYy2J4w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="KagFVWc8VV0qeEPMvLa2OK09pdg9J5UtU"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from g4t3427.houston.hp.com ([15.201.208.55]:39703 "EHLO
-	g4t3427.houston.hp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753633AbbHFMKP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Aug 2015 08:10:15 -0400
-Received: from G4W6310.americas.hpqcorp.net (g4w6310.houston.hp.com [16.210.26.217])
-	(using TLSv1 with cipher AES128-SHA (128/128 bits))
-	(No client certificate requested)
-	by g4t3427.houston.hp.com (Postfix) with ESMTPS id 47A5E32D
-	for <ceph-devel@vger.kernel.org>; Thu,  6 Aug 2015 12:10:15 +0000 (UTC)
-In-Reply-To: <CACJqLyYCf_QBXjxAProirc3RqhYQh8Z7mDamZe7aVKwEozYtpw@mail.gmail.com>
-Content-Language: en-US
+Received: from mail2.dachary.org ([91.121.57.175]:34321 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1755500AbbHFMbH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Aug 2015 08:31:07 -0400
+In-Reply-To: <CAKEOLWVxuURSgYP3FLRhHs=THuYK0Qy084hNxZAqERyAYy2J4w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomaiwang@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Derek Su <dereksu@qnap.com>
+Cc: ceph-devel@vger.kernel.org
 
-VGhhbmtzIGZvciBxdWljayByZXNwb25zZSBIYW9tYWkhIFBsZWFzZSBmaW5kIHRoZSBiYWNrdHJh
-Y2UgaGVyZSBbMV0uDQoNClsxXSAtIGh0dHA6Ly9wYXN0ZS5vcGVuc3RhY2sub3JnL3Nob3cvNDEx
-MTM5Lw0KDQpSZWdhcmRzLA0KVW5tZXNoIEcuDQpJUkM6IHVubWVzaGcNCg0KPiAtLS0tLU9yaWdp
-bmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBIYW9tYWkgV2FuZyBbbWFpbHRvOmhhb21haXdhbmdA
-Z21haWwuY29tXQ0KPiBTZW50OiBUaHVyc2RheSwgQXVndXN0IDA2LCAyMDE1IDU6MzEgUE0NCj4g
-VG86IEd1cmphciwgVW5tZXNoDQo+IENjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KPiBT
-dWJqZWN0OiBSZTogT1NEIHNvbWV0aW1lcyBzdHVjayBpbiBpbml0IHBoYXNlDQo+IA0KPiBDb3Vs
-ZCB5b3UgcHJpbnQgeW91ciBhbGwgdGhyZWFkIGNhbGxiYWNrIHZpYSAidGhyZWFkIGFwcGx5IGFs
-bCBidCI/DQo+IA0KPiBPbiBUaHUsIEF1ZyA2LCAyMDE1IGF0IDc6NTIgUE0sIEd1cmphciwgVW5t
-ZXNoIDx1bm1lc2guZ3VyamFyQGhwLmNvbT4NCj4gd3JvdGU6DQo+ID4gSGksDQo+ID4NCj4gPiBP
-biBhIENlcGggRmlyZWZseSBjbHVzdGVyICh2ZXJzaW9uIFsxXSksIE9TRHMgYXJlIGNvbmZpZ3Vy
-ZWQgdG8gdXNlIHNlcGFyYXRlDQo+IGRhdGEgYW5kIGpvdXJuYWwgZGlza3MgKHVzaW5nIHRoZSBj
-ZXBoLWRpc2sgdXRpbGl0eSkuIEl0IGlzIG9ic2VydmVkLCB0aGF0IGZldyBPU0RzDQo+IHN0YXJ0
-LXVwIGZpbmUgKGFyZSAndXAnIGFuZCAnaW4nIHN0YXRlKTsgaG93ZXZlciwgb3RoZXJzIGFyZSBz
-dHVjayBpbiB0aGUgJ2luaXQNCj4gY3JlYXRpbmcvdG91Y2hpbmcgc25hcG1hcHBlciBvYmplY3Qn
-IHBoYXNlLiBCZWxvdyBpcyBhIE9TRCBzdGFydC11cCBsb2cNCj4gc25pcHBldDoNCj4gPg0KPiA+
-IDIwMTUtMDgtMDYgMDg6NTg6MDIuNDkxNTM3IDdmZDMxMmRmOTdjMCAgMSBqb3VybmFsIF9vcGVu
-DQo+ID4gL3Zhci9saWIvY2VwaC9vc2QvY2VwaC0wL2pvdXJuYWwgZmQgMjE6IDEwNzM3NDE4MjQg
-Ynl0ZXMsIGJsb2NrIHNpemUNCj4gPiA0MDk2IGJ5dGVzLCBkaXJlY3RpbyA9IDEsIGFpbyA9IDEN
-Cj4gPiAyMDE1LTA4LTA2IDA4OjU4OjAyLjQ5ODQ0NyA3ZmQzMTJkZjk3YzAgIDEgam91cm5hbCBf
-b3Blbg0KPiA+IC92YXIvbGliL2NlcGgvb3NkL2NlcGgtMC9qb3VybmFsIGZkIDIxOiAxMDczNzQx
-ODI0IGJ5dGVzLCBibG9jayBzaXplDQo+ID4gNDA5NiBieXRlcywgZGlyZWN0aW8gPSAxLCBhaW8g
-PSAxDQo+ID4gMjAxNS0wOC0wNiAwODo1ODowMi40OTg3MjAgN2ZkMzEyZGY5N2MwICAyIG9zZC4w
-IDAgYm9vdA0KPiA+IDIwMTUtMDgtMDYgMDg6NTg6MDIuNDk4ODY1IDdmZDMxMmRmOTdjMCAxMCBv
-c2QuMCAwIHJlYWRfc3VwZXJibG9jaw0KPiA+IHNiKDI2NDViYmY2LTE2ZDAtNGM0Mi04ODM1LThi
-YTlmNWM5NWExZCBvc2QuMA0KPiA+IGE4MjExNDZmLTA3NDItNDcyNC1iNGNhLTM5ZWE0Y2NjMjk4
-ZCBlMCBbMCwwXSBsY2k9WzAsMF0pDQo+ID4gMjAxNS0wOC0wNiAwODo1ODowMi40OTg5MzcgN2Zk
-MzEyZGY5N2MwIDEwIG9zZC4wIDAgaW5pdA0KPiA+IGNyZWF0aW5nL3RvdWNoaW5nIHNuYXBtYXBw
-ZXIgb2JqZWN0DQo+ID4NCj4gPiBUaGUgbG9nIHN0YXRlbWVudCBpcyBpbmFjY3VyYXRlIHRob3Vn
-aCwgc2luY2UgaXQgaXMgYWN0dWFsbHkgZG9pbmcgaW5pdA0KPiBvcGVyYXRpb24gZm9yIHRoZSAn
-aW5mb3MnIG9iamVjdCAoYXMgY2FuIGJlIG9ic2VydmVkIGZyb20gc291cmNlIFsyXSkuDQo+ID4N
-Cj4gPiBVcG9uIGRlYnVnZ2luZyBmdXJ0aGVyLCB0aGUgdGhyZWFkIHNlZW1zIHRvIGJlIHdhaXRp
-bmcgdG8gYWNxdWlyZSB0aGUNCj4gJ09iamVjdFN0b3JlOjphcHBseV90cmFuc2FjdGlvbjo6bXlf
-bG9jaycgbXV0ZXguIEJlbG93IGlzIHRoZSBkZWJ1ZyB0cmFjZToNCj4gPg0KPiA+IChnZGIpIHdo
-ZXJlDQo+ID4gIzAgIDB4MDAwMDdmZDMxMjJiNzA4ZiBpbiBwdGhyZWFkX2NvbmRfd2FpdEBAR0xJ
-QkNfMi4zLjIgKCkgZnJvbQ0KPiA+IC9saWIveDg2XzY0LWxpbnV4LWdudS9saWJwdGhyZWFkLnNv
-LjANCj4gPiAjMSAgMHgwMDAwN2ZkMzEzMTMyYmY0IGluDQo+ID4gT2JqZWN0U3RvcmU6OmFwcGx5
-X3RyYW5zYWN0aW9ucyhPYmplY3RTdG9yZTo6U2VxdWVuY2VyKiwNCj4gPiBzdGQ6Omxpc3Q8T2Jq
-ZWN0U3RvcmU6OlRyYW5zYWN0aW9uKiwNCj4gPiBzdGQ6OmFsbG9jYXRvcjxPYmplY3RTdG9yZTo6
-VHJhbnNhY3Rpb24qPiA+JiwgQ29udGV4dCopICgpDQo+ID4gIzIgIDB4MDAwMDdmZDMxMzA5N2Qw
-OCBpbg0KPiA+IE9iamVjdFN0b3JlOjphcHBseV90cmFuc2FjdGlvbihPYmplY3RTdG9yZTo6VHJh
-bnNhY3Rpb24mLCBDb250ZXh0KikgKCkNCj4gPiAjMyAgMHgwMDAwN2ZkMzEzMDc2NzkwIGluIE9T
-RDo6aW5pdCgpICgpDQo+ID4gIzQgIDB4MDAwMDdmZDMxMzAyMzNhNyBpbiBtYWluICgpDQo+ID4N
-Cj4gPiBJbiBhIGZldyBjYXNlcywgdXBvbiByZXN0YXJ0aW5nIHRoZSBzdHVjayBPU0QgKHNlcnZp
-Y2UpLCBpdCBzdWNjZXNzZnVsbHkNCj4gY29tcGxldGVzIHRoZSAnaW5pdCcgcGhhc2UgYW5kIHJl
-YWNoZXMgdGhlICd1cCcgYW5kICdpbicgc3RhdGUhDQo+ID4NCj4gPiBBbnkgaGVscCBpcyBncmVh
-dGx5IGFwcHJlY2lhdGVkLiBQbGVhc2UgbGV0IG1lIGtub3cgaWYgYW55IG1vcmUgZGV0YWlscyBh
-cmUNCj4gcmVxdWlyZWQgZm9yIHJvb3QgY2F1c2luZy4NCj4gPg0KPiA+IFsxXSAtIDAuODAuNyAo
-NmMwMTI3ZmNiNTgwMDg3OTNkM2M4YjYyZDkyNWJjOTE5NjM2NzJhMykNCj4gPiBbMl0gLSAgaHR0
-cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC9ibG9iL2ZpcmVmbHkvc3JjL29zZC9PU0QuY2MjTDEy
-MTENCj4gPg0KPiA+IFJlZ2FyZHMsDQo+ID4gVW5tZXNoIEcuDQo+ID4gSVJDOiB1bm1lc2hnDQo+
-ID4gLS0NCj4gPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAi
-dW5zdWJzY3JpYmUgY2VwaC1kZXZlbCINCj4gPiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8g
-bWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbw0KPiA+IGluZm8gYXQgIGh0
-dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPiANCj4gDQo+IA0KPiAt
-LQ0KPiBCZXN0IFJlZ2FyZHMsDQo+IA0KPiBXaGVhdA0K
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--KagFVWc8VV0qeEPMvLa2OK09pdg9J5UtU
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+Hi,
+
+Could you please publish the benchmark results somewhere ? I should be ab=
+le to figure out why you don't see a difference.
+
+Cheers
+
+On 06/08/2015 13:25, Derek Su wrote:
+> Dear Mr. Dachary and all,
+>=20
+> Recently, I found your blog show the performance tests of erasure
+> pools (http://dachary.org/?p=3D3042 , http://dachary.org/?p=3D3665).
+> The results indicates the write throughput can be enhanced
+> significantly using Intel xeon CPU.
+>=20
+> I tried to create an erasure pool with isa plugin, reed_sol_van
+> technique, and k/m=3D4/2 on the Intel(R) Xeon(R) CPU E3-1245 v3 @
+> 3.40GHz machines.
+>=20
+> However, the results of the rados benchmark showed that there was no
+> any difference between the jerasure and isa plugins. It seems very
+> strange.
+>=20
+> Do I need to do other configurations in addition to only setting the
+> erasure profile?
+> In addition, how can I know the erasure pool is accelerated by ISA
+> plugin exactly? Is there any command I can use?
+>=20
+> Thanks, :)
+>=20
+> Derek Su.
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--KagFVWc8VV0qeEPMvLa2OK09pdg9J5UtU
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlXDU4YACgkQ8dLMyEl6F23qswCgtZu9Bx9RJO1ZGzYjdjM6SnhY
+f4QAn0vAgzuFxrjXxhzL8MUbuTDNN4fG
+=SmTD
+-----END PGP SIGNATURE-----
+
+--KagFVWc8VV0qeEPMvLa2OK09pdg9J5UtU--
