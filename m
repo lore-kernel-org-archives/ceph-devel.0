@@ -1,32 +1,112 @@
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: FileStore should not use syncfs(2)
-Date: Thu, 6 Aug 2015 06:06:36 -0700
-Message-ID: <20150806130636.GA20436@infradead.org>
-References: <alpine.DEB.2.00.1508051415070.26854@cobra.newdream.net>
- <20150806112747.GA21742@infradead.org>
- <alpine.DEB.2.00.1508060559410.22099@cobra.newdream.net>
+From: "Gurjar, Unmesh" <unmesh.gurjar@hp.com>
+Subject: RE: OSD sometimes stuck in init phase
+Date: Thu, 6 Aug 2015 13:17:07 +0000
+Message-ID: <BA2282FCE1654C43BF189535A964CC9F27327CB9@G4W3218.americas.hpqcorp.net>
+References: <BA2282FCE1654C43BF189535A964CC9F273279B3@G4W3218.americas.hpqcorp.net>
+	<CACJqLyYCf_QBXjxAProirc3RqhYQh8Z7mDamZe7aVKwEozYtpw@mail.gmail.com>
+	<BA2282FCE1654C43BF189535A964CC9F27327A40@G4W3218.americas.hpqcorp.net>
+ <CACJqLyZOmgnY6OTNWu9Or7ZvLxv8_wUX8ZgUtEd0d8n8s3RHpg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from bombadil.infradead.org ([198.137.202.9]:50633 "EHLO
-	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752014AbbHFNGh (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Aug 2015 09:06:37 -0400
-Content-Disposition: inline
-In-Reply-To: <alpine.DEB.2.00.1508060559410.22099@cobra.newdream.net>
+Received: from g4t3427.houston.hp.com ([15.201.208.55]:34227 "EHLO
+	g4t3427.houston.hp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752895AbbHFNRv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Aug 2015 09:17:51 -0400
+Received: from G4W6310.americas.hpqcorp.net (g4w6310.houston.hp.com [16.210.26.217])
+	(using TLSv1 with cipher AES128-SHA (128/128 bits))
+	(No client certificate requested)
+	by g4t3427.houston.hp.com (Postfix) with ESMTPS id 32FD029A
+	for <ceph-devel@vger.kernel.org>; Thu,  6 Aug 2015 13:17:51 +0000 (UTC)
+In-Reply-To: <CACJqLyZOmgnY6OTNWu9Or7ZvLxv8_wUX8ZgUtEd0d8n8s3RHpg@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Somnath.Roy@sandisk.com, ceph-devel@vger.kernel.org, sjust@redhat.com
+To: Haomai Wang <haomaiwang@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, Aug 06, 2015 at 06:00:42AM -0700, Sage Weil wrote:
-> I'm guessing the strategy here should be to fsync the file (leaf) and then 
-> any affected ancestors, such that the directory fsyncs are effectively 
-> no-ops?  Or does it matter?
-
-All metadata transactions log the involve parties (parent and child
-inode(s) mostly) in the same transaction.  So flushing one of them out
-is enough.  But file data I/O might dirty the inode before flushing them
-out, so to not need to write out the inode log item twice you first want
-to fsync any file that had data I/O followed by directories or special
-files that only had metadata modified.
+UGxlYXNlIGZpbmQgY2VwaC5jb25mIGF0IFsxXSBhbmQgdGhlIGNvcnJlc3BvbmRpbmcgT1NEIGxv
+ZyBhdCBbMl0uDQoNClRvIGNsYXJpZnkgb25lIHRoaW5nIEkgc2tpcHBlZCBlYXJsaWVyIG9uLCBp
+cyB3aGlsZSBicmluZ2luZyB1cCB0aGUgT1NEcywgJ2NlcGgtZGlzayBhY3RpdmF0ZScgd2FzIGdl
+dHRpbmcgaHVuZyAoZHVlIHRvIGlzc3VlIFszXSkuIFRvIGdldCBvdmVyIHRoaXMsIEkgaGFkIHRv
+IHRlbXBvcmFyaWx5IGRpc2FibGUgJ2pvdXJuYWwgZGlvJyB0byBnZXQgdGhlIGRpc2sgYWN0aXZh
+dGVkICh3aXRoIGEgJ21hcmstaW5pdCcgc2V0IHRvIG5vbmUpIGFuZCB0aGVuIGV4cGxpY2l0bHkg
+c3RhcnQgdGhlIE9TRCBzZXJ2aWNlIGFmdGVyIHVwZGF0aW5nIHRoZSBjb25mIHRvIGVuYWJsZSAn
+am91cm5hbCBkaW8nLiBJIGFtIGhvcGVmdWwgdGhhdCB0aGlzIHNob3VsZCBub3QgY2F1c2UgdGhl
+IHByZXNlbnQgaXNzdWUgKHNpbmNlIGZldyBPU0Qgc3RhcnQgc3VjY2Vzc2Z1bGx5IG9uIGZpcnN0
+IGF0dGVtcHQgYW5kIG90aGVycyBvbiBzdWJzZXF1ZW50IHNlcnZpY2UgcmVzdGFydHMpIQ0KDQpb
+MV0gLSBodHRwOi8vcGFzdGUub3BlbnN0YWNrLm9yZy9zaG93LzQxMTE2MS8NClsyXSAtIGh0dHA6
+Ly9wYXN0ZS5vcGVuc3RhY2sub3JnL3Nob3cvNDExMTYyLw0KWzNdIC0gaHR0cDovL3RyYWNrZXIu
+Y2VwaC5jb20vaXNzdWVzLzk3NjgNCg0KUmVnYXJkcywNClVubWVzaCBHLg0KSVJDOiB1bm1lc2hn
+DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogSGFvbWFpIFdhbmcgW21h
+aWx0bzpoYW9tYWl3YW5nQGdtYWlsLmNvbV0NCj4gU2VudDogVGh1cnNkYXksIEF1Z3VzdCAwNiwg
+MjAxNSA2OjIyIFBNDQo+IFRvOiBHdXJqYXIsIFVubWVzaA0KPiBDYzogY2VwaC1kZXZlbEB2Z2Vy
+Lmtlcm5lbC5vcmcNCj4gU3ViamVjdDogUmU6IE9TRCBzb21ldGltZXMgc3R1Y2sgaW4gaW5pdCBw
+aGFzZQ0KPiANCj4gRG9uJ3QgZmluZCBzb21ldGhpbmcgc3RyYW5nZS4NCj4gDQo+IENvdWxkIHlv
+dSBwYXN0ZSB5b3VyIGNlcGguY29uZj8gQW5kIHJlc3RhcnQgdGhpcyBvc2Qgd2l0aCBkZWJ1Z19v
+c2Q9MjAvMjAsDQo+IGRlYnVnX2ZpbGVzdG9yZT0yMC8yMCA6LSkNCj4gDQo+IE9uIFRodSwgQXVn
+IDYsIDIwMTUgYXQgODowOSBQTSwgR3VyamFyLCBVbm1lc2ggPHVubWVzaC5ndXJqYXJAaHAuY29t
+Pg0KPiB3cm90ZToNCj4gPiBUaGFua3MgZm9yIHF1aWNrIHJlc3BvbnNlIEhhb21haSEgUGxlYXNl
+IGZpbmQgdGhlIGJhY2t0cmFjZSBoZXJlIFsxXS4NCj4gPg0KPiA+IFsxXSAtIGh0dHA6Ly9wYXN0
+ZS5vcGVuc3RhY2sub3JnL3Nob3cvNDExMTM5Lw0KPiA+DQo+ID4gUmVnYXJkcywNCj4gPiBVbm1l
+c2ggRy4NCj4gPiBJUkM6IHVubWVzaGcNCj4gPg0KPiA+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2Ut
+LS0tLQ0KPiA+PiBGcm9tOiBIYW9tYWkgV2FuZyBbbWFpbHRvOmhhb21haXdhbmdAZ21haWwuY29t
+XQ0KPiA+PiBTZW50OiBUaHVyc2RheSwgQXVndXN0IDA2LCAyMDE1IDU6MzEgUE0NCj4gPj4gVG86
+IEd1cmphciwgVW5tZXNoDQo+ID4+IENjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KPiA+
+PiBTdWJqZWN0OiBSZTogT1NEIHNvbWV0aW1lcyBzdHVjayBpbiBpbml0IHBoYXNlDQo+ID4+DQo+
+ID4+IENvdWxkIHlvdSBwcmludCB5b3VyIGFsbCB0aHJlYWQgY2FsbGJhY2sgdmlhICJ0aHJlYWQg
+YXBwbHkgYWxsIGJ0Ij8NCj4gPj4NCj4gPj4gT24gVGh1LCBBdWcgNiwgMjAxNSBhdCA3OjUyIFBN
+LCBHdXJqYXIsIFVubWVzaCA8dW5tZXNoLmd1cmphckBocC5jb20+DQo+ID4+IHdyb3RlOg0KPiA+
+PiA+IEhpLA0KPiA+PiA+DQo+ID4+ID4gT24gYSBDZXBoIEZpcmVmbHkgY2x1c3RlciAodmVyc2lv
+biBbMV0pLCBPU0RzIGFyZSBjb25maWd1cmVkIHRvIHVzZQ0KPiA+PiA+IHNlcGFyYXRlDQo+ID4+
+IGRhdGEgYW5kIGpvdXJuYWwgZGlza3MgKHVzaW5nIHRoZSBjZXBoLWRpc2sgdXRpbGl0eSkuIEl0
+IGlzIG9ic2VydmVkLA0KPiA+PiB0aGF0IGZldyBPU0RzIHN0YXJ0LXVwIGZpbmUgKGFyZSAndXAn
+IGFuZCAnaW4nIHN0YXRlKTsgaG93ZXZlciwNCj4gPj4gb3RoZXJzIGFyZSBzdHVjayBpbiB0aGUg
+J2luaXQgY3JlYXRpbmcvdG91Y2hpbmcgc25hcG1hcHBlciBvYmplY3QnDQo+ID4+IHBoYXNlLiBC
+ZWxvdyBpcyBhIE9TRCBzdGFydC11cCBsb2cNCj4gPj4gc25pcHBldDoNCj4gPj4gPg0KPiA+PiA+
+IDIwMTUtMDgtMDYgMDg6NTg6MDIuNDkxNTM3IDdmZDMxMmRmOTdjMCAgMSBqb3VybmFsIF9vcGVu
+DQo+ID4+ID4gL3Zhci9saWIvY2VwaC9vc2QvY2VwaC0wL2pvdXJuYWwgZmQgMjE6IDEwNzM3NDE4
+MjQgYnl0ZXMsIGJsb2NrDQo+ID4+ID4gc2l6ZQ0KPiA+PiA+IDQwOTYgYnl0ZXMsIGRpcmVjdGlv
+ID0gMSwgYWlvID0gMQ0KPiA+PiA+IDIwMTUtMDgtMDYgMDg6NTg6MDIuNDk4NDQ3IDdmZDMxMmRm
+OTdjMCAgMSBqb3VybmFsIF9vcGVuDQo+ID4+ID4gL3Zhci9saWIvY2VwaC9vc2QvY2VwaC0wL2pv
+dXJuYWwgZmQgMjE6IDEwNzM3NDE4MjQgYnl0ZXMsIGJsb2NrDQo+ID4+ID4gc2l6ZQ0KPiA+PiA+
+IDQwOTYgYnl0ZXMsIGRpcmVjdGlvID0gMSwgYWlvID0gMQ0KPiA+PiA+IDIwMTUtMDgtMDYgMDg6
+NTg6MDIuNDk4NzIwIDdmZDMxMmRmOTdjMCAgMiBvc2QuMCAwIGJvb3QNCj4gPj4gPiAyMDE1LTA4
+LTA2IDA4OjU4OjAyLjQ5ODg2NSA3ZmQzMTJkZjk3YzAgMTAgb3NkLjAgMCByZWFkX3N1cGVyYmxv
+Y2sNCj4gPj4gPiBzYigyNjQ1YmJmNi0xNmQwLTRjNDItODgzNS04YmE5ZjVjOTVhMWQgb3NkLjAN
+Cj4gPj4gPiBhODIxMTQ2Zi0wNzQyLTQ3MjQtYjRjYS0zOWVhNGNjYzI5OGQgZTAgWzAsMF0gbGNp
+PVswLDBdKQ0KPiA+PiA+IDIwMTUtMDgtMDYgMDg6NTg6MDIuNDk4OTM3IDdmZDMxMmRmOTdjMCAx
+MCBvc2QuMCAwIGluaXQNCj4gPj4gPiBjcmVhdGluZy90b3VjaGluZyBzbmFwbWFwcGVyIG9iamVj
+dA0KPiA+PiA+DQo+ID4+ID4gVGhlIGxvZyBzdGF0ZW1lbnQgaXMgaW5hY2N1cmF0ZSB0aG91Z2gs
+IHNpbmNlIGl0IGlzIGFjdHVhbGx5IGRvaW5nDQo+ID4+ID4gaW5pdA0KPiA+PiBvcGVyYXRpb24g
+Zm9yIHRoZSAnaW5mb3MnIG9iamVjdCAoYXMgY2FuIGJlIG9ic2VydmVkIGZyb20gc291cmNlIFsy
+XSkuDQo+ID4+ID4NCj4gPj4gPiBVcG9uIGRlYnVnZ2luZyBmdXJ0aGVyLCB0aGUgdGhyZWFkIHNl
+ZW1zIHRvIGJlIHdhaXRpbmcgdG8gYWNxdWlyZQ0KPiA+PiA+IHRoZQ0KPiA+PiAnT2JqZWN0U3Rv
+cmU6OmFwcGx5X3RyYW5zYWN0aW9uOjpteV9sb2NrJyBtdXRleC4gQmVsb3cgaXMgdGhlIGRlYnVn
+IHRyYWNlOg0KPiA+PiA+DQo+ID4+ID4gKGdkYikgd2hlcmUNCj4gPj4gPiAjMCAgMHgwMDAwN2Zk
+MzEyMmI3MDhmIGluIHB0aHJlYWRfY29uZF93YWl0QEBHTElCQ18yLjMuMiAoKSBmcm9tDQo+ID4+
+ID4gL2xpYi94ODZfNjQtbGludXgtZ251L2xpYnB0aHJlYWQuc28uMA0KPiA+PiA+ICMxICAweDAw
+MDA3ZmQzMTMxMzJiZjQgaW4NCj4gPj4gPiBPYmplY3RTdG9yZTo6YXBwbHlfdHJhbnNhY3Rpb25z
+KE9iamVjdFN0b3JlOjpTZXF1ZW5jZXIqLA0KPiA+PiA+IHN0ZDo6bGlzdDxPYmplY3RTdG9yZTo6
+VHJhbnNhY3Rpb24qLA0KPiA+PiA+IHN0ZDo6YWxsb2NhdG9yPE9iamVjdFN0b3JlOjpUcmFuc2Fj
+dGlvbio+ID4mLCBDb250ZXh0KikgKCkNCj4gPj4gPiAjMiAgMHgwMDAwN2ZkMzEzMDk3ZDA4IGlu
+DQo+ID4+ID4gT2JqZWN0U3RvcmU6OmFwcGx5X3RyYW5zYWN0aW9uKE9iamVjdFN0b3JlOjpUcmFu
+c2FjdGlvbiYsIENvbnRleHQqKQ0KPiA+PiA+ICgpDQo+ID4+ID4gIzMgIDB4MDAwMDdmZDMxMzA3
+Njc5MCBpbiBPU0Q6OmluaXQoKSAoKQ0KPiA+PiA+ICM0ICAweDAwMDA3ZmQzMTMwMjMzYTcgaW4g
+bWFpbiAoKQ0KPiA+PiA+DQo+ID4+ID4gSW4gYSBmZXcgY2FzZXMsIHVwb24gcmVzdGFydGluZyB0
+aGUgc3R1Y2sgT1NEIChzZXJ2aWNlKSwgaXQNCj4gPj4gPiBzdWNjZXNzZnVsbHkNCj4gPj4gY29t
+cGxldGVzIHRoZSAnaW5pdCcgcGhhc2UgYW5kIHJlYWNoZXMgdGhlICd1cCcgYW5kICdpbicgc3Rh
+dGUhDQo+ID4+ID4NCj4gPj4gPiBBbnkgaGVscCBpcyBncmVhdGx5IGFwcHJlY2lhdGVkLiBQbGVh
+c2UgbGV0IG1lIGtub3cgaWYgYW55IG1vcmUNCj4gPj4gPiBkZXRhaWxzIGFyZQ0KPiA+PiByZXF1
+aXJlZCBmb3Igcm9vdCBjYXVzaW5nLg0KPiA+PiA+DQo+ID4+ID4gWzFdIC0gMC44MC43ICg2YzAx
+MjdmY2I1ODAwODc5M2QzYzhiNjJkOTI1YmM5MTk2MzY3MmEzKQ0KPiA+PiA+IFsyXSAtDQo+ID4+
+ID4gaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC9ibG9iL2ZpcmVmbHkvc3JjL29zZC9PU0Qu
+Y2MjTDEyMTENCj4gPj4gPg0KPiA+PiA+IFJlZ2FyZHMsDQo+ID4+ID4gVW5tZXNoIEcuDQo+ID4+
+ID4gSVJDOiB1bm1lc2hnDQo+ID4+ID4gLS0NCj4gPj4gPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRo
+aXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCINCj4gPj4gPiBp
+biB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3Jl
+DQo+ID4+ID4gbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jk
+b21vLWluZm8uaHRtbA0KPiA+Pg0KPiA+Pg0KPiA+Pg0KPiA+PiAtLQ0KPiA+PiBCZXN0IFJlZ2Fy
+ZHMsDQo+ID4+DQo+ID4+IFdoZWF0DQo+IA0KPiANCj4gDQo+IC0tDQo+IEJlc3QgUmVnYXJkcywN
+Cj4gDQo+IFdoZWF0DQo=
