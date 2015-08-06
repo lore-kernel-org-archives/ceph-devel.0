@@ -1,61 +1,41 @@
-From: Travis Rhoden <trhoden@gmail.com>
+From: Nigel Williams <nigel.williams@utas.edu.au>
 Subject: Re: [ANN] ceph-deploy 1.5.27 released
-Date: Wed, 5 Aug 2015 21:22:43 -0700
-Message-ID: <CACkq2mp2O3-gc=X_0nmjr96LWZz+T6VmKPmgCnvWVpoL80MoSA@mail.gmail.com>
+Date: Thu, 6 Aug 2015 14:37:33 +1000
+Message-ID: <mpuoab$2ac$1@ger.gmane.org>
 References: <CACkq2mqgjP-J3CFM0zA8uoXbi1oPjni8JbtTwvvE5K0hSDTQig@mail.gmail.com>
  <mpum4o$4ud$1@ger.gmane.org>
+ <CACkq2mp2O3-gc=X_0nmjr96LWZz+T6VmKPmgCnvWVpoL80MoSA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f175.google.com ([209.85.214.175]:35542 "EHLO
-	mail-ob0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751496AbbHFEXG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Aug 2015 00:23:06 -0400
-Received: by obbop1 with SMTP id op1so47379354obb.2
-        for <ceph-devel@vger.kernel.org>; Wed, 05 Aug 2015 21:23:03 -0700 (PDT)
-In-Reply-To: <mpum4o$4ud$1@ger.gmane.org>
+Received: from plane.gmane.org ([80.91.229.3]:54157 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751379AbbHFEhs (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 6 Aug 2015 00:37:48 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1ZNCw5-0000Mh-Sv
+	for ceph-devel@vger.kernel.org; Thu, 06 Aug 2015 06:37:46 +0200
+Received: from fjzmd2s-nigelw.its.utas.edu.au ([131.217.4.28])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Thu, 06 Aug 2015 06:37:45 +0200
+Received: from nigel.williams by fjzmd2s-nigelw.its.utas.edu.au with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Thu, 06 Aug 2015 06:37:45 +0200
+In-Reply-To: <CACkq2mp2O3-gc=X_0nmjr96LWZz+T6VmKPmgCnvWVpoL80MoSA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nigel Williams <nigel.williams@utas.edu.au>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
+To: ceph-devel@vger.kernel.org
+Cc: ceph-users@lists.ceph.com
 
-Hi Nigel,
+On 6/08/2015 2:22 PM, Travis Rhoden wrote:
+> A few things in this area changed with 1.5.26. ceph-deploys options
+> are much more strictly attached only to the commands where they make
+> sense.
 
-On Wed, Aug 5, 2015 at 9:00 PM, Nigel Williams
-<nigel.williams@utas.edu.au> wrote:
-> On 6/08/2015 9:45 AM, Travis Rhoden wrote:
->>
->> A new version of ceph-deploy has been released. Version 1.5.27
->> includes the following:
->
->
-> Has the syntax for use of --zap-disk changed? I moved it around but it is no
-> longer recognised; worked around by doing a ceph-disk zap before running
-> ceph-deploy.
+Oh much better, thanks. I did wonder about that, but as it worked I didn't revisit.
 
-A few things in this area changed with 1.5.26. ceph-deploys options
-are much more strictly attached only to the commands where they make
-sense.
 
->
-> This worked previously:
->
-> ceph-deploy --overwrite-conf osd --zap-disk prepare ceph05:/dev/sdb:/dev/sdd
 
---zap-disk is an option to 'prepare', not to 'osd'.  "ceph-deploy osd
---zap-disk list" doesn't make any sense, for example.  The help menus
-should make this clear:
-
-# ceph-deploy osd --help
-usage: ceph-deploy osd [-h] {list,create,prepare,activate} ...
-
-# ceph-deploy osd prepare --help
-usage: ceph-deploy osd prepare [-h] [--zap-disk] [--fs-type FS_TYPE]
-                               [--dmcrypt] [--dmcrypt-key-dir KEYDIR]
->
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
