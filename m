@@ -1,128 +1,96 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Erasure Code Plugins : PLUGINS_V3 feature
-Date: Thu, 06 Aug 2015 15:57:58 +0200
-Message-ID: <55C367E6.8040902@dachary.org>
-References: <55B899FB.4080007@dachary.org> <55C1C789.3050401@dachary.org> <alpine.DEB.2.00.1508051136360.22099@cobra.newdream.net> <870DE8DBB716524BAE51B2D499EC81E40AB68E6A@g01jpexmbyt24>
+From: =?GBK?B?sszS4w==?= <cymengxiang@126.com>
+Subject: Re:Re: Consult some problems of Ceph when reading source code
+Date: Thu, 6 Aug 2015 23:02:52 +0800 (CST)
+Message-ID: <44598b40.157d5.14f0389480d.Coremail.cymengxiang@126.com>
+References: <780bf286.119cf.14f008cac3f.Coremail.cymengxiang@126.com>
+ <alpine.DEB.2.00.1508060540070.22099@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="2xlxwE3TiIhwFm0u8L6Fm39PCCQ30WSxU"
+Content-Type: text/plain; charset=GBK
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:34384 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751780AbbHFN6E (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Aug 2015 09:58:04 -0400
-In-Reply-To: <870DE8DBB716524BAE51B2D499EC81E40AB68E6A@g01jpexmbyt24>
+Received: from m15-39.126.com ([220.181.15.39]:36769 "EHLO m15-39.126.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751780AbbHFPDB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 6 Aug 2015 11:03:01 -0400
+In-Reply-To: <alpine.DEB.2.00.1508060540070.22099@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, "Shiozawa, Kensuke" <shiozawa.kennsu@jp.fujitsu.com>, "Nakao, Takanori" <nakao.takanori@jp.fujitsu.com>
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---2xlxwE3TiIhwFm0u8L6Fm39PCCQ30WSxU
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-Hi Takeshi,
-
-https://github.com/ceph/ceph/pull/5493 is ready for your review. The matc=
-hing integration tests can be found at https://github.com/ceph/ceph-qa-su=
-ite/pull/523
-
-Cheers
-
-On 06/08/2015 02:28, Miyamae, Takeshi wrote:
-> Dear Sage,
->=20
->> note that what this really means is that the on-disk encoding needs to=
- remain fixed.
->=20
-> Thank you for letting us know the important notice.
-> We have no plan to change shec's format at this moment, but we will rem=
-ember the
-> comment for any future events.
->=20
-> Best Regards,
-> Takeshi Miyamae
->=20
-> -----Original Message-----
-> From: Sage Weil [mailto:sweil@redhat.com]=20
-> Sent: Thursday, August 6, 2015 3:45 AM
-> To: Loic Dachary; Miyamae, Takeshi/=E5=AE=AE=E5=89=8D =E5=89=9B
-> Cc: Samuel Just; Ceph Development
-> Subject: Re: Erasure Code Plugins : PLUGINS_V3 feature
->=20
-> On Wed, 5 Aug 2015, Loic Dachary wrote:
->> Hi Sam,
->>
->> How does this proposal sound ? It would be great if that was done=20
->> before the feature freeze.
->=20
-> I think it's a good time.
->=20
-> Takeshi, note that what this really means is that the on-disk encoding =
-needs to remain fixed.  If we decide to change it down the line, we'll ha=
-ve to make a 'shec2' or similar so that the old format is still decodable=
- (or ensure that existing data can still be read in some other way).
->=20
-> Sound good?
->=20
-> sage
->=20
->=20
->>
->> Cheers
->>
->> On 29/07/2015 11:16, Loic Dachary wrote:
->>> Hi Sam,
->>>
->>> The SHEC plugin[0] has been running in the rados runs[1] in the past =
-few months. It also has a matching corpus verification which runs on ever=
-y make check[2] as well as its optimized variants. I believe the flag "ex=
-perimental" can now be removed.=20
->>>
->>> In order to do so, we need to use a PLUGINS_V3 feature, in the same w=
-ay we did back in Giant when the ISA and LRC plugins were introduced[3]. =
-This won't be necessary in the future, when there is a generic plugin mec=
-hanism, but right now that's what we need. It would be a commit very simi=
-lar to the one implementing PLUGINS_V2[4].
->>>
->>> Is this agreeable to you ? Or would you rather see another way to res=
-olve this ?
->>>
->>> Cheers
->>>
->>> [0] https://github.com/ceph/ceph/tree/master/src/erasure-code/shec
->>> [1]=20
->>> https://github.com/ceph/ceph-qa-suite/tree/master/suites/rados/thras
->>> h-erasure-code-shec [2]=20
->>> https://github.com/ceph/ceph-erasure-code-corpus/blob/master/v0.92-9
->>> 88/non-regression.sh#L52 [3] http://tracker.ceph.com/issues/9343
->>> [4]=20
->>> https://github.com/ceph/ceph/commit/9687150ceac9cc7e506bc227f430d420
->>> 7a6d7489
->>>
->>
->> --
->> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->>
->>
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---2xlxwE3TiIhwFm0u8L6Fm39PCCQ30WSxU
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlXDZ+cACgkQ8dLMyEl6F23gOgCgj9F6aZnwacvOwZPek/jI3sRR
-iEoAoLTL8G9mxOm9VNk5xXGxrQxxqFdy
-=Dzvw
------END PGP SIGNATURE-----
-
---2xlxwE3TiIhwFm0u8L6Fm39PCCQ30WSxU--
+RGVhciBEci5TYWdlOgpUaGFuayB5b3UgZm9yIHlvdXIgZGV0YWlsZWQgcmVwbHmjoVRoZXNlIGFu
+c3dlcnMgaGVscHMgbWUgYSBsb3QuIEkgYWxzbyBoYXZlIHNvbWUgcHJvYmxlbXMgaW4gUXVlc3Rp
+b24gKDEuCkluIHlvdXIgcmVwbHksIHRoZSByZXF1ZXN0cyBhY2NvcmRpbmcgdG8gdGhlIGRpZmZl
+cmVudCBQRyBlbnF1ZXVlIGludG8gdGhlIFNoYXJkZWRXUSwgaWYgSSBoYXZlIDMgcmVxdWVzdHMo
+IHRoYXQgaXMgPHBnMSxyMT4sPHBnMixyMj4sPHBnMyxyMz4pLCBhbmQgSSBwdXQgdGhlbSB0byB0
+aGUgU2hhcmRlZFdRLCBpcyB0aGUgcHJvY2VzcyBhbHNvIGFzZXJpYWxpemVzIHByb2Nlc3Npbmc/
+CldoZW4gSSB3YW50IHRvIGRlcXVldWUgdGhlIGl0ZW0gZnJvbSBTaGFyZGVkV1EsIHRoZXJlIGlz
+IGEgd29ya19xdWV1ZXMgKHRoZSB0eXBlIGlzIHRoZSB2ZWN0b3Igb2Ygd29ya19xdWV1ZSkgaW4g
+VGhyZWFkUG9vbCBtZXRob2QoV29ya1F1ZXVlLmNjKSBhbmQgdGhlbiBJICBjYWxjdWxhdGUgdGhl
+IHdvcmsgcXVldWUgYWNjb3JkaW5nIHRvIHRoZSB3b3JrX3F1ZXVlcywgc28gaXMgdGhlcmUgbWFu
+eSB3b3JrIHF1ZXVlIGluIHRoZSByZXF1ZXN0IHByb2Nlc3M/ICBvciBpcyB0aGVyZSBubyBhc3Nv
+Y2lhdGlvbiB3aXRoIHRoZSBTaGFyZGVkV1E/CldoZW4gSSBnZXQgdGhlIGl0ZW0gZnJvbSBTaGFy
+ZGVkV1EsIEkgd2lsbCB0cmFuc2ZlciBpdCB0byB0aGUgdHJhbnNhY3Rpb24gYW5kIHRoZW4gcmVh
+ZCBvciB3cml0ZS4gSXMgdGhlIHByb2Nlc3MgZG9uZSBvbmUgYnkgb25lKCBhbm90aGVyIHRyYW5z
+YWN0aW9uIGlzIGhhbmRsZWQgb25seSB3aGVuIHRoaXMgdHJhbnNhY3Rpb24gaXMgb3ZlciksIGlm
+IGl0IGlzLCBDb3VsZCB3ZSBwcm9taXNlIHRoZSBwZXJmb3JtYW5jZT8gaWYgaXQgaXNuJ3QgLCBB
+cmUgdGhlIHRyYW5zYWN0aW9ucydhY3Rpb25zIHBhcmFsbGVsPwpUaGFuayB5b3UgYSBsb3QhCgoK
+CgoKQXQgMjAxNS0wOC0wNiAyMDo0NDo0NSwgIlNhZ2UgV2VpbCIgPHNhZ2VAbmV3ZHJlYW0ubmV0
+PiB3cm90ZToKPkhpIQo+Cj5PbiBUaHUsIDYgQXVnIDIwMTUsID8/IHdyb3RlOgo+PiBEZWFyIGRl
+dmVsb3BlcnMsCj4+IAo+PiBNeSBuYW1lIGlzIENhaSBZaSwgYW5kIEkgYW0gYSBncmFkdWF0ZSBz
+dHVkZW50IG1ham9yZWQgaW4gQ1Mgb2YgWGk/YW4gCj4+IEppYW90b25nIFVuaXZlcnNpdHkgaW4g
+Q2hpbmEuIEZyb20gQ2VwaD9zIGhvbWVwYWdlLCBJIGtub3cgU2FnZSBpcyB0aGUgCj4+IGF1dGhv
+ciBvZiBDZXBoIGFuZCBJIGdldCB0aGUgZW1haWwgYWRkcmVzcyBmcm9tIHlvdXIgR2l0SHViIGFu
+ZCBDZXBoP3MgCj4+IG9mZmljaWFsIHdlYnNpdGUuIEJlY2F1c2UgQ2VwaCBpcyBhbiBleGNlbGxl
+bnQgZGlzdHJpYnV0ZWQgZmlsZSBzeXN0ZW0sIAo+PiBzbyByZWNlbnRseSwgSSBhbSByZWFkaW5n
+IHRoZSBzb3VyY2UgY29kZSBvZiB0aGUgQ2VwaCAodGhlIGVkaXRpb24gaXMgCj4+IEhhbW1lcikg
+dG8gdW5kZXJzdGFuZCB0aGUgSU8gZ29vZCBwYXRoIGFuZCB0aGUgcGVyZm9ybWFuY2Ugb2YgQ2Vw
+aC4gCj4+IEhvd2V2ZXIsIEkgZmFjZSBzb21lIHByb2JsZW1zIHdoaWNoIEkgY291bGQgbm90IGZp
+bmQgdGhlIHNvbHV0aW9uIGZyb20gCj4+IEludGVybmV0IG9yIHNvbHZlIGJ5IG15c2VsZiBhbmQg
+bXkgcGFydG5lcnMuIFNvIEkgd2FzIHdvbmRlcmluZyBpZiB5b3UgCj4+IGNvdWxkIGhlbHAgdXMg
+c29sdmUgc29tZSBwcm9ibGVtcy4gVGhlIHByb2JsZW1zIGFyZSBhcyBmb2xsb3dzOgo+PiAKPj4g
+MSkgIEluIHRoZSBDZXBoLCB0aGVyZSBpcyBhIGNvbmNlcHQgdGhhdCBpcyB0aGUgdHJhbnNhY3Rp
+b24uIFdoZW4gdGhlIAo+PiBPU0QgcmVjZWl2ZXMgYSB3cml0ZSByZXF1ZXN0LCBhbmQgdGhlbiBp
+dCBpcyBlbmNhcHN1bGF0ZWQgYnkgYSAKPj4gdHJhbnNhY3Rpb24uIEJ1dCBXaGVuIHRoZSBPU0Qg
+cmVjZWl2ZSBtYW55IHJlcXVlc3RzLCBpcyB0aGVyZSBhIAo+PiB0cmFuc2FjdGlvbiBxdWV1ZSB0
+byByZWNlaXZlIHRoZSBtZXNzYWdlcz8gSWYgdGhlcmUgaXMgYSBxdWV1ZSwgaXMgaXQgYSAKPj4g
+cHJvY2VzcyBvZiBzZXJpYWwgb3IgcGFyYWxsZWwgdG8gc3VibWl0IHRoZXNlIHRyYW5zYWN0aW9u
+IHRvIGRvIG5leHQgCj4+IG9wZXJhdGlvbj8gSWYgaXQgaXMgc2VyaWFsLCBjb3VsZCB0aGUgdHJh
+bnNhY3Rpb24gb3BlcmF0aW9ucyBpbmZsdWVuY2UgCj4+IHRoZSBwZXJmb3JtYW5jZT8KPgo+VGhl
+IHJlcXVlc3RzIGFyZSBkaXN0cmlidXRlZCBhY3Jvc3MgcGxhY2VtZW50IGdyb3VwcyBhbmQgaW50
+byBhIHNoYXJlZCAKPndvcmsgcXVldWUsIGltcGxlbWVudGVkIGJ5IFNoYXJkZWRXUSBpbiBjb21t
+b24vV29ya1F1ZXVlLmguICBUaGlzIAo+c2VyaWFsaXplcyBwcm9jZXNzaW5nIGZvciBhIGdpdmVu
+IFBHLCBidXQgdGhpcyBnZW5lcmFsbHkgbWFrZXMgbGl0dGxlIAo+ZGlmZmVyZW5jZSBhcyB0aGVy
+ZSBhcmUgdHlwaWNhbGx5IDEwMCBvciBtb3JlIFBHcyBwZXIgT1NELgo+Cj4+IDIpICBGcm9tIHNv
+bWUgZG9jdW1lbnRzIGFib3V0IENlcGgsIGlmIHRoZSBPU0QgcmVjZWl2ZXMgYSByZWFkIHJlcXVl
+c3QsIAo+PiB0aGUgT1NEIGNhbiBvbmx5IHJlYWQgZGF0YSBmcm9tIHByaW1hcnkgYW5kIHRoZW4g
+YmFjayB0byBjbGllbnQuIElzIHRoZSAKPj4gZGVzY3JpcHRpb24gcmlnaHQ/Cj4KPlllcy4gIFRo
+aXMgaXMgdXN1YWxseSB0aGUgcmlnaHQgdGhpbmcgdG8gZG8gb3IgZWxzZSBhIGdpdmVuIG9iamVj
+dCB3aWxsIAo+ZW5kIHVwIGNvbnN1bWluZyBjYWNoZSAobWVtb3J5KSBvbiBtb3JlIHRoYW4gb25l
+IE9TRCBhbmQgdGhlIG92ZXJhbGwgY2FjaGUgCj5lZmZpY2llbmN5IG9mIHRoZSBjbHVzdGVyIHdp
+bGwgZHJvcCBieSB5b3VyIHJlcGxpY2F0aW9uIGZhY3Rvci4gIEl0J3Mgb25seSAKPmEgd2luIHRv
+IGRpc3RyaWJ1dGVkIHJlYWRzIHdoZW4geW91IGhhdmUgYSB2ZXJ5IGhvdCBvYmplY3QsIG9yIHdo
+ZW4geW91IAo+d2FudCB0byBzcGVuZCBPU0QgcmVzb3VyY2VzIGJ5IHJlZHVjZSBsYXRlbmN5IChl
+LmcuLCBieSBzZW5kaW5nIHJlYWRzIHRvIAo+YWxsIHJlcGxpY2EgYW5kIHRha2luZyB0aGUgZmFz
+dGVzdCByZXBseSkuCj4KPj4gSXMgdGhlcmUgYW55IHdheSB0byByZWFkIHRoZSBkYXRhIGZyb20g
+cmVwbGljYXRlZCAKPj4gT1NEPyBEbyB3ZSBoYXZlIHRvIHJlcXVpcmUgdGhlIGRhdGEgZnJvbSB0
+aGUgcHJpbWFyeSBPU0Qgd2hlbiBkZWFsIHdpdGggCj4+IHRoZSByZWFkIHJlcXVlc3Q/IElmIG5v
+dCBhbmQgd2UgY2FuIHJlYWQgZnJvbSByZXBsaWNhdGVkIE9TRCwgY291bGQgd2UgCj4+IHByb21p
+c2UgdGhlIGNvbnNpc3RlbmN5Pwo+Cj5UaGVyZSBpcyBhIGNsaWVudC1zaWRlIGZsYWcgdG8gcmVh
+ZCBmcm9tIGEgcmFuZG9tIG9yIHRoZSBjbG9zZXN0IAo+cmVwbGljYSwgYnV0IHRoZXJlIGFyZSBh
+IGZldyBidWdzIHRoYXQgYWZmZWN0IGNvbnNpc3RlbmN5IHdoZW4gcmVjb3ZlcnkgaXMgCj51bmRl
+cndheSB0aGF0IGFyZSBiZWluZyBmaXhlZCB1cCBub3cuICBJdCBpcyBsaWtlbHkgdGhhdCB0aGlz
+IHdpbGwgd29yayAKPmNvcnJlY3RseSBpbiBJbmZlcm5hbGlzLCB0aGUgbmV4dCBzdGFibGUgcmVs
+ZWFzZS4KPgo+PiAzKSAgV2hlbiB0aGUgT1NEIHJlY2VpdmVzIHRoZSBtZXNzYWdlLCB0aGUgbWVz
+c2FnZT9zIGF0dHJpYnV0ZSBtYXkgYmUgCj4+IHRoZSBub3JtYWwgZGlzcGF0Y2ggb3IgdGhlIGZh
+c3QgZGlzcGF0Y2guIFdoYXQgaXMgdGhlIGRpZmZlcmVuY2UgYmV0d2VlbiAKPj4gdGhlIG5vcm1h
+bCBkaXNwYXRjaCBhbmQgdGhlIGZhc3QgZGlzcGF0Y2g/IElmIHRoZSBhdHRyaWJ1dGUgaXMgdGhl
+IAo+PiBub3JtYWwgZGlzcGF0Y2gsIGl0IGVudGVycyB0aGUgZGlzcGF0Y2ggcXVldWUuIElzIHRo
+ZXJlIGEgc2luZ2xlIAo+PiBkaXNwYXRjaCBxdWV1ZSBvciBtdWx0aSBkaXNwYXRjaCBxdWV1ZSB0
+byBkZWFsIHdpdGggYWxsIHRoZSBtZXNzYWdlcz8KPgo+VGhlcmUgaXMgYSBzaW5nbGUgdGhyZWFk
+IHRoYXQgZG9lcyB0aGUgbm9ybWFsIGRpc3BhdGNoLiAgRmFzdCBkaXNwYXRjaCAKPnByb2Nlc3Nl
+cyB0aGUgbWVzc2FnZSBzeW5jaHJub25vdXNseSBmcm9tIHRoZSB0aHJlYWQgdGhhdCByZWNlaXZl
+ZCB0aGUgCj5tZXNzYWdlLCBzbyBpdCBmYXN0ZXIsIGJ1dCBpdCBoYXMgdG8gYmUgY2FyZWZ1bCBu
+b3QgdG8gYmxvY2suCj4KPj4gVGhlc2UgYXJlIHRoZSBwcm9ibGVtIEkgYW0gZmFjaW5nLiBUaGFu
+ayB5b3UgZm9yIHlvdXIgcGF0aWVuY2UgYW5kIAo+PiBjb29wZXJhdGlvbiwgYW5kIEkgbG9vayBm
+b3J3YXJkIHRvIGhlYXJpbmcgZnJvbSB5b3UuCj4KPkhvcGUgdGhhdCBoZWxwcyEKPnNhZ2UK
