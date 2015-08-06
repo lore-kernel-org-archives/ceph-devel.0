@@ -1,88 +1,57 @@
-From: =?UTF-8?B?xYF1a2Fzeg==?= Szymczyk <lukasz.szymczyk@corp.ovh.com>
-Subject: Newbie question about metadata_list.
-Date: Thu, 6 Aug 2015 11:26:30 +0200
-Message-ID: <20150806112630.d3c4ed783a07dfefb0d6dbc6@corp.ovh.com>
+From: Ding Dinghua <dingdinghua85@gmail.com>
+Subject: Re: More ondisk_finisher thread?
+Date: Thu, 6 Aug 2015 18:47:33 +0800
+Message-ID: <CANf+_k+aYrhWDY=dKdDJ7ErOFQ2heScLOuo9V-qo-O7g20zEzw@mail.gmail.com>
+References: <CANf+_kKpR6prfna20CtRfq=6QF+vpvCJu2NaO73RwuF=X+HMwA@mail.gmail.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F2CDF8A9C@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CANf+_kLHWKdc+7wq=SvnLeZzibDpMOiHi4d+aW58=DnSHVZJVw@mail.gmail.com>
+	<alpine.DEB.2.00.1508050528090.22099@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mo69.mail-out.ovh.net ([178.32.228.69]:49034 "EHLO
-	mo69.mail-out.ovh.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754746AbbHFKqD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Aug 2015 06:46:03 -0400
-Received: from mail611.ha.ovh.net (b9.ovh.net [213.186.33.59])
-	by mo69.mail-out.ovh.net (Postfix) with SMTP id 3764EFFB06B
-	for <ceph-devel@vger.kernel.org>; Thu,  6 Aug 2015 11:27:22 +0200 (CEST)
-Received: from localhost (lszymczy.local.lp [10.40.0.52])
-	by proxy.pl.ovh.net (Postfix) with ESMTP id C4728100B86
-	for <ceph-devel@vger.kernel.org>; Thu,  6 Aug 2015 11:25:26 +0200 (CEST)
+Received: from mail-yk0-f177.google.com ([209.85.160.177]:33394 "EHLO
+	mail-yk0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753125AbbHFKre (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Aug 2015 06:47:34 -0400
+Received: by ykoo205 with SMTP id o205so58833048yko.0
+        for <ceph-devel@vger.kernel.org>; Thu, 06 Aug 2015 03:47:34 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1508050528090.22099@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: Somnath Roy <Somnath.Roy@sandisk.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
+Sorry for the noise.
+I have find out the cause in our setup and case: We gathered too many
+logs in our RADOS IO path, and the latency seems to be
+reasonable(about 0.026 ms) if we don't gather that many logs...
 
-I'm writing some program to replace image in cluster with it's copy.
-But I have problem with metadata_list.
-I created pool:
-#rados mkpool dupa
-then I created image:
-#rbd create --size 1000 -p mypool image --image-format 2
+2015-08-05 20:29 GMT+08:00 Sage Weil <sage@newdream.net>:
+> On Wed, 5 Aug 2015, Ding Dinghua wrote:
+>> 2015-08-05 0:13 GMT+08:00 Somnath Roy <Somnath.Roy@sandisk.com>:
+>> > Yes, it has to re-acquire pg_lock today..
+>> > But, between journal write and initiating the ondisk ack, there is one context switche in the code path. So, I guess the pg_lock is not the only one that is causing this 1 ms delay...
+>> > Not sure increasing the finisher threads will help in the pg_lock case as it will be more or less serialized by this pg_lock..
+>> My concern is, if pg lock of pg A has been grabbed, not only ondisk
+>> callback of pg A is delayed, since ondisk_finisher has only one
+>> thread,  ondisk callback of other pgs will be delayed too.
+>
+> I wonder if an optimistic approach might help here by making the
+> completion synchronous and doing something like
+>
+>    if (pg->lock.TryLock()) {
+>       pg->_finish_thing(completion->op);
+>       delete completion;
+>    } else {
+>       finisher.queue(completion);
+>    }
+>
+> or whatever.  We'd need to ensure that we aren't holding any lock or
+> throttle budget that the pg could deadlock against.
+>
+> sage
 
-Below is code which tries to get metadata, but it fails with -EOPNOTSUP=
-P.
-I compile it with command like this:
-g++ file.cpp -lrbd -lrados -I/ceph/source/directory/src
 
-#include <stdio.h>
-#include <stdlib.h>
-#include "include/rbd/librbd.h"
-#include "include/rbd/librbd.hpp"
-using namespace ceph;
-#include "librbd/ImageCtx.h"
 
-int main() {
-	rados_t clu;
-	int ret =3D rados_create(&clu, NULL);
-	if (ret) return -1;
-
-	ret =3D rados_conf_read_file(clu, NULL);
-	if (ret) return -1;
-
-	rados_conf_parse_env(clu, NULL);
-	ret =3D rados_connect(clu);
-	if (ret) return -1;
-
-	rados_ioctx_t io;
-	ret =3D rados_ioctx_create(clu, "mypool", &io);
-	if (ret) return -1;
-
-	rbd_image_t im;
-	ret =3D rbd_open(io, "image", &im, NULL);
-	if (ret) return -1;
-
-	librbd::ImageCtx *ic =3D (librbd::ImageCtx*)im;
-	std::string start;
-	int max =3D 1000;
-	bufferlist in, out;
-	::encode(start, in);
-	::encode(max, in);
-	ret =3D ((librados::IoCtx*)&io)->exec(ic->header_oid, "rbd", "metadata=
-_list", in, out);
-	if (ret < 0) printf("fail\n");
-
-	return 0;
-
-}
-
-So, my question is: what should be set/enabled to get those metadata?
-Or maybe what I'm doing wrong here.
-Thanks for your help.
-
-Best regards,
-=C5=81ukasz
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-- 
+Ding Dinghua
