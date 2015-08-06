@@ -1,76 +1,82 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: About the Ceph erasure pool with ISA plugin on Intel xeon CPU
-Date: Thu, 06 Aug 2015 14:31:02 +0200
-Message-ID: <55C35386.6070602@dachary.org>
-References: <CAKEOLWVxuURSgYP3FLRhHs=THuYK0Qy084hNxZAqERyAYy2J4w@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Consult some problems of Ceph when reading source code
+Date: Thu, 6 Aug 2015 05:44:45 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1508060540070.22099@cobra.newdream.net>
+References: <780bf286.119cf.14f008cac3f.Coremail.cymengxiang@126.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="KagFVWc8VV0qeEPMvLa2OK09pdg9J5UtU"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:34321 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1755500AbbHFMbH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Aug 2015 08:31:07 -0400
-In-Reply-To: <CAKEOLWVxuURSgYP3FLRhHs=THuYK0Qy084hNxZAqERyAYy2J4w@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:38863 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755143AbbHFMoq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Aug 2015 08:44:46 -0400
+In-Reply-To: <780bf286.119cf.14f008cac3f.Coremail.cymengxiang@126.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Derek Su <dereksu@qnap.com>
+To: =?ISO-2022-JP?Q?=1B$Bhq5#=1B=28J?= <cymengxiang@126.com>
 Cc: ceph-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---KagFVWc8VV0qeEPMvLa2OK09pdg9J5UtU
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Hi!
 
-Hi,
+On Thu, 6 Aug 2015, ?? wrote:
+> Dear developers,
+> 
+> My name is Cai Yi, and I am a graduate student majored in CS of Xi?an 
+> Jiaotong University in China. From Ceph?s homepage, I know Sage is the 
+> author of Ceph and I get the email address from your GitHub and Ceph?s 
+> official website. Because Ceph is an excellent distributed file system, 
+> so recently, I am reading the source code of the Ceph (the edition is 
+> Hammer) to understand the IO good path and the performance of Ceph. 
+> However, I face some problems which I could not find the solution from 
+> Internet or solve by myself and my partners. So I was wondering if you 
+> could help us solve some problems. The problems are as follows:
+> 
+> 1)  In the Ceph, there is a concept that is the transaction. When the 
+> OSD receives a write request, and then it is encapsulated by a 
+> transaction. But When the OSD receive many requests, is there a 
+> transaction queue to receive the messages? If there is a queue, is it a 
+> process of serial or parallel to submit these transaction to do next 
+> operation? If it is serial, could the transaction operations influence 
+> the performance?
 
-Could you please publish the benchmark results somewhere ? I should be ab=
-le to figure out why you don't see a difference.
+The requests are distributed across placement groups and into a shared 
+work queue, implemented by ShardedWQ in common/WorkQueue.h.  This 
+serializes processing for a given PG, but this generally makes little 
+difference as there are typically 100 or more PGs per OSD.
 
-Cheers
+> 2)  From some documents about Ceph, if the OSD receives a read request, 
+> the OSD can only read data from primary and then back to client. Is the 
+> description right?
 
-On 06/08/2015 13:25, Derek Su wrote:
-> Dear Mr. Dachary and all,
->=20
-> Recently, I found your blog show the performance tests of erasure
-> pools (http://dachary.org/?p=3D3042 , http://dachary.org/?p=3D3665).
-> The results indicates the write throughput can be enhanced
-> significantly using Intel xeon CPU.
->=20
-> I tried to create an erasure pool with isa plugin, reed_sol_van
-> technique, and k/m=3D4/2 on the Intel(R) Xeon(R) CPU E3-1245 v3 @
-> 3.40GHz machines.
->=20
-> However, the results of the rados benchmark showed that there was no
-> any difference between the jerasure and isa plugins. It seems very
-> strange.
->=20
-> Do I need to do other configurations in addition to only setting the
-> erasure profile?
-> In addition, how can I know the erasure pool is accelerated by ISA
-> plugin exactly? Is there any command I can use?
->=20
-> Thanks, :)
->=20
-> Derek Su.
->=20
+Yes.  This is usually the right thing to do or else a given object will 
+end up consuming cache (memory) on more than one OSD and the overall cache 
+efficiency of the cluster will drop by your replication factor.  It's only 
+a win to distributed reads when you have a very hot object, or when you 
+want to spend OSD resources by reduce latency (e.g., by sending reads to 
+all replica and taking the fastest reply).
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+> Is there any way to read the data from replicated 
+> OSD? Do we have to require the data from the primary OSD when deal with 
+> the read request? If not and we can read from replicated OSD, could we 
+> promise the consistency?
 
+There is a client-side flag to read from a random or the closest 
+replica, but there are a few bugs that affect consistency when recovery is 
+underway that are being fixed up now.  It is likely that this will work 
+correctly in Infernalis, the next stable release.
 
---KagFVWc8VV0qeEPMvLa2OK09pdg9J5UtU
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+> 3)  When the OSD receives the message, the message?s attribute may be 
+> the normal dispatch or the fast dispatch. What is the difference between 
+> the normal dispatch and the fast dispatch? If the attribute is the 
+> normal dispatch, it enters the dispatch queue. Is there a single 
+> dispatch queue or multi dispatch queue to deal with all the messages?
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
+There is a single thread that does the normal dispatch.  Fast dispatch 
+processes the message synchrnonously from the thread that received the 
+message, so it faster, but it has to be careful not to block.
 
-iEYEARECAAYFAlXDU4YACgkQ8dLMyEl6F23qswCgtZu9Bx9RJO1ZGzYjdjM6SnhY
-f4QAn0vAgzuFxrjXxhzL8MUbuTDNN4fG
-=SmTD
------END PGP SIGNATURE-----
+> These are the problem I am facing. Thank you for your patience and 
+> cooperation, and I look forward to hearing from you.
 
---KagFVWc8VV0qeEPMvLa2OK09pdg9J5UtU--
+Hope that helps!
+sage
