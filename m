@@ -1,163 +1,128 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: OSD sometimes stuck in init phase
-Date: Thu, 6 Aug 2015 21:28:39 +0800
-Message-ID: <CACJqLyaUbUrx0+1vepN68QR=5ZDeuZa_0jhE5322iJ8D2vmqXg@mail.gmail.com>
-References: <BA2282FCE1654C43BF189535A964CC9F273279B3@G4W3218.americas.hpqcorp.net>
-	<CACJqLyYCf_QBXjxAProirc3RqhYQh8Z7mDamZe7aVKwEozYtpw@mail.gmail.com>
-	<BA2282FCE1654C43BF189535A964CC9F27327A40@G4W3218.americas.hpqcorp.net>
-	<CACJqLyZOmgnY6OTNWu9Or7ZvLxv8_wUX8ZgUtEd0d8n8s3RHpg@mail.gmail.com>
-	<BA2282FCE1654C43BF189535A964CC9F27327CB9@G4W3218.americas.hpqcorp.net>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Erasure Code Plugins : PLUGINS_V3 feature
+Date: Thu, 06 Aug 2015 15:57:58 +0200
+Message-ID: <55C367E6.8040902@dachary.org>
+References: <55B899FB.4080007@dachary.org> <55C1C789.3050401@dachary.org> <alpine.DEB.2.00.1508051136360.22099@cobra.newdream.net> <870DE8DBB716524BAE51B2D499EC81E40AB68E6A@g01jpexmbyt24>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="2xlxwE3TiIhwFm0u8L6Fm39PCCQ30WSxU"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f54.google.com ([209.85.220.54]:36064 "EHLO
-	mail-pa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751278AbbHFN2k convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Aug 2015 09:28:40 -0400
-Received: by pacrr5 with SMTP id rr5so27895677pac.3
-        for <ceph-devel@vger.kernel.org>; Thu, 06 Aug 2015 06:28:40 -0700 (PDT)
-In-Reply-To: <BA2282FCE1654C43BF189535A964CC9F27327CB9@G4W3218.americas.hpqcorp.net>
+Received: from mail2.dachary.org ([91.121.57.175]:34384 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751780AbbHFN6E (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Aug 2015 09:58:04 -0400
+In-Reply-To: <870DE8DBB716524BAE51B2D499EC81E40AB68E6A@g01jpexmbyt24>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Gurjar, Unmesh" <unmesh.gurjar@hp.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, "Shiozawa, Kensuke" <shiozawa.kennsu@jp.fujitsu.com>, "Nakao, Takanori" <nakao.takanori@jp.fujitsu.com>
 
-It seemed filestore doesn't do transaction as expected. Sorry, you
-need to add debug_journal=20/20 to help find the reason. :-)
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--2xlxwE3TiIhwFm0u8L6Fm39PCCQ30WSxU
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-BTW, what's your os version? How many osds do you have in this
-cluster, how many osds failed to start like this?
+Hi Takeshi,
 
-On Thu, Aug 6, 2015 at 9:17 PM, Gurjar, Unmesh <unmesh.gurjar@hp.com> wrote:
-> Please find ceph.conf at [1] and the corresponding OSD log at [2].
->
-> To clarify one thing I skipped earlier on, is while bringing up the OSDs, 'ceph-disk activate' was getting hung (due to issue [3]). To get over this, I had to temporarily disable 'journal dio' to get the disk activated (with a 'mark-init' set to none) and then explicitly start the OSD service after updating the conf to enable 'journal dio'. I am hopeful that this should not cause the present issue (since few OSD start successfully on first attempt and others on subsequent service restarts)!
->
-> [1] - http://paste.openstack.org/show/411161/
-> [2] - http://paste.openstack.org/show/411162/
-> [3] - http://tracker.ceph.com/issues/9768
->
-> Regards,
-> Unmesh G.
-> IRC: unmeshg
->
->> -----Original Message-----
->> From: Haomai Wang [mailto:haomaiwang@gmail.com]
->> Sent: Thursday, August 06, 2015 6:22 PM
->> To: Gurjar, Unmesh
->> Cc: ceph-devel@vger.kernel.org
->> Subject: Re: OSD sometimes stuck in init phase
+https://github.com/ceph/ceph/pull/5493 is ready for your review. The matc=
+hing integration tests can be found at https://github.com/ceph/ceph-qa-su=
+ite/pull/523
+
+Cheers
+
+On 06/08/2015 02:28, Miyamae, Takeshi wrote:
+> Dear Sage,
+>=20
+>> note that what this really means is that the on-disk encoding needs to=
+ remain fixed.
+>=20
+> Thank you for letting us know the important notice.
+> We have no plan to change shec's format at this moment, but we will rem=
+ember the
+> comment for any future events.
+>=20
+> Best Regards,
+> Takeshi Miyamae
+>=20
+> -----Original Message-----
+> From: Sage Weil [mailto:sweil@redhat.com]=20
+> Sent: Thursday, August 6, 2015 3:45 AM
+> To: Loic Dachary; Miyamae, Takeshi/=E5=AE=AE=E5=89=8D =E5=89=9B
+> Cc: Samuel Just; Ceph Development
+> Subject: Re: Erasure Code Plugins : PLUGINS_V3 feature
+>=20
+> On Wed, 5 Aug 2015, Loic Dachary wrote:
+>> Hi Sam,
 >>
->> Don't find something strange.
+>> How does this proposal sound ? It would be great if that was done=20
+>> before the feature freeze.
+>=20
+> I think it's a good time.
+>=20
+> Takeshi, note that what this really means is that the on-disk encoding =
+needs to remain fixed.  If we decide to change it down the line, we'll ha=
+ve to make a 'shec2' or similar so that the old format is still decodable=
+ (or ensure that existing data can still be read in some other way).
+>=20
+> Sound good?
+>=20
+> sage
+>=20
+>=20
 >>
->> Could you paste your ceph.conf? And restart this osd with debug_osd=20/20,
->> debug_filestore=20/20 :-)
+>> Cheers
 >>
->> On Thu, Aug 6, 2015 at 8:09 PM, Gurjar, Unmesh <unmesh.gurjar@hp.com>
->> wrote:
->> > Thanks for quick response Haomai! Please find the backtrace here [1].
->> >
->> > [1] - http://paste.openstack.org/show/411139/
->> >
->> > Regards,
->> > Unmesh G.
->> > IRC: unmeshg
->> >
->> >> -----Original Message-----
->> >> From: Haomai Wang [mailto:haomaiwang@gmail.com]
->> >> Sent: Thursday, August 06, 2015 5:31 PM
->> >> To: Gurjar, Unmesh
->> >> Cc: ceph-devel@vger.kernel.org
->> >> Subject: Re: OSD sometimes stuck in init phase
->> >>
->> >> Could you print your all thread callback via "thread apply all bt"?
->> >>
->> >> On Thu, Aug 6, 2015 at 7:52 PM, Gurjar, Unmesh <unmesh.gurjar@hp.com>
->> >> wrote:
->> >> > Hi,
->> >> >
->> >> > On a Ceph Firefly cluster (version [1]), OSDs are configured to use
->> >> > separate
->> >> data and journal disks (using the ceph-disk utility). It is observed,
->> >> that few OSDs start-up fine (are 'up' and 'in' state); however,
->> >> others are stuck in the 'init creating/touching snapmapper object'
->> >> phase. Below is a OSD start-up log
->> >> snippet:
->> >> >
->> >> > 2015-08-06 08:58:02.491537 7fd312df97c0  1 journal _open
->> >> > /var/lib/ceph/osd/ceph-0/journal fd 21: 1073741824 bytes, block
->> >> > size
->> >> > 4096 bytes, directio = 1, aio = 1
->> >> > 2015-08-06 08:58:02.498447 7fd312df97c0  1 journal _open
->> >> > /var/lib/ceph/osd/ceph-0/journal fd 21: 1073741824 bytes, block
->> >> > size
->> >> > 4096 bytes, directio = 1, aio = 1
->> >> > 2015-08-06 08:58:02.498720 7fd312df97c0  2 osd.0 0 boot
->> >> > 2015-08-06 08:58:02.498865 7fd312df97c0 10 osd.0 0 read_superblock
->> >> > sb(2645bbf6-16d0-4c42-8835-8ba9f5c95a1d osd.0
->> >> > a821146f-0742-4724-b4ca-39ea4ccc298d e0 [0,0] lci=[0,0])
->> >> > 2015-08-06 08:58:02.498937 7fd312df97c0 10 osd.0 0 init
->> >> > creating/touching snapmapper object
->> >> >
->> >> > The log statement is inaccurate though, since it is actually doing
->> >> > init
->> >> operation for the 'infos' object (as can be observed from source [2]).
->> >> >
->> >> > Upon debugging further, the thread seems to be waiting to acquire
->> >> > the
->> >> 'ObjectStore::apply_transaction::my_lock' mutex. Below is the debug trace:
->> >> >
->> >> > (gdb) where
->> >> > #0  0x00007fd3122b708f in pthread_cond_wait@@GLIBC_2.3.2 () from
->> >> > /lib/x86_64-linux-gnu/libpthread.so.0
->> >> > #1  0x00007fd313132bf4 in
->> >> > ObjectStore::apply_transactions(ObjectStore::Sequencer*,
->> >> > std::list<ObjectStore::Transaction*,
->> >> > std::allocator<ObjectStore::Transaction*> >&, Context*) ()
->> >> > #2  0x00007fd313097d08 in
->> >> > ObjectStore::apply_transaction(ObjectStore::Transaction&, Context*)
->> >> > ()
->> >> > #3  0x00007fd313076790 in OSD::init() ()
->> >> > #4  0x00007fd3130233a7 in main ()
->> >> >
->> >> > In a few cases, upon restarting the stuck OSD (service), it
->> >> > successfully
->> >> completes the 'init' phase and reaches the 'up' and 'in' state!
->> >> >
->> >> > Any help is greatly appreciated. Please let me know if any more
->> >> > details are
->> >> required for root causing.
->> >> >
->> >> > [1] - 0.80.7 (6c0127fcb58008793d3c8b62d925bc91963672a3)
->> >> > [2] -
->> >> > https://github.com/ceph/ceph/blob/firefly/src/osd/OSD.cc#L1211
->> >> >
->> >> > Regards,
->> >> > Unmesh G.
->> >> > IRC: unmeshg
->> >> > --
->> >> > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->> >> > in the body of a message to majordomo@vger.kernel.org More
->> >> > majordomo info at  http://vger.kernel.org/majordomo-info.html
->> >>
->> >>
->> >>
->> >> --
->> >> Best Regards,
->> >>
->> >> Wheat
->>
->>
+>> On 29/07/2015 11:16, Loic Dachary wrote:
+>>> Hi Sam,
+>>>
+>>> The SHEC plugin[0] has been running in the rados runs[1] in the past =
+few months. It also has a matching corpus verification which runs on ever=
+y make check[2] as well as its optimized variants. I believe the flag "ex=
+perimental" can now be removed.=20
+>>>
+>>> In order to do so, we need to use a PLUGINS_V3 feature, in the same w=
+ay we did back in Giant when the ISA and LRC plugins were introduced[3]. =
+This won't be necessary in the future, when there is a generic plugin mec=
+hanism, but right now that's what we need. It would be a commit very simi=
+lar to the one implementing PLUGINS_V2[4].
+>>>
+>>> Is this agreeable to you ? Or would you rather see another way to res=
+olve this ?
+>>>
+>>> Cheers
+>>>
+>>> [0] https://github.com/ceph/ceph/tree/master/src/erasure-code/shec
+>>> [1]=20
+>>> https://github.com/ceph/ceph-qa-suite/tree/master/suites/rados/thras
+>>> h-erasure-code-shec [2]=20
+>>> https://github.com/ceph/ceph-erasure-code-corpus/blob/master/v0.92-9
+>>> 88/non-regression.sh#L52 [3] http://tracker.ceph.com/issues/9343
+>>> [4]=20
+>>> https://github.com/ceph/ceph/commit/9687150ceac9cc7e506bc227f430d420
+>>> 7a6d7489
+>>>
 >>
 >> --
->> Best Regards,
+>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
 >>
->> Wheat
+>>
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
 
+--2xlxwE3TiIhwFm0u8L6Fm39PCCQ30WSxU
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
--- 
-Best Regards,
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
 
-Wheat
+iEYEARECAAYFAlXDZ+cACgkQ8dLMyEl6F23gOgCgj9F6aZnwacvOwZPek/jI3sRR
+iEoAoLTL8G9mxOm9VNk5xXGxrQxxqFdy
+=Dzvw
+-----END PGP SIGNATURE-----
+
+--2xlxwE3TiIhwFm0u8L6Fm39PCCQ30WSxU--
