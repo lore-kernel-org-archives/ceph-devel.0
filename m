@@ -1,33 +1,32 @@
-From: Sage Weil <sweil@redhat.com>
+From: Christoph Hellwig <hch@infradead.org>
 Subject: Re: FileStore should not use syncfs(2)
-Date: Thu, 6 Aug 2015 05:57:53 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1508060556540.22099@cobra.newdream.net>
-References: <alpine.DEB.2.00.1508051415070.26854@cobra.newdream.net> <CAAM7YAnH8QaKP1RY3zbLX=3eZd-4tVX1EL=sH-x4y0P5ydDtfQ@mail.gmail.com>
+Date: Thu, 6 Aug 2015 06:06:36 -0700
+Message-ID: <20150806130636.GA20436@infradead.org>
+References: <alpine.DEB.2.00.1508051415070.26854@cobra.newdream.net>
+ <20150806112747.GA21742@infradead.org>
+ <alpine.DEB.2.00.1508060559410.22099@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:58667 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754043AbbHFNFq (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 6 Aug 2015 09:05:46 -0400
-In-Reply-To: <CAAM7YAnH8QaKP1RY3zbLX=3eZd-4tVX1EL=sH-x4y0P5ydDtfQ@mail.gmail.com>
+Received: from bombadil.infradead.org ([198.137.202.9]:50633 "EHLO
+	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752014AbbHFNGh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Aug 2015 09:06:37 -0400
+Content-Disposition: inline
+In-Reply-To: <alpine.DEB.2.00.1508060559410.22099@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <ukernel@gmail.com>
-Cc: Somnath.Roy@sandisk.com, ceph-devel <ceph-devel@vger.kernel.org>, sjust@redhat.com
+To: Sage Weil <sweil@redhat.com>
+Cc: Somnath.Roy@sandisk.com, ceph-devel@vger.kernel.org, sjust@redhat.com
 
-On Thu, 6 Aug 2015, Yan, Zheng wrote:
-> On Thu, Aug 6, 2015 at 5:26 AM, Sage Weil <sweil@redhat.com> wrote:
-> > Today I learned that syncfs(2) does an O(n) search of the superblock's
-> > inode list searching for dirty items.  I've always assumed that it was
-> > only traversing dirty inodes (e.g., a list of dirty inodes), but that
-> > appears not to be the case, even on the latest kernels.
-> >
-> 
-> I checked syncfs code in 3.10/4.1 kernel. I think both kernels only
-> traverse dirty inodes (inodes in
-> bdi_writeback::{b_dirty,b_io,b_more_io} lists). what am I missing?
+On Thu, Aug 06, 2015 at 06:00:42AM -0700, Sage Weil wrote:
+> I'm guessing the strategy here should be to fsync the file (leaf) and then 
+> any affected ancestors, such that the directory fsyncs are effectively 
+> no-ops?  Or does it matter?
 
-See wait_sb_inodes in fs/fs-writeback.c, called by sync_inodes_sb.
-
-sage
+All metadata transactions log the involve parties (parent and child
+inode(s) mostly) in the same transaction.  So flushing one of them out
+is enough.  But file data I/O might dirty the inode before flushing them
+out, so to not need to write out the inode log item twice you first want
+to fsync any file that had data I/O followed by directories or special
+files that only had metadata modified.
