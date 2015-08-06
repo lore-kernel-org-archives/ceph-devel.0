@@ -1,75 +1,116 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: FileStore should not use syncfs(2)
-Date: Thu, 6 Aug 2015 05:47:29 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1508060545260.22099@cobra.newdream.net>
-References: <alpine.DEB.2.00.1508051415070.26854@cobra.newdream.net> <755F6B91B3BE364F9BCA11EA3F9E0C6F2CDFBE42@SACMBXIP01.sdcorp.global.sandisk.com> <CACJqLyYfh=s3n_iKq0UPnWpeirKV=BVEf7LHv-dKC+xiAG6W=Q@mail.gmail.com>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: OSD sometimes stuck in init phase
+Date: Thu, 6 Aug 2015 20:52:26 +0800
+Message-ID: <CACJqLyZOmgnY6OTNWu9Or7ZvLxv8_wUX8ZgUtEd0d8n8s3RHpg@mail.gmail.com>
+References: <BA2282FCE1654C43BF189535A964CC9F273279B3@G4W3218.americas.hpqcorp.net>
+	<CACJqLyYCf_QBXjxAProirc3RqhYQh8Z7mDamZe7aVKwEozYtpw@mail.gmail.com>
+	<BA2282FCE1654C43BF189535A964CC9F27327A40@G4W3218.americas.hpqcorp.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:38881 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755628AbbHFMr3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Aug 2015 08:47:29 -0400
-In-Reply-To: <CACJqLyYfh=s3n_iKq0UPnWpeirKV=BVEf7LHv-dKC+xiAG6W=Q@mail.gmail.com>
+Received: from mail-pa0-f44.google.com ([209.85.220.44]:33787 "EHLO
+	mail-pa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752892AbbHFMw1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Aug 2015 08:52:27 -0400
+Received: by pabyb7 with SMTP id yb7so30380364pab.0
+        for <ceph-devel@vger.kernel.org>; Thu, 06 Aug 2015 05:52:26 -0700 (PDT)
+In-Reply-To: <BA2282FCE1654C43BF189535A964CC9F27327A40@G4W3218.americas.hpqcorp.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomaiwang@gmail.com>
-Cc: Somnath Roy <Somnath.Roy@sandisk.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "sjust@redhat.com" <sjust@redhat.com>
+To: "Gurjar, Unmesh" <unmesh.gurjar@hp.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, 6 Aug 2015, Haomai Wang wrote:
-> Agree
-> 
-> On Thu, Aug 6, 2015 at 5:38 AM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
-> > Thanks Sage for digging down..I was suspecting something similar.. As I mentioned in today's call, in idle time also syncfs is taking ~60ms. I have 64 GB of RAM in the system.
-> > The workaround I was talking about today  is working pretty good so far. In this implementation, I am not giving much work to syncfs as each worker thread is writing with o_dsync mode. I am issuing syncfs before trimming the journal and most of the time I saw it is taking < 100 ms.
-> 
-> Actually I prefer we don't use syncfs anymore. I more like to use
-> "aio+dio+Filestore custom cache" to deal with all "syncfs+pagecache"
-> things. So we even can make cache more smart to aware of upper levels
-> instead of fadvise* calls. Second we can use "checkpoint" method like
-> mysql innodb, we can know the bw of frontend(filejournal) and decide
-> how much and how often we want to flush(using aio+dio).
-> 
-> Anyway, because it's a big project, we may prefer to work at newstore
-> instead of filestore.
-> 
-> > I have to wake up the sync_thread now after each worker thread finished writing. I will benchmark both the approaches. As we discussed earlier, in case of only fsync approach, we still need to do a db sync to make sure the leveldb stuff persisted, right ?
-> >
-> > Thanks & Regards
-> > Somnath
-> >
-> > -----Original Message-----
-> > From: Sage Weil [mailto:sweil@redhat.com]
-> > Sent: Wednesday, August 05, 2015 2:27 PM
-> > To: Somnath Roy
-> > Cc: ceph-devel@vger.kernel.org; sjust@redhat.com
-> > Subject: FileStore should not use syncfs(2)
-> >
-> > Today I learned that syncfs(2) does an O(n) search of the superblock's inode list searching for dirty items.  I've always assumed that it was only traversing dirty inodes (e.g., a list of dirty inodes), but that appears not to be the case, even on the latest kernels.
-> >
-> > That means that the more RAM in the box, the larger (generally) the inode cache, the longer syncfs(2) will take, and the more CPU you'll waste doing it.  The box I was looking at had 256GB of RAM, 36 OSDs, and a load of ~40 servicing a very light workload, and each syncfs(2) call was taking ~7 seconds (usually to write out a single inode).
-> >
-> > A possible workaround for such boxes is to turn /proc/sys/vm/vfs_cache_pressure way up (so that the kernel favors caching pages instead of inodes/dentries)...
-> >
-> > I think the take-away though is that we do need to bite the bullet and make FileStore f[data]sync all the right things so that the syncfs call can be avoided.  This is the path you were originally headed down, Somnath, and I think it's the right one.
-> >
-> > The main thing to watch out for is that according to POSIX you really need to fsync directories.  With XFS that isn't the case since all metadata operations are going into the journal and that's fully ordered, but we don't want to allow data loss on e.g. ext4 (we need to check what the metadata ordering behavior is there) or other file systems.
-> 
-> I guess there only a little directory modify operations, is it true?
-> Maybe we only need to do syncfs when modifying directories?
+Don't find something strange.
 
-I'd say there are a few broad cases:
+Could you paste your ceph.conf? And restart this osd with
+debug_osd=20/20, debug_filestore=20/20 :-)
 
- - creating or deleting objects.  simply fsyncing the file is 
-sufficient on XFS; we should confirm what the behavior is on other 
-distros.  But even if we d the fsync on the dir this is simple to 
-implement.
+On Thu, Aug 6, 2015 at 8:09 PM, Gurjar, Unmesh <unmesh.gurjar@hp.com> wrote:
+> Thanks for quick response Haomai! Please find the backtrace here [1].
+>
+> [1] - http://paste.openstack.org/show/411139/
+>
+> Regards,
+> Unmesh G.
+> IRC: unmeshg
+>
+>> -----Original Message-----
+>> From: Haomai Wang [mailto:haomaiwang@gmail.com]
+>> Sent: Thursday, August 06, 2015 5:31 PM
+>> To: Gurjar, Unmesh
+>> Cc: ceph-devel@vger.kernel.org
+>> Subject: Re: OSD sometimes stuck in init phase
+>>
+>> Could you print your all thread callback via "thread apply all bt"?
+>>
+>> On Thu, Aug 6, 2015 at 7:52 PM, Gurjar, Unmesh <unmesh.gurjar@hp.com>
+>> wrote:
+>> > Hi,
+>> >
+>> > On a Ceph Firefly cluster (version [1]), OSDs are configured to use separate
+>> data and journal disks (using the ceph-disk utility). It is observed, that few OSDs
+>> start-up fine (are 'up' and 'in' state); however, others are stuck in the 'init
+>> creating/touching snapmapper object' phase. Below is a OSD start-up log
+>> snippet:
+>> >
+>> > 2015-08-06 08:58:02.491537 7fd312df97c0  1 journal _open
+>> > /var/lib/ceph/osd/ceph-0/journal fd 21: 1073741824 bytes, block size
+>> > 4096 bytes, directio = 1, aio = 1
+>> > 2015-08-06 08:58:02.498447 7fd312df97c0  1 journal _open
+>> > /var/lib/ceph/osd/ceph-0/journal fd 21: 1073741824 bytes, block size
+>> > 4096 bytes, directio = 1, aio = 1
+>> > 2015-08-06 08:58:02.498720 7fd312df97c0  2 osd.0 0 boot
+>> > 2015-08-06 08:58:02.498865 7fd312df97c0 10 osd.0 0 read_superblock
+>> > sb(2645bbf6-16d0-4c42-8835-8ba9f5c95a1d osd.0
+>> > a821146f-0742-4724-b4ca-39ea4ccc298d e0 [0,0] lci=[0,0])
+>> > 2015-08-06 08:58:02.498937 7fd312df97c0 10 osd.0 0 init
+>> > creating/touching snapmapper object
+>> >
+>> > The log statement is inaccurate though, since it is actually doing init
+>> operation for the 'infos' object (as can be observed from source [2]).
+>> >
+>> > Upon debugging further, the thread seems to be waiting to acquire the
+>> 'ObjectStore::apply_transaction::my_lock' mutex. Below is the debug trace:
+>> >
+>> > (gdb) where
+>> > #0  0x00007fd3122b708f in pthread_cond_wait@@GLIBC_2.3.2 () from
+>> > /lib/x86_64-linux-gnu/libpthread.so.0
+>> > #1  0x00007fd313132bf4 in
+>> > ObjectStore::apply_transactions(ObjectStore::Sequencer*,
+>> > std::list<ObjectStore::Transaction*,
+>> > std::allocator<ObjectStore::Transaction*> >&, Context*) ()
+>> > #2  0x00007fd313097d08 in
+>> > ObjectStore::apply_transaction(ObjectStore::Transaction&, Context*) ()
+>> > #3  0x00007fd313076790 in OSD::init() ()
+>> > #4  0x00007fd3130233a7 in main ()
+>> >
+>> > In a few cases, upon restarting the stuck OSD (service), it successfully
+>> completes the 'init' phase and reaches the 'up' and 'in' state!
+>> >
+>> > Any help is greatly appreciated. Please let me know if any more details are
+>> required for root causing.
+>> >
+>> > [1] - 0.80.7 (6c0127fcb58008793d3c8b62d925bc91963672a3)
+>> > [2] -  https://github.com/ceph/ceph/blob/firefly/src/osd/OSD.cc#L1211
+>> >
+>> > Regards,
+>> > Unmesh G.
+>> > IRC: unmeshg
+>> > --
+>> > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>> > in the body of a message to majordomo@vger.kernel.org More majordomo
+>> > info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
+>>
+>> --
+>> Best Regards,
+>>
+>> Wheat
 
- - renaming objects (collection_move_rename).  Easy to add an fsync here.
 
- - HashIndex rehashing.  This is where I get nervous... and setting some 
-flag that triggers a full syncfs might be an interim solution since it's a 
-pretty rare event.  OTOH, adding the fsync calls in the HashIndex code 
-probably isn't so bad to audit and get right either...
 
-sage
+-- 
+Best Regards,
+
+Wheat
