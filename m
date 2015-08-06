@@ -1,41 +1,37 @@
-From: Derek Su <dereksu@qnap.com>
-Subject: About the Ceph erasure pool with ISA plugin on Intel xeon CPU
-Date: Thu, 6 Aug 2015 19:25:22 +0800
-Message-ID: <CAKEOLWVxuURSgYP3FLRhHs=THuYK0Qy084hNxZAqERyAYy2J4w@mail.gmail.com>
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: FileStore should not use syncfs(2)
+Date: Thu, 6 Aug 2015 04:27:47 -0700
+Message-ID: <20150806112747.GA21742@infradead.org>
+References: <alpine.DEB.2.00.1508051415070.26854@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f53.google.com ([209.85.220.53]:35130 "EHLO
-	mail-pa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753652AbbHFLZX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Aug 2015 07:25:23 -0400
-Received: by pabxd6 with SMTP id xd6so42983534pab.2
-        for <ceph-devel@vger.kernel.org>; Thu, 06 Aug 2015 04:25:23 -0700 (PDT)
+Received: from bombadil.infradead.org ([198.137.202.9]:54906 "EHLO
+	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754376AbbHFL17 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Aug 2015 07:27:59 -0400
+Content-Disposition: inline
+In-Reply-To: <alpine.DEB.2.00.1508051415070.26854@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: loic@dachary.org
-Cc: ceph-devel@vger.kernel.org
+To: Sage Weil <sweil@redhat.com>
+Cc: Somnath.Roy@sandisk.com, ceph-devel@vger.kernel.org, sjust@redhat.com
 
-Dear Mr. Dachary and all,
+On Wed, Aug 05, 2015 at 02:26:30PM -0700, Sage Weil wrote:
+> Today I learned that syncfs(2) does an O(n) search of the superblock's 
+> inode list searching for dirty items.  I've always assumed that it was 
+> only traversing dirty inodes (e.g., a list of dirty inodes), but that 
+> appears not to be the case, even on the latest kernels.
 
-Recently, I found your blog show the performance tests of erasure
-pools (http://dachary.org/?p=3042 , http://dachary.org/?p=3665).
-The results indicates the write throughput can be enhanced
-significantly using Intel xeon CPU.
+I'm pretty sure Dave had some patches for that,  Even if they aren't
+included it's not an unsolved problem.
 
-I tried to create an erasure pool with isa plugin, reed_sol_van
-technique, and k/m=4/2 on the Intel(R) Xeon(R) CPU E3-1245 v3 @
-3.40GHz machines.
+> The main thing to watch out for is that according to POSIX you really need 
+> to fsync directories.  With XFS that isn't the case since all metadata 
+> operations are going into the journal and that's fully ordered, but we 
+> don't want to allow data loss on e.g. ext4 (we need to check what the 
+> metadata ordering behavior is there) or other file systems.
 
-However, the results of the rados benchmark showed that there was no
-any difference between the jerasure and isa plugins. It seems very
-strange.
+That additional fsync in XFS is basically free, so better get it right
+and let the file system micro optimize for you.
 
-Do I need to do other configurations in addition to only setting the
-erasure profile?
-In addition, how can I know the erasure pool is accelerated by ISA
-plugin exactly? Is there any command I can use?
-
-Thanks, :)
-
-Derek Su.
