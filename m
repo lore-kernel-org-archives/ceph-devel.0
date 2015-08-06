@@ -1,112 +1,163 @@
-From: "Gurjar, Unmesh" <unmesh.gurjar@hp.com>
-Subject: RE: OSD sometimes stuck in init phase
-Date: Thu, 6 Aug 2015 13:17:07 +0000
-Message-ID: <BA2282FCE1654C43BF189535A964CC9F27327CB9@G4W3218.americas.hpqcorp.net>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: OSD sometimes stuck in init phase
+Date: Thu, 6 Aug 2015 21:28:39 +0800
+Message-ID: <CACJqLyaUbUrx0+1vepN68QR=5ZDeuZa_0jhE5322iJ8D2vmqXg@mail.gmail.com>
 References: <BA2282FCE1654C43BF189535A964CC9F273279B3@G4W3218.americas.hpqcorp.net>
 	<CACJqLyYCf_QBXjxAProirc3RqhYQh8Z7mDamZe7aVKwEozYtpw@mail.gmail.com>
 	<BA2282FCE1654C43BF189535A964CC9F27327A40@G4W3218.americas.hpqcorp.net>
- <CACJqLyZOmgnY6OTNWu9Or7ZvLxv8_wUX8ZgUtEd0d8n8s3RHpg@mail.gmail.com>
+	<CACJqLyZOmgnY6OTNWu9Or7ZvLxv8_wUX8ZgUtEd0d8n8s3RHpg@mail.gmail.com>
+	<BA2282FCE1654C43BF189535A964CC9F27327CB9@G4W3218.americas.hpqcorp.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from g4t3427.houston.hp.com ([15.201.208.55]:34227 "EHLO
-	g4t3427.houston.hp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752895AbbHFNRv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Aug 2015 09:17:51 -0400
-Received: from G4W6310.americas.hpqcorp.net (g4w6310.houston.hp.com [16.210.26.217])
-	(using TLSv1 with cipher AES128-SHA (128/128 bits))
-	(No client certificate requested)
-	by g4t3427.houston.hp.com (Postfix) with ESMTPS id 32FD029A
-	for <ceph-devel@vger.kernel.org>; Thu,  6 Aug 2015 13:17:51 +0000 (UTC)
-In-Reply-To: <CACJqLyZOmgnY6OTNWu9Or7ZvLxv8_wUX8ZgUtEd0d8n8s3RHpg@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-pa0-f54.google.com ([209.85.220.54]:36064 "EHLO
+	mail-pa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751278AbbHFN2k convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Aug 2015 09:28:40 -0400
+Received: by pacrr5 with SMTP id rr5so27895677pac.3
+        for <ceph-devel@vger.kernel.org>; Thu, 06 Aug 2015 06:28:40 -0700 (PDT)
+In-Reply-To: <BA2282FCE1654C43BF189535A964CC9F27327CB9@G4W3218.americas.hpqcorp.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomaiwang@gmail.com>
+To: "Gurjar, Unmesh" <unmesh.gurjar@hp.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-UGxlYXNlIGZpbmQgY2VwaC5jb25mIGF0IFsxXSBhbmQgdGhlIGNvcnJlc3BvbmRpbmcgT1NEIGxv
-ZyBhdCBbMl0uDQoNClRvIGNsYXJpZnkgb25lIHRoaW5nIEkgc2tpcHBlZCBlYXJsaWVyIG9uLCBp
-cyB3aGlsZSBicmluZ2luZyB1cCB0aGUgT1NEcywgJ2NlcGgtZGlzayBhY3RpdmF0ZScgd2FzIGdl
-dHRpbmcgaHVuZyAoZHVlIHRvIGlzc3VlIFszXSkuIFRvIGdldCBvdmVyIHRoaXMsIEkgaGFkIHRv
-IHRlbXBvcmFyaWx5IGRpc2FibGUgJ2pvdXJuYWwgZGlvJyB0byBnZXQgdGhlIGRpc2sgYWN0aXZh
-dGVkICh3aXRoIGEgJ21hcmstaW5pdCcgc2V0IHRvIG5vbmUpIGFuZCB0aGVuIGV4cGxpY2l0bHkg
-c3RhcnQgdGhlIE9TRCBzZXJ2aWNlIGFmdGVyIHVwZGF0aW5nIHRoZSBjb25mIHRvIGVuYWJsZSAn
-am91cm5hbCBkaW8nLiBJIGFtIGhvcGVmdWwgdGhhdCB0aGlzIHNob3VsZCBub3QgY2F1c2UgdGhl
-IHByZXNlbnQgaXNzdWUgKHNpbmNlIGZldyBPU0Qgc3RhcnQgc3VjY2Vzc2Z1bGx5IG9uIGZpcnN0
-IGF0dGVtcHQgYW5kIG90aGVycyBvbiBzdWJzZXF1ZW50IHNlcnZpY2UgcmVzdGFydHMpIQ0KDQpb
-MV0gLSBodHRwOi8vcGFzdGUub3BlbnN0YWNrLm9yZy9zaG93LzQxMTE2MS8NClsyXSAtIGh0dHA6
-Ly9wYXN0ZS5vcGVuc3RhY2sub3JnL3Nob3cvNDExMTYyLw0KWzNdIC0gaHR0cDovL3RyYWNrZXIu
-Y2VwaC5jb20vaXNzdWVzLzk3NjgNCg0KUmVnYXJkcywNClVubWVzaCBHLg0KSVJDOiB1bm1lc2hn
-DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogSGFvbWFpIFdhbmcgW21h
-aWx0bzpoYW9tYWl3YW5nQGdtYWlsLmNvbV0NCj4gU2VudDogVGh1cnNkYXksIEF1Z3VzdCAwNiwg
-MjAxNSA2OjIyIFBNDQo+IFRvOiBHdXJqYXIsIFVubWVzaA0KPiBDYzogY2VwaC1kZXZlbEB2Z2Vy
-Lmtlcm5lbC5vcmcNCj4gU3ViamVjdDogUmU6IE9TRCBzb21ldGltZXMgc3R1Y2sgaW4gaW5pdCBw
-aGFzZQ0KPiANCj4gRG9uJ3QgZmluZCBzb21ldGhpbmcgc3RyYW5nZS4NCj4gDQo+IENvdWxkIHlv
-dSBwYXN0ZSB5b3VyIGNlcGguY29uZj8gQW5kIHJlc3RhcnQgdGhpcyBvc2Qgd2l0aCBkZWJ1Z19v
-c2Q9MjAvMjAsDQo+IGRlYnVnX2ZpbGVzdG9yZT0yMC8yMCA6LSkNCj4gDQo+IE9uIFRodSwgQXVn
-IDYsIDIwMTUgYXQgODowOSBQTSwgR3VyamFyLCBVbm1lc2ggPHVubWVzaC5ndXJqYXJAaHAuY29t
-Pg0KPiB3cm90ZToNCj4gPiBUaGFua3MgZm9yIHF1aWNrIHJlc3BvbnNlIEhhb21haSEgUGxlYXNl
-IGZpbmQgdGhlIGJhY2t0cmFjZSBoZXJlIFsxXS4NCj4gPg0KPiA+IFsxXSAtIGh0dHA6Ly9wYXN0
-ZS5vcGVuc3RhY2sub3JnL3Nob3cvNDExMTM5Lw0KPiA+DQo+ID4gUmVnYXJkcywNCj4gPiBVbm1l
-c2ggRy4NCj4gPiBJUkM6IHVubWVzaGcNCj4gPg0KPiA+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2Ut
-LS0tLQ0KPiA+PiBGcm9tOiBIYW9tYWkgV2FuZyBbbWFpbHRvOmhhb21haXdhbmdAZ21haWwuY29t
-XQ0KPiA+PiBTZW50OiBUaHVyc2RheSwgQXVndXN0IDA2LCAyMDE1IDU6MzEgUE0NCj4gPj4gVG86
-IEd1cmphciwgVW5tZXNoDQo+ID4+IENjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KPiA+
-PiBTdWJqZWN0OiBSZTogT1NEIHNvbWV0aW1lcyBzdHVjayBpbiBpbml0IHBoYXNlDQo+ID4+DQo+
-ID4+IENvdWxkIHlvdSBwcmludCB5b3VyIGFsbCB0aHJlYWQgY2FsbGJhY2sgdmlhICJ0aHJlYWQg
-YXBwbHkgYWxsIGJ0Ij8NCj4gPj4NCj4gPj4gT24gVGh1LCBBdWcgNiwgMjAxNSBhdCA3OjUyIFBN
-LCBHdXJqYXIsIFVubWVzaCA8dW5tZXNoLmd1cmphckBocC5jb20+DQo+ID4+IHdyb3RlOg0KPiA+
-PiA+IEhpLA0KPiA+PiA+DQo+ID4+ID4gT24gYSBDZXBoIEZpcmVmbHkgY2x1c3RlciAodmVyc2lv
-biBbMV0pLCBPU0RzIGFyZSBjb25maWd1cmVkIHRvIHVzZQ0KPiA+PiA+IHNlcGFyYXRlDQo+ID4+
-IGRhdGEgYW5kIGpvdXJuYWwgZGlza3MgKHVzaW5nIHRoZSBjZXBoLWRpc2sgdXRpbGl0eSkuIEl0
-IGlzIG9ic2VydmVkLA0KPiA+PiB0aGF0IGZldyBPU0RzIHN0YXJ0LXVwIGZpbmUgKGFyZSAndXAn
-IGFuZCAnaW4nIHN0YXRlKTsgaG93ZXZlciwNCj4gPj4gb3RoZXJzIGFyZSBzdHVjayBpbiB0aGUg
-J2luaXQgY3JlYXRpbmcvdG91Y2hpbmcgc25hcG1hcHBlciBvYmplY3QnDQo+ID4+IHBoYXNlLiBC
-ZWxvdyBpcyBhIE9TRCBzdGFydC11cCBsb2cNCj4gPj4gc25pcHBldDoNCj4gPj4gPg0KPiA+PiA+
-IDIwMTUtMDgtMDYgMDg6NTg6MDIuNDkxNTM3IDdmZDMxMmRmOTdjMCAgMSBqb3VybmFsIF9vcGVu
-DQo+ID4+ID4gL3Zhci9saWIvY2VwaC9vc2QvY2VwaC0wL2pvdXJuYWwgZmQgMjE6IDEwNzM3NDE4
-MjQgYnl0ZXMsIGJsb2NrDQo+ID4+ID4gc2l6ZQ0KPiA+PiA+IDQwOTYgYnl0ZXMsIGRpcmVjdGlv
-ID0gMSwgYWlvID0gMQ0KPiA+PiA+IDIwMTUtMDgtMDYgMDg6NTg6MDIuNDk4NDQ3IDdmZDMxMmRm
-OTdjMCAgMSBqb3VybmFsIF9vcGVuDQo+ID4+ID4gL3Zhci9saWIvY2VwaC9vc2QvY2VwaC0wL2pv
-dXJuYWwgZmQgMjE6IDEwNzM3NDE4MjQgYnl0ZXMsIGJsb2NrDQo+ID4+ID4gc2l6ZQ0KPiA+PiA+
-IDQwOTYgYnl0ZXMsIGRpcmVjdGlvID0gMSwgYWlvID0gMQ0KPiA+PiA+IDIwMTUtMDgtMDYgMDg6
-NTg6MDIuNDk4NzIwIDdmZDMxMmRmOTdjMCAgMiBvc2QuMCAwIGJvb3QNCj4gPj4gPiAyMDE1LTA4
-LTA2IDA4OjU4OjAyLjQ5ODg2NSA3ZmQzMTJkZjk3YzAgMTAgb3NkLjAgMCByZWFkX3N1cGVyYmxv
-Y2sNCj4gPj4gPiBzYigyNjQ1YmJmNi0xNmQwLTRjNDItODgzNS04YmE5ZjVjOTVhMWQgb3NkLjAN
-Cj4gPj4gPiBhODIxMTQ2Zi0wNzQyLTQ3MjQtYjRjYS0zOWVhNGNjYzI5OGQgZTAgWzAsMF0gbGNp
-PVswLDBdKQ0KPiA+PiA+IDIwMTUtMDgtMDYgMDg6NTg6MDIuNDk4OTM3IDdmZDMxMmRmOTdjMCAx
-MCBvc2QuMCAwIGluaXQNCj4gPj4gPiBjcmVhdGluZy90b3VjaGluZyBzbmFwbWFwcGVyIG9iamVj
-dA0KPiA+PiA+DQo+ID4+ID4gVGhlIGxvZyBzdGF0ZW1lbnQgaXMgaW5hY2N1cmF0ZSB0aG91Z2gs
-IHNpbmNlIGl0IGlzIGFjdHVhbGx5IGRvaW5nDQo+ID4+ID4gaW5pdA0KPiA+PiBvcGVyYXRpb24g
-Zm9yIHRoZSAnaW5mb3MnIG9iamVjdCAoYXMgY2FuIGJlIG9ic2VydmVkIGZyb20gc291cmNlIFsy
-XSkuDQo+ID4+ID4NCj4gPj4gPiBVcG9uIGRlYnVnZ2luZyBmdXJ0aGVyLCB0aGUgdGhyZWFkIHNl
-ZW1zIHRvIGJlIHdhaXRpbmcgdG8gYWNxdWlyZQ0KPiA+PiA+IHRoZQ0KPiA+PiAnT2JqZWN0U3Rv
-cmU6OmFwcGx5X3RyYW5zYWN0aW9uOjpteV9sb2NrJyBtdXRleC4gQmVsb3cgaXMgdGhlIGRlYnVn
-IHRyYWNlOg0KPiA+PiA+DQo+ID4+ID4gKGdkYikgd2hlcmUNCj4gPj4gPiAjMCAgMHgwMDAwN2Zk
-MzEyMmI3MDhmIGluIHB0aHJlYWRfY29uZF93YWl0QEBHTElCQ18yLjMuMiAoKSBmcm9tDQo+ID4+
-ID4gL2xpYi94ODZfNjQtbGludXgtZ251L2xpYnB0aHJlYWQuc28uMA0KPiA+PiA+ICMxICAweDAw
-MDA3ZmQzMTMxMzJiZjQgaW4NCj4gPj4gPiBPYmplY3RTdG9yZTo6YXBwbHlfdHJhbnNhY3Rpb25z
-KE9iamVjdFN0b3JlOjpTZXF1ZW5jZXIqLA0KPiA+PiA+IHN0ZDo6bGlzdDxPYmplY3RTdG9yZTo6
-VHJhbnNhY3Rpb24qLA0KPiA+PiA+IHN0ZDo6YWxsb2NhdG9yPE9iamVjdFN0b3JlOjpUcmFuc2Fj
-dGlvbio+ID4mLCBDb250ZXh0KikgKCkNCj4gPj4gPiAjMiAgMHgwMDAwN2ZkMzEzMDk3ZDA4IGlu
-DQo+ID4+ID4gT2JqZWN0U3RvcmU6OmFwcGx5X3RyYW5zYWN0aW9uKE9iamVjdFN0b3JlOjpUcmFu
-c2FjdGlvbiYsIENvbnRleHQqKQ0KPiA+PiA+ICgpDQo+ID4+ID4gIzMgIDB4MDAwMDdmZDMxMzA3
-Njc5MCBpbiBPU0Q6OmluaXQoKSAoKQ0KPiA+PiA+ICM0ICAweDAwMDA3ZmQzMTMwMjMzYTcgaW4g
-bWFpbiAoKQ0KPiA+PiA+DQo+ID4+ID4gSW4gYSBmZXcgY2FzZXMsIHVwb24gcmVzdGFydGluZyB0
-aGUgc3R1Y2sgT1NEIChzZXJ2aWNlKSwgaXQNCj4gPj4gPiBzdWNjZXNzZnVsbHkNCj4gPj4gY29t
-cGxldGVzIHRoZSAnaW5pdCcgcGhhc2UgYW5kIHJlYWNoZXMgdGhlICd1cCcgYW5kICdpbicgc3Rh
-dGUhDQo+ID4+ID4NCj4gPj4gPiBBbnkgaGVscCBpcyBncmVhdGx5IGFwcHJlY2lhdGVkLiBQbGVh
-c2UgbGV0IG1lIGtub3cgaWYgYW55IG1vcmUNCj4gPj4gPiBkZXRhaWxzIGFyZQ0KPiA+PiByZXF1
-aXJlZCBmb3Igcm9vdCBjYXVzaW5nLg0KPiA+PiA+DQo+ID4+ID4gWzFdIC0gMC44MC43ICg2YzAx
-MjdmY2I1ODAwODc5M2QzYzhiNjJkOTI1YmM5MTk2MzY3MmEzKQ0KPiA+PiA+IFsyXSAtDQo+ID4+
-ID4gaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC9ibG9iL2ZpcmVmbHkvc3JjL29zZC9PU0Qu
-Y2MjTDEyMTENCj4gPj4gPg0KPiA+PiA+IFJlZ2FyZHMsDQo+ID4+ID4gVW5tZXNoIEcuDQo+ID4+
-ID4gSVJDOiB1bm1lc2hnDQo+ID4+ID4gLS0NCj4gPj4gPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRo
-aXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCINCj4gPj4gPiBp
-biB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3Jl
-DQo+ID4+ID4gbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jk
-b21vLWluZm8uaHRtbA0KPiA+Pg0KPiA+Pg0KPiA+Pg0KPiA+PiAtLQ0KPiA+PiBCZXN0IFJlZ2Fy
-ZHMsDQo+ID4+DQo+ID4+IFdoZWF0DQo+IA0KPiANCj4gDQo+IC0tDQo+IEJlc3QgUmVnYXJkcywN
-Cj4gDQo+IFdoZWF0DQo=
+It seemed filestore doesn't do transaction as expected. Sorry, you
+need to add debug_journal=20/20 to help find the reason. :-)
+
+BTW, what's your os version? How many osds do you have in this
+cluster, how many osds failed to start like this?
+
+On Thu, Aug 6, 2015 at 9:17 PM, Gurjar, Unmesh <unmesh.gurjar@hp.com> wrote:
+> Please find ceph.conf at [1] and the corresponding OSD log at [2].
+>
+> To clarify one thing I skipped earlier on, is while bringing up the OSDs, 'ceph-disk activate' was getting hung (due to issue [3]). To get over this, I had to temporarily disable 'journal dio' to get the disk activated (with a 'mark-init' set to none) and then explicitly start the OSD service after updating the conf to enable 'journal dio'. I am hopeful that this should not cause the present issue (since few OSD start successfully on first attempt and others on subsequent service restarts)!
+>
+> [1] - http://paste.openstack.org/show/411161/
+> [2] - http://paste.openstack.org/show/411162/
+> [3] - http://tracker.ceph.com/issues/9768
+>
+> Regards,
+> Unmesh G.
+> IRC: unmeshg
+>
+>> -----Original Message-----
+>> From: Haomai Wang [mailto:haomaiwang@gmail.com]
+>> Sent: Thursday, August 06, 2015 6:22 PM
+>> To: Gurjar, Unmesh
+>> Cc: ceph-devel@vger.kernel.org
+>> Subject: Re: OSD sometimes stuck in init phase
+>>
+>> Don't find something strange.
+>>
+>> Could you paste your ceph.conf? And restart this osd with debug_osd=20/20,
+>> debug_filestore=20/20 :-)
+>>
+>> On Thu, Aug 6, 2015 at 8:09 PM, Gurjar, Unmesh <unmesh.gurjar@hp.com>
+>> wrote:
+>> > Thanks for quick response Haomai! Please find the backtrace here [1].
+>> >
+>> > [1] - http://paste.openstack.org/show/411139/
+>> >
+>> > Regards,
+>> > Unmesh G.
+>> > IRC: unmeshg
+>> >
+>> >> -----Original Message-----
+>> >> From: Haomai Wang [mailto:haomaiwang@gmail.com]
+>> >> Sent: Thursday, August 06, 2015 5:31 PM
+>> >> To: Gurjar, Unmesh
+>> >> Cc: ceph-devel@vger.kernel.org
+>> >> Subject: Re: OSD sometimes stuck in init phase
+>> >>
+>> >> Could you print your all thread callback via "thread apply all bt"?
+>> >>
+>> >> On Thu, Aug 6, 2015 at 7:52 PM, Gurjar, Unmesh <unmesh.gurjar@hp.com>
+>> >> wrote:
+>> >> > Hi,
+>> >> >
+>> >> > On a Ceph Firefly cluster (version [1]), OSDs are configured to use
+>> >> > separate
+>> >> data and journal disks (using the ceph-disk utility). It is observed,
+>> >> that few OSDs start-up fine (are 'up' and 'in' state); however,
+>> >> others are stuck in the 'init creating/touching snapmapper object'
+>> >> phase. Below is a OSD start-up log
+>> >> snippet:
+>> >> >
+>> >> > 2015-08-06 08:58:02.491537 7fd312df97c0  1 journal _open
+>> >> > /var/lib/ceph/osd/ceph-0/journal fd 21: 1073741824 bytes, block
+>> >> > size
+>> >> > 4096 bytes, directio = 1, aio = 1
+>> >> > 2015-08-06 08:58:02.498447 7fd312df97c0  1 journal _open
+>> >> > /var/lib/ceph/osd/ceph-0/journal fd 21: 1073741824 bytes, block
+>> >> > size
+>> >> > 4096 bytes, directio = 1, aio = 1
+>> >> > 2015-08-06 08:58:02.498720 7fd312df97c0  2 osd.0 0 boot
+>> >> > 2015-08-06 08:58:02.498865 7fd312df97c0 10 osd.0 0 read_superblock
+>> >> > sb(2645bbf6-16d0-4c42-8835-8ba9f5c95a1d osd.0
+>> >> > a821146f-0742-4724-b4ca-39ea4ccc298d e0 [0,0] lci=[0,0])
+>> >> > 2015-08-06 08:58:02.498937 7fd312df97c0 10 osd.0 0 init
+>> >> > creating/touching snapmapper object
+>> >> >
+>> >> > The log statement is inaccurate though, since it is actually doing
+>> >> > init
+>> >> operation for the 'infos' object (as can be observed from source [2]).
+>> >> >
+>> >> > Upon debugging further, the thread seems to be waiting to acquire
+>> >> > the
+>> >> 'ObjectStore::apply_transaction::my_lock' mutex. Below is the debug trace:
+>> >> >
+>> >> > (gdb) where
+>> >> > #0  0x00007fd3122b708f in pthread_cond_wait@@GLIBC_2.3.2 () from
+>> >> > /lib/x86_64-linux-gnu/libpthread.so.0
+>> >> > #1  0x00007fd313132bf4 in
+>> >> > ObjectStore::apply_transactions(ObjectStore::Sequencer*,
+>> >> > std::list<ObjectStore::Transaction*,
+>> >> > std::allocator<ObjectStore::Transaction*> >&, Context*) ()
+>> >> > #2  0x00007fd313097d08 in
+>> >> > ObjectStore::apply_transaction(ObjectStore::Transaction&, Context*)
+>> >> > ()
+>> >> > #3  0x00007fd313076790 in OSD::init() ()
+>> >> > #4  0x00007fd3130233a7 in main ()
+>> >> >
+>> >> > In a few cases, upon restarting the stuck OSD (service), it
+>> >> > successfully
+>> >> completes the 'init' phase and reaches the 'up' and 'in' state!
+>> >> >
+>> >> > Any help is greatly appreciated. Please let me know if any more
+>> >> > details are
+>> >> required for root causing.
+>> >> >
+>> >> > [1] - 0.80.7 (6c0127fcb58008793d3c8b62d925bc91963672a3)
+>> >> > [2] -
+>> >> > https://github.com/ceph/ceph/blob/firefly/src/osd/OSD.cc#L1211
+>> >> >
+>> >> > Regards,
+>> >> > Unmesh G.
+>> >> > IRC: unmeshg
+>> >> > --
+>> >> > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>> >> > in the body of a message to majordomo@vger.kernel.org More
+>> >> > majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> >>
+>> >>
+>> >>
+>> >> --
+>> >> Best Regards,
+>> >>
+>> >> Wheat
+>>
+>>
+>>
+>> --
+>> Best Regards,
+>>
+>> Wheat
+
+
+
+-- 
+Best Regards,
+
+Wheat
