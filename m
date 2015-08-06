@@ -1,97 +1,82 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: Newbie question about metadata_list.
-Date: Thu, 6 Aug 2015 15:01:54 +0300
-Message-ID: <CAOi1vP-S8zui8vwhbzc1i7t=LLJx6PW2Lmtg-OeZectL_umpFA@mail.gmail.com>
-References: <20150806112630.d3c4ed783a07dfefb0d6dbc6@corp.ovh.com>
+From: "Gurjar, Unmesh" <unmesh.gurjar@hp.com>
+Subject: RE: OSD sometimes stuck in init phase
+Date: Thu, 6 Aug 2015 12:09:14 +0000
+Message-ID: <BA2282FCE1654C43BF189535A964CC9F27327A40@G4W3218.americas.hpqcorp.net>
+References: <BA2282FCE1654C43BF189535A964CC9F273279B3@G4W3218.americas.hpqcorp.net>
+ <CACJqLyYCf_QBXjxAProirc3RqhYQh8Z7mDamZe7aVKwEozYtpw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f170.google.com ([209.85.212.170]:34446 "EHLO
-	mail-wi0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754754AbbHFMB4 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Aug 2015 08:01:56 -0400
-Received: by wicne3 with SMTP id ne3so19616263wic.1
-        for <ceph-devel@vger.kernel.org>; Thu, 06 Aug 2015 05:01:55 -0700 (PDT)
-In-Reply-To: <20150806112630.d3c4ed783a07dfefb0d6dbc6@corp.ovh.com>
+Received: from g4t3427.houston.hp.com ([15.201.208.55]:39703 "EHLO
+	g4t3427.houston.hp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753633AbbHFMKP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Aug 2015 08:10:15 -0400
+Received: from G4W6310.americas.hpqcorp.net (g4w6310.houston.hp.com [16.210.26.217])
+	(using TLSv1 with cipher AES128-SHA (128/128 bits))
+	(No client certificate requested)
+	by g4t3427.houston.hp.com (Postfix) with ESMTPS id 47A5E32D
+	for <ceph-devel@vger.kernel.org>; Thu,  6 Aug 2015 12:10:15 +0000 (UTC)
+In-Reply-To: <CACJqLyYCf_QBXjxAProirc3RqhYQh8Z7mDamZe7aVKwEozYtpw@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?Q?=C5=81ukasz_Szymczyk?= <lukasz.szymczyk@corp.ovh.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Haomai Wang <haomaiwang@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, Aug 6, 2015 at 12:26 PM, =C5=81ukasz Szymczyk
-<lukasz.szymczyk@corp.ovh.com> wrote:
-> Hi,
->
-> I'm writing some program to replace image in cluster with it's copy.
-> But I have problem with metadata_list.
-> I created pool:
-> #rados mkpool dupa
-> then I created image:
-> #rbd create --size 1000 -p mypool image --image-format 2
->
-> Below is code which tries to get metadata, but it fails with -EOPNOTS=
-UPP.
-> I compile it with command like this:
-> g++ file.cpp -lrbd -lrados -I/ceph/source/directory/src
->
-> #include <stdio.h>
-> #include <stdlib.h>
-> #include "include/rbd/librbd.h"
-> #include "include/rbd/librbd.hpp"
-> using namespace ceph;
-> #include "librbd/ImageCtx.h"
->
-> int main() {
->         rados_t clu;
->         int ret =3D rados_create(&clu, NULL);
->         if (ret) return -1;
->
->         ret =3D rados_conf_read_file(clu, NULL);
->         if (ret) return -1;
->
->         rados_conf_parse_env(clu, NULL);
->         ret =3D rados_connect(clu);
->         if (ret) return -1;
->
->         rados_ioctx_t io;
->         ret =3D rados_ioctx_create(clu, "mypool", &io);
->         if (ret) return -1;
->
->         rbd_image_t im;
->         ret =3D rbd_open(io, "image", &im, NULL);
->         if (ret) return -1;
->
->         librbd::ImageCtx *ic =3D (librbd::ImageCtx*)im;
->         std::string start;
->         int max =3D 1000;
->         bufferlist in, out;
->         ::encode(start, in);
->         ::encode(max, in);
->         ret =3D ((librados::IoCtx*)&io)->exec(ic->header_oid, "rbd", =
-"metadata_list", in, out);
->         if (ret < 0) printf("fail\n");
-
-You should use rbd_metadata_list() C API instead of this.
-
->
->         return 0;
->
-> }
->
-> So, my question is: what should be set/enabled to get those metadata?
-> Or maybe what I'm doing wrong here.
-
-Try "rbd image-meta list image"?
-
-It's a fairly recent feature, are you sure your OSDs support it?
-What's the output of "ceph daemon osd.0 version"?
-
-Thanks,
-
-                Ilya
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+VGhhbmtzIGZvciBxdWljayByZXNwb25zZSBIYW9tYWkhIFBsZWFzZSBmaW5kIHRoZSBiYWNrdHJh
+Y2UgaGVyZSBbMV0uDQoNClsxXSAtIGh0dHA6Ly9wYXN0ZS5vcGVuc3RhY2sub3JnL3Nob3cvNDEx
+MTM5Lw0KDQpSZWdhcmRzLA0KVW5tZXNoIEcuDQpJUkM6IHVubWVzaGcNCg0KPiAtLS0tLU9yaWdp
+bmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBIYW9tYWkgV2FuZyBbbWFpbHRvOmhhb21haXdhbmdA
+Z21haWwuY29tXQ0KPiBTZW50OiBUaHVyc2RheSwgQXVndXN0IDA2LCAyMDE1IDU6MzEgUE0NCj4g
+VG86IEd1cmphciwgVW5tZXNoDQo+IENjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KPiBT
+dWJqZWN0OiBSZTogT1NEIHNvbWV0aW1lcyBzdHVjayBpbiBpbml0IHBoYXNlDQo+IA0KPiBDb3Vs
+ZCB5b3UgcHJpbnQgeW91ciBhbGwgdGhyZWFkIGNhbGxiYWNrIHZpYSAidGhyZWFkIGFwcGx5IGFs
+bCBidCI/DQo+IA0KPiBPbiBUaHUsIEF1ZyA2LCAyMDE1IGF0IDc6NTIgUE0sIEd1cmphciwgVW5t
+ZXNoIDx1bm1lc2guZ3VyamFyQGhwLmNvbT4NCj4gd3JvdGU6DQo+ID4gSGksDQo+ID4NCj4gPiBP
+biBhIENlcGggRmlyZWZseSBjbHVzdGVyICh2ZXJzaW9uIFsxXSksIE9TRHMgYXJlIGNvbmZpZ3Vy
+ZWQgdG8gdXNlIHNlcGFyYXRlDQo+IGRhdGEgYW5kIGpvdXJuYWwgZGlza3MgKHVzaW5nIHRoZSBj
+ZXBoLWRpc2sgdXRpbGl0eSkuIEl0IGlzIG9ic2VydmVkLCB0aGF0IGZldyBPU0RzDQo+IHN0YXJ0
+LXVwIGZpbmUgKGFyZSAndXAnIGFuZCAnaW4nIHN0YXRlKTsgaG93ZXZlciwgb3RoZXJzIGFyZSBz
+dHVjayBpbiB0aGUgJ2luaXQNCj4gY3JlYXRpbmcvdG91Y2hpbmcgc25hcG1hcHBlciBvYmplY3Qn
+IHBoYXNlLiBCZWxvdyBpcyBhIE9TRCBzdGFydC11cCBsb2cNCj4gc25pcHBldDoNCj4gPg0KPiA+
+IDIwMTUtMDgtMDYgMDg6NTg6MDIuNDkxNTM3IDdmZDMxMmRmOTdjMCAgMSBqb3VybmFsIF9vcGVu
+DQo+ID4gL3Zhci9saWIvY2VwaC9vc2QvY2VwaC0wL2pvdXJuYWwgZmQgMjE6IDEwNzM3NDE4MjQg
+Ynl0ZXMsIGJsb2NrIHNpemUNCj4gPiA0MDk2IGJ5dGVzLCBkaXJlY3RpbyA9IDEsIGFpbyA9IDEN
+Cj4gPiAyMDE1LTA4LTA2IDA4OjU4OjAyLjQ5ODQ0NyA3ZmQzMTJkZjk3YzAgIDEgam91cm5hbCBf
+b3Blbg0KPiA+IC92YXIvbGliL2NlcGgvb3NkL2NlcGgtMC9qb3VybmFsIGZkIDIxOiAxMDczNzQx
+ODI0IGJ5dGVzLCBibG9jayBzaXplDQo+ID4gNDA5NiBieXRlcywgZGlyZWN0aW8gPSAxLCBhaW8g
+PSAxDQo+ID4gMjAxNS0wOC0wNiAwODo1ODowMi40OTg3MjAgN2ZkMzEyZGY5N2MwICAyIG9zZC4w
+IDAgYm9vdA0KPiA+IDIwMTUtMDgtMDYgMDg6NTg6MDIuNDk4ODY1IDdmZDMxMmRmOTdjMCAxMCBv
+c2QuMCAwIHJlYWRfc3VwZXJibG9jaw0KPiA+IHNiKDI2NDViYmY2LTE2ZDAtNGM0Mi04ODM1LThi
+YTlmNWM5NWExZCBvc2QuMA0KPiA+IGE4MjExNDZmLTA3NDItNDcyNC1iNGNhLTM5ZWE0Y2NjMjk4
+ZCBlMCBbMCwwXSBsY2k9WzAsMF0pDQo+ID4gMjAxNS0wOC0wNiAwODo1ODowMi40OTg5MzcgN2Zk
+MzEyZGY5N2MwIDEwIG9zZC4wIDAgaW5pdA0KPiA+IGNyZWF0aW5nL3RvdWNoaW5nIHNuYXBtYXBw
+ZXIgb2JqZWN0DQo+ID4NCj4gPiBUaGUgbG9nIHN0YXRlbWVudCBpcyBpbmFjY3VyYXRlIHRob3Vn
+aCwgc2luY2UgaXQgaXMgYWN0dWFsbHkgZG9pbmcgaW5pdA0KPiBvcGVyYXRpb24gZm9yIHRoZSAn
+aW5mb3MnIG9iamVjdCAoYXMgY2FuIGJlIG9ic2VydmVkIGZyb20gc291cmNlIFsyXSkuDQo+ID4N
+Cj4gPiBVcG9uIGRlYnVnZ2luZyBmdXJ0aGVyLCB0aGUgdGhyZWFkIHNlZW1zIHRvIGJlIHdhaXRp
+bmcgdG8gYWNxdWlyZSB0aGUNCj4gJ09iamVjdFN0b3JlOjphcHBseV90cmFuc2FjdGlvbjo6bXlf
+bG9jaycgbXV0ZXguIEJlbG93IGlzIHRoZSBkZWJ1ZyB0cmFjZToNCj4gPg0KPiA+IChnZGIpIHdo
+ZXJlDQo+ID4gIzAgIDB4MDAwMDdmZDMxMjJiNzA4ZiBpbiBwdGhyZWFkX2NvbmRfd2FpdEBAR0xJ
+QkNfMi4zLjIgKCkgZnJvbQ0KPiA+IC9saWIveDg2XzY0LWxpbnV4LWdudS9saWJwdGhyZWFkLnNv
+LjANCj4gPiAjMSAgMHgwMDAwN2ZkMzEzMTMyYmY0IGluDQo+ID4gT2JqZWN0U3RvcmU6OmFwcGx5
+X3RyYW5zYWN0aW9ucyhPYmplY3RTdG9yZTo6U2VxdWVuY2VyKiwNCj4gPiBzdGQ6Omxpc3Q8T2Jq
+ZWN0U3RvcmU6OlRyYW5zYWN0aW9uKiwNCj4gPiBzdGQ6OmFsbG9jYXRvcjxPYmplY3RTdG9yZTo6
+VHJhbnNhY3Rpb24qPiA+JiwgQ29udGV4dCopICgpDQo+ID4gIzIgIDB4MDAwMDdmZDMxMzA5N2Qw
+OCBpbg0KPiA+IE9iamVjdFN0b3JlOjphcHBseV90cmFuc2FjdGlvbihPYmplY3RTdG9yZTo6VHJh
+bnNhY3Rpb24mLCBDb250ZXh0KikgKCkNCj4gPiAjMyAgMHgwMDAwN2ZkMzEzMDc2NzkwIGluIE9T
+RDo6aW5pdCgpICgpDQo+ID4gIzQgIDB4MDAwMDdmZDMxMzAyMzNhNyBpbiBtYWluICgpDQo+ID4N
+Cj4gPiBJbiBhIGZldyBjYXNlcywgdXBvbiByZXN0YXJ0aW5nIHRoZSBzdHVjayBPU0QgKHNlcnZp
+Y2UpLCBpdCBzdWNjZXNzZnVsbHkNCj4gY29tcGxldGVzIHRoZSAnaW5pdCcgcGhhc2UgYW5kIHJl
+YWNoZXMgdGhlICd1cCcgYW5kICdpbicgc3RhdGUhDQo+ID4NCj4gPiBBbnkgaGVscCBpcyBncmVh
+dGx5IGFwcHJlY2lhdGVkLiBQbGVhc2UgbGV0IG1lIGtub3cgaWYgYW55IG1vcmUgZGV0YWlscyBh
+cmUNCj4gcmVxdWlyZWQgZm9yIHJvb3QgY2F1c2luZy4NCj4gPg0KPiA+IFsxXSAtIDAuODAuNyAo
+NmMwMTI3ZmNiNTgwMDg3OTNkM2M4YjYyZDkyNWJjOTE5NjM2NzJhMykNCj4gPiBbMl0gLSAgaHR0
+cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC9ibG9iL2ZpcmVmbHkvc3JjL29zZC9PU0QuY2MjTDEy
+MTENCj4gPg0KPiA+IFJlZ2FyZHMsDQo+ID4gVW5tZXNoIEcuDQo+ID4gSVJDOiB1bm1lc2hnDQo+
+ID4gLS0NCj4gPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAi
+dW5zdWJzY3JpYmUgY2VwaC1kZXZlbCINCj4gPiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8g
+bWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbw0KPiA+IGluZm8gYXQgIGh0
+dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPiANCj4gDQo+IA0KPiAt
+LQ0KPiBCZXN0IFJlZ2FyZHMsDQo+IA0KPiBXaGVhdA0K
