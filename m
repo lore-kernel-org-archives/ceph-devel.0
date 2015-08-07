@@ -1,139 +1,129 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re:Re: Consult some problems of Ceph when reading source code
-Date: Thu, 6 Aug 2015 13:00:58 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1508061252250.22099@cobra.newdream.net>
-References: <780bf286.119cf.14f008cac3f.Coremail.cymengxiang@126.com> <alpine.DEB.2.00.1508060540070.22099@cobra.newdream.net> <44598b40.157d5.14f0389480d.Coremail.cymengxiang@126.com>
+From: Derek Su <dereksu@qnap.com>
+Subject: Re: About the Ceph erasure pool with ISA plugin on Intel xeon CPU
+Date: Fri, 7 Aug 2015 09:26:45 +0800
+Message-ID: <CAKEOLWVtwPC4Ob5SSOCe2dxHrbVV+ncUEETD2qKYXaj=onQDvw@mail.gmail.com>
+References: <CAKEOLWVxuURSgYP3FLRhHs=THuYK0Qy084hNxZAqERyAYy2J4w@mail.gmail.com>
+	<55C35386.6070602@dachary.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:41713 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752390AbbHFUA6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Aug 2015 16:00:58 -0400
-In-Reply-To: <44598b40.157d5.14f0389480d.Coremail.cymengxiang@126.com>
+Received: from mail-pa0-f51.google.com ([209.85.220.51]:34881 "EHLO
+	mail-pa0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753000AbbHGB0q convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Aug 2015 21:26:46 -0400
+Received: by pabxd6 with SMTP id xd6so57183496pab.2
+        for <ceph-devel@vger.kernel.org>; Thu, 06 Aug 2015 18:26:45 -0700 (PDT)
+In-Reply-To: <55C35386.6070602@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-2022-JP?Q?=1B$Bhq5#=1B=28J?= <cymengxiang@126.com>
+To: Loic Dachary <loic@dachary.org>
 Cc: ceph-devel@vger.kernel.org
 
-On Thu, 6 Aug 2015, ?? wrote:
-> Dear Dr.Sage:
+Hello, Loic
+the following is my steps and configurations:
+(1) The 11 osd and 3 monitors were ran in the docker container on the
+same host machine.
+(2) Each osd had one 1T HDD.
 
-> Thank you for your detailed reply?These answers helps me a lot. I also 
-> have some problems in Question (1.
+(3)  I set the erasure coding pool profiles:
+## Jerasure, reed-soloman
+ $ ceph osd erasure-code-profile set reed_k4m2_A k=3D4 m=3D2
+directory=3D/usr/lib64/ceph/erasure-code
 
-> In your reply, the requests according to the different PG enqueue into 
-> the ShardedWQ, if I have 3 requests( that is 
-> <pg1,r1>,<pg2,r2>,<pg3,r3>), and I put them to the ShardedWQ, is the 
-> process also aserializes processing?
+## ISA, reed-soloman
+ceph osd erasure-code-profile set reed_k4m2_isa_A k=3D4 m=3D2
+directory=3D/usr/lib64/ceph/erasure-code plugin=3Disa
+technique=3Dreed_sol_van
 
-Lots of threads are enqueuing things into the ShardedWQ.  A deterministic 
-function of the pg determines which shard the request lands in.
+(4) Then, the erasure pools were created:
+## Jerasure, reed-soloman
+$ $ceph osd pool create reed_k4m2_A_pool 128 128 erasure reed_k4m2_A
 
-	https://github.com/ceph/ceph/blob/master/src/osd/OSD.cc#L8247
+## ISA, reed-soloman
+$ ceph osd pool create reed_k4m2_isa_A_pool 128 128 erasure reed_k4m2_i=
+sa_A
 
-> When I want to dequeue the item from ShardedWQ, there is a work_queues 
-> (the type is the vector of work_queue) in ThreadPool 
-> method(WorkQueue.cc) and then I calculate the work queue according to 
-> the work_queues, so is there many work queue in the request process?  
-> or is there no association with the ShardedWQ?
+(5) Then, I used the rados benchmark to test the write performance
+## Jerasure, reed-soloman
+rados bench  -p reed_k4m2_A_pool 500 write --no-cleanup
 
-	https://github.com/ceph/ceph/blob/master/src/common/WorkQueue.cc#L350
+## ISA, reed-soloman
+rados bench  -p reed_k4m2_isa_A_pool write --no-cleanup
 
-Any given thread services a single shard.  There can be more than 
-one threads per shard.  There's a bunch of code in OSD.cc that ensures 
-that the requests for any given PG are processed in order, serially, 
-so if two threads pull off requests for the same PG one will block so 
-that they still complete in order.
+----
+The results:
+(1) Jerasure/Reed-Soloman
+Write throughput: 136.0 MB/S, Latency: 0.471
+(2) ISA/Reed-Soloman
+Write throughput: 133.1 MB/S, Latency: 0.481
+(3) Jerasure/cauchy_good
+Write throughput: 138.3 MB/S, Latency: 0.462
+(4) ISA/cauchy
+Write throughput: 140.2 MB/S, Latency: 0.452
 
-> When I get the item from ShardedWQ, I will transfer it to the 
-> transaction and then read or write. Is the process done one by one( 
-> another transaction is handled only when this transaction is over), if 
-> it is, Could we promise the performance? if it isn't , Are the 
-> transactions'actions parallel?
+--
+My CPU information:
+Intel(R) Xeon(R) CPU E3-1245 v3 @ 3.40GHz
 
-The write operations are analyzed, prepared, and then started (queued for 
-disk and replicated over the network).  Completion is asynchronous (since 
-it can take a while).
+$ cat /proc/cpuinfo | grep flags
+flags           : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge
+mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe
+syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon pebs bts
+rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq
+dtes64 monitor ds_cpl vmx smx est tm2 ssse3 fma cx16 xtpr pdcm pcid
+sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx
+f16c rdrand lahf_lm abm ida arat epb pln pts dtherm tpr_shadow vnmi
+flexpriority ept vpid fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms
+invpcid xsaveopt
 
-The read operatoins are currently done synchronously (we block while we 
-read the data from the local copy on disk), although this is likely to 
-change soon to be either synchronous or async (depending on the backend, 
-hardware, etc.).
-
-HTH!
-sage
+Ram: 12 GiB
 
 
-> Thank you a lot!
-> 
-> 
-> 
-> 
-> 
-> At 2015-08-06 20:44:45, "Sage Weil" <sage@newdream.net> wrote:
-> >Hi!
-> >
-> >On Thu, 6 Aug 2015, ?? wrote:
-> >> Dear developers,
-> >> 
-> >> My name is Cai Yi, and I am a graduate student majored in CS of Xi?an 
-> >> Jiaotong University in China. From Ceph?s homepage, I know Sage is the 
-> >> author of Ceph and I get the email address from your GitHub and Ceph?s 
-> >> official website. Because Ceph is an excellent distributed file system, 
-> >> so recently, I am reading the source code of the Ceph (the edition is 
-> >> Hammer) to understand the IO good path and the performance of Ceph. 
-> >> However, I face some problems which I could not find the solution from 
-> >> Internet or solve by myself and my partners. So I was wondering if you 
-> >> could help us solve some problems. The problems are as follows:
-> >> 
-> >> 1)  In the Ceph, there is a concept that is the transaction. When the 
-> >> OSD receives a write request, and then it is encapsulated by a 
-> >> transaction. But When the OSD receive many requests, is there a 
-> >> transaction queue to receive the messages? If there is a queue, is it a 
-> >> process of serial or parallel to submit these transaction to do next 
-> >> operation? If it is serial, could the transaction operations influence 
-> >> the performance?
-> >
-> >The requests are distributed across placement groups and into a shared 
-> >work queue, implemented by ShardedWQ in common/WorkQueue.h.  This 
-> >serializes processing for a given PG, but this generally makes little 
-> >difference as there are typically 100 or more PGs per OSD.
-> >
-> >> 2)  From some documents about Ceph, if the OSD receives a read request, 
-> >> the OSD can only read data from primary and then back to client. Is the 
-> >> description right?
-> >
-> >Yes.  This is usually the right thing to do or else a given object will 
-> >end up consuming cache (memory) on more than one OSD and the overall cache 
-> >efficiency of the cluster will drop by your replication factor.  It's only 
-> >a win to distributed reads when you have a very hot object, or when you 
-> >want to spend OSD resources by reduce latency (e.g., by sending reads to 
-> >all replica and taking the fastest reply).
-> >
-> >> Is there any way to read the data from replicated 
-> >> OSD? Do we have to require the data from the primary OSD when deal with 
-> >> the read request? If not and we can read from replicated OSD, could we 
-> >> promise the consistency?
-> >
-> >There is a client-side flag to read from a random or the closest 
-> >replica, but there are a few bugs that affect consistency when recovery is 
-> >underway that are being fixed up now.  It is likely that this will work 
-> >correctly in Infernalis, the next stable release.
-> >
-> >> 3)  When the OSD receives the message, the message?s attribute may be 
-> >> the normal dispatch or the fast dispatch. What is the difference between 
-> >> the normal dispatch and the fast dispatch? If the attribute is the 
-> >> normal dispatch, it enters the dispatch queue. Is there a single 
-> >> dispatch queue or multi dispatch queue to deal with all the messages?
-> >
-> >There is a single thread that does the normal dispatch.  Fast dispatch 
-> >processes the message synchrnonously from the thread that received the 
-> >message, so it faster, but it has to be careful not to block.
-> >
-> >> These are the problem I am facing. Thank you for your patience and 
-> >> cooperation, and I look forward to hearing from you.
-> >
-> >Hope that helps!
-> >sage
-> 
+The results of the performance tests seem there are no differences...
+
+Thanks, :)
+Derek
+
+2015-08-06 20:31 GMT+08:00 Loic Dachary <loic@dachary.org>:
+> Hi,
+>
+> Could you please publish the benchmark results somewhere ? I should b=
+e able to figure out why you don't see a difference.
+>
+> Cheers
+>
+> On 06/08/2015 13:25, Derek Su wrote:
+>> Dear Mr. Dachary and all,
+>>
+>> Recently, I found your blog show the performance tests of erasure
+>> pools (http://dachary.org/?p=3D3042 , http://dachary.org/?p=3D3665).
+>> The results indicates the write throughput can be enhanced
+>> significantly using Intel xeon CPU.
+>>
+>> I tried to create an erasure pool with isa plugin, reed_sol_van
+>> technique, and k/m=3D4/2 on the Intel(R) Xeon(R) CPU E3-1245 v3 @
+>> 3.40GHz machines.
+>>
+>> However, the results of the rados benchmark showed that there was no
+>> any difference between the jerasure and isa plugins. It seems very
+>> strange.
+>>
+>> Do I need to do other configurations in addition to only setting the
+>> erasure profile?
+>> In addition, how can I know the erasure pool is accelerated by ISA
+>> plugin exactly? Is there any command I can use?
+>>
+>> Thanks, :)
+>>
+>> Derek Su.
+>>
+>
+> --
+> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
