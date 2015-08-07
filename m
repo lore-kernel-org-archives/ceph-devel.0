@@ -1,77 +1,101 @@
-From: Srikanth Madugundi <srikanth.madugundi@gmail.com>
-Subject: Re: civetweb health check
-Date: Thu, 6 Aug 2015 21:34:17 -0700
-Message-ID: <CACAg-u9R4zjvteNyXN_LOv57J4VvAA5iZghi=zn==_u1k52gyQ@mail.gmail.com>
-References: <CACAg-u9r6jXW7C5dWes3_AnkGkXvzS_vhmw044i4n0mAc31oUw@mail.gmail.com>
-	<55C31A37.9050302@42on.com>
+From: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>
+Subject: RE: Erasure Code Plugins : PLUGINS_V3 feature
+Date: Fri, 7 Aug 2015 05:12:54 +0000
+Message-ID: <870DE8DBB716524BAE51B2D499EC81E40AB691AB@g01jpexmbyt24>
+References: <55B899FB.4080007@dachary.org> <55C1C789.3050401@dachary.org>
+ <alpine.DEB.2.00.1508051136360.22099@cobra.newdream.net>
+ <870DE8DBB716524BAE51B2D499EC81E40AB68E6A@g01jpexmbyt24>
+ <55C367E6.8040902@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f171.google.com ([209.85.213.171]:36676 "EHLO
-	mail-ig0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751003AbbHGEeS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Aug 2015 00:34:18 -0400
-Received: by igbij6 with SMTP id ij6so24377394igb.1
-        for <ceph-devel@vger.kernel.org>; Thu, 06 Aug 2015 21:34:17 -0700 (PDT)
-In-Reply-To: <55C31A37.9050302@42on.com>
+Received: from mgwym01.jp.fujitsu.com ([211.128.242.40]:64832 "EHLO
+	mgwym01.jp.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752544AbbHGFNB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Aug 2015 01:13:01 -0400
+Received: from g01jpfmpwyt03.exch.g01.fujitsu.local (g01jpfmpwyt03.exch.g01.fujitsu.local [10.128.193.57])
+	by yt-mxoi1.gw.nic.fujitsu.com (Postfix) with ESMTP id EA86AAC03A8
+	for <ceph-devel@vger.kernel.org>; Fri,  7 Aug 2015 14:12:57 +0900 (JST)
+In-Reply-To: <55C367E6.8040902@dachary.org>
+Content-Language: ja-JP
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>
-Cc: ceph-devel@vger.kernel.org
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, "Shiozawa, Kensuke" <shiozawa.kennsu@jp.fujitsu.com>, "Nakao, Takanori" <nakao.takanori@jp.fujitsu.com>
 
-hitting '/' endpoint worked.
-
-Thanks
-Srikanth
-
-On Thu, Aug 6, 2015 at 1:26 AM, Wido den Hollander <wido@42on.com> wrote:
->
->
-> On 05-08-15 18:37, Srikanth Madugundi wrote:
->> Hi,
->>
->> We are planning to move our radosgw setup from apache to civetweb. We
->> were successfully able to setup and run civetweb on a test cluster.
->>
->> The radosgw instances are fronted by a VIP with currently checks the
->> health by getting /status.html file, after moving to civetweb the vip
->> is unable to get the health of radosgw server using /status.html
->> endpoint and assumes the server is down.
->>
->> I looked at ceph radosgw documentation and did not find any
->> configuration to rewrite urls. What is the best approach for VIP to
->> get the health of radosgw?
->>
->
-> You can simply query /
->
-> This is what I use in Varnish to do a health check:
->
-> backend rgw {
->     .host               = "127.0.0.1";
->     .port               = "7480";
->     .connect_timeout    = 1s;
->     .probe = {
->         .timeout   = 30s;
->         .interval  = 3s;
->         .window    = 10;
->         .threshold = 3;
->         .request =
->             "GET / HTTP/1.1"
->             "Host: localhost"
->             "User-Agent: Varnish-health-check"
->             "Connection: close";
->     }
-> }
->
-> Works fine, RGW will respond with a 200 OK in /
->
-> Wido
->
->> Thanks
->> Srikanth
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
+SGkgTG9pYywNCg0KVGhhbmsgeW91IGZvciBhcnJhbmdpbmcgUExVR0lOU19W
+MyBmZWF0dXJlLg0KSSBoYWQganVzdCBzdGFydGVkIHRvIHJldmlldyBwdWxs
+IHJlcXVlc3QgIzU0OTMuIFBsZWFzZSB3YWl0IGp1c3QgYSBtb21lbnQuDQoN
+CkJ5IHRoZSB3YXksIG1heSBJIGFzayB3aGF0IGtpbmQgb2Ygc3RhdHVzICM1
+MjU3IChkZWNvZGluZyBjYWNoZToNCnRoZSBsYXN0IGltbWVkaWF0ZSByZXF1
+ZXN0IGZyb20gU0hFQykgY3VycmVudGx5IGlzPw0KaHR0cHM6Ly9naXRodWIu
+Y29tL2NlcGgvY2VwaC9wdWxsLzUyNTcNClRlbGwgdXMgaWYgd2UgbmVlZCB0
+byByZWJhc2UgYWdhaW4uDQoNCkJlc3QgcmVnYXJkcywNClRha2VzaGkgTWl5
+YW1hZQ0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogTG9p
+YyBEYWNoYXJ5IFttYWlsdG86bG9pY0BkYWNoYXJ5Lm9yZ10gDQpTZW50OiBU
+aHVyc2RheSwgQXVndXN0IDYsIDIwMTUgMTA6NTggUE0NClRvOiBNaXlhbWFl
+LCBUYWtlc2hpL+WuruWJjSDliZsNCkNjOiBDZXBoIERldmVsb3BtZW50OyBT
+aGlvemF3YSwgS2Vuc3VrZS/loanmsqIg6LOi6LyUOyBOYWthbywgVGFrYW5v
+cmkv5Lit5bC+IOm3ueiplA0KU3ViamVjdDogUmU6IEVyYXN1cmUgQ29kZSBQ
+bHVnaW5zIDogUExVR0lOU19WMyBmZWF0dXJlDQoNCkhpIFRha2VzaGksDQoN
+Cmh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgvcHVsbC81NDkzIGlzIHJl
+YWR5IGZvciB5b3VyIHJldmlldy4gVGhlIG1hdGNoaW5nIGludGVncmF0aW9u
+IHRlc3RzIGNhbiBiZSBmb3VuZCBhdCBodHRwczovL2dpdGh1Yi5jb20vY2Vw
+aC9jZXBoLXFhLXN1aXRlL3B1bGwvNTIzDQoNCkNoZWVycw0KDQpPbiAwNi8w
+OC8yMDE1IDAyOjI4LCBNaXlhbWFlLCBUYWtlc2hpIHdyb3RlOg0KPiBEZWFy
+IFNhZ2UsDQo+IA0KPj4gbm90ZSB0aGF0IHdoYXQgdGhpcyByZWFsbHkgbWVh
+bnMgaXMgdGhhdCB0aGUgb24tZGlzayBlbmNvZGluZyBuZWVkcyB0byByZW1h
+aW4gZml4ZWQuDQo+IA0KPiBUaGFuayB5b3UgZm9yIGxldHRpbmcgdXMga25v
+dyB0aGUgaW1wb3J0YW50IG5vdGljZS4NCj4gV2UgaGF2ZSBubyBwbGFuIHRv
+IGNoYW5nZSBzaGVjJ3MgZm9ybWF0IGF0IHRoaXMgbW9tZW50LCBidXQgd2Ug
+d2lsbCANCj4gcmVtZW1iZXIgdGhlIGNvbW1lbnQgZm9yIGFueSBmdXR1cmUg
+ZXZlbnRzLg0KPiANCj4gQmVzdCBSZWdhcmRzLA0KPiBUYWtlc2hpIE1peWFt
+YWUNCj4gDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206
+IFNhZ2UgV2VpbCBbbWFpbHRvOnN3ZWlsQHJlZGhhdC5jb21dDQo+IFNlbnQ6
+IFRodXJzZGF5LCBBdWd1c3QgNiwgMjAxNSAzOjQ1IEFNDQo+IFRvOiBMb2lj
+IERhY2hhcnk7IE1peWFtYWUsIFRha2VzaGkv5a6u5YmNIOWJmw0KPiBDYzog
+U2FtdWVsIEp1c3Q7IENlcGggRGV2ZWxvcG1lbnQNCj4gU3ViamVjdDogUmU6
+IEVyYXN1cmUgQ29kZSBQbHVnaW5zIDogUExVR0lOU19WMyBmZWF0dXJlDQo+
+IA0KPiBPbiBXZWQsIDUgQXVnIDIwMTUsIExvaWMgRGFjaGFyeSB3cm90ZToN
+Cj4+IEhpIFNhbSwNCj4+DQo+PiBIb3cgZG9lcyB0aGlzIHByb3Bvc2FsIHNv
+dW5kID8gSXQgd291bGQgYmUgZ3JlYXQgaWYgdGhhdCB3YXMgZG9uZSANCj4+
+IGJlZm9yZSB0aGUgZmVhdHVyZSBmcmVlemUuDQo+IA0KPiBJIHRoaW5rIGl0
+J3MgYSBnb29kIHRpbWUuDQo+IA0KPiBUYWtlc2hpLCBub3RlIHRoYXQgd2hh
+dCB0aGlzIHJlYWxseSBtZWFucyBpcyB0aGF0IHRoZSBvbi1kaXNrIGVuY29k
+aW5nIG5lZWRzIHRvIHJlbWFpbiBmaXhlZC4gIElmIHdlIGRlY2lkZSB0byBj
+aGFuZ2UgaXQgZG93biB0aGUgbGluZSwgd2UnbGwgaGF2ZSB0byBtYWtlIGEg
+J3NoZWMyJyBvciBzaW1pbGFyIHNvIHRoYXQgdGhlIG9sZCBmb3JtYXQgaXMg
+c3RpbGwgZGVjb2RhYmxlIChvciBlbnN1cmUgdGhhdCBleGlzdGluZyBkYXRh
+IGNhbiBzdGlsbCBiZSByZWFkIGluIHNvbWUgb3RoZXIgd2F5KS4NCj4gDQo+
+IFNvdW5kIGdvb2Q/DQo+IA0KPiBzYWdlDQo+IA0KPiANCj4+DQo+PiBDaGVl
+cnMNCj4+DQo+PiBPbiAyOS8wNy8yMDE1IDExOjE2LCBMb2ljIERhY2hhcnkg
+d3JvdGU6DQo+Pj4gSGkgU2FtLA0KPj4+DQo+Pj4gVGhlIFNIRUMgcGx1Z2lu
+WzBdIGhhcyBiZWVuIHJ1bm5pbmcgaW4gdGhlIHJhZG9zIHJ1bnNbMV0gaW4g
+dGhlIHBhc3QgZmV3IG1vbnRocy4gSXQgYWxzbyBoYXMgYSBtYXRjaGluZyBj
+b3JwdXMgdmVyaWZpY2F0aW9uIHdoaWNoIHJ1bnMgb24gZXZlcnkgbWFrZSBj
+aGVja1syXSBhcyB3ZWxsIGFzIGl0cyBvcHRpbWl6ZWQgdmFyaWFudHMuIEkg
+YmVsaWV2ZSB0aGUgZmxhZyAiZXhwZXJpbWVudGFsIiBjYW4gbm93IGJlIHJl
+bW92ZWQuIA0KPj4+DQo+Pj4gSW4gb3JkZXIgdG8gZG8gc28sIHdlIG5lZWQg
+dG8gdXNlIGEgUExVR0lOU19WMyBmZWF0dXJlLCBpbiB0aGUgc2FtZSB3YXkg
+d2UgZGlkIGJhY2sgaW4gR2lhbnQgd2hlbiB0aGUgSVNBIGFuZCBMUkMgcGx1
+Z2lucyB3ZXJlIGludHJvZHVjZWRbM10uIFRoaXMgd29uJ3QgYmUgbmVjZXNz
+YXJ5IGluIHRoZSBmdXR1cmUsIHdoZW4gdGhlcmUgaXMgYSBnZW5lcmljIHBs
+dWdpbiBtZWNoYW5pc20sIGJ1dCByaWdodCBub3cgdGhhdCdzIHdoYXQgd2Ug
+bmVlZC4gSXQgd291bGQgYmUgYSBjb21taXQgdmVyeSBzaW1pbGFyIHRvIHRo
+ZSBvbmUgaW1wbGVtZW50aW5nIFBMVUdJTlNfVjJbNF0uDQo+Pj4NCj4+PiBJ
+cyB0aGlzIGFncmVlYWJsZSB0byB5b3UgPyBPciB3b3VsZCB5b3UgcmF0aGVy
+IHNlZSBhbm90aGVyIHdheSB0byByZXNvbHZlIHRoaXMgPw0KPj4+DQo+Pj4g
+Q2hlZXJzDQo+Pj4NCj4+PiBbMF0gaHR0cHM6Ly9naXRodWIuY29tL2NlcGgv
+Y2VwaC90cmVlL21hc3Rlci9zcmMvZXJhc3VyZS1jb2RlL3NoZWMNCj4+PiBb
+MV0NCj4+PiBodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBoLXFhLXN1aXRl
+L3RyZWUvbWFzdGVyL3N1aXRlcy9yYWRvcy90aHJhcw0KPj4+IGgtZXJhc3Vy
+ZS1jb2RlLXNoZWMgWzJdDQo+Pj4gaHR0cHM6Ly9naXRodWIuY29tL2NlcGgv
+Y2VwaC1lcmFzdXJlLWNvZGUtY29ycHVzL2Jsb2IvbWFzdGVyL3YwLjkyLTkN
+Cj4+PiA4OC9ub24tcmVncmVzc2lvbi5zaCNMNTIgWzNdIGh0dHA6Ly90cmFj
+a2VyLmNlcGguY29tL2lzc3Vlcy85MzQzDQo+Pj4gWzRdDQo+Pj4gaHR0cHM6
+Ly9naXRodWIuY29tL2NlcGgvY2VwaC9jb21taXQvOTY4NzE1MGNlYWM5Y2M3
+ZTUwNmJjMjI3ZjQzMGQ0MjANCj4+PiA3YTZkNzQ4OQ0KPj4+DQo+Pg0KPj4g
+LS0NCj4+IExvw69jIERhY2hhcnksIEFydGlzYW4gTG9naWNpZWwgTGlicmUN
+Cj4+DQo+Pg0KDQotLSANCkxvw69jIERhY2hhcnksIEFydGlzYW4gTG9naWNp
+ZWwgTGlicmUNCg0K
