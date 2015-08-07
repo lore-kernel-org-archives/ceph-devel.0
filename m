@@ -1,211 +1,143 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: About the Ceph erasure pool with ISA plugin on Intel xeon CPU
-Date: Fri, 07 Aug 2015 12:43:08 +0200
-Message-ID: <55C48BBC.1070007@dachary.org>
-References: <CAKEOLWVxuURSgYP3FLRhHs=THuYK0Qy084hNxZAqERyAYy2J4w@mail.gmail.com>	<55C35386.6070602@dachary.org>	<CAKEOLWVtwPC4Ob5SSOCe2dxHrbVV+ncUEETD2qKYXaj=onQDvw@mail.gmail.com>	<55C479A7.5030602@dachary.org> <CAKEOLWWfGYLfgxseRkAQv+L24Z4BUYg5ej0f_zd0vmH=VPm-gQ@mail.gmail.com>
+From: "Gurjar, Unmesh" <unmesh.gurjar@hp.com>
+Subject: RE: OSD sometimes stuck in init phase
+Date: Fri, 7 Aug 2015 11:43:59 +0000
+Message-ID: <BA2282FCE1654C43BF189535A964CC9F273281E4@G4W3218.americas.hpqcorp.net>
+References: <BA2282FCE1654C43BF189535A964CC9F273279B3@G4W3218.americas.hpqcorp.net>
+	<CACJqLyYCf_QBXjxAProirc3RqhYQh8Z7mDamZe7aVKwEozYtpw@mail.gmail.com>
+	<BA2282FCE1654C43BF189535A964CC9F27327A40@G4W3218.americas.hpqcorp.net>
+	<CACJqLyZOmgnY6OTNWu9Or7ZvLxv8_wUX8ZgUtEd0d8n8s3RHpg@mail.gmail.com>
+	<BA2282FCE1654C43BF189535A964CC9F27327CB9@G4W3218.americas.hpqcorp.net>
+ <CACJqLyaUbUrx0+1vepN68QR=5ZDeuZa_0jhE5322iJ8D2vmqXg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="b5drAboTgwibasCXJvaTbkssFfLFBovX3"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:34807 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751471AbbHGKnL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Aug 2015 06:43:11 -0400
-In-Reply-To: <CAKEOLWWfGYLfgxseRkAQv+L24Z4BUYg5ej0f_zd0vmH=VPm-gQ@mail.gmail.com>
+Received: from g4t3425.houston.hp.com ([15.201.208.53]:14905 "EHLO
+	g4t3425.houston.hp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753049AbbHGLpZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Aug 2015 07:45:25 -0400
+Received: from G4W6310.americas.hpqcorp.net (g4w6310.houston.hp.com [16.210.26.217])
+	(using TLSv1 with cipher AES128-SHA (128/128 bits))
+	(No client certificate requested)
+	by g4t3425.houston.hp.com (Postfix) with ESMTPS id 95536148
+	for <ceph-devel@vger.kernel.org>; Fri,  7 Aug 2015 11:45:24 +0000 (UTC)
+In-Reply-To: <CACJqLyaUbUrx0+1vepN68QR=5ZDeuZa_0jhE5322iJ8D2vmqXg@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Derek Su <dereksu@qnap.com>
-Cc: ceph-devel@vger.kernel.org
+To: Haomai Wang <haomaiwang@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---b5drAboTgwibasCXJvaTbkssFfLFBovX3
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-Hi,
-
-On 07/08/2015 11:45, Derek Su wrote:
-> Hi, Loic,
->=20
-> I also suspect the bottleneck is not the CPU.
-> I stored the journal and the data on the same HDD, so the write
-> performance is very poor. Is it the possible limiting factor in my
-> system?
->=20
-> Now I am trying to save the journal to SSD insted of the HDD.
-> I will report the results later if I got better results.
->=20
-> By the way, is there any commands or methods to know whether the CPU
-> is really accelerated? Or I can only know that from the results of
-> benchmark?
-> I am worry about that the ISA erasure profile is not read by the Ceph..=
-=2E
-
-You can easily verify the ISA profile is being used by running the benchm=
-ark described at http://dachary.org/?p=3D3665.
-
-Cheers
-
->=20
-> Thanks,
-> Derek
->=20
->=20
-> 2015-08-07 17:25 GMT+08:00 Loic Dachary <loic@dachary.org>:
->> Hi,
->>
->> On 07/08/2015 03:26, Derek Su wrote:
->>> Hello, Loic
->>> the following is my steps and configurations:
->>> (1) The 11 osd and 3 monitors were ran in the docker container on the=
-
->>> same host machine.
->>> (2) Each osd had one 1T HDD.
->>>
->>> (3)  I set the erasure coding pool profiles:
->>> ## Jerasure, reed-soloman
->>>  $ ceph osd erasure-code-profile set reed_k4m2_A k=3D4 m=3D2
->>> directory=3D/usr/lib64/ceph/erasure-code
->>>
->>> ## ISA, reed-soloman
->>> ceph osd erasure-code-profile set reed_k4m2_isa_A k=3D4 m=3D2
->>> directory=3D/usr/lib64/ceph/erasure-code plugin=3Disa
->>> technique=3Dreed_sol_van
->>>
->>> (4) Then, the erasure pools were created:
->>> ## Jerasure, reed-soloman
->>> $ $ceph osd pool create reed_k4m2_A_pool 128 128 erasure reed_k4m2_A
->>>
->>> ## ISA, reed-soloman
->>> $ ceph osd pool create reed_k4m2_isa_A_pool 128 128 erasure reed_k4m2=
-_isa_A
->>>
->>> (5) Then, I used the rados benchmark to test the write performance
->>> ## Jerasure, reed-soloman
->>> rados bench  -p reed_k4m2_A_pool 500 write --no-cleanup
->>>
->>> ## ISA, reed-soloman
->>> rados bench  -p reed_k4m2_isa_A_pool write --no-cleanup
->>>
->>> ----
->>> The results:
->>> (1) Jerasure/Reed-Soloman
->>> Write throughput: 136.0 MB/S, Latency: 0.471
->>> (2) ISA/Reed-Soloman
->>> Write throughput: 133.1 MB/S, Latency: 0.481
->>> (3) Jerasure/cauchy_good
->>> Write throughput: 138.3 MB/S, Latency: 0.462
->>> (4) ISA/cauchy
->>> Write throughput: 140.2 MB/S, Latency: 0.452
->>>
->>> --
->>> My CPU information:
->>> Intel(R) Xeon(R) CPU E3-1245 v3 @ 3.40GHz
->>>
->>> $ cat /proc/cpuinfo | grep flags
->>> flags           : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pg=
-e
->>> mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe
->>> syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon pebs bts
->>> rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq=
-
->>> dtes64 monitor ds_cpl vmx smx est tm2 ssse3 fma cx16 xtpr pdcm pcid
->>> sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx
->>> f16c rdrand lahf_lm abm ida arat epb pln pts dtherm tpr_shadow vnmi
->>> flexpriority ept vpid fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms
->>> invpcid xsaveopt
->>>
->>> Ram: 12 GiB
->>>
->>>
->>> The results of the performance tests seem there are no differences...=
-
->>>
->>
->> I have not conducted such tests myself. I would however expect to see =
-some difference because the ISA plugin goes faster than the Jerasure plug=
-in for writes. Could it be that in the test you run the CPU is not the li=
-miting factor ?
->>
->> Cheers
->>
->>
->>> Thanks, :)
->>> Derek
->>>
->>> 2015-08-06 20:31 GMT+08:00 Loic Dachary <loic@dachary.org>:
->>>> Hi,
->>>>
->>>> Could you please publish the benchmark results somewhere ? I should =
-be able to figure out why you don't see a difference.
->>>>
->>>> Cheers
->>>>
->>>> On 06/08/2015 13:25, Derek Su wrote:
->>>>> Dear Mr. Dachary and all,
->>>>>
->>>>> Recently, I found your blog show the performance tests of erasure
->>>>> pools (http://dachary.org/?p=3D3042 , http://dachary.org/?p=3D3665)=
-=2E
->>>>> The results indicates the write throughput can be enhanced
->>>>> significantly using Intel xeon CPU.
->>>>>
->>>>> I tried to create an erasure pool with isa plugin, reed_sol_van
->>>>> technique, and k/m=3D4/2 on the Intel(R) Xeon(R) CPU E3-1245 v3 @
->>>>> 3.40GHz machines.
->>>>>
->>>>> However, the results of the rados benchmark showed that there was n=
-o
->>>>> any difference between the jerasure and isa plugins. It seems very
->>>>> strange.
->>>>>
->>>>> Do I need to do other configurations in addition to only setting th=
-e
->>>>> erasure profile?
->>>>> In addition, how can I know the erasure pool is accelerated by ISA
->>>>> plugin exactly? Is there any command I can use?
->>>>>
->>>>> Thanks, :)
->>>>>
->>>>> Derek Su.
->>>>>
->>>>
->>>> --
->>>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->>>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>
->> --
->> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---b5drAboTgwibasCXJvaTbkssFfLFBovX3
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlXEi7wACgkQ8dLMyEl6F23MpgCeK8m0YEnpleL1jdNdP9EdF5CN
-JFsAn0KCCe9losgV6Q64+cecgViSTfgE
-=YxR4
------END PGP SIGNATURE-----
-
---b5drAboTgwibasCXJvaTbkssFfLFBovX3--
+QEhhb21haTogVGhhbmtzIGZvciB5b3VyIHN1cHBvcnQgYW5kIGN1cmlvc2l0eS4NCg0KQWZ0ZXIg
+ZW5hYmxpbmcgdGhlIHZlcmJvc2Ugam91cm5hbCBsb2dzIGFuZCBvYnNlcnZpbmcgdGhlIGRpc2Ny
+ZXBhbmNpZXMgb2Ygd29ya2luZyBhbmQgc3R1Y2sgT1NEcywgaXQgc2VlbWVkIHJlbGF0ZWQgdG8g
+dGhlICdqb3VybmFsIGFpbycuIFRvIGNvbmZpcm0gdGhhdCB0aGUgaXNzdWUgSSBoaXQgaXMgZHVl
+IHRvIGpvdXJuYWwgYWlvLCBJIGRpc2FibGVkIGl0IGFuZCBlcmVjdGVkIGEgbmV3IGNsdXN0ZXIg
+aGF2aW5nIDkgT1NEcywgYWxsIG9mIHdoaWNoIHdlbnQgdG8gJ3VwJyBhbmQgJ2luJyBzdGF0ZSAo
+b24gc3RhcnRpbmcgdGhlIE9TRCBzZXJ2aWNlIGZvciBmaXJzdCB0aW1lKSENCg0KVGhlIGZpeCBy
+ZWxhdGVkIGZvciB0aGUgaXNzdWUgWzFdIGlzIGF2YWlsYWJsZSBpbiBuZXh0IHZlcnNpb24gb2Yg
+RmlyZWZseSByZWxlYXNlICgwLjgwLjggYW5kIG9ud2FyZHMpOyBwcm9iYWJseSBJIHNob3VsZCBt
+b3ZlIHRvIHRoZSBsYXRlc3QgRmlyZWZseSB2ZXJzaW9uICgwLjgwLjEwKSENCg0KWzFdIC0gaHR0
+cDovL3RyYWNrZXIuY2VwaC5jb20vaXNzdWVzLzkwNzMNCg0KUmVnYXJkcywNClVubWVzaCBHLg0K
+SVJDOiB1bm1lc2hnDQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogSGFv
+bWFpIFdhbmcgW21haWx0bzpoYW9tYWl3YW5nQGdtYWlsLmNvbV0NCj4gU2VudDogVGh1cnNkYXks
+IEF1Z3VzdCAwNiwgMjAxNSA2OjU5IFBNDQo+IFRvOiBHdXJqYXIsIFVubWVzaA0KPiBDYzogY2Vw
+aC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCj4gU3ViamVjdDogUmU6IE9TRCBzb21ldGltZXMgc3R1
+Y2sgaW4gaW5pdCBwaGFzZQ0KPiANCj4gSXQgc2VlbWVkIGZpbGVzdG9yZSBkb2Vzbid0IGRvIHRy
+YW5zYWN0aW9uIGFzIGV4cGVjdGVkLiBTb3JyeSwgeW91IG5lZWQgdG8gYWRkDQo+IGRlYnVnX2pv
+dXJuYWw9MjAvMjAgdG8gaGVscCBmaW5kIHRoZSByZWFzb24uIDotKQ0KPiANCj4gQlRXLCB3aGF0
+J3MgeW91ciBvcyB2ZXJzaW9uPyBIb3cgbWFueSBvc2RzIGRvIHlvdSBoYXZlIGluIHRoaXMgY2x1
+c3RlciwgaG93DQo+IG1hbnkgb3NkcyBmYWlsZWQgdG8gc3RhcnQgbGlrZSB0aGlzPw0KPiANCj4g
+T24gVGh1LCBBdWcgNiwgMjAxNSBhdCA5OjE3IFBNLCBHdXJqYXIsIFVubWVzaCA8dW5tZXNoLmd1
+cmphckBocC5jb20+DQo+IHdyb3RlOg0KPiA+IFBsZWFzZSBmaW5kIGNlcGguY29uZiBhdCBbMV0g
+YW5kIHRoZSBjb3JyZXNwb25kaW5nIE9TRCBsb2cgYXQgWzJdLg0KPiA+DQo+ID4gVG8gY2xhcmlm
+eSBvbmUgdGhpbmcgSSBza2lwcGVkIGVhcmxpZXIgb24sIGlzIHdoaWxlIGJyaW5naW5nIHVwIHRo
+ZSBPU0RzLCAnY2VwaC0NCj4gZGlzayBhY3RpdmF0ZScgd2FzIGdldHRpbmcgaHVuZyAoZHVlIHRv
+IGlzc3VlIFszXSkuIFRvIGdldCBvdmVyIHRoaXMsIEkgaGFkIHRvDQo+IHRlbXBvcmFyaWx5IGRp
+c2FibGUgJ2pvdXJuYWwgZGlvJyB0byBnZXQgdGhlIGRpc2sgYWN0aXZhdGVkICh3aXRoIGEgJ21h
+cmstaW5pdCcgc2V0DQo+IHRvIG5vbmUpIGFuZCB0aGVuIGV4cGxpY2l0bHkgc3RhcnQgdGhlIE9T
+RCBzZXJ2aWNlIGFmdGVyIHVwZGF0aW5nIHRoZSBjb25mIHRvDQo+IGVuYWJsZSAnam91cm5hbCBk
+aW8nLiBJIGFtIGhvcGVmdWwgdGhhdCB0aGlzIHNob3VsZCBub3QgY2F1c2UgdGhlIHByZXNlbnQg
+aXNzdWUNCj4gKHNpbmNlIGZldyBPU0Qgc3RhcnQgc3VjY2Vzc2Z1bGx5IG9uIGZpcnN0IGF0dGVt
+cHQgYW5kIG90aGVycyBvbiBzdWJzZXF1ZW50DQo+IHNlcnZpY2UgcmVzdGFydHMpIQ0KPiA+DQo+
+ID4gWzFdIC0gaHR0cDovL3Bhc3RlLm9wZW5zdGFjay5vcmcvc2hvdy80MTExNjEvDQo+ID4gWzJd
+IC0gaHR0cDovL3Bhc3RlLm9wZW5zdGFjay5vcmcvc2hvdy80MTExNjIvDQo+ID4gWzNdIC0gaHR0
+cDovL3RyYWNrZXIuY2VwaC5jb20vaXNzdWVzLzk3NjgNCj4gPg0KPiA+IFJlZ2FyZHMsDQo+ID4g
+VW5tZXNoIEcuDQo+ID4gSVJDOiB1bm1lc2hnDQo+ID4NCj4gPj4gLS0tLS1PcmlnaW5hbCBNZXNz
+YWdlLS0tLS0NCj4gPj4gRnJvbTogSGFvbWFpIFdhbmcgW21haWx0bzpoYW9tYWl3YW5nQGdtYWls
+LmNvbV0NCj4gPj4gU2VudDogVGh1cnNkYXksIEF1Z3VzdCAwNiwgMjAxNSA2OjIyIFBNDQo+ID4+
+IFRvOiBHdXJqYXIsIFVubWVzaA0KPiA+PiBDYzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcN
+Cj4gPj4gU3ViamVjdDogUmU6IE9TRCBzb21ldGltZXMgc3R1Y2sgaW4gaW5pdCBwaGFzZQ0KPiA+
+Pg0KPiA+PiBEb24ndCBmaW5kIHNvbWV0aGluZyBzdHJhbmdlLg0KPiA+Pg0KPiA+PiBDb3VsZCB5
+b3UgcGFzdGUgeW91ciBjZXBoLmNvbmY/IEFuZCByZXN0YXJ0IHRoaXMgb3NkIHdpdGgNCj4gPj4g
+ZGVidWdfb3NkPTIwLzIwLA0KPiA+PiBkZWJ1Z19maWxlc3RvcmU9MjAvMjAgOi0pDQo+ID4+DQo+
+ID4+IE9uIFRodSwgQXVnIDYsIDIwMTUgYXQgODowOSBQTSwgR3VyamFyLCBVbm1lc2ggPHVubWVz
+aC5ndXJqYXJAaHAuY29tPg0KPiA+PiB3cm90ZToNCj4gPj4gPiBUaGFua3MgZm9yIHF1aWNrIHJl
+c3BvbnNlIEhhb21haSEgUGxlYXNlIGZpbmQgdGhlIGJhY2t0cmFjZSBoZXJlIFsxXS4NCj4gPj4g
+Pg0KPiA+PiA+IFsxXSAtIGh0dHA6Ly9wYXN0ZS5vcGVuc3RhY2sub3JnL3Nob3cvNDExMTM5Lw0K
+PiA+PiA+DQo+ID4+ID4gUmVnYXJkcywNCj4gPj4gPiBVbm1lc2ggRy4NCj4gPj4gPiBJUkM6IHVu
+bWVzaGcNCj4gPj4gPg0KPiA+PiA+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiA+PiA+
+PiBGcm9tOiBIYW9tYWkgV2FuZyBbbWFpbHRvOmhhb21haXdhbmdAZ21haWwuY29tXQ0KPiA+PiA+
+PiBTZW50OiBUaHVyc2RheSwgQXVndXN0IDA2LCAyMDE1IDU6MzEgUE0NCj4gPj4gPj4gVG86IEd1
+cmphciwgVW5tZXNoDQo+ID4+ID4+IENjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KPiA+
+PiA+PiBTdWJqZWN0OiBSZTogT1NEIHNvbWV0aW1lcyBzdHVjayBpbiBpbml0IHBoYXNlDQo+ID4+
+ID4+DQo+ID4+ID4+IENvdWxkIHlvdSBwcmludCB5b3VyIGFsbCB0aHJlYWQgY2FsbGJhY2sgdmlh
+ICJ0aHJlYWQgYXBwbHkgYWxsIGJ0Ij8NCj4gPj4gPj4NCj4gPj4gPj4gT24gVGh1LCBBdWcgNiwg
+MjAxNSBhdCA3OjUyIFBNLCBHdXJqYXIsIFVubWVzaA0KPiA+PiA+PiA8dW5tZXNoLmd1cmphckBo
+cC5jb20+DQo+ID4+ID4+IHdyb3RlOg0KPiA+PiA+PiA+IEhpLA0KPiA+PiA+PiA+DQo+ID4+ID4+
+ID4gT24gYSBDZXBoIEZpcmVmbHkgY2x1c3RlciAodmVyc2lvbiBbMV0pLCBPU0RzIGFyZSBjb25m
+aWd1cmVkIHRvDQo+ID4+ID4+ID4gdXNlIHNlcGFyYXRlDQo+ID4+ID4+IGRhdGEgYW5kIGpvdXJu
+YWwgZGlza3MgKHVzaW5nIHRoZSBjZXBoLWRpc2sgdXRpbGl0eSkuIEl0IGlzDQo+ID4+ID4+IG9i
+c2VydmVkLCB0aGF0IGZldyBPU0RzIHN0YXJ0LXVwIGZpbmUgKGFyZSAndXAnIGFuZCAnaW4nIHN0
+YXRlKTsNCj4gPj4gPj4gaG93ZXZlciwgb3RoZXJzIGFyZSBzdHVjayBpbiB0aGUgJ2luaXQgY3Jl
+YXRpbmcvdG91Y2hpbmcgc25hcG1hcHBlcg0KPiBvYmplY3QnDQo+ID4+ID4+IHBoYXNlLiBCZWxv
+dyBpcyBhIE9TRCBzdGFydC11cCBsb2cNCj4gPj4gPj4gc25pcHBldDoNCj4gPj4gPj4gPg0KPiA+
+PiA+PiA+IDIwMTUtMDgtMDYgMDg6NTg6MDIuNDkxNTM3IDdmZDMxMmRmOTdjMCAgMSBqb3VybmFs
+IF9vcGVuDQo+ID4+ID4+ID4gL3Zhci9saWIvY2VwaC9vc2QvY2VwaC0wL2pvdXJuYWwgZmQgMjE6
+IDEwNzM3NDE4MjQgYnl0ZXMsIGJsb2NrDQo+ID4+ID4+ID4gc2l6ZQ0KPiA+PiA+PiA+IDQwOTYg
+Ynl0ZXMsIGRpcmVjdGlvID0gMSwgYWlvID0gMQ0KPiA+PiA+PiA+IDIwMTUtMDgtMDYgMDg6NTg6
+MDIuNDk4NDQ3IDdmZDMxMmRmOTdjMCAgMSBqb3VybmFsIF9vcGVuDQo+ID4+ID4+ID4gL3Zhci9s
+aWIvY2VwaC9vc2QvY2VwaC0wL2pvdXJuYWwgZmQgMjE6IDEwNzM3NDE4MjQgYnl0ZXMsIGJsb2Nr
+DQo+ID4+ID4+ID4gc2l6ZQ0KPiA+PiA+PiA+IDQwOTYgYnl0ZXMsIGRpcmVjdGlvID0gMSwgYWlv
+ID0gMQ0KPiA+PiA+PiA+IDIwMTUtMDgtMDYgMDg6NTg6MDIuNDk4NzIwIDdmZDMxMmRmOTdjMCAg
+MiBvc2QuMCAwIGJvb3QNCj4gPj4gPj4gPiAyMDE1LTA4LTA2IDA4OjU4OjAyLjQ5ODg2NSA3ZmQz
+MTJkZjk3YzAgMTAgb3NkLjAgMA0KPiA+PiA+PiA+IHJlYWRfc3VwZXJibG9jayBzYigyNjQ1YmJm
+Ni0xNmQwLTRjNDItODgzNS04YmE5ZjVjOTVhMWQgb3NkLjANCj4gPj4gPj4gPiBhODIxMTQ2Zi0w
+NzQyLTQ3MjQtYjRjYS0zOWVhNGNjYzI5OGQgZTAgWzAsMF0gbGNpPVswLDBdKQ0KPiA+PiA+PiA+
+IDIwMTUtMDgtMDYgMDg6NTg6MDIuNDk4OTM3IDdmZDMxMmRmOTdjMCAxMCBvc2QuMCAwIGluaXQN
+Cj4gPj4gPj4gPiBjcmVhdGluZy90b3VjaGluZyBzbmFwbWFwcGVyIG9iamVjdA0KPiA+PiA+PiA+
+DQo+ID4+ID4+ID4gVGhlIGxvZyBzdGF0ZW1lbnQgaXMgaW5hY2N1cmF0ZSB0aG91Z2gsIHNpbmNl
+IGl0IGlzIGFjdHVhbGx5DQo+ID4+ID4+ID4gZG9pbmcgaW5pdA0KPiA+PiA+PiBvcGVyYXRpb24g
+Zm9yIHRoZSAnaW5mb3MnIG9iamVjdCAoYXMgY2FuIGJlIG9ic2VydmVkIGZyb20gc291cmNlIFsy
+XSkuDQo+ID4+ID4+ID4NCj4gPj4gPj4gPiBVcG9uIGRlYnVnZ2luZyBmdXJ0aGVyLCB0aGUgdGhy
+ZWFkIHNlZW1zIHRvIGJlIHdhaXRpbmcgdG8NCj4gPj4gPj4gPiBhY3F1aXJlIHRoZQ0KPiA+PiA+
+PiAnT2JqZWN0U3RvcmU6OmFwcGx5X3RyYW5zYWN0aW9uOjpteV9sb2NrJyBtdXRleC4gQmVsb3cg
+aXMgdGhlIGRlYnVnDQo+IHRyYWNlOg0KPiA+PiA+PiA+DQo+ID4+ID4+ID4gKGdkYikgd2hlcmUN
+Cj4gPj4gPj4gPiAjMCAgMHgwMDAwN2ZkMzEyMmI3MDhmIGluIHB0aHJlYWRfY29uZF93YWl0QEBH
+TElCQ18yLjMuMiAoKSBmcm9tDQo+ID4+ID4+ID4gL2xpYi94ODZfNjQtbGludXgtZ251L2xpYnB0
+aHJlYWQuc28uMA0KPiA+PiA+PiA+ICMxICAweDAwMDA3ZmQzMTMxMzJiZjQgaW4NCj4gPj4gPj4g
+PiBPYmplY3RTdG9yZTo6YXBwbHlfdHJhbnNhY3Rpb25zKE9iamVjdFN0b3JlOjpTZXF1ZW5jZXIq
+LA0KPiA+PiA+PiA+IHN0ZDo6bGlzdDxPYmplY3RTdG9yZTo6VHJhbnNhY3Rpb24qLA0KPiA+PiA+
+PiA+IHN0ZDo6YWxsb2NhdG9yPE9iamVjdFN0b3JlOjpUcmFuc2FjdGlvbio+ID4mLCBDb250ZXh0
+KikgKCkNCj4gPj4gPj4gPiAjMiAgMHgwMDAwN2ZkMzEzMDk3ZDA4IGluDQo+ID4+ID4+ID4gT2Jq
+ZWN0U3RvcmU6OmFwcGx5X3RyYW5zYWN0aW9uKE9iamVjdFN0b3JlOjpUcmFuc2FjdGlvbiYsDQo+
+ID4+ID4+ID4gQ29udGV4dCopDQo+ID4+ID4+ID4gKCkNCj4gPj4gPj4gPiAjMyAgMHgwMDAwN2Zk
+MzEzMDc2NzkwIGluIE9TRDo6aW5pdCgpICgpDQo+ID4+ID4+ID4gIzQgIDB4MDAwMDdmZDMxMzAy
+MzNhNyBpbiBtYWluICgpDQo+ID4+ID4+ID4NCj4gPj4gPj4gPiBJbiBhIGZldyBjYXNlcywgdXBv
+biByZXN0YXJ0aW5nIHRoZSBzdHVjayBPU0QgKHNlcnZpY2UpLCBpdA0KPiA+PiA+PiA+IHN1Y2Nl
+c3NmdWxseQ0KPiA+PiA+PiBjb21wbGV0ZXMgdGhlICdpbml0JyBwaGFzZSBhbmQgcmVhY2hlcyB0
+aGUgJ3VwJyBhbmQgJ2luJyBzdGF0ZSENCj4gPj4gPj4gPg0KPiA+PiA+PiA+IEFueSBoZWxwIGlz
+IGdyZWF0bHkgYXBwcmVjaWF0ZWQuIFBsZWFzZSBsZXQgbWUga25vdyBpZiBhbnkgbW9yZQ0KPiA+
+PiA+PiA+IGRldGFpbHMgYXJlDQo+ID4+ID4+IHJlcXVpcmVkIGZvciByb290IGNhdXNpbmcuDQo+
+ID4+ID4+ID4NCj4gPj4gPj4gPiBbMV0gLSAwLjgwLjcgKDZjMDEyN2ZjYjU4MDA4NzkzZDNjOGI2
+MmQ5MjViYzkxOTYzNjcyYTMpDQo+ID4+ID4+ID4gWzJdIC0NCj4gPj4gPj4gPiBodHRwczovL2dp
+dGh1Yi5jb20vY2VwaC9jZXBoL2Jsb2IvZmlyZWZseS9zcmMvb3NkL09TRC5jYyNMMTIxMQ0KPiA+
+PiA+PiA+DQo+ID4+ID4+ID4gUmVnYXJkcywNCj4gPj4gPj4gPiBVbm1lc2ggRy4NCj4gPj4gPj4g
+PiBJUkM6IHVubWVzaGcNCj4gPj4gPj4gPiAtLQ0KPiA+PiA+PiA+IFRvIHVuc3Vic2NyaWJlIGZy
+b20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIg0KPiA+
+PiA+PiA+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwu
+b3JnIE1vcmUNCj4gPj4gPj4gPiBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVs
+Lm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+ID4+ID4+DQo+ID4+ID4+DQo+ID4+ID4+DQo+ID4+
+ID4+IC0tDQo+ID4+ID4+IEJlc3QgUmVnYXJkcywNCj4gPj4gPj4NCj4gPj4gPj4gV2hlYXQNCj4g
+Pj4NCj4gPj4NCj4gPj4NCj4gPj4gLS0NCj4gPj4gQmVzdCBSZWdhcmRzLA0KPiA+Pg0KPiA+PiBX
+aGVhdA0KPiANCj4gDQo+IA0KPiAtLQ0KPiBCZXN0IFJlZ2FyZHMsDQo+IA0KPiBXaGVhdA0K
