@@ -1,52 +1,86 @@
-From: Samuel Just <sjust@redhat.com>
-Subject: Re: c++11 merged in master
-Date: Fri, 7 Aug 2015 11:36:18 -0700
-Message-ID: <CAN=+7FU_D=qcj-Ku_2JbFSZA1SM-4dBGJ6qcewmu3qnLQCGNJg@mail.gmail.com>
-References: <alpine.DEB.2.00.1508071041040.22099@cobra.newdream.net>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: jerasure packaging and Ceph
+Date: Fri, 07 Aug 2015 21:27:43 +0200
+Message-ID: <55C506AF.4080309@dachary.org>
+References: <55C4EA1C.3080601@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="1e1WaDrevO7JlmuoN2Wb0Mj4hckXB15IQ"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f176.google.com ([209.85.213.176]:33509 "EHLO
-	mail-ig0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1946063AbbHGSgT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Aug 2015 14:36:19 -0400
-Received: by igbpg9 with SMTP id pg9so37155766igb.0
-        for <ceph-devel@vger.kernel.org>; Fri, 07 Aug 2015 11:36:18 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1508071041040.22099@cobra.newdream.net>
+Received: from mail2.dachary.org ([91.121.57.175]:35038 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1945960AbbHGT1r (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Aug 2015 15:27:47 -0400
+In-Reply-To: <55C4EA1C.3080601@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "Deza, Alfredo" <adeza@redhat.com>
+To: Ken Dreyer <kdreyer@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-lambdas and autos for everyone!
--Sam
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--1e1WaDrevO7JlmuoN2Wb0Mj4hckXB15IQ
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-On Fri, Aug 7, 2015 at 10:52 AM, Sage Weil <sweil@redhat.com> wrote:
-> Yay!  Thanks, Casey!
->
-> This initially breaks the precise and el6 builds on master.  I've fixed
-> the precise gitbuilders with
->
-> sudo apt-get install python-software-properties
-> echo | sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-> sudo apt-get update
-> sudo apt-get install -y g++-4.8
-> /srv/autobuild-ceph/gitbuilder.git/build/install-deps.sh
-> sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.6 60 --slave /usr/bin/g++ g++ /usr/bin/g++-4.6
-> sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 40 --slave /usr/bin/g++ g++ /usr/bin/g++-4.8
-> echo 2 | sudo update-alternatives --config gcc
-> sudo restart autobuild-ceph
->
-> We'll need to do something similar on centos6 to get g++ 4.7 or 4.8 in
-> place, and the jenkins slaves for release builds will also need to be
-> updated.
->
-> Assuming this doesn't cause problems (e.g., runtime issues on vanilla
-> precise) this will have no bearing on the previous discussion about
-> whether we continue supporting old distros for future releases.
->
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Hi Ken,
+
+On 07/08/2015 19:25, Ken Dreyer wrote:
+> Hi Loic,
+>=20
+> I was looking through Ceph's bundled libraries recently and I was
+> wondering why Ceph bundles its own copy of jerasure.
+>=20
+> Could you give some background on that? Why don't we link to an separat=
+e
+> system package?
+
+Mainly because there is no proper non regression testing of the packages =
+found in the distributions. It is absolutely critical for Ceph to ensure =
+there is no regression because it would mean data loss. The packagers do =
+not have that concern in mind right now, nor do they have the infrastruct=
+ure to run non regression tests, to the best of my knowledge.
+
+Even if they had non regression tests, whenever a new package is publishe=
+d, we would need to run Ceph integration tests before it lands in the dis=
+tribution repositories to ensure that everything is fine from the Ceph pe=
+rspective. The recent work with teuthology and OpenStack simplified this =
+quite a lot and anyone can run teuthology now. However the level of coord=
+ination it would require between the jerasure packager and the ceph packa=
+ger is far from what is going on currently.
+
+I offered to package jerasure for Debian to solve that problem in the Deb=
+ian / Ubuntu realm. I thought a first step to decouple ceph from jerasure=
+ could be that I care for jerasure because I have access to the test infr=
+astructure and I understand what Ceph needs. And I could gradually make i=
+t possible for any packager to do the same, somehow (I have no idea how t=
+o do that, honestly). Unfortunately the person responsible for packaging =
+jerasure did not respond favorably to my offer. Nor does he plan to imple=
+ment integration or non regression tests.
+
+Hopefully that will change in the future, but for now I think bundling je=
+rasure with Ceph is the best way to preserve the data of our users.
+
+Cheers
+
+>=20
+> - Ken
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--1e1WaDrevO7JlmuoN2Wb0Mj4hckXB15IQ
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlXFBq8ACgkQ8dLMyEl6F23IEgCgrUUic4DfPeJKOVJkGoRqIkKE
+OBsAoJIKaM8Z6/VAc3L7xu/Xqn5FpkuB
+=eZdU
+-----END PGP SIGNATURE-----
+
+--1e1WaDrevO7JlmuoN2Wb0Mj4hckXB15IQ--
