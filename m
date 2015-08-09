@@ -1,89 +1,78 @@
-From: =?iso-8859-2?Q?Da=B3ek=2C_Piotr?= <Piotr.Dalek@ts.fujitsu.com>
-Subject: RE: c++11 merged in master
-Date: Sun, 9 Aug 2015 20:02:34 +0200
-Message-ID: <90559C83A9C7FA45B5846C975DFA612DDB53475CC8@ABGEX73E.FSC.NET>
-References: <alpine.DEB.2.00.1508071041040.22099@cobra.newdream.net>
- <alpine.DEB.2.00.1508091032040.22099@cobra.newdream.net>
+From: Walker H Haddock <whaddock@uab.edu>
+Subject: RE: Ceph Manual Deployment for version 94.2
+Date: Sun, 9 Aug 2015 19:40:34 +0000
+Message-ID: <ED6C2349E87E9848AE0A2DAE891AD0A4222DEAE6@UABEXMB1.ad.uab.edu>
+References: <ED6C2349E87E9848AE0A2DAE891AD0A4222DE6BE@UABEXMB1.ad.uab.edu>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-2
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from dgate10.ts.fujitsu.com ([80.70.172.49]:15041 "EHLO
-	dgate10.ts.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933123AbbHISCj convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 9 Aug 2015 14:02:39 -0400
-In-Reply-To: <alpine.DEB.2.00.1508091032040.22099@cobra.newdream.net>
+Received: from uabexch3.ad.uab.edu ([138.26.5.132]:49436 "EHLO
+	uabexch3.ad.uab.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752508AbbHITkh convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 9 Aug 2015 15:40:37 -0400
+In-Reply-To: <ED6C2349E87E9848AE0A2DAE891AD0A4222DE6BE@UABEXMB1.ad.uab.edu>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-Cc: "adeza@redhat.com" <adeza@redhat.com>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
-> owner@vger.kernel.org] On Behalf Of Sage Weil
-> Sent: Sunday, August 09, 2015 7:39 PM
->=20
-> [..]
->
-> Well, I spoke too soon.  The builds still aren't completing (the olde=
-r boost's
-> shared_ptr is buggy on c++11, and I'm not sure we can upgrade since s=
-ome
-> of it is dynamically linked).  Also, when you try to install packages=
- built with
-> gcc 4.8 (regardless of the branch), you get
->=20
-> 2015-08-08T11:28:45.471 INFO:teuthology.orchestra.run.plana89.stdout:
-> ceph
-> : Depends: libstdc++6 (>=3D 4.8.1) but 4.6.3-1ubuntu5 is to be instal=
-led
-> 2015-08-08T11:28:45.471 INFO:teuthology.orchestra.run.plana89.stdout:
-> ceph-test : Depends: libstdc++6 (>=3D 4.8.1) but 4.6.3-1ubuntu5 is to=
- be
-> installed
->=20
-> ...which blows.  I think we'd either need to include the 4.8 runtime =
-in our
-> repos or require users to add the appropriate APT source.  :(
->=20
-> At this point my vote is to drop precise and el6 entirely for inferna=
-lis
-> and later.  Someone can always go build themselves and hunt down the
-> proper backports but it's not worth our time.
->=20
-> The main downsides here are:
->=20
->  - There may be precise or el6 users who want infernalis or later.  G=
-iven
-> what we've seen so far I think there aren't many of these people and
-> our time is better spent on other things.
->
-> [..]
->=20
-> Thoughts?
-> sage
+Correction. The version of Ceph is 94.1
+ceph.x86_64 1:0.94.1-0.el7.centos
 
-I'm pretty sure there will be a lot of users (and direct or indirect cu=
-stomers) being forced to use el6, so they won't get Infernalis. I'm not=
- sure about the Red Hat's stance on this, and we probably need their op=
-inion here. For us (Fujitsu) it'll be a huge issue, as we're relying on=
- CentOS 6 and moving to 7 *will* be a huge amount of work, not to menti=
-on that we will have to support both CentOS 6 (for existing and near-fu=
-ture customers) and CentOS 7 (for future customers once we make the swi=
-tch). Probably inevitable, but still a huge pain.
-My suggestion is that the current LTS release could have more of "L" in=
- the "LTS" than others, so companies like ours will have more time to s=
-witch and still benefit from any fixes community (including us) provide=
-=2E=20
+________________________________________
+From: ceph-devel-owner@vger.kernel.org [ceph-devel-owner@vger.kernel.org] on behalf of Walker H Haddock [whaddock@uab.edu]
+Sent: Sunday, August 09, 2015 7:22 AM
+To: ceph-devel@vger.kernel.org
+Subject: Ceph Manual Deployment for version 94.2
 
+In CentOS 7,
+In Step 16, http://ceph.com/docs/master/install/manual-deployment/,
 
-With best regards / Pozdrawiam
-Piotr Da=B3ek
+The /etc/init.d/ceph script fails with no error messages unless the file /var/lib/ceph/mon/{node name}sysvinit exists.
+
+The procedure as documented worked on an Ubuntu distribution but would not start on the CentOS 7 distribution.
+The documentation implies that this is only necessary to start the cluster on reboot of the node, but the service would not start using the init script without the file being created.
+
+sudo sh -x /etc/init.d/ceph start mon.ceph07
+...
++ cluster=ceph
++ '[' -e /var/lib/ceph/mon/ceph-ceph07/upstart ']'
++ '[' -e /var/lib/ceph/mon/ceph-ceph07/sysvinit ']'
++ '[' -z '' ']'
++ return 1
++ continue
++ '[' start = start -a /usr/bin '!=' . ']'
++ '[' mon.ceph07 = '' ']'
++ echo mon.ceph07
++ grep -q '^osd$'
++ exit 0
+
+[ceph@ceph07 ~]$ sudo ls -l /var/lib/ceph/mon/ceph-ceph07
+total 4
+-rw-r--r--. 1 root root  0 Aug  8 16:47 done
+-rw-r--r--. 1 root root 77 Aug  8 16:47 keyring
+drwxr-xr-x. 2 root root 80 Aug  8 16:47 store.db
+[ceph@ceph07 ~]$ sudo touch /var/lib/ceph/mon/ceph-ceph07/sysvinit
+[ceph@ceph07 ~]$ sudo ls -l /var/lib/ceph/mon/ceph-ceph07
+total 4
+-rw-r--r--. 1 root root  0 Aug  8 16:47 done
+-rw-r--r--. 1 root root 77 Aug  8 16:47 keyring
+drwxr-xr-x. 2 root root 80 Aug  8 16:47 store.db
+-rw-r--r--. 1 root root  0 Aug  9 07:06 sysvinit
+[ceph@ceph07 ~]$ sudo sh -x /etc/init.d/ceph start mon.ceph07
+...
++ '[' -e /var/lib/ceph/mon/ceph-ceph07/upstart ']'
++ '[' -e /var/lib/ceph/mon/ceph-ceph07/sysvinit ']'
++ host=ceph07
++ echo '=== mon.ceph07 === '
+=== mon.ceph07 ===
++ return 0
+...
+
 
 
 --
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 the body of a message to majordomo@vger.kernel.org
 More majordomo info at  http://vger.kernel.org/majordomo-info.html
