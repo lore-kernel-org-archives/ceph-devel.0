@@ -1,90 +1,79 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: inconsistent pgs
-Date: Sun, 9 Aug 2015 07:23:51 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1508090712130.22099@cobra.newdream.net>
-References: <CAJnOFAqRjXcuO0bJN8PSLsnnMhBjYMOTJTFY8T+4Z36LaBiMfg@mail.gmail.com>
+Subject: Re: c++11 merged in master
+Date: Sun, 9 Aug 2015 10:38:52 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1508091032040.22099@cobra.newdream.net>
+References: <alpine.DEB.2.00.1508071041040.22099@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:55909 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:56493 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754340AbbHIOXw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 9 Aug 2015 10:23:52 -0400
-In-Reply-To: <CAJnOFAqRjXcuO0bJN8PSLsnnMhBjYMOTJTFY8T+4Z36LaBiMfg@mail.gmail.com>
+	with ESMTP id S933105AbbHIRix (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 9 Aug 2015 13:38:53 -0400
+In-Reply-To: <alpine.DEB.2.00.1508071041040.22099@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?KOI8-R?B?68/O09TBztTJziDzwcjJzs/X?= <sakhinov@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: adeza@redhat.com
 
-On Sat, 8 Aug 2015, ?????????? ??????? wrote:
-> Hi!
+On Fri, 7 Aug 2015, Sage Weil wrote:
+> Yay!  Thanks, Casey!
 > 
-> I have a large number of inconsistent pgs 229 of 656, and it's
-> increasing every hour.
-> I'm using ceph version 0.94.2 (5fb85614ca8f354284c713a2f9c610860720bbf3).
+> This initially breaks the precise and el6 builds on master.  I've fixed 
+> the precise gitbuilders with
 > 
-> For example, pg 3.d8:
-> # ceph health detail | grep 3.d8
-> pg 3.d8 is active+clean+scrubbing+deep+inconsistent, acting [1,7]
+> sudo apt-get install python-software-properties
+> echo | sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+> sudo apt-get update
+> sudo apt-get install -y g++-4.8
+> /srv/autobuild-ceph/gitbuilder.git/build/install-deps.sh
+> sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.6 60 --slave /usr/bin/g++ g++ /usr/bin/g++-4.6
+> sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 40 --slave /usr/bin/g++ g++ /usr/bin/g++-4.8
+> echo 2 | sudo update-alternatives --config gcc
+> sudo restart autobuild-ceph
 > 
-> # grep 3.d8 /var/log/ceph/ceph-osd.1.log | less -S
-> 2015-08-07 13:10:48.311810 7f5903f7a700 0 log_channel(cluster) log
-> [INF] : 3.d8 repair starts 2015-08-07 13:12:05.703084 7f5903f7a700 -1
-> log_channel(cluster) log [ERR] : repair 3.d8
-> cbd2d0d8/rbd_data.6a5cf474b0dc51.0000000000000b1f/head//3 on disk data
-> digest 0x6e4d80bf != 0x6fb5b103 2015-08-07 13:13:26.837524
-> 7f5903f7a700 -1 log_channel(cluster) log [ERR] : repair 3.d8
-> b5892d8/rbd_data.dbe674b0dc51.00000000000001b9/head//3 on disk data
-> digest 0x79082779 != 0x9f102f3d 2015-08-07 13:13:44.874725
-> 7f5903f7a700 -1 log_channel(cluster) log [ERR] : repair 3.d8
-> ee6dc2d8/rbd_data.e7592ae8944a.0000000000000833/head//3 on disk data
-> digest 0x63ab49d0 != 0x68778496 2015-08-07 13:14:19.378582
-> 7f5903f7a700 -1 log_channel(cluster) log [ERR] : repair 3.d8
-> d93e14d8/rbd_data.3ef8442ae8944a.0000000000000729/head//3 on disk data
-> digest 0x3cdb1f5c != 0x4e0400c2 2015-08-07 13:23:38.668080
-> 7f5903f7a700 -1 log_channel(cluster) log [ERR] : 3.d8 repair 4 errors,
-> 0 fixed 2015-08-07 13:23:38.714668 7f5903f7a700 0 log_channel(cluster)
-> log [INF] : 3.d8 deep-scrub starts 2015-08-07 13:25:00.656306
-> 7f5903f7a700 -1 log_channel(cluster) log [ERR] : deep-scrub 3.d8
-> cbd2d0d8/rbd_data.6a5cf474b0dc51.0000000000000b1f/head//3 on disk data
-> digest 0x6e4d80bf != 0x6fb5b103 2015-08-07 13:26:18.775362
-> 7f5903f7a700 -1 log_channel(cluster) log [ERR] : deep-scrub 3.d8
-> b5892d8/rbd_data.dbe674b0dc51.00000000000001b9/head//3 on disk data
-> digest 0x79082779 != 0x9f102f3d 2015-08-07 13:26:42.084218
-> 7f5903f7a700 -1 log_channel(cluster) log [ERR] : deep-scrub 3.d8
-> ee6dc2d8/rbd_data.e7592ae8944a.0000000000000833/head//3 on disk data
-> digest 0x59a6e7e0 != 0x68778496 2015-08-07 13:26:56.495207
-
-This indicates the stored crc doesn't match the observed crc, 
-and
-
-> 7f5903f7a700 -1 log_channel(cluster) log [ERR] : be_compare_scrubmaps:
-> 3.d8 shard 1: soid
-> cc49f2d8/rbd_data.3ef8442ae8944a.0000000000000aff/head//3 data_digest
-> 0x4e20a792 != known data_digest 0xc0e9b2d2 from auth shard 7
-
-this indicates two replicas do not match.
-
-> 2015-08-07 13:27:12.134765 7f5903f7a700 -1 log_channel(cluster) log
-> [ERR] : deep-scrub 3.d8
-> d93e14d8/rbd_data.3ef8442ae8944a.0000000000000729/head//3 on disk data
-> digest 0x3cdb1f5c != 0x4e0400c2
+> We'll need to do something similar on centos6 to get g++ 4.7 or 4.8 in 
+> place, and the jenkins slaves for release builds will also need to be 
+> updated.
 > 
-> osd.7.log is clean for that period of time.
-> /var/log/dmesg is also clean.
+> Assuming this doesn't cause problems (e.g., runtime issues on vanilla 
+> precise) this will have no bearing on the previous discussion about 
+> whether we continue supporting old distros for future releases.
 
-This really shouldn't happen, but there has been one recently fixed bug 
-that could have corrupted a replica.  Can you locate two mismatched copies 
-of some object on two different OSDs, and use ceph-post-file so that we 
-can take a look at the actual corruption?  For this PG, for example, the 
-mismatched copies are on osd.1 and osd.7.  On those hosts, you can find 
-the backing file with
+Well, I spoke too soon.  The builds still aren't completing (the 
+older boost's shared_ptr is buggy on c++11, and I'm not sure we can 
+upgrade since some of it is dynamically linked).  Also, when you try to 
+install packages built with gcc 4.8 (regardless of the branch), you get
 
- find /var/lib/ceph/osd/ceph-1/current/3.d8_head | grep rbd_data.3ef8442ae8944a.0000000000000aff
+2015-08-08T11:28:45.471 INFO:teuthology.orchestra.run.plana89.stdout: ceph 
+: Depends: libstdc++6 (>= 4.8.1) but 4.6.3-1ubuntu5 is to be installed
+2015-08-08T11:28:45.471 INFO:teuthology.orchestra.run.plana89.stdout: 
+ceph-test : Depends: libstdc++6 (>= 4.8.1) but 4.6.3-1ubuntu5 is to be 
+installed
 
-Alternatively, if the data is sensitive, can you diff the hexdump -C 
-output of both files, see what the differing bytes look like, and describe 
-that to us?
+...which blows.  I think we'd either need to include the 4.8 runtime 
+in our repos or require users to add the appropriate APT source.  :(
 
-Thanks!
+
+At this point my vote is to drop precise and el6 entirely for infernalis 
+and later.  Someone can always go build themselves and hunt down the 
+proper backports but it's not worth our time.
+
+The main downsides here are:
+
+ - There may be precise or el6 users who want infernalis or later.  Given 
+what we've seen so far I think there aren't many of these people and 
+our time is better spent on other things.
+
+ - We'll need to reimage the precise machines in the upstream QA 
+lab.  This effectively means that while we will still build all the 
+existing releases on precise and el6, the regression testing will be on 
+trusty and centos7.  Given how few bugs we've seen over the last 
+couple years that are distro-dependent, and the (un)likelihood of a new 
+distro issue arising in a stable branch, I'm okay with this, but want to 
+make sure others aren't concerned.  We will still use VMs running those 
+distros doing the stable upgrade tests--they just won't get as much stress 
+testing on bare metal.
+
+Thoughts?
 sage
