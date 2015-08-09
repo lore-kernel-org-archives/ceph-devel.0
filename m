@@ -1,63 +1,90 @@
-From: Walker H Haddock <whaddock@uab.edu>
-Subject: Ceph Manual Deployment for version 94.2
-Date: Sun, 9 Aug 2015 12:22:17 +0000
-Message-ID: <ED6C2349E87E9848AE0A2DAE891AD0A4222DE6BE@UABEXMB1.ad.uab.edu>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: inconsistent pgs
+Date: Sun, 9 Aug 2015 07:23:51 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1508090712130.22099@cobra.newdream.net>
+References: <CAJnOFAqRjXcuO0bJN8PSLsnnMhBjYMOTJTFY8T+4Z36LaBiMfg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from uabexch6.ad.uab.edu ([138.26.5.129]:33527 "EHLO
-	UABEXCH6.ad.uab.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932983AbbHIM1Y convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 9 Aug 2015 08:27:24 -0400
-Content-Language: en-US
+Received: from cobra.newdream.net ([66.33.216.30]:55909 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754340AbbHIOXw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 9 Aug 2015 10:23:52 -0400
+In-Reply-To: <CAJnOFAqRjXcuO0bJN8PSLsnnMhBjYMOTJTFY8T+4Z36LaBiMfg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: =?KOI8-R?B?68/O09TBztTJziDzwcjJzs/X?= <sakhinov@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-In CentOS 7,
-In Step 16, http://ceph.com/docs/master/install/manual-deployment/,
+On Sat, 8 Aug 2015, ?????????? ??????? wrote:
+> Hi!
+> 
+> I have a large number of inconsistent pgs 229 of 656, and it's
+> increasing every hour.
+> I'm using ceph version 0.94.2 (5fb85614ca8f354284c713a2f9c610860720bbf3).
+> 
+> For example, pg 3.d8:
+> # ceph health detail | grep 3.d8
+> pg 3.d8 is active+clean+scrubbing+deep+inconsistent, acting [1,7]
+> 
+> # grep 3.d8 /var/log/ceph/ceph-osd.1.log | less -S
+> 2015-08-07 13:10:48.311810 7f5903f7a700 0 log_channel(cluster) log
+> [INF] : 3.d8 repair starts 2015-08-07 13:12:05.703084 7f5903f7a700 -1
+> log_channel(cluster) log [ERR] : repair 3.d8
+> cbd2d0d8/rbd_data.6a5cf474b0dc51.0000000000000b1f/head//3 on disk data
+> digest 0x6e4d80bf != 0x6fb5b103 2015-08-07 13:13:26.837524
+> 7f5903f7a700 -1 log_channel(cluster) log [ERR] : repair 3.d8
+> b5892d8/rbd_data.dbe674b0dc51.00000000000001b9/head//3 on disk data
+> digest 0x79082779 != 0x9f102f3d 2015-08-07 13:13:44.874725
+> 7f5903f7a700 -1 log_channel(cluster) log [ERR] : repair 3.d8
+> ee6dc2d8/rbd_data.e7592ae8944a.0000000000000833/head//3 on disk data
+> digest 0x63ab49d0 != 0x68778496 2015-08-07 13:14:19.378582
+> 7f5903f7a700 -1 log_channel(cluster) log [ERR] : repair 3.d8
+> d93e14d8/rbd_data.3ef8442ae8944a.0000000000000729/head//3 on disk data
+> digest 0x3cdb1f5c != 0x4e0400c2 2015-08-07 13:23:38.668080
+> 7f5903f7a700 -1 log_channel(cluster) log [ERR] : 3.d8 repair 4 errors,
+> 0 fixed 2015-08-07 13:23:38.714668 7f5903f7a700 0 log_channel(cluster)
+> log [INF] : 3.d8 deep-scrub starts 2015-08-07 13:25:00.656306
+> 7f5903f7a700 -1 log_channel(cluster) log [ERR] : deep-scrub 3.d8
+> cbd2d0d8/rbd_data.6a5cf474b0dc51.0000000000000b1f/head//3 on disk data
+> digest 0x6e4d80bf != 0x6fb5b103 2015-08-07 13:26:18.775362
+> 7f5903f7a700 -1 log_channel(cluster) log [ERR] : deep-scrub 3.d8
+> b5892d8/rbd_data.dbe674b0dc51.00000000000001b9/head//3 on disk data
+> digest 0x79082779 != 0x9f102f3d 2015-08-07 13:26:42.084218
+> 7f5903f7a700 -1 log_channel(cluster) log [ERR] : deep-scrub 3.d8
+> ee6dc2d8/rbd_data.e7592ae8944a.0000000000000833/head//3 on disk data
+> digest 0x59a6e7e0 != 0x68778496 2015-08-07 13:26:56.495207
 
-The /etc/init.d/ceph script fails with no error messages unless the file /var/lib/ceph/mon/{node name}sysvinit exists.
+This indicates the stored crc doesn't match the observed crc, 
+and
 
-The procedure as documented worked on an Ubuntu distribution but would not start on the CentOS 7 distribution.
-The documentation implies that this is only necessary to start the cluster on reboot of the node, but the service would not start using the init script without the file being created.
+> 7f5903f7a700 -1 log_channel(cluster) log [ERR] : be_compare_scrubmaps:
+> 3.d8 shard 1: soid
+> cc49f2d8/rbd_data.3ef8442ae8944a.0000000000000aff/head//3 data_digest
+> 0x4e20a792 != known data_digest 0xc0e9b2d2 from auth shard 7
 
-sudo sh -x /etc/init.d/ceph start mon.ceph07
-...
-+ cluster=ceph
-+ '[' -e /var/lib/ceph/mon/ceph-ceph07/upstart ']'
-+ '[' -e /var/lib/ceph/mon/ceph-ceph07/sysvinit ']'
-+ '[' -z '' ']'
-+ return 1
-+ continue
-+ '[' start = start -a /usr/bin '!=' . ']'
-+ '[' mon.ceph07 = '' ']'
-+ echo mon.ceph07
-+ grep -q '^osd$'
-+ exit 0
+this indicates two replicas do not match.
 
-[ceph@ceph07 ~]$ sudo ls -l /var/lib/ceph/mon/ceph-ceph07
-total 4
--rw-r--r--. 1 root root  0 Aug  8 16:47 done
--rw-r--r--. 1 root root 77 Aug  8 16:47 keyring
-drwxr-xr-x. 2 root root 80 Aug  8 16:47 store.db
-[ceph@ceph07 ~]$ sudo touch /var/lib/ceph/mon/ceph-ceph07/sysvinit
-[ceph@ceph07 ~]$ sudo ls -l /var/lib/ceph/mon/ceph-ceph07
-total 4
--rw-r--r--. 1 root root  0 Aug  8 16:47 done
--rw-r--r--. 1 root root 77 Aug  8 16:47 keyring
-drwxr-xr-x. 2 root root 80 Aug  8 16:47 store.db
--rw-r--r--. 1 root root  0 Aug  9 07:06 sysvinit
-[ceph@ceph07 ~]$ sudo sh -x /etc/init.d/ceph start mon.ceph07
-...
-+ '[' -e /var/lib/ceph/mon/ceph-ceph07/upstart ']'
-+ '[' -e /var/lib/ceph/mon/ceph-ceph07/sysvinit ']'
-+ host=ceph07
-+ echo '=== mon.ceph07 === '
-=== mon.ceph07 === 
-+ return 0
-...
+> 2015-08-07 13:27:12.134765 7f5903f7a700 -1 log_channel(cluster) log
+> [ERR] : deep-scrub 3.d8
+> d93e14d8/rbd_data.3ef8442ae8944a.0000000000000729/head//3 on disk data
+> digest 0x3cdb1f5c != 0x4e0400c2
+> 
+> osd.7.log is clean for that period of time.
+> /var/log/dmesg is also clean.
 
+This really shouldn't happen, but there has been one recently fixed bug 
+that could have corrupted a replica.  Can you locate two mismatched copies 
+of some object on two different OSDs, and use ceph-post-file so that we 
+can take a look at the actual corruption?  For this PG, for example, the 
+mismatched copies are on osd.1 and osd.7.  On those hosts, you can find 
+the backing file with
 
+ find /var/lib/ceph/osd/ceph-1/current/3.d8_head | grep rbd_data.3ef8442ae8944a.0000000000000aff
 
+Alternatively, if the data is sensitive, can you diff the hexdump -C 
+output of both files, see what the differing bytes look like, and describe 
+that to us?
+
+Thanks!
+sage
