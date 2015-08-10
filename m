@@ -1,88 +1,85 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: bufferlist allocation optimization ideas
-Date: Mon, 10 Aug 2015 12:19:42 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1508101208510.26854@cobra.newdream.net>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: inconsistent pgs
+Date: Mon, 10 Aug 2015 12:20:22 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1508101219510.22099@cobra.newdream.net>
+References: <CAJnOFAqRjXcuO0bJN8PSLsnnMhBjYMOTJTFY8T+4Z36LaBiMfg@mail.gmail.com> <alpine.DEB.2.00.1508090712130.22099@cobra.newdream.net> <CAJnOFApACz47rukJpf50sY2hBvLoPM1+ZuSoTyaWXykxprrmtA@mail.gmail.com> <alpine.DEB.2.00.1508100531290.22099@cobra.newdream.net>
+ <CAJnOFAqSX1UQ1iEFdHoNAoBXoxvRKOH60F1mPt-zR+w9veTSJQ@mail.gmail.com> <alpine.DEB.2.00.1508100641160.22099@cobra.newdream.net> <90559C83A9C7FA45B5846C975DFA612DDB53476094@ABGEX73E.FSC.NET>
+ <CAJnOFArUmwW40=5-7HOF47y2JRcHPmLqyumt8G2h4ScyMhvPYw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1332105851-1439234383=:26854"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:44056 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755154AbbHJTTo (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 10 Aug 2015 15:19:44 -0400
-Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
-	by mx1.redhat.com (Postfix) with ESMTPS id E6FC88E4E5
-	for <ceph-devel@vger.kernel.org>; Mon, 10 Aug 2015 19:19:43 +0000 (UTC)
-Received: from redhat.com (ovpn-112-37.phx2.redhat.com [10.3.112.37])
-	by int-mx13.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t7AJJgpe009480
-	for <ceph-devel@vger.kernel.org>; Mon, 10 Aug 2015 15:19:43 -0400
+Received: from cobra.newdream.net ([66.33.216.30]:33696 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754757AbbHJTUX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Aug 2015 15:20:23 -0400
+In-Reply-To: <CAJnOFArUmwW40=5-7HOF47y2JRcHPmLqyumt8G2h4ScyMhvPYw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: =?KOI8-R?B?68/O09TBztTJziDzwcjJzs/X?= <sakhinov@gmail.com>
+Cc: =?ISO-8859-2?Q?Da=B3ek=2C_Piotr?= <Piotr.Dalek@ts.fujitsu.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Mon, 10 Aug 2015, ?????????? ??????? wrote:
+> Sage, Piotr, sorry for your time and thanx for your help.
+> Memtest showed me red results. Will be digging for bad memory chips.
 
---557981400-1332105851-1439234383=:26854
-Content-Type: TEXT/PLAIN; charset=ISO-8859-15
-Content-Transfer-Encoding: 8BIT
+Thank you for following up, and relieved to hear we have a likely culprit.  
+Good luck!
 
-Currently putting something in a bufferlist invovles 3 allocations:
-
- 1. raw buffer (posix_memalign, or new char[])
- Â  2. buffer::rawÂ(this holds the refcount.Â  lifecycle matches the 
-    raw buffer exactly)
- Â  3. bufferlist's STL list<> node, which embeds buffer::ptr
-
---- combine buffer and buffer::raw ---
-
-This should be a pretty simple patch, and turns 2 allocations into 
-one.  Most buffers are constructed/allocated via buffer::create_*() 
-methods.  Those each look something like
-
-  buffer::raw* buffer::create(unsigned len) {
-    return new raw_char(len);
-  }
-
-where raw_char::raw_char() allocates the actual buffer.  Instead, allocate 
-sizeof(raw_char_combined) + len, and use the right magic C++ syntax to 
-call the constructor on that memory.  Something like
-
-  raw_char_combined *foo = new (ptr) raw_char_combined(ptr);
-
-where the raw_char_combined constructor is smart enough to figure out 
-that data goes at ptr + sizeof(*this).
-
-That takes us from 3 -> 2 allocations.
-
-An open question is whether this is always a good idea, or whether there 
-are cases where 2 allocates are better, e.g. when len is exactly one page, 
-and we're better off with a mempool allocation for raw and page 
-separately.  Or maybe for very large buffers?  I'm really not sure what 
-would be better...
-
-
---- make bufferlist use boost::intrusive::list ---
-
-Most buffers exist in only one list, so the indirection through the ptr 
-is mostly wasted.
-
-1. embed a boost::intrustive::list node into buffer::ptr.  (Note that 
-doing just this buys us nothing... we are just allocating ptr's and using 
-the intrusive node instead the list<> node with an embedded ptr.)
-
-2. embed a ptr in buffer::raw (or raw_char_combined)
-
-When adding a buffer to the bufferlist, we use the raw_char_combined's 
-embedded ptr if it is available.  Otherwise, we allocate one as before.
-
-This would need some careful adjustment of hte common append() paths, 
-since they currently are all ptr-based.  One way to make this work 
-well might be to embed N ptr's in raw_char_combined, on the assumption 
-that the refcount for a buffer is never more than 2 or 3.  Only in extreme 
-cases will we need to explicitly allocate ptr's.
-
-
-Thoughts?
 sage
 
---557981400-1332105851-1439234383=:26854--
+
+> 
+> Thanks again.
+> 
+> ??????? ??????????
+> ???.: +7 (909) 945-89-42
+> 
+> 
+> 2015-08-10 16:58 GMT+03:00 Da?ek, Piotr <Piotr.Dalek@ts.fujitsu.com>:
+> >> -----Original Message-----
+> >> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
+> >> owner@vger.kernel.org] On Behalf Of Sage Weil
+> >> Sent: Monday, August 10, 2015 3:52 PM
+> >> To: ?????????? ???????
+> >>
+> >> On Mon, 10 Aug 2015, ?????????? ??????? wrote:
+> >> > Uploaded another corrupted piece.
+> >> >
+> >> > 2015-08-10 16:18:40.027726 7f7979697700 -1 log_channel(cluster) log
+> >> > [ERR] : be_compare_scrubmaps: 3.fd shard 6: soid
+> >> > f2e832fd/rbd_data.ab7174b0dc51.0000000000000249/head//3 data_digest
+> >> > 0x64e94460 != known data_digest 0xaec3bea8 from auth shard 10
+> >> >
+> >> > # ceph-post-file ceph-6-rbd_data.ab7174b0dc51.0000000000000249
+> >> > ceph-post-file: e96e5828-b97c-45f1-8e3f-23abbf700865
+> >> >
+> >> > # ceph-post-file ceph-10-rbd_data.ab7174b0dc51.0000000000000249
+> >> > ceph-post-file: e1277a33-74a5-4d46-93c8-266bd81867db
+> >> >
+> >> > I dont' think of bad disk:
+> >> > - all OSDs SMART is clean,
+> >> > - I tried to ceph pg repair 3.d8 on another OSDs in the past with the
+> >> > same result. Then I rebalanced the cluster so that pg 3.d8 moved to
+> >> > [7,1].
+> >>
+> >> Again, it's all single bit changes:
+> >>
+> >> [..]
+> >>
+> >> It looks like it's also always the least significant bit in a 4-byte word.
+> >>
+> >> Can you see if there is any pattern to which OSDs are used for the
+> >> inconsistent PGs?
+> >
+> > I would check machines that host those PGs for memory errors, especially if they don't have ECC RAM sticks or ECC feature is disabled.
+> > http://www.memtest.org/ is a good tool for this purpose.
+> >
+> > With best regards / Pozdrawiam
+> > Piotr Da?ek
+> >
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
