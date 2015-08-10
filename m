@@ -1,84 +1,68 @@
 From: Loic Dachary <loic@dachary.org>
-Subject: Re: testing the teuthology OpenStack backend
-Date: Mon, 10 Aug 2015 15:09:40 +0200
-Message-ID: <55C8A294.9050405@dachary.org>
-References: <55C377B3.7050500@dachary.org> <55C6108C.7010803@ubuntukylin.com> <55C61F0C.3000903@dachary.org>
+Subject: Re: make check bot paused
+Date: Mon, 10 Aug 2015 15:22:27 +0200
+Message-ID: <55C8A593.6030703@dachary.org>
+References: <55C55500.3000303@dachary.org> <alpine.DEB.2.00.1508080449510.22099@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="EjhidwPVkxnf07gh5Iks5skaLCcEWsiei"
+ boundary="kAOQTeHDRD4dsJmQOSSDMH5ssfdLgaBtT"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:35915 "EHLO
+Received: from mail2.dachary.org ([91.121.57.175]:35931 "EHLO
 	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751117AbbHJNJm (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Aug 2015 09:09:42 -0400
-In-Reply-To: <55C61F0C.3000903@dachary.org>
+	with ESMTP id S1753694AbbHJNW3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Aug 2015 09:22:29 -0400
+Received: from [10.9.0.14] (unknown [10.0.2.28])
+	by smtp.dmail.dachary.org (Postfix) with ESMTP id A510B420B6
+	for <ceph-devel@vger.kernel.org>; Mon, 10 Aug 2015 15:22:27 +0200 (CEST)
+In-Reply-To: <alpine.DEB.2.00.1508080449510.22099@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Li Wang <liwang@ubuntukylin.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
 This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---EjhidwPVkxnf07gh5Iks5skaLCcEWsiei
-Content-Type: text/plain; charset=utf-8
+--kAOQTeHDRD4dsJmQOSSDMH5ssfdLgaBtT
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: quoted-printable
 
 Hi,
 
-You should be able to follow the instructions at
+The make check bot is back to work. It will not send any report for anoth=
+er 24h to 48h to avoid a burst false negative. In the meantime you can ru=
+n it locally with:
 
-   https://github.com/dachary/teuthology/tree/wip-6502-v3-dragonfly#opens=
-tack-backend
+  run-make-check.sh
 
-on your OpenStack cluster. I expect it to be portable accross OpenStack i=
-mplemenations back to Havana. Please let me know if your OpenStack cluste=
-r has a non standard behavior and we will figure out a workaround. By usi=
-ng (note the --upload flag)
-
-   teuthology-openstack --key-filename myself.pem --key-name myself \
-                        --suite dummy --upload --teardown
-
-the results of the teuthology run will be uploaded to=20
-
-    http://integration.ceph.dachary.org/
+It is the same script that the bot uses and should work from a fresh git =
+clone of Ceph.
 
 Cheers
 
-On 08/08/2015 17:23, Loic Dachary wrote:
->=20
->=20
-> On 08/08/2015 16:22, Li Wang wrote:
->> Hi Loic,
->>   Glad to talk with you on IRC about setting up
->> the teuthology OpenStack backend. Once it is ready
->> to run the test in private cloud, and the results
->> could be exported and uploaded to a public place,
->> please let me know asap :)
->=20
-> I'm working on it, should be ready RSN.
->=20
+On 08/08/2015 13:50, Sage Weil wrote:
+> On Sat, 8 Aug 2015, Loic Dachary wrote:
+>> Hi,
 >>
->> Cheers,
->> Li Wang
->>
->>
->> On 2015/8/6 23:05, Loic Dachary wrote:
->>> Hi,
->>>
->>> I'm looking into testing the OpenStack backend for teuthology on a ne=
-w cluster to verify it's portable. I think it is but ... ;-) I'm told you=
- have an OpenStack cluster and would be interested in running teuthology =
-workloads on it. Does it have a public facing API ?
->>>
->>> Cheers
->>>
+>> The make check bot is paused until the master branch passes make check=
+=20
+>> again.
+>=20
+> Several fixes here that need review:
+>=20
+> 	https://github.com/ceph/ceph/pull/5515
+>=20
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >=20
 
 --=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+Lo=EFc Dachary, Artisan Logiciel Libre
 
 
---EjhidwPVkxnf07gh5Iks5skaLCcEWsiei
+--kAOQTeHDRD4dsJmQOSSDMH5ssfdLgaBtT
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -86,9 +70,9 @@ Content-Disposition: attachment; filename="signature.asc"
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2.0.22 (GNU/Linux)
 
-iEYEARECAAYFAlXIopQACgkQ8dLMyEl6F205XgCgszR2c+ug9aFbnjic31M0MEdE
-19kAn0+kQvKYTCHMCmILC+tXeWGGeKjs
-=sC5o
+iEYEARECAAYFAlXIpZMACgkQ8dLMyEl6F221TgCgsQhWRRZYWZd0E/XLFzQfmh/K
+PbEAoMBDBPKt/BBeWsrX4HZ+wotoHJHK
+=mQvg
 -----END PGP SIGNATURE-----
 
---EjhidwPVkxnf07gh5Iks5skaLCcEWsiei--
+--kAOQTeHDRD4dsJmQOSSDMH5ssfdLgaBtT--
