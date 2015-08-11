@@ -1,118 +1,458 @@
-From: =?iso-8859-2?Q?Da=B3ek=2C_Piotr?= <Piotr.Dalek@ts.fujitsu.com>
-Subject: RE: bufferlist allocation optimization ideas
-Date: Tue, 11 Aug 2015 23:48:46 +0200
-Message-ID: <90559C83A9C7FA45B5846C975DFA612DDB53561F31@ABGEX73E.FSC.NET>
-References: <alpine.DEB.2.00.1508101208510.26854@cobra.newdream.net>
- <alpine.DEB.2.00.1508111307540.22099@cobra.newdream.net>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: tracking down failed eviction
+Date: Tue, 11 Aug 2015 23:57:45 +0200
+Message-ID: <55CA6FD9.1090801@dachary.org>
+References: <55C9DD3C.8020607@dachary.org> <55CA0C1B.7090600@dachary.org> <55CA0D9F.1040208@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-2
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="J2RURcgJpvFKixINMq7VwS2s3FkG38XdL"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from dgate10.ts.fujitsu.com ([80.70.172.49]:24925 "EHLO
-	dgate10.ts.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753907AbbHKVsv convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Aug 2015 17:48:51 -0400
-In-Reply-To: <alpine.DEB.2.00.1508111307540.22099@cobra.newdream.net>
-Content-Language: en-US
+Received: from mail2.dachary.org ([91.121.57.175]:36754 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1753764AbbHKV55 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Aug 2015 17:57:57 -0400
+In-Reply-To: <55CA0D9F.1040208@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Shylesh Kumar <shmohan@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
-> owner@vger.kernel.org] On Behalf Of Sage Weil
-> Sent: Tuesday, August 11, 2015 10:11 PM
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--J2RURcgJpvFKixINMq7VwS2s3FkG38XdL
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+Hi Shylesh,
+
+The following script reproduces the  problem: obj3 is promoted and never =
+evicted
+
+   rados -p slow get obj3 /tmp/obj3
+
+Running the same command again somehow fixes the situation and obj3 is ev=
+icted. Reading again, obj3 is no longer evicted. I'll create a bug report=
+ out of this.
+
+Thanks for your patience :-)
+
+    ./stop.sh=20
+    rm -fr out dev ; MON=3D1 OSD=3D3 ./vstart.sh -X -d -n -l mon osd
+
+    ceph osd pool create slow  1 1
+    ceph osd pool create fast  1 1
+    ceph osd tier add slow fast
+    ceph osd tier cache-mode fast writeback
+    ceph osd tier set-overlay slow fast
+    ceph osd pool set fast hit_set_type bloom
+    ceph osd pool set fast cache_target_dirty_ratio 0.05
+    ceph osd pool set fast cache_min_flush_age 300
+    rados -p slow put obj1 /etc/group
+    rados -p slow put obj2 /etc/group
+    rados -p slow put obj3 /etc/group
+    ceph osd pool set fast cache_target_dirty_ratio .5
+    ceph osd pool set fast cache_target_full_ratio .8
+    ceph osd pool set fast target_max_objects  1
+    ceph osd pool set fast hit_set_count 1
+    ceph osd pool set fast hit_set_period 5
+
+    sleep 30
+    ceph df
+
+    rados -p slow get obj3 /tmp/obj3
+    ceph df
+
+    sleep 30
+
+    ceph df
+    ceph health detail
+
+
+
+On 11/08/2015 16:58, Loic Dachary wrote:
+> Looks like these 8 objects really are hit set archives:
 >=20
-> I went ahead and implemented both of these pieces.  See
+> $ sudo rados --namespace .ceph-internal -p fast ls
+> hit_set_4.3_archive_2015-08-10 14:21:26.133292_2015-08-11 10:42:57.4630=
+74
+> hit_set_4.4_archive_2015-08-10 14:46:52.626962_2015-08-11 07:12:21.6544=
+10
+> hit_set_4.b_archive_2015-08-10 14:21:32.897661_2015-08-11 10:42:30.8887=
+82
+> hit_set_4.2c_archive_2015-08-10 08:29:09.218604_2015-08-10 08:29:14.782=
+606
+> hit_set_4.63_archive_2015-08-11 06:52:25.052126_2015-08-11 07:12:21.776=
+928
+> hit_set_4.74_archive_2015-08-10 14:41:39.411882_2015-08-11 07:12:21.789=
+545
+> hit_set_4.7c_archive_2015-08-10 14:38:04.463447_2015-08-11 07:12:21.801=
+581
+> hit_set_4.7f_archive_2015-08-10 14:43:01.446562_2015-08-11 07:12:21.819=
+104
 >=20
-> 	https://github.com/ceph/ceph/pull/5534
 >=20
-> My benchmark numbers are highly suspect, but the approximate takeaway=
- is
-> that it's 2x faster for the simple microbenchmarks and does 1/3rd the
-> allocations.  But there is some weird interaction with the allocator =
-going on
-> for 16k allocations that I saw, so it needs some more careful benchma=
-rking.
+> On 11/08/2015 16:52, Loic Dachary wrote:
+>> Hi,
+>>
+>> In your cluster there is:
+>>
+>> GLOBAL:
+>>     SIZE      AVAIL     RAW USED     %RAW USED=20
+>>     8334G     8333G        1280M          0.02=20
+>> POOLS:
+>>     NAME       ID     USED     %USED     MAX AVAIL     OBJECTS=20
+>>     rbd        0         0         0         2777G           0=20
+>>     mypool     1       135         0         2777G           2=20
+>>     sample     2         0         0         1851G           0=20
+>>     slow       3      295M         0         1851G          84=20
+>>     fast       4       498         0         1851G           6=20
+>>
+>> After running
+>>
+>> rados -p fast cache-flush-evict-all
+>>
+>> Then I do the following:
+>>
+>>    rados -p slow put loic1 /etc/group
+>>
+>>    ceph df
+>>     fast       4      1371         0         1851G           8
+>>
+>> I'm assuming the extra object (6 objects + 1 for loic1 + 1 other ) is =
+an internal hit set.
+>>
+>>    rados -p slow put loic2 /etc/group
+>>
+>>    ceph df
+>>     fast       4      1455         0         1851G           9
+>>
+>> There I have 2 objects in the fast pool. I sleep 120 seconds and I see=
+ it going back to 8
+>>
+>>    ceph df
+>>     fast       4       666         0         1851G           8=20
+>>
+>> Which is consistent with the settings of the pool that only allow for =
+one object to stay in the fast pool as reported with ceph report:
+>>
+>>             {
+>>                 "pool": 4,
+>>                 "pool_name": "fast",
+>>                 "flags": 9,
+>>                 "flags_names": "hashpspool,incomplete_clones",
+>>                 "type": 1,
+>>                 "size": 3,
+>>                 "min_size": 2,
+>>                 "crush_ruleset": 1,
+>>                 "object_hash": 2,
+>>                 "pg_num": 128,
+>>                 "pg_placement_num": 128,
+>>                 "crash_replay_interval": 0,
+>>                 "last_change": "79",
+>>                 "last_force_op_resend": "0",
+>>                 "auid": 0,
+>>                 "snap_mode": "selfmanaged",
+>>                 "snap_seq": 0,
+>>                 "snap_epoch": 67,
+>>                 "pool_snaps": [],
+>>                 "removed_snaps": "[]",
+>>                 "quota_max_bytes": 0,
+>>                 "quota_max_objects": 0,
+>>                 "tiers": [],
+>>                 "tier_of": 3,
+>>                 "read_tier": -1,
+>>                 "write_tier": -1,
+>>                 "cache_mode": "writeback",
+>>                 "target_max_bytes": 1000,
+>>                 "target_max_objects": 1,
+>>                 "cache_target_dirty_ratio_micro": 500000,
+>>                 "cache_target_full_ratio_micro": 800000,
+>>                 "cache_min_flush_age": 300,
+>>                 "cache_min_evict_age": 0,
+>>                 "erasure_code_profile": "cache",
+>>                 "hit_set_params": {
+>>                     "type": "bloom",
+>>                     "false_positive_probability": 0.050000,
+>>                     "target_size": 0,
+>>                     "seed": 0
+>>                 },
+>>                 "hit_set_period": 600,
+>>                 "hit_set_count": 1,
+>>                 "min_read_recency_for_promote": 0,
+>>                 "stripe_width": 0,
+>>                 "expected_num_objects": 0
+>>             }
+>>
+>> I'm not entirely sure the explanation for the remaining 6 objects (i.e=
+=2E them being internal objects used to store the hit set) is right. Let =
+say it is right, is there more unexplained behavior ?
+>>
+>> Cheers
+>>
+>> For the record: https://github.com/ceph/ceph/blob/hammer/src/osd/Repli=
+catedPG.cc#L10494  bool ReplicatedPG::agent_work
+>>
+>> On 11/08/2015 13:32, Loic Dachary wrote:
+>>> Hi Shylesh,
+>>>
+>>>
+>>> I ran the following on a hammer compiled from sources.
+>>>
+>>>     ./stop.sh=20
+>>>     rm -fr out dev ; MON=3D1 OSD=3D3 ./vstart.sh -X -d -n -l mon osd
+>>>
+>>>     ceph osd pool create slow  1 1
+>>>     ceph osd pool create fast  1 1
+>>>     ceph osd tier add slow fast
+>>>     ceph osd tier cache-mode fast writeback
+>>>     ceph osd tier set-overlay slow fast
+>>>     ceph osd pool set fast hit_set_type bloom
+>>>     ceph osd pool set fast cache_target_dirty_ratio 0.05
+>>>     ceph osd pool set fast cache_min_flush_age 300
+>>>     rados -p slow put obj1 /etc/group
+>>>     ceph osd pool set fast cache_target_dirty_ratio .5
+>>>     ceph osd pool set  fast cache_target_full_ratio .8
+>>>     ceph osd pool set fast target_max_objects  1
+>>>     rados -p slow put obj2 /etc/group
+>>>     rados -p slow put obj3 /etc/group
+>>>     ceph osd pool set fast hit_set_count 1
+>>>     ceph osd pool set fast hit_set_period 5
+>>>     ceph osd pool set fast hit_set_period 600
+>>>
+>>>     sleep 30
+>>>
+>>>     ceph df
+>>>     ceph health detail
+>>>
+>>>
+>>> and the output shows it works (see below). I'll try to figure out the=
+ difference with your cluster now that I have a baseline that does the ri=
+ght thing :-) If you can think of something else you did that may explain=
+ the failure, please let me know.
+>>>
+>>> $ bash -x /tmp/bug.sh
+>>> + ./stop.sh
+>>> + rm -fr out dev
+>>> + MON=3D1
+>>> + OSD=3D3
+>>> + ./vstart.sh -X -d -n -l mon osd
+>>> ** going verbose **
+>>> ip 127.0.0.1
+>>> port=20
+>>>
+>>> NOTE: hostname resolves to loopback; remote hosts will not be able to=
 
-16k allocations aren't that common, actually.
-Some time ago I took an alloc profile for raw_char and posix_aligned bu=
-ffers, and...=20
+>>>   connect.  either adjust /etc/hosts, or edit this script to use your=
 
-[root@storage1 /]# sort buffer::raw_char-2143984.dat | uniq -c | sort -=
-g=20
-      1 12                                                             =
- =20
-      1 33                                                             =
- =20
-      1 393                                                            =
- =20
-      1 41                                                             =
- =20
-      2 473                                                            =
- =20
-      2 66447                                                          =
- =20
-      3 190                                                            =
- =20
-      3 20                                                             =
- =20
-      3 64                                                             =
- =20
-      4 16                                                             =
- =20
-     36 206                                                            =
- =20
-     88 174                                                            =
- =20
-     88 48                                                             =
- =20
-     89 272                                                            =
- =20
-     89 36                                                             =
- =20
-     90 34                                                             =
- =20
-    312 207                                                            =
- =20
-   3238 208                                                            =
- =20
-  32403 209                                                            =
- =20
- 196300 210                                                            =
- =20
- 360164 45                                                             =
- =20
+>>>   machine's real IP.
+>>>
+>>> creating /home/loic/software/ceph/ceph/src/keyring
+>>> ./monmaptool --create --clobber --add a 127.0.0.1:6789 --print /tmp/c=
+eph_monmap.24142
+>>> ./monmaptool: monmap file /tmp/ceph_monmap.24142
+>>> ./monmaptool: generated fsid 1d4a5e92-e47c-4f79-9390-07614b8d261a
+>>> epoch 0
+>>> fsid 1d4a5e92-e47c-4f79-9390-07614b8d261a
+>>> last_changed 2015-08-11 13:26:52.958438
+>>> created 2015-08-11 13:26:52.958438
+>>> 0: 127.0.0.1:6789/0 mon.a
+>>> ./monmaptool: writing epoch 0 to /tmp/ceph_monmap.24142 (1 monitors)
+>>> rm -rf /home/loic/software/ceph/ceph/src/dev/mon.a
+>>> mkdir -p /home/loic/software/ceph/ceph/src/dev/mon.a
+>>> ./ceph-mon --mkfs -c /home/loic/software/ceph/ceph/src/ceph.conf -i a=
+ --monmap=3D/tmp/ceph_monmap.24142 --keyring=3D/home/loic/software/ceph/c=
+eph/src/keyring
+>>> ./ceph-mon: set fsid to 87413c55-5249-4969-a8fe-f2768e5c59ce
+>>> ./ceph-mon: created monfs at /home/loic/software/ceph/ceph/src/dev/mo=
+n.a for mon.a
+>>> ./ceph-mon -i a -c /home/loic/software/ceph/ceph/src/ceph.conf
+>>> ERROR: error accessing '/home/loic/software/ceph/ceph/src/dev/osd0/*'=
 
-[root@storage1 /]# sort buffer::posix_aligned-2081990.dat | uniq -c | s=
-ort -g
-     36 36864                                                          =
-     =20
- 433635 4096=20
+>>> add osd0 8c8ac2c0-2426-42dd-ac43-c7b1a54a14bc
+>>> *** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
+>>> 0
+>>> *** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
+>>> add item id 0 name 'osd.0' weight 1 at location {host=3Dfold,root=3Dd=
+efault} to crush map
+>>> 2015-08-11 13:26:55.473416 7ff1bf4a07c0 -1 journal FileJournal::_open=
+: disabling aio for non-block journal.  Use journal_force_aio to force us=
+e of aio anyway
+>>> 2015-08-11 13:26:56.462509 7ff1bf4a07c0 -1 journal FileJournal::_open=
+: disabling aio for non-block journal.  Use journal_force_aio to force us=
+e of aio anyway
+>>> 2015-08-11 13:26:56.480075 7ff1bf4a07c0 -1 filestore(/home/loic/softw=
+are/ceph/ceph/src/dev/osd0) could not find 23c2fcde/osd_superblock/0//-1 =
+in index: (2) No such file or directory
+>>> 2015-08-11 13:26:57.030312 7ff1bf4a07c0 -1 created object store /home=
+/loic/software/ceph/ceph/src/dev/osd0 journal /home/loic/software/ceph/ce=
+ph/src/dev/osd0.journal for osd.0 fsid 87413c55-5249-4969-a8fe-f2768e5c59=
+ce
+>>> 2015-08-11 13:26:57.030372 7ff1bf4a07c0 -1 auth: error reading file: =
+/home/loic/software/ceph/ceph/src/dev/osd0/keyring: can't open /home/loic=
+/software/ceph/ceph/src/dev/osd0/keyring: (2) No such file or directory
+>>> 2015-08-11 13:26:57.030471 7ff1bf4a07c0 -1 created new key in keyring=
+ /home/loic/software/ceph/ceph/src/dev/osd0/keyring
+>>> adding osd0 key to auth repository
+>>> *** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
+>>> added key for osd.0
+>>> start osd0
+>>> ./ceph-osd -i 0 -c /home/loic/software/ceph/ceph/src/ceph.conf
+>>> starting osd.0 at :/0 osd_data /home/loic/software/ceph/ceph/src/dev/=
+osd0 /home/loic/software/ceph/ceph/src/dev/osd0.journal
+>>> ERROR: error accessing '/home/loic/software/ceph/ceph/src/dev/osd1/*'=
 
-So most common are very small (<255 bytes) allocs and CEPH_PAGE_SIZE al=
-locs.
+>>> add osd1 a57e7891-c8ca-4a59-92fa-6f65f681a560
+>>> *** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
+>>> 1
+>>> *** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
+>>> add item id 1 name 'osd.1' weight 1 at location {host=3Dfold,root=3Dd=
+efault} to crush map
+>>> 2015-08-11 13:27:00.350457 7fc4aa2507c0 -1 journal FileJournal::_open=
+: disabling aio for non-block journal.  Use journal_force_aio to force us=
+e of aio anyway
+>>> 2015-08-11 13:27:01.104445 7fc4aa2507c0 -1 journal FileJournal::_open=
+: disabling aio for non-block journal.  Use journal_force_aio to force us=
+e of aio anyway
+>>> 2015-08-11 13:27:01.117456 7fc4aa2507c0 -1 filestore(/home/loic/softw=
+are/ceph/ceph/src/dev/osd1) could not find 23c2fcde/osd_superblock/0//-1 =
+in index: (2) No such file or directory
+>>> 2015-08-11 13:27:01.826145 7fc4aa2507c0 -1 created object store /home=
+/loic/software/ceph/ceph/src/dev/osd1 journal /home/loic/software/ceph/ce=
+ph/src/dev/osd1.journal for osd.1 fsid 87413c55-5249-4969-a8fe-f2768e5c59=
+ce
+>>> 2015-08-11 13:27:01.826194 7fc4aa2507c0 -1 auth: error reading file: =
+/home/loic/software/ceph/ceph/src/dev/osd1/keyring: can't open /home/loic=
+/software/ceph/ceph/src/dev/osd1/keyring: (2) No such file or directory
+>>> 2015-08-11 13:27:01.826277 7fc4aa2507c0 -1 created new key in keyring=
+ /home/loic/software/ceph/ceph/src/dev/osd1/keyring
+>>> adding osd1 key to auth repository
+>>> *** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
+>>> added key for osd.1
+>>> start osd1
+>>> ./ceph-osd -i 1 -c /home/loic/software/ceph/ceph/src/ceph.conf
+>>> starting osd.1 at :/0 osd_data /home/loic/software/ceph/ceph/src/dev/=
+osd1 /home/loic/software/ceph/ceph/src/dev/osd1.journal
+>>> ERROR: error accessing '/home/loic/software/ceph/ceph/src/dev/osd2/*'=
 
-> The other interesting thing is that either of these pieces in isolati=
-on seems to
-> have a pretty decent benefit, but when combined the benefits are full=
-y
-> additive.
+>>> add osd2 f88f90e0-5796-479c-ac2b-9406f91e55cd
+>>> *** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
+>>> 2
+>>> *** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
+>>> add item id 2 name 'osd.2' weight 1 at location {host=3Dfold,root=3Dd=
+efault} to crush map
+>>> 2015-08-11 13:27:05.397800 7f4462e1b7c0 -1 journal FileJournal::_open=
+: disabling aio for non-block journal.  Use journal_force_aio to force us=
+e of aio anyway
+>>> 2015-08-11 13:27:06.808009 7f4462e1b7c0 -1 journal FileJournal::_open=
+: disabling aio for non-block journal.  Use journal_force_aio to force us=
+e of aio anyway
+>>> 2015-08-11 13:27:06.827479 7f4462e1b7c0 -1 filestore(/home/loic/softw=
+are/ceph/ceph/src/dev/osd2) could not find 23c2fcde/osd_superblock/0//-1 =
+in index: (2) No such file or directory
+>>> 2015-08-11 13:27:08.451691 7f4462e1b7c0 -1 created object store /home=
+/loic/software/ceph/ceph/src/dev/osd2 journal /home/loic/software/ceph/ce=
+ph/src/dev/osd2.journal for osd.2 fsid 87413c55-5249-4969-a8fe-f2768e5c59=
+ce
+>>> 2015-08-11 13:27:08.451731 7f4462e1b7c0 -1 auth: error reading file: =
+/home/loic/software/ceph/ceph/src/dev/osd2/keyring: can't open /home/loic=
+/software/ceph/ceph/src/dev/osd2/keyring: (2) No such file or directory
+>>> 2015-08-11 13:27:08.454963 7f4462e1b7c0 -1 created new key in keyring=
+ /home/loic/software/ceph/ceph/src/dev/osd2/keyring
+>>> adding osd2 key to auth repository
+>>> *** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
+>>> added key for osd.2
+>>> start osd2
+>>> ./ceph-osd -i 2 -c /home/loic/software/ceph/ceph/src/ceph.conf
+>>> starting osd.2 at :/0 osd_data /home/loic/software/ceph/ceph/src/dev/=
+osd2 /home/loic/software/ceph/ceph/src/dev/osd2.journal
+>>> started.  stop.sh to stop.  see out/* (e.g. 'tail -f out/????') for d=
+ebug output.
+>>>
+>>> export PYTHONPATH=3D./pybind
+>>> export LD_LIBRARY_PATH=3D.libs
+>>> + ceph osd pool create slow 1 1
+>>> *** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
+>>> pool 'slow' created
+>>> + ceph osd pool create fast 1 1
+>>> *** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
+>>> pool 'fast' created
+>>> + ceph osd tier add slow fast
+>>> *** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
+>>> pool 'fast' is now (or already was) a tier of 'slow'
+>>> + ceph osd tier cache-mode fast writeback
+>>> *** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
+>>> set cache-mode for pool 'fast' to writeback
+>>> + ceph osd tier set-overlay slow fast
+>>> *** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
+>>> overlay for 'slow' is now (or already was) 'fast'
+>>> + ceph osd pool set fast hit_set_type bloom
+>>> *** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
+>>> set pool 2 hit_set_type to bloom
+>>> + ceph osd pool set fast cache_target_dirty_ratio 0.05
+>>> *** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
+>>> set pool 2 cache_target_dirty_ratio to 0.05
+>>> + ceph osd pool set fast cache_min_flush_age 300
+>>> *** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
+>>> set pool 2 cache_min_flush_age to 300
+>>> + rados -p slow put obj1 /etc/group
+>>> + ceph osd pool set fast cache_target_dirty_ratio .5
+>>> *** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
+>>> set pool 2 cache_target_dirty_ratio to .5
+>>> + ceph osd pool set fast cache_target_full_ratio .8
+>>> *** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
+>>> set pool 2 cache_target_full_ratio to .8
+>>> + ceph osd pool set fast target_max_objects 1
+>>> *** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
+>>> set pool 2 target_max_objects to 1
+>>> + rados -p slow put obj2 /etc/group
+>>> + rados -p slow put obj3 /etc/group
+>>> + ceph osd pool set fast hit_set_count 1
+>>> *** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
+>>> set pool 2 hit_set_count to 1
+>>> + ceph osd pool set fast hit_set_period 5
+>>> *** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
+>>> set pool 2 hit_set_period to 5
+>>> + ceph osd pool set fast hit_set_period 600
+>>> *** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
+>>> set pool 2 hit_set_period to 600
+>>> + sleep 30
+>>> + ceph df
+>>> *** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
+>>> GLOBAL:
+>>>     SIZE     AVAIL      RAW USED     %RAW USED=20
+>>>     547G     56407M         491G         89.92=20
+>>> POOLS:
+>>>     NAME     ID     USED     %USED     MAX AVAIL     OBJECTS=20
+>>>     rbd      0         0         0        18801M           0=20
+>>>     slow     1      3834         0        18801M           3=20
+>>>     fast     2         0         0        18801M           0=20
+>>> + ceph health detail
+>>> *** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
+>>> HEALTH_WARN 3 near full osd(s); mon.a low disk space
+>>> osd.0 is near full at 89%
+>>> osd.1 is near full at 89%
+>>> osd.2 is near full at 89%
+>>> mon.a low disk space -- 10% avail
+>>>
+>>>
+>>
 >=20
-> It seems to be reasonably stable, though!
 
-I'm going to test them in my environment, because allocations and deall=
-ocations alone, when done in "best-case pattern" (series of allocations=
- followed by series of frees not interleaved by frees/allocs), aren't a=
- good benchmark for memory allocators (actually, most allocators are sp=
-ecially optimized for this case).=20
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
 
-With best regards / Pozdrawiam
-Piotr Da=B3ek
+--J2RURcgJpvFKixINMq7VwS2s3FkG38XdL
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlXKb9kACgkQ8dLMyEl6F23yjACePvZJ2ZaoKNO/md2L+4njH9hd
+Z4AAoK3gkRyweb2yul15FID+7yUz84VI
+=22Ur
+-----END PGP SIGNATURE-----
+
+--J2RURcgJpvFKixINMq7VwS2s3FkG38XdL--
