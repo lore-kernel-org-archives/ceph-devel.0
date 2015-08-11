@@ -1,110 +1,71 @@
-From: GuangYang <yguang11@outlook.com>
-Subject: RE: radosgw - stuck ops
-Date: Mon, 10 Aug 2015 17:55:27 -0700
-Message-ID: <BLU175-W2C5DEC4433FDA2A4054A2DF7F0@phx.gbl>
-References: <BLU175-W48D8E409F917C02492E3C4DF760@phx.gbl>,<CADRKj5SadChvVbVmVx18SFKfAeXWKiGmLB4Xybkqn3xXxoxnyg@mail.gmail.com>,<alpine.DEB.2.00.1508040950540.22099@cobra.newdream.net>,<CADRKj5QG2Qfbh9z9RghW2=JoSvzXcctUjTjDUXg4F_vw9mM2yw@mail.gmail.com>,<alpine.DEB.2.00.1508041000490.22099@cobra.newdream.net>,<CADRKj5Qfffrc3zSaaT+fKV6LpD+Z_p4SfE3z9KHEyXTRPn1s2A@mail.gmail.com>,<BLU175-W473A2D4104E37342497CC2DF760@phx.gbl>,<CADRKj5TZT7_=v-mec_td0KAPba0r4D58fBZ_UxeuKweE3mO2+g@mail.gmail.com>
+From: Li Wang <liwang@ubuntukylin.com>
+Subject: Re: testing the teuthology OpenStack backend
+Date: Tue, 11 Aug 2015 09:02:25 +0800
+Message-ID: <55C949A1.9080301@ubuntukylin.com>
+References: <55C377B3.7050500@dachary.org> <55C6108C.7010803@ubuntukylin.com>
+ <55C61F0C.3000903@dachary.org> <55C8A294.9050405@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from blu004-omc1s18.hotmail.com ([65.55.116.29]:59778 "EHLO
-	BLU004-OMC1S18.hotmail.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S933065AbbHKAz2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 10 Aug 2015 20:55:28 -0400
-In-Reply-To: <CADRKj5TZT7_=v-mec_td0KAPba0r4D58fBZ_UxeuKweE3mO2+g@mail.gmail.com>
+Received: from m59-178.qiye.163.com ([123.58.178.59]:38826 "EHLO
+	m59-178.qiye.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932848AbbHKBCk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Aug 2015 21:02:40 -0400
+In-Reply-To: <55C8A294.9050405@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh-Weinraub <ysadehwe@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-SGkgWWVodWRhLApPbiB0b3Agb2YgdGhlIGNoYW5nZXMgZm9yIFsxXSwgSSB3b3VsZCBwcm9wb3Nl
-IGFub3RoZXIgY2hhbmdlLCB3aGljaCBleHBvc2VzIHRoZSBudW1iZXIgb2YgKnN0dWNrIHRocmVh
-ZHMqIHZpYSBhZG1pbiBzb2NrZXQsIHNvIHRoYXQgd2UgY2FuIGJ1aWxkIHNvbWV0aGluZyBvdXRz
-aWRlIG9mIGNlcGggdG8gY2hlY2sgaWYgYWxsIHdvcmtlciB0aHJlYWRzIGFyZSBzdHVjaywgYW5k
-IGlmIHllcywgcmVzdGFydCB0aGUgc2VydmljZS4KCldlIGNhbiBhbHNvIGFzc2VydGlvbiBvdXQg
-aWYgYWxsIHdvcmtlcnMgYXJlIHN0dWNrLCBhcyBhbiBpbnNpZGUgY2VwaCBzb2x1dGlvbi4uLiAo
-YXMgYmVpbmcgbW9yZSBjb25zZXJ2YXRpdmUgdG8gdXNlICdoaXRfc3VpY2lkZV90aW1lb3V0JyB0
-byBhc3NlcnQgb3V0IGlmIHRoZXJlIGlzIG9uZSB0aHJlYWQgc3R1Y2spLgoKV2hhdCBkbyB5b3Ug
-dGhpbms/CgpbMV0gaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC9wdWxsLzU1MDEKVGhhbmtz
-LApHdWFuZwoKCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KPiBEYXRl
-OiBXZWQsIDUgQXVnIDIwMTUgMDc6NDQ6MzQgLTA3MDAKPiBTdWJqZWN0OiBSZTogcmFkb3NndyAt
-IHN0dWNrIG9wcwo+IEZyb206IHlzYWRlaHdlQHJlZGhhdC5jb20KPiBUbzogeWd1YW5nMTFAb3V0
-bG9vay5jb20KPiBDQzogc3dlaWxAcmVkaGF0LmNvbTsgc2p1c3RAcmVkaGF0LmNvbTsgeWVodWRh
-QHJlZGhhdC5jb207IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnCj4KPiBPbiBUdWUsIEF1ZyA0
-LCAyMDE1IGF0IDM6MjMgUE0sIEd1YW5nWWFuZyA8eWd1YW5nMTFAb3V0bG9vay5jb20+IHdyb3Rl
-Ogo+PiBUaGFua3MgZm9yIFNhZ2UsIFllaHVkYSBhbmQgU2FtJ3MgcXVpY2sgcmVwbHkuCj4+Cj4+
-IEdpdmVuIHRoZSBkaXNjdXNzaW9uIHNvIGZhciwgY291bGQgSSBzdW1tYXJpemUgaW50byB0aGUg
-Zm9sbG93aW5nIGJ1bGxldCBwb2ludHM6Cj4+Cj4+IDE+IFRoZSBmaXJzdCBzdGVwIHdlIHdvdWxk
-IGxpa2UgdG8gcHVyc3VlIGlzIHRvIGltcGxlbWVudCB0aGUgZm9sbG93aW5nIG1lY2hhbmlzbSB0
-byBhdm9pZCBpbmZpbml0ZSB3YWl0aW5nIGF0IHJhZG9zZ3cgc2lkZToKPj4gMS4xLiByYWRvc2d3
-IC0gc2VuZCBPUCB3aXRoIGEgKmZhc3RfZmFpbCogZmxhZwo+PiAxLjIuIE9TRCAtIHJlcGx5IHdp
-dGggLUVBR0FJTiBpZiB0aGUgUEcgaXMgKmluYWN0aXZlKiBhbmQgdGhlICpmYXN0X2ZhaWwqIGZs
-YWcgaXMgc2V0Cj4+IDEuMy4gcmFkb3NndyAtIHVwb24gcmVjZWl2aW5nIC1FQUdBSU4sIHJldHJ5
-IHRpbGwgYSB0aW1lb3V0IGludGVydmFsIGlzIHJlYWNoZWQgKHByb3Blcmx5IHdpdGggc29tZSBi
-YWNrLW9mZj8pLCBhbmQgaWYgaXQgZXZlbnR1YWxseSBmYWlscywgY29udmVydCAtRUFHQUlOIHRv
-IHNvbWUgb3RoZXIgZXJyb3IgY29kZSBhbmQgcGFzc2VzIHRvIHVwcGVyIGxheWVyLgo+Cj4gSSdt
-IG5vdCBjcmF6eSBhYm91dCB0aGUgJ2Zhc3RfZmFpbCcgbmFtZSwgbWF5YmUgd2UgY2FuIGNvbWUg
-dXAgd2l0aCBhCj4gYmV0dGVyIGRlc2NyaWJpbmcgdGVybS4gQWxzbywgbm90IDEwMCUgc3VyZSB0
-aGUgRUFHQUlOIGlzIHRoZSBlcnJvciB3ZQo+IHdhbnQgdG8gc2VlLiBNYXliZSB0aGUgZmxhZyBv
-biB0aGUgcmVxdWVzdCBjb3VsZCBzcGVjaWZ5IHdoYXQgd291bGQgYmUKPiB0aGUgZXJyb3IgY29k
-ZSB0byByZXR1cm4gaW4gdGhpcyBjYXNlPwo+IEkgdGhpbmsgaXQncyBhIGdvb2QgcGxhbiB0byBz
-dGFydCB3aXRoLCB3ZSBjYW4gYWRqdXN0IHRoaW5ncyBsYXRlci4KPgo+Pgo+PiAyPiBJbiB0ZXJt
-cyBvZiBtYW5hZ2VtZW50IG9mIHJhZG9zZ3cncyB3b3JrZXIgdGhyZWFkcywgSSB0aGluayB3ZSBl
-aXRoZXIgcHVyc3VlIFNhZ2UncyBwcm9wb3NhbCAod2hpY2ggY291bGQgbGluZWFybHkgaW5jcmVh
-c2UgdGhlIHRpbWUgaXQgdGFrZXMgdG8gc3R1Y2sgYWxsIHdvcmtlciB0aHJlYWRzIGRlcGVuZGlu
-ZyBob3cgbWFueSB0aHJlYWRzIHdlIGV4cGFuZCksIG9yIHNpbXBseSB0cnkgc2hhcmRpbmcgd29y
-ayBxdWV1ZSAod2hpY2ggd2UgYWxyZWFkeSBoYXMgc29tZSBiYXNpYyBidWlsZGluZyBibG9jayk/
-Cj4KPiBUaGUgcHJvYmxlbSB0aGF0IEkgc2VlIHdpdGggdGhhdCBwcm9wb3NhbCAobWlzc2VkIGl0
-IGVhcmxpZXIsIG9ubHkKPiBzZWVpbmcgaXQgbm93KSwgaXMgdGhhdCB3aGVuIHRoZSB0aHJlYWRz
-IGFjdHVhbGx5IHdha2UgdXAgdGhlIHN5c3RlbQo+IGNvdWxkIGJlY29tZSB1bnVzYWJsZS4gSW4g
-YW55IGNhc2UsIGl0J3MgcHJvYmFibHkgYSBsb3dlciBwcmlvcml0eSBhdAo+IHRoaXMgcG9pbnQs
-IHdlIGNvdWxkIHJldGhpbmsgdGhpcyBhcmVhIGFnYWluIGxhdGVyLgo+Cj4gWWVodWRhCj4KPj4K
-Pj4gQ2FuIEkgc3RhcnQgd29ya2luZyBvbiBwYXRjaCBmb3IgPDE+IGFuZCB0aGVuIDwyPiBhcyBh
-IGxvd2VyIHByaW9yaXR5Pwo+Pgo+PiBUaGFua3MsCj4+IEd1YW5nCj4+IC0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KPj4+IERhdGU6IFR1ZSwgNCBBdWcgMjAxNSAxMDox
-NDowNiAtMDcwMAo+Pj4gU3ViamVjdDogUmU6IHJhZG9zZ3cgLSBzdHVjayBvcHMKPj4+IEZyb206
-IHlzYWRlaHdlQHJlZGhhdC5jb20KPj4+IFRvOiBzd2VpbEByZWRoYXQuY29tCj4+PiBDQzogeWd1
-YW5nMTFAb3V0bG9vay5jb207IHNqdXN0QHJlZGhhdC5jb207IHllaHVkYUByZWRoYXQuY29tOyBj
-ZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZwo+Pj4KPj4+IE9uIFR1ZSwgQXVnIDQsIDIwMTUgYXQg
-MTA6MDMgQU0sIFNhZ2UgV2VpbCA8c3dlaWxAcmVkaGF0LmNvbT4gd3JvdGU6Cj4+Pj4gT24gVHVl
-LCA0IEF1ZyAyMDE1LCBZZWh1ZGEgU2FkZWgtV2VpbnJhdWIgd3JvdGU6Cj4+Pj4+IE9uIFR1ZSwg
-QXVnIDQsIDIwMTUgYXQgOTo1NSBBTSwgU2FnZSBXZWlsIDxzd2VpbEByZWRoYXQuY29tPiB3cm90
-ZToKPj4+Pj4+PiBPbmUgc29sdXRpb24gdGhhdCBJIGNhbiB0aGluayBvZiBpcyB0byBkZXRlcm1p
-bmUgYmVmb3JlIHRoZSByZWFkL3dyaXRlCj4+Pj4+Pj4gd2hldGhlciB0aGUgcGcgd2UncmUgYWJv
-dXQgdG8gYWNjZXNzIGlzIGhlYWx0aHkgKG9yIGhhcyBiZWVuIHVuaGVhbHRoeSBmb3IgYQo+Pj4+
-Pj4+IHNob3J0IHBlcmlvZCBvZiB0aW1lKSwgYW5kIGlmIG5vdCB0byBjYW5jZWwgdGhlIHJlcXVl
-c3QgYmVmb3JlIHNlbmRpbmcgdGhlCj4+Pj4+Pj4gb3BlcmF0aW9uLiBUaGlzIGNvdWxkIG1pdGln
-YXRlIHRoZSBwcm9ibGVtIHlvdSdyZSBzZWVpbmcgYXQgdGhlIGV4cGVuc2Ugb2YKPj4+Pj4+PiBh
-dmFpbGFiaWxpdHkgaW4gc29tZSBjYXNlcy4gV2UnZCBuZWVkIHRvIGhhdmUgYSB3YXkgdG8gcXVl
-cnkgcGcgaGVhbHRoCj4+Pj4+Pj4gdGhyb3VnaCBsaWJyYWRvcyB3aGljaCB3ZSBkb24ndCBoYXZl
-IHJpZ2h0IG5vdyBhZmFpay4KPj4+Pj4+PiBTYWdlIC8gU2FtLCBkb2VzIHRoYXQgbWFrZSBzZW5z
-ZSwgYW5kL29yIHBvc3NpYmxlPwo+Pj4+Pj4KPj4+Pj4+IFRoaXMgc2VlbXMgbW9zdGx5IGltcG9z
-c2libGUgYmVjYXVzZSB3ZSBkb24ndCBrbm93IGFoZWFkIG9mIHRpbWUgd2hpY2gKPj4+Pj4+IFBH
-KHMpIGEgcmVxdWVzdCBpcyBnb2luZyB0byB0b3VjaCAoaXQnbGwgZ2VuZXJhbGx5IGJlIGEgbG90
-IG9mIHRoZW0pPwo+Pj4+Pj4KPj4+Pj4KPj4+Pj4gQmFycmluZyBwZ2xzKCkgYW5kIHN1Y2gsIGVh
-Y2ggcmFkb3MgcmVxdWVzdCB0aGF0IHJhZG9zZ3cgcHJvZHVjZXMgd2lsbAo+Pj4+PiBvbmx5IHRv
-dWNoIGEgc2luZ2xlIHBnLCByaWdodD8KPj4+Pgo+Pj4+IE9oLCB5ZWFoLiBJIHRob3VnaHQgeW91
-IG1lYW50IGJlZm9yZSBlYWNoIFJHVyByZXF1ZXN0LiBJZiBpdCdzIGF0IHRoZQo+Pj4+IHJhZG9z
-IGxldmVsIHRoZW4geWVhaCwgeW91IGNvdWxkIGF2b2lkIHN0dWNrIHBncywgYWx0aG91Z2ggSSB0
-aGluayBhCj4+Pj4gYmV0dGVyIGFwcHJvYWNoIHdvdWxkIGJlIHRvIG1ha2UgdGhlIE9TRCByZXBs
-eSB3aXRoIC1FQUdBSU4gaW4gdGhhdCBjYXNlCj4+Pj4gc28gdGhhdCB5b3Uga25vdyB0aGUgb3Ag
-ZGlkbid0IGhhcHBlbi4gVGhlcmUgd291bGQgc3RpbGwgYmUgY2FzZXMgKHRob3VnaAo+Pj4+IG1v
-cmUgcmFyZSkgd2hlcmUgeW91IHdlcmVuJ3Qgc3VyZSBpZiB0aGUgb3AgaGFwcGVuZWQgb3Igbm90
-IChlLmcuLCB3aGVuCj4+Pj4geW91IHNlbmQgdG8gb3NkIEEsIGl0IGdvZXMgZG93biwgeW91IHJl
-c2VuZCB0byBvc2QgQiwgYW5kIHRoZW4geW91IGdldAo+Pj4+IEVBR0FJTi90aW1lb3V0KS4KPj4+
-Cj4+PiBJZiBkb25lIG9uIHRoZSBjbGllbnQgc2lkZSB0aGVuIHdlIHNob3VsZCBvbmx5IG1ha2Ug
-aXQgYXBwbHkgdG8gdGhlCj4+PiBmaXJzdCByZXF1ZXN0IHNlbnQuIElzIGl0IGFjdHVhbGx5IGEg
-cHJvYmxlbSBpZiB0aGUgb3NkIHRyaWdnZXJlZCB0aGUKPj4+IGVycm9yPwo+Pj4KPj4+Pgo+Pj4+
-IFdoYXQgd291bGQgeW91IGRvIHdoZW4geW91IGdldCB0aGF0IGZhaWx1cmUvdGltZW91dCwgdGhv
-dWdoPyBJcyBpdAo+Pj4+IHByYWN0aWNhbCB0byBhYm9ydCB0aGUgcmd3IHJlcXVlc3QgaGFuZGxp
-bmcgY29tcGxldGVseT8KPj4+Pgo+Pj4KPj4+IEl0IHNob3VsZCBiZSBsaWtlIGFueSBlcnJvciB0
-aGF0IGhhcHBlbnMgdGhyb3VnaCB0aGUgdHJhbnNhY3Rpb24KPj4+IChlLmcuLCBjbGllbnQgZGlz
-Y29ubmVjdGlvbikuCj4+Pgo+Pj4gWWVodWRhCj4+PiAtLQo+Pj4gVG8gdW5zdWJzY3JpYmUgZnJv
-bSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluCj4+
-PiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZwo+Pj4g
-TW9yZSBtYWpvcmRvbW8gaW5mbyBhdCBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1p
-bmZvLmh0bWwKPj4KPiAtLQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRo
-ZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbgo+IHRoZSBib2R5IG9mIGEgbWVzc2Fn
-ZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnCj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCBo
-dHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwKIAkJIAkgICAJCSAg
+Hi Loic,
+   Thanks very much, we will give a try asap.
+
+Cheers,
+Li Wang
+
+On 2015/8/10 21:09, Loic Dachary wrote:
+> Hi,
+>
+> You should be able to follow the instructions at
+>
+>     https://github.com/dachary/teuthology/tree/wip-6502-v3-dragonfly#openstack-backend
+>
+> on your OpenStack cluster. I expect it to be portable accross OpenStack implemenations back to Havana. Please let me know if your OpenStack cluster has a non standard behavior and we will figure out a workaround. By using (note the --upload flag)
+>
+>     teuthology-openstack --key-filename myself.pem --key-name myself \
+>                          --suite dummy --upload --teardown
+>
+> the results of the teuthology run will be uploaded to
+>
+>      http://integration.ceph.dachary.org/
+>
+> Cheers
+>
+> On 08/08/2015 17:23, Loic Dachary wrote:
+>>
+>>
+>> On 08/08/2015 16:22, Li Wang wrote:
+>>> Hi Loic,
+>>>    Glad to talk with you on IRC about setting up
+>>> the teuthology OpenStack backend. Once it is ready
+>>> to run the test in private cloud, and the results
+>>> could be exported and uploaded to a public place,
+>>> please let me know asap :)
+>>
+>> I'm working on it, should be ready RSN.
+>>
+>>>
+>>> Cheers,
+>>> Li Wang
+>>>
+>>>
+>>> On 2015/8/6 23:05, Loic Dachary wrote:
+>>>> Hi,
+>>>>
+>>>> I'm looking into testing the OpenStack backend for teuthology on a new cluster to verify it's portable. I think it is but ... ;-) I'm told you have an OpenStack cluster and would be interested in running teuthology workloads on it. Does it have a public facing API ?
+>>>>
+>>>> Cheers
+>>>>
+>>
+>
