@@ -1,170 +1,110 @@
-From: Matt Benjamin <mbenjamin@redhat.com>
-Subject: Re: bufferlist allocation optimization ideas
-Date: Mon, 10 Aug 2015 16:27:03 -0400 (EDT)
-Message-ID: <853447999.3469406.1439238423535.JavaMail.zimbra@redhat.com>
-References: <alpine.DEB.2.00.1508101208510.26854@cobra.newdream.net> <90559C83A9C7FA45B5846C975DFA612DDB53476107@ABGEX73E.FSC.NET> <alpine.DEB.2.00.1508101239290.22099@cobra.newdream.net>
+From: GuangYang <yguang11@outlook.com>
+Subject: RE: radosgw - stuck ops
+Date: Mon, 10 Aug 2015 17:55:27 -0700
+Message-ID: <BLU175-W2C5DEC4433FDA2A4054A2DF7F0@phx.gbl>
+References: <BLU175-W48D8E409F917C02492E3C4DF760@phx.gbl>,<CADRKj5SadChvVbVmVx18SFKfAeXWKiGmLB4Xybkqn3xXxoxnyg@mail.gmail.com>,<alpine.DEB.2.00.1508040950540.22099@cobra.newdream.net>,<CADRKj5QG2Qfbh9z9RghW2=JoSvzXcctUjTjDUXg4F_vw9mM2yw@mail.gmail.com>,<alpine.DEB.2.00.1508041000490.22099@cobra.newdream.net>,<CADRKj5Qfffrc3zSaaT+fKV6LpD+Z_p4SfE3z9KHEyXTRPn1s2A@mail.gmail.com>,<BLU175-W473A2D4104E37342497CC2DF760@phx.gbl>,<CADRKj5TZT7_=v-mec_td0KAPba0r4D58fBZ_UxeuKweE3mO2+g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx3-phx2.redhat.com ([209.132.183.24]:48157 "EHLO
-	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754569AbbHJU1H convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Aug 2015 16:27:07 -0400
-In-Reply-To: <alpine.DEB.2.00.1508101239290.22099@cobra.newdream.net>
+Received: from blu004-omc1s18.hotmail.com ([65.55.116.29]:59778 "EHLO
+	BLU004-OMC1S18.hotmail.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S933065AbbHKAz2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 10 Aug 2015 20:55:28 -0400
+In-Reply-To: <CADRKj5TZT7_=v-mec_td0KAPba0r4D58fBZ_UxeuKweE3mO2+g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Piotr =?utf-8?Q?Da=C5=82ek?= <Piotr.Dalek@ts.fujitsu.com>, ceph-devel@vger.kernel.org
+To: Yehuda Sadeh-Weinraub <ysadehwe@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-We explored a number of these ideas.  We have a few branches that might=
- be picked over.
-
-Having said that, our feeling was that the generality to span shared an=
-d non-shared cases transparently has cost in the unmarked case.  Other =
-aspects of the buffer indirection are essential (e.g., Accelio originat=
-ed buffers, etc).  We see a large contribution from ptr::release in per=
-f.  One of the main aspirations we had was to identify code paths which=
- would never share buffers, and not pay for sharing in those paths.
-
-To the degree that bufferlist is frequently used as a kind of flexible =
-string class, while other code uses it as a smart tailq of iovec or str=
-uct uio, there is client code with disjoint assumptions.  As mentioned,=
- shared vs. non-shared code paths are similarly disjoint.  I'm not cert=
-ain what the consequent here is.  Ceph code gets a lot of simplificatio=
-n from this idiom, but it is not minimalist.
-
-We found ways, as Piotr suggested, to avoid allocations of groups of ob=
-jects related to a message, and this had a lot of impact.  We're trying=
- to merge some of that soon.
-
-Matt
-
------ Original Message -----
-=46rom: "Sage Weil" <sweil@redhat.com>
-To: "Piotr Da=C5=82ek" <Piotr.Dalek@ts.fujitsu.com>
-Cc: ceph-devel@vger.kernel.org
-Sent: Monday, August 10, 2015 3:39:56 PM
-Subject: RE: bufferlist allocation optimization ideas
-
-On Mon, 10 Aug 2015, Da?ek, Piotr wrote:
-> This is pretty much low-level approach, what I was actually wondering=
- is=20
-> whether we can reduce amount of memory (de)allocations on higher leve=
-l,=20
-> like improving the message lifecycle logic (from receiving to perform=
-ing=20
-> actual operation and finishing it), so it wouldn't involve so many=20
-> allocations and deallocations. Reducing memory allocation on low leve=
-l=20
-> will help, no doubts about this, but we can probably improve on highe=
-r=20
-> level and don't risk breaking more than we need.
-
-Yes, definitely!  I think we should pursue both...
-
-sage
-
-
->=20
->=20
-> With best regards / Pozdrawiam
-> Piotr Da?ek
->=20
->=20
-> > -----Original Message-----
-> > From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
-> > owner@vger.kernel.org] On Behalf Of Sage Weil
-> > Sent: Monday, August 10, 2015 9:20 PM
-> > To: ceph-devel@vger.kernel.org
-> > Subject: bufferlist allocation optimization ideas
-> >=20
-> > Currently putting something in a bufferlist invovles 3 allocations:
-> >=20
-> >  1. raw buffer (posix_memalign, or new char[])  =C3=82=C2=A0 2. buf=
-fer::raw=C3=82(this holds
-> > the refcount.=C3=82=C2=A0 lifecycle matches the
-> >     raw buffer exactly)
-> > =C2=A0=C3=82=C2=A0 3. bufferlist's STL list<> node, which embeds bu=
-ffer::ptr
-> >=20
-> > --- combine buffer and buffer::raw ---
-> >=20
-> > This should be a pretty simple patch, and turns 2 allocations into =
-one.  Most
-> > buffers are constructed/allocated via buffer::create_*() methods.  =
-Those
-> > each look something like
-> >=20
-> >   buffer::raw* buffer::create(unsigned len) {
-> >     return new raw_char(len);
-> >   }
-> >=20
-> > where raw_char::raw_char() allocates the actual buffer.  Instead, a=
-llocate
-> > sizeof(raw_char_combined) + len, and use the right magic C++ syntax=
- to call
-> > the constructor on that memory.  Something like
-> >=20
-> >   raw_char_combined *foo =3D new (ptr) raw_char_combined(ptr);
-> >=20
-> > where the raw_char_combined constructor is smart enough to figure o=
-ut
-> > that data goes at ptr + sizeof(*this).
-> >=20
-> > That takes us from 3 -> 2 allocations.
-> >=20
-> > An open question is whether this is always a good idea, or whether =
-there are
-> > cases where 2 allocates are better, e.g. when len is exactly one pa=
-ge, and
-> > we're better off with a mempool allocation for raw and page separat=
-ely.  Or
-> > maybe for very large buffers?  I'm really not sure what would be be=
-tter...
-> >=20
-> >=20
-> > --- make bufferlist use boost::intrusive::list ---
-> >=20
-> > Most buffers exist in only one list, so the indirection through the=
- ptr is mostly
-> > wasted.
-> >=20
-> > 1. embed a boost::intrustive::list node into buffer::ptr.  (Note th=
-at doing just
-> > this buys us nothing... we are just allocating ptr's and using the =
-intrusive node
-> > instead the list<> node with an embedded ptr.)
-> >=20
-> > 2. embed a ptr in buffer::raw (or raw_char_combined)
-> >=20
-> > When adding a buffer to the bufferlist, we use the raw_char_combine=
-d's
-> > embedded ptr if it is available.  Otherwise, we allocate one as bef=
-ore.
-> >=20
-> > This would need some careful adjustment of hte common append() path=
-s,
-> > since they currently are all ptr-based.  One way to make this work =
-well might
-> > be to embed N ptr's in raw_char_combined, on the assumption that th=
-e
-> > refcount for a buffer is never more than 2 or 3.  Only in extreme c=
-ases will we
-> > need to explicitly allocate ptr's.
-> >=20
-> >=20
-> > Thoughts?
-> > sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGkgWWVodWRhLApPbiB0b3Agb2YgdGhlIGNoYW5nZXMgZm9yIFsxXSwgSSB3b3VsZCBwcm9wb3Nl
+IGFub3RoZXIgY2hhbmdlLCB3aGljaCBleHBvc2VzIHRoZSBudW1iZXIgb2YgKnN0dWNrIHRocmVh
+ZHMqIHZpYSBhZG1pbiBzb2NrZXQsIHNvIHRoYXQgd2UgY2FuIGJ1aWxkIHNvbWV0aGluZyBvdXRz
+aWRlIG9mIGNlcGggdG8gY2hlY2sgaWYgYWxsIHdvcmtlciB0aHJlYWRzIGFyZSBzdHVjaywgYW5k
+IGlmIHllcywgcmVzdGFydCB0aGUgc2VydmljZS4KCldlIGNhbiBhbHNvIGFzc2VydGlvbiBvdXQg
+aWYgYWxsIHdvcmtlcnMgYXJlIHN0dWNrLCBhcyBhbiBpbnNpZGUgY2VwaCBzb2x1dGlvbi4uLiAo
+YXMgYmVpbmcgbW9yZSBjb25zZXJ2YXRpdmUgdG8gdXNlICdoaXRfc3VpY2lkZV90aW1lb3V0JyB0
+byBhc3NlcnQgb3V0IGlmIHRoZXJlIGlzIG9uZSB0aHJlYWQgc3R1Y2spLgoKV2hhdCBkbyB5b3Ug
+dGhpbms/CgpbMV0gaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC9wdWxsLzU1MDEKVGhhbmtz
+LApHdWFuZwoKCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KPiBEYXRl
+OiBXZWQsIDUgQXVnIDIwMTUgMDc6NDQ6MzQgLTA3MDAKPiBTdWJqZWN0OiBSZTogcmFkb3NndyAt
+IHN0dWNrIG9wcwo+IEZyb206IHlzYWRlaHdlQHJlZGhhdC5jb20KPiBUbzogeWd1YW5nMTFAb3V0
+bG9vay5jb20KPiBDQzogc3dlaWxAcmVkaGF0LmNvbTsgc2p1c3RAcmVkaGF0LmNvbTsgeWVodWRh
+QHJlZGhhdC5jb207IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnCj4KPiBPbiBUdWUsIEF1ZyA0
+LCAyMDE1IGF0IDM6MjMgUE0sIEd1YW5nWWFuZyA8eWd1YW5nMTFAb3V0bG9vay5jb20+IHdyb3Rl
+Ogo+PiBUaGFua3MgZm9yIFNhZ2UsIFllaHVkYSBhbmQgU2FtJ3MgcXVpY2sgcmVwbHkuCj4+Cj4+
+IEdpdmVuIHRoZSBkaXNjdXNzaW9uIHNvIGZhciwgY291bGQgSSBzdW1tYXJpemUgaW50byB0aGUg
+Zm9sbG93aW5nIGJ1bGxldCBwb2ludHM6Cj4+Cj4+IDE+IFRoZSBmaXJzdCBzdGVwIHdlIHdvdWxk
+IGxpa2UgdG8gcHVyc3VlIGlzIHRvIGltcGxlbWVudCB0aGUgZm9sbG93aW5nIG1lY2hhbmlzbSB0
+byBhdm9pZCBpbmZpbml0ZSB3YWl0aW5nIGF0IHJhZG9zZ3cgc2lkZToKPj4gMS4xLiByYWRvc2d3
+IC0gc2VuZCBPUCB3aXRoIGEgKmZhc3RfZmFpbCogZmxhZwo+PiAxLjIuIE9TRCAtIHJlcGx5IHdp
+dGggLUVBR0FJTiBpZiB0aGUgUEcgaXMgKmluYWN0aXZlKiBhbmQgdGhlICpmYXN0X2ZhaWwqIGZs
+YWcgaXMgc2V0Cj4+IDEuMy4gcmFkb3NndyAtIHVwb24gcmVjZWl2aW5nIC1FQUdBSU4sIHJldHJ5
+IHRpbGwgYSB0aW1lb3V0IGludGVydmFsIGlzIHJlYWNoZWQgKHByb3Blcmx5IHdpdGggc29tZSBi
+YWNrLW9mZj8pLCBhbmQgaWYgaXQgZXZlbnR1YWxseSBmYWlscywgY29udmVydCAtRUFHQUlOIHRv
+IHNvbWUgb3RoZXIgZXJyb3IgY29kZSBhbmQgcGFzc2VzIHRvIHVwcGVyIGxheWVyLgo+Cj4gSSdt
+IG5vdCBjcmF6eSBhYm91dCB0aGUgJ2Zhc3RfZmFpbCcgbmFtZSwgbWF5YmUgd2UgY2FuIGNvbWUg
+dXAgd2l0aCBhCj4gYmV0dGVyIGRlc2NyaWJpbmcgdGVybS4gQWxzbywgbm90IDEwMCUgc3VyZSB0
+aGUgRUFHQUlOIGlzIHRoZSBlcnJvciB3ZQo+IHdhbnQgdG8gc2VlLiBNYXliZSB0aGUgZmxhZyBv
+biB0aGUgcmVxdWVzdCBjb3VsZCBzcGVjaWZ5IHdoYXQgd291bGQgYmUKPiB0aGUgZXJyb3IgY29k
+ZSB0byByZXR1cm4gaW4gdGhpcyBjYXNlPwo+IEkgdGhpbmsgaXQncyBhIGdvb2QgcGxhbiB0byBz
+dGFydCB3aXRoLCB3ZSBjYW4gYWRqdXN0IHRoaW5ncyBsYXRlci4KPgo+Pgo+PiAyPiBJbiB0ZXJt
+cyBvZiBtYW5hZ2VtZW50IG9mIHJhZG9zZ3cncyB3b3JrZXIgdGhyZWFkcywgSSB0aGluayB3ZSBl
+aXRoZXIgcHVyc3VlIFNhZ2UncyBwcm9wb3NhbCAod2hpY2ggY291bGQgbGluZWFybHkgaW5jcmVh
+c2UgdGhlIHRpbWUgaXQgdGFrZXMgdG8gc3R1Y2sgYWxsIHdvcmtlciB0aHJlYWRzIGRlcGVuZGlu
+ZyBob3cgbWFueSB0aHJlYWRzIHdlIGV4cGFuZCksIG9yIHNpbXBseSB0cnkgc2hhcmRpbmcgd29y
+ayBxdWV1ZSAod2hpY2ggd2UgYWxyZWFkeSBoYXMgc29tZSBiYXNpYyBidWlsZGluZyBibG9jayk/
+Cj4KPiBUaGUgcHJvYmxlbSB0aGF0IEkgc2VlIHdpdGggdGhhdCBwcm9wb3NhbCAobWlzc2VkIGl0
+IGVhcmxpZXIsIG9ubHkKPiBzZWVpbmcgaXQgbm93KSwgaXMgdGhhdCB3aGVuIHRoZSB0aHJlYWRz
+IGFjdHVhbGx5IHdha2UgdXAgdGhlIHN5c3RlbQo+IGNvdWxkIGJlY29tZSB1bnVzYWJsZS4gSW4g
+YW55IGNhc2UsIGl0J3MgcHJvYmFibHkgYSBsb3dlciBwcmlvcml0eSBhdAo+IHRoaXMgcG9pbnQs
+IHdlIGNvdWxkIHJldGhpbmsgdGhpcyBhcmVhIGFnYWluIGxhdGVyLgo+Cj4gWWVodWRhCj4KPj4K
+Pj4gQ2FuIEkgc3RhcnQgd29ya2luZyBvbiBwYXRjaCBmb3IgPDE+IGFuZCB0aGVuIDwyPiBhcyBh
+IGxvd2VyIHByaW9yaXR5Pwo+Pgo+PiBUaGFua3MsCj4+IEd1YW5nCj4+IC0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KPj4+IERhdGU6IFR1ZSwgNCBBdWcgMjAxNSAxMDox
+NDowNiAtMDcwMAo+Pj4gU3ViamVjdDogUmU6IHJhZG9zZ3cgLSBzdHVjayBvcHMKPj4+IEZyb206
+IHlzYWRlaHdlQHJlZGhhdC5jb20KPj4+IFRvOiBzd2VpbEByZWRoYXQuY29tCj4+PiBDQzogeWd1
+YW5nMTFAb3V0bG9vay5jb207IHNqdXN0QHJlZGhhdC5jb207IHllaHVkYUByZWRoYXQuY29tOyBj
+ZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZwo+Pj4KPj4+IE9uIFR1ZSwgQXVnIDQsIDIwMTUgYXQg
+MTA6MDMgQU0sIFNhZ2UgV2VpbCA8c3dlaWxAcmVkaGF0LmNvbT4gd3JvdGU6Cj4+Pj4gT24gVHVl
+LCA0IEF1ZyAyMDE1LCBZZWh1ZGEgU2FkZWgtV2VpbnJhdWIgd3JvdGU6Cj4+Pj4+IE9uIFR1ZSwg
+QXVnIDQsIDIwMTUgYXQgOTo1NSBBTSwgU2FnZSBXZWlsIDxzd2VpbEByZWRoYXQuY29tPiB3cm90
+ZToKPj4+Pj4+PiBPbmUgc29sdXRpb24gdGhhdCBJIGNhbiB0aGluayBvZiBpcyB0byBkZXRlcm1p
+bmUgYmVmb3JlIHRoZSByZWFkL3dyaXRlCj4+Pj4+Pj4gd2hldGhlciB0aGUgcGcgd2UncmUgYWJv
+dXQgdG8gYWNjZXNzIGlzIGhlYWx0aHkgKG9yIGhhcyBiZWVuIHVuaGVhbHRoeSBmb3IgYQo+Pj4+
+Pj4+IHNob3J0IHBlcmlvZCBvZiB0aW1lKSwgYW5kIGlmIG5vdCB0byBjYW5jZWwgdGhlIHJlcXVl
+c3QgYmVmb3JlIHNlbmRpbmcgdGhlCj4+Pj4+Pj4gb3BlcmF0aW9uLiBUaGlzIGNvdWxkIG1pdGln
+YXRlIHRoZSBwcm9ibGVtIHlvdSdyZSBzZWVpbmcgYXQgdGhlIGV4cGVuc2Ugb2YKPj4+Pj4+PiBh
+dmFpbGFiaWxpdHkgaW4gc29tZSBjYXNlcy4gV2UnZCBuZWVkIHRvIGhhdmUgYSB3YXkgdG8gcXVl
+cnkgcGcgaGVhbHRoCj4+Pj4+Pj4gdGhyb3VnaCBsaWJyYWRvcyB3aGljaCB3ZSBkb24ndCBoYXZl
+IHJpZ2h0IG5vdyBhZmFpay4KPj4+Pj4+PiBTYWdlIC8gU2FtLCBkb2VzIHRoYXQgbWFrZSBzZW5z
+ZSwgYW5kL29yIHBvc3NpYmxlPwo+Pj4+Pj4KPj4+Pj4+IFRoaXMgc2VlbXMgbW9zdGx5IGltcG9z
+c2libGUgYmVjYXVzZSB3ZSBkb24ndCBrbm93IGFoZWFkIG9mIHRpbWUgd2hpY2gKPj4+Pj4+IFBH
+KHMpIGEgcmVxdWVzdCBpcyBnb2luZyB0byB0b3VjaCAoaXQnbGwgZ2VuZXJhbGx5IGJlIGEgbG90
+IG9mIHRoZW0pPwo+Pj4+Pj4KPj4+Pj4KPj4+Pj4gQmFycmluZyBwZ2xzKCkgYW5kIHN1Y2gsIGVh
+Y2ggcmFkb3MgcmVxdWVzdCB0aGF0IHJhZG9zZ3cgcHJvZHVjZXMgd2lsbAo+Pj4+PiBvbmx5IHRv
+dWNoIGEgc2luZ2xlIHBnLCByaWdodD8KPj4+Pgo+Pj4+IE9oLCB5ZWFoLiBJIHRob3VnaHQgeW91
+IG1lYW50IGJlZm9yZSBlYWNoIFJHVyByZXF1ZXN0LiBJZiBpdCdzIGF0IHRoZQo+Pj4+IHJhZG9z
+IGxldmVsIHRoZW4geWVhaCwgeW91IGNvdWxkIGF2b2lkIHN0dWNrIHBncywgYWx0aG91Z2ggSSB0
+aGluayBhCj4+Pj4gYmV0dGVyIGFwcHJvYWNoIHdvdWxkIGJlIHRvIG1ha2UgdGhlIE9TRCByZXBs
+eSB3aXRoIC1FQUdBSU4gaW4gdGhhdCBjYXNlCj4+Pj4gc28gdGhhdCB5b3Uga25vdyB0aGUgb3Ag
+ZGlkbid0IGhhcHBlbi4gVGhlcmUgd291bGQgc3RpbGwgYmUgY2FzZXMgKHRob3VnaAo+Pj4+IG1v
+cmUgcmFyZSkgd2hlcmUgeW91IHdlcmVuJ3Qgc3VyZSBpZiB0aGUgb3AgaGFwcGVuZWQgb3Igbm90
+IChlLmcuLCB3aGVuCj4+Pj4geW91IHNlbmQgdG8gb3NkIEEsIGl0IGdvZXMgZG93biwgeW91IHJl
+c2VuZCB0byBvc2QgQiwgYW5kIHRoZW4geW91IGdldAo+Pj4+IEVBR0FJTi90aW1lb3V0KS4KPj4+
+Cj4+PiBJZiBkb25lIG9uIHRoZSBjbGllbnQgc2lkZSB0aGVuIHdlIHNob3VsZCBvbmx5IG1ha2Ug
+aXQgYXBwbHkgdG8gdGhlCj4+PiBmaXJzdCByZXF1ZXN0IHNlbnQuIElzIGl0IGFjdHVhbGx5IGEg
+cHJvYmxlbSBpZiB0aGUgb3NkIHRyaWdnZXJlZCB0aGUKPj4+IGVycm9yPwo+Pj4KPj4+Pgo+Pj4+
+IFdoYXQgd291bGQgeW91IGRvIHdoZW4geW91IGdldCB0aGF0IGZhaWx1cmUvdGltZW91dCwgdGhv
+dWdoPyBJcyBpdAo+Pj4+IHByYWN0aWNhbCB0byBhYm9ydCB0aGUgcmd3IHJlcXVlc3QgaGFuZGxp
+bmcgY29tcGxldGVseT8KPj4+Pgo+Pj4KPj4+IEl0IHNob3VsZCBiZSBsaWtlIGFueSBlcnJvciB0
+aGF0IGhhcHBlbnMgdGhyb3VnaCB0aGUgdHJhbnNhY3Rpb24KPj4+IChlLmcuLCBjbGllbnQgZGlz
+Y29ubmVjdGlvbikuCj4+Pgo+Pj4gWWVodWRhCj4+PiAtLQo+Pj4gVG8gdW5zdWJzY3JpYmUgZnJv
+bSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluCj4+
+PiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZwo+Pj4g
+TW9yZSBtYWpvcmRvbW8gaW5mbyBhdCBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1p
+bmZvLmh0bWwKPj4KPiAtLQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRo
+ZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbgo+IHRoZSBib2R5IG9mIGEgbWVzc2Fn
+ZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnCj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCBo
+dHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwKIAkJIAkgICAJCSAg
