@@ -1,56 +1,109 @@
-From: =?utf-8?B?RGHFgmVrLCBQaW90cg==?= <Piotr.Dalek@ts.fujitsu.com>
-Subject: RE: bufferlist allocation optimization ideas
-Date: Wed, 12 Aug 2015 06:43:00 +0200
-Message-ID: <90559C83A9C7FA45B5846C975DFA612DDB53561F34@ABGEX73E.FSC.NET>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: bufferlist allocation optimization ideas
+Date: Wed, 12 Aug 2015 12:53:00 +0800
+Message-ID: <CACJqLyb7FW11944whyxNa+=2qAaMp0oQ=aXuJrj4jhU8usM=Yg@mail.gmail.com>
 References: <alpine.DEB.2.00.1508101208510.26854@cobra.newdream.net>
 	<alpine.DEB.2.00.1508111307540.22099@cobra.newdream.net>
 	<90559C83A9C7FA45B5846C975DFA612DDB53561F31@ABGEX73E.FSC.NET>
- <CACJqLyYrd4eZVfaW07ahF5m8C9DQOOHjDh0fj9XixePUkXa_tQ@mail.gmail.com>
+	<CACJqLyYrd4eZVfaW07ahF5m8C9DQOOHjDh0fj9XixePUkXa_tQ@mail.gmail.com>
+	<90559C83A9C7FA45B5846C975DFA612DDB53561F34@ABGEX73E.FSC.NET>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from dgate10.ts.fujitsu.com ([80.70.172.49]:39278 "EHLO
-	dgate10.ts.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752811AbbHLEnF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Aug 2015 00:43:05 -0400
-In-Reply-To: <CACJqLyYrd4eZVfaW07ahF5m8C9DQOOHjDh0fj9XixePUkXa_tQ@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-yk0-f182.google.com ([209.85.160.182]:34708 "EHLO
+	mail-yk0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753717AbbHLExB convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Aug 2015 00:53:01 -0400
+Received: by ykdt205 with SMTP id t205so5223902ykd.1
+        for <ceph-devel@vger.kernel.org>; Tue, 11 Aug 2015 21:53:00 -0700 (PDT)
+In-Reply-To: <90559C83A9C7FA45B5846C975DFA612DDB53561F34@ABGEX73E.FSC.NET>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomaiwang@gmail.com>
+To: =?UTF-8?Q?Da=C5=82ek=2C_Piotr?= <Piotr.Dalek@ts.fujitsu.com>
 Cc: Sage Weil <sage@newdream.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBIYW9tYWkgV2FuZyBbbWFpbHRv
-Omhhb21haXdhbmdAZ21haWwuY29tXQ0KPiBTZW50OiBXZWRuZXNkYXksIEF1Z3VzdCAxMiwgMjAx
-NSA0OjU2IEFNDQo+IFRvOiBEYcWCZWssIFBpb3RyDQo+IA0KPiBPbiBXZWQsIEF1ZyAxMiwgMjAx
-NSBhdCA1OjQ4IEFNLCBEYcWCZWssIFBpb3RyIDxQaW90ci5EYWxla0B0cy5mdWppdHN1LmNvbT4N
-Cj4gd3JvdGU6DQo+ID4+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+ID4+IEZyb206IGNl
-cGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC0NCj4gPj4g
-b3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgU2FnZSBXZWlsDQo+ID4+IFNlbnQ6
-IFR1ZXNkYXksIEF1Z3VzdCAxMSwgMjAxNSAxMDoxMSBQTQ0KPiA+Pg0KPiA+PiBJIHdlbnQgYWhl
-YWQgYW5kIGltcGxlbWVudGVkIGJvdGggb2YgdGhlc2UgcGllY2VzLiAgU2VlDQo+ID4+DQo+ID4+
-ICAgICAgIGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgvcHVsbC81NTM0DQo+ID4+DQo+ID4+
-IE15IGJlbmNobWFyayBudW1iZXJzIGFyZSBoaWdobHkgc3VzcGVjdCwgYnV0IHRoZSBhcHByb3hp
-bWF0ZQ0KPiB0YWtlYXdheQ0KPiA+PiBpcyB0aGF0IGl0J3MgMnggZmFzdGVyIGZvciB0aGUgc2lt
-cGxlIG1pY3JvYmVuY2htYXJrcyBhbmQgZG9lcyAxLzNyZA0KPiA+PiB0aGUgYWxsb2NhdGlvbnMu
-ICBCdXQgdGhlcmUgaXMgc29tZSB3ZWlyZCBpbnRlcmFjdGlvbiB3aXRoIHRoZQ0KPiA+PiBhbGxv
-Y2F0b3IgZ29pbmcgb24gZm9yIDE2ayBhbGxvY2F0aW9ucyB0aGF0IEkgc2F3LCBzbyBpdCBuZWVk
-cyBzb21lIG1vcmUNCj4gY2FyZWZ1bCBiZW5jaG1hcmtpbmcuDQo+ID4NCj4gPiAxNmsgYWxsb2Nh
-dGlvbnMgYXJlbid0IHRoYXQgY29tbW9uLCBhY3R1YWxseS4NCj4gPiBTb21lIHRpbWUgYWdvIEkg
-dG9vayBhbiBhbGxvYyBwcm9maWxlIGZvciByYXdfY2hhciBhbmQgcG9zaXhfYWxpZ25lZA0KPiBi
-dWZmZXJzLCBhbmQuLi4NCj4gPg0KPiA+IFtyb290QHN0b3JhZ2UxIC9dIyBzb3J0IGJ1ZmZlcjo6
-cmF3X2NoYXItMjE0Mzk4NC5kYXQgfCB1bmlxIC1jIHwgc29ydCAtZw0KPiA+ICAgICAgIDEgMTIN
-Cj4gPiAgICAgICAxIDMzDQo+ID4gICAgICAgMSAzOTMNCj4gPiAgICAgICAxIDQxDQo+ID4gICAg
-ICAgMiA0NzMNCj4gPiAgICAgICAyIDY2NDQ3DQo+ID4gICAgICAgMyAxOTANCj4gPiAgICAgICAz
-IDIwDQo+ID4gICAgICAgMyA2NA0KPiA+ICAgICAgIDQgMTYNCj4gPiAgICAgIDM2IDIwNg0KPiA+
-ICAgICAgODggMTc0DQo+ID4gICAgICA4OCA0OA0KPiA+ICAgICAgODkgMjcyDQo+ID4gICAgICA4
-OSAzNg0KPiA+ICAgICAgOTAgMzQNCj4gPiAgICAgMzEyIDIwNw0KPiA+ICAgIDMyMzggMjA4DQo+
-ID4gICAzMjQwMyAyMDkNCj4gPiAgMTk2MzAwIDIxMA0KPiA+ICAzNjAxNjQgNDUNCj4gDQo+IFNp
-bmNlIHNpemUgaXMgY2VudHJhbGl6YXRpb24sIHdlIGNvdWxkIHVzZSBhIGZpeGVkIHNpemUgYnVm
-ZmVyIHBvb2wgdG8gb3B0aW1pemUNCj4gdGhpcy4gVGhlIHBlcmZvcm1hbmNlIGlzIG91dHN0YW5k
-aW5nIGFzIEkgcGVyZi4NCg0KSWRlYSBpcyBncmVhdCwgYnV0IGV4ZWN1dGlvbiBpcyB0cmlja3ks
-IGVzcGVjaWFsbHkgaW4gY2FzZSBvZiBzaW1wbGUgbWVzc2VuZ2VyIC0tIHdlIGhhdmUgYSBsb3Qg
-b2YgdGhyZWFkcyBhbGxvY2luZyBhbmQgZnJlZWluZyBtZW1vcnksIHNvIHBvb2wgbXVzdCBiZSBh
-d2FyZSBvZiB0aGF0IGFuZCBub3QgYmVjb21lIGEgYm90dGxlbmVjayBpdHNlbGYuIA0KDQoNCldp
-dGggYmVzdCByZWdhcmRzIC8gUG96ZHJhd2lhbQ0KUGlvdHIgRGHFgmVrDQo=
+Sure, so we could introduce it to async messenger. We could create a
+buffer pool, then bufferlist's api could use passing in buffer pool to
+alloc memory.
+
+On Wed, Aug 12, 2015 at 12:43 PM, Da=C5=82ek, Piotr
+<Piotr.Dalek@ts.fujitsu.com> wrote:
+>> -----Original Message-----
+>> From: Haomai Wang [mailto:haomaiwang@gmail.com]
+>> Sent: Wednesday, August 12, 2015 4:56 AM
+>> To: Da=C5=82ek, Piotr
+>>
+>> On Wed, Aug 12, 2015 at 5:48 AM, Da=C5=82ek, Piotr <Piotr.Dalek@ts.f=
+ujitsu.com>
+>> wrote:
+>> >> -----Original Message-----
+>> >> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
+>> >> owner@vger.kernel.org] On Behalf Of Sage Weil
+>> >> Sent: Tuesday, August 11, 2015 10:11 PM
+>> >>
+>> >> I went ahead and implemented both of these pieces.  See
+>> >>
+>> >>       https://github.com/ceph/ceph/pull/5534
+>> >>
+>> >> My benchmark numbers are highly suspect, but the approximate
+>> takeaway
+>> >> is that it's 2x faster for the simple microbenchmarks and does 1/=
+3rd
+>> >> the allocations.  But there is some weird interaction with the
+>> >> allocator going on for 16k allocations that I saw, so it needs so=
+me more
+>> careful benchmarking.
+>> >
+>> > 16k allocations aren't that common, actually.
+>> > Some time ago I took an alloc profile for raw_char and posix_align=
+ed
+>> buffers, and...
+>> >
+>> > [root@storage1 /]# sort buffer::raw_char-2143984.dat | uniq -c | s=
+ort -g
+>> >       1 12
+>> >       1 33
+>> >       1 393
+>> >       1 41
+>> >       2 473
+>> >       2 66447
+>> >       3 190
+>> >       3 20
+>> >       3 64
+>> >       4 16
+>> >      36 206
+>> >      88 174
+>> >      88 48
+>> >      89 272
+>> >      89 36
+>> >      90 34
+>> >     312 207
+>> >    3238 208
+>> >   32403 209
+>> >  196300 210
+>> >  360164 45
+>>
+>> Since size is centralization, we could use a fixed size buffer pool =
+to optimize
+>> this. The performance is outstanding as I perf.
+>
+> Idea is great, but execution is tricky, especially in case of simple =
+messenger -- we have a lot of threads allocing and freeing memory, so p=
+ool must be aware of that and not become a bottleneck itself.
+>
+>
+> With best regards / Pozdrawiam
+> Piotr Da=C5=82ek
+
+
+
+--=20
+Best Regards,
+
+Wheat
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
