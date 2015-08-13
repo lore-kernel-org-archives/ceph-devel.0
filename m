@@ -1,51 +1,42 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: sepia gitbuilder jessie down ?
-Date: Thu, 13 Aug 2015 15:43:34 +0200 (CEST)
-Message-ID: <2017068765.35913862.1439473414867.JavaMail.zimbra@oxygem.tv>
+From: Pete Zaitcev <zaitcev@redhat.com>
+Subject: RGWUserInfo encode/decode
+Date: Thu, 13 Aug 2015 12:50:16 -0600
+Message-ID: <20150813125016.5276db24@guren.zaitcev.lan>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:56925 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751889AbbHMNnh (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Aug 2015 09:43:37 -0400
-Received: from localhost (localhost [127.0.0.1])
-	by mailpro.odiso.net (Postfix) with ESMTP id 4AF5640000706
-	for <ceph-devel@vger.kernel.org>; Thu, 13 Aug 2015 15:43:35 +0200 (CEST)
-Received: from mailpro.odiso.net ([127.0.0.1])
-	by localhost (mailpro.odiso.net [127.0.0.1]) (amavisd-new, port 10032)
-	with ESMTP id l7s1_f3-GvXF for <ceph-devel@vger.kernel.org>;
-	Thu, 13 Aug 2015 15:43:35 +0200 (CEST)
-Received: from localhost (localhost [127.0.0.1])
-	by mailpro.odiso.net (Postfix) with ESMTP id 1E91B403BD128
-	for <ceph-devel@vger.kernel.org>; Thu, 13 Aug 2015 15:43:35 +0200 (CEST)
-Received: from mailpro.odiso.net ([127.0.0.1])
-	by localhost (mailpro.odiso.net [127.0.0.1]) (amavisd-new, port 10026)
-	with ESMTP id eXIlCD_1Rj_Y for <ceph-devel@vger.kernel.org>;
-	Thu, 13 Aug 2015 15:43:35 +0200 (CEST)
-Received: from mailpro.odiso.net (mailpro.odiso.net [10.1.31.112])
-	by mailpro.odiso.net (Postfix) with ESMTP id E6D9340000706
-	for <ceph-devel@vger.kernel.org>; Thu, 13 Aug 2015 15:43:34 +0200 (CEST)
+Received: from mx1.redhat.com ([209.132.183.28]:37564 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752474AbbHMSuS (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 13 Aug 2015 14:50:18 -0400
+Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
+	by mx1.redhat.com (Postfix) with ESMTPS id 88FBC91DB7
+	for <ceph-devel@vger.kernel.org>; Thu, 13 Aug 2015 18:50:18 +0000 (UTC)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Yehuda Sadeh-Weinraub <ysadehwe@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, zaitcev@redhat.com
 
 Hi,
 
-since some day, sepia gitbuilder for debian jessie seem to be down.
+I stumpbled upon a code like this in src/rgw/rgw_common.h:
 
-http://gitbuilder.sepia.ceph.com/gitbuilder-ceph-deb-jessie-amd64-basic/
+struct RGWUserInfo {
+  map<string, RGWAccessKey> swift_keys;  // not one swift_key, a whole map
+  void decode(bufferlist::iterator& bl) {
+    string swift_key;
+    if (struct_v >= 4) ::decode(swift_key, bl);
+    // that's all, folks
+  }
+}
 
+Looks like swift_key is never set when RGWUserInfo is deserialized.
+It looks like a bug on the surface, but nobody cared thus far, so maybe
+it's not actually a problem.
 
-I don't see new update since 6 august in repository
+Do you happen to recall where this is used... Does radosgw-admin send
+a whole RGWUserInfo to RADOS, ever? It appears to go the other way, in
+show_user_info(), but strangely enough the tool shows Swift keys just fine.
 
-http://gitbuilder.ceph.com/ceph-deb-jessie-x86_64-basic/ref/
-
-
-(BTW, is they any roadmap to release official package for jessie ? I'm waiting this to include them in next proxmox version)
-
-
-Regards,
-
-Alexandre
+-- Pete
