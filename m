@@ -1,123 +1,43 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: /sys/block and /dev and partitions
-Date: Sun, 16 Aug 2015 00:10:22 +0200
-Message-ID: <55CFB8CE.10508@dachary.org>
-References: <55CF1F99.5050807@dachary.org>	<alpine.DEB.2.00.1508150727060.32106@cobra.newdream.net>	<55CF5C4B.2010406@dachary.org>	<CAOi1vP-0Kz6x=nEO=9yijNfS1QzN9hEa0GMQR94Ggv-KCrM=cw@mail.gmail.com>	<55CFA778.6030703@dachary.org> <CAOi1vP--kcWVtWoFCWqgmuB+A0vUX8E3pxoFbVQbTQuLn6hW2Q@mail.gmail.com>
+From: "Ma, Jianpeng" <jianpeng.ma@intel.com>
+Subject: [PATCH] fs/ceph: No need get inode of parent in ceph_open.
+Date: Mon, 17 Aug 2015 08:43:26 +0000
+Message-ID: <6AA21C22F0A5DA478922644AD2EC308C1D19FBFC@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="It4gP2dxqjproxFtrEhPkw8LhAXJR9E6g"
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:38670 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751103AbbHOWK0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 15 Aug 2015 18:10:26 -0400
-In-Reply-To: <CAOi1vP--kcWVtWoFCWqgmuB+A0vUX8E3pxoFbVQbTQuLn6hW2Q@mail.gmail.com>
+Received: from mga14.intel.com ([192.55.52.115]:30852 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750754AbbHQIni convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Aug 2015 04:43:38 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, "zyan@redhat.com" <zyan@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---It4gP2dxqjproxFtrEhPkw8LhAXJR9E6g
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+For ceph_open, it already get the parent inode. So no need to get again.
 
+Signed-off-by: Jianpeng Ma <jianpeng.ma@intel.com>
+---
+ fs/ceph/file.c | 3 ---
+ 1 file changed, 3 deletions(-)
 
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index 8b79d87..5ecd3dc 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -210,10 +210,7 @@ int ceph_open(struct inode *inode, struct file *file)
+        ihold(inode);
 
-On 16/08/2015 00:00, Ilya Dryomov wrote:
-> On Sat, Aug 15, 2015 at 11:56 PM, Loic Dachary <loic@dachary.org> wrote=
-:
->> Hi Ilya,
->>
->> On 15/08/2015 19:42, Ilya Dryomov wrote:
->>> On Sat, Aug 15, 2015 at 6:35 PM, Loic Dachary <loic@dachary.org> wrot=
-e:
->>>> Hi Sage,
->>>>
->>>> On 15/08/2015 16:28, Sage Weil wrote:
->>>>> On Sat, 15 Aug 2015, Loic Dachary wrote:
->>>>>> Hi,
->>>>>>
->>>>>> Is there a portable and consistent way to figure out if a given /d=
-ev/XXX
->>>>>> path (for instance /dev/dm-1) is a partition of a whole device ?
->>>>>> Although checking /sys/block/dm-1/dm/name for a number at the end =
-(like
->>>>>> mpatha1 or mpatha2) would probably work, it feels like a fragile h=
-ack.
->>>>>> Looking into /sys/block/dm-1/slaves will lead to
->>>>>> /sys/block/dm-1/slaves/dm-0 and we can check that
->>>>>> /sys/block/dm-*/subsystem is class/block. But that does not necess=
-arily
->>>>>> mean dm-1 is a partition of dm-0, just that it's a slave of dm-0.
->>>>>
->>>>> Take a look at is_partition in ceph-disk, whih is the best I came u=
-p with.
->>>>> Basically it checks if the device name appears as /sys/block/*/$foo=
-=2E..
->>>
->>> For regular devices, you can access() /sys/dev/block/maj:min/partitio=
-n.
->>> If it's there, it's a partition - no need to iterate over /sys/block.=
+        req->r_num_caps = 1;
+-       if (flags & O_CREAT)
+-               parent_inode = ceph_get_dentry_parent_inode(file->f_path.dentry);
+        err = ceph_mdsc_do_request(mdsc, parent_inode, req);
+-       iput(parent_inode);
+        if (!err)
+                err = ceph_init_file(inode, file, req->r_fmode);
+        ceph_mdsc_put_request(req);
+--
+2.4.3
 
->>
->> I added http://tracker.ceph.com/issues/12706 for when someone has time=
- to rework that part of the code.
->>
->>>
->>>>
->>>> That is consistently updated for /dev/sdb or /dev/vdb but things are=
- different when using multipath. I'll rely on /sys/block/dm-?/dm/name ins=
-tead until a better solution is found.
->>>
->>> A better way might be to rely on the fact that a dm partition will
->>> necessarily have its uuid prefixed by "part".  In that case, it shoul=
-d
->>> be safe to assume that the thing in slaves is a whole disk - I think
->>> that's what various util-linux tools do.  However, IIRC the dm uuid i=
-s
->>> optional, so that won't work on a dm device without a uuid.
->>
->> It looks like multipath on both CentOS 7 and Ubuntu 14.04 set the uuid=
- in this way.
->>
->> Is it also safe to assume that if the uuid is:
->>
->> $ cat /sys/dev/block/253:?/dm/uuid
->> mpath-353333330000007d0
->> part1-mpath-353333330000007d0
->> part2-mpath-353333330000007d0
->>
->> it means these were created by multipath because of the mpath ? When a=
-sking dmsetup with:
->=20
-> Yes, I think so.  I'm pretty sure these "part<id>-" and "mpath-"
-> prefixes were devised for exactly this purpose.
->=20
-
-Excellent !
-
-> Thanks,
->=20
->                 Ilya
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---It4gP2dxqjproxFtrEhPkw8LhAXJR9E6g
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlXPuM4ACgkQ8dLMyEl6F20EKQCfed683EVgBNZQ+RVcHPi4eigk
-aUEAn21cvAcfNmxMnPisVouw83iVmvMi
-=9aSW
------END PGP SIGNATURE-----
-
---It4gP2dxqjproxFtrEhPkw8LhAXJR9E6g--
