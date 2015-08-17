@@ -1,63 +1,100 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: [PATCH] fs/ceph: No need get inode of parent in ceph_open.
-Date: Mon, 17 Aug 2015 17:51:44 +0800
-Message-ID: <E5A1FE0E-8303-4BD6-BDD5-F88B153768C6@redhat.com>
-References: <6AA21C22F0A5DA478922644AD2EC308C1D19FBFC@SHSMSX101.ccr.corp.intel.com>
-Mime-Version: 1.0 (Mac OS X Mail 8.2 \(2102\))
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Varada Kari <Varada.Kari@sandisk.com>
+Subject: Package issue in hammer branch on ubuntu
+Date: Mon, 17 Aug 2015 09:58:32 +0000
+Message-ID: <C226B0AB34511445928D9882AA519F601C46FF47@SACMBXIP03.sdcorp.global.sandisk.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:58063 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751673AbbHQJvv convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Aug 2015 05:51:51 -0400
-In-Reply-To: <6AA21C22F0A5DA478922644AD2EC308C1D19FBFC@SHSMSX101.ccr.corp.intel.com>
+Received: from mail-bl2on0066.outbound.protection.outlook.com ([65.55.169.66]:12458
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1754671AbbHQLag convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Aug 2015 07:30:36 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Ma, Jianpeng" <jianpeng.ma@intel.com>
-Cc: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-It seems all of your patches are malformed. please use 'git send-email=E2=
-=80=99 to send patch.
+Hi all,
 
-Regards
-Yan, Zheng
+When I tried to build and install the packages on hammer branch. Facing the issue mentioned below.
+
+$dpkg -i ceph-common_0.94.2-1_amd64.deb
+Selecting previously unselected package ceph-common.
+(Reading database ... 57855 files and directories currently installed.)
+Preparing to unpack .../ceph-common_0.94.2-1_amd64.deb ...
+Unpacking ceph-common (0.94.2-1) ...
+Setting up ceph-common (0.94.2-1) ...
+Processing triggers for ureadahead (0.100.0-16) ...
+Processing triggers for man-db (2.6.7.1-1ubuntu1) ...
+
+$dpkg -i ceph_0.94.2-1_amd64.deb
+Selecting previously unselected package ceph.
+(Reading database ... 57891 files and directories currently installed.)
+Preparing to unpack .../ceph//ceph_0.94.2-1_amd64.deb ...
+Unpacking ceph (0.94.2-1) ...
+ dpkg: dependency problems prevent configuration of ceph:
+  ceph depends on ceph-common (>= 0.94.2-2); however:
+Processing triggers for man-db (2.6.7.1-1ubuntu1) ...
+   Version of ceph-common on system is 0.94.2-1.
+  ceph-common (0.94.2-1) breaks ceph (<< 0.94.2-2) and is installed.
+   Version of ceph to be configured is 0.94.2-1.
+
+ dpkg: error processing package ceph (--install):
+ dependency problems - leaving unconfigured
+Processing triggers for ureadahead (0.100.0-16) ...
+ Errors were encountered while processing:
+  ceph
+ command returned non-zero exit status: 1
 
 
-> On Aug 17, 2015, at 16:43, Ma, Jianpeng <jianpeng.ma@intel.com> wrote=
-:
->=20
-> For ceph_open, it already get the parent inode. So no need to get aga=
-in.
->=20
-> Signed-off-by: Jianpeng Ma <jianpeng.ma@intel.com>
-> ---
-> fs/ceph/file.c | 3 ---
-> 1 file changed, 3 deletions(-)
->=20
-> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-> index 8b79d87..5ecd3dc 100644
-> --- a/fs/ceph/file.c
-> +++ b/fs/ceph/file.c
-> @@ -210,10 +210,7 @@ int ceph_open(struct inode *inode, struct file *=
-file)
->        ihold(inode);
->=20
->        req->r_num_caps =3D 1;
-> -       if (flags & O_CREAT)
-> -               parent_inode =3D ceph_get_dentry_parent_inode(file->f=
-_path.dentry);
->        err =3D ceph_mdsc_do_request(mdsc, parent_inode, req);
-> -       iput(parent_inode);
->        if (!err)
->                err =3D ceph_init_file(inode, file, req->r_fmode);
->        ceph_mdsc_put_request(req);
-> --
-> 2.4.3
->=20
+Seems in debian/control , ceph version is mentioned as 0.94.2-2 than 0.94.2-1. Change log files contains the build till 0.94.2-1. Made the following change, my installation went through.
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/debian/control b/debian/control
+index 246bebc..0f6ad2a 100644
+--- a/debian/control
++++ b/debian/control
+@@ -60,7 +60,7 @@ Standards-Version: 3.9.3
+ Package: ceph
+ Architecture: linux-any
+ Depends: binutils,
+-         ceph-common (>= 0.94.2-2),
++         ceph-common (>= 0.94.2-1),
+          cryptsetup-bin | cryptsetup,
+          gdisk,
+          parted,
+@@ -92,8 +92,8 @@ Architecture: linux-any
+ Section: debug
+ Priority: extra
+ Depends: ceph (= ${binary:Version}), ${misc:Depends}
+-Replaces: ceph-test-dbg (<< 0.94.2-2)
+-Breaks: ceph-test-dbg (<< 0.94.2-2)
++Replaces: ceph-test-dbg (<< 0.94.2-1)
++Breaks: ceph-test-dbg (<< 0.94.2-1)
+ Description: debugging symbols for ceph
+  Ceph is a distributed storage system designed to provide excellent
+  performance, reliability, and scalability.
+@@ -191,10 +191,10 @@ Depends: librbd1 (= ${binary:Version}), ${misc:Depends}, ${shlibs:Depends},
+         python-requests
+ Conflicts: ceph-client-tools
+ Replaces: ceph-client-tools,
+-         ceph (<< 0.94.2-2),
++         ceph (<< 0.94.2-1),
+          python-ceph (<< 0.92-1223),
+          librbd1 (<< 0.92-1238)
+-Breaks: ceph (<< 0.94.2-2),
++Breaks: ceph (<< 0.94.2-1),
+        python-ceph (<< 0.92-1223),
+        librbd1 (<< 0.92-1238)
+ Suggests: ceph, ceph-mds
+
+
+Not sure if that is the correct change, anyone facing same issue?
+
+Varada
+
+________________________________
+
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+
