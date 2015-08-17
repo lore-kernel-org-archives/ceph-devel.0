@@ -1,715 +1,270 @@
-From: ceph branch robot <nobody@ceph.com>
-Subject: ceph branch status
-Date: Mon, 17 Aug 2015 08:00:42 -0700 (PDT)
-Message-ID: <20150817150042.8698E282659@teuthology.front.sepia.ceph.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: rbd: default map options, new options, misc (Re: creating the issue
+ for the v0.94.4 release)
+Date: Mon, 17 Aug 2015 18:09:44 +0200
+Message-ID: <55D20748.9030809@dachary.org>
+References: <55CF14CB.1040900@dachary.org> <CAP3mxSyGkYz6vfbE4sNkV2K6iS4waBrptQ+Vnfprqc75Uc2CHg@mail.gmail.com> <55CF6607.8010808@dachary.org> <CAP3mxSyqMCicjzPGo119j5krgr74NnN1cp9D1mswdg=FLGqD_A@mail.gmail.com> <55CF9DD9.9020000@dachary.org> <1724454033.38265287.1439819503323.JavaMail.zimbra@oxygem.tv>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="cdQ4fLQoX9kCj2ijuQFmsBekkeCqMi2x6"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from gw.sepia.ceph.com ([64.90.32.62]:21863 "EHLO
-	teuthology.front.sepia.ceph.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1754345AbbHQPAp (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 17 Aug 2015 11:00:45 -0400
+Received: from mail2.dachary.org ([91.121.57.175]:39271 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1755341AbbHQQJq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Aug 2015 12:09:46 -0400
+In-Reply-To: <1724454033.38265287.1439819503323.JavaMail.zimbra@oxygem.tv>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-
--- All Branches --
-
-Abhishek Varshney <abhishek.varshney@debian-jessie-1>
-	2015-08-13 11:20:49 +0530   hammer-backports
-
-Adam Crume <adamcrume@gmail.com>
-	2014-12-01 20:45:58 -0800   wip-doc-rbd-replay
-
-Alfredo Deza <adeza@redhat.com>
-	2015-03-23 16:39:48 -0400   wip-11212
-	2015-03-25 10:10:43 -0400   wip-11065
-	2015-07-01 08:34:15 -0400   wip-12037
-
-Alfredo Deza <alfredo.deza@inktank.com>
-	2014-07-08 13:58:35 -0400   wip-8679
-	2014-09-04 13:58:14 -0400   wip-8366
-	2014-10-13 11:10:10 -0400   wip-9730
-
-Ali Maredia <amaredia@redhat.com>
-	2015-08-04 12:45:52 -0400   wip-cmake
-
-Boris Ranto <branto@redhat.com>
-	2015-04-13 13:51:32 +0200   wip-fix-ceph-dencoder-build
-	2015-04-14 13:51:49 +0200   wip-fix-ceph-dencoder-build-master
-	2015-06-23 15:29:45 +0200   wip-user-rebase
-	2015-07-10 12:34:33 +0200   wip-bash-completion
-	2015-07-15 18:21:11 +0200   wip-selinux-policy
-	2015-08-11 09:47:05 +0200   wip-selinux-radosgw
-	2015-08-12 15:17:19 +0200   wip-selinux-improve-update
-
-Chendi.Xue <chendi.xue@intel.com>
-	2015-06-16 14:39:42 +0800   wip-blkin
-
-Chi Xinze <xmdxcxz@gmail.com>
-	2015-05-15 21:47:44 +0000   XinzeChi-wip-ec-read
-
-Dan Mick <dan.mick@inktank.com>
-	2013-07-16 23:00:06 -0700   wip-5634
-
-Danny Al-Gaaf <danny.al-gaaf@bisect.de>
-	2015-04-23 16:32:00 +0200   wip-da-SCA-20150421
-	2015-04-23 17:18:57 +0200   wip-nosetests
-	2015-04-23 18:20:16 +0200   wip-unify-num_objects_degraded
-
-David Zafman <dzafman@redhat.com>
-	2014-08-29 10:41:23 -0700   wip-libcommon-rebase
-	2015-04-24 13:14:23 -0700   wip-cot-giant
-	2015-07-20 17:48:15 -0700   wip-12387
-	2015-07-23 17:02:58 -0700   wip-12437
-	2015-08-04 07:39:00 -0700   wip-12577-hammer
-	2015-08-13 12:34:18 -0700   wip-12000-12200
-	2015-08-13 13:25:41 -0700   wip-zafman-testing
-
-Dongmao Zhang <deanraccoon@gmail.com>
-	2014-11-14 19:14:34 +0800   thesues-master
-
-Greg Farnum <gfarnum@redhat.com>
-	2015-04-29 21:44:11 -0700   wip-init-names
-	2015-06-11 18:22:55 -0700   greg-fs-testing
-	2015-07-16 09:28:24 -0700   hammer-12297
-
-Greg Farnum <greg@inktank.com>
-	2014-10-23 13:33:44 -0700   wip-forward-scrub
-
-Gregory Meno <gmeno@redhat.com>
-	2015-02-25 17:30:33 -0800   wip-fix-typo-troubleshooting
-
-Guang G Yang <yguang@renownedground.corp.gq1.yahoo.com>
-	2015-06-26 20:31:44 +0000   wip-ec-readall
-	2015-07-23 16:13:19 +0000   wip-12316
-
-Guang Yang <yguang@yahoo-inc.com>
-	2014-08-08 10:41:12 +0000   wip-guangyy-pg-splitting
-	2014-09-25 00:47:46 +0000   wip-9008
-	2014-09-30 10:36:39 +0000   guangyy-wip-9614
-
-Haomai Wang <haomaiwang@gmail.com>
-	2014-07-27 13:37:49 +0800   wip-flush-set
-	2015-04-20 00:47:59 +0800   update-organization
-	2015-04-20 00:48:42 +0800   update-organization-1
-	2015-07-21 19:33:56 +0800   fio-objectstore
-
-Ilya Dryomov <ilya.dryomov@inktank.com>
-	2014-09-05 16:15:10 +0400   wip-rbd-notify-errors
-
-James Page <james.page@ubuntu.com>
-	2013-02-27 22:50:38 +0000   wip-debhelper-8
-
-Jason Dillaman <dillaman@redhat.com>
-	2015-06-10 12:02:16 -0400   wip-11770-hammer
-	2015-06-22 11:17:56 -0400   wip-12109-hammer
-	2015-07-17 14:17:04 -0400   wip-12384-hammer
-	2015-07-19 13:44:16 -0400   wip-12237-hammer
-	2015-07-24 09:59:56 -0400   wip-11769-firefly
-	2015-07-28 16:36:35 -0400   wip-12345-hammer
-	2015-07-29 13:29:54 -0400   wip-12235-hammer
-	2015-07-29 13:41:40 -0400   wip-12236-hammer
-	2015-07-30 11:39:22 -0400   wip-11286
-	2015-07-30 11:42:58 -0400   wip-11287
-	2015-07-31 13:55:23 -0400   wip-12383-next
-	2015-08-12 23:13:48 -0400   wip-12682-hammer
-
-Jenkins <jenkins@inktank.com>
-	2014-07-29 05:24:39 -0700   wip-nhm-hang
-	2015-02-02 10:35:28 -0800   wip-sam-v0.92
-	2015-07-14 13:10:32 -0700   last
-	2015-07-29 20:22:13 -0700   rhcs-v0.80.8
-	2015-08-13 06:50:20 -0700   rhcs-v0.94.1-ubuntu
-
-Joao Eduardo Luis <jeclui@gmail.com>
-	2014-09-10 09:39:23 +0100   wip-leveldb-get.dumpling
-
-Joao Eduardo Luis <joao.luis@gmail.com>
-	2014-07-22 15:41:42 +0100   wip-leveldb-misc
-
-Joao Eduardo Luis <joao.luis@inktank.com>
-	2014-09-02 17:19:52 +0100   wip-leveldb-get
-	2014-10-17 16:20:11 +0100   wip-paxos-fix
-	2014-10-21 21:32:46 +0100   wip-9675.dumpling
-	2015-07-27 21:56:42 +0100   wip-11470.hammer
-	2015-07-27 22:01:36 +0100   wip-11786.hammer
-
-Joao Eduardo Luis <joao@redhat.com>
-	2014-11-17 16:43:53 +0000   wip-mon-osdmap-cleanup
-	2014-12-15 16:18:56 +0000   wip-giant-mon-backports
-	2014-12-17 17:13:57 +0000   wip-mon-backports.firefly
-	2014-12-17 23:15:10 +0000   wip-mon-sync-fix.dumpling
-	2015-01-07 23:01:00 +0000   wip-mon-blackhole-mlog-0.87.7
-	2015-01-10 02:40:42 +0000   wip-dho-joao
-	2015-01-10 02:46:31 +0000   wip-mon-paxos-fix
-	2015-01-26 13:00:09 +0000   wip-mon-datahealth-fix
-	2015-02-04 22:36:14 +0000   wip-10643
-	2015-07-27 21:53:38 +0100   wip-11470.firefly
-	2015-07-27 22:04:27 +0100   wip-11786.firefly
-
-Joao Eduardo Luis <joao@suse.de>
-	2015-05-27 23:48:45 +0100   wip-mon-scrub
-	2015-05-29 12:21:43 +0100   wip-11545
-	2015-06-05 16:12:57 +0100   wip-10507
-	2015-06-16 14:34:11 +0100   wip-11470
-	2015-06-25 00:16:41 +0100   wip-10507-2
-	2015-07-14 16:52:35 +0100   wip-joao-testing
-	2015-07-27 21:17:31 +0100   wip-12325
-
-John Spray <jcspray@gmail.com>
-	2015-08-11 15:40:58 +0100   wip-mem
-
-John Spray <john.spray@redhat.com>
-	2015-04-06 17:25:02 +0100   wip-progress-events
-	2015-05-05 14:29:16 +0100   wip-live-query
-	2015-05-28 13:31:32 +0100   wip-9963
-	2015-05-29 13:59:03 +0100   wip-9964-intrapg
-	2015-05-29 14:19:16 +0100   wip-9964
-	2015-06-02 18:16:38 +0100   wip-11859
-	2015-06-02 18:16:38 +0100   wip-damage-table
-	2015-06-03 10:09:09 +0100   wip-11857
-	2015-06-10 23:50:49 +0100   wip-9964-nosharding
-	2015-08-10 16:41:00 +0100   wip-scrub-jcs
-	2015-08-11 15:57:35 +0100   wip-objclass-filters
-	2015-08-13 14:28:53 +0100   wip-scan-use-layout
-	2015-08-14 15:50:13 +0100   wip-9663-hashorder
-	2015-08-14 17:23:57 +0100   wip-newstore-sort-rebased
-
-John Wilkins <john.wilkins@inktank.com>
-	2013-07-31 18:00:50 -0700   wip-doc-rados-python-api
-	2014-07-03 07:31:14 -0700   wip-doc-rgw-federated
-	2014-11-03 14:04:33 -0800   wip-doc-openstack-juno
-
-John Wilkins <jowilki@redhat.com>
-	2014-09-15 11:10:35 -0700   wip-doc-preflight
-
-Josh Durgin <jdurgin@redhat.com>
-	2015-01-26 17:37:33 -0800   wip-10644
-	2015-02-26 15:00:26 -0800   wip-librbd-resize
-	2015-03-16 16:19:31 -0700   wip-lttng-daemon
-	2015-03-30 11:00:12 -0700   revert-4157-cleanup
-	2015-04-07 23:40:58 -0700   wip-2862
-	2015-06-17 10:00:16 -0700   giant
-	2015-08-09 22:08:23 -0700   wip-12383-next-librados
-
-Josh Durgin <josh.durgin@inktank.com>
-	2013-03-01 14:45:23 -0800   wip-rbd-workunit-debug
-	2013-07-25 18:44:10 -0700   wip-5488-2
-	2013-08-14 15:51:04 -0700   wip-5970
-	2013-08-27 12:03:08 -0700   wip-krbd-workunits
-	2013-11-22 15:17:08 -0800   wip-zero-copy-bufferlist
-	2013-11-25 13:59:29 -0800   wip-init-highlander
-	2013-12-17 08:16:59 -0800   wip-rbd-deadlock-lockdep
-	2013-12-18 12:28:39 -0800   wip-rbd-deadlock-lockdep-dumpling
-	2013-12-26 18:06:39 -0800   emperor-5426
-	2013-12-26 18:07:13 -0800   dumpling-5426
-	2014-02-06 20:31:43 -0800   wip-librados-obj-ops
-	2014-02-06 20:31:47 -0800   wip-librados-op-rvals
-	2014-03-03 14:27:39 -0800   wip-object-cacher-memory
-	2014-04-08 15:13:44 -0700   wip-6480-0.67.7
-	2014-04-27 14:13:07 -0700   wip-rbd-header-dump
-	2014-06-06 15:40:12 -0700   wip-libradosstriper
-	2014-09-17 12:23:17 -0700   wip-9997-tmp
-	2014-10-20 13:51:19 -0700   wip-9806
-	2014-10-23 13:57:27 -0700   wip-9806-giant
-
-Jo=C3=A3o Eduardo Lu=C3=ADs <joao.luis@inktank.com>
-	2014-10-26 18:58:50 +0000   wip-giant-old-sam
-
-Kefu Chai <kchai@redhat.com>
-	2015-08-17 19:05:39 +0800   wip-kefu-t3sting
-	2015-08-17 20:16:03 +0800   port/new
-	2015-08-17 21:20:19 +0800   wip-kefu-testing
-
-Ken Dreyer <kdreyer@redhat.com>
-	2014-12-16 13:39:20 -0700   wip-5900
-	2015-02-27 12:10:43 -0700   wip-rpm-license-files
-	2015-03-09 14:19:51 -0600   wip-doc-rgw-socket-perms
-	2015-04-30 16:12:32 -0600   wip-11388-hammer-debian-argparse
-	2015-05-12 11:16:49 -0600   wip-hammer-11535-admin-socket
-	2015-05-19 19:56:13 -0600   wip-11686-rgw-init-hammer
-	2015-06-08 12:35:16 -0600   wip-master-specfile-cleanup3
-	2015-06-23 11:36:06 -0600   wip_ceph_spec_sharutils
-	2015-06-29 13:12:08 -0600   wip-11680-rhcs-v0.94.1-ubuntu
-	2015-07-09 10:36:07 -0600   wip-12166
-	2015-07-10 16:52:53 -0600   wip-10587-split-servers
-	2015-07-13 12:23:51 -0600   wip-12315-libs-compat-conditional
-	2015-07-13 15:24:25 -0600   wip-spec-tidying
-
-Krzysztof Kosi=C5=84ski <krzysztof.kosinski@intel.com>
-	2015-07-15 14:44:42 +0200   wip-5238
-
-Li Wang <liwang@ubuntukylin.com>
-	2014-12-01 09:01:55 +0800   wip-quota
-
-Loic Dachary <ldachary@redhat.com>
-	2015-02-04 08:40:57 +0100   wip-sam-hammer
-	2015-03-23 17:44:12 +0100   dumpling
-	2015-07-24 10:00:08 +0200   remove-me-firefly
-	2015-08-06 17:54:55 +0200   wip-10887-shec
-
-Loic Dachary <loic@dachary.org>
-	2015-08-04 13:02:17 +0200   hammer
-
-Matt Benjamin <mbenjamin@redhat.com>
-	2015-08-11 12:25:26 -0400   wip-xio
-
-Nathan Cutler <ncutler@suse.com>
-	2015-08-10 20:18:03 +0200   firefly-backports
-
-Nathan Cutler <presnypreklad@gmail.com>
-	2015-07-16 08:52:32 +0000   wip-pr-5203
-	2015-08-12 09:43:19 +0200   firefly
-
-Noah Watkins <noah.watkins@inktank.com>
-	2013-11-06 08:39:57 -0800   wip-6636
-	2014-02-05 14:23:59 -0800   port/main
-	2015-07-22 09:37:11 -0700   cls-lua
-	2015-08-16 16:15:34 -0600   wip-jni-loader
-
-Orit Wasserman <owasserm@redhat.com>
-	2015-06-05 18:21:12 +0200   nfs
-
-Owen Synge <osynge@googlemail.com>
-	2015-05-27 08:28:53 +0000   wip-git_ignore_systemd_autotools_template_=
-systemd_ceph_osd
-	2015-06-15 15:23:51 +0000   wip-4898
-
-PierreChaumont <pierre.chaumont31@gmail.com>
-	2015-06-27 14:03:03 +0000   PierreChaumont-master
-
-Roald van Loon <roald@roaldvanloon.nl>
-	2012-12-24 22:26:56 +0000   wip-dout
-
-Sage Weil <sage@inktank.com>
-	2012-11-30 13:47:27 -0800   wip-osd-readhole
-	2013-01-29 13:46:02 -0800   wip-readdir
-	2013-04-18 13:51:36 -0700   argonaut
-	2013-09-19 12:08:45 -0700   wip-neon-crc32c
-	2013-12-07 16:04:15 -0800   wip-journaler-kludge
-	2014-01-06 22:13:09 -0800   wip-librados
-	2014-03-05 15:14:26 -0800   wip-6101
-	2014-03-16 09:50:31 -0700   wip-dumpling-sloppy-log
-	2014-03-24 17:22:52 -0700   wip-7779
-	2014-04-01 13:07:57 -0700   wip-rest-api-init
-	2014-04-02 08:49:33 -0700   wip-ms-dump
-	2014-04-08 12:48:49 -0700   wip-debug-pgrefs
-	2014-04-10 07:04:17 -0700   wip-fuse-reconnect
-	2014-04-19 21:13:23 -0700   wip-f2fs
-	2014-06-12 09:39:04 -0700   wip-addr
-	2014-07-01 17:15:03 -0700   wip-7995
-	2014-07-03 15:06:53 -0700   wip-poll-timeout
-
-Sage Weil <sage@redhat.com>
-	2014-06-18 21:34:57 -0700   wip-disk-ioprio-dumpling
-	2014-06-18 21:34:57 -0700   wip-scrub-sleep-dumpling
-	2014-06-30 17:54:58 -0700   wip-osd-map-cache-size
-	2014-07-15 09:36:32 -0700   wip-journal-sync
-	2014-07-16 18:04:07 -0700   wip-8632-dumpling
-	2014-07-19 15:20:05 -0700   wip-transaction
-	2014-08-05 11:03:08 -0700   wip-firefly-isa
-	2014-08-06 10:55:24 -0700   wip-libcommon
-	2014-08-06 17:04:02 -0700   wip-dumpling-rados-xattr
-	2014-08-10 13:15:07 -0700   wip-8935
-	2014-08-11 16:00:20 -0700   wip-firefly-dmcrypt
-	2014-08-12 17:28:59 -0700   wip-firefly-dmcrypt-2
-	2014-08-12 20:48:54 -0700   wip-9073
-	2014-08-13 09:13:34 -0700   wip-9082-firefly
-	2014-08-15 09:33:40 -0700   wip-swat30
-	2014-08-15 14:29:11 -0700   wip-osd-mon-feature
-	2014-08-18 17:41:04 -0700   wip-snaps-firefly
-	2014-08-18 21:00:56 -0700   wip-snaps-dumpling
-	2014-08-26 16:57:27 -0700   wip-8639-a
-	2014-08-29 16:54:37 -0700   wip-9193
-	2014-08-31 17:46:33 -0700   wip-9309
-	2014-09-09 16:16:59 -0700   wip-9295
-	2014-09-12 18:11:42 -0700   wip-pidfile
-	2014-09-13 22:31:06 -0700   wip-9462
-	2014-09-16 21:36:15 -0700   wip-udev-el7
-	2014-09-21 19:16:02 -0700   wip-9487-dumpling-forcehack
-	2014-09-25 13:16:52 -0700   wip-9582-dumpling
-	2014-09-25 16:30:22 -0700   wip-noserver
-	2014-10-06 17:49:12 -0700   wip-9128
-	2014-10-07 10:15:27 -0700   wip-noserver-firefly
-	2014-10-10 16:48:14 -0700   wip-9706
-	2014-10-22 11:36:07 -0700   wip-librbd-fio-giant
-	2014-10-23 16:57:52 -0700   wip-promote-forward
-	2014-10-24 11:22:04 -0700   wip-osdc
-	2014-12-01 18:15:59 -0800   wip-10209
-	2014-12-02 11:03:44 -0800   wip-crush-straw-dumpling
-	2014-12-06 10:18:12 -0800   wip-10171
-	2014-12-06 11:49:06 -0800   wip-9485
-	2014-12-06 11:49:55 -0800   wip-9485-firefly
-	2014-12-07 08:56:03 -0800   wip-read-hole
-	2014-12-08 16:21:24 -0800   wip-9998
-	2014-12-09 13:32:00 -0800   wip-opcontext
-	2014-12-09 16:09:26 -0800   wip-crush-straw
-	2014-12-18 06:24:49 -0800   wip-osdmap-leak
-	2014-12-22 17:15:51 -0800   wip-10422-firefly
-	2014-12-23 15:49:49 -0800   wip-10372-firefly
-	2014-12-29 14:46:20 -0800   wip-sage-testing-firefly
-	2014-12-30 12:27:45 -0800   wip-10441
-	2015-01-09 11:01:18 -0800   wip-dho-sage
-	2015-01-12 08:30:40 -0800   emperor
-	2015-01-13 08:32:45 -0800   wip-formatter
-	2015-01-14 16:41:45 -0800   wip-10477
-	2015-01-19 18:15:12 -0800   wip-dho-old
-	2015-01-22 09:46:15 -0800   wip-osd-prestart
-	2015-01-23 16:08:33 -0800   wip-10617
-	2015-01-27 18:45:25 -0800   wip-10458
-	2015-01-29 12:58:00 -0800   wip-mds-types
-	2015-02-02 02:46:10 -0800   wip-assert-version
-	2015-02-02 14:53:17 -0800   wip-crush-linear
-	2015-02-13 08:32:00 -0800   wip-crush-straw-firefly
-	2015-02-18 14:53:21 -0800   wip-ms-dump-on-send-giant
-	2015-02-23 13:32:23 -0800   wip-crushtool
-	2015-02-27 08:15:53 -0800   wip-build
-	2015-03-10 08:17:23 -0700   wip-add-cache
-	2015-03-16 09:32:22 -0700   wip-mon-doc
-	2015-03-16 09:43:59 -0700   wip-whiteout
-	2015-03-16 16:25:46 -0700   wip-7737-firefly
-	2015-03-19 17:39:02 -0700   wip-10759
-	2015-04-05 17:25:05 -0700   wip-9580
-	2015-04-06 13:50:03 -0700   wip-hammer
-	2015-04-07 11:42:14 -0700   wip-digest-repair
-	2015-04-09 13:30:48 -0700   wip-crush-straw2-div0-hammer
-	2015-04-11 08:48:06 -0700   wip-plugin
-	2015-04-16 10:14:23 -0700   wip-newss
-	2015-04-28 14:51:16 -0700   wip-11493-b
-	2015-04-28 15:19:37 -0700   wip-11464
-	2015-04-28 17:31:31 -0700   wip-civetweb-openssl
-	2015-05-01 09:00:26 -0700   wip-hammer-snaps
-	2015-05-06 14:41:51 -0700   wip-fpie
-	2015-05-14 09:20:33 -0700   wip-11604-hammer
-	2015-05-14 15:32:41 -0400   wip-11622
-	2015-06-02 01:05:53 -0400   wip-newstore-debuglist
-	2015-06-03 21:02:30 -0400   wip-10873-firefly
-	2015-06-05 08:56:30 -0700   wip-rgw-civetweb-port
-	2015-06-06 00:05:26 -0400   wip-temp-base
-	2015-06-09 17:15:31 -0400   wip-promote-prob
-	2015-06-16 13:38:27 -0700   wip-chain-xattr-hammer
-	2015-06-17 11:35:18 -0700   wip-12064
-	2015-06-18 16:43:06 -0700   wip-user-old
-	2015-07-08 15:47:20 -0400   wip-mdscap-debug
-	2015-07-22 11:38:02 -0400   hamemr
-	2015-07-27 09:01:31 -0400   wip-12465-hammer
-	2015-07-27 09:35:48 -0400   wip-12465-firefly
-	2015-07-31 08:48:52 -0400   wip-12551
-	2015-07-31 08:51:02 -0400   wip-12551-hammer
-	2015-08-03 11:53:09 -0400   wip-12536
-	2015-08-04 13:21:50 -0400   wip-osd-compat-hammer
-	2015-08-09 10:46:57 -0400   wip-12652
-	2015-08-10 09:56:16 -0400   wip-filestore-handle
-	2015-08-10 14:48:22 -0400   wip-perf
-	2015-08-11 16:16:55 -0400   wip-nocmtime
-	2015-08-11 21:38:37 -0400   wip-corpus-hammer
-	2015-08-12 10:34:33 -0400   wip-debian-systemd
-	2015-08-12 14:19:08 -0400   wip-mdscap-test
-	2015-08-12 16:54:55 -0400   wip-user
-	2015-08-13 12:53:06 -0400   wip-osd-compat
-	2015-08-13 15:59:46 -0400   wip-buffer-alloc
-	2015-08-15 15:22:27 -0400   wip-memstore
-	2015-08-15 15:30:44 -0400   wip-newstore
-	2015-08-17 09:31:24 -0400   wip-sage-testing
-	2015-08-17 10:09:37 -0400   wip-mdscap
-	2015-08-17 10:30:32 -0400   wip-newstore-sort
-
-Samuel Just <sam.just@inktank.com>
-	2013-08-19 00:04:13 -0700   wip-dumpling-pglog-undirty
-	2013-08-26 23:19:47 -0700   wip-dumpling-log-assert
-	2014-03-26 13:29:33 -0700   wip-6910-72.2
-	2014-05-01 12:14:49 -0700   wip-dumpling-scrub
-	2014-06-19 07:50:25 -0700   wip-dumpling-scrub-67.9
-	2014-07-09 11:50:20 -0700   wip-dumpling-scrub-snaptrimmer-67.9
-	2014-07-31 15:51:55 -0700   wip-8977
-	2014-09-21 10:04:30 -0700   wip-sam-testing-firefly
-	2014-10-01 11:11:30 -0700   wip-log-crash-firefly-wip-9574
-	2014-10-10 13:57:49 -0700   wip-9731-firefly
-	2014-10-10 13:59:52 -0700   wip-9696-firefly
-	2014-10-10 14:00:13 -0700   wip-firefly-9696-9731
-	2014-10-23 15:26:17 -0700   wip-9876-67.9
-	2014-11-03 13:00:59 -0800   wip-ceph_filestore_dump-v0.80.5
-	2014-11-03 13:58:47 -0800   wip-v0.80.7-9626
-	2014-11-03 18:42:51 -0800   wip-firefly-dmcrypt-2-filestore_dump-snaps
-	2014-11-04 17:39:02 -0800   wip-firefly-dmcrypt-2-filestore_dump-snaps=
--scrub
-	2014-11-04 18:02:09 -0800   wip-firefly-dmcrypt-2-filestore_dump
-
-Samuel Just <sjust@redhat.com>
-	2014-11-11 13:28:31 -0800   wip-last_epoch_started
-	2014-11-21 14:58:47 -0800   wip-sam-dumpling-testing
-	2014-12-04 09:52:03 -0800   wip-sam-giant-testing
-	2014-12-04 09:52:46 -0800   wip-sam-firefly-testing
-	2014-12-18 11:00:10 -0800   wip-aio-fsync
-	2015-02-04 11:20:04 -0800   wip-10734
-	2015-02-10 16:46:17 -0800   wip-sam-testing-10847
-	2015-02-12 15:56:59 -0800   wip-sam-testing-10883
-	2015-03-16 07:48:20 -0700   wip-11110
-	2015-03-17 16:34:29 -0700   wip-v0.80.7-last_epoch_started
-	2015-03-19 15:24:16 -0700   wip-fix-assert
-	2015-03-20 16:25:59 -0700   wip-parallel-fsync
-	2015-03-26 10:50:19 -0700   wip-move-code
-	2015-03-27 15:44:30 -0700   wip-sam-testing-old
-	2015-05-01 06:38:12 -0700   wip-11429
-	2015-05-11 10:42:26 -0700   wip-txn-noappend-sam-rebased
-	2015-05-14 15:10:08 -0700   wip-sam-working2
-	2015-05-15 13:20:00 -0700   wip-11493
-	2015-05-21 17:00:27 -0700   wip-1677-reproduce
-	2015-07-07 11:07:46 -0700   wip-12021-firefly
-	2015-07-07 11:45:05 -0700   wip-12021-master
-	2015-07-21 11:35:29 -0700   wip-12338-hammer
-	2015-07-24 15:38:20 -0700   wip-12465
-	2015-07-29 13:22:36 -0700   wip-12410
-	2015-07-29 13:23:44 -0700   wip-12410-hammer
-	2015-08-05 11:18:40 -0700   wip-12536-hammer
-	2015-08-05 15:05:38 -0700   wip-sam-working
-	2015-08-07 09:01:52 -0700   wip-sam-testing
-
-Sandon Van Ness <sandon@inktank.com>
-	2014-08-08 18:45:52 -0700   wip-specfile-orig
-
-Takeshi Miyamae <miyamae.takeshi@jp.fujitsu.com>
-	2015-06-30 21:15:44 +0000   wip-mshec-fixlogic2
-	2015-07-28 20:26:34 +0000   t-miyamae-wip-mshec-fixlogic4
-
-Warren Usui <warren.usui@inktank.com>
-	2014-09-10 16:04:49 -0700   wip-9425-wusui
-
-Wido den Hollander <wido@42on.com>
-	2014-12-10 10:56:09 +0100   wip-10029
-
-Xinze Chi <xmdxcxz@gmail.com>
-	2015-06-08 16:54:08 +0800   wip-xinze-ec-block
-
-Yan, Zheng <zheng.z.yan@intel.com>
-	2015-07-29 23:12:39 +0800   hammer-12088
-
-Yan, Zheng <zyan@redhat.com>
-	2015-01-26 14:58:30 +0800   wip-mds-shared-ptr
-	2015-06-25 09:51:25 +0800   wip-11783
-	2015-08-05 21:51:09 +0800   wip-12598
-	2015-08-10 16:01:01 +0800   wip-12653
-	2015-08-14 16:46:10 +0800   wip-12676
-	2015-08-17 14:42:09 +0800   hammer-12709
-
-Yehuda Sadeh <yehuda@inktank.com>
-	2012-11-16 11:09:34 -0800   wip-mongoose
-	2012-12-13 18:09:37 -0800   wip-2169
-	2013-02-12 09:40:12 -0800   wip-json-decode
-	2013-02-22 15:04:37 -0800   wip-4247
-	2013-02-22 16:19:37 -0800   wip-rgw-zone
-	2013-02-26 18:01:46 -0800   wip-cls-version
-	2013-02-28 09:56:43 -0800   wip-librados-exec
-	2013-03-07 09:46:49 -0800   wip-4363
-	2013-03-07 09:47:56 -0800   wip-4363-next
-	2013-03-07 11:38:06 -0800   wip-4247-bobtail
-	2013-03-12 12:56:01 -0700   wip-4425
-	2013-03-13 10:13:29 -0700   wip-4425-next
-	2013-03-22 11:01:02 -0700   wip-rgw-zone-2
-	2013-03-22 11:29:49 -0700   wip-rgw-zone-3
-	2013-04-15 12:32:48 -0700   wip-rgw-bucketlog
-	2013-04-22 13:01:20 -0700   wip-4776-bobtail
-	2013-04-23 09:26:33 -0700   wip-4755
-	2013-04-26 09:41:39 -0700   wip-4760
-	2013-05-02 22:08:37 -0700   wip-4716
-	2013-05-06 14:41:10 -0700   wip-rgw-bucketlog-2
-	2013-05-07 14:03:04 -0700   wip-4600-bobtail
-	2013-05-07 14:03:37 -0700   wip-4600-argonaut
-	2013-05-16 09:08:46 -0700   wip-5073-2
-	2013-05-22 21:34:52 -0700   wip-5152
-	2013-05-30 09:34:21 -0700   wip-5204
-	2013-05-30 13:04:27 -0700   wip-5209
-	2013-06-14 14:53:54 -0700   wip-5362
-	2013-06-26 11:36:59 -0700   wip-5455
-	2013-06-29 00:25:32 -0700   wip-rgw-geo-2-replicalog2
-	2013-06-29 21:04:39 -0700   wip-rgw-geo-3
-	2013-07-08 18:55:19 -0700   rgw-next-libcurl
-	2013-07-22 14:46:30 -0700   wip-5664
-	2013-07-29 10:52:22 -0700   wip-5789
-	2013-07-29 10:54:02 -0700   wip-5793
-	2013-07-29 10:58:30 -0700   wip-5770
-	2013-07-30 13:53:53 -0700   wip-5808
-	2013-08-01 13:20:19 -0700   wip-5831
-	2013-08-01 18:23:49 -0700   wip-5810
-	2013-08-05 11:38:27 -0700   wip-5875
-	2013-08-15 11:00:05 -0700   wip-5978
-	2013-08-16 18:19:02 -0700   wip-rgw-papercuts
-	2013-08-19 16:56:27 -0700   wip-6056
-	2013-08-25 17:57:23 -0700   wip-5374
-	2013-09-04 16:03:22 -0700   wip-6078-dumpling
-	2013-09-10 12:18:55 -0700   wip-6268-bobtail
-	2013-09-10 14:18:46 -0700   wip-6268
-	2013-09-11 13:46:31 -0700   wip-6175
-	2013-09-11 22:30:12 -0700   wip-6286
-	2013-09-12 10:22:08 -0700   wip-6286-dumpling
-	2013-09-12 14:32:17 -0700   wip-6294
-	2013-09-13 14:43:54 -0700   wip-6302
-	2013-09-16 16:05:55 -0700   wip-6176
-	2013-09-18 10:37:21 -0700   wip-6340
-	2013-09-20 14:04:47 -0700   wip-6360
-	2013-10-03 11:49:33 -0700   wip-6444
-	2013-10-04 13:00:26 -0700   wip-6462
-	2013-10-07 09:45:20 -0700   wip-rgw-write
-	2013-10-17 21:29:34 -0700   wip-apache-mod
-	2013-10-18 10:36:01 -0700   wip-3896
-	2013-10-25 17:16:34 -0700   wip-mongoose-test
-	2013-10-30 10:31:11 -0700   wip-rgw-nxweb
-	2013-10-31 14:40:23 -0700   wip-bobtail-admin
-	2013-10-31 14:45:45 -0700   wip-5170
-	2013-11-04 19:02:35 -0800   wip-rgw-standalone
-	2013-11-07 09:14:27 -0800   wip-6678
-	2013-11-08 16:26:23 -0800   wip-6744
-	2013-12-02 21:37:13 -0800   wip-6919
-	2013-12-07 21:13:19 -0800   wip-objecter-lock
-	2013-12-10 11:33:29 -0800   wip-mongoose-2
-	2013-12-13 11:01:49 -0800   wip-messenger-prefetch
-	2013-12-17 23:24:27 -0800   wip-rgw-getobj-cb
-	2013-12-18 10:34:12 -0800   wip-7030
-	2013-12-18 12:57:40 -0800   wip-queueing3
-	2013-12-18 13:02:52 -0800   wip-queueing3-rgw
-	2014-01-06 18:32:42 -0800   wip-7110-dumpling
-	2014-01-09 18:22:46 -0800   wip-queuing3-loadgen
-	2014-01-15 13:06:31 -0800   wip-rgw-civetweb
-	2014-01-15 14:35:57 -0800   wip-user-quota
-	2014-01-22 17:10:32 -0800   wip-7169
-	2014-01-23 13:48:28 -0800   wip-7169-dumpling
-	2014-01-28 09:38:19 -0800   bobtail
-	2014-01-28 09:40:18 -0800   cuttlefish
-	2014-01-28 13:42:37 -0800   wip-6678-dumpling
-	2014-02-05 21:51:11 -0800   wip-rgw-manifest
-	2014-02-20 09:01:21 -0800   wip-7453
-	2014-02-20 09:25:04 -0800   multi-object-delete
-	2014-02-21 10:43:37 -0800   wip-messenger-prefetch2
-	2014-02-21 19:50:36 -0800   wip-rgw-server-changes
-	2014-02-26 14:00:01 -0800   wip-objecter-locking
-	2014-02-27 13:07:55 -0800   wip-rwmap
-	2014-03-03 17:07:03 -0800   wip-7589
-	2014-03-07 17:15:39 -0800   wip-objecter-session-ops
-	2014-03-21 11:21:18 -0700   wip-rgw-fail
-	2014-03-21 15:09:26 -0700   wip-7774
-	2014-03-25 14:08:01 -0700   wip-rgw-less-alloc
-	2014-04-03 13:44:52 -0700   wip-7774-2
-	2014-04-03 13:46:16 -0700   wip-rgw-less-alloc-2
-	2014-04-03 13:46:45 -0700   wip-7767-2
-	2014-04-10 11:24:34 -0700   wip-5170-dumpling
-	2014-04-10 13:10:36 -0700   wip-5170-dumpling-2
-	2014-04-17 16:38:32 -0700   wip-objecter-session-ops-4
-	2014-04-29 15:50:59 -0700   wip-objecter-session-ops-sage
-	2014-04-29 15:50:59 -0700   wip-objecter-session-ops-sage-old
-	2014-05-06 11:06:29 -0700   wip-8289-dumpling
-	2014-05-22 18:27:58 -0700   wip-8428-firefly
-	2014-05-28 14:19:40 -0700   wip-8170-dumpling
-	2014-05-29 07:53:15 -0700   wip-8436
-	2014-06-04 13:25:23 -0700   wip-objecter-yehuda
-	2014-06-05 11:09:12 -0700   wip-7767-3
-	2014-07-14 10:50:48 -0700   wip-firefly-8698
-	2014-07-16 16:39:36 -0700   wip-8632
-	2014-07-18 13:31:30 -0700   wip-8702
-
-Yehuda Sadeh <yehuda@redhat.com>
-	2014-07-25 13:53:26 -0700   wip-rgw-align-firefly
-	2014-07-25 20:38:44 -0700   wip-8937
-	2014-08-11 11:40:40 -0700   wip-8539
-	2014-08-12 18:30:03 -0700   wip-5170-dumpling-3
-	2014-08-14 11:30:31 -0700   wip-8784
-	2014-08-22 10:05:53 -0700   wip-civetweb-log
-	2014-08-22 10:07:56 -0700   wip-9201
-	2014-08-22 18:35:44 -0700   wip-9208
-	2014-10-09 10:20:27 -0700   wip-7796-firefly
-	2014-10-24 11:43:14 -0700   wip-rgw-explicit-reason
-	2014-11-10 23:37:34 -0800   wip-rgw-scrub-dumpling
-	2014-11-21 10:15:36 -0800   wip-watch-notify-rgw
-	2014-11-26 15:18:07 -0800   wip-proxy-fcgi-simple
-	2014-12-03 09:55:10 -0800   wip-firefly-9089
-	2014-12-09 09:58:57 -0800   wip-proxy-fcgi
-	2014-12-09 13:08:58 -0800   wip-crush-straw2-ln
-	2014-12-11 17:32:22 -0800   wip-rgw-versioning
-	2014-12-12 05:25:30 -0800   wip-10271
-	2014-12-12 08:56:05 -0800   wip-10271-firefly
-	2015-01-08 10:28:05 -0800   wip-bi-sharding
-	2015-01-08 11:46:15 -0800   wip-10482-firefly
-	2015-01-08 13:34:49 -0800   wip-bi-sharding-2
-	2015-01-15 16:31:22 -0800   wip-10553-firefly
-	2015-01-16 09:12:54 -0800   wip-bi-sharding-3
-	2015-01-21 16:43:31 -0800   wip-rgw-versioning-3
-	2015-01-29 16:24:33 -0800   wip-rgw-versioning-4
-	2015-01-30 15:50:18 -0800   wip-10482
-	2015-01-30 18:42:40 -0800   wip-10106
-	2015-02-05 15:37:43 -0800   wip-rgw-reason-dumpling
-	2015-02-10 17:21:39 -0800   wip-5073-3
-	2015-02-13 16:39:53 -0800   wip-10849
-	2015-02-18 08:54:23 -0800   wip-firefly-rgw-backports
-	2015-02-27 14:10:39 -0800   wip-dho-10965
-	2015-02-27 16:22:30 -0800   wip-rgw-owner
-	2015-02-27 17:13:21 -0800   wip-dho-owner
-	2015-02-27 17:14:17 -0800   wip-rgw-owner-firefly
-	2015-03-02 10:40:01 -0800   wip-10662
-	2015-03-02 19:04:53 -0800   wip-dho
-	2015-03-03 11:03:35 -0800   wip-rgw-keystone-expire
-	2015-03-11 11:53:36 -0700   wip-11084
-	2015-03-19 12:44:45 -0700   wip-11125-firefly
-	2015-03-26 21:25:54 -0700   wip-static-website
-	2015-03-27 10:00:24 -0700   wip-rgw-mark
-	2015-03-30 17:34:57 -0700   wip-11256-firefly
-	2015-04-13 16:33:17 -0700   wip-11256
-	2015-04-16 11:05:17 -0700   wip-11149-firefly
-	2015-04-16 15:54:34 -0700   wip-11416
-	2015-04-21 11:08:45 -0700   wip-10243
-	2015-04-24 14:45:40 -0700   wip-rgw-content-length
-	2015-05-06 16:03:46 -0700   wip-hammer-replicalog
-	2015-05-13 13:22:42 -0700   wip-11613-hammer
-	2015-05-15 11:11:09 -0700   wip-11622-firefly
-	2015-05-15 11:37:17 -0700   wip-11622-hammer
-	2015-05-21 10:19:21 -0700   wip-rgw-handles
-	2015-05-21 15:08:12 -0700   wip-rgw-orphans
-	2015-06-12 09:16:17 -0700   wip-rgw-noperiod
-	2015-06-17 11:46:15 -0700   wip-11563
-	2015-06-17 15:11:28 -0700   wip-11974-hammer
-	2015-06-17 15:33:50 -0700   wip-11974
-	2015-06-25 14:35:14 -0700   wip-11851
-	2015-06-25 16:40:31 -0700   wip-11851-firefly
-	2015-06-26 13:49:55 -0700   wip-11984
-	2015-06-26 17:01:54 -0700   wip-12079-hammer
-	2015-06-29 15:35:04 -0700   wip-rgw-orphans-2
-	2015-07-06 11:09:28 -0700   wip-12079
-	2015-07-20 20:41:19 -0700   wip-7647
-	2015-07-23 23:06:28 -0700   wip-rgw-metaheap
-	2015-08-06 09:11:41 -0700   wip-12432-hammer
-	2015-08-13 11:08:56 -0700   wip-12370
-	2015-08-14 17:49:18 -0700   wip-rgw-metaheap-2
-
-Yuan Zhou <yuan.zhou@intel.com>
-	2015-01-28 14:23:12 +0800   zhouyuan-submodule_https_git
-	2015-03-30 13:39:31 +0800   zhouyuan/isal_2.13
-	2015-08-12 09:09:07 +0800   wip-5072
-	2015-08-17 13:35:50 +0800   wip-intel-testing
-
-Zhiqiang Wang <zhiqiang.wang@intel.com>
-	2015-06-18 09:07:42 +0800   wip-proxy-write
-	2015-06-18 16:50:08 +0800   wip-cache-pin
-
-markhpc <mark.nelson@inktank.com>
-	2013-11-06 09:23:22 -0600   wip-v0.70-mark
-	2014-03-17 14:50:57 -0500   wip-pq-mark
-	2014-07-29 18:53:37 -0500   wip-rocksdb-mark
-
-scuttlemonkey <patrick@inktank.com>
-	2013-12-13 13:37:30 -0800   wip-doc-quick-start
-
-smbillah <syed.masum.billah@gmail.com>
-	2015-08-13 11:42:22 -0400   wip-dmclock
-
-xinxin shu <xinxin.shu@intel.com>
-	2015-06-03 09:04:52 +0800   wip-lmdb
-
-
-
-Grouped by committer, ordered by commit time stamp.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+To: Josh Durgin <jdurgin@redhat.com>
+Cc: Alexandre DERUMIER <aderumier@odiso.com>, ceph-devel <ceph-devel@vger.kernel.org>
+
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--cdQ4fLQoX9kCj2ijuQFmsBekkeCqMi2x6
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+Hi Josh,
+
+Do you think it would make sense to backport https://github.com/ceph/ceph=
+/pull/3979 to hammer ?
+
+Cheers
+
+On 17/08/2015 15:51, Alexandre DERUMIER wrote:
+> Hi Loic,
+>=20
+> I wonder if we could backport
+>=20
+> https://github.com/ceph/ceph/pull/3979
+>=20
+> to hammer.
+>=20
+> It's mainly to add support to last kernels to cephx_require_signature a=
+nd tcp_nodelay mount options.
+>=20
+>=20
+> For example since kernel 3.19, cephx_require_signatures is the default,=
+=20
+> and they are no way to mount a rbd device without cephx_require_signatu=
+re, with current hammer "rbd map ..."
+>=20
+> Regards,
+>=20
+> alexandre
+>=20
+>=20
+> ----- Mail original -----
+> De: "Loic Dachary" <loic@dachary.org>
+> =C3=80: "Abhishek Varshney" <abhishek.varshney@flipkart.com>
+> Cc: "ceph-devel" <ceph-devel@vger.kernel.org>
+> Envoy=C3=A9: Samedi 15 Ao=C3=BBt 2015 22:15:21
+> Objet: Re: creating the issue for the v0.94.4 release
+>=20
+> Hi,=20
+>=20
+> On 15/08/2015 19:54, Abhishek Varshney wrote:=20
+>> Done ! Let me know if it is fine.=20
+>=20
+> Perfect ! I have run the commands for you and the corresponding suite c=
+an be seen at http://pulpito.ceph.com/. We usually add a link to each h4.=
+ with something like:=20
+>=20
+> * *running* http://pulpito.ceph.com/loic-2015-08-15_22:00:55-rados-hamm=
+er-backports---basic-multi=20
+>=20
+> etc. I expect teuthology will do something similar eventually but right=
+ now we have to do that manually.=20
+>=20
+> As much as I like to be your command line proxy, things will be easier =
+if you can run those yourself in the future ;-) I opened an issue to that=
+ end at http://tracker.ceph.com/issues/12705. The staff in charge of the =
+sepia lab is extremely busy and it may take a few weeks before you actual=
+ly have access.=20
+>=20
+> Cheers=20
+>=20
+>>
+>> Thanks=20
+>> Abhishek=20
+>>
+>> On Sat, Aug 15, 2015 at 9:47 PM, Loic Dachary <loic@dachary.org <mailt=
+o:loic@dachary.org>> wrote:=20
+>>
+>>
+>>
+>> On 15/08/2015 17:49, Abhishek Varshney wrote:> Hi Loic,=20
+>>>
+>>> Thanks for the detailed explanation. I have created an issue to keep =
+track of hammer v0.94.4 release here : http://tracker.ceph.com/issues/127=
+01. I guess the HOWTO page (http://tracker.ceph.com/projects/ceph-release=
+s/wiki/HOWTO) would be updated with this tracker issue once v0.94.3 is re=
+leased? Please correct me if I am wrong.=20
+>>
+>> You are correct.=20
+>>
+>> Could you also update the header http://tracker.ceph.com/issues/12701#=
+teuthology-run-commit to mimic http://tracker.ceph.com/issues/11990#teuth=
+ology-run-commit-1e841b08cc9534e654de50967f06113fb7383b0chammer-backports=
+-July-20 ? It should be=20
+>>
+>> .h3 teuthology run commit e1dadd3da9e39daf669f94715c7833d2b280bbed=20
+>> (hammer backports August-14)=20
+>>
+>> Because $ git rev-parse ceph/hammer-backports=20
+>> e1dadd3da9e39daf669f94715c7833d2b280bbed=20
+>>
+>> which is the branch you populated and that was compiled by http://ceph=
+=2Ecom/gitbuilder.cgi.=20
+>>
+>> The content of this h3. section should the the output of the command=20
+>>
+>> git --no-pager log --format=3D'%H %s' --graph ceph/hammer..ceph/hammer=
+-backports | perl -p -e 's/"/ /g; if (/\w+\s+Merge (\d+)/) { s|\w+\s+Merg=
+e (\d+).*|"Pull request $1":https://github.com/ceph/ceph/pull/$1|; } else=
+ { s|(\w+)\s+(.*)|"$2":https://github.com/ceph/ceph/commit/$1|; } s/\*/+/=
+; s/^/* /;'=20
+>>
+>> it starts with:=20
+>>
+>> * + "Pull request 5202":https://github.com/ceph/ceph/pull/5202=20
+>> * |\=20
+>> * | + "rpm: add missing Java conditionals":https://github.com/ceph/cep=
+h/commit/6417e8eff942dbbf6cd231ffb73136b7bdcd837f=20
+>> * + "Pull request 5203":https://github.com/ceph/ceph/pull/5203=20
+>> * |\=20
+>> * | + "Add rpm conditionals : cephfs_java":https://github.com/ceph/cep=
+h/commit/37284773a754ef4b91d2b5436d46a5fd2be4f67e=20
+>> * + "Pull request 5204":https://github.com/ceph/ceph/pull/5204=20
+>> ...=20
+>>
+>> and should render nicely.=20
+>>
+>> This should then be followed by h4. section, one per test suite we are=
+ going to run.=20
+>>
+>> h4. rbd=20
+>>
+>> <pre>=20
+>> ./virtualenv/bin/teuthology-suite --priority 1000 --suite rbd --subset=
+ $(expr $RANDOM % 5)/5 --suite-branch hammer --distro ubuntu --email loic=
+@dachary.org <mailto:loic@dachary.org> --ceph hammer-backports --machine-=
+type plana,burnupi,mira=20
+>> </pre>=20
+>>
+>> etc.=20
+>>
+>> Once this is done, I will copy paste the command to actually schedule =
+the test. And then we'll have to wait a few days for it to complete.=20
+>>
+>> Cheers=20
+>>
+>>>
+>>> Regards=20
+>>> Abhishek Varshney=20
+>>>
+>>> On Sat, Aug 15, 2015 at 4:00 PM, Loic Dachary <loic@dachary.org <mail=
+to:loic@dachary.org> <mailto:loic@dachary.org <mailto:loic@dachary.org>>>=
+ wrote:=20
+>>>
+>>> Hi Abhishek,=20
+>>>
+>>> I'll be driving the next hammer point release (v0.94.4) and theanalys=
+t will participate as I did for v0.94.3 (i.e. helping and mentoring when =
+there is a need). During the v0.94.4 release you will have the opportunit=
+y to participate in all the steps. When we move to v0.94.5 you'll hopeful=
+ly know all you need to drive it, should you want to. As you discovered o=
+ver the past few weeks, it's not a complex process, but there are a lot o=
+f details.=20
+>>>
+>>> Contrary to what I told you the other day=20
+>>>
+>>> http://tracker.ceph.com/projects/ceph-releases/wiki/HOWTO_start_backp=
+orting_a_stable_release/diff?utf8=3D%E2%9C%93&version=3D7&version_from=3D=
+6&commit=3DView+differences=20
+>>>
+>>> is not the documentation you need to create a new ticket for v0.94.4 =
+and I removed this chapter to avoid further confusion. There is a more de=
+tailed explanation at:=20
+>>>
+>>> http://tracker.ceph.com/projects/ceph-releases/wiki/HOWTO_start_worki=
+ng_on_a_new_point_release=20
+>>>
+>>> A section was added as a reminder that someone has to volunteer to dr=
+ive the release.=20
+>>>
+>>> http://tracker.ceph.com/projects/ceph-releases/wiki/HOWTO_start_worki=
+ng_on_a_new_point_release/diff?utf8=3D%E2%9C%93&version=3D9&version_from=3D=
+8&commit=3DView+differences=20
+>>>
+>>> Let me know if you need anything else to create the issue vor v0.94.4=
+=2E=20
+>>>
+>>> Cheers=20
+>>> --=20
+>>> Lo=C3=AFc Dachary, Artisan Logiciel Libre=20
+>>>
+>>>
+>>>
+>>> ---------------------------------------------------------------------=
+---------------------------------------------------------------------=20
+>>>
+>>> This email and any files transmitted with it are confidential and int=
+ended solely for the use of the individual or entity to whom they are add=
+ressed. If you have received this email in error please notify the system=
+ manager. This message contains confidential information and is intended =
+only for the individual named. If you are not the named addressee you sho=
+uld not disseminate, distribute or copy this e-mail. Please notify the se=
+nder immediately by e-mail if you have received this e-mail by mistake an=
+d delete this e-mail from your system. If you are not the intended recipi=
+ent you are notified that disclosing, copying, distributing or taking any=
+ action in reliance on the contents of this information is strictly prohi=
+bited. Although Flipkart has taken reasonable precautions to ensure no vi=
+ruses are present in this email, the company cannot accept responsibility=
+ for any loss or damage arising from the use of this email or attachments=
+=20
+>>>
+>>
+>> --=20
+>> Lo=C3=AFc Dachary, Artisan Logiciel Libre=20
+>>
+>>
+>>
+>> ----------------------------------------------------------------------=
+--------------------------------------------------------------------=20
+>>
+>> This email and any files transmitted with it are confidential and inte=
+nded solely for the use of the individual or entity to whom they are addr=
+essed. If you have received this email in error please notify the system =
+manager. This message contains confidential information and is intended o=
+nly for the individual named. If you are not the named addressee you shou=
+ld not disseminate, distribute or copy this e-mail. Please notify the sen=
+der immediately by e-mail if you have received this e-mail by mistake and=
+ delete this e-mail from your system. If you are not the intended recipie=
+nt you are notified that disclosing, copying, distributing or taking any =
+action in reliance on the contents of this information is strictly prohib=
+ited. Although Flipkart has taken reasonable precautions to ensure no vir=
+uses are present in this email, the company cannot accept responsibility =
+for any loss or damage arising from the use of this email or attachments =
+
+>>
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--cdQ4fLQoX9kCj2ijuQFmsBekkeCqMi2x6
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlXSB0gACgkQ8dLMyEl6F23AfwCgjob3iAKs+JGjXwfFUYcelbmY
+cK8AoIMEQmb39YHxaFLBkAab7tJBN7c2
+=RWJ+
+-----END PGP SIGNATURE-----
+
+--cdQ4fLQoX9kCj2ijuQFmsBekkeCqMi2x6--
