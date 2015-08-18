@@ -1,46 +1,33 @@
-From: GuangYang <yguang11@outlook.com>
-Subject: RE: OSD::do_mon_report - do we need holding osd_lock
-Date: Tue, 18 Aug 2015 10:13:57 -0700
-Message-ID: <BLU175-W75FC952629090851DC610DF780@phx.gbl>
-References: <BLU175-W2D3E7CFB5B9535A1E5AAFDF780@phx.gbl>,<CAN=+7FXJ3m9=fjOeNbPY3_EJg_LmtRUdk7Y1DQ1zOvqQL06eUA@mail.gmail.com>
+From: "Adam C. Emerson" <aemerson@redhat.com>
+Subject: WIP for C++11 Time Support
+Date: Tue, 18 Aug 2015 14:08:24 -0400
+Message-ID: <55D37498.8060504@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from blu004-omc4s26.hotmail.com ([65.55.111.165]:49555 "EHLO
-	BLU004-OMC4S26.hotmail.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753451AbbHRRPs (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 18 Aug 2015 13:15:48 -0400
-In-Reply-To: <CAN=+7FXJ3m9=fjOeNbPY3_EJg_LmtRUdk7Y1DQ1zOvqQL06eUA@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:55173 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751443AbbHRSHj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 18 Aug 2015 14:07:39 -0400
+Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
+	by mx1.redhat.com (Postfix) with ESMTPS id CAD252631
+	for <ceph-devel@vger.kernel.org>; Tue, 18 Aug 2015 18:07:38 +0000 (UTC)
+Received: from [10.3.113.95] (ovpn-113-95.phx2.redhat.com [10.3.113.95])
+	by int-mx14.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t7II7b2W014637
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+	for <ceph-devel@vger.kernel.org>; Tue, 18 Aug 2015 14:07:38 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sjust@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ceph Developers <ceph-devel@vger.kernel.org>
 
-VGhhbmtzIFNhbSwgSSB3aWxsIGdvIGFoZWFkIG9wZW5pbmcgYSB0cmFja2VyIGZvciB0aGlzLgoK
-VGhhbmtzLApHdWFuZwoKCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0K
-PiBEYXRlOiBUdWUsIDE4IEF1ZyAyMDE1IDA4OjQyOjA0IC0wNzAwCj4gU3ViamVjdDogUmU6IE9T
-RDo6ZG9fbW9uX3JlcG9ydCAtIGRvIHdlIG5lZWQgaG9sZGluZyBvc2RfbG9jawo+IEZyb206IHNq
-dXN0QHJlZGhhdC5jb20KPiBUbzogeWd1YW5nMTFAb3V0bG9vay5jb20KPiBDQzogY2VwaC1kZXZl
-bEB2Z2VyLmtlcm5lbC5vcmcKPgo+IFByb2JhYmx5ISBBIHF1aWNrIGdsYW5jZSBhdCBkb19tb25f
-cmVwb3J0IGRvZXNuJ3Qgc2VlbSB0byB0dXJuIHVwCj4gYW55dGhpbmcgSSdkIGV4cGVjdCB0byBi
-ZSByZWFsbHkgaGFyZCB0byByZWZhY3Rvci4gWW91IGRvIG5lZWQgdG8KPiBicmVhayBvdXQgdGhl
-IHJlcXVpcmVkIGRhdGEgKGludG8gT1NEU2VydmljZSwgSSdkIHRoaW5rKSBzbyB0aGF0IHRoZQo+
-IGxvY2sgaXMgbm90IG5lY2Vzc2FyeS4KPiAtU2FtCj4KPiBPbiBNb24sIEF1ZyAxNywgMjAxNSBh
-dCA2OjEwIFBNLCBHdWFuZ1lhbmcgPHlndWFuZzExQG91dGxvb2suY29tPiB3cm90ZToKPj4gSGkg
-U2FtLAo+PiBUb2RheSBJIG5vdGljZWQgYSBzY2VuYXJpbyB0aGF0IG1vbml0b3IgbWFya2VkIE9T
-RCBkb3duIHNpbmNlIGl0IGRpZCBub3QgcmVjZWl2ZSB0aGUgUEcgc3RhdHMgZnJvbSB0aGUgT1NE
-LCBmdXJ0aGVyIGludmVzdGlnYXRpb24gc2hvd2VkIHRoYXQgdGhlIHJlYXNvbiB3aHkgT1NEIGRp
-ZG4ndCByZXBvcnQgc3RhdHMgYmVjYXVzZSBpdCBmYWlsZWQgdG8gYWNxdWlyZSB0aGUgb3NkX2xv
-Y2ssIHdoYXQgaGFwcGVuZWQgd2FzOgo+PiAxLiBvbmUgUEcgaXMgdW5kZXJnb2luZyBsb25nLXJ1
-biBwZWVyaW5nIChzZWFyY2ggZm9yIG1pc3Npbmcgb2JqZWN0cykKPj4gMi4gQW4gT1AgaG9sZCB0
-aGUgb3NkX2xvY2sgYW5kIHRyeSB0byBhY3F1aXJlIHRoZSBQRyBsb2NrLCB3aGljaCBpcyBiZWlu
-ZyBoZWxkIGJ5IDEpLgo+PiAzLiBPU0QgdGljayB0aHJlYWQgZmFpbGVkIHRvIGFjcXVpcmUgb3Nk
-X2xvY2sgYW5kIHN0dWNrIGZvciAxMCBtaW51dGVzLCB0aHVzIGZhaWxlZCB0byB1cGRhdGUgdG8g
-bW9uaXRvciBpdHMgc3RhdHMKPj4gNC4gbW9uaXRvciBtYXJrIGl0IGRvd24KPj4KPj4gQWZ0ZXIg
-bG9va2luZyBhdCB0aGUgY29kZSwgd2UgZm91bmQgc2V2ZXJhbCBhc3NlcnRpb25zICh0aGF0IG9z
-ZF9sb2NrIHNob3VsZCBiZSBoZWxkKSBhcm91bmQgT1NEOjpkb19tb25fcmVwb3J0LCBpcyB0aGF0
-IHJlcXVpcmVkPyBBbnkgY2hhbmNlIHRvIG92ZXJjb21lIHRoZSBwcm9ibGVtIGRlc2NyaWJlZCBh
-Ym92ZSBieSByZWZhY3RvcmluZyB0aGUgbG9ja2luZyB0aGVyZT8KPj4KPj4gVGhhbmtzLAo+PiBH
-dWFuZwogCQkgCSAgIAkJICA=
+I've pushed a branch, wip-cxx11time for inspection. It includes basic 
+support for std::chrono (including clocks linked to specific POSIX 
+CLOCK_* identifiers) and a new timer class that doesn't require Context*.
+
+As was suggested to me, I updated one subsystem to use std::chrono as an 
+example, in this case OSDC.
+
+Please review/critique.
+
+Thank you.
