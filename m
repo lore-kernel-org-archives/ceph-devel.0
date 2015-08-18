@@ -1,33 +1,35 @@
-From: "Adam C. Emerson" <aemerson@redhat.com>
-Subject: WIP for C++11 Time Support
-Date: Tue, 18 Aug 2015 14:08:24 -0400
-Message-ID: <55D37498.8060504@redhat.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: rbd: default map options, new options, misc (Re: creating the
+ issue for the v0.94.4 release)
+Date: Tue, 18 Aug 2015 23:02:00 +0300
+Message-ID: <CAOi1vP9-MvAnG9zDOQaCbD1Ho0KRcMf_Dqt9anEshvr0NVYpDg@mail.gmail.com>
+References: <91df434f-d3ac-49b1-98b6-b7c2a966a4e0@redhat.com>
+	<55D21CAE.10601@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:55173 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751443AbbHRSHj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 18 Aug 2015 14:07:39 -0400
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-	by mx1.redhat.com (Postfix) with ESMTPS id CAD252631
-	for <ceph-devel@vger.kernel.org>; Tue, 18 Aug 2015 18:07:38 +0000 (UTC)
-Received: from [10.3.113.95] (ovpn-113-95.phx2.redhat.com [10.3.113.95])
-	by int-mx14.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t7II7b2W014637
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-	for <ceph-devel@vger.kernel.org>; Tue, 18 Aug 2015 14:07:38 -0400
+Received: from mail-lb0-f173.google.com ([209.85.217.173]:34577 "EHLO
+	mail-lb0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750874AbbHRUCC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Aug 2015 16:02:02 -0400
+Received: by lbbtg9 with SMTP id tg9so111087297lbb.1
+        for <ceph-devel@vger.kernel.org>; Tue, 18 Aug 2015 13:02:00 -0700 (PDT)
+In-Reply-To: <55D21CAE.10601@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Developers <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Josh Durgin <jdurgin@redhat.com>, Alexandre DERUMIER <aderumier@odiso.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-I've pushed a branch, wip-cxx11time for inspection. It includes basic 
-support for std::chrono (including clocks linked to specific POSIX 
-CLOCK_* identifiers) and a new timer class that doesn't require Context*.
+On Mon, Aug 17, 2015 at 8:41 PM, Loic Dachary <loic@dachary.org> wrote:
+>
+>
+> On 17/08/2015 18:31, Josh Durgin wrote:
+>> Yes, this would make sense in firefly too, since it's useful for newer kernels regardless of ceph userspace versions.
+>
+> Ok, I'll schedule it for backport. Is there an issue associated to this pull request ?
 
-As was suggested to me, I updated one subsystem to use std::chrono as an 
-example, in this case OSDC.
+No, probably not.
 
-Please review/critique.
+Thanks,
 
-Thank you.
+                Ilya
