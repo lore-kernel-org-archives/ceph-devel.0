@@ -1,50 +1,64 @@
-From: Varada Kari <Varada.Kari@sandisk.com>
-Subject: RE: Package issue in hammer branch on ubuntu
-Date: Tue, 18 Aug 2015 02:21:38 +0000
-Message-ID: <C226B0AB34511445928D9882AA519F601C470761@SACMBXIP03.sdcorp.global.sandisk.com>
-References: <C226B0AB34511445928D9882AA519F601C46FF47@SACMBXIP03.sdcorp.global.sandisk.com>
- <CALqRxCz8YFAPveyUCemzLuXpUB=VNVE_NfmPsetUapipZ7Gw0A@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: Re: [PATCH] fs/ceph: No need get inode of parent in ceph_open.
+Date: Tue, 18 Aug 2015 10:36:24 +0800
+Message-ID: <C24229C0-E3B1-4773-BEF0-84B7264F5607@redhat.com>
+References: <6AA21C22F0A5DA478922644AD2EC308C1D19FBFC@SHSMSX101.ccr.corp.intel.com>
+Mime-Version: 1.0 (Mac OS X Mail 8.2 \(2102\))
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0088.outbound.protection.outlook.com ([207.46.100.88]:49504
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751061AbbHRCVl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 17 Aug 2015 22:21:41 -0400
-In-Reply-To: <CALqRxCz8YFAPveyUCemzLuXpUB=VNVE_NfmPsetUapipZ7Gw0A@mail.gmail.com>
-Content-Language: en-US
+Received: from mx1.redhat.com ([209.132.183.28]:41576 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750741AbbHRCga convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Aug 2015 22:36:30 -0400
+In-Reply-To: <6AA21C22F0A5DA478922644AD2EC308C1D19FBFC@SHSMSX101.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ken Dreyer <kdreyer@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: "Ma, Jianpeng" <jianpeng.ma@intel.com>
+Cc: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-VGhhbmtzLiBUaGVyZSBhcmUgbm8gY2hhbmdlcyBmcm9tIG15IGVuZCwganVzdCB0cmllZCBidWls
-ZGluZyB0aGUgcGFja2FnZXMgdG8gdGVzdCBpbnRlcm5hbGx5IHdpdGggdGhlIGxhdGVzdCBjb2Rl
-IGJhc2UuDQoNCjAuIDk0LTIuMiBpcyBpbnRlbnRpb25hbD8NCg0KVmFyYWRhDQoNCi0tLS0tT3Jp
-Z2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBLZW4gRHJleWVyIFttYWlsdG86a2RyZXllckByZWRo
-YXQuY29tXQ0KU2VudDogVHVlc2RheSwgQXVndXN0IDE4LCAyMDE1IDM6NDIgQU0NClRvOiBWYXJh
-ZGEgS2FyaSA8VmFyYWRhLkthcmlAc2FuZGlzay5jb20+DQpDYzogY2VwaC1kZXZlbCA8Y2VwaC1k
-ZXZlbEB2Z2VyLmtlcm5lbC5vcmc+DQpTdWJqZWN0OiBSZTogUGFja2FnZSBpc3N1ZSBpbiBoYW1t
-ZXIgYnJhbmNoIG9uIHVidW50dQ0KDQpPbiBNb24sIEF1ZyAxNywgMjAxNSBhdCAzOjU4IEFNLCBW
-YXJhZGEgS2FyaSA8VmFyYWRhLkthcmlAc2FuZGlzay5jb20+IHdyb3RlOg0KPiBTZWVtcyBpbiBk
-ZWJpYW4vY29udHJvbCAsIGNlcGggdmVyc2lvbiBpcyBtZW50aW9uZWQgYXMgMC45NC4yLTIgdGhh
-bg0KPiAwLjk0LjItMS4gQ2hhbmdlIGxvZyBmaWxlcyBjb250YWlucyB0aGUgYnVpbGQgdGlsbCAw
-Ljk0LjItMS4gTWFkZSB0aGUNCj4gZm9sbG93aW5nIGNoYW5nZSwgbXkgaW5zdGFsbGF0aW9uIHdl
-bnQgdGhyb3VnaC4NCg0KSXQgc291bmRzIGxpa2UgeW91J3JlIHBhdGNoaW5nIENlcGggYW5kIGRv
-aW5nIHlvdXIgb3duIGJ1aWxkPw0KDQpJZiB0aGF0J3MgdGhlIGNhc2UsIGFkZCBhIG5ldyBkZWJp
-YW4vY2hhbmdlbG9nIGVudHJ5IGZvciAwLjk0LjItMiwgZGVzY3JpYmluZyB5b3VyIGNoYW5nZXMu
-DQoNCllvdSBqdXN0IG5lZWQgdG8gYnVtcCB0aGUgdmVyc2lvbiB0byBzb21ldGhpbmcgPj0yIC4N
-Cg0KLSBLZW4NCg0KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCg0KUExFQVNFIE5P
-VEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVz
-c2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lw
-aWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90
-IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91
-IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcs
-IGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2Ug
-aXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5p
-Y2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9y
-IGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQg
-YWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhh
-cmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KDQo=
+
+> On Aug 17, 2015, at 16:43, Ma, Jianpeng <jianpeng.ma@intel.com> wrote=
+:
+>=20
+> For ceph_open, it already get the parent inode. So no need to get aga=
+in.
+>=20
+> Signed-off-by: Jianpeng Ma <jianpeng.ma@intel.com>
+> ---
+> fs/ceph/file.c | 3 ---
+> 1 file changed, 3 deletions(-)
+>=20
+> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+> index 8b79d87..5ecd3dc 100644
+> --- a/fs/ceph/file.c
+> +++ b/fs/ceph/file.c
+> @@ -210,10 +210,7 @@ int ceph_open(struct inode *inode, struct file *=
+file)
+>        ihold(inode);
+>=20
+>        req->r_num_caps =3D 1;
+> -       if (flags & O_CREAT)
+> -               parent_inode =3D ceph_get_dentry_parent_inode(file->f=
+_path.dentry);
+>        err =3D ceph_mdsc_do_request(mdsc, parent_inode, req);
+> -       iput(parent_inode);
+>        if (!err)
+>                err =3D ceph_init_file(inode, file, req->r_fmode);
+>        ceph_mdsc_put_request(req);
+> =E2=80=94
+
+I fixed your patches (all tabs are replaced by spaces in your patches) =
+ and added them to our testing branch
+
+Thanks
+Yan, Zheng
+
+> 2.4.3
+>=20
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
