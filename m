@@ -1,33 +1,50 @@
-From: Ken Dreyer <kdreyer@redhat.com>
-Subject: Re: Package issue in hammer branch on ubuntu
-Date: Mon, 17 Aug 2015 16:11:49 -0600
-Message-ID: <CALqRxCz8YFAPveyUCemzLuXpUB=VNVE_NfmPsetUapipZ7Gw0A@mail.gmail.com>
+From: Varada Kari <Varada.Kari@sandisk.com>
+Subject: RE: Package issue in hammer branch on ubuntu
+Date: Tue, 18 Aug 2015 02:21:38 +0000
+Message-ID: <C226B0AB34511445928D9882AA519F601C470761@SACMBXIP03.sdcorp.global.sandisk.com>
 References: <C226B0AB34511445928D9882AA519F601C46FF47@SACMBXIP03.sdcorp.global.sandisk.com>
+ <CALqRxCz8YFAPveyUCemzLuXpUB=VNVE_NfmPsetUapipZ7Gw0A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f49.google.com ([209.85.218.49]:35847 "EHLO
-	mail-oi0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750875AbbHQWLu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Aug 2015 18:11:50 -0400
-Received: by oiev193 with SMTP id v193so88825996oie.3
-        for <ceph-devel@vger.kernel.org>; Mon, 17 Aug 2015 15:11:49 -0700 (PDT)
-In-Reply-To: <C226B0AB34511445928D9882AA519F601C46FF47@SACMBXIP03.sdcorp.global.sandisk.com>
+Received: from mail-by2on0088.outbound.protection.outlook.com ([207.46.100.88]:49504
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751061AbbHRCVl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 17 Aug 2015 22:21:41 -0400
+In-Reply-To: <CALqRxCz8YFAPveyUCemzLuXpUB=VNVE_NfmPsetUapipZ7Gw0A@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Varada Kari <Varada.Kari@sandisk.com>
+To: Ken Dreyer <kdreyer@redhat.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, Aug 17, 2015 at 3:58 AM, Varada Kari <Varada.Kari@sandisk.com> wrote:
-> Seems in debian/control , ceph version is mentioned as 0.94.2-2 than
-> 0.94.2-1. Change log files contains the build till 0.94.2-1. Made the
-> following change, my installation went through.
-
-It sounds like you're patching Ceph and doing your own build?
-
-If that's the case, add a new debian/changelog entry for 0.94.2-2,
-describing your changes.
-
-You just need to bump the version to something >=2 .
-
-- Ken
+VGhhbmtzLiBUaGVyZSBhcmUgbm8gY2hhbmdlcyBmcm9tIG15IGVuZCwganVzdCB0cmllZCBidWls
+ZGluZyB0aGUgcGFja2FnZXMgdG8gdGVzdCBpbnRlcm5hbGx5IHdpdGggdGhlIGxhdGVzdCBjb2Rl
+IGJhc2UuDQoNCjAuIDk0LTIuMiBpcyBpbnRlbnRpb25hbD8NCg0KVmFyYWRhDQoNCi0tLS0tT3Jp
+Z2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBLZW4gRHJleWVyIFttYWlsdG86a2RyZXllckByZWRo
+YXQuY29tXQ0KU2VudDogVHVlc2RheSwgQXVndXN0IDE4LCAyMDE1IDM6NDIgQU0NClRvOiBWYXJh
+ZGEgS2FyaSA8VmFyYWRhLkthcmlAc2FuZGlzay5jb20+DQpDYzogY2VwaC1kZXZlbCA8Y2VwaC1k
+ZXZlbEB2Z2VyLmtlcm5lbC5vcmc+DQpTdWJqZWN0OiBSZTogUGFja2FnZSBpc3N1ZSBpbiBoYW1t
+ZXIgYnJhbmNoIG9uIHVidW50dQ0KDQpPbiBNb24sIEF1ZyAxNywgMjAxNSBhdCAzOjU4IEFNLCBW
+YXJhZGEgS2FyaSA8VmFyYWRhLkthcmlAc2FuZGlzay5jb20+IHdyb3RlOg0KPiBTZWVtcyBpbiBk
+ZWJpYW4vY29udHJvbCAsIGNlcGggdmVyc2lvbiBpcyBtZW50aW9uZWQgYXMgMC45NC4yLTIgdGhh
+bg0KPiAwLjk0LjItMS4gQ2hhbmdlIGxvZyBmaWxlcyBjb250YWlucyB0aGUgYnVpbGQgdGlsbCAw
+Ljk0LjItMS4gTWFkZSB0aGUNCj4gZm9sbG93aW5nIGNoYW5nZSwgbXkgaW5zdGFsbGF0aW9uIHdl
+bnQgdGhyb3VnaC4NCg0KSXQgc291bmRzIGxpa2UgeW91J3JlIHBhdGNoaW5nIENlcGggYW5kIGRv
+aW5nIHlvdXIgb3duIGJ1aWxkPw0KDQpJZiB0aGF0J3MgdGhlIGNhc2UsIGFkZCBhIG5ldyBkZWJp
+YW4vY2hhbmdlbG9nIGVudHJ5IGZvciAwLjk0LjItMiwgZGVzY3JpYmluZyB5b3VyIGNoYW5nZXMu
+DQoNCllvdSBqdXN0IG5lZWQgdG8gYnVtcCB0aGUgdmVyc2lvbiB0byBzb21ldGhpbmcgPj0yIC4N
+Cg0KLSBLZW4NCg0KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCg0KUExFQVNFIE5P
+VEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVz
+c2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lw
+aWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90
+IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91
+IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcs
+IGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2Ug
+aXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5p
+Y2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9y
+IGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQg
+YWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhh
+cmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KDQo=
