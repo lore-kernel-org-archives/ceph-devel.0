@@ -1,95 +1,38 @@
-From: Alex Elsayed <eternaleye@gmail.com>
-Subject: Re: Signed-off-by and aliases
-Date: Tue, 18 Aug 2015 08:11:06 -0700
-Message-ID: <mqvhua$an4$1@ger.gmane.org>
-References: <55BBD384.7030703@dachary.org> <CALe9h7fsi-UcQ3W0d=t4dCBpNy5vtL8q=sO902FbQN21yNGjQg@mail.gmail.com> <55BFCAAB.1040707@dachary.org> <CAC6JEv-teZ0jq-t7f+==e0f5BQHAD4qrm5EOFMWJ1+g8zqLHcQ@mail.gmail.com> <55CB4163.9040504@dachary.org> <55CDABB2.4080401@suse.de> <55CDC978.20304@dachary.org> <mqtfkc$ic7$1@ger.gmane.org> <55D24790.4010703@dachary.org> <mqthtj$jp4$1@ger.gmane.org> <alpine.DEB.2.00.1508180629470.22099@cobra.newdream.net>
+From: Samuel Just <sjust@redhat.com>
+Subject: Re: OSD::do_mon_report - do we need holding osd_lock
+Date: Tue, 18 Aug 2015 08:42:04 -0700
+Message-ID: <CAN=+7FXJ3m9=fjOeNbPY3_EJg_LmtRUdk7Y1DQ1zOvqQL06eUA@mail.gmail.com>
+References: <BLU175-W2D3E7CFB5B9535A1E5AAFDF780@phx.gbl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:32988 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753191AbbHRPL3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 18 Aug 2015 11:11:29 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1ZRiXv-0005nB-2P
-	for ceph-devel@vger.kernel.org; Tue, 18 Aug 2015 17:11:27 +0200
-Received: from 66-87-138-127.pools.spcsdns.net ([66-87-138-127.pools.spcsdns.net])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Tue, 18 Aug 2015 17:11:27 +0200
-Received: from eternaleye by 66-87-138-127.pools.spcsdns.net with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Tue, 18 Aug 2015 17:11:27 +0200
+Received: from mail-io0-f179.google.com ([209.85.223.179]:36235 "EHLO
+	mail-io0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751634AbbHRPmF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Aug 2015 11:42:05 -0400
+Received: by iodv127 with SMTP id v127so178085267iod.3
+        for <ceph-devel@vger.kernel.org>; Tue, 18 Aug 2015 08:42:04 -0700 (PDT)
+In-Reply-To: <BLU175-W2D3E7CFB5B9535A1E5AAFDF780@phx.gbl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: GuangYang <yguang11@outlook.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Sage Weil wrote:
+Probably!  A quick glance at do_mon_report doesn't seem to turn up
+anything I'd expect to be really hard to refactor.  You do need to
+break out the required data (into OSDService, I'd think) so that the
+lock is not necessary.
+-Sam
 
-> On Mon, 17 Aug 2015, Alex Elsayed wrote:
->> Loic Dachary wrote:
->> 
->> > Hi Alex,
->> > 
->> > On 17/08/2015 22:19, Alex Elsayed wrote:
->> <snip>
->> >> This is where I see a subtle, but meaningful distinction: Accepting
->> >> from aliases *which have submitted a DCO* means that the person behind
->> >> the alias, even if we don't know their name, has bound themselves to a
->> >> standard ov behavior.
->> >> 
->> >> Accepting from arbitrary aliases does _not_ carry that meaning.
->> > 
->> > Yes. Although we don't do formal background checks, we make sure that
->> > each commit is Signed-off-by: the author as required by
->> > https://github.com/ceph/ceph/blob/master/SubmittingPatches#L22 which is
->> > linked from the
->> > https://github.com/ceph/ceph/blob/master/CONTRIBUTING.rst document that
->> > shows whenever someone submits a pull request.
->> > 
->> > I also believe this is an important distinction and I would feel
->> > uncomfortable if Ceph accepted contributions (aliases or not) that are
->> > not Signed-off one way or the other.
->> 
->> The kernel does something slightly different, in a very careful manner:
->> Signed-off-by says that you have _submitted_ the DCO - as in, you must
->> have, from the same address as you signed off by, emailed the DCO itself
->> to the list.
->> 
->> The S-o-B tag, then, simply says "If you look, you'll find my affirmation
->> of intent to follow the DCO" - it is not, in itself, anything other than
->> a pointer. This prevents people from copypasta'ing the S-o-B line as a
->> magic incantation, without understanding the meaning. (Which the kernel
->> has found _does_ happen _anyway_, but with the "actually submitted a DCO"
->> requirement they can _detect_ that.)
-> 
-> I can't find any reference to emailing a copy of the DCO to any address in
-> SubmittingPatches or elsewhere.  Are you sure this is the case?  See
-> 
-> https://www.kernel.org/doc/Documentation/SubmittingPatches
-> 
-> FWIW, LWN's coverage of James's talk on the DCO last year matches my
-> understanding:
-> 
-> https://lwn.net/Articles/592503/
-> 
-> ...
-> 
-> As far as aliases go in sign-offs, I don't see that it's an issue.  In my
-> opinion the sign-off is more about due diligence than anything else--that
-> we have made a good faith effort to ensure that the code is made in
-> compliance with the license.
-> 
-> James contends that it's also more cleaning out offending code when a
-> problematic contributor is identified and less about liability for that
-> individual, so as long as an alias is used consistently I'm not sure it
-> makes a difference.  Lots of people go by names that are not technically
-> their legal names, but shortened or anglicized versions of them, but as
-> long as they are sufficient to associate the contribution with the
-> contributor it serves its purpose.
-
-Hm, you're right. Not sure where I got that, then - weird.
-
-
+On Mon, Aug 17, 2015 at 6:10 PM, GuangYang <yguang11@outlook.com> wrote:
+> Hi Sam,
+> Today I noticed a scenario that monitor marked OSD down since it did not receive the PG stats from the OSD, further investigation showed that the reason why OSD didn't report stats because it failed to acquire the osd_lock, what happened was:
+>   1. one PG is undergoing long-run peering (search for missing objects)
+>   2. An OP hold the osd_lock and try to acquire the PG lock, which is being held by 1).
+>   3. OSD tick thread failed to acquire osd_lock and stuck for 10 minutes, thus failed to update to monitor its stats
+>   4. monitor mark it down
+>
+> After looking at the code, we found several assertions (that osd_lock should be held) around OSD::do_mon_report, is that required? Any chance to overcome the problem described above by refactoring the locking there?
+>
+> Thanks,
+> Guang
