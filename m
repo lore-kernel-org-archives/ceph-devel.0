@@ -1,38 +1,46 @@
-From: Samuel Just <sjust@redhat.com>
-Subject: Re: OSD::do_mon_report - do we need holding osd_lock
-Date: Tue, 18 Aug 2015 08:42:04 -0700
-Message-ID: <CAN=+7FXJ3m9=fjOeNbPY3_EJg_LmtRUdk7Y1DQ1zOvqQL06eUA@mail.gmail.com>
-References: <BLU175-W2D3E7CFB5B9535A1E5AAFDF780@phx.gbl>
+From: GuangYang <yguang11@outlook.com>
+Subject: RE: OSD::do_mon_report - do we need holding osd_lock
+Date: Tue, 18 Aug 2015 10:13:57 -0700
+Message-ID: <BLU175-W75FC952629090851DC610DF780@phx.gbl>
+References: <BLU175-W2D3E7CFB5B9535A1E5AAFDF780@phx.gbl>,<CAN=+7FXJ3m9=fjOeNbPY3_EJg_LmtRUdk7Y1DQ1zOvqQL06eUA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f179.google.com ([209.85.223.179]:36235 "EHLO
-	mail-io0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751634AbbHRPmF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Aug 2015 11:42:05 -0400
-Received: by iodv127 with SMTP id v127so178085267iod.3
-        for <ceph-devel@vger.kernel.org>; Tue, 18 Aug 2015 08:42:04 -0700 (PDT)
-In-Reply-To: <BLU175-W2D3E7CFB5B9535A1E5AAFDF780@phx.gbl>
+Received: from blu004-omc4s26.hotmail.com ([65.55.111.165]:49555 "EHLO
+	BLU004-OMC4S26.hotmail.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753451AbbHRRPs (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 18 Aug 2015 13:15:48 -0400
+In-Reply-To: <CAN=+7FXJ3m9=fjOeNbPY3_EJg_LmtRUdk7Y1DQ1zOvqQL06eUA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: GuangYang <yguang11@outlook.com>
+To: Samuel Just <sjust@redhat.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Probably!  A quick glance at do_mon_report doesn't seem to turn up
-anything I'd expect to be really hard to refactor.  You do need to
-break out the required data (into OSDService, I'd think) so that the
-lock is not necessary.
--Sam
-
-On Mon, Aug 17, 2015 at 6:10 PM, GuangYang <yguang11@outlook.com> wrote:
-> Hi Sam,
-> Today I noticed a scenario that monitor marked OSD down since it did not receive the PG stats from the OSD, further investigation showed that the reason why OSD didn't report stats because it failed to acquire the osd_lock, what happened was:
->   1. one PG is undergoing long-run peering (search for missing objects)
->   2. An OP hold the osd_lock and try to acquire the PG lock, which is being held by 1).
->   3. OSD tick thread failed to acquire osd_lock and stuck for 10 minutes, thus failed to update to monitor its stats
->   4. monitor mark it down
->
-> After looking at the code, we found several assertions (that osd_lock should be held) around OSD::do_mon_report, is that required? Any chance to overcome the problem described above by refactoring the locking there?
->
-> Thanks,
-> Guang
+VGhhbmtzIFNhbSwgSSB3aWxsIGdvIGFoZWFkIG9wZW5pbmcgYSB0cmFja2VyIGZvciB0aGlzLgoK
+VGhhbmtzLApHdWFuZwoKCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0K
+PiBEYXRlOiBUdWUsIDE4IEF1ZyAyMDE1IDA4OjQyOjA0IC0wNzAwCj4gU3ViamVjdDogUmU6IE9T
+RDo6ZG9fbW9uX3JlcG9ydCAtIGRvIHdlIG5lZWQgaG9sZGluZyBvc2RfbG9jawo+IEZyb206IHNq
+dXN0QHJlZGhhdC5jb20KPiBUbzogeWd1YW5nMTFAb3V0bG9vay5jb20KPiBDQzogY2VwaC1kZXZl
+bEB2Z2VyLmtlcm5lbC5vcmcKPgo+IFByb2JhYmx5ISBBIHF1aWNrIGdsYW5jZSBhdCBkb19tb25f
+cmVwb3J0IGRvZXNuJ3Qgc2VlbSB0byB0dXJuIHVwCj4gYW55dGhpbmcgSSdkIGV4cGVjdCB0byBi
+ZSByZWFsbHkgaGFyZCB0byByZWZhY3Rvci4gWW91IGRvIG5lZWQgdG8KPiBicmVhayBvdXQgdGhl
+IHJlcXVpcmVkIGRhdGEgKGludG8gT1NEU2VydmljZSwgSSdkIHRoaW5rKSBzbyB0aGF0IHRoZQo+
+IGxvY2sgaXMgbm90IG5lY2Vzc2FyeS4KPiAtU2FtCj4KPiBPbiBNb24sIEF1ZyAxNywgMjAxNSBh
+dCA2OjEwIFBNLCBHdWFuZ1lhbmcgPHlndWFuZzExQG91dGxvb2suY29tPiB3cm90ZToKPj4gSGkg
+U2FtLAo+PiBUb2RheSBJIG5vdGljZWQgYSBzY2VuYXJpbyB0aGF0IG1vbml0b3IgbWFya2VkIE9T
+RCBkb3duIHNpbmNlIGl0IGRpZCBub3QgcmVjZWl2ZSB0aGUgUEcgc3RhdHMgZnJvbSB0aGUgT1NE
+LCBmdXJ0aGVyIGludmVzdGlnYXRpb24gc2hvd2VkIHRoYXQgdGhlIHJlYXNvbiB3aHkgT1NEIGRp
+ZG4ndCByZXBvcnQgc3RhdHMgYmVjYXVzZSBpdCBmYWlsZWQgdG8gYWNxdWlyZSB0aGUgb3NkX2xv
+Y2ssIHdoYXQgaGFwcGVuZWQgd2FzOgo+PiAxLiBvbmUgUEcgaXMgdW5kZXJnb2luZyBsb25nLXJ1
+biBwZWVyaW5nIChzZWFyY2ggZm9yIG1pc3Npbmcgb2JqZWN0cykKPj4gMi4gQW4gT1AgaG9sZCB0
+aGUgb3NkX2xvY2sgYW5kIHRyeSB0byBhY3F1aXJlIHRoZSBQRyBsb2NrLCB3aGljaCBpcyBiZWlu
+ZyBoZWxkIGJ5IDEpLgo+PiAzLiBPU0QgdGljayB0aHJlYWQgZmFpbGVkIHRvIGFjcXVpcmUgb3Nk
+X2xvY2sgYW5kIHN0dWNrIGZvciAxMCBtaW51dGVzLCB0aHVzIGZhaWxlZCB0byB1cGRhdGUgdG8g
+bW9uaXRvciBpdHMgc3RhdHMKPj4gNC4gbW9uaXRvciBtYXJrIGl0IGRvd24KPj4KPj4gQWZ0ZXIg
+bG9va2luZyBhdCB0aGUgY29kZSwgd2UgZm91bmQgc2V2ZXJhbCBhc3NlcnRpb25zICh0aGF0IG9z
+ZF9sb2NrIHNob3VsZCBiZSBoZWxkKSBhcm91bmQgT1NEOjpkb19tb25fcmVwb3J0LCBpcyB0aGF0
+IHJlcXVpcmVkPyBBbnkgY2hhbmNlIHRvIG92ZXJjb21lIHRoZSBwcm9ibGVtIGRlc2NyaWJlZCBh
+Ym92ZSBieSByZWZhY3RvcmluZyB0aGUgbG9ja2luZyB0aGVyZT8KPj4KPj4gVGhhbmtzLAo+PiBH
+dWFuZwogCQkgCSAgIAkJICA=
