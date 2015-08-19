@@ -1,78 +1,110 @@
-From: Shinobu Kinjo <skinjo@redhat.com>
-Subject: Re: Ceph Hackathon: More Memory Allocator Testing
-Date: Wed, 19 Aug 2015 05:06:28 -0400 (EDT)
-Message-ID: <380641833.6250870.1439975188966.JavaMail.zimbra@redhat.com>
-References: <55D409F0.3050802@redhat.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE1171B@SACMBXIP01.sdcorp.global.sandisk.com> <CACJqLyatyLmdf0ptSuJ5fGrvkQiy-5pOPHFA=h9vuG54xKrngw@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: testing the teuthology OpenStack backend
+Date: Wed, 19 Aug 2015 12:23:41 +0200
+Message-ID: <55D4592D.9060704@dachary.org>
+References: <55C377B3.7050500@dachary.org> <55C6108C.7010803@ubuntukylin.com> <55C61F0C.3000903@dachary.org> <55D44D1A.10607@ubuntukylin.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="IRU0rJvFDdqi6w9TqgXVsx1d5QKMW3jLu"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx3-phx2.redhat.com ([209.132.183.24]:33247 "EHLO
-	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750874AbbHSJGd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Aug 2015 05:06:33 -0400
-In-Reply-To: <CACJqLyatyLmdf0ptSuJ5fGrvkQiy-5pOPHFA=h9vuG54xKrngw@mail.gmail.com>
+Received: from mail2.dachary.org ([91.121.57.175]:40452 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1750855AbbHSKXv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Aug 2015 06:23:51 -0400
+In-Reply-To: <55D44D1A.10607@ubuntukylin.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomaiwang@gmail.com>
-Cc: Somnath Roy <Somnath.Roy@sandisk.com>, Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Li Wang <liwang@ubuntukylin.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-yes, that's true.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--IRU0rJvFDdqi6w9TqgXVsx1d5QKMW3jLu
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
------ Original Message -----
-From: "Haomai Wang" <haomaiwang@gmail.com>
-To: "Somnath Roy" <Somnath.Roy@sandisk.com>
-Cc: "Mark Nelson" <mnelson@redhat.com>, "ceph-devel" <ceph-devel@vger.kernel.org>
-Sent: Wednesday, August 19, 2015 5:07:53 PM
-Subject: Re: Ceph Hackathon: More Memory Allocator Testing
+Hi,
 
-On Wed, Aug 19, 2015 at 1:36 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
-> Mark,
-> Thanks for verifying this. Nice report !
-> Since there is a big difference in memory consumption with jemalloc, I would say a recovery performance data or client performance data during recovery would be helpful.
->
+[cc'ing the ceph-devel list for Zack or Andrew's input]
 
-The RSS memory usage in the report is per OSD I guess(really?). It
-can't be ignored since it's really a great improvement memory usage.
+On 19/08/2015 11:32, Li Wang wrote:
+> Hi Loic,
+>   we did a test, the results are attached. We found that the
+> network may be the bottleneck, it seems it will fetch all
+> the packages from ceph website on the fly, that does take time
+> and cause many failed jobs, and there are also many dead
+> jobs, what do those mean? Do you have some suggestions,
+> if possible to enable it fetch the packages from configurable
+> mirror or even private package repositories?
 
-> Thanks & Regards
-> Somnath
->
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
-> Sent: Tuesday, August 18, 2015 9:46 PM
-> To: ceph-devel
-> Subject: Ceph Hackathon: More Memory Allocator Testing
->
-> Hi Everyone,
->
-> One of the goals at the Ceph Hackathon last week was to examine how to improve Ceph Small IO performance.  Jian Zhang presented findings showing a dramatic improvement in small random IO performance when Ceph is used with jemalloc.  His results build upon Sandisk's original findings that the default thread cache values are a major bottleneck in TCMalloc 2.1.  To further verify these results, we sat down at the Hackathon and configured the new performance test cluster that Intel generously donated to the Ceph community laboratory to run through a variety of tests with different memory allocator configurations.  I've since written the results of those tests up in pdf form for folks who are interested.
->
-> The results are located here:
->
-> http://nhm.ceph.com/hackathon/Ceph_Hackathon_Memory_Allocator_Testing.pdf
->
-> I want to be clear that many other folks have done the heavy lifting here.  These results are simply a validation of the many tests that other folks have already done.  Many thanks to Sandisk and others for figuring this out as it's a pretty big deal!
->
-> Side note:  Very little tuning other than swapping the memory allocator and a couple of quick and dirty ceph tunables were set during these tests. It's quite possible that higher IOPS will be achieved as we really start digging into the cluster and learning what the bottlenecks are.
->
-> Thanks,
-> Mark
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-> ________________________________
->
-> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
->
+You can ssh to the teuthology instance (the host that runs pulpito) and m=
+odify the ~/.teuthology.yaml with
+
+   gitbuilder_host: gitbuilder.ubuntukylin.com
+
+which will override the default of=20
+
+   gitbuilder_host: gitbuilder.ceph.com
+
+I've never done that however and maybe Zack or Andrew have advices on how=
+ to establish a mirror properly.
+
+I think having a private package repository that is useable by teuthology=
+ is complicated because the package locations, naming conventions and bui=
+ld methods are difficult to reproduce (and I don't fully understand what =
+they are right now).
+
+Cheers
+
+>=20
+> Cheers,
+> Li Wang
+>=20
+> On 2015/8/8 23:23, Loic Dachary wrote:
+>>
+>>
+>> On 08/08/2015 16:22, Li Wang wrote:
+>>> Hi Loic,
+>>>    Glad to talk with you on IRC about setting up
+>>> the teuthology OpenStack backend. Once it is ready
+>>> to run the test in private cloud, and the results
+>>> could be exported and uploaded to a public place,
+>>> please let me know asap :)
+>>
+>> I'm working on it, should be ready RSN.
+>>
+>>>
+>>> Cheers,
+>>> Li Wang
+>>>
+>>>
+>>> On 2015/8/6 23:05, Loic Dachary wrote:
+>>>> Hi,
+>>>>
+>>>> I'm looking into testing the OpenStack backend for teuthology on a n=
+ew cluster to verify it's portable. I think it is but ... ;-) I'm told yo=
+u have an OpenStack cluster and would be interested in running teuthology=
+ workloads on it. Does it have a public facing API ?
+>>>>
+>>>> Cheers
+>>>>
+>>
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
 
+--IRU0rJvFDdqi6w9TqgXVsx1d5QKMW3jLu
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
--- 
-Best Regards,
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
 
-Wheat
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+iEYEARECAAYFAlXUWS0ACgkQ8dLMyEl6F239bwCffxxVh+qArn1DJxrrWZqvoKLW
+3tQAnAnspSmWu+0IT+AyqvrjdtVK4XA3
+=6xl0
+-----END PGP SIGNATURE-----
+
+--IRU0rJvFDdqi6w9TqgXVsx1d5QKMW3jLu--
