@@ -1,89 +1,114 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: hammer integration tests for v0.94.4
-Date: Wed, 19 Aug 2015 18:21:35 +0200
-Message-ID: <55D4AD0F.1080908@dachary.org>
-References: <CAP3mxSw7B0HA7iTB+Fr8sF3bxL2V2KKoq7LdWER9kuVr_XZ4FQ@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Ceph Hackathon: More Memory Allocator Testing
+Date: Wed, 19 Aug 2015 16:27:30 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE12211@SACMBXIP01.sdcorp.global.sandisk.com>
+References: <55D409F0.3050802@redhat.com>
+ <1491599152.40068072.1439992888600.JavaMail.zimbra@oxygem.tv>
+ <1960465945.40252217.1440000351155.JavaMail.zimbra@oxygem.tv>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="ODQjtdQ0foGbEKf4WI3j3t9PwRTFsbt4n"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:40640 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751829AbbHSQVi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Aug 2015 12:21:38 -0400
-In-Reply-To: <CAP3mxSw7B0HA7iTB+Fr8sF3bxL2V2KKoq7LdWER9kuVr_XZ4FQ@mail.gmail.com>
+Received: from mail-bl2on0078.outbound.protection.outlook.com ([65.55.169.78]:51837
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751621AbbHSQ1e (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 19 Aug 2015 12:27:34 -0400
+In-Reply-To: <1960465945.40252217.1440000351155.JavaMail.zimbra@oxygem.tv>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Abhishek Varshney <abhishek.varshney@flipkart.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Alexandre DERUMIER <aderumier@odiso.com>, Mark Nelson <mnelson@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---ODQjtdQ0foGbEKf4WI3j3t9PwRTFsbt4n
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-Hi Abhishek,
-
-The tests for your integration branch completed and I updated http://trac=
-ker.ceph.com/issues/12701#teuthology-run-commit-e1dadd3da9e39daf669f94715=
-c7833d2b280bbed-HAMMER-BACKPORTS-August-14 to reflect the results.
-
-The general idea is that if there are a few failed jobs, I just re-schedu=
-led them assuming this is noise (fs, rados, rbd). The rgw suite however h=
-ad a number of failures and I just updated http://tracker.ceph.com/issues=
-/12701#rgw to group the same error together. There seems to be only two t=
-ypes of error.=20
-
-Can you make sense of them ?=20
-
-Cheers
-
-On 19/08/2015 17:37, Abhishek Varshney wrote:
-> Hey Loic,
->=20
-> I saw that there was a PR which was probably causing all the upgrade te=
-sts to hang. What about other tests which failed in other suites?
->=20
-> Also let me know how should I proceed now or any other task that I can =
-take?
->=20
-> Thanks
-> Abhishek
->=20
-> -----------------------------------------------------------------------=
--------------------------------------------------------------------
->=20
-> This email and any files transmitted with it are confidential and inten=
-ded solely for the use of the individual or entity to whom they are addre=
-ssed. If you have received this email in error please notify the system m=
-anager. This message contains confidential information and is intended on=
-ly for the individual named. If you are not the named addressee you shoul=
-d not disseminate, distribute or copy this e-mail. Please notify the send=
-er immediately by e-mail if you have received this e-mail by mistake and =
-delete this e-mail from your system. If you are not the intended recipien=
-t you are notified that disclosing, copying, distributing or taking any a=
-ction in reliance on the contents of this information is strictly prohibi=
-ted. Although Flipkart has taken reasonable precautions to ensure no viru=
-ses are present in this email, the company cannot accept responsibility f=
-or any loss or damage arising from the use of this email or attachments
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---ODQjtdQ0foGbEKf4WI3j3t9PwRTFsbt4n
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlXUrQ8ACgkQ8dLMyEl6F21yrgCfSfmHfSrKKdBq1qFDykKDbe4a
-r0MAnjML0eTm+230B8bdFqnYF3Vi22IZ
-=z3BR
------END PGP SIGNATURE-----
-
---ODQjtdQ0foGbEKf4WI3j3t9PwRTFsbt4n--
+PDwgSSB0aGluayB0aGF0IHRjbWFsbG9jIGhhdmUgYSBmaXhlZCBzaXplIChUQ01BTExPQ19NQVhf
+VE9UQUxfVEhSRUFEX0NBQ0hFX0JZVEVTKSwgYW5kIHNoYXJlIGl0IGJldHdlZW4gYWxsIHByb2Nl
+c3MuDQoNCkkgdGhpbmsgaXQgaXMgcGVyIHRjbWFsbG9jIGluc3RhbmNlIGxvYWRlZCAsIHNvLCBh
+dCBsZWFzdCB3aXRoIG51bV9vc2RzICogbnVtX3RjbWFsbG9jX2luc3RhbmNlICogVENNQUxMT0Nf
+TUFYX1RPVEFMX1RIUkVBRF9DQUNIRV9CWVRFUyBpbiBhIGJveC4NCg0KQWxzbywgSSB0aGluayB0
+aGVyZSBpcyBubyBwb2ludCBvZiBpbmNyZWFzaW5nIG9zZF9vcF90aHJlYWRzIGFzIGl0IGlzIG5v
+dCBpbiBJTyBwYXRoIGFueW1vcmUuLk1hcmsgaXMgdXNpbmcgZGVmYXVsdCA1OjIgZm9yIHNoYXJk
+OnRocmVhZCBwZXIgc2hhcmQuLg0KDQpCdXQsIHllcywgaXQgY291bGQgYmUgcmVsYXRlZCB0byBu
+dW1iZXIgb2YgdGhyZWFkcyBPU0RzIGFyZSB1c2luZywgbmVlZCB0byB1bmRlcnN0YW5kIGhvdyBq
+ZW1hbGxvYyB3b3Jrcy4uQWxzbywgdGhlcmUgbWF5IGJlIHNvbWUgdHVuaW5nIHRvIHJlZHVjZSBt
+ZW1vcnkgdXNhZ2UgKD8pLg0KDQpUaGFua3MgJiBSZWdhcmRzDQpTb21uYXRoDQoNCi0tLS0tT3Jp
+Z2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9y
+ZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2Yg
+QWxleGFuZHJlIERFUlVNSUVSDQpTZW50OiBXZWRuZXNkYXksIEF1Z3VzdCAxOSwgMjAxNSA5OjA2
+IEFNDQpUbzogTWFyayBOZWxzb24NCkNjOiBjZXBoLWRldmVsDQpTdWJqZWN0OiBSZTogQ2VwaCBI
+YWNrYXRob246IE1vcmUgTWVtb3J5IEFsbG9jYXRvciBUZXN0aW5nDQoNCkkgd2FzIGxpc3Rlbmlu
+ZyBhdCB0aGUgdG9kYXkgbWVldGluZywNCg0KYW5kIHNlZW0gdGhhdCB0aGUgYmxvY2tlciB0byBo
+YXZlIGplbWFsbG9jIGFzIGRlZmF1bHQsDQoNCmlzIHRoYXQgaXQncyB1c2VkIG1vcmUgbWVtb3J5
+IGJ5IG9zZCAoYXJvdW5kIDMwME1CPyksIGFuZCBzb21lIGd1eXMgY291bGQgaGF2ZSBib3hlcyB3
+aXRoIDYwZGlza3MuDQoNCg0KSSBqdXN0IHdvbmRlciBpZiB0aGUgbWVtb3J5IGluY3JlYXNlIGlz
+IHJlbGF0ZWQgdG8gb3NkX29wX251bV9zaGFyZHMvb3NkX29wX3RocmVhZHMgdmFsdWUgPw0KDQpT
+ZWVtIHRoYXQgYXMgaGFja2F0b24sIHRoZSBiZW5jaCBoYXMgYmVlbiBkb25lIG9uIHN1cGVyIGJp
+ZyBjcHVzIGJveGVkIDM2Y29yZXMvNzJULCBodHRwOi8vY2VwaC5jb20vaGFja2F0aG9uLzIwMTUt
+MDgtY2VwaC1oYW1tZXItZnVsbC1zc2QucHB0eA0Kd2l0aCBvc2Rfb3BfdGhyZWFkcyA9IDMyLg0K
+DQpJIHRoaW5rIHRoYXQgdGNtYWxsb2MgaGF2ZSBhIGZpeGVkIHNpemUgKFRDTUFMTE9DX01BWF9U
+T1RBTF9USFJFQURfQ0FDSEVfQllURVMpLCBhbmQgc2hhcmUgaXQgYmV0d2VlbiBhbGwgcHJvY2Vz
+cy4NCg0KTWF5YmUgamVtYWxsb2MgYWxsb2NhdGVkIG1lbW9yeSBieSB0aHJlYWRzLg0KDQoNCg0K
+KEkgdGhpbmsgZ3V5cyB3aXRoIDYwZGlza3MgYm94LCBkb250IHVzZSBzc2QsIHNvIGxvdyBpb3Bz
+IGJ5IG9zZCwgYW5kIHRoZXkgZG9uJ3QgbmVlZCBhIGxvdCBvZiB0aHJlYWRzIGJ5IG9zZCkNCg0K
+DQoNCi0tLS0tIE1haWwgb3JpZ2luYWwgLS0tLS0NCkRlOiAiYWRlcnVtaWVyIiA8YWRlcnVtaWVy
+QG9kaXNvLmNvbT4NCsOAOiAiTWFyayBOZWxzb24iIDxtbmVsc29uQHJlZGhhdC5jb20+DQpDYzog
+ImNlcGgtZGV2ZWwiIDxjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZz4NCkVudm95w6k6IE1lcmNy
+ZWRpIDE5IEFvw7t0IDIwMTUgMTY6MDE6MjgNCk9iamV0OiBSZTogQ2VwaCBIYWNrYXRob246IE1v
+cmUgTWVtb3J5IEFsbG9jYXRvciBUZXN0aW5nDQoNClRoYW5rcyBNYXJjLA0KDQpSZXN1bHRzIGFy
+ZSBtYXRjaGluZyBleGFjdGx5IHdoYXQgSSBoYXZlIHNlZW4gd2l0aCB0Y21hbGxvYyAyLjEgdnMg
+Mi40IHZzIGplbWFsbG9jLg0KDQphbmQgaW5kZWVkIHRjbWFsbG9jLCBldmVuIHdpdGggYmlnZ2Vy
+IGNhY2hlLCBzZWVtIGRlY3JlYXNlIG92ZXIgdGltZS4NCg0KDQpXaGF0IGlzIGZ1bm55LCBpcyB0
+aGF0IEkgc2VlIGV4YWN0bHkgc2FtZSBiZWhhdmlvdXIgY2xpZW50IGxpYnJiZCBzaWRlLCB3aXRo
+IHFlbXUgYW5kIG11bHRpcGxlIGlvdGhyZWFkcy4NCg0KDQpTd2l0Y2hpbmcgYm90aCBzZXJ2ZXIg
+YW5kIGNsaWVudCB0byBqZW1hbGxvYyBnaXZlIG1lIGJlc3QgcGVyZm9ybWFuY2Ugb24gc21hbGwg
+cmVhZCBjdXJyZW50bHkuDQoNCg0KDQoNCg0KDQotLS0tLSBNYWlsIG9yaWdpbmFsIC0tLS0tDQpE
+ZTogIk1hcmsgTmVsc29uIiA8bW5lbHNvbkByZWRoYXQuY29tPg0Kw4A6ICJjZXBoLWRldmVsIiA8
+Y2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc+DQpFbnZvecOpOiBNZXJjcmVkaSAxOSBBb8O7dCAy
+MDE1IDA2OjQ1OjM2DQpPYmpldDogQ2VwaCBIYWNrYXRob246IE1vcmUgTWVtb3J5IEFsbG9jYXRv
+ciBUZXN0aW5nDQoNCkhpIEV2ZXJ5b25lLA0KDQpPbmUgb2YgdGhlIGdvYWxzIGF0IHRoZSBDZXBo
+IEhhY2thdGhvbiBsYXN0IHdlZWsgd2FzIHRvIGV4YW1pbmUgaG93IHRvIGltcHJvdmUgQ2VwaCBT
+bWFsbCBJTyBwZXJmb3JtYW5jZS4gSmlhbiBaaGFuZyBwcmVzZW50ZWQgZmluZGluZ3Mgc2hvd2lu
+ZyBhIGRyYW1hdGljIGltcHJvdmVtZW50IGluIHNtYWxsIHJhbmRvbSBJTyBwZXJmb3JtYW5jZSB3
+aGVuIENlcGggaXMgdXNlZCB3aXRoIGplbWFsbG9jLiBIaXMgcmVzdWx0cyBidWlsZCB1cG9uIFNh
+bmRpc2sncyBvcmlnaW5hbCBmaW5kaW5ncyB0aGF0IHRoZSBkZWZhdWx0IHRocmVhZCBjYWNoZSB2
+YWx1ZXMgYXJlIGEgbWFqb3IgYm90dGxlbmVjayBpbiBUQ01hbGxvYyAyLjEuIFRvIGZ1cnRoZXIg
+dmVyaWZ5IHRoZXNlIHJlc3VsdHMsIHdlIHNhdCBkb3duIGF0IHRoZSBIYWNrYXRob24gYW5kIGNv
+bmZpZ3VyZWQgdGhlIG5ldyBwZXJmb3JtYW5jZSB0ZXN0IGNsdXN0ZXIgdGhhdCBJbnRlbCBnZW5l
+cm91c2x5IGRvbmF0ZWQgdG8gdGhlIENlcGggY29tbXVuaXR5IGxhYm9yYXRvcnkgdG8gcnVuIHRo
+cm91Z2ggYSB2YXJpZXR5IG9mIHRlc3RzIHdpdGggZGlmZmVyZW50IG1lbW9yeSBhbGxvY2F0b3Ig
+Y29uZmlndXJhdGlvbnMuIEkndmUgc2luY2Ugd3JpdHRlbiB0aGUgcmVzdWx0cyBvZiB0aG9zZSB0
+ZXN0cyB1cCBpbiBwZGYgZm9ybSBmb3IgZm9sa3Mgd2hvIGFyZSBpbnRlcmVzdGVkLg0KDQpUaGUg
+cmVzdWx0cyBhcmUgbG9jYXRlZCBoZXJlOg0KDQpodHRwOi8vbmhtLmNlcGguY29tL2hhY2thdGhv
+bi9DZXBoX0hhY2thdGhvbl9NZW1vcnlfQWxsb2NhdG9yX1Rlc3RpbmcucGRmDQoNCkkgd2FudCB0
+byBiZSBjbGVhciB0aGF0IG1hbnkgb3RoZXIgZm9sa3MgaGF2ZSBkb25lIHRoZSBoZWF2eSBsaWZ0
+aW5nIGhlcmUuIFRoZXNlIHJlc3VsdHMgYXJlIHNpbXBseSBhIHZhbGlkYXRpb24gb2YgdGhlIG1h
+bnkgdGVzdHMgdGhhdCBvdGhlciBmb2xrcyBoYXZlIGFscmVhZHkgZG9uZS4gTWFueSB0aGFua3Mg
+dG8gU2FuZGlzayBhbmQgb3RoZXJzIGZvciBmaWd1cmluZyB0aGlzIG91dCBhcyBpdCdzIGEgcHJl
+dHR5IGJpZyBkZWFsIQ0KDQpTaWRlIG5vdGU6IFZlcnkgbGl0dGxlIHR1bmluZyBvdGhlciB0aGFu
+IHN3YXBwaW5nIHRoZSBtZW1vcnkgYWxsb2NhdG9yIGFuZCBhIGNvdXBsZSBvZiBxdWljayBhbmQg
+ZGlydHkgY2VwaCB0dW5hYmxlcyB3ZXJlIHNldCBkdXJpbmcgdGhlc2UgdGVzdHMuIEl0J3MgcXVp
+dGUgcG9zc2libGUgdGhhdCBoaWdoZXIgSU9QUyB3aWxsIGJlIGFjaGlldmVkIGFzIHdlIHJlYWxs
+eSBzdGFydCBkaWdnaW5nIGludG8gdGhlIGNsdXN0ZXIgYW5kIGxlYXJuaW5nIHdoYXQgdGhlIGJv
+dHRsZW5lY2tzIGFyZS4NCg0KVGhhbmtzLA0KTWFyaw0KLS0NClRvIHVuc3Vic2NyaWJlIGZyb20g
+dGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbiB0aGUg
+Ym9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9y
+ZG9tbyBpbmZvIGF0IGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
+DQotLQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vi
+c2NyaWJlIGNlcGgtZGV2ZWwiIGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9A
+dmdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgaHR0cDovL3ZnZXIua2VybmVs
+Lm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQotLQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxp
+c3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIHRoZSBib2R5IG9m
+IGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGlu
+Zm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KDQpfX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fXw0KDQpQTEVBU0UgTk9URTogVGhlIGluZm9ybWF0
+aW9uIGNvbnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNzYWdlIGlzIGludGVuZGVk
+IG9ubHkgZm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpIG5hbWVkIGFi
+b3ZlLiBJZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVuZGVkIHJl
+Y2lwaWVudCwgeW91IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0
+aGlzIG1lc3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywgZGlzc2VtaW5hdGlvbiwg
+ZGlzdHJpYnV0aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3RseSBwcm9o
+aWJpdGVkLiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4gZXJyb3Is
+IHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3IgZS1tYWlsIChhcyBzaG93
+biBhYm92ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVzIG9mIHRo
+aXMgbWVzc2FnZSBpbiB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxl
+Y3Ryb25pY2FsbHkgc3RvcmVkIGNvcGllcykuDQoNCg==
