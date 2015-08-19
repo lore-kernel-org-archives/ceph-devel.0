@@ -1,147 +1,239 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Ceph Hackathon: More Memory Allocator Testing
-Date: Wed, 19 Aug 2015 20:29:00 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE12841@SACMBXIP01.sdcorp.global.sandisk.com>
+From: Stefan Priebe <s.priebe@profihost.ag>
+Subject: Re: Ceph Hackathon: More Memory Allocator Testing
+Date: Wed, 19 Aug 2015 22:31:15 +0200
+Message-ID: <55D4E793.9040408@profihost.ag>
 References: <55D409F0.3050802@redhat.com>
  <1491599152.40068072.1439992888600.JavaMail.zimbra@oxygem.tv>
  <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE127C5@SACMBXIP01.sdcorp.global.sandisk.com>
  <55D4E470.9030501@profihost.ag>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE12841@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1on0084.outbound.protection.outlook.com ([157.56.110.84]:8468
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750767AbbHSU3G (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 19 Aug 2015 16:29:06 -0400
-In-Reply-To: <55D4E470.9030501@profihost.ag>
-Content-Language: en-US
+Received: from mail-ph.de-nserver.de ([85.158.179.214]:35311 "EHLO
+	mail-ph.de-nserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751258AbbHSUbO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Aug 2015 16:31:14 -0400
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE12841@SACMBXIP01.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe <s.priebe@profihost.ag>, Alexandre DERUMIER <aderumier@odiso.com>, Mark Nelson <mnelson@redhat.com>
+To: Somnath Roy <Somnath.Roy@sandisk.com>, Alexandre DERUMIER <aderumier@odiso.com>, Mark Nelson <mnelson@redhat.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-SG1tLi4uV2UgbmVlZCB0byBmaXggdGhhdCBhcyBwYXJ0IG9mIGNvbmZpZ3VyZS9NYWtlZmlsZSBJ
-IGd1ZXNzICg/KS4uDQpTaW5jZSB3ZSBoYXZlIGRvbmUgdGhpcyBqZW1hbGxvYyBpbnRlZ3JhdGlv
-biBvcmlnaW5hbGx5LCB3ZSBjYW4gdGFrZSB0aGF0IG93bmVyc2hpcCB1bmxlc3MgYW55Ym9keSBz
-ZWVzIGEgcHJvYmxlbSBvZiBlbmFibGluZyB0Y21hbGxvYy9qZW1hbGxvYyB3aXRoIGxpYnJiZC9s
-aWJyYWRvcy4gDQoNCjw8IFlvdSBoYXZlIHRvIHJlbW92ZSBsaWJjbWFsbG9jIG91dCBvZiB5b3Vy
-IGJ1aWxkIGVudmlyb25tZW50IHRvIGdldCB0aGlzIGRvbmUNCkhvdyBkbyBJIGRvIHRoYXQgPyBJ
-IGFtIHVzaW5nIFVidW50dSBhbmQgY2FuJ3QgYWZmb3JkIHRvIHJlbW92ZSBsaWJjKiBwYWNrYWdl
-cy4NCg0KVGhhbmtzICYgUmVnYXJkcw0KU29tbmF0aA0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2Ut
-LS0tLQ0KRnJvbTogU3RlZmFuIFByaWViZSBbbWFpbHRvOnMucHJpZWJlQHByb2ZpaG9zdC5hZ10g
-DQpTZW50OiBXZWRuZXNkYXksIEF1Z3VzdCAxOSwgMjAxNSAxOjE4IFBNDQpUbzogU29tbmF0aCBS
-b3k7IEFsZXhhbmRyZSBERVJVTUlFUjsgTWFyayBOZWxzb24NCkNjOiBjZXBoLWRldmVsDQpTdWJq
-ZWN0OiBSZTogQ2VwaCBIYWNrYXRob246IE1vcmUgTWVtb3J5IEFsbG9jYXRvciBUZXN0aW5nDQoN
-Cg0KQW0gMTkuMDguMjAxNSB1bSAyMjoxNiBzY2hyaWViIFNvbW5hdGggUm95Og0KPiBBbGV4YW5k
-cmUsDQo+IEkgYW0gbm90IGFibGUgdG8gYnVpbGQgbGlicmFkb3MvbGlicmJkIGJ5IHVzaW5nIHRo
-ZSBmb2xsb3dpbmcgY29uZmlnIG9wdGlvbi4NCj4NCj4gLi9jb25maWd1cmUg4oCTd2l0aG91dC10
-Y21hbGxvYyDigJN3aXRoLWplbWFsbG9jDQoNClNhbWUgaXNzdWUgdG8gbWUuIFlvdSBoYXZlIHRv
-IHJlbW92ZSBsaWJjbWFsbG9jIG91dCBvZiB5b3VyIGJ1aWxkIGVudmlyb25tZW50IHRvIGdldCB0
-aGlzIGRvbmUuDQoNClN0ZWZhbg0KDQoNCj4gSXQgc2VlbXMgaXQgaXMgYnVpbGRpbmcgb3NkL21v
-bi9NZHMvUkdXIHdpdGggamVtYWxsb2MgZW5hYmxlZC4uDQo+DQo+IHJvb3RAZW1zbm9kZTEwOn4v
-Y2VwaC1sYXRlc3Qvc3JjIyBsZGQgLi9jZXBoLW9zZA0KPiAgICAgICAgICBsaW51eC12ZHNvLnNv
-LjEgPT4gICgweDAwMDA3ZmZkMGViNDMwMDApDQo+ICAgICAgICAgIGxpYmplbWFsbG9jLnNvLjEg
-PT4gL3Vzci9saWIveDg2XzY0LWxpbnV4LWdudS9saWJqZW1hbGxvYy5zby4xICgweDAwMDA3ZjVm
-OTJkNzAwMDApDQo+ICAgICAgICAgIC4uLi4uLi4NCj4NCj4gcm9vdEBlbXNub2RlMTA6fi9jZXBo
-LWxhdGVzdC9zcmMvLmxpYnMjIGxkZCAuL2xpYnJhZG9zLnNvLjIuMC4wDQo+ICAgICAgICAgIGxp
-bnV4LXZkc28uc28uMSA9PiAgKDB4MDAwMDdmZmVkNDZmMjAwMCkNCj4gICAgICAgICAgbGliYm9v
-c3RfdGhyZWFkLnNvLjEuNTUuMCA9PiAvdXNyL2xpYi94ODZfNjQtbGludXgtZ251L2xpYmJvb3N0
-X3RocmVhZC5zby4xLjU1LjAgKDB4MDAwMDdmZjY4Nzg4NzAwMCkNCj4gICAgICAgICAgbGlibHR0
-bmctdXN0LnNvLjAgPT4gL3Vzci9saWIveDg2XzY0LWxpbnV4LWdudS9saWJsdHRuZy11c3Quc28u
-MCAoMHgwMDAwN2ZmNjg3NjNkMDAwKQ0KPiAgICAgICAgICBsaWJkbC5zby4yID0+IC9saWIveDg2
-XzY0LWxpbnV4LWdudS9saWJkbC5zby4yICgweDAwMDA3ZmY2ODc0MzgwMDApDQo+ICAgICAgICAg
-IGxpYnB0aHJlYWQuc28uMCA9PiAvbGliL3g4Nl82NC1saW51eC1nbnUvbGlicHRocmVhZC5zby4w
-ICgweDAwMDA3ZmY2ODcyMWEwMDApDQo+ICAgICAgICAgIGxpYm5zczMuc28gPT4gL3Vzci9saWIv
-eDg2XzY0LWxpbnV4LWdudS9saWJuc3MzLnNvICgweDAwMDA3ZmY2ODZlZTAwMDApDQo+ICAgICAg
-ICAgIGxpYnNtaW1lMy5zbyA9PiAvdXNyL2xpYi94ODZfNjQtbGludXgtZ251L2xpYnNtaW1lMy5z
-byAoMHgwMDAwN2ZmNjg2Y2IzMDAwKQ0KPiAgICAgICAgICBsaWJuc3ByNC5zbyA9PiAvdXNyL2xp
-Yi94ODZfNjQtbGludXgtZ251L2xpYm5zcHI0LnNvICgweDAwMDA3ZmY2ODZhNzYwMDApDQo+ICAg
-ICAgICAgIGxpYnV1aWQuc28uMSA9PiAvbGliL3g4Nl82NC1saW51eC1nbnUvbGlidXVpZC5zby4x
-ICgweDAwMDA3ZmY2ODY4NzEwMDApDQo+ICAgICAgICAgIGxpYnJ0LnNvLjEgPT4gL2xpYi94ODZf
-NjQtbGludXgtZ251L2xpYnJ0LnNvLjEgKDB4MDAwMDdmZjY4NjY2ODAwMCkNCj4gICAgICAgICAg
-bGliYm9vc3Rfc3lzdGVtLnNvLjEuNTUuMCA9PiAvdXNyL2xpYi94ODZfNjQtbGludXgtZ251L2xp
-YmJvb3N0X3N5c3RlbS5zby4xLjU1LjAgKDB4MDAwMDdmZjY4NjQ2NDAwMCkNCj4gICAgICAgICAg
-bGlic3RkYysrLnNvLjYgPT4gL3Vzci9saWIveDg2XzY0LWxpbnV4LWdudS9saWJzdGRjKysuc28u
-NiAoMHgwMDAwN2ZmNjg2MTYwMDAwKQ0KPiAgICAgICAgICBsaWJtLnNvLjYgPT4gL2xpYi94ODZf
-NjQtbGludXgtZ251L2xpYm0uc28uNiAoMHgwMDAwN2ZmNjg1ZTU5MDAwKQ0KPiAgICAgICAgICBs
-aWJjLnNvLjYgPT4gL2xpYi94ODZfNjQtbGludXgtZ251L2xpYmMuc28uNiAoMHgwMDAwN2ZmNjg1
-YTk0MDAwKQ0KPiAgICAgICAgICBsaWJnY2Nfcy5zby4xID0+IC9saWIveDg2XzY0LWxpbnV4LWdu
-dS9saWJnY2Nfcy5zby4xICgweDAwMDA3ZmY2ODU4N2UwMDApDQo+ICAgICAgICAgIGxpYmx0dG5n
-LXVzdC10cmFjZXBvaW50LnNvLjAgPT4gL3Vzci9saWIveDg2XzY0LWxpbnV4LWdudS9saWJsdHRu
-Zy11c3QtdHJhY2Vwb2ludC5zby4wICgweDAwMDA3ZmY2ODU2NjMwMDApDQo+ICAgICAgICAgIGxp
-YnVyY3UtYnAuc28uMSA9PiAvdXNyL2xpYi9saWJ1cmN1LWJwLnNvLjEgKDB4MDAwMDdmZjY4NTQ1
-YzAwMCkNCj4gICAgICAgICAgbGlidXJjdS1jZHMuc28uMSA9PiAvdXNyL2xpYi9saWJ1cmN1LWNk
-cy5zby4xICgweDAwMDA3ZmY2ODUyNTUwMDApDQo+ICAgICAgICAgIC9saWI2NC9sZC1saW51eC14
-ODYtNjQuc28uMiAoMHgwMDAwN2ZmNjhhMGY2MDAwKQ0KPiAgICAgICAgICBsaWJuc3N1dGlsMy5z
-byA9PiAvdXNyL2xpYi94ODZfNjQtbGludXgtZ251L2xpYm5zc3V0aWwzLnNvICgweDAwMDA3ZmY2
-ODUwMjkwMDApDQo+ICAgICAgICAgIGxpYnBsYzQuc28gPT4gL3Vzci9saWIveDg2XzY0LWxpbnV4
-LWdudS9saWJwbGM0LnNvICgweDAwMDA3ZmY2ODRlMjQwMDApDQo+ICAgICAgICAgIGxpYnBsZHM0
-LnNvID0+IC91c3IvbGliL3g4Nl82NC1saW51eC1nbnUvbGlicGxkczQuc28gDQo+ICgweDAwMDA3
-ZmY2ODRjMjAwMDApDQo+DQo+IEl0IGlzIGJ1aWxkaW5nIHdpdGggbGliY21hbGxvYyBhbHdheXMu
-Li4NCj4NCj4gRGlkIHlvdSBjaGFuZ2UgdGhlIGNlcGggbWFrZWZpbGVzIHRvIGJ1aWxkIGxpYnJi
-ZC9saWJyYWRvcyB3aXRoIGplbWFsbG9jID8NCj4NCj4gVGhhbmtzICYgUmVnYXJkcw0KPiBTb21u
-YXRoDQo+DQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IGNlcGgtZGV2ZWwt
-b3duZXJAdmdlci5rZXJuZWwub3JnIA0KPiBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdlci5r
-ZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgQWxleGFuZHJlIA0KPiBERVJVTUlFUg0KPiBTZW50OiBX
-ZWRuZXNkYXksIEF1Z3VzdCAxOSwgMjAxNSA3OjAxIEFNDQo+IFRvOiBNYXJrIE5lbHNvbg0KPiBD
-YzogY2VwaC1kZXZlbA0KPiBTdWJqZWN0OiBSZTogQ2VwaCBIYWNrYXRob246IE1vcmUgTWVtb3J5
-IEFsbG9jYXRvciBUZXN0aW5nDQo+DQo+IFRoYW5rcyBNYXJjLA0KPg0KPiBSZXN1bHRzIGFyZSBt
-YXRjaGluZyBleGFjdGx5IHdoYXQgSSBoYXZlIHNlZW4gd2l0aCB0Y21hbGxvYyAyLjEgdnMgMi40
-IHZzIGplbWFsbG9jLg0KPg0KPiBhbmQgaW5kZWVkIHRjbWFsbG9jLCBldmVuIHdpdGggYmlnZ2Vy
-IGNhY2hlLCBzZWVtIGRlY3JlYXNlIG92ZXIgdGltZS4NCj4NCj4NCj4gV2hhdCBpcyBmdW5ueSwg
-aXMgdGhhdCBJIHNlZSBleGFjdGx5IHNhbWUgYmVoYXZpb3VyIGNsaWVudCBsaWJyYmQgc2lkZSwg
-d2l0aCBxZW11IGFuZCBtdWx0aXBsZSBpb3RocmVhZHMuDQo+DQo+DQo+IFN3aXRjaGluZyBib3Ro
-IHNlcnZlciBhbmQgY2xpZW50IHRvIGplbWFsbG9jIGdpdmUgbWUgYmVzdCBwZXJmb3JtYW5jZSBv
-biBzbWFsbCByZWFkIGN1cnJlbnRseS4NCj4NCj4NCj4NCj4NCj4NCj4NCj4gLS0tLS0gTWFpbCBv
-cmlnaW5hbCAtLS0tLQ0KPiBEZTogIk1hcmsgTmVsc29uIiA8bW5lbHNvbkByZWRoYXQuY29tPg0K
-PiDDgDogImNlcGgtZGV2ZWwiIDxjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZz4NCj4gRW52b3nD
-qTogTWVyY3JlZGkgMTkgQW/Du3QgMjAxNSAwNjo0NTozNg0KPiBPYmpldDogQ2VwaCBIYWNrYXRo
-b246IE1vcmUgTWVtb3J5IEFsbG9jYXRvciBUZXN0aW5nDQo+DQo+IEhpIEV2ZXJ5b25lLA0KPg0K
-PiBPbmUgb2YgdGhlIGdvYWxzIGF0IHRoZSBDZXBoIEhhY2thdGhvbiBsYXN0IHdlZWsgd2FzIHRv
-IGV4YW1pbmUgaG93IHRvIGltcHJvdmUgQ2VwaCBTbWFsbCBJTyBwZXJmb3JtYW5jZS4gSmlhbiBa
-aGFuZyBwcmVzZW50ZWQgZmluZGluZ3Mgc2hvd2luZyBhIGRyYW1hdGljIGltcHJvdmVtZW50IGlu
-IHNtYWxsIHJhbmRvbSBJTyBwZXJmb3JtYW5jZSB3aGVuIENlcGggaXMgdXNlZCB3aXRoIGplbWFs
-bG9jLiBIaXMgcmVzdWx0cyBidWlsZCB1cG9uIFNhbmRpc2sncyBvcmlnaW5hbCBmaW5kaW5ncyB0
-aGF0IHRoZSBkZWZhdWx0IHRocmVhZCBjYWNoZSB2YWx1ZXMgYXJlIGEgbWFqb3IgYm90dGxlbmVj
-ayBpbiBUQ01hbGxvYyAyLjEuIFRvIGZ1cnRoZXIgdmVyaWZ5IHRoZXNlIHJlc3VsdHMsIHdlIHNh
-dCBkb3duIGF0IHRoZSBIYWNrYXRob24gYW5kIGNvbmZpZ3VyZWQgdGhlIG5ldyBwZXJmb3JtYW5j
-ZSB0ZXN0IGNsdXN0ZXIgdGhhdCBJbnRlbCBnZW5lcm91c2x5IGRvbmF0ZWQgdG8gdGhlIENlcGgg
-Y29tbXVuaXR5IGxhYm9yYXRvcnkgdG8gcnVuIHRocm91Z2ggYSB2YXJpZXR5IG9mIHRlc3RzIHdp
-dGggZGlmZmVyZW50IG1lbW9yeSBhbGxvY2F0b3IgY29uZmlndXJhdGlvbnMuIEkndmUgc2luY2Ug
-d3JpdHRlbiB0aGUgcmVzdWx0cyBvZiB0aG9zZSB0ZXN0cyB1cCBpbiBwZGYgZm9ybSBmb3IgZm9s
-a3Mgd2hvIGFyZSBpbnRlcmVzdGVkLg0KPg0KPiBUaGUgcmVzdWx0cyBhcmUgbG9jYXRlZCBoZXJl
-Og0KPg0KPiBodHRwOi8vbmhtLmNlcGguY29tL2hhY2thdGhvbi9DZXBoX0hhY2thdGhvbl9NZW1v
-cnlfQWxsb2NhdG9yX1Rlc3RpbmcuDQo+IHBkZg0KPg0KPiBJIHdhbnQgdG8gYmUgY2xlYXIgdGhh
-dCBtYW55IG90aGVyIGZvbGtzIGhhdmUgZG9uZSB0aGUgaGVhdnkgbGlmdGluZyBoZXJlLiBUaGVz
-ZSByZXN1bHRzIGFyZSBzaW1wbHkgYSB2YWxpZGF0aW9uIG9mIHRoZSBtYW55IHRlc3RzIHRoYXQg
-b3RoZXIgZm9sa3MgaGF2ZSBhbHJlYWR5IGRvbmUuIE1hbnkgdGhhbmtzIHRvIFNhbmRpc2sgYW5k
-IG90aGVycyBmb3IgZmlndXJpbmcgdGhpcyBvdXQgYXMgaXQncyBhIHByZXR0eSBiaWcgZGVhbCEN
-Cj4NCj4gU2lkZSBub3RlOiBWZXJ5IGxpdHRsZSB0dW5pbmcgb3RoZXIgdGhhbiBzd2FwcGluZyB0
-aGUgbWVtb3J5IGFsbG9jYXRvciBhbmQgYSBjb3VwbGUgb2YgcXVpY2sgYW5kIGRpcnR5IGNlcGgg
-dHVuYWJsZXMgd2VyZSBzZXQgZHVyaW5nIHRoZXNlIHRlc3RzLiBJdCdzIHF1aXRlIHBvc3NpYmxl
-IHRoYXQgaGlnaGVyIElPUFMgd2lsbCBiZSBhY2hpZXZlZCBhcyB3ZSByZWFsbHkgc3RhcnQgZGln
-Z2luZyBpbnRvIHRoZSBjbHVzdGVyIGFuZCBsZWFybmluZyB3aGF0IHRoZSBib3R0bGVuZWNrcyBh
-cmUuDQo+DQo+IFRoYW5rcywNCj4gTWFyaw0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRo
-aXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgDQo+IGluIHRo
-ZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFq
-b3Jkb21vIA0KPiBpbmZvIGF0IGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8u
-aHRtbA0KPg0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUg
-bGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgDQo+IGluIHRoZSBib2R5IG9mIGEgbWVzc2Fn
-ZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIA0KPiBpbmZvIGF0
-ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4NCj4gX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX18NCj4NCj4gUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1h
-dGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRl
-ZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBh
-Ym92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCBy
-ZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQg
-dGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24s
-IGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJv
-aGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9y
-LCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hv
-d24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0
-aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVs
-ZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KPg0KPiBOICAgICByICB5ICAgYiBYICDHp3Yg
-XiAp3rp7Lm4gKyAgIHogXXogICB7YXkgHcqH2pkgLGogICBmICAgaCAgIHogHiB3ICAgDQogICBq
-Oit2ICAgdyBqIG0gICAgICAgICB6WisgICAgIN2iaiIgICF0bWw9DQo+DQo=
+
+Am 19.08.2015 um 22:29 schrieb Somnath Roy:
+> Hmm...We need to fix that as part of configure/Makefile I guess (?)..
+> Since we have done this jemalloc integration originally, we can take =
+that ownership unless anybody sees a problem of enabling tcmalloc/jemal=
+loc with librbd/librados.
+>
+> << You have to remove libcmalloc out of your build environment to get=
+ this done
+> How do I do that ? I am using Ubuntu and can't afford to remove libc*=
+ packages.
+
+I always use a chroot to build packages where only a minimal bootstrap =
++=20
+the build deps are installed. googleperftools where libtcmalloc comes=20
+from is not Ubuntu "core/minimal".
+
+Stefan
+
+>
+> Thanks & Regards
+> Somnath
+>
+> -----Original Message-----
+> From: Stefan Priebe [mailto:s.priebe@profihost.ag]
+> Sent: Wednesday, August 19, 2015 1:18 PM
+> To: Somnath Roy; Alexandre DERUMIER; Mark Nelson
+> Cc: ceph-devel
+> Subject: Re: Ceph Hackathon: More Memory Allocator Testing
+>
+>
+> Am 19.08.2015 um 22:16 schrieb Somnath Roy:
+>> Alexandre,
+>> I am not able to build librados/librbd by using the following config=
+ option.
+>>
+>> ./configure =E2=80=93without-tcmalloc =E2=80=93with-jemalloc
+>
+> Same issue to me. You have to remove libcmalloc out of your build env=
+ironment to get this done.
+>
+> Stefan
+>
+>
+>> It seems it is building osd/mon/Mds/RGW with jemalloc enabled..
+>>
+>> root@emsnode10:~/ceph-latest/src# ldd ./ceph-osd
+>>           linux-vdso.so.1 =3D>  (0x00007ffd0eb43000)
+>>           libjemalloc.so.1 =3D> /usr/lib/x86_64-linux-gnu/libjemallo=
+c.so.1 (0x00007f5f92d70000)
+>>           .......
+>>
+>> root@emsnode10:~/ceph-latest/src/.libs# ldd ./librados.so.2.0.0
+>>           linux-vdso.so.1 =3D>  (0x00007ffed46f2000)
+>>           libboost_thread.so.1.55.0 =3D> /usr/lib/x86_64-linux-gnu/l=
+ibboost_thread.so.1.55.0 (0x00007ff687887000)
+>>           liblttng-ust.so.0 =3D> /usr/lib/x86_64-linux-gnu/liblttng-=
+ust.so.0 (0x00007ff68763d000)
+>>           libdl.so.2 =3D> /lib/x86_64-linux-gnu/libdl.so.2 (0x00007f=
+f687438000)
+>>           libpthread.so.0 =3D> /lib/x86_64-linux-gnu/libpthread.so.0=
+ (0x00007ff68721a000)
+>>           libnss3.so =3D> /usr/lib/x86_64-linux-gnu/libnss3.so (0x00=
+007ff686ee0000)
+>>           libsmime3.so =3D> /usr/lib/x86_64-linux-gnu/libsmime3.so (=
+0x00007ff686cb3000)
+>>           libnspr4.so =3D> /usr/lib/x86_64-linux-gnu/libnspr4.so (0x=
+00007ff686a76000)
+>>           libuuid.so.1 =3D> /lib/x86_64-linux-gnu/libuuid.so.1 (0x00=
+007ff686871000)
+>>           librt.so.1 =3D> /lib/x86_64-linux-gnu/librt.so.1 (0x00007f=
+f686668000)
+>>           libboost_system.so.1.55.0 =3D> /usr/lib/x86_64-linux-gnu/l=
+ibboost_system.so.1.55.0 (0x00007ff686464000)
+>>           libstdc++.so.6 =3D> /usr/lib/x86_64-linux-gnu/libstdc++.so=
+=2E6 (0x00007ff686160000)
+>>           libm.so.6 =3D> /lib/x86_64-linux-gnu/libm.so.6 (0x00007ff6=
+85e59000)
+>>           libc.so.6 =3D> /lib/x86_64-linux-gnu/libc.so.6 (0x00007ff6=
+85a94000)
+>>           libgcc_s.so.1 =3D> /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x=
+00007ff68587e000)
+>>           liblttng-ust-tracepoint.so.0 =3D> /usr/lib/x86_64-linux-gn=
+u/liblttng-ust-tracepoint.so.0 (0x00007ff685663000)
+>>           liburcu-bp.so.1 =3D> /usr/lib/liburcu-bp.so.1 (0x00007ff68=
+545c000)
+>>           liburcu-cds.so.1 =3D> /usr/lib/liburcu-cds.so.1 (0x00007ff=
+685255000)
+>>           /lib64/ld-linux-x86-64.so.2 (0x00007ff68a0f6000)
+>>           libnssutil3.so =3D> /usr/lib/x86_64-linux-gnu/libnssutil3.=
+so (0x00007ff685029000)
+>>           libplc4.so =3D> /usr/lib/x86_64-linux-gnu/libplc4.so (0x00=
+007ff684e24000)
+>>           libplds4.so =3D> /usr/lib/x86_64-linux-gnu/libplds4.so
+>> (0x00007ff684c20000)
+>>
+>> It is building with libcmalloc always...
+>>
+>> Did you change the ceph makefiles to build librbd/librados with jema=
+lloc ?
+>>
+>> Thanks & Regards
+>> Somnath
+>>
+>> -----Original Message-----
+>> From: ceph-devel-owner@vger.kernel.org
+>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Alexandre
+>> DERUMIER
+>> Sent: Wednesday, August 19, 2015 7:01 AM
+>> To: Mark Nelson
+>> Cc: ceph-devel
+>> Subject: Re: Ceph Hackathon: More Memory Allocator Testing
+>>
+>> Thanks Marc,
+>>
+>> Results are matching exactly what I have seen with tcmalloc 2.1 vs 2=
+=2E4 vs jemalloc.
+>>
+>> and indeed tcmalloc, even with bigger cache, seem decrease over time=
+=2E
+>>
+>>
+>> What is funny, is that I see exactly same behaviour client librbd si=
+de, with qemu and multiple iothreads.
+>>
+>>
+>> Switching both server and client to jemalloc give me best performanc=
+e on small read currently.
+>>
+>>
+>>
+>>
+>>
+>>
+>> ----- Mail original -----
+>> De: "Mark Nelson" <mnelson@redhat.com>
+>> =C3=80: "ceph-devel" <ceph-devel@vger.kernel.org>
+>> Envoy=C3=A9: Mercredi 19 Ao=C3=BBt 2015 06:45:36
+>> Objet: Ceph Hackathon: More Memory Allocator Testing
+>>
+>> Hi Everyone,
+>>
+>> One of the goals at the Ceph Hackathon last week was to examine how =
+to improve Ceph Small IO performance. Jian Zhang presented findings sho=
+wing a dramatic improvement in small random IO performance when Ceph is=
+ used with jemalloc. His results build upon Sandisk's original findings=
+ that the default thread cache values are a major bottleneck in TCMallo=
+c 2.1. To further verify these results, we sat down at the Hackathon an=
+d configured the new performance test cluster that Intel generously don=
+ated to the Ceph community laboratory to run through a variety of tests=
+ with different memory allocator configurations. I've since written the=
+ results of those tests up in pdf form for folks who are interested.
+>>
+>> The results are located here:
+>>
+>> http://nhm.ceph.com/hackathon/Ceph_Hackathon_Memory_Allocator_Testin=
+g.
+>> pdf
+>>
+>> I want to be clear that many other folks have done the heavy lifting=
+ here. These results are simply a validation of the many tests that oth=
+er folks have already done. Many thanks to Sandisk and others for figur=
+ing this out as it's a pretty big deal!
+>>
+>> Side note: Very little tuning other than swapping the memory allocat=
+or and a couple of quick and dirty ceph tunables were set during these =
+tests. It's quite possible that higher IOPS will be achieved as we real=
+ly start digging into the cluster and learning what the bottlenecks are=
+=2E
+>>
+>> Thanks,
+>> Mark
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+"
+>> in the body of a message to majordomo@vger.kernel.org More majordomo
+>> info at http://vger.kernel.org/majordomo-info.html
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+"
+>> in the body of a message to majordomo@vger.kernel.org More majordomo
+>> info at  http://vger.kernel.org/majordomo-info.html
+>>
+>> ________________________________
+>>
+>> PLEASE NOTE: The information contained in this electronic mail messa=
+ge is intended only for the use of the designated recipient(s) named ab=
+ove. If the reader of this message is not the intended recipient, you a=
+re hereby notified that you have received this message in error and tha=
+t any review, dissemination, distribution, or copying of this message i=
+s strictly prohibited. If you have received this communication in error=
+, please notify the sender by telephone or e-mail (as shown above) imme=
+diately and destroy any and all copies of this message in your possessi=
+on (whether hard copies or electronically stored copies).
+>>
+>> N     r  y   b X  =C7=A7v ^ )=DE=BA{.n +   z ]z   {ay =1D=CA=87=DA=99=
+ ,j   f   h   z =1E w
+>     j:+v   w j m         zZ+     =DD=A2j"  !tml=3D
+>>
+> N=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDr=EF=BF=BD=EF=BF=BDy=EF=
+=BF=BD=EF=BF=BD=EF=BF=BDb=EF=BF=BDX=EF=BF=BD=EF=BF=BD=C7=A7v=EF=BF=BD^=EF=
+=BF=BD)=DE=BA{.n=EF=BF=BD+=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD]z=EF=BF=
+=BD=EF=BF=BD=EF=BF=BD{ay=EF=BF=BD=1D=CA=87=DA=99=EF=BF=BD,j=07=EF=BF=BD=
+=EF=BF=BDf=EF=BF=BD=EF=BF=BD=EF=BF=BDh=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=
+=BD=1E=EF=BF=BDw=EF=BF=BD=EF=BF=BD=EF=BF=BD=0C=EF=BF=BD=EF=BF=BD=EF=BF=BD=
+j:+v=EF=BF=BD=EF=BF=BD=EF=BF=BDw=EF=BF=BDj=EF=BF=BDm=EF=BF=BD=EF=BF=BD=EF=
+=BF=BD=EF=BF=BD=07=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDzZ+=EF=BF=BD=EF=BF=
+=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=DD=A2j"=EF=BF=BD=EF=BF=BD!tml=3D
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
