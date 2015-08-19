@@ -1,38 +1,90 @@
-From: =?utf-8?B?RGHFgmVrLCBQaW90cg==?= <Piotr.Dalek@ts.fujitsu.com>
-Subject: RE: Ceph Hackathon: More Memory Allocator Testing
-Date: Wed, 19 Aug 2015 14:47:47 +0200
-Message-ID: <90559C83A9C7FA45B5846C975DFA612DDB536537CB@ABGEX73E.FSC.NET>
+From: Alexandre DERUMIER <aderumier@odiso.com>
+Subject: Re: Ceph Hackathon: More Memory Allocator Testing
+Date: Wed, 19 Aug 2015 16:01:28 +0200 (CEST)
+Message-ID: <1491599152.40068072.1439992888600.JavaMail.zimbra@oxygem.tv>
 References: <55D409F0.3050802@redhat.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F2CE1171B@SACMBXIP01.sdcorp.global.sandisk.com>
- <CACJqLyatyLmdf0ptSuJ5fGrvkQiy-5pOPHFA=h9vuG54xKrngw@mail.gmail.com>
- <55D473D9.3020706@redhat.com>
- <90559C83A9C7FA45B5846C975DFA612DDB536537B6@ABGEX73E.FSC.NET>
- <55D47A3F.9060001@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from dgate10.ts.fujitsu.com ([80.70.172.49]:63189 "EHLO
-	dgate10.ts.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753884AbbHSMrw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Aug 2015 08:47:52 -0400
-In-Reply-To: <55D47A3F.9060001@redhat.com>
-Content-Language: en-US
+Received: from mailpro.odiso.net ([89.248.209.98]:48040 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751239AbbHSOBa convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Aug 2015 10:01:30 -0400
+In-Reply-To: <55D409F0.3050802@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>, Haomai Wang <haomaiwang@gmail.com>, Somnath Roy <Somnath.Roy@sandisk.com>
+To: Mark Nelson <mnelson@redhat.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZn
-ZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtDQo+IG93bmVyQHZnZXIua2VybmVsLm9y
-Z10gT24gQmVoYWxmIE9mIE1hcmsgTmVsc29uDQo+IFNlbnQ6IFdlZG5lc2RheSwgQXVndXN0IDE5
-LCAyMDE1IDI6NDUgUE0NCj4NCj4gPiBIYXZlIHlvdSB0cmllZCBydW5uaW5nIHRoZXNlIHRlc3Rz
-IGFnYWluIHdpdGggVENNYWxsb2MgYWZ0ZXIgYXBwbHlpbmcNCj4gcGF0Y2hlcyBmcm9tIGh0dHBz
-Oi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgvcHVsbC81NTM0PyBCZWNhdXNlIHN3aXRjaGluZw0KPiB0
-byBqZW1hbGxvYyBhbG9uZSB3b24ndCBmaXggdGhlIHJvb3QgaXNzdWVzLCBvbmx5IG1ha2UgaXQg
-bGVzcyBwYWluZnVsLg0KPiANCj4gTm90IHlldCwgbXkgZmlyc3QgZ29hbCB3YXMgdG8gc2ltcGx5
-IHJlcGxpY2F0ZSB0aGUgdGVzdHMgdGhhdCBoYXZlIGFscmVhZHkgYmVlbg0KPiBkb25lIHVzaW5n
-IGhhbW1lciB0byBnZXQgYSBiYXNlbGluZSBvbiB0aGUgbmV3IGNsdXN0ZXIuICBJdCBkZWZpbml0
-ZWx5IGxvb2tzDQo+IGxpa2UgdGhhdCdzICh5ZXQgYW5vdGhlciEpIGdvb2QgbmV4dCBzdGVwLg0K
-DQpBaCwgT0suDQpXYWl0aW5nIGZvciBtb3JlIHJlc3VsdHMgdGhlbiENCg0KV2l0aCBiZXN0IHJl
-Z2FyZHMgLyBQb3pkcmF3aWFtDQpQaW90ciBEYcWCZWsNCg==
+Thanks Marc,
+
+Results are matching exactly what I have seen with tcmalloc 2.1 vs 2.4 =
+vs jemalloc.
+
+and indeed tcmalloc, even with bigger cache, seem decrease over time.
+
+
+What is funny, is that I see exactly same behaviour client librbd side,=
+ with qemu and multiple iothreads.
+
+
+Switching both server and client to jemalloc give me best performance o=
+n small read currently.
+
+
+
+
+
+
+----- Mail original -----
+De: "Mark Nelson" <mnelson@redhat.com>
+=C3=80: "ceph-devel" <ceph-devel@vger.kernel.org>
+Envoy=C3=A9: Mercredi 19 Ao=C3=BBt 2015 06:45:36
+Objet: Ceph Hackathon: More Memory Allocator Testing
+
+Hi Everyone,=20
+
+One of the goals at the Ceph Hackathon last week was to examine how to=20
+improve Ceph Small IO performance. Jian Zhang presented findings=20
+showing a dramatic improvement in small random IO performance when Ceph=
+=20
+is used with jemalloc. His results build upon Sandisk's original=20
+findings that the default thread cache values are a major bottleneck in=
+=20
+TCMalloc 2.1. To further verify these results, we sat down at the=20
+Hackathon and configured the new performance test cluster that Intel=20
+generously donated to the Ceph community laboratory to run through a=20
+variety of tests with different memory allocator configurations. I've=20
+since written the results of those tests up in pdf form for folks who=20
+are interested.=20
+
+The results are located here:=20
+
+http://nhm.ceph.com/hackathon/Ceph_Hackathon_Memory_Allocator_Testing.p=
+df=20
+
+I want to be clear that many other folks have done the heavy lifting=20
+here. These results are simply a validation of the many tests that=20
+other folks have already done. Many thanks to Sandisk and others for=20
+figuring this out as it's a pretty big deal!=20
+
+Side note: Very little tuning other than swapping the memory allocator=20
+and a couple of quick and dirty ceph tunables were set during these=20
+tests. It's quite possible that higher IOPS will be achieved as we=20
+really start digging into the cluster and learning what the bottlenecks=
+ are.=20
+
+Thanks,=20
+Mark=20
+--=20
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n=20
+the body of a message to majordomo@vger.kernel.org=20
+More majordomo info at http://vger.kernel.org/majordomo-info.html=20
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
