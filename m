@@ -1,54 +1,92 @@
-From: "Zhang, Jian" <jian.zhang@intel.com>
-Subject: RE: Ceph Hackathon: More Memory Allocator Testing
-Date: Wed, 19 Aug 2015 20:50:15 +0000
-Message-ID: <51FC7A40FB29414D88A121A7FFEF9A4711236E68@SHSMSX104.ccr.corp.intel.com>
-References: <55D409F0.3050802@redhat.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: [Cbt] Ceph Community Lab: Understanding where the QA suites spend
+ time
+Date: Thu, 20 Aug 2015 00:05:13 +0200
+Message-ID: <55D4FD99.6000508@dachary.org>
+References: <55D4DD24.9010100@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="MN8o3rO8uLOQUjAaaK3p430ibHxClpFXN"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:46778 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751562AbbHSUuU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 19 Aug 2015 16:50:20 -0400
-In-Reply-To: <55D409F0.3050802@redhat.com>
-Content-Language: en-US
+Received: from mail2.dachary.org ([91.121.57.175]:40793 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751958AbbHSWFU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Aug 2015 18:05:20 -0400
+In-Reply-To: <55D4DD24.9010100@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, cbt@lists.ceph.com
 
-TWFyaywgDQpHcmVhdCBkdXRpZnVsIHJlcG9ydCEgUmVhbGx5IGhlbHBmdWwgdG8gdW5kZXJzdGFu
-ZGluZyB0aGUgaW1wYWN0IGluIGRpZmZlcmVuY2Ugc2NlbmFyaW9zLiANCg0KVGhhbmtzDQpKaWFu
-DQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZn
-ZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnXSBP
-biBCZWhhbGYgT2YgTWFyayBOZWxzb24NClNlbnQ6IFR1ZXNkYXksIEF1Z3VzdCAxOCwgMjAxNSA5
-OjQ2IFBNDQpUbzogY2VwaC1kZXZlbA0KU3ViamVjdDogQ2VwaCBIYWNrYXRob246IE1vcmUgTWVt
-b3J5IEFsbG9jYXRvciBUZXN0aW5nDQoNCkhpIEV2ZXJ5b25lLA0KDQpPbmUgb2YgdGhlIGdvYWxz
-IGF0IHRoZSBDZXBoIEhhY2thdGhvbiBsYXN0IHdlZWsgd2FzIHRvIGV4YW1pbmUgaG93IHRvIGlt
-cHJvdmUgQ2VwaCBTbWFsbCBJTyBwZXJmb3JtYW5jZS4gIEppYW4gWmhhbmcgcHJlc2VudGVkIGZp
-bmRpbmdzIHNob3dpbmcgYSBkcmFtYXRpYyBpbXByb3ZlbWVudCBpbiBzbWFsbCByYW5kb20gSU8g
-cGVyZm9ybWFuY2Ugd2hlbiBDZXBoIGlzIHVzZWQgd2l0aCBqZW1hbGxvYy4gIEhpcyByZXN1bHRz
-IGJ1aWxkIHVwb24gU2FuZGlzaydzIG9yaWdpbmFsIGZpbmRpbmdzIHRoYXQgdGhlIGRlZmF1bHQg
-dGhyZWFkIGNhY2hlIHZhbHVlcyBhcmUgYSBtYWpvciBib3R0bGVuZWNrIGluIFRDTWFsbG9jIDIu
-MS4gIFRvIGZ1cnRoZXIgdmVyaWZ5IHRoZXNlIHJlc3VsdHMsIHdlIHNhdCBkb3duIGF0IHRoZSBI
-YWNrYXRob24gYW5kIGNvbmZpZ3VyZWQgdGhlIG5ldyBwZXJmb3JtYW5jZSB0ZXN0IGNsdXN0ZXIg
-dGhhdCBJbnRlbCBnZW5lcm91c2x5IGRvbmF0ZWQgdG8gdGhlIENlcGggY29tbXVuaXR5IGxhYm9y
-YXRvcnkgdG8gcnVuIHRocm91Z2ggYSB2YXJpZXR5IG9mIHRlc3RzIHdpdGggZGlmZmVyZW50IG1l
-bW9yeSBhbGxvY2F0b3IgY29uZmlndXJhdGlvbnMuICBJJ3ZlIHNpbmNlIHdyaXR0ZW4gdGhlIHJl
-c3VsdHMgb2YgdGhvc2UgdGVzdHMgdXAgaW4gcGRmIGZvcm0gZm9yIGZvbGtzIHdobyBhcmUgaW50
-ZXJlc3RlZC4NCg0KVGhlIHJlc3VsdHMgYXJlIGxvY2F0ZWQgaGVyZToNCg0KaHR0cDovL25obS5j
-ZXBoLmNvbS9oYWNrYXRob24vQ2VwaF9IYWNrYXRob25fTWVtb3J5X0FsbG9jYXRvcl9UZXN0aW5n
-LnBkZg0KDQpJIHdhbnQgdG8gYmUgY2xlYXIgdGhhdCBtYW55IG90aGVyIGZvbGtzIGhhdmUgZG9u
-ZSB0aGUgaGVhdnkgbGlmdGluZyBoZXJlLiAgVGhlc2UgcmVzdWx0cyBhcmUgc2ltcGx5IGEgdmFs
-aWRhdGlvbiBvZiB0aGUgbWFueSB0ZXN0cyB0aGF0IG90aGVyIGZvbGtzIGhhdmUgYWxyZWFkeSBk
-b25lLiAgTWFueSB0aGFua3MgdG8gU2FuZGlzayBhbmQgb3RoZXJzIGZvciBmaWd1cmluZyB0aGlz
-IG91dCBhcyBpdCdzIGEgcHJldHR5IGJpZyBkZWFsIQ0KDQpTaWRlIG5vdGU6ICBWZXJ5IGxpdHRs
-ZSB0dW5pbmcgb3RoZXIgdGhhbiBzd2FwcGluZyB0aGUgbWVtb3J5IGFsbG9jYXRvciBhbmQgYSBj
-b3VwbGUgb2YgcXVpY2sgYW5kIGRpcnR5IGNlcGggdHVuYWJsZXMgd2VyZSBzZXQgZHVyaW5nIHRo
-ZXNlIHRlc3RzLiBJdCdzIHF1aXRlIHBvc3NpYmxlIHRoYXQgaGlnaGVyIElPUFMgd2lsbCBiZSBh
-Y2hpZXZlZCBhcyB3ZSByZWFsbHkgc3RhcnQgZGlnZ2luZyBpbnRvIHRoZSBjbHVzdGVyIGFuZCBs
-ZWFybmluZyB3aGF0IHRoZSBib3R0bGVuZWNrcyBhcmUuDQoNClRoYW5rcywNCk1hcmsNCi0tDQpU
-byB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUg
-Y2VwaC1kZXZlbCIgaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtl
-cm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9t
-YWpvcmRvbW8taW5mby5odG1sDQo=
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--MN8o3rO8uLOQUjAaaK3p430ibHxClpFXN
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: quoted-printable
+
+Hi,
+
+To help put things in perspective (please forgive me if it's a fact alrea=
+dy known to everyone), > 95% of the teuthology jobs can run on virtual ma=
+chines with 8GB RAM, 40GB disk, 2 processors and no attached disks. The c=
+ost of running such virtual machines in the cloud currently is 0.033 euro=
+s per hour. Running 40 teuthology jobs at all times would require an aver=
+age of 80 such virtual machines (most jobs use 2 machines, some 1 or 3), =
+that is 0.033 * 80 vms * 24 hours * 31 days =3D=3D ~2000 euros per month =
+(also note that at least one cloud provider offers 50% discount if such v=
+irtual machines are reserved full time). That's 3 to 6 times cheaper than=
+ AWS.=20
+
+I'm not sure how much it costs to run these 40 teuthology jobs on a hand =
+made lab but I'd be surprised if it was cheaper, all included. Whatever h=
+ardware already exists in the sepia lab can easily handle the remaining 5=
+% of jobs that require actual hardware for one reason or the other.
+
+My 3.3cts ;-)
+
+On 19/08/2015 21:46, Mark Nelson wrote:
+> Hi Guys,
+>=20
+> About a month ago we were going through the process of trying to figure=
+ out how to replace some of the hardware in the community laboratory that=
+ runs all of the nightly Teuthology tests.  Given a limited budget to rep=
+lace the existing nodes, we wanted to understand how the current QA suite=
+s actually spend time on the hardware.  To do this, we investigated the c=
+omposition of suites, the amount of time that is spent in each suite, and=
+ then a deeper dive into how the most resource intensive jobs spend their=
+ time.  We then wrote a new benchmark for CBT to run ceph-test-rados in a=
+ rather naive reproduction of what the ceph task in teuthology does and t=
+ested it against several different storage device configurations to see h=
+ow much benefit SSDs in the nodes may provide.
+>=20
+> A couple of folks at the Hackathon were interested in the paper we wrot=
+e.  I thought I would share it with the community as well in case any fol=
+ks ever wondered what Teuthology actually spends it's time doing.
+>=20
+> http://nhm.ceph.com/community/Ceph_Community_Lab_Performance_Investigat=
+ion.pdf
+>=20
+> Thanks,
+> Mark
+> _______________________________________________
+> Cbt mailing list
+> Cbt@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/cbt-ceph.com
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+--MN8o3rO8uLOQUjAaaK3p430ibHxClpFXN
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlXU/ZkACgkQ8dLMyEl6F21s0wCfW885QLVdyoo1mRsk1CscACBK
+yjQAoKc/uH8zp2N8sUbyY4chuG+9/XSF
+=HEtM
+-----END PGP SIGNATURE-----
+
+--MN8o3rO8uLOQUjAaaK3p430ibHxClpFXN--
