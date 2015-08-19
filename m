@@ -1,69 +1,23 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Ceph Hackathon: More Memory Allocator Testing
-Date: Wed, 19 Aug 2015 05:36:52 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE1171B@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <55D409F0.3050802@redhat.com>
+From: chen kael <chenji.bupt@gmail.com>
+Subject: when create a new pool, Does straw2 applies in crushmap by default?
+Date: Wed, 19 Aug 2015 14:18:23 +0800
+Message-ID: <CAA-rZjb703OESbaZW=8z_D2h3ePb-hFo3LYQrX_7CsDLpi6USQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0056.outbound.protection.outlook.com ([65.55.169.56]:63744
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751016AbbHSFwx (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 19 Aug 2015 01:52:53 -0400
-In-Reply-To: <55D409F0.3050802@redhat.com>
-Content-Language: en-US
+Received: from mail-wi0-f171.google.com ([209.85.212.171]:37578 "EHLO
+	mail-wi0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751207AbbHSGSY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Aug 2015 02:18:24 -0400
+Received: by wibhh20 with SMTP id hh20so126795597wib.0
+        for <ceph-devel@vger.kernel.org>; Tue, 18 Aug 2015 23:18:23 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-TWFyaywNClRoYW5rcyBmb3IgdmVyaWZ5aW5nIHRoaXMuIE5pY2UgcmVwb3J0ICENClNpbmNlIHRo
-ZXJlIGlzIGEgYmlnIGRpZmZlcmVuY2UgaW4gbWVtb3J5IGNvbnN1bXB0aW9uIHdpdGggamVtYWxs
-b2MsIEkgd291bGQgc2F5IGEgcmVjb3ZlcnkgcGVyZm9ybWFuY2UgZGF0YSBvciBjbGllbnQgcGVy
-Zm9ybWFuY2UgZGF0YSBkdXJpbmcgcmVjb3Zlcnkgd291bGQgYmUgaGVscGZ1bC4NCg0KVGhhbmtz
-ICYgUmVnYXJkcw0KU29tbmF0aA0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTog
-Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVsLW93bmVy
-QHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIE1hcmsgTmVsc29uDQpTZW50OiBUdWVzZGF5
-LCBBdWd1c3QgMTgsIDIwMTUgOTo0NiBQTQ0KVG86IGNlcGgtZGV2ZWwNClN1YmplY3Q6IENlcGgg
-SGFja2F0aG9uOiBNb3JlIE1lbW9yeSBBbGxvY2F0b3IgVGVzdGluZw0KDQpIaSBFdmVyeW9uZSwN
-Cg0KT25lIG9mIHRoZSBnb2FscyBhdCB0aGUgQ2VwaCBIYWNrYXRob24gbGFzdCB3ZWVrIHdhcyB0
-byBleGFtaW5lIGhvdyB0byBpbXByb3ZlIENlcGggU21hbGwgSU8gcGVyZm9ybWFuY2UuICBKaWFu
-IFpoYW5nIHByZXNlbnRlZCBmaW5kaW5ncyBzaG93aW5nIGEgZHJhbWF0aWMgaW1wcm92ZW1lbnQg
-aW4gc21hbGwgcmFuZG9tIElPIHBlcmZvcm1hbmNlIHdoZW4gQ2VwaCBpcyB1c2VkIHdpdGggamVt
-YWxsb2MuICBIaXMgcmVzdWx0cyBidWlsZCB1cG9uIFNhbmRpc2sncyBvcmlnaW5hbCBmaW5kaW5n
-cyB0aGF0IHRoZSBkZWZhdWx0IHRocmVhZCBjYWNoZSB2YWx1ZXMgYXJlIGEgbWFqb3IgYm90dGxl
-bmVjayBpbiBUQ01hbGxvYyAyLjEuICBUbyBmdXJ0aGVyIHZlcmlmeSB0aGVzZSByZXN1bHRzLCB3
-ZSBzYXQgZG93biBhdCB0aGUgSGFja2F0aG9uIGFuZCBjb25maWd1cmVkIHRoZSBuZXcgcGVyZm9y
-bWFuY2UgdGVzdCBjbHVzdGVyIHRoYXQgSW50ZWwgZ2VuZXJvdXNseSBkb25hdGVkIHRvIHRoZSBD
-ZXBoIGNvbW11bml0eSBsYWJvcmF0b3J5IHRvIHJ1biB0aHJvdWdoIGEgdmFyaWV0eSBvZiB0ZXN0
-cyB3aXRoIGRpZmZlcmVudCBtZW1vcnkgYWxsb2NhdG9yIGNvbmZpZ3VyYXRpb25zLiAgSSd2ZSBz
-aW5jZSB3cml0dGVuIHRoZSByZXN1bHRzIG9mIHRob3NlIHRlc3RzIHVwIGluIHBkZiBmb3JtIGZv
-ciBmb2xrcyB3aG8gYXJlIGludGVyZXN0ZWQuDQoNClRoZSByZXN1bHRzIGFyZSBsb2NhdGVkIGhl
-cmU6DQoNCmh0dHA6Ly9uaG0uY2VwaC5jb20vaGFja2F0aG9uL0NlcGhfSGFja2F0aG9uX01lbW9y
-eV9BbGxvY2F0b3JfVGVzdGluZy5wZGYNCg0KSSB3YW50IHRvIGJlIGNsZWFyIHRoYXQgbWFueSBv
-dGhlciBmb2xrcyBoYXZlIGRvbmUgdGhlIGhlYXZ5IGxpZnRpbmcgaGVyZS4gIFRoZXNlIHJlc3Vs
-dHMgYXJlIHNpbXBseSBhIHZhbGlkYXRpb24gb2YgdGhlIG1hbnkgdGVzdHMgdGhhdCBvdGhlciBm
-b2xrcyBoYXZlIGFscmVhZHkgZG9uZS4gIE1hbnkgdGhhbmtzIHRvIFNhbmRpc2sgYW5kIG90aGVy
-cyBmb3IgZmlndXJpbmcgdGhpcyBvdXQgYXMgaXQncyBhIHByZXR0eSBiaWcgZGVhbCENCg0KU2lk
-ZSBub3RlOiAgVmVyeSBsaXR0bGUgdHVuaW5nIG90aGVyIHRoYW4gc3dhcHBpbmcgdGhlIG1lbW9y
-eSBhbGxvY2F0b3IgYW5kIGEgY291cGxlIG9mIHF1aWNrIGFuZCBkaXJ0eSBjZXBoIHR1bmFibGVz
-IHdlcmUgc2V0IGR1cmluZyB0aGVzZSB0ZXN0cy4gSXQncyBxdWl0ZSBwb3NzaWJsZSB0aGF0IGhp
-Z2hlciBJT1BTIHdpbGwgYmUgYWNoaWV2ZWQgYXMgd2UgcmVhbGx5IHN0YXJ0IGRpZ2dpbmcgaW50
-byB0aGUgY2x1c3RlciBhbmQgbGVhcm5pbmcgd2hhdCB0aGUgYm90dGxlbmVja3MgYXJlLg0KDQpU
-aGFua3MsDQpNYXJrDQotLQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhl
-IGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0
-byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6
-Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KDQpfX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fXw0KDQpQTEVBU0UgTk9URTogVGhlIGluZm9ybWF0aW9uIGNvbnRhaW5l
-ZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNzYWdlIGlzIGludGVuZGVkIG9ubHkgZm9yIHRo
-ZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpIG5hbWVkIGFib3ZlLiBJZiB0aGUg
-cmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVuZGVkIHJlY2lwaWVudCwgeW91
-IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2Ug
-aW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywgZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9u
-LCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5
-b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFzZSBub3Rp
-ZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3IgZS1tYWlsIChhcyBzaG93biBhYm92ZSkgaW1t
-ZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVzIG9mIHRoaXMgbWVzc2FnZSBp
-biB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkg
-c3RvcmVkIGNvcGllcykuDQoNCg==
+Hi,
+
+When setting up a new enviroment, How can I  make all pools created
+use straw2 other than straw by default?
+Such as ./vstart.sh -l -n -x ,I hope all pools use straw2 ,no need
+change bucket type by myself
