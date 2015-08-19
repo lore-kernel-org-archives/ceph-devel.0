@@ -1,63 +1,47 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: Ceph Hackathon: More Memory Allocator Testing
-Date: Wed, 19 Aug 2015 07:20:36 -0500
-Message-ID: <55D47494.6090908@redhat.com>
-References: <55D409F0.3050802@redhat.com> <55D42337.5080205@profihost.ag>
+From: =?utf-8?B?RGHFgmVrLCBQaW90cg==?= <Piotr.Dalek@ts.fujitsu.com>
+Subject: RE: Ceph Hackathon: More Memory Allocator Testing
+Date: Wed, 19 Aug 2015 14:36:44 +0200
+Message-ID: <90559C83A9C7FA45B5846C975DFA612DDB536537B6@ABGEX73E.FSC.NET>
+References: <55D409F0.3050802@redhat.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F2CE1171B@SACMBXIP01.sdcorp.global.sandisk.com>
+ <CACJqLyatyLmdf0ptSuJ5fGrvkQiy-5pOPHFA=h9vuG54xKrngw@mail.gmail.com>
+ <55D473D9.3020706@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:42774 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751599AbbHSMUj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 19 Aug 2015 08:20:39 -0400
-In-Reply-To: <55D42337.5080205@profihost.ag>
+Received: from dgate10.ts.fujitsu.com ([80.70.172.49]:14162 "EHLO
+	dgate10.ts.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753691AbbHSMgr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Aug 2015 08:36:47 -0400
+In-Reply-To: <55D473D9.3020706@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mnelson@redhat.com>, Haomai Wang <haomaiwang@gmail.com>, Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Nope!  So in this case it's just server side.
-
-On 08/19/2015 01:33 AM, Stefan Priebe - Profihost AG wrote:
->
-> Thanks for sharing. Do those tests use jemalloc for fio too? Otherwise
-> librbd on client side is running with tcmalloc again.
->
-> Stefan
->
-> Am 19.08.2015 um 06:45 schrieb Mark Nelson:
->> Hi Everyone,
->>
->> One of the goals at the Ceph Hackathon last week was to examine how to
->> improve Ceph Small IO performance.  Jian Zhang presented findings
->> showing a dramatic improvement in small random IO performance when Ceph
->> is used with jemalloc.  His results build upon Sandisk's original
->> findings that the default thread cache values are a major bottleneck in
->> TCMalloc 2.1.  To further verify these results, we sat down at the
->> Hackathon and configured the new performance test cluster that Intel
->> generously donated to the Ceph community laboratory to run through a
->> variety of tests with different memory allocator configurations.  I've
->> since written the results of those tests up in pdf form for folks who
->> are interested.
->>
->> The results are located here:
->>
->> http://nhm.ceph.com/hackathon/Ceph_Hackathon_Memory_Allocator_Testing.pdf
->>
->> I want to be clear that many other folks have done the heavy lifting
->> here.  These results are simply a validation of the many tests that
->> other folks have already done.  Many thanks to Sandisk and others for
->> figuring this out as it's a pretty big deal!
->>
->> Side note:  Very little tuning other than swapping the memory allocator
->> and a couple of quick and dirty ceph tunables were set during these
->> tests. It's quite possible that higher IOPS will be achieved as we
->> really start digging into the cluster and learning what the bottlenecks
->> are.
->>
->> Thanks,
->> Mark
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZn
+ZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtDQo+IG93bmVyQHZnZXIua2VybmVsLm9y
+Z10gT24gQmVoYWxmIE9mIE1hcmsgTmVsc29uDQo+IFNlbnQ6IFdlZG5lc2RheSwgQXVndXN0IDE5
+LCAyMDE1IDI6MTcgUE0NCj4gDQo+ID4gVGhlIFJTUyBtZW1vcnkgdXNhZ2UgaW4gdGhlIHJlcG9y
+dCBpcyBwZXIgT1NEIEkgZ3Vlc3MocmVhbGx5PykuIEl0DQo+ID4gY2FuJ3QgYmUgaWdub3JlZCBz
+aW5jZSBpdCdzIHJlYWxseSBhIGdyZWF0IGltcHJvdmVtZW50IG1lbW9yeSB1c2FnZS4NCj4gDQo+
+IERvIHlvdSBtZWFuIHdpdGggdGNtYWxsb2M/ICBJIHRoaW5rIGl0J3MgYSB0b3VnaCBkZWNpc2lv
+bi4gIEZvciBqZW1hbGxvYywgMzAwTUINCj4gbW9yZSBvZiBSU1MgcGVyIE9TRCBkb2VzIGFkZCB1
+cCAoYWJvdXQgMThHQiBmb3IgNjAgT1NEcykuICBPbiB0aGUgb3RoZXINCj4gaGFuZCwgdGhlIGNv
+c3Qgb2YgbWVtb3J5IGlzIHN1Y2ggYSBzbWFsbCBmcmFjdGlvbiBvZiB0aGUgb3ZlcmFsbCBjb3N0
+IG9mDQo+IHN5c3RlbXMgbGlrZSB0aGlzIHRoYXQgaXQgbWlnaHQgYmUgd29ydGggaXQgdG8gc3dp
+dGNoIG92ZXIgYW55d2F5LiAgSW4gdGhlIDRLDQo+IHdyaXRlIHRlc3RzIGl0J3MgcHJldHR5IGNs
+ZWFyIHRoYXQgZXZlbiB3aXRoIDEyOE1CIFRDLCBUQ01hbGxvYyBpcyBzdWZmZXJpbmcNCj4gYW5k
+IGplbWFsbG9jIGFwcGVhcnMgdG8gc3RpbGwgaGF2ZSBoZWFkcm9vbSBsZWZ0LiAgSXQncyBwb3Nz
+aWJsZSB0aGF0IGJ1bXBpbmcNCj4gdGhlIHRocmVhZCBjYWNoZSBldmVuIGhpZ2hlciBtaWdodCBo
+ZWxwIFRDTWFsbG9jIGNsb3NlIHRoZSBnYXAgdGhvdWdoLiAgSXQncw0KPiBhbHNvIHBvc3NpYmxl
+IHRoYXQgamVtYWxsb2MgbWlnaHQgaGF2ZSB3b3JzZSBtZW1vcnkgYmVoYXZpb3IgdW5kZXINCj4g
+cmVjb3Zlcnkgc2NlbmFyaW9zIGFzIHdlIGRpc2N1c3NlZCBhdCB0aGUgaGFja2F0aG9uIChBbmQg
+U29tbmF0aA0KPiBtZW50aW9uZWQgYWJvdmUpLCBzbyBJIHRoaW5rIHdlIHByb2JhYmx5IG5lZWQg
+dG8gcnVuIHRoZSB0ZXN0cy4NCg0KSGF2ZSB5b3UgdHJpZWQgcnVubmluZyB0aGVzZSB0ZXN0cyBh
+Z2FpbiB3aXRoIFRDTWFsbG9jIGFmdGVyIGFwcGx5aW5nIHBhdGNoZXMgZnJvbSBodHRwczovL2dp
+dGh1Yi5jb20vY2VwaC9jZXBoL3B1bGwvNTUzND8gQmVjYXVzZSBzd2l0Y2hpbmcgdG8gamVtYWxs
+b2MgYWxvbmUgd29uJ3QgZml4IHRoZSByb290IGlzc3Vlcywgb25seSBtYWtlIGl0IGxlc3MgcGFp
+bmZ1bC4NCg0KV2l0aCBiZXN0IHJlZ2FyZHMgLyBQb3pkcmF3aWFtDQpQaW90ciBEYcWCZWsNCg0K
