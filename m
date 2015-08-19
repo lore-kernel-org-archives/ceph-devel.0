@@ -1,49 +1,47 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: hammer upgrade suite error
-Date: Wed, 19 Aug 2015 01:37:55 +0200
-Message-ID: <55D3C1D3.5090002@dachary.org>
+From: "Ma, Jianpeng" <jianpeng.ma@intel.com>
+Subject: RE: [PATCH] fs/ceph: No need get inode of parent in ceph_open.
+Date: Wed, 19 Aug 2015 02:16:49 +0000
+Message-ID: <6AA21C22F0A5DA478922644AD2EC308C1D19FF2B@SHSMSX101.ccr.corp.intel.com>
+References: <6AA21C22F0A5DA478922644AD2EC308C1D19FBFC@SHSMSX101.ccr.corp.intel.com>
+ <C24229C0-E3B1-4773-BEF0-84B7264F5607@redhat.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="K6QqHD3qWDWUtvNwsvXw0iLUINFDxIO87"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:40172 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1750923AbbHRXh5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Aug 2015 19:37:57 -0400
+Received: from mga11.intel.com ([192.55.52.93]:2720 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750871AbbHSCTT (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 18 Aug 2015 22:19:19 -0400
+In-Reply-To: <C24229C0-E3B1-4773-BEF0-84B7264F5607@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Abhishek Varshney <abhishek.varshney@flipkart.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Abhishek L <abhishek.lekshmanan@gmail.com>
+To: "Yan, Zheng" <zyan@redhat.com>
+Cc: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---K6QqHD3qWDWUtvNwsvXw0iLUINFDxIO87
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-Hi
-
-It looks like we have an upgrade issue with the backport branch, see http=
-://tracker.ceph.com/issues/12701#note-10
-
-Cheers
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
-
---K6QqHD3qWDWUtvNwsvXw0iLUINFDxIO87
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlXTwdMACgkQ8dLMyEl6F20uaACgoEtLoUEJ/MipOWSUAZ0zYbYr
-grgAoJmdSwsQWo9V7mSWgwMbgX0GhwlV
-=LAkJ
------END PGP SIGNATURE-----
-
---K6QqHD3qWDWUtvNwsvXw0iLUINFDxIO87--
+VGhhbmtzIHZlcnkgbXVjaCB6aGVuZy4gSSdsbCBwYXkgbW9yZSBhdHRlbnRpb24gdG8gdGhlIGZv
+cm1hdCBvZiBwYXRjaC4NCg0KSmlhbnBlbmcNCg0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0t
+LS0tDQo+IEZyb206IFlhbiwgWmhlbmcgW21haWx0bzp6eWFuQHJlZGhhdC5jb21dDQo+IFNlbnQ6
+IFR1ZXNkYXksIEF1Z3VzdCAxOCwgMjAxNSAxMDozNiBBTQ0KPiBUbzogTWEsIEppYW5wZW5nDQo+
+IENjOiBTYWdlIFdlaWw7IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQo+IFN1YmplY3Q6IFJl
+OiBbUEFUQ0hdIGZzL2NlcGg6IE5vIG5lZWQgZ2V0IGlub2RlIG9mIHBhcmVudCBpbiBjZXBoX29w
+ZW4uDQo+IA0KPiANCj4gPiBPbiBBdWcgMTcsIDIwMTUsIGF0IDE2OjQzLCBNYSwgSmlhbnBlbmcg
+PGppYW5wZW5nLm1hQGludGVsLmNvbT4gd3JvdGU6DQo+ID4NCj4gPiBGb3IgY2VwaF9vcGVuLCBp
+dCBhbHJlYWR5IGdldCB0aGUgcGFyZW50IGlub2RlLiBTbyBubyBuZWVkIHRvIGdldCBhZ2Fpbi4N
+Cj4gPg0KPiA+IFNpZ25lZC1vZmYtYnk6IEppYW5wZW5nIE1hIDxqaWFucGVuZy5tYUBpbnRlbC5j
+b20+DQo+ID4gLS0tDQo+ID4gZnMvY2VwaC9maWxlLmMgfCAzIC0tLQ0KPiA+IDEgZmlsZSBjaGFu
+Z2VkLCAzIGRlbGV0aW9ucygtKQ0KPiA+DQo+ID4gZGlmZiAtLWdpdCBhL2ZzL2NlcGgvZmlsZS5j
+IGIvZnMvY2VwaC9maWxlLmMgaW5kZXggOGI3OWQ4Ny4uNWVjZDNkYw0KPiA+IDEwMDY0NA0KPiA+
+IC0tLSBhL2ZzL2NlcGgvZmlsZS5jDQo+ID4gKysrIGIvZnMvY2VwaC9maWxlLmMNCj4gPiBAQCAt
+MjEwLDEwICsyMTAsNyBAQCBpbnQgY2VwaF9vcGVuKHN0cnVjdCBpbm9kZSAqaW5vZGUsIHN0cnVj
+dCBmaWxlICpmaWxlKQ0KPiA+ICAgICAgICBpaG9sZChpbm9kZSk7DQo+ID4NCj4gPiAgICAgICAg
+cmVxLT5yX251bV9jYXBzID0gMTsNCj4gPiAtICAgICAgIGlmIChmbGFncyAmIE9fQ1JFQVQpDQo+
+ID4gLSAgICAgICAgICAgICAgIHBhcmVudF9pbm9kZSA9DQo+IGNlcGhfZ2V0X2RlbnRyeV9wYXJl
+bnRfaW5vZGUoZmlsZS0+Zl9wYXRoLmRlbnRyeSk7DQo+ID4gICAgICAgIGVyciA9IGNlcGhfbWRz
+Y19kb19yZXF1ZXN0KG1kc2MsIHBhcmVudF9pbm9kZSwgcmVxKTsNCj4gPiAtICAgICAgIGlwdXQo
+cGFyZW50X2lub2RlKTsNCj4gPiAgICAgICAgaWYgKCFlcnIpDQo+ID4gICAgICAgICAgICAgICAg
+ZXJyID0gY2VwaF9pbml0X2ZpbGUoaW5vZGUsIGZpbGUsIHJlcS0+cl9mbW9kZSk7DQo+ID4gICAg
+ICAgIGNlcGhfbWRzY19wdXRfcmVxdWVzdChyZXEpOw0KPiA+IOKAlA0KPiANCj4gSSBmaXhlZCB5
+b3VyIHBhdGNoZXMgKGFsbCB0YWJzIGFyZSByZXBsYWNlZCBieSBzcGFjZXMgaW4geW91ciBwYXRj
+aGVzKSAgYW5kDQo+IGFkZGVkIHRoZW0gdG8gb3VyIHRlc3RpbmcgYnJhbmNoDQo+IA0KPiBUaGFu
+a3MNCj4gWWFuLCBaaGVuZw0KPiANCj4gPiAyLjQuMw0KPiA+DQoNCg==
