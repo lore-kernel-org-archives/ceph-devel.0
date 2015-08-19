@@ -1,25 +1,32 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Ceph Hackathon: More Memory Allocator Testing
-Date: Tue, 18 Aug 2015 23:45:36 -0500
-Message-ID: <55D409F0.3050802@redhat.com>
+From: Shinobu Kinjo <skinjo@redhat.com>
+Subject: Re: Ceph Hackathon: More Memory Allocator Testing
+Date: Wed, 19 Aug 2015 01:13:15 -0400 (EDT)
+Message-ID: <1670246719.6192240.1439961195619.JavaMail.zimbra@redhat.com>
+References: <55D409F0.3050802@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:38626 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751187AbbHSEpi (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 19 Aug 2015 00:45:38 -0400
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-	by mx1.redhat.com (Postfix) with ESMTPS id BFD058E740
-	for <ceph-devel@vger.kernel.org>; Wed, 19 Aug 2015 04:45:38 +0000 (UTC)
-Received: from [10.3.112.2] ([10.3.112.2])
-	by int-mx14.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t7J4jaAX004302
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-	for <ceph-devel@vger.kernel.org>; Wed, 19 Aug 2015 00:45:38 -0400
+Received: from mx4-phx2.redhat.com ([209.132.183.25]:45940 "EHLO
+	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751197AbbHSFNQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Aug 2015 01:13:16 -0400
+In-Reply-To: <55D409F0.3050802@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mnelson@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
+
+Thank you.
+That's pretty interesting to me.
+
+ Shinobu
+
+----- Original Message -----
+From: "Mark Nelson" <mnelson@redhat.com>
+To: "ceph-devel" <ceph-devel@vger.kernel.org>
+Sent: Wednesday, August 19, 2015 1:45:36 PM
+Subject: Ceph Hackathon: More Memory Allocator Testing
 
 Hi Everyone,
 
@@ -51,3 +58,7 @@ really start digging into the cluster and learning what the bottlenecks are.
 
 Thanks,
 Mark
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
