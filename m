@@ -1,21 +1,36 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
+From: Shinobu Kinjo <skinjo@redhat.com>
 Subject: Re: Ceph Hackathon: More Memory Allocator Testing
-Date: Thu, 20 Aug 2015 10:17:46 +0200 (CEST)
-Message-ID: <189248331.40627960.1440058666440.JavaMail.zimbra@oxygem.tv>
-References: <55D409F0.3050802@redhat.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE12211@SACMBXIP01.sdcorp.global.sandisk.com> <87804130.40306063.1440003324534.JavaMail.zimbra@oxygem.tv> <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE12406@SACMBXIP01.sdcorp.global.sandisk.com> <1002950976.40342661.1440010026776.JavaMail.zimbra@oxygem.tv> <3649A15A2562B54294DE14BCE5AC79120B5940A0@FMSMSX119.amr.corp.intel.com> <1821412943.6571923.1440036015749.JavaMail.zimbra@redhat.com> <1987635974.40440667.1440048562601.JavaMail.zimbra@oxygem.tv>
+Date: Thu, 20 Aug 2015 08:54:59 -0400 (EDT)
+Message-ID: <1388436889.6755045.1440075299003.JavaMail.zimbra@redhat.com>
+References: <55D409F0.3050802@redhat.com> <87804130.40306063.1440003324534.JavaMail.zimbra@oxygem.tv> <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE12406@SACMBXIP01.sdcorp.global.sandisk.com> <1002950976.40342661.1440010026776.JavaMail.zimbra@oxygem.tv> <3649A15A2562B54294DE14BCE5AC79120B5940A0@FMSMSX119.amr.corp.intel.com> <1821412943.6571923.1440036015749.JavaMail.zimbra@redhat.com> <1987635974.40440667.1440048562601.JavaMail.zimbra@oxygem.tv> <189248331.40627960.1440058666440.JavaMail.zimbra@oxygem.tv>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:49350 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752057AbbHTIRs convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Aug 2015 04:17:48 -0400
-In-Reply-To: <1987635974.40440667.1440048562601.JavaMail.zimbra@oxygem.tv>
+Received: from mx3-phx2.redhat.com ([209.132.183.24]:34875 "EHLO
+	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752391AbbHTMzH convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Aug 2015 08:55:07 -0400
+In-Reply-To: <189248331.40627960.1440058666440.JavaMail.zimbra@oxygem.tv>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Shinobu Kinjo <skinjo@redhat.com>
+To: Alexandre DERUMIER <aderumier@odiso.com>
 Cc: Stephen L Blinick <stephen.l.blinick@intel.com>, Somnath Roy <Somnath.Roy@sandisk.com>, Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+
+Thank you for that result.
+So it might make sense to know difference between jemalloc and jemalloc=
+ 4.0.
+
+ Shinobu
+
+----- Original Message -----
+=46rom: "Alexandre DERUMIER" <aderumier@odiso.com>
+To: "Shinobu Kinjo" <skinjo@redhat.com>
+Cc: "Stephen L Blinick" <stephen.l.blinick@intel.com>, "Somnath Roy" <S=
+omnath.Roy@sandisk.com>, "Mark Nelson" <mnelson@redhat.com>, "ceph-deve=
+l" <ceph-devel@vger.kernel.org>
+Sent: Thursday, August 20, 2015 5:17:46 PM
+Subject: Re: Ceph Hackathon: More Memory Allocator Testing
 
 memory results of osd daemon under load,
 
@@ -368,6 +383,11 @@ n=20
 the body of a message to majordomo@vger.kernel.org=20
 More majordomo info at http://vger.kernel.org/majordomo-info.html=20
 
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
