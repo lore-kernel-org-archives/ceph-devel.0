@@ -1,7 +1,7 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: Inline dedup/compression
-Date: Fri, 21 Aug 2015 11:01:12 +0800
-Message-ID: <CACJqLybk7OFcewX97rp+8h4z-XNBxhqOw_yCC_VF2O_S8hftjw@mail.gmail.com>
+From: Allen Samuels <Allen.Samuels@sandisk.com>
+Subject: RE: Inline dedup/compression
+Date: Fri, 21 Aug 2015 03:37:08 +0000
+Message-ID: <7334B4281E425749B85E08CF7EC6F853437D1D9A@SACMBXIP03.sdcorp.global.sandisk.com>
 References: <99767EA2E27DD44DB4E9F9B9ACA458C03B319727@SSIEXCH-MB3.ssi.samsung.com>
 	<CACJqLybMy1Tfr8baZMbv268gbmeBpG7uJuvbkrnQ9pjdn-AOvA@mail.gmail.com>
 	<99767EA2E27DD44DB4E9F9B9ACA458C03B3198B4@SSIEXCH-MB3.ssi.samsung.com>
@@ -14,459 +14,366 @@ References: <99767EA2E27DD44DB4E9F9B9ACA458C03B319727@SSIEXCH-MB3.ssi.samsung.co
 	<9E914F5BD7F48A4782456CEB550A422824E9070A@SACMBXIP02.sdcorp.global.sandisk.com>
 	<7334B4281E425749B85E08CF7EC6F853437877B7@SACMBXIP03.sdcorp.global.sandisk.com>
 	<CACJqLyaRQU2oyja___jRAY7sidfbVM1XiYgpLVUSX-N8mH3aGg@mail.gmail.com>
+ <CACJqLybk7OFcewX97rp+8h4z-XNBxhqOw_yCC_VF2O_S8hftjw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yk0-f170.google.com ([209.85.160.170]:34198 "EHLO
-	mail-yk0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751283AbbHUDBN convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Aug 2015 23:01:13 -0400
-Received: by ykdt205 with SMTP id t205so58553289ykd.1
-        for <ceph-devel@vger.kernel.org>; Thu, 20 Aug 2015 20:01:12 -0700 (PDT)
-In-Reply-To: <CACJqLyaRQU2oyja___jRAY7sidfbVM1XiYgpLVUSX-N8mH3aGg@mail.gmail.com>
+Received: from mail-bl2on0086.outbound.protection.outlook.com ([65.55.169.86]:39712
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751308AbbHUDhP (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 20 Aug 2015 23:37:15 -0400
+In-Reply-To: <CACJqLybk7OFcewX97rp+8h4z-XNBxhqOw_yCC_VF2O_S8hftjw@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Allen Samuels <Allen.Samuels@sandisk.com>
+To: Haomai Wang <haomaiwang@gmail.com>
 Cc: Chaitanya Huilgol <Chaitanya.Huilgol@sandisk.com>, "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-sorry, should be this
-blog(http://mysqlserverteam.com/innodb-transparent-page-compression/)
-
-On Fri, Aug 21, 2015 at 10:51 AM, Haomai Wang <haomaiwang@gmail.com> wr=
-ote:
-> I found a blog(http://mysqlserverteam.com/innodb-transparent-pageio-c=
-ompression/)
-> about mysql innodb transparent compression. It's surprised that innod=
-b
-> will do it at low level(just like filestore in ceph) and rely it on
-> filesystem file hole feature. I'm very suspect about the performance
-> afeter storing lot's of *small* hole files on fs. If reliable, it
-> would be easy that filestore/newstore impl alike feature.
->
-> On Fri, Jul 3, 2015 at 1:13 PM, Allen Samuels <Allen.Samuels@sandisk.=
-com> wrote:
->> For non-overwriting relatively large objects, this scheme works fine=
-=2E Unfortunately the real use-case for deduplication is block storage =
-with virtualized infrastructure (eliminating duplicate operating system=
- files and applications, etc.) and in order for this to provide good de=
-duplication, you'll need a block size that's equal or smaller than the =
-cluster-size of the file system mounted on the block device. Meaning th=
-at your storage is now dominated by small chunks (probably 8K-ish) rath=
-er than the relatively large 4M stripes that is used today (this will a=
-lso kill EC since small objects are replicated rather than ECed). This =
-will have a massive impact on backend storage I/O as the basic data/met=
-adata ratio is complete skewed (both for static storage and dynamic I/O=
- count).
->>
->>
->> Allen Samuels
->> Software Architect, Emerging Storage Solutions
->>
->> 2880 Junction Avenue, Milpitas, CA 95134
->> T: +1 408 801 7030| M: +1 408 780 6416
->> allen.samuels@SanDisk.com
->>
->>
->> -----Original Message-----
->> From: Chaitanya Huilgol
->> Sent: Thursday, July 02, 2015 3:50 AM
->> To: James (Fei) Liu-SSI; Allen Samuels; Haomai Wang
->> Cc: ceph-devel
->> Subject: RE: Inline dedup/compression
->>
->> Hi James et.al ,
->>
->> Here is an example for clarity,
->> 1. Client Writes object  object.abcd
->> 2. Based on the crush rules, say  OSD.a is the primary OSD which rec=
-eives the write 3. OSD.a  performs segmenting/fingerprinting which can =
-be static or dynamic and generates a list of segments, the object.abcd =
-is now represented by a manifest object with the list of segment hash a=
-nd len  [Header]  [Seg1_sha, len]  [Seg2_sha, len]  ...
->>  [Seg3_sha, len]
->> 4. OSD.a writes each segment as a new object in the cluster with obj=
-ect name  <reserved_dedupe_perfix><sha> 5. The dedupe object write is t=
-reated differently from regular object writes, If the object is present=
- then an object reference count is incremented and the object is not ov=
-erwritten - this forms the basis of the dedupe logic. Multiple objects =
-with one or more same constituent segments start sharing the segment ob=
-jects.
->> 6. Once all the segments are successfully written the object 'object=
-=2Eabcd' is now just a stub object with the segment manifest as describ=
-ed above and is goes through a regular object write sequence
->>
->> Partial writes on objects will be complicated,
->> - Partially affected segments will have to be read and segmentation =
-logic has to be run from first to last affected segment boundaries
->> -  New segments will be written
->> - Old overwritten segments have to be deleted
->> - Write merged manifest of the object
->>
->> All this will need protection of the PG lock, Also additional journa=
-ling mechanism will be needed to  recover from cases where the osd goes=
- down before writing all the segments.
->>
->> Since this is quite a lot of processing, a better use case for this =
-dedupe mechanism would be in the data tiering model with object redirec=
-ts.
->> The manifest object fits quiet well into object redirects scheme of =
-things, the idea is that, when an object is moved out of the base tier,=
- you have an option to create a dedupe stub object and write individual=
- segments into the cold backend tier with a rados plugin.
->>
->> Remaining responses inline.
->>
->> Regards,
->> Chaitanya
->>
->> -----Original Message-----
->> From: James (Fei) Liu-SSI [mailto:james.liu@ssi.samsung.com]
->> Sent: Wednesday, July 01, 2015 4:00 AM
->> To: Chaitanya Huilgol; Allen Samuels; Haomai Wang
->> Cc: ceph-devel
->> Subject: RE: Inline dedup/compression
->>
->> Hi Chaitanya,
->>    Very interesting thoughts. I am not sure whether I get all of the=
-m or now. Here are several questions for the solution you provided, Mig=
-ht be a little bit detailed.
->>
->>     Regards,
->>     James
->>
->> - Dedupe is set as a pool property
->> Write:
->> - Write arrives at the primary OSD/pg
->> [James] Does the OSD/PG mean PG Backend over here?
->> [Chaitanya] I mean the Primary OSD and the PG which get selected by =
-the crush - not the specific OSD component
->>
->> - Data is segmented (rabin/static) and secure hash computed [James] =
-Which component in OSD are you going to do the data segment and hash co=
-mputation?
->> [Chaitanya] If partial writes are not supported then this could be d=
-own before acquiring the PG lock, else we need the protection of the PG=
- lock.  Probably in the do_request() path?
->>
->> - A manifest is created with the offset/len/hash for all the segment=
-s [James] The manifest is going to be part of xattr of object? Where ar=
-e you going to save manifest?
->> [Chaitanya] The manifest is a stub object with the constituent segme=
-nts list
->>
->> - OSD/pg sends rados write with a special name <__known__prefix><sec=
-ure hash> for all segments [James] What's your meaning of Rados Wirte? =
- Where do the all segments with secure hash signature write to?
->> [Chaitanya] All segments are unique objects with the above mentioned=
- naming scheme, they get written back into the cluster as a regular cli=
-ent rados object write
->>
->> - PG receiving dedup write will:
->>         1. check for object presence and create object if not presen=
-t
->>         2. If object is already present, then an reference count is =
-incremented (check and increment needs to be atomic) [James] It makes s=
-ense. But I was wondering the unit for dedupe is segment or object? If =
-object base, it totally make sense. However, why we need to have segmen=
-t with manifest?
->>
->> - Response is received by original primary PG for all segments [Jame=
-s] What response?
->> [Chaitanya] Write response indicating the status of the segment obje=
-ct write
->>
->> - Primary PG writes the manifest to local and replicas or EC members=
- [James] How about the dedupe data if the data is not present in replic=
-as?
->> [Chaitanya] I am sorry, I did not get your question, the manifest ob=
-ject gets written in the primary and the replicas or encoded and writte=
-n to the EC members, it is afforded the protection policy set for the p=
-ool. Same is the case with the individual constituent segments.
->>
->> - Response sent to client
->>
->> Read:
->> - Read received at primary PG
->> [James]  The read can only fetch data from Primary PG?
->> - Reads manifest object
->>
->> - sends reads for each segment object <__know_prefix><secure hash>
->> - coalesces all the response to build the required data
->> - Responds to client
->>
->>
->> Pros:
->> No need of centralized hash index so inline with ceph no bottleneck =
-philosophy
->>
->> Cons:
->> Some PGs may get overloaded due to frequently occurring segment patt=
-erns Latency and increased traffic on the network
->>
->>
->>
->> -----Original Message-----
->> From: Chaitanya Huilgol [mailto:Chaitanya.Huilgol@sandisk.com]
->> Sent: Tuesday, June 30, 2015 8:50 AM
->> To: Allen Samuels; James (Fei) Liu-SSI; Haomai Wang
->> Cc: ceph-devel
->> Subject: RE: Inline dedup/compression
->>
->>
->> - Reference count has to be maintained as an attribute of the object
->> - As mentioned in the write workflow, duplicate segment writes incre=
-ment the reference count
->> - Object Delete would result in delete on constituent segments liste=
-d in the object segment manifest
->> - Segment object delete will decrement reference count and remove th=
-e segment when there are no more references present
->>
->> Regards,
->> Chaitanya
->>
->> -----Original Message-----
->> From: Allen Samuels
->> Sent: Tuesday, June 30, 2015 9:02 PM
->> To: Chaitanya Huilgol; James (Fei) Liu-SSI; Haomai Wang
->> Cc: ceph-devel
->> Subject: RE: Inline dedup/compression
->>
->> This covers the read and write, what about the delete? One of the ma=
-jor issues with Dedupe, whether global or local is to address the inher=
-ent ref-counting associated with sharing of pieces of storage.
->>
->> Allen Samuels
->> Software Architect, Emerging Storage Solutions
->>
->> 2880 Junction Avenue, Milpitas, CA 95134
->> T: +1 408 801 7030| M: +1 408 780 6416
->> allen.samuels@SanDisk.com
->>
->> -----Original Message-----
->> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger=
-=2Ekernel.org] On Behalf Of Chaitanya Huilgol
->> Sent: Monday, June 29, 2015 11:20 PM
->> To: James (Fei) Liu-SSI; Haomai Wang
->> Cc: ceph-devel
->> Subject: RE: Inline dedup/compression
->>
->> Below is an alternative idea at a very high level around dedup with =
-ceph without a need of centralized hash index,
->>
->> - Dedupe is set as a pool property
->> Write:
->> - Write arrives at the primary OSD/pg
->> - Data is segmented (rabin/static) and secure hash computed
->> - A manifest is created with the offset/len/hash for all the segment=
-s
->> - OSD/pg sends rados write with a special name <__known__prefix><sec=
-ure hash> for all segments
->> - PG receiving dedup write will:
->>         1. check for object presence and create object if not presen=
-t
->>         2. If object is already present, then an reference count is =
-incremented (check and increment needs to be atomic)
->> - Response is received by original primary PG for all segments
->> - Primary PG writes the manifest to local and replicas or EC members
->> - Response sent to client
->>
->> Read:
->> - Read received at primary PG
->> - Reads manifest object
->> - sends reads for each segment object <__know_prefix><secure hash>
->> - coalesces all the response to build the required data
->> - Responds to client
->>
->>
->> Pros:
->> No need of centralized hash index so inline with ceph no bottleneck =
-philosophy
->>
->> Cons:
->> Some PGs may get overloaded due to frequently occurring segment patt=
-erns Latency and increased traffic on the network
->>
->> Regards,
->> Chaitanya
->>
->> -----Original Message-----
->> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger=
-=2Ekernel.org] On Behalf Of James (Fei) Liu-SSI
->> Sent: Tuesday, June 30, 2015 2:25 AM
->> To: Haomai Wang
->> Cc: ceph-devel
->> Subject: RE: Inline dedup/compression
->>
->> Hi Haomai,
->>   Thanks for moving the idea forward. Regarding to the compression. =
- However,  if we do compression on the client level, it is not global. =
-And the compression was only applied to the local client, am I right?  =
-I think there is pros and cons in two solutions and we can get into det=
-ails more for each solution.
->>   I really like your idea for dedupe in OSD side   by the way. Let m=
-e think more about it.
->>
->>  Regards,
->>  James
->>
->> -----Original Message-----
->> From: Haomai Wang [mailto:haomaiwang@gmail.com]
->> Sent: Friday, June 26, 2015 8:55 PM
->> To: James (Fei) Liu-SSI
->> Cc: ceph-devel
->> Subject: Re: Inline dedup/compression
->>
->> On Sat, Jun 27, 2015 at 2:03 AM, James (Fei) Liu-SSI <james.liu@ssi.=
-samsung.com> wrote:
->>> Hi Haomai,
->>>   Thanks for your response as always. I agree compression is compar=
-able easier task but still very challenge in terms of implementation no=
- matter where we should implement . Client side like RBD, or RDBGW or C=
-ephFS, or PG should be a little bit better place to implementation in t=
-erms of efficiency and cost reduction before the data were duplicated t=
-o other OSDs. It has  two reasons :
->>> 1. Keep the data consistency among OSDs in one PG 2. Saving the
->>> computing resources
->>>
->>> IMHO , The compression should be accomplished before the replicatio=
-n come into play in pool level. However, we can also have second level =
-of compression in the local objectstore.  In term of unit size of compr=
-ession , It really depends workload and in which layer we should implem=
-ent.
->>>
->>> About inline deduplication, it will dramatically increase the compl=
-exities if we bring in the replication and Erasure Coding for considera=
-tion.
->>>
->>> However, Before we talk about implementation, It would be great if =
-we can understand the pros and cons to implement inline dedupe/compress=
-ion. We all understand the benefits of dedupe/compression. However, the=
- side effect is performance hurt and need more computing resources. It =
-would be great if we can understand the problems from 30,000 feet high =
-for the whole picture about the Ceph. Please correct me if I were wrong=
-=2E
->>
->> Actually we may have some tricks to reduce performance hurt like com=
-pression. As Joe mentioned, we can compress slave pg data to avoid perf=
-ormance hurt, but it may increase the complexity of recovery and pg rem=
-ap things. Another in-detail implement way if we begin to compress data=
- from messenger, osd thread and pg thread won't access data for normal =
-client op, so maybe we can make it parallel with pg process. Journal th=
-read will get the compressed data at last.
->>
->> The effect of compression also is a concern, we do compression in ra=
-dos may not get the best compression result. If we can do compression i=
-n libcephfs, librbd and radosgw and make rados unknown to compression, =
-it maybe simpler and we can get file/block/object level compression. it=
- should be better?
->>
->> About dedup, my current idea is we could setup a memory pool at osd =
-side for checksum store usage. Then we calculate object data and map to=
- PG instead of object name at client side, so a object could always in =
-a osd where it's also responsible for dedup storage. It also could be d=
-istributed at pool level.
->>
->>
->>>
->>> By the way, Both of software defined storage solution startups like=
- Hdevig and Springpath provide inline dedupe/compression.  It is not ap=
-ple to apple comparison. But it is good reference. The datacenters need=
- cost effective solution.
->>>
->>> Regards,
->>> James
->>>
->>>
->>>
->>> -----Original Message-----
->>> From: Haomai Wang [mailto:haomaiwang@gmail.com]
->>> Sent: Thursday, June 25, 2015 8:08 PM
->>> To: James (Fei) Liu-SSI
->>> Cc: ceph-devel
->>> Subject: Re: Inline dedup/compression
->>>
->>> On Fri, Jun 26, 2015 at 6:01 AM, James (Fei) Liu-SSI <james.liu@ssi=
-=2Esamsung.com> wrote:
->>>> Hi Cephers,
->>>>     It is not easy to ask when Ceph is going to support inline ded=
-up/compression across OSDs in RADOS because it is not easy task and ans=
-wered. Ceph is providing replication and EC for performance and failure=
- recovery. But we also lose the efficiency  of storage store and cost a=
-ssociate with it. It is kind of contradicted with each other. But I am =
-curious how other Cephers think about this question.
->>>>    Any plan for Cephers to do anything regarding to inline dedupe/=
-compression except the features brought by local node itself like BRTFS=
-?
->>>
->>> Compression is easier to implement in rados than dedup. The most im=
-portant thing about compression is where we begin to compress, client, =
-pg or objectstore. Then we need to decide how much the compress unit is=
-=2E Of course, compress and dedup both like to use keyvalue-alike stora=
-ge api to use, but I think it's not difficult to use existing objectsto=
-re api.
->>>
->>> Dedup is more possible to implement in local osd instead of the who=
-le pool or cluster, and if we want to do dedup for the pool level, we n=
-eed to do dedup from client.
->>>
->>>>
->>>>   Regards,
->>>>   James
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-dev=
-el"
->>>> in the body of a message to majordomo@vger.kernel.org More majordo=
-mo
->>>> info at  http://vger.kernel.org/majordomo-info.html
->>>
->>>
->>>
->>> --
->>> Best Regards,
->>>
->>> Wheat
->>
->>
->>
->> --
->> Best Regards,
->>
->> Wheat
->>    =EC=B9=BB  & ~ &    +-  =DD=B6   w  =CB=9B   m    ^  b  ^n r   z =
-   h    &    G   h  ( =E9=9A=8E =DD=A2j"     m     z =DE=96   f   h   ~=
- m
->>
->> ________________________________
->>
->> PLEASE NOTE: The information contained in this electronic mail messa=
-ge is intended only for the use of the designated recipient(s) named ab=
-ove. If the reader of this message is not the intended recipient, you a=
-re hereby notified that you have received this message in error and tha=
-t any review, dissemination, distribution, or copying of this message i=
-s strictly prohibited. If you have received this communication in error=
-, please notify the sender by telephone or e-mail (as shown above) imme=
-diately and destroy any and all copies of this message in your possessi=
-on (whether hard copies or electronically stored copies).
->>
->> N     r  y   b X  =C7=A7v ^ )=DE=BA{.n +   z ]z   {ay  =CA=87=DA=99 =
-,j   f   h   z   w       j:+v   w j m         zZ+     =DD=A2j"  ! i
->
->
->
-> --
-> Best Regards,
->
-> Wheat
-
-
-
---=20
-Best Regards,
-
-Wheat
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+WEZTIHNob3VsZG4ndCBoYXZlIGFueSB0cm91YmxlIHdpdGggdGhlICJob2xlcyIgc2NoZW1lLiBJ
+IGRvbid0IGtub3cgQlRSRlMgYXMgd2VsbCwgYnV0IEkgZG91YnQgaXQncyBzaWduaWZpY2FudGx5
+IGRpZmZlcmVudC4NCg0KSWYgd2UgYXNzdW1lIHRoYXQgdGhlIGxvZ2ljYWwgYWRkcmVzcyBzcGFj
+ZSBvZiBhIGZpbGUgaXMgYnJva2VuIHVwIGludG8gZml4ZWQgc2l6ZWQgY2h1bmtzIG9uIGZpeGVk
+IHNpemUgYm91bmRhcmllcyAocHJlc3VtYWJseSBhIHBvd2VyIG9mIDIpIHRoZW4gdGhlIGltcGxl
+bWVudGF0aW9uIGlzIHF1aXRlIHN0cmFpZ2h0Zm9yd2FyZC4NCg0KUGlja2luZyB0aGUgY2h1bmsg
+c2l6ZSB3aWxsIGJlIGEga2V5IGlzc3VlIGZvciBwZXJmb3JtYW5jZS4gVW5mb3J0dW5hdGVseSwg
+dGhlcmUgYXJlIGNvbXBldGluZyBkZXNpcmVzLg0KDQpGb3IgYmVzdCBzcGFjZSB1dGlsaXphdGlv
+biwgeW91J2xsIHdhbnQgdGhlIGNodW5rIHNpemUgdG8gYmUgbGFyZ2UsIGJlY2F1c2Ugb24gYXZl
+cmFnZSB5b3UnbGwgbG9zZSAxLzIgb2YgYSBmaWxlIHN5c3RlbSBzZWN0b3IvYmxvY2sgZm9yIGVh
+Y2ggY2h1bmsgb2YgY29tcHJlc3NlZCBkYXRhLg0KDQpGb3IgYmVzdCBSL1cgcGVyZm9ybWFuY2Us
+IHlvdSdsbCB3YW50IHRoZSBjaHVuayBzaXplIHRvIGJlIHNtYWxsLCBiZWNhdXNlIGxvZ2ljYWxs
+eSB0aGUgZmlsZSBJL08gc2l6ZSBpcyBlcXVhbCB0byBhIGNodW5rLCBpLmUuLCBvbiBhIHdyaXRl
+IHlvdSBtaWdodCBoYXZlIHRvIHJlYWQgdGhlIGNvcnJlc3BvbmRpbmcgY2h1bmssIGRlY29tcHJl
+c3MgaXQsIGluc2VydCB0aGUgbmV3IGRhdGEgYW5kIHJlY29tcHJlc3MgaXQuIFRoaXMgZ2V0cyBz
+dXBlciBkdXBlciB1Z2x5IG9uIEZpbGVTdG9yZSBiZWNhdXNlIHlvdSBjYW4ndCBhZmZvcmQgdG8g
+Y3Jhc2ggZHVyaW5nIHRoZSByZS13cml0ZSB1cGRhdGUgYW5kIHJpc2sgYSBwYXJ0aWFsbHkgdXBk
+YXRlZCBjaHVuayAodGhpcyB3aWxsIGdpdmUgeW91IGdhcmJhZ2Ugd2hlbiB5b3UgZGVjb21wcmVz
+cyBpdCkuIFRoaXMgbWVhbnMgdGhhdCB5b3UnbGwgaGF2ZSB0byBsb2cgdGhlIGVudGlyZSBjaHVu
+ayBldmVuIGlmIHlvdSdyZSBvbmx5IHJlLXdyaXRpbmcgYSBzbWFsbCBwb3J0aW9uIG9mIGl0LiBI
+ZW5jZSB0aGUgZGVzaXJlIHRvIG1ha2UgdGhlIGNodW5rc2l6ZSBzbWFsbC4gSSdtIG5vdCBhcyBm
+YW1pbGlhciB3aXRoIE5ld1N0b3JlLCBidXQgSSBkb24ndCB0aGluayBpdCdzIGZ1bmRhbWVudGFs
+bHkgbXVjaCBiZXR0ZXIuIEJhc2ljYWxseSBhbnkgZm9ybSBvZiBzdWItY2h1bmsgd3JpdGUtb3Bl
+cmF0aW9uIHN0aW5rcyBpbiBwZXJmb3JtYW5jZS4gU3ViLWNodW5rIHJlYWQgb3BlcmF0aW9ucyBh
+cmVuJ3QgdG9vIGJhZCB1bmxlc3MgdGhlIGNodW5rIHNpemUgaXMgcmlkaWN1bG91c2x5IGxhcmdl
+LiANCg0KRm9yIGJlc3QgY29tcHJlc3Npb24gcmF0aW9zLCB5b3UnbGwgd2FudCB0aGUgY2h1bmsg
+c2l6ZSB0byBiZSBhdCBsZWFzdCBlcXVhbCB0byB0aGUgaGlzdG9yeSBzaXplIGlmIG5vdCAyIG9y
+IDMgdGltZXMgbGFyZ2VyICg2NEsgaGlzdG9yeSBzaXplIHdoZW4gdXNpbmcgemxpYiwgc25hcHB5
+IGlzIDMySyBvciA2NEsgZm9yIHRoZSBsYXRlc3QgdmVyc2lvbikNCg0KVGhlIHBhcnRpYWwtYmxv
+Y2sgd3JpdGUgcHJvYmxlbSBkb2Vzbid0IGV4aXN0IGZvciBSR1cgb2JqZWN0cyBhbmQgaXQncyBv
+YmplY3RzIGFyZSBwcm9iYWJseSBhbHJlYWR5IGNvbXByZXNzZWQuIE1lYW5pbmcgdGhhdCB5b3Un
+bGwgd2FudCB0byBiZSBhYmxlIHRvIGNvbnZleSB0aGUgY29tcHJlc3Npb24gcGFyYW1ldGVycyB0
+byBSQURPUyBzbyB0aGF0IHRoZSBiYWNrZW5kIGtub3dzIHdoYXQgdG8gZG8uDQoNCkkgd291bGQg
+YWRkIGEgcGVyLWZpbGUgYXR0cmlidXRlIHRoYXQgZW5jb2RlcyB0aGUgY29tcHJlc3Npb24gcGFy
+YW1ldGVyczogIGNvbXByZXNzaW9uIGFsZ29yaXRobSAoemxpYiwgc25hcHB5LCAuLi4pIGFuZCBj
+aHVua3NpemUuIFRoYXQgd291bGQgYWxzbyBwcm92aWRlIGJhY2t3YXJkIGNvbXBhdGliaWxpdHkg
+YW5kIGFsbG93IHBlci1vYmplY3QgY29tcHJlc3Npb24gZGl2ZXJzaXR5Lg0KDQpUaGVuIHlvdSdk
+IHdhbnQgdG8gYWRkIHZlcmJpYWdlIHRvIHRoZSBpbmRpdmlkdWFsIGFjY2VzcyBzY2hlbWVzIHRv
+IGFsbG93L2Rpc2FsbG93IGNvbXByZXNzaW9uLiBGb3IgZmlsZSBzeXN0ZW1zIHlvdSdkIHdhbnQg
+dGhhdCBvbiBhIHBlci1kaXJlY3RvcnkgYmFzaXMgb3IgcGVyaGFwcyBldmVuIGJldHRlciBhIHNl
+dCBvZiByZWd1bGFyIGV4cHJlc3Npb25zLg0KDQoNCkFsbGVuIFNhbXVlbHMNClNvZnR3YXJlIEFy
+Y2hpdGVjdCwgU3lzdGVtcyBhbmQgU29mdHdhcmUgU29sdXRpb25zIA0KDQoyODgwIEp1bmN0aW9u
+IEF2ZW51ZSwgU2FuIEpvc2UsIENBIDk1MTM0DQpUOiArMSA0MDggODAxIDcwMzB8IE06ICsxIDQw
+OCA3ODAgNjQxNg0KYWxsZW4uc2FtdWVsc0BTYW5EaXNrLmNvbQ0KDQoNCi0tLS0tT3JpZ2luYWwg
+TWVzc2FnZS0tLS0tDQpGcm9tOiBIYW9tYWkgV2FuZyBbbWFpbHRvOmhhb21haXdhbmdAZ21haWwu
+Y29tXSANClNlbnQ6IFRodXJzZGF5LCBBdWd1c3QgMjAsIDIwMTUgODowMSBQTQ0KVG86IEFsbGVu
+IFNhbXVlbHMNCkNjOiBDaGFpdGFueWEgSHVpbGdvbDsgSmFtZXMgKEZlaSkgTGl1LVNTSTsgY2Vw
+aC1kZXZlbA0KU3ViamVjdDogUmU6IElubGluZSBkZWR1cC9jb21wcmVzc2lvbg0KDQpzb3JyeSwg
+c2hvdWxkIGJlIHRoaXMNCmJsb2coaHR0cDovL215c3Fsc2VydmVydGVhbS5jb20vaW5ub2RiLXRy
+YW5zcGFyZW50LXBhZ2UtY29tcHJlc3Npb24vKQ0KDQpPbiBGcmksIEF1ZyAyMSwgMjAxNSBhdCAx
+MDo1MSBBTSwgSGFvbWFpIFdhbmcgPGhhb21haXdhbmdAZ21haWwuY29tPiB3cm90ZToNCj4gSSBm
+b3VuZCBhIA0KPiBibG9nKGh0dHA6Ly9teXNxbHNlcnZlcnRlYW0uY29tL2lubm9kYi10cmFuc3Bh
+cmVudC1wYWdlaW8tY29tcHJlc3Npb24vDQo+ICkgYWJvdXQgbXlzcWwgaW5ub2RiIHRyYW5zcGFy
+ZW50IGNvbXByZXNzaW9uLiBJdCdzIHN1cnByaXNlZCB0aGF0IA0KPiBpbm5vZGIgd2lsbCBkbyBp
+dCBhdCBsb3cgbGV2ZWwoanVzdCBsaWtlIGZpbGVzdG9yZSBpbiBjZXBoKSBhbmQgcmVseSANCj4g
+aXQgb24gZmlsZXN5c3RlbSBmaWxlIGhvbGUgZmVhdHVyZS4gSSdtIHZlcnkgc3VzcGVjdCBhYm91
+dCB0aGUgDQo+IHBlcmZvcm1hbmNlIGFmZXRlciBzdG9yaW5nIGxvdCdzIG9mICpzbWFsbCogaG9s
+ZSBmaWxlcyBvbiBmcy4gSWYgDQo+IHJlbGlhYmxlLCBpdCB3b3VsZCBiZSBlYXN5IHRoYXQgZmls
+ZXN0b3JlL25ld3N0b3JlIGltcGwgYWxpa2UgZmVhdHVyZS4NCj4NCj4gT24gRnJpLCBKdWwgMywg
+MjAxNSBhdCAxOjEzIFBNLCBBbGxlbiBTYW11ZWxzIDxBbGxlbi5TYW11ZWxzQHNhbmRpc2suY29t
+PiB3cm90ZToNCj4+IEZvciBub24tb3ZlcndyaXRpbmcgcmVsYXRpdmVseSBsYXJnZSBvYmplY3Rz
+LCB0aGlzIHNjaGVtZSB3b3JrcyBmaW5lLiBVbmZvcnR1bmF0ZWx5IHRoZSByZWFsIHVzZS1jYXNl
+IGZvciBkZWR1cGxpY2F0aW9uIGlzIGJsb2NrIHN0b3JhZ2Ugd2l0aCB2aXJ0dWFsaXplZCBpbmZy
+YXN0cnVjdHVyZSAoZWxpbWluYXRpbmcgZHVwbGljYXRlIG9wZXJhdGluZyBzeXN0ZW0gZmlsZXMg
+YW5kIGFwcGxpY2F0aW9ucywgZXRjLikgYW5kIGluIG9yZGVyIGZvciB0aGlzIHRvIHByb3ZpZGUg
+Z29vZCBkZWR1cGxpY2F0aW9uLCB5b3UnbGwgbmVlZCBhIGJsb2NrIHNpemUgdGhhdCdzIGVxdWFs
+IG9yIHNtYWxsZXIgdGhhbiB0aGUgY2x1c3Rlci1zaXplIG9mIHRoZSBmaWxlIHN5c3RlbSBtb3Vu
+dGVkIG9uIHRoZSBibG9jayBkZXZpY2UuIE1lYW5pbmcgdGhhdCB5b3VyIHN0b3JhZ2UgaXMgbm93
+IGRvbWluYXRlZCBieSBzbWFsbCBjaHVua3MgKHByb2JhYmx5IDhLLWlzaCkgcmF0aGVyIHRoYW4g
+dGhlIHJlbGF0aXZlbHkgbGFyZ2UgNE0gc3RyaXBlcyB0aGF0IGlzIHVzZWQgdG9kYXkgKHRoaXMg
+d2lsbCBhbHNvIGtpbGwgRUMgc2luY2Ugc21hbGwgb2JqZWN0cyBhcmUgcmVwbGljYXRlZCByYXRo
+ZXIgdGhhbiBFQ2VkKS4gVGhpcyB3aWxsIGhhdmUgYSBtYXNzaXZlIGltcGFjdCBvbiBiYWNrZW5k
+IHN0b3JhZ2UgSS9PIGFzIHRoZSBiYXNpYyBkYXRhL21ldGFkYXRhIHJhdGlvIGlzIGNvbXBsZXRl
+IHNrZXdlZCAoYm90aCBmb3Igc3RhdGljIHN0b3JhZ2UgYW5kIGR5bmFtaWMgSS9PIGNvdW50KS4N
+Cj4+DQo+Pg0KPj4gQWxsZW4gU2FtdWVscw0KPj4gU29mdHdhcmUgQXJjaGl0ZWN0LCBFbWVyZ2lu
+ZyBTdG9yYWdlIFNvbHV0aW9ucw0KPj4NCj4+IDI4ODAgSnVuY3Rpb24gQXZlbnVlLCBNaWxwaXRh
+cywgQ0EgOTUxMzQNCj4+IFQ6ICsxIDQwOCA4MDEgNzAzMHwgTTogKzEgNDA4IDc4MCA2NDE2IGFs
+bGVuLnNhbXVlbHNAU2FuRGlzay5jb20NCj4+DQo+Pg0KPj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdl
+LS0tLS0NCj4+IEZyb206IENoYWl0YW55YSBIdWlsZ29sDQo+PiBTZW50OiBUaHVyc2RheSwgSnVs
+eSAwMiwgMjAxNSAzOjUwIEFNDQo+PiBUbzogSmFtZXMgKEZlaSkgTGl1LVNTSTsgQWxsZW4gU2Ft
+dWVsczsgSGFvbWFpIFdhbmcNCj4+IENjOiBjZXBoLWRldmVsDQo+PiBTdWJqZWN0OiBSRTogSW5s
+aW5lIGRlZHVwL2NvbXByZXNzaW9uDQo+Pg0KPj4gSGkgSmFtZXMgZXQuYWwgLA0KPj4NCj4+IEhl
+cmUgaXMgYW4gZXhhbXBsZSBmb3IgY2xhcml0eSwNCj4+IDEuIENsaWVudCBXcml0ZXMgb2JqZWN0
+ICBvYmplY3QuYWJjZA0KPj4gMi4gQmFzZWQgb24gdGhlIGNydXNoIHJ1bGVzLCBzYXkgIE9TRC5h
+IGlzIHRoZSBwcmltYXJ5IE9TRCB3aGljaCByZWNlaXZlcyB0aGUgd3JpdGUgMy4gT1NELmEgIHBl
+cmZvcm1zIHNlZ21lbnRpbmcvZmluZ2VycHJpbnRpbmcgd2hpY2ggY2FuIGJlIHN0YXRpYyBvciBk
+eW5hbWljIGFuZCBnZW5lcmF0ZXMgYSBsaXN0IG9mIHNlZ21lbnRzLCB0aGUgb2JqZWN0LmFiY2Qg
+aXMgbm93IHJlcHJlc2VudGVkIGJ5IGEgbWFuaWZlc3Qgb2JqZWN0IHdpdGggdGhlIGxpc3Qgb2Yg
+c2VnbWVudCBoYXNoIGFuZCBsZW4gIFtIZWFkZXJdICBbU2VnMV9zaGEsIGxlbl0gIFtTZWcyX3No
+YSwgbGVuXSAgLi4uDQo+PiAgW1NlZzNfc2hhLCBsZW5dDQo+PiA0LiBPU0QuYSB3cml0ZXMgZWFj
+aCBzZWdtZW50IGFzIGEgbmV3IG9iamVjdCBpbiB0aGUgY2x1c3RlciB3aXRoIG9iamVjdCBuYW1l
+ICA8cmVzZXJ2ZWRfZGVkdXBlX3BlcmZpeD48c2hhPiA1LiBUaGUgZGVkdXBlIG9iamVjdCB3cml0
+ZSBpcyB0cmVhdGVkIGRpZmZlcmVudGx5IGZyb20gcmVndWxhciBvYmplY3Qgd3JpdGVzLCBJZiB0
+aGUgb2JqZWN0IGlzIHByZXNlbnQgdGhlbiBhbiBvYmplY3QgcmVmZXJlbmNlIGNvdW50IGlzIGlu
+Y3JlbWVudGVkIGFuZCB0aGUgb2JqZWN0IGlzIG5vdCBvdmVyd3JpdHRlbiAtIHRoaXMgZm9ybXMg
+dGhlIGJhc2lzIG9mIHRoZSBkZWR1cGUgbG9naWMuIE11bHRpcGxlIG9iamVjdHMgd2l0aCBvbmUg
+b3IgbW9yZSBzYW1lIGNvbnN0aXR1ZW50IHNlZ21lbnRzIHN0YXJ0IHNoYXJpbmcgdGhlIHNlZ21l
+bnQgb2JqZWN0cy4NCj4+IDYuIE9uY2UgYWxsIHRoZSBzZWdtZW50cyBhcmUgc3VjY2Vzc2Z1bGx5
+IHdyaXR0ZW4gdGhlIG9iamVjdCAnb2JqZWN0LmFiY2QnIGlzIG5vdyBqdXN0IGEgc3R1YiBvYmpl
+Y3Qgd2l0aCB0aGUgc2VnbWVudCBtYW5pZmVzdCBhcyBkZXNjcmliZWQgYWJvdmUgYW5kIGlzIGdv
+ZXMgdGhyb3VnaCBhIHJlZ3VsYXIgb2JqZWN0IHdyaXRlIHNlcXVlbmNlDQo+Pg0KPj4gUGFydGlh
+bCB3cml0ZXMgb24gb2JqZWN0cyB3aWxsIGJlIGNvbXBsaWNhdGVkLA0KPj4gLSBQYXJ0aWFsbHkg
+YWZmZWN0ZWQgc2VnbWVudHMgd2lsbCBoYXZlIHRvIGJlIHJlYWQgYW5kIHNlZ21lbnRhdGlvbiBs
+b2dpYyBoYXMgdG8gYmUgcnVuIGZyb20gZmlyc3QgdG8gbGFzdCBhZmZlY3RlZCBzZWdtZW50IGJv
+dW5kYXJpZXMNCj4+IC0gIE5ldyBzZWdtZW50cyB3aWxsIGJlIHdyaXR0ZW4NCj4+IC0gT2xkIG92
+ZXJ3cml0dGVuIHNlZ21lbnRzIGhhdmUgdG8gYmUgZGVsZXRlZA0KPj4gLSBXcml0ZSBtZXJnZWQg
+bWFuaWZlc3Qgb2YgdGhlIG9iamVjdA0KPj4NCj4+IEFsbCB0aGlzIHdpbGwgbmVlZCBwcm90ZWN0
+aW9uIG9mIHRoZSBQRyBsb2NrLCBBbHNvIGFkZGl0aW9uYWwgam91cm5hbGluZyBtZWNoYW5pc20g
+d2lsbCBiZSBuZWVkZWQgdG8gIHJlY292ZXIgZnJvbSBjYXNlcyB3aGVyZSB0aGUgb3NkIGdvZXMg
+ZG93biBiZWZvcmUgd3JpdGluZyBhbGwgdGhlIHNlZ21lbnRzLg0KPj4NCj4+IFNpbmNlIHRoaXMg
+aXMgcXVpdGUgYSBsb3Qgb2YgcHJvY2Vzc2luZywgYSBiZXR0ZXIgdXNlIGNhc2UgZm9yIHRoaXMg
+ZGVkdXBlIG1lY2hhbmlzbSB3b3VsZCBiZSBpbiB0aGUgZGF0YSB0aWVyaW5nIG1vZGVsIHdpdGgg
+b2JqZWN0IHJlZGlyZWN0cy4NCj4+IFRoZSBtYW5pZmVzdCBvYmplY3QgZml0cyBxdWlldCB3ZWxs
+IGludG8gb2JqZWN0IHJlZGlyZWN0cyBzY2hlbWUgb2YgdGhpbmdzLCB0aGUgaWRlYSBpcyB0aGF0
+LCB3aGVuIGFuIG9iamVjdCBpcyBtb3ZlZCBvdXQgb2YgdGhlIGJhc2UgdGllciwgeW91IGhhdmUg
+YW4gb3B0aW9uIHRvIGNyZWF0ZSBhIGRlZHVwZSBzdHViIG9iamVjdCBhbmQgd3JpdGUgaW5kaXZp
+ZHVhbCBzZWdtZW50cyBpbnRvIHRoZSBjb2xkIGJhY2tlbmQgdGllciB3aXRoIGEgcmFkb3MgcGx1
+Z2luLg0KPj4NCj4+IFJlbWFpbmluZyByZXNwb25zZXMgaW5saW5lLg0KPj4NCj4+IFJlZ2FyZHMs
+DQo+PiBDaGFpdGFueWENCj4+DQo+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPj4gRnJv
+bTogSmFtZXMgKEZlaSkgTGl1LVNTSSBbbWFpbHRvOmphbWVzLmxpdUBzc2kuc2Ftc3VuZy5jb21d
+DQo+PiBTZW50OiBXZWRuZXNkYXksIEp1bHkgMDEsIDIwMTUgNDowMCBBTQ0KPj4gVG86IENoYWl0
+YW55YSBIdWlsZ29sOyBBbGxlbiBTYW11ZWxzOyBIYW9tYWkgV2FuZw0KPj4gQ2M6IGNlcGgtZGV2
+ZWwNCj4+IFN1YmplY3Q6IFJFOiBJbmxpbmUgZGVkdXAvY29tcHJlc3Npb24NCj4+DQo+PiBIaSBD
+aGFpdGFueWEsDQo+PiAgICBWZXJ5IGludGVyZXN0aW5nIHRob3VnaHRzLiBJIGFtIG5vdCBzdXJl
+IHdoZXRoZXIgSSBnZXQgYWxsIG9mIHRoZW0gb3Igbm93LiBIZXJlIGFyZSBzZXZlcmFsIHF1ZXN0
+aW9ucyBmb3IgdGhlIHNvbHV0aW9uIHlvdSBwcm92aWRlZCwgTWlnaHQgYmUgYSBsaXR0bGUgYml0
+IGRldGFpbGVkLg0KPj4NCj4+ICAgICBSZWdhcmRzLA0KPj4gICAgIEphbWVzDQo+Pg0KPj4gLSBE
+ZWR1cGUgaXMgc2V0IGFzIGEgcG9vbCBwcm9wZXJ0eQ0KPj4gV3JpdGU6DQo+PiAtIFdyaXRlIGFy
+cml2ZXMgYXQgdGhlIHByaW1hcnkgT1NEL3BnDQo+PiBbSmFtZXNdIERvZXMgdGhlIE9TRC9QRyBt
+ZWFuIFBHIEJhY2tlbmQgb3ZlciBoZXJlPw0KPj4gW0NoYWl0YW55YV0gSSBtZWFuIHRoZSBQcmlt
+YXJ5IE9TRCBhbmQgdGhlIFBHIHdoaWNoIGdldCBzZWxlY3RlZCBieSB0aGUgY3J1c2ggLSBub3Qg
+dGhlIHNwZWNpZmljIE9TRCBjb21wb25lbnQNCj4+DQo+PiAtIERhdGEgaXMgc2VnbWVudGVkIChy
+YWJpbi9zdGF0aWMpIGFuZCBzZWN1cmUgaGFzaCBjb21wdXRlZCBbSmFtZXNdIFdoaWNoIGNvbXBv
+bmVudCBpbiBPU0QgYXJlIHlvdSBnb2luZyB0byBkbyB0aGUgZGF0YSBzZWdtZW50IGFuZCBoYXNo
+IGNvbXB1dGF0aW9uPw0KPj4gW0NoYWl0YW55YV0gSWYgcGFydGlhbCB3cml0ZXMgYXJlIG5vdCBz
+dXBwb3J0ZWQgdGhlbiB0aGlzIGNvdWxkIGJlIGRvd24gYmVmb3JlIGFjcXVpcmluZyB0aGUgUEcg
+bG9jaywgZWxzZSB3ZSBuZWVkIHRoZSBwcm90ZWN0aW9uIG9mIHRoZSBQRyBsb2NrLiAgUHJvYmFi
+bHkgaW4gdGhlIGRvX3JlcXVlc3QoKSBwYXRoPw0KPj4NCj4+IC0gQSBtYW5pZmVzdCBpcyBjcmVh
+dGVkIHdpdGggdGhlIG9mZnNldC9sZW4vaGFzaCBmb3IgYWxsIHRoZSBzZWdtZW50cyBbSmFtZXNd
+IFRoZSBtYW5pZmVzdCBpcyBnb2luZyB0byBiZSBwYXJ0IG9mIHhhdHRyIG9mIG9iamVjdD8gV2hl
+cmUgYXJlIHlvdSBnb2luZyB0byBzYXZlIG1hbmlmZXN0Pw0KPj4gW0NoYWl0YW55YV0gVGhlIG1h
+bmlmZXN0IGlzIGEgc3R1YiBvYmplY3Qgd2l0aCB0aGUgY29uc3RpdHVlbnQgc2VnbWVudHMgbGlz
+dA0KPj4NCj4+IC0gT1NEL3BnIHNlbmRzIHJhZG9zIHdyaXRlIHdpdGggYSBzcGVjaWFsIG5hbWUg
+PF9fa25vd25fX3ByZWZpeD48c2VjdXJlIGhhc2g+IGZvciBhbGwgc2VnbWVudHMgW0phbWVzXSBX
+aGF0J3MgeW91ciBtZWFuaW5nIG9mIFJhZG9zIFdpcnRlPyAgV2hlcmUgZG8gdGhlIGFsbCBzZWdt
+ZW50cyB3aXRoIHNlY3VyZSBoYXNoIHNpZ25hdHVyZSB3cml0ZSB0bz8NCj4+IFtDaGFpdGFueWFd
+IEFsbCBzZWdtZW50cyBhcmUgdW5pcXVlIG9iamVjdHMgd2l0aCB0aGUgYWJvdmUgbWVudGlvbmVk
+IG5hbWluZyBzY2hlbWUsIHRoZXkgZ2V0IHdyaXR0ZW4gYmFjayBpbnRvIHRoZSBjbHVzdGVyIGFz
+IGEgcmVndWxhciBjbGllbnQgcmFkb3Mgb2JqZWN0IHdyaXRlDQo+Pg0KPj4gLSBQRyByZWNlaXZp
+bmcgZGVkdXAgd3JpdGUgd2lsbDoNCj4+ICAgICAgICAgMS4gY2hlY2sgZm9yIG9iamVjdCBwcmVz
+ZW5jZSBhbmQgY3JlYXRlIG9iamVjdCBpZiBub3QgcHJlc2VudA0KPj4gICAgICAgICAyLiBJZiBv
+YmplY3QgaXMgYWxyZWFkeSBwcmVzZW50LCB0aGVuIGFuIHJlZmVyZW5jZSBjb3VudCBpcyBpbmNy
+ZW1lbnRlZCAoY2hlY2sgYW5kIGluY3JlbWVudCBuZWVkcyB0byBiZSBhdG9taWMpIFtKYW1lc10g
+SXQgbWFrZXMgc2Vuc2UuIEJ1dCBJIHdhcyB3b25kZXJpbmcgdGhlIHVuaXQgZm9yIGRlZHVwZSBp
+cyBzZWdtZW50IG9yIG9iamVjdD8gSWYgb2JqZWN0IGJhc2UsIGl0IHRvdGFsbHkgbWFrZSBzZW5z
+ZS4gSG93ZXZlciwgd2h5IHdlIG5lZWQgdG8gaGF2ZSBzZWdtZW50IHdpdGggbWFuaWZlc3Q/DQo+
+Pg0KPj4gLSBSZXNwb25zZSBpcyByZWNlaXZlZCBieSBvcmlnaW5hbCBwcmltYXJ5IFBHIGZvciBh
+bGwgc2VnbWVudHMgW0phbWVzXSBXaGF0IHJlc3BvbnNlPw0KPj4gW0NoYWl0YW55YV0gV3JpdGUg
+cmVzcG9uc2UgaW5kaWNhdGluZyB0aGUgc3RhdHVzIG9mIHRoZSBzZWdtZW50IG9iamVjdCB3cml0
+ZQ0KPj4NCj4+IC0gUHJpbWFyeSBQRyB3cml0ZXMgdGhlIG1hbmlmZXN0IHRvIGxvY2FsIGFuZCBy
+ZXBsaWNhcyBvciBFQyBtZW1iZXJzIFtKYW1lc10gSG93IGFib3V0IHRoZSBkZWR1cGUgZGF0YSBp
+ZiB0aGUgZGF0YSBpcyBub3QgcHJlc2VudCBpbiByZXBsaWNhcz8NCj4+IFtDaGFpdGFueWFdIEkg
+YW0gc29ycnksIEkgZGlkIG5vdCBnZXQgeW91ciBxdWVzdGlvbiwgdGhlIG1hbmlmZXN0IG9iamVj
+dCBnZXRzIHdyaXR0ZW4gaW4gdGhlIHByaW1hcnkgYW5kIHRoZSByZXBsaWNhcyBvciBlbmNvZGVk
+IGFuZCB3cml0dGVuIHRvIHRoZSBFQyBtZW1iZXJzLCBpdCBpcyBhZmZvcmRlZCB0aGUgcHJvdGVj
+dGlvbiBwb2xpY3kgc2V0IGZvciB0aGUgcG9vbC4gU2FtZSBpcyB0aGUgY2FzZSB3aXRoIHRoZSBp
+bmRpdmlkdWFsIGNvbnN0aXR1ZW50IHNlZ21lbnRzLg0KPj4NCj4+IC0gUmVzcG9uc2Ugc2VudCB0
+byBjbGllbnQNCj4+DQo+PiBSZWFkOg0KPj4gLSBSZWFkIHJlY2VpdmVkIGF0IHByaW1hcnkgUEcN
+Cj4+IFtKYW1lc10gIFRoZSByZWFkIGNhbiBvbmx5IGZldGNoIGRhdGEgZnJvbSBQcmltYXJ5IFBH
+Pw0KPj4gLSBSZWFkcyBtYW5pZmVzdCBvYmplY3QNCj4+DQo+PiAtIHNlbmRzIHJlYWRzIGZvciBl
+YWNoIHNlZ21lbnQgb2JqZWN0IDxfX2tub3dfcHJlZml4PjxzZWN1cmUgaGFzaD4NCj4+IC0gY29h
+bGVzY2VzIGFsbCB0aGUgcmVzcG9uc2UgdG8gYnVpbGQgdGhlIHJlcXVpcmVkIGRhdGENCj4+IC0g
+UmVzcG9uZHMgdG8gY2xpZW50DQo+Pg0KPj4NCj4+IFByb3M6DQo+PiBObyBuZWVkIG9mIGNlbnRy
+YWxpemVkIGhhc2ggaW5kZXggc28gaW5saW5lIHdpdGggY2VwaCBubyBib3R0bGVuZWNrIHBoaWxv
+c29waHkNCj4+DQo+PiBDb25zOg0KPj4gU29tZSBQR3MgbWF5IGdldCBvdmVybG9hZGVkIGR1ZSB0
+byBmcmVxdWVudGx5IG9jY3VycmluZyBzZWdtZW50IHBhdHRlcm5zIExhdGVuY3kgYW5kIGluY3Jl
+YXNlZCB0cmFmZmljIG9uIHRoZSBuZXR3b3JrDQo+Pg0KPj4NCj4+DQo+PiAtLS0tLU9yaWdpbmFs
+IE1lc3NhZ2UtLS0tLQ0KPj4gRnJvbTogQ2hhaXRhbnlhIEh1aWxnb2wgW21haWx0bzpDaGFpdGFu
+eWEuSHVpbGdvbEBzYW5kaXNrLmNvbV0NCj4+IFNlbnQ6IFR1ZXNkYXksIEp1bmUgMzAsIDIwMTUg
+ODo1MCBBTQ0KPj4gVG86IEFsbGVuIFNhbXVlbHM7IEphbWVzIChGZWkpIExpdS1TU0k7IEhhb21h
+aSBXYW5nDQo+PiBDYzogY2VwaC1kZXZlbA0KPj4gU3ViamVjdDogUkU6IElubGluZSBkZWR1cC9j
+b21wcmVzc2lvbg0KPj4NCj4+DQo+PiAtIFJlZmVyZW5jZSBjb3VudCBoYXMgdG8gYmUgbWFpbnRh
+aW5lZCBhcyBhbiBhdHRyaWJ1dGUgb2YgdGhlIG9iamVjdA0KPj4gLSBBcyBtZW50aW9uZWQgaW4g
+dGhlIHdyaXRlIHdvcmtmbG93LCBkdXBsaWNhdGUgc2VnbWVudCB3cml0ZXMgaW5jcmVtZW50IHRo
+ZSByZWZlcmVuY2UgY291bnQNCj4+IC0gT2JqZWN0IERlbGV0ZSB3b3VsZCByZXN1bHQgaW4gZGVs
+ZXRlIG9uIGNvbnN0aXR1ZW50IHNlZ21lbnRzIGxpc3RlZCBpbiB0aGUgb2JqZWN0IHNlZ21lbnQg
+bWFuaWZlc3QNCj4+IC0gU2VnbWVudCBvYmplY3QgZGVsZXRlIHdpbGwgZGVjcmVtZW50IHJlZmVy
+ZW5jZSBjb3VudCBhbmQgcmVtb3ZlIHRoZSBzZWdtZW50IHdoZW4gdGhlcmUgYXJlIG5vIG1vcmUg
+cmVmZXJlbmNlcyBwcmVzZW50DQo+Pg0KPj4gUmVnYXJkcywNCj4+IENoYWl0YW55YQ0KPj4NCj4+
+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+PiBGcm9tOiBBbGxlbiBTYW11ZWxzDQo+PiBT
+ZW50OiBUdWVzZGF5LCBKdW5lIDMwLCAyMDE1IDk6MDIgUE0NCj4+IFRvOiBDaGFpdGFueWEgSHVp
+bGdvbDsgSmFtZXMgKEZlaSkgTGl1LVNTSTsgSGFvbWFpIFdhbmcNCj4+IENjOiBjZXBoLWRldmVs
+DQo+PiBTdWJqZWN0OiBSRTogSW5saW5lIGRlZHVwL2NvbXByZXNzaW9uDQo+Pg0KPj4gVGhpcyBj
+b3ZlcnMgdGhlIHJlYWQgYW5kIHdyaXRlLCB3aGF0IGFib3V0IHRoZSBkZWxldGU/IE9uZSBvZiB0
+aGUgbWFqb3IgaXNzdWVzIHdpdGggRGVkdXBlLCB3aGV0aGVyIGdsb2JhbCBvciBsb2NhbCBpcyB0
+byBhZGRyZXNzIHRoZSBpbmhlcmVudCByZWYtY291bnRpbmcgYXNzb2NpYXRlZCB3aXRoIHNoYXJp
+bmcgb2YgcGllY2VzIG9mIHN0b3JhZ2UuDQo+Pg0KPj4gQWxsZW4gU2FtdWVscw0KPj4gU29mdHdh
+cmUgQXJjaGl0ZWN0LCBFbWVyZ2luZyBTdG9yYWdlIFNvbHV0aW9ucw0KPj4NCj4+IDI4ODAgSnVu
+Y3Rpb24gQXZlbnVlLCBNaWxwaXRhcywgQ0EgOTUxMzQNCj4+IFQ6ICsxIDQwOCA4MDEgNzAzMHwg
+TTogKzEgNDA4IDc4MCA2NDE2DQo+PiBhbGxlbi5zYW11ZWxzQFNhbkRpc2suY29tDQo+Pg0KPj4g
+LS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4+IEZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdl
+ci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9u
+IEJlaGFsZiBPZiBDaGFpdGFueWEgSHVpbGdvbA0KPj4gU2VudDogTW9uZGF5LCBKdW5lIDI5LCAy
+MDE1IDExOjIwIFBNDQo+PiBUbzogSmFtZXMgKEZlaSkgTGl1LVNTSTsgSGFvbWFpIFdhbmcNCj4+
+IENjOiBjZXBoLWRldmVsDQo+PiBTdWJqZWN0OiBSRTogSW5saW5lIGRlZHVwL2NvbXByZXNzaW9u
+DQo+Pg0KPj4gQmVsb3cgaXMgYW4gYWx0ZXJuYXRpdmUgaWRlYSBhdCBhIHZlcnkgaGlnaCBsZXZl
+bCBhcm91bmQgZGVkdXAgd2l0aCBjZXBoIHdpdGhvdXQgYSBuZWVkIG9mIGNlbnRyYWxpemVkIGhh
+c2ggaW5kZXgsDQo+Pg0KPj4gLSBEZWR1cGUgaXMgc2V0IGFzIGEgcG9vbCBwcm9wZXJ0eQ0KPj4g
+V3JpdGU6DQo+PiAtIFdyaXRlIGFycml2ZXMgYXQgdGhlIHByaW1hcnkgT1NEL3BnDQo+PiAtIERh
+dGEgaXMgc2VnbWVudGVkIChyYWJpbi9zdGF0aWMpIGFuZCBzZWN1cmUgaGFzaCBjb21wdXRlZA0K
+Pj4gLSBBIG1hbmlmZXN0IGlzIGNyZWF0ZWQgd2l0aCB0aGUgb2Zmc2V0L2xlbi9oYXNoIGZvciBh
+bGwgdGhlIHNlZ21lbnRzDQo+PiAtIE9TRC9wZyBzZW5kcyByYWRvcyB3cml0ZSB3aXRoIGEgc3Bl
+Y2lhbCBuYW1lIDxfX2tub3duX19wcmVmaXg+PHNlY3VyZSBoYXNoPiBmb3IgYWxsIHNlZ21lbnRz
+DQo+PiAtIFBHIHJlY2VpdmluZyBkZWR1cCB3cml0ZSB3aWxsOg0KPj4gICAgICAgICAxLiBjaGVj
+ayBmb3Igb2JqZWN0IHByZXNlbmNlIGFuZCBjcmVhdGUgb2JqZWN0IGlmIG5vdCBwcmVzZW50DQo+
+PiAgICAgICAgIDIuIElmIG9iamVjdCBpcyBhbHJlYWR5IHByZXNlbnQsIHRoZW4gYW4gcmVmZXJl
+bmNlIGNvdW50IGlzIGluY3JlbWVudGVkIChjaGVjayBhbmQgaW5jcmVtZW50IG5lZWRzIHRvIGJl
+IGF0b21pYykNCj4+IC0gUmVzcG9uc2UgaXMgcmVjZWl2ZWQgYnkgb3JpZ2luYWwgcHJpbWFyeSBQ
+RyBmb3IgYWxsIHNlZ21lbnRzDQo+PiAtIFByaW1hcnkgUEcgd3JpdGVzIHRoZSBtYW5pZmVzdCB0
+byBsb2NhbCBhbmQgcmVwbGljYXMgb3IgRUMgbWVtYmVycw0KPj4gLSBSZXNwb25zZSBzZW50IHRv
+IGNsaWVudA0KPj4NCj4+IFJlYWQ6DQo+PiAtIFJlYWQgcmVjZWl2ZWQgYXQgcHJpbWFyeSBQRw0K
+Pj4gLSBSZWFkcyBtYW5pZmVzdCBvYmplY3QNCj4+IC0gc2VuZHMgcmVhZHMgZm9yIGVhY2ggc2Vn
+bWVudCBvYmplY3QgPF9fa25vd19wcmVmaXg+PHNlY3VyZSBoYXNoPg0KPj4gLSBjb2FsZXNjZXMg
+YWxsIHRoZSByZXNwb25zZSB0byBidWlsZCB0aGUgcmVxdWlyZWQgZGF0YQ0KPj4gLSBSZXNwb25k
+cyB0byBjbGllbnQNCj4+DQo+Pg0KPj4gUHJvczoNCj4+IE5vIG5lZWQgb2YgY2VudHJhbGl6ZWQg
+aGFzaCBpbmRleCBzbyBpbmxpbmUgd2l0aCBjZXBoIG5vIGJvdHRsZW5lY2sgcGhpbG9zb3BoeQ0K
+Pj4NCj4+IENvbnM6DQo+PiBTb21lIFBHcyBtYXkgZ2V0IG92ZXJsb2FkZWQgZHVlIHRvIGZyZXF1
+ZW50bHkgb2NjdXJyaW5nIHNlZ21lbnQgcGF0dGVybnMgTGF0ZW5jeSBhbmQgaW5jcmVhc2VkIHRy
+YWZmaWMgb24gdGhlIG5ldHdvcmsNCj4+DQo+PiBSZWdhcmRzLA0KPj4gQ2hhaXRhbnlhDQo+Pg0K
+Pj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4+IEZyb206IGNlcGgtZGV2ZWwtb3duZXJA
+dmdlci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmdd
+IE9uIEJlaGFsZiBPZiBKYW1lcyAoRmVpKSBMaXUtU1NJDQo+PiBTZW50OiBUdWVzZGF5LCBKdW5l
+IDMwLCAyMDE1IDI6MjUgQU0NCj4+IFRvOiBIYW9tYWkgV2FuZw0KPj4gQ2M6IGNlcGgtZGV2ZWwN
+Cj4+IFN1YmplY3Q6IFJFOiBJbmxpbmUgZGVkdXAvY29tcHJlc3Npb24NCj4+DQo+PiBIaSBIYW9t
+YWksDQo+PiAgIFRoYW5rcyBmb3IgbW92aW5nIHRoZSBpZGVhIGZvcndhcmQuIFJlZ2FyZGluZyB0
+byB0aGUgY29tcHJlc3Npb24uICBIb3dldmVyLCAgaWYgd2UgZG8gY29tcHJlc3Npb24gb24gdGhl
+IGNsaWVudCBsZXZlbCwgaXQgaXMgbm90IGdsb2JhbC4gQW5kIHRoZSBjb21wcmVzc2lvbiB3YXMg
+b25seSBhcHBsaWVkIHRvIHRoZSBsb2NhbCBjbGllbnQsIGFtIEkgcmlnaHQ/ICBJIHRoaW5rIHRo
+ZXJlIGlzIHByb3MgYW5kIGNvbnMgaW4gdHdvIHNvbHV0aW9ucyBhbmQgd2UgY2FuIGdldCBpbnRv
+IGRldGFpbHMgbW9yZSBmb3IgZWFjaCBzb2x1dGlvbi4NCj4+ICAgSSByZWFsbHkgbGlrZSB5b3Vy
+IGlkZWEgZm9yIGRlZHVwZSBpbiBPU0Qgc2lkZSAgIGJ5IHRoZSB3YXkuIExldCBtZSB0aGluayBt
+b3JlIGFib3V0IGl0Lg0KPj4NCj4+ICBSZWdhcmRzLA0KPj4gIEphbWVzDQo+Pg0KPj4gLS0tLS1P
+cmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4+IEZyb206IEhhb21haSBXYW5nIFttYWlsdG86aGFvbWFp
+d2FuZ0BnbWFpbC5jb21dDQo+PiBTZW50OiBGcmlkYXksIEp1bmUgMjYsIDIwMTUgODo1NSBQTQ0K
+Pj4gVG86IEphbWVzIChGZWkpIExpdS1TU0kNCj4+IENjOiBjZXBoLWRldmVsDQo+PiBTdWJqZWN0
+OiBSZTogSW5saW5lIGRlZHVwL2NvbXByZXNzaW9uDQo+Pg0KPj4gT24gU2F0LCBKdW4gMjcsIDIw
+MTUgYXQgMjowMyBBTSwgSmFtZXMgKEZlaSkgTGl1LVNTSSA8amFtZXMubGl1QHNzaS5zYW1zdW5n
+LmNvbT4gd3JvdGU6DQo+Pj4gSGkgSGFvbWFpLA0KPj4+ICAgVGhhbmtzIGZvciB5b3VyIHJlc3Bv
+bnNlIGFzIGFsd2F5cy4gSSBhZ3JlZSBjb21wcmVzc2lvbiBpcyBjb21wYXJhYmxlIGVhc2llciB0
+YXNrIGJ1dCBzdGlsbCB2ZXJ5IGNoYWxsZW5nZSBpbiB0ZXJtcyBvZiBpbXBsZW1lbnRhdGlvbiBu
+byBtYXR0ZXIgd2hlcmUgd2Ugc2hvdWxkIGltcGxlbWVudCAuIENsaWVudCBzaWRlIGxpa2UgUkJE
+LCBvciBSREJHVyBvciBDZXBoRlMsIG9yIFBHIHNob3VsZCBiZSBhIGxpdHRsZSBiaXQgYmV0dGVy
+IHBsYWNlIHRvIGltcGxlbWVudGF0aW9uIGluIHRlcm1zIG9mIGVmZmljaWVuY3kgYW5kIGNvc3Qg
+cmVkdWN0aW9uIGJlZm9yZSB0aGUgZGF0YSB3ZXJlIGR1cGxpY2F0ZWQgdG8gb3RoZXIgT1NEcy4g
+SXQgaGFzICB0d28gcmVhc29ucyA6DQo+Pj4gMS4gS2VlcCB0aGUgZGF0YSBjb25zaXN0ZW5jeSBh
+bW9uZyBPU0RzIGluIG9uZSBQRyAyLiBTYXZpbmcgdGhlDQo+Pj4gY29tcHV0aW5nIHJlc291cmNl
+cw0KPj4+DQo+Pj4gSU1ITyAsIFRoZSBjb21wcmVzc2lvbiBzaG91bGQgYmUgYWNjb21wbGlzaGVk
+IGJlZm9yZSB0aGUgcmVwbGljYXRpb24gY29tZSBpbnRvIHBsYXkgaW4gcG9vbCBsZXZlbC4gSG93
+ZXZlciwgd2UgY2FuIGFsc28gaGF2ZSBzZWNvbmQgbGV2ZWwgb2YgY29tcHJlc3Npb24gaW4gdGhl
+IGxvY2FsIG9iamVjdHN0b3JlLiAgSW4gdGVybSBvZiB1bml0IHNpemUgb2YgY29tcHJlc3Npb24g
+LCBJdCByZWFsbHkgZGVwZW5kcyB3b3JrbG9hZCBhbmQgaW4gd2hpY2ggbGF5ZXIgd2Ugc2hvdWxk
+IGltcGxlbWVudC4NCj4+Pg0KPj4+IEFib3V0IGlubGluZSBkZWR1cGxpY2F0aW9uLCBpdCB3aWxs
+IGRyYW1hdGljYWxseSBpbmNyZWFzZSB0aGUgY29tcGxleGl0aWVzIGlmIHdlIGJyaW5nIGluIHRo
+ZSByZXBsaWNhdGlvbiBhbmQgRXJhc3VyZSBDb2RpbmcgZm9yIGNvbnNpZGVyYXRpb24uDQo+Pj4N
+Cj4+PiBIb3dldmVyLCBCZWZvcmUgd2UgdGFsayBhYm91dCBpbXBsZW1lbnRhdGlvbiwgSXQgd291
+bGQgYmUgZ3JlYXQgaWYgd2UgY2FuIHVuZGVyc3RhbmQgdGhlIHByb3MgYW5kIGNvbnMgdG8gaW1w
+bGVtZW50IGlubGluZSBkZWR1cGUvY29tcHJlc3Npb24uIFdlIGFsbCB1bmRlcnN0YW5kIHRoZSBi
+ZW5lZml0cyBvZiBkZWR1cGUvY29tcHJlc3Npb24uIEhvd2V2ZXIsIHRoZSBzaWRlIGVmZmVjdCBp
+cyBwZXJmb3JtYW5jZSBodXJ0IGFuZCBuZWVkIG1vcmUgY29tcHV0aW5nIHJlc291cmNlcy4gSXQg
+d291bGQgYmUgZ3JlYXQgaWYgd2UgY2FuIHVuZGVyc3RhbmQgdGhlIHByb2JsZW1zIGZyb20gMzAs
+MDAwIGZlZXQgaGlnaCBmb3IgdGhlIHdob2xlIHBpY3R1cmUgYWJvdXQgdGhlIENlcGguIFBsZWFz
+ZSBjb3JyZWN0IG1lIGlmIEkgd2VyZSB3cm9uZy4NCj4+DQo+PiBBY3R1YWxseSB3ZSBtYXkgaGF2
+ZSBzb21lIHRyaWNrcyB0byByZWR1Y2UgcGVyZm9ybWFuY2UgaHVydCBsaWtlIGNvbXByZXNzaW9u
+LiBBcyBKb2UgbWVudGlvbmVkLCB3ZSBjYW4gY29tcHJlc3Mgc2xhdmUgcGcgZGF0YSB0byBhdm9p
+ZCBwZXJmb3JtYW5jZSBodXJ0LCBidXQgaXQgbWF5IGluY3JlYXNlIHRoZSBjb21wbGV4aXR5IG9m
+IHJlY292ZXJ5IGFuZCBwZyByZW1hcCB0aGluZ3MuIEFub3RoZXIgaW4tZGV0YWlsIGltcGxlbWVu
+dCB3YXkgaWYgd2UgYmVnaW4gdG8gY29tcHJlc3MgZGF0YSBmcm9tIG1lc3Nlbmdlciwgb3NkIHRo
+cmVhZCBhbmQgcGcgdGhyZWFkIHdvbid0IGFjY2VzcyBkYXRhIGZvciBub3JtYWwgY2xpZW50IG9w
+LCBzbyBtYXliZSB3ZSBjYW4gbWFrZSBpdCBwYXJhbGxlbCB3aXRoIHBnIHByb2Nlc3MuIEpvdXJu
+YWwgdGhyZWFkIHdpbGwgZ2V0IHRoZSBjb21wcmVzc2VkIGRhdGEgYXQgbGFzdC4NCj4+DQo+PiBU
+aGUgZWZmZWN0IG9mIGNvbXByZXNzaW9uIGFsc28gaXMgYSBjb25jZXJuLCB3ZSBkbyBjb21wcmVz
+c2lvbiBpbiByYWRvcyBtYXkgbm90IGdldCB0aGUgYmVzdCBjb21wcmVzc2lvbiByZXN1bHQuIElm
+IHdlIGNhbiBkbyBjb21wcmVzc2lvbiBpbiBsaWJjZXBoZnMsIGxpYnJiZCBhbmQgcmFkb3NndyBh
+bmQgbWFrZSByYWRvcyB1bmtub3duIHRvIGNvbXByZXNzaW9uLCBpdCBtYXliZSBzaW1wbGVyIGFu
+ZCB3ZSBjYW4gZ2V0IGZpbGUvYmxvY2svb2JqZWN0IGxldmVsIGNvbXByZXNzaW9uLiBpdCBzaG91
+bGQgYmUgYmV0dGVyPw0KPj4NCj4+IEFib3V0IGRlZHVwLCBteSBjdXJyZW50IGlkZWEgaXMgd2Ug
+Y291bGQgc2V0dXAgYSBtZW1vcnkgcG9vbCBhdCBvc2Qgc2lkZSBmb3IgY2hlY2tzdW0gc3RvcmUg
+dXNhZ2UuIFRoZW4gd2UgY2FsY3VsYXRlIG9iamVjdCBkYXRhIGFuZCBtYXAgdG8gUEcgaW5zdGVh
+ZCBvZiBvYmplY3QgbmFtZSBhdCBjbGllbnQgc2lkZSwgc28gYSBvYmplY3QgY291bGQgYWx3YXlz
+IGluIGEgb3NkIHdoZXJlIGl0J3MgYWxzbyByZXNwb25zaWJsZSBmb3IgZGVkdXAgc3RvcmFnZS4g
+SXQgYWxzbyBjb3VsZCBiZSBkaXN0cmlidXRlZCBhdCBwb29sIGxldmVsLg0KPj4NCj4+DQo+Pj4N
+Cj4+PiBCeSB0aGUgd2F5LCBCb3RoIG9mIHNvZnR3YXJlIGRlZmluZWQgc3RvcmFnZSBzb2x1dGlv
+biBzdGFydHVwcyBsaWtlIEhkZXZpZyBhbmQgU3ByaW5ncGF0aCBwcm92aWRlIGlubGluZSBkZWR1
+cGUvY29tcHJlc3Npb24uICBJdCBpcyBub3QgYXBwbGUgdG8gYXBwbGUgY29tcGFyaXNvbi4gQnV0
+IGl0IGlzIGdvb2QgcmVmZXJlbmNlLiBUaGUgZGF0YWNlbnRlcnMgbmVlZCBjb3N0IGVmZmVjdGl2
+ZSBzb2x1dGlvbi4NCj4+Pg0KPj4+IFJlZ2FyZHMsDQo+Pj4gSmFtZXMNCj4+Pg0KPj4+DQo+Pj4N
+Cj4+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPj4+IEZyb206IEhhb21haSBXYW5nIFtt
+YWlsdG86aGFvbWFpd2FuZ0BnbWFpbC5jb21dDQo+Pj4gU2VudDogVGh1cnNkYXksIEp1bmUgMjUs
+IDIwMTUgODowOCBQTQ0KPj4+IFRvOiBKYW1lcyAoRmVpKSBMaXUtU1NJDQo+Pj4gQ2M6IGNlcGgt
+ZGV2ZWwNCj4+PiBTdWJqZWN0OiBSZTogSW5saW5lIGRlZHVwL2NvbXByZXNzaW9uDQo+Pj4NCj4+
+PiBPbiBGcmksIEp1biAyNiwgMjAxNSBhdCA2OjAxIEFNLCBKYW1lcyAoRmVpKSBMaXUtU1NJIDxq
+YW1lcy5saXVAc3NpLnNhbXN1bmcuY29tPiB3cm90ZToNCj4+Pj4gSGkgQ2VwaGVycywNCj4+Pj4g
+ICAgIEl0IGlzIG5vdCBlYXN5IHRvIGFzayB3aGVuIENlcGggaXMgZ29pbmcgdG8gc3VwcG9ydCBp
+bmxpbmUgZGVkdXAvY29tcHJlc3Npb24gYWNyb3NzIE9TRHMgaW4gUkFET1MgYmVjYXVzZSBpdCBp
+cyBub3QgZWFzeSB0YXNrIGFuZCBhbnN3ZXJlZC4gQ2VwaCBpcyBwcm92aWRpbmcgcmVwbGljYXRp
+b24gYW5kIEVDIGZvciBwZXJmb3JtYW5jZSBhbmQgZmFpbHVyZSByZWNvdmVyeS4gQnV0IHdlIGFs
+c28gbG9zZSB0aGUgZWZmaWNpZW5jeSAgb2Ygc3RvcmFnZSBzdG9yZSBhbmQgY29zdCBhc3NvY2lh
+dGUgd2l0aCBpdC4gSXQgaXMga2luZCBvZiBjb250cmFkaWN0ZWQgd2l0aCBlYWNoIG90aGVyLiBC
+dXQgSSBhbSBjdXJpb3VzIGhvdyBvdGhlciBDZXBoZXJzIHRoaW5rIGFib3V0IHRoaXMgcXVlc3Rp
+b24uDQo+Pj4+ICAgIEFueSBwbGFuIGZvciBDZXBoZXJzIHRvIGRvIGFueXRoaW5nIHJlZ2FyZGlu
+ZyB0byBpbmxpbmUgZGVkdXBlL2NvbXByZXNzaW9uIGV4Y2VwdCB0aGUgZmVhdHVyZXMgYnJvdWdo
+dCBieSBsb2NhbCBub2RlIGl0c2VsZiBsaWtlIEJSVEZTPw0KPj4+DQo+Pj4gQ29tcHJlc3Npb24g
+aXMgZWFzaWVyIHRvIGltcGxlbWVudCBpbiByYWRvcyB0aGFuIGRlZHVwLiBUaGUgbW9zdCBpbXBv
+cnRhbnQgdGhpbmcgYWJvdXQgY29tcHJlc3Npb24gaXMgd2hlcmUgd2UgYmVnaW4gdG8gY29tcHJl
+c3MsIGNsaWVudCwgcGcgb3Igb2JqZWN0c3RvcmUuIFRoZW4gd2UgbmVlZCB0byBkZWNpZGUgaG93
+IG11Y2ggdGhlIGNvbXByZXNzIHVuaXQgaXMuIE9mIGNvdXJzZSwgY29tcHJlc3MgYW5kIGRlZHVw
+IGJvdGggbGlrZSB0byB1c2Uga2V5dmFsdWUtYWxpa2Ugc3RvcmFnZSBhcGkgdG8gdXNlLCBidXQg
+SSB0aGluayBpdCdzIG5vdCBkaWZmaWN1bHQgdG8gdXNlIGV4aXN0aW5nIG9iamVjdHN0b3JlIGFw
+aS4NCj4+Pg0KPj4+IERlZHVwIGlzIG1vcmUgcG9zc2libGUgdG8gaW1wbGVtZW50IGluIGxvY2Fs
+IG9zZCBpbnN0ZWFkIG9mIHRoZSB3aG9sZSBwb29sIG9yIGNsdXN0ZXIsIGFuZCBpZiB3ZSB3YW50
+IHRvIGRvIGRlZHVwIGZvciB0aGUgcG9vbCBsZXZlbCwgd2UgbmVlZCB0byBkbyBkZWR1cCBmcm9t
+IGNsaWVudC4NCj4+Pg0KPj4+Pg0KPj4+PiAgIFJlZ2FyZHMsDQo+Pj4+ICAgSmFtZXMNCj4+Pj4g
+LS0NCj4+Pj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVu
+c3Vic2NyaWJlIGNlcGgtZGV2ZWwiDQo+Pj4+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBt
+YWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vDQo+Pj4+IGluZm8gYXQgIGh0
+dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPj4+DQo+Pj4NCj4+Pg0K
+Pj4+IC0tDQo+Pj4gQmVzdCBSZWdhcmRzLA0KPj4+DQo+Pj4gV2hlYXQNCj4+DQo+Pg0KPj4NCj4+
+IC0tDQo+PiBCZXN0IFJlZ2FyZHMsDQo+Pg0KPj4gV2hlYXQNCj4+ICAgIOy5uyAgJiB+ICYgICAg
+Ky0gIN22ICAgdyAgy5sgICBtICAgIF4gIGIgIF5uIHIgICB6ICAgIGggICAgJiAgICBHICAgaCAg
+KCDpmo4g3aJqIiAgICAgbSAgICAgeiDeliAgIGYgICBoICAgfiBtDQo+Pg0KPj4gX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX18NCj4+DQo+PiBQTEVBU0UgTk9URTogVGhlIGluZm9ybWF0
+aW9uIGNvbnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNzYWdlIGlzIGludGVuZGVk
+IG9ubHkgZm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpIG5hbWVkIGFi
+b3ZlLiBJZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVuZGVkIHJl
+Y2lwaWVudCwgeW91IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0
+aGlzIG1lc3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywgZGlzc2VtaW5hdGlvbiwg
+ZGlzdHJpYnV0aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3RseSBwcm9o
+aWJpdGVkLiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4gZXJyb3Is
+IHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3IgZS1tYWlsIChhcyBzaG93
+biBhYm92ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVzIG9mIHRo
+aXMgbWVzc2FnZSBpbiB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxl
+Y3Ryb25pY2FsbHkgc3RvcmVkIGNvcGllcykuDQo+Pg0KPj4gTiAgICAgciAgeSAgIGIgWCAgx6d2
+IF4gKd66ey5uICsgICB6IF16ICAge2F5ICDKh9qZICxqICAgZiAgIGggICB6ICAgdyAgICAgICBq
+Oit2ICAgdyBqIG0gICAgICAgICB6WisgICAgIN2iaiIgICEgaQ0KPg0KPg0KPg0KPiAtLQ0KPiBC
+ZXN0IFJlZ2FyZHMsDQo+DQo+IFdoZWF0DQoNCg0KDQotLSANCkJlc3QgUmVnYXJkcywNCg0KV2hl
+YXQNCg==
