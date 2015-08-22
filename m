@@ -1,102 +1,90 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: Re: Ceph Hackathon: More Memory Allocator Testing
-Date: Sat, 22 Aug 2015 18:57:18 +0200 (CEST)
-Message-ID: <2058625694.43353019.1440262638523.JavaMail.zimbra@oxygem.tv>
-References: <55D409F0.3050802@redhat.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE12899@SACMBXIP01.sdcorp.global.sandisk.com> <55D4E9BE.8000309@profihost.ag> <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE12966@SACMBXIP01.sdcorp.global.sandisk.com> <EA545303A8F8E842820A172C3D641D6E1B09E891@SACMBXIP01.sdcorp.global.sandisk.com> <CANP1eJH=mhQ1rBkUD8=yuF26s2t2vO0JMO-wKOLQ8VbWdEmxxw@mail.gmail.com> <alpine.DEB.2.00.1508220653120.13116@cobra.newdream.net> <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE1DC70@SACMBXIP01.sdcorp.global.sandisk.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Ceph Hackathon: More Memory Allocator Testing
+Date: Sat, 22 Aug 2015 17:03:41 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE1FD73@SACMBXIP01.sdcorp.global.sandisk.com>
+References: <55D409F0.3050802@redhat.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE12899@SACMBXIP01.sdcorp.global.sandisk.com>
+ <55D4E9BE.8000309@profihost.ag>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE12966@SACMBXIP01.sdcorp.global.sandisk.com>
+ <EA545303A8F8E842820A172C3D641D6E1B09E891@SACMBXIP01.sdcorp.global.sandisk.com>
+ <CANP1eJH=mhQ1rBkUD8=yuF26s2t2vO0JMO-wKOLQ8VbWdEmxxw@mail.gmail.com>
+ <alpine.DEB.2.00.1508220653120.13116@cobra.newdream.net>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE1DC70@SACMBXIP01.sdcorp.global.sandisk.com>
+ <2058625694.43353019.1440262638523.JavaMail.zimbra@oxygem.tv>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:36002 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753028AbbHVQ5V convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 22 Aug 2015 12:57:21 -0400
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE1DC70@SACMBXIP01.sdcorp.global.sandisk.com>
+Received: from mail-bn1bon0069.outbound.protection.outlook.com ([157.56.111.69]:15573
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753028AbbHVRDp (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 22 Aug 2015 13:03:45 -0400
+In-Reply-To: <2058625694.43353019.1440262638523.JavaMail.zimbra@oxygem.tv>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
+To: Alexandre DERUMIER <aderumier@odiso.com>
 Cc: Sage Weil <sage@newdream.net>, Milosz Tanski <milosz@adfin.com>, Shishir Gowda <Shishir.Gowda@sandisk.com>, Stefan Priebe <s.priebe@profihost.ag>, Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
->>Wanted to know is there any reason we didn't link client libraries wi=
-th tcmalloc at the first place (but did link only OSDs/mon/RGW) ?
-
-Do we need to link client librairies ?
-
-I'm building qemu with jemalloc , and it's seem to be enough.
-
-
-
------ Mail original -----
-De: "Somnath Roy" <Somnath.Roy@sandisk.com>
-=C3=80: "Sage Weil" <sage@newdream.net>, "Milosz Tanski" <milosz@adfin.=
-com>
-Cc: "Shishir Gowda" <Shishir.Gowda@sandisk.com>, "Stefan Priebe" <s.pri=
-ebe@profihost.ag>, "aderumier" <aderumier@odiso.com>, "Mark Nelson" <mn=
-elson@redhat.com>, "ceph-devel" <ceph-devel@vger.kernel.org>
-Envoy=C3=A9: Samedi 22 Ao=C3=BBt 2015 18:15:36
-Objet: RE: Ceph Hackathon: More Memory Allocator Testing
-
-Yes, even today rocksdb also linked with tcmalloc. It doesn't mean all =
-the application using rocksdb needs to be built with tcmalloc.=20
-Sage,=20
-Wanted to know is there any reason we didn't link client libraries with=
- tcmalloc at the first place (but did link only OSDs/mon/RGW) ?=20
-
-Thanks & Regards=20
-Somnath=20
-
------Original Message-----=20
-=46rom: Sage Weil [mailto:sage@newdream.net]=20
-Sent: Saturday, August 22, 2015 6:56 AM=20
-To: Milosz Tanski=20
-Cc: Shishir Gowda; Somnath Roy; Stefan Priebe; Alexandre DERUMIER; Mark=
- Nelson; ceph-devel=20
-Subject: Re: Ceph Hackathon: More Memory Allocator Testing=20
-
-On Fri, 21 Aug 2015, Milosz Tanski wrote:=20
-> On Fri, Aug 21, 2015 at 12:22 AM, Shishir Gowda=20
-> <Shishir.Gowda@sandisk.com> wrote:=20
-> > Hi All,=20
-> >=20
-> > Have sent out a pull request which enables building librados/librbd=
- with either tcmalloc(as default) or jemalloc.=20
-> >=20
-> > Please find the pull request @=20
-> > https://github.com/ceph/ceph/pull/5628=20
-> >=20
-> > With regards,=20
-> > Shishir=20
->=20
-> Unless I'm missing something here, this seams like the wrong thing to=
-=2E=20
-> Libraries that will be linked in by other external applications shoul=
-d=20
-> not have a 3rd party malloc linked in there. That seams like an=20
-> application choice. At the very least the default should not be to=20
-> link in a 3rd party malloc.=20
-
-Yeah, I think you're right.=20
-
-Note that this isn't/wasn't always the case, though.. on precise, for i=
-nstance, libleveldb links libtcmalloc. They stopped doing this sometime=
- before trusty.=20
-
-sage=20
-
-________________________________=20
-
-PLEASE NOTE: The information contained in this electronic mail message =
-is intended only for the use of the designated recipient(s) named above=
-=2E If the reader of this message is not the intended recipient, you ar=
-e hereby notified that you have received this message in error and that=
- any review, dissemination, distribution, or copying of this message is=
- strictly prohibited. If you have received this communication in error,=
- please notify the sender by telephone or e-mail (as shown above) immed=
-iately and destroy any and all copies of this message in your possessio=
-n (whether hard copies or electronically stored copies).=20
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+TmVlZCB0byBzZWUgaWYgY2xpZW50IGlzIG92ZXJyaWRpbmcgdGhlIGxpYnJhcmllcyBidWlsdCB3
+aXRoIGRpZmZlcmVudCBtYWxsb2MgbGlicmFyaWVzIEkgZ3Vlc3MuLg0KSSBhbSBub3Qgc3VyZSBp
+biB5b3VyIGNhc2UgdGhlIGJlbmVmaXQgeW91IGFyZSBzZWVpbmcgaXMgYmVjYXVzZSBvZiBxZW11
+IGlzIG1vcmUgZWZmaWNpZW50IHdpdGggdGNtYWxsb2MvamVtYWxsb2Mgb3IgdGhlIGVudGlyZSBj
+bGllbnQgc3RhY2sgPw0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogQWxleGFu
+ZHJlIERFUlVNSUVSIFttYWlsdG86YWRlcnVtaWVyQG9kaXNvLmNvbV0gDQpTZW50OiBTYXR1cmRh
+eSwgQXVndXN0IDIyLCAyMDE1IDk6NTcgQU0NClRvOiBTb21uYXRoIFJveQ0KQ2M6IFNhZ2UgV2Vp
+bDsgTWlsb3N6IFRhbnNraTsgU2hpc2hpciBHb3dkYTsgU3RlZmFuIFByaWViZTsgTWFyayBOZWxz
+b247IGNlcGgtZGV2ZWwNClN1YmplY3Q6IFJlOiBDZXBoIEhhY2thdGhvbjogTW9yZSBNZW1vcnkg
+QWxsb2NhdG9yIFRlc3RpbmcNCg0KPj5XYW50ZWQgdG8ga25vdyBpcyB0aGVyZSBhbnkgcmVhc29u
+IHdlIGRpZG4ndCBsaW5rIGNsaWVudCBsaWJyYXJpZXMgd2l0aCB0Y21hbGxvYyBhdCB0aGUgZmly
+c3QgcGxhY2UgKGJ1dCBkaWQgbGluayBvbmx5IE9TRHMvbW9uL1JHVykgPw0KDQpEbyB3ZSBuZWVk
+IHRvIGxpbmsgY2xpZW50IGxpYnJhaXJpZXMgPw0KDQpJJ20gYnVpbGRpbmcgcWVtdSB3aXRoIGpl
+bWFsbG9jICwgYW5kIGl0J3Mgc2VlbSB0byBiZSBlbm91Z2guDQoNCg0KDQotLS0tLSBNYWlsIG9y
+aWdpbmFsIC0tLS0tDQpEZTogIlNvbW5hdGggUm95IiA8U29tbmF0aC5Sb3lAc2FuZGlzay5jb20+
+DQrDgDogIlNhZ2UgV2VpbCIgPHNhZ2VAbmV3ZHJlYW0ubmV0PiwgIk1pbG9zeiBUYW5za2kiIDxt
+aWxvc3pAYWRmaW4uY29tPg0KQ2M6ICJTaGlzaGlyIEdvd2RhIiA8U2hpc2hpci5Hb3dkYUBzYW5k
+aXNrLmNvbT4sICJTdGVmYW4gUHJpZWJlIiA8cy5wcmllYmVAcHJvZmlob3N0LmFnPiwgImFkZXJ1
+bWllciIgPGFkZXJ1bWllckBvZGlzby5jb20+LCAiTWFyayBOZWxzb24iIDxtbmVsc29uQHJlZGhh
+dC5jb20+LCAiY2VwaC1kZXZlbCIgPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPg0KRW52b3nD
+qTogU2FtZWRpIDIyIEFvw7t0IDIwMTUgMTg6MTU6MzYNCk9iamV0OiBSRTogQ2VwaCBIYWNrYXRo
+b246IE1vcmUgTWVtb3J5IEFsbG9jYXRvciBUZXN0aW5nDQoNClllcywgZXZlbiB0b2RheSByb2Nr
+c2RiIGFsc28gbGlua2VkIHdpdGggdGNtYWxsb2MuIEl0IGRvZXNuJ3QgbWVhbiBhbGwgdGhlIGFw
+cGxpY2F0aW9uIHVzaW5nIHJvY2tzZGIgbmVlZHMgdG8gYmUgYnVpbHQgd2l0aCB0Y21hbGxvYy4g
+DQpTYWdlLA0KV2FudGVkIHRvIGtub3cgaXMgdGhlcmUgYW55IHJlYXNvbiB3ZSBkaWRuJ3QgbGlu
+ayBjbGllbnQgbGlicmFyaWVzIHdpdGggdGNtYWxsb2MgYXQgdGhlIGZpcnN0IHBsYWNlIChidXQg
+ZGlkIGxpbmsgb25seSBPU0RzL21vbi9SR1cpID8gDQoNClRoYW5rcyAmIFJlZ2FyZHMNClNvbW5h
+dGggDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBTYWdlIFdlaWwgW21haWx0
+bzpzYWdlQG5ld2RyZWFtLm5ldF0NClNlbnQ6IFNhdHVyZGF5LCBBdWd1c3QgMjIsIDIwMTUgNjo1
+NiBBTQ0KVG86IE1pbG9zeiBUYW5za2kNCkNjOiBTaGlzaGlyIEdvd2RhOyBTb21uYXRoIFJveTsg
+U3RlZmFuIFByaWViZTsgQWxleGFuZHJlIERFUlVNSUVSOyBNYXJrIE5lbHNvbjsgY2VwaC1kZXZl
+bA0KU3ViamVjdDogUmU6IENlcGggSGFja2F0aG9uOiBNb3JlIE1lbW9yeSBBbGxvY2F0b3IgVGVz
+dGluZyANCg0KT24gRnJpLCAyMSBBdWcgMjAxNSwgTWlsb3N6IFRhbnNraSB3cm90ZTogDQo+IE9u
+IEZyaSwgQXVnIDIxLCAyMDE1IGF0IDEyOjIyIEFNLCBTaGlzaGlyIEdvd2RhIA0KPiA8U2hpc2hp
+ci5Hb3dkYUBzYW5kaXNrLmNvbT4gd3JvdGU6DQo+ID4gSGkgQWxsLA0KPiA+IA0KPiA+IEhhdmUg
+c2VudCBvdXQgYSBwdWxsIHJlcXVlc3Qgd2hpY2ggZW5hYmxlcyBidWlsZGluZyBsaWJyYWRvcy9s
+aWJyYmQgd2l0aCBlaXRoZXIgdGNtYWxsb2MoYXMgZGVmYXVsdCkgb3IgamVtYWxsb2MuIA0KPiA+
+IA0KPiA+IFBsZWFzZSBmaW5kIHRoZSBwdWxsIHJlcXVlc3QgQA0KPiA+IGh0dHBzOi8vZ2l0aHVi
+LmNvbS9jZXBoL2NlcGgvcHVsbC81NjI4DQo+ID4gDQo+ID4gV2l0aCByZWdhcmRzLA0KPiA+IFNo
+aXNoaXINCj4gDQo+IFVubGVzcyBJJ20gbWlzc2luZyBzb21ldGhpbmcgaGVyZSwgdGhpcyBzZWFt
+cyBsaWtlIHRoZSB3cm9uZyB0aGluZyB0by4gDQo+IExpYnJhcmllcyB0aGF0IHdpbGwgYmUgbGlu
+a2VkIGluIGJ5IG90aGVyIGV4dGVybmFsIGFwcGxpY2F0aW9ucyBzaG91bGQgDQo+IG5vdCBoYXZl
+IGEgM3JkIHBhcnR5IG1hbGxvYyBsaW5rZWQgaW4gdGhlcmUuIFRoYXQgc2VhbXMgbGlrZSBhbiAN
+Cj4gYXBwbGljYXRpb24gY2hvaWNlLiBBdCB0aGUgdmVyeSBsZWFzdCB0aGUgZGVmYXVsdCBzaG91
+bGQgbm90IGJlIHRvIA0KPiBsaW5rIGluIGEgM3JkIHBhcnR5IG1hbGxvYy4NCg0KWWVhaCwgSSB0
+aGluayB5b3UncmUgcmlnaHQuIA0KDQpOb3RlIHRoYXQgdGhpcyBpc24ndC93YXNuJ3QgYWx3YXlz
+IHRoZSBjYXNlLCB0aG91Z2guLiBvbiBwcmVjaXNlLCBmb3IgaW5zdGFuY2UsIGxpYmxldmVsZGIg
+bGlua3MgbGlidGNtYWxsb2MuIFRoZXkgc3RvcHBlZCBkb2luZyB0aGlzIHNvbWV0aW1lIGJlZm9y
+ZSB0cnVzdHkuIA0KDQpzYWdlIA0KDQpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXyAN
+Cg0KUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJv
+bmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNp
+Z25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1l
+c3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlm
+aWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0
+IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0
+aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQg
+dGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkg
+dGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0
+cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9u
+ICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLiAN
+Cg0K
