@@ -1,129 +1,108 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Ceph Hackathon: More Memory Allocator Testing
-Date: Sun, 23 Aug 2015 16:38:55 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE21AB2@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <55D409F0.3050802@redhat.com>
- <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE12966@SACMBXIP01.sdcorp.global.sandisk.com>
- <EA545303A8F8E842820A172C3D641D6E1B09E891@SACMBXIP01.sdcorp.global.sandisk.com>
- <CANP1eJH=mhQ1rBkUD8=yuF26s2t2vO0JMO-wKOLQ8VbWdEmxxw@mail.gmail.com>
- <alpine.DEB.2.00.1508220653120.13116@cobra.newdream.net>
- <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE1DC70@SACMBXIP01.sdcorp.global.sandisk.com>
- <2058625694.43353019.1440262638523.JavaMail.zimbra@oxygem.tv>
- <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE1FD73@SACMBXIP01.sdcorp.global.sandisk.com>
- <316455461.43834300.1440335577243.JavaMail.zimbra@oxygem.tv>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: Kernel RBD Readahead
+Date: Sun, 23 Aug 2015 20:33:22 +0300
+Message-ID: <CAOi1vP8Tvcdh8Xy+eJKJdoHWDO2=OmVXqfxH9KzoJQQE645Rww@mail.gmail.com>
+References: <3dc364a7.9Ro.9Gf.13.ic3ciX@mailjet.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1bon0076.outbound.protection.outlook.com ([157.56.111.76]:25668
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751955AbbHWQjA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 23 Aug 2015 12:39:00 -0400
-In-Reply-To: <316455461.43834300.1440335577243.JavaMail.zimbra@oxygem.tv>
-Content-Language: en-US
+Received: from mail-lb0-f173.google.com ([209.85.217.173]:35336 "EHLO
+	mail-lb0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752123AbbHWRdY convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 23 Aug 2015 13:33:24 -0400
+Received: by lbcbn3 with SMTP id bn3so67604504lbc.2
+        for <ceph-devel@vger.kernel.org>; Sun, 23 Aug 2015 10:33:23 -0700 (PDT)
+In-Reply-To: <3dc364a7.9Ro.9Gf.13.ic3ciX@mailjet.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>
-Cc: Sage Weil <sage@newdream.net>, Milosz Tanski <milosz@adfin.com>, Shishir Gowda <Shishir.Gowda@sandisk.com>, Stefan Priebe <s.priebe@profihost.ag>, Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Nick Fisk <nick@fisk.me.uk>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-SG1tLi5Zb3Ugc2FpZCB5b3UgYnVpbHQgcWVtdSB3aXRoIHRjbWFsbG9jL2plbWFsbG9jIGFuZCBi
-YXNlZCBvbiB5b3VyIHJlc3VsdCBpdCBzZWVtcyBpdCBpcyBvdmVycmlkaW5nIHRoZSBsaWJyYmQg
-YWxsb2NhdG9yIHByb2JhYmx5LiBXZSBuZWVkIHRvIHNlZSBpZiBxZW11IGlzIGJ1aWx0IHdpdGgg
-Z2xpYmMgYW5kIGxpYnJiZCBpcyBidWlsdCB3aXRoIHNheSBqZW1hbGxvYywgc3RpbGwgeW91IHdp
-bGwgc2VlIGltcHJvdmVtZW50IG9yIG5vdC4gSWYgeW91IGhhdmUgc29tZSBzcGFyZSB0aW1lLCBj
-b3VsZCB5b3UgcGxlYXNlIHVzZSB0aGUgcGF0Y2ggdG8gdmVyaWZ5IHRoaXMgPw0KRGlkIHlvdSBi
-dWlsZCBmaW8vcmFkb3MgYmVuY2ggYWxzbyB3aXRoIHRjbWFsbG9jL2plbWFsbG9jID8gSWYgbm90
-LCBob3cvd2h5IGl0IGlzIGltcHJvdmluZyA/DQoNClRoYW5rcyAmIFJlZ2FyZHMNClNvbW5hdGgN
-Cg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IEFsZXhhbmRyZSBERVJVTUlFUiBb
-bWFpbHRvOmFkZXJ1bWllckBvZGlzby5jb21dIA0KU2VudDogU3VuZGF5LCBBdWd1c3QgMjMsIDIw
-MTUgNjoxMyBBTQ0KVG86IFNvbW5hdGggUm95DQpDYzogU2FnZSBXZWlsOyBNaWxvc3ogVGFuc2tp
-OyBTaGlzaGlyIEdvd2RhOyBTdGVmYW4gUHJpZWJlOyBNYXJrIE5lbHNvbjsgY2VwaC1kZXZlbA0K
-U3ViamVjdDogUmU6IENlcGggSGFja2F0aG9uOiBNb3JlIE1lbW9yeSBBbGxvY2F0b3IgVGVzdGlu
-Zw0KDQo+PkkgYW0gbm90IHN1cmUgaW4geW91ciBjYXNlIHRoZSBiZW5lZml0IHlvdSBhcmUgc2Vl
-aW5nIGlzIGJlY2F1c2Ugb2YgcWVtdSBpcyBtb3JlIGVmZmljaWVudCB3aXRoIHRjbWFsbG9jL2pl
-bWFsbG9jIG9yIHRoZSBlbnRpcmUgY2xpZW50IHN0YWNrID8gDQoNCkZyb20gbXkgdGVzdCwgcWVt
-dSwgZmlvIG9yICJyYWRvcyBiZW5jaCIgYXJlIG1vcmUgZWZmaWNpZW50IHdpdGggdGNtYWxsb2Mv
-amVtbWFsb2Mgd2hlbiB1c2luZyBsaWJyYmQuDQoNCkZvciBxZW11LCBJIGRvbid0IHNlZSBhbnkg
-ZGlmZmVyZW5jZSB3aXRoIG90aGVyIGJhY2tlbmRzIChpc2NzaSxuZnMsbG9jYWwpLCBvbmx5IHJi
-ZCBiYWNrZW5kIGhhdmUgYSBiaWcgZGlmZmVyZW5jZSB3aGVuIHVzaW5nIGFub3RoZXIgbWVtb3J5
-IGFsbG9jYXRvci4NCg0KSGVyZSBzb21lIHFlbXUgcmVzdWx0cyAoMWRpc2sgLyAxIGlvdGhyZWFk
-KToNCg0KZ2xpYmMgbWFsbG9jDQotLS0tLS0tLS0tLS0NCg0KMSBkaXNrICAgICAgMjkwNTINCjIg
-ZGlza3MgICAgIDU1ODc4DQo0IGRpc2tzICAgICAxMjc4OTkNCjggZGlza3MgICAgIDI0MDU2Ng0K
-MTUgZGlza3MgICAgMjY5OTc2DQoNCmplbWFsbG9jDQotLS0tLS0tLQ0KDQoxIGRpc2sgICAgICA0
-MTI3OA0KMiBkaXNrcyAgICAgNzU3ODENCjQgZGlza3MgICAgIDE5NTM1MQ0KOCBkaXNrcyAgICAg
-Mjk0MjQxDQoxNSBkaXNrcyAgICAyOTgxOTkNCg0KdGNtYWxsb2MgIGRlZmF1bHQgY2FjaGUgKGlu
-Y3JlYXNpbmcgdGhyZWFkcyBoaXQgdGNtYWxsb2MgYnVnKQ0KLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLQ0KDQoxIGRpc2sgICAzNzkxMQ0KMiBkaXNrcyAgNjc2OTgNCjQgZGlza3MgIDQxMDc2
-DQo4IGRpc2tzICA0MzMxMg0KMTUgZGlza3MgMzc1NjkNCg0KdGNtYWxsb2MgOiAyNTZNIGNhY2hl
-DQotLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCg0KMSBkaXNrICAgICAzMzkxNA0KMiBkaXNr
-cyAgICA1ODgzOQ0KNCBkaXNrcyAgICAxNDgyMDUNCjggZGlza3MgICAgMjEzMjk4DQoxNSBkaXNr
-cyAgIDIxODM4Mw0KDQoNCi0tLS0tIE1haWwgb3JpZ2luYWwgLS0tLS0NCkRlOiAiU29tbmF0aCBS
-b3kiIDxTb21uYXRoLlJveUBzYW5kaXNrLmNvbT4NCsOAOiAiYWRlcnVtaWVyIiA8YWRlcnVtaWVy
-QG9kaXNvLmNvbT4NCkNjOiAiU2FnZSBXZWlsIiA8c2FnZUBuZXdkcmVhbS5uZXQ+LCAiTWlsb3N6
-IFRhbnNraSIgPG1pbG9zekBhZGZpbi5jb20+LCAiU2hpc2hpciBHb3dkYSIgPFNoaXNoaXIuR293
-ZGFAc2FuZGlzay5jb20+LCAiU3RlZmFuIFByaWViZSIgPHMucHJpZWJlQHByb2ZpaG9zdC5hZz4s
-ICJNYXJrIE5lbHNvbiIgPG1uZWxzb25AcmVkaGF0LmNvbT4sICJjZXBoLWRldmVsIiA8Y2VwaC1k
-ZXZlbEB2Z2VyLmtlcm5lbC5vcmc+DQpFbnZvecOpOiBTYW1lZGkgMjIgQW/Du3QgMjAxNSAxOTow
-Mzo0MQ0KT2JqZXQ6IFJFOiBDZXBoIEhhY2thdGhvbjogTW9yZSBNZW1vcnkgQWxsb2NhdG9yIFRl
-c3RpbmcNCg0KTmVlZCB0byBzZWUgaWYgY2xpZW50IGlzIG92ZXJyaWRpbmcgdGhlIGxpYnJhcmll
-cyBidWlsdCB3aXRoIGRpZmZlcmVudCBtYWxsb2MgbGlicmFyaWVzIEkgZ3Vlc3MuLiANCkkgYW0g
-bm90IHN1cmUgaW4geW91ciBjYXNlIHRoZSBiZW5lZml0IHlvdSBhcmUgc2VlaW5nIGlzIGJlY2F1
-c2Ugb2YgcWVtdSBpcyBtb3JlIGVmZmljaWVudCB3aXRoIHRjbWFsbG9jL2plbWFsbG9jIG9yIHRo
-ZSBlbnRpcmUgY2xpZW50IHN0YWNrID8gDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpG
-cm9tOiBBbGV4YW5kcmUgREVSVU1JRVIgW21haWx0bzphZGVydW1pZXJAb2Rpc28uY29tXQ0KU2Vu
-dDogU2F0dXJkYXksIEF1Z3VzdCAyMiwgMjAxNSA5OjU3IEFNDQpUbzogU29tbmF0aCBSb3kNCkNj
-OiBTYWdlIFdlaWw7IE1pbG9zeiBUYW5za2k7IFNoaXNoaXIgR293ZGE7IFN0ZWZhbiBQcmllYmU7
-IE1hcmsgTmVsc29uOyBjZXBoLWRldmVsDQpTdWJqZWN0OiBSZTogQ2VwaCBIYWNrYXRob246IE1v
-cmUgTWVtb3J5IEFsbG9jYXRvciBUZXN0aW5nIA0KDQo+PldhbnRlZCB0byBrbm93IGlzIHRoZXJl
-IGFueSByZWFzb24gd2UgZGlkbid0IGxpbmsgY2xpZW50IGxpYnJhcmllcyB3aXRoIHRjbWFsbG9j
-IGF0IHRoZSBmaXJzdCBwbGFjZSAoYnV0IGRpZCBsaW5rIG9ubHkgT1NEcy9tb24vUkdXKSA/IA0K
-DQpEbyB3ZSBuZWVkIHRvIGxpbmsgY2xpZW50IGxpYnJhaXJpZXMgPyANCg0KSSdtIGJ1aWxkaW5n
-IHFlbXUgd2l0aCBqZW1hbGxvYyAsIGFuZCBpdCdzIHNlZW0gdG8gYmUgZW5vdWdoLiANCg0KDQoN
-Ci0tLS0tIE1haWwgb3JpZ2luYWwgLS0tLS0NCkRlOiAiU29tbmF0aCBSb3kiIDxTb21uYXRoLlJv
-eUBzYW5kaXNrLmNvbT4NCsOAOiAiU2FnZSBXZWlsIiA8c2FnZUBuZXdkcmVhbS5uZXQ+LCAiTWls
-b3N6IFRhbnNraSIgPG1pbG9zekBhZGZpbi5jb20+DQpDYzogIlNoaXNoaXIgR293ZGEiIDxTaGlz
-aGlyLkdvd2RhQHNhbmRpc2suY29tPiwgIlN0ZWZhbiBQcmllYmUiIDxzLnByaWViZUBwcm9maWhv
-c3QuYWc+LCAiYWRlcnVtaWVyIiA8YWRlcnVtaWVyQG9kaXNvLmNvbT4sICJNYXJrIE5lbHNvbiIg
-PG1uZWxzb25AcmVkaGF0LmNvbT4sICJjZXBoLWRldmVsIiA8Y2VwaC1kZXZlbEB2Z2VyLmtlcm5l
-bC5vcmc+DQpFbnZvecOpOiBTYW1lZGkgMjIgQW/Du3QgMjAxNSAxODoxNTozNg0KT2JqZXQ6IFJF
-OiBDZXBoIEhhY2thdGhvbjogTW9yZSBNZW1vcnkgQWxsb2NhdG9yIFRlc3RpbmcgDQoNClllcywg
-ZXZlbiB0b2RheSByb2Nrc2RiIGFsc28gbGlua2VkIHdpdGggdGNtYWxsb2MuIEl0IGRvZXNuJ3Qg
-bWVhbiBhbGwgdGhlIGFwcGxpY2F0aW9uIHVzaW5nIHJvY2tzZGIgbmVlZHMgdG8gYmUgYnVpbHQg
-d2l0aCB0Y21hbGxvYy4gDQpTYWdlLA0KV2FudGVkIHRvIGtub3cgaXMgdGhlcmUgYW55IHJlYXNv
-biB3ZSBkaWRuJ3QgbGluayBjbGllbnQgbGlicmFyaWVzIHdpdGggdGNtYWxsb2MgYXQgdGhlIGZp
-cnN0IHBsYWNlIChidXQgZGlkIGxpbmsgb25seSBPU0RzL21vbi9SR1cpID8gDQoNClRoYW5rcyAm
-IFJlZ2FyZHMNClNvbW5hdGggDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBT
-YWdlIFdlaWwgW21haWx0bzpzYWdlQG5ld2RyZWFtLm5ldF0NClNlbnQ6IFNhdHVyZGF5LCBBdWd1
-c3QgMjIsIDIwMTUgNjo1NiBBTQ0KVG86IE1pbG9zeiBUYW5za2kNCkNjOiBTaGlzaGlyIEdvd2Rh
-OyBTb21uYXRoIFJveTsgU3RlZmFuIFByaWViZTsgQWxleGFuZHJlIERFUlVNSUVSOyBNYXJrIE5l
-bHNvbjsgY2VwaC1kZXZlbA0KU3ViamVjdDogUmU6IENlcGggSGFja2F0aG9uOiBNb3JlIE1lbW9y
-eSBBbGxvY2F0b3IgVGVzdGluZyANCg0KT24gRnJpLCAyMSBBdWcgMjAxNSwgTWlsb3N6IFRhbnNr
-aSB3cm90ZTogDQo+IE9uIEZyaSwgQXVnIDIxLCAyMDE1IGF0IDEyOjIyIEFNLCBTaGlzaGlyIEdv
-d2RhIA0KPiA8U2hpc2hpci5Hb3dkYUBzYW5kaXNrLmNvbT4gd3JvdGU6DQo+ID4gSGkgQWxsLA0K
-PiA+IA0KPiA+IEhhdmUgc2VudCBvdXQgYSBwdWxsIHJlcXVlc3Qgd2hpY2ggZW5hYmxlcyBidWls
-ZGluZyBsaWJyYWRvcy9saWJyYmQgd2l0aCBlaXRoZXIgdGNtYWxsb2MoYXMgZGVmYXVsdCkgb3Ig
-amVtYWxsb2MuIA0KPiA+IA0KPiA+IFBsZWFzZSBmaW5kIHRoZSBwdWxsIHJlcXVlc3QgQA0KPiA+
-IGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgvcHVsbC81NjI4DQo+ID4gDQo+ID4gV2l0aCBy
-ZWdhcmRzLA0KPiA+IFNoaXNoaXINCj4gDQo+IFVubGVzcyBJJ20gbWlzc2luZyBzb21ldGhpbmcg
-aGVyZSwgdGhpcyBzZWFtcyBsaWtlIHRoZSB3cm9uZyB0aGluZyB0by4gDQo+IExpYnJhcmllcyB0
-aGF0IHdpbGwgYmUgbGlua2VkIGluIGJ5IG90aGVyIGV4dGVybmFsIGFwcGxpY2F0aW9ucyBzaG91
-bGQgDQo+IG5vdCBoYXZlIGEgM3JkIHBhcnR5IG1hbGxvYyBsaW5rZWQgaW4gdGhlcmUuIFRoYXQg
-c2VhbXMgbGlrZSBhbiANCj4gYXBwbGljYXRpb24gY2hvaWNlLiBBdCB0aGUgdmVyeSBsZWFzdCB0
-aGUgZGVmYXVsdCBzaG91bGQgbm90IGJlIHRvIA0KPiBsaW5rIGluIGEgM3JkIHBhcnR5IG1hbGxv
-Yy4NCg0KWWVhaCwgSSB0aGluayB5b3UncmUgcmlnaHQuIA0KDQpOb3RlIHRoYXQgdGhpcyBpc24n
-dC93YXNuJ3QgYWx3YXlzIHRoZSBjYXNlLCB0aG91Z2guLiBvbiBwcmVjaXNlLCBmb3IgaW5zdGFu
-Y2UsIGxpYmxldmVsZGIgbGlua3MgbGlidGNtYWxsb2MuIFRoZXkgc3RvcHBlZCBkb2luZyB0aGlz
-IHNvbWV0aW1lIGJlZm9yZSB0cnVzdHkuIA0KDQpzYWdlIA0KDQpfX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fXyANCg0KUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQg
-aW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUg
-dXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJl
-YWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBh
-cmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGlu
-IGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwg
-b3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91
-IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5
-IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVk
-aWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4g
-eW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0
-b3JlZCBjb3BpZXMpLiANCg==
+On Sat, Aug 22, 2015 at 11:45 PM, Nick Fisk <nick@fisk.me.uk> wrote:
+> Hi Ilya,
+>
+> I was wondering if I could just get your thoughts on a matter I have =
+run
+> into?
+>
+> Its surrounding read performance of the RBD kernel client and blk-mq,=
+ mainly
+> when doing large single threaded reads. During testing performance se=
+ems to
+> be limited to around 40MB/s, which is probably fairly similar to what=
+ you
+> would expect to get from a single OSD. This is to be expected as an R=
+BD is
+> just a long chain of objects each on a different OSD which is being r=
+ead
+> through in order one at a time.
+>
+> In theory readahead should make up for this by making the RBD client =
+read
+> from several OSD=E2=80=99s ahead of the current required block. Howev=
+er from what I
+> can see it seems that setting a readahead value higher than max_secto=
+rs_kb
+> doesn=E2=80=99t appear to have any effect, meaning that readahead is =
+limited to each
+> object that is currently being read. Would you be able to confirm if =
+this is
+> correct and if this is by design?
+
+[CCing ceph-devel]
+
+Certainly not by design.  rbd is just a block device driver, so if the
+kernel submits a readahead read, it will obey and carry it out in full.
+The readahead is driven by the VM in pages, it doesn't care about rbd
+object boundaries and such.
+
+That said, one problem is in the VM subsystem, where readaheads get
+capped at 512 pages (=3D 2M).  If you do a simple single threaded read
+test, you'll see 4096 sector (=3D 2M) I/Os instead of object size I/Os:
+
+    $ rbd info foo | grep order
+            order 24 (16384 kB objects)
+    $ blockdev --getra /dev/rbd0
+    32768
+    $ dd if=3D/dev/rbd0 of=3D/dev/null bs=3D32M
+    # avgrq-sz is 4096.00
+
+This was introduced in commit 6d2be915e589 ("mm/readahead.c: fix
+readahead failure for memoryless NUMA nodes and limit readahead pages")
+[1], which went into 3.15.  The hard limit was Linus' suggestion,
+apparently.
+
+#define MAX_READAHEAD   ((512*4096)/PAGE_CACHE_SIZE)
+/*
+ * Given a desired number of PAGE_CACHE_SIZE readahead pages, return a
+ * sensible upper limit.
+ */
+unsigned long max_sane_readahead(unsigned long nr)
+{
+        return min(nr, MAX_READAHEAD);
+}
+
+This limit used to be dynamic and depended on the number of free pages
+in the system.  There has been an attempt to bring that behaviour back
+[2], but it didn't go very far as far as getting into mainline.  It
+looks like Red Hat and Oracle are shipping [2] in some of their kernels
+though.  If you apply it, you'll see 32768 sector (=3D 16M) I/Os in the
+above test, which is how it should be.
+
+[1] https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/com=
+mit/?id=3D6d2be915e589b58cb11418cbe1f22ff90732b6ac
+[2] http://thread.gmane.org/gmane.linux.kernel/1893680
+
+One thing we should be doing is setting read_ahead_kb to object size,
+the default 128k doesn't really cut it for rbd.  I'll send a patch for
+that.
+
+Thanks,
+
+                Ilya
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
