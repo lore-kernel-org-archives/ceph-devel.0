@@ -1,72 +1,49 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Enabling contributors to run teuthology suites
-Date: Mon, 24 Aug 2015 17:44:15 +0200
-Message-ID: <55DB3BCF.2080901@dachary.org>
-References: <55DB0553.90406@dachary.org> <55DB2E59.50607@suse.cz> <55DB3652.9050107@dachary.org>
+From: Matt Benjamin <mbenjamin@redhat.com>
+Subject: handle-based object store
+Date: Mon, 24 Aug 2015 11:50:45 -0400 (EDT)
+Message-ID: <634542282.7893067.1440431445910.JavaMail.zimbra@redhat.com>
+References: <1141157085.7889185.1440430914232.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="8Eot0KGWCa9I4Iii2oXQDKP10fLdrQxB5"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:42941 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1750904AbbHXPoS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Aug 2015 11:44:18 -0400
-In-Reply-To: <55DB3652.9050107@dachary.org>
+Received: from mx4-phx2.redhat.com ([209.132.183.25]:56504 "EHLO
+	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754548AbbHXPuq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Aug 2015 11:50:46 -0400
+In-Reply-To: <1141157085.7889185.1440430914232.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nathan Cutler <ncutler@suse.cz>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Samuel Just <sjust@redhat.com>, Casey Bodley <cbodley@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---8Eot0KGWCa9I4Iii2oXQDKP10fLdrQxB5
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+(11:37:44 AM) mattbenjamin: sjusthm, cbodley:  Casey and I think it might be useful to have a short video call on the meet points between object and collection handle as we did it, and the other objectstore changes; I don't know which aspects really should port over to master, but I think it would be useful to do a walk-through and discussion of what parts we could retarget, and anything that we could sequence cleanly later.
+(11:38:06 AM) mattbenjamin: sjusthm, cbodley: do you have a bit of time available?
 
+Some of the pieces we had:
 
+1. the handle interface change itself
+2. indexed slots for collection and object handles or ids (unions, iirc) in Transaction, and efficient operations to fill slots
+3. probably more flexbility than needed in that every OS could completely redefine Collection and Object
+4. lifecycle and refcounting which worked correctly
+5. an Object hierarchy we actually used in our version of filestore, w/concurrent LRU system
+6. a set of changes by Casey replacing the FDRef system w/management of objects--some of this could be useful, I don't know how it maps onto newstore at all
+7. a unification of ObjectContext and opaque Object which we were debating in Oregon
+8. thread-local caches of collections and objects above the OS interface that appeared to be a big help in IOPs work
 
-On 24/08/2015 17:20, Loic Dachary wrote:> Hi Nathan,
->=20
-> That's a nice idea. Since I'm not using my paypal account, it holds a g=
-rand total of zero euros. It will be easy to relate that to what is spent=
- on OpenStack accounts. The mail of my paypal account is : loic+paypal@da=
-chary.org
+ok, apparently we're on for 11:00 am pst--I'll send an invite
 
-Actually, I have another one, also empty and easier to remember: loic@dac=
-hary.org
+Matt 
 
-> I'll update http://tracker.ceph.com/projects/ceph/wiki/RunTeuthology#Fu=
-nding on a weekly basis.
->=20
-> Cheers
->=20
-> On 24/08/2015 16:46, Nathan Cutler wrote:
->>> We don't yet have a long term solution to fund this kind of testing, =
-but that's not a blocker. It's cheap enough to setup and I'm willing to s=
-pend 500 euros per month of my own money for the time being. It's really =
-selfish of me : enabling contributors will save me time that's worth more=
- than 500 euros ;-)
->>
->> I suggest that Loic provide PayPal details so folks can help him defra=
-y the cost of running teuthology on his cluster.
->>
->=20
+-- 
+Matt Benjamin
+Red Hat, Inc.
+315 West Huron Street, Suite 140A
+Ann Arbor, Michigan 48103
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+http://www.redhat.com/en/technologies/storage
 
+tel.  734-761-4689
+fax.  734-769-8938
+cel.  734-216-5309
 
---8Eot0KGWCa9I4Iii2oXQDKP10fLdrQxB5
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlXbO88ACgkQ8dLMyEl6F23oJQCfa36hFXXXX3MYFsdUd3a5MX1Z
-O2kAniaE8WvNFp1j1dJwUHPI920jT37i
-=2hJ5
------END PGP SIGNATURE-----
-
---8Eot0KGWCa9I4Iii2oXQDKP10fLdrQxB5--
