@@ -1,253 +1,176 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: Kernel RBD Readahead
-Date: Mon, 24 Aug 2015 20:18:37 +0300
-Message-ID: <CAOi1vP-5bF6zCCaddvpF-TeMs66CLq6KtOL-_POJ6Ayxi-V6EA@mail.gmail.com>
-References: <3dc364a7.9Ro.9Gf.13.ic3ciX@mailjet.com>
-	<CAOi1vP8Tvcdh8Xy+eJKJdoHWDO2=OmVXqfxH9KzoJQQE645Rww@mail.gmail.com>
-	<590a725d.9Ro.9Gf.1M.icIth1@mailjet.com>
-	<CAOi1vP9=47yYPpJVwSUnZmoK1jv81s_4TmoaxJ=MxMtQ3-7nXQ@mail.gmail.com>
-	<CAOi1vP-zmOCAfWQVS2JknOX7QyKwHy8REeHkpKrAYcUJPwJ8Rw@mail.gmail.com>
-	<bd4da65e.9Ro.9Gf.13.idFHtU@mailjet.com>
+From: Sage Weil <sage-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: v9.0.3 released
+Date: Mon, 24 Aug 2015 10:45:16 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1508241043440.15480@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f179.google.com ([209.85.217.179]:36331 "EHLO
-	mail-lb0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753894AbbHXRSj convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Aug 2015 13:18:39 -0400
-Received: by lbbpu9 with SMTP id pu9so84238481lbb.3
-        for <ceph-devel@vger.kernel.org>; Mon, 24 Aug 2015 10:18:37 -0700 (PDT)
-In-Reply-To: <bd4da65e.9Ro.9Gf.13.idFHtU@mailjet.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Nick Fisk <nick@fisk.me.uk>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-announce-Qp0mS5GaXlQ@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Mon, Aug 24, 2015 at 7:00 PM, Nick Fisk <nick@fisk.me.uk> wrote:
->> -----Original Message-----
->> From: Ilya Dryomov [mailto:idryomov@gmail.com]
->> Sent: 24 August 2015 16:07
->> To: Nick Fisk <nick@fisk.me.uk>
->> Cc: Ceph Development <ceph-devel@vger.kernel.org>
->> Subject: Re: Kernel RBD Readahead
->>
->> On Mon, Aug 24, 2015 at 5:43 PM, Ilya Dryomov <idryomov@gmail.com>
->> wrote:
->> > On Sun, Aug 23, 2015 at 10:23 PM, Nick Fisk <nick@fisk.me.uk> wrot=
-e:
->> >>> -----Original Message-----
->> >>> From: Ilya Dryomov [mailto:idryomov@gmail.com]
->> >>> Sent: 23 August 2015 18:33
->> >>> To: Nick Fisk <nick@fisk.me.uk>
->> >>> Cc: Ceph Development <ceph-devel@vger.kernel.org>
->> >>> Subject: Re: Kernel RBD Readahead
->> >>>
->> >>> On Sat, Aug 22, 2015 at 11:45 PM, Nick Fisk <nick@fisk.me.uk> wr=
-ote:
->> >>> > Hi Ilya,
->> >>> >
->> >>> > I was wondering if I could just get your thoughts on a matter =
-I
->> >>> > have run into?
->> >>> >
->> >>> > Its surrounding read performance of the RBD kernel client and
->> >>> > blk-mq, mainly when doing large single threaded reads. During
->> >>> > testing performance seems to be limited to around 40MB/s, whic=
-h is
->> >>> > probably fairly similar to what you would expect to get from a
->> >>> > single OSD. This is to be expected as an RBD is just a long ch=
-ain
->> >>> > of objects each on a different OSD which is being read through=
- in order
->> one at a time.
->> >>> >
->> >>> > In theory readahead should make up for this by making the RBD
->> >>> > client read from several OSD=E2=80=99s ahead of the current re=
-quired
->> >>> > block. However from what I can see it seems that setting a
->> >>> > readahead value higher than max_sectors_kb doesn=E2=80=99t app=
-ear to have
->> >>> > any effect, meaning that readahead is limited to each object t=
-hat is
->> currently being read.
->> >>> > Would you be able to confirm if this is correct and if this is=
- by design?
->> >>>
->> >>> [CCing ceph-devel]
->> >>>
->> >>> Certainly not by design.  rbd is just a block device driver, so =
-if
->> >>> the kernel submits a readahead read, it will obey and carry it o=
-ut in full.
->> >>> The readahead is driven by the VM in pages, it doesn't care abou=
-t
->> >>> rbd object boundaries and such.
->> >>>
->> >>> That said, one problem is in the VM subsystem, where readaheads =
-get
->> >>> capped at 512 pages (=3D 2M).  If you do a simple single threade=
-d read
->> >>> test, you'll see 4096 sector (=3D 2M) I/Os instead of object siz=
-e I/Os:
->> >>>
->> >>>     $ rbd info foo | grep order
->> >>>             order 24 (16384 kB objects)
->> >>>     $ blockdev --getra /dev/rbd0
->> >>>     32768
->> >>>     $ dd if=3D/dev/rbd0 of=3D/dev/null bs=3D32M
->> >>>     # avgrq-sz is 4096.00
->> >>>
->> >>> This was introduced in commit 6d2be915e589 ("mm/readahead.c: fix
->> >>> readahead failure for memoryless NUMA nodes and limit readahead
->> >>> pages") [1], which went into 3.15.  The hard limit was Linus' su=
-ggestion,
->> apparently.
->> >>>
->> >>> #define MAX_READAHEAD   ((512*4096)/PAGE_CACHE_SIZE)
->> >>> /*
->> >>>  * Given a desired number of PAGE_CACHE_SIZE readahead pages,
->> return
->> >>> a
->> >>>  * sensible upper limit.
->> >>>  */
->> >>> unsigned long max_sane_readahead(unsigned long nr) {
->> >>>         return min(nr, MAX_READAHEAD); }
->> >>>
->> >>> This limit used to be dynamic and depended on the number of free
->> >>> pages in the system.  There has been an attempt to bring that
->> >>> behaviour back [2], but it didn't go very far as far as getting =
-into
->> >>> mainline.  It looks like Red Hat and Oracle are shipping [2] in =
-some
->> >>> of their kernels though.  If you apply it, you'll see 32768 sect=
-or (=3D 16M)
->> I/Os in the above test, which is how it should be.
->> >>>
->> >>> [1]
->> >>> https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/=
-comm
->> >>> it/?id=3D6d 2be915e589b58cb11418cbe1f22ff90732b6ac
->> >>> [2] http://thread.gmane.org/gmane.linux.kernel/1893680
->> >>>
->> >>> One thing we should be doing is setting read_ahead_kb to object
->> >>> size, the default 128k doesn't really cut it for rbd.  I'll send=
- a patch for
->> that.
->> >>>
->> >>> Thanks,
->> >>>
->> >>>                 Ilya
->> >>
->> >>
->> >> Thanks for your response.
->> >>
->> >> I do see the IO's being limited to 4096 sectors in the 4.1 kernel=
- and so that
->> is likely to be partly the cause of the poor performance I am seeing=
-=2E However
->> I tried a 3.14 kernel and saw the same level performance, but this t=
-ime the
->> IO's were limited to 1024 sectors. The queue depth was at around 8 s=
-o I
->> guess this means its submitting 8*512kb IO's up to the max_sectors_k=
-b limit
->> of 4096KB. From the OSD point of view, this will still be accessing =
-1 OSD at a
->> time.
->> >>
->> >> Maybe I'm expecting the wrong results but I was expecting that ei=
-ther 1
->> of these 2 scenarios would happen.
->> >>
->> >> 1. Kernel submits a large enough IO to satisfy the readahead valu=
-e,
->> max_sectors_kb would need to be higher than the object size (current=
-ly not
->> possible) and the RADOS layer would be responsible for doing the par=
-allel
->> reads to the OSD's to satisfy it.
->> >>
->> >> 2. Kernel recognises that the readahead is bigger than the
->> max_sectors_kb value and submits several IO's in parallel to the RBD=
- device
->> to satisfy the readahead request. Ie 32MB readahead would submit 8x4=
-MB
->> IO's in parallel.
->> >>
->> >> Please let me know if I have got the wrong idea here. But in my h=
-ead
->> either solution should improve sequential reads by a large amount, w=
-ith the
->> 2nd possibly slightly better as you are only waiting on the 1st OSD =
-to respond
->> to complete the request.
->> >>
->> >> Thanks for including the Ceph-Devel list, unfortunately despite s=
-everal
->> attempts I have not been able to post to this list after subscribing=
-, please can
->> you forward any correspondence if you think it would be useful to sh=
-are.
->> >
->> > Did you remember to set max_sectors_kb to max_hw_sectors_kb?  The
->> > block layer in 3.14 leaves max_sectors_kb at 512, even when
->> > max_hw_sectors_kb is set to a much bigger value by the driver.  If=
- you
->> > adjust it, you should be able to see object size requests, at leas=
-t
->> > sometimes.  Note that you definitely won't see them all the time d=
-ue
->> > to max_segments limitation, which was lifted only recently.
->
-> Yes I made sure I have checked this on all Kernels I have tested.
->
->>
->> I just realized that what I wrote is true for O_DIRECT reads.  For p=
-age cache
->> driven reads, which is what we are discussing, the max_segments limi=
-tation
->> is killer - 128 pages =3D 512k.  The fix was a one-liner, but I don'=
-t think it was
->> submitted for stable.
->
-> I'm also seeing this, which is probably not helping, but see below :-=
-)
->
->>
->> The other thing is that 3.14.21+ kernels are just as screwed readahe=
-ad wise
->> as 3.15+, as the offending commit was backported.  So even if I subm=
-it the
->> max_segments one-liner to stable and it makes it to say 3.14.52, we =
-will still
->> get only 4096 sector page cache I/Os, just like you got on 4.1.
->>
->
-> Yes, this was the problem, apologies I should have checked to see if =
-the patch was back ported. I tried an older 3.14 release and I am now s=
-eeing up to 200MB/s, a massive improvement. Queue depths are hovering a=
-round the 50 mark which is what I would expect. I suspect with the max_=
-segments fix it would possibly go faster as the requests to the OSD wou=
-ld be larger.
->
-> In that thread you linked, Linus asked for a real work example where =
-that commit was causing problems, here is one.
->
-> "Using a Ceph RBD as a staging area before trying to stream to tape, =
-which needs to average around 150-200MB/s to be suitable"
->
-> Where do we go from here to try and get the behaviour modified upstre=
-am?
+This is the second to last batch of development work for the Infernalis 
+cycle.  The most intrusive change is an internal (non user-visible) change 
+to the OSD's ObjectStore interface.  Many fixes and improvements elsewhere 
+across RGW, RBD, and another big pile of CephFS scrub/repair improvements.
 
-Can you describe your use case in more detail, in a cut & pasteable
-way?
+Upgrading
+---------
 
-Thanks,
+* The return code for librbd's rbd_aio_read and Image::aio_read API methods no
+  longer returns the number of bytes read upon success.  Instead, it 
+  returns 0 upon success and a negative value upon failure.
 
-                Ilya
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+* 'ceph scrub', 'ceph compact' and 'ceph sync force are now DEPRECATED.  
+  Users should instead use 'ceph mon scrub', 'ceph mon compact' and
+  'ceph mon sync force'.
+
+* 'ceph mon_metadata' should now be used as 'ceph mon metadata'. There is no
+  need to deprecate this command (same major release since it was first
+  introduced).
+
+* The `--dump-json` option of "osdmaptool" is replaced by `--dump json`.
+
+* The commands of "pg ls-by-{pool,primary,osd}" and "pg ls" now take 
+  "recovering" instead of "recovery", to include the recovering pgs in the 
+  listed pgs.
+
+
+Notable Changes
+---------------
+
+  * autotools: fix out of tree build (Krxysztof Kosinski)
+  * autotools: improve make check output (Loic Dachary)
+  * buffer: add invalidate_crc() (Piotr Dalek)
+  * buffer: fix zero bug (#12252 Haomai Wang)
+  * build: fix junit detection on Fedora 22 (Ira Cooper)
+  * ceph-disk: install pip > 6.1 (#11952 Loic Dachary)
+  * cephfs-data-scan: many additions, improvements (John Spray)
+  * ceph: improve error output for 'tell' (#11101 Kefu Chai)
+  * ceph-objectstore-tool: misc improvements (David Zafman)
+  * ceph-objectstore-tool: refactoring and cleanup (John Spray)
+  * ceph_test_rados: test pipelined reads (Zhiqiang Wang)
+  * common: fix bit_vector extent calc (#12611 Jason Dillaman)
+  * common: make work queue addition/removal thread safe (#12662 Jason 
+    Dillaman)
+  * common: optracker improvements (Zhiqiang Wang, Jianpeng Ma)
+  * crush: add --check to validate dangling names, max osd id (Kefu Chai)
+  * crush: cleanup, sync with kernel (Ilya Dryomov)
+  * crush: fix subtree base weight on adjust_subtree_weight (#11855 Sage 
+    Weil)
+  * crypo: fix NSS leak (Jason Dillaman)
+  * crypto: fix unbalanced init/shutdown (#12598 Zheng Yan)
+  * doc: misc updates (Kefu Chai, Owen Synge, Gael Fenet-Garde, Loic 
+    Dachary, Yannick Atchy-Dalama, Jiaying Ren, Kevin Caradant, Robert 
+    Maxime, Nicolas Yong, Germain Chipaux, Arthur Gorjux, Gabriel Sentucq, 
+    Clement Lebrun, Jean-Remi Deveaux, Clair Massot, Robin Tang, Thomas 
+    Laumondais, Jordan Dorne, Yuan Zhou, Valentin Thomas, Pierre Chaumont, 
+    Benjamin Troquereau, Benjamin Sesia, Vikhyat Umrao)
+  * erasure-code: cleanup (Kefu Chai)
+  * erasure-code: improve tests (Loic Dachary)
+  * erasure-code: shec: fix recovery bugs (Takanori Nakao, Shotaro 
+    Kawaguchi)
+  * libcephfs: add pread, pwrite (Jevon Qiao)
+  * libcephfs,ceph-fuse: cache cleanup (Zheng Yan)
+  * librados: add src_fadvise_flags for copy-from (Jianpeng Ma)
+  * librados: respect default_crush_ruleset on pool_create (#11640 Yuan 
+    Zhou)
+  * librbd: fadvise for copy, export, import (Jianpeng Ma)
+  * librbd: handle NOCACHE fadvise flag (Jinapeng Ma)
+  * librbd: optionally disable allocation hint (Haomai Wang)
+  * librbd: prevent race between resize requests (#12664 Jason Dillaman)
+  * log: fix data corruption race resulting from log rotation (#12465 
+    Samuel Just)
+  * mds: expose frags via asok (John Spray)
+  * mds: fix setting entire file layout in one setxattr (John Spray)
+  * mds: fix shutdown (John Spray)
+  * mds: handle misc corruption issues (John Spray)
+  * mds: misc fixes (Jianpeng Ma, Dan van der Ster, Zhang Zhi)
+  * mds: misc snap fixes (Zheng Yan)
+  * mds: store layout on header object (#4161 John Spray)
+  * misc performance and cleanup (Nathan Cutler, Xinxin Shu)
+  * mon: add NOFORWARD, OBSOLETE, DEPRECATE flags for mon commands (Joao 
+    Eduardo Luis)
+  * mon: add PG count to 'ceph osd df' output (Michal Jarzabek)
+  * mon: clean up, reorg some mon commands (Joao Eduardo Luis)
+  * mon: disallow >2 tiers (#11840 Kefu Chai)
+  * mon: fix log dump crash when debugging (Mykola Golub)
+  * mon: fix metadata update race (Mykola Golub)
+  * mon: fix refresh (#11470 Joao Eduardo Luis)
+  * mon: make blocked op messages more readable (Jianpeng Ma)
+  * mon: only send mon metadata to supporting peers (Sage Weil)
+  * mon: periodic background scrub (Joao Eduardo Luis)
+  * mon: prevent pgp_num > pg_num (#12025 Xinxin Shu)
+  * mon: reject large max_mds values (#12222 John Spray)
+  * msgr: add ceph_perf_msgr tool (Hoamai Wang)
+  * msgr: async: fix seq handling (Haomai Wang)
+  * msgr: xio: fastpath improvements (Raju Kurunkad)
+  * msgr: xio: sync with accellio v1.4 (Vu Pham)
+  * osd: clean up temp object if promotion fails (Jianpeng Ma)
+  * osd: constrain collections to meta and PGs (normal and temp) (Sage 
+    Weil)
+  * osd: filestore: clone using splice (Jianpeng Ma)
+  * osd: filestore: fix recursive lock (Xinxin Shu)
+  * osd: fix dup promotion lost op bug (Zhiqiang Wang)
+  * osd: fix temp-clearing (David Zafman)
+  * osd: include a temp namespace within each collection/pgid (Sage Weil)
+  * osd: low and high speed flush modes (Mingxin Liu)
+  * osd: peer_features includes self (David Zafman)
+  * osd: recovery, peering fixes (#11687 Samuel Just)
+  * osd: require firefly features (David Zafman)
+  * osd: set initial crush weight with more precision (Sage Weil)
+  * osd: use a temp object for recovery (Sage Weil)
+  * osd: use blkid to collection partition information (Joseph Handzik)
+  * rados: add --striper option to use libradosstriper (#10759 Sebastien 
+    Ponce)
+  * radosgw-admin: fix subuser modify output (#12286 Guce)
+  * rados: handle --snapid arg properly (Abhishek Lekshmanan)
+  * rados: improve bench buffer handling, performance (Piotr Dalek)
+  * rados: new pool import implementation (John Spray)
+  * rbd: fix link issues (Jason Dillaman)
+  * rbd: improve CLI arg parsing, usage (Ilya Dryomov)
+  * rbd: recognize queue_depth kernel option (Ilya Dryomov)
+  * rbd: support G and T units for CLI (Abhishek Lekshmanan)
+  * rbd: use image-spec and snap-spec in help (Vikhyat Umrao, Ilya 
+    Dryomov)
+  * rest-bench: misc fixes (Shawn Chen)
+  * rest-bench: support https (#3968 Yuan Zhou)
+  * rgw: add max multipart upload parts (#12146 Abshishek Dixit)
+  * rgw: add Trasnaction-Id to response (Abhishek Dixit)
+  * rgw: document layout of pools and objects (Pete Zaitcev)
+  * rgw: do not preserve ACLs when copying object (#12370 Yehuda Sadeh)
+  * rgw: fix Connection: header handling (#12298 Wido den Hollander)
+  * rgw: fix data corruptions race condition (#11749 Wuxingyi)
+  * rgw: fix JSON response when getting user quota (#12117 Wuxingyi)
+  * rgw: force content_type for swift bucket stats requests (#12095 Orit 
+    Wasserman)
+  * rgw: improved support for swift account metadata (Radoslaw Zarzynski)
+  * rgw: make max put size configurable (#6999 Yuan Zhou)
+  * rgw: orphan detection tool (Yehuda Sadeh)
+  * rgw: swift: do not override sent content type (#12363 Orit Wasserman)
+  * rgw: swift: set Content-Length for account GET (#12158 Radoslav 
+    Zarzynski)
+  * rpm: always rebuild and install man pages for rpm (Owen Synge)
+  * rpm: misc fixes (Boris Ranto, Owen Synge, Ken Dreyer, Ira Cooper)
+  * systemd: logrotate fixes (Tim Seron, Lars Marowsky-Bree, Nathan 
+    Cutler)
+  * sysvinit compat: misc fixes (Owen Synge)
+  * test: misc fs test improvements (John Spray, Loic Dachary)
+  * test: python tests, linter cleanup (Alfredo Deza)
+
+Getting Ceph
+------------
+
+* Git at git://github.com/ceph/ceph.git
+* Tarball at http://ceph.com/download/ceph-9.0.3.tar.gz
+* For packages, see http://ceph.com/docs/master/install/get-packages
+* For ceph-deploy, see http://ceph.com/docs/master/install/install-ceph-deploy
