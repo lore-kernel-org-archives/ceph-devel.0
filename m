@@ -1,176 +1,70 @@
-From: Sage Weil <sage-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: v9.0.3 released
-Date: Mon, 24 Aug 2015 10:45:16 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1508241043440.15480@cobra.newdream.net>
+From: Sage Weil <sweil@redhat.com>
+Subject: wip-addr
+Date: Mon, 24 Aug 2015 11:01:45 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1508241046070.13116@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-announce-Qp0mS5GaXlQ@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:49561 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751235AbbHXSCC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 24 Aug 2015 14:02:02 -0400
+Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
+	by mx1.redhat.com (Postfix) with ESMTPS id CE3A28E67C
+	for <ceph-devel@vger.kernel.org>; Mon, 24 Aug 2015 18:02:02 +0000 (UTC)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: mwatts@redhat.com, ceph-devel@vger.kernel.org
 
-This is the second to last batch of development work for the Infernalis 
-cycle.  The most intrusive change is an internal (non user-visible) change 
-to the OSD's ObjectStore interface.  Many fixes and improvements elsewhere 
-across RGW, RBD, and another big pile of CephFS scrub/repair improvements.
+Hi Marcus,
 
-Upgrading
----------
+I looked over the wip-addr branch a bit.  I have two basic 
+questions/concerns:
 
-* The return code for librbd's rbd_aio_read and Image::aio_read API methods no
-  longer returns the number of bytes read upon success.  Instead, it 
-  returns 0 upon success and a negative value upon failure.
+1) In commit
+	https://github.com/ceph/ceph/commit/73b09090466a43d5aceb979a4802de3f3f5bf24a 
+we switch the type field from sa_family to transport_type.  This seems 
+like the way to go, but we need to deal with the fact that lots of 
+clusters out there are IPv6 and have AF_INET6 filled in here.  Probably 
+both types should be interpreted to mean "existing/legacy IP messenger" or 
+whatever we want to call SimpleMessenger/AsyncMessenger's protocol.
 
-* 'ceph scrub', 'ceph compact' and 'ceph sync force are now DEPRECATED.  
-  Users should instead use 'ceph mon scrub', 'ceph mon compact' and
-  'ceph mon sync force'.
+I think encode needs to make sure it fills in that value for the type when 
+encoding the legacy entity_addr_t encoding, but could use a/the single 
+valid value for the new encoding.  And any get_transport_type() accessor 
+should also return the single valid value.
 
-* 'ceph mon_metadata' should now be used as 'ceph mon metadata'. There is no
-  need to deprecate this command (same major release since it was first
-  introduced).
+2) In the later commit
+	https://github.com/ceph/ceph/commit/9d203a2058f76414703b4fc212a1a0a960d0c672 
+you introduce a grammar for printing/parsing the addrs.  This also makes 
+sense since e.g. xio uses an IP to identify an endpoint.  I think we 
+should identify these based on the *protocol* and not the implementation, 
+though... whether we use SimpleMessenger or AsyncMessenger is not a 
+property of the address.  Maybe "tcp://" makes more sense here?  Or 
+perhaps no prefix at all (a bare IP address), so that this looks the same 
+as it did before in the case where the default protocol(s) are in use.
 
-* The `--dump-json` option of "osdmaptool" is replaced by `--dump json`.
+I assume the xio protocol (whether it is rdma or tcp) is closely tied to 
+libxio itself.. is that right?  If so, using xio in that prefix makes 
+sense.  I'd include xio somewhere in the rdma prefix though (xrdma:// and 
+xtcp://)?
 
-* The commands of "pg ls-by-{pool,primary,osd}" and "pg ls" now take 
-  "recovering" instead of "recovery", to include the recovering pgs in the 
-  listed pgs.
+What do you think?
 
+Logistically, I think the steps for getting this ready for merge are:
 
-Notable Changes
----------------
+1) Separate out the preliminary patches that pass a feature to the addr 
+encoding.. without any of the other cohortfs patches that are currently on 
+this branch.  Once this builds we can merge it separately from the rest...
 
-  * autotools: fix out of tree build (Krxysztof Kosinski)
-  * autotools: improve make check output (Loic Dachary)
-  * buffer: add invalidate_crc() (Piotr Dalek)
-  * buffer: fix zero bug (#12252 Haomai Wang)
-  * build: fix junit detection on Fedora 22 (Ira Cooper)
-  * ceph-disk: install pip > 6.1 (#11952 Loic Dachary)
-  * cephfs-data-scan: many additions, improvements (John Spray)
-  * ceph: improve error output for 'tell' (#11101 Kefu Chai)
-  * ceph-objectstore-tool: misc improvements (David Zafman)
-  * ceph-objectstore-tool: refactoring and cleanup (John Spray)
-  * ceph_test_rados: test pipelined reads (Zhiqiang Wang)
-  * common: fix bit_vector extent calc (#12611 Jason Dillaman)
-  * common: make work queue addition/removal thread safe (#12662 Jason 
-    Dillaman)
-  * common: optracker improvements (Zhiqiang Wang, Jianpeng Ma)
-  * crush: add --check to validate dangling names, max osd id (Kefu Chai)
-  * crush: cleanup, sync with kernel (Ilya Dryomov)
-  * crush: fix subtree base weight on adjust_subtree_weight (#11855 Sage 
-    Weil)
-  * crypo: fix NSS leak (Jason Dillaman)
-  * crypto: fix unbalanced init/shutdown (#12598 Zheng Yan)
-  * doc: misc updates (Kefu Chai, Owen Synge, Gael Fenet-Garde, Loic 
-    Dachary, Yannick Atchy-Dalama, Jiaying Ren, Kevin Caradant, Robert 
-    Maxime, Nicolas Yong, Germain Chipaux, Arthur Gorjux, Gabriel Sentucq, 
-    Clement Lebrun, Jean-Remi Deveaux, Clair Massot, Robin Tang, Thomas 
-    Laumondais, Jordan Dorne, Yuan Zhou, Valentin Thomas, Pierre Chaumont, 
-    Benjamin Troquereau, Benjamin Sesia, Vikhyat Umrao)
-  * erasure-code: cleanup (Kefu Chai)
-  * erasure-code: improve tests (Loic Dachary)
-  * erasure-code: shec: fix recovery bugs (Takanori Nakao, Shotaro 
-    Kawaguchi)
-  * libcephfs: add pread, pwrite (Jevon Qiao)
-  * libcephfs,ceph-fuse: cache cleanup (Zheng Yan)
-  * librados: add src_fadvise_flags for copy-from (Jianpeng Ma)
-  * librados: respect default_crush_ruleset on pool_create (#11640 Yuan 
-    Zhou)
-  * librbd: fadvise for copy, export, import (Jianpeng Ma)
-  * librbd: handle NOCACHE fadvise flag (Jinapeng Ma)
-  * librbd: optionally disable allocation hint (Haomai Wang)
-  * librbd: prevent race between resize requests (#12664 Jason Dillaman)
-  * log: fix data corruption race resulting from log rotation (#12465 
-    Samuel Just)
-  * mds: expose frags via asok (John Spray)
-  * mds: fix setting entire file layout in one setxattr (John Spray)
-  * mds: fix shutdown (John Spray)
-  * mds: handle misc corruption issues (John Spray)
-  * mds: misc fixes (Jianpeng Ma, Dan van der Ster, Zhang Zhi)
-  * mds: misc snap fixes (Zheng Yan)
-  * mds: store layout on header object (#4161 John Spray)
-  * misc performance and cleanup (Nathan Cutler, Xinxin Shu)
-  * mon: add NOFORWARD, OBSOLETE, DEPRECATE flags for mon commands (Joao 
-    Eduardo Luis)
-  * mon: add PG count to 'ceph osd df' output (Michal Jarzabek)
-  * mon: clean up, reorg some mon commands (Joao Eduardo Luis)
-  * mon: disallow >2 tiers (#11840 Kefu Chai)
-  * mon: fix log dump crash when debugging (Mykola Golub)
-  * mon: fix metadata update race (Mykola Golub)
-  * mon: fix refresh (#11470 Joao Eduardo Luis)
-  * mon: make blocked op messages more readable (Jianpeng Ma)
-  * mon: only send mon metadata to supporting peers (Sage Weil)
-  * mon: periodic background scrub (Joao Eduardo Luis)
-  * mon: prevent pgp_num > pg_num (#12025 Xinxin Shu)
-  * mon: reject large max_mds values (#12222 John Spray)
-  * msgr: add ceph_perf_msgr tool (Hoamai Wang)
-  * msgr: async: fix seq handling (Haomai Wang)
-  * msgr: xio: fastpath improvements (Raju Kurunkad)
-  * msgr: xio: sync with accellio v1.4 (Vu Pham)
-  * osd: clean up temp object if promotion fails (Jianpeng Ma)
-  * osd: constrain collections to meta and PGs (normal and temp) (Sage 
-    Weil)
-  * osd: filestore: clone using splice (Jianpeng Ma)
-  * osd: filestore: fix recursive lock (Xinxin Shu)
-  * osd: fix dup promotion lost op bug (Zhiqiang Wang)
-  * osd: fix temp-clearing (David Zafman)
-  * osd: include a temp namespace within each collection/pgid (Sage Weil)
-  * osd: low and high speed flush modes (Mingxin Liu)
-  * osd: peer_features includes self (David Zafman)
-  * osd: recovery, peering fixes (#11687 Samuel Just)
-  * osd: require firefly features (David Zafman)
-  * osd: set initial crush weight with more precision (Sage Weil)
-  * osd: use a temp object for recovery (Sage Weil)
-  * osd: use blkid to collection partition information (Joseph Handzik)
-  * rados: add --striper option to use libradosstriper (#10759 Sebastien 
-    Ponce)
-  * radosgw-admin: fix subuser modify output (#12286 Guce)
-  * rados: handle --snapid arg properly (Abhishek Lekshmanan)
-  * rados: improve bench buffer handling, performance (Piotr Dalek)
-  * rados: new pool import implementation (John Spray)
-  * rbd: fix link issues (Jason Dillaman)
-  * rbd: improve CLI arg parsing, usage (Ilya Dryomov)
-  * rbd: recognize queue_depth kernel option (Ilya Dryomov)
-  * rbd: support G and T units for CLI (Abhishek Lekshmanan)
-  * rbd: use image-spec and snap-spec in help (Vikhyat Umrao, Ilya 
-    Dryomov)
-  * rest-bench: misc fixes (Shawn Chen)
-  * rest-bench: support https (#3968 Yuan Zhou)
-  * rgw: add max multipart upload parts (#12146 Abshishek Dixit)
-  * rgw: add Trasnaction-Id to response (Abhishek Dixit)
-  * rgw: document layout of pools and objects (Pete Zaitcev)
-  * rgw: do not preserve ACLs when copying object (#12370 Yehuda Sadeh)
-  * rgw: fix Connection: header handling (#12298 Wido den Hollander)
-  * rgw: fix data corruptions race condition (#11749 Wuxingyi)
-  * rgw: fix JSON response when getting user quota (#12117 Wuxingyi)
-  * rgw: force content_type for swift bucket stats requests (#12095 Orit 
-    Wasserman)
-  * rgw: improved support for swift account metadata (Radoslaw Zarzynski)
-  * rgw: make max put size configurable (#6999 Yuan Zhou)
-  * rgw: orphan detection tool (Yehuda Sadeh)
-  * rgw: swift: do not override sent content type (#12363 Orit Wasserman)
-  * rgw: swift: set Content-Length for account GET (#12158 Radoslav 
-    Zarzynski)
-  * rpm: always rebuild and install man pages for rpm (Owen Synge)
-  * rpm: misc fixes (Boris Ranto, Owen Synge, Ken Dreyer, Ira Cooper)
-  * systemd: logrotate fixes (Tim Seron, Lars Marowsky-Bree, Nathan 
-    Cutler)
-  * sysvinit compat: misc fixes (Owen Synge)
-  * test: misc fs test improvements (John Spray, Loic Dachary)
-  * test: python tests, linter cleanup (Alfredo Deza)
+2) The entity_addrvec_t type.
 
-Getting Ceph
-------------
+3) The type -> transport_type switch.
 
-* Git at git://github.com/ceph/ceph.git
-* Tarball at http://ceph.com/download/ceph-9.0.3.tar.gz
-* For packages, see http://ceph.com/docs/master/install/get-packages
-* For ceph-deploy, see http://ceph.com/docs/master/install/install-ceph-deploy
+4) We should make the new entity_addr_t encoding encode sockaddr piece 
+more compactly instead of eating up a full 80-byte sockaddr_storage even 
+for the ~8-byte IPv4 sockaddr_in.  Maybe just need to encode an 
+explicit length for the sockaddr_* piece?
+
+Something like that?
+sage
