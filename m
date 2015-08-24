@@ -1,49 +1,93 @@
-From: Matt Benjamin <mbenjamin@redhat.com>
-Subject: handle-based object store
-Date: Mon, 24 Aug 2015 11:50:45 -0400 (EDT)
-Message-ID: <634542282.7893067.1440431445910.JavaMail.zimbra@redhat.com>
-References: <1141157085.7889185.1440430914232.JavaMail.zimbra@redhat.com>
+From: Robert LeBlanc <robert@leblancnet.us>
+Subject: Re: Ceph Hackathon: More Memory Allocator Testing
+Date: Mon, 24 Aug 2015 11:01:18 -0600
+Message-ID: <CAANLjFrCSP-RX29Mqtf5xB2-6AiGbxUdgFz25uMwa8BiAdWcYw@mail.gmail.com>
+References: <55D409F0.3050802@redhat.com>
+	<1491599152.40068072.1439992888600.JavaMail.zimbra@oxygem.tv>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F2CE127C5@SACMBXIP01.sdcorp.global.sandisk.com>
+	<55D4E470.9030501@profihost.ag>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F2CE12841@SACMBXIP01.sdcorp.global.sandisk.com>
+	<55D4E793.9040408@profihost.ag>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F2CE12899@SACMBXIP01.sdcorp.global.sandisk.com>
+	<55D4E9BE.8000309@profihost.ag>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F2CE12966@SACMBXIP01.sdcorp.global.sandisk.com>
+	<EA545303A8F8E842820A172C3D641D6E1B09E891@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CANP1eJH=mhQ1rBkUD8=yuF26s2t2vO0JMO-wKOLQ8VbWdEmxxw@mail.gmail.com>
+	<alpine.DEB.2.00.1508220653120.13116@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx4-phx2.redhat.com ([209.132.183.25]:56504 "EHLO
-	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754548AbbHXPuq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Aug 2015 11:50:46 -0400
-In-Reply-To: <1141157085.7889185.1440430914232.JavaMail.zimbra@redhat.com>
+Received: from mail-vk0-f51.google.com ([209.85.213.51]:33719 "EHLO
+	mail-vk0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753858AbbHXRGz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Aug 2015 13:06:55 -0400
+Received: by vkd66 with SMTP id 66so60802090vkd.0
+        for <ceph-devel@vger.kernel.org>; Mon, 24 Aug 2015 10:06:54 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1508220653120.13116@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sjust@redhat.com>, Casey Bodley <cbodley@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-(11:37:44 AM) mattbenjamin: sjusthm, cbodley:  Casey and I think it might be useful to have a short video call on the meet points between object and collection handle as we did it, and the other objectstore changes; I don't know which aspects really should port over to master, but I think it would be useful to do a walk-through and discussion of what parts we could retarget, and anything that we could sequence cleanly later.
-(11:38:06 AM) mattbenjamin: sjusthm, cbodley: do you have a bit of time available?
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
 
-Some of the pieces we had:
+Probably possible. The question is if it would it be worth the extra
+logic. It seems a lot more complicated than an include line. I don't
+know if you would have to use introspection or if you could assume
+that functions exist.
 
-1. the handle interface change itself
-2. indexed slots for collection and object handles or ids (unions, iirc) in Transaction, and efficient operations to fill slots
-3. probably more flexbility than needed in that every OS could completely redefine Collection and Object
-4. lifecycle and refcounting which worked correctly
-5. an Object hierarchy we actually used in our version of filestore, w/concurrent LRU system
-6. a set of changes by Casey replacing the FDRef system w/management of objects--some of this could be useful, I don't know how it maps onto newstore at all
-7. a unification of ObjectContext and opaque Object which we were debating in Oregon
-8. thread-local caches of collections and objects above the OS interface that appeared to be a big help in IOPs work
+https://en.m.wikipedia.org/wiki/Dynamic_loading
 
-ok, apparently we're on for 11:00 am pst--I'll send an invite
+Robert LeBlanc
 
-Matt 
+Sent from a mobile device please excuse any typos.
 
--- 
-Matt Benjamin
-Red Hat, Inc.
-315 West Huron Street, Suite 140A
-Ann Arbor, Michigan 48103
+On Aug 22, 2015 7:55 AM, "Sage Weil"  wrote:
+On Fri, 21 Aug 2015, Milosz Tanski wrote:
+> On Fri, Aug 21, 2015 at 12:22 AM, Shishir Gowda
+>  wrote:
+> > Hi All,
+> >
+> > Have sent out a pull request which enables building librados/librbd with either tcmalloc(as default)  or jemalloc.
+> >
+> > Please find the pull request @ https://github.com/ceph/ceph/pull/5628
+> >
+> > With regards,
+> > Shishir
+>
+> Unless I'm missing something here, this seams like the wrong thing to.
+> Libraries that will be linked in by other external applications should
+> not have a 3rd party malloc linked in there. That seams like an
+> application choice. At the very least the default should not be to
+> link in a 3rd party malloc.
 
-http://www.redhat.com/en/technologies/storage
+Yeah, I think you're right.
 
-tel.  734-761-4689
-fax.  734-769-8938
-cel.  734-216-5309
+Note that this isn't/wasn't always the case, though.. on precise, for
+instance, libleveldb links libtcmalloc.  They stopped doing this
+sometime before trusty.
 
+sage
+- --
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-----BEGIN PGP SIGNATURE-----
+Version: Mailvelope v1.0.0
+Comment: https://www.mailvelope.com
+
+wsFcBAEBCAAQBQJV203VCRDmVDuy+mK58QAA4nkQAMjitAd+qP7o6Oq6T/Xq
+QnAhiUXzgIW4EPcuKl6CsuQp2jeKn0QYzhbf0qqARnIwTisM7PiKyH7lMgYR
+izH7ZA9IJt5KeCrgOJrbpOxWNWHAJgUwPqFPCkOIvjeQjjLa8vh4oki072dC
+A8cIgMAo/baRNiRtPn+B4OUpgkzYBUvePHfBMACFfwB6Tu+7p4kqRSXMshOs
+3zdV8dG3S4vTS5hJO0zMKN3XDq9Nz0p/+XsSQ9C8bw2LMD/ctVxBBn+g9jiD
+HsImeSRHoZpna/XZ8EFdwDaEPiRRdCLxueVMpcwTDQYh86DoPL9tqnmzJeD4
+lgFnBJfAztvfSqwTaA0BZWAZyt5XkdUZrY365/ZfhfBpdLeXb8ozdaQcWNd4
+nE28ce47m6nU8MenC1/cVSFF1VJ9cxsvc3jOqxcvObs6OwzblGWboxAxMhXD
+kS4IdTbOdixiWKgCBvmWvjgI9dUSr00EMaW6LtrPiNjRjF+fiEzKNQrvYkZJ
+gVTcXJQVpYZirUj7z+PjnmuFVOuq1aQ0cscl/cDfew/II9ZLtf5+nScE+z2c
+SqWfi+q/FI+Z7yJtzHlmY5No19rlFycP4pjawCZhuy7bZts5adh+JhciVv9B
+7Y7NM3K4/nmU4DYwC0RbyK1ty2xVwuvME/Ws6Ds4ywjGi29uXBA9ryf8Cgvq
+c7zh
+=MlV0
+-----END PGP SIGNATURE-----
