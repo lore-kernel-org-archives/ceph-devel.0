@@ -1,125 +1,98 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: hammer integration (was: Enabling contributors to run teuthology
- suites)
-Date: Tue, 25 Aug 2015 10:37:05 +0200
-Message-ID: <55DC2931.5000707@dachary.org>
-References: <55DB0553.90406@dachary.org> <CAP3mxSyrzTdozmsTKCfcnSc=mV5MfBazYASNDrsqmVHZkFLHfw@mail.gmail.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: Kernel RBD Readahead
+Date: Tue, 25 Aug 2015 11:44:36 +0300
+Message-ID: <CAOi1vP9Rrgn0RVAOdjrqHNRBHNZQXs4tpQ8jKDtz6R6ttqLsmA@mail.gmail.com>
+References: <3dc364a7.9Ro.9Gf.13.ic3ciX@mailjet.com>
+	<CAOi1vP8Tvcdh8Xy+eJKJdoHWDO2=OmVXqfxH9KzoJQQE645Rww@mail.gmail.com>
+	<590a725d.9Ro.9Gf.1M.icIth1@mailjet.com>
+	<CAOi1vP9=47yYPpJVwSUnZmoK1jv81s_4TmoaxJ=MxMtQ3-7nXQ@mail.gmail.com>
+	<CAOi1vP-zmOCAfWQVS2JknOX7QyKwHy8REeHkpKrAYcUJPwJ8Rw@mail.gmail.com>
+	<bd4da65e.9Ro.9Gf.13.idFHtU@mailjet.com>
+	<CAOi1vP-5bF6zCCaddvpF-TeMs66CLq6KtOL-_POJ6Ayxi-V6EA@mail.gmail.com>
+	<b1744442.9Ro.9Gf.1X.idQDIl@mailjet.com>
+	<CAOi1vP8V2wknnzS5Rx7reAaQiZk9XHOjRc7o2ZmVQWZyhbCWuQ@mail.gmail.com>
+	<32c2ce0c.9Ro.9Gf.1Z.ieeVCT@mailjet.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="WBm7DgEhxf6gT3oEckvVEUPLCwjCbxHDR"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:43394 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S932103AbbHYIhI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Aug 2015 04:37:08 -0400
-In-Reply-To: <CAP3mxSyrzTdozmsTKCfcnSc=mV5MfBazYASNDrsqmVHZkFLHfw@mail.gmail.com>
+Received: from mail-la0-f43.google.com ([209.85.215.43]:35402 "EHLO
+	mail-la0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751935AbbHYIoi convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Aug 2015 04:44:38 -0400
+Received: by labgv11 with SMTP id gv11so25771963lab.2
+        for <ceph-devel@vger.kernel.org>; Tue, 25 Aug 2015 01:44:37 -0700 (PDT)
+In-Reply-To: <32c2ce0c.9Ro.9Gf.1Z.ieeVCT@mailjet.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Abhishek Varshney <abhishek.varshney@flipkart.com>
+To: Nick Fisk <nick@fisk.me.uk>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---WBm7DgEhxf6gT3oEckvVEUPLCwjCbxHDR
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+On Tue, Aug 25, 2015 at 10:40 AM, Nick Fisk <nick@fisk.me.uk> wrote:
+> I have done two tests one with 1MB objects and another with 4MB objec=
+ts, my cluster is a little busier than when I did the quick test yester=
+day, so all speeds are slightly down across the board but you can see t=
+he scaling effect nicely. Results:
+>
+> 1MB Order RBD
+> Readahead       DD->Null Speed
+> 128             18MB/s
+> 1024            32MB/s
+> 2048            40MB/s
+> 4096            58MB/s
+> 8192            75MB/s
+> 16384           91MB/s
+> 32768           160MB/s
+>
+> 4MB Order RBD
+> 128             42MB/s
+> 1024            56MB/s
+> 2048            61MB/s
+> 4096            98MB/s
+> 8192            121MB/s
+> 16384           170MB/s
+> 32768           195MB/s
+> 65536           221MB/s
+> 131072          271MB/s
+>
+> I think the results confirm my suspicions, where a full stripe in a r=
+aid array will usually only be a couple of MB (eg 256kb chunk * 8 disks=
+) and so a relatively small readahead will involve all the disks for ma=
+x performance. In a Ceph RBD a full stripe will be 4MB * number of OSD'=
+s in the cluster. So I think that if sequential read performance is the=
+ only goal, then readahead probably needs to equal that figure, which c=
+ould be massive. But in reality like me you will probably find that  yo=
+u get sufficient performance at a lower value. Of course all this theor=
+y could all change when the kernel client gets striping support.
+>
+> However in terms of a default, that=E2=80=99s a tricky one. Even sett=
+ing it to 4096 would probably start to have a negative impact on pure r=
+andom IO latency. Each read would make a OSD read a whole 4MB object, s=
+ee small table below for IOP/Read size for disks in my cluster. I would=
+ imagine somewhere between 256-1024 would be a good trade off between w=
+here the OSD disks latency starts to rise. Users would need to be aware=
+ of their workload and tweak readahead if needed.
+>
+>                         IOPs
+> (4k Random Read)        83
+> (64k Random Read)       81
+> (256k Random Read)      73
+> (1M Random Read)        52
+> (4M Random Read)        25
 
-Hi Abhishek,
+Yeah, we want a sensible default, but it's always going to be a trade
+off.  librbd has readahead knobs, but the only real use case there is
+shortening qemu boot times, so we can't copy those settings.  I'll have
+to think about it some more - it might make more sense to leave things
+as is.  Users with large sequential read workloads should know to check
+and adjust readahead settings, and likely won't be satisfied with 1x
+object size anyway.
 
-On 25/08/2015 07:57, Abhishek Varshney wrote:> Hi Loic,
->=20
-> Thanks for the kind gesture and providing access to run teuthology runs=
-=2E I was able to run the dummy test suite, monitor its progress and uplo=
-ad the logs as described here https://github.com/dachary/teuthology/tree/=
-openstack#openstack-backend.
->=20
-> Before I re-populate the hammer-backports integration branch (issue #12=
-701 <http://tracker.ceph.com/issues/12701>) and run the integration tests=
- on it, it would be nice if you can mark the earlier hammer backports PR =
-with DNM (https://github.com/ceph/ceph/pull/5571)=20
+Thanks,
 
-Done
-
-> and review if there are any other PRs that have to be marked DNM for ha=
-mmer.
-
-I think that's all there is.
-
-Cheers
-
-> Thanks
-> Abhishek
->=20
-> On Mon, Aug 24, 2015 at 5:21 PM, Loic Dachary <loic@dachary.org <mailto=
-:loic@dachary.org>> wrote:
->=20
->     Hi Sam,
->=20
->     Maybe we can start an experiment to enable contributors to run thei=
-r own teuthology suites. It would go like this:
->=20
->     * Send an OpenStack credential file to the author of a pull request=
-
->     * Ask her/him to follow the instructions at https://github.com/dach=
-ary/teuthology/tree/openstack#openstack-backend to verify it works
->     * Ask her/him to run and debug a specific suite by providing the co=
-mmand line such as
->=20
->        teuthology-openstack --key-name myself --key-filename ~/Download=
-s/myself --suite ceph-disk --suite-branch wip-11881-multipath --filter=3D=
-ubuntu_14.04 --ceph wip-11881-multipath
->=20
->     We don't yet have a long term solution to fund this kind of testing=
-, but that's not a blocker. It's cheap enough to setup and I'm willing to=
- spend 500 euros per month of my own money for the time being. It's reall=
-y selfish of me : enabling contributors will save me time that's worth mo=
-re than 500 euros ;-)
->=20
->     The details of how the first account has been setup are at http://t=
-racker.ceph.com/projects/ceph/wiki/RunTeuthology
->=20
->     What do you think ?
->=20
->     Cheers
->=20
->     --
->     Lo=C3=AFc Dachary, Artisan Logiciel Libre
->=20
->=20
->=20
-> -----------------------------------------------------------------------=
--------------------------------------------------------------------
->=20
-> This email and any files transmitted with it are confidential and inten=
-ded solely for the use of the individual or entity to whom they are addre=
-ssed. If you have received this email in error please notify the system m=
-anager. This message contains confidential information and is intended on=
-ly for the individual named. If you are not the named addressee you shoul=
-d not disseminate, distribute or copy this e-mail. Please notify the send=
-er immediately by e-mail if you have received this e-mail by mistake and =
-delete this e-mail from your system. If you are not the intended recipien=
-t you are notified that disclosing, copying, distributing or taking any a=
-ction in reliance on the contents of this information is strictly prohibi=
-ted. Although Flipkart has taken reasonable precautions to ensure no viru=
-ses are present in this email, the company cannot accept responsibility f=
-or any loss or damage arising from the use of this email or attachments
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---WBm7DgEhxf6gT3oEckvVEUPLCwjCbxHDR
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlXcKTEACgkQ8dLMyEl6F23UdgCfexG7qdo0D1BSP3zWvm2nYza8
-t/MAnik+h1N9Z4Yg7lQRQIRyz2v1hlHW
-=iGyh
------END PGP SIGNATURE-----
-
---WBm7DgEhxf6gT3oEckvVEUPLCwjCbxHDR--
+                Ilya
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
