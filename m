@@ -1,106 +1,56 @@
-From: "Deneau, Tom" <tom.deneau-5C7GfCeVMHo@public.gmane.org>
-Subject: Re: rados bench object not correct errors on v9.0.3
-Date: Wed, 26 Aug 2015 15:23:28 +0000
-Message-ID: <BC97738F8E7C8742BABED7F06FB9DF91924D8376@SATLEXDAG01.amd.com>
-References: <BC97738F8E7C8742BABED7F06FB9DF91924D7E0E@SATLEXDAG01.amd.com>
-	<alpine.DEB.2.00.1508251041260.13116@cobra.newdream.net>
-	<90559C83A9C7FA45B5846C975DFA612DDB537017C2@ABGEX73E.FSC.NET>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: format 2TB rbd device is too slow
+Date: Wed, 26 Aug 2015 18:56:14 +0300
+Message-ID: <CAOi1vP__WA0+Q1xfRwcvNfs6_7T3OeA7Wdsw58taZt1arNR+bg@mail.gmail.com>
+References: <CABAwU-ahZz48B2VHfeyqssBv778fKoVeD5Z3x2=Xgcf42VxTbQ@mail.gmail.com>
+	<CACJqLyY0FrJDbi4VDzBa3aUBGu30A9soxbRbiiNpAL_Mttna+w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-2"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <90559C83A9C7FA45B5846C975DFA612DDB537017C2-SPt524Z5ILdAuK1PVaBULA@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: =?iso-8859-2?Q?Da=B3ek=2C_Piotr?= <Piotr.Dalek-RJz4owOZxyXQFUHtdCDX3A@public.gmane.org>, Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-la0-f43.google.com ([209.85.215.43]:33525 "EHLO
+	mail-la0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752550AbbHZP4Q (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Aug 2015 11:56:16 -0400
+Received: by labns7 with SMTP id ns7so4845870lab.0
+        for <ceph-devel@vger.kernel.org>; Wed, 26 Aug 2015 08:56:15 -0700 (PDT)
+In-Reply-To: <CACJqLyY0FrJDbi4VDzBa3aUBGu30A9soxbRbiiNpAL_Mttna+w@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Haomai Wang <haomaiwang@gmail.com>
+Cc: huang jun <hjwsm1989@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
+On Wed, Aug 26, 2015 at 6:22 PM, Haomai Wang <haomaiwang@gmail.com> wrote:
+> On Wed, Aug 26, 2015 at 11:16 PM, huang jun <hjwsm1989@gmail.com> wrote:
+>> hi,all
+>> we create a 2TB rbd image, after map it to local,
+>> then we format it to xfs with 'mkfs.xfs /dev/rbd0', it spent 318
+>> seconds to finish, but  local physical disk with the same size just
+>> need 6 seconds.
+>>
+>
+> I think librbd have two PR related to this.
+>
+>> After debug, we found there are two steps in rbd module during formating:
+>> a) send  233093 DELETE requests to osds(number_of_requests = 2TB / 4MB),
+>>    this step spent almost 92 seconds.
+>
+> I guess this(https://github.com/ceph/ceph/pull/4221/files) may help
 
-> -----Original Message-----
-> From: Da=B3ek, Piotr [mailto:Piotr.Dalek-RJz4owOZxyXQFUHtdCDX3A@public.gmane.org]
-> Sent: Wednesday, August 26, 2015 2:02 AM
-> To: Sage Weil; Deneau, Tom
-> Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; ceph-users-Qp0mS5GaXlQ@public.gmane.org
-> Subject: RE: rados bench object not correct errors on v9.0.3
-> =
+It's submitting deletes for non-existent objects, not zeroing.  The
+only thing that will really help here is the addition of rbd object map
+support to the kernel client.  That could happen in 4.4, but 4.5 is
+a safer bet.
 
-> > -----Original Message-----
-> > From: ceph-devel-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org [mailto:ceph-devel-
-> > owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org] On Behalf Of Sage Weil
-> > Sent: Tuesday, August 25, 2015 7:43 PM
-> =
+>
+>> b) send 4238 messages like this: [set-alloc-hint object_size 4194304
+>> write_size 4194304,write 0~512] to osds, that spent 227 seconds.
+>
+> I think kernel rbd also need to use
+> https://github.com/ceph/ceph/pull/4983/files
 
-> > > I have built rpms from the tarball http://ceph.com/download/ceph-
-> > 9.0.3.tar.bz2.
-> > > Have done this for fedora 21 x86_64 and for aarch64.  On both
-> > > platforms when I run a single node "cluster" with a few osds and run
-> > > rados bench read tests (either seq or rand) I get occasional reports
-> > > like
-> > >
-> > > benchmark_data_myhost_20729_object73 is not correct!
-> > >
-> > > I never saw these with similar rpm builds on these platforms from
-> > > 9.0.2
-> > sources.
-> > >
-> > > Also, if I go to an x86-64 system running Ubuntu trusty for which I
-> > > am able to install prebuilt binary packages via
-> > >     ceph-deploy install --dev v9.0.3
-> > >
-> > > I do not see the errors there.
-> >
-> > Hrm.. haven't seen it on this end, but we're running/testing master
-> > and not
-> > 9.0.2 specifically.  If you can reproduce this on master, that'd be very
-> helpful!
-> >
-> > There have been some recent changes to rados bench... Piotr, does this
-> > seem like it might be caused by your changes?
-> =
+set-alloc-hint may be a problem, but I think a bigger problem is the
+size of the write.  Are all those writes 512 bytes long?
 
-> Yes. My PR #4690 (https://github.com/ceph/ceph/pull/4690) caused rados be=
-nch
-> to be fast enough to sometimes run into race condition between librados's=
- AIO
-> and objbencher processing. That was fixed in PR #5152
-> (https://github.com/ceph/ceph/pull/5152) which didn't make it into 9.0.3.
-> Tom, you can confirm this by inspecting the contents of objects questioned
-> (their contents should be perfectly fine and I in line with other objects=
-).
-> In the meantime you can either apply patch from PR #5152 on your own or u=
-se -
-> -no-verify.
-> =
+Thanks,
 
-> With best regards / Pozdrawiam
-> Piotr Da=B3ek
-
-Piotr --
-
-Thank you.  Yes, when I looked at the contents of the objects they always
-looked correct.  And yes a single object would sometimes report an error
-and sometimes not.  So a race condition makes sense.
-
-A couple of questions:
-
-   * Why would I not see this behavior using the pre-built 9.0.3 binaries
-     that get installed using "ceph-deploy install --dev v9.0.3"?  I would =
-assume
-     this is built from the same sources as the 9.0.3 tarball.
-
-   * So I assume one should not compare pre 9.0.3 rados bench numbers with =
-9.0.3 and after?
-     The pull request https://github.com/ceph/ceph/pull/4690 did not mentio=
-n the
-     effect on final bandwidth numbers, did you notice what that effect was?
-
--- Tom
+                Ilya
