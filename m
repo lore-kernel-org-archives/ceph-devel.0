@@ -1,47 +1,31 @@
-From: Goncalo Borges <goncalo-JAjqph6Yjy/r8pF6qxatHrpzq4S04n8Q@public.gmane.org>
-Subject: Re: Ceph Day Raleigh Cancelled
-Date: Wed, 26 Aug 2015 09:47:35 +1000
-Message-ID: <55DCFE97.1080701@physics.usyd.edu.au>
-References: <CAAZbbf07ZdeKqWJZQLcV131+bz5-ECUv+KEJv7rdQXOJS_2esQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAAZbbf07ZdeKqWJZQLcV131+bz5-ECUv+KEJv7rdQXOJS_2esQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+From: nigel.d.williams@gmail.com
+Subject: Re: [ceph-users] Ceph Day Raleigh Cancelled
+Date: Wed, 26 Aug 2015 10:28:41 +1000
+Message-ID: <9B5E1D02-4A53-41C2-91BB-069950AEFB1A@gmail.com>
+References: <CAAZbbf07ZdeKqWJZQLcV131+bz5-ECUv+KEJv7rdQXOJS_2esQ@mail.gmail.com> <55DCFE97.1080701@physics.usyd.edu.au>
+Mime-Version: 1.0 (1.0)
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-pa0-f52.google.com ([209.85.220.52]:33208 "EHLO
+	mail-pa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932904AbbHZA2q convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Aug 2015 20:28:46 -0400
+Received: by pacti10 with SMTP id ti10so67451129pac.0
+        for <ceph-devel@vger.kernel.org>; Tue, 25 Aug 2015 17:28:46 -0700 (PDT)
+In-Reply-To: <55DCFE97.1080701@physics.usyd.edu.au>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Goncalo Borges <goncalo@physics.usyd.edu.au>
+Cc: Patrick McGarry <pmcgarry@redhat.com>, Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
 
-Hey Patrick...
 
-I am interested in the Melbourne one. Under
-http://ceph.com/cephdays/
-I do not see any reference to it.
-
-Can you give me more details on that?
-
-TIA
-Goncalo
-
-On 08/26/2015 07:23 AM, Patrick McGarry wrote:
-> Due to low registration this event is being pushed back to next year.
-> The Ceph Day events for Shanghai, Tokyo, and Melbourne should all
-> still be proceeding as planned, however. Feel free to contact me if
-> you have any questions about Ceph Days. Thanks.
->
->
-
--- 
-Goncalo Borges
-Research Computing
-ARC Centre of Excellence for Particle Physics at the Terascale
-School of Physics A28 | University of Sydney, NSW  2006
-T: +61 2 93511937
+> On 26 Aug 2015, at 9:47 am, Goncalo Borges <goncalo@physics.usyd.edu.=
+au> wrote:
+> I am interested in the Melbourne one.
+Hi Gon=C3=A7alo, where did you hear about the Melbourne event? We would=
+ be interested in this too. --
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
