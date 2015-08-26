@@ -1,62 +1,56 @@
-From: Eric Jackson <ejackson@suse.com>
-Subject: pull-request guidance
-Date: Wed, 26 Aug 2015 08:52:02 -0400
-Message-ID: <1515099.fctPuTxLi4@ruby>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: 08/26/2015 Weekly Ceph Performance Meeting IS ON!
+Date: Wed, 26 Aug 2015 08:34:51 -0500
+Message-ID: <55DDC07B.9070601@redhat.com>
+Reply-To: mnelson@redhat.com
 Mime-Version: 1.0
-Content-Type: multipart/signed; boundary="nextPart1922185.aLWH4MiOlN"; micalg="pgp-sha1"; protocol="application/pgp-signature"
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.nue.novell.com ([195.135.221.5]:56319 "EHLO
-	smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932084AbbHZMwk (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-	Wed, 26 Aug 2015 08:52:40 -0400
+Received: from mx1.redhat.com ([209.132.183.28]:46466 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751859AbbHZNez (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 26 Aug 2015 09:34:55 -0400
+Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
+	by mx1.redhat.com (Postfix) with ESMTPS id 1E3F7AA9
+	for <ceph-devel@vger.kernel.org>; Wed, 26 Aug 2015 13:34:55 +0000 (UTC)
+Received: from [10.3.112.58] (ovpn-112-58.phx2.redhat.com [10.3.112.58])
+	by int-mx14.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t7QDYqw4016642
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+	for <ceph-devel@vger.kernel.org>; Wed, 26 Aug 2015 09:34:54 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+8AM PST Still!  Discussion topics include kernel RBD client readahead 
+issues, and memory allocator testing under recovery.  Please feel free 
+to add your own!
+
+Here's the links:
+
+Etherpad URL:
+http://pad.ceph.com/p/performance_weekly
+
+To join the Meeting:
+https://bluejeans.com/268261044
+
+To join via Browser:
+https://bluejeans.com/268261044/browser
+
+To join with Lync:
+https://bluejeans.com/268261044/lync
 
 
---nextPart1922185.aLWH4MiOlN
-Content-Transfer-Encoding: 7Bit
-Content-Type: text/plain; charset="us-ascii"
+To join via Room System:
+Video Conferencing System: bjn.vc -or- 199.48.152.152
+Meeting ID: 268261044
 
-Hello,
-  I have developed a small utility for configuring iSCSI targets and storing 
-the configuration in extended attributes of Ceph objects.   I named it lrbd and 
-it's at https://github.com/swiftgist/lrbd.  
+To join via Phone:
+1) Dial:
+           +1 408 740 7256
+           +1 888 240 2560(US Toll Free)
+           +1 408 317 9253(Alternate Number)
+           (see all numbers - http://bluejeans.com/numbers)
+2) Enter Conference ID: 268261044
 
-  For supporting rbd backstores (as opposed to iblock backstores), I depend on 
-a targetcli (and indirectly python-rtslib) that is not yet upstreamed and a 
-kernel supporting tpg_enabled_sendtargets.  The primary purpose for using rbd 
-backstores is an active-active redundant iSCSI target across different 
-gateways.
-
-  The utility does support iblock backstores and can be useful for other 
-configurations.  Lrbd is written in python and the spec file is fairly simple.  
-I have only packaged and tested on SUSE.
-
-  Should I submit a pull request with these limitations?  
-
-Eric
-
-  
-  
-
---nextPart1922185.aLWH4MiOlN
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: This is a digitally signed message part.
-Content-Transfer-Encoding: 7Bit
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQEcBAABAgAGBQJV3bZ7AAoJEGKLgqb27CIaqYsH/1QKg7GYb+10Jvz0oFUCZJio
-g8lFXi5xtZLjybRCKS4G9wxl6MENI+byTFHJ5ceGwTk/u6aCl8jUrRrGElL0U3HO
-TEDpSnJIkjiu0ylo6u/CjzFNZfBS+yCdsSz0uWdtPXA53rNV++qrfYohHjKCjzhD
-oBCvJOBO/5dL2WwpaK8hsOTtlNIViZ85inG1JmeFoSnjBr7tPD3m1NDYrf9VJrGV
-CZsvLf9uOeVGE0MkhDf4yRH1dBOSDhseJL49gsGXlpoAxE6eOelvSPKv/RMsyUCv
-Qr6jYxrMkG8Jcc0pNNSzuFIsq1YKleFEo47W3LZpAT0cZFHTIby7FDnI4E9Dojc=
-=//+k
------END PGP SIGNATURE-----
-
---nextPart1922185.aLWH4MiOlN--
-
+Mark
