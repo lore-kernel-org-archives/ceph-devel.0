@@ -1,112 +1,74 @@
-From: Daleep Bais <daleepbais-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: Ceph Day Raleigh Cancelled
-Date: Wed, 26 Aug 2015 10:25:34 +0530
-Message-ID: <CAPG7zF1aC+FZNscDz0tGpEzTPrFNq+JKcFLSjy=0K-_bbm7KPw@mail.gmail.com>
-References: <CAAZbbf07ZdeKqWJZQLcV131+bz5-ECUv+KEJv7rdQXOJS_2esQ@mail.gmail.com>
+From: =?iso-8859-2?Q?Da=B3ek=2C_Piotr?= <Piotr.Dalek@ts.fujitsu.com>
+Subject: RE: rados bench object not correct errors on v9.0.3
+Date: Wed, 26 Aug 2015 09:02:08 +0200
+Message-ID: <90559C83A9C7FA45B5846C975DFA612DDB537017C2@ABGEX73E.FSC.NET>
+References: <BC97738F8E7C8742BABED7F06FB9DF91924D7E0E@SATLEXDAG01.amd.com>
+ <alpine.DEB.2.00.1508251041260.13116@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0354334898=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAAZbbf07ZdeKqWJZQLcV131+bz5-ECUv+KEJv7rdQXOJS_2esQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=iso-8859-2
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from dgate10.ts.fujitsu.com ([80.70.172.49]:62287 "EHLO
+	dgate10.ts.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756101AbbHZHCL convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Aug 2015 03:02:11 -0400
+In-Reply-To: <alpine.DEB.2.00.1508251041260.13116@cobra.newdream.net>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, "Deneau, Tom" <tom.deneau@amd.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@ceph.com" <ceph-users@ceph.com>
 
---===============0354334898==
-Content-Type: multipart/alternative; boundary=001a1136ac5031aa01051e2fa9df
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
+> owner@vger.kernel.org] On Behalf Of Sage Weil
+> Sent: Tuesday, August 25, 2015 7:43 PM
 
---001a1136ac5031aa01051e2fa9df
-Content-Type: text/plain; charset=UTF-8
+> > I have built rpms from the tarball http://ceph.com/download/ceph-
+> 9.0.3.tar.bz2.
+> > Have done this for fedora 21 x86_64 and for aarch64.  On both
+> > platforms when I run a single node "cluster" with a few osds and ru=
+n
+> > rados bench read tests (either seq or rand) I get occasional report=
+s
+> > like
+> >
+> > benchmark_data_myhost_20729_object73 is not correct!
+> >
+> > I never saw these with similar rpm builds on these platforms from 9=
+=2E0.2
+> sources.
+> >
+> > Also, if I go to an x86-64 system running Ubuntu trusty for which I=
+ am
+> > able to install prebuilt binary packages via
+> >     ceph-deploy install --dev v9.0.3
+> >
+> > I do not see the errors there.
+>=20
+> Hrm.. haven't seen it on this end, but we're running/testing master a=
+nd not
+> 9.0.2 specifically.  If you can reproduce this on master, that'd be v=
+ery helpful!
+>=20
+> There have been some recent changes to rados bench... Piotr, does thi=
+s
+> seem like it might be caused by your changes?
 
-Hi Patrick,
+Yes. My PR #4690 (https://github.com/ceph/ceph/pull/4690) caused rados =
+bench to be fast enough to sometimes run into race condition between li=
+brados's AIO and objbencher processing. That was fixed in PR #5152 (htt=
+ps://github.com/ceph/ceph/pull/5152) which didn't make it into 9.0.3.
+Tom, you can confirm this by inspecting the contents of objects questio=
+ned (their contents should be perfectly fine and I in line with other o=
+bjects).
+In the meantime you can either apply patch from PR #5152 on your own or=
+ use --no-verify.
 
-is there any plans for such events to be held in India?
-
-Eagerly looking forward to it..
-
-Thanks.
-
-Daleep Singh Bais
-
-On Wed, Aug 26, 2015 at 2:53 AM, Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-wrote:
-
-> Due to low registration this event is being pushed back to next year.
-> The Ceph Day events for Shanghai, Tokyo, and Melbourne should all
-> still be proceeding as planned, however. Feel free to contact me if
-> you have any questions about Ceph Days. Thanks.
->
->
-> --
->
-> Best Regards,
->
-> Patrick McGarry
-> Director Ceph Community || Red Hat
-> http://ceph.com  ||  http://community.redhat.com
-> @scuttlemonkey || @ceph
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->
-
---001a1136ac5031aa01051e2fa9df
-Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr">Hi Patrick,<div><br></div><div>is there any plans for such=
- events to be held in India?=C2=A0</div><div><br></div><div>Eagerly looking=
- forward to it..</div><div><br></div><div>Thanks.</div><div><br></div><div>=
-Daleep Singh Bais</div></div><div class=3D"gmail_extra"><br><div class=3D"g=
-mail_quote">On Wed, Aug 26, 2015 at 2:53 AM, Patrick McGarry <span dir=3D"l=
-tr">&lt;<a href=3D"mailto:pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" target=3D"_blank">pmcgarry@r=
-edhat.com</a>&gt;</span> wrote:<br><blockquote class=3D"gmail_quote" style=
-=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">Due to l=
-ow registration this event is being pushed back to next year.<br>
-The Ceph Day events for Shanghai, Tokyo, and Melbourne should all<br>
-still be proceeding as planned, however. Feel free to contact me if<br>
-you have any questions about Ceph Days. Thanks.<br>
-<span class=3D"HOEnZb"><font color=3D"#888888"><br>
-<br>
---<br>
-<br>
-Best Regards,<br>
-<br>
-Patrick McGarry<br>
-Director Ceph Community || Red Hat<br>
-<a href=3D"http://ceph.com" rel=3D"noreferrer" target=3D"_blank">http://cep=
-h.com</a>=C2=A0 ||=C2=A0 <a href=3D"http://community.redhat.com" rel=3D"nor=
-eferrer" target=3D"_blank">http://community.redhat.com</a><br>
-@scuttlemonkey || @ceph<br>
-_______________________________________________<br>
-ceph-users mailing list<br>
-<a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a><=
-br>
-<a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" rel=3D"n=
-oreferrer" target=3D"_blank">http://lists.ceph.com/listinfo.cgi/ceph-users-=
-ceph.com</a><br>
-</font></span></blockquote></div><br></div>
-
---001a1136ac5031aa01051e2fa9df--
-
---===============0354334898==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============0354334898==--
+With best regards / Pozdrawiam
+Piotr Da=B3ek
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
