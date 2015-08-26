@@ -1,181 +1,98 @@
-From: Goncalo Borges <goncalo-JAjqph6Yjy/r8pF6qxatHrpzq4S04n8Q@public.gmane.org>
-Subject: Re: Ceph Day Raleigh Cancelled
-Date: Wed, 26 Aug 2015 12:24:14 +1000
-Message-ID: <55DD234E.7020800@physics.usyd.edu.au>
-References: <CAAZbbf07ZdeKqWJZQLcV131+bz5-ECUv+KEJv7rdQXOJS_2esQ@mail.gmail.com>
-	<55DCFE97.1080701@physics.usyd.edu.au>
-	<9B5E1D02-4A53-41C2-91BB-069950AEFB1A@gmail.com>
+From: Z Zhang <zhangz.david@outlook.com>
+Subject: RE: Long tail latency due to journal aio io_submit takes long time
+ to return
+Date: Wed, 26 Aug 2015 11:43:34 +0800
+Message-ID: <SNT146-W84E31EC6809BEAC70107FC8C600@phx.gbl>
+References: <SNT146-W82DA23C3C4087E77B0317F8C610@phx.gbl>,<alpine.DEB.2.00.1508250609120.13116@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1464014734=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <9B5E1D02-4A53-41C2-91BB-069950AEFB1A-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: nigel.d.williams-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
-Cc: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from snt004-omc2s4.hotmail.com ([65.55.90.79]:58607 "EHLO
+	SNT004-OMC2S4.hotmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750737AbbHZDne (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Aug 2015 23:43:34 -0400
+In-Reply-To: <alpine.DEB.2.00.1508250609120.13116@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is a multi-part message in MIME format.
---===============1464014734==
-Content-Type: multipart/alternative;
- boundary="------------070704080606080905090301"
-
-This is a multi-part message in MIME format.
---------------070704080606080905090301
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: quoted-printable
-
-Hi Nigel...
-
-The first message from Patrick on the current thread says that "The Ceph=20
-Day events for Shanghai, Tokyo, and Melbourne should all still be=20
-proceeding as planned". Then i tried to check when it was the Melbourne=20
-day but found nothing  :-)
-
-Cheers
-G.
-
--------- Forwarded Message --------
-Subject: 	[ceph-users] Ceph Day Raleigh Cancelled
-Date: 	Tue, 25 Aug 2015 17:23:57 -0400
-From: 	Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-To: 	Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User=20
-<ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-
-
-
-Due to low registration this event is being pushed back to next year.
-The Ceph Day events for Shanghai, Tokyo, and Melbourne should all
-still be proceeding as planned, however. Feel free to contact me if
-you have any questions about Ceph Days. Thanks.
-
-
-
-On 08/26/2015 10:28 AM, nigel.d.williams-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org wrote:
->> On 26 Aug 2015, at 9:47 am, Goncalo Borges <goncalo-JAjqph6Yjy/r8pF6qxatHqYATziBogYQ@public.gmane.org=
-u> wrote:
->> I am interested in the Melbourne one.
-> Hi Gon=C3=A7alo, where did you hear about the Melbourne event? We would=
- be interested in this too.
-
---=20
-Goncalo Borges
-Research Computing
-ARC Centre of Excellence for Particle Physics at the Terascale
-School of Physics A28 | University of Sydney, NSW  2006
-T: +61 2 93511937
-
-
---------------070704080606080905090301
-Content-Type: text/html; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-<html>
-  <head>
-    <meta content=3D"text/html; charset=3Dutf-8" http-equiv=3D"Content-Ty=
-pe">
-  </head>
-  <body bgcolor=3D"#FFFFFF" text=3D"#000000">
-    Hi Nigel...<br>
-    <br>
-    The first message from Patrick on the current thread says that "The
-    Ceph Day events for Shanghai, Tokyo, and Melbourne should all
-    still be proceeding as planned". Then i tried to check when it was
-    the Melbourne day but found nothing=C2=A0 :-)<br>
-    <br>
-    Cheers<br>
-    G.<br>
-    <br>
-    -------- Forwarded Message --------
-    <table class=3D"moz-email-headers-table" border=3D"0" cellpadding=3D"=
-0"
-      cellspacing=3D"0">
-      <tbody>
-        <tr>
-          <th align=3D"RIGHT" nowrap=3D"nowrap" valign=3D"BASELINE">Subje=
-ct: </th>
-          <td>[ceph-users] Ceph Day Raleigh Cancelled</td>
-        </tr>
-        <tr>
-          <th align=3D"RIGHT" nowrap=3D"nowrap" valign=3D"BASELINE">Date:=
- </th>
-          <td>Tue, 25 Aug 2015 17:23:57 -0400</td>
-        </tr>
-        <tr>
-          <th align=3D"RIGHT" nowrap=3D"nowrap" valign=3D"BASELINE">From:=
- </th>
-          <td>Patrick McGarry <a class=3D"moz-txt-link-rfc2396E" href=3D"=
-mailto:pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org">&lt;pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org&gt;</a></td>
-        </tr>
-        <tr>
-          <th align=3D"RIGHT" nowrap=3D"nowrap" valign=3D"BASELINE">To: <=
-/th>
-          <td>Ceph Devel <a class=3D"moz-txt-link-rfc2396E" href=3D"mailt=
-o:ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org">&lt;ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org&gt;</a>, Cep=
-h-User
-            <a class=3D"moz-txt-link-rfc2396E" href=3D"mailto:ceph-users@=
-ceph.com">&lt;ceph-users-Qp0mS5GaXlQ@public.gmane.org&gt;</a></td>
-        </tr>
-      </tbody>
-    </table>
-    <br>
-    <br>
-    <pre>Due to low registration this event is being pushed back to next =
-year.
-The Ceph Day events for Shanghai, Tokyo, and Melbourne should all
-still be proceeding as planned, however. Feel free to contact me if
-you have any questions about Ceph Days. Thanks.</pre>
-    <br>
-    <br>
-    <div class=3D"moz-cite-prefix">On 08/26/2015 10:28 AM,
-      <a class=3D"moz-txt-link-abbreviated" href=3D"mailto:nigel.d.willia=
-ms-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org">nigel.d.williams-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a> wrote:<br>
-    </div>
-    <blockquote
-      cite=3D"mid:9B5E1D02-4A53-41C2-91BB-069950AEFB1A-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org"
-      type=3D"cite">
-      <pre wrap=3D"">
-</pre>
-      <blockquote type=3D"cite">
-        <pre wrap=3D"">On 26 Aug 2015, at 9:47 am, Goncalo Borges <a clas=
-s=3D"moz-txt-link-rfc2396E" href=3D"mailto:goncalo-JAjqph6Yjy/r8pF6qxatHrpzq4S04n8Q@public.gmane.org">&=
-lt;goncalo-JAjqph6Yjy/r8pF6qxatHrpzq4S04n8Q@public.gmane.org&gt;</a> wrote:
-I am interested in the Melbourne one.
-</pre>
-      </blockquote>
-      <pre wrap=3D"">Hi Gon=C3=A7alo, where did you hear about the Melbou=
-rne event? We would be interested in this too.=20
-</pre>
-    </blockquote>
-    <br>
-    <pre class=3D"moz-signature" cols=3D"72">--=20
-Goncalo Borges
-Research Computing
-ARC Centre of Excellence for Particle Physics at the Terascale
-School of Physics A28 | University of Sydney, NSW  2006
-T: +61 2 93511937
-</pre>
-  </body>
-</html>
-
---------------070704080606080905090301--
-
---===============1464014734==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============1464014734==--
+UGxlYXNlIGNoZWNrIHRoaXMgUFI6Jm5ic3A7PGEgaHJlZj0iaHR0cHM6Ly9naXRodWIuY29tL2Nl
+cGgvY2VwaC9wdWxsLzU2NzAiIHRhcmdldD0iX2JsYW5rIj5odHRwczovL2dpdGh1Yi5jb20vY2Vw
+aC9jZXBoL3B1bGwvNTY3MDwvYT48YnI+PGJyPlRoYW5rcy48YnI+WmhpIFpoYW5nIChEYXZpZCk8
+YnI+PGJyPjxicj4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tPGJyPiZn
+dDsgRGF0ZTogVHVlLCAyNSBBdWcgMjAxNSAwNjoxMDoxOSAtMDcwMDxicj4mZ3Q7IEZyb206IHNh
+Z2VAbmV3ZHJlYW0ubmV0PGJyPiZndDsgVG86IHpoYW5nei5kYXZpZEBvdXRsb29rLmNvbTxicj4m
+Z3Q7IENDOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZzxicj4mZ3Q7IFN1YmplY3Q6IFJlOiBM
+b25nIHRhaWwgbGF0ZW5jeSBkdWUgdG8gam91cm5hbCBhaW8gaW9fc3VibWl0IHRha2VzIGxvbmcg
+dGltZSB0byByZXR1cm48YnI+Jmd0Ozxicj4mZ3Q7IE9uIFR1ZSwgMjUgQXVnIDIwMTUsIFogWmhh
+bmcgd3JvdGU6PGJyPiZndDsgJmd0OyBIaSBDZXBoLWRldmVsLDxicj4mZ3Q7ICZndDs8YnI+Jmd0
+OyAmZ3Q7IFJlY2VudGx5IHdlIGZpbmQgdGhlcmUgYXJlIHNvbWUgKG5vdCBtdWNoKSBsb25nIHRh
+aWwgbGF0ZW5jeSBkdWUgdG88YnI+Jmd0OyAmZ3Q7IGpvdXJuYWwgYWlvIGlvX3N1Ym1pdCB0YWtl
+cyBsb25nIHRpbWUgdG8gcmV0dXJuLiBXZSBhZGRlZCBzb21lIGxvZ3MgaW48YnI+Jmd0OyAmZ3Q7
+IHRoZSBGaWxlSm91cmFubC5jYyBhbmQgZ2V0IGZvbGxvd2luZyBvdXRwdXQgYXMgYW4gZXhhbXBs
+ZS4gQUlPJ3M8YnI+Jmd0OyAmZ3Q7IGlvX3N1Ym1pdCBmdW5jdGlvbiB0YWtlcyB+NDAwbXMgdG8g
+cmV0dXJuLCBvY2Nhc2lvbmFsbHkgZXZlbiB0YWtlcyB1cCB0bzxicj4mZ3Q7ICZndDsgOTAwbXMu
+PGJyPiZndDsgJmd0Ozxicj4mZ3Q7ICZndDsgLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tPGJyPiZndDsgJmd0OyAyMDE1LTA4LTI1IDE1
+OjI0OjM5LjUzNTIwNiA3ZjIyNjk5YzI3MDAgMjAgam91cm5hbCB3cml0ZV90aHJlYWRfZW50cnkg
+d29rZSB1cDxicj4mZ3Q7ICZndDsgMjAxNS0wOC0yNSAxNToyNDozOS41MzUyMTIgN2YyMjY5OWMy
+NzAwIDEwIGpvdXJuYWwgcm9vbSAxMDQ2MDU5NDE3NSBtYXhfc2l6ZSAxMDQ4NDcxMTQyNCBwb3Mg
+NDc4NjY3OTgwOCBoZWFkZXIuc3RhcnQgNDc2MjU2NjY1NiB0b3AgNDA5Njxicj4mZ3Q7ICZndDsg
+MjAxNS0wOC0yNSAxNToyNDozOS41MzUyMTUgN2YyMjY5OWMyNzAwIDEwIGpvdXJuYWwgY2hlY2tf
+Zm9yX2Z1bGwgYXQgNDc4NjY3OTgwOCA6IDUzMjQ4MCAmbHQ7IDEwNDYwNTk0MTc1PGJyPiZndDsg
+Jmd0OyAyMDE1LTA4LTI1IDE1OjI0OjM5LjUzNTIxNiA3ZjIyNjk5YzI3MDAgMTUgam91cm5hbCBw
+cmVwYXJlX3NpbmdsZV93cml0ZSAxIHdpbGwgd3JpdGUgNDc4NjY3OTgwOCA6IHNlcSAxMzA3NTIy
+NCBsZW4gNTI2NTM3IC0mZ3Q7IDUzMjQ4MCAoaGVhZCA0MCBwcmVfcGFkIDQwNDYgZWJsIDUyNjUz
+NyBwb3N0X3BhZCAxODE3IHRhaWwgNDApIChlYmwgYWxpZ25tZW50IDQwODYpPGJyPiZndDsgJmd0
+OyAyMDE1LTA4LTI1IDE1OjI0OjM5LjUzNTMyMiA3ZjIyNjk5YzI3MDAgMjAgam91cm5hbCBwcmVw
+YXJlX211bHRpX3dyaXRlIHF1ZXVlX3BvcyBub3cgNDc4NzIxMjI4ODxicj4mZ3Q7ICZndDsgMjAx
+NS0wOC0yNSAxNToyNDozOS41MzUzMjQgN2YyMjY5OWMyNzAwIDE1IGpvdXJuYWwgZG9fYWlvX3dy
+aXRlIHdyaXRpbmcgNDc4NjY3OTgwOH41MzI0ODA8YnI+Jmd0OyAmZ3Q7IDIwMTUtMDgtMjUgMTU6
+MjQ6MzkuNTM1NDM0IDdmMjI2OTljMjcwMCAxMCBqb3VybmFsIGFsaWduX2JsIHRvdGFsIG1lbWNv
+cHk6IDUzMjQ4MDxicj4mZ3Q7ICZndDsgMjAxNS0wOC0yNSAxNToyNDozOS41MzU0MzkgN2YyMjY5
+OWMyNzAwIDIwIGpvdXJuYWwgd3JpdGVfYWlvX2JsIDQ3ODY2Nzk4MDh+NTMyNDgwIHNlcSAxMzA3
+NTIyNDxicj4mZ3Q7ICZndDsgMjAxNS0wOC0yNSAxNToyNDozOS41MzU0NDIgN2YyMjY5OWMyNzAw
+IDIwIGpvdXJuYWwgd3JpdGVfYWlvX2JsIC4uIDQ3ODY2Nzk4MDh+NTMyNDgwIGluIDE8YnI+Jmd0
+OyAmZ3Q7IDIwMTUtMDgtMjUgMTU6MjQ6MzkuNTM1NDQ0IDdmMjI2OTljMjcwMCA1IGpvdXJuYWwg
+aW9fc3VibWl0IHN0YXJ0aW5nLi4uPGJyPiZndDsgJmd0Ozxicj4mZ3Q7ICZndDsgMjAxNS0wOC0y
+NSAxNToyNDozOS45OTAzNzIgN2YyMjY5OWMyNzAwIDUgam91cm5hbCBpb19zdWJtaXQgcmV0dXJu
+IHZhbHVlOiAxPGJyPiZndDsgJmd0OyAyMDE1LTA4LTI1IDE1OjI0OjM5Ljk5MDM5NiA3ZjIyNjk5
+YzI3MDAgNSBqb3VybmFsIHB1dF90aHJvdHRsZSBmaW5pc2hlZCAxIG9wcyBhbmQgNTI2NTM3IGJ5
+dGVzLCBub3cgMTIgb3BzIGFuZCA2MzE4NDQ0IGJ5dGVzPGJyPiZndDsgJmd0OyAyMDE1LTA4LTI1
+IDE1OjI0OjM5Ljk5MDQwMSA3ZjIyNjkxYzE3MDAgMjAgam91cm5hbCB3cml0ZV9maW5pc2hfdGhy
+ZWFkX2VudHJ5IHdhaXRpbmcgZm9yIGFpbyhzKTxicj4mZ3Q7ICZndDsgMjAxNS0wOC0yNSAxNToy
+NDozOS45OTA0MDYgN2YyMjY5OWMyNzAwIDIwIGpvdXJuYWwgd3JpdGVfdGhyZWFkX2VudHJ5IGFp
+byB0aHJvdHRsZTogYWlvIG51bSAxIGJ5dGVzIDUzMjQ4MCAuLi4gZXhwIDIgbWluX25ldyA0IC4u
+LiBwZW5kaW5nIDYzMTg0NDQ8YnI+Jmd0OyAmZ3Q7IDIwMTUtMDgtMjUgMTU6MjQ6MzkuOTkwNDEw
+IDdmMjI2OTljMjcwMCAxMCBqb3VybmFsIHJvb20gMTA0NjAwNjE2OTUgbWF4X3NpemUgMTA0ODQ3
+MTE0MjQgcG9zIDQ3ODcyMTIyODggaGVhZGVyLnN0YXJ0IDQ3NjI1NjY2NTYgdG9wIDQwOTY8YnI+
+Jmd0OyAmZ3Q7IDIwMTUtMDgtMjUgMTU6MjQ6MzkuOTkwNDEzIDdmMjI2OTljMjcwMCAxMCBqb3Vy
+bmFsIGNoZWNrX2Zvcl9mdWxsIGF0IDQ3ODcyMTIyODggOiA1MzI0ODAgJmx0OyAxMDQ2MDA2MTY5
+NTxicj4mZ3Q7ICZndDsgMjAxNS0wOC0yNSAxNToyNDozOS45OTA0MTUgN2YyMjY5OWMyNzAwIDE1
+IGpvdXJuYWwgcHJlcGFyZV9zaW5nbGVfd3JpdGUgMSB3aWxsIHdyaXRlIDQ3ODcyMTIyODggOiBz
+ZXEgMTMwNzUyMjUgbGVuIDUyNjUzNyAtJmd0OyA1MzI0ODAgKGhlYWQgNDAgcHJlX3BhZCA0MDQ2
+IGVibCA1MjY1MzcgcG9zdF9wYWQgMTgxNyB0YWlsIDQwKSAoZWJsIGFsaWdubWVudCA0MDg2KTxi
+cj4mZ3Q7ICZndDsgLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tPGJyPiZndDs8YnI+Jmd0OyBUaGlzIGlzIHByb2JhYmx5IHRoZSBrZXJu
+ZWwgdGhyb3R0bGluZyB1cyBiZWNhdXNlIHRoZSByZXF1ZXN0IHF1ZXVlIGlzPGJyPiZndDsgZnVs
+bCAvIGRldmljZSBpcyBidXN5IC8gd2hhdGV2ZXIuPGJyPiZndDs8YnI+Jmd0OyAmZ3Q7IEFuZCB3
+cml0ZV9haW9fYmwgd2lsbCBob2xkIGFpb19sb2NrIHVudGlsIGl0IHJldHVybnMsIHNvPGJyPiZn
+dDsgJmd0OyB3cml0ZV9maW5pc2hfdGhyZWFkX2VudHJ5IGNhbid0IHByb2Nlc3MgY29tcGxldGVk
+IGFpbyB3aGVuIGlvX3N1Ym1pdCBpczxicj4mZ3Q7ICZndDsgYmxvY2tpbmcuIFdlIHJlZHVjZWQg
+dGhlIGFpb19sb2NrJ3MgbG9ja2luZyBzY29wZSBpbjxicj4mZ3Q7ICZndDsgd3JpdGVfYWlvX2Js
+LCBzcGVjaWZpY2FsbHkgbm90IGxvY2tpbmcgaW9fc3VibWl0LiBJdCBkb2Vzbid0IHNlZW0gdG88
+YnI+Jmd0OyAmZ3Q7IG5lZWQgbG9jayBvbiBpb19zdWJtaXQgaW4gam91cm5hbCBiZWNhdXNlIHRo
+ZXJlIGlzIG9ubHkgMTxicj4mZ3Q7ICZndDsgd3JpdGVfdGhyZWFkX2VudHJ5IGFuZCAxIHdyaXRl
+X2ZpbmlzaF90aHJlYWRfZW50cnkuPGJyPiZndDsgJmd0Ozxicj4mZ3Q7ICZndDsgVGhpcyBtaWdo
+dCBoZWxwIHRob3NlIGNvbXBsZXRlZCBhaW8gdG8gZ2V0IHByb2Nlc3NlZCBhc2FwLiBCdXQgZm9y
+IHRoZTxicj4mZ3Q7ICZndDsgb25lIGJsb2NrZWQgaW4gaW9fc3VibWl0IGFuZCB0aGUgb25lcyBp
+biB0aGUgcXVldWUsIHRoZXkgc3RpbGwgbmVlZCB0bzxicj4mZ3Q7ICZndDsgdGFrZSBtb3JlIHRp
+bWUuPGJyPiZndDsgJmd0Ozxicj4mZ3Q7ICZndDsgQW55IGlkZWEgYWJvdXQgdGhpcz88YnI+Jmd0
+Ozxicj4mZ3Q7IFRoYXQgc291bmRzIGxpa2UgdGhlIHJpZ2h0IGZpeCEgSSBkb24ndCB0aGluayB0
+aGVyZSBpcyBhbnl0aGluZyBlbHNlIHRvPGJyPiZndDsgYmUgZG9uZS4uIGlmIHRoZSBrZXJuZWwg
+aXMgdGhyb3R0bGluZyB1cyBpdCdzIGdlbmVyYWxseSBmb3IgYSBnb29kIHJlYXNvbiw8YnI+Jmd0
+OyBhbmQgdGhlcmUgaXNuJ3QgYW55dGhpbmcgZWxzZSB3ZSBjYW4gZG8uPGJyPiZndDs8YnI+Jmd0
+OyBEbyB5b3UgaGF2ZSBhIHBhdGNoPzxicj4mZ3Q7PGJyPiZndDsgc2FnZTxicj4gCQkgCSAgIAkJ
+ICA=
