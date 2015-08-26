@@ -1,44 +1,50 @@
 From: Patrick McGarry <pmcgarry@redhat.com>
 Subject: Re: [ceph-users] Ceph Day Raleigh Cancelled
-Date: Wed, 26 Aug 2015 12:52:44 -0400
-Message-ID: <CAAZbbf0+NdKYgUO2oTp22hP0wyke0ONH5K5iOv4+kJyp-NdmKg@mail.gmail.com>
+Date: Wed, 26 Aug 2015 12:54:53 -0400
+Message-ID: <CAAZbbf1TjgsfeGO4Vxtb=jjUpDnvD6VuA_7G-ZNPBF7HE2KVpw@mail.gmail.com>
 References: <CAAZbbf07ZdeKqWJZQLcV131+bz5-ECUv+KEJv7rdQXOJS_2esQ@mail.gmail.com>
-	<55DCFE97.1080701@physics.usyd.edu.au>
+	<CAPG7zF1aC+FZNscDz0tGpEzTPrFNq+JKcFLSjy=0K-_bbm7KPw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f173.google.com ([209.85.217.173]:33087 "EHLO
-	mail-lb0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751999AbbHZQwq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Aug 2015 12:52:46 -0400
-Received: by lbbsx3 with SMTP id sx3so123757349lbb.0
-        for <ceph-devel@vger.kernel.org>; Wed, 26 Aug 2015 09:52:44 -0700 (PDT)
-In-Reply-To: <55DCFE97.1080701@physics.usyd.edu.au>
+Received: from mail-lb0-f181.google.com ([209.85.217.181]:33610 "EHLO
+	mail-lb0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751675AbbHZQyy (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Aug 2015 12:54:54 -0400
+Received: by lbbsx3 with SMTP id sx3so123796176lbb.0
+        for <ceph-devel@vger.kernel.org>; Wed, 26 Aug 2015 09:54:53 -0700 (PDT)
+In-Reply-To: <CAPG7zF1aC+FZNscDz0tGpEzTPrFNq+JKcFLSjy=0K-_bbm7KPw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Goncalo Borges <goncalo@physics.usyd.edu.au>
+To: Daleep Bais <daleepbais@gmail.com>
 Cc: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
 
-Yeah, we're still working on nailing down a venue for the Melbourne
-event (but it looks like 05 Nov is probably the date). As soon as we
-have a venue confirmed we'll put out a call for speakers and post the
-details on the /cephdays/ page. Thanks!
+Hey Daleep,
+
+Right now we're planned through the end of the year, but if you know
+of a location where we would get good attendance and maybe someone
+with a space to host it we could certainly add that to the planning
+for 2016. Feel free to shoot me an email if you know of any places
+that might fit the bill.
+
+Typically we shoot for about 75-100 people and like to cater in lunch,
+snacks, and a cocktail reception. So that should give you an idea for
+what we look at when planning a venue. Thanks.
 
 
-On Tue, Aug 25, 2015 at 7:47 PM, Goncalo Borges
-<goncalo@physics.usyd.edu.au> wrote:
-> Hey Patrick...
+On Wed, Aug 26, 2015 at 12:55 AM, Daleep Bais <daleepbais@gmail.com> wrote:
+> Hi Patrick,
 >
-> I am interested in the Melbourne one. Under
-> http://ceph.com/cephdays/
-> I do not see any reference to it.
+> is there any plans for such events to be held in India?
 >
-> Can you give me more details on that?
+> Eagerly looking forward to it..
 >
-> TIA
-> Goncalo
+> Thanks.
 >
-> On 08/26/2015 07:23 AM, Patrick McGarry wrote:
+> Daleep Singh Bais
+>
+> On Wed, Aug 26, 2015 at 2:53 AM, Patrick McGarry <pmcgarry@redhat.com>
+> wrote:
 >>
 >> Due to low registration this event is being pushed back to next year.
 >> The Ceph Day events for Shanghai, Tokyo, and Melbourne should all
@@ -46,13 +52,19 @@ On Tue, Aug 25, 2015 at 7:47 PM, Goncalo Borges
 >> you have any questions about Ceph Days. Thanks.
 >>
 >>
+>> --
+>>
+>> Best Regards,
+>>
+>> Patrick McGarry
+>> Director Ceph Community || Red Hat
+>> http://ceph.com  ||  http://community.redhat.com
+>> @scuttlemonkey || @ceph
+>> _______________________________________________
+>> ceph-users mailing list
+>> ceph-users@lists.ceph.com
+>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 >
-> --
-> Goncalo Borges
-> Research Computing
-> ARC Centre of Excellence for Particle Physics at the Terascale
-> School of Physics A28 | University of Sydney, NSW  2006
-> T: +61 2 93511937
 >
 
 
