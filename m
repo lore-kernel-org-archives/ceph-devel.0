@@ -1,53 +1,71 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: async messenger
-Date: Thu, 27 Aug 2015 21:22:34 +0800
-Message-ID: <CACJqLyapdDqvL5W3j9fZyH6BY0tRw8xVWKrsrKTdm2+vh7Uarg@mail.gmail.com>
-References: <alpine.DEB.2.00.1508241427170.13128@cobra.newdream.net>
-	<CACJqLyZ_9AM+_9cPxdm-Ab7dFc-CKze5khZPQGBrDdjxRMSrdQ@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Proposal: data-at-rest encryption
+Date: Thu, 27 Aug 2015 06:38:01 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1508270635300.13116@cobra.newdream.net>
+References: <55DAE0F7.1070905@suse.de> <alpine.DEB.2.00.1508261744370.13116@cobra.newdream.net> <55DECE66.5000505@suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yk0-f182.google.com ([209.85.160.182]:35576 "EHLO
-	mail-yk0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751797AbbH0NWe (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Aug 2015 09:22:34 -0400
-Received: by ykbi184 with SMTP id i184so19078878ykb.2
-        for <ceph-devel@vger.kernel.org>; Thu, 27 Aug 2015 06:22:34 -0700 (PDT)
-In-Reply-To: <CACJqLyZ_9AM+_9cPxdm-Ab7dFc-CKze5khZPQGBrDdjxRMSrdQ@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:55855 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752153AbbH0NiC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Aug 2015 09:38:02 -0400
+In-Reply-To: <55DECE66.5000505@suse.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Joshua Schmid <jschmid@suse.de>
+Cc: ceph-devel@vger.kernel.org
 
-I ran a random job(http://pulpito.ceph.com/haomai-2015-08-27_04:09:28-rados-master-distro-basic-multi/)
-and the result seemed ok to me.
+On Thu, 27 Aug 2015, Joshua Schmid wrote:
+> 
+> On 08/27/2015 02:49 AM, Sage Weil wrote:
+> > Hi Joshua!
+> > 
+> 
+> Hi Sage,
+> 
+> 
+> > Overall the ceph-disk changes look pretty good, and it looks like Andrew 
+> > and David have both reviewed.  My only real concern/request is that the 
+> > key server be as pluggable as possible.  You're using ftps here, but we'd 
+> > also like to allow deo[1], or even the mon config-key service.
+> 
+> Thank for having a look!
+> I think this should do:
+> 
+> https://github.com/jschmid1/ceph/commit/7dd64c70bcb8d986568d6f379a6fbf9a0e40a441
+> 
+> Service of choice can now be set in the ceph.conf and will be handled
+> separately. This is currently only for unlocking/mapping but will be
+> extended for locking/new if this solution is acceptable.
 
-On Tue, Aug 25, 2015 at 9:22 AM, Haomai Wang <haomaiwang@gmail.com> wrote:
-> On Tue, Aug 25, 2015 at 5:28 AM, Sage Weil <sweil@redhat.com> wrote:
->> Hi Haomai,
->>
->> How did your most recent async messenger run go?
->>
->> If there aren't major issues, we'd like to start mixing it in with the
->> regular rados suite by doing 'ms type = random'...
->
-> From last run, we have no async related failed jobs. I would like to
-> scheduler a "random" type by hand to see whether have terrible
-> compatible problem.
->
->>
->> sage
->
->
->
-> --
-> Best Regards,
->
-> Wheat
+Yep!  It'd probably be much cleaner to wrap this up in a class with 
+fetch_key() and create_key(), etc. methods so that there is only one place 
+that has to instantiate the implemetnation based on type.
 
+> > With the original mon proposal, we also wanted an additional layer of 
+> > security (beyond simply access to the storage network) by 
+> > storing some key-fetching-key on the disk.
+> 
+> Like deo does it? (From the deo README)
+> 
+> """
+> Second, we will add a new random key to the pre-existing LUKS encrypted
+> disk and then encrypt it using Deo in a known location.
+> """
+> 
+> 
+>   It looks like the ftps
+> > access is unauthenticated... is that right?  I would assume (I'm not hte 
+> > expert!) that most key management systems require some credentials to 
+> > store/fetch keys?
+> 
+> Its totally unauthenticated, thats right. It'd be possible to require
+> USER/PASS for ftp.
 
+Yeah.  If we have a general method to store a key-fetching-key on the disk 
+(in the LUKS table?  I forget if this was practical) on the LUKS disk the 
+might work?  Hopefully such that various backends can all use it (e.g., as 
+the ftps password, or as a mon key)..
 
--- 
-Best Regards,
-
-Wheat
+sage
