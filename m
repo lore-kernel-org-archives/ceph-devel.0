@@ -1,91 +1,144 @@
-From: "B, Naga Venkata" <naga.b@hpe.com>
-Subject: RE: Errors attaching RBD image to a running VM
-Date: Thu, 27 Aug 2015 12:47:16 +0000
-Message-ID: <85E6A9CA58484A42B4C2F91092BC19870849AF3C@G4W3228.americas.hpqcorp.net>
-References: <20121207212247.GA12635@staff.dca.net>
- <50C6504D.8090307@inktank.com> <20121210232935.GD22300@staff.dca.net>
- <loom.20150825T132950-136@post.gmane.org>
- <CAFdRU73roiZmHu60ELVCFnV0M=WcPzk7Af1r1zSqiWSZE7yQEg@mail.gmail.com>
- <85E6A9CA58484A42B4C2F91092BC19870849102F@G9W0733.americas.hpqcorp.net>
- <84670482.8877337.1440591821445.JavaMail.zimbra@redhat.com>
- <85E6A9CA58484A42B4C2F91092BC198708499E61@G4W3228.americas.hpqcorp.net>
- <1799199753.9411791.1440678622013.JavaMail.zimbra@redhat.com>
+From: Shinobu Kinjo <skinjo@redhat.com>
+Subject: Re: Errors attaching RBD image to a running VM
+Date: Thu, 27 Aug 2015 09:17:03 -0400 (EDT)
+Message-ID: <1402664490.9438072.1440681423773.JavaMail.zimbra@redhat.com>
+References: <20121207212247.GA12635@staff.dca.net> <loom.20150825T132950-136@post.gmane.org> <CAFdRU73roiZmHu60ELVCFnV0M=WcPzk7Af1r1zSqiWSZE7yQEg@mail.gmail.com> <85E6A9CA58484A42B4C2F91092BC19870849102F@G9W0733.americas.hpqcorp.net> <84670482.8877337.1440591821445.JavaMail.zimbra@redhat.com> <85E6A9CA58484A42B4C2F91092BC198708499E61@G4W3228.americas.hpqcorp.net> <1799199753.9411791.1440678622013.JavaMail.zimbra@redhat.com> <85E6A9CA58484A42B4C2F91092BC19870849AF3C@G4W3228.americas.hpqcorp.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from g9t5009.houston.hp.com ([15.240.92.67]:59931 "EHLO
-	g9t5009.houston.hp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753744AbbH0MsF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Aug 2015 08:48:05 -0400
-In-Reply-To: <1799199753.9411791.1440678622013.JavaMail.zimbra@redhat.com>
-Content-Language: en-US
+Received: from mx4-phx2.redhat.com ([209.132.183.25]:54868 "EHLO
+	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751930AbbH0NRK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Aug 2015 09:17:10 -0400
+In-Reply-To: <85E6A9CA58484A42B4C2F91092BC19870849AF3C@G4W3228.americas.hpqcorp.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Shinobu Kinjo <skinjo@redhat.com>
+To: "B, Naga Venkata" <naga.b@hpe.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Tk8sIGRlYmlhbiAzLjE0LjQ0LTEtYW1kNjQsIFFFTVUgZW11bGF0b3IgdmVyc2lvbiAyLjMuMCwg
-b3BlbnN0YWNrIGtpbG8sIGxpYnZpcnQgMS4yLjksIGNlcGggdmVyc2lvbiAwLjgwLjcNCg0KSSBh
-bSB0byBhdHRhY2ggdm9sdW1lIHRvIG5vdmEgaW5zdGFuY2UgaWYgaW5zdGFuY2UgaXMgaW4gc2h1
-dG9mZiBzdGF0ZS4gRm9yIHRoYXQgZm9sbG93aW5nIHN0ZXBzIEkgZGlkLg0KDQpJIHJlc3RhcnRl
-ZCBsaWJ2aXJ0ZCBhbmQgbGlidmlydC1ndWVzdHMsIGFmdGVyIGxpYnZpcnQtZ3Vlc3RzIHJlc3Rh
-cnQgdm0gd2VudCB0byBzaHV0b2ZmIHN0YXRlIGJ1dCBub3ZhIGlzIG5vdCB1cGRhdGVkIGluc3Rh
-bmNlIHN0YXRlIHN0aWxsIGl0IGlzIGluIHJ1bm5pbmcgc3RhdGUsIG5vdyBJIGRpZCB2b2x1bWUg
-YXR0YWNoIGl0IHdlbnQgZmluZS4NCklmIEkgcmVzdGFydCBub3ZhLWNvbXB1dGUgaW5zdGFuY2Ug
-c3RhdGUgaXMgdXBkYXRlZCB3aXRoIHNodXRvZmYgc3RhdGUsIGlmIEkgdHJ5IHRvIHN0YXJ0IGlu
-c3RhbmNlIHRoZSBiZWxvdyBlcnJvciBJIGFtIGZhY2luZy4NCiANCmxpYnZpcnRFcnJvcjogaW50
-ZXJuYWwgZXJyb3I6IHByb2Nlc3MgZXhpdGVkIHdoaWxlIGNvbm5lY3RpbmcgdG8gbW9uaXRvcjog
-MjAxNS0wOC0yN1QxMToxNjowMi43MjYyNjVaIHFlbXUtc3lzdGVtLXg4Nl82NDogLWRyaXZlIGZp
-bGU9cmJkOnZvbHVtZXMvdm9sdW1lLWVlN2Y2ZTNkLTgyNjktNGZmYy04ZDYyLWE4ODFhMGQ3MTE2
-ZjppZD1jaW5kZXI6a2V5PUFRQ2ZFZHhWVVAxM01CQUF2NE9qN3R3Rkl4YUYxQlh5WTFQa1JRPT06
-YXV0aF9zdXBwb3J0ZWQ9Y2VwaHhcO25vbmU6bW9uX2hvc3Q9MTkyLjE2OC4yNDUuMlw6Njc4OVw7
-MTkyLjE2OC4yNDUuM1w6Njc4OVw7MTkyLjE2OC4yNDUuNFw6Njc4OSxpZj1ub25lLGlkPWRyaXZl
-LXZpcnRpby1kaXNrMSxmb3JtYXQ9cmF3LHNlcmlhbD1lZTdmNmUzZC04MjY5LTRmZmMtOGQ2Mi1h
-ODgxYTBkNzExNmYsY2FjaGU9bm9uZTogVW5rbm93biBwcm90b2NvbCAncmJkJw0KDQpTdGlsbCB0
-aGlzIGVycm9yICJFcnJvcnMgYXR0YWNoaW5nIFJCRCBpbWFnZSB0byBhIHJ1bm5pbmcgVk0iIGlz
-IHRoZXJlLg0KDQpUaGFua3MgJiBSZWdhcmRzLA0KVmVua2F0DQotLS0tLU9yaWdpbmFsIE1lc3Nh
-Z2UtLS0tLQ0KRnJvbTogU2hpbm9idSBLaW5qbyBbbWFpbHRvOnNraW5qb0ByZWRoYXQuY29tXSAN
-ClNlbnQ6IFRodXJzZGF5LCBBdWd1c3QgMjcsIDIwMTUgNjowMCBQTQ0KVG86IEIsIE5hZ2EgVmVu
-a2F0YQ0KQ2M6IENlcGggRGV2ZWxvcG1lbnQNClN1YmplY3Q6IFJlOiBFcnJvcnMgYXR0YWNoaW5n
-IFJCRCBpbWFnZSB0byBhIHJ1bm5pbmcgVk0NCg0KSGVsbG8sDQoNCk15IHF1ZXN0aW9uIGZyb20g
-Zmlyc3QgbG9vayBhdCBpcyB0aGF0LCBpcyBpdCB5b3VyIGVudmlyb25tZW50Pw0KDQo+IEN1cnJl
-bnRseSBydW5uaW5nIFNMIDYuMywgT3BlblN0YWNrIEZvbHNvbSBwYWNrYWdlcyBmcm9tIEVQRUws
-IExpYnZpcnQgDQo+IDAuOS4xMCwgUUVNVSAxLjIuMSBidWlsdCBmcm9tIGFuIGVwZWwtdGVzdGlu
-ZyBTUlBNIGZvciBSQkQgc3VwcG9ydCwgDQo+IGFuZCBDZXBoIDAuNTQNCg0KSWYgaXQncyB0cnVl
-LCB5b3UgaGF2ZSB0byB1cGdyYWRlIFNMIGFuZCBDZXBoIGFzIG11Y2ggYXMgeW91IGNhbi4NCkJl
-Y2F1c2UsIGFzIHlvdSBtaWdodCBub3RpY2UsIHRoZXJlIGhhdmUgYmVlbiBhIGJ1bmNoIG9mIGJ1
-ZyBmaXhlcy4NCg0KQW5kIHBsZWFzZSBhdHRhY2ggbG9ncyByZWxhdGVkIHRvIENlcGgsIHFlbXUg
-YW5kIGxpdmJpcnQuDQoNClNoaW5vYnUNCg0KLS0tLS0gT3JpZ2luYWwgTWVzc2FnZSAtLS0tLQ0K
-RnJvbTogIkIsIE5hZ2EgVmVua2F0YSIgPG5hZ2EuYkBocGUuY29tPg0KVG86ICJTaGlub2J1IEtp
-bmpvIiA8c2tpbmpvQHJlZGhhdC5jb20+DQpDYzogIkNlcGggRGV2ZWxvcG1lbnQiIDxjZXBoLWRl
-dmVsQHZnZXIua2VybmVsLm9yZz4NClNlbnQ6IFRodXJzZGF5LCBBdWd1c3QgMjcsIDIwMTUgNzox
-MjozNiBQTQ0KU3ViamVjdDogUkU6IEVycm9ycyBhdHRhY2hpbmcgUkJEIGltYWdlIHRvIGEgcnVu
-bmluZyBWTQ0KDQpIaSBTaGlub2J1LA0KDQpDYW4gSSBoYXZlIHF1aWNrIHJlcGx5IG9uIHRoaXMs
-IGlzIHRoaXMgaXNzdWUgd2l0aCBsaWJ2aXJ0IHZlcnNpb24gb3IgY2VwaC4NCg0KVGhhbmtzICYg
-UmVnYXJkcywNClZlbmthdA0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogU2hp
-bm9idSBLaW5qbyBbbWFpbHRvOnNraW5qb0ByZWRoYXQuY29tXQ0KU2VudDogV2VkbmVzZGF5LCBB
-dWd1c3QgMjYsIDIwMTUgNTo1NCBQTQ0KVG86IEIsIE5hZ2EgVmVua2F0YQ0KQ2M6IENlcGggRGV2
-ZWxvcG1lbnQNClN1YmplY3Q6IFJlOiBFcnJvcnMgYXR0YWNoaW5nIFJCRCBpbWFnZSB0byBhIHJ1
-bm5pbmcgVk0NCg0KSGVsbG8gVmVua2F0LA0KDQpUaGFuayB5b3UhIQ0KDQogU2hpbm9idQ0KDQot
-LS0tLSBPcmlnaW5hbCBNZXNzYWdlIC0tLS0tDQpGcm9tOiAiQiwgTmFnYSBWZW5rYXRhIiA8bmFn
-YS5iQGhwZS5jb20+DQpUbzogc2tpbmpvQHJlZGhhdC5jb20NCkNjOiAiQ2VwaCBEZXZlbG9wbWVu
-dCIgPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPg0KU2VudDogV2VkbmVzZGF5LCBBdWd1c3Qg
-MjYsIDIwMTUgNzoyNDoxNyBQTQ0KU3ViamVjdDogUkU6IEVycm9ycyBhdHRhY2hpbmcgUkJEIGlt
-YWdlIHRvIGEgcnVubmluZyBWTQ0KDQpIaSBTaGlub2J1LA0KDQpUaGlzIGlzIGZyb20gaHR0cDov
-L2NvbW1lbnRzLmdtYW5lLm9yZy9nbWFuZS5jb21wLmZpbGUtc3lzdGVtcy5jZXBoLmRldmVsLzEx
-MjMwLg0KDQpUaGFua3MgJiBSZWdhcmRzLA0KVmVua2F0DQoNCg0KRnJvbTogU2hpbm9idSBbbWFp
-bHRvOnNoaW5vYnUua2pAZ21haWwuY29tXQ0KU2VudDogVHVlc2RheSwgQXVndXN0IDI1LCAyMDE1
-IDU6MzUgUE0NClRvOiBCLCBOYWdhIFZlbmthdGENCkNjOiBDZXBoIERldmVsb3BtZW50DQpTdWJq
-ZWN0OiBSZTogRXJyb3JzIGF0dGFjaGluZyBSQkQgaW1hZ2UgdG8gYSBydW5uaW5nIFZNDQoNCldo
-ZXJlIGlzIG9yaWdpbmFsIG1lc3NhZ2U/DQpTaGlub2J1DQoNCk9uIFR1ZSwgQXVnIDI1LCAyMDE1
-IGF0IDg6MzEgUE0sIHZlbmthdCA8bmFnYS5iQGhwLmNvbTxtYWlsdG86bmFnYS5iQGhwLmNvbT4+
-IHdyb3RlOg0KDQoNCg0Kc2FtZSBpc3N1ZSB3aXRoIGxpYnZpcnQgdmVyc2lvbiAxLjIuOSwNCmNh
-biBzb21lYm9keSBoZWxwIG1lLg0KDQpUaGFua3MgJiBSZWdhcmRzLA0KVmVua2F0DQoNCi0tDQpU
-byB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUg
-Y2VwaC1kZXZlbCIgaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtl
-cm5lbC5vcmc8bWFpbHRvOm1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmc+DQpNb3JlIG1ham9yZG9t
-byBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg0K
-DQoNCi0tDQpFbWFpbDoNCiBzaGlub2J1QGxpbnV4LmNvbTxtYWlsdG86c2hpbm9idUBsaW51eC5j
-b20+DQogc2tpbmpvQHJlZGhhdC5jb208bWFpbHRvOnNraW5qb0ByZWRoYXQuY29tPg0KDQogTGlm
-ZSB3LyBMaW51eDxodHRwOi8vaS1zaGlub2J1LmhhdGVuYWJsb2cuY29tLz4NCg==
+O.k, I got you -;
+
+> NO, debian 3.14.44-1-amd64, QEMU emulator version 2.3.0, openstack kilo, libvirt 1.2.9, ceph version 0.80.7
+
+How about this?
+
+> And please attach logs related to Ceph, qemu and livbirt.
+
+Shinobu
+
+----- Original Message -----
+From: "B, Naga Venkata" <naga.b@hpe.com>
+To: "Shinobu Kinjo" <skinjo@redhat.com>
+Cc: "Ceph Development" <ceph-devel@vger.kernel.org>
+Sent: Thursday, August 27, 2015 9:47:16 PM
+Subject: RE: Errors attaching RBD image to a running VM
+
+NO, debian 3.14.44-1-amd64, QEMU emulator version 2.3.0, openstack kilo, libvirt 1.2.9, ceph version 0.80.7
+
+I am to attach volume to nova instance if instance is in shutoff state. For that following steps I did.
+
+I restarted libvirtd and libvirt-guests, after libvirt-guests restart vm went to shutoff state but nova is not updated instance state still it is in running state, now I did volume attach it went fine.
+If I restart nova-compute instance state is updated with shutoff state, if I try to start instance the below error I am facing.
+ 
+libvirtError: internal error: process exited while connecting to monitor: 2015-08-27T11:16:02.726265Z qemu-system-x86_64: -drive file=rbd:volumes/volume-ee7f6e3d-8269-4ffc-8d62-a881a0d7116f:id=cinder:key=AQCfEdxVUP13MBAAv4Oj7twFIxaF1BXyY1PkRQ==:auth_supported=cephx\;none:mon_host=192.168.245.2\:6789\;192.168.245.3\:6789\;192.168.245.4\:6789,if=none,id=drive-virtio-disk1,format=raw,serial=ee7f6e3d-8269-4ffc-8d62-a881a0d7116f,cache=none: Unknown protocol 'rbd'
+
+Still this error "Errors attaching RBD image to a running VM" is there.
+
+Thanks & Regards,
+Venkat
+-----Original Message-----
+From: Shinobu Kinjo [mailto:skinjo@redhat.com] 
+Sent: Thursday, August 27, 2015 6:00 PM
+To: B, Naga Venkata
+Cc: Ceph Development
+Subject: Re: Errors attaching RBD image to a running VM
+
+Hello,
+
+My question from first look at is that, is it your environment?
+
+> Currently running SL 6.3, OpenStack Folsom packages from EPEL, Libvirt 
+> 0.9.10, QEMU 1.2.1 built from an epel-testing SRPM for RBD support, 
+> and Ceph 0.54
+
+If it's true, you have to upgrade SL and Ceph as much as you can.
+Because, as you might notice, there have been a bunch of bug fixes.
+
+And please attach logs related to Ceph, qemu and livbirt.
+
+Shinobu
+
+----- Original Message -----
+From: "B, Naga Venkata" <naga.b@hpe.com>
+To: "Shinobu Kinjo" <skinjo@redhat.com>
+Cc: "Ceph Development" <ceph-devel@vger.kernel.org>
+Sent: Thursday, August 27, 2015 7:12:36 PM
+Subject: RE: Errors attaching RBD image to a running VM
+
+Hi Shinobu,
+
+Can I have quick reply on this, is this issue with libvirt version or ceph.
+
+Thanks & Regards,
+Venkat
+
+-----Original Message-----
+From: Shinobu Kinjo [mailto:skinjo@redhat.com]
+Sent: Wednesday, August 26, 2015 5:54 PM
+To: B, Naga Venkata
+Cc: Ceph Development
+Subject: Re: Errors attaching RBD image to a running VM
+
+Hello Venkat,
+
+Thank you!!
+
+ Shinobu
+
+----- Original Message -----
+From: "B, Naga Venkata" <naga.b@hpe.com>
+To: skinjo@redhat.com
+Cc: "Ceph Development" <ceph-devel@vger.kernel.org>
+Sent: Wednesday, August 26, 2015 7:24:17 PM
+Subject: RE: Errors attaching RBD image to a running VM
+
+Hi Shinobu,
+
+This is from http://comments.gmane.org/gmane.comp.file-systems.ceph.devel/11230.
+
+Thanks & Regards,
+Venkat
+
+
+From: Shinobu [mailto:shinobu.kj@gmail.com]
+Sent: Tuesday, August 25, 2015 5:35 PM
+To: B, Naga Venkata
+Cc: Ceph Development
+Subject: Re: Errors attaching RBD image to a running VM
+
+Where is original message?
+Shinobu
+
+On Tue, Aug 25, 2015 at 8:31 PM, venkat <naga.b@hp.com<mailto:naga.b@hp.com>> wrote:
+
+
+
+same issue with libvirt version 1.2.9,
+can somebody help me.
+
+Thanks & Regards,
+Venkat
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org<mailto:majordomo@vger.kernel.org>
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+--
+Email:
+ shinobu@linux.com<mailto:shinobu@linux.com>
+ skinjo@redhat.com<mailto:skinjo@redhat.com>
+
+ Life w/ Linux<http://i-shinobu.hatenablog.com/>
