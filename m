@@ -1,39 +1,44 @@
-From: Patrick McGarry <pmcgarry@redhat.com>
-Subject: Ceph Tech Talk Tomorrow
-Date: Wed, 26 Aug 2015 13:22:45 -0400
-Message-ID: <CAAZbbf3wPBjnik_QxbBh2QjZkVWhFvO6=Spkzs5uW1Uzj622iQ@mail.gmail.com>
+From: Travis Rhoden <trhoden-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [ANN] ceph-deploy 1.5.28 released
+Date: Wed, 26 Aug 2015 17:32:09 -0700
+Message-ID: <CABcKxi_5kuzBhQPFGOz3j6Gb3iZXjASbvyQ3gTw5KBRpyabMPg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f170.google.com ([209.85.217.170]:36087 "EHLO
-	mail-lb0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751393AbbHZRWq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Aug 2015 13:22:46 -0400
-Received: by lbbpu9 with SMTP id pu9so124412554lbb.3
-        for <ceph-devel@vger.kernel.org>; Wed, 26 Aug 2015 10:22:45 -0700 (PDT)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-Hey cephers,
+Hi everyone,
 
-Don't forget that tomorrow is our monthly Ceph Tech Talk. This month
-we're taking a look at performance measuring and tuning in Ceph. Mark
-Nelson, Ceph's lead performance engineer will be giving an overview of
-what's new in the performance world of Ceph and sharing some recent
-findings, definitely not one to miss!
+A new version of ceph-deploy has been released. Version 1.5.28
+includes the following:
 
-http://ceph.com/ceph-tech-talks/
+ - A fix for a regression introduced in 1.5.27 that prevented
+importing GPG keys on CentOS 6 only.
+ - Will prevent Ceph daemon deployment on nodes that don't have Ceph
+installed on them.
+ - Makes it possible to go from 1 monitor daemon to 2 without a 5
+minute hang/delay.
+ - More systemd enablement work.
 
-1p Eastern on our BlueJeans video conferencing system. Hopefully we'll
-see you there!
 
+Full changelog is at [1].
 
--- 
+Updated packages have been uploaded to
+{rpm,debian}-{firefly,hammer,testing} repos on ceph.com, and to PyPI.
 
-Best Regards,
+Cheers,
 
-Patrick McGarry
-Director Ceph Community || Red Hat
-http://ceph.com  ||  http://community.redhat.com
-@scuttlemonkey || @ceph
+ - Travis
+
+[1] http://ceph.com/ceph-deploy/docs/changelog.html#id2
