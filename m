@@ -1,39 +1,50 @@
-From: wenjunh <huangwenjun310@gmail.com>
-Subject: My test on newstore show much poorer performance than filestore
-Date: Thu, 27 Aug 2015 16:51:45 +0800
-Message-ID: <55DECFA1.7050203@gmail.com>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: [radosgw] absolute uri
+Date: Thu, 27 Aug 2015 11:34:49 +0200
+Message-ID: <55DED9B9.7060200@42on.com>
+References: <CAPHxCcTAA4sPXmbCxkMo8gFH_=d5AW8BvzVgGuGVJpZ5+N1CKA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f47.google.com ([209.85.220.47]:32938 "EHLO
-	mail-pa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751625AbbH0Ivt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Aug 2015 04:51:49 -0400
-Received: by pacti10 with SMTP id ti10so19028858pac.0
-        for <ceph-devel@vger.kernel.org>; Thu, 27 Aug 2015 01:51:49 -0700 (PDT)
-Received: from [10.3.156.4] ([203.205.141.123])
-        by smtp.gmail.com with ESMTPSA id m2sm1605042pdr.64.2015.08.27.01.51.47
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 27 Aug 2015 01:51:48 -0700 (PDT)
+Received: from websrv.42on.com ([31.25.102.167]:43183 "EHLO websrv.42on.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751401AbbH0Jex (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 27 Aug 2015 05:34:53 -0400
+In-Reply-To: <CAPHxCcTAA4sPXmbCxkMo8gFH_=d5AW8BvzVgGuGVJpZ5+N1CKA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Lorieri <lorieri@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi
-I have a try of the newstore to explore its performance, which shows its performance is much poorer than filestore.
+On 08/27/2015 06:36 AM, Lorieri wrote:
+> Hi,
+> 
+> I'm debugging a golang aws client and I've noticed it makes absolute
+> uri requests on amazon.
+> http://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html#sec5.1.2
+> 
+> it would be great if radosgw implement it.
+> 
 
-I test my cluster using fio, Here is the comparison of the two store with randread & randwrite scenario:
+I think only the Golang client is the one that does it. I've never seen
+any other client do it.
 
-rw=randread, bs=4K, numjobs=1:
-newstore: bw=2280.7KB/s, iops=570
-filestore: bw=4846.6KB/s, iops=1211
+Even the AWS SDK or Python Boto don't do this, so shouldn't the Golang
+AWS client be fixed?
 
-rw=randwrite, bs=4K, numjobs=1:
-newstore: bw=32999 B/s, iops=8
-filestore: bw=250978 B/s, iops=61
-The two tests are performed using the same hardware, but newstore is much poorer than filestore. From the view of the community, newstore is the next default backend store in Ceph, but why its performance so poor. Could someone tell me why?
+> cheers,
+> -lorieri
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 
-Thanks
-wenjunh
+
+-- 
+Wido den Hollander
+42on B.V.
+Ceph trainer and consultant
+
+Phone: +31 (0)20 700 9902
+Skype: contact42on
