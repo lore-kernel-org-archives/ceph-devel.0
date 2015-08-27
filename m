@@ -1,144 +1,53 @@
-From: Shinobu Kinjo <skinjo@redhat.com>
-Subject: Re: Errors attaching RBD image to a running VM
-Date: Thu, 27 Aug 2015 09:17:03 -0400 (EDT)
-Message-ID: <1402664490.9438072.1440681423773.JavaMail.zimbra@redhat.com>
-References: <20121207212247.GA12635@staff.dca.net> <loom.20150825T132950-136@post.gmane.org> <CAFdRU73roiZmHu60ELVCFnV0M=WcPzk7Af1r1zSqiWSZE7yQEg@mail.gmail.com> <85E6A9CA58484A42B4C2F91092BC19870849102F@G9W0733.americas.hpqcorp.net> <84670482.8877337.1440591821445.JavaMail.zimbra@redhat.com> <85E6A9CA58484A42B4C2F91092BC198708499E61@G4W3228.americas.hpqcorp.net> <1799199753.9411791.1440678622013.JavaMail.zimbra@redhat.com> <85E6A9CA58484A42B4C2F91092BC19870849AF3C@G4W3228.americas.hpqcorp.net>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: async messenger
+Date: Thu, 27 Aug 2015 21:22:34 +0800
+Message-ID: <CACJqLyapdDqvL5W3j9fZyH6BY0tRw8xVWKrsrKTdm2+vh7Uarg@mail.gmail.com>
+References: <alpine.DEB.2.00.1508241427170.13128@cobra.newdream.net>
+	<CACJqLyZ_9AM+_9cPxdm-Ab7dFc-CKze5khZPQGBrDdjxRMSrdQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx4-phx2.redhat.com ([209.132.183.25]:54868 "EHLO
-	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751930AbbH0NRK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Aug 2015 09:17:10 -0400
-In-Reply-To: <85E6A9CA58484A42B4C2F91092BC19870849AF3C@G4W3228.americas.hpqcorp.net>
+Received: from mail-yk0-f182.google.com ([209.85.160.182]:35576 "EHLO
+	mail-yk0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751797AbbH0NWe (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Aug 2015 09:22:34 -0400
+Received: by ykbi184 with SMTP id i184so19078878ykb.2
+        for <ceph-devel@vger.kernel.org>; Thu, 27 Aug 2015 06:22:34 -0700 (PDT)
+In-Reply-To: <CACJqLyZ_9AM+_9cPxdm-Ab7dFc-CKze5khZPQGBrDdjxRMSrdQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "B, Naga Venkata" <naga.b@hpe.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-O.k, I got you -;
+I ran a random job(http://pulpito.ceph.com/haomai-2015-08-27_04:09:28-rados-master-distro-basic-multi/)
+and the result seemed ok to me.
 
-> NO, debian 3.14.44-1-amd64, QEMU emulator version 2.3.0, openstack kilo, libvirt 1.2.9, ceph version 0.80.7
-
-How about this?
-
-> And please attach logs related to Ceph, qemu and livbirt.
-
-Shinobu
-
------ Original Message -----
-From: "B, Naga Venkata" <naga.b@hpe.com>
-To: "Shinobu Kinjo" <skinjo@redhat.com>
-Cc: "Ceph Development" <ceph-devel@vger.kernel.org>
-Sent: Thursday, August 27, 2015 9:47:16 PM
-Subject: RE: Errors attaching RBD image to a running VM
-
-NO, debian 3.14.44-1-amd64, QEMU emulator version 2.3.0, openstack kilo, libvirt 1.2.9, ceph version 0.80.7
-
-I am to attach volume to nova instance if instance is in shutoff state. For that following steps I did.
-
-I restarted libvirtd and libvirt-guests, after libvirt-guests restart vm went to shutoff state but nova is not updated instance state still it is in running state, now I did volume attach it went fine.
-If I restart nova-compute instance state is updated with shutoff state, if I try to start instance the below error I am facing.
- 
-libvirtError: internal error: process exited while connecting to monitor: 2015-08-27T11:16:02.726265Z qemu-system-x86_64: -drive file=rbd:volumes/volume-ee7f6e3d-8269-4ffc-8d62-a881a0d7116f:id=cinder:key=AQCfEdxVUP13MBAAv4Oj7twFIxaF1BXyY1PkRQ==:auth_supported=cephx\;none:mon_host=192.168.245.2\:6789\;192.168.245.3\:6789\;192.168.245.4\:6789,if=none,id=drive-virtio-disk1,format=raw,serial=ee7f6e3d-8269-4ffc-8d62-a881a0d7116f,cache=none: Unknown protocol 'rbd'
-
-Still this error "Errors attaching RBD image to a running VM" is there.
-
-Thanks & Regards,
-Venkat
------Original Message-----
-From: Shinobu Kinjo [mailto:skinjo@redhat.com] 
-Sent: Thursday, August 27, 2015 6:00 PM
-To: B, Naga Venkata
-Cc: Ceph Development
-Subject: Re: Errors attaching RBD image to a running VM
-
-Hello,
-
-My question from first look at is that, is it your environment?
-
-> Currently running SL 6.3, OpenStack Folsom packages from EPEL, Libvirt 
-> 0.9.10, QEMU 1.2.1 built from an epel-testing SRPM for RBD support, 
-> and Ceph 0.54
-
-If it's true, you have to upgrade SL and Ceph as much as you can.
-Because, as you might notice, there have been a bunch of bug fixes.
-
-And please attach logs related to Ceph, qemu and livbirt.
-
-Shinobu
-
------ Original Message -----
-From: "B, Naga Venkata" <naga.b@hpe.com>
-To: "Shinobu Kinjo" <skinjo@redhat.com>
-Cc: "Ceph Development" <ceph-devel@vger.kernel.org>
-Sent: Thursday, August 27, 2015 7:12:36 PM
-Subject: RE: Errors attaching RBD image to a running VM
-
-Hi Shinobu,
-
-Can I have quick reply on this, is this issue with libvirt version or ceph.
-
-Thanks & Regards,
-Venkat
-
------Original Message-----
-From: Shinobu Kinjo [mailto:skinjo@redhat.com]
-Sent: Wednesday, August 26, 2015 5:54 PM
-To: B, Naga Venkata
-Cc: Ceph Development
-Subject: Re: Errors attaching RBD image to a running VM
-
-Hello Venkat,
-
-Thank you!!
-
- Shinobu
-
------ Original Message -----
-From: "B, Naga Venkata" <naga.b@hpe.com>
-To: skinjo@redhat.com
-Cc: "Ceph Development" <ceph-devel@vger.kernel.org>
-Sent: Wednesday, August 26, 2015 7:24:17 PM
-Subject: RE: Errors attaching RBD image to a running VM
-
-Hi Shinobu,
-
-This is from http://comments.gmane.org/gmane.comp.file-systems.ceph.devel/11230.
-
-Thanks & Regards,
-Venkat
-
-
-From: Shinobu [mailto:shinobu.kj@gmail.com]
-Sent: Tuesday, August 25, 2015 5:35 PM
-To: B, Naga Venkata
-Cc: Ceph Development
-Subject: Re: Errors attaching RBD image to a running VM
-
-Where is original message?
-Shinobu
-
-On Tue, Aug 25, 2015 at 8:31 PM, venkat <naga.b@hp.com<mailto:naga.b@hp.com>> wrote:
+On Tue, Aug 25, 2015 at 9:22 AM, Haomai Wang <haomaiwang@gmail.com> wrote:
+> On Tue, Aug 25, 2015 at 5:28 AM, Sage Weil <sweil@redhat.com> wrote:
+>> Hi Haomai,
+>>
+>> How did your most recent async messenger run go?
+>>
+>> If there aren't major issues, we'd like to start mixing it in with the
+>> regular rados suite by doing 'ms type = random'...
+>
+> From last run, we have no async related failed jobs. I would like to
+> scheduler a "random" type by hand to see whether have terrible
+> compatible problem.
+>
+>>
+>> sage
+>
+>
+>
+> --
+> Best Regards,
+>
+> Wheat
 
 
 
-same issue with libvirt version 1.2.9,
-can somebody help me.
+-- 
+Best Regards,
 
-Thanks & Regards,
-Venkat
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org<mailto:majordomo@vger.kernel.org>
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
---
-Email:
- shinobu@linux.com<mailto:shinobu@linux.com>
- skinjo@redhat.com<mailto:skinjo@redhat.com>
-
- Life w/ Linux<http://i-shinobu.hatenablog.com/>
+Wheat
