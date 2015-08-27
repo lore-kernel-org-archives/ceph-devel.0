@@ -1,71 +1,53 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: Proposal: data-at-rest encryption
-Date: Thu, 27 Aug 2015 06:38:01 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1508270635300.13116@cobra.newdream.net>
-References: <55DAE0F7.1070905@suse.de> <alpine.DEB.2.00.1508261744370.13116@cobra.newdream.net> <55DECE66.5000505@suse.de>
+Subject: Re: My test on newstore show much poorer performance than
+ filestore
+Date: Thu, 27 Aug 2015 06:40:48 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1508270638220.13116@cobra.newdream.net>
+References: <55DECFA1.7050203@gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:55855 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:55875 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752153AbbH0NiC (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Aug 2015 09:38:02 -0400
-In-Reply-To: <55DECE66.5000505@suse.de>
+	with ESMTP id S1752895AbbH0Nkt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Aug 2015 09:40:49 -0400
+In-Reply-To: <55DECFA1.7050203@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Joshua Schmid <jschmid@suse.de>
+To: wenjunh <huangwenjun310@gmail.com>
 Cc: ceph-devel@vger.kernel.org
 
-On Thu, 27 Aug 2015, Joshua Schmid wrote:
+On Thu, 27 Aug 2015, wenjunh wrote:
+> Hi
+> I have a try of the newstore to explore its performance, which shows 
+> its performance is much poorer than filestore.
 > 
-> On 08/27/2015 02:49 AM, Sage Weil wrote:
-> > Hi Joshua!
-> > 
+> I test my cluster using fio, Here is the comparison of the two store 
+> with randread & randwrite scenario:
 > 
-> Hi Sage,
+> rw=randread, bs=4K, numjobs=1:
+> newstore: bw=2280.7KB/s, iops=570
+> filestore: bw=4846.6KB/s, iops=1211
 > 
-> 
-> > Overall the ceph-disk changes look pretty good, and it looks like Andrew 
-> > and David have both reviewed.  My only real concern/request is that the 
-> > key server be as pluggable as possible.  You're using ftps here, but we'd 
-> > also like to allow deo[1], or even the mon config-key service.
-> 
-> Thank for having a look!
-> I think this should do:
-> 
-> https://github.com/jschmid1/ceph/commit/7dd64c70bcb8d986568d6f379a6fbf9a0e40a441
-> 
-> Service of choice can now be set in the ceph.conf and will be handled
-> separately. This is currently only for unlocking/mapping but will be
-> extended for locking/new if this solution is acceptable.
+> rw=randwrite, bs=4K, numjobs=1:
+> newstore: bw=32999 B/s, iops=8
+> filestore: bw=250978 B/s, iops=61
+> The two tests are performed using the same hardware, but newstore is 
+> much poorer than filestore. From the view of the community, newstore is 
+> the next default backend store in Ceph, but why its performance so poor. 
+> Could someone tell me why?
 
-Yep!  It'd probably be much cleaner to wrap this up in a class with 
-fetch_key() and create_key(), etc. methods so that there is only one place 
-that has to instantiate the implemetnation based on type.
+Newstore doesn't do well with random IO just yet, especially when the 
+WAL/journal is not on a separate device, because rocksdb doesn't do a very 
+good job with its log management.  I'm working on fixing this in rocksdb 
+now.
 
-> > With the original mon proposal, we also wanted an additional layer of 
-> > security (beyond simply access to the storage network) by 
-> > storing some key-fetching-key on the disk.
-> 
-> Like deo does it? (From the deo README)
-> 
-> """
-> Second, we will add a new random key to the pre-existing LUKS encrypted
-> disk and then encrypt it using Deo in a known location.
-> """
-> 
-> 
->   It looks like the ftps
-> > access is unauthenticated... is that right?  I would assume (I'm not hte 
-> > expert!) that most key management systems require some credentials to 
-> > store/fetch keys?
-> 
-> Its totally unauthenticated, thats right. It'd be possible to require
-> USER/PASS for ftp.
+At the other end of the spectrum, if you do something like rados bench (4M 
+writes) newstore should be almost 2x faster.
 
-Yeah.  If we have a general method to store a key-fetching-key on the disk 
-(in the LUKS table?  I forget if this was practical) on the LUKS disk the 
-might work?  Hopefully such that various backends can all use it (e.g., as 
-the ftps password, or as a mon key)..
+Were you using an SSD journal with filestore or a disk partition?  
+Newstore doesn't know how to use a separate SSD yet unless you set up the 
+wal_dir manually.
 
 sage
+
