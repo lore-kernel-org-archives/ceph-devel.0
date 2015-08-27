@@ -1,50 +1,54 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: [radosgw] absolute uri
-Date: Thu, 27 Aug 2015 11:34:49 +0200
-Message-ID: <55DED9B9.7060200@42on.com>
-References: <CAPHxCcTAA4sPXmbCxkMo8gFH_=d5AW8BvzVgGuGVJpZ5+N1CKA@mail.gmail.com>
+From: "B, Naga Venkata" <naga.b@hpe.com>
+Subject: RE: Errors attaching RBD image to a running VM
+Date: Thu, 27 Aug 2015 10:12:36 +0000
+Message-ID: <85E6A9CA58484A42B4C2F91092BC198708499E61@G4W3228.americas.hpqcorp.net>
+References: <20121207212247.GA12635@staff.dca.net>
+ <50C272A0.9020506@inktank.com> <20121210204850.GC22300@staff.dca.net>
+ <50C6504D.8090307@inktank.com> <20121210232935.GD22300@staff.dca.net>
+ <loom.20150825T132950-136@post.gmane.org>
+ <CAFdRU73roiZmHu60ELVCFnV0M=WcPzk7Af1r1zSqiWSZE7yQEg@mail.gmail.com>
+ <85E6A9CA58484A42B4C2F91092BC19870849102F@G9W0733.americas.hpqcorp.net>
+ <84670482.8877337.1440591821445.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from websrv.42on.com ([31.25.102.167]:43183 "EHLO websrv.42on.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751401AbbH0Jex (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 27 Aug 2015 05:34:53 -0400
-In-Reply-To: <CAPHxCcTAA4sPXmbCxkMo8gFH_=d5AW8BvzVgGuGVJpZ5+N1CKA@mail.gmail.com>
+Received: from g9t5009.houston.hp.com ([15.240.92.67]:37152 "EHLO
+	g9t5009.houston.hp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750952AbbH0KNi (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Aug 2015 06:13:38 -0400
+In-Reply-To: <84670482.8877337.1440591821445.JavaMail.zimbra@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Lorieri <lorieri@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Shinobu Kinjo <skinjo@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 08/27/2015 06:36 AM, Lorieri wrote:
-> Hi,
-> 
-> I'm debugging a golang aws client and I've noticed it makes absolute
-> uri requests on amazon.
-> http://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html#sec5.1.2
-> 
-> it would be great if radosgw implement it.
-> 
-
-I think only the Golang client is the one that does it. I've never seen
-any other client do it.
-
-Even the AWS SDK or Python Boto don't do this, so shouldn't the Golang
-AWS client be fixed?
-
-> cheers,
-> -lorieri
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
-
--- 
-Wido den Hollander
-42on B.V.
-Ceph trainer and consultant
-
-Phone: +31 (0)20 700 9902
-Skype: contact42on
+SGkgU2hpbm9idSwNCg0KQ2FuIEkgaGF2ZSBxdWljayByZXBseSBvbiB0aGlzLCBpcyB0aGlzIGlz
+c3VlIHdpdGggbGlidmlydCB2ZXJzaW9uIG9yIGNlcGguDQoNClRoYW5rcyAmIFJlZ2FyZHMsDQpW
+ZW5rYXQNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IFNoaW5vYnUgS2luam8g
+W21haWx0bzpza2luam9AcmVkaGF0LmNvbV0gDQpTZW50OiBXZWRuZXNkYXksIEF1Z3VzdCAyNiwg
+MjAxNSA1OjU0IFBNDQpUbzogQiwgTmFnYSBWZW5rYXRhDQpDYzogQ2VwaCBEZXZlbG9wbWVudA0K
+U3ViamVjdDogUmU6IEVycm9ycyBhdHRhY2hpbmcgUkJEIGltYWdlIHRvIGEgcnVubmluZyBWTQ0K
+DQpIZWxsbyBWZW5rYXQsDQoNClRoYW5rIHlvdSEhDQoNCiBTaGlub2J1DQoNCi0tLS0tIE9yaWdp
+bmFsIE1lc3NhZ2UgLS0tLS0NCkZyb206ICJCLCBOYWdhIFZlbmthdGEiIDxuYWdhLmJAaHBlLmNv
+bT4NClRvOiBza2luam9AcmVkaGF0LmNvbQ0KQ2M6ICJDZXBoIERldmVsb3BtZW50IiA8Y2VwaC1k
+ZXZlbEB2Z2VyLmtlcm5lbC5vcmc+DQpTZW50OiBXZWRuZXNkYXksIEF1Z3VzdCAyNiwgMjAxNSA3
+OjI0OjE3IFBNDQpTdWJqZWN0OiBSRTogRXJyb3JzIGF0dGFjaGluZyBSQkQgaW1hZ2UgdG8gYSBy
+dW5uaW5nIFZNDQoNCkhpIFNoaW5vYnUsDQoNClRoaXMgaXMgZnJvbSBodHRwOi8vY29tbWVudHMu
+Z21hbmUub3JnL2dtYW5lLmNvbXAuZmlsZS1zeXN0ZW1zLmNlcGguZGV2ZWwvMTEyMzAuDQoNClRo
+YW5rcyAmIFJlZ2FyZHMsDQpWZW5rYXQNCg0KDQpGcm9tOiBTaGlub2J1IFttYWlsdG86c2hpbm9i
+dS5rakBnbWFpbC5jb21dDQpTZW50OiBUdWVzZGF5LCBBdWd1c3QgMjUsIDIwMTUgNTozNSBQTQ0K
+VG86IEIsIE5hZ2EgVmVua2F0YQ0KQ2M6IENlcGggRGV2ZWxvcG1lbnQNClN1YmplY3Q6IFJlOiBF
+cnJvcnMgYXR0YWNoaW5nIFJCRCBpbWFnZSB0byBhIHJ1bm5pbmcgVk0NCg0KV2hlcmUgaXMgb3Jp
+Z2luYWwgbWVzc2FnZT8NClNoaW5vYnUNCg0KT24gVHVlLCBBdWcgMjUsIDIwMTUgYXQgODozMSBQ
+TSwgdmVua2F0IDxuYWdhLmJAaHAuY29tPG1haWx0bzpuYWdhLmJAaHAuY29tPj4gd3JvdGU6DQoN
+Cg0KDQpzYW1lIGlzc3VlIHdpdGggbGlidmlydCB2ZXJzaW9uIDEuMi45LA0KY2FuIHNvbWVib2R5
+IGhlbHAgbWUuDQoNClRoYW5rcyAmIFJlZ2FyZHMsDQpWZW5rYXQNCg0KLS0NClRvIHVuc3Vic2Ny
+aWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVs
+IiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZzxt
+YWlsdG86bWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZz4NCk1vcmUgbWFqb3Jkb21vIGluZm8gYXQg
+IGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KDQoNCg0KLS0NCkVt
+YWlsOg0KIHNoaW5vYnVAbGludXguY29tPG1haWx0bzpzaGlub2J1QGxpbnV4LmNvbT4NCiBza2lu
+am9AcmVkaGF0LmNvbTxtYWlsdG86c2tpbmpvQHJlZGhhdC5jb20+DQoNCiBMaWZlIHcvIExpbnV4
+PGh0dHA6Ly9pLXNoaW5vYnUuaGF0ZW5hYmxvZy5jb20vPg0K
