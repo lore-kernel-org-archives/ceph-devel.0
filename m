@@ -1,44 +1,87 @@
-From: Travis Rhoden <trhoden-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [ANN] ceph-deploy 1.5.28 released
-Date: Wed, 26 Aug 2015 17:32:09 -0700
-Message-ID: <CABcKxi_5kuzBhQPFGOz3j6Gb3iZXjASbvyQ3gTw5KBRpyabMPg@mail.gmail.com>
+From: huang jun <hjwsm1989@gmail.com>
+Subject: Re: format 2TB rbd device is too slow
+Date: Thu, 27 Aug 2015 08:43:37 +0800
+Message-ID: <CABAwU-YnEw2mzpF-EwMoWLrTmDdSt+XPQ0dgawigkbH7rGMtuw@mail.gmail.com>
+References: <CABAwU-ahZz48B2VHfeyqssBv778fKoVeD5Z3x2=Xgcf42VxTbQ@mail.gmail.com>
+	<CACJqLyY0FrJDbi4VDzBa3aUBGu30A9soxbRbiiNpAL_Mttna+w@mail.gmail.com>
+	<CAOi1vP__WA0+Q1xfRwcvNfs6_7T3OeA7Wdsw58taZt1arNR+bg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-la0-f47.google.com ([209.85.215.47]:33393 "EHLO
+	mail-la0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750962AbbH0Ank (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Aug 2015 20:43:40 -0400
+Received: by labns7 with SMTP id ns7so2350945lab.0
+        for <ceph-devel@vger.kernel.org>; Wed, 26 Aug 2015 17:43:38 -0700 (PDT)
+In-Reply-To: <CAOi1vP__WA0+Q1xfRwcvNfs6_7T3OeA7Wdsw58taZt1arNR+bg@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Haomai Wang <haomaiwang@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi everyone,
+hi,llya
 
-A new version of ceph-deploy has been released. Version 1.5.28
-includes the following:
+2015-08-26 23:56 GMT+08:00 Ilya Dryomov <idryomov@gmail.com>:
+> On Wed, Aug 26, 2015 at 6:22 PM, Haomai Wang <haomaiwang@gmail.com> wrote:
+>> On Wed, Aug 26, 2015 at 11:16 PM, huang jun <hjwsm1989@gmail.com> wrote:
+>>> hi,all
+>>> we create a 2TB rbd image, after map it to local,
+>>> then we format it to xfs with 'mkfs.xfs /dev/rbd0', it spent 318
+>>> seconds to finish, but  local physical disk with the same size just
+>>> need 6 seconds.
+>>>
+>>
+>> I think librbd have two PR related to this.
+>>
+>>> After debug, we found there are two steps in rbd module during formating:
+>>> a) send  233093 DELETE requests to osds(number_of_requests = 2TB / 4MB),
+>>>    this step spent almost 92 seconds.
+>>
+>> I guess this(https://github.com/ceph/ceph/pull/4221/files) may help
+>
+> It's submitting deletes for non-existent objects, not zeroing.  The
+> only thing that will really help here is the addition of rbd object map
+> support to the kernel client.  That could happen in 4.4, but 4.5 is
+> a safer bet.
+>
+>>
+>>> b) send 4238 messages like this: [set-alloc-hint object_size 4194304
+>>> write_size 4194304,write 0~512] to osds, that spent 227 seconds.
+>>
+>> I think kernel rbd also need to use
+>> https://github.com/ceph/ceph/pull/4983/files
+>
+> set-alloc-hint may be a problem, but I think a bigger problem is the
+> size of the write.  Are all those writes 512 bytes long?
+>
+In another test to format 2TB rbd device,
+there are :
+2 messages,each write 131072 bytes
+4000 messages, each write 262144 bytes
+112 messages, each write 4096 bytes
+194 messages, each write 512 bytes
 
- - A fix for a regression introduced in 1.5.27 that prevented
-importing GPG keys on CentOS 6 only.
- - Will prevent Ceph daemon deployment on nodes that don't have Ceph
-installed on them.
- - Makes it possible to go from 1 monitor daemon to 2 without a 5
-minute hang/delay.
- - More systemd enablement work.
+the xfs info:
+meta-data = /dev/rbd/rbd/test2t    isize=256    agcount=33, agsize=16382976 blks
+               =                                sectsz=512   attr=2,
+projid32bit=1
+               =                                crc=0
+data         =                               bsize=4096
+blocks=524288000, imaxpct=5
+               =                               sunit=1024   swidth=1024 blks
+naming    =version 2                   bsize=4096   ascii-ci=0
+log          =internal log                 bsize=4096   blocks=256000, version=2
+              =                                 sectsz=512   sunit=8
+blks, lazy-count=1
+realtime  =none                          extsz=4096   blocks=0, rtextents=0
+
+> Thanks,
+>
+>                 Ilya
 
 
-Full changelog is at [1].
 
-Updated packages have been uploaded to
-{rpm,debian}-{firefly,hammer,testing} repos on ceph.com, and to PyPI.
-
-Cheers,
-
- - Travis
-
-[1] http://ceph.com/ceph-deploy/docs/changelog.html#id2
+-- 
+thanks
+huangjun
