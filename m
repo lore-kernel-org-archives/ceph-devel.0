@@ -1,91 +1,39 @@
-From: Joshua Schmid <jschmid@suse.de>
-Subject: Re: Proposal: data-at-rest encryption
-Date: Thu, 27 Aug 2015 10:46:30 +0200
-Message-ID: <55DECE66.5000505@suse.de>
-References: <55DAE0F7.1070905@suse.de>
- <alpine.DEB.2.00.1508261744370.13116@cobra.newdream.net>
+From: wenjunh <huangwenjun310@gmail.com>
+Subject: My test on newstore show much poorer performance than filestore
+Date: Thu, 27 Aug 2015 16:51:45 +0800
+Message-ID: <55DECFA1.7050203@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:43339 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750802AbbH0IoF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 27 Aug 2015 04:44:05 -0400
-In-Reply-To: <alpine.DEB.2.00.1508261744370.13116@cobra.newdream.net>
+Received: from mail-pa0-f47.google.com ([209.85.220.47]:32938 "EHLO
+	mail-pa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751625AbbH0Ivt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Aug 2015 04:51:49 -0400
+Received: by pacti10 with SMTP id ti10so19028858pac.0
+        for <ceph-devel@vger.kernel.org>; Thu, 27 Aug 2015 01:51:49 -0700 (PDT)
+Received: from [10.3.156.4] ([203.205.141.123])
+        by smtp.gmail.com with ESMTPSA id m2sm1605042pdr.64.2015.08.27.01.51.47
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 27 Aug 2015 01:51:48 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
+Hi
+I have a try of the newstore to explore its performance, which shows its performance is much poorer than filestore.
 
+I test my cluster using fio, Here is the comparison of the two store with randread & randwrite scenario:
 
-On 08/27/2015 02:49 AM, Sage Weil wrote:
-> Hi Joshua!
->=20
+rw=randread, bs=4K, numjobs=1:
+newstore: bw=2280.7KB/s, iops=570
+filestore: bw=4846.6KB/s, iops=1211
 
-Hi Sage,
+rw=randwrite, bs=4K, numjobs=1:
+newstore: bw=32999 B/s, iops=8
+filestore: bw=250978 B/s, iops=61
+The two tests are performed using the same hardware, but newstore is much poorer than filestore. From the view of the community, newstore is the next default backend store in Ceph, but why its performance so poor. Could someone tell me why?
 
-
-> Overall the ceph-disk changes look pretty good, and it looks like And=
-rew=20
-> and David have both reviewed.  My only real concern/request is that t=
-he=20
-> key server be as pluggable as possible.  You're using ftps here, but =
-we'd=20
-> also like to allow deo[1], or even the mon config-key service.
-
-Thank for having a look!
-I think this should do:
-
-https://github.com/jschmid1/ceph/commit/7dd64c70bcb8d986568d6f379a6fbf9=
-a0e40a441
-
-Service of choice can now be set in the ceph.conf and will be handled
-separately. This is currently only for unlocking/mapping but will be
-extended for locking/new if this solution is acceptable.
-
-
->=20
-> With the original mon proposal, we also wanted an additional layer of=
-=20
-> security (beyond simply access to the storage network) by=20
-> storing some key-fetching-key on the disk.
-
-Like deo does it? (From the deo README)
-
-"""
-Second, we will add a new random key to the pre-existing LUKS encrypted
-disk and then encrypt it using Deo in a known location.
-"""
-
-
-  It looks like the ftps
-> access is unauthenticated... is that right?  I would assume (I'm not =
-hte=20
-> expert!) that most key management systems require some credentials to=
-=20
-> store/fetch keys?
-
-Its totally unauthenticated, thats right. It'd be possible to require
-USER/PASS for ftp.
->=20
-> sage
->=20
-
---=20
-=46reundliche Gr=FC=DFe - Kind regards,
-Joshua Schmid
-Trainee - Storage
-SUSE Linux GmbH - Maxfeldstr. 5 - 90409 N=FCrnberg
------------------------------------------------------------------------=
----------------------------------------------
-SUSE Linux GmbH, GF: Felix Imend=F6rffer, Jane Smithard,
-Jennifer Guild, Dilip Upmanyu, Graham Norton, HRB 21284 (AG N=FCrnberg)
------------------------------------------------------------------------=
----------------------------------------------
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thanks
+wenjunh
