@@ -1,37 +1,38 @@
-From: kefu chai <tchaikov@gmail.com>
-Subject: Re: WIP for C++11 Time Support
-Date: Fri, 28 Aug 2015 01:13:35 +0800
-Message-ID: <CAJE9aOOELZk9yipBcavEUFS+bamTA3m+ONJ67ub8uDUzgKPs0A@mail.gmail.com>
-References: <55D37498.8060504@redhat.com>
+From: Patrick McGarry <pmcgarry@redhat.com>
+Subject: Sage doing Reddit AMA 02 Sep @ 2p EDT
+Date: Thu, 27 Aug 2015 13:36:37 -0400
+Message-ID: <CAAZbbf0mZPGmPMk8t1Wp9DtOF8f130GoNBz=Ji7jvxS-HWTLTA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f173.google.com ([209.85.220.173]:33231 "EHLO
-	mail-qk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752406AbbH0RNg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Aug 2015 13:13:36 -0400
-Received: by qkch123 with SMTP id h123so14091553qkc.0
-        for <ceph-devel@vger.kernel.org>; Thu, 27 Aug 2015 10:13:35 -0700 (PDT)
-In-Reply-To: <55D37498.8060504@redhat.com>
+Received: from mail-la0-f44.google.com ([209.85.215.44]:35695 "EHLO
+	mail-la0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751302AbbH0Rgj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Aug 2015 13:36:39 -0400
+Received: by laaa3 with SMTP id a3so8244039laa.2
+        for <ceph-devel@vger.kernel.org>; Thu, 27 Aug 2015 10:36:37 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Adam C. Emerson" <aemerson@redhat.com>
-Cc: Ceph Developers <ceph-devel@vger.kernel.org>
+To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
 
-On Wed, Aug 19, 2015 at 2:08 AM, Adam C. Emerson <aemerson@redhat.com> wrote:
-> I've pushed a branch, wip-cxx11time for inspection. It includes basic
-> support for std::chrono (including clocks linked to specific POSIX CLOCK_*
-> identifiers) and a new timer class that doesn't require Context*.
->
-> As was suggested to me, I updated one subsystem to use std::chrono as an
-> example, in this case OSDC.
->
-> Please review/critique.
+Hey cephers,
 
-Adam, the commits look great! i just posted some comments on them.
+Just wanted to start sharing this so that people could help us
+generate interest. Sage will be answering questions via a Reddit AMA
+on Wednesday 02 September from 2-4p EDT.
 
-looking forward to the time literals in config_opt.h!
+You can see him in the /r/iama calender in the margin on the main
+page: https://www.reddit.com/r/iama
+
+If anyone has questions about this in the meantime, feel free to send
+them my way. Thanks!
+
 
 -- 
-Regards
-Kefu Chai
+
+Best Regards,
+
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
