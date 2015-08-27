@@ -1,87 +1,80 @@
-From: huang jun <hjwsm1989@gmail.com>
-Subject: Re: format 2TB rbd device is too slow
-Date: Thu, 27 Aug 2015 08:43:37 +0800
-Message-ID: <CABAwU-YnEw2mzpF-EwMoWLrTmDdSt+XPQ0dgawigkbH7rGMtuw@mail.gmail.com>
-References: <CABAwU-ahZz48B2VHfeyqssBv778fKoVeD5Z3x2=Xgcf42VxTbQ@mail.gmail.com>
-	<CACJqLyY0FrJDbi4VDzBa3aUBGu30A9soxbRbiiNpAL_Mttna+w@mail.gmail.com>
-	<CAOi1vP__WA0+Q1xfRwcvNfs6_7T3OeA7Wdsw58taZt1arNR+bg@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Proposal: data-at-rest encryption
+Date: Wed, 26 Aug 2015 17:49:12 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1508261744370.13116@cobra.newdream.net>
+References: <55DAE0F7.1070905@suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f47.google.com ([209.85.215.47]:33393 "EHLO
-	mail-la0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750962AbbH0Ank (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Aug 2015 20:43:40 -0400
-Received: by labns7 with SMTP id ns7so2350945lab.0
-        for <ceph-devel@vger.kernel.org>; Wed, 26 Aug 2015 17:43:38 -0700 (PDT)
-In-Reply-To: <CAOi1vP__WA0+Q1xfRwcvNfs6_7T3OeA7Wdsw58taZt1arNR+bg@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:53043 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750982AbbH0AtN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Aug 2015 20:49:13 -0400
+In-Reply-To: <55DAE0F7.1070905@suse.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Haomai Wang <haomaiwang@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Joshua Schmid <jschmid@suse.de>
+Cc: ceph-devel@vger.kernel.org
 
-hi,llya
+Hi Joshua!
 
-2015-08-26 23:56 GMT+08:00 Ilya Dryomov <idryomov@gmail.com>:
-> On Wed, Aug 26, 2015 at 6:22 PM, Haomai Wang <haomaiwang@gmail.com> wrote:
->> On Wed, Aug 26, 2015 at 11:16 PM, huang jun <hjwsm1989@gmail.com> wrote:
->>> hi,all
->>> we create a 2TB rbd image, after map it to local,
->>> then we format it to xfs with 'mkfs.xfs /dev/rbd0', it spent 318
->>> seconds to finish, but  local physical disk with the same size just
->>> need 6 seconds.
->>>
->>
->> I think librbd have two PR related to this.
->>
->>> After debug, we found there are two steps in rbd module during formating:
->>> a) send  233093 DELETE requests to osds(number_of_requests = 2TB / 4MB),
->>>    this step spent almost 92 seconds.
->>
->> I guess this(https://github.com/ceph/ceph/pull/4221/files) may help
->
-> It's submitting deletes for non-existent objects, not zeroing.  The
-> only thing that will really help here is the addition of rbd object map
-> support to the kernel client.  That could happen in 4.4, but 4.5 is
-> a safer bet.
->
->>
->>> b) send 4238 messages like this: [set-alloc-hint object_size 4194304
->>> write_size 4194304,write 0~512] to osds, that spent 227 seconds.
->>
->> I think kernel rbd also need to use
->> https://github.com/ceph/ceph/pull/4983/files
->
-> set-alloc-hint may be a problem, but I think a bigger problem is the
-> size of the write.  Are all those writes 512 bytes long?
->
-In another test to format 2TB rbd device,
-there are :
-2 messages,each write 131072 bytes
-4000 messages, each write 262144 bytes
-112 messages, each write 4096 bytes
-194 messages, each write 512 bytes
+On Mon, 24 Aug 2015, Joshua Schmid wrote:
+> Hi all,
+> 
+> 
+> just as a quick preface:
+> 
+> I'm fairly new to ceph, so forgive me any blunders :) But back to the topic.
+> 
+> after following several discussions on how to implement data-at-rest
+> encryption in ceph i want to add my two cents.
+> 
+> 
+> What is used:
+> 
+> a dedicated FTPS server for key-handling
+> 
+> 
+> How it will work:
+> 
+> Specify your key-server in ceph.conf.
+> Preparing and activating an OSD as usual via --dmcrypt. The newly
+> created key will be uploaded and deleted locally. On the initial unlock
+> it will already be retrieved via network.
+> 
+> 
+> Why is this a good way:
+> 
+> Taking in consideration that MONs are not the best place to put the keys
+> imho, a dedicated machine is a good place to put them since you are able
+> to take care of additional security arrangements.
+> 
+> 
+> What needs attention:
+> 
+> - The dedicated server is a single point of failure.
+> - If you add more servers, is rsync enough?
+> - Prevent swapping on key retrieval. (mlockall)
+> 
+> 
+> 
+> This is what i did so far:
+> 
+> https://github.com/jschmid1/ceph/commit/fee26890c24bd3a7b8865295546297e3f144e6d0?diff=unified
+> 
+> 
+> ANY feedback is welcome :)
 
-the xfs info:
-meta-data = /dev/rbd/rbd/test2t    isize=256    agcount=33, agsize=16382976 blks
-               =                                sectsz=512   attr=2,
-projid32bit=1
-               =                                crc=0
-data         =                               bsize=4096
-blocks=524288000, imaxpct=5
-               =                               sunit=1024   swidth=1024 blks
-naming    =version 2                   bsize=4096   ascii-ci=0
-log          =internal log                 bsize=4096   blocks=256000, version=2
-              =                                 sectsz=512   sunit=8
-blks, lazy-count=1
-realtime  =none                          extsz=4096   blocks=0, rtextents=0
+Overall the ceph-disk changes look pretty good, and it looks like Andrew 
+and David have both reviewed.  My only real concern/request is that the 
+key server be as pluggable as possible.  You're using ftps here, but we'd 
+also like to allow deo[1], or even the mon config-key service.
 
-> Thanks,
->
->                 Ilya
+With the original mon proposal, we also wanted an additional layer of 
+security (beyond simply access to the storage network) by 
+storing some key-fetching-key on the disk.  It looks like the ftps 
+access is unauthenticated... is that right?  I would assume (I'm not hte 
+expert!) that most key management systems require some credentials to 
+store/fetch keys?
 
-
-
--- 
-thanks
-huangjun
+sage
