@@ -1,150 +1,76 @@
-From: Joshua Schmid <jschmid@suse.de>
-Subject: Re: Proposal: data-at-rest encryption
-Date: Fri, 28 Aug 2015 10:11:34 +0200
-Message-ID: <55E017B6.1000302@suse.de>
-References: <55DAE0F7.1070905@suse.de>
- <alpine.DEB.2.00.1508261744370.13116@cobra.newdream.net>
- <55DECE66.5000505@suse.de>
- <alpine.DEB.2.00.1508270635300.13116@cobra.newdream.net>
- <CAFdRU70jHtfh84zzAnyffvEpqFHAQ1=413Xok_gxpBcVX1NhKw@mail.gmail.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: format 2TB rbd device is too slow
+Date: Fri, 28 Aug 2015 12:16:39 +0300
+Message-ID: <CAOi1vP-+ODN=88C8T-Kc-3VC_g=_-3skfHN0CPrSH598LG4_cg@mail.gmail.com>
+References: <CABAwU-ahZz48B2VHfeyqssBv778fKoVeD5Z3x2=Xgcf42VxTbQ@mail.gmail.com>
+	<CACJqLyY0FrJDbi4VDzBa3aUBGu30A9soxbRbiiNpAL_Mttna+w@mail.gmail.com>
+	<CAOi1vP__WA0+Q1xfRwcvNfs6_7T3OeA7Wdsw58taZt1arNR+bg@mail.gmail.com>
+	<CABAwU-YnEw2mzpF-EwMoWLrTmDdSt+XPQ0dgawigkbH7rGMtuw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:47179 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751717AbbH1IJK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 28 Aug 2015 04:09:10 -0400
-In-Reply-To: <CAFdRU70jHtfh84zzAnyffvEpqFHAQ1=413Xok_gxpBcVX1NhKw@mail.gmail.com>
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:35804 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750896AbbH1JQn (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Aug 2015 05:16:43 -0400
+Received: by lbcbn3 with SMTP id bn3so26482419lbc.2
+        for <ceph-devel@vger.kernel.org>; Fri, 28 Aug 2015 02:16:39 -0700 (PDT)
+In-Reply-To: <CABAwU-YnEw2mzpF-EwMoWLrTmDdSt+XPQ0dgawigkbH7rGMtuw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: skinjo@redhat.com, Sage Weil <sage@newdream.net>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: huang jun <hjwsm1989@gmail.com>
+Cc: Haomai Wang <haomaiwang@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-
-
-On 08/28/2015 01:32 AM, Shinobu wrote:
-> Hello,
->=20
-> Just question.
-> If the key is broken, how could ceph (maybe named kss standing for ke=
-y
-> store server :0) recover, and where information to restore it could b=
-e
-> retrieved?
-> Any blueprint?
-
-Hi,
-
-i don't know if i got your question right.
-Are you asking what ceph will do if the keyserver is down and where to
-get the information from on how to restore the OSD?
-
-Well, there will be a timeout if the KSS is unreachable. But in a
-productive environment it might not be a bad idea to add HA to your KSS=
-=2E
-
->=20
-> Shinobu
->=20
-> On Thu, Aug 27, 2015 at 10:38 PM, Sage Weil <sage@newdream.net> wrote=
-:
->=20
->> On Thu, 27 Aug 2015, Joshua Schmid wrote:
->>>
->>> On 08/27/2015 02:49 AM, Sage Weil wrote:
->>>> Hi Joshua!
+On Thu, Aug 27, 2015 at 3:43 AM, huang jun <hjwsm1989@gmail.com> wrote:
+> hi,llya
+>
+> 2015-08-26 23:56 GMT+08:00 Ilya Dryomov <idryomov@gmail.com>:
+>> On Wed, Aug 26, 2015 at 6:22 PM, Haomai Wang <haomaiwang@gmail.com> wrote:
+>>> On Wed, Aug 26, 2015 at 11:16 PM, huang jun <hjwsm1989@gmail.com> wrote:
+>>>> hi,all
+>>>> we create a 2TB rbd image, after map it to local,
+>>>> then we format it to xfs with 'mkfs.xfs /dev/rbd0', it spent 318
+>>>> seconds to finish, but  local physical disk with the same size just
+>>>> need 6 seconds.
 >>>>
 >>>
->>> Hi Sage,
+>>> I think librbd have two PR related to this.
 >>>
+>>>> After debug, we found there are two steps in rbd module during formating:
+>>>> a) send  233093 DELETE requests to osds(number_of_requests = 2TB / 4MB),
+>>>>    this step spent almost 92 seconds.
 >>>
->>>> Overall the ceph-disk changes look pretty good, and it looks like
->> Andrew
->>>> and David have both reviewed.  My only real concern/request is tha=
-t the
->>>> key server be as pluggable as possible.  You're using ftps here, b=
-ut
->> we'd
->>>> also like to allow deo[1], or even the mon config-key service.
->>>
->>> Thank for having a look!
->>> I think this should do:
->>>
->>>
->> https://github.com/jschmid1/ceph/commit/7dd64c70bcb8d986568d6f379a6f=
-bf9a0e40a441
->>>
->>> Service of choice can now be set in the ceph.conf and will be handl=
-ed
->>> separately. This is currently only for unlocking/mapping but will b=
-e
->>> extended for locking/new if this solution is acceptable.
+>>> I guess this(https://github.com/ceph/ceph/pull/4221/files) may help
 >>
->> Yep!  It'd probably be much cleaner to wrap this up in a class with
->> fetch_key() and create_key(), etc. methods so that there is only one=
- place
->> that has to instantiate the implemetnation based on type.
+>> It's submitting deletes for non-existent objects, not zeroing.  The
+>> only thing that will really help here is the addition of rbd object map
+>> support to the kernel client.  That could happen in 4.4, but 4.5 is
+>> a safer bet.
 >>
->>>> With the original mon proposal, we also wanted an additional layer=
- of
->>>> security (beyond simply access to the storage network) by
->>>> storing some key-fetching-key on the disk.
 >>>
->>> Like deo does it? (From the deo README)
+>>>> b) send 4238 messages like this: [set-alloc-hint object_size 4194304
+>>>> write_size 4194304,write 0~512] to osds, that spent 227 seconds.
 >>>
->>> """
->>> Second, we will add a new random key to the pre-existing LUKS encry=
-pted
->>> disk and then encrypt it using Deo in a known location.
->>> """
->>>
->>>
->>>   It looks like the ftps
->>>> access is unauthenticated... is that right?  I would assume (I'm n=
-ot
->> hte
->>>> expert!) that most key management systems require some credentials=
- to
->>>> store/fetch keys?
->>>
->>> Its totally unauthenticated, thats right. It'd be possible to requi=
-re
->>> USER/PASS for ftp.
+>>> I think kernel rbd also need to use
+>>> https://github.com/ceph/ceph/pull/4983/files
 >>
->> Yeah.  If we have a general method to store a key-fetching-key on th=
-e disk
->> (in the LUKS table?  I forget if this was practical) on the LUKS dis=
-k the
->> might work?  Hopefully such that various backends can all use it (e.=
-g., as
->> the ftps password, or as a mon key)..
+>> set-alloc-hint may be a problem, but I think a bigger problem is the
+>> size of the write.  Are all those writes 512 bytes long?
 >>
->> sage
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->=20
->=20
->=20
+> In another test to format 2TB rbd device,
+> there are :
+> 2 messages,each write 131072 bytes
+> 4000 messages, each write 262144 bytes
+> 112 messages, each write 4096 bytes
+> 194 messages, each write 512 bytes
 
---=20
-=46reundliche Gr=C3=BC=C3=9Fe - Kind regards,
-Joshua Schmid
-Trainee - Storage
-SUSE Linux GmbH - Maxfeldstr. 5 - 90409 N=C3=BCrnberg
------------------------------------------------------------------------=
----------------------------------------------
-SUSE Linux GmbH, GF: Felix Imend=C3=B6rffer, Jane Smithard,
-Jennifer Guild, Dilip Upmanyu, Graham Norton, HRB 21284 (AG N=C3=BCrnbe=
-rg)
------------------------------------------------------------------------=
----------------------------------------------
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+So the majority of writes is not 512 bytes long.  I don't think
+disabling set-alloc-hint (and, as of now at least, you can't disable it
+anyway) would drastically change the numbers.  If you are doing mkfs
+right after creating and mapping an image for the first time, you can
+add -K option to mkfs, which will tell it to not try to discard.  As
+for the write phase, I can't suggest anything off hand.
+
+Thanks,
+
+                Ilya
