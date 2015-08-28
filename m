@@ -1,38 +1,71 @@
-From: Yehuda Sadeh-Weinraub <yehuda-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: =?utf-8?q?S3=EF=BC=9APermissions_of_access-key?=
-Date: Fri, 28 Aug 2015 08:24:12 -0700
-Message-ID: <CADRKj5StOdRYGkWq=bH3SmPoArJ+zPxFAys1qxDDO28mRQQ4wQ@mail.gmail.com>
-References: <1C8B8335F613C640A5D49490DFDC782A478375DB@H3CMLB12-EX.srv.huawei-3com.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Hammer backport and bypassing procedure
+Date: Fri, 28 Aug 2015 21:16:38 +0200
+Message-ID: <55E0B396.2090602@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <1C8B8335F613C640A5D49490DFDC782A478375DB-JwQOC20i6vT3cnzPNjVLboSsE/coCuR8pWgKQ6/u3Fg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Zhengqiankun <zheng.qiankun-vVzyEvZLFYE@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="57MiWgjVFCeCNwS52G07uIocTaXa5WmG3"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail2.dachary.org ([91.121.57.175]:45506 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752164AbbH1TQl (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Aug 2015 15:16:41 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Abhishek Varshney <abhishek.varshney@flipkart.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, Aug 28, 2015 at 2:17 AM, Zhengqiankun <zheng.qiankun-vVzyEvZLFYE@public.gmane.org> wrote:
-> hi,Yehuda:
->
->       I have a question and hope that you can help me answer it. Different
-> subuser of swift
->
->   can set specific permissions, but why not set specific permission for
-> access-key of s3?
->
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--57MiWgjVFCeCNwS52G07uIocTaXa5WmG3
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-Probably because no one ever asked it. It shouldn't be hard to do
-this, sounds like an easy starter project if anyone wants to get their
-hands dirty in the rgw code. Note that the canonical way to do it in
-S3 is through user policies that we don't (yet?) support.
+Hi Abhishek,
 
-Yehuda
+We've just had an example of a backport merged into hammer although it di=
+d not follow the procedure : https://github.com/ceph/ceph/pull/5691
+
+It's a key aspect of backports : we're bound to follow procedure, but dev=
+elopers are allowed to bypass it entirely. It may seem like something lea=
+ding to chaos and frustration but it turns out to be exactly the opposite=
+=2E In a nutshell, it would be constant source of frustration for develop=
+ers to learn and obey the rules documented at http://tracker.ceph.com/pro=
+jects/ceph-releases/wiki/HOWTO because it would not benefit them signific=
+antly. It would also be a problem for us, backporters, because developers=
+ would not be as interested in backporting and our workload would signifi=
+cantly increase.
+
+When a developer prepares a backport on his / her own, we update the pull=
+ request and the issues to obey the procedure so the (s)he does not have =
+to. Sure, it's a little tedious but it's a small price to pay for the ben=
+efit of having a backport being dealt with. That's what I did for https:/=
+/github.com/ceph/ceph/pull/5691 : updaging the corresponding issues, addi=
+ng cross references to the pull request.
+
+Samuel Just felt confident enough about the backport that it did not need=
+ a rados run to verify it does the right thing. Since it's ultimately Sam=
+'s responsibility, that's also ok. The only thing we need to keep in mind=
+ when analyzing the next rados run is that this backport did not pass yet=
+=2E We don't have a way to mark commits that bypassed tests just yet, if =
+you have ideas let us know :-)
+
+Cheers
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--57MiWgjVFCeCNwS52G07uIocTaXa5WmG3
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlXgs5YACgkQ8dLMyEl6F20ahwCfe5MfdA1O0xIXW74RONOZUn3h
+PKMAoIVWxVf+AQe7lMwE2drQRXNsH1qA
+=lGJK
+-----END PGP SIGNATURE-----
+
+--57MiWgjVFCeCNwS52G07uIocTaXa5WmG3--
