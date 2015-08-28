@@ -1,82 +1,42 @@
-From: "Ma, Jianpeng" <jianpeng.ma@intel.com>
-Subject: RE: format 2TB rbd device is too slow
-Date: Fri, 28 Aug 2015 07:36:50 +0000
-Message-ID: <6AA21C22F0A5DA478922644AD2EC308C1D1A5038@SHSMSX101.ccr.corp.intel.com>
-References: <CABAwU-ahZz48B2VHfeyqssBv778fKoVeD5Z3x2=Xgcf42VxTbQ@mail.gmail.com>
-	<CACJqLyY0FrJDbi4VDzBa3aUBGu30A9soxbRbiiNpAL_Mttna+w@mail.gmail.com>
-	<CAOi1vP__WA0+Q1xfRwcvNfs6_7T3OeA7Wdsw58taZt1arNR+bg@mail.gmail.com>
- <CABAwU-YnEw2mzpF-EwMoWLrTmDdSt+XPQ0dgawigkbH7rGMtuw@mail.gmail.com>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: =?UTF-8?Q?Re=3A_wakeup=28_=29_in_async_messenger=E2=80=98_event?=
+Date: Fri, 28 Aug 2015 15:46:46 +0800
+Message-ID: <CACJqLyZf0GZvNeSW3gA8mFxBfEqkj5U_hqC8AZuh_1QRH8CAiA@mail.gmail.com>
+References: <CAEHhVAkSdYpgNRwtUa1WWu4sfNoO+sm-Yi6MeM1g5shXpaBb+A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:23942 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751525AbbH1Hhb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 28 Aug 2015 03:37:31 -0400
-In-Reply-To: <CABAwU-YnEw2mzpF-EwMoWLrTmDdSt+XPQ0dgawigkbH7rGMtuw@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-yk0-f179.google.com ([209.85.160.179]:36681 "EHLO
+	mail-yk0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751005AbbH1Hqq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Aug 2015 03:46:46 -0400
+Received: by ykfw73 with SMTP id w73so45896715ykf.3
+        for <ceph-devel@vger.kernel.org>; Fri, 28 Aug 2015 00:46:46 -0700 (PDT)
+In-Reply-To: <CAEHhVAkSdYpgNRwtUa1WWu4sfNoO+sm-Yi6MeM1g5shXpaBb+A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: huang jun <hjwsm1989@gmail.com>, Ilya Dryomov <idryomov@gmail.com>
-Cc: Haomai Wang <haomaiwang@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Jianhui Yuan <zuiwanyuan@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SGkgSWx5YSwgDQogICBXZSBjYW4gY2hhbmdlIHNlY3RvciBzaXplIGZyb20gNTEyIHRvIDQwOTYu
-IFRoaXMgY2FuIHJlZHVjZSB0aGUgY291bnQgb2Ygd3JpdGUuDQpJIGRpZCBhIHNpbXBsZSB0ZXN0
-OiBmb3IgOTAwRywgbWtmcy54ZnMgLWYNCkZvciBkZWZhdWx0OiAxbTEwcw0KUGh5c2ljYWwgc2Vj
-dG9yIHNpemUgPSA0MDk2OiAgMG0xMHMuDQoNCkJ1dCBpZiBjaGFuZ2Ugc2VjdG9yIHNpemUsIHdl
-IG5lZWQgcmJkIG1ldGEgcmVjb3JkIHRoaXMuDQoNClRoYW5rcyENCkppYW5wZW5nDQo+IC0tLS0t
-T3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJu
-ZWwub3JnDQo+IFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJl
-aGFsZiBPZiBodWFuZyBqdW4NCj4gU2VudDogVGh1cnNkYXksIEF1Z3VzdCAyNywgMjAxNSA4OjQ0
-IEFNDQo+IFRvOiBJbHlhIERyeW9tb3YNCj4gQ2M6IEhhb21haSBXYW5nOyBjZXBoLWRldmVsDQo+
-IFN1YmplY3Q6IFJlOiBmb3JtYXQgMlRCIHJiZCBkZXZpY2UgaXMgdG9vIHNsb3cNCj4gDQo+IGhp
-LGxseWENCj4gDQo+IDIwMTUtMDgtMjYgMjM6NTYgR01UKzA4OjAwIElseWEgRHJ5b21vdiA8aWRy
-eW9tb3ZAZ21haWwuY29tPjoNCj4gPiBPbiBXZWQsIEF1ZyAyNiwgMjAxNSBhdCA2OjIyIFBNLCBI
-YW9tYWkgV2FuZyA8aGFvbWFpd2FuZ0BnbWFpbC5jb20+DQo+IHdyb3RlOg0KPiA+PiBPbiBXZWQs
-IEF1ZyAyNiwgMjAxNSBhdCAxMToxNiBQTSwgaHVhbmcganVuIDxoandzbTE5ODlAZ21haWwuY29t
-Pg0KPiB3cm90ZToNCj4gPj4+IGhpLGFsbA0KPiA+Pj4gd2UgY3JlYXRlIGEgMlRCIHJiZCBpbWFn
-ZSwgYWZ0ZXIgbWFwIGl0IHRvIGxvY2FsLCB0aGVuIHdlIGZvcm1hdCBpdA0KPiA+Pj4gdG8geGZz
-IHdpdGggJ21rZnMueGZzIC9kZXYvcmJkMCcsIGl0IHNwZW50IDMxOCBzZWNvbmRzIHRvIGZpbmlz
-aCwNCj4gPj4+IGJ1dCAgbG9jYWwgcGh5c2ljYWwgZGlzayB3aXRoIHRoZSBzYW1lIHNpemUganVz
-dCBuZWVkIDYgc2Vjb25kcy4NCj4gPj4+DQo+ID4+DQo+ID4+IEkgdGhpbmsgbGlicmJkIGhhdmUg
-dHdvIFBSIHJlbGF0ZWQgdG8gdGhpcy4NCj4gPj4NCj4gPj4+IEFmdGVyIGRlYnVnLCB3ZSBmb3Vu
-ZCB0aGVyZSBhcmUgdHdvIHN0ZXBzIGluIHJiZCBtb2R1bGUgZHVyaW5nIGZvcm1hdGluZzoNCj4g
-Pj4+IGEpIHNlbmQgIDIzMzA5MyBERUxFVEUgcmVxdWVzdHMgdG8gb3NkcyhudW1iZXJfb2ZfcmVx
-dWVzdHMgPSAyVEIgLw0KPiA0TUIpLA0KPiA+Pj4gICAgdGhpcyBzdGVwIHNwZW50IGFsbW9zdCA5
-MiBzZWNvbmRzLg0KPiA+Pg0KPiA+PiBJIGd1ZXNzIHRoaXMoaHR0cHM6Ly9naXRodWIuY29tL2Nl
-cGgvY2VwaC9wdWxsLzQyMjEvZmlsZXMpIG1heSBoZWxwDQo+ID4NCj4gPiBJdCdzIHN1Ym1pdHRp
-bmcgZGVsZXRlcyBmb3Igbm9uLWV4aXN0ZW50IG9iamVjdHMsIG5vdCB6ZXJvaW5nLiAgVGhlDQo+
-ID4gb25seSB0aGluZyB0aGF0IHdpbGwgcmVhbGx5IGhlbHAgaGVyZSBpcyB0aGUgYWRkaXRpb24g
-b2YgcmJkIG9iamVjdA0KPiA+IG1hcCBzdXBwb3J0IHRvIHRoZSBrZXJuZWwgY2xpZW50LiAgVGhh
-dCBjb3VsZCBoYXBwZW4gaW4gNC40LCBidXQgNC41DQo+ID4gaXMgYSBzYWZlciBiZXQuDQo+ID4N
-Cj4gPj4NCj4gPj4+IGIpIHNlbmQgNDIzOCBtZXNzYWdlcyBsaWtlIHRoaXM6IFtzZXQtYWxsb2Mt
-aGludCBvYmplY3Rfc2l6ZSA0MTk0MzA0DQo+ID4+PiB3cml0ZV9zaXplIDQxOTQzMDQsd3JpdGUg
-MH41MTJdIHRvIG9zZHMsIHRoYXQgc3BlbnQgMjI3IHNlY29uZHMuDQo+ID4+DQo+ID4+IEkgdGhp
-bmsga2VybmVsIHJiZCBhbHNvIG5lZWQgdG8gdXNlDQo+ID4+IGh0dHBzOi8vZ2l0aHViLmNvbS9j
-ZXBoL2NlcGgvcHVsbC80OTgzL2ZpbGVzDQo+ID4NCj4gPiBzZXQtYWxsb2MtaGludCBtYXkgYmUg
-YSBwcm9ibGVtLCBidXQgSSB0aGluayBhIGJpZ2dlciBwcm9ibGVtIGlzIHRoZQ0KPiA+IHNpemUg
-b2YgdGhlIHdyaXRlLiAgQXJlIGFsbCB0aG9zZSB3cml0ZXMgNTEyIGJ5dGVzIGxvbmc/DQo+ID4N
-Cj4gSW4gYW5vdGhlciB0ZXN0IHRvIGZvcm1hdCAyVEIgcmJkIGRldmljZSwgdGhlcmUgYXJlIDoN
-Cj4gMiBtZXNzYWdlcyxlYWNoIHdyaXRlIDEzMTA3MiBieXRlcw0KPiA0MDAwIG1lc3NhZ2VzLCBl
-YWNoIHdyaXRlIDI2MjE0NCBieXRlcw0KPiAxMTIgbWVzc2FnZXMsIGVhY2ggd3JpdGUgNDA5NiBi
-eXRlcw0KPiAxOTQgbWVzc2FnZXMsIGVhY2ggd3JpdGUgNTEyIGJ5dGVzDQo+IA0KPiB0aGUgeGZz
-IGluZm86DQo+IG1ldGEtZGF0YSA9IC9kZXYvcmJkL3JiZC90ZXN0MnQgICAgaXNpemU9MjU2ICAg
-IGFnY291bnQ9MzMsDQo+IGFnc2l6ZT0xNjM4Mjk3NiBibGtzDQo+ICAgICAgICAgICAgICAgID0g
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHNlY3Rzej01MTINCj4gYXR0cj0yLA0KPiBw
-cm9qaWQzMmJpdD0xDQo+ICAgICAgICAgICAgICAgID0gICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgIGNyYz0wDQo+IGRhdGEgICAgICAgICA9ICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgIGJzaXplPTQwOTYNCj4gYmxvY2tzPTUyNDI4ODAwMCwgaW1heHBjdD01DQo+ICAgICAgICAg
-ICAgICAgID0gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgc3VuaXQ9MTAyNA0KPiBzd2lk
-dGg9MTAyNCBibGtzDQo+IG5hbWluZyAgICA9dmVyc2lvbiAyICAgICAgICAgICAgICAgICAgIGJz
-aXplPTQwOTYgICBhc2NpaS1jaT0wDQo+IGxvZyAgICAgICAgICA9aW50ZXJuYWwgbG9nICAgICAg
-ICAgICAgICAgICBic2l6ZT00MDk2ICAgYmxvY2tzPTI1NjAwMCwNCj4gdmVyc2lvbj0yDQo+ICAg
-ICAgICAgICAgICAgPSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHNlY3Rzej01MTIN
-Cj4gc3VuaXQ9OA0KPiBibGtzLCBsYXp5LWNvdW50PTENCj4gcmVhbHRpbWUgID1ub25lICAgICAg
-ICAgICAgICAgICAgICAgICAgICBleHRzej00MDk2ICAgYmxvY2tzPTAsDQo+IHJ0ZXh0ZW50cz0w
-DQo+IA0KPiA+IFRoYW5rcywNCj4gPg0KPiA+ICAgICAgICAgICAgICAgICBJbHlhDQo+IA0KPiAN
-Cj4gDQo+IC0tDQo+IHRoYW5rcw0KPiBodWFuZ2p1bg0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBm
-cm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4g
-dGhlIGJvZHkNCj4gb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9y
-ZSBtYWpvcmRvbW8gaW5mbyBhdA0KPiBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1p
-bmZvLmh0bWwNCg==
+On Fri, Aug 28, 2015 at 2:35 PM, Jianhui Yuan <zuiwanyuan@gmail.com> wrote:
+> Hi Haomai,
+>
+> when we use async messenger, the client(as: ceph -s) always stuck in
+> WorkerPool::barrier for 30 seconds. It seems the wakeup don't work.
+
+What's the ceph version and os version? It should be a bug we already
+fixed before.
+
+>
+> Then, I remove "already_wakeup" in wakeup. It seems to be working well. So,
+> can we just remove "already_wakeup". And do read in C_handle_notify until it
+> is not data to read.
+>
+> Jianhui Yuan
+
+
+
+-- 
+Best Regards,
+
+Wheat
