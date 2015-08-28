@@ -1,43 +1,51 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: format 2TB rbd device is too slow
-Date: Fri, 28 Aug 2015 12:22:34 +0300
-Message-ID: <CAOi1vP9Cx6VcZv7JJEjsT-jHpyB8RgRV7jDr2Xs4KLJMHr7v6Q@mail.gmail.com>
-References: <CABAwU-ahZz48B2VHfeyqssBv778fKoVeD5Z3x2=Xgcf42VxTbQ@mail.gmail.com>
-	<CACJqLyY0FrJDbi4VDzBa3aUBGu30A9soxbRbiiNpAL_Mttna+w@mail.gmail.com>
-	<CAOi1vP__WA0+Q1xfRwcvNfs6_7T3OeA7Wdsw58taZt1arNR+bg@mail.gmail.com>
-	<CABAwU-YnEw2mzpF-EwMoWLrTmDdSt+XPQ0dgawigkbH7rGMtuw@mail.gmail.com>
-	<6AA21C22F0A5DA478922644AD2EC308C1D1A5038@SHSMSX101.ccr.corp.intel.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: [ceph-users] Opensource plugin for pulling out cluster recovery
+ and client IO metric
+Date: Fri, 28 Aug 2015 12:07:39 +0100
+Message-ID: <CAJ4mKGbOm8DMyPCzi_NFKVYBrnSW4UvGWuWB_EBp69Oc4tdSaQ@mail.gmail.com>
+References: <CALL4jwPkeHemknEWypgTzAE7kSa9F+pyZZQUWJwYFY6OQWTFbQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f54.google.com ([209.85.215.54]:34092 "EHLO
-	mail-la0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752023AbbH1JWg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Aug 2015 05:22:36 -0400
-Received: by laba3 with SMTP id a3so28626525lab.1
-        for <ceph-devel@vger.kernel.org>; Fri, 28 Aug 2015 02:22:34 -0700 (PDT)
-In-Reply-To: <6AA21C22F0A5DA478922644AD2EC308C1D1A5038@SHSMSX101.ccr.corp.intel.com>
+Received: from mail-wi0-f173.google.com ([209.85.212.173]:32912 "EHLO
+	mail-wi0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752056AbbH1LHk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Aug 2015 07:07:40 -0400
+Received: by wieo17 with SMTP id o17so11729789wie.0
+        for <ceph-devel@vger.kernel.org>; Fri, 28 Aug 2015 04:07:39 -0700 (PDT)
+In-Reply-To: <CALL4jwPkeHemknEWypgTzAE7kSa9F+pyZZQUWJwYFY6OQWTFbQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Ma, Jianpeng" <jianpeng.ma@intel.com>
-Cc: huang jun <hjwsm1989@gmail.com>, Haomai Wang <haomaiwang@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Vickey Singh <vickey.singh22693@gmail.com>
+Cc: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, ceph-users <ceph-users@ceph.com>, ceph-devel@vger.kernel.org
 
-On Fri, Aug 28, 2015 at 10:36 AM, Ma, Jianpeng <jianpeng.ma@intel.com> wrote:
-> Hi Ilya,
->    We can change sector size from 512 to 4096. This can reduce the count of write.
-> I did a simple test: for 900G, mkfs.xfs -f
-> For default: 1m10s
-> Physical sector size = 4096:  0m10s.
+On Mon, Aug 24, 2015 at 4:03 PM, Vickey Singh
+<vickey.singh22693@gmail.com> wrote:
+> Hello Ceph Geeks
 >
-> But if change sector size, we need rbd meta record this.
+> I am planning to develop a python plugin that pulls out cluster recovery IO
+> and client IO operation metrics , that can be further used with collectd.
+>
+> For example , i need to take out these values
+>
+> recovery io 814 MB/s, 101 objects/s
+> client io 85475 kB/s rd, 1430 kB/s wr, 32 op/s
+>
+>
+> Could you please help me in understanding how ceph -s  and ceph -w outputs
+> prints cluster recovery IO and client IO information.
+> Where this information is coming from. Is it coming from perf dump ? If yes
+> then which section of perf dump output is should focus on. If not then how
+> can i get this values.
+>
+> I tried ceph --admin-daemon /var/run/ceph/ceph-osd.48.asok perf dump , but
+> it generates hell lot of information and i am confused which section of
+> output should i use.
 
-What exactly do you mean by changing the sector size?  xfs sector size
-or physical block size of the rbd device?  If the latter, meaning
-mkfs.xfs -s size 4096, I fail to see how it can result in the above
-numbers.  If the former, you have to patch the kernel and I fail to see
-how it can result in such an improvement too.  I probably didn't have
-enough coffee, please elaborate.
-
-Thanks,
-
-                Ilya
+This information is generated only on the monitors based on pg stats
+from the OSDs, is slightly laggy, and can be most easily accessed by
+calling "ceph -s" on a regular basis. You can get it with json output
+that is easier to parse, and you can optionally set up an API server
+for more programmatic access. I'm not sure on the details of doing
+that last, though.
+-Greg
