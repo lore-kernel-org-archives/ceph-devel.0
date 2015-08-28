@@ -1,61 +1,45 @@
 From: Loic Dachary <loic@dachary.org>
-Subject: Hammer backport and bypassing procedure
-Date: Fri, 28 Aug 2015 21:16:38 +0200
-Message-ID: <55E0B396.2090602@dachary.org>
+Subject: v0.94.3 is published -> toward v0.94.4
+Date: Fri, 28 Aug 2015 21:21:11 +0200
+Message-ID: <55E0B4A7.1010604@dachary.org>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="57MiWgjVFCeCNwS52G07uIocTaXa5WmG3"
+ boundary="eVOCmrMoUhihlOLWu0iDw1ma5bdaNTlSF"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:45506 "EHLO
+Received: from mail2.dachary.org ([91.121.57.175]:45510 "EHLO
 	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752164AbbH1TQl (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Aug 2015 15:16:41 -0400
+	with ESMTP id S1752719AbbH1TVN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Aug 2015 15:21:13 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Abhishek Varshney <abhishek.varshney@flipkart.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Abhishek L <abhishek.lekshmanan@gmail.com>
 
 This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---57MiWgjVFCeCNwS52G07uIocTaXa5WmG3
+--eVOCmrMoUhihlOLWu0iDw1ma5bdaNTlSF
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
 
 Hi Abhishek,
 
-We've just had an example of a backport merged into hammer although it di=
-d not follow the procedure : https://github.com/ceph/ceph/pull/5691
+Since v0.94.3 was published after we started work on v0.94.4, part of htt=
+p://tracker.ceph.com/projects/ceph-releases/wiki/HOWTO_start_working_on_a=
+_new_point_release was not done yet. I've updated the HWOTO page to link =
+to the v0.94.4 page:
 
-It's a key aspect of backports : we're bound to follow procedure, but dev=
-elopers are allowed to bypass it entirely. It may seem like something lea=
-ding to chaos and frustration but it turns out to be exactly the opposite=
-=2E In a nutshell, it would be constant source of frustration for develop=
-ers to learn and obey the rules documented at http://tracker.ceph.com/pro=
-jects/ceph-releases/wiki/HOWTO because it would not benefit them signific=
-antly. It would also be a problem for us, backporters, because developers=
- would not be as interested in backporting and our workload would signifi=
-cantly increase.
+http://tracker.ceph.com/projects/ceph-releases/wiki/HOWTO/diff?utf8=3D%E2=
+%9C%93&version=3D66&version_from=3D65&commit=3DView+differences
 
-When a developer prepares a backport on his / her own, we update the pull=
- request and the issues to obey the procedure so the (s)he does not have =
-to. Sure, it's a little tedious but it's a small price to pay for the ben=
-efit of having a backport being dealt with. That's what I did for https:/=
-/github.com/ceph/ceph/pull/5691 : updaging the corresponding issues, addi=
-ng cross references to the pull request.
-
-Samuel Just felt confident enough about the backport that it did not need=
- a rados run to verify it does the right thing. Since it's ultimately Sam=
-'s responsibility, that's also ok. The only thing we need to keep in mind=
- when analyzing the next rados run is that this backport did not pass yet=
-=2E We don't have a way to mark commits that bypassed tests just yet, if =
-you have ideas let us know :-)
+Please let me know if you see anything else I've missed.
 
 Cheers
+
 --=20
 Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
 
---57MiWgjVFCeCNwS52G07uIocTaXa5WmG3
+--eVOCmrMoUhihlOLWu0iDw1ma5bdaNTlSF
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -63,9 +47,9 @@ Content-Disposition: attachment; filename="signature.asc"
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2.0.22 (GNU/Linux)
 
-iEYEARECAAYFAlXgs5YACgkQ8dLMyEl6F20ahwCfe5MfdA1O0xIXW74RONOZUn3h
-PKMAoIVWxVf+AQe7lMwE2drQRXNsH1qA
-=lGJK
+iEYEARECAAYFAlXgtKcACgkQ8dLMyEl6F22vmACffBBkYy1q2yMypwgEmUidbFdx
+WOwAoLUpKqOoijsO2wurFKJVP8tfxTmj
+=sSIv
 -----END PGP SIGNATURE-----
 
---57MiWgjVFCeCNwS52G07uIocTaXa5WmG3--
+--eVOCmrMoUhihlOLWu0iDw1ma5bdaNTlSF--
