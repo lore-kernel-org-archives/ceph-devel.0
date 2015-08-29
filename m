@@ -1,17 +1,17 @@
 From: Loic Dachary <loic@dachary.org>
 Subject: Re: hammer integration branch
-Date: Sat, 29 Aug 2015 20:04:46 +0200
-Message-ID: <55E1F43E.9000007@dachary.org>
+Date: Sat, 29 Aug 2015 20:25:57 +0200
+Message-ID: <55E1F935.4020007@dachary.org>
 References: <55E17F9E.4060507@dachary.org> <CAP3mxSzo1Bu0-f1HxaNw4KU3kqRC9DmNrfmAYYN+BhGisiHVsw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="5IXb0hVPc9cdXX3vMMWRAMCLfNGf1sqot"
+ boundary="Mssk7sELtepuEDsL0phbn57f7JluJVipp"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:45978 "EHLO
+Received: from mail2.dachary.org ([91.121.57.175]:45993 "EHLO
 	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751356AbbH2SEu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 29 Aug 2015 14:04:50 -0400
+	with ESMTP id S1752880AbbH2S0B (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 29 Aug 2015 14:26:01 -0400
 In-Reply-To: <CAP3mxSzo1Bu0-f1HxaNw4KU3kqRC9DmNrfmAYYN+BhGisiHVsw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -19,7 +19,7 @@ To: Abhishek Varshney <abhishek.varshney@flipkart.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
 This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---5IXb0hVPc9cdXX3vMMWRAMCLfNGf1sqot
+--Mssk7sELtepuEDsL0phbn57f7JluJVipp
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
 
@@ -34,35 +34,10 @@ se review.
 > Also, does it mean that the PRs in this integration branch are ready to=
  be merged to hammer now?
 
-Not just yet. We've just confirmed that there is no issue with upgrades w=
-hich is good. But we're still to analyze the results of the previous run =
-at
+I confess I don't quite remember what the conclusion was regarding the rg=
+w suite errors and it looks like I failed to record it. Do you ?
 
-http://tracker.ceph.com/issues/12701#teuthology-run-commit-e1dadd3da9e39d=
-af669f94715c7833d2b280bbed-HAMMER-BACKPORTS-August-14
-
-
-In a nutshell:
-
-* http://tracker.ceph.com/issues/12701#fs pass and we can consider mergin=
-g the CephFS pull requests
-
-Unless I missed something, there is just one
-
-* https://github.com/ceph/ceph/pull/5381
-
-Since I authored the backport, we need to ask permission before merging. =
-See
-
-http://tracker.ceph.com/projects/ceph-releases/wiki/HOWTO_merge_commits_f=
-rom_the_integration_branch
-
-for how to do that. Would you like to do it ?
-
-For the other suites, further analysis of the errors must be done to figu=
-re out what's a false negative and what could be a genuine error.
-
-Cheers
+http://tracker.ceph.com/issues/12701#rgw
 
 >=20
 > Thanks
@@ -110,7 +85,7 @@ or any loss or damage arising from the use of this email or attachments
 Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
 
---5IXb0hVPc9cdXX3vMMWRAMCLfNGf1sqot
+--Mssk7sELtepuEDsL0phbn57f7JluJVipp
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -118,9 +93,9 @@ Content-Disposition: attachment; filename="signature.asc"
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2.0.22 (GNU/Linux)
 
-iEYEARECAAYFAlXh9D4ACgkQ8dLMyEl6F20A7ACgrbsbegW0r5LkN5PAq5Ax7zKE
-J/sAmwQXRKVHiMSqZ5xLol+7dKwuxdqC
-=6S1c
+iEYEARECAAYFAlXh+TUACgkQ8dLMyEl6F20WqwCfRhi6dYpmmcDySwsYLcDoXuJW
+ifEAn1nrlPiX+omypyx59pgu+UYDnipu
+=7ZPh
 -----END PGP SIGNATURE-----
 
---5IXb0hVPc9cdXX3vMMWRAMCLfNGf1sqot--
+--Mssk7sELtepuEDsL0phbn57f7JluJVipp--
