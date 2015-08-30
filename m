@@ -1,34 +1,38 @@
 From: Loic Dachary <loic@dachary.org>
-Subject: [Backports] updating the release field
-Date: Sun, 30 Aug 2015 14:02:49 +0200
-Message-ID: <55E2F0E9.5080204@dachary.org>
+Subject: Improving shared backport efforts
+Date: Sun, 30 Aug 2015 17:39:11 +0200
+Message-ID: <55E3239F.7030806@dachary.org>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="6dXsN1Sm9FxW4M5VFeQFKnacU85xcnmD7"
+ boundary="Oh6aJhD664eP2PWt3TDI69fpDIJfXaF3N"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:46196 "EHLO
+Received: from mail2.dachary.org ([91.121.57.175]:46287 "EHLO
 	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753324AbbH3MCy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 30 Aug 2015 08:02:54 -0400
+	with ESMTP id S1753468AbbH3PjQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 30 Aug 2015 11:39:16 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Abhishek L <abhishek.lekshmanan@gmail.com>, Abhishek Varshney <abhishek.varshney@flipkart.com>, Nathan Cutler <ncutler@suse.cz>
+To: Ken Dreyer <kdreyer@redhat.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
 This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---6dXsN1Sm9FxW4M5VFeQFKnacU85xcnmD7
+--Oh6aJhD664eP2PWt3TDI69fpDIJfXaF3N
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
 
-Hi,
+Hi Ken,
 
-I created a custom search to find the resolved backports that are missing=
- a release field value. It found a few and they are now updated. I've add=
-ed it to our recurring duties at:
+The tip you left at http://tracker.ceph.com/issues/12591 regarding the ba=
+ckport of "rgw: create a tool for orphaned objects cleanup" was quite use=
+ful, thank you !
 
-http://tracker.ceph.com/projects/ceph-releases/wiki/HOWTO#Recurring-dutie=
-s-expected-from-backporters
+I'm curious about what made it inconvenient for you to push a pull reques=
+t when you did that backport. Maybe you just did not have time to do it, =
+in which case all is well. But maybe it was because something in the back=
+port procedures was confusing or blocking you, in which case I'm eager to=
+ fix it. It's really selfish of me: every backport you publish is one les=
+s in the queue of the stable release team ;-)
 
 Cheers
 
@@ -36,7 +40,7 @@ Cheers
 Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
 
---6dXsN1Sm9FxW4M5VFeQFKnacU85xcnmD7
+--Oh6aJhD664eP2PWt3TDI69fpDIJfXaF3N
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -44,9 +48,9 @@ Content-Disposition: attachment; filename="signature.asc"
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2.0.22 (GNU/Linux)
 
-iEYEARECAAYFAlXi8OkACgkQ8dLMyEl6F23PFACeNiS3Tp7FhczdtxbmOKVvF7yT
-ozEAoJYO+iSkhLFVrciDesZNayGqerFI
-=o4Q8
+iEYEARECAAYFAlXjI6AACgkQ8dLMyEl6F23qoQCdGHYCZ/vCl0ODoCGO3lSaLvmE
+lAEAoI29yfGlm2DUT7Lq+4AE09p7Hk9U
+=ZzNi
 -----END PGP SIGNATURE-----
 
---6dXsN1Sm9FxW4M5VFeQFKnacU85xcnmD7--
+--Oh6aJhD664eP2PWt3TDI69fpDIJfXaF3N--
