@@ -1,74 +1,48 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: format 2TB rbd device is too slow
-Date: Mon, 31 Aug 2015 10:34:53 +0300
-Message-ID: <CAOi1vP_nN9k0U-TgiWk4W-0n22X+py+n0Kx_P0mQJi4-GaV9HQ@mail.gmail.com>
-References: <CABAwU-ahZz48B2VHfeyqssBv778fKoVeD5Z3x2=Xgcf42VxTbQ@mail.gmail.com>
-	<CACJqLyY0FrJDbi4VDzBa3aUBGu30A9soxbRbiiNpAL_Mttna+w@mail.gmail.com>
-	<CAOi1vP__WA0+Q1xfRwcvNfs6_7T3OeA7Wdsw58taZt1arNR+bg@mail.gmail.com>
-	<CABAwU-YnEw2mzpF-EwMoWLrTmDdSt+XPQ0dgawigkbH7rGMtuw@mail.gmail.com>
-	<6AA21C22F0A5DA478922644AD2EC308C1D1A5038@SHSMSX101.ccr.corp.intel.com>
-	<CAOi1vP9Cx6VcZv7JJEjsT-jHpyB8RgRV7jDr2Xs4KLJMHr7v6Q@mail.gmail.com>
-	<6AA21C22F0A5DA478922644AD2EC308C1D1A53B7@SHSMSX101.ccr.corp.intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Subject: [PATCH] rbd: fix double free on rbd_dev->header_name
+Date: Mon, 31 Aug 2015 15:47:28 +0300
+Message-ID: <1441025248-50599-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f49.google.com ([209.85.215.49]:35637 "EHLO
-	mail-la0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752850AbbHaHey (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 31 Aug 2015 03:34:54 -0400
-Received: by lanb10 with SMTP id b10so30314408lan.2
-        for <ceph-devel@vger.kernel.org>; Mon, 31 Aug 2015 00:34:53 -0700 (PDT)
-In-Reply-To: <6AA21C22F0A5DA478922644AD2EC308C1D1A53B7@SHSMSX101.ccr.corp.intel.com>
+Received: from mail-wi0-f175.google.com ([209.85.212.175]:34761 "EHLO
+	mail-wi0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752668AbbHaMrq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 31 Aug 2015 08:47:46 -0400
+Received: by widfa3 with SMTP id fa3so23882317wid.1
+        for <ceph-devel@vger.kernel.org>; Mon, 31 Aug 2015 05:47:45 -0700 (PDT)
+Received: from orange.local.localdomain ([109.110.67.18])
+        by smtp.gmail.com with ESMTPSA id w8sm17928143wiy.10.2015.08.31.05.47.43
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Mon, 31 Aug 2015 05:47:44 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Ma, Jianpeng" <jianpeng.ma@intel.com>
-Cc: huang jun <hjwsm1989@gmail.com>, Haomai Wang <haomaiwang@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Mon, Aug 31, 2015 at 4:21 AM, Ma, Jianpeng <jianpeng.ma@intel.com> wrote:
-> Ilya
->  I modify kernel code. The patch like this:
-> [root@dev linux]# git diff
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index bc67a93..e4c4ea9 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -55,7 +55,7 @@
->   * universally 512 bytes.  These symbols are just slightly more
->   * meaningful than the bare numbers they represent.
->   */
-> -#define        SECTOR_SHIFT    9
-> +#define        SECTOR_SHIFT    12
->  #define        SECTOR_SIZE     (1ULL << SECTOR_SHIFT)
->
->  /*
-> @@ -3811,6 +3811,7 @@ static int rbd_init_disk(struct rbd_device *rbd_dev)
->         blk_queue_io_min(q, segment_size);
->         blk_queue_io_opt(q, segment_size);
->
-> +       blk_queue_physical_block_size(q, SECTOR_SIZE);
->         /* enable the discard support */
->         queue_flag_set_unlocked(QUEUE_FLAG_DISCARD, q);
->         q->limits.discard_granularity = segment_size;
->
-> I don't know the exact why this can decrease the time.
+If rbd_dev_image_probe() in rbd_dev_probe_parent() fails, header_name
+is freed twice: once in rbd_dev_probe_parent() and then in its caller
+rbd_dev_image_probe() (rbd_dev_image_probe() is called recursively to
+handle parent images).
 
-Well, that's the answer ;)  set_capacity()'s @size is always in 512
-byte sectors, and it's called as follows in rbd:
+rbd_dev_probe_parent() is responsible for probing the parent, so it
+shoudn't mock with clone's fields.
 
-    set_capacity(rbd_dev->disk, rbd_dev->mapping.size / SECTOR_SIZE);
+Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+---
+ drivers/block/rbd.c | 1 -
+ 1 file changed, 1 deletion(-)
 
-By changing the SECTOR_SIZE from 512 to 4096 (i.e. by a factor of 8)
-you just shrink the block device by the same factor.  What used to be
-a 2T mapping would now be a 256G mapping, and since the amount of data
-mkfs.xfs has to write is proportional to the size of the device, your
-7 times decrease in time is easily explained by an 8 times decrease in
-size of the mapping.
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index bc67a93aa4f4..324bf35ec4dd 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -5201,7 +5201,6 @@ static int rbd_dev_probe_parent(struct rbd_device *rbd_dev)
+ out_err:
+ 	if (parent) {
+ 		rbd_dev_unparent(rbd_dev);
+-		kfree(rbd_dev->header_name);
+ 		rbd_dev_destroy(parent);
+ 	} else {
+ 		rbd_put_client(rbdc);
+-- 
+1.9.3
 
->
-> For the -b of mkfs.xfs, I try for 65536. But it don't change any.
-
-Right.
-
-Thanks,
-
-                Ilya
