@@ -1,62 +1,34 @@
-From: "Ma, Jianpeng" <jianpeng.ma@intel.com>
-Subject: RE: format 2TB rbd device is too slow
-Date: Mon, 31 Aug 2015 01:21:55 +0000
-Message-ID: <6AA21C22F0A5DA478922644AD2EC308C1D1A53B7@SHSMSX101.ccr.corp.intel.com>
-References: <CABAwU-ahZz48B2VHfeyqssBv778fKoVeD5Z3x2=Xgcf42VxTbQ@mail.gmail.com>
-	<CACJqLyY0FrJDbi4VDzBa3aUBGu30A9soxbRbiiNpAL_Mttna+w@mail.gmail.com>
-	<CAOi1vP__WA0+Q1xfRwcvNfs6_7T3OeA7Wdsw58taZt1arNR+bg@mail.gmail.com>
-	<CABAwU-YnEw2mzpF-EwMoWLrTmDdSt+XPQ0dgawigkbH7rGMtuw@mail.gmail.com>
-	<6AA21C22F0A5DA478922644AD2EC308C1D1A5038@SHSMSX101.ccr.corp.intel.com>
- <CAOi1vP9Cx6VcZv7JJEjsT-jHpyB8RgRV7jDr2Xs4KLJMHr7v6Q@mail.gmail.com>
+From: Alexandre DERUMIER <aderumier@odiso.com>
+Subject: debian jessie repository ?
+Date: Mon, 31 Aug 2015 07:27:37 +0200 (CEST)
+Message-ID: <1335215704.12402856.1440998857436.JavaMail.zimbra@oxygem.tv>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:34176 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751433AbbHaBWA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 30 Aug 2015 21:22:00 -0400
-In-Reply-To: <CAOi1vP9Cx6VcZv7JJEjsT-jHpyB8RgRV7jDr2Xs4KLJMHr7v6Q@mail.gmail.com>
-Content-Language: en-US
+Received: from mailpro.odiso.net ([89.248.209.98]:42278 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750912AbbHaF1j (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 31 Aug 2015 01:27:39 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: huang jun <hjwsm1989@gmail.com>, Haomai Wang <haomaiwang@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>, sepia@ceph.com
 
-SWx5YQ0KIEkgbW9kaWZ5IGtlcm5lbCBjb2RlLiBUaGUgcGF0Y2ggbGlrZSB0aGlzOg0KW3Jvb3RA
-ZGV2IGxpbnV4XSMgZ2l0IGRpZmYNCmRpZmYgLS1naXQgYS9kcml2ZXJzL2Jsb2NrL3JiZC5jIGIv
-ZHJpdmVycy9ibG9jay9yYmQuYw0KaW5kZXggYmM2N2E5My4uZTRjNGVhOSAxMDA2NDQNCi0tLSBh
-L2RyaXZlcnMvYmxvY2svcmJkLmMNCisrKyBiL2RyaXZlcnMvYmxvY2svcmJkLmMNCkBAIC01NSw3
-ICs1NSw3IEBADQogICogdW5pdmVyc2FsbHkgNTEyIGJ5dGVzLiAgVGhlc2Ugc3ltYm9scyBhcmUg
-anVzdCBzbGlnaHRseSBtb3JlDQogICogbWVhbmluZ2Z1bCB0aGFuIHRoZSBiYXJlIG51bWJlcnMg
-dGhleSByZXByZXNlbnQuDQogICovDQotI2RlZmluZSAgICAgICAgU0VDVE9SX1NISUZUICAgIDkN
-CisjZGVmaW5lICAgICAgICBTRUNUT1JfU0hJRlQgICAgMTINCiAjZGVmaW5lICAgICAgICBTRUNU
-T1JfU0laRSAgICAgKDFVTEwgPDwgU0VDVE9SX1NISUZUKQ0KDQogLyoNCkBAIC0zODExLDYgKzM4
-MTEsNyBAQCBzdGF0aWMgaW50IHJiZF9pbml0X2Rpc2soc3RydWN0IHJiZF9kZXZpY2UgKnJiZF9k
-ZXYpDQogICAgICAgIGJsa19xdWV1ZV9pb19taW4ocSwgc2VnbWVudF9zaXplKTsNCiAgICAgICAg
-YmxrX3F1ZXVlX2lvX29wdChxLCBzZWdtZW50X3NpemUpOw0KDQorICAgICAgIGJsa19xdWV1ZV9w
-aHlzaWNhbF9ibG9ja19zaXplKHEsIFNFQ1RPUl9TSVpFKTsNCiAgICAgICAgLyogZW5hYmxlIHRo
-ZSBkaXNjYXJkIHN1cHBvcnQgKi8NCiAgICAgICAgcXVldWVfZmxhZ19zZXRfdW5sb2NrZWQoUVVF
-VUVfRkxBR19ESVNDQVJELCBxKTsNCiAgICAgICAgcS0+bGltaXRzLmRpc2NhcmRfZ3JhbnVsYXJp
-dHkgPSBzZWdtZW50X3NpemU7DQoNCkkgZG9uJ3Qga25vdyB0aGUgZXhhY3Qgd2h5IHRoaXMgY2Fu
-IGRlY3JlYXNlIHRoZSB0aW1lLg0KDQpGb3IgdGhlIC1iIG9mIG1rZnMueGZzLCBJIHRyeSBmb3Ig
-NjU1MzYuIEJ1dCBpdCBkb24ndCBjaGFuZ2UgYW55Lg0KDQoNClRoYW5rcyENCg0KPiAtLS0tLU9y
-aWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBJbHlhIERyeW9tb3YgW21haWx0bzppZHJ5b21v
-dkBnbWFpbC5jb21dDQo+IFNlbnQ6IEZyaWRheSwgQXVndXN0IDI4LCAyMDE1IDU6MjMgUE0NCj4g
-VG86IE1hLCBKaWFucGVuZw0KPiBDYzogaHVhbmcganVuOyBIYW9tYWkgV2FuZzsgY2VwaC1kZXZl
-bA0KPiBTdWJqZWN0OiBSZTogZm9ybWF0IDJUQiByYmQgZGV2aWNlIGlzIHRvbyBzbG93DQo+IA0K
-PiBPbiBGcmksIEF1ZyAyOCwgMjAxNSBhdCAxMDozNiBBTSwgTWEsIEppYW5wZW5nIDxqaWFucGVu
-Zy5tYUBpbnRlbC5jb20+DQo+IHdyb3RlOg0KPiA+IEhpIElseWEsDQo+ID4gICAgV2UgY2FuIGNo
-YW5nZSBzZWN0b3Igc2l6ZSBmcm9tIDUxMiB0byA0MDk2LiBUaGlzIGNhbiByZWR1Y2UgdGhlIGNv
-dW50DQo+IG9mIHdyaXRlLg0KPiA+IEkgZGlkIGEgc2ltcGxlIHRlc3Q6IGZvciA5MDBHLCBta2Zz
-LnhmcyAtZiBGb3IgZGVmYXVsdDogMW0xMHMgUGh5c2ljYWwNCj4gPiBzZWN0b3Igc2l6ZSA9IDQw
-OTY6ICAwbTEwcy4NCj4gPg0KPiA+IEJ1dCBpZiBjaGFuZ2Ugc2VjdG9yIHNpemUsIHdlIG5lZWQg
-cmJkIG1ldGEgcmVjb3JkIHRoaXMuDQo+IA0KPiBXaGF0IGV4YWN0bHkgZG8geW91IG1lYW4gYnkg
-Y2hhbmdpbmcgdGhlIHNlY3RvciBzaXplPyAgeGZzIHNlY3RvciBzaXplIG9yDQo+IHBoeXNpY2Fs
-IGJsb2NrIHNpemUgb2YgdGhlIHJiZCBkZXZpY2U/ICBJZiB0aGUgbGF0dGVyLCBtZWFuaW5nIG1r
-ZnMueGZzIC1zIHNpemUNCj4gNDA5NiwgSSBmYWlsIHRvIHNlZSBob3cgaXQgY2FuIHJlc3VsdCBp
-biB0aGUgYWJvdmUgbnVtYmVycy4gIElmIHRoZSBmb3JtZXIsIHlvdQ0KPiBoYXZlIHRvIHBhdGNo
-IHRoZSBrZXJuZWwgYW5kIEkgZmFpbCB0byBzZWUgaG93IGl0IGNhbiByZXN1bHQgaW4gc3VjaCBh
-bg0KPiBpbXByb3ZlbWVudCB0b28uICBJIHByb2JhYmx5IGRpZG4ndCBoYXZlIGVub3VnaCBjb2Zm
-ZWUsIHBsZWFzZSBlbGFib3JhdGUuDQo+IA0KPiBUaGFua3MsDQo+IA0KPiAgICAgICAgICAgICAg
-ICAgSWx5YQ0K
+Hi,
+
+any news for to add an official debian jessie repository on ceph.com?
+
+
+gitbuilder repository is available since some weeks
+
+http://gitbuilder.ceph.com/ceph-deb-jessie-x86_64-basic/ref/
+
+
+Is it something blocking the release of the packages ? 
+
+Regards,
+
+Alexandre
+
+
+
