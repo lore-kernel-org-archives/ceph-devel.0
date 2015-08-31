@@ -1,47 +1,51 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH] rbd: plug rbd_dev->header.object_prefix memory leak
-Date: Mon, 31 Aug 2015 20:02:38 +0300
-Message-ID: <1441040558-8977-1-git-send-email-idryomov@gmail.com>
+From: Ken Dreyer <kdreyer@redhat.com>
+Subject: Re: Improving shared backport efforts
+Date: Mon, 31 Aug 2015 13:51:37 -0600
+Message-ID: <CALqRxCwwgMQGP+XATjSX7TFR66xrZpvAdeKD8ykvdAi9ssMn7w@mail.gmail.com>
+References: <55E3239F.7030806@dachary.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f170.google.com ([209.85.212.170]:32815 "EHLO
-	mail-wi0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753340AbbHaRCx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 31 Aug 2015 13:02:53 -0400
-Received: by wicmc4 with SMTP id mc4so6578736wic.0
-        for <ceph-devel@vger.kernel.org>; Mon, 31 Aug 2015 10:02:51 -0700 (PDT)
-Received: from orange.local.localdomain ([109.110.66.71])
-        by smtp.gmail.com with ESMTPSA id lz10sm23031893wjb.48.2015.08.31.10.02.50
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 31 Aug 2015 10:02:51 -0700 (PDT)
+Received: from mail-wi0-f177.google.com ([209.85.212.177]:34243 "EHLO
+	mail-wi0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754021AbbHaTvj convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 31 Aug 2015 15:51:39 -0400
+Received: by wicjd9 with SMTP id jd9so10738732wic.1
+        for <ceph-devel@vger.kernel.org>; Mon, 31 Aug 2015 12:51:37 -0700 (PDT)
+In-Reply-To: <55E3239F.7030806@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Need to free object_prefix when rbd_dev_v2_snap_context() fails, but
-only if this is the first time we are reading in the header.
+Hi Loic,
 
-Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
----
- drivers/block/rbd.c | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+Exactly, I didn't have the time do the actual PR myself :(
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 324bf35ec4dd..69d03aa46d0d 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -4720,7 +4720,10 @@ static int rbd_dev_v2_header_info(struct rbd_device *rbd_dev)
- 	}
- 
- 	ret = rbd_dev_v2_snap_context(rbd_dev);
--	dout("rbd_dev_v2_snap_context returned %d\n", ret);
-+	if (ret && first_time) {
-+		kfree(rbd_dev->header.object_prefix);
-+		rbd_dev->header.object_prefix = NULL;
-+	}
- 
- 	return ret;
- }
--- 
-1.9.3
+- Ken
 
+On Sun, Aug 30, 2015 at 9:39 AM, Loic Dachary <loic@dachary.org> wrote:
+> Hi Ken,
+>
+> The tip you left at http://tracker.ceph.com/issues/12591 regarding th=
+e backport of "rgw: create a tool for orphaned objects cleanup" was qui=
+te useful, thank you !
+>
+> I'm curious about what made it inconvenient for you to push a pull re=
+quest when you did that backport. Maybe you just did not have time to d=
+o it, in which case all is well. But maybe it was because something in =
+the backport procedures was confusing or blocking you, in which case I'=
+m eager to fix it. It's really selfish of me: every backport you publis=
+h is one less in the queue of the stable release team ;-)
+>
+> Cheers
+>
+> --
+> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
