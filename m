@@ -1,51 +1,50 @@
-From: Ken Dreyer <kdreyer@redhat.com>
-Subject: Re: Improving shared backport efforts
-Date: Mon, 31 Aug 2015 13:51:37 -0600
-Message-ID: <CALqRxCwwgMQGP+XATjSX7TFR66xrZpvAdeKD8ykvdAi9ssMn7w@mail.gmail.com>
-References: <55E3239F.7030806@dachary.org>
+From: Loic Dachary <loic@dachary.org>
+Subject: devicemapper and udev events
+Date: Tue, 01 Sep 2015 00:09:38 +0200
+Message-ID: <55E4D0A2.6040302@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="d8wsI819lkHDXFvOcuStQQRTxM6JS8Mxm"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f177.google.com ([209.85.212.177]:34243 "EHLO
-	mail-wi0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754021AbbHaTvj convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 31 Aug 2015 15:51:39 -0400
-Received: by wicjd9 with SMTP id jd9so10738732wic.1
-        for <ceph-devel@vger.kernel.org>; Mon, 31 Aug 2015 12:51:37 -0700 (PDT)
-In-Reply-To: <55E3239F.7030806@dachary.org>
+Received: from mail2.dachary.org ([91.121.57.175]:47093 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751381AbbHaWJn (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 31 Aug 2015 18:09:43 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
+To: Ilya Dryomov <idryomov@gmail.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Loic,
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--d8wsI819lkHDXFvOcuStQQRTxM6JS8Mxm
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-Exactly, I didn't have the time do the actual PR myself :(
+Hi Ilya,
 
-- Ken
+While working on multipath, I noticed that udev add event are not trigger=
+ed when /dev/dm-0 etc. are created. Should I expect a udev add event for =
+every device ? Or does it not apply to devices created by / with devicema=
+pper ?=20
 
-On Sun, Aug 30, 2015 at 9:39 AM, Loic Dachary <loic@dachary.org> wrote:
-> Hi Ken,
->
-> The tip you left at http://tracker.ceph.com/issues/12591 regarding th=
-e backport of "rgw: create a tool for orphaned objects cleanup" was qui=
-te useful, thank you !
->
-> I'm curious about what made it inconvenient for you to push a pull re=
-quest when you did that backport. Maybe you just did not have time to d=
-o it, in which case all is well. But maybe it was because something in =
-the backport procedures was confusing or blocking you, in which case I'=
-m eager to fix it. It's really selfish of me: every backport you publis=
-h is one less in the queue of the stable release team ;-)
->
-> Cheers
->
-> --
-> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thanks in advance for your insights :-)
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--d8wsI819lkHDXFvOcuStQQRTxM6JS8Mxm
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlXk0KMACgkQ8dLMyEl6F20bEQCgkL1gr3DYeBQ6boE4/ngEkqzj
+k8cAoI5l+FgM3PI5jVr2PRFK/plgXJto
+=xptV
+-----END PGP SIGNATURE-----
+
+--d8wsI819lkHDXFvOcuStQQRTxM6JS8Mxm--
