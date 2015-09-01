@@ -1,73 +1,56 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: devicemapper and udev events
-Date: Tue, 01 Sep 2015 13:02:51 +0200
-Message-ID: <55E585DB.3020404@dachary.org>
-References: <55E4D0A2.6040302@dachary.org> <CAOi1vP_ME6TyKtTS9PQbfJmwUu4LP4Vh7rAqbHTLY-QGcAv9UQ@mail.gmail.com>
+From: Alex Elder <elder@ieee.org>
+Subject: Re: [PATCH] rbd: fix double free on rbd_dev->header_name
+Date: Tue, 1 Sep 2015 07:26:56 -0500
+Message-ID: <55E59990.5010902@ieee.org>
+References: <1441025248-50599-1-git-send-email-idryomov@gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="8gQ6xqecGbnBhocEQs3qki3e7KJcNMoN9"
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:47436 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753095AbbIALCy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Sep 2015 07:02:54 -0400
-In-Reply-To: <CAOi1vP_ME6TyKtTS9PQbfJmwUu4LP4Vh7rAqbHTLY-QGcAv9UQ@mail.gmail.com>
+Received: from mail-io0-f177.google.com ([209.85.223.177]:33415 "EHLO
+	mail-io0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753559AbbIAM06 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Sep 2015 08:26:58 -0400
+Received: by iods203 with SMTP id s203so193227044iod.0
+        for <ceph-devel@vger.kernel.org>; Tue, 01 Sep 2015 05:26:58 -0700 (PDT)
+In-Reply-To: <1441025248-50599-1-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---8gQ6xqecGbnBhocEQs3qki3e7KJcNMoN9
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+On 08/31/2015 07:47 AM, Ilya Dryomov wrote:
+> If rbd_dev_image_probe() in rbd_dev_probe_parent() fails, header_name
+> is freed twice: once in rbd_dev_probe_parent() and then in its caller
+> rbd_dev_image_probe() (rbd_dev_image_probe() is called recursively to
+> handle parent images).
+> 
+> rbd_dev_probe_parent() is responsible for probing the parent, so it
+> shoudn't mock with clone's fields.
 
+Agreed.  (But I think you mean "muck with.")  The other
+argument is that the caller is who allocated it (via
+rbd_dev_header_name()), so it should be responsible for
+freeing it.
 
+Reviewed-by: Alex Elder <elder@linaro.org>
 
-On 01/09/2015 09:44, Ilya Dryomov wrote:
-> On Tue, Sep 1, 2015 at 1:09 AM, Loic Dachary <loic@dachary.org> wrote:
->> Hi Ilya,
->>
->> While working on multipath, I noticed that udev add event are not trig=
-gered when /dev/dm-0 etc. are created. Should I expect a udev add event f=
-or every device ? Or does it not apply to devices created by / with devic=
-emapper ?
->=20
-> I'd expect an event - are you sure it's not triggered?  Are you using
-> udevadm monitor or is it just some udev rule not getting executed?
+> 
+> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+> ---
+>  drivers/block/rbd.c | 1 -
+>  1 file changed, 1 deletion(-)
+> 
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index bc67a93aa4f4..324bf35ec4dd 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -5201,7 +5201,6 @@ static int rbd_dev_probe_parent(struct rbd_device *rbd_dev)
+>  out_err:
+>  	if (parent) {
+>  		rbd_dev_unparent(rbd_dev);
+> -		kfree(rbd_dev->header_name);
+>  		rbd_dev_destroy(parent);
+>  	} else {
+>  		rbd_put_client(rbdc);
+> 
 
-It's just that udev rules are not getting executed. Thanks for sorting ou=
-t my confusion :-)
-
-A++
-
->=20
-> Thanks,
->=20
->                 Ilya
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---8gQ6xqecGbnBhocEQs3qki3e7KJcNMoN9
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlXlhdsACgkQ8dLMyEl6F21UowCfXkWZ2QIczdNOnne1ZApk2mfw
-TkAAnihkOy4eUjeQhIJLf6CipGRvg7Fw
-=7RFz
------END PGP SIGNATURE-----
-
---8gQ6xqecGbnBhocEQs3qki3e7KJcNMoN9--
