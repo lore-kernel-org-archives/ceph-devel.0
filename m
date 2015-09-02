@@ -1,76 +1,63 @@
-From: Pete Zaitcev <zaitcev@redhat.com>
-Subject: Re: Multi-tenancy in radosgw
-Date: Wed, 2 Sep 2015 11:35:19 -0600
-Message-ID: <20150902113519.50a2a8b5@guren.zaitcev.lan>
-References: <CA+H5UW2=yzXfRcuRHDW99b80GjuhUaqihkAYUV_fnUj-PXhXKQ@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: jerasure.org disaster recovery plan
+Date: Wed, 02 Sep 2015 20:57:41 +0200
+Message-ID: <55E746A5.7040303@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="tASRUHRiwefNjSoWcJcm1xdgOOBcPp5Js"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:59147 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751927AbbIBRfV (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 2 Sep 2015 13:35:21 -0400
-In-Reply-To: <CA+H5UW2=yzXfRcuRHDW99b80GjuhUaqihkAYUV_fnUj-PXhXKQ@mail.gmail.com>
+Received: from mail2.dachary.org ([91.121.57.175]:48417 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1755159AbbIBS5t (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Sep 2015 14:57:49 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Radoslaw Zarzynski <rzarzynski@mirantis.com>
-Cc: Yehuda Sadeh-Weinraub <yehuda@redhat.com>, zaitcev@redhat.com, ceph-devel <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
+Cc: Kevin Greenan <kmgreen2@gmail.com>
 
-On Wed, 2 Sep 2015 14:23:33 +0200
-Radoslaw Zarzynski <rzarzynski@mirantis.com> wrote:
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--tASRUHRiwefNjSoWcJcm1xdgOOBcPp5Js
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-> What is the current status of multi-tenancy support in radosgw?
-> I saw branch wip-ymt-5073 which looks really nice.
+Hi Ceph,
 
-That branch is actually an clone of wip-5073-3, only I made it build on the
-current code (about 9.0.2 level) and pass "make check". I also streamlined
-a couple of things, like the confusing maze of assignments between tenant
-and user_id.tenant in radosgw-admin (rgw_admin.cc). Oh, and we settled on
-using '/' as the syntax separator for buckets in tenant namespace. The
-original wip-5073-3 have not yet come to that decision.
+The jerasure.org web site, gitlab and gitlab-ci is hosted on a single vir=
+tual machine on an OpenStack + Ceph cluster I maintain on my spare time. =
+Kevin Greenan has access in case I'm not available. It is a set of docker=
+ containers and the installation is documented on my blog[1].
 
-> What is missing? What do we need to implement?
-> I guess I would have time to help with this.
+It would be great if someone was willing to mirror the virtual machine wh=
+ere all this is running (rsync / will do) , just in case something bad ha=
+ppens and there is a need to switch hosting. I'm also willing to share ac=
+cess to the DNS server so that resurecting jerasure.org is not more compl=
+icated than:
 
-Well... In theory everything is in place. In practice, nothing works. :-)
-If you want to create buckets within a non-default tenant, you have to
-have a user sited under a non-default tenant. But if you try to create
-one, this happens:
+   * docker start
+   * update the IP of jerasure.org
 
-$ LD_LIBRARY_PATH=/q/zaitcev/ceph/ceph-tip/src/.libs /q/zaitcev/ceph/ceph-tip/src/.libs/radosgw-admin  user create --tenant=prodtx --uid=prodt --subuser=prodt:prod1 --display-name="Prod Tenant T" --key-type=swift --access=full --email=prodt@zaitcev.lan
-{
-    "user_id": "prodtx:prodt",
-    "display_name": "Prod Tenant T",
-    "email": "prodt@zaitcev.lan",
-    "suspended": 0,
-    "max_buckets": 1000,   
-    "auid": 0,
-    "subusers": [
-        {
-            "id": "prodtx:prodt:prod1",
-            "permissions": "full-control"
-        }
-    ],
-    "swift_keys": [
-        {
-            "user": "prodtx:prodt:prod1",
-            "secret_key": "rfJdJIDxCypUVgld2OUPpjgOUQ6R2UycHpqxuQyP"
-        }
-    ],
-.................
-}
+Cheers
 
-As you can see, tenant leaks _everywhere_. It's a real pest.
-In addition, Yehuda chose to use a struct rgw_user as a vehicle to carry
-the tenant. That has important advantages, the biggest being that you
-let gcc to point out all the place where conversion may be needed.
-However, per above the serialization into JSON relies onto to_str(),
-and then you cannot tell if there's actually a tenant field set
-correctly in RGWUserInfo or it's just a colon leaked into user.
+[1] Gitlab CI runner installation http://dachary.org/?p=3D3481 http://dac=
+hary.org/?p=3D3401 http://dachary.org/?p=3D3409
 
-As far as where you are best to apply, I honestly have no clue.
-This is not easy to decompose further into tasks. Maybe you could
-just take over :-)
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
--- Pete
+
+
+--tASRUHRiwefNjSoWcJcm1xdgOOBcPp5Js
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlXnRqUACgkQ8dLMyEl6F22V0gCgtwE+fbZHZAlZA56J8rhTcm97
+pF4An1ViWzsRlQ79T7R8AEyDxbzZc2lh
+=lUP7
+-----END PGP SIGNATURE-----
+
+--tASRUHRiwefNjSoWcJcm1xdgOOBcPp5Js--
