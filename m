@@ -1,160 +1,76 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH] libceph: check data_len in ->alloc_msg()
-Date: Wed,  2 Sep 2015 20:33:48 +0300
-Message-ID: <1441215228-12315-1-git-send-email-idryomov@gmail.com>
+From: Pete Zaitcev <zaitcev@redhat.com>
+Subject: Re: Multi-tenancy in radosgw
+Date: Wed, 2 Sep 2015 11:35:19 -0600
+Message-ID: <20150902113519.50a2a8b5@guren.zaitcev.lan>
+References: <CA+H5UW2=yzXfRcuRHDW99b80GjuhUaqihkAYUV_fnUj-PXhXKQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f173.google.com ([209.85.212.173]:37406 "EHLO
-	mail-wi0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751927AbbIBReH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Sep 2015 13:34:07 -0400
-Received: by wicfx3 with SMTP id fx3so26695601wic.0
-        for <ceph-devel@vger.kernel.org>; Wed, 02 Sep 2015 10:34:06 -0700 (PDT)
-Received: from orange.local.localdomain ([109.110.66.71])
-        by smtp.gmail.com with ESMTPSA id gk9sm4658259wib.9.2015.09.02.10.34.05
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 02 Sep 2015 10:34:05 -0700 (PDT)
+Received: from mx1.redhat.com ([209.132.183.28]:59147 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751927AbbIBRfV (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 2 Sep 2015 13:35:21 -0400
+In-Reply-To: <CA+H5UW2=yzXfRcuRHDW99b80GjuhUaqihkAYUV_fnUj-PXhXKQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Radoslaw Zarzynski <rzarzynski@mirantis.com>
+Cc: Yehuda Sadeh-Weinraub <yehuda@redhat.com>, zaitcev@redhat.com, ceph-devel <ceph-devel@vger.kernel.org>
 
-Only ->alloc_msg() should check data_len of the incoming message
-against the preallocated ceph_msg, doing it in the messenger is not
-right.  The contract is that either ->alloc_msg() returns a ceph_msg
-which will fit all of the portions of the incoming message, or it
-returns NULL and possibly sets skip, signaling whether NULL is due to
-an -ENOMEM.  ->alloc_msg() should be the only place where we make the
-skip/no-skip decision.
+On Wed, 2 Sep 2015 14:23:33 +0200
+Radoslaw Zarzynski <rzarzynski@mirantis.com> wrote:
 
-I stumbled upon this while looking at con/osd ref counting.  Right now,
-if we get a non-extent message with a larger data portion than we are
-prepared for, ->alloc_msg() returns a ceph_msg, and then, when we skip
-it in the messenger, we don't put the con/osd ref acquired in
-ceph_con_in_msg_alloc() (which is normally put in process_message()),
-so this also fixes a memory leak.
+> What is the current status of multi-tenancy support in radosgw?
+> I saw branch wip-ymt-5073 which looks really nice.
 
-An existing BUG_ON in ceph_msg_data_cursor_init() ensures we don't
-corrupt random memory should a buggy ->alloc_msg() return an unfit
-ceph_msg.
+That branch is actually an clone of wip-5073-3, only I made it build on the
+current code (about 9.0.2 level) and pass "make check". I also streamlined
+a couple of things, like the confusing maze of assignments between tenant
+and user_id.tenant in radosgw-admin (rgw_admin.cc). Oh, and we settled on
+using '/' as the syntax separator for buckets in tenant namespace. The
+original wip-5073-3 have not yet come to that decision.
 
-While at it, I changed the "unknown tid" dout() to a pr_warn() to make
-sure all skips are seen and unified format strings.
+> What is missing? What do we need to implement?
+> I guess I would have time to help with this.
 
-Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
----
- net/ceph/messenger.c  |  7 -------
- net/ceph/osd_client.c | 51 ++++++++++++++++++---------------------------------
- 2 files changed, 18 insertions(+), 40 deletions(-)
+Well... In theory everything is in place. In practice, nothing works. :-)
+If you want to create buckets within a non-default tenant, you have to
+have a user sited under a non-default tenant. But if you try to create
+one, this happens:
 
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index 36757d46ac40..525f454f7531 100644
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -2337,13 +2337,6 @@ static int read_partial_message(struct ceph_connection *con)
- 			return ret;
- 
- 		BUG_ON(!con->in_msg ^ skip);
--		if (con->in_msg && data_len > con->in_msg->data_length) {
--			pr_warn("%s skipping long message (%u > %zd)\n",
--				__func__, data_len, con->in_msg->data_length);
--			ceph_msg_put(con->in_msg);
--			con->in_msg = NULL;
--			skip = 1;
--		}
- 		if (skip) {
- 			/* skip this message */
- 			dout("alloc_msg said skip message\n");
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 50033677c0fa..80b94e37c94a 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -2817,8 +2817,9 @@ out:
- }
- 
- /*
-- * lookup and return message for incoming reply.  set up reply message
-- * pages.
-+ * Lookup and return message for incoming reply.  Don't try to do
-+ * anything about a larger than preallocated data portion of the
-+ * message at the moment - for now, just skip the message.
-  */
- static struct ceph_msg *get_reply(struct ceph_connection *con,
- 				  struct ceph_msg_header *hdr,
-@@ -2836,10 +2837,10 @@ static struct ceph_msg *get_reply(struct ceph_connection *con,
- 	mutex_lock(&osdc->request_mutex);
- 	req = __lookup_request(osdc, tid);
- 	if (!req) {
--		*skip = 1;
-+		pr_warn("%s osd%d tid %llu unknown, skipping\n",
-+			__func__, osd->o_osd, tid);
- 		m = NULL;
--		dout("get_reply unknown tid %llu from osd%d\n", tid,
--		     osd->o_osd);
-+		*skip = 1;
- 		goto out;
- 	}
- 
-@@ -2849,10 +2850,9 @@ static struct ceph_msg *get_reply(struct ceph_connection *con,
- 	ceph_msg_revoke_incoming(req->r_reply);
- 
- 	if (front_len > req->r_reply->front_alloc_len) {
--		pr_warn("get_reply front %d > preallocated %d (%u#%llu)\n",
--			front_len, req->r_reply->front_alloc_len,
--			(unsigned int)con->peer_name.type,
--			le64_to_cpu(con->peer_name.num));
-+		pr_warn("%s osd%d tid %llu front %d > preallocated %d\n",
-+			__func__, osd->o_osd, req->r_tid, front_len,
-+			req->r_reply->front_alloc_len);
- 		m = ceph_msg_new(CEPH_MSG_OSD_OPREPLY, front_len, GFP_NOFS,
- 				 false);
- 		if (!m)
-@@ -2860,37 +2860,22 @@ static struct ceph_msg *get_reply(struct ceph_connection *con,
- 		ceph_msg_put(req->r_reply);
- 		req->r_reply = m;
- 	}
--	m = ceph_msg_get(req->r_reply);
--
--	if (data_len > 0) {
--		struct ceph_osd_data *osd_data;
- 
--		/*
--		 * XXX This is assuming there is only one op containing
--		 * XXX page data.  Probably OK for reads, but this
--		 * XXX ought to be done more generally.
--		 */
--		osd_data = osd_req_op_extent_osd_data(req, 0);
--		if (osd_data->type == CEPH_OSD_DATA_TYPE_PAGES) {
--			if (osd_data->pages &&
--				unlikely(osd_data->length < data_len)) {
--
--				pr_warn("tid %lld reply has %d bytes we had only %llu bytes ready\n",
--					tid, data_len, osd_data->length);
--				*skip = 1;
--				ceph_msg_put(m);
--				m = NULL;
--				goto out;
--			}
--		}
-+	if (data_len > req->r_reply->data_length) {
-+		pr_warn("%s osd%d tid %llu data %d > preallocated %zu, skipping\n",
-+			__func__, osd->o_osd, req->r_tid, data_len,
-+			req->r_reply->data_length);
-+		m = NULL;
-+		*skip = 1;
-+		goto out;
- 	}
--	*skip = 0;
-+
-+	m = ceph_msg_get(req->r_reply);
- 	dout("get_reply tid %lld %p\n", tid, m);
- 
- out:
- 	mutex_unlock(&osdc->request_mutex);
- 	return m;
--
- }
- 
- static struct ceph_msg *alloc_msg(struct ceph_connection *con,
--- 
-1.9.3
+$ LD_LIBRARY_PATH=/q/zaitcev/ceph/ceph-tip/src/.libs /q/zaitcev/ceph/ceph-tip/src/.libs/radosgw-admin  user create --tenant=prodtx --uid=prodt --subuser=prodt:prod1 --display-name="Prod Tenant T" --key-type=swift --access=full --email=prodt@zaitcev.lan
+{
+    "user_id": "prodtx:prodt",
+    "display_name": "Prod Tenant T",
+    "email": "prodt@zaitcev.lan",
+    "suspended": 0,
+    "max_buckets": 1000,   
+    "auid": 0,
+    "subusers": [
+        {
+            "id": "prodtx:prodt:prod1",
+            "permissions": "full-control"
+        }
+    ],
+    "swift_keys": [
+        {
+            "user": "prodtx:prodt:prod1",
+            "secret_key": "rfJdJIDxCypUVgld2OUPpjgOUQ6R2UycHpqxuQyP"
+        }
+    ],
+.................
+}
 
+As you can see, tenant leaks _everywhere_. It's a real pest.
+In addition, Yehuda chose to use a struct rgw_user as a vehicle to carry
+the tenant. That has important advantages, the biggest being that you
+let gcc to point out all the place where conversion may be needed.
+However, per above the serialization into JSON relies onto to_str(),
+and then you cannot tell if there's actually a tenant field set
+correctly in RGWUserInfo or it's just a colon leaked into user.
+
+As far as where you are best to apply, I honestly have no clue.
+This is not easy to decompose further into tasks. Maybe you could
+just take over :-)
+
+-- Pete
