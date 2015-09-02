@@ -1,55 +1,53 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: 09/02/2015 Weekly Ceph Performance Meeting IS ON!
-Date: Wed, 02 Sep 2015 09:25:39 -0500
-Message-ID: <55E706E3.7020804@redhat.com>
-Reply-To: mnelson@redhat.com
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH] libceph: use keepalive2 to verify the mon session is alive
+Date: Wed, 2 Sep 2015 18:23:41 +0300
+Message-ID: <CAOi1vP_iL2mUyQ2eQKoqf8tccKpBfdMBLwxYo=aCAT+rYbkMLQ@mail.gmail.com>
+References: <CAOi1vP-c_VRVOSvF-YW7Q-+GXhWw8PZYzPha-K5Fr9yQbtjDtA@mail.gmail.com>
+	<AFB5599E-A06C-480C-8A9C-C42C9FC9EFE1@redhat.com>
+	<CAOi1vP-3Ea=4x01JhRGDC1xvtuyvt+oq0jOVQYxTw+NHoKsbeQ@mail.gmail.com>
+	<3313E8D4-6363-416A-AF0D-7BFF0C7ED0B8@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:52670 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754990AbbIBOZm (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 2 Sep 2015 10:25:42 -0400
-Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
-	by mx1.redhat.com (Postfix) with ESMTPS id AA74CC0F05E5
-	for <ceph-devel@vger.kernel.org>; Wed,  2 Sep 2015 14:25:42 +0000 (UTC)
-Received: from [10.3.112.19] ([10.3.112.19])
-	by int-mx13.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t82EPexs017788
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-	for <ceph-devel@vger.kernel.org>; Wed, 2 Sep 2015 10:25:42 -0400
+Received: from mail-la0-f41.google.com ([209.85.215.41]:34764 "EHLO
+	mail-la0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752942AbbIBPXo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Sep 2015 11:23:44 -0400
+Received: by laeb10 with SMTP id b10so9728564lae.1
+        for <ceph-devel@vger.kernel.org>; Wed, 02 Sep 2015 08:23:42 -0700 (PDT)
+In-Reply-To: <3313E8D4-6363-416A-AF0D-7BFF0C7ED0B8@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Yan, Zheng" <zyan@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-8AM PST as usual!  No set topics for this morning.  Please feel free to 
-add your own!
+On Wed, Sep 2, 2015 at 12:25 PM, Yan, Zheng <zyan@redhat.com> wrote:
+>
+>> On Sep 2, 2015, at 17:12, Ilya Dryomov <idryomov@gmail.com> wrote:
+>>
+>> On Wed, Sep 2, 2015 at 5:22 AM, Yan, Zheng <zyan@redhat.com> wrote:
+>>> timespec_to_jiffies() does not work this way. it convert time delta in form of timespec to time delta in form of jiffies.
+>>
+>> Ah sorry, con->last_keepalive_ack is a realtime timespec from
+>> userspace.
+>>
+>>>
+>>> I will updated the patch according  to the rest comments .
+>>
+>> I still want ceph_con_keepalive_expired() to handle interval == 0
+>> internally, so that opt->monc_ping_timeout can be passed without any
+>> checks in the caller.
+>>
+>> I also noticed you added delay = max_t(unsigned long, delay, HZ); to
+>> __schedule_delayed().  Is it really necessary?
+>>
+>
+> Updated. please review.
 
-Here's the links:
+I was concerned about user facing option names and timeouts, since
+that's what I had to deal with recently - those parts look OK to me
+now.
 
-Etherpad URL:
-http://pad.ceph.com/p/performance_weekly
+Thanks,
 
-To join the Meeting:
-https://bluejeans.com/268261044
-
-To join via Browser:
-https://bluejeans.com/268261044/browser
-
-To join with Lync:
-https://bluejeans.com/268261044/lync
-
-
-To join via Room System:
-Video Conferencing System: bjn.vc -or- 199.48.152.152
-Meeting ID: 268261044
-
-To join via Phone:
-1) Dial:
-           +1 408 740 7256
-           +1 888 240 2560(US Toll Free)
-           +1 408 317 9253(Alternate Number)
-           (see all numbers - http://bluejeans.com/numbers)
-2) Enter Conference ID: 268261044
-
-Mark
+                Ilya
