@@ -1,47 +1,55 @@
-From: Shinobu Kinjo <skinjo@redhat.com>
-Subject: [ceph-deploy] Ambiguous Debug Message
-Date: Tue, 1 Sep 2015 19:48:29 -0400 (EDT)
-Message-ID: <1765197817.11321874.1441151309841.JavaMail.zimbra@redhat.com>
-References: <1772331860.11320004.1441150585905.JavaMail.zimbra@redhat.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: verifying rpm packages for v0.80.11
+Date: Wed, 02 Sep 2015 07:47:27 +0200
+Message-ID: <55E68D6F.5050506@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="OpVI4rNO71LQU6lAxlvhAHXuJVuQmi4rk"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx6-phx2.redhat.com ([209.132.183.39]:42600 "EHLO
-	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751092AbbIAXsa (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Sep 2015 19:48:30 -0400
-Received: from zmail26.collab.prod.int.phx2.redhat.com (zmail26.collab.prod.int.phx2.redhat.com [10.5.83.33])
-	by mx6-phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t81NmTeH007769
-	for <ceph-devel@vger.kernel.org>; Tue, 1 Sep 2015 19:48:29 -0400
-In-Reply-To: <1772331860.11320004.1441150585905.JavaMail.zimbra@redhat.com>
+Received: from mail2.dachary.org ([91.121.57.175]:47933 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751110AbbIBFre (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Sep 2015 01:47:34 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Nathan Cutler <ncutler@suse.cz>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi,
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--OpVI4rNO71LQU6lAxlvhAHXuJVuQmi4rk
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-When I ran:
+Hi Nathan,
 
-    $ sudo ./ceph-deploy --username ceph install ceph01
+In order to verify that the ceph.spec.in change do not introduce a regres=
+sion in v0.80.11, I scheduled an upgrade/firefly suite on CentOS 6 ( http=
+://tracker.ceph.com/issues/11644#upgrade) and a ceph-deploy suite on all =
+supported distributions (because we did not do it before http://tracker.c=
+eph.com/issues/11644#ceph-deploy).=20
 
-I ended up with:
+https://github.com/ceph/ceph/pull/5217
+https://github.com/ceph/ceph/pull/5224
+https://github.com/ceph/ceph/pull/5225
 
-    [ceph_deploy][ERROR ] RuntimeError: connecting to host: ceph@ceph01 resulted in errors: HostNotFound ceph@ceph01
+Cheers
 
-That's fine. I need to do something.
-But actual reason of failure was:
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
-    Permission denied (publickey,gssapi-keyex,gssapi-with-mic).
 
-I think we should change such an ambiguous [ERROR ] message
-to more reasonable one so that nobody doesn't confuse any 
-hostname configuration?
+--OpVI4rNO71LQU6lAxlvhAHXuJVuQmi4rk
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
-Thought?
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
 
--
-$ ./ceph-deploy --version
-1.5.27
+iEYEARECAAYFAlXmjW8ACgkQ8dLMyEl6F23+AQCgnArRxL7/hW0dlaJMN4bHhgkb
+XekAoLNJtPL/3y0IXoOlmqmAM9YUIbFx
+=D8wu
+-----END PGP SIGNATURE-----
 
-Shinobu
+--OpVI4rNO71LQU6lAxlvhAHXuJVuQmi4rk--
