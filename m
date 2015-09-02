@@ -1,56 +1,31 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: make check bot hicups today
-Date: Wed, 02 Sep 2015 23:52:04 +0200
-Message-ID: <55E76F84.7040204@dachary.org>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: Ceph Write Path Improvement
+Date: Wed, 2 Sep 2015 23:06:05 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE354DD@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="UVpcsFLij5ccg7gHhDgtUUqW586jWt1Hl"
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:48494 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753182AbbIBVwH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Sep 2015 17:52:07 -0400
-Received: from [10.9.0.6] (unknown [10.0.2.28])
-	by smtp.dmail.dachary.org (Postfix) with ESMTP id 497B142B2B
-	for <ceph-devel@vger.kernel.org>; Wed,  2 Sep 2015 23:52:04 +0200 (CEST)
+Received: from mail-bl2on0084.outbound.protection.outlook.com ([65.55.169.84]:55203
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751737AbbIBXGJ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Sep 2015 19:06:09 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
-
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---UVpcsFLij5ccg7gHhDgtUUqW586jWt1Hl
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
 Hi,
+Here is the link of the document I presented in today's performance meeting.
+https://docs.google.com/presentation/d/1lCoLpFRjD8t_YCeHyWDV7ddv7ZkwfETgyjUzXw0-ttU/edit?usp=sharing
 
-The make check bot had troubles today because a yum repository temporaril=
-y had missing files. While trying to figure that out the CentOS 7 docker =
-image was updated and fails to create the container to run the tests. It =
-is fixed but it will take a day or two before CentOS 7 is back. In the me=
-antime the bot runs Ubuntu 14.04 only.
+It has the benchmark result of the filestore changes I proposed earlier for the ceph write path optimization.
 
-If the bot failed to visit a pull request, you can trigger it again with =
-a git commit --amend + git push --force.
+Thanks & Regards
+Somnath
 
-Cheers
+________________________________
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
 
-
---UVpcsFLij5ccg7gHhDgtUUqW586jWt1Hl
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlXnb4QACgkQ8dLMyEl6F23vZACffvkZE+aIvnw8ZRzBki+QW7em
-QRAAoJ4dvj5dEkWtCqWXZPBwp4NZFytQ
-=Nshc
------END PGP SIGNATURE-----
-
---UVpcsFLij5ccg7gHhDgtUUqW586jWt1Hl--
