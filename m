@@ -1,112 +1,65 @@
-From: Noah Watkins <noahwatkins@gmail.com>
-Subject: Re: ceph-deploy: too many argument: --setgroup 10
-Date: Thu, 3 Sep 2015 11:08:48 -0600
-Message-ID: <CAB2gnbXfFAjZgT8w5piRDwfS3o1yqjjUHHeFO=xq=PzhZmWvQg@mail.gmail.com>
-References: <CAB2gnbV3LxJYxSxnz7J8ZsXxPkjhy7Ba5aN834nrFwzG-QyNOw@mail.gmail.com>
-	<CACkq2mqhmpFWKTWK59J=wdvNUPz3d5jeRA7Z4hYW5tkrcUf6Yg@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Ceph Write Path Improvement
+Date: Thu, 3 Sep 2015 17:42:17 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE36FF9@SACMBXIP01.sdcorp.global.sandisk.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE354DD@SACMBXIP01.sdcorp.global.sandisk.com>
+ <CAANLjFpmO+rGnEFM5+u6piVoa4YqvoVCcTWjYOQJ2cXEEk7T-g@mail.gmail.com>
+ <55E87862.5060809@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qg0-f46.google.com ([209.85.192.46]:36277 "EHLO
-	mail-qg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754322AbbICRIs (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Sep 2015 13:08:48 -0400
-Received: by qgx61 with SMTP id 61so33791233qgx.3
-        for <ceph-devel@vger.kernel.org>; Thu, 03 Sep 2015 10:08:48 -0700 (PDT)
-In-Reply-To: <CACkq2mqhmpFWKTWK59J=wdvNUPz3d5jeRA7Z4hYW5tkrcUf6Yg@mail.gmail.com>
+Received: from mail-bl2on0094.outbound.protection.outlook.com ([65.55.169.94]:23038
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752389AbbICRmV (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 3 Sep 2015 13:42:21 -0400
+In-Reply-To: <55E87862.5060809@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Travis Rhoden <trhoden@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
+To: Mark Nelson <mnelson@redhat.com>, Robert LeBlanc <robert@leblancnet.us>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-I see. This is the ownership info for /var/lib/ceph
-
-[nwatkins@cn67 ~]$ stat /var/lib/ceph
-  File: `/var/lib/ceph' -> `/ram/var/lib/ceph'
-  Size: 17        Blocks: 3          IO Block: 524288 symbolic link
-Device: 12h/18d Inode: 4429801211  Links: 1
-Access: (0777/lrwxrwxrwx)  Uid: (    0/    root)   Gid: (   10/   wheel)
-
-This is probably a rather non traditional environment that Ceph is
-being deployed onto. I talked with the sys admins and they were rather
-surprised by this. I guess we can take care of it on this end now that
-we see the issue.
-
-In general should the ceph-deploy tool version be paired up with the
-version of Ceph being deployed, or is it the case that for Hammer the
-file system uid/gid _should be_ 0 to avoid the unsupported --getgroup
-flag?
-
-Thanks!
-
-On Wed, Sep 2, 2015 at 3:32 PM, Travis Rhoden <trhoden@gmail.com> wrote:
-> Hi Noah,
->
-> What is the ownership on /var/lib/ceph ?
->
-> ceph-deploy should only be trying to use --setgroup if /var/lib/ceph is
-> owned by non-root.
->
-> On a fresh install of Hammer, this should be root:root.
->
-> The --setgroup flag was added to ceph-deploy in 1.5.26.
->
->  - Travis
->
-> On Wed, Sep 2, 2015 at 1:59 PM, Noah Watkins <noahwatkins@gmail.com> wrote:
->>
->> I'm getting the following error using ceph-deploy to setup a cluster.
->> It's Centos6.6 and I'm using Hammer and the latest ceph-deploy. It
->> looks like setgroup wasn't an option in Hammer, but ceph-deploy adds
->> it. Is there a trick or older version of ceph-deploy I should try?
->>
->> - Noah
->>
->> [cn67][INFO  ] Running command: sudo ceph-mon --cluster ceph --mkfs -i
->> cn67 --keyring /var/lib/ceph/tmp/ceph-cn67.mon.keyring --setgroup 10
->> [cn67][WARNIN] too many arguments: [--setgroup,10]
->> [cn67][DEBUG ]   --conf/-c FILE    read configuration from the given
->> configuration file
->> [cn67][WARNIN] usage: ceph-mon -i monid [flags]
->> [cn67][DEBUG ]   --id/-i ID        set ID portion of my name
->> [cn67][WARNIN]   --debug_mon n
->> [cn67][DEBUG ]   --name/-n TYPE.ID set name
->> [cn67][WARNIN]         debug monitor level (e.g. 10)
->> [cn67][DEBUG ]   --cluster NAME    set cluster name (default: ceph)
->> [cn67][WARNIN]   --mkfs
->> [cn67][DEBUG ]   --version         show version and quit
->> [cn67][WARNIN]         build fresh monitor fs
->> [cn67][DEBUG ]
->> [cn67][WARNIN]   --force-sync
->> [cn67][DEBUG ]   -d                run in foreground, log to stderr.
->> [cn67][WARNIN]         force a sync from another mon by wiping local
->> data (BE CAREFUL)
->> [cn67][DEBUG ]   -f                run in foreground, log to usual
->> location.
->> [cn67][WARNIN]   --yes-i-really-mean-it
->> [cn67][DEBUG ]   --debug_ms N      set message debug level (e.g. 1)
->> [cn67][WARNIN]         mandatory safeguard for --force-sync
->> [cn67][WARNIN]   --compact
->> [cn67][WARNIN]         compact the monitor store
->> [cn67][WARNIN]   --osdmap <filename>
->> [cn67][WARNIN]         only used when --mkfs is provided: load the
->> osdmap from <filename>
->> [cn67][WARNIN]   --inject-monmap <filename>
->> [cn67][WARNIN]         write the <filename> monmap to the local
->> monitor store and exit
->> [cn67][WARNIN]   --extract-monmap <filename>
->> [cn67][WARNIN]         extract the monmap from the local monitor store and
->> exit
->> [cn67][WARNIN]   --mon-data <directory>
->> [cn67][WARNIN]         where the mon store and keyring are located
->> [cn67][ERROR ] RuntimeError: command returned non-zero exit status: 1
->> [ceph_deploy.mon][ERROR ] Failed to execute command: ceph-mon
->> --cluster ceph --mkfs -i cn67 --keyring
->> /var/lib/ceph/tmp/ceph-cn67.mon.keyring --setgroup 10
->> [ceph_deploy][ERROR ] GenericError: Failed to create 1 monitors
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
+WWVzLCBBcyBNYXJrIHNhaWQgSSB3aWxsIGNvbGxlY3QgYWxsIHRoZSBkYXRhIGFuZCBob3BlZnVs
+bHkgSSBjYW4gcHJlc2VudCBpbiB0aGUgbmV4dCBwZXJmb3JtYW5jZSBtZWV0aW5nLg0KQlRXLCBJ
+IGhhdmUgdGVzdGVkIHdpdGggSGFtbWVyIGNvZGUgYmFzZSArIE52UkFNIGpvdXJuYWwgaW5pdGlh
+bGx5LCBidXQgdGhhdCBwZXJmb3JtYW5jZSBpcyB2ZXJ5IHNwaWt5IHdpdGggfjEwJSBwZXJmb3Jt
+YW5jZSBnYWluIChhdCBtYXgpLiBJIHRob3VnaHQgdGhlcmUgaXMgbm8gcG9pbnQgb2YgY29sbGVj
+dGluZyBtb3JlIGRhdGEgd2l0aCB0aGF0IGNvbmZpZy4NClRoYXQncyB3aHkgSSBoYXZlIGludHJv
+ZHVjZWQgYSBuZXcgdGhyb3R0bGluZyBzY2hlbWUgdGhhdCBzaG91bGQgYmVuZWZpdCBpbiBhbGwg
+dGhlIHNjZW5hcmlvcy4NCg0KVGhhbmtzICYgUmVnYXJkcw0KU29tbmF0aA0KDQotLS0tLU9yaWdp
+bmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogTWFyayBOZWxzb24gW21haWx0bzptbmVsc29uQHJlZGhh
+dC5jb21dDQpTZW50OiBUaHVyc2RheSwgU2VwdGVtYmVyIDAzLCAyMDE1IDk6NDIgQU0NClRvOiBS
+b2JlcnQgTGVCbGFuYzsgU29tbmF0aCBSb3kNCkNjOiBjZXBoLWRldmVsDQpTdWJqZWN0OiBSZTog
+Q2VwaCBXcml0ZSBQYXRoIEltcHJvdmVtZW50DQoNCk9uIDA5LzAzLzIwMTUgMTE6MjMgQU0sIFJv
+YmVydCBMZUJsYW5jIHdyb3RlOg0KPiAtLS0tLUJFR0lOIFBHUCBTSUdORUQgTUVTU0FHRS0tLS0t
+DQo+IEhhc2g6IFNIQTI1Ng0KPg0KPiBTb21uYXRoLA0KPg0KPiBJJ20gaGF2aW5nIGEgaGFyZCB0
+aW1lIHdpdGggeW91ciBzbGlkZSBkZWNrLiBBbSBJIHVuZGVyc3RhbmRpbmcNCj4gY29ycmVjdGx5
+IHRoYXQgdGhlIGRlZmF1bHQgSGFtbWVyIGluc3RhbGwgd2FzIHBlcmZvcm1lZCBvbiBTU0RzIHdp
+dGgNCj4gY28tbG9jYXRlZCBqb3VybmFscywgYnV0IHRoZSBvcHRpbWl6ZWQgY29kZSB3YXMgcGVy
+Zm9ybWVkIG9uIHRoZSBzYW1lDQo+IFNTRHMgYnV0IHRoZSBqb3VybmFsIHdhcyBpbiBOVlJBTT8g
+SWYgc28gSSdtIGhhdmluZyBhIGhhcmQgdGltZQ0KPiB1bmRlcnN0YW5kaW5nIGhvdyB0aGVzZSB0
+ZXN0cyBjYW4gYmUgY29tcGFyYWJsZS4gSSByZWFsbHkgbGlrZSB0aGUNCj4gcGVyZm9ybWFuY2Ug
+Z2FpbnMgeW91IGFyZSBzZWVpbmcsIGJ1dCBJJ20gdHJ5aW5nIHRvIHVuZGVyc3RhbmQgaG93DQo+
+IG11Y2ggdGhlIG9wdGltaXplZCBjb2RlIGFsb25lIGhlbHBzIHBlcmZvcm1hbmNlLg0KDQpIaSBS
+b2JlcnQsDQoNCldlIHRhbGtlZCBhYm91dCB0aGlzIGEgYml0IGF0IHRoZSB3ZWVrbHkgcGVyZm9y
+bWFuY2UgbWVldGluZy4gIEkgdGhpbmsgU29tbmF0aCBqdXN0IGhhc24ndCBnb3R0ZW4gYSBjaGFu
+Y2UgdG8gZG8gdGhvc2UgdGVzdHMgeWV0IGFuZCBpcyBwbGFubmluZyBvbiBkb2luZyB0aGVtIGlu
+IHRoZSBjb21pbmcgd2Vla3MuICBJIGJlbGlldmUgaGUgc3RhcnRlZCBvdXQgd2l0aCBoYW1tZXIg
+b24gdGhlIFNTRHMgYW5kIHRoZW4gdHJpZWQgdG8gZmlndXJlIG91dCBob3cgdG8gdHdlYWsgdGhp
+bmdzIHRvIG1ha2UgdGhlIE5WUkFNIGNvbmZpZ3VyYXRpb24gcGVyZm9ybSBiZXR0ZXIuICBOb3cg
+aGUgaGFzIHRvIGdvIGJhY2sgYW5kIHJldGVzdCB0aGUgb3JpZ2luYWwgY29uZmlndXJhdGlvbiBi
+dXQgd2l0aCB0aGUgbmV3IGNvZGUuDQoNCk1hcmsNCg0KX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX18NCg0KUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhp
+cyBlbGVjdHJvbmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9m
+IHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBv
+ZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVy
+ZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9y
+IGFuZCB0aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29w
+eWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUg
+cmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBz
+ZW5kZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5
+IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBw
+b3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBj
+b3BpZXMpLg0KDQo=
