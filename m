@@ -1,53 +1,75 @@
-From: Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [sepia] debian jessie repository ?
-Date: Thu, 3 Sep 2015 14:04:36 +0200 (CEST)
-Message-ID: <72530183.22951419.1441281876629.JavaMail.zimbra@oxygem.tv>
-References: <1335215704.12402856.1440998857436.JavaMail.zimbra@oxygem.tv>
-	<CAC-Np1xiN8257gjGBU_vwBp5nfRmJofC-Xu8Qs8NS-g+jW67JQ@mail.gmail.com>
+From: Alfredo Deza <adeza@redhat.com>
+Subject: Re: [ceph-deploy] Ambiguous Debug Message
+Date: Thu, 3 Sep 2015 08:10:15 -0400
+Message-ID: <CAC-Np1ynRiXSRNrNdpRwCiL5kAbkdZoAqFV-593XgeFJm531EQ@mail.gmail.com>
+References: <1772331860.11320004.1441150585905.JavaMail.zimbra@redhat.com>
+	<1765197817.11321874.1441151309841.JavaMail.zimbra@redhat.com>
+	<CAC-Np1wp0R4Z26JnpEi6S8N6AWXQS-J+FNBZbCNzYUgxUDnbfQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAC-Np1xiN8257gjGBU_vwBp5nfRmJofC-Xu8Qs8NS-g+jW67JQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Alfredo Deza <adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: sepia-Qp0mS5GaXlQ@public.gmane.org, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-wi0-f177.google.com ([209.85.212.177]:35937 "EHLO
+	mail-wi0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754501AbbICMKR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Sep 2015 08:10:17 -0400
+Received: by wibz8 with SMTP id z8so96598394wib.1
+        for <ceph-devel@vger.kernel.org>; Thu, 03 Sep 2015 05:10:16 -0700 (PDT)
+In-Reply-To: <CAC-Np1wp0R4Z26JnpEi6S8N6AWXQS-J+FNBZbCNzYUgxUDnbfQ@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Shinobu Kinjo <skinjo@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-SGksCgo+PkFzIG9mIHllc3RlcmRheSB3ZSBhcmUgbm93IHJlYWR5IHRvIHN0YXJ0IHByb3ZpZGlu
-ZyBEZWJpYW4gSmVzc2llIHBhY2thZ2VzLiBUaGV5IHdpbGwgYmUgcHJlc2VudCBieSBkZWZhdWx0
-IGZvciB0aGUgdXBjb21pbmcgQ2VwaCByZWxlYXNlIChJbmZlcm5hbGlzKS4gCj4+Rm9yIG90aGVy
-IHJlbGVhc2VzIChlLmcuIEZpcmVmbHksIEhhbW1lciwgR2lhbnQpIGl0IG1lYW5zIHRoYXQgdGhl
-cmUgd2lsbCBiZSBhIEplc3NpZSBwYWNrYWdlIGZvciB0aGVtIGZvciBuZXcgdmVyc2lvbnMgb25s
-eS4gCgpPayBwZXJmZWN0LCB0aGFua3MgIQoKCi0tLS0tIE1haWwgb3JpZ2luYWwgLS0tLS0KRGU6
-ICJBbGZyZWRvIERlemEiIDxhZGV6YUByZWRoYXQuY29tPgrDgDogImFkZXJ1bWllciIgPGFkZXJ1
-bWllckBvZGlzby5jb20+CkNjOiAiY2VwaC1kZXZlbCIgPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwu
-b3JnPiwgc2VwaWFAY2VwaC5jb20sICJjZXBoLXVzZXJzIiA8Y2VwaC11c2Vyc0BsaXN0cy5jZXBo
-LmNvbT4KRW52b3nDqTogTWVyY3JlZGkgMiBTZXB0ZW1icmUgMjAxNSAxNjoxMDo1NgpPYmpldDog
-UmU6IFtzZXBpYV0gZGViaWFuIGplc3NpZSByZXBvc2l0b3J5ID8KCkFzIG9mIHllc3RlcmRheSB3
-ZSBhcmUgbm93IHJlYWR5IHRvIHN0YXJ0IHByb3ZpZGluZyBEZWJpYW4gSmVzc2llIHBhY2thZ2Vz
-LiBUaGV5IHdpbGwgYmUgcHJlc2VudCBieSBkZWZhdWx0IGZvciB0aGUgdXBjb21pbmcgQ2VwaCBy
-ZWxlYXNlIChJbmZlcm5hbGlzKS4gCgpGb3Igb3RoZXIgcmVsZWFzZXMgKGUuZy4gRmlyZWZseSwg
-SGFtbWVyLCBHaWFudCkgaXQgbWVhbnMgdGhhdCB0aGVyZSB3aWxsIGJlIGEgSmVzc2llIHBhY2th
-Z2UgZm9yIHRoZW0gZm9yIG5ldyB2ZXJzaW9ucyBvbmx5LiAKCkxldCBtZSBrbm93IGlmIHlvdSBo
-YXZlIGFueSBxdWVzdGlvbnMuIAoKClRoYW5rcyEgCgpBbGZyZWRvIAoKT24gTW9uLCBBdWcgMzEs
-IDIwMTUgYXQgMToyNyBBTSwgQWxleGFuZHJlIERFUlVNSUVSIDwgYWRlcnVtaWVyQG9kaXNvLmNv
-bSA+IHdyb3RlOiAKCgpIaSwgCgphbnkgbmV3cyBmb3IgdG8gYWRkIGFuIG9mZmljaWFsIGRlYmlh
-biBqZXNzaWUgcmVwb3NpdG9yeSBvbiBjZXBoLmNvbSA/IAoKCmdpdGJ1aWxkZXIgcmVwb3NpdG9y
-eSBpcyBhdmFpbGFibGUgc2luY2Ugc29tZSB3ZWVrcyAKCmh0dHA6Ly9naXRidWlsZGVyLmNlcGgu
-Y29tL2NlcGgtZGViLWplc3NpZS14ODZfNjQtYmFzaWMvcmVmLyAKCgpJcyBpdCBzb21ldGhpbmcg
-YmxvY2tpbmcgdGhlIHJlbGVhc2Ugb2YgdGhlIHBhY2thZ2VzID8gCgpSZWdhcmRzLCAKCkFsZXhh
-bmRyZSAKCgoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18g
-ClNlcGlhIG1haWxpbmcgbGlzdCAKU2VwaWFAbGlzdHMuY2VwaC5jb20gCmh0dHA6Ly9saXN0cy5j
-ZXBoLmNvbS9saXN0aW5mby5jZ2kvc2VwaWEtY2VwaC5jb20gCgoKCgoKX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QK
-Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8u
-Y2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
+On Thu, Sep 3, 2015 at 8:04 AM, Alfredo Deza <adeza@redhat.com> wrote:
+>
+>
+> On Tue, Sep 1, 2015 at 7:48 PM, Shinobu Kinjo <skinjo@redhat.com> wrote:
+>>
+>> Hi,
+>>
+>> When I ran:
+>>
+>>     $ sudo ./ceph-deploy --username ceph install ceph01
+>>
+>> I ended up with:
+>>
+>>     [ceph_deploy][ERROR ] RuntimeError: connecting to host: ceph@ceph01
+>> resulted in errors: HostNotFound ceph@ceph01
+>
+>
+ This is a problem from the underlying library that ceph-deploy uses that
+ treats the inability to connect to a host as a "HostNotFound" error
+ which may not be correct.
+
+ I opened an issue to follow up on this:
+ https://bitbucket.org/hpk42/execnet/issues/48/hostnotfound-is-raised-when-ssh-reports-a
+
+ But in the meantime, I think that ceph-deploy could report that it couldn't
+ connect and suggest that the user should try to
+ SSH directly to the host. Would that be an acceptable report? (given that we
+ don't have access to what SSH returned as the error message)
+>
+>>
+>>
+>> That's fine. I need to do something.
+>> But actual reason of failure was:
+>>
+>>     Permission denied (publickey,gssapi-keyex,gssapi-with-mic).
+>>
+>> I think we should change such an ambiguous [ERROR ] message
+>> to more reasonable one so that nobody doesn't confuse any
+>> hostname configuration?
+>>
+>> Thought?
+>>
+>> -
+>> $ ./ceph-deploy --version
+>> 1.5.27
+>>
+>> Shinobu
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
