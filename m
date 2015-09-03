@@ -1,83 +1,80 @@
-From: Robert LeBlanc <robert@leblancnet.us>
-Subject: Re: Ceph Write Path Improvement
-Date: Thu, 3 Sep 2015 11:38:40 -0600
-Message-ID: <CAANLjFqUukYWwJk7QGhn56bDibigw74d7uv0CxHvf2UNG2zcEA@mail.gmail.com>
+From: "Blinick, Stephen L" <stephen.l.blinick@intel.com>
+Subject: RE: Ceph Write Path Improvement
+Date: Thu, 3 Sep 2015 20:01:51 +0000
+Message-ID: <3649A15A2562B54294DE14BCE5AC79120B5AEB14@FMSMSX119.amr.corp.intel.com>
 References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE354DD@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CAANLjFpmO+rGnEFM5+u6piVoa4YqvoVCcTWjYOQJ2cXEEk7T-g@mail.gmail.com>
-	<55E87862.5060809@redhat.com>
+ <CAANLjFpmO+rGnEFM5+u6piVoa4YqvoVCcTWjYOQJ2cXEEk7T-g@mail.gmail.com>
+ <55E87862.5060809@redhat.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE36FF9@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f49.google.com ([209.85.213.49]:35741 "EHLO
-	mail-vk0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752995AbbICRpV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Sep 2015 13:45:21 -0400
-Received: by vkaw128 with SMTP id w128so28750791vka.2
-        for <ceph-devel@vger.kernel.org>; Thu, 03 Sep 2015 10:45:20 -0700 (PDT)
-In-Reply-To: <55E87862.5060809@redhat.com>
+Received: from mga11.intel.com ([192.55.52.93]:7495 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752878AbbICUBy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 3 Sep 2015 16:01:54 -0400
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE36FF9@SACMBXIP01.sdcorp.global.sandisk.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>
-Cc: Somnath Roy <Somnath.Roy@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA256
-
-Mark,
-
-Thanks for the update. The performance meetings are at a bad time for
-me and it usually takes a while for them to become available to review
-later so I'm usually behind on the freshest news. I'm looking forward
-to the results.
-- ----------------
-Robert LeBlanc
-PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
-
-
-On Thu, Sep 3, 2015 at 10:42 AM, Mark Nelson  wrote:
-> On 09/03/2015 11:23 AM, Robert LeBlanc wrote:
->>
->> -----BEGIN PGP SIGNED MESSAGE-----
->> Hash: SHA256
->>
->> Somnath,
->>
->> I'm having a hard time with your slide deck. Am I understanding
->> correctly that the default Hammer install was performed on SSDs with
->> co-located journals, but the optimized code was performed on the same
->> SSDs but the journal was in NVRAM? If so I'm having a hard time
->> understanding how these tests can be comparable. I really like the
->> performance gains you are seeing, but I'm trying to understand how
->> much the optimized code alone helps performance.
->
->
-> Hi Robert,
->
-> We talked about this a bit at the weekly performance meeting.  I think
-> Somnath just hasn't gotten a chance to do those tests yet and is planning on
-> doing them in the coming weeks.  I believe he started out with hammer on the
-> SSDs and then tried to figure out how to tweak things to make the NVRAM
-> configuration perform better.  Now he has to go back and retest the original
-> configuration but with the new code.
->
-> Mark
-
------BEGIN PGP SIGNATURE-----
-Version: Mailvelope v1.0.2
-Comment: https://www.mailvelope.com
-
-wsFcBAEBCAAQBQJV6IWbCRDmVDuy+mK58QAAC4MP/RmUaee7sDJcUvMDDySc
-BexzhwpCQ6Ur/MUrjdWvf2YhPr4d0+gSrFDFpU8bwG056nz8F0QIRufmGY9p
-b76xhcnTLvwIbIlInAfBXVWYp7uheAz+4znEuVYbmYiCau3FlWe4jnd+ohCg
-hOuAy/fkcnjXcjv6TToFUr1KIe07xNZkvt4ALWcSeafTwvl3JgddUvpKgBYq
-KdM2g4RL7KvYDIAmgf4/KKBtX2bcbLXkL48Tc6Ev4NJCcAZk5VlX3eBvQYgY
-ZWnlRHDNeBlDRvwHzS5aaWdar19qXpSkMjqW4u5YiT+kL0k0jbcTVpu2W+qC
-1dOGwMInFnAzT+vgrw8tFy8XEcZ2PWoNmY1wiYTLp+mgvDDeSoqmldmF7R9N
-lM1woA/NRhpYY9RqHUC8JkUdcW5mZ3yjCMP7fj/5HxPZAe8QAsZrwg91xqew
-5WrCnh0kLUGQltE/jSpqBnn1tLGpGkoE5Uowy5nODEWWQbOz9rECOiMdOrAY
-3lZXz9QzetYPAa+kAJLQ6AG5fDmq0sIvc30kyVBkOa83aQPrdsSXpwGj1B7W
-V1iRCb132zzzGFGGlQZZDKkErBKz5Txwki66ExKpiNI7lJ0YYIw1+hMrdLoy
-SrgYIdZB/7jOnAaDkK68MTrvQKmDUtxLKkBqd8zFhpqMNAj7vlShWfic7fxl
-Pj/3
-=zJ9M
------END PGP SIGNATURE-----
+U29tbmF0aCAtLSB0aGFua3MgZm9yIHB1Ymxpc2hpbmcgYWxsIHRoZSBkYXRhLCB3aWxsIGJlIGdy
+ZWF0IHRvIGxvb2sgYXQgaXQgb2ZmbGluZS4gIEkgZGlkbid0IGZpbmQgdGhpcyBpbmZvOiAgSG93
+IG1hbnkgUkJEIHZvbHVtZXMsIGFuZCB3aGF0IHNpemUsIGRpZCB5b3UgdXNlIGZvciB5b3VyIG1p
+eGVkIHRlc3RzPyAgV2FzIGl0IGp1c3Qgb25lIFJCRCB3LyBudW1fam9icz0xICYgMTA/ICBBbHNv
+IGhvdyBtYW55IGNsaWVudCBzeXN0ZW1zIHdlcmUgbmVjZXNzYXJ5IHRvIGRyaXZlIHRoZSB3b3Jr
+bG9hZCBvbiB0aGUgNCBzdG9yYWdlIG5vZGVzPyAgICAgIA0KDQpJIHNhdyB0aGUgc2FtZSBiZWhh
+dmlvciBxdWl0ZSBhIHdoaWxlIGJhY2sgd2hlbiBwbGF5aW5nIHdpdGggcmFtZGlzayBqb3VybmFs
+Li4uIE5vdCBhIGxvdCBvZiBpbXByb3ZlbWVudC4NCg0KVGhhbmtzLA0KDQpTdGVwaGVuDQoNCi0t
+LS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZnZXIua2Vy
+bmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhh
+bGYgT2YgU29tbmF0aCBSb3kNClNlbnQ6IFRodXJzZGF5LCBTZXB0ZW1iZXIgMywgMjAxNSAxMDo0
+MiBBTQ0KVG86IE1hcmsgTmVsc29uOyBSb2JlcnQgTGVCbGFuYw0KQ2M6IGNlcGgtZGV2ZWwNClN1
+YmplY3Q6IFJFOiBDZXBoIFdyaXRlIFBhdGggSW1wcm92ZW1lbnQNCg0KWWVzLCBBcyBNYXJrIHNh
+aWQgSSB3aWxsIGNvbGxlY3QgYWxsIHRoZSBkYXRhIGFuZCBob3BlZnVsbHkgSSBjYW4gcHJlc2Vu
+dCBpbiB0aGUgbmV4dCBwZXJmb3JtYW5jZSBtZWV0aW5nLg0KQlRXLCBJIGhhdmUgdGVzdGVkIHdp
+dGggSGFtbWVyIGNvZGUgYmFzZSArIE52UkFNIGpvdXJuYWwgaW5pdGlhbGx5LCBidXQgdGhhdCBw
+ZXJmb3JtYW5jZSBpcyB2ZXJ5IHNwaWt5IHdpdGggfjEwJSBwZXJmb3JtYW5jZSBnYWluIChhdCBt
+YXgpLiBJIHRob3VnaHQgdGhlcmUgaXMgbm8gcG9pbnQgb2YgY29sbGVjdGluZyBtb3JlIGRhdGEg
+d2l0aCB0aGF0IGNvbmZpZy4NClRoYXQncyB3aHkgSSBoYXZlIGludHJvZHVjZWQgYSBuZXcgdGhy
+b3R0bGluZyBzY2hlbWUgdGhhdCBzaG91bGQgYmVuZWZpdCBpbiBhbGwgdGhlIHNjZW5hcmlvcy4N
+Cg0KVGhhbmtzICYgUmVnYXJkcw0KU29tbmF0aA0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0t
+LQ0KRnJvbTogTWFyayBOZWxzb24gW21haWx0bzptbmVsc29uQHJlZGhhdC5jb21dDQpTZW50OiBU
+aHVyc2RheSwgU2VwdGVtYmVyIDAzLCAyMDE1IDk6NDIgQU0NClRvOiBSb2JlcnQgTGVCbGFuYzsg
+U29tbmF0aCBSb3kNCkNjOiBjZXBoLWRldmVsDQpTdWJqZWN0OiBSZTogQ2VwaCBXcml0ZSBQYXRo
+IEltcHJvdmVtZW50DQoNCk9uIDA5LzAzLzIwMTUgMTE6MjMgQU0sIFJvYmVydCBMZUJsYW5jIHdy
+b3RlOg0KPiAtLS0tLUJFR0lOIFBHUCBTSUdORUQgTUVTU0FHRS0tLS0tDQo+IEhhc2g6IFNIQTI1
+Ng0KPg0KPiBTb21uYXRoLA0KPg0KPiBJJ20gaGF2aW5nIGEgaGFyZCB0aW1lIHdpdGggeW91ciBz
+bGlkZSBkZWNrLiBBbSBJIHVuZGVyc3RhbmRpbmcgDQo+IGNvcnJlY3RseSB0aGF0IHRoZSBkZWZh
+dWx0IEhhbW1lciBpbnN0YWxsIHdhcyBwZXJmb3JtZWQgb24gU1NEcyB3aXRoIA0KPiBjby1sb2Nh
+dGVkIGpvdXJuYWxzLCBidXQgdGhlIG9wdGltaXplZCBjb2RlIHdhcyBwZXJmb3JtZWQgb24gdGhl
+IHNhbWUgDQo+IFNTRHMgYnV0IHRoZSBqb3VybmFsIHdhcyBpbiBOVlJBTT8gSWYgc28gSSdtIGhh
+dmluZyBhIGhhcmQgdGltZSANCj4gdW5kZXJzdGFuZGluZyBob3cgdGhlc2UgdGVzdHMgY2FuIGJl
+IGNvbXBhcmFibGUuIEkgcmVhbGx5IGxpa2UgdGhlIA0KPiBwZXJmb3JtYW5jZSBnYWlucyB5b3Ug
+YXJlIHNlZWluZywgYnV0IEknbSB0cnlpbmcgdG8gdW5kZXJzdGFuZCBob3cgDQo+IG11Y2ggdGhl
+IG9wdGltaXplZCBjb2RlIGFsb25lIGhlbHBzIHBlcmZvcm1hbmNlLg0KDQpIaSBSb2JlcnQsDQoN
+CldlIHRhbGtlZCBhYm91dCB0aGlzIGEgYml0IGF0IHRoZSB3ZWVrbHkgcGVyZm9ybWFuY2UgbWVl
+dGluZy4gIEkgdGhpbmsgU29tbmF0aCBqdXN0IGhhc24ndCBnb3R0ZW4gYSBjaGFuY2UgdG8gZG8g
+dGhvc2UgdGVzdHMgeWV0IGFuZCBpcyBwbGFubmluZyBvbiBkb2luZyB0aGVtIGluIHRoZSBjb21p
+bmcgd2Vla3MuICBJIGJlbGlldmUgaGUgc3RhcnRlZCBvdXQgd2l0aCBoYW1tZXIgb24gdGhlIFNT
+RHMgYW5kIHRoZW4gdHJpZWQgdG8gZmlndXJlIG91dCBob3cgdG8gdHdlYWsgdGhpbmdzIHRvIG1h
+a2UgdGhlIE5WUkFNIGNvbmZpZ3VyYXRpb24gcGVyZm9ybSBiZXR0ZXIuICBOb3cgaGUgaGFzIHRv
+IGdvIGJhY2sgYW5kIHJldGVzdCB0aGUgb3JpZ2luYWwgY29uZmlndXJhdGlvbiBidXQgd2l0aCB0
+aGUgbmV3IGNvZGUuDQoNCk1hcmsNCg0KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18N
+Cg0KUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJv
+bmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNp
+Z25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1l
+c3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlm
+aWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0
+IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0
+aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQg
+dGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkg
+dGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0
+cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9u
+ICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0K
+DQoTICDsubscICYgfiAmIBggICstICDdthcgIHcgIMubICAgbSAeIBdeICBiICBebiByICAgeiAa
+ICBoICAgICYgIB4gRyAgIGggAygg6ZqOIN2iaiIgIBogG20gICAgIHog3pYgICBmICAgaCAgIH4g
+bSANCg==
