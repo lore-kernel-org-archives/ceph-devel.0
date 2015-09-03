@@ -1,43 +1,112 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: Ceph Write Path Improvement
-Date: Thu, 03 Sep 2015 11:42:10 -0500
-Message-ID: <55E87862.5060809@redhat.com>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE354DD@SACMBXIP01.sdcorp.global.sandisk.com> <CAANLjFpmO+rGnEFM5+u6piVoa4YqvoVCcTWjYOQJ2cXEEk7T-g@mail.gmail.com>
+From: Noah Watkins <noahwatkins@gmail.com>
+Subject: Re: ceph-deploy: too many argument: --setgroup 10
+Date: Thu, 3 Sep 2015 11:08:48 -0600
+Message-ID: <CAB2gnbXfFAjZgT8w5piRDwfS3o1yqjjUHHeFO=xq=PzhZmWvQg@mail.gmail.com>
+References: <CAB2gnbV3LxJYxSxnz7J8ZsXxPkjhy7Ba5aN834nrFwzG-QyNOw@mail.gmail.com>
+	<CACkq2mqhmpFWKTWK59J=wdvNUPz3d5jeRA7Z4hYW5tkrcUf6Yg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:57303 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932569AbbICQmP (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 3 Sep 2015 12:42:15 -0400
-In-Reply-To: <CAANLjFpmO+rGnEFM5+u6piVoa4YqvoVCcTWjYOQJ2cXEEk7T-g@mail.gmail.com>
+Received: from mail-qg0-f46.google.com ([209.85.192.46]:36277 "EHLO
+	mail-qg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754322AbbICRIs (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Sep 2015 13:08:48 -0400
+Received: by qgx61 with SMTP id 61so33791233qgx.3
+        for <ceph-devel@vger.kernel.org>; Thu, 03 Sep 2015 10:08:48 -0700 (PDT)
+In-Reply-To: <CACkq2mqhmpFWKTWK59J=wdvNUPz3d5jeRA7Z4hYW5tkrcUf6Yg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Robert LeBlanc <robert@leblancnet.us>, Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Travis Rhoden <trhoden@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
 
-On 09/03/2015 11:23 AM, Robert LeBlanc wrote:
-> -----BEGIN PGP SIGNED MESSAGE-----
-> Hash: SHA256
+I see. This is the ownership info for /var/lib/ceph
+
+[nwatkins@cn67 ~]$ stat /var/lib/ceph
+  File: `/var/lib/ceph' -> `/ram/var/lib/ceph'
+  Size: 17        Blocks: 3          IO Block: 524288 symbolic link
+Device: 12h/18d Inode: 4429801211  Links: 1
+Access: (0777/lrwxrwxrwx)  Uid: (    0/    root)   Gid: (   10/   wheel)
+
+This is probably a rather non traditional environment that Ceph is
+being deployed onto. I talked with the sys admins and they were rather
+surprised by this. I guess we can take care of it on this end now that
+we see the issue.
+
+In general should the ceph-deploy tool version be paired up with the
+version of Ceph being deployed, or is it the case that for Hammer the
+file system uid/gid _should be_ 0 to avoid the unsupported --getgroup
+flag?
+
+Thanks!
+
+On Wed, Sep 2, 2015 at 3:32 PM, Travis Rhoden <trhoden@gmail.com> wrote:
+> Hi Noah,
 >
-> Somnath,
+> What is the ownership on /var/lib/ceph ?
 >
-> I'm having a hard time with your slide deck. Am I understanding
-> correctly that the default Hammer install was performed on SSDs with
-> co-located journals, but the optimized code was performed on the same
-> SSDs but the journal was in NVRAM? If so I'm having a hard time
-> understanding how these tests can be comparable. I really like the
-> performance gains you are seeing, but I'm trying to understand how
-> much the optimized code alone helps performance.
-
-Hi Robert,
-
-We talked about this a bit at the weekly performance meeting.  I think 
-Somnath just hasn't gotten a chance to do those tests yet and is 
-planning on doing them in the coming weeks.  I believe he started out 
-with hammer on the SSDs and then tried to figure out how to tweak things 
-to make the NVRAM configuration perform better.  Now he has to go back 
-and retest the original configuration but with the new code.
-
-Mark
+> ceph-deploy should only be trying to use --setgroup if /var/lib/ceph is
+> owned by non-root.
+>
+> On a fresh install of Hammer, this should be root:root.
+>
+> The --setgroup flag was added to ceph-deploy in 1.5.26.
+>
+>  - Travis
+>
+> On Wed, Sep 2, 2015 at 1:59 PM, Noah Watkins <noahwatkins@gmail.com> wrote:
+>>
+>> I'm getting the following error using ceph-deploy to setup a cluster.
+>> It's Centos6.6 and I'm using Hammer and the latest ceph-deploy. It
+>> looks like setgroup wasn't an option in Hammer, but ceph-deploy adds
+>> it. Is there a trick or older version of ceph-deploy I should try?
+>>
+>> - Noah
+>>
+>> [cn67][INFO  ] Running command: sudo ceph-mon --cluster ceph --mkfs -i
+>> cn67 --keyring /var/lib/ceph/tmp/ceph-cn67.mon.keyring --setgroup 10
+>> [cn67][WARNIN] too many arguments: [--setgroup,10]
+>> [cn67][DEBUG ]   --conf/-c FILE    read configuration from the given
+>> configuration file
+>> [cn67][WARNIN] usage: ceph-mon -i monid [flags]
+>> [cn67][DEBUG ]   --id/-i ID        set ID portion of my name
+>> [cn67][WARNIN]   --debug_mon n
+>> [cn67][DEBUG ]   --name/-n TYPE.ID set name
+>> [cn67][WARNIN]         debug monitor level (e.g. 10)
+>> [cn67][DEBUG ]   --cluster NAME    set cluster name (default: ceph)
+>> [cn67][WARNIN]   --mkfs
+>> [cn67][DEBUG ]   --version         show version and quit
+>> [cn67][WARNIN]         build fresh monitor fs
+>> [cn67][DEBUG ]
+>> [cn67][WARNIN]   --force-sync
+>> [cn67][DEBUG ]   -d                run in foreground, log to stderr.
+>> [cn67][WARNIN]         force a sync from another mon by wiping local
+>> data (BE CAREFUL)
+>> [cn67][DEBUG ]   -f                run in foreground, log to usual
+>> location.
+>> [cn67][WARNIN]   --yes-i-really-mean-it
+>> [cn67][DEBUG ]   --debug_ms N      set message debug level (e.g. 1)
+>> [cn67][WARNIN]         mandatory safeguard for --force-sync
+>> [cn67][WARNIN]   --compact
+>> [cn67][WARNIN]         compact the monitor store
+>> [cn67][WARNIN]   --osdmap <filename>
+>> [cn67][WARNIN]         only used when --mkfs is provided: load the
+>> osdmap from <filename>
+>> [cn67][WARNIN]   --inject-monmap <filename>
+>> [cn67][WARNIN]         write the <filename> monmap to the local
+>> monitor store and exit
+>> [cn67][WARNIN]   --extract-monmap <filename>
+>> [cn67][WARNIN]         extract the monmap from the local monitor store and
+>> exit
+>> [cn67][WARNIN]   --mon-data <directory>
+>> [cn67][WARNIN]         where the mon store and keyring are located
+>> [cn67][ERROR ] RuntimeError: command returned non-zero exit status: 1
+>> [ceph_deploy.mon][ERROR ] Failed to execute command: ceph-mon
+>> --cluster ceph --mkfs -i cn67 --keyring
+>> /var/lib/ceph/tmp/ceph-cn67.mon.keyring --setgroup 10
+>> [ceph_deploy][ERROR ] GenericError: Failed to create 1 monitors
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
