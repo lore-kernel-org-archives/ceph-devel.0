@@ -1,90 +1,38 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Ceph Write Path Improvement
-Date: Thu, 3 Sep 2015 20:06:18 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE37454@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE354DD@SACMBXIP01.sdcorp.global.sandisk.com>
- <CAANLjFpmO+rGnEFM5+u6piVoa4YqvoVCcTWjYOQJ2cXEEk7T-g@mail.gmail.com>
- <55E87862.5060809@redhat.com>
- <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE36FF9@SACMBXIP01.sdcorp.global.sandisk.com>
- <3649A15A2562B54294DE14BCE5AC79120B5AEB14@FMSMSX119.amr.corp.intel.com>
+From: Casey Bodley <cbodley@redhat.com>
+Subject: multi-site rgw and the period push/pull api
+Date: Thu, 3 Sep 2015 17:09:37 -0400 (EDT)
+Message-ID: <1624232893.12469438.1441314577271.JavaMail.zimbra@redhat.com>
+References: <1131886463.12452865.1441312989166.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0076.outbound.protection.outlook.com ([65.55.169.76]:26544
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752882AbbICUGY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 3 Sep 2015 16:06:24 -0400
-In-Reply-To: <3649A15A2562B54294DE14BCE5AC79120B5AEB14@FMSMSX119.amr.corp.intel.com>
-Content-Language: en-US
+Received: from mx3-phx2.redhat.com ([209.132.183.24]:34771 "EHLO
+	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757511AbbICVJh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Sep 2015 17:09:37 -0400
+In-Reply-To: <1131886463.12452865.1441312989166.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Blinick, Stephen L" <stephen.l.blinick@intel.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Orit Wasserman <owasserm@redhat.com>
+Cc: Yehuda Sadeh-Weinraub <ysadehwe@redhat.com>, ceph-devel@vger.kernel.org
 
-U3RlcGhlbiwNCkl0J3MgYSAxIFJCRCB2b2x1bWUgKHByZWNvbmRpdGlvbmVkKSBvZiAyIFRCIHNp
-emUgZnJvbSBvbmUgcGh5c2ljYWwgY2xpZW50IGJveC4NCmZpby1yYmQgc2NyaXB0IEkgYW0gcnVu
-bmluZyB3aXRoIDEwIGpvYnMgYW5kIGVhY2ggd2l0aCA2NCBRRC4NCkZvciBtaXhlZCB3b3JrbG9h
-ZCBpdCBpcyB3aXRoIFFEID0gOCBhbmQgbnVtX2pvYj0gMSBhbmQgMTAuDQoNCg0KVGhhbmtzICYg
-UmVnYXJkcw0KU29tbmF0aA0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogQmxp
-bmljaywgU3RlcGhlbiBMIFttYWlsdG86c3RlcGhlbi5sLmJsaW5pY2tAaW50ZWwuY29tXSANClNl
-bnQ6IFRodXJzZGF5LCBTZXB0ZW1iZXIgMDMsIDIwMTUgMTowMiBQTQ0KVG86IFNvbW5hdGggUm95
-DQpDYzogY2VwaC1kZXZlbA0KU3ViamVjdDogUkU6IENlcGggV3JpdGUgUGF0aCBJbXByb3ZlbWVu
-dA0KDQpTb21uYXRoIC0tIHRoYW5rcyBmb3IgcHVibGlzaGluZyBhbGwgdGhlIGRhdGEsIHdpbGwg
-YmUgZ3JlYXQgdG8gbG9vayBhdCBpdCBvZmZsaW5lLiAgSSBkaWRuJ3QgZmluZCB0aGlzIGluZm86
-ICBIb3cgbWFueSBSQkQgdm9sdW1lcywgYW5kIHdoYXQgc2l6ZSwgZGlkIHlvdSB1c2UgZm9yIHlv
-dXIgbWl4ZWQgdGVzdHM/ICBXYXMgaXQganVzdCBvbmUgUkJEIHcvIG51bV9qb2JzPTEgJiAxMD8g
-IEFsc28gaG93IG1hbnkgY2xpZW50IHN5c3RlbXMgd2VyZSBuZWNlc3NhcnkgdG8gZHJpdmUgdGhl
-IHdvcmtsb2FkIG9uIHRoZSA0IHN0b3JhZ2Ugbm9kZXM/ICAgICAgDQoNCkkgc2F3IHRoZSBzYW1l
-IGJlaGF2aW9yIHF1aXRlIGEgd2hpbGUgYmFjayB3aGVuIHBsYXlpbmcgd2l0aCByYW1kaXNrIGpv
-dXJuYWwuLi4gTm90IGEgbG90IG9mIGltcHJvdmVtZW50Lg0KDQpUaGFua3MsDQoNClN0ZXBoZW4N
-Cg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdl
-ci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9u
-IEJlaGFsZiBPZiBTb21uYXRoIFJveQ0KU2VudDogVGh1cnNkYXksIFNlcHRlbWJlciAzLCAyMDE1
-IDEwOjQyIEFNDQpUbzogTWFyayBOZWxzb247IFJvYmVydCBMZUJsYW5jDQpDYzogY2VwaC1kZXZl
-bA0KU3ViamVjdDogUkU6IENlcGggV3JpdGUgUGF0aCBJbXByb3ZlbWVudA0KDQpZZXMsIEFzIE1h
-cmsgc2FpZCBJIHdpbGwgY29sbGVjdCBhbGwgdGhlIGRhdGEgYW5kIGhvcGVmdWxseSBJIGNhbiBw
-cmVzZW50IGluIHRoZSBuZXh0IHBlcmZvcm1hbmNlIG1lZXRpbmcuDQpCVFcsIEkgaGF2ZSB0ZXN0
-ZWQgd2l0aCBIYW1tZXIgY29kZSBiYXNlICsgTnZSQU0gam91cm5hbCBpbml0aWFsbHksIGJ1dCB0
-aGF0IHBlcmZvcm1hbmNlIGlzIHZlcnkgc3Bpa3kgd2l0aCB+MTAlIHBlcmZvcm1hbmNlIGdhaW4g
-KGF0IG1heCkuIEkgdGhvdWdodCB0aGVyZSBpcyBubyBwb2ludCBvZiBjb2xsZWN0aW5nIG1vcmUg
-ZGF0YSB3aXRoIHRoYXQgY29uZmlnLg0KVGhhdCdzIHdoeSBJIGhhdmUgaW50cm9kdWNlZCBhIG5l
-dyB0aHJvdHRsaW5nIHNjaGVtZSB0aGF0IHNob3VsZCBiZW5lZml0IGluIGFsbCB0aGUgc2NlbmFy
-aW9zLg0KDQpUaGFua3MgJiBSZWdhcmRzDQpTb21uYXRoDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2Fn
-ZS0tLS0tDQpGcm9tOiBNYXJrIE5lbHNvbiBbbWFpbHRvOm1uZWxzb25AcmVkaGF0LmNvbV0NClNl
-bnQ6IFRodXJzZGF5LCBTZXB0ZW1iZXIgMDMsIDIwMTUgOTo0MiBBTQ0KVG86IFJvYmVydCBMZUJs
-YW5jOyBTb21uYXRoIFJveQ0KQ2M6IGNlcGgtZGV2ZWwNClN1YmplY3Q6IFJlOiBDZXBoIFdyaXRl
-IFBhdGggSW1wcm92ZW1lbnQNCg0KT24gMDkvMDMvMjAxNSAxMToyMyBBTSwgUm9iZXJ0IExlQmxh
-bmMgd3JvdGU6DQo+IC0tLS0tQkVHSU4gUEdQIFNJR05FRCBNRVNTQUdFLS0tLS0NCj4gSGFzaDog
-U0hBMjU2DQo+DQo+IFNvbW5hdGgsDQo+DQo+IEknbSBoYXZpbmcgYSBoYXJkIHRpbWUgd2l0aCB5
-b3VyIHNsaWRlIGRlY2suIEFtIEkgdW5kZXJzdGFuZGluZyANCj4gY29ycmVjdGx5IHRoYXQgdGhl
-IGRlZmF1bHQgSGFtbWVyIGluc3RhbGwgd2FzIHBlcmZvcm1lZCBvbiBTU0RzIHdpdGggDQo+IGNv
-LWxvY2F0ZWQgam91cm5hbHMsIGJ1dCB0aGUgb3B0aW1pemVkIGNvZGUgd2FzIHBlcmZvcm1lZCBv
-biB0aGUgc2FtZSANCj4gU1NEcyBidXQgdGhlIGpvdXJuYWwgd2FzIGluIE5WUkFNPyBJZiBzbyBJ
-J20gaGF2aW5nIGEgaGFyZCB0aW1lIA0KPiB1bmRlcnN0YW5kaW5nIGhvdyB0aGVzZSB0ZXN0cyBj
-YW4gYmUgY29tcGFyYWJsZS4gSSByZWFsbHkgbGlrZSB0aGUgDQo+IHBlcmZvcm1hbmNlIGdhaW5z
-IHlvdSBhcmUgc2VlaW5nLCBidXQgSSdtIHRyeWluZyB0byB1bmRlcnN0YW5kIGhvdyANCj4gbXVj
-aCB0aGUgb3B0aW1pemVkIGNvZGUgYWxvbmUgaGVscHMgcGVyZm9ybWFuY2UuDQoNCkhpIFJvYmVy
-dCwNCg0KV2UgdGFsa2VkIGFib3V0IHRoaXMgYSBiaXQgYXQgdGhlIHdlZWtseSBwZXJmb3JtYW5j
-ZSBtZWV0aW5nLiAgSSB0aGluayBTb21uYXRoIGp1c3QgaGFzbid0IGdvdHRlbiBhIGNoYW5jZSB0
-byBkbyB0aG9zZSB0ZXN0cyB5ZXQgYW5kIGlzIHBsYW5uaW5nIG9uIGRvaW5nIHRoZW0gaW4gdGhl
-IGNvbWluZyB3ZWVrcy4gIEkgYmVsaWV2ZSBoZSBzdGFydGVkIG91dCB3aXRoIGhhbW1lciBvbiB0
-aGUgU1NEcyBhbmQgdGhlbiB0cmllZCB0byBmaWd1cmUgb3V0IGhvdyB0byB0d2VhayB0aGluZ3Mg
-dG8gbWFrZSB0aGUgTlZSQU0gY29uZmlndXJhdGlvbiBwZXJmb3JtIGJldHRlci4gIE5vdyBoZSBo
-YXMgdG8gZ28gYmFjayBhbmQgcmV0ZXN0IHRoZSBvcmlnaW5hbCBjb25maWd1cmF0aW9uIGJ1dCB3
-aXRoIHRoZSBuZXcgY29kZS4NCg0KTWFyaw0KDQpfX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fXw0KDQpQTEVBU0UgTk9URTogVGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBpbiB0aGlzIGVs
-ZWN0cm9uaWMgbWFpbCBtZXNzYWdlIGlzIGludGVuZGVkIG9ubHkgZm9yIHRoZSB1c2Ugb2YgdGhl
-IGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpIG5hbWVkIGFib3ZlLiBJZiB0aGUgcmVhZGVyIG9mIHRo
-aXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVuZGVkIHJlY2lwaWVudCwgeW91IGFyZSBoZXJlYnkg
-bm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2UgaW4gZXJyb3IgYW5k
-IHRoYXQgYW55IHJldmlldywgZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9uLCBvciBjb3B5aW5n
-IG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5b3UgaGF2ZSByZWNl
-aXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRl
-ciBieSB0ZWxlcGhvbmUgb3IgZS1tYWlsIChhcyBzaG93biBhYm92ZSkgaW1tZWRpYXRlbHkgYW5k
-IGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVzIG9mIHRoaXMgbWVzc2FnZSBpbiB5b3VyIHBvc3Nl
-c3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkgc3RvcmVkIGNvcGll
-cykuDQoNChMgIOy5uxwgJiB+ICYgGCAgKy0gIN22FyAgdyAgy5sgICBtIB4gF14gIGIgIF5uIHIg
-ICB6IBogIGggICAgJiAgHiBHICAgaCADKCDpmo4g3aJqIiAgGiAbbSAgICAgeiDeliAgIGYgICBo
-ICAgfiBtIA0K
+Hi Orit and Yehuda,
+
+A couple questions came up today while I was fleshing out the /admin/realm handler:
+
+I found a RGWOp_Period_Get() and _Post() in rgw_rest_config.cc that do pretty much what we want for push and pull.  Is this /admin/config handler temporary, or should we share these ops between the /admin/config and /admin/realm handlers?
+
+I also asked Yehuda for clarification on the push op (POST /admin/realm/period):
+
+(04:09:59 PM) cbodley: i'm confused, because the title says "Request children to fetch period", but under Input: it includes a json representation of the period
+(04:10:29 PM) cbodley: so should the POST include the data, or should the handler send a GET request to fetch it?
+(04:11:57 PM) yehudasa_: cbodley, great question.. let me take a look
+(04:14:21 PM) cbodley: i guess it depends on how we do authentication? we don't want to accept a POST from any random endpoint, and overwrite our map. so sending a GET to a known party sounds safer in that respect
+(04:14:30 PM) yehudasa_: cbodley, I think it should include the period data
+(04:15:20 PM) yehudasa_: we should only allow authenticated system users to be able to send it to us
+
+So my followup question is, should we get rid of the period_id and epoch parameters for POST, since the json-encoded period will contain those already?
+
+Thanks,
+Casey
