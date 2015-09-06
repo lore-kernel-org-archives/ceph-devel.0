@@ -1,87 +1,42 @@
-From: Shinobu Kinjo <skinjo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: RAM usage only very slowly decreases after cluster
- recovery
-Date: Sat, 5 Sep 2015 23:46:49 -0400 (EDT)
-Message-ID: <2109384358.13054984.1441511209539.JavaMail.zimbra@redhat.com>
-References: <1822049.0C84EggWvt@trog>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F2CE29D27@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CANE=7sX9ftf9iS6y+6iyAcn9JSdrsBX52B7jiFL96yJOpY2h-g@mail.gmail.com>
-	<2071029.GPQoXqnqrY@trog>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F2CE2ABC5@SACMBXIP01.sdcorp.global.sandisk.com>
+From: Sagi Grimberg <sagig@dev.mellanox.co.il>
+Subject: Re: [PATCH 12/18] target: compare and write backend driver sense
+ handling
+Date: Sun, 6 Sep 2015 09:38:08 +0300
+Message-ID: <55EBDF50.9090006@dev.mellanox.co.il>
+References: <1438161835-27960-1-git-send-email-mchristi@redhat.com>
+ <1438161835-27960-12-git-send-email-mchristi@redhat.com>
+ <55E9F3DC.1010404@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE2ABC5-cXZ6iGhjG0il5HHZYNR2WTJ2aSJ780jGSxCzGc5ayCJWk0Htik3J/w@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-wi0-f174.google.com ([209.85.212.174]:34498 "EHLO
+	mail-wi0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750888AbbIFGhz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 6 Sep 2015 02:37:55 -0400
+Received: by wicfx3 with SMTP id fx3so57730744wic.1
+        for <ceph-devel@vger.kernel.org>; Sat, 05 Sep 2015 23:37:54 -0700 (PDT)
+In-Reply-To: <55E9F3DC.1010404@redhat.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Mike Christie <mchristi@redhat.com>, ceph-devel@vger.kernel.org, target-devel@vger.kernel.org
 
-U2luY2UgamVtYWxsb2MgdHJpZXMgdG8gY3JlYXRlIGFyZW5hIG9uIGRpZmZlcmVudCB0aHJlYWQg
-Zm9yIGxvY2sgY29udGVudGlvbiBwcm9ibGVtcywgbm8gbWF0dGVyIHdoZW4gc3lzdGVtIGlzIGJ1
-c3kuClRoaXMgY2F1c2VzIGluY3JlYXNpbmcgbWVtb3J5IHVzYWdlLiAKCkkgdGhpbmsgd2UgcHJv
-YmFibHkgbmVlZCB0byB0aGluayBob3cgdG8gYSBsaXR0bGUgYml0IGNhcmVmdWxseSBtYWtlIHVz
-ZSBvZjoKCiAgICBwdGhyZWFkX2NyZWF0ZSgpCiAgICB0Y2FjaGUKICAgIHJlZHpvbmUKICAgIEV0
-Yy4uLgoKQW5kIEkgYWxzbyB0aGluayBpdCdzIGJldHRlciB0byB0aGluayBvZiBjaHVuayBzaXpl
-LgpUaGVyZSB3b3VsZCBiZSB0cmFkZS1vZmYgYmV0d2VlbiBwZXJmb3JtYW5jZSBhbmQgY29zdC4K
-CkknbSBub3Qgc3VyZSBob3cgYnVzeSBzeXN0ZW0gd2FzLgoKVGhlcmUgbWlnaHQgaGFkIGJlZW4g
-bWVtb3J5IGxlYWsuIFdoaWNoIG1lYW5zIHRoYXQgdGhlcmUgbWlnaHQgaGF2ZSBiZWVuIGJsb2Nr
-cyB3aGljaCB3ZXJlIG5vdCBmcmVlZCBhZnRlciBtYWxsb2MuCkRpZCB5b3UgY2hlY2s/CgogICAg
-PiBpdCBzZWVtcyBqZW1hbGxvYyBpcyBjb25zdW1pbmcgfjIwME1CIG1vcmUgbWVtb3J5L29zZCBk
-dXJpbmcgSU8gcnVuLi4uCgpJZiBJJ3ZlIG1pc3NlZCBhbnl0aGluZywganVzdCBwb2ludCBvdXQg
-aXQgdG8gbWUuCkknbSByZWFsbHkgcmVhbGx5IHBpY2sgaW4gdGVybXMgb2YgcGVyZm9ybWFuY2Ug
-dHVuaW5nLgoKIFNoaW5vYnUKCi0tLS0tIE9yaWdpbmFsIE1lc3NhZ2UgLS0tLS0KRnJvbTogIlNv
-bW5hdGggUm95IiA8U29tbmF0aC5Sb3lAc2FuZGlzay5jb20+ClRvOiAiQ2hhZCBXaWxsaWFtIFNl
-eXMiIDxjd3NleXNAcGh5c2ljcy53aXNjLmVkdT4sICLmsaDkv6Hms70iIDx4bWR4Y3h6QGdtYWls
-LmNvbT4KQ2M6IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KU2VudDogU2F0dXJkYXksIEF1Z3Vz
-dCAyOSwgMjAxNSAxMjo1NTozNCBBTQpTdWJqZWN0OiBSZTogW2NlcGgtdXNlcnNdIFJBTSB1c2Fn
-ZSBvbmx5IHZlcnkgc2xvd2x5IGRlY3JlYXNlcyBhZnRlciBjbHVzdGVyIHJlY292ZXJ5CgpZZWFo
-LCB0aGF0IG1lYW5zIHRjbWFsbG9jIHByb2JhYmx5IGNhY2hpbmcgdGhvc2UgYXMgSSBzdXNwZWN0
-ZWQuLgpUaGVyZSBhcmUgc29tZSBkaXNjdXNzaW9uIGdvaW5nIG9uIGluIHRoYXQgZnJvbnQsIGJ1
-dCwgdW5mb3J0dW5hdGVseSB3ZSBjb25jbHVkZWQgdG8gaGF2ZSB0Y21hbGxvYyBhcyBkZWZhdWx0
-IGFuZCBpZiBzb21lYm9keSBuZWVkcyBwZXJmb3JtYW5jZSBzaG91bGQgbW92ZSB0byBqZW1hbGxv
-Yy4KT25lIG9mIHRoZSByZWFzb24gaXMsIGl0IHNlZW1zIGplbWFsbG9jIGlzIGNvbnN1bWluZyB+
-MjAwTUIgbW9yZSBtZW1vcnkvb3NkIGR1cmluZyBJTyBydW4uLi4KQnV0LCBJIHRoaW5rIHRoaXMg
-aXMgb25lIG9mIHRoZSBzZXJpb3VzIGlzc3VlIG9mIHRjbWFsbG9jIHdlIG5lZWQgdG8gY29uc2lk
-ZXIgYXMgd2VsbC4uSSBwb3N0ZWQgdGhpcyBmaW5kaW5ncyBlYXJsaWVyIGluIGNlcGgtZGV2bCBk
-dXJpbmcgbXkgd3JpdGUgcGF0aCBvcHRpbWl6YXRpb24gaW52ZXN0aWdhdGlvbi4KVGhlcmUgYXJl
-IHNvbWUgc2V0dGluZ3MgaW4gdGNtYWxsb2MgdGhhdCBzaG91bGQgZXhwZWRpdGUgdGhpcyBtZW1v
-cnkgcmVsZWFzZSBmYXN0ZXIgdGhvdWdoLiBJIHRyaWVkLCBidXQsIGRpZG4ndCB3b3JrLiBJIGRp
-ZG4ndCBkaWcgZG93biBmdXJ0aGVyIGluIHRoYXQgcm91dGUgdGhvdWdoLgoKTWFyaywKRGlkIHlv
-dSBvYnNlcnZlIHNpbWlsYXIgdGNtYWxsb2MgYmVoYXZpb3IgaW4geW91ciByZWNvdmVyeSBleHBl
-cmltZW50IGZvciB0Y21hbGxvYyB2cyBqZW1hbGxvYz8KClRoYW5rcyAmIFJlZ2FyZHMKU29tbmF0
-aAoKLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0KRnJvbTogQ2hhZCBXaWxsaWFtIFNleXMgW21h
-aWx0bzpjd3NleXNAcGh5c2ljcy53aXNjLmVkdV0KU2VudDogRnJpZGF5LCBBdWd1c3QgMjgsIDIw
-MTUgNzo1OCBBTQpUbzog5rGg5L+h5rO9CkNjOiBTb21uYXRoIFJveTsgSGFvbWFpIFdhbmc7IGNl
-cGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KU3ViamVjdDogUmU6IFtjZXBoLXVzZXJzXSBSQU0gdXNh
-Z2Ugb25seSB2ZXJ5IHNsb3dseSBkZWNyZWFzZXMgYWZ0ZXIgY2x1c3RlciByZWNvdmVyeQoKVGhh
-bmtzISAnY2VwaCB0ZWxsIG9zZC4qIGhlYXAgcmVsZWFzZScgc2VlbXMgdG8gaGF2ZSB3b3JrZWQh
-ICBHdWVzcyBJJ2xsIHNwcmlua2xlIGl0IGFyb3VuZCBteSBtYWludGVuYW5jZSBzY3JpcHRzLgoK
-U29tbmF0aCBJcyB0aGVyZSBhIHBsYW4gdG8gbWFrZSBqZW1hbGxvYyBzdGFuZGFyZCBpbiBDZXBo
-IGluIHRoZSBmdXR1cmU/CgpUaGFua3MhCkNoYWQuCgoKX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX18KClBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMg
-ZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0
-aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2Yg
-dGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVi
-eSBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBh
-bmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlp
-bmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJl
-Y2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2Vu
-ZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBh
-bmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9z
-c2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29w
-aWVzKS4KCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmNl
-cGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDovL2xp
-c3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCl9fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBs
-aXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3Rp
-bmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
+On 9/4/2015 10:41 PM, Mike Christie wrote:
+> Hey Nick and Christoph,
+
+Hi Mike,
+
+>
+> For the target_core_iblock + rbd/COMPARE_AND_WRITE support approach, I
+> still need a patch like below to be able to allow target_core_iblock.c
+> to be able to specify specific codes like TCM_MISCOMPARE_VERIFY.
+
+I just posted a couple of patches to use scsi helpers to set the
+sense buffer with/without information (see translate_sense_reason).
+You can just add TCM_MISCOMPARE_VERIFY entry to sense_info_table with
+.add_sector_info = true.
+
+Moreover, we have a field in the command structure to keep the error
+sector (used in DIF). So you should go ahead and use that.
+
+Sagi.
