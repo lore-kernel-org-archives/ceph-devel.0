@@ -1,67 +1,39 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: pull request labels : related to
-Date: Sun, 06 Sep 2015 18:04:28 +0200
-Message-ID: <55EC640C.7020700@dachary.org>
+From: iSayor <iSayor@iSayor.com>
+Subject: usually 3000 customers/Where 100,000+ customers worldwide?
+Date: Sun, 06 Sep 2015 11:26:12 -0700
+Message-ID: <01d0e8d1$Blat.v3.2.4$828cf2c8$13ab031da@localhost>
+Reply-To: iSayor <iSayor@163.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="QMEDj6Kgca54odPB0n1hCwoaqHCHilacu"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:50502 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1750871AbbIFQEb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 6 Sep 2015 12:04:31 -0400
-Received: from [10.9.0.6] (unknown [10.0.2.28])
-	by smtp.dmail.dachary.org (Postfix) with ESMTP id 3B80742092
-	for <ceph-devel@vger.kernel.org>; Sun,  6 Sep 2015 18:04:29 +0200 (CEST)
+Received: from [106.6.186.155] ([106.6.186.155]:1289 "EHLO iSayor.com"
+	rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751173AbbIFQ4w (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 6 Sep 2015 12:56:52 -0400
+Received: from sun (127.0.0.1) by iSayor.com for <ceph-devel@vger.kernel.org>; Sun, 6 Sep 2015 11:26:13 -0700 (envelope-from <iSayor@iSayor.com>)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---QMEDj6Kgca54odPB0n1hCwoaqHCHilacu
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-Hi,
-
-I wen thru all pull request looking for those not related to anything (li=
-ke having "bug fix" without "core" or "rgw"). Now that there are many lab=
-els, it's not trivial for someone not used to Ceph to sort out what's wha=
-t. We really have three kinds of labels:
-
- * those that relate the pull request to an area / component of Ceph (rgw=
-, core, etc.)
- * those used to remember at what stage of QA the pull request is (wip-* =
-and needs*qa)
- * those that describe the kind of pull request (cleanup, bug fix, perfor=
-mance etc.)
-
-To help reading the label I prefixed the names of rgw, core, etc. with "r=
-elated to". If someone think that's not helpful or too long to read, feel=
- free to revert, it's just a proposal.
-
-Cheers
-
-P.S. For backport snippets that set the component to "core" we'll need to=
- change that to "related to core" instead. Not too much of an inconvenien=
-ce IMHO but ...
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---QMEDj6Kgca54odPB0n1hCwoaqHCHilacu
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlXsZAwACgkQ8dLMyEl6F23NawCeMb02LSgp0eoWe2+TunyCBnTZ
-EbMAniyfMHw417OaC6vKck0fmb5mWPmO
-=F2a8
------END PGP SIGNATURE-----
-
---QMEDj6Kgca54odPB0n1hCwoaqHCHilacu--
+Hi
+=C2=A0=C2=A0Are you still develop foreign customers with alibaba, exhib=
+ition?
+=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0You out of!!!
+=C2=A0 Are you looking other channel beside exhibition/B2B when you fee=
+l difficult to find foreign customers?
+=C2=A0 Industry hundreds of thousands of customers worldwide, usually w=
+e can only contact three thousand, do you want to rest also developed?
+=C2=A0 Guangdong General Chamber of Commerce recommended the initiative=
+ customer develop first brand, nearly ten thousand companies are benefi=
+ting.
+  the first benefit with first use, nearly twenty thousand companies le=
+ad you!
+  You can not use, but not without understanding.
+=C2=A0 Add QQ2652697913/Skype:iSayor let's show you the initiative cust=
+omer develop means.
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
