@@ -1,94 +1,41 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: pull request labels : related to
-Date: Tue, 08 Sep 2015 16:22:27 +0200
-Message-ID: <55EEEF23.10403@dachary.org>
-References: <55EC640C.7020700@dachary.org> <CAJ4mKGa8ELkQ85mzdQjqhriuGhxjR5uEUvT0ggQAS+k0ZaDcgA@mail.gmail.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: [NewStore]About PGLog Workload With RocksDB
+Date: Tue, 8 Sep 2015 16:47:46 +0100
+Message-ID: <CAJ4mKGbA4ZbPr9bS+EKiagTBcZoyOB5OJsbALkhf2mde56rwfw@mail.gmail.com>
+References: <CACJqLybUOPaj3kFrn6b3-1O7fEd0zom2KR5ETC+DiPpid4HQew@mail.gmail.com>
+	<CACJqLyanf82a60YrLmYio80ff+-xkdWUiSqhiiu3v8TqSa0K_w@mail.gmail.com>
+	<CAJ4mKGZFoScqE3t-fawrkCEPZe2t_BmbbV+tpUF3HBkMUF+8=w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="tEbWGjPFmCURoId8WXMGw9GdUb844wn1f"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:51717 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1755124AbbIHOWa (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Sep 2015 10:22:30 -0400
-In-Reply-To: <CAJ4mKGa8ELkQ85mzdQjqhriuGhxjR5uEUvT0ggQAS+k0ZaDcgA@mail.gmail.com>
+Received: from mail-wi0-f180.google.com ([209.85.212.180]:37449 "EHLO
+	mail-wi0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753551AbbIHPrr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Sep 2015 11:47:47 -0400
+Received: by wicfx3 with SMTP id fx3so120151235wic.0
+        for <ceph-devel@vger.kernel.org>; Tue, 08 Sep 2015 08:47:46 -0700 (PDT)
+In-Reply-To: <CAJ4mKGZFoScqE3t-fawrkCEPZe2t_BmbbV+tpUF3HBkMUF+8=w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Haomai Wang <haomaiwang@gmail.com>
+Cc: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---tEbWGjPFmCURoId8WXMGw9GdUb844wn1f
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-Hi Greg,
-
-You're right, it's a bad idea. I reverted the change.
-
-Cheers
-
-On 08/09/2015 15:46, Gregory Farnum wrote:
-> On Sun, Sep 6, 2015 at 5:04 PM, Loic Dachary <loic@dachary.org> wrote:
->> Hi,
+On Tue, Sep 8, 2015 at 3:12 PM, Gregory Farnum <gfarnum@redhat.com> wrote:
+> On Tue, Sep 8, 2015 at 3:06 PM, Haomai Wang <haomaiwang@gmail.com> wrote:
+>> Hit "Send" by accident for previous mail. :-(
 >>
->> I wen thru all pull request looking for those not related to anything =
-(like having "bug fix" without "core" or "rgw"). Now that there are many =
-labels, it's not trivial for someone not used to Ceph to sort out what's =
-what. We really have three kinds of labels:
->>
->>  * those that relate the pull request to an area / component of Ceph (=
-rgw, core, etc.)
->>  * those used to remember at what stage of QA the pull request is (wip=
--* and needs*qa)
->>  * those that describe the kind of pull request (cleanup, bug fix, per=
-formance etc.)
->>
->> To help reading the label I prefixed the names of rgw, core, etc. with=
- "related to". If someone think that's not helpful or too long to read, f=
-eel free to revert, it's just a proposal.
->=20
-> You broke all my bookmarked searches. :( I've updated them now but I'm
-> really not sure this change is helpful =E2=80=94 in particular, we don'=
-t need
-> these labels to make sense to people who aren't used to Ceph and it's
-> impossible to have them quickly auto-complete now with a long shared
-> prefix across them all...
+>> some points about pglog:
+>> 1. short-alive but frequency(HIGH)
+>
+> Is this really true? The default length of the log is 1000 entries,
+> and most OSDs have ~100 PGs, so on a hard drive running at 80
+> writes/second that's about 100000 seconds (~27 hours) before we delete
+> an entry. In reality most deployments aren't writing that
+> quickly....and if something goes wrong with the PG we increase to
+> 10000 log entries!
 > -Greg
->=20
->>
->> Cheers
->>
->> P.S. For backport snippets that set the component to "core" we'll need=
- to change that to "related to core" instead. Not too much of an inconven=
-ience IMHO but ...
->>
->> --
->> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---tEbWGjPFmCURoId8WXMGw9GdUb844wn1f
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlXu7yMACgkQ8dLMyEl6F21phACgs/pHqmJuCYJ+EURC7JBp7exW
-UYYAn0o92TURtBW/UXmAQRxFiBhUoIo9
-=Ct0+
------END PGP SIGNATURE-----
-
---tEbWGjPFmCURoId8WXMGw9GdUb844wn1f--
+Er, whoops, as Ilya points out I've left out a step here. 100000
+entries at 80 entries/sec is only 1250 seconds, or about 20 minutes.
+That's quite a different number and you should perhaps just ignore me.
+:)
