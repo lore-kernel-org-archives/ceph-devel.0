@@ -1,150 +1,266 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: [NewStore]About PGLog Workload With RocksDB
-Date: Tue, 8 Sep 2015 12:32:40 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1509081227090.29438@cobra.newdream.net>
-References: <CACJqLybUOPaj3kFrn6b3-1O7fEd0zom2KR5ETC+DiPpid4HQew@mail.gmail.com> <CACJqLyanf82a60YrLmYio80ff+-xkdWUiSqhiiu3v8TqSa0K_w@mail.gmail.com> <alpine.DEB.2.00.1509081209250.29438@cobra.newdream.net> <55EF3639.3060108@redhat.com>
+From: Shinobu Kinjo <skinjo@redhat.com>
+Subject: Re: [ceph-users] Inconsistent PGs that ceph pg repair does not fix
+Date: Tue, 8 Sep 2015 17:42:37 -0400 (EDT)
+Message-ID: <682625709.14021783.1441748557255.JavaMail.zimbra@redhat.com>
+References: <D1E53A36.8DB6%apataki@simonsfoundation.org> <D1E53B6A.8DC6%apataki@simonsfoundation.org> <CAN=+7FUucyFUEm--jkGZWUULFGS7NHGApOG5x=wK7SM0OqTv=g@mail.gmail.com> <D1E543BF.8DD2%apataki@simonsfoundation.org> <1441734638465.20865@simonsfoundation.org> <alpine.DEB.2.00.1509081106100.29438@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:40387 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752058AbbIHTz7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Sep 2015 15:55:59 -0400
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 169BA8002D
-	for <ceph-devel@vger.kernel.org>; Tue,  8 Sep 2015 12:55:59 -0700 (PDT)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id EC0F88002D
-	for <ceph-devel@vger.kernel.org>; Tue,  8 Sep 2015 12:55:58 -0700 (PDT)
-In-Reply-To: <55EF3639.3060108@redhat.com>
+Received: from mx3-phx2.redhat.com ([209.132.183.24]:59610 "EHLO
+	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752202AbbIHVmk convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Sep 2015 17:42:40 -0400
+In-Reply-To: <alpine.DEB.2.00.1509081106100.29438@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>
+To: Sage Weil <sweil@redhat.com>
+Cc: Andras Pataki <apataki@simonsfoundation.org>, ceph-users@lists.ceph.com, ceph-devel@vger.kernel.org
 
-On Tue, 8 Sep 2015, Mark Nelson wrote:
-> On 09/08/2015 02:19 PM, Sage Weil wrote:
-> > > On Tue, Sep 8, 2015 at 9:58 PM, Haomai Wang <haomaiwang@gmail.com> wrote:
-> > > > Hi Sage,
-> > > > 
-> > > > I notice your post in rocksdb page about make rocksdb aware of short
-> > > > alive key/value pairs.
-> > > > 
-> > > > I think it would be great if one keyvalue db impl could support
-> > > > different key types with different store behaviors. But it looks like
-> > > > difficult for me to add this feature to an existing db.
-> > 
-> > WiredTiger comes to mind.. it supports a few different backing
-> > strategies (both btree and lsm, iirc).  Also, rocksdb has column families.
-> > That doesn't help with the write log piece (the log is shared, as I
-> > understand it) but it does mean that we can segregate the log events or
-> > other bits of the namespace off into regions that have different
-> > compaction policies (e.g., rarely/ever compact so that we avoid
-> > amplification and but suffer on reads during startup).
-> > 
-> > > > So combine my experience with filestore, I just think let
-> > > > NewStore/FileStore aware of this short-alive keys(Or just PGLog keys)
-> > > > could be easy and effective. PGLog owned by PG and maintain the
-> > > > history of ops. It's alike Journal Data but only have several hundreds
-> > > > bytes. Actually we only need to have several hundreds MB at most to
-> > > > store all pgs pglog. For FileStore, we already have FileJournal have a
-> > > > copy of PGLog, previously I always think about reduce another copy in
-> > > > leveldb to reduce leveldb calls which consumes lots of cpu cycles. But
-> > > > it need a lot of works to be done in FileJournal to aware of pglog
-> > > > things. NewStore doesn't use FileJournal and it should be easier to
-> > > > settle down my idea(?).
-> > > > 
-> > > > Actually I think a rados write op in current objectstore impl that
-> > > > omap key/value pairs hurts performance hugely. Lots of cpu cycles are
-> > > > consumed and contributes to short-alive keys(pglog). It should be a
-> > > > obvious optimization point. In the other hands, pglog is dull and
-> > > > doesn't need rich keyvalue api supports. Maybe a lightweight
-> > > > filejournal to settle down pglogs keys is also worth to try.
-> > > > 
-> > > > In short, I think it would be cleaner and easier than improving
-> > > > rocksdb to impl a pglog-optimization structure to store this.
-> > 
-> > I've given some thought to adding a FileJournal to newstore to do the wal
-> > events (which are the main thing we're putting in rocksdb that is *always*
-> > shortlived and can be reasonably big--and thus cost a lot when it gets
-> > flushed to L0).  But it just makes things a lot more complex.  We would
-> > have two synchronization (fsync) targets, or we would want to be smart
-> > about putting entire transactions in one journal and not the other.
-> > Still thinking about it, but it makes me a bit sad--it really feels like
-> > this is a common, simple workload that the KeyValueDB implementation
-> > should be able to handle.  What I'd really like is a hint on they key, or
-> > a predetermined key range that we use, so that the backend knows our
-> > lifecycle expectations and can optimize accordingly.
-> 
-> That sure seems like the right way to go to me too.
-> 
-> > 
-> > I'm hoping I can sell the rocksdb folks on a log rotation and flush
-> > strategy that prevents these keys from every making it into L0... that,
-> > combined with the overwrite change, will give us both low latency and no
-> > amplification for these writes (and any other keys that get rewritten,
-> > like hot object metadata).
-> 
-> Am I correct that the above is assuming we can't convince the rocksdb guys
-> that we should be able to explicitly hint that the key should never go to L0
-> anyway?
+That's a good news.
 
-The 'flush strategy' part would make overwritten or deleted keys skip L0, 
-without any hint needed.  The rest (compaction policy, I guess) I 
-think can be accomplished with column families... so I don't think hints 
-are actually needed in the rocksdb case.
+Shinobu
 
-Basically, the issue is that some number of log files/buffers are 
-compacted together and then written to a new L0 sst.  That means that any 
-keys alive at the end of that time period are amplified.  What I'd like to 
-do is make it so that we take N + M logs, and we flush/dedup the N log 
-segments into SST's... but skip any keys present in the M log buffers 
-that follow.  That way we have M logs' worth of time to hide overwrites 
-and short-lived keys.  The problem is that it will break the snapshot and 
-replication stuff in rocksdb.   We don't need that, so I'm hoping we can 
-have an upstream feature that's incompatible with those bits... otherwise, 
-we'd need to carry our changes downstream, which would suck, or just 
-accept that some of the WAL events will get rewritten (making N very large 
-would make it more infrequent, but never eliminate it entirely).
+----- Original Message -----
+=46rom: "Sage Weil" <sweil@redhat.com>
+To: "Andras Pataki" <apataki@simonsfoundation.org>
+Cc: ceph-users@lists.ceph.com, ceph-devel@vger.kernel.org
+Sent: Wednesday, September 9, 2015 3:07:29 AM
+Subject: Re: [ceph-users] Inconsistent PGs that ceph pg repair does not=
+ fix
 
-Anyway, what I meant to say before but forgot was that the other 
-reason I like putting this in the kv backend is that it gives us a 
-single commit transaction log to reason about.  That will keep 
-things simpler and while still keeping latency low.
+On Tue, 8 Sep 2015, Andras Pataki wrote:
+> Hi Sam,
+>=20
+> I saw that ceph 0.94.3 is out and it contains a resolution to the iss=
+ue below (http://tracker.ceph.com/issues/12577).  I installed it on our=
+ cluster, but unfortunately it didn't resolve the issue.  Same as befor=
+e, I have a couple of inconsistent pg's, and run ceph pg repair on them=
+ - the OSD says:
+>=20
+> 2015-09-08 11:21:53.930324 7f49c17ea700  0 log_channel(cluster) log [=
+INF] : 2.439 repair starts
+> 2015-09-08 11:27:57.708394 7f49c17ea700 -1 log_channel(cluster) log [=
+ERR] : repair 2.439 b029e439/10000022d93.00000f0c/head//2 on disk data =
+digest 0xb3d78a6e !=3D 0xa3944ad0
+> 2015-09-08 11:28:32.359938 7f49c17ea700 -1 log_channel(cluster) log [=
+ERR] : 2.439 repair 1 errors, 0 fixed
+> 2015-09-08 11:28:32.364506 7f49c17ea700  0 log_channel(cluster) log [=
+INF] : 2.439 deep-scrub starts
+> 2015-09-08 11:29:18.650876 7f49c17ea700 -1 log_channel(cluster) log [=
+ERR] : deep-scrub 2.439 b029e439/10000022d93.00000f0c/head//2 on disk d=
+ata digest 0xb3d78a6e !=3D 0xa3944ad0
+> 2015-09-08 11:29:23.136109 7f49c17ea700 -1 log_channel(cluster) log [=
+ERR] : 2.439 deep-scrub 1 errors
+>=20
+> $ ceph tell osd.* version | grep version | sort | uniq -c
+>      94     "version": "ceph version 0.94.3 (95cefea9fd9ab740263bf8bb=
+4796fd864d9afe2b)"
+>=20
+> Could you have another look?
+
+The fix was merged into master in=20
+6a949e10198a1787f2008b6c537b7060d191d236, after v0.94.3 was released.  =
+It=20
+will be in v0.94.4.
+
+Note that we had a bunch of similar errors on our internal lab cluster =
+and=20
+this resolved them.  We installed the test build from gitbuilder,=20
+available at=20
+http://gitbuilder.ceph.com/ceph-rpm-centos7-x86_64-basic/ref/hammer/ (o=
+r=20
+similar, adjust URL for your distro).
 
 sage
 
 
-> 
-> > 
-> > On Tue, 8 Sep 2015, Haomai Wang wrote:
-> > > Hit "Send" by accident for previous mail. :-(
-> > > 
-> > > some points about pglog:
-> > > 1. short-alive but frequency(HIGH)
-> > > 2. small and related to the number of pgs
-> > > 3. typical seq read/write scene
-> > > 4. doesn't need rich structure like LSM or B-tree to support apis, has
-> > > obvious different to user-side/other omap keys.
-> > > 5. a simple loopback impl is efficient and simple
-> > 
-> > It simpler.. though not quite as simple as it could be.  The pg log
-> > lengths may vary widely (10000 events could be any time span,
-> > depending on how active the pg is).  And we want to pix all the pg log
-> > events into a single append stream for write efficiency.  So we still need
-> > some complex tracking and eventual compaction ... which is part of
-> > what the LSM is doing for us.
-> > 
-> > > > PS(off topic): a keyvaluedb benchmark http://sphia.org/benchmarks.html
-> > 
-> > This looks pretty interested!  Anyone interested in giving it a spin?  It
-> > should be pretty easy to write it into the KeyValueDB interface.
-> > 
-> > sage
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> 
-> 
-
+>=20
+> Thanks,
+>=20
+> Andras
+>=20
+>=20
+> ________________________________________
+> From: Andras Pataki
+> Sent: Monday, August 3, 2015 4:09 PM
+> To: Samuel Just
+> Cc: ceph-users@lists.ceph.com; ceph-devel@vger.kernel.org
+> Subject: Re: [ceph-users] Inconsistent PGs that ceph pg repair does n=
+ot fix
+>=20
+> Done: http://tracker.ceph.com/issues/12577
+> BTW, I=C2=B9m using the latest release 0.94.2 on all machines.
+>=20
+> Andras
+>=20
+>=20
+> On 8/3/15, 3:38 PM, "Samuel Just" <sjust@redhat.com> wrote:
+>=20
+> >Hrm, that's certainly supposed to work.  Can you make a bug?  Be sur=
+e
+> >to note what version you are running (output of ceph-osd -v).
+> >-Sam
+> >
+> >On Mon, Aug 3, 2015 at 12:34 PM, Andras Pataki
+> ><apataki@simonsfoundation.org> wrote:
+> >> Summary: I am having problems with inconsistent PG's that the 'cep=
+h pg
+> >> repair' command does not fix.  Below are the details.  Any help wo=
+uld be
+> >> appreciated.
+> >>
+> >> # Find the inconsistent PG's
+> >> ~# ceph pg dump | grep inconsistent
+> >> dumped all in format plain
+> >> 2.439 42080 00 017279507143 31033103 active+clean+inconsistent2015=
+-08-03
+> >> 14:49:17.29288477323'2250145 77480:890566 [78,54]78 [78,54]78
+> >> 77323'22501452015-08-03 14:49:17.29253877323'2250145 2015-08-03
+> >> 14:49:17.292538
+> >> 2.8b9 40830 00 016669590823 30513051 active+clean+inconsistent2015=
+-08-03
+> >> 14:46:05.14006377323'2249886 77473:897325 [7,72]7 [7,72]7
+> >> 77323'22498862015-08-03 14:22:47.83406377323'2249886 2015-08-03
+> >> 14:22:47.834063
+> >>
+> >> # Look at the first one:
+> >> ~# ceph pg deep-scrub 2.439
+> >> instructing pg 2.439 on osd.78 to deep-scrub
+> >>
+> >> # The logs of osd.78 show:
+> >> 2015-08-03 15:16:34.409738 7f09ec04a700  0 log_channel(cluster) lo=
+g
+> >>[INF] :
+> >> 2.439 deep-scrub starts
+> >> 2015-08-03 15:16:51.364229 7f09ec04a700 -1 log_channel(cluster) lo=
+g
+> >>[ERR] :
+> >> deep-scrub 2.439 b029e439/10000022d93.00000f0c/head//2 on disk dat=
+a
+> >>digest
+> >> 0xb3d78a6e !=3D 0xa3944ad0
+> >> 2015-08-03 15:16:52.763977 7f09ec04a700 -1 log_channel(cluster) lo=
+g
+> >>[ERR] :
+> >> 2.439 deep-scrub 1 errors
+> >>
+> >> # Finding the object in question:
+> >> ~# find ~ceph/osd/ceph-78/current/2.439_head -name
+> >>10000022d93.00000f0c* -ls
+> >> 21510412310 4100 -rw-r--r--   1 root     root      4194304 Jun 30 =
+17:09
+> >>
+> >>/var/lib/ceph/osd/ceph-78/current/2.439_head/DIR_9/DIR_3/DIR_4/DIR_=
+E/1000
+> >>0022d93.00000f0c__head_B029E439__2
+> >> ~# md5sum
+> >>
+> >>/var/lib/ceph/osd/ceph-78/current/2.439_head/DIR_9/DIR_3/DIR_4/DIR_=
+E/1000
+> >>0022d93.00000f0c__head_B029E439__2
+> >> 4e4523244deec051cfe53dd48489a5db
+> >>
+> >>/var/lib/ceph/osd/ceph-78/current/2.439_head/DIR_9/DIR_3/DIR_4/DIR_=
+E/1000
+> >>0022d93.00000f0c__head_B029E439__2
+> >>
+> >> # The object on the backup osd:
+> >> ~# find ~ceph/osd/ceph-54/current/2.439_head -name
+> >>10000022d93.00000f0c* -ls
+> >> 6442614367 4100 -rw-r--r--   1 root     root      4194304 Jun 30 1=
+7:09
+> >>
+> >>/var/lib/ceph/osd/ceph-54/current/2.439_head/DIR_9/DIR_3/DIR_4/DIR_=
+E/1000
+> >>0022d93.00000f0c__head_B029E439__2
+> >> ~# md5sum
+> >>
+> >>/var/lib/ceph/osd/ceph-54/current/2.439_head/DIR_9/DIR_3/DIR_4/DIR_=
+E/1000
+> >>0022d93.00000f0c__head_B029E439__2
+> >> 4e4523244deec051cfe53dd48489a5db
+> >>
+> >>/var/lib/ceph/osd/ceph-54/current/2.439_head/DIR_9/DIR_3/DIR_4/DIR_=
+E/1000
+> >>0022d93.00000f0c__head_B029E439__2
+> >>
+> >> # They don't seem to be different.
+> >> # When I try repair:
+> >> ~# ceph pg repair 2.439
+> >> instructing pg 2.439 on osd.78 to repair
+> >>
+> >> # The osd.78 logs show:
+> >> 2015-08-03 15:19:21.775933 7f09ec04a700  0 log_channel(cluster) lo=
+g
+> >>[INF] :
+> >> 2.439 repair starts
+> >> 2015-08-03 15:19:38.088673 7f09ec04a700 -1 log_channel(cluster) lo=
+g
+> >>[ERR] :
+> >> repair 2.439 b029e439/10000022d93.00000f0c/head//2 on disk data di=
+gest
+> >> 0xb3d78a6e !=3D 0xa3944ad0
+> >> 2015-08-03 15:19:39.958019 7f09ec04a700 -1 log_channel(cluster) lo=
+g
+> >>[ERR] :
+> >> 2.439 repair 1 errors, 0 fixed
+> >> 2015-08-03 15:19:39.962406 7f09ec04a700  0 log_channel(cluster) lo=
+g
+> >>[INF] :
+> >> 2.439 deep-scrub starts
+> >> 2015-08-03 15:19:56.510874 7f09ec04a700 -1 log_channel(cluster) lo=
+g
+> >>[ERR] :
+> >> deep-scrub 2.439 b029e439/10000022d93.00000f0c/head//2 on disk dat=
+a
+> >>digest
+> >> 0xb3d78a6e !=3D 0xa3944ad0
+> >> 2015-08-03 15:19:58.348083 7f09ec04a700 -1 log_channel(cluster) lo=
+g
+> >>[ERR] :
+> >> 2.439 deep-scrub 1 errors
+> >>
+> >> The inconsistency is not fixed.  Any hints of what should be done =
+next?
+> >> I have tried  a few things:
+> >>  * Stop the primary osd, remove the object from the filesystem, re=
+start
+> >>the
+> >> OSD and issue a repair.  It didn't work - it sais that one object =
+is
+> >> missing, but did not copy it from the backup.
+> >>  * I tried the same on the backup (remove the file) - it also didn=
+'t get
+> >> copied back from the primary in a repair.
+> >>
+> >> Any help would be appreciated.
+> >>
+> >> Thanks,
+> >>
+> >> Andras
+> >> apataki@simonsfoundation.org
+> >>
+> >>
+> >> _______________________________________________
+> >> ceph-users mailing list
+> >> ceph-users@lists.ceph.com
+> >> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> >>
+>=20
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+>=20
+_______________________________________________
+ceph-users mailing list
+ceph-users@lists.ceph.com
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
