@@ -1,47 +1,59 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: self-contained teuthology jobs and ansible
-Date: Tue, 08 Sep 2015 13:26:49 +0200
-Message-ID: <55EEC5F9.9070306@dachary.org>
+From: Shinobu Kinjo <skinjo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: qemu jemalloc support soon in master (applied in
+ paolo upstream branch)
+Date: Tue, 8 Sep 2015 08:07:54 -0400 (EDT)
+Message-ID: <1832805400.13686233.1441714074279.JavaMail.zimbra@redhat.com>
+References: <1583693791.33394679.1441709895629.JavaMail.zimbra@oxygem.tv>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="nXrB2B0nRs18DDIOLB4oc1RVv5Qi7dPhf"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:51597 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753876AbbIHL0w (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Sep 2015 07:26:52 -0400
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Andrew Schoen <aschoen@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <1583693791.33394679.1441709895629.JavaMail.zimbra-M8QNeUgB6UTyG1zEObXtfA@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
+Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---nXrB2B0nRs18DDIOLB4oc1RVv5Qi7dPhf
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+That would be my life saver.
+Thanks a lot!
 
-Hi Andrew,
+> you simply need to compile qemu with --enable-jemalloc, to enable jemmaloc support.
 
-I would like to disable running ansible on targets for teuthology jobs th=
-at do not need it. Is there a way to do that ?
+----- Original Message -----
+From: "Alexandre DERUMIER" <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
+To: "ceph-users" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sent: Tuesday, September 8, 2015 7:58:15 PM
+Subject: [ceph-users] qemu jemalloc support soon in master (applied in paolo upstream branch)
 
-Cheers
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+Hi,
+
+Paolo Bonzini from qemu team has finally applied my qemu jemalloc patch 
+in his for-upstream branch
+
+https://github.com/bonzini/qemu/releases/tag/for-upstream
+https://github.com/bonzini/qemu/tree/for-upstream
+
+So,It'll be in qemu master soon and ready for qemu 2.5
 
 
---nXrB2B0nRs18DDIOLB4oc1RVv5Qi7dPhf
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+I have write some small benchmark results with librbd in the commit itself
+https://github.com/bonzini/qemu/commit/efc1e9f08020cd460eb2204e3092b39e408e1fa9
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
 
-iEYEARECAAYFAlXuxfkACgkQ8dLMyEl6F23wuwCfdCN+463QMZ0G0RqZETOJFM6P
-vJUAnjcrkQAC9Y681CaFwPpy8Yx8BlJM
-=61Aw
------END PGP SIGNATURE-----
+you simply need to compile qemu with --enable-jemalloc, to enable jemmaloc support.
 
---nXrB2B0nRs18DDIOLB4oc1RVv5Qi7dPhf--
+Regards,
+
+Alexandre
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
