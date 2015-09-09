@@ -1,180 +1,139 @@
-From: Alex Elder <elder@ieee.org>
-Subject: Re: [PATCH] libceph: check data_len in ->alloc_msg()
-Date: Tue, 08 Sep 2015 20:44:21 -0500
-Message-ID: <55EF8EF5.8080607@ieee.org>
-References: <1441215228-12315-1-git-send-email-idryomov@gmail.com>
+From: Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
+Subject: Re: jemalloc and transparent hugepage
+Date: Wed, 9 Sep 2015 04:01:52 +0200 (CEST)
+Message-ID: <502903422.35467518.1441764112283.JavaMail.zimbra@oxygem.tv>
+References: <1694547545.35004320.1441741355122.JavaMail.zimbra@oxygem.tv>
+	<1751466764.35298801.1441755238223.JavaMail.zimbra@oxygem.tv>
+	<55EF740F.5090605@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f42.google.com ([209.85.220.42]:35612 "EHLO
-	mail-pa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754013AbbIIBoX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Sep 2015 21:44:23 -0400
-Received: by pacfv12 with SMTP id fv12so143539995pac.2
-        for <ceph-devel@vger.kernel.org>; Tue, 08 Sep 2015 18:44:23 -0700 (PDT)
-In-Reply-To: <1441215228-12315-1-git-send-email-idryomov@gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <55EF740F.5090605-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Mark Nelson <mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On 09/02/2015 12:33 PM, Ilya Dryomov wrote:
-> Only ->alloc_msg() should check data_len of the incoming message
-> against the preallocated ceph_msg, doing it in the messenger is not
-> right.  The contract is that either ->alloc_msg() returns a ceph_msg
-> which will fit all of the portions of the incoming message, or it
-> returns NULL and possibly sets skip, signaling whether NULL is due to
-> an -ENOMEM.  ->alloc_msg() should be the only place where we make the
-> skip/no-skip decision.
-> 
-> I stumbled upon this while looking at con/osd ref counting.  Right now,
-> if we get a non-extent message with a larger data portion than we are
-> prepared for, ->alloc_msg() returns a ceph_msg, and then, when we skip
-> it in the messenger, we don't put the con/osd ref acquired in
-> ceph_con_in_msg_alloc() (which is normally put in process_message()),
-> so this also fixes a memory leak.
-
-Sorry for the delay reviewing this.
-
-This looks good.  In a follow-on patch you could update the
-comments at the top of ceph_con_in_msg_alloc() to suggest
-that *skip may be set or not when this function returns,
-without saying "if we set" (which says to me that this
-function sets it directly).  Minor, but I think it could
-be stated a little more clearly.  That comment block also
-talks about a connection's "alloc_msg op if available"
-but we assert that pointer is non-null, so that doesn't
-really sound right either.
-
-> An existing BUG_ON in ceph_msg_data_cursor_init() ensures we don't
-> corrupt random memory should a buggy ->alloc_msg() return an unfit
-> ceph_msg.
-
-So this will catch the problem, just a little later.
-
-Reviewed-by: Alex Elder <elder@linaro.org>
-
-> While at it, I changed the "unknown tid" dout() to a pr_warn() to make
-> sure all skips are seen and unified format strings.
-> 
-> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
-> ---
->  net/ceph/messenger.c  |  7 -------
->  net/ceph/osd_client.c | 51 ++++++++++++++++++---------------------------------
->  2 files changed, 18 insertions(+), 40 deletions(-)
-> 
-> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-> index 36757d46ac40..525f454f7531 100644
-> --- a/net/ceph/messenger.c
-> +++ b/net/ceph/messenger.c
-> @@ -2337,13 +2337,6 @@ static int read_partial_message(struct ceph_connection *con)
->  			return ret;
->  
->  		BUG_ON(!con->in_msg ^ skip);
-> -		if (con->in_msg && data_len > con->in_msg->data_length) {
-> -			pr_warn("%s skipping long message (%u > %zd)\n",
-> -				__func__, data_len, con->in_msg->data_length);
-> -			ceph_msg_put(con->in_msg);
-> -			con->in_msg = NULL;
-> -			skip = 1;
-> -		}
->  		if (skip) {
->  			/* skip this message */
->  			dout("alloc_msg said skip message\n");
-> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> index 50033677c0fa..80b94e37c94a 100644
-> --- a/net/ceph/osd_client.c
-> +++ b/net/ceph/osd_client.c
-> @@ -2817,8 +2817,9 @@ out:
->  }
->  
->  /*
-> - * lookup and return message for incoming reply.  set up reply message
-> - * pages.
-> + * Lookup and return message for incoming reply.  Don't try to do
-> + * anything about a larger than preallocated data portion of the
-> + * message at the moment - for now, just skip the message.
->   */
->  static struct ceph_msg *get_reply(struct ceph_connection *con,
->  				  struct ceph_msg_header *hdr,
-> @@ -2836,10 +2837,10 @@ static struct ceph_msg *get_reply(struct ceph_connection *con,
->  	mutex_lock(&osdc->request_mutex);
->  	req = __lookup_request(osdc, tid);
->  	if (!req) {
-> -		*skip = 1;
-> +		pr_warn("%s osd%d tid %llu unknown, skipping\n",
-> +			__func__, osd->o_osd, tid);
->  		m = NULL;
-> -		dout("get_reply unknown tid %llu from osd%d\n", tid,
-> -		     osd->o_osd);
-> +		*skip = 1;
->  		goto out;
->  	}
->  
-> @@ -2849,10 +2850,9 @@ static struct ceph_msg *get_reply(struct ceph_connection *con,
->  	ceph_msg_revoke_incoming(req->r_reply);
->  
->  	if (front_len > req->r_reply->front_alloc_len) {
-> -		pr_warn("get_reply front %d > preallocated %d (%u#%llu)\n",
-> -			front_len, req->r_reply->front_alloc_len,
-> -			(unsigned int)con->peer_name.type,
-> -			le64_to_cpu(con->peer_name.num));
-> +		pr_warn("%s osd%d tid %llu front %d > preallocated %d\n",
-> +			__func__, osd->o_osd, req->r_tid, front_len,
-> +			req->r_reply->front_alloc_len);
->  		m = ceph_msg_new(CEPH_MSG_OSD_OPREPLY, front_len, GFP_NOFS,
->  				 false);
->  		if (!m)
-> @@ -2860,37 +2860,22 @@ static struct ceph_msg *get_reply(struct ceph_connection *con,
->  		ceph_msg_put(req->r_reply);
->  		req->r_reply = m;
->  	}
-> -	m = ceph_msg_get(req->r_reply);
-> -
-> -	if (data_len > 0) {
-> -		struct ceph_osd_data *osd_data;
->  
-
-This was doing a special case test.  I'm not sure why it
-was not done more generally before...
-
-> -		/*
-> -		 * XXX This is assuming there is only one op containing
-> -		 * XXX page data.  Probably OK for reads, but this
-> -		 * XXX ought to be done more generally.
-> -		 */
-> -		osd_data = osd_req_op_extent_osd_data(req, 0);
-> -		if (osd_data->type == CEPH_OSD_DATA_TYPE_PAGES) {
-> -			if (osd_data->pages &&
-> -				unlikely(osd_data->length < data_len)) {
-> -
-> -				pr_warn("tid %lld reply has %d bytes we had only %llu bytes ready\n",
-> -					tid, data_len, osd_data->length);
-> -				*skip = 1;
-> -				ceph_msg_put(m);
-> -				m = NULL;
-> -				goto out;
-> -			}
-> -		}
-> +	if (data_len > req->r_reply->data_length) {
-> +		pr_warn("%s osd%d tid %llu data %d > preallocated %zu, skipping\n",
-> +			__func__, osd->o_osd, req->r_tid, data_len,
-> +			req->r_reply->data_length);
-> +		m = NULL;
-> +		*skip = 1;
-> +		goto out;
->  	}
-> -	*skip = 0;
-> +
-> +	m = ceph_msg_get(req->r_reply);
->  	dout("get_reply tid %lld %p\n", tid, m);
->  
->  out:
->  	mutex_unlock(&osdc->request_mutex);
->  	return m;
-> -
->  }
->  
->  static struct ceph_msg *alloc_msg(struct ceph_connection *con,
-> 
-
+Pj5IYXZlIHlvdSBub3RpY2VkIGFueSBwZXJmb3JtYW5jZSBkaWZmZXJlbmNlIHdpdGggdHA9bmV2
+ZXI/CgpObyBkaWZmZXJlbmNlLgoKSSB0aGluayBodWdlcGFnZSBjb3VsZCBzcGVlZHVwIGJpZyBt
+ZW1vcnkgc2V0cyBsaWtlIDEwMC0yMDBHQiwgYnV0IGZvciAxLTJHQiB0aGV5IGFyZSBubyBub3Rp
+Y2FibGUgZGlmZmVyZW5jZS4KCgoKCgoKLS0tLS0gTWFpbCBvcmlnaW5hbCAtLS0tLQpEZTogIk1h
+cmsgTmVsc29uIiA8bW5lbHNvbkByZWRoYXQuY29tPgrDgDogImFkZXJ1bWllciIgPGFkZXJ1bWll
+ckBvZGlzby5jb20+LCAiY2VwaC1kZXZlbCIgPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPiwg
+ImNlcGgtdXNlcnMiIDxjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tPgpDYzogIlNvbW5hdGggUm95
+IiA8c29tbmF0aC5yb3lAc2FuZGlzay5jb20+CkVudm95w6k6IE1lcmNyZWRpIDkgU2VwdGVtYnJl
+IDIwMTUgMDE6NDk6MzUKT2JqZXQ6IFJlOiBbY2VwaC11c2Vyc10gamVtYWxsb2MgYW5kIHRyYW5z
+cGFyZW50IGh1Z2VwYWdlCgpFeGNlbGxlbnQgaW52ZXN0aWdhdGlvbiBBbGV4YW5kcmUhIEhhdmUg
+eW91IG5vdGljZWQgYW55IHBlcmZvcm1hbmNlIApkaWZmZXJlbmNlIHdpdGggdHA9bmV2ZXI/IAoK
+TWFyayAKCk9uIDA5LzA4LzIwMTUgMDY6MzMgUE0sIEFsZXhhbmRyZSBERVJVTUlFUiB3cm90ZTog
+Cj4gSSBoYXZlIGRvbmUgc21hbGwgYmVuY2htYXJrIHdpdGggdGNtYWxsb2MgYW5kIGplbWFsbG9j
+LCB0cmFuc3BhcmVudCBodWdlcGFnZT1hbHdheXN8bmV2ZXIuIAo+IAo+IGZvciB0Y21hbGxvYywg
+dGhleSBhcmUgbm8gZGlmZmVyZW5jZS4gCj4gYnV0IGZvciBqZW1hbGxvYywgdGhlIGRpZmZlcmVu
+Y2UgaXMgaHVnZSAoYXJvdW5kIDI1JSBsb3dlciB3aXRoIHRwPW5ldmVyKS4gCj4gCj4gamVtbWFs
+b2MgNC42LjArdHA9bmV2ZXIgdnMgdGNtYWxsb2MgdXNlIDEwJSBtb3JlIFJTUyBtZW1vcnkgCj4g
+Cj4gamVtbWFsb2MgNC4wK3RwPW5ldmVyIGFsbW9zdCB1c2Ugc2FtZSBSU1MgbWVtb3J5IHRoYW4g
+dGNtYWxsb2MgISAKPiAKPiAKPiBJIGRvbid0IGhhdmUgbW9uaXRvcmVkIG1lbW9yeSB1c2FnZSBp
+biByZWNvdmVyeSwgYnV0IEkgdGhpbmsgaXQgc2hvdWxkIGhlbHAgdG9vLiAKPiAKPiAKPiAKPiAK
+PiB0Y21hbGxvYyAyLjEgdHA9YWx3YXlzIAo+IC0tLS0tLS0tLS0tLS0tLS0tLS0gCj4gVVNFUiBQ
+SUQgJUNQVSAlTUVNIFZTWiBSU1MgVFRZIFNUQVQgU1RBUlQgVElNRSBDT01NQU5EIAo+IAo+IHJv
+b3QgNjc3NDYgMTIwIDEuMCAxNTMxMjIwIDY3MTE1MiA/IFNzbCAwMToxOCAwOjQzIC91c3IvYmlu
+L2NlcGgtb3NkIC0tY2x1c3Rlcj1jZXBoIC1pIDAgLWYgCj4gcm9vdCA2Nzc2NCAxNDQgMS4wIDE1
+NzAyNTYgNzExMjMyID8gU3NsIDAxOjE4IDA6NTEgL3Vzci9iaW4vY2VwaC1vc2QgLS1jbHVzdGVy
+PWNlcGggLWkgMSAtZiAKPiAKPiByb290IDY4MzYzIDIyMCAwLjkgMTUyMjI5MiA2NTU4ODggPyBT
+c2wgMDE6MTkgMDo0NiAvdXNyL2Jpbi9jZXBoLW9zZCAtLWNsdXN0ZXI9Y2VwaCAtaSAwIC1mIAo+
+IHJvb3QgNjgzODEgMjYxIDEuMCAxNTYzMzk2IDcwMjUwMCA/IFNzbCAwMToxOSAwOjU1IC91c3Iv
+YmluL2NlcGgtb3NkIC0tY2x1c3Rlcj1jZXBoIC1pIDEgLWYgCj4gCj4gcm9vdCA2ODk2MyAyMjgg
+MS4wIDE1MTkyNDAgNjY2MTk2ID8gU3NsIDAxOjIwIDA6MzEgL3Vzci9iaW4vY2VwaC1vc2QgLS1j
+bHVzdGVyPWNlcGggLWkgMCAtZiAKPiByb290IDY4OTgxIDI2OCAxLjAgMTU2NDQ1MiA2OTQzNTIg
+PyBTc2wgMDE6MjAgMDozNyAvdXNyL2Jpbi9jZXBoLW9zZCAtLWNsdXN0ZXI9Y2VwaCAtaSAxIC1m
+IAo+IAo+IAo+IAo+IHRjbWFsbG9jIDIuMSB0cD1uZXZlciAKPiAtLS0tLS0tLS0tLS0tLS0tLSAK
+PiBVU0VSIFBJRCAlQ1BVICVNRU0gVlNaIFJTUyBUVFkgU1RBVCBTVEFSVCBUSU1FIENPTU1BTkQg
+Cj4gCj4gcm9vdCA2OTU2MCAxNDQgMS4wIDE1NDQ5NjggNjc3NTg0ID8gU3NsIDAxOjIxIDA6MjAg
+L3Vzci9iaW4vY2VwaC1vc2QgLS1jbHVzdGVyPWNlcGggLWkgMCAtZiAKPiByb290IDY5NTc4IDE2
+NyAxLjAgMTU2ODYyMCA3MDQ0NTYgPyBTc2wgMDE6MjEgMDoyMyAvdXNyL2Jpbi9jZXBoLW9zZCAt
+LWNsdXN0ZXI9Y2VwaCAtaSAxIC1mIAo+IAo+IAo+IHJvb3QgNzAxNTYgMTY0IDAuOSAxNTE5Njgw
+IDY0OTc3NiA/IFNzbCAwMToyMSAwOjE2IC91c3IvYmluL2NlcGgtb3NkIC0tY2x1c3Rlcj1jZXBo
+IC1pIDAgLWYgCj4gcm9vdCA3MDE3NCAyMTQgMS4wIDE1NTk3NzIgNjkyODI4ID8gU3NsIDAxOjIx
+IDA6MTkgL3Vzci9iaW4vY2VwaC1vc2QgLS1jbHVzdGVyPWNlcGggLWkgMSAtZiAKPiAKPiByb290
+IDcwNzU3IDIwMiAwLjkgMTUyMDM3NiA2NTA1NzIgPyBTc2wgMDE6MjIgMDoyMCAvdXNyL2Jpbi9j
+ZXBoLW9zZCAtLWNsdXN0ZXI9Y2VwaCAtaSAwIC1mIAo+IHJvb3QgNzA3NzUgMjM2IDEuMCAxNTYw
+NjQ0IDY5NDA4OCA/IFNzbCAwMToyMiAwOjIzIC91c3IvYmluL2NlcGgtb3NkIC0tY2x1c3Rlcj1j
+ZXBoIC1pIDEgLWYgCj4gCj4gCj4gCj4gamVtYWxsb2MgMy42IHRwID0gYWx3YXlzIAo+IC0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLSAKPiBVU0VSIFBJRCAlQ1BVICVNRU0gVlNaIFJTUyBUVFkgU1RB
+VCBTVEFSVCBUSU1FIENPTU1BTkQgCj4gCj4gcm9vdCA5MjAwNSA0Ni4xIDEuNCAyMDMzODY0IDk2
+NzUxMiA/IFNzbCAwMTowMCAwOjA0IC91c3IvYmluL2NlcGgtb3NkIC0tY2x1c3Rlcj1jZXBoIC1p
+IDUgLWYgCj4gcm9vdCA5MjAyNyA0NS41IDEuNCAyMDIxNjI0IDk2MzUzNiA/IFNzbCAwMTowMCAw
+OjA0IC91c3IvYmluL2NlcGgtb3NkIC0tY2x1c3Rlcj1jZXBoIC1pIDQgLWYgCj4gCj4gCj4gCj4g
+cm9vdCA5MjcwMyAxOTEgMS41IDIxMzg3MjQgMTAwMjM3NiA/IFNzbCAwMTowMiAxOjE2IC91c3Iv
+YmluL2NlcGgtb3NkIC0tY2x1c3Rlcj1jZXBoIC1pIDUgLWYgCj4gcm9vdCA5MjcyMSAxODMgMS41
+IDIxMjYyMjggOTg2NDQ4ID8gU3NsIDAxOjAyIDE6MTMgL3Vzci9iaW4vY2VwaC1vc2QgLS1jbHVz
+dGVyPWNlcGggLWkgNCAtZiAKPiAKPiAKPiByb290IDkzMzY2IDI1OCAxLjQgMjEzOTA1MiA5ODQx
+MzIgPyBTc2wgMDE6MDMgMTowOSAvdXNyL2Jpbi9jZXBoLW9zZCAtLWNsdXN0ZXI9Y2VwaCAtaSA1
+IC1mIAo+IHJvb3QgOTMzODQgMjUwIDEuNSAyMTI2MjQ0IDk5MDM0OCA/IFNzbCAwMTowMyAxOjA3
+IC91c3IvYmluL2NlcGgtb3NkIC0tY2x1c3Rlcj1jZXBoIC1pIDQgLWYgCj4gCj4gCj4gCj4gamVt
+YWxsb2MgMy42IHRwID0gbmV2ZXIgCj4gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0gCj4gVVNFUiBQ
+SUQgJUNQVSAlTUVNIFZTWiBSU1MgVFRZIFNUQVQgU1RBUlQgVElNRSBDT01NQU5EIAo+IAo+IHJv
+b3QgOTM5OTAgMjM4IDEuMSAyMTA1ODEyIDc2MjYyOCA/IFNzbCAwMTowNCAxOjE2IC91c3IvYmlu
+L2NlcGgtb3NkIC0tY2x1c3Rlcj1jZXBoIC1pIDQgLWYgCj4gcm9vdCA5NDAzMyAyNjMgMS4xIDIx
+MTgyODggNzgxNzY4ID8gU3NsIDAxOjA0IDE6MTggL3Vzci9iaW4vY2VwaC1vc2QgLS1jbHVzdGVy
+PWNlcGggLWkgNSAtZiAKPiAKPiAKPiByb290IDk0NjU2IDI2NiAxLjEgMjEzOTA5NiA3ODEzOTIg
+PyBTc2wgMDE6MDUgMDo1OCAvdXNyL2Jpbi9jZXBoLW9zZCAtLWNsdXN0ZXI9Y2VwaCAtaSA1IC1m
+IAo+IHJvb3QgOTQ2NzQgMjU3IDEuMSAyMTI2MzE2IDc2MDYzMiA/IFNzbCAwMTowNSAwOjU2IC91
+c3IvYmluL2NlcGgtb3NkIC0tY2x1c3Rlcj1jZXBoIC1pIDQgLWYgCj4gCj4gcm9vdCA5NTMxNyAy
+OTcgMS4xIDIxMzUwNDQgNzgwNTMyID8gU3NsIDAxOjA2IDA6MzUgL3Vzci9iaW4vY2VwaC1vc2Qg
+LS1jbHVzdGVyPWNlcGggLWkgNSAtZiAKPiByb290IDk1MzM1IDI4NCAxLjEgMjExMjAxNiA3NjA5
+NzIgPyBTc2wgMDE6MDYgMDozNCAvdXNyL2Jpbi9jZXBoLW9zZCAtLWNsdXN0ZXI9Y2VwaCAtaSA0
+IC1mIAo+IAo+IAo+IAo+IGplbWFsbG9jIDQuMCB0cCA9IGFsd2F5cyAKPiAtLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0gCj4gVVNFUiBQSUQgJUNQVSAlTUVNIFZTWiBSU1MgVFRZIFNUQVQgU1RBUlQg
+VElNRSBDT01NQU5EIAo+IAo+IHJvb3QgMTAwMjc1IDE5OCAxLjMgMTc4NDUyMCA4ODAyODggPyBT
+c2wgMDE6MTQgMDo0NSAvdXNyL2Jpbi9jZXBoLW9zZCAtLWNsdXN0ZXI9Y2VwaCAtaSA0IC1mIAo+
+IHJvb3QgMTAwMzIwIDIzOSAxLjEgMTc5MzE4NCA3NjA4MjQgPyBTc2wgMDE6MTQgMDo0NyAvdXNy
+L2Jpbi9jZXBoLW9zZCAtLWNsdXN0ZXI9Y2VwaCAtaSA1IC1mIAo+IAo+IAo+IHJvb3QgMTAwODk3
+IDIwMCAxLjMgMTc2NTc4MCA4OTEyNTYgPyBTc2wgMDE6MTUgMDo1MCAvdXNyL2Jpbi9jZXBoLW9z
+ZCAtLWNsdXN0ZXI9Y2VwaCAtaSA0IC1mIAo+IHJvb3QgMTAwOTQyIDI0NSAxLjEgMTgxNzQzNiA3
+NDY5NTYgPyBTc2wgMDE6MTUgMDo1MyAvdXNyL2Jpbi9jZXBoLW9zZCAtLWNsdXN0ZXI9Y2VwaCAt
+aSA1IC1mIAo+IAo+IHJvb3QgMTAxNTE3IDE5NiAxLjMgMTc2OTkwNCA4NzcxMzIgPyBTc2wgMDE6
+MTYgMDozMyAvdXNyL2Jpbi9jZXBoLW9zZCAtLWNsdXN0ZXI9Y2VwaCAtaSA0IC1mIAo+IHJvb3Qg
+MTAxNTYyIDI1OCAxLjEgMTgwNTE3MiA3NDY1MzIgPyBTc2wgMDE6MTYgMDozNiAvdXNyL2Jpbi9j
+ZXBoLW9zZCAtLWNsdXN0ZXI9Y2VwaCAtaSA1IC1mIAo+IAo+IAo+IGplbWFsbG9jIDQuMCB0cCA9
+IG5ldmVyIAo+IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tIAo+IFVTRVIgUElEICVDUFUgJU1FTSBW
+U1ogUlNTIFRUWSBTVEFUIFNUQVJUIFRJTUUgQ09NTUFORCAKPiAKPiByb290IDk4MzYyIDg3Ljgg
+MS4wIDE4NDE3NDggNjc4ODQ4ID8gU3NsIDAxOjEwIDA6NTMgL3Vzci9iaW4vY2VwaC1vc2QgLS1j
+bHVzdGVyPWNlcGggLWkgNCAtZiAKPiByb290IDk4NDA1IDk3LjAgMS4wIDE4NDYzMjggNjk5NjIw
+ID8gU3NsIDAxOjEwIDA6NTYgL3Vzci9iaW4vY2VwaC1vc2QgLS1jbHVzdGVyPWNlcGggLWkgNSAt
+ZiAKPiAKPiAKPiAKPiByb290IDk5MDE4IDIzMyAxLjAgMTgxMjU4MCA2OTg4NDggPyBTc2wgMDE6
+MTIgMDozMCAvdXNyL2Jpbi9jZXBoLW9zZCAtLWNsdXN0ZXI9Y2VwaCAtaSA1IC1mIAo+IHJvb3Qg
+OTkwMzYgMjI2IDEuMCAxODIyMzQ0IDY3NzQyMCA/IFNzbCAwMToxMiAwOjI5IC91c3IvYmluL2Nl
+cGgtb3NkIC0tY2x1c3Rlcj1jZXBoIC1pIDQgLWYgCj4gCj4gcm9vdCA5OTY2NiAyODEgMS4wIDE4
+MTQ2NDAgNjk2NDIwID8gU3NsIDAxOjEzIDA6MzMgL3Vzci9iaW4vY2VwaC1vc2QgLS1jbHVzdGVy
+PWNlcGggLWkgNSAtZiAKPiByb290IDk5Njg0IDI2NiAxLjAgMTgzNTY3NiA2NzY3NjggPyBTc2wg
+MDE6MTMgMDozMiAvdXNyL2Jpbi9jZXBoLW9zZCAtLWNsdXN0ZXI9Y2VwaCAtaSA0IC1mIAo+IAo+
+IAo+IAo+IAo+IC0tLS0tIE1haWwgb3JpZ2luYWwgLS0tLS0gCj4gRGU6ICJhZGVydW1pZXIiIDxh
+ZGVydW1pZXJAb2Rpc28uY29tPiAKPiDDgDogImNlcGgtZGV2ZWwiIDxjZXBoLWRldmVsQHZnZXIu
+a2VybmVsLm9yZz4sICJjZXBoLXVzZXJzIiA8Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbT4gCj4g
+RW52b3nDqTogTWFyZGkgOCBTZXB0ZW1icmUgMjAxNSAyMTo0MjozNSAKPiBPYmpldDogW2NlcGgt
+dXNlcnNdIGplbWFsbG9jIGFuZCB0cmFuc3BhcmVudCBodWdlcGFnZSAKPiAKPiBIaSwgCj4gSSBo
+YXZlIGZvdW5kIGFuIGludGVyZXN0aW5nIGFydGljbGUgYWJvdXQgamVtYWxsb2MgYW5kIHRyYW5z
+cGFyZW50IGh1Z2VwYWdlcyAKPiAKPiBodHRwczovL3d3dy5kaWdpdGFsb2NlYW4uY29tL2NvbXBh
+bnkvYmxvZy90cmFuc3BhcmVudC1odWdlLXBhZ2VzLWFuZC1hbHRlcm5hdGl2ZS1tZW1vcnktYWxs
+b2NhdG9ycy8gCj4gCj4gCj4gQ291bGQgYmUgZ3JlYXQgdG8gc2VlIGlmIGRpc2FibGUgdHJhbnNw
+YXJlbnQgaHVnZXBhZ2UgaGVscCB0byBoYXZlIGxvd2VyIGplbWFsbG9jIG1lbW9yeSB1c2FnZS4g
+Cj4gCj4gCj4gUmVnYXJkcywgCj4gCj4gQWxleGFuZHJlIAo+IAo+IF9fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fIAo+IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0
+IAo+IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20gCj4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xp
+c3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tIAo+IC0tIAo+IFRvIHVuc3Vic2NyaWJlIGZy
+b20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbiAK
+PiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyAKPiBN
+b3JlIG1ham9yZG9tbyBpbmZvIGF0IGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWlu
+Zm8uaHRtbCAKPiAKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRw
+Oi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
