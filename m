@@ -1,204 +1,104 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: ceph-disk pyudev implementation
-Date: Wed, 09 Sep 2015 13:03:41 +0200
-Message-ID: <55F0120D.7080300@dachary.org>
-References: <9E914F5BD7F48A4782456CEB550A422824EC8564@SACMBXIP02.sdcorp.global.sandisk.com> <55EFE129.8030502@dachary.org> <9E914F5BD7F48A4782456CEB550A422824EC86DC@SACMBXIP02.sdcorp.global.sandisk.com>
+From: Chaitanya Huilgol <Chaitanya.Huilgol@sandisk.com>
+Subject: RE: ceph-disk pyudev implementation
+Date: Wed, 9 Sep 2015 10:37:43 +0000
+Message-ID: <9E914F5BD7F48A4782456CEB550A422824EC86DC@SACMBXIP02.sdcorp.global.sandisk.com>
+References: <9E914F5BD7F48A4782456CEB550A422824EC8564@SACMBXIP02.sdcorp.global.sandisk.com>
+ <55EFE129.8030502@dachary.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="528Eo29Dj6NWUQAhEIIHSkblTTkjGsK4h"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:52417 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751886AbbIILDq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Sep 2015 07:03:46 -0400
-In-Reply-To: <9E914F5BD7F48A4782456CEB550A422824EC86DC@SACMBXIP02.sdcorp.global.sandisk.com>
+Received: from mail-bn1on0097.outbound.protection.outlook.com ([157.56.110.97]:62240
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753100AbbIILKt (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 9 Sep 2015 07:10:49 -0400
+In-Reply-To: <55EFE129.8030502@dachary.org>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Chaitanya Huilgol <Chaitanya.Huilgol@sandisk.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---528Eo29Dj6NWUQAhEIIHSkblTTkjGsK4h
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-Inline as well
-
-On 09/09/2015 12:37, Chaitanya Huilgol wrote:
-> Inline
->=20
->> -----Original Message-----
->> From: Loic Dachary [mailto:loic@dachary.org]
->> Sent: Wednesday, September 09, 2015 1:05 PM
->> To: Chaitanya Huilgol; Ceph Development
->> Subject: Re: ceph-disk pyudev implementation
->>
->> Hi,
->>
->> The approach you describe makes sense to me. And you've done a nice jo=
-b
->> with the refactor.
->>
->> I'm not familiar with pyudev though and other Ceph developers may alre=
-ady
->> have an opinion (or answers). When adding new dependencies to Ceph, I
->> think we need to assert how stable / reliable those dependencies are. =
-How
->> well tested do you think it is ?
->> https://github.com/pyudev/pyudev/blob/master/Vagrantfile suggests ther=
-e
->> are tests with good coverage, https://github.com/pyudev/pyudev/pulls a=
-nd
->> https://github.com/pyudev/pyudev/issues?q=3Dis%3Aopen+is%3Aissue have
->> few open issues and a number of resolved ones. The timeline is a bit s=
-trange
->> : a burst of recent commits and a large gap back to 2012. But maybe it=
-'s
->> widely used and this really is not a concern ?
->>
->=20
-> Did not hit any pyudev issues in our tests, but cannot comment on the o=
-verall stability.
-> Almost all major distros package this and hence inferred that it must b=
-e stable enough.
-> However, there is no list of projects using this package in the project=
- site, but lot of references and downloads https://crate.io/packages/pyud=
-ev/#history
->=20
-
-On Ubuntu 14.04 there is one package depending on pyudev.
-
-loic@fold:~$ apt-cache rdepends python-pyudev
-python-pyudev
-Reverse Depends:
-  solaar
-
->=20
->> Is there a particular reason why you did not re-use the json format fo=
-r ceph-
->> disk list ?
->>
-> Its ported from a slightly dated giant version, will add this when port=
-ing to master
-
-Ha, cool.
-
->> Could you make your new ceph-disk into a pull request so that it can r=
-un
->> integration tests ?
->=20
-> Yes, will merge it with master and send out a pull request after tests.=
-
-
-I suggest you create the pull request even before testing anything. Such =
-a large refactor is easier to handle with baby steps. I think we will end=
- up splitting your pull request in a series of smaller pull request that =
-can gradually be integrated in the existing code base.
-
-It's very exciting to go in this direction and I look forward to a better=
- codebase for ceph-disk :-)
-
-Cheers
-
->>
->> Cheers
->>
->> On 09/09/2015 08:52, Chaitanya Huilgol wrote:
->>> Hi Loic,
->>>
->>> As discussed in the multipath tracker, please find the port of ceph-d=
-isk
->> which is based on pyudev (https://pyudev.readthedocs.org/en/latest/
->> python libudev binding)
->>>
->>> Here is a short summary on the approach:
->>> - Current ceph-disk determines various properties on block device by =
-path
->> string manipulations and /sys/dev properties
->>> - These are difficult to implement and fragile for device types such =
-as DM
->> multipath.
->>> - Since different code needs to be added based on the device type, a =
-Block
->> device class based approach has been used.
->>> - Based on the device type supplied a block device object is instanti=
-ated
->> (currently GenericBlockDev or DMBlockDev).
->>> - Each class implements device specific functionality as an implement=
-ation
->> of the abstract BlockDevBase base class.
->>>         a. Get partition device from base device
->>>         b. Get base device from partition
->>>         c. Get Part UUID and Type
->>>         d. Determine if device path is partition
->>>         e. Determine if device is referenced
->>>          f. Get HW sector size
->>>         g. List partitions
->>>
->>> In Prepare/Activate/List code paths, the required device object is
->> instantiated and hence these code paths remain clean
->>>
->>> This port also support multipath devices with the DMBlockDev Class.
->>>
->>> https://github.com/chaitanyahuilgol/ceph-disk-udev.git
->>>
->>> Let us know your thoughts.
->>>
->>> Regards,
->>> Chaitanya
->>>
->>>
->>> ________________________________
->>>
->>> PLEASE NOTE: The information contained in this electronic mail messag=
-e is
->> intended only for the use of the designated recipient(s) named above. =
-If the
->> reader of this message is not the intended recipient, you are hereby n=
-otified
->> that you have received this message in error and that any review,
->> dissemination, distribution, or copying of this message is strictly pr=
-ohibited. If
->> you have received this communication in error, please notify the sende=
-r by
->> telephone or e-mail (as shown above) immediately and destroy any and a=
-ll
->> copies of this message in your possession (whether hard copies or
->> electronically stored copies).
->>>
->>
->> --
->> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->=20
->=20
-> ________________________________
->=20
-> PLEASE NOTE: The information contained in this electronic mail message =
-is intended only for the use of the designated recipient(s) named above. =
-If the reader of this message is not the intended recipient, you are here=
-by notified that you have received this message in error and that any rev=
-iew, dissemination, distribution, or copying of this message is strictly =
-prohibited. If you have received this communication in error, please noti=
-fy the sender by telephone or e-mail (as shown above) immediately and des=
-troy any and all copies of this message in your possession (whether hard =
-copies or electronically stored copies).
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---528Eo29Dj6NWUQAhEIIHSkblTTkjGsK4h
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlXwEg0ACgkQ8dLMyEl6F23CbwCgtOqilXwoxCRq+eCWioa85MfD
-FTgAoI+Bo2GgHxc0pA9f4wHeY6ovpISO
-=syGO
------END PGP SIGNATURE-----
-
---528Eo29Dj6NWUQAhEIIHSkblTTkjGsK4h--
+SW5saW5lDQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogTG9pYyBEYWNo
+YXJ5IFttYWlsdG86bG9pY0BkYWNoYXJ5Lm9yZ10NCj4gU2VudDogV2VkbmVzZGF5LCBTZXB0ZW1i
+ZXIgMDksIDIwMTUgMTowNSBQTQ0KPiBUbzogQ2hhaXRhbnlhIEh1aWxnb2w7IENlcGggRGV2ZWxv
+cG1lbnQNCj4gU3ViamVjdDogUmU6IGNlcGgtZGlzayBweXVkZXYgaW1wbGVtZW50YXRpb24NCj4N
+Cj4gSGksDQo+DQo+IFRoZSBhcHByb2FjaCB5b3UgZGVzY3JpYmUgbWFrZXMgc2Vuc2UgdG8gbWUu
+IEFuZCB5b3UndmUgZG9uZSBhIG5pY2Ugam9iDQo+IHdpdGggdGhlIHJlZmFjdG9yLg0KPg0KPiBJ
+J20gbm90IGZhbWlsaWFyIHdpdGggcHl1ZGV2IHRob3VnaCBhbmQgb3RoZXIgQ2VwaCBkZXZlbG9w
+ZXJzIG1heSBhbHJlYWR5DQo+IGhhdmUgYW4gb3BpbmlvbiAob3IgYW5zd2VycykuIFdoZW4gYWRk
+aW5nIG5ldyBkZXBlbmRlbmNpZXMgdG8gQ2VwaCwgSQ0KPiB0aGluayB3ZSBuZWVkIHRvIGFzc2Vy
+dCBob3cgc3RhYmxlIC8gcmVsaWFibGUgdGhvc2UgZGVwZW5kZW5jaWVzIGFyZS4gSG93DQo+IHdl
+bGwgdGVzdGVkIGRvIHlvdSB0aGluayBpdCBpcyA/DQo+IGh0dHBzOi8vZ2l0aHViLmNvbS9weXVk
+ZXYvcHl1ZGV2L2Jsb2IvbWFzdGVyL1ZhZ3JhbnRmaWxlIHN1Z2dlc3RzIHRoZXJlDQo+IGFyZSB0
+ZXN0cyB3aXRoIGdvb2QgY292ZXJhZ2UsIGh0dHBzOi8vZ2l0aHViLmNvbS9weXVkZXYvcHl1ZGV2
+L3B1bGxzIGFuZA0KPiBodHRwczovL2dpdGh1Yi5jb20vcHl1ZGV2L3B5dWRldi9pc3N1ZXM/cT1p
+cyUzQW9wZW4raXMlM0Fpc3N1ZSBoYXZlDQo+IGZldyBvcGVuIGlzc3VlcyBhbmQgYSBudW1iZXIg
+b2YgcmVzb2x2ZWQgb25lcy4gVGhlIHRpbWVsaW5lIGlzIGEgYml0IHN0cmFuZ2UNCj4gOiBhIGJ1
+cnN0IG9mIHJlY2VudCBjb21taXRzIGFuZCBhIGxhcmdlIGdhcCBiYWNrIHRvIDIwMTIuIEJ1dCBt
+YXliZSBpdCdzDQo+IHdpZGVseSB1c2VkIGFuZCB0aGlzIHJlYWxseSBpcyBub3QgYSBjb25jZXJu
+ID8NCj4NCg0KRGlkIG5vdCBoaXQgYW55IHB5dWRldiBpc3N1ZXMgaW4gb3VyIHRlc3RzLCBidXQg
+Y2Fubm90IGNvbW1lbnQgb24gdGhlIG92ZXJhbGwgc3RhYmlsaXR5Lg0KQWxtb3N0IGFsbCBtYWpv
+ciBkaXN0cm9zIHBhY2thZ2UgdGhpcyBhbmQgaGVuY2UgaW5mZXJyZWQgdGhhdCBpdCBtdXN0IGJl
+IHN0YWJsZSBlbm91Z2guDQpIb3dldmVyLCB0aGVyZSBpcyBubyBsaXN0IG9mIHByb2plY3RzIHVz
+aW5nIHRoaXMgcGFja2FnZSBpbiB0aGUgcHJvamVjdCBzaXRlLCBidXQgbG90IG9mIHJlZmVyZW5j
+ZXMgYW5kIGRvd25sb2FkcyBodHRwczovL2NyYXRlLmlvL3BhY2thZ2VzL3B5dWRldi8jaGlzdG9y
+eQ0KDQoNCj4gSXMgdGhlcmUgYSBwYXJ0aWN1bGFyIHJlYXNvbiB3aHkgeW91IGRpZCBub3QgcmUt
+dXNlIHRoZSBqc29uIGZvcm1hdCBmb3IgY2VwaC0NCj4gZGlzayBsaXN0ID8NCj4NCkl0cyBwb3J0
+ZWQgZnJvbSBhIHNsaWdodGx5IGRhdGVkIGdpYW50IHZlcnNpb24sIHdpbGwgYWRkIHRoaXMgd2hl
+biBwb3J0aW5nIHRvIG1hc3Rlcg0KDQo+IENvdWxkIHlvdSBtYWtlIHlvdXIgbmV3IGNlcGgtZGlz
+ayBpbnRvIGEgcHVsbCByZXF1ZXN0IHNvIHRoYXQgaXQgY2FuIHJ1bg0KPiBpbnRlZ3JhdGlvbiB0
+ZXN0cyA/DQoNClllcywgd2lsbCBtZXJnZSBpdCB3aXRoIG1hc3RlciBhbmQgc2VuZCBvdXQgYSBw
+dWxsIHJlcXVlc3QgYWZ0ZXIgdGVzdHMuDQoNCj4NCj4gQ2hlZXJzDQo+DQo+IE9uIDA5LzA5LzIw
+MTUgMDg6NTIsIENoYWl0YW55YSBIdWlsZ29sIHdyb3RlOg0KPiA+IEhpIExvaWMsDQo+ID4NCj4g
+PiBBcyBkaXNjdXNzZWQgaW4gdGhlIG11bHRpcGF0aCB0cmFja2VyLCBwbGVhc2UgZmluZCB0aGUg
+cG9ydCBvZiBjZXBoLWRpc2sNCj4gd2hpY2ggaXMgYmFzZWQgb24gcHl1ZGV2IChodHRwczovL3B5
+dWRldi5yZWFkdGhlZG9jcy5vcmcvZW4vbGF0ZXN0Lw0KPiBweXRob24gbGlidWRldiBiaW5kaW5n
+KQ0KPiA+DQo+ID4gSGVyZSBpcyBhIHNob3J0IHN1bW1hcnkgb24gdGhlIGFwcHJvYWNoOg0KPiA+
+IC0gQ3VycmVudCBjZXBoLWRpc2sgZGV0ZXJtaW5lcyB2YXJpb3VzIHByb3BlcnRpZXMgb24gYmxv
+Y2sgZGV2aWNlIGJ5IHBhdGgNCj4gc3RyaW5nIG1hbmlwdWxhdGlvbnMgYW5kIC9zeXMvZGV2IHBy
+b3BlcnRpZXMNCj4gPiAtIFRoZXNlIGFyZSBkaWZmaWN1bHQgdG8gaW1wbGVtZW50IGFuZCBmcmFn
+aWxlIGZvciBkZXZpY2UgdHlwZXMgc3VjaCBhcyBETQ0KPiBtdWx0aXBhdGguDQo+ID4gLSBTaW5j
+ZSBkaWZmZXJlbnQgY29kZSBuZWVkcyB0byBiZSBhZGRlZCBiYXNlZCBvbiB0aGUgZGV2aWNlIHR5
+cGUsIGEgQmxvY2sNCj4gZGV2aWNlIGNsYXNzIGJhc2VkIGFwcHJvYWNoIGhhcyBiZWVuIHVzZWQu
+DQo+ID4gLSBCYXNlZCBvbiB0aGUgZGV2aWNlIHR5cGUgc3VwcGxpZWQgYSBibG9jayBkZXZpY2Ug
+b2JqZWN0IGlzIGluc3RhbnRpYXRlZA0KPiAoY3VycmVudGx5IEdlbmVyaWNCbG9ja0RldiBvciBE
+TUJsb2NrRGV2KS4NCj4gPiAtIEVhY2ggY2xhc3MgaW1wbGVtZW50cyBkZXZpY2Ugc3BlY2lmaWMg
+ZnVuY3Rpb25hbGl0eSBhcyBhbiBpbXBsZW1lbnRhdGlvbg0KPiBvZiB0aGUgYWJzdHJhY3QgQmxv
+Y2tEZXZCYXNlIGJhc2UgY2xhc3MuDQo+ID4gICAgICAgICBhLiBHZXQgcGFydGl0aW9uIGRldmlj
+ZSBmcm9tIGJhc2UgZGV2aWNlDQo+ID4gICAgICAgICBiLiBHZXQgYmFzZSBkZXZpY2UgZnJvbSBw
+YXJ0aXRpb24NCj4gPiAgICAgICAgIGMuIEdldCBQYXJ0IFVVSUQgYW5kIFR5cGUNCj4gPiAgICAg
+ICAgIGQuIERldGVybWluZSBpZiBkZXZpY2UgcGF0aCBpcyBwYXJ0aXRpb24NCj4gPiAgICAgICAg
+IGUuIERldGVybWluZSBpZiBkZXZpY2UgaXMgcmVmZXJlbmNlZA0KPiA+ICAgICAgICAgIGYuIEdl
+dCBIVyBzZWN0b3Igc2l6ZQ0KPiA+ICAgICAgICAgZy4gTGlzdCBwYXJ0aXRpb25zDQo+ID4NCj4g
+PiBJbiBQcmVwYXJlL0FjdGl2YXRlL0xpc3QgY29kZSBwYXRocywgdGhlIHJlcXVpcmVkIGRldmlj
+ZSBvYmplY3QgaXMNCj4gaW5zdGFudGlhdGVkIGFuZCBoZW5jZSB0aGVzZSBjb2RlIHBhdGhzIHJl
+bWFpbiBjbGVhbg0KPiA+DQo+ID4gVGhpcyBwb3J0IGFsc28gc3VwcG9ydCBtdWx0aXBhdGggZGV2
+aWNlcyB3aXRoIHRoZSBETUJsb2NrRGV2IENsYXNzLg0KPiA+DQo+ID4gaHR0cHM6Ly9naXRodWIu
+Y29tL2NoYWl0YW55YWh1aWxnb2wvY2VwaC1kaXNrLXVkZXYuZ2l0DQo+ID4NCj4gPiBMZXQgdXMg
+a25vdyB5b3VyIHRob3VnaHRzLg0KPiA+DQo+ID4gUmVnYXJkcywNCj4gPiBDaGFpdGFueWENCj4g
+Pg0KPiA+DQo+ID4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCj4gPg0KPiA+IFBM
+RUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBt
+YWlsIG1lc3NhZ2UgaXMNCj4gaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWdu
+YXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZQ0KPiByZWFkZXIgb2YgdGhpcyBt
+ZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3Rp
+ZmllZA0KPiB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQg
+dGhhdCBhbnkgcmV2aWV3LA0KPiBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlp
+bmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmDQo+IHlvdSBoYXZl
+IHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUg
+c2VuZGVyIGJ5DQo+IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlh
+dGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbA0KPiBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGlu
+IHlvdXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvcg0KPiBlbGVjdHJvbmljYWxs
+eSBzdG9yZWQgY29waWVzKS4NCj4gPg0KPg0KPiAtLQ0KPiBMb8OvYyBEYWNoYXJ5LCBBcnRpc2Fu
+IExvZ2ljaWVsIExpYnJlDQoNCg0KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCg0K
+UExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmlj
+IG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25h
+dGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3Nh
+Z2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVk
+IHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFu
+eSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlz
+IG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhp
+cyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVs
+ZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95
+IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3
+aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KDQo=
