@@ -1,15 +1,16 @@
-From: Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
+From: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Subject: Re: jemalloc and transparent hugepage
-Date: Wed, 9 Sep 2015 04:01:52 +0200 (CEST)
-Message-ID: <502903422.35467518.1441764112283.JavaMail.zimbra@oxygem.tv>
+Date: Tue, 8 Sep 2015 19:07:59 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1509081904060.24969@cobra.newdream.net>
 References: <1694547545.35004320.1441741355122.JavaMail.zimbra@oxygem.tv>
 	<1751466764.35298801.1441755238223.JavaMail.zimbra@oxygem.tv>
 	<55EF740F.5090605@redhat.com>
+	<502903422.35467518.1441764112283.JavaMail.zimbra@oxygem.tv>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: MULTIPART/MIXED;
+	BOUNDARY="557981400-1585410181-1441764481=:24969"
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <55EF740F.5090605-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+In-Reply-To: <502903422.35467518.1441764112283.JavaMail.zimbra-M8QNeUgB6UTyG1zEObXtfA@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -19,121 +20,253 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Mark Nelson <mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: Alexandre DERUMIER <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>
 Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-Pj5IYXZlIHlvdSBub3RpY2VkIGFueSBwZXJmb3JtYW5jZSBkaWZmZXJlbmNlIHdpdGggdHA9bmV2
-ZXI/CgpObyBkaWZmZXJlbmNlLgoKSSB0aGluayBodWdlcGFnZSBjb3VsZCBzcGVlZHVwIGJpZyBt
-ZW1vcnkgc2V0cyBsaWtlIDEwMC0yMDBHQiwgYnV0IGZvciAxLTJHQiB0aGV5IGFyZSBubyBub3Rp
-Y2FibGUgZGlmZmVyZW5jZS4KCgoKCgoKLS0tLS0gTWFpbCBvcmlnaW5hbCAtLS0tLQpEZTogIk1h
-cmsgTmVsc29uIiA8bW5lbHNvbkByZWRoYXQuY29tPgrDgDogImFkZXJ1bWllciIgPGFkZXJ1bWll
-ckBvZGlzby5jb20+LCAiY2VwaC1kZXZlbCIgPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPiwg
-ImNlcGgtdXNlcnMiIDxjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tPgpDYzogIlNvbW5hdGggUm95
-IiA8c29tbmF0aC5yb3lAc2FuZGlzay5jb20+CkVudm95w6k6IE1lcmNyZWRpIDkgU2VwdGVtYnJl
-IDIwMTUgMDE6NDk6MzUKT2JqZXQ6IFJlOiBbY2VwaC11c2Vyc10gamVtYWxsb2MgYW5kIHRyYW5z
-cGFyZW50IGh1Z2VwYWdlCgpFeGNlbGxlbnQgaW52ZXN0aWdhdGlvbiBBbGV4YW5kcmUhIEhhdmUg
-eW91IG5vdGljZWQgYW55IHBlcmZvcm1hbmNlIApkaWZmZXJlbmNlIHdpdGggdHA9bmV2ZXI/IAoK
-TWFyayAKCk9uIDA5LzA4LzIwMTUgMDY6MzMgUE0sIEFsZXhhbmRyZSBERVJVTUlFUiB3cm90ZTog
-Cj4gSSBoYXZlIGRvbmUgc21hbGwgYmVuY2htYXJrIHdpdGggdGNtYWxsb2MgYW5kIGplbWFsbG9j
-LCB0cmFuc3BhcmVudCBodWdlcGFnZT1hbHdheXN8bmV2ZXIuIAo+IAo+IGZvciB0Y21hbGxvYywg
-dGhleSBhcmUgbm8gZGlmZmVyZW5jZS4gCj4gYnV0IGZvciBqZW1hbGxvYywgdGhlIGRpZmZlcmVu
-Y2UgaXMgaHVnZSAoYXJvdW5kIDI1JSBsb3dlciB3aXRoIHRwPW5ldmVyKS4gCj4gCj4gamVtbWFs
-b2MgNC42LjArdHA9bmV2ZXIgdnMgdGNtYWxsb2MgdXNlIDEwJSBtb3JlIFJTUyBtZW1vcnkgCj4g
-Cj4gamVtbWFsb2MgNC4wK3RwPW5ldmVyIGFsbW9zdCB1c2Ugc2FtZSBSU1MgbWVtb3J5IHRoYW4g
-dGNtYWxsb2MgISAKPiAKPiAKPiBJIGRvbid0IGhhdmUgbW9uaXRvcmVkIG1lbW9yeSB1c2FnZSBp
-biByZWNvdmVyeSwgYnV0IEkgdGhpbmsgaXQgc2hvdWxkIGhlbHAgdG9vLiAKPiAKPiAKPiAKPiAK
-PiB0Y21hbGxvYyAyLjEgdHA9YWx3YXlzIAo+IC0tLS0tLS0tLS0tLS0tLS0tLS0gCj4gVVNFUiBQ
-SUQgJUNQVSAlTUVNIFZTWiBSU1MgVFRZIFNUQVQgU1RBUlQgVElNRSBDT01NQU5EIAo+IAo+IHJv
-b3QgNjc3NDYgMTIwIDEuMCAxNTMxMjIwIDY3MTE1MiA/IFNzbCAwMToxOCAwOjQzIC91c3IvYmlu
-L2NlcGgtb3NkIC0tY2x1c3Rlcj1jZXBoIC1pIDAgLWYgCj4gcm9vdCA2Nzc2NCAxNDQgMS4wIDE1
-NzAyNTYgNzExMjMyID8gU3NsIDAxOjE4IDA6NTEgL3Vzci9iaW4vY2VwaC1vc2QgLS1jbHVzdGVy
-PWNlcGggLWkgMSAtZiAKPiAKPiByb290IDY4MzYzIDIyMCAwLjkgMTUyMjI5MiA2NTU4ODggPyBT
-c2wgMDE6MTkgMDo0NiAvdXNyL2Jpbi9jZXBoLW9zZCAtLWNsdXN0ZXI9Y2VwaCAtaSAwIC1mIAo+
-IHJvb3QgNjgzODEgMjYxIDEuMCAxNTYzMzk2IDcwMjUwMCA/IFNzbCAwMToxOSAwOjU1IC91c3Iv
-YmluL2NlcGgtb3NkIC0tY2x1c3Rlcj1jZXBoIC1pIDEgLWYgCj4gCj4gcm9vdCA2ODk2MyAyMjgg
-MS4wIDE1MTkyNDAgNjY2MTk2ID8gU3NsIDAxOjIwIDA6MzEgL3Vzci9iaW4vY2VwaC1vc2QgLS1j
-bHVzdGVyPWNlcGggLWkgMCAtZiAKPiByb290IDY4OTgxIDI2OCAxLjAgMTU2NDQ1MiA2OTQzNTIg
-PyBTc2wgMDE6MjAgMDozNyAvdXNyL2Jpbi9jZXBoLW9zZCAtLWNsdXN0ZXI9Y2VwaCAtaSAxIC1m
-IAo+IAo+IAo+IAo+IHRjbWFsbG9jIDIuMSB0cD1uZXZlciAKPiAtLS0tLS0tLS0tLS0tLS0tLSAK
-PiBVU0VSIFBJRCAlQ1BVICVNRU0gVlNaIFJTUyBUVFkgU1RBVCBTVEFSVCBUSU1FIENPTU1BTkQg
-Cj4gCj4gcm9vdCA2OTU2MCAxNDQgMS4wIDE1NDQ5NjggNjc3NTg0ID8gU3NsIDAxOjIxIDA6MjAg
-L3Vzci9iaW4vY2VwaC1vc2QgLS1jbHVzdGVyPWNlcGggLWkgMCAtZiAKPiByb290IDY5NTc4IDE2
-NyAxLjAgMTU2ODYyMCA3MDQ0NTYgPyBTc2wgMDE6MjEgMDoyMyAvdXNyL2Jpbi9jZXBoLW9zZCAt
-LWNsdXN0ZXI9Y2VwaCAtaSAxIC1mIAo+IAo+IAo+IHJvb3QgNzAxNTYgMTY0IDAuOSAxNTE5Njgw
-IDY0OTc3NiA/IFNzbCAwMToyMSAwOjE2IC91c3IvYmluL2NlcGgtb3NkIC0tY2x1c3Rlcj1jZXBo
-IC1pIDAgLWYgCj4gcm9vdCA3MDE3NCAyMTQgMS4wIDE1NTk3NzIgNjkyODI4ID8gU3NsIDAxOjIx
-IDA6MTkgL3Vzci9iaW4vY2VwaC1vc2QgLS1jbHVzdGVyPWNlcGggLWkgMSAtZiAKPiAKPiByb290
-IDcwNzU3IDIwMiAwLjkgMTUyMDM3NiA2NTA1NzIgPyBTc2wgMDE6MjIgMDoyMCAvdXNyL2Jpbi9j
-ZXBoLW9zZCAtLWNsdXN0ZXI9Y2VwaCAtaSAwIC1mIAo+IHJvb3QgNzA3NzUgMjM2IDEuMCAxNTYw
-NjQ0IDY5NDA4OCA/IFNzbCAwMToyMiAwOjIzIC91c3IvYmluL2NlcGgtb3NkIC0tY2x1c3Rlcj1j
-ZXBoIC1pIDEgLWYgCj4gCj4gCj4gCj4gamVtYWxsb2MgMy42IHRwID0gYWx3YXlzIAo+IC0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLSAKPiBVU0VSIFBJRCAlQ1BVICVNRU0gVlNaIFJTUyBUVFkgU1RB
-VCBTVEFSVCBUSU1FIENPTU1BTkQgCj4gCj4gcm9vdCA5MjAwNSA0Ni4xIDEuNCAyMDMzODY0IDk2
-NzUxMiA/IFNzbCAwMTowMCAwOjA0IC91c3IvYmluL2NlcGgtb3NkIC0tY2x1c3Rlcj1jZXBoIC1p
-IDUgLWYgCj4gcm9vdCA5MjAyNyA0NS41IDEuNCAyMDIxNjI0IDk2MzUzNiA/IFNzbCAwMTowMCAw
-OjA0IC91c3IvYmluL2NlcGgtb3NkIC0tY2x1c3Rlcj1jZXBoIC1pIDQgLWYgCj4gCj4gCj4gCj4g
-cm9vdCA5MjcwMyAxOTEgMS41IDIxMzg3MjQgMTAwMjM3NiA/IFNzbCAwMTowMiAxOjE2IC91c3Iv
-YmluL2NlcGgtb3NkIC0tY2x1c3Rlcj1jZXBoIC1pIDUgLWYgCj4gcm9vdCA5MjcyMSAxODMgMS41
-IDIxMjYyMjggOTg2NDQ4ID8gU3NsIDAxOjAyIDE6MTMgL3Vzci9iaW4vY2VwaC1vc2QgLS1jbHVz
-dGVyPWNlcGggLWkgNCAtZiAKPiAKPiAKPiByb290IDkzMzY2IDI1OCAxLjQgMjEzOTA1MiA5ODQx
-MzIgPyBTc2wgMDE6MDMgMTowOSAvdXNyL2Jpbi9jZXBoLW9zZCAtLWNsdXN0ZXI9Y2VwaCAtaSA1
-IC1mIAo+IHJvb3QgOTMzODQgMjUwIDEuNSAyMTI2MjQ0IDk5MDM0OCA/IFNzbCAwMTowMyAxOjA3
-IC91c3IvYmluL2NlcGgtb3NkIC0tY2x1c3Rlcj1jZXBoIC1pIDQgLWYgCj4gCj4gCj4gCj4gamVt
-YWxsb2MgMy42IHRwID0gbmV2ZXIgCj4gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0gCj4gVVNFUiBQ
-SUQgJUNQVSAlTUVNIFZTWiBSU1MgVFRZIFNUQVQgU1RBUlQgVElNRSBDT01NQU5EIAo+IAo+IHJv
-b3QgOTM5OTAgMjM4IDEuMSAyMTA1ODEyIDc2MjYyOCA/IFNzbCAwMTowNCAxOjE2IC91c3IvYmlu
-L2NlcGgtb3NkIC0tY2x1c3Rlcj1jZXBoIC1pIDQgLWYgCj4gcm9vdCA5NDAzMyAyNjMgMS4xIDIx
-MTgyODggNzgxNzY4ID8gU3NsIDAxOjA0IDE6MTggL3Vzci9iaW4vY2VwaC1vc2QgLS1jbHVzdGVy
-PWNlcGggLWkgNSAtZiAKPiAKPiAKPiByb290IDk0NjU2IDI2NiAxLjEgMjEzOTA5NiA3ODEzOTIg
-PyBTc2wgMDE6MDUgMDo1OCAvdXNyL2Jpbi9jZXBoLW9zZCAtLWNsdXN0ZXI9Y2VwaCAtaSA1IC1m
-IAo+IHJvb3QgOTQ2NzQgMjU3IDEuMSAyMTI2MzE2IDc2MDYzMiA/IFNzbCAwMTowNSAwOjU2IC91
-c3IvYmluL2NlcGgtb3NkIC0tY2x1c3Rlcj1jZXBoIC1pIDQgLWYgCj4gCj4gcm9vdCA5NTMxNyAy
-OTcgMS4xIDIxMzUwNDQgNzgwNTMyID8gU3NsIDAxOjA2IDA6MzUgL3Vzci9iaW4vY2VwaC1vc2Qg
-LS1jbHVzdGVyPWNlcGggLWkgNSAtZiAKPiByb290IDk1MzM1IDI4NCAxLjEgMjExMjAxNiA3NjA5
-NzIgPyBTc2wgMDE6MDYgMDozNCAvdXNyL2Jpbi9jZXBoLW9zZCAtLWNsdXN0ZXI9Y2VwaCAtaSA0
-IC1mIAo+IAo+IAo+IAo+IGplbWFsbG9jIDQuMCB0cCA9IGFsd2F5cyAKPiAtLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0gCj4gVVNFUiBQSUQgJUNQVSAlTUVNIFZTWiBSU1MgVFRZIFNUQVQgU1RBUlQg
-VElNRSBDT01NQU5EIAo+IAo+IHJvb3QgMTAwMjc1IDE5OCAxLjMgMTc4NDUyMCA4ODAyODggPyBT
-c2wgMDE6MTQgMDo0NSAvdXNyL2Jpbi9jZXBoLW9zZCAtLWNsdXN0ZXI9Y2VwaCAtaSA0IC1mIAo+
-IHJvb3QgMTAwMzIwIDIzOSAxLjEgMTc5MzE4NCA3NjA4MjQgPyBTc2wgMDE6MTQgMDo0NyAvdXNy
-L2Jpbi9jZXBoLW9zZCAtLWNsdXN0ZXI9Y2VwaCAtaSA1IC1mIAo+IAo+IAo+IHJvb3QgMTAwODk3
-IDIwMCAxLjMgMTc2NTc4MCA4OTEyNTYgPyBTc2wgMDE6MTUgMDo1MCAvdXNyL2Jpbi9jZXBoLW9z
-ZCAtLWNsdXN0ZXI9Y2VwaCAtaSA0IC1mIAo+IHJvb3QgMTAwOTQyIDI0NSAxLjEgMTgxNzQzNiA3
-NDY5NTYgPyBTc2wgMDE6MTUgMDo1MyAvdXNyL2Jpbi9jZXBoLW9zZCAtLWNsdXN0ZXI9Y2VwaCAt
-aSA1IC1mIAo+IAo+IHJvb3QgMTAxNTE3IDE5NiAxLjMgMTc2OTkwNCA4NzcxMzIgPyBTc2wgMDE6
-MTYgMDozMyAvdXNyL2Jpbi9jZXBoLW9zZCAtLWNsdXN0ZXI9Y2VwaCAtaSA0IC1mIAo+IHJvb3Qg
-MTAxNTYyIDI1OCAxLjEgMTgwNTE3MiA3NDY1MzIgPyBTc2wgMDE6MTYgMDozNiAvdXNyL2Jpbi9j
-ZXBoLW9zZCAtLWNsdXN0ZXI9Y2VwaCAtaSA1IC1mIAo+IAo+IAo+IGplbWFsbG9jIDQuMCB0cCA9
-IG5ldmVyIAo+IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tIAo+IFVTRVIgUElEICVDUFUgJU1FTSBW
-U1ogUlNTIFRUWSBTVEFUIFNUQVJUIFRJTUUgQ09NTUFORCAKPiAKPiByb290IDk4MzYyIDg3Ljgg
-MS4wIDE4NDE3NDggNjc4ODQ4ID8gU3NsIDAxOjEwIDA6NTMgL3Vzci9iaW4vY2VwaC1vc2QgLS1j
-bHVzdGVyPWNlcGggLWkgNCAtZiAKPiByb290IDk4NDA1IDk3LjAgMS4wIDE4NDYzMjggNjk5NjIw
-ID8gU3NsIDAxOjEwIDA6NTYgL3Vzci9iaW4vY2VwaC1vc2QgLS1jbHVzdGVyPWNlcGggLWkgNSAt
-ZiAKPiAKPiAKPiAKPiByb290IDk5MDE4IDIzMyAxLjAgMTgxMjU4MCA2OTg4NDggPyBTc2wgMDE6
-MTIgMDozMCAvdXNyL2Jpbi9jZXBoLW9zZCAtLWNsdXN0ZXI9Y2VwaCAtaSA1IC1mIAo+IHJvb3Qg
-OTkwMzYgMjI2IDEuMCAxODIyMzQ0IDY3NzQyMCA/IFNzbCAwMToxMiAwOjI5IC91c3IvYmluL2Nl
-cGgtb3NkIC0tY2x1c3Rlcj1jZXBoIC1pIDQgLWYgCj4gCj4gcm9vdCA5OTY2NiAyODEgMS4wIDE4
-MTQ2NDAgNjk2NDIwID8gU3NsIDAxOjEzIDA6MzMgL3Vzci9iaW4vY2VwaC1vc2QgLS1jbHVzdGVy
-PWNlcGggLWkgNSAtZiAKPiByb290IDk5Njg0IDI2NiAxLjAgMTgzNTY3NiA2NzY3NjggPyBTc2wg
-MDE6MTMgMDozMiAvdXNyL2Jpbi9jZXBoLW9zZCAtLWNsdXN0ZXI9Y2VwaCAtaSA0IC1mIAo+IAo+
-IAo+IAo+IAo+IC0tLS0tIE1haWwgb3JpZ2luYWwgLS0tLS0gCj4gRGU6ICJhZGVydW1pZXIiIDxh
-ZGVydW1pZXJAb2Rpc28uY29tPiAKPiDDgDogImNlcGgtZGV2ZWwiIDxjZXBoLWRldmVsQHZnZXIu
-a2VybmVsLm9yZz4sICJjZXBoLXVzZXJzIiA8Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbT4gCj4g
-RW52b3nDqTogTWFyZGkgOCBTZXB0ZW1icmUgMjAxNSAyMTo0MjozNSAKPiBPYmpldDogW2NlcGgt
-dXNlcnNdIGplbWFsbG9jIGFuZCB0cmFuc3BhcmVudCBodWdlcGFnZSAKPiAKPiBIaSwgCj4gSSBo
-YXZlIGZvdW5kIGFuIGludGVyZXN0aW5nIGFydGljbGUgYWJvdXQgamVtYWxsb2MgYW5kIHRyYW5z
-cGFyZW50IGh1Z2VwYWdlcyAKPiAKPiBodHRwczovL3d3dy5kaWdpdGFsb2NlYW4uY29tL2NvbXBh
-bnkvYmxvZy90cmFuc3BhcmVudC1odWdlLXBhZ2VzLWFuZC1hbHRlcm5hdGl2ZS1tZW1vcnktYWxs
-b2NhdG9ycy8gCj4gCj4gCj4gQ291bGQgYmUgZ3JlYXQgdG8gc2VlIGlmIGRpc2FibGUgdHJhbnNw
-YXJlbnQgaHVnZXBhZ2UgaGVscCB0byBoYXZlIGxvd2VyIGplbWFsbG9jIG1lbW9yeSB1c2FnZS4g
-Cj4gCj4gCj4gUmVnYXJkcywgCj4gCj4gQWxleGFuZHJlIAo+IAo+IF9fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fIAo+IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0
-IAo+IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20gCj4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xp
-c3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tIAo+IC0tIAo+IFRvIHVuc3Vic2NyaWJlIGZy
-b20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbiAK
-PiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyAKPiBN
-b3JlIG1ham9yZG9tbyBpbmZvIGF0IGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWlu
-Zm8uaHRtbCAKPiAKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRw
-Oi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
+
+--557981400-1585410181-1441764481=:24969
+Content-Type: TEXT/PLAIN; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+On Wed, 9 Sep 2015, Alexandre DERUMIER wrote:
+> >>Have you noticed any performance difference with tp=3Dnever?
+>=20
+> No difference.
+>=20
+> I think hugepage could speedup big memory sets like 100-200GB, but for=20
+> 1-2GB they are no noticable difference.
+
+Is this something we can set with mallctl[1] at startup?
+
+sage
+
+[1] http://www.canonware.com/download/jemalloc/jemalloc-latest/doc/jemall=
+oc.html
+
+>=20
+>=20
+>=20
+>=20
+>=20
+>=20
+> ----- Mail original -----
+> De: "Mark Nelson" <mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> =C3=80: "aderumier" <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>, "ceph-devel" <ceph-devel@vge=
+r.kernel.org>, "ceph-users" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+> Cc: "Somnath Roy" <somnath.roy-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>
+> Envoy=C3=A9: Mercredi 9 Septembre 2015 01:49:35
+> Objet: Re: [ceph-users] jemalloc and transparent hugepage
+>=20
+> Excellent investigation Alexandre! Have you noticed any performance=20
+> difference with tp=3Dnever?=20
+>=20
+> Mark=20
+>=20
+> On 09/08/2015 06:33 PM, Alexandre DERUMIER wrote:=20
+> > I have done small benchmark with tcmalloc and jemalloc, transparent h=
+ugepage=3Dalways|never.=20
+> >=20
+> > for tcmalloc, they are no difference.=20
+> > but for jemalloc, the difference is huge (around 25% lower with tp=3D=
+never).=20
+> >=20
+> > jemmaloc 4.6.0+tp=3Dnever vs tcmalloc use 10% more RSS memory=20
+> >=20
+> > jemmaloc 4.0+tp=3Dnever almost use same RSS memory than tcmalloc !=20
+> >=20
+> >=20
+> > I don't have monitored memory usage in recovery, but I think it shoul=
+d help too.=20
+> >=20
+> >=20
+> >=20
+> >=20
+> > tcmalloc 2.1 tp=3Dalways=20
+> > -------------------=20
+> > USER PID %CPU %MEM VSZ RSS TTY STAT START TIME COMMAND=20
+> >=20
+> > root 67746 120 1.0 1531220 671152 ? Ssl 01:18 0:43 /usr/bin/ceph-osd =
+--cluster=3Dceph -i 0 -f=20
+> > root 67764 144 1.0 1570256 711232 ? Ssl 01:18 0:51 /usr/bin/ceph-osd =
+--cluster=3Dceph -i 1 -f=20
+> >=20
+> > root 68363 220 0.9 1522292 655888 ? Ssl 01:19 0:46 /usr/bin/ceph-osd =
+--cluster=3Dceph -i 0 -f=20
+> > root 68381 261 1.0 1563396 702500 ? Ssl 01:19 0:55 /usr/bin/ceph-osd =
+--cluster=3Dceph -i 1 -f=20
+> >=20
+> > root 68963 228 1.0 1519240 666196 ? Ssl 01:20 0:31 /usr/bin/ceph-osd =
+--cluster=3Dceph -i 0 -f=20
+> > root 68981 268 1.0 1564452 694352 ? Ssl 01:20 0:37 /usr/bin/ceph-osd =
+--cluster=3Dceph -i 1 -f=20
+> >=20
+> >=20
+> >=20
+> > tcmalloc 2.1 tp=3Dnever=20
+> > -----------------=20
+> > USER PID %CPU %MEM VSZ RSS TTY STAT START TIME COMMAND=20
+> >=20
+> > root 69560 144 1.0 1544968 677584 ? Ssl 01:21 0:20 /usr/bin/ceph-osd =
+--cluster=3Dceph -i 0 -f=20
+> > root 69578 167 1.0 1568620 704456 ? Ssl 01:21 0:23 /usr/bin/ceph-osd =
+--cluster=3Dceph -i 1 -f=20
+> >=20
+> >=20
+> > root 70156 164 0.9 1519680 649776 ? Ssl 01:21 0:16 /usr/bin/ceph-osd =
+--cluster=3Dceph -i 0 -f=20
+> > root 70174 214 1.0 1559772 692828 ? Ssl 01:21 0:19 /usr/bin/ceph-osd =
+--cluster=3Dceph -i 1 -f=20
+> >=20
+> > root 70757 202 0.9 1520376 650572 ? Ssl 01:22 0:20 /usr/bin/ceph-osd =
+--cluster=3Dceph -i 0 -f=20
+> > root 70775 236 1.0 1560644 694088 ? Ssl 01:22 0:23 /usr/bin/ceph-osd =
+--cluster=3Dceph -i 1 -f=20
+> >=20
+> >=20
+> >=20
+> > jemalloc 3.6 tp =3D always=20
+> > ------------------------=20
+> > USER PID %CPU %MEM VSZ RSS TTY STAT START TIME COMMAND=20
+> >=20
+> > root 92005 46.1 1.4 2033864 967512 ? Ssl 01:00 0:04 /usr/bin/ceph-osd=
+ --cluster=3Dceph -i 5 -f=20
+> > root 92027 45.5 1.4 2021624 963536 ? Ssl 01:00 0:04 /usr/bin/ceph-osd=
+ --cluster=3Dceph -i 4 -f=20
+> >=20
+> >=20
+> >=20
+> > root 92703 191 1.5 2138724 1002376 ? Ssl 01:02 1:16 /usr/bin/ceph-osd=
+ --cluster=3Dceph -i 5 -f=20
+> > root 92721 183 1.5 2126228 986448 ? Ssl 01:02 1:13 /usr/bin/ceph-osd =
+--cluster=3Dceph -i 4 -f=20
+> >=20
+> >=20
+> > root 93366 258 1.4 2139052 984132 ? Ssl 01:03 1:09 /usr/bin/ceph-osd =
+--cluster=3Dceph -i 5 -f=20
+> > root 93384 250 1.5 2126244 990348 ? Ssl 01:03 1:07 /usr/bin/ceph-osd =
+--cluster=3Dceph -i 4 -f=20
+> >=20
+> >=20
+> >=20
+> > jemalloc 3.6 tp =3D never=20
+> > -----------------------=20
+> > USER PID %CPU %MEM VSZ RSS TTY STAT START TIME COMMAND=20
+> >=20
+> > root 93990 238 1.1 2105812 762628 ? Ssl 01:04 1:16 /usr/bin/ceph-osd =
+--cluster=3Dceph -i 4 -f=20
+> > root 94033 263 1.1 2118288 781768 ? Ssl 01:04 1:18 /usr/bin/ceph-osd =
+--cluster=3Dceph -i 5 -f=20
+> >=20
+> >=20
+> > root 94656 266 1.1 2139096 781392 ? Ssl 01:05 0:58 /usr/bin/ceph-osd =
+--cluster=3Dceph -i 5 -f=20
+> > root 94674 257 1.1 2126316 760632 ? Ssl 01:05 0:56 /usr/bin/ceph-osd =
+--cluster=3Dceph -i 4 -f=20
+> >=20
+> > root 95317 297 1.1 2135044 780532 ? Ssl 01:06 0:35 /usr/bin/ceph-osd =
+--cluster=3Dceph -i 5 -f=20
+> > root 95335 284 1.1 2112016 760972 ? Ssl 01:06 0:34 /usr/bin/ceph-osd =
+--cluster=3Dceph -i 4 -f=20
+> >=20
+> >=20
+> >=20
+> > jemalloc 4.0 tp =3D always=20
+> > ------------------------=20
+> > USER PID %CPU %MEM VSZ RSS TTY STAT START TIME COMMAND=20
+> >=20
+> > root 100275 198 1.3 1784520 880288 ? Ssl 01:14 0:45 /usr/bin/ceph-osd=
+ --cluster=3Dceph -i 4 -f=20
+> > root 100320 239 1.1 1793184 760824 ? Ssl 01:14 0:47 /usr/bin/ceph-osd=
+ --cluster=3Dceph -i 5 -f=20
+> >=20
+> >=20
+> > root 100897 200 1.3 1765780 891256 ? Ssl 01:15 0:50 /usr/bin/ceph-osd=
+ --cluster=3Dceph -i 4 -f=20
+> > root 100942 245 1.1 1817436 746956 ? Ssl 01:15 0:53 /usr/bin/ceph-osd=
+ --cluster=3Dceph -i 5 -f=20
+> >=20
+> > root 101517 196 1.3 1769904 877132 ? Ssl 01:16 0:33 /usr/bin/ceph-osd=
+ --cluster=3Dceph -i 4 -f=20
+> > root 101562 258 1.1 1805172 746532 ? Ssl 01:16 0:36 /usr/bin/ceph-osd=
+ --cluster=3Dceph -i 5 -f=20
+> >=20
+> >=20
+> > jemalloc 4.0 tp =3D never=20
+> > -----------------------=20
+> > USER PID %CPU %MEM VSZ RSS TTY STAT START TIME COMMAND=20
+> >=20
+> > root 98362 87.8 1.0 1841748 678848 ? Ssl 01:10 0:53 /usr/bin/ceph-osd=
+ --cluster=3Dceph -i 4 -f=20
+> > root 98405 97.0 1.0 1846328 699620 ? Ssl 01:10 0:56 /usr/bin/ceph-osd=
+ --cluster=3Dceph -i 5 -f=20
+> >=20
+> >=20
+> >=20
+> > root 99018 233 1.0 1812580 698848 ? Ssl 01:12 0:30 /usr/bin/ceph-osd =
+--cluster=3Dceph -i 5 -f=20
+> > root 99036 226 1.0 1822344 677420 ? Ssl 01:12 0:29 /usr/bin/ceph-osd =
+--cluster=3Dceph -i 4 -f=20
+> >=20
+> > root 99666 281 1.0 1814640 696420 ? Ssl 01:13 0:33 /usr/bin/ceph-osd =
+--cluster=3Dceph -i 5 -f=20
+> > root 99684 266 1.0 1835676 676768 ? Ssl 01:13 0:32 /usr/bin/ceph-osd =
+--cluster=3Dceph -i 4 -f=20
+> >=20
+> >=20
+> >=20
+> >=20
+> > ----- Mail original -----=20
+> > De: "aderumier" <aderumier-U/x3PoR4x10AvxtiuMwx3w@public.gmane.org>=20
+> > =C3=80: "ceph-devel" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users" <ceph=
+-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>=20
+> > Envoy=C3=A9: Mardi 8 Septembre 2015 21:42:35=20
+> > Objet: [ceph-users] jemalloc and transparent hugepage=20
+> >=20
+> > Hi,=20
+> > I have found an interesting article about jemalloc and transparent hu=
+gepages=20
+> >=20
+> > https://www.digitalocean.com/company/blog/transparent-huge-pages-and-=
+alternative-memory-allocators/=20
+> >=20
+> >=20
+> > Could be great to see if disable transparent hugepage help to have lo=
+wer jemalloc memory usage.=20
+> >=20
+> >=20
+> > Regards,=20
+> >=20
+> > Alexandre=20
+> >=20
+> > _______________________________________________=20
+> > ceph-users mailing list=20
+> > ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org=20
+> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com=20
+> > --=20
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in=20
+> > the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org=20
+> > More majordomo info at http://vger.kernel.org/majordomo-info.html=20
+> >=20
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+>=20
+--557981400-1585410181-1441764481=:24969
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--557981400-1585410181-1441764481=:24969--
