@@ -1,65 +1,37 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: bug with cache/tiering and snapshot reads
-Date: Wed, 09 Sep 2015 09:04:03 +0200
-Message-ID: <55EFD9E3.4070300@dachary.org>
-References: <55EF6CBF.4090703@dachary.org> <1807779066.25465139.1441760102338.JavaMail.zimbra@redhat.com>
+From: =?utf-8?B?RGHFgmVrLCBQaW90cg==?= <Piotr.Dalek@ts.fujitsu.com>
+Subject: RE: [NewStore]About PGLog Workload With RocksDB
+Date: Wed, 9 Sep 2015 09:28:03 +0200
+Message-ID: <90559C83A9C7FA45B5846C975DFA612DDB5498EAB9@ABGEX73E.FSC.NET>
+References: <CACJqLybUOPaj3kFrn6b3-1O7fEd0zom2KR5ETC+DiPpid4HQew@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="3P8WQW8mapSEoCc25isbCC8BJP2OqbiRv"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:52261 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751861AbbIIHEH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Sep 2015 03:04:07 -0400
-In-Reply-To: <1807779066.25465139.1441760102338.JavaMail.zimbra@redhat.com>
+Received: from dgate20.ts.fujitsu.com ([80.70.172.51]:38947 "EHLO
+	dgate20.ts.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751214AbbIIH2H (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Sep 2015 03:28:07 -0400
+In-Reply-To: <CACJqLybUOPaj3kFrn6b3-1O7fEd0zom2KR5ETC+DiPpid4HQew@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jason Dillaman <dillaman@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Haomai Wang <haomaiwang@gmail.com>, Sage Weil <sweil@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---3P8WQW8mapSEoCc25isbCC8BJP2OqbiRv
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-Hi Jason,
-
-Thanks for the quick reply :-)
-
-Cheers
-
-On 09/09/2015 02:55, Jason Dillaman wrote:
->> Does "bug with cache/tiering and snapshot reads"
->> http://tracker.ceph.com/issues/12748 sound familiar to you ? Although =
-it
->> looks like a tiering problem, it involves rbd and maybe it rings a bel=
-l ? If
->> not, don't worry about it and I'll dig further: I can repeat it every =
-time
->> using the script from the description. I kind of remember something si=
-milar
->> but it involved erasure coded pools and is probably different.
->=20
-> I believe it's related to this thread [1].  There is an cache tier / EC=
- pool issue wrt proxied writes, but this is different.  =20
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---3P8WQW8mapSEoCc25isbCC8BJP2OqbiRv
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlXv2eMACgkQ8dLMyEl6F22ofwCeNBtdyuNPRrCF6MxsJCsbCF0Z
-8rcAnAhI0fEoIvXTxd4VHnUgo9nStXfF
-=PQqG
------END PGP SIGNATURE-----
-
---3P8WQW8mapSEoCc25isbCC8BJP2OqbiRv--
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZn
+ZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtDQo+IG93bmVyQHZnZXIua2VybmVsLm9y
+Z10gT24gQmVoYWxmIE9mIEhhb21haSBXYW5nDQo+IFNlbnQ6IFR1ZXNkYXksIFNlcHRlbWJlciAw
+OCwgMjAxNSAzOjU4IFBNDQo+IFRvOiBTYWdlIFdlaWwNCiANCj4gSGkgU2FnZSwNCj4gDQo+IEkg
+bm90aWNlIHlvdXIgcG9zdCBpbiByb2Nrc2RiIHBhZ2UgYWJvdXQgbWFrZSByb2Nrc2RiIGF3YXJl
+IG9mIHNob3J0IGFsaXZlDQo+IGtleS92YWx1ZSBwYWlycy4NCj4gDQo+IEkgdGhpbmsgaXQgd291
+bGQgYmUgZ3JlYXQgaWYgb25lIGtleXZhbHVlIGRiIGltcGwgY291bGQgc3VwcG9ydCBkaWZmZXJl
+bnQga2V5DQo+IHR5cGVzIHdpdGggZGlmZmVyZW50IHN0b3JlIGJlaGF2aW9ycy4gQnV0IGl0IGxv
+b2tzIGxpa2UgZGlmZmljdWx0IGZvciBtZSB0byBhZGQNCj4gdGhpcyBmZWF0dXJlIHRvIGFuIGV4
+aXN0aW5nIGRiLg0KPiANCj4gWy4uXQ0KDQpTb21ld2hhdCByYWRpY2FsIChhbmQgbWF5YmUgYWxz
+byByZWNrbGVzcykgcG9pbnQgb2YgdmlldyBoZXJlLCBidXQgZG8gd2UgYWN0dWFsbHkgbmVlZCB0
+aGF0IFJvY2tzREI/IEknbSBwZXJmZWN0bHkgYXdhcmUgb2YgZmFjdCB0aGF0IHdyaXRpbmcgb3du
+IFJvY2tzREIgcmVwbGFjZW1lbnQgd2lsbCB0YWtlIGEgbG90IG9mIG1hbi1ob3VycywgYnV0IG1h
+eWJlIHRoZXknbGwgYmUgYmV0dGVyIHNwZW50IHRoYW4gZ29pbmcgYXJvdW5kIGN1cnJlbnQgUm9j
+a3NEQiBsaW1pdGF0aW9ucywgZml4aW5nIHRoZWlyIGJ1Z3MgYW5kIHR1bmluZyBDZXBoIGZvciB0
+aGVpciBjb2RlPw0KDQoNCg0KV2l0aCBiZXN0IHJlZ2FyZHMgLyBQb3pkcmF3aWFtDQpQaW90ciBE
+YcWCZWsNCg==
