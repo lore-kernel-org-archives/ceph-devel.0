@@ -1,54 +1,65 @@
-From: Chaitanya Huilgol <Chaitanya.Huilgol@sandisk.com>
-Subject: ceph-disk pyudev implementation
-Date: Wed, 9 Sep 2015 06:52:34 +0000
-Message-ID: <9E914F5BD7F48A4782456CEB550A422824EC8564@SACMBXIP02.sdcorp.global.sandisk.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: bug with cache/tiering and snapshot reads
+Date: Wed, 09 Sep 2015 09:04:03 +0200
+Message-ID: <55EFD9E3.4070300@dachary.org>
+References: <55EF6CBF.4090703@dachary.org> <1807779066.25465139.1441760102338.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="3P8WQW8mapSEoCc25isbCC8BJP2OqbiRv"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0068.outbound.protection.outlook.com ([65.55.169.68]:5207
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751402AbbIIGwi (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 9 Sep 2015 02:52:38 -0400
-Content-Language: en-US
+Received: from mail2.dachary.org ([91.121.57.175]:52261 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751861AbbIIHEH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Sep 2015 03:04:07 -0400
+In-Reply-To: <1807779066.25465139.1441760102338.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Jason Dillaman <dillaman@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-SGkgTG9pYywNCg0KQXMgZGlzY3Vzc2VkIGluIHRoZSBtdWx0aXBhdGggdHJhY2tlciwgcGxlYXNl
-IGZpbmQgdGhlIHBvcnQgb2YgY2VwaC1kaXNrIHdoaWNoIGlzIGJhc2VkIG9uIHB5dWRldiAoaHR0
-cHM6Ly9weXVkZXYucmVhZHRoZWRvY3Mub3JnL2VuL2xhdGVzdC8gIHB5dGhvbiBsaWJ1ZGV2IGJp
-bmRpbmcpDQoNCkhlcmUgaXMgYSBzaG9ydCBzdW1tYXJ5IG9uIHRoZSBhcHByb2FjaDoNCi0gQ3Vy
-cmVudCBjZXBoLWRpc2sgZGV0ZXJtaW5lcyB2YXJpb3VzIHByb3BlcnRpZXMgb24gYmxvY2sgZGV2
-aWNlIGJ5IHBhdGggc3RyaW5nIG1hbmlwdWxhdGlvbnMgYW5kIC9zeXMvZGV2IHByb3BlcnRpZXMN
-Ci0gVGhlc2UgYXJlIGRpZmZpY3VsdCB0byBpbXBsZW1lbnQgYW5kIGZyYWdpbGUgZm9yIGRldmlj
-ZSB0eXBlcyBzdWNoIGFzIERNIG11bHRpcGF0aC4NCi0gU2luY2UgZGlmZmVyZW50IGNvZGUgbmVl
-ZHMgdG8gYmUgYWRkZWQgYmFzZWQgb24gdGhlIGRldmljZSB0eXBlLCBhIEJsb2NrIGRldmljZSBj
-bGFzcyBiYXNlZCBhcHByb2FjaCBoYXMgYmVlbiB1c2VkLg0KLSBCYXNlZCBvbiB0aGUgZGV2aWNl
-IHR5cGUgc3VwcGxpZWQgYSBibG9jayBkZXZpY2Ugb2JqZWN0IGlzIGluc3RhbnRpYXRlZCAoY3Vy
-cmVudGx5IEdlbmVyaWNCbG9ja0RldiBvciBETUJsb2NrRGV2KS4NCi0gRWFjaCBjbGFzcyBpbXBs
-ZW1lbnRzIGRldmljZSBzcGVjaWZpYyBmdW5jdGlvbmFsaXR5IGFzIGFuIGltcGxlbWVudGF0aW9u
-IG9mIHRoZSBhYnN0cmFjdCBCbG9ja0RldkJhc2UgYmFzZSBjbGFzcy4NCiAgICAgICAgYS4gR2V0
-IHBhcnRpdGlvbiBkZXZpY2UgZnJvbSBiYXNlIGRldmljZQ0KICAgICAgICBiLiBHZXQgYmFzZSBk
-ZXZpY2UgZnJvbSBwYXJ0aXRpb24NCiAgICAgICAgYy4gR2V0IFBhcnQgVVVJRCBhbmQgVHlwZQ0K
-ICAgICAgICBkLiBEZXRlcm1pbmUgaWYgZGV2aWNlIHBhdGggaXMgcGFydGl0aW9uDQogICAgICAg
-IGUuIERldGVybWluZSBpZiBkZXZpY2UgaXMgcmVmZXJlbmNlZA0KICAgICAgICAgZi4gR2V0IEhX
-IHNlY3RvciBzaXplDQogICAgICAgIGcuIExpc3QgcGFydGl0aW9ucw0KDQpJbiBQcmVwYXJlL0Fj
-dGl2YXRlL0xpc3QgY29kZSBwYXRocywgdGhlIHJlcXVpcmVkIGRldmljZSBvYmplY3QgaXMgaW5z
-dGFudGlhdGVkIGFuZCBoZW5jZSB0aGVzZSBjb2RlIHBhdGhzIHJlbWFpbiBjbGVhbg0KDQpUaGlz
-IHBvcnQgYWxzbyBzdXBwb3J0IG11bHRpcGF0aCBkZXZpY2VzIHdpdGggdGhlIERNQmxvY2tEZXYg
-Q2xhc3MuDQoNCmh0dHBzOi8vZ2l0aHViLmNvbS9jaGFpdGFueWFodWlsZ29sL2NlcGgtZGlzay11
-ZGV2LmdpdA0KDQpMZXQgdXMga25vdyB5b3VyIHRob3VnaHRzLg0KDQpSZWdhcmRzLA0KQ2hhaXRh
-bnlhDQoNCg0KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCg0KUExFQVNFIE5PVEU6
-IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2Fn
-ZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVu
-dChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRo
-ZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhh
-dmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRp
-c3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMg
-c3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0
-aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUt
-bWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxs
-IGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQg
-Y29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KDQo=
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--3P8WQW8mapSEoCc25isbCC8BJP2OqbiRv
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+Hi Jason,
+
+Thanks for the quick reply :-)
+
+Cheers
+
+On 09/09/2015 02:55, Jason Dillaman wrote:
+>> Does "bug with cache/tiering and snapshot reads"
+>> http://tracker.ceph.com/issues/12748 sound familiar to you ? Although =
+it
+>> looks like a tiering problem, it involves rbd and maybe it rings a bel=
+l ? If
+>> not, don't worry about it and I'll dig further: I can repeat it every =
+time
+>> using the script from the description. I kind of remember something si=
+milar
+>> but it involved erasure coded pools and is probably different.
+>=20
+> I believe it's related to this thread [1].  There is an cache tier / EC=
+ pool issue wrt proxied writes, but this is different.  =20
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--3P8WQW8mapSEoCc25isbCC8BJP2OqbiRv
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlXv2eMACgkQ8dLMyEl6F22ofwCeNBtdyuNPRrCF6MxsJCsbCF0Z
+8rcAnAhI0fEoIvXTxd4VHnUgo9nStXfF
+=PQqG
+-----END PGP SIGNATURE-----
+
+--3P8WQW8mapSEoCc25isbCC8BJP2OqbiRv--
