@@ -1,56 +1,45 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: 09/09/2015 Weekly Ceph Performance Meeting IS ON!
-Date: Wed, 09 Sep 2015 09:30:41 -0500
-Message-ID: <55F04291.2030402@redhat.com>
-Reply-To: mnelson@redhat.com
+From: Huamin Chen <hchen@redhat.com>
+Subject: rbd lock list command failure
+Date: Wed, 9 Sep 2015 12:26:47 -0400 (EDT)
+Message-ID: <1133197671.21438012.1441816007901.JavaMail.zimbra@redhat.com>
+References: <638484117.21434546.1441815449448.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:40797 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752821AbbIIOao (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 9 Sep 2015 10:30:44 -0400
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-	by mx1.redhat.com (Postfix) with ESMTPS id D895C2EB675
-	for <ceph-devel@vger.kernel.org>; Wed,  9 Sep 2015 14:30:43 +0000 (UTC)
-Received: from [10.3.112.44] (ovpn-112-44.phx2.redhat.com [10.3.112.44])
-	by int-mx14.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t89EUg18031394
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-	for <ceph-devel@vger.kernel.org>; Wed, 9 Sep 2015 10:30:43 -0400
+Received: from mx4-phx2.redhat.com ([209.132.183.25]:43287 "EHLO
+	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753272AbbIIQ0s (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Sep 2015 12:26:48 -0400
+Received: from zmail23.collab.prod.int.phx2.redhat.com (zmail23.collab.prod.int.phx2.redhat.com [10.5.83.28])
+	by mx4-phx2.redhat.com (8.13.8/8.13.8) with ESMTP id t89GQmCZ000841
+	for <ceph-devel@vger.kernel.org>; Wed, 9 Sep 2015 12:26:48 -0400
+In-Reply-To: <638484117.21434546.1441815449448.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-8AM PST as usual!  Discussion topics include: delayed hashmaps for 
-memory usage reduction, transparent huge pages, newstore testing, async 
-messenger testing, and others.  Please feel free to add your own!
+Hi
 
-Here's the links:
+Running "rbd lock list" inside a Docker container yields mixed results. Sometimes I can get the right results but most times I just get errors.
 
-Etherpad URL:
-http://pad.ceph.com/p/performance_weekly
+A good run is like this:
+[root@host server]# docker run --privileged --net=host -v /dev:/dev -v /sys:/sys ceph/base rbd lock list foo --pool kube --id kube -m host:6789 --key=AQAMgXhVwBCeDhAA9nlPaFyfUSatGD4drFWDvQ==
+2015-09-09 16:11:16.812858 7f3337ff5840 -1 did not load config file, using default settings.
+There is 1 exclusive lock on this image.
+Locker      ID                                                     Address                
+client.4333 kubelet_lock_magic_host 10.16.154.78:0/1000001 
 
-To join the Meeting:
-https://bluejeans.com/268261044
+Same commands but with error:
+[root@host server]# docker run --privileged --net=host -v /dev:/dev -v /sys:/sys ceph/base rbd lock list foo --pool kube --id kube -m host:6789 --key=AQAMgXhVwBCeDhAA9nlPaFyfUSatGD4drFWDvQ==
+2015-09-09 16:11:30.430345 7f4159766840 -1 did not load config file, using default settings.
+2015-09-09 16:11:30.464193 7f4159766840 -1 librbd::ImageCtx: error finding header: (108) Cannot send after transport endpoint shutdown
+rbd: error opening image foo: (108) Cannot send after transport endpoint shutdown
 
-To join via Browser:
-https://bluejeans.com/268261044/browser
+rbd version:
+[root@host server]# docker run -ti ceph/base ceph -v
+ceph version 0.94.2 (5fb85614ca8f354284c713a2f9c610860720bbf3)
 
-To join with Lync:
-https://bluejeans.com/268261044/lync
-
-
-To join via Room System:
-Video Conferencing System: bjn.vc -or- 199.48.152.152
-Meeting ID: 268261044
-
-To join via Phone:
-1) Dial:
-           +1 408 740 7256
-           +1 888 240 2560(US Toll Free)
-           +1 408 317 9253(Alternate Number)
-           (see all numbers - http://bluejeans.com/numbers)
-2) Enter Conference ID: 268261044
-
-Mark
+ceph server version:
+# ceph -v
+ceph version 0.80.9 (b5a67f0e1d15385bc0d60a6da6e7fc810bde6047)
