@@ -1,108 +1,60 @@
 From: Loic Dachary <loic@dachary.org>
-Subject: Re: ceph-disk pyudev implementation
-Date: Wed, 09 Sep 2015 09:35:05 +0200
-Message-ID: <55EFE129.8030502@dachary.org>
-References: <9E914F5BD7F48A4782456CEB550A422824EC8564@SACMBXIP02.sdcorp.global.sandisk.com>
+Subject: Re: How to save log when test  met bugs
+Date: Wed, 09 Sep 2015 10:32:37 +0200
+Message-ID: <55EFEEA5.9060103@dachary.org>
+References: <6AA21C22F0A5DA478922644AD2EC308C1D1A6A2C@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="CMOI9wMhrhWbNqX8LECuObIffA6OdLOCw"
+ boundary="hCU7alSwbxSuPps8FBxleONfu2Eh9IhAs"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:52274 "EHLO
+Received: from mail2.dachary.org ([91.121.57.175]:52310 "EHLO
 	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752821AbbIIHfI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Sep 2015 03:35:08 -0400
-In-Reply-To: <9E914F5BD7F48A4782456CEB550A422824EC8564@SACMBXIP02.sdcorp.global.sandisk.com>
+	with ESMTP id S1752694AbbIIIco (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Sep 2015 04:32:44 -0400
+In-Reply-To: <6AA21C22F0A5DA478922644AD2EC308C1D1A6A2C@SHSMSX101.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Chaitanya Huilgol <Chaitanya.Huilgol@sandisk.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: "Ma, Jianpeng" <jianpeng.ma@intel.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
 This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---CMOI9wMhrhWbNqX8LECuObIffA6OdLOCw
-Content-Type: text/plain; charset=utf-8
+--hCU7alSwbxSuPps8FBxleONfu2Eh9IhAs
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: quoted-printable
 
-Hi,
+[adding ceph-devel as this may also be an inconvenient to others]
 
-The approach you describe makes sense to me. And you've done a nice job w=
-ith the refactor.
 
-I'm not familiar with pyudev though and other Ceph developers may already=
- have an opinion (or answers). When adding new dependencies to Ceph, I th=
-ink we need to assert how stable / reliable those dependencies are. How w=
-ell tested do you think it is ? https://github.com/pyudev/pyudev/blob/mas=
-ter/Vagrantfile suggests there are tests with good coverage, https://gith=
-ub.com/pyudev/pyudev/pulls and https://github.com/pyudev/pyudev/issues?q=3D=
-is%3Aopen+is%3Aissue have few open issues and a number of resolved ones. =
-The timeline is a bit strange : a burst of recent commits and a large gap=
- back to 2012. But maybe it's widely used and this really is not a concer=
-n ?=20
+On 09/09/2015 10:23, Ma, Jianpeng wrote:> Hi Loic:
+>   Today, I run test/cephtool-test-mds.sh, because my code has bug cause=
+ osd down. I only from the screen saw "osd o down ...." and so on. But I =
+don't find the related osd log.
+> This because in vstart_wrapper.sh
+>>> function vstart_setup()
+>>> {
+>>>    rm -fr $CEPH_DEV_DIR $CEPH_OUT_DIR
+>>>    mkdir -p $CEPH_DEV_DIR
+>>>    trap "teardown $CEPH_DIR" EXIT
+>  This " trap "teardown $CEPH_DIR" EXIT" will remove the test dir(osd lo=
+g in this).
+>=20
+> I don' know how to resolve this. But I think this really is a bug. Or a=
+m missing something?
 
-Is there a particular reason why you did not re-use the json format for c=
-eph-disk list ?
+You're right, it is inconvenient for debug. What I usually do in these si=
+tuations is add "exit" or even a sleep 10000000 somewhere to bypass every=
+thing and give me time to take a look at the logs. There should really be=
+ a way to ask (option, environment variable ?) "please keep the logs when=
+ it fails instead of cleaning up".
 
-Could you make your new ceph-disk into a pull request so that it can run =
-integration tests ?
-
-Cheers
-
-On 09/09/2015 08:52, Chaitanya Huilgol wrote:
-> Hi Loic,
->=20
-> As discussed in the multipath tracker, please find the port of ceph-dis=
-k which is based on pyudev (https://pyudev.readthedocs.org/en/latest/  py=
-thon libudev binding)
->=20
-> Here is a short summary on the approach:
-> - Current ceph-disk determines various properties on block device by pa=
-th string manipulations and /sys/dev properties
-> - These are difficult to implement and fragile for device types such as=
- DM multipath.
-> - Since different code needs to be added based on the device type, a Bl=
-ock device class based approach has been used.
-> - Based on the device type supplied a block device object is instantiat=
-ed (currently GenericBlockDev or DMBlockDev).
-> - Each class implements device specific functionality as an implementat=
-ion of the abstract BlockDevBase base class.
->         a. Get partition device from base device
->         b. Get base device from partition
->         c. Get Part UUID and Type
->         d. Determine if device path is partition
->         e. Determine if device is referenced
->          f. Get HW sector size
->         g. List partitions
->=20
-> In Prepare/Activate/List code paths, the required device object is inst=
-antiated and hence these code paths remain clean
->=20
-> This port also support multipath devices with the DMBlockDev Class.
->=20
-> https://github.com/chaitanyahuilgol/ceph-disk-udev.git
->=20
-> Let us know your thoughts.
->=20
-> Regards,
-> Chaitanya
->=20
->=20
-> ________________________________
->=20
-> PLEASE NOTE: The information contained in this electronic mail message =
-is intended only for the use of the designated recipient(s) named above. =
-If the reader of this message is not the intended recipient, you are here=
-by notified that you have received this message in error and that any rev=
-iew, dissemination, distribution, or copying of this message is strictly =
-prohibited. If you have received this communication in error, please noti=
-fy the sender by telephone or e-mail (as shown above) immediately and des=
-troy any and all copies of this message in your possession (whether hard =
-copies or electronically stored copies).
->=20
+What do you think ?
 
 --=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+Lo=EFc Dachary, Artisan Logiciel Libre
 
 
---CMOI9wMhrhWbNqX8LECuObIffA6OdLOCw
+--hCU7alSwbxSuPps8FBxleONfu2Eh9IhAs
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -110,9 +62,9 @@ Content-Disposition: attachment; filename="signature.asc"
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2.0.22 (GNU/Linux)
 
-iEYEARECAAYFAlXv4SoACgkQ8dLMyEl6F22g2QCgjg3lHarvbAWzBgo49FY5Llsg
-52UAn1+A/lL3zBco2Glm5NMHbxzoFoIn
-=fQva
+iEYEARECAAYFAlXv7qUACgkQ8dLMyEl6F21fqwCcCxGvGT3xLQ9T/rzXcpreHxAk
+QHcAn0x7ACX7XxGQbCpjRuq5kOq91Xyv
+=s4x0
 -----END PGP SIGNATURE-----
 
---CMOI9wMhrhWbNqX8LECuObIffA6OdLOCw--
+--hCU7alSwbxSuPps8FBxleONfu2Eh9IhAs--
