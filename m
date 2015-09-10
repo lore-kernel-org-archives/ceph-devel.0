@@ -1,117 +1,64 @@
-From: Shinobu Kinjo <skinjo@redhat.com>
-Subject: Re: [ceph-users] Ceph.conf
-Date: Thu, 10 Sep 2015 05:57:45 -0400 (EDT)
-Message-ID: <518147335.14834792.1441879065903.JavaMail.zimbra@redhat.com>
-References: <719445511.14807548.1441873777873.JavaMail.zimbra@redhat.com> <945773049.14811634.1441874647066.JavaMail.zimbra@redhat.com> <CAJ4mKGbF1zME=hQxjk5SOxqxnYDxPeJZgsZ=Sf3m=TNW-9e=eg@mail.gmail.com> <1048259835.14823145.1441876904812.JavaMail.zimbra@redhat.com> <CAEw75dMj3HZXxnpjPZAH2CLA=C3LRPm1wU9gmPdf-cOLq-dwTg@mail.gmail.com>
+From: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>
+Subject: RE: Re: What should be in the next hammer/firefly release ?
+Date: Thu, 10 Sep 2015 10:57:44 +0000
+Message-ID: <870DE8DBB716524BAE51B2D499EC81E40AB98467@g01jpexmbyt24>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx3-phx2.redhat.com ([209.132.183.24]:49440 "EHLO
-	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751227AbbIJJ5r (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Sep 2015 05:57:47 -0400
-In-Reply-To: <CAEw75dMj3HZXxnpjPZAH2CLA=C3LRPm1wU9gmPdf-cOLq-dwTg@mail.gmail.com>
+Received: from mgwkm02.jp.fujitsu.com ([202.219.69.169]:37976 "EHLO
+	mgwkm02.jp.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751253AbbIJK5t (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Sep 2015 06:57:49 -0400
+Received: from g01jpfmpwyt03.exch.g01.fujitsu.local (g01jpfmpwyt03.exch.g01.fujitsu.local [10.128.193.57])
+	by kw-mxq.gw.nic.fujitsu.com (Postfix) with ESMTP id E998AAC02FC
+	for <ceph-devel@vger.kernel.org>; Thu, 10 Sep 2015 19:57:46 +0900 (JST)
+Received: from g01jpexchyt37.g01.fujitsu.local (unknown [10.128.193.4])
+	by g01jpfmpwyt03.exch.g01.fujitsu.local (Postfix) with ESMTP id 29C2B46E4B2
+	for <ceph-devel@vger.kernel.org>; Thu, 10 Sep 2015 19:57:46 +0900 (JST)
+Content-Language: ja-JP
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Abhishek L <abhishek.lekshmanan@gmail.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, ceph-users <ceph-users@lists.ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
+Cc: "PVonStamwitz@us.fujitsu.com" <PVonStamwitz@us.fujitsu.com>, "Toshine, Naoyoshi" <toshine@jp.fujitsu.com>, "Shiozawa, Kensuke" <shiozawa.kennsu@jp.fujitsu.com>, "Nakao, Takanori" <nakao.takanori@jp.fujitsu.com>
 
-Thank you for letting me know your thought, Abhishek!!
-
-
-    > The Ceph Object Gateway will query Keystone periodically
-    > for a list of revoked tokens. These requests are encoded
-    > and signed. Also, Keystone may be configured to provide 
-    > self-signed tokens, which are also encoded and signed.
-
-
-This is completely absolutely out of scope of my original
-question.
-
-But I would like to ask you if above implementation that
-**periodically** talks to keystone with tokens is really
-secure or not.
-
-I'm just asking you. Because I'm just thinking of keysto-
-ne federation.
-
-But you can ignore me anyhow or point out anything to me -;
-
-Shinobu
-
------ Original Message -----
-From: "Abhishek L" <abhishek.lekshmanan@gmail.com>
-To: "Shinobu Kinjo" <skinjo@redhat.com>
-Cc: "Gregory Farnum" <gfarnum@redhat.com>, "ceph-users" <ceph-users@lists.ceph.com>, "ceph-devel" <ceph-devel@vger.kernel.org>
-Sent: Thursday, September 10, 2015 6:35:31 PM
-Subject: Re: [ceph-users] Ceph.conf
-
-On Thu, Sep 10, 2015 at 2:51 PM, Shinobu Kinjo <skinjo@redhat.com> wrote:
-> Thank you for your really really quick reply, Greg.
->
->  > Yes. A bunch shouldn't ever be set by users.
->
->  Anyhow, this is one of my biggest concern right now -;
->
->     rgw_keystone_admin_password =
->                        ^^^^^^^^
->
-> MUST not be there.
-
-
-I know the dangers of this (ie keystone admin password being visible);
-but isn't this already visible in ceph/radosgw configuration file as
-well if you configure keystone.[1]
-
-[1]: http://ceph.com/docs/master/radosgw/keystone/#integrating-with-openstack-keystone
-
-> Shinobu
->
-> ----- Original Message -----
-> From: "Gregory Farnum" <gfarnum@redhat.com>
-> To: "Shinobu Kinjo" <skinjo@redhat.com>
-> Cc: "ceph-users" <ceph-users@lists.ceph.com>, "ceph-devel" <ceph-devel@vger.kernel.org>
-> Sent: Thursday, September 10, 2015 5:57:52 PM
-> Subject: Re: [ceph-users] Ceph.conf
->
-> On Thu, Sep 10, 2015 at 9:44 AM, Shinobu Kinjo <skinjo@redhat.com> wrote:
->> Hello,
->>
->> I'm seeing 859 parameters in the output of:
->>
->>     $ ./ceph --show-config | wc -l
->>     *** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
->>     859
->>
->> In:
->>
->>     $ ./ceph --version
->>     *** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
->>     ceph version 9.0.2-1454-g050e1c5 (050e1c5c7471f8f237d9fa119af98c1efa9a8479)
->>
->> Since I'm quite new to Ceph, so my question is:
->>
->>     Where can I know what each parameter exactly mean?
->>
->> I am probably right. Some parameters are just for tes-
->> ting purpose.
->
-> Yes. A bunch shouldn't ever be set by users. A lot of the ones that
-> should be are described as part of various operations in
-> ceph.com/docs, but I don't know which ones of interest are missing
-> from there. It's not very discoverable right now, unfortunately.
-> -Greg
->
->>
->> Thank you for your help in advance.
->>
->> Shinobu
->> _______________________________________________
->> ceph-users mailing list
->> ceph-users@lists.ceph.com
->> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users@lists.ceph.com
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+SGkgTG9pYywNCg0KQXMgdGhlIGxhc3QgcHVsbCByZXF1ZXN0ICM1MjU3IHdh
+cyBjb21taXR0ZWQgaW50byB0aGUgbWFpbiB0cnVuaywNCndlIGJlbGlldmUg
+YWxsIHRoZSBTSEVDIGNvZGVzIGluIG1haW4gdHJ1bmsgYXJlIHJlYWR5IHRv
+IGJlIGJhY2twb3J0ZWQgaW50byBIYW1tZXIgYnJhbmNoLg0KV2hhdCBjYW4g
+d2UgZG8gYXQgdGhpcyBtb21lbnQ/DQoNCkJlc3QgcmVnYXJkcywNClRha2Vz
+aGkgTWl5YW1hZQ0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJv
+bTogTWl5YW1hZSwgVGFrZXNoaS/lrq7liY0g5YmbIA0KU2VudDogVGh1cnNk
+YXksIFNlcHRlbWJlciAzLCAyMDE1IDQ6MDkgUE0NClRvOiAnY2VwaC1kZXZl
+bC1vd25lckB2Z2VyLmtlcm5lbC5vcmcnDQpDYzogUGF1bCBWb24tU3RhbXdp
+dHogKFBWb25TdGFtd2l0ekB1cy5mdWppdHN1LmNvbSk7IFRvc2hpbmUsIE5h
+b3lvc2hpL+WIqeaguSDnm7TkvbM7IFNoaW96YXdhLCBLZW5zdWtlL+Whqeay
+oiDos6LovJQ7IE5ha2FvLCBUYWthbm9yaS/kuK3lsL4g6be56KmUIChuYWth
+by50YWthbm9yaUBqcC5mdWppdHN1LmNvbSkNClN1YmplY3Q6IFJlOiBXaGF0
+IHNob3VsZCBiZSBpbiB0aGUgbmV4dCBoYW1tZXIvZmlyZWZseSByZWxlYXNl
+ID8NCg0KRGVhciBMb2ljLA0KDQpXZSB3b3VsZCBsaWtlIHRvIGxldCBmb2xs
+b3dpbmcgdHdvIHBhdGNoZXMgYmUgYmFja3BvcnRlZCB0byBoYW1tZXIgdjAu
+OTQuNC4NCihBbmQgb3VyIHdpc2ggaXMgZmluYWxseSBiYWNrcG9ydGluZyB0
+aGVzZSBwYXRjaGVzIHRvIFJIQ1MgdjEuMy4pIENhbiBpdCBiZSBwb3NzaWJs
+ZT8gSWYgcG9zc2libGUsIHBsZWFzZSBsZXQgdXMga25vdyB3aGF0IHNob3Vs
+ZCBiZSBzdGFydGVkIGF0IGZpcnN0Lg0KKENhdXRpb246ICM1MjU3IGhhcyBu
+b3QgYmVlbiBjb21taXR0ZWQgdG8gbWFzdGVyIGJyYW5jaCB5ZXQuKQ0KDQpl
+cmFzdXJlLWNvZGU6IHNoZWMgcGx1Z2luIGZlYXR1cmUgIzU0OTMNCmh0dHBz
+Oi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgvcHVsbC81NDkzDQoNCmVyYXN1cmUg
+Y29kZTogc2hlYyBwZXJmb3JtYW5jZSBvcHRpbWl6YXRpb24gYnkgZGVjb2Rp
+bmcgY2FjaGUgIzUyNTcNCmh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgv
+cHVsbC81MjU3DQoNCkJlc3QgcmVnYXJkcywNClRha2VzaGkgTWl5YW1hZQ0K
+DQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogTG9pYyBEYWNo
+YXJ5IDxsb2ljIDxhdD4gZGFjaGFyeS5vcmc+DQpTdWJqZWN0OiBXaGF0IHNo
+b3VsZCBiZSBpbiB0aGUgbmV4dCBoYW1tZXIvZmlyZWZseSByZWxlYXNlID8N
+Ck5ld3Nncm91cHM6IGdtYW5lLmNvbXAuZmlsZS1zeXN0ZW1zLmNlcGguZGV2
+ZWwNCkRhdGU6IDIwMTUtMDktMDIgMTE6MDA6NTMgR01UICgxNSBob3VycyBh
+bmQgMzIgbWludXRlcyBhZ28pIEhpLA0KDQpJIGFkZGVkIGEgbGluayB0bw0K
+DQpodHRwOi8vdHJhY2tlci5jZXBoLmNvbS9wcm9qZWN0cy9jZXBoLXJlbGVh
+c2VzL3dpa2kvSE9XVE8jT3ZlcnZpZXctb2YtdGhlLWJhY2twb3J0cy1pbi1w
+cm9ncmVzcw0KDQp0byBzaG93IGFsbCBpc3N1ZXMgdGhhdCBzaG91bGQgYmUg
+aW4gdGhlIG5leHQgcG9pbnQgcmVsZWFzZSBmb3INCg0KaGFtbWVyIHYwLjk0
+LjQgOiBodHRwOi8vdHJhY2tlci5jZXBoLmNvbS92ZXJzaW9ucy80OTUNCmZp
+cmVmbHkgdjAuODAuMTEgOiBodHRwOi8vdHJhY2tlci5jZXBoLmNvbS92ZXJz
+aW9ucy80ODANCg0KQ2hlZXJzDQoNCi0tDQpMb8OvYyBEYWNoYXJ5LCBBcnRp
+c2FuIExvZ2ljaWVsIExpYnJlDQo=
