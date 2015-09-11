@@ -1,41 +1,61 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Backfill
-Date: Fri, 11 Sep 2015 05:57:42 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1509110556430.7527@cobra.newdream.net>
-References: <BLU175-W33B6417CFB278EA9EC4092DF500@phx.gbl>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: osd: new pool flags: noscrub, nodeep-scrub
+Date: Fri, 11 Sep 2015 05:59:56 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1509110559300.7527@cobra.newdream.net>
+References: <20150911064256.GA12899@gmail.com> <CAJ4mKGZPXnH+z=aBp7vLY35pj4JXq6c_Sq1PFknWj5y0fs2-zQ@mail.gmail.com> <20150911124704.GB12899@gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:58836 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752130AbbIKM5n (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Sep 2015 08:57:43 -0400
-In-Reply-To: <BLU175-W33B6417CFB278EA9EC4092DF500@phx.gbl>
+Received: from mx1.redhat.com ([209.132.183.28]:45412 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751696AbbIKM77 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 11 Sep 2015 08:59:59 -0400
+In-Reply-To: <20150911124704.GB12899@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: GuangYang <yguang11@outlook.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "sjust@redhat.com" <sjust@redhat.com>
+To: Mykola Golub <mgolub@mirantis.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, 10 Sep 2015, GuangYang wrote:
-> Today I played around recovery and backfill of a Ceph cluster (by 
-> manually bringing some OSDs down/out), and got one question regards to 
-> the current flow:
+On Fri, 11 Sep 2015, Mykola Golub wrote:
+> On Fri, Sep 11, 2015 at 11:08:29AM +0100, Gregory Farnum wrote:
+> > On Fri, Sep 11, 2015 at 7:42 AM, Mykola Golub <mgolub@mirantis.com> wrote:
+> > > Hi,
+> > >
+> > > I would like to add new pool flags: noscrub and nodeep-scrub, to be
+> > > able to control scrubbing on per pool basis. In our case it could be
+> > > helpful in order to disable scrubbing on cache pools, which does not
+> > > work well right now, but I can imagine other scenarios where it could
+> > > be useful too.
+> > 
+> > Can you talk more about this? It sounds to me like maybe you dislike
+> > the performance impact of scrubbing, but it's fairly important in
+> > terms of data integrity. I don't think we want to permanently disable
+> > them. A corruption in the cache pool isn't any less important than in
+> > the backing pool ? it will eventually get flushed, and it's where all
+> > the reads will be handled!
 > 
-> Does backfill push everything to the backfill target regardless what the 
-> backfill target already has? The scenario is like - acting set of the PG 
-> is [1, 2, 3], and 3 went down (at which point it already had some data) 
-> and stayed down for a sustained period (but not marked out), during 
-> which time there were sustained WRITE to the PG. At some point 3 went 
-> back up, and it is not sufficient to recovery via PG log, so the PG 
-> needed to be backfilled and 3 is the target. Does 1 needs to push 
-> everything (last_backfill starts with MIN) to 3? It seems so to me as I 
-> don't see some round trip to negotiate what each OSD has and do an 
-> incremental push (as recovery does), but it would be nice to get confirm 
-> :)
+> I was talking about this:
+> 
+> http://tracker.ceph.com/issues/8752
+> 
+> (false-negative on a caching pool). Although the best solution is
+> definitely to fix the bug, I am not sure it will be resolved soon (the
+> bug is open for a year). Still these false-negatives are annoying, as
+> they complicate monitoring for real inconsistent pgs. In this case I
+> might want to disable periodic scrub for caching pools, as a
+> workaround (I could do scrub for them manually though).
+> 
+> This might be not the best example where these flags could be helpful
+> (I just came to the idea when thinking about a workaround for that
+> problem, and this looked useful to me in general). We already have
+> 'ceph osd set no[deep-]scrub', and users use it to temporary resolve
+> high I/O load. Being able to do this per pool looks useful too.
+> 
+> You might have pools of different importance for you, and disabling
+> scrub for some of them might be ok.
 
-No.  Backfill iterates over objects on the source and destination and 
-only pushes objects that are missing or out of date (and deletes ones 
-that shouldn't be there).  This is all in ReplicatedPG::recover_backfill() 
-(though it's not the easiest read).
+I wonder if, in addition, we should also allow scrub and deep-scrub 
+intervals to be set on a per-pool basis?
 
 sage
+
