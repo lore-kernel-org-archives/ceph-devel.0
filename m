@@ -1,61 +1,59 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: osd: new pool flags: noscrub, nodeep-scrub
-Date: Fri, 11 Sep 2015 05:59:56 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1509110559300.7527@cobra.newdream.net>
-References: <20150911064256.GA12899@gmail.com> <CAJ4mKGZPXnH+z=aBp7vLY35pj4JXq6c_Sq1PFknWj5y0fs2-zQ@mail.gmail.com> <20150911124704.GB12899@gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: make check bot failures (2 hours today)
+Date: Fri, 11 Sep 2015 15:03:51 +0200
+Message-ID: <55F2D137.9090401@dachary.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="R0HTo8IRDLQpLSx6o9NfVJ6hLdqduN3oB"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:45412 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751696AbbIKM77 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 11 Sep 2015 08:59:59 -0400
-In-Reply-To: <20150911124704.GB12899@gmail.com>
+Received: from mail2.dachary.org ([91.121.57.175]:53785 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1753078AbbIKNDy (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Sep 2015 09:03:54 -0400
+Received: from [10.9.0.6] (unknown [10.0.2.28])
+	by smtp.dmail.dachary.org (Postfix) with ESMTP id 2A73F42B2B
+	for <ceph-devel@vger.kernel.org>; Fri, 11 Sep 2015 15:03:52 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mykola Golub <mgolub@mirantis.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, 11 Sep 2015, Mykola Golub wrote:
-> On Fri, Sep 11, 2015 at 11:08:29AM +0100, Gregory Farnum wrote:
-> > On Fri, Sep 11, 2015 at 7:42 AM, Mykola Golub <mgolub@mirantis.com> wrote:
-> > > Hi,
-> > >
-> > > I would like to add new pool flags: noscrub and nodeep-scrub, to be
-> > > able to control scrubbing on per pool basis. In our case it could be
-> > > helpful in order to disable scrubbing on cache pools, which does not
-> > > work well right now, but I can imagine other scenarios where it could
-> > > be useful too.
-> > 
-> > Can you talk more about this? It sounds to me like maybe you dislike
-> > the performance impact of scrubbing, but it's fairly important in
-> > terms of data integrity. I don't think we want to permanently disable
-> > them. A corruption in the cache pool isn't any less important than in
-> > the backing pool ? it will eventually get flushed, and it's where all
-> > the reads will be handled!
-> 
-> I was talking about this:
-> 
-> http://tracker.ceph.com/issues/8752
-> 
-> (false-negative on a caching pool). Although the best solution is
-> definitely to fix the bug, I am not sure it will be resolved soon (the
-> bug is open for a year). Still these false-negatives are annoying, as
-> they complicate monitoring for real inconsistent pgs. In this case I
-> might want to disable periodic scrub for caching pools, as a
-> workaround (I could do scrub for them manually though).
-> 
-> This might be not the best example where these flags could be helpful
-> (I just came to the idea when thinking about a workaround for that
-> problem, and this looked useful to me in general). We already have
-> 'ceph osd set no[deep-]scrub', and users use it to temporary resolve
-> high I/O load. Being able to do this per pool looks useful too.
-> 
-> You might have pools of different importance for you, and disabling
-> scrub for some of them might be ok.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--R0HTo8IRDLQpLSx6o9NfVJ6hLdqduN3oB
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-I wonder if, in addition, we should also allow scrub and deep-scrub 
-intervals to be set on a per-pool basis?
+Hi Ceph,
 
-sage
+The make check bot failed a number of pull request verifications today. E=
+ach of them was notified as false negative (you should have received a sh=
+ort note if your pull request is concerned). The problem is now fixed[1] =
+and all should be back to normal. If you want to schedule another run, yo=
+u just need to rebase your pull request and re-push it, the bot will noti=
+ce.
 
+Sorry for the inconvenience and thanks for your patience :-)
+
+P.S. I'm not sure what it was exactly. Just that git fetch took too long =
+to answer and failed. Reseting the git clone from which the bot works fix=
+ed the problem. It happened a few times in the past but did not show up i=
+n the past six month or so.
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--R0HTo8IRDLQpLSx6o9NfVJ6hLdqduN3oB
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlXy0TcACgkQ8dLMyEl6F23sdQCfXuwQhOjnTWy30suzAwFBTn04
+qRoAoLheDOOPoYzOS7s2UuDikbul9ndq
+=O3QH
+-----END PGP SIGNATURE-----
+
+--R0HTo8IRDLQpLSx6o9NfVJ6hLdqduN3oB--
