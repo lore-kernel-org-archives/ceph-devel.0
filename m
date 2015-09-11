@@ -1,246 +1,213 @@
-From: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
-Subject: RE: loadable objectstore
-Date: Fri, 11 Sep 2015 18:43:01 +0000
-Message-ID: <99767EA2E27DD44DB4E9F9B9ACA458C03BD7D4D6@SSIEXCH-MB3.ssi.samsung.com>
-References: <1615100301.29.1434984131967.JavaMail.root@thunderbeast.private.linuxbox.com>
- <46879752.37.1434985621131.JavaMail.root@thunderbeast.private.linuxbox.com>
- <C226B0AB34511445928D9882AA519F601C434076@SACMBXIP03.sdcorp.global.sandisk.com>
- <C226B0AB34511445928D9882AA519F601C436F7A@SACMBXIP03.sdcorp.global.sandisk.com>
- <C226B0AB34511445928D9882AA519F601C43C597@SACMBXIP03.sdcorp.global.sandisk.com>
- <C226B0AB34511445928D9882AA519F601C498B33@SACMBXIP03.sdcorp.global.sandisk.com>
+From: Ivo Jimenez <ivo@cs.ucsc.edu>
+Subject: Re: Fwd: Running a single teuthology job locally using containers
+Date: Fri, 11 Sep 2015 12:07:22 -0700
+Message-ID: <CAJw4g7WG__XJs7rH2BROU1Rsb9ZxXw2+35qCzYM2P98Jz7GWKA@mail.gmail.com>
+References: <1559779519.12046158.1441271711230.JavaMail.zimbra@redhat.com>
+ <55E81C46.6060805@dachary.org> <CAJw4g7W9g6Hkk3w5c=psM5xRviF+AYqxu4hcHLTNzhJC_n8DYg@mail.gmail.com>
+ <CAJw4g7XUek_0BaBFqJnJOaLSK7NVgWmbrJuKpfa5NOzTcPqy-Q@mail.gmail.com> <55E8C85B.600@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.ssi.samsung.com ([207.140.43.206]:50319 "EHLO
-	mx2.ssi.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751408AbbIKSnY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Sep 2015 14:43:24 -0400
-In-Reply-To: <C226B0AB34511445928D9882AA519F601C498B33@SACMBXIP03.sdcorp.global.sandisk.com>
-Content-Language: en-US
+Received: from mail-io0-f175.google.com ([209.85.223.175]:33820 "EHLO
+	mail-io0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751841AbbIKTHo convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Sep 2015 15:07:44 -0400
+Received: by iofb144 with SMTP id b144so109369641iof.1
+        for <ceph-devel@vger.kernel.org>; Fri, 11 Sep 2015 12:07:44 -0700 (PDT)
+Received: from mail-ig0-f182.google.com (mail-ig0-f182.google.com. [209.85.213.182])
+        by smtp.gmail.com with ESMTPSA id 10sm2050442igt.2.2015.09.11.12.07.42
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Fri, 11 Sep 2015 12:07:42 -0700 (PDT)
+Received: by igcrk20 with SMTP id rk20so49072443igc.1
+        for <ceph-devel@vger.kernel.org>; Fri, 11 Sep 2015 12:07:42 -0700 (PDT)
+In-Reply-To: <55E8C85B.600@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Varada Kari <Varada.Kari@sandisk.com>, Sage Weil <sage@newdream.net>, "Matt W. Benjamin" <matt@cohortfs.com>, Loic Dachary <loic@dachary.org>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: ceph-devel@vger.kernel.org
 
-SGkgVmFyYWRhLA0KICBHb3QgYSBjaGFuY2UgdG8gZ28gdGhyb3VnaCB0aGUgY29kZS4gR3JlYXQg
-am9iLiBJdCBpcyBtdWNoIGNsZWFuZXIgLiBTZXZlcmFsIHF1ZXN0aW9uczoNCiAgMS4gV2hhdCB5
-b3UgdGhpbmsgYWJvdXQgdGhlIHBlcmZvcm1hbmNlIGltcGFjdCB3aXRoIHRoZSBuZXcgaW1wbGVt
-ZW50YXRpb24/IFN1Y2ggIGFzIGR5bmFtaWMgbGlicmFyeSB2cyBzdGF0aWMgbGluaz8NCiAgMi4g
-Q291bGQgYW55IHZlbmRvciBqdXN0IHByb3ZpZGUgYSBvYmplY3RzdG9yZSBpbnRlcmZhY2VzIGNv
-bXBsaWVkIGR5bmFtaWMgYmluYXJ5IGxpYnJhcnkgZm9yIHRoZWlyIG93biBzdG9yYWdlIGVuZ2lu
-ZSB3aXRoIG5ldyBmYWN0b3J5IGZyYW1ld29yaz8gDQogIA0KICBSZWdhcmRzLA0KICBKYW1lcw0K
-ICANCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IGNlcGgtZGV2ZWwtb3duZXJA
-dmdlci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmdd
-IE9uIEJlaGFsZiBPZiBWYXJhZGEgS2FyaQ0KU2VudDogRnJpZGF5LCBTZXB0ZW1iZXIgMTEsIDIw
-MTUgMzoyOCBBTQ0KVG86IFNhZ2UgV2VpbDsgTWF0dCBXLiBCZW5qYW1pbjsgTG9pYyBEYWNoYXJ5
-DQpDYzogY2VwaC1kZXZlbA0KU3ViamVjdDogUkU6IGxvYWRhYmxlIG9iamVjdHN0b3JlDQoNCkhp
-IFNhZ2UvIE1hdHQsDQoNCkkgaGF2ZSBzdWJtaXR0ZWQgdGhlIHB1bGwgcmVxdWVzdCBiYXNlZCBv
-biB3aXAtcGx1Z2luIGJyYW5jaCBmb3IgdGhlIG9iamVjdCBzdG9yZSBmYWN0b3J5IGltcGxlbWVu
-dGF0aW9uIGF0IGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgvcHVsbC81ODg0IC4gSGF2ZW4n
-dCByZWJhc2VkIHRvIHRoZSBtYXN0ZXIgeWV0LiBXb3JraW5nIG9uIHJlYmFzZSBhbmQgaW5jbHVk
-aW5nIG5ldyBzdG9yZSBpbiB0aGUgZmFjdG9yeSBpbXBsZW1lbnRhdGlvbi4gIFBsZWFzZSBoYXZl
-IGEgbG9vayBhbmQgbGV0IG1lIGtub3cgeW91ciBjb21tZW50cy4gV2lsbCBzdWJtaXQgYSByZWJh
-c2VkIFBSIHNvb24gd2l0aCBuZXcgc3RvcmUgaW50ZWdyYXRpb24uIA0KDQpUaGFua3MsDQpWYXJh
-ZGENCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IGNlcGgtZGV2ZWwtb3duZXJA
-dmdlci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmdd
-IE9uIEJlaGFsZiBPZiBWYXJhZGEgS2FyaQ0KU2VudDogRnJpZGF5LCBKdWx5IDAzLCAyMDE1IDc6
-MzEgUE0NClRvOiBTYWdlIFdlaWwgPHNhZ2VAbmV3ZHJlYW0ubmV0PjsgQWRhbSBDcnVtZSA8YWRh
-bWNydW1lQGdtYWlsLmNvbT4NCkNjOiBMb2ljIERhY2hhcnkgPGxvaWNAZGFjaGFyeS5vcmc+OyBj
-ZXBoLWRldmVsIDxjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZz47IE1hdHQgVy4gQmVuamFtaW4g
-PG1hdHRAY29ob3J0ZnMuY29tPg0KU3ViamVjdDogUkU6IGxvYWRhYmxlIG9iamVjdHN0b3JlDQoN
-CkhpIEFsbCwNCg0KTm90IGFibGUgdG8gbWFrZSBtdWNoIHByb2dyZXNzIGFmdGVyIG1ha2luZyBj
-b21tb24gYXMgYSBzaGFyZWQgb2JqZWN0IGFsb25nIHdpdGggb2JqZWN0IHN0b3JlLiANCkNvbXBp
-bGF0aW9uIG9mIHRoZSB0ZXN0IGJpbmFyaWVzIGFyZSBmYWlsaW5nIHdpdGggIi4vLmxpYnMvbGli
-Y2VwaF9maWxlc3RvcmUuc286IHVuZGVmaW5lZCByZWZlcmVuY2UgdG8gYHRyYWNlcG9pbnRfZGxv
-cGVuJyIuDQoNCiAgQ1hYTEQgICAgY2VwaF9zdHJlYW10ZXN0DQouLy5saWJzL2xpYmNlcGhfZmls
-ZXN0b3JlLnNvOiB1bmRlZmluZWQgcmVmZXJlbmNlIHRvIGB0cmFjZXBvaW50X2Rsb3BlbicNCmNv
-bGxlY3QyOiBlcnJvcjogbGQgcmV0dXJuZWQgMSBleGl0IHN0YXR1cw0KbWFrZVszXTogKioqIFtj
-ZXBoX3N0cmVhbXRlc3RdIEVycm9yIDENCg0KQnV0IGxpYmZpbGVzdG9yZS5zbyBpcyBsaW5rZWQg
-d2l0aCBsdHRuZy11c3QuDQoNCnNyYy8ubGlicyQgbGRkIGxpYmNlcGhfZmlsZXN0b3JlLnNvDQog
-ICAgICAgIGxpYmNlcGhfa2V5dmFsdWVzdG9yZS5zby4xID0+IC9ob21lL3ZhcmFkYS9vYnMtZmFj
-dG9yeS9wbHVnaW4td29yay9zcmMvLmxpYnMvbGliY2VwaF9rZXl2YWx1ZXN0b3JlLnNvLjEgKDB4
-MDAwMDdmNWU1MGY1MDAwMCkNCiAgICAgICAgbGliY2VwaF9vcy5zby4xID0+IC9ob21lL3ZhcmFk
-YS9vYnMtZmFjdG9yeS9wbHVnaW4td29yay9zcmMvLmxpYnMvbGliY2VwaF9vcy5zby4xICgweDAw
-MDA3ZjVlNGY5M2EwMDApDQogICAgICAgIGxpYmNvbW1vbi5zby4xID0+IC9ob21lL3ZhcmFkYS8g
-b2JzLWZhY3RvcnkvcGx1Z2luLXdvcmsvc3JjLy5saWJzL2xpYmNvbW1vbi5zby4xICgweDAwMDA3
-ZjVlNGI1ZGYwMDApDQogICAgICAgIGxpYmx0dG5nLXVzdC5zby4wID0+IC91c3IvbGliL3g4Nl82
-NC1saW51eC1nbnUvbGlibHR0bmctdXN0LnNvLjAgKDB4MDAwMDdmNWU0YjE3OTAwMCkNCiAgICAg
-ICAgbGlibHR0bmctdXN0LXRyYWNlcG9pbnQuc28uMCA9PiAvdXNyL2xpYi94ODZfNjQtbGludXgt
-Z251L2xpYmx0dG5nLXVzdC10cmFjZXBvaW50LnNvLjAgKDB4MDAwMDdmNWU0YTAyMTAwMCkNCiAg
-ICAgICAgbGlidXJjdS1icC5zby4xID0+IC91c3IvbGliL2xpYnVyY3UtYnAuc28uMSAoMHgwMDAw
-N2Y1ZTQ5ZTFhMDAwKQ0KICAgICAgICBsaWJ1cmN1LWNkcy5zby4xID0+IC91c3IvbGliL2xpYnVy
-Y3UtY2RzLnNvLjEgKDB4MDAwMDdmNWU0OWMxMjAwMCkNCg0KRWRpdGVkIHRoZSBhYm92ZSBvdXRw
-dXQganVzdCBzaG93IHRoZSBkZXBlbmRlbmNpZXMuICANCkRpZCBhbnlvbmUgZmFjZSB0aGlzIGlz
-c3VlIGJlZm9yZT8gDQpBbnkgaGVscCB3b3VsZCBiZSBtdWNoIGFwcHJlY2lhdGVkLiANCg0KVGhh
-bmtzLA0KVmFyYWRhDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBjZXBoLWRl
-dmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdlci5r
-ZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgVmFyYWRhIEthcmkNClNlbnQ6IEZyaWRheSwgSnVuZSAy
-NiwgMjAxNSAzOjM0IFBNDQpUbzogU2FnZSBXZWlsDQpDYzogTG9pYyBEYWNoYXJ5OyBjZXBoLWRl
-dmVsOyBNYXR0IFcuIEJlbmphbWluDQpTdWJqZWN0OiBSRTogbG9hZGFibGUgb2JqZWN0c3RvcmUN
-Cg0KSGksDQoNCk1hZGUgc29tZSBtb3JlIGNoYW5nZXMgdG8gcmVzb2x2ZSBsdHRuZyBwcm9ibGVt
-cyBhdCBodHRwczovL2dpdGh1Yi5jb20vdmFyYWRha2FyaS9jZXBoL2NvbW1pdHMvd2lwLXBsdWdp
-bi4NCkJ1dCBjb3VsZG7igJl0IGJ5IHBhc3MgdGhlIGlzc3Vlcy4gRmFjaW5nIHNvbWUgaXNzdWVz
-IGxpa2UgbWVudGlvbmVkIGJlbG93Lg0KDQouLy5saWJzL2xpYmNlcGhfZmlsZXN0b3JlLnNvOiB1
-bmRlZmluZWQgcmVmZXJlbmNlIHRvIGB0cmFjZXBvaW50X2Rsb3BlbicNCg0KQ29tcGlsaW5nIHdp
-dGggLWxsdHRuZy11c3QgaXMgbm90IHJlc29sdmluZyB0aGUgcHJvYmxlbS4gU2VlbiBzb21lIHRo
-cmVhZHMgaW4gZGV2ZWwgbGlzdCBiZWZvcmUsIG1lbnRpb25pbmcgdGhpcyBwcm9ibGVtLiANCkNh
-biBhbnlvbmUgdGFrZSBhIGxvb2sgYW5kIGd1aWRlIG1lIHRvIGZpeCB0aGlzIHByb2JsZW0/DQoN
-CkhhdmVuJ3QgbWFkZSB0aGUgY2hhbmdlcyB0byBjaGFuZ2UgdGhlIHBsdWdpbiBuYW1lIGV0Yy4u
-LiB3aWxsIGJlIG1ha2luZyB0aGVtIGFzIHBhcnQgb2YgY2xlYW51cC4NCg0KVGhhbmtzLA0KVmFy
-YWRhDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBjZXBoLWRldmVsLW93bmVy
-QHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3Jn
-XSBPbiBCZWhhbGYgT2YgVmFyYWRhIEthcmkNClNlbnQ6IE1vbmRheSwgSnVuZSAyMiwgMjAxNSA4
-OjU3IFBNDQpUbzogTWF0dCBXLiBCZW5qYW1pbg0KQ2M6IExvaWMgRGFjaGFyeTsgY2VwaC1kZXZl
-bDsgU2FnZSBXZWlsDQpTdWJqZWN0OiBSRTogbG9hZGFibGUgb2JqZWN0c3RvcmUNCg0KSGkgTWF0
-dCwNCg0KTWFqb3JpdHkgb2YgdGhlIGNoYW5nZXMgYXJlIHNlZ3JlZ2F0aW5nIHRoZSBmaWxlcyB0
-byBjb3JyZXNwb25kaW5nIHNoYXJlZCBvYmplY3QgYW5kIGNyZWF0aW5nIGEgZmFjdG9yeSBvYmpl
-Y3QuIEFuZCB0aGUgbmFtaW5nIGlzIG1vc3RseSB0YWtlbiBmcm9tIEVyYXN1cmUtY29kaW5nIHBs
-dWdpbnMuIFdhbnQgYSBnb29kIG5hbWluZyBjb252ZW50aW9uIDotKSwgaGVuY2UgYSBwcmVsaW1p
-bmFyeSByZXZpZXcuIERvIGFncmVlLCB3ZSBoYXZlIGxvdCBvZiBsb2FkYWJsZSBpbnRlcmZhY2Vz
-LCBhbmQgSSB0aGluayB3ZSBhcmUgaW4gdGhlIHdheSBvZiBtYWtpbmcgdGhlbSBvbi1kZW1hbmQg
-KGlmIHBvc3NpYmxlKSBsb2FkYWJsZSBtb2R1bGVzLg0KDQpWYXJhZGENCg0KLS0tLS1PcmlnaW5h
-bCBNZXNzYWdlLS0tLS0NCkZyb206IE1hdHQgVy4gQmVuamFtaW4gW21haWx0bzptYXR0QGNvaG9y
-dGZzLmNvbV0NClNlbnQ6IE1vbmRheSwgSnVuZSAyMiwgMjAxNSA4OjM3IFBNDQpUbzogVmFyYWRh
-IEthcmkNCkNjOiBMb2ljIERhY2hhcnk7IGNlcGgtZGV2ZWw7IFNhZ2UgV2VpbA0KU3ViamVjdDog
-UmU6IGxvYWRhYmxlIG9iamVjdHN0b3JlDQoNCkhpLA0KDQpJdCdzIGp1c3QgYWVzdGhldGljLCBi
-dXQgaXQgZmVlbHMgY2x1bmt5IHRvIGNoYW5nZSB0aGUgbmFtZXMgb2Ygd2VsbCBrbm93biBtb2R1
-bGVzIHRvIDxzb21ldGhpbmc+UGx1Z2luLS1lc3AuIGlmIHRoYXQgZ2VuZXJhbGl6ZXMgZm9yd2Fy
-ZCB0byBuZXcgbG9hZGFibGUgbW9kdWxlcyAoYW5kIHdlIGhhdmUgYSBsb3Qgb2YgbG9hZGFibGUg
-aW50ZXJmYWNlcykuDQoNCk1hdHQNCg0KLS0tLS0gIlZhcmFkYSBLYXJpIiA8VmFyYWRhLkthcmlA
-c2FuZGlzay5jb20+IHdyb3RlOg0KDQo+IEhpIFNhZ2UsDQo+DQo+IFBsZWFzZSBmaW5kIHRoZSBp
-bml0aWFsIGltcGxlbWVudGF0aW9uIG9mIG9iamVjdHMgc3RvcmUgZmFjdG9yeSANCj4gKGluaXRp
-YWwgY3V0KSBhdCANCj4gaHR0cHM6Ly9naXRodWIuY29tL3ZhcmFkYWthcmkvY2VwaC9jb21taXQv
-OWQ1ZmUyZmVjZjM4YmExMDZjN2M3YjdhM2VkZQ0KPiA0ZjE4OWVjN2UxYzgNCj4NCj4gVGhpcyBp
-cyBzdGlsbCB3b3JrIGluIHByb2dyZXNzIGJyYW5jaC4gUmlnaHQgbm93IEkgYW0gZmFjaW5nIEx0
-dG5nIA0KPiBpc3N1ZXMsDQo+IExUVG5nLVVTVDogRXJyb3IgKC0xNykgd2hpbGUgcmVnaXN0ZXJp
-bmcgdHJhY2Vwb2ludCBwcm9iZS4gRHVwbGljYXRlIA0KPiByZWdpc3RyYXRpb24gb2YgdHJhY2Vw
-b2ludCBwcm9iZXMgaGF2aW5nIHRoZSBzYW1lIG5hbWUgaXMgbm90IGFsbG93ZWQuDQo+DQo+IE1p
-Z2h0IGJlIGFuIGlzc3VlIHdpdGggbGliY29tbW9uIGluY2x1c2lvbi4gVHJ5aW5nIHJlc29sdmlu
-ZyB0aGUgaXNzdWUgDQo+IG5vdy4gU2VlbXMgSSBuZWVkIHRvIG1ha2UgbGliY29tbW9uIGFsc28g
-YXMgYSBzaGFyZWQgb2JqZWN0IHRvIGF2b2lkIA0KPiB0aGUgZHVwbGljYXRlcywgc3RhdGljIGxp
-bmtpbmcgaXMgYSBwcm9ibGVtIGhlcmUuDQo+IEFueSBzdWdnZXN0aW9ucyBvciBjb21tZW50cyBv
-biB0aGlzIHByb2JsZW0/DQo+DQo+DQo+IEkgaGF2ZSBjb21tZW50ZWQgb3V0IHRlc3QgYmluYXJ5
-IChjZXBoX3Rlc3Rfa2V5dmFsdWVkYl9hdG9taWNpdHkpIA0KPiBjb21waWxhdGlvbiwgZHVlIHRv
-IHVucmVzb2x2ZWQgc3ltYm9scyBmb3IgZ19jZXBoX2NvbnRleHQgYW5kIGdfY29uZi4NCj4gTm90
-IGFibGUgdG8gZml4L3dvcmthcm91bmQgdGhlIHByb2JsZW0gc28gZmFyLg0KPg0KPiBDYW4geW91
-IHBsZWFzZSByZXZpZXcgaWYgdGhpcyBpcyB3aGF0IGluIHlvdXIgbWluZCBmb3IgdGhlIGZhY3Rv
-cnkgDQo+IGltcGxlbWVudGF0aW9uPw0KPg0KPiBXZSBjYW4gZXh0ZW5kIHRoaXMgaW1wbGVtZW50
-YXRpb24gdG8gbWVzc2VuZ2VyIGFuZCBkaWZmZXJlbnQgYmFja2VuZCANCj4gb2YgdGhlIE9TRC4g
-V2lsbCBtYWtlIHRob3NlIGluY3JlbWVudGFsIG9uY2UgdGhlIGJhc2UgZnJhbWV3b3JrIGlzIA0K
-PiBhcHByb3ZlZC4NCj4NCj4gVGhhbmtzLA0KPiBWYXJhZGENCj4NCj4NCj4NCj4gLS0tLS1Pcmln
-aW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogU2FnZSBXZWlsIFttYWlsdG86c2FnZUBuZXdkcmVh
-bS5uZXRdDQo+IFNlbnQ6IFR1ZXNkYXksIE1heSAxMiwgMjAxNSA1OjExIEFNDQo+IFRvOiBWYXJh
-ZGEgS2FyaQ0KPiBDYzogTG9pYyBEYWNoYXJ5OyBNYXR0IFcuIEJlbmphbWluOyBjZXBoLWRldmVs
-DQo+IFN1YmplY3Q6IFJFOiBsb2FkYWJsZSBvYmplY3RzdG9yZQ0KPg0KPiBIaSBWYXJhZGEsDQo+
-DQo+IEFueSBwcm9ncmVzcyBvbiB0aGlzPw0KPg0KPiBUaGFua3MhDQo+IHNhZ2UNCj4NCj4gT24g
-U2F0LCAxMSBBcHIgMjAxNSwgVmFyYWRhIEthcmkgd3JvdGU6DQo+DQo+ID4gVGhhbmtzIFNhZ2Ug
-YW5kIExvaWMuIFdpbGwgYWRkIHRoZSBtaXNzaW5nIHBpZWNlcyBhbmQgaW50ZWdyYXRlIHRoZQ0K
-PiBvYmplY3QgZmFjdG9yeSBhbmQgcGx1Z2luIGNoYW5nZXMuDQo+ID4NCj4gPiBWYXJhZGENCj4g
-Pg0KPiA+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+ID4gRnJvbTogU2FnZSBXZWlsIFtt
-YWlsdG86c2FnZUBuZXdkcmVhbS5uZXRdDQo+ID4gU2VudDogU2F0dXJkYXksIEFwcmlsIDExLCAy
-MDE1IDk6MTkgUE0NCj4gPiBUbzogTG9pYyBEYWNoYXJ5DQo+ID4gQ2M6IFZhcmFkYSBLYXJpOyBN
-YXR0IFcuIEJlbmphbWluOyBjZXBoLWRldmVsDQo+ID4gU3ViamVjdDogUmU6IGxvYWRhYmxlIG9i
-amVjdHN0b3JlDQo+ID4NCj4gPiBPbiBTYXQsIDExIEFwciAyMDE1LCBMb2ljIERhY2hhcnkgd3Jv
-dGU6DQo+ID4gPiBIaSBTYWdlLA0KPiA+ID4NCj4gPiA+IEl0IGxvb2tzIGxpa2UgY29tbW9uL1Bs
-dWdpblJlZ2lzdHJ5LntoLGNjfSBhcmUgbWlzc2luZyBmcm9tIA0KPiA+ID4gMThhZDhkZjEwOTRk
-YjUyYzgzOWRjNmIyZGM2ODlmYzg4MjIzMGFjYg0KPiA+DQo+ID4gd2hvb3BzIHB1c2hlZCEgOikN
-Cj4gPg0KPiA+IHNhZ2UNCj4gPg0KPiA+ID4NCj4gPiA+IENoZWVycw0KPiA+ID4NCj4gPiA+IE9u
-IDExLzA0LzIwMTUgMTY6NTEsIFNhZ2UgV2VpbCB3cm90ZToNCj4gPiA+ID4gT24gU2F0LCAxMSBB
-cHIgMjAxNSwgVmFyYWRhIEthcmkgd3JvdGU6DQo+ID4gPiA+PiBIaSBNYXR0LyBTYWdlLA0KPiA+
-ID4gPj4NCj4gPiA+ID4+IFRoYW5rcyBmb3Igc2hhcmluZyB0aGUgcHVsbCByZXF1ZXN0LiBXaWxs
-IHdvcmsgb24gdGhlIGl0ZW1zDQo+IHdoYXQNCj4gPiA+ID4+IHNhZ2Ugd2FzIG1lbnRpb25pbmcg
-aW4gdGhlIGNvbW1lbnRzIGFsb25nIHdpdGggdGhlIGl0ZW1zIGluIHRoZQ0KPiB0cmFja2VyLg0K
-PiA+ID4gPg0KPiA+ID4gPiBJIHB1c2hlZCBhIHdpcC1wbHVnaW4gYnJhbmNoIHdpdGggdGhlIHBh
-dHRlcm4gSSBoYWQgaW4gbWluZC4uLg0KPiA+ID4gPiBkb2VzIHRoaXMgbWFrZSBzZW5zZT8gIEl0
-J3Mgb25seSBjb21waWxlIHRlc3RlZCwgYW5kIHN0aWxsDQo+IG5lZWRzDQo+ID4gPiA+IHByZWxv
-YWQoKSBtZXRob2RzIGltcGxlbWVudGVkIHNvIHRoYXQgbG9uZy1ydW5uaW5nIGRhZW1vbnMgKG9y
-IA0KPiA+ID4gPiBwZXJoYXBzIG90aGVycz8pIGNhbiBwcmVsb2FkIGl0IGFsbCBhdCBvbmNlLg0K
-PiA+ID4gPg0KPiA+ID4gPiBJZGVhbGx5IHdlIHdvdWxkIHJlcGxhY2UgRXJhc3VyZVBsdWdpblJl
-Z2lzdHJ5IHdpdGggdGhpcyB0b28sIA0KPiA+ID4gPiB3aGljaCBtZWFucyB0aGUgbmFtaW5nIG9m
-IHRoZSAuc28ncyBuZWVkcyB0byBiZSBhIGJpdCBtb3JlIA0KPiA+ID4gPiBmbGV4aWJsZSBhcyB0
-aGUgRUMgcGx1Z2luIHNjaGVtZSBpcyBzb21ldGhpbmcgbGlrZSANCj4gPiA+ID4gL3Vzci9saWIv
-Y2VwaC9lcmFzdXJlLWNvZGUvbGliZWNfJG5hbWUuc28gKG5vdCBhIHN0cmljdCBmdW5jdGlvbg0K
-Pg0KPiA+ID4gPiBvZiB0eXBlIGFuZCBuYW1lKS4gIE9yIGFjdHVhbGx5LCB3ZSBjYW4ganVzdCBy
-ZW5hbWUgdGhlIEVDIC5zbydzDQo+DQo+ID4gPiA+IHdoZW4gdGhpcyBnb2VzIGluPyAgU2luY2Ug
-dGhleSdyZSBleHBsaWNpdGx5IGluY29tcGF0aWJsZQ0KPiBiZXR3ZWVuDQo+ID4gPiA+IHZlcnNp
-b25zIHRoZXJlIGlzIG5vIHJlYXNvbiB0aGUgbmFtZXMgbmVlZCB0byByZW1haW4NCj4gY29uc2lz
-dGVudC4uLg0KPiA+ID4gPg0KPiA+ID4gPiBzYWdlDQo+ID4gPiA+DQo+ID4gPiA+Pg0KPiA+ID4g
-Pj4gVmFyYWRhDQo+ID4gPiA+Pg0KPiA+ID4gPj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0N
-Cj4gPiA+ID4+IEZyb206IFNhZ2UgV2VpbCBbbWFpbHRvOnNhZ2VAbmV3ZHJlYW0ubmV0XQ0KPiA+
-ID4gPj4gU2VudDogU2F0dXJkYXksIEFwcmlsIDExLCAyMDE1IDQ6MTYgQU0NCj4gPiA+ID4+IFRv
-OiBNYXR0IFcuIEJlbmphbWluDQo+ID4gPiA+PiBDYzogVmFyYWRhIEthcmk7IGNlcGgtZGV2ZWwN
-Cj4gPiA+ID4+IFN1YmplY3Q6IFJlOiBsb2FkYWJsZSBvYmplY3RzdG9yZQ0KPiA+ID4gPj4NCj4g
-PiA+ID4+IE9uIEZyaSwgMTAgQXByIDIwMTUsIE1hdHQgVy4gQmVuamFtaW4gd3JvdGU6DQo+ID4g
-PiA+Pj4gSGkgVmFyYWRhLA0KPiA+ID4gPj4+DQo+ID4gPiA+Pj4gSSBwdXNoZWQgYnJhbmNoIGhh
-bW1lci1vc2ZhY3RvcnkgdG8gDQo+ID4gPiA+Pj4gaHR0cHM6Ly9naXRodWIuY29tL2xpbnV4Ym94
-Mi9jZXBoLmdpdA0KPiA+ID4gPj4+DQo+ID4gPiA+Pj4gSXQgY2FuIGF0IGxlYXN0IHByb3ZpZGUg
-YSBzdGFydGluZyBwb2ludCBmb3IgZGlzY3Vzc2lvbiwgaWYNCj4gbm90DQo+ID4gPiA+Pj4gYSBq
-dW1waW5nIG9mZiBwb2ludDsgIEkgZG8gdGhpbmsgaXQncyBiYXNpY2FsbHkgd2hhdCBTYWdlDQo+
-IGRlc2NyaWJlZC4NCj4gPiA+ID4+DQo+ID4gPiA+PiBJIG1hZGUgYSBmZXcgY29tbWVudHMgb24g
-dGhlIHB1bGwgcmVxdWVzdC4gIEkgdGhpbmsgYSBmYWN0b3J5DQo+IGNsYXNzIGlzIHRoZSB3YXkg
-dG8gZ28sIGJ1dCB3ZSBzaG91bGQgYmUgYWJsZSB0byBtYWtlIHRoZSBwbHVnaW4gDQo+IGxvYWRp
-bmcgcGFydCBnZW5lcmljIGFuZCBub3QgaW50ZXJmYWNlIHNwZWNpZmljIGF0IGFsbC4uLg0KPiA+
-ID4gPj4NCj4gPiA+ID4+IHNhZ2UNCj4gPiA+ID4+DQo+ID4gPiA+Pj4NCj4gPiA+ID4+PiBJIHdh
-cyBhYmxlIHRvIHVwZGF0ZSB0aGUgQ01ha2UgYnVpbGQgc3lzdGVtIHRvIGJ1aWxkIHRoZSB0cmVl
-LA0KPiBJDQo+ID4gPiA+Pj4gaGF2ZW4ndCBhdHRlbXB0ZWQgQXV0b3Rvb2xzLiA6KA0KPiA+ID4g
-Pj4+DQo+ID4gPiA+Pj4gUmVnYXJkcywNCj4gPiA+ID4+Pg0KPiA+ID4gPj4+IE1hdHQNCj4gPiA+
-ID4+Pg0KPiA+ID4gPj4+IC0tDQo+ID4gPiA+Pj4gTWF0dCBCZW5qYW1pbg0KPiA+ID4gPj4+IENv
-aG9ydEZTLCBMTEMuDQo+ID4gPiA+Pj4gMzE1IFdlc3QgSHVyb24gU3RyZWV0LCBTdWl0ZSAxNDBB
-IEFubiBBcmJvciwgTWljaGlnYW4gNDgxMDMNCj4gPiA+ID4+Pg0KPiA+ID4gPj4+IGh0dHA6Ly9j
-b2hvcnRmcy5jb20NCj4gPiA+ID4+Pg0KPiA+ID4gPj4+IHRlbC4gIDczNC03NjEtNDY4OQ0KPiA+
-ID4gPj4+IGZheC4gIDczNC03NjktODkzOA0KPiA+ID4gPj4+IGNlbC4gIDczNC0yMTYtNTMwOQ0K
-PiA+ID4gPj4+IC0tDQo+ID4gPiA+Pj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNl
-bmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlDQo+IGNlcGgtZGV2ZWwiDQo+ID4gPiA+Pj4gaW4gdGhl
-IGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSANCj4g
-PiA+ID4+PiBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRv
-bW8taW5mby5odG1sDQo+ID4gPiA+Pj4NCj4gPiA+ID4+Pg0KPiA+ID4gPj4NCj4gPiA+ID4+IF9f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQo+ID4gPiA+Pg0KPiA+ID4gPj4gUExFQVNF
-IE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwN
-Cj4gbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVk
-IHJlY2lwaWVudChzKSANCj4gbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNz
-YWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgDQo+IHJlY2lwaWVudCwgeW91IGFyZSBoZXJlYnkgbm90
-aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2UgDQo+IGluIGVycm9yIGFu
-ZCB0aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWlu
-ZyANCj4gb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZl
-IHJlY2VpdmVkIHRoaXMgDQo+IGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkg
-dGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3IgDQo+IGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGlt
-bWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiANCj4gdGhpcyBtZXNz
-YWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmlj
-YWxseSANCj4gc3RvcmVkIGNvcGllcykuDQo+ID4gPiA+Pg0KPiA+ID4gPj4gLS0NCj4gPiA+ID4+
-IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmli
-ZSANCj4gPiA+ID4+IGNlcGgtZGV2ZWwiIGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0bw0KPiBt
-YWpvcmRvbW9Admdlci5rZXJuZWwub3JnDQo+ID4gPiA+PiBNb3JlIG1ham9yZG9tbyBpbmZvIGF0
-DQo+ID4gPiA+PiBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4g
-PiA+ID4+DQo+ID4gPiA+Pg0KPiA+ID4gPiAtLQ0KPiA+ID4gPiBUbyB1bnN1YnNjcmliZSBmcm9t
-IHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgDQo+ID4gPiA+IGNlcGgtZGV2
-ZWwiIGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0bw0KPiBtYWpvcmRvbW9Admdlci5rZXJuZWwu
-b3JnDQo+ID4gPiA+IE1vcmUgbWFqb3Jkb21vIGluZm8gYXQNCj4gaHR0cDovL3ZnZXIua2VybmVs
-Lm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+ID4gPiA+DQo+ID4gPg0KPiA+ID4gLS0NCj4gPiA+
-IExvw69jIERhY2hhcnksIEFydGlzYW4gTG9naWNpZWwgTGlicmUNCj4gPiA+DQo+ID4gPg0KPiA+
-IC0tDQo+ID4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVu
-c3Vic2NyaWJlDQo+IGNlcGgtZGV2ZWwiDQo+ID4gaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRv
-IG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8NCj4NCj4gPiBpbmZvIGF0
-ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4gPg0KPiA+DQoN
-Ci0tDQpNYXR0IEJlbmphbWluDQpDb2hvcnRGUywgTExDLg0KMzE1IFdlc3QgSHVyb24gU3RyZWV0
-LCBTdWl0ZSAxNDBBDQpBbm4gQXJib3IsIE1pY2hpZ2FuIDQ4MTAzDQoNCmh0dHA6Ly9jb2hvcnRm
-cy5jb20NCg0KdGVsLiAgNzM0LTc2MS00Njg5DQpmYXguICA3MzQtNzY5LTg5MzgNCmNlbC4gIDcz
-NC0yMTYtNTMwOQ0KDQpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXw0KDQpQTEVBU0Ug
-Tk9URTogVGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbCBt
-ZXNzYWdlIGlzIGludGVuZGVkIG9ubHkgZm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVj
-aXBpZW50KHMpIG5hbWVkIGFib3ZlLiBJZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBu
-b3QgdGhlIGludGVuZGVkIHJlY2lwaWVudCwgeW91IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5
-b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmll
-dywgZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2Fn
-ZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11
-bmljYXRpb24gaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUg
-b3IgZS1tYWlsIChhcyBzaG93biBhYm92ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFu
-ZCBhbGwgY29waWVzIG9mIHRoaXMgbWVzc2FnZSBpbiB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIg
-aGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkgc3RvcmVkIGNvcGllcykuDQoNCk4gICAgIHIg
-IHkgICBiIFggIMendiBeICneunsubiArICAgeiBdeiAgIA0KTiAgICAgciAgeSAgIGIgWCAgx6d2
-IF4gKd66ey5uICsgICB6IF16ICAge2F5IB3Kh9qZICxqICAgZiAgIGggICB6IB4gdyAgICAgICBq
-Oit2ICAgdyBqIG0gICAgICAgICB6WisgICAgIN2iaiIgICEgaQ0KEyAg7Lm7HCAmIH4gJiAYICAr
-LSAg3bYXICB3ICDLmyAgIG0gHiAXXiAgYiAgXm4gciAgIHogGiAgaCAgICAmICAeIEcgICBoIAMo
-IOmajiDdomoiICAaIBttICAgICB6IN6WICAgZiAgIGggICB+IG0gDQoEIHsubiArICAgICAgICsl
-ICBsendtICBiIOunsiAgciAgecepINevelggIBcgINyofSAgIMageiAmajordiAgICAgICAgelor
-ICAremYgICBoICAgfiAgICBpICAgeiAeIHcgICA/ICAgICYgKd+iG2YNCg==
+Hi Loic,
+
+Based on your feedback, a few action-items emerged for improving this
+containerized approach to running teuthology jobs:
+
+ 1. use install-deps.sh for installing dependencies
+ 2. modify the sshd configuration so that the ssh port is specified at
+    runtime via an environment variable. This has the consequence of
+    being able to use --net=3Dhost and thus more than one remote can ru=
+n
+    locally (for jobs with multiple remotes).
+ 3. add an option to provide a sha1 so that the code gets checked out
+    as part of the entrypoint of the container and gets built.
+ 4. write a 'dockerize-config' script for taking a failed job's YAML
+    file and modify it so that it can run with containers.
+ 5. write a 'failed-devenv' script that given a url to a failed job
+    (a) fetches the YAML file (b) runs the dockerize-config script (c)
+    checks out the corresponding sha1 version (d) compiles the code
+ 6. write a 'run-failed-job' that (a) re-builds the code (b)
+    instantiates one container for each specified remote and (c)
+    executes the job.
+
+I've implemented 1-3 and am working on 4-6. In short, the goal of all
+the above is to capture the dev/build/test loop and make it easier to
+go from 'failed job' to 'working on a fix'. The high-level sequence is
+(1) run 'make-failed-devenv' so you get the dev environment for the
+failed job (2) work on a fix and (3) invoke 'run-failed-job' and
+inspect results (possibly going back to 2 if need it).
+
+Thoughts on 4-6?
+
+cheers,
+ivo
+
+
+On Thu, Sep 3, 2015 at 3:23 PM, Loic Dachary <loic@dachary.org> wrote:
+>
+>
+> On 03/09/2015 23:45, Ivo Jimenez wrote:> On Thu, Sep 3, 2015 at 3:09 =
+AM Loic Dachary <loic@dachary.org> wrote:
+>>>
+>>>>  2. Initialize a `cephdev` container (the following assumes `$PWD`=
+ is
+>>>>     the folder containing the ceph code in your machine):
+>>>>
+>>>>     ```bash
+>>>>     docker run \
+>>>>       --name remote0
+>>>>       -p 2222:22
+>>>>       -d -e AUTHORIZED_KEYS=3D"`cat ~/.ssh/id_rsa.pub`" \
+>>>>       -v `pwd`:/ceph \
+>>>>       -v /dev:/dev \
+>>>>       -v /tmp/ceph_data/$RANDOM:/var/lib/ceph \
+>>>>       --cap-add=3DSYS_ADMIN --privileged \
+>>>>       --device /dev/fuse
+>>>>       ivotron/cephdev
+>>>>     ```
+>>>
+>>> $PWD is ceph built from sources ? Could you share the dockerfile yo=
+u used to create ivotron/cephdev ?
+>>
+>>
+>> Yes, the idea is to wrap your ceph folder in a container so that it
+>> becomes a target for teuthology. The link to the dockerfile:
+>>
+>> https://github.com/ivotron/docker-cephdev
+>
+> You may want to use install-deps.sh instead of apt-get build-dep to g=
+et the packages from sources instead of a presumably older from the sou=
+rce repositories.
+>>
+>>>
+>>>>
+>>>> Caveats:
+>>>>
+>>>>   * only a single job can be executed and has to be manually
+>>>>     assembled. I plan to work on supporting suites, which, in shor=
+t,
+>>>>     implies stripping out the `install` task from existing suites =
+and
+>>>>     leaving only the `install.ship_utilities` subtask instead (the
+>>>>     container image has all the dependencies in it already).
+>>>
+>>> Maybe there could be a script to transform config files such as htt=
+p://qa-proxy.ceph.com/teuthology/loic-2015-09-02_15:41:18-rbd-master---=
+basic-multi/1042448/config.yaml into a config file suitable for this us=
+e case ?
+>>
+>>
+>> that's what I have in mind but haven't looked into it yet. I was
+>> thinking about extending teuthology-suite so that you pass a
+>> --filter-tasks flag so that we can remove the unwanted tasks, in the
+>> similar way that --filter leaves some suites out.
+>>
+>>>
+>>> Together with git clone -b $sha1 + make in the container, it would =
+be a nice way to replay / debug a failed job using a single vm and with=
+out going through packages.
+>>
+>>
+>> that'd be relatively straight-forward to accomplish, at least the
+>> docker-side of things (a dockerfile that is given the $SHA1). Prior =
+to
+>> that, we'd need to have a script that extracts the failed job from
+>> paddles (does this exist already?), creates a new sha1-predicated
+>
+> What do you mean by "extract the failed job" ? Do you expect paddles =
+to have more information than the config.yaml file ( loic-2015-09-02_15=
+:41:18-rbd-master---basic-multi/1042448/config.yaml for instance) ?
+>
+>> container and passes the yaml file of the failed job to teuthology
+>> (which would be invoked with the hypothetical --filter-tasks flag
+>> mentioned above).
+>
+> It's probably more than just filtering out tasks. What about a script=
+ that would
+>
+>    dockerize-config < config.yaml > docker-config.yaml
+>
+> and be smart enough to do whatever is necessary to transform an exist=
+ing config.yaml so that it is suitable to run on docker targets. And fa=
+il loudly if it can't ;-)
+>
+>>
+>>>
+>>>>   * I have only tried the above with the `radosbench` and `ceph-fu=
+se`
+>>>>     tasks. Using `--cap-add=3DALL` and `-v /lib/modules:/lib/modul=
+es`
+>>>>     flags allows a container to load kernel modules so, in princip=
+le,
+>>>>     it should work for `rbd` and  `kclient` tasks but I haven't tr=
+ied
+>>>>     it yet.
+>>>>   * For jobs specifying multiple remotes, multiple containers can =
+be
+>>>>     launched (one per remote). While it is possible to run these
+>>>>     on the same docker host, the way ceph daemons dynamically
+>>>>     bind to ports in the 6800-7300 range makes it difficult to
+>>>>     determine which ports to expose from each container (exposing =
+the
+>>>>     same port from multiple containers in the same host is not
+>>>>     allowed, for obvious reasons). So either each remote runs on a
+>>>>     distinct docker host machine, or a deterministic port assignme=
+nt
+>>>>     is implemented such that, for example, 6800 is always assigned=
+ to
+>>>>     osd.0, regardless of where it runs.
+>>>
+>>> Would docker run --publish-all=3Dtrue help ?
+>>
+>>
+>> That option doesn't work with --net=3Dcontainer, which is what we ar=
+e
+>> using in this case since we remap sshd's 22 port of the container. I=
+n
+>> other words, for --publish-all to work we need to use --net=3Dhost b=
+ut
+>> that disables the virtual network that docker provides. An alternati=
+ve
+>> would be to configure the base image we're using
+>> (https://github.com/tutumcloud/tutum-ubuntu/) so that the port that
+>> sshd uses is passed in an env var.
+>
+> Why not use --net=3Dhost then ?
+>
+>>
+>>>
+>>>
+>>> Clever hack, congrats :-)
+>>
+>>
+>> thanks!
+>>
+>
+> --
+> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
