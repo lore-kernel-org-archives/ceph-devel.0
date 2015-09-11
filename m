@@ -1,35 +1,51 @@
-From: Andrey Korolyov <andrey@xdel.ru>
-Subject: Re: osd: new pool flags: noscrub, nodeep-scrub
-Date: Fri, 11 Sep 2015 16:44:57 +0300
-Message-ID: <CABYiri9Lpbj43ZdHxQ8c0gMCBCo5w1svPa8QdYE1KkQ7HWULNg@mail.gmail.com>
-References: <20150911064256.GA12899@gmail.com> <CAJ4mKGZPXnH+z=aBp7vLY35pj4JXq6c_Sq1PFknWj5y0fs2-zQ@mail.gmail.com>
- <20150911124704.GB12899@gmail.com> <alpine.DEB.2.00.1509110559300.7527@cobra.newdream.net>
- <20150911132422.GC12899@gmail.com>
+From: Daniel Gryniewicz <dang@redhat.com>
+Subject: Re: make check bot failures (2 hours today)
+Date: Fri, 11 Sep 2015 09:53:10 -0400
+Message-ID: <CAL-2WbF9TuPK_H5kTu9jVxRjgQg9P8B2zvjgcibeyubYhkgAWA@mail.gmail.com>
+References: <55F2D137.9090401@dachary.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f51.google.com ([209.85.215.51]:33336 "EHLO
-	mail-la0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752544AbbIKNpS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Sep 2015 09:45:18 -0400
-Received: by lamp12 with SMTP id p12so47468567lam.0
-        for <ceph-devel@vger.kernel.org>; Fri, 11 Sep 2015 06:45:17 -0700 (PDT)
-In-Reply-To: <20150911132422.GC12899@gmail.com>
+Received: from mail-wi0-f176.google.com ([209.85.212.176]:33394 "EHLO
+	mail-wi0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752130AbbIKNxb convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Sep 2015 09:53:31 -0400
+Received: by wiclk2 with SMTP id lk2so65419190wic.0
+        for <ceph-devel@vger.kernel.org>; Fri, 11 Sep 2015 06:53:29 -0700 (PDT)
+In-Reply-To: <55F2D137.9090401@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mykola Golub <mgolub@mirantis.com>
-Cc: Sage Weil <sweil@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, Sep 11, 2015 at 4:24 PM, Mykola Golub <mgolub@mirantis.com> wrote:
-> On Fri, Sep 11, 2015 at 05:59:56AM -0700, Sage Weil wrote:
->
->> I wonder if, in addition, we should also allow scrub and deep-scrub
->> intervals to be set on a per-pool basis?
->
-> ceph osd pool set <pool> [deep-]scrub_interval N ?
+Maybe periodically run git gc on the clone out-of-line?  Git runs it
+occasionally when it thinks it's necessary, and that can take a while
+on large and/or fragmented repos.
 
-BTW it would be absolutely lovely to see a copy-aware scrubs, e.g.
-parallel (deep-) scrubs on a non-intersecting set of PGs. Currently as
-far as I can see if the scrub starts, the max_scrubs is in effect only
-for a primary OSD, allowing situations when two scrubs, primary and
-non-primary, can land on a same OSD.
+Daniel
+
+On Fri, Sep 11, 2015 at 9:03 AM, Loic Dachary <loic@dachary.org> wrote:
+> Hi Ceph,
+>
+> The make check bot failed a number of pull request verifications toda=
+y. Each of them was notified as false negative (you should have receive=
+d a short note if your pull request is concerned). The problem is now f=
+ixed[1] and all should be back to normal. If you want to schedule anoth=
+er run, you just need to rebase your pull request and re-push it, the b=
+ot will notice.
+>
+> Sorry for the inconvenience and thanks for your patience :-)
+>
+> P.S. I'm not sure what it was exactly. Just that git fetch took too l=
+ong to answer and failed. Reseting the git clone from which the bot wor=
+ks fixed the problem. It happened a few times in the past but did not s=
+how up in the past six month or so.
+>
+> --
+> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
