@@ -1,21 +1,32 @@
 From: Casey Bodley <cbodley@redhat.com>
 Subject: Re: About Fio backend with ObjectStore API
-Date: Fri, 11 Sep 2015 10:28:14 -0400 (EDT)
-Message-ID: <1169204779.15582423.1441981694437.JavaMail.zimbra@redhat.com>
-References: <99767EA2E27DD44DB4E9F9B9ACA458C03B31A8D8@SSIEXCH-MB3.ssi.samsung.com> <327699266.948920.1437598600219.JavaMail.zimbra@redhat.com> <CACJqLyY9t_t7omJfb9vknwqBQ2V7csfLPqU-jvUtvDj2fhuyPw@mail.gmail.com> <99767EA2E27DD44DB4E9F9B9ACA458C03BD79F00@SSIEXCH-MB3.ssi.samsung.com> <596210169.12342351.1441302227895.JavaMail.zimbra@redhat.com> <99767EA2E27DD44DB4E9F9B9ACA458C03BD7A59A@SSIEXCH-MB3.ssi.samsung.com> <CACJqLybm+1qWHHB+mnNe8QkVyn1nfjuOYD99uz7ztX-Nb-YtiA@mail.gmail.com> <99767EA2E27DD44DB4E9F9B9ACA458C03BD7D259@SSIEXCH-MB3.ssi.samsung.com>
+Date: Fri, 11 Sep 2015 10:35:30 -0400 (EDT)
+Message-ID: <653443615.15587496.1441982130977.JavaMail.zimbra@redhat.com>
+References: <99767EA2E27DD44DB4E9F9B9ACA458C03B31A8D8@SSIEXCH-MB3.ssi.samsung.com> <CACJqLyY9t_t7omJfb9vknwqBQ2V7csfLPqU-jvUtvDj2fhuyPw@mail.gmail.com> <99767EA2E27DD44DB4E9F9B9ACA458C03BD79F00@SSIEXCH-MB3.ssi.samsung.com> <596210169.12342351.1441302227895.JavaMail.zimbra@redhat.com> <99767EA2E27DD44DB4E9F9B9ACA458C03BD7A59A@SSIEXCH-MB3.ssi.samsung.com> <CACJqLybm+1qWHHB+mnNe8QkVyn1nfjuOYD99uz7ztX-Nb-YtiA@mail.gmail.com> <99767EA2E27DD44DB4E9F9B9ACA458C03BD7D259@SSIEXCH-MB3.ssi.samsung.com> <1169204779.15582423.1441981694437.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx6-phx2.redhat.com ([209.132.183.39]:35190 "EHLO
+Received: from mx6-phx2.redhat.com ([209.132.183.39]:35534 "EHLO
 	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751731AbbIKO2R (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Sep 2015 10:28:17 -0400
-In-Reply-To: <99767EA2E27DD44DB4E9F9B9ACA458C03BD7D259@SSIEXCH-MB3.ssi.samsung.com>
+	with ESMTP id S1751532AbbIKOfd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Sep 2015 10:35:33 -0400
+In-Reply-To: <1169204779.15582423.1441981694437.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
 Cc: Haomai Wang <haomaiwang@gmail.com>, ceph-devel@vger.kernel.org
+
+I forgot to mention for the list, you can find the latest version of the fio-objectstore branch at https://github.com/cbodley/ceph/commits/fio-objectstore.
+
+Casey
+
+----- Original Message -----
+From: "Casey Bodley" <cbodley@redhat.com>
+To: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
+Cc: "Haomai Wang" <haomaiwang@gmail.com>, ceph-devel@vger.kernel.org
+Sent: Friday, September 11, 2015 10:28:14 AM
+Subject: Re: About Fio backend with ObjectStore API
 
 Hi James,
 
@@ -561,6 +572,10 @@ directly and git clone a clean tree
 Best Regards,
 
 Wheat
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 the body of a message to majordomo@vger.kernel.org
