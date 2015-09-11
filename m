@@ -1,52 +1,99 @@
-From: iSayor <iSayor@iSayor.com>
-Subject: =?UTF-8?B?5bmz5pe25pyA5aSa5Lmf5bCx6IGU57O75LqG5LiJ5Y2D5a6277yM5YWo?=
- =?UTF-8?B?55CD6L+Y5pyJ5Y2B5Yeg5LiH5a6i5oi35Zyo5ZOq6YeM77yf?=
-Date: Fri, 11 Sep 2015 20:51:00 +0800
-Message-ID: <01d0ec90$Blat.v3.2.4$82e45331$84d875b0@localhost>
-Reply-To: iSayor <iSayor@163.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Failed on starting osd-daemon after upgrade giant-0.87.1
+ tohammer-0.94.3
+Date: Fri, 11 Sep 2015 05:56:14 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1509110554520.7527@cobra.newdream.net>
+References: <tencent_42C775740D2FE9D03D12EA84@qq.com> <alpine.DEB.2.00.1509090954410.12362@cobra.newdream.net> <tencent_7EDD2DF72EF83A9470528405@qq.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from 89.112.212.118.adsl-pool.jx.chinaunicom.com ([118.212.112.89]:29067
-	"EHLO iSayor.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751677AbbIKMvJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Sep 2015 08:51:09 -0400
-Received: from andy.iSayor.com (127.0.0.1) by iSayor.com for <ceph-devel@vger.kernel.org>; Fri, 11 Sep 2015 20:51:00 +0800 (envelope-from <iSayor@iSayor.com>)
+Received: from cobra.newdream.net ([66.33.216.30]:58824 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751915AbbIKM4P (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Sep 2015 08:56:15 -0400
+In-Reply-To: <tencent_7EDD2DF72EF83A9470528405@qq.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: =?GB2312?B?zfXI8Q==?= <wangrui@tvmining.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-=E6=82=A8=E5=A5=BD:
-    =E6=82=A8=E8=BF=98=E5=9C=A8=E7=94=A8ali=E5=B9=B3=E5=8F=B0=E5=BC=80=E5=
-=8F=91=E5=A4=96=E8=B4=B8=E5=AE=A2=E6=88=B7?
-       =E8=BF=98=E5=9C=A8=E4=BD=BF=E7=94=A8=E5=B1=95=E4=BC=9A=E5=AE=A3=E4=
-=BC=A0=E4=BC=81=E4=B8=9A=E5=92=8C=E4=BA=A7=E5=93=81?
-             =E4=BD=A0out=E4=BA=86!!!
- =E5=BD=93=E5=89=8D=E5=A4=96=E8=B4=B8=E5=AE=A2=E6=88=B7=E5=BC=80=E5=8F=91=
-=E9=9A=BE=EF=BC=8C=E6=82=A8=E6=98=AF=E5=90=A6=E4=B9=9F=E5=9C=A8=E5=AF=BB=
-=E6=89=BE=E5=B1=95=E4=BC=9A=EF=BC=8CB2B=E4=B9=8B=E5=A4=96=E5=A5=BD=E7=9A=
-=84=E6=B8=A0=E9=81=93=EF=BC=9F=20
- =E8=A1=8C=E4=B8=9A=E5=85=A8=E7=90=83=E5=8D=81=E5=87=A0=E4=B8=87=E5=AE=A2=
-=E6=88=B7=EF=BC=8C=E5=B9=B3=E6=97=B6=E6=9C=80=E5=A4=9A=E4=B9=9F=E5=B0=B1=
-=E8=81=94=E7=B3=BB=E4=BA=86=E4=B8=89=E5=8D=83=E5=AE=B6=EF=BC=8C=E6=82=A8=
-=E6=98=AF=E5=90=A6=E6=83=B3=E6=8A=8A=E5=89=A9=E4=B8=8B=E7=9A=84=E4=B9=9F=
-=E5=BC=80=E5=8F=91=E5=88=B0=EF=BC=9F
- =E5=8A=A0QQ2652697913=E7=BB=99=E6=82=A8=E6=BC=94=E7=A4=BA=E4=B8=8B=E4=B8=
-=BB=E5=8A=A8=E5=BC=80=E5=8F=91=E5=AE=A2=E6=88=B7=E7=9A=84=E6=96=B9=E6=B3=
-=95=EF=BC=8C=E5=85=88=E7=94=A8=E5=85=88=E5=8F=97=E7=9B=8A=EF=BC=8C=E5=B7=
-=B2=E7=BB=8F=E6=9C=89=E8=BF=91=E4=B8=87=E5=AE=B6=E4=BC=81=E4=B8=9A=E9=A2=
-=86=E5=85=88=E6=82=A8=E4=BD=BF=E7=94=A8=EF=BC=81=EF=BC=81=E3=80=82
- =E5=B9=BF=E4=B8=9C=E7=9C=81=E5=95=86=E4=B8=9A=E8=81=94=E5=90=88=E4=BC=9A=
-=E6=8E=A8=E8=8D=90=EF=BC=8C=E4=B8=BB=E5=8A=A8=E5=BC=80=E5=8F=91=E5=AE=A2=
-=E6=88=B7=E7=AC=AC=E4=B8=80=E5=93=81=E7=89=8C=EF=BC=8C=E8=BF=91=E4=B8=87=
-=E5=AE=B6=E4=BC=81=E4=B8=9A=E6=AD=A3=E5=9C=A8=E8=8E=B7=E7=9B=8A=E3=80=82=
-=E6=82=A8=E5=8F=AF=E4=BB=A5=E6=B2=A1=E6=9C=89=E4=BD=BF=E7=94=A8=EF=BC=8C=
-=E4=BD=86=E6=98=AF=E4=B8=8D=E8=83=BD=E6=B2=A1=E6=9C=89=E4=BA=86=E8=A7=A3=
-=E3=80=82
+On Fri, 11 Sep 2015, ?? wrote:
+> Thank Sage Weil:
+> 
+> 1. I delete some testing pools in the past, but is was a long time ago (may be 2 months ago), in recently upgrade, do not delete pools.
+> 2.  ceph osd dump please see the (attachment file ceph.osd.dump.log)
+> 3. debug osd = 20' and 'debug filestore = 20  (attachment file ceph.osd.5.log.tar.gz)
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+This one is failing on pool 54, which has been deleted.  In this case you 
+can work around it by renaming current/54.* out of the way.
+
+> 4. i install the ceph-test, but output error
+> ceph-kvstore-tool /ceph/data5/current/db list 
+> Invalid argument: /ceph/data5/current/db: does not exist (create_if_missing is false)
+
+Sorry, I should have said current/omap, not current/db.  I'm still curious 
+to see the key dump.  I'm not sure why the leveldb key for these pgs is 
+missing...
+
+Thanks!
+sage
+
+
+> 
+> ls -l /ceph/data5/current/db
+> total 0
+> -rw-r--r-- 1 root root 0 Sep 11 09:41 LOCK
+> -rw-r--r-- 1 root root 0 Sep 11 09:54 LOG
+> -rw-r--r-- 1 root root 0 Sep 11 09:54 LOG.old
+> 
+> Thanks very much!
+> Wang Rui 
+>  
+> ------------------ Original ------------------
+> From:  "Sage Weil"<sage@newdream.net>;
+> Date:  Fri, Sep 11, 2015 06:23 AM
+> To:  "??"<wangrui@tvmining.com>;
+> Cc:  "ceph-devel"<ceph-devel@vger.kernel.org>;
+> Subject:  Re: Failed on starting osd-daemon after upgrade giant-0.87.1 tohammer-0.94.3
+>  
+> Hi!
+> 
+> On Wed, 9 Sep 2015, ?? wrote:
+> > Hi all:
+> > 
+> > I got on error after upgrade my ceph cluster from giant-0.87.2 to hammer-0.94.3, my local environment is:
+> > CentOS 6.7 x86_64
+> > Kernel 3.10.86-1.el6.elrepo.x86_64
+> > HDD: XFS, 2TB
+> > Install Package: ceph.com official RPMs x86_64
+> > 
+> > step 1: 
+> > Upgrade MON server from 0.87.1 to 0.94.3, all is fine!
+> > 
+> > step 2: 
+> > Upgrade OSD server from 0.87.1 to 0.94.3. i just upgrade two servers and noticed that some osds can not started!
+> > server-1 have 4 osds, all of them can not started;
+> > server-2 have 3 osds, 2 of them can not started, but 1 of them successfully started and work in good.
+> > 
+> > Error log 1:
+> > service ceph start osd.4
+> > /var/log/ceph/ceph-osd.24.log 
+> > (attachment file: ceph.24.log)
+> > 
+> > Error log 2:
+> > /usr/bin/ceph-osd -c /etc/ceph/ceph.conf -i 4 -f
+> >  (attachment file: cli.24.log)
+> 
+> This looks a lot like a problem with a stray directory that older versions 
+> did not clean up (#11429)... but not quite.  Have you deleted pools in the 
+> past? (Can you attach a 'ceph osd dump'?)?  Also, i fyou start the osd 
+> with 'debug osd = 20' and 'debug filestore = 20' we can see which PG is 
+> problematic.  If you install the 'ceph-test' package which contains 
+> ceph-kvstore-tool, the output of 
+> 
+>  ceph-kvstore-tool /var/lib/ceph/osd/ceph-$id/current/db list
+> 
+> would also be helpful.
+> 
+> Thanks!
+> sage
