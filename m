@@ -1,34 +1,36 @@
-From: GuangYang <yguang11@outlook.com>
-Subject: Backfill
-Date: Thu, 10 Sep 2015 20:23:01 -0700
-Message-ID: <BLU175-W33B6417CFB278EA9EC4092DF500@phx.gbl>
+From: Mykola Golub <mgolub@mirantis.com>
+Subject: osd: new pool flags: noscrub, nodeep-scrub
+Date: Fri, 11 Sep 2015 09:42:57 +0300
+Message-ID: <20150911064256.GA12899@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from blu004-omc4s25.hotmail.com ([65.55.111.164]:61280 "EHLO
-	BLU004-OMC4S25.hotmail.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750860AbbIKDXD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 10 Sep 2015 23:23:03 -0400
+Received: from mail-wi0-f176.google.com ([209.85.212.176]:38841 "EHLO
+	mail-wi0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751229AbbIKGnA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Sep 2015 02:43:00 -0400
+Received: by wiclk2 with SMTP id lk2so46716713wic.1
+        for <ceph-devel@vger.kernel.org>; Thu, 10 Sep 2015 23:42:59 -0700 (PDT)
+Received: from localhost ([93.183.239.2])
+        by smtp.gmail.com with ESMTPSA id gc19sm612798wic.19.2015.09.10.23.42.58
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 10 Sep 2015 23:42:58 -0700 (PDT)
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-Cc: "sjust@redhat.com" <sjust@redhat.com>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-VG9kYXkgSSBwbGF5ZWQgYXJvdW5kIHJlY292ZXJ5IGFuZCBiYWNrZmlsbCBvZiBhIENlcGggY2x1
-c3RlciAoYnkgbWFudWFsbHkgYnJpbmdpbmcgc29tZSBPU0RzIGRvd24vb3V0KSwgYW5kIGdvdCBv
-bmUgcXVlc3Rpb24gcmVnYXJkcyB0byB0aGUgY3VycmVudCBmbG93OgoKRG9lcyBiYWNrZmlsbCBw
-dXNoIGV2ZXJ5dGhpbmcgdG8gdGhlIGJhY2tmaWxsIHRhcmdldCByZWdhcmRsZXNzIHdoYXQgdGhl
-IGJhY2tmaWxsIHRhcmdldCBhbHJlYWR5IGhhcz8gVGhlIHNjZW5hcmlvIGlzIGxpa2UgLSBhY3Rp
-bmcgc2V0IG9mIHRoZSBQRyBpcyBbMSwgMiwgM10sIGFuZCAzIHdlbnQgZG93biAoYXQgd2hpY2gg
-cG9pbnQgaXQgYWxyZWFkeSBoYWQgc29tZSBkYXRhKSBhbmQgc3RheWVkIGRvd24gZm9yIGEgc3Vz
-dGFpbmVkIHBlcmlvZCAoYnV0IG5vdCBtYXJrZWQgb3V0KSwgZHVyaW5nIHdoaWNoIHRpbWUgdGhl
-cmUgd2VyZSBzdXN0YWluZWQgV1JJVEUgdG8gdGhlIFBHLiBBdCBzb21lIHBvaW50IDMgd2VudCBi
-YWNrIHVwLCBhbmQgaXQgaXMgbm90IHN1ZmZpY2llbnQgdG8gcmVjb3ZlcnkgdmlhIFBHIGxvZywg
-c28gdGhlIFBHIG5lZWRlZCB0byBiZSBiYWNrZmlsbGVkIGFuZCAzIGlzIHRoZSB0YXJnZXQuIERv
-ZXMgMSBuZWVkcyB0byBwdXNoIGV2ZXJ5dGhpbmcgKGxhc3RfYmFja2ZpbGwgc3RhcnRzIHdpdGgg
-TUlOKSB0byAzPyBJdCBzZWVtcyBzbyB0byBtZSBhcyBJIGRvbid0IHNlZSBzb21lIHJvdW5kIHRy
-aXAgdG8gbmVnb3RpYXRlIHdoYXQgZWFjaCBPU0QgaGFzIGFuZCBkbyBhbiBpbmNyZW1lbnRhbCBw
-dXNoIChhcyByZWNvdmVyeSBkb2VzKSwgYnV0IGl0IHdvdWxkIGJlIG5pY2UgdG8gZ2V0IGNvbmZp
-cm0gOikKClRoYW5rcywKR3VhbmcgCQkgCSAgIAkJICA=
+Hi,
+
+I would like to add new pool flags: noscrub and nodeep-scrub, to be
+able to control scrubbing on per pool basis. In our case it could be
+helpful in order to disable scrubbing on cache pools, which does not
+work well right now, but I can imagine other scenarios where it could
+be useful too.
+
+Before I created a pull request, I would like to see if other people
+consider this useful or may be have some other suggestions?
+
+-- 
+Mykola Golub
