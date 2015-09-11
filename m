@@ -1,83 +1,43 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: make check bot failures (2 hours today)
-Date: Fri, 11 Sep 2015 17:12:21 +0200
-Message-ID: <55F2EF55.3030405@dachary.org>
-References: <55F2D137.9090401@dachary.org> <CAL-2WbF9TuPK_H5kTu9jVxRjgQg9P8B2zvjgcibeyubYhkgAWA@mail.gmail.com>
+From: Patrick McGarry <pmcgarry@redhat.com>
+Subject: Ceph Wiki has moved!
+Date: Fri, 11 Sep 2015 12:54:15 -0400
+Message-ID: <CAAZbbf1MgmCNZZ_BVY89Xz5pq9rPSNac+waWggQEtvdxjnyPAg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="VSMjmSnPXI3LCsGlQGjjQEU2TeQ6mGWSV"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:53861 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751875AbbIKPMX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Sep 2015 11:12:23 -0400
-In-Reply-To: <CAL-2WbF9TuPK_H5kTu9jVxRjgQg9P8B2zvjgcibeyubYhkgAWA@mail.gmail.com>
+Received: from mail-la0-f43.google.com ([209.85.215.43]:35877 "EHLO
+	mail-la0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753145AbbIKQyR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Sep 2015 12:54:17 -0400
+Received: by lanb10 with SMTP id b10so51558973lan.3
+        for <ceph-devel@vger.kernel.org>; Fri, 11 Sep 2015 09:54:15 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Daniel Gryniewicz <dang@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---VSMjmSnPXI3LCsGlQGjjQEU2TeQ6mGWSV
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Hey cephers,
 
+Just a note to let you know that the wiki migration is complete.
+http://wiki.ceph.com now 301s to the deep link inside of our Ceph
+tracker instance.
 
+All content from the original wiki has been moved over and is ready
+for consumption and editing. You should be able to create a tracker
+account and get started hacking right away. If you would like to see
+the wiki map you can do so via the "Index by Title" link in the
+sidebar or using the following URL:
 
-On 11/09/2015 15:53, Daniel Gryniewicz wrote:
-> Maybe periodically run git gc on the clone out-of-line?  Git runs it
-> occasionally when it thinks it's necessary, and that can take a while
-> on large and/or fragmented repos.
+http://tracker.ceph.com/projects/ceph/wiki/index
 
-I did git prune + git gc on the clone on both sides (receiving and sendin=
-g) but it did not help. But I did dig deeper than that.
-
->=20
-> Daniel
->=20
-> On Fri, Sep 11, 2015 at 9:03 AM, Loic Dachary <loic@dachary.org> wrote:=
-
->> Hi Ceph,
->>
->> The make check bot failed a number of pull request verifications today=
-=2E Each of them was notified as false negative (you should have received=
- a short note if your pull request is concerned). The problem is now fixe=
-d[1] and all should be back to normal. If you want to schedule another ru=
-n, you just need to rebase your pull request and re-push it, the bot will=
- notice.
->>
->> Sorry for the inconvenience and thanks for your patience :-)
->>
->> P.S. I'm not sure what it was exactly. Just that git fetch took too lo=
-ng to answer and failed. Reseting the git clone from which the bot works =
-fixed the problem. It happened a few times in the past but did not show u=
-p in the past six month or so.
->>
->> --
->> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+If anyone has problems, questions, or concerns, feel free to contact
+me directly. Thanks.
 
 
---VSMjmSnPXI3LCsGlQGjjQEU2TeQ6mGWSV
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+-- 
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
+Best Regards,
 
-iEYEARECAAYFAlXy71UACgkQ8dLMyEl6F20sSACePPdf6XlcolZe/+cwg/TM9wK4
-kXQAoIErCHOcW3VCsj8AJrWZS6x3gpDJ
-=5sAh
------END PGP SIGNATURE-----
-
---VSMjmSnPXI3LCsGlQGjjQEU2TeQ6mGWSV--
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
