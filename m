@@ -1,99 +1,41 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: Failed on starting osd-daemon after upgrade giant-0.87.1
- tohammer-0.94.3
-Date: Fri, 11 Sep 2015 05:56:14 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1509110554520.7527@cobra.newdream.net>
-References: <tencent_42C775740D2FE9D03D12EA84@qq.com> <alpine.DEB.2.00.1509090954410.12362@cobra.newdream.net> <tencent_7EDD2DF72EF83A9470528405@qq.com>
+Subject: Re: Backfill
+Date: Fri, 11 Sep 2015 05:57:42 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1509110556430.7527@cobra.newdream.net>
+References: <BLU175-W33B6417CFB278EA9EC4092DF500@phx.gbl>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:58824 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:58836 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751915AbbIKM4P (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Sep 2015 08:56:15 -0400
-In-Reply-To: <tencent_7EDD2DF72EF83A9470528405@qq.com>
+	with ESMTP id S1752130AbbIKM5n (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Sep 2015 08:57:43 -0400
+In-Reply-To: <BLU175-W33B6417CFB278EA9EC4092DF500@phx.gbl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?GB2312?B?zfXI8Q==?= <wangrui@tvmining.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: GuangYang <yguang11@outlook.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "sjust@redhat.com" <sjust@redhat.com>
 
-On Fri, 11 Sep 2015, ?? wrote:
-> Thank Sage Weil:
+On Thu, 10 Sep 2015, GuangYang wrote:
+> Today I played around recovery and backfill of a Ceph cluster (by 
+> manually bringing some OSDs down/out), and got one question regards to 
+> the current flow:
 > 
-> 1. I delete some testing pools in the past, but is was a long time ago (may be 2 months ago), in recently upgrade, do not delete pools.
-> 2.  ceph osd dump please see the (attachment file ceph.osd.dump.log)
-> 3. debug osd = 20' and 'debug filestore = 20  (attachment file ceph.osd.5.log.tar.gz)
+> Does backfill push everything to the backfill target regardless what the 
+> backfill target already has? The scenario is like - acting set of the PG 
+> is [1, 2, 3], and 3 went down (at which point it already had some data) 
+> and stayed down for a sustained period (but not marked out), during 
+> which time there were sustained WRITE to the PG. At some point 3 went 
+> back up, and it is not sufficient to recovery via PG log, so the PG 
+> needed to be backfilled and 3 is the target. Does 1 needs to push 
+> everything (last_backfill starts with MIN) to 3? It seems so to me as I 
+> don't see some round trip to negotiate what each OSD has and do an 
+> incremental push (as recovery does), but it would be nice to get confirm 
+> :)
 
-This one is failing on pool 54, which has been deleted.  In this case you 
-can work around it by renaming current/54.* out of the way.
+No.  Backfill iterates over objects on the source and destination and 
+only pushes objects that are missing or out of date (and deletes ones 
+that shouldn't be there).  This is all in ReplicatedPG::recover_backfill() 
+(though it's not the easiest read).
 
-> 4. i install the ceph-test, but output error
-> ceph-kvstore-tool /ceph/data5/current/db list 
-> Invalid argument: /ceph/data5/current/db: does not exist (create_if_missing is false)
-
-Sorry, I should have said current/omap, not current/db.  I'm still curious 
-to see the key dump.  I'm not sure why the leveldb key for these pgs is 
-missing...
-
-Thanks!
 sage
-
-
-> 
-> ls -l /ceph/data5/current/db
-> total 0
-> -rw-r--r-- 1 root root 0 Sep 11 09:41 LOCK
-> -rw-r--r-- 1 root root 0 Sep 11 09:54 LOG
-> -rw-r--r-- 1 root root 0 Sep 11 09:54 LOG.old
-> 
-> Thanks very much!
-> Wang Rui 
->  
-> ------------------ Original ------------------
-> From:  "Sage Weil"<sage@newdream.net>;
-> Date:  Fri, Sep 11, 2015 06:23 AM
-> To:  "??"<wangrui@tvmining.com>;
-> Cc:  "ceph-devel"<ceph-devel@vger.kernel.org>;
-> Subject:  Re: Failed on starting osd-daemon after upgrade giant-0.87.1 tohammer-0.94.3
->  
-> Hi!
-> 
-> On Wed, 9 Sep 2015, ?? wrote:
-> > Hi all:
-> > 
-> > I got on error after upgrade my ceph cluster from giant-0.87.2 to hammer-0.94.3, my local environment is:
-> > CentOS 6.7 x86_64
-> > Kernel 3.10.86-1.el6.elrepo.x86_64
-> > HDD: XFS, 2TB
-> > Install Package: ceph.com official RPMs x86_64
-> > 
-> > step 1: 
-> > Upgrade MON server from 0.87.1 to 0.94.3, all is fine!
-> > 
-> > step 2: 
-> > Upgrade OSD server from 0.87.1 to 0.94.3. i just upgrade two servers and noticed that some osds can not started!
-> > server-1 have 4 osds, all of them can not started;
-> > server-2 have 3 osds, 2 of them can not started, but 1 of them successfully started and work in good.
-> > 
-> > Error log 1:
-> > service ceph start osd.4
-> > /var/log/ceph/ceph-osd.24.log 
-> > (attachment file: ceph.24.log)
-> > 
-> > Error log 2:
-> > /usr/bin/ceph-osd -c /etc/ceph/ceph.conf -i 4 -f
-> >  (attachment file: cli.24.log)
-> 
-> This looks a lot like a problem with a stray directory that older versions 
-> did not clean up (#11429)... but not quite.  Have you deleted pools in the 
-> past? (Can you attach a 'ceph osd dump'?)?  Also, i fyou start the osd 
-> with 'debug osd = 20' and 'debug filestore = 20' we can see which PG is 
-> problematic.  If you install the 'ceph-test' package which contains 
-> ceph-kvstore-tool, the output of 
-> 
->  ceph-kvstore-tool /var/lib/ceph/osd/ceph-$id/current/db list
-> 
-> would also be helpful.
-> 
-> Thanks!
-> sage
