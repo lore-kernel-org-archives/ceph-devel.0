@@ -1,85 +1,73 @@
 From: Loic Dachary <loic@dachary.org>
-Subject: Re: pet project: OSD compatible daemon
-Date: Fri, 11 Sep 2015 17:10:43 +0200
-Message-ID: <55F2EEF3.9060603@dachary.org>
-References: <55EFF1A6.9060201@dachary.org> <CAFdRU728GucijsJgcw+do9dp=JLx6KpLvr42apUU1vrgxLT7Ug@mail.gmail.com> <1005119049.15552536.1441980521113.JavaMail.zimbra@redhat.com>
+Subject: Re: make check bot failures (2 hours today)
+Date: Fri, 11 Sep 2015 17:12:21 +0200
+Message-ID: <55F2EF55.3030405@dachary.org>
+References: <55F2D137.9090401@dachary.org> <CAL-2WbF9TuPK_H5kTu9jVxRjgQg9P8B2zvjgcibeyubYhkgAWA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="cqr1FVmSn83IVUXHjTKCvlU4jDbVnhUAA"
+ boundary="VSMjmSnPXI3LCsGlQGjjQEU2TeQ6mGWSV"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:53857 "EHLO
+Received: from mail2.dachary.org ([91.121.57.175]:53861 "EHLO
 	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752355AbbIKPKt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Sep 2015 11:10:49 -0400
-In-Reply-To: <1005119049.15552536.1441980521113.JavaMail.zimbra@redhat.com>
+	with ESMTP id S1751875AbbIKPMX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Sep 2015 11:12:23 -0400
+In-Reply-To: <CAL-2WbF9TuPK_H5kTu9jVxRjgQg9P8B2zvjgcibeyubYhkgAWA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Shinobu Kinjo <skinjo@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Daniel Gryniewicz <dang@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
 This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---cqr1FVmSn83IVUXHjTKCvlU4jDbVnhUAA
+--VSMjmSnPXI3LCsGlQGjjQEU2TeQ6mGWSV
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
 
 
 
-On 11/09/2015 16:08, Shinobu Kinjo wrote:
-> What I'm thinking of is to use fluentd to get log with
-> quite human-readable format.
+On 11/09/2015 15:53, Daniel Gryniewicz wrote:
+> Maybe periodically run git gc on the clone out-of-line?  Git runs it
+> occasionally when it thinks it's necessary, and that can take a while
+> on large and/or fragmented repos.
 
-If you refer to https://github.com/fluent/fluentd it's different. Or is i=
-t something else ?
+I did git prune + git gc on the clone on both sides (receiving and sendin=
+g) but it did not help. But I did dig deeper than that.
 
 >=20
-> Is it same of what you are thinking of?
+> Daniel
 >=20
-> Shinobu
->=20
-> ----- Original Message -----
-> From: "Shinobu" <shinobu.kj@gmail.com>
-> To: skinjo@redhat.com
-> Sent: Friday, September 11, 2015 6:16:18 PM
-> Subject: Fwd: pet project: OSD compatible daemon
->=20
-> ---------- Forwarded message ----------
-> From: Loic Dachary <loic@dachary.org>
-> Date: Wed, Sep 9, 2015 at 5:45 PM
-> Subject: pet project: OSD compatible daemon
-> To: Ceph Development <ceph-devel@vger.kernel.org>
->=20
->=20
-> Hi Ceph,
->=20
-> I would like to try to write an OSD compatible daemon, as a pet project=
-, to
-> learn Go and better understand the message flow. I suspect it may also =
-be
-> useful for debug purposes but that's not my primary incentive.
->=20
-> Has anyone tried something similar ? If so I'd happily contribute inste=
-ad
-> of starting something from scratch.
->=20
-> Cheers
->=20
-> P.S. Since it's a pet project it's likely to take months before there i=
-s
-> any kind of progress ;-)
->=20
+> On Fri, Sep 11, 2015 at 9:03 AM, Loic Dachary <loic@dachary.org> wrote:=
+
+>> Hi Ceph,
+>>
+>> The make check bot failed a number of pull request verifications today=
+=2E Each of them was notified as false negative (you should have received=
+ a short note if your pull request is concerned). The problem is now fixe=
+d[1] and all should be back to normal. If you want to schedule another ru=
+n, you just need to rebase your pull request and re-push it, the bot will=
+ notice.
+>>
+>> Sorry for the inconvenience and thanks for your patience :-)
+>>
+>> P.S. I'm not sure what it was exactly. Just that git fetch took too lo=
+ng to answer and failed. Reseting the git clone from which the bot works =
+fixed the problem. It happened a few times in the past but did not show u=
+p in the past six month or so.
+>>
+>> --
+>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>>
 > --
-> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->=20
->=20
->=20
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >=20
 
 --=20
 Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
 
---cqr1FVmSn83IVUXHjTKCvlU4jDbVnhUAA
+--VSMjmSnPXI3LCsGlQGjjQEU2TeQ6mGWSV
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -87,9 +75,9 @@ Content-Disposition: attachment; filename="signature.asc"
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2.0.22 (GNU/Linux)
 
-iEYEARECAAYFAlXy7vMACgkQ8dLMyEl6F22WvwCggKWasSLxD19LtuT5kPwAeihO
-d3QAoMYCSPCltMgK+tbETvXyOL0X/SP0
-=e/yV
+iEYEARECAAYFAlXy71UACgkQ8dLMyEl6F20sSACePPdf6XlcolZe/+cwg/TM9wK4
+kXQAoIErCHOcW3VCsj8AJrWZS6x3gpDJ
+=5sAh
 -----END PGP SIGNATURE-----
 
---cqr1FVmSn83IVUXHjTKCvlU4jDbVnhUAA--
+--VSMjmSnPXI3LCsGlQGjjQEU2TeQ6mGWSV--
