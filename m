@@ -1,66 +1,90 @@
-From: Radoslaw Zarzynski <rzarzynski@mirantis.com>
-Subject: [rgw] Multi-tenancy support in radosgw
-Date: Sat, 12 Sep 2015 00:24:27 +0200
-Message-ID: <CA+H5UW0Y2Yc7jSG=iZ5bFpSEFsPpb50tgG1FUxRZFihf904yiQ@mail.gmail.com>
+From: Shinobu Kinjo <skinjo@redhat.com>
+Subject: Re: pet project: OSD compatible daemon
+Date: Fri, 11 Sep 2015 21:57:38 -0400 (EDT)
+Message-ID: <465582353.15791765.1442023058578.JavaMail.zimbra@redhat.com>
+References: <55EFF1A6.9060201@dachary.org> <CAFdRU728GucijsJgcw+do9dp=JLx6KpLvr42apUU1vrgxLT7Ug@mail.gmail.com> <1005119049.15552536.1441980521113.JavaMail.zimbra@redhat.com> <55F2EEF3.9060603@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f173.google.com ([209.85.212.173]:35099 "EHLO
-	mail-wi0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752125AbbIKWY2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Sep 2015 18:24:28 -0400
-Received: by wicge5 with SMTP id ge5so78872708wic.0
-        for <ceph-devel@vger.kernel.org>; Fri, 11 Sep 2015 15:24:27 -0700 (PDT)
+Received: from mx6-phx2.redhat.com ([209.132.183.39]:33325 "EHLO
+	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753922AbbILB6n convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Sep 2015 21:58:43 -0400
+In-Reply-To: <55F2EEF3.9060603@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>, Yehuda Sadeh-Weinraub <yehuda@redhat.com>, Pete Zaitcev <zaitcev@redhat.com>
+To: Loic Dachary <loic@dachary.org>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hello,
+Yes, that is what I'm thinking.
 
-It's a well-known trait of radosgw that an user cannot create new
-bucket with a given name if the name is already occupied by other
-user's bucket (request to do that will be rejected with 409 Conflict).
-This behaviour is entirely expected in S3. However, when it comes
-to Swift API, it turns into huge limitation.
+Shinobu
 
-In my opinion the root cause lies in how radosgw actually handles
-bucket entry points. They might be seen as symlinks which must
-be resolved in order to map bucket names exposed to users into
-concrete bucket instances:
-
-  bucket name -> unique bucket instance ID
-
-It's completely clear we need to preserve backward compatibility.
-Thus we cannot simply append ID of user who owns a given
-bucket to argument list of mapping function. We would have to
-introduce an indirection layer - bucket namespaces:
-
-  bucket namespace, bucket name -> unique bucket instance ID
-
-Each already existing user would obtain empty bucket namespace
-by default. It will be possible to create user  with his own, unique
-namespace.
-
-Generally this looks to me as stupidly simple solution. Of course,
-it has limitations. At the moment I see following things:
-
-1. We may need to develop a new mechanism for moving buckets
-    between namespaces in radosgw-admin. The already existing
-    one for linking/unlinking might be not enough.
-
-2. We will always need ID of namespace in order to access proper
-    bucket entry points. This is not a problem for requests authorized
-    through Keystone/TempAuth because user ID is known and thus
-    BNS may be easily calculated.
-    Anonymous access/TempURL for bucket with non-empty namespace
-    is a different story. In this case BNS must be provided explicitly.
-    Swift resolves the problem by having account name as a part of URL.
-    We could go the same way. This would be extended by decoupling
-    rgw_user used for storage access purposes from the one for
-    authorizing a given operation (RGWOp::verify_permission() method).
+----- Original Message -----
+=46rom: "Loic Dachary" <loic@dachary.org>
+To: "Shinobu Kinjo" <skinjo@redhat.com>
+Cc: "ceph-devel" <ceph-devel@vger.kernel.org>
+Sent: Saturday, September 12, 2015 12:10:43 AM
+Subject: Re: pet project: OSD compatible daemon
 
 
-I would like to ask for reviews of the idea and feedback.
 
-Best regards,
-Radoslaw Zarzynski
+On 11/09/2015 16:08, Shinobu Kinjo wrote:
+> What I'm thinking of is to use fluentd to get log with
+> quite human-readable format.
+
+If you refer to https://github.com/fluent/fluentd it's different. Or is=
+ it something else ?
+
+>=20
+> Is it same of what you are thinking of?
+>=20
+> Shinobu
+>=20
+> ----- Original Message -----
+> From: "Shinobu" <shinobu.kj@gmail.com>
+> To: skinjo@redhat.com
+> Sent: Friday, September 11, 2015 6:16:18 PM
+> Subject: Fwd: pet project: OSD compatible daemon
+>=20
+> ---------- Forwarded message ----------
+> From: Loic Dachary <loic@dachary.org>
+> Date: Wed, Sep 9, 2015 at 5:45 PM
+> Subject: pet project: OSD compatible daemon
+> To: Ceph Development <ceph-devel@vger.kernel.org>
+>=20
+>=20
+> Hi Ceph,
+>=20
+> I would like to try to write an OSD compatible daemon, as a pet proje=
+ct, to
+> learn Go and better understand the message flow. I suspect it may als=
+o be
+> useful for debug purposes but that's not my primary incentive.
+>=20
+> Has anyone tried something similar ? If so I'd happily contribute ins=
+tead
+> of starting something from scratch.
+>=20
+> Cheers
+>=20
+> P.S. Since it's a pet project it's likely to take months before there=
+ is
+> any kind of progress ;-)
+>=20
+> --
+> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>=20
+>=20
+>=20
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
