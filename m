@@ -1,258 +1,134 @@
-From: "Dilger, Andreas" <andreas.dilger-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [HPDD-discuss] [PATCH] nfsd: add a new EXPORT_OP_NOWCC flag to
- struct export_operations
-Date: Sat, 12 Sep 2015 04:41:33 +0000
-Message-ID: <D21906EE.10A741%andreas.dilger@intel.com>
-References: <1441966830-5517-1-git-send-email-jeff.layton@primarydata.com>
+From: Abhishek L <abhishek.lekshmanan-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: RGW Keystone interaction (was  Ceph.conf)
+Date: Sat, 12 Sep 2015 13:10:32 +0530
+Message-ID: <CAEw75dNPsd51Cy5MSFdcktv3O+0UAhnFGNd1_rg+rhTr-2Retg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1441966830-5517-1-git-send-email-jeff.layton-7I+n7zu2hftEKMMhf/gKZA@public.gmane.org>
-Content-Language: en-US
-Content-ID: <FC898B37AE5AAF4F9AE4C42A376F87A2-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jeff Layton <jlayton-vpEMnDpepFuMZCB2o+C8xQ@public.gmane.org>, "bfields-uC3wQj2KruNg9hUCZPvPmw@public.gmane.org" <bfields-uC3wQj2KruNg9hUCZPvPmw@public.gmane.org>
-Cc: "cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "fuse-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org" <fuse-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "HPDD-discuss-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org" <HPDD-discuss-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>, "linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ocfs2-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org" <ocfs2-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org>
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Shinobu Kinjo <skinjo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: ajku.agr-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On 2015/09/11, 4:20 AM, "HPDD-discuss on behalf of Jeff Layton"
-<hpdd-discuss-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org on behalf of jlayton-vpEMnDpepFuMZCB2o+C8xQ@public.gmane.org>
-wrote:
-
->With NFSv3 nfsd will always attempt to send along WCC data to the
->client. This generally involves saving off the in-core inode information
->prior to doing the operation on the given filehandle, and then issuing a
->vfs_getattr to it after the op.
+On Thu, Sep 10, 2015 at 3:27 PM, Shinobu Kinjo <skinjo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+> Thank you for letting me know your thought, Abhishek!!
 >
->Some filesystems (particularly clustered or networked ones) have an
->expensive ->getattr inode operation. Atomicitiy is also often difficult
->or impossible to guarantee on such filesystems. For those, we're best
->off not trying to provide WCC information to the client at all, and to
->simply allow it to poll for that information as needed with a GETATTR
->RPC.
 >
->This patch adds a new flags field to struct export_operations, and
->defines a new EXPORT_OP_NOWCC flag that filesystems can use to indicate
->that nfsd should not attempt to provide WCC info in NFSv3 replies. It
->also adds a blurb about the new flags field and flag to the exporting
->documentation.
->
->The server will also now skip collecting this information for NFSv2 as
->well, since that info is never used there anyway.
->
->Note that this patch does not add this flag to any filesystem
->export_operations structures. This was originally developed to allow
->reexporting nfs via nfsd. That code is not (and may never be) suitable
->for merging into mainline.
->
->Other filesystems may want to consider enabling this flag too. It's hard
->to tell however which ones have export operations to enable export via
->knfsd and which ones mostly rely on them for open-by-filehandle support,
->so I'm leaving that up to the individual maintainers to decide. I am
->cc'ing the relevant lists for those filesystems that I think may want to
->consider adding this though.
->
->Cc: HPDD-discuss-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org
->Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
->Cc: cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
->Cc: fuse-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
->Cc: ocfs2-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org
->Signed-off-by: Jeff Layton <jeff.layton-7I+n7zu2hftEKMMhf/gKZA@public.gmane.org>
->---
-> Documentation/filesystems/nfs/Exporting | 27 +++++++++++++++++++++++++++
-> fs/nfsd/nfs3xdr.c                       |  5 ++++-
-> fs/nfsd/nfsfh.c                         | 14 ++++++++++++++
-> fs/nfsd/nfsfh.h                         |  5 ++++-
-> include/linux/exportfs.h                |  2 ++
-> 5 files changed, 51 insertions(+), 2 deletions(-)
->
->diff --git a/Documentation/filesystems/nfs/Exporting
->b/Documentation/filesystems/nfs/Exporting
->index 520a4becb75c..fa636cde3907 100644
->--- a/Documentation/filesystems/nfs/Exporting
->+++ b/Documentation/filesystems/nfs/Exporting
->@@ -138,6 +138,11 @@ struct which has the following members:
->     to find potential names, and matches inode numbers to find the
->correct
->     match.
-> 
->+  flags
->+    Some filesystems may need to be handled differently than others. The
->+    export_operations struct also includes a flags field that allows the
->+    filesystem to communicate such information to nfsd. See the Export
->+    Operations Flags section below for more explanation.
-> 
-> A filehandle fragment consists of an array of 1 or more 4byte words,
-> together with a one byte "type".
->@@ -147,3 +152,25 @@ generated by encode_fh, in which case it will have
->been padded with
-> nuls.  Rather, the encode_fh routine should choose a "type" which
-> indicates the decode_fh how much of the filehandle is valid, and how
-> it should be interpreted.
->+
->+Export Operations Flags
->+-----------------------
->+In addition to the operation vector pointers, struct export_operations
->also
->+contains a "flags" field that allows the filesystem to communicate to
->nfsd
->+that it may want to do things differently when dealing with it. The
->+following flags are defined:
->+
->+  EXPORT_OP_NOWCC
->+    RFC 1813 recommends that servers always send weak cache consistency
->+    (WCC) data to the client after each operation. The server should
->+    atomically collect attributes about the inode, do an operation on it,
->+    and then collect the attributes afterward. This allows the client to
->+    skip issuing GETATTRs in some situations but means that the server
->+    is calling vfs_getattr for almost all RPCs. On some filesystems
->+    (particularly those that are clustered or networked) this is
->expensive
->+    and atomicity is difficult to guarantee. This flag indicates to nfsd
->+    that it should skip providing WCC attributes to the client in NFSv3
->+    replies when doing operations on this filesystem. Consider enabling
->+    this on filesystems that have an expensive ->getattr inode operation,
->+    or when atomicity between pre and post operation attribute collection
->+    is impossible to guarantee.
->diff --git a/fs/nfsd/nfs3xdr.c b/fs/nfsd/nfs3xdr.c
->index 01dcd494f781..c30c8c604e2a 100644
->--- a/fs/nfsd/nfs3xdr.c
->+++ b/fs/nfsd/nfs3xdr.c
->@@ -203,7 +203,7 @@ static __be32 *
-> encode_post_op_attr(struct svc_rqst *rqstp, __be32 *p, struct svc_fh
->*fhp)
-> {
-> 	struct dentry *dentry = fhp->fh_dentry;
->-	if (dentry && d_really_is_positive(dentry)) {
->+	if (!fhp->fh_no_wcc && dentry && d_really_is_positive(dentry)) {
-> 	        __be32 err;
-> 		struct kstat stat;
-> 
->@@ -256,6 +256,9 @@ void fill_post_wcc(struct svc_fh *fhp)
-> {
-> 	__be32 err;
-> 
->+	if (fhp->fh_no_wcc)
->+		return;
->+
-> 	if (fhp->fh_post_saved)
-> 		printk("nfsd: inode locked twice during operation.\n");
-> 
->diff --git a/fs/nfsd/nfsfh.c b/fs/nfsd/nfsfh.c
->index 350041a40fe5..29ae37f62b9b 100644
->--- a/fs/nfsd/nfsfh.c
->+++ b/fs/nfsd/nfsfh.c
->@@ -267,6 +267,16 @@ static __be32 nfsd_set_fh_dentry(struct svc_rqst
->*rqstp, struct svc_fh *fhp)
-> 
-> 	fhp->fh_dentry = dentry;
-> 	fhp->fh_export = exp;
->+
->+	switch (rqstp->rq_vers) {
->+	case 3:
->+		if (!(dentry->d_sb->s_export_op->flags & EXPORT_OP_NOWCC))
->+			break;
->+		/* Fallthrough */
->+	case 2:
->+		fhp->fh_no_wcc = true;
->+	}
->+
-> 	return 0;
-> out:
-> 	exp_put(exp);
->@@ -535,6 +545,9 @@ fh_compose(struct svc_fh *fhp, struct svc_export
->*exp, struct dentry *dentry,
-> 	 */
-> 	 set_version_and_fsid_type(fhp, exp, ref_fh);
-> 
->+	/* If we have a ref_fh, then copy the fh_no_wcc setting from it. */
->+	fhp->fh_no_wcc = ref_fh ? ref_fh->fh_no_wcc : false;
->+
-> 	if (ref_fh == fhp)
-> 		fh_put(ref_fh);
-> 
->@@ -641,6 +654,7 @@ fh_put(struct svc_fh *fhp)
-> 		exp_put(exp);
-> 		fhp->fh_export = NULL;
-> 	}
->+	fhp->fh_no_wcc = false;
-> 	return;
-> }
-> 
->diff --git a/fs/nfsd/nfsfh.h b/fs/nfsd/nfsfh.h
->index 1e90dad4926b..9ddead4d98f8 100644
->--- a/fs/nfsd/nfsfh.h
->+++ b/fs/nfsd/nfsfh.h
->@@ -32,6 +32,7 @@ typedef struct svc_fh {
-> 
-> 	unsigned char		fh_locked;	/* inode locked by us */
-> 	unsigned char		fh_want_write;	/* remount protection taken */
->+	bool			fh_no_wcc;	/* no wcc data needed */
-
-This increases the size of svc_fh because it splits the four unsigned
-chars.
-You could change all of these (fh_locked, fh_want_write,
-fh_{pre,post}saved)
-to be bools to avoid that and make it more clear they are only used as
-booleans (I verified that they all are only assigned 0 or 1).
-
-Cheers, Andreas
-
-> 
-> #ifdef CONFIG_NFSD_V3
-> 	unsigned char		fh_post_saved;	/* post-op attrs saved */
->@@ -51,7 +52,6 @@ typedef struct svc_fh {
-> 	struct kstat		fh_post_attr;	/* full attrs after operation */
-> 	u64			fh_post_change; /* nfsv4 change; see above */
-> #endif /* CONFIG_NFSD_V3 */
->-
-> } svc_fh;
-> 
-> enum nfsd_fsid {
->@@ -225,6 +225,9 @@ fill_pre_wcc(struct svc_fh *fhp)
-> {
-> 	struct inode    *inode;
-> 
->+	if (fhp->fh_no_wcc)
->+		return;
->+
-> 	inode = d_inode(fhp->fh_dentry);
-> 	if (!fhp->fh_pre_saved) {
-> 		fhp->fh_pre_mtime = inode->i_mtime;
->diff --git a/include/linux/exportfs.h b/include/linux/exportfs.h
->index fa05e04c5531..600c3fccc999 100644
->--- a/include/linux/exportfs.h
->+++ b/include/linux/exportfs.h
->@@ -214,6 +214,8 @@ struct export_operations {
-> 			  bool write, u32 *device_generation);
-> 	int (*commit_blocks)(struct inode *inode, struct iomap *iomaps,
-> 			     int nr_iomaps, struct iattr *iattr);
->+#define	EXPORT_OP_NOWCC		(0x1)	/* Don't collect wcc data for NFSv3
->replies */
->+	unsigned long	flags;
-> };
-> 
-> extern int exportfs_encode_inode_fh(struct inode *inode, struct fid *fid,
->-- 
->2.4.3
->
->_______________________________________________
->HPDD-discuss mailing list
->HPDD-discuss-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org
->https://lists.01.org/mailman/listinfo/hpdd-discuss
+>     > The Ceph Object Gateway will query Keystone periodically
+>     > for a list of revoked tokens. These requests are encoded
+>     > and signed. Also, Keystone may be configured to provide
+>     > self-signed tokens, which are also encoded and signed.
 >
 
+Looked a bit more into this, swift apis seem to support the use
+of an admin tenant, user & token for validating the bearer token,
+similar to other openstack service which use a service tenant
+credentials for authenticating.
+ Though it needs documentation, the configurables `rgw keystone admin
+tenant`, `rgw keystone admin user` and `rgw keystone admin password`
+make this possible, so as to avoid configuring the keystone shared
+admin password compoletely.
 
-Cheers, Andreas
--- 
-Andreas Dilger
+S3 APIs with keystone seem to be a bit more different, apparently
+s3tokens interface does seem to allow authenticating without an
+`X-Auth-Token` in the headers and validates based on the access key,
+secret key provided to it. So basically not configuring
+`rgw_keystone_admin_password` seem to work, can you also see if this
+is the case for you.
 
-Lustre Software Architect
-Intel High Performance Data Division
-
-
---
-To unsubscribe from this list: send the line "unsubscribe linux-nfs" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> This is completely absolutely out of scope of my original
+> question.
+>
+> But I would like to ask you if above implementation that
+> **periodically** talks to keystone with tokens is really
+> secure or not.
+>
+> I'm just asking you. Because I'm just thinking of keysto-
+> ne federation.
+> But you can ignore me anyhow or point out anything to me -;
+> Shinobu
+>
+> ----- Original Message -----
+> From: "Abhishek L" <abhishek.lekshmanan-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+> To: "Shinobu Kinjo" <skinjo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Cc: "Gregory Farnum" <gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "ceph-users" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+> Sent: Thursday, September 10, 2015 6:35:31 PM
+> Subject: Re: [ceph-users] Ceph.conf
+>
+> On Thu, Sep 10, 2015 at 2:51 PM, Shinobu Kinjo <skinjo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+>> Thank you for your really really quick reply, Greg.
+>>
+>>  > Yes. A bunch shouldn't ever be set by users.
+>>
+>>  Anyhow, this is one of my biggest concern right now -;
+>>
+>>     rgw_keystone_admin_password =
+>>                        ^^^^^^^^
+>>
+>> MUST not be there.
+>
+>
+> I know the dangers of this (ie keystone admin password being visible);
+> but isn't this already visible in ceph/radosgw configuration file as
+> well if you configure keystone.[1]
+>
+> [1]: http://ceph.com/docs/master/radosgw/keystone/#integrating-with-openstack-keystone
+>
+>> Shinobu
+>>
+>> ----- Original Message -----
+>> From: "Gregory Farnum" <gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+>> To: "Shinobu Kinjo" <skinjo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+>> Cc: "ceph-users" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+>> Sent: Thursday, September 10, 2015 5:57:52 PM
+>> Subject: Re: [ceph-users] Ceph.conf
+>>
+>> On Thu, Sep 10, 2015 at 9:44 AM, Shinobu Kinjo <skinjo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+>>> Hello,
+>>>
+>>> I'm seeing 859 parameters in the output of:
+>>>
+>>>     $ ./ceph --show-config | wc -l
+>>>     *** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
+>>>     859
+>>>
+>>> In:
+>>>
+>>>     $ ./ceph --version
+>>>     *** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
+>>>     ceph version 9.0.2-1454-g050e1c5 (050e1c5c7471f8f237d9fa119af98c1efa9a8479)
+>>>
+>>> Since I'm quite new to Ceph, so my question is:
+>>>
+>>>     Where can I know what each parameter exactly mean?
+>>>
+>>> I am probably right. Some parameters are just for tes-
+>>> ting purpose.
+>>
+>> Yes. A bunch shouldn't ever be set by users. A lot of the ones that
+>> should be are described as part of various operations in
+>> ceph.com/docs, but I don't know which ones of interest are missing
+>> from there. It's not very discoverable right now, unfortunately.
+>> -Greg
+>>
+>>>
+>>> Thank you for your help in advance.
+>>>
+>>> Shinobu
+>>> _______________________________________________
+>>> ceph-users mailing list
+>>> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>> _______________________________________________
+>> ceph-users mailing list
+>> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
