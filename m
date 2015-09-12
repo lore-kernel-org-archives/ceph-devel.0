@@ -1,289 +1,258 @@
-From: Varada Kari <Varada.Kari@sandisk.com>
-Subject: RE: loadable objectstore
-Date: Sat, 12 Sep 2015 04:34:05 +0000
-Message-ID: <C226B0AB34511445928D9882AA519F601C49901D@SACMBXIP03.sdcorp.global.sandisk.com>
-References: <1615100301.29.1434984131967.JavaMail.root@thunderbeast.private.linuxbox.com>
- <46879752.37.1434985621131.JavaMail.root@thunderbeast.private.linuxbox.com>
- <C226B0AB34511445928D9882AA519F601C434076@SACMBXIP03.sdcorp.global.sandisk.com>
- <C226B0AB34511445928D9882AA519F601C436F7A@SACMBXIP03.sdcorp.global.sandisk.com>
- <C226B0AB34511445928D9882AA519F601C43C597@SACMBXIP03.sdcorp.global.sandisk.com>
- <C226B0AB34511445928D9882AA519F601C498B33@SACMBXIP03.sdcorp.global.sandisk.com>
- <99767EA2E27DD44DB4E9F9B9ACA458C03BD7D4D6@SSIEXCH-MB3.ssi.samsung.com>
+From: "Dilger, Andreas" <andreas.dilger-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [HPDD-discuss] [PATCH] nfsd: add a new EXPORT_OP_NOWCC flag to
+ struct export_operations
+Date: Sat, 12 Sep 2015 04:41:33 +0000
+Message-ID: <D21906EE.10A741%andreas.dilger@intel.com>
+References: <1441966830-5517-1-git-send-email-jeff.layton@primarydata.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0056.outbound.protection.outlook.com ([207.46.100.56]:32416
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751281AbbILEeL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 12 Sep 2015 00:34:11 -0400
-In-Reply-To: <99767EA2E27DD44DB4E9F9B9ACA458C03BD7D4D6@SSIEXCH-MB3.ssi.samsung.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1441966830-5517-1-git-send-email-jeff.layton-7I+n7zu2hftEKMMhf/gKZA@public.gmane.org>
 Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>, Sage Weil <sage@newdream.net>, "Matt W. Benjamin" <matt@cohortfs.com>, Loic Dachary <loic@dachary.org>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Content-ID: <FC898B37AE5AAF4F9AE4C42A376F87A2-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Jeff Layton <jlayton-vpEMnDpepFuMZCB2o+C8xQ@public.gmane.org>, "bfields-uC3wQj2KruNg9hUCZPvPmw@public.gmane.org" <bfields-uC3wQj2KruNg9hUCZPvPmw@public.gmane.org>
+Cc: "cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "fuse-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org" <fuse-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "HPDD-discuss-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org" <HPDD-discuss-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>, "linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ocfs2-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org" <ocfs2-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-SGkgSmFtZXMsDQoNClBsZWFzZSBmaW5kIHRoZSByZXNwb25zZXMgaW5saW5lLg0KDQp2YXJhZGEN
-Cg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBKYW1lcyAoRmVpKSBMaXUt
-U1NJIFttYWlsdG86amFtZXMubGl1QHNzaS5zYW1zdW5nLmNvbV0NCj4gU2VudDogU2F0dXJkYXks
-IFNlcHRlbWJlciAxMiwgMjAxNSAxMjoxMyBBTQ0KPiBUbzogVmFyYWRhIEthcmkgPFZhcmFkYS5L
-YXJpQHNhbmRpc2suY29tPjsgU2FnZSBXZWlsDQo+IDxzYWdlQG5ld2RyZWFtLm5ldD47IE1hdHQg
-Vy4gQmVuamFtaW4gPG1hdHRAY29ob3J0ZnMuY29tPjsgTG9pYw0KPiBEYWNoYXJ5IDxsb2ljQGRh
-Y2hhcnkub3JnPg0KPiBDYzogY2VwaC1kZXZlbCA8Y2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc+
-DQo+IFN1YmplY3Q6IFJFOiBsb2FkYWJsZSBvYmplY3RzdG9yZQ0KPg0KPiBIaSBWYXJhZGEsDQo+
-ICAgR290IGEgY2hhbmNlIHRvIGdvIHRocm91Z2ggdGhlIGNvZGUuIEdyZWF0IGpvYi4gSXQgaXMg
-bXVjaCBjbGVhbmVyIC4gU2V2ZXJhbA0KPiBxdWVzdGlvbnM6DQo+ICAgMS4gV2hhdCB5b3UgdGhp
-bmsgYWJvdXQgdGhlIHBlcmZvcm1hbmNlIGltcGFjdCB3aXRoIHRoZSBuZXcNCj4gaW1wbGVtZW50
-YXRpb24/IFN1Y2ggIGFzIGR5bmFtaWMgbGlicmFyeSB2cyBzdGF0aWMgbGluaz8NCltWYXJhZGEg
-S2FyaV0gSGF2ZW4ndCBtZWFzdXJlZCB0aGUgcGVyZm9ybWFuY2UgeWV0LCBidXQgdGhlcmUgd2ls
-bCBiZSBzb21lIGhpdCBkdWUgdG8gc3RhdGljIHZzIGR5bmFtaWMuIEJ1dCB0aGF0IHNob3VsZG4n
-dCBiZSBhIG1ham9yIGRlZ3JhZGF0aW9uLCBidXQgSSB3aWxsIGhvbGQgb24gdGlsbCB3ZSBoYXZl
-IHNvbWUgcGVyZiBydW5zIHRvIGZpZ3VyZSB0aGF0IG91dC4NCj4gICAyLiBDb3VsZCBhbnkgdmVu
-ZG9yIGp1c3QgcHJvdmlkZSBhIG9iamVjdHN0b3JlIGludGVyZmFjZXMgY29tcGxpZWQgZHluYW1p
-Yw0KPiBiaW5hcnkgbGlicmFyeSBmb3IgdGhlaXIgb3duIHN0b3JhZ2UgZW5naW5lIHdpdGggbmV3
-IGZhY3RvcnkgZnJhbWV3b3JrPw0KW1ZhcmFkYSBLYXJpXSBUaGF0IHdhcyBvbmUgb2YgdGhlIGRl
-c2lnbiBtb3RpdmVzIGZvciB0aGlzIGNoYW5nZS4gWWVzIGFueSBiYWNrZW5kIGFkaGVyaW5nIHRo
-ZSBpbnRlcmZhY2VzIG9mIG9iamVjdCBzdG9yZSBjYW4gaW50ZWdyYXRlIHdpdGggb3NkLiBBbGwg
-dGhleSBuZWVkIHRvIGRvIHByb3ZpZGUgYSBmYWN0b3J5IGludGVyZmFjZSBhbmQgdGhlIHJlcXVp
-cmVkIHZlcnNpb24gYW5kIGluaXQgZnVuY3Rpb25hbGl0eSBhZGRpdGlvbmFsbHkgdG8gYWxsIHRo
-ZSByZXF1aXJlZCBvYmplY3Qgc3RvcmUgaW50ZXJmYWNlcy4NCj4NCj4gICBSZWdhcmRzLA0KPiAg
-IEphbWVzDQo+DQo+DQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IGNlcGgt
-ZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC0NCj4gb3duZXJA
-dmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgVmFyYWRhIEthcmkNCj4gU2VudDogRnJpZGF5
-LCBTZXB0ZW1iZXIgMTEsIDIwMTUgMzoyOCBBTQ0KPiBUbzogU2FnZSBXZWlsOyBNYXR0IFcuIEJl
-bmphbWluOyBMb2ljIERhY2hhcnkNCj4gQ2M6IGNlcGgtZGV2ZWwNCj4gU3ViamVjdDogUkU6IGxv
-YWRhYmxlIG9iamVjdHN0b3JlDQo+DQo+IEhpIFNhZ2UvIE1hdHQsDQo+DQo+IEkgaGF2ZSBzdWJt
-aXR0ZWQgdGhlIHB1bGwgcmVxdWVzdCBiYXNlZCBvbiB3aXAtcGx1Z2luIGJyYW5jaCBmb3IgdGhl
-IG9iamVjdA0KPiBzdG9yZSBmYWN0b3J5IGltcGxlbWVudGF0aW9uIGF0IGh0dHBzOi8vZ2l0aHVi
-LmNvbS9jZXBoL2NlcGgvcHVsbC81ODg0IC4NCj4gSGF2ZW4ndCByZWJhc2VkIHRvIHRoZSBtYXN0
-ZXIgeWV0LiBXb3JraW5nIG9uIHJlYmFzZSBhbmQgaW5jbHVkaW5nIG5ldw0KPiBzdG9yZSBpbiB0
-aGUgZmFjdG9yeSBpbXBsZW1lbnRhdGlvbi4gIFBsZWFzZSBoYXZlIGEgbG9vayBhbmQgbGV0IG1l
-IGtub3cNCj4geW91ciBjb21tZW50cy4gV2lsbCBzdWJtaXQgYSByZWJhc2VkIFBSIHNvb24gd2l0
-aCBuZXcgc3RvcmUgaW50ZWdyYXRpb24uDQo+DQo+IFRoYW5rcywNCj4gVmFyYWRhDQo+DQo+IC0t
-LS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5r
-ZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC0NCj4gb3duZXJAdmdlci5rZXJuZWwub3JnXSBP
-biBCZWhhbGYgT2YgVmFyYWRhIEthcmkNCj4gU2VudDogRnJpZGF5LCBKdWx5IDAzLCAyMDE1IDc6
-MzEgUE0NCj4gVG86IFNhZ2UgV2VpbCA8c2FnZUBuZXdkcmVhbS5uZXQ+OyBBZGFtIENydW1lDQo+
-IDxhZGFtY3J1bWVAZ21haWwuY29tPg0KPiBDYzogTG9pYyBEYWNoYXJ5IDxsb2ljQGRhY2hhcnku
-b3JnPjsgY2VwaC1kZXZlbCA8Y2VwaC0NCj4gZGV2ZWxAdmdlci5rZXJuZWwub3JnPjsgTWF0dCBX
-LiBCZW5qYW1pbiA8bWF0dEBjb2hvcnRmcy5jb20+DQo+IFN1YmplY3Q6IFJFOiBsb2FkYWJsZSBv
-YmplY3RzdG9yZQ0KPg0KPiBIaSBBbGwsDQo+DQo+IE5vdCBhYmxlIHRvIG1ha2UgbXVjaCBwcm9n
-cmVzcyBhZnRlciBtYWtpbmcgY29tbW9uIGFzIGEgc2hhcmVkIG9iamVjdA0KPiBhbG9uZyB3aXRo
-IG9iamVjdCBzdG9yZS4NCj4gQ29tcGlsYXRpb24gb2YgdGhlIHRlc3QgYmluYXJpZXMgYXJlIGZh
-aWxpbmcgd2l0aCAiLi8ubGlicy9saWJjZXBoX2ZpbGVzdG9yZS5zbzoNCj4gdW5kZWZpbmVkIHJl
-ZmVyZW5jZSB0byBgdHJhY2Vwb2ludF9kbG9wZW4nIi4NCj4NCj4gICBDWFhMRCAgICBjZXBoX3N0
-cmVhbXRlc3QNCj4gLi8ubGlicy9saWJjZXBoX2ZpbGVzdG9yZS5zbzogdW5kZWZpbmVkIHJlZmVy
-ZW5jZSB0byBgdHJhY2Vwb2ludF9kbG9wZW4nDQo+IGNvbGxlY3QyOiBlcnJvcjogbGQgcmV0dXJu
-ZWQgMSBleGl0IHN0YXR1cw0KPiBtYWtlWzNdOiAqKiogW2NlcGhfc3RyZWFtdGVzdF0gRXJyb3Ig
-MQ0KPg0KPiBCdXQgbGliZmlsZXN0b3JlLnNvIGlzIGxpbmtlZCB3aXRoIGx0dG5nLXVzdC4NCj4N
-Cj4gc3JjLy5saWJzJCBsZGQgbGliY2VwaF9maWxlc3RvcmUuc28NCj4gICAgICAgICBsaWJjZXBo
-X2tleXZhbHVlc3RvcmUuc28uMSA9PiAvaG9tZS92YXJhZGEvb2JzLWZhY3RvcnkvcGx1Z2luLQ0K
-PiB3b3JrL3NyYy8ubGlicy9saWJjZXBoX2tleXZhbHVlc3RvcmUuc28uMSAoMHgwMDAwN2Y1ZTUw
-ZjUwMDAwKQ0KPiAgICAgICAgIGxpYmNlcGhfb3Muc28uMSA9PiAvaG9tZS92YXJhZGEvb2JzLWZh
-Y3RvcnkvcGx1Z2luLQ0KPiB3b3JrL3NyYy8ubGlicy9saWJjZXBoX29zLnNvLjEgKDB4MDAwMDdm
-NWU0ZjkzYTAwMCkNCj4gICAgICAgICBsaWJjb21tb24uc28uMSA9PiAvaG9tZS92YXJhZGEvIG9i
-cy1mYWN0b3J5L3BsdWdpbi0NCj4gd29yay9zcmMvLmxpYnMvbGliY29tbW9uLnNvLjEgKDB4MDAw
-MDdmNWU0YjVkZjAwMCkNCj4gICAgICAgICBsaWJsdHRuZy11c3Quc28uMCA9PiAvdXNyL2xpYi94
-ODZfNjQtbGludXgtZ251L2xpYmx0dG5nLXVzdC5zby4wDQo+ICgweDAwMDA3ZjVlNGIxNzkwMDAp
-DQo+ICAgICAgICAgbGlibHR0bmctdXN0LXRyYWNlcG9pbnQuc28uMCA9PiAvdXNyL2xpYi94ODZf
-NjQtbGludXgtZ251L2xpYmx0dG5nLXVzdC0NCj4gdHJhY2Vwb2ludC5zby4wICgweDAwMDA3ZjVl
-NGEwMjEwMDApDQo+ICAgICAgICAgbGlidXJjdS1icC5zby4xID0+IC91c3IvbGliL2xpYnVyY3Ut
-YnAuc28uMSAoMHgwMDAwN2Y1ZTQ5ZTFhMDAwKQ0KPiAgICAgICAgIGxpYnVyY3UtY2RzLnNvLjEg
-PT4gL3Vzci9saWIvbGlidXJjdS1jZHMuc28uMSAoMHgwMDAwN2Y1ZTQ5YzEyMDAwKQ0KPg0KPiBF
-ZGl0ZWQgdGhlIGFib3ZlIG91dHB1dCBqdXN0IHNob3cgdGhlIGRlcGVuZGVuY2llcy4NCj4gRGlk
-IGFueW9uZSBmYWNlIHRoaXMgaXNzdWUgYmVmb3JlPw0KPiBBbnkgaGVscCB3b3VsZCBiZSBtdWNo
-IGFwcHJlY2lhdGVkLg0KPg0KPiBUaGFua3MsDQo+IFZhcmFkYQ0KPg0KPiAtLS0tLU9yaWdpbmFs
-IE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBb
-bWFpbHRvOmNlcGgtZGV2ZWwtDQo+IG93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9m
-IFZhcmFkYSBLYXJpDQo+IFNlbnQ6IEZyaWRheSwgSnVuZSAyNiwgMjAxNSAzOjM0IFBNDQo+IFRv
-OiBTYWdlIFdlaWwNCj4gQ2M6IExvaWMgRGFjaGFyeTsgY2VwaC1kZXZlbDsgTWF0dCBXLiBCZW5q
-YW1pbg0KPiBTdWJqZWN0OiBSRTogbG9hZGFibGUgb2JqZWN0c3RvcmUNCj4NCj4gSGksDQo+DQo+
-IE1hZGUgc29tZSBtb3JlIGNoYW5nZXMgdG8gcmVzb2x2ZSBsdHRuZyBwcm9ibGVtcyBhdA0KPiBo
-dHRwczovL2dpdGh1Yi5jb20vdmFyYWRha2FyaS9jZXBoL2NvbW1pdHMvd2lwLXBsdWdpbi4NCj4g
-QnV0IGNvdWxkbuKAmXQgYnkgcGFzcyB0aGUgaXNzdWVzLiBGYWNpbmcgc29tZSBpc3N1ZXMgbGlr
-ZSBtZW50aW9uZWQgYmVsb3cuDQo+DQo+IC4vLmxpYnMvbGliY2VwaF9maWxlc3RvcmUuc286IHVu
-ZGVmaW5lZCByZWZlcmVuY2UgdG8gYHRyYWNlcG9pbnRfZGxvcGVuJw0KPg0KPiBDb21waWxpbmcg
-d2l0aCAtbGx0dG5nLXVzdCBpcyBub3QgcmVzb2x2aW5nIHRoZSBwcm9ibGVtLiBTZWVuIHNvbWUg
-dGhyZWFkcyBpbg0KPiBkZXZlbCBsaXN0IGJlZm9yZSwgbWVudGlvbmluZyB0aGlzIHByb2JsZW0u
-DQo+IENhbiBhbnlvbmUgdGFrZSBhIGxvb2sgYW5kIGd1aWRlIG1lIHRvIGZpeCB0aGlzIHByb2Js
-ZW0/DQo+DQo+IEhhdmVuJ3QgbWFkZSB0aGUgY2hhbmdlcyB0byBjaGFuZ2UgdGhlIHBsdWdpbiBu
-YW1lIGV0Yy4uLiB3aWxsIGJlIG1ha2luZw0KPiB0aGVtIGFzIHBhcnQgb2YgY2xlYW51cC4NCj4N
-Cj4gVGhhbmtzLA0KPiBWYXJhZGENCj4NCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4g
-RnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVs
-LQ0KPiBvd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBWYXJhZGEgS2FyaQ0KPiBT
-ZW50OiBNb25kYXksIEp1bmUgMjIsIDIwMTUgODo1NyBQTQ0KPiBUbzogTWF0dCBXLiBCZW5qYW1p
-bg0KPiBDYzogTG9pYyBEYWNoYXJ5OyBjZXBoLWRldmVsOyBTYWdlIFdlaWwNCj4gU3ViamVjdDog
-UkU6IGxvYWRhYmxlIG9iamVjdHN0b3JlDQo+DQo+IEhpIE1hdHQsDQo+DQo+IE1ham9yaXR5IG9m
-IHRoZSBjaGFuZ2VzIGFyZSBzZWdyZWdhdGluZyB0aGUgZmlsZXMgdG8gY29ycmVzcG9uZGluZyBz
-aGFyZWQNCj4gb2JqZWN0IGFuZCBjcmVhdGluZyBhIGZhY3Rvcnkgb2JqZWN0LiBBbmQgdGhlIG5h
-bWluZyBpcyBtb3N0bHkgdGFrZW4gZnJvbQ0KPiBFcmFzdXJlLWNvZGluZyBwbHVnaW5zLiBXYW50
-IGEgZ29vZCBuYW1pbmcgY29udmVudGlvbiA6LSksIGhlbmNlIGENCj4gcHJlbGltaW5hcnkgcmV2
-aWV3LiBEbyBhZ3JlZSwgd2UgaGF2ZSBsb3Qgb2YgbG9hZGFibGUgaW50ZXJmYWNlcywgYW5kIEkg
-dGhpbmsNCj4gd2UgYXJlIGluIHRoZSB3YXkgb2YgbWFraW5nIHRoZW0gb24tZGVtYW5kIChpZiBw
-b3NzaWJsZSkgbG9hZGFibGUNCj4gbW9kdWxlcy4NCj4NCj4gVmFyYWRhDQo+DQo+IC0tLS0tT3Jp
-Z2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IE1hdHQgVy4gQmVuamFtaW4gW21haWx0bzptYXR0
-QGNvaG9ydGZzLmNvbV0NCj4gU2VudDogTW9uZGF5LCBKdW5lIDIyLCAyMDE1IDg6MzcgUE0NCj4g
-VG86IFZhcmFkYSBLYXJpDQo+IENjOiBMb2ljIERhY2hhcnk7IGNlcGgtZGV2ZWw7IFNhZ2UgV2Vp
-bA0KPiBTdWJqZWN0OiBSZTogbG9hZGFibGUgb2JqZWN0c3RvcmUNCj4NCj4gSGksDQo+DQo+IEl0
-J3MganVzdCBhZXN0aGV0aWMsIGJ1dCBpdCBmZWVscyBjbHVua3kgdG8gY2hhbmdlIHRoZSBuYW1l
-cyBvZiB3ZWxsIGtub3duDQo+IG1vZHVsZXMgdG8gPHNvbWV0aGluZz5QbHVnaW4tLWVzcC4gaWYg
-dGhhdCBnZW5lcmFsaXplcyBmb3J3YXJkIHRvIG5ldw0KPiBsb2FkYWJsZSBtb2R1bGVzIChhbmQg
-d2UgaGF2ZSBhIGxvdCBvZiBsb2FkYWJsZSBpbnRlcmZhY2VzKS4NCj4NCj4gTWF0dA0KPg0KPiAt
-LS0tLSAiVmFyYWRhIEthcmkiIDxWYXJhZGEuS2FyaUBzYW5kaXNrLmNvbT4gd3JvdGU6DQo+DQo+
-ID4gSGkgU2FnZSwNCj4gPg0KPiA+IFBsZWFzZSBmaW5kIHRoZSBpbml0aWFsIGltcGxlbWVudGF0
-aW9uIG9mIG9iamVjdHMgc3RvcmUgZmFjdG9yeQ0KPiA+IChpbml0aWFsIGN1dCkgYXQNCj4gPg0K
-PiBodHRwczovL2dpdGh1Yi5jb20vdmFyYWRha2FyaS9jZXBoL2NvbW1pdC85ZDVmZTJmZWNmMzhi
-YTEwNmM3YzdiN2EzZWQNCj4gZQ0KPiA+IDRmMTg5ZWM3ZTFjOA0KPiA+DQo+ID4gVGhpcyBpcyBz
-dGlsbCB3b3JrIGluIHByb2dyZXNzIGJyYW5jaC4gUmlnaHQgbm93IEkgYW0gZmFjaW5nIEx0dG5n
-DQo+ID4gaXNzdWVzLA0KPiA+IExUVG5nLVVTVDogRXJyb3IgKC0xNykgd2hpbGUgcmVnaXN0ZXJp
-bmcgdHJhY2Vwb2ludCBwcm9iZS4gRHVwbGljYXRlDQo+ID4gcmVnaXN0cmF0aW9uIG9mIHRyYWNl
-cG9pbnQgcHJvYmVzIGhhdmluZyB0aGUgc2FtZSBuYW1lIGlzIG5vdCBhbGxvd2VkLg0KPiA+DQo+
-ID4gTWlnaHQgYmUgYW4gaXNzdWUgd2l0aCBsaWJjb21tb24gaW5jbHVzaW9uLiBUcnlpbmcgcmVz
-b2x2aW5nIHRoZSBpc3N1ZQ0KPiA+IG5vdy4gU2VlbXMgSSBuZWVkIHRvIG1ha2UgbGliY29tbW9u
-IGFsc28gYXMgYSBzaGFyZWQgb2JqZWN0IHRvIGF2b2lkDQo+ID4gdGhlIGR1cGxpY2F0ZXMsIHN0
-YXRpYyBsaW5raW5nIGlzIGEgcHJvYmxlbSBoZXJlLg0KPiA+IEFueSBzdWdnZXN0aW9ucyBvciBj
-b21tZW50cyBvbiB0aGlzIHByb2JsZW0/DQo+ID4NCj4gPg0KPiA+IEkgaGF2ZSBjb21tZW50ZWQg
-b3V0IHRlc3QgYmluYXJ5IChjZXBoX3Rlc3Rfa2V5dmFsdWVkYl9hdG9taWNpdHkpDQo+ID4gY29t
-cGlsYXRpb24sIGR1ZSB0byB1bnJlc29sdmVkIHN5bWJvbHMgZm9yIGdfY2VwaF9jb250ZXh0IGFu
-ZCBnX2NvbmYuDQo+ID4gTm90IGFibGUgdG8gZml4L3dvcmthcm91bmQgdGhlIHByb2JsZW0gc28g
-ZmFyLg0KPiA+DQo+ID4gQ2FuIHlvdSBwbGVhc2UgcmV2aWV3IGlmIHRoaXMgaXMgd2hhdCBpbiB5
-b3VyIG1pbmQgZm9yIHRoZSBmYWN0b3J5DQo+ID4gaW1wbGVtZW50YXRpb24/DQo+ID4NCj4gPiBX
-ZSBjYW4gZXh0ZW5kIHRoaXMgaW1wbGVtZW50YXRpb24gdG8gbWVzc2VuZ2VyIGFuZCBkaWZmZXJl
-bnQgYmFja2VuZA0KPiA+IG9mIHRoZSBPU0QuIFdpbGwgbWFrZSB0aG9zZSBpbmNyZW1lbnRhbCBv
-bmNlIHRoZSBiYXNlIGZyYW1ld29yayBpcw0KPiA+IGFwcHJvdmVkLg0KPiA+DQo+ID4gVGhhbmtz
-LA0KPiA+IFZhcmFkYQ0KPiA+DQo+ID4NCj4gPg0KPiA+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0t
-LS0tDQo+ID4gRnJvbTogU2FnZSBXZWlsIFttYWlsdG86c2FnZUBuZXdkcmVhbS5uZXRdDQo+ID4g
-U2VudDogVHVlc2RheSwgTWF5IDEyLCAyMDE1IDU6MTEgQU0NCj4gPiBUbzogVmFyYWRhIEthcmkN
-Cj4gPiBDYzogTG9pYyBEYWNoYXJ5OyBNYXR0IFcuIEJlbmphbWluOyBjZXBoLWRldmVsDQo+ID4g
-U3ViamVjdDogUkU6IGxvYWRhYmxlIG9iamVjdHN0b3JlDQo+ID4NCj4gPiBIaSBWYXJhZGEsDQo+
-ID4NCj4gPiBBbnkgcHJvZ3Jlc3Mgb24gdGhpcz8NCj4gPg0KPiA+IFRoYW5rcyENCj4gPiBzYWdl
-DQo+ID4NCj4gPiBPbiBTYXQsIDExIEFwciAyMDE1LCBWYXJhZGEgS2FyaSB3cm90ZToNCj4gPg0K
-PiA+ID4gVGhhbmtzIFNhZ2UgYW5kIExvaWMuIFdpbGwgYWRkIHRoZSBtaXNzaW5nIHBpZWNlcyBh
-bmQgaW50ZWdyYXRlIHRoZQ0KPiA+IG9iamVjdCBmYWN0b3J5IGFuZCBwbHVnaW4gY2hhbmdlcy4N
-Cj4gPiA+DQo+ID4gPiBWYXJhZGENCj4gPiA+DQo+ID4gPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2Ut
-LS0tLQ0KPiA+ID4gRnJvbTogU2FnZSBXZWlsIFttYWlsdG86c2FnZUBuZXdkcmVhbS5uZXRdDQo+
-ID4gPiBTZW50OiBTYXR1cmRheSwgQXByaWwgMTEsIDIwMTUgOToxOSBQTQ0KPiA+ID4gVG86IExv
-aWMgRGFjaGFyeQ0KPiA+ID4gQ2M6IFZhcmFkYSBLYXJpOyBNYXR0IFcuIEJlbmphbWluOyBjZXBo
-LWRldmVsDQo+ID4gPiBTdWJqZWN0OiBSZTogbG9hZGFibGUgb2JqZWN0c3RvcmUNCj4gPiA+DQo+
-ID4gPiBPbiBTYXQsIDExIEFwciAyMDE1LCBMb2ljIERhY2hhcnkgd3JvdGU6DQo+ID4gPiA+IEhp
-IFNhZ2UsDQo+ID4gPiA+DQo+ID4gPiA+IEl0IGxvb2tzIGxpa2UgY29tbW9uL1BsdWdpblJlZ2lz
-dHJ5LntoLGNjfSBhcmUgbWlzc2luZyBmcm9tDQo+ID4gPiA+IDE4YWQ4ZGYxMDk0ZGI1MmM4Mzlk
-YzZiMmRjNjg5ZmM4ODIyMzBhY2INCj4gPiA+DQo+ID4gPiB3aG9vcHMgcHVzaGVkISA6KQ0KPiA+
-ID4NCj4gPiA+IHNhZ2UNCj4gPiA+DQo+ID4gPiA+DQo+ID4gPiA+IENoZWVycw0KPiA+ID4gPg0K
-PiA+ID4gPiBPbiAxMS8wNC8yMDE1IDE2OjUxLCBTYWdlIFdlaWwgd3JvdGU6DQo+ID4gPiA+ID4g
-T24gU2F0LCAxMSBBcHIgMjAxNSwgVmFyYWRhIEthcmkgd3JvdGU6DQo+ID4gPiA+ID4+IEhpIE1h
-dHQvIFNhZ2UsDQo+ID4gPiA+ID4+DQo+ID4gPiA+ID4+IFRoYW5rcyBmb3Igc2hhcmluZyB0aGUg
-cHVsbCByZXF1ZXN0LiBXaWxsIHdvcmsgb24gdGhlIGl0ZW1zDQo+ID4gd2hhdA0KPiA+ID4gPiA+
-PiBzYWdlIHdhcyBtZW50aW9uaW5nIGluIHRoZSBjb21tZW50cyBhbG9uZyB3aXRoIHRoZSBpdGVt
-cyBpbiB0aGUNCj4gPiB0cmFja2VyLg0KPiA+ID4gPiA+DQo+ID4gPiA+ID4gSSBwdXNoZWQgYSB3
-aXAtcGx1Z2luIGJyYW5jaCB3aXRoIHRoZSBwYXR0ZXJuIEkgaGFkIGluIG1pbmQuLi4NCj4gPiA+
-ID4gPiBkb2VzIHRoaXMgbWFrZSBzZW5zZT8gIEl0J3Mgb25seSBjb21waWxlIHRlc3RlZCwgYW5k
-IHN0aWxsDQo+ID4gbmVlZHMNCj4gPiA+ID4gPiBwcmVsb2FkKCkgbWV0aG9kcyBpbXBsZW1lbnRl
-ZCBzbyB0aGF0IGxvbmctcnVubmluZyBkYWVtb25zIChvcg0KPiA+ID4gPiA+IHBlcmhhcHMgb3Ro
-ZXJzPykgY2FuIHByZWxvYWQgaXQgYWxsIGF0IG9uY2UuDQo+ID4gPiA+ID4NCj4gPiA+ID4gPiBJ
-ZGVhbGx5IHdlIHdvdWxkIHJlcGxhY2UgRXJhc3VyZVBsdWdpblJlZ2lzdHJ5IHdpdGggdGhpcyB0
-b28sDQo+ID4gPiA+ID4gd2hpY2ggbWVhbnMgdGhlIG5hbWluZyBvZiB0aGUgLnNvJ3MgbmVlZHMg
-dG8gYmUgYSBiaXQgbW9yZQ0KPiA+ID4gPiA+IGZsZXhpYmxlIGFzIHRoZSBFQyBwbHVnaW4gc2No
-ZW1lIGlzIHNvbWV0aGluZyBsaWtlDQo+ID4gPiA+ID4gL3Vzci9saWIvY2VwaC9lcmFzdXJlLWNv
-ZGUvbGliZWNfJG5hbWUuc28gKG5vdCBhIHN0cmljdCBmdW5jdGlvbg0KPiA+DQo+ID4gPiA+ID4g
-b2YgdHlwZSBhbmQgbmFtZSkuICBPciBhY3R1YWxseSwgd2UgY2FuIGp1c3QgcmVuYW1lIHRoZSBF
-QyAuc28ncw0KPiA+DQo+ID4gPiA+ID4gd2hlbiB0aGlzIGdvZXMgaW4/ICBTaW5jZSB0aGV5J3Jl
-IGV4cGxpY2l0bHkgaW5jb21wYXRpYmxlDQo+ID4gYmV0d2Vlbg0KPiA+ID4gPiA+IHZlcnNpb25z
-IHRoZXJlIGlzIG5vIHJlYXNvbiB0aGUgbmFtZXMgbmVlZCB0byByZW1haW4NCj4gPiBjb25zaXN0
-ZW50Li4uDQo+ID4gPiA+ID4NCj4gPiA+ID4gPiBzYWdlDQo+ID4gPiA+ID4NCj4gPiA+ID4gPj4N
-Cj4gPiA+ID4gPj4gVmFyYWRhDQo+ID4gPiA+ID4+DQo+ID4gPiA+ID4+IC0tLS0tT3JpZ2luYWwg
-TWVzc2FnZS0tLS0tDQo+ID4gPiA+ID4+IEZyb206IFNhZ2UgV2VpbCBbbWFpbHRvOnNhZ2VAbmV3
-ZHJlYW0ubmV0XQ0KPiA+ID4gPiA+PiBTZW50OiBTYXR1cmRheSwgQXByaWwgMTEsIDIwMTUgNDox
-NiBBTQ0KPiA+ID4gPiA+PiBUbzogTWF0dCBXLiBCZW5qYW1pbg0KPiA+ID4gPiA+PiBDYzogVmFy
-YWRhIEthcmk7IGNlcGgtZGV2ZWwNCj4gPiA+ID4gPj4gU3ViamVjdDogUmU6IGxvYWRhYmxlIG9i
-amVjdHN0b3JlDQo+ID4gPiA+ID4+DQo+ID4gPiA+ID4+IE9uIEZyaSwgMTAgQXByIDIwMTUsIE1h
-dHQgVy4gQmVuamFtaW4gd3JvdGU6DQo+ID4gPiA+ID4+PiBIaSBWYXJhZGEsDQo+ID4gPiA+ID4+
-Pg0KPiA+ID4gPiA+Pj4gSSBwdXNoZWQgYnJhbmNoIGhhbW1lci1vc2ZhY3RvcnkgdG8NCj4gPiA+
-ID4gPj4+IGh0dHBzOi8vZ2l0aHViLmNvbS9saW51eGJveDIvY2VwaC5naXQNCj4gPiA+ID4gPj4+
-DQo+ID4gPiA+ID4+PiBJdCBjYW4gYXQgbGVhc3QgcHJvdmlkZSBhIHN0YXJ0aW5nIHBvaW50IGZv
-ciBkaXNjdXNzaW9uLCBpZg0KPiA+IG5vdA0KPiA+ID4gPiA+Pj4gYSBqdW1waW5nIG9mZiBwb2lu
-dDsgIEkgZG8gdGhpbmsgaXQncyBiYXNpY2FsbHkgd2hhdCBTYWdlDQo+ID4gZGVzY3JpYmVkLg0K
-PiA+ID4gPiA+Pg0KPiA+ID4gPiA+PiBJIG1hZGUgYSBmZXcgY29tbWVudHMgb24gdGhlIHB1bGwg
-cmVxdWVzdC4gIEkgdGhpbmsgYSBmYWN0b3J5DQo+ID4gY2xhc3MgaXMgdGhlIHdheSB0byBnbywg
-YnV0IHdlIHNob3VsZCBiZSBhYmxlIHRvIG1ha2UgdGhlIHBsdWdpbg0KPiA+IGxvYWRpbmcgcGFy
-dCBnZW5lcmljIGFuZCBub3QgaW50ZXJmYWNlIHNwZWNpZmljIGF0IGFsbC4uLg0KPiA+ID4gPiA+
-Pg0KPiA+ID4gPiA+PiBzYWdlDQo+ID4gPiA+ID4+DQo+ID4gPiA+ID4+Pg0KPiA+ID4gPiA+Pj4g
-SSB3YXMgYWJsZSB0byB1cGRhdGUgdGhlIENNYWtlIGJ1aWxkIHN5c3RlbSB0byBidWlsZCB0aGUg
-dHJlZSwNCj4gPiBJDQo+ID4gPiA+ID4+PiBoYXZlbid0IGF0dGVtcHRlZCBBdXRvdG9vbHMuIDoo
-DQo+ID4gPiA+ID4+Pg0KPiA+ID4gPiA+Pj4gUmVnYXJkcywNCj4gPiA+ID4gPj4+DQo+ID4gPiA+
-ID4+PiBNYXR0DQo+ID4gPiA+ID4+Pg0KPiA+ID4gPiA+Pj4gLS0NCj4gPiA+ID4gPj4+IE1hdHQg
-QmVuamFtaW4NCj4gPiA+ID4gPj4+IENvaG9ydEZTLCBMTEMuDQo+ID4gPiA+ID4+PiAzMTUgV2Vz
-dCBIdXJvbiBTdHJlZXQsIFN1aXRlIDE0MEEgQW5uIEFyYm9yLCBNaWNoaWdhbiA0ODEwMw0KPiA+
-ID4gPiA+Pj4NCj4gPiA+ID4gPj4+IGh0dHA6Ly9jb2hvcnRmcy5jb20NCj4gPiA+ID4gPj4+DQo+
-ID4gPiA+ID4+PiB0ZWwuICA3MzQtNzYxLTQ2ODkNCj4gPiA+ID4gPj4+IGZheC4gIDczNC03Njkt
-ODkzOA0KPiA+ID4gPiA+Pj4gY2VsLiAgNzM0LTIxNi01MzA5DQo+ID4gPiA+ID4+PiAtLQ0KPiA+
-ID4gPiA+Pj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVu
-c3Vic2NyaWJlDQo+ID4gY2VwaC1kZXZlbCINCj4gPiA+ID4gPj4+IGluIHRoZSBib2R5IG9mIGEg
-bWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUNCj4gPiA+ID4gPj4+IG1h
-am9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0
-bWwNCj4gPiA+ID4gPj4+DQo+ID4gPiA+ID4+Pg0KPiA+ID4gPiA+Pg0KPiA+ID4gPiA+PiBfX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fXw0KPiA+ID4gPiA+Pg0KPiA+ID4gPiA+PiBQTEVB
-U0UgTk9URTogVGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFp
-bA0KPiA+IG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWdu
-YXRlZCByZWNpcGllbnQocykNCj4gPiBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlz
-IG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZA0KPiA+IHJlY2lwaWVudCwgeW91IGFyZSBoZXJl
-Ynkgbm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2UNCj4gPiBpbiBl
-cnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9y
-IGNvcHlpbmcNCj4gPiBvZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYg
-eW91IGhhdmUgcmVjZWl2ZWQgdGhpcw0KPiA+IGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFz
-ZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3INCj4gPiBlLW1haWwgKGFzIHNob3du
-IGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YNCj4g
-PiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9y
-IGVsZWN0cm9uaWNhbGx5DQo+ID4gc3RvcmVkIGNvcGllcykuDQo+ID4gPiA+ID4+DQo+ID4gPiA+
-ID4+IC0tDQo+ID4gPiA+ID4+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRo
-ZSBsaW5lICJ1bnN1YnNjcmliZQ0KPiA+ID4gPiA+PiBjZXBoLWRldmVsIiBpbiB0aGUgYm9keSBv
-ZiBhIG1lc3NhZ2UgdG8NCj4gPiBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnDQo+ID4gPiA+ID4+
-IE1vcmUgbWFqb3Jkb21vIGluZm8gYXQNCj4gPiA+ID4gPj4gaHR0cDovL3ZnZXIua2VybmVsLm9y
-Zy9tYWpvcmRvbW8taW5mby5odG1sDQo+ID4gPiA+ID4+DQo+ID4gPiA+ID4+DQo+ID4gPiA+ID4g
-LS0NCj4gPiA+ID4gPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGlu
-ZSAidW5zdWJzY3JpYmUNCj4gPiA+ID4gPiBjZXBoLWRldmVsIiBpbiB0aGUgYm9keSBvZiBhIG1l
-c3NhZ2UgdG8NCj4gPiBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnDQo+ID4gPiA+ID4gTW9yZSBt
-YWpvcmRvbW8gaW5mbyBhdA0KPiA+IGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWlu
-Zm8uaHRtbA0KPiA+ID4gPiA+DQo+ID4gPiA+DQo+ID4gPiA+IC0tDQo+ID4gPiA+IExvw69jIERh
-Y2hhcnksIEFydGlzYW4gTG9naWNpZWwgTGlicmUNCj4gPiA+ID4NCj4gPiA+ID4NCj4gPiA+IC0t
-DQo+ID4gPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5z
-dWJzY3JpYmUNCj4gPiBjZXBoLWRldmVsIg0KPiA+ID4gaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdl
-IHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZQ0KPiBtYWpvcmRvbW8NCj4gPg0KPiA+
-ID4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+
-ID4gPg0KPiA+ID4NCj4NCj4gLS0NCj4gTWF0dCBCZW5qYW1pbg0KPiBDb2hvcnRGUywgTExDLg0K
-PiAzMTUgV2VzdCBIdXJvbiBTdHJlZXQsIFN1aXRlIDE0MEENCj4gQW5uIEFyYm9yLCBNaWNoaWdh
-biA0ODEwMw0KPg0KPiBodHRwOi8vY29ob3J0ZnMuY29tDQo+DQo+IHRlbC4gIDczNC03NjEtNDY4
-OQ0KPiBmYXguICA3MzQtNzY5LTg5MzgNCj4gY2VsLiAgNzM0LTIxNi01MzA5DQo+DQo+IF9fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fDQo+DQo+IFBMRUFTRSBOT1RFOiBUaGUgaW5mb3Jt
-YXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMNCj4gaW50
-ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFt
-ZWQgYWJvdmUuIElmIHRoZQ0KPiByZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50
-ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZA0KPiB0aGF0IHlvdSBoYXZl
-IHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LA0KPiBk
-aXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlz
-IHN0cmljdGx5IHByb2hpYml0ZWQuIElmDQo+IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgY29tbXVu
-aWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5DQo+IHRlbGVwaG9u
-ZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkg
-YW5kIGFsbA0KPiBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hl
-dGhlciBoYXJkIGNvcGllcyBvcg0KPiBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCj4N
-Cj4gTiAgICAgciAgeSAgIGIgWCAgx6d2IF4gKd66ey5uICsgICB6IF16DQo+IE4gICAgIHIgIHkg
-ICBiIFggIMendiBeICneunsubiArICAgeiBdeiAgIHtheSAdyofamSAsaiAgIGYgICBoICAgeiAe
-IHcgICAgICAgajordiAgIHcgaiBtICAgICAgICAgelorDQo+IN2iaiIgICEgaQ0KPiATICDsubsc
-ICYgfiAmIBggICstICDdthcgIHcgIMubICAgbSAeIBdeICBiICBebiByICAgeiAaICBoICAgICYg
-IB4gRyAgIGggAygg6ZqOIN2iaiIgIBogG20gICAgIHoNCj4g3pYgICBmICAgaCAgIH4gbQ0KPiAE
-IHsubiArICAgICAgICslICBsendtICBiIOunsiAgciAgecepINevelggIBcgINyofSAgIMageiAm
-ajordiAgICAgICAgelorICAremYgICBoICAgfiAgICBpICAgeiAeIHcNCj4gPyAgICAmICnfohtm
-DQoNCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQoNClBMRUFTRSBOT1RFOiBUaGUg
-aW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMg
-aW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykg
-bmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50
-ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJl
-Y2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1p
-bmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmlj
-dGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBp
-biBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwg
-KGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3Bp
-ZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGll
-cyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCg0K
+On 2015/09/11, 4:20 AM, "HPDD-discuss on behalf of Jeff Layton"
+<hpdd-discuss-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org on behalf of jlayton-vpEMnDpepFuMZCB2o+C8xQ@public.gmane.org>
+wrote:
+
+>With NFSv3 nfsd will always attempt to send along WCC data to the
+>client. This generally involves saving off the in-core inode information
+>prior to doing the operation on the given filehandle, and then issuing a
+>vfs_getattr to it after the op.
+>
+>Some filesystems (particularly clustered or networked ones) have an
+>expensive ->getattr inode operation. Atomicitiy is also often difficult
+>or impossible to guarantee on such filesystems. For those, we're best
+>off not trying to provide WCC information to the client at all, and to
+>simply allow it to poll for that information as needed with a GETATTR
+>RPC.
+>
+>This patch adds a new flags field to struct export_operations, and
+>defines a new EXPORT_OP_NOWCC flag that filesystems can use to indicate
+>that nfsd should not attempt to provide WCC info in NFSv3 replies. It
+>also adds a blurb about the new flags field and flag to the exporting
+>documentation.
+>
+>The server will also now skip collecting this information for NFSv2 as
+>well, since that info is never used there anyway.
+>
+>Note that this patch does not add this flag to any filesystem
+>export_operations structures. This was originally developed to allow
+>reexporting nfs via nfsd. That code is not (and may never be) suitable
+>for merging into mainline.
+>
+>Other filesystems may want to consider enabling this flag too. It's hard
+>to tell however which ones have export operations to enable export via
+>knfsd and which ones mostly rely on them for open-by-filehandle support,
+>so I'm leaving that up to the individual maintainers to decide. I am
+>cc'ing the relevant lists for those filesystems that I think may want to
+>consider adding this though.
+>
+>Cc: HPDD-discuss-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org
+>Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+>Cc: cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+>Cc: fuse-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
+>Cc: ocfs2-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org
+>Signed-off-by: Jeff Layton <jeff.layton-7I+n7zu2hftEKMMhf/gKZA@public.gmane.org>
+>---
+> Documentation/filesystems/nfs/Exporting | 27 +++++++++++++++++++++++++++
+> fs/nfsd/nfs3xdr.c                       |  5 ++++-
+> fs/nfsd/nfsfh.c                         | 14 ++++++++++++++
+> fs/nfsd/nfsfh.h                         |  5 ++++-
+> include/linux/exportfs.h                |  2 ++
+> 5 files changed, 51 insertions(+), 2 deletions(-)
+>
+>diff --git a/Documentation/filesystems/nfs/Exporting
+>b/Documentation/filesystems/nfs/Exporting
+>index 520a4becb75c..fa636cde3907 100644
+>--- a/Documentation/filesystems/nfs/Exporting
+>+++ b/Documentation/filesystems/nfs/Exporting
+>@@ -138,6 +138,11 @@ struct which has the following members:
+>     to find potential names, and matches inode numbers to find the
+>correct
+>     match.
+> 
+>+  flags
+>+    Some filesystems may need to be handled differently than others. The
+>+    export_operations struct also includes a flags field that allows the
+>+    filesystem to communicate such information to nfsd. See the Export
+>+    Operations Flags section below for more explanation.
+> 
+> A filehandle fragment consists of an array of 1 or more 4byte words,
+> together with a one byte "type".
+>@@ -147,3 +152,25 @@ generated by encode_fh, in which case it will have
+>been padded with
+> nuls.  Rather, the encode_fh routine should choose a "type" which
+> indicates the decode_fh how much of the filehandle is valid, and how
+> it should be interpreted.
+>+
+>+Export Operations Flags
+>+-----------------------
+>+In addition to the operation vector pointers, struct export_operations
+>also
+>+contains a "flags" field that allows the filesystem to communicate to
+>nfsd
+>+that it may want to do things differently when dealing with it. The
+>+following flags are defined:
+>+
+>+  EXPORT_OP_NOWCC
+>+    RFC 1813 recommends that servers always send weak cache consistency
+>+    (WCC) data to the client after each operation. The server should
+>+    atomically collect attributes about the inode, do an operation on it,
+>+    and then collect the attributes afterward. This allows the client to
+>+    skip issuing GETATTRs in some situations but means that the server
+>+    is calling vfs_getattr for almost all RPCs. On some filesystems
+>+    (particularly those that are clustered or networked) this is
+>expensive
+>+    and atomicity is difficult to guarantee. This flag indicates to nfsd
+>+    that it should skip providing WCC attributes to the client in NFSv3
+>+    replies when doing operations on this filesystem. Consider enabling
+>+    this on filesystems that have an expensive ->getattr inode operation,
+>+    or when atomicity between pre and post operation attribute collection
+>+    is impossible to guarantee.
+>diff --git a/fs/nfsd/nfs3xdr.c b/fs/nfsd/nfs3xdr.c
+>index 01dcd494f781..c30c8c604e2a 100644
+>--- a/fs/nfsd/nfs3xdr.c
+>+++ b/fs/nfsd/nfs3xdr.c
+>@@ -203,7 +203,7 @@ static __be32 *
+> encode_post_op_attr(struct svc_rqst *rqstp, __be32 *p, struct svc_fh
+>*fhp)
+> {
+> 	struct dentry *dentry = fhp->fh_dentry;
+>-	if (dentry && d_really_is_positive(dentry)) {
+>+	if (!fhp->fh_no_wcc && dentry && d_really_is_positive(dentry)) {
+> 	        __be32 err;
+> 		struct kstat stat;
+> 
+>@@ -256,6 +256,9 @@ void fill_post_wcc(struct svc_fh *fhp)
+> {
+> 	__be32 err;
+> 
+>+	if (fhp->fh_no_wcc)
+>+		return;
+>+
+> 	if (fhp->fh_post_saved)
+> 		printk("nfsd: inode locked twice during operation.\n");
+> 
+>diff --git a/fs/nfsd/nfsfh.c b/fs/nfsd/nfsfh.c
+>index 350041a40fe5..29ae37f62b9b 100644
+>--- a/fs/nfsd/nfsfh.c
+>+++ b/fs/nfsd/nfsfh.c
+>@@ -267,6 +267,16 @@ static __be32 nfsd_set_fh_dentry(struct svc_rqst
+>*rqstp, struct svc_fh *fhp)
+> 
+> 	fhp->fh_dentry = dentry;
+> 	fhp->fh_export = exp;
+>+
+>+	switch (rqstp->rq_vers) {
+>+	case 3:
+>+		if (!(dentry->d_sb->s_export_op->flags & EXPORT_OP_NOWCC))
+>+			break;
+>+		/* Fallthrough */
+>+	case 2:
+>+		fhp->fh_no_wcc = true;
+>+	}
+>+
+> 	return 0;
+> out:
+> 	exp_put(exp);
+>@@ -535,6 +545,9 @@ fh_compose(struct svc_fh *fhp, struct svc_export
+>*exp, struct dentry *dentry,
+> 	 */
+> 	 set_version_and_fsid_type(fhp, exp, ref_fh);
+> 
+>+	/* If we have a ref_fh, then copy the fh_no_wcc setting from it. */
+>+	fhp->fh_no_wcc = ref_fh ? ref_fh->fh_no_wcc : false;
+>+
+> 	if (ref_fh == fhp)
+> 		fh_put(ref_fh);
+> 
+>@@ -641,6 +654,7 @@ fh_put(struct svc_fh *fhp)
+> 		exp_put(exp);
+> 		fhp->fh_export = NULL;
+> 	}
+>+	fhp->fh_no_wcc = false;
+> 	return;
+> }
+> 
+>diff --git a/fs/nfsd/nfsfh.h b/fs/nfsd/nfsfh.h
+>index 1e90dad4926b..9ddead4d98f8 100644
+>--- a/fs/nfsd/nfsfh.h
+>+++ b/fs/nfsd/nfsfh.h
+>@@ -32,6 +32,7 @@ typedef struct svc_fh {
+> 
+> 	unsigned char		fh_locked;	/* inode locked by us */
+> 	unsigned char		fh_want_write;	/* remount protection taken */
+>+	bool			fh_no_wcc;	/* no wcc data needed */
+
+This increases the size of svc_fh because it splits the four unsigned
+chars.
+You could change all of these (fh_locked, fh_want_write,
+fh_{pre,post}saved)
+to be bools to avoid that and make it more clear they are only used as
+booleans (I verified that they all are only assigned 0 or 1).
+
+Cheers, Andreas
+
+> 
+> #ifdef CONFIG_NFSD_V3
+> 	unsigned char		fh_post_saved;	/* post-op attrs saved */
+>@@ -51,7 +52,6 @@ typedef struct svc_fh {
+> 	struct kstat		fh_post_attr;	/* full attrs after operation */
+> 	u64			fh_post_change; /* nfsv4 change; see above */
+> #endif /* CONFIG_NFSD_V3 */
+>-
+> } svc_fh;
+> 
+> enum nfsd_fsid {
+>@@ -225,6 +225,9 @@ fill_pre_wcc(struct svc_fh *fhp)
+> {
+> 	struct inode    *inode;
+> 
+>+	if (fhp->fh_no_wcc)
+>+		return;
+>+
+> 	inode = d_inode(fhp->fh_dentry);
+> 	if (!fhp->fh_pre_saved) {
+> 		fhp->fh_pre_mtime = inode->i_mtime;
+>diff --git a/include/linux/exportfs.h b/include/linux/exportfs.h
+>index fa05e04c5531..600c3fccc999 100644
+>--- a/include/linux/exportfs.h
+>+++ b/include/linux/exportfs.h
+>@@ -214,6 +214,8 @@ struct export_operations {
+> 			  bool write, u32 *device_generation);
+> 	int (*commit_blocks)(struct inode *inode, struct iomap *iomaps,
+> 			     int nr_iomaps, struct iattr *iattr);
+>+#define	EXPORT_OP_NOWCC		(0x1)	/* Don't collect wcc data for NFSv3
+>replies */
+>+	unsigned long	flags;
+> };
+> 
+> extern int exportfs_encode_inode_fh(struct inode *inode, struct fid *fid,
+>-- 
+>2.4.3
+>
+>_______________________________________________
+>HPDD-discuss mailing list
+>HPDD-discuss-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org
+>https://lists.01.org/mailman/listinfo/hpdd-discuss
+>
+
+
+Cheers, Andreas
+-- 
+Andreas Dilger
+
+Lustre Software Architect
+Intel High Performance Data Division
+
+
+--
+To unsubscribe from this list: send the line "unsubscribe linux-nfs" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
