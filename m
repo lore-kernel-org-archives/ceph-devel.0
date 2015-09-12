@@ -1,43 +1,40 @@
-From: "zhao.mingyue@h3c.com" <zhao.mingyue@h3c.com>
-Subject: 2 replications,flapping can not stop for a very long time
-Date: Sat, 12 Sep 2015 12:26:36 +0000
-Message-ID: <1CB94550540AE44E9CAAE8CD5AF40BF846CEB60D@H3CMLB12-EX.srv.huawei-3com.com>
+From: Mike Almateia <mike.almateia@gmail.com>
+Subject: Question about big EC pool.
+Date: Sat, 12 Sep 2015 19:01:01 +0300
+Message-ID: <55F44C3D.4070603@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([60.191.123.56]:3677 "EHLO h3cmg01-ex.h3c.com"
-	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1754507AbbILM0O (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 12 Sep 2015 08:26:14 -0400
-Content-Language: zh-CN
+Received: from mail-la0-f46.google.com ([209.85.215.46]:36751 "EHLO
+	mail-la0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751028AbbILQBI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 12 Sep 2015 12:01:08 -0400
+Received: by lanb10 with SMTP id b10so63792998lan.3
+        for <ceph-devel@vger.kernel.org>; Sat, 12 Sep 2015 09:01:06 -0700 (PDT)
+Received: from [192.168.43.78] ([213.87.146.252])
+        by smtp.gmail.com with ESMTPSA id an1sm888627lac.43.2015.09.12.09.01.05
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Sat, 12 Sep 2015 09:01:06 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-oaGhoQ0KSGksDQpJJ20gdGVzdGluZyByZWxpYWJpbGl0eSBvZiBjZXBoIHJlY2VudGx5LCBhbmQg
-SSBoYXZlIG1ldCB0aGUgZmxhcHBpbmcgcHJvYmxlbS4NCkkgaGF2ZSAyIHJlcGxpY2F0aW9ucywg
-YW5kIGN1dCBvZmYgdGhlIGNsdXN0ZXIgbmV0d29yayAsbm93ICBmbGFwcGluZyBjYW4gbm90IHN0
-b3AsSSBoYXZlIHdhaXQgbW9yZSB0aGFuIDMwbWluLCBidXQgc3RhdHVzIG9mIG9zZHMgYXJlIHN0
-aWxsIG5vdCBzdGFibGU7DQogICAgSSB3YW50IHRvIGtub3cgYWJvdXQgIHdoZW4gbW9uaXRvciBy
-ZWN2IHJlcG9ydHMgZnJvbSBvc2RzICxob3cgaXQgY2FuIG1hcmsgb25lIG9zZCBkb3duPw0KICAg
-IChyZXBvcnRzICYmIHJlcG9ydGVyICYmIGdyYWNlKSBuZWVkIHRvIHNhdGlzZmllZCBzb21lIGNv
-bmRpdGlvbnMsIGhvdyB0byBjYWxjdWxhdGUgdGhlIGdyYWNlPw0KYW5kIGhvdyBsb25nIHdpbGwg
-dGhlIGZsYXBwaW5nICBzdG9wP0RvZXMgdGhlIGZsYXBwaW5nIG11c3QgYmUgc3RvcHBlZCBieSBj
-b25maWd1cmUsc3VjaCBhcyBjb25maWd1cmUgYW4gb3NkIGxvc3Q/DQpDYW4gc29tZW9uZSBoZWxw
-IG1lID8NClRoYW5rc34NCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCrG+08q8/rywxuS4vbz+uqzT0Lq8
-1t27qsj9zajQxby8yvXT0M/euavLvrXEsaPD3NDFz6KjrL32z97T2reiy824+MnPw+a12Na31tDB
-0LP2DQq1xLj2yMu78si61+mho7371rnIzrrOxuTL+8jL0tTIzrrO0M7Kvcq508OjqLD8wKi1q7K7
-z97T2sirsr+78rK/t9a12NC5wrahori01sahog0Ku/LJoreio6mxvtPKvP7W0LXE0MXPoqGjyOe5
-+8T6tO3K1cHLsb7Tyrz+o6zH68T6waK8tLXnu7C78tPKvP7NqNaqt6K8/sjLsqLJvrP9sb4NCtPK
-vP6joQ0KVGhpcyBlLW1haWwgYW5kIGl0cyBhdHRhY2htZW50cyBjb250YWluIGNvbmZpZGVudGlh
-bCBpbmZvcm1hdGlvbiBmcm9tIEgzQywgd2hpY2ggaXMNCmludGVuZGVkIG9ubHkgZm9yIHRoZSBw
-ZXJzb24gb3IgZW50aXR5IHdob3NlIGFkZHJlc3MgaXMgbGlzdGVkIGFib3ZlLiBBbnkgdXNlIG9m
-IHRoZQ0KaW5mb3JtYXRpb24gY29udGFpbmVkIGhlcmVpbiBpbiBhbnkgd2F5IChpbmNsdWRpbmcs
-IGJ1dCBub3QgbGltaXRlZCB0bywgdG90YWwgb3IgcGFydGlhbA0KZGlzY2xvc3VyZSwgcmVwcm9k
-dWN0aW9uLCBvciBkaXNzZW1pbmF0aW9uKSBieSBwZXJzb25zIG90aGVyIHRoYW4gdGhlIGludGVu
-ZGVkDQpyZWNpcGllbnQocykgaXMgcHJvaGliaXRlZC4gSWYgeW91IHJlY2VpdmUgdGhpcyBlLW1h
-aWwgaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlcg0KYnkgcGhvbmUgb3IgZW1haWwg
-aW1tZWRpYXRlbHkgYW5kIGRlbGV0ZSBpdCENCg==
+Hello!
+
+Ceph have EC pool feature a long time and I thinking how much big EC 
+pool can we made and support.
+
+I have task from our a client to make a storage around 5Pb userful space 
+for storing video from cams (I ask in ceph-user maillist but nobody 
+answer me.)
+
+Ceph by now can handle that huge EC storage or not? May be someone 
+testing or useing in prodaction huge EC pools?
+I heard, that EC feature not ready for production, it's right?
+
+Thanks for any answer.
+
+--
+Mike, yes.
