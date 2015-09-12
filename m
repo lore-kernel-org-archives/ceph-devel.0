@@ -1,51 +1,51 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Question about big EC pool.
-Date: Sat, 12 Sep 2015 16:34:07 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE44457@SACMBXIP01.sdcorp.global.sandisk.com>
+From: Mike Almateia <mike.almateia@gmail.com>
+Subject: Re: Question about big EC pool.
+Date: Sat, 12 Sep 2015 22:12:58 +0300
+Message-ID: <55F4793A.8040802@gmail.com>
 References: <55F44C3D.4070603@gmail.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE44457@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0059.outbound.protection.outlook.com ([207.46.100.59]:63856
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751114AbbILQeL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 12 Sep 2015 12:34:11 -0400
-In-Reply-To: <55F44C3D.4070603@gmail.com>
-Content-Language: en-US
+Received: from mail-la0-f46.google.com ([209.85.215.46]:33845 "EHLO
+	mail-la0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751566AbbILTNG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 12 Sep 2015 15:13:06 -0400
+Received: by lahg1 with SMTP id g1so35412091lah.1
+        for <ceph-devel@vger.kernel.org>; Sat, 12 Sep 2015 12:13:03 -0700 (PDT)
+Received: from [192.168.10.33] ([37.204.142.248])
+        by smtp.gmail.com with ESMTPSA id b1sm1000849lah.11.2015.09.12.12.13.02
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Sat, 12 Sep 2015 12:13:02 -0700 (PDT)
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE44457@SACMBXIP01.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mike Almateia <mike.almateia@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-SSBkb24ndCB0aGluayB0aGVyZSBpcyBhbnkgbGltaXQgZnJvbSBDZXBoIHNpZGUuLg0KV2UgYXJl
-IHRlc3Rpbmcgd2l0aCB+NzY4IFRCIGRlcGxveW1lbnQgd2l0aCA0OjIgRUMgb24gRmxhc2ggYW5k
-IGl0IGlzIHdvcmtpbmcgd2VsbCBzbyBmYXIuLg0KDQpUaGFua3MgJiBSZWdhcmRzDQpTb21uYXRo
-DQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZn
-ZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnXSBP
-biBCZWhhbGYgT2YgTWlrZSBBbG1hdGVpYQ0KU2VudDogU2F0dXJkYXksIFNlcHRlbWJlciAxMiwg
-MjAxNSA5OjAxIEFNDQpUbzogY2VwaC1kZXZlbA0KU3ViamVjdDogUXVlc3Rpb24gYWJvdXQgYmln
-IEVDIHBvb2wuDQoNCkhlbGxvIQ0KDQpDZXBoIGhhdmUgRUMgcG9vbCBmZWF0dXJlIGEgbG9uZyB0
-aW1lIGFuZCBJIHRoaW5raW5nIGhvdyBtdWNoIGJpZyBFQyBwb29sIGNhbiB3ZSBtYWRlIGFuZCBz
-dXBwb3J0Lg0KDQpJIGhhdmUgdGFzayBmcm9tIG91ciBhIGNsaWVudCB0byBtYWtlIGEgc3RvcmFn
-ZSBhcm91bmQgNVBiIHVzZXJmdWwgc3BhY2UgZm9yIHN0b3JpbmcgdmlkZW8gZnJvbSBjYW1zIChJ
-IGFzayBpbiBjZXBoLXVzZXIgbWFpbGxpc3QgYnV0IG5vYm9keSBhbnN3ZXIgbWUuKQ0KDQpDZXBo
-IGJ5IG5vdyBjYW4gaGFuZGxlIHRoYXQgaHVnZSBFQyBzdG9yYWdlIG9yIG5vdD8gTWF5IGJlIHNv
-bWVvbmUgdGVzdGluZyBvciB1c2VpbmcgaW4gcHJvZGFjdGlvbiBodWdlIEVDIHBvb2xzPw0KSSBo
-ZWFyZCwgdGhhdCBFQyBmZWF0dXJlIG5vdCByZWFkeSBmb3IgcHJvZHVjdGlvbiwgaXQncyByaWdo
-dD8NCg0KVGhhbmtzIGZvciBhbnkgYW5zd2VyLg0KDQotLQ0KTWlrZSwgeWVzLg0KLS0NClRvIHVu
-c3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBo
-LWRldmVsIiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVs
-Lm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9y
-ZG9tby1pbmZvLmh0bWwNCg0KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCg0KUExF
-QVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1h
-aWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVk
-IHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2Ug
-aXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRo
-YXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSBy
-ZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1l
-c3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBj
-b21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBo
-b25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFu
-eSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0
-aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KDQo=
+12-Sep-15 19:34, Somnath Roy =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
+> I don't think there is any limit from Ceph side..
+> We are testing with ~768 TB deployment with 4:2 EC on Flash and it is=
+ working well so far..
+>
+> Thanks & Regards
+> Somnath
+
+Thanks for answer!
+
+It's very interesting!
+
+What is hardware you use for your the test cluster?
+You use only SSD or SSD+NVE?
+Journal is located on the same SSD or not?
+What a plugin you use?
+You catch some bugs or strange things?
+
+Sorry for so many questions, but it's very interesting!
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
