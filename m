@@ -1,94 +1,73 @@
-From: "zhao.mingyue@h3c.com" <zhao.mingyue@h3c.com>
-Subject: =?utf-8?B?562U5aSNOiAyIHJlcGxpY2F0aW9ucyxmbGFwcGluZyBjYW4gbm90IHN0b3Ag?=
- =?utf-8?Q?for_a_very_long_time?=
-Date: Sun, 13 Sep 2015 06:07:42 +0000
-Message-ID: <1CB94550540AE44E9CAAE8CD5AF40BF846CEB6A5@H3CMLB12-EX.srv.huawei-3com.com>
-References: <1CB94550540AE44E9CAAE8CD5AF40BF846CEB60D@H3CMLB12-EX.srv.huawei-3com.com>
- <CABAwU-bw_65HXAxNCVMkmCXZw4c5F0UBNwNUQwf9wOXbCt=VeA@mail.gmail.com>
+From: Shinobu Kinjo <skinjo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: RGW Keystone interaction (was  Ceph.conf)
+Date: Sun, 13 Sep 2015 02:20:17 -0400 (EDT)
+Message-ID: <276152828.15916829.1442125217473.JavaMail.zimbra@redhat.com>
+References: <1309337249.15903333.1442101488287.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([221.12.31.13]:19861 "EHLO h3cmg01-ex.h3c.com"
-	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751055AbbIMGJ6 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 13 Sep 2015 02:09:58 -0400
-In-Reply-To: <CABAwU-bw_65HXAxNCVMkmCXZw4c5F0UBNwNUQwf9wOXbCt=VeA@mail.gmail.com>
-Content-Language: zh-CN
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: huang jun <hjwsm1989@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <1309337249.15903333.1442101488287.JavaMail.zimbra-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Abhishek L <abhishek.lekshmanan-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-aGksIGRvIHlvdSBzZXQgYm90aCBwdWJsaWNfbmV0d29yayBhbmQgY2x1c3Rlcl9uZXR3b3JrLCBi
-dXQganVzdCBjdXQgb2ZmIHRoZSBjbHVzdGVyX25ldHdvcms/DQpBbmQgZG8geW91IGhhdmUgbm90
-IG9ubHkgb25lIG9zZCBvbiB0aGUgc2FtZSBob3N0Pw0KPT09PT09PT09PT09PT09PT09PT09PT09
-PT09PT15ZXMscHVibGljIG5ldHdvcmsrY2x1c3RlciBuZXR3b3JrLGFuZCBJIGN1dCBvZmYgdGhl
-IGNsdXN0ZXIgbmV0d29yazsgMiBub2RlICxlYWNoIG5vZGUgaGFzIHNlcnZlcmFsIG9zZHM7DQoN
-CklmIHNvLCBtYXliZSB5b3UgY2FuIG5vdCBnZXQgc3RhYmxlLCBub3cgdGhlIG9zZCBoYXZlIHBl
-ZXJzIGluIHRoZSBwcmV2IGFuZCBuZXh0IG9zZCBpZCwgdGhleSBjYW4gZXhjaGFuZ2UgcGluZyBt
-ZXNzYWdlLg0KeW91IGN1dCBvZmYgdGhlIGNsdXN0ZXJfbmV0d29yaywgdGhlIG91dGJveCBwZWVy
-IG9zZHMgY2FuIG5vdCBkZXRlY3QgdGhlIHBpbmcsIHRoZXkgcmVwb3J0cyB0aGUgb3NkIGZhaWx1
-cmUgdG8gTU9OLCBhbmQgTU9OIGdhdGhlciBlbm91Z2ggcmVwb3J0ZXJzIGFuZCByZXBvcnRzLCB0
-aGVuIHRoZSBvc2Qgd2lsbCBiZSBtYXJrZWQgZG93bi4NCj09PT09PT09PT09PT09PT09PT09PT09
-PT09PT09d2hlbiBvc2QgcmVjdiBhIG5ldyBtYXAgYW5kIGl0IGlzIG1hcmtlZCBkb3duLGl0IHRo
-aW5rIE1PTiB3cm9ubHkgbWFyayBtZSBkb3duLHdoYXQgd2lsbCBpdCBkbyxqb2luIHRoZSBjbHVz
-dGVyIGFnYWluIG9yIG90aGVyIGFjdGlvbnM/Y2FuIHlvdSBnaXZlIG1lIHNvbWUgbW9yZSBkZXRh
-aWxlZCBleHBsYW5hdGlvbj8NCg0KQnV0IHRoZSBvc2QgY2FuIHJlcG9ydHMgdG8gTU9OIGJjIHRo
-ZSBwdWJsaWNfbmV0d29yayBpcyBvaywgIE1PTiB0aGlua3MgdGhlIG9zZCB3cm9ubHkgbWFya2Vk
-IGRvd24sIG1hcmsgaXQgdG8gVVAuDQo9PT09PT09PT09PT09PT09PT09PT09PT09PT09PXlvdSBt
-ZWFuIHRoYXQgTU9OIHJlY3YgbWVzc2FnZSBPTkUgVElNRSBmcm9tIHRoaXMgb3NkIHRoZW4gaXQg
-d2lsbCBtYXJrIHRoaXMgb3NkIHVwPyANCg0KU28gZmxhcHBpbmcgaGFwcGVucyBhZ2FpbiBhbmQg
-YWdhaW4uDQo9PT09PT09PT09PT09PT09PT09PT09PT09PT09PSBJIHRyaWVkIDMgcmVwbGljYXRp
-b25zLChwdWJsaWMgbmV0d29yayArIGNsdXN0ZXIgbmV0d29yaywzIG5vZGUsZWFjaCBub2RlIGhh
-cyBzZXJ2ZXJhbCBvc2RzKSxhbHRob3VnaCBpdCB3aWxsIG9jY3VyIGZsYXBwaW5nLGJ1dCBhZnRl
-ciBzZXJ2ZXJhbCBtaW51dGVzIGl0IHdpbGwgYmUgc3RhYmxlLA0KY29tcGFyZWQgd2l0aCAyIHJl
-cGxpY2F0aW9ucyBzaXR1YXRpb24sIEkgd2FpdCBmb3IgdGhlIHNhbWUgaW50ZXJ2YWxzLHRoZSBj
-bHVzdGVyIGNhbiBub3QgYmUgc3RhYmxlOw0Kc28gSSdtIGNvbmZ1c2VkIGFib3V0IHRoZSBtYWNo
-bmlzbSB0aGF0IGhvdyBtb25pdG9yIGNhbiBkZWNpZGUgd2hpY2ggb3NkIGlzIGFjdHVhbGx5IGRv
-d24/DQoNCnRoYW5rcw0KDQotLS0tLemCruS7tuWOn+S7ti0tLS0tDQrlj5Hku7bkuro6IGh1YW5n
-IGp1biBbbWFpbHRvOmhqd3NtMTk4OUBnbWFpbC5jb21dIA0K5Y+R6YCB5pe26Ze0OiAyMDE15bm0
-OeaciDEz5pelIDEwOjM5DQrmlLbku7bkuro6IHpoYW9taW5neXVlIDA5NDQwIChSRCkNCuaKhOmA
-gTogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCuS4u+mimDogUmU6IDIgcmVwbGljYXRpb25z
-LGZsYXBwaW5nIGNhbiBub3Qgc3RvcCBmb3IgYSB2ZXJ5IGxvbmcgdGltZQ0KDQpoaSwgZG8geW91
-IHNldCBib3RoIHB1YmxpY19uZXR3b3JrIGFuZCBjbHVzdGVyX25ldHdvcmssIGJ1dCBqdXN0IGN1
-dCBvZmYgdGhlIGNsdXN0ZXJfbmV0d29yaz8NCkFuZCBkbyB5b3UgaGF2ZSBub3Qgb25seSBvbmUg
-b3NkIG9uIHRoZSBzYW1lIGhvc3Q/DQpJZiBzbywgbWF5YmUgeW91IGNhbiBub3QgZ2V0IHN0YWJs
-ZSwgbm93IHRoZSBvc2QgaGF2ZSBwZWVycyBpbiB0aGUgcHJldiBhbmQgbmV4dCBvc2QgaWQsIHRo
-ZXkgY2FuIGV4Y2hhbmdlIHBpbmcgbWVzc2FnZS4NCnlvdSBjdXQgb2ZmIHRoZSBjbHVzdGVyX25l
-dHdvcmssIHRoZSBvdXRib3ggcGVlciBvc2RzIGNhbiBub3QgZGV0ZWN0IHRoZSBwaW5nLCB0aGV5
-IHJlcG9ydHMgdGhlIG9zZCBmYWlsdXJlIHRvIE1PTiwgYW5kIE1PTiBnYXRoZXIgZW5vdWdoIHJl
-cG9ydGVycyBhbmQgcmVwb3J0cywgdGhlbiB0aGUgb3NkIHdpbGwgYmUgbWFya2VkIGRvd24uDQpC
-dXQgdGhlIG9zZCBjYW4gcmVwb3J0cyB0byBNT04gYmMgdGhlIHB1YmxpY19uZXR3b3JrIGlzIG9r
-LCAgTU9OIHRoaW5rcyB0aGUgb3NkIHdyb25seSBtYXJrZWQgZG93biwgbWFyayBpdCB0byBVUC4N
-ClNvIGZsYXBwaW5nIGhhcHBlbnMgYWdhaW4gYW5kIGFnYWluLg0KDQoyMDE1LTA5LTEyIDIwOjI2
-IEdNVCswODowMCB6aGFvLm1pbmd5dWVAaDNjLmNvbSA8emhhby5taW5neXVlQGgzYy5jb20+Og0K
-Pg0KPiBIaSwNCj4gSSdtIHRlc3RpbmcgcmVsaWFiaWxpdHkgb2YgY2VwaCByZWNlbnRseSwgYW5k
-IEkgaGF2ZSBtZXQgdGhlIGZsYXBwaW5nIHByb2JsZW0uDQo+IEkgaGF2ZSAyIHJlcGxpY2F0aW9u
-cywgYW5kIGN1dCBvZmYgdGhlIGNsdXN0ZXIgbmV0d29yayAsbm93ICBmbGFwcGluZyBjYW4gbm90
-IHN0b3AsSSBoYXZlIHdhaXQgbW9yZSB0aGFuIDMwbWluLCBidXQgc3RhdHVzIG9mIG9zZHMgYXJl
-IHN0aWxsIG5vdCBzdGFibGU7DQo+ICAgICBJIHdhbnQgdG8ga25vdyBhYm91dCAgd2hlbiBtb25p
-dG9yIHJlY3YgcmVwb3J0cyBmcm9tIG9zZHMgLGhvdyBpdCBjYW4gbWFyayBvbmUgb3NkIGRvd24/
-DQo+ICAgICAocmVwb3J0cyAmJiByZXBvcnRlciAmJiBncmFjZSkgbmVlZCB0byBzYXRpc2ZpZWQg
-c29tZSBjb25kaXRpb25zLCBob3cgdG8gY2FsY3VsYXRlIHRoZSBncmFjZT8NCj4gYW5kIGhvdyBs
-b25nIHdpbGwgdGhlIGZsYXBwaW5nICBzdG9wP0RvZXMgdGhlIGZsYXBwaW5nIG11c3QgYmUgc3Rv
-cHBlZCBieSBjb25maWd1cmUsc3VjaCBhcyBjb25maWd1cmUgYW4gb3NkIGxvc3Q/DQo+IENhbiBz
-b21lb25lIGhlbHAgbWUgPw0KPiBUaGFua3N+DQo+IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCj4gLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQo+
-IOacrOmCruS7tuWPiuWFtumZhOS7tuWQq+acieadreW3nuWNjuS4iemAmuS/oeaKgOacr+aciemZ
-kOWFrOWPuOeahOS/neWvhuS/oeaBr++8jOS7hemZkOS6juWPkemAgee7meS4iumdouWcsOWdgOS4
-reWIl+WHug0KPiDnmoTkuKrkurrmiJbnvqTnu4TjgILnpoHmraLku7vkvZXlhbbku5bkurrku6Xk
-u7vkvZXlvaLlvI/kvb/nlKjvvIjljIXmi6zkvYbkuI3pmZDkuo7lhajpg6jmiJbpg6jliIblnLDm
-s4TpnLLjgIHlpI3liLbjgIENCj4g5oiW5pWj5Y+R77yJ5pys6YKu5Lu25Lit55qE5L+h5oGv44CC
-5aaC5p6c5oKo6ZSZ5pS25LqG5pys6YKu5Lu277yM6K+35oKo56uL5Y2z55S16K+d5oiW6YKu5Lu2
-6YCa55+l5Y+R5Lu25Lq65bm25Yig6Zmk5pysDQo+IOmCruS7tu+8gQ0KPiBUaGlzIGUtbWFpbCBh
-bmQgaXRzIGF0dGFjaG1lbnRzIGNvbnRhaW4gY29uZmlkZW50aWFsIGluZm9ybWF0aW9uIGZyb20g
-DQo+IEgzQywgd2hpY2ggaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHBlcnNvbiBvciBlbnRpdHkg
-d2hvc2UgYWRkcmVzcyBpcyANCj4gbGlzdGVkIGFib3ZlLiBBbnkgdXNlIG9mIHRoZSBpbmZvcm1h
-dGlvbiBjb250YWluZWQgaGVyZWluIGluIGFueSB3YXkgDQo+IChpbmNsdWRpbmcsIGJ1dCBub3Qg
-bGltaXRlZCB0bywgdG90YWwgb3IgcGFydGlhbCBkaXNjbG9zdXJlLCANCj4gcmVwcm9kdWN0aW9u
-LCBvciBkaXNzZW1pbmF0aW9uKSBieSBwZXJzb25zIG90aGVyIHRoYW4gdGhlIGludGVuZGVkDQo+
-IHJlY2lwaWVudChzKSBpcyBwcm9oaWJpdGVkLiBJZiB5b3UgcmVjZWl2ZSB0aGlzIGUtbWFpbCBp
-biBlcnJvciwgDQo+IHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSBwaG9uZSBvciBlbWFpbCBp
-bW1lZGlhdGVseSBhbmQgZGVsZXRlIGl0IQ0KDQoNCg0KLS0NCnRoYW5rcw0KaHVhbmdqdW4NCg==
+> Looked a bit more into this, swift apis seem to support the use
+> of an admin tenant, user & token for validating the bearer token,
+> similar to other openstack service which use a service tenant
+> credentials for authenticating.
+
+Yes, it's just working as middleware under Keystone.
+
+>  Though it needs documentation, the configurables `rgw keystone admin
+> tenant`, `rgw keystone admin user` and `rgw keystone admin password`
+> make this possible, so as to avoid configuring the keystone shared
+> admin password compoletely.
+
+It's getting better but still problematic:
+
+    keystonemiddleware.auth_token
+
+> S3 APIs with keystone seem to be a bit more different, apparently
+
+Yes, from codes point of view, it's a bit. But, architecture point of
+view, it's not bit, I think.
+
+> s3tokens interface does seem to allow authenticating without an
+> `X-Auth-Token` in the headers and validates based on the access key,
+> secret key provided to it. So basically not configuring
+> `rgw_keystone_admin_password` seem to work, can you also see if this
+> is the case for you.
+
+Yes, I think so.
+
+I do not say that Keystone is problem. Keystone itself is quite fine.
+
+But what we have to make sure is that OpenStack becomes getting bigger
+than we thought just 4 years ago.
+
+There have been already more components like TripleO which was totally out
+of scope of OpenStack at the beginning.
+
+So it's impossible for Keystone to deal with every single request regarding
+to identities about using OpenStack services properly.
+
+In respect to our page:
+
+  http://ceph.com/docs/giant/radosgw/keystone/
+
+Probably it's better explain why we are using v1 not v2, if we have any
+specific reason.
+
+What do you think?
+
+ Shinobu
