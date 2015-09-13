@@ -1,75 +1,80 @@
-From: "Shetty, Pradeep" <pshetty-FZCUwILI1QrR7s880joybQ@public.gmane.org>
-Subject: Ceph version compatibility with centos(libvirt) and
-	cloudstack
-Date: Sun, 13 Sep 2015 13:13:23 +0000
-Message-ID: <659EF5C7A0B2134793E1A6D463A568A04A863765@DCOENG1-EX-MB6.virtela.cc>
+From: Mike Almateia <mike.almateia@gmail.com>
+Subject: Re: Question about big EC pool.
+Date: Sun, 13 Sep 2015 20:39:18 +0300
+Message-ID: <55F5B4C6.1040606@gmail.com>
+References: <55F44C3D.4070603@gmail.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE44457@SACMBXIP01.sdcorp.global.sandisk.com>
+ <55F4793A.8040802@gmail.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE4473A@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1174105070=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-la0-f49.google.com ([209.85.215.49]:36759 "EHLO
+	mail-la0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752758AbbIMRjW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 13 Sep 2015 13:39:22 -0400
+Received: by lanb10 with SMTP id b10so74023184lan.3
+        for <ceph-devel@vger.kernel.org>; Sun, 13 Sep 2015 10:39:20 -0700 (PDT)
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE4473A@SACMBXIP01.sdcorp.global.sandisk.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
---===============1174105070==
-Content-Language: en-US
-Content-Type: multipart/alternative;
-	boundary="_000_659EF5C7A0B2134793E1A6D463A568A04A863765DCOENG1EXMB6vir_"
-
---_000_659EF5C7A0B2134793E1A6D463A568A04A863765DCOENG1EXMB6vir_
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
-
-Hello,
-
-I am building ceph cluster (0.94.3) using kvm hypervisor in cloudstack, how=
-ever we are unable to add this kvm host in cloudstack.
-
-Please confirm is ceph 0.94.3 compatible with centos 6.5 (libvirt 0.10.2-29=
-) and cloudstack 4.4.2
-
-Thanks,
-Pradeep
-
---_000_659EF5C7A0B2134793E1A6D463A568A04A863765DCOENG1EXMB6vir_
-Content-Type: text/html; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
-
-<html>
-<head>
-<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dus-ascii"=
+13-Sep-15 01:12, Somnath Roy =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
+> 12-Sep-15 19:34, Somnath Roy =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
+>> >I don't think there is any limit from Ceph side..
+>> >We are testing with ~768 TB deployment with 4:2 EC on Flash and it =
+is working well so far..
+>> >
+>> >Thanks & Regards
+>> >Somnath
+> Thanks for answer!
 >
-</head>
-<body>
-<p dir=3D"ltr">Hello,</p>
-<p dir=3D"ltr">I am building ceph cluster (0.94.3) using kvm hypervisor in =
-cloudstack, however we are unable to add this kvm host in cloudstack.</p>
-<p dir=3D"ltr">Please confirm is ceph 0.94.3 compatible with centos 6.5 (li=
-bvirt 0.10.2-29) and cloudstack 4.4.2</p>
-<p dir=3D"ltr">Thanks,<br>
-Pradeep</p>
-</body>
-</html>
+> It's very interesting!
+>
+> What is hardware you use for your the test cluster?
+> [Somnath] Three 256 TB SanDisk's JBOF (IF100) and 2 heads in front of=
+ that , so, total of 6 node cluster. FYI, each IF100 can support max 51=
+2 TB. Heads are with 128GB  RAM and Xeon 2690 V3 dual socket on each of=
+ the server.
 
---_000_659EF5C7A0B2134793E1A6D463A568A04A863765DCOENG1EXMB6vir_--
+What a version of ceph you use?
+How cluster working in degraded state? Performance degradation is huge?
+I think that e5-2690 didn't enough for that flash cluster.
 
---===============1174105070==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+How you have 6 node if as you say "Three 256 TB SanDisk's JBOF (IF100)=20
+and 2 heads in front of that", may be I not realized how IF100 working.
 
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> You use only SSD or SSD+NVE?
+>
+> [Somnath] For now, it is all SSDs.
+>
+> Journal is located on the same SSD or not?
+>
+> [Somnath] Yes, journal is on the same SSD.
+>
+> What a plugin you use?
+>
+> [Somnath] Cauchy_good jerasure.
 
---===============1174105070==--
+You did try the isa plugin?
+
+>
+> You catch some bugs or strange things?
+>
+> [Somnath] So far all is well :-)
+>
+
+It's good :)
+
+Thanks for answer!
+--=20
+Mike, yes.
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
