@@ -1,80 +1,85 @@
-From: Mike Almateia <mike.almateia@gmail.com>
-Subject: Re: Question about big EC pool.
-Date: Sun, 13 Sep 2015 20:39:18 +0300
-Message-ID: <55F5B4C6.1040606@gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Question about big EC pool.
+Date: Sun, 13 Sep 2015 18:25:53 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE44F96@SACMBXIP01.sdcorp.global.sandisk.com>
 References: <55F44C3D.4070603@gmail.com>
  <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE44457@SACMBXIP01.sdcorp.global.sandisk.com>
  <55F4793A.8040802@gmail.com>
  <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE4473A@SACMBXIP01.sdcorp.global.sandisk.com>
+ <55F5B4C6.1040606@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f49.google.com ([209.85.215.49]:36759 "EHLO
-	mail-la0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752758AbbIMRjW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 13 Sep 2015 13:39:22 -0400
-Received: by lanb10 with SMTP id b10so74023184lan.3
-        for <ceph-devel@vger.kernel.org>; Sun, 13 Sep 2015 10:39:20 -0700 (PDT)
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE4473A@SACMBXIP01.sdcorp.global.sandisk.com>
+Received: from mail-by2on0062.outbound.protection.outlook.com ([207.46.100.62]:48952
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753550AbbIMSZ5 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 13 Sep 2015 14:25:57 -0400
+In-Reply-To: <55F5B4C6.1040606@gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Mike Almateia <mike.almateia@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-13-Sep-15 01:12, Somnath Roy =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
-> 12-Sep-15 19:34, Somnath Roy =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
->> >I don't think there is any limit from Ceph side..
->> >We are testing with ~768 TB deployment with 4:2 EC on Flash and it =
-is working well so far..
->> >
->> >Thanks & Regards
->> >Somnath
-> Thanks for answer!
->
-> It's very interesting!
->
-> What is hardware you use for your the test cluster?
-> [Somnath] Three 256 TB SanDisk's JBOF (IF100) and 2 heads in front of=
- that , so, total of 6 node cluster. FYI, each IF100 can support max 51=
-2 TB. Heads are with 128GB  RAM and Xeon 2690 V3 dual socket on each of=
- the server.
-
-What a version of ceph you use?
-How cluster working in degraded state? Performance degradation is huge?
-I think that e5-2690 didn't enough for that flash cluster.
-
-How you have 6 node if as you say "Three 256 TB SanDisk's JBOF (IF100)=20
-and 2 heads in front of that", may be I not realized how IF100 working.
-
-> You use only SSD or SSD+NVE?
->
-> [Somnath] For now, it is all SSDs.
->
-> Journal is located on the same SSD or not?
->
-> [Somnath] Yes, journal is on the same SSD.
->
-> What a plugin you use?
->
-> [Somnath] Cauchy_good jerasure.
-
-You did try the isa plugin?
-
->
-> You catch some bugs or strange things?
->
-> [Somnath] So far all is well :-)
->
-
-It's good :)
-
-Thanks for answer!
---=20
-Mike, yes.
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+PDxpbmxpbmUNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IE1pa2UgQWxtYXRl
+aWEgW21haWx0bzptaWtlLmFsbWF0ZWlhQGdtYWlsLmNvbV0NClNlbnQ6IFN1bmRheSwgU2VwdGVt
+YmVyIDEzLCAyMDE1IDEwOjM5IEFNDQpUbzogU29tbmF0aCBSb3k7IGNlcGgtZGV2ZWwNClN1Ympl
+Y3Q6IFJlOiBRdWVzdGlvbiBhYm91dCBiaWcgRUMgcG9vbC4NCg0KMTMtU2VwLTE1IDAxOjEyLCBT
+b21uYXRoIFJveSDQv9C40YjQtdGCOg0KPiAxMi1TZXAtMTUgMTk6MzQsIFNvbW5hdGggUm95INC/
+0LjRiNC10YI6DQo+PiA+SSBkb24ndCB0aGluayB0aGVyZSBpcyBhbnkgbGltaXQgZnJvbSBDZXBo
+IHNpZGUuLg0KPj4gPldlIGFyZSB0ZXN0aW5nIHdpdGggfjc2OCBUQiBkZXBsb3ltZW50IHdpdGgg
+NDoyIEVDIG9uIEZsYXNoIGFuZCBpdCBpcyB3b3JraW5nIHdlbGwgc28gZmFyLi4NCj4+ID4NCj4+
+ID5UaGFua3MgJiBSZWdhcmRzDQo+PiA+U29tbmF0aA0KPiBUaGFua3MgZm9yIGFuc3dlciENCj4N
+Cj4gSXQncyB2ZXJ5IGludGVyZXN0aW5nIQ0KPg0KPiBXaGF0IGlzIGhhcmR3YXJlIHlvdSB1c2Ug
+Zm9yIHlvdXIgdGhlIHRlc3QgY2x1c3Rlcj8NCj4gW1NvbW5hdGhdIFRocmVlIDI1NiBUQiBTYW5E
+aXNrJ3MgSkJPRiAoSUYxMDApIGFuZCAyIGhlYWRzIGluIGZyb250IG9mIHRoYXQgLCBzbywgdG90
+YWwgb2YgNiBub2RlIGNsdXN0ZXIuIEZZSSwgZWFjaCBJRjEwMCBjYW4gc3VwcG9ydCBtYXggNTEy
+IFRCLiBIZWFkcyBhcmUgd2l0aCAxMjhHQiAgUkFNIGFuZCBYZW9uIDI2OTAgVjMgZHVhbCBzb2Nr
+ZXQgb24gZWFjaCBvZiB0aGUgc2VydmVyLg0KDQpXaGF0IGEgdmVyc2lvbiBvZiBjZXBoIHlvdSB1
+c2U/DQpbU29tbmF0aF0gQXMgb2Ygbm93LCBpdCdzIGdpYW50ICwgYnV0LCB3aWxsIGJlIG1vdmlu
+ZyB0byBIYW1tZXIgc29vbi4uDQoNCkhvdyBjbHVzdGVyIHdvcmtpbmcgaW4gZGVncmFkZWQgc3Rh
+dGU/IFBlcmZvcm1hbmNlIGRlZ3JhZGF0aW9uIGlzIGh1Z2U/DQoNCltTb21uYXRoXSBUaGF0J3Mg
+b25lIG9mIHRoZSByZWFzb24gd2UgYXJlIHVzaW5nIENhdWNoeV9nb29kLCBpdCdzIHBlcmZvcm1h
+bmNlIGluIGRlZ3JhZGVkIHN0YXRlIGlzIG11Y2ggYmV0dGVyLiBCeSByZWR1Y2luZyB0aGUgcmVj
+b3ZlcnkgdHJhZmZpYyAobG93ZXIgdmFsdWVzIG9mIHJlY292ZXJ5IHNldHRpbmdzKSAsIHdlIGFy
+ZSBhYmxlIHRvIGdldCBzaWduaWZpY2FudCBwZXJmb3JtYW5jZSBpbXByb3ZlbWVudCBkdXJpbmcg
+ZGVncmFkZWQgc3RhdGUgYXMgd2VsbC4uLkJUVywgZGVncmFkYXRpb24gd2lsbCBkZXBlbmQgb24g
+aG93IG11Y2ggZGF0YSBjbHVzdGVyIGhhcyB0byByZWNvdmVyLiBJbiBvdXIgY2FzZSwgd2UgYXJl
+IHNlZWluZyB+OCUgZGVncmFkYXRpb24gaWYgc2F5IH42NCBUQiAob25lIGNlcGggbm9kZSkgaXMg
+ZmFpbGVkLCBidXQsIH4yOCUgaWYgfjEyOFRCICgyIG5vZGUpIGlzIGRvd24uIFRoaXMgaXMgZm9y
+IDRNIHJlYWRzLi4NCg0KSSB0aGluayB0aGF0IGU1LTI2OTAgZGlkbid0IGVub3VnaCBmb3IgdGhh
+dCBmbGFzaCBjbHVzdGVyLg0KDQpbU29tbmF0aF0gSW4gb3VyIGNhc2UgYW5kIHNwZWNpYWxseSBm
+b3IgYmlnZ2VyIGJsb2NrIHNpemVzIG9iamVjdCB1c2UgY2FzZXMsIGR1YWwgc29ja2V0IEU1LTI2
+OTAgc2hvdWxkIGJlIG1vcmUgdGhhbiBzdWZmaWNpZW50LiBXZSBhcmUgbm90IGFibGUgdG8gc2F0
+dXJhdGUgdGhhdCBpbiB0aGlzIGNhc2UuIEZvciBzbWFsbGVyIGJsb2NrIHNpemUgYmxvY2sgdXNl
+IGNhc2VzIHdlIGFyZSBhbG1vc3Qgc2F0dXJhdGluZyB0aGUgY3B1cyB3aXRoIG91ciBjb25maWcg
+dGhvdWdoLiBJZiB5b3UgYXJlIHBsYW5uaW5nIHRvIHVzZSBFQyB3aXRoIFJHVyBhbmQgY29uc2lk
+ZXJpbmcgeW91IGhhdmUgb2JqZWN0IHNpemUgYXQgbGVhc3QgMjU2SyBvciBzbywgdGhpcyBjcHUg
+Y29tcGxleCBpcyBnb29kIGVub3VnaCBJTU8uDQoNCg0KSG93IHlvdSBoYXZlIDYgbm9kZSBpZiBh
+cyB5b3Ugc2F5ICJUaHJlZSAyNTYgVEIgU2FuRGlzaydzIEpCT0YgKElGMTAwKSBhbmQgMiBoZWFk
+cyBpbiBmcm9udCBvZiB0aGF0IiwgbWF5IGJlIEkgbm90IHJlYWxpemVkIGhvdyBJRjEwMCB3b3Jr
+aW5nLg0KDQpbU29tbmF0aF0gSXQgaXMgMiBjZXBoIG5vZGVzIGNvbm5lY3RlZCB0byBlYWNoIElG
+MTAwICh5b3UgY2FuIGNvbm5lY3QgdXB0byA4IHNlcnZlcnMgaW4gZnJvbnQpLiBUaGUgSUYxMDAg
+ZHJpdmVzIGFyZSBwYXJ0aXRpb25lZCBiZXR3ZWVuIDIgaGVhZCBzZXJ2ZXJzLiBXZSB1c2VkIDMg
+SUYxMDBzLCBzbywgdG90YWwgMyAqIDIgPSA2IGhlYWQgbm9kZXMgb3IgNiBub2RlIGNlcGggc2Vy
+dmVycy4gSG9wZSB0aGF0IG1ha2Ugc2Vuc2Ugbm93Lg0KDQo+IFlvdSB1c2Ugb25seSBTU0Qgb3Ig
+U1NEK05WRT8NCj4NCj4gW1NvbW5hdGhdIEZvciBub3csIGl0IGlzIGFsbCBTU0RzLg0KPg0KPiBK
+b3VybmFsIGlzIGxvY2F0ZWQgb24gdGhlIHNhbWUgU1NEIG9yIG5vdD8NCj4NCj4gW1NvbW5hdGhd
+IFllcywgam91cm5hbCBpcyBvbiB0aGUgc2FtZSBTU0QuDQo+DQo+IFdoYXQgYSBwbHVnaW4geW91
+IHVzZT8NCj4NCj4gW1NvbW5hdGhdIENhdWNoeV9nb29kIGplcmFzdXJlLg0KDQpZb3UgZGlkIHRy
+eSB0aGUgaXNhIHBsdWdpbj8NCg0KPg0KPiBZb3UgY2F0Y2ggc29tZSBidWdzIG9yIHN0cmFuZ2Ug
+dGhpbmdzPw0KPg0KPiBbU29tbmF0aF0gU28gZmFyIGFsbCBpcyB3ZWxsIDotKQ0KPg0KDQpJdCdz
+IGdvb2QgOikNCg0KVGhhbmtzIGZvciBhbnN3ZXIhDQotLQ0KTWlrZSwgeWVzLg0KDQoNCl9fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fDQoNClBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRp
+b24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQg
+b25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJv
+dmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVj
+aXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRo
+aXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBk
+aXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hp
+Yml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwg
+cGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3du
+IGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhp
+cyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVj
+dHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCg0K
