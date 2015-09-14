@@ -1,82 +1,52 @@
-From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Subject: Re: [rgw] Multi-tenancy support in radosgw
-Date: Mon, 14 Sep 2015 13:57:35 -0700
-Message-ID: <CADRKj5QZqKwGm0_kkR1msjxvwdeCEybVfGK0bQ8dO2Z+b-yDSQ@mail.gmail.com>
-References: <CA+H5UW0Y2Yc7jSG=iZ5bFpSEFsPpb50tgG1FUxRZFihf904yiQ@mail.gmail.com>
+From: GuangYang <yguang11@outlook.com>
+Subject: Priority backfill/recovery based on the degradation level of the PG
+Date: Mon, 14 Sep 2015 14:29:39 -0700
+Message-ID: <BLU175-W372B4EAB4A50AEE222196DF5D0@phx.gbl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f169.google.com ([209.85.214.169]:34070 "EHLO
-	mail-ob0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750951AbbINU5g (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Sep 2015 16:57:36 -0400
-Received: by obbda8 with SMTP id da8so118654786obb.1
-        for <ceph-devel@vger.kernel.org>; Mon, 14 Sep 2015 13:57:36 -0700 (PDT)
-In-Reply-To: <CA+H5UW0Y2Yc7jSG=iZ5bFpSEFsPpb50tgG1FUxRZFihf904yiQ@mail.gmail.com>
+Received: from blu004-omc4s29.hotmail.com ([65.55.111.168]:59500 "EHLO
+	BLU004-OMC4S29.hotmail.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751357AbbINV3j convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 14 Sep 2015 17:29:39 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Radoslaw Zarzynski <rzarzynski@mirantis.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Pete Zaitcev <zaitcev@redhat.com>
+To: "sjust@redhat.com" <sjust@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "dzafman@redhat.com" <dzafman@redhat.com>
 
-On Fri, Sep 11, 2015 at 3:24 PM, Radoslaw Zarzynski
-<rzarzynski@mirantis.com> wrote:
-> Hello,
->
-> It's a well-known trait of radosgw that an user cannot create new
-> bucket with a given name if the name is already occupied by other
-> user's bucket (request to do that will be rejected with 409 Conflict).
-> This behaviour is entirely expected in S3. However, when it comes
-> to Swift API, it turns into huge limitation.
->
-> In my opinion the root cause lies in how radosgw actually handles
-> bucket entry points. They might be seen as symlinks which must
-> be resolved in order to map bucket names exposed to users into
-> concrete bucket instances:
->
->   bucket name -> unique bucket instance ID
->
-> It's completely clear we need to preserve backward compatibility.
-> Thus we cannot simply append ID of user who owns a given
-> bucket to argument list of mapping function. We would have to
-> introduce an indirection layer - bucket namespaces:
->
->   bucket namespace, bucket name -> unique bucket instance ID
->
-> Each already existing user would obtain empty bucket namespace
-> by default. It will be possible to create user  with his own, unique
-> namespace.
->
-> Generally this looks to me as stupidly simple solution. Of course,
-> it has limitations. At the moment I see following things:
->
-> 1. We may need to develop a new mechanism for moving buckets
->     between namespaces in radosgw-admin. The already existing
->     one for linking/unlinking might be not enough.
+Hi Sam,
+We discussed this briefly on IRC, I think it might be better to recap w=
+ith an email.
 
+Currently we schedule the backfill/recovery based on how degrade the PG=
+ is, with a factor distinguishing recovery vs. backfill (recovery alway=
+s has higher priority). The way to calculate the degradation level of a=
+ PG is: {expected_pool_size} - {acting_set_size}. I think there are two=
+ issues with the current approach:
 
-This is a nice to have, not sure we actually need that.
+1. The current {acting_size_size} might not capture the degradation lev=
+el over the past intervals. For example, we have two PGs (Erasure Codin=
+g with 8 data and 3 parity chunks) 1.0 and 1.1:
+=A0 =A0 =A01.1 At t1, PG 1.0's acting set size becomes 8 while PG 1.1's=
+ acting set is 11
+=A0 =A0 =A01.2 At t2, PG 1.1's acting set size becomes 10 while PG 1.1'=
+s acting set is 9
+=A0 =A0 =A01.3 At t3, we start recovering (e.g. mark out some OSDs)
+With the current algorithm, PG 1.1 will recovery first and then PG 1.0 =
+(if the concurrency is configured as 1), however, from a data durabilit=
+y's perspective, the data written between t1 and t2 are more degraded a=
+nd risky.
 
->
-> 2. We will always need ID of namespace in order to access proper
->     bucket entry points. This is not a problem for requests authorized
->     through Keystone/TempAuth because user ID is known and thus
->     BNS may be easily calculated.
->     Anonymous access/TempURL for bucket with non-empty namespace
->     is a different story. In this case BNS must be provided explicitly.
->     Swift resolves the problem by having account name as a part of URL.
->     We could go the same way. This would be extended by decoupling
->     rgw_user used for storage access purposes from the one for
->     authorizing a given operation (RGWOp::verify_permission() method).
->
->
-> I would like to ask for reviews of the idea and feedback.
->
+2. The algorithm does not take EC/replication into account (and EC prof=
+ile), which might be also important go consider the data durability.
 
-I think that it's orthogonal to the whole multi-tenancy issue. It
-might solve a specific requirement, but doesn't address the entire
-scope of multitenancy. But it's probably a good idea to have it
-anyway, as it adds a needed layer of abstraction.
-I also think that we shouldn't treat this as a swift specific issue.
-We should make it configurable and work for both S3 and swift.
+Is my understanding correct here?
 
-Yehuda
+Thanks,
+Guang 		 	   		  --
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
