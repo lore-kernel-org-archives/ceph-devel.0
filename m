@@ -1,37 +1,55 @@
-From: SF Markus Elfring <elfring@users.sourceforge.net>
-Subject: Re: [PATCH 00/39] drop null test before destroy functions
-Date: Mon, 14 Sep 2015 13:55:06 +0200
-Message-ID: <55F6B59A.4040104@users.sourceforge.net>
-References: <1442146532-9100-1-git-send-email-Julia.Lawall@lip6.fr>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: reducing package size / compression time
+Date: Mon, 14 Sep 2015 05:22:46 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1509140522030.23022@cobra.newdream.net>
+References: <55F5FAD2.10802@dachary.org> <alpine.DEB.2.00.1509131839480.23022@cobra.newdream.net> <55F66834.3030909@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-15
-Content-Transfer-Encoding: 7bit
-Return-path: <ecryptfs-owner@vger.kernel.org>
-In-Reply-To: <1442146532-9100-1-git-send-email-Julia.Lawall@lip6.fr>
-Sender: ecryptfs-owner@vger.kernel.org
-To: Julia Lawall <Julia.Lawall@lip6.fr>, kernel-janitors@vger.kernel.org
-Cc: iommu@lists.linux-foundation.org, dccp@vger.kernel.org, dri-devel@lists.freedesktop.org, intel-gfx@lists.freedesktop.org, ecryptfs@vger.kernel.org, dmaengine@vger.kernel.org, sergey.senozhatsky@gmail.com, Dan Williams <dan.j.williams@intel.com>, cluster-devel@redhat.com, intel-wired-lan@lists.osuosl.org, Mitch Williams <mitch.a.williams@intel.com>, John Ronciak <john.ronciak@intel.com>, Matthew Vick <matthew.vick@intel.com>, Don Skidmore <donald.c.skidmore@intel.com>, Carolyn Wyborny <carolyn.wyborny@intel.com>, Shannon Nelson <shannon.nelson@intel.com>, Jesse Brandeburg <jesse.brandeburg@intel.com>, linux-nfs@vger.kernel.org, linux-raid@vger.kernel.org, netdev@vger.kernel.org, linux-atm-general@lists.sourceforge.net, linux-btrfs@vger.kernel.org, linux-nilfs@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mtd@lists.infradead.org, linux-usb@vger.kernel.orglinux
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1782100475-1442233368=:23022"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:56319 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754779AbbINMWs (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 14 Sep 2015 08:22:48 -0400
+In-Reply-To: <55F66834.3030909@dachary.org>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-> Recent commits to kernel/git/torvalds/linux.git have made the following
-> functions able to tolerate NULL arguments:
->
-> kmem_cache_destroy (commit 3942d29918522)
-> mempool_destroy (commit 4e3ca3e033d1)
-> dma_pool_destroy (commit 44d7175da6ea)
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-How do you think about to extend an other SmPL script?
+--557981400-1782100475-1442233368=:23022
+Content-Type: TEXT/PLAIN; charset=windows-1252
+Content-Transfer-Encoding: 8BIT
 
-Related topic:
-scripts/coccinelle/free: Delete NULL test before freeing functions
-https://systeme.lip6.fr/pipermail/cocci/2015-May/001960.html
-https://www.mail-archive.com/cocci@systeme.lip6.fr/msg01855.html
+On Mon, 14 Sep 2015, Loic Dachary wrote:
+> Thanks for the link. Was that effective ?
 
+It appeared to cut out ~17 minutes from the build time, and increased the 
+debuginfo package size by 30%.  Seems like a good trade to me!
 
-> If these changes are OK, I will address the remainder later.
+s
 
-Would anybody like to reuse my general SmPL approach for similar source
-code clean-up?
-
-Regards,
-Markus
+> 
+> On 14/09/2015 03:40, Sage Weil wrote:
+> > On Mon, 14 Sep 2015, Loic Dachary wrote:
+> >> Hi Sage,
+> >>
+> >> You did something to reduce the size (hence the compression time) of the 
+> >> debug packages using 
+> >> https://fedoraproject.org/wiki/Features/DwarfCompressor. Would you be so 
+> >> kind as to remind me which commit does that ?
+> > 
+> > https://github.com/ceph/autobuild-ceph/commit/193864ec69edb4dbb0112bb3ea54e6d2f20b30dd
+> > 
+> > The suggestion came from Boris.
+> > 
+> > sage
+> > 
+> 
+> -- 
+> Loïc Dachary, Artisan Logiciel Libre
+> 
+> 
+--557981400-1782100475-1442233368=:23022--
