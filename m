@@ -1,56 +1,58 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: reducing the size of Ceph debug packages
-Date: Mon, 14 Sep 2015 10:35:38 +0200
-Message-ID: <55F686DA.5000606@dachary.org>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH 33/39] rbd: drop null test before destroy functions
+Date: Mon, 14 Sep 2015 12:53:50 +0300
+Message-ID: <CAOi1vP8W58-RqCnOfLnL5rwF_r=XAxYDgOgqxtLdN2BJ5MBi1Q@mail.gmail.com>
+References: <1442146532-9100-1-git-send-email-Julia.Lawall@lip6.fr>
+	<1442146532-9100-34-git-send-email-Julia.Lawall@lip6.fr>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="2IMfs3OoaxpsfnNK9J4r8XNmAJ8BlwArp"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:54944 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752291AbbINIfn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Sep 2015 04:35:43 -0400
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: James Page <james.page@ubuntu.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1442146532-9100-34-git-send-email-Julia.Lawall@lip6.fr>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Julia Lawall <Julia.Lawall@lip6.fr>
+Cc: sergey.senozhatsky@gmail.com, kernel-janitors@vger.kernel.org, Sage Weil <sage@redhat.com>, Alex Elder <elder@kernel.org>, Ceph Development <ceph-devel@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---2IMfs3OoaxpsfnNK9J4r8XNmAJ8BlwArp
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+On Sun, Sep 13, 2015 at 3:15 PM, Julia Lawall <Julia.Lawall@lip6.fr> wrote:
+> Remove unneeded NULL test.
+>
+> The semantic patch that makes this change is as follows:
+> (http://coccinelle.lip6.fr/)
+>
+> // <smpl>
+> @@ expression x; @@
+> -if (x != NULL) {
+>   \(kmem_cache_destroy\|mempool_destroy\|dma_pool_destroy\)(x);
+>   x = NULL;
+> -}
+> // </smpl>
+>
+> Signed-off-by: Julia Lawall <Julia.Lawall@lip6.fr>
+>
+> ---
+>  drivers/block/rbd.c |    6 ++----
+>  1 file changed, 2 insertions(+), 4 deletions(-)
+>
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index d93a037..0507246 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -5645,10 +5645,8 @@ static int rbd_slab_init(void)
+>         if (rbd_segment_name_cache)
+>                 return 0;
+>  out_err:
+> -       if (rbd_obj_request_cache) {
+> -               kmem_cache_destroy(rbd_obj_request_cache);
+> -               rbd_obj_request_cache = NULL;
+> -       }
+> +       kmem_cache_destroy(rbd_obj_request_cache);
+> +       rbd_obj_request_cache = NULL;
+>
+>         kmem_cache_destroy(rbd_img_request_cache);
+>         rbd_img_request_cache = NULL;
 
-Hi James,
+Applied.
 
-https://fedoraproject.org/wiki/Features/DwarfCompressor is packaged for U=
-buntu (http://packages.ubuntu.com/trusty/dwz) and could be used to reduce=
- the size of the Ceph debug packages. This is how it's done for RPM : htt=
-ps://github.com/ceph/autobuild-ceph/commit/193864ec69edb4dbb0112bb3ea54e6=
-d2f20b30dd but I could not find a  page explaining how to do the same for=
- Ubuntu. Do you happen to have more information on that topic ?
+Thanks,
 
-About half the time required to build Ceph packages is used to compress t=
-he debug packages (ceph-dbg, ceph-test-dbg) and it would be great if we c=
-ould reduce that :-)
-
-Cheers
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---2IMfs3OoaxpsfnNK9J4r8XNmAJ8BlwArp
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlX2htoACgkQ8dLMyEl6F20P6wCgh33eEvi333pPRZ4XFupy8rIF
-kr0An3FF9SChnTkFUij3H2FZGMJXcxpt
-=1bcQ
------END PGP SIGNATURE-----
-
---2IMfs3OoaxpsfnNK9J4r8XNmAJ8BlwArp--
+                Ilya
