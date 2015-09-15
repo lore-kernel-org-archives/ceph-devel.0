@@ -1,58 +1,51 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Backporting from Infernalis and c++11
-Date: Tue, 15 Sep 2015 09:21:47 +0200
-Message-ID: <55F7C70B.4000308@dachary.org>
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: Re: Backporting from Infernalis and c++11
+Date: Tue, 15 Sep 2015 10:11:39 +0200
+Message-ID: <55F7D2BB.2050403@suse.cz>
+References: <55F7C70B.4000308@dachary.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="l7vOdwE4phE0oBQNxi2hd4cdI07JnaXK7"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:55528 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1750698AbbIOHVt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Sep 2015 03:21:49 -0400
-Received: from [10.9.0.6] (unknown [10.0.2.28])
-	by smtp.dmail.dachary.org (Postfix) with ESMTP id B87FC42130
-	for <ceph-devel@vger.kernel.org>; Tue, 15 Sep 2015 09:21:47 +0200 (CEST)
+Received: from mx2.suse.de ([195.135.220.15]:59570 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751477AbbIOILm (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 15 Sep 2015 04:11:42 -0400
+In-Reply-To: <55F7C70B.4000308@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>, ceph-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---l7vOdwE4phE0oBQNxi2hd4cdI07JnaXK7
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+> With Infernalis Ceph move to c++11 (and CMake), we will see more conflicts when backporting bug fixes to Hammer. 
 
-Hi Ceph,
+Good point, Loic!
 
-With Infernalis Ceph move to c++11 (and CMake), we will see more conflict=
-s when backporting bug fixes to Hammer. Any ideas you may have to better =
-deal with this would be most welcome. Since these conflicts will be mostl=
-y cosmetic, they should not be too difficult to resolve. The trick will b=
-e for someone not familiar with the codebase to separate what is cosmetic=
- and what is not.
+> Any ideas you may have to better deal with this would be most welcome.
 
-This does not happen yet, no immediate concern :-) Maybe if we think abou=
-t that well in advance we'll be in a better position to deal with it late=
-r on ?
+A couple thoughts pop into mind.
 
-Cheers
+When I joined the project, I was told that doing backports is a good way
+to get into the codebase, and after some months I can confirm that this
+is true.
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+Loic has literally bent over backwards to help me along the way, and
+thanks to that I have made some progress. Still, the factor determining
+whether a backport is trivial or non-trivial is often my own
+"cluenessness".
 
+I would suggest to developers that they keep backporting in the back of
+their mind as they design and implement bugfixes. Will the backport be
+doable even by a relatively inexperienced backporter? Is there a way to
+make it easier on the backporter?
 
---l7vOdwE4phE0oBQNxi2hd4cdI07JnaXK7
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+I would suggest that it is in the developers' best interest to make a
+little extra effort in this direction, as it will reduce the
+probability of the backporter asking them for help later ;-)
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
+Regards
 
-iEYEARECAAYFAlX3xwsACgkQ8dLMyEl6F22FBQCguaZZ0rpWMD83oCTCveYNCfw3
-6soAn2pISz/Yh48NoPqxhVv8ojIzsyyS
-=ToAl
------END PGP SIGNATURE-----
-
---l7vOdwE4phE0oBQNxi2hd4cdI07JnaXK7--
+-- 
+Nathan Cutler
+Software Engineer Distributed Storage
+SUSE LINUX, s.r.o.
+Tel.: +420 284 084 037
