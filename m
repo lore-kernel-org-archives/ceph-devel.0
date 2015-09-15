@@ -1,91 +1,59 @@
-From: Owen Synge <osynge@suse.com>
-Subject: Brewer's theorem also known as CAP theorem
-Date: Tue, 15 Sep 2015 14:38:20 +0200
-Message-ID: <20150915143820.700c62d0@linux-520c.site>
-References: <1CB94550540AE44E9CAAE8CD5AF40BF846CEB60D@H3CMLB12-EX.srv.huawei-3com.com>
-	<CABAwU-bw_65HXAxNCVMkmCXZw4c5F0UBNwNUQwf9wOXbCt=VeA@mail.gmail.com>
-	<1CB94550540AE44E9CAAE8CD5AF40BF846CEB6A5@H3CMLB12-EX.srv.huawei-3com.com>
-	<CABAwU-YFhMbrvT7ao6c605aJXi2kLiC7wjr3eSAQvAqrNNzCmg@mail.gmail.com>
-	<6F3FA899187F0043BA1827A69DA2F7CC0361EE09@shsmsx102.ccr.corp.intel.com>
-	<1CB94550540AE44E9CAAE8CD5AF40BF846CEC8F1@H3CMLB12-EX.srv.huawei-3com.com>
-	<CAJ4mKGY7p+vDmSaPa5=WjbMHT4XXNK8a9RT19R6ir=A7SvsmRQ@mail.gmail.com>
+From: Huamin Chen <hchen@redhat.com>
+Subject: Re: rbd lock list command failure
+Date: Tue, 15 Sep 2015 09:10:48 -0400 (EDT)
+Message-ID: <1409465566.23543060.1442322647959.JavaMail.zimbra@redhat.com>
+References: <1133197671.21438012.1441816007901.JavaMail.zimbra@redhat.com> <55F74BC5.1070002@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.nue.novell.com ([195.135.221.5]:39568 "EHLO
-	smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751438AbbIOMic (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-	Tue, 15 Sep 2015 08:38:32 -0400
-In-Reply-To: <CAJ4mKGY7p+vDmSaPa5=WjbMHT4XXNK8a9RT19R6ir=A7SvsmRQ@mail.gmail.com>
+Received: from mx5-phx2.redhat.com ([209.132.183.37]:36988 "EHLO
+	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751573AbbIONKu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Sep 2015 09:10:50 -0400
+In-Reply-To: <55F74BC5.1070002@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: "zhao.mingyue@h3c.com" <zhao.mingyue@h3c.com>, "Chen, Xiaoxi" <xiaoxi.chen@intel.com>, huang jun <hjwsm1989@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Mon, 14 Sep 2015 13:57:26 -0700
-Gregory Farnum <gfarnum@redhat.com> wrote:
+Hey Josh,
 
-> The OSD is supposed to stay down if any of the networks are missing.
-> Ceph is a CP system in CAP parlance; there's no such thing as a CA
-> system. ;)
+Indeed, from "ceph -w", I found my client got blacklisted the moment the "rbd lock" command was executed.
 
-I know I am being fussy, but within my team your email was sited that
-you cannot consider ceph as a CA system. Hence I make my argument in
-public so I can be humbled in public.
+I think this might be caused by my configuration that both Ceph OSD and rbd command are running inside the containers on the same host. 
 
-Just to clarify your opinion I site
+Thanks
 
-http://www.infoq.com/articles/cap-twelve-years-later-how-the-rules-have-changed
+Huamin
 
-suggests:
+----- Original Message -----
+From: "Josh Durgin" <josh.durgin@inktank.com>
+To: "Huamin Chen" <hchen@redhat.com>, ceph-devel@vger.kernel.org
+Sent: Monday, September 14, 2015 6:35:49 PM
+Subject: Re: rbd lock list command failure
 
-<quote>
-The CAP theorem states that any networked shared-data system can have
-at most two of three desirable properties.
+On 09/09/2015 09:26 AM, Huamin Chen wrote:
+> Hi
+>
+> Running "rbd lock list" inside a Docker container yields mixed results. Sometimes I can get the right results but most times I just get errors.
+>
+> A good run is like this:
+> [root@host server]# docker run --privileged --net=host -v /dev:/dev -v /sys:/sys ceph/base rbd lock list foo --pool kube --id kube -m host:6789 --key=AQAMgXhVwBCeDhAA9nlPaFyfUSatGD4drFWDvQ==
+> 2015-09-09 16:11:16.812858 7f3337ff5840 -1 did not load config file, using default settings.
+> There is 1 exclusive lock on this image.
+> Locker      ID                                                     Address
+> client.4333 kubelet_lock_magic_host 10.16.154.78:0/1000001
+>
+> Same commands but with error:
+> [root@host server]# docker run --privileged --net=host -v /dev:/dev -v /sys:/sys ceph/base rbd lock list foo --pool kube --id kube -m host:6789 --key=AQAMgXhVwBCeDhAA9nlPaFyfUSatGD4drFWDvQ==
+> 2015-09-09 16:11:30.430345 7f4159766840 -1 did not load config file, using default settings.
+> 2015-09-09 16:11:30.464193 7f4159766840 -1 librbd::ImageCtx: error finding header: (108) Cannot send after transport endpoint shutdown
+> rbd: error opening image foo: (108) Cannot send after transport endpoint shutdown
 
-* consistency (C) equivalent to having a single up-to-date copy of
-    the data;
-* high availability (A) of that data (for updates)
-* tolerance to network partitions (P).
-</quote>
-
-So I dispute that a CA system cannot exist.
-
-I think you are too absolute even in interpretation of this vague
-theory. A further quote from the author of said theorem from the same
-article:
-
-<quote>
-The "2 of 3" formulation was always misleading because it tended to
-oversimplify the tensions among properties.
-</quote>
-
-As I understand it:
-
-Ceph as a cluster always provides "Consistency". (or else you found a
-bug)
-
-If a ceph cluster is operating it will always provide acknowledgment
-(it may block) to the client if the operation has succeeded
-or failed hence provides "availability".
-
-if a ceph cluster is partitioned, only one partition will continue
-operation, hence you cannot consider the system "partition" tolerant
-as multiple parts of the system cannot operate when partitioned.
-
-Hence as a cluster ceph is CA.
-
-Alternatively if you look at it from an OSD rather than cluster
-perspective, you can get the perspective you take, OSD's are CP system
-in CAP parlance.
-
-I would argue it is all a matter of perspective, and believe that to
-call Brewer's theorem anything other than guidance without strong
-discussion of your understanding of consistency and its interaction with
-partitioning is to confuse and over simplify.
-
-Best regards
-
-Owen
+Are you using blacklisting? That is the error that a blacklisted client
+gets from rados.
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
