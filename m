@@ -1,94 +1,107 @@
-From: Radoslaw Zarzynski <rzarzynski@mirantis.com>
-Subject: Re: [rgw] Multi-tenancy support in radosgw
-Date: Tue, 15 Sep 2015 13:17:19 +0200
-Message-ID: <CA+H5UW11XJ5Ag8Ye-h7LipOGLoFms-OMNELgb2Lh4pG2WRvEog@mail.gmail.com>
-References: <CA+H5UW0Y2Yc7jSG=iZ5bFpSEFsPpb50tgG1FUxRZFihf904yiQ@mail.gmail.com>
-	<20150914231036.4cb235a0@guren.zaitcev.lan>
+From: Mike Almateia <mike.almateia@gmail.com>
+Subject: Re: Question about big EC pool.
+Date: Tue, 15 Sep 2015 14:32:47 +0300
+Message-ID: <55F801DF.9070908@gmail.com>
+References: <55F44C3D.4070603@gmail.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE44457@SACMBXIP01.sdcorp.global.sandisk.com>
+ <55F4793A.8040802@gmail.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE4473A@SACMBXIP01.sdcorp.global.sandisk.com>
+ <55F5B4C6.1040606@gmail.com>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE44F96@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f174.google.com ([209.85.212.174]:37790 "EHLO
-	mail-wi0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750750AbbIOLRU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Sep 2015 07:17:20 -0400
-Received: by wicfx3 with SMTP id fx3so22291466wic.0
-        for <ceph-devel@vger.kernel.org>; Tue, 15 Sep 2015 04:17:19 -0700 (PDT)
-In-Reply-To: <20150914231036.4cb235a0@guren.zaitcev.lan>
+Received: from mail-la0-f51.google.com ([209.85.215.51]:34409 "EHLO
+	mail-la0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751005AbbIOLcu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Sep 2015 07:32:50 -0400
+Received: by lahg1 with SMTP id g1so75770670lah.1
+        for <ceph-devel@vger.kernel.org>; Tue, 15 Sep 2015 04:32:48 -0700 (PDT)
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE44F96@SACMBXIP01.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Pete Zaitcev <zaitcev@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+To: Somnath Roy <Somnath.Roy@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hello Pete,
-
-On Tue, Sep 15, 2015 at 7:10 AM, Pete Zaitcev <zaitcev@redhat.com> wrote:
-> On Sat, 12 Sep 2015 00:24:27 +0200
-> Radoslaw Zarzynski <rzarzynski@mirantis.com> wrote:
+13-Sep-15 21:25, Somnath Roy =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
+> <<inline
 >
->> Each already existing user would obtain empty bucket namespace
->> by default. It will be possible to create user  with his own, unique
->> namespace. [...]
+> -----Original Message-----
+> From: Mike Almateia [mailto:mike.almateia@gmail.com]
+> Sent: Sunday, September 13, 2015 10:39 AM
+> To: Somnath Roy; ceph-devel
+> Subject: Re: Question about big EC pool.
 >
->> 2. We will always need ID of namespace in order to access proper
->>     bucket entry points. [...]
+> 13-Sep-15 01:12, Somnath Roy =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
+>> 12-Sep-15 19:34, Somnath Roy =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
+>>>> I don't think there is any limit from Ceph side..
+>>>> We are testing with ~768 TB deployment with 4:2 EC on Flash and it=
+ is working well so far..
+>>>>
+>>>> Thanks & Regards
+>>>> Somnath
+>> Thanks for answer!
+>>
+>> It's very interesting!
+>>
+>> What is hardware you use for your the test cluster?
+>> [Somnath] Three 256 TB SanDisk's JBOF (IF100) and 2 heads in front o=
+f that , so, total of 6 node cluster. FYI, each IF100 can support max 5=
+12 TB. Heads are with 128GB  RAM and Xeon 2690 V3 dual socket on each o=
+f the server.
 >
->> I would like to ask for reviews of the idea and feedback.
+> What a version of ceph you use?
+> [Somnath] As of now, it's giant , but, will be moving to Hammer soon.=
+=2E
 >
-> I still don't understand how this is different from tenants in wip-5073.
-> Each tenant defines what amounts to a namespace for buckets. Could you
-> clear this up? I heard you discussing it a little bit during the RGW
-> team stand-up call, but I can't wrap my head around it.
+Good, may be you write a result perfomance/benefits after migrating to=20
+Hammer?
 
-Tenant is much more wider concept. In wip-5073 not only bucket entry
-points got a prefix, but account as well. This huge, global namespace
-was called tenant. In effect, listing of RADOS pool storing serialized
-RGWUserInfo and buckets register for a given account was looking like
-the following example:
-
-  $ rados -p .users.uid ls
-  68a23e70b5854263ab64f2ddc16c2a38:68a23e70b5854263ab64f2ddc16c2a38.buckets
-  68a23e70b5854263ab64f2ddc16c2a38:68a23e70b5854263ab64f2ddc16c2a38
-
-where '68a23e70b5854263ab64f2ddc16c2a38' in an account ID.
-
-It's also worth to mention that accounts and users in radosgw are
-a bit blurred - RGWUserInfo describes both entities. I'm visualizing
-that as a composition - account always has an owner who is so tightly
-bound to it that they share even a common identifier - UID.
-
-
-> Secondly, have you given a thought to exact API here, or is it all
-> hand-waved for now? As you may know, initially I hoped we'd get by
-> without adding any special syntax for tenants. Just off-load it onto
-> the authentication system, I thought. That didn't work and now we
-> have the tenant$user syntax allowed all over.
+> How cluster working in degraded state? Performance degradation is hug=
+e?
 >
-> What I mean by that, a client has to do "swift -U tenant\$user:subuser -K pass"
-> in 5073, and that looks a bit fraught. I presume you avoided that.
+> [Somnath] That's one of the reason we are using Cauchy_good, it's per=
+formance in degraded state is much better. By reducing the recovery tra=
+ffic (lower values of recovery settings) , we are able to get significa=
+nt performance improvement during degraded state as well...BTW, degrada=
+tion will depend on how much data cluster has to recover. In our case, =
+we are seeing ~8% degradation if say ~64 TB (one ceph node) is failed, =
+but, ~28% if ~128TB (2 node) is down. This is for 4M reads..
+>
+Cool, I see now.
 
-Yes, avoiding that was a requirement.
+> I think that e5-2690 didn't enough for that flash cluster.
+>
+> [Somnath] In our case and specially for bigger block sizes object use=
+ cases, dual socket E5-2690 should be more than sufficient. We are not =
+able to saturate that in this case. For smaller block size block use ca=
+ses we are almost saturating the cpus with our config though. If you ar=
+e planning to use EC with RGW and considering you have object size at l=
+east 256K or so, this cpu complex is good enough IMO.
+>
 
+Ok.
 
-> Specifically though, imagine I'm doing "radosgw-admin user info",
-> what do I get under your plan?
+>
+> How you have 6 node if as you say "Three 256 TB SanDisk's JBOF (IF100=
+) and 2 heads in front of that", may be I not realized how IF100 workin=
+g.
+>
+> [Somnath] It is 2 ceph nodes connected to each IF100 (you can connect=
+ upto 8 servers in front). The IF100 drives are partitioned between 2 h=
+ead servers. We used 3 IF100s, so, total 3 * 2 =3D 6 head nodes or 6 no=
+de ceph servers. Hope that make sense now.
+>
 
-You would get everything as usual with one, small exception - boolean
-indicating whether the account has its own namespace for bucket entry
-points or not. We really need that due to the compatibility with already
-existing clusters.
+Yes, I understood it now.
 
-Of course, S3 also will be able to use non-empty BNS. However, I plan
-to not enforce that.
+Thanks for info!
 
-> P.S. What repo/branch do you use for this? I know you quoted it before,
-> but just so we're at the same place.
-
-Initial BNS implementation has been sent as a pull request [1]. I'm also
-working on separating account's owner from user involved in RGWOp
-authorization process [2] (*::verify_permission methods).
-
-Best regards,
-Radek
-
-[1] https://github.com/ceph/ceph/pull/5872
-[2] https://github.com/rzarzynski/ceph/tree/wip-5073-bns-authsep
+--=20
+Mike, yes.
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
