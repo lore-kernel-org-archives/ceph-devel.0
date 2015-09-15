@@ -1,55 +1,31 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: [Hammer Backports] Status of https://github.com/ceph/ceph/pull/5812
-Date: Tue, 15 Sep 2015 16:09:40 +0200
-Message-ID: <55F826A4.7060908@dachary.org>
-References: <CAP3mxSx8ziqAhQH58eEim1MvwSj6f-A0bBkEey_YA7AtkZCLCQ@mail.gmail.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: gitbuilder mirrors
+Date: Tue, 15 Sep 2015 08:33:04 -0700
+Message-ID: <CAJ4mKGbKbOGVrTb8Lnk6ozNp4EVb2UD+8AdVOasVKTKQAW_u+g@mail.gmail.com>
+References: <CABZ+qqm0JSGgYhAN6cgvb7q7O=57oG1XZhCkeDvFjHr0zpOjKg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="PHx4F4RaxDvuJ7vGXul0Mcw5FApKCaWro"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:55771 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753296AbbIOOJm (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Sep 2015 10:09:42 -0400
-In-Reply-To: <CAP3mxSx8ziqAhQH58eEim1MvwSj6f-A0bBkEey_YA7AtkZCLCQ@mail.gmail.com>
+Received: from mail-wi0-f171.google.com ([209.85.212.171]:32833 "EHLO
+	mail-wi0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753314AbbIOPdG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Sep 2015 11:33:06 -0400
+Received: by wiclk2 with SMTP id lk2so34477901wic.0
+        for <ceph-devel@vger.kernel.org>; Tue, 15 Sep 2015 08:33:05 -0700 (PDT)
+In-Reply-To: <CABZ+qqm0JSGgYhAN6cgvb7q7O=57oG1XZhCkeDvFjHr0zpOjKg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Abhishek Varshney <abhishek.varshney@flipkart.com>, abhishek.lekshmanan@gmail.com
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, ncutler@suse.cz
+To: Dan van der Ster <dan@vanderster.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---PHx4F4RaxDvuJ7vGXul0Mcw5FApKCaWro
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+On Tue, Sep 15, 2015 at 1:13 AM, Dan van der Ster <dan@vanderster.com> wrote:
+> Hi,
+> Downloading from gitbuilder.ceph.com is super slow from where I'm
+> sitting (<100KB/s). Does anyone have a publicly accessible mirror?
+> Cheers, Dan
 
-
-
-On 15/09/2015 12:36, Abhishek Varshney wrote:
-
->   * https://github.com/ceph/ceph/pull/5812 run-make-check-status SUCCES=
-S.
->       o This is the PR with changes to obj_bencher.{cc,h}, and I guess =
-we are waiting for Sage's approval to backport all commits from 9bcf5f0 t=
-o 069d95e along with it.
-
-Correct :-)
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---PHx4F4RaxDvuJ7vGXul0Mcw5FApKCaWro
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEUEARECAAYFAlX4JqQACgkQ8dLMyEl6F21cggCeKVNt/CmtyvCKwiwgo0T+jkm6
-9A4AmPmmcUOdFcRGAJ01Ao6VlJf2T6g=
-=u042
------END PGP SIGNATURE-----
-
---PHx4F4RaxDvuJ7vGXul0Mcw5FApKCaWro--
+I'm not aware of any...it would be pretty bandwidth intensive and
+generally users shouldn't be running off of those. Probably best to
+set up a mirror of the one branch/build you're interested in locally
+if that's necessary.
+-Greg
