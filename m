@@ -1,107 +1,91 @@
-From: Mike Almateia <mike.almateia@gmail.com>
-Subject: Re: Question about big EC pool.
-Date: Tue, 15 Sep 2015 14:32:47 +0300
-Message-ID: <55F801DF.9070908@gmail.com>
-References: <55F44C3D.4070603@gmail.com>
- <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE44457@SACMBXIP01.sdcorp.global.sandisk.com>
- <55F4793A.8040802@gmail.com>
- <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE4473A@SACMBXIP01.sdcorp.global.sandisk.com>
- <55F5B4C6.1040606@gmail.com>
- <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE44F96@SACMBXIP01.sdcorp.global.sandisk.com>
+From: Owen Synge <osynge@suse.com>
+Subject: Brewer's theorem also known as CAP theorem
+Date: Tue, 15 Sep 2015 14:38:20 +0200
+Message-ID: <20150915143820.700c62d0@linux-520c.site>
+References: <1CB94550540AE44E9CAAE8CD5AF40BF846CEB60D@H3CMLB12-EX.srv.huawei-3com.com>
+	<CABAwU-bw_65HXAxNCVMkmCXZw4c5F0UBNwNUQwf9wOXbCt=VeA@mail.gmail.com>
+	<1CB94550540AE44E9CAAE8CD5AF40BF846CEB6A5@H3CMLB12-EX.srv.huawei-3com.com>
+	<CABAwU-YFhMbrvT7ao6c605aJXi2kLiC7wjr3eSAQvAqrNNzCmg@mail.gmail.com>
+	<6F3FA899187F0043BA1827A69DA2F7CC0361EE09@shsmsx102.ccr.corp.intel.com>
+	<1CB94550540AE44E9CAAE8CD5AF40BF846CEC8F1@H3CMLB12-EX.srv.huawei-3com.com>
+	<CAJ4mKGY7p+vDmSaPa5=WjbMHT4XXNK8a9RT19R6ir=A7SvsmRQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f51.google.com ([209.85.215.51]:34409 "EHLO
-	mail-la0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751005AbbIOLcu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Sep 2015 07:32:50 -0400
-Received: by lahg1 with SMTP id g1so75770670lah.1
-        for <ceph-devel@vger.kernel.org>; Tue, 15 Sep 2015 04:32:48 -0700 (PDT)
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE44F96@SACMBXIP01.sdcorp.global.sandisk.com>
+Received: from smtp.nue.novell.com ([195.135.221.5]:39568 "EHLO
+	smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751438AbbIOMic (ORCPT
+	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+	Tue, 15 Sep 2015 08:38:32 -0400
+In-Reply-To: <CAJ4mKGY7p+vDmSaPa5=WjbMHT4XXNK8a9RT19R6ir=A7SvsmRQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: "zhao.mingyue@h3c.com" <zhao.mingyue@h3c.com>, "Chen, Xiaoxi" <xiaoxi.chen@intel.com>, huang jun <hjwsm1989@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-13-Sep-15 21:25, Somnath Roy =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
-> <<inline
->
-> -----Original Message-----
-> From: Mike Almateia [mailto:mike.almateia@gmail.com]
-> Sent: Sunday, September 13, 2015 10:39 AM
-> To: Somnath Roy; ceph-devel
-> Subject: Re: Question about big EC pool.
->
-> 13-Sep-15 01:12, Somnath Roy =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
->> 12-Sep-15 19:34, Somnath Roy =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
->>>> I don't think there is any limit from Ceph side..
->>>> We are testing with ~768 TB deployment with 4:2 EC on Flash and it=
- is working well so far..
->>>>
->>>> Thanks & Regards
->>>> Somnath
->> Thanks for answer!
->>
->> It's very interesting!
->>
->> What is hardware you use for your the test cluster?
->> [Somnath] Three 256 TB SanDisk's JBOF (IF100) and 2 heads in front o=
-f that , so, total of 6 node cluster. FYI, each IF100 can support max 5=
-12 TB. Heads are with 128GB  RAM and Xeon 2690 V3 dual socket on each o=
-f the server.
->
-> What a version of ceph you use?
-> [Somnath] As of now, it's giant , but, will be moving to Hammer soon.=
-=2E
->
-Good, may be you write a result perfomance/benefits after migrating to=20
-Hammer?
+On Mon, 14 Sep 2015 13:57:26 -0700
+Gregory Farnum <gfarnum@redhat.com> wrote:
 
-> How cluster working in degraded state? Performance degradation is hug=
-e?
->
-> [Somnath] That's one of the reason we are using Cauchy_good, it's per=
-formance in degraded state is much better. By reducing the recovery tra=
-ffic (lower values of recovery settings) , we are able to get significa=
-nt performance improvement during degraded state as well...BTW, degrada=
-tion will depend on how much data cluster has to recover. In our case, =
-we are seeing ~8% degradation if say ~64 TB (one ceph node) is failed, =
-but, ~28% if ~128TB (2 node) is down. This is for 4M reads..
->
-Cool, I see now.
+> The OSD is supposed to stay down if any of the networks are missing.
+> Ceph is a CP system in CAP parlance; there's no such thing as a CA
+> system. ;)
 
-> I think that e5-2690 didn't enough for that flash cluster.
->
-> [Somnath] In our case and specially for bigger block sizes object use=
- cases, dual socket E5-2690 should be more than sufficient. We are not =
-able to saturate that in this case. For smaller block size block use ca=
-ses we are almost saturating the cpus with our config though. If you ar=
-e planning to use EC with RGW and considering you have object size at l=
-east 256K or so, this cpu complex is good enough IMO.
->
+I know I am being fussy, but within my team your email was sited that
+you cannot consider ceph as a CA system. Hence I make my argument in
+public so I can be humbled in public.
 
-Ok.
+Just to clarify your opinion I site
 
->
-> How you have 6 node if as you say "Three 256 TB SanDisk's JBOF (IF100=
-) and 2 heads in front of that", may be I not realized how IF100 workin=
-g.
->
-> [Somnath] It is 2 ceph nodes connected to each IF100 (you can connect=
- upto 8 servers in front). The IF100 drives are partitioned between 2 h=
-ead servers. We used 3 IF100s, so, total 3 * 2 =3D 6 head nodes or 6 no=
-de ceph servers. Hope that make sense now.
->
+http://www.infoq.com/articles/cap-twelve-years-later-how-the-rules-have-changed
 
-Yes, I understood it now.
+suggests:
 
-Thanks for info!
+<quote>
+The CAP theorem states that any networked shared-data system can have
+at most two of three desirable properties.
 
---=20
-Mike, yes.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+* consistency (C) equivalent to having a single up-to-date copy of
+    the data;
+* high availability (A) of that data (for updates)
+* tolerance to network partitions (P).
+</quote>
+
+So I dispute that a CA system cannot exist.
+
+I think you are too absolute even in interpretation of this vague
+theory. A further quote from the author of said theorem from the same
+article:
+
+<quote>
+The "2 of 3" formulation was always misleading because it tended to
+oversimplify the tensions among properties.
+</quote>
+
+As I understand it:
+
+Ceph as a cluster always provides "Consistency". (or else you found a
+bug)
+
+If a ceph cluster is operating it will always provide acknowledgment
+(it may block) to the client if the operation has succeeded
+or failed hence provides "availability".
+
+if a ceph cluster is partitioned, only one partition will continue
+operation, hence you cannot consider the system "partition" tolerant
+as multiple parts of the system cannot operate when partitioned.
+
+Hence as a cluster ceph is CA.
+
+Alternatively if you look at it from an OSD rather than cluster
+perspective, you can get the perspective you take, OSD's are CP system
+in CAP parlance.
+
+I would argue it is all a matter of perspective, and believe that to
+call Brewer's theorem anything other than guidance without strong
+discussion of your understanding of consistency and its interaction with
+partitioning is to confuse and over simplify.
+
+Best regards
+
+Owen
