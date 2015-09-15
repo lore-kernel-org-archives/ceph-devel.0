@@ -1,39 +1,74 @@
-From: Mykola Golub <mgolub@mirantis.com>
-Subject: Re: osd: new pool flags: noscrub, nodeep-scrub
-Date: Tue, 15 Sep 2015 08:48:49 +0300
-Message-ID: <20150915054848.GA15539@gmail.com>
-References: <20150911064256.GA12899@gmail.com>
- <CAJ4mKGZPXnH+z=aBp7vLY35pj4JXq6c_Sq1PFknWj5y0fs2-zQ@mail.gmail.com>
- <20150911124704.GB12899@gmail.com>
- <alpine.DEB.2.00.1509110559300.7527@cobra.newdream.net>
- <20150911132422.GC12899@gmail.com>
+From: "zhao.mingyue-vVzyEvZLFYE@public.gmane.org" <zhao.mingyue-vVzyEvZLFYE@public.gmane.org>
+Subject: =?gb2312?b?aGVsbG+jrEkgaGF2ZSBhIHByb2JsZW0gb2YgT1NE?=
+ =?gb2312?b?o6hzdGFydCBPU0QgZGFlbW9uIGlzIE9Lo6wgYWZ0ZXIgMjAgc2Vjb25kcywg?=
+ =?gb2312?b?T1NEIGlzIGRvd26jqQ==?=
+Date: Tue, 15 Sep 2015 07:21:48 +0000
+Message-ID: <1CB94550540AE44E9CAAE8CD5AF40BF846CEDC95@H3CMLB12-EX.srv.huawei-3com.com>
+References: <7B5C2F2226F8AF419D625C6097AD814C5E2753C1@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f182.google.com ([209.85.212.182]:38795 "EHLO
-	mail-wi0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751469AbbIOFsw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Sep 2015 01:48:52 -0400
-Received: by wiclk2 with SMTP id lk2so11364664wic.1
-        for <ceph-devel@vger.kernel.org>; Mon, 14 Sep 2015 22:48:51 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <20150911132422.GC12899@gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <7B5C2F2226F8AF419D625C6097AD814C5E2753C1-JwQOC20i6vT3cnzPNjVLboSsE/coCuR8pWgKQ6/u3Fg@public.gmane.org>
+Content-Language: zh-CN
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+Cc: "zhengbin.08747-vVzyEvZLFYE@public.gmane.org" <zhengbin.08747-vVzyEvZLFYE@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Fri, Sep 11, 2015 at 04:24:23PM +0300, Mykola Golub wrote:
-> On Fri, Sep 11, 2015 at 05:59:56AM -0700, Sage Weil wrote:
-> 
-> > I wonder if, in addition, we should also allow scrub and deep-scrub 
-> > intervals to be set on a per-pool basis?
-> 
-> ceph osd pool set <pool> [deep-]scrub_interval N ?
-> 
-> I could do this too.
-
-https://github.com/ceph/ceph/pull/5922
-
--- 
-Mykola Golub
+SSBjaGVjayB0aGUgbG9nLGl0IGhhcyBhc3NlcnQgbGlrZSB0aHVzLCBzbyB0aGUgT1NEIGRlYW1v
+biBpcyBzdG9wcGVkDQoNCg0KMD4gMjAxNS0wOC0yOCAxNzowMzozNi44OTgxMzkgN2YzMjJhOWIy
+NzAwIC0xIG9zZC9SZXBsaWNhdGVkUEcuY2M6IEluIGZ1bmN0aW9uICd2aXJ0dWFsIHZvaWQgUmVw
+bGljYXRlZFBHOjpvbl9sb2NhbF9yZWNvdmVyKGNvbnN0IGhvYmplY3RfdCYsIGNvbnN0IG9iamVj
+dF9zdGF0X3N1bV90JiwgY29uc3QgT2JqZWN0UmVjb3ZlcnlJbmZvJiwgT2JqZWN0Q29udGV4dFJl
+ZiwgT2JqZWN0U3RvcmU6OlRyYW5zYWN0aW9uKiknIHRocmVhZCA3ZjMyMmE5YjI3MDAgdGltZSAy
+MDE1LTA4LTI4IDE3OjAzOjM2Ljg5NDM3Ng0Kb3NkL1JlcGxpY2F0ZWRQRy5jYzogMjExOiBGQUlM
+RUQgYXNzZXJ0KGlzX3ByaW1hcnkoKSkNCg0KIGNlcGggdmVyc2lvbiAwLjk0LjIgKDVmYjg1NjE0
+Y2E4ZjM1NDI4NGM3MTNhMmY5YzYxMDg2MDcyMGJiZjMpDQogMTogKGNlcGg6Ol9fY2VwaF9hc3Nl
+cnRfZmFpbChjaGFyIGNvbnN0KiwgY2hhciBjb25zdCosIGludCwgY2hhciBjb25zdCopKzB4OGIp
+IFsweGJjMmI4Yl0NCiAyOiAoUmVwbGljYXRlZFBHOjpvbl9sb2NhbF9yZWNvdmVyKGhvYmplY3Rf
+dCBjb25zdCYsIG9iamVjdF9zdGF0X3N1bV90IGNvbnN0JiwgT2JqZWN0UmVjb3ZlcnlJbmZvIGNv
+bnN0Jiwgc3RkOjp0cjE6OnNoYXJlZF9wdHI8T2JqZWN0Q29udGV4dD4sIE9iamVjdFN0b3JlOjpU
+cmFuc2FjdGlvbiopKzB4NGI4KSBbMHg4NTRiYThdDQogMzogKFJlcGxpY2F0ZWRCYWNrZW5kOjpo
+YW5kbGVfcHVzaChwZ19zaGFyZF90LCBQdXNoT3AmLCBQdXNoUmVwbHlPcCosIE9iamVjdFN0b3Jl
+OjpUcmFuc2FjdGlvbiopKzB4MzcwKSBbMHhhMGM0NzBdDQogNDogKFJlcGxpY2F0ZWRCYWNrZW5k
+OjpfZG9fcHVzaChzdGQ6OnRyMTo6c2hhcmVkX3B0cjxPcFJlcXVlc3Q+KSsweDExNykgWzB4YTBj
+N2Y3XQ0KIDU6IChSZXBsaWNhdGVkQmFja2VuZDo6aGFuZGxlX21lc3NhZ2Uoc3RkOjp0cjE6OnNo
+YXJlZF9wdHI8T3BSZXF1ZXN0PikrMHg0MGYpIFsweGExNzY3Zl0NCiA2OiAoUmVwbGljYXRlZFBH
+Ojpkb19yZXF1ZXN0KHN0ZDo6dHIxOjpzaGFyZWRfcHRyPE9wUmVxdWVzdD4mLCBUaHJlYWRQb29s
+OjpUUEhhbmRsZSYpKzB4MTY3KSBbMHg4NDBmNTddDQogNzogKE9TRDo6ZGVxdWV1ZV9vcChib29z
+dDo6aW50cnVzaXZlX3B0cjxQRz4sIHN0ZDo6dHIxOjpzaGFyZWRfcHRyPE9wUmVxdWVzdD4sIFRo
+cmVhZFBvb2w6OlRQSGFuZGxlJikrMHgzZDUpIFsweDZhMGY4NV0NCiA4OiAoT1NEOjpTaGFyZGVk
+T3BXUTo6X3Byb2Nlc3ModW5zaWduZWQgaW50LCBjZXBoOjpoZWFydGJlYXRfaGFuZGxlX2QqKSsw
+eDMzMSkgWzB4NmExNGQxXQ0KIDk6IChTaGFyZGVkVGhyZWFkUG9vbDo6c2hhcmRlZHRocmVhZHBv
+b2xfd29ya2VyKHVuc2lnbmVkIGludCkrMHg4NzUpIFsweGJiMmM4NV0NCiAxMDogKFNoYXJkZWRU
+aHJlYWRQb29sOjpXb3JrVGhyZWFkU2hhcmRlZDo6ZW50cnkoKSsweDEwKSBbMHhiYjRkYTBdDQog
+MTE6ICgoKSsweDgxODIpIFsweDdmMzI0NzdkYzE4Ml0NCiAxMjogKGNsb25lKCkrMHg2ZCkgWzB4
+N2YzMjQ1ZDQ3MDBkXQ0KIE5PVEU6IGEgY29weSBvZiB0aGUgZXhlY3V0YWJsZSwgb3IgYG9iamR1
+bXAgLXJkUyA8ZXhlY3V0YWJsZT5gIGlzIG5lZWRlZCB0byBpbnRlcnByZXQgdGhpcy4NCi0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0NCrG+08q8/rywxuS4vbz+uqzT0Lq81t27qsj9zajQxby8yvXT0M/euavL
+vrXEsaPD3NDFz6KjrL32z97T2reiy824+MnPw+a12Na31tDB0LP2DQq1xLj2yMu78si61+mho737
+1rnIzrrOxuTL+8jL0tTIzrrO0M7Kvcq508OjqLD8wKi1q7K7z97T2sirsr+78rK/t9a12NC5wrah
+ori01sahog0Ku/LJoreio6mxvtPKvP7W0LXE0MXPoqGjyOe5+8T6tO3K1cHLsb7Tyrz+o6zH68T6
+waK8tLXnu7C78tPKvP7NqNaqt6K8/sjLsqLJvrP9sb4NCtPKvP6joQ0KVGhpcyBlLW1haWwgYW5k
+IGl0cyBhdHRhY2htZW50cyBjb250YWluIGNvbmZpZGVudGlhbCBpbmZvcm1hdGlvbiBmcm9tIEgz
+Qywgd2hpY2ggaXMNCmludGVuZGVkIG9ubHkgZm9yIHRoZSBwZXJzb24gb3IgZW50aXR5IHdob3Nl
+IGFkZHJlc3MgaXMgbGlzdGVkIGFib3ZlLiBBbnkgdXNlIG9mIHRoZQ0KaW5mb3JtYXRpb24gY29u
+dGFpbmVkIGhlcmVpbiBpbiBhbnkgd2F5IChpbmNsdWRpbmcsIGJ1dCBub3QgbGltaXRlZCB0bywg
+dG90YWwgb3IgcGFydGlhbA0KZGlzY2xvc3VyZSwgcmVwcm9kdWN0aW9uLCBvciBkaXNzZW1pbmF0
+aW9uKSBieSBwZXJzb25zIG90aGVyIHRoYW4gdGhlIGludGVuZGVkDQpyZWNpcGllbnQocykgaXMg
+cHJvaGliaXRlZC4gSWYgeW91IHJlY2VpdmUgdGhpcyBlLW1haWwgaW4gZXJyb3IsIHBsZWFzZSBu
+b3RpZnkgdGhlIHNlbmRlcg0KYnkgcGhvbmUgb3IgZW1haWwgaW1tZWRpYXRlbHkgYW5kIGRlbGV0
+ZSBpdCENCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmNl
+cGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDovL2xp
+c3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
