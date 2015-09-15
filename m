@@ -1,52 +1,39 @@
-From: Pete Zaitcev <zaitcev@redhat.com>
-Subject: Re: [rgw] Multi-tenancy support in radosgw
-Date: Mon, 14 Sep 2015 23:10:36 -0600
-Message-ID: <20150914231036.4cb235a0@guren.zaitcev.lan>
-References: <CA+H5UW0Y2Yc7jSG=iZ5bFpSEFsPpb50tgG1FUxRZFihf904yiQ@mail.gmail.com>
+From: Mykola Golub <mgolub@mirantis.com>
+Subject: Re: osd: new pool flags: noscrub, nodeep-scrub
+Date: Tue, 15 Sep 2015 08:48:49 +0300
+Message-ID: <20150915054848.GA15539@gmail.com>
+References: <20150911064256.GA12899@gmail.com>
+ <CAJ4mKGZPXnH+z=aBp7vLY35pj4JXq6c_Sq1PFknWj5y0fs2-zQ@mail.gmail.com>
+ <20150911124704.GB12899@gmail.com>
+ <alpine.DEB.2.00.1509110559300.7527@cobra.newdream.net>
+ <20150911132422.GC12899@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:32937 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751536AbbIOFKi (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 15 Sep 2015 01:10:38 -0400
-In-Reply-To: <CA+H5UW0Y2Yc7jSG=iZ5bFpSEFsPpb50tgG1FUxRZFihf904yiQ@mail.gmail.com>
+Received: from mail-wi0-f182.google.com ([209.85.212.182]:38795 "EHLO
+	mail-wi0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751469AbbIOFsw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Sep 2015 01:48:52 -0400
+Received: by wiclk2 with SMTP id lk2so11364664wic.1
+        for <ceph-devel@vger.kernel.org>; Mon, 14 Sep 2015 22:48:51 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <20150911132422.GC12899@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Radoslaw Zarzynski <rzarzynski@mirantis.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Yehuda Sadeh-Weinraub <yehuda@redhat.com>, zaitcev@redhat.com
+To: Sage Weil <sweil@redhat.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Sat, 12 Sep 2015 00:24:27 +0200
-Radoslaw Zarzynski <rzarzynski@mirantis.com> wrote:
+On Fri, Sep 11, 2015 at 04:24:23PM +0300, Mykola Golub wrote:
+> On Fri, Sep 11, 2015 at 05:59:56AM -0700, Sage Weil wrote:
+> 
+> > I wonder if, in addition, we should also allow scrub and deep-scrub 
+> > intervals to be set on a per-pool basis?
+> 
+> ceph osd pool set <pool> [deep-]scrub_interval N ?
+> 
+> I could do this too.
 
-> Each already existing user would obtain empty bucket namespace
-> by default. It will be possible to create user  with his own, unique
-> namespace. [...]
+https://github.com/ceph/ceph/pull/5922
 
-> 2. We will always need ID of namespace in order to access proper
->     bucket entry points. [...]
-
-> I would like to ask for reviews of the idea and feedback.
-
-I still don't understand how this is different from tenants in wip-5073.
-Each tenant defines what amounts to a namespace for buckets. Could you
-clear this up? I heard you discussing it a little bit during the RGW
-team stand-up call, but I can't wrap my head around it.
-
-Secondly, have you given a thought to exact API here, or is it all
-hand-waved for now? As you may know, initially I hoped we'd get by
-without adding any special syntax for tenants. Just off-load it onto
-the authentication system, I thought. That didn't work and now we
-have the tenant$user syntax allowed all over.
-
-What I mean by that, a client has to do "swift -U tenant\$user:subuser -K pass"
-in 5073, and that looks a bit fraught. I presume you avoided that.
-
-Specifically though, imagine I'm doing "radosgw-admin user info",
-what do I get under your plan?
-
--- Pete
-
-P.S. What repo/branch do you use for this? I know you quoted it before,
-but just so we're at the same place.
+-- 
+Mykola Golub
