@@ -1,64 +1,66 @@
 From: Loic Dachary <loic@dachary.org>
-Subject: Re: Backporting from Infernalis and c++11
-Date: Tue, 15 Sep 2015 12:19:15 +0200
-Message-ID: <55F7F0A3.9090203@dachary.org>
-References: <55F7C70B.4000308@dachary.org> <CALe9h7ex+31ouk+ed0d8XyuzuCw+BscM4bj8TWZ0w-RNgFa-hQ@mail.gmail.com>
+Subject: Re: [Hammer Backports] Status of https://github.com/ceph/ceph/pull/5888
+Date: Tue, 15 Sep 2015 13:06:24 +0200
+Message-ID: <55F7FBB0.4040605@dachary.org>
+References: <CAP3mxSx8ziqAhQH58eEim1MvwSj6f-A0bBkEey_YA7AtkZCLCQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="MkrWEUgOTdm5ilnxnLk4RAbjqwGSmRQXa"
+ boundary="Hcx9vTeUSjM6FLkmQRv4odT3giDdIMjlM"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:55638 "EHLO
+Received: from mail2.dachary.org ([91.121.57.175]:55671 "EHLO
 	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751601AbbIOKTS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Sep 2015 06:19:18 -0400
-In-Reply-To: <CALe9h7ex+31ouk+ed0d8XyuzuCw+BscM4bj8TWZ0w-RNgFa-hQ@mail.gmail.com>
+	with ESMTP id S1751423AbbIOLG1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Sep 2015 07:06:27 -0400
+In-Reply-To: <CAP3mxSx8ziqAhQH58eEim1MvwSj6f-A0bBkEey_YA7AtkZCLCQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Abhishek Varshney <abhishek.varshney@flipkart.com>, abhishek.lekshmanan@gmail.com
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, ncutler@suse.cz
 
 This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---MkrWEUgOTdm5ilnxnLk4RAbjqwGSmRQXa
+--Hcx9vTeUSjM6FLkmQRv4odT3giDdIMjlM
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
 
-Hi John,
 
-On 15/09/2015 12:02, John Spray wrote:
-> On Tue, Sep 15, 2015 at 8:21 AM, Loic Dachary <loic@dachary.org> wrote:=
 
->> With Infernalis Ceph move to c++11 (and CMake), we will see more confl=
-icts when backporting bug fixes to Hammer. Any ideas you may have to bett=
-er deal with this would be most welcome. Since these conflicts will be mo=
-stly cosmetic, they should not be too difficult to resolve. The trick wil=
-l be for someone not familiar with the codebase to separate what is cosme=
-tic and what is not.
->>
->> This does not happen yet, no immediate concern :-) Maybe if we think a=
-bout that well in advance we'll be in a better position to deal with it l=
-ater on ?
+On 15/09/2015 12:36, Abhishek Varshney wrote:
+> Hi Loic/Abhishek,
 >=20
-> I think this came up in conversation but wasn't necessarily made
-> official policy yet -- my understanding is that we are (already)
-> endeavouring to avoid c++11isms in bug fixes, along with the usual
-> principle of fixing bugs in the smallest/neatest patch we can.
+> Here are a few backport PRs which I created and some of them have run-m=
+ake-check failures. I have tried to triage them and this is the summary o=
+f what I could make of. It would be nice if you can have a look at them a=
+nd help me in how to proceed ahead with them.
 >=20
-> Perhaps in cases where those of us working on master mistakenly put
-> something un-backportable in a bug fix, it would be reasonable for the
-> backporter to point it out and poke us for a clean version of the
-> patch.
+>   * https://github.com/ceph/ceph/pull/5888 run-make-check status FAILUR=
+E
+>       o It may require commit 90e5f410ee35a614e1d49771226064d012d8b85e =
+to be in hammer, as per my understanding.
+>=20
 
-We'll do our best but it's very reassuring to know we can rely on you if =
-we struggle with c++11isms :-)
+This is probably non trivial: you could ask for help with a pull request =
+comment like:
 
-Thanks !
+@XinzeChi this commit does not apply cleanly, would you mind taking a loo=
+k ?
+
+http://jenkins.ceph.dachary.org/job/ceph/LABELS=3Dcentos-7&&x86_64/7703/c=
+onsole
+<pre>
+osd/ReplicatedPG.cc:11761:76: error: expected '}' at end of input
+ void intrusive_ptr_release(ReplicatedPG::RepGather *repop) { repop->put(=
+); }
+                                                                         =
+   ^
+osd/ReplicatedPG.cc:11761:76: error: expected '}' at end of input
+</pre>
 
 --=20
 Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
 
---MkrWEUgOTdm5ilnxnLk4RAbjqwGSmRQXa
+--Hcx9vTeUSjM6FLkmQRv4odT3giDdIMjlM
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -66,9 +68,9 @@ Content-Disposition: attachment; filename="signature.asc"
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2.0.22 (GNU/Linux)
 
-iEYEARECAAYFAlX38KMACgkQ8dLMyEl6F20rTwCeMUdYeuBt+eTxsff+jK/HzJei
-rvYAoLSNwQhP6cArIF4pYNLd2A35/ulX
-=juE/
+iEYEARECAAYFAlX3+7AACgkQ8dLMyEl6F20JYACeLuTq2uKu2W4hKkd6MKqYQh6N
+UukAn0WPg1O05G0woVmkZzw3wr1RtYTq
+=C72x
 -----END PGP SIGNATURE-----
 
---MkrWEUgOTdm5ilnxnLk4RAbjqwGSmRQXa--
+--Hcx9vTeUSjM6FLkmQRv4odT3giDdIMjlM--
