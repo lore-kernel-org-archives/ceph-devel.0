@@ -1,121 +1,128 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: Review Request
-Date: Wed, 16 Sep 2015 23:15:57 +0100
-Message-ID: <CALe9h7f-O77BB=gPkujUWtyPVtFW-h8OfO8jKCsSWfmPzpQkQA@mail.gmail.com>
-References: <55F9B061.2090300@redhat.com> <CAJ4mKGbP8K_iMN6AvZW2UwMjjxcEnb0vO2c_k2_3VUWSCWMQKA@mail.gmail.com>
- <55F9BDC1.20501@redhat.com>
+From: Joao Eduardo Luis <joao@suse.de>
+Subject: Re: Very slow recovery/peering with latest master
+Date: Wed, 16 Sep 2015 23:59:16 +0100
+Message-ID: <55F9F444.8060805@suse.de>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE48251@SACMBXIP01.sdcorp.global.sandisk.com> <CAJ4mKGa1vr6Zp9ZUaT8rrHDgRFJgdkO2c8LZqMQuwxwYt7TJ+A@mail.gmail.com> <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE49E1A@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f52.google.com ([209.85.218.52]:32999 "EHLO
-	mail-oi0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752863AbbIPWQR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Sep 2015 18:16:17 -0400
-Received: by oixx17 with SMTP id x17so188303oix.0
-        for <ceph-devel@vger.kernel.org>; Wed, 16 Sep 2015 15:16:17 -0700 (PDT)
-In-Reply-To: <55F9BDC1.20501@redhat.com>
+Received: from mx2.suse.de ([195.135.220.15]:41468 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753281AbbIPW7S (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 16 Sep 2015 18:59:18 -0400
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE49E1A@SACMBXIP01.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Adam C. Emerson" <aemerson@redhat.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, Ceph Developers <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>, Gregory Farnum <gfarnum@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-This is neat, I had been hankering to lambda-ize various things, but
-hadn't worked through what the allocation would looked like in
-practice.
+On 09/16/2015 10:19 PM, Somnath Roy wrote:
+>=20
+> Sage/Greg,
+>=20
+> Yeah, as we expected, it is not happening probably because of recover=
+y settings. I reverted it back in my ceph.conf , but, still seeing this=
+ problem.
+>=20
+> Some observation :
+> ----------------------
+>=20
+> 1. First of all, I don't think it is something related to my environm=
+ent. I recreated the cluster with Hammer and this problem is not there.
+>=20
+> 2. I have enabled the messenger/monclient log (Couldn't attach here) =
+in one of the OSDs and found monitor is taking long time to detect the =
+up OSDs. If you see the log, I have started OSD at 2015-09-16 16:13:07.=
+042463 , but, there is no communication (only getting KEEP_ALIVE) till =
+2015-09-16 16:16:07.180482 , so, 3 mins !!
+>=20
+> 3. During this period, I saw monclient trying to communicate with mon=
+itor but not able to probably. It is sending osd_boot at 2015-09-16 16:=
+16:07.180482 only..
+>=20
+> 2015-09-16 16:16:07.180450 7f65377fe700 10 monclient: _send_mon_messa=
+ge to mon.a at 10.60.194.10:6789/0
+> 2015-09-16 16:16:07.180482 7f65377fe700  1 -- 10.60.194.10:6820/20102=
+ --> 10.60.194.10:6789/0 -- osd_boot(osd.10 booted 0 features 720575940=
+37927935 v45) v6 -- ?+0 0x7f6523c19100 con 0x7f6542045680
+> 2015-09-16 16:16:07.180496 7f65377fe700 20 -- 10.60.194.10:6820/20102=
+ submit_message osd_boot(osd.10 booted 0 features 72057594037927935 v45=
+) v6 remote, 10.60.194.10:6789/0, have pipe.
 
-Do you know if there's a reason the standard is defined so as to not
-let us override the reserved size of a std::function?  Are we taking
-any kind of hit by doing this?
+Is this the only monitor in your cluster? Are there others?
 
-John
+Logs would certainly be helpful. The more the merrier, I'd think.
+
+If you can't send them to the list, please find some place where we can
+reach them, or drop them in cephdrop and point us to them.
+
+Thanks!
+
+  -Joao
 
 
-P.S. I have just gone on Amazon to order a C++11 book because I need
-to start using more than just lambda, auto, and pretty for loops ;-)
 
-On Wed, Sep 16, 2015 at 8:06 PM, Adam C. Emerson <aemerson@redhat.com> wrote:
-> On 09/16/2015 02:31 PM, Gregory Farnum wrote:
->> Can you provide a little background (links or text) for those of us
->> who aren't up on C++11x/14x? I looked at them briefly but having only
->> the vaguest idea about some of them quickly got lost. :)
->
-> Surely, sir.
->
-> So, in summary, Context* is the means we have been using to handle
-> callbacks. It has two big problems:
->
-> (1) Every Context is allocated at the point of use and freed when it's
-> called. So by their nature they make heavy use of the heap. (If you
-> overload complete there's a few exceptions, but by and large Context is
-> very heapy.)
->
-> (2) Context accepts an int. That's it. You can get around this by
-> storing other things in it and passing pointers to it and so forth. But
-> it would be nice to have more variety of type in our callbacks.
->
-> C++11 (and following) have a whole pile of things that can be used as
-> functions. There are function objects (objects with an operator()
-> defined on them), lambdas with variable capture, function member
-> pointers, reference wrappers pointing to function objects and the like.
-> This gives you a good bit of flexibility, allows things like variable
-> capture, let's you allocate one object once and just pass references to
-> it, and so forth.
->
-> Now, these objects all have different sizes and different types. So you
-> can't just shove them in an object naively. Because a class one of whose
-> members is a function pointer is going to be a different type than a
-> class holding a function object. (Which itself is different to a type
-> holding a reference to a function object.)
->
-> std::function exists as a solution to this problem. It provides a
-> uniform type that can hold any object satisfying the requirement of
-> being callable with given argument types and a given return value. So,
-> for example, if you have some 'stat'-like call, you could specify it as
-> taking a function taking an error code, a size, and a date. Anything
-> that can be called with such would be accepted, anything that can't
-> (wrong argument types, say) would be rejected at compile time. And it
-> could be uniformly stored in a list of Operations.
->
-> The downside is that if the thing you provide is too big, std::function
-> will allocate. 'too big' depends on your library vendor and there's no
-> way to find it out what. Thus the purpose of the ceph::function class.
-> If we have a pretty good idea how large most of the callback function
-> objects we expect to hold are, we can tell it to statically allocate
-> that much space. This gives us a tool to get allocations out of our fast
-> path. (For example, if we preallocate a bunch of classes with a
-> ceph::function that preallocates enough space to hold likely callbacks,
-> we can just pick them off and have no allocations, in the usual case.)
->
-> If we know /everything/ we'll ever get, we can disable allocations
-> entirely. This is mostly so we can catch situations where we're trying
-> to shove something unexpectedly huge somewhere it ought not go. An
-> internal sanity check.
->
-> Now, ceph::function, like std::function, is still an abstraction with a
-> virtual call in it and because it copies things around it reduces
-> opportunities for inlining. Thus, if you aren't storing a callback on an
-> object that's supposed to be in a queue, you shouldn't use it. You
-> should do something like:
->
-> template<typename Fun>
-> void do_stuff(Fun&& f) {
->   ...;
->   f(some, values);
-> };
->
-> This allows inlining, and (based on my experiments trying multiple
-> implementations and looking at the generated assembly) if f is called in
-> a loop, the code is just as good as if you'd open-coded the loop and
-> written the body of 'f' in it. Functions like this can have the
-> potential to use closures (lambda expression) effectively for free.
->
-> So, the summary is:
->
-> Context* is very heapy. We have less heapy alternatives. This implements
-> a foundation for one of them. We also get a bit more flexibility.
->
-> Thank you.
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 4. BTW, the osd down scenario is detected very quickly (ceph -w outpu=
+t) , problem is during coming up I guess.
+>=20
+>=20
+> So, something related to mon communication getting slower ?
+> Let me know if more verbose logging is required and how should I shar=
+e the log..
+>=20
+> Thanks & Regards
+> Somnath
+>=20
+> -----Original Message-----
+> From: Gregory Farnum [mailto:gfarnum@redhat.com]
+> Sent: Wednesday, September 16, 2015 11:35 AM
+> To: Somnath Roy
+> Cc: ceph-devel
+> Subject: Re: Very slow recovery/peering with latest master
+>=20
+> On Tue, Sep 15, 2015 at 8:04 PM, Somnath Roy <Somnath.Roy@sandisk.com=
+> wrote:
+>> Hi,
+>> I am seeing very slow recovery when I am adding OSDs with the latest=
+ master.
+>> Also, If I just restart all the OSDs (no IO is going on in the clust=
+er) , cluster is taking a significant amount of time to reach in active=
++clean state (and even detecting all the up OSDs).
+>>
+>> I saw the recovery/backfill default parameters are now changed (to l=
+ower value) , this probably explains the recovery scenario , but, will =
+it affect the peering time during OSD startup as well ?
+>=20
+> I don't think these values should impact peering time, but you could =
+configure them back to the old defaults and see if it changes.
+> -Greg
+>=20
+> ________________________________
+>=20
+> PLEASE NOTE: The information contained in this electronic mail messag=
+e is intended only for the use of the designated recipient(s) named abo=
+ve. If the reader of this message is not the intended recipient, you ar=
+e hereby notified that you have received this message in error and that=
+ any review, dissemination, distribution, or copying of this message is=
+ strictly prohibited. If you have received this communication in error,=
+ please notify the sender by telephone or e-mail (as shown above) immed=
+iately and destroy any and all copies of this message in your possessio=
+n (whether hard copies or electronically stored copies).
+>=20
+> N=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDr=EF=BF=BD=EF=BF=BDy=EF=
+=BF=BD=EF=BF=BD=EF=BF=BDb=EF=BF=BDX=EF=BF=BD=EF=BF=BD=C7=A7v=EF=BF=BD^=EF=
+=BF=BD)=DE=BA{.n=EF=BF=BD+=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD]z=EF=BF=
+=BD=EF=BF=BD=EF=BF=BD{ay=EF=BF=BD=1D=CA=87=DA=99=EF=BF=BD,j=07=EF=BF=BD=
+=EF=BF=BDf=EF=BF=BD=EF=BF=BD=EF=BF=BDh=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=
+=BD=1E=EF=BF=BDw=EF=BF=BD=EF=BF=BD=EF=BF=BD=0C=EF=BF=BD=EF=BF=BD=EF=BF=BD=
+j:+v=EF=BF=BD=EF=BF=BD=EF=BF=BDw=EF=BF=BDj=EF=BF=BDm=EF=BF=BD=EF=BF=BD=EF=
+=BF=BD=EF=BF=BD=07=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDzZ+=EF=BF=BD=EF=BF=
+=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=DD=A2j"=EF=BF=BD=EF=BF=BD!tml=3D
+>=20
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
