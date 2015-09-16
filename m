@@ -1,45 +1,32 @@
-From: "yangruifeng.09209@h3c.com" <yangruifeng.09209@h3c.com>
-Subject: =?utf-8?B?562U5aSNOiBvc2RzIGZ1bGwsIGRlbGV0ZSBzdHVjay4=?=
-Date: Wed, 16 Sep 2015 02:12:23 +0000
-Message-ID: <0C3F6DA3760D0C4691E69E5BE224FF495E153DC6@H3CMLB12-EX.srv.huawei-3com.com>
-References: <5F4E7462F2F4A14E974FBE17B8EB37210DC05AEF@H3CMLB13-EX.srv.huawei-3com.com>
- <alpine.DEB.2.00.1509151841420.23022@cobra.newdream.net>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: Very slow recovery/peering with latest master
+Date: Wed, 16 Sep 2015 03:04:12 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE48251@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([60.191.123.56]:4935 "EHLO h3cmg01-ex.h3c.com"
-	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751272AbbIPCL7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 15 Sep 2015 22:11:59 -0400
-In-Reply-To: <alpine.DEB.2.00.1509151841420.23022@cobra.newdream.net>
-Content-Language: zh-CN
+Received: from mail-by2on0074.outbound.protection.outlook.com ([207.46.100.74]:63520
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751806AbbIPDET convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Sep 2015 23:04:19 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, Chenxiaowei <chen.xiaowei@h3c.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-YSBzaW1wbGUgc29sdXRpb24sDQoNCmluIGNvbmZpZ19vcHRzLmgsIGFkZCBhIGNvbmZpZ3VyYXRp
-b24gaXRlbSBvc2Rfb3BfZm9yY2VfZGVsZXRlLCBkZWZhdWx0IGlzIGZhbHNlIG9yIHRydWU/DQoN
-CmluIHRoZSBjbGFzcyBPcFJlcXVlc++8jGFkZCB0d28gZnVuY3Rpb24gbmVlZF9za2lwX2Z1bGxf
-Y2hlY2soKSwgc2V0X3NraXBfZnVsbF9jaGVjaygpDQoNCmluIHRoZSBPU0Q6OmluaXRfb3BfZmxh
-Z3MsIGFkZCBjaGVja2luZywgaWYgdGhlcmUgaXMgYSBkZWxldGUgb3AgYW5kIG9zZF9vcF9mb3Jj
-ZV9kZWxldGUgaXMgdHVyZSwgY2FsbCBzZXRfc2tpcF9mdWxsX2NoZWNrLg0KDQppbiB0aGUgT1NE
-OjpoYW5kbGVfb3AsIHdoZW4gY2hlY2tpbmcgZnVsbCwgd2UgY2FuIHNraXAgaXQgYnkgbmVlZF9z
-a2lwX2Z1bGxfY2hlY2soKS4NCg0KSXMgdGhhdCBPSz8NCg0KUnVpZmVuZyBZYW5nDQoNCi0tLS0t
-6YKu5Lu25Y6f5Lu2LS0tLS0NCuWPkeS7tuS6ujogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5l
-bC5vcmcgW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10g5Luj6KGoIFNh
-Z2UgV2VpbA0K5Y+R6YCB5pe26Ze0OiAyMDE15bm0OeaciDE25pelIDk6NDMNCuaUtuS7tuS6ujog
-Y2hlbnhpYW93ZWkgMTEyNDUgKFJEKQ0K5oqE6YCBOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9y
-Zw0K5Li76aKYOiBSZTogb3NkcyBmdWxsLCBkZWxldGUgc3R1Y2suDQoNCk9uIFdlZCwgMTYgU2Vw
-IDIwMTUsIENoZW54aWFvd2VpIHdyb3RlOg0KPiANCj4gSGksIFNhZ2U6DQo+IA0KPiDCoMKgwqDC
-oMKgwqDCoMKgIExhdGVseSBteSB0ZWFtIHJ1biBpbnRvIGEgcHJvYmxlbTogd2hlbiBvc2RzIGZ1
-bGwsIHRoZSANCj4gZGVsZXRlL3dyaXRlIHJlcXVlc3Qgc3R1Y2suDQo+IA0KPiBCdXQgd2UgYWxs
-IGFncmVlIHRoYXQgdGhlIGNsdXN0ZXIgc2hvdWxkIG5vdCBzdHVjayB3aGVuIHNlbmRpbmcgZGVs
-ZXRlIA0KPiByZXF1ZXN0LCBjYXVzZSBhZnRlciB0aGF0IG1heWJlIHRoZSBvc2RzIGNhbg0KPiAN
-Cj4gd3JpdGUgYWdhaW4uIFNvIHdoYXQ/cyB5b3VyIGFkdmljZT8gV2lzaCB5b3VyIHJlcGx5LCB0
-aGFua3MuDQoNClRoZSB3b3JrYXJvdW5kIGlzIHRvIHRlbXBvcmFyaWx5IHJhaXNlIHRoZSBmdWxs
-IHRocmVzaG9sZCBzbyB5b3UgY2FuIGRvIHNvbWUgZGVsZXRlcy4gIEJ1dCB5b3UncmUgcmlnaHQg
-dGhhdCBhIHJhZG9zIGRlbGV0ZSBvcGVyYXRpb24gc2hvdWxkIGJlIGFjY2VwdGVkIGluIHRoaXMg
-c3RhdGUuICBJJ3ZlIG9wZW5lZA0KDQoJaHR0cDovL3RyYWNrZXIuY2VwaC5jb20vaXNzdWVzLzEz
-MTEwDQoNCnNhZ2UNCg==
+Hi,
+I am seeing very slow recovery when I am adding OSDs with the latest master.
+Also, If I just restart all the OSDs (no IO is going on in the cluster) , cluster is taking a significant amount of time to reach in active+clean state (and even detecting all the up OSDs).
+
+I saw the recovery/backfill default parameters are now changed (to lower value) , this probably explains the recovery scenario , but, will it affect the peering time during OSD startup as well ?
+
+Thanks & Regards
+Somnath
+
+
+________________________________
+
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+
