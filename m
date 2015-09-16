@@ -1,47 +1,30 @@
 From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: Review Request
-Date: Wed, 16 Sep 2015 11:31:31 -0700
-Message-ID: <CAJ4mKGbP8K_iMN6AvZW2UwMjjxcEnb0vO2c_k2_3VUWSCWMQKA@mail.gmail.com>
-References: <55F9B061.2090300@redhat.com>
+Subject: Re: Very slow recovery/peering with latest master
+Date: Wed, 16 Sep 2015 11:35:06 -0700
+Message-ID: <CAJ4mKGa1vr6Zp9ZUaT8rrHDgRFJgdkO2c8LZqMQuwxwYt7TJ+A@mail.gmail.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE48251@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f173.google.com ([209.85.212.173]:32854 "EHLO
+Received: from mail-wi0-f173.google.com ([209.85.212.173]:37968 "EHLO
 	mail-wi0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752565AbbIPSbd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Sep 2015 14:31:33 -0400
-Received: by wiclk2 with SMTP id lk2so85885864wic.0
-        for <ceph-devel@vger.kernel.org>; Wed, 16 Sep 2015 11:31:31 -0700 (PDT)
-In-Reply-To: <55F9B061.2090300@redhat.com>
+	with ESMTP id S1752633AbbIPSfI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Sep 2015 14:35:08 -0400
+Received: by wiclk2 with SMTP id lk2so83252872wic.1
+        for <ceph-devel@vger.kernel.org>; Wed, 16 Sep 2015 11:35:07 -0700 (PDT)
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE48251@SACMBXIP01.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Adam C. Emerson" <aemerson@redhat.com>
-Cc: Ceph Developers <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, Sep 16, 2015 at 11:09 AM, Adam C. Emerson <aemerson@redhat.com> wrote:
-> Creators of the Storage Squid,
+On Tue, Sep 15, 2015 at 8:04 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
+> Hi,
+> I am seeing very slow recovery when I am adding OSDs with the latest master.
+> Also, If I just restart all the OSDs (no IO is going on in the cluster) , cluster is taking a significant amount of time to reach in active+clean state (and even detecting all the up OSDs).
 >
-> If you're interested in less use of the allocator, you are interested in
-> Context* elimination. If so, please review the top two commits on the
-> wip-decontextualization branch of:
->
-> https://github.com/cohortfsllc/cohortfs-ceph
->
-> They provide an enhanced version of std::function that allows you to
-> specify how much space gets preallocated for function objects or disable
-> allocation entirely.
+> I saw the recovery/backfill default parameters are now changed (to lower value) , this probably explains the recovery scenario , but, will it affect the peering time during OSD startup as well ?
 
-Can you provide a little background (links or text) for those of us
-who aren't up on C++11x/14x? I looked at them briefly but having only
-the vaguest idea about some of them quickly got lost. :)
+I don't think these values should impact peering time, but you could
+configure them back to the old defaults and see if it changes.
 -Greg
-
->
-> Also, I have two pull requests, wip-cxx11time and wip-cxx11concurrency
-> that pass check on which I would appreciate any feedback.
->
-> Thank you, Comrades!
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
