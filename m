@@ -1,49 +1,39 @@
-From: GuangYang <yguang11@outlook.com>
-Subject: RE: Pool setting for recovery priority
-Date: Wed, 16 Sep 2015 10:58:46 -0700
-Message-ID: <BLU175-W18B81CC647AE86275CA3EDF5B0@phx.gbl>
-References: <BLU175-W30B038F9EE84A31BF7D842DF5B0@phx.gbl>,<alpine.DEB.2.00.1509160920120.14342@cobra.newdream.net>
+From: "Adam C. Emerson" <aemerson@redhat.com>
+Subject: Review Request
+Date: Wed, 16 Sep 2015 14:09:37 -0400
+Message-ID: <55F9B061.2090300@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from blu004-omc3s21.hotmail.com ([65.55.116.96]:62786 "EHLO
-	BLU004-OMC3S21.hotmail.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754017AbbIPR6r (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 16 Sep 2015 13:58:47 -0400
-In-Reply-To: <alpine.DEB.2.00.1509160920120.14342@cobra.newdream.net>
+Received: from mx1.redhat.com ([209.132.183.28]:49480 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752825AbbIPSFA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 16 Sep 2015 14:05:00 -0400
+Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
+	by mx1.redhat.com (Postfix) with ESMTPS id 22EA48E69A
+	for <ceph-devel@vger.kernel.org>; Wed, 16 Sep 2015 18:05:00 +0000 (UTC)
+Received: from [10.3.113.191] (ovpn-113-191.phx2.redhat.com [10.3.113.191])
+	by int-mx13.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t8GI4w8v025535
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+	for <ceph-devel@vger.kernel.org>; Wed, 16 Sep 2015 14:04:59 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Weil Sage <sweil@redhat.com>
-Cc: "sjust@redhat.com" <sjust@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ceph Developers <ceph-devel@vger.kernel.org>
 
-VGhhbmtzIFNhZ2UsIGp1c3Qgb3BlbmVkIGEgdHJhY2tlciBmb3IgdGhpcyAtIGh0dHA6Ly90cmFj
-a2VyLmNlcGguY29tL2lzc3Vlcy8xMzEyMS4KClRoYW5rcywKR3VhbmcKCi0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KPiBEYXRlOiBXZWQsIDE2IFNlcCAyMDE1IDA5OjIz
-OjA3IC0wNzAwCj4gRnJvbTogc3dlaWxAcmVkaGF0LmNvbQo+IFRvOiB5Z3VhbmcxMUBvdXRsb29r
-LmNvbQo+IENDOiBzanVzdEByZWRoYXQuY29tOyBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZwo+
-IFN1YmplY3Q6IFJlOiBQb29sIHNldHRpbmcgZm9yIHJlY292ZXJ5IHByaW9yaXR5Cj4KPiBPbiBX
-ZWQsIDE2IFNlcCAyMDE1LCBHdWFuZ1lhbmcgd3JvdGU6Cj4+IEhpIFNhbSwKPj4gQXMgcGFydCBv
-ZiB0aGUgZWZmb3J0IHRvIHNvbHZlIHByb2JsZW1zIHNpbWlsYXIgdG8gaXNzdWUgIzEzMTA0ICho
-dHRwOi8vdHJhY2tlci5jZXBoLmNvbS9pc3N1ZXMvMTMxMDQpLCBkbyB5b3UgdGhpbmsgaXQgaXMg
-YXBwcm9wcmlhdGUgdG8gYWRkIHNvbWUgcGFyYW1ldGVycyB0byBwb29sIHNldHRpbmc6Cj4+IDEu
-IHJlY292ZXJ5IHByaW9yaXR5IG9mIHRoZSBwb29sIC0gd2UgaGF2ZSBhIGN1c3RvbWl6ZWQgcG9v
-bCByZWNvdmVyeSBwcmlvcml0eSAobGlrZSBwcm9jZXNzJ3MgbmljZSB2YWx1ZSkgdG8gZmF2b3Ig
-c29tZSBwb29scyBvdmVyIG90aGVycy4gRm9yIGV4YW1wbGUsIHRoZSBidWNrZXQgaW5kZXggcG9v
-bCBpcyB1c3VhbGx5IG11Y2ggbXVjaCBzbWFsbGVyIGJ1dCBpbXBvcnRhbnQgdG8gcmVjb3ZlciBm
-aXJzdCAoZS5nLiBtaWdodCBhZmZlY3Qgd3JpdGUgbGF0ZW5jeSBhcyBsaWtlIGlzc3VlICMxMzEw
-NCkuCj4+IDIuIHBvb2wgbGV2ZWwgcmVjb3Zlcnkgb3AgcHJpb3JpdHkgLSBjdXJyZW50bHkgd2Ug
-aGF2ZSBhIGxvdyBwcmlvcml0eSBmb3IgcmVjb3Zlcnkgb3AgKGJ5IGRlZmF1bHQgaXQgaXMgMTAg
-d2hpbGUgY2xpZW50IGlvJ3MgcHJpb3JpdHkgaXMgNjMpLCBpcyBpdCBwb3NzaWJsZSB0byBoYXZl
-IGEgcG9vbCBzZXR0aW5nIHRvIGN1c3RvbWl6ZWQgdGhlIHByaW9yaXR5IG9uIHBvb2wgbGV2ZWwu
-Cj4+Cj4+IFRoZSBwdXJwb3NlIGlzIHRvIGdpdmUgc29tZSBmbGV4aWJpbGl0eSBpbiB0ZXJtcyBv
-ZiBmYXZvciBzb21lIHBvb2xzIG92ZXIgb3RoZXJzIHdoZW4gZG9pbmcgcmVjb3ZlcnksIGluIG91
-ciBjYXNlIHVzaW5nIHJhZG9zZ3csIHdlIHdvdWxkIGxpa2UgdG8gZmF2b3IgYnVja2V0IGluZGV4
-IHBvb2wgYXMgdGhhdCBpcyBvbiB0aGUgd3JpdGUgcGF0aCBmb3IgYWxsIHJlcXVlc3RzLgo+Cj4g
-SSB0aGluayB0aGlzIG1ha2VzIHNlbnNlLCBhbmQgaXMgYW5hbG9nb3VzIHRvCj4KPiBodHRwczov
-L2dpdGh1Yi5jb20vY2VwaC9jZXBoL3B1bGwvNTkyMgo+Cj4gd2hpY2ggZG9lcyBwZXItcG9vbCBz
-Y3J1YiBzZXR0aW5ncy4gSSB0aGluayB0aGUgb25seSByZWFsIHF1ZXN0aW9uIGlzCj4gd2hldGhl
-ciBwZ19wb29sX3QgaXMgdGhlIHJpZ2h0IHBsYWNlIHRvIGtlZXAgcGlsaW5nIHRoZXNlIHBhcmFt
-ZXRlcnMgaW4sCj4gb3Igd2hldGhlciB3ZSB3YW50IHNvbWUgdW5zdHJ1Y3R1cmVkIGtleS92YWx1
-ZSBzZXR0aW5ncyBvciBzb21ldGhpbmcuCj4KPiBzYWdlCiAJCSAJICAgCQkgIA==
+Creators of the Storage Squid,
+
+If you're interested in less use of the allocator, you are interested in
+Context* elimination. If so, please review the top two commits on the
+wip-decontextualization branch of:
+
+https://github.com/cohortfsllc/cohortfs-ceph
+
+They provide an enhanced version of std::function that allows you to
+specify how much space gets preallocated for function objects or disable
+allocation entirely.
+
+Also, I have two pull requests, wip-cxx11time and wip-cxx11concurrency
+that pass check on which I would appreciate any feedback.
+
+Thank you, Comrades!
