@@ -1,109 +1,55 @@
-From: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>
-Subject: RE: What should be in the next hammer/firefly release ?
-Date: Wed, 16 Sep 2015 10:37:39 +0000
-Message-ID: <870DE8DBB716524BAE51B2D499EC81E40AB99186@g01jpexmbyt24>
-References: <870DE8DBB716524BAE51B2D499EC81E40AB98467@g01jpexmbyt24>
- <55F16598.2020002@dachary.org>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: 09/16/2015 Weekly Ceph Performance Meeting IS ON!
+Date: Wed, 16 Sep 2015 09:00:03 -0500
+Message-ID: <55F975E3.3050405@redhat.com>
+Reply-To: mnelson@redhat.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mgwkm02.jp.fujitsu.com ([202.219.69.169]:52368 "EHLO
-	mgwkm02.jp.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751637AbbIPKhp (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Sep 2015 06:37:45 -0400
-Received: from g01jpfmpwyt01.exch.g01.fujitsu.local (g01jpfmpwyt01.exch.g01.fujitsu.local [10.128.193.38])
-	by kw-mxoi1.gw.nic.fujitsu.com (Postfix) with ESMTP id 8CFF8AC0098
-	for <ceph-devel@vger.kernel.org>; Wed, 16 Sep 2015 19:37:42 +0900 (JST)
-In-Reply-To: <55F16598.2020002@dachary.org>
-Content-Language: ja-JP
+Received: from mx1.redhat.com ([209.132.183.28]:50945 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753506AbbIPOAF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 16 Sep 2015 10:00:05 -0400
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+	by mx1.redhat.com (Postfix) with ESMTPS id 448ECC0B9190
+	for <ceph-devel@vger.kernel.org>; Wed, 16 Sep 2015 14:00:05 +0000 (UTC)
+Received: from [10.3.112.33] (ovpn-112-33.phx2.redhat.com [10.3.112.33])
+	by int-mx11.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t8GE03xD030224
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+	for <ceph-devel@vger.kernel.org>; Wed, 16 Sep 2015 10:00:04 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
-Cc: "PVonStamwitz@us.fujitsu.com" <PVonStamwitz@us.fujitsu.com>, "Toshine, Naoyoshi" <toshine@jp.fujitsu.com>, "Nakao, Takanori" <nakao.takanori@jp.fujitsu.com>, "Shiozawa, Kensuke" <shiozawa.kennsu@jp.fujitsu.com>, "Kawaguchi, Shotaro" <kawaguchi.s@jp.fujitsu.com>, "Imai, Hiroki" <imai.hiroki@jp.fujitsu.com>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SGkgTG9pYywNCg0KSXQncyBub3Qgc3RyYW5nZSB0aGF0IHlvdSB3b3JyeSBh
-Ym91dCB0aGF0IHNpbmNlIHdlIGhhdmUgY29tbWl0dGVkIGxvdHMgb2YgcHVs
-bCByZXF1ZXN0cw0KaW50byB0aGUgbWFpbiB0cnVuayBzbyBmYXIuDQpIb3dl
-dmVyLCB3ZSBhcmUgY29uc2lkZXJpbmcgZWFjaCBwdWxsIHJlcXVlc3QgYWxy
-ZWFkeSBjb21taXR0ZWQgd2FzIGVpdGhlciBhIGJ1ZyBmaXggb3INCmEgcGVy
-Zm9ybWFuY2UgaW1wcm92ZW1lbnQsIHNvIHdlIGJlbGlldmUgd2UgYXJlIHF1
-YWxpZmllZCB0byBiYWNrcG9ydCB0aGVtIGludG8gaGFtbWVyLg0KQW55d2F5
-LCB3ZSB0cmllZCB0byBiYWNrcG9ydCBpdCBvbiBvdXIgbG9jYWwgcmVwb3Np
-dG9yeSBpbiBvcmRlciB0byBkZWNpZGUgd2hldGhlciBpdCdzIGZlYXNpYmxl
-DQpvciBub3QgYW5kIGZlbHQgdGhhdCBpdCdzIG5vdCBzbyBkaWZmaWN1bHQg
-YWx0aG91Z2ggd2UgaGFkIHRvIHJlc29sdmUgYSBsaXR0bGUgY29tcGxpY2F0
-ZWQgY29uZmxpY3RzLg0KSW4gYWRkaXRpb24sIHdlIGNvdWxkIGhhdmUgc2Vs
-ZWN0ZWQgb25seSBsb2NhbCBjb21taXRzIGluIHNoZWMgZGlyZWN0b3J5IGFu
-ZCBhdm9pZGVkDQpjaGFuZ2luZyBhbnkgZXJhc3VyZSBjb2RlIEkvRi4NCkhl
-cmUgaXMgdGhlIHJlc3VsdCBvZiBvdXIgYmFja3BvcnQgdHJpYWwuDQoNCmh0
-dHBzOi8vZ2l0aHViLmNvbS90LW1peWFtYWUvY2VwaC9jb21taXRzL2hhbW1l
-cg0KDQpXZSBhcmUgdmVyeSBnbGFkIGlmIHlvdSBjb3VsZCBjaGVjayBpdCBv
-dXQgYW5kIGxldCB1cyBrbm93IHlvdXIgb3BpbmlvbiBhZnRlciB0aGF0Lg0K
-V2UgYXJlIHRlc3RpbmcgaXQgb24gb3VyIGNsdXN0ZXIgZm9yIGEgY291cGxl
-IG9mIGRheXMgaW4gcGFyYWxsZWwuDQoNCkJlc3QgcmVnYXJkcywNClRha2Vz
-aGkgTWl5YW1hZQ0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJv
-bTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpj
-ZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9m
-IExvaWMgRGFjaGFyeQ0KU2VudDogVGh1cnNkYXksIFNlcHRlbWJlciAxMCwg
-MjAxNSA4OjEyIFBNDQpUbzogTWl5YW1hZSwgVGFrZXNoaS/lrq7liY0g5Ymb
-OyBDZXBoIERldmVsb3BtZW50DQpDYzogVm9uLVN0YW13aXR6LCBQYXVsOyBU
-b3NoaW5lLCBOYW95b3NoaS/liKnmoLkg55u05L2zOyBTaGlvemF3YSwgS2Vu
-c3VrZS/loanmsqIg6LOi6LyUOyBOYWthbywgVGFrYW5vcmkv5Lit5bC+IOm3
-ueiplA0KU3ViamVjdDogUmU6IFdoYXQgc2hvdWxkIGJlIGluIHRoZSBuZXh0
-IGhhbW1lci9maXJlZmx5IHJlbGVhc2UgPw0KDQpIaSwNCg0KU2luY2UgU0hF
-QyByZWFsbHkgaXMgYSBuZXcgZmVhdHVyZSBpbiBJbmZlcm5hbGlzIChiZWNh
-dXNlIGl0IHdhcyBleHBlcmltZW50YWwgYmVmb3JlKSwgSSdsbCBsZWF2ZSBp
-dCB0byBTYW0gYW5kIFNhZ2UgdG8gZGVjaWRlIGlmIGl0J3MgcmVsZXZhbnQg
-dG8gYmFja3BvcnQgdG8gSGFtbWVyLiBOb3RlIHRoYXQgaXQgZGVwZW5kcyBv
-biBjaGFuZ2VzIGluIHRoZSBlcmFzdXJlIGNvZGUgYmFzZSB0aGF0IGV4dGVu
-ZCB0byBhbGwgcGx1Z2lucy4gQmFja3BvcnRpbmcgd291bGQgdW5mb3J0dW5h
-dGVseSBub3QgYmUgYXMgc2ltcGxlIGFzIGNoZXJyeS1waWNraW5nIHRoZSBj
-b21taXRzIG1vZGlmeWluZyB0aGUgc2hlYyBkaXJlY3Rvcmllcy4NCg0KQ2hl
-ZXJzDQoNCk9uIDEwLzA5LzIwMTUgMTI6NTcsIE1peWFtYWUsIFRha2VzaGkg
-d3JvdGU6DQo+IEhpIExvaWMsDQo+IA0KPiBBcyB0aGUgbGFzdCBwdWxsIHJl
-cXVlc3QgIzUyNTcgd2FzIGNvbW1pdHRlZCBpbnRvIHRoZSBtYWluIHRydW5r
-LCB3ZSANCj4gYmVsaWV2ZSBhbGwgdGhlIFNIRUMgY29kZXMgaW4gbWFpbiB0
-cnVuayBhcmUgcmVhZHkgdG8gYmUgYmFja3BvcnRlZCBpbnRvIEhhbW1lciBi
-cmFuY2guDQo+IFdoYXQgY2FuIHdlIGRvIGF0IHRoaXMgbW9tZW50Pw0KPiAN
-Cj4gQmVzdCByZWdhcmRzLA0KPiBUYWtlc2hpIE1peWFtYWUNCj4gDQo+IC0t
-LS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IE1peWFtYWUsIFRh
-a2VzaGkv5a6u5YmNIOWJmw0KPiBTZW50OiBUaHVyc2RheSwgU2VwdGVtYmVy
-IDMsIDIwMTUgNDowOSBQTQ0KPiBUbzogJ2NlcGgtZGV2ZWwtb3duZXJAdmdl
-ci5rZXJuZWwub3JnJw0KPiBDYzogUGF1bCBWb24tU3RhbXdpdHogKFBWb25T
-dGFtd2l0ekB1cy5mdWppdHN1LmNvbSk7IFRvc2hpbmUsIA0KPiBOYW95b3No
-aS/liKnmoLkg55u05L2zOyBTaGlvemF3YSwgS2Vuc3VrZS/loanmsqIg6LOi
-6LyUOyBOYWthbywgVGFrYW5vcmkv5Lit5bC+IOm3ueiplCANCj4gKG5ha2Fv
-LnRha2Fub3JpQGpwLmZ1aml0c3UuY29tKQ0KPiBTdWJqZWN0OiBSZTogV2hh
-dCBzaG91bGQgYmUgaW4gdGhlIG5leHQgaGFtbWVyL2ZpcmVmbHkgcmVsZWFz
-ZSA/DQo+IA0KPiBEZWFyIExvaWMsDQo+IA0KPiBXZSB3b3VsZCBsaWtlIHRv
-IGxldCBmb2xsb3dpbmcgdHdvIHBhdGNoZXMgYmUgYmFja3BvcnRlZCB0byBo
-YW1tZXIgdjAuOTQuNC4NCj4gKEFuZCBvdXIgd2lzaCBpcyBmaW5hbGx5IGJh
-Y2twb3J0aW5nIHRoZXNlIHBhdGNoZXMgdG8gUkhDUyB2MS4zLikgQ2FuIGl0
-IGJlIHBvc3NpYmxlPyBJZiBwb3NzaWJsZSwgcGxlYXNlIGxldCB1cyBrbm93
-IHdoYXQgc2hvdWxkIGJlIHN0YXJ0ZWQgYXQgZmlyc3QuDQo+IChDYXV0aW9u
-OiAjNTI1NyBoYXMgbm90IGJlZW4gY29tbWl0dGVkIHRvIG1hc3RlciBicmFu
-Y2ggeWV0LikNCj4gDQo+IGVyYXN1cmUtY29kZTogc2hlYyBwbHVnaW4gZmVh
-dHVyZSAjNTQ5Mw0KPiBodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBoL3B1
-bGwvNTQ5Mw0KPiANCj4gZXJhc3VyZSBjb2RlOiBzaGVjIHBlcmZvcm1hbmNl
-IG9wdGltaXphdGlvbiBieSBkZWNvZGluZyBjYWNoZSAjNTI1Nw0KPiBodHRw
-czovL2dpdGh1Yi5jb20vY2VwaC9jZXBoL3B1bGwvNTI1Nw0KPiANCj4gQmVz
-dCByZWdhcmRzLA0KPiBUYWtlc2hpIE1peWFtYWUNCj4gDQo+IC0tLS0tT3Jp
-Z2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IExvaWMgRGFjaGFyeSA8bG9p
-YyA8YXQ+IGRhY2hhcnkub3JnPg0KPiBTdWJqZWN0OiBXaGF0IHNob3VsZCBi
-ZSBpbiB0aGUgbmV4dCBoYW1tZXIvZmlyZWZseSByZWxlYXNlID8NCj4gTmV3
-c2dyb3VwczogZ21hbmUuY29tcC5maWxlLXN5c3RlbXMuY2VwaC5kZXZlbA0K
-PiBEYXRlOiAyMDE1LTA5LTAyIDExOjAwOjUzIEdNVCAoMTUgaG91cnMgYW5k
-IDMyIG1pbnV0ZXMgYWdvKSBIaSwNCj4gDQo+IEkgYWRkZWQgYSBsaW5rIHRv
-DQo+IA0KPiBodHRwOi8vdHJhY2tlci5jZXBoLmNvbS9wcm9qZWN0cy9jZXBo
-LXJlbGVhc2VzL3dpa2kvSE9XVE8jT3ZlcnZpZXctb2YtDQo+IHRoZS1iYWNr
-cG9ydHMtaW4tcHJvZ3Jlc3MNCj4gDQo+IHRvIHNob3cgYWxsIGlzc3VlcyB0
-aGF0IHNob3VsZCBiZSBpbiB0aGUgbmV4dCBwb2ludCByZWxlYXNlIGZvcg0K
-PiANCj4gaGFtbWVyIHYwLjk0LjQgOiBodHRwOi8vdHJhY2tlci5jZXBoLmNv
-bS92ZXJzaW9ucy80OTUNCj4gZmlyZWZseSB2MC44MC4xMSA6IGh0dHA6Ly90
-cmFja2VyLmNlcGguY29tL3ZlcnNpb25zLzQ4MA0KPiANCj4gQ2hlZXJzDQo+
-IA0KPiAtLQ0KPiBMb8OvYyBEYWNoYXJ5LCBBcnRpc2FuIExvZ2ljaWVsIExp
-YnJlDQo+IE4gICAgIHIgIHkgICBiIFggIMendiBeICneunsubiArICAgeiBd
-eiAgIHtheSAdyofamSAsaiAgIGYgICBoICAgeiAeIHcgICANCiAgIGo6K3Yg
-ICB3IGogbSAgICAgICAgIHpaKyAgICAg3aJqIiAgIXRtbD0NCj4gDQoNCi0t
-DQpMb8OvYyBEYWNoYXJ5LCBBcnRpc2FuIExvZ2ljaWVsIExpYnJlDQoNCg==
+8AM PST as usual!  No set discussion topics this week.  Please feel free 
+to add your own!
+
+Here's the links:
+
+Etherpad URL:
+http://pad.ceph.com/p/performance_weekly
+
+To join the Meeting:
+https://bluejeans.com/268261044
+
+To join via Browser:
+https://bluejeans.com/268261044/browser
+
+To join with Lync:
+https://bluejeans.com/268261044/lync
+
+
+To join via Room System:
+Video Conferencing System: bjn.vc -or- 199.48.152.152
+Meeting ID: 268261044
+
+To join via Phone:
+1) Dial:
+           +1 408 740 7256
+           +1 888 240 2560(US Toll Free)
+           +1 408 317 9253(Alternate Number)
+           (see all numbers - http://bluejeans.com/numbers)
+2) Enter Conference ID: 268261044
+
+Mark
