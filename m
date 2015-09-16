@@ -1,78 +1,58 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Very slow recovery/peering with latest master
-Date: Wed, 16 Sep 2015 21:19:57 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE49E1A@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE48251@SACMBXIP01.sdcorp.global.sandisk.com>
- <CAJ4mKGa1vr6Zp9ZUaT8rrHDgRFJgdkO2c8LZqMQuwxwYt7TJ+A@mail.gmail.com>
+From: "bfields@fieldses.org" <bfields@fieldses.org>
+Subject: Re: [HPDD-discuss] [PATCH] nfsd: add a new EXPORT_OP_NOWCC flag to
+ struct export_operations
+Date: Wed, 16 Sep 2015 17:30:44 -0400
+Message-ID: <20150916213044.GB5169@fieldses.org>
+References: <1441966830-5517-1-git-send-email-jeff.layton@primarydata.com>
+ <D21906EE.10A741%andreas.dilger@intel.com>
+ <20150912062454.2283d4b6@tlielax.poochiereds.net>
+ <20150914161015.GC5338@fieldses.org>
+ <20150916131829.6cbf5657@tlielax.poochiereds.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0094.outbound.protection.outlook.com ([65.55.169.94]:3136
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752521AbbIPVUB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 16 Sep 2015 17:20:01 -0400
-Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20150916131829.6cbf5657@tlielax.poochiereds.net>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jeff Layton <jlayton@poochiereds.net>
+Cc: "Dilger, Andreas" <andreas.dilger@intel.com>, "cluster-devel@redhat.com" <cluster-devel@redhat.com>, "linux-nfs@vger.kernel.org" <linux-nfs@vger.kernel.org>, "fuse-devel@lists.sourceforge.net" <fuse-devel@lists.sourceforge.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "HPDD-discuss@lists.01.org" <HPDD-discuss@lists.01.org>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ocfs2-devel@oss.oracle.com" <ocfs2-devel@oss.oracle.com>
+List-Id: ceph-devel.vger.kernel.org
 
-DQpTYWdlL0dyZWcsDQoNClllYWgsIGFzIHdlIGV4cGVjdGVkLCBpdCBpcyBub3QgaGFwcGVuaW5n
-IHByb2JhYmx5IGJlY2F1c2Ugb2YgcmVjb3Zlcnkgc2V0dGluZ3MuIEkgcmV2ZXJ0ZWQgaXQgYmFj
-ayBpbiBteSBjZXBoLmNvbmYgLCBidXQsIHN0aWxsIHNlZWluZyB0aGlzIHByb2JsZW0uDQoNClNv
-bWUgb2JzZXJ2YXRpb24gOg0KLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KDQoxLiBGaXJzdCBvZiBh
-bGwsIEkgZG9uJ3QgdGhpbmsgaXQgaXMgc29tZXRoaW5nIHJlbGF0ZWQgdG8gbXkgZW52aXJvbm1l
-bnQuIEkgcmVjcmVhdGVkIHRoZSBjbHVzdGVyIHdpdGggSGFtbWVyIGFuZCB0aGlzIHByb2JsZW0g
-aXMgbm90IHRoZXJlLg0KDQoyLiBJIGhhdmUgZW5hYmxlZCB0aGUgbWVzc2VuZ2VyL21vbmNsaWVu
-dCBsb2cgKENvdWxkbid0IGF0dGFjaCBoZXJlKSBpbiBvbmUgb2YgdGhlIE9TRHMgYW5kIGZvdW5k
-IG1vbml0b3IgaXMgdGFraW5nIGxvbmcgdGltZSB0byBkZXRlY3QgdGhlIHVwIE9TRHMuIElmIHlv
-dSBzZWUgdGhlIGxvZywgSSBoYXZlIHN0YXJ0ZWQgT1NEIGF0IDIwMTUtMDktMTYgMTY6MTM6MDcu
-MDQyNDYzICwgYnV0LCB0aGVyZSBpcyBubyBjb21tdW5pY2F0aW9uIChvbmx5IGdldHRpbmcgS0VF
-UF9BTElWRSkgdGlsbCAyMDE1LTA5LTE2IDE2OjE2OjA3LjE4MDQ4MiAsIHNvLCAzIG1pbnMgISEN
-Cg0KMy4gRHVyaW5nIHRoaXMgcGVyaW9kLCBJIHNhdyBtb25jbGllbnQgdHJ5aW5nIHRvIGNvbW11
-bmljYXRlIHdpdGggbW9uaXRvciBidXQgbm90IGFibGUgdG8gcHJvYmFibHkuIEl0IGlzIHNlbmRp
-bmcgb3NkX2Jvb3QgYXQgMjAxNS0wOS0xNiAxNjoxNjowNy4xODA0ODIgb25seS4uDQoNCjIwMTUt
-MDktMTYgMTY6MTY6MDcuMTgwNDUwIDdmNjUzNzdmZTcwMCAxMCBtb25jbGllbnQ6IF9zZW5kX21v
-bl9tZXNzYWdlIHRvIG1vbi5hIGF0IDEwLjYwLjE5NC4xMDo2Nzg5LzANCjIwMTUtMDktMTYgMTY6
-MTY6MDcuMTgwNDgyIDdmNjUzNzdmZTcwMCAgMSAtLSAxMC42MC4xOTQuMTA6NjgyMC8yMDEwMiAt
-LT4gMTAuNjAuMTk0LjEwOjY3ODkvMCAtLSBvc2RfYm9vdChvc2QuMTAgYm9vdGVkIDAgZmVhdHVy
-ZXMgNzIwNTc1OTQwMzc5Mjc5MzUgdjQ1KSB2NiAtLSA/KzAgMHg3ZjY1MjNjMTkxMDAgY29uIDB4
-N2Y2NTQyMDQ1NjgwDQoyMDE1LTA5LTE2IDE2OjE2OjA3LjE4MDQ5NiA3ZjY1Mzc3ZmU3MDAgMjAg
-LS0gMTAuNjAuMTk0LjEwOjY4MjAvMjAxMDIgc3VibWl0X21lc3NhZ2Ugb3NkX2Jvb3Qob3NkLjEw
-IGJvb3RlZCAwIGZlYXR1cmVzIDcyMDU3NTk0MDM3OTI3OTM1IHY0NSkgdjYgcmVtb3RlLCAxMC42
-MC4xOTQuMTA6Njc4OS8wLCBoYXZlIHBpcGUuDQoNCjQuIEJUVywgdGhlIG9zZCBkb3duIHNjZW5h
-cmlvIGlzIGRldGVjdGVkIHZlcnkgcXVpY2tseSAoY2VwaCAtdyBvdXRwdXQpICwgcHJvYmxlbSBp
-cyBkdXJpbmcgY29taW5nIHVwIEkgZ3Vlc3MuDQoNCg0KU28sIHNvbWV0aGluZyByZWxhdGVkIHRv
-IG1vbiBjb21tdW5pY2F0aW9uIGdldHRpbmcgc2xvd2VyID8NCkxldCBtZSBrbm93IGlmIG1vcmUg
-dmVyYm9zZSBsb2dnaW5nIGlzIHJlcXVpcmVkIGFuZCBob3cgc2hvdWxkIEkgc2hhcmUgdGhlIGxv
-Zy4uDQoNClRoYW5rcyAmIFJlZ2FyZHMNClNvbW5hdGgNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdl
-LS0tLS0NCkZyb206IEdyZWdvcnkgRmFybnVtIFttYWlsdG86Z2Zhcm51bUByZWRoYXQuY29tXQ0K
-U2VudDogV2VkbmVzZGF5LCBTZXB0ZW1iZXIgMTYsIDIwMTUgMTE6MzUgQU0NClRvOiBTb21uYXRo
-IFJveQ0KQ2M6IGNlcGgtZGV2ZWwNClN1YmplY3Q6IFJlOiBWZXJ5IHNsb3cgcmVjb3ZlcnkvcGVl
-cmluZyB3aXRoIGxhdGVzdCBtYXN0ZXINCg0KT24gVHVlLCBTZXAgMTUsIDIwMTUgYXQgODowNCBQ
-TSwgU29tbmF0aCBSb3kgPFNvbW5hdGguUm95QHNhbmRpc2suY29tPiB3cm90ZToNCj4gSGksDQo+
-IEkgYW0gc2VlaW5nIHZlcnkgc2xvdyByZWNvdmVyeSB3aGVuIEkgYW0gYWRkaW5nIE9TRHMgd2l0
-aCB0aGUgbGF0ZXN0IG1hc3Rlci4NCj4gQWxzbywgSWYgSSBqdXN0IHJlc3RhcnQgYWxsIHRoZSBP
-U0RzIChubyBJTyBpcyBnb2luZyBvbiBpbiB0aGUgY2x1c3RlcikgLCBjbHVzdGVyIGlzIHRha2lu
-ZyBhIHNpZ25pZmljYW50IGFtb3VudCBvZiB0aW1lIHRvIHJlYWNoIGluIGFjdGl2ZStjbGVhbiBz
-dGF0ZSAoYW5kIGV2ZW4gZGV0ZWN0aW5nIGFsbCB0aGUgdXAgT1NEcykuDQo+DQo+IEkgc2F3IHRo
-ZSByZWNvdmVyeS9iYWNrZmlsbCBkZWZhdWx0IHBhcmFtZXRlcnMgYXJlIG5vdyBjaGFuZ2VkICh0
-byBsb3dlciB2YWx1ZSkgLCB0aGlzIHByb2JhYmx5IGV4cGxhaW5zIHRoZSByZWNvdmVyeSBzY2Vu
-YXJpbyAsIGJ1dCwgd2lsbCBpdCBhZmZlY3QgdGhlIHBlZXJpbmcgdGltZSBkdXJpbmcgT1NEIHN0
-YXJ0dXAgYXMgd2VsbCA/DQoNCkkgZG9uJ3QgdGhpbmsgdGhlc2UgdmFsdWVzIHNob3VsZCBpbXBh
-Y3QgcGVlcmluZyB0aW1lLCBidXQgeW91IGNvdWxkIGNvbmZpZ3VyZSB0aGVtIGJhY2sgdG8gdGhl
-IG9sZCBkZWZhdWx0cyBhbmQgc2VlIGlmIGl0IGNoYW5nZXMuDQotR3JlZw0KDQpfX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fXw0KDQpQTEVBU0UgTk9URTogVGhlIGluZm9ybWF0aW9uIGNv
-bnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNzYWdlIGlzIGludGVuZGVkIG9ubHkg
-Zm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpIG5hbWVkIGFib3ZlLiBJ
-ZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVuZGVkIHJlY2lwaWVu
-dCwgeW91IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1l
-c3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywgZGlzc2VtaW5hdGlvbiwgZGlzdHJp
-YnV0aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVk
-LiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFz
-ZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3IgZS1tYWlsIChhcyBzaG93biBhYm92
-ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVzIG9mIHRoaXMgbWVz
-c2FnZSBpbiB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25p
-Y2FsbHkgc3RvcmVkIGNvcGllcykuDQoNCg==
+On Wed, Sep 16, 2015 at 01:18:29PM -0400, Jeff Layton wrote:
+> On Mon, 14 Sep 2015 12:10:15 -0400
+> "bfields@fieldses.org" <bfields@fieldses.org> wrote:
+> 
+> > On Sat, Sep 12, 2015 at 06:24:54AM -0400, Jeff Layton wrote:
+> > > I don't think it matters, at least not on x86_64. bools and chars both
+> > > require a byte. pahole does show this adding a new hole, but that's
+> > > just because this brings the code up to 5 flags and the next field
+> > > (fh_pre_size) needs to be aligned.
+> > > 
+> > > I do agree that replacing those other unsigned chars with bools is more
+> > > clear however. Maybe we should even replace them all with a single
+> > > unsigned int and use bitops to set flags in there. That would be more
+> > > space efficient now that we're at 5 flags.
+> > 
+> > Makes sense to me.--b.
+> 
+> I played around with this a little today, and it turns out not to make
+> a lot of difference. Here's what pahole says about the existing code
+> (once I moved fh_maxsize to snuggle up to fh_handle to plug a hole):
+...
+> I used an unsigned long for fh_flags since we might as well. Making it
+> smaller just adds a hole in there since the compiler wants to align the
+> fh_pre_size. Moving it around doesn't help either as it just moves the
+> hole around. Note that this is x86_64. It might look different on a
+> 32-bit arch, but I doubt it really matters much in the big scheme of
+> things.
+> 
+> Bruce, I'll send out the patches that change this if you like, but I'm
+> inclined to just leave this alone since it doesn't seem to have a
+> tangible benefit.
+
+Unless more flags are imminent I guess it's just a question of which is
+more readable.  Arguably there's some value to making it more obvious
+that these are each just a bit.  I'll accept your judgement on that
+question.
+
+--b.
