@@ -1,39 +1,47 @@
-From: "Adam C. Emerson" <aemerson@redhat.com>
-Subject: Review Request
-Date: Wed, 16 Sep 2015 14:09:37 -0400
-Message-ID: <55F9B061.2090300@redhat.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: Review Request
+Date: Wed, 16 Sep 2015 11:31:31 -0700
+Message-ID: <CAJ4mKGbP8K_iMN6AvZW2UwMjjxcEnb0vO2c_k2_3VUWSCWMQKA@mail.gmail.com>
+References: <55F9B061.2090300@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:49480 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752825AbbIPSFA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 16 Sep 2015 14:05:00 -0400
-Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
-	by mx1.redhat.com (Postfix) with ESMTPS id 22EA48E69A
-	for <ceph-devel@vger.kernel.org>; Wed, 16 Sep 2015 18:05:00 +0000 (UTC)
-Received: from [10.3.113.191] (ovpn-113-191.phx2.redhat.com [10.3.113.191])
-	by int-mx13.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t8GI4w8v025535
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-	for <ceph-devel@vger.kernel.org>; Wed, 16 Sep 2015 14:04:59 -0400
+Received: from mail-wi0-f173.google.com ([209.85.212.173]:32854 "EHLO
+	mail-wi0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752565AbbIPSbd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Sep 2015 14:31:33 -0400
+Received: by wiclk2 with SMTP id lk2so85885864wic.0
+        for <ceph-devel@vger.kernel.org>; Wed, 16 Sep 2015 11:31:31 -0700 (PDT)
+In-Reply-To: <55F9B061.2090300@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Developers <ceph-devel@vger.kernel.org>
+To: "Adam C. Emerson" <aemerson@redhat.com>
+Cc: Ceph Developers <ceph-devel@vger.kernel.org>
 
-Creators of the Storage Squid,
+On Wed, Sep 16, 2015 at 11:09 AM, Adam C. Emerson <aemerson@redhat.com> wrote:
+> Creators of the Storage Squid,
+>
+> If you're interested in less use of the allocator, you are interested in
+> Context* elimination. If so, please review the top two commits on the
+> wip-decontextualization branch of:
+>
+> https://github.com/cohortfsllc/cohortfs-ceph
+>
+> They provide an enhanced version of std::function that allows you to
+> specify how much space gets preallocated for function objects or disable
+> allocation entirely.
 
-If you're interested in less use of the allocator, you are interested in
-Context* elimination. If so, please review the top two commits on the
-wip-decontextualization branch of:
+Can you provide a little background (links or text) for those of us
+who aren't up on C++11x/14x? I looked at them briefly but having only
+the vaguest idea about some of them quickly got lost. :)
+-Greg
 
-https://github.com/cohortfsllc/cohortfs-ceph
-
-They provide an enhanced version of std::function that allows you to
-specify how much space gets preallocated for function objects or disable
-allocation entirely.
-
-Also, I have two pull requests, wip-cxx11time and wip-cxx11concurrency
-that pass check on which I would appreciate any feedback.
-
-Thank you, Comrades!
+>
+> Also, I have two pull requests, wip-cxx11time and wip-cxx11concurrency
+> that pass check on which I would appreciate any feedback.
+>
+> Thank you, Comrades!
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
