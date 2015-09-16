@@ -1,245 +1,109 @@
-From: Owen Synge <osynge@suse.com>
-Subject: Re: Brewer's theorem also known as CAP theorem
-Date: Wed, 16 Sep 2015 12:01:54 +0200
-Message-ID: <20150916120154.0e5f0b75@linux-520c.site>
-References: <1CB94550540AE44E9CAAE8CD5AF40BF846CEB60D@H3CMLB12-EX.srv.huawei-3com.com>
-	<CABAwU-bw_65HXAxNCVMkmCXZw4c5F0UBNwNUQwf9wOXbCt=VeA@mail.gmail.com>
-	<1CB94550540AE44E9CAAE8CD5AF40BF846CEB6A5@H3CMLB12-EX.srv.huawei-3com.com>
-	<CABAwU-YFhMbrvT7ao6c605aJXi2kLiC7wjr3eSAQvAqrNNzCmg@mail.gmail.com>
-	<6F3FA899187F0043BA1827A69DA2F7CC0361EE09@shsmsx102.ccr.corp.intel.com>
-	<1CB94550540AE44E9CAAE8CD5AF40BF846CEC8F1@H3CMLB12-EX.srv.huawei-3com.com>
-	<CAJ4mKGY7p+vDmSaPa5=WjbMHT4XXNK8a9RT19R6ir=A7SvsmRQ@mail.gmail.com>
-	<20150915143820.700c62d0@linux-520c.site>
-	<CAJ4mKGYVALXKdbwoV79WGqFoKJHdR2zSUfDZYze4oZ_=PeVSdg@mail.gmail.com>
+From: "Miyamae, Takeshi" <miyamae.takeshi@jp.fujitsu.com>
+Subject: RE: What should be in the next hammer/firefly release ?
+Date: Wed, 16 Sep 2015 10:37:39 +0000
+Message-ID: <870DE8DBB716524BAE51B2D499EC81E40AB99186@g01jpexmbyt24>
+References: <870DE8DBB716524BAE51B2D499EC81E40AB98467@g01jpexmbyt24>
+ <55F16598.2020002@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.nue.novell.com ([195.135.221.5]:41790 "EHLO
-	smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751480AbbIPKCQ convert rfc822-to-8bit (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-	Wed, 16 Sep 2015 06:02:16 -0400
-In-Reply-To: <CAJ4mKGYVALXKdbwoV79WGqFoKJHdR2zSUfDZYze4oZ_=PeVSdg@mail.gmail.com>
+Received: from mgwkm02.jp.fujitsu.com ([202.219.69.169]:52368 "EHLO
+	mgwkm02.jp.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751637AbbIPKhp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Sep 2015 06:37:45 -0400
+Received: from g01jpfmpwyt01.exch.g01.fujitsu.local (g01jpfmpwyt01.exch.g01.fujitsu.local [10.128.193.38])
+	by kw-mxoi1.gw.nic.fujitsu.com (Postfix) with ESMTP id 8CFF8AC0098
+	for <ceph-devel@vger.kernel.org>; Wed, 16 Sep 2015 19:37:42 +0900 (JST)
+In-Reply-To: <55F16598.2020002@dachary.org>
+Content-Language: ja-JP
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: "zhao.mingyue@h3c.com" <zhao.mingyue@h3c.com>, "Chen, Xiaoxi" <xiaoxi.chen@intel.com>, huang jun <hjwsm1989@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
+Cc: "PVonStamwitz@us.fujitsu.com" <PVonStamwitz@us.fujitsu.com>, "Toshine, Naoyoshi" <toshine@jp.fujitsu.com>, "Nakao, Takanori" <nakao.takanori@jp.fujitsu.com>, "Shiozawa, Kensuke" <shiozawa.kennsu@jp.fujitsu.com>, "Kawaguchi, Shotaro" <kawaguchi.s@jp.fujitsu.com>, "Imai, Hiroki" <imai.hiroki@jp.fujitsu.com>
 
-On Tue, 15 Sep 2015 09:09:20 -0700
-Gregory Farnum <gfarnum@redhat.com> wrote:
-
-> Congratulations, you've just hit on my biggest pet peeve in
-> distributed systems discussions. Sorry if this gets a little hot. :)
-
-Not at all.
-
-I am keen to understand pet peeve's of the core team.
-
-This discussion is mostly theoretical.
-
-Thank you for specifying clearly your definitions and I am happy to liv=
-e
-with these.
-
-With your definitions clearly stated I completely agree on all points
-about ceph.
-
-I add a few small comments and one further point for clarification.
-=20
-> On Tue, Sep 15, 2015 at 5:38 AM, Owen Synge <osynge@suse.com> wrote:
-> > On Mon, 14 Sep 2015 13:57:26 -0700
-> > Gregory Farnum <gfarnum@redhat.com> wrote:
-> >
-> >> The OSD is supposed to stay down if any of the networks are
-> >> missing. Ceph is a CP system in CAP parlance; there's no such
-> >> thing as a CA system. ;)
-> >
-> > I know I am being fussy, but within my team your email was sited
-> > that you cannot consider ceph as a CA system. Hence I make my
-> > argument in public so I can be humbled in public.
-> >
-> > Just to clarify your opinion I site
-> >
-> > http://www.infoq.com/articles/cap-twelve-years-later-how-the-rules-=
-have-changed
-> >
-> > suggests:
-> >
-> > <quote>
-> > The CAP theorem states that any networked shared-data system can
-> > have at most two of three desirable properties.
-> >
-> > * consistency (C) equivalent to having a single up-to-date copy of
-> >     the data;
-> > * high availability (A) of that data (for updates)
-> > * tolerance to network partitions (P).
-> > </quote>
-> >
-> > So I dispute that a CA system cannot exist.
->=20
-> Right, you can create a system that assumes no partitions and thus is
-> always consistent and available in the absence of partitions. The
-> problem is that partitions *do* exist and happen.=20
-
-> The stereotypical
-> example is that a simple hard power-off on one server is
-> indistinguishable from a (very small) partition to the other nodes.
-> Even leaving aside stuff like that, networks partition, or undergo
-> partition-like events (huge packet loss over some link). When that
-> happens, your system is going to...do something. If you don't want
-> that something to be widespread data corruption, it will be designed
-> to handle partitions.
->=20
-> There are no real "CA" systems in the world.
-
-So what you are saying is that due to availability and partition
-tolerance being so interlinked that even safety critical systems cannot
-be considered CA?
-
-I think this is less true when you try to include non consistent
-systems within the same definitions.
-
-Maybe the problem with CAP is that the order of the 3 priorities in CAP
-effects each decision, and consequently each definition.
-
-> > I think you are too absolute even in interpretation of this vague
-> > theory. A further quote from the author of said theorem from the
-> > same article:
-> >
-> > <quote>
-> > The "2 of 3" formulation was always misleading because it tended to
-> > oversimplify the tensions among properties.
-> > </quote>
->=20
-> Right. This is the cause of a lot of problems for students of
-> distributed systems. Another quote from that article:
->=20
-> >CAP prohibits only a tiny part of the design space: perfect
-> >availability and consistency in the presence of partitions, which
-> >are rare.
->=20
-> Lots of users forget that the CAP theorem is very precise, and that
-> precision is important. Some quick-and-dirty (but precise enough)
-> definitions:
-> Available: any request received by a well-behaved node of the system
-> will receive a (correct!) response (within some bounded amount of
-> time)
-> Consistent: All nodes in the system agree on the status of a
-> particular piece of state. (Eg, that an object is at version 12345 an=
-d
-> not 12344.)
-> Partition-tolerant: the system continues to function correctly in the
-> presence of message loss between some set of nodes.
-
-Thank you for these tighter definitions.
-
-Even with these definitions their is some interplay between Available
-and Partition-tolerant. I see particular problems when Available and
-Partion-tolerant is favored over consistency, in keeping definitions
-consistent with models where consistency is favored.
-
-This is why I think it is better to think on consequences rather than
-desirable features, as you state later.
-=20
-> > As  I understand it:
-> >
-> > Ceph as a cluster always provides "Consistency". (or else you found
-> > a bug)
-> >
-> > If a ceph cluster is operating it will always provide acknowledgmen=
-t
-> > (it may block) to the client if the operation has succeeded
-> > or failed hence provides "availability".
->=20
-> This is the part you're missing: blocking a request is not allowed
-> under the CAP theorem's definition of availability.
-
-Thanks for this.
-
-> If a PG might have
-> been updated by a set of nodes which are now partitioned away, we
-> can't respond to the client request (despite it being a valid,
-> well-behaved request) and so the system is not big-A Available.
-> Now, we are little-a available for *other* kinds of work. The cluster
-> keeps going and will process requests for all the state which it know=
-s
-> it is authoritative for. But we do not satisfy the availability
-> criteria of the CAP theorem. This is part of the wide design space
-> which CAP does not demonstrate is impossible.
-
-Thanks for the clarification.
-
-> > if a ceph cluster is partitioned, only one partition will continue
-> > operation, hence you cannot consider the system "partition" toleran=
-t
-> > as multiple parts of the system cannot operate when partitioned.
->=20
-> Nope, that's not what partition-tolerant means in the context of the
-> CAP theorem. This shortcut =E2=80=94 in which we treat one side of th=
-e
-> partition as a misbehaving node =E2=80=94 is pretty common, but what =
-you're
-> citing here is actually associated with the "Available" side of the
-> spectrum.
-
-I agree on LAN systems, it is very common to consider that one side of
-the partition as misbehaving.
-
-Using these definitions AP systems are not uncommon, for example one
-you can buy is "oracle database streams".
-
-> The proof of the CAP theorem is relatively elegant and can be
-> summarized as: if a node disappears/is partitioned,=20
-
-The implication that node disappears/is partitioned is also a
-engineering decision.
-
-That ceph for example has decided to consider identical is a
-reasonable decision, and particularly common for systems that value
-consistency.
-
-> you must either
-> ignore any updates it handled (sacrificing consistency) or refuse to
-> answer until the node reappears (sacrificing availability).=20
-
-This engineering compromise is much clearer, and does not rely on
-complex definitions that always seem incomplete.
-
-> No
-> combination of clever data replication or distribution can eliminate
-> the choice a system has to make when it goes to look at data and
-> discovers the data isn't there.
-
-I quiet agree, when we are being theoretical, emergent consistency is
-not consistency under the definitions presented. Emergent consistency
-also brings in constraints that ceph does not enforce, to allow ceph to
-be more universal.
-=20
-> Now, that discussion of Ceph's classification under the CAP theorem
-> obviously leaves out lots of stuff: Ceph is small-a available in that
-> it takes a lot more than one disk failure to render data inaccessible=
-!
-> Much has been made of this design space, with many vendors and
-> developers pretending that this means they've somehow beaten CAP. But
-> when faced with requests for data that are not currently accessible,
-> Ceph chooses to block and remain Consistent over making up a value an=
-d
-> remaining Available; every distributed system must make that choice
-> one way or another. Most CP systems endeavor to remain available for
-> as long as possible; AP systems expend varying amounts of effort to b=
-e
-> consistent up until they're faced with either blocking or making up a
-> value.
-
-Thanks for this discussion.
-
-Best regards
-
-Owen
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGkgTG9pYywNCg0KSXQncyBub3Qgc3RyYW5nZSB0aGF0IHlvdSB3b3JyeSBh
+Ym91dCB0aGF0IHNpbmNlIHdlIGhhdmUgY29tbWl0dGVkIGxvdHMgb2YgcHVs
+bCByZXF1ZXN0cw0KaW50byB0aGUgbWFpbiB0cnVuayBzbyBmYXIuDQpIb3dl
+dmVyLCB3ZSBhcmUgY29uc2lkZXJpbmcgZWFjaCBwdWxsIHJlcXVlc3QgYWxy
+ZWFkeSBjb21taXR0ZWQgd2FzIGVpdGhlciBhIGJ1ZyBmaXggb3INCmEgcGVy
+Zm9ybWFuY2UgaW1wcm92ZW1lbnQsIHNvIHdlIGJlbGlldmUgd2UgYXJlIHF1
+YWxpZmllZCB0byBiYWNrcG9ydCB0aGVtIGludG8gaGFtbWVyLg0KQW55d2F5
+LCB3ZSB0cmllZCB0byBiYWNrcG9ydCBpdCBvbiBvdXIgbG9jYWwgcmVwb3Np
+dG9yeSBpbiBvcmRlciB0byBkZWNpZGUgd2hldGhlciBpdCdzIGZlYXNpYmxl
+DQpvciBub3QgYW5kIGZlbHQgdGhhdCBpdCdzIG5vdCBzbyBkaWZmaWN1bHQg
+YWx0aG91Z2ggd2UgaGFkIHRvIHJlc29sdmUgYSBsaXR0bGUgY29tcGxpY2F0
+ZWQgY29uZmxpY3RzLg0KSW4gYWRkaXRpb24sIHdlIGNvdWxkIGhhdmUgc2Vs
+ZWN0ZWQgb25seSBsb2NhbCBjb21taXRzIGluIHNoZWMgZGlyZWN0b3J5IGFu
+ZCBhdm9pZGVkDQpjaGFuZ2luZyBhbnkgZXJhc3VyZSBjb2RlIEkvRi4NCkhl
+cmUgaXMgdGhlIHJlc3VsdCBvZiBvdXIgYmFja3BvcnQgdHJpYWwuDQoNCmh0
+dHBzOi8vZ2l0aHViLmNvbS90LW1peWFtYWUvY2VwaC9jb21taXRzL2hhbW1l
+cg0KDQpXZSBhcmUgdmVyeSBnbGFkIGlmIHlvdSBjb3VsZCBjaGVjayBpdCBv
+dXQgYW5kIGxldCB1cyBrbm93IHlvdXIgb3BpbmlvbiBhZnRlciB0aGF0Lg0K
+V2UgYXJlIHRlc3RpbmcgaXQgb24gb3VyIGNsdXN0ZXIgZm9yIGEgY291cGxl
+IG9mIGRheXMgaW4gcGFyYWxsZWwuDQoNCkJlc3QgcmVnYXJkcywNClRha2Vz
+aGkgTWl5YW1hZQ0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJv
+bTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpj
+ZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9m
+IExvaWMgRGFjaGFyeQ0KU2VudDogVGh1cnNkYXksIFNlcHRlbWJlciAxMCwg
+MjAxNSA4OjEyIFBNDQpUbzogTWl5YW1hZSwgVGFrZXNoaS/lrq7liY0g5Ymb
+OyBDZXBoIERldmVsb3BtZW50DQpDYzogVm9uLVN0YW13aXR6LCBQYXVsOyBU
+b3NoaW5lLCBOYW95b3NoaS/liKnmoLkg55u05L2zOyBTaGlvemF3YSwgS2Vu
+c3VrZS/loanmsqIg6LOi6LyUOyBOYWthbywgVGFrYW5vcmkv5Lit5bC+IOm3
+ueiplA0KU3ViamVjdDogUmU6IFdoYXQgc2hvdWxkIGJlIGluIHRoZSBuZXh0
+IGhhbW1lci9maXJlZmx5IHJlbGVhc2UgPw0KDQpIaSwNCg0KU2luY2UgU0hF
+QyByZWFsbHkgaXMgYSBuZXcgZmVhdHVyZSBpbiBJbmZlcm5hbGlzIChiZWNh
+dXNlIGl0IHdhcyBleHBlcmltZW50YWwgYmVmb3JlKSwgSSdsbCBsZWF2ZSBp
+dCB0byBTYW0gYW5kIFNhZ2UgdG8gZGVjaWRlIGlmIGl0J3MgcmVsZXZhbnQg
+dG8gYmFja3BvcnQgdG8gSGFtbWVyLiBOb3RlIHRoYXQgaXQgZGVwZW5kcyBv
+biBjaGFuZ2VzIGluIHRoZSBlcmFzdXJlIGNvZGUgYmFzZSB0aGF0IGV4dGVu
+ZCB0byBhbGwgcGx1Z2lucy4gQmFja3BvcnRpbmcgd291bGQgdW5mb3J0dW5h
+dGVseSBub3QgYmUgYXMgc2ltcGxlIGFzIGNoZXJyeS1waWNraW5nIHRoZSBj
+b21taXRzIG1vZGlmeWluZyB0aGUgc2hlYyBkaXJlY3Rvcmllcy4NCg0KQ2hl
+ZXJzDQoNCk9uIDEwLzA5LzIwMTUgMTI6NTcsIE1peWFtYWUsIFRha2VzaGkg
+d3JvdGU6DQo+IEhpIExvaWMsDQo+IA0KPiBBcyB0aGUgbGFzdCBwdWxsIHJl
+cXVlc3QgIzUyNTcgd2FzIGNvbW1pdHRlZCBpbnRvIHRoZSBtYWluIHRydW5r
+LCB3ZSANCj4gYmVsaWV2ZSBhbGwgdGhlIFNIRUMgY29kZXMgaW4gbWFpbiB0
+cnVuayBhcmUgcmVhZHkgdG8gYmUgYmFja3BvcnRlZCBpbnRvIEhhbW1lciBi
+cmFuY2guDQo+IFdoYXQgY2FuIHdlIGRvIGF0IHRoaXMgbW9tZW50Pw0KPiAN
+Cj4gQmVzdCByZWdhcmRzLA0KPiBUYWtlc2hpIE1peWFtYWUNCj4gDQo+IC0t
+LS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IE1peWFtYWUsIFRh
+a2VzaGkv5a6u5YmNIOWJmw0KPiBTZW50OiBUaHVyc2RheSwgU2VwdGVtYmVy
+IDMsIDIwMTUgNDowOSBQTQ0KPiBUbzogJ2NlcGgtZGV2ZWwtb3duZXJAdmdl
+ci5rZXJuZWwub3JnJw0KPiBDYzogUGF1bCBWb24tU3RhbXdpdHogKFBWb25T
+dGFtd2l0ekB1cy5mdWppdHN1LmNvbSk7IFRvc2hpbmUsIA0KPiBOYW95b3No
+aS/liKnmoLkg55u05L2zOyBTaGlvemF3YSwgS2Vuc3VrZS/loanmsqIg6LOi
+6LyUOyBOYWthbywgVGFrYW5vcmkv5Lit5bC+IOm3ueiplCANCj4gKG5ha2Fv
+LnRha2Fub3JpQGpwLmZ1aml0c3UuY29tKQ0KPiBTdWJqZWN0OiBSZTogV2hh
+dCBzaG91bGQgYmUgaW4gdGhlIG5leHQgaGFtbWVyL2ZpcmVmbHkgcmVsZWFz
+ZSA/DQo+IA0KPiBEZWFyIExvaWMsDQo+IA0KPiBXZSB3b3VsZCBsaWtlIHRv
+IGxldCBmb2xsb3dpbmcgdHdvIHBhdGNoZXMgYmUgYmFja3BvcnRlZCB0byBo
+YW1tZXIgdjAuOTQuNC4NCj4gKEFuZCBvdXIgd2lzaCBpcyBmaW5hbGx5IGJh
+Y2twb3J0aW5nIHRoZXNlIHBhdGNoZXMgdG8gUkhDUyB2MS4zLikgQ2FuIGl0
+IGJlIHBvc3NpYmxlPyBJZiBwb3NzaWJsZSwgcGxlYXNlIGxldCB1cyBrbm93
+IHdoYXQgc2hvdWxkIGJlIHN0YXJ0ZWQgYXQgZmlyc3QuDQo+IChDYXV0aW9u
+OiAjNTI1NyBoYXMgbm90IGJlZW4gY29tbWl0dGVkIHRvIG1hc3RlciBicmFu
+Y2ggeWV0LikNCj4gDQo+IGVyYXN1cmUtY29kZTogc2hlYyBwbHVnaW4gZmVh
+dHVyZSAjNTQ5Mw0KPiBodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBoL3B1
+bGwvNTQ5Mw0KPiANCj4gZXJhc3VyZSBjb2RlOiBzaGVjIHBlcmZvcm1hbmNl
+IG9wdGltaXphdGlvbiBieSBkZWNvZGluZyBjYWNoZSAjNTI1Nw0KPiBodHRw
+czovL2dpdGh1Yi5jb20vY2VwaC9jZXBoL3B1bGwvNTI1Nw0KPiANCj4gQmVz
+dCByZWdhcmRzLA0KPiBUYWtlc2hpIE1peWFtYWUNCj4gDQo+IC0tLS0tT3Jp
+Z2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IExvaWMgRGFjaGFyeSA8bG9p
+YyA8YXQ+IGRhY2hhcnkub3JnPg0KPiBTdWJqZWN0OiBXaGF0IHNob3VsZCBi
+ZSBpbiB0aGUgbmV4dCBoYW1tZXIvZmlyZWZseSByZWxlYXNlID8NCj4gTmV3
+c2dyb3VwczogZ21hbmUuY29tcC5maWxlLXN5c3RlbXMuY2VwaC5kZXZlbA0K
+PiBEYXRlOiAyMDE1LTA5LTAyIDExOjAwOjUzIEdNVCAoMTUgaG91cnMgYW5k
+IDMyIG1pbnV0ZXMgYWdvKSBIaSwNCj4gDQo+IEkgYWRkZWQgYSBsaW5rIHRv
+DQo+IA0KPiBodHRwOi8vdHJhY2tlci5jZXBoLmNvbS9wcm9qZWN0cy9jZXBo
+LXJlbGVhc2VzL3dpa2kvSE9XVE8jT3ZlcnZpZXctb2YtDQo+IHRoZS1iYWNr
+cG9ydHMtaW4tcHJvZ3Jlc3MNCj4gDQo+IHRvIHNob3cgYWxsIGlzc3VlcyB0
+aGF0IHNob3VsZCBiZSBpbiB0aGUgbmV4dCBwb2ludCByZWxlYXNlIGZvcg0K
+PiANCj4gaGFtbWVyIHYwLjk0LjQgOiBodHRwOi8vdHJhY2tlci5jZXBoLmNv
+bS92ZXJzaW9ucy80OTUNCj4gZmlyZWZseSB2MC44MC4xMSA6IGh0dHA6Ly90
+cmFja2VyLmNlcGguY29tL3ZlcnNpb25zLzQ4MA0KPiANCj4gQ2hlZXJzDQo+
+IA0KPiAtLQ0KPiBMb8OvYyBEYWNoYXJ5LCBBcnRpc2FuIExvZ2ljaWVsIExp
+YnJlDQo+IE4gICAgIHIgIHkgICBiIFggIMendiBeICneunsubiArICAgeiBd
+eiAgIHtheSAdyofamSAsaiAgIGYgICBoICAgeiAeIHcgICANCiAgIGo6K3Yg
+ICB3IGogbSAgICAgICAgIHpaKyAgICAg3aJqIiAgIXRtbD0NCj4gDQoNCi0t
+DQpMb8OvYyBEYWNoYXJ5LCBBcnRpc2FuIExvZ2ljaWVsIExpYnJlDQoNCg==
