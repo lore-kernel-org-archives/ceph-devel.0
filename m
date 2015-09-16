@@ -1,45 +1,45 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: osds full, delete stuck.
-Date: Tue, 15 Sep 2015 18:42:55 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1509151841420.23022@cobra.newdream.net>
+From: "yangruifeng.09209@h3c.com" <yangruifeng.09209@h3c.com>
+Subject: =?utf-8?B?562U5aSNOiBvc2RzIGZ1bGwsIGRlbGV0ZSBzdHVjay4=?=
+Date: Wed, 16 Sep 2015 02:12:23 +0000
+Message-ID: <0C3F6DA3760D0C4691E69E5BE224FF495E153DC6@H3CMLB12-EX.srv.huawei-3com.com>
 References: <5F4E7462F2F4A14E974FBE17B8EB37210DC05AEF@H3CMLB13-EX.srv.huawei-3com.com>
+ <alpine.DEB.2.00.1509151841420.23022@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-482899330-1442367777=:23022"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:34966 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751772AbbIPBm6 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 15 Sep 2015 21:42:58 -0400
-In-Reply-To: <5F4E7462F2F4A14E974FBE17B8EB37210DC05AEF@H3CMLB13-EX.srv.huawei-3com.com>
+Received: from smtp.h3c.com ([60.191.123.56]:4935 "EHLO h3cmg01-ex.h3c.com"
+	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751272AbbIPCL7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 15 Sep 2015 22:11:59 -0400
+In-Reply-To: <alpine.DEB.2.00.1509151841420.23022@cobra.newdream.net>
+Content-Language: zh-CN
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Chenxiaowei <chen.xiaowei@h3c.com>
-Cc: ceph-devel@vger.kernel.org
+To: Sage Weil <sweil@redhat.com>, Chenxiaowei <chen.xiaowei@h3c.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
-
---557981400-482899330-1442367777=:23022
-Content-Type: TEXT/PLAIN; charset=ISO-8859-15
-Content-Transfer-Encoding: 8BIT
-
-On Wed, 16 Sep 2015, Chenxiaowei wrote:
-> 
-> Hi, Sage:
-> 
->          Lately my team run into a problem: when osds full, the delete/write
-> request stuck.
-> 
-> But we all agree that the cluster should not stuck when sending delete
-> request, cause after that maybe the osds can
-> 
-> write again. So what?s your advice? Wish your reply, thanks.
-
-The workaround is to temporarily raise the full threshold so you can 
-do some deletes.  But you're right that a rados delete operation 
-should be accepted in this state.  I've opened
-
-	http://tracker.ceph.com/issues/13110
-
-sage
---557981400-482899330-1442367777=:23022--
+YSBzaW1wbGUgc29sdXRpb24sDQoNCmluIGNvbmZpZ19vcHRzLmgsIGFkZCBhIGNvbmZpZ3VyYXRp
+b24gaXRlbSBvc2Rfb3BfZm9yY2VfZGVsZXRlLCBkZWZhdWx0IGlzIGZhbHNlIG9yIHRydWU/DQoN
+CmluIHRoZSBjbGFzcyBPcFJlcXVlc++8jGFkZCB0d28gZnVuY3Rpb24gbmVlZF9za2lwX2Z1bGxf
+Y2hlY2soKSwgc2V0X3NraXBfZnVsbF9jaGVjaygpDQoNCmluIHRoZSBPU0Q6OmluaXRfb3BfZmxh
+Z3MsIGFkZCBjaGVja2luZywgaWYgdGhlcmUgaXMgYSBkZWxldGUgb3AgYW5kIG9zZF9vcF9mb3Jj
+ZV9kZWxldGUgaXMgdHVyZSwgY2FsbCBzZXRfc2tpcF9mdWxsX2NoZWNrLg0KDQppbiB0aGUgT1NE
+OjpoYW5kbGVfb3AsIHdoZW4gY2hlY2tpbmcgZnVsbCwgd2UgY2FuIHNraXAgaXQgYnkgbmVlZF9z
+a2lwX2Z1bGxfY2hlY2soKS4NCg0KSXMgdGhhdCBPSz8NCg0KUnVpZmVuZyBZYW5nDQoNCi0tLS0t
+6YKu5Lu25Y6f5Lu2LS0tLS0NCuWPkeS7tuS6ujogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5l
+bC5vcmcgW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10g5Luj6KGoIFNh
+Z2UgV2VpbA0K5Y+R6YCB5pe26Ze0OiAyMDE15bm0OeaciDE25pelIDk6NDMNCuaUtuS7tuS6ujog
+Y2hlbnhpYW93ZWkgMTEyNDUgKFJEKQ0K5oqE6YCBOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9y
+Zw0K5Li76aKYOiBSZTogb3NkcyBmdWxsLCBkZWxldGUgc3R1Y2suDQoNCk9uIFdlZCwgMTYgU2Vw
+IDIwMTUsIENoZW54aWFvd2VpIHdyb3RlOg0KPiANCj4gSGksIFNhZ2U6DQo+IA0KPiDCoMKgwqDC
+oMKgwqDCoMKgIExhdGVseSBteSB0ZWFtIHJ1biBpbnRvIGEgcHJvYmxlbTogd2hlbiBvc2RzIGZ1
+bGwsIHRoZSANCj4gZGVsZXRlL3dyaXRlIHJlcXVlc3Qgc3R1Y2suDQo+IA0KPiBCdXQgd2UgYWxs
+IGFncmVlIHRoYXQgdGhlIGNsdXN0ZXIgc2hvdWxkIG5vdCBzdHVjayB3aGVuIHNlbmRpbmcgZGVs
+ZXRlIA0KPiByZXF1ZXN0LCBjYXVzZSBhZnRlciB0aGF0IG1heWJlIHRoZSBvc2RzIGNhbg0KPiAN
+Cj4gd3JpdGUgYWdhaW4uIFNvIHdoYXQ/cyB5b3VyIGFkdmljZT8gV2lzaCB5b3VyIHJlcGx5LCB0
+aGFua3MuDQoNClRoZSB3b3JrYXJvdW5kIGlzIHRvIHRlbXBvcmFyaWx5IHJhaXNlIHRoZSBmdWxs
+IHRocmVzaG9sZCBzbyB5b3UgY2FuIGRvIHNvbWUgZGVsZXRlcy4gIEJ1dCB5b3UncmUgcmlnaHQg
+dGhhdCBhIHJhZG9zIGRlbGV0ZSBvcGVyYXRpb24gc2hvdWxkIGJlIGFjY2VwdGVkIGluIHRoaXMg
+c3RhdGUuICBJJ3ZlIG9wZW5lZA0KDQoJaHR0cDovL3RyYWNrZXIuY2VwaC5jb20vaXNzdWVzLzEz
+MTEwDQoNCnNhZ2UNCg==
