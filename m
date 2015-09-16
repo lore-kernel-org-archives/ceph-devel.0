@@ -1,93 +1,44 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: [PATCH] libceph: don't access invalid memory in keepalive2 path
-Date: Wed, 16 Sep 2015 14:33:27 +0800
-Message-ID: <CAAM7YA=81JqaU_0EE85wRLv+ZGK-bS0Yeue7RnHvvuteZqdmgw@mail.gmail.com>
-References: <1442238626-13714-1-git-send-email-idryomov@gmail.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH] libceph: advertise support for keepalive2
+Date: Wed, 16 Sep 2015 10:39:54 +0300
+Message-ID: <CAOi1vP_o8rKjcOf7mNoyiOm5JAFw55A=zwmXznx5QqAaO+XZ4A@mail.gmail.com>
+References: <1442238695-13809-1-git-send-email-idryomov@gmail.com>
+	<CAAM7YAkDeRXOjtX4KGJzcftadZ0tRvhzfLL3rbqfLSGv6_qQMw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f176.google.com ([209.85.217.176]:34109 "EHLO
-	mail-lb0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752372AbbIPGd3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Sep 2015 02:33:29 -0400
-Received: by lbbmp1 with SMTP id mp1so97676719lbb.1
-        for <ceph-devel@vger.kernel.org>; Tue, 15 Sep 2015 23:33:28 -0700 (PDT)
-In-Reply-To: <1442238626-13714-1-git-send-email-idryomov@gmail.com>
+Received: from mail-wi0-f176.google.com ([209.85.212.176]:35887 "EHLO
+	mail-wi0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751904AbbIPHjz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Sep 2015 03:39:55 -0400
+Received: by wicgb1 with SMTP id gb1so60660577wic.1
+        for <ceph-devel@vger.kernel.org>; Wed, 16 Sep 2015 00:39:54 -0700 (PDT)
+In-Reply-To: <CAAM7YAkDeRXOjtX4KGJzcftadZ0tRvhzfLL3rbqfLSGv6_qQMw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
+To: "Yan, Zheng" <ukernel@gmail.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, Sep 14, 2015 at 9:50 PM, Ilya Dryomov <idryomov@gmail.com> wrote:
-> This
+On Wed, Sep 16, 2015 at 9:28 AM, Yan, Zheng <ukernel@gmail.com> wrote:
+> On Mon, Sep 14, 2015 at 9:51 PM, Ilya Dryomov <idryomov@gmail.com> wrote:
+>> We are the client, but advertise keepalive2 anyway - for consistency,
+>> if nothing else.  In the future the server might want to know whether
+>> its clients support keepalive2.
 >
->     struct ceph_timespec ceph_ts;
->     ...
->     con_out_kvec_add(con, sizeof(ceph_ts), &ceph_ts);
->
-> wraps ceph_ts into a kvec and adds it to con->out_kvec array, yet
-> ceph_ts becomes invalid on return from prepare_write_keepalive().  As
-> a result, we send out bogus keepalive2 stamps.  Fix this by encoding
-> into a ceph_timespec member, similar to how acks are read and written.
->
-> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
-> ---
->  include/linux/ceph/messenger.h | 4 +++-
->  net/ceph/messenger.c           | 9 +++++----
->  2 files changed, 8 insertions(+), 5 deletions(-)
->
-> diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
-> index 7e1252e97a30..b2371d9b51fa 100644
-> --- a/include/linux/ceph/messenger.h
-> +++ b/include/linux/ceph/messenger.h
-> @@ -238,6 +238,8 @@ struct ceph_connection {
->         bool out_kvec_is_msg; /* kvec refers to out_msg */
->         int out_more;        /* there is more data after the kvecs */
->         __le64 out_temp_ack; /* for writing an ack */
-> +       struct ceph_timespec out_temp_keepalive2; /* for writing keepalive2
-> +                                                    stamp */
->
->         /* message in temps */
->         struct ceph_msg_header in_hdr;
-> @@ -248,7 +250,7 @@ struct ceph_connection {
->         int in_base_pos;     /* bytes read */
->         __le64 in_temp_ack;  /* for reading an ack */
->
-> -       struct timespec last_keepalive_ack;
-> +       struct timespec last_keepalive_ack; /* keepalive2 ack stamp */
->
->         struct delayed_work work;           /* send|recv work */
->         unsigned long       delay;          /* current delay interval */
-> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-> index 525f454f7531..b9b0e3b5da49 100644
-> --- a/net/ceph/messenger.c
-> +++ b/net/ceph/messenger.c
-> @@ -1353,11 +1353,12 @@ static void prepare_write_keepalive(struct ceph_connection *con)
->         dout("prepare_write_keepalive %p\n", con);
->         con_out_kvec_reset(con);
->         if (con->peer_features & CEPH_FEATURE_MSGR_KEEPALIVE2) {
-> -               struct timespec ts = CURRENT_TIME;
-> -               struct ceph_timespec ceph_ts;
-> -               ceph_encode_timespec(&ceph_ts, &ts);
-> +               struct timespec now = CURRENT_TIME;
-> +
->                 con_out_kvec_add(con, sizeof(tag_keepalive2), &tag_keepalive2);
-> -               con_out_kvec_add(con, sizeof(ceph_ts), &ceph_ts);
-> +               ceph_encode_timespec(&con->out_temp_keepalive2, &now);
-> +               con_out_kvec_add(con, sizeof(con->out_temp_keepalive2),
-> +                                &con->out_temp_keepalive2);
->         } else {
->                 con_out_kvec_add(con, sizeof(tag_keepalive), &tag_keepalive);
->         }
-> --
-Sorry for introducing this bug
+> the kernel code still does fully support KEEPALIVE2 (it does not
+> recognize CEPH_MSGR_TAG_KEEPALIVE2 tag). I think it's better to not
+> advertise support for keepalive2.
 
+I guess by "does not recognize" you mean the kernel client knows how to
+write TAG_KEEPALIVE2, but not how to read it?  The same is true about
+TAG_KEEPALIVE tag and the reverse (we can read, but can't write) is
+true about TAG_KEEPALIVE2_ACK.
 
-Reviewed-by: Yan, Zheng <zyan@redhat.com>
+What I'm getting at is the kernel client is the client, and so it
+doesn't need to know how to read keepalive bytes or write keepalive
+acks.  The server however might want to know if its clients can send
+keepalive2 bytes and handle keepalive2 acks.  Does this make sense?
 
-> 1.9.3
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thanks,
+
+                Ilya
