@@ -1,103 +1,78 @@
-From: "Adam C. Emerson" <aemerson@redhat.com>
-Subject: Re: Review Request
-Date: Wed, 16 Sep 2015 15:06:41 -0400
-Message-ID: <55F9BDC1.20501@redhat.com>
-References: <55F9B061.2090300@redhat.com> <CAJ4mKGbP8K_iMN6AvZW2UwMjjxcEnb0vO2c_k2_3VUWSCWMQKA@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Very slow recovery/peering with latest master
+Date: Wed, 16 Sep 2015 21:19:57 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE49E1A@SACMBXIP01.sdcorp.global.sandisk.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE48251@SACMBXIP01.sdcorp.global.sandisk.com>
+ <CAJ4mKGa1vr6Zp9ZUaT8rrHDgRFJgdkO2c8LZqMQuwxwYt7TJ+A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:35197 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751689AbbIPTCF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 16 Sep 2015 15:02:05 -0400
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-	by mx1.redhat.com (Postfix) with ESMTPS id 922D6C02C030
-	for <ceph-devel@vger.kernel.org>; Wed, 16 Sep 2015 19:02:05 +0000 (UTC)
-In-Reply-To: <CAJ4mKGbP8K_iMN6AvZW2UwMjjxcEnb0vO2c_k2_3VUWSCWMQKA@mail.gmail.com>
+Received: from mail-bl2on0094.outbound.protection.outlook.com ([65.55.169.94]:3136
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752521AbbIPVUB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 16 Sep 2015 17:20:01 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Ceph Developers <ceph-devel@vger.kernel.org>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 09/16/2015 02:31 PM, Gregory Farnum wrote:
-> Can you provide a little background (links or text) for those of us
-> who aren't up on C++11x/14x? I looked at them briefly but having only
-> the vaguest idea about some of them quickly got lost. :)
-
-Surely, sir.
-
-So, in summary, Context* is the means we have been using to handle
-callbacks. It has two big problems:
-
-(1) Every Context is allocated at the point of use and freed when it's
-called. So by their nature they make heavy use of the heap. (If you
-overload complete there's a few exceptions, but by and large Context is
-very heapy.)
-
-(2) Context accepts an int. That's it. You can get around this by
-storing other things in it and passing pointers to it and so forth. But
-it would be nice to have more variety of type in our callbacks.
-
-C++11 (and following) have a whole pile of things that can be used as
-functions. There are function objects (objects with an operator()
-defined on them), lambdas with variable capture, function member
-pointers, reference wrappers pointing to function objects and the like.
-This gives you a good bit of flexibility, allows things like variable
-capture, let's you allocate one object once and just pass references to
-it, and so forth.
-
-Now, these objects all have different sizes and different types. So you
-can't just shove them in an object naively. Because a class one of whose
-members is a function pointer is going to be a different type than a
-class holding a function object. (Which itself is different to a type
-holding a reference to a function object.)
-
-std::function exists as a solution to this problem. It provides a
-uniform type that can hold any object satisfying the requirement of
-being callable with given argument types and a given return value. So,
-for example, if you have some 'stat'-like call, you could specify it as
-taking a function taking an error code, a size, and a date. Anything
-that can be called with such would be accepted, anything that can't
-(wrong argument types, say) would be rejected at compile time. And it
-could be uniformly stored in a list of Operations.
-
-The downside is that if the thing you provide is too big, std::function
-will allocate. 'too big' depends on your library vendor and there's no
-way to find it out what. Thus the purpose of the ceph::function class.
-If we have a pretty good idea how large most of the callback function
-objects we expect to hold are, we can tell it to statically allocate
-that much space. This gives us a tool to get allocations out of our fast
-path. (For example, if we preallocate a bunch of classes with a
-ceph::function that preallocates enough space to hold likely callbacks,
-we can just pick them off and have no allocations, in the usual case.)
-
-If we know /everything/ we'll ever get, we can disable allocations
-entirely. This is mostly so we can catch situations where we're trying
-to shove something unexpectedly huge somewhere it ought not go. An
-internal sanity check.
-
-Now, ceph::function, like std::function, is still an abstraction with a
-virtual call in it and because it copies things around it reduces
-opportunities for inlining. Thus, if you aren't storing a callback on an
-object that's supposed to be in a queue, you shouldn't use it. You
-should do something like:
-
-template<typename Fun>
-void do_stuff(Fun&& f) {
-  ...;
-  f(some, values);
-};
-
-This allows inlining, and (based on my experiments trying multiple
-implementations and looking at the generated assembly) if f is called in
-a loop, the code is just as good as if you'd open-coded the loop and
-written the body of 'f' in it. Functions like this can have the
-potential to use closures (lambda expression) effectively for free.
-
-So, the summary is:
-
-Context* is very heapy. We have less heapy alternatives. This implements
-a foundation for one of them. We also get a bit more flexibility.
-
-Thank you.
+DQpTYWdlL0dyZWcsDQoNClllYWgsIGFzIHdlIGV4cGVjdGVkLCBpdCBpcyBub3QgaGFwcGVuaW5n
+IHByb2JhYmx5IGJlY2F1c2Ugb2YgcmVjb3Zlcnkgc2V0dGluZ3MuIEkgcmV2ZXJ0ZWQgaXQgYmFj
+ayBpbiBteSBjZXBoLmNvbmYgLCBidXQsIHN0aWxsIHNlZWluZyB0aGlzIHByb2JsZW0uDQoNClNv
+bWUgb2JzZXJ2YXRpb24gOg0KLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KDQoxLiBGaXJzdCBvZiBh
+bGwsIEkgZG9uJ3QgdGhpbmsgaXQgaXMgc29tZXRoaW5nIHJlbGF0ZWQgdG8gbXkgZW52aXJvbm1l
+bnQuIEkgcmVjcmVhdGVkIHRoZSBjbHVzdGVyIHdpdGggSGFtbWVyIGFuZCB0aGlzIHByb2JsZW0g
+aXMgbm90IHRoZXJlLg0KDQoyLiBJIGhhdmUgZW5hYmxlZCB0aGUgbWVzc2VuZ2VyL21vbmNsaWVu
+dCBsb2cgKENvdWxkbid0IGF0dGFjaCBoZXJlKSBpbiBvbmUgb2YgdGhlIE9TRHMgYW5kIGZvdW5k
+IG1vbml0b3IgaXMgdGFraW5nIGxvbmcgdGltZSB0byBkZXRlY3QgdGhlIHVwIE9TRHMuIElmIHlv
+dSBzZWUgdGhlIGxvZywgSSBoYXZlIHN0YXJ0ZWQgT1NEIGF0IDIwMTUtMDktMTYgMTY6MTM6MDcu
+MDQyNDYzICwgYnV0LCB0aGVyZSBpcyBubyBjb21tdW5pY2F0aW9uIChvbmx5IGdldHRpbmcgS0VF
+UF9BTElWRSkgdGlsbCAyMDE1LTA5LTE2IDE2OjE2OjA3LjE4MDQ4MiAsIHNvLCAzIG1pbnMgISEN
+Cg0KMy4gRHVyaW5nIHRoaXMgcGVyaW9kLCBJIHNhdyBtb25jbGllbnQgdHJ5aW5nIHRvIGNvbW11
+bmljYXRlIHdpdGggbW9uaXRvciBidXQgbm90IGFibGUgdG8gcHJvYmFibHkuIEl0IGlzIHNlbmRp
+bmcgb3NkX2Jvb3QgYXQgMjAxNS0wOS0xNiAxNjoxNjowNy4xODA0ODIgb25seS4uDQoNCjIwMTUt
+MDktMTYgMTY6MTY6MDcuMTgwNDUwIDdmNjUzNzdmZTcwMCAxMCBtb25jbGllbnQ6IF9zZW5kX21v
+bl9tZXNzYWdlIHRvIG1vbi5hIGF0IDEwLjYwLjE5NC4xMDo2Nzg5LzANCjIwMTUtMDktMTYgMTY6
+MTY6MDcuMTgwNDgyIDdmNjUzNzdmZTcwMCAgMSAtLSAxMC42MC4xOTQuMTA6NjgyMC8yMDEwMiAt
+LT4gMTAuNjAuMTk0LjEwOjY3ODkvMCAtLSBvc2RfYm9vdChvc2QuMTAgYm9vdGVkIDAgZmVhdHVy
+ZXMgNzIwNTc1OTQwMzc5Mjc5MzUgdjQ1KSB2NiAtLSA/KzAgMHg3ZjY1MjNjMTkxMDAgY29uIDB4
+N2Y2NTQyMDQ1NjgwDQoyMDE1LTA5LTE2IDE2OjE2OjA3LjE4MDQ5NiA3ZjY1Mzc3ZmU3MDAgMjAg
+LS0gMTAuNjAuMTk0LjEwOjY4MjAvMjAxMDIgc3VibWl0X21lc3NhZ2Ugb3NkX2Jvb3Qob3NkLjEw
+IGJvb3RlZCAwIGZlYXR1cmVzIDcyMDU3NTk0MDM3OTI3OTM1IHY0NSkgdjYgcmVtb3RlLCAxMC42
+MC4xOTQuMTA6Njc4OS8wLCBoYXZlIHBpcGUuDQoNCjQuIEJUVywgdGhlIG9zZCBkb3duIHNjZW5h
+cmlvIGlzIGRldGVjdGVkIHZlcnkgcXVpY2tseSAoY2VwaCAtdyBvdXRwdXQpICwgcHJvYmxlbSBp
+cyBkdXJpbmcgY29taW5nIHVwIEkgZ3Vlc3MuDQoNCg0KU28sIHNvbWV0aGluZyByZWxhdGVkIHRv
+IG1vbiBjb21tdW5pY2F0aW9uIGdldHRpbmcgc2xvd2VyID8NCkxldCBtZSBrbm93IGlmIG1vcmUg
+dmVyYm9zZSBsb2dnaW5nIGlzIHJlcXVpcmVkIGFuZCBob3cgc2hvdWxkIEkgc2hhcmUgdGhlIGxv
+Zy4uDQoNClRoYW5rcyAmIFJlZ2FyZHMNClNvbW5hdGgNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdl
+LS0tLS0NCkZyb206IEdyZWdvcnkgRmFybnVtIFttYWlsdG86Z2Zhcm51bUByZWRoYXQuY29tXQ0K
+U2VudDogV2VkbmVzZGF5LCBTZXB0ZW1iZXIgMTYsIDIwMTUgMTE6MzUgQU0NClRvOiBTb21uYXRo
+IFJveQ0KQ2M6IGNlcGgtZGV2ZWwNClN1YmplY3Q6IFJlOiBWZXJ5IHNsb3cgcmVjb3ZlcnkvcGVl
+cmluZyB3aXRoIGxhdGVzdCBtYXN0ZXINCg0KT24gVHVlLCBTZXAgMTUsIDIwMTUgYXQgODowNCBQ
+TSwgU29tbmF0aCBSb3kgPFNvbW5hdGguUm95QHNhbmRpc2suY29tPiB3cm90ZToNCj4gSGksDQo+
+IEkgYW0gc2VlaW5nIHZlcnkgc2xvdyByZWNvdmVyeSB3aGVuIEkgYW0gYWRkaW5nIE9TRHMgd2l0
+aCB0aGUgbGF0ZXN0IG1hc3Rlci4NCj4gQWxzbywgSWYgSSBqdXN0IHJlc3RhcnQgYWxsIHRoZSBP
+U0RzIChubyBJTyBpcyBnb2luZyBvbiBpbiB0aGUgY2x1c3RlcikgLCBjbHVzdGVyIGlzIHRha2lu
+ZyBhIHNpZ25pZmljYW50IGFtb3VudCBvZiB0aW1lIHRvIHJlYWNoIGluIGFjdGl2ZStjbGVhbiBz
+dGF0ZSAoYW5kIGV2ZW4gZGV0ZWN0aW5nIGFsbCB0aGUgdXAgT1NEcykuDQo+DQo+IEkgc2F3IHRo
+ZSByZWNvdmVyeS9iYWNrZmlsbCBkZWZhdWx0IHBhcmFtZXRlcnMgYXJlIG5vdyBjaGFuZ2VkICh0
+byBsb3dlciB2YWx1ZSkgLCB0aGlzIHByb2JhYmx5IGV4cGxhaW5zIHRoZSByZWNvdmVyeSBzY2Vu
+YXJpbyAsIGJ1dCwgd2lsbCBpdCBhZmZlY3QgdGhlIHBlZXJpbmcgdGltZSBkdXJpbmcgT1NEIHN0
+YXJ0dXAgYXMgd2VsbCA/DQoNCkkgZG9uJ3QgdGhpbmsgdGhlc2UgdmFsdWVzIHNob3VsZCBpbXBh
+Y3QgcGVlcmluZyB0aW1lLCBidXQgeW91IGNvdWxkIGNvbmZpZ3VyZSB0aGVtIGJhY2sgdG8gdGhl
+IG9sZCBkZWZhdWx0cyBhbmQgc2VlIGlmIGl0IGNoYW5nZXMuDQotR3JlZw0KDQpfX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fXw0KDQpQTEVBU0UgTk9URTogVGhlIGluZm9ybWF0aW9uIGNv
+bnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNzYWdlIGlzIGludGVuZGVkIG9ubHkg
+Zm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpIG5hbWVkIGFib3ZlLiBJ
+ZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVuZGVkIHJlY2lwaWVu
+dCwgeW91IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1l
+c3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywgZGlzc2VtaW5hdGlvbiwgZGlzdHJp
+YnV0aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVk
+LiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFz
+ZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3IgZS1tYWlsIChhcyBzaG93biBhYm92
+ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVzIG9mIHRoaXMgbWVz
+c2FnZSBpbiB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25p
+Y2FsbHkgc3RvcmVkIGNvcGllcykuDQoNCg==
