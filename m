@@ -1,96 +1,52 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [Ceph-community] Getting WARN in __kick_osd_requests doing stress testing
-Date: Fri, 18 Sep 2015 14:17:54 +0300
-Message-ID: <CAOi1vP8RJjdPeR7qeVuyJnz_7Xu6TMnc7Zj+9itTo8KMh6_XGw@mail.gmail.com>
-References: <20150917153314.73c74430a203f93b40249fa0fa5c8853.dffc7cf164.wbe@email11.secureserver.net>
-	<CAEw75dM7D0kaBV9rt+wKvv3xqwT+KNDPRiu8rs_ZX8cd4KKRDg@mail.gmail.com>
+From: iSayor <iSayor@iSayor.com>
+Subject: =?UTF-8?B?5bmz5pe25pyA5aSa5Lmf5bCx6IGU57O75LqG5LiJ5Y2D5a6277yM5YWo?=
+ =?UTF-8?B?55CD6L+Y5pyJ5Y2B5Yeg5LiH5a6i5oi35Zyo5ZOq6YeM77yf?=
+Date: Thu, 17 Sep 2015 13:19:33 -0700
+Message-ID: <01d0f186$Blat.v3.2.4$2a68b167$17fc319c@localhost>
+Reply-To: iSayor <iSayor@163.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f172.google.com ([209.85.212.172]:33021 "EHLO
-	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753465AbbIRLRz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Sep 2015 07:17:55 -0400
-Received: by wiclk2 with SMTP id lk2so60007997wic.0
-        for <ceph-devel@vger.kernel.org>; Fri, 18 Sep 2015 04:17:54 -0700 (PDT)
-In-Reply-To: <CAEw75dM7D0kaBV9rt+wKvv3xqwT+KNDPRiu8rs_ZX8cd4KKRDg@mail.gmail.com>
+Received: from [106.6.178.246] ([106.6.178.246]:19084 "EHLO iSayor.com"
+	rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1754601AbbIRPRb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 18 Sep 2015 11:17:31 -0400
+Received: from sun (127.0.0.1) by iSayor.com for <ceph-devel@vger.kernel.org>; Thu, 17 Sep 2015 13:19:33 -0700 (envelope-from <iSayor@iSayor.com>)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Abhishek L <abhishek.lekshmanan@gmail.com>
-Cc: bart.bartel@osnexus.com, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Fri, Sep 18, 2015 at 9:48 AM, Abhishek L
-<abhishek.lekshmanan@gmail.com> wrote:
-> Redirecting to ceph-devel, where such a question might have a better
-> chance of a reply.
->
-> On Fri, Sep 18, 2015 at 4:03 AM,  <bart.bartel@osnexus.com> wrote:
->> I'm running in a 3-node cluster and doing osd/rbd creation and deletion, and
->> ran across this WARN
->> Note, it only happened once (on one rbd add) after approximately 500 cycles
->> of the test, but was wondering if
->> someone can explain to me why this warning would be happening, and how I can
->> prevent it.
->>
->> Here is what my test script is doing:
->>
->> while(1):
->>     create 5 ceph pools   - sleep 2 between each pool create
->>     sleep 5
->>     create 5 ceph volumes - sleep 2 between each pool create
->>     sleep 5
->>     delete 5 ceph volumes - sleep 2 between each pool create
->>     sleep 5
->>     delete 5 ceph pools   - sleep 2 between each pool create
->>     sleep 5
->>
->>
->> 333940 Sep 17 00:31:54 10.0.41.9 [18372.272771] Call Trace:
->> 333941 Sep 17 00:31:54 10.0.41.9 [18372.273489]  [<ffffffff817d8d3e>]
->> dump_stack+0x45/0x57
->> 333942 Sep 17 00:31:54 10.0.41.9 [18372.274226]  [<ffffffff81078067>]
->> warn_slowpath_common+0x97/0xe0
->> 333943 Sep 17 00:31:54 10.0.41.9 [18372.274923]  [<ffffffff810780ca>]
->> warn_slowpath_null+0x1a/0x20
->> 333944 Sep 17 00:31:54 10.0.41.9 [18372.275635]  [<ffffffffc0f60eec>]
->> __kick_osd_requests+0x1dc/0x240 [libceph]
->> 333945 Sep 17 00:31:54 10.0.41.9 [18372.276305]  [<ffffffffc0f60fa7>]
->> osd_reset+0x57/0xa0 [libceph]
->> 333946 Sep 17 00:31:54 10.0.41.9 [18372.276962]  [<ffffffffc0f59162>]
->> con_work+0x112/0x290 [libceph]
->> 333947 Sep 17 00:31:54 10.0.41.9 [18372.277608]  [<ffffffff810909c4>]
->> process_one_work+0x144/0x470
->> 333948 Sep 17 00:31:54 10.0.41.9 [18372.278247]  [<ffffffff8109140e>]
->> worker_thread+0x11e/0x450
->> 333949 Sep 17 00:31:54 10.0.41.9 [18372.278880]  [<ffffffff810912f0>] ?
->> create_worker+0x1f0/0x1f0
->> 333950 Sep 17 00:31:54 10.0.41.9 [18372.279543]  [<ffffffff81097179>]
->> kthread+0xc9/0xe0
->> 333951 Sep 17 00:31:54 10.0.41.9 [18372.280174]  [<ffffffff810970b0>] ?
->> flush_kthread_worker+0x90/0x90
->> 333952 Sep 17 00:31:54 10.0.41.9 [18372.280803]  [<ffffffff817e5998>]
->> ret_from_fork+0x58/0x90
->> 333953 Sep 17 00:31:54 10.0.41.9 [18372.281430]  [<ffffffff810970b0>] ?
->> flush_kthread_worker+0x90/0x90
->>
->> static void __kick_osd_requests(struct ceph_osd_client *osdc,
->>                                 struct ceph_osd *osd)
->> {
->>      :
->>         list_for_each_entry_safe(req, nreq, &osd->o_linger_requests,
->>                                  r_linger_osd_item) {
->>                 WARN_ON(!list_empty(&req->r_req_lru_item));
->>                 __kick_linger_request(req);
->>         }
->>     :
->> }
+=E6=82=A8=E5=A5=BD:
+    =E6=82=A8=E8=BF=98=E5=9C=A8=E7=94=A8ali=E5=B9=B3=E5=8F=B0=E5=BC=80=E5=
+=8F=91=E5=A4=96=E8=B4=B8=E5=AE=A2=E6=88=B7?
+       =E8=BF=98=E5=9C=A8=E4=BD=BF=E7=94=A8=E5=B1=95=E4=BC=9A=E5=AE=A3=E4=
+=BC=A0=E4=BC=81=E4=B8=9A=E5=92=8C=E4=BA=A7=E5=93=81?
+             =E4=BD=A0out=E4=BA=86!!!
+ =E5=BD=93=E5=89=8D=E5=A4=96=E8=B4=B8=E5=AE=A2=E6=88=B7=E5=BC=80=E5=8F=91=
+=E9=9A=BE=EF=BC=8C=E6=82=A8=E6=98=AF=E5=90=A6=E4=B9=9F=E5=9C=A8=E5=AF=BB=
+=E6=89=BE=E5=B1=95=E4=BC=9A=EF=BC=8CB2B=E4=B9=8B=E5=A4=96=E5=A5=BD=E7=9A=
+=84=E6=B8=A0=E9=81=93=EF=BC=9F=20
+ =E8=A1=8C=E4=B8=9A=E5=85=A8=E7=90=83=E5=8D=81=E5=87=A0=E4=B8=87=E5=AE=A2=
+=E6=88=B7=EF=BC=8C=E5=B9=B3=E6=97=B6=E6=9C=80=E5=A4=9A=E4=B9=9F=E5=B0=B1=
+=E8=81=94=E7=B3=BB=E4=BA=86=E4=B8=89=E5=8D=83=E5=AE=B6=EF=BC=8C=E6=82=A8=
+=E6=98=AF=E5=90=A6=E6=83=B3=E6=8A=8A=E5=89=A9=E4=B8=8B=E7=9A=84=E4=B9=9F=
+=E5=BC=80=E5=8F=91=E5=88=B0=EF=BC=9F
+ =E5=8A=A0QQ2652697913=E7=BB=99=E6=82=A8=E6=BC=94=E7=A4=BA=E4=B8=8B=E4=B8=
+=BB=E5=8A=A8=E5=BC=80=E5=8F=91=E5=AE=A2=E6=88=B7=E7=9A=84=E6=96=B9=E6=B3=
+=95=EF=BC=8C=E5=85=88=E7=94=A8=E5=85=88=E5=8F=97=E7=9B=8A=EF=BC=8C=E5=B7=
+=B2=E7=BB=8F=E6=9C=89=E8=BF=91=E4=B8=87=E5=AE=B6=E4=BC=81=E4=B8=9A=E9=A2=
+=86=E5=85=88=E6=82=A8=E4=BD=BF=E7=94=A8=EF=BC=81=EF=BC=81=E3=80=82
+ =E5=B9=BF=E4=B8=9C=E7=9C=81=E5=95=86=E4=B8=9A=E8=81=94=E5=90=88=E4=BC=9A=
+=E6=8E=A8=E8=8D=90=EF=BC=8C=E4=B8=BB=E5=8A=A8=E5=BC=80=E5=8F=91=E5=AE=A2=
+=E6=88=B7=E7=AC=AC=E4=B8=80=E5=93=81=E7=89=8C=EF=BC=8C=E8=BF=91=E4=B8=87=
+=E5=AE=B6=E4=BC=81=E4=B8=9A=E6=AD=A3=E5=9C=A8=E8=8E=B7=E7=9B=8A=E3=80=82=
+=E6=82=A8=E5=8F=AF=E4=BB=A5=E6=B2=A1=E6=9C=89=E4=BD=BF=E7=94=A8=EF=BC=8C=
+=E4=BD=86=E6=98=AF=E4=B8=8D=E8=83=BD=E6=B2=A1=E6=9C=89=E4=BA=86=E8=A7=A3=
+=E3=80=82
 
-What is your kernel version?
-
-There is no mention of rbd map/unmap in the pseudo code you provided.
-How are you mapping/unmapping those rbd images?  More details or the
-script itself would be nice to see.
-
-Thanks,
-
-                Ilya
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
