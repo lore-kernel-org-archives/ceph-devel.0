@@ -1,124 +1,104 @@
-From: Xusangdi <xu.sangdi@h3c.com>
-Subject: RE: rgw: the swift key remains after removing a subuser
-Date: Thu, 17 Sep 2015 12:29:05 +0000
-Message-ID: <FF8D83DAE5DF57468726B79904321E0604356A@H3CMLB12-EX.srv.huawei-3com.com>
-References: <FF8D83DAE5DF57468726B79904321E06043079@H3CMLB12-EX.srv.huawei-3com.com>
- <CADRKj5SWgAiAXuQPWkUF+Fc86kbn6rUOPg32LjQDz+eGFb9ETg@mail.gmail.com>
+From: "Adam C. Emerson" <aemerson@redhat.com>
+Subject: Re: Review Request
+Date: Thu, 17 Sep 2015 12:19:26 -0400
+Message-ID: <55FAE80E.8040700@redhat.com>
+References: <55F9B061.2090300@redhat.com> <CAJ4mKGbP8K_iMN6AvZW2UwMjjxcEnb0vO2c_k2_3VUWSCWMQKA@mail.gmail.com> <55F9BDC1.20501@redhat.com> <CALe9h7f-O77BB=gPkujUWtyPVtFW-h8OfO8jKCsSWfmPzpQkQA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([221.12.31.13]:11450 "EHLO h3cmg01-ex.h3c.com"
-	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751354AbbIQM2v (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 17 Sep 2015 08:28:51 -0400
-In-Reply-To: <CADRKj5SWgAiAXuQPWkUF+Fc86kbn6rUOPg32LjQDz+eGFb9ETg@mail.gmail.com>
-Content-Language: zh-CN
+Received: from mx1.redhat.com ([209.132.183.28]:39274 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751834AbbIQQP3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 17 Sep 2015 12:15:29 -0400
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+	by mx1.redhat.com (Postfix) with ESMTPS id 48B1A8E6F0
+	for <ceph-devel@vger.kernel.org>; Thu, 17 Sep 2015 16:15:29 +0000 (UTC)
+In-Reply-To: <CALe9h7f-O77BB=gPkujUWtyPVtFW-h8OfO8jKCsSWfmPzpQkQA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: John Spray <jspray@redhat.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, Ceph Developers <ceph-devel@vger.kernel.org>
 
-DQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IGNlcGgtZGV2ZWwtb3duZXJA
-dmdlci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmdd
-IE9uIEJlaGFsZiBPZg0KPiBZZWh1ZGEgU2FkZWgtV2VpbnJhdWINCj4gU2VudDogV2VkbmVzZGF5
-LCBTZXB0ZW1iZXIgMTYsIDIwMTUgMTE6MTYgUE0NCj4gVG86IHh1c2FuZ2RpIDExOTc2IChSRCkN
-Cj4gQ2M6IHh1c2FuZ2RpQDEyNi5jb207IGNlcGgtZGV2ZWwNCj4gU3ViamVjdDogUmU6IHJndzog
-dGhlIHN3aWZ0IGtleSByZW1haW5zIGFmdGVyIHJlbW92aW5nIGEgc3VidXNlcg0KPiANCj4gT24g
-VHVlLCBTZXAgMTUsIDIwMTUgYXQgMTE6NDkgUE0sIFh1c2FuZ2RpIDx4dS5zYW5nZGlAaDNjLmNv
-bT4gd3JvdGU6DQo+ID4NCj4gPiAzLiBEbyB3ZSBuZWVkIHRvIHByZXZlbnQgYSBzdWJ1c2VyIHdp
-dGhvdXQgYW55IHBlcm1pc3Npb24gZnJvbSBvYnRhaW5pbmcgdGhlIGFjY291bnQgaW5mb3JtYXRp
-b24/DQo+ID4gQ3VycmVudGx5IGEgc3VidXNlciB3aXRoIHBlcm1pc3Npb24gPG5vbmU+IGNhbiBn
-ZXQgc29tZSBvZiB0aGUgYWNjb3VudCBtZXRhZGF0YSBhbmQgaXRzIGJ1Y2tldA0KPj4gIGxpc3Qu
-IFRoZSBmb2xsb3dpbmcgc2hvd3MgYSBwYXJ0IG9mIG15IHRlc3RpbmcgcmVzdWx0Og0KPiA+ICAg
-ICAgICAgc2FuZHlAY2VwaDIwOn4kIGN1cmwgLWkgJHVybCAtWCBHRVQgLUggIlgtQXV0aC1Ub2tl
-bjogJHRva2VuIg0KPiA+ICAgICAgICAgSFRUUC8xLjEgMjAwIE9LDQo+ID4gICAgICAgICBYLVRp
-bWVzdGFtcDogMTQ0MjM2Nzk5MC45MDc0MA0KPiA+ICAgICAgICAgWC1BY2NvdW50LUNvbnRhaW5l
-ci1Db3VudDogMQ0KPiA+ICAgICAgICAgWC1BY2NvdW50LU9iamVjdC1Db3VudDogMg0KPiA+ICAg
-ICAgICAgWC1BY2NvdW50LUJ5dGVzLVVzZWQ6IDQxOTQzMDQwDQo+ID4gICAgICAgICBYLUFjY291
-bnQtQnl0ZXMtVXNlZC1BY3R1YWw6IDQxOTQzMDQwDQo+ID4gICAgICAgICBYLVRyYW5zLUlkOiB0
-cy1kZWZhdWx0LjY0MTcxLjg2LTIwMTUwOTE2OjAxNDYzMDo5MDQNCj4gPiAgICAgICAgIENvbnRl
-bnQtdHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD11dGYtOA0KPiA+ICAgICAgICAgQ29udGVudC1M
-ZW5ndGg6IDkNCj4gPiAgICAgICAgIERhdGU6IFdlZCwgMTYgU2VwIDIwMTUgMDE6NDY6MzAgR01U
-DQo+ID4NCj4gPiAgICAgICAgIGJrdF90ZXN0DQo+ID4NCj4gDQo+IEknbSBub3Qgc3VyZS4gVGhl
-IHBlcm1pc3Npb25zIGFyZSBlaXRoZXIgcmVhZCwgd3JpdGUsIG9yIGRlbGV0ZSwgd2hpY2ggZG9u
-J3QgbWFrZSBzZW5zZSB3aXRoIHJlZ2FyZCB0bw0KPiB0aGlzIG9wZXJhdGlvbi4gSSB0aGluayB3
-ZSB3b3VsZCBuZWVkIHRvIGFkZCBhIG5ldyBwZXJtaXNzaW9uIHR5cGUgZm9yIGl0IHRvIG1ha2Ug
-c2Vuc2UsIGJ1dCBJJ20gbm90DQo+IHN1cmUgdGhpcyBpcyBzb21ldGhpbmcgd2UgbmVlZCBvciB3
-YW50IHRvIHB1cnN1ZS4NCj4gDQoNCkkgd2FzIHRoaW5raW5nIHJlYWQgcGVybWlzc2lvbiBzaG91
-bGQgYmUgcmVxdWlyZWQgdG8gZ2V0IHRoZSB1c2VyIG1ldGFkYXRhIGFuZCBjb250YWluZXIgbGlz
-dCwgYnV0IGlmIHRoZSBwZXJtaXNzaW9ucyBhcmUgc3BlY2lmaWNhbGx5IGRlc2lnbmVkIGZvciBv
-YmplY3Qgb3BlcmF0aW9ucywgd2UgbWF5IGp1c3QgcGFzcyB0aGlzIGlzc3VlLg0KDQo+ID4NCj4g
-PiBXaGVuIGRvaW5nIHRoZSB0ZXN0cywgSSBhbHNvIGVuY291bnRlcmVkIHNldmVyYWwgb3RoZXIg
-aXNzdWVzIHRoYXQgSSBjYW5ub3QgdGVsbCB3aGV0aGVyIGFyZSBidWdzIG9yDQo+IGRlc2lnbmVk
-IG9uIHB1cnBvc2UuDQo+ID4gaTE6IEFzIG1lbnRpb25lZCBpbiBxdWVzdGlvbiAyLCBhIHN1YnVz
-ZXIgaXMgY3JlYXRlZCB3aXRoIHMzIGtleXMgcmF0aGVyIHRoYW4gYSBzd2lmdCBrZXkuDQo+IA0K
-PiBUaGlzIGlzIHByb2JhYmx5IGEgYnVnLiBJIHZhZ3VlbHkgcmVtZW1iZXIgbWVyZ2luZyBpbiBv
-ciByZXZpZXdpbmcgYSByZWxhdGVkIGZpeCByZWNlbnRseS4gQXJlIHlvdQ0KPiBydW5uaW5nIHRo
-ZSBsYXRlc3Q/DQo+IA0KDQpOb3BlIEknbSBydW5uaW5nIHY5LjAuMywgSSB3aWxsIGdvIGNoZWNr
-IHJlbGF0ZWQgcHVsbCByZXF1ZXN0cyBhbmQgbWF5YmUgdGVzdCBpdCBvbiBsYXRlc3QgbWFzdGVy
-Lg0KDQo+ID4gaTI6IFRoZSBhdXRvLWdlbmVyYXRlZCBzMyBzZWNyZXQga2V5IGlzIGVtcHR5LCBh
-bmQgaXQgaXMgcmVnYXJkZWQgYXMgdmFsaWQuDQo+IA0KPiBTb3VuZHMgbGlrZSBhIGJ1Zy4NCg0K
-aHR0cDovL3RyYWNrZXIuY2VwaC5jb20vaXNzdWVzLzEzMTMzDQoNCj4gDQo+ID4gaTM6IFRoZSBh
-Y2NvdW50IG1ldGFkYXRhIG9idGFpbmVkIGZyb20gc3dpZnQgQVBJIGNvbnRhaW5zIGRvdWJsZWQg
-b2JqZWN0IGNvdW50IGFuZCBieXRlcyB1c2VkLiBGb3INCj4gYSBzdWJ1c2VyIHBvc3Nlc3Npbmcg
-b25lIGNvbnRhaW5lciBhbmQgb25lIG9iamVjdCwgdGhlIHJlc3VsdHMgbWF5IGxvb2sgbGlrZSB0
-aGlzOg0KPiA+ICAgICAgICAgc2FuZHlAY2VwaDIwOn4kIGN1cmwgLWkgJHVybCAtWCBHRVQgLUgg
-IlgtQXV0aC1Ub2tlbjogJHRva2VuMiINCj4gPiAgICAgICAgIEhUVFAvMS4xIDIwMCBPSw0KPiA+
-ICAgICAgICAgWC1UaW1lc3RhbXA6IDE0NDIzNzEzMTYuNzk0ODkNCj4gPiAgICAgICAgIFgtQWNj
-b3VudC1Db250YWluZXItQ291bnQ6IDENCj4gPiAgICAgICAgIFgtQWNjb3VudC1PYmplY3QtQ291
-bnQ6IDINCj4gPiAgICAgICAgIFgtQWNjb3VudC1CeXRlcy1Vc2VkOiA0MTk0MzA0MA0KPiA+ICAg
-ICAgICAgWC1BY2NvdW50LUJ5dGVzLVVzZWQtQWN0dWFsOiA0MTk0MzA0MA0KPiA+ICAgICAgICAg
-WC1UcmFucy1JZDogdHMtZGVmYXVsdC42NDE3MS45OS0yMDE1MDkxNjowMjQxNTY6NzkwDQo+ID4g
-ICAgICAgICBDb250ZW50LXR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9dXRmLTgNCj4gPiAgICAg
-ICAgIENvbnRlbnQtTGVuZ3RoOiA5DQo+ID4gICAgICAgICBEYXRlOiBXZWQsIDE2IFNlcCAyMDE1
-IDAyOjQxOjU2IEdNVA0KPiA+DQo+ID4gICAgICAgICBia3RfdGVzdA0KPiA+DQo+ID4gICAgICAg
-ICBzYW5keUBjZXBoMjA6fiQgY3VybCAtaSAkdXJsL2JrdF90ZXN0IC1YIEdFVCAtSCAiWC1BdXRo
-LVRva2VuOiAkdG9rZW4yIg0KPiA+ICAgICAgICAgSFRUUC8xLjEgMjAwIE9LDQo+ID4gICAgICAg
-ICBYLVRpbWVzdGFtcDogMTQ0MjI4MDY5MC4wMDAwMA0KPiA+ICAgICAgICAgWC1Db250YWluZXIt
-T2JqZWN0LUNvdW50OiAxDQo+ID4gICAgICAgICBYLUNvbnRhaW5lci1CeXRlcy1Vc2VkOiAyMDk3
-MTUyMA0KPiA+ICAgICAgICAgWC1Db250YWluZXItQnl0ZXMtVXNlZC1BY3R1YWw6IDIwOTcxNTIw
-DQo+ID4gICAgICAgICBYLVN0b3JhZ2UtUG9saWN5OiBkZWZhdWx0LXBsYWNlbWVudA0KPiA+ICAg
-ICAgICAgWC1UcmFucy1JZDogdHMtZGVmYXVsdC42NDE3MS4xMDAtMjAxNTA5MTY6MDI0MjAwOjQ4
-Mg0KPiA+ICAgICAgICAgQ29udGVudC1MZW5ndGg6IDkNCj4gPiAgICAgICAgIEFjY2VwdC1SYW5n
-ZXM6IGJ5dGVzDQo+ID4gICAgICAgICBDb250ZW50LXR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9
-dXRmLTgNCj4gPiAgICAgICAgIERhdGU6IFdlZCwgMTYgU2VwIDIwMTUgMDI6NDI6MDAgR01UDQo+
-ID4NCj4gPiAgICAgICAgIGZpbGVfdGVzdA0KPiANCj4gU291bmRzIGxpa2UgYW5vdGhlciBidWcs
-IGNhbiB5b3Ugb3BlbiB0aWNrZXRzIGZvciB0aGUgcmVsZXZhbnQgYnVncz8NCj4gDQoNCmh0dHA6
-Ly90cmFja2VyLmNlcGguY29tL2lzc3Vlcy8xMzE0MA0KDQo+IFRoYW5rcywNCj4gWWVodWRhDQo+
-IA0KPiA+DQo+ID4gQXMgeW91IGNhbiBzZWUsIHRoZSBjb250YWluZXIgaGFzIG9ubHkgb25lIG9i
-amVjdCBvZiAyME0sIGJ1dCB0aGUgYWNjb3VudCBvd25zIHR3byBvYmplY3RzIG9mIDQwTQ0KPiBp
-biB0b3RhbC4gSSBjaGVja2VkIHRoZSAucmd3LmJ1Y2tldHMgcG9vbCBhbmQgaXQgY29udGFpbnMg
-b25seSBvbmUgZmlsZToNCj4gPiAgICAgICAgIHNhbmR5QGNlcGgyMDp+JCByYWRvcyAtcCAucmd3
-LmJ1Y2tldHMgbHMNCj4gPiAgICAgICAgIGRlZmF1bHQuNjQxNzEuMV9fc2hhZG93Xy5iU0k4YjF1
-MFdmZjQtMkx1RURDWXRZa3FocHVxUEFLXzQNCj4gPiAgICAgICAgIGRlZmF1bHQuNjQxNzEuMV9f
-c2hhZG93Xy5iU0k4YjF1MFdmZjQtMkx1RURDWXRZa3FocHVxUEFLXzENCj4gPiAgICAgICAgIGRl
-ZmF1bHQuNjQxNzEuMV9fc2hhZG93Xy5iU0k4YjF1MFdmZjQtMkx1RURDWXRZa3FocHVxUEFLXzUN
-Cj4gPiAgICAgICAgIGRlZmF1bHQuNjQxNzEuMV9fc2hhZG93Xy5iU0k4YjF1MFdmZjQtMkx1RURD
-WXRZa3FocHVxUEFLXzMNCj4gPiAgICAgICAgIGRlZmF1bHQuNjQxNzEuMV9maWxlX3Rlc3QNCj4g
-PiAgICAgICAgIGRlZmF1bHQuNjQxNzEuMV9fc2hhZG93Xy5iU0k4YjF1MFdmZjQtMkx1RURDWXRZ
-a3FocHVxUEFLXzINCj4gPg0KPiA+DQo+ID4gWW91ciBjb21tZW50cyBhbmQgc3VnZ2VzdGlvbnMg
-d291bGQgYmUgc2luY2VyZWx5IGFwcHJlY2lhdGVkLCB0aGFuayB5b3UuDQo+ID4NCj4gPiAtLS0t
-LQ0KPiA+IEJlc3QgcmVnYXJkcywNCj4gPiBTYW5nZGkNCj4gPiAtLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQo+ID4g
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tDQo+ID4g5pys6YKu5Lu25Y+K5YW26ZmE5Lu25ZCr5pyJ5p2t5bee5Y2O5LiJ6YCa5L+h
-5oqA5pyv5pyJ6ZmQ5YWs5Y+455qE5L+d5a+G5L+h5oGv77yM5LuF6ZmQ5LqO5Y+R6YCB57uZ5LiK
-6Z2i5Zyw5Z2A5Lit5YiX5Ye6DQo+ID4g55qE5Liq5Lq65oiW576k57uE44CC56aB5q2i5Lu75L2V
-5YW25LuW5Lq65Lul5Lu75L2V5b2i5byP5L2/55So77yI5YyF5ous5L2G5LiN6ZmQ5LqO5YWo6YOo
-5oiW6YOo5YiG5Zyw5rOE6Zyy44CB5aSN5Yi244CBDQo+ID4g5oiW5pWj5Y+R77yJ5pys6YKu5Lu2
-5Lit55qE5L+h5oGv44CC5aaC5p6c5oKo6ZSZ5pS25LqG5pys6YKu5Lu277yM6K+35oKo56uL5Y2z
-55S16K+d5oiW6YKu5Lu26YCa55+l5Y+R5Lu25Lq65bm25Yig6Zmk5pysDQo+ID4g6YKu5Lu277yB
-DQo+ID4gVGhpcyBlLW1haWwgYW5kIGl0cyBhdHRhY2htZW50cyBjb250YWluIGNvbmZpZGVudGlh
-bCBpbmZvcm1hdGlvbiBmcm9tDQo+ID4gSDNDLCB3aGljaCBpcyBpbnRlbmRlZCBvbmx5IGZvciB0
-aGUgcGVyc29uIG9yIGVudGl0eSB3aG9zZSBhZGRyZXNzIGlzDQo+ID4gbGlzdGVkIGFib3ZlLiBB
-bnkgdXNlIG9mIHRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaGVyZWluIGluIGFueSB3YXkNCj4g
-PiAoaW5jbHVkaW5nLCBidXQgbm90IGxpbWl0ZWQgdG8sIHRvdGFsIG9yIHBhcnRpYWwgZGlzY2xv
-c3VyZSwNCj4gPiByZXByb2R1Y3Rpb24sIG9yIGRpc3NlbWluYXRpb24pIGJ5IHBlcnNvbnMgb3Ro
-ZXIgdGhhbiB0aGUgaW50ZW5kZWQNCj4gPiByZWNpcGllbnQocykgaXMgcHJvaGliaXRlZC4gSWYg
-eW91IHJlY2VpdmUgdGhpcyBlLW1haWwgaW4gZXJyb3IsDQo+ID4gcGxlYXNlIG5vdGlmeSB0aGUg
-c2VuZGVyIGJ5IHBob25lIG9yIGVtYWlsIGltbWVkaWF0ZWx5IGFuZCBkZWxldGUgaXQhDQo+IC0t
-DQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNj
-cmliZSBjZXBoLWRldmVsIiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8NCj4gbWFqb3Jkb21v
-QHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJu
-ZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg==
+On 09/16/2015 06:15 PM, John Spray wrote:
+> This is neat, I had been hankering to lambda-ize various things, but
+> hadn't worked through what the allocation would looked like in
+> practice.
+> 
+> Do you know if there's a reason the standard is defined so as to not
+> let us override the reserved size of a std::function?  Are we taking
+> any kind of hit by doing this?
+
+There are tradeoffs, but I do not believe they burden us.
+
+Small Function Optimization is not actually required by the standard.
+It's just that all implementations of std::function I'm familiar with
+implement it to at least some degree. In the GNU implementation, the
+structure always has space for a pointer to point to heap allocated
+stuff. If your 'function' is just a pointer (or something as big as a
+pointer) it stores that. Since there aren't really any tradeoffs with
+providing at least /some/ form of Small Function Optimization, there's
+no reason for an implementation not to write it in. (This is in contrast
+to Short String Operation, where it can clash with Copy-on-Write.)
+
+So, the main reason the Standard doesn't allow one to specify the amount
+of space reserved for Small Functions is that it doesn't talk about it.
+
+There is a trade-off, however.
+
+  ceph::function<void(int), 4 * sizeof(void*)>
+
+Is a different type than
+
+  ceph::function<void(int), 3 * sizeof(void*)>
+
+This is good, in that it means that in our heap_allocations::forbid
+case, we can reject, at compile time anything that the type system can't
+guarantee will fit in our reserved space.
+
+The cost is that they differ by type. A reference to one type won't
+reference an object of the other type. This means that you'll need to
+use a template and universal reference, like:
+
+  template<typename F>
+  void do_stuff(F&& f) {
+    auto o = new Thing(std::forward<F>(f));
+  }
+
+And if you want to overload do_stuff, you'll need to use enable_if to
+disambiguate the function from the other stuff. One day we shall have
+Concepts. And if they don't give us too broken down and wimpified a
+version it should make these problems go away. But for now we need
+enable_if. There's a good chance that passing functions by universal
+reference and forward right until the point they get stored somewhere is
+going to be slightly more efficient at runtime than having the function
+take a std::function&/ceph::function& parameter, depending on what the
+compiler does (I haven't looked at the assembler for this case but I
+suspect it would call the std::function constructor at the point of
+function call and the move constructor at the point of storing it into
+the data structure), so you might want to do this anyway.
+
+It also means that you can't store pointer/reference to functions with a
+different reserved size in the same container. In practice this doesn't
+really come up, since if I'm a subsystem with a bunch of OnComplete
+functions that I've stored and I want to gather up a list of references
+to them I already control what I've stored. Or if you really need to you
+can combine a ceph::function with a reserved size of 1 * sizeof(void*)
+with std::ref to get a 'universal function reference' at the cost of a
+double indirection and two virtual function calls where one would
+normally be required.
+
+There is also a potential runtime cost in the move constructor. If our
+ceph::function heap allocates its storage and we then use swap, move
+assignment, or move construction, we just end up copying a pointer at
+each move. If everything fits in reserved space, all these pointer
+copies become fairly substantial memcpies. Since Ceph normally stores a
+callback function in the structure describing an operation, leaves it
+there, and then calls it, this shouldn't hurt us too much. (And is one
+of the reasons I recommend using a universal reference and std::forward
+above rather than accepting a ceph::function reference and then
+std::moving it into its final home.) For cases where we do want to
+'move' them around a lot, we can use std::ref and other tricks to turn
+the memcpies back into pointer copies.
+
+Thank you!
