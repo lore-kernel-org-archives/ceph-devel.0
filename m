@@ -1,92 +1,125 @@
-From: Abhishek L <abhishek.lekshmanan@gmail.com>
-Subject: Re: [Ceph-community] Getting WARN in __kick_osd_requests doing stress testing
-Date: Fri, 18 Sep 2015 12:18:44 +0530
-Message-ID: <CAEw75dM7D0kaBV9rt+wKvv3xqwT+KNDPRiu8rs_ZX8cd4KKRDg@mail.gmail.com>
-References: <20150917153314.73c74430a203f93b40249fa0fa5c8853.dffc7cf164.wbe@email11.secureserver.net>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: What should be in the next hammer/firefly release ?
+Date: Fri, 18 Sep 2015 08:57:19 +0200
+Message-ID: <55FBB5CF.30206@dachary.org>
+References: <870DE8DBB716524BAE51B2D499EC81E40AB98467@g01jpexmbyt24> <CAANLjFo8Knp1OHy69fnxxtDE0WKzZkmk3U3yCPpW16pxtaKDtQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="vEJkvx0OmvxxsjblR0Iwt2SFWNSFfFJgo"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f177.google.com ([209.85.213.177]:38770 "EHLO
-	mail-ig0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752340AbbIRGsp (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Sep 2015 02:48:45 -0400
-Received: by igxx6 with SMTP id x6so11332380igx.1
-        for <ceph-devel@vger.kernel.org>; Thu, 17 Sep 2015 23:48:45 -0700 (PDT)
-In-Reply-To: <20150917153314.73c74430a203f93b40249fa0fa5c8853.dffc7cf164.wbe@email11.secureserver.net>
+Received: from mail2.dachary.org ([91.121.57.175]:57377 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751478AbbIRG50 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Sep 2015 02:57:26 -0400
+In-Reply-To: <CAANLjFo8Knp1OHy69fnxxtDE0WKzZkmk3U3yCPpW16pxtaKDtQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: bart.bartel@osnexus.com
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Robert LeBlanc <robert@leblancnet.us>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Redirecting to ceph-devel, where such a question might have a better
-chance of a reply.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--vEJkvx0OmvxxsjblR0Iwt2SFWNSFfFJgo
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-On Fri, Sep 18, 2015 at 4:03 AM,  <bart.bartel@osnexus.com> wrote:
-> I'm running in a 3-node cluster and doing osd/rbd creation and deletion, and
-> ran across this WARN
-> Note, it only happened once (on one rbd add) after approximately 500 cycles
-> of the test, but was wondering if
-> someone can explain to me why this warning would be happening, and how I can
-> prevent it.
->
-> Here is what my test script is doing:
->
-> while(1):
->     create 5 ceph pools   - sleep 2 between each pool create
->     sleep 5
->     create 5 ceph volumes - sleep 2 between each pool create
->     sleep 5
->     delete 5 ceph volumes - sleep 2 between each pool create
->     sleep 5
->     delete 5 ceph pools   - sleep 2 between each pool create
->     sleep 5
->
->
-> 333940 Sep 17 00:31:54 10.0.41.9 [18372.272771] Call Trace:
-> 333941 Sep 17 00:31:54 10.0.41.9 [18372.273489]  [<ffffffff817d8d3e>]
-> dump_stack+0x45/0x57
-> 333942 Sep 17 00:31:54 10.0.41.9 [18372.274226]  [<ffffffff81078067>]
-> warn_slowpath_common+0x97/0xe0
-> 333943 Sep 17 00:31:54 10.0.41.9 [18372.274923]  [<ffffffff810780ca>]
-> warn_slowpath_null+0x1a/0x20
-> 333944 Sep 17 00:31:54 10.0.41.9 [18372.275635]  [<ffffffffc0f60eec>]
-> __kick_osd_requests+0x1dc/0x240 [libceph]
-> 333945 Sep 17 00:31:54 10.0.41.9 [18372.276305]  [<ffffffffc0f60fa7>]
-> osd_reset+0x57/0xa0 [libceph]
-> 333946 Sep 17 00:31:54 10.0.41.9 [18372.276962]  [<ffffffffc0f59162>]
-> con_work+0x112/0x290 [libceph]
-> 333947 Sep 17 00:31:54 10.0.41.9 [18372.277608]  [<ffffffff810909c4>]
-> process_one_work+0x144/0x470
-> 333948 Sep 17 00:31:54 10.0.41.9 [18372.278247]  [<ffffffff8109140e>]
-> worker_thread+0x11e/0x450
-> 333949 Sep 17 00:31:54 10.0.41.9 [18372.278880]  [<ffffffff810912f0>] ?
-> create_worker+0x1f0/0x1f0
-> 333950 Sep 17 00:31:54 10.0.41.9 [18372.279543]  [<ffffffff81097179>]
-> kthread+0xc9/0xe0
-> 333951 Sep 17 00:31:54 10.0.41.9 [18372.280174]  [<ffffffff810970b0>] ?
-> flush_kthread_worker+0x90/0x90
-> 333952 Sep 17 00:31:54 10.0.41.9 [18372.280803]  [<ffffffff817e5998>]
-> ret_from_fork+0x58/0x90
-> 333953 Sep 17 00:31:54 10.0.41.9 [18372.281430]  [<ffffffff810970b0>] ?
-> flush_kthread_worker+0x90/0x90
->
-> static void __kick_osd_requests(struct ceph_osd_client *osdc,
->                                 struct ceph_osd *osd)
-> {
->      :
->         list_for_each_entry_safe(req, nreq, &osd->o_linger_requests,
->                                  r_linger_osd_item) {
->                 WARN_ON(!list_empty(&req->r_req_lru_item));
->                 __kick_linger_request(req);
->         }
->     :
-> }
->
-> - Bart
->
->
-> _______________________________________________
-> Ceph-community mailing list
-> Ceph-community@lists.ceph.com
-> http://lists.ceph.com/listinfo.cgi/ceph-community-ceph.com
->
+Hi Robert,
+
+http://tracker.ceph.com/issues/10399 was backported to hammer and will be=
+ in v0.94.4 (see http://tracker.ceph.com/issues/12751 for details).
+
+Cheers
+
+On 18/09/2015 02:44, Robert LeBlanc wrote:
+> Can we get http://tracker.ceph.com/issues/10399 into hammer. We hit thi=
+s today.
+> ----------------
+> Robert LeBlanc
+> PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
+>=20
+>=20
+> On Thu, Sep 10, 2015 at 4:57 AM, Miyamae, Takeshi  wrote:
+>> Hi Loic,
+>=20
+>> As the last pull request #5257 was committed into the main trunk,
+>> we believe all the SHEC codes in main trunk are ready to be backported=
+ into Hammer branch.
+>> What can we do at this moment?
+>=20
+>> Best regards,
+>> Takeshi Miyamae
+>=20
+>> -----Original Message-----
+>> From: Miyamae, Takeshi/=E5=AE=AE=E5=89=8D =E5=89=9B
+>> Sent: Thursday, September 3, 2015 4:09 PM
+>> To: 'ceph-devel-owner@vger.kernel.org'
+>> Cc: Paul Von-Stamwitz (PVonStamwitz@us.fujitsu.com); Toshine, Naoyoshi=
+/=E5=88=A9=E6=A0=B9 =E7=9B=B4=E4=BD=B3; Shiozawa, Kensuke/=E5=A1=A9=E6=B2=
+=A2 =E8=B3=A2=E8=BC=94; Nakao, Takanori/=E4=B8=AD=E5=B0=BE =E9=B7=B9=E8=A9=
+=94 (nakao.takanori@jp.fujitsu.com)
+>> Subject: Re: What should be in the next hammer/firefly release ?
+>=20
+>> Dear Loic,
+>=20
+>> We would like to let following two patches be backported to hammer v0.=
+94.4.
+>> (And our wish is finally backporting these patches to RHCS v1.3.) Can =
+it be possible? If possible, please let us know what should be started at=
+ first.
+>> (Caution: #5257 has not been committed to master branch yet.)
+>=20
+>> erasure-code: shec plugin feature #5493
+>> https://github.com/ceph/ceph/pull/5493
+>=20
+>> erasure code: shec performance optimization by decoding cache #5257
+>> https://github.com/ceph/ceph/pull/5257
+>=20
+>> Best regards,
+>> Takeshi Miyamae
+>=20
+>> -----Original Message-----
+>> From: Loic Dachary  dachary.org>
+>> Subject: What should be in the next hammer/firefly release ?
+>> Newsgroups: gmane.comp.file-systems.ceph.devel
+>> Date: 2015-09-02 11:00:53 GMT (15 hours and 32 minutes ago) Hi,
+>=20
+>> I added a link to
+>=20
+>> http://tracker.ceph.com/projects/ceph-releases/wiki/HOWTO#Overview-of-=
+the-backports-in-progress
+>=20
+>> to show all issues that should be in the next point release for
+>=20
+>> hammer v0.94.4 : http://tracker.ceph.com/versions/495
+>> firefly v0.80.11 : http://tracker.ceph.com/versions/480
+>=20
+>> Cheers
+>=20
+>> --
+>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>=20
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--vEJkvx0OmvxxsjblR0Iwt2SFWNSFfFJgo
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlX7tc8ACgkQ8dLMyEl6F21fwgCeMvyMgUR7QyK+oJdGeRm3VSp7
+eU8An068TdQa6lFmUjMhSY6tw2aNg+r8
+=9zF0
+-----END PGP SIGNATURE-----
+
+--vEJkvx0OmvxxsjblR0Iwt2SFWNSFfFJgo--
