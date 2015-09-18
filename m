@@ -1,143 +1,123 @@
-From: Robert LeBlanc <robert@leblancnet.us>
-Subject: Re: What should be in the next hammer/firefly release ?
-Date: Fri, 18 Sep 2015 10:10:15 -0600
-Message-ID: <CAANLjFo8PVGox9+2ndKXUOqTVjAZvkDLUEeBD+XF3oycw4wVmw@mail.gmail.com>
-References: <870DE8DBB716524BAE51B2D499EC81E40AB98467@g01jpexmbyt24>
-	<CAANLjFo8Knp1OHy69fnxxtDE0WKzZkmk3U3yCPpW16pxtaKDtQ@mail.gmail.com>
-	<55FBB5CF.30206@dachary.org>
+From: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
+Subject: RE: Newstore create failed with fio_objectstore
+Date: Fri, 18 Sep 2015 21:54:50 +0000
+Message-ID: <99767EA2E27DD44DB4E9F9B9ACA458C03BD7E2B0@SSIEXCH-MB3.ssi.samsung.com>
+References: <99767EA2E27DD44DB4E9F9B9ACA458C03BD7DFC5@SSIEXCH-MB3.ssi.samsung.com>
+ <6F3FA899187F0043BA1827A69DA2F7CC03621088@shsmsx102.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f47.google.com ([209.85.213.47]:35979 "EHLO
-	mail-vk0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751706AbbIRQKR convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Sep 2015 12:10:17 -0400
-Received: by vkfp126 with SMTP id p126so32745111vkf.3
-        for <ceph-devel@vger.kernel.org>; Fri, 18 Sep 2015 09:10:16 -0700 (PDT)
-In-Reply-To: <55FBB5CF.30206@dachary.org>
+Received: from mx2.ssi.samsung.com ([207.140.43.206]:57118 "EHLO
+	mx2.ssi.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753375AbbIRVyy (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Sep 2015 17:54:54 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA256
-
-Thanks, didn't find the original ticket number in the list.
-- ----------------
-Robert LeBlanc
-PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
-
-
-On Fri, Sep 18, 2015 at 12:57 AM, Loic Dachary  wrote:
-> Hi Robert,
->
-> http://tracker.ceph.com/issues/10399 was backported to hammer and wil=
-l be in v0.94.4 (see http://tracker.ceph.com/issues/12751 for details).
->
-> Cheers
->
-> On 18/09/2015 02:44, Robert LeBlanc wrote:
->> Can we get http://tracker.ceph.com/issues/10399 into hammer. We hit =
-this today.
->> ----------------
->> Robert LeBlanc
->> PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
->>
->>
->> On Thu, Sep 10, 2015 at 4:57 AM, Miyamae, Takeshi  wrote:
->>> Hi Loic,
->>
->>> As the last pull request #5257 was committed into the main trunk,
->>> we believe all the SHEC codes in main trunk are ready to be backpor=
-ted into Hammer branch.
->>> What can we do at this moment?
->>
->>> Best regards,
->>> Takeshi Miyamae
->>
->>> -----Original Message-----
->>> From: Miyamae, Takeshi/=E5=AE=AE=E5=89=8D =E5=89=9B
->>> Sent: Thursday, September 3, 2015 4:09 PM
->>> To: 'ceph-devel-owner@vger.kernel.org'
->>> Cc: Paul Von-Stamwitz (PVonStamwitz@us.fujitsu.com); Toshine, Naoyo=
-shi/=E5=88=A9=E6=A0=B9 =E7=9B=B4=E4=BD=B3; Shiozawa, Kensuke/=E5=A1=A9=E6=
-=B2=A2 =E8=B3=A2=E8=BC=94; Nakao, Takanori/=E4=B8=AD=E5=B0=BE =E9=B7=B9=
-=E8=A9=94 (nakao.takanori@jp.fujitsu.com)
->>> Subject: Re: What should be in the next hammer/firefly release ?
->>
->>> Dear Loic,
->>
->>> We would like to let following two patches be backported to hammer =
-v0.94.4.
->>> (And our wish is finally backporting these patches to RHCS v1.3.) C=
-an it be possible? If possible, please let us know what should be start=
-ed at first.
->>> (Caution: #5257 has not been committed to master branch yet.)
->>
->>> erasure-code: shec plugin feature #5493
->>> https://github.com/ceph/ceph/pull/5493
->>
->>> erasure code: shec performance optimization by decoding cache #5257
->>> https://github.com/ceph/ceph/pull/5257
->>
->>> Best regards,
->>> Takeshi Miyamae
->>
->>> -----Original Message-----
->>> From: Loic Dachary  dachary.org>
->>> Subject: What should be in the next hammer/firefly release ?
->>> Newsgroups: gmane.comp.file-systems.ceph.devel
->>> Date: 2015-09-02 11:00:53 GMT (15 hours and 32 minutes ago) Hi,
->>
->>> I added a link to
->>
->>> http://tracker.ceph.com/projects/ceph-releases/wiki/HOWTO#Overview-=
-of-the-backports-in-progress
->>
->>> to show all issues that should be in the next point release for
->>
->>> hammer v0.94.4 : http://tracker.ceph.com/versions/495
->>> firefly v0.80.11 : http://tracker.ceph.com/versions/480
->>
->>> Cheers
->>
->>> --
->>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->
-> --
-> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->
-
------BEGIN PGP SIGNATURE-----
-Version: Mailvelope v1.1.0
-Comment: https://www.mailvelope.com
-
-wsFcBAEBCAAQBQJV/DdkCRDmVDuy+mK58QAAB9wP/ilDxlotJ3ar6l46AjhB
-hM9aytpLermhzOvznNkwrRXcRET7IZcBUeNv9lr2E1Elq56mM7d4nlvpJMME
-KdfmvkfQYR1oiyKt0lJgG3Hl6ZCtzNRzWSEGp72yCpKmtK0/47PWQvQHdW8C
-B88umZ1i1u16VuKEv8TdgySohJCXr/7gTMYrui7yQCBWoUWUaSSH+MV7UStx
-vWM0806Xvvp3hfbrh5ffBk1ycLDaYDvW0+/vQJc0VJpGLn47u8TVjZrj1xZk
-92B2TXwHdIMAQpF7xGFwVDbY+PkExRPWd8Yd75kxL7O+s+HYQIPU2nDo9qp8
-PgXsXKr8Qu/WksbjVi8GEUj8rLrOPgoboqB+D6e4RpaZz4/gHt12aedQwbPj
-hm6N4KOVr3oc5+QEAu81loC3d/uG4+BDwVTRRn4bt8+5ksOLDWeKdYOteBim
-BvlyUt42ZlbDKQlr65a/h/v2C8asSvMM1NNhFl/NOM9k01wCY7/dNsWMeO0T
-88gn4rAMNA9fpP1kZvFc5h7palKhPh2CVr9VuKyc45YBi8w8pCD2eYwgBjPN
-R7LDbOgUhBjRtU/bqLY/KQYzG7o5VMuJp0MtY9HHDLXQyqR6GyMMUuKYFCX9
-xREqJQStrTi1eQ7oeZ0gLcx9sd7WmWldb8OW6JTgJ7zu5rB8N3qu+V2JN2nn
-OAW5
-=3DM8sA
------END PGP SIGNATURE-----
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGkgWGlhb3hpIGFuZCBDZXBoZXJzLA0KIFRoYW5rcyBmb3IgeW91ciBmZWVkYmFjay4gSSBhbSB0
+cnlpbmcgdG8gZ2V0IG5ld3N0b3JlIHdvcmtzIHdpdGggcm9ja3NkYiBpbiBmaW8tb2JqZWN0c3Rv
+cmUgcGx1Z2luLiDCoA0KIA0KIEhlcmUgYXJlIHN0ZXBzIEnCoCBkaWQ6DQoxLiBSZWNvbmZpZ3Vy
+ZSB0aGUgY2VwaCB3aXRoIFJvY2tzREIgYnVpbGQgaW4NCi4vY29uZmlndXJlIC0td2l0aC1maW8t
+ZGlyPS4vc3JjL2Zpby8gLS13aXRoLWxpYnJvY2tzZGItc3RhdGljDQoyLiBzdWRvIC4vZmlvL2Zp
+byAuL3Rlc3Qvb2JqZWN0c3RvcmUuZmlvIA0KIEkgYWx3YXlzIGdldCBlcnJvciBvZiB1bmRlZmlu
+ZWQgc3ltYm9sIFJvY2tzREJTdG9yZS4NCiANCiBmaW86IGVuZ2luZSAuLy5saWJzL2xpYmZpb19j
+ZXBoX29iamVjdHN0b3JlLnNvIG5vdCBsb2FkYWJsZQ0KIGZpbzogZmFpbGVkIHRvIGxvYWQgZW5n
+aW5lIC4vLmxpYnMvbGliZmlvX2NlcGhfb2JqZWN0c3RvcmUuc28NCiBCYWQgb3B0aW9uIDxvYmpl
+Y3RzdG9yZT1uZXdzdG9yZT4NCiBEaWQgeW91IG1lYW4gZGlyZWN0b3J5Pw0KIEJhZCBvcHRpb24g
+PGV4cGVyaW1lbnRhbGZlYXR1cmU9bmV3c3RvcmU+DQogRGlkIHlvdSBtZWFuIGV4cGVyaW1lbnRh
+bF92ZXJpZnk/DQogZmlvOiBqb2IgbmV3c3RvcmUgZHJvcHBlZA0KIGZpbzogZmlsZTppb2VuZ2lu
+ZXMuYzo5OSwgZnVuYz1kbG9wZW4sIGVycm9yPS4vLmxpYnMvbGliZmlvX2NlcGhfb2JqZWN0c3Rv
+cmUuc286IHVuZGVmaW5lZCBzeW1ib2w6IF9aVFYxMlJvY2tzREJTdG9yZQ0KIGxpYmdjY19zLnNv
+LjEgbXVzdCBiZSBpbnN0YWxsZWQgZm9yIHB0aHJlYWRfY2FuY2VsIHRvIHdvcmsNCsKgIA0KMy4g
+bm0gLmxpYnMvbGlib3MuYSB8Z3JlcCBSb2Nrc0RCU3RvcmUNCkkgZG8gZmluZCB0aGF0IFJvY2tz
+REJTdG9yZSBpcyB1bmRlZmluZWQgYWZ0ZXIgSSB1c2VkIG5tLg0KDQrCoMKgwqDCoMKgwqDCoMKg
+wqDCoMKgwqDCoMKgwqDCoCBVIF9aTjEyUm9ja3NEQlN0b3JlMTBfdGVzdF9pbml0RVJLU3MNCjAw
+MDAwMDAwMDAwMDAwMDAgVyBfWk4xMlJvY2tzREJTdG9yZTEzQ29tcGFjdFRocmVhZDVlbnRyeUV2
+DQowMDAwMDAwMDAwMDAwMDAwIFcgX1pOMTJSb2Nrc0RCU3RvcmUxM0NvbXBhY3RUaHJlYWREMEV2
+DQowMDAwMDAwMDAwMDAwMDAwIFcgX1pOMTJSb2Nrc0RCU3RvcmUxM0NvbXBhY3RUaHJlYWREMUV2
+DQowMDAwMDAwMDAwMDAwMDAwIFcgX1pOMTJSb2Nrc0RCU3RvcmUxM0NvbXBhY3RUaHJlYWREMkV2
+DQowMDAwMDAwMDAwMDAwMDAwIG4gX1pOMTJSb2Nrc0RCU3RvcmUxM0NvbXBhY3RUaHJlYWRENUV2
+DQrCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoCBVIF9aTjEyUm9ja3NEQlN0b3JlMjBj
+b21wYWN0X3RocmVhZF9lbnRyeUV2DQowMDAwMDAwMDAwMDAwMDAwIFYgX1pUSU4xMlJvY2tzREJT
+dG9yZTEzQ29tcGFjdFRocmVhZEUNCjAwMDAwMDAwMDAwMDAwMDAgViBfWlRTTjEyUm9ja3NEQlN0
+b3JlMTNDb21wYWN0VGhyZWFkRQ0KwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqAgVSBf
+WlRWMTJSb2Nrc0RCU3RvcmUNCjAwMDAwMDAwMDAwMDAwMDAgViBfWlRWTjEyUm9ja3NEQlN0b3Jl
+MTNDb21wYWN0VGhyZWFkRQ0KDQpEbyB5b3UgaGF2ZSBhbnkgY2x1ZSB3aHkgUm9ja3NEQlN0b3Jl
+IGlzIHVuZGVmaW5lZCBldmVuIHRob3VnaCBJIGFscmVhZHkgY29tcGlsZWQgdGhlIGNvZGUgd2l0
+aCAtLXdpdGgtbGlicm9ja3NkYi1zdGF0aWMgZmxhZ3M/DQoNCkFkZGluZyBvdGhlciBDZXBoIGRl
+dmVsb3BlcnMganVzdCBpbiBjYXNlIHRoZXkgZ290IHNhbWUgaXNzdWVzLg0KDQpUaGFua3MsDQpK
+YW1lcw0KDQpGcm9tOiBDaGVuLCBYaWFveGkgW21haWx0bzp4aWFveGkuY2hlbkBpbnRlbC5jb21d
+IA0KU2VudDogVGh1cnNkYXksIFNlcHRlbWJlciAxNywgMjAxNSA3OjA5IFBNDQpUbzogSmFtZXMg
+KEZlaSkgTGl1LVNTSQ0KU3ViamVjdDogUkU6IE5ld3N0b3JlIGNyZWF0ZSBmYWlsZWQgd2l0aCBm
+aW9fb2JqZWN0c3RvcmUNCg0KSGkgSmFtZXMsDQoNCk9uIGRlZmF1bHQgLCBuZXdzdG9yZV9iYWNr
+ZW5kIGlzIHJvY2tzZGIsIHNvIGlzIHRoYXQgeW91ciBjZXBoIGJ1aWxkIHdpdGgg4oCTd2l0aC1y
+b2Nrc2RiIG9yIOKAk3dpdGgtcm9ja3NkYi1zdGF0aWM/DQoNClBscyBub3RlIGFmdGVyIHlvdSBo
+YXZlIHJvY2tzZGIgc3VwcG9ydCwgdGhlbiB5b3UgYWxzbyBuZWVkIMKgdG8gaGF2ZSByb2Nrc2Ri
+IGxpc3RlZCBpbiB0aGUgZXhwZXJpbWVudGFsIGZlYXR1cmUsIG90aGVyd2lzZSBhbiBleHBlcmlt
+ZW50YWwgY2hlY2tpbmcgZXJyb3Igd2lsbCBwcmVzZW50Lg0KDQpTaW5jZSBub3cgeW91IGRvbuKA
+mXQgc2V0IHRoZSBleHBlcmltZW50YWwgZmVhdHVyZSBhbmQgZG9u4oCZdCBzZWUgdGhlIGVycm9y
+LCBzbyBJIHN1c3BlY3QgeW91ciBjZXBoIGlzIG5vdCBidWlsZCB3aXRoIHJvY2tzZGIuIENoYW5n
+aW5nIHRoZSBkZWZhdWx0IHRvIExldmVsREIgbWF5IG9yIG1heW5vdCB3b3JrIGFzIG1vc3Qgb2Yg
+dGhlIGRldmVsb3BtZW50IGFuZCB0ZXN0aW5nIGFyZSBiYXNlZCBvbiByb2Nrc2RiLCBidXQgaXQg
+d291bGQgYmUgdmVyeSBoZWxwZnVsIGlmIHlvdSB3b3VsZCBsaWtlIHRvIGhlbHAgdXMgcGxheWlu
+ZyBvbiBMZXZlbERCLg0KDQpCeSB0aGUgd2F5LCBncmVhdCBqb2Igb24gZmlvX29iamVjdHN0b3Jl
+LCB3aGljaCBpcyByZWFsbHkgZ29vZCBmb3IgYmFja2VuZCBib3R0bGVuZWNrIGFuYWx5c2lzLg0K
+DQotLVhpYW94aQ0KDQpGcm9tOiBKYW1lcyAoRmVpKSBMaXUtU1NJIFttYWlsdG86amFtZXMubGl1
+QHNzaS5zYW1zdW5nLmNvbV0gDQpTZW50OiBGcmlkYXksIFNlcHRlbWJlciAxOCwgMjAxNSAxOjQ3
+IEFNDQpUbzogQ2hlbiwgWGlhb3hpDQpTdWJqZWN0OiBOZXdzdG9yZSBjcmVhdGUgZmFpbGVkIHdp
+dGggZmlvX29iamVjdHN0b3JlDQoNCkhpIFhpYW94aSwNCiBJIGFtIHRyeWluZyB0byBydW4gZmlv
+LW9iamVjdHN0b3JlIGFnYWluc3QgdGhlIG5ldyBzdG9yZSAuIEhlcmUgaXMgbXkgbmV3c3RvcmUg
+Y29kZSBmb3Igc3VwcG9ydGluZyBuZXdzdG9yZSB3aXRoIGZpby1vYmplY3RzdG9yZS4gSGVyZSBp
+cyBmaW8gY29uZmlndXJlIGZpbGUuDQogDQogIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMj
+IyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIw0KICMgRXhhbXBsZSB0ZXN0
+IGZvciB0aGUgZXh0ZXJuYWwgZmlvIGlvZW5naW5lIGZvciBPYmplY3RTdG9yZS4NCiAjIA0KICMg
+UnVucyBhIDRrIHJhbmRvbSB3cml0ZSB0ZXN0IGFnYWluc3QgYSBPYmplY3RTdG9yZSBjb25maWd1
+cmF0aW9uLg0KICMNCiAjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMj
+IyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjDQogW2dsb2JhbF0NCiAjbG9nZ2luZw0KICN3cml0
+ZV9pb3BzX2xvZz13cml0ZV9pb3BzX2xvZw0KICN3cml0ZV9id19sb2c9d3JpdGVfYndfbG9nDQog
+I3dyaXRlX2xhdF9sb2c9d3JpdGVfbGF0X2xvZw0KIGlvZW5naW5lPS4vLmxpYnMvbGliZmlvX2Nl
+cGhfb2JqZWN0c3RvcmUuc28NCiBpbnZhbGlkYXRlPTDCoMKgwqAgIyBtYW5kYXRvcnkNCiBydz13
+cml0ZQ0KIGJzPTEyOGsNCiBzaXplPTJHDQogbnVtam9icz0xDQogDQogDQogW25ld3N0b3JlXQ0K
+IGlvZGVwdGg9MTYNCiAjIGNyZWF0ZSBhIGpvdXJuYWxlZCBmaWxlc3RvcmUNCiBvYmplY3RzdG9y
+ZT1uZXdzdG9yZQ0KIGV4cGVyaW1lbnRhbGZlYXR1cmU9bmV3c3RvcmUNCiBkaXJlY3Rvcnk9L21u
+dC9udm1lZGV2aWNlLw0KICNmaWxlc3RvcmVfam91cm5hbD0vdG1wL2ZpbGVzdG9yZQ0KIA0KIA0K
+IEhvd2V2ZXIsIEkgYW0gYWx3YXlzIGZhY2luZyBiZWxvdyBlcnJvcnMgd2hpbGUgdHJ5aW5nIHRv
+IGNyZWF0ZSBsZXZlbGRiIGZvciBuZXdzdG9yZS4NCiANCiBqYW1lc2xpdUBqYW1lc2xpdS1PcHRp
+UGxleC03MDEwOn4vV29ya1NwYWNlL2NlcGhfY2FzZXkvc3JjJCBzdWRvIGZpby9maW8gLi90ZXN0
+L29iamVjdHN0b3JlLmZpbyANCiBuZXdzdG9yZTogKGc9MCk6IHJ3PXdyaXRlLCBicz0xMjhLLTEy
+OEsvMTI4Sy0xMjhLLzEyOEstMTI4SywgaW9lbmdpbmU9Y2VwaG9iamVjdHN0b3JlLCBpb2RlcHRo
+PTE2DQogZmlvLTIuMi45LTU2LWc3MzZhDQogU3RhcnRpbmcgMSBwcm9jZXNzDQogbmV3c3RvcmU6
+IExheWluZyBvdXQgSU8gZmlsZShzKSAoMSBmaWxlKHMpIC8gMjA0OE1CKQ0KIDIwMTUtMDktMTcg
+MTA6MjU6MjguMTY3MjgzIDdmMjA0NDczMzg0MCAtMSBXQVJOSU5HOiB0aGUgZm9sbG93aW5nIGRh
+bmdlcm91cyBhbmQgZXhwZXJpbWVudGFsIGZlYXR1cmVzIGFyZSBlbmFibGVkOiBuZXdzdG9yZQ0K
+IDIwMTUtMDktMTcgMTA6MjU6MjguMTY3MzA4IDdmMjA0NDczMzg0MCAtMSBXQVJOSU5HOiBleHBl
+cmltZW50YWwgZmVhdHVyZSAnbmV3c3RvcmUnIGlzIGVuYWJsZWQNCiBQbGVhc2UgYmUgYXdhcmUg
+dGhhdCB0aGlzIGZlYXR1cmUgaXMgZXhwZXJpbWVudGFsLCB1bnRlc3RlZCwNCiB1bnN1cHBvcnRl
+ZCwgYW5kIG1heSByZXN1bHQgaW4gZGF0YSBjb3JydXB0aW9uLCBkYXRhIGxvc3MsDQogYW5kL29y
+IGlycmVwYXJhYmxlIGRhbWFnZSB0byB5b3VyIGNsdXN0ZXIuwqAgRG8gbm90IHVzZQ0KIGZlYXR1
+cmUgd2l0aCBpbXBvcnRhbnQgZGF0YS4NCiANCiAyMDE1LTA5LTE3IDEwOjI1OjI4LjE2NzczMiA3
+ZjIwNDQ3MzM4NDDCoCAxIG5ld3N0b3JlKC9tbnQvbnZtZWRldmljZS8pIG1rZnMgcGF0aCAvbW50
+L252bWVkZXZpY2UvDQogMjAxNS0wOS0xNyAxMDoyNToyOC4xNjc3NjEgN2YyMDQ0NzMzODQwwqAg
+MSBuZXdzdG9yZSgvbW50L252bWVkZXZpY2UvKSBfb3Blbl9wYXRoIHVzaW5nIGZzIGRyaXZlciAn
+Z2VuZXJpYycNCiAyMDE1LTA5LTE3IDEwOjI1OjI4LjE2ODA1NSA3ZjIwNDQ3MzM4NDDCoCAxIG5l
+d3N0b3JlKC9tbnQvbnZtZWRldmljZS8pIG1rZnMgZ2VuZXJhdGVkIGZzaWQgMGQ0MzBhMTgtYjg4
+Zi00NDY2LTlkNDAtNjM2ZWExNzU0M2YyDQogMjAxNS0wOS0xNyAxMDoyNToyOC4xNjg3NTEgN2Yy
+MDQ0NzMzODQwwqAgMSBuZXdzdG9yZSgvbW50L252bWVkZXZpY2UvKSBfb3Blbl9kYiAhISEhISEh
+ZXJyb3IgY3JlYXRpbmcgZGIhISEhISENCiBmaW86IGlvIGVuZ2luZSBpbml0IGZhaWxlZC4gUGVy
+aGFwcyB0cnkgcmVkdWNpbmcgaW8gZGVwdGg/DQogZmlvOiBwaWQ9MTgwNDksIGVycj0xLw0KIA0K
+IA0KIFRoYW5rcyBmb3IgeW91ciBoZWxwIGluIGFkdmFuY2UuDQogDQogUmVnYXJkcywNCiBKYW1l
+cw0KIA0KDQpGcm9tOiBIYW9tYWkgV2FuZyBbbWFpbHRvOmhhb21haXdhbmdAZ21haWwuY29tXSAN
+ClNlbnQ6IFdlZG5lc2RheSwgU2VwdGVtYmVyIDE2LCAyMDE1IDY6NTEgUE0NClRvOiBKYW1lcyAo
+RmVpKSBMaXUtU1NJDQpTdWJqZWN0OiBSZTogR0RCIGNhbiBub3Qgc3RvcCBpbiB0aGUgbmV3c3Rv
+cmUgb3IgYW55IGZ1bmN0aW9ucyBpbiBsaWJvcy5hDQoNCllvdSBjYW4gYXR0YWNoIHJ1bm5pbmcg
+Y2VwaC1vc2QgcHJvY2VzcyBhbmQgYnJlYWtwb2ludCBhdCBhbnkgT2JqZWN0U3RvcmUgZnVuY3Rp
+b25zLiBJJ20gbm90IHN1cmUgd2hhdCB0aGUgcHJvYmxlbSB5b3UgbWV0Lg0KDQpPbiBUaHUsIFNl
+cCAxNywgMjAxNSBhdCA3OjQ2IEFNLCBKYW1lcyAoRmVpKSBMaXUtU1NJIDxqYW1lcy5saXVAc3Np
+LnNhbXN1bmcuY29tPiB3cm90ZToNCkhpIEhhb21haSwNCiBEbyB5b3UgdXNlIEdEQiB0byBkZWJ1
+ZyBvYmplY3RzdG9yZSBjb2RlPyBJZiB5ZXMsIGhvdyBkbyB5b3Ugc2V0IGl0IHVwP8KgIFdlIGNh
+biBub3Qgc3RlcCBpbiB0aGUgbmV3c3RvcmUgc291cmNlY29kZS4NCiDCoA0KIFRoYW5rcywNCiBK
+YW1lcw0KDQoNCg0KDQotLSANCkJlc3QgUmVnYXJkcywNCldoZWF0DQo=
