@@ -1,68 +1,61 @@
-From: "Zhou, Yuan" <yuan.zhou@intel.com>
-Subject: RE: nginx for rgw fcgi frontend
-Date: Sat, 19 Sep 2015 01:45:13 +0000
-Message-ID: <06681238D8946F44A60AA400760A1CBF020D98D3@SHSMSX104.ccr.corp.intel.com>
-References: <06681238D8946F44A60AA400760A1CBF020D6923@SHSMSX104.ccr.corp.intel.com>
- <CADRKj5Rzztv0Mhc9or2_iEcBzezi1UgoJVJrtAHM3ktXjS0ZOw@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: partprobe or partx or ... ?
+Date: Sat, 19 Sep 2015 17:23:36 +0200
+Message-ID: <55FD7DF8.7060601@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="Fhg3BrkXgnK54gX4XNOo3ouCrQecsQOHB"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:26130 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752217AbbISBpS (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 18 Sep 2015 21:45:18 -0400
-In-Reply-To: <CADRKj5Rzztv0Mhc9or2_iEcBzezi1UgoJVJrtAHM3ktXjS0ZOw@mail.gmail.com>
-Content-Language: en-US
+Received: from mail2.dachary.org ([91.121.57.175]:57972 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1754712AbbISPXi (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 19 Sep 2015 11:23:38 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+To: Ilya Dryomov <idryomov@gmail.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-VGhhbmtzIFllaHVhZGEgZm9yIHRoZSBxdWljayByZXNwb25zZSENCg0KTXkgbmdpbnggaXMgMS40
-LjYob2xkIGJ1dCBkZWZhdWx0IGZvciBVYnVudHUgdHJ1c3R5KSBhbmQgZm9yIHNvbWUgcmVhc29u
-IGl0J3Mgc2VuZGluZyBib3RoIENPTlRFTlRfTEVOR1RIIGFuZCBIVFRQX0NPTlRFTlRfTEVOR1RI
-IHRvIHRoZSBiYWNrZW5kIGV2ZW4gaWYgSSBjb21tZW50IG91dCB0aGUgZmFzdGNnaV9wYXJhbXMg
-cGFydCBpbiB0aGUgc2l0ZSBjb25mDQoNCldpdGggYmVsb3cgY29uZmlnIHRoaXMgaXNzdWUgaXMg
-Zml4ZWQ6DQogDQpyZ3cgY29udGVudCBsZW5ndGggY29tcGF0ID0gdHJ1ZQ0KDQoNClRoYW5rcywg
-LXl1YW4NCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IFllaHVkYSBTYWRlaC1X
-ZWlucmF1YiBbbWFpbHRvOnllaHVkYUByZWRoYXQuY29tXSANClNlbnQ6IEZyaWRheSwgU2VwdGVt
-YmVyIDE4LCAyMDE1IDExOjI5IFBNDQpUbzogWmhvdSwgWXVhbg0KQ2M6IENlcGggRGV2ZWxvcG1l
-bnQNClN1YmplY3Q6IFJlOiBuZ2lueCBmb3Igcmd3IGZjZ2kgZnJvbnRlbmQNCg0KT24gVGh1LCBT
-ZXAgMTcsIDIwMTUgYXQgMTE6MzggUE0sIFpob3UsIFl1YW4gPHl1YW4uemhvdUBpbnRlbC5jb20+
-IHdyb3RlOg0KPiBIaSBZZWh1ZGEsDQo+DQo+IEkgd2FzIHRyeWluZyB0byBkbyBzb21lIHRlc3Rz
-IG9uIG5naW54IG92ZXIgcmd3IGFuZCByYW4gaW50byBzb21lIGlzc3VlIG9uIHRoZSBQVVQgc2lk
-ZToNCj4NCj4gJCBzd2lmdCB1cGxvYWQgY29uIGNlcGhfZnVzZS5jYw0KPiBPYmplY3QgUFVUIGZh
-aWxlZDogaHR0cDovL2xvY2FsaG9zdC9zd2lmdC92MS9jb24vY2VwaF9mdXNlLmNjIDQxMSBMZW5n
-dGggUmVxdWlyZWQgICBNaXNzaW5nQ29udGVudExlbmd0aA0KPg0KPiBIb3dldmVyIHRoZSBHRVQv
-SEVBRC9QT1NUIHJlcXVlc3RzIGFyZSBhbGwgd29ya2luZy4gRnJvbSB0aGUgaGlzdG9yeSBtYWls
-IGluIGNlcGgtdXNlciBuZ2lueCBzaG91bGQgYmUgd29ya2luZyB3ZWxsLiBUaGVyZSdzIG5vIHN1
-Y2ggaXNzdWUgaWYgc3dpdGNoIHRvIGNpdmV0d2ViIGZyb250ZW5kLiBJcyB0aGVyZSBhbnl0aGlu
-ZyBjaGFuZ2VkIGluIGZjZ2kgZnJvbnRlbmQ/IEknbSB0ZXN0aW5nIG9uIHRoZSBtYXN0ZXIgYnJh
-bmNoLg0KPg0KPiBoZXJlJ3MgdGhlIHJlcXVlc3QgbG9nIGFuZCB0aGUgQ09OVEVOVF9MRU5HVEgg
-aXMgdGhlcmUgYWN0dWFsbHkuDQo+DQo+IGh0dHA6Ly9wYXN0ZTIub3JnL1lESkZZSWNwDQo+DQo+
-DQoNCldoYXQgdmVyc2lvbiBhcmUgeW91IHJ1bm5pbmc/IE5vdGUgdGhhdCB5b3UncmUgZ2V0dGlu
-ZyBhbiBIVFRQX0NPTlRFTlRfTEVOR1RIIGhlYWRlciBpbnN0ZWFkIG9mIENPTlRFTlRfTEVOR1RI
-IGhlYWRlci4gVGhlcmUgc2hvdWxkIGJlIHNvbWUgc3VwcG9ydCBmb3IgaXQsIGJ1dCBvbiB0aGUg
-b3RoZXIgaGFuZCB0aGVyZSBub3csIGJ1dCBtYXliZSB5b3UgY2FuIGdldCBuZ2lueCB0byBzZW5k
-IHRoZSBhcHByb3ByaWF0ZSBoZWFkZXI/DQoNClllaHVkYQ0KDQoNCj4NCj4gcmd3IHBhcnQgb2Yg
-Y2VwaC5jb25mDQo+IC4uLi4NCj4gICAgICAgICByZ3cgZnJvbnRlbmRzID0gZmFzdGNnaQ0KPiAg
-ICAgICAgIHJndyBkbnMgbmFtZSA9IGxvY2FsaG9zdA0KPiAgICAgICAgIHJndyBzb2NrZXQgcGF0
-aCA9IC92YXIvcnVuL2NlcGgvY2VwaC5yYWRvc2d3LmdhdGV3YXkuZmFzdGNnaS5zb2NrDQo+ICAg
-ICAgICAgcmd3IHByaW50IGNvbnRpbnVlID0gZmFsc2UNCj4gLi4uDQo+DQo+DQo+IE5naW54IHNp
-dGUuY29uZjoNCj4NCj4gc2VydmVyIHsNCj4gICAgIGxpc3RlbiA4MDsNCj4NCj4gICAgIGNsaWVu
-dF9tYXhfYm9keV9zaXplIDEwZzsNCj4NCj4gICAgIGFjY2Vzc19sb2cgL2Rldi9zdGRvdXQ7DQo+
-ICAgICBlcnJvcl9sb2cgL2Rldi9zdGRlcnI7DQo+DQo+ICAgICBsb2NhdGlvbiAvIHsNCj4gICAg
-ICAgICBmYXN0Y2dpX3Bhc3NfaGVhZGVyIEF1dGhvcml6YXRpb247DQo+ICAgICAgICAgZmFzdGNn
-aV9wYXNzX3JlcXVlc3RfaGVhZGVycyBvbjsNCj4NCj4gICAgICAgICBpZiAoJHJlcXVlc3RfbWV0
-aG9kID0gUFVUKSB7DQo+ICAgICAgICAgICAgIHJld3JpdGUgXiAvUFVUJHJlcXVlc3RfdXJpOw0K
-PiAgICAgICAgIH0NCj4NCj4gICAgICAgICBpbmNsdWRlIGZhc3RjZ2lfcGFyYW1zOw0KPg0KPiAg
-ICAgICAgIGZhc3RjZ2lfcGFzcyB1bml4Oi92YXIvcnVuL2NlcGgvY2VwaC5yYWRvc2d3LmdhdGV3
-YXkuZmFzdGNnaS5zb2NrOw0KPiAgICAgfQ0KPg0KPiAgICAgbG9jYXRpb24gL1BVVC8gew0KPiAg
-ICAgICAgIGludGVybmFsOw0KPg0KPiAgICAgICAgIGZhc3RjZ2lfcGFzc19oZWFkZXIgQXV0aG9y
-aXphdGlvbjsNCj4gICAgICAgICBmYXN0Y2dpX3Bhc3NfcmVxdWVzdF9oZWFkZXJzIG9uOw0KPg0K
-PiAgICAgICAgIGluY2x1ZGUgZmFzdGNnaV9wYXJhbXM7DQo+ICAgICAgICAgZmFzdGNnaV9wYXJh
-bSBDT05URU5UX0xFTkdUSCAkY29udGVudF9sZW5ndGg7DQo+ICAgICAgICAgZmFzdGNnaV9wYXJh
-bSBIVFRQX0NPTlRFTlRfTEVOR1RIICRjb250ZW50X2xlbmd0aDsNCj4NCj4gICAgICAgICBmYXN0
-Y2dpX3Bhc3MgdW5peDovdmFyL3J1bi9jZXBoL2NlcGgucmFkb3Nndy5nYXRld2F5LmZhc3RjZ2ku
-c29jazsNCj4gICAgIH0NCj4gfQ0KPg0KPg0KPg0KPiBTaW5jZXJlbHksIFl1YW4NCj4NCg==
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--Fhg3BrkXgnK54gX4XNOo3ouCrQecsQOHB
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+Hi Ilya,
+
+At present ceph-disk uses partprobe to ensure the kernel is aware of the =
+latest partition changes after a new one is created, or after zapping the=
+ partition table. Although it works reliably (in the sense that the kerne=
+l is indeed aware of the desired partition layout), it goes as far as to =
+remove all partition devices of the current kernel table, only to re-add =
+them with the new partition table. The delay it implies is not an issue b=
+ecause ceph-disk is rarely called. It however generate many udev events (=
+dozens remove/change/add for a two partition disk) and almost always crea=
+tes border cases that are difficult to figure out and debug. While it is =
+a good way to ensure that ceph-disk is idempotent and immune to race cond=
+itions, maybe it is needlessly hard.
+
+Do you know of a light weight alternative to partprobe ? In the past we'v=
+e used partx but I remember it failed to address some border cases in non=
+-intuitive ways. Do you know of another, simpler, approach to this ?
+
+Thanks in advance for your help :-)
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--Fhg3BrkXgnK54gX4XNOo3ouCrQecsQOHB
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlX9ffgACgkQ8dLMyEl6F201lACgjzp7NZ8Rn59g9izaMuuMmt6W
+d94An2qY6ClDbt/YUJ4pr8hNT9Yh01ub
+=1PMt
+-----END PGP SIGNATURE-----
+
+--Fhg3BrkXgnK54gX4XNOo3ouCrQecsQOHB--
