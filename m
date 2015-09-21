@@ -1,85 +1,157 @@
-From: Mykola Golub <mgolub@mirantis.com>
-Subject: Re: Pool setting for recovery priority
-Date: Mon, 21 Sep 2015 16:32:19 +0300
-Message-ID: <20150921133218.GB23240@gmail.com>
-References: <BLU175-W30B038F9EE84A31BF7D842DF5B0@phx.gbl>
- <alpine.DEB.2.00.1509160920120.14342@cobra.newdream.net>
+From: Jason Dillaman <dillaman@redhat.com>
+Subject: RBD mirroring CLI proposal ...
+Date: Mon, 21 Sep 2015 10:48:11 -0400 (EDT)
+Message-ID: <189900515.31291453.1442846891314.JavaMail.zimbra@redhat.com>
+References: <604040155.31290870.1442846770290.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=koi8-r
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f177.google.com ([209.85.212.177]:38721 "EHLO
-	mail-wi0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932291AbbIUNcW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Sep 2015 09:32:22 -0400
-Received: by wiclk2 with SMTP id lk2so111818843wic.1
-        for <ceph-devel@vger.kernel.org>; Mon, 21 Sep 2015 06:32:21 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <alpine.DEB.2.00.1509160920120.14342@cobra.newdream.net>
+Received: from mx6-phx2.redhat.com ([209.132.183.39]:54258 "EHLO
+	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752126AbbIUOsL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Sep 2015 10:48:11 -0400
+Received: from zmail12.collab.prod.int.phx2.redhat.com (zmail12.collab.prod.int.phx2.redhat.com [10.5.83.14])
+	by mx6-phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t8LEmBeW002553
+	for <ceph-devel@vger.kernel.org>; Mon, 21 Sep 2015 10:48:11 -0400
+In-Reply-To: <604040155.31290870.1442846770290.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: GuangYang <yguang11@outlook.com>, "sjust@redhat.com" <sjust@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, Sep 16, 2015 at 09:23:07AM -0700, Sage Weil wrote:
-> On Wed, 16 Sep 2015, GuangYang wrote:
-> > Hi Sam,
-> > As part of the effort to solve problems similar to issue #13104 (ht=
-tp://tracker.ceph.com/issues/13104), do you think it is appropriate to =
-add some parameters to pool setting:
-> > =9A =9A1. recovery priority of the pool - we have a customized pool=
- recovery priority (like process's nice value) to favor some pools over=
- others. For example, the bucket index pool is usually much much smalle=
-r but important to recover first (e.g. might affect write latency as li=
-ke issue #13104).
-> > =9A =9A2. pool level recovery op priority - currently we have a low=
- priority for recovery op (by default it is 10 while client io's priori=
-ty is 63), is it possible to have a pool setting to customized the prio=
-rity on pool level.
-> >=20
-> > The purpose is to give some flexibility in terms of favor some pool=
-s over others when doing recovery, in our case using radosgw, we would =
-like to favor bucket index pool as that is on the write path for all re=
-quests.
->=20
-> I think this makes sense, and is analogous to
->=20
-> 	https://github.com/ceph/ceph/pull/5922
->=20
-> which does per-pool scrub settings.  I think the only real question i=
-s=20
-> whether pg_pool_t is the right place to keep piling these parameters =
-in,=20
-> or whether we want some unstructured key/value settings or something.
+The following describes a set of proposals to support the upcoming RBD mirroring feature [1] via the rbd cli.    The RBD mirroring feature will utilize a journal to allow modifications from a primary source to be replicated to one or more backup destinations. 
 
-I aggree that adding a bunch of new rarely used fields to pg_pool_t
-might not be a very good idea. Still storing these options here looks
-convenient (accessing, updating...). What do you think if I add
-something like this in pg_pool_t instead?
+To keep configuration simple (no need for synchronizing mirroring metadata), RBD mirroring will be configured on a per-pool basis within a (conceptional) availability zone. For a given image, each zone will have a copy of the image and a journal.  When mirroring is enabled on an image (either at creation due to the default pool settings to explicitly via the rbd CLI), the image's journal will automatically register the known peer clusters.  If a peer is added or rebuilt after mirroring is enabled, the peer will be registered with the image and the RBD mirroring daemon on the remote peer will then be responsible for snapshotting the image, transferring the base image, deleting the snapshot, and starting journal replay.
 
-  typedef boost::variant<string,int,double> pool_opt_value_t;
-  typedef std::map<pool_opt_key_t,pool_opt_value_t> opts_t;
-  opts_t opts;
+A mirrored image can have the following state: primary, secondary (consistent), and secondary (inconsistent).  The images will also track an epoch associated with the primary state for
+detecting when a secondary is now inconsistent due to a failover event. Any modification (IO writes, resize, snap create, etc) to a mirrored image will result in its status being automatically updated to primary.  Inconsistent secondary images will disallow any modifications.
 
-(in reality I suppose it will be more compicated but will have
-something like this in base).
+Proposed CLI Updates
 
-Usually opts will be empty or have only one or two settings, so it
-will not consume much space.
+To configure basic journaling support for an RBD image:
 
-Or where do you suggest to store them instead?
+* rbd feature enable <image-spec> journaling
+                [--journal-object-pool <pool-name>]
+                [--journal-splay-width <num>]
+                [--journal-object-size <B/K/M>]
+                [--journal-additional-tweakable-settings]
+        This will enable the RBD journaling feature bit.  A new journal will be
+        created using default settings if not overridden.  
 
-BTW, I see we already have in pg_pool_t:
+* rbd feature disable <image-spec> journaling
+        This will disable the RBD journaling feature bit. If there are associated RBD
+        mirroring peers connected to this image's journal, this will fail if the mirror
+        doesn't detach within a timeout.  If the image is not attached to a consistency
+        group, the journal will be automatically deleted.
 
-  map<string,string> properties;  ///< OBSOLETE
+To configure consistency groups:
 
-I wonder what it was supposed to be used for and why it is marked
-obsolete?
+* rbd consistency-group create <group-spec>
+                [--object-pool <pool-name>]
+                [--splay-width <num>]
+                [--object-size <B/K/M>]
+                [--additional-journal-tweakable-settings]
+        This will create an empty journal for use with consistency groups (i.e. attaching
+        multiple RBD images to the same journal to ensure consistent replay).
 
---=20
-Mykola Golub
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+* rbd consistency-group rename <group-spec>
+        This will remove the named consistency group journal.  If one or more images
+        are attached, this will fail.
+
+* rbd consistency-group attach <image-spec> <journal-spec>
+        This will enable the RBD journaling feature bit and will configure the image to
+        record all journal entries to the specified journal.  If journaling is already
+        enabled on the image, this will fail.
+
+* rbd consistency-group detach <image-spec>
+        This will detach the specified image from its journal and disable the RBD
+        journaling feature. 
+
+* rbd consistency-group ls
+        This will list all consistency groups within the current pool.
+
+* rbd consistency-group info <group-spec>
+        This will display information about the specified consistent group
+
+where <group-spec> is [<pool-name>/]<group-name>
+
+To configure mirroring support for an RBD image:
+
+* rbd feature enable <image-spec> mirroring
+        This will enable mirroring for an existing image if it wasn't auto-enabled
+        by the default pool policy.
+
+* rbd feature disable <image-spec> mirroring
+        This will disable mirroring for a specific image if enabled manually or
+        automatically via the default pool policy.
+        
+* rbd mirror pool enable <pool-name>
+        This will, by default, ensure that all images created in this
+        pool have exclusive lock, journaling, and mirroring feature bits
+        enabled.
+
+* rbd mirror pool disable <pool-name>
+        This will clear the default image features for new images in this
+        pool.
+
+* rbd mirror pool add <remote-pool-spec>
+        This will register a remote cluster/pool as a peer to the current,
+        local pool.  All existing mirrored images and all future mirrored
+        images will have this peer registered as a journal client.
+        
+* rbd mirror pool remove <remote-pool-spec>
+        This will deregister a remote cluster/pool as a peer to the current,
+        local pool.  All existing mirrored images will have the remote
+        deregistered from image journals.
+
+* rbd mirror pool info
+         This will show the current status of pool mirroring (if newly created
+         images automatically have mirroring enabled) and will list any
+         registered remote clusters/pools.
+
+* rbd mirror image enable <image-spec>
+        This is an alias for 'rbd feature enable mirroring'
+
+* rbd mirror image disable <image-spec>
+        This is an alias for 'rbd feature disable mirroring'
+
+* rbd mirror image resync <image-spec>
+        This will delete the local image and initiate a full resync
+        with a remote primary image.  This can be used to fix an
+        inconsistent secondary image.
+
+where <pool-spec> is [<cluster name>/]<pool name>
+
+To verify the operational status of mirroring for a given image:
+
+* rbd status <image-spec>
+        This command currently only shows the current watchers for the
+        image. This will be expanded to include mirroring status.
+
+To manage journals:
+
+* rbd journal info <journal-spec>
+        This will display information about the specified journal
+
+* rbd journal inspect <journal-spec>
+        This will inspect the journal for structural errors
+
+* rbd journal export <journal-spec> <dest>
+        This will export the journal entries into JSON
+
+* rbd journal import <src> <journal-spec>
+        This will import the JSON-formated journal
+
+* rbd journal reset
+        This will delete all entries from the journal
+
+where <journal-spec> is [<pool name>/]journal name
+
+-- 
+
+Jason Dillaman 
+
+[1] http://tracker.ceph.com/projects/ceph/wiki/RBD_Async_Mirroring
+
+
+
