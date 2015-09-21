@@ -1,131 +1,85 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: partprobe or partx or ... ?
-Date: Mon, 21 Sep 2015 12:40:10 +0200
-Message-ID: <55FFDE8A.7090802@dachary.org>
-References: <55FD7DF8.7060601@dachary.org>	<55FDC0C4.6050103@dachary.org> <CAOi1vP_Nz=c+sOWA44q6kvtiLCtZBTJZNaSNCPx5Qoyat=V+MQ@mail.gmail.com>
+From: Mykola Golub <mgolub@mirantis.com>
+Subject: Re: Pool setting for recovery priority
+Date: Mon, 21 Sep 2015 16:32:19 +0300
+Message-ID: <20150921133218.GB23240@gmail.com>
+References: <BLU175-W30B038F9EE84A31BF7D842DF5B0@phx.gbl>
+ <alpine.DEB.2.00.1509160920120.14342@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="eFqcpxhiip3Ncrk0jwb6AmJLEEd73kkaO"
+Content-Type: text/plain; charset=koi8-r
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:58595 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753569AbbIUKkO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Sep 2015 06:40:14 -0400
-In-Reply-To: <CAOi1vP_Nz=c+sOWA44q6kvtiLCtZBTJZNaSNCPx5Qoyat=V+MQ@mail.gmail.com>
+Received: from mail-wi0-f177.google.com ([209.85.212.177]:38721 "EHLO
+	mail-wi0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932291AbbIUNcW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Sep 2015 09:32:22 -0400
+Received: by wiclk2 with SMTP id lk2so111818843wic.1
+        for <ceph-devel@vger.kernel.org>; Mon, 21 Sep 2015 06:32:21 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <alpine.DEB.2.00.1509160920120.14342@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: GuangYang <yguang11@outlook.com>, "sjust@redhat.com" <sjust@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---eFqcpxhiip3Ncrk0jwb6AmJLEEd73kkaO
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-Hi Ilya,
-
-On 21/09/2015 12:23, Ilya Dryomov wrote:
-> On Sat, Sep 19, 2015 at 11:08 PM, Loic Dachary <loic@dachary.org> wrote=
-:
->>
->>
->> On 19/09/2015 17:23, Loic Dachary wrote:
->>> Hi Ilya,
->>>
->>> At present ceph-disk uses partprobe to ensure the kernel is aware of =
-the latest partition changes after a new one is created, or after zapping=
- the partition table. Although it works reliably (in the sense that the k=
-ernel is indeed aware of the desired partition layout), it goes as far as=
- to remove all partition devices of the current kernel table, only to re-=
-add them with the new partition table. The delay it implies is not an iss=
-ue because ceph-disk is rarely called. It however generate many udev even=
-ts (dozens remove/change/add for a two partition disk) and almost always =
-creates border cases that are difficult to figure out and debug. While it=
- is a good way to ensure that ceph-disk is idempotent and immune to race =
-conditions, maybe it is needlessly hard.
->>>
->>> Do you know of a light weight alternative to partprobe ? In the past =
-we've used partx but I remember it failed to address some border cases in=
- non-intuitive ways. Do you know of another, simpler, approach to this ?
->>>
->>> Thanks in advance for your help :-)
->>>
->>
->> For the record using /sys/block/sdX/device/rescan sounds good but does=
- not exist for devices created via devicemapper (used for dmcrypt and mul=
-tipath).
+On Wed, Sep 16, 2015 at 09:23:07AM -0700, Sage Weil wrote:
+> On Wed, 16 Sep 2015, GuangYang wrote:
+> > Hi Sam,
+> > As part of the effort to solve problems similar to issue #13104 (ht=
+tp://tracker.ceph.com/issues/13104), do you think it is appropriate to =
+add some parameters to pool setting:
+> > =9A =9A1. recovery priority of the pool - we have a customized pool=
+ recovery priority (like process's nice value) to favor some pools over=
+ others. For example, the bucket index pool is usually much much smalle=
+r but important to recover first (e.g. might affect write latency as li=
+ke issue #13104).
+> > =9A =9A2. pool level recovery op priority - currently we have a low=
+ priority for recovery op (by default it is 10 while client io's priori=
+ty is 63), is it possible to have a pool setting to customized the prio=
+rity on pool level.
+> >=20
+> > The purpose is to give some flexibility in terms of favor some pool=
+s over others when doing recovery, in our case using radosgw, we would =
+like to favor bucket index pool as that is on the write path for all re=
+quests.
 >=20
-> Hi Loic,
+> I think this makes sense, and is analogous to
 >=20
-> Yeah, partprobe loops through the entire partition table, trying do
-> delete/add every slot.  As an aside, the in-kernel way to do this
-> (blockdev --rereadpt) is similar in that it also drops all partitions
-> and re-adds them later, but it's faster and probably generates less
-> change events.  The downside is it won't work on busy device.
+> 	https://github.com/ceph/ceph/pull/5922
 >=20
-> I don't think there is any alternative, except for using partx --add
-> with --nr, that is targeting specific slots in the partition table.  If=
+> which does per-pool scrub settings.  I think the only real question i=
+s=20
+> whether pg_pool_t is the right place to keep piling these parameters =
+in,=20
+> or whether we want some unstructured key/value settings or something.
 
-> all you are doing is adding partitions and zapping entire partition
-> tables, that may work well enough.
->=20
-> That said, given that the resulting delay (which can be in the seconds
-> range, especially if your disk happens to have a busy partition) isn't
-> a problem, what difference does it make?  What are you listening to
-> those events for?
+I aggree that adding a bunch of new rarely used fields to pg_pool_t
+might not be a very good idea. Still storing these options here looks
+convenient (accessing, updating...). What do you think if I add
+something like this in pg_pool_t instead?
 
-This is part of the ceph-disk prepare / activate workflow:
+  typedef boost::variant<string,int,double> pool_opt_value_t;
+  typedef std::map<pool_opt_key_t,pool_opt_value_t> opts_t;
+  opts_t opts;
 
- ceph-disk prepare creates partitions, mounts them, populate them and exi=
-ts
- ceph udev rules ( 95-ceph-osd.rules ) react to udev events when the part=
-ition type is known and run ceph-disk activate in the background
+(in reality I suppose it will be more compicated but will have
+something like this in base).
 
-When a machine boots or a disk is hot swapped, udev rules do the same and=
- activate: we only have one code path for all cases. The problem is to en=
-sure all race conditions are addressed. What used to work in hammer has t=
-o be revisited because the code path was changed in infernalis. udev acti=
-ons no longer call ceph-disk activate, because it can take a long time an=
-d that's not what udev is good at. Instead, udev actions run ceph-disk ac=
-tivate in the background, using systemd/upstart when available (it falls =
-back to the legacy syncrhonous behavior when they are not available).
+Usually opts will be empty or have only one or two settings, so it
+will not consume much space.
 
-I think I managed to address all race conditons with the patch series at =
-https://github.com/ceph/ceph/pull/5999.
+Or where do you suggest to store them instead?
 
-We should be good with partprobe :-)
+BTW, I see we already have in pg_pool_t:
 
->=20
-> /sys/block/sdX/device/rescan is sd only, and AFAIK it doesn't generally=
+  map<string,string> properties;  ///< OBSOLETE
 
-> trigger a re-read of a partition table.
-
-Thanks a lot for your insights !
-
-Cheers
-
->=20
-> Thanks,
->=20
->                 Ilya
->=20
+I wonder what it was supposed to be used for and why it is marked
+obsolete?
 
 --=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---eFqcpxhiip3Ncrk0jwb6AmJLEEd73kkaO
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlX/3ooACgkQ8dLMyEl6F21ZSgCfZXv81ZbsHuya8z50piNt8OPt
-DaMAnA1mvL361V8UbAs5mbfssntOoCvo
-=4U3/
------END PGP SIGNATURE-----
-
---eFqcpxhiip3Ncrk0jwb6AmJLEEd73kkaO--
+Mykola Golub
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
