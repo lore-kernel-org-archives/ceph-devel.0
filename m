@@ -1,51 +1,41 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: OSD::op_is_discardable condition doubled
-Date: Tue, 22 Sep 2015 07:41:20 -0700
-Message-ID: <CAJ4mKGYV+Dm+fK=c51akbuheT6c+c6OV54N+M22POZGOZ7-mnQ@mail.gmail.com>
-References: <90EABA838E32E141BC06296A2C40520A1A62D80F@IRSMSX108.ger.corp.intel.com>
-	<alpine.DEB.2.00.1509220524500.11876@cobra.newdream.net>
+From: Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Ceph Tech Talk on Thursday
+Date: Tue, 22 Sep 2015 11:15:36 -0400
+Message-ID: <CAAZbbf3NA+oeLUbhE0iGH2oVGwix6fWOLjU7w+-3dL3cUg=VzQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f181.google.com ([209.85.212.181]:34622 "EHLO
-	mail-wi0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751984AbbIVOlV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Sep 2015 10:41:21 -0400
-Received: by wicfx3 with SMTP id fx3so195747431wic.1
-        for <ceph-devel@vger.kernel.org>; Tue, 22 Sep 2015 07:41:20 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1509220524500.11876@cobra.newdream.net>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: "Lakis, Jacek" <jacek.lakis@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Tue, Sep 22, 2015 at 5:26 AM, Sage Weil <sage@newdream.net> wrote:
-> On Tue, 22 Sep 2015, Lakis, Jacek wrote:
->> Hi ceph-devel!
->> We're checking OSD::op_is_discardable condition two times: in dispatcher (handle_op) and in worker threads (do_request->can_discard_request->can_discard_op)
->>
->>   if (!op->get_connection()->is_connected() &&
->>       op->get_version().version == 0) {
->>     return true;
->>   }
->>
->> Is there any purpose to do this? If not, which of those should be
->> removed in your opinion? If condition in handle_op will remain, OP won't
->> pass to the worker threads through the prioritized queue. On the other
->> hand, leaving it in do_request will parallelize this check (I started
->> parallelizing in PR 5211).
->
-> Is there a reason not to do it twice?  It looks pretty cheap.
->
-> But, if we have to choose, I'd leave it in the worker thread.  It is
-> unlikely to trigger on newly dispatched messages (that were *just* taken
-> off the wire), and the worker thread check is critical to avoid wasting
-> work on requeued/delayed messages that no longer have clients waiting on
-> them.
+Hey cephers,
 
-While this is definitely the right choice if eliminating one, I think
-there was a specific reason to leave it in both. Perhaps just because
-it's cheap, but I think maybe the rest of the dispatch work in that
-thread relies on it having a connection. (Unless that got changed? We
-are a lot more generous about lack of connections than we used to be.)
--Greg
+Don't forget that this Thursday is the monthly Ceph Tech Talk
+(starting @ 2p EDT instead of 1p).  This month Brent Compton will be
+discussing the particulars of building a Ceph reference architecture.
+Tune in on Thurs for details.
+
+http://ceph.com/ceph-tech-talks/
+
+If you have questions, concerns, or would like to sign up for a future
+Ceph Tech Talk please feel free to contact me! Thanks.
+
+
+-- 
+
+Best Regards,
+
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
