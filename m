@@ -1,185 +1,126 @@
-From: Igor Fedotov <ifedotov@mirantis.com>
-Subject: Adding Data-At-Rest compression support to Ceph
-Date: Tue, 22 Sep 2015 20:04:05 +0300
-Message-ID: <56018A05.6090100@mirantis.com>
+From: Jason Dillaman <dillaman@redhat.com>
+Subject: Re: RBD mirroring CLI proposal ...
+Date: Tue, 22 Sep 2015 13:32:49 -0400 (EDT)
+Message-ID: <151161168.32108716.1442943169367.JavaMail.zimbra@redhat.com>
+References: <604040155.31290870.1442846770290.JavaMail.zimbra@redhat.com> <189900515.31291453.1442846891314.JavaMail.zimbra@redhat.com> <20150922092847.GA13767@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f50.google.com ([209.85.215.50]:32973 "EHLO
-	mail-la0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752862AbbIVREI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Sep 2015 13:04:08 -0400
-Received: by lamp12 with SMTP id p12so19990968lam.0
-        for <ceph-devel@vger.kernel.org>; Tue, 22 Sep 2015 10:04:06 -0700 (PDT)
-Received: from [127.0.0.1] ([91.218.144.129])
-        by smtp.googlemail.com with ESMTPSA id ku11sm320795lac.8.2015.09.22.10.04.05
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 22 Sep 2015 10:04:05 -0700 (PDT)
+Received: from mx3-phx2.redhat.com ([209.132.183.24]:50123 "EHLO
+	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751529AbbIVRcu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Sep 2015 13:32:50 -0400
+In-Reply-To: <20150922092847.GA13767@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Mykola Golub <mgolub@mirantis.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi guys,
+> > * rbd consistency-group create <group-spec>
+> >                 [--object-pool <pool-name>]
+> >                 [--splay-width <num>]
+> >                 [--object-size <B/K/M>]
+> >                 [--additional-journal-tweakable-settings]
+> >         This will create an empty journal for use with consistency groups
+> >         (i.e. attaching
+> >         multiple RBD images to the same journal to ensure consistent
+> >         replay).
+> 
+> For 'rbd feature' commands the option names have "journal" prefix
+> (--journal-object-pool), while for 'rbd consistency-group' they
+> don't. Is it intentional? I would prefer having "journal" prefix for
+> both.
 
-I can find some talks about adding compression support to Ceph. Let me=20
-share some thoughts and proposals on that too.
+It was intentional with the rationale that the 'journal-' prefix was added to the 'rbd feature enable' command because in the future it might support other configurable params.  I have no issue keeping them consistent between the two.   
 
-=46irst of all I=E2=80=99d like to consider several major implementatio=
-n options=20
-separately. IMHO this makes sense since they have different=20
-applicability, value and implementation specifics. Besides that less=20
-parts are easier for both understanding and implementation.
+> > 
+> > * rbd consistency-group rename <group-spec>
+> 
+> s/rename/remove/ ?
 
-   * Data-At-Rest Compression. This is about compressing basic data=20
-volume kept by the Ceph backing tier. The main reason for that is data=20
-store costs reduction. One can find similar approach introduced by=20
-Erasure Coding Pool implementation - cluster capacity increases (i.e.=20
-storage cost reduces) at the expense of additional computations. This i=
-s=20
-especially effective when combined with the high-performance cache tier=
-=2E
-   *  Intermediate Data Compression. This case is about applying=20
-compression for intermediate data like system journals, caches etc. The=
-=20
-intention is to improve expensive storage resource  utilization (e.g.=20
-solid state drives or RAM ). At the same time the idea to apply=20
-compression ( feature that undoubtedly introduces additional overhead )=
-=20
-to the crucial heavy-duty components probably looks contradictory.
-   *  Exchange Data =D0=A1ompression. This one to be applied to message=
-s=20
-transported between client and storage cluster components as well as=20
-internal cluster traffic. The rationale for that might be the desire to=
-=20
-improve cluster run-time characteristics, e.g. limited data bandwidth=20
-caused by the network or storage devices throughput. The potential=20
-drawback is client overburdening - client computation resources might=20
-become a bottleneck since they take most of compression/decompression t=
-asks.
+Yup -- I think I merged the rename and remove commands by accident.  
 
-Obviously it would be great to have support for all the above cases,=20
-e.g. object compression takes place at the client and cluster component=
-s=20
-handle that naturally during the object life-cycle. Unfortunately=20
-significant  complexities arise on this way. Most of them are related t=
-o=20
-partial object access, both reading and writing. It looks like huge=20
-development ( redesigning, refactoring and new code development ) and=20
-testing efforts are required on this way. It=E2=80=99s hard to estimate=
- the=20
-value of such aggregated support at the current moment too.
-Thus the approach I=E2=80=99m suggesting is to drive the progress event=
-ually and=20
-consider cases separately. At the moment my proposal is to add=20
-Data-At-Rest compression to Erasure Coded pools as the most definite on=
-e=20
-from both implementation and value points of view.
+> > * rbd consistency-group info <group-spec>
+> >         This will display information about the specified consistent group
+> > 
+> > where <group-spec> is [<pool-name>/]<group-name>
+> 
+> Is a consistency-group just a journal (usually used for several images)
+> or is it something more? If I enable journaling feature for an image,
+> journal is automatically created, is it already a consistency-group?
 
-How we can do that.
+Correct -- I'm just using the command name to describe the behavior you would receive if you attached multiple images to the same journal.  If you enable journaling for a given image (or if it is enabled by default due to the pool's mirroring policy), then you will have a journal created for you automatically that is only associated with the single image.  However, you wouldn't be able to attach another image to the same journal nor would you see such a journal listed as a named consistency group.  I was originally toying around with having all of these "rbd consistency-group" commands being just additional "rbd journal" commands and eliminating the semantic difference.
 
-Ceph Cluster Architecture suggests two-tier storage model for productio=
-n=20
-usage. Cache tier built on high-performance expensive storage devices=20
-provides performance. Storage tier with low-cost less-efficient devices=
-=20
-provides cost-effectiveness and capacity. Cache tier is supposed to use=
-=20
-ordinary data replication while storage one can use erasure coding (EC)=
-=20
-for effective and reliable data keeping. EC provides less store costs=20
-with the same reliability comparing to data replication approach at the=
-=20
-expenses of additional computations. Thus Ceph already has some trade=20
-off between capacity and computation efforts. Actually Data-At-Rest=20
-compression is exactly about the same. Moreover one can tie EC and=20
-Data-At-Rest compression together to achieve even better storage=20
-effectiveness.
-There are two possible ways on adding Data-At-Rest compression:
-   *  Use data compression built into a file system beyond the Ceph.
-   *  Add compression to Ceph OSD.
+> > * rbd mirror pool enable <pool-name>
+> >         This will, by default, ensure that all images created in this
+> >         pool have exclusive lock, journaling, and mirroring feature bits
+> >         enabled.
+> > 
+> > * rbd mirror pool disable <pool-name>
+> >         This will clear the default image features for new images in this
+> >         pool.
+> 
+> Will 'rbd mirror pool enable|disable' change behaviour only for newly
+> created images in the pool or will enable|disable mirroring for
+> existent images too?
 
-At first glance Option 1. looks pretty attractive but there are some=20
-drawbacks for this approach. Here they are:
-   *  File System lock-in. BTRFS is the only file system supporting=20
-transparent compression among ones recommended for Ceph usage.        =20
-          Moreover AFAIK it=E2=80=99s still not recommended for product=
-ion=20
-usage, see:
-http://ceph.com/docs/master/rados/configuration/filesystem-recommendati=
-ons/
-    *  Limited flexibility - one can use compression methods and=20
-policies supported by FS only.
-    *  Data compression depends on volume or mount point properties (an=
-d=20
-is bound to OSD). Without additional support Ceph lacks the ability to=20
-have different compression policies for different pools residing at the=
-=20
-same OSD.
-    *  File Compression Control isn=E2=80=99t standardized among file s=
-ystems.=20
-If (or when) new compression-equipped File System appears Ceph might=20
-require corresponding changes to handle that properly.
+Since the goal is to set default pool behavior, it would only apply to newly created images.  You can enable/disable on specific images using the 'rbd mirror image enable/disable' commands.
 
-Having compression at OSD helps to eliminate these drawbacks.
-As mentioned above Data-At-Rest compression purposes are pretty the sam=
-e=20
-as for Erasure Coding. It looks quite easy to add compression support t=
-o=20
-EC pools. This way one can have even more storage space for higher CPU =
-load.
-Additional Pros for combining compression and erasure coding are:
-   *  Both EC and compression have complexities in partial writing. EC=20
-pools don=E2=80=99t have partial write support (data append only) and t=
-he=20
-solution for that is cache tier insertion.  Thus we can transparently=20
-reuse the same approach in case of compression.
-   *  Compression becomes a pool property thus Ceph users will have=20
-direct control what pools to apply compression with.
-   *  Original write performance isn=E2=80=99t impacted by the compress=
-ion for=20
-two-tier model - write data goes to the cache uncompressed and there is=
-=20
-no corresponding compression latency. Actual compression happens in=20
-background when backing storage filling takes place.
-   *  There is an additional benefit in network bandwidth saving when=20
-primary OSD performs a compression as resulting object shards for=20
-replication are less.
-   *  Data-at-rest compression can also bring an additional performance=
-=20
-improvement for HDD-based storage. Reducing the amount of data written=20
-to slow media can provide a net performance improvement even taking int=
-o=20
-account the compression overhead.
+> > * rbd mirror pool add <remote-pool-spec>
+> >         This will register a remote cluster/pool as a peer to the current,
+> >         local pool.  All existing mirrored images and all future mirrored
+> >         images will have this peer registered as a journal client.
+> >         
+> > * rbd mirror pool remove <remote-pool-spec>
+> >         This will deregister a remote cluster/pool as a peer to the
+> >         current,
+> >         local pool.  All existing mirrored images will have the remote
+> >         deregistered from image journals.
+> 
+> In remote-pool-spec, if it is "cluster/pool", where it is expected to
+> find configuration for the cluster "cluster"? In /etc/ceph/cluster.conf?
 
-Some implementation notes:
+Ceph conventions state that the configuration file for a given cluster should be named "<cluster-name>.conf" and placed in the search path (/etc/ceph being one such place). 
 
-The suggested approach is to perform data compression prior to Erasure=20
-Coding to reduce data portion passed to coding and avoid the need to=20
-introduce additional means to disable EC-generated chunks compression.
-Data-At-Rest compression should support plugin architecture to enable=20
-multiple compression backends.
-Compression engine should mark stored objects with some tags to indicat=
-e=20
-if compression took place and what algorithm was used.
-To avoid (reduce) backing storage CPU overload caused by=20
-compression/decompression ( e.g. this can happen during massive reads )=
-=20
-we can introduce additional means to detect such situations and=20
-temporary disable compression for current write requests. Since there i=
-s=20
-way to mark objects as compressed/uncompressed this produces almost no=20
-issues for future handling. Hardware compression support usage, e.g.=20
-Intel QuickAssist can be an additional helper for this issue.
+> Apart from the list of new commands, it would be very helpful to see
+> typical use case examples. Are my examples below correct?
+> 
+> Enable mirroring for pool "volumes", using pool "journals" for journal
+> objects:
+> 
+>   rbd mirror pool enable volumes --journal-object-pool journals
 
-Any thoughts?
+Yup -- I neglected to include journaling defaults in that command, but it would be good to include them.
 
-Thanks,
-Igor.
+> Start mirroring to the remote cluster ceph-remote:
+> 
+>   Specify the remote cluster configuration in
+>   /etc/ceph/ceph-remote.conf
+> 
+>   rbd mirror pool add ceph-remote/volumes
+> 
+>   Start RBD mirroring daemon on the remote cluster. Both clusters
+>   should be specified in config or via command line parameters. No
+>   need to specify mirroring pools, I suppose?
+
+Haven't thought about this level of detail, but I think you'd be fine only specifying the local cluster to the RBD mirroring daemon.  It could then scan all the pools, lookup peer cluster names, and connect.  The daemon should use the journal's primary / secondary state + epoch to know whether or not to replicate the events from the remote.
+
+> To configure a consistency group cgroup1 for images volume1 and
+> volume2 in pool volumes:
+> 
+>   rbd consistency-group create volume/cgroup1 --object-pool journals
+>   rbd consistency-group attach volume/volume1 volume/cgroup1
+>   rbd consistency-group attach volume/volume2 volume/cgroup1
+> 
+> I guess before attaching I will need to disable journaling for volumes
+> (because it was automatically enabled previously with 'rbd mirror pool
+> enable')? Will it automatically enable mirroring feature for the
+> attached images?
+
+I was planning to just fail the attach if journaling was already enabled, but it could just as easily (behind the scenes) disable journaling to kill off the old journal (and wean potential RBD mirroring daemons off the journal) and then just re-enable it using the new consistency group journal.  In this example, if the images volume1 and volume2 existed before you enable the pool mirroring property, they wouldn't have add journaling automatically enabled.
+
 --
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+Jason Dillaman
+ 
