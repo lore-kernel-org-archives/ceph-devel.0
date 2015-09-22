@@ -1,43 +1,51 @@
-From: Ken Dreyer <kdreyer@redhat.com>
-Subject: Re: [ceph-users] Important security noticed regarding release signing key
-Date: Tue, 22 Sep 2015 08:24:04 -0600
-Message-ID: <CALqRxCw6tq0PvqMJAY1S0At1FB3cm_KPUY_bbX72Z9R_pyJ4+Q@mail.gmail.com>
-References: <alpine.DEB.2.00.1509170925140.31198@cobra.newdream.net>
-	<CAHRQ3VU1RFQL6AKh_CtOOeqg87wX7W5oa3n_3d8Ki9WFW=w5tw@mail.gmail.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: OSD::op_is_discardable condition doubled
+Date: Tue, 22 Sep 2015 07:41:20 -0700
+Message-ID: <CAJ4mKGYV+Dm+fK=c51akbuheT6c+c6OV54N+M22POZGOZ7-mnQ@mail.gmail.com>
+References: <90EABA838E32E141BC06296A2C40520A1A62D80F@IRSMSX108.ger.corp.intel.com>
+	<alpine.DEB.2.00.1509220524500.11876@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f170.google.com ([209.85.212.170]:34951 "EHLO
-	mail-wi0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756257AbbIVOYF convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Sep 2015 10:24:05 -0400
-Received: by wicge5 with SMTP id ge5so164000659wic.0
-        for <ceph-devel@vger.kernel.org>; Tue, 22 Sep 2015 07:24:04 -0700 (PDT)
-In-Reply-To: <CAHRQ3VU1RFQL6AKh_CtOOeqg87wX7W5oa3n_3d8Ki9WFW=w5tw@mail.gmail.com>
+Received: from mail-wi0-f181.google.com ([209.85.212.181]:34622 "EHLO
+	mail-wi0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751984AbbIVOlV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Sep 2015 10:41:21 -0400
+Received: by wicfx3 with SMTP id fx3so195747431wic.1
+        for <ceph-devel@vger.kernel.org>; Tue, 22 Sep 2015 07:41:20 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1509220524500.11876@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Songbo Wang <songbo1227@gmail.com>
-Cc: Sage Weil <sage@newdream.net>, ceph-devel <ceph-devel@vger.kernel.org>, ceph-users@ceph.com, ceph-maintainers@ceph.com, ceph-announce@ceph.com
+To: Sage Weil <sage@newdream.net>
+Cc: "Lakis, Jacek" <jacek.lakis@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, Sep 22, 2015 at 2:38 AM, Songbo Wang <songbo1227@gmail.com> wro=
-te:
-> Hi, all,
->         Since the last week=E2=80=98s attack, =E2=80=9Cceph.com/packa=
-ges/ceph-extras=E2=80=9D can be
-> opened never, but where can I get the releases of ceph-extra now?
+On Tue, Sep 22, 2015 at 5:26 AM, Sage Weil <sage@newdream.net> wrote:
+> On Tue, 22 Sep 2015, Lakis, Jacek wrote:
+>> Hi ceph-devel!
+>> We're checking OSD::op_is_discardable condition two times: in dispatcher (handle_op) and in worker threads (do_request->can_discard_request->can_discard_op)
+>>
+>>   if (!op->get_connection()->is_connected() &&
+>>       op->get_version().version == 0) {
+>>     return true;
+>>   }
+>>
+>> Is there any purpose to do this? If not, which of those should be
+>> removed in your opinion? If condition in handle_op will remain, OP won't
+>> pass to the worker threads through the prioritized queue. On the other
+>> hand, leaving it in do_request will parallelize this check (I started
+>> parallelizing in PR 5211).
 >
-> Thanks and Regards,
-> WangSongbo
+> Is there a reason not to do it twice?  It looks pretty cheap.
 >
+> But, if we have to choose, I'd leave it in the worker thread.  It is
+> unlikely to trigger on newly dispatched messages (that were *just* taken
+> off the wire), and the worker thread check is critical to avoid wasting
+> work on requeued/delayed messages that no longer have clients waiting on
+> them.
 
-The packages in "ceph-extras" were old and subject to CVEs (the big
-one being VENOM, CVE-2015-3456). So I don't intend to host ceph-extras
-in the new location.
-
-- Ken
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+While this is definitely the right choice if eliminating one, I think
+there was a specific reason to leave it in both. Perhaps just because
+it's cheap, but I think maybe the rest of the dispatch work in that
+thread relies on it having a connection. (Unless that got changed? We
+are a lot more generous about lack of connections than we used to be.)
+-Greg
