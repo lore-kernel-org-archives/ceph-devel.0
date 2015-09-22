@@ -1,53 +1,35 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: OSD::op_is_discardable condition doubled
-Date: Tue, 22 Sep 2015 05:26:01 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1509220524500.11876@cobra.newdream.net>
-References: <90EABA838E32E141BC06296A2C40520A1A62D80F@IRSMSX108.ger.corp.intel.com>
+From: "Redynk, Lukasz" <lukasz.redynk@intel.com>
+Subject: (unknown)
+Date: Tue, 22 Sep 2015 12:57:14 +0000
+Message-ID: <366FBB9F4071D247873F0154404E6FF01E2D2A40@IRSMSX107.ger.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1457832326-1442924761=:11876"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:34558 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751622AbbIVM0C (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Sep 2015 08:26:02 -0400
-In-Reply-To: <90EABA838E32E141BC06296A2C40520A1A62D80F@IRSMSX108.ger.corp.intel.com>
+Received: from mga03.intel.com ([134.134.136.65]:58718 "EHLO mga03.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757956AbbIVM5Q (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 22 Sep 2015 08:57:16 -0400
+Subject: 
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Lakis, Jacek" <jacek.lakis@intel.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+c3Vic2NyaWJlIGNlcGgtZGV2ZWwNCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tCgpJbnRlbCBUZWNobm9sb2d5IFBvbGFu
+ZCBzcC4geiBvLm8uCnVsLiBTbG93YWNraWVnbyAxNzMgfCA4MC0yOTggR2RhbnNrIHwgU2FkIFJl
+am9ub3d5IEdkYW5zayBQb2xub2MgfCBWSUkgV3lkemlhbCBHb3Nwb2RhcmN6eSBLcmFqb3dlZ28g
+UmVqZXN0cnUgU2Fkb3dlZ28gLSBLUlMgMTAxODgyIHwgTklQIDk1Ny0wNy01Mi0zMTYgfCBLYXBp
+dGFsIHpha2xhZG93eSAyMDAuMDAwIFBMTi4KClRhIHdpYWRvbW9zYyB3cmF6IHogemFsYWN6bmlr
+YW1pIGplc3QgcHJ6ZXpuYWN6b25hIGRsYSBva3Jlc2xvbmVnbyBhZHJlc2F0YSBpIG1vemUgemF3
+aWVyYWMgaW5mb3JtYWNqZSBwb3VmbmUuIFcgcmF6aWUgcHJ6eXBhZGtvd2VnbyBvdHJ6eW1hbmlh
+IHRlaiB3aWFkb21vc2NpLCBwcm9zaW15IG8gcG93aWFkb21pZW5pZSBuYWRhd2N5IG9yYXogdHJ3
+YWxlIGplaiB1c3VuaWVjaWU7IGpha2lla29sd2llawpwcnplZ2xhZGFuaWUgbHViIHJvenBvd3N6
+ZWNobmlhbmllIGplc3QgemFicm9uaW9uZS4KVGhpcyBlLW1haWwgYW5kIGFueSBhdHRhY2htZW50
+cyBtYXkgY29udGFpbiBjb25maWRlbnRpYWwgbWF0ZXJpYWwgZm9yIHRoZSBzb2xlIHVzZSBvZiB0
+aGUgaW50ZW5kZWQgcmVjaXBpZW50KHMpLiBJZiB5b3UgYXJlIG5vdCB0aGUgaW50ZW5kZWQgcmVj
+aXBpZW50LCBwbGVhc2UgY29udGFjdCB0aGUgc2VuZGVyIGFuZCBkZWxldGUgYWxsIGNvcGllczsg
+YW55IHJldmlldyBvciBkaXN0cmlidXRpb24gYnkKb3RoZXJzIGlzIHN0cmljdGx5IHByb2hpYml0
+ZWQuCg==
 
---557981400-1457832326-1442924761=:11876
-Content-Type: TEXT/PLAIN; charset=iso-8859-2
-Content-Transfer-Encoding: quoted-printable
-
-On Tue, 22 Sep 2015, Lakis, Jacek wrote:
-> Hi ceph-devel!
-> We're checking OSD::op_is_discardable condition two times: in dispatche=
-r (handle_op) and in worker threads (do_request->can_discard_request->can=
-_discard_op)
->=20
-> =A0 if (!op->get_connection()->is_connected() &&
-> =A0=A0=A0=A0=A0 op->get_version().version =3D=3D 0) {
-> =A0=A0=A0 return true;
-> =A0 }
->=20
-> Is there any purpose to do this? If not, which of those should be=20
-> removed in your opinion? If condition in handle_op will remain, OP won'=
-t=20
-> pass to the worker threads through the prioritized queue. On the other=20
-> hand, leaving it in do_request will parallelize this check (I started=20
-> parallelizing in PR 5211).
-
-Is there a reason not to do it twice?  It looks pretty cheap.
-
-But, if we have to choose, I'd leave it in the worker thread.  It is=20
-unlikely to trigger on newly dispatched messages (that were *just* taken=20
-off the wire), and the worker thread check is critical to avoid wasting=20
-work on requeued/delayed messages that no longer have clients waiting on=20
-them.
-
-sage
---557981400-1457832326-1442924761=:11876--
