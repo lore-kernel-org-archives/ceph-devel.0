@@ -1,53 +1,192 @@
-From: Jason Dillaman <dillaman@redhat.com>
-Subject: Re: RBD mirroring CLI proposal ...
-Date: Wed, 23 Sep 2015 14:28:36 -0400 (EDT)
-Message-ID: <628927553.33246726.1443032916737.JavaMail.zimbra@redhat.com>
-References: <604040155.31290870.1442846770290.JavaMail.zimbra@redhat.com> <189900515.31291453.1442846891314.JavaMail.zimbra@redhat.com> <20150922092847.GA13767@gmail.com> <151161168.32108716.1442943169367.JavaMail.zimbra@redhat.com> <20150923063313.GA8713@gmail.com> <CAOi1vP_KNFG7KNYsEmh+tX3xq0EY4op0fXxdCcNW+xSDFuxPig@mail.gmail.com> <1213966550.33031523.1443013689108.JavaMail.zimbra@redhat.com> <CAOi1vP9=3Uf1Z69AFpsENpimebf+3=RTP2JsOouhAnVPpQMzgQ@mail.gmail.com>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: Re: perf counters from a performance discrepancy
+Date: Wed, 23 Sep 2015 13:42:32 -0500
+Message-ID: <5602F298.7060609@redhat.com>
+References: <BC97738F8E7C8742BABED7F06FB9DF9192500992@SATLEXDAG01.amd.com>	<alpine.DEB.2.00.1509231116580.13265@cobra.newdream.net> <CAJ4mKGavY4ZdutpjnKduQ1AcpCpHDeWST8NyOa_RT19W+DvrNQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx5-phx2.redhat.com ([209.132.183.37]:52991 "EHLO
-	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751953AbbIWS2i (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Sep 2015 14:28:38 -0400
-In-Reply-To: <CAOi1vP9=3Uf1Z69AFpsENpimebf+3=RTP2JsOouhAnVPpQMzgQ@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:39034 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753291AbbIWSmg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 23 Sep 2015 14:42:36 -0400
+In-Reply-To: <CAJ4mKGavY4ZdutpjnKduQ1AcpCpHDeWST8NyOa_RT19W+DvrNQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Mykola Golub <mgolub@mirantis.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <gfarnum@redhat.com>, Sage Weil <sage@newdream.net>
+Cc: "Deneau, Tom" <tom.deneau@amd.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-> So a pool policy is just a set of feature bits?
 
-It would have to store additional details as well.
 
-> I think Cinder at least creates images with rbd_default_features from
-> ceph.conf and adds in layering if it's not set, meaning there is no
-> interface for passing through feature bits (or anything else really,
-> things like striping options, etc).  What pool-level default feature
-> bits infrastructure would do is replace a big (cluster-level) hammer
-> with a smaller (pool-level) hammer.  You'd have to add librbd APIs for
-> it and someone eventually will try to follow suit and add defaults for
-> other settings.  You said you weren't attempting to create a mechanism
-> to specify arbitrary default features for a given pool, but I think it
-> will come up in the future if we introduce this - it's only logical.
-> 
-> What we might want to do instead is use this mirroring milestone to add
-> support for a proper key-value interface for passing in features and
-> other settings for individual rbd images to OpenStack.  I assume it's
-> all python dicts with OpenStack, so it shouldn't be hard?  I know that
-> getting patches into OpenStack can be frustrating at times and I might
-> be underestimating the importance of the use case you have in mind, but
-> patching our OpenStack drivers rather than adding what essentially is
-> a workaround to librbd makes a lot more sense to me.
-> 
+On 09/23/2015 01:25 PM, Gregory Farnum wrote:
+> On Wed, Sep 23, 2015 at 11:19 AM, Sage Weil <sage@newdream.net> wrote=
+:
+>> On Wed, 23 Sep 2015, Deneau, Tom wrote:
+>>> Hi all --
+>>>
+>>> Looking for guidance with perf counters...
+>>> I am trying to see whether the perf counters can tell me anything a=
+bout the following discrepancy
+>>>
+>>> I populate a number of 40k size objects in each of two pools, poolA=
+ and poolB.
+>>> Both pools cover osds on a single node, 5 osds total.
+>>>
+>>>     * Config 1 (1p):
+>>>        * use single rados bench client with 32 threads to do seq re=
+ad of 20000 objects from poolA.
+>>>
+>>>     * Config 2 (2p):
+>>>        * use two concurrent rados bench clients (running on same cl=
+ient node) with 16 threads each,
+>>>             one reading 10000 objects from poolA,
+>>>             one reading 10000 objects from poolB,
+>>>
+>>> So in both configs, we have 32 threads total and the number of obje=
+cts read is the same.
+>>> Note: in all cases, we drop the caches before doing the seq reads
+>>>
+>>> The combined bandwidth (MB/sec) for the 2 clients in config 2 is ab=
+out 1/3 of the bandwidth for
+>>> the single client in config 1.
+>>
+>> How were the object written?  I assume the cluster is backed by spin=
+ning
+>> disks?
+>>
+>> I wonder if this is a disk layout issue.  If the 20,000 objects are
+>> written in order, they willb e roughly sequential on disk, and the 3=
+2
+>> thread case will read them in order.  In the 2x 10,000 case, the two
+>> clients are reading two sequences of objects written at different
+>> times, and the disk arms will be swinging around more.
+>>
+>> My guess is that if the reads were reading the objects in a random o=
+rder
+>> the performance would be the same... I'm not sure that rados bench d=
+oes
+>> that though?
+>>
+>> sage
+>>
+>>>
+>>>
+>>> I gathered perf counters before and after each run and looked at th=
+e difference of
+>>> the before and after counters for both the 1p and 2p cases.  Here a=
+re some things I noticed
+>>> that are different between the two runs.  Can someone take a look a=
+nd let me know
+>>> whether any of these differences are significant.  In particular, f=
+or the
+>>> throttle-msgr_dispatch_throttler ones, since I don't know the detai=
+led definitions of these fields.
+>>> Note: these are the numbers for one of the 5 osds, the other osds a=
+re similar...
+>>>
+>>> * The field osd/loadavg is always about 3 times higher on the 2p c
+>>>
+>>> some latency-related counters
+>>> ------------------------------
+>>> osd/op_latency/sum 1p=3D6.24801117205061, 2p=3D579.722513078945
+>>> osd/op_process_latency/sum 1p=3D3.48506945394911, 2p=3D42.627849454=
+9915
+>>> osd/op_r_latency/sum 1p=3D6.2480111719924, 2p=3D579.722513079003
+>>> osd/op_r_process_latency/sum 1p=3D3.48506945399276, 2p=3D42.6278494=
+550061
+>
+> So, yep, the individual read ops are taking much longer in the
+> two-client case. Naively that's pretty odd.
+>
+>>>
+>>>
+>>> and some throttle-msgr_dispatch_throttler related counters
+>>> ----------------------------------------------------------
+>>> throttle-msgr_dispatch_throttler-client/get 1p=3D1337, 2p=3D1339, d=
+iff=3D2
+>>> throttle-msgr_dispatch_throttler-client/get_sum 1p=3D222877, 2p=3D2=
+23088, diff=3D211
+>>> throttle-msgr_dispatch_throttler-client/put 1p=3D1337, 2p=3D1339, d=
+iff=3D2
+>>> throttle-msgr_dispatch_throttler-client/put_sum 1p=3D222877, 2p=3D2=
+23088, diff=3D211
+>>> throttle-msgr_dispatch_throttler-hb_back_server/get 1p=3D58, 2p=3D1=
+34, diff=3D76
+>>> throttle-msgr_dispatch_throttler-hb_back_server/get_sum 1p=3D2726, =
+2p=3D6298, diff=3D3572
+>>> throttle-msgr_dispatch_throttler-hb_back_server/put 1p=3D58, 2p=3D1=
+34, diff=3D76
+>>> throttle-msgr_dispatch_throttler-hb_back_server/put_sum 1p=3D2726, =
+2p=3D6298, diff=3D3572
+>>> throttle-msgr_dispatch_throttler-hb_front_server/get 1p=3D58, 2p=3D=
+134, diff=3D76
+>>> throttle-msgr_dispatch_throttler-hb_front_server/get_sum 1p=3D2726,=
+ 2p=3D6298, diff=3D3572
+>>> throttle-msgr_dispatch_throttler-hb_front_server/put 1p=3D58, 2p=3D=
+134, diff=3D76
+>>> throttle-msgr_dispatch_throttler-hb_front_server/put_sum 1p=3D2726,=
+ 2p=3D6298, diff=3D3572
+>>> throttle-msgr_dispatch_throttler-hbclient/get 1p=3D168, 2p=3D252, d=
+iff=3D84
+>>> throttle-msgr_dispatch_throttler-hbclient/get_sum 1p=3D7896, 2p=3D1=
+1844, diff=3D3948
+>>> throttle-msgr_dispatch_throttler-hbclient/put 1p=3D168, 2p=3D252, d=
+iff=3D84
+>>> throttle-msgr_dispatch_throttler-hbclient/put_sum 1p=3D7896, 2p=3D1=
+1844, diff=3D3948
+>
+> IIRC these are just saying how many times the dispatch throttler was
+> accessed on each messenger =E2=80=94 nothing here is surprising, you'=
+re doing
+> basically the same number of messages on the client messengers, and
+> the heartbeat messengers are passing more because the test takes
+> longer.
+>
+> I'd go with Sage's idea for what is actually causing this, or try and
+> look at how the latency changes over time =E2=80=94 if you're going t=
+o two
+> pools instead of one, presumably you're doubling the amount of
+> metadata that needs to be read into memory during the run? Perhaps
+> that's just a significant enough effect with your settings that you'r=
+e
+> seeing a bunch of extra directory lookups impact your throughput more
+> than expected... :/
 
-It would be less work to skip adding the pool-level defaults which is a plus given everything else required.  However, putting aside how long it would take for the required changes to trickle down from OpenStack, Qemu, etc (since I agree that shouldn't drive design), in some ways your proposal could be seen as blurring the configuration encapsulation between clients and Ceph. 
+=46WIW, typically if I've seen an effect, it's been the opposite where=20
+multiple rados bench processes are slightly faster (maybe simply relate=
+d=20
+to the client side implementation).  Running collectl or iostat would=20
+show various interval statistics that would help diagnose if this is=20
+related to slower accesses on the disks.  blktrace of course would give=
+=20
+a more nuanced view.  Might be worth doing if there are extra metadata=20
+accesses.
 
-Is the goal to configure my storage policies in one place or should I have to update all my client configuration settings (not that big of a deal if you are using something like Puppet to push down consistent configs across your servers)? Trying to think like an end-user, I think I would prefer configuring it once within the storage system itself.  I am not familiar with any other storage systems that configure mirroring via OpenStack config files, but I could be wrong since there are a lot of volume drivers now.
+A couple of other random thoughts:
 
-I do like the idea of key/value configuration pairs on image create and I had even proposed that a few weeks ago on a separate email thread since we shouldn't keep expanding rbd_create/rbd_clone/rbd_copy for every possible configuration override.  
+- Are any of the reads coming from buffer cache?
+- Readahead not working well?
+- Were the pools recreated between tests?
+- If not, what were the total number of objects and PGs for each pool=20
+(Is it possible that the per-pg directory hirearchy was deeper for the=20
+2nd set of tests?)
+- If the pools still exist, what does the following script say about th=
+em?
 
+https://github.com/ceph/cbt/blob/master/tools/readpgdump.py
+
+
+> -Greg
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
 --
-
-Jason
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
