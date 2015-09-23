@@ -1,417 +1,166 @@
-From: Robert LeBlanc <robert-4JaGZRWAfWbajFs6igw21g@public.gmane.org>
-Subject: Re: Potential OSD deadlock?
-Date: Wed, 23 Sep 2015 13:30:44 -0600
-Message-ID: <CAANLjFqTW3750rw6zCnNfcD41GjYxer05m--JAWx-YLnaxcg-Q@mail.gmail.com>
-References: <CAANLjFpAXaDWQzumg1hCs=SC_0YvdYDd6vyodz5_ZBNvGWdkSw@mail.gmail.com>
-	<CAANLjFob5ZsJzYop0RjQsXw-4UfV4OvdhBjT2sGF-u6gq9NrhQ@mail.gmail.com>
-	<CAJ4mKGZ8WhY5JWD2P=5fQ+9EYQazEKETCTg8gU6qcZ03V3jrVw@mail.gmail.com>
-	<CAANLjFrcx_M7BxW5UCZxUk_Y7-s3NneBevnP+JHU0PA8pazpAw@mail.gmail.com>
-	<CAJ4mKGZLD4QfAfhZEXAe6KSbq9Z6wPXdUes_GJunfgnTf+K0Yg@mail.gmail.com>
-	<CAANLjFqn8t+w3hACiCvgi2zpG4TGFYzmAW5ocsa1TOjqueY6QQ@mail.gmail.com>
-	<CAJ4mKGY-XcFvbzSCRH4d5qJuwNE1uQ0Kdj7UCq5p0saFyaoiBA@mail.gmail.com>
-	<CAANLjFrDqHhAtWPqBV+QEDcFU6xNum37puO6XHZE0zhNp9reSQ@mail.gmail.com>
-	<CAJ4mKGYdJJfFERrOrdN7T8SzhdcyKhSDqJ69wOiee2aVj8vpEA@mail.gmail.com>
-	<CAANLjFqbt0y-Ri=q6hXuuS06Sgi1S6phRdb1MJTgR6LTyHPtvw@mail.gmail.com>
-	<CAN=+7FVo6D2AoufELCP_qeiJ23i0XEOqQs_yYLrFNXwiiQSthw@mail.gmail.com>
-	<alpine.DEB.2.00.1509221450490.11876@cobra.newdream.net>
-	<CAANLjFoK4O-3GB_1b40xp-5RtbZhdSXJT5+ydUDX+dq=dBHR8w@mail.gmail.com>
-	<CAANLjFrrAyhJ=JR0+K3SX6G1ZsdcUyhTqFzUn_A0+bSh0D=bkA@mail.gmail.com>
-	<5602F921.3010204@redhat.com>
+From: "Deneau, Tom" <tom.deneau@amd.com>
+Subject: RE: perf counters from a performance discrepancy
+Date: Wed, 23 Sep 2015 20:05:00 +0000
+Message-ID: <BC97738F8E7C8742BABED7F06FB9DF9192500B92@SATLEXDAG01.amd.com>
+References: <BC97738F8E7C8742BABED7F06FB9DF9192500992@SATLEXDAG01.amd.com>
+	<alpine.DEB.2.00.1509231116580.13265@cobra.newdream.net>
+ <CAJ4mKGavY4ZdutpjnKduQ1AcpCpHDeWST8NyOa_RT19W+DvrNQ@mail.gmail.com>
+ <5602F298.7060609@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <5602F921.3010204-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Mark Nelson <mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-by2on0094.outbound.protection.outlook.com ([207.46.100.94]:3584
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753999AbbIWUUD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 23 Sep 2015 16:20:03 -0400
+In-Reply-To: <5602F298.7060609@redhat.com>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Mark Nelson <mnelson@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, Sage Weil <sage@newdream.net>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA256
-
-We were able to only get ~17Gb out of the XL710 (heavily tweaked)
-until we went to the 4.x kernel where we got ~36Gb (no tweaking). It
-seems that there were some major reworks in the network handling in
-the kernel to efficiently handle that network rate. If I remember
-right we also saw a drop in CPU utilization. I'm starting to think
-that we did see packet loss while congesting our ISLs in our initial
-testing, but we could not tell where the dropping was happening. We
-saw some on the switches, but it didn't seem to be bad if we weren't
-trying to congest things. We probably already saw this issue, just
-didn't know it.
-- ----------------
-Robert LeBlanc
-PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
-
-
-On Wed, Sep 23, 2015 at 1:10 PM, Mark Nelson  wrote:
-> FWIW, we've got some 40GbE Intel cards in the community performance cluster
-> on a Mellanox 40GbE switch that appear (knock on wood) to be running fine
-> with 3.10.0-229.7.2.el7.x86_64.  We did get feedback from Intel that older
-> drivers might cause problems though.
->
-> Here's ifconfig from one of the nodes:
->
-> ens513f1: flags=4163  mtu 1500
->         inet 10.0.10.101  netmask 255.255.255.0  broadcast 10.0.10.255
->         inet6 fe80::6a05:caff:fe2b:7ea1  prefixlen 64  scopeid 0x20
->         ether 68:05:ca:2b:7e:a1  txqueuelen 1000  (Ethernet)
->         RX packets 169232242875  bytes 229346261232279 (208.5 TiB)
->         RX errors 0  dropped 0  overruns 0  frame 0
->         TX packets 153491686361  bytes 203976410836881 (185.5 TiB)
->         TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
->
-> Mark
->
->
-> On 09/23/2015 01:48 PM, Robert LeBlanc wrote:
->>
->> -----BEGIN PGP SIGNED MESSAGE-----
->> Hash: SHA256
->>
->> OK, here is the update on the saga...
->>
->> I traced some more of blocked I/Os and it seems that communication
->> between two hosts seemed worse than others. I did a two way ping flood
->> between the two hosts using max packet sizes (1500). After 1.5M
->> packets, no lost pings. Then then had the ping flood running while I
->> put Ceph load on the cluster and the dropped pings started increasing
->> after stopping the Ceph workload the pings stopped dropping.
->>
->> I then ran iperf between all the nodes with the same results, so that
->> ruled out Ceph to a large degree. I then booted in the the
->> 3.10.0-229.14.1.el7.x86_64 kernel and with an hour test so far there
->> hasn't been any dropped pings or blocked I/O. Our 40 Gb NICs really
->> need the network enhancements in the 4.x series to work well.
->>
->> Does this sound familiar to anyone? I'll probably start bisecting the
->> kernel to see where this issue in introduced. Both of the clusters
->> with this issue are running 4.x, other than that, they are pretty
->> differing hardware and network configs.
->>
->> Thanks,
->> -----BEGIN PGP SIGNATURE-----
->> Version: Mailvelope v1.1.0
->> Comment: https://www.mailvelope.com
->>
->> wsFcBAEBCAAQBQJWAvOzCRDmVDuy+mK58QAApOMP/1xmCtW++G11qcE8y/sr
->> RkXguqZJLc4czdOwV/tjUvhVsm5qOl4wvQCtABFZpc6t4+m5nzE3LkA1rl2l
->> AnARPOjh61TO6cV0CT8O0DlqtHmSd2y0ElgAUl0594eInEn7eI7crz8R543V
->> 7I68XU5zL/vNJ9IIx38UqdhtSzXQQL664DGq3DLINK0Yb9XRVBlFip+Slt+j
->> cB64TuWjOPLSH09pv7SUyksodqrTq3K7p6sQkq0MOzBkFQM1FHfOipbo/LYv
->> F42iiQbCvFizArMu20WeOSQ4dmrXT/iecgTfEag/Zxvor2gOi/J6d2XS9ckW
->> byEC5/rbm4yDBua2ZugeNxQLWq0Oa7spZnx7usLsu/6YzeDNI6kmtGURajdE
->> /XC8bESWKveBzmGDzjff5oaMs9A1PZURYnlYADEODGAt6byoaoQEGN6dlFGe
->> LwQ5nOdQYuUrWpJzTJBN3aduOxursoFY8S0eR0uXm0l1CHcp22RWBDvRinok
->> UWk5xRBgjDCD2gIwc+wpImZbCtiTdf0vad1uLvdxGL29iFta4THzJgUGrp98
->> sUqM3RaTRdJYjFcNP293H7/DC0mqpnmo0Clx3jkdHX+x1EXpJUtocSeI44LX
->> KWIMhe9wXtKAoHQFEcJ0o0+wrXWMevvx33HPC4q1ULrFX0ILNx5Mo0Rp944X
->> 4OEo
->> =P33I
->> -----END PGP SIGNATURE-----
->> ----------------
->> Robert LeBlanc
->> PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
->>
->>
->> On Tue, Sep 22, 2015 at 4:15 PM, Robert LeBlanc
->> wrote:
->>>
->>> -----BEGIN PGP SIGNED MESSAGE-----
->>> Hash: SHA256
->>>
->>> This is IPoIB and we have the MTU set to 64K. There was some issues
->>> pinging hosts with "No buffer space available" (hosts are currently
->>> configured for 4GB to test SSD caching rather than page cache). I
->>> found that MTU under 32K worked reliable for ping, but still had the
->>> blocked I/O.
->>>
->>> I reduced the MTU to 1500 and checked pings (OK), but I'm still seeing
->>> the blocked I/O.
->>> - ----------------
->>> Robert LeBlanc
->>> PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
->>>
->>>
->>> On Tue, Sep 22, 2015 at 3:52 PM, Sage Weil  wrote:
->>>>
->>>> On Tue, 22 Sep 2015, Samuel Just wrote:
->>>>>
->>>>> I looked at the logs, it looks like there was a 53 second delay
->>>>> between when osd.17 started sending the osd_repop message and when
->>>>> osd.13 started reading it, which is pretty weird.  Sage, didn't we
->>>>> once see a kernel issue which caused some messages to be mysteriously
->>>>> delayed for many 10s of seconds?
->>>>
->>>>
->>>> Every time we have seen this behavior and diagnosed it in the wild it
->>>> has
->>>> been a network misconfiguration.  Usually related to jumbo frames.
->>>>
->>>> sage
->>>>
->>>>
->>>>>
->>>>> What kernel are you running?
->>>>> -Sam
->>>>>
->>>>> On Tue, Sep 22, 2015 at 2:22 PM, Robert LeBlanc  wrote:
->>>>>>
->>>>>> -----BEGIN PGP SIGNED MESSAGE-----
->>>>>> Hash: SHA256
->>>>>>
->>>>>> OK, looping in ceph-devel to see if I can get some more eyes. I've
->>>>>> extracted what I think are important entries from the logs for the
->>>>>> first blocked request. NTP is running all the servers so the logs
->>>>>> should be close in terms of time. Logs for 12:50 to 13:00 are
->>>>>> available at http://162.144.87.113/files/ceph_block_io.logs.tar.xz
->>>>>>
->>>>>> 2015-09-22 12:55:06.500374 - osd.17 gets I/O from client
->>>>>> 2015-09-22 12:55:06.557160 - osd.17 submits I/O to osd.13
->>>>>> 2015-09-22 12:55:06.557305 - osd.17 submits I/O to osd.16
->>>>>> 2015-09-22 12:55:06.573711 - osd.16 gets I/O from osd.17
->>>>>> 2015-09-22 12:55:06.595716 - osd.17 gets ondisk result=0 from osd.16
->>>>>> 2015-09-22 12:55:06.640631 - osd.16 reports to osd.17 ondisk result=0
->>>>>> 2015-09-22 12:55:36.926691 - osd.17 reports slow I/O > 30.439150 sec
->>>>>> 2015-09-22 12:55:59.790591 - osd.13 gets I/O from osd.17
->>>>>> 2015-09-22 12:55:59.812405 - osd.17 gets ondisk result=0 from osd.13
->>>>>> 2015-09-22 12:56:02.941602 - osd.13 reports to osd.17 ondisk result=0
->>>>>>
->>>>>> In the logs I can see that osd.17 dispatches the I/O to osd.13 and
->>>>>> osd.16 almost silmutaniously. osd.16 seems to get the I/O right away,
->>>>>> but for some reason osd.13 doesn't get the message until 53 seconds
->>>>>> later. osd.17 seems happy to just wait and doesn't resend the data
->>>>>> (well, I'm not 100% sure how to tell which entries are the actual data
->>>>>> transfer).
->>>>>>
->>>>>> It looks like osd.17 is receiving responses to start the communication
->>>>>> with osd.13, but the op is not acknowledged until almost a minute
->>>>>> later. To me it seems that the message is getting received but not
->>>>>> passed to another thread right away or something. This test was done
->>>>>> with an idle cluster, a single fio client (rbd engine) with a single
->>>>>> thread.
->>>>>>
->>>>>> The OSD servers are almost 100% idle during these blocked I/O
->>>>>> requests. I think I'm at the end of my troubleshooting, so I can use
->>>>>> some help.
->>>>>>
->>>>>> Single Test started about
->>>>>> 2015-09-22 12:52:36
->>>>>>
->>>>>> 2015-09-22 12:55:36.926680 osd.17 192.168.55.14:6800/16726 56 :
->>>>>> cluster [WRN] 1 slow requests, 1 included below; oldest blocked for >
->>>>>> 30.439150 secs
->>>>>> 2015-09-22 12:55:36.926699 osd.17 192.168.55.14:6800/16726 57 :
->>>>>> cluster [WRN] slow request 30.439150 seconds old, received at
->>>>>> 2015-09-22 12:55:06.487451:
->>>>>>   osd_op(client.250874.0:1388 rbd_data.3380e2ae8944a.0000000000000545
->>>>>> [set-alloc-hint object_size 4194304 write_size 4194304,write
->>>>>> 0~4194304] 8.bbf3e8ff ack+ondisk+write+known_if_redirected e56785)
->>>>>>   currently waiting for subops from 13,16
->>>>>> 2015-09-22 12:55:36.697904 osd.16 192.168.55.13:6800/29410 7 : cluster
->>>>>> [WRN] 2 slow requests, 2 included below; oldest blocked for >
->>>>>> 30.379680 secs
->>>>>> 2015-09-22 12:55:36.697918 osd.16 192.168.55.13:6800/29410 8 : cluster
->>>>>> [WRN] slow request 30.291520 seconds old, received at 2015-09-22
->>>>>> 12:55:06.406303:
->>>>>>   osd_op(client.250874.0:1384 rbd_data.3380e2ae8944a.0000000000000541
->>>>>> [set-alloc-hint object_size 4194304 write_size 4194304,write
->>>>>> 0~4194304] 8.5fb2123f ack+ondisk+write+known_if_redirected e56785)
->>>>>>   currently waiting for subops from 13,17
->>>>>> 2015-09-22 12:55:36.697927 osd.16 192.168.55.13:6800/29410 9 : cluster
->>>>>> [WRN] slow request 30.379680 seconds old, received at 2015-09-22
->>>>>> 12:55:06.318144:
->>>>>>   osd_op(client.250874.0:1382 rbd_data.3380e2ae8944a.000000000000053f
->>>>>> [set-alloc-hint object_size 4194304 write_size 4194304,write
->>>>>> 0~4194304] 8.312e69ca ack+ondisk+write+known_if_redirected e56785)
->>>>>>   currently waiting for subops from 13,14
->>>>>> 2015-09-22 12:58:03.998275 osd.13 192.168.55.12:6804/4574 130 :
->>>>>> cluster [WRN] 1 slow requests, 1 included below; oldest blocked for >
->>>>>> 30.954212 secs
->>>>>> 2015-09-22 12:58:03.998286 osd.13 192.168.55.12:6804/4574 131 :
->>>>>> cluster [WRN] slow request 30.954212 seconds old, received at
->>>>>> 2015-09-22 12:57:33.044003:
->>>>>>   osd_op(client.250874.0:1873 rbd_data.3380e2ae8944a.000000000000070d
->>>>>> [set-alloc-hint object_size 4194304 write_size 4194304,write
->>>>>> 0~4194304] 8.e69870d4 ack+ondisk+write+known_if_redirected e56785)
->>>>>>   currently waiting for subops from 16,17
->>>>>> 2015-09-22 12:58:03.759826 osd.16 192.168.55.13:6800/29410 10 :
->>>>>> cluster [WRN] 1 slow requests, 1 included below; oldest blocked for >
->>>>>> 30.704367 secs
->>>>>> 2015-09-22 12:58:03.759840 osd.16 192.168.55.13:6800/29410 11 :
->>>>>> cluster [WRN] slow request 30.704367 seconds old, received at
->>>>>> 2015-09-22 12:57:33.055404:
->>>>>>   osd_op(client.250874.0:1874 rbd_data.3380e2ae8944a.000000000000070e
->>>>>> [set-alloc-hint object_size 4194304 write_size 4194304,write
->>>>>> 0~4194304] 8.f7635819 ack+ondisk+write+known_if_redirected e56785)
->>>>>>   currently waiting for subops from 13,17
->>>>>>
->>>>>> Server   IP addr              OSD
->>>>>> nodev  - 192.168.55.11 - 12
->>>>>> nodew  - 192.168.55.12 - 13
->>>>>> nodex  - 192.168.55.13 - 16
->>>>>> nodey  - 192.168.55.14 - 17
->>>>>> nodez  - 192.168.55.15 - 14
->>>>>> nodezz - 192.168.55.16 - 15
->>>>>>
->>>>>> fio job:
->>>>>> [rbd-test]
->>>>>> readwrite=write
->>>>>> blocksize=4M
->>>>>> #runtime=60
->>>>>> name=rbd-test
->>>>>> #readwrite=randwrite
->>>>>> #bssplit=4k/85:32k/11:512/3:1m/1,4k/89:32k/10:512k/1
->>>>>> #rwmixread=72
->>>>>> #norandommap
->>>>>> #size=1T
->>>>>> #blocksize=4k
->>>>>> ioengine=rbd
->>>>>> rbdname=test2
->>>>>> pool=rbd
->>>>>> clientname=admin
->>>>>> iodepth=8
->>>>>> #numjobs=4
->>>>>> #thread
->>>>>> #group_reporting
->>>>>> #time_based
->>>>>> #direct=1
->>>>>> #ramp_time=60
->>>>>>
->>>>>>
->>>>>> Thanks,
->>>>>> -----BEGIN PGP SIGNATURE-----
->>>>>> Version: Mailvelope v1.1.0
->>>>>> Comment: https://www.mailvelope.com
->>>>>>
->>>>>> wsFcBAEBCAAQBQJWAcaKCRDmVDuy+mK58QAAPMsQAKBnS94fwuw0OqpPU3/z
->>>>>> tL8Z6TVRxrNigf721+2ClIu4LIH71bupDc3DgrrysQmmqGuvEMn68spmasWu
->>>>>> h9I/CqqgRpHqe4lUVoUEjyWA9/6Dbb6NiHSdpJ6p5jpGc8kZCvNS+ocDgFOl
->>>>>> 903i0M0E9eEMeci5O/hrMrx1FG8SN2LS8nI261aNHMOwQK0bw8wWiCJEvqVB
->>>>>> sz1/+jK1BJoeIYfaT9HfUXBAvfo/W3tY/vj9KbJuZJ5AMpeYPvEHu/LAr1N7
->>>>>> FzzUc7a6EMlaxmSd0ML49JbV0cY9BMDjfrkKEQNKlzszlEHm3iif98QtsxbF
->>>>>> pPJ0hZ0G53BY3k976OWVMFm3WFRWUVOb/oiLF8H6PCm59b4LBNAg6iPNH1AI
->>>>>> 5XhEcPpg06M03vqUaIiY9P1kQlvnn0yCXf82IUEgmg///vhxDsHWmcwClLEn
->>>>>> B0VszouStTzlMYnc/2vlUiI4gFVeilWLMW00VGTWV+7V1oIzIYvWHyl2QpBq
->>>>>> 4/ZwVjQ43qLfuDTS4o+IJ4ztOMd26vIv6Mn6WVwKCjoCXJc8ajywR9Dy+6lL
->>>>>> o8oJ+tn7hMc9Qy1iBhu3/QIP4WCsUf9RVeu60oahNEpde89qW32S9CZlrJDO
->>>>>> gf4iTryRjkAhdmZIj9JiaE8jQ6dvN817D9cqs/CXKV9vhzYoM7p5YWHghBKB
->>>>>> J3hS
->>>>>> =0J7F
->>>>>> -----END PGP SIGNATURE-----
->>>>>> ----------------
->>>>>> Robert LeBlanc
->>>>>> PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
->>>>>>
->>>>>>
->>>>>> On Tue, Sep 22, 2015 at 8:31 AM, Gregory Farnum  wrote:
->>>>>>>
->>>>>>> On Tue, Sep 22, 2015 at 7:24 AM, Robert LeBlanc  wrote:
->>>>>>>>
->>>>>>>> -----BEGIN PGP SIGNED MESSAGE-----
->>>>>>>> Hash: SHA256
->>>>>>>>
->>>>>>>> Is there some way to tell in the logs that this is happening?
->>>>>>>
->>>>>>>
->>>>>>> You can search for the (mangled) name _split_collection
->>>>>>>>
->>>>>>>> I'm not
->>>>>>>> seeing much I/O, CPU usage during these times. Is there some way to
->>>>>>>> prevent the splitting? Is there a negative side effect to doing so?
->>>>>>>
->>>>>>>
->>>>>>> Bump up the split and merge thresholds. You can search the list for
->>>>>>> this, it was discussed not too long ago.
->>>>>>>
->>>>>>>> We've had I/O block for over 900 seconds and as soon as the sessions
->>>>>>>> are aborted, they are reestablished and complete immediately.
->>>>>>>>
->>>>>>>> The fio test is just a seq write, starting it over (rewriting from
->>>>>>>> the
->>>>>>>> beginning) is still causing the issue. I was suspect that it is not
->>>>>>>> having to create new file and therefore split collections. This is
->>>>>>>> on
->>>>>>>> my test cluster with no other load.
->>>>>>>
->>>>>>>
->>>>>>> Hmm, that does make it seem less likely if you're really not creating
->>>>>>> new objects, if you're actually running fio in such a way that it's
->>>>>>> not allocating new FS blocks (this is probably hard to set up?).
->>>>>>>
->>>>>>>>
->>>>>>>> I'll be doing a lot of testing today. Which log options and depths
->>>>>>>> would be the most helpful for tracking this issue down?
->>>>>>>
->>>>>>>
->>>>>>> If you want to go log diving "debug osd = 20", "debug filestore =
->>>>>>> 20",
->>>>>>> "debug ms = 1" are what the OSD guys like to see. That should spit
->>>>>>> out
->>>>>>> everything you need to track exactly what each Op is doing.
->>>>>>> -Greg
->>>>>>
->>>>>> --
->>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->>>>>> in
->>>>>> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
->>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>
->>>>>
->>>>>
->>>
->>> -----BEGIN PGP SIGNATURE-----
->>> Version: Mailvelope v1.1.0
->>> Comment: https://www.mailvelope.com
->>>
->>> wsFcBAEBCAAQBQJWAdMSCRDmVDuy+mK58QAAoEgP/AqpH7i1BLpoz6fTlfWG
->>> a6swvF8xvsyR15PDiPINYT0N7MgoikikGrMmhWpJ6utEr1XPW0MPFgzvNIsf
->>> a1eMtNzyww4rAo6JCq6BtjmUsSKmOrBNhRNr6It9v4Nv+biqZHkiY8x/rRtV
->>> s9z0cv3Q9Wqa6y/zKZg3H1XtbtUAx0r/DUwzSsP3omupZgNyaKkCgdkil9Vc
->>> iyzBxFZU4+qXNT2FBG4dYDjxSHQv4psjvKR3AWXSN4yEn286KyMDjFrsDY5B
->>> izS3h603QPoErqsUQngDE8COcaTAHHrV7gNJTikmGoNW6oQBjFq/z/zindTz
->>> caXshVQQ+OTLo/qzJM8QPswh0TGU74SVbDkTq+eTOb5pBhQbp+42Pkkqh7jj
->>> efyyYgDzpB1WrWRbUlWMNqmnjq7DT3lnAtuHyKbkwVs8x3JMPEiCl6PBvJbx
->>> GnNSCqgDJrpb4fHQ2iqfQeh8Ai6AL1C1Ai19RZPrAUhpDW0/DbUvuoKSR8m7
->>> glYYuH3hpy+oPYRhFcHm2fpNJ3u9npyk2Dai9RpzQ+mWmp3xi7becYmL482H
->>> +WyvLeY+8AiJQDpA0CdD8KeSlOC9bw5TPmihAIn9dVTJ1O2RlapCLqL3YAJg
->>> pGyDs8ercTEJLmvEyElj5XWh5DarsGscd2LELNS/UpyuYurbPcyPKUQ0uPjp
->>> gcZm
->>> =CjwB
->>> -----END PGP SIGNATURE-----
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->
-
------BEGIN PGP SIGNATURE-----
-Version: Mailvelope v1.1.0
-Comment: https://www.mailvelope.com
-
-wsFcBAEBCAAQBQJWAv3QCRDmVDuy+mK58QAABr4QAJcQj8zjl606aMdkmQG7
-S46iMXVav/Tv2os9GCUsQmMPx2u1w3/WmPfjByd6Divczfo0JLDDqrbsqre2
-lq0GNK6e8fq6FXHhPpnL+t4uFV4UZ289cma3yklRqEBDXWHlP59Hu7VpxC5l
-0MIcCg4wM5VM/LkrfcMven5em5CnjyFJYbActGzw9043rZoyUwCM+eL7sotl
-JYHMcNWnqwdt8TLFDhUfVGiAQyV8/6E33CuCNUEuFGdtiBKzs9IZadOI8Ce0
-dod2DQNyFSvomqNq6t0DuTCSA+pT8uuks2O0NcrHjoqwIWVkxQGPYlpbpckf
-nxQdVM7vkqapVeQ0qUZx43Db9A5wDTC3PaEfVJZPZzWsSDjh9z7o6qHs3Kvp
-krfyS+dJaZ3tOYAP1VFDfasj06sOTFu3mfGYToKA75zz5HN7QZ13Zau/qhDu
-FHxsgk4oIXJsjj22LiSpoiigH5Ls+aVqtIbg8/vWp+EO6pK1fovEtJVeGAfE
-tLOdxfJJLVjMCAScFG9BRl1ePPLeptivKV0v9ruWsTpn+Q96VtqAR5GQCkYE
-hFrlxM+oIzHeArhhiIxSPCYLlnzxoD5IYXmTrWUYBCGvlY1mrI3j80mZ4VTj
-BErsSlqnjUyFKmaI7YNKyARCloMroz3wqdy/wpg/63Io62nmh5IyY+WO8hPo
-ae22
-=AX+L
------END PGP SIGNATURE-----
+DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogTWFyayBOZWxzb24gW21h
+aWx0bzptbmVsc29uQHJlZGhhdC5jb21dDQo+IFNlbnQ6IFdlZG5lc2RheSwgU2VwdGVtYmVyIDIz
+LCAyMDE1IDE6NDMgUE0NCj4gVG86IEdyZWdvcnkgRmFybnVtOyBTYWdlIFdlaWwNCj4gQ2M6IERl
+bmVhdSwgVG9tOyBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KPiBTdWJqZWN0OiBSZTogcGVy
+ZiBjb3VudGVycyBmcm9tIGEgcGVyZm9ybWFuY2UgZGlzY3JlcGFuY3kNCj4gDQo+IA0KPiANCj4g
+T24gMDkvMjMvMjAxNSAwMToyNSBQTSwgR3JlZ29yeSBGYXJudW0gd3JvdGU6DQo+ID4gT24gV2Vk
+LCBTZXAgMjMsIDIwMTUgYXQgMTE6MTkgQU0sIFNhZ2UgV2VpbCA8c2FnZUBuZXdkcmVhbS5uZXQ+
+IHdyb3RlOg0KPiA+PiBPbiBXZWQsIDIzIFNlcCAyMDE1LCBEZW5lYXUsIFRvbSB3cm90ZToNCj4g
+Pj4+IEhpIGFsbCAtLQ0KPiA+Pj4NCj4gPj4+IExvb2tpbmcgZm9yIGd1aWRhbmNlIHdpdGggcGVy
+ZiBjb3VudGVycy4uLg0KPiA+Pj4gSSBhbSB0cnlpbmcgdG8gc2VlIHdoZXRoZXIgdGhlIHBlcmYg
+Y291bnRlcnMgY2FuIHRlbGwgbWUgYW55dGhpbmcNCj4gPj4+IGFib3V0IHRoZSBmb2xsb3dpbmcg
+ZGlzY3JlcGFuY3kNCj4gPj4+DQo+ID4+PiBJIHBvcHVsYXRlIGEgbnVtYmVyIG9mIDQwayBzaXpl
+IG9iamVjdHMgaW4gZWFjaCBvZiB0d28gcG9vbHMsIHBvb2xBDQo+IGFuZCBwb29sQi4NCj4gPj4+
+IEJvdGggcG9vbHMgY292ZXIgb3NkcyBvbiBhIHNpbmdsZSBub2RlLCA1IG9zZHMgdG90YWwuDQo+
+ID4+Pg0KPiA+Pj4gICAgICogQ29uZmlnIDEgKDFwKToNCj4gPj4+ICAgICAgICAqIHVzZSBzaW5n
+bGUgcmFkb3MgYmVuY2ggY2xpZW50IHdpdGggMzIgdGhyZWFkcyB0byBkbyBzZXEgcmVhZA0KPiBv
+ZiAyMDAwMCBvYmplY3RzIGZyb20gcG9vbEEuDQo+ID4+Pg0KPiA+Pj4gICAgICogQ29uZmlnIDIg
+KDJwKToNCj4gPj4+ICAgICAgICAqIHVzZSB0d28gY29uY3VycmVudCByYWRvcyBiZW5jaCBjbGll
+bnRzIChydW5uaW5nIG9uIHNhbWUNCj4gY2xpZW50IG5vZGUpIHdpdGggMTYgdGhyZWFkcyBlYWNo
+LA0KPiA+Pj4gICAgICAgICAgICAgb25lIHJlYWRpbmcgMTAwMDAgb2JqZWN0cyBmcm9tIHBvb2xB
+LA0KPiA+Pj4gICAgICAgICAgICAgb25lIHJlYWRpbmcgMTAwMDAgb2JqZWN0cyBmcm9tIHBvb2xC
+LA0KPiA+Pj4NCj4gPj4+IFNvIGluIGJvdGggY29uZmlncywgd2UgaGF2ZSAzMiB0aHJlYWRzIHRv
+dGFsIGFuZCB0aGUgbnVtYmVyIG9mIG9iamVjdHMNCj4gcmVhZCBpcyB0aGUgc2FtZS4NCj4gPj4+
+IE5vdGU6IGluIGFsbCBjYXNlcywgd2UgZHJvcCB0aGUgY2FjaGVzIGJlZm9yZSBkb2luZyB0aGUg
+c2VxIHJlYWRzDQo+ID4+Pg0KPiA+Pj4gVGhlIGNvbWJpbmVkIGJhbmR3aWR0aCAoTUIvc2VjKSBm
+b3IgdGhlIDIgY2xpZW50cyBpbiBjb25maWcgMiBpcw0KPiA+Pj4gYWJvdXQgMS8zIG9mIHRoZSBi
+YW5kd2lkdGggZm9yIHRoZSBzaW5nbGUgY2xpZW50IGluIGNvbmZpZyAxLg0KPiA+Pg0KPiA+PiBI
+b3cgd2VyZSB0aGUgb2JqZWN0IHdyaXR0ZW4/ICBJIGFzc3VtZSB0aGUgY2x1c3RlciBpcyBiYWNr
+ZWQgYnkNCj4gPj4gc3Bpbm5pbmcgZGlza3M/DQo+ID4+DQo+ID4+IEkgd29uZGVyIGlmIHRoaXMg
+aXMgYSBkaXNrIGxheW91dCBpc3N1ZS4gIElmIHRoZSAyMCwwMDAgb2JqZWN0cyBhcmUNCj4gPj4g
+d3JpdHRlbiBpbiBvcmRlciwgdGhleSB3aWxsYiBlIHJvdWdobHkgc2VxdWVudGlhbCBvbiBkaXNr
+LCBhbmQgdGhlIDMyDQo+ID4+IHRocmVhZCBjYXNlIHdpbGwgcmVhZCB0aGVtIGluIG9yZGVyLiAg
+SW4gdGhlIDJ4IDEwLDAwMCBjYXNlLCB0aGUgdHdvDQo+ID4+IGNsaWVudHMgYXJlIHJlYWRpbmcg
+dHdvIHNlcXVlbmNlcyBvZiBvYmplY3RzIHdyaXR0ZW4gYXQgZGlmZmVyZW50DQo+ID4+IHRpbWVz
+LCBhbmQgdGhlIGRpc2sgYXJtcyB3aWxsIGJlIHN3aW5naW5nIGFyb3VuZCBtb3JlLg0KPiA+Pg0K
+PiA+PiBNeSBndWVzcyBpcyB0aGF0IGlmIHRoZSByZWFkcyB3ZXJlIHJlYWRpbmcgdGhlIG9iamVj
+dHMgaW4gYSByYW5kb20NCj4gPj4gb3JkZXIgdGhlIHBlcmZvcm1hbmNlIHdvdWxkIGJlIHRoZSBz
+YW1lLi4uIEknbSBub3Qgc3VyZSB0aGF0IHJhZG9zDQo+ID4+IGJlbmNoIGRvZXMgdGhhdCB0aG91
+Z2g/DQo+ID4+DQo+ID4+IHNhZ2UNCj4gPj4NCj4gPj4+DQo+ID4+Pg0KPiA+Pj4gSSBnYXRoZXJl
+ZCBwZXJmIGNvdW50ZXJzIGJlZm9yZSBhbmQgYWZ0ZXIgZWFjaCBydW4gYW5kIGxvb2tlZCBhdCB0
+aGUNCj4gPj4+IGRpZmZlcmVuY2Ugb2YgdGhlIGJlZm9yZSBhbmQgYWZ0ZXIgY291bnRlcnMgZm9y
+IGJvdGggdGhlIDFwIGFuZCAycA0KPiA+Pj4gY2FzZXMuICBIZXJlIGFyZSBzb21lIHRoaW5ncyBJ
+IG5vdGljZWQgdGhhdCBhcmUgZGlmZmVyZW50IGJldHdlZW4NCj4gPj4+IHRoZSB0d28gcnVucy4g
+IENhbiBzb21lb25lIHRha2UgYSBsb29rIGFuZCBsZXQgbWUga25vdyB3aGV0aGVyIGFueQ0KPiA+
+Pj4gb2YgdGhlc2UgZGlmZmVyZW5jZXMgYXJlIHNpZ25pZmljYW50LiAgSW4gcGFydGljdWxhciwg
+Zm9yIHRoZQ0KPiB0aHJvdHRsZS1tc2dyX2Rpc3BhdGNoX3Rocm90dGxlciBvbmVzLCBzaW5jZSBJ
+IGRvbid0IGtub3cgdGhlIGRldGFpbGVkDQo+IGRlZmluaXRpb25zIG9mIHRoZXNlIGZpZWxkcy4N
+Cj4gPj4+IE5vdGU6IHRoZXNlIGFyZSB0aGUgbnVtYmVycyBmb3Igb25lIG9mIHRoZSA1IG9zZHMs
+IHRoZSBvdGhlciBvc2RzIGFyZQ0KPiBzaW1pbGFyLi4uDQo+ID4+Pg0KPiA+Pj4gKiBUaGUgZmll
+bGQgb3NkL2xvYWRhdmcgaXMgYWx3YXlzIGFib3V0IDMgdGltZXMgaGlnaGVyIG9uIHRoZSAycCBj
+DQo+ID4+Pg0KPiA+Pj4gc29tZSBsYXRlbmN5LXJlbGF0ZWQgY291bnRlcnMNCj4gPj4+IC0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KPiA+Pj4gb3NkL29wX2xhdGVuY3kvc3VtIDFwPTYu
+MjQ4MDExMTcyMDUwNjEsIDJwPTU3OS43MjI1MTMwNzg5NDUNCj4gPj4+IG9zZC9vcF9wcm9jZXNz
+X2xhdGVuY3kvc3VtIDFwPTMuNDg1MDY5NDUzOTQ5MTEsIDJwPTQyLjYyNzg0OTQ1NDk5MTUNCj4g
+Pj4+IG9zZC9vcF9yX2xhdGVuY3kvc3VtIDFwPTYuMjQ4MDExMTcxOTkyNCwgMnA9NTc5LjcyMjUx
+MzA3OTAwMw0KPiA+Pj4gb3NkL29wX3JfcHJvY2Vzc19sYXRlbmN5L3N1bSAxcD0zLjQ4NTA2OTQ1
+Mzk5Mjc2LA0KPiA+Pj4gMnA9NDIuNjI3ODQ5NDU1MDA2MQ0KPiA+DQo+ID4gU28sIHllcCwgdGhl
+IGluZGl2aWR1YWwgcmVhZCBvcHMgYXJlIHRha2luZyBtdWNoIGxvbmdlciBpbiB0aGUNCj4gPiB0
+d28tY2xpZW50IGNhc2UuIE5haXZlbHkgdGhhdCdzIHByZXR0eSBvZGQuDQo+ID4NCj4gPj4+DQo+
+ID4+Pg0KPiA+Pj4gYW5kIHNvbWUgdGhyb3R0bGUtbXNncl9kaXNwYXRjaF90aHJvdHRsZXIgcmVs
+YXRlZCBjb3VudGVycw0KPiA+Pj4gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KPiA+Pj4gdGhyb3R0bGUtbXNncl9kaXNwYXRjaF90aHJv
+dHRsZXItY2xpZW50L2dldCAxcD0xMzM3LCAycD0xMzM5LCBkaWZmPTINCj4gPj4+IHRocm90dGxl
+LW1zZ3JfZGlzcGF0Y2hfdGhyb3R0bGVyLWNsaWVudC9nZXRfc3VtIDFwPTIyMjg3NywNCj4gPj4+
+IDJwPTIyMzA4OCwgZGlmZj0yMTEgdGhyb3R0bGUtbXNncl9kaXNwYXRjaF90aHJvdHRsZXItY2xp
+ZW50L3B1dA0KPiA+Pj4gMXA9MTMzNywgMnA9MTMzOSwgZGlmZj0yDQo+ID4+PiB0aHJvdHRsZS1t
+c2dyX2Rpc3BhdGNoX3Rocm90dGxlci1jbGllbnQvcHV0X3N1bSAxcD0yMjI4NzcsDQo+ID4+PiAy
+cD0yMjMwODgsIGRpZmY9MjExDQo+ID4+PiB0aHJvdHRsZS1tc2dyX2Rpc3BhdGNoX3Rocm90dGxl
+ci1oYl9iYWNrX3NlcnZlci9nZXQgMXA9NTgsIDJwPTEzNCwNCj4gPj4+IGRpZmY9NzYgdGhyb3R0
+bGUtbXNncl9kaXNwYXRjaF90aHJvdHRsZXItaGJfYmFja19zZXJ2ZXIvZ2V0X3N1bQ0KPiA+Pj4g
+MXA9MjcyNiwgMnA9NjI5OCwgZGlmZj0zNTcyDQo+ID4+PiB0aHJvdHRsZS1tc2dyX2Rpc3BhdGNo
+X3Rocm90dGxlci1oYl9iYWNrX3NlcnZlci9wdXQgMXA9NTgsIDJwPTEzNCwNCj4gPj4+IGRpZmY9
+NzYgdGhyb3R0bGUtbXNncl9kaXNwYXRjaF90aHJvdHRsZXItaGJfYmFja19zZXJ2ZXIvcHV0X3N1
+bQ0KPiA+Pj4gMXA9MjcyNiwgMnA9NjI5OCwgZGlmZj0zNTcyDQo+ID4+PiB0aHJvdHRsZS1tc2dy
+X2Rpc3BhdGNoX3Rocm90dGxlci1oYl9mcm9udF9zZXJ2ZXIvZ2V0IDFwPTU4LCAycD0xMzQsDQo+
+ID4+PiBkaWZmPTc2IHRocm90dGxlLW1zZ3JfZGlzcGF0Y2hfdGhyb3R0bGVyLWhiX2Zyb250X3Nl
+cnZlci9nZXRfc3VtDQo+ID4+PiAxcD0yNzI2LCAycD02Mjk4LCBkaWZmPTM1NzINCj4gPj4+IHRo
+cm90dGxlLW1zZ3JfZGlzcGF0Y2hfdGhyb3R0bGVyLWhiX2Zyb250X3NlcnZlci9wdXQgMXA9NTgs
+IDJwPTEzNCwNCj4gPj4+IGRpZmY9NzYgdGhyb3R0bGUtbXNncl9kaXNwYXRjaF90aHJvdHRsZXIt
+aGJfZnJvbnRfc2VydmVyL3B1dF9zdW0NCj4gPj4+IDFwPTI3MjYsIDJwPTYyOTgsIGRpZmY9MzU3
+Mg0KPiA+Pj4gdGhyb3R0bGUtbXNncl9kaXNwYXRjaF90aHJvdHRsZXItaGJjbGllbnQvZ2V0IDFw
+PTE2OCwgMnA9MjUyLA0KPiA+Pj4gZGlmZj04NCB0aHJvdHRsZS1tc2dyX2Rpc3BhdGNoX3Rocm90
+dGxlci1oYmNsaWVudC9nZXRfc3VtIDFwPTc4OTYsDQo+ID4+PiAycD0xMTg0NCwgZGlmZj0zOTQ4
+IHRocm90dGxlLW1zZ3JfZGlzcGF0Y2hfdGhyb3R0bGVyLWhiY2xpZW50L3B1dA0KPiA+Pj4gMXA9
+MTY4LCAycD0yNTIsIGRpZmY9ODQNCj4gPj4+IHRocm90dGxlLW1zZ3JfZGlzcGF0Y2hfdGhyb3R0
+bGVyLWhiY2xpZW50L3B1dF9zdW0gMXA9Nzg5NiwgMnA9MTE4NDQsDQo+ID4+PiBkaWZmPTM5NDgN
+Cj4gPg0KPiA+IElJUkMgdGhlc2UgYXJlIGp1c3Qgc2F5aW5nIGhvdyBtYW55IHRpbWVzIHRoZSBk
+aXNwYXRjaCB0aHJvdHRsZXIgd2FzDQo+ID4gYWNjZXNzZWQgb24gZWFjaCBtZXNzZW5nZXIg4oCU
+IG5vdGhpbmcgaGVyZSBpcyBzdXJwcmlzaW5nLCB5b3UncmUgZG9pbmcNCj4gPiBiYXNpY2FsbHkg
+dGhlIHNhbWUgbnVtYmVyIG9mIG1lc3NhZ2VzIG9uIHRoZSBjbGllbnQgbWVzc2VuZ2VycywgYW5k
+DQo+ID4gdGhlIGhlYXJ0YmVhdCBtZXNzZW5nZXJzIGFyZSBwYXNzaW5nIG1vcmUgYmVjYXVzZSB0
+aGUgdGVzdCB0YWtlcw0KPiA+IGxvbmdlci4NCj4gPg0KPiA+IEknZCBnbyB3aXRoIFNhZ2UncyBp
+ZGVhIGZvciB3aGF0IGlzIGFjdHVhbGx5IGNhdXNpbmcgdGhpcywgb3IgdHJ5IGFuZA0KPiA+IGxv
+b2sgYXQgaG93IHRoZSBsYXRlbmN5IGNoYW5nZXMgb3ZlciB0aW1lIOKAlCBpZiB5b3UncmUgZ29p
+bmcgdG8gdHdvDQo+ID4gcG9vbHMgaW5zdGVhZCBvZiBvbmUsIHByZXN1bWFibHkgeW91J3JlIGRv
+dWJsaW5nIHRoZSBhbW91bnQgb2YNCj4gPiBtZXRhZGF0YSB0aGF0IG5lZWRzIHRvIGJlIHJlYWQg
+aW50byBtZW1vcnkgZHVyaW5nIHRoZSBydW4/IFBlcmhhcHMNCj4gPiB0aGF0J3MganVzdCBhIHNp
+Z25pZmljYW50IGVub3VnaCBlZmZlY3Qgd2l0aCB5b3VyIHNldHRpbmdzIHRoYXQgeW91J3JlDQo+
+ID4gc2VlaW5nIGEgYnVuY2ggb2YgZXh0cmEgZGlyZWN0b3J5IGxvb2t1cHMgaW1wYWN0IHlvdXIg
+dGhyb3VnaHB1dCBtb3JlDQo+ID4gdGhhbiBleHBlY3RlZC4uLiA6Lw0KPiANCj4gRldJVywgdHlw
+aWNhbGx5IGlmIEkndmUgc2VlbiBhbiBlZmZlY3QsIGl0J3MgYmVlbiB0aGUgb3Bwb3NpdGUgd2hl
+cmUNCj4gbXVsdGlwbGUgcmFkb3MgYmVuY2ggcHJvY2Vzc2VzIGFyZSBzbGlnaHRseSBmYXN0ZXIg
+KG1heWJlIHNpbXBseSByZWxhdGVkDQo+IHRvIHRoZSBjbGllbnQgc2lkZSBpbXBsZW1lbnRhdGlv
+bikuICBSdW5uaW5nIGNvbGxlY3RsIG9yIGlvc3RhdCB3b3VsZCBzaG93DQo+IHZhcmlvdXMgaW50
+ZXJ2YWwgc3RhdGlzdGljcyB0aGF0IHdvdWxkIGhlbHAgZGlhZ25vc2UgaWYgdGhpcyBpcyByZWxh
+dGVkIHRvDQo+IHNsb3dlciBhY2Nlc3NlcyBvbiB0aGUgZGlza3MuICBibGt0cmFjZSBvZiBjb3Vy
+c2Ugd291bGQgZ2l2ZSBhIG1vcmUNCj4gbnVhbmNlZCB2aWV3LiAgTWlnaHQgYmUgd29ydGggZG9p
+bmcgaWYgdGhlcmUgYXJlIGV4dHJhIG1ldGFkYXRhIGFjY2Vzc2VzLg0KPiANCj4gQSBjb3VwbGUg
+b2Ygb3RoZXIgcmFuZG9tIHRob3VnaHRzOg0KPiANCj4gLSBBcmUgYW55IG9mIHRoZSByZWFkcyBj
+b21pbmcgZnJvbSBidWZmZXIgY2FjaGU/DQo+IC0gUmVhZGFoZWFkIG5vdCB3b3JraW5nIHdlbGw/
+DQo+IC0gV2VyZSB0aGUgcG9vbHMgcmVjcmVhdGVkIGJldHdlZW4gdGVzdHM/DQo+IC0gSWYgbm90
+LCB3aGF0IHdlcmUgdGhlIHRvdGFsIG51bWJlciBvZiBvYmplY3RzIGFuZCBQR3MgZm9yIGVhY2gg
+cG9vbCAoSXMNCj4gaXQgcG9zc2libGUgdGhhdCB0aGUgcGVyLXBnIGRpcmVjdG9yeSBoaXJlYXJj
+aHkgd2FzIGRlZXBlciBmb3IgdGhlIDJuZCBzZXQNCj4gb2YgdGVzdHM/KQ0KPiAtIElmIHRoZSBw
+b29scyBzdGlsbCBleGlzdCwgd2hhdCBkb2VzIHRoZSBmb2xsb3dpbmcgc2NyaXB0IHNheSBhYm91
+dCB0aGVtPw0KPiANCj4gaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2J0L2Jsb2IvbWFzdGVyL3Rv
+b2xzL3JlYWRwZ2R1bXAucHkNCj4gDQo+IA0KDQpUaGFua3MgU2FnZSwgR3JlZyBhbmQgTWFyayBm
+b3IgdGhlIHN1Z2dlc3Rpb25zIC0tDQoNClRoZSBvYmplY3RzIGluIHRoZSBwb29scyB3ZXJlIGNy
+ZWF0ZWQgYnkgcnVubmluZyB0d28gc2ltdWx0YW5lb3VzDQpjbGllbnQgcmFkb3MgYmVuY2ggd3Jp
+dGUgcHJvY2Vzc2VzLCBvbmUgdG8gZWFjaCBwb29sLiAgSSBzdGFydGVkIHdpdGgNCmVtcHR5IG9z
+ZCBkaXNrcy4gIFRoZSBwb29scyBib3RoIGNvdmVyIHRoZSBzYW1lIG9zZHMgYW5kIHNpbmNlDQp0
+aGVyZSB3YXMgYSByZXBsaWNhdGlvbiBmYWN0b3Igb2YgMiwgc28gSSB3b3VsZCBoYXZlIGV4cGVj
+dGVkIHRoYXQgbm90DQphbGwgdGhlIHByaW1hcnkgb2JqZWN0cyBpbiBlYWNoIHBvb2wgd291bGQg
+YmUgc2VxdWVudGlhbCBvbiB0aGUgZGlzay4NCg0KQnV0IHdoZW4gSSBjaGFuZ2VkIHRoZSByZWFk
+IHRlc3QgdG8gZG8gcmFkb3MgYmVuY2ggcmFuZCByYXRoZXIgdGhhbg0Kc2VxLCBib3RoIHRoZSAx
+cCBhbmQgMnAgY29uZmlncyB3ZW50IGRvd24gaW4gYmFuZHdpZHRoLCBzbyBjbGVhcmx5IHRoZQ0K
+ZGlzayBsYXlvdXQgaGFkIHNvbWV0aGluZyB0byBkbyB3aXRoIGl0LiAgV2l0aCByYW5kb20gcmVh
+ZHMsIDFwIGlzIG5vdw0KIm9ubHkiIDQwJSBmYXN0ZXIgdGhhbiAycC4NCg0KTWFyayBoYWQgbWVu
+dGlvbmVkIHRoYXQgaGUncyBvZnRlbiBzZWVuIHRoZSBvcHBvc2l0ZSBlZmZlY3QsIGllLCBtb3Jl
+DQpjbGllbnQgcHJvY2Vzc2VzIGluY3JlYXNpbmcgdGhlIGJhbmR3aWR0aCwgYW5kIHdlIGhhdmUg
+c2VlbiB0aGUgc2FtZSwNCndoaWNoIGlzIHdoeSBJIHN0YXJ0ZWQgdXNpbmcgbXVsdGlwbGUgY2xp
+ZW50cy4gIEluIGZhY3QgaWYgSSBkbyB0aGUNCnNhbWUgY29uZmlndXJhdGlvbiB0ZXN0cyBhcyBh
+Ym92ZSBidXQgd2l0aCA0TSBvYmplY3RzIHJhdGhlciB0aGFuIDQwSywNCkkgc2VlIHRoZSAycCBi
+ZWF0cyAxcCBieSAzMCUgb3Igc28uIChhbmQgSSd2ZSBzZWVuIDRwIGhlbHAgZXZlbiBtb3JlKS4N
+Cg0KU28gdGhlcmUncyBzb21ldGhpbmcgYWJvdXQgc21hbGxlciBvYmplY3Qgc2l6ZXMgdGhhdCBn
+ZXRzIGh1cnQgYnkNCm11bHRpcGxlIGNsaWVudHMgdnMuIDEgY2xpZW50Lg0KDQpJIHdpbGwgdHJ5
+IHRvIGxvb2sgaW50byB0aGlzIHdpdGggc29tZSBvZiB0aGUgbG93IGxldmVsIHN0YXQgdG9vbHMN
+CnRoYXQgTWFyayBtZW50aW9uZWQuDQoNCi0tIFRvbQ0KDQo+ID4gLUdyZWcNCj4gPiAtLQ0KPiA+
+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmli
+ZSBjZXBoLWRldmVsIg0KPiA+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9A
+dmdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vDQo+ID4gaW5mbyBhdCAgaHR0cDovL3ZnZXIu
+a2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+ID4NCg==
