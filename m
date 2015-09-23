@@ -1,54 +1,46 @@
-From: Shinobu Kinjo <skinjo@redhat.com>
-Subject: Re: MAX_RBD_IMAGES
-Date: Tue, 22 Sep 2015 18:53:36 -0400 (EDT)
-Message-ID: <1358452839.20213671.1442962416283.JavaMail.zimbra@redhat.com>
-References: <866247178.20201562.1442958933148.JavaMail.zimbra@redhat.com> <5601D955.7020701@redhat.com>
+From: "zhao.mingyue@h3c.com" <zhao.mingyue@h3c.com>
+Subject: Ceph problem
+Date: Wed, 23 Sep 2015 01:43:13 +0000
+Message-ID: <1CB94550540AE44E9CAAE8CD5AF40BF846CF1A41@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx6-phx2.redhat.com ([209.132.183.39]:53457 "EHLO
-	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934970AbbIVWxg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Sep 2015 18:53:36 -0400
-In-Reply-To: <5601D955.7020701@redhat.com>
+Received: from smtp.h3c.com ([60.191.123.56]:15171 "EHLO h3cmg01-ex.h3c.com"
+	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752217AbbIWBmc (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 22 Sep 2015 21:42:32 -0400
+Content-Language: zh-CN
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <jdurgin@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-> I don't think there's a reason for the exact limit. rbd-fuse was
-> created as a prototype, and hasn't had much work on it since.
-
-That's why I've ended up with asking. I've spent 2 days to find out any reason -;
-The kernel says nothing to me, of course.
-Thank you.
-
- Shinobu
-
------ Original Message -----
-From: "Josh Durgin" <jdurgin@redhat.com>
-To: "Shinobu Kinjo" <skinjo@redhat.com>, "ceph-devel" <ceph-devel@vger.kernel.org>
-Sent: Wednesday, September 23, 2015 7:42:29 AM
-Subject: Re: [CEPH-DEVEL] MAX_RBD_IMAGES
-
-On 09/22/2015 02:55 PM, Shinobu Kinjo wrote:
-> Hello,
->
-> Does any of you know why *MAX_RBD_IMAGES* was changed from 16 to 128?
-> I hope that Dan remember -;
->
-> http://resources.ustack.com/ceph/ceph/commit/2a6dcabf7f1b7550a0fa4fd223970ffc24ad7870
-
-I don't think there's a reason for the exact limit. rbd-fuse was
-created as a prototype, and hasn't had much work on it since. A
-hardcoded limit on open images is not necessary, for example. Some
-more ideas for improvements if anyone's interested:
-
-http://pad.ceph.com/p/rbd-fuse-2015
-
-Josh
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+LS0t5Y6f5aeL6YKu5Lu2LS0tDQrlj5Hku7bkuro6ICLpmYjmnbAiPDI3NjY0ODE3OEBxcS5jb20+
+DQrlj5HpgIHml7bpl7Q6IDIwMTXlubQwOeaciDIx5pelIDE3OjUyOjE5DQrmlLbku7bkuro6ICJj
+ZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZyI8Y2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc+Ow0K
+5Li76aKYOiBDZXBoIHByb2JsZW0NCg0KRGVhciBjZXBoLWRldmVsDQogICAgICBJJ20gYSBzb2Z0
+d2FyZSBlbmdpbmVlciBmb3IgSDNDLFdlIGZvdW5kIGEgY2VwaCBwcm9ibGVtIGluIHRoZSB0ZXN0
+LHRoZSBuZWVkIHlvdXIgaGVscC4NCiAgICAgSWYgb25lIG9mIHRoZSBob3N0cyBpbiB0aGUgY2x1
+c3RlciBpcyByZXN0YXJ0ZWQsd2UgcnVuICdyYmQgY3JlYXRl4oCm4oCmJyBjb21tYW5kIHdpbGwg
+YmxvY2sgMTIwIHNlY29uZHMsYnV0IHRoZSBub3JtYWwgaXMgYmxvY2tlZCBmb3IgMjAgc2Vjb25k
+cy4NCiAgICBDbHVzdGVyIGVudmlyb25tZW50IGNvbXBvc2VkIG9mIHRocmVlIGhvc3RzLGVhY2gg
+aG9zdCBydW5zIGEgbW9uaXRvciBwcm9jZXNzIGFuZCB0ZW4gT1NEIHByb2Nlc3Nlcw0KDQpMb29r
+aW5nIGZvcndhcmQgdG8geW91ciByZXBseSxUaGFuayB5b3UhDQotLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+DQrmnKzpgq7ku7blj4rlhbbpmYTku7blkKvmnInmna3lt57ljY7kuInpgJrkv6HmioDmnK/mnInp
+mZDlhazlj7jnmoTkv53lr4bkv6Hmga/vvIzku4XpmZDkuo7lj5HpgIHnu5nkuIrpnaLlnLDlnYDk
+uK3liJflh7oNCueahOS4quS6uuaIlue+pOe7hOOAguemgeatouS7u+S9leWFtuS7luS6uuS7peS7
+u+S9leW9ouW8j+S9v+eUqO+8iOWMheaLrOS9huS4jemZkOS6juWFqOmDqOaIlumDqOWIhuWcsOaz
+hOmcsuOAgeWkjeWItuOAgQ0K5oiW5pWj5Y+R77yJ5pys6YKu5Lu25Lit55qE5L+h5oGv44CC5aaC
+5p6c5oKo6ZSZ5pS25LqG5pys6YKu5Lu277yM6K+35oKo56uL5Y2z55S16K+d5oiW6YKu5Lu26YCa
+55+l5Y+R5Lu25Lq65bm25Yig6Zmk5pysDQrpgq7ku7bvvIENClRoaXMgZS1tYWlsIGFuZCBpdHMg
+YXR0YWNobWVudHMgY29udGFpbiBjb25maWRlbnRpYWwgaW5mb3JtYXRpb24gZnJvbSBIM0MsIHdo
+aWNoIGlzDQppbnRlbmRlZCBvbmx5IGZvciB0aGUgcGVyc29uIG9yIGVudGl0eSB3aG9zZSBhZGRy
+ZXNzIGlzIGxpc3RlZCBhYm92ZS4gQW55IHVzZSBvZiB0aGUNCmluZm9ybWF0aW9uIGNvbnRhaW5l
+ZCBoZXJlaW4gaW4gYW55IHdheSAoaW5jbHVkaW5nLCBidXQgbm90IGxpbWl0ZWQgdG8sIHRvdGFs
+IG9yIHBhcnRpYWwNCmRpc2Nsb3N1cmUsIHJlcHJvZHVjdGlvbiwgb3IgZGlzc2VtaW5hdGlvbikg
+YnkgcGVyc29ucyBvdGhlciB0aGFuIHRoZSBpbnRlbmRlZA0KcmVjaXBpZW50KHMpIGlzIHByb2hp
+Yml0ZWQuIElmIHlvdSByZWNlaXZlIHRoaXMgZS1tYWlsIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5
+IHRoZSBzZW5kZXINCmJ5IHBob25lIG9yIGVtYWlsIGltbWVkaWF0ZWx5IGFuZCBkZWxldGUgaXQh
+DQo=
