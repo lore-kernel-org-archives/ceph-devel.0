@@ -1,51 +1,70 @@
-From: wangsongbo <songbo1227-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: Important security noticed regarding release
- signing key
-Date: Wed, 23 Sep 2015 11:01:30 +0800
-Message-ID: <5602160A.2080805@gmail.com>
-References: <alpine.DEB.2.00.1509170925140.31198@cobra.newdream.net>
-	<CAHRQ3VU1RFQL6AKh_CtOOeqg87wX7W5oa3n_3d8Ki9WFW=w5tw@mail.gmail.com>
-	<CALqRxCw6tq0PvqMJAY1S0At1FB3cm_KPUY_bbX72Z9R_pyJ4+Q@mail.gmail.com>
-	<56020F6A.9050406@gmail.com>
-	<CALqRxCw=T6JFC2i-ECQJoRd_n2atMLsDQGT13aq6amDqmtC2Kw@mail.gmail.com>
+From: Mykola Golub <mgolub@mirantis.com>
+Subject: Re: RBD mirroring CLI proposal ...
+Date: Wed, 23 Sep 2015 09:33:14 +0300
+Message-ID: <20150923063313.GA8713@gmail.com>
+References: <604040155.31290870.1442846770290.JavaMail.zimbra@redhat.com>
+ <189900515.31291453.1442846891314.JavaMail.zimbra@redhat.com>
+ <20150922092847.GA13767@gmail.com>
+ <151161168.32108716.1442943169367.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CALqRxCw=T6JFC2i-ECQJoRd_n2atMLsDQGT13aq6amDqmtC2Kw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ken Dreyer <kdreyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-wi0-f181.google.com ([209.85.212.181]:33110 "EHLO
+	mail-wi0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751823AbbIWGdR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Sep 2015 02:33:17 -0400
+Received: by wiclk2 with SMTP id lk2so223887884wic.0
+        for <ceph-devel@vger.kernel.org>; Tue, 22 Sep 2015 23:33:16 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <151161168.32108716.1442943169367.JavaMail.zimbra@redhat.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Jason Dillaman <dillaman@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-SGkgS2VuLAogICAgICAgICBUaGFuayB5b3UsIEkgd2lsbCB1cGRhdGUgbXkgcmVwbyBhbmQgY29u
-dGludWUgbXkgdGVzdC4KCi0gU29uZ2JvCgpPbiAxNS85LzIzIOS4iuWNiDEwOjUwLCBLZW4gRHJl
-eWVyIHdyb3RlOgo+IEhpIFNvbmdibywgSXQncyBiZWVuIHJlbW92ZWQgZnJvbSBBbnNpYmxlIG5v
-dzoKPiBodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBoLWNtLWFuc2libGUvcHVsbC8xMzcKPgo+
-IC0gS2VuCj4KPiBPbiBUdWUsIFNlcCAyMiwgMjAxNSBhdCA4OjMzIFBNLCB3YW5nc29uZ2JvIDxz
-b25nYm8xMjI3QGdtYWlsLmNvbT4gd3JvdGU6Cj4+IEhpIEtlbiwKPj4gICAgICBUaGFua3MgZm9y
-IHlvdXIgcmVwbHkuIEJ1dCBpbiB0aGUgY2VwaC1jbS1hbnNpYmxlIHByb2plY3Qgc2NoZWR1bGVk
-IGJ5Cj4+IHRldXRob2xvZ3ksICJjZXBoLmNvbS9wYWNrYWdlcy9jZXBoLWV4dHJhcyIgaXMgaW4g
-dXNlZCBub3csIHN1Y2ggYXMKPj4gcWVtdS1rdm0tMC4xMi4xLjItMi40MTUuZWw2LjNjZXBoLCBx
-ZW11LWt2bS10b29scy0wLjEyLjEuMi0yLjQxNS5lbDYuM2NlcGgKPj4gZXRjLgo+PiAgICAgIEFu
-eSBuZXcgcmVsZWFzZXMgd2lsbCBiZSBwcm92aWRlZCA/Cj4+Cj4+Cj4+IE9uIDE1LzkvMjIg5LiL
-5Y2IMTA6MjQsIEtlbiBEcmV5ZXIgd3JvdGU6Cj4+PiBPbiBUdWUsIFNlcCAyMiwgMjAxNSBhdCAy
-OjM4IEFNLCBTb25nYm8gV2FuZyA8c29uZ2JvMTIyN0BnbWFpbC5jb20+IHdyb3RlOgo+Pj4+IEhp
-LCBhbGwsCj4+Pj4gICAgICAgICAgIFNpbmNlIHRoZSBsYXN0IHdlZWvigJhzIGF0dGFjaywg4oCc
-Y2VwaC5jb20vcGFja2FnZXMvY2VwaC1leHRyYXPigJ0KPj4+PiBjYW4gYmUKPj4+PiBvcGVuZWQg
-bmV2ZXIsIGJ1dCB3aGVyZSBjYW4gSSBnZXQgdGhlIHJlbGVhc2VzIG9mIGNlcGgtZXh0cmEgbm93
-Pwo+Pj4+Cj4+Pj4gVGhhbmtzIGFuZCBSZWdhcmRzLAo+Pj4+IFdhbmdTb25nYm8KPj4+Pgo+Pj4g
-VGhlIHBhY2thZ2VzIGluICJjZXBoLWV4dHJhcyIgd2VyZSBvbGQgYW5kIHN1YmplY3QgdG8gQ1ZF
-cyAodGhlIGJpZwo+Pj4gb25lIGJlaW5nIFZFTk9NLCBDVkUtMjAxNS0zNDU2KS4gU28gSSBkb24n
-dCBpbnRlbmQgdG8gaG9zdCBjZXBoLWV4dHJhcwo+Pj4gaW4gdGhlIG5ldyBsb2NhdGlvbi4KPj4+
-Cj4+PiAtIEtlbgo+PgoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpo
-dHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
+On Tue, Sep 22, 2015 at 01:32:49PM -0400, Jason Dillaman wrote:
+
+> > > * rbd mirror pool enable <pool-name>
+> > >         This will, by default, ensure that all images created in this
+> > >         pool have exclusive lock, journaling, and mirroring feature bits
+> > >         enabled.
+> > > 
+> > > * rbd mirror pool disable <pool-name>
+> > >         This will clear the default image features for new images in this
+> > >         pool.
+> > 
+> > Will 'rbd mirror pool enable|disable' change behaviour only for newly
+> > created images in the pool or will enable|disable mirroring for
+> > existent images too?
+>
+> Since the goal is to set default pool behavior, it would only apply
+> to newly created images.  You can enable/disable on specific images
+> using the 'rbd mirror image enable/disable' commands.
+
+In this case the commands look a little confusing to me, as from their
+names I would rather think they enable/disable mirror for existent
+images too. Also, I don't see a command to check what current
+behaviour is. And, I suppose it would be useful if we could configure
+other default features for a pool (exclusive-lock, object-map, ...)
+Also, I am not sure we should specify <pool-name> this way, as it is
+not consistent with other rbd commands. By default rbd operates on
+'rbd' pool, which can be changed by --pool option. So what do you
+think if we have something similar to 'rbd feature' commands?
+
+  rbd [--pool <pool>] default-feature enable <feature>
+  rbd [--pool <pool>] default-feature disable <feature>
+  rbd [--pool <pool>] default-feature show [<feature>]
+
+(If <feature> is not specified in the last command, all features are
+shown).
+
+Similarly, it might be useful to have 'rbd feature show' command:
+
+  rbd feature show <image-spec> [<feature>]
+
+BTW, where do you think these default feature flags will be stored?
+Storing in pg_pool_t::flags I suppose is the easiest but it looks like
+a layering violation.
+
+-- 
+Mykola Golub
