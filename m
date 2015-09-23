@@ -1,91 +1,187 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: RBD mirroring CLI proposal ...
-Date: Wed, 23 Sep 2015 20:58:13 +0300
-Message-ID: <CAOi1vP9=3Uf1Z69AFpsENpimebf+3=RTP2JsOouhAnVPpQMzgQ@mail.gmail.com>
-References: <604040155.31290870.1442846770290.JavaMail.zimbra@redhat.com>
-	<189900515.31291453.1442846891314.JavaMail.zimbra@redhat.com>
-	<20150922092847.GA13767@gmail.com>
-	<151161168.32108716.1442943169367.JavaMail.zimbra@redhat.com>
-	<20150923063313.GA8713@gmail.com>
-	<CAOi1vP_KNFG7KNYsEmh+tX3xq0EY4op0fXxdCcNW+xSDFuxPig@mail.gmail.com>
-	<1213966550.33031523.1443013689108.JavaMail.zimbra@redhat.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: Adding Data-At-Rest compression support to Ceph
+Date: Wed, 23 Sep 2015 11:03:41 -0700
+Message-ID: <CAJ4mKGZLc1AzAbhEKpjSdUd21dXWgVxiLjjETHuP+EwVCA8EoA@mail.gmail.com>
+References: <56018A05.6090100@mirantis.com>
+	<alpine.DEB.2.00.1509221201570.11876@cobra.newdream.net>
+	<56029F66.3070503@mirantis.com>
+	<alpine.DEB.2.00.1509230613410.11876@cobra.newdream.net>
+	<CAJ4mKGanEtC3yX5Y2SA+698FEtNupOVcpFnoDLoJ7Hwo1ruSGw@mail.gmail.com>
+	<5602C48C.4010009@mirantis.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f178.google.com ([209.85.212.178]:35414 "EHLO
-	mail-wi0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752834AbbIWR6P convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Sep 2015 13:58:15 -0400
-Received: by wicge5 with SMTP id ge5so218939149wic.0
-        for <ceph-devel@vger.kernel.org>; Wed, 23 Sep 2015 10:58:13 -0700 (PDT)
-In-Reply-To: <1213966550.33031523.1443013689108.JavaMail.zimbra@redhat.com>
+Received: from mail-wi0-f169.google.com ([209.85.212.169]:33820 "EHLO
+	mail-wi0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751366AbbIWSDn convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Sep 2015 14:03:43 -0400
+Received: by wicfx3 with SMTP id fx3so250552228wic.1
+        for <ceph-devel@vger.kernel.org>; Wed, 23 Sep 2015 11:03:41 -0700 (PDT)
+In-Reply-To: <5602C48C.4010009@mirantis.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jason Dillaman <dillaman@redhat.com>
-Cc: Mykola Golub <mgolub@mirantis.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Igor Fedotov <ifedotov@mirantis.com>
+Cc: Sage Weil <sage@newdream.net>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, Sep 23, 2015 at 4:08 PM, Jason Dillaman <dillaman@redhat.com> wrote:
->> > In this case the commands look a little confusing to me, as from their
->> > names I would rather think they enable/disable mirror for existent
->> > images too. Also, I don't see a command to check what current
->> > behaviour is. And, I suppose it would be useful if we could configure
->> > other default features for a pool (exclusive-lock, object-map, ...)
->> > Also, I am not sure we should specify <pool-name> this way, as it is
->> > not consistent with other rbd commands. By default rbd operates on
->> > 'rbd' pool, which can be changed by --pool option. So what do you
->> > think if we have something similar to 'rbd feature' commands?
->> >
->> >   rbd [--pool <pool>] default-feature enable <feature>
->> >   rbd [--pool <pool>] default-feature disable <feature>
->> >   rbd [--pool <pool>] default-feature show [<feature>]
->> >
->> > (If <feature> is not specified in the last command, all features are
->> > shown).
->>
->> I haven't read the discussion in full, so feel free to ignore, but I'd
->> much rather have rbd create create images with the same set of features
->> enabled no matter which pool it's pointed to.
->>
->> I'm not clear on what exactly a pool policy is.  If it's just a set of
->> feature bits to enable at create time, I don't think it's worth
->> introducing at all.  If it's a set feature bits + a set of mirroring
->> related options, I think it should just be a set of those options.
->> Then, rbd create --enable-mirroring could be a way to create an image
->> with mirroring enabled.
->>
->> My point is a plain old "rbd create foo" shouldn't depend an any new
->> pool-level metadata.  It's not that hard to remember which features you
->> want for which pools and rbd create shortcuts like --enable-object-map
->> and --enable-mirroring would hide feature bit dependencies and save
->> typing.  --enable-mirroring would also serve as a ticket to go look at
->> new metadata and pull out any mirroring related defaults.
->>
+On Wed, Sep 23, 2015 at 8:26 AM, Igor Fedotov <ifedotov@mirantis.com> w=
+rote:
 >
-> While I agree that I don't necessarily want to go down the road of specifying per-pool default features, I think there is a definite use-case need to be able to enable mirroring on a per-pool basis by default.  Without such an ability, taking OpenStack for example, it would require changes to Glance, Cinder, and Nova in order to support DR configurations -- or you could get it automatically with a little pre-configuration.
+>
+> On 23.09.2015 17:05, Gregory Farnum wrote:
+>>
+>> On Wed, Sep 23, 2015 at 6:15 AM, Sage Weil <sage@newdream.net> wrote=
+:
+>>>
+>>> On Wed, 23 Sep 2015, Igor Fedotov wrote:
+>>>>
+>>>> Hi Sage,
+>>>> thanks a lot for your feedback.
+>>>>
+>>>> Regarding issues with offset mapping and stripe size exposure.
+>>>> What's about the idea to apply compression in two-tier (cache+back=
+ing
+>>>> storage)
+>>>> model only ?
+>>>
+>>> I'm not sure we win anything by making it a two-tier only thing... =
+simply
+>>> making it a feature of the EC pool means we can also address EC poo=
+l
+>>> users
+>>> like radosgw.
+>>>
+>>>> I doubt single-tier one is widely used for EC pools since there is=
+ no
+>>>> random
+>>>> write support in such mode. Thus this might be an acceptable limit=
+ation.
+>>>> At the same time it seems that appends caused by cached object flu=
+sh
+>>>> have
+>>>> fixed block size (8Mb by default). And object is totally rewritten=
+ on
+>>>> the next
+>>>> flush if any. This makes offset mapping less tricky.
+>>>> Decompression should be applied in any model though as cache tier
+>>>> shutdown and
+>>>> subsequent compressed data access is possibly  a valid use case.
+>>>
+>>> Yeah, we need to handle random reads either way, so I think the off=
+set
+>>> mapping is going to be needed anyway.
+>>
+>> The idea of making the primary responsible for object compression
+>> really concerns me. It means for instance that a single random acces=
+s
+>> will likely require access to multiple objects, and breaks many of t=
+he
+>> optimizations we have right now or in the pipeline (for instance:
+>> direct client access).
+>
+> Could you please elaborate why multiple objects access is required on=
+ single
+> random access?
 
-So a pool policy is just a set of feature bits?
+It sounds to me like you were planning to take an incoming object
+write, compress it, and then chunk it. If you do that, the symbols
+("abcdefgh =3D a", "ijklmnop =3D b", etc) for the compression are likel=
+y
+to reside in the first object and need to be fetched for each read in
+other objects.
 
-I think Cinder at least creates images with rbd_default_features from
-ceph.conf and adds in layering if it's not set, meaning there is no
-interface for passing through feature bits (or anything else really,
-things like striping options, etc).  What pool-level default feature
-bits infrastructure would do is replace a big (cluster-level) hammer
-with a smaller (pool-level) hammer.  You'd have to add librbd APIs for
-it and someone eventually will try to follow suit and add defaults for
-other settings.  You said you weren't attempting to create a mechanism
-to specify arbitrary default features for a given pool, but I think it
-will come up in the future if we introduce this - it's only logical.
+> In my opinion we need to access absolutely the same object set as bef=
+ore: in
+> EC pool each appended block is spitted into multiple shards that go t=
+o
+> respective OSDs. In general case one has to retrieve a set of adjacen=
+t
+> shards from several OSDs on single read request.
 
-What we might want to do instead is use this mirroring milestone to add
-support for a proper key-value interface for passing in features and
-other settings for individual rbd images to OpenStack.  I assume it's
-all python dicts with OpenStack, so it shouldn't be hard?  I know that
-getting patches into OpenStack can be frustrating at times and I might
-be underestimating the importance of the use case you have in mind, but
-patching our OpenStack drivers rather than adding what essentially is
-a workaround to librbd makes a lot more sense to me.
+Usually we just need to get the object info from the primary and then
+read whichever object has the data for the requested region. If the
+region spans a stripe boundary we might need to get two, but often we
+don't...
 
-Thanks,
+> In case of compression the
+> only difference is in data range that compressed shard set occupy. I.=
+e. we
+> simply need to translate requested data range to the actually stored =
+one and
+> retrieve that data from OSDs. What's missed?
+>>
+>> And apparently only the EC pool will support
+>> compression, which is frustrating for all the replicated pool users
+>> out there...
+>
+> In my opinion  replicated pool users should consider EC pool usage fi=
+rst if
+> they care about space saving. They automatically gain 50% space savin=
+g this
+> way. Compression brings even more saving but that's rather the second=
+ step
+> on this way.
 
-                Ilya
+EC pools have important limitations that replicated pools don't, like
+not working for object classes or allowing random overwrites. You can
+stick a replicated cache pool in front but that comes with another
+whole can of worms. Anybody with a large enough proportion of active
+data won't find that solution suitable but might still want to reduce
+space required where they can, like with local compression.
+
+>> Is there some reason we don't just want to apply encryption across a=
+n
+>> OSD store? Perhaps doing it on the filesystem level is the wrong way
+>> (for reasons named above) but there are other mechanisms like inline
+>> block device compression that I think are supposed to work pretty
+>> well.
+>
+> If I understand the idea of inline block device compression correctly=
+ it has
+> some of drawbacks similar to FS compression approach. Ones to mention=
+:
+> * Less flexibility - per device compression only, no way to have per-=
+pool
+> compression. No control on the compression process.
+
+What would the use case be here? I can imagine not wanting to slow
+down your cache pools with it or something (although realistically I
+don't think that's a concern unless the sheer CPU usage is a problem
+with frequent writes), but those would be on separate OSDs/volumes
+anyway
+Plus block device compression is also able to include all the *other*
+stuff that doesn't fit inside the object proper (xattrs and omap).
+
+> * Potentially higher overhead when operating- There is no way to bypa=
+ss
+> non-compressible data processing, e.g. shards with Erasure codes.
+
+My information theory intuition has never been very good, but I don't
+think the coded chunks are any less compressible than the data they're
+coding for, in general...
+
+> * Potentially higher overhead for recovery on OSD death - one needs t=
+o
+> decompress data at working OSDs and compress it at new OSD. That's no=
+t
+> necessary if compression takes place prior to EC though.
+
+Hmm, that is an interesting point. I guess I'm just not sure about the
+labor and validation tradeoffs involved in obtaining this (it really
+seems like the only advantage to me).
+
+
+=2E..I should note that I'm under the impression that transparent
+compression already exists at some level which can be stacked with
+regular filesystems, but I'm not finding it now, so maybe I'm
+misinformed and the tradeoffs are a little different than I thought.
+But I still don't like the idea of doing it on a primary just for EC
+pools =E2=80=93 I think if we were going to take that approach it'd be =
+easier
+to compress somewhere before it reaches the EC/replicated split?
+-Greg
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
