@@ -1,96 +1,103 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Very slow recovery/peering with latest master
-Date: Wed, 23 Sep 2015 22:48:07 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE536F2@SACMBXIP01.sdcorp.global.sandisk.com>
+From: Samuel Just <sjust@redhat.com>
+Subject: Re: Very slow recovery/peering with latest master
+Date: Wed, 23 Sep 2015 16:06:58 -0700
+Message-ID: <CAN=+7FWL8c2EO8CU0DS_bMpEXXZS4tpWnkgvjg9p7+D3ztLQhg@mail.gmail.com>
 References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE48251@SACMBXIP01.sdcorp.global.sandisk.com>
- <CAJ4mKGa1vr6Zp9ZUaT8rrHDgRFJgdkO2c8LZqMQuwxwYt7TJ+A@mail.gmail.com>
+	<CAJ4mKGa1vr6Zp9ZUaT8rrHDgRFJgdkO2c8LZqMQuwxwYt7TJ+A@mail.gmail.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F2CE536F2@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1on0067.outbound.protection.outlook.com ([157.56.110.67]:10560
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1755524AbbIWWsM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 23 Sep 2015 18:48:12 -0400
-Content-Language: en-US
+Received: from mail-io0-f178.google.com ([209.85.223.178]:34101 "EHLO
+	mail-io0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755310AbbIWXG7 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Sep 2015 19:06:59 -0400
+Received: by iofb144 with SMTP id b144so59336113iof.1
+        for <ceph-devel@vger.kernel.org>; Wed, 23 Sep 2015 16:06:58 -0700 (PDT)
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE536F2@SACMBXIP01.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>, "Sage Weil (sage@newdream.net)" <sage@newdream.net>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>, "Sage Weil (sage@newdream.net)" <sage@newdream.net>, ceph-devel <ceph-devel@vger.kernel.org>
 
-U2FtL1NhZ2UsDQpJIGRlYnVnZ2VkIGl0IGRvd24gYW5kIGZvdW5kIG91dCB0aGF0IHRoZSBnZXRf
-ZGV2aWNlX2J5X3V1aWQtPmJsa2lkX2ZpbmRfZGV2X3dpdGhfdGFnKCkgY2FsbCB3aXRoaW4gRmls
-ZVN0b3JlOjpjb2xsZWN0X21ldGFkYXRhKCkgaXMgaGFuZ2luZyBmb3IgfjMgbWlucyBiZWZvcmUg
-cmV0dXJuaW5nIGEgRUlOVkFMLiBJIHNhdyB0aGlzIHBvcnRpb24gaXMgbmV3bHkgYWRkZWQgYWZ0
-ZXIgaGFtbWVyLg0KQ29tbWVudGluZyBpdCBvdXQgcmVzb2x2ZXMgdGhlIGlzc3VlLiBCVFcsIEkg
-c2F3IHRoaXMgdmFsdWUgaXMgc3RvcmVkIGFzIG1ldGFkYXRhIGJ1dCBub3QgdXNlZCBhbnl3aGVy
-ZSAsIGFtIEkgbWlzc2luZyBhbnl0aGluZyA/DQpIZXJlIGlzIG15IExpbnV4IGRldGFpbHMuLg0K
-DQpyb290QGVtc25vZGU1On4vd2lwLXdyaXRlLXBhdGgtb3B0aW1pemF0aW9uL3NyYyMgdW5hbWUg
-LWENCkxpbnV4IGVtc25vZGU1IDMuMTYuMC0zOC1nZW5lcmljICM1Mn4xNC4wNC4xLVVidW50dSBT
-TVAgRnJpIE1heSA4IDA5OjQzOjU3IFVUQyAyMDE1IHg4Nl82NCB4ODZfNjQgeDg2XzY0IEdOVS9M
-aW51eA0KDQoNCnJvb3RAZW1zbm9kZTU6fi93aXAtd3JpdGUtcGF0aC1vcHRpbWl6YXRpb24vc3Jj
-IyBsc2JfcmVsZWFzZSAtYQ0KTm8gTFNCIG1vZHVsZXMgYXJlIGF2YWlsYWJsZS4NCkRpc3RyaWJ1
-dG9yIElEOiBVYnVudHUNCkRlc2NyaXB0aW9uOiAgICBVYnVudHUgMTQuMDQuMiBMVFMNClJlbGVh
-c2U6ICAgICAgICAxNC4wNA0KQ29kZW5hbWU6ICAgICAgIHRydXN0eQ0KDQpUaGFua3MgJiBSZWdh
-cmRzDQpTb21uYXRoDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBTb21uYXRo
-IFJveQ0KU2VudDogV2VkbmVzZGF5LCBTZXB0ZW1iZXIgMTYsIDIwMTUgMjoyMCBQTQ0KVG86ICdH
-cmVnb3J5IEZhcm51bScNCkNjOiAnY2VwaC1kZXZlbCcNClN1YmplY3Q6IFJFOiBWZXJ5IHNsb3cg
-cmVjb3ZlcnkvcGVlcmluZyB3aXRoIGxhdGVzdCBtYXN0ZXINCg0KDQpTYWdlL0dyZWcsDQoNClll
-YWgsIGFzIHdlIGV4cGVjdGVkLCBpdCBpcyBub3QgaGFwcGVuaW5nIHByb2JhYmx5IGJlY2F1c2Ug
-b2YgcmVjb3Zlcnkgc2V0dGluZ3MuIEkgcmV2ZXJ0ZWQgaXQgYmFjayBpbiBteSBjZXBoLmNvbmYg
-LCBidXQsIHN0aWxsIHNlZWluZyB0aGlzIHByb2JsZW0uDQoNClNvbWUgb2JzZXJ2YXRpb24gOg0K
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KDQoxLiBGaXJzdCBvZiBhbGwsIEkgZG9uJ3QgdGhpbmsg
-aXQgaXMgc29tZXRoaW5nIHJlbGF0ZWQgdG8gbXkgZW52aXJvbm1lbnQuIEkgcmVjcmVhdGVkIHRo
-ZSBjbHVzdGVyIHdpdGggSGFtbWVyIGFuZCB0aGlzIHByb2JsZW0gaXMgbm90IHRoZXJlLg0KDQoy
-LiBJIGhhdmUgZW5hYmxlZCB0aGUgbWVzc2VuZ2VyL21vbmNsaWVudCBsb2cgKENvdWxkbid0IGF0
-dGFjaCBoZXJlKSBpbiBvbmUgb2YgdGhlIE9TRHMgYW5kIGZvdW5kIG1vbml0b3IgaXMgdGFraW5n
-IGxvbmcgdGltZSB0byBkZXRlY3QgdGhlIHVwIE9TRHMuIElmIHlvdSBzZWUgdGhlIGxvZywgSSBo
-YXZlIHN0YXJ0ZWQgT1NEIGF0IDIwMTUtMDktMTYgMTY6MTM6MDcuMDQyNDYzICwgYnV0LCB0aGVy
-ZSBpcyBubyBjb21tdW5pY2F0aW9uIChvbmx5IGdldHRpbmcgS0VFUF9BTElWRSkgdGlsbCAyMDE1
-LTA5LTE2IDE2OjE2OjA3LjE4MDQ4MiAsIHNvLCAzIG1pbnMgISENCg0KMy4gRHVyaW5nIHRoaXMg
-cGVyaW9kLCBJIHNhdyBtb25jbGllbnQgdHJ5aW5nIHRvIGNvbW11bmljYXRlIHdpdGggbW9uaXRv
-ciBidXQgbm90IGFibGUgdG8gcHJvYmFibHkuIEl0IGlzIHNlbmRpbmcgb3NkX2Jvb3QgYXQgMjAx
-NS0wOS0xNiAxNjoxNjowNy4xODA0ODIgb25seS4uDQoNCjIwMTUtMDktMTYgMTY6MTY6MDcuMTgw
-NDUwIDdmNjUzNzdmZTcwMCAxMCBtb25jbGllbnQ6IF9zZW5kX21vbl9tZXNzYWdlIHRvIG1vbi5h
-IGF0IDEwLjYwLjE5NC4xMDo2Nzg5LzANCjIwMTUtMDktMTYgMTY6MTY6MDcuMTgwNDgyIDdmNjUz
-NzdmZTcwMCAgMSAtLSAxMC42MC4xOTQuMTA6NjgyMC8yMDEwMiAtLT4gMTAuNjAuMTk0LjEwOjY3
-ODkvMCAtLSBvc2RfYm9vdChvc2QuMTAgYm9vdGVkIDAgZmVhdHVyZXMgNzIwNTc1OTQwMzc5Mjc5
-MzUgdjQ1KSB2NiAtLSA/KzAgMHg3ZjY1MjNjMTkxMDAgY29uIDB4N2Y2NTQyMDQ1NjgwDQoyMDE1
-LTA5LTE2IDE2OjE2OjA3LjE4MDQ5NiA3ZjY1Mzc3ZmU3MDAgMjAgLS0gMTAuNjAuMTk0LjEwOjY4
-MjAvMjAxMDIgc3VibWl0X21lc3NhZ2Ugb3NkX2Jvb3Qob3NkLjEwIGJvb3RlZCAwIGZlYXR1cmVz
-IDcyMDU3NTk0MDM3OTI3OTM1IHY0NSkgdjYgcmVtb3RlLCAxMC42MC4xOTQuMTA6Njc4OS8wLCBo
-YXZlIHBpcGUuDQoNCjQuIEJUVywgdGhlIG9zZCBkb3duIHNjZW5hcmlvIGlzIGRldGVjdGVkIHZl
-cnkgcXVpY2tseSAoY2VwaCAtdyBvdXRwdXQpICwgcHJvYmxlbSBpcyBkdXJpbmcgY29taW5nIHVw
-IEkgZ3Vlc3MuDQoNCg0KU28sIHNvbWV0aGluZyByZWxhdGVkIHRvIG1vbiBjb21tdW5pY2F0aW9u
-IGdldHRpbmcgc2xvd2VyID8NCkxldCBtZSBrbm93IGlmIG1vcmUgdmVyYm9zZSBsb2dnaW5nIGlz
-IHJlcXVpcmVkIGFuZCBob3cgc2hvdWxkIEkgc2hhcmUgdGhlIGxvZy4uDQoNClRoYW5rcyAmIFJl
-Z2FyZHMNClNvbW5hdGgNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IEdyZWdv
-cnkgRmFybnVtIFttYWlsdG86Z2Zhcm51bUByZWRoYXQuY29tXQ0KU2VudDogV2VkbmVzZGF5LCBT
-ZXB0ZW1iZXIgMTYsIDIwMTUgMTE6MzUgQU0NClRvOiBTb21uYXRoIFJveQ0KQ2M6IGNlcGgtZGV2
-ZWwNClN1YmplY3Q6IFJlOiBWZXJ5IHNsb3cgcmVjb3ZlcnkvcGVlcmluZyB3aXRoIGxhdGVzdCBt
-YXN0ZXINCg0KT24gVHVlLCBTZXAgMTUsIDIwMTUgYXQgODowNCBQTSwgU29tbmF0aCBSb3kgPFNv
-bW5hdGguUm95QHNhbmRpc2suY29tPiB3cm90ZToNCj4gSGksDQo+IEkgYW0gc2VlaW5nIHZlcnkg
-c2xvdyByZWNvdmVyeSB3aGVuIEkgYW0gYWRkaW5nIE9TRHMgd2l0aCB0aGUgbGF0ZXN0IG1hc3Rl
-ci4NCj4gQWxzbywgSWYgSSBqdXN0IHJlc3RhcnQgYWxsIHRoZSBPU0RzIChubyBJTyBpcyBnb2lu
-ZyBvbiBpbiB0aGUgY2x1c3RlcikgLCBjbHVzdGVyIGlzIHRha2luZyBhIHNpZ25pZmljYW50IGFt
-b3VudCBvZiB0aW1lIHRvIHJlYWNoIGluIGFjdGl2ZStjbGVhbiBzdGF0ZSAoYW5kIGV2ZW4gZGV0
-ZWN0aW5nIGFsbCB0aGUgdXAgT1NEcykuDQo+DQo+IEkgc2F3IHRoZSByZWNvdmVyeS9iYWNrZmls
-bCBkZWZhdWx0IHBhcmFtZXRlcnMgYXJlIG5vdyBjaGFuZ2VkICh0byBsb3dlciB2YWx1ZSkgLCB0
-aGlzIHByb2JhYmx5IGV4cGxhaW5zIHRoZSByZWNvdmVyeSBzY2VuYXJpbyAsIGJ1dCwgd2lsbCBp
-dCBhZmZlY3QgdGhlIHBlZXJpbmcgdGltZSBkdXJpbmcgT1NEIHN0YXJ0dXAgYXMgd2VsbCA/DQoN
-CkkgZG9uJ3QgdGhpbmsgdGhlc2UgdmFsdWVzIHNob3VsZCBpbXBhY3QgcGVlcmluZyB0aW1lLCBi
-dXQgeW91IGNvdWxkIGNvbmZpZ3VyZSB0aGVtIGJhY2sgdG8gdGhlIG9sZCBkZWZhdWx0cyBhbmQg
-c2VlIGlmIGl0IGNoYW5nZXMuDQotR3JlZw0KDQpfX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fXw0KDQpQTEVBU0UgTk9URTogVGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBpbiB0aGlzIGVs
-ZWN0cm9uaWMgbWFpbCBtZXNzYWdlIGlzIGludGVuZGVkIG9ubHkgZm9yIHRoZSB1c2Ugb2YgdGhl
-IGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpIG5hbWVkIGFib3ZlLiBJZiB0aGUgcmVhZGVyIG9mIHRo
-aXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVuZGVkIHJlY2lwaWVudCwgeW91IGFyZSBoZXJlYnkg
-bm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2UgaW4gZXJyb3IgYW5k
-IHRoYXQgYW55IHJldmlldywgZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9uLCBvciBjb3B5aW5n
-IG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5b3UgaGF2ZSByZWNl
-aXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRl
-ciBieSB0ZWxlcGhvbmUgb3IgZS1tYWlsIChhcyBzaG93biBhYm92ZSkgaW1tZWRpYXRlbHkgYW5k
-IGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVzIG9mIHRoaXMgbWVzc2FnZSBpbiB5b3VyIHBvc3Nl
-c3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkgc3RvcmVkIGNvcGll
-cykuDQoNCg==
+Wow.  Why would that take so long?  I think you are correct that it's
+only used for metadata, we could just add a config value to disable
+it.
+-Sam
+
+On Wed, Sep 23, 2015 at 3:48 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
+> Sam/Sage,
+> I debugged it down and found out that the get_device_by_uuid->blkid_find_dev_with_tag() call within FileStore::collect_metadata() is hanging for ~3 mins before returning a EINVAL. I saw this portion is newly added after hammer.
+> Commenting it out resolves the issue. BTW, I saw this value is stored as metadata but not used anywhere , am I missing anything ?
+> Here is my Linux details..
+>
+> root@emsnode5:~/wip-write-path-optimization/src# uname -a
+> Linux emsnode5 3.16.0-38-generic #52~14.04.1-Ubuntu SMP Fri May 8 09:43:57 UTC 2015 x86_64 x86_64 x86_64 GNU/Linux
+>
+>
+> root@emsnode5:~/wip-write-path-optimization/src# lsb_release -a
+> No LSB modules are available.
+> Distributor ID: Ubuntu
+> Description:    Ubuntu 14.04.2 LTS
+> Release:        14.04
+> Codename:       trusty
+>
+> Thanks & Regards
+> Somnath
+>
+> -----Original Message-----
+> From: Somnath Roy
+> Sent: Wednesday, September 16, 2015 2:20 PM
+> To: 'Gregory Farnum'
+> Cc: 'ceph-devel'
+> Subject: RE: Very slow recovery/peering with latest master
+>
+>
+> Sage/Greg,
+>
+> Yeah, as we expected, it is not happening probably because of recovery settings. I reverted it back in my ceph.conf , but, still seeing this problem.
+>
+> Some observation :
+> ----------------------
+>
+> 1. First of all, I don't think it is something related to my environment. I recreated the cluster with Hammer and this problem is not there.
+>
+> 2. I have enabled the messenger/monclient log (Couldn't attach here) in one of the OSDs and found monitor is taking long time to detect the up OSDs. If you see the log, I have started OSD at 2015-09-16 16:13:07.042463 , but, there is no communication (only getting KEEP_ALIVE) till 2015-09-16 16:16:07.180482 , so, 3 mins !!
+>
+> 3. During this period, I saw monclient trying to communicate with monitor but not able to probably. It is sending osd_boot at 2015-09-16 16:16:07.180482 only..
+>
+> 2015-09-16 16:16:07.180450 7f65377fe700 10 monclient: _send_mon_message to mon.a at 10.60.194.10:6789/0
+> 2015-09-16 16:16:07.180482 7f65377fe700  1 -- 10.60.194.10:6820/20102 --> 10.60.194.10:6789/0 -- osd_boot(osd.10 booted 0 features 72057594037927935 v45) v6 -- ?+0 0x7f6523c19100 con 0x7f6542045680
+> 2015-09-16 16:16:07.180496 7f65377fe700 20 -- 10.60.194.10:6820/20102 submit_message osd_boot(osd.10 booted 0 features 72057594037927935 v45) v6 remote, 10.60.194.10:6789/0, have pipe.
+>
+> 4. BTW, the osd down scenario is detected very quickly (ceph -w output) , problem is during coming up I guess.
+>
+>
+> So, something related to mon communication getting slower ?
+> Let me know if more verbose logging is required and how should I share the log..
+>
+> Thanks & Regards
+> Somnath
+>
+> -----Original Message-----
+> From: Gregory Farnum [mailto:gfarnum@redhat.com]
+> Sent: Wednesday, September 16, 2015 11:35 AM
+> To: Somnath Roy
+> Cc: ceph-devel
+> Subject: Re: Very slow recovery/peering with latest master
+>
+> On Tue, Sep 15, 2015 at 8:04 PM, Somnath Roy <Somnath.Roy@sandisk.com> wrote:
+>> Hi,
+>> I am seeing very slow recovery when I am adding OSDs with the latest master.
+>> Also, If I just restart all the OSDs (no IO is going on in the cluster) , cluster is taking a significant amount of time to reach in active+clean state (and even detecting all the up OSDs).
+>>
+>> I saw the recovery/backfill default parameters are now changed (to lower value) , this probably explains the recovery scenario , but, will it affect the peering time during OSD startup as well ?
+>
+> I don't think these values should impact peering time, but you could configure them back to the old defaults and see if it changes.
+> -Greg
+>
+> ________________________________
+>
+> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+>
