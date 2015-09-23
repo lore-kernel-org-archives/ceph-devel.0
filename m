@@ -1,49 +1,54 @@
-From: Jevon Qiao <scaleqiao@gmail.com>
-Subject: Seek advice for using Ceph to provice NAS service
-Date: Wed, 23 Sep 2015 10:21:54 +0800
-Message-ID: <56020CC2.2060806@gmail.com>
+From: huang jun <hjwsm1989@gmail.com>
+Subject: Re: Ceph problem
+Date: Wed, 23 Sep 2015 10:23:28 +0800
+Message-ID: <CABAwU-YQqfZiOCmNgh0ZaejSDH1hbekKQkj1Fjxa6hZss=QwWw@mail.gmail.com>
+References: <1CB94550540AE44E9CAAE8CD5AF40BF846CF1A78@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f47.google.com ([209.85.220.47]:35782 "EHLO
-	mail-pa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759819AbbIWCWH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Sep 2015 22:22:07 -0400
-Received: by pacfv12 with SMTP id fv12so26349521pac.2
-        for <ceph-devel@vger.kernel.org>; Tue, 22 Sep 2015 19:22:06 -0700 (PDT)
+Received: from mail-vk0-f46.google.com ([209.85.213.46]:34944 "EHLO
+	mail-vk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753075AbbIWC3W (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Sep 2015 22:29:22 -0400
+Received: by vkao3 with SMTP id o3so18909248vka.2
+        for <ceph-devel@vger.kernel.org>; Tue, 22 Sep 2015 19:29:21 -0700 (PDT)
+In-Reply-To: <1CB94550540AE44E9CAAE8CD5AF40BF846CF1A78@H3CMLB12-EX.srv.huawei-3com.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: sage@newdream.net
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ceph-users@ceph.com
+To: "zhao.mingyue@h3c.com" <zhao.mingyue@h3c.com>
+Cc: "gfarnum@redhat.com" <gfarnum@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Sage and other Ceph experts,
-
-This is a greeting from Jevon, I'm from China and working in a company 
-which are using Ceph as the backend storage. At present, I'm evaluating 
-the following two options of using Ceph cluster to provide NAS service 
-and I need your advice from the perspective of stability and feasibility.
-
-Option 1: Directly use CephFS
-Since Ceph as a unified storage can provide file system storage service 
-via cephfs, this looks an ideal solution for my case if CephFS is ready 
-to be used in production environment. However, based on the previous 
-discussions on CephFS, I see that there are still some issues like not 
-ready for supporting multiple metadata servers, lack of a fully 
-functioning fsck and so on. Also, I learn that CephFS has been evaluated 
-by a large community of users and there are production systems using it 
-with a single MDS from the official website of Ceph. So it is difficult 
-for me to make the decision on whether I should use it.
-
-Option 2: Ceph rbd + NFS server
-This might be a common architecture used in current NAS storage. But the 
-problem is how to get rid of the single point failure on NFS server. 
-What I have right now is to use Corosync and Pacemaker(the typical HA 
-solution in Linux) to form a cluster. It seems that Sebastien Han has 
-verified the feasibility.
-
-Your comments/advices would be highly appreciated and I'm looking 
-forward to your reply.
-
-Thanks,
-Jevon
+eW91IGNhbiBhZGQgZGVidWdfcmFkb3Mgb3IgZGVidWdfbXMgdG8gcmJkIGNyZWF0ZSBjb21tYW5k
+IHRvIHNlZSB3aGF0DQpoYXBwZW5lZCBkdXJpbmcgMTIwcw0KDQoyMDE1LTA5LTIzIDk6NTkgR01U
+KzA4OjAwIHpoYW8ubWluZ3l1ZUBoM2MuY29tIDx6aGFvLm1pbmd5dWVAaDNjLmNvbT46DQo+DQo+
+IC0tLeWOn+Wni+mCruS7ti0tLQ0KPiDlj5Hku7bkuro6ICLpmYjmnbAiPDI3NjY0ODE3OEBxcS5j
+b20+DQo+IOWPkemAgeaXtumXtDogMjAxNeW5tDA55pyIMjHml6UgMTc6NTI6MTkNCj4g5pS25Lu2
+5Lq6OiAiY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmciPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwu
+b3JnPjsNCj4g5Li76aKYOiBDZXBoIHByb2JsZW0NCj4NCj4gRGVhciBjZXBoLWRldmVsDQo+ICAg
+ICAgIEknbSBhIHNvZnR3YXJlIGVuZ2luZWVyIGZvciBIM0MsV2UgZm91bmQgYSBjZXBoIHByb2Js
+ZW0gaW4gdGhlIHRlc3QsdGhlIG5lZWQgeW91ciBoZWxwLg0KPiAgICAgIElmIG9uZSBvZiB0aGUg
+aG9zdHMgaW4gdGhlIGNsdXN0ZXIgaXMgcmVzdGFydGVkLHdlIHJ1biAncmJkIGNyZWF0ZeKApuKA
+picgY29tbWFuZCB3aWxsIGJsb2NrIDEyMCBzZWNvbmRzLGJ1dCB0aGUgbm9ybWFsIGlzIGJsb2Nr
+ZWQgZm9yIDIwIHNlY29uZHMuDQo+ICAgICBDbHVzdGVyIGVudmlyb25tZW50IGNvbXBvc2VkIG9m
+IHRocmVlIGhvc3RzLGVhY2ggaG9zdCBydW5zIGEgbW9uaXRvciBwcm9jZXNzIGFuZCB0ZW4gT1NE
+IHByb2Nlc3Nlcw0KPg0KPiBMb29raW5nIGZvcndhcmQgdG8geW91ciByZXBseSxUaGFuayB5b3Uh
+DQo+IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCj4g5pys6YKu5Lu25Y+K5YW26ZmE5Lu25ZCr5pyJ5p2t
+5bee5Y2O5LiJ6YCa5L+h5oqA5pyv5pyJ6ZmQ5YWs5Y+455qE5L+d5a+G5L+h5oGv77yM5LuF6ZmQ
+5LqO5Y+R6YCB57uZ5LiK6Z2i5Zyw5Z2A5Lit5YiX5Ye6DQo+IOeahOS4quS6uuaIlue+pOe7hOOA
+guemgeatouS7u+S9leWFtuS7luS6uuS7peS7u+S9leW9ouW8j+S9v+eUqO+8iOWMheaLrOS9huS4
+jemZkOS6juWFqOmDqOaIlumDqOWIhuWcsOazhOmcsuOAgeWkjeWItuOAgQ0KPiDmiJbmlaPlj5Hv
+vInmnKzpgq7ku7bkuK3nmoTkv6Hmga/jgILlpoLmnpzmgqjplJnmlLbkuobmnKzpgq7ku7bvvIzo
+r7fmgqjnq4vljbPnlLXor53miJbpgq7ku7bpgJrnn6Xlj5Hku7bkurrlubbliKDpmaTmnKwNCj4g
+6YKu5Lu277yBDQo+IFRoaXMgZS1tYWlsIGFuZCBpdHMgYXR0YWNobWVudHMgY29udGFpbiBjb25m
+aWRlbnRpYWwgaW5mb3JtYXRpb24gZnJvbSBIM0MsIHdoaWNoIGlzDQo+IGludGVuZGVkIG9ubHkg
+Zm9yIHRoZSBwZXJzb24gb3IgZW50aXR5IHdob3NlIGFkZHJlc3MgaXMgbGlzdGVkIGFib3ZlLiBB
+bnkgdXNlIG9mIHRoZQ0KPiBpbmZvcm1hdGlvbiBjb250YWluZWQgaGVyZWluIGluIGFueSB3YXkg
+KGluY2x1ZGluZywgYnV0IG5vdCBsaW1pdGVkIHRvLCB0b3RhbCBvciBwYXJ0aWFsDQo+IGRpc2Ns
+b3N1cmUsIHJlcHJvZHVjdGlvbiwgb3IgZGlzc2VtaW5hdGlvbikgYnkgcGVyc29ucyBvdGhlciB0
+aGFuIHRoZSBpbnRlbmRlZA0KPiByZWNpcGllbnQocykgaXMgcHJvaGliaXRlZC4gSWYgeW91IHJl
+Y2VpdmUgdGhpcyBlLW1haWwgaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlcg0KPiBi
+eSBwaG9uZSBvciBlbWFpbCBpbW1lZGlhdGVseSBhbmQgZGVsZXRlIGl0IQ0KDQoNCg0KLS0gDQp0
+aGFua3MNCmh1YW5nanVuDQo=
