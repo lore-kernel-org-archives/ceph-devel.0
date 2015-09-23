@@ -1,35 +1,47 @@
-From: Tomy Cheru <Tomy.Cheru@sandisk.com>
-Subject: Where does the data go ??
-Date: Wed, 23 Sep 2015 01:58:21 +0000
-Message-ID: <EBFBEFF470372547BAACF06D39FF53A54F58B8B8@SACMBXIP02.sdcorp.global.sandisk.com>
+From: "zhao.mingyue@h3c.com" <zhao.mingyue@h3c.com>
+Subject: Ceph problem
+Date: Wed, 23 Sep 2015 01:59:58 +0000
+Message-ID: <1CB94550540AE44E9CAAE8CD5AF40BF846CF1A78@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0094.outbound.protection.outlook.com ([65.55.169.94]:43653
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752217AbbIWB6Z convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Sep 2015 21:58:25 -0400
-Content-Language: en-US
+Received: from smtp.h3c.com ([60.191.123.56]:15434 "EHLO h3cmg01-ex.h3c.com"
+	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752366AbbIWB72 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 22 Sep 2015 21:59:28 -0400
+Content-Language: zh-CN
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "gfarnum@redhat.com" <gfarnum@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Noticed while benchmarking newstore with rocksdb backend that, the data is missing in "dev/osd0/fragments"
-
->64k sized objects produces content in above mentioned dir, however missing with <=64k  sized objects
-
-Corresponding drive/s shows activity, .sst files are in "dev/osd0/db" dir
-
-Is it expected behavior ??
-
-Where does the data go ??
-
-Tomy
-
-
-________________________________
-
-PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-
+DQotLS3ljp/lp4vpgq7ku7YtLS0NCuWPkeS7tuS6ujogIumZiOadsCI8Mjc2NjQ4MTc4QHFxLmNv
+bT4NCuWPkemAgeaXtumXtDogMjAxNeW5tDA55pyIMjHml6UgMTc6NTI6MTkNCuaUtuS7tuS6ujog
+ImNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnIjxjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZz47
+DQrkuLvpopg6IENlcGggcHJvYmxlbQ0KDQpEZWFyIGNlcGgtZGV2ZWwNCiAgICAgIEknbSBhIHNv
+ZnR3YXJlIGVuZ2luZWVyIGZvciBIM0MsV2UgZm91bmQgYSBjZXBoIHByb2JsZW0gaW4gdGhlIHRl
+c3QsdGhlIG5lZWQgeW91ciBoZWxwLg0KICAgICBJZiBvbmUgb2YgdGhlIGhvc3RzIGluIHRoZSBj
+bHVzdGVyIGlzIHJlc3RhcnRlZCx3ZSBydW4gJ3JiZCBjcmVhdGXigKbigKYnIGNvbW1hbmQgd2ls
+bCBibG9jayAxMjAgc2Vjb25kcyxidXQgdGhlIG5vcm1hbCBpcyBibG9ja2VkIGZvciAyMCBzZWNv
+bmRzLg0KICAgIENsdXN0ZXIgZW52aXJvbm1lbnQgY29tcG9zZWQgb2YgdGhyZWUgaG9zdHMsZWFj
+aCBob3N0IHJ1bnMgYSBtb25pdG9yIHByb2Nlc3MgYW5kIHRlbiBPU0QgcHJvY2Vzc2VzDQoNCkxv
+b2tpbmcgZm9yd2FyZCB0byB5b3VyIHJlcGx5LFRoYW5rIHlvdSENCi0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0NCuacrOmCruS7tuWPiuWFtumZhOS7tuWQq+acieadreW3nuWNjuS4iemAmuS/oeaKgOacr+ac
+iemZkOWFrOWPuOeahOS/neWvhuS/oeaBr++8jOS7hemZkOS6juWPkemAgee7meS4iumdouWcsOWd
+gOS4reWIl+WHug0K55qE5Liq5Lq65oiW576k57uE44CC56aB5q2i5Lu75L2V5YW25LuW5Lq65Lul
+5Lu75L2V5b2i5byP5L2/55So77yI5YyF5ous5L2G5LiN6ZmQ5LqO5YWo6YOo5oiW6YOo5YiG5Zyw
+5rOE6Zyy44CB5aSN5Yi244CBDQrmiJbmlaPlj5HvvInmnKzpgq7ku7bkuK3nmoTkv6Hmga/jgILl
+poLmnpzmgqjplJnmlLbkuobmnKzpgq7ku7bvvIzor7fmgqjnq4vljbPnlLXor53miJbpgq7ku7bp
+gJrnn6Xlj5Hku7bkurrlubbliKDpmaTmnKwNCumCruS7tu+8gQ0KVGhpcyBlLW1haWwgYW5kIGl0
+cyBhdHRhY2htZW50cyBjb250YWluIGNvbmZpZGVudGlhbCBpbmZvcm1hdGlvbiBmcm9tIEgzQywg
+d2hpY2ggaXMNCmludGVuZGVkIG9ubHkgZm9yIHRoZSBwZXJzb24gb3IgZW50aXR5IHdob3NlIGFk
+ZHJlc3MgaXMgbGlzdGVkIGFib3ZlLiBBbnkgdXNlIG9mIHRoZQ0KaW5mb3JtYXRpb24gY29udGFp
+bmVkIGhlcmVpbiBpbiBhbnkgd2F5IChpbmNsdWRpbmcsIGJ1dCBub3QgbGltaXRlZCB0bywgdG90
+YWwgb3IgcGFydGlhbA0KZGlzY2xvc3VyZSwgcmVwcm9kdWN0aW9uLCBvciBkaXNzZW1pbmF0aW9u
+KSBieSBwZXJzb25zIG90aGVyIHRoYW4gdGhlIGludGVuZGVkDQpyZWNpcGllbnQocykgaXMgcHJv
+aGliaXRlZC4gSWYgeW91IHJlY2VpdmUgdGhpcyBlLW1haWwgaW4gZXJyb3IsIHBsZWFzZSBub3Rp
+ZnkgdGhlIHNlbmRlcg0KYnkgcGhvbmUgb3IgZW1haWwgaW1tZWRpYXRlbHkgYW5kIGRlbGV0ZSBp
+dCENCg==
