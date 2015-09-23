@@ -1,187 +1,102 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: Adding Data-At-Rest compression support to Ceph
-Date: Wed, 23 Sep 2015 11:03:41 -0700
-Message-ID: <CAJ4mKGZLc1AzAbhEKpjSdUd21dXWgVxiLjjETHuP+EwVCA8EoA@mail.gmail.com>
-References: <56018A05.6090100@mirantis.com>
-	<alpine.DEB.2.00.1509221201570.11876@cobra.newdream.net>
-	<56029F66.3070503@mirantis.com>
-	<alpine.DEB.2.00.1509230613410.11876@cobra.newdream.net>
-	<CAJ4mKGanEtC3yX5Y2SA+698FEtNupOVcpFnoDLoJ7Hwo1ruSGw@mail.gmail.com>
-	<5602C48C.4010009@mirantis.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: perf counters from a performance discrepancy
+Date: Wed, 23 Sep 2015 11:19:53 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1509231116580.13265@cobra.newdream.net>
+References: <BC97738F8E7C8742BABED7F06FB9DF9192500992@SATLEXDAG01.amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f169.google.com ([209.85.212.169]:33820 "EHLO
-	mail-wi0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751366AbbIWSDn convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Sep 2015 14:03:43 -0400
-Received: by wicfx3 with SMTP id fx3so250552228wic.1
-        for <ceph-devel@vger.kernel.org>; Wed, 23 Sep 2015 11:03:41 -0700 (PDT)
-In-Reply-To: <5602C48C.4010009@mirantis.com>
+Received: from cobra.newdream.net ([66.33.216.30]:43109 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752026AbbIWSTy (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Sep 2015 14:19:54 -0400
+In-Reply-To: <BC97738F8E7C8742BABED7F06FB9DF9192500992@SATLEXDAG01.amd.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Igor Fedotov <ifedotov@mirantis.com>
-Cc: Sage Weil <sage@newdream.net>, ceph-devel <ceph-devel@vger.kernel.org>
+To: "Deneau, Tom" <tom.deneau@amd.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, Sep 23, 2015 at 8:26 AM, Igor Fedotov <ifedotov@mirantis.com> w=
-rote:
->
->
-> On 23.09.2015 17:05, Gregory Farnum wrote:
->>
->> On Wed, Sep 23, 2015 at 6:15 AM, Sage Weil <sage@newdream.net> wrote=
-:
->>>
->>> On Wed, 23 Sep 2015, Igor Fedotov wrote:
->>>>
->>>> Hi Sage,
->>>> thanks a lot for your feedback.
->>>>
->>>> Regarding issues with offset mapping and stripe size exposure.
->>>> What's about the idea to apply compression in two-tier (cache+back=
-ing
->>>> storage)
->>>> model only ?
->>>
->>> I'm not sure we win anything by making it a two-tier only thing... =
-simply
->>> making it a feature of the EC pool means we can also address EC poo=
-l
->>> users
->>> like radosgw.
->>>
->>>> I doubt single-tier one is widely used for EC pools since there is=
- no
->>>> random
->>>> write support in such mode. Thus this might be an acceptable limit=
-ation.
->>>> At the same time it seems that appends caused by cached object flu=
-sh
->>>> have
->>>> fixed block size (8Mb by default). And object is totally rewritten=
- on
->>>> the next
->>>> flush if any. This makes offset mapping less tricky.
->>>> Decompression should be applied in any model though as cache tier
->>>> shutdown and
->>>> subsequent compressed data access is possibly  a valid use case.
->>>
->>> Yeah, we need to handle random reads either way, so I think the off=
-set
->>> mapping is going to be needed anyway.
->>
->> The idea of making the primary responsible for object compression
->> really concerns me. It means for instance that a single random acces=
-s
->> will likely require access to multiple objects, and breaks many of t=
-he
->> optimizations we have right now or in the pipeline (for instance:
->> direct client access).
->
-> Could you please elaborate why multiple objects access is required on=
- single
-> random access?
+On Wed, 23 Sep 2015, Deneau, Tom wrote:
+> Hi all --
+> 
+> Looking for guidance with perf counters...
+> I am trying to see whether the perf counters can tell me anything about the following discrepancy
+> 
+> I populate a number of 40k size objects in each of two pools, poolA and poolB.
+> Both pools cover osds on a single node, 5 osds total.
+> 
+>    * Config 1 (1p): 
+>       * use single rados bench client with 32 threads to do seq read of 20000 objects from poolA.
+> 
+>    * Config 2 (2p):
+>       * use two concurrent rados bench clients (running on same client node) with 16 threads each,
+>            one reading 10000 objects from poolA,
+>            one reading 10000 objects from poolB,
+> 
+> So in both configs, we have 32 threads total and the number of objects read is the same.
+> Note: in all cases, we drop the caches before doing the seq reads
+> 
+> The combined bandwidth (MB/sec) for the 2 clients in config 2 is about 1/3 of the bandwidth for
+> the single client in config 1.
 
-It sounds to me like you were planning to take an incoming object
-write, compress it, and then chunk it. If you do that, the symbols
-("abcdefgh =3D a", "ijklmnop =3D b", etc) for the compression are likel=
-y
-to reside in the first object and need to be fetched for each read in
-other objects.
+How were the object written?  I assume the cluster is backed by spinning 
+disks?
 
-> In my opinion we need to access absolutely the same object set as bef=
-ore: in
-> EC pool each appended block is spitted into multiple shards that go t=
-o
-> respective OSDs. In general case one has to retrieve a set of adjacen=
-t
-> shards from several OSDs on single read request.
+I wonder if this is a disk layout issue.  If the 20,000 objects are 
+written in order, they willb e roughly sequential on disk, and the 32 
+thread case will read them in order.  In the 2x 10,000 case, the two 
+clients are reading two sequences of objects written at different 
+times, and the disk arms will be swinging around more.
 
-Usually we just need to get the object info from the primary and then
-read whichever object has the data for the requested region. If the
-region spans a stripe boundary we might need to get two, but often we
-don't...
+My guess is that if the reads were reading the objects in a random order 
+the performance would be the same... I'm not sure that rados bench does 
+that though?
 
-> In case of compression the
-> only difference is in data range that compressed shard set occupy. I.=
-e. we
-> simply need to translate requested data range to the actually stored =
-one and
-> retrieve that data from OSDs. What's missed?
->>
->> And apparently only the EC pool will support
->> compression, which is frustrating for all the replicated pool users
->> out there...
->
-> In my opinion  replicated pool users should consider EC pool usage fi=
-rst if
-> they care about space saving. They automatically gain 50% space savin=
-g this
-> way. Compression brings even more saving but that's rather the second=
- step
-> on this way.
+sage
 
-EC pools have important limitations that replicated pools don't, like
-not working for object classes or allowing random overwrites. You can
-stick a replicated cache pool in front but that comes with another
-whole can of worms. Anybody with a large enough proportion of active
-data won't find that solution suitable but might still want to reduce
-space required where they can, like with local compression.
-
->> Is there some reason we don't just want to apply encryption across a=
-n
->> OSD store? Perhaps doing it on the filesystem level is the wrong way
->> (for reasons named above) but there are other mechanisms like inline
->> block device compression that I think are supposed to work pretty
->> well.
->
-> If I understand the idea of inline block device compression correctly=
- it has
-> some of drawbacks similar to FS compression approach. Ones to mention=
-:
-> * Less flexibility - per device compression only, no way to have per-=
-pool
-> compression. No control on the compression process.
-
-What would the use case be here? I can imagine not wanting to slow
-down your cache pools with it or something (although realistically I
-don't think that's a concern unless the sheer CPU usage is a problem
-with frequent writes), but those would be on separate OSDs/volumes
-anyway
-Plus block device compression is also able to include all the *other*
-stuff that doesn't fit inside the object proper (xattrs and omap).
-
-> * Potentially higher overhead when operating- There is no way to bypa=
-ss
-> non-compressible data processing, e.g. shards with Erasure codes.
-
-My information theory intuition has never been very good, but I don't
-think the coded chunks are any less compressible than the data they're
-coding for, in general...
-
-> * Potentially higher overhead for recovery on OSD death - one needs t=
-o
-> decompress data at working OSDs and compress it at new OSD. That's no=
-t
-> necessary if compression takes place prior to EC though.
-
-Hmm, that is an interesting point. I guess I'm just not sure about the
-labor and validation tradeoffs involved in obtaining this (it really
-seems like the only advantage to me).
-
-
-=2E..I should note that I'm under the impression that transparent
-compression already exists at some level which can be stacked with
-regular filesystems, but I'm not finding it now, so maybe I'm
-misinformed and the tradeoffs are a little different than I thought.
-But I still don't like the idea of doing it on a primary just for EC
-pools =E2=80=93 I think if we were going to take that approach it'd be =
-easier
-to compress somewhere before it reaches the EC/replicated split?
--Greg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+> I gathered perf counters before and after each run and looked at the difference of
+> the before and after counters for both the 1p and 2p cases.  Here are some things I noticed
+> that are different between the two runs.  Can someone take a look and let me know
+> whether any of these differences are significant.  In particular, for the
+> throttle-msgr_dispatch_throttler ones, since I don't know the detailed definitions of these fields.
+> Note: these are the numbers for one of the 5 osds, the other osds are similar...
+> 
+> * The field osd/loadavg is always about 3 times higher on the 2p c
+> 
+> some latency-related counters
+> ------------------------------
+> osd/op_latency/sum 1p=6.24801117205061, 2p=579.722513078945
+> osd/op_process_latency/sum 1p=3.48506945394911, 2p=42.6278494549915
+> osd/op_r_latency/sum 1p=6.2480111719924, 2p=579.722513079003
+> osd/op_r_process_latency/sum 1p=3.48506945399276, 2p=42.6278494550061
+> 
+> 
+> and some throttle-msgr_dispatch_throttler related counters
+> ----------------------------------------------------------
+> throttle-msgr_dispatch_throttler-client/get 1p=1337, 2p=1339, diff=2
+> throttle-msgr_dispatch_throttler-client/get_sum 1p=222877, 2p=223088, diff=211
+> throttle-msgr_dispatch_throttler-client/put 1p=1337, 2p=1339, diff=2
+> throttle-msgr_dispatch_throttler-client/put_sum 1p=222877, 2p=223088, diff=211
+> throttle-msgr_dispatch_throttler-hb_back_server/get 1p=58, 2p=134, diff=76
+> throttle-msgr_dispatch_throttler-hb_back_server/get_sum 1p=2726, 2p=6298, diff=3572
+> throttle-msgr_dispatch_throttler-hb_back_server/put 1p=58, 2p=134, diff=76
+> throttle-msgr_dispatch_throttler-hb_back_server/put_sum 1p=2726, 2p=6298, diff=3572
+> throttle-msgr_dispatch_throttler-hb_front_server/get 1p=58, 2p=134, diff=76
+> throttle-msgr_dispatch_throttler-hb_front_server/get_sum 1p=2726, 2p=6298, diff=3572
+> throttle-msgr_dispatch_throttler-hb_front_server/put 1p=58, 2p=134, diff=76
+> throttle-msgr_dispatch_throttler-hb_front_server/put_sum 1p=2726, 2p=6298, diff=3572
+> throttle-msgr_dispatch_throttler-hbclient/get 1p=168, 2p=252, diff=84
+> throttle-msgr_dispatch_throttler-hbclient/get_sum 1p=7896, 2p=11844, diff=3948
+> throttle-msgr_dispatch_throttler-hbclient/put 1p=168, 2p=252, diff=84
+> throttle-msgr_dispatch_throttler-hbclient/put_sum 1p=7896, 2p=11844, diff=3948
+> 
+> -- Tom Deneau, AMD
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
