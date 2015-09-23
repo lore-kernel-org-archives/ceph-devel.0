@@ -1,46 +1,35 @@
-From: "zhao.mingyue@h3c.com" <zhao.mingyue@h3c.com>
-Subject: Ceph problem
-Date: Wed, 23 Sep 2015 01:43:13 +0000
-Message-ID: <1CB94550540AE44E9CAAE8CD5AF40BF846CF1A41@H3CMLB12-EX.srv.huawei-3com.com>
+From: Tomy Cheru <Tomy.Cheru@sandisk.com>
+Subject: Where does the data go ??
+Date: Wed, 23 Sep 2015 01:58:21 +0000
+Message-ID: <EBFBEFF470372547BAACF06D39FF53A54F58B8B8@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([60.191.123.56]:15171 "EHLO h3cmg01-ex.h3c.com"
-	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752217AbbIWBmc (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 22 Sep 2015 21:42:32 -0400
-Content-Language: zh-CN
+Received: from mail-bl2on0094.outbound.protection.outlook.com ([65.55.169.94]:43653
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752217AbbIWB6Z convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Sep 2015 21:58:25 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-LS0t5Y6f5aeL6YKu5Lu2LS0tDQrlj5Hku7bkuro6ICLpmYjmnbAiPDI3NjY0ODE3OEBxcS5jb20+
-DQrlj5HpgIHml7bpl7Q6IDIwMTXlubQwOeaciDIx5pelIDE3OjUyOjE5DQrmlLbku7bkuro6ICJj
-ZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZyI8Y2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc+Ow0K
-5Li76aKYOiBDZXBoIHByb2JsZW0NCg0KRGVhciBjZXBoLWRldmVsDQogICAgICBJJ20gYSBzb2Z0
-d2FyZSBlbmdpbmVlciBmb3IgSDNDLFdlIGZvdW5kIGEgY2VwaCBwcm9ibGVtIGluIHRoZSB0ZXN0
-LHRoZSBuZWVkIHlvdXIgaGVscC4NCiAgICAgSWYgb25lIG9mIHRoZSBob3N0cyBpbiB0aGUgY2x1
-c3RlciBpcyByZXN0YXJ0ZWQsd2UgcnVuICdyYmQgY3JlYXRl4oCm4oCmJyBjb21tYW5kIHdpbGwg
-YmxvY2sgMTIwIHNlY29uZHMsYnV0IHRoZSBub3JtYWwgaXMgYmxvY2tlZCBmb3IgMjAgc2Vjb25k
-cy4NCiAgICBDbHVzdGVyIGVudmlyb25tZW50IGNvbXBvc2VkIG9mIHRocmVlIGhvc3RzLGVhY2gg
-aG9zdCBydW5zIGEgbW9uaXRvciBwcm9jZXNzIGFuZCB0ZW4gT1NEIHByb2Nlc3Nlcw0KDQpMb29r
-aW5nIGZvcndhcmQgdG8geW91ciByZXBseSxUaGFuayB5b3UhDQotLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-DQrmnKzpgq7ku7blj4rlhbbpmYTku7blkKvmnInmna3lt57ljY7kuInpgJrkv6HmioDmnK/mnInp
-mZDlhazlj7jnmoTkv53lr4bkv6Hmga/vvIzku4XpmZDkuo7lj5HpgIHnu5nkuIrpnaLlnLDlnYDk
-uK3liJflh7oNCueahOS4quS6uuaIlue+pOe7hOOAguemgeatouS7u+S9leWFtuS7luS6uuS7peS7
-u+S9leW9ouW8j+S9v+eUqO+8iOWMheaLrOS9huS4jemZkOS6juWFqOmDqOaIlumDqOWIhuWcsOaz
-hOmcsuOAgeWkjeWItuOAgQ0K5oiW5pWj5Y+R77yJ5pys6YKu5Lu25Lit55qE5L+h5oGv44CC5aaC
-5p6c5oKo6ZSZ5pS25LqG5pys6YKu5Lu277yM6K+35oKo56uL5Y2z55S16K+d5oiW6YKu5Lu26YCa
-55+l5Y+R5Lu25Lq65bm25Yig6Zmk5pysDQrpgq7ku7bvvIENClRoaXMgZS1tYWlsIGFuZCBpdHMg
-YXR0YWNobWVudHMgY29udGFpbiBjb25maWRlbnRpYWwgaW5mb3JtYXRpb24gZnJvbSBIM0MsIHdo
-aWNoIGlzDQppbnRlbmRlZCBvbmx5IGZvciB0aGUgcGVyc29uIG9yIGVudGl0eSB3aG9zZSBhZGRy
-ZXNzIGlzIGxpc3RlZCBhYm92ZS4gQW55IHVzZSBvZiB0aGUNCmluZm9ybWF0aW9uIGNvbnRhaW5l
-ZCBoZXJlaW4gaW4gYW55IHdheSAoaW5jbHVkaW5nLCBidXQgbm90IGxpbWl0ZWQgdG8sIHRvdGFs
-IG9yIHBhcnRpYWwNCmRpc2Nsb3N1cmUsIHJlcHJvZHVjdGlvbiwgb3IgZGlzc2VtaW5hdGlvbikg
-YnkgcGVyc29ucyBvdGhlciB0aGFuIHRoZSBpbnRlbmRlZA0KcmVjaXBpZW50KHMpIGlzIHByb2hp
-Yml0ZWQuIElmIHlvdSByZWNlaXZlIHRoaXMgZS1tYWlsIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5
-IHRoZSBzZW5kZXINCmJ5IHBob25lIG9yIGVtYWlsIGltbWVkaWF0ZWx5IGFuZCBkZWxldGUgaXQh
-DQo=
+Noticed while benchmarking newstore with rocksdb backend that, the data is missing in "dev/osd0/fragments"
+
+>64k sized objects produces content in above mentioned dir, however missing with <=64k  sized objects
+
+Corresponding drive/s shows activity, .sst files are in "dev/osd0/db" dir
+
+Is it expected behavior ??
+
+Where does the data go ??
+
+Tomy
+
+
+________________________________
+
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+
