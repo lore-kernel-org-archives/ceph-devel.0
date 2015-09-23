@@ -1,113 +1,228 @@
-From: Igor Fedotov <ifedotov@mirantis.com>
-Subject: Re: Adding Data-At-Rest compression support to Ceph
-Date: Wed, 23 Sep 2015 18:26:04 +0300
-Message-ID: <5602C48C.4010009@mirantis.com>
-References: <56018A05.6090100@mirantis.com>
- <alpine.DEB.2.00.1509221201570.11876@cobra.newdream.net>
- <56029F66.3070503@mirantis.com>
- <alpine.DEB.2.00.1509230613410.11876@cobra.newdream.net>
- <CAJ4mKGanEtC3yX5Y2SA+698FEtNupOVcpFnoDLoJ7Hwo1ruSGw@mail.gmail.com>
+From: Michael Kidd <linuxkidd-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: ceph-mon always election when change crushmap in
+	firefly
+Date: Wed, 23 Sep 2015 11:45:37 -0400
+Message-ID: <CAND7sixgvyvAL8mM5c4VP9DCLMxeMTN3ma+R9L=4poakF9Pv6w@mail.gmail.com>
+References: <CAA4r=YCZ+7jekicx6NqJ-+bzAcniMReMrLL-dYafCtrPGixpMg@mail.gmail.com>
+	<alpine.DEB.2.00.1509230531150.11876@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f54.google.com ([209.85.215.54]:36381 "EHLO
-	mail-la0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753506AbbIWP0K (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Sep 2015 11:26:10 -0400
-Received: by lacao8 with SMTP id ao8so31892231lac.3
-        for <ceph-devel@vger.kernel.org>; Wed, 23 Sep 2015 08:26:07 -0700 (PDT)
-In-Reply-To: <CAJ4mKGanEtC3yX5Y2SA+698FEtNupOVcpFnoDLoJ7Hwo1ruSGw@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>, Sage Weil <sage@newdream.net>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: multipart/mixed; boundary="===============0932107645=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.00.1509230531150.11876-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Cc: Alexander Yang <yangwanyuan8861-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
+--===============0932107645==
+Content-Type: multipart/alternative; boundary=001a113f2de8d6d14505206c032f
 
+--001a113f2de8d6d14505206c032f
+Content-Type: text/plain; charset=UTF-8
 
-On 23.09.2015 17:05, Gregory Farnum wrote:
-> On Wed, Sep 23, 2015 at 6:15 AM, Sage Weil <sage@newdream.net> wrote:
->> On Wed, 23 Sep 2015, Igor Fedotov wrote:
->>> Hi Sage,
->>> thanks a lot for your feedback.
->>>
->>> Regarding issues with offset mapping and stripe size exposure.
->>> What's about the idea to apply compression in two-tier (cache+backi=
-ng storage)
->>> model only ?
->> I'm not sure we win anything by making it a two-tier only thing... s=
-imply
->> making it a feature of the EC pool means we can also address EC pool=
- users
->> like radosgw.
->>
->>> I doubt single-tier one is widely used for EC pools since there is =
-no random
->>> write support in such mode. Thus this might be an acceptable limita=
-tion.
->>> At the same time it seems that appends caused by cached object flus=
-h have
->>> fixed block size (8Mb by default). And object is totally rewritten =
-on the next
->>> flush if any. This makes offset mapping less tricky.
->>> Decompression should be applied in any model though as cache tier s=
-hutdown and
->>> subsequent compressed data access is possibly  a valid use case.
->> Yeah, we need to handle random reads either way, so I think the offs=
-et
->> mapping is going to be needed anyway.
-> The idea of making the primary responsible for object compression
-> really concerns me. It means for instance that a single random access
-> will likely require access to multiple objects, and breaks many of th=
-e
-> optimizations we have right now or in the pipeline (for instance:
-> direct client access).
-Could you please elaborate why multiple objects access is required on=20
-single random access?
-In my opinion we need to access absolutely the same object set as=20
-before: in EC pool each appended block is spitted into multiple shards=20
-that go to respective OSDs. In general case one has to retrieve a set o=
-f=20
-adjacent shards from several OSDs on single read request. In case of=20
-compression the only difference is in data range that compressed shard=20
-set occupy. I.e. we simply need to translate requested data range to th=
-e=20
-actually stored one and retrieve that data from OSDs. What's missed?
-> And apparently only the EC pool will support
-> compression, which is frustrating for all the replicated pool users
-> out there...
-In my opinion  replicated pool users should consider EC pool usage firs=
-t=20
-if they care about space saving. They automatically gain 50% space=20
-saving this way. Compression brings even more saving but that's rather=20
-the second step on this way.
-> Is there some reason we don't just want to apply encryption across an
-> OSD store? Perhaps doing it on the filesystem level is the wrong way
-> (for reasons named above) but there are other mechanisms like inline
-> block device compression that I think are supposed to work pretty
-> well.
-If I understand the idea of inline block device compression correctly i=
-t=20
-has some of drawbacks similar to FS compression approach. Ones to menti=
-on:
-* Less flexibility - per device compression only, no way to have=20
-per-pool compression. No control on the compression process.
-* Potentially higher overhead when operating- There is no way to bypass=
-=20
-non-compressible data processing, e.g. shards with Erasure codes.
-* Potentially higher overhead for recovery on OSD death - one needs to=20
-decompress data at working OSDs and compress it at new OSD. That's not=20
-necessary if compression takes place prior to EC though.
-> The only thing that doesn't get us that I can see mentioned here
-> is the over-the-wire compression =E2=80=94 and Haomai already has pat=
-ches for
-> that, which should be a lot easier to validate and will work at all
-> levels of the stack!
-> -Greg
+Hello Alexander,
+  One other point on your email.. You indicate you desire each OSD to have
+~100 PGs, but depending on your pool size, it seems you may have forgetting
+about the additional PGs associated with replication itself.
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Assuming 3x replication in your environment:
+70,000 * 3
+------------
+800 OSDs
+
+=~ 262.5 PGs per OSD on average
+
+While this PG to OSD ratio shouldn't cause significant pain, I would not go
+to any higher PG count without adding more spindles.
+
+For more specific PG count guidance and modeling, please see:
+http://ceph.com/pgcalc
+
+Hope this helps,
+
+Michael J. Kidd
+Sr. Storage Consultant
+Red Hat Global Storage Consulting
++1 919-442-8878
+
+On Wed, Sep 23, 2015 at 8:34 AM, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> wrote:
+
+> On Wed, 23 Sep 2015, Alexander Yang wrote:
+> > hello,
+> >         We use Ceph+Openstack in our private cloud. In our cluster, we
+> have
+> > 5 mons and 800 osds, the Capacity is about 1Pb. And run about 700 vms and
+> > 1100 volumes,
+> >         recently, we increase our pg_num , now the cluster have about
+> 70000
+> > pgs. In my real intention? I want every osd have 100pgs. but after
+> increase
+> > pg_num, I find I'm wrong. Because the different crush weight for
+> different
+> > osd, the osd's pg_num is different, some osd have exceed  500pgs.
+> >         Now, the problem is  appear?cause some reason when i want to
+> change
+> > some osd  weight, that means change the crushmap.  This change cause
+> about
+> > 0.03% data to migrate. the mon is always begin to election. It's will
+> hung
+> > the cluster, and when they end, the  original  leader still is the new
+> > leader. And during the mon eclection?On the upper layer, vm have too many
+> > slow request will appear. so now i dare to do any operation about change
+> > crushmap. But i worry about an important thing, If  when our cluster
+> down
+> >  one host even down one rack.   By the time, the cluster curshmap will
+> > change large, and the migrate data also large. I worry the cluster will
+> > hung  long time. and result on upper layer, all vm became to  shutdown.
+> >         In my opinion, I guess when I change the crushmap,* the leader
+> mon
+> > maybe calculate the too many information*, or* too many client want to
+> get
+> > the new crushmap from leader mon*.  It must be hung the mon thread, so
+> the
+> > leader mon can't heatbeat to other mons, the other mons think the leader
+> is
+> > down then begin the new election.  I am sorry if i guess is wrong.
+> >         The crushmap in accessory. So who can give me some advice or
+> guide,
+> > Thanks very much!
+>
+> There were huge improvements made in hammer in terms of mon efficiency in
+> these cases where it is under load.  I recommend upgrading as that will
+> help.
+>
+> You can also mitigate the problem somewhat by adjusting the mon_lease and
+> associated settings up.  Scale all of mon_lease, mon_lease_renew_interval,
+> mon_lease_ack_timeout, mon_accept_timeout by 2x or 3x.
+>
+> It also sounds like you may be using some older tunables/settings
+> for your pools or crush rules.  Can you attach the output of 'ceph osd
+> dump' and 'ceph osd crush dump | tail -n 20' ?
+>
+> sage
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>
+
+--001a113f2de8d6d14505206c032f
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div><div><div><div><div><div><div><div><div>Hello Alexand=
+er,<br></div>=C2=A0 One other point on your email.. You indicate you desire=
+ each OSD to have ~100 PGs, but depending on your pool size, it seems you m=
+ay have forgetting about the additional PGs associated with replication its=
+elf.<br><br></div>Assuming 3x replication in your environment:<br>70,000 * =
+3<br>------------<br></div>800 OSDs<br><br></div>=3D~ 262.5 PGs per OSD on =
+average<br><br></div>While this PG to OSD ratio shouldn&#39;t cause signifi=
+cant pain, I would not go to any higher PG count without adding more spindl=
+es.<br></div><br></div>For more specific PG count guidance and modeling, pl=
+ease see:<br></div><a href=3D"http://ceph.com/pgcalc">http://ceph.com/pgcal=
+c</a><br><br></div>Hope this helps,<br></div><div class=3D"gmail_extra"><br=
+ clear=3D"all"><div><div class=3D"gmail_signature"><div dir=3D"ltr"><div>Mi=
+chael J. Kidd<br>Sr. Storage Consultant<br> Red Hat Global Storage Consulti=
+ng<br></div>+1 919-442-8878</div></div></div>
+<br><div class=3D"gmail_quote">On Wed, Sep 23, 2015 at 8:34 AM, Sage Weil <=
+span dir=3D"ltr">&lt;<a href=3D"mailto:sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org" target=3D"_blank"=
+>sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org</a>&gt;</span> wrote:<br><blockquote class=3D"gmail_quot=
+e" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">=
+On Wed, 23 Sep 2015, Alexander Yang wrote:<br>
+&gt; hello,<br>
+&gt;=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0We use Ceph+Openstack in our private =
+cloud. In our cluster, we have<br>
+&gt; 5 mons and 800 osds, the Capacity is about 1Pb. And run about 700 vms =
+and<br>
+&gt; 1100 volumes,<br>
+&gt;=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0recently, we increase our pg_num , no=
+w the cluster have about 70000<br>
+&gt; pgs. In my real intention? I want every osd have 100pgs. but after inc=
+rease<br>
+&gt; pg_num, I find I&#39;m wrong. Because the different crush weight for d=
+ifferent<br>
+&gt; osd, the osd&#39;s pg_num is different, some osd have exceed=C2=A0 500=
+pgs.<br>
+&gt;=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0Now, the problem is=C2=A0 appear?caus=
+e some reason when i want to change<br>
+&gt; some osd=C2=A0 weight, that means change the crushmap.=C2=A0 This chan=
+ge cause about<br>
+&gt; 0.03% data to migrate. the mon is always begin to election. It&#39;s w=
+ill hung<br>
+&gt; the cluster, and when they end, the=C2=A0 original=C2=A0 leader still =
+is the new<br>
+&gt; leader. And during the mon eclection?On the upper layer, vm have too m=
+any<br>
+&gt; slow request will appear. so now i dare to do any operation about chan=
+ge<br>
+&gt; crushmap. But i worry about an important thing, If=C2=A0 when our clus=
+ter=C2=A0 down<br>
+&gt;=C2=A0 one host even down one rack.=C2=A0 =C2=A0By the time, the cluste=
+r curshmap will<br>
+&gt; change large, and the migrate data also large. I worry the cluster wil=
+l<br>
+&gt; hung=C2=A0 long time. and result on upper layer, all vm became to=C2=
+=A0 shutdown.<br>
+&gt;=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0In my opinion, I guess when I change =
+the crushmap,* the leader mon<br>
+&gt; maybe calculate the too many information*, or* too many client want to=
+ get<br>
+&gt; the new crushmap from leader mon*.=C2=A0 It must be hung the mon threa=
+d, so the<br>
+&gt; leader mon can&#39;t heatbeat to other mons, the other mons think the =
+leader is<br>
+&gt; down then begin the new election.=C2=A0 I am sorry if i guess is wrong=
+.<br>
+&gt;=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0The crushmap in accessory. So who can=
+ give me some advice or guide,<br>
+&gt; Thanks very much!<br>
+<br>
+There were huge improvements made in hammer in terms of mon efficiency in<b=
+r>
+these cases where it is under load.=C2=A0 I recommend upgrading as that wil=
+l<br>
+help.<br>
+<br>
+You can also mitigate the problem somewhat by adjusting the mon_lease and<b=
+r>
+associated settings up.=C2=A0 Scale all of mon_lease, mon_lease_renew_inter=
+val,<br>
+mon_lease_ack_timeout, mon_accept_timeout by 2x or 3x.<br>
+<br>
+It also sounds like you may be using some older tunables/settings<br>
+for your pools or crush rules.=C2=A0 Can you attach the output of &#39;ceph=
+ osd<br>
+dump&#39; and &#39;ceph osd crush dump | tail -n 20&#39; ?<br>
+<br>
+sage<br>
+_______________________________________________<br>
+ceph-users mailing list<br>
+<a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a><=
+br>
+<a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" rel=3D"n=
+oreferrer" target=3D"_blank">http://lists.ceph.com/listinfo.cgi/ceph-users-=
+ceph.com</a><br>
+</blockquote></div><br></div>
+
+--001a113f2de8d6d14505206c032f--
+
+--===============0932107645==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============0932107645==--
