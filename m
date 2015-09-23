@@ -1,53 +1,49 @@
-From: Z Zhang <zhangz.david@outlook.com>
-Subject: RE: use crushtool to simulate pg distribution for a specific pool
-Date: Wed, 23 Sep 2015 10:15:29 +0800
-Message-ID: <SNT146-W425B28F17CD41FF6C88C688C440@phx.gbl>
-References: <SNT146-W7672C7B2604BA26E504E1D8C450@phx.gbl>,<alpine.DEB.2.00.1509221138330.11876@cobra.newdream.net>
+From: Jevon Qiao <scaleqiao@gmail.com>
+Subject: Seek advice for using Ceph to provice NAS service
+Date: Wed, 23 Sep 2015 10:21:54 +0800
+Message-ID: <56020CC2.2060806@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from snt004-omc2s34.hotmail.com ([65.55.90.109]:52347 "EHLO
-	SNT004-OMC2S34.hotmail.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1758805AbbIWCP3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 22 Sep 2015 22:15:29 -0400
-In-Reply-To: <alpine.DEB.2.00.1509221138330.11876@cobra.newdream.net>
+Received: from mail-pa0-f47.google.com ([209.85.220.47]:35782 "EHLO
+	mail-pa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759819AbbIWCWH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Sep 2015 22:22:07 -0400
+Received: by pacfv12 with SMTP id fv12so26349521pac.2
+        for <ceph-devel@vger.kernel.org>; Tue, 22 Sep 2015 19:22:06 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: sage@newdream.net
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ceph-users@ceph.com
 
-VGhhbmtzLCBTYWdlLiBJIHdpbGwgdGFrZSBhIGxvb2sgYXQgb3NkbWFwdG9vbC4KCgpUaGFua3Mu
-ClpoaSBaaGFuZyAoRGF2aWQpCgoKLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLQo+IERhdGU6IFR1ZSwgMjIgU2VwIDIwMTUgMTE6NDE6MjQgLTA3MDAKPiBGcm9tOiBzYWdl
-QG5ld2RyZWFtLm5ldAo+IFRvOiB6aGFuZ3ouZGF2aWRAb3V0bG9vay5jb20KPiBDQzogY2VwaC1k
-ZXZlbEB2Z2VyLmtlcm5lbC5vcmcKPiBTdWJqZWN0OiBSZTogdXNlIGNydXNodG9vbCB0byBzaW11
-bGF0ZSBwZyBkaXN0cmlidXRpb24gZm9yIGEgc3BlY2lmaWMgcG9vbAo+Cj4gSGkgWmhhbmcsCj4K
-PiBPbiBUdWUsIDIyIFNlcCAyMDE1LCBaIFpoYW5nIHdyb3RlOgo+PiBIaSBjZXBoLWRldmVsLAo+
-Pgo+PiBXZSBlbmhhbmNlZCB0aGUgY3J1c2h0b29sIHRvIHNpbXVsYXRlIHJlYWwgcGcgZGlzdHJp
-YnV0aW9uIGZvciBhCj4+IHNwZWNpZmljIHBvb2wuIFJlY2VudGx5IHdlIGhhZCBlbmNvdW50ZXJl
-ZCBwZyB1bmV2ZW4gaXNzdWUgYWdhaW4gYWZ0ZXIKPj4gZXhwYW5kaW5nIG91ciBjbHVzdGVyLCBh
-bHRob3VnaCB3ZSBoYWQgcmUtd2VpZ2h0ZWQgdGhlIGNsdXN0ZXIgdG8gbWFrZQo+PiBwZyBldmVu
-bHktZGlzdHJpYnV0aW9uIGF0IHRoZSB0aW1lIHdlIGJ1aWx0IHVwIHRoZSBjbHVzdGVyLgo+Pgo+
-PiBJdCBjb3VsZCBiZSBwYWluZnVsIHRvIHJlLXdlaWdodGVkIG9zZHMgYWZ0ZXIgZXhwYW5kaW5n
-IGNsdXN0ZXIgYmVjYXVzZQo+PiBpbiBvcmRlciB0byBhY2hpZXZlIHBnIGV2ZW5seS1kaXN0cmli
-dXRpb24sIHdlIG1heSBuZWVkIHRvIHJlLXdlaWdodAo+PiBjb3VwbGUgb2YgdGltZXMgYW5kIGVh
-Y2ggdGltZSB3aWxsIHRyaWdnZXIgZGF0YSBtb3ZlbWVudC4KPj4KPj4gTm93IHdlIGNvdWxkIHVz
-ZSB0aGlzIGNydXNodG9vbCB0byBzaW11bGF0ZSBwZyBkaXN0cmlidXRpb24gYWdhaW5zdAo+PiBj
-cnVzaCBtYXAsIHJlLXdlaWdodCBvc2RzIGFuZCB0ZXN0IHRoZSBjcnVzaCBtYXAgYWdhaW4gYW5k
-IGFnYWluIHVudGlsCj4+IHdlIHNhdGlzZnkgd2l0aCBwZyBkaXN0cmlidXRpb24uIFRoZW4gd2Ug
-Y291bGQgc2V0IGJhY2sgdGhlIGZpbmFsIGNydXNoCj4+IG1hcCBhbmQgdHJpZ2dlciBkYXRhIG1v
-dmVtZW50IGZvciBvbmUgdGltZS4KPj4KPj4gUGxlYXNlIGNoZWNrIHRoaXMgUFI6IGh0dHBzOi8v
-Z2l0aHViLmNvbS9jZXBoL2NlcGgvcHVsbC82MDA0IGlmIHlvdXIKPj4gZ3V5cyBhcmUgaW50ZXJl
-c3RlZC4KPgo+IFRoaXMgbG9va3MgbGlrZSBpdCB3aWxsIHdvcmssIGJ1dCBJJ20gbm90IHN1cmUg
-aXQncyB0aGUgcmlnaHQgcGxhY2UgdG8KPiBwdXQgaXQuIFRoZSBvc2RtYXB0b29sIGhhcyBhIC0t
-dGVzdC1tYXAtcGdzIG9wdGlvbiB0aGF0IG1hcHMgYWxsIFBHcyBhbmQKPiBnaXZlcyB5b3UgdGhl
-IG9zZCBkaXN0cmlidXRpb24gYW5kIHBnIG1pbi9tYXggcGVyIE9TRC4gVGhlIHByb2NlZHVyZSBp
-cwo+IHRoZW4gc2xpZ2h0bHkgZGlmZmVyZW50Ogo+Cj4gY2VwaCBvc2QgZ2V0bWFwIC1vIG9tCj4g
-b3NkbWFwdG9vbCBvbSAtLWV4cG9ydC1jcnVzaCBjbQo+IHJlcGVhdDoKPiBhZGp1c3QgY3J1c2gg
-bWFwIGNtLi4uCj4gb3NkbWFwdG9vbCBvbSAtLWltcG9ydC1jcnVzaCBjbSAtLXRlc3QtbWFwLXBn
-cwo+IGNlcGggb3NkIHNldGNydXNobWFwIC1pIGNtCj4KPiAuLi5idXQgaXQgd2lsbCBrZWVwIHRo
-ZSBkZXRhaWxzIG9mIGNlcGggcG9vbHMgb3V0IG9mIGNydXNodG9vbCAod2hlcmUgdGhleQo+IHBy
-b2JhYmx5IGRvbid0IGJlbG9uZykuCj4KPiBXaGF0IGRvIHlvdSB0aGluaz8KPiBzYWdlCiAJCSAJ
-ICAgCQkgIA==
+Hi Sage and other Ceph experts,
+
+This is a greeting from Jevon, I'm from China and working in a company 
+which are using Ceph as the backend storage. At present, I'm evaluating 
+the following two options of using Ceph cluster to provide NAS service 
+and I need your advice from the perspective of stability and feasibility.
+
+Option 1: Directly use CephFS
+Since Ceph as a unified storage can provide file system storage service 
+via cephfs, this looks an ideal solution for my case if CephFS is ready 
+to be used in production environment. However, based on the previous 
+discussions on CephFS, I see that there are still some issues like not 
+ready for supporting multiple metadata servers, lack of a fully 
+functioning fsck and so on. Also, I learn that CephFS has been evaluated 
+by a large community of users and there are production systems using it 
+with a single MDS from the official website of Ceph. So it is difficult 
+for me to make the decision on whether I should use it.
+
+Option 2: Ceph rbd + NFS server
+This might be a common architecture used in current NAS storage. But the 
+problem is how to get rid of the single point failure on NFS server. 
+What I have right now is to use Corosync and Pacemaker(the typical HA 
+solution in Linux) to form a cluster. It seems that Sebastien Han has 
+verified the feasibility.
+
+Your comments/advices would be highly appreciated and I'm looking 
+forward to your reply.
+
+Thanks,
+Jevon
