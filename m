@@ -1,54 +1,56 @@
-From: huang jun <hjwsm1989@gmail.com>
-Subject: Re: Ceph problem
-Date: Wed, 23 Sep 2015 10:23:28 +0800
-Message-ID: <CABAwU-YQqfZiOCmNgh0ZaejSDH1hbekKQkj1Fjxa6hZss=QwWw@mail.gmail.com>
-References: <1CB94550540AE44E9CAAE8CD5AF40BF846CF1A78@H3CMLB12-EX.srv.huawei-3com.com>
+From: wangsongbo <songbo1227@gmail.com>
+Subject: Re: [ceph-users] Important security noticed regarding release signing
+ key
+Date: Wed, 23 Sep 2015 10:33:14 +0800
+Message-ID: <56020F6A.9050406@gmail.com>
+References: <alpine.DEB.2.00.1509170925140.31198@cobra.newdream.net>
+ <CAHRQ3VU1RFQL6AKh_CtOOeqg87wX7W5oa3n_3d8Ki9WFW=w5tw@mail.gmail.com>
+ <CALqRxCw6tq0PvqMJAY1S0At1FB3cm_KPUY_bbX72Z9R_pyJ4+Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f46.google.com ([209.85.213.46]:34944 "EHLO
-	mail-vk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753075AbbIWC3W (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Sep 2015 22:29:22 -0400
-Received: by vkao3 with SMTP id o3so18909248vka.2
-        for <ceph-devel@vger.kernel.org>; Tue, 22 Sep 2015 19:29:21 -0700 (PDT)
-In-Reply-To: <1CB94550540AE44E9CAAE8CD5AF40BF846CF1A78@H3CMLB12-EX.srv.huawei-3com.com>
+Received: from mail-pa0-f50.google.com ([209.85.220.50]:32961 "EHLO
+	mail-pa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934146AbbIWCd1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Sep 2015 22:33:27 -0400
+Received: by pacex6 with SMTP id ex6so26280222pac.0
+        for <ceph-devel@vger.kernel.org>; Tue, 22 Sep 2015 19:33:27 -0700 (PDT)
+In-Reply-To: <CALqRxCw6tq0PvqMJAY1S0At1FB3cm_KPUY_bbX72Z9R_pyJ4+Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "zhao.mingyue@h3c.com" <zhao.mingyue@h3c.com>
-Cc: "gfarnum@redhat.com" <gfarnum@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ken Dreyer <kdreyer@redhat.com>
+Cc: Sage Weil <sage@newdream.net>, ceph-devel <ceph-devel@vger.kernel.org>, ceph-users@ceph.com, ceph-maintainers@ceph.com, ceph-announce@ceph.com
 
-eW91IGNhbiBhZGQgZGVidWdfcmFkb3Mgb3IgZGVidWdfbXMgdG8gcmJkIGNyZWF0ZSBjb21tYW5k
-IHRvIHNlZSB3aGF0DQpoYXBwZW5lZCBkdXJpbmcgMTIwcw0KDQoyMDE1LTA5LTIzIDk6NTkgR01U
-KzA4OjAwIHpoYW8ubWluZ3l1ZUBoM2MuY29tIDx6aGFvLm1pbmd5dWVAaDNjLmNvbT46DQo+DQo+
-IC0tLeWOn+Wni+mCruS7ti0tLQ0KPiDlj5Hku7bkuro6ICLpmYjmnbAiPDI3NjY0ODE3OEBxcS5j
-b20+DQo+IOWPkemAgeaXtumXtDogMjAxNeW5tDA55pyIMjHml6UgMTc6NTI6MTkNCj4g5pS25Lu2
-5Lq6OiAiY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmciPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwu
-b3JnPjsNCj4g5Li76aKYOiBDZXBoIHByb2JsZW0NCj4NCj4gRGVhciBjZXBoLWRldmVsDQo+ICAg
-ICAgIEknbSBhIHNvZnR3YXJlIGVuZ2luZWVyIGZvciBIM0MsV2UgZm91bmQgYSBjZXBoIHByb2Js
-ZW0gaW4gdGhlIHRlc3QsdGhlIG5lZWQgeW91ciBoZWxwLg0KPiAgICAgIElmIG9uZSBvZiB0aGUg
-aG9zdHMgaW4gdGhlIGNsdXN0ZXIgaXMgcmVzdGFydGVkLHdlIHJ1biAncmJkIGNyZWF0ZeKApuKA
-picgY29tbWFuZCB3aWxsIGJsb2NrIDEyMCBzZWNvbmRzLGJ1dCB0aGUgbm9ybWFsIGlzIGJsb2Nr
-ZWQgZm9yIDIwIHNlY29uZHMuDQo+ICAgICBDbHVzdGVyIGVudmlyb25tZW50IGNvbXBvc2VkIG9m
-IHRocmVlIGhvc3RzLGVhY2ggaG9zdCBydW5zIGEgbW9uaXRvciBwcm9jZXNzIGFuZCB0ZW4gT1NE
-IHByb2Nlc3Nlcw0KPg0KPiBMb29raW5nIGZvcndhcmQgdG8geW91ciByZXBseSxUaGFuayB5b3Uh
-DQo+IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCj4g5pys6YKu5Lu25Y+K5YW26ZmE5Lu25ZCr5pyJ5p2t
-5bee5Y2O5LiJ6YCa5L+h5oqA5pyv5pyJ6ZmQ5YWs5Y+455qE5L+d5a+G5L+h5oGv77yM5LuF6ZmQ
-5LqO5Y+R6YCB57uZ5LiK6Z2i5Zyw5Z2A5Lit5YiX5Ye6DQo+IOeahOS4quS6uuaIlue+pOe7hOOA
-guemgeatouS7u+S9leWFtuS7luS6uuS7peS7u+S9leW9ouW8j+S9v+eUqO+8iOWMheaLrOS9huS4
-jemZkOS6juWFqOmDqOaIlumDqOWIhuWcsOazhOmcsuOAgeWkjeWItuOAgQ0KPiDmiJbmlaPlj5Hv
-vInmnKzpgq7ku7bkuK3nmoTkv6Hmga/jgILlpoLmnpzmgqjplJnmlLbkuobmnKzpgq7ku7bvvIzo
-r7fmgqjnq4vljbPnlLXor53miJbpgq7ku7bpgJrnn6Xlj5Hku7bkurrlubbliKDpmaTmnKwNCj4g
-6YKu5Lu277yBDQo+IFRoaXMgZS1tYWlsIGFuZCBpdHMgYXR0YWNobWVudHMgY29udGFpbiBjb25m
-aWRlbnRpYWwgaW5mb3JtYXRpb24gZnJvbSBIM0MsIHdoaWNoIGlzDQo+IGludGVuZGVkIG9ubHkg
-Zm9yIHRoZSBwZXJzb24gb3IgZW50aXR5IHdob3NlIGFkZHJlc3MgaXMgbGlzdGVkIGFib3ZlLiBB
-bnkgdXNlIG9mIHRoZQ0KPiBpbmZvcm1hdGlvbiBjb250YWluZWQgaGVyZWluIGluIGFueSB3YXkg
-KGluY2x1ZGluZywgYnV0IG5vdCBsaW1pdGVkIHRvLCB0b3RhbCBvciBwYXJ0aWFsDQo+IGRpc2Ns
-b3N1cmUsIHJlcHJvZHVjdGlvbiwgb3IgZGlzc2VtaW5hdGlvbikgYnkgcGVyc29ucyBvdGhlciB0
-aGFuIHRoZSBpbnRlbmRlZA0KPiByZWNpcGllbnQocykgaXMgcHJvaGliaXRlZC4gSWYgeW91IHJl
-Y2VpdmUgdGhpcyBlLW1haWwgaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlcg0KPiBi
-eSBwaG9uZSBvciBlbWFpbCBpbW1lZGlhdGVseSBhbmQgZGVsZXRlIGl0IQ0KDQoNCg0KLS0gDQp0
-aGFua3MNCmh1YW5nanVuDQo=
+Hi Ken,
+     Thanks for your reply. But in the ceph-cm-ansible project schedule=
+d=20
+by teuthology, "ceph.com/packages/ceph-extras" is in used now, such as=20
+qemu-kvm-0.12.1.2-2.415.el6.3ceph,=20
+qemu-kvm-tools-0.12.1.2-2.415.el6.3ceph etc.
+     Any new releases will be provided ?
+
+On 15/9/22 =E4=B8=8B=E5=8D=8810:24, Ken Dreyer wrote:
+> On Tue, Sep 22, 2015 at 2:38 AM, Songbo Wang <songbo1227@gmail.com> w=
+rote:
+>> Hi, all,
+>>          Since the last week=E2=80=98s attack, =E2=80=9Cceph.com/pac=
+kages/ceph-extras=E2=80=9D can be
+>> opened never, but where can I get the releases of ceph-extra now?
+>>
+>> Thanks and Regards,
+>> WangSongbo
+>>
+> The packages in "ceph-extras" were old and subject to CVEs (the big
+> one being VENOM, CVE-2015-3456). So I don't intend to host ceph-extra=
+s
+> in the new location.
+>
+> - Ken
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
