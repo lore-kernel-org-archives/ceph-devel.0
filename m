@@ -1,23 +1,30 @@
-From: GuangYang <yguang11@outlook.com>
-Subject: ceph pg query - num_objects_missing_on_primary
-Date: Wed, 23 Sep 2015 14:29:11 -0700
-Message-ID: <BLU175-W24FED0B3FA4DF17C772645DF440@phx.gbl>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: ceph pg query - num_objects_missing_on_primary
+Date: Wed, 23 Sep 2015 14:40:40 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1509231439430.11876@cobra.newdream.net>
+References: <BLU175-W24FED0B3FA4DF17C772645DF440@phx.gbl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from blu004-omc4s27.hotmail.com ([65.55.111.166]:58066 "EHLO
-	BLU004-OMC4S27.hotmail.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753386AbbIWV3M (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 23 Sep 2015 17:29:12 -0400
+Received: from cobra.newdream.net ([66.33.216.30]:44306 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755839AbbIWVkm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Sep 2015 17:40:42 -0400
+In-Reply-To: <BLU175-W24FED0B3FA4DF17C772645DF440@phx.gbl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: GuangYang <yguang11@outlook.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SGVsbG8sCldoaWxlIGRvaW5nIGEgJ2NlcGggcGcge2lkfSBxdWVyeScsIGl0IGR1bXBzIHRoZSBp
-bmZvIGZyb20gYWxsIHBlZXJzLCBob3dldmVyLCBmb3IgYWxsIHBlZXJzLCBpdCBvbmx5IHNob3dz
-ICdudW1fb2JqZWN0c19taXNzaW5nX29uX3ByaW1hcnknLCB3aGljaCBpcyB0aGUgc2FtZSBhY3Jv
-c3MgYWxsIHBlZXJzLgoKSXNuJ3QgaXQgYmV0dGVyIHRvIHNob3cgdGhlICdudW1fb2JqZWNndHNf
-bWlzc2luZycgZm9yIHRoZSBwZWVyIHJhdGhlciB0aGFuIHByaW1hcnk/CgpUaGFua3MsCkd1YW5n
-IAkJIAkgICAJCSAg
+On Wed, 23 Sep 2015, GuangYang wrote:
+> Hello,
+> While doing a 'ceph pg {id} query', it dumps the info from all peers, however, for all peers, it only shows 'num_objects_missing_on_primary', which is the same across all peers.
+> 
+> Isn't it better to show the 'num_objecgts_missing' for the peer rather than primary?
+
+Probably, yeah.  I think this is just an artifact of being lazy when 
+implementing query... we dumped whatever was convenient without 
+considering it too carefully.  Adding a section for missing would 
+definitely be useful.
+
+sage
