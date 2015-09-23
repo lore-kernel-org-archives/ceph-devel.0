@@ -1,28 +1,42 @@
-From: "Handzik, Joe" <joseph.t.handzik@hpe.com>
-Subject: Re: Very slow recovery/peering with latest master
-Date: Wed, 23 Sep 2015 23:19:34 +0000
-Message-ID: <2B48BC83-794A-4C76-A50D-86C9349B73BE@hpe.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Very slow recovery/peering with latest master
+Date: Wed, 23 Sep 2015 23:26:25 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE53886@SACMBXIP01.sdcorp.global.sandisk.com>
 References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE48251@SACMBXIP01.sdcorp.global.sandisk.com>
 	<CAJ4mKGa1vr6Zp9ZUaT8rrHDgRFJgdkO2c8LZqMQuwxwYt7TJ+A@mail.gmail.com>
 	<755F6B91B3BE364F9BCA11EA3F9E0C6F2CE536F2@SACMBXIP01.sdcorp.global.sandisk.com>,<CAN=+7FWL8c2EO8CU0DS_bMpEXXZS4tpWnkgvjg9p7+D3ztLQhg@mail.gmail.com>
+ <2B48BC83-794A-4C76-A50D-86C9349B73BE@hpe.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from g4t3425.houston.hp.com ([15.201.208.53]:9907 "EHLO
-	g4t3425.houston.hp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754956AbbIWXUm convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Sep 2015 19:20:42 -0400
-In-Reply-To: <CAN=+7FWL8c2EO8CU0DS_bMpEXXZS4tpWnkgvjg9p7+D3ztLQhg@mail.gmail.com>
+Received: from mail-bn1bon0061.outbound.protection.outlook.com ([157.56.111.61]:16262
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1755946AbbIWX0a convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Sep 2015 19:26:30 -0400
+In-Reply-To: <2B48BC83-794A-4C76-A50D-86C9349B73BE@hpe.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sjust@redhat.com>
-Cc: Somnath Roy <Somnath.Roy@sandisk.com>, "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>, "Sage Weil (sage@newdream.net)" <sage@newdream.net>, ceph-devel <ceph-devel@vger.kernel.org>
+To: "Handzik, Joe" <joseph.t.handzik@hpe.com>, Samuel Just <sjust@redhat.com>
+Cc: "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>, "Sage Weil (sage@newdream.net)" <sage@newdream.net>, ceph-devel <ceph-devel@vger.kernel.org>
+
+<<inline
+
+-----Original Message-----
+From: Handzik, Joe [mailto:joseph.t.handzik@hpe.com] 
+Sent: Wednesday, September 23, 2015 4:20 PM
+To: Samuel Just
+Cc: Somnath Roy; Samuel Just (sam.just@inktank.com); Sage Weil (sage@newdream.net); ceph-devel
+Subject: Re: Very slow recovery/peering with latest master
 
 I added that, there is code up the stack in calamari that consumes the path provided, which is intended in the future to facilitate disk monitoring and management.
 
+[Somnath] Ok
+
 Somnath, what does your disk configuration look like (filesystem, SSD/HDD, anything else you think could be relevant)? Did you configure your disks with ceph-disk, or by hand? I never saw this while testing my code, has anyone else heard of this behavior on master? The code has been in master for 2-3 months now I believe.
+[Somnath] All SSD , I use mkcephfs to create cluster , I partitioned the disk with fdisk beforehand. I am using XFS. Are you trying with Ubuntu 3.16.* kernel ? It could be Linux distribution/kernel specific.
 
 It would be nice to not need to disable this, but if this behavior exists and can't be explained by a misconfiguration or something else I'll need to figure out a different implementation.
 
@@ -30,8 +44,8 @@ Joe
 
 > On Sep 23, 2015, at 6:07 PM, Samuel Just <sjust@redhat.com> wrote:
 > 
-> Wow.  Why would that take so long?  I think you are correct that it's
-> only used for metadata, we could just add a config value to disable
+> Wow.  Why would that take so long?  I think you are correct that it's 
+> only used for metadata, we could just add a config value to disable 
 > it.
 > -Sam
 > 
@@ -41,12 +55,13 @@ Joe
 >> Commenting it out resolves the issue. BTW, I saw this value is stored as metadata but not used anywhere , am I missing anything ?
 >> Here is my Linux details..
 >> 
->> root@emsnode5:~/wip-write-path-optimization/src# uname -a
->> Linux emsnode5 3.16.0-38-generic #52~14.04.1-Ubuntu SMP Fri May 8 09:43:57 UTC 2015 x86_64 x86_64 x86_64 GNU/Linux
+>> root@emsnode5:~/wip-write-path-optimization/src# uname -a Linux 
+>> emsnode5 3.16.0-38-generic #52~14.04.1-Ubuntu SMP Fri May 8 09:43:57 
+>> UTC 2015 x86_64 x86_64 x86_64 GNU/Linux
 >> 
 >> 
->> root@emsnode5:~/wip-write-path-optimization/src# lsb_release -a
->> No LSB modules are available.
+>> root@emsnode5:~/wip-write-path-optimization/src# lsb_release -a No 
+>> LSB modules are available.
 >> Distributor ID: Ubuntu
 >> Description:    Ubuntu 14.04.2 LTS
 >> Release:        14.04
@@ -76,8 +91,11 @@ Joe
 >> 
 >> 3. During this period, I saw monclient trying to communicate with monitor but not able to probably. It is sending osd_boot at 2015-09-16 16:16:07.180482 only..
 >> 
->> 2015-09-16 16:16:07.180450 7f65377fe700 10 monclient: _send_mon_message to mon.a at 10.60.194.10:6789/0
->> 2015-09-16 16:16:07.180482 7f65377fe700  1 -- 10.60.194.10:6820/20102 --> 10.60.194.10:6789/0 -- osd_boot(osd.10 booted 0 features 72057594037927935 v45) v6 -- ?+0 0x7f6523c19100 con 0x7f6542045680
+>> 2015-09-16 16:16:07.180450 7f65377fe700 10 monclient: 
+>> _send_mon_message to mon.a at 10.60.194.10:6789/0
+>> 2015-09-16 16:16:07.180482 7f65377fe700  1 -- 10.60.194.10:6820/20102 
+>> --> 10.60.194.10:6789/0 -- osd_boot(osd.10 booted 0 features 
+>> 72057594037927935 v45) v6 -- ?+0 0x7f6523c19100 con 0x7f6542045680
 >> 2015-09-16 16:16:07.180496 7f65377fe700 20 -- 10.60.194.10:6820/20102 submit_message osd_boot(osd.10 booted 0 features 72057594037927935 v45) v6 remote, 10.60.194.10:6789/0, have pipe.
 >> 
 >> 4. BTW, the osd down scenario is detected very quickly (ceph -w output) , problem is during coming up I guess.
@@ -110,6 +128,6 @@ Joe
 >> 
 >> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> in the body of a message to majordomo@vger.kernel.org More majordomo 
+> info at  http://vger.kernel.org/majordomo-info.html
