@@ -1,69 +1,82 @@
-From: "zhao.mingyue@h3c.com" <zhao.mingyue@h3c.com>
-Subject: =?utf-8?B?562U5aSNOiBDZXBoIHByb2JsZW0=?=
-Date: Wed, 23 Sep 2015 08:21:36 +0000
-Message-ID: <1CB94550540AE44E9CAAE8CD5AF40BF846CF1C3E@H3CMLB12-EX.srv.huawei-3com.com>
-References: <1CB94550540AE44E9CAAE8CD5AF40BF846CF1A78@H3CMLB12-EX.srv.huawei-3com.com>
- <CABAwU-YQqfZiOCmNgh0ZaejSDH1hbekKQkj1Fjxa6hZss=QwWw@mail.gmail.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: RBD mirroring CLI proposal ...
+Date: Wed, 23 Sep 2015 11:48:48 +0300
+Message-ID: <CAOi1vP_KNFG7KNYsEmh+tX3xq0EY4op0fXxdCcNW+xSDFuxPig@mail.gmail.com>
+References: <604040155.31290870.1442846770290.JavaMail.zimbra@redhat.com>
+	<189900515.31291453.1442846891314.JavaMail.zimbra@redhat.com>
+	<20150922092847.GA13767@gmail.com>
+	<151161168.32108716.1442943169367.JavaMail.zimbra@redhat.com>
+	<20150923063313.GA8713@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([60.191.123.56]:20273 "EHLO h3cmg01-ex.h3c.com"
-	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751000AbbIWIZf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 23 Sep 2015 04:25:35 -0400
-In-Reply-To: <CABAwU-YQqfZiOCmNgh0ZaejSDH1hbekKQkj1Fjxa6hZss=QwWw@mail.gmail.com>
-Content-Language: zh-CN
+Received: from mail-wi0-f174.google.com ([209.85.212.174]:32848 "EHLO
+	mail-wi0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753309AbbIWIst (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Sep 2015 04:48:49 -0400
+Received: by wiclk2 with SMTP id lk2so228471394wic.0
+        for <ceph-devel@vger.kernel.org>; Wed, 23 Sep 2015 01:48:48 -0700 (PDT)
+In-Reply-To: <20150923063313.GA8713@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: huang jun <hjwsm1989@gmail.com>
-Cc: "gfarnum@redhat.com" <gfarnum@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Mykola Golub <mgolub@mirantis.com>
+Cc: Jason Dillaman <dillaman@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-DQpEZWFyIGNlcGgtZGV2ZWwNCg0KICAgIENsdXN0ZXIgZW52aXJvbm1lbnQgY29tcG9zZWQgb2Yg
-dGhyZWUgaG9zdHMsZWFjaCBob3N0IHJ1bnMgYSBtb25pdG9yIHByb2Nlc3MgYW5kIHRlbiBPU0Qg
-cHJvY2Vzc2VzDQoNCiAgICBJZiBvbmUgb2YgdGhlIGhvc3RzIGluIHRoZSBjbHVzdGVyIGlzIHJl
-c3RhcnRlZCx3ZSBydW4gJ3JiZCBjcmVhdGXigKbigKYnIGNvbW1hbmQgd2lsbCBibG9jayAxMjAg
-c2Vjb25kcyxidXQgdGhlIG5vcm1hbCBpcyBibG9ja2VkIGZvciAyMCBzZWNvbmRzLg0KICAgIA0K
-ICAgIFdoZW4gYSBob3N0IGlzIGRvd24sIE9TRCBzdGF0dXMgcmVtYWlucyBpbiB0aGUgY2x1c3Rl
-ciBpcyAiVVAiLiANCiAgICBUcmFja2luZyBmdW5jdGlvbiJvc2Rtb25pdG9yOjpjaGVja19mYWls
-dXJlIiwgdGhlIHZhcmlhYmxlICJvc2RfeGluZm9fdC5sYWdneV9pbnRlcnZhbCIgdmFsdWVzIGlz
-IHZlcnlsYXJnZSwgYW5kIGZhciBtb3JlIA0KdGhhbiAyMCBzZWNvbmRzLCBidXQgaXMgbm9ybWFs
-bHkgMC4gDQogICAgU28sIHRoZSB2YXJpYWJsZSJvc2RfeGluZm9fdC5sYWdneV9pbnRlcnZhbCIg
-d2h5IGRvZXMgZXhpc3Q/DQoNCg0KTG9va2luZyBmb3J3YXJkIHRvIHlvdXIgcmVwbHksVGhhbmsg
-eW91IQ0KDQotLS0tLemCruS7tuWOn+S7ti0tLS0tDQrlj5Hku7bkuro6IGh1YW5nIGp1biBbbWFp
-bHRvOmhqd3NtMTk4OUBnbWFpbC5jb21dIA0K5Y+R6YCB5pe26Ze0OiAyMDE15bm0OeaciDIz5pel
-IDEwOjIzDQrmlLbku7bkuro6IHpoYW9taW5neXVlIDA5NDQwIChSRCkNCuaKhOmAgTogZ2Zhcm51
-bUByZWRoYXQuY29tOyBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0K5Li76aKYOiBSZTogQ2Vw
-aCBwcm9ibGVtDQoNCnlvdSBjYW4gYWRkIGRlYnVnX3JhZG9zIG9yIGRlYnVnX21zIHRvIHJiZCBj
-cmVhdGUgY29tbWFuZCB0byBzZWUgd2hhdCBoYXBwZW5lZCBkdXJpbmcgMTIwcw0KDQoyMDE1LTA5
-LTIzIDk6NTkgR01UKzA4OjAwIHpoYW8ubWluZ3l1ZUBoM2MuY29tIDx6aGFvLm1pbmd5dWVAaDNj
-LmNvbT46DQo+DQo+IC0tLeWOn+Wni+mCruS7ti0tLQ0KPiDlj5Hku7bkuro6ICLpmYjmnbAiPDI3
-NjY0ODE3OEBxcS5jb20+DQo+IOWPkemAgeaXtumXtDogMjAxNeW5tDA55pyIMjHml6UgMTc6NTI6
-MTkNCj4g5pS25Lu25Lq6OiAiY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmciPGNlcGgtZGV2ZWxA
-dmdlci5rZXJuZWwub3JnPjsNCj4g5Li76aKYOiBDZXBoIHByb2JsZW0NCj4NCj4gRGVhciBjZXBo
-LWRldmVsDQo+ICAgICAgIEknbSBhIHNvZnR3YXJlIGVuZ2luZWVyIGZvciBIM0MsV2UgZm91bmQg
-YSBjZXBoIHByb2JsZW0gaW4gdGhlIHRlc3QsdGhlIG5lZWQgeW91ciBoZWxwLg0KPiAgICAgIElm
-IG9uZSBvZiB0aGUgaG9zdHMgaW4gdGhlIGNsdXN0ZXIgaXMgcmVzdGFydGVkLHdlIHJ1biAncmJk
-IGNyZWF0ZeKApuKApicgY29tbWFuZCB3aWxsIGJsb2NrIDEyMCBzZWNvbmRzLGJ1dCB0aGUgbm9y
-bWFsIGlzIGJsb2NrZWQgZm9yIDIwIHNlY29uZHMuDQo+ICAgICBDbHVzdGVyIGVudmlyb25tZW50
-IGNvbXBvc2VkIG9mIHRocmVlIGhvc3RzLGVhY2ggaG9zdCBydW5zIGEgDQo+IG1vbml0b3IgcHJv
-Y2VzcyBhbmQgdGVuIE9TRCBwcm9jZXNzZXMNCj4NCj4gTG9va2luZyBmb3J3YXJkIHRvIHlvdXIg
-cmVwbHksVGhhbmsgeW91IQ0KPiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQo+IC0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KPiDmnKzpgq7ku7bl
-j4rlhbbpmYTku7blkKvmnInmna3lt57ljY7kuInpgJrkv6HmioDmnK/mnInpmZDlhazlj7jnmoTk
-v53lr4bkv6Hmga/vvIzku4XpmZDkuo7lj5HpgIHnu5nkuIrpnaLlnLDlnYDkuK3liJflh7oNCj4g
-55qE5Liq5Lq65oiW576k57uE44CC56aB5q2i5Lu75L2V5YW25LuW5Lq65Lul5Lu75L2V5b2i5byP
-5L2/55So77yI5YyF5ous5L2G5LiN6ZmQ5LqO5YWo6YOo5oiW6YOo5YiG5Zyw5rOE6Zyy44CB5aSN
-5Yi244CBDQo+IOaIluaVo+WPke+8ieacrOmCruS7tuS4reeahOS/oeaBr+OAguWmguaenOaCqOmU
-meaUtuS6huacrOmCruS7tu+8jOivt+aCqOeri+WNs+eUteivneaIlumCruS7tumAmuefpeWPkeS7
-tuS6uuW5tuWIoOmZpOacrA0KPiDpgq7ku7bvvIENCj4gVGhpcyBlLW1haWwgYW5kIGl0cyBhdHRh
-Y2htZW50cyBjb250YWluIGNvbmZpZGVudGlhbCBpbmZvcm1hdGlvbiBmcm9tIA0KPiBIM0MsIHdo
-aWNoIGlzIGludGVuZGVkIG9ubHkgZm9yIHRoZSBwZXJzb24gb3IgZW50aXR5IHdob3NlIGFkZHJl
-c3MgaXMgDQo+IGxpc3RlZCBhYm92ZS4gQW55IHVzZSBvZiB0aGUgaW5mb3JtYXRpb24gY29udGFp
-bmVkIGhlcmVpbiBpbiBhbnkgd2F5IA0KPiAoaW5jbHVkaW5nLCBidXQgbm90IGxpbWl0ZWQgdG8s
-IHRvdGFsIG9yIHBhcnRpYWwgZGlzY2xvc3VyZSwgDQo+IHJlcHJvZHVjdGlvbiwgb3IgZGlzc2Vt
-aW5hdGlvbikgYnkgcGVyc29ucyBvdGhlciB0aGFuIHRoZSBpbnRlbmRlZA0KPiByZWNpcGllbnQo
-cykgaXMgcHJvaGliaXRlZC4gSWYgeW91IHJlY2VpdmUgdGhpcyBlLW1haWwgaW4gZXJyb3IsIA0K
-PiBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgcGhvbmUgb3IgZW1haWwgaW1tZWRpYXRlbHkg
-YW5kIGRlbGV0ZSBpdCENCg0KDQoNCi0tDQp0aGFua3MNCmh1YW5nanVuDQo=
+On Wed, Sep 23, 2015 at 9:33 AM, Mykola Golub <mgolub@mirantis.com> wrote:
+> On Tue, Sep 22, 2015 at 01:32:49PM -0400, Jason Dillaman wrote:
+>
+>> > > * rbd mirror pool enable <pool-name>
+>> > >         This will, by default, ensure that all images created in this
+>> > >         pool have exclusive lock, journaling, and mirroring feature bits
+>> > >         enabled.
+>> > >
+>> > > * rbd mirror pool disable <pool-name>
+>> > >         This will clear the default image features for new images in this
+>> > >         pool.
+>> >
+>> > Will 'rbd mirror pool enable|disable' change behaviour only for newly
+>> > created images in the pool or will enable|disable mirroring for
+>> > existent images too?
+>>
+>> Since the goal is to set default pool behavior, it would only apply
+>> to newly created images.  You can enable/disable on specific images
+>> using the 'rbd mirror image enable/disable' commands.
+>
+> In this case the commands look a little confusing to me, as from their
+> names I would rather think they enable/disable mirror for existent
+> images too. Also, I don't see a command to check what current
+> behaviour is. And, I suppose it would be useful if we could configure
+> other default features for a pool (exclusive-lock, object-map, ...)
+> Also, I am not sure we should specify <pool-name> this way, as it is
+> not consistent with other rbd commands. By default rbd operates on
+> 'rbd' pool, which can be changed by --pool option. So what do you
+> think if we have something similar to 'rbd feature' commands?
+>
+>   rbd [--pool <pool>] default-feature enable <feature>
+>   rbd [--pool <pool>] default-feature disable <feature>
+>   rbd [--pool <pool>] default-feature show [<feature>]
+>
+> (If <feature> is not specified in the last command, all features are
+> shown).
+
+I haven't read the discussion in full, so feel free to ignore, but I'd
+much rather have rbd create create images with the same set of features
+enabled no matter which pool it's pointed to.
+
+I'm not clear on what exactly a pool policy is.  If it's just a set of
+feature bits to enable at create time, I don't think it's worth
+introducing at all.  If it's a set feature bits + a set of mirroring
+related options, I think it should just be a set of those options.
+Then, rbd create --enable-mirroring could be a way to create an image
+with mirroring enabled.
+
+My point is a plain old "rbd create foo" shouldn't depend an any new
+pool-level metadata.  It's not that hard to remember which features you
+want for which pools and rbd create shortcuts like --enable-object-map
+and --enable-mirroring would hide feature bit dependencies and save
+typing.  --enable-mirroring would also serve as a ticket to go look at
+new metadata and pull out any mirroring related defaults.
+
+Thanks,
+
+                Ilya
