@@ -1,18 +1,10 @@
 From: wangsongbo <songbo1227-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: Important security noticed regarding release
- signing key
-Date: Wed, 23 Sep 2015 17:47:44 +0800
-Message-ID: <56027540.90004@gmail.com>
-References: <alpine.DEB.2.00.1509170925140.31198@cobra.newdream.net>
-	<CAHRQ3VU1RFQL6AKh_CtOOeqg87wX7W5oa3n_3d8Ki9WFW=w5tw@mail.gmail.com>
-	<CALqRxCw6tq0PvqMJAY1S0At1FB3cm_KPUY_bbX72Z9R_pyJ4+Q@mail.gmail.com>
-	<56020F6A.9050406@gmail.com>
-	<CALqRxCw=T6JFC2i-ECQJoRd_n2atMLsDQGT13aq6amDqmtC2Kw@mail.gmail.com>
+Subject: failed to open http://apt-mirror.front.sepia.ceph.com
+Date: Wed, 23 Sep 2015 18:28:51 +0800
+Message-ID: <56027EE3.5080909@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
+Content-Type: multipart/mixed; boundary="===============0562275488=="
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CALqRxCw=T6JFC2i-ECQJoRd_n2atMLsDQGT13aq6amDqmtC2Kw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -22,36 +14,76 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ken Dreyer <kdreyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org
+To: Loic Dachary <loic-cLsNCMjd+0JAfugRpC6u6w@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-Qp0mS5GaXlQ@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-SGkgIEtlbiwKSnVzdCBub3csIEkgcnVuIHRldXRob2xvZ3ktc3VpdGVzIGluIG91ciB0ZXN0aW5n
-LCBpdCBmYWlsZWQgYmVjYXVzZSBvZiBsYWNraW5nIHRoZXNlIHBhY2thZ2VzLApzdWNoIGFzIHFl
-bXUta3ZtLTAuMTIuMS4yLTIuNDE1LmVsNi4zY2VwaC54ODZfNjQsIHFlbXUta3ZtLXRvb2xzLTAu
-MTIuMS4yLTIuNDE1LmVsNi4zY2VwaCBldGMuClRoZSBtb2RpZnkgInJtIGNlcGgtZXh0cmFzIHJl
-cG9zaXRvcnkgY29uZmlnIzEzNyIgb25seSByZW1vdmUgdGhlIHJlcG9zaXRvcnkgLCBidXQgZGlk
-IG5vdCBzb2x2ZSB0aGUgYW5zaWJsZSdzIGRlcGVuZGVuY2UuCkhvdyB0byBzb2x2ZSB0aGlzIGRl
-cGVuZGVuY2UgPwoKVGhhbmtzIGFuZCBSZWdhcmRzLApXYW5nU29uZ2JvCgoKT24gMTUvOS8yMyDk
-uIrljYgxMDo1MCwgS2VuIERyZXllciB3cm90ZToKPiBIaSBTb25nYm8sIEl0J3MgYmVlbiByZW1v
-dmVkIGZyb20gQW5zaWJsZSBub3c6Cj4gaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC1jbS1h
-bnNpYmxlL3B1bGwvMTM3Cj4KPiAtIEtlbgo+Cj4gT24gVHVlLCBTZXAgMjIsIDIwMTUgYXQgODoz
-MyBQTSwgd2FuZ3NvbmdibyA8c29uZ2JvMTIyN0BnbWFpbC5jb20+IHdyb3RlOgo+PiBIaSBLZW4s
-Cj4+ICAgICAgVGhhbmtzIGZvciB5b3VyIHJlcGx5LiBCdXQgaW4gdGhlIGNlcGgtY20tYW5zaWJs
-ZSBwcm9qZWN0IHNjaGVkdWxlZCBieQo+PiB0ZXV0aG9sb2d5LCAiY2VwaC5jb20vcGFja2FnZXMv
-Y2VwaC1leHRyYXMiIGlzIGluIHVzZWQgbm93LCBzdWNoIGFzCj4+IHFlbXUta3ZtLTAuMTIuMS4y
-LTIuNDE1LmVsNi4zY2VwaCwgcWVtdS1rdm0tdG9vbHMtMC4xMi4xLjItMi40MTUuZWw2LjNjZXBo
-Cj4+IGV0Yy4KPj4gICAgICBBbnkgbmV3IHJlbGVhc2VzIHdpbGwgYmUgcHJvdmlkZWQgPwo+Pgo+
-Pgo+PiBPbiAxNS85LzIyIOS4i+WNiDEwOjI0LCBLZW4gRHJleWVyIHdyb3RlOgo+Pj4gT24gVHVl
-LCBTZXAgMjIsIDIwMTUgYXQgMjozOCBBTSwgU29uZ2JvIFdhbmcgPHNvbmdibzEyMjdAZ21haWwu
-Y29tPiB3cm90ZToKPj4+PiBIaSwgYWxsLAo+Pj4+ICAgICAgICAgICBTaW5jZSB0aGUgbGFzdCB3
-ZWVr4oCYcyBhdHRhY2ssIOKAnGNlcGguY29tL3BhY2thZ2VzL2NlcGgtZXh0cmFz4oCdCj4+Pj4g
-Y2FuIGJlCj4+Pj4gb3BlbmVkIG5ldmVyLCBidXQgd2hlcmUgY2FuIEkgZ2V0IHRoZSByZWxlYXNl
-cyBvZiBjZXBoLWV4dHJhIG5vdz8KPj4+Pgo+Pj4+IFRoYW5rcyBhbmQgUmVnYXJkcywKPj4+PiBX
-YW5nU29uZ2JvCj4+Pj4KPj4+IFRoZSBwYWNrYWdlcyBpbiAiY2VwaC1leHRyYXMiIHdlcmUgb2xk
-IGFuZCBzdWJqZWN0IHRvIENWRXMgKHRoZSBiaWcKPj4+IG9uZSBiZWluZyBWRU5PTSwgQ1ZFLTIw
-MTUtMzQ1NikuIFNvIEkgZG9uJ3QgaW50ZW5kIHRvIGhvc3QgY2VwaC1leHRyYXMKPj4+IGluIHRo
-ZSBuZXcgbG9jYXRpb24uCj4+Pgo+Pj4gLSBLZW4KPj4KCl9fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNl
-cnNAbGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBo
-LXVzZXJzLWNlcGguY29tCg==
+This is a multi-part message in MIME format.
+--===============0562275488==
+Content-Type: multipart/alternative;
+ boundary="------------010400050002030204090900"
+
+This is a multi-part message in MIME format.
+--------------010400050002030204090900
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+
+Hi Loic and other Cephers,
+
+I am running teuthology-suites in our testing, because the connection to 
+"apt-mirror.front.sepia.ceph.com" timed out , "ceph-cm-ansible" failed.
+And from a web-browser, I got the response like this : "502 Bad Gateway".
+
+"64.90.32.37 apt-mirror.front.sepia.ceph.com" has been added to /etc/hosts.
+
+Did the resources have been removed ?
+
+
+Thanks and Regards,
+WangSongbo
+
+--------------010400050002030204090900
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+<html>
+  <head>
+
+    <meta http-equiv=3D"content-type" content=3D"text/html; charset=3Dutf=
+-8">
+  </head>
+  <body bgcolor=3D"#FFFFFF" text=3D"#000000">
+    Hi Loic and other Cephers,<br>
+    =C2=A0=C2=A0=C2=A0 <br>
+    I am running teuthology-suites in our testing, because the
+    connection to "apt-mirror.front.sepia.ceph.com" timed out ,
+    "ceph-cm-ansible" failed.<br>
+    And from a web-browser, I got the response like this :
+    <meta charset=3D"utf-8">
+    "502 Bad Gateway".<br>
+    <br>
+    "64.90.32.37 apt-mirror.front.sepia.ceph.com" has been added to
+    /etc/hosts.<br>
+    <br>
+    Did the resources have been removed ? <br>
+    <br>
+    <br>
+    Thanks and Regards,<br>
+    WangSongbo<br>
+    <meta charset=3D"utf-8">
+  </body>
+</html>
+
+--------------010400050002030204090900--
+
+--===============0562275488==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============0562275488==--
