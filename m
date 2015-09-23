@@ -1,166 +1,270 @@
-From: "Deneau, Tom" <tom.deneau@amd.com>
-Subject: RE: perf counters from a performance discrepancy
-Date: Wed, 23 Sep 2015 20:05:00 +0000
-Message-ID: <BC97738F8E7C8742BABED7F06FB9DF9192500B92@SATLEXDAG01.amd.com>
+From: Samuel Just <sjust@redhat.com>
+Subject: Re: perf counters from a performance discrepancy
+Date: Wed, 23 Sep 2015 13:28:24 -0700
+Message-ID: <CAN=+7FUJv4nweu5bNcVDWYJQANBMaogA1Dm6Ufuqtxw3=dqR0Q@mail.gmail.com>
 References: <BC97738F8E7C8742BABED7F06FB9DF9192500992@SATLEXDAG01.amd.com>
 	<alpine.DEB.2.00.1509231116580.13265@cobra.newdream.net>
- <CAJ4mKGavY4ZdutpjnKduQ1AcpCpHDeWST8NyOa_RT19W+DvrNQ@mail.gmail.com>
- <5602F298.7060609@redhat.com>
+	<CAJ4mKGavY4ZdutpjnKduQ1AcpCpHDeWST8NyOa_RT19W+DvrNQ@mail.gmail.com>
+	<5602F298.7060609@redhat.com>
+	<BC97738F8E7C8742BABED7F06FB9DF9192500B92@SATLEXDAG01.amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0094.outbound.protection.outlook.com ([207.46.100.94]:3584
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753999AbbIWUUD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 23 Sep 2015 16:20:03 -0400
-In-Reply-To: <5602F298.7060609@redhat.com>
-Content-Language: en-US
+Received: from mail-io0-f174.google.com ([209.85.223.174]:36671 "EHLO
+	mail-io0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753195AbbIWU2Z convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Sep 2015 16:28:25 -0400
+Received: by ioii196 with SMTP id i196so55654455ioi.3
+        for <ceph-devel@vger.kernel.org>; Wed, 23 Sep 2015 13:28:24 -0700 (PDT)
+In-Reply-To: <BC97738F8E7C8742BABED7F06FB9DF9192500B92@SATLEXDAG01.amd.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, Sage Weil <sage@newdream.net>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Deneau, Tom" <tom.deneau@amd.com>
+Cc: Mark Nelson <mnelson@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, Sage Weil <sage@newdream.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogTWFyayBOZWxzb24gW21h
-aWx0bzptbmVsc29uQHJlZGhhdC5jb21dDQo+IFNlbnQ6IFdlZG5lc2RheSwgU2VwdGVtYmVyIDIz
-LCAyMDE1IDE6NDMgUE0NCj4gVG86IEdyZWdvcnkgRmFybnVtOyBTYWdlIFdlaWwNCj4gQ2M6IERl
-bmVhdSwgVG9tOyBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KPiBTdWJqZWN0OiBSZTogcGVy
-ZiBjb3VudGVycyBmcm9tIGEgcGVyZm9ybWFuY2UgZGlzY3JlcGFuY3kNCj4gDQo+IA0KPiANCj4g
-T24gMDkvMjMvMjAxNSAwMToyNSBQTSwgR3JlZ29yeSBGYXJudW0gd3JvdGU6DQo+ID4gT24gV2Vk
-LCBTZXAgMjMsIDIwMTUgYXQgMTE6MTkgQU0sIFNhZ2UgV2VpbCA8c2FnZUBuZXdkcmVhbS5uZXQ+
-IHdyb3RlOg0KPiA+PiBPbiBXZWQsIDIzIFNlcCAyMDE1LCBEZW5lYXUsIFRvbSB3cm90ZToNCj4g
-Pj4+IEhpIGFsbCAtLQ0KPiA+Pj4NCj4gPj4+IExvb2tpbmcgZm9yIGd1aWRhbmNlIHdpdGggcGVy
-ZiBjb3VudGVycy4uLg0KPiA+Pj4gSSBhbSB0cnlpbmcgdG8gc2VlIHdoZXRoZXIgdGhlIHBlcmYg
-Y291bnRlcnMgY2FuIHRlbGwgbWUgYW55dGhpbmcNCj4gPj4+IGFib3V0IHRoZSBmb2xsb3dpbmcg
-ZGlzY3JlcGFuY3kNCj4gPj4+DQo+ID4+PiBJIHBvcHVsYXRlIGEgbnVtYmVyIG9mIDQwayBzaXpl
-IG9iamVjdHMgaW4gZWFjaCBvZiB0d28gcG9vbHMsIHBvb2xBDQo+IGFuZCBwb29sQi4NCj4gPj4+
-IEJvdGggcG9vbHMgY292ZXIgb3NkcyBvbiBhIHNpbmdsZSBub2RlLCA1IG9zZHMgdG90YWwuDQo+
-ID4+Pg0KPiA+Pj4gICAgICogQ29uZmlnIDEgKDFwKToNCj4gPj4+ICAgICAgICAqIHVzZSBzaW5n
-bGUgcmFkb3MgYmVuY2ggY2xpZW50IHdpdGggMzIgdGhyZWFkcyB0byBkbyBzZXEgcmVhZA0KPiBv
-ZiAyMDAwMCBvYmplY3RzIGZyb20gcG9vbEEuDQo+ID4+Pg0KPiA+Pj4gICAgICogQ29uZmlnIDIg
-KDJwKToNCj4gPj4+ICAgICAgICAqIHVzZSB0d28gY29uY3VycmVudCByYWRvcyBiZW5jaCBjbGll
-bnRzIChydW5uaW5nIG9uIHNhbWUNCj4gY2xpZW50IG5vZGUpIHdpdGggMTYgdGhyZWFkcyBlYWNo
-LA0KPiA+Pj4gICAgICAgICAgICAgb25lIHJlYWRpbmcgMTAwMDAgb2JqZWN0cyBmcm9tIHBvb2xB
-LA0KPiA+Pj4gICAgICAgICAgICAgb25lIHJlYWRpbmcgMTAwMDAgb2JqZWN0cyBmcm9tIHBvb2xC
-LA0KPiA+Pj4NCj4gPj4+IFNvIGluIGJvdGggY29uZmlncywgd2UgaGF2ZSAzMiB0aHJlYWRzIHRv
-dGFsIGFuZCB0aGUgbnVtYmVyIG9mIG9iamVjdHMNCj4gcmVhZCBpcyB0aGUgc2FtZS4NCj4gPj4+
-IE5vdGU6IGluIGFsbCBjYXNlcywgd2UgZHJvcCB0aGUgY2FjaGVzIGJlZm9yZSBkb2luZyB0aGUg
-c2VxIHJlYWRzDQo+ID4+Pg0KPiA+Pj4gVGhlIGNvbWJpbmVkIGJhbmR3aWR0aCAoTUIvc2VjKSBm
-b3IgdGhlIDIgY2xpZW50cyBpbiBjb25maWcgMiBpcw0KPiA+Pj4gYWJvdXQgMS8zIG9mIHRoZSBi
-YW5kd2lkdGggZm9yIHRoZSBzaW5nbGUgY2xpZW50IGluIGNvbmZpZyAxLg0KPiA+Pg0KPiA+PiBI
-b3cgd2VyZSB0aGUgb2JqZWN0IHdyaXR0ZW4/ICBJIGFzc3VtZSB0aGUgY2x1c3RlciBpcyBiYWNr
-ZWQgYnkNCj4gPj4gc3Bpbm5pbmcgZGlza3M/DQo+ID4+DQo+ID4+IEkgd29uZGVyIGlmIHRoaXMg
-aXMgYSBkaXNrIGxheW91dCBpc3N1ZS4gIElmIHRoZSAyMCwwMDAgb2JqZWN0cyBhcmUNCj4gPj4g
-d3JpdHRlbiBpbiBvcmRlciwgdGhleSB3aWxsYiBlIHJvdWdobHkgc2VxdWVudGlhbCBvbiBkaXNr
-LCBhbmQgdGhlIDMyDQo+ID4+IHRocmVhZCBjYXNlIHdpbGwgcmVhZCB0aGVtIGluIG9yZGVyLiAg
-SW4gdGhlIDJ4IDEwLDAwMCBjYXNlLCB0aGUgdHdvDQo+ID4+IGNsaWVudHMgYXJlIHJlYWRpbmcg
-dHdvIHNlcXVlbmNlcyBvZiBvYmplY3RzIHdyaXR0ZW4gYXQgZGlmZmVyZW50DQo+ID4+IHRpbWVz
-LCBhbmQgdGhlIGRpc2sgYXJtcyB3aWxsIGJlIHN3aW5naW5nIGFyb3VuZCBtb3JlLg0KPiA+Pg0K
-PiA+PiBNeSBndWVzcyBpcyB0aGF0IGlmIHRoZSByZWFkcyB3ZXJlIHJlYWRpbmcgdGhlIG9iamVj
-dHMgaW4gYSByYW5kb20NCj4gPj4gb3JkZXIgdGhlIHBlcmZvcm1hbmNlIHdvdWxkIGJlIHRoZSBz
-YW1lLi4uIEknbSBub3Qgc3VyZSB0aGF0IHJhZG9zDQo+ID4+IGJlbmNoIGRvZXMgdGhhdCB0aG91
-Z2g/DQo+ID4+DQo+ID4+IHNhZ2UNCj4gPj4NCj4gPj4+DQo+ID4+Pg0KPiA+Pj4gSSBnYXRoZXJl
-ZCBwZXJmIGNvdW50ZXJzIGJlZm9yZSBhbmQgYWZ0ZXIgZWFjaCBydW4gYW5kIGxvb2tlZCBhdCB0
-aGUNCj4gPj4+IGRpZmZlcmVuY2Ugb2YgdGhlIGJlZm9yZSBhbmQgYWZ0ZXIgY291bnRlcnMgZm9y
-IGJvdGggdGhlIDFwIGFuZCAycA0KPiA+Pj4gY2FzZXMuICBIZXJlIGFyZSBzb21lIHRoaW5ncyBJ
-IG5vdGljZWQgdGhhdCBhcmUgZGlmZmVyZW50IGJldHdlZW4NCj4gPj4+IHRoZSB0d28gcnVucy4g
-IENhbiBzb21lb25lIHRha2UgYSBsb29rIGFuZCBsZXQgbWUga25vdyB3aGV0aGVyIGFueQ0KPiA+
-Pj4gb2YgdGhlc2UgZGlmZmVyZW5jZXMgYXJlIHNpZ25pZmljYW50LiAgSW4gcGFydGljdWxhciwg
-Zm9yIHRoZQ0KPiB0aHJvdHRsZS1tc2dyX2Rpc3BhdGNoX3Rocm90dGxlciBvbmVzLCBzaW5jZSBJ
-IGRvbid0IGtub3cgdGhlIGRldGFpbGVkDQo+IGRlZmluaXRpb25zIG9mIHRoZXNlIGZpZWxkcy4N
-Cj4gPj4+IE5vdGU6IHRoZXNlIGFyZSB0aGUgbnVtYmVycyBmb3Igb25lIG9mIHRoZSA1IG9zZHMs
-IHRoZSBvdGhlciBvc2RzIGFyZQ0KPiBzaW1pbGFyLi4uDQo+ID4+Pg0KPiA+Pj4gKiBUaGUgZmll
-bGQgb3NkL2xvYWRhdmcgaXMgYWx3YXlzIGFib3V0IDMgdGltZXMgaGlnaGVyIG9uIHRoZSAycCBj
-DQo+ID4+Pg0KPiA+Pj4gc29tZSBsYXRlbmN5LXJlbGF0ZWQgY291bnRlcnMNCj4gPj4+IC0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KPiA+Pj4gb3NkL29wX2xhdGVuY3kvc3VtIDFwPTYu
-MjQ4MDExMTcyMDUwNjEsIDJwPTU3OS43MjI1MTMwNzg5NDUNCj4gPj4+IG9zZC9vcF9wcm9jZXNz
-X2xhdGVuY3kvc3VtIDFwPTMuNDg1MDY5NDUzOTQ5MTEsIDJwPTQyLjYyNzg0OTQ1NDk5MTUNCj4g
-Pj4+IG9zZC9vcF9yX2xhdGVuY3kvc3VtIDFwPTYuMjQ4MDExMTcxOTkyNCwgMnA9NTc5LjcyMjUx
-MzA3OTAwMw0KPiA+Pj4gb3NkL29wX3JfcHJvY2Vzc19sYXRlbmN5L3N1bSAxcD0zLjQ4NTA2OTQ1
-Mzk5Mjc2LA0KPiA+Pj4gMnA9NDIuNjI3ODQ5NDU1MDA2MQ0KPiA+DQo+ID4gU28sIHllcCwgdGhl
-IGluZGl2aWR1YWwgcmVhZCBvcHMgYXJlIHRha2luZyBtdWNoIGxvbmdlciBpbiB0aGUNCj4gPiB0
-d28tY2xpZW50IGNhc2UuIE5haXZlbHkgdGhhdCdzIHByZXR0eSBvZGQuDQo+ID4NCj4gPj4+DQo+
-ID4+Pg0KPiA+Pj4gYW5kIHNvbWUgdGhyb3R0bGUtbXNncl9kaXNwYXRjaF90aHJvdHRsZXIgcmVs
-YXRlZCBjb3VudGVycw0KPiA+Pj4gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KPiA+Pj4gdGhyb3R0bGUtbXNncl9kaXNwYXRjaF90aHJv
-dHRsZXItY2xpZW50L2dldCAxcD0xMzM3LCAycD0xMzM5LCBkaWZmPTINCj4gPj4+IHRocm90dGxl
-LW1zZ3JfZGlzcGF0Y2hfdGhyb3R0bGVyLWNsaWVudC9nZXRfc3VtIDFwPTIyMjg3NywNCj4gPj4+
-IDJwPTIyMzA4OCwgZGlmZj0yMTEgdGhyb3R0bGUtbXNncl9kaXNwYXRjaF90aHJvdHRsZXItY2xp
-ZW50L3B1dA0KPiA+Pj4gMXA9MTMzNywgMnA9MTMzOSwgZGlmZj0yDQo+ID4+PiB0aHJvdHRsZS1t
-c2dyX2Rpc3BhdGNoX3Rocm90dGxlci1jbGllbnQvcHV0X3N1bSAxcD0yMjI4NzcsDQo+ID4+PiAy
-cD0yMjMwODgsIGRpZmY9MjExDQo+ID4+PiB0aHJvdHRsZS1tc2dyX2Rpc3BhdGNoX3Rocm90dGxl
-ci1oYl9iYWNrX3NlcnZlci9nZXQgMXA9NTgsIDJwPTEzNCwNCj4gPj4+IGRpZmY9NzYgdGhyb3R0
-bGUtbXNncl9kaXNwYXRjaF90aHJvdHRsZXItaGJfYmFja19zZXJ2ZXIvZ2V0X3N1bQ0KPiA+Pj4g
-MXA9MjcyNiwgMnA9NjI5OCwgZGlmZj0zNTcyDQo+ID4+PiB0aHJvdHRsZS1tc2dyX2Rpc3BhdGNo
-X3Rocm90dGxlci1oYl9iYWNrX3NlcnZlci9wdXQgMXA9NTgsIDJwPTEzNCwNCj4gPj4+IGRpZmY9
-NzYgdGhyb3R0bGUtbXNncl9kaXNwYXRjaF90aHJvdHRsZXItaGJfYmFja19zZXJ2ZXIvcHV0X3N1
-bQ0KPiA+Pj4gMXA9MjcyNiwgMnA9NjI5OCwgZGlmZj0zNTcyDQo+ID4+PiB0aHJvdHRsZS1tc2dy
-X2Rpc3BhdGNoX3Rocm90dGxlci1oYl9mcm9udF9zZXJ2ZXIvZ2V0IDFwPTU4LCAycD0xMzQsDQo+
-ID4+PiBkaWZmPTc2IHRocm90dGxlLW1zZ3JfZGlzcGF0Y2hfdGhyb3R0bGVyLWhiX2Zyb250X3Nl
-cnZlci9nZXRfc3VtDQo+ID4+PiAxcD0yNzI2LCAycD02Mjk4LCBkaWZmPTM1NzINCj4gPj4+IHRo
-cm90dGxlLW1zZ3JfZGlzcGF0Y2hfdGhyb3R0bGVyLWhiX2Zyb250X3NlcnZlci9wdXQgMXA9NTgs
-IDJwPTEzNCwNCj4gPj4+IGRpZmY9NzYgdGhyb3R0bGUtbXNncl9kaXNwYXRjaF90aHJvdHRsZXIt
-aGJfZnJvbnRfc2VydmVyL3B1dF9zdW0NCj4gPj4+IDFwPTI3MjYsIDJwPTYyOTgsIGRpZmY9MzU3
-Mg0KPiA+Pj4gdGhyb3R0bGUtbXNncl9kaXNwYXRjaF90aHJvdHRsZXItaGJjbGllbnQvZ2V0IDFw
-PTE2OCwgMnA9MjUyLA0KPiA+Pj4gZGlmZj04NCB0aHJvdHRsZS1tc2dyX2Rpc3BhdGNoX3Rocm90
-dGxlci1oYmNsaWVudC9nZXRfc3VtIDFwPTc4OTYsDQo+ID4+PiAycD0xMTg0NCwgZGlmZj0zOTQ4
-IHRocm90dGxlLW1zZ3JfZGlzcGF0Y2hfdGhyb3R0bGVyLWhiY2xpZW50L3B1dA0KPiA+Pj4gMXA9
-MTY4LCAycD0yNTIsIGRpZmY9ODQNCj4gPj4+IHRocm90dGxlLW1zZ3JfZGlzcGF0Y2hfdGhyb3R0
-bGVyLWhiY2xpZW50L3B1dF9zdW0gMXA9Nzg5NiwgMnA9MTE4NDQsDQo+ID4+PiBkaWZmPTM5NDgN
-Cj4gPg0KPiA+IElJUkMgdGhlc2UgYXJlIGp1c3Qgc2F5aW5nIGhvdyBtYW55IHRpbWVzIHRoZSBk
-aXNwYXRjaCB0aHJvdHRsZXIgd2FzDQo+ID4gYWNjZXNzZWQgb24gZWFjaCBtZXNzZW5nZXIg4oCU
-IG5vdGhpbmcgaGVyZSBpcyBzdXJwcmlzaW5nLCB5b3UncmUgZG9pbmcNCj4gPiBiYXNpY2FsbHkg
-dGhlIHNhbWUgbnVtYmVyIG9mIG1lc3NhZ2VzIG9uIHRoZSBjbGllbnQgbWVzc2VuZ2VycywgYW5k
-DQo+ID4gdGhlIGhlYXJ0YmVhdCBtZXNzZW5nZXJzIGFyZSBwYXNzaW5nIG1vcmUgYmVjYXVzZSB0
-aGUgdGVzdCB0YWtlcw0KPiA+IGxvbmdlci4NCj4gPg0KPiA+IEknZCBnbyB3aXRoIFNhZ2UncyBp
-ZGVhIGZvciB3aGF0IGlzIGFjdHVhbGx5IGNhdXNpbmcgdGhpcywgb3IgdHJ5IGFuZA0KPiA+IGxv
-b2sgYXQgaG93IHRoZSBsYXRlbmN5IGNoYW5nZXMgb3ZlciB0aW1lIOKAlCBpZiB5b3UncmUgZ29p
-bmcgdG8gdHdvDQo+ID4gcG9vbHMgaW5zdGVhZCBvZiBvbmUsIHByZXN1bWFibHkgeW91J3JlIGRv
-dWJsaW5nIHRoZSBhbW91bnQgb2YNCj4gPiBtZXRhZGF0YSB0aGF0IG5lZWRzIHRvIGJlIHJlYWQg
-aW50byBtZW1vcnkgZHVyaW5nIHRoZSBydW4/IFBlcmhhcHMNCj4gPiB0aGF0J3MganVzdCBhIHNp
-Z25pZmljYW50IGVub3VnaCBlZmZlY3Qgd2l0aCB5b3VyIHNldHRpbmdzIHRoYXQgeW91J3JlDQo+
-ID4gc2VlaW5nIGEgYnVuY2ggb2YgZXh0cmEgZGlyZWN0b3J5IGxvb2t1cHMgaW1wYWN0IHlvdXIg
-dGhyb3VnaHB1dCBtb3JlDQo+ID4gdGhhbiBleHBlY3RlZC4uLiA6Lw0KPiANCj4gRldJVywgdHlw
-aWNhbGx5IGlmIEkndmUgc2VlbiBhbiBlZmZlY3QsIGl0J3MgYmVlbiB0aGUgb3Bwb3NpdGUgd2hl
-cmUNCj4gbXVsdGlwbGUgcmFkb3MgYmVuY2ggcHJvY2Vzc2VzIGFyZSBzbGlnaHRseSBmYXN0ZXIg
-KG1heWJlIHNpbXBseSByZWxhdGVkDQo+IHRvIHRoZSBjbGllbnQgc2lkZSBpbXBsZW1lbnRhdGlv
-bikuICBSdW5uaW5nIGNvbGxlY3RsIG9yIGlvc3RhdCB3b3VsZCBzaG93DQo+IHZhcmlvdXMgaW50
-ZXJ2YWwgc3RhdGlzdGljcyB0aGF0IHdvdWxkIGhlbHAgZGlhZ25vc2UgaWYgdGhpcyBpcyByZWxh
-dGVkIHRvDQo+IHNsb3dlciBhY2Nlc3NlcyBvbiB0aGUgZGlza3MuICBibGt0cmFjZSBvZiBjb3Vy
-c2Ugd291bGQgZ2l2ZSBhIG1vcmUNCj4gbnVhbmNlZCB2aWV3LiAgTWlnaHQgYmUgd29ydGggZG9p
-bmcgaWYgdGhlcmUgYXJlIGV4dHJhIG1ldGFkYXRhIGFjY2Vzc2VzLg0KPiANCj4gQSBjb3VwbGUg
-b2Ygb3RoZXIgcmFuZG9tIHRob3VnaHRzOg0KPiANCj4gLSBBcmUgYW55IG9mIHRoZSByZWFkcyBj
-b21pbmcgZnJvbSBidWZmZXIgY2FjaGU/DQo+IC0gUmVhZGFoZWFkIG5vdCB3b3JraW5nIHdlbGw/
-DQo+IC0gV2VyZSB0aGUgcG9vbHMgcmVjcmVhdGVkIGJldHdlZW4gdGVzdHM/DQo+IC0gSWYgbm90
-LCB3aGF0IHdlcmUgdGhlIHRvdGFsIG51bWJlciBvZiBvYmplY3RzIGFuZCBQR3MgZm9yIGVhY2gg
-cG9vbCAoSXMNCj4gaXQgcG9zc2libGUgdGhhdCB0aGUgcGVyLXBnIGRpcmVjdG9yeSBoaXJlYXJj
-aHkgd2FzIGRlZXBlciBmb3IgdGhlIDJuZCBzZXQNCj4gb2YgdGVzdHM/KQ0KPiAtIElmIHRoZSBw
-b29scyBzdGlsbCBleGlzdCwgd2hhdCBkb2VzIHRoZSBmb2xsb3dpbmcgc2NyaXB0IHNheSBhYm91
-dCB0aGVtPw0KPiANCj4gaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2J0L2Jsb2IvbWFzdGVyL3Rv
-b2xzL3JlYWRwZ2R1bXAucHkNCj4gDQo+IA0KDQpUaGFua3MgU2FnZSwgR3JlZyBhbmQgTWFyayBm
-b3IgdGhlIHN1Z2dlc3Rpb25zIC0tDQoNClRoZSBvYmplY3RzIGluIHRoZSBwb29scyB3ZXJlIGNy
-ZWF0ZWQgYnkgcnVubmluZyB0d28gc2ltdWx0YW5lb3VzDQpjbGllbnQgcmFkb3MgYmVuY2ggd3Jp
-dGUgcHJvY2Vzc2VzLCBvbmUgdG8gZWFjaCBwb29sLiAgSSBzdGFydGVkIHdpdGgNCmVtcHR5IG9z
-ZCBkaXNrcy4gIFRoZSBwb29scyBib3RoIGNvdmVyIHRoZSBzYW1lIG9zZHMgYW5kIHNpbmNlDQp0
-aGVyZSB3YXMgYSByZXBsaWNhdGlvbiBmYWN0b3Igb2YgMiwgc28gSSB3b3VsZCBoYXZlIGV4cGVj
-dGVkIHRoYXQgbm90DQphbGwgdGhlIHByaW1hcnkgb2JqZWN0cyBpbiBlYWNoIHBvb2wgd291bGQg
-YmUgc2VxdWVudGlhbCBvbiB0aGUgZGlzay4NCg0KQnV0IHdoZW4gSSBjaGFuZ2VkIHRoZSByZWFk
-IHRlc3QgdG8gZG8gcmFkb3MgYmVuY2ggcmFuZCByYXRoZXIgdGhhbg0Kc2VxLCBib3RoIHRoZSAx
-cCBhbmQgMnAgY29uZmlncyB3ZW50IGRvd24gaW4gYmFuZHdpZHRoLCBzbyBjbGVhcmx5IHRoZQ0K
-ZGlzayBsYXlvdXQgaGFkIHNvbWV0aGluZyB0byBkbyB3aXRoIGl0LiAgV2l0aCByYW5kb20gcmVh
-ZHMsIDFwIGlzIG5vdw0KIm9ubHkiIDQwJSBmYXN0ZXIgdGhhbiAycC4NCg0KTWFyayBoYWQgbWVu
-dGlvbmVkIHRoYXQgaGUncyBvZnRlbiBzZWVuIHRoZSBvcHBvc2l0ZSBlZmZlY3QsIGllLCBtb3Jl
-DQpjbGllbnQgcHJvY2Vzc2VzIGluY3JlYXNpbmcgdGhlIGJhbmR3aWR0aCwgYW5kIHdlIGhhdmUg
-c2VlbiB0aGUgc2FtZSwNCndoaWNoIGlzIHdoeSBJIHN0YXJ0ZWQgdXNpbmcgbXVsdGlwbGUgY2xp
-ZW50cy4gIEluIGZhY3QgaWYgSSBkbyB0aGUNCnNhbWUgY29uZmlndXJhdGlvbiB0ZXN0cyBhcyBh
-Ym92ZSBidXQgd2l0aCA0TSBvYmplY3RzIHJhdGhlciB0aGFuIDQwSywNCkkgc2VlIHRoZSAycCBi
-ZWF0cyAxcCBieSAzMCUgb3Igc28uIChhbmQgSSd2ZSBzZWVuIDRwIGhlbHAgZXZlbiBtb3JlKS4N
-Cg0KU28gdGhlcmUncyBzb21ldGhpbmcgYWJvdXQgc21hbGxlciBvYmplY3Qgc2l6ZXMgdGhhdCBn
-ZXRzIGh1cnQgYnkNCm11bHRpcGxlIGNsaWVudHMgdnMuIDEgY2xpZW50Lg0KDQpJIHdpbGwgdHJ5
-IHRvIGxvb2sgaW50byB0aGlzIHdpdGggc29tZSBvZiB0aGUgbG93IGxldmVsIHN0YXQgdG9vbHMN
-CnRoYXQgTWFyayBtZW50aW9uZWQuDQoNCi0tIFRvbQ0KDQo+ID4gLUdyZWcNCj4gPiAtLQ0KPiA+
-IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmli
-ZSBjZXBoLWRldmVsIg0KPiA+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9A
-dmdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vDQo+ID4gaW5mbyBhdCAgaHR0cDovL3ZnZXIu
-a2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+ID4NCg==
+Just to eliminate a variable, can you reproduce this on master, first
+with the simple messenger, and then with the async messenger? (make
+sure to switch the messengers on all daemons and clients, just put it
+in the [global] section on all configs).
+-Sam
+
+On Wed, Sep 23, 2015 at 1:05 PM, Deneau, Tom <tom.deneau@amd.com> wrote=
+:
+>
+>
+>> -----Original Message-----
+>> From: Mark Nelson [mailto:mnelson@redhat.com]
+>> Sent: Wednesday, September 23, 2015 1:43 PM
+>> To: Gregory Farnum; Sage Weil
+>> Cc: Deneau, Tom; ceph-devel@vger.kernel.org
+>> Subject: Re: perf counters from a performance discrepancy
+>>
+>>
+>>
+>> On 09/23/2015 01:25 PM, Gregory Farnum wrote:
+>> > On Wed, Sep 23, 2015 at 11:19 AM, Sage Weil <sage@newdream.net> wr=
+ote:
+>> >> On Wed, 23 Sep 2015, Deneau, Tom wrote:
+>> >>> Hi all --
+>> >>>
+>> >>> Looking for guidance with perf counters...
+>> >>> I am trying to see whether the perf counters can tell me anythin=
+g
+>> >>> about the following discrepancy
+>> >>>
+>> >>> I populate a number of 40k size objects in each of two pools, po=
+olA
+>> and poolB.
+>> >>> Both pools cover osds on a single node, 5 osds total.
+>> >>>
+>> >>>     * Config 1 (1p):
+>> >>>        * use single rados bench client with 32 threads to do seq=
+ read
+>> of 20000 objects from poolA.
+>> >>>
+>> >>>     * Config 2 (2p):
+>> >>>        * use two concurrent rados bench clients (running on same
+>> client node) with 16 threads each,
+>> >>>             one reading 10000 objects from poolA,
+>> >>>             one reading 10000 objects from poolB,
+>> >>>
+>> >>> So in both configs, we have 32 threads total and the number of o=
+bjects
+>> read is the same.
+>> >>> Note: in all cases, we drop the caches before doing the seq read=
+s
+>> >>>
+>> >>> The combined bandwidth (MB/sec) for the 2 clients in config 2 is
+>> >>> about 1/3 of the bandwidth for the single client in config 1.
+>> >>
+>> >> How were the object written?  I assume the cluster is backed by
+>> >> spinning disks?
+>> >>
+>> >> I wonder if this is a disk layout issue.  If the 20,000 objects a=
+re
+>> >> written in order, they willb e roughly sequential on disk, and th=
+e 32
+>> >> thread case will read them in order.  In the 2x 10,000 case, the =
+two
+>> >> clients are reading two sequences of objects written at different
+>> >> times, and the disk arms will be swinging around more.
+>> >>
+>> >> My guess is that if the reads were reading the objects in a rando=
+m
+>> >> order the performance would be the same... I'm not sure that rado=
+s
+>> >> bench does that though?
+>> >>
+>> >> sage
+>> >>
+>> >>>
+>> >>>
+>> >>> I gathered perf counters before and after each run and looked at=
+ the
+>> >>> difference of the before and after counters for both the 1p and =
+2p
+>> >>> cases.  Here are some things I noticed that are different betwee=
+n
+>> >>> the two runs.  Can someone take a look and let me know whether a=
+ny
+>> >>> of these differences are significant.  In particular, for the
+>> throttle-msgr_dispatch_throttler ones, since I don't know the detail=
+ed
+>> definitions of these fields.
+>> >>> Note: these are the numbers for one of the 5 osds, the other osd=
+s are
+>> similar...
+>> >>>
+>> >>> * The field osd/loadavg is always about 3 times higher on the 2p=
+ c
+>> >>>
+>> >>> some latency-related counters
+>> >>> ------------------------------
+>> >>> osd/op_latency/sum 1p=3D6.24801117205061, 2p=3D579.722513078945
+>> >>> osd/op_process_latency/sum 1p=3D3.48506945394911, 2p=3D42.627849=
+4549915
+>> >>> osd/op_r_latency/sum 1p=3D6.2480111719924, 2p=3D579.722513079003
+>> >>> osd/op_r_process_latency/sum 1p=3D3.48506945399276,
+>> >>> 2p=3D42.6278494550061
+>> >
+>> > So, yep, the individual read ops are taking much longer in the
+>> > two-client case. Naively that's pretty odd.
+>> >
+>> >>>
+>> >>>
+>> >>> and some throttle-msgr_dispatch_throttler related counters
+>> >>> ----------------------------------------------------------
+>> >>> throttle-msgr_dispatch_throttler-client/get 1p=3D1337, 2p=3D1339=
+, diff=3D2
+>> >>> throttle-msgr_dispatch_throttler-client/get_sum 1p=3D222877,
+>> >>> 2p=3D223088, diff=3D211 throttle-msgr_dispatch_throttler-client/=
+put
+>> >>> 1p=3D1337, 2p=3D1339, diff=3D2
+>> >>> throttle-msgr_dispatch_throttler-client/put_sum 1p=3D222877,
+>> >>> 2p=3D223088, diff=3D211
+>> >>> throttle-msgr_dispatch_throttler-hb_back_server/get 1p=3D58, 2p=3D=
+134,
+>> >>> diff=3D76 throttle-msgr_dispatch_throttler-hb_back_server/get_su=
+m
+>> >>> 1p=3D2726, 2p=3D6298, diff=3D3572
+>> >>> throttle-msgr_dispatch_throttler-hb_back_server/put 1p=3D58, 2p=3D=
+134,
+>> >>> diff=3D76 throttle-msgr_dispatch_throttler-hb_back_server/put_su=
+m
+>> >>> 1p=3D2726, 2p=3D6298, diff=3D3572
+>> >>> throttle-msgr_dispatch_throttler-hb_front_server/get 1p=3D58, 2p=
+=3D134,
+>> >>> diff=3D76 throttle-msgr_dispatch_throttler-hb_front_server/get_s=
+um
+>> >>> 1p=3D2726, 2p=3D6298, diff=3D3572
+>> >>> throttle-msgr_dispatch_throttler-hb_front_server/put 1p=3D58, 2p=
+=3D134,
+>> >>> diff=3D76 throttle-msgr_dispatch_throttler-hb_front_server/put_s=
+um
+>> >>> 1p=3D2726, 2p=3D6298, diff=3D3572
+>> >>> throttle-msgr_dispatch_throttler-hbclient/get 1p=3D168, 2p=3D252=
+,
+>> >>> diff=3D84 throttle-msgr_dispatch_throttler-hbclient/get_sum 1p=3D=
+7896,
+>> >>> 2p=3D11844, diff=3D3948 throttle-msgr_dispatch_throttler-hbclien=
+t/put
+>> >>> 1p=3D168, 2p=3D252, diff=3D84
+>> >>> throttle-msgr_dispatch_throttler-hbclient/put_sum 1p=3D7896, 2p=3D=
+11844,
+>> >>> diff=3D3948
+>> >
+>> > IIRC these are just saying how many times the dispatch throttler w=
+as
+>> > accessed on each messenger =E2=80=94 nothing here is surprising, y=
+ou're doing
+>> > basically the same number of messages on the client messengers, an=
+d
+>> > the heartbeat messengers are passing more because the test takes
+>> > longer.
+>> >
+>> > I'd go with Sage's idea for what is actually causing this, or try =
+and
+>> > look at how the latency changes over time =E2=80=94 if you're goin=
+g to two
+>> > pools instead of one, presumably you're doubling the amount of
+>> > metadata that needs to be read into memory during the run? Perhaps
+>> > that's just a significant enough effect with your settings that yo=
+u're
+>> > seeing a bunch of extra directory lookups impact your throughput m=
+ore
+>> > than expected... :/
+>>
+>> FWIW, typically if I've seen an effect, it's been the opposite where
+>> multiple rados bench processes are slightly faster (maybe simply rel=
+ated
+>> to the client side implementation).  Running collectl or iostat woul=
+d show
+>> various interval statistics that would help diagnose if this is rela=
+ted to
+>> slower accesses on the disks.  blktrace of course would give a more
+>> nuanced view.  Might be worth doing if there are extra metadata acce=
+sses.
+>>
+>> A couple of other random thoughts:
+>>
+>> - Are any of the reads coming from buffer cache?
+>> - Readahead not working well?
+>> - Were the pools recreated between tests?
+>> - If not, what were the total number of objects and PGs for each poo=
+l (Is
+>> it possible that the per-pg directory hirearchy was deeper for the 2=
+nd set
+>> of tests?)
+>> - If the pools still exist, what does the following script say about=
+ them?
+>>
+>> https://github.com/ceph/cbt/blob/master/tools/readpgdump.py
+>>
+>>
+>
+> Thanks Sage, Greg and Mark for the suggestions --
+>
+> The objects in the pools were created by running two simultaneous
+> client rados bench write processes, one to each pool.  I started with
+> empty osd disks.  The pools both cover the same osds and since
+> there was a replication factor of 2, so I would have expected that no=
+t
+> all the primary objects in each pool would be sequential on the disk.
+>
+> But when I changed the read test to do rados bench rand rather than
+> seq, both the 1p and 2p configs went down in bandwidth, so clearly th=
+e
+> disk layout had something to do with it.  With random reads, 1p is no=
+w
+> "only" 40% faster than 2p.
+>
+> Mark had mentioned that he's often seen the opposite effect, ie, more
+> client processes increasing the bandwidth, and we have seen the same,
+> which is why I started using multiple clients.  In fact if I do the
+> same configuration tests as above but with 4M objects rather than 40K=
+,
+> I see the 2p beats 1p by 30% or so. (and I've seen 4p help even more)=
+=2E
+>
+> So there's something about smaller object sizes that gets hurt by
+> multiple clients vs. 1 client.
+>
+> I will try to look into this with some of the low level stat tools
+> that Mark mentioned.
+>
+> -- Tom
+>
+>> > -Greg
+>> > --
+>> > To unsubscribe from this list: send the line "unsubscribe ceph-dev=
+el"
+>> > in the body of a message to majordomo@vger.kernel.org More majordo=
+mo
+>> > info at  http://vger.kernel.org/majordomo-info.html
+>> >
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
