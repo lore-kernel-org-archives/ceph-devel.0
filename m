@@ -1,79 +1,51 @@
-From: "Deneau, Tom" <tom.deneau@amd.com>
-Subject: RE: perf counters from a performance discrepancy
-Date: Wed, 23 Sep 2015 20:51:06 +0000
-Message-ID: <BC97738F8E7C8742BABED7F06FB9DF9192500C22@SATLEXDAG01.amd.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: perf counters from a performance discrepancy
+Date: Wed, 23 Sep 2015 13:52:58 -0700
+Message-ID: <CAJ4mKGYiZtaGZqRnG+r+sfhONNBkCukRrOXE6tX84orSzdwCLA@mail.gmail.com>
 References: <BC97738F8E7C8742BABED7F06FB9DF9192500992@SATLEXDAG01.amd.com>
- <CAJ4mKGap3+xK5yecofei-H7upgt4waiRH2fAPmVLEXdrAmUxjQ@mail.gmail.com>
+	<CAJ4mKGap3+xK5yecofei-H7upgt4waiRH2fAPmVLEXdrAmUxjQ@mail.gmail.com>
+	<BC97738F8E7C8742BABED7F06FB9DF9192500C22@SATLEXDAG01.amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0067.outbound.protection.outlook.com ([65.55.169.67]:57792
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1754722AbbIWUvR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 23 Sep 2015 16:51:17 -0400
-In-Reply-To: <CAJ4mKGap3+xK5yecofei-H7upgt4waiRH2fAPmVLEXdrAmUxjQ@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-wi0-f172.google.com ([209.85.212.172]:33970 "EHLO
+	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754910AbbIWUw7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Sep 2015 16:52:59 -0400
+Received: by wicfx3 with SMTP id fx3so1717642wic.1
+        for <ceph-devel@vger.kernel.org>; Wed, 23 Sep 2015 13:52:58 -0700 (PDT)
+In-Reply-To: <BC97738F8E7C8742BABED7F06FB9DF9192500C22@SATLEXDAG01.amd.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
+To: "Deneau, Tom" <tom.deneau@amd.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogR3JlZ29yeSBGYXJudW0g
-W21haWx0bzpnZmFybnVtQHJlZGhhdC5jb21dDQo+IFNlbnQ6IFdlZG5lc2RheSwgU2VwdGVtYmVy
-IDIzLCAyMDE1IDM6MzkgUE0NCj4gVG86IERlbmVhdSwgVG9tDQo+IENjOiBjZXBoLWRldmVsQHZn
-ZXIua2VybmVsLm9yZw0KPiBTdWJqZWN0OiBSZTogcGVyZiBjb3VudGVycyBmcm9tIGEgcGVyZm9y
-bWFuY2UgZGlzY3JlcGFuY3kNCj4gDQo+IE9uIFdlZCwgU2VwIDIzLCAyMDE1IGF0IDk6MzMgQU0s
-IERlbmVhdSwgVG9tIDx0b20uZGVuZWF1QGFtZC5jb20+IHdyb3RlOg0KPiA+IEhpIGFsbCAtLQ0K
-PiA+DQo+ID4gTG9va2luZyBmb3IgZ3VpZGFuY2Ugd2l0aCBwZXJmIGNvdW50ZXJzLi4uDQo+ID4g
-SSBhbSB0cnlpbmcgdG8gc2VlIHdoZXRoZXIgdGhlIHBlcmYgY291bnRlcnMgY2FuIHRlbGwgbWUg
-YW55dGhpbmcNCj4gPiBhYm91dCB0aGUgZm9sbG93aW5nIGRpc2NyZXBhbmN5DQo+ID4NCj4gPiBJ
-IHBvcHVsYXRlIGEgbnVtYmVyIG9mIDQwayBzaXplIG9iamVjdHMgaW4gZWFjaCBvZiB0d28gcG9v
-bHMsIHBvb2xBIGFuZA0KPiBwb29sQi4NCj4gPiBCb3RoIHBvb2xzIGNvdmVyIG9zZHMgb24gYSBz
-aW5nbGUgbm9kZSwgNSBvc2RzIHRvdGFsLg0KPiA+DQo+ID4gICAgKiBDb25maWcgMSAoMXApOg0K
-PiA+ICAgICAgICogdXNlIHNpbmdsZSByYWRvcyBiZW5jaCBjbGllbnQgd2l0aCAzMiB0aHJlYWRz
-IHRvIGRvIHNlcSByZWFkIG9mDQo+IDIwMDAwIG9iamVjdHMgZnJvbSBwb29sQS4NCj4gPg0KPiA+
-ICAgICogQ29uZmlnIDIgKDJwKToNCj4gPiAgICAgICAqIHVzZSB0d28gY29uY3VycmVudCByYWRv
-cyBiZW5jaCBjbGllbnRzIChydW5uaW5nIG9uIHNhbWUgY2xpZW50DQo+IG5vZGUpIHdpdGggMTYg
-dGhyZWFkcyBlYWNoLA0KPiA+ICAgICAgICAgICAgb25lIHJlYWRpbmcgMTAwMDAgb2JqZWN0cyBm
-cm9tIHBvb2xBLA0KPiA+ICAgICAgICAgICAgb25lIHJlYWRpbmcgMTAwMDAgb2JqZWN0cyBmcm9t
-IHBvb2xCLA0KPiA+DQo+ID4gU28gaW4gYm90aCBjb25maWdzLCB3ZSBoYXZlIDMyIHRocmVhZHMg
-dG90YWwgYW5kIHRoZSBudW1iZXIgb2Ygb2JqZWN0cw0KPiByZWFkIGlzIHRoZSBzYW1lLg0KPiA+
-IE5vdGU6IGluIGFsbCBjYXNlcywgd2UgZHJvcCB0aGUgY2FjaGVzIGJlZm9yZSBkb2luZyB0aGUg
-c2VxIHJlYWRzDQo+ID4NCj4gPiBUaGUgY29tYmluZWQgYmFuZHdpZHRoIChNQi9zZWMpIGZvciB0
-aGUgMiBjbGllbnRzIGluIGNvbmZpZyAyIGlzIGFib3V0DQo+ID4gMS8zIG9mIHRoZSBiYW5kd2lk
-dGggZm9yIHRoZSBzaW5nbGUgY2xpZW50IGluIGNvbmZpZyAxLg0KPiA+DQo+ID4NCj4gPiBJIGdh
-dGhlcmVkIHBlcmYgY291bnRlcnMgYmVmb3JlIGFuZCBhZnRlciBlYWNoIHJ1biBhbmQgbG9va2Vk
-IGF0IHRoZQ0KPiA+IGRpZmZlcmVuY2Ugb2YgdGhlIGJlZm9yZSBhbmQgYWZ0ZXIgY291bnRlcnMg
-Zm9yIGJvdGggdGhlIDFwIGFuZCAycA0KPiA+IGNhc2VzLiAgSGVyZSBhcmUgc29tZSB0aGluZ3Mg
-SSBub3RpY2VkIHRoYXQgYXJlIGRpZmZlcmVudCBiZXR3ZWVuIHRoZQ0KPiA+IHR3byBydW5zLiAg
-Q2FuIHNvbWVvbmUgdGFrZSBhIGxvb2sgYW5kIGxldCBtZSBrbm93IHdoZXRoZXIgYW55IG9mDQo+
-ID4gdGhlc2UgZGlmZmVyZW5jZXMgYXJlIHNpZ25pZmljYW50LiAgSW4gcGFydGljdWxhciwgZm9y
-IHRoZSB0aHJvdHRsZS0NCj4gbXNncl9kaXNwYXRjaF90aHJvdHRsZXIgb25lcywgc2luY2UgSSBk
-b24ndCBrbm93IHRoZSBkZXRhaWxlZCBkZWZpbml0aW9ucw0KPiBvZiB0aGVzZSBmaWVsZHMuDQo+
-ID4gTm90ZTogdGhlc2UgYXJlIHRoZSBudW1iZXJzIGZvciBvbmUgb2YgdGhlIDUgb3NkcywgdGhl
-IG90aGVyIG9zZHMgYXJlDQo+IHNpbWlsYXIuLi4NCj4gPg0KPiA+ICogVGhlIGZpZWxkIG9zZC9s
-b2FkYXZnIGlzIGFsd2F5cyBhYm91dCAzIHRpbWVzIGhpZ2hlciBvbiB0aGUgMnAgYw0KPiA+DQo+
-ID4gc29tZSBsYXRlbmN5LXJlbGF0ZWQgY291bnRlcnMNCj4gPiAtLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0NCj4gPiBvc2Qvb3BfbGF0ZW5jeS9zdW0gMXA9Ni4yNDgwMTExNzIwNTA2MSwg
-MnA9NTc5LjcyMjUxMzA3ODk0NQ0KPiA+IG9zZC9vcF9wcm9jZXNzX2xhdGVuY3kvc3VtIDFwPTMu
-NDg1MDY5NDUzOTQ5MTEsIDJwPTQyLjYyNzg0OTQ1NDk5MTUNCj4gPiBvc2Qvb3Bfcl9sYXRlbmN5
-L3N1bSAxcD02LjI0ODAxMTE3MTk5MjQsIDJwPTU3OS43MjI1MTMwNzkwMDMNCj4gPiBvc2Qvb3Bf
-cl9wcm9jZXNzX2xhdGVuY3kvc3VtIDFwPTMuNDg1MDY5NDUzOTkyNzYsIDJwPTQyLjYyNzg0OTQ1
-NTAwNjENCj4gDQo+IFNvIGlmIHlvdSd2ZSBnb3QgMjBrIG9iamVjdHMgYW5kIDUgT1NEcyB0aGVu
-IGVhY2ggT1NEIGlzIGdldHRpbmcgfjRrIHJlYWRzDQo+IGR1cmluZyB0aGlzIHRlc3QuIFdoaWNo
-IGlmIEknbSByZWFkaW5nIHRoZXNlIHByb3Blcmx5IG1lYW5zIE9TRC1zaWRlDQo+IGxhdGVuY3kg
-aXMgc29tZXRoaW5nIGxpa2UgMS41IG1pbGxpc2Vjb25kcyBmb3IgdGhlIHNpbmdsZSBjbGllbnQg
-YW5kLi4uMTQ0DQo+IG1pbGxpc2Vjb25kcyBmb3IgdGhlIHR3by1jbGllbnQgY2FzZSEgWW91IG1p
-Z2h0IHRyeSBkdW1waW5nIHNvbWUgb2YgdGhlDQo+IGhpc3RvcmljIG9wcyBvdXQgb2YgdGhlIGFk
-bWluIHNvY2tldCBhbmQgc2VlaW5nIHdoZXJlIHRoZSB0aW1lIGlzIGdldHRpbmcNCj4gc3BlbnQg
-KGlzIGl0IGFsbCBvbiBkaXNrIGFjY2Vzc2VzPykuIEFuZCB0cnlpbmcgdG8gcmVwcm9kdWNlIHNv
-bWV0aGluZw0KPiBsaWtlIHRoaXMgd29ya2xvYWQgb24geW91ciBkaXNrcyB3aXRob3V0IENlcGgg
-aW52b2x2ZWQuDQo+IC1HcmVnDQoNCkdyZWcgLS0NCg0KTm90IHN1cmUgaG93IG11Y2ggaXQgbWF0
-dGVycyBidXQgaW4gbG9va2luZyBhdCB0aGUgcG9vbHMgbW9yZSBjbG9zZWx5IEkNCndhcyBnZXR0
-aW5nIG1peGVkIHVwIHdpdGggYW4gZWFybGllciBleHBlcmltZW50IHdpdGggcG9vbHMgdGhhdCBq
-dXN0IHVzZWQgNSBvc2RzLg0KVGhlIHBvb2xzIGZvciB0aGlzIGV4YW1wbGUgYWN0dWFsbHkgZGlz
-dHJpYnV0ZWQgYWNyb3NzIDE1IG9zZHMgb24gMyBub2Rlcy4NCg0KV2hhdCBpcyB0aGUgcmVjb21t
-ZW5kZWQgY29tbWFuZCBmb3IgZHVtcGluZyBoaXN0b3JpYyBvcHMgb3V0IG9mIHRoZSBhZG1pbiBz
-b2NrZXQ/DQoNCi0tIFRvbQ0KDQoNCg0KDQo=
+On Wed, Sep 23, 2015 at 1:51 PM, Deneau, Tom <tom.deneau@amd.com> wrote:
+>
+>
+>> -----Original Message-----
+>> From: Gregory Farnum [mailto:gfarnum@redhat.com]
+>> So if you've got 20k objects and 5 OSDs then each OSD is getting ~4k reads
+>> during this test. Which if I'm reading these properly means OSD-side
+>> latency is something like 1.5 milliseconds for the single client and...144
+>> milliseconds for the two-client case! You might try dumping some of the
+>> historic ops out of the admin socket and seeing where the time is getting
+>> spent (is it all on disk accesses?). And trying to reproduce something
+>> like this workload on your disks without Ceph involved.
+>> -Greg
+>
+> Greg --
+>
+> Not sure how much it matters but in looking at the pools more closely I
+> was getting mixed up with an earlier experiment with pools that just used 5 osds.
+> The pools for this example actually distributed across 15 osds on 3 nodes.
+
+Okay, so this is running on hard drives, not SSDs. The speed
+differential is a lot more plausibly in the drive/filesystem/total
+layout in that case, then...
+
+>
+> What is the recommended command for dumping historic ops out of the admin socket?
+
+"ceph daemon osd.<N> dump_historic_ops", I think. "ceph daemon osd.<N>
+help" will include it in the list, though.
