@@ -1,35 +1,30 @@
-From: Sage Weil <sage@newdream.net>
-Subject: aarch64 test builds for trusty now available
-Date: Thu, 24 Sep 2015 05:14:44 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1509240509200.13834@cobra.newdream.net>
+From: Sage Weil <sweil@redhat.com>
+Subject: aarch64 not using crc32?
+Date: Thu, 24 Sep 2015 05:17:27 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1509240514480.13834@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:34829 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:35521 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752819AbbIXMOr (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 24 Sep 2015 08:14:47 -0400
+	id S1752819AbbIXMR3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 24 Sep 2015 08:17:29 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-users@ceph.com, ceph-devel@vger.kernel.org
+To: Pankaj.Garg@caviumnetworks.com
+Cc: ceph-devel@vger.kernel.org
 
-We now have a gitbuilder up and running building test packages for arm64 
-(aarch64).  The hardware for these builds has been graciously provided by 
-Cavium (thank you!).
+Hi Pankaj,
 
-Trusty aarch64 users can now install packages with
+In order to get the build going on the new trusty gitbuilder I had to make 
+this change:
 
- ceph-deploy install --dev BRANCH HOST
+	https://github.com/ceph/ceph/commit/3123b2c5d3b72c9d43b10d8f296305d41b68b730
 
-and build results are visible at
-
-http://gitbuilder.sepia.ceph.com/gitbuilder-ceph-deb-trusty-aarch64-basic/
-http://gitbuilder.ceph.com/ceph-deb-trusty-aarch64-basic/ref/
-
-I would love to expand this to include centos7 builds and to also have 
-hardware to run make check (as we do on x86_64).  If you have reasonably 
-powerful aarch64 hardware available and are willing to provide us with 
-remote access please let me know off-list.
+It was clearly a bug, but what worries me is that the fact that I hit it 
+means the HWCAP_CRC32 is not present.  Is there a problem with the 
+hardware feature detection or is that feature simply missing from the box 
+we're using?
 
 Thanks!
 sage
