@@ -1,81 +1,49 @@
 From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: full cluster/pool handling
-Date: Thu, 24 Sep 2015 11:26:19 -0700
-Message-ID: <CAJ4mKGb-V8L6P_StKRO2EL99AJ7R5UrUA=zsQZ8r0qzUP8j-2g@mail.gmail.com>
-References: <alpine.DEB.2.00.1509240523510.13834@cobra.newdream.net>
-	<CAANLjFo7J44QbGRRY0oKTWRy3HPUKvvxPpKz8rYcr4a24riUtA@mail.gmail.com>
-	<alpine.DEB.2.00.1509240803460.13265@cobra.newdream.net>
+Subject: Re: Very slow recovery/peering with latest master
+Date: Thu, 24 Sep 2015 11:27:41 -0700
+Message-ID: <CAJ4mKGZqOyc=JF_j2VC33-CyV1d8KFT1dmaeTxhFSkKJmO8hoA@mail.gmail.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE48251@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CAJ4mKGa1vr6Zp9ZUaT8rrHDgRFJgdkO2c8LZqMQuwxwYt7TJ+A@mail.gmail.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F2CE536F2@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CAN=+7FWL8c2EO8CU0DS_bMpEXXZS4tpWnkgvjg9p7+D3ztLQhg@mail.gmail.com>
+	<2B48BC83-794A-4C76-A50D-86C9349B73BE@hpe.com>
+	<755F6B91B3BE364F9BCA11EA3F9E0C6F2CE53886@SACMBXIP01.sdcorp.global.sandisk.com>
+	<33032584-0996-4506-B07E-66F1DD650A0D@hpe.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f174.google.com ([209.85.212.174]:33121 "EHLO
-	mail-wi0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755331AbbIXS0U convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Sep 2015 14:26:20 -0400
-Received: by wiclk2 with SMTP id lk2so40483311wic.0
-        for <ceph-devel@vger.kernel.org>; Thu, 24 Sep 2015 11:26:19 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1509240803460.13265@cobra.newdream.net>
+Received: from mail-wi0-f176.google.com ([209.85.212.176]:33699 "EHLO
+	mail-wi0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755331AbbIXS1m convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Sep 2015 14:27:42 -0400
+Received: by wiclk2 with SMTP id lk2so40529349wic.0
+        for <ceph-devel@vger.kernel.org>; Thu, 24 Sep 2015 11:27:41 -0700 (PDT)
+In-Reply-To: <33032584-0996-4506-B07E-66F1DD650A0D@hpe.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, Yehuda Sadeh-Weinraub <ysadehwe@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: "Handzik, Joe" <joseph.t.handzik@hpe.com>
+Cc: Somnath Roy <Somnath.Roy@sandisk.com>, Samuel Just <sjust@redhat.com>, "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>, "Sage Weil (sage@newdream.net)" <sage@newdream.net>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, Sep 24, 2015 at 8:04 AM, Sage Weil <sweil@redhat.com> wrote:
-> On Thu, 24 Sep 2015, Robert LeBlanc wrote:
->> -----BEGIN PGP SIGNED MESSAGE-----
->> Hash: SHA256
->>
->>
->> On Thu, Sep 24, 2015 at 6:30 AM, Sage Weil  wrote:
->> > Xuan Liu recently pointed out that there is a problem with our han=
-dling
->> > for full clusters/pools: we don't allow any writes when full,
->> > including delete operations.
->> >
->> > While fixing a separate full issue I ended up making several fixes=
- and
->> > cleanups in the full handling code in
->> >
->> >         https://github.com/ceph/ceph/pull/6052
->> >
->> > The interesting part of that is that we will allow a write as long=
- as it
->> > doesn't increase the overall utilizate of bytes or objects (accord=
-ing to
->> > the pg stats we're maintaining).  That will include remove ops, of=
- cours,
->> > but will also allow overwrites while full, which seems fair.
->>
->> What about overwrites on a COW FS, won't that still increase used
->> space? Maybe if it is a COW FS, don't allow overwrites?
+On Wed, Sep 23, 2015 at 4:42 PM, Handzik, Joe <joseph.t.handzik@hpe.com=
+> wrote:
+> Ok. When configuring with ceph-disk, it does something nifty and actu=
+ally gives the OSD the uuid of the disk's partition as its fsid. I boot=
+strap off that to get an argument to pass into the function you have id=
+entified as the bottleneck. I ran it by sage and we both realized there=
+ would be cases where it wouldn't work...I'm sure neither of us realize=
+d the failure would take three minutes though.
 >
-> Yeah, we could strengthen (optionally?) the check so that only operat=
-ions
-> that result in a net decrease are allowed..
+> In the short term, it makes sense to create an option to disable or s=
+hort-circuit the blkid code. I would prefer that the default be left wi=
+th the code enabled, but I'm open to default disabled if others think t=
+his will be a widespread problem. You could also make sure your OSD fsi=
+ds are set to match your disk partition uuids for now too, if that's a =
+faster workaround for you (it'll get rid of the failure).
 
-It's not just COW filesystems, anything that modifies
-leveldb/rocksdb/whatever in any way will also increase the space used
-=E2=80=94 including regular object deletes which additionally get added=
- to the
-PG log, although *hopefully* that's not a problem since we have our
-extra buffers to handle this sort of thing. While right now we might
-have some hope of being able to tag ops as "net deletes" or "net
-adds", I don't see that happening once we have widespread third-party
-object classes or that Lua work gets in or something...
-
-So, I'd be really leery of trying to do anything more advanced than
-letting clients execute delete operations, and letting privileged
-clients keep doing real work. (Or maybe restricting it entirely to the
-second half there.)
-
-That latter switch already exists, by the way, although I don't think
-it's actually enforced via cephx caps (it should be) =E2=80=94 the Obje=
-cter
-has an honor_full_flag setting which the MDS sets to false. I don't
-think the library interfaces are there to specify it per-op but IIRC
-it is part of the data sent to OSDs so it wouldn't require a wire
-protocol change.
+I'd leave it enabled by default =E2=80=94 ceph-disk is the standard way=
+ of
+setting up a Ceph cluster, and mkcephfs is definitely going bye-bye.
 -Greg
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
