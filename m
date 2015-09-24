@@ -1,243 +1,136 @@
-From: "Podoski, Igor" <Igor.Podoski@ts.fujitsu.com>
-Subject: RE: Very slow recovery/peering with latest master
-Date: Thu, 24 Sep 2015 08:32:38 +0200
-Message-ID: <6BAAF46BC7E1924A827AF6223BED64D7939C7143B3@ABGEX73E.FSC.NET>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE48251@SACMBXIP01.sdcorp.global.sandisk.com>
- <CAJ4mKGa1vr6Zp9ZUaT8rrHDgRFJgdkO2c8LZqMQuwxwYt7TJ+A@mail.gmail.com>
- <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE536F2@SACMBXIP01.sdcorp.global.sandisk.com>,
- <CAN=+7FWL8c2EO8CU0DS_bMpEXXZS4tpWnkgvjg9p7+D3ztLQhg@mail.gmail.com>
- <2B48BC83-794A-4C76-A50D-86C9349B73BE@hpe.com>,
- <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE53886@SACMBXIP01.sdcorp.global.sandisk.com>
- <33032584-0996-4506-B07E-66F1DD650A0D@hpe.com>
- <alpine.DEB.2.00.1509231830520.11876@cobra.newdream.net>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: ceph-mon always election when change crushmap in firefly
+Date: Thu, 24 Sep 2015 03:42:56 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1509240339030.13265@cobra.newdream.net>
+References: <CAA4r=YCZ+7jekicx6NqJ-+bzAcniMReMrLL-dYafCtrPGixpMg@mail.gmail.com> <alpine.DEB.2.00.1509230531150.11876@cobra.newdream.net> <CAA4r=YBhSnrp=6khoPR9J3R_CCFqNB+=9E_ZUkdVdo86fjQtqA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="Windows-1252"
-Content-Transfer-Encoding: 8BIT
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from dgate10.ts.fujitsu.com ([80.70.172.49]:34242 "EHLO
-	dgate10.ts.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756270AbbIXGcm convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Sep 2015 02:32:42 -0400
-In-Reply-To: <alpine.DEB.2.00.1509231830520.11876@cobra.newdream.net>
-Content-Language: en-US
+Received: from cobra.newdream.net ([66.33.216.30]:48042 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752745AbbIXKm5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Sep 2015 06:42:57 -0400
+In-Reply-To: <CAA4r=YBhSnrp=6khoPR9J3R_CCFqNB+=9E_ZUkdVdo86fjQtqA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: Samuel Just <sjust@redhat.com>, "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@newdream.net>, "Handzik, Joe" <joseph.t.handzik@hpe.com>
+To: Alexander Yang <yangwanyuan8861@gmail.com>
+Cc: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
 
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
-> owner@vger.kernel.org] On Behalf Of Sage Weil
-> Sent: Thursday, September 24, 2015 3:32 AM
-> To: Handzik, Joe
-> Cc: Somnath Roy; Samuel Just; Samuel Just (sam.just@inktank.com); ceph-
-> devel
-> Subject: Re: Very slow recovery/peering with latest master
+On Thu, 24 Sep 2015, Alexander Yang wrote:
+>     I use 'ceph osd crush dump | tail -n 20' get :
 > 
-> On Wed, 23 Sep 2015, Handzik, Joe wrote:
-> > Ok. When configuring with ceph-disk, it does something nifty and
-> > actually gives the OSD the uuid of the disk's partition as its fsid. I
-> > bootstrap off that to get an argument to pass into the function you
-> > have identified as the bottleneck. I ran it by sage and we both
-> > realized there would be cases where it wouldn't work...I'm sure
-> > neither of us realized the failure would take three minutes though.
+>               "type": 1,
+>           "min_size": 1,
+>           "max_size": 10,
+>           "steps": [
+>                 { "op": "take",
+>                   "item": -62,
+>                   "item_name": "BJ-SSD"},
+>                 { "op": "chooseleaf_firstn",
+>                   "num": 0,
+>                   "type": "rack"},
+>                 { "op": "emit"}]}],
+>   "tunables": { "choose_local_tries": 2,
+>       "choose_local_fallback_tries": 5,
+>       "choose_total_tries": 19,
+>       "chooseleaf_descend_once": 0,
+>       "profile": "argonaut",
+>       "optimal_tunables": 0,
+>       "legacy_tunables": 1,
+>       "require_feature_tunables": 0,
+>       "require_feature_tunables2": 0}}
+> 
+>    does it provide some clue?
+> 
+>    In my test environment, I can't reappear this problem, It just appear in
+> production environment.So i need make sure my cluster as steady as
+> possible,  as less data migration as possible. do you have some advice?
+
+It looks like this is an old cluster that has been upgraded--it's still 
+using the argonaut (original!) crush tunables.  I suggest moving to
+
+ ceph osd crush tunables firefly
+
+(assuming all your clients are firefly or newer).  If not, then the 
+bobtail tunables are a good first step.  This should eliminate the behaior 
+you see... but will trigger a fair bit of rebalancing to do the 
+transition.  You can use crushtool to test how bad it will be with 
+something like
+
+ ceph osd getcrushmap -i cm
+ crushtool -i cm --set-choose-local-tries 0 
+--set-choose-local-fallback-tries 0 --set-choose-total-tries 50 
+--set-chooseleaf-descend-once 1 --set-chooseleaf-vary-r 1 -o cm.new
+ crushtool -i cm --test --num-rep 3 --show-mapping > /tmp/before
+ curshtool -i cm.new --test --num-rep 3 --show-mapping > /tmp/after
+ wc -l /tmp/before
+ diff -u /tmp/before /tmp/after | grep ^+ | wc -l
+
+sage
+
+
+ > 
+>    In addition? I find  the cluster reply slower than before when I use
+> 'ceph -s '.  Before 'ceph -w'  print the status  per second,  but now
+> sometimes it print one status I will wait for 3-4 seconds, Is this contact
+> with that problem?
+> 
+>    thanks for your attention!
+> 
+> 2015-09-23 20:34 GMT+08:00 Sage Weil <sage@newdream.net>:
+> 
+> > On Wed, 23 Sep 2015, Alexander Yang wrote:
+> > > hello,
+> > >         We use Ceph+Openstack in our private cloud. In our cluster, we
+> > have
+> > > 5 mons and 800 osds, the Capacity is about 1Pb. And run about 700 vms and
+> > > 1100 volumes,
+> > >         recently, we increase our pg_num , now the cluster have about
+> > 70000
+> > > pgs. In my real intention? I want every osd have 100pgs. but after
+> > increase
+> > > pg_num, I find I'm wrong. Because the different crush weight for
+> > different
+> > > osd, the osd's pg_num is different, some osd have exceed  500pgs.
+> > >         Now, the problem is  appear?cause some reason when i want to
+> > change
+> > > some osd  weight, that means change the crushmap.  This change cause
+> > about
+> > > 0.03% data to migrate. the mon is always begin to election. It's will
+> > hung
+> > > the cluster, and when they end, the  original  leader still is the new
+> > > leader. And during the mon eclection?On the upper layer, vm have too many
+> > > slow request will appear. so now i dare to do any operation about change
+> > > crushmap. But i worry about an important thing, If  when our cluster
+> > down
+> > >  one host even down one rack.   By the time, the cluster curshmap will
+> > > change large, and the migrate data also large. I worry the cluster will
+> > > hung  long time. and result on upper layer, all vm became to  shutdown.
+> > >         In my opinion, I guess when I change the crushmap,* the leader
+> > mon
+> > > maybe calculate the too many information*, or* too many client want to
+> > get
+> > > the new crushmap from leader mon*.  It must be hung the mon thread, so
+> > the
+> > > leader mon can't heatbeat to other mons, the other mons think the leader
+> > is
+> > > down then begin the new election.  I am sorry if i guess is wrong.
+> > >         The crushmap in accessory. So who can give me some advice or
+> > guide,
+> > > Thanks very much!
 > >
-> > In the short term, it makes sense to create an option to disable or
-> > short-circuit the blkid code. I would prefer that the default be left
-> > with the code enabled, but I'm open to default disabled if others
-> > think this will be a widespread problem. You could also make sure your
-> > OSD fsids are set to match your disk partition uuids for now too, if
-> > that's a faster workaround for you (it'll get rid of the failure).
-> 
-> I think we should try to figure out where it is hanging.  Can you strace the
-> blkid process to see what it is up to?
-> 
-> I opened http://tracker.ceph.com/issues/13219
-> 
-> I think as long as it behaves reliably with ceph-disk OSDs then we can have it
-> on by default.
-> 
-> sage
-> 
-> 
+> > There were huge improvements made in hammer in terms of mon efficiency in
+> > these cases where it is under load.  I recommend upgrading as that will
+> > help.
 > >
-> > Joe
+> > You can also mitigate the problem somewhat by adjusting the mon_lease and
+> > associated settings up.  Scale all of mon_lease, mon_lease_renew_interval,
+> > mon_lease_ack_timeout, mon_accept_timeout by 2x or 3x.
 > >
-> > > On Sep 23, 2015, at 6:26 PM, Somnath Roy <Somnath.Roy@sandisk.com>
-> wrote:
-> > >
-> > > <<inline
-> > >
-> > > -----Original Message-----
-> > > From: Handzik, Joe [mailto:joseph.t.handzik@hpe.com]
-> > > Sent: Wednesday, September 23, 2015 4:20 PM
-> > > To: Samuel Just
-> > > Cc: Somnath Roy; Samuel Just (sam.just@inktank.com); Sage Weil
-> > > (sage@newdream.net); ceph-devel
-> > > Subject: Re: Very slow recovery/peering with latest master
-> > >
-> > > I added that, there is code up the stack in calamari that consumes the
-> path provided, which is intended in the future to facilitate disk monitoring
-> and management.
-> > >
-> > > [Somnath] Ok
-> > >
-> > > Somnath, what does your disk configuration look like (filesystem,
-> SSD/HDD, anything else you think could be relevant)? Did you configure your
-> disks with ceph-disk, or by hand? I never saw this while testing my code, has
-> anyone else heard of this behavior on master? The code has been in master
-> for 2-3 months now I believe.
-> > > [Somnath] All SSD , I use mkcephfs to create cluster , I partitioned the
-> disk with fdisk beforehand. I am using XFS. Are you trying with Ubuntu 3.16.*
-> kernel ? It could be Linux distribution/kernel specific.
-
-Somnath, maybe it is GPT related, what partition table do you have? I think parted and gdisk can create GPT partitions, but not fdisk (definitely not in version that I use).
-
-You could backup and clear blkid cache /etc/blkid/blkid.tab, maybe there is a mess.
-
-Regards,
-Igor.
-
-
-> > >
-> > > It would be nice to not need to disable this, but if this behavior exists and
-> can't be explained by a misconfiguration or something else I'll need to figure
-> out a different implementation.
-> > >
-> > > Joe
-> > >
-> > >> On Sep 23, 2015, at 6:07 PM, Samuel Just <sjust@redhat.com> wrote:
-> > >>
-> > >> Wow.  Why would that take so long?  I think you are correct that
-> > >> it's only used for metadata, we could just add a config value to
-> > >> disable it.
-> > >> -Sam
-> > >>
-> > >>> On Wed, Sep 23, 2015 at 3:48 PM, Somnath Roy
-> <Somnath.Roy@sandisk.com> wrote:
-> > >>> Sam/Sage,
-> > >>> I debugged it down and found out that the get_device_by_uuid-
-> >blkid_find_dev_with_tag() call within FileStore::collect_metadata() is
-> hanging for ~3 mins before returning a EINVAL. I saw this portion is newly
-> added after hammer.
-> > >>> Commenting it out resolves the issue. BTW, I saw this value is stored as
-> metadata but not used anywhere , am I missing anything ?
-> > >>> Here is my Linux details..
-> > >>>
-> > >>> root@emsnode5:~/wip-write-path-optimization/src# uname -a Linux
-> > >>> emsnode5 3.16.0-38-generic #52~14.04.1-Ubuntu SMP Fri May 8
-> > >>> 09:43:57 UTC 2015 x86_64 x86_64 x86_64 GNU/Linux
-> > >>>
-> > >>>
-> > >>> root@emsnode5:~/wip-write-path-optimization/src# lsb_release -a
-> No
-> > >>> LSB modules are available.
-> > >>> Distributor ID: Ubuntu
-> > >>> Description:    Ubuntu 14.04.2 LTS
-> > >>> Release:        14.04
-> > >>> Codename:       trusty
-> > >>>
-> > >>> Thanks & Regards
-> > >>> Somnath
-> > >>>
-> > >>> -----Original Message-----
-> > >>> From: Somnath Roy
-> > >>> Sent: Wednesday, September 16, 2015 2:20 PM
-> > >>> To: 'Gregory Farnum'
-> > >>> Cc: 'ceph-devel'
-> > >>> Subject: RE: Very slow recovery/peering with latest master
-> > >>>
-> > >>>
-> > >>> Sage/Greg,
-> > >>>
-> > >>> Yeah, as we expected, it is not happening probably because of
-> recovery settings. I reverted it back in my ceph.conf , but, still seeing this
-> problem.
-> > >>>
-> > >>> Some observation :
-> > >>> ----------------------
-> > >>>
-> > >>> 1. First of all, I don't think it is something related to my environment. I
-> recreated the cluster with Hammer and this problem is not there.
-> > >>>
-> > >>> 2. I have enabled the messenger/monclient log (Couldn't attach here)
-> in one of the OSDs and found monitor is taking long time to detect the up
-> OSDs. If you see the log, I have started OSD at 2015-09-16 16:13:07.042463 ,
-> but, there is no communication (only getting KEEP_ALIVE) till 2015-09-16
-> 16:16:07.180482 , so, 3 mins !!
-> > >>>
-> > >>> 3. During this period, I saw monclient trying to communicate with
-> monitor but not able to probably. It is sending osd_boot at 2015-09-16
-> 16:16:07.180482 only..
-> > >>>
-> > >>> 2015-09-16 16:16:07.180450 7f65377fe700 10 monclient:
-> > >>> _send_mon_message to mon.a at 10.60.194.10:6789/0
-> > >>> 2015-09-16 16:16:07.180482 7f65377fe700  1 --
-> > >>> 10.60.194.10:6820/20102
-> > >>> --> 10.60.194.10:6789/0 -- osd_boot(osd.10 booted 0 features
-> > >>> 72057594037927935 v45) v6 -- ?+0 0x7f6523c19100 con 0x7f6542045680
-> > >>> 2015-09-16 16:16:07.180496 7f65377fe700 20 -- 10.60.194.10:6820/20102
-> submit_message osd_boot(osd.10 booted 0 features 72057594037927935
-> v45) v6 remote, 10.60.194.10:6789/0, have pipe.
-> > >>>
-> > >>> 4. BTW, the osd down scenario is detected very quickly (ceph -w
-> output) , problem is during coming up I guess.
-> > >>>
-> > >>>
-> > >>> So, something related to mon communication getting slower ?
-> > >>> Let me know if more verbose logging is required and how should I
-> share the log..
-> > >>>
-> > >>> Thanks & Regards
-> > >>> Somnath
-> > >>>
-> > >>> -----Original Message-----
-> > >>> From: Gregory Farnum [mailto:gfarnum@redhat.com]
-> > >>> Sent: Wednesday, September 16, 2015 11:35 AM
-> > >>> To: Somnath Roy
-> > >>> Cc: ceph-devel
-> > >>> Subject: Re: Very slow recovery/peering with latest master
-> > >>>
-> > >>>> On Tue, Sep 15, 2015 at 8:04 PM, Somnath Roy
-> <Somnath.Roy@sandisk.com> wrote:
-> > >>>> Hi,
-> > >>>> I am seeing very slow recovery when I am adding OSDs with the latest
-> master.
-> > >>>> Also, If I just restart all the OSDs (no IO is going on in the cluster) ,
-> cluster is taking a significant amount of time to reach in active+clean state
-> (and even detecting all the up OSDs).
-> > >>>>
-> > >>>> I saw the recovery/backfill default parameters are now changed (to
-> lower value) , this probably explains the recovery scenario , but, will it affect
-> the peering time during OSD startup as well ?
-> > >>>
-> > >>> I don't think these values should impact peering time, but you could
-> configure them back to the old defaults and see if it changes.
-> > >>> -Greg
-> > >>>
-> > >>> ________________________________
-> > >>>
-> > >>> PLEASE NOTE: The information contained in this electronic mail
-> message is intended only for the use of the designated recipient(s) named
-> above. If the reader of this message is not the intended recipient, you are
-> hereby notified that you have received this message in error and that any
-> review, dissemination, distribution, or copying of this message is strictly
-> prohibited. If you have received this communication in error, please notify
-> the sender by telephone or e-mail (as shown above) immediately and
-> destroy any and all copies of this message in your possession (whether hard
-> copies or electronically stored copies).
-> > >> --
-> > >> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> > >> in the body of a message to majordomo@vger.kernel.org More
-> > >> majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> > in the body of a message to majordomo@vger.kernel.org More
-> majordomo
-> > info at  http://vger.kernel.org/majordomo-info.html
+> > It also sounds like you may be using some older tunables/settings
+> > for your pools or crush rules.  Can you attach the output of 'ceph osd
+> > dump' and 'ceph osd crush dump | tail -n 20' ?
 > >
+> > sage
 > >
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the
-> body of a message to majordomo@vger.kernel.org More majordomo info at
-> http://vger.kernel.org/majordomo-info.html
+> 
