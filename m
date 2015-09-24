@@ -1,81 +1,59 @@
-From: John Spray <jspray@redhat.com>
-Subject: [Manila] CephFS native driver
-Date: Thu, 24 Sep 2015 14:49:17 +0100
-Message-ID: <CALe9h7datjEmxQ8i+pZPPXA_355o4wMs7MVH56eVrPACFjCKSg@mail.gmail.com>
+From: Jevon Qiao <scaleqiao@gmail.com>
+Subject: Re: Seek advice for using Ceph to provice NAS service
+Date: Thu, 24 Sep 2015 22:21:58 +0800
+Message-ID: <56040706.1000902@gmail.com>
+References: <56020CC2.2060806@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f51.google.com ([209.85.218.51]:32816 "EHLO
-	mail-oi0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755598AbbIXNth (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Sep 2015 09:49:37 -0400
-Received: by oixx17 with SMTP id x17so41386321oix.0
-        for <ceph-devel@vger.kernel.org>; Thu, 24 Sep 2015 06:49:37 -0700 (PDT)
+Received: from mail-pa0-f44.google.com ([209.85.220.44]:34793 "EHLO
+	mail-pa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756467AbbIXOWI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Sep 2015 10:22:08 -0400
+Received: by padhy16 with SMTP id hy16so74680082pad.1
+        for <ceph-devel@vger.kernel.org>; Thu, 24 Sep 2015 07:22:08 -0700 (PDT)
+In-Reply-To: <56020CC2.2060806@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: openstack-dev@lists.openstack.org, Ceph Development <ceph-devel@vger.kernel.org>
-Cc: Csaba Henk <chenk@redhat.com>
+To: sage@newdream.net, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: ceph-users@ceph.com
 
-Hi all,
+Any comments or suggestions?
 
-I've recently started work on a CephFS driver for Manila.  The (early)
-code is here:
-https://github.com/openstack/manila/compare/master...jcsp:ceph
+Thanks,
+Jevon
+On 23/9/15 10:21, Jevon Qiao wrote:
+> Hi Sage and other Ceph experts,
+>
+> This is a greeting from Jevon, I'm from China and working in a company 
+> which are using Ceph as the backend storage. At present, I'm 
+> evaluating the following two options of using Ceph cluster to provide 
+> NAS service and I need your advice from the perspective of stability 
+> and feasibility.
+>
+> Option 1: Directly use CephFS
+> Since Ceph as a unified storage can provide file system storage 
+> service via cephfs, this looks an ideal solution for my case if CephFS 
+> is ready to be used in production environment. However, based on the 
+> previous discussions on CephFS, I see that there are still some issues 
+> like not ready for supporting multiple metadata servers, lack of a 
+> fully functioning fsck and so on. Also, I learn that CephFS has been 
+> evaluated by a large community of users and there are production 
+> systems using it with a single MDS from the official website of Ceph. 
+> So it is difficult for me to make the decision on whether I should use 
+> it.
+>
+> Option 2: Ceph rbd + NFS server
+> This might be a common architecture used in current NAS storage. But 
+> the problem is how to get rid of the single point failure on NFS 
+> server. What I have right now is to use Corosync and Pacemaker(the 
+> typical HA solution in Linux) to form a cluster. It seems that 
+> Sebastien Han has verified the feasibility.
+>
+> Your comments/advices would be highly appreciated and I'm looking 
+> forward to your reply.
+>
+> Thanks,
+> Jevon
 
-It requires a special branch of ceph which is here:
-https://github.com/ceph/ceph/compare/master...jcsp:wip-manila
-
-This isn't done yet (hence this email rather than a gerrit review),
-but I wanted to give everyone a heads up that this work is going on,
-and a brief status update.
-
-This is the 'native' driver in the sense that clients use the CephFS
-client to access the share, rather than re-exporting it over NFS.  The
-idea is that this driver will be useful for anyone who has such
-clients, as well as acting as the basis for a later NFS-enabled
-driver.
-
-The export location returned by the driver gives the client the Ceph
-mon IP addresses, the share path, and an authentication token.  This
-authentication token is what permits the clients access (Ceph does not
-do access control based on IP addresses).
-
-It's just capable of the minimal functionality of creating and
-deleting shares so far, but I will shortly be looking into hooking up
-snapshots/consistency groups, albeit for read-only snapshots only
-(cephfs does not have writeable shapshots).  Currently deletion is
-just a move into a 'trash' directory, the idea is to add something
-later that cleans this up in the background: the downside to the
-"shares are just directories" approach is that clearing them up has a
-"rm -rf" cost!
-
-A note on the implementation: cephfs recently got the ability (not yet
-in master) to restrict client metadata access based on path, so this
-driver is simply creating shares by creating directories within a
-cluster-wide filesystem, and issuing credentials to clients that
-restrict them to their own directory.  They then mount that subpath,
-so that from the client's point of view it's like having their own
-filesystem.  We also have a quota mechanism that I'll hook in later to
-enforce the share size.
-
-Currently the security here requires clients (i.e. the ceph-fuse code
-on client hosts, not the userspace applications) to be trusted, as
-quotas are enforced on the client side.  The OSD access control
-operates on a per-pool basis, and creating a separate pool for each
-share is inefficient.  In the future it is expected that CephFS will
-be extended to support file layouts that use RADOS namespaces, which
-are cheap, such that we can issue a new namespace to each share and
-enforce the separation between shares on the OSD side.
-
-However, for many people the ultimate access control solution will be
-to use a NFS gateway in front of their CephFS filesystem: it is
-expected that an NFS-enabled cephfs driver will follow this native
-driver in the not-too-distant future.
-
-This will be my first openstack contribution, so please bear with me
-while I come up to speed with the submission process.  I'll also be in
-Tokyo for the summit next month, so I hope to meet other interested
-parties there.
-
-All the best,
-John
