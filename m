@@ -1,37 +1,51 @@
-From: Mykola Golub <to.my.trociny@gmail.com>
-Subject: Re: Pool setting for recovery priority
-Date: Fri, 25 Sep 2015 21:09:10 +0300
-Message-ID: <20150925180909.GB3831@gmail.com>
-References: <BLU175-W30B038F9EE84A31BF7D842DF5B0@phx.gbl>
- <alpine.DEB.2.00.1509160920120.14342@cobra.newdream.net>
- <20150921133218.GB23240@gmail.com>
- <20150925114440.GA30636@gmail.com>
- <alpine.DEB.2.00.1509250708531.13265@cobra.newdream.net>
- <20150925175042.GA3831@gmail.com>
- <alpine.DEB.2.00.1509251102240.13265@cobra.newdream.net>
+From: Casey Bodley <cbodley@redhat.com>
+Subject: Re: Backend ObjectStore engine performance bench with FIO
+Date: Fri, 25 Sep 2015 14:22:03 -0400 (EDT)
+Message-ID: <720951445.22040695.1443205323581.JavaMail.zimbra@redhat.com>
+References: <99767EA2E27DD44DB4E9F9B9ACA458C03BD7EFC9@SSIEXCH-MB3.ssi.samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f50.google.com ([209.85.215.50]:35980 "EHLO
-	mail-la0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932736AbbIYSJN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 25 Sep 2015 14:09:13 -0400
-Received: by laclj5 with SMTP id lj5so11767304lac.3
-        for <ceph-devel@vger.kernel.org>; Fri, 25 Sep 2015 11:09:12 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <alpine.DEB.2.00.1509251102240.13265@cobra.newdream.net>
+Received: from mx4-phx2.redhat.com ([209.132.183.25]:47252 "EHLO
+	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932764AbbIYSWH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 25 Sep 2015 14:22:07 -0400
+In-Reply-To: <99767EA2E27DD44DB4E9F9B9ACA458C03BD7EFC9@SSIEXCH-MB3.ssi.samsung.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Mykola Golub <mgolub@mirantis.com>, GuangYang <yguang11@outlook.com>, "sjust@redhat.com" <sjust@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, David Zafman <dzafman@redhat.com>
+To: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
+Cc: Xiaoxi Chen <xiaoxi.chen@intel.com>, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
 
-On Fri, Sep 25, 2015 at 11:02:36AM -0700, Sage Weil wrote:
+Great work James!
 
-> It's just this last commit, right?
+----- Original Message -----
+> From: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
+> To: "Xiaoxi Chen" <xiaoxi.chen@intel.com>, "Casey Bodley" <cbodley@redhat.com>
+> Cc: "Sage Weil" <sage@newdream.net>, ceph-devel@vger.kernel.org
+> Sent: Friday, September 25, 2015 1:55:29 PM
+> Subject: Backend ObjectStore engine performance bench with FIO
 > 
-> https://github.com/ceph/ceph/pull/6084
+> Hi Xiaoxi,
+> 
+>    With changing the IO mode from aio to sync, we make fio against newstore
+>    works. Even  with sync engine(I am still debugging the aio engine in
+>    newstore with Xiaoxi) in newstore, Newstore still performing the best
+>    among all of backstore engine with our initial setup(Thoroughly test will
+>    be run soon). Attachment is the initial data we collected for your
+>    reference. Thanks for great help from Xiaoxi from regarding to Newstore
+>    development to support FIO.
+> 
+> Hi Casey,
+>   Let me know if you need any help to put fio-ceph-objectstore into upstream.
+>   After then , I can commit all of mine into upstream.
 
-Yes, thanks.
+My pull request at https://github.com/ceph/ceph/pull/5943 is still pending. If you have patches that you'd like included, I would be happy to pull them in; just point me to a branch.
 
--- 
-Mykola Golub
+> 
+>   Thanks,
+>   James
+> 
+
+Thanks,
+Casey
