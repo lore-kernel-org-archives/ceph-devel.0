@@ -1,7 +1,7 @@
 From: Igor Fedotov <ifedotov@mirantis.com>
 Subject: Re: Adding Data-At-Rest compression support to Ceph
-Date: Fri, 25 Sep 2015 14:59:42 +0300
-Message-ID: <5605372E.9020004@mirantis.com>
+Date: Fri, 25 Sep 2015 16:16:23 +0300
+Message-ID: <56054927.2040008@mirantis.com>
 References: <56018A05.6090100@mirantis.com>
  <alpine.DEB.2.00.1509221201570.11876@cobra.newdream.net>
  <56029F66.3070503@mirantis.com>
@@ -10,120 +10,120 @@ References: <56018A05.6090100@mirantis.com>
  <5602C48C.4010009@mirantis.com>
  <CAJ4mKGZLc1AzAbhEKpjSdUd21dXWgVxiLjjETHuP+EwVCA8EoA@mail.gmail.com>
  <5604131E.2030408@mirantis.com>
- <alpine.DEB.2.00.1509240829540.13265@cobra.newdream.net>
- <56041D16.6060805@mirantis.com>
- <alpine.DEB.2.00.1509240900540.13265@cobra.newdream.net>
- <560423DD.3080701@mirantis.com>
- <CAANLjFqLAHV2NEpc0-p3Ft4kqd3S+L_EpQTAFGa7vd4gT8fS_w@mail.gmail.com>
- <CAN=+7FUrBdTc7hD1mQNs5GPO_uKUZsbxR73VU8P9KqaiZ_hAJA@mail.gmail.com>
+ <CAJ4mKGaJY31=WbTPFfpWkNho0zSb__dYMbjN6W9jeQTKiGvxyw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f43.google.com ([209.85.215.43]:35002 "EHLO
-	mail-la0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754579AbbIYL7o (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 25 Sep 2015 07:59:44 -0400
-Received: by lacrr8 with SMTP id rr8so16435360lac.2
-        for <ceph-devel@vger.kernel.org>; Fri, 25 Sep 2015 04:59:42 -0700 (PDT)
-In-Reply-To: <CAN=+7FUrBdTc7hD1mQNs5GPO_uKUZsbxR73VU8P9KqaiZ_hAJA@mail.gmail.com>
+Received: from mail-la0-f52.google.com ([209.85.215.52]:35355 "EHLO
+	mail-la0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756083AbbIYNQ0 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 25 Sep 2015 09:16:26 -0400
+Received: by lacrr8 with SMTP id rr8so18684448lac.2
+        for <ceph-devel@vger.kernel.org>; Fri, 25 Sep 2015 06:16:24 -0700 (PDT)
+In-Reply-To: <CAJ4mKGaJY31=WbTPFfpWkNho0zSb__dYMbjN6W9jeQTKiGvxyw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sjust@redhat.com>, Robert LeBlanc <robert@leblancnet.us>
-Cc: Sage Weil <sweil@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: Sage Weil <sage@newdream.net>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Another thing to note is that we don't have the whole object ready for 
-compression. We just have some new data block written(appended) to the 
-object. And we should either compress that block and save mentioned 
-mapping data or decompress the existing object data and do full 
-compression again.
-And IMO introducing seek points is largely similar to what we were 
-talking about - it requires a sort of offset mapping as well.
 
-Probably compression at OSD has some Pros as well. But it wouldn't 
-eliminate the need to "muck with stripe sizes or anything".
 
-On 24.09.2015 20:53, Samuel Just wrote:
-> The catch is that currently accessing 4k in the middle of a 4MB object
-> does not require reading the whole object, so you'd need some kind of
-> logical offset -> compressed offset mapping.
-> -Sam
->
-> On Thu, Sep 24, 2015 at 10:36 AM, Robert LeBlanc <robert@leblancnet.us> wrote:
->> -----BEGIN PGP SIGNED MESSAGE-----
->> Hash: SHA256
->>
->> I'm probably missing something, but since we are talking about data at
->> rest, can't we just have the OSD compress the object as it goes to
->> disk? Instead of
->> rbd\udata.1ba49c10d9b00c.0000000000006859__head_2AD1002B__11 it would
->> be rbd\udata.1ba49c10d9b00c.0000000000006859__head_2AD1002B__11.{gz,xz,bz2,lzo,etc}.
->> Then it seems that you don't have to muck with stripe sizes or
->> anything. For compressible objects they would be less than 4MB, some
->> of theses algorithms already say if it is not compressible enough,
->> just store it.
->>
->> Something like zlib Z_FULL_FLUSH may help provide some seek points
->> within an archive to prevent decompressing the whole object for reads?
->>
->> - ----------------
->> Robert LeBlanc
->> PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
->>
->>
->> On Thu, Sep 24, 2015 at 10:25 AM, Igor Fedotov  wrote:
->>>
->>> On 24.09.2015 19:03, Sage Weil wrote:
->>>> On Thu, 24 Sep 2015, Igor Fedotov wrote:
->>>>
->>>> Dynamic stripe sizes are possible but it's a significant change from the
->>>> way the EC pool currently works. I would make that a separate project (as
->>>> its useful in its own right) and not complicate the compression situation.
->>>> Or, if it simplifies the compression approach, then I'd make that change
->>>> first. sage
->>> Just to clarify a bit. What I saw when played with Ceph. Please correct me
->>> if I'm wrong..
->>>
->>> For low-level RADOS access client data written to EC pool has to be aligned
->>> with stripe size . The last block can be unaligned though but no more
->>> appends are permitted in this case.
->>> Data copied from cache goes in blocks up to 8Mb size. In general case  the
->>> last block seems to have unaligned size too.
->>>
->>> EC pool additionally performs alignment of the incoming blocks to stripe
->>> bound internally. This way blocks going to EC lib are always aligned.
->>> We should probably perform compression prior to this alignment.
->>> Thus some dependency on stripe size is present in EC pools but it's not that
->>> strict.
->>>
->>> Thanks,
->>> Igor
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> -----BEGIN PGP SIGNATURE-----
->> Version: Mailvelope v1.1.0
->> Comment: https://www.mailvelope.com
->>
->> wsFcBAEBCAAQBQJWBDSDCRDmVDuy+mK58QAAmwwP/3q0tbLZA95RVsvSLrXk
->> ipuhjiGPvAX8o2kTYFtf5tXkMuiJIJIy+WK1uD6zs+CXM/2JR6SJthS3tE9A
->> meaFW7W5lropbWKRZ8TkpUNQAXDyRrpSEcTDBWciq+EOca5tlP+17KDevVnZ
->> PWDCNPlZmbHyBy91iJju4TTzaJYoD8mXU/+4xLCicePDPomlpO4oyndDfOmI
->> JP5uRDmgP0ecsxfcyoYSTCJylfnBsmK0IMyxZoV2Mx+SEcqgtECPCOY7Uc/4
->> wwXGhu//zO7twyOvtsk4OQGjLX9wpSpVWz+zcR2RYiYfw3YSTSzGvbBC5hpb
->> pfQya5DbypJra2oz5BZkikvwYPhxPoI0FcdTCYFFxclm0jMwQqh2b141kN8Z
->> eR7v8ttfnbACumWP74j2KSpHRm/1l65nN4wqzg3ovoesjoJDvb2miz8AX7ag
->> FXVa54JpIcoIzCkIkqvpCfzhatGU55yQiyt7aFAhJfpmP/cNpxmAete8buTK
->> 6aFMiYWFJe+md/bLOrk5g/cyr9BUq+tHT7Qf+mRmgw9fuECUXMXMzf6vOUk8
->> 0JnYiYVk0j+twZeuDaVPBrXEMKuYuq7NlILuHJDF3meRPM2xekan8ARZoJxL
->> XAOzvaEFly0TH5DJfItSVOL86qtp+1orULSrVbtvolxzQtv8xiNOzJYBKEnO
->> ouVI
->> =d8mm
->> -----END PGP SIGNATURE-----
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On 24.09.2015 21:10, Gregory Farnum wrote:
+> On Thu, Sep 24, 2015 at 8:13 AM, Igor Fedotov <ifedotov@mirantis.com> wrote:
+>> On 23.09.2015 21:03, Gregory Farnum wrote:
+>> Okay, that's acceptable, but that metadata then gets pretty large. 
+>> You would need to store an offset, for each chunk in the PG, and for 
+>> each individual write. (And even then you'd have to read an entire 
+>> write at a time to make sure you get the data requested, even if they 
+>> only want a small portion of it.) If you're doing it this way, then 
+>> realize we've also got a problem with recovery: we can't lose those 
+>> offsets. Which means they need to be preserved at all costs. So that 
+>> means for each stripe unit you'd store them on the primary (for easy 
+>> access) and on the replica (so they have the same lifecycle as the 
+>> data they're mapping), which means the replicas need to be 
+>> compression-aware. Which is good, since I think they'd need to be 
+>> compression-aware for scrubbing and things as well. And then when you 
+>> lose the primary the next guy who's reconstructing would need to, uh, 
+>> ask each shard for the uncompressed version of the data? 
+You are absolutely right about metadata importance and replicas 
+compression-awareness. The great thing here is that it's absolutely 
+similar to current EC pool implementation. Each append to EC pool 
+updates some specific metadata (hash info) that are propagated to all 
+replicas. And each replica is able to restore EC encoded data when 
+primary is lost. IMO such replica simply becomes a new primary.
 
+And yes - reconstructing entity collects shards from multiple OSDs. 
+Moreover primary does the same during regular read. Thus all this 
+mechanics already exists for EC pools.
+
+>> If we were going to limit this to EC pools I think we should just do 
+>> it at the replica in the FileStore or something, transparently to the 
+>> wire and recovery protocols. While the compression would help on 
+>> 1GigE networks, on 10GigE I think the CPU costs of compression 
+>> outweigh any bandwidth efficiencies we'd get... 
+This is definitely worth to consider but one thing to mention here. In 
+general from CPU loading perspective there is no much difference where 
+compression is performed: at primary OSD or at replica node. Each 
+replica node can be a primary for some other object thus its' CPU can be 
+utilized for that compression.
+E.g.
+There are three nodes: node1, node2, node3.
+There are three objects written to EC pool.
+They have different primaries: node1, node2, node3 respectively.
+and all nodes are used for objects to store resulting EC shards.
+
+Original disposition after EC:
+obj1 -> shard1_1, shard1_2, shard1_3. (performed at node1)
+obj2 -> shard2_1, shard2_2, shard2_3. (performed at node2)
+obj3 -> shard3_1, shard3_2, shard3_3. (performed at node3)
+
+Stored data disposition can be:
+node1: shard1_1,  shard2_2, shard3_3
+node2: shard1_3, shard2_1, shard3_2
+node3: shard1_2 & shard2_3, shard3_1
+
+Thus each node has to deal with 3 shards - no matter where you have 
+compression functionality:  each node has to compress 3 shards.
+If compression is done at primary  node1 compresses shards1_1, 1_2, 1_3
+If compression is at replica node 1 compresses shard1_1,  shard2_2, shard3_3
+The same applies to other nodes.
+
+As a result you will have similar CPU load distribution among nodes 
+under Ceph cluster load  for both compression approaches.
+Actually compression at primary before EC even has some benefit: each 
+object has two shards prior to EC thus you need to compress less data.
+
+>>
+>> Well I agree that have compression support for both replicated and EC pools
+>> is better.
+>> But random access ( and probably other advanced features ) requires much
+>> more complex data handling that also brings additional overhead. Actually I
+>> suppose EC pools have such limitations due to these reasons. Thus my
+>> original idea was to simplify compression implementation from one side and
+>> make it  in-line with EC usage from another. The latter makes sense since
+>> compression and EC  have pretty the same reasons for implementation.
+> Well, EC pools still support random reads, I think? Or at least
+> reading along stripes, which for the purpose of this discussion is
+> almost the same.
+Yeah, random reads are possible for EC pools. But they aren't the major 
+issue IMO. That's random writes that causes a head ache.
+On such write one should decompress existing block, merge it with new 
+data, compress it again and then save to a disk given the fact that 
+block size has changed.
+Or implement a sort of journal where new writes are saved separately and 
+then data reconstruction from this journal is required on read. As well 
+as some garbage collection... AFAIK ZBD I mentioned before works in this 
+way.
+see
+http://users.ics.forth.gr/~bilas/pdffiles/makatos-snapi10.pdf
+
+> In any case, as Sam said I think judging these proposals well will 
+> require actually going through the data structure and algorithms 
+> design work for each one and comparing. Unfortunately I've no time to 
+> do that, but I'd definitely like to see two real approaches 
+> well-sketched-out before any work is spent on coding one. -Greg 
+Got it, will try to prepare some draft...
+
+Thanks,
+Igor
