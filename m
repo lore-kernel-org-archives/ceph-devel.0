@@ -1,102 +1,129 @@
-From: Mykola Golub <mgolub@mirantis.com>
-Subject: Re: Pool setting for recovery priority
-Date: Fri, 25 Sep 2015 14:44:42 +0300
-Message-ID: <20150925114440.GA30636@gmail.com>
-References: <BLU175-W30B038F9EE84A31BF7D842DF5B0@phx.gbl>
- <alpine.DEB.2.00.1509160920120.14342@cobra.newdream.net>
- <20150921133218.GB23240@gmail.com>
+From: Igor Fedotov <ifedotov@mirantis.com>
+Subject: Re: Adding Data-At-Rest compression support to Ceph
+Date: Fri, 25 Sep 2015 14:59:42 +0300
+Message-ID: <5605372E.9020004@mirantis.com>
+References: <56018A05.6090100@mirantis.com>
+ <alpine.DEB.2.00.1509221201570.11876@cobra.newdream.net>
+ <56029F66.3070503@mirantis.com>
+ <alpine.DEB.2.00.1509230613410.11876@cobra.newdream.net>
+ <CAJ4mKGanEtC3yX5Y2SA+698FEtNupOVcpFnoDLoJ7Hwo1ruSGw@mail.gmail.com>
+ <5602C48C.4010009@mirantis.com>
+ <CAJ4mKGZLc1AzAbhEKpjSdUd21dXWgVxiLjjETHuP+EwVCA8EoA@mail.gmail.com>
+ <5604131E.2030408@mirantis.com>
+ <alpine.DEB.2.00.1509240829540.13265@cobra.newdream.net>
+ <56041D16.6060805@mirantis.com>
+ <alpine.DEB.2.00.1509240900540.13265@cobra.newdream.net>
+ <560423DD.3080701@mirantis.com>
+ <CAANLjFqLAHV2NEpc0-p3Ft4kqd3S+L_EpQTAFGa7vd4gT8fS_w@mail.gmail.com>
+ <CAN=+7FUrBdTc7hD1mQNs5GPO_uKUZsbxR73VU8P9KqaiZ_hAJA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=koi8-r
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f44.google.com ([209.85.215.44]:35817 "EHLO
-	mail-la0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755917AbbIYLoq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 25 Sep 2015 07:44:46 -0400
-Received: by lacrr8 with SMTP id rr8so16060113lac.2
-        for <ceph-devel@vger.kernel.org>; Fri, 25 Sep 2015 04:44:44 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <20150921133218.GB23240@gmail.com>
+Received: from mail-la0-f43.google.com ([209.85.215.43]:35002 "EHLO
+	mail-la0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754579AbbIYL7o (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 25 Sep 2015 07:59:44 -0400
+Received: by lacrr8 with SMTP id rr8so16435360lac.2
+        for <ceph-devel@vger.kernel.org>; Fri, 25 Sep 2015 04:59:42 -0700 (PDT)
+In-Reply-To: <CAN=+7FUrBdTc7hD1mQNs5GPO_uKUZsbxR73VU8P9KqaiZ_hAJA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: GuangYang <yguang11@outlook.com>, "sjust@redhat.com" <sjust@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, David Zafman <dzafman@redhat.com>
+To: Samuel Just <sjust@redhat.com>, Robert LeBlanc <robert@leblancnet.us>
+Cc: Sage Weil <sweil@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi,
+Another thing to note is that we don't have the whole object ready for 
+compression. We just have some new data block written(appended) to the 
+object. And we should either compress that block and save mentioned 
+mapping data or decompress the existing object data and do full 
+compression again.
+And IMO introducing seek points is largely similar to what we were 
+talking about - it requires a sort of offset mapping as well.
 
-On Mon, Sep 21, 2015 at 04:32:19PM +0300, Mykola Golub wrote:
-> On Wed, Sep 16, 2015 at 09:23:07AM -0700, Sage Weil wrote:
-> > On Wed, 16 Sep 2015, GuangYang wrote:
-> > > Hi Sam,
-> > > As part of the effort to solve problems similar to issue #13104 (=
-http://tracker.ceph.com/issues/13104), do you think it is appropriate t=
-o add some parameters to pool setting:
-> > > =9A =9A1. recovery priority of the pool - we have a customized po=
-ol recovery priority (like process's nice value) to favor some pools ov=
-er others. For example, the bucket index pool is usually much much smal=
-ler but important to recover first (e.g. might affect write latency as =
-like issue #13104).
-> > > =9A =9A2. pool level recovery op priority - currently we have a l=
-ow priority for recovery op (by default it is 10 while client io's prio=
-rity is 63), is it possible to have a pool setting to customized the pr=
-iority on pool level.
-> > >=20
-> > > The purpose is to give some flexibility in terms of favor some po=
-ols over others when doing recovery, in our case using radosgw, we woul=
-d like to favor bucket index pool as that is on the write path for all =
-requests.
-> >=20
-> > I think this makes sense, and is analogous to
-> >=20
-> > 	https://github.com/ceph/ceph/pull/5922
-> >=20
-> > which does per-pool scrub settings.  I think the only real question=
- is=20
-> > whether pg_pool_t is the right place to keep piling these parameter=
-s in,=20
-> > or whether we want some unstructured key/value settings or somethin=
-g.
->=20
-> I aggree that adding a bunch of new rarely used fields to pg_pool_t
-> might not be a very good idea. Still storing these options here looks
-> convenient (accessing, updating...). What do you think if I add
-> something like this in pg_pool_t instead?
->=20
->   typedef boost::variant<string,int,double> pool_opt_value_t;
->   typedef std::map<pool_opt_key_t,pool_opt_value_t> opts_t;
->   opts_t opts;
->=20
-> (in reality I suppose it will be more compicated but will have
-> something like this in base).
->=20
-> Usually opts will be empty or have only one or two settings, so it
-> will not consume much space.
+Probably compression at OSD has some Pros as well. But it wouldn't 
+eliminate the need to "muck with stripe sizes or anything".
 
-What do you think about this implementation, which adds a dictionary
-for pool options to pg_pool_t?
+On 24.09.2015 20:53, Samuel Just wrote:
+> The catch is that currently accessing 4k in the middle of a 4MB object
+> does not require reading the whole object, so you'd need some kind of
+> logical offset -> compressed offset mapping.
+> -Sam
+>
+> On Thu, Sep 24, 2015 at 10:36 AM, Robert LeBlanc <robert@leblancnet.us> wrote:
+>> -----BEGIN PGP SIGNED MESSAGE-----
+>> Hash: SHA256
+>>
+>> I'm probably missing something, but since we are talking about data at
+>> rest, can't we just have the OSD compress the object as it goes to
+>> disk? Instead of
+>> rbd\udata.1ba49c10d9b00c.0000000000006859__head_2AD1002B__11 it would
+>> be rbd\udata.1ba49c10d9b00c.0000000000006859__head_2AD1002B__11.{gz,xz,bz2,lzo,etc}.
+>> Then it seems that you don't have to muck with stripe sizes or
+>> anything. For compressible objects they would be less than 4MB, some
+>> of theses algorithms already say if it is not compressible enough,
+>> just store it.
+>>
+>> Something like zlib Z_FULL_FLUSH may help provide some seek points
+>> within an archive to prevent decompressing the whole object for reads?
+>>
+>> - ----------------
+>> Robert LeBlanc
+>> PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
+>>
+>>
+>> On Thu, Sep 24, 2015 at 10:25 AM, Igor Fedotov  wrote:
+>>>
+>>> On 24.09.2015 19:03, Sage Weil wrote:
+>>>> On Thu, 24 Sep 2015, Igor Fedotov wrote:
+>>>>
+>>>> Dynamic stripe sizes are possible but it's a significant change from the
+>>>> way the EC pool currently works. I would make that a separate project (as
+>>>> its useful in its own right) and not complicate the compression situation.
+>>>> Or, if it simplifies the compression approach, then I'd make that change
+>>>> first. sage
+>>> Just to clarify a bit. What I saw when played with Ceph. Please correct me
+>>> if I'm wrong..
+>>>
+>>> For low-level RADOS access client data written to EC pool has to be aligned
+>>> with stripe size . The last block can be unaligned though but no more
+>>> appends are permitted in this case.
+>>> Data copied from cache goes in blocks up to 8Mb size. In general case  the
+>>> last block seems to have unaligned size too.
+>>>
+>>> EC pool additionally performs alignment of the incoming blocks to stripe
+>>> bound internally. This way blocks going to EC lib are always aligned.
+>>> We should probably perform compression prior to this alignment.
+>>> Thus some dependency on stripe size is present in EC pools but it's not that
+>>> strict.
+>>>
+>>> Thanks,
+>>> Igor
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> -----BEGIN PGP SIGNATURE-----
+>> Version: Mailvelope v1.1.0
+>> Comment: https://www.mailvelope.com
+>>
+>> wsFcBAEBCAAQBQJWBDSDCRDmVDuy+mK58QAAmwwP/3q0tbLZA95RVsvSLrXk
+>> ipuhjiGPvAX8o2kTYFtf5tXkMuiJIJIy+WK1uD6zs+CXM/2JR6SJthS3tE9A
+>> meaFW7W5lropbWKRZ8TkpUNQAXDyRrpSEcTDBWciq+EOca5tlP+17KDevVnZ
+>> PWDCNPlZmbHyBy91iJju4TTzaJYoD8mXU/+4xLCicePDPomlpO4oyndDfOmI
+>> JP5uRDmgP0ecsxfcyoYSTCJylfnBsmK0IMyxZoV2Mx+SEcqgtECPCOY7Uc/4
+>> wwXGhu//zO7twyOvtsk4OQGjLX9wpSpVWz+zcR2RYiYfw3YSTSzGvbBC5hpb
+>> pfQya5DbypJra2oz5BZkikvwYPhxPoI0FcdTCYFFxclm0jMwQqh2b141kN8Z
+>> eR7v8ttfnbACumWP74j2KSpHRm/1l65nN4wqzg3ovoesjoJDvb2miz8AX7ag
+>> FXVa54JpIcoIzCkIkqvpCfzhatGU55yQiyt7aFAhJfpmP/cNpxmAete8buTK
+>> 6aFMiYWFJe+md/bLOrk5g/cyr9BUq+tHT7Qf+mRmgw9fuECUXMXMzf6vOUk8
+>> 0JnYiYVk0j+twZeuDaVPBrXEMKuYuq7NlILuHJDF3meRPM2xekan8ARZoJxL
+>> XAOzvaEFly0TH5DJfItSVOL86qtp+1orULSrVbtvolxzQtv8xiNOzJYBKEnO
+>> ouVI
+>> =d8mm
+>> -----END PGP SIGNATURE-----
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-https://github.com/ceph/ceph/pull/6081
-
-Although #5922 has already been merged to master, I think it is still
-not late to change scrub intervals to be stored in options?
-
->=20
-> Or where do you suggest to store them instead?
->=20
-> BTW, I see we already have in pg_pool_t:
->=20
->   map<string,string> properties;  ///< OBSOLETE
->=20
-> I wonder what it was supposed to be used for and why it is marked
-> obsolete?
->=20
-> --=20
-> Mykola Golub
-
---=20
-Mykola Golub
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
