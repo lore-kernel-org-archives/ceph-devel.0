@@ -1,129 +1,102 @@
-From: Igor Fedotov <ifedotov@mirantis.com>
-Subject: Re: Adding Data-At-Rest compression support to Ceph
-Date: Fri, 25 Sep 2015 16:16:23 +0300
-Message-ID: <56054927.2040008@mirantis.com>
-References: <56018A05.6090100@mirantis.com>
- <alpine.DEB.2.00.1509221201570.11876@cobra.newdream.net>
- <56029F66.3070503@mirantis.com>
- <alpine.DEB.2.00.1509230613410.11876@cobra.newdream.net>
- <CAJ4mKGanEtC3yX5Y2SA+698FEtNupOVcpFnoDLoJ7Hwo1ruSGw@mail.gmail.com>
- <5602C48C.4010009@mirantis.com>
- <CAJ4mKGZLc1AzAbhEKpjSdUd21dXWgVxiLjjETHuP+EwVCA8EoA@mail.gmail.com>
- <5604131E.2030408@mirantis.com>
- <CAJ4mKGaJY31=WbTPFfpWkNho0zSb__dYMbjN6W9jeQTKiGvxyw@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: Pool setting for recovery priority
+Date: Fri, 25 Sep 2015 07:09:53 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1509250708531.13265@cobra.newdream.net>
+References: <BLU175-W30B038F9EE84A31BF7D842DF5B0@phx.gbl> <alpine.DEB.2.00.1509160920120.14342@cobra.newdream.net> <20150921133218.GB23240@gmail.com> <20150925114440.GA30636@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-405161035-1443190196=:13265"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-la0-f52.google.com ([209.85.215.52]:35355 "EHLO
-	mail-la0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756083AbbIYNQ0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 25 Sep 2015 09:16:26 -0400
-Received: by lacrr8 with SMTP id rr8so18684448lac.2
-        for <ceph-devel@vger.kernel.org>; Fri, 25 Sep 2015 06:16:24 -0700 (PDT)
-In-Reply-To: <CAJ4mKGaJY31=WbTPFfpWkNho0zSb__dYMbjN6W9jeQTKiGvxyw@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:51926 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756266AbbIYOJ5 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 25 Sep 2015 10:09:57 -0400
+In-Reply-To: <20150925114440.GA30636@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Sage Weil <sage@newdream.net>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Mykola Golub <mgolub@mirantis.com>
+Cc: GuangYang <yguang11@outlook.com>, "sjust@redhat.com" <sjust@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, David Zafman <dzafman@redhat.com>
+
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
+
+--557981400-405161035-1443190196=:13265
+Content-Type: TEXT/PLAIN; charset=koi8-r
+Content-Transfer-Encoding: 8BIT
+
+Hi Mykola,
+
+On Fri, 25 Sep 2015, Mykola Golub wrote:
+> Hi,
+> 
+> On Mon, Sep 21, 2015 at 04:32:19PM +0300, Mykola Golub wrote:
+> > On Wed, Sep 16, 2015 at 09:23:07AM -0700, Sage Weil wrote:
+> > > On Wed, 16 Sep 2015, GuangYang wrote:
+> > > > Hi Sam,
+> > > > As part of the effort to solve problems similar to issue #13104 (http://tracker.ceph.com/issues/13104), do you think it is appropriate to add some parameters to pool setting:
+> > > > š š1. recovery priority of the pool - we have a customized pool recovery priority (like process's nice value) to favor some pools over others. For example, the bucket index pool is usually much much smaller but important to recover first (e.g. might affect write latency as like issue #13104).
+> > > > š š2. pool level recovery op priority - currently we have a low priority for recovery op (by default it is 10 while client io's priority is 63), is it possible to have a pool setting to customized the priority on pool level.
+> > > > 
+> > > > The purpose is to give some flexibility in terms of favor some pools over others when doing recovery, in our case using radosgw, we would like to favor bucket index pool as that is on the write path for all requests.
+> > > 
+> > > I think this makes sense, and is analogous to
+> > > 
+> > > 	https://github.com/ceph/ceph/pull/5922
+> > > 
+> > > which does per-pool scrub settings.  I think the only real question is 
+> > > whether pg_pool_t is the right place to keep piling these parameters in, 
+> > > or whether we want some unstructured key/value settings or something.
+> > 
+> > I aggree that adding a bunch of new rarely used fields to pg_pool_t
+> > might not be a very good idea. Still storing these options here looks
+> > convenient (accessing, updating...). What do you think if I add
+> > something like this in pg_pool_t instead?
+> > 
+> >   typedef boost::variant<string,int,double> pool_opt_value_t;
+> >   typedef std::map<pool_opt_key_t,pool_opt_value_t> opts_t;
+> >   opts_t opts;
+> > 
+> > (in reality I suppose it will be more compicated but will have
+> > something like this in base).
+> > 
+> > Usually opts will be empty or have only one or two settings, so it
+> > will not consume much space.
+> 
+> What do you think about this implementation, which adds a dictionary
+> for pool options to pg_pool_t?
+> 
+> https://github.com/ceph/ceph/pull/6081
+> 
+> Although #5922 has already been merged to master, I think it is still
+> not late to change scrub intervals to be stored in options?
+
+Yeah, I agree that something along these lines is better.  It's too late 
+to add this to infernalis, though.. I think we should revert the scrub 
+interval options and then use the dictionary (post-infernalis).
+
+How does that sound?
+sage
 
 
-
-On 24.09.2015 21:10, Gregory Farnum wrote:
-> On Thu, Sep 24, 2015 at 8:13 AM, Igor Fedotov <ifedotov@mirantis.com> wrote:
->> On 23.09.2015 21:03, Gregory Farnum wrote:
->> Okay, that's acceptable, but that metadata then gets pretty large. 
->> You would need to store an offset, for each chunk in the PG, and for 
->> each individual write. (And even then you'd have to read an entire 
->> write at a time to make sure you get the data requested, even if they 
->> only want a small portion of it.) If you're doing it this way, then 
->> realize we've also got a problem with recovery: we can't lose those 
->> offsets. Which means they need to be preserved at all costs. So that 
->> means for each stripe unit you'd store them on the primary (for easy 
->> access) and on the replica (so they have the same lifecycle as the 
->> data they're mapping), which means the replicas need to be 
->> compression-aware. Which is good, since I think they'd need to be 
->> compression-aware for scrubbing and things as well. And then when you 
->> lose the primary the next guy who's reconstructing would need to, uh, 
->> ask each shard for the uncompressed version of the data? 
-You are absolutely right about metadata importance and replicas 
-compression-awareness. The great thing here is that it's absolutely 
-similar to current EC pool implementation. Each append to EC pool 
-updates some specific metadata (hash info) that are propagated to all 
-replicas. And each replica is able to restore EC encoded data when 
-primary is lost. IMO such replica simply becomes a new primary.
-
-And yes - reconstructing entity collects shards from multiple OSDs. 
-Moreover primary does the same during regular read. Thus all this 
-mechanics already exists for EC pools.
-
->> If we were going to limit this to EC pools I think we should just do 
->> it at the replica in the FileStore or something, transparently to the 
->> wire and recovery protocols. While the compression would help on 
->> 1GigE networks, on 10GigE I think the CPU costs of compression 
->> outweigh any bandwidth efficiencies we'd get... 
-This is definitely worth to consider but one thing to mention here. In 
-general from CPU loading perspective there is no much difference where 
-compression is performed: at primary OSD or at replica node. Each 
-replica node can be a primary for some other object thus its' CPU can be 
-utilized for that compression.
-E.g.
-There are three nodes: node1, node2, node3.
-There are three objects written to EC pool.
-They have different primaries: node1, node2, node3 respectively.
-and all nodes are used for objects to store resulting EC shards.
-
-Original disposition after EC:
-obj1 -> shard1_1, shard1_2, shard1_3. (performed at node1)
-obj2 -> shard2_1, shard2_2, shard2_3. (performed at node2)
-obj3 -> shard3_1, shard3_2, shard3_3. (performed at node3)
-
-Stored data disposition can be:
-node1: shard1_1,  shard2_2, shard3_3
-node2: shard1_3, shard2_1, shard3_2
-node3: shard1_2 & shard2_3, shard3_1
-
-Thus each node has to deal with 3 shards - no matter where you have 
-compression functionality:  each node has to compress 3 shards.
-If compression is done at primary  node1 compresses shards1_1, 1_2, 1_3
-If compression is at replica node 1 compresses shard1_1,  shard2_2, shard3_3
-The same applies to other nodes.
-
-As a result you will have similar CPU load distribution among nodes 
-under Ceph cluster load  for both compression approaches.
-Actually compression at primary before EC even has some benefit: each 
-object has two shards prior to EC thus you need to compress less data.
-
->>
->> Well I agree that have compression support for both replicated and EC pools
->> is better.
->> But random access ( and probably other advanced features ) requires much
->> more complex data handling that also brings additional overhead. Actually I
->> suppose EC pools have such limitations due to these reasons. Thus my
->> original idea was to simplify compression implementation from one side and
->> make it  in-line with EC usage from another. The latter makes sense since
->> compression and EC  have pretty the same reasons for implementation.
-> Well, EC pools still support random reads, I think? Or at least
-> reading along stripes, which for the purpose of this discussion is
-> almost the same.
-Yeah, random reads are possible for EC pools. But they aren't the major 
-issue IMO. That's random writes that causes a head ache.
-On such write one should decompress existing block, merge it with new 
-data, compress it again and then save to a disk given the fact that 
-block size has changed.
-Or implement a sort of journal where new writes are saved separately and 
-then data reconstruction from this journal is required on read. As well 
-as some garbage collection... AFAIK ZBD I mentioned before works in this 
-way.
-see
-http://users.ics.forth.gr/~bilas/pdffiles/makatos-snapi10.pdf
-
-> In any case, as Sam said I think judging these proposals well will 
-> require actually going through the data structure and algorithms 
-> design work for each one and comparing. Unfortunately I've no time to 
-> do that, but I'd definitely like to see two real approaches 
-> well-sketched-out before any work is spent on coding one. -Greg 
-Got it, will try to prepare some draft...
-
-Thanks,
-Igor
+> 
+> > 
+> > Or where do you suggest to store them instead?
+> > 
+> > BTW, I see we already have in pg_pool_t:
+> > 
+> >   map<string,string> properties;  ///< OBSOLETE
+> > 
+> > I wonder what it was supposed to be used for and why it is marked
+> > obsolete?
+> > 
+> > -- 
+> > Mykola Golub
+> 
+> -- 
+> Mykola Golub
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+--557981400-405161035-1443190196=:13265--
