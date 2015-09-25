@@ -1,45 +1,32 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: full cluster/pool handling
-Date: Thu, 24 Sep 2015 13:45:34 -0700
-Message-ID: <CAJ4mKGZM-p6DeHDu=md7WVJ68JLeoHxyo46uwmik94sCShL4MA@mail.gmail.com>
-References: <alpine.DEB.2.00.1509240523510.13834@cobra.newdream.net>
-	<CAANLjFo7J44QbGRRY0oKTWRy3HPUKvvxPpKz8rYcr4a24riUtA@mail.gmail.com>
-	<alpine.DEB.2.00.1509240803460.13265@cobra.newdream.net>
-	<CAJ4mKGb-V8L6P_StKRO2EL99AJ7R5UrUA=zsQZ8r0qzUP8j-2g@mail.gmail.com>
-	<CALe9h7eSjOrHG0jcx7v9j9BQLg6AmoVgVndt7cv3oZBppP64RQ@mail.gmail.com>
+From: Jaze Lee <jazeltq@gmail.com>
+Subject: how to sepcify the point a rbd mapped?
+Date: Fri, 25 Sep 2015 11:25:09 +0800
+Message-ID: <CAKZcxgeKCGr3_=z1=A4yhDyqK01ZzXeAFMhMow_aCT1gXeuAoQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f176.google.com ([209.85.212.176]:38384 "EHLO
-	mail-wi0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751639AbbIXUpf convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Sep 2015 16:45:35 -0400
-Received: by wiclk2 with SMTP id lk2so317479wic.1
-        for <ceph-devel@vger.kernel.org>; Thu, 24 Sep 2015 13:45:34 -0700 (PDT)
-In-Reply-To: <CALe9h7eSjOrHG0jcx7v9j9BQLg6AmoVgVndt7cv3oZBppP64RQ@mail.gmail.com>
+Received: from mail-la0-f46.google.com ([209.85.215.46]:33833 "EHLO
+	mail-la0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753868AbbIYDZL convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Sep 2015 23:25:11 -0400
+Received: by lacdq2 with SMTP id dq2so29384019lac.1
+        for <ceph-devel@vger.kernel.org>; Thu, 24 Sep 2015 20:25:10 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: Sage Weil <sweil@redhat.com>, Yehuda Sadeh-Weinraub <ysadehwe@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Thu, Sep 24, 2015 at 1:36 PM, John Spray <jspray@redhat.com> wrote:
-> On Thu, Sep 24, 2015 at 7:26 PM, Gregory Farnum <gfarnum@redhat.com> =
-wrote:
+Hello,
+    I know we can map a rbd image to a block device into kernel by
+=E2=80=98rbd map=E2=80=99 command=E3=80=82
+    But we can not specify which block device. For example, if i have
+a rbd named rbd_0,
+    i want it mapped into /dev/rbd_0 when it mapped.
 
->> That latter switch already exists, by the way, although I don't thin=
-k
->> it's actually enforced via cephx caps (it should be) =E2=80=94 the O=
-bjecter
->> has an honor_full_flag setting which the MDS sets to false. I don't
->> think the library interfaces are there to specify it per-op but IIRC
->> it is part of the data sent to OSDs so it wouldn't require a wire
->> protocol change.
->
-> I don't think it's sent with the ops, the OSDs simply check if the
-> requester's entity type is MDS.
+    Is there some way to do that?
 
-Oh drat, you're right.
+--=20
+=E8=B0=A6=E8=B0=A6=E5=90=9B=E5=AD=90
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
