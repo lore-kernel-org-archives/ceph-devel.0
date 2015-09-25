@@ -1,264 +1,123 @@
-From: zhucaifeng <zhucaifeng@unissoft-nj.com>
-Subject: a patch to improve cephfs direct io performance
-Date: Fri, 25 Sep 2015 11:52:23 +0800
-Message-ID: <5604C4F7.10300@unissoft-nj.com>
+From: Shinobu Kinjo <skinjo@redhat.com>
+Subject: Re: [openstack-dev] [Manila] CephFS native driver
+Date: Fri, 25 Sep 2015 03:04:14 -0400 (EDT)
+Message-ID: <1886719958.21640286.1443164654402.JavaMail.zimbra@redhat.com>
+References: <CALe9h7datjEmxQ8i+pZPPXA_355o4wMs7MVH56eVrPACFjCKSg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtpbg202.qq.com ([184.105.206.29]:56993 "EHLO smtpbg202.qq.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754745AbbIYDwX (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 24 Sep 2015 23:52:23 -0400
-Received: from [192.168.2.106] (unknown [58.213.102.114])
-	by esmtp4.qq.com (ESMTP) with SMTP id 0
-	for <ceph-devel@vger.kernel.org>; Fri, 25 Sep 2015 11:52:17 +0800 (CST)
+Received: from mx3-phx2.redhat.com ([209.132.183.24]:52669 "EHLO
+	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754557AbbIYHEP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 25 Sep 2015 03:04:15 -0400
+In-Reply-To: <CALe9h7datjEmxQ8i+pZPPXA_355o4wMs7MVH56eVrPACFjCKSg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: John Spray <jspray@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, openstack-dev@lists.openstack.org
 
-Hi, all
-
-When using cephfs, we find that cephfs direct io is very slow.
-For example, installing Windows 7 takes more than 1 hour on a
-virtual machine whose disk is a file in cephfs.
-
-The cause is that when doing direct io, both ceph_sync_direct_write
-and ceph_sync_read iterate iov elements one by one, and send one
-osd_op request for each iov that covers about 4K~8K bytes data. The
-result is lots of small requests and replies shuttled among the kernel
-client and OSDs.
-
-The fix tries to combine as many iovs as possible into one page vector, and
-then send one request for this page vector. In this way, small requests and
-replies are reduced; the OSD can serve a large read/write request one time.
-
-We observe that the performance is improved by about 5~15 times, 
-dependent on
-different application workload.
-
-The fix is below. Some change notes are as follows:
-     - function ceph_get_direct_page_vetor and ceph_put_page_vector
-       are moved from net/ceph/pagevec.c to fs/ceph/file.c, and are
-       renamed as dio_grab_pages and dio_free_pagev respectively.
-
-     - function dio_get_pagevlen and dio_alloc_pagev are newly introduced.
-
-       dio_get_pagevlen is to calculate the page vector length in bytes
-       from the io vectors. Except for the first and last one, an io vector
-       can be merged into a page vector iff its base and tail are page 
-aligned.
-       for the first vector, only its tail should be page aligned; for 
-the last
-       vector, only its head should be page aligned.
-
-       dio_alloc_pagev allocates pages for each io vector and put these 
-pages
-       together in one page pointer array.
-
-Best Regards!
-
---- /home/linux-3.10.0-229.7.2.el7/fs/ceph/file.c    2015-05-16 
-09:05:28.000000000 +0800
-+++ ./fs/ceph/file.c    2015-09-17 10:43:44.798591846 +0800
-@@ -34,6 +34,115 @@
-   * need to wait for MDS acknowledgement.
-   */
-
-+/*
-+ * Calculate the length sum of direct io vectors that can
-+ * be combined into one page vector.
-+ */
-+static int
-+dio_get_pagevlen(const struct iov_iter *it)
-+{
-+    const struct iovec *iov = it->iov;
-+    const struct iovec *iovend = iov + it->nr_segs;
-+    int pagevlen;
-+
-+    pagevlen = iov->iov_len - it->iov_offset;
-+    /*
-+     * An iov can be page vectored when both the current tail
-+     * and the next base are page aligned.
-+     */
-+    while (PAGE_ALIGNED((iov->iov_base + iov->iov_len)) &&
-+           (++iov < iovend && PAGE_ALIGNED((iov->iov_base)))) {
-+        pagevlen += iov->iov_len;
-+    }
-+    dout("dio_get_pagevlen len = %d\n", pagevlen);
-+    return pagevlen;
-+}
-+
-+/*
-+ * Grab @num_pages from the process vm space. These pages are
-+ * continuous and start from @data.
-+ */
-+static int
-+dio_grab_pages(const void *data, int num_pages, bool write_page,
-+    struct page **pages)
-+{
-+    int got = 0;
-+    int rc = 0;
-+
-+    down_read(&current->mm->mmap_sem);
-+    while (got < num_pages) {
-+        rc = get_user_pages(current, current->mm,
-+            (unsigned long)data + ((unsigned long)got * PAGE_SIZE),
-+            num_pages - got, write_page, 0, pages + got, NULL);
-+        if (rc < 0)
-+            break;
-+        BUG_ON(rc == 0);
-+        got += rc;
-+    }
-+    up_read(&current->mm->mmap_sem);
-+    return got;
-+}
-+
-+static void
-+dio_free_pagev(struct page **pages, int num_pages, bool dirty)
-+{
-+    int i;
-+
-+    for (i = 0; i < num_pages; i++) {
-+        if (dirty)
-+            set_page_dirty_lock(pages[i]);
-+        put_page(pages[i]);
-+    }
-+    kfree(pages);
-+}
-+
-+/*
-+ * Allocate a page vector based on (@it, @pagevlen).
-+ * The return value is the tuple describing a page vector,
-+ * that is (@pages, @pagevlen, @page_align, @num_pages).
-+ */
-+static struct page **
-+dio_alloc_pagev(const struct iov_iter *it, int pagevlen, bool write_page,
-+    int *page_align, int *num_pages)
-+{
-+    const struct iovec *iov = it->iov;
-+    struct page **pages;
-+    int n, m, k, npages;
-+    int align;
-+    int len;
-+    void *data;
-+
-+    data = iov->iov_base + it->iov_offset;
-+    len = iov->iov_len - it->iov_offset;
-+    align = ((ulong)data) & ~PAGE_MASK;
-+    npages = calc_pages_for((ulong)data, pagevlen);
-+    pages = kmalloc(sizeof(*pages) * npages, GFP_NOFS);
-+    if (!pages)
-+        return ERR_PTR(-ENOMEM);
-+    for (n = 0; n < npages; n += m) {
-+        m = calc_pages_for((ulong)data, len);
-+        if (n + m > npages)
-+            m = npages - n;
-+        k = dio_grab_pages(data, m, write_page, pages + n);
-+        if (k < m) {
-+            n += k;
-+            goto failed;
-+        }
-+
-+        iov++;
-+        data = iov->iov_base;
-+        len = iov->iov_len;
-+    }
-+    *num_pages = npages;
-+    *page_align = align;
-+    dout("dio_alloc_pagev: alloc pages pages[0:%d], page align %d\n",
-+        npages, align);
-+    return pages;
-+
-+failed:
-+    dio_free_pagev(pages, n, false);
-+    return ERR_PTR(-ENOMEM);
-+}
-
-  /*
-   * Prepare an open request.  Preallocate ceph_cap to avoid an
-@@ -354,13 +463,14 @@ more:
-      if (ret >= 0) {
-          int didpages;
-          if (was_short && (pos + ret < inode->i_size)) {
--            u64 tmp = min(this_len - ret,
-+            u64 zlen = min(this_len - ret,
-                      inode->i_size - pos - ret);
-+            int zoff = (o_direct ? buf_align : io_align) +
-+                   read + ret;
-              dout(" zero gap %llu to %llu\n",
--                pos + ret, pos + ret + tmp);
--            ceph_zero_page_vector_range(page_align + read + ret,
--                            tmp, pages);
--            ret += tmp;
-+                pos + ret, pos + ret + zlen);
-+            ceph_zero_page_vector_range(zoff, zlen, pages);
-+            ret += zlen;
-          }
-
-          didpages = (page_align + ret) >> PAGE_CACHE_SHIFT;
-@@ -421,19 +531,19 @@ static ssize_t ceph_sync_read(struct kio
-
-      if (file->f_flags & O_DIRECT) {
-          while (iov_iter_count(i)) {
--            void __user *data = i->iov[0].iov_base + i->iov_offset;
--            size_t len = i->iov[0].iov_len - i->iov_offset;
--
--            num_pages = calc_pages_for((unsigned long)data, len);
--            pages = ceph_get_direct_page_vector(data,
--                                num_pages, true);
-+            int page_align;
-+            size_t len;
-+
-+            len = dio_get_pagevlen(i);
-+            pages = dio_alloc_pagev(i, len, true, &page_align,
-+                &num_pages);
-              if (IS_ERR(pages))
-                  return PTR_ERR(pages);
-
-              ret = striped_read(inode, off, len,
-                         pages, num_pages, checkeof,
--                       1, (unsigned long)data & ~PAGE_MASK);
--            ceph_put_page_vector(pages, num_pages, true);
-+                       1, page_align);
-+            dio_free_pagev(pages, num_pages, true);
-
-              if (ret <= 0)
-                  break;
-@@ -570,10 +680,7 @@ ceph_sync_direct_write(struct kiocb *ioc
-      iov_iter_init(&i, iov, nr_segs, count, 0);
-
-      while (iov_iter_count(&i) > 0) {
--        void __user *data = i.iov->iov_base + i.iov_offset;
--        u64 len = i.iov->iov_len - i.iov_offset;
--
--        page_align = (unsigned long)data & ~PAGE_MASK;
-+        u64 len = dio_get_pagevlen(&i);
-
-          snapc = ci->i_snap_realm->cached_context;
-          vino = ceph_vino(inode);
-@@ -589,8 +696,7 @@ ceph_sync_direct_write(struct kiocb *ioc
-              break;
-          }
-
--        num_pages = calc_pages_for(page_align, len);
--        pages = ceph_get_direct_page_vector(data, num_pages, false);
-+        pages = dio_alloc_pagev(&i, len, false, &page_align, &num_pages);
-          if (IS_ERR(pages)) {
-              ret = PTR_ERR(pages);
-              goto out;
-@@ -612,7 +718,7 @@ ceph_sync_direct_write(struct kiocb *ioc
-          if (!ret)
-              ret = ceph_osdc_wait_request(&fsc->client->osdc, req);
-
--        ceph_put_page_vector(pages, num_pages, false);
-+        dio_free_pagev(pages, num_pages, false);
-
-  out:
-          ceph_osdc_put_request(req);
+So here are questions from my side.
+Just question.
 
 
+ 1.What is the biggest advantage comparing others such as RDB?
+  We should be able to implement what you are going to do in
+  existing module, shouldn't we?
 
+ 2.What are you going to focus on with a new implementation?
+  It seems to be to use NFS in front of that implementation
+  with more transparently.
 
+ 3.What are you thinking of integration with OpenStack using
+  a new implementation?
+  Since it's going to be new kind of, there should be differ-
+  ent architecture.
 
+ 4.Is this implementation intended for OneStack integration 
+  mainly?
 
+Since velocity of OpenStack feature expansion is much more than 
+it used to be, it's much more important to think of performance.
+
+Is a new implementation also going to improve Ceph integration
+with OpenStack system?
+ 
+Thank you so much for your explanation in advance.
+
+Shinobu 
+
+----- Original Message -----
+From: "John Spray" <jspray@redhat.com>
+To: openstack-dev@lists.openstack.org, "Ceph Development" <ceph-devel@vger.kernel.org>
+Sent: Thursday, September 24, 2015 10:49:17 PM
+Subject: [openstack-dev] [Manila] CephFS native driver
+
+Hi all,
+
+I've recently started work on a CephFS driver for Manila.  The (early)
+code is here:
+https://github.com/openstack/manila/compare/master...jcsp:ceph
+
+It requires a special branch of ceph which is here:
+https://github.com/ceph/ceph/compare/master...jcsp:wip-manila
+
+This isn't done yet (hence this email rather than a gerrit review),
+but I wanted to give everyone a heads up that this work is going on,
+and a brief status update.
+
+This is the 'native' driver in the sense that clients use the CephFS
+client to access the share, rather than re-exporting it over NFS.  The
+idea is that this driver will be useful for anyone who has such
+clients, as well as acting as the basis for a later NFS-enabled
+driver.
+
+The export location returned by the driver gives the client the Ceph
+mon IP addresses, the share path, and an authentication token.  This
+authentication token is what permits the clients access (Ceph does not
+do access control based on IP addresses).
+
+It's just capable of the minimal functionality of creating and
+deleting shares so far, but I will shortly be looking into hooking up
+snapshots/consistency groups, albeit for read-only snapshots only
+(cephfs does not have writeable shapshots).  Currently deletion is
+just a move into a 'trash' directory, the idea is to add something
+later that cleans this up in the background: the downside to the
+"shares are just directories" approach is that clearing them up has a
+"rm -rf" cost!
+
+A note on the implementation: cephfs recently got the ability (not yet
+in master) to restrict client metadata access based on path, so this
+driver is simply creating shares by creating directories within a
+cluster-wide filesystem, and issuing credentials to clients that
+restrict them to their own directory.  They then mount that subpath,
+so that from the client's point of view it's like having their own
+filesystem.  We also have a quota mechanism that I'll hook in later to
+enforce the share size.
+
+Currently the security here requires clients (i.e. the ceph-fuse code
+on client hosts, not the userspace applications) to be trusted, as
+quotas are enforced on the client side.  The OSD access control
+operates on a per-pool basis, and creating a separate pool for each
+share is inefficient.  In the future it is expected that CephFS will
+be extended to support file layouts that use RADOS namespaces, which
+are cheap, such that we can issue a new namespace to each share and
+enforce the separation between shares on the OSD side.
+
+However, for many people the ultimate access control solution will be
+to use a NFS gateway in front of their CephFS filesystem: it is
+expected that an NFS-enabled cephfs driver will follow this native
+driver in the not-too-distant future.
+
+This will be my first openstack contribution, so please bear with me
+while I come up to speed with the submission process.  I'll also be in
+Tokyo for the summit next month, so I hope to meet other interested
+parties there.
+
+All the best,
+John
+
+__________________________________________________________________________
+OpenStack Development Mailing List (not for usage questions)
+Unsubscribe: OpenStack-dev-request@lists.openstack.org?subject:unsubscribe
+http://lists.openstack.org/cgi-bin/mailman/listinfo/openstack-dev
