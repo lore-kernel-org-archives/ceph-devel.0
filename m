@@ -1,7 +1,7 @@
-From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
 Subject: RE: Very slow recovery/peering with latest master
-Date: Mon, 28 Sep 2015 08:01:46 +0000
-Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC03625C79@shsmsx102.ccr.corp.intel.com>
+Date: Mon, 28 Sep 2015 08:42:58 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE59173@SACMBXIP01.sdcorp.global.sandisk.com>
 References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE48251@SACMBXIP01.sdcorp.global.sandisk.com>
  <CAJ4mKGa1vr6Zp9ZUaT8rrHDgRFJgdkO2c8LZqMQuwxwYt7TJ+A@mail.gmail.com>
  <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE536F2@SACMBXIP01.sdcorp.global.sandisk.com>,
@@ -12,20 +12,59 @@ References: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE48251@SACMBXIP01.sdcorp.global.s
  <alpine.DEB.2.00.1509231830520.11876@cobra.newdream.net>
  <6BAAF46BC7E1924A827AF6223BED64D7939C7143B3@ABGEX73E.FSC.NET>
  <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE54809@SACMBXIP01.sdcorp.global.sandisk.com>
+ <6F3FA899187F0043BA1827A69DA2F7CC03625C79@shsmsx102.ccr.corp.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:20155 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756449AbbI1IBu convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Sep 2015 04:01:50 -0400
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE54809@SACMBXIP01.sdcorp.global.sandisk.com>
+Received: from mail-bn1bon0086.outbound.protection.outlook.com ([157.56.111.86]:19515
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753045AbbI1InG convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Sep 2015 04:43:06 -0400
+In-Reply-To: <6F3FA899187F0043BA1827A69DA2F7CC03625C79@shsmsx102.ccr.corp.intel.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>, "Podoski, Igor" <Igor.Podoski@ts.fujitsu.com>
+To: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>, "Podoski, Igor" <Igor.Podoski@ts.fujitsu.com>
 Cc: Samuel Just <sjust@redhat.com>, "Samuel Just (sam.just@inktank.com)" <sam.just@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@newdream.net>, "Handzik, Joe" <joseph.t.handzik@hpe.com>
+
+Xiaoxi,
+Thanks for giving me some pointers.
+Now, with the help of strace I am able to figure out why it is taking so long in my setup to complete blkid* calls.
+In my case, the partitions are showing properly even if it is connected to JBOD controller.
+
+root@emsnode10:~/wip-write-path-optimization/src/os# strace -t -o /root/strace_blkid.txt blkid
+/dev/sda1: UUID="d2060642-1af4-424f-9957-6a8dc77ff301" TYPE="ext4"
+/dev/sda5: UUID="2a987cc0-e3cd-43d4-99cd-b8d8e58617e7" TYPE="swap"
+/dev/sdy2: UUID="0ebd1631-52e7-4dc2-8bff-07102b877bfc" TYPE="xfs"
+/dev/sdw2: UUID="29f1203b-6f44-45e3-8f6a-8ad1d392a208" TYPE="xfs"
+/dev/sdt2: UUID="94f6bb55-ac61-499c-8552-600581e13dfa" TYPE="xfs"
+/dev/sdr2: UUID="b629710e-915d-4c56-b6a5-4782e6d6215d" TYPE="xfs"
+/dev/sdv2: UUID="69623b7f-9036-4a35-8298-dc7f5cecdb21" TYPE="xfs"
+/dev/sds2: UUID="75d941c5-a85c-4c37-b409-02de34483314" TYPE="xfs"
+/dev/sdx: UUID="cc84bc66-208b-4387-8470-071ec71532f2" TYPE="xfs"
+/dev/sdu2: UUID="c9817831-8362-48a9-9a6c-920e0f04d029" TYPE="xfs"
+
+But, it is taking time on the drives those are not reserved for this host. Basically, I am using 2 heads in front of a JBOF and I am using sg_persist to reserve the drives between 2 hosts.
+Here is the strace output of blkid.
+
+http://pastebin.com/qz2Z7Phj
+
+You can see lot of input/output errors on accessing the drives which are not reserved for this host.
+
+This is an inefficiency part of blkid* calls (?) since calls like fdisk/lsscsi are not taking time.
+
+Regards
+Somnath
+
+
+-----Original Message-----
+From: Chen, Xiaoxi [mailto:xiaoxi.chen@intel.com]
+Sent: Monday, September 28, 2015 1:02 AM
+To: Somnath Roy; Podoski, Igor
+Cc: Samuel Just; Samuel Just (sam.just@inktank.com); ceph-devel; Sage Weil; Handzik, Joe
+Subject: RE: Very slow recovery/peering with latest master
 
 FWIW, blkid works well in both GPT(created by parted) and MSDOS(created by fdisk) in my environment.
 
@@ -48,42 +87,51 @@ See below, SDB and SDH are SSDs attached to the front panel but the rest osd dis
 
 
 
-root@osd1:~# blkid 
-/dev/sdb1: UUID="907806fe-1d29-4ef7-ad11-5a933a11601e" TYPE="xfs" 
-/dev/sdh1: UUID="9dfe68ac-f297-4a02-8d21-50c194af4ff2" TYPE="xfs" 
-/dev/sda1: UUID="cdf945ce-a345-4766-b89e-cecc33689016" TYPE="ext4" 
-/dev/sda2: UUID="7a565029-deb9-4e68-835c-f097c2b1514e" TYPE="ext4" 
+root@osd1:~# blkid
+/dev/sdb1: UUID="907806fe-1d29-4ef7-ad11-5a933a11601e" TYPE="xfs"
+/dev/sdh1: UUID="9dfe68ac-f297-4a02-8d21-50c194af4ff2" TYPE="xfs"
+/dev/sda1: UUID="cdf945ce-a345-4766-b89e-cecc33689016" TYPE="ext4"
+/dev/sda2: UUID="7a565029-deb9-4e68-835c-f097c2b1514e" TYPE="ext4"
 /dev/sda5: UUID="e61bfc35-932d-442f-a5ca-795897f62744" TYPE="swap"
 
- 
+
 
 > -----Original Message-----
 > From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
 > owner@vger.kernel.org] On Behalf Of Somnath Roy
 > Sent: Friday, September 25, 2015 12:09 AM
 > To: Podoski, Igor
-> Cc: Samuel Just; Samuel Just (sam.just@inktank.com); ceph-devel; Sage Weil;
-> Handzik, Joe
+> Cc: Samuel Just; Samuel Just (sam.just@inktank.com); ceph-devel; Sage
+> Weil; Handzik, Joe
 > Subject: RE: Very slow recovery/peering with latest master
-> 
+>
 > Yeah , Igor may be..
 > Meanwhile, I am able to get gdb trace of the hang..
-> 
+>
 > (gdb) bt
-> #0  0x00007f6f6bf043bd in read () at ../sysdeps/unix/syscall-template.S:81
-> #1  0x00007f6f6af3b066 in ?? () from /lib/x86_64-linux-gnu/libblkid.so.1
-> #2  0x00007f6f6af43ae2 in ?? () from /lib/x86_64-linux-gnu/libblkid.so.1
-> #3  0x00007f6f6af42788 in ?? () from /lib/x86_64-linux-gnu/libblkid.so.1
-> #4  0x00007f6f6af42a53 in ?? () from /lib/x86_64-linux-gnu/libblkid.so.1
-> #5  0x00007f6f6af3c17b in blkid_do_safeprobe () from /lib/x86_64-linux-
+> #0  0x00007f6f6bf043bd in read () at
+> ../sysdeps/unix/syscall-template.S:81
+> #1  0x00007f6f6af3b066 in ?? () from
+> /lib/x86_64-linux-gnu/libblkid.so.1
+> #2  0x00007f6f6af43ae2 in ?? () from
+> /lib/x86_64-linux-gnu/libblkid.so.1
+> #3  0x00007f6f6af42788 in ?? () from
+> /lib/x86_64-linux-gnu/libblkid.so.1
+> #4  0x00007f6f6af42a53 in ?? () from
+> /lib/x86_64-linux-gnu/libblkid.so.1
+> #5  0x00007f6f6af3c17b in blkid_do_safeprobe () from
+> /lib/x86_64-linux-
 > gnu/libblkid.so.1
 > #6  0x00007f6f6af3e0c4 in blkid_verify () from /lib/x86_64-linux-
 > gnu/libblkid.so.1
 > #7  0x00007f6f6af387fb in blkid_get_dev () from /lib/x86_64-linux-
 > gnu/libblkid.so.1
-> #8  0x00007f6f6af38acb in ?? () from /lib/x86_64-linux-gnu/libblkid.so.1
-> #9  0x00007f6f6af3946d in ?? () from /lib/x86_64-linux-gnu/libblkid.so.1
-> #10 0x00007f6f6af39892 in blkid_probe_all_new () from /lib/x86_64-linux-
+> #8  0x00007f6f6af38acb in ?? () from
+> /lib/x86_64-linux-gnu/libblkid.so.1
+> #9  0x00007f6f6af3946d in ?? () from
+> /lib/x86_64-linux-gnu/libblkid.so.1
+> #10 0x00007f6f6af39892 in blkid_probe_all_new () from
+> /lib/x86_64-linux-
 > gnu/libblkid.so.1
 > #11 0x00007f6f6af3dc10 in blkid_find_dev_with_tag () from /lib/x86_64-
 > linux-gnu/libblkid.so.1
@@ -92,7 +140,8 @@ root@osd1:~# blkid
 > partition=partition@entry=0x7f6f347eb5a0 "",
 > device=device@entry=0x7f6f347ec5a0 "")
 >     at common/blkdev.cc:193
-> #13 0x00007f6f6d147de5 in FileStore::collect_metadata (this=0x7f6f68893000,
+> #13 0x00007f6f6d147de5 in FileStore::collect_metadata
+> (this=0x7f6f68893000,
 > pm=0x7f6f21419598) at os/FileStore.cc:660
 > #14 0x00007f6f6cebfa9a in OSD::_collect_metadata
 > (this=this@entry=0x7f6f6894f000, pm=pm@entry=0x7f6f21419598) at
@@ -109,22 +158,22 @@ root@osd1:~# blkid
 > pthread_create.c:312
 > #20 0x00007f6f6a24347d in clone ()
 > at ../sysdeps/unix/sysv/linux/x86_64/clone.S:111
-> 
-> 
+>
+>
 > Strace was not helpful much since other threads are not block and keep
 > printing the futex traces..
-> 
+>
 > Thanks & Regards
 > Somnath
-> 
+>
 > -----Original Message-----
 > From: Podoski, Igor [mailto:Igor.Podoski@ts.fujitsu.com]
 > Sent: Wednesday, September 23, 2015 11:33 PM
 > To: Somnath Roy
-> Cc: Samuel Just; Samuel Just (sam.just@inktank.com); ceph-devel; Sage Weil;
-> Handzik, Joe
+> Cc: Samuel Just; Samuel Just (sam.just@inktank.com); ceph-devel; Sage
+> Weil; Handzik, Joe
 > Subject: RE: Very slow recovery/peering with latest master
-> 
+>
 > > -----Original Message-----
 > > From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
 > > owner@vger.kernel.org] On Behalf Of Sage Weil
@@ -138,24 +187,24 @@ root@osd1:~# blkid
 > > > Ok. When configuring with ceph-disk, it does something nifty and
 > > > actually gives the OSD the uuid of the disk's partition as its fsid.
 > > > I bootstrap off that to get an argument to pass into the function
-> > > you have identified as the bottleneck. I ran it by sage and we both
-> > > realized there would be cases where it wouldn't work...I'm sure
-> > > neither of us realized the failure would take three minutes though.
+> > > you have identified as the bottleneck. I ran it by sage and we
+> > > both realized there would be cases where it wouldn't work...I'm
+> > > sure neither of us realized the failure would take three minutes though.
 > > >
-> > > In the short term, it makes sense to create an option to disable or
-> > > short-circuit the blkid code. I would prefer that the default be
-> > > left with the code enabled, but I'm open to default disabled if
-> > > others think this will be a widespread problem. You could also make
-> > > sure your OSD fsids are set to match your disk partition uuids for
-> > > now too, if that's a faster workaround for you (it'll get rid of the failure).
+> > > In the short term, it makes sense to create an option to disable
+> > > or short-circuit the blkid code. I would prefer that the default
+> > > be left with the code enabled, but I'm open to default disabled if
+> > > others think this will be a widespread problem. You could also
+> > > make sure your OSD fsids are set to match your disk partition
+> > > uuids for now too, if that's a faster workaround for you (it'll get rid of the failure).
 > >
 > > I think we should try to figure out where it is hanging.  Can you
 > > strace the blkid process to see what it is up to?
 > >
 > > I opened http://tracker.ceph.com/issues/13219
 > >
-> > I think as long as it behaves reliably with ceph-disk OSDs then we can
-> > have it on by default.
+> > I think as long as it behaves reliably with ceph-disk OSDs then we
+> > can have it on by default.
 > >
 > > sage
 > >
@@ -163,7 +212,8 @@ root@osd1:~# blkid
 > > >
 > > > Joe
 > > >
-> > > > On Sep 23, 2015, at 6:26 PM, Somnath Roy <Somnath.Roy@sandisk.com>
+> > > > On Sep 23, 2015, at 6:26 PM, Somnath Roy
+> > > > <Somnath.Roy@sandisk.com>
 > > wrote:
 > > > >
 > > > > <<inline
@@ -176,37 +226,39 @@ root@osd1:~# blkid
 > > > > (sage@newdream.net); ceph-devel
 > > > > Subject: Re: Very slow recovery/peering with latest master
 > > > >
-> > > > I added that, there is code up the stack in calamari that consumes
-> > > > the
+> > > > I added that, there is code up the stack in calamari that
+> > > > consumes the
 > > path provided, which is intended in the future to facilitate disk
 > > monitoring and management.
 > > > >
 > > > > [Somnath] Ok
 > > > >
-> > > > Somnath, what does your disk configuration look like (filesystem,
-> > SSD/HDD, anything else you think could be relevant)? Did you configure
-> > your disks with ceph-disk, or by hand? I never saw this while testing
-> > my code, has anyone else heard of this behavior on master? The code
-> > has been in master for 2-3 months now I believe.
+> > > > Somnath, what does your disk configuration look like
+> > > > (filesystem,
+> > SSD/HDD, anything else you think could be relevant)? Did you
+> > configure your disks with ceph-disk, or by hand? I never saw this
+> > while testing my code, has anyone else heard of this behavior on
+> > master? The code has been in master for 2-3 months now I believe.
 > > > > [Somnath] All SSD , I use mkcephfs to create cluster , I
 > > > > partitioned the
-> > disk with fdisk beforehand. I am using XFS. Are you trying with Ubuntu
+> > disk with fdisk beforehand. I am using XFS. Are you trying with
+> > Ubuntu
 > > 3.16.* kernel ? It could be Linux distribution/kernel specific.
-> 
-> Somnath, maybe it is GPT related, what partition table do you have? I think
-> parted and gdisk can create GPT partitions, but not fdisk (definitely not in
-> version that I use).
-> 
-> You could backup and clear blkid cache /etc/blkid/blkid.tab, maybe there is a
-> mess.
-> 
+>
+> Somnath, maybe it is GPT related, what partition table do you have? I
+> think parted and gdisk can create GPT partitions, but not fdisk
+> (definitely not in version that I use).
+>
+> You could backup and clear blkid cache /etc/blkid/blkid.tab, maybe
+> there is a mess.
+>
 > Regards,
 > Igor.
-> 
-> 
+>
+>
 > > > >
-> > > > It would be nice to not need to disable this, but if this behavior
-> > > > exists and
+> > > > It would be nice to not need to disable this, but if this
+> > > > behavior exists and
 > > can't be explained by a misconfiguration or something else I'll need
 > > to figure out a different implementation.
 > > > >
@@ -214,9 +266,9 @@ root@osd1:~# blkid
 > > > >
 > > > >> On Sep 23, 2015, at 6:07 PM, Samuel Just <sjust@redhat.com> wrote:
 > > > >>
-> > > >> Wow.  Why would that take so long?  I think you are correct that
-> > > >> it's only used for metadata, we could just add a config value to
-> > > >> disable it.
+> > > >> Wow.  Why would that take so long?  I think you are correct
+> > > >> that it's only used for metadata, we could just add a config
+> > > >> value to disable it.
 > > > >> -Sam
 > > > >>
 > > > >>> On Wed, Sep 23, 2015 at 3:48 PM, Somnath Roy
@@ -238,7 +290,8 @@ root@osd1:~# blkid
 > > > >>> 09:43:57 UTC 2015 x86_64 x86_64 x86_64 GNU/Linux
 > > > >>>
 > > > >>>
-> > > >>> root@emsnode5:~/wip-write-path-optimization/src# lsb_release -a
+> > > >>> root@emsnode5:~/wip-write-path-optimization/src# lsb_release
+> > > >>> -a
 > > No
 > > > >>> LSB modules are available.
 > > > >>> Distributor ID: Ubuntu
@@ -272,15 +325,16 @@ root@osd1:~# blkid
 > > > >>>
 > > > >>> 2. I have enabled the messenger/monclient log (Couldn't attach
 > > > >>> here)
-> > in one of the OSDs and found monitor is taking long time to detect the
-> > up OSDs. If you see the log, I have started OSD at 2015-09-16
+> > in one of the OSDs and found monitor is taking long time to detect
+> > the up OSDs. If you see the log, I have started OSD at 2015-09-16
 > > 16:13:07.042463 , but, there is no communication (only getting
 > > KEEP_ALIVE) till 2015-09-16
 > > 16:16:07.180482 , so, 3 mins !!
 > > > >>>
 > > > >>> 3. During this period, I saw monclient trying to communicate
 > > > >>> with
-> > monitor but not able to probably. It is sending osd_boot at 2015-09-16
+> > monitor but not able to probably. It is sending osd_boot at
+> > 2015-09-16
 > > 16:16:07.180482 only..
 > > > >>>
 > > > >>> 2015-09-16 16:16:07.180450 7f65377fe700 10 monclient:
@@ -295,12 +349,14 @@ root@osd1:~# blkid
 > > submit_message osd_boot(osd.10 booted 0 features 72057594037927935
 > > v45) v6 remote, 10.60.194.10:6789/0, have pipe.
 > > > >>>
-> > > >>> 4. BTW, the osd down scenario is detected very quickly (ceph -w
+> > > >>> 4. BTW, the osd down scenario is detected very quickly (ceph
+> > > >>> -w
 > > output) , problem is during coming up I guess.
 > > > >>>
 > > > >>>
 > > > >>> So, something related to mon communication getting slower ?
-> > > >>> Let me know if more verbose logging is required and how should I
+> > > >>> Let me know if more verbose logging is required and how should
+> > > >>> I
 > > share the log..
 > > > >>>
 > > > >>> Thanks & Regards
@@ -319,13 +375,14 @@ root@osd1:~# blkid
 > > > >>>> I am seeing very slow recovery when I am adding OSDs with the
 > > > >>>> latest
 > > master.
-> > > >>>> Also, If I just restart all the OSDs (no IO is going on in the
+> > > >>>> Also, If I just restart all the OSDs (no IO is going on in
+> > > >>>> the
 > > > >>>> cluster) ,
 > > cluster is taking a significant amount of time to reach in
 > > active+clean state (and even detecting all the up OSDs).
 > > > >>>>
-> > > >>>> I saw the recovery/backfill default parameters are now changed
-> > > >>>> (to
+> > > >>>> I saw the recovery/backfill default parameters are now
+> > > >>>> changed (to
 > > lower value) , this probably explains the recovery scenario , but,
 > > will it affect the peering time during OSD startup as well ?
 > > > >>>
@@ -339,12 +396,13 @@ root@osd1:~# blkid
 > > > >>> PLEASE NOTE: The information contained in this electronic mail
 > > message is intended only for the use of the designated recipient(s)
 > > named above. If the reader of this message is not the intended
-> > recipient, you are hereby notified that you have received this message
-> > in error and that any review, dissemination, distribution, or copying
-> > of this message is strictly prohibited. If you have received this
-> > communication in error, please notify the sender by telephone or
-> > e-mail (as shown above) immediately and destroy any and all copies of
-> > this message in your possession (whether hard copies or electronically
+> > recipient, you are hereby notified that you have received this
+> > message in error and that any review, dissemination, distribution,
+> > or copying of this message is strictly prohibited. If you have
+> > received this communication in error, please notify the sender by
+> > telephone or e-mail (as shown above) immediately and destroy any and
+> > all copies of this message in your possession (whether hard copies
+> > or electronically
 > stored copies).
 > > > >> --
 > > > >> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
@@ -362,20 +420,25 @@ root@osd1:~# blkid
 > > in the body of a message to majordomo@vger.kernel.org More
 > majordomo
 > > info at http://vger.kernel.org/majordomo-info.html
-> 
+>
 > ________________________________
-> 
-> PLEASE NOTE: The information contained in this electronic mail message is
-> intended only for the use of the designated recipient(s) named above. If the
-> reader of this message is not the intended recipient, you are hereby notified
-> that you have received this message in error and that any review,
-> dissemination, distribution, or copying of this message is strictly prohibited. If
-> you have received this communication in error, please notify the sender by
-> telephone or e-mail (as shown above) immediately and destroy any and all
-> copies of this message in your possession (whether hard copies or
-> electronically stored copies).
-> 
+>
+> PLEASE NOTE: The information contained in this electronic mail message
+> is intended only for the use of the designated recipient(s) named
+> above. If the reader of this message is not the intended recipient,
+> you are hereby notified that you have received this message in error
+> and that any review, dissemination, distribution, or copying of this
+> message is strictly prohibited. If you have received this
+> communication in error, please notify the sender by telephone or
+> e-mail (as shown above) immediately and destroy any and all copies of
+> this message in your possession (whether hard copies or electronically stored copies).
+>
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the
-> body of a message to majordomo@vger.kernel.org More majordomo info at
-> http://vger.kernel.org/majordomo-info.html
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+> in the body of a message to majordomo@vger.kernel.org More majordomo
+> info at http://vger.kernel.org/majordomo-info.html
+
+________________________________
+
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+
