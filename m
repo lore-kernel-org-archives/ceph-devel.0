@@ -1,39 +1,70 @@
-From: GuangYang <yguang11@outlook.com>
-Subject: RE: Pool setting for recovery priority
-Date: Tue, 29 Sep 2015 13:57:39 -0700
-Message-ID: <BLU175-W27C138D13405F5FC786170DF4E0@phx.gbl>
-References: <BLU175-W30B038F9EE84A31BF7D842DF5B0@phx.gbl>,<alpine.DEB.2.00.1509160920120.14342@cobra.newdream.net>,<20150921133218.GB23240@gmail.com>,<20150925114440.GA30636@gmail.com>,<alpine.DEB.2.00.1509250708531.13265@cobra.newdream.net>,<BLU175-W32A058482A229644D8A329DF4E0@phx.gbl>,<20150929184741.GA19934@gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: branches! infernalis vs master, RIP next
+Date: Tue, 29 Sep 2015 14:12:12 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1509291310470.4617@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from blu004-omc2s33.hotmail.com ([65.55.111.108]:62266 "EHLO
-	BLU004-OMC2S33.hotmail.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754292AbbI2U5k (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 29 Sep 2015 16:57:40 -0400
-In-Reply-To: <20150929184741.GA19934@gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:51427 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752373AbbI2VMO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 29 Sep 2015 17:12:14 -0400
+Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
+	by mx1.redhat.com (Postfix) with ESMTPS id 3A99B8F314
+	for <ceph-devel@vger.kernel.org>; Tue, 29 Sep 2015 21:12:14 +0000 (UTC)
+Received: from redhat.com ([10.3.112.16])
+	by int-mx13.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t8TLCCRY018089
+	for <ceph-devel@vger.kernel.org>; Tue, 29 Sep 2015 17:12:13 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mykola Golub <to.my.trociny@gmail.com>
-Cc: Weil Sage <sweil@redhat.com>, Mykola Golub <mgolub@mirantis.com>, "sjust@redhat.com" <sjust@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, David Zafman <dzafman@redhat.com>
+To: ceph-devel@vger.kernel.org
 
-WWVhaCBpdCBpcyB0aGlzIG9uZSAtIGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgvcHVsbC81
-OTUzLiBJdCBpcyBub3QgY29uZmxpY3RlZCB3aXRoIHlvdXIgd29yayBidXQganVzdCBuZWVkIGEg
-cmViYXNlLi4gSSB3aWxsIGRvIG9uY2UgeW91ciBQUiBwYXNzIHRoZSByZXZpZXcuIFRoYW5rcy4K
-Ci0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KPiBEYXRlOiBUdWUsIDI5
-IFNlcCAyMDE1IDIxOjQ3OjQyICswMzAwCj4gRnJvbTogdG8ubXkudHJvY2lueUBnbWFpbC5jb20K
-PiBUbzogeWd1YW5nMTFAb3V0bG9vay5jb20KPiBDQzogc3dlaWxAcmVkaGF0LmNvbTsgbWdvbHVi
-QG1pcmFudGlzLmNvbTsgc2p1c3RAcmVkaGF0LmNvbTsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5v
-cmc7IGR6YWZtYW5AcmVkaGF0LmNvbQo+IFN1YmplY3Q6IFJlOiBQb29sIHNldHRpbmcgZm9yIHJl
-Y292ZXJ5IHByaW9yaXR5Cj4KPiBPbiBUdWUsIFNlcCAyOSwgMjAxNSBhdCAxMDoyMzo1NEFNIC0w
-NzAwLCBHdWFuZ1lhbmcgd3JvdGU6Cj4KPj4gSSBzb3J0IG9mIG1pc3VuZGVyc3Rvb2QgdGhlIHBh
-aW4gcG9pbnQgaGVyZSwgSSB0aG91Z2h0IHdlIHdhbnRlZCB0bwo+PiBzaW1wbGlmeSBmcm9tIENM
-SSBzaWRlIHRvIHNldCB0aG9zZSBwYXJhbWV0ZXJzIGFzIHdlIGhhdmUgbW9yZSBhbmQKPj4gbW9y
-ZSBwb29sIGxldmVsIHNldHRpbmcsIG5vdCBmcm9tIGFuIGludGVybmFsIGltcGxlbWVudGF0aW9u
-J3MKPj4gcGVyc3BlY3RpdmUuLgo+Pgo+PiBUaGFua3MgTXlrb2xhIGZvciBpbXBsZW1lbnRpbmcg
-dGhpcywgSSB3aWxsIHJlYmFzZSB0aGUgcHJpb3JpdHkKPj4gc2V0dGluZyBzdHVmZiBhZ2FpbnN0
-IGl0Lgo+Cj4gQWgsIHNvIHlvdSBhcmUgd29ya2luZyBvbiBhZGRpbmcgcGVyIHBvb2wgcHJpb3Jp
-dHkgb3B0aW9ucz8gQmVjYXVzZSBJCj4gaGF2ZSBqdXN0IHN0YXJ0ZWQgd29ya2luZyBvbiB0aGlz
-IHRvbywgYnV0IGlmIHlvdSBhbHJlYWR5IGRvIHRoaXMgSQo+IHdpbGwgYWJhbmRvbiBpdC4KPgo+
-IC0tCj4gTXlrb2xhIEdvbHViCiAJCSAJICAgCQkgIA==
+Having master and infernalis branches follow each other is preventing some 
+folks from moving forward with post-infernalis work.  And it's confusing.  
+So, we're proposing a new world order... and this time it should keep 
+things consistent both during regular development and stabilization 
+periods:
+
+ master - where new feature work is merged
+ infernalis ($next_stable) - where bug fixes are merged
+ hammer, firefly ($previous_stable) - where bug fixes are merged
+
+Previously we had a 'next' branch that was whatever the next pending 
+release would be.  This will henceforth be named after the next major 
+release (currently infernalis).  This let's us avoid having next sometimes 
+during regular development periods and not during stabilization periods.  
+It also means that we needn't know ahead of time whether the next release 
+is going to be a development release, rc, or the initial (x.2.0) release 
+of the next stable series.
+
+That $next_stable branch (currently infernalis) will periodically get 
+merged back into master, just like next did.  We will stop doing that when 
+the release is made.  From that point forward, any stable series backports 
+will be cherry-picked.
+
+The only real difference then between the development and stabilization 
+periods is that during development we pull in new stuff from master each 
+time we release, and releases are x.0.z.  During stabilization, we do rc 
+releases that look like x.1.z, and we don't merge in anything new from 
+master.
+
+So:
+
+ 1- Target any pull request with a bug fix that should go into infernalis 
+at the infernalis branch.
+
+ 2- Before merging anything, make sure it is targetting the right branch.  
+If it isn't, merge it manually, and verify it isn't pulling in a bunch of 
+extra stuff (e.g., because a bug fix for infernalis was based on the 
+current master branch).
+
+ 3- We will periodically merge infernalis back into master until the first 
+infernalis (9.2.0) release.  After that we'll cherry-pick -x.
+
+ 4- At that point we'll create a jewel branch that will work the same way.  
+(It will be regularly merged into master, will eventually result in 10.0.z 
+releases, and will pull lumps of new stuff from master in each time that 
+happens.)
+
+Sound okay?
+sage
