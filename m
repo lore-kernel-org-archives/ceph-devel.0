@@ -1,50 +1,51 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: Compiler prerequisite and C++11-ificartion
-Date: Tue, 29 Sep 2015 06:53:11 -0700
-Message-ID: <CAJ4mKGaTn-yFRLB639dh5zdDOFWJ8dqM2XBypPTn=Uj5_zNp_Q@mail.gmail.com>
-References: <90559C83A9C7FA45B5846C975DFA612DDB54D33194@ABGEX73E.FSC.NET>
+From: =?utf-8?B?RGHFgmVrLCBQaW90cg==?= <Piotr.Dalek@ts.fujitsu.com>
+Subject: RE: Follow-Up on Alexandre's Transparent Huge Pages Testing
+Date: Tue, 29 Sep 2015 16:28:29 +0200
+Message-ID: <90559C83A9C7FA45B5846C975DFA612DDB54DC1CAD@ABGEX73E.FSC.NET>
+References: <5609CE4C.5060403@gmail.com>
+ <90559C83A9C7FA45B5846C975DFA612DDB54D32F42@ABGEX73E.FSC.NET>
+ <560A908A.9040208@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f181.google.com ([209.85.212.181]:36095 "EHLO
-	mail-wi0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965448AbbI2NxM convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Sep 2015 09:53:12 -0400
-Received: by wicgb1 with SMTP id gb1so150461342wic.1
-        for <ceph-devel@vger.kernel.org>; Tue, 29 Sep 2015 06:53:11 -0700 (PDT)
-In-Reply-To: <90559C83A9C7FA45B5846C975DFA612DDB54D33194@ABGEX73E.FSC.NET>
+Received: from dgate20.ts.fujitsu.com ([80.70.172.51]:24744 "EHLO
+	dgate20.ts.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S965055AbbI2O2c (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Sep 2015 10:28:32 -0400
+In-Reply-To: <560A908A.9040208@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?Q?Da=C5=82ek=2C_Piotr?= <Piotr.Dalek@ts.fujitsu.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, Sep 29, 2015 at 2:21 AM, Da=C5=82ek, Piotr
-<Piotr.Dalek@ts.fujitsu.com> wrote:
-> Hello,
->
-> With recent C++11-ification of Ceph codebase, there's been (silent) c=
-ompiler requirement change, in particular: GCC 4.4.7 is not enough to b=
-uild Ceph from master branch, and recent commits made even GCC 4.7 obso=
-lete, requiring GCC 4.8. That is not noted anywhere. Maybe it's a good =
-idea to note this somewhere?
-> This is particularly painful for some LTS distros, like CentOS 6, whi=
-ch come shipped with GCC 4.4.7 and require installation of at least Dev=
-Toolset 2 to build Ceph successfully.
-
-I'm not sure we've ever reported required compiler versions for the
-Ceph toolchain. :/ I'd merge a PR doing somewhere, probably in the
-README file.
-
-But honestly to do that properly we'd have to keep track of which
-version of gcc will build the source, and I have a suspicion we won't
-notice anything like that unless it breaks our gitbuilders =E2=80=94 wh=
-ich
-include a CentOS 6 one using standard tools, so the necessarily
-compiler is at least readily available! :)
--Greg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZn
+ZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtDQo+IG93bmVyQHZnZXIua2VybmVsLm9y
+Z10gT24gQmVoYWxmIE9mIE1hcmsgTmVsc29uDQo+IFNlbnQ6IFR1ZXNkYXksIFNlcHRlbWJlciAy
+OSwgMjAxNSAzOjIyIFBNDQo+DQo+ID4+IGh0dHBzOi8vZHJpdmUuZ29vZ2xlLmNvbS9maWxlL2Qv
+MEIyZ1RCWnJrcm5wWlkzVTNUVVUzUmtKVmVWay92aWV3DQo+ID4NCj4gPiAgRnJvbSBteSBwb2lu
+dCBvZiB2aWV3LCB0aGlzIGxvb2tzIGV4Y2VsbGVudC4gSSBnZW5lcmFsbHkgZGlkbid0IGxpa2Ug
+dGhlIGlkZWENCj4gPiBvZiBtb3ZpbmcgdG8gSmVtYWxsb2MgYmVjYXVzZSBvZiBtZW1vcnkgdXNh
+Z2UgaW5jcmVhc2UgKHdoaWNoIGlzIGFic3VyZGx5DQo+ID4gaGlnaCBhcyB5b3UgY2FuIHNlZSBm
+cm9tIHRoZSBncmFwaHMpLCBidXQgd2l0aCBUSFAgZGlzYWJsZWQgdGhpbmdzIGxvb2sgd2F5DQo+
+ID4gYmV0dGVyLg0KPiA+IEhvdyBhYm91dCB0cnlpbmcgSmVtYWxsb2MgNCB3aXRob3V0IFRIUCBh
+bmQgd2l0aCBDZXBoIHBhdGNoZWQgd2l0aA0KPiA+IGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2Nl
+cGgvcHVsbC81ODU1PyBJIHdvbmRlciBob3cgbXVjaCBkaWZmZXJlbmNlIGl0J2xsDQo+ID4gZ2l2
+ZSBvbiBJbmNlcnRhLg0KPiANCj4gSSBhY3R1YWxseSBkaWQgdHJ5IDU4NTUsIGJ1dCB0aGVyZSB3
+YXMgYSBuYXN0eSBtb25pdG9yIG1lbW9yeSBsZWFrIGluIG1hc3Rlcg0KPiB0aGF0IHByZXZlbnRl
+ZCB0aGUgdGVzdHMgZnJvbSBydW5uaW5nLiAgSXQgZGlkbid0IGdldCBmaXhlZCB1bnRpbCBlYXJs
+eSBsYXN0DQo+IHdlZWsgYW5kIDU4NTUgbm8gbG9uZ2VyIG1lcmdlcyBjbGVhbmx5IHdpdGggbGF0
+ZXN0IG1hc3Rlci4gIEkgaGF2ZW4ndCBoYWQNCj4gdGltZSB0byBnbyBiYWNrIGFuZCBzZWUgd2hh
+dCdzIGNvbmZsaWN0aW5nLCBidXQgaWYgeW91IHdhbnQgdG8gdGFrZSBhIGxvb2sgYW5kDQo+IHVw
+ZGF0ZSBpdCBJIHdvdWxkIGJlIGhhcHB5IHRvIGdpdmUgaXQgYSB3aGlybC4gOikNCg0KSSB3aWxs
+LCBpZiBJIHdvbid0IHJ1biBpbnRvIGFueSB0cm91Ymxlcy4gSSByZWFkIGFib3V0IG1vbiBsZWFr
+IGJlaW5nIGZpeGVkIHNvIEkgdHJpZWQgdG8gcmVidWlsZCBteSBjbHVzdGVyIGZyb20gY3VycmVu
+dCBtYXN0ZXIgKEkgd2FzIGJhZGx5IGhpdCB3aXRoIHRoYXQgbGVhaywgYXMgSSB0b2xkIG9uICNj
+ZXBoLWRldmVsIHNvbWUgdGltZSBhZ28pIGFuZCBhZnRlciBhIHJlc3RhcnQgb2YgQ2VwaCBjb21w
+b25lbnRzLCBvbmx5IDI5IChvdXQgb2YgOTgpIE9TRHMgd2VyZSByZXBvcnRpbmcgdG8gbW9ucyAo
+YWxsIG9mIHRoZW0gd2VyZSBydW5uaW5nLCB0aG91Z2gpLCBhZnRlciByZXZlcnRpbmcgdG8gdGhl
+IGNvZGUgZnJvbSBhcm91bmQgYmVnaW5uaW5nIG9mIFNlcHRlbWJlciwgdGhlIGNsdXN0ZXIgYm9v
+dGVkIHVwIGZpbmUsIHNvIGVpdGhlciBpdCB3YXMgYSBvbmUtdGltZSBidWlsZCBoaWNjdXAsIG9y
+IHNvbWV0aGluZyBuYXN0eSB3ZW50IGludG8gbWFzdGVyIHJlY2VudGx5IC0gSSdsbCBjaGVjayBh
+Z2FpbiB0b21vcnJvdy4NCg0KDQpXaXRoIGJlc3QgcmVnYXJkcyAvIFBvemRyYXdpYW0NClBpb3Ry
+IERhxYJlaw0K
