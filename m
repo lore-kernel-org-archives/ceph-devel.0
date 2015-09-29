@@ -1,70 +1,69 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: branches! infernalis vs master, RIP next
-Date: Tue, 29 Sep 2015 14:12:12 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1509291310470.4617@cobra.newdream.net>
+From: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
+Subject: RE: Backend ObjectStore engine performance bench with FIO
+Date: Tue, 29 Sep 2015 21:12:49 +0000
+Message-ID: <99767EA2E27DD44DB4E9F9B9ACA458C03BD7F790@SSIEXCH-MB3.ssi.samsung.com>
+References: <99767EA2E27DD44DB4E9F9B9ACA458C03BD7EFC9@SSIEXCH-MB3.ssi.samsung.com>
+ <720951445.22040695.1443205323581.JavaMail.zimbra@redhat.com>
+ <727310273.23482377.1443557176794.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:51427 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752373AbbI2VMO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 29 Sep 2015 17:12:14 -0400
-Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
-	by mx1.redhat.com (Postfix) with ESMTPS id 3A99B8F314
-	for <ceph-devel@vger.kernel.org>; Tue, 29 Sep 2015 21:12:14 +0000 (UTC)
-Received: from redhat.com ([10.3.112.16])
-	by int-mx13.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t8TLCCRY018089
-	for <ceph-devel@vger.kernel.org>; Tue, 29 Sep 2015 17:12:13 -0400
+Received: from mx2.ssi.samsung.com ([207.140.43.206]:51940 "EHLO
+	mx2.ssi.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753840AbbI2VNP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Sep 2015 17:13:15 -0400
+In-Reply-To: <727310273.23482377.1443557176794.JavaMail.zimbra@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Casey Bodley <cbodley@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Having master and infernalis branches follow each other is preventing some 
-folks from moving forward with post-infernalis work.  And it's confusing.  
-So, we're proposing a new world order... and this time it should keep 
-things consistent both during regular development and stabilization 
-periods:
-
- master - where new feature work is merged
- infernalis ($next_stable) - where bug fixes are merged
- hammer, firefly ($previous_stable) - where bug fixes are merged
-
-Previously we had a 'next' branch that was whatever the next pending 
-release would be.  This will henceforth be named after the next major 
-release (currently infernalis).  This let's us avoid having next sometimes 
-during regular development periods and not during stabilization periods.  
-It also means that we needn't know ahead of time whether the next release 
-is going to be a development release, rc, or the initial (x.2.0) release 
-of the next stable series.
-
-That $next_stable branch (currently infernalis) will periodically get 
-merged back into master, just like next did.  We will stop doing that when 
-the release is made.  From that point forward, any stable series backports 
-will be cherry-picked.
-
-The only real difference then between the development and stabilization 
-periods is that during development we pull in new stuff from master each 
-time we release, and releases are x.0.z.  During stabilization, we do rc 
-releases that look like x.1.z, and we don't merge in anything new from 
-master.
-
-So:
-
- 1- Target any pull request with a bug fix that should go into infernalis 
-at the infernalis branch.
-
- 2- Before merging anything, make sure it is targetting the right branch.  
-If it isn't, merge it manually, and verify it isn't pulling in a bunch of 
-extra stuff (e.g., because a bug fix for infernalis was based on the 
-current master branch).
-
- 3- We will periodically merge infernalis back into master until the first 
-infernalis (9.2.0) release.  After that we'll cherry-pick -x.
-
- 4- At that point we'll create a jewel branch that will work the same way.  
-(It will be regularly merged into master, will eventually result in 10.0.z 
-releases, and will pull lumps of new stuff from master in each time that 
-happens.)
-
-Sound okay?
-sage
+SGkgQ2FzZXksDQogIEdyZWF0IGpvYi4NCg0KICBSZWdhcmRzLA0KICBKYW1lcw0KDQotLS0tLU9y
+aWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogQ2FzZXkgQm9kbGV5IFttYWlsdG86Y2JvZGxleUBy
+ZWRoYXQuY29tXSANClNlbnQ6IFR1ZXNkYXksIFNlcHRlbWJlciAyOSwgMjAxNSAxOjA2IFBNDQpU
+bzogSmFtZXMgKEZlaSkgTGl1LVNTSQ0KQ2M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpT
+dWJqZWN0OiBSZTogQmFja2VuZCBPYmplY3RTdG9yZSBlbmdpbmUgcGVyZm9ybWFuY2UgYmVuY2gg
+d2l0aCBGSU8NCg0KSGkgSmFtZXMvSGFvbWFpL1hpYW94aSwNCg0KSSBzcGVudCBzb21lIG1vcmUg
+dGltZSBvbiB0aGUgZmlvLW9iamVjdHN0b3JlIGJyYW5jaCwgYW5kIHB1c2hlZCBhbiB1cGRhdGUu
+DQoNCkluIHRlc3RpbmcsIEkgcmVhbGl6ZWQgdGhhdCBpdCB3YXMgdXNpbmcgdGhlIGlvX3VuaXQn
+cyBzdGFydCB0aW1lIHRvIG5hbWUgdGhlIG9iamVjdHMsIHdoaWNoIG1lYW50IHRoYXQgZXZlcnkg
+d3JpdGUgb3BlcmF0aW9uIHdhcyBjcmVhdGluZyBhIHNlcGFyYXRlIG9iamVjdC4NCkluIGFkZGl0
+aW9uIHRvIGZpeGluZyB0aGlzIHRvIHVzZSBmaW8ncyBmaWxlbmFtZXMgZm9yIG9iamVjdCBuYW1l
+cywgSSBhbHNvIGFkZGVkIHN1cHBvcnQgZm9yIHRoZSBvcGVuX2ZpbGUoKSBhbmQgY2xvc2VfZmls
+ZSgpIGZ1bmN0aW9ucy4gSXQgbm93IGNyZWF0ZXMgb2JqZWN0cyBvZiB0aGUgcHJvcGVyIHNpemUg
+b24gc3RhcnR1cCwgc28gcmVhZC1vbmx5IGpvYnMgd2lsbCB3b3JrIG5vcm1hbGx5Lg0KSXQgYWxz
+byByZW1vdmVzIGl0cyBvYmplY3RzIG9uIGV4aXQuDQoNCk9uIHN0YXJ0dXAsIGl0IG5vIGxvbmdl
+ciBjYWxscyBjcmVhdGVfY29sbGVjdGlvbigpIGlmIGl0IGFscmVhZHkgZXhpc3RzLCBzbyBJIHdh
+cyBhYmxlIHRvIHJlLXJ1biBmaW8gam9icyBvdmVyIGFuZCBvdmVyIGFnYWluIHdpdGhvdXQgaGF2
+aW5nIHRvIGNsZWFyIHRoZSBkYXRhIGRpcmVjdG9yeSAodGVzdGVkIHdpdGggRmlsZVN0b3JlIGFu
+ZCBLZXlWYWx1ZVN0b3JlKS4NCg0KQ2FzZXkNCg0KLS0tLS0gT3JpZ2luYWwgTWVzc2FnZSAtLS0t
+LQ0KPiBHcmVhdCB3b3JrIEphbWVzIQ0KPiANCj4gLS0tLS0gT3JpZ2luYWwgTWVzc2FnZSAtLS0t
+LQ0KPiA+IEZyb206ICJKYW1lcyAoRmVpKSBMaXUtU1NJIiA8amFtZXMubGl1QHNzaS5zYW1zdW5n
+LmNvbT4NCj4gPiBUbzogIlhpYW94aSBDaGVuIiA8eGlhb3hpLmNoZW5AaW50ZWwuY29tPiwgIkNh
+c2V5IEJvZGxleSINCj4gPiA8Y2JvZGxleUByZWRoYXQuY29tPg0KPiA+IENjOiAiU2FnZSBXZWls
+IiA8c2FnZUBuZXdkcmVhbS5uZXQ+LCBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KPiA+IFNl
+bnQ6IEZyaWRheSwgU2VwdGVtYmVyIDI1LCAyMDE1IDE6NTU6MjkgUE0NCj4gPiBTdWJqZWN0OiBC
+YWNrZW5kIE9iamVjdFN0b3JlIGVuZ2luZSBwZXJmb3JtYW5jZSBiZW5jaCB3aXRoIEZJTw0KPiA+
+IA0KPiA+IEhpIFhpYW94aSwNCj4gPiANCj4gPiAgICBXaXRoIGNoYW5naW5nIHRoZSBJTyBtb2Rl
+IGZyb20gYWlvIHRvIHN5bmMsIHdlIG1ha2UgZmlvIGFnYWluc3QgbmV3c3RvcmUNCj4gPiAgICB3
+b3Jrcy4gRXZlbiAgd2l0aCBzeW5jIGVuZ2luZShJIGFtIHN0aWxsIGRlYnVnZ2luZyB0aGUgYWlv
+IGVuZ2luZSBpbg0KPiA+ICAgIG5ld3N0b3JlIHdpdGggWGlhb3hpKSBpbiBuZXdzdG9yZSwgTmV3
+c3RvcmUgc3RpbGwgcGVyZm9ybWluZyB0aGUgYmVzdA0KPiA+ICAgIGFtb25nIGFsbCBvZiBiYWNr
+c3RvcmUgZW5naW5lIHdpdGggb3VyIGluaXRpYWwgc2V0dXAoVGhvcm91Z2hseSB0ZXN0DQo+ID4g
+ICAgd2lsbA0KPiA+ICAgIGJlIHJ1biBzb29uKS4gQXR0YWNobWVudCBpcyB0aGUgaW5pdGlhbCBk
+YXRhIHdlIGNvbGxlY3RlZCBmb3IgeW91cg0KPiA+ICAgIHJlZmVyZW5jZS4gVGhhbmtzIGZvciBn
+cmVhdCBoZWxwIGZyb20gWGlhb3hpIGZyb20gcmVnYXJkaW5nIHRvIE5ld3N0b3JlDQo+ID4gICAg
+ZGV2ZWxvcG1lbnQgdG8gc3VwcG9ydCBGSU8uDQo+ID4gDQo+ID4gSGkgQ2FzZXksDQo+ID4gICBM
+ZXQgbWUga25vdyBpZiB5b3UgbmVlZCBhbnkgaGVscCB0byBwdXQgZmlvLWNlcGgtb2JqZWN0c3Rv
+cmUgaW50bw0KPiA+ICAgdXBzdHJlYW0uDQo+ID4gICBBZnRlciB0aGVuICwgSSBjYW4gY29tbWl0
+IGFsbCBvZiBtaW5lIGludG8gdXBzdHJlYW0uDQo+IA0KPiBNeSBwdWxsIHJlcXVlc3QgYXQgaHR0
+cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC9wdWxsLzU5NDMgaXMgc3RpbGwgcGVuZGluZy4NCj4g
+SWYgeW91IGhhdmUgcGF0Y2hlcyB0aGF0IHlvdSdkIGxpa2UgaW5jbHVkZWQsIEkgd291bGQgYmUg
+aGFwcHkgdG8gcHVsbCANCj4gdGhlbSBpbjsganVzdCBwb2ludCBtZSB0byBhIGJyYW5jaC4NCj4g
+DQo+ID4gDQo+ID4gICBUaGFua3MsDQo+ID4gICBKYW1lcw0KPiA+IA0KPiANCj4gVGhhbmtzLA0K
+PiBDYXNleQ0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUg
+bGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgDQo+IGluIHRoZSBib2R5IG9mIGEgbWVzc2Fn
+ZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIA0KPiBpbmZvIGF0
+ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4gDQo=
