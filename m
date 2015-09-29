@@ -1,70 +1,42 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: Pull request for FileStore write path optimization
-Date: Tue, 29 Sep 2015 18:14:48 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F2CE5B30C@SACMBXIP01.sdcorp.global.sandisk.com>
+From: Mykola Golub <to.my.trociny@gmail.com>
+Subject: Re: Pool setting for recovery priority
+Date: Tue, 29 Sep 2015 21:47:42 +0300
+Message-ID: <20150929184741.GA19934@gmail.com>
+References: <BLU175-W30B038F9EE84A31BF7D842DF5B0@phx.gbl>
+ <alpine.DEB.2.00.1509160920120.14342@cobra.newdream.net>
+ <20150921133218.GB23240@gmail.com>
+ <20150925114440.GA30636@gmail.com>
+ <alpine.DEB.2.00.1509250708531.13265@cobra.newdream.net>
+ <BLU175-W32A058482A229644D8A329DF4E0@phx.gbl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0063.outbound.protection.outlook.com ([65.55.169.63]:63052
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S935313AbbI2SOx convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Sep 2015 14:14:53 -0400
-Content-Language: en-US
+Received: from mail-la0-f52.google.com ([209.85.215.52]:34793 "EHLO
+	mail-la0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S935252AbbI2Srq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Sep 2015 14:47:46 -0400
+Received: by labzv5 with SMTP id zv5so19898713lab.1
+        for <ceph-devel@vger.kernel.org>; Tue, 29 Sep 2015 11:47:44 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <BLU175-W32A058482A229644D8A329DF4E0@phx.gbl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Mark Nelson (mnelson@redhat.com)" <mnelson@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: GuangYang <yguang11@outlook.com>
+Cc: Weil Sage <sweil@redhat.com>, Mykola Golub <mgolub@mirantis.com>, "sjust@redhat.com" <sjust@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, David Zafman <dzafman@redhat.com>
 
-Hi Mark,
-I have sent out the following pull request for my write path changes.
+On Tue, Sep 29, 2015 at 10:23:54AM -0700, GuangYang wrote:
 
-https://github.com/ceph/ceph/pull/6112
+> I sort of misunderstood the pain point here, I thought we wanted to
+> simplify from CLI side to set those parameters as we have more and
+> more pool level setting, not from an internal implementation's
+> perspective..
+>
+> Thanks Mykola for implementing this, I will rebase the priority
+> setting stuff against it.
 
-Meanwhile, if you want to give it a spin to your SSD cluster , take the following branch.
+Ah, so you are working on adding per pool priority options? Because I
+have just started working on this too, but if you already do this I
+will abandon it.
 
-https://github.com/somnathr/ceph/tree/wip-write-path-optimization
-
-1. Please use the following config options to enable the fast write path..
-
-        filestore_odsync_write = true //This will make the actual transaction write as O_DSYNC
-        filestore_fast_commit = true //This will disable all of the existing throttling scheme
-        filestore_do_fast_sync = true    //This is presently only applicable to XFS backend. In general , it should be fine for any FS where FileStore is going for write_ahead journaling. I will open it for other FS (like ext4) after testing.
-
-
-2. If both data and journal are on the same SSD , please tune the following parameter starting from lower value.
-
-        journal_max_write_entries = 10
-
-This heavily depends on how fast your backend and journal is. If you go for bigger value , the journal will be going further ahead (since applying transaction will be always slower) and memory usage for OSD will be increasing. You need to increase this value till you see memory is piling up. Increasing this value     should increase performance considerably.
-
-3. Another parameter we need to tune mostly in case of say NVRAM as journal is the following.
-
-      journal_induce_delay
-
-But, I found the default value I gave should be fine if both data and journal is on the same SSD. Since you have faster backend, you may want to make it a bit lower. I would say play with journal_max_write_entries first.
-I have a plan to automate this parameter from inside by recognizing the workload patter in future.
-
-4. I found disabling journal aio is giving me more stable performance out. Aio is not giving me any performance gain for me either.
-
-    journal_aio = false
-
-5. Finally, I found the following VM tuning params are useful to deal with the xfsaild problem that I mentioned sometimes back. This should stabilize the write performance.
-
-  sysctl -w vm.dirty_ratio=80
-  sysctl -w vm.dirty_background_ratio=3
-  sysctl -w fs.xfs.xfssyncd_centisecs=720000
-  sysctl -w fs.xfs.xfsbufd_centisecs=3000
-  sysctl -w fs.xfs.age_buffer_centisecs=720000
-
-Let me know if you need further information on this.
-
-Thanks & Regards
-Somnath
-
-
-________________________________
-
-PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-
+-- 
+Mykola Golub
