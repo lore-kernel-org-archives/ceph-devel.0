@@ -1,54 +1,68 @@
-From: Samuel Just <sjust@redhat.com>
-Subject: Re: Data-at-rest compression at EC pools blueprint
-Date: Wed, 30 Sep 2015 11:40:49 -0700
-Message-ID: <CAN=+7FUzyWRJ+PWbuJv1T2=uORFTPmr8_XRpMthAiy10oT+caQ@mail.gmail.com>
-References: <560C0356.90401@mirantis.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Running the rbd suite on OpenStack
+Date: Wed, 30 Sep 2015 23:34:59 +0200
+Message-ID: <560C5583.9070005@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="WtXffxEWdVb6p0HcTrbolF388blL4Ulq8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f174.google.com ([209.85.213.174]:38001 "EHLO
-	mail-ig0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932495AbbI3Skt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Sep 2015 14:40:49 -0400
-Received: by igxx6 with SMTP id x6so37750883igx.1
-        for <ceph-devel@vger.kernel.org>; Wed, 30 Sep 2015 11:40:49 -0700 (PDT)
-In-Reply-To: <560C0356.90401@mirantis.com>
+Received: from mail2.dachary.org ([91.121.57.175]:35453 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1754995AbbI3VfC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Sep 2015 17:35:02 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Igor Fedotov <ifedotov@mirantis.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Jason Dillaman <dillaman@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Seems like a reasonable start.  Quick back-of-the-envelope calculation
-suggests 2k of (logical_offset, compressed_offset) pairs per 1MB of
-data with 8MB/pair and 4k chunks, which is probably ok to stuff into
-an xattr.  You should restructure the blueprint to make it independent
-of EC.  ReplicatedPG can do this before feeding the writes to the
-backend (whichever backend is used) -- the pool alignment parameter
-could be set on a replicated pool to enforce aligned appends on a
-compressed replicated pool.
--Sam
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--WtXffxEWdVb6p0HcTrbolF388blL4Ulq8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-On Wed, Sep 30, 2015 at 8:44 AM, Igor Fedotov <ifedotov@mirantis.com> wrote:
-> Folks,
->
-> I've just added a blueprint about adding compression to EC pools as per our
-> previous discussion.
-> Please find it at
-> http://tracker.ceph.com/projects/ceph/wiki/Submissions
->
-> Not sure I did that in proper manner - by attaching a new file. Other
-> blueprints look different at this page. Can't undo though.
-> Sorry about that.
->
-> And please point out different way to publish my blueprint if needed.
->
-> Any way - comments and reviews on the content are welcome.
->
-> Thanks.,
-> Igor.
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Hi Jason,
+
+The hammer rbd suite runs ok. The infernalis rbd suite revealed a few iss=
+ues (the details are at http://tracker.ceph.com/issues/13270):
+
+CentOS 7 and Ubuntu 14.04 : http://tracker.ceph.com/issues/13310=20
+
+CentOS 7 specific: http://tracker.ceph.com/issues/13309 and http://tracke=
+r.ceph.com/issues/13308
+
+Note that they also happen when running on a VPS in the Sepia lab which i=
+s convenient for fixing them with no access to an OpenStack tenant.
+
+There also is an ansible issue: http://tracker.ceph.com/issues/13305 and =
+a teuthology issue: http://tracker.ceph.com/issues/13187.
+
+One job needs more than the default 40GB disk ( rbd/qemu/{cache/none.yaml=
+ cachepool/none.yaml clusters/fixed-3.yaml fs/btrfs.yaml msgr-failures/fe=
+w.yaml workloads/qemu_xfstests.yaml} ) each OpenStack instance is given (=
+http://tracker.ceph.com/issues/13270):=20
+
+I'm not sure which priority these issues should be given so I set them to=
+ Normal. The goal was to figure out how much work is required on the RBD =
+suite to make it run solely on OpenStack. All in all it's not too bad :)
+
+Cheers
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--WtXffxEWdVb6p0HcTrbolF388blL4Ulq8
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlYMVYMACgkQ8dLMyEl6F23lVwCgvUPbvxyaLRfIqaCtMhujkoWc
+g98AoKtP/i6RZ8/qp0tZ/6LYTa/dHScN
+=7t66
+-----END PGP SIGNATURE-----
+
+--WtXffxEWdVb6p0HcTrbolF388blL4Ulq8--
