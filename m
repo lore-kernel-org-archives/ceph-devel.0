@@ -1,30 +1,28 @@
-From: Daniel Gryniewicz <dang@redhat.com>
-Subject: Re: branches! infernalis vs master, RIP next
-Date: Wed, 30 Sep 2015 08:51:51 -0400
-Message-ID: <CAL-2WbHHD5_Y07viKp+sjWbTSpgsJn7uysas7dQR=T70VsraRQ@mail.gmail.com>
-References: <alpine.DEB.2.00.1509291310470.4617@cobra.newdream.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f169.google.com ([209.85.212.169]:38742 "EHLO
-	mail-wi0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754899AbbI3MwM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Sep 2015 08:52:12 -0400
-Received: by wiclk2 with SMTP id lk2so60299328wic.1
-        for <ceph-devel@vger.kernel.org>; Wed, 30 Sep 2015 05:52:11 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1509291310470.4617@cobra.newdream.net>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: [BUG] commit "namei: d_is_negative() should be checked before ->d_seq validation" breaks ceph-fuse
+Date: Wed, 30 Sep 2015 20:53:22 +0800
+Message-ID: <C096DBE6-9E22-48BA-B449-375F5AD6E177@redhat.com>
+Mime-Version: 1.0 (Mac OS X Mail 8.2 \(2104\))
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Al Viro <viro@ZenIV.linux.org.uk>
+Cc: linux-kernel <linux-kernel@vger.kernel.org>, Ceph Development <ceph-devel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Tue, Sep 29, 2015 at 5:12 PM, Sage Weil <sweil@redhat.com> wrote:
->
->  1- Target any pull request with a bug fix that should go into infernalis
-> at the infernalis branch.
+Hi, Al
 
+I found that commit 766c4cbfac "namei: d_is_negative() should be checke=
+d before ->d_seq validation=E2=80=9D  breaks ceph-fuse. After that comm=
+it,  lookup_fast can return -ENOENT before calling d_revalidate(). This=
+ breaks remote filesystems which allows creating/deleting files from mu=
+ltiple machines.=20
 
-So, currently, anything targeted at both infernalis and master should
-have a pull request for infernalis only?  Or for both?
-
-Daniel
+Regards
+Yan, Zheng--
+To unsubscribe from this list: send the line "unsubscribe linux-kernel"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Please read the FAQ at  http://www.tux.org/lkml/
