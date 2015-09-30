@@ -1,54 +1,88 @@
-From: Shinobu Kinjo <skinjo@redhat.com>
-Subject: Re: MAX_RBD_IMAGES
-Date: Tue, 29 Sep 2015 23:58:44 -0400 (EDT)
-Message-ID: <159480963.23629349.1443585524566.JavaMail.zimbra@redhat.com>
-References: <866247178.20201562.1442958933148.JavaMail.zimbra@redhat.com> <560B2713.8080107@redhat.com>
+From: Mykola Golub <mgolub@mirantis.com>
+Subject: CEPH_RBD_API: options on image create
+Date: Wed, 30 Sep 2015 09:50:45 +0300
+Message-ID: <20150930065044.GA14958@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx6-phx2.redhat.com ([209.132.183.39]:57062 "EHLO
-	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753374AbbI3D6o (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Sep 2015 23:58:44 -0400
-In-Reply-To: <560B2713.8080107@redhat.com>
+Received: from mail-la0-f42.google.com ([209.85.215.42]:33426 "EHLO
+	mail-la0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753714AbbI3Gut (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Sep 2015 02:50:49 -0400
+Received: by lahh2 with SMTP id h2so34593651lah.0
+        for <ceph-devel@vger.kernel.org>; Tue, 29 Sep 2015 23:50:47 -0700 (PDT)
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan Mick <dmick@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: Jason Dillaman <dillaman@redhat.com>, Josh Durgin <jdurgin@redhat.com>
 
-I just want to know what that number means.
+Hi,
 
-Based on the Linux kenel, that number doesn't make sense but, for the Ceph cluster, would make sense from performance, resource handling including networking resource point of views.
+It was mentioned several times eralier that it would be nice to pass
+options as key/value configuration pairs on image create instead of
+expanding rbd_create/rbd_clone/rbd_copy for every possible
+configuration override.
 
-So, do you remember?
+What do you think about this API?
 
-Shinobu
+Introduce rbd_image_options_t and functions to manipulate it:
 
------ Original Message -----
-From: "Dan Mick" <dmick@redhat.com>
-To: "Shinobu Kinjo" <skinjo@redhat.com>, "ceph-devel" <ceph-devel@vger.kernel.org>
-Sent: Wednesday, September 30, 2015 9:04:35 AM
-Subject: Re: [CEPH-DEVEL] MAX_RBD_IMAGES
+int rbd_image_options_create(rbd_image_options_t* opts);
 
-On 09/22/2015 02:55 PM, Shinobu Kinjo wrote:
-> Hello,
-> 
-> Does any of you know why *MAX_RBD_IMAGES* was changed from 16 to 128?
-> I hope that Dan remember -;
-> 
-> http://resources.ustack.com/ceph/ceph/commit/2a6dcabf7f1b7550a0fa4fd223970ffc24ad7870
-> 
->  - Shinobu
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+void rbd_image_options_destroy(rbd_image_options_t opts);
 
-to....have more of them?
+int rbd_image_options_set(rbd_image_options_t opts, int optname,
+                          const void* optval, size_t optlen);
+
+int rbd_image_options_get(rbd_image_options_t opts, int optname,
+                          void* optval, size_t* optlen);
+
+void rbd_image_options_iterate(rbd_image_options_t opts,
+                               void (*func)(int* optname, void* optval, size_t* optlen));
+
+Functions that return a value return 0 on success, and -ERROR on
+failure.
+
+optname is a constant like RBD_OPTION_STRIPE_UNIT,
+RBD_OPTION_STRIPE_COUNT...
+
+Pass options as additional argument to rbd_create, rbd_clone (and may
+be rbd_copy) functions:
+
+int rbd_create4(rados_ioctx_t io, const char *name, uint64_t size,
+	        uint64_t features, int *order, rbd_image_options_t opts);
+
+int rbd_clone3(rados_ioctx_t p_ioctx, const char *p_name,
+               const char *p_snapname, rados_ioctx_t c_ioctx,
+               const char *c_name, uint64_t features, int *c_order,
+               rbd_image_options_t opts);
+
+int rbd_copy3(rbd_image_t src, rbd_image_t dest, rbd_image_options_t opts); // possibly
+
+
+Example:
+
+rbd_image_options_t opts;
+int r;
+r = rbd_image_options_create(&opts);
+assert(r == 0);
+uint64_t stripe_unit = 65536;
+r = rbd_image_options_set(opts, RBD_OPTION_STRIPE_UNIT,
+                          &stripe_unit, size_of(stripe_unit));
+assert(r == 0);
+uint64_t stripe_count = 16;
+r = rbd_image_options_set(opts, RBD_OPTION_STRIPE_COUNT,
+                          &stripe_count, size_of(stripe_count));
+assert(r == 0);
+const char* journal_object_pool = "journal";
+r = rbd_image_options_set(opts, RBD_OPTION_JOURNAL_OBJECT_POOL,
+                          journal_object_pool, strlen(journal_object_pool) + 1);
+assert(r == 0);
+r = rbd_create4(io, name, size, features, int *order, rbd_image_options_t opts);
+
+cleanup:
+rbd_image_options_destroy(opts);
 
 -- 
-Dan Mick
-Red Hat, Inc.
-Ceph docs: http://ceph.com/docs
+Mykola Golub
