@@ -1,79 +1,38 @@
-From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Subject: RE: Backend ObjectStore engine performance bench with FIO
-Date: Wed, 30 Sep 2015 00:47:38 +0000
-Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC036269EB@shsmsx102.ccr.corp.intel.com>
-References: <99767EA2E27DD44DB4E9F9B9ACA458C03BD7EFC9@SSIEXCH-MB3.ssi.samsung.com>
- <720951445.22040695.1443205323581.JavaMail.zimbra@redhat.com>
- <727310273.23482377.1443557176794.JavaMail.zimbra@redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+From: Geliang Tang <geliangtang@163.com>
+Subject: [PATCH] ceph: fix a comment typo
+Date: Tue, 29 Sep 2015 20:36:57 -0700
+Message-ID: <4fb037c2ae2e494be58dc752483fb2f852a4cd70.1443612355.git.geliangtang@163.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:4212 "EHLO mga03.intel.com"
+Received: from m12-12.163.com ([220.181.12.12]:50301 "EHLO m12-12.163.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752581AbbI3Ar7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 29 Sep 2015 20:47:59 -0400
-In-Reply-To: <727310273.23482377.1443557176794.JavaMail.zimbra@redhat.com>
-Content-Language: en-US
+	id S1752320AbbI3DhP (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 29 Sep 2015 23:37:15 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Casey Bodley <cbodley@redhat.com>, "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>
+Cc: Geliang Tang <geliangtang@163.com>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 
-SGkgQ2FzZXksDQogICAgICBXb3VsZCBpdCBiZXR0ZXIgaWYgd2UgY3JlYXRlIGFuIGludGVncmF0
-aW9uIGJydW5jaCBvbiBjZXBoL2NlcGgvd2lwLWZpby1vYmpzdG9yZSB0byBhbGxvdyBtb3JlIHBl
-b3BsZSB0cnkgYW5kIGltcHJvdmUgaXQ/ICBTZWVtcyBKYW1lcyBoYXMgc29tZSBwYXRjaGVzLiAN
-Cg0KLVhpYW94aQ0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IGNlcGgt
-ZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC0NCj4gb3duZXJA
-dmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgQ2FzZXkgQm9kbGV5DQo+IFNlbnQ6IFdlZG5l
-c2RheSwgU2VwdGVtYmVyIDMwLCAyMDE1IDQ6MDYgQU0NCj4gVG86IEphbWVzIChGZWkpIExpdS1T
-U0kNCj4gQ2M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQo+IFN1YmplY3Q6IFJlOiBCYWNr
-ZW5kIE9iamVjdFN0b3JlIGVuZ2luZSBwZXJmb3JtYW5jZSBiZW5jaCB3aXRoIEZJTw0KPiANCj4g
-SGkgSmFtZXMvSGFvbWFpL1hpYW94aSwNCj4gDQo+IEkgc3BlbnQgc29tZSBtb3JlIHRpbWUgb24g
-dGhlIGZpby1vYmplY3RzdG9yZSBicmFuY2gsIGFuZCBwdXNoZWQgYW4NCj4gdXBkYXRlLg0KPiAN
-Cj4gSW4gdGVzdGluZywgSSByZWFsaXplZCB0aGF0IGl0IHdhcyB1c2luZyB0aGUgaW9fdW5pdCdz
-IHN0YXJ0IHRpbWUgdG8gbmFtZSB0aGUNCj4gb2JqZWN0cywgd2hpY2ggbWVhbnQgdGhhdCBldmVy
-eSB3cml0ZSBvcGVyYXRpb24gd2FzIGNyZWF0aW5nIGEgc2VwYXJhdGUNCj4gb2JqZWN0Lg0KPiBJ
-biBhZGRpdGlvbiB0byBmaXhpbmcgdGhpcyB0byB1c2UgZmlvJ3MgZmlsZW5hbWVzIGZvciBvYmpl
-Y3QgbmFtZXMsIEkgYWxzbyBhZGRlZA0KPiBzdXBwb3J0IGZvciB0aGUgb3Blbl9maWxlKCkgYW5k
-IGNsb3NlX2ZpbGUoKSBmdW5jdGlvbnMuIEl0IG5vdyBjcmVhdGVzIG9iamVjdHMNCj4gb2YgdGhl
-IHByb3BlciBzaXplIG9uIHN0YXJ0dXAsIHNvIHJlYWQtb25seSBqb2JzIHdpbGwgd29yayBub3Jt
-YWxseS4NCj4gSXQgYWxzbyByZW1vdmVzIGl0cyBvYmplY3RzIG9uIGV4aXQuDQo+IA0KPiBPbiBz
-dGFydHVwLCBpdCBubyBsb25nZXIgY2FsbHMgY3JlYXRlX2NvbGxlY3Rpb24oKSBpZiBpdCBhbHJl
-YWR5IGV4aXN0cywgc28gSSB3YXMNCj4gYWJsZSB0byByZS1ydW4gZmlvIGpvYnMgb3ZlciBhbmQg
-b3ZlciBhZ2FpbiB3aXRob3V0IGhhdmluZyB0byBjbGVhciB0aGUgZGF0YQ0KPiBkaXJlY3Rvcnkg
-KHRlc3RlZCB3aXRoIEZpbGVTdG9yZSBhbmQgS2V5VmFsdWVTdG9yZSkuDQo+IA0KPiBDYXNleQ0K
-PiANCj4gLS0tLS0gT3JpZ2luYWwgTWVzc2FnZSAtLS0tLQ0KPiA+IEdyZWF0IHdvcmsgSmFtZXMh
-DQo+ID4NCj4gPiAtLS0tLSBPcmlnaW5hbCBNZXNzYWdlIC0tLS0tDQo+ID4gPiBGcm9tOiAiSmFt
-ZXMgKEZlaSkgTGl1LVNTSSIgPGphbWVzLmxpdUBzc2kuc2Ftc3VuZy5jb20+DQo+ID4gPiBUbzog
-IlhpYW94aSBDaGVuIiA8eGlhb3hpLmNoZW5AaW50ZWwuY29tPiwgIkNhc2V5IEJvZGxleSINCj4g
-PiA+IDxjYm9kbGV5QHJlZGhhdC5jb20+DQo+ID4gPiBDYzogIlNhZ2UgV2VpbCIgPHNhZ2VAbmV3
-ZHJlYW0ubmV0PiwgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCj4gPiA+IFNlbnQ6IEZyaWRh
-eSwgU2VwdGVtYmVyIDI1LCAyMDE1IDE6NTU6MjkgUE0NCj4gPiA+IFN1YmplY3Q6IEJhY2tlbmQg
-T2JqZWN0U3RvcmUgZW5naW5lIHBlcmZvcm1hbmNlIGJlbmNoIHdpdGggRklPDQo+ID4gPg0KPiA+
-ID4gSGkgWGlhb3hpLA0KPiA+ID4NCj4gPiA+ICAgIFdpdGggY2hhbmdpbmcgdGhlIElPIG1vZGUg
-ZnJvbSBhaW8gdG8gc3luYywgd2UgbWFrZSBmaW8gYWdhaW5zdA0KPiBuZXdzdG9yZQ0KPiA+ID4g
-ICAgd29ya3MuIEV2ZW4gIHdpdGggc3luYyBlbmdpbmUoSSBhbSBzdGlsbCBkZWJ1Z2dpbmcgdGhl
-IGFpbyBlbmdpbmUgaW4NCj4gPiA+ICAgIG5ld3N0b3JlIHdpdGggWGlhb3hpKSBpbiBuZXdzdG9y
-ZSwgTmV3c3RvcmUgc3RpbGwgcGVyZm9ybWluZyB0aGUgYmVzdA0KPiA+ID4gICAgYW1vbmcgYWxs
-IG9mIGJhY2tzdG9yZSBlbmdpbmUgd2l0aCBvdXIgaW5pdGlhbCBzZXR1cChUaG9yb3VnaGx5IHRl
-c3QNCj4gPiA+ICAgIHdpbGwNCj4gPiA+ICAgIGJlIHJ1biBzb29uKS4gQXR0YWNobWVudCBpcyB0
-aGUgaW5pdGlhbCBkYXRhIHdlIGNvbGxlY3RlZCBmb3IgeW91cg0KPiA+ID4gICAgcmVmZXJlbmNl
-LiBUaGFua3MgZm9yIGdyZWF0IGhlbHAgZnJvbSBYaWFveGkgZnJvbSByZWdhcmRpbmcgdG8NCj4g
-TmV3c3RvcmUNCj4gPiA+ICAgIGRldmVsb3BtZW50IHRvIHN1cHBvcnQgRklPLg0KPiA+ID4NCj4g
-PiA+IEhpIENhc2V5LA0KPiA+ID4gICBMZXQgbWUga25vdyBpZiB5b3UgbmVlZCBhbnkgaGVscCB0
-byBwdXQgZmlvLWNlcGgtb2JqZWN0c3RvcmUgaW50bw0KPiA+ID4gICB1cHN0cmVhbS4NCj4gPiA+
-ICAgQWZ0ZXIgdGhlbiAsIEkgY2FuIGNvbW1pdCBhbGwgb2YgbWluZSBpbnRvIHVwc3RyZWFtLg0K
-PiA+DQo+ID4gTXkgcHVsbCByZXF1ZXN0IGF0IGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgv
-cHVsbC81OTQzIGlzIHN0aWxsIHBlbmRpbmcuDQo+ID4gSWYgeW91IGhhdmUgcGF0Y2hlcyB0aGF0
-IHlvdSdkIGxpa2UgaW5jbHVkZWQsIEkgd291bGQgYmUgaGFwcHkgdG8gcHVsbA0KPiA+IHRoZW0g
-aW47IGp1c3QgcG9pbnQgbWUgdG8gYSBicmFuY2guDQo+ID4NCj4gPiA+DQo+ID4gPiAgIFRoYW5r
-cywNCj4gPiA+ICAgSmFtZXMNCj4gPiA+DQo+ID4NCj4gPiBUaGFua3MsDQo+ID4gQ2FzZXkNCj4g
-PiAtLQ0KPiA+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1
-bnN1YnNjcmliZSBjZXBoLWRldmVsIg0KPiA+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBt
-YWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUNCj4gbWFqb3Jkb21vDQo+ID4gaW5mbyBhdCAg
-aHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+ID4NCj4gLS0NCj4g
-VG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJl
-IGNlcGgtZGV2ZWwiIGluIHRoZQ0KPiBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdl
-ci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGluZm8gYXQNCj4gaHR0cDovL3ZnZXIua2VybmVs
-Lm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo=
+Just fix a typo in the code comment.
+
+Signed-off-by: Geliang Tang <geliangtang@163.com>
+---
+ fs/ceph/cache.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/fs/ceph/cache.c b/fs/ceph/cache.c
+index 834f9f3..a4766de 100644
+--- a/fs/ceph/cache.c
++++ b/fs/ceph/cache.c
+@@ -88,7 +88,7 @@ static uint16_t ceph_fscache_inode_get_key(const void *cookie_netfs_data,
+ 	const struct ceph_inode_info* ci = cookie_netfs_data;
+ 	uint16_t klen;
+ 
+-	/* use ceph virtual inode (id + snaphot) */
++	/* use ceph virtual inode (id + snapshot) */
+ 	klen = sizeof(ci->i_vino);
+ 	if (klen > maxbuf)
+ 		return 0;
+-- 
+1.9.1
+
+
