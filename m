@@ -1,41 +1,154 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: [PATCH] ceph: fix message length computation
-Date: Wed, 30 Sep 2015 15:04:42 +0200
-Message-ID: <9959810.KasB66Ks40@wuerfel>
+From: Casey Bodley <cbodley@redhat.com>
+Subject: Re: Backend ObjectStore engine performance bench with FIO
+Date: Wed, 30 Sep 2015 09:57:04 -0400 (EDT)
+Message-ID: <1995924083.23911468.1443621424366.JavaMail.zimbra@redhat.com>
+References: <99767EA2E27DD44DB4E9F9B9ACA458C03BD7EFC9@SSIEXCH-MB3.ssi.samsung.com> <720951445.22040695.1443205323581.JavaMail.zimbra@redhat.com> <727310273.23482377.1443557176794.JavaMail.zimbra@redhat.com> <6F3FA899187F0043BA1827A69DA2F7CC036269EB@shsmsx102.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <y2038-bounces@lists.linaro.org>
-List-Unsubscribe: <https://lists.linaro.org/mailman/options/y2038>,
- <mailto:y2038-request@lists.linaro.org?subject=unsubscribe>
-List-Archive: <http://lists.linaro.org/pipermail/y2038/>
-List-Post: <mailto:y2038@lists.linaro.org>
-List-Help: <mailto:y2038-request@lists.linaro.org?subject=help>
-List-Subscribe: <https://lists.linaro.org/mailman/listinfo/y2038>,
- <mailto:y2038-request@lists.linaro.org?subject=subscribe>
-Errors-To: y2038-bounces@lists.linaro.org
-Sender: "Y2038" <y2038-bounces@lists.linaro.org>
-To: ceph-devel@vger.kernel.org
-Cc: y2038@lists.linaro.org, "Yan, Zheng" <zyan@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, linux-kernel@vger.kernel.org, Sage Weil <sage@redhat.com>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx6-phx2.redhat.com ([209.132.183.39]:53125 "EHLO
+	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751027AbbI3N5H convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Sep 2015 09:57:07 -0400
+In-Reply-To: <6F3FA899187F0043BA1827A69DA2F7CC036269EB@shsmsx102.ccr.corp.intel.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Xiaoxi Chen <xiaoxi.chen@intel.com>
+Cc: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>, ceph-devel@vger.kernel.org
 
-Y3JlYXRlX3JlcXVlc3RfbWVzc2FnZSgpIGNvbXB1dGVzIHRoZSBtYXhpbXVtIGxlbmd0aCBvZiBh
-IG1lc3NhZ2UsCmJ1dCB1c2VzIHRoZSB3cm9uZyB0eXBlIGZvciB0aGUgdGltZSBzdGFtcDogc2l6
-ZW9mKHN0cnVjdCB0aW1lc3BlYykKbWF5IGJlIDggb3IgMTYgZGVwZW5kaW5nIG9uIHRoZSBhcmNo
-aXRlY3R1cmUsIHdoaWxlIHNpemVvZihzdHJ1Y3QKY2VwaF90aW1lc3BlYykgaXMgYWx3YXlzIDgs
-IGFuZCB0aGF0IGlzIHdoYXQgZ2V0cyBwdXQgaW50byB0aGUKbWVzc2FnZS4KCkZvdW5kIHdoaWxl
-IGF1ZGl0aW5nIHRoZSB1c2VzIG9mIHRpbWVzcGVjIGZvciB5MjAzOCBwcm9ibGVtcy4KClNpZ25l
-ZC1vZmYtYnk6IEFybmQgQmVyZ21hbm4gPGFybmRAYXJuZGIuZGU+CkZpeGVzOiBiOGU2OTA2NmQ4
-YWYgKCJjZXBoOiBpbmNsdWRlIHRpbWUgc3RhbXAgaW4gZXZlcnkgTURTIHJlcXVlc3QiKQotLS0K
-ZGlmZiAtLWdpdCBhL2ZzL2NlcGgvbWRzX2NsaWVudC5jIGIvZnMvY2VwaC9tZHNfY2xpZW50LmMK
-aW5kZXggNTFjYjAyZGE3NWQ5Li5mZTJjOTgyNzY0ZTcgMTAwNjQ0Ci0tLSBhL2ZzL2NlcGgvbWRz
-X2NsaWVudC5jCisrKyBiL2ZzL2NlcGgvbWRzX2NsaWVudC5jCkBAIC0xOTM1LDcgKzE5MzUsNyBA
-QCBzdGF0aWMgc3RydWN0IGNlcGhfbXNnICpjcmVhdGVfcmVxdWVzdF9tZXNzYWdlKHN0cnVjdCBj
-ZXBoX21kc19jbGllbnQgKm1kc2MsCiAKIAlsZW4gPSBzaXplb2YoKmhlYWQpICsKIAkJcGF0aGxl
-bjEgKyBwYXRobGVuMiArIDIqKDEgKyBzaXplb2YodTMyKSArIHNpemVvZih1NjQpKSArCi0JCXNp
-emVvZihzdHJ1Y3QgdGltZXNwZWMpOworCQlzaXplb2Yoc3RydWN0IGNlcGhfdGltZXNwZWMpOwog
-CiAJLyogY2FsY3VsYXRlIChtYXgpIGxlbmd0aCBmb3IgY2FwIHJlbGVhc2VzICovCiAJbGVuICs9
-IHNpemVvZihzdHJ1Y3QgY2VwaF9tZHNfcmVxdWVzdF9yZWxlYXNlKSAqCgpfX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpZMjAzOCBtYWlsaW5nIGxpc3QKWTIw
-MzhAbGlzdHMubGluYXJvLm9yZwpodHRwczovL2xpc3RzLmxpbmFyby5vcmcvbWFpbG1hbi9saXN0
-aW5mby95MjAzOAo=
+Hi Xiaoxi,
+
+I pushed a new branch wip-fio-objectstore to ceph's github. I look forw=
+ard to seeing James' work!
+
+Thanks,
+Casey
+
+----- Original Message -----
+> Hi Casey,
+>       Would it better if we create an integration brunch on
+>       ceph/ceph/wip-fio-objstore to allow more people try and improve=
+ it?
+>       Seems James has some patches.
+>=20
+> -Xiaoxi
+>=20
+> > -----Original Message-----
+> > From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
+> > owner@vger.kernel.org] On Behalf Of Casey Bodley
+> > Sent: Wednesday, September 30, 2015 4:06 AM
+> > To: James (Fei) Liu-SSI
+> > Cc: ceph-devel@vger.kernel.org
+> > Subject: Re: Backend ObjectStore engine performance bench with FIO
+> >=20
+> > Hi James/Haomai/Xiaoxi,
+> >=20
+> > I spent some more time on the fio-objectstore branch, and pushed an
+> > update.
+> >=20
+> > In testing, I realized that it was using the io_unit's start time t=
+o name
+> > the
+> > objects, which meant that every write operation was creating a sepa=
+rate
+> > object.
+> > In addition to fixing this to use fio's filenames for object names,=
+ I also
+> > added
+> > support for the open_file() and close_file() functions. It now crea=
+tes
+> > objects
+> > of the proper size on startup, so read-only jobs will work normally=
+=2E
+> > It also removes its objects on exit.
+> >=20
+> > On startup, it no longer calls create_collection() if it already ex=
+ists, so
+> > I was
+> > able to re-run fio jobs over and over again without having to clear=
+ the
+> > data
+> > directory (tested with FileStore and KeyValueStore).
+> >=20
+> > Casey
+> >=20
+> > ----- Original Message -----
+> > > Great work James!
+> > >
+> > > ----- Original Message -----
+> > > > From: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
+> > > > To: "Xiaoxi Chen" <xiaoxi.chen@intel.com>, "Casey Bodley"
+> > > > <cbodley@redhat.com>
+> > > > Cc: "Sage Weil" <sage@newdream.net>, ceph-devel@vger.kernel.org
+> > > > Sent: Friday, September 25, 2015 1:55:29 PM
+> > > > Subject: Backend ObjectStore engine performance bench with FIO
+> > > >
+> > > > Hi Xiaoxi,
+> > > >
+> > > >    With changing the IO mode from aio to sync, we make fio agai=
+nst
+> > newstore
+> > > >    works. Even  with sync engine(I am still debugging the aio e=
+ngine in
+> > > >    newstore with Xiaoxi) in newstore, Newstore still performing=
+ the
+> > > >    best
+> > > >    among all of backstore engine with our initial setup(Thoroug=
+hly test
+> > > >    will
+> > > >    be run soon). Attachment is the initial data we collected fo=
+r your
+> > > >    reference. Thanks for great help from Xiaoxi from regarding =
+to
+> > Newstore
+> > > >    development to support FIO.
+> > > >
+> > > > Hi Casey,
+> > > >   Let me know if you need any help to put fio-ceph-objectstore =
+into
+> > > >   upstream.
+> > > >   After then , I can commit all of mine into upstream.
+> > >
+> > > My pull request at https://github.com/ceph/ceph/pull/5943 is stil=
+l
+> > > pending.
+> > > If you have patches that you'd like included, I would be happy to=
+ pull
+> > > them in; just point me to a branch.
+> > >
+> > > >
+> > > >   Thanks,
+> > > >   James
+> > > >
+> > >
+> > > Thanks,
+> > > Casey
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe ceph-de=
+vel"
+> > > in the body of a message to majordomo@vger.kernel.org More
+> > majordomo
+> > > info at  http://vger.kernel.org/majordomo-info.html
+> > >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-deve=
+l" in
+> > the
+> > body of a message to majordomo@vger.kernel.org More majordomo info =
+at
+> > http://vger.kernel.org/majordomo-info.html
+> N=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDr=EF=BF=BD=EF=BF=BDy=EF=
+=BF=BD=EF=BF=BD=EF=BF=BDb=EF=BF=BDX=EF=BF=BD=EF=BF=BD=C7=A7v=EF=BF=BD^=EF=
+=BF=BD)=DE=BA{.n=EF=BF=BD+=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD]z=EF=BF=
+=BD=EF=BF=BD=EF=BF=BD{ay=EF=BF=BD=CA=87=DA=99=EF=BF=BD,j=EF=BF=BD=EF=BF=
+=BDf=EF=BF=BD=EF=BF=BD=EF=BF=BDh=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD=EF=
+=BF=BDw=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDj:+v=EF=BF=
+=BD=EF=BF=BD=EF=BF=BDw=EF=BF=BDj=EF=BF=BDm=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=
+=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDzZ+=EF=BF=BD=EF=BF=BD=DD=A2j"=
+=EF=BF=BD=EF=BF=BD
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
