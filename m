@@ -1,410 +1,516 @@
-From: Bharath Krishna <BKrishna@walmartlabs.com>
-Subject: Re: Teuthology Integration to native openstack
-Date: Wed, 30 Sep 2015 09:34:43 +0000
-Message-ID: <D231A8D6.18A9%bkrishna@walmartlabs.com>
-References: <D22E3F64.15AF%bkrishna@walmartlabs.com>
- <56084EDE.9050005@dachary.org> <D22ECA7E.15C3%bkrishna@walmartlabs.com>
- <56090D7C.4020000@dachary.org> <D23170D5.186E%bkrishna@walmartlabs.com>
- <560BA270.3060409@dachary.org>
+From: zhucaifeng <zhucaifeng@unissoft-nj.com>
+Subject: Re: a patch to improve cephfs direct io performance
+Date: Wed, 30 Sep 2015 17:40:39 +0800
+Message-ID: <560BAE17.2020002@unissoft-nj.com>
+References: <5604C4F7.10300@unissoft-nj.com>
+ <CAAM7YAkeHOO+VR22B2NZWyhOvgNq=CqZJKJzE3Gi5GiRJgR2vg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1254
+Content-Type: text/plain; charset=utf-8;
+	format=flowed
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from homgw008.wal-mart.com ([161.165.225.37]:41757 "EHLO
-	ppes-mail-e6.wal-mart.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1754583AbbI3JhW convert rfc822-to-8bit
-	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 30 Sep 2015 05:37:22 -0400
-In-Reply-To: <560BA270.3060409@dachary.org>
-Content-Language: en-US
-Content-ID: <836838F3A385314A828B42AF7300A605@email.wal-mart.com>
+Received: from smtpbg65.qq.com ([103.7.28.233]:10935 "EHLO smtpbg65.qq.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755305AbbI3Jkj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 30 Sep 2015 05:40:39 -0400
+In-Reply-To: <CAAM7YAkeHOO+VR22B2NZWyhOvgNq=CqZJKJzE3Gi5GiRJgR2vg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
+To: "Yan, Zheng" <ukernel@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Loic,
+Hi, Yan
 
-Does piping the command output of "openstack server show -f json
-<target-name>=94 to jq alter the output format?
+iov_iter APIs seems unsuitable for the direct io manipulation below.=20
+iov_iter APIs
+hide how to iterate over elements, whileas dio_xxx below explicitly=20
+control over
+the iteration. They conflict with each other in the principle.
 
-Openstack version being used is Juno.
+The patch for the newest kernel branch is below.
 
-Thank you
+Best Regards
 
-Regards,
-M Bharath Krishna
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index 8b79d87..3938ac9 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -34,6 +34,115 @@
+   * need to wait for MDS acknowledgement.
+   */
 
-On 9/30/15, 2:20 PM, "Loic Dachary" <loic@dachary.org> wrote:
++/*
++ * Calculate the length sum of direct io vectors that can
++ * be combined into one page vector.
++ */
++static int
++dio_get_pagevlen(const struct iov_iter *it)
++{
++    const struct iovec *iov =3D it->iov;
++    const struct iovec *iovend =3D iov + it->nr_segs;
++    int pagevlen;
++
++    pagevlen =3D iov->iov_len - it->iov_offset;
++    /*
++     * An iov can be page vectored when both the current tail
++     * and the next base are page aligned.
++     */
++    while (PAGE_ALIGNED((iov->iov_base + iov->iov_len)) &&
++           (++iov < iovend && PAGE_ALIGNED((iov->iov_base)))) {
++        pagevlen +=3D iov->iov_len;
++    }
++    dout("dio_get_pagevlen len =3D %d\n", pagevlen);
++    return pagevlen;
++}
++
++/*
++ * Grab @num_pages from the process vm space. These pages are
++ * continuous and start from @data.
++ */
++static int
++dio_grab_pages(const void *data, int num_pages, bool write_page,
++    struct page **pages)
++{
++    int got =3D 0;
++    int rc =3D 0;
++
++    down_read(&current->mm->mmap_sem);
++    while (got < num_pages) {
++        rc =3D get_user_pages(current, current->mm,
++            (unsigned long)data + ((unsigned long)got * PAGE_SIZE),
++            num_pages - got, write_page, 0, pages + got, NULL);
++        if (rc < 0)
++            break;
++        BUG_ON(rc =3D=3D 0);
++        got +=3D rc;
++    }
++    up_read(&current->mm->mmap_sem);
++    return got;
++}
++
++static void
++dio_free_pagev(struct page **pages, int num_pages, bool dirty)
++{
++    int i;
++
++    for (i =3D 0; i < num_pages; i++) {
++        if (dirty)
++            set_page_dirty_lock(pages[i]);
++        put_page(pages[i]);
++    }
++    kfree(pages);
++}
++
++/*
++ * Allocate a page vector based on (@it, @pagevlen).
++ * The return value is the tuple describing a page vector,
++ * that is (@pages, @pagevlen, @page_align, @num_pages).
++ */
++static struct page **
++dio_alloc_pagev(const struct iov_iter *it, int pagevlen, bool write_pa=
+ge,
++    size_t *page_align, int *num_pages)
++{
++    const struct iovec *iov =3D it->iov;
++    struct page **pages;
++    int n, m, k, npages;
++    int align;
++    int len;
++    void *data;
++
++    data =3D iov->iov_base + it->iov_offset;
++    len =3D iov->iov_len - it->iov_offset;
++    align =3D ((ulong)data) & ~PAGE_MASK;
++    npages =3D calc_pages_for((ulong)data, pagevlen);
++    pages =3D kmalloc(sizeof(*pages) * npages, GFP_NOFS);
++    if (!pages)
++        return ERR_PTR(-ENOMEM);
++    for (n =3D 0; n < npages; n +=3D m) {
++        m =3D calc_pages_for((ulong)data, len);
++        if (n + m > npages)
++            m =3D npages - n;
++        k =3D dio_grab_pages(data, m, write_page, pages + n);
++        if (k < m) {
++            n +=3D k;
++            goto failed;
++        }
++
++        iov++;
++        data =3D iov->iov_base;
++        len =3D iov->iov_len;
++    }
++    *num_pages =3D npages;
++    *page_align =3D align;
++    dout("dio_alloc_pagev: alloc pages pages[0:%d], page align %d\n",
++        npages, align);
++    return pages;
++
++failed:
++    dio_free_pagev(pages, n, false);
++    return ERR_PTR(-ENOMEM);
++}
 
->Hi,
+  /*
+   * Prepare an open request.  Preallocate ceph_cap to avoid an
+@@ -462,17 +571,17 @@ static ssize_t ceph_sync_read(struct kiocb *iocb,=
+=20
+struct iov_iter *i,
+              size_t start;
+              ssize_t n;
+
+-            n =3D iov_iter_get_pages_alloc(i, &pages, INT_MAX, &start)=
+;
+-            if (n < 0)
+-                return n;
+-
+-            num_pages =3D (n + start + PAGE_SIZE - 1) / PAGE_SIZE;
++            n =3D dio_get_pagevlen(i);
++            pages =3D dio_alloc_pagev(i, n, true, &start,
++                &num_pages);
++            if (IS_ERR(pages))
++                return PTR_ERR(pages);
+
+              ret =3D striped_read(inode, off, n,
+                         pages, num_pages, checkeof,
+                         1, start);
+
+-            ceph_put_page_vector(pages, num_pages, true);
++            dio_free_pagev(pages, num_pages, true);
+
+              if (ret <=3D 0)
+                  break;
+@@ -596,7 +705,7 @@ ceph_sync_direct_write(struct kiocb *iocb, struct=20
+iov_iter *from, loff_t pos,
+          CEPH_OSD_FLAG_WRITE;
+
+      while (iov_iter_count(from) > 0) {
+-        u64 len =3D iov_iter_single_seg_count(from);
++        u64 len =3D dio_get_pagevlen(from);
+          size_t start;
+          ssize_t n;
+
+@@ -615,14 +724,15 @@ ceph_sync_direct_write(struct kiocb *iocb, struct=
+=20
+iov_iter *from, loff_t pos,
+
+          osd_req_op_init(req, 1, CEPH_OSD_OP_STARTSYNC, 0);
+
+-        n =3D iov_iter_get_pages_alloc(from, &pages, len, &start);
+-        if (unlikely(n < 0)) {
+-            ret =3D n;
++        n =3D len;
++        pages =3D dio_alloc_pagev(from, len, false, &start,
++            &num_pages);
++        if (IS_ERR(pages)) {
+              ceph_osdc_put_request(req);
++            ret =3D PTR_ERR(pages);
+              break;
+          }
+
+-        num_pages =3D (n + start + PAGE_SIZE - 1) / PAGE_SIZE;
+          /*
+           * throw out any page cache pages in this range. this
+           * may block.
+@@ -639,8 +749,7 @@ ceph_sync_direct_write(struct kiocb *iocb, struct=20
+iov_iter *from, loff_t pos,
+          if (!ret)
+              ret =3D ceph_osdc_wait_request(&fsc->client->osdc, req);
+
+-        ceph_put_page_vector(pages, num_pages, false);
+-
++        dio_free_pagev(pages, num_pages, false);
+          ceph_osdc_put_request(req);
+          if (ret)
+              break;
+
+
+=E5=9C=A8 2015/9/28 11:17, Yan, Zheng =E5=86=99=E9=81=93:
+> Hi, zhucaifeng
 >
->On 30/09/2015 07:51, Bharath Krishna wrote:
->> Hi,
->>=20
->> Thanks a lot for pointing to right git and instructions. I have pass=
-ed
->> that step now and teuthology VM got created.
->>=20
->> But teuthology openstack command fails to parse the instance id from=
- the
->> json format output of below command:
->>=20
->> DEBUG:teuthology.misc:openstack server show -f json teuthology outpu=
-t
->>=20
->>  "OS-EXT-STS:task_state": null,
->>   "addresses": =B3Primary_External_Net=3D<ip-address>",
->>   "image": "teuthology-ubuntu-14.04
->> (10e6d3b1-f94a-4220-a00f-3e3a13f349e0)",
->>   "OS-EXT-STS:vm_state": "active",
->>   "OS-EXT-SRV-ATTR:instance_name": "instance-000026e8",
->>   "OS-SRV-USG:launched_at": "2015-09-28T10:33:09.000000",
->>   "flavor": "m1.small (2)",
->>   "id": "79a41b6f-f379-4d14-98ac-e73cb42cfa48",
->>   "security_groups": [
->>     {
->>       "name": "teuthology"
->>     }
->>   ],
->>   "user_id": "281f9aa2d9c54177b45e72db742b4744",
->>   "OS-DCF:diskConfig": "MANUAL",
->>   "accessIPv4": "",
->>   "accessIPv6": "",
->>   "progress": 0,
->>   "OS-EXT-STS:power_state": 1,
->>   "OS-EXT-AZ:availability_zone": "az3",
->>   "config_drive": "",
->>   "status": "ACTIVE",
->>   "updated": "2015-09-28T10:33:09Z",
->>   "hostId": "b205fbea7ee98ef482712db93325a1d7d44d7694a8ec9fce7df038c=
-3",
->>   "OS-EXT-SRV-ATTR:host": =B3hostname",
->>   "OS-SRV-USG:terminated_at": null,
->>   "key_name": "ceph_test_key",
->>   "properties": "",
->>   "project_id": "1d0137fe585742bdbe13e2b16daab6ff",
->>   "OS-EXT-SRV-ATTR:hypervisor_hostname": =B3hostname",
->>   "name": "teuthology",
->>   "created": "2015-09-28T10:32:47Z",
->>   "os-extended-volumes:volumes_attached": []
->> }
->> Traceback (most recent call last):
->>   File "/opt/teuthology/virtualenv/bin/teuthology-openstack", line 9=
-, in
->> <module>
->>     load_entry_point('teuthology=3D=3D0.1.0', 'console_scripts',
->> 'teuthology-openstack')()
->>   File "/opt/teuthology/scripts/openstack.py", line 8, in main
->>     teuthology.openstack.main(parse_args(argv), argv)
->>   File "/opt/teuthology/teuthology/openstack/__init__.py", line 622,=
- in
->> main
->>     return TeuthologyOpenStack(ctx, teuth_config, argv).main()
->>   File "/opt/teuthology/teuthology/openstack/__init__.py", line 284,=
- in
->> main
->>     ip =3D self.setup()
->>   File "/opt/teuthology/teuthology/openstack/__init__.py", line 338,=
- in
->> setup
->>     if not self.cluster_exists():
->>   File "/opt/teuthology/teuthology/openstack/__init__.py", line 607,=
- in
->> cluster_exists
->>     instance_id =3D self.get_instance_id(self.args.name)
->>   File "/opt/teuthology/teuthology/openstack/__init__.py", line 565,=
- in
->> get_instance_id
->>     return TeuthologyOpenStack.get_value(instance, 'id')
->>   File "/opt/teuthology/teuthology/openstack/__init__.py", line 75, =
-in
->> get_value
->>     return filter(lambda v: v['Field'] =3D=3D field, result)[0]['Val=
-ue']
->>   File "/opt/teuthology/teuthology/openstack/__init__.py", line 75, =
-in
->> <lambda>
->>     return filter(lambda v: v['Field'] =3D=3D field, result)[0]['Val=
-ue']
->> TypeError: string indices must be integers
->>=20
->>=20
->> I could understand that we are trying to get instance id value using
->> get_value method, but it fails with an exception even though instanc=
-e id
->> shown is a valid format of id.
->>=20
->> Any pointers to fix this will greatly help.
+> The patch generally looks good. But I think there is minor flaw, see
+> my comment below. Besides, could you write a patch for the newest
+> kernel (it's easier because there is iov_iter_get_pages() helper).
 >
->It appears that the format of the json output is very different on you=
-r
->implementation. Here is the kind of output I get on all the clusters I
->tried. Which OpenStack version is your cluster running ?
 >
->$ openstack server show -f json target225193 | jq .
->[
->  {
->    "Value": "MANUAL",
->    "Field": "OS-DCF:diskConfig"
->  },
->  {
->    "Value": "nova",
->    "Field": "OS-EXT-AZ:availability_zone"
->  },
->  {
->    "Value": 1,
->    "Field": "OS-EXT-STS:power_state"
->  },
->  {
->    "Value": null,
->    "Field": "OS-EXT-STS:task_state"
->  },
->  {
->    "Value": "active",
->    "Field": "OS-EXT-STS:vm_state"
->  },
->  {
->    "Value": "2015-09-30T08:37:55.000000",
->    "Field": "OS-SRV-USG:launched_at"
->  },
->  {
->    "Value": null,
->    "Field": "OS-SRV-USG:terminated_at"
->  },
->  {
->    "Value": "",
->    "Field": "accessIPv4"
->  },
->  {
->    "Value": "",
->    "Field": "accessIPv6"
->  },
->  {
->    "Value": "Ext-Net=3D167.114.225.193",
->    "Field": "addresses"
->  },
->  {
->    "Value": "",
->    "Field": "config_drive"
->  },
->  {
->    "Value": "2015-09-30T08:37:01Z",
->    "Field": "created"
->  },
->  {
->    "Value": "vps-ssd-3 (e43d7458-6b82-4a78-a712-3a4dc6748cf4)",
->    "Field": "flavor"
->  },
->  {
->    "Value": "38119f63edc62252c491fa7e9a8d164a90c48db09fdee1a5687c1c7f=
+> On Fri, Sep 25, 2015 at 11:52 AM, zhucaifeng <zhucaifeng@unissoft-nj.=
+com> wrote:
+>> Hi, all
+>>
+>> When using cephfs, we find that cephfs direct io is very slow.
+>> For example, installing Windows 7 takes more than 1 hour on a
+>> virtual machine whose disk is a file in cephfs.
+>>
+>> The cause is that when doing direct io, both ceph_sync_direct_write
+>> and ceph_sync_read iterate iov elements one by one, and send one
+>> osd_op request for each iov that covers about 4K~8K bytes data. The
+>> result is lots of small requests and replies shuttled among the kern=
+el
+>> client and OSDs.
+>>
+>> The fix tries to combine as many iovs as possible into one page vect=
+or, and
+>> then send one request for this page vector. In this way, small reque=
+sts and
+>> replies are reduced; the OSD can serve a large read/write request on=
+e time.
+>>
+>> We observe that the performance is improved by about 5~15 times, dep=
+endent
+>> on
+>> different application workload.
+>>
+>> The fix is below. Some change notes are as follows:
+>>      - function ceph_get_direct_page_vetor and ceph_put_page_vector
+>>        are moved from net/ceph/pagevec.c to fs/ceph/file.c, and are
+>>        renamed as dio_grab_pages and dio_free_pagev respectively.
+>>
+>>      - function dio_get_pagevlen and dio_alloc_pagev are newly intro=
+duced.
+>>
+>>        dio_get_pagevlen is to calculate the page vector length in by=
+tes
+>>        from the io vectors. Except for the first and last one, an io=
+ vector
+>>        can be merged into a page vector iff its base and tail are pa=
+ge
+>> aligned.
+>>        for the first vector, only its tail should be page aligned; f=
+or the
+>> last
+>>        vector, only its head should be page aligned.
+>>
+>>        dio_alloc_pagev allocates pages for each io vector and put th=
+ese pages
+>>        together in one page pointer array.
+>>
+>> Best Regards!
+>>
+>> --- /home/linux-3.10.0-229.7.2.el7/fs/ceph/file.c    2015-05-16
+>> 09:05:28.000000000 +0800
+>> +++ ./fs/ceph/file.c    2015-09-17 10:43:44.798591846 +0800
+>> @@ -34,6 +34,115 @@
+>>    * need to wait for MDS acknowledgement.
+>>    */
+>>
+>> +/*
+>> + * Calculate the length sum of direct io vectors that can
+>> + * be combined into one page vector.
+>> + */
+>> +static int
+>> +dio_get_pagevlen(const struct iov_iter *it)
+>> +{
+>> +    const struct iovec *iov =3D it->iov;
+>> +    const struct iovec *iovend =3D iov + it->nr_segs;
+>> +    int pagevlen;
+>> +
+>> +    pagevlen =3D iov->iov_len - it->iov_offset;
+>> +    /*
+>> +     * An iov can be page vectored when both the current tail
+>> +     * and the next base are page aligned.
+>> +     */
+>> +    while (PAGE_ALIGNED((iov->iov_base + iov->iov_len)) &&
+>> +           (++iov < iovend && PAGE_ALIGNED((iov->iov_base)))) {
+>> +        pagevlen +=3D iov->iov_len;
+>> +    }
+>> +    dout("dio_get_pagevlen len =3D %d\n", pagevlen);
+>> +    return pagevlen;
+>> +}
+>> +
+>> +/*
+>> + * Grab @num_pages from the process vm space. These pages are
+>> + * continuous and start from @data.
+>> + */
+>> +static int
+>> +dio_grab_pages(const void *data, int num_pages, bool write_page,
+>> +    struct page **pages)
+>> +{
+>> +    int got =3D 0;
+>> +    int rc =3D 0;
+>> +
+>> +    down_read(&current->mm->mmap_sem);
+>> +    while (got < num_pages) {
+>> +        rc =3D get_user_pages(current, current->mm,
+>> +            (unsigned long)data + ((unsigned long)got * PAGE_SIZE),
+>> +            num_pages - got, write_page, 0, pages + got, NULL);
+>> +        if (rc < 0)
+>> +            break;
+>> +        BUG_ON(rc =3D=3D 0);
+>> +        got +=3D rc;
+>> +    }
+>> +    up_read(&current->mm->mmap_sem);
+>> +    return got;
+>> +}
+>> +
+>> +static void
+>> +dio_free_pagev(struct page **pages, int num_pages, bool dirty)
+>> +{
+>> +    int i;
+>> +
+>> +    for (i =3D 0; i < num_pages; i++) {
+>> +        if (dirty)
+>> +            set_page_dirty_lock(pages[i]);
+>> +        put_page(pages[i]);
+>> +    }
+>> +    kfree(pages);
+>> +}
+>> +
+>> +/*
+>> + * Allocate a page vector based on (@it, @pagevlen).
+>> + * The return value is the tuple describing a page vector,
+>> + * that is (@pages, @pagevlen, @page_align, @num_pages).
+>> + */
+>> +static struct page **
+>> +dio_alloc_pagev(const struct iov_iter *it, int pagevlen, bool write=
+_page,
+>> +    int *page_align, int *num_pages)
+>> +{
+>> +    const struct iovec *iov =3D it->iov;
+>> +    struct page **pages;
+>> +    int n, m, k, npages;
+>> +    int align;
+>> +    int len;
+>> +    void *data;
+>> +
+>> +    data =3D iov->iov_base + it->iov_offset;
+>> +    len =3D iov->iov_len - it->iov_offset;
+>> +    align =3D ((ulong)data) & ~PAGE_MASK;
+>> +    npages =3D calc_pages_for((ulong)data, pagevlen);
+>> +    pages =3D kmalloc(sizeof(*pages) * npages, GFP_NOFS);
+>> +    if (!pages)
+>> +        return ERR_PTR(-ENOMEM);
+>> +    for (n =3D 0; n < npages; n +=3D m) {
+>> +        m =3D calc_pages_for((ulong)data, len);
+>> +        if (n + m > npages)
+>> +            m =3D npages - n;
+>> +        k =3D dio_grab_pages(data, m, write_page, pages + n);
+>> +        if (k < m) {
+>> +            n +=3D k;
+>> +            goto failed;
+>> +        }
+> if (align + len) is not page aligned, the loop should stop.
+>
+>> +
+>> +        iov++;
+>> +        data =3D iov->iov_base;
+> if (unsigned long)data is not page aligned, the loop should stop
+>
+>
+> Regards
+> Yan, Zheng
+>
+>> +        len =3D iov->iov_len;
+>> +    }
+>> +    *num_pages =3D npages;
+>> +    *page_align =3D align;
+>> +    dout("dio_alloc_pagev: alloc pages pages[0:%d], page align %d\n=
 ",
->    "Field": "hostId"
->  },
->  {
->    "Value": "897cbcc9-d662-4ae9-bb68-a71ef4269cdc",
->    "Field": "id"
->  },
->  {
->    "Value": "teuthology-centos-7.0
->(67438ecf-803c-45a6-83bb-54a0ba0d0b6c)",
->    "Field": "image"
->  },
->  {
->    "Value": "teuthology",
->    "Field": "key_name"
->  },
->  {
->    "Value": "target225193",
->    "Field": "name"
->  },
->  {
->    "Value": [],
->    "Field": "os-extended-volumes:volumes_attached"
->  },
->  {
->    "Value": 0,
->    "Field": "progress"
->  },
->  {
->    "Value": "131b886b156a4f84b5f41baf2fbe646c",
->    "Field": "project_id"
->  },
->  {
->    "Value": "ownedby=3D'167.114.249.14',
->teuthology=3D'd48f8bc9adf785614308e33094933a72'",
->    "Field": "properties"
->  },
->  {
->    "Value": [
->      {
->        "name": "teuthology"
->      }
->    ],
->    "Field": "security_groups"
->  },
->  {
->    "Value": "ACTIVE",
->    "Field": "status"
->  },
->  {
->    "Value": "2015-09-30T08:39:08Z",
->    "Field": "updated"
->  },
->  {
->    "Value": "291dde1633154837be2693c6ffa6315c",
->    "Field": "user_id"
->  }
->]
+>> +        npages, align);
+>> +    return pages;
+>> +
+>> +failed:
+>> +    dio_free_pagev(pages, n, false);
+>> +    return ERR_PTR(-ENOMEM);
+>> +}
+>>
+>>   /*
+>>    * Prepare an open request.  Preallocate ceph_cap to avoid an
+>> @@ -354,13 +463,14 @@ more:
+>>       if (ret >=3D 0) {
+>>           int didpages;
+>>           if (was_short && (pos + ret < inode->i_size)) {
+>> -            u64 tmp =3D min(this_len - ret,
+>> +            u64 zlen =3D min(this_len - ret,
+>>                       inode->i_size - pos - ret);
+>> +            int zoff =3D (o_direct ? buf_align : io_align) +
+>> +                   read + ret;
+>>               dout(" zero gap %llu to %llu\n",
+>> -                pos + ret, pos + ret + tmp);
+>> -            ceph_zero_page_vector_range(page_align + read + ret,
+>> -                            tmp, pages);
+>> -            ret +=3D tmp;
+>> +                pos + ret, pos + ret + zlen);
+>> +            ceph_zero_page_vector_range(zoff, zlen, pages);
+>> +            ret +=3D zlen;
+>>           }
+>>
+>>           didpages =3D (page_align + ret) >> PAGE_CACHE_SHIFT;
+>> @@ -421,19 +531,19 @@ static ssize_t ceph_sync_read(struct kio
+>>
+>>       if (file->f_flags & O_DIRECT) {
+>>           while (iov_iter_count(i)) {
+>> -            void __user *data =3D i->iov[0].iov_base + i->iov_offse=
+t;
+>> -            size_t len =3D i->iov[0].iov_len - i->iov_offset;
+>> -
+>> -            num_pages =3D calc_pages_for((unsigned long)data, len);
+>> -            pages =3D ceph_get_direct_page_vector(data,
+>> -                                num_pages, true);
+>> +            int page_align;
+>> +            size_t len;
+>> +
+>> +            len =3D dio_get_pagevlen(i);
+>> +            pages =3D dio_alloc_pagev(i, len, true, &page_align,
+>> +                &num_pages);
+>>               if (IS_ERR(pages))
+>>                   return PTR_ERR(pages);
+>>
+>>               ret =3D striped_read(inode, off, len,
+>>                          pages, num_pages, checkeof,
+>> -                       1, (unsigned long)data & ~PAGE_MASK);
+>> -            ceph_put_page_vector(pages, num_pages, true);
+>> +                       1, page_align);
+>> +            dio_free_pagev(pages, num_pages, true);
+>>
+>>               if (ret <=3D 0)
+>>                   break;
+>> @@ -570,10 +680,7 @@ ceph_sync_direct_write(struct kiocb *ioc
+>>       iov_iter_init(&i, iov, nr_segs, count, 0);
+>>
+>>       while (iov_iter_count(&i) > 0) {
+>> -        void __user *data =3D i.iov->iov_base + i.iov_offset;
+>> -        u64 len =3D i.iov->iov_len - i.iov_offset;
+>> -
+>> -        page_align =3D (unsigned long)data & ~PAGE_MASK;
+>> +        u64 len =3D dio_get_pagevlen(&i);
+>>
+>>           snapc =3D ci->i_snap_realm->cached_context;
+>>           vino =3D ceph_vino(inode);
+>> @@ -589,8 +696,7 @@ ceph_sync_direct_write(struct kiocb *ioc
+>>               break;
+>>           }
+>>
+>> -        num_pages =3D calc_pages_for(page_align, len);
+>> -        pages =3D ceph_get_direct_page_vector(data, num_pages, fals=
+e);
+>> +        pages =3D dio_alloc_pagev(&i, len, false, &page_align, &num=
+_pages);
+>>           if (IS_ERR(pages)) {
+>>               ret =3D PTR_ERR(pages);
+>>               goto out;
+>> @@ -612,7 +718,7 @@ ceph_sync_direct_write(struct kiocb *ioc
+>>           if (!ret)
+>>               ret =3D ceph_osdc_wait_request(&fsc->client->osdc, req=
+);
+>>
+>> -        ceph_put_page_vector(pages, num_pages, false);
+>> +        dio_free_pagev(pages, num_pages, false);
+>>
+>>   out:
+>>           ceph_osdc_put_request(req);
+>>
+>>
+>>
+>>
+>>
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >
->>=20
->> Thank you.
->>=20
->> Regards,
->> M Bharath Krishna
->>=20
->>=20
->> On 9/28/15, 3:20 PM, "Loic Dachary" <loic@dachary.org> wrote:
->>=20
->>> Hi,
->>>
->>> On 28/09/2015 07:24, Bharath Krishna wrote:
->>>> Hi Dachary,
->>>>
->>>> Thanks for the reply. I am following your blog
->>>> http://dachary.org/?p=3D3767
->>>> And the README in
->>>>
->>>>=20
->>>>https://github.com/dachary/teuthology/tree/wip-6502-openstack-v2/#o=
-pens
->>>>ta
->>>> ck
->>>> -backend
->>>
->>> The up to date instructions are at
->>> https://github.com/dachary/teuthology/tree/openstack/#openstack-bac=
-kend
->>> (the link you used comes from http://dachary.org/?p=3D3828 and I ju=
-st
->>> updated it so noone else will be confused).
->>>>
->>>> I have sourced the openrc file of my Openstack deployment and veri=
-fied
->>>> that clients are working fine. My Openstack deployment has Cinder
->>>> integrated with CEPH backend.
->>>>
->>>> I have cloned and installed teuthology using the below steps:
->>>>
->>>> $ git clone -b wip-6502-openstack-v2
->>>> http://github.com/dachary/teuthology
->>>> $ cd teuthology ; ./bootstrap install
->>>> $ source virtualenv/bin/activate
->>>>
->>>>
->>>> Then I tried to run a dummy suite as test and I ran into following
->>>> error:
->>>>
->>>> Traceback (most recent call last):
->>>>   File "/root/teuthology/virtualenv/bin/teuthology-openstack", lin=
-e 9,
->>>> in
->>>> <module>
->>>>     load_entry_point('teuthology=3D=3D0.1.0', 'console_scripts',
->>>> 'teuthology-openstack')()
->>>>   File "/root/teuthology/scripts/openstack.py", line 8, in main
->>>>     teuthology.openstack.main(parse_args(argv), argv)
->>>>   File "/root/teuthology/teuthology/openstack.py", line 375, in ma=
-in
->>>>     return TeuthologyOpenStack(ctx, teuth_config, argv).main()
->>>>   File "/root/teuthology/teuthology/openstack.py", line 181, in ma=
-in
->>>>     self.verify_openstack()
->>>>   File "/root/teuthology/teuthology/openstack.py", line 270, in
->>>> verify_openstack
->>>>     str(providers))
->>>> Exception: ('OS_AUTH_URL=3Dhttp://<ip-address>:5000/v2.0', " does =
-is
->>>>not a
->>>> known OpenStack provider (('cloud.ovh.net', 'ovh'),
->>>>('control.os1.phx2',
->>>> 'redhat'), ('entercloudsuite.com', 'entercloudsuite'))")
->>>
->>> This limitation was in an earlier implementations and should not be=
- a
->>> problem now.
->>>
->>> Cheers
->>>
->>>>
->>>>
->>>> Thank you.
->>>>
->>>> Regards,
->>>> M Bharath Krishna
->>>>
->>>> On 9/28/15, 1:47 AM, "Loic Dachary" <loic@dachary.org> wrote:
->>>>
->>>>> [moving to ceph-devel]
->>>>>
->>>>> Hi,
->>>>>
->>>>> On 27/09/2015 21:20, Bharath Krishna wrote:
->>>>>> Hi,
->>>>>>
->>>>>> We have an openstack deployment in place with CEPH as CINDER
->>>>>>backend.
->>>>>>
->>>>>> We would like to perform functional testing for CEPH and found
->>>>>> teuthology as recommended option.
->>>>>>
->>>>>> Have successfully installed teuthology. Now to integrate it with
->>>>>> Openstack, I could see that the possible providers could be eith=
-er
->>>>>> OVH,
->>>>>> REDHAT or ENTERCLOUDSITE.
->>>>>>
->>>>>> Is there any option where in we can source openstack deployment =
-of
->>>>>>our
->>>>>> own and test CEPH using teuthology?
->>>>>
->>>>> The documentation mentions these providers because they have been
->>>>> tested.
->>>>> But there should be no blocker to run teuthology against a regula=
-r
->>>>> OpenStack provider. Should you run into troubles, please let me k=
-now
->>>>> and
->>>>> I'll help.
->>>>>
->>>>> Cheers
->>>>>
->>>>>>
->>>>>> If NO, please suggest on how to test CEPH in such scenarios?
->>>>>>
->>>>>> Please help.
->>>>>>
->>>>>> Thank you.
->>>>>> Bharath Krishna
->>>>>> _______________________________________________
->>>>>> ceph-users mailing list
->>>>>> ceph-users@lists.ceph.com
->>>>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>>>>>
->>>>>
->>>>> --=20
->>>>> Lo=EFc Dachary, Artisan Logiciel Libre
->>>>>
->>>>
->>>
->>> --=20
->>> Lo=EFc Dachary, Artisan Logiciel Libre
->>>
->>=20
->
->--=20
->Lo=EFc Dachary, Artisan Logiciel Libre
->
+
+
 
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
