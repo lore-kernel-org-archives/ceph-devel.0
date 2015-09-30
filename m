@@ -1,101 +1,54 @@
-From: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
-Subject: RE: Backend ObjectStore engine performance bench with FIO
-Date: Wed, 30 Sep 2015 18:30:07 +0000
-Message-ID: <99767EA2E27DD44DB4E9F9B9ACA458C03BD7FA22@SSIEXCH-MB3.ssi.samsung.com>
-References: <99767EA2E27DD44DB4E9F9B9ACA458C03BD7EFC9@SSIEXCH-MB3.ssi.samsung.com>
- <720951445.22040695.1443205323581.JavaMail.zimbra@redhat.com>
- <727310273.23482377.1443557176794.JavaMail.zimbra@redhat.com>
- <6F3FA899187F0043BA1827A69DA2F7CC036269EB@shsmsx102.ccr.corp.intel.com>
- <1995924083.23911468.1443621424366.JavaMail.zimbra@redhat.com>
+From: Samuel Just <sjust@redhat.com>
+Subject: Re: Data-at-rest compression at EC pools blueprint
+Date: Wed, 30 Sep 2015 11:40:49 -0700
+Message-ID: <CAN=+7FUzyWRJ+PWbuJv1T2=uORFTPmr8_XRpMthAiy10oT+caQ@mail.gmail.com>
+References: <560C0356.90401@mirantis.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.ssi.samsung.com ([207.140.43.206]:55142 "EHLO
-	mx2.ssi.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932434AbbI3Saa (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Sep 2015 14:30:30 -0400
-In-Reply-To: <1995924083.23911468.1443621424366.JavaMail.zimbra@redhat.com>
-Content-Language: en-US
+Received: from mail-ig0-f174.google.com ([209.85.213.174]:38001 "EHLO
+	mail-ig0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932495AbbI3Skt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Sep 2015 14:40:49 -0400
+Received: by igxx6 with SMTP id x6so37750883igx.1
+        for <ceph-devel@vger.kernel.org>; Wed, 30 Sep 2015 11:40:49 -0700 (PDT)
+In-Reply-To: <560C0356.90401@mirantis.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Casey Bodley <cbodley@redhat.com>, Xiaoxi Chen <xiaoxi.chen@intel.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Igor Fedotov <ifedotov@mirantis.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-SGkgQ2FzZXkgYW5kIFhpYW94aSwNCiAgVGhlIG5leHQgY2hhbGxlbmdlIHRvIHVzIGlzIHRvIGZp
-Z3VyZSBvdXQgd2h5IHRoZSBwZXJmb3JtYW5jZSBpcyBzbyBiYWQgd2l0aCBmaW8tY2VwaC1vYmpl
-Y3RzdG9yZS4gIFdpdGggb3VyIGluaXRpYWwgcGVyZm9ybWFuY2UgZGF0YSwgdGhlIG5ld3N0b3Jl
-ICBpcyB+IDkgdGltZXMgd29yc2UgdGhhbiByYXcgYmxvY2sgZGV2aWNlIGFjY2VzcyBpbiB0ZXJt
-cyBvZiBJT1BTIGFuZCByYXcgZGF0YS4NCkFzIEkgbWVudGlvbmVkICwgVGhlIHN5bmMgZW5naW5l
-IGlzIG1pZ2h0IGJlIHRoZSBib3R0bGVuZWNrLiBBbnl0aGluZyBlbHNlIGluIHlvdXIgbWluZCB3
-aWxsIGJlIHRoZSBib3R0bGVuZWNrPw0KDQpSZWdhcmRzLA0KSmFtZXMNCg0KLS0tLS1PcmlnaW5h
-bCBNZXNzYWdlLS0tLS0NCkZyb206IENhc2V5IEJvZGxleSBbbWFpbHRvOmNib2RsZXlAcmVkaGF0
-LmNvbV0gDQpTZW50OiBXZWRuZXNkYXksIFNlcHRlbWJlciAzMCwgMjAxNSA2OjU3IEFNDQpUbzog
-WGlhb3hpIENoZW4NCkNjOiBKYW1lcyAoRmVpKSBMaXUtU1NJOyBjZXBoLWRldmVsQHZnZXIua2Vy
-bmVsLm9yZw0KU3ViamVjdDogUmU6IEJhY2tlbmQgT2JqZWN0U3RvcmUgZW5naW5lIHBlcmZvcm1h
-bmNlIGJlbmNoIHdpdGggRklPDQoNCkhpIFhpYW94aSwNCg0KSSBwdXNoZWQgYSBuZXcgYnJhbmNo
-IHdpcC1maW8tb2JqZWN0c3RvcmUgdG8gY2VwaCdzIGdpdGh1Yi4gSSBsb29rIGZvcndhcmQgdG8g
-c2VlaW5nIEphbWVzJyB3b3JrIQ0KDQpUaGFua3MsDQpDYXNleQ0KDQotLS0tLSBPcmlnaW5hbCBN
-ZXNzYWdlIC0tLS0tDQo+IEhpIENhc2V5LA0KPiAgICAgICBXb3VsZCBpdCBiZXR0ZXIgaWYgd2Ug
-Y3JlYXRlIGFuIGludGVncmF0aW9uIGJydW5jaCBvbg0KPiAgICAgICBjZXBoL2NlcGgvd2lwLWZp
-by1vYmpzdG9yZSB0byBhbGxvdyBtb3JlIHBlb3BsZSB0cnkgYW5kIGltcHJvdmUgaXQ/DQo+ICAg
-ICAgIFNlZW1zIEphbWVzIGhhcyBzb21lIHBhdGNoZXMuDQo+IA0KPiAtWGlhb3hpDQo+IA0KPiA+
-IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+ID4gRnJvbTogY2VwaC1kZXZlbC1vd25lckB2
-Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVsLSANCj4gPiBvd25lckB2Z2VyLmtlcm5l
-bC5vcmddIE9uIEJlaGFsZiBPZiBDYXNleSBCb2RsZXkNCj4gPiBTZW50OiBXZWRuZXNkYXksIFNl
-cHRlbWJlciAzMCwgMjAxNSA0OjA2IEFNDQo+ID4gVG86IEphbWVzIChGZWkpIExpdS1TU0kNCj4g
-PiBDYzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCj4gPiBTdWJqZWN0OiBSZTogQmFja2Vu
-ZCBPYmplY3RTdG9yZSBlbmdpbmUgcGVyZm9ybWFuY2UgYmVuY2ggd2l0aCBGSU8NCj4gPiANCj4g
-PiBIaSBKYW1lcy9IYW9tYWkvWGlhb3hpLA0KPiA+IA0KPiA+IEkgc3BlbnQgc29tZSBtb3JlIHRp
-bWUgb24gdGhlIGZpby1vYmplY3RzdG9yZSBicmFuY2gsIGFuZCBwdXNoZWQgYW4gDQo+ID4gdXBk
-YXRlLg0KPiA+IA0KPiA+IEluIHRlc3RpbmcsIEkgcmVhbGl6ZWQgdGhhdCBpdCB3YXMgdXNpbmcg
-dGhlIGlvX3VuaXQncyBzdGFydCB0aW1lIHRvIA0KPiA+IG5hbWUgdGhlIG9iamVjdHMsIHdoaWNo
-IG1lYW50IHRoYXQgZXZlcnkgd3JpdGUgb3BlcmF0aW9uIHdhcyANCj4gPiBjcmVhdGluZyBhIHNl
-cGFyYXRlIG9iamVjdC4NCj4gPiBJbiBhZGRpdGlvbiB0byBmaXhpbmcgdGhpcyB0byB1c2UgZmlv
-J3MgZmlsZW5hbWVzIGZvciBvYmplY3QgbmFtZXMsIA0KPiA+IEkgYWxzbyBhZGRlZCBzdXBwb3J0
-IGZvciB0aGUgb3Blbl9maWxlKCkgYW5kIGNsb3NlX2ZpbGUoKSBmdW5jdGlvbnMuIA0KPiA+IEl0
-IG5vdyBjcmVhdGVzIG9iamVjdHMgb2YgdGhlIHByb3BlciBzaXplIG9uIHN0YXJ0dXAsIHNvIHJl
-YWQtb25seSANCj4gPiBqb2JzIHdpbGwgd29yayBub3JtYWxseS4NCj4gPiBJdCBhbHNvIHJlbW92
-ZXMgaXRzIG9iamVjdHMgb24gZXhpdC4NCj4gPiANCj4gPiBPbiBzdGFydHVwLCBpdCBubyBsb25n
-ZXIgY2FsbHMgY3JlYXRlX2NvbGxlY3Rpb24oKSBpZiBpdCBhbHJlYWR5IA0KPiA+IGV4aXN0cywg
-c28gSSB3YXMgYWJsZSB0byByZS1ydW4gZmlvIGpvYnMgb3ZlciBhbmQgb3ZlciBhZ2FpbiB3aXRo
-b3V0IA0KPiA+IGhhdmluZyB0byBjbGVhciB0aGUgZGF0YSBkaXJlY3RvcnkgKHRlc3RlZCB3aXRo
-IEZpbGVTdG9yZSBhbmQgDQo+ID4gS2V5VmFsdWVTdG9yZSkuDQo+ID4gDQo+ID4gQ2FzZXkNCj4g
-PiANCj4gPiAtLS0tLSBPcmlnaW5hbCBNZXNzYWdlIC0tLS0tDQo+ID4gPiBHcmVhdCB3b3JrIEph
-bWVzIQ0KPiA+ID4NCj4gPiA+IC0tLS0tIE9yaWdpbmFsIE1lc3NhZ2UgLS0tLS0NCj4gPiA+ID4g
-RnJvbTogIkphbWVzIChGZWkpIExpdS1TU0kiIDxqYW1lcy5saXVAc3NpLnNhbXN1bmcuY29tPg0K
-PiA+ID4gPiBUbzogIlhpYW94aSBDaGVuIiA8eGlhb3hpLmNoZW5AaW50ZWwuY29tPiwgIkNhc2V5
-IEJvZGxleSINCj4gPiA+ID4gPGNib2RsZXlAcmVkaGF0LmNvbT4NCj4gPiA+ID4gQ2M6ICJTYWdl
-IFdlaWwiIDxzYWdlQG5ld2RyZWFtLm5ldD4sIGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQo+
-ID4gPiA+IFNlbnQ6IEZyaWRheSwgU2VwdGVtYmVyIDI1LCAyMDE1IDE6NTU6MjkgUE0NCj4gPiA+
-ID4gU3ViamVjdDogQmFja2VuZCBPYmplY3RTdG9yZSBlbmdpbmUgcGVyZm9ybWFuY2UgYmVuY2gg
-d2l0aCBGSU8NCj4gPiA+ID4NCj4gPiA+ID4gSGkgWGlhb3hpLA0KPiA+ID4gPg0KPiA+ID4gPiAg
-ICBXaXRoIGNoYW5naW5nIHRoZSBJTyBtb2RlIGZyb20gYWlvIHRvIHN5bmMsIHdlIG1ha2UgZmlv
-IA0KPiA+ID4gPiBhZ2FpbnN0DQo+ID4gbmV3c3RvcmUNCj4gPiA+ID4gICAgd29ya3MuIEV2ZW4g
-IHdpdGggc3luYyBlbmdpbmUoSSBhbSBzdGlsbCBkZWJ1Z2dpbmcgdGhlIGFpbyBlbmdpbmUgaW4N
-Cj4gPiA+ID4gICAgbmV3c3RvcmUgd2l0aCBYaWFveGkpIGluIG5ld3N0b3JlLCBOZXdzdG9yZSBz
-dGlsbCBwZXJmb3JtaW5nIHRoZQ0KPiA+ID4gPiAgICBiZXN0DQo+ID4gPiA+ICAgIGFtb25nIGFs
-bCBvZiBiYWNrc3RvcmUgZW5naW5lIHdpdGggb3VyIGluaXRpYWwgc2V0dXAoVGhvcm91Z2hseSB0
-ZXN0DQo+ID4gPiA+ICAgIHdpbGwNCj4gPiA+ID4gICAgYmUgcnVuIHNvb24pLiBBdHRhY2htZW50
-IGlzIHRoZSBpbml0aWFsIGRhdGEgd2UgY29sbGVjdGVkIGZvciB5b3VyDQo+ID4gPiA+ICAgIHJl
-ZmVyZW5jZS4gVGhhbmtzIGZvciBncmVhdCBoZWxwIGZyb20gWGlhb3hpIGZyb20gcmVnYXJkaW5n
-IA0KPiA+ID4gPiB0bw0KPiA+IE5ld3N0b3JlDQo+ID4gPiA+ICAgIGRldmVsb3BtZW50IHRvIHN1
-cHBvcnQgRklPLg0KPiA+ID4gPg0KPiA+ID4gPiBIaSBDYXNleSwNCj4gPiA+ID4gICBMZXQgbWUg
-a25vdyBpZiB5b3UgbmVlZCBhbnkgaGVscCB0byBwdXQgZmlvLWNlcGgtb2JqZWN0c3RvcmUgaW50
-bw0KPiA+ID4gPiAgIHVwc3RyZWFtLg0KPiA+ID4gPiAgIEFmdGVyIHRoZW4gLCBJIGNhbiBjb21t
-aXQgYWxsIG9mIG1pbmUgaW50byB1cHN0cmVhbS4NCj4gPiA+DQo+ID4gPiBNeSBwdWxsIHJlcXVl
-c3QgYXQgaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC9wdWxsLzU5NDMgaXMgc3RpbGwgDQo+
-ID4gPiBwZW5kaW5nLg0KPiA+ID4gSWYgeW91IGhhdmUgcGF0Y2hlcyB0aGF0IHlvdSdkIGxpa2Ug
-aW5jbHVkZWQsIEkgd291bGQgYmUgaGFwcHkgdG8gDQo+ID4gPiBwdWxsIHRoZW0gaW47IGp1c3Qg
-cG9pbnQgbWUgdG8gYSBicmFuY2guDQo+ID4gPg0KPiA+ID4gPg0KPiA+ID4gPiAgIFRoYW5rcywN
-Cj4gPiA+ID4gICBKYW1lcw0KPiA+ID4gPg0KPiA+ID4NCj4gPiA+IFRoYW5rcywNCj4gPiA+IENh
-c2V5DQo+ID4gPiAtLQ0KPiA+ID4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQg
-dGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiDQo+ID4gPiBpbiB0aGUgYm9keSBvZiBh
-IG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlDQo+ID4gbWFqb3Jkb21v
-DQo+ID4gPiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0
-bWwNCj4gPiA+DQo+ID4gLS0NCj4gPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2Vu
-ZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgDQo+ID4gY2VwaC1kZXZlbCIgaW4gdGhlIGJvZHkgb2Yg
-YSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgDQo+ID4gTW9yZSBtYWpvcmRv
-bW8gaW5mbyBhdCBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4g
-TiAgICAgciAgeSAgIGIgWCAgx6d2IF4gKd66ey5uICsgICB6IF16ICAge2F5IMqH2pkgLGogIGYg
-ICBoICAgeiAgdyAgICAgIGoNCj4gOit2ICAgdyBqIG0gICAgICAgIHpaKyAg3aJqIiAgDQo=
+Seems like a reasonable start.  Quick back-of-the-envelope calculation
+suggests 2k of (logical_offset, compressed_offset) pairs per 1MB of
+data with 8MB/pair and 4k chunks, which is probably ok to stuff into
+an xattr.  You should restructure the blueprint to make it independent
+of EC.  ReplicatedPG can do this before feeding the writes to the
+backend (whichever backend is used) -- the pool alignment parameter
+could be set on a replicated pool to enforce aligned appends on a
+compressed replicated pool.
+-Sam
+
+On Wed, Sep 30, 2015 at 8:44 AM, Igor Fedotov <ifedotov@mirantis.com> wrote:
+> Folks,
+>
+> I've just added a blueprint about adding compression to EC pools as per our
+> previous discussion.
+> Please find it at
+> http://tracker.ceph.com/projects/ceph/wiki/Submissions
+>
+> Not sure I did that in proper manner - by attaching a new file. Other
+> blueprints look different at this page. Can't undo though.
+> Sorry about that.
+>
+> And please point out different way to publish my blueprint if needed.
+>
+> Any way - comments and reviews on the content are welcome.
+>
+> Thanks.,
+> Igor.
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
