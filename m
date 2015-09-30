@@ -1,48 +1,54 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: [PATCH] ceph: fix a comment typo
-Date: Wed, 30 Sep 2015 11:44:58 +0800
-Message-ID: <E1975EBF-13AA-4FE6-9A4D-82C2ED286CAC@redhat.com>
-References: <4fb037c2ae2e494be58dc752483fb2f852a4cd70.1443612355.git.geliangtang@163.com>
-Mime-Version: 1.0 (Mac OS X Mail 8.2 \(2104\))
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <4fb037c2ae2e494be58dc752483fb2f852a4cd70.1443612355.git.geliangtang@163.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Geliang Tang <geliangtang@163.com>
-Cc: Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+From: Shinobu Kinjo <skinjo@redhat.com>
+Subject: Re: MAX_RBD_IMAGES
+Date: Tue, 29 Sep 2015 23:58:44 -0400 (EDT)
+Message-ID: <159480963.23629349.1443585524566.JavaMail.zimbra@redhat.com>
+References: <866247178.20201562.1442958933148.JavaMail.zimbra@redhat.com> <560B2713.8080107@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx6-phx2.redhat.com ([209.132.183.39]:57062 "EHLO
+	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753374AbbI3D6o (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Sep 2015 23:58:44 -0400
+In-Reply-To: <560B2713.8080107@redhat.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Dan Mick <dmick@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
+I just want to know what that number means.
 
-> On Sep 30, 2015, at 11:36, Geliang Tang <geliangtang@163.com> wrote:
-> 
-> Just fix a typo in the code comment.
-> 
-> Signed-off-by: Geliang Tang <geliangtang@163.com>
-> ---
-> fs/ceph/cache.c | 2 +-
-> 1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/fs/ceph/cache.c b/fs/ceph/cache.c
-> index 834f9f3..a4766de 100644
-> --- a/fs/ceph/cache.c
-> +++ b/fs/ceph/cache.c
-> @@ -88,7 +88,7 @@ static uint16_t ceph_fscache_inode_get_key(const void *cookie_netfs_data,
-> 	const struct ceph_inode_info* ci = cookie_netfs_data;
-> 	uint16_t klen;
-> 
-> -	/* use ceph virtual inode (id + snaphot) */
-> +	/* use ceph virtual inode (id + snapshot) */
-> 	klen = sizeof(ci->i_vino);
-> 	if (klen > maxbuf)
-> 		return 0;
+Based on the Linux kenel, that number doesn't make sense but, for the Ceph cluster, would make sense from performance, resource handling including networking resource point of views.
 
-Applied, thank you.
+So, do you remember?
 
-Yan, Zheng
+Shinobu
 
+----- Original Message -----
+From: "Dan Mick" <dmick@redhat.com>
+To: "Shinobu Kinjo" <skinjo@redhat.com>, "ceph-devel" <ceph-devel@vger.kernel.org>
+Sent: Wednesday, September 30, 2015 9:04:35 AM
+Subject: Re: [CEPH-DEVEL] MAX_RBD_IMAGES
 
-> -- 
-> 1.9.1
+On 09/22/2015 02:55 PM, Shinobu Kinjo wrote:
+> Hello,
 > 
+> Does any of you know why *MAX_RBD_IMAGES* was changed from 16 to 128?
+> I hope that Dan remember -;
 > 
+> http://resources.ustack.com/ceph/ceph/commit/2a6dcabf7f1b7550a0fa4fd223970ffc24ad7870
+> 
+>  - Shinobu
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
+to....have more of them?
+
+-- 
+Dan Mick
+Red Hat, Inc.
+Ceph docs: http://ceph.com/docs
