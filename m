@@ -1,35 +1,41 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: branches! infernalis vs master, RIP next
-Date: Wed, 30 Sep 2015 05:56:45 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1509300556090.21582@cobra.newdream.net>
-References: <alpine.DEB.2.00.1509291310470.4617@cobra.newdream.net> <CAL-2WbHHD5_Y07viKp+sjWbTSpgsJn7uysas7dQR=T70VsraRQ@mail.gmail.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: [PATCH] ceph: fix message length computation
+Date: Wed, 30 Sep 2015 15:04:42 +0200
+Message-ID: <9959810.KasB66Ks40@wuerfel>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:59770 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932774AbbI3M4t (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 30 Sep 2015 08:56:49 -0400
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-	by mx1.redhat.com (Postfix) with ESMTPS id AB3A2C0B1B27
-	for <ceph-devel@vger.kernel.org>; Wed, 30 Sep 2015 12:56:47 +0000 (UTC)
-In-Reply-To: <CAL-2WbHHD5_Y07viKp+sjWbTSpgsJn7uysas7dQR=T70VsraRQ@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Daniel Gryniewicz <dang@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <y2038-bounces@lists.linaro.org>
+List-Unsubscribe: <https://lists.linaro.org/mailman/options/y2038>,
+ <mailto:y2038-request@lists.linaro.org?subject=unsubscribe>
+List-Archive: <http://lists.linaro.org/pipermail/y2038/>
+List-Post: <mailto:y2038@lists.linaro.org>
+List-Help: <mailto:y2038-request@lists.linaro.org?subject=help>
+List-Subscribe: <https://lists.linaro.org/mailman/listinfo/y2038>,
+ <mailto:y2038-request@lists.linaro.org?subject=subscribe>
+Errors-To: y2038-bounces@lists.linaro.org
+Sender: "Y2038" <y2038-bounces@lists.linaro.org>
+To: ceph-devel@vger.kernel.org
+Cc: y2038@lists.linaro.org, "Yan, Zheng" <zyan@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, linux-kernel@vger.kernel.org, Sage Weil <sage@redhat.com>
+List-Id: ceph-devel.vger.kernel.org
 
-On Wed, 30 Sep 2015, Daniel Gryniewicz wrote:
-> On Tue, Sep 29, 2015 at 5:12 PM, Sage Weil <sweil@redhat.com> wrote:
-> >
-> >  1- Target any pull request with a bug fix that should go into infernalis
-> > at the infernalis branch.
-> 
-> 
-> So, currently, anything targeted at both infernalis and master should
-> have a pull request for infernalis only?  Or for both?
-
-Only infernalis.  We will regularly merge infernalis back into 
-master up until the final/initial release (9.2.0).
-
-sage
+Y3JlYXRlX3JlcXVlc3RfbWVzc2FnZSgpIGNvbXB1dGVzIHRoZSBtYXhpbXVtIGxlbmd0aCBvZiBh
+IG1lc3NhZ2UsCmJ1dCB1c2VzIHRoZSB3cm9uZyB0eXBlIGZvciB0aGUgdGltZSBzdGFtcDogc2l6
+ZW9mKHN0cnVjdCB0aW1lc3BlYykKbWF5IGJlIDggb3IgMTYgZGVwZW5kaW5nIG9uIHRoZSBhcmNo
+aXRlY3R1cmUsIHdoaWxlIHNpemVvZihzdHJ1Y3QKY2VwaF90aW1lc3BlYykgaXMgYWx3YXlzIDgs
+IGFuZCB0aGF0IGlzIHdoYXQgZ2V0cyBwdXQgaW50byB0aGUKbWVzc2FnZS4KCkZvdW5kIHdoaWxl
+IGF1ZGl0aW5nIHRoZSB1c2VzIG9mIHRpbWVzcGVjIGZvciB5MjAzOCBwcm9ibGVtcy4KClNpZ25l
+ZC1vZmYtYnk6IEFybmQgQmVyZ21hbm4gPGFybmRAYXJuZGIuZGU+CkZpeGVzOiBiOGU2OTA2NmQ4
+YWYgKCJjZXBoOiBpbmNsdWRlIHRpbWUgc3RhbXAgaW4gZXZlcnkgTURTIHJlcXVlc3QiKQotLS0K
+ZGlmZiAtLWdpdCBhL2ZzL2NlcGgvbWRzX2NsaWVudC5jIGIvZnMvY2VwaC9tZHNfY2xpZW50LmMK
+aW5kZXggNTFjYjAyZGE3NWQ5Li5mZTJjOTgyNzY0ZTcgMTAwNjQ0Ci0tLSBhL2ZzL2NlcGgvbWRz
+X2NsaWVudC5jCisrKyBiL2ZzL2NlcGgvbWRzX2NsaWVudC5jCkBAIC0xOTM1LDcgKzE5MzUsNyBA
+QCBzdGF0aWMgc3RydWN0IGNlcGhfbXNnICpjcmVhdGVfcmVxdWVzdF9tZXNzYWdlKHN0cnVjdCBj
+ZXBoX21kc19jbGllbnQgKm1kc2MsCiAKIAlsZW4gPSBzaXplb2YoKmhlYWQpICsKIAkJcGF0aGxl
+bjEgKyBwYXRobGVuMiArIDIqKDEgKyBzaXplb2YodTMyKSArIHNpemVvZih1NjQpKSArCi0JCXNp
+emVvZihzdHJ1Y3QgdGltZXNwZWMpOworCQlzaXplb2Yoc3RydWN0IGNlcGhfdGltZXNwZWMpOwog
+CiAJLyogY2FsY3VsYXRlIChtYXgpIGxlbmd0aCBmb3IgY2FwIHJlbGVhc2VzICovCiAJbGVuICs9
+IHNpemVvZihzdHJ1Y3QgY2VwaF9tZHNfcmVxdWVzdF9yZWxlYXNlKSAqCgpfX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpZMjAzOCBtYWlsaW5nIGxpc3QKWTIw
+MzhAbGlzdHMubGluYXJvLm9yZwpodHRwczovL2xpc3RzLmxpbmFyby5vcmcvbWFpbG1hbi9saXN0
+aW5mby95MjAzOAo=
