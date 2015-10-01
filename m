@@ -1,54 +1,508 @@
-From: Stephen Hoogendijk <stephen@tca0.nl>
-Subject: problem with ceph admin api
-Date: Thu, 01 Oct 2015 09:30:17 +0200
-Message-ID: <82417e87a21e28acb03e9f352088aaed@tca0.nl>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Teuthology Integration to native openstack
+Date: Thu, 01 Oct 2015 11:52:40 +0200
+Message-ID: <560D0268.2050501@dachary.org>
+References: <D22E3F64.15AF%bkrishna@walmartlabs.com> <56084EDE.9050005@dachary.org> <D22ECA7E.15C3%bkrishna@walmartlabs.com> <56090D7C.4020000@dachary.org> <D23170D5.186E%bkrishna@walmartlabs.com> <560BA270.3060409@dachary.org> <D231A8D6.18A9%bkrishna@walmartlabs.com> <560BB574.6070005@dachary.org> <D231B463.18BD%bkrishna@walmartlabs.com> <560BBB08.90102@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="mhS2nmegRuOEFeVHuHCrfwj90bAV8Et2O"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from s03.tca0.nl ([62.212.93.253]:54330 "EHLO s03.tca0.nl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755934AbbJAIJN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 1 Oct 2015 04:09:13 -0400
-Received: from www-data by s03.tca0.nl with local (Exim 4.82)
-	(envelope-from <stephen@tca0.nl>)
-	id 1ZhYJl-0002uK-MS
-	for ceph-devel@vger.kernel.org; Thu, 01 Oct 2015 07:30:17 +0000
+Received: from mail2.dachary.org ([91.121.57.175]:35757 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751590AbbJAJwz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Oct 2015 05:52:55 -0400
+In-Reply-To: <560BBB08.90102@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Bharath Krishna <BKrishna@walmartlabs.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hey all,
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--mhS2nmegRuOEFeVHuHCrfwj90bAV8Et2O
+Content-Type: text/plain; charset=windows-1254
+Content-Transfer-Encoding: quoted-printable
 
-We are having some problems with the rados gw admin API. We are trying=20
-to list accounts but the API won=E2=80=99t let us.
+Hi,
 
-According to the documentation:
-http://docs.ceph.com/docs/master/radosgw/adminops/#get-user-info
+I filed http://tracker.ceph.com/issues/13315 as a reminder regarding this=
+ problem. I believe you can fix it by de-installing the python-cliff pack=
+age. If this is inconvenient, you could use
 
-A call to /admin/user?format=3Djson should return a list of all the use=
-rs.=20
-However it will throw a 403 Unauthorized message.
+strace -e open openstack flavor show -f json m1.tiny 2>&1 | grep json | g=
+rep cliff
 
-We currently have no way to get a list of all the accounts from the=20
-radosgw-api. Currently there are two options:
+to find where the faulty json formatter comes from. Digging through the l=
+oading rules of http://docs.openstack.org/developer/stevedore/ should exp=
+lain why it choses to load this one instead of the one from the virtualen=
+v.
 
-"user info --uid=3D<something>"
-or
-"metadata list user"
+Cheers
 
-The latter will only return the names of the users and the first doesn=E2=
-=80=99t=20
-work unless you provide a uid (even though the documentation tells you=20
-something else).
+On 30/09/2015 12:35, Loic Dachary wrote:
+> Could you send me privately the full log ? I suspect something else is =
+happening (not a problem with tools / cluster version) and I may find a c=
+lue in the logs.
+>=20
+> On 30/09/2015 12:17, Bharath Krishna wrote:
+>> Its the same version I do have as well.
+>>
+>> #openstack --version
+>> openstack 1.7.0
+>>
+>>
+>> Thank you.
+>>
+>> Regards
+>> M Bharath Krishna
+>>
+>>
+>>
+>> On 9/30/15, 3:42 PM, "Loic Dachary" <loic@dachary.org> wrote:
+>>
+>>>
+>>>
+>>> On 30/09/2015 11:34, Bharath Krishna wrote:
+>>>> Hi Loic,
+>>>>
+>>>> Does piping the command output of "openstack server show -f json
+>>>> <target-name>=94 to jq alter the output format?
+>>>
+>>> It just displays it nicely but does not otherwise change it.
+>>>
+>>>
+>>>>
+>>>> Openstack version being used is Juno.
+>>>
+>>> That's also the version of some of the clusters I use. What version o=
+f
+>>> the openstack cli do you have ?
+>>>
+>>> $ openstack --version
+>>> openstack 1.7.0
+>>>
+>>>
+>>>>
+>>>> Thank you
+>>>>
+>>>> Regards,
+>>>> M Bharath Krishna
+>>>>
+>>>> On 9/30/15, 2:20 PM, "Loic Dachary" <loic@dachary.org> wrote:
+>>>>
+>>>>> Hi,
+>>>>>
+>>>>> On 30/09/2015 07:51, Bharath Krishna wrote:
+>>>>>> Hi,
+>>>>>>
+>>>>>> Thanks a lot for pointing to right git and instructions. I have pa=
+ssed
+>>>>>> that step now and teuthology VM got created.
+>>>>>>
+>>>>>> But teuthology openstack command fails to parse the instance id fr=
+om
+>>>>>> the
+>>>>>> json format output of below command:
+>>>>>>
+>>>>>> DEBUG:teuthology.misc:openstack server show -f json teuthology out=
+put
+>>>>>>
+>>>>>>  "OS-EXT-STS:task_state": null,
+>>>>>>   "addresses": =B3Primary_External_Net=3D<ip-address>",
+>>>>>>   "image": "teuthology-ubuntu-14.04
+>>>>>> (10e6d3b1-f94a-4220-a00f-3e3a13f349e0)",
+>>>>>>   "OS-EXT-STS:vm_state": "active",
+>>>>>>   "OS-EXT-SRV-ATTR:instance_name": "instance-000026e8",
+>>>>>>   "OS-SRV-USG:launched_at": "2015-09-28T10:33:09.000000",
+>>>>>>   "flavor": "m1.small (2)",
+>>>>>>   "id": "79a41b6f-f379-4d14-98ac-e73cb42cfa48",
+>>>>>>   "security_groups": [
+>>>>>>     {
+>>>>>>       "name": "teuthology"
+>>>>>>     }
+>>>>>>   ],
+>>>>>>   "user_id": "281f9aa2d9c54177b45e72db742b4744",
+>>>>>>   "OS-DCF:diskConfig": "MANUAL",
+>>>>>>   "accessIPv4": "",
+>>>>>>   "accessIPv6": "",
+>>>>>>   "progress": 0,
+>>>>>>   "OS-EXT-STS:power_state": 1,
+>>>>>>   "OS-EXT-AZ:availability_zone": "az3",
+>>>>>>   "config_drive": "",
+>>>>>>   "status": "ACTIVE",
+>>>>>>   "updated": "2015-09-28T10:33:09Z",
+>>>>>>   "hostId":=20
+>>>>>> "b205fbea7ee98ef482712db93325a1d7d44d7694a8ec9fce7df038c3",
+>>>>>>   "OS-EXT-SRV-ATTR:host": =B3hostname",
+>>>>>>   "OS-SRV-USG:terminated_at": null,
+>>>>>>   "key_name": "ceph_test_key",
+>>>>>>   "properties": "",
+>>>>>>   "project_id": "1d0137fe585742bdbe13e2b16daab6ff",
+>>>>>>   "OS-EXT-SRV-ATTR:hypervisor_hostname": =B3hostname",
+>>>>>>   "name": "teuthology",
+>>>>>>   "created": "2015-09-28T10:32:47Z",
+>>>>>>   "os-extended-volumes:volumes_attached": []
+>>>>>> }
+>>>>>> Traceback (most recent call last):
+>>>>>>   File "/opt/teuthology/virtualenv/bin/teuthology-openstack", line=
+ 9,
+>>>>>> in
+>>>>>> <module>
+>>>>>>     load_entry_point('teuthology=3D=3D0.1.0', 'console_scripts',
+>>>>>> 'teuthology-openstack')()
+>>>>>>   File "/opt/teuthology/scripts/openstack.py", line 8, in main
+>>>>>>     teuthology.openstack.main(parse_args(argv), argv)
+>>>>>>   File "/opt/teuthology/teuthology/openstack/__init__.py", line 62=
+2,
+>>>>>> in
+>>>>>> main
+>>>>>>     return TeuthologyOpenStack(ctx, teuth_config, argv).main()
+>>>>>>   File "/opt/teuthology/teuthology/openstack/__init__.py", line 28=
+4,
+>>>>>> in
+>>>>>> main
+>>>>>>     ip =3D self.setup()
+>>>>>>   File "/opt/teuthology/teuthology/openstack/__init__.py", line 33=
+8,
+>>>>>> in
+>>>>>> setup
+>>>>>>     if not self.cluster_exists():
+>>>>>>   File "/opt/teuthology/teuthology/openstack/__init__.py", line 60=
+7,
+>>>>>> in
+>>>>>> cluster_exists
+>>>>>>     instance_id =3D self.get_instance_id(self.args.name)
+>>>>>>   File "/opt/teuthology/teuthology/openstack/__init__.py", line 56=
+5,
+>>>>>> in
+>>>>>> get_instance_id
+>>>>>>     return TeuthologyOpenStack.get_value(instance, 'id')
+>>>>>>   File "/opt/teuthology/teuthology/openstack/__init__.py", line 75=
+, in
+>>>>>> get_value
+>>>>>>     return filter(lambda v: v['Field'] =3D=3D field, result)[0]['V=
+alue']
+>>>>>>   File "/opt/teuthology/teuthology/openstack/__init__.py", line 75=
+, in
+>>>>>> <lambda>
+>>>>>>     return filter(lambda v: v['Field'] =3D=3D field, result)[0]['V=
+alue']
+>>>>>> TypeError: string indices must be integers
+>>>>>>
+>>>>>>
+>>>>>> I could understand that we are trying to get instance id value usi=
+ng
+>>>>>> get_value method, but it fails with an exception even though insta=
+nce
+>>>>>> id
+>>>>>> shown is a valid format of id.
+>>>>>>
+>>>>>> Any pointers to fix this will greatly help.
+>>>>>
+>>>>> It appears that the format of the json output is very different on =
+your
+>>>>> implementation. Here is the kind of output I get on all the cluster=
+s I
+>>>>> tried. Which OpenStack version is your cluster running ?
+>>>>>
+>>>>> $ openstack server show -f json target225193 | jq .
+>>>>> [
+>>>>>  {
+>>>>>    "Value": "MANUAL",
+>>>>>    "Field": "OS-DCF:diskConfig"
+>>>>>  },
+>>>>>  {
+>>>>>    "Value": "nova",
+>>>>>    "Field": "OS-EXT-AZ:availability_zone"
+>>>>>  },
+>>>>>  {
+>>>>>    "Value": 1,
+>>>>>    "Field": "OS-EXT-STS:power_state"
+>>>>>  },
+>>>>>  {
+>>>>>    "Value": null,
+>>>>>    "Field": "OS-EXT-STS:task_state"
+>>>>>  },
+>>>>>  {
+>>>>>    "Value": "active",
+>>>>>    "Field": "OS-EXT-STS:vm_state"
+>>>>>  },
+>>>>>  {
+>>>>>    "Value": "2015-09-30T08:37:55.000000",
+>>>>>    "Field": "OS-SRV-USG:launched_at"
+>>>>>  },
+>>>>>  {
+>>>>>    "Value": null,
+>>>>>    "Field": "OS-SRV-USG:terminated_at"
+>>>>>  },
+>>>>>  {
+>>>>>    "Value": "",
+>>>>>    "Field": "accessIPv4"
+>>>>>  },
+>>>>>  {
+>>>>>    "Value": "",
+>>>>>    "Field": "accessIPv6"
+>>>>>  },
+>>>>>  {
+>>>>>    "Value": "Ext-Net=3D167.114.225.193",
+>>>>>    "Field": "addresses"
+>>>>>  },
+>>>>>  {
+>>>>>    "Value": "",
+>>>>>    "Field": "config_drive"
+>>>>>  },
+>>>>>  {
+>>>>>    "Value": "2015-09-30T08:37:01Z",
+>>>>>    "Field": "created"
+>>>>>  },
+>>>>>  {
+>>>>>    "Value": "vps-ssd-3 (e43d7458-6b82-4a78-a712-3a4dc6748cf4)",
+>>>>>    "Field": "flavor"
+>>>>>  },
+>>>>>  {
+>>>>>    "Value": "38119f63edc62252c491fa7e9a8d164a90c48db09fdee1a5687c1c=
+7f",
+>>>>>    "Field": "hostId"
+>>>>>  },
+>>>>>  {
+>>>>>    "Value": "897cbcc9-d662-4ae9-bb68-a71ef4269cdc",
+>>>>>    "Field": "id"
+>>>>>  },
+>>>>>  {
+>>>>>    "Value": "teuthology-centos-7.0
+>>>>> (67438ecf-803c-45a6-83bb-54a0ba0d0b6c)",
+>>>>>    "Field": "image"
+>>>>>  },
+>>>>>  {
+>>>>>    "Value": "teuthology",
+>>>>>    "Field": "key_name"
+>>>>>  },
+>>>>>  {
+>>>>>    "Value": "target225193",
+>>>>>    "Field": "name"
+>>>>>  },
+>>>>>  {
+>>>>>    "Value": [],
+>>>>>    "Field": "os-extended-volumes:volumes_attached"
+>>>>>  },
+>>>>>  {
+>>>>>    "Value": 0,
+>>>>>    "Field": "progress"
+>>>>>  },
+>>>>>  {
+>>>>>    "Value": "131b886b156a4f84b5f41baf2fbe646c",
+>>>>>    "Field": "project_id"
+>>>>>  },
+>>>>>  {
+>>>>>    "Value": "ownedby=3D'167.114.249.14',
+>>>>> teuthology=3D'd48f8bc9adf785614308e33094933a72'",
+>>>>>    "Field": "properties"
+>>>>>  },
+>>>>>  {
+>>>>>    "Value": [
+>>>>>      {
+>>>>>        "name": "teuthology"
+>>>>>      }
+>>>>>    ],
+>>>>>    "Field": "security_groups"
+>>>>>  },
+>>>>>  {
+>>>>>    "Value": "ACTIVE",
+>>>>>    "Field": "status"
+>>>>>  },
+>>>>>  {
+>>>>>    "Value": "2015-09-30T08:39:08Z",
+>>>>>    "Field": "updated"
+>>>>>  },
+>>>>>  {
+>>>>>    "Value": "291dde1633154837be2693c6ffa6315c",
+>>>>>    "Field": "user_id"
+>>>>>  }
+>>>>> ]
+>>>>>
+>>>>>>
+>>>>>> Thank you.
+>>>>>>
+>>>>>> Regards,
+>>>>>> M Bharath Krishna
+>>>>>>
+>>>>>>
+>>>>>> On 9/28/15, 3:20 PM, "Loic Dachary" <loic@dachary.org> wrote:
+>>>>>>
+>>>>>>> Hi,
+>>>>>>>
+>>>>>>> On 28/09/2015 07:24, Bharath Krishna wrote:
+>>>>>>>> Hi Dachary,
+>>>>>>>>
+>>>>>>>> Thanks for the reply. I am following your blog
+>>>>>>>> http://dachary.org/?p=3D3767
+>>>>>>>> And the README in
+>>>>>>>>
+>>>>>>>>
+>>>>>>>>
+>>>>>>>> https://github.com/dachary/teuthology/tree/wip-6502-openstack-v2=
+/#ope
+>>>>>>>> ns
+>>>>>>>> ta
+>>>>>>>> ck
+>>>>>>>> -backend
+>>>>>>>
+>>>>>>> The up to date instructions are at
+>>>>>>>
+>>>>>>> https://github.com/dachary/teuthology/tree/openstack/#openstack-b=
+acken
+>>>>>>> d
+>>>>>>> (the link you used comes from http://dachary.org/?p=3D3828 and I =
+just
+>>>>>>> updated it so noone else will be confused).
+>>>>>>>>
+>>>>>>>> I have sourced the openrc file of my Openstack deployment and
+>>>>>>>> verified
+>>>>>>>> that clients are working fine. My Openstack deployment has Cinde=
+r
+>>>>>>>> integrated with CEPH backend.
+>>>>>>>>
+>>>>>>>> I have cloned and installed teuthology using the below steps:
+>>>>>>>>
+>>>>>>>> $ git clone -b wip-6502-openstack-v2
+>>>>>>>> http://github.com/dachary/teuthology
+>>>>>>>> $ cd teuthology ; ./bootstrap install
+>>>>>>>> $ source virtualenv/bin/activate
+>>>>>>>>
+>>>>>>>>
+>>>>>>>> Then I tried to run a dummy suite as test and I ran into followi=
+ng
+>>>>>>>> error:
+>>>>>>>>
+>>>>>>>> Traceback (most recent call last):
+>>>>>>>>   File "/root/teuthology/virtualenv/bin/teuthology-openstack", l=
+ine
+>>>>>>>> 9,
+>>>>>>>> in
+>>>>>>>> <module>
+>>>>>>>>     load_entry_point('teuthology=3D=3D0.1.0', 'console_scripts',=
 
+>>>>>>>> 'teuthology-openstack')()
+>>>>>>>>   File "/root/teuthology/scripts/openstack.py", line 8, in main
+>>>>>>>>     teuthology.openstack.main(parse_args(argv), argv)
+>>>>>>>>   File "/root/teuthology/teuthology/openstack.py", line 375, in =
+main
+>>>>>>>>     return TeuthologyOpenStack(ctx, teuth_config, argv).main()
+>>>>>>>>   File "/root/teuthology/teuthology/openstack.py", line 181, in =
+main
+>>>>>>>>     self.verify_openstack()
+>>>>>>>>   File "/root/teuthology/teuthology/openstack.py", line 270, in
+>>>>>>>> verify_openstack
+>>>>>>>>     str(providers))
+>>>>>>>> Exception: ('OS_AUTH_URL=3Dhttp://<ip-address>:5000/v2.0', " doe=
+s is
+>>>>>>>> not a
+>>>>>>>> known OpenStack provider (('cloud.ovh.net', 'ovh'),
+>>>>>>>> ('control.os1.phx2',
+>>>>>>>> 'redhat'), ('entercloudsuite.com', 'entercloudsuite'))")
+>>>>>>>
+>>>>>>> This limitation was in an earlier implementations and should not =
+be a
+>>>>>>> problem now.
+>>>>>>>
+>>>>>>> Cheers
+>>>>>>>
+>>>>>>>>
+>>>>>>>>
+>>>>>>>> Thank you.
+>>>>>>>>
+>>>>>>>> Regards,
+>>>>>>>> M Bharath Krishna
+>>>>>>>>
+>>>>>>>> On 9/28/15, 1:47 AM, "Loic Dachary" <loic@dachary.org> wrote:
+>>>>>>>>
+>>>>>>>>> [moving to ceph-devel]
+>>>>>>>>>
+>>>>>>>>> Hi,
+>>>>>>>>>
+>>>>>>>>> On 27/09/2015 21:20, Bharath Krishna wrote:
+>>>>>>>>>> Hi,
+>>>>>>>>>>
+>>>>>>>>>> We have an openstack deployment in place with CEPH as CINDER
+>>>>>>>>>> backend.
+>>>>>>>>>>
+>>>>>>>>>> We would like to perform functional testing for CEPH and found=
+
+>>>>>>>>>> teuthology as recommended option.
+>>>>>>>>>>
+>>>>>>>>>> Have successfully installed teuthology. Now to integrate it wi=
+th
+>>>>>>>>>> Openstack, I could see that the possible providers could be ei=
+ther
+>>>>>>>>>> OVH,
+>>>>>>>>>> REDHAT or ENTERCLOUDSITE.
+>>>>>>>>>>
+>>>>>>>>>> Is there any option where in we can source openstack deploymen=
+t of
+>>>>>>>>>> our
+>>>>>>>>>> own and test CEPH using teuthology?
+>>>>>>>>>
+>>>>>>>>> The documentation mentions these providers because they have be=
+en
+>>>>>>>>> tested.
+>>>>>>>>> But there should be no blocker to run teuthology against a regu=
+lar
+>>>>>>>>> OpenStack provider. Should you run into troubles, please let me=
+
+>>>>>>>>> know
+>>>>>>>>> and
+>>>>>>>>> I'll help.
+>>>>>>>>>
+>>>>>>>>> Cheers
+>>>>>>>>>
+>>>>>>>>>>
+>>>>>>>>>> If NO, please suggest on how to test CEPH in such scenarios?
+>>>>>>>>>>
+>>>>>>>>>> Please help.
+>>>>>>>>>>
+>>>>>>>>>> Thank you.
+>>>>>>>>>> Bharath Krishna
+>>>>>>>>>> _______________________________________________
+>>>>>>>>>> ceph-users mailing list
+>>>>>>>>>> ceph-users@lists.ceph.com
+>>>>>>>>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>>>>>>>>>>
+>>>>>>>>>
+>>>>>>>>> --=20
+>>>>>>>>> Lo=EFc Dachary, Artisan Logiciel Libre
+>>>>>>>>>
+>>>>>>>>
+>>>>>>>
+>>>>>>> --=20
+>>>>>>> Lo=EFc Dachary, Artisan Logiciel Libre
+>>>>>>>
+>>>>>>
+>>>>>
+>>>>> --=20
+>>>>> Lo=EFc Dachary, Artisan Logiciel Libre
+>>>>>
+>>>>
+>>>
+>>> --=20
+>>> Lo=EFc Dachary, Artisan Logiciel Libre
+>>>
+>>
+>=20
 
 --=20
-Best regards,
-Stephen Hoogendijk
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Lo=EFc Dachary, Artisan Logiciel Libre
+
+
+--mhS2nmegRuOEFeVHuHCrfwj90bAV8Et2O
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlYNAmgACgkQ8dLMyEl6F213jwCfUpUlhKMSB1lfDHXxun3zWboY
+9U0AnRcYPDe9Jb0W4KrtfLFKrioqw6eX
+=sN55
+-----END PGP SIGNATURE-----
+
+--mhS2nmegRuOEFeVHuHCrfwj90bAV8Et2O--
