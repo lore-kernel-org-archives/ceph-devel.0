@@ -1,49 +1,35 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: [PATCH] ceph: fix message length computation
-Date: Thu, 1 Oct 2015 21:40:10 +0800
-Message-ID: <CAAM7YAm-YrSrYuNiUEC7z8t3FC0j+9bFs9Tdf4PpmRy5CojyqA@mail.gmail.com>
-References: <9959810.KasB66Ks40@wuerfel>
+From: "Curley, Matthew" <matthew.curley@hpe.com>
+Subject: Reproducing allocator performance differences
+Date: Thu, 1 Oct 2015 15:32:49 +0000
+Message-ID: <E011655B53F0CC41BB273E3A0B53F14409B749EC@G1W3777.americas.hpqcorp.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <9959810.KasB66Ks40@wuerfel>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, y2038@lists.linaro.org, Ilya Dryomov <idryomov@gmail.com>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from g2t1383g.austin.hp.com ([15.217.136.92]:57042 "EHLO
+	g2t1383g.austin.hp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752818AbbJAPeR convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Oct 2015 11:34:17 -0400
+Received: from g2t2352.austin.hp.com (g2t2352.austin.hp.com [15.217.128.51])
+	(using TLSv1.2 with cipher DHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by g2t1383g.austin.hp.com (Postfix) with ESMTPS id B9EBB1729
+	for <ceph-devel@vger.kernel.org>; Thu,  1 Oct 2015 15:34:16 +0000 (UTC)
+Received: from G2W4316.americas.hpqcorp.net (g2w4316.austin.hp.com [16.197.9.73])
+	(using TLSv1 with cipher AES128-SHA (128/128 bits))
+	(No client certificate requested)
+	by g2t2352.austin.hp.com (Postfix) with ESMTPS id E083C4D
+	for <ceph-devel@vger.kernel.org>; Thu,  1 Oct 2015 15:34:15 +0000 (UTC)
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, Sep 30, 2015 at 9:04 PM, Arnd Bergmann <arnd@arndb.de> wrote:
-> create_request_message() computes the maximum length of a message,
-> but uses the wrong type for the time stamp: sizeof(struct timespec)
-> may be 8 or 16 depending on the architecture, while sizeof(struct
-> ceph_timespec) is always 8, and that is what gets put into the
-> message.
->
-> Found while auditing the uses of timespec for y2038 problems.
->
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
-> Fixes: b8e69066d8af ("ceph: include time stamp in every MDS request")
-> ---
-> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index 51cb02da75d9..fe2c982764e7 100644
-> --- a/fs/ceph/mds_client.c
-> +++ b/fs/ceph/mds_client.c
-> @@ -1935,7 +1935,7 @@ static struct ceph_msg *create_request_message(struct ceph_mds_client *mdsc,
->
->         len = sizeof(*head) +
->                 pathlen1 + pathlen2 + 2*(1 + sizeof(u32) + sizeof(u64)) +
-> -               sizeof(struct timespec);
-> +               sizeof(struct ceph_timespec);
->
->         /* calculate (max) length for cap releases */
->         len += sizeof(struct ceph_mds_request_release) *
->
+We've been trying to reproduce the allocator performance impact on 4K random reads seen in the Hackathon (and more recent tests).  At this point though, we're not seeing any significant difference between tcmalloc and jemalloc so we're looking for thoughts on what we're doing wrong.  Or at least some suggestions to try out.
 
-Applied. thanks
+More detail here:
+https://drive.google.com/file/d/0B2kp18maR7axTmU5WG9WclNKQlU/view?usp=sharing
 
-Yan, Zheng
+Thanks for any input!
 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--MC
