@@ -1,7 +1,7 @@
-From: Robert LeBlanc <robert-4JaGZRWAfWbajFs6igw21g@public.gmane.org>
+From: Josef Johansson <josef86-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Subject: Re: Potential OSD deadlock?
-Date: Sun, 4 Oct 2015 10:13:54 -0600
-Message-ID: <CAANLjFosyB_cqk19Ax=5wgXDnSGOOa-_5sY1FuCZyYTx3rS9JQ@mail.gmail.com>
+Date: Sun, 4 Oct 2015 18:16:39 +0200
+Message-ID: <CAOnYue_X09VQ9gSQDEVWXq1JG=Hz+p8dNkfRd6=vWrkoJdnf3w@mail.gmail.com>
 References: <CAANLjFpAXaDWQzumg1hCs=SC_0YvdYDd6vyodz5_ZBNvGWdkSw@mail.gmail.com>
 	<CAANLjFob5ZsJzYop0RjQsXw-4UfV4OvdhBjT2sGF-u6gq9NrhQ@mail.gmail.com>
 	<CAJ4mKGZ8WhY5JWD2P=5fQ+9EYQazEKETCTg8gU6qcZ03V3jrVw@mail.gmail.com>
@@ -21,10 +21,11 @@ References: <CAANLjFpAXaDWQzumg1hCs=SC_0YvdYDd6vyodz5_ZBNvGWdkSw@mail.gmail.com>
 	<CAANLjFrw0AtqvHu5ioRPH7yKjV5ZqfnGKou+fKLTZukLTnLbgw@mail.gmail.com>
 	<CAANLjFoafHQ1X8U7LUrvhh2h8fu3WgNpUsMDR+QkSWpfW8ad0g@mail.gmail.com>
 	<CAOnYue-T061jkAvpe3cwH7Et4xXY_dkW73KyKcbwiefgzgs8cA@mail.gmail.com>
+	<CAANLjFosyB_cqk19Ax=5wgXDnSGOOa-_5sY1FuCZyYTx3rS9JQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0181094635=="
+Content-Type: multipart/mixed; boundary="===============1340533483=="
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAOnYue-T061jkAvpe3cwH7Et4xXY_dkW73KyKcbwiefgzgs8cA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <CAANLjFosyB_cqk19Ax=5wgXDnSGOOa-_5sY1FuCZyYTx3rS9JQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -34,962 +35,1041 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Josef Johansson <josef86-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+To: Robert LeBlanc <robert-4JaGZRWAfWbajFs6igw21g@public.gmane.org>
 Cc: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
---===============0181094635==
-Content-Type: multipart/alternative; boundary=001a1143c0f6e600ef052149ae99
+--===============1340533483==
+Content-Type: multipart/alternative; boundary=f46d044287d2ca28d3052149b818
 
---001a1143c0f6e600ef052149ae99
+--f46d044287d2ca28d3052149b818
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA256
+I would start with defrag the drives, the good part is that you can just
+run the defrag with the time parameter and it will take all available xfs
+drives.
+On 4 Oct 2015 6:13 pm, "Robert LeBlanc" <robert-4JaGZRWAfWbajFs6igw21g@public.gmane.org> wrote:
 
-These are Toshiba MG03ACA400 drives.
-
-sd{a,b} are 4TB on 00:1f.2 SATA controller: Intel Corporation C600/X79
-series chipset 6-Port SATA AHCI Controller (rev 05) at 3.0 Gb
-sd{c,d} are 4TB on 00:1f.2 SATA controller: Intel Corporation C600/X79
-series chipset 6-Port SATA AHCI Controller (rev 05) at 6.0 Gb
-sde is SATADOM with OS install
-sd{f..i,l,m} are 4TB on 01:00.0 Serial Attached SCSI controller: LSI
-Logic / Symbios Logic SAS2308 PCI-Express Fusion-MPT SAS-2 (rev 05)
-sd{j,k} are 240 GB Intel SSDSC2BB240G4 on 01:00.0 Serial Attached SCSI
-controller: LSI Logic / Symbios Logic SAS2308 PCI-Express Fusion-MPT
-SAS-2 (rev 05)
-
-There is probably some performance optimization that we can do in this
-area, however unless I'm missing something, I don't see anything that
-should cause I/O to take 30-60+ seconds to complete from a disk
-standpoint.
-
-[root@ceph1 ~]# for i in {{a..d},{f..i},{l,m}}; do echo -n "sd${i}1:
-"; xfs_db -c frag -r /dev/sd${i}1; done
-sda1: actual 924229, ideal 414161, fragmentation factor 55.19%
-sdb1: actual 1703083, ideal 655321, fragmentation factor 61.52%
-sdc1: actual 2161827, ideal 746418, fragmentation factor 65.47%
-sdd1: actual 1807008, ideal 654214, fragmentation factor 63.80%
-sdf1: actual 735471, ideal 311837, fragmentation factor 57.60%
-sdg1: actual 1463859, ideal 507362, fragmentation factor 65.34%
-sdh1: actual 1684905, ideal 556571, fragmentation factor 66.97%
-sdi1: actual 1833980, ideal 608499, fragmentation factor 66.82%
-sdl1: actual 1641128, ideal 554364, fragmentation factor 66.22%
-sdm1: actual 2032644, ideal 697129, fragmentation factor 65.70%
-
-
-[root@ceph1 ~]# iostat -xd 2
-Linux 4.2.1-1.el7.elrepo.x86_64 (ceph1)   10/04/2015      _x86_64_
-   (16 CPU)
-
-Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s
-avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
-sda               0.09     2.06    9.24   36.18   527.28  1743.71
-100.00     8.96  197.32   17.50  243.23   4.07  18.47
-sdb               0.17     3.61   16.70   74.44   949.65  2975.30
-86.13     6.74   73.95   23.94   85.16   4.31  39.32
-sdc               0.14     4.67   15.69   87.80   818.02  3860.11
-90.41     9.56   92.38   26.73  104.11   4.44  45.91
-sdd               0.17     3.43    7.16   69.13   480.96  2847.42
-87.25     4.80   62.89   30.00   66.30   4.33  33.00
-sde               0.01     1.13    0.34    0.99     8.35    12.01
-30.62     0.01    7.37    2.64    9.02   1.64   0.22
-sdj               0.00     1.22    0.01  348.22     0.03 11302.65
-64.91     0.23    0.66    0.14    0.66   0.15   5.15
-sdk               0.00     1.99    0.01  369.94     0.03 12876.74
-69.61     0.26    0.71    0.13    0.71   0.16   5.75
-sdf               0.01     1.79    1.55   31.12    39.64  1431.37
-90.06     4.07  124.67   16.25  130.05   3.11  10.17
-sdi               0.22     3.17   23.92   72.90  1386.45  2676.28
-83.93     7.75   80.00   24.31   98.27   4.31  41.77
-sdm               0.16     3.10   17.63   72.84   986.29  2767.24
-82.98     6.57   72.64   23.67   84.50   4.23  38.30
-sdl               0.11     3.01   12.10   55.14   660.85  2361.40
-89.89    17.87  265.80   21.64  319.36   4.08  27.45
-sdg               0.08     2.45    9.75   53.90   489.67  1929.42
-76.01    17.27  271.30   20.77  316.61   3.98  25.33
-sdh               0.10     2.76   11.28   60.97   600.10  2114.48
-75.14     1.70   23.55   22.92   23.66   4.10  29.60
-
-Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s
-avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
-sda               0.00     0.00    0.50    0.00   146.00     0.00
-584.00     0.01   16.00   16.00    0.00  16.00   0.80
-sdb               0.00     0.50    9.00  119.00  2036.00  2578.00
-72.09     0.68    5.50    7.06    5.39   2.36  30.25
-sdc               0.00     4.00   34.00  129.00   494.00  6987.75
-91.80     1.70   10.44   17.00    8.72   4.44  72.40
-sdd               0.00     1.50    1.50   95.50    74.00  2396.50
-50.94     0.85    8.75   23.33    8.52   7.53  73.05
-sde               0.00    37.00   11.00    1.00    46.00   152.00
-33.00     0.01    1.00    0.64    5.00   0.54   0.65
-sdj               0.00     0.50    0.00  970.50     0.00 12594.00
-25.95     0.09    0.09    0.00    0.09   0.08   8.20
-sdk               0.00     0.00    0.00  977.50     0.00 12016.00
-24.59     0.10    0.10    0.00    0.10   0.09   8.90
-sdf               0.00     0.50    0.50   37.50     2.00   230.25
-12.22     9.63   10.58    8.00   10.61   1.79   6.80
-sdi               2.00     0.00   10.50    0.00  2528.00     0.00
-481.52     0.10    9.33    9.33    0.00   7.76   8.15
-sdm               0.00     0.50   15.00  116.00   546.00   833.25
-21.06     0.94    7.17   14.03    6.28   4.13  54.15
-sdl               0.00     0.00    3.00    0.00    26.00     0.00
-17.33     0.02    7.50    7.50    0.00   7.50   2.25
-sdg               0.00     3.50    1.00   64.50     4.00  2929.25
-89.56     0.40    6.04    9.00    5.99   3.42  22.40
-sdh               0.50     0.50    4.00   64.00   770.00  1105.00
-55.15     4.96  189.42   21.25  199.93   4.21  28.60
-
-Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s
-avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
-sda               0.00     0.00    8.50    0.00   110.00     0.00
-25.88     0.01    1.59    1.59    0.00   1.53   1.30
-sdb               0.00     4.00    6.50  117.50   494.00  4544.50
-81.27     0.87    6.99   11.62    6.73   3.28  40.70
-sdc               0.00     0.50    5.50  202.50   526.00  4123.00
-44.70     1.80    8.66   18.73    8.39   2.08  43.30
-sdd               0.00     3.00    2.50  227.00   108.00  6952.00
-61.53    46.10  197.44   30.20  199.29   3.86  88.60
-sde               0.00     0.00    0.00    1.50     0.00     6.00
-8.00     0.00    2.33    0.00    2.33   1.33   0.20
-sdj               0.00     0.00    0.00  834.00     0.00  9912.00
-23.77     0.08    0.09    0.00    0.09   0.08   6.75
-sdk               0.00     0.00    0.00  777.00     0.00 12318.00
-31.71     0.12    0.15    0.00    0.15   0.10   7.70
-sdf               0.00     1.00    4.50  117.00   198.00   693.25
-14.67    34.86  362.88   84.33  373.60   3.59  43.65
-sdi               0.00     0.00    1.50    0.00     6.00     0.00
-8.00     0.01    9.00    9.00    0.00   9.00   1.35
-sdm               0.50     3.00    3.50  143.00  1014.00  4205.25
-71.25     0.93    5.95   20.43    5.59   3.08  45.15
-sdl               0.50     0.00    8.00  148.50  1578.00  2128.50
-47.37     0.82    5.27    6.44    5.21   3.40  53.20
-sdg               1.50     2.00   10.50  100.50  2540.00  2039.50
-82.51     0.77    7.00   14.19    6.25   5.42  60.20
-sdh               0.50     0.00    5.00    0.00  1050.00     0.00
-420.00     0.04    7.10    7.10    0.00   7.10   3.55
-
-Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s
-avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
-sda               0.00     0.00    6.00    0.00   604.00     0.00
-201.33     0.03    5.58    5.58    0.00   5.58   3.35
-sdb               0.00     6.00    7.00  236.00   132.00  8466.00
-70.77    45.48  186.59   31.79  191.18   1.62  39.45
-sdc               2.00     0.00   19.50   46.50  6334.00   686.00
-212.73     0.39    5.96    7.97    5.12   3.57  23.55
-sdd               0.00     1.00    3.00   20.00    72.00  1527.25
-139.07     0.31   47.67    6.17   53.90   3.11   7.15
-sde               0.00    17.00    0.00    4.50     0.00   184.00
-81.78     0.01    2.33    0.00    2.33   2.33   1.05
-sdj               0.00     0.00    0.00  805.50     0.00 12760.00
-31.68     0.21    0.27    0.00    0.27   0.09   7.35
-sdk               0.00     0.00    0.00  438.00     0.00 14300.00
-65.30     0.24    0.54    0.00    0.54   0.13   5.65
-sdf               0.00     0.00    1.00    0.00     6.00     0.00
-12.00     0.00    2.50    2.50    0.00   2.50   0.25
-sdi               0.00     5.50   14.50   27.50   394.00  6459.50
-326.36     0.86   20.18   11.00   25.02   7.42  31.15
-sdm               0.00     1.00    9.00  175.00   554.00  3173.25
-40.51     1.12    6.38    7.22    6.34   2.41  44.40
-sdl               0.00     2.00    2.50  100.50    26.00  2483.00
-48.72     0.77    7.47   11.80    7.36   2.10  21.65
-sdg               0.00     4.50    9.00  214.00   798.00  7417.00
-73.68    66.56  298.46   28.83  309.80   3.35  74.70
-sdh               0.00     0.00   16.50    0.00   344.00     0.00
-41.70     0.09    5.61    5.61    0.00   4.55   7.50
-
-Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s
-avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
-sda               1.00     0.00    9.00    0.00  3162.00     0.00
-702.67     0.07    8.06    8.06    0.00   6.06   5.45
-sdb               0.50     0.00   12.50   13.00  1962.00   298.75
-177.31     0.63   30.00    4.84   54.19   9.96  25.40
-sdc               0.00     0.50    3.50  131.00    18.00  1632.75
-24.55     0.87    6.48   16.86    6.20   3.51  47.25
-sdd               0.00     0.00    4.00    0.00    72.00    16.00
-44.00     0.26   10.38   10.38    0.00  23.38   9.35
-sde               0.00     0.00    0.00    0.00     0.00     0.00
-0.00     0.00    0.00    0.00    0.00   0.00   0.00
-sdj               0.00     0.00    0.00  843.50     0.00 16334.00
-38.73     0.19    0.23    0.00    0.23   0.11   9.10
-sdk               0.00     0.00    0.00  803.00     0.00 10394.00
-25.89     0.07    0.08    0.00    0.08   0.08   6.25
-sdf               0.00     4.00   11.00   90.50   150.00  2626.00
-54.70     0.59    5.84    3.82    6.08   4.06  41.20
-sdi               0.00     3.50   17.50  130.50  2132.00  6309.50
-114.07     1.84   12.55   25.60   10.80   5.76  85.30
-sdm               0.00     4.00    2.00  139.00    44.00  1957.25
-28.39     0.89    6.28   14.50    6.17   3.55  50.10
-sdl               0.00     0.50   12.00  101.00   334.00  1449.75
-31.57     0.94    8.28   10.17    8.06   2.11  23.85
-sdg               0.00     0.00    2.50    3.00   204.00    17.00
-80.36     0.02    5.27    4.60    5.83   3.91   2.15
-sdh               0.00     0.50    9.50   32.50  1810.00   199.50
-95.69     0.28    6.69    3.79    7.54   5.12  21.50
-
-Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s
-avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
-sda               0.50     0.50   25.00   24.50  1248.00   394.25
-66.35     0.76   15.30   11.62   19.06   5.25  26.00
-sdb               1.50     0.00   13.50   30.00  2628.00   405.25
-139.46     0.27    5.94    8.19    4.93   5.31  23.10
-sdc               0.00     6.00    3.00  163.00    60.00  9889.50
-119.87     1.66    9.83   28.67    9.48   5.95  98.70
-sdd               0.00    11.00    5.50  353.50    50.00  2182.00
-12.43   118.42  329.26   30.27  333.91   2.78  99.90
-sde               0.00     5.50    0.00    1.50     0.00    28.00
-37.33     0.00    2.33    0.00    2.33   2.33   0.35
-sdj               0.00     0.00    0.00 1227.50     0.00 22064.00
-35.95     0.50    0.41    0.00    0.41   0.10  12.50
-sdk               0.00     0.50    0.00 1073.50     0.00 19248.00
-35.86     0.24    0.23    0.00    0.23   0.10  10.40
-sdf               0.00     4.00    0.00  109.00     0.00  4145.00
-76.06     0.59    5.44    0.00    5.44   3.63  39.55
-sdi               0.00     1.00    8.50   95.50   218.00  2091.75
-44.42     1.06    9.70   18.71    8.90   7.00  72.80
-sdm               0.00     0.00    8.00  177.50    82.00  3173.00
-35.09     1.24    6.65   14.31    6.30   3.53  65.40
-sdl               0.00     3.50    3.00  187.50    32.00  2175.25
-23.17     1.47    7.68   18.50    7.50   3.85  73.35
-sdg               0.00     0.00    1.00    0.00    12.00     0.00
-24.00     0.00    1.50    1.50    0.00   1.50   0.15
-sdh               0.50     1.00   14.00  169.50  2364.00  4568.00
-75.55     1.50    8.12   21.25    7.03   4.91  90.10
-
-Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s
-avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
-sda               0.00     4.00    3.00   60.00   212.00  2542.00
-87.43     0.58    8.02   15.50    7.64   7.95  50.10
-sdb               0.00     0.50    2.50   98.00   682.00  1652.00
-46.45     0.51    5.13    6.20    5.10   3.05  30.65
-sdc               0.00     2.50    4.00  146.00    16.00  4623.25
-61.86     1.07    7.33   13.38    7.17   2.22  33.25
-sdd               0.00     0.50    9.50   30.00   290.00   358.00
-32.81     0.84   32.22   49.16   26.85  12.28  48.50
-sde               0.00     0.00    0.00    0.00     0.00     0.00
-0.00     0.00    0.00    0.00    0.00   0.00   0.00
-sdj               0.00     0.50    0.00  530.00     0.00  7138.00
-26.94     0.06    0.11    0.00    0.11   0.09   4.65
-sdk               0.00     0.00    0.00  625.00     0.00  8254.00
-26.41     0.07    0.12    0.00    0.12   0.09   5.75
-sdf               0.00     0.00    0.00    4.00     0.00    18.00
-9.00     0.01    3.62    0.00    3.62   3.12   1.25
-sdi               0.00     2.50    8.00   61.00   836.00  2681.50
-101.96     0.58    9.25   15.12    8.48   6.71  46.30
-sdm               0.00     4.50   11.00  273.00  2100.00  8562.00
-75.08    13.49   47.53   24.95   48.44   1.83  52.00
-sdl               0.00     1.00    0.50   49.00     2.00  1038.00
-42.02     0.23    4.83   14.00    4.73   2.45  12.15
-sdg               0.00     0.00    0.00    0.00     0.00     0.00
-0.00     0.00    0.00    0.00    0.00   0.00   0.00
-sdh               1.00     1.00    9.00  109.00  2082.00  2626.25
-79.80     0.85    7.34    7.83    7.30   3.83  45.20
-
-Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s
-avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
-sda               0.00     1.50   10.00  177.00   284.00  4857.00
-54.98    36.26  194.27   21.85  204.01   3.53  66.00
-sdb               1.00     0.50   39.50  119.50  1808.00  2389.25
-52.80     1.58    9.96   12.32    9.18   2.42  38.45
-sdc               0.00     2.00   15.00  200.50   116.00  4951.00
-47.03    14.37   66.70   73.87   66.16   2.23  47.95
-sdd               0.00     3.50    6.00   54.50   180.00  2360.50
-83.98     0.69   11.36   20.42   10.36   7.99  48.35
-sde               0.00     7.50    0.00   32.50     0.00   160.00
-9.85     1.64   50.51    0.00   50.51   1.48   4.80
-sdj               0.00     0.00    0.00  835.00     0.00 10198.00
-24.43     0.07    0.09    0.00    0.09   0.08   6.50
-sdk               0.00     0.00    0.00  802.00     0.00 12534.00
-31.26     0.23    0.29    0.00    0.29   0.10   8.05
-sdf               0.00     2.50    2.00  133.50    14.00  5272.25
-78.03     4.37   32.21    4.50   32.63   1.73  23.40
-sdi               0.00     4.50   17.00  125.50  2676.00  8683.25
-159.43     1.86   13.02   27.97   11.00   4.95  70.55
-sdm               0.00     0.00    7.00    0.50   540.00    32.00
-152.53     0.05    7.07    7.57    0.00   7.07   5.30
-sdl               0.00     7.00   27.00  276.00  2374.00 11955.50
-94.58    25.87   85.36   15.20   92.23   1.84  55.90
-sdg               0.00     0.00   45.00    0.00   828.00     0.00
-36.80     0.07    1.62    1.62    0.00   0.68   3.05
-sdh               0.00     0.50    0.50   65.50     2.00  1436.25
-43.58     0.51    7.79   16.00    7.73   3.61  23.80
-
-Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s
-avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
-sda               0.00     8.00   14.50  150.00   122.00   929.25
-12.78    20.65   70.61    7.55   76.71   1.46  24.05
-sdb               0.00     5.00    8.00  283.50    86.00  2757.50
-19.51    69.43  205.40   51.75  209.73   2.40  69.85
-sdc               0.00     0.00   12.50    1.50   350.00    48.25
-56.89     0.25   17.75   17.00   24.00   4.75   6.65
-sdd               0.00     3.50   36.50  141.00   394.00  2338.75
-30.79     1.50    8.42   16.16    6.41   4.56  80.95
-sde               0.00     1.50    0.00    1.00     0.00    10.00
-20.00     0.00    2.00    0.00    2.00   2.00   0.20
-sdj               0.00     0.00    0.00 1059.00     0.00 18506.00
-34.95     0.19    0.18    0.00    0.18   0.10  10.75
-sdk               0.00     0.00    0.00 1103.00     0.00 14220.00
-25.78     0.09    0.08    0.00    0.08   0.08   8.35
-sdf               0.00     5.50    2.00   19.50     8.00  5158.75
-480.63     0.17    8.05    6.50    8.21   6.95  14.95
-sdi               0.00     5.50   28.00  224.50  2210.00  8971.75
-88.57   122.15  328.47   27.43  366.02   3.71  93.70
-sdm               0.00     0.00   13.00    4.00   718.00    16.00
-86.35     0.15    3.76    4.23    2.25   3.62   6.15
-sdl               0.00     0.00   16.50    0.00   832.00     0.00
-100.85     0.02    1.12    1.12    0.00   1.09   1.80
-sdg               0.00     2.50   17.00   23.50  1032.00  3224.50
-210.20     0.25    6.25    2.56    8.91   3.41  13.80
-sdh               0.00    10.50    4.50  241.00    66.00  7252.00
-59.62    23.00   91.66    4.22   93.29   2.11  51.85
-
-Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s
-avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
-sda               0.00     0.50    3.50   91.00    92.00   552.75
-13.65    36.27  479.41   81.57  494.71   5.65  53.35
-sdb               0.00     1.00    6.00  168.00   224.00   962.50
-13.64    83.35  533.92   62.00  550.77   5.75 100.00
-sdc               0.00     1.00    3.00  171.00    16.00  1640.00
-19.03     1.08    6.18   11.83    6.08   3.15  54.80
-sdd               0.00     5.00    5.00  107.50   132.00  6576.75
-119.27     0.79    7.06   18.80    6.51   5.13  57.70
-sde               0.00     0.00    0.00    0.00     0.00     0.00
-0.00     0.00    0.00    0.00    0.00   0.00   0.00
-sdj               0.00     0.00    0.00 1111.50     0.00 22346.00
-40.21     0.27    0.24    0.00    0.24   0.11  12.10
-sdk               0.00     0.00    0.00 1022.00     0.00 33040.00
-64.66     0.68    0.67    0.00    0.67   0.13  13.60
-sdf               0.00     5.50    2.50   91.00    12.00  4977.25
-106.72     2.29   24.48   14.40   24.76   2.42  22.60
-sdi               0.00     0.00   10.00   69.50   368.00   858.50
-30.86     7.40  586.41    5.50  669.99   4.21  33.50
-sdm               0.00     4.00    8.00  210.00   944.00  5833.50
-62.18     1.57    7.62   18.62    7.20   4.57  99.70
-sdl               0.00     0.00    7.50   22.50   104.00   253.25
-23.82     0.14    4.82    5.07    4.73   4.03  12.10
-sdg               0.00     4.00    1.00   84.00     4.00  3711.75
-87.43     0.58    6.88   12.50    6.81   5.75  48.90
-sdh               0.00     3.50    7.50   44.00    72.00  2954.25
-117.52     1.54   39.50   61.73   35.72   6.40  32.95
-
-Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s
-avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
-sda               0.00     0.00    1.00    0.00    20.00     0.00
-40.00     0.01   14.50   14.50    0.00  14.50   1.45
-sdb               0.00     7.00   10.50  198.50  2164.00  6014.75
-78.27     1.94    9.29   28.90    8.25   4.77  99.75
-sdc               0.00     2.00    4.00   95.50   112.00  5152.25
-105.81     0.94    9.46   24.25    8.84   4.68  46.55
-sdd               0.00     1.00    2.00  131.00    10.00  7167.25
-107.93     4.55   34.23   83.25   33.48   2.52  33.55
-sde               0.00     0.00    0.00    0.50     0.00     2.00
-8.00     0.00    0.00    0.00    0.00   0.00   0.00
-sdj               0.00     0.00    0.00  541.50     0.00  6468.00
-23.89     0.05    0.10    0.00    0.10   0.09   5.00
-sdk               0.00     0.00    0.00  509.00     0.00  7704.00
-30.27     0.07    0.14    0.00    0.14   0.10   4.85
-sdf               0.00     0.00    0.00    0.00     0.00     0.00
-0.00     0.00    0.00    0.00    0.00   0.00   0.00
-sdi               0.00     0.00    3.50    0.00    90.00     0.00
-51.43     0.04   10.14   10.14    0.00  10.14   3.55
-sdm               0.00     2.00    5.00  102.50  1186.00  4583.00
-107.33     0.81    7.56   23.20    6.80   2.78  29.85
-sdl               0.00    14.00   10.00  216.00   112.00  3645.50
-33.25    73.45  311.05   46.30  323.31   3.51  79.35
-sdg               0.00     1.00    0.00   52.50     0.00   240.00
-9.14     0.25    4.76    0.00    4.76   4.48  23.50
-sdh               0.00     0.00    3.50    0.00    18.00     0.00
-10.29     0.02    7.00    7.00    0.00   7.00   2.45
-
-Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s
-avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
-sda               0.00     0.00    1.00    0.00     4.00     0.00
-8.00     0.01   14.50   14.50    0.00  14.50   1.45
-sdb               0.00     9.00    2.00  292.00   192.00 10925.75
-75.63    36.98  100.27   54.75  100.58   2.95  86.60
-sdc               0.00     9.00   10.50  151.00    78.00  6771.25
-84.82    36.06   94.60   26.57   99.33   3.77  60.85
-sdd               0.00     0.00    5.00    1.00    74.00    24.00
-32.67     0.03    5.00    6.00    0.00   5.00   3.00
-sde               0.00     0.00    0.00    0.00     0.00     0.00
-0.00     0.00    0.00    0.00    0.00   0.00   0.00
-sdj               0.00     0.00    0.00  787.50     0.00  9418.00
-23.92     0.07    0.10    0.00    0.10   0.09   6.70
-sdk               0.00     0.00    0.00  766.50     0.00  9400.00
-24.53     0.08    0.11    0.00    0.11   0.10   7.70
-sdf               0.00     0.00    0.50   41.50     6.00   391.00
-18.90     0.24    5.79    9.00    5.75   5.50  23.10
-sdi               0.00    10.00    9.00  268.00    92.00  1618.75
-12.35    68.20  150.90   15.50  155.45   2.36  65.30
-sdm               0.00    11.50   10.00  330.50    72.00  3201.25
-19.23    68.83  139.38   37.45  142.46   1.84  62.80
-sdl               0.00     2.50    2.50  228.50    14.00  2526.00
-21.99    90.42  404.71  242.40  406.49   4.33 100.00
-sdg               0.00     5.50    7.50  298.00    68.00  5275.25
-34.98    75.31  174.85   26.73  178.58   2.67  81.60
-sdh               0.00     0.00    2.50    2.00    28.00    24.00
-23.11     0.01    2.78    5.00    0.00   2.78   1.25
-
-- ----------------
-Robert LeBlanc
-PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
-
-On Sun, Oct 4, 2015 at 12:16 AM, Josef Johansson  wrote:
-Hi,
-
-I don't know what brand those 4TB spindles are, but I know that mine
-are very bad at doing write at the same time as read. Especially small
-read write.
-
-This has an absurdly bad effect when doing maintenance on ceph. That
-being said we see a lot of difference between dumpling and hammer in
-performance on these drives. Most likely due to hammer able to read
-write degraded PGs.
-
-We have run into two different problems along the way, the first was
-blocked request where we had to upgrade from 64GB mem on each node to
-256GB. We thought that it was the only safe buy make things better.
-
-I believe it worked because more reads were cached so we had less
-mixed read write on the nodes, thus giving the spindles more room to
-breath. Now this was a shot in the dark then, but the price is not
-that high even to just try it out.. compared to 6 people working on
-it. I believe the IO on disk was not huge either, but what kills the
-disk is high latency. How much bandwidth are the disk using? We had
-very low.. 3-5MB/s.
-
-The second problem was defragmentations hitting 70%, lowering that to
-6% made a lot of difference. Depending on IO pattern this increases
-different.
-
-TL;DR read kills the 4TB spindles.
-
-Hope you guys clear out of the woods.
-/Josef
-
-On 3 Oct 2015 10:10 pm, "Robert LeBlanc"  wrote:
-- -----BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA256
-
-We are still struggling with this and have tried a lot of different
-things. Unfortunately, Inktank (now Red Hat) no longer provides
-consulting services for non-Red Hat systems. If there are some
-certified Ceph consultants in the US that we can do both remote and
-on-site engagements, please let us know.
-
-This certainly seems to be network related, but somewhere in the
-kernel. We have tried increasing the network and TCP buffers, number
-of TCP sockets, reduced the FIN_WAIT2 state. There is about 25% idle
-on the boxes, the disks are busy, but not constantly at 100% (they
-cycle from <10% up to 100%, but not 100% for more than a few seconds
-at a time). There seems to be no reasonable explanation why I/O is
-blocked pretty frequently longer than 30 seconds. We have verified
-Jumbo frames by pinging from/to each node with 9000 byte packets. The
-network admins have verified that packets are not being dropped in the
-switches for these nodes. We have tried different kernels including
-the recent Google patch to cubic. This is showing up on three cluster
-(two Ethernet and one IPoIB). I booted one cluster into Debian Jessie
-(from CentOS 7.1) with similar results.
-
-The messages seem slightly different:
-2015-10-03 14:38:23.193082 osd.134 10.208.16.25:6800/1425 439 :
-cluster [WRN] 14 slow requests, 1 included below; oldest blocked for >
-100.087155 secs
-2015-10-03 14:38:23.193090 osd.134 10.208.16.25:6800/1425 440 :
-cluster [WRN] slow request 30.041999 seconds old, received at
-2015-10-03 14:37:53.151014: osd_op(client.1328605.0:7082862
-rbd_data.13fdcb2ae8944a.000000000001264f [read 975360~4096]
-11.6d19c36f ack+read+known_if_redirected e10249) currently no flag
-points reached
-
-I don't know what "no flag points reached" means.
-
-The problem is most pronounced when we have to reboot an OSD node (1
-of 13), we will have hundreds of I/O blocked for some times up to 300
-seconds. It takes a good 15 minutes for things to settle down. The
-production cluster is very busy doing normally 8,000 I/O and peaking
-at 15,000. This is all 4TB spindles with SSD journals and the disks
-are between 25-50% full. We are currently splitting PGs to distribute
-the load better across the disks, but we are having to do this 10 PGs
-at a time as we get blocked I/O. We have max_backfills and
-max_recovery set to 1, client op priority is set higher than recovery
-priority. We tried increasing the number of op threads but this didn't
-seem to help. It seems as soon as PGs are finished being checked, they
-become active and could be the cause for slow I/O while the other PGs
-are being checked.
-
-What I don't understand is that the messages are delayed. As soon as
-the message is received by Ceph OSD process, it is very quickly
-committed to the journal and a response is sent back to the primary
-OSD which is received very quickly as well. I've adjust
-min_free_kbytes and it seems to keep the OSDs from crashing, but
-doesn't solve the main problem. We don't have swap and there is 64 GB
-of RAM per nodes for 10 OSDs.
-
-Is there something that could cause the kernel to get a packet but not
-be able to dispatch it to Ceph such that it could be explaining why we
-are seeing these blocked I/O for 30+ seconds. Is there some pointers
-to tracing Ceph messages from the network buffer through the kernel to
-the Ceph process?
-
-We can really use some pointers no matter how outrageous. We've have
-over 6 people looking into this for weeks now and just can't think of
-anything else.
-
-Thanks,
-- -----BEGIN PGP SIGNATURE-----
-Version: Mailvelope v1.1.0
-Comment: https://www.mailvelope.com
-
-wsFcBAEBCAAQBQJWEDY1CRDmVDuy+mK58QAARgoP/RcoL1qVmg7qbQrzStar
-NK80bqYGeYHb26xHbt1fZVgnZhXU0nN0Dv4ew0e/cYJLELSO2KCeXNfXN6F1
-prZuzYagYEyj1Q1TOo+4h/nOQRYsTwQDdFzbHb/OUDN55C0QGZ29DjEvrqP6
-K5l6sAQzvQDpUEEIiOCkS6pH59ira740nSmnYkEWhr1lxF/hMjb6fFlfCFe2
-h1djM0GfY7vBHFGgI3jkw0BL5AQnWe+SCcCiKZmxY6xiR70FWl3XqK5M+nxm
-iq74y7Dv6cpenit6boMr6qtOeIt+8ko85hVMh09Hkaqz/m2FzxAKLcahzkGF
-Fh/M6YBzgnX7QBURTC4YQT/FVyDTW3JMuT3RKQdaX6c0iiOsVdkE+iyidWyY
-Hr1KzWU23Ur9yBfZ39Y43jrsSiAEwHnKjSqMowSGljdTysNEAAZQhlqZIoHb
-JlgpB39ugkHI1H5fZ5b2SIDz32/d5ywG4Gay9Rk6hp8VanvIrBbev+JYEoYT
-8/WX+fhueHt4dqUYWIl3HZ0CEzbXbug0xmFvhrbmL2f3t9XOkDZRbAjlYrGm
-lswiJMDueY8JkxSnPvCQrHXqjbCcy9rMG7nTnLFz98rTcHNCwtpv0qVYhheg
-4YRNRVMbfNP/6xsJvG1wVOSQPwxZSPqJh42pDqMRePJl3Zn66MTx5wvdNDpk
-l7OF
-=OI++
-- -----END PGP SIGNATURE-----
-- ----------------
-Robert LeBlanc
-PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
-
-
-On Fri, Sep 25, 2015 at 2:40 PM, Robert LeBlanc  wrote:
-> We dropped the replication on our cluster from 4 to 3 and it looks
-> like all the blocked I/O has stopped (no entries in the log for the
-> last 12 hours). This makes me believe that there is some issue with
-> the number of sockets or some other TCP issue. We have not messed with
-> Ephemeral ports and TIME_WAIT at this point. There are 130 OSDs, 8 KVM
-> hosts hosting about 150 VMs. Open files is set at 32K for the OSD
-> processes and 16K system wide.
+> -----BEGIN PGP SIGNED MESSAGE-----
+> Hash: SHA256
 >
-> Does this seem like the right spot to be looking? What are some
-> configuration items we should be looking at?
+> These are Toshiba MG03ACA400 drives.
+>
+> sd{a,b} are 4TB on 00:1f.2 SATA controller: Intel Corporation C600/X79 se=
+ries chipset 6-Port SATA AHCI Controller (rev 05) at 3.0 Gb
+> sd{c,d} are 4TB on 00:1f.2 SATA controller: Intel Corporation C600/X79 se=
+ries chipset 6-Port SATA AHCI Controller (rev 05) at 6.0 Gb
+> sde is SATADOM with OS install
+> sd{f..i,l,m} are 4TB on 01:00.0 Serial Attached SCSI controller: LSI Logi=
+c / Symbios Logic SAS2308 PCI-Express Fusion-MPT SAS-2 (rev 05)
+> sd{j,k} are 240 GB Intel SSDSC2BB240G4 on 01:00.0 Serial Attached SCSI co=
+ntroller: LSI Logic / Symbios Logic SAS2308 PCI-Express Fusion-MPT SAS-2 (r=
+ev 05)
+>
+> There is probably some performance optimization that we can do in this ar=
+ea, however unless I'm missing something, I don't see anything that should =
+cause I/O to take 30-60+ seconds to complete from a disk standpoint.
+>
+> [root@ceph1 ~]# for i in {{a..d},{f..i},{l,m}}; do echo -n "sd${i}1: "; x=
+fs_db -c frag -r /dev/sd${i}1; done
+> sda1: actual 924229, ideal 414161, fragmentation factor 55.19%
+> sdb1: actual 1703083, ideal 655321, fragmentation factor 61.52%
+> sdc1: actual 2161827, ideal 746418, fragmentation factor 65.47%
+> sdd1: actual 1807008, ideal 654214, fragmentation factor 63.80%
+> sdf1: actual 735471, ideal 311837, fragmentation factor 57.60%
+> sdg1: actual 1463859, ideal 507362, fragmentation factor 65.34%
+> sdh1: actual 1684905, ideal 556571, fragmentation factor 66.97%
+> sdi1: actual 1833980, ideal 608499, fragmentation factor 66.82%
+> sdl1: actual 1641128, ideal 554364, fragmentation factor 66.22%
+> sdm1: actual 2032644, ideal 697129, fragmentation factor 65.70%
+>
+>
+> [root@ceph1 ~]# iostat -xd 2
+> Linux 4.2.1-1.el7.elrepo.x86_64 (ceph1)   10/04/2015      _x86_64_       =
+ (16 CPU)
+>
+> Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-s=
+z avgqu-sz   await r_await w_await  svctm  %util
+> sda               0.09     2.06    9.24   36.18   527.28  1743.71   100.0=
+0     8.96  197.32   17.50  243.23   4.07  18.47
+> sdb               0.17     3.61   16.70   74.44   949.65  2975.30    86.1=
+3     6.74   73.95   23.94   85.16   4.31  39.32
+> sdc               0.14     4.67   15.69   87.80   818.02  3860.11    90.4=
+1     9.56   92.38   26.73  104.11   4.44  45.91
+> sdd               0.17     3.43    7.16   69.13   480.96  2847.42    87.2=
+5     4.80   62.89   30.00   66.30   4.33  33.00
+> sde               0.01     1.13    0.34    0.99     8.35    12.01    30.6=
+2     0.01    7.37    2.64    9.02   1.64   0.22
+> sdj               0.00     1.22    0.01  348.22     0.03 11302.65    64.9=
+1     0.23    0.66    0.14    0.66   0.15   5.15
+> sdk               0.00     1.99    0.01  369.94     0.03 12876.74    69.6=
+1     0.26    0.71    0.13    0.71   0.16   5.75
+> sdf               0.01     1.79    1.55   31.12    39.64  1431.37    90.0=
+6     4.07  124.67   16.25  130.05   3.11  10.17
+> sdi               0.22     3.17   23.92   72.90  1386.45  2676.28    83.9=
+3     7.75   80.00   24.31   98.27   4.31  41.77
+> sdm               0.16     3.10   17.63   72.84   986.29  2767.24    82.9=
+8     6.57   72.64   23.67   84.50   4.23  38.30
+> sdl               0.11     3.01   12.10   55.14   660.85  2361.40    89.8=
+9    17.87  265.80   21.64  319.36   4.08  27.45
+> sdg               0.08     2.45    9.75   53.90   489.67  1929.42    76.0=
+1    17.27  271.30   20.77  316.61   3.98  25.33
+> sdh               0.10     2.76   11.28   60.97   600.10  2114.48    75.1=
+4     1.70   23.55   22.92   23.66   4.10  29.60
+>
+> Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-s=
+z avgqu-sz   await r_await w_await  svctm  %util
+> sda               0.00     0.00    0.50    0.00   146.00     0.00   584.0=
+0     0.01   16.00   16.00    0.00  16.00   0.80
+> sdb               0.00     0.50    9.00  119.00  2036.00  2578.00    72.0=
+9     0.68    5.50    7.06    5.39   2.36  30.25
+> sdc               0.00     4.00   34.00  129.00   494.00  6987.75    91.8=
+0     1.70   10.44   17.00    8.72   4.44  72.40
+> sdd               0.00     1.50    1.50   95.50    74.00  2396.50    50.9=
+4     0.85    8.75   23.33    8.52   7.53  73.05
+> sde               0.00    37.00   11.00    1.00    46.00   152.00    33.0=
+0     0.01    1.00    0.64    5.00   0.54   0.65
+> sdj               0.00     0.50    0.00  970.50     0.00 12594.00    25.9=
+5     0.09    0.09    0.00    0.09   0.08   8.20
+> sdk               0.00     0.00    0.00  977.50     0.00 12016.00    24.5=
+9     0.10    0.10    0.00    0.10   0.09   8.90
+> sdf               0.00     0.50    0.50   37.50     2.00   230.25    12.2=
+2     9.63   10.58    8.00   10.61   1.79   6.80
+> sdi               2.00     0.00   10.50    0.00  2528.00     0.00   481.5=
+2     0.10    9.33    9.33    0.00   7.76   8.15
+> sdm               0.00     0.50   15.00  116.00   546.00   833.25    21.0=
+6     0.94    7.17   14.03    6.28   4.13  54.15
+> sdl               0.00     0.00    3.00    0.00    26.00     0.00    17.3=
+3     0.02    7.50    7.50    0.00   7.50   2.25
+> sdg               0.00     3.50    1.00   64.50     4.00  2929.25    89.5=
+6     0.40    6.04    9.00    5.99   3.42  22.40
+> sdh               0.50     0.50    4.00   64.00   770.00  1105.00    55.1=
+5     4.96  189.42   21.25  199.93   4.21  28.60
+>
+> Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-s=
+z avgqu-sz   await r_await w_await  svctm  %util
+> sda               0.00     0.00    8.50    0.00   110.00     0.00    25.8=
+8     0.01    1.59    1.59    0.00   1.53   1.30
+> sdb               0.00     4.00    6.50  117.50   494.00  4544.50    81.2=
+7     0.87    6.99   11.62    6.73   3.28  40.70
+> sdc               0.00     0.50    5.50  202.50   526.00  4123.00    44.7=
+0     1.80    8.66   18.73    8.39   2.08  43.30
+> sdd               0.00     3.00    2.50  227.00   108.00  6952.00    61.5=
+3    46.10  197.44   30.20  199.29   3.86  88.60
+> sde               0.00     0.00    0.00    1.50     0.00     6.00     8.0=
+0     0.00    2.33    0.00    2.33   1.33   0.20
+> sdj               0.00     0.00    0.00  834.00     0.00  9912.00    23.7=
+7     0.08    0.09    0.00    0.09   0.08   6.75
+> sdk               0.00     0.00    0.00  777.00     0.00 12318.00    31.7=
+1     0.12    0.15    0.00    0.15   0.10   7.70
+> sdf               0.00     1.00    4.50  117.00   198.00   693.25    14.6=
+7    34.86  362.88   84.33  373.60   3.59  43.65
+> sdi               0.00     0.00    1.50    0.00     6.00     0.00     8.0=
+0     0.01    9.00    9.00    0.00   9.00   1.35
+> sdm               0.50     3.00    3.50  143.00  1014.00  4205.25    71.2=
+5     0.93    5.95   20.43    5.59   3.08  45.15
+> sdl               0.50     0.00    8.00  148.50  1578.00  2128.50    47.3=
+7     0.82    5.27    6.44    5.21   3.40  53.20
+> sdg               1.50     2.00   10.50  100.50  2540.00  2039.50    82.5=
+1     0.77    7.00   14.19    6.25   5.42  60.20
+> sdh               0.50     0.00    5.00    0.00  1050.00     0.00   420.0=
+0     0.04    7.10    7.10    0.00   7.10   3.55
+>
+> Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-s=
+z avgqu-sz   await r_await w_await  svctm  %util
+> sda               0.00     0.00    6.00    0.00   604.00     0.00   201.3=
+3     0.03    5.58    5.58    0.00   5.58   3.35
+> sdb               0.00     6.00    7.00  236.00   132.00  8466.00    70.7=
+7    45.48  186.59   31.79  191.18   1.62  39.45
+> sdc               2.00     0.00   19.50   46.50  6334.00   686.00   212.7=
+3     0.39    5.96    7.97    5.12   3.57  23.55
+> sdd               0.00     1.00    3.00   20.00    72.00  1527.25   139.0=
+7     0.31   47.67    6.17   53.90   3.11   7.15
+> sde               0.00    17.00    0.00    4.50     0.00   184.00    81.7=
+8     0.01    2.33    0.00    2.33   2.33   1.05
+> sdj               0.00     0.00    0.00  805.50     0.00 12760.00    31.6=
+8     0.21    0.27    0.00    0.27   0.09   7.35
+> sdk               0.00     0.00    0.00  438.00     0.00 14300.00    65.3=
+0     0.24    0.54    0.00    0.54   0.13   5.65
+> sdf               0.00     0.00    1.00    0.00     6.00     0.00    12.0=
+0     0.00    2.50    2.50    0.00   2.50   0.25
+> sdi               0.00     5.50   14.50   27.50   394.00  6459.50   326.3=
+6     0.86   20.18   11.00   25.02   7.42  31.15
+> sdm               0.00     1.00    9.00  175.00   554.00  3173.25    40.5=
+1     1.12    6.38    7.22    6.34   2.41  44.40
+> sdl               0.00     2.00    2.50  100.50    26.00  2483.00    48.7=
+2     0.77    7.47   11.80    7.36   2.10  21.65
+> sdg               0.00     4.50    9.00  214.00   798.00  7417.00    73.6=
+8    66.56  298.46   28.83  309.80   3.35  74.70
+> sdh               0.00     0.00   16.50    0.00   344.00     0.00    41.7=
+0     0.09    5.61    5.61    0.00   4.55   7.50
+>
+> Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-s=
+z avgqu-sz   await r_await w_await  svctm  %util
+> sda               1.00     0.00    9.00    0.00  3162.00     0.00   702.6=
+7     0.07    8.06    8.06    0.00   6.06   5.45
+> sdb               0.50     0.00   12.50   13.00  1962.00   298.75   177.3=
+1     0.63   30.00    4.84   54.19   9.96  25.40
+> sdc               0.00     0.50    3.50  131.00    18.00  1632.75    24.5=
+5     0.87    6.48   16.86    6.20   3.51  47.25
+> sdd               0.00     0.00    4.00    0.00    72.00    16.00    44.0=
+0     0.26   10.38   10.38    0.00  23.38   9.35
+> sde               0.00     0.00    0.00    0.00     0.00     0.00     0.0=
+0     0.00    0.00    0.00    0.00   0.00   0.00
+> sdj               0.00     0.00    0.00  843.50     0.00 16334.00    38.7=
+3     0.19    0.23    0.00    0.23   0.11   9.10
+> sdk               0.00     0.00    0.00  803.00     0.00 10394.00    25.8=
+9     0.07    0.08    0.00    0.08   0.08   6.25
+> sdf               0.00     4.00   11.00   90.50   150.00  2626.00    54.7=
+0     0.59    5.84    3.82    6.08   4.06  41.20
+> sdi               0.00     3.50   17.50  130.50  2132.00  6309.50   114.0=
+7     1.84   12.55   25.60   10.80   5.76  85.30
+> sdm               0.00     4.00    2.00  139.00    44.00  1957.25    28.3=
+9     0.89    6.28   14.50    6.17   3.55  50.10
+> sdl               0.00     0.50   12.00  101.00   334.00  1449.75    31.5=
+7     0.94    8.28   10.17    8.06   2.11  23.85
+> sdg               0.00     0.00    2.50    3.00   204.00    17.00    80.3=
+6     0.02    5.27    4.60    5.83   3.91   2.15
+> sdh               0.00     0.50    9.50   32.50  1810.00   199.50    95.6=
+9     0.28    6.69    3.79    7.54   5.12  21.50
+>
+> Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-s=
+z avgqu-sz   await r_await w_await  svctm  %util
+> sda               0.50     0.50   25.00   24.50  1248.00   394.25    66.3=
+5     0.76   15.30   11.62   19.06   5.25  26.00
+> sdb               1.50     0.00   13.50   30.00  2628.00   405.25   139.4=
+6     0.27    5.94    8.19    4.93   5.31  23.10
+> sdc               0.00     6.00    3.00  163.00    60.00  9889.50   119.8=
+7     1.66    9.83   28.67    9.48   5.95  98.70
+> sdd               0.00    11.00    5.50  353.50    50.00  2182.00    12.4=
+3   118.42  329.26   30.27  333.91   2.78  99.90
+> sde               0.00     5.50    0.00    1.50     0.00    28.00    37.3=
+3     0.00    2.33    0.00    2.33   2.33   0.35
+> sdj               0.00     0.00    0.00 1227.50     0.00 22064.00    35.9=
+5     0.50    0.41    0.00    0.41   0.10  12.50
+> sdk               0.00     0.50    0.00 1073.50     0.00 19248.00    35.8=
+6     0.24    0.23    0.00    0.23   0.10  10.40
+> sdf               0.00     4.00    0.00  109.00     0.00  4145.00    76.0=
+6     0.59    5.44    0.00    5.44   3.63  39.55
+> sdi               0.00     1.00    8.50   95.50   218.00  2091.75    44.4=
+2     1.06    9.70   18.71    8.90   7.00  72.80
+> sdm               0.00     0.00    8.00  177.50    82.00  3173.00    35.0=
+9     1.24    6.65   14.31    6.30   3.53  65.40
+> sdl               0.00     3.50    3.00  187.50    32.00  2175.25    23.1=
+7     1.47    7.68   18.50    7.50   3.85  73.35
+> sdg               0.00     0.00    1.00    0.00    12.00     0.00    24.0=
+0     0.00    1.50    1.50    0.00   1.50   0.15
+> sdh               0.50     1.00   14.00  169.50  2364.00  4568.00    75.5=
+5     1.50    8.12   21.25    7.03   4.91  90.10
+>
+> Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-s=
+z avgqu-sz   await r_await w_await  svctm  %util
+> sda               0.00     4.00    3.00   60.00   212.00  2542.00    87.4=
+3     0.58    8.02   15.50    7.64   7.95  50.10
+> sdb               0.00     0.50    2.50   98.00   682.00  1652.00    46.4=
+5     0.51    5.13    6.20    5.10   3.05  30.65
+> sdc               0.00     2.50    4.00  146.00    16.00  4623.25    61.8=
+6     1.07    7.33   13.38    7.17   2.22  33.25
+> sdd               0.00     0.50    9.50   30.00   290.00   358.00    32.8=
+1     0.84   32.22   49.16   26.85  12.28  48.50
+> sde               0.00     0.00    0.00    0.00     0.00     0.00     0.0=
+0     0.00    0.00    0.00    0.00   0.00   0.00
+> sdj               0.00     0.50    0.00  530.00     0.00  7138.00    26.9=
+4     0.06    0.11    0.00    0.11   0.09   4.65
+> sdk               0.00     0.00    0.00  625.00     0.00  8254.00    26.4=
+1     0.07    0.12    0.00    0.12   0.09   5.75
+> sdf               0.00     0.00    0.00    4.00     0.00    18.00     9.0=
+0     0.01    3.62    0.00    3.62   3.12   1.25
+> sdi               0.00     2.50    8.00   61.00   836.00  2681.50   101.9=
+6     0.58    9.25   15.12    8.48   6.71  46.30
+> sdm               0.00     4.50   11.00  273.00  2100.00  8562.00    75.0=
+8    13.49   47.53   24.95   48.44   1.83  52.00
+> sdl               0.00     1.00    0.50   49.00     2.00  1038.00    42.0=
+2     0.23    4.83   14.00    4.73   2.45  12.15
+> sdg               0.00     0.00    0.00    0.00     0.00     0.00     0.0=
+0     0.00    0.00    0.00    0.00   0.00   0.00
+> sdh               1.00     1.00    9.00  109.00  2082.00  2626.25    79.8=
+0     0.85    7.34    7.83    7.30   3.83  45.20
+>
+> Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-s=
+z avgqu-sz   await r_await w_await  svctm  %util
+> sda               0.00     1.50   10.00  177.00   284.00  4857.00    54.9=
+8    36.26  194.27   21.85  204.01   3.53  66.00
+> sdb               1.00     0.50   39.50  119.50  1808.00  2389.25    52.8=
+0     1.58    9.96   12.32    9.18   2.42  38.45
+> sdc               0.00     2.00   15.00  200.50   116.00  4951.00    47.0=
+3    14.37   66.70   73.87   66.16   2.23  47.95
+> sdd               0.00     3.50    6.00   54.50   180.00  2360.50    83.9=
+8     0.69   11.36   20.42   10.36   7.99  48.35
+> sde               0.00     7.50    0.00   32.50     0.00   160.00     9.8=
+5     1.64   50.51    0.00   50.51   1.48   4.80
+> sdj               0.00     0.00    0.00  835.00     0.00 10198.00    24.4=
+3     0.07    0.09    0.00    0.09   0.08   6.50
+> sdk               0.00     0.00    0.00  802.00     0.00 12534.00    31.2=
+6     0.23    0.29    0.00    0.29   0.10   8.05
+> sdf               0.00     2.50    2.00  133.50    14.00  5272.25    78.0=
+3     4.37   32.21    4.50   32.63   1.73  23.40
+> sdi               0.00     4.50   17.00  125.50  2676.00  8683.25   159.4=
+3     1.86   13.02   27.97   11.00   4.95  70.55
+> sdm               0.00     0.00    7.00    0.50   540.00    32.00   152.5=
+3     0.05    7.07    7.57    0.00   7.07   5.30
+> sdl               0.00     7.00   27.00  276.00  2374.00 11955.50    94.5=
+8    25.87   85.36   15.20   92.23   1.84  55.90
+> sdg               0.00     0.00   45.00    0.00   828.00     0.00    36.8=
+0     0.07    1.62    1.62    0.00   0.68   3.05
+> sdh               0.00     0.50    0.50   65.50     2.00  1436.25    43.5=
+8     0.51    7.79   16.00    7.73   3.61  23.80
+>
+> Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-s=
+z avgqu-sz   await r_await w_await  svctm  %util
+> sda               0.00     8.00   14.50  150.00   122.00   929.25    12.7=
+8    20.65   70.61    7.55   76.71   1.46  24.05
+> sdb               0.00     5.00    8.00  283.50    86.00  2757.50    19.5=
+1    69.43  205.40   51.75  209.73   2.40  69.85
+> sdc               0.00     0.00   12.50    1.50   350.00    48.25    56.8=
+9     0.25   17.75   17.00   24.00   4.75   6.65
+> sdd               0.00     3.50   36.50  141.00   394.00  2338.75    30.7=
+9     1.50    8.42   16.16    6.41   4.56  80.95
+> sde               0.00     1.50    0.00    1.00     0.00    10.00    20.0=
+0     0.00    2.00    0.00    2.00   2.00   0.20
+> sdj               0.00     0.00    0.00 1059.00     0.00 18506.00    34.9=
+5     0.19    0.18    0.00    0.18   0.10  10.75
+> sdk               0.00     0.00    0.00 1103.00     0.00 14220.00    25.7=
+8     0.09    0.08    0.00    0.08   0.08   8.35
+> sdf               0.00     5.50    2.00   19.50     8.00  5158.75   480.6=
+3     0.17    8.05    6.50    8.21   6.95  14.95
+> sdi               0.00     5.50   28.00  224.50  2210.00  8971.75    88.5=
+7   122.15  328.47   27.43  366.02   3.71  93.70
+> sdm               0.00     0.00   13.00    4.00   718.00    16.00    86.3=
+5     0.15    3.76    4.23    2.25   3.62   6.15
+> sdl               0.00     0.00   16.50    0.00   832.00     0.00   100.8=
+5     0.02    1.12    1.12    0.00   1.09   1.80
+> sdg               0.00     2.50   17.00   23.50  1032.00  3224.50   210.2=
+0     0.25    6.25    2.56    8.91   3.41  13.80
+> sdh               0.00    10.50    4.50  241.00    66.00  7252.00    59.6=
+2    23.00   91.66    4.22   93.29   2.11  51.85
+>
+> Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-s=
+z avgqu-sz   await r_await w_await  svctm  %util
+> sda               0.00     0.50    3.50   91.00    92.00   552.75    13.6=
+5    36.27  479.41   81.57  494.71   5.65  53.35
+> sdb               0.00     1.00    6.00  168.00   224.00   962.50    13.6=
+4    83.35  533.92   62.00  550.77   5.75 100.00
+> sdc               0.00     1.00    3.00  171.00    16.00  1640.00    19.0=
+3     1.08    6.18   11.83    6.08   3.15  54.80
+> sdd               0.00     5.00    5.00  107.50   132.00  6576.75   119.2=
+7     0.79    7.06   18.80    6.51   5.13  57.70
+> sde               0.00     0.00    0.00    0.00     0.00     0.00     0.0=
+0     0.00    0.00    0.00    0.00   0.00   0.00
+> sdj               0.00     0.00    0.00 1111.50     0.00 22346.00    40.2=
+1     0.27    0.24    0.00    0.24   0.11  12.10
+> sdk               0.00     0.00    0.00 1022.00     0.00 33040.00    64.6=
+6     0.68    0.67    0.00    0.67   0.13  13.60
+> sdf               0.00     5.50    2.50   91.00    12.00  4977.25   106.7=
+2     2.29   24.48   14.40   24.76   2.42  22.60
+> sdi               0.00     0.00   10.00   69.50   368.00   858.50    30.8=
+6     7.40  586.41    5.50  669.99   4.21  33.50
+> sdm               0.00     4.00    8.00  210.00   944.00  5833.50    62.1=
+8     1.57    7.62   18.62    7.20   4.57  99.70
+> sdl               0.00     0.00    7.50   22.50   104.00   253.25    23.8=
+2     0.14    4.82    5.07    4.73   4.03  12.10
+> sdg               0.00     4.00    1.00   84.00     4.00  3711.75    87.4=
+3     0.58    6.88   12.50    6.81   5.75  48.90
+> sdh               0.00     3.50    7.50   44.00    72.00  2954.25   117.5=
+2     1.54   39.50   61.73   35.72   6.40  32.95
+>
+> Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-s=
+z avgqu-sz   await r_await w_await  svctm  %util
+> sda               0.00     0.00    1.00    0.00    20.00     0.00    40.0=
+0     0.01   14.50   14.50    0.00  14.50   1.45
+> sdb               0.00     7.00   10.50  198.50  2164.00  6014.75    78.2=
+7     1.94    9.29   28.90    8.25   4.77  99.75
+> sdc               0.00     2.00    4.00   95.50   112.00  5152.25   105.8=
+1     0.94    9.46   24.25    8.84   4.68  46.55
+> sdd               0.00     1.00    2.00  131.00    10.00  7167.25   107.9=
+3     4.55   34.23   83.25   33.48   2.52  33.55
+> sde               0.00     0.00    0.00    0.50     0.00     2.00     8.0=
+0     0.00    0.00    0.00    0.00   0.00   0.00
+> sdj               0.00     0.00    0.00  541.50     0.00  6468.00    23.8=
+9     0.05    0.10    0.00    0.10   0.09   5.00
+> sdk               0.00     0.00    0.00  509.00     0.00  7704.00    30.2=
+7     0.07    0.14    0.00    0.14   0.10   4.85
+> sdf               0.00     0.00    0.00    0.00     0.00     0.00     0.0=
+0     0.00    0.00    0.00    0.00   0.00   0.00
+> sdi               0.00     0.00    3.50    0.00    90.00     0.00    51.4=
+3     0.04   10.14   10.14    0.00  10.14   3.55
+> sdm               0.00     2.00    5.00  102.50  1186.00  4583.00   107.3=
+3     0.81    7.56   23.20    6.80   2.78  29.85
+> sdl               0.00    14.00   10.00  216.00   112.00  3645.50    33.2=
+5    73.45  311.05   46.30  323.31   3.51  79.35
+> sdg               0.00     1.00    0.00   52.50     0.00   240.00     9.1=
+4     0.25    4.76    0.00    4.76   4.48  23.50
+> sdh               0.00     0.00    3.50    0.00    18.00     0.00    10.2=
+9     0.02    7.00    7.00    0.00   7.00   2.45
+>
+> Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-s=
+z avgqu-sz   await r_await w_await  svctm  %util
+> sda               0.00     0.00    1.00    0.00     4.00     0.00     8.0=
+0     0.01   14.50   14.50    0.00  14.50   1.45
+> sdb               0.00     9.00    2.00  292.00   192.00 10925.75    75.6=
+3    36.98  100.27   54.75  100.58   2.95  86.60
+> sdc               0.00     9.00   10.50  151.00    78.00  6771.25    84.8=
+2    36.06   94.60   26.57   99.33   3.77  60.85
+> sdd               0.00     0.00    5.00    1.00    74.00    24.00    32.6=
+7     0.03    5.00    6.00    0.00   5.00   3.00
+> sde               0.00     0.00    0.00    0.00     0.00     0.00     0.0=
+0     0.00    0.00    0.00    0.00   0.00   0.00
+> sdj               0.00     0.00    0.00  787.50     0.00  9418.00    23.9=
+2     0.07    0.10    0.00    0.10   0.09   6.70
+> sdk               0.00     0.00    0.00  766.50     0.00  9400.00    24.5=
+3     0.08    0.11    0.00    0.11   0.10   7.70
+> sdf               0.00     0.00    0.50   41.50     6.00   391.00    18.9=
+0     0.24    5.79    9.00    5.75   5.50  23.10
+> sdi               0.00    10.00    9.00  268.00    92.00  1618.75    12.3=
+5    68.20  150.90   15.50  155.45   2.36  65.30
+> sdm               0.00    11.50   10.00  330.50    72.00  3201.25    19.2=
+3    68.83  139.38   37.45  142.46   1.84  62.80
+> sdl               0.00     2.50    2.50  228.50    14.00  2526.00    21.9=
+9    90.42  404.71  242.40  406.49   4.33 100.00
+> sdg               0.00     5.50    7.50  298.00    68.00  5275.25    34.9=
+8    75.31  174.85   26.73  178.58   2.67  81.60
+> sdh               0.00     0.00    2.50    2.00    28.00    24.00    23.1=
+1     0.01    2.78    5.00    0.00   2.78   1.25
+>
+> - ----------------
+> Robert LeBlanc
+> PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
+>
+> On Sun, Oct 4, 2015 at 12:16 AM, Josef Johansson  wrote:
+> Hi,
+>
+> I don't know what brand those 4TB spindles are, but I know that mine are =
+very bad at doing write at the same time as read. Especially small read wri=
+te.
+>
+> This has an absurdly bad effect when doing maintenance on ceph. That bein=
+g said we see a lot of difference between dumpling and hammer in performanc=
+e on these drives. Most likely due to hammer able to read write degraded PG=
+s.
+>
+> We have run into two different problems along the way, the first was bloc=
+ked request where we had to upgrade from 64GB mem on each node to 256GB. We=
+ thought that it was the only safe buy make things better.
+>
+> I believe it worked because more reads were cached so we had less mixed r=
+ead write on the nodes, thus giving the spindles more room to breath. Now t=
+his was a shot in the dark then, but the price is not that high even to jus=
+t try it out.. compared to 6 people working on it. I believe the IO on disk=
+ was not huge either, but what kills the disk is high latency. How much ban=
+dwidth are the disk using? We had very low.. 3-5MB/s.
+>
+> The second problem was defragmentations hitting 70%, lowering that to 6% =
+made a lot of difference. Depending on IO pattern this increases different.
+>
+> TL;DR read kills the 4TB spindles.
+>
+> Hope you guys clear out of the woods.
+> /Josef
+>
+> On 3 Oct 2015 10:10 pm, "Robert LeBlanc"  wrote:
+> - -----BEGIN PGP SIGNED MESSAGE-----
+> Hash: SHA256
+>
+> We are still struggling with this and have tried a lot of different
+> things. Unfortunately, Inktank (now Red Hat) no longer provides
+> consulting services for non-Red Hat systems. If there are some
+> certified Ceph consultants in the US that we can do both remote and
+> on-site engagements, please let us know.
+>
+> This certainly seems to be network related, but somewhere in the
+> kernel. We have tried increasing the network and TCP buffers, number
+> of TCP sockets, reduced the FIN_WAIT2 state. There is about 25% idle
+> on the boxes, the disks are busy, but not constantly at 100% (they
+> cycle from <10% up to 100%, but not 100% for more than a few seconds
+> at a time). There seems to be no reasonable explanation why I/O is
+> blocked pretty frequently longer than 30 seconds. We have verified
+> Jumbo frames by pinging from/to each node with 9000 byte packets. The
+> network admins have verified that packets are not being dropped in the
+> switches for these nodes. We have tried different kernels including
+> the recent Google patch to cubic. This is showing up on three cluster
+> (two Ethernet and one IPoIB). I booted one cluster into Debian Jessie
+> (from CentOS 7.1) with similar results.
+>
+> The messages seem slightly different:
+> 2015-10-03 14:38:23.193082 osd.134 10.208.16.25:6800/1425 439 :
+> cluster [WRN] 14 slow requests, 1 included below; oldest blocked for >
+> 100.087155 secs
+> 2015-10-03 14:38:23.193090 osd.134 10.208.16.25:6800/1425 440 :
+> cluster [WRN] slow request 30.041999 seconds old, received at
+> 2015-10-03 14:37:53.151014: osd_op(client.1328605.0:7082862
+> rbd_data.13fdcb2ae8944a.000000000001264f [read 975360~4096]
+> 11.6d19c36f ack+read+known_if_redirected e10249) currently no flag
+> points reached
+>
+> I don't know what "no flag points reached" means.
+>
+> The problem is most pronounced when we have to reboot an OSD node (1
+> of 13), we will have hundreds of I/O blocked for some times up to 300
+> seconds. It takes a good 15 minutes for things to settle down. The
+> production cluster is very busy doing normally 8,000 I/O and peaking
+> at 15,000. This is all 4TB spindles with SSD journals and the disks
+> are between 25-50% full. We are currently splitting PGs to distribute
+> the load better across the disks, but we are having to do this 10 PGs
+> at a time as we get blocked I/O. We have max_backfills and
+> max_recovery set to 1, client op priority is set higher than recovery
+> priority. We tried increasing the number of op threads but this didn't
+> seem to help. It seems as soon as PGs are finished being checked, they
+> become active and could be the cause for slow I/O while the other PGs
+> are being checked.
+>
+> What I don't understand is that the messages are delayed. As soon as
+> the message is received by Ceph OSD process, it is very quickly
+> committed to the journal and a response is sent back to the primary
+> OSD which is received very quickly as well. I've adjust
+> min_free_kbytes and it seems to keep the OSDs from crashing, but
+> doesn't solve the main problem. We don't have swap and there is 64 GB
+> of RAM per nodes for 10 OSDs.
+>
+> Is there something that could cause the kernel to get a packet but not
+> be able to dispatch it to Ceph such that it could be explaining why we
+> are seeing these blocked I/O for 30+ seconds. Is there some pointers
+> to tracing Ceph messages from the network buffer through the kernel to
+> the Ceph process?
+>
+> We can really use some pointers no matter how outrageous. We've have
+> over 6 people looking into this for weeks now and just can't think of
+> anything else.
 >
 > Thanks,
-> ----------------
+> - -----BEGIN PGP SIGNATURE-----
+> Version: Mailvelope v1.1.0
+> Comment: https://www.mailvelope.com
+>
+> wsFcBAEBCAAQBQJWEDY1CRDmVDuy+mK58QAARgoP/RcoL1qVmg7qbQrzStar
+> NK80bqYGeYHb26xHbt1fZVgnZhXU0nN0Dv4ew0e/cYJLELSO2KCeXNfXN6F1
+> prZuzYagYEyj1Q1TOo+4h/nOQRYsTwQDdFzbHb/OUDN55C0QGZ29DjEvrqP6
+> K5l6sAQzvQDpUEEIiOCkS6pH59ira740nSmnYkEWhr1lxF/hMjb6fFlfCFe2
+> h1djM0GfY7vBHFGgI3jkw0BL5AQnWe+SCcCiKZmxY6xiR70FWl3XqK5M+nxm
+> iq74y7Dv6cpenit6boMr6qtOeIt+8ko85hVMh09Hkaqz/m2FzxAKLcahzkGF
+> Fh/M6YBzgnX7QBURTC4YQT/FVyDTW3JMuT3RKQdaX6c0iiOsVdkE+iyidWyY
+> Hr1KzWU23Ur9yBfZ39Y43jrsSiAEwHnKjSqMowSGljdTysNEAAZQhlqZIoHb
+> JlgpB39ugkHI1H5fZ5b2SIDz32/d5ywG4Gay9Rk6hp8VanvIrBbev+JYEoYT
+> 8/WX+fhueHt4dqUYWIl3HZ0CEzbXbug0xmFvhrbmL2f3t9XOkDZRbAjlYrGm
+> lswiJMDueY8JkxSnPvCQrHXqjbCcy9rMG7nTnLFz98rTcHNCwtpv0qVYhheg
+> 4YRNRVMbfNP/6xsJvG1wVOSQPwxZSPqJh42pDqMRePJl3Zn66MTx5wvdNDpk
+> l7OF
+> =3DOI++
+> - -----END PGP SIGNATURE-----
+> - ----------------
 > Robert LeBlanc
 > PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
 >
 >
-> On Wed, Sep 23, 2015 at 1:30 PM, Robert LeBlanc  wrote:
->> -----BEGIN PGP SIGNED MESSAGE-----
->> Hash: SHA256
->>
->> We were able to only get ~17Gb out of the XL710 (heavily tweaked)
->> until we went to the 4.x kernel where we got ~36Gb (no tweaking). It
->> seems that there were some major reworks in the network handling in
->> the kernel to efficiently handle that network rate. If I remember
->> right we also saw a drop in CPU utilization. I'm starting to think
->> that we did see packet loss while congesting our ISLs in our initial
->> testing, but we could not tell where the dropping was happening. We
->> saw some on the switches, but it didn't seem to be bad if we weren't
->> trying to congest things. We probably already saw this issue, just
->> didn't know it.
->> - ----------------
->> Robert LeBlanc
->> PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
->>
->>
->> On Wed, Sep 23, 2015 at 1:10 PM, Mark Nelson  wrote:
->>> FWIW, we've got some 40GbE Intel cards in the community performance cluster
->>> on a Mellanox 40GbE switch that appear (knock on wood) to be running fine
->>> with 3.10.0-229.7.2.el7.x86_64.  We did get feedback from Intel that older
->>> drivers might cause problems though.
->>>
->>> Here's ifconfig from one of the nodes:
->>>
->>> ens513f1: flags=4163  mtu 1500
->>>         inet 10.0.10.101  netmask 255.255.255.0  broadcast 10.0.10.255
->>>         inet6 fe80::6a05:caff:fe2b:7ea1  prefixlen 64  scopeid 0x20
->>>         ether 68:05:ca:2b:7e:a1  txqueuelen 1000  (Ethernet)
->>>         RX packets 169232242875  bytes 229346261232279 (208.5 TiB)
->>>         RX errors 0  dropped 0  overruns 0  frame 0
->>>         TX packets 153491686361  bytes 203976410836881 (185.5 TiB)
->>>         TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
->>>
->>> Mark
->>>
->>>
->>> On 09/23/2015 01:48 PM, Robert LeBlanc wrote:
->>>>
->>>> -----BEGIN PGP SIGNED MESSAGE-----
->>>> Hash: SHA256
->>>>
->>>> OK, here is the update on the saga...
->>>>
->>>> I traced some more of blocked I/Os and it seems that communication
->>>> between two hosts seemed worse than others. I did a two way ping flood
->>>> between the two hosts using max packet sizes (1500). After 1.5M
->>>> packets, no lost pings. Then then had the ping flood running while I
->>>> put Ceph load on the cluster and the dropped pings started increasing
->>>> after stopping the Ceph workload the pings stopped dropping.
->>>>
->>>> I then ran iperf between all the nodes with the same results, so that
->>>> ruled out Ceph to a large degree. I then booted in the the
->>>> 3.10.0-229.14.1.el7.x86_64 kernel and with an hour test so far there
->>>> hasn't been any dropped pings or blocked I/O. Our 40 Gb NICs really
->>>> need the network enhancements in the 4.x series to work well.
->>>>
->>>> Does this sound familiar to anyone? I'll probably start bisecting the
->>>> kernel to see where this issue in introduced. Both of the clusters
->>>> with this issue are running 4.x, other than that, they are pretty
->>>> differing hardware and network configs.
->>>>
->>>> Thanks,
->>>> -----BEGIN PGP SIGNATURE-----
->>>> Version: Mailvelope v1.1.0
->>>> Comment: https://www.mailvelope.com
->>>>
->>>> wsFcBAEBCAAQBQJWAvOzCRDmVDuy+mK58QAApOMP/1xmCtW++G11qcE8y/sr
->>>> RkXguqZJLc4czdOwV/tjUvhVsm5qOl4wvQCtABFZpc6t4+m5nzE3LkA1rl2l
->>>> AnARPOjh61TO6cV0CT8O0DlqtHmSd2y0ElgAUl0594eInEn7eI7crz8R543V
->>>> 7I68XU5zL/vNJ9IIx38UqdhtSzXQQL664DGq3DLINK0Yb9XRVBlFip+Slt+j
->>>> cB64TuWjOPLSH09pv7SUyksodqrTq3K7p6sQkq0MOzBkFQM1FHfOipbo/LYv
->>>> F42iiQbCvFizArMu20WeOSQ4dmrXT/iecgTfEag/Zxvor2gOi/J6d2XS9ckW
->>>> byEC5/rbm4yDBua2ZugeNxQLWq0Oa7spZnx7usLsu/6YzeDNI6kmtGURajdE
->>>> /XC8bESWKveBzmGDzjff5oaMs9A1PZURYnlYADEODGAt6byoaoQEGN6dlFGe
->>>> LwQ5nOdQYuUrWpJzTJBN3aduOxursoFY8S0eR0uXm0l1CHcp22RWBDvRinok
->>>> UWk5xRBgjDCD2gIwc+wpImZbCtiTdf0vad1uLvdxGL29iFta4THzJgUGrp98
->>>> sUqM3RaTRdJYjFcNP293H7/DC0mqpnmo0Clx3jkdHX+x1EXpJUtocSeI44LX
->>>> KWIMhe9wXtKAoHQFEcJ0o0+wrXWMevvx33HPC4q1ULrFX0ILNx5Mo0Rp944X
->>>> 4OEo
->>>> =P33I
->>>> -----END PGP SIGNATURE-----
->>>> ----------------
->>>> Robert LeBlanc
->>>> PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
->>>>
->>>>
->>>> On Tue, Sep 22, 2015 at 4:15 PM, Robert LeBlanc
->>>> wrote:
->>>>>
->>>>> -----BEGIN PGP SIGNED MESSAGE-----
->>>>> Hash: SHA256
->>>>>
->>>>> This is IPoIB and we have the MTU set to 64K. There was some issues
->>>>> pinging hosts with "No buffer space available" (hosts are currently
->>>>> configured for 4GB to test SSD caching rather than page cache). I
->>>>> found that MTU under 32K worked reliable for ping, but still had the
->>>>> blocked I/O.
->>>>>
->>>>> I reduced the MTU to 1500 and checked pings (OK), but I'm still seeing
->>>>> the blocked I/O.
->>>>> - ----------------
->>>>> Robert LeBlanc
->>>>> PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
->>>>>
->>>>>
->>>>> On Tue, Sep 22, 2015 at 3:52 PM, Sage Weil  wrote:
->>>>>>
->>>>>> On Tue, 22 Sep 2015, Samuel Just wrote:
->>>>>>>
->>>>>>> I looked at the logs, it looks like there was a 53 second delay
->>>>>>> between when osd.17 started sending the osd_repop message and when
->>>>>>> osd.13 started reading it, which is pretty weird.  Sage, didn't we
->>>>>>> once see a kernel issue which caused some messages to be mysteriously
->>>>>>> delayed for many 10s of seconds?
->>>>>>
->>>>>>
->>>>>> Every time we have seen this behavior and diagnosed it in the wild it
->>>>>> has
->>>>>> been a network misconfiguration.  Usually related to jumbo frames.
->>>>>>
->>>>>> sage
->>>>>>
->>>>>>
->>>>>>>
->>>>>>> What kernel are you running?
->>>>>>> -Sam
->>>>>>>
->>>>>>> On Tue, Sep 22, 2015 at 2:22 PM, Robert LeBlanc  wrote:
->>>>>>>>
->>>>>>>> -----BEGIN PGP SIGNED MESSAGE-----
->>>>>>>> Hash: SHA256
->>>>>>>>
->>>>>>>> OK, looping in ceph-devel to see if I can get some more eyes. I've
->>>>>>>> extracted what I think are important entries from the logs for the
->>>>>>>> first blocked request. NTP is running all the servers so the logs
->>>>>>>> should be close in terms of time. Logs for 12:50 to 13:00 are
->>>>>>>> available at http://162.144.87.113/files/ceph_block_io.logs.tar.xz
->>>>>>>>
->>>>>>>> 2015-09-22 12:55:06.500374 - osd.17 gets I/O from client
->>>>>>>> 2015-09-22 12:55:06.557160 - osd.17 submits I/O to osd.13
->>>>>>>> 2015-09-22 12:55:06.557305 - osd.17 submits I/O to osd.16
->>>>>>>> 2015-09-22 12:55:06.573711 - osd.16 gets I/O from osd.17
->>>>>>>> 2015-09-22 12:55:06.595716 - osd.17 gets ondisk result=0 from osd.16
->>>>>>>> 2015-09-22 12:55:06.640631 - osd.16 reports to osd.17 ondisk result=0
->>>>>>>> 2015-09-22 12:55:36.926691 - osd.17 reports slow I/O > 30.439150 sec
->>>>>>>> 2015-09-22 12:55:59.790591 - osd.13 gets I/O from osd.17
->>>>>>>> 2015-09-22 12:55:59.812405 - osd.17 gets ondisk result=0 from osd.13
->>>>>>>> 2015-09-22 12:56:02.941602 - osd.13 reports to osd.17 ondisk result=0
->>>>>>>>
->>>>>>>> In the logs I can see that osd.17 dispatches the I/O to osd.13 and
->>>>>>>> osd.16 almost silmutaniously. osd.16 seems to get the I/O right away,
->>>>>>>> but for some reason osd.13 doesn't get the message until 53 seconds
->>>>>>>> later. osd.17 seems happy to just wait and doesn't resend the data
->>>>>>>> (well, I'm not 100% sure how to tell which entries are the actual data
->>>>>>>> transfer).
->>>>>>>>
->>>>>>>> It looks like osd.17 is receiving responses to start the communication
->>>>>>>> with osd.13, but the op is not acknowledged until almost a minute
->>>>>>>> later. To me it seems that the message is getting received but not
->>>>>>>> passed to another thread right away or something. This test was done
->>>>>>>> with an idle cluster, a single fio client (rbd engine) with a single
->>>>>>>> thread.
->>>>>>>>
->>>>>>>> The OSD servers are almost 100% idle during these blocked I/O
->>>>>>>> requests. I think I'm at the end of my troubleshooting, so I can use
->>>>>>>> some help.
->>>>>>>>
->>>>>>>> Single Test started about
->>>>>>>> 2015-09-22 12:52:36
->>>>>>>>
->>>>>>>> 2015-09-22 12:55:36.926680 osd.17 192.168.55.14:6800/16726 56 :
->>>>>>>> cluster [WRN] 1 slow requests, 1 included below; oldest blocked for >
->>>>>>>> 30.439150 secs
->>>>>>>> 2015-09-22 12:55:36.926699 osd.17 192.168.55.14:6800/16726 57 :
->>>>>>>> cluster [WRN] slow request 30.439150 seconds old, received at
->>>>>>>> 2015-09-22 12:55:06.487451:
->>>>>>>>   osd_op(client.250874.0:1388 rbd_data.3380e2ae8944a.0000000000000545
->>>>>>>> [set-alloc-hint object_size 4194304 write_size 4194304,write
->>>>>>>> 0~4194304] 8.bbf3e8ff ack+ondisk+write+known_if_redirected e56785)
->>>>>>>>   currently waiting for subops from 13,16
->>>>>>>> 2015-09-22 12:55:36.697904 osd.16 192.168.55.13:6800/29410 7 : cluster
->>>>>>>> [WRN] 2 slow requests, 2 included below; oldest blocked for >
->>>>>>>> 30.379680 secs
->>>>>>>> 2015-09-22 12:55:36.697918 osd.16 192.168.55.13:6800/29410 8 : cluster
->>>>>>>> [WRN] slow request 30.291520 seconds old, received at 2015-09-22
->>>>>>>> 12:55:06.406303:
->>>>>>>>   osd_op(client.250874.0:1384 rbd_data.3380e2ae8944a.0000000000000541
->>>>>>>> [set-alloc-hint object_size 4194304 write_size 4194304,write
->>>>>>>> 0~4194304] 8.5fb2123f ack+ondisk+write+known_if_redirected e56785)
->>>>>>>>   currently waiting for subops from 13,17
->>>>>>>> 2015-09-22 12:55:36.697927 osd.16 192.168.55.13:6800/29410 9 : cluster
->>>>>>>> [WRN] slow request 30.379680 seconds old, received at 2015-09-22
->>>>>>>> 12:55:06.318144:
->>>>>>>>   osd_op(client.250874.0:1382 rbd_data.3380e2ae8944a.000000000000053f
->>>>>>>> [set-alloc-hint object_size 4194304 write_size 4194304,write
->>>>>>>> 0~4194304] 8.312e69ca ack+ondisk+write+known_if_redirected e56785)
->>>>>>>>   currently waiting for subops from 13,14
->>>>>>>> 2015-09-22 12:58:03.998275 osd.13 192.168.55.12:6804/4574 130 :
->>>>>>>> cluster [WRN] 1 slow requests, 1 included below; oldest blocked for >
->>>>>>>> 30.954212 secs
->>>>>>>> 2015-09-22 12:58:03.998286 osd.13 192.168.55.12:6804/4574 131 :
->>>>>>>> cluster [WRN] slow request 30.954212 seconds old, received at
->>>>>>>> 2015-09-22 12:57:33.044003:
->>>>>>>>   osd_op(client.250874.0:1873 rbd_data.3380e2ae8944a.000000000000070d
->>>>>>>> [set-alloc-hint object_size 4194304 write_size 4194304,write
->>>>>>>> 0~4194304] 8.e69870d4 ack+ondisk+write+known_if_redirected e56785)
->>>>>>>>   currently waiting for subops from 16,17
->>>>>>>> 2015-09-22 12:58:03.759826 osd.16 192.168.55.13:6800/29410 10 :
->>>>>>>> cluster [WRN] 1 slow requests, 1 included below; oldest blocked for >
->>>>>>>> 30.704367 secs
->>>>>>>> 2015-09-22 12:58:03.759840 osd.16 192.168.55.13:6800/29410 11 :
->>>>>>>> cluster [WRN] slow request 30.704367 seconds old, received at
->>>>>>>> 2015-09-22 12:57:33.055404:
->>>>>>>>   osd_op(client.250874.0:1874 rbd_data.3380e2ae8944a.000000000000070e
->>>>>>>> [set-alloc-hint object_size 4194304 write_size 4194304,write
->>>>>>>> 0~4194304] 8.f7635819 ack+ondisk+write+known_if_redirected e56785)
->>>>>>>>   currently waiting for subops from 13,17
->>>>>>>>
->>>>>>>> Server   IP addr              OSD
->>>>>>>> nodev  - 192.168.55.11 - 12
->>>>>>>> nodew  - 192.168.55.12 - 13
->>>>>>>> nodex  - 192.168.55.13 - 16
->>>>>>>> nodey  - 192.168.55.14 - 17
->>>>>>>> nodez  - 192.168.55.15 - 14
->>>>>>>> nodezz - 192.168.55.16 - 15
->>>>>>>>
->>>>>>>> fio job:
->>>>>>>> [rbd-test]
->>>>>>>> readwrite=write
->>>>>>>> blocksize=4M
->>>>>>>> #runtime=60
->>>>>>>> name=rbd-test
->>>>>>>> #readwrite=randwrite
->>>>>>>> #bssplit=4k/85:32k/11:512/3:1m/1,4k/89:32k/10:512k/1
->>>>>>>> #rwmixread=72
->>>>>>>> #norandommap
->>>>>>>> #size=1T
->>>>>>>> #blocksize=4k
->>>>>>>> ioengine=rbd
->>>>>>>> rbdname=test2
->>>>>>>> pool=rbd
->>>>>>>> clientname=admin
->>>>>>>> iodepth=8
->>>>>>>> #numjobs=4
->>>>>>>> #thread
->>>>>>>> #group_reporting
->>>>>>>> #time_based
->>>>>>>> #direct=1
->>>>>>>> #ramp_time=60
->>>>>>>>
->>>>>>>>
->>>>>>>> Thanks,
->>>>>>>> -----BEGIN PGP SIGNATURE-----
->>>>>>>> Version: Mailvelope v1.1.0
->>>>>>>> Comment: https://www.mailvelope.com
->>>>>>>>
->>>>>>>> wsFcBAEBCAAQBQJWAcaKCRDmVDuy+mK58QAAPMsQAKBnS94fwuw0OqpPU3/z
->>>>>>>> tL8Z6TVRxrNigf721+2ClIu4LIH71bupDc3DgrrysQmmqGuvEMn68spmasWu
->>>>>>>> h9I/CqqgRpHqe4lUVoUEjyWA9/6Dbb6NiHSdpJ6p5jpGc8kZCvNS+ocDgFOl
->>>>>>>> 903i0M0E9eEMeci5O/hrMrx1FG8SN2LS8nI261aNHMOwQK0bw8wWiCJEvqVB
->>>>>>>> sz1/+jK1BJoeIYfaT9HfUXBAvfo/W3tY/vj9KbJuZJ5AMpeYPvEHu/LAr1N7
->>>>>>>> FzzUc7a6EMlaxmSd0ML49JbV0cY9BMDjfrkKEQNKlzszlEHm3iif98QtsxbF
->>>>>>>> pPJ0hZ0G53BY3k976OWVMFm3WFRWUVOb/oiLF8H6PCm59b4LBNAg6iPNH1AI
->>>>>>>> 5XhEcPpg06M03vqUaIiY9P1kQlvnn0yCXf82IUEgmg///vhxDsHWmcwClLEn
->>>>>>>> B0VszouStTzlMYnc/2vlUiI4gFVeilWLMW00VGTWV+7V1oIzIYvWHyl2QpBq
->>>>>>>> 4/ZwVjQ43qLfuDTS4o+IJ4ztOMd26vIv6Mn6WVwKCjoCXJc8ajywR9Dy+6lL
->>>>>>>> o8oJ+tn7hMc9Qy1iBhu3/QIP4WCsUf9RVeu60oahNEpde89qW32S9CZlrJDO
->>>>>>>> gf4iTryRjkAhdmZIj9JiaE8jQ6dvN817D9cqs/CXKV9vhzYoM7p5YWHghBKB
->>>>>>>> J3hS
->>>>>>>> =0J7F
->>>>>>>> -----END PGP SIGNATURE-----
->>>>>>>> ----------------
->>>>>>>> Robert LeBlanc
->>>>>>>> PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
->>>>>>>>
->>>>>>>>
->>>>>>>> On Tue, Sep 22, 2015 at 8:31 AM, Gregory Farnum  wrote:
->>>>>>>>>
->>>>>>>>> On Tue, Sep 22, 2015 at 7:24 AM, Robert LeBlanc  wrote:
->>>>>>>>>>
->>>>>>>>>> -----BEGIN PGP SIGNED MESSAGE-----
->>>>>>>>>> Hash: SHA256
->>>>>>>>>>
->>>>>>>>>> Is there some way to tell in the logs that this is happening?
->>>>>>>>>
->>>>>>>>>
->>>>>>>>> You can search for the (mangled) name _split_collection
->>>>>>>>>>
->>>>>>>>>> I'm not
->>>>>>>>>> seeing much I/O, CPU usage during these times. Is there some way to
->>>>>>>>>> prevent the splitting? Is there a negative side effect to doing so?
->>>>>>>>>
->>>>>>>>>
->>>>>>>>> Bump up the split and merge thresholds. You can search the list for
->>>>>>>>> this, it was discussed not too long ago.
->>>>>>>>>
->>>>>>>>>> We've had I/O block for over 900 seconds and as soon as the sessions
->>>>>>>>>> are aborted, they are reestablished and complete immediately.
->>>>>>>>>>
->>>>>>>>>> The fio test is just a seq write, starting it over (rewriting from
->>>>>>>>>> the
->>>>>>>>>> beginning) is still causing the issue. I was suspect that it is not
->>>>>>>>>> having to create new file and therefore split collections. This is
->>>>>>>>>> on
->>>>>>>>>> my test cluster with no other load.
->>>>>>>>>
->>>>>>>>>
->>>>>>>>> Hmm, that does make it seem less likely if you're really not creating
->>>>>>>>> new objects, if you're actually running fio in such a way that it's
->>>>>>>>> not allocating new FS blocks (this is probably hard to set up?).
->>>>>>>>>
->>>>>>>>>>
->>>>>>>>>> I'll be doing a lot of testing today. Which log options and depths
->>>>>>>>>> would be the most helpful for tracking this issue down?
->>>>>>>>>
->>>>>>>>>
->>>>>>>>> If you want to go log diving "debug osd = 20", "debug filestore =
->>>>>>>>> 20",
->>>>>>>>> "debug ms = 1" are what the OSD guys like to see. That should spit
->>>>>>>>> out
->>>>>>>>> everything you need to track exactly what each Op is doing.
->>>>>>>>> -Greg
->>>>>>>>
->>>>>>>> --
->>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->>>>>>>> in
->>>>>>>> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
->>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>>>
->>>>>>>
->>>>>>>
->>>>>
->>>>> -----BEGIN PGP SIGNATURE-----
->>>>> Version: Mailvelope v1.1.0
->>>>> Comment: https://www.mailvelope.com
->>>>>
->>>>> wsFcBAEBCAAQBQJWAdMSCRDmVDuy+mK58QAAoEgP/AqpH7i1BLpoz6fTlfWG
->>>>> a6swvF8xvsyR15PDiPINYT0N7MgoikikGrMmhWpJ6utEr1XPW0MPFgzvNIsf
->>>>> a1eMtNzyww4rAo6JCq6BtjmUsSKmOrBNhRNr6It9v4Nv+biqZHkiY8x/rRtV
->>>>> s9z0cv3Q9Wqa6y/zKZg3H1XtbtUAx0r/DUwzSsP3omupZgNyaKkCgdkil9Vc
->>>>> iyzBxFZU4+qXNT2FBG4dYDjxSHQv4psjvKR3AWXSN4yEn286KyMDjFrsDY5B
->>>>> izS3h603QPoErqsUQngDE8COcaTAHHrV7gNJTikmGoNW6oQBjFq/z/zindTz
->>>>> caXshVQQ+OTLo/qzJM8QPswh0TGU74SVbDkTq+eTOb5pBhQbp+42Pkkqh7jj
->>>>> efyyYgDzpB1WrWRbUlWMNqmnjq7DT3lnAtuHyKbkwVs8x3JMPEiCl6PBvJbx
->>>>> GnNSCqgDJrpb4fHQ2iqfQeh8Ai6AL1C1Ai19RZPrAUhpDW0/DbUvuoKSR8m7
->>>>> glYYuH3hpy+oPYRhFcHm2fpNJ3u9npyk2Dai9RpzQ+mWmp3xi7becYmL482H
->>>>> +WyvLeY+8AiJQDpA0CdD8KeSlOC9bw5TPmihAIn9dVTJ1O2RlapCLqL3YAJg
->>>>> pGyDs8ercTEJLmvEyElj5XWh5DarsGscd2LELNS/UpyuYurbPcyPKUQ0uPjp
->>>>> gcZm
->>>>> =CjwB
->>>>> -----END PGP SIGNATURE-----
->>>>
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>
->>>
->>
->> -----BEGIN PGP SIGNATURE-----
->> Version: Mailvelope v1.1.0
->> Comment: https://www.mailvelope.com
->>
->> wsFcBAEBCAAQBQJWAv3QCRDmVDuy+mK58QAABr4QAJcQj8zjl606aMdkmQG7
->> S46iMXVav/Tv2os9GCUsQmMPx2u1w3/WmPfjByd6Divczfo0JLDDqrbsqre2
->> lq0GNK6e8fq6FXHhPpnL+t4uFV4UZ289cma3yklRqEBDXWHlP59Hu7VpxC5l
->> 0MIcCg4wM5VM/LkrfcMven5em5CnjyFJYbActGzw9043rZoyUwCM+eL7sotl
->> JYHMcNWnqwdt8TLFDhUfVGiAQyV8/6E33CuCNUEuFGdtiBKzs9IZadOI8Ce0
->> dod2DQNyFSvomqNq6t0DuTCSA+pT8uuks2O0NcrHjoqwIWVkxQGPYlpbpckf
->> nxQdVM7vkqapVeQ0qUZx43Db9A5wDTC3PaEfVJZPZzWsSDjh9z7o6qHs3Kvp
->> krfyS+dJaZ3tOYAP1VFDfasj06sOTFu3mfGYToKA75zz5HN7QZ13Zau/qhDu
->> FHxsgk4oIXJsjj22LiSpoiigH5Ls+aVqtIbg8/vWp+EO6pK1fovEtJVeGAfE
->> tLOdxfJJLVjMCAScFG9BRl1ePPLeptivKV0v9ruWsTpn+Q96VtqAR5GQCkYE
->> hFrlxM+oIzHeArhhiIxSPCYLlnzxoD5IYXmTrWUYBCGvlY1mrI3j80mZ4VTj
->> BErsSlqnjUyFKmaI7YNKyARCloMroz3wqdy/wpg/63Io62nmh5IyY+WO8hPo
->> ae22
->> =AX+L
->> -----END PGP SIGNATURE-----
-_______________________________________________
-ceph-users mailing
-listceph-users-idqoXFIVOFIuzjOF24JIZ5en40jlLrCI@public.gmane.org://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> On Fri, Sep 25, 2015 at 2:40 PM, Robert LeBlanc  wrote:
+> > We dropped the replication on our cluster from 4 to 3 and it looks
+> > like all the blocked I/O has stopped (no entries in the log for the
+> > last 12 hours). This makes me believe that there is some issue with
+> > the number of sockets or some other TCP issue. We have not messed with
+> > Ephemeral ports and TIME_WAIT at this point. There are 130 OSDs, 8 KVM
+> > hosts hosting about 150 VMs. Open files is set at 32K for the OSD
+> > processes and 16K system wide.
+> >
+> > Does this seem like the right spot to be looking? What are some
+> > configuration items we should be looking at?
+> >
+> > Thanks,
+> > ----------------
+> > Robert LeBlanc
+> > PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
+> >
+> >
+> > On Wed, Sep 23, 2015 at 1:30 PM, Robert LeBlanc  wrote:
+> >> -----BEGIN PGP SIGNED MESSAGE-----
+> >> Hash: SHA256
+> >>
+> >> We were able to only get ~17Gb out of the XL710 (heavily tweaked)
+> >> until we went to the 4.x kernel where we got ~36Gb (no tweaking). It
+> >> seems that there were some major reworks in the network handling in
+> >> the kernel to efficiently handle that network rate. If I remember
+> >> right we also saw a drop in CPU utilization. I'm starting to think
+> >> that we did see packet loss while congesting our ISLs in our initial
+> >> testing, but we could not tell where the dropping was happening. We
+> >> saw some on the switches, but it didn't seem to be bad if we weren't
+> >> trying to congest things. We probably already saw this issue, just
+> >> didn't know it.
+> >> - ----------------
+> >> Robert LeBlanc
+> >> PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
+> >>
+> >>
+> >> On Wed, Sep 23, 2015 at 1:10 PM, Mark Nelson  wrote:
+> >>> FWIW, we've got some 40GbE Intel cards in the community performance c=
+luster
+> >>> on a Mellanox 40GbE switch that appear (knock on wood) to be running =
+fine
+> >>> with 3.10.0-229.7.2.el7.x86_64.  We did get feedback from Intel that =
+older
+> >>> drivers might cause problems though.
+> >>>
+> >>> Here's ifconfig from one of the nodes:
+> >>>
+> >>> ens513f1: flags=3D4163  mtu 1500
+> >>>         inet 10.0.10.101  netmask 255.255.255.0  broadcast 10.0.10.25=
+5
+> >>>         inet6 fe80::6a05:caff:fe2b:7ea1  prefixlen 64  scopeid 0x20
+> >>>         ether 68:05:ca:2b:7e:a1  txqueuelen 1000  (Ethernet)
+> >>>         RX packets 169232242875  bytes 229346261232279 (208.5 TiB)
+> >>>         RX errors 0  dropped 0  overruns 0  frame 0
+> >>>         TX packets 153491686361  bytes 203976410836881 (185.5 TiB)
+> >>>         TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+> >>>
+> >>> Mark
+> >>>
+> >>>
+> >>> On 09/23/2015 01:48 PM, Robert LeBlanc wrote:
+> >>>>
+> >>>> -----BEGIN PGP SIGNED MESSAGE-----
+> >>>> Hash: SHA256
+> >>>>
+> >>>> OK, here is the update on the saga...
+> >>>>
+> >>>> I traced some more of blocked I/Os and it seems that communication
+> >>>> between two hosts seemed worse than others. I did a two way ping flo=
+od
+> >>>> between the two hosts using max packet sizes (1500). After 1.5M
+> >>>> packets, no lost pings. Then then had the ping flood running while I
+> >>>> put Ceph load on the cluster and the dropped pings started increasin=
+g
+> >>>> after stopping the Ceph workload the pings stopped dropping.
+> >>>>
+> >>>> I then ran iperf between all the nodes with the same results, so tha=
+t
+> >>>> ruled out Ceph to a large degree. I then booted in the the
+> >>>> 3.10.0-229.14.1.el7.x86_64 kernel and with an hour test so far there
+> >>>> hasn't been any dropped pings or blocked I/O. Our 40 Gb NICs really
+> >>>> need the network enhancements in the 4.x series to work well.
+> >>>>
+> >>>> Does this sound familiar to anyone? I'll probably start bisecting th=
+e
+> >>>> kernel to see where this issue in introduced. Both of the clusters
+> >>>> with this issue are running 4.x, other than that, they are pretty
+> >>>> differing hardware and network configs.
+> >>>>
+> >>>> Thanks,
+> >>>> -----BEGIN PGP SIGNATURE-----
+> >>>> Version: Mailvelope v1.1.0
+> >>>> Comment: https://www.mailvelope.com
+> >>>>
+> >>>> wsFcBAEBCAAQBQJWAvOzCRDmVDuy+mK58QAApOMP/1xmCtW++G11qcE8y/sr
+> >>>> RkXguqZJLc4czdOwV/tjUvhVsm5qOl4wvQCtABFZpc6t4+m5nzE3LkA1rl2l
+> >>>> AnARPOjh61TO6cV0CT8O0DlqtHmSd2y0ElgAUl0594eInEn7eI7crz8R543V
+> >>>> 7I68XU5zL/vNJ9IIx38UqdhtSzXQQL664DGq3DLINK0Yb9XRVBlFip+Slt+j
+> >>>> cB64TuWjOPLSH09pv7SUyksodqrTq3K7p6sQkq0MOzBkFQM1FHfOipbo/LYv
+> >>>> F42iiQbCvFizArMu20WeOSQ4dmrXT/iecgTfEag/Zxvor2gOi/J6d2XS9ckW
+> >>>> byEC5/rbm4yDBua2ZugeNxQLWq0Oa7spZnx7usLsu/6YzeDNI6kmtGURajdE
+> >>>> /XC8bESWKveBzmGDzjff5oaMs9A1PZURYnlYADEODGAt6byoaoQEGN6dlFGe
+> >>>> LwQ5nOdQYuUrWpJzTJBN3aduOxursoFY8S0eR0uXm0l1CHcp22RWBDvRinok
+> >>>> UWk5xRBgjDCD2gIwc+wpImZbCtiTdf0vad1uLvdxGL29iFta4THzJgUGrp98
+> >>>> sUqM3RaTRdJYjFcNP293H7/DC0mqpnmo0Clx3jkdHX+x1EXpJUtocSeI44LX
+> >>>> KWIMhe9wXtKAoHQFEcJ0o0+wrXWMevvx33HPC4q1ULrFX0ILNx5Mo0Rp944X
+> >>>> 4OEo
+> >>>> =3DP33I
+> >>>> -----END PGP SIGNATURE-----
+> >>>> ----------------
+> >>>> Robert LeBlanc
+> >>>> PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
+> >>>>
+> >>>>
+> >>>> On Tue, Sep 22, 2015 at 4:15 PM, Robert LeBlanc
+> >>>> wrote:
+> >>>>>
+> >>>>> -----BEGIN PGP SIGNED MESSAGE-----
+> >>>>> Hash: SHA256
+> >>>>>
+> >>>>> This is IPoIB and we have the MTU set to 64K. There was some issues
+> >>>>> pinging hosts with "No buffer space available" (hosts are currently
+> >>>>> configured for 4GB to test SSD caching rather than page cache). I
+> >>>>> found that MTU under 32K worked reliable for ping, but still had th=
+e
+> >>>>> blocked I/O.
+> >>>>>
+> >>>>> I reduced the MTU to 1500 and checked pings (OK), but I'm still see=
+ing
+> >>>>> the blocked I/O.
+> >>>>> - ----------------
+> >>>>> Robert LeBlanc
+> >>>>> PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
+> >>>>>
+> >>>>>
+> >>>>> On Tue, Sep 22, 2015 at 3:52 PM, Sage Weil  wrote:
+> >>>>>>
+> >>>>>> On Tue, 22 Sep 2015, Samuel Just wrote:
+> >>>>>>>
+> >>>>>>> I looked at the logs, it looks like there was a 53 second delay
+> >>>>>>> between when osd.17 started sending the osd_repop message and whe=
+n
+> >>>>>>> osd.13 started reading it, which is pretty weird.  Sage, didn't w=
+e
+> >>>>>>> once see a kernel issue which caused some messages to be mysterio=
+usly
+> >>>>>>> delayed for many 10s of seconds?
+> >>>>>>
+> >>>>>>
+> >>>>>> Every time we have seen this behavior and diagnosed it in the wild=
+ it
+> >>>>>> has
+> >>>>>> been a network misconfiguration.  Usually related to jumbo frames.
+> >>>>>>
+> >>>>>> sage
+> >>>>>>
+> >>>>>>
+> >>>>>>>
+> >>>>>>> What kernel are you running?
+> >>>>>>> -Sam
+> >>>>>>>
+> >>>>>>> On Tue, Sep 22, 2015 at 2:22 PM, Robert LeBlanc  wrote:
+> >>>>>>>>
+> >>>>>>>> -----BEGIN PGP SIGNED MESSAGE-----
+> >>>>>>>> Hash: SHA256
+> >>>>>>>>
+> >>>>>>>> OK, looping in ceph-devel to see if I can get some more eyes. I'=
+ve
+> >>>>>>>> extracted what I think are important entries from the logs for t=
+he
+> >>>>>>>> first blocked request. NTP is running all the servers so the log=
+s
+> >>>>>>>> should be close in terms of time. Logs for 12:50 to 13:00 are
+> >>>>>>>> available at http://162.144.87.113/files/ceph_block_io.logs.tar.=
+xz
+> >>>>>>>>
+> >>>>>>>> 2015-09-22 12:55:06.500374 - osd.17 gets I/O from client
+> >>>>>>>> 2015-09-22 12:55:06.557160 - osd.17 submits I/O to osd.13
+> >>>>>>>> 2015-09-22 12:55:06.557305 - osd.17 submits I/O to osd.16
+> >>>>>>>> 2015-09-22 12:55:06.573711 - osd.16 gets I/O from osd.17
+> >>>>>>>> 2015-09-22 12:55:06.595716 - osd.17 gets ondisk result=3D0 from =
+osd.16
+> >>>>>>>> 2015-09-22 12:55:06.640631 - osd.16 reports to osd.17 ondisk res=
+ult=3D0
+> >>>>>>>> 2015-09-22 12:55:36.926691 - osd.17 reports slow I/O > 30.439150=
+ sec
+> >>>>>>>> 2015-09-22 12:55:59.790591 - osd.13 gets I/O from osd.17
+> >>>>>>>> 2015-09-22 12:55:59.812405 - osd.17 gets ondisk result=3D0 from =
+osd.13
+> >>>>>>>> 2015-09-22 12:56:02.941602 - osd.13 reports to osd.17 ondisk res=
+ult=3D0
+> >>>>>>>>
+> >>>>>>>> In the logs I can see that osd.17 dispatches the I/O to osd.13 a=
+nd
+> >>>>>>>> osd.16 almost silmutaniously. osd.16 seems to get the I/O right =
+away,
+> >>>>>>>> but for some reason osd.13 doesn't get the message until 53 seco=
+nds
+> >>>>>>>> later. osd.17 seems happy to just wait and doesn't resend the da=
+ta
+> >>>>>>>> (well, I'm not 100% sure how to tell which entries are the actua=
+l data
+> >>>>>>>> transfer).
+> >>>>>>>>
+> >>>>>>>> It looks like osd.17 is receiving responses to start the communi=
+cation
+> >>>>>>>> with osd.13, but the op is not acknowledged until almost a minut=
+e
+> >>>>>>>> later. To me it seems that the message is getting received but n=
+ot
+> >>>>>>>> passed to another thread right away or something. This test was =
+done
+> >>>>>>>> with an idle cluster, a single fio client (rbd engine) with a si=
+ngle
+> >>>>>>>> thread.
+> >>>>>>>>
+> >>>>>>>> The OSD servers are almost 100% idle during these blocked I/O
+> >>>>>>>> requests. I think I'm at the end of my troubleshooting, so I can=
+ use
+> >>>>>>>> some help.
+> >>>>>>>>
+> >>>>>>>> Single Test started about
+> >>>>>>>> 2015-09-22 12:52:36
+> >>>>>>>>
+> >>>>>>>> 2015-09-22 12:55:36.926680 osd.17 192.168.55.14:6800/16726 56 :
+> >>>>>>>> cluster [WRN] 1 slow requests, 1 included below; oldest blocked =
+for >
+> >>>>>>>> 30.439150 secs
+> >>>>>>>> 2015-09-22 12:55:36.926699 osd.17 192.168.55.14:6800/16726 57 :
+> >>>>>>>> cluster [WRN] slow request 30.439150 seconds old, received at
+> >>>>>>>> 2015-09-22 12:55:06.487451:
+> >>>>>>>>   osd_op(client.250874.0:1388 rbd_data.3380e2ae8944a.00000000000=
+00545
+> >>>>>>>> [set-alloc-hint object_size 4194304 write_size 4194304,write
+> >>>>>>>> 0~4194304] 8.bbf3e8ff ack+ondisk+write+known_if_redirected e5678=
+5)
+> >>>>>>>>   currently waiting for subops from 13,16
+> >>>>>>>> 2015-09-22 12:55:36.697904 osd.16 192.168.55.13:6800/29410 7 : c=
+luster
+> >>>>>>>> [WRN] 2 slow requests, 2 included below; oldest blocked for >
+> >>>>>>>> 30.379680 secs
+> >>>>>>>> 2015-09-22 12:55:36.697918 osd.16 192.168.55.13:6800/29410 8 : c=
+luster
+> >>>>>>>> [WRN] slow request 30.291520 seconds old, received at 2015-09-22
+> >>>>>>>> 12:55:06.406303:
+> >>>>>>>>   osd_op(client.250874.0:1384 rbd_data.3380e2ae8944a.00000000000=
+00541
+> >>>>>>>> [set-alloc-hint object_size 4194304 write_size 4194304,write
+> >>>>>>>> 0~4194304] 8.5fb2123f ack+ondisk+write+known_if_redirected e5678=
+5)
+> >>>>>>>>   currently waiting for subops from 13,17
+> >>>>>>>> 2015-09-22 12:55:36.697927 osd.16 192.168.55.13:6800/29410 9 : c=
+luster
+> >>>>>>>> [WRN] slow request 30.379680 seconds old, received at 2015-09-22
+> >>>>>>>> 12:55:06.318144:
+> >>>>>>>>   osd_op(client.250874.0:1382 rbd_data.3380e2ae8944a.00000000000=
+0053f
+> >>>>>>>> [set-alloc-hint object_size 4194304 write_size 4194304,write
+> >>>>>>>> 0~4194304] 8.312e69ca ack+ondisk+write+known_if_redirected e5678=
+5)
+> >>>>>>>>   currently waiting for subops from 13,14
+> >>>>>>>> 2015-09-22 12:58:03.998275 osd.13 192.168.55.12:6804/4574 130 :
+> >>>>>>>> cluster [WRN] 1 slow requests, 1 included below; oldest blocked =
+for >
+> >>>>>>>> 30.954212 secs
+> >>>>>>>> 2015-09-22 12:58:03.998286 osd.13 192.168.55.12:6804/4574 131 :
+> >>>>>>>> cluster [WRN] slow request 30.954212 seconds old, received at
+> >>>>>>>> 2015-09-22 12:57:33.044003:
+> >>>>>>>>   osd_op(client.250874.0:1873 rbd_data.3380e2ae8944a.00000000000=
+0070d
+> >>>>>>>> [set-alloc-hint object_size 4194304 write_size 4194304,write
+> >>>>>>>> 0~4194304] 8.e69870d4 ack+ondisk+write+known_if_redirected e5678=
+5)
+> >>>>>>>>   currently waiting for subops from 16,17
+> >>>>>>>> 2015-09-22 12:58:03.759826 osd.16 192.168.55.13:6800/29410 10 :
+> >>>>>>>> cluster [WRN] 1 slow requests, 1 included below; oldest blocked =
+for >
+> >>>>>>>> 30.704367 secs
+> >>>>>>>> 2015-09-22 12:58:03.759840 osd.16 192.168.55.13:6800/29410 11 :
+> >>>>>>>> cluster [WRN] slow request 30.704367 seconds old, received at
+> >>>>>>>> 2015-09-22 12:57:33.055404:
+> >>>>>>>>   osd_op(client.250874.0:1874 rbd_data.3380e2ae8944a.00000000000=
+0070e
+> >>>>>>>> [set-alloc-hint object_size 4194304 write_size 4194304,write
+> >>>>>>>> 0~4194304] 8.f7635819 ack+ondisk+write+known_if_redirected e5678=
+5)
+> >>>>>>>>   currently waiting for subops from 13,17
+> >>>>>>>>
+> >>>>>>>> Server   IP addr              OSD
+> >>>>>>>> nodev  - 192.168.55.11 - 12
+> >>>>>>>> nodew  - 192.168.55.12 - 13
+> >>>>>>>> nodex  - 192.168.55.13 - 16
+> >>>>>>>> nodey  - 192.168.55.14 - 17
+> >>>>>>>> nodez  - 192.168.55.15 - 14
+> >>>>>>>> nodezz - 192.168.55.16 - 15
+> >>>>>>>>
+> >>>>>>>> fio job:
+> >>>>>>>> [rbd-test]
+> >>>>>>>> readwrite=3Dwrite
+> >>>>>>>> blocksize=3D4M
+> >>>>>>>> #runtime=3D60
+> >>>>>>>> name=3Drbd-test
+> >>>>>>>> #readwrite=3Drandwrite
+> >>>>>>>> #bssplit=3D4k/85:32k/11:512/3:1m/1,4k/89:32k/10:512k/1
+> >>>>>>>> #rwmixread=3D72
+> >>>>>>>> #norandommap
+> >>>>>>>> #size=3D1T
+> >>>>>>>> #blocksize=3D4k
+> >>>>>>>> ioengine=3Drbd
+> >>>>>>>> rbdname=3Dtest2
+> >>>>>>>> pool=3Drbd
+> >>>>>>>> clientname=3Dadmin
+> >>>>>>>> iodepth=3D8
+> >>>>>>>> #numjobs=3D4
+> >>>>>>>> #thread
+> >>>>>>>> #group_reporting
+> >>>>>>>> #time_based
+> >>>>>>>> #direct=3D1
+> >>>>>>>> #ramp_time=3D60
+> >>>>>>>>
+> >>>>>>>>
+> >>>>>>>> Thanks,
+> >>>>>>>> -----BEGIN PGP SIGNATURE-----
+> >>>>>>>> Version: Mailvelope v1.1.0
+> >>>>>>>> Comment: https://www.mailvelope.com
+> >>>>>>>>
+> >>>>>>>> wsFcBAEBCAAQBQJWAcaKCRDmVDuy+mK58QAAPMsQAKBnS94fwuw0OqpPU3/z
+> >>>>>>>> tL8Z6TVRxrNigf721+2ClIu4LIH71bupDc3DgrrysQmmqGuvEMn68spmasWu
+> >>>>>>>> h9I/CqqgRpHqe4lUVoUEjyWA9/6Dbb6NiHSdpJ6p5jpGc8kZCvNS+ocDgFOl
+> >>>>>>>> 903i0M0E9eEMeci5O/hrMrx1FG8SN2LS8nI261aNHMOwQK0bw8wWiCJEvqVB
+> >>>>>>>> sz1/+jK1BJoeIYfaT9HfUXBAvfo/W3tY/vj9KbJuZJ5AMpeYPvEHu/LAr1N7
+> >>>>>>>> FzzUc7a6EMlaxmSd0ML49JbV0cY9BMDjfrkKEQNKlzszlEHm3iif98QtsxbF
+> >>>>>>>> pPJ0hZ0G53BY3k976OWVMFm3WFRWUVOb/oiLF8H6PCm59b4LBNAg6iPNH1AI
+> >>>>>>>> 5XhEcPpg06M03vqUaIiY9P1kQlvnn0yCXf82IUEgmg///vhxDsHWmcwClLEn
+> >>>>>>>> B0VszouStTzlMYnc/2vlUiI4gFVeilWLMW00VGTWV+7V1oIzIYvWHyl2QpBq
+> >>>>>>>> 4/ZwVjQ43qLfuDTS4o+IJ4ztOMd26vIv6Mn6WVwKCjoCXJc8ajywR9Dy+6lL
+> >>>>>>>> o8oJ+tn7hMc9Qy1iBhu3/QIP4WCsUf9RVeu60oahNEpde89qW32S9CZlrJDO
+> >>>>>>>> gf4iTryRjkAhdmZIj9JiaE8jQ6dvN817D9cqs/CXKV9vhzYoM7p5YWHghBKB
+> >>>>>>>> J3hS
+> >>>>>>>> =3D0J7F
+> >>>>>>>> -----END PGP SIGNATURE-----
+> >>>>>>>> ----------------
+> >>>>>>>> Robert LeBlanc
+> >>>>>>>> PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9=
+F1
+> >>>>>>>>
+> >>>>>>>>
+> >>>>>>>> On Tue, Sep 22, 2015 at 8:31 AM, Gregory Farnum  wrote:
+> >>>>>>>>>
+> >>>>>>>>> On Tue, Sep 22, 2015 at 7:24 AM, Robert LeBlanc  wrote:
+> >>>>>>>>>>
+> >>>>>>>>>> -----BEGIN PGP SIGNED MESSAGE-----
+> >>>>>>>>>> Hash: SHA256
+> >>>>>>>>>>
+> >>>>>>>>>> Is there some way to tell in the logs that this is happening?
+> >>>>>>>>>
+> >>>>>>>>>
+> >>>>>>>>> You can search for the (mangled) name _split_collection
+> >>>>>>>>>>
+> >>>>>>>>>> I'm not
+> >>>>>>>>>> seeing much I/O, CPU usage during these times. Is there some w=
+ay to
+> >>>>>>>>>> prevent the splitting? Is there a negative side effect to doin=
+g so?
+> >>>>>>>>>
+> >>>>>>>>>
+> >>>>>>>>> Bump up the split and merge thresholds. You can search the list=
+ for
+> >>>>>>>>> this, it was discussed not too long ago.
+> >>>>>>>>>
+> >>>>>>>>>> We've had I/O block for over 900 seconds and as soon as the se=
+ssions
+> >>>>>>>>>> are aborted, they are reestablished and complete immediately.
+> >>>>>>>>>>
+> >>>>>>>>>> The fio test is just a seq write, starting it over (rewriting =
+from
+> >>>>>>>>>> the
+> >>>>>>>>>> beginning) is still causing the issue. I was suspect that it i=
+s not
+> >>>>>>>>>> having to create new file and therefore split collections. Thi=
+s is
+> >>>>>>>>>> on
+> >>>>>>>>>> my test cluster with no other load.
+> >>>>>>>>>
+> >>>>>>>>>
+> >>>>>>>>> Hmm, that does make it seem less likely if you're really not cr=
+eating
+> >>>>>>>>> new objects, if you're actually running fio in such a way that =
+it's
+> >>>>>>>>> not allocating new FS blocks (this is probably hard to set up?)=
+.
+> >>>>>>>>>
+> >>>>>>>>>>
+> >>>>>>>>>> I'll be doing a lot of testing today. Which log options and de=
+pths
+> >>>>>>>>>> would be the most helpful for tracking this issue down?
+> >>>>>>>>>
+> >>>>>>>>>
+> >>>>>>>>> If you want to go log diving "debug osd =3D 20", "debug filesto=
+re =3D
+> >>>>>>>>> 20",
+> >>>>>>>>> "debug ms =3D 1" are what the OSD guys like to see. That should=
+ spit
+> >>>>>>>>> out
+> >>>>>>>>> everything you need to track exactly what each Op is doing.
+> >>>>>>>>> -Greg
+> >>>>>>>>
+> >>>>>>>> --
+> >>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-d=
+evel"
+> >>>>>>>> in
+> >>>>>>>> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> >>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.ht=
+ml
+> >>>>>>>
+> >>>>>>>
+> >>>>>>>
+> >>>>>
+> >>>>> -----BEGIN PGP SIGNATURE-----
+> >>>>> Version: Mailvelope v1.1.0
+> >>>>> Comment: https://www.mailvelope.com
+> >>>>>
+> >>>>> wsFcBAEBCAAQBQJWAdMSCRDmVDuy+mK58QAAoEgP/AqpH7i1BLpoz6fTlfWG
+> >>>>> a6swvF8xvsyR15PDiPINYT0N7MgoikikGrMmhWpJ6utEr1XPW0MPFgzvNIsf
+> >>>>> a1eMtNzyww4rAo6JCq6BtjmUsSKmOrBNhRNr6It9v4Nv+biqZHkiY8x/rRtV
+> >>>>> s9z0cv3Q9Wqa6y/zKZg3H1XtbtUAx0r/DUwzSsP3omupZgNyaKkCgdkil9Vc
+> >>>>> iyzBxFZU4+qXNT2FBG4dYDjxSHQv4psjvKR3AWXSN4yEn286KyMDjFrsDY5B
+> >>>>> izS3h603QPoErqsUQngDE8COcaTAHHrV7gNJTikmGoNW6oQBjFq/z/zindTz
+> >>>>> caXshVQQ+OTLo/qzJM8QPswh0TGU74SVbDkTq+eTOb5pBhQbp+42Pkkqh7jj
+> >>>>> efyyYgDzpB1WrWRbUlWMNqmnjq7DT3lnAtuHyKbkwVs8x3JMPEiCl6PBvJbx
+> >>>>> GnNSCqgDJrpb4fHQ2iqfQeh8Ai6AL1C1Ai19RZPrAUhpDW0/DbUvuoKSR8m7
+> >>>>> glYYuH3hpy+oPYRhFcHm2fpNJ3u9npyk2Dai9RpzQ+mWmp3xi7becYmL482H
+> >>>>> +WyvLeY+8AiJQDpA0CdD8KeSlOC9bw5TPmihAIn9dVTJ1O2RlapCLqL3YAJg
+> >>>>> pGyDs8ercTEJLmvEyElj5XWh5DarsGscd2LELNS/UpyuYurbPcyPKUQ0uPjp
+> >>>>> gcZm
+> >>>>> =3DCjwB
+> >>>>> -----END PGP SIGNATURE-----
+> >>>>
+> >>>> --
+> >>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+> >>>> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> >>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >>>>
+> >>>
+> >>
+> >> -----BEGIN PGP SIGNATURE-----
+> >> Version: Mailvelope v1.1.0
+> >> Comment: https://www.mailvelope.com
+> >>
+> >> wsFcBAEBCAAQBQJWAv3QCRDmVDuy+mK58QAABr4QAJcQj8zjl606aMdkmQG7
+> >> S46iMXVav/Tv2os9GCUsQmMPx2u1w3/WmPfjByd6Divczfo0JLDDqrbsqre2
+> >> lq0GNK6e8fq6FXHhPpnL+t4uFV4UZ289cma3yklRqEBDXWHlP59Hu7VpxC5l
+> >> 0MIcCg4wM5VM/LkrfcMven5em5CnjyFJYbActGzw9043rZoyUwCM+eL7sotl
+> >> JYHMcNWnqwdt8TLFDhUfVGiAQyV8/6E33CuCNUEuFGdtiBKzs9IZadOI8Ce0
+> >> dod2DQNyFSvomqNq6t0DuTCSA+pT8uuks2O0NcrHjoqwIWVkxQGPYlpbpckf
+> >> nxQdVM7vkqapVeQ0qUZx43Db9A5wDTC3PaEfVJZPZzWsSDjh9z7o6qHs3Kvp
+> >> krfyS+dJaZ3tOYAP1VFDfasj06sOTFu3mfGYToKA75zz5HN7QZ13Zau/qhDu
+> >> FHxsgk4oIXJsjj22LiSpoiigH5Ls+aVqtIbg8/vWp+EO6pK1fovEtJVeGAfE
+> >> tLOdxfJJLVjMCAScFG9BRl1ePPLeptivKV0v9ruWsTpn+Q96VtqAR5GQCkYE
+> >> hFrlxM+oIzHeArhhiIxSPCYLlnzxoD5IYXmTrWUYBCGvlY1mrI3j80mZ4VTj
+> >> BErsSlqnjUyFKmaI7YNKyARCloMroz3wqdy/wpg/63Io62nmh5IyY+WO8hPo
+> >> ae22
+> >> =3DAX+L
+> >> -----END PGP SIGNATURE-----
+> _______________________________________________
+> ceph-users mailing listceph-users-idqoXFIVOFIuzjOF24JIZ5en40jlLrCI@public.gmane.org://lists.ceph.com/lis=
+tinfo.cgi/ceph-users-ceph.com
+>
+> -----BEGIN PGP SIGNATURE-----
+> Version: Mailvelope v1.1.0
+> Comment: https://www.mailvelope.com
+>
+> wsFcBAEBCAAQBQJWEVA5CRDmVDuy+mK58QAAY4EP/2jTEGPrbR3KDOC1d6FU
+> 7TkVeFtow7UCe9/TwArLtcEVTr8rdaXNWRi7gat99zbL5pw+96Sj6bGqpKVz
+> ZBSHcBlLIl42Hj10Ju7Svpwn7Q9RnSGOvjEdghEKsTxnf37gZD/KjvMbidJu
+> jlPGEfnGEdYbQ+vDYoCoUIuvUNPbCvWQTjJpnTXrMZfhhEBoOepMzF9s6L6B
+> AWR9WUrtz4HtGSMT42U1gd3LDOUh/5Ioy6FuhJe04piaf3ikRg+pjX47/WBd
+> mQupmKJOblaULCswOrMLTS9R2+p6yaWj0zlUb3OAOErO7JR8OWZ2H7tYjkQN
+> rGPsIRNv4yKw2Z5vJdHLksVdYhBQY1I4N1GO3+hf+j/yotPC9Ay4BYLZrQwf
+> 3L+uhqSEu80erZjsJF4lilmw0l9nbDSoXc0MqRoXrpUIqyVtmaCBynv5Xq7s
+> L5idaH6iVPBwy4Y6qzVuQpP0LaHp48ojIRx7likQJt0MSeDzqnslnp5B/9nb
+> Ppu3peRUKf5GEKISRQ6gOI3C4gTSSX6aBatWdtpm01Et0T6ysoxAP/VoO3Nb
+> 0PDsuYYT0U1MYqi0USouiNc4yRWNb9hkkBHEJrwjtP52moL1WYdYleL6w+FS
+> Y1YQ1DU8YsEtVniBmZc4TBQJRRIS6SaQjH108JCjUcy9oVNwRtOqbcT1aiI6
+> EP/Q
+> =3Defx7
+> -----END PGP SIGNATURE-----
+>
+>
 
------BEGIN PGP SIGNATURE-----
-Version: Mailvelope v1.1.0
-Comment: https://www.mailvelope.com
-
-wsFcBAEBCAAQBQJWEVA5CRDmVDuy+mK58QAAY4EP/2jTEGPrbR3KDOC1d6FU
-7TkVeFtow7UCe9/TwArLtcEVTr8rdaXNWRi7gat99zbL5pw+96Sj6bGqpKVz
-ZBSHcBlLIl42Hj10Ju7Svpwn7Q9RnSGOvjEdghEKsTxnf37gZD/KjvMbidJu
-jlPGEfnGEdYbQ+vDYoCoUIuvUNPbCvWQTjJpnTXrMZfhhEBoOepMzF9s6L6B
-AWR9WUrtz4HtGSMT42U1gd3LDOUh/5Ioy6FuhJe04piaf3ikRg+pjX47/WBd
-mQupmKJOblaULCswOrMLTS9R2+p6yaWj0zlUb3OAOErO7JR8OWZ2H7tYjkQN
-rGPsIRNv4yKw2Z5vJdHLksVdYhBQY1I4N1GO3+hf+j/yotPC9Ay4BYLZrQwf
-3L+uhqSEu80erZjsJF4lilmw0l9nbDSoXc0MqRoXrpUIqyVtmaCBynv5Xq7s
-L5idaH6iVPBwy4Y6qzVuQpP0LaHp48ojIRx7likQJt0MSeDzqnslnp5B/9nb
-Ppu3peRUKf5GEKISRQ6gOI3C4gTSSX6aBatWdtpm01Et0T6ysoxAP/VoO3Nb
-0PDsuYYT0U1MYqi0USouiNc4yRWNb9hkkBHEJrwjtP52moL1WYdYleL6w+FS
-Y1YQ1DU8YsEtVniBmZc4TBQJRRIS6SaQjH108JCjUcy9oVNwRtOqbcT1aiI6
-EP/Q
-=efx7
------END PGP SIGNATURE-----
-
---001a1143c0f6e600ef052149ae99
+--f46d044287d2ca28d3052149b818
 Content-Type: text/html; charset=UTF-8
 Content-Transfer-Encoding: quoted-printable
 
-<div dir=3D"ltr"><pre>-----BEGIN PGP SIGNED MESSAGE-----
+<p dir=3D"ltr">I would start with defrag the drives, the good part is that =
+you can just run the defrag with the time parameter and it will take all av=
+ailable xfs drives.</p>
+<div class=3D"gmail_quote">On 4 Oct 2015 6:13 pm, &quot;Robert LeBlanc&quot=
+; &lt;<a href=3D"mailto:robert-4JaGZRWAfWbajFs6igw21g@public.gmane.org">robert-4JaGZRWAfWbajFs6igw21g@public.gmane.org</a>&gt; =
+wrote:<br type=3D"attribution"><blockquote class=3D"gmail_quote" style=3D"m=
+argin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex"><div dir=3D"l=
+tr"><pre>-----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA256
 
 These are Toshiba=C2=A0MG03ACA400 drives.
@@ -1766,11 +1846,11 @@ the recent Google patch to cubic. This is showing up on three cluster
 
 The messages seem slightly different:
 2015-10-03 14:38:23.193082 osd.134 <a href=3D"http://10.208.16.25:6800/1425=
-">10.208.16.25:6800/1425</a> 439 :
+" target=3D"_blank">10.208.16.25:6800/1425</a> 439 :
 cluster [WRN] 14 slow requests, 1 included below; oldest blocked for &gt;
 100.087155 secs
 2015-10-03 14:38:23.193090 osd.134 <a href=3D"http://10.208.16.25:6800/1425=
-">10.208.16.25:6800/1425</a> 440 :
+" target=3D"_blank">10.208.16.25:6800/1425</a> 440 :
 cluster [WRN] slow request 30.041999 seconds old, received at
 2015-10-03 14:37:53.151014: osd_op(client.1328605.0:7082862
 rbd_data.13fdcb2ae8944a.000000000001264f [read 975360~4096]
@@ -1815,8 +1895,8 @@ anything else.
 Thanks,
 - -----BEGIN PGP SIGNATURE-----
 Version: Mailvelope v1.1.0
-Comment: <a href=3D"https://www.mailvelope.com">https://www.mailvelope.com<=
-/a>
+Comment: <a href=3D"https://www.mailvelope.com" target=3D"_blank">https://w=
+ww.mailvelope.com</a>
 
 wsFcBAEBCAAQBQJWEDY1CRDmVDuy+mK58QAARgoP/RcoL1qVmg7qbQrzStar
 NK80bqYGeYHb26xHbt1fZVgnZhXU0nN0Dv4ew0e/cYJLELSO2KCeXNfXN6F1
@@ -1954,8 +2034,8 @@ clusters
 &gt;&gt;&gt;&gt; Thanks,
 &gt;&gt;&gt;&gt; -----BEGIN PGP SIGNATURE-----
 &gt;&gt;&gt;&gt; Version: Mailvelope v1.1.0
-&gt;&gt;&gt;&gt; Comment: <a href=3D"https://www.mailvelope.com">https://ww=
-w.mailvelope.com</a>
+&gt;&gt;&gt;&gt; Comment: <a href=3D"https://www.mailvelope.com" target=3D"=
+_blank">https://www.mailvelope.com</a>
 &gt;&gt;&gt;&gt;
 &gt;&gt;&gt;&gt; wsFcBAEBCAAQBQJWAvOzCRDmVDuy+mK58QAApOMP/1xmCtW++G11qcE8y/=
 sr
@@ -2059,8 +2139,8 @@ the servers so the logs
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; should be close in terms of time. Logs for=
  12:50 to 13:00 are
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; available at <a href=3D"http://162.144.87.=
-113/files/ceph_block_io.logs.tar.xz">http://162.144.87.113/files/ceph_block=
-_io.logs.tar.xz</a>
+113/files/ceph_block_io.logs.tar.xz" target=3D"_blank">http://162.144.87.11=
+3/files/ceph_block_io.logs.tar.xz</a>
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; 2015-09-22 12:55:06.500374 - osd.17 gets I=
 /O from client
@@ -2117,12 +2197,14 @@ g these blocked I/O
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; 2015-09-22 12:52:36
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; 2015-09-22 12:55:36.926680 osd.17 <a href=
-=3D"http://192.168.55.14:6800/16726">192.168.55.14:6800/16726</a> 56 :
+=3D"http://192.168.55.14:6800/16726" target=3D"_blank">192.168.55.14:6800/1=
+6726</a> 56 :
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; cluster [WRN] 1 slow requests, 1 included =
 below; oldest blocked for &gt;
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; 30.439150 secs
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; 2015-09-22 12:55:36.926699 osd.17 <a href=
-=3D"http://192.168.55.14:6800/16726">192.168.55.14:6800/16726</a> 57 :
+=3D"http://192.168.55.14:6800/16726" target=3D"_blank">192.168.55.14:6800/1=
+6726</a> 57 :
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; cluster [WRN] slow request 30.439150 secon=
 ds old, received at
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; 2015-09-22 12:55:06.487451:
@@ -2135,14 +2217,14 @@ wn_if_redirected e56785)
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;=C2=A0 =C2=A0currently waiting for subops f=
 rom 13,16
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; 2015-09-22 12:55:36.697904 osd.16 <a href=
-=3D"http://192.168.55.13:6800/29410">192.168.55.13:6800/29410</a> 7 : clust=
-er
+=3D"http://192.168.55.13:6800/29410" target=3D"_blank">192.168.55.13:6800/2=
+9410</a> 7 : cluster
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; [WRN] 2 slow requests, 2 included below; o=
 ldest blocked for &gt;
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; 30.379680 secs
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; 2015-09-22 12:55:36.697918 osd.16 <a href=
-=3D"http://192.168.55.13:6800/29410">192.168.55.13:6800/29410</a> 8 : clust=
-er
+=3D"http://192.168.55.13:6800/29410" target=3D"_blank">192.168.55.13:6800/2=
+9410</a> 8 : cluster
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; [WRN] slow request 30.291520 seconds old, =
 received at 2015-09-22
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; 12:55:06.406303:
@@ -2155,8 +2237,8 @@ wn_if_redirected e56785)
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;=C2=A0 =C2=A0currently waiting for subops f=
 rom 13,17
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; 2015-09-22 12:55:36.697927 osd.16 <a href=
-=3D"http://192.168.55.13:6800/29410">192.168.55.13:6800/29410</a> 9 : clust=
-er
+=3D"http://192.168.55.13:6800/29410" target=3D"_blank">192.168.55.13:6800/2=
+9410</a> 9 : cluster
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; [WRN] slow request 30.379680 seconds old, =
 received at 2015-09-22
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; 12:55:06.318144:
@@ -2169,12 +2251,14 @@ wn_if_redirected e56785)
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;=C2=A0 =C2=A0currently waiting for subops f=
 rom 13,14
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; 2015-09-22 12:58:03.998275 osd.13 <a href=
-=3D"http://192.168.55.12:6804/4574">192.168.55.12:6804/4574</a> 130 :
+=3D"http://192.168.55.12:6804/4574" target=3D"_blank">192.168.55.12:6804/45=
+74</a> 130 :
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; cluster [WRN] 1 slow requests, 1 included =
 below; oldest blocked for &gt;
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; 30.954212 secs
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; 2015-09-22 12:58:03.998286 osd.13 <a href=
-=3D"http://192.168.55.12:6804/4574">192.168.55.12:6804/4574</a> 131 :
+=3D"http://192.168.55.12:6804/4574" target=3D"_blank">192.168.55.12:6804/45=
+74</a> 131 :
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; cluster [WRN] slow request 30.954212 secon=
 ds old, received at
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; 2015-09-22 12:57:33.044003:
@@ -2187,12 +2271,14 @@ wn_if_redirected e56785)
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;=C2=A0 =C2=A0currently waiting for subops f=
 rom 16,17
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; 2015-09-22 12:58:03.759826 osd.16 <a href=
-=3D"http://192.168.55.13:6800/29410">192.168.55.13:6800/29410</a> 10 :
+=3D"http://192.168.55.13:6800/29410" target=3D"_blank">192.168.55.13:6800/2=
+9410</a> 10 :
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; cluster [WRN] 1 slow requests, 1 included =
 below; oldest blocked for &gt;
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; 30.704367 secs
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; 2015-09-22 12:58:03.759840 osd.16 <a href=
-=3D"http://192.168.55.13:6800/29410">192.168.55.13:6800/29410</a> 11 :
+=3D"http://192.168.55.13:6800/29410" target=3D"_blank">192.168.55.13:6800/2=
+9410</a> 11 :
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; cluster [WRN] slow request 30.704367 secon=
 ds old, received at
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; 2015-09-22 12:57:33.055404:
@@ -2244,7 +2330,7 @@ rom 13,17
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; -----BEGIN PGP SIGNATURE-----
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; Version: Mailvelope v1.1.0
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; Comment: <a href=3D"https://www.mailvelope=
-.com">https://www.mailvelope.com</a>
+.com" target=3D"_blank">https://www.mailvelope.com</a>
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; wsFcBAEBCAAQBQJWAcaKCRDmVDuy+mK58QAAPMsQAK=
 BnS94fwuw0OqpPU3/z
@@ -2353,18 +2439,18 @@ hat each Op is doing.
 ne &quot;unsubscribe ceph-devel&quot;
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; in
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; the body of a message to <a href=3D"mailto=
-:majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org">majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org</a>
+:majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" target=3D"_blank">majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org</a>
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; More majordomo info at=C2=A0 <a href=3D"ht=
-tp://vger.kernel.org/majordomo-info.html">http://vger.kernel.org/majordomo-=
-info.html</a>
+tp://vger.kernel.org/majordomo-info.html" target=3D"_blank">http://vger.ker=
+nel.org/majordomo-info.html</a>
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;
 &gt;&gt;&gt;&gt;&gt;&gt;&gt;
 &gt;&gt;&gt;&gt;&gt;
 &gt;&gt;&gt;&gt;&gt; -----BEGIN PGP SIGNATURE-----
 &gt;&gt;&gt;&gt;&gt; Version: Mailvelope v1.1.0
-&gt;&gt;&gt;&gt;&gt; Comment: <a href=3D"https://www.mailvelope.com">https:=
-//www.mailvelope.com</a>
+&gt;&gt;&gt;&gt;&gt; Comment: <a href=3D"https://www.mailvelope.com" target=
+=3D"_blank">https://www.mailvelope.com</a>
 &gt;&gt;&gt;&gt;&gt;
 &gt;&gt;&gt;&gt;&gt; wsFcBAEBCAAQBQJWAdMSCRDmVDuy+mK58QAAoEgP/AqpH7i1BLpoz6=
 fTlfWG
@@ -2398,16 +2484,17 @@ Q0uPjp
 &gt;&gt;&gt;&gt; To unsubscribe from this list: send the line &quot;unsubsc=
 ribe ceph-devel&quot; in
 &gt;&gt;&gt;&gt; the body of a message to <a href=3D"mailto:majordomo@vger.=
-kernel.org">majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org</a>
+kernel.org" target=3D"_blank">majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org</a>
 &gt;&gt;&gt;&gt; More majordomo info at=C2=A0 <a href=3D"http://vger.kernel=
-.org/majordomo-info.html">http://vger.kernel.org/majordomo-info.html</a>
+.org/majordomo-info.html" target=3D"_blank">http://vger.kernel.org/majordom=
+o-info.html</a>
 &gt;&gt;&gt;&gt;
 &gt;&gt;&gt;
 &gt;&gt;
 &gt;&gt; -----BEGIN PGP SIGNATURE-----
 &gt;&gt; Version: Mailvelope v1.1.0
-&gt;&gt; Comment: <a href=3D"https://www.mailvelope.com">https://www.mailve=
-lope.com</a>
+&gt;&gt; Comment: <a href=3D"https://www.mailvelope.com" target=3D"_blank">=
+https://www.mailvelope.com</a>
 &gt;&gt;
 &gt;&gt; wsFcBAEBCAAQBQJWAv3QCRDmVDuy+mK58QAABr4QAJcQj8zjl606aMdkmQG7
 &gt;&gt; S46iMXVav/Tv2os9GCUsQmMPx2u1w3/WmPfjByd6Divczfo0JLDDqrbsqre2
@@ -2426,14 +2513,15 @@ lope.com</a>
 &gt;&gt; -----END PGP SIGNATURE-----
 _______________________________________________
 ceph-users mailing list
-<a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a>
-<a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com">http://l=
-ists.ceph.com/listinfo.cgi/ceph-users-ceph.com</a>
+<a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" target=3D"_blank">ceph-users@l=
+ists.ceph.com</a>
+<a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" target=
+=3D"_blank">http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com</a>
 
 -----BEGIN PGP SIGNATURE-----
 Version: Mailvelope v1.1.0
-Comment: <a href=3D"https://www.mailvelope.com">https://www.mailvelope.com<=
-/a>
+Comment: <a href=3D"https://www.mailvelope.com" target=3D"_blank">https://w=
+ww.mailvelope.com</a>
 
 wsFcBAEBCAAQBQJWEVA5CRDmVDuy+mK58QAAY4EP/2jTEGPrbR3KDOC1d6FU
 7TkVeFtow7UCe9/TwArLtcEVTr8rdaXNWRi7gat99zbL5pw+96Sj6bGqpKVz
@@ -2451,10 +2539,11 @@ EP/Q
 =3Defx7
 -----END PGP SIGNATURE-----
 <pre></pre></pre></div>
+</blockquote></div>
 
---001a1143c0f6e600ef052149ae99--
+--f46d044287d2ca28d3052149b818--
 
---===============0181094635==
+--===============1340533483==
 Content-Type: text/plain; charset="us-ascii"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
@@ -2465,4 +2554,4 @@ ceph-users mailing list
 ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
---===============0181094635==--
+--===============1340533483==--
