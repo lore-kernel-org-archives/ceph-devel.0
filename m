@@ -1,10 +1,8 @@
-From: Ken Dreyer <kdreyer@redhat.com>
-Subject: Re: [ceph-users] Potential OSD deadlock?
-Date: Tue, 6 Oct 2015 10:26:21 -0600
-Message-ID: <CALqRxCw=tV5h-xfaxsCwwqhK=zLiP=m_iGTn+dF0Op=Uth_vPA@mail.gmail.com>
+From: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: Potential OSD deadlock?
+Date: Tue, 6 Oct 2015 09:40:06 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1510060939340.32037@cobra.newdream.net>
 References: <CAANLjFpAXaDWQzumg1hCs=SC_0YvdYDd6vyodz5_ZBNvGWdkSw@mail.gmail.com>
-	<CAANLjFqbt0y-Ri=q6hXuuS06Sgi1S6phRdb1MJTgR6LTyHPtvw@mail.gmail.com>
-	<CAN=+7FVo6D2AoufELCP_qeiJ23i0XEOqQs_yYLrFNXwiiQSthw@mail.gmail.com>
 	<alpine.DEB.2.00.1509221450490.11876@cobra.newdream.net>
 	<CAANLjFoK4O-3GB_1b40xp-5RtbZhdSXJT5+ydUDX+dq=dBHR8w@mail.gmail.com>
 	<CAANLjFrrAyhJ=JR0+K3SX6G1ZsdcUyhTqFzUn_A0+bSh0D=bkA@mail.gmail.com>
@@ -18,26 +16,34 @@ References: <CAANLjFpAXaDWQzumg1hCs=SC_0YvdYDd6vyodz5_ZBNvGWdkSw@mail.gmail.com>
 	<alpine.DEB.2.00.1510060534010.32037@cobra.newdream.net>
 	<CAANLjFo==i7wivrGR9LJFs3GOrD2iQHLdCpEfR-AruHyOMLi-w@mail.gmail.com>
 	<alpine.DEB.2.00.1510060737480.32037@cobra.newdream.net>
+	<CALqRxCw=tV5h-xfaxsCwwqhK=zLiP=m_iGTn+dF0Op=Uth_vPA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f171.google.com ([209.85.212.171]:36414 "EHLO
-	mail-wi0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751498AbbJFQ0W (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Oct 2015 12:26:22 -0400
-Received: by wicgb1 with SMTP id gb1so173354851wic.1
-        for <ceph-devel@vger.kernel.org>; Tue, 06 Oct 2015 09:26:21 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1510060737480.32037@cobra.newdream.net>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Robert LeBlanc <robert@leblancnet.us>, ceph-devel <ceph-devel@vger.kernel.org>, ceph-users@lists.ceph.com
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CALqRxCw=tV5h-xfaxsCwwqhK=zLiP=m_iGTn+dF0Op=Uth_vPA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Ken Dreyer <kdreyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Tue, Oct 6, 2015 at 8:38 AM, Sage Weil <sweil@redhat.com> wrote:
-> Oh.. I bet you didn't upgrade the osds to 0.94.4 (or latest hammer build)
-> first.  They won't be allowed to boot until that happens... all upgrades
-> must stop at 0.94.4 first.
+On Tue, 6 Oct 2015, Ken Dreyer wrote:
+> On Tue, Oct 6, 2015 at 8:38 AM, Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+> > Oh.. I bet you didn't upgrade the osds to 0.94.4 (or latest hammer build)
+> > first.  They won't be allowed to boot until that happens... all upgrades
+> > must stop at 0.94.4 first.
+> 
+> This sounds pretty crucial. is there Redmine ticket(s)?
 
-This sounds pretty crucial. is there Redmine ticket(s)?
+It's documented in the (draft) release notes, which discuss how to 
+upgrade.  There's no bug...
 
-- Ken
+sage
