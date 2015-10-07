@@ -1,48 +1,120 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH] rbd: set max_sectors explicitly
-Date: Wed,  7 Oct 2015 19:00:32 +0200
-Message-ID: <1444237232-9574-1-git-send-email-idryomov@gmail.com>
+Subject: [PATCH] rbd: use writefull op for object size writes
+Date: Wed,  7 Oct 2015 19:02:13 +0200
+Message-ID: <1444237333-9677-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f172.google.com ([209.85.212.172]:36075 "EHLO
-	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753527AbbJGPUl (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Oct 2015 11:20:41 -0400
-Received: by wicgb1 with SMTP id gb1so216394375wic.1
-        for <ceph-devel@vger.kernel.org>; Wed, 07 Oct 2015 08:20:40 -0700 (PDT)
+Received: from mail-wi0-f178.google.com ([209.85.212.178]:37004 "EHLO
+	mail-wi0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753980AbbJGPWW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Oct 2015 11:22:22 -0400
+Received: by wicfx3 with SMTP id fx3so33806725wic.0
+        for <ceph-devel@vger.kernel.org>; Wed, 07 Oct 2015 08:22:21 -0700 (PDT)
 Received: from orange.localdomain (nat-pool-brq-u.redhat.com. [213.175.37.12])
-        by smtp.gmail.com with ESMTPSA id hx4sm39884510wjb.31.2015.10.07.08.20.39
+        by smtp.gmail.com with ESMTPSA id fs9sm3005310wic.24.2015.10.07.08.22.20
         for <ceph-devel@vger.kernel.org>
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 07 Oct 2015 08:20:39 -0700 (PDT)
+        Wed, 07 Oct 2015 08:22:20 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Commit 30e2bc08b2bb ("Revert "block: remove artifical max_hw_sectors
-cap"") restored a clamp on max_sectors.  It's now 2560 sectors instead
-of 1024, but it's not good enough: we set max_hw_sectors to rbd object
-size because we don't want object sized I/Os to be split, and the
-default object size is 4M.
+This covers only the simplest case - an object size sized write, but
+it's still useful in tiering setups when EC is used for the base tier
+as writefull op can be proxied, saving an object promotion.
 
-So, set max_sectors to max_hw_sectors in rbd at queue init time.
+Even though updating ceph_osdc_new_request() to allow writefull should
+just be a matter of fixing an assert, I didn't do it because its only
+user is cephfs.  All other sites were updated.
+
+Reflects ceph.git commit 7bfb7f9025a8ee0d2305f49bf0336d2424da5b5b.
 
 Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 ---
- drivers/block/rbd.c | 1 +
- 1 file changed, 1 insertion(+)
+ drivers/block/rbd.c   |  9 +++++++--
+ net/ceph/osd_client.c | 13 +++++++++----
+ 2 files changed, 16 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 05072464d25e..04e69b4df664 100644
+index 04e69b4df664..cd00e4653e49 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -3760,6 +3760,7 @@ static int rbd_init_disk(struct rbd_device *rbd_dev)
- 	/* set io sizes to object size */
- 	segment_size = rbd_obj_bytes(&rbd_dev->header);
- 	blk_queue_max_hw_sectors(q, segment_size / SECTOR_SIZE);
-+	q->limits.max_sectors = queue_max_hw_sectors(q);
- 	blk_queue_max_segments(q, segment_size / SECTOR_SIZE);
- 	blk_queue_max_segment_size(q, segment_size);
- 	blk_queue_io_min(q, segment_size);
+@@ -1863,9 +1863,11 @@ static void rbd_osd_req_callback(struct ceph_osd_request *osd_req,
+ 		rbd_osd_read_callback(obj_request);
+ 		break;
+ 	case CEPH_OSD_OP_SETALLOCHINT:
+-		rbd_assert(osd_req->r_ops[1].op == CEPH_OSD_OP_WRITE);
++		rbd_assert(osd_req->r_ops[1].op == CEPH_OSD_OP_WRITE ||
++			   osd_req->r_ops[1].op == CEPH_OSD_OP_WRITEFULL);
+ 		/* fall through */
+ 	case CEPH_OSD_OP_WRITE:
++	case CEPH_OSD_OP_WRITEFULL:
+ 		rbd_osd_write_callback(obj_request);
+ 		break;
+ 	case CEPH_OSD_OP_STAT:
+@@ -2401,7 +2403,10 @@ static void rbd_img_obj_request_fill(struct rbd_obj_request *obj_request,
+ 				opcode = CEPH_OSD_OP_ZERO;
+ 		}
+ 	} else if (op_type == OBJ_OP_WRITE) {
+-		opcode = CEPH_OSD_OP_WRITE;
++		if (!offset && length == object_size)
++			opcode = CEPH_OSD_OP_WRITEFULL;
++		else
++			opcode = CEPH_OSD_OP_WRITE;
+ 		osd_req_op_alloc_hint_init(osd_request, num_ops,
+ 					object_size, object_size);
+ 		num_ops++;
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 80b94e37c94a..f79ccac6699f 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -285,6 +285,7 @@ static void osd_req_op_data_release(struct ceph_osd_request *osd_req,
+ 	switch (op->op) {
+ 	case CEPH_OSD_OP_READ:
+ 	case CEPH_OSD_OP_WRITE:
++	case CEPH_OSD_OP_WRITEFULL:
+ 		ceph_osd_data_release(&op->extent.osd_data);
+ 		break;
+ 	case CEPH_OSD_OP_CALL:
+@@ -485,13 +486,14 @@ void osd_req_op_extent_init(struct ceph_osd_request *osd_req,
+ 	size_t payload_len = 0;
+ 
+ 	BUG_ON(opcode != CEPH_OSD_OP_READ && opcode != CEPH_OSD_OP_WRITE &&
+-	       opcode != CEPH_OSD_OP_ZERO && opcode != CEPH_OSD_OP_TRUNCATE);
++	       opcode != CEPH_OSD_OP_WRITEFULL && opcode != CEPH_OSD_OP_ZERO &&
++	       opcode != CEPH_OSD_OP_TRUNCATE);
+ 
+ 	op->extent.offset = offset;
+ 	op->extent.length = length;
+ 	op->extent.truncate_size = truncate_size;
+ 	op->extent.truncate_seq = truncate_seq;
+-	if (opcode == CEPH_OSD_OP_WRITE)
++	if (opcode == CEPH_OSD_OP_WRITE || opcode == CEPH_OSD_OP_WRITEFULL)
+ 		payload_len += length;
+ 
+ 	op->payload_len = payload_len;
+@@ -670,9 +672,11 @@ static u64 osd_req_encode_op(struct ceph_osd_request *req,
+ 		break;
+ 	case CEPH_OSD_OP_READ:
+ 	case CEPH_OSD_OP_WRITE:
++	case CEPH_OSD_OP_WRITEFULL:
+ 	case CEPH_OSD_OP_ZERO:
+ 	case CEPH_OSD_OP_TRUNCATE:
+-		if (src->op == CEPH_OSD_OP_WRITE)
++		if (src->op == CEPH_OSD_OP_WRITE ||
++		    src->op == CEPH_OSD_OP_WRITEFULL)
+ 			request_data_len = src->extent.length;
+ 		dst->extent.offset = cpu_to_le64(src->extent.offset);
+ 		dst->extent.length = cpu_to_le64(src->extent.length);
+@@ -681,7 +685,8 @@ static u64 osd_req_encode_op(struct ceph_osd_request *req,
+ 		dst->extent.truncate_seq =
+ 			cpu_to_le32(src->extent.truncate_seq);
+ 		osd_data = &src->extent.osd_data;
+-		if (src->op == CEPH_OSD_OP_WRITE)
++		if (src->op == CEPH_OSD_OP_WRITE ||
++		    src->op == CEPH_OSD_OP_WRITEFULL)
+ 			ceph_osdc_msg_data_add(req->r_request, osd_data);
+ 		else
+ 			ceph_osdc_msg_data_add(req->r_reply, osd_data);
 -- 
 2.4.3
 
