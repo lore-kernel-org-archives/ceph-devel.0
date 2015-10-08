@@ -1,87 +1,45 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: RE: perf counters from a performance discrepancy
-Date: Thu, 8 Oct 2015 08:55:51 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1510080853380.29929@cobra.newdream.net>
-References: <BC97738F8E7C8742BABED7F06FB9DF9192500992@SATLEXDAG01.amd.com> <alpine.DEB.2.00.1509231116580.13265@cobra.newdream.net> <CAJ4mKGavY4ZdutpjnKduQ1AcpCpHDeWST8NyOa_RT19W+DvrNQ@mail.gmail.com> <5602F298.7060609@redhat.com>
- <BC97738F8E7C8742BABED7F06FB9DF919250DA8E@SATLEXDAG01.amd.com> <alpine.DEB.2.00.1510071944370.8667@cobra.newdream.net> <BC97738F8E7C8742BABED7F06FB9DF919250ED6B@SATLEXDAG01.amd.com>
+From: =?UTF-8?B?6JSh5q+F?= <cymengxiang@126.com>
+Subject: The questions of data collection and cache tiering in Ceph
+Date: Fri, 9 Oct 2015 00:09:17 +0800 (CST)
+Message-ID: <1f22defc.11cdc.1504836bb4f.Coremail.cymengxiang@126.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:56187 "EHLO mx1.redhat.com"
+Received: from m15-16.126.com ([220.181.15.16]:41317 "EHLO m15-16.126.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S934437AbbJHPzy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 8 Oct 2015 11:55:54 -0400
-In-Reply-To: <BC97738F8E7C8742BABED7F06FB9DF919250ED6B@SATLEXDAG01.amd.com>
+	id S933830AbbJHQlF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 8 Oct 2015 12:41:05 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Deneau, Tom" <tom.deneau@amd.com>
-Cc: Mark Nelson <mnelson@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Thu, 8 Oct 2015, Deneau, Tom wrote:
-> > -----Original Message-----
-> > From: Sage Weil [mailto:sweil@redhat.com]
-> > Sent: Wednesday, October 07, 2015 9:48 PM
-> > To: Deneau, Tom
-> > Cc: Mark Nelson; Gregory Farnum; ceph-devel@vger.kernel.org
-> > Subject: RE: perf counters from a performance discrepancy
-> > 
-> > > I finally got around to looking at the dump_historic_ops output for
-> > > the 1-client and 2-client cases.
-> > > As you recall these are all read-ops.  so the events in the dump are
-> > >    initiated
-> > >    reached_pg
-> > >    started
-> > >    done
-> > >
-> > > The pattern I see for most of the slow ops recorded in the dump is:
-> > >
-> > >    * In the 1-client case the typical slow op has duration between 50-65
-> > ms
-> > >      and usually most of this is the interval between reached_pg and
-> > started.
-> > >
-> > >    * In the 2-client case the typical slow op has duration between 95-
-> > 120 ms
-> > >      and again usually most of this is the interval between reached_pg
-> > >      and started.
-> > >
-> > > Could someone describe what the interval between reached_pg and
-> > > started means?
-> > 
-> > I think the slow part is probably find_object_context() (although to be
-> > fair tons of stuff happens here, see do_op()).  You could test this theory
-> > or otherwise narrow this down with additional event markers lke
-> > 
-> > diff --git a/src/osd/ReplicatedPG.cc b/src/osd/ReplicatedPG.cc index
-> > d6f3084..6faccc2 100644
-> > --- a/src/osd/ReplicatedPG.cc
-> > +++ b/src/osd/ReplicatedPG.cc
-> > @@ -1691,10 +1691,12 @@ void ReplicatedPG::do_op(OpRequestRef& op)
-> >      return;
-> >    }
-> > 
-> > +  op->mark_event("about to find");
-> >    int r = find_object_context(
-> >      oid, &obc, can_create,
-> >      m->has_flag(CEPH_OSD_FLAG_MAP_SNAP_CLONE),
-> >      &missing_oid);
-> > +  op->mark_event("found");
-> > 
-> >    if (r == -EAGAIN) {
-> >      // If we're not the primary of this OSD, and we have
-> > 
-> > 
-> > sage
-> 
-> Sage --
-> 
-> Is it likely that find_object_context would take longer when there are two clients
-> each using their own pool (compared to one client using one pool)?
-> 
-> And would two clients using the same pool spend less time in find_object_context?
-
-Maybe.. find_object_context is where we lookup the file, and if there 
-are caching effects that would be one place where we'd see it.
-
-sage
+CkRlYXIgZGV2ZWxvcGVycywKCsKgwqAgUmVjZW50bHkgSSBtZXQgc29tZSB0cm91YmxlcyB3aGVu
+IEkgcmVhZCB0aGUgQ2VwaOKAmXMgc291cmNlIGNvZGUgYW5kIHVuZGVyc3RhbmQgdGhlIGFyY2hp
+dGVjdHVyZS4KVGhlIGRldGFpbHMgb2YgcHJvYmxlbXMgYXJlIGFzIGZvbGxvd2VkLgoKICAgMS5J
+biBtb25pdG9yaW5nIHRvb2xzLCB0aGV5IGNhbiBjb2xsZWN0IG11Y2ggZGF0YSB3aGVuIENlcGgg
+cnVucy4gSSB3b25kZXIgd2hhdApraW5kIG9mIGRhdGEgdGhlIENlcGggY2FuIHByb3ZpZGUgKG9i
+amVjdCBkYXRhLCBQRyBkYXRhIG9yIG90aGVyIGRhdGE/KS4gQ291bGQgdGhlCkNlcGggcHJvdmlk
+ZSBldmVyeSBvYmplY3TigJlzIGRhdGEgKGUuZy4gVGhlIHRpbWVzIHRoZSBvYmplY3QgaXMgcmVh
+ZCBvciB3cm90ZQosdGhlIGxhdGVzdCB0aW1lIHRoZSBvYmplY3QgaXMgdXNlZCAsZXRjLikgLGlm
+IENlcGggY291bGQgLGluIHNvdXJjZSBjb2RlICx3aGVyZQpjb3VsZCBJIGZpbmQgdGhlc2UgZGV0
+YWlscy4gSSByZWFsbHkgd2FudCB0byBrbm93IHRoZSBtb25pdG9yaW5nIGRhdGEgdGhlIENlcGgK
+Y2FuIHByb3ZpZGVzIGFuZCB3aGVyZSB0aGV5IGFyZSBpbiBzb3VyY2UgY29kZSBzbyB0aGF0IEkg
+Y291bGQga25vdyBob3cgdG8gdXNlIGl0Cm1vcmUgZWZmaWNpZW50bHkuIEZvciBleGFtcGxlLCBJ
+IGtub3cgdGhlIENlcGggY291bGQgcHJvdmlkZSB0aGUgZGF0YSBvZiB0aGUKb2JqZWN0c+KAmSBu
+dW1iZXIgcGVyIFBHLCB0aGUgcmVhZCBhbmQgd3JpdGUgYmFuZHdpZHRoLCBidXQgSSBjb3VsZG7i
+gJl0IGZpbmQgaG93IHRvCmFjaGlldmUgdGhlc2UgaW4gc291cmNlIGNvZGUuIAoKwqDCoCAyLkZy
+b20gb2ZmaWNpYWwgZG9jdW1lbnRzLCBDZXBoIHByb3ZpZGVzIHRoZSBjYWNoZSB0aWVyaW5nIHRv
+IGltcHJvdmUKcGVyZm9ybWFuY2UuIEJ1dCBJIGNvdWxkbuKAmXQgZmluZCBtb3JlIGRldGFpbHMg
+dG8gZGVzY3JpYmUgdGhlIGNhY2hlIHRpZXJpbmcKbGlrZSB3aGljaCBraW5kIG9mIGFsZ29yaXRo
+bSB0aGUgY2FjaGUgYWdlbnQgdXNlcy4gSW4gdGhlIHNvdXJjZSBjb2RlLCB3aGVyZQpjb3VsZCBJ
+IGZpbmQgdGhlc2U/IAoKICAzLkluIHdyaXRlIHByb2Nlc3MgLCB0aGVyZSBhcmUgdHdvIHJlc3Bv
+bnNlcyB0byBjbGllbnQgLGZpcnN0IGlzIGZyb20gam91cm5hbCBhbmQKc2Vjb25kIGlzIG9jY3Vy
+cmVkIHdoZW4gb2JqZWN0IHdyaXRlcyB0byByZWFsIGRpc2sgLnNvIHdoZW4gSSB3cml0ZSBhIG9i
+amVjdCB0bwpDZXBoIHVzaW5nIGxpYnJiZCwgZG9lcyBub3QgdGhlIHdyaXRlIGZpbmlzaCB1bnRp
+bCB0aGUgc2Vjb25kIHJlc3BvbnNlIG9jY3VycyBhbmQKd2hhdCBtZWFuIHRoZSBmaXJzdCBhbmQg
+c2Vjb25kIHJlc3BvbnNlcyBmb3IgY2xpZW50cz8gV2hlbiBhIG9iamVjdCB3cml0ZXMgdG8gam91
+cm5hbApidXQgbm90IHRvIGZpbGVzdG9yZSAodGhhdCBpcyBub3QgdG8gZGlzayApLCBjb3VsZCBJ
+IHJlYWQgdGhpcyBvYmplY3Q/IElmIEkgY291bGQsCndoZXJlIGNvdWxkIEkgcmVhZCB0aGlzIG9i
+amVjdD8KIFJlYWxseSB0aGFua3MgYSBsb3QuIAogWW91cnMgc2luY2VyZWx5LAogQ2hheSDCoMKg
 
