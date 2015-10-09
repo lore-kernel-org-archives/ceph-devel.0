@@ -1,130 +1,92 @@
-From: Milosz Tanski <milosz@adfin.com>
-Subject: Re: [ceph-users] O_DIRECT on deep-scrub read
-Date: Fri, 9 Oct 2015 12:54:16 -0400
-Message-ID: <CANP1eJHD+gHdMgVPadENS-7C-1qROKHRMsdLdq7Wj-VhC85new@mail.gmail.com>
-References: <56150598.1080604@sadziu.pl>
-	<alpine.DEB.2.00.1510070748580.8667@cobra.newdream.net>
-	<561577DD.1050107@redhat.com>
-	<alpine.DEB.2.00.1510071349410.8667@cobra.newdream.net>
-	<5616251E.8090104@sadziu.pl>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: wip-addr
+Date: Fri, 9 Oct 2015 14:49:25 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1510091446090.29929@cobra.newdream.net>
+References: <20151002232413.GA8939@degu.b.linuxbox.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f180.google.com ([209.85.217.180]:36201 "EHLO
-	mail-lb0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752596AbbJIQyV convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Oct 2015 12:54:21 -0400
-Received: by lbcao8 with SMTP id ao8so88091500lbc.3
-        for <ceph-devel@vger.kernel.org>; Fri, 09 Oct 2015 09:54:17 -0700 (PDT)
-In-Reply-To: <5616251E.8090104@sadziu.pl>
+Received: from cobra.newdream.net ([66.33.216.30]:53169 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932128AbbJIVt0 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Oct 2015 17:49:26 -0400
+In-Reply-To: <20151002232413.GA8939@degu.b.linuxbox.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?Q?Pawe=C5=82_Sadowski?= <ceph@sadziu.pl>
-Cc: Sage Weil <sage@newdream.net>, David Zafman <dzafman@redhat.com>, ceph-users <ceph-users@ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Marcus Watts <mwatts@redhat.com>
+Cc: ceph-devel@vger.kernel.org, haomai@xsky.com, dzafman@redhat.com
 
-On Thu, Oct 8, 2015 at 4:11 AM, Pawe=C5=82 Sadowski <ceph@sadziu.pl> wr=
-ote:
->
-> On 10/07/2015 10:52 PM, Sage Weil wrote:
-> > On Wed, 7 Oct 2015, David Zafman wrote:
-> >> There would be a benefit to doing fadvise POSIX_FADV_DONTNEED afte=
-r
-> >> deep-scrub reads for objects not recently accessed by clients.
-> > Yeah, it's the 'except for stuff already in cache' part that we don=
-'t do
-> > (and the kernel doesn't give us a good interface for).  IIRC there =
-was a
-> > patch that guessed based on whether the obc was already in cache, w=
-hich
-> > seems like a pretty decent heuristic, but I forget if that was in t=
-he
-> > final version.
->
-> I've run some tests and it look like on XFS cache is discarded on
-> O_DIRECT write and read but on EXT4 is discarded only on O_DIRECT wri=
-te.
-> I've found some patches to add support for "read only if in page cach=
-e"
-> (preadv2/RWF_NONBLOCK) but can't find them in kernel source. Maybe
-> Milosz Tanski can tell more about that. I think it could help a bit
-> during deep scrub.
+Hey Marcus,
 
+On Fri, 2 Oct 2015, Marcus Watts wrote:
+> wip-addr
+> 
+> 1. where is it?
+> 2. current state
+> 3. more info
+> 4. cheap fixes
+> 5. in case you were wondering why?
+> 
+> ____ 1. where is it?
+> 
+> I've just pushed another update to wip-addr:
+> 
+> git@github.com:linuxbox2/linuxbox-ceph.git
+> wip-addr
+> 
+> ____ 2. current state
+> 
+> This version
+> 1/ compiles
+> 2/ ran an extremely limited set of tests successfully
+> 	(was able to bring up ceph-mon, ceph-osd).
+> 
+> In theory, it should do everything a recent "master" branch copy of ceph
+> can do and little or nothing past that.  Internally it adds "address vector"
+> support, some parsing/print logic, and lots of encoding rules to pass them
+> around, but there's nothing that can create and little that makes any
+> sensible use of this.  So this is just the back end encoding and storage rules.
 
-After a fair amount of bike shedding on the API (and removing
-pwritev2) it looked like we (me and Christoph) had enough consensus to
-get it upstream. But sadly it died, akpm preferred different approach
-(fincore) and with enough roadblocks it died :/
+This is looking pretty good. I left some comments.  There are still a few 
+XXX's left... but not many.  Haomai, can you help with the async msgr one? 
+(Also, Marcus, can you check if the msg/Simple/Pipe.cc connect() and 
+accept() code doing the right thing?)
 
->
->
-> >> I see the NewStore objectstore sometimes using the O_DIRECT  flag =
-for writes.
-> >> This concerns me because the open(2) man pages says:
-> >>
-> >> "Applications should avoid mixing O_DIRECT and normal I/O to the s=
-ame file,
-> >> and especially to overlapping byte regions in the same file.  Even=
- when the
-> >> filesystem correctly handles the coherency issues in this situatio=
-n, overall
-> >> I/O throughput is likely to be slower than using either mode alone=
-=2E"
-> > Yeah: an O_DIRECT write will do a cache flush on the write range, s=
-o if
-> > there was already dirty data in cache you'll write twice.  There's
-> > similarly an invalidate on read.  I need to go back through the new=
-store
-> > code and see how the modes are being mixed and how it can be avoide=
-d...
-> >
-> > sage
-> >
-> >
-> >> On 10/7/15 7:50 AM, Sage Weil wrote:
-> >>> It's not, but it would not be ahrd to do this.  There are fadvise=
--style
-> >>> hints being passed down that could trigger O_DIRECT reads in this=
- case.
-> >>> That may not be the best choice, though--it won't use data that h=
-appens
-> >>> to be in cache and it'll also throw it out..
-> >>>
-> >>> On Wed, 7 Oct 2015, Pawe? Sadowski wrote:
-> >>>
-> >>>> Hi,
-> >>>>
-> >>>> Can anyone tell if deep scrub is done using O_DIRECT flag or not=
-? I'm
-> >>>> not able to verify that in source code.
-> >>>>
-> >>>> If not would it be possible to add such feature (maybe config op=
-tion) to
-> >>>> help keeping Linux page cache in better shape?
-> >>>>
-> >>>> Thanks,
->
-> --
-> PS
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+One minor thing.. please put the subsystem as the prefix to the commit
+message instead of the branch name (e.g., mds: add features to event 
+types).
 
+> Phase 2 is to add logic to actually make it useful.
+> 	(the very start of this is on linuxbox2 "wip-addr-p2",
+> 	just monmap changes so far...)
+> ____ 3. more info
+> 
+> There's an etherpad document that describes this in more detail,
+> 
+> http://pad.ceph.com/p/wip_addr
+> 
+> ____ 4. cheap fixes
+> 
+> a couple of minor issues that should be easy to resolve,
+> 1.
+> AsyncConnection.cc
+> this passes addresses back and forth as it's setting up the connection,
+> and it also exchanges features.  As best I can tell, it looks like
+> it exchanges addresses before it knows what features the other end
+> supports.  There should be something in here that
+> does this after knowing what features the other end supports.
 
+Copying Haomai.
+ 
+> 2.
+> (about line 2067 in src/tools/ceph_objectstore_tool.cc)
+> (use via ceph cmd?) tools - "object store tool".
+> This has a way to serialize objects which includes a watch list
+> which includes an address.  There should be an option here to say
+> whether to include exported addresses.
 
+I think it's safe to use defaults here.. what do you think, David?
 
---=20
-Milosz Tanski
-CTO
-16 East 34th Street, 15th floor
-New York, NY 10016
+Thanks!
+sage
 
-p: 646-253-9055
-e: milosz@adfin.com
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
