@@ -1,137 +1,143 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: wip-addr
-Date: Sat, 10 Oct 2015 05:07:28 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1510100505330.5497@cobra.newdream.net>
-References: <20151002232413.GA8939@degu.b.linuxbox.com> <alpine.DEB.2.00.1510091446090.29929@cobra.newdream.net> <CACJqLyZh4WQZv_3isjXJy=t6YL700C2GjWuen-QG1D5=RkKHYw@mail.gmail.com>
+From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Subject: Re: after a reboot,
+	osd can not up because of leveldb Corruption
+Date: Sat, 10 Oct 2015 05:19:21 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1510100517220.5497@cobra.newdream.net>
+References: <CANxbt0QJFryEOvm=BcRhPmwa3mvrnDKYs-RkAntUJsaNXbU_Dg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-75370036-1444478848=:5497"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:55700 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750731AbbJJMH3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 10 Oct 2015 08:07:29 -0400
-In-Reply-To: <CACJqLyZh4WQZv_3isjXJy=t6YL700C2GjWuen-QG1D5=RkKHYw@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomaiwang@gmail.com>
-Cc: Marcus Watts <mwatts@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, dzafman@redhat.com
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CANxbt0QJFryEOvm=BcRhPmwa3mvrnDKYs-RkAntUJsaNXbU_Dg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: =?ISO-2022-JP?Q?lin_zhou_=1B$B=3C~NS=1B=28J?= <hnuzhoulin-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Sat, 10 Oct 2015, lin zhou ?? wrote:
+> hi,guys
+> 
+> the mon and osds in one of a node in our ceph cluster can not up now
+> because of leveldb.
+> 
+> ceph 0.80.7  ubuntu12.04
+> 
+> osd log is:
+> ------------------------------------------------------
+> 
+> 2015-10-10 11:12:58.896724 7f4cfcf9d7c0 -1 ESC[0;31m ** ERROR: error
+> converting store /var/lib/ceph/osd/ceph-3: (1) Operation not
+> permittedESC[0m
+> 2015-10-10 11:12:59.090344 7f7f29eb47c0  0 ceph version 0.80.7
+> (6c0127fcb58008793d3c8b62d925bc91963672a3), process ceph-osd, pid
+> 14134
+> 2015-10-10 11:12:59.091039 7f7f29eb47c0 10 -- :/0 rank.bind 10.1.41.203:0/0
+> 2015-10-10 11:12:59.091048 7f7f29eb47c0 10 accepter.accepter.bind
+> 2015-10-10 11:12:59.091061 7f7f29eb47c0 10 accepter.accepter.bind
+> bound on random port 10.1.41.203:6800/0
+> 2015-10-10 11:12:59.091066 7f7f29eb47c0 10 accepter.accepter.bind
+> bound to 10.1.41.203:6800/0
+> 2015-10-10 11:12:59.091073 7f7f29eb47c0  1 -- 10.1.41.203:0/0 learned
+> my addr 10.1.41.203:0/0
+> 2015-10-10 11:12:59.091076 7f7f29eb47c0  1 accepter.accepter.bind
+> my_inst.addr is 10.1.41.203:6800/14134 need_addr=0
+> 2015-10-10 11:12:59.091081 7f7f29eb47c0 10 -- :/0 rank.bind 192.168.20.5:0/0
+> 2015-10-10 11:12:59.091083 7f7f29eb47c0 10 accepter.accepter.bind
+> 2015-10-10 11:12:59.091088 7f7f29eb47c0 10 accepter.accepter.bind
+> bound on random port 192.168.20.5:6800/0
+> 2015-10-10 11:12:59.091091 7f7f29eb47c0 10 accepter.accepter.bind
+> bound to 192.168.20.5:6800/0
+> 2015-10-10 11:12:59.091095 7f7f29eb47c0  1 -- 192.168.20.5:0/0 learned
+> my addr 192.168.20.5:0/0
+> 2015-10-10 11:12:59.091098 7f7f29eb47c0  1 accepter.accepter.bind
+> my_inst.addr is 192.168.20.5:6800/14134 need_addr=0
+> 2015-10-10 11:12:59.091100 7f7f29eb47c0 10 -- :/0 rank.bind 192.168.20.5:0/0
+> 2015-10-10 11:12:59.091102 7f7f29eb47c0 10 accepter.accepter.bind
+> 2015-10-10 11:12:59.091107 7f7f29eb47c0 10 accepter.accepter.bind
+> bound on random port 192.168.20.5:6801/0
+> 2015-10-10 11:12:59.091109 7f7f29eb47c0 10 accepter.accepter.bind
+> bound to 192.168.20.5:6801/0
+> 2015-10-10 11:12:59.091113 7f7f29eb47c0  1 -- 192.168.20.5:0/0 learned
+> my addr 192.168.20.5:0/0
+> 2015-10-10 11:12:59.091116 7f7f29eb47c0  1 accepter.accepter.bind
+> my_inst.addr is 192.168.20.5:6801/14134 need_addr=0
+> 2015-10-10 11:12:59.091118 7f7f29eb47c0 10 -- :/0 rank.bind 10.1.41.203:0/0
+> 2015-10-10 11:12:59.091119 7f7f29eb47c0 10 accepter.accepter.bind
+> 2015-10-10 11:12:59.091124 7f7f29eb47c0 10 accepter.accepter.bind
+> bound on random port 10.1.41.203:6801/0
+> 2015-10-10 11:12:59.091126 7f7f29eb47c0 10 accepter.accepter.bind
+> bound to 10.1.41.203:6801/0
+> 2015-10-10 11:12:59.091132 7f7f29eb47c0  1 -- 10.1.41.203:0/0 learned
+> my addr 10.1.41.203:0/0
+> 2015-10-10 11:12:59.091134 7f7f29eb47c0  1 accepter.accepter.bind
+> my_inst.addr is 10.1.41.203:6801/14134 need_addr=0
+> 2015-10-10 11:12:59.091137 7f7f29eb47c0 10 -- :/0 rank.bind 10.1.41.203:0/0
+> 2015-10-10 11:12:59.091138 7f7f29eb47c0 10 accepter.accepter.bind
+> 2015-10-10 11:12:59.091143 7f7f29eb47c0 10 accepter.accepter.bind
+> bound on random port 10.1.41.203:6802/0
+> 2015-10-10 11:12:59.091145 7f7f29eb47c0 10 accepter.accepter.bind
+> bound to 10.1.41.203:6802/0
+> 2015-10-10 11:12:59.091150 7f7f29eb47c0  1 -- 10.1.41.203:0/0 learned
+> my addr 10.1.41.203:0/0
+> 2015-10-10 11:12:59.091153 7f7f29eb47c0  1 accepter.accepter.bind
+> my_inst.addr is 10.1.41.203:6802/14134 need_addr=0
+> 2015-10-10 11:12:59.092322 7f7f29eb47c0  0
+> filestore(/var/lib/ceph/osd/ceph-3) mount detected xfs (libxfs)
+> 2015-10-10 11:12:59.092327 7f7f29eb47c0  1
+> filestore(/var/lib/ceph/osd/ceph-3)  disabling 'filestore replica
+> fadvise' due to known issues with fadvise(DONTNEED) on xfs
+> 2015-10-10 11:12:59.094728 7f7f29eb47c0  0
+> genericfilestorebackend(/var/lib/ceph/osd/ceph-3) detect_features:
+> FIEMAP ioctl is supported and appears to work
+> 2015-10-10 11:12:59.095142 7f7f29eb47c0  0
+> genericfilestorebackend(/var/lib/ceph/osd/ceph-3) detect_features:
+> syncfs(2) syscall fully supported (by glibc and kernel)
+> 2015-10-10 11:12:59.095181 7f7f29eb47c0  0
+> xfsfilestorebackend(/var/lib/ceph/osd/ceph-3) detect_feature: extsize
+> is disabled by conf
+> 2015-10-10 11:12:59.098529 7f7f29eb47c0 -1
+> filestore(/var/lib/ceph/osd/ceph-3) Error initializing leveldb:
+> Corruption: 16 missing files; e.g.:
+> /var/lib/ceph/osd/ceph-3/current/omap/078957.sst
 
---557981400-75370036-1444478848=:5497
-Content-Type: TEXT/PLAIN; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+^^^ This is the problem.
 
-On Sat, 10 Oct 2015, Haomai Wang wrote:
-> On Sat, Oct 10, 2015 at 5:49 AM, Sage Weil <sage@newdream.net> wrote:
->       Hey Marcus,
->=20
->       On Fri, 2 Oct 2015, Marcus Watts wrote:
->       > wip-addr
->       >
->       > 1. where is it?
->       > 2. current state
->       > 3. more info
->       > 4. cheap fixes
->       > 5. in case you were wondering why?
->       >
->       > ____ 1. where is it?
->       >
->       > I've just pushed another update to wip-addr:
->       >
->       > git@github.com:linuxbox2/linuxbox-ceph.git
->       > wip-addr
->       >
->       > ____ 2. current state
->       >
->       > This version
->       > 1/ compiles
->       > 2/ ran an extremely limited set of tests successfully
->       >=C2=A0 =C2=A0 =C2=A0 =C2=A0(was able to bring up ceph-mon, ceph-=
-osd).
->       >
->       > In theory, it should do everything a recent "master" branch
->       copy of ceph
->       > can do and little or nothing past that.=C2=A0 Internally it add=
-s
->       "address vector"
->       > support, some parsing/print logic, and lots of encoding rules
->       to pass them
->       > around, but there's nothing that can create and little that
->       makes any
->       > sensible use of this.=C2=A0 So this is just the back end encodi=
-ng
->       and storage rules.
->=20
->       This is looking pretty good. I left some comments.=C2=A0 There ar=
-e
->       still a few
->       XXX's left... but not many.=C2=A0 Haomai, can you help with the a=
-sync
->       msgr one?
->       (Also, Marcus, can you check if the msg/Simple/Pipe.cc connect()
->       and
->       accept() code doing the right thing?)
->=20
->=20
-> I have a quick view among all commits, looks a great improvement for th=
-e
-> future enhancing.
-> =C2=A0
->=20
->       One minor thing.. please put the subsystem as the prefix to the
->       commit
->       message instead of the branch name (e.g., mds: add features to
->       event
->       types).
->=20
->       > Phase 2 is to add logic to actually make it useful.
->       >=C2=A0 =C2=A0 =C2=A0 =C2=A0(the very start of this is on linuxbo=
-x2 "wip-addr-p2",
->       >=C2=A0 =C2=A0 =C2=A0 =C2=A0just monmap changes so far...)
->       > ____ 3. more info
->       >
->       > There's an etherpad document that describes this in more
->       detail,
->       >
->       > http://pad.ceph.com/p/wip_addr
->       >
->       > ____ 4. cheap fixes
->       >
->       > a couple of minor issues that should be easy to resolve,
->       > 1.
->       > AsyncConnection.cc
->       > this passes addresses back and forth as it's setting up the
->       connection,
->       > and it also exchanges features.=C2=A0 As best I can tell, it lo=
-oks
->       like
->       > it exchanges addresses before it knows what features the other
->       end
->       > supports.=C2=A0 There should be something in here that
->       > does this after knowing what features the other end supports.
->=20
->       Copying Haomai.
->=20
->=20
-> Right, it should be the same as simple messenger. The "features" bit is
-> exchanged in "ceph_msg_connect" and "ceph_msg_connect_reply".=C2=A0
->=20
-> I'm afraid that making features before addr exchange isn't a smooth way=
-.=20
-> Maybe we need a middle release to help format migrating. Or we need to=20
-> add retry mechanism, we could add proper way to let new-style addr side=
-=20
-> detect peer format. =C2=A0
+> ----------------------------------------------
+> mon log is :
+> ===================================
+> 2015-10-10 10:38:47.325121 7f4947e677c0  0 ceph version 0.80.7
+> (6c0127fcb58008793d3c8b62d925bc91963672a3), process ceph-mon, pid
+> 35589
+> 2015-10-10 10:38:47.326558 7f4947e677c0 10
+> ErasureCodePluginSelectJerasure: SSE4 plugin
+> 2015-10-10 10:38:47.330133 7f4947e677c0 10 ErasureCodeJerasure:
+> technique=reed_sol_van
+> 2015-10-10 10:38:47.330143 7f4947e677c0 10 ErasureCodeJerasure: k defaults to 7
+> 2015-10-10 10:38:47.330148 7f4947e677c0 10 ErasureCodeJerasure: m defaults to 3
+> 2015-10-10 10:38:47.330149 7f4947e677c0 10 ErasureCodeJerasure: w defaults to 8
+> 2015-10-10 10:38:47.330162 7f4947e677c0 10 load: jerasure
+> 2015-10-10 10:38:47.435134 7f4947e677c0 -1 failed to create new leveldb store
+> =============================
+> 
+> now I recreate this mon using ceph-deploy,adn it work well now.
+> 
+> But I do not want to recreate osd until this absolutely can not be repaired.
 
-Yeah... it seems like we need the initial exchange to share the addr that=
-=20
-we accepted on, and then a second tag + addrvec to share the full list=20
-after that if both sides have the new feature bit.
+If leveldb is missing files, there isn't much we can do.  I would check 
+for errors in kern.log or disk problems before recreating the OSD. This 
+looks like a file system corruption (caused by buggy kernel, bad 
+controller, or bad disk).
 
-In any case, I think in both these cases encoding wth 0 with a FIXME=20
-comment is fine for the time being.
+Another good practice is to mark the osd out and let the cluster get back 
+to healthy before wiping or discarding the bad OSD.  If there are problems 
+you can reconsider whether heroic measures are necessary...
 
 sage
---557981400-75370036-1444478848=:5497--
