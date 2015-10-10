@@ -1,143 +1,57 @@
-From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-Subject: Re: after a reboot,
-	osd can not up because of leveldb Corruption
-Date: Sat, 10 Oct 2015 05:19:21 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1510100517220.5497@cobra.newdream.net>
-References: <CANxbt0QJFryEOvm=BcRhPmwa3mvrnDKYs-RkAntUJsaNXbU_Dg@mail.gmail.com>
+From: Martin Bureau <mbureau@stingraydigital.onmicrosoft.com>
+Subject: Re: [ceph-users] How to reduce the influenct on the IO when an osd is
+	marked out?
+Date: Sat, 10 Oct 2015 12:29:52 +0000
+Message-ID: <BLUPR0801MB165230605729F9E3268AD893E0330@BLUPR0801MB1652.namprd08.prod.outlook.com>
+References: <56188B95.7060006@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CANxbt0QJFryEOvm=BcRhPmwa3mvrnDKYs-RkAntUJsaNXbU_Dg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: =?ISO-2022-JP?Q?lin_zhou_=1B$B=3C~NS=1B=28J?= <hnuzhoulin-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-bl2on0087.outbound.protection.outlook.com ([65.55.169.87]:39904
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751054AbbJJM35 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 10 Oct 2015 08:29:57 -0400
+In-Reply-To: <56188B95.7060006@gmail.com>
+Content-Language: en-CA
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: wangsongbo <songbo1227@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, "ceph-users@ceph.com" <ceph-users@ceph.com>
 
-On Sat, 10 Oct 2015, lin zhou ?? wrote:
-> hi,guys
-> 
-> the mon and osds in one of a node in our ceph cluster can not up now
-> because of leveldb.
-> 
-> ceph 0.80.7  ubuntu12.04
-> 
-> osd log is:
-> ------------------------------------------------------
-> 
-> 2015-10-10 11:12:58.896724 7f4cfcf9d7c0 -1 ESC[0;31m ** ERROR: error
-> converting store /var/lib/ceph/osd/ceph-3: (1) Operation not
-> permittedESC[0m
-> 2015-10-10 11:12:59.090344 7f7f29eb47c0  0 ceph version 0.80.7
-> (6c0127fcb58008793d3c8b62d925bc91963672a3), process ceph-osd, pid
-> 14134
-> 2015-10-10 11:12:59.091039 7f7f29eb47c0 10 -- :/0 rank.bind 10.1.41.203:0/0
-> 2015-10-10 11:12:59.091048 7f7f29eb47c0 10 accepter.accepter.bind
-> 2015-10-10 11:12:59.091061 7f7f29eb47c0 10 accepter.accepter.bind
-> bound on random port 10.1.41.203:6800/0
-> 2015-10-10 11:12:59.091066 7f7f29eb47c0 10 accepter.accepter.bind
-> bound to 10.1.41.203:6800/0
-> 2015-10-10 11:12:59.091073 7f7f29eb47c0  1 -- 10.1.41.203:0/0 learned
-> my addr 10.1.41.203:0/0
-> 2015-10-10 11:12:59.091076 7f7f29eb47c0  1 accepter.accepter.bind
-> my_inst.addr is 10.1.41.203:6800/14134 need_addr=0
-> 2015-10-10 11:12:59.091081 7f7f29eb47c0 10 -- :/0 rank.bind 192.168.20.5:0/0
-> 2015-10-10 11:12:59.091083 7f7f29eb47c0 10 accepter.accepter.bind
-> 2015-10-10 11:12:59.091088 7f7f29eb47c0 10 accepter.accepter.bind
-> bound on random port 192.168.20.5:6800/0
-> 2015-10-10 11:12:59.091091 7f7f29eb47c0 10 accepter.accepter.bind
-> bound to 192.168.20.5:6800/0
-> 2015-10-10 11:12:59.091095 7f7f29eb47c0  1 -- 192.168.20.5:0/0 learned
-> my addr 192.168.20.5:0/0
-> 2015-10-10 11:12:59.091098 7f7f29eb47c0  1 accepter.accepter.bind
-> my_inst.addr is 192.168.20.5:6800/14134 need_addr=0
-> 2015-10-10 11:12:59.091100 7f7f29eb47c0 10 -- :/0 rank.bind 192.168.20.5:0/0
-> 2015-10-10 11:12:59.091102 7f7f29eb47c0 10 accepter.accepter.bind
-> 2015-10-10 11:12:59.091107 7f7f29eb47c0 10 accepter.accepter.bind
-> bound on random port 192.168.20.5:6801/0
-> 2015-10-10 11:12:59.091109 7f7f29eb47c0 10 accepter.accepter.bind
-> bound to 192.168.20.5:6801/0
-> 2015-10-10 11:12:59.091113 7f7f29eb47c0  1 -- 192.168.20.5:0/0 learned
-> my addr 192.168.20.5:0/0
-> 2015-10-10 11:12:59.091116 7f7f29eb47c0  1 accepter.accepter.bind
-> my_inst.addr is 192.168.20.5:6801/14134 need_addr=0
-> 2015-10-10 11:12:59.091118 7f7f29eb47c0 10 -- :/0 rank.bind 10.1.41.203:0/0
-> 2015-10-10 11:12:59.091119 7f7f29eb47c0 10 accepter.accepter.bind
-> 2015-10-10 11:12:59.091124 7f7f29eb47c0 10 accepter.accepter.bind
-> bound on random port 10.1.41.203:6801/0
-> 2015-10-10 11:12:59.091126 7f7f29eb47c0 10 accepter.accepter.bind
-> bound to 10.1.41.203:6801/0
-> 2015-10-10 11:12:59.091132 7f7f29eb47c0  1 -- 10.1.41.203:0/0 learned
-> my addr 10.1.41.203:0/0
-> 2015-10-10 11:12:59.091134 7f7f29eb47c0  1 accepter.accepter.bind
-> my_inst.addr is 10.1.41.203:6801/14134 need_addr=0
-> 2015-10-10 11:12:59.091137 7f7f29eb47c0 10 -- :/0 rank.bind 10.1.41.203:0/0
-> 2015-10-10 11:12:59.091138 7f7f29eb47c0 10 accepter.accepter.bind
-> 2015-10-10 11:12:59.091143 7f7f29eb47c0 10 accepter.accepter.bind
-> bound on random port 10.1.41.203:6802/0
-> 2015-10-10 11:12:59.091145 7f7f29eb47c0 10 accepter.accepter.bind
-> bound to 10.1.41.203:6802/0
-> 2015-10-10 11:12:59.091150 7f7f29eb47c0  1 -- 10.1.41.203:0/0 learned
-> my addr 10.1.41.203:0/0
-> 2015-10-10 11:12:59.091153 7f7f29eb47c0  1 accepter.accepter.bind
-> my_inst.addr is 10.1.41.203:6802/14134 need_addr=0
-> 2015-10-10 11:12:59.092322 7f7f29eb47c0  0
-> filestore(/var/lib/ceph/osd/ceph-3) mount detected xfs (libxfs)
-> 2015-10-10 11:12:59.092327 7f7f29eb47c0  1
-> filestore(/var/lib/ceph/osd/ceph-3)  disabling 'filestore replica
-> fadvise' due to known issues with fadvise(DONTNEED) on xfs
-> 2015-10-10 11:12:59.094728 7f7f29eb47c0  0
-> genericfilestorebackend(/var/lib/ceph/osd/ceph-3) detect_features:
-> FIEMAP ioctl is supported and appears to work
-> 2015-10-10 11:12:59.095142 7f7f29eb47c0  0
-> genericfilestorebackend(/var/lib/ceph/osd/ceph-3) detect_features:
-> syncfs(2) syscall fully supported (by glibc and kernel)
-> 2015-10-10 11:12:59.095181 7f7f29eb47c0  0
-> xfsfilestorebackend(/var/lib/ceph/osd/ceph-3) detect_feature: extsize
-> is disabled by conf
-> 2015-10-10 11:12:59.098529 7f7f29eb47c0 -1
-> filestore(/var/lib/ceph/osd/ceph-3) Error initializing leveldb:
-> Corruption: 16 missing files; e.g.:
-> /var/lib/ceph/osd/ceph-3/current/omap/078957.sst
+Hello,
 
-^^^ This is the problem.
+You can use these settings to lower the impact of backfilling and recovery operations:
 
-> ----------------------------------------------
-> mon log is :
-> ===================================
-> 2015-10-10 10:38:47.325121 7f4947e677c0  0 ceph version 0.80.7
-> (6c0127fcb58008793d3c8b62d925bc91963672a3), process ceph-mon, pid
-> 35589
-> 2015-10-10 10:38:47.326558 7f4947e677c0 10
-> ErasureCodePluginSelectJerasure: SSE4 plugin
-> 2015-10-10 10:38:47.330133 7f4947e677c0 10 ErasureCodeJerasure:
-> technique=reed_sol_van
-> 2015-10-10 10:38:47.330143 7f4947e677c0 10 ErasureCodeJerasure: k defaults to 7
-> 2015-10-10 10:38:47.330148 7f4947e677c0 10 ErasureCodeJerasure: m defaults to 3
-> 2015-10-10 10:38:47.330149 7f4947e677c0 10 ErasureCodeJerasure: w defaults to 8
-> 2015-10-10 10:38:47.330162 7f4947e677c0 10 load: jerasure
-> 2015-10-10 10:38:47.435134 7f4947e677c0 -1 failed to create new leveldb store
-> =============================
-> 
-> now I recreate this mon using ceph-deploy,adn it work well now.
-> 
-> But I do not want to recreate osd until this absolutely can not be repaired.
+osd max backfills
+osd recovery max active
 
-If leveldb is missing files, there isn't much we can do.  I would check 
-for errors in kern.log or disk problems before recreating the OSD. This 
-looks like a file system corruption (caused by buggy kernel, bad 
-controller, or bad disk).
+Additionally, if you are using the cfq io scheduler, with these you can set the io priority of recovery operations versus client operations:
 
-Another good practice is to mark the osd out and let the cluster get back 
-to healthy before wiping or discarding the bad OSD.  If there are problems 
-you can reconsider whether heroic measures are necessary...
+osd client op priority
+osd recovery op priority
 
-sage
+Finally, if the osd is down temporarily because of a maintenance for example, you can set the noout flag (ceph osd set noout) so that backfilling will not occur during this time.
+
+Regards,
+Martin
+
+________________________________________
+From: ceph-users <ceph-users-bounces@lists.ceph.com> on behalf of wangsongbo <songbo1227@gmail.com>
+Sent: October 9, 2015 11:52 PM
+To: ceph-devel; ceph-users@ceph.com
+Subject: [ceph-users] How to reduce the influenct on the IO when an osd is      marked out?
+
+Hi all,
+when an osd is marked out, relative IO will be blocked, in which case,
+application built on ceph will fail.According to test result, the larger
+a data is,the longer it will take to elapse.
+How to reduce the impact of this process on the IO?
+
+
+Thanks and Regards,
+WangSongbo
+_______________________________________________
+ceph-users mailing list
+ceph-users@lists.ceph.com
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
