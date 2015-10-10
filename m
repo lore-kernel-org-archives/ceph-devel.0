@@ -1,57 +1,49 @@
-From: Martin Bureau <mbureau@stingraydigital.onmicrosoft.com>
-Subject: Re: [ceph-users] How to reduce the influenct on the IO when an osd is
-	marked out?
-Date: Sat, 10 Oct 2015 12:29:52 +0000
-Message-ID: <BLUPR0801MB165230605729F9E3268AD893E0330@BLUPR0801MB1652.namprd08.prod.outlook.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: How to reduce the influenct on the IO when an osd is marked
+ out?
+Date: Sat, 10 Oct 2015 06:39:12 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1510100634450.29929@cobra.newdream.net>
 References: <56188B95.7060006@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0087.outbound.protection.outlook.com ([65.55.169.87]:39904
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751054AbbJJM35 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 10 Oct 2015 08:29:57 -0400
+Received: from cobra.newdream.net ([66.33.216.30]:55944 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751128AbbJJNjM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 10 Oct 2015 09:39:12 -0400
 In-Reply-To: <56188B95.7060006@gmail.com>
-Content-Language: en-CA
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: wangsongbo <songbo1227@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, "ceph-users@ceph.com" <ceph-users@ceph.com>
+To: wangsongbo <songbo1227@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, sjust@redhat.com
 
-Hello,
+[dropping ceph-users]
 
-You can use these settings to lower the impact of backfilling and recovery operations:
+On Sat, 10 Oct 2015, wangsongbo wrote:
+> Hi all,
+> when an osd is marked out, relative IO will be blocked, in which case,
+> application built on ceph will fail.According to test result, the larger a
+> data is,the longer it will take to elapse.
+> How to reduce the impact of this process on the IO?
 
-osd max backfills
-osd recovery max active
+When you mark an osd out the mon is doing prime_pg_temp, which 
+preemptively remaps the PG to the same OSDs.  This should make peering 
+fast... except that the OSDs still have to do a cycle of up_thru updates.
 
-Additionally, if you are using the cfq io scheduler, with these you can set the io priority of recovery operations versus client operations:
+Sam, I think we can do the following to avoid this:
 
-osd client op priority
-osd recovery op priority
+ - in build prior, we can infer that that interval for last_epoch_start is 
+also a rw interval (because clearly it finished peering).
 
-Finally, if the osd is down temporarily because of a maintenance for example, you can set the noout flag (ceph osd set noout) so that backfilling will not occur during this time.
+ - if the acting set and primary do not change, we can skip the up_thru 
+update (because we will already infer rw from above).
 
-Regards,
-Martin
+I think the only caveat is that we can only skip the up_thru update 
+once the entire cluster has a feature bit indicating they understand 
+that last_epoch_started implies rw.
 
-________________________________________
-From: ceph-users <ceph-users-bounces@lists.ceph.com> on behalf of wangsongbo <songbo1227@gmail.com>
-Sent: October 9, 2015 11:52 PM
-To: ceph-devel; ceph-users@ceph.com
-Subject: [ceph-users] How to reduce the influenct on the IO when an osd is      marked out?
+Anyway, this would mean that there's no subsequent mon interaction after 
+the mark out (and probably lots of other common scenarios)...
 
-Hi all,
-when an osd is marked out, relative IO will be blocked, in which case,
-application built on ceph will fail.According to test result, the larger
-a data is,the longer it will take to elapse.
-How to reduce the impact of this process on the IO?
-
-
-Thanks and Regards,
-WangSongbo
-_______________________________________________
-ceph-users mailing list
-ceph-users@lists.ceph.com
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+What do you think?
+sage
