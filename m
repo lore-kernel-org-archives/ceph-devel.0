@@ -1,157 +1,45 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH] rbd: prevent kernel stack blow up on rbd map
-Date: Sun, 11 Oct 2015 20:05:47 +0200
-Message-ID: <1444586747-24268-1-git-send-email-idryomov@gmail.com>
+From: Alexandre DERUMIER <aderumier@odiso.com>
+Subject: lltng enabled by default and qemu apparmor|selinux problems
+Date: Sun, 11 Oct 2015 19:06:54 +0200 (CEST)
+Message-ID: <370906433.54234352.1444583214983.JavaMail.zimbra@oxygem.tv>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f178.google.com ([209.85.212.178]:35557 "EHLO
-	mail-wi0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751261AbbJKQZ4 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 11 Oct 2015 12:25:56 -0400
-Received: by wicge5 with SMTP id ge5so123716344wic.0
-        for <ceph-devel@vger.kernel.org>; Sun, 11 Oct 2015 09:25:55 -0700 (PDT)
+Received: from mailpro.odiso.net ([89.248.209.98]:45015 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751102AbbJKRG5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 11 Oct 2015 13:06:57 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Xudong Cao <cao.xudong@h3c.com>
+To: ceph-devel <ceph-devel@vger.kernel.org>
+Cc: Sage Weil <sweil@redhat.com>
 
-Mapping an image with a long parent chain (e.g. image foo, whose parent
-is bar, whose parent is baz, etc) currently leads to a kernel stack
-overflow, due to the following recursion in the reply path:
+Hi,
 
-  rbd_osd_req_callback()
-    rbd_obj_request_complete()
-      rbd_img_obj_callback()
-        rbd_img_parent_read_callback()
-          rbd_obj_request_complete()
-            ...
+it seem that since this commit
 
-Limit the parent chain to 8 images, which is ~3K worth of stack.  It's
-probably a good thing to do regardless - performance with more than
-a few images long parent chain is likely to be pretty bad.
+https://github.com/ceph/ceph/pull/4261/files
 
-Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
----
- drivers/block/rbd.c | 33 +++++++++++++++++++++++----------
- 1 file changed, 23 insertions(+), 10 deletions(-)
+lltng is enabled by default.
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index ccbc3cbbf24e..07f666f4ca18 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -96,6 +96,8 @@ static int atomic_dec_return_safe(atomic_t *v)
- #define RBD_MINORS_PER_MAJOR		256
- #define RBD_SINGLE_MAJOR_PART_SHIFT	4
- 
-+#define RBD_MAX_PARENT_CHAIN_LEN	8
-+
- #define RBD_SNAP_DEV_NAME_PREFIX	"snap_"
- #define RBD_MAX_SNAP_NAME_LEN	\
- 			(NAME_MAX - (sizeof (RBD_SNAP_DEV_NAME_PREFIX) - 1))
-@@ -426,7 +428,7 @@ static ssize_t rbd_add_single_major(struct bus_type *bus, const char *buf,
- 				    size_t count);
- static ssize_t rbd_remove_single_major(struct bus_type *bus, const char *buf,
- 				       size_t count);
--static int rbd_dev_image_probe(struct rbd_device *rbd_dev, bool mapping);
-+static int rbd_dev_image_probe(struct rbd_device *rbd_dev, int depth);
- static void rbd_spec_put(struct rbd_spec *spec);
- 
- static int rbd_dev_id_to_minor(int dev_id)
-@@ -5131,7 +5133,12 @@ out_err:
- 	return ret;
- }
- 
--static int rbd_dev_probe_parent(struct rbd_device *rbd_dev)
-+/*
-+ * @depth is rbd_dev_image_probe() -> rbd_dev_probe_parent() ->
-+ * rbd_dev_image_probe() recursion depth, which means it's also the
-+ * length of the already discovered part of the parent chain.
-+ */
-+static int rbd_dev_probe_parent(struct rbd_device *rbd_dev, int depth)
- {
- 	struct rbd_device *parent = NULL;
- 	int ret;
-@@ -5139,6 +5146,12 @@ static int rbd_dev_probe_parent(struct rbd_device *rbd_dev)
- 	if (!rbd_dev->parent_spec)
- 		return 0;
- 
-+	if (++depth > RBD_MAX_PARENT_CHAIN_LEN) {
-+		pr_info("parent chain is too long (%d)\n", depth);
-+		ret = -EINVAL;
-+		goto out_err;
-+	}
-+
- 	parent = rbd_dev_create(rbd_dev->rbd_client, rbd_dev->parent_spec,
- 				NULL);
- 	if (!parent) {
-@@ -5153,7 +5166,7 @@ static int rbd_dev_probe_parent(struct rbd_device *rbd_dev)
- 	__rbd_get_client(rbd_dev->rbd_client);
- 	rbd_spec_get(rbd_dev->parent_spec);
- 
--	ret = rbd_dev_image_probe(parent, false);
-+	ret = rbd_dev_image_probe(parent, depth);
- 	if (ret < 0)
- 		goto out_err;
- 
-@@ -5282,7 +5295,7 @@ static void rbd_dev_image_release(struct rbd_device *rbd_dev)
-  * parent), initiate a watch on its header object before using that
-  * object to get detailed information about the rbd image.
-  */
--static int rbd_dev_image_probe(struct rbd_device *rbd_dev, bool mapping)
-+static int rbd_dev_image_probe(struct rbd_device *rbd_dev, int depth)
- {
- 	int ret;
- 
-@@ -5300,7 +5313,7 @@ static int rbd_dev_image_probe(struct rbd_device *rbd_dev, bool mapping)
- 	if (ret)
- 		goto err_out_format;
- 
--	if (mapping) {
-+	if (!depth) {
- 		ret = rbd_dev_header_watch_sync(rbd_dev);
- 		if (ret) {
- 			if (ret == -ENOENT)
-@@ -5321,7 +5334,7 @@ static int rbd_dev_image_probe(struct rbd_device *rbd_dev, bool mapping)
- 	 * Otherwise this is a parent image, identified by pool, image
- 	 * and snap ids - need to fill in names for those ids.
- 	 */
--	if (mapping)
-+	if (!depth)
- 		ret = rbd_spec_fill_snap_id(rbd_dev);
- 	else
- 		ret = rbd_spec_fill_names(rbd_dev);
-@@ -5343,12 +5356,12 @@ static int rbd_dev_image_probe(struct rbd_device *rbd_dev, bool mapping)
- 		 * Need to warn users if this image is the one being
- 		 * mapped and has a parent.
- 		 */
--		if (mapping && rbd_dev->parent_spec)
-+		if (!depth && rbd_dev->parent_spec)
- 			rbd_warn(rbd_dev,
- 				 "WARNING: kernel layering is EXPERIMENTAL!");
- 	}
- 
--	ret = rbd_dev_probe_parent(rbd_dev);
-+	ret = rbd_dev_probe_parent(rbd_dev, depth);
- 	if (ret)
- 		goto err_out_probe;
- 
-@@ -5359,7 +5372,7 @@ static int rbd_dev_image_probe(struct rbd_device *rbd_dev, bool mapping)
- err_out_probe:
- 	rbd_dev_unprobe(rbd_dev);
- err_out_watch:
--	if (mapping)
-+	if (!depth)
- 		rbd_dev_header_unwatch_sync(rbd_dev);
- out_header_name:
- 	kfree(rbd_dev->header_name);
-@@ -5422,7 +5435,7 @@ static ssize_t do_rbd_add(struct bus_type *bus,
- 	spec = NULL;		/* rbd_dev now owns this */
- 	rbd_opts = NULL;	/* rbd_dev now owns this */
- 
--	rc = rbd_dev_image_probe(rbd_dev, true);
-+	rc = rbd_dev_image_probe(rbd_dev, 0);
- 	if (rc < 0)
- 		goto err_out_rbd_dev;
- 
--- 
-2.4.3
+But this give error with qemu when apparmor|selinux is enabled.
+
+That's why ubuntu && redhat now disable it for their own packages.
+
+https://bugzilla.redhat.com/show_bug.cgi?id=1223319
+https://bugs.launchpad.net/ubuntu/+source/libvirt/+bug/1432644
+
+In the ubuntu launchpad, Sage has made a reply
+
+"
+Sage Weil (sage-newdream) wrote on 2015-04-02:	#21
+FWIW, we are disabling the lttng support in the final hammer release to avoid this issue (until we come up with a better solution)."
+
+
+It seem that it's still enabled by default in ceph git and ceph.com packages.
+
+Is it still planned to disable by default ?
+
+
 
