@@ -1,99 +1,156 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH] rbd: don't leak parent_spec in rbd_dev_probe_parent()
-Date: Sun, 11 Oct 2015 20:03:11 +0200
-Message-ID: <1444586591-24141-1-git-send-email-idryomov@gmail.com>
+Subject: [PATCH] rbd: prevent kernel stack blow up on rbd map
+Date: Sun, 11 Oct 2015 20:05:47 +0200
+Message-ID: <1444586747-24268-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f173.google.com ([209.85.212.173]:33049 "EHLO
-	mail-wi0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751168AbbJKQXa (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 11 Oct 2015 12:23:30 -0400
-Received: by wiclk2 with SMTP id lk2so124830807wic.0
-        for <ceph-devel@vger.kernel.org>; Sun, 11 Oct 2015 09:23:29 -0700 (PDT)
-Received: from orange.localdomain (nat-pool-brq-t.redhat.com. [213.175.37.10])
-        by smtp.gmail.com with ESMTPSA id x7sm7358104wia.10.2015.10.11.09.23.28
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Sun, 11 Oct 2015 09:23:28 -0700 (PDT)
+Received: from mail-wi0-f178.google.com ([209.85.212.178]:35557 "EHLO
+	mail-wi0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751261AbbJKQZ4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 11 Oct 2015 12:25:56 -0400
+Received: by wicge5 with SMTP id ge5so123716344wic.0
+        for <ceph-devel@vger.kernel.org>; Sun, 11 Oct 2015 09:25:55 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
+Cc: Xudong Cao <cao.xudong@h3c.com>
 
-Currently we leak parent_spec and trigger a "parent reference
-underflow" warning if rbd_dev_create() in rbd_dev_probe_parent() fails.
-The problem is we take the !parent out_err branch and that only drops
-refcounts; parent_spec that would've been freed had we called
-rbd_dev_unparent() remains and triggers rbd_warn() in
-rbd_dev_parent_put() - at that point we have parent_spec != NULL and
-parent_ref == 0, so counter ends up being -1 after the decrement.
+Mapping an image with a long parent chain (e.g. image foo, whose parent
+is bar, whose parent is baz, etc) currently leads to a kernel stack
+overflow, due to the following recursion in the reply path:
 
-Redo rbd_dev_probe_parent() to fix this.
+  rbd_osd_req_callback()
+    rbd_obj_request_complete()
+      rbd_img_obj_callback()
+        rbd_img_parent_read_callback()
+          rbd_obj_request_complete()
+            ...
+
+Limit the parent chain to 8 images, which is ~3K worth of stack.  It's
+probably a good thing to do regardless - performance with more than
+a few images long parent chain is likely to be pretty bad.
 
 Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 ---
- drivers/block/rbd.c | 36 ++++++++++++++++--------------------
- 1 file changed, 16 insertions(+), 20 deletions(-)
+ drivers/block/rbd.c | 33 +++++++++++++++++++++++----------
+ 1 file changed, 23 insertions(+), 10 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index cd00e4653e49..ccbc3cbbf24e 100644
+index ccbc3cbbf24e..07f666f4ca18 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -5134,41 +5134,37 @@ out_err:
- static int rbd_dev_probe_parent(struct rbd_device *rbd_dev)
- {
- 	struct rbd_device *parent = NULL;
--	struct rbd_spec *parent_spec;
--	struct rbd_client *rbdc;
- 	int ret;
+@@ -96,6 +96,8 @@ static int atomic_dec_return_safe(atomic_t *v)
+ #define RBD_MINORS_PER_MAJOR		256
+ #define RBD_SINGLE_MAJOR_PART_SHIFT	4
  
- 	if (!rbd_dev->parent_spec)
- 		return 0;
--	/*
--	 * We need to pass a reference to the client and the parent
--	 * spec when creating the parent rbd_dev.  Images related by
--	 * parent/child relationships always share both.
--	 */
--	parent_spec = rbd_spec_get(rbd_dev->parent_spec);
--	rbdc = __rbd_get_client(rbd_dev->rbd_client);
++#define RBD_MAX_PARENT_CHAIN_LEN	8
++
+ #define RBD_SNAP_DEV_NAME_PREFIX	"snap_"
+ #define RBD_MAX_SNAP_NAME_LEN	\
+ 			(NAME_MAX - (sizeof (RBD_SNAP_DEV_NAME_PREFIX) - 1))
+@@ -426,7 +428,7 @@ static ssize_t rbd_add_single_major(struct bus_type *bus, const char *buf,
+ 				    size_t count);
+ static ssize_t rbd_remove_single_major(struct bus_type *bus, const char *buf,
+ 				       size_t count);
+-static int rbd_dev_image_probe(struct rbd_device *rbd_dev, bool mapping);
++static int rbd_dev_image_probe(struct rbd_device *rbd_dev, int depth);
+ static void rbd_spec_put(struct rbd_spec *spec);
  
--	ret = -ENOMEM;
--	parent = rbd_dev_create(rbdc, parent_spec, NULL);
--	if (!parent)
-+	parent = rbd_dev_create(rbd_dev->rbd_client, rbd_dev->parent_spec,
-+				NULL);
-+	if (!parent) {
-+		ret = -ENOMEM;
- 		goto out_err;
-+	}
-+
-+	/*
-+	 * Images related by parent/child relationships always share
-+	 * rbd_client and spec/parent_spec, so bump their refcounts.
-+	 */
-+	__rbd_get_client(rbd_dev->rbd_client);
-+	rbd_spec_get(rbd_dev->parent_spec);
- 
- 	ret = rbd_dev_image_probe(parent, false);
- 	if (ret < 0)
- 		goto out_err;
-+
- 	rbd_dev->parent = parent;
- 	atomic_set(&rbd_dev->parent_ref, 1);
--
- 	return 0;
-+
- out_err:
--	if (parent) {
--		rbd_dev_unparent(rbd_dev);
-+	rbd_dev_unparent(rbd_dev);
-+	if (parent)
- 		rbd_dev_destroy(parent);
--	} else {
--		rbd_put_client(rbdc);
--		rbd_spec_put(parent_spec);
--	}
--
+ static int rbd_dev_id_to_minor(int dev_id)
+@@ -5131,7 +5133,12 @@ out_err:
  	return ret;
  }
+ 
+-static int rbd_dev_probe_parent(struct rbd_device *rbd_dev)
++/*
++ * @depth is rbd_dev_image_probe() -> rbd_dev_probe_parent() ->
++ * rbd_dev_image_probe() recursion depth, which means it's also the
++ * length of the already discovered part of the parent chain.
++ */
++static int rbd_dev_probe_parent(struct rbd_device *rbd_dev, int depth)
+ {
+ 	struct rbd_device *parent = NULL;
+ 	int ret;
+@@ -5139,6 +5146,12 @@ static int rbd_dev_probe_parent(struct rbd_device *rbd_dev)
+ 	if (!rbd_dev->parent_spec)
+ 		return 0;
+ 
++	if (++depth > RBD_MAX_PARENT_CHAIN_LEN) {
++		pr_info("parent chain is too long (%d)\n", depth);
++		ret = -EINVAL;
++		goto out_err;
++	}
++
+ 	parent = rbd_dev_create(rbd_dev->rbd_client, rbd_dev->parent_spec,
+ 				NULL);
+ 	if (!parent) {
+@@ -5153,7 +5166,7 @@ static int rbd_dev_probe_parent(struct rbd_device *rbd_dev)
+ 	__rbd_get_client(rbd_dev->rbd_client);
+ 	rbd_spec_get(rbd_dev->parent_spec);
+ 
+-	ret = rbd_dev_image_probe(parent, false);
++	ret = rbd_dev_image_probe(parent, depth);
+ 	if (ret < 0)
+ 		goto out_err;
+ 
+@@ -5282,7 +5295,7 @@ static void rbd_dev_image_release(struct rbd_device *rbd_dev)
+  * parent), initiate a watch on its header object before using that
+  * object to get detailed information about the rbd image.
+  */
+-static int rbd_dev_image_probe(struct rbd_device *rbd_dev, bool mapping)
++static int rbd_dev_image_probe(struct rbd_device *rbd_dev, int depth)
+ {
+ 	int ret;
+ 
+@@ -5300,7 +5313,7 @@ static int rbd_dev_image_probe(struct rbd_device *rbd_dev, bool mapping)
+ 	if (ret)
+ 		goto err_out_format;
+ 
+-	if (mapping) {
++	if (!depth) {
+ 		ret = rbd_dev_header_watch_sync(rbd_dev);
+ 		if (ret) {
+ 			if (ret == -ENOENT)
+@@ -5321,7 +5334,7 @@ static int rbd_dev_image_probe(struct rbd_device *rbd_dev, bool mapping)
+ 	 * Otherwise this is a parent image, identified by pool, image
+ 	 * and snap ids - need to fill in names for those ids.
+ 	 */
+-	if (mapping)
++	if (!depth)
+ 		ret = rbd_spec_fill_snap_id(rbd_dev);
+ 	else
+ 		ret = rbd_spec_fill_names(rbd_dev);
+@@ -5343,12 +5356,12 @@ static int rbd_dev_image_probe(struct rbd_device *rbd_dev, bool mapping)
+ 		 * Need to warn users if this image is the one being
+ 		 * mapped and has a parent.
+ 		 */
+-		if (mapping && rbd_dev->parent_spec)
++		if (!depth && rbd_dev->parent_spec)
+ 			rbd_warn(rbd_dev,
+ 				 "WARNING: kernel layering is EXPERIMENTAL!");
+ 	}
+ 
+-	ret = rbd_dev_probe_parent(rbd_dev);
++	ret = rbd_dev_probe_parent(rbd_dev, depth);
+ 	if (ret)
+ 		goto err_out_probe;
+ 
+@@ -5359,7 +5372,7 @@ static int rbd_dev_image_probe(struct rbd_device *rbd_dev, bool mapping)
+ err_out_probe:
+ 	rbd_dev_unprobe(rbd_dev);
+ err_out_watch:
+-	if (mapping)
++	if (!depth)
+ 		rbd_dev_header_unwatch_sync(rbd_dev);
+ out_header_name:
+ 	kfree(rbd_dev->header_name);
+@@ -5422,7 +5435,7 @@ static ssize_t do_rbd_add(struct bus_type *bus,
+ 	spec = NULL;		/* rbd_dev now owns this */
+ 	rbd_opts = NULL;	/* rbd_dev now owns this */
+ 
+-	rc = rbd_dev_image_probe(rbd_dev, true);
++	rc = rbd_dev_image_probe(rbd_dev, 0);
+ 	if (rc < 0)
+ 		goto err_out_rbd_dev;
  
 -- 
 2.4.3
