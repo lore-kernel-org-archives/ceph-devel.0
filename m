@@ -1,49 +1,100 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: How to reduce the influenct on the IO when an osd is marked
- out?
-Date: Sat, 10 Oct 2015 06:39:12 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1510100634450.29929@cobra.newdream.net>
-References: <56188B95.7060006@gmail.com>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: [PATCH] rbd: don't leak parent_spec in rbd_dev_probe_parent()
+Date: Sun, 11 Oct 2015 20:03:11 +0200
+Message-ID: <1444586591-24141-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:55944 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751128AbbJJNjM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 10 Oct 2015 09:39:12 -0400
-In-Reply-To: <56188B95.7060006@gmail.com>
+Received: from mail-wi0-f173.google.com ([209.85.212.173]:33049 "EHLO
+	mail-wi0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751168AbbJKQXa (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 11 Oct 2015 12:23:30 -0400
+Received: by wiclk2 with SMTP id lk2so124830807wic.0
+        for <ceph-devel@vger.kernel.org>; Sun, 11 Oct 2015 09:23:29 -0700 (PDT)
+Received: from orange.localdomain (nat-pool-brq-t.redhat.com. [213.175.37.10])
+        by smtp.gmail.com with ESMTPSA id x7sm7358104wia.10.2015.10.11.09.23.28
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Sun, 11 Oct 2015 09:23:28 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: wangsongbo <songbo1227@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, sjust@redhat.com
+To: ceph-devel@vger.kernel.org
 
-[dropping ceph-users]
+Currently we leak parent_spec and trigger a "parent reference
+underflow" warning if rbd_dev_create() in rbd_dev_probe_parent() fails.
+The problem is we take the !parent out_err branch and that only drops
+refcounts; parent_spec that would've been freed had we called
+rbd_dev_unparent() remains and triggers rbd_warn() in
+rbd_dev_parent_put() - at that point we have parent_spec != NULL and
+parent_ref == 0, so counter ends up being -1 after the decrement.
 
-On Sat, 10 Oct 2015, wangsongbo wrote:
-> Hi all,
-> when an osd is marked out, relative IO will be blocked, in which case,
-> application built on ceph will fail.According to test result, the larger a
-> data is,the longer it will take to elapse.
-> How to reduce the impact of this process on the IO?
+Redo rbd_dev_probe_parent() to fix this.
 
-When you mark an osd out the mon is doing prime_pg_temp, which 
-preemptively remaps the PG to the same OSDs.  This should make peering 
-fast... except that the OSDs still have to do a cycle of up_thru updates.
+Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+---
+ drivers/block/rbd.c | 36 ++++++++++++++++--------------------
+ 1 file changed, 16 insertions(+), 20 deletions(-)
 
-Sam, I think we can do the following to avoid this:
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index cd00e4653e49..ccbc3cbbf24e 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -5134,41 +5134,37 @@ out_err:
+ static int rbd_dev_probe_parent(struct rbd_device *rbd_dev)
+ {
+ 	struct rbd_device *parent = NULL;
+-	struct rbd_spec *parent_spec;
+-	struct rbd_client *rbdc;
+ 	int ret;
+ 
+ 	if (!rbd_dev->parent_spec)
+ 		return 0;
+-	/*
+-	 * We need to pass a reference to the client and the parent
+-	 * spec when creating the parent rbd_dev.  Images related by
+-	 * parent/child relationships always share both.
+-	 */
+-	parent_spec = rbd_spec_get(rbd_dev->parent_spec);
+-	rbdc = __rbd_get_client(rbd_dev->rbd_client);
+ 
+-	ret = -ENOMEM;
+-	parent = rbd_dev_create(rbdc, parent_spec, NULL);
+-	if (!parent)
++	parent = rbd_dev_create(rbd_dev->rbd_client, rbd_dev->parent_spec,
++				NULL);
++	if (!parent) {
++		ret = -ENOMEM;
+ 		goto out_err;
++	}
++
++	/*
++	 * Images related by parent/child relationships always share
++	 * rbd_client and spec/parent_spec, so bump their refcounts.
++	 */
++	__rbd_get_client(rbd_dev->rbd_client);
++	rbd_spec_get(rbd_dev->parent_spec);
+ 
+ 	ret = rbd_dev_image_probe(parent, false);
+ 	if (ret < 0)
+ 		goto out_err;
++
+ 	rbd_dev->parent = parent;
+ 	atomic_set(&rbd_dev->parent_ref, 1);
+-
+ 	return 0;
++
+ out_err:
+-	if (parent) {
+-		rbd_dev_unparent(rbd_dev);
++	rbd_dev_unparent(rbd_dev);
++	if (parent)
+ 		rbd_dev_destroy(parent);
+-	} else {
+-		rbd_put_client(rbdc);
+-		rbd_spec_put(parent_spec);
+-	}
+-
+ 	return ret;
+ }
+ 
+-- 
+2.4.3
 
- - in build prior, we can infer that that interval for last_epoch_start is 
-also a rw interval (because clearly it finished peering).
-
- - if the acting set and primary do not change, we can skip the up_thru 
-update (because we will already infer rw from above).
-
-I think the only caveat is that we can only skip the up_thru update 
-once the entire cluster has a feature bit indicating they understand 
-that last_epoch_started implies rw.
-
-Anyway, this would mean that there's no subsequent mon interaction after 
-the mark out (and probably lots of other common scenarios)...
-
-What do you think?
-sage
