@@ -1,48 +1,33 @@
-From: "HEWLETT, Paul (Paul)" <paul.hewlett@alcatel-lucent.com>
-Subject: Re: lltng enabled by default and qemu apparmor|selinux problems
-Date: Mon, 12 Oct 2015 08:28:06 +0000
-Message-ID: <12AB04D8-665A-4F2B-8CB1-E5268065DDE0@alcatel-lucent.com>
-References: <370906433.54234352.1444583214983.JavaMail.zimbra@oxygem.tv>
+From: David Casier <david.casier@aevoo.fr>
+Subject: Fwd: [newstore (again)] how disable double write WAL
+Date: Mon, 12 Oct 2015 14:50:09 +0200
+Message-ID: <561BAC81.5030506@aevoo.fr>
+References: <561BABB5.2090209@aevoo.fr>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from fr-hpgre-esg-01.alcatel-lucent.com ([135.245.210.22]:51094 "EHLO
-	smtp-fr.alcatel-lucent.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751481AbbJLI2W (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 12 Oct 2015 04:28:22 -0400
-In-Reply-To: <370906433.54234352.1444583214983.JavaMail.zimbra@oxygem.tv>
-Content-Language: en-US
-Content-ID: <8B3AB54942716A458FCF943DC2D4178F@exchange.lucent.com>
+Received: from 62-210-192-203.rev.poneytelecom.eu ([62.210.192.203]:42452 "EHLO
+	aevoo.fr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751924AbbJLMv2 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 12 Oct 2015 08:51:28 -0400
+Received: from [172.18.56.197] (LCaen-656-1-144-187.w217-128.abo.wanadoo.fr [217.128.26.187])
+	by aevoo.fr (Postfix) with ESMTPSA id E942740212
+	for <ceph-devel@vger.kernel.org>; Mon, 12 Oct 2015 14:51:26 +0200 (CEST)
+In-Reply-To: <561BABB5.2090209@aevoo.fr>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>, ceph-devel <ceph-devel@vger.kernel.org>
-Cc: Sage Weil <sweil@redhat.com>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-SUYgSSBjYW4gYWRkIG15ICQwLjAyIC0gd2Ugd2VyZSB1bmFibGUgdG8gdXNlIHRoZSBsaWJyYWRv
-c3N0cmlwZXIgbGlicmFyeSBpbiBSSEVMNiBiZWNhdXNlIGl0IHVzZXMgdGhlIHNhbWUgaW5pdGlh
-bGlzYXRpb24gdGFncyBhcyBsaWJyYWRvcyBhbmQgbHR0bmcgZG9lcyBub3QgbGlrZSB0aGF0LiBX
-ZSBoYWQgbm8gcHJvYmxlbXMgd2l0aCBSSEVMNyB2ZXJzaW9uIG9mIGNlcGggYmVjYXVzZSBsdHRu
-ZyBpcyBub3QgZW5hYmxlZC4gUGxlYXNlIGRvIG5vdCByZS1lbmFibGUgbHR0bmcgaW4gUkhFTDcg
-YW5kIGxhdGVyIGJyYW5jaGVz4oCmLg0KDQpSZWdhcmRzDQpQYXVsDQoNCg0KDQoNCk9uIDExLzEw
-LzIwMTUgMTg6MDYsICJjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBvbiBiZWhhbGYg
-b2YgQWxleGFuZHJlIERFUlVNSUVSIiA8Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcg
-b24gYmVoYWxmIG9mIGFkZXJ1bWllckBvZGlzby5jb20+IHdyb3RlOg0KDQo+SGksDQo+DQo+aXQg
-c2VlbSB0aGF0IHNpbmNlIHRoaXMgY29tbWl0DQo+DQo+aHR0cHM6Ly9naXRodWIuY29tL2NlcGgv
-Y2VwaC9wdWxsLzQyNjEvZmlsZXMNCj4NCj5sbHRuZyBpcyBlbmFibGVkIGJ5IGRlZmF1bHQuDQo+
-DQo+QnV0IHRoaXMgZ2l2ZSBlcnJvciB3aXRoIHFlbXUgd2hlbiBhcHBhcm1vcnxzZWxpbnV4IGlz
-IGVuYWJsZWQuDQo+DQo+VGhhdCdzIHdoeSB1YnVudHUgJiYgcmVkaGF0IG5vdyBkaXNhYmxlIGl0
-IGZvciB0aGVpciBvd24gcGFja2FnZXMuDQo+DQo+aHR0cHM6Ly9idWd6aWxsYS5yZWRoYXQuY29t
-L3Nob3dfYnVnLmNnaT9pZD0xMjIzMzE5DQo+aHR0cHM6Ly9idWdzLmxhdW5jaHBhZC5uZXQvdWJ1
-bnR1Lytzb3VyY2UvbGlidmlydC8rYnVnLzE0MzI2NDQNCj4NCj5JbiB0aGUgdWJ1bnR1IGxhdW5j
-aHBhZCwgU2FnZSBoYXMgbWFkZSBhIHJlcGx5DQo+DQo+Ig0KPlNhZ2UgV2VpbCAoc2FnZS1uZXdk
-cmVhbSkgd3JvdGUgb24gMjAxNS0wNC0wMjoJIzIxDQo+RldJVywgd2UgYXJlIGRpc2FibGluZyB0
-aGUgbHR0bmcgc3VwcG9ydCBpbiB0aGUgZmluYWwgaGFtbWVyIHJlbGVhc2UgdG8gYXZvaWQgdGhp
-cyBpc3N1ZSAodW50aWwgd2UgY29tZSB1cCB3aXRoIGEgYmV0dGVyIHNvbHV0aW9uKS4iDQo+DQo+
-DQo+SXQgc2VlbSB0aGF0IGl0J3Mgc3RpbGwgZW5hYmxlZCBieSBkZWZhdWx0IGluIGNlcGggZ2l0
-IGFuZCBjZXBoLmNvbSBwYWNrYWdlcy4NCj4NCj5JcyBpdCBzdGlsbCBwbGFubmVkIHRvIGRpc2Fi
-bGUgYnkgZGVmYXVsdCA/DQo+DQo+DQo+DQo+LS0NCj5UbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMg
-bGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4NCj50aGUgYm9k
-eSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZw0KPk1vcmUgbWFqb3Jk
-b21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
+Hello everybody,
+fragment is stored in rocksdb before being written to "/fragments" ?
+I separed "/db" and "/fragments" but during the bench, everything is 
+writing to "/db"
+I changed options "newstore_sync_*" without success.
+
+Is there any way to write all metadata in "/db" and all data in 
+"/fragments" ?
+
+-- 
+
+
