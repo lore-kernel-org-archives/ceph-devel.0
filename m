@@ -1,33 +1,83 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: Reply: [PATCH] rbd: prevent kernel stack blow up on rbd map
-Date: Mon, 12 Oct 2015 15:32:57 +0200
-Message-ID: <CAOi1vP_vMrHnOv+uYsbOu6UQhtKZ2PA2Kp2QX=nWxRTWLN5vUg@mail.gmail.com>
-References: <5CB836F0B0F3DE4A985E180F2472FA7168CE92@H3CMLB12-EX.srv.huawei-3com.com>
+From: =?GBK?B?sszS4w==?= <cymengxiang@126.com>
+Subject: Re:Re: The questions of data collection and cache tiering in Ceph
+Date: Mon, 12 Oct 2015 21:37:41 +0800 (CST)
+Message-ID: <5ba3ce4f.109e5.1505c455f47.Coremail.cymengxiang@126.com>
+References: <1f22defc.11cdc.1504836bb4f.Coremail.cymengxiang@126.com>
+ <CAJ4mKGaSOR+jSsWfrXQ6wmh3HCuWzk04koeKr6St5Y0AF=9kCw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=GBK
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f182.google.com ([209.85.212.182]:33815 "EHLO
-	mail-wi0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751924AbbJLNc7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Oct 2015 09:32:59 -0400
-Received: by wicgb1 with SMTP id gb1so50631649wic.1
-        for <ceph-devel@vger.kernel.org>; Mon, 12 Oct 2015 06:32:58 -0700 (PDT)
-In-Reply-To: <5CB836F0B0F3DE4A985E180F2472FA7168CE92@H3CMLB12-EX.srv.huawei-3com.com>
+Received: from m15-16.126.com ([220.181.15.16]:52186 "EHLO m15-16.126.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751796AbbJLNh5 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 12 Oct 2015 09:37:57 -0400
+In-Reply-To: <CAJ4mKGaSOR+jSsWfrXQ6wmh3HCuWzk04koeKr6St5Y0AF=9kCw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Caoxudong <cao.xudong@h3c.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, Oct 12, 2015 at 4:22 AM, Caoxudong <cao.xudong@h3c.com> wrote:
-> By the way, do you think it's necessary that we add the clone-chain-length limit in user-space code too?
-
-librbd is different in a lot of ways and there isn't a clean separation
-between the client part (i.e. what is essentially reimplemented in the
-kernel) and the rest (management and maintenance parts, etc).  It's
-certainly not necessary, whether it's desirable - I'm not sure.  Also,
-librbd limit, if we were to introduce one, would probably have to be
-bigger.
-
-Thanks,
-
-                Ilya
+R3JlZywKICAgIFRoYW5rIHlvdSAgYSBsb3QgZm9yIHlvdXIgdGltZWx5IHJlcGx5LiBUaGVzZSBh
+cmUgcmVhbGx5IGhlbHBmdWwgZm9yIG1lLkkgYWxzbyBoYXZlIHNvbWUgZG91YnRzLgogICAgSW4g
+Q2VwaCwgYmVzaWRlcyBtb25pdG9yaW5nIHBvb2wsIHBnLCBvYmplY3QsIGl0IGNhbiBhbHNvIGFj
+cXVpcmUgb3RoZXIgc3RhdGlzdGljcyBzdWNoIGFzICBDUFUsIElPUFMsIEJXLiBJbiBvcmRlciB0
+byBhY3F1aXJlIHRoZSBpbmZvcm1hdGlvbiAsIApkbyB0aGUgQ2VwaCBuZWVkIHRvIGNhbGwgb3Ro
+ZXIgdG9vbHMgb3IgaGF2ZSBhY2hpZXZlZCBmdW5jdGlvbnMgaW4gdGhlIHNvdXJjZSBjb2RlIGJl
+Y2F1c2UgSSBjb3VsZCBvbmx5IGZpbmQgZWFzeSBlcXVhdGlvbiAobGlrZSB0aGUgZGl2aXNpb24g
+KSBpbiAKc291cmNlIGNvZGU/CiAgICBBcyBhIG9iamVjdCAsIHRoZXJlIGFyZSB0d28gcGFydHMg
+OiBkYXRhIGFuZCBhdHRyaWJ1dGVzLiBEbyB0aGV5IHN0b3JlIGluIGRpZmZlcmVudCBzcGFjZXMg
+ZmluYWxseSBiZWNhdXNlIEkgZmluZCB0aGVzZSBpcyBzb21lIGF0dHJpYnV0ZXMgaW5mb3JtYXRp
+b24gaW4gT01hcD8KICAgIEluIHlvdXIgcmVwbHksIHlvdSBzYWlkICyhsWFueSBzdWJzZXF1ZW50
+IG9wZXJhdGlvbnMgb24gdGhhdCBvYmplY3Qgd2lsbCB3YWl0IHVudGlsIHRoYXQgZHVyYWJsZSBv
+cCBpcyByZWFkYWJsZSBiZWZvcmUgY29tcGxldGluZy6hsSBzbyBpZiBJIHNldCB0aGUgc3lzdGVt
+IApmbHVzaGVzIHRoZSBvYmplY3RzIGZyb20gam91cm5hbCB0byBkaXNrIGV2ZXJ5IDE1cywgZG9l
+cyBpdCBtZWFuIEkgY291bGQgbm90IHJlYWQgdGhlIG9iamVjdCBpbiAxNXMgYmVjYXVzZSBJIG9u
+bHkgd3JpdGUgdGhlIG9iamVjdCBvbiB0aGUgam91cm5hbCBidXQgbm90IHlldCAKb24gdGhlIGRp
+c2s/IElzIGl0IHBvc3NpYmxlIHRvIGNhdXNlIHNvbWUgcHJvYmxlbXM/CiAgICBUaGFuayB5b3Ug
+c28gbXVjaC4gCiAgICBZb3VycywKICAgIENoYXkKCgoKCgoKCtTaIDIwMTUtMTAtMDkgMDI6MzQ6
+MjWjrCJHcmVnb3J5IEZhcm51bSIgPGdmYXJudW1AcmVkaGF0LmNvbT4g0LS1wKO6Cj5PbiBUaHUs
+IE9jdCA4LCAyMDE1IGF0IDk6MDkgQU0sILLM0uMgPGN5bWVuZ3hpYW5nQDEyNi5jb20+IHdyb3Rl
+Ogo+Pgo+PiBEZWFyIGRldmVsb3BlcnMsCj4+Cj4+ICAgIFJlY2VudGx5IEkgbWV0IHNvbWUgdHJv
+dWJsZXMgd2hlbiBJIHJlYWQgdGhlIENlcGihr3Mgc291cmNlIGNvZGUgYW5kIHVuZGVyc3RhbmQg
+dGhlIGFyY2hpdGVjdHVyZS4KPj4gVGhlIGRldGFpbHMgb2YgcHJvYmxlbXMgYXJlIGFzIGZvbGxv
+d2VkLgo+Pgo+PiAgICAxLkluIG1vbml0b3JpbmcgdG9vbHMsIHRoZXkgY2FuIGNvbGxlY3QgbXVj
+aCBkYXRhIHdoZW4gQ2VwaCBydW5zLiBJIHdvbmRlciB3aGF0Cj4+IGtpbmQgb2YgZGF0YSB0aGUg
+Q2VwaCBjYW4gcHJvdmlkZSAob2JqZWN0IGRhdGEsIFBHIGRhdGEgb3Igb3RoZXIgZGF0YT8pLiBD
+b3VsZCB0aGUKPj4gQ2VwaCBwcm92aWRlIGV2ZXJ5IG9iamVjdKGvcyBkYXRhIChlLmcuIFRoZSB0
+aW1lcyB0aGUgb2JqZWN0IGlzIHJlYWQgb3Igd3JvdGUKPj4gLHRoZSBsYXRlc3QgdGltZSB0aGUg
+b2JqZWN0IGlzIHVzZWQgLGV0Yy4pICxpZiBDZXBoIGNvdWxkICxpbiBzb3VyY2UgY29kZSAsd2hl
+cmUKPj4gY291bGQgSSBmaW5kIHRoZXNlIGRldGFpbHMuIEkgcmVhbGx5IHdhbnQgdG8ga25vdyB0
+aGUgbW9uaXRvcmluZyBkYXRhIHRoZSBDZXBoCj4+IGNhbiBwcm92aWRlcyBhbmQgd2hlcmUgdGhl
+eSBhcmUgaW4gc291cmNlIGNvZGUgc28gdGhhdCBJIGNvdWxkIGtub3cgaG93IHRvIHVzZSBpdAo+
+PiBtb3JlIGVmZmljaWVudGx5LiBGb3IgZXhhbXBsZSwgSSBrbm93IHRoZSBDZXBoIGNvdWxkIHBy
+b3ZpZGUgdGhlIGRhdGEgb2YgdGhlCj4+IG9iamVjdHOhryBudW1iZXIgcGVyIFBHLCB0aGUgcmVh
+ZCBhbmQgd3JpdGUgYmFuZHdpZHRoLCBidXQgSSBjb3VsZG6hr3QgZmluZCBob3cgdG8KPj4gYWNo
+aWV2ZSB0aGVzZSBpbiBzb3VyY2UgY29kZS4KPgo+SSdtIG5vdCBxdWl0ZSBzdXJlIHdoYXQgeW91
+J3JlIGFza2luZyBoZXJlLCBidXQgSSB0aGluayB5b3UnbGwgd2FudCB0bwo+bG9vayBhdCB0aGUg
+TVBHU3RhdHMuaCBtZXNzYWdlIChpbiBjZXBoL3NyYy9tZXNzYWdlcyksIGFuZCB0cmFjZQo+YmFj
+a3dhcmRzIHRocm91Z2ggdGhlIE9TRCBjb2RlIChjZXBoL3NyYy9vc2QvKSB3aGljaCBjcmVhdGVz
+IHRoZW0gYW5kCj50aGVuIGZvcndhcmRzIHRocm91Z2ggdGhlIG1vbml0b3IgY29kZSAoY2VwaC9z
+cmMvbW9uL09TRE1vbml0b3IuY2MpCj4KPj4KPj4gICAgMi5Gcm9tIG9mZmljaWFsIGRvY3VtZW50
+cywgQ2VwaCBwcm92aWRlcyB0aGUgY2FjaGUgdGllcmluZyB0byBpbXByb3ZlCj4+IHBlcmZvcm1h
+bmNlLiBCdXQgSSBjb3VsZG6hr3QgZmluZCBtb3JlIGRldGFpbHMgdG8gZGVzY3JpYmUgdGhlIGNh
+Y2hlIHRpZXJpbmcKPj4gbGlrZSB3aGljaCBraW5kIG9mIGFsZ29yaXRobSB0aGUgY2FjaGUgYWdl
+bnQgdXNlcy4gSW4gdGhlIHNvdXJjZSBjb2RlLCB3aGVyZQo+PiBjb3VsZCBJIGZpbmQgdGhlc2U/
+Cj4KPlRoZSBjYWNoZSB0aWVyaW5nIGlzIHBhcnQgb2YgdGhlIE9TRC4gTG9vayBhdCB0aGUgVGll
+ckFnZW50U3RhdGUuaAo+ZmlsZSBhbmQgdGhlIHBhcnRzIG9mIFJlcGxpY2F0ZWRQRy5jYyB3aGlj
+aCByZWZlcmVuY2UgaXQuCj4KPj4KPj4gICAzLkluIHdyaXRlIHByb2Nlc3MgLCB0aGVyZSBhcmUg
+dHdvIHJlc3BvbnNlcyB0byBjbGllbnQgLGZpcnN0IGlzIGZyb20gam91cm5hbCBhbmQKPj4gc2Vj
+b25kIGlzIG9jY3VycmVkIHdoZW4gb2JqZWN0IHdyaXRlcyB0byByZWFsIGRpc2sgLnNvIHdoZW4g
+SSB3cml0ZSBhIG9iamVjdCB0bwo+PiBDZXBoIHVzaW5nIGxpYnJiZCwgZG9lcyBub3QgdGhlIHdy
+aXRlIGZpbmlzaCB1bnRpbCB0aGUgc2Vjb25kIHJlc3BvbnNlIG9jY3VycyBhbmQKPj4gd2hhdCBt
+ZWFuIHRoZSBmaXJzdCBhbmQgc2Vjb25kIHJlc3BvbnNlcyBmb3IgY2xpZW50cz8gV2hlbiBhIG9i
+amVjdCB3cml0ZXMgdG8gam91cm5hbAo+PiBidXQgbm90IHRvIGZpbGVzdG9yZSAodGhhdCBpcyBu
+b3QgdG8gZGlzayApLCBjb3VsZCBJIHJlYWQgdGhpcyBvYmplY3Q/IElmIEkgY291bGQsCj4+IHdo
+ZXJlIGNvdWxkIEkgcmVhZCB0aGlzIG9iamVjdD8KPgo+WW91IGdldCBhIHJlc3BvbnNlIGZyb20g
+dGhlIE9TRHM6Cj4xKSB3aGVuIHRoZSB3cml0ZSBvcGVyYXRpb24gaXMgZHVyYWJsZS4KPjIpIHdo
+ZW4gdGhlIHdyaXRlIG9wZXJhdGlvbiBpcyByZWFkYWJsZS4KPgo+VGhlIG9yZGVyIHRoZXNlIGFy
+cml2ZSBpbiB3aWxsIGRlcGVuZCBvbiB5b3VyIE9TRCBjb25maWd1cmF0aW9uIChidHJmcwo+Y2Fu
+IHNlbmQgcmVhZGFibGUgYmVmb3JlIGR1cmFibGU7IHhmcyBhbHdheXMgc2VuZHMgZHVyYWJsZSBm
+aXJzdDsKPmV0YykuIElmIHlvdSBnZXQgYSAiZHVyYWJsZSIgcmVzcG9uc2UsIGFueSBzdWJzZXF1
+ZW50IG9wZXJhdGlvbnMgb24KPnRoYXQgb2JqZWN0IHdpbGwgd2FpdCB1bnRpbCB0aGF0IGR1cmFi
+bGUgb3AgaXMgcmVhZGFibGUgYmVmb3JlCj5jb21wbGV0aW5nLgo+LUdyZWcK
