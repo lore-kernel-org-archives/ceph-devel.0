@@ -1,59 +1,39 @@
-From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Subject: Re: rgw and the next hammer release v0.94.4
-Date: Mon, 12 Oct 2015 16:05:18 -0700
-Message-ID: <CADRKj5QrJtjfTHNj5ye-GVxcxmVF8EaQV+vg1GSSSSxgC81q2g@mail.gmail.com>
-References: <560EE98C.5090202@dachary.org>
-	<561C3AB8.2090808@dachary.org>
+From: "Deneau, Tom" <tom.deneau@amd.com>
+Subject: throttles
+Date: Mon, 12 Oct 2015 23:08:58 +0000
+Message-ID: <BC97738F8E7C8742BABED7F06FB9DF91925201E3@SATLEXDAG01.amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f169.google.com ([209.85.214.169]:33564 "EHLO
-	mail-ob0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751729AbbJLXFT convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Oct 2015 19:05:19 -0400
-Received: by obbbh8 with SMTP id bh8so601798obb.0
-        for <ceph-devel@vger.kernel.org>; Mon, 12 Oct 2015 16:05:18 -0700 (PDT)
-In-Reply-To: <561C3AB8.2090808@dachary.org>
+Received: from mail-by2on0094.outbound.protection.outlook.com ([207.46.100.94]:12800
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751902AbbJLXXV convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Oct 2015 19:23:21 -0400
+Received: from satlvexedge02.amd.com (satlvexedge02.amd.com [10.177.96.29])
+	(using TLSv1 with cipher AES128-SHA (128/128 bits))
+	(No client certificate requested)
+	by atltwp02.amd.com (Axway MailGate 5.3.1) with ESMTPS id 2508CBD88F1
+	for <ceph-devel@vger.kernel.org>; Mon, 12 Oct 2015 19:08:59 -0400 (EDT)
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Abhishek Varshney <abhishek.varshney@flipkart.com>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Yeah, it should be fine.
+Looking at the perf counters on my osds, I see wait counts for the following
+throttle related perf counters:  (This is from trying to benchmark using
+multiple rados bench client processes).
 
-On Mon, Oct 12, 2015 at 3:56 PM, Loic Dachary <loic@dachary.org> wrote:
-> Hi,
->
-> After todays private discussion and the merge of https://github.com/c=
-eph/ceph/pull/6161, I will assume the current hammer branch (7f485ed5aa=
-620fe982561663bf64356b7e2c38f2) is ready for QE to start their own roun=
-d of testing. If I misinterpreted what you wrote, please speak up and I=
-'ll do what's needed ;-)
->
-> Cheers
->
-> On 02/10/2015 22:31, Loic Dachary wrote:
->> Hi Yehuda,
->>
->> The next hammer release as found at https://github.com/ceph/ceph/tre=
-e/hammer passed the rgw suite (http://tracker.ceph.com/issues/12701#not=
-e-58).
->> Do you think the hammer branch is ready for QE to start their own ro=
-und of testing ?
->>
->> Cheers
->>
->> P.S. http://tracker.ceph.com/issues/12701#Release-information has di=
-rect links to the pull requests merged into hammer since v0.94.3 in cas=
-e you need more context about one of them.
->>
->
-> --
-> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+   throttle-filestore_bytes
+   throttle-msgr_dispatch_throttler-client
+   throttle-osd_client_bytes
+   throttle-osd_client_messages
+
+What are the config variables that would allow me to experiment with these throttle limits?
+(When I look at the output from --admin-daemon osd.xx.asok config show, it's
+not clear which items these correspond to).
+
+-- Tom Deneau
+
+
