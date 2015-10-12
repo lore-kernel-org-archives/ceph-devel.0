@@ -1,114 +1,96 @@
-From: Jason Dillaman <dillaman@redhat.com>
-Subject: Re: lltng enabled by default and qemu apparmor|selinux problems
-Date: Mon, 12 Oct 2015 14:32:43 -0400 (EDT)
-Message-ID: <1681969339.44810690.1444674763678.JavaMail.zimbra@redhat.com>
-References: <370906433.54234352.1444583214983.JavaMail.zimbra@oxygem.tv> <12AB04D8-665A-4F2B-8CB1-E5268065DDE0@alcatel-lucent.com>
+From: David Casier <david.casier@aevoo.fr>
+Subject: Re: Fwd: [newstore (again)] how disable double write WAL
+Date: Mon, 12 Oct 2015 20:52:26 +0200
+Message-ID: <561C016A.8090701@aevoo.fr>
+References: <561BABB5.2090209@aevoo.fr> <561BAC81.5030506@aevoo.fr> <alpine.DEB.2.00.1510120557380.29929@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx5-phx2.redhat.com ([209.132.183.37]:52804 "EHLO
-	mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751457AbbJLScu convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Oct 2015 14:32:50 -0400
-In-Reply-To: <12AB04D8-665A-4F2B-8CB1-E5268065DDE0@alcatel-lucent.com>
+Received: from 62-210-192-203.rev.poneytelecom.eu ([62.210.192.203]:42456 "EHLO
+	aevoo.fr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751657AbbJLSyL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 12 Oct 2015 14:54:11 -0400
+In-Reply-To: <alpine.DEB.2.00.1510120557380.29929@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Paul HEWLETT (Paul)" <paul.hewlett@alcatel-lucent.com>
-Cc: Alexandre DERUMIER <aderumier@odiso.com>, ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>
+To: Sage Weil <sage@newdream.net>, Ceph Development <ceph-devel@vger.kernel.org>
+Cc: =?windows-1252?Q?S=E9bastien_VALSEMEY?= <sebastien.valsemey@aevoo.fr>, benoit.loriot@aevoo.fr, Denis Saget <geodni@gmail.com>, "luc.petetin" <luc.petetin@aevoo.fr>
 
-I have an open PR [1] to dynamically enable LTTng-UST via new config op=
-tions.  This change will hopefully trickle down to older release and wi=
-ll avoid the SElinux / AppArmor issues in the default case (which led t=
-o downstream Ubuntu and Fedora disabling LTTng-UST support).  Anyone th=
-at wants to use LTTng-UST (i.e. for generating RBD replay traces) can e=
-nable the support and adjust their SElinux / AppArmor rules to accommod=
-ate.
+Ok,
+Great.
 
-[1] https://github.com/ceph/ceph/pull/6135
+With these  settings :
+//
+newstore_max_dir_size = 4096
+newstore_sync_io = true
+newstore_sync_transaction = true
+newstore_sync_submit_transaction = true
+newstore_sync_wal_apply = true
+newstore_overlay_max = 0
+//
 
---=20
+And direct IO in the benchmark tool (fio)
 
-Jason Dillaman=20
+I see that the HDD is 100% charged and there are notransfer of /db to 
+/fragments after stopping benchmark : Great !
+
+But when i launch a bench with random blocs of 256k, i see random blocs 
+between 32k and 256k on HDD. Any idea ?
+
+Debits to the HDD are about 8MBps when they could be higher with larger 
+blocs (~30MBps)
+And 70 MBps without fsync (hard drive cache disabled).
+
+Other questions :
+newstore_sync_io -> true = fsync immediatly, false = fsync later (Thread 
+fsync_wq) ?
+newstore_sync_transaction -> true = sync in DB ?
+newstore_sync_submit_transaction -> if false then kv_queue (only if 
+newstore_sync_transaction=false) ?
+newstore_sync_wal_apply = true -> if false then WAL later (thread wal_wq) ?
+
+Is it true ?
+
+Way for cache with battery (sync DB and no sync data) ?
+
+Thanks for everything !
+
+On 10/12/2015 03:01 PM, Sage Weil wrote:
+> On Mon, 12 Oct 2015, David Casier wrote:
+>> Hello everybody,
+>> fragment is stored in rocksdb before being written to "/fragments" ?
+>> I separed "/db" and "/fragments" but during the bench, everything is writing
+>> to "/db"
+>> I changed options "newstore_sync_*" without success.
+>>
+>> Is there any way to write all metadata in "/db" and all data in "/fragments" ?
+> You can set newstore_overlay_max = 0 to avoid most data landing in db/.
+> But if you are overwriting an existing object, doing write-ahead logging
+> is usually unavoidable because we need to make the update atomic (and the
+> underlying posix fs doesn't provide that).  The wip-newstore-frags branch
+> mitigates this somewhat for larger writes by limiting fragment size, but
+> for small IOs this is pretty much always going to be the case.  For small
+> IOs, though, putting things in db/ is generally better since we can
+> combine many small ios into a single (rocksdb) journal/wal write.  And
+> often leave them there (via the 'overlay' behavior).
+>
+> sage
+>
 
 
------ Original Message -----
-> From: "Paul HEWLETT (Paul)" <paul.hewlett@alcatel-lucent.com>
-> To: "Alexandre DERUMIER" <aderumier@odiso.com>, "ceph-devel" <ceph-de=
-vel@vger.kernel.org>
-> Cc: "Sage Weil" <sweil@redhat.com>
-> Sent: Monday, October 12, 2015 4:28:06 AM
-> Subject: Re: lltng enabled by default and qemu apparmor|selinux probl=
-ems
->=20
-> IF I can add my $0.02 - we were unable to use the libradosstriper lib=
-rary in
-> RHEL6 because it uses the same initialisation tags as librados and lt=
-tng
-> does not like that. We had no problems with RHEL7 version of ceph bec=
-ause
-> lttng is not enabled. Please do not re-enable lttng in RHEL7 and late=
-r
-> branches=E2=80=A6.
->=20
-> Regards
-> Paul
->=20
->=20
->=20
->=20
-> On 11/10/2015 18:06, "ceph-devel-owner@vger.kernel.org on behalf of A=
-lexandre
-> DERUMIER" <ceph-devel-owner@vger.kernel.org on behalf of
-> aderumier@odiso.com> wrote:
->=20
-> >Hi,
-> >
-> >it seem that since this commit
-> >
-> >https://github.com/ceph/ceph/pull/4261/files
-> >
-> >lltng is enabled by default.
-> >
-> >But this give error with qemu when apparmor|selinux is enabled.
-> >
-> >That's why ubuntu && redhat now disable it for their own packages.
-> >
-> >https://bugzilla.redhat.com/show_bug.cgi?id=3D1223319
-> >https://bugs.launchpad.net/ubuntu/+source/libvirt/+bug/1432644
-> >
-> >In the ubuntu launchpad, Sage has made a reply
-> >
-> >"
-> >Sage Weil (sage-newdream) wrote on 2015-04-02:	#21
-> >FWIW, we are disabling the lttng support in the final hammer release=
- to
-> >avoid this issue (until we come up with a better solution)."
-> >
-> >
-> >It seem that it's still enabled by default in ceph git and ceph.com
-> >packages.
-> >
-> >Is it still planned to disable by default ?
-> >
-> >
-> >
-> >--
-> >To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
-> >the body of a message to majordomo@vger.kernel.org
-> >More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> N=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDr=EF=BF=BD=EF=BF=BDy=EF=
-=BF=BD=EF=BF=BD=EF=BF=BDb=EF=BF=BDX=EF=BF=BD=EF=BF=BD=C7=A7v=EF=BF=BD^=EF=
-=BF=BD)=DE=BA{.n=EF=BF=BD+=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD]z=EF=BF=
-=BD=EF=BF=BD=EF=BF=BD{ay=EF=BF=BD=CA=87=DA=99=EF=BF=BD,j=EF=BF=BD=EF=BF=
-=BDf=EF=BF=BD=EF=BF=BD=EF=BF=BDh=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD=EF=
-=BF=BDw=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDj:+v=EF=BF=
-=BD=EF=BF=BD=EF=BF=BDw=EF=BF=BDj=EF=BF=BDm=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=
-=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDzZ+=EF=BF=BD=EF=BF=BD=DD=A2j"=
-=EF=BF=BD=EF=BF=BD
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-- 
+________________________________________________________
+
+Cordialement,
+
+*David CASIER
+DCConsulting SARL
+
+
+4 Trait d'Union
+77127 LIEUSAINT
+
+**Ligne directe: _01 75 98 53 85_
+Email: _david.casier@aevoo.fr_
+* ________________________________________________________
