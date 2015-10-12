@@ -1,133 +1,57 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Fwd: [newstore (again)] how disable double write WAL
-Date: Mon, 12 Oct 2015 12:33:52 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1510121225540.6589@cobra.newdream.net>
-References: <561BABB5.2090209@aevoo.fr> <561BAC81.5030506@aevoo.fr> <alpine.DEB.2.00.1510120557380.29929@cobra.newdream.net> <561C016A.8090701@aevoo.fr>
+From: "Deneau, Tom" <tom.deneau@amd.com>
+Subject: dump_historic_ops, slow requests
+Date: Mon, 12 Oct 2015 21:22:46 +0000
+Message-ID: <BC97738F8E7C8742BABED7F06FB9DF9192520164@SATLEXDAG01.amd.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:38565 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751342AbbJLTdx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Oct 2015 15:33:53 -0400
-In-Reply-To: <561C016A.8090701@aevoo.fr>
+Received: from mail-by2on0084.outbound.protection.outlook.com ([207.46.100.84]:57197
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751658AbbJLVWw convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Oct 2015 17:22:52 -0400
+Received: from satlvexedge02.amd.com (satlvexedge02.amd.com [10.177.96.29])
+	(using TLSv1 with cipher AES128-SHA (128/128 bits))
+	(No client certificate requested)
+	by atltwp01.amd.com (Axway MailGate 5.3.1) with ESMTPS id 26A05CAE666
+	for <ceph-devel@vger.kernel.org>; Mon, 12 Oct 2015 17:22:46 -0400 (EDT)
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: David Casier <david.casier@aevoo.fr>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, =?ISO-8859-15?Q?S=E9bastien_VALSEMEY?= <sebastien.valsemey@aevoo.fr>, benoit.loriot@aevoo.fr, Denis Saget <geodni@gmail.com>, "luc.petetin" <luc.petetin@aevoo.fr>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi David-
+I have a small ceph cluster (3 nodes, 5 osds each, journals all just partitions
+on the spinner disks) and I have noticed that when I hit it with a bunch of
+rados bench clients all doing writes of large (40M objects) with --no-cleanup,
+the rados bench commands seem to finish OK but I often get health warnings like
+    HEALTH_WARN 4 requests are blocked > 32 sec;
+                2 osds have slow requests 3 ops are blocked > 32.768 sec on osd.9
+                1 ops are blocked > 32.768 sec on osd.10
+                2 osds have slow requests
+After a couple of minutes, health goes to HEALTH_OK.
 
-On Mon, 12 Oct 2015, David Casier wrote:
-> Ok,
-> Great.
-> 
-> With these  settings :
-> //
-> newstore_max_dir_size = 4096
-> newstore_sync_io = true
-> newstore_sync_transaction = true
-> newstore_sync_submit_transaction = true
+But if I go to the node containing osd.10 for example and do dump_historic_ops
+I do get lots of around 20-sec durations but nothing over 32 sec.
 
-Is this a hard disk?  Those settings probably don't make sense since it 
-does every IO synchronously, blocking the submitting IO path...
+The 20-sec or so ops are always  "ack+ondisk+write+known_if_redirected"
+with type_data = "commit sent: apply or cleanup"
+and the following are typical event timings
 
-> newstore_sync_wal_apply = true
-> newstore_overlay_max = 0
-> //
-> 
-> And direct IO in the benchmark tool (fio)
-> 
-> I see that the HDD is 100% charged and there are notransfer of /db to
-> /fragments after stopping benchmark : Great !
-> 
-> But when i launch a bench with random blocs of 256k, i see random blocs
-> between 32k and 256k on HDD. Any idea ?
+                               initiated: 14:06:58.205937
+                              reached_pg: 14:07:01.823288, gap=  3617.351
+                                 started: 14:07:01.823359, gap=     0.071
+               waiting for subops from 3: 14:07:01.855259, gap=    31.900
+         commit_queued_for_journal_write: 14:07:03.132697, gap=  1277.438
+          write_thread_in_journal_buffer: 14:07:03.143356, gap=    10.659
+             journaled_completion_queued: 14:07:04.175863, gap=  1032.507
+                               op_commit: 14:07:04.585040, gap=   409.177
+                              op_applied: 14:07:04.589751, gap=     4.711
+                sub_op_commit_rec from 3: 14:07:14.682925, gap= 10093.174
+                             commit_sent: 14:07:14.683081, gap=     0.156
+                                    done: 14:07:14.683119, gap=     0.038
 
-Random IOs have to be write ahead logged in rocksdb, which has its own IO 
-pattern.  Since you made everything sync above I think it'll depend on 
-how many osd threads get batched together at a time.. maybe.  Those 
-settings aren't something I've really tested, and probably only make 
-sense with very fast NVMe devices.
+Should I expect to see a historic op with duration greater than 32 sec?
 
-> Debits to the HDD are about 8MBps when they could be higher with larger blocs> (~30MBps)
-> And 70 MBps without fsync (hard drive cache disabled).
-> 
-> Other questions :
-> newstore_sync_io -> true = fsync immediatly, false = fsync later (Thread
-> fsync_wq) ?
+-- Tom Deneau
 
-yes
-
-> newstore_sync_transaction -> true = sync in DB ?
-
-synchronously do the rocksdb commit too
-
-> newstore_sync_submit_transaction -> if false then kv_queue (only if
-> newstore_sync_transaction=false) ?
-
-yeah.. there is an annoying rocksdb behavior that makes an async 
-transaction submit block if a sync one is in progress, so this queues them 
-up and explicitly batches them.
-
-> newstore_sync_wal_apply = true -> if false then WAL later (thread wal_wq) ?
-
-the txn commit completion threads can do the wal work synchronously.. this 
-is only a good idea if it's doing aio (which it generally is).
-
-> Is it true ?
-> 
-> Way for cache with battery (sync DB and no sync data) ?
-
-?
-s
-
-> 
-> Thanks for everything !
-> 
-> On 10/12/2015 03:01 PM, Sage Weil wrote:
-> > On Mon, 12 Oct 2015, David Casier wrote:
-> > > Hello everybody,
-> > > fragment is stored in rocksdb before being written to "/fragments" ?
-> > > I separed "/db" and "/fragments" but during the bench, everything is
-> > > writing
-> > > to "/db"
-> > > I changed options "newstore_sync_*" without success.
-> > > 
-> > > Is there any way to write all metadata in "/db" and all data in
-> > > "/fragments" ?
-> > You can set newstore_overlay_max = 0 to avoid most data landing in db/.
-> > But if you are overwriting an existing object, doing write-ahead logging
-> > is usually unavoidable because we need to make the update atomic (and the
-> > underlying posix fs doesn't provide that).  The wip-newstore-frags branch
-> > mitigates this somewhat for larger writes by limiting fragment size, but
-> > for small IOs this is pretty much always going to be the case.  For small
-> > IOs, though, putting things in db/ is generally better since we can
-> > combine many small ios into a single (rocksdb) journal/wal write.  And
-> > often leave them there (via the 'overlay' behavior).
-> > 
-> > sage
-> > 
-> 
-> 
-> -- 
-> ________________________________________________________
-> 
-> Cordialement,
-> 
-> *David CASIER
-> DCConsulting SARL
-> 
-> 
-> 4 Trait d'Union
-> 77127 LIEUSAINT
-> 
-> **Ligne directe: _01 75 98 53 85_
-> Email: _david.casier@aevoo.fr_
-> * ________________________________________________________
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
