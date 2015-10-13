@@ -1,152 +1,113 @@
-From: Robert LeBlanc <robert@leblancnet.us>
-Subject: Re: throttles
-Date: Tue, 13 Oct 2015 10:27:36 -0600
-Message-ID: <CAANLjFoxOoKNSirEgk1WhupLY-W5_ReWJx2yKGE3q=bEm=yKag@mail.gmail.com>
-References: <BC97738F8E7C8742BABED7F06FB9DF91925201E3@SATLEXDAG01.amd.com>
-	<alpine.DEB.2.00.1510130541070.6589@cobra.newdream.net>
-	<BC97738F8E7C8742BABED7F06FB9DF919252061D@SATLEXDAG01.amd.com>
-	<755F6B91B3BE364F9BCA11EA3F9E0C6F31741523@SACMBXIP02.sdcorp.global.sandisk.com>
-	<BC97738F8E7C8742BABED7F06FB9DF9192520646@SATLEXDAG01.amd.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: chooseleaf may cause some unnecessary pg migrations
+Date: Tue, 13 Oct 2015 09:44:45 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1510130940400.6589@cobra.newdream.net>
+References: <FF8D83DAE5DF57468726B79904321E06046B73@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f43.google.com ([209.85.213.43]:33286 "EHLO
-	mail-vk0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753051AbbJMQ1h (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Oct 2015 12:27:37 -0400
-Received: by vkaw128 with SMTP id w128so13618826vka.0
-        for <ceph-devel@vger.kernel.org>; Tue, 13 Oct 2015 09:27:36 -0700 (PDT)
-In-Reply-To: <BC97738F8E7C8742BABED7F06FB9DF9192520646@SATLEXDAG01.amd.com>
+Received: from mx1.redhat.com ([209.132.183.28]:46129 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753118AbbJMQos (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 13 Oct 2015 12:44:48 -0400
+In-Reply-To: <FF8D83DAE5DF57468726B79904321E06046B73@H3CMLB12-EX.srv.huawei-3com.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Deneau, Tom" <tom.deneau@amd.com>
-Cc: Somnath Roy <Somnath.Roy@sandisk.com>, Sage Weil <sage@newdream.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Xusangdi <xu.sangdi@h3c.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA256
+Hi Sangdi,
 
-In my experience with throttles, we had to restart the OSD, the admin
-socket would not apply the change to a running OSD.
-- ----------------
-Robert LeBlanc
-PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
+On Tue, 13 Oct 2015, Xusangdi wrote:
+> Hi Sage,
+> 
+> Recently when I was learning about the crush rules I noticed that the step chooseleaf may cause some unnecessary pg migrations when OSDs are outed.
+> For example, for a cluster of 4 hosts with 2 OSDs each, after host1(osd.2, osd.3) is down, the mapping differences would be like this:
+> pgid    before <-> after        diff    diff_num
+> 0.1e    [5, 1, 2] <-> [5, 1, 7]         [2]     1
+> 0.1f    [0, 7, 3] <-> [0, 7, 4]         [3]     1
+> 0.1a    [0, 4, 3] <-> [0, 4, 6]         [3]     1
+> 0.5     [6, 3, 1] <-> [6, 0, 5]         [1, 3]  2
+> 0.4     [5, 6, 2] <-> [5, 6, 0]         [2]     1
+> 0.7     [3, 7, 0] <-> [7, 0, 4]         [3]     1
+> 0.6     [2, 1, 7] <-> [0, 7, 4]         [1, 2]  2
+> 0.9     [3, 4, 0] <-> [5, 0, 7]         [3, 4]  2
+> 0.15    [2, 6, 1] <-> [6, 0, 5]         [1, 2]  2
+> 0.14    [3, 6, 5] <-> [7, 4, 1]         [3, 5, 6]       3
+> 0.17    [0, 5, 2] <-> [0, 5, 6]         [2]     1
+> 0.16    [0, 4, 2] <-> [0, 4, 7]         [2]     1
+> 0.11    [4, 7, 2] <-> [4, 7, 1]         [2]     1
+> 0.10    [0, 3, 6] <-> [0, 7, 4]         [3, 6]  2
+> 0.13    [1, 7, 3] <-> [1, 7, 4]         [3]     1
+> 0.a     [0, 2, 7] <-> [0, 7, 4]         [2]     1
+> 0.c     [5, 0, 3] <-> [5, 0, 6]         [3]     1
+> 0.b     [2, 5, 7] <-> [4, 7, 0]         [2, 5]  2
+> 0.18    [7, 2, 4] <-> [7, 4, 0]         [2]     1
+> 0.f     [2, 7, 5] <-> [6, 4, 0]         [2, 5, 7]       3
+> Changed pg ratio: 30 / 32
+> 
+> I tried to change the code (please see https://github.com/ceph/ceph/pull/6242) and after the modification the result would be like this:
+
+Can you describe the reasoning behind the change?  I can't make sense 
+of it.  The recursive call is still picking just 1 item, but it looks 
+like it is always choosing a device in for slot 0 and not the current 
+slot in the caller.  I'm not sure how that could generate a correct 
+result.
+
+Perhaps you can share the osd tree output so we can see how your map it 
+structured?
+
+It is normal for some mappings to have multiple items change, as I've 
+described previously on this list.  It's a result of the fact that we're 
+considering totally independent series of items, but whether we accept a 
+choice also depends on the previous choices (we do not allow dups).. which 
+means that you get echo effects in later slots when we make a different 
+choice in earlier slots.
+
+Thanks!
+sage
 
 
-On Tue, Oct 13, 2015 at 9:59 AM, Deneau, Tom  wrote:
-> I remember previously there were some options that could be reset
-> thru the admin socket and some that required an osd restart.
-> Do the ones below require an osd restart?
->
-> -- Tom
->
->> -----Original Message-----
->> From: Somnath Roy [mailto:Somnath.Roy@sandisk.com]
->> Sent: Tuesday, October 13, 2015 10:57 AM
->> To: Deneau, Tom; Sage Weil
->> Cc: ceph-devel@vger.kernel.org
->> Subject: RE: throttles
->>
->> BTW, you can completely turn off these throttles ( other than the
->> filestore throttle ) by setting the value to 0.
->>
->> Thanks & Regards
->> Somnath
->>
->> -----Original Message-----
->> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
->> owner@vger.kernel.org] On Behalf Of Deneau, Tom
->> Sent: Tuesday, October 13, 2015 8:55 AM
->> To: Sage Weil
->> Cc: ceph-devel@vger.kernel.org
->> Subject: RE: throttles
->>
->> > -----Original Message-----
->> > From: Sage Weil [mailto:sage@newdream.net]
->> > Sent: Tuesday, October 13, 2015 7:44 AM
->> > To: Deneau, Tom
->> > Cc: ceph-devel@vger.kernel.org
->> > Subject: Re: throttles
->> >
->> > On Mon, 12 Oct 2015, Deneau, Tom wrote:
->> > > Looking at the perf counters on my osds, I see wait counts for the
->> > > following throttle related perf counters:  (This is from trying to
->> > > benchmark using multiple rados bench client processes).
->> > >
->> > >    throttle-filestore_bytes
->> >
->> > OPTION(filestore_queue_max_ops, OPT_INT, 50)
->> > OPTION(filestore_queue_max_bytes, OPT_INT, 100 << 20)
->> >
->> > >    throttle-msgr_dispatch_throttler-client
->> >
->> > OPTION(ms_dispatch_throttle_bytes, OPT_U64, 100 << 20)
->> >
->> > >    throttle-osd_client_bytes
->> > >    throttle-osd_client_messages
->> >
->> > OPTION(osd_client_message_size_cap, OPT_U64, 500*1024L*1024L) //
->> > client data allowed in-memory (in bytes)
->> > OPTION(osd_client_message_cap, OPT_U64, 100)              // num client
->> > messages allowed in-memory
->> >
->> > > What are the config variables that would allow me to experiment with
->> > these throttle limits?
->> > > (When I look at the output from --admin-daemon osd.xx.asok config
->> > > show, it's not clear which items these correspond to).
->> >
->> > These are all involved in slowing down clients to the rate of the
->> > storage...
->> >
->> > sage
->>
->> Thanks, Sage and Somnath --
->>
->> The reason I was interested is that I am seeing a levelling off of read
->> bandwidth while the sar data shows we are not anywhere near the limits for
->> cpu utilization (client or osd node) nor for disk utilization (no disk
->> above 40% utilization) nor for network utilization (this is with 10Gig
->> Ethernet).
->>
->> -- Tom
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org More majordomo info at
->> http://vger.kernel.org/majordomo-info.html
->>
->> ________________________________
->>
->> PLEASE NOTE: The information contained in this electronic mail message is
->> intended only for the use of the designated recipient(s) named above. If
->> the reader of this message is not the intended recipient, you are hereby
->> notified that you have received this message in error and that any review,
->> dissemination, distribution, or copying of this message is strictly
->> prohibited. If you have received this communication in error, please
->> notify the sender by telephone or e-mail (as shown above) immediately and
->> destroy any and all copies of this message in your possession (whether
->> hard copies or electronically stored copies).
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
------BEGIN PGP SIGNATURE-----
-Version: Mailvelope v1.2.0
-Comment: https://www.mailvelope.com
-
-wsFcBAEBCAAQBQJWHTD0CRDmVDuy+mK58QAAEZIQAMdBRDXIfovmeHhEpB/A
-v7+gq/2D1lh7G45OkDLmpwJM0b0KmTqZIOJiVylfzqGZlxQAFy+nSOp9cZi9
-8dUc7ybV3U7fHxXlOmotXJAHf3GsOBccIcyKhSW8Z6h/pfUyCAOQLCU2FIcE
-NN8latUJZE4WJMjyvcoeQNsrVDahPORznXXSZ1+yzkyBBdopKkbMbz7qk1Wu
-eH1IwfIEcqND9cE59wMM4E+EtRH/iiJE9JibRz9TI8Zo40RgWdrlYd0REbOC
-STtbIw8LderkXmlcyYQfiOWc+fRGkcgac2Oqybdhpl2wEr24KnkaCyJl8RRD
-p0MtU4fNJ0G7L7/fZW+bMb0FjyjKpXBLrBzkTQmlI1rxN8lhN7xiPnXQcjUF
-qr5Gu1in/9rC6Nxr5iyvat3UhcL8ggGl6KAnVh5AvTsyWgh2DRs5IH7WfYMz
-f7HgHVcXNK3NGar7bs22/mJmsLbFwfBIe03LYssv+y0kic+HpSii4zCVi0+7
-JAYS37qca8lE17Z4LLEEf6XbzVkwhgKAG4sBjzqdded0qaxvNUaXe4GBKxeM
-Dk09VHcdlGLB+2Db5IWy7ynl97ljwSPcbNvaQtKDUfSWVgvbqIXxmhBEa0/P
-RWWf7OhGYlVNPlNdyaaaU0Fd0n4YiV9kTfS+70G9uGzKA4viybQMfJRXpROQ
-oCGR
-=IJGd
------END PGP SIGNATURE-----
+> pgid    before <-> after        diff    diff_num
+> 0.1e    [5, 0, 3] <-> [5, 0, 7]         [3]     1
+> 0.1f    [0, 6, 3] <-> [0, 6, 4]         [3]     1
+> 0.1a    [0, 5, 2] <-> [0, 5, 6]         [2]     1
+> 0.5     [6, 3, 0] <-> [6, 0, 5]         [3]     1
+> 0.4     [5, 7, 2] <-> [5, 7, 0]         [2]     1
+> 0.7     [3, 7, 1] <-> [7, 1, 5]         [3]     1
+> 0.6     [2, 0, 7] <-> [0, 7, 4]         [2]     1
+> 0.9     [3, 5, 1] <-> [5, 1, 7]         [3]     1
+> 0.15    [2, 6, 1] <-> [6, 1, 4]         [2]     1
+> 0.14    [3, 7, 5] <-> [7, 5, 1]         [3]     1
+> 0.17    [0, 4, 3] <-> [0, 4, 6]         [3]     1
+> 0.16    [0, 4, 3] <-> [0, 4, 6]         [3]     1
+> 0.11    [4, 6, 3] <-> [4, 6, 0]         [3]     1
+> 0.10    [0, 3, 6] <-> [0, 6, 5]         [3]     1
+> 0.13    [1, 7, 3] <-> [1, 7, 5]         [3]     1
+> 0.a     [0, 3, 6] <-> [0, 6, 5]         [3]     1
+> 0.c     [5, 0, 3] <-> [5, 0, 6]         [3]     1
+> 0.b     [2, 4, 6] <-> [4, 6, 1]         [2]     1
+> 0.18    [7, 3, 5] <-> [7, 5, 1]         [3]     1
+> 0.f     [2, 6, 5] <-> [6, 5, 1]         [2]     1
+> Changed pg ratio: 20 / 32
+> 
+> Currently the only defect I can see from the change is that the chance for a given pg to successfully choose required available OSDs might be a bit lower compared with before. However, I believe it will cause problems only when the cluster is pretty small and degraded. And in that case, we can still make it workable by tuning some of the crushmap parameters such as chooseleaf_tries.
+> 
+> Anyway I'm not sure if it would raise any other issues, could you please review it and maybe give me some suggestions? Thank you!
+> 
+> ----------
+> Best regards,
+> Sangdi
+> 
+> -------------------------------------------------------------------------------------------------------------------------------------
+> ????????????????????????????????????????
+> ????????????????????????????????????????
+> ????????????????????????????????????????
+> ???
+> This e-mail and its attachments contain confidential information from H3C, which is
+> intended only for the person or entity whose address is listed above. Any use of the
+> information contained herein in any way (including, but not limited to, total or partial
+> disclosure, reproduction, or dissemination) by persons other than the intended
+> recipient(s) is prohibited. If you receive this e-mail in error, please notify the sender
+> by phone or email immediately and delete it!
+> N?????r??y??????X???v???)?{.n?????z?]z????ay?????j??f???h??????w??????j:+v???w????????????zZ+???????j"????i
