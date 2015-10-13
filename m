@@ -1,85 +1,92 @@
-From: Tomy Cheru <Tomy.Cheru@sandisk.com>
-Subject: RE: enable rbd on ec pool ?
-Date: Tue, 13 Oct 2015 07:59:21 +0000
-Message-ID: <EBFBEFF470372547BAACF06D39FF53A54F5A8823@SACMBXIP02.sdcorp.global.sandisk.com>
-References: <EBFBEFF470372547BAACF06D39FF53A54F5A8665@SACMBXIP02.sdcorp.global.sandisk.com>
- <561CB009.7090708@dachary.org>
+From: Xusangdi <xu.sangdi@h3c.com>
+Subject: chooseleaf may cause some unnecessary pg migrations
+Date: Tue, 13 Oct 2015 08:22:36 +0000
+Message-ID: <FF8D83DAE5DF57468726B79904321E06046B73@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0063.outbound.protection.outlook.com ([65.55.169.63]:45952
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752401AbbJMH70 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Oct 2015 03:59:26 -0400
-In-Reply-To: <561CB009.7090708@dachary.org>
-Content-Language: en-US
+Received: from smtp.h3c.com ([221.12.31.13]:25081 "EHLO h3cmg01-ex.h3c.com"
+	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752389AbbJMIWQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 13 Oct 2015 04:22:16 -0400
+Content-Language: zh-CN
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "sweil@redhat.com" <sweil@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Loic,
-		Thanks for your response,=20
-
-however am specifically looking for a patch to enable rbd on ec pool(am=
- aware of cache tier option).
-
-Thanks,
-tomy
-
------Original Message-----
-=46rom: Loic Dachary [mailto:loic@dachary.org]=20
-Sent: Tuesday, October 13, 2015 12:47 PM
-To: Tomy Cheru; ceph-devel@vger.kernel.org
-Subject: Re: enable rbd on ec pool ?
-
-Hi Tomy,
-
-On 13/10/2015 06:13, Tomy Cheru wrote:
-> Is there a patch available to enable rbd over an EC pool ?
-
-You have to go through a cache tier instead of using it directly. See h=
-ttp://docs.ceph.com/docs/master/rados/operations/cache-tiering/ for mor=
-e information.
-
-Cheers
-
->=20
-> Currently its restricted,
-> 2015-10-12 10:52:23.042085 7f4721ca1840 -1 librbd: error adding image=
-=20
-> to directory: (95) Operation not supported
-> rbd: create error: (95) Operation not supported
->=20
-> Thanks,
-> tomy
->=20
->=20
-> ________________________________
->=20
-> PLEASE NOTE: The information contained in this electronic mail messag=
-e is intended only for the use of the designated recipient(s) named abo=
-ve. If the reader of this message is not the intended recipient, you ar=
-e hereby notified that you have received this message in error and that=
- any review, dissemination, distribution, or copying of this message is=
- strictly prohibited. If you have received this communication in error,=
- please notify the sender by telephone or e-mail (as shown above) immed=
-iately and destroy any and all copies of this message in your possessio=
-n (whether hard copies or electronically stored copies).
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
-=20
-> in the body of a message to majordomo@vger.kernel.org More majordomo=20
-> info at  http://vger.kernel.org/majordomo-info.html
->=20
-
---
-Lo=EFc Dachary, Artisan Logiciel Libre
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGkgU2FnZSwNCg0KUmVjZW50bHkgd2hlbiBJIHdhcyBsZWFybmluZyBhYm91dCB0aGUgY3J1c2gg
+cnVsZXMgSSBub3RpY2VkIHRoYXQgdGhlIHN0ZXAgY2hvb3NlbGVhZiBtYXkgY2F1c2Ugc29tZSB1
+bm5lY2Vzc2FyeSBwZyBtaWdyYXRpb25zIHdoZW4gT1NEcyBhcmUgb3V0ZWQuDQpGb3IgZXhhbXBs
+ZSwgZm9yIGEgY2x1c3RlciBvZiA0IGhvc3RzIHdpdGggMiBPU0RzIGVhY2gsIGFmdGVyIGhvc3Qx
+KG9zZC4yLCBvc2QuMykgaXMgZG93biwgdGhlIG1hcHBpbmcgZGlmZmVyZW5jZXMgd291bGQgYmUg
+bGlrZSB0aGlzOg0KcGdpZCAgICBiZWZvcmUgPC0+IGFmdGVyICAgICAgICBkaWZmICAgIGRpZmZf
+bnVtDQowLjFlICAgIFs1LCAxLCAyXSA8LT4gWzUsIDEsIDddICAgICAgICAgWzJdICAgICAxDQow
+LjFmICAgIFswLCA3LCAzXSA8LT4gWzAsIDcsIDRdICAgICAgICAgWzNdICAgICAxDQowLjFhICAg
+IFswLCA0LCAzXSA8LT4gWzAsIDQsIDZdICAgICAgICAgWzNdICAgICAxDQowLjUgICAgIFs2LCAz
+LCAxXSA8LT4gWzYsIDAsIDVdICAgICAgICAgWzEsIDNdICAyDQowLjQgICAgIFs1LCA2LCAyXSA8
+LT4gWzUsIDYsIDBdICAgICAgICAgWzJdICAgICAxDQowLjcgICAgIFszLCA3LCAwXSA8LT4gWzcs
+IDAsIDRdICAgICAgICAgWzNdICAgICAxDQowLjYgICAgIFsyLCAxLCA3XSA8LT4gWzAsIDcsIDRd
+ICAgICAgICAgWzEsIDJdICAyDQowLjkgICAgIFszLCA0LCAwXSA8LT4gWzUsIDAsIDddICAgICAg
+ICAgWzMsIDRdICAyDQowLjE1ICAgIFsyLCA2LCAxXSA8LT4gWzYsIDAsIDVdICAgICAgICAgWzEs
+IDJdICAyDQowLjE0ICAgIFszLCA2LCA1XSA8LT4gWzcsIDQsIDFdICAgICAgICAgWzMsIDUsIDZd
+ICAgICAgIDMNCjAuMTcgICAgWzAsIDUsIDJdIDwtPiBbMCwgNSwgNl0gICAgICAgICBbMl0gICAg
+IDENCjAuMTYgICAgWzAsIDQsIDJdIDwtPiBbMCwgNCwgN10gICAgICAgICBbMl0gICAgIDENCjAu
+MTEgICAgWzQsIDcsIDJdIDwtPiBbNCwgNywgMV0gICAgICAgICBbMl0gICAgIDENCjAuMTAgICAg
+WzAsIDMsIDZdIDwtPiBbMCwgNywgNF0gICAgICAgICBbMywgNl0gIDINCjAuMTMgICAgWzEsIDcs
+IDNdIDwtPiBbMSwgNywgNF0gICAgICAgICBbM10gICAgIDENCjAuYSAgICAgWzAsIDIsIDddIDwt
+PiBbMCwgNywgNF0gICAgICAgICBbMl0gICAgIDENCjAuYyAgICAgWzUsIDAsIDNdIDwtPiBbNSwg
+MCwgNl0gICAgICAgICBbM10gICAgIDENCjAuYiAgICAgWzIsIDUsIDddIDwtPiBbNCwgNywgMF0g
+ICAgICAgICBbMiwgNV0gIDINCjAuMTggICAgWzcsIDIsIDRdIDwtPiBbNywgNCwgMF0gICAgICAg
+ICBbMl0gICAgIDENCjAuZiAgICAgWzIsIDcsIDVdIDwtPiBbNiwgNCwgMF0gICAgICAgICBbMiwg
+NSwgN10gICAgICAgMw0KQ2hhbmdlZCBwZyByYXRpbzogMzAgLyAzMg0KDQpJIHRyaWVkIHRvIGNo
+YW5nZSB0aGUgY29kZSAocGxlYXNlIHNlZSBodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBoL3B1
+bGwvNjI0MikgYW5kIGFmdGVyIHRoZSBtb2RpZmljYXRpb24gdGhlIHJlc3VsdCB3b3VsZCBiZSBs
+aWtlIHRoaXM6DQpwZ2lkICAgIGJlZm9yZSA8LT4gYWZ0ZXIgICAgICAgIGRpZmYgICAgZGlmZl9u
+dW0NCjAuMWUgICAgWzUsIDAsIDNdIDwtPiBbNSwgMCwgN10gICAgICAgICBbM10gICAgIDENCjAu
+MWYgICAgWzAsIDYsIDNdIDwtPiBbMCwgNiwgNF0gICAgICAgICBbM10gICAgIDENCjAuMWEgICAg
+WzAsIDUsIDJdIDwtPiBbMCwgNSwgNl0gICAgICAgICBbMl0gICAgIDENCjAuNSAgICAgWzYsIDMs
+IDBdIDwtPiBbNiwgMCwgNV0gICAgICAgICBbM10gICAgIDENCjAuNCAgICAgWzUsIDcsIDJdIDwt
+PiBbNSwgNywgMF0gICAgICAgICBbMl0gICAgIDENCjAuNyAgICAgWzMsIDcsIDFdIDwtPiBbNywg
+MSwgNV0gICAgICAgICBbM10gICAgIDENCjAuNiAgICAgWzIsIDAsIDddIDwtPiBbMCwgNywgNF0g
+ICAgICAgICBbMl0gICAgIDENCjAuOSAgICAgWzMsIDUsIDFdIDwtPiBbNSwgMSwgN10gICAgICAg
+ICBbM10gICAgIDENCjAuMTUgICAgWzIsIDYsIDFdIDwtPiBbNiwgMSwgNF0gICAgICAgICBbMl0g
+ICAgIDENCjAuMTQgICAgWzMsIDcsIDVdIDwtPiBbNywgNSwgMV0gICAgICAgICBbM10gICAgIDEN
+CjAuMTcgICAgWzAsIDQsIDNdIDwtPiBbMCwgNCwgNl0gICAgICAgICBbM10gICAgIDENCjAuMTYg
+ICAgWzAsIDQsIDNdIDwtPiBbMCwgNCwgNl0gICAgICAgICBbM10gICAgIDENCjAuMTEgICAgWzQs
+IDYsIDNdIDwtPiBbNCwgNiwgMF0gICAgICAgICBbM10gICAgIDENCjAuMTAgICAgWzAsIDMsIDZd
+IDwtPiBbMCwgNiwgNV0gICAgICAgICBbM10gICAgIDENCjAuMTMgICAgWzEsIDcsIDNdIDwtPiBb
+MSwgNywgNV0gICAgICAgICBbM10gICAgIDENCjAuYSAgICAgWzAsIDMsIDZdIDwtPiBbMCwgNiwg
+NV0gICAgICAgICBbM10gICAgIDENCjAuYyAgICAgWzUsIDAsIDNdIDwtPiBbNSwgMCwgNl0gICAg
+ICAgICBbM10gICAgIDENCjAuYiAgICAgWzIsIDQsIDZdIDwtPiBbNCwgNiwgMV0gICAgICAgICBb
+Ml0gICAgIDENCjAuMTggICAgWzcsIDMsIDVdIDwtPiBbNywgNSwgMV0gICAgICAgICBbM10gICAg
+IDENCjAuZiAgICAgWzIsIDYsIDVdIDwtPiBbNiwgNSwgMV0gICAgICAgICBbMl0gICAgIDENCkNo
+YW5nZWQgcGcgcmF0aW86IDIwIC8gMzINCg0KQ3VycmVudGx5IHRoZSBvbmx5IGRlZmVjdCBJIGNh
+biBzZWUgZnJvbSB0aGUgY2hhbmdlIGlzIHRoYXQgdGhlIGNoYW5jZSBmb3IgYSBnaXZlbiBwZyB0
+byBzdWNjZXNzZnVsbHkgY2hvb3NlIHJlcXVpcmVkIGF2YWlsYWJsZSBPU0RzIG1pZ2h0IGJlIGEg
+Yml0IGxvd2VyIGNvbXBhcmVkIHdpdGggYmVmb3JlLiBIb3dldmVyLCBJIGJlbGlldmUgaXQgd2ls
+bCBjYXVzZSBwcm9ibGVtcyBvbmx5IHdoZW4gdGhlIGNsdXN0ZXIgaXMgcHJldHR5IHNtYWxsIGFu
+ZCBkZWdyYWRlZC4gQW5kIGluIHRoYXQgY2FzZSwgd2UgY2FuIHN0aWxsIG1ha2UgaXQgd29ya2Fi
+bGUgYnkgdHVuaW5nIHNvbWUgb2YgdGhlIGNydXNobWFwIHBhcmFtZXRlcnMgc3VjaCBhcyBjaG9v
+c2VsZWFmX3RyaWVzLg0KDQpBbnl3YXkgSSdtIG5vdCBzdXJlIGlmIGl0IHdvdWxkIHJhaXNlIGFu
+eSBvdGhlciBpc3N1ZXMsIGNvdWxkIHlvdSBwbGVhc2UgcmV2aWV3IGl0IGFuZCBtYXliZSBnaXZl
+IG1lIHNvbWUgc3VnZ2VzdGlvbnM/IFRoYW5rIHlvdSENCg0KLS0tLS0tLS0tLQ0KQmVzdCByZWdh
+cmRzLA0KU2FuZ2RpDQoNCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCuacrOmCruS7tuWPiuWFtumZhOS7
+tuWQq+acieadreW3nuWNjuS4iemAmuS/oeaKgOacr+aciemZkOWFrOWPuOeahOS/neWvhuS/oeaB
+r++8jOS7hemZkOS6juWPkemAgee7meS4iumdouWcsOWdgOS4reWIl+WHug0K55qE5Liq5Lq65oiW
+576k57uE44CC56aB5q2i5Lu75L2V5YW25LuW5Lq65Lul5Lu75L2V5b2i5byP5L2/55So77yI5YyF
+5ous5L2G5LiN6ZmQ5LqO5YWo6YOo5oiW6YOo5YiG5Zyw5rOE6Zyy44CB5aSN5Yi244CBDQrmiJbm
+laPlj5HvvInmnKzpgq7ku7bkuK3nmoTkv6Hmga/jgILlpoLmnpzmgqjplJnmlLbkuobmnKzpgq7k
+u7bvvIzor7fmgqjnq4vljbPnlLXor53miJbpgq7ku7bpgJrnn6Xlj5Hku7bkurrlubbliKDpmaTm
+nKwNCumCruS7tu+8gQ0KVGhpcyBlLW1haWwgYW5kIGl0cyBhdHRhY2htZW50cyBjb250YWluIGNv
+bmZpZGVudGlhbCBpbmZvcm1hdGlvbiBmcm9tIEgzQywgd2hpY2ggaXMNCmludGVuZGVkIG9ubHkg
+Zm9yIHRoZSBwZXJzb24gb3IgZW50aXR5IHdob3NlIGFkZHJlc3MgaXMgbGlzdGVkIGFib3ZlLiBB
+bnkgdXNlIG9mIHRoZQ0KaW5mb3JtYXRpb24gY29udGFpbmVkIGhlcmVpbiBpbiBhbnkgd2F5IChp
+bmNsdWRpbmcsIGJ1dCBub3QgbGltaXRlZCB0bywgdG90YWwgb3IgcGFydGlhbA0KZGlzY2xvc3Vy
+ZSwgcmVwcm9kdWN0aW9uLCBvciBkaXNzZW1pbmF0aW9uKSBieSBwZXJzb25zIG90aGVyIHRoYW4g
+dGhlIGludGVuZGVkDQpyZWNpcGllbnQocykgaXMgcHJvaGliaXRlZC4gSWYgeW91IHJlY2VpdmUg
+dGhpcyBlLW1haWwgaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlcg0KYnkgcGhvbmUg
+b3IgZW1haWwgaW1tZWRpYXRlbHkgYW5kIGRlbGV0ZSBpdCENCg==
