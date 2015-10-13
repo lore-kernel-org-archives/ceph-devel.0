@@ -1,44 +1,46 @@
-From: Luis Periquito <periquito@gmail.com>
-Subject: Fwd: monitor crashing
-Date: Tue, 13 Oct 2015 12:45:24 +0100
-Message-ID: <CACx0BdMi79jokSX4aPy9XJrUorE-2Fa-_oBDjYwW3bBuee5A7g@mail.gmail.com>
-References: <CACx0BdM2qsO0n492Y7R=+FBfJzJT+4HxbBYaU1rkG0mZV=caJw@mail.gmail.com>
-	<CACx0BdNRPk64Etwvs7_tEce=xwFw7E4Ube=8raav_-EFhhP2Fw@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: throttles
+Date: Tue, 13 Oct 2015 05:44:05 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1510130541070.6589@cobra.newdream.net>
+References: <BC97738F8E7C8742BABED7F06FB9DF91925201E3@SATLEXDAG01.amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f181.google.com ([209.85.214.181]:35293 "EHLO
-	mail-ob0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752330AbbJMLpZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Oct 2015 07:45:25 -0400
-Received: by obbzf10 with SMTP id zf10so11120047obb.2
-        for <ceph-devel@vger.kernel.org>; Tue, 13 Oct 2015 04:45:25 -0700 (PDT)
-In-Reply-To: <CACx0BdNRPk64Etwvs7_tEce=xwFw7E4Ube=8raav_-EFhhP2Fw@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:42317 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752823AbbJMMoG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Oct 2015 08:44:06 -0400
+In-Reply-To: <BC97738F8E7C8742BABED7F06FB9DF91925201E3@SATLEXDAG01.amd.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: "Deneau, Tom" <tom.deneau@amd.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Any ideas? I'm growing desperate :(
+On Mon, 12 Oct 2015, Deneau, Tom wrote:
+> Looking at the perf counters on my osds, I see wait counts for the following
+> throttle related perf counters:  (This is from trying to benchmark using
+> multiple rados bench client processes).
+> 
+>    throttle-filestore_bytes
 
-I've tried compiling from source, and including
-https://github.com/ceph/ceph/pull/5276, but it still crashes on boot
-of the ceph-mon
+OPTION(filestore_queue_max_ops, OPT_INT, 50)
+OPTION(filestore_queue_max_bytes, OPT_INT, 100 << 20)
 
----------- Forwarded message ----------
-From: Luis Periquito <periquito@gmail.com>
-Date: Tue, Oct 13, 2015 at 12:26 PM
-Subject: Re: monitor crashing
-To: Ceph Users <ceph-users@lists.ceph.com>
+>    throttle-msgr_dispatch_throttler-client
 
+OPTION(ms_dispatch_throttle_bytes, OPT_U64, 100 << 20)
 
-I'm currently running Hammer (0.94.3), created an invalid LRC profile
-(typo in the l=, should have been l=4 but was l=3, and now I don't
-have enough different ruleset-locality) and created a pool. Is there
-any way to delete this pool? remember I can't start the ceph-mon...
+>    throttle-osd_client_bytes
+>    throttle-osd_client_messages
 
-On Tue, Oct 13, 2015 at 11:56 AM, Luis Periquito <periquito@gmail.com> wrote:
-> It seems I've hit this bug:
-> https://bugzilla.redhat.com/show_bug.cgi?id=1231630
->
-> is there any way I can recover this cluster? It worked in our test
-> cluster, but crashed the production one...
+OPTION(osd_client_message_size_cap, OPT_U64, 500*1024L*1024L) // client data allowed in-memory (in bytes)
+OPTION(osd_client_message_cap, OPT_U64, 100)              // num client messages allowed in-memory
+
+> What are the config variables that would allow me to experiment with these throttle limits?
+> (When I look at the output from --admin-daemon osd.xx.asok config show, it's
+> not clear which items these correspond to).
+
+These are all involved in slowing down clients to the rate of the 
+storage...
+
+sage
