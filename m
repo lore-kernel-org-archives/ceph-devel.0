@@ -1,195 +1,128 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: [ceph-users] Initial performance cluster SimpleMessenger vs
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: [ceph-users] Initial performance cluster SimpleMessenger vs
  AsyncMessenger results
-Date: Tue, 13 Oct 2015 14:34:46 +0800
-Message-ID: <CACJqLyZp=+c0BbHRW3JUdAXrT9nWPopE82GEAJUUFrPi5g1vnQ@mail.gmail.com>
+Date: Tue, 13 Oct 2015 06:45:39 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F31740E6B@SACMBXIP02.sdcorp.global.sandisk.com>
 References: <561BE4E3.7050404@redhat.com>
 	<CACJqLyaF-rtPVe2cX=y19cxcupfWPVXeZSpgpofXxR1qktwo2g@mail.gmail.com>
 	<755F6B91B3BE364F9BCA11EA3F9E0C6F31740C2F@SACMBXIP02.sdcorp.global.sandisk.com>
+ <CACJqLyZp=+c0BbHRW3JUdAXrT9nWPopE82GEAJUUFrPi5g1vnQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f54.google.com ([209.85.213.54]:36536 "EHLO
-	mail-vk0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751449AbbJMGer convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Oct 2015 02:34:47 -0400
-Received: by vkgc187 with SMTP id c187so4506165vkg.3
-        for <ceph-devel@vger.kernel.org>; Mon, 12 Oct 2015 23:34:46 -0700 (PDT)
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F31740C2F@SACMBXIP02.sdcorp.global.sandisk.com>
+Received: from mail-bn1bon0074.outbound.protection.outlook.com ([157.56.111.74]:54935
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751914AbbJMGpo (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 13 Oct 2015 02:45:44 -0400
+In-Reply-To: <CACJqLyZp=+c0BbHRW3JUdAXrT9nWPopE82GEAJUUFrPi5g1vnQ@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
+To: Haomai Wang <haomaiwang@gmail.com>
 Cc: Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
 
-On Tue, Oct 13, 2015 at 12:18 PM, Somnath Roy <Somnath.Roy@sandisk.com>=
- wrote:
-> Mark,
->
-> Thanks for this data. This means probably simple messenger (not OSD c=
-ore) is
-> not doing optimal job of handling memory.
->
->
->
-> Haomai,
->
-> I am not that familiar with Async messenger code base, do you have an
-> explanation of the behavior (like good performance with default tcmal=
-loc)
-> Mark reported ? Is it using lot less thread overall than Simple ?
-
-Originally async messenger mainly want to solve with high thread
-number problem which limited the ceph cluster size. High context
-switch and cpu usage caused by simple messenger under large cluster.
-
-Recently we have memory problem discussed on ML and I also spend times
-to think about the root cause. Currently I would like to consider the
-simple messenger's memory usage is deviating from the design of
-tcmalloc. Tcmalloc is aimed to provide memory with local cache, and it
-also has memory control among all threads, if we have too much
-threads, it may let tcmalloc busy with memory lock contention.
-
-Async messenger uses thread pool to serve connections, it make all
-blocking calls in simple messenger async.
-
->
-> Also, it seems Async messenger has some inefficiencies in the io path=
- and
-> that=E2=80=99s why it is not performing as well as simple if the memo=
-ry allocation
-> stuff is optimally handled.
-
-Yep, simple messenger use two threads(one for read, one for write) to
-serve one connection, async messenger at most have one thread to serve
-one connection and multi connection  will share the same thread.
-
-Next, I would like to have several plans to improve performance:
-1. add poll mode support, I hope it can help enhance high performance
-storage need
-2. add load balance ability among worker threads
-3. move more works out of messenger thread.
-
->
-> Could you please send out any documentation around Async messenger ? =
-I tried
-> to google it , but, not even blueprint is popping up.
-
->
->
->
->
->
-> Thanks & Regards
->
-> Somnath
->
-> From: ceph-users [mailto:ceph-users-bounces@lists.ceph.com] On Behalf=
- Of
-> Haomai Wang
-> Sent: Monday, October 12, 2015 7:57 PM
-> To: Mark Nelson
-> Cc: ceph-devel; ceph-users@lists.ceph.com
-> Subject: Re: [ceph-users] Initial performance cluster SimpleMessenger=
- vs
-> AsyncMessenger results
->
->
->
-> COOL
->
->
->
-> Interesting that async messenger will consume more memory than simple=
-, in my
-> mind I always think async should use less memory. I will give a look =
-at this
->
->
->
-> On Tue, Oct 13, 2015 at 12:50 AM, Mark Nelson <mnelson@redhat.com> wr=
-ote:
->
-> Hi Guy,
->
-> Given all of the recent data on how different memory allocator
-> configurations improve SimpleMessenger performance (and the effect of=
- memory
-> allocators and transparent hugepages on RSS memory usage), I thought =
-I'd run
-> some tests looking how AsyncMessenger does in comparison.  We spoke a=
-bout
-> these a bit at the last performance meeting but here's the full write=
- up.
-> The rough conclusion as of right now appears to be:
->
-> 1) AsyncMessenger performance is not dependent on the memory allocato=
-r like
-> with SimpleMessenger.
->
-> 2) AsyncMessenger is faster than SimpleMessenger with TCMalloc + 32MB=
- (ie
-> default) thread cache.
->
-> 3) AsyncMessenger is consistently faster than SimpleMessenger for 128=
-K
-> random reads.
->
-> 4) AsyncMessenger is sometimes slower than SimpleMessenger when memor=
-y
-> allocator optimizations are used.
->
-> 5) AsyncMessenger currently uses far more RSS memory than SimpleMesse=
-nger.
->
-> Here's a link to the paper:
->
-> https://drive.google.com/file/d/0B2gTBZrkrnpZS1Q4VktjZkhrNHc/view
->
-> Mark
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users@lists.ceph.com
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->
->
->
->
->
-> --
->
-> Best Regards,
->
-> Wheat
->
->
-> ________________________________
->
-> PLEASE NOTE: The information contained in this electronic mail messag=
-e is
-> intended only for the use of the designated recipient(s) named above.=
- If the
-> reader of this message is not the intended recipient, you are hereby
-> notified that you have received this message in error and that any re=
-view,
-> dissemination, distribution, or copying of this message is strictly
-> prohibited. If you have received this communication in error, please =
-notify
-> the sender by telephone or e-mail (as shown above) immediately and de=
-stroy
-> any and all copies of this message in your possession (whether hard c=
-opies
-> or electronically stored copies).
->
-
-
-
---=20
-Best Regards,
-
-Wheat
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+VGhhbmtzIEhhb21haS4uDQpTaW5jZSBBc3luYyBtZXNzZW5nZXIgaXMgYWx3YXlzIHVzaW5nIGEg
+Y29uc3RhbnQgbnVtYmVyIG9mIHRocmVhZHMgLCB0aGVyZSBjb3VsZCBiZSBhIHBvdGVudGlhbCBw
+ZXJmb3JtYW5jZSBwcm9ibGVtIG9mIHNjYWxpbmcgdXAgdGhlIGNsaWVudCBjb25uZWN0aW9ucyBr
+ZWVwaW5nIHRoZSBjb25zdGFudCBudW1iZXIgb2YgT1NEcyA/DQpNYXkgYmUgaXQncyBhIGdvb2Qg
+dHJhZGVvZmYuLg0KDQpSZWdhcmRzDQpTb21uYXRoDQoNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdl
+LS0tLS0NCkZyb206IEhhb21haSBXYW5nIFttYWlsdG86aGFvbWFpd2FuZ0BnbWFpbC5jb21dDQpT
+ZW50OiBNb25kYXksIE9jdG9iZXIgMTIsIDIwMTUgMTE6MzUgUE0NClRvOiBTb21uYXRoIFJveQ0K
+Q2M6IE1hcmsgTmVsc29uOyBjZXBoLWRldmVsOyBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tDQpT
+dWJqZWN0OiBSZTogW2NlcGgtdXNlcnNdIEluaXRpYWwgcGVyZm9ybWFuY2UgY2x1c3RlciBTaW1w
+bGVNZXNzZW5nZXIgdnMgQXN5bmNNZXNzZW5nZXIgcmVzdWx0cw0KDQpPbiBUdWUsIE9jdCAxMywg
+MjAxNSBhdCAxMjoxOCBQTSwgU29tbmF0aCBSb3kgPFNvbW5hdGguUm95QHNhbmRpc2suY29tPiB3
+cm90ZToNCj4gTWFyaywNCj4NCj4gVGhhbmtzIGZvciB0aGlzIGRhdGEuIFRoaXMgbWVhbnMgcHJv
+YmFibHkgc2ltcGxlIG1lc3NlbmdlciAobm90IE9TRA0KPiBjb3JlKSBpcyBub3QgZG9pbmcgb3B0
+aW1hbCBqb2Igb2YgaGFuZGxpbmcgbWVtb3J5Lg0KPg0KPg0KPg0KPiBIYW9tYWksDQo+DQo+IEkg
+YW0gbm90IHRoYXQgZmFtaWxpYXIgd2l0aCBBc3luYyBtZXNzZW5nZXIgY29kZSBiYXNlLCBkbyB5
+b3UgaGF2ZSBhbg0KPiBleHBsYW5hdGlvbiBvZiB0aGUgYmVoYXZpb3IgKGxpa2UgZ29vZCBwZXJm
+b3JtYW5jZSB3aXRoIGRlZmF1bHQNCj4gdGNtYWxsb2MpIE1hcmsgcmVwb3J0ZWQgPyBJcyBpdCB1
+c2luZyBsb3QgbGVzcyB0aHJlYWQgb3ZlcmFsbCB0aGFuIFNpbXBsZSA/DQoNCk9yaWdpbmFsbHkg
+YXN5bmMgbWVzc2VuZ2VyIG1haW5seSB3YW50IHRvIHNvbHZlIHdpdGggaGlnaCB0aHJlYWQgbnVt
+YmVyIHByb2JsZW0gd2hpY2ggbGltaXRlZCB0aGUgY2VwaCBjbHVzdGVyIHNpemUuIEhpZ2ggY29u
+dGV4dCBzd2l0Y2ggYW5kIGNwdSB1c2FnZSBjYXVzZWQgYnkgc2ltcGxlIG1lc3NlbmdlciB1bmRl
+ciBsYXJnZSBjbHVzdGVyLg0KDQpSZWNlbnRseSB3ZSBoYXZlIG1lbW9yeSBwcm9ibGVtIGRpc2N1
+c3NlZCBvbiBNTCBhbmQgSSBhbHNvIHNwZW5kIHRpbWVzIHRvIHRoaW5rIGFib3V0IHRoZSByb290
+IGNhdXNlLiBDdXJyZW50bHkgSSB3b3VsZCBsaWtlIHRvIGNvbnNpZGVyIHRoZSBzaW1wbGUgbWVz
+c2VuZ2VyJ3MgbWVtb3J5IHVzYWdlIGlzIGRldmlhdGluZyBmcm9tIHRoZSBkZXNpZ24gb2YgdGNt
+YWxsb2MuIFRjbWFsbG9jIGlzIGFpbWVkIHRvIHByb3ZpZGUgbWVtb3J5IHdpdGggbG9jYWwgY2Fj
+aGUsIGFuZCBpdCBhbHNvIGhhcyBtZW1vcnkgY29udHJvbCBhbW9uZyBhbGwgdGhyZWFkcywgaWYg
+d2UgaGF2ZSB0b28gbXVjaCB0aHJlYWRzLCBpdCBtYXkgbGV0IHRjbWFsbG9jIGJ1c3kgd2l0aCBt
+ZW1vcnkgbG9jayBjb250ZW50aW9uLg0KDQpBc3luYyBtZXNzZW5nZXIgdXNlcyB0aHJlYWQgcG9v
+bCB0byBzZXJ2ZSBjb25uZWN0aW9ucywgaXQgbWFrZSBhbGwgYmxvY2tpbmcgY2FsbHMgaW4gc2lt
+cGxlIG1lc3NlbmdlciBhc3luYy4NCg0KPg0KPiBBbHNvLCBpdCBzZWVtcyBBc3luYyBtZXNzZW5n
+ZXIgaGFzIHNvbWUgaW5lZmZpY2llbmNpZXMgaW4gdGhlIGlvIHBhdGgNCj4gYW5kIHRoYXTigJlz
+IHdoeSBpdCBpcyBub3QgcGVyZm9ybWluZyBhcyB3ZWxsIGFzIHNpbXBsZSBpZiB0aGUgbWVtb3J5
+DQo+IGFsbG9jYXRpb24gc3R1ZmYgaXMgb3B0aW1hbGx5IGhhbmRsZWQuDQoNClllcCwgc2ltcGxl
+IG1lc3NlbmdlciB1c2UgdHdvIHRocmVhZHMob25lIGZvciByZWFkLCBvbmUgZm9yIHdyaXRlKSB0
+byBzZXJ2ZSBvbmUgY29ubmVjdGlvbiwgYXN5bmMgbWVzc2VuZ2VyIGF0IG1vc3QgaGF2ZSBvbmUg
+dGhyZWFkIHRvIHNlcnZlIG9uZSBjb25uZWN0aW9uIGFuZCBtdWx0aSBjb25uZWN0aW9uICB3aWxs
+IHNoYXJlIHRoZSBzYW1lIHRocmVhZC4NCg0KTmV4dCwgSSB3b3VsZCBsaWtlIHRvIGhhdmUgc2V2
+ZXJhbCBwbGFucyB0byBpbXByb3ZlIHBlcmZvcm1hbmNlOg0KMS4gYWRkIHBvbGwgbW9kZSBzdXBw
+b3J0LCBJIGhvcGUgaXQgY2FuIGhlbHAgZW5oYW5jZSBoaWdoIHBlcmZvcm1hbmNlIHN0b3JhZ2Ug
+bmVlZCAyLiBhZGQgbG9hZCBiYWxhbmNlIGFiaWxpdHkgYW1vbmcgd29ya2VyIHRocmVhZHMgMy4g
+bW92ZSBtb3JlIHdvcmtzIG91dCBvZiBtZXNzZW5nZXIgdGhyZWFkLg0KDQo+DQo+IENvdWxkIHlv
+dSBwbGVhc2Ugc2VuZCBvdXQgYW55IGRvY3VtZW50YXRpb24gYXJvdW5kIEFzeW5jIG1lc3Nlbmdl
+ciA/IEkNCj4gdHJpZWQgdG8gZ29vZ2xlIGl0ICwgYnV0LCBub3QgZXZlbiBibHVlcHJpbnQgaXMg
+cG9wcGluZyB1cC4NCg0KPg0KPg0KPg0KPg0KPg0KPiBUaGFua3MgJiBSZWdhcmRzDQo+DQo+IFNv
+bW5hdGgNCj4NCj4gRnJvbTogY2VwaC11c2VycyBbbWFpbHRvOmNlcGgtdXNlcnMtYm91bmNlc0Bs
+aXN0cy5jZXBoLmNvbV0gT24gQmVoYWxmDQo+IE9mIEhhb21haSBXYW5nDQo+IFNlbnQ6IE1vbmRh
+eSwgT2N0b2JlciAxMiwgMjAxNSA3OjU3IFBNDQo+IFRvOiBNYXJrIE5lbHNvbg0KPiBDYzogY2Vw
+aC1kZXZlbDsgY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQ0KPiBTdWJqZWN0OiBSZTogW2NlcGgt
+dXNlcnNdIEluaXRpYWwgcGVyZm9ybWFuY2UgY2x1c3RlciBTaW1wbGVNZXNzZW5nZXINCj4gdnMg
+QXN5bmNNZXNzZW5nZXIgcmVzdWx0cw0KPg0KPg0KPg0KPiBDT09MDQo+DQo+DQo+DQo+IEludGVy
+ZXN0aW5nIHRoYXQgYXN5bmMgbWVzc2VuZ2VyIHdpbGwgY29uc3VtZSBtb3JlIG1lbW9yeSB0aGFu
+IHNpbXBsZSwNCj4gaW4gbXkgbWluZCBJIGFsd2F5cyB0aGluayBhc3luYyBzaG91bGQgdXNlIGxl
+c3MgbWVtb3J5LiBJIHdpbGwgZ2l2ZSBhDQo+IGxvb2sgYXQgdGhpcw0KPg0KPg0KPg0KPiBPbiBU
+dWUsIE9jdCAxMywgMjAxNSBhdCAxMjo1MCBBTSwgTWFyayBOZWxzb24gPG1uZWxzb25AcmVkaGF0
+LmNvbT4gd3JvdGU6DQo+DQo+IEhpIEd1eSwNCj4NCj4gR2l2ZW4gYWxsIG9mIHRoZSByZWNlbnQg
+ZGF0YSBvbiBob3cgZGlmZmVyZW50IG1lbW9yeSBhbGxvY2F0b3INCj4gY29uZmlndXJhdGlvbnMg
+aW1wcm92ZSBTaW1wbGVNZXNzZW5nZXIgcGVyZm9ybWFuY2UgKGFuZCB0aGUgZWZmZWN0IG9mDQo+
+IG1lbW9yeSBhbGxvY2F0b3JzIGFuZCB0cmFuc3BhcmVudCBodWdlcGFnZXMgb24gUlNTIG1lbW9y
+eSB1c2FnZSksIEkNCj4gdGhvdWdodCBJJ2QgcnVuIHNvbWUgdGVzdHMgbG9va2luZyBob3cgQXN5
+bmNNZXNzZW5nZXIgZG9lcyBpbg0KPiBjb21wYXJpc29uLiAgV2Ugc3Bva2UgYWJvdXQgdGhlc2Ug
+YSBiaXQgYXQgdGhlIGxhc3QgcGVyZm9ybWFuY2UgbWVldGluZyBidXQgaGVyZSdzIHRoZSBmdWxs
+IHdyaXRlIHVwLg0KPiBUaGUgcm91Z2ggY29uY2x1c2lvbiBhcyBvZiByaWdodCBub3cgYXBwZWFy
+cyB0byBiZToNCj4NCj4gMSkgQXN5bmNNZXNzZW5nZXIgcGVyZm9ybWFuY2UgaXMgbm90IGRlcGVu
+ZGVudCBvbiB0aGUgbWVtb3J5IGFsbG9jYXRvcg0KPiBsaWtlIHdpdGggU2ltcGxlTWVzc2VuZ2Vy
+Lg0KPg0KPiAyKSBBc3luY01lc3NlbmdlciBpcyBmYXN0ZXIgdGhhbiBTaW1wbGVNZXNzZW5nZXIg
+d2l0aCBUQ01hbGxvYyArIDMyTUINCj4gKGllDQo+IGRlZmF1bHQpIHRocmVhZCBjYWNoZS4NCj4N
+Cj4gMykgQXN5bmNNZXNzZW5nZXIgaXMgY29uc2lzdGVudGx5IGZhc3RlciB0aGFuIFNpbXBsZU1l
+c3NlbmdlciBmb3IgMTI4Sw0KPiByYW5kb20gcmVhZHMuDQo+DQo+IDQpIEFzeW5jTWVzc2VuZ2Vy
+IGlzIHNvbWV0aW1lcyBzbG93ZXIgdGhhbiBTaW1wbGVNZXNzZW5nZXIgd2hlbiBtZW1vcnkNCj4g
+YWxsb2NhdG9yIG9wdGltaXphdGlvbnMgYXJlIHVzZWQuDQo+DQo+IDUpIEFzeW5jTWVzc2VuZ2Vy
+IGN1cnJlbnRseSB1c2VzIGZhciBtb3JlIFJTUyBtZW1vcnkgdGhhbiBTaW1wbGVNZXNzZW5nZXIu
+DQo+DQo+IEhlcmUncyBhIGxpbmsgdG8gdGhlIHBhcGVyOg0KPg0KPiBodHRwczovL2RyaXZlLmdv
+b2dsZS5jb20vZmlsZS9kLzBCMmdUQlpya3JucFpTMVE0Vmt0alpraHJOSGMvdmlldw0KPg0KPiBN
+YXJrDQo+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQo+
+IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0DQo+IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20NCj4g
+aHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tDQo+
+DQo+DQo+DQo+DQo+DQo+IC0tDQo+DQo+IEJlc3QgUmVnYXJkcywNCj4NCj4gV2hlYXQNCj4NCj4N
+Cj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCj4NCj4gUExFQVNFIE5PVEU6IFRo
+ZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2FnZQ0K
+PiBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVu
+dChzKSBuYW1lZA0KPiBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90
+IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsDQo+IHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQg
+eW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yDQo+IGFuZCB0aGF0IGFueSBy
+ZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzDQo+
+IG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhp
+cw0KPiBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkg
+dGVsZXBob25lIG9yDQo+IGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBk
+ZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZg0KPiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3Nz
+ZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3Bp
+ZXMpLg0KPg0KDQoNCg0KLS0NCkJlc3QgUmVnYXJkcywNCg0KV2hlYXQNCg0KX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX18NCg0KUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250
+YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZv
+ciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYg
+dGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQs
+IHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNz
+YWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1
+dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4g
+SWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ug
+bm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUp
+IGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3Nh
+Z2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNh
+bGx5IHN0b3JlZCBjb3BpZXMpLg0KDQo=
