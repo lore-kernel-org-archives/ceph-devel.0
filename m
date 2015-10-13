@@ -1,129 +1,154 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: Re: lltng enabled by default and qemu apparmor|selinux problems
-Date: Tue, 13 Oct 2015 04:19:19 +0200 (CEST)
-Message-ID: <2024180394.63217405.1444702759816.JavaMail.zimbra@oxygem.tv>
-References: <370906433.54234352.1444583214983.JavaMail.zimbra@oxygem.tv> <12AB04D8-665A-4F2B-8CB1-E5268065DDE0@alcatel-lucent.com> <1681969339.44810690.1444674763678.JavaMail.zimbra@redhat.com>
+From: Haomai Wang <haomaiwang-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: Initial performance cluster SimpleMessenger vs
+ AsyncMessenger results
+Date: Tue, 13 Oct 2015 10:56:31 +0800
+Message-ID: <CACJqLyaF-rtPVe2cX=y19cxcupfWPVXeZSpgpofXxR1qktwo2g@mail.gmail.com>
+References: <561BE4E3.7050404@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:36622 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752826AbbJMCTW convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Oct 2015 22:19:22 -0400
-In-Reply-To: <1681969339.44810690.1444674763678.JavaMail.zimbra@redhat.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Jason Dillaman <dillaman@redhat.com>
-Cc: "Paul HEWLETT (Paul)" <paul.hewlett@alcatel-lucent.com>, ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>
+Content-Type: multipart/mixed; boundary="===============1753942434=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <561BE4E3.7050404-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Mark Nelson <mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
->>I have an open PR [1] to dynamically enable LTTng-UST via new config =
-options
+--===============1753942434==
+Content-Type: multipart/alternative; boundary=001a1143f84ed344a10521f39733
 
-Great ,Thanks Jason !
+--001a1143f84ed344a10521f39733
+Content-Type: text/plain; charset=UTF-8
+
+COOL
+
+Interesting that async messenger will consume more memory than simple, in
+my mind I always think async should use less memory. I will give a look at
+this
+
+On Tue, Oct 13, 2015 at 12:50 AM, Mark Nelson <mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+
+> Hi Guy,
+>
+> Given all of the recent data on how different memory allocator
+> configurations improve SimpleMessenger performance (and the effect of
+> memory allocators and transparent hugepages on RSS memory usage), I thought
+> I'd run some tests looking how AsyncMessenger does in comparison.  We spoke
+> about these a bit at the last performance meeting but here's the full write
+> up.  The rough conclusion as of right now appears to be:
+>
+> 1) AsyncMessenger performance is not dependent on the memory allocator
+> like with SimpleMessenger.
+>
+> 2) AsyncMessenger is faster than SimpleMessenger with TCMalloc + 32MB (ie
+> default) thread cache.
+>
+> 3) AsyncMessenger is consistently faster than SimpleMessenger for 128K
+> random reads.
+>
+> 4) AsyncMessenger is sometimes slower than SimpleMessenger when memory
+> allocator optimizations are used.
+>
+> 5) AsyncMessenger currently uses far more RSS memory than SimpleMessenger.
+>
+> Here's a link to the paper:
+>
+> https://drive.google.com/file/d/0B2gTBZrkrnpZS1Q4VktjZkhrNHc/view
+>
+> Mark
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>
 
 
 
------ Mail original -----
-De: "Jason Dillaman" <dillaman@redhat.com>
-=C3=80: "Paul HEWLETT (Paul)" <paul.hewlett@alcatel-lucent.com>
-Cc: "aderumier" <aderumier@odiso.com>, "ceph-devel" <ceph-devel@vger.ke=
-rnel.org>, "Sage Weil" <sweil@redhat.com>
-Envoy=C3=A9: Lundi 12 Octobre 2015 20:32:43
-Objet: Re: lltng enabled by default and qemu apparmor|selinux problems
+-- 
 
-I have an open PR [1] to dynamically enable LTTng-UST via new config op=
-tions. This change will hopefully trickle down to older release and wil=
-l avoid the SElinux / AppArmor issues in the default case (which led to=
- downstream Ubuntu and Fedora disabling LTTng-UST support). Anyone that=
- wants to use LTTng-UST (i.e. for generating RBD replay traces) can ena=
-ble the support and adjust their SElinux / AppArmor rules to accommodat=
-e.=20
+Best Regards,
 
-[1] https://github.com/ceph/ceph/pull/6135=20
+Wheat
 
---=20
+--001a1143f84ed344a10521f39733
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 
-Jason Dillaman=20
+<div dir=3D"ltr">COOL<div><br></div><div>Interesting that async messenger w=
+ill consume more memory than simple, in my mind I always think async should=
+ use less memory. I will give a look at this</div></div><div class=3D"gmail=
+_extra"><br><div class=3D"gmail_quote">On Tue, Oct 13, 2015 at 12:50 AM, Ma=
+rk Nelson <span dir=3D"ltr">&lt;<a href=3D"mailto:mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" targe=
+t=3D"_blank">mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org</a>&gt;</span> wrote:<br><blockquote class=
+=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padd=
+ing-left:1ex">Hi Guy,<br>
+<br>
+Given all of the recent data on how different memory allocator configuratio=
+ns improve SimpleMessenger performance (and the effect of memory allocators=
+ and transparent hugepages on RSS memory usage), I thought I&#39;d run some=
+ tests looking how AsyncMessenger does in comparison.=C2=A0 We spoke about =
+these a bit at the last performance meeting but here&#39;s the full write u=
+p.=C2=A0 The rough conclusion as of right now appears to be:<br>
+<br>
+1) AsyncMessenger performance is not dependent on the memory allocator like=
+ with SimpleMessenger.<br>
+<br>
+2) AsyncMessenger is faster than SimpleMessenger with TCMalloc + 32MB (ie d=
+efault) thread cache.<br>
+<br>
+3) AsyncMessenger is consistently faster than SimpleMessenger for 128K rand=
+om reads.<br>
+<br>
+4) AsyncMessenger is sometimes slower than SimpleMessenger when memory allo=
+cator optimizations are used.<br>
+<br>
+5) AsyncMessenger currently uses far more RSS memory than SimpleMessenger.<=
+br>
+<br>
+Here&#39;s a link to the paper:<br>
+<br>
+<a href=3D"https://drive.google.com/file/d/0B2gTBZrkrnpZS1Q4VktjZkhrNHc/vie=
+w" rel=3D"noreferrer" target=3D"_blank">https://drive.google.com/file/d/0B2=
+gTBZrkrnpZS1Q4VktjZkhrNHc/view</a><br>
+<br>
+Mark<br>
+_______________________________________________<br>
+ceph-users mailing list<br>
+<a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" target=3D"_blank">ceph-users@l=
+ists.ceph.com</a><br>
+<a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" rel=3D"n=
+oreferrer" target=3D"_blank">http://lists.ceph.com/listinfo.cgi/ceph-users-=
+ceph.com</a><br>
+</blockquote></div><br><br clear=3D"all"><div><br></div>-- <br><div class=
+=3D"gmail_signature">
 
 
------ Original Message -----=20
-> From: "Paul HEWLETT (Paul)" <paul.hewlett@alcatel-lucent.com>=20
-> To: "Alexandre DERUMIER" <aderumier@odiso.com>, "ceph-devel" <ceph-de=
-vel@vger.kernel.org>=20
-> Cc: "Sage Weil" <sweil@redhat.com>=20
-> Sent: Monday, October 12, 2015 4:28:06 AM=20
-> Subject: Re: lltng enabled by default and qemu apparmor|selinux probl=
-ems=20
->=20
-> IF I can add my $0.02 - we were unable to use the libradosstriper lib=
-rary in=20
-> RHEL6 because it uses the same initialisation tags as librados and lt=
-tng=20
-> does not like that. We had no problems with RHEL7 version of ceph bec=
-ause=20
-> lttng is not enabled. Please do not re-enable lttng in RHEL7 and late=
-r=20
-> branches=E2=80=A6.=20
->=20
-> Regards=20
-> Paul=20
->=20
->=20
->=20
->=20
-> On 11/10/2015 18:06, "ceph-devel-owner@vger.kernel.org on behalf of A=
-lexandre=20
-> DERUMIER" <ceph-devel-owner@vger.kernel.org on behalf of=20
-> aderumier@odiso.com> wrote:=20
->=20
-> >Hi,=20
-> >=20
-> >it seem that since this commit=20
-> >=20
-> >https://github.com/ceph/ceph/pull/4261/files=20
-> >=20
-> >lltng is enabled by default.=20
-> >=20
-> >But this give error with qemu when apparmor|selinux is enabled.=20
-> >=20
-> >That's why ubuntu && redhat now disable it for their own packages.=20
-> >=20
-> >https://bugzilla.redhat.com/show_bug.cgi?id=3D1223319=20
-> >https://bugs.launchpad.net/ubuntu/+source/libvirt/+bug/1432644=20
-> >=20
-> >In the ubuntu launchpad, Sage has made a reply=20
-> >=20
-> >"=20
-> >Sage Weil (sage-newdream) wrote on 2015-04-02: #21=20
-> >FWIW, we are disabling the lttng support in the final hammer release=
- to=20
-> >avoid this issue (until we come up with a better solution)."=20
-> >=20
-> >=20
-> >It seem that it's still enabled by default in ceph git and ceph.com=20
-> >packages.=20
-> >=20
-> >Is it still planned to disable by default ?=20
-> >=20
-> >=20
-> >=20
-> >--=20
-> >To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in=20
-> >the body of a message to majordomo@vger.kernel.org=20
-> >More majordomo info at http://vger.kernel.org/majordomo-info.html=20
-> N=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDr=EF=BF=BD=EF=BF=BDy=EF=
-=BF=BD=EF=BF=BD=EF=BF=BDb=EF=BF=BDX=EF=BF=BD=EF=BF=BD=C7=A7v=EF=BF=BD^=EF=
-=BF=BD)=DE=BA{.n=EF=BF=BD+=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD]z=EF=BF=
-=BD=EF=BF=BD=EF=BF=BD{ay=EF=BF=BD=CA=87=DA=99=EF=BF=BD,j=EF=BF=BD=EF=BF=
-=BDf=EF=BF=BD=EF=BF=BD=EF=BF=BDh=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD=EF=
-=BF=BDw=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDj:+v=EF=BF=
-=BD=EF=BF=BD=EF=BF=BDw=EF=BF=BDj=EF=BF=BDm=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=
-=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDzZ+=EF=BF=BD=EF=BF=BD=DD=A2j"=
-=EF=BF=BD=EF=BF=BD=20
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+
+
+<p>Best Regards,</p><p>Wheat</p></div>
+</div>
+
+--001a1143f84ed344a10521f39733--
+
+--===============1753942434==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============1753942434==--
