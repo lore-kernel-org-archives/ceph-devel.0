@@ -1,80 +1,71 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: Initial performance cluster SimpleMessenger vs AsyncMessenger
- results
-Date: Tue, 13 Oct 2015 10:52:51 -0500
-Message-ID: <561D28D3.3060107@redhat.com>
-References: <561BE4E3.7050404@redhat.com> <CAJ4mKGYOOgL7WPzFtkO6r12B7kL+mTekC-OUayckA2bdV7P1qg@mail.gmail.com>
+From: "Deneau, Tom" <tom.deneau@amd.com>
+Subject: RE: throttles
+Date: Tue, 13 Oct 2015 15:54:52 +0000
+Message-ID: <BC97738F8E7C8742BABED7F06FB9DF919252061D@SATLEXDAG01.amd.com>
+References: <BC97738F8E7C8742BABED7F06FB9DF91925201E3@SATLEXDAG01.amd.com>
+ <alpine.DEB.2.00.1510130541070.6589@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:47323 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752702AbbJMPwy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 13 Oct 2015 11:52:54 -0400
-In-Reply-To: <CAJ4mKGYOOgL7WPzFtkO6r12B7kL+mTekC-OUayckA2bdV7P1qg@mail.gmail.com>
+Received: from mail-bn1bon0088.outbound.protection.outlook.com ([157.56.111.88]:54694
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S932298AbbJMPy7 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Oct 2015 11:54:59 -0400
+In-Reply-To: <alpine.DEB.2.00.1510130541070.6589@cobra.newdream.net>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
+To: Sage Weil <sage@newdream.net>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 10/12/2015 11:12 PM, Gregory Farnum wrote:
-> On Mon, Oct 12, 2015 at 9:50 AM, Mark Nelson <mnelson@redhat.com> wrote:
->> Hi Guy,
->>
->> Given all of the recent data on how different memory allocator
->> configurations improve SimpleMessenger performance (and the effect of memory
->> allocators and transparent hugepages on RSS memory usage), I thought I'd run
->> some tests looking how AsyncMessenger does in comparison.  We spoke about
->> these a bit at the last performance meeting but here's the full write up.
->> The rough conclusion as of right now appears to be:
->>
->> 1) AsyncMessenger performance is not dependent on the memory allocator like
->> with SimpleMessenger.
->>
->> 2) AsyncMessenger is faster than SimpleMessenger with TCMalloc + 32MB (ie
->> default) thread cache.
->>
->> 3) AsyncMessenger is consistently faster than SimpleMessenger for 128K
->> random reads.
->>
->> 4) AsyncMessenger is sometimes slower than SimpleMessenger when memory
->> allocator optimizations are used.
->>
->> 5) AsyncMessenger currently uses far more RSS memory than SimpleMessenger.
->>
->> Here's a link to the paper:
->>
->> https://drive.google.com/file/d/0B2gTBZrkrnpZS1Q4VktjZkhrNHc/view
->
-> Can you clarify these tests a bit more? I can't make the number of
-> nodes, OSDs, and SSDs work out properly. Were the FIO jobs 256
-> concurrent ops per job, or in aggregate? Is there any more info that
-> might suggest why the 128KB rand-read (but not read nor write, and not
-> 4k rand-read) was so asymmetrical?
->
+> -----Original Message-----
+> From: Sage Weil [mailto:sage@newdream.net]
+> Sent: Tuesday, October 13, 2015 7:44 AM
+> To: Deneau, Tom
+> Cc: ceph-devel@vger.kernel.org
+> Subject: Re: throttles
+> 
+> On Mon, 12 Oct 2015, Deneau, Tom wrote:
+> > Looking at the perf counters on my osds, I see wait counts for the
+> > following throttle related perf counters:  (This is from trying to
+> > benchmark using multiple rados bench client processes).
+> >
+> >    throttle-filestore_bytes
+> 
+> OPTION(filestore_queue_max_ops, OPT_INT, 50)
+> OPTION(filestore_queue_max_bytes, OPT_INT, 100 << 20)
+> 
+> >    throttle-msgr_dispatch_throttler-client
+> 
+> OPTION(ms_dispatch_throttle_bytes, OPT_U64, 100 << 20)
+> 
+> >    throttle-osd_client_bytes
+> >    throttle-osd_client_messages
+> 
+> OPTION(osd_client_message_size_cap, OPT_U64, 500*1024L*1024L) // client
+> data allowed in-memory (in bytes)
+> OPTION(osd_client_message_cap, OPT_U64, 100)              // num client
+> messages allowed in-memory
+> 
+> > What are the config variables that would allow me to experiment with
+> these throttle limits?
+> > (When I look at the output from --admin-daemon osd.xx.asok config
+> > show, it's not clear which items these correspond to).
+> 
+> These are all involved in slowing down clients to the rate of the
+> storage...
+> 
+> sage
 
-Hi Greg,
+Thanks, Sage and Somnath --
 
-Resending this to the list for posterity as I realized I only sent it 
-you earlier:
+The reason I was interested is that I am seeing a levelling
+off of read bandwidth while the sar data shows we are not anywhere
+near the limits for cpu utilization (client or osd node) nor
+for disk utilization (no disk above 40% utilization) nor for
+network utilization (this is with 10Gig Ethernet).
 
-- 4 Nodes
-- 4 P3700s per node
-- 4 OSDs per P3700 (Similar to Intel's setup in Jiangang and Jian's paper)
+-- Tom
 
-Each node also acted as an fio client using the librbd engine:
-
-- 4 Nodes
-- 2 volumes per node
-- 1 fio process per volume
-- 32 concurrent IOs per fio process
-
-The 128KB random read results are interesting.  In memory allocator 
-tests I saw performance decrease with more threadcache or when TCMalloc 
-was used, and in the past I've seen odd performance characteristics 
-around this IO size.  I think it must be a difficult case for the memory 
-allocator to handle consistently well and AsyncMesseneger maybe just 
-sidesteps the problem.
-
-Mark
