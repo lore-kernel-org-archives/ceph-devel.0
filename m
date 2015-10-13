@@ -1,178 +1,80 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Fwd: monitor crashing
-Date: Tue, 13 Oct 2015 07:35:31 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1510130734380.6589@cobra.newdream.net>
-References: <CACx0BdM2qsO0n492Y7R=+FBfJzJT+4HxbBYaU1rkG0mZV=caJw@mail.gmail.com> <CACx0BdNRPk64Etwvs7_tEce=xwFw7E4Ube=8raav_-EFhhP2Fw@mail.gmail.com> <CACx0BdMi79jokSX4aPy9XJrUorE-2Fa-_oBDjYwW3bBuee5A7g@mail.gmail.com> <alpine.DEB.2.00.1510130624270.6589@cobra.newdream.net>
- <CACx0BdOOY0k02kJSacm_rHgBz0wLKv0YtganjuGy9Vtj63QVPQ@mail.gmail.com> <alpine.DEB.2.00.1510130637450.6589@cobra.newdream.net> <561D0C9B.2050706@dachary.org> <alpine.DEB.2.00.1510130658330.6589@cobra.newdream.net>
- <CACx0BdNgjD5nWEXdP61phPK-T90x=Pso2=oG0LV+1wpesiOK0Q@mail.gmail.com>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: Re: Initial performance cluster SimpleMessenger vs AsyncMessenger
+ results
+Date: Tue, 13 Oct 2015 10:52:51 -0500
+Message-ID: <561D28D3.3060107@redhat.com>
+References: <561BE4E3.7050404@redhat.com> <CAJ4mKGYOOgL7WPzFtkO6r12B7kL+mTekC-OUayckA2bdV7P1qg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-2079603334-1444746931=:6589"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:42887 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932095AbbJMOfc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Oct 2015 10:35:32 -0400
-In-Reply-To: <CACx0BdNgjD5nWEXdP61phPK-T90x=Pso2=oG0LV+1wpesiOK0Q@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:47323 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752702AbbJMPwy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 13 Oct 2015 11:52:54 -0400
+In-Reply-To: <CAJ4mKGYOOgL7WPzFtkO6r12B7kL+mTekC-OUayckA2bdV7P1qg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Luis Periquito <periquito@gmail.com>
-Cc: Loic Dachary <loic@dachary.org>, ceph-devel@vger.kernel.org
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On 10/12/2015 11:12 PM, Gregory Farnum wrote:
+> On Mon, Oct 12, 2015 at 9:50 AM, Mark Nelson <mnelson@redhat.com> wrote:
+>> Hi Guy,
+>>
+>> Given all of the recent data on how different memory allocator
+>> configurations improve SimpleMessenger performance (and the effect of memory
+>> allocators and transparent hugepages on RSS memory usage), I thought I'd run
+>> some tests looking how AsyncMessenger does in comparison.  We spoke about
+>> these a bit at the last performance meeting but here's the full write up.
+>> The rough conclusion as of right now appears to be:
+>>
+>> 1) AsyncMessenger performance is not dependent on the memory allocator like
+>> with SimpleMessenger.
+>>
+>> 2) AsyncMessenger is faster than SimpleMessenger with TCMalloc + 32MB (ie
+>> default) thread cache.
+>>
+>> 3) AsyncMessenger is consistently faster than SimpleMessenger for 128K
+>> random reads.
+>>
+>> 4) AsyncMessenger is sometimes slower than SimpleMessenger when memory
+>> allocator optimizations are used.
+>>
+>> 5) AsyncMessenger currently uses far more RSS memory than SimpleMessenger.
+>>
+>> Here's a link to the paper:
+>>
+>> https://drive.google.com/file/d/0B2gTBZrkrnpZS1Q4VktjZkhrNHc/view
+>
+> Can you clarify these tests a bit more? I can't make the number of
+> nodes, OSDs, and SSDs work out properly. Were the FIO jobs 256
+> concurrent ops per job, or in aggregate? Is there any more info that
+> might suggest why the 128KB rand-read (but not read nor write, and not
+> 4k rand-read) was so asymmetrical?
+>
 
---557981400-2079603334-1444746931=:6589
-Content-Type: TEXT/PLAIN; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Hi Greg,
 
-On Tue, 13 Oct 2015, Luis Periquito wrote:
-> Hi Sage,
->=20
-> awesome help.
->=20
-> Sorry for not telling before, but I'm running 2xMON in precise and
-> 1xMON in trusty. Looking at the status page
-> (http://ceph.com/gitbuilder.cgi) it seems the precise build is
-> failing... Can you have a look?
+Resending this to the list for posterity as I realized I only sent it 
+you earlier:
 
-I've repushed the branch, this time cherry-picking the master fix.  Let m=
-e=20
-know if you run into other problems!
+- 4 Nodes
+- 4 P3700s per node
+- 4 OSDs per P3700 (Similar to Intel's setup in Jiangang and Jian's paper)
 
-Thanks-
-sage
+Each node also acted as an fio client using the librbd engine:
 
->=20
-> thanks,
->=20
->=20
-> On Tue, Oct 13, 2015 at 2:59 PM, Sage Weil <sage@newdream.net> wrote:
-> > On Tue, 13 Oct 2015, Loic Dachary wrote:
-> >> https://github.com/ceph/ceph/compare/hammer...wip-ecpool-hammer
-> >>
-> >> In order to bypass the crush verification, you could:
-> >>
-> >> ceph tell mon.* injectargs --crushtool /bin/true
-> >
-> > Ah, good trick!
-> >
-> >         http://tracker.ceph.com/issues/13477
-> >
-> > is the ticket, and my fix for master is
-> >
-> >         https://github.com/ceph/ceph/pull/6246
-> >
-> > sage
-> >
-> >>
-> >> Cheers
-> >>
-> >> On 13/10/2015 15:41, Sage Weil wrote:
-> >> > On Tue, 13 Oct 2015, Luis Periquito wrote:
-> >> >> the store.db dir is 3.4GB big :(
-> >> >>
-> >> >> can I do it on my side?
-> >> >
-> >> > Nevermind, I was able to reproduce it from the bugzilla.  I've pus=
-hed a
-> >> > branch wip-ecpool-hammer.  Not sure which distro you're on, but pa=
-ckages
-> >> > will appear at gitbuilder.ceph.com in 30-45 minutes.  This fixes t=
-he mon
-> >> > crash, which will let you delete the pool.  I suggest stopping the=
- OSDs
-> >> > before starting the mon with this or else they might get pg create
-> >> > messages and crash too.  Once the pool is removed you can start th=
-em
-> >> > again.  They shouldn't need to be upgraded.
-> >> >
-> >> > Note that the latest hammer doesn't let you create the pool at all=
- because
-> >> > it fails the crush safety check (I had to disable the check to rep=
-roduce
-> >> > this), so that's good at least!
-> >> >
-> >> > sage
-> >> >
-> >> >>
-> >> >> On Tue, Oct 13, 2015 at 2:25 PM, Sage Weil <sage@newdream.net> wr=
-ote:
-> >> >>> On Tue, 13 Oct 2015, Luis Periquito wrote:
-> >> >>>> Any ideas? I'm growing desperate :(
-> >> >>>>
-> >> >>>> I've tried compiling from source, and including
-> >> >>>> https://github.com/ceph/ceph/pull/5276, but it still crashes on=
- boot
-> >> >>>> of the ceph-mon
-> >> >>>
-> >> >>> If you can email a (link to a) tarball of your mon data director=
-y I'd love
-> >> >>> to extract the osdmap and see why crush is crashing.. it's obvio=
-usly not
-> >> >>> supposed to do that (even with a bad rule).  You can also use
-> >> >>> the ceph-post-file utility.
-> >> >>>
-> >> >>> Thanks!
-> >> >>> sage
-> >> >>>
-> >> >>>
-> >> >>>>
-> >> >>>> ---------- Forwarded message ----------
-> >> >>>> From: Luis Periquito <periquito@gmail.com>
-> >> >>>> Date: Tue, Oct 13, 2015 at 12:26 PM
-> >> >>>> Subject: Re: monitor crashing
-> >> >>>> To: Ceph Users <ceph-users@lists.ceph.com>
-> >> >>>>
-> >> >>>>
-> >> >>>> I'm currently running Hammer (0.94.3), created an invalid LRC p=
-rofile
-> >> >>>> (typo in the l=3D, should have been l=3D4 but was l=3D3, and no=
-w I don't
-> >> >>>> have enough different ruleset-locality) and created a pool. Is =
-there
-> >> >>>> any way to delete this pool? remember I can't start the ceph-mo=
-n...
-> >> >>>>
-> >> >>>> On Tue, Oct 13, 2015 at 11:56 AM, Luis Periquito <periquito@gma=
-il.com> wrote:
-> >> >>>>> It seems I've hit this bug:
-> >> >>>>> https://bugzilla.redhat.com/show_bug.cgi?id=3D1231630
-> >> >>>>>
-> >> >>>>> is there any way I can recover this cluster? It worked in our =
-test
-> >> >>>>> cluster, but crashed the production one...
-> >> >>>> --
-> >> >>>> To unsubscribe from this list: send the line "unsubscribe ceph-=
-devel" in
-> >> >>>> the body of a message to majordomo@vger.kernel.org
-> >> >>>> More majordomo info at  http://vger.kernel.org/majordomo-info.h=
-tml
-> >> >>>>
-> >> >>>>
-> >> >> --
-> >> >> To unsubscribe from this list: send the line "unsubscribe ceph-de=
-vel" in
-> >> >> the body of a message to majordomo@vger.kernel.org
-> >> >> More majordomo info at  http://vger.kernel.org/majordomo-info.htm=
-l
-> >> >>
-> >> >>
-> >> > --
-> >> > To unsubscribe from this list: send the line "unsubscribe ceph-dev=
-el" in
-> >> > the body of a message to majordomo@vger.kernel.org
-> >> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >> >
-> >>
-> >> --
-> >> Lo=C3=AFc Dachary, Artisan Logiciel Libre
-> >>
-> >>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
->=20
---557981400-2079603334-1444746931=:6589--
+- 4 Nodes
+- 2 volumes per node
+- 1 fio process per volume
+- 32 concurrent IOs per fio process
+
+The 128KB random read results are interesting.  In memory allocator 
+tests I saw performance decrease with more threadcache or when TCMalloc 
+was used, and in the past I've seen odd performance characteristics 
+around this IO size.  I think it must be a difficult case for the memory 
+allocator to handle consistently well and AsyncMesseneger maybe just 
+sidesteps the problem.
+
+Mark
