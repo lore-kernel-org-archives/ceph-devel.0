@@ -1,113 +1,192 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: chooseleaf may cause some unnecessary pg migrations
-Date: Tue, 13 Oct 2015 09:44:45 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1510130940400.6589@cobra.newdream.net>
-References: <FF8D83DAE5DF57468726B79904321E06046B73@H3CMLB12-EX.srv.huawei-3com.com>
+From: Luis Periquito <periquito@gmail.com>
+Subject: Re: Fwd: monitor crashing
+Date: Tue, 13 Oct 2015 18:01:11 +0100
+Message-ID: <CACx0BdN76RC0iqFHEFrJNDznXkfRKPCMZGCP8+N42Wz47--6zg@mail.gmail.com>
+References: <CACx0BdM2qsO0n492Y7R=+FBfJzJT+4HxbBYaU1rkG0mZV=caJw@mail.gmail.com>
+	<CACx0BdNRPk64Etwvs7_tEce=xwFw7E4Ube=8raav_-EFhhP2Fw@mail.gmail.com>
+	<CACx0BdMi79jokSX4aPy9XJrUorE-2Fa-_oBDjYwW3bBuee5A7g@mail.gmail.com>
+	<alpine.DEB.2.00.1510130624270.6589@cobra.newdream.net>
+	<CACx0BdOOY0k02kJSacm_rHgBz0wLKv0YtganjuGy9Vtj63QVPQ@mail.gmail.com>
+	<alpine.DEB.2.00.1510130637450.6589@cobra.newdream.net>
+	<561D0C9B.2050706@dachary.org>
+	<alpine.DEB.2.00.1510130658330.6589@cobra.newdream.net>
+	<CACx0BdNgjD5nWEXdP61phPK-T90x=Pso2=oG0LV+1wpesiOK0Q@mail.gmail.com>
+	<alpine.DEB.2.00.1510130734380.6589@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:46129 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753118AbbJMQos (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 13 Oct 2015 12:44:48 -0400
-In-Reply-To: <FF8D83DAE5DF57468726B79904321E06046B73@H3CMLB12-EX.srv.huawei-3com.com>
+Received: from mail-ob0-f173.google.com ([209.85.214.173]:33351 "EHLO
+	mail-ob0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752966AbbJMRBM convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Oct 2015 13:01:12 -0400
+Received: by obbbh8 with SMTP id bh8so18942481obb.0
+        for <ceph-devel@vger.kernel.org>; Tue, 13 Oct 2015 10:01:11 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1510130734380.6589@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Xusangdi <xu.sangdi@h3c.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Loic Dachary <loic@dachary.org>, ceph-devel@vger.kernel.org
 
-Hi Sangdi,
+Thanks for all the help Sage. The cluster is now back to life with
+your awesome patch.
 
-On Tue, 13 Oct 2015, Xusangdi wrote:
-> Hi Sage,
-> 
-> Recently when I was learning about the crush rules I noticed that the step chooseleaf may cause some unnecessary pg migrations when OSDs are outed.
-> For example, for a cluster of 4 hosts with 2 OSDs each, after host1(osd.2, osd.3) is down, the mapping differences would be like this:
-> pgid    before <-> after        diff    diff_num
-> 0.1e    [5, 1, 2] <-> [5, 1, 7]         [2]     1
-> 0.1f    [0, 7, 3] <-> [0, 7, 4]         [3]     1
-> 0.1a    [0, 4, 3] <-> [0, 4, 6]         [3]     1
-> 0.5     [6, 3, 1] <-> [6, 0, 5]         [1, 3]  2
-> 0.4     [5, 6, 2] <-> [5, 6, 0]         [2]     1
-> 0.7     [3, 7, 0] <-> [7, 0, 4]         [3]     1
-> 0.6     [2, 1, 7] <-> [0, 7, 4]         [1, 2]  2
-> 0.9     [3, 4, 0] <-> [5, 0, 7]         [3, 4]  2
-> 0.15    [2, 6, 1] <-> [6, 0, 5]         [1, 2]  2
-> 0.14    [3, 6, 5] <-> [7, 4, 1]         [3, 5, 6]       3
-> 0.17    [0, 5, 2] <-> [0, 5, 6]         [2]     1
-> 0.16    [0, 4, 2] <-> [0, 4, 7]         [2]     1
-> 0.11    [4, 7, 2] <-> [4, 7, 1]         [2]     1
-> 0.10    [0, 3, 6] <-> [0, 7, 4]         [3, 6]  2
-> 0.13    [1, 7, 3] <-> [1, 7, 4]         [3]     1
-> 0.a     [0, 2, 7] <-> [0, 7, 4]         [2]     1
-> 0.c     [5, 0, 3] <-> [5, 0, 6]         [3]     1
-> 0.b     [2, 5, 7] <-> [4, 7, 0]         [2, 5]  2
-> 0.18    [7, 2, 4] <-> [7, 4, 0]         [2]     1
-> 0.f     [2, 7, 5] <-> [6, 4, 0]         [2, 5, 7]       3
-> Changed pg ratio: 30 / 32
-> 
-> I tried to change the code (please see https://github.com/ceph/ceph/pull/6242) and after the modification the result would be like this:
-
-Can you describe the reasoning behind the change?  I can't make sense 
-of it.  The recursive call is still picking just 1 item, but it looks 
-like it is always choosing a device in for slot 0 and not the current 
-slot in the caller.  I'm not sure how that could generate a correct 
-result.
-
-Perhaps you can share the osd tree output so we can see how your map it 
-structured?
-
-It is normal for some mappings to have multiple items change, as I've 
-described previously on this list.  It's a result of the fact that we're 
-considering totally independent series of items, but whether we accept a 
-choice also depends on the previous choices (we do not allow dups).. which 
-means that you get echo effects in later slots when we make a different 
-choice in earlier slots.
-
-Thanks!
-sage
-
-
-> pgid    before <-> after        diff    diff_num
-> 0.1e    [5, 0, 3] <-> [5, 0, 7]         [3]     1
-> 0.1f    [0, 6, 3] <-> [0, 6, 4]         [3]     1
-> 0.1a    [0, 5, 2] <-> [0, 5, 6]         [2]     1
-> 0.5     [6, 3, 0] <-> [6, 0, 5]         [3]     1
-> 0.4     [5, 7, 2] <-> [5, 7, 0]         [2]     1
-> 0.7     [3, 7, 1] <-> [7, 1, 5]         [3]     1
-> 0.6     [2, 0, 7] <-> [0, 7, 4]         [2]     1
-> 0.9     [3, 5, 1] <-> [5, 1, 7]         [3]     1
-> 0.15    [2, 6, 1] <-> [6, 1, 4]         [2]     1
-> 0.14    [3, 7, 5] <-> [7, 5, 1]         [3]     1
-> 0.17    [0, 4, 3] <-> [0, 4, 6]         [3]     1
-> 0.16    [0, 4, 3] <-> [0, 4, 6]         [3]     1
-> 0.11    [4, 6, 3] <-> [4, 6, 0]         [3]     1
-> 0.10    [0, 3, 6] <-> [0, 6, 5]         [3]     1
-> 0.13    [1, 7, 3] <-> [1, 7, 5]         [3]     1
-> 0.a     [0, 3, 6] <-> [0, 6, 5]         [3]     1
-> 0.c     [5, 0, 3] <-> [5, 0, 6]         [3]     1
-> 0.b     [2, 4, 6] <-> [4, 6, 1]         [2]     1
-> 0.18    [7, 3, 5] <-> [7, 5, 1]         [3]     1
-> 0.f     [2, 6, 5] <-> [6, 5, 1]         [2]     1
-> Changed pg ratio: 20 / 32
-> 
-> Currently the only defect I can see from the change is that the chance for a given pg to successfully choose required available OSDs might be a bit lower compared with before. However, I believe it will cause problems only when the cluster is pretty small and degraded. And in that case, we can still make it workable by tuning some of the crushmap parameters such as chooseleaf_tries.
-> 
-> Anyway I'm not sure if it would raise any other issues, could you please review it and maybe give me some suggestions? Thank you!
-> 
-> ----------
-> Best regards,
-> Sangdi
-> 
-> -------------------------------------------------------------------------------------------------------------------------------------
-> ????????????????????????????????????????
-> ????????????????????????????????????????
-> ????????????????????????????????????????
-> ???
-> This e-mail and its attachments contain confidential information from H3C, which is
-> intended only for the person or entity whose address is listed above. Any use of the
-> information contained herein in any way (including, but not limited to, total or partial
-> disclosure, reproduction, or dissemination) by persons other than the intended
-> recipient(s) is prohibited. If you receive this e-mail in error, please notify the sender
-> by phone or email immediately and delete it!
-> N?????r??y??????X???v???)?{.n?????z?]z????ay?????j??f???h??????w??????j:+v???w????????????zZ+???????j"????i
+On Tue, Oct 13, 2015 at 3:35 PM, Sage Weil <sage@newdream.net> wrote:
+> On Tue, 13 Oct 2015, Luis Periquito wrote:
+>> Hi Sage,
+>>
+>> awesome help.
+>>
+>> Sorry for not telling before, but I'm running 2xMON in precise and
+>> 1xMON in trusty. Looking at the status page
+>> (http://ceph.com/gitbuilder.cgi) it seems the precise build is
+>> failing... Can you have a look?
+>
+> I've repushed the branch, this time cherry-picking the master fix.  L=
+et me
+> know if you run into other problems!
+>
+> Thanks-
+> sage
+>
+>>
+>> thanks,
+>>
+>>
+>> On Tue, Oct 13, 2015 at 2:59 PM, Sage Weil <sage@newdream.net> wrote=
+:
+>> > On Tue, 13 Oct 2015, Loic Dachary wrote:
+>> >> https://github.com/ceph/ceph/compare/hammer...wip-ecpool-hammer
+>> >>
+>> >> In order to bypass the crush verification, you could:
+>> >>
+>> >> ceph tell mon.* injectargs --crushtool /bin/true
+>> >
+>> > Ah, good trick!
+>> >
+>> >         http://tracker.ceph.com/issues/13477
+>> >
+>> > is the ticket, and my fix for master is
+>> >
+>> >         https://github.com/ceph/ceph/pull/6246
+>> >
+>> > sage
+>> >
+>> >>
+>> >> Cheers
+>> >>
+>> >> On 13/10/2015 15:41, Sage Weil wrote:
+>> >> > On Tue, 13 Oct 2015, Luis Periquito wrote:
+>> >> >> the store.db dir is 3.4GB big :(
+>> >> >>
+>> >> >> can I do it on my side?
+>> >> >
+>> >> > Nevermind, I was able to reproduce it from the bugzilla.  I've =
+pushed a
+>> >> > branch wip-ecpool-hammer.  Not sure which distro you're on, but=
+ packages
+>> >> > will appear at gitbuilder.ceph.com in 30-45 minutes.  This fixe=
+s the mon
+>> >> > crash, which will let you delete the pool.  I suggest stopping =
+the OSDs
+>> >> > before starting the mon with this or else they might get pg cre=
+ate
+>> >> > messages and crash too.  Once the pool is removed you can start=
+ them
+>> >> > again.  They shouldn't need to be upgraded.
+>> >> >
+>> >> > Note that the latest hammer doesn't let you create the pool at =
+all because
+>> >> > it fails the crush safety check (I had to disable the check to =
+reproduce
+>> >> > this), so that's good at least!
+>> >> >
+>> >> > sage
+>> >> >
+>> >> >>
+>> >> >> On Tue, Oct 13, 2015 at 2:25 PM, Sage Weil <sage@newdream.net>=
+ wrote:
+>> >> >>> On Tue, 13 Oct 2015, Luis Periquito wrote:
+>> >> >>>> Any ideas? I'm growing desperate :(
+>> >> >>>>
+>> >> >>>> I've tried compiling from source, and including
+>> >> >>>> https://github.com/ceph/ceph/pull/5276, but it still crashes=
+ on boot
+>> >> >>>> of the ceph-mon
+>> >> >>>
+>> >> >>> If you can email a (link to a) tarball of your mon data direc=
+tory I'd love
+>> >> >>> to extract the osdmap and see why crush is crashing.. it's ob=
+viously not
+>> >> >>> supposed to do that (even with a bad rule).  You can also use
+>> >> >>> the ceph-post-file utility.
+>> >> >>>
+>> >> >>> Thanks!
+>> >> >>> sage
+>> >> >>>
+>> >> >>>
+>> >> >>>>
+>> >> >>>> ---------- Forwarded message ----------
+>> >> >>>> From: Luis Periquito <periquito@gmail.com>
+>> >> >>>> Date: Tue, Oct 13, 2015 at 12:26 PM
+>> >> >>>> Subject: Re: monitor crashing
+>> >> >>>> To: Ceph Users <ceph-users@lists.ceph.com>
+>> >> >>>>
+>> >> >>>>
+>> >> >>>> I'm currently running Hammer (0.94.3), created an invalid LR=
+C profile
+>> >> >>>> (typo in the l=3D, should have been l=3D4 but was l=3D3, and=
+ now I don't
+>> >> >>>> have enough different ruleset-locality) and created a pool. =
+Is there
+>> >> >>>> any way to delete this pool? remember I can't start the ceph=
+-mon...
+>> >> >>>>
+>> >> >>>> On Tue, Oct 13, 2015 at 11:56 AM, Luis Periquito <periquito@=
+gmail.com> wrote:
+>> >> >>>>> It seems I've hit this bug:
+>> >> >>>>> https://bugzilla.redhat.com/show_bug.cgi?id=3D1231630
+>> >> >>>>>
+>> >> >>>>> is there any way I can recover this cluster? It worked in o=
+ur test
+>> >> >>>>> cluster, but crashed the production one...
+>> >> >>>> --
+>> >> >>>> To unsubscribe from this list: send the line "unsubscribe ce=
+ph-devel" in
+>> >> >>>> the body of a message to majordomo@vger.kernel.org
+>> >> >>>> More majordomo info at  http://vger.kernel.org/majordomo-inf=
+o.html
+>> >> >>>>
+>> >> >>>>
+>> >> >> --
+>> >> >> To unsubscribe from this list: send the line "unsubscribe ceph=
+-devel" in
+>> >> >> the body of a message to majordomo@vger.kernel.org
+>> >> >> More majordomo info at  http://vger.kernel.org/majordomo-info.=
+html
+>> >> >>
+>> >> >>
+>> >> > --
+>> >> > To unsubscribe from this list: send the line "unsubscribe ceph-=
+devel" in
+>> >> > the body of a message to majordomo@vger.kernel.org
+>> >> > More majordomo info at  http://vger.kernel.org/majordomo-info.h=
+tml
+>> >> >
+>> >>
+>> >> --
+>> >> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>> >>
+>> >>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
