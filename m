@@ -1,128 +1,63 @@
-From: Xusangdi <xu.sangdi@h3c.com>
-Subject: RE: chooseleaf may cause some unnecessary pg migrations
-Date: Wed, 14 Oct 2015 02:15:37 +0000
-Message-ID: <FF8D83DAE5DF57468726B79904321E0604720C@H3CMLB12-EX.srv.huawei-3com.com>
-References: <FF8D83DAE5DF57468726B79904321E06046B73@H3CMLB12-EX.srv.huawei-3com.com>
- <CAANLjFpOPXCL0FEkejzR+hBYcH1=Wajvz-12v+XPZT3buA2z2A@mail.gmail.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: dump_historic_ops, slow requests
+Date: Tue, 13 Oct 2015 21:25:43 -0700
+Message-ID: <CAJ4mKGY946cdLPTWPSPwu9TsV=FsSaKJNnkWBEcaVrxXaOMv6g@mail.gmail.com>
+References: <BC97738F8E7C8742BABED7F06FB9DF9192520164@SATLEXDAG01.amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([60.191.123.56]:29612 "EHLO h3cmg01-ex.h3c.com"
-	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750906AbbJNCTO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 13 Oct 2015 22:19:14 -0400
-In-Reply-To: <CAANLjFpOPXCL0FEkejzR+hBYcH1=Wajvz-12v+XPZT3buA2z2A@mail.gmail.com>
-Content-Language: zh-CN
+Received: from mail-wi0-f179.google.com ([209.85.212.179]:38889 "EHLO
+	mail-wi0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750719AbbJNEZp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Oct 2015 00:25:45 -0400
+Received: by wieq12 with SMTP id q12so62737758wie.1
+        for <ceph-devel@vger.kernel.org>; Tue, 13 Oct 2015 21:25:44 -0700 (PDT)
+In-Reply-To: <BC97738F8E7C8742BABED7F06FB9DF9192520164@SATLEXDAG01.amd.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Robert LeBlanc <robert@leblancnet.us>
+To: "Deneau, Tom" <tom.deneau@amd.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-U3RyYXcyLiBCdXQgSSBoYWQgYWxzbyBydW4gdGhlIHNhbWUgdGVzdCBmb3Igc3RyYXcgYWxnLCB3
-aGljaCBnZW5lcmF0ZWQgcXVpdGUgc2ltaWxhciByZXN1bHRzLg0KDQo+IC0tLS0tT3JpZ2luYWwg
-TWVzc2FnZS0tLS0tDQo+IEZyb206IFJvYmVydCBMZUJsYW5jIFttYWlsdG86cm9iZXJ0QGxlYmxh
-bmNuZXQudXNdDQo+IFNlbnQ6IFR1ZXNkYXksIE9jdG9iZXIgMTMsIDIwMTUgMTA6MjEgUE0NCj4g
-VG86IHh1c2FuZ2RpIDExOTc2IChSRCkNCj4gQ2M6IHN3ZWlsQHJlZGhhdC5jb207IGNlcGgtZGV2
-ZWxAdmdlci5rZXJuZWwub3JnDQo+IFN1YmplY3Q6IFJlOiBjaG9vc2VsZWFmIG1heSBjYXVzZSBz
-b21lIHVubmVjZXNzYXJ5IHBnIG1pZ3JhdGlvbnMNCj4gDQo+IC0tLS0tQkVHSU4gUEdQIFNJR05F
-RCBNRVNTQUdFLS0tLS0NCj4gSGFzaDogU0hBMjU2DQo+IA0KPiBBcmUgeW91IHRlc3Rpbmcgd2l0
-aCBzdHJhdyBvciBzdHJhdzI/DQo+IC0gLS0tLS0tLS0tLS0tLS0tLQ0KPiBSb2JlcnQgTGVCbGFu
-Yw0KPiBQR1AgRmluZ2VycHJpbnQgNzlBMiA5Q0E0IDZDQzQgNDVERCBBOTA0ICBDNzBFIEU2NTQg
-M0JCMiBGQTYyIEI5RjENCj4gDQo+IA0KPiBPbiBUdWUsIE9jdCAxMywgMjAxNSBhdCAyOjIyIEFN
-LCBYdXNhbmdkaSAgd3JvdGU6DQo+ID4gSGkgU2FnZSwNCj4gPg0KPiA+IFJlY2VudGx5IHdoZW4g
-SSB3YXMgbGVhcm5pbmcgYWJvdXQgdGhlIGNydXNoIHJ1bGVzIEkgbm90aWNlZCB0aGF0IHRoZSBz
-dGVwIGNob29zZWxlYWYgbWF5IGNhdXNlDQo+IHNvbWUgdW5uZWNlc3NhcnkgcGcgbWlncmF0aW9u
-cyB3aGVuIE9TRHMgYXJlIG91dGVkLg0KPiA+IEZvciBleGFtcGxlLCBmb3IgYSBjbHVzdGVyIG9m
-IDQgaG9zdHMgd2l0aCAyIE9TRHMgZWFjaCwgYWZ0ZXIgaG9zdDEob3NkLjIsIG9zZC4zKSBpcyBk
-b3duLCB0aGUNCj4gbWFwcGluZyBkaWZmZXJlbmNlcyB3b3VsZCBiZSBsaWtlIHRoaXM6DQo+ID4g
-cGdpZCAgICBiZWZvcmUgPC0+IGFmdGVyICAgICAgICBkaWZmICAgIGRpZmZfbnVtDQo+ID4gMC4x
-ZSAgICBbNSwgMSwgMl0gPC0+IFs1LCAxLCA3XSAgICAgICAgIFsyXSAgICAgMQ0KPiA+IDAuMWYg
-ICAgWzAsIDcsIDNdIDwtPiBbMCwgNywgNF0gICAgICAgICBbM10gICAgIDENCj4gPiAwLjFhICAg
-IFswLCA0LCAzXSA8LT4gWzAsIDQsIDZdICAgICAgICAgWzNdICAgICAxDQo+ID4gMC41ICAgICBb
-NiwgMywgMV0gPC0+IFs2LCAwLCA1XSAgICAgICAgIFsxLCAzXSAgMg0KPiA+IDAuNCAgICAgWzUs
-IDYsIDJdIDwtPiBbNSwgNiwgMF0gICAgICAgICBbMl0gICAgIDENCj4gPiAwLjcgICAgIFszLCA3
-LCAwXSA8LT4gWzcsIDAsIDRdICAgICAgICAgWzNdICAgICAxDQo+ID4gMC42ICAgICBbMiwgMSwg
-N10gPC0+IFswLCA3LCA0XSAgICAgICAgIFsxLCAyXSAgMg0KPiA+IDAuOSAgICAgWzMsIDQsIDBd
-IDwtPiBbNSwgMCwgN10gICAgICAgICBbMywgNF0gIDINCj4gPiAwLjE1ICAgIFsyLCA2LCAxXSA8
-LT4gWzYsIDAsIDVdICAgICAgICAgWzEsIDJdICAyDQo+ID4gMC4xNCAgICBbMywgNiwgNV0gPC0+
-IFs3LCA0LCAxXSAgICAgICAgIFszLCA1LCA2XSAgICAgICAzDQo+ID4gMC4xNyAgICBbMCwgNSwg
-Ml0gPC0+IFswLCA1LCA2XSAgICAgICAgIFsyXSAgICAgMQ0KPiA+IDAuMTYgICAgWzAsIDQsIDJd
-IDwtPiBbMCwgNCwgN10gICAgICAgICBbMl0gICAgIDENCj4gPiAwLjExICAgIFs0LCA3LCAyXSA8
-LT4gWzQsIDcsIDFdICAgICAgICAgWzJdICAgICAxDQo+ID4gMC4xMCAgICBbMCwgMywgNl0gPC0+
-IFswLCA3LCA0XSAgICAgICAgIFszLCA2XSAgMg0KPiA+IDAuMTMgICAgWzEsIDcsIDNdIDwtPiBb
-MSwgNywgNF0gICAgICAgICBbM10gICAgIDENCj4gPiAwLmEgICAgIFswLCAyLCA3XSA8LT4gWzAs
-IDcsIDRdICAgICAgICAgWzJdICAgICAxDQo+ID4gMC5jICAgICBbNSwgMCwgM10gPC0+IFs1LCAw
-LCA2XSAgICAgICAgIFszXSAgICAgMQ0KPiA+IDAuYiAgICAgWzIsIDUsIDddIDwtPiBbNCwgNywg
-MF0gICAgICAgICBbMiwgNV0gIDINCj4gPiAwLjE4ICAgIFs3LCAyLCA0XSA8LT4gWzcsIDQsIDBd
-ICAgICAgICAgWzJdICAgICAxDQo+ID4gMC5mICAgICBbMiwgNywgNV0gPC0+IFs2LCA0LCAwXSAg
-ICAgICAgIFsyLCA1LCA3XSAgICAgICAzDQo+ID4gQ2hhbmdlZCBwZyByYXRpbzogMzAgLyAzMg0K
-PiA+DQo+ID4gSSB0cmllZCB0byBjaGFuZ2UgdGhlIGNvZGUgKHBsZWFzZSBzZWUgaHR0cHM6Ly9n
-aXRodWIuY29tL2NlcGgvY2VwaC9wdWxsLzYyNDIpIGFuZCBhZnRlciB0aGUNCj4gbW9kaWZpY2F0
-aW9uIHRoZSByZXN1bHQgd291bGQgYmUgbGlrZSB0aGlzOg0KPiA+IHBnaWQgICAgYmVmb3JlIDwt
-PiBhZnRlciAgICAgICAgZGlmZiAgICBkaWZmX251bQ0KPiA+IDAuMWUgICAgWzUsIDAsIDNdIDwt
-PiBbNSwgMCwgN10gICAgICAgICBbM10gICAgIDENCj4gPiAwLjFmICAgIFswLCA2LCAzXSA8LT4g
-WzAsIDYsIDRdICAgICAgICAgWzNdICAgICAxDQo+ID4gMC4xYSAgICBbMCwgNSwgMl0gPC0+IFsw
-LCA1LCA2XSAgICAgICAgIFsyXSAgICAgMQ0KPiA+IDAuNSAgICAgWzYsIDMsIDBdIDwtPiBbNiwg
-MCwgNV0gICAgICAgICBbM10gICAgIDENCj4gPiAwLjQgICAgIFs1LCA3LCAyXSA8LT4gWzUsIDcs
-IDBdICAgICAgICAgWzJdICAgICAxDQo+ID4gMC43ICAgICBbMywgNywgMV0gPC0+IFs3LCAxLCA1
-XSAgICAgICAgIFszXSAgICAgMQ0KPiA+IDAuNiAgICAgWzIsIDAsIDddIDwtPiBbMCwgNywgNF0g
-ICAgICAgICBbMl0gICAgIDENCj4gPiAwLjkgICAgIFszLCA1LCAxXSA8LT4gWzUsIDEsIDddICAg
-ICAgICAgWzNdICAgICAxDQo+ID4gMC4xNSAgICBbMiwgNiwgMV0gPC0+IFs2LCAxLCA0XSAgICAg
-ICAgIFsyXSAgICAgMQ0KPiA+IDAuMTQgICAgWzMsIDcsIDVdIDwtPiBbNywgNSwgMV0gICAgICAg
-ICBbM10gICAgIDENCj4gPiAwLjE3ICAgIFswLCA0LCAzXSA8LT4gWzAsIDQsIDZdICAgICAgICAg
-WzNdICAgICAxDQo+ID4gMC4xNiAgICBbMCwgNCwgM10gPC0+IFswLCA0LCA2XSAgICAgICAgIFsz
-XSAgICAgMQ0KPiA+IDAuMTEgICAgWzQsIDYsIDNdIDwtPiBbNCwgNiwgMF0gICAgICAgICBbM10g
-ICAgIDENCj4gPiAwLjEwICAgIFswLCAzLCA2XSA8LT4gWzAsIDYsIDVdICAgICAgICAgWzNdICAg
-ICAxDQo+ID4gMC4xMyAgICBbMSwgNywgM10gPC0+IFsxLCA3LCA1XSAgICAgICAgIFszXSAgICAg
-MQ0KPiA+IDAuYSAgICAgWzAsIDMsIDZdIDwtPiBbMCwgNiwgNV0gICAgICAgICBbM10gICAgIDEN
-Cj4gPiAwLmMgICAgIFs1LCAwLCAzXSA8LT4gWzUsIDAsIDZdICAgICAgICAgWzNdICAgICAxDQo+
-ID4gMC5iICAgICBbMiwgNCwgNl0gPC0+IFs0LCA2LCAxXSAgICAgICAgIFsyXSAgICAgMQ0KPiA+
-IDAuMTggICAgWzcsIDMsIDVdIDwtPiBbNywgNSwgMV0gICAgICAgICBbM10gICAgIDENCj4gPiAw
-LmYgICAgIFsyLCA2LCA1XSA8LT4gWzYsIDUsIDFdICAgICAgICAgWzJdICAgICAxDQo+ID4gQ2hh
-bmdlZCBwZyByYXRpbzogMjAgLyAzMg0KPiA+DQo+ID4gQ3VycmVudGx5IHRoZSBvbmx5IGRlZmVj
-dCBJIGNhbiBzZWUgZnJvbSB0aGUgY2hhbmdlIGlzIHRoYXQgdGhlIGNoYW5jZSBmb3IgYSBnaXZl
-biBwZyB0byBzdWNjZXNzZnVsbHkNCj4gY2hvb3NlIHJlcXVpcmVkIGF2YWlsYWJsZSBPU0RzIG1p
-Z2h0IGJlIGEgYml0IGxvd2VyIGNvbXBhcmVkIHdpdGggYmVmb3JlLiBIb3dldmVyLCBJIGJlbGll
-dmUgaXQgd2lsbA0KPiBjYXVzZSBwcm9ibGVtcyBvbmx5IHdoZW4gdGhlIGNsdXN0ZXIgaXMgcHJl
-dHR5IHNtYWxsIGFuZCBkZWdyYWRlZC4gQW5kIGluIHRoYXQgY2FzZSwgd2UgY2FuIHN0aWxsIG1h
-a2UNCj4gaXQgd29ya2FibGUgYnkgdHVuaW5nIHNvbWUgb2YgdGhlIGNydXNobWFwIHBhcmFtZXRl
-cnMgc3VjaCBhcyBjaG9vc2VsZWFmX3RyaWVzLg0KPiA+DQo+ID4gQW55d2F5IEknbSBub3Qgc3Vy
-ZSBpZiBpdCB3b3VsZCByYWlzZSBhbnkgb3RoZXIgaXNzdWVzLCBjb3VsZCB5b3UgcGxlYXNlIHJl
-dmlldyBpdCBhbmQgbWF5YmUgZ2l2ZSBtZQ0KPiBzb21lIHN1Z2dlc3Rpb25zPyBUaGFuayB5b3Uh
-DQo+ID4NCj4gPiAtLS0tLS0tLS0tDQo+ID4gQmVzdCByZWdhcmRzLA0KPiA+IFNhbmdkaQ0KPiA+
-DQo+ID4gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLQ0KPiA+IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KPiA+IOacrOmCruS7tuWPiuWFtumZhOS7
-tuWQq+acieadreW3nuWNjuS4iemAmuS/oeaKgOacr+aciemZkOWFrOWPuOeahOS/neWvhuS/oeaB
-r++8jOS7hemZkOS6juWPkemAgee7meS4iumdouWcsOWdgOS4reWIl+WHug0KPiA+IOeahOS4quS6
-uuaIlue+pOe7hOOAguemgeatouS7u+S9leWFtuS7luS6uuS7peS7u+S9leW9ouW8j+S9v+eUqO+8
-iOWMheaLrOS9huS4jemZkOS6juWFqOmDqOaIlumDqOWIhuWcsOazhOmcsuOAgeWkjeWItuOAgQ0K
-PiA+IOaIluaVo+WPke+8ieacrOmCruS7tuS4reeahOS/oeaBr+OAguWmguaenOaCqOmUmeaUtuS6
-huacrOmCruS7tu+8jOivt+aCqOeri+WNs+eUteivneaIlumCruS7tumAmuefpeWPkeS7tuS6uuW5
-tuWIoOmZpOacrA0KPiA+IOmCruS7tu+8gQ0KPiA+IFRoaXMgZS1tYWlsIGFuZCBpdHMgYXR0YWNo
-bWVudHMgY29udGFpbiBjb25maWRlbnRpYWwgaW5mb3JtYXRpb24gZnJvbQ0KPiA+IEgzQywgd2hp
-Y2ggaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHBlcnNvbiBvciBlbnRpdHkgd2hvc2UgYWRkcmVz
-cyBpcw0KPiA+IGxpc3RlZCBhYm92ZS4gQW55IHVzZSBvZiB0aGUgaW5mb3JtYXRpb24gY29udGFp
-bmVkIGhlcmVpbiBpbiBhbnkgd2F5DQo+ID4gKGluY2x1ZGluZywgYnV0IG5vdCBsaW1pdGVkIHRv
-LCB0b3RhbCBvciBwYXJ0aWFsIGRpc2Nsb3N1cmUsDQo+ID4gcmVwcm9kdWN0aW9uLCBvciBkaXNz
-ZW1pbmF0aW9uKSBieSBwZXJzb25zIG90aGVyIHRoYW4gdGhlIGludGVuZGVkDQo+ID4gcmVjaXBp
-ZW50KHMpIGlzIHByb2hpYml0ZWQuIElmIHlvdSByZWNlaXZlIHRoaXMgZS1tYWlsIGluIGVycm9y
-LA0KPiA+IHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSBwaG9uZSBvciBlbWFpbCBpbW1lZGlh
-dGVseSBhbmQgZGVsZXRlIGl0IQ0KPiANCj4gLS0tLS1CRUdJTiBQR1AgU0lHTkFUVVJFLS0tLS0N
-Cj4gVmVyc2lvbjogTWFpbHZlbG9wZSB2MS4yLjANCj4gQ29tbWVudDogaHR0cHM6Ly93d3cubWFp
-bHZlbG9wZS5jb20NCj4gDQo+IHdzRmNCQUVCQ0FBUUJRSldIUk00Q1JEbVZEdXkrbUs1OFFBQVJW
-TVAvamhodHlSc2lVWHc0a2wyaWtzbw0KPiBGOENpQXdQdUdSTXZGU2EyQ1hxenZhSG5Oaml5OFE0
-dVI4bzBLZ2NSMDRlaUxHUFVlYWhqeUFRNzMrOGsNCj4gZ2VyeWI5eW1qb0RGamtLWDJuN1l4Q0h5
-L01uQjVIYXlOSXVVUGkrS1VGenByYWR4MXY3UzU0WEwyREhtDQo+IG1EUlIyRERlb3U5SDZXY0lx
-a25SaDRlNmZjMWE3MEUyQ2JwS3I5cXU3QWlOaUVmUlp6WG9kLy9qb2F2Vw0KPiBoME1rWUMwVWc0
-MVVHNjRSOVFUQ0pPS3Ard1NqcmkrSVVnU1NyczNXUFlYYjVXMWpaUEZJaHNGa2lnd3MNCj4gVmdp
-dFpUdjMrck81WnlIYnRDUiszeU5JNWlzVTE4TGhmK0RyMDFNRXhVdXlDUVF6NnpPRFhWMFcreGdQ
-DQo+IHdzTVNlOFpYWHI4NGEvOE1Lb1A5MG1yMnBOaWlhc013V3JjWi9rbFE5SjRBSXFoOERKRUhK
-ZUFXZis0Tg0KPiBwWVdUaVJGYnEzTlp6SVVqVEJxdFAvQWxpS3ZDVERRaFZQM0U4aEsxcVlnNEd2
-MGdRMFp1NzZGNWM1L3ANCj4gcmo5SFRaYStvOHJTUU0wVER1aXFLU01FSlVjdU10L1RTY1dtUU5a
-RjFHVGIzSFN4NkxXNkgrYU9rTHVFDQo+IE4wRmkrcmtZdXB4WEMzUDNIblUzNUdNemx1bS8vai9z
-dklGa0xPQTVWNWFiVkF0dGN4ckdnOWpwZWJVTw0KPiBpM2Y0RFI2ZTg2Uk5MTWFha05veWJZbEs5
-Sis3ajNKakt5ZEJUcWtEbjlzS0JlTWFFL29XMjFGdDk5L3oNCj4gZUpETGYrOHhHdDAydFY1MTJt
-UER3OFNXSlpVd3MzL0I0cWM0eXJrWVVlMmFXQmVIckU3dklYOFpnQzFNDQo+IGljckUNCj4gPS9w
-UWQNCj4gLS0tLS1FTkQgUEdQIFNJR05BVFVSRS0tLS0tDQo=
+On Mon, Oct 12, 2015 at 2:22 PM, Deneau, Tom <tom.deneau@amd.com> wrote:
+> I have a small ceph cluster (3 nodes, 5 osds each, journals all just partitions
+> on the spinner disks) and I have noticed that when I hit it with a bunch of
+> rados bench clients all doing writes of large (40M objects) with --no-cleanup,
+> the rados bench commands seem to finish OK but I often get health warnings like
+>     HEALTH_WARN 4 requests are blocked > 32 sec;
+>                 2 osds have slow requests 3 ops are blocked > 32.768 sec on osd.9
+>                 1 ops are blocked > 32.768 sec on osd.10
+>                 2 osds have slow requests
+> After a couple of minutes, health goes to HEALTH_OK.
+>
+> But if I go to the node containing osd.10 for example and do dump_historic_ops
+> I do get lots of around 20-sec durations but nothing over 32 sec.
+>
+> The 20-sec or so ops are always  "ack+ondisk+write+known_if_redirected"
+> with type_data = "commit sent: apply or cleanup"
+> and the following are typical event timings
+>
+>                                initiated: 14:06:58.205937
+>                               reached_pg: 14:07:01.823288, gap=  3617.351
+>                                  started: 14:07:01.823359, gap=     0.071
+>                waiting for subops from 3: 14:07:01.855259, gap=    31.900
+>          commit_queued_for_journal_write: 14:07:03.132697, gap=  1277.438
+>           write_thread_in_journal_buffer: 14:07:03.143356, gap=    10.659
+>              journaled_completion_queued: 14:07:04.175863, gap=  1032.507
+>                                op_commit: 14:07:04.585040, gap=   409.177
+>                               op_applied: 14:07:04.589751, gap=     4.711
+>                 sub_op_commit_rec from 3: 14:07:14.682925, gap= 10093.174
+>                              commit_sent: 14:07:14.683081, gap=     0.156
+>                                     done: 14:07:14.683119, gap=     0.038
+>
+> Should I expect to see a historic op with duration greater than 32 sec?
+
+IIRC, the historic ops generally consist of up to the N longest
+operations in the last Y time period, on a rolling basis. Something
+like 20 ops from the last 6 minutes. So if you get a report of a
+32-second blocked op and immediately go to the OSD, it should have
+that op in either in-progress or historic ops.
+
+One possibility is that if you've got peering happening, it's got ops
+blocked on that but they get thrown out because the OSD turns out not
+to be responsible for them.
+-Greg
