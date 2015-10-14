@@ -1,146 +1,383 @@
 From: Sage Weil <sage@newdream.net>
-Subject: RE: chooseleaf may cause some unnecessary pg migrations
-Date: Wed, 14 Oct 2015 05:18:28 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1510140518120.6589@cobra.newdream.net>
-References: <FF8D83DAE5DF57468726B79904321E06046B73@H3CMLB12-EX.srv.huawei-3com.com> <CAANLjFpOPXCL0FEkejzR+hBYcH1=Wajvz-12v+XPZT3buA2z2A@mail.gmail.com> <FF8D83DAE5DF57468726B79904321E0604720C@H3CMLB12-EX.srv.huawei-3com.com>
+Subject: Re: [ceph-users] v9.1.0 Infernalis release candidate released
+Date: Wed, 14 Oct 2015 05:30:14 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1510140527120.6589@cobra.newdream.net>
+References: <alpine.DEB.2.00.1510131356001.27022@cobra.newdream.net> <561DDF65.7080001@physics.usyd.edu.au> <CABZ+qq=a1y6vVk9sVuW0w=NV1zPas+nW-vRtfgywRMFtJBf_sQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:49383 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:49422 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751478AbbJNMS3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Oct 2015 08:18:29 -0400
-In-Reply-To: <FF8D83DAE5DF57468726B79904321E0604720C@H3CMLB12-EX.srv.huawei-3com.com>
+	with ESMTP id S1752677AbbJNMaQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Oct 2015 08:30:16 -0400
+In-Reply-To: <CABZ+qq=a1y6vVk9sVuW0w=NV1zPas+nW-vRtfgywRMFtJBf_sQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Xusangdi <xu.sangdi@h3c.com>
-Cc: Robert LeBlanc <robert@leblancnet.us>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Dan van der Ster <dan@vanderster.com>
+Cc: Goncalo Borges <goncalo@physics.usyd.edu.au>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>, ceph-maintainers@ceph.com
 
-On Wed, 14 Oct 2015, Xusangdi wrote:
-> Straw2. But I had also run the same test for straw alg, which generated 
-> quite similar results.
+On Wed, 14 Oct 2015, Dan van der Ster wrote:
+> Hi Goncalo,
+> 
+> On Wed, Oct 14, 2015 at 6:51 AM, Goncalo Borges
+> <goncalo@physics.usyd.edu.au> wrote:
+> > Hi Sage...
+> >
+> > I've seen that the rh6 derivatives have been ruled out.
+> >
+> > This is a problem in our case since the OS choice in our systems is,
+> > somehow, imposed by CERN. The experiments software is certified for SL6 and
+> > the transition to SL7 will take some time.
+> 
+> Are you accessing Ceph directly from "physics" machines? Here at CERN
+> we run CentOS 7 on the native clients (e.g. qemu-kvm hosts) and by the
+> time we upgrade to Infernalis the servers will all be CentOS 7 as
+> well. Batch nodes running SL6 don't (currently) talk to Ceph directly
+> (in the future they might talk to Ceph-based storage via an xroot
+> gateway). But if there are use-cases then perhaps we could find a
+> place to build and distributing the newer ceph clients.
+> 
+> There's a ML ceph-talk@cern.ch where we could take this discussion.
+> Mail me if have trouble joining that e-Group.
 
-This post explains the current behavior:
+Also note that it *is* possible to build infernalis on el6, but it 
+requires a lot more effort... enough that we would rather spend our time 
+elsewhere (at least as far as ceph.com packages go).  If someone else 
+wants to do that work we'd be happy to take patches to update the and/or 
+release process.
 
-http://marc.info/?l=ceph-devel&m=143862308610881&w=2
+IIRC the thing that eventually made me stop going down this patch was the 
+fact that the newer gcc had a runtime dependency on the newer libstdc++, 
+which wasn't part of the base distro... which means we'd need also to 
+publish those packages in the ceph.com repos, or users would have to 
+add some backport repo or ppa or whatever to get things running.  Bleh.
 
 sage
 
+
 > 
-> > -----Original Message-----
-> > From: Robert LeBlanc [mailto:robert@leblancnet.us]
-> > Sent: Tuesday, October 13, 2015 10:21 PM
-> > To: xusangdi 11976 (RD)
-> > Cc: sweil@redhat.com; ceph-devel@vger.kernel.org
-> > Subject: Re: chooseleaf may cause some unnecessary pg migrations
-> > 
-> > -----BEGIN PGP SIGNED MESSAGE-----
-> > Hash: SHA256
-> > 
-> > Are you testing with straw or straw2?
-> > - ----------------
-> > Robert LeBlanc
-> > PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
-> > 
-> > 
-> > On Tue, Oct 13, 2015 at 2:22 AM, Xusangdi  wrote:
-> > > Hi Sage,
-> > >
-> > > Recently when I was learning about the crush rules I noticed that the step chooseleaf may cause
-> > some unnecessary pg migrations when OSDs are outed.
-> > > For example, for a cluster of 4 hosts with 2 OSDs each, after host1(osd.2, osd.3) is down, the
-> > mapping differences would be like this:
-> > > pgid    before <-> after        diff    diff_num
-> > > 0.1e    [5, 1, 2] <-> [5, 1, 7]         [2]     1
-> > > 0.1f    [0, 7, 3] <-> [0, 7, 4]         [3]     1
-> > > 0.1a    [0, 4, 3] <-> [0, 4, 6]         [3]     1
-> > > 0.5     [6, 3, 1] <-> [6, 0, 5]         [1, 3]  2
-> > > 0.4     [5, 6, 2] <-> [5, 6, 0]         [2]     1
-> > > 0.7     [3, 7, 0] <-> [7, 0, 4]         [3]     1
-> > > 0.6     [2, 1, 7] <-> [0, 7, 4]         [1, 2]  2
-> > > 0.9     [3, 4, 0] <-> [5, 0, 7]         [3, 4]  2
-> > > 0.15    [2, 6, 1] <-> [6, 0, 5]         [1, 2]  2
-> > > 0.14    [3, 6, 5] <-> [7, 4, 1]         [3, 5, 6]       3
-> > > 0.17    [0, 5, 2] <-> [0, 5, 6]         [2]     1
-> > > 0.16    [0, 4, 2] <-> [0, 4, 7]         [2]     1
-> > > 0.11    [4, 7, 2] <-> [4, 7, 1]         [2]     1
-> > > 0.10    [0, 3, 6] <-> [0, 7, 4]         [3, 6]  2
-> > > 0.13    [1, 7, 3] <-> [1, 7, 4]         [3]     1
-> > > 0.a     [0, 2, 7] <-> [0, 7, 4]         [2]     1
-> > > 0.c     [5, 0, 3] <-> [5, 0, 6]         [3]     1
-> > > 0.b     [2, 5, 7] <-> [4, 7, 0]         [2, 5]  2
-> > > 0.18    [7, 2, 4] <-> [7, 4, 0]         [2]     1
-> > > 0.f     [2, 7, 5] <-> [6, 4, 0]         [2, 5, 7]       3
-> > > Changed pg ratio: 30 / 32
-> > >
-> > > I tried to change the code (please see https://github.com/ceph/ceph/pull/6242) and after the
-> > modification the result would be like this:
-> > > pgid    before <-> after        diff    diff_num
-> > > 0.1e    [5, 0, 3] <-> [5, 0, 7]         [3]     1
-> > > 0.1f    [0, 6, 3] <-> [0, 6, 4]         [3]     1
-> > > 0.1a    [0, 5, 2] <-> [0, 5, 6]         [2]     1
-> > > 0.5     [6, 3, 0] <-> [6, 0, 5]         [3]     1
-> > > 0.4     [5, 7, 2] <-> [5, 7, 0]         [2]     1
-> > > 0.7     [3, 7, 1] <-> [7, 1, 5]         [3]     1
-> > > 0.6     [2, 0, 7] <-> [0, 7, 4]         [2]     1
-> > > 0.9     [3, 5, 1] <-> [5, 1, 7]         [3]     1
-> > > 0.15    [2, 6, 1] <-> [6, 1, 4]         [2]     1
-> > > 0.14    [3, 7, 5] <-> [7, 5, 1]         [3]     1
-> > > 0.17    [0, 4, 3] <-> [0, 4, 6]         [3]     1
-> > > 0.16    [0, 4, 3] <-> [0, 4, 6]         [3]     1
-> > > 0.11    [4, 6, 3] <-> [4, 6, 0]         [3]     1
-> > > 0.10    [0, 3, 6] <-> [0, 6, 5]         [3]     1
-> > > 0.13    [1, 7, 3] <-> [1, 7, 5]         [3]     1
-> > > 0.a     [0, 3, 6] <-> [0, 6, 5]         [3]     1
-> > > 0.c     [5, 0, 3] <-> [5, 0, 6]         [3]     1
-> > > 0.b     [2, 4, 6] <-> [4, 6, 1]         [2]     1
-> > > 0.18    [7, 3, 5] <-> [7, 5, 1]         [3]     1
-> > > 0.f     [2, 6, 5] <-> [6, 5, 1]         [2]     1
-> > > Changed pg ratio: 20 / 32
-> > >
-> > > Currently the only defect I can see from the change is that the chance for a given pg to successfully
-> > choose required available OSDs might be a bit lower compared with before. However, I believe it will
-> > cause problems only when the cluster is pretty small and degraded. And in that case, we can still make
-> > it workable by tuning some of the crushmap parameters such as chooseleaf_tries.
-> > >
-> > > Anyway I'm not sure if it would raise any other issues, could you please review it and maybe give me
-> > some suggestions? Thank you!
-> > >
-> > > ----------
-> > > Best regards,
-> > > Sangdi
-> > >
-> > > ----------------------------------------------------------------------
-> > > ---------------------------------------------------------------
-> > > ????????????????????????????????????????
-> > > ????????????????????????????????????????
-> > > ????????????????????????????????????????
-> > > ???
-> > > This e-mail and its attachments contain confidential information from
-> > > H3C, which is intended only for the person or entity whose address is
-> > > listed above. Any use of the information contained herein in any way
-> > > (including, but not limited to, total or partial disclosure,
-> > > reproduction, or dissemination) by persons other than the intended
-> > > recipient(s) is prohibited. If you receive this e-mail in error,
-> > > please notify the sender by phone or email immediately and delete it!
-> > 
-> > -----BEGIN PGP SIGNATURE-----
-> > Version: Mailvelope v1.2.0
-> > Comment: https://www.mailvelope.com
-> > 
-> > wsFcBAEBCAAQBQJWHRM4CRDmVDuy+mK58QAARVMP/jhhtyRsiUXw4kl2ikso
-> > F8CiAwPuGRMvFSa2CXqzvaHnNjiy8Q4uR8o0KgcR04eiLGPUeahjyAQ73+8k
-> > geryb9ymjoDFjkKX2n7YxCHy/MnB5HayNIuUPi+KUFzpradx1v7S54XL2DHm
-> > mDRR2DDeou9H6WcIqknRh4e6fc1a70E2CbpKr9qu7AiNiEfRZzXod//joavW
-> > h0MkYC0Ug41UG64R9QTCJOKp+wSjri+IUgSSrs3WPYXb5W1jZPFIhsFkigws
-> > VgitZTv3+rO5ZyHbtCR+3yNI5isU18Lhf+Dr01MExUuyCQQz6zODXV0W+xgP
-> > wsMSe8ZXXr84a/8MKoP90mr2pNiiasMwWrcZ/klQ9J4AIqh8DJEHJeAWf+4N
-> > pYWTiRFbq3NZzIUjTBqtP/AliKvCTDQhVP3E8hK1qYg4Gv0gQ0Zu76F5c5/p
-> > rj9HTZa+o8rSQM0TDuiqKSMEJUcuMt/TScWmQNZF1GTb3HSx6LW6H+aOkLuE
-> > N0Fi+rkYupxXC3P3HnU35GMzlum//j/svIFkLOA5V5abVAttcxrGg9jpebUO
-> > i3f4DR6e86RNLMaakNoybYlK9J+7j3JjKydBTqkDn9sKBeMaE/oW21Ft99/z
-> > eJDLf+8xGt02tV512mPDw8SWJZUws3/B4qc4yrkYUe2aWBeHrE7vIX8ZgC1M
-> > icrE
-> > =/pQd
-> > -----END PGP SIGNATURE-----
-> N?????r??y??????X???v???)?{.n?????z?]z????ay?????j??f???h??????w??????j:+v???w????????????zZ+???????j"????i
+> Cheers, Dan
+> CERN IT-DSS
+> 
+> > This is kind of a showstopper specially if we can't deploy clients in SL6 /
+> > Centos6.
+> >
+> > Is there any alternative?
+> >
+> > TIA
+> > Goncalo
+> >
+> >
+> >
+> > On 10/14/2015 08:01 AM, Sage Weil wrote:
+> >>
+> >> This is the first Infernalis release candidate.  There have been some
+> >> major changes since hammer, and the upgrade process is non-trivial.
+> >> Please read carefully.
+> >>
+> >> Getting the release candidate
+> >> -----------------------------
+> >>
+> >> The v9.1.0 packages are pushed to the development release repositories::
+> >>
+> >>    http://download.ceph.com/rpm-testing
+> >>    http://download.ceph.com/debian-testing
+> >>
+> >> For for info, see::
+> >>
+> >>    http://docs.ceph.com/docs/master/install/get-packages/
+> >>
+> >> Or install with ceph-deploy via::
+> >>
+> >>    ceph-deploy install --testing HOST
+> >>
+> >> Known issues
+> >> ------------
+> >>
+> >> * librbd and librados ABI compatibility is broken.  Be careful
+> >>    installing this RC on client machines (e.g., those running qemu).
+> >>    It will be fixed in the final v9.2.0 release.
+> >>
+> >> Major Changes from Hammer
+> >> -------------------------
+> >>
+> >> * *General*:
+> >>    * Ceph daemons are now managed via systemd (with the exception of
+> >>      Ubuntu Trusty, which still uses upstart).
+> >>    * Ceph daemons run as 'ceph' user instead root.
+> >>    * On Red Hat distros, there is also an SELinux policy.
+> >> * *RADOS*:
+> >>    * The RADOS cache tier can now proxy write operations to the base
+> >>      tier, allowing writes to be handled without forcing migration of
+> >>      an object into the cache.
+> >>    * The SHEC erasure coding support is no longer flagged as
+> >>      experimental. SHEC trades some additional storage space for faster
+> >>      repair.
+> >>    * There is now a unified queue (and thus prioritization) of client
+> >>      IO, recovery, scrubbing, and snapshot trimming.
+> >>    * There have been many improvements to low-level repair tooling
+> >>      (ceph-objectstore-tool).
+> >>    * The internal ObjectStore API has been significantly cleaned up in
+> >> order
+> >>      to faciliate new storage backends like NewStore.
+> >> * *RGW*:
+> >>    * The Swift API now supports object expiration.
+> >>    * There are many Swift API compatibility improvements.
+> >> * *RBD*:
+> >>    * The ``rbd du`` command shows actual usage (quickly, when
+> >>      object-map is enabled).
+> >>    * The object-map feature has seen many stability improvements.
+> >>    * Object-map and exclusive-lock features can be enabled or disabled
+> >>      dynamically.
+> >>    * You can now store user metadata and set persistent librbd options
+> >>      associated with individual images.
+> >>    * The new deep-flatten features allows flattening of a clone and all
+> >>      of its snapshots.  (Previously snapshots could not be flattened.)
+> >>    * The export-diff command command is now faster (it uses aio).  There
+> >> is also
+> >>      a new fast-diff feature.
+> >>    * The --size argument can be specified with a suffix for units
+> >>      (e.g., ``--size 64G``).
+> >>    * There is a new ``rbd status`` command that, for now, shows who has
+> >>      the image open/mapped.
+> >> * *CephFS*:
+> >>    * You can now rename snapshots.
+> >>    * There have been ongoing improvements around administration,
+> >> diagnostics,
+> >>      and the check and repair tools.
+> >>    * The caching and revocation of client cache state due to unused
+> >>      inodes has been dramatically improved.
+> >>    * The ceph-fuse client behaves better on 32-bit hosts.
+> >>
+> >> Distro compatibility
+> >> --------------------
+> >>
+> >> We have decided to drop support for many older distributions so that we
+> >> can
+> >> move to a newer compiler toolchain (e.g., C++11).  Although it is still
+> >> possible
+> >> to build Ceph on older distributions by installing backported development
+> >> tools,
+> >> we are not building and publishing release packages for ceph.com.
+> >>
+> >> In particular,
+> >>
+> >> * CentOS 7 or later; we have dropped support for CentOS 6 (and other
+> >>    RHEL 6 derivatives, like Scientific Linux 6).
+> >> * Debian Jessie 8.x or later; Debian Wheezy 7.x's g++ has incomplete
+> >>    support for C++11 (and no systemd).
+> >> * Ubuntu Trusty 14.04 or later; Ubuntu Precise 12.04 is no longer
+> >>    supported.
+> >> * Fedora 22 or later.
+> >>
+> >> Upgrading from Firefly
+> >> ----------------------
+> >>
+> >> Upgrading directly from Firefly v0.80.z is not possible.  All clusters
+> >> must first upgrade to Hammer v0.94.4 or a later v0.94.z release; only
+> >> then is it possible to upgrade to Infernalis 9.2.z.
+> >>
+> >> Note that v0.94.4 isn't released yet, but you can upgrade to a test build
+> >> from gitbuilder with::
+> >>
+> >>    ceph-deploy install --dev hammer HOST
+> >>
+> >> The v0.94.4 Hammer point release will be out before v9.2.0 Infernalis
+> >> is.
+> >>
+> >> Upgrading from Hammer
+> >> ---------------------
+> >>
+> >> * For all distributions that support systemd (CentOS 7, Fedora, Debian
+> >>    Jessie 8.x, OpenSUSE), ceph daemons are now managed using native
+> >> systemd
+> >>    files instead of the legacy sysvinit scripts.  For example,::
+> >>
+> >>      systemctl start ceph.target       # start all daemons
+> >>      systemctl status ceph-osd@12      # check status of osd.12
+> >>
+> >>    The main notable distro that is *not* yet using systemd is Ubuntu
+> >> trusty
+> >>    14.04.  (The next Ubuntu LTS, 16.04, will use systemd instead of
+> >> upstart.)
+> >>      * Ceph daemons now run as user and group ``ceph`` by default.  The
+> >>    ceph user has a static UID assigned by Fedora and Debian (also used
+> >>    by derivative distributions like RHEL/CentOS and Ubuntu).  On SUSE
+> >>    the ceph user will currently get a dynamically assigned UID when the
+> >>    user is created.
+> >>
+> >>    If your systems already have a ceph user, upgrading the package will
+> >> cause
+> >>    problems.  We suggest you first remove or rename the existing 'ceph'
+> >> user
+> >>    before upgrading.
+> >>
+> >>    When upgrading, administrators have two options:
+> >>
+> >>     #. Add the following line to ``ceph.conf`` on all hosts::
+> >>
+> >>          setuser match path = /var/lib/ceph/$type/$cluster-$id
+> >>
+> >>        This will make the Ceph daemons run as root (i.e., not drop
+> >>        privileges and switch to user ceph) if the daemon's data
+> >>        directory is still owned by root.  Newly deployed daemons will
+> >>        be created with data owned by user ceph and will run with
+> >>        reduced privileges, but upgraded daemons will continue to run as
+> >>        root.
+> >>
+> >>     #. Fix the data ownership during the upgrade.  This is the preferred
+> >> option,
+> >>        but is more work.  The process for each host would be to:
+> >>
+> >>        #. Upgrade the ceph package.  This creates the ceph user and group.
+> >> For
+> >>          example::
+> >>
+> >>            ceph-deploy install --stable infernalis HOST
+> >>
+> >>        #. Stop the daemon(s).::
+> >>
+> >>            service ceph stop           # fedora, centos, rhel, debian
+> >>            stop ceph-all               # ubuntu
+> >>
+> >>        #. Fix the ownership::
+> >>
+> >>            chown -R ceph:ceph /var/lib/ceph
+> >>
+> >>        #. Restart the daemon(s).::
+> >>
+> >>            start ceph-all                # ubuntu
+> >>            systemctl start ceph.target   # debian, centos, fedora, rhel
+> >>
+> >> * The on-disk format for the experimental KeyValueStore OSD backend has
+> >>    changed.  You will need to remove any OSDs using that backend before
+> >> you
+> >>    upgrade any test clusters that use it.
+> >>
+> >> Upgrade notes
+> >> -------------
+> >>
+> >> * When a pool quota is reached, librados operations now block
+> >> indefinitely,
+> >>    the same way they do when the cluster fills up.  (Previously they would
+> >> return
+> >>    -ENOSPC).  By default, a full cluster or pool will now block.  If your
+> >>    librados application can handle ENOSPC or EDQUOT errors gracefully, you
+> >> can
+> >>    get error returns instead by using the new librados OPERATION_FULL_TRY
+> >> flag.
+> >>
+> >> Notable changes
+> >> ---------------
+> >>
+> >> NOTE: These notes are somewhat abbreviated while we find a less
+> >> time-consuming process for generating them.
+> >>
+> >> * build: C++11 now supported
+> >> * build: many cmake improvements
+> >> * build: OSX build fixes (Yan, Zheng)
+> >> * build: remove rest-bench
+> >> * ceph-disk: many fixes (Loic Dachary)
+> >> * ceph-disk: support for multipath devices (Loic Dachary)
+> >> * ceph-fuse: mostly behave on 32-bit hosts (Yan, Zheng)
+> >> * ceph-objectstore-tool: many improvements (David Zafman)
+> >> * common: bufferlist performance tuning (Piotr Dalek, Sage Weil)
+> >> * common: make mutex more efficient
+> >> * common: some async compression infrastructure (Haomai Wang)
+> >> * librados: add FULL_TRY and FULL_FORCE flags for dealing with full
+> >> clusters or pools (Sage Weil)
+> >> * librados: fix notify completion race (#13114 Sage Weil)
+> >> * librados, libcephfs: randomize client nonces (Josh Durgin)
+> >> * librados: pybind: fix binary omap values (Robin H. Johnson)
+> >> * librbd: fix reads larger than the cache size (Lu Shi)
+> >> * librbd: metadata filter fixes (Haomai Wang)
+> >> * librbd: use write_full when possible (Zhiqiang Wang)
+> >> * mds: avoid emitting cap warnigns before evicting session (John Spray)
+> >> * mds: fix expected holes in journal objects (#13167 Yan, Zheng)
+> >> * mds: fix SnapServer crash on deleted pool (John Spray)
+> >> * mds: many fixes (Yan, Zheng, John Spray, Greg Farnum)
+> >> * mon: add cache over MonitorDBStore (Kefu Chai)
+> >> * mon: 'ceph osd metadata' can dump all osds (Haomai Wang)
+> >> * mon: detect kv backend failures (Sage Weil)
+> >> * mon: fix CRUSH map test for new pools (Sage Weil)
+> >> * mon: fix min_last_epoch_clean tracking (Kefu Chai)
+> >> * mon: misc scaling fixes (Sage Weil)
+> >> * mon: streamline session handling, fix memory leaks (Sage Weil)
+> >> * mon: upgrades must pass through hammer (Sage Weil)
+> >> * msg/async: many fixes (Haomai Wang)
+> >> * osd: cache proxy-write support (Zhiqiang Wang, Samuel Just)
+> >> * osd: configure promotion based on write recency (Zhiqiang Wang)
+> >> * osd: don't send dup MMonGetOSDMap requests (Sage Weil, Kefu Chai)
+> >> * osd: erasure-code: fix SHEC floating point bug (#12936 Loic Dachary)
+> >> * osd: erasure-code: update to ISA-L 2.14 (Yuan Zhou)
+> >> * osd: fix hitset object naming to use GMT (Kefu Chai)
+> >> * osd: fix misc memory leaks (Sage Weil)
+> >> * osd: fix peek_queue locking in FileStore (Xinze Chi)
+> >> * osd: fix promotion vs full cache tier (Samuel Just)
+> >> * osd: fix replay requeue when pg is still activating (#13116 Samuel Just)
+> >> * osd: fix scrub stat bugs (Sage Weil, Samuel Just)
+> >> * osd: force promotion for ops EC can't handle (Zhiqiang Wang)
+> >> * osd: improve behavior on machines with large memory pages (Steve Capper)
+> >> * osd: merge multiple setattr calls into a setattrs call (Xinxin Shu)
+> >> * osd: newstore prototype (Sage Weil)
+> >> * osd: ObjectStore internal API refactor (Sage Weil)
+> >> * osd: SHEC no longer experimental
+> >> * osd: throttle evict ops (Yunchuan Wen)
+> >> * osd: upgrades must pass through hammer (Sage Weil)
+> >> * osd: use SEEK_HOLE / SEEK_DATA for sparse copy (Xinxin Shu)
+> >> * rbd: rbd-replay-prep and rbd-replay improvements (Jason Dillaman)
+> >> * rgw: expose the number of unhealthy workers through admin socket (Guang
+> >> Yang)
+> >> * rgw: fix casing of Content-Type header (Robin H. Johnson)
+> >> * rgw: fix decoding of X-Object-Manifest from GET on Swift DLO (Radslow
+> >> Rzarzynski)
+> >> * rgw: fix sysvinit script
+> >> * rgw: fix sysvinit script w/ multiple instances (Sage Weil, Pavan
+> >> Rallabhandi)
+> >> * rgw: improve handling of already removed buckets in expirer (Radoslaw
+> >> Rzarzynski)
+> >> * rgw: log to /var/log/ceph instead of /var/log/radosgw
+> >> * rgw: rework X-Trans-Id header to be conform with Swift API (Radoslaw
+> >> Rzarzynski)
+> >> * rgw: s3 encoding-type for get bucket (Jeff Weber)
+> >> * rgw: set max buckets per user in ceph.conf (Vikhyat Umrao)
+> >> * rgw: support for Swift expiration API (Radoslaw Rzarzynski, Yehuda
+> >> Sadeh)
+> >> * rgw: user rm is idempotent (Orit Wasserman)
+> >> * selinux policy (Boris Ranto, Milan Broz)
+> >> * systemd: many fixes (Sage Weil, Owen Synge, Boris Ranto, Dan van der
+> >> Ster)
+> >> * systemd: run daemons as user ceph
+> >>
+> >> Getting Ceph
+> >> ------------
+> >>
+> >> * Git at git://github.com/ceph/ceph.git
+> >> * Tarball at http://download.ceph.com/tarballs/ceph-9.1.0.tar.gz
+> >> * For packages, see http://ceph.com/docs/master/install/get-packages
+> >> * For ceph-deploy, see
+> >> http://ceph.com/docs/master/install/install-ceph-deploy
+> >> _______________________________________________
+> >> ceph-users mailing list
+> >> ceph-users@lists.ceph.com
+> >> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> >
+> >
+> > --
+> > Goncalo Borges
+> > Research Computing
+> > ARC Centre of Excellence for Particle Physics at the Terascale
+> > School of Physics A28 | University of Sydney, NSW  2006
+> > T: +61 2 93511937
+> >
+> >
+> > _______________________________________________
+> > ceph-users mailing list
+> > ceph-users@lists.ceph.com
+> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
