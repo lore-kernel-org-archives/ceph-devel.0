@@ -1,101 +1,146 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Preparing the suites to run with the OpenStack backend
-Date: Wed, 14 Oct 2015 12:19:27 +0200
-Message-ID: <561E2C2F.8050804@dachary.org>
+From: Sage Weil <sage@newdream.net>
+Subject: RE: chooseleaf may cause some unnecessary pg migrations
+Date: Wed, 14 Oct 2015 05:18:28 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1510140518120.6589@cobra.newdream.net>
+References: <FF8D83DAE5DF57468726B79904321E06046B73@H3CMLB12-EX.srv.huawei-3com.com> <CAANLjFpOPXCL0FEkejzR+hBYcH1=Wajvz-12v+XPZT3buA2z2A@mail.gmail.com> <FF8D83DAE5DF57468726B79904321E0604720C@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="E8JT7pA1rtnodeO8kSjNPwxq2OBiRKR99"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:42861 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751257AbbJNKTa (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Oct 2015 06:19:30 -0400
+Received: from cobra.newdream.net ([66.33.216.30]:49383 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751478AbbJNMS3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Oct 2015 08:18:29 -0400
+In-Reply-To: <FF8D83DAE5DF57468726B79904321E0604720C@H3CMLB12-EX.srv.huawei-3com.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <jdurgin@redhat.com>, Yehuda Sadeh <yehuda@redhat.com>, Gregory Farnum <gfarnum@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Xusangdi <xu.sangdi@h3c.com>
+Cc: Robert LeBlanc <robert@leblancnet.us>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---E8JT7pA1rtnodeO8kSjNPwxq2OBiRKR99
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+On Wed, 14 Oct 2015, Xusangdi wrote:
+> Straw2. But I had also run the same test for straw alg, which generated 
+> quite similar results.
 
-Hi Josh, Yehuda and Greg,
+This post explains the current behavior:
 
-It is my understanding that there is a chance we may need to use the Open=
-Stack teuthology backend as a backup while machines in the sepia lab migr=
-ate from one data center to another. Zack has setup a new teuthology clus=
-ter that will transparently behave as the cluster in the sepia lab does: =
-the only difference being that you would --machine-type openstack instead=
-=2E Or the new teuthology-openstack command could be used if one feels li=
-ke learning about it.
+http://marc.info/?l=ceph-devel&m=143862308610881&w=2
 
-Despite our best efforts, OpenStack provisionning is not 100% transparent=
-=2E In the past few months we made various attempts at running suites on =
-OpenStack to verify that they do not massively fail and identify possible=
- show stoppers. When possible the OpenStack backend was adapted but in so=
-me cases the suites themselves had to be modified. For instance, a number=
- of jobs in the rados suite run fine with no attached disks, which is the=
- default. But all jobs in rados/thrash need three attached disks per targ=
-et and that had to be set in the ceph-qa-suite files as follows[1]:
+sage
 
-openstack:
-  machine:
-    disk: 40 # GB
-    ram: 8000 # MB
-    cpus: 1
-  volumes: # attached to each instance
-    count: 3
-    size: 30 # GB
-
-The rados suite for hammer now runs cleanly on OpenStack [2] and I'll wor=
-k on making it run on infernalis as well [3]. The rbd suite for hammer ru=
-ns cleanly (no changes :-) on OpenStack [4] but needs work to run on infe=
-rnalis: an inventory of the problems was made[5].
-
-A similar verification needs to be done for the rgw and fs suites (the up=
-grade / ceph-deploy / ceph-disk are not a concern as they already run on =
-virtual machines). The first problem that need attention for the rgw suit=
-e is http://tracker.ceph.com/issues/12471#note-4 (which also happens with=
- the infernalis rados suite because it has some rgw workload). AFAIK, the=
-re are no other outstanding issues.
-
-I will not be able to run and fix all the suites all by myself, it's too =
-much work and would divert me for too long from my rados duties. I'm howe=
-ver available to help as much as you need to make it work :-)
-
-Cheers
-
-
-[1] resource hint for rados/thrash https://github.com/ceph/ceph-qa-suite/=
-blob/wip-12329-resources-hint-hammer/suites/rados/thrash/clusters/opensta=
-ck.yaml
-[2] running the rados suite on OpenStack virtual machines (hammer) http:/=
-/tracker.ceph.com/issues/12386
-[3] running the rados suite on OpenStack virtual machines (infernalis) ht=
-tp://tracker.ceph.com/issues/12471
-[4] running the rbd suite on OpenStack virtual machines (hammer) http://t=
-racker.ceph.com/issues/13265
-[5] running the rbd suite on OpenStack virtual machines (infernalis) http=
-://tracker.ceph.com/issues/13270
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
-
---E8JT7pA1rtnodeO8kSjNPwxq2OBiRKR99
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlYeLC8ACgkQ8dLMyEl6F22ILgCfdn05EWaDBg45LKoPc67IjLeY
-+cEAn0OqameFJ0bX9Wp2kl6QRwMU0vR1
-=Sjs5
------END PGP SIGNATURE-----
-
---E8JT7pA1rtnodeO8kSjNPwxq2OBiRKR99--
+> 
+> > -----Original Message-----
+> > From: Robert LeBlanc [mailto:robert@leblancnet.us]
+> > Sent: Tuesday, October 13, 2015 10:21 PM
+> > To: xusangdi 11976 (RD)
+> > Cc: sweil@redhat.com; ceph-devel@vger.kernel.org
+> > Subject: Re: chooseleaf may cause some unnecessary pg migrations
+> > 
+> > -----BEGIN PGP SIGNED MESSAGE-----
+> > Hash: SHA256
+> > 
+> > Are you testing with straw or straw2?
+> > - ----------------
+> > Robert LeBlanc
+> > PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
+> > 
+> > 
+> > On Tue, Oct 13, 2015 at 2:22 AM, Xusangdi  wrote:
+> > > Hi Sage,
+> > >
+> > > Recently when I was learning about the crush rules I noticed that the step chooseleaf may cause
+> > some unnecessary pg migrations when OSDs are outed.
+> > > For example, for a cluster of 4 hosts with 2 OSDs each, after host1(osd.2, osd.3) is down, the
+> > mapping differences would be like this:
+> > > pgid    before <-> after        diff    diff_num
+> > > 0.1e    [5, 1, 2] <-> [5, 1, 7]         [2]     1
+> > > 0.1f    [0, 7, 3] <-> [0, 7, 4]         [3]     1
+> > > 0.1a    [0, 4, 3] <-> [0, 4, 6]         [3]     1
+> > > 0.5     [6, 3, 1] <-> [6, 0, 5]         [1, 3]  2
+> > > 0.4     [5, 6, 2] <-> [5, 6, 0]         [2]     1
+> > > 0.7     [3, 7, 0] <-> [7, 0, 4]         [3]     1
+> > > 0.6     [2, 1, 7] <-> [0, 7, 4]         [1, 2]  2
+> > > 0.9     [3, 4, 0] <-> [5, 0, 7]         [3, 4]  2
+> > > 0.15    [2, 6, 1] <-> [6, 0, 5]         [1, 2]  2
+> > > 0.14    [3, 6, 5] <-> [7, 4, 1]         [3, 5, 6]       3
+> > > 0.17    [0, 5, 2] <-> [0, 5, 6]         [2]     1
+> > > 0.16    [0, 4, 2] <-> [0, 4, 7]         [2]     1
+> > > 0.11    [4, 7, 2] <-> [4, 7, 1]         [2]     1
+> > > 0.10    [0, 3, 6] <-> [0, 7, 4]         [3, 6]  2
+> > > 0.13    [1, 7, 3] <-> [1, 7, 4]         [3]     1
+> > > 0.a     [0, 2, 7] <-> [0, 7, 4]         [2]     1
+> > > 0.c     [5, 0, 3] <-> [5, 0, 6]         [3]     1
+> > > 0.b     [2, 5, 7] <-> [4, 7, 0]         [2, 5]  2
+> > > 0.18    [7, 2, 4] <-> [7, 4, 0]         [2]     1
+> > > 0.f     [2, 7, 5] <-> [6, 4, 0]         [2, 5, 7]       3
+> > > Changed pg ratio: 30 / 32
+> > >
+> > > I tried to change the code (please see https://github.com/ceph/ceph/pull/6242) and after the
+> > modification the result would be like this:
+> > > pgid    before <-> after        diff    diff_num
+> > > 0.1e    [5, 0, 3] <-> [5, 0, 7]         [3]     1
+> > > 0.1f    [0, 6, 3] <-> [0, 6, 4]         [3]     1
+> > > 0.1a    [0, 5, 2] <-> [0, 5, 6]         [2]     1
+> > > 0.5     [6, 3, 0] <-> [6, 0, 5]         [3]     1
+> > > 0.4     [5, 7, 2] <-> [5, 7, 0]         [2]     1
+> > > 0.7     [3, 7, 1] <-> [7, 1, 5]         [3]     1
+> > > 0.6     [2, 0, 7] <-> [0, 7, 4]         [2]     1
+> > > 0.9     [3, 5, 1] <-> [5, 1, 7]         [3]     1
+> > > 0.15    [2, 6, 1] <-> [6, 1, 4]         [2]     1
+> > > 0.14    [3, 7, 5] <-> [7, 5, 1]         [3]     1
+> > > 0.17    [0, 4, 3] <-> [0, 4, 6]         [3]     1
+> > > 0.16    [0, 4, 3] <-> [0, 4, 6]         [3]     1
+> > > 0.11    [4, 6, 3] <-> [4, 6, 0]         [3]     1
+> > > 0.10    [0, 3, 6] <-> [0, 6, 5]         [3]     1
+> > > 0.13    [1, 7, 3] <-> [1, 7, 5]         [3]     1
+> > > 0.a     [0, 3, 6] <-> [0, 6, 5]         [3]     1
+> > > 0.c     [5, 0, 3] <-> [5, 0, 6]         [3]     1
+> > > 0.b     [2, 4, 6] <-> [4, 6, 1]         [2]     1
+> > > 0.18    [7, 3, 5] <-> [7, 5, 1]         [3]     1
+> > > 0.f     [2, 6, 5] <-> [6, 5, 1]         [2]     1
+> > > Changed pg ratio: 20 / 32
+> > >
+> > > Currently the only defect I can see from the change is that the chance for a given pg to successfully
+> > choose required available OSDs might be a bit lower compared with before. However, I believe it will
+> > cause problems only when the cluster is pretty small and degraded. And in that case, we can still make
+> > it workable by tuning some of the crushmap parameters such as chooseleaf_tries.
+> > >
+> > > Anyway I'm not sure if it would raise any other issues, could you please review it and maybe give me
+> > some suggestions? Thank you!
+> > >
+> > > ----------
+> > > Best regards,
+> > > Sangdi
+> > >
+> > > ----------------------------------------------------------------------
+> > > ---------------------------------------------------------------
+> > > ????????????????????????????????????????
+> > > ????????????????????????????????????????
+> > > ????????????????????????????????????????
+> > > ???
+> > > This e-mail and its attachments contain confidential information from
+> > > H3C, which is intended only for the person or entity whose address is
+> > > listed above. Any use of the information contained herein in any way
+> > > (including, but not limited to, total or partial disclosure,
+> > > reproduction, or dissemination) by persons other than the intended
+> > > recipient(s) is prohibited. If you receive this e-mail in error,
+> > > please notify the sender by phone or email immediately and delete it!
+> > 
+> > -----BEGIN PGP SIGNATURE-----
+> > Version: Mailvelope v1.2.0
+> > Comment: https://www.mailvelope.com
+> > 
+> > wsFcBAEBCAAQBQJWHRM4CRDmVDuy+mK58QAARVMP/jhhtyRsiUXw4kl2ikso
+> > F8CiAwPuGRMvFSa2CXqzvaHnNjiy8Q4uR8o0KgcR04eiLGPUeahjyAQ73+8k
+> > geryb9ymjoDFjkKX2n7YxCHy/MnB5HayNIuUPi+KUFzpradx1v7S54XL2DHm
+> > mDRR2DDeou9H6WcIqknRh4e6fc1a70E2CbpKr9qu7AiNiEfRZzXod//joavW
+> > h0MkYC0Ug41UG64R9QTCJOKp+wSjri+IUgSSrs3WPYXb5W1jZPFIhsFkigws
+> > VgitZTv3+rO5ZyHbtCR+3yNI5isU18Lhf+Dr01MExUuyCQQz6zODXV0W+xgP
+> > wsMSe8ZXXr84a/8MKoP90mr2pNiiasMwWrcZ/klQ9J4AIqh8DJEHJeAWf+4N
+> > pYWTiRFbq3NZzIUjTBqtP/AliKvCTDQhVP3E8hK1qYg4Gv0gQ0Zu76F5c5/p
+> > rj9HTZa+o8rSQM0TDuiqKSMEJUcuMt/TScWmQNZF1GTb3HSx6LW6H+aOkLuE
+> > N0Fi+rkYupxXC3P3HnU35GMzlum//j/svIFkLOA5V5abVAttcxrGg9jpebUO
+> > i3f4DR6e86RNLMaakNoybYlK9J+7j3JjKydBTqkDn9sKBeMaE/oW21Ft99/z
+> > eJDLf+8xGt02tV512mPDw8SWJZUws3/B4qc4yrkYUe2aWBeHrE7vIX8ZgC1M
+> > icrE
+> > =/pQd
+> > -----END PGP SIGNATURE-----
+> N?????r??y??????X???v???)?{.n?????z?]z????ay?????j??f???h??????w??????j:+v???w????????????zZ+???????j"????i
