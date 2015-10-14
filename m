@@ -1,150 +1,219 @@
 From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: Re: The questions of data collection and cache tiering in Ceph
-Date: Tue, 13 Oct 2015 21:29:30 -0700
-Message-ID: <CAJ4mKGbS0Vom7JWXtR25OqtFoZNFk9U_rNHEMmjHNzwCgKbuoQ@mail.gmail.com>
-References: <1f22defc.11cdc.1504836bb4f.Coremail.cymengxiang@126.com>
-	<CAJ4mKGaSOR+jSsWfrXQ6wmh3HCuWzk04koeKr6St5Y0AF=9kCw@mail.gmail.com>
-	<5ba3ce4f.109e5.1505c455f47.Coremail.cymengxiang@126.com>
+Subject: Re: MDS stuck in a crash loop
+Date: Tue, 13 Oct 2015 21:46:43 -0700
+Message-ID: <CAJ4mKGYyza=MqV8zRS3cGA0EfbB=h=UhYbwO7QBgTb6FfzXSQw@mail.gmail.com>
+References: <CANP1eJGesJ_wGKDNQRJ952x8jkNHiJybeX075wxmJDurbSTMNw@mail.gmail.com>
+	<CAJ4mKGY5uTZ6oiqZY4VbU5LdECXx5sko6VOd5aD2aEhtq74NDA@mail.gmail.com>
+	<CANP1eJFNpLu3-HeqJ28L7xCTuKh-MhUT2j7A_tM7reofZ94FTQ@mail.gmail.com>
+	<CANP1eJFGy4psfmUHpsgdPFT+UUW=NTzLTgAsnGqeuD6iWuF-cQ@mail.gmail.com>
+	<CANP1eJHnavBzJRnDLa9gQ93haJ2QzKJsLj4+ZbS_vd1kquV8Lw@mail.gmail.com>
+	<CANP1eJGmjechy8ZkVarA-HWdL37scmHdQXToM6NdAXxU-_KVMw@mail.gmail.com>
+	<CANP1eJHYvgUKDCKrVYY=XkJsgcdVGn6T=drvEA8hofHyVX+0YA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f179.google.com ([209.85.212.179]:37975 "EHLO
-	mail-wi0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750719AbbJNE3c convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Oct 2015 00:29:32 -0400
-Received: by wieq12 with SMTP id q12so62822499wie.1
-        for <ceph-devel@vger.kernel.org>; Tue, 13 Oct 2015 21:29:31 -0700 (PDT)
-In-Reply-To: <5ba3ce4f.109e5.1505c455f47.Coremail.cymengxiang@126.com>
+Received: from mail-wi0-f178.google.com ([209.85.212.178]:33130 "EHLO
+	mail-wi0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751312AbbJNEqo convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Oct 2015 00:46:44 -0400
+Received: by wicge5 with SMTP id ge5so84035672wic.0
+        for <ceph-devel@vger.kernel.org>; Tue, 13 Oct 2015 21:46:43 -0700 (PDT)
+In-Reply-To: <CANP1eJHYvgUKDCKrVYY=XkJsgcdVGn6T=drvEA8hofHyVX+0YA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?B?6JSh5q+F?= <cymengxiang@126.com>
+To: Milosz Tanski <milosz@adfin.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, Oct 12, 2015 at 6:37 AM, =E8=94=A1=E6=AF=85 <cymengxiang@126.co=
+On Sun, Oct 11, 2015 at 7:36 PM, Milosz Tanski <milosz@adfin.com> wrote=
+:
+> On Sun, Oct 11, 2015 at 6:44 PM, Milosz Tanski <milosz@adfin.com> wro=
+te:
+>> On Sun, Oct 11, 2015 at 6:01 PM, Milosz Tanski <milosz@adfin.com> wr=
+ote:
+>>> On Sun, Oct 11, 2015 at 5:33 PM, Milosz Tanski <milosz@adfin.com> w=
+rote:
+>>>> On Sun, Oct 11, 2015 at 5:24 PM, Milosz Tanski <milosz@adfin.com> =
+wrote:
+>>>>> On Sun, Oct 11, 2015 at 1:16 PM, Gregory Farnum <gfarnum@redhat.c=
+om> wrote:
+>>>>>> On Sun, Oct 11, 2015 at 10:09 AM, Milosz Tanski <milosz@adfin.co=
 m> wrote:
-> Greg,
->     Thank you  a lot for your timely reply. These are really helpful =
-for me.I also have some doubts.
->     In Ceph, besides monitoring pool, pg, object, it can also acquire=
- other statistics such as  CPU, IOPS, BW. In order to acquire the infor=
-mation ,
-> do the Ceph need to call other tools or have achieved functions in th=
-e source code because I could only find easy equation (like the divisio=
-n ) in
-> source code?
+>>>>>>> About an hour ago my MDSs (primary and follower) started ping-p=
+ong
+>>>>>>> crashing with this message. I've spent about 30 minutes looking=
+ into
+>>>>>>> it but nothing yet.
+>>>>>>>
+>>>>>>> This is from a 0.94.3 MDS
+>>>>>>>
+>>>>>>
+>>>>>>>      0> 2015-10-11 17:01:23.596008 7fd4f52ad700 -1 mds/SessionM=
+ap.cc:
+>>>>>>> In function 'virtual void C_IO_SM_Save::finish(int)' thread
+>>>>>>> 7fd4f52ad700 time 2015-10-11 17:01:23.594089
+>>>>>>> mds/SessionMap.cc: 120: FAILED assert(r =3D=3D 0)
+>>>>>>
+>>>>>> These "r =3D=3D 0" asserts pretty much always mean that the MDS =
+did did a
+>>>>>> read or write to RADOS (the OSDs) and got an error of some kind =
+back.
+>>>>>> (Or in the case of the OSDs, access to the local filesystem retu=
+rned
+>>>>>> an error, etc.) I don't think these writes include any safety ch=
+ecks
+>>>>>> which would let the MDS break it which means that probably the O=
+SD is
+>>>>>> actually returning an error =E2=80=94 odd, but not impossible.
+>>>>>>
+>>>>>> Notice that the assert happened in thread 7fd4f52ad700, and look=
+ for
+>>>>>> the stuff in that thread. You should be able to find an OSD op r=
+eply
+>>>>>> (on the SessionMap object) coming in and reporting an error code=
+=2E
+>>>>>> -Greg
+>>>>>
+>>>>> I only two error ops in that whole MDS session. Neither one happe=
+ned
+>>>>> on the same thread (7f5ab6000700 in this file). But it looks like=
+ the
+>>>>> only session map is the -90 "Message too long" one.
+>>>>>
+>>>>> mtanski@tiny:~$ cat single_crash.log | grep 'osd_op_reply' | grep=
+ -v
+>>>>> 'ondisk =3D 0'
+>>>>>  -3946> 2015-10-11 20:51:11.013965 7f5ab20f2700  1 --
+>>>>> 10.0.5.31:6802/27121 <=3D=3D osd.25 10.0.5.57:6804/32341 6163 =3D=
+=3D=3D=3D
+>>>>> osd_op_reply(46349 mds0_sessionmap [writefull 0~95168363] v0'0 uv=
+0
+>>>>> ondisk =3D -90 ((90) Message too long)) v6 =3D=3D=3D=3D 182+0+0 (=
+2955408122 0 0)
+>>>>> 0x3a55d340 con 0x3d5a3c0
+>>>>>   -705> 2015-10-11 20:51:11.374132 7f5ab22f4700  1 --
+>>>>> 10.0.5.31:6802/27121 <=3D=3D osd.28 10.0.5.50:6801/1787 5297 =3D=3D=
+=3D=3D
+>>>>> osd_op_reply(48004 300.0000e274 [delete] v0'0 uv1349638 ondisk =3D=
+ -2
+>>>>> ((2) No such file or directory)) v6 =3D=3D=3D=3D 179+0+0 (1182549=
+251 0 0)
+>>>>> 0x66c5c80 con 0x3d5a7e0
+>>>>>
+>>>>> Any idea what this could be Greg?
+>>>>
+>>>> To follow this up I found this ticket from 9 months ago:
+>>>> http://tracker.ceph.com/issues/10449 In there Yan says:
+>>>>
+>>>> "it's a kernel bug. hang request prevents mds from trimming
+>>>> completed_requests in sessionmap. there is nothing to do with mds.
+>>>> (maybe we should add some code to MDS to show warning when this bu=
+g
+>>>> happens)"
+>>>>
+>>>> When I was debugging this I saw an OSD (not cephfs client) operati=
+on
+>>>> stuck for a long time along with the MDS error:
+>>>>
+>>>> HEALTH_WARN 1 requests are blocked > 32 sec; 1 osds have slow
+>>>> requests; mds cluster is degraded; mds0: Behind on trimming (709/3=
+0)
+>>>> 1 ops are blocked > 16777.2 sec
+>>>> 1 ops are blocked > 16777.2 sec on osd.28
+>>>>
+>>>> I did eventually bounce the OSD in question and it hasn't become s=
+tuck
+>>>> since, but the MDS is still eating it every time with the "Message=
+ too
+>>>> long" error on the session map.
+>>>>
+>>>> I'm not quite sure where to go from here.
+>>>
+>>> First time I had a chance to use the new recover tools. I was able =
+to
+>>> reply the journal, reset it and then reset the sessionmap. MDS
+>>> returned back to life and so far everything looks good. Yay.
+>>>
+>>> Triggering this a bug/issue is a pretty interesting set of steps.
+>>
+>> Spoke too soon, a missing dir is now causing MDS to restart it self.
+>>
+>>     -6> 2015-10-11 22:40:47.300169 7f580c7b9700  5 -- op tracker --
+>> seq: 4, time: 2015-10-11 22:40:47.300168, event: finishing request,
+>> op: client_request(client.3597476:21480382 rmdir #100015e0be2/58
+>> 2015-10-11 21:34:49.224905 RETRY=3D36)
+>>     -5> 2015-10-11 22:40:47.300208 7f580c7b9700  5 -- op tracker --
+>> seq: 4, time: 2015-10-11 22:40:47.300208, event: cleaned up request,
+>> op: client_request(client.3597476:21480382 rmdir #100015e0be2/58
+>> 2015-10-11 21:34:49.224905 RETRY=3D36)
+>>     -4> 2015-10-11 22:40:47.300231 7f580c7b9700  5 -- op tracker --
+>> seq: 4, time: 2015-10-11 22:40:47.300231, event: done, op:
+>> client_request(client.3597476:21480382 rmdir #100015e0be2/58
+>> 2015-10-11 21:34:49.224905 RETRY=3D36)
+>>     -3> 2015-10-11 22:40:47.300284 7f580e0bd700  0
+>> mds.0.cache.dir(100048df076) _fetched missing object for [dir
+>> 100048df076 /petabucket/beta/6d/f6/ [2,head] auth v=3D0 cv=3D0/0 ap=3D=
+1+0+0
+>> state=3D1073741952 f() n() hs=3D0+0,ss=3D0+0 | waiter=3D1 authpin=3D=
+1 0x6debcf8]
+>>     -2> 2015-10-11 22:40:47.300313 7f580e0bd700 -1
+>> log_channel(cluster) log [ERR] : dir 100048df076 object missing on
+>> disk; some files may be lost
+>>     -1> 2015-10-11 22:40:47.300549 7f580c7b9700  5 -- op tracker --
+>> seq: 6, time: 2015-10-11 22:40:47.300549, event: acquired locks, op:
+>> client_request(client.3710941:1805 mkdir
+>> #100048df076/1dd4c66b916cf55f19beafc0574ac2dd923bc7efcc5b7757198f323=
+e04d0.dl
+>> 2015-10-11 22:36:32.489705 RETRY=3D33)
+>>      0> 2015-10-11 22:40:47.303770 7f580c7b9700 -1 mds/CDir.cc: In
+>> function 'fnode_t* CDir::project_fnode()' thread 7f580c7b9700 time
+>> 2015-10-11 22:40:47.300581
+>> mds/CDir.cc: 1267: FAILED assert(get_version() !=3D 0)
+>>
+>>  ceph version 0.94.3 (95cefea9fd9ab740263bf8bb4796fd864d9afe2b)
+>>  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+>> const*)+0x8b) [0x94cc1b]
+>>  2: (CDir::project_fnode()+0x2da) [0x75da1a]
+>
+> Worked around this as well. Stopped the client that was trying to
+> access this dir (or delete it, not sure) and move it somewhere else
+> (because I can't delete it).
+>
+> A series of steps that happened today (not sure if all are related) i=
+n
+> case the postmortem is interesting to anybody following at home.
+>
+> 1. One (of 5) monitors somehow gets OOM killed after eating up 10gigs=
+ of ram.
+> 2. An OSD blocks on an IO request
+> 3. This is when the MSD starts growing it's SessionMap to a place
+> where eventually it gets to big. This is related to bug:
+> http://tracker.ceph.com/issues/10449 (not the client bug, but the too
+> large Session)
+> 4. MDS suicides and then two MDS machines start ping ponging in
+> recovery but always fail to save SessionMap.
+> 5. I stop the MDS, recover the journal and reset the session map.
 
-Uh, it's using the standard linux interfaces for this. Some of that's
-via the psuedo-fs stuff in /proc/sys or whatever...
-
->     As a object , there are two parts : data and attributes. Do they =
-store in different spaces finally because I find these is some attribut=
-es information in OMap?
-
-Yes, although the specifics depend on your backend configuration. In
-the default setup, data is stored in the filesystem, "omap" entries
-are stored in leveldb, and the first few object xattrs will get stored
-in fs xattrs but more will overflow into leveldb.
-
->     In your reply, you said ,=E2=80=9Dany subsequent operations on th=
-at object will wait until that durable op is readable before completing=
-=2E=E2=80=9D so if I set the system
-> flushes the objects from journal to disk every 15s, does it mean I co=
-uld not read the object in 15s because I only write the object on the j=
-ournal but not yet
-> on the disk? Is it possible to cause some problems?
-
-No, that's not quite it. If you set it for a 15-second flush interval,
-that's how often the backing filesystem will get a forced sync to
-disk. But the journal will have persisted the data way before that,
-and the data will be written into the filesystem right after that =E2=80=
-=94 so
-it's readable out of page cache! As soon as the write operation
-completes in-memory the OSD will continue processing subsequent ops on
-the object (because the OSD journal has persisted the operation).
+Exactly what did you do in this step? I have a suspicion you didn't
+recover and flush out the journal all the way, and that's what caused
+your directory to go bad.
 -Greg
 
->     Thank you so much.
->     Yours,
->     Chay
+> 6. MDS come back to life after that.
+> 7. Ceph loses one directory and as soon as the client tries to access
+> it the MDS also suicides. Standing bug:
+> http://tracker.ceph.com/issues/9880
+> 8. Lame workaround (moving / renaming bad dir) so client doesn't acce=
+ss it.
 >
+> --
+> Milosz Tanski
+> CTO
+> 16 East 34th Street, 15th floor
+> New York, NY 10016
 >
->
->
->
->
->
-> =E5=9C=A8 2015-10-09 02:34:25=EF=BC=8C"Gregory Farnum" <gfarnum@redha=
-t.com> =E5=86=99=E9=81=93=EF=BC=9A
->>On Thu, Oct 8, 2015 at 9:09 AM, =E8=94=A1=E6=AF=85 <cymengxiang@126.c=
-om> wrote:
->>>
->>> Dear developers,
->>>
->>>    Recently I met some troubles when I read the Ceph=E2=80=99s sour=
-ce code and understand the architecture.
->>> The details of problems are as followed.
->>>
->>>    1.In monitoring tools, they can collect much data when Ceph runs=
-=2E I wonder what
->>> kind of data the Ceph can provide (object data, PG data or other da=
-ta?). Could the
->>> Ceph provide every object=E2=80=99s data (e.g. The times the object=
- is read or wrote
->>> ,the latest time the object is used ,etc.) ,if Ceph could ,in sourc=
-e code ,where
->>> could I find these details. I really want to know the monitoring da=
-ta the Ceph
->>> can provides and where they are in source code so that I could know=
- how to use it
->>> more efficiently. For example, I know the Ceph could provide the da=
-ta of the
->>> objects=E2=80=99 number per PG, the read and write bandwidth, but I=
- couldn=E2=80=99t find how to
->>> achieve these in source code.
->>
->>I'm not quite sure what you're asking here, but I think you'll want t=
-o
->>look at the MPGStats.h message (in ceph/src/messages), and trace
->>backwards through the OSD code (ceph/src/osd/) which creates them and
->>then forwards through the monitor code (ceph/src/mon/OSDMonitor.cc)
->>
->>>
->>>    2.From official documents, Ceph provides the cache tiering to im=
-prove
->>> performance. But I couldn=E2=80=99t find more details to describe t=
-he cache tiering
->>> like which kind of algorithm the cache agent uses. In the source co=
-de, where
->>> could I find these?
->>
->>The cache tiering is part of the OSD. Look at the TierAgentState.h
->>file and the parts of ReplicatedPG.cc which reference it.
->>
->>>
->>>   3.In write process , there are two responses to client ,first is =
-from journal and
->>> second is occurred when object writes to real disk .so when I write=
- a object to
->>> Ceph using librbd, does not the write finish until the second respo=
-nse occurs and
->>> what mean the first and second responses for clients? When a object=
- writes to journal
->>> but not to filestore (that is not to disk ), could I read this obje=
-ct? If I could,
->>> where could I read this object?
->>
->>You get a response from the OSDs:
->>1) when the write operation is durable.
->>2) when the write operation is readable.
->>
->>The order these arrive in will depend on your OSD configuration (btrf=
-s
->>can send readable before durable; xfs always sends durable first;
->>etc). If you get a "durable" response, any subsequent operations on
->>that object will wait until that durable op is readable before
->>completing.
->>-Greg
+> p: 646-253-9055
+> e: milosz@adfin.com
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
