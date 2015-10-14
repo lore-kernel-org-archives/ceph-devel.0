@@ -1,312 +1,261 @@
-From: Goncalo Borges <goncalo-JAjqph6Yjy/r8pF6qxatHrpzq4S04n8Q@public.gmane.org>
-Subject: Re: v9.1.0 Infernalis release candidate released
-Date: Wed, 14 Oct 2015 15:51:49 +1100
-Message-ID: <561DDF65.7080001@physics.usyd.edu.au>
-References: <alpine.DEB.2.00.1510131356001.27022@cobra.newdream.net>
+From: Xusangdi <xu.sangdi@h3c.com>
+Subject: RE: chooseleaf may cause some unnecessary pg migrations
+Date: Wed, 14 Oct 2015 05:22:44 +0000
+Message-ID: <FF8D83DAE5DF57468726B79904321E06047273@H3CMLB12-EX.srv.huawei-3com.com>
+References: <FF8D83DAE5DF57468726B79904321E06046B73@H3CMLB12-EX.srv.huawei-3com.com>
+ <alpine.DEB.2.00.1510130940400.6589@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.00.1510131356001.27022-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>, ceph-announce-Qp0mS5GaXlQ@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
-Cc: ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp.h3c.com ([60.191.123.56]:31650 "EHLO h3cmg01-ex.h3c.com"
+	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750759AbbJNFWp (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 14 Oct 2015 01:22:45 -0400
+In-Reply-To: <alpine.DEB.2.00.1510130940400.6589@cobra.newdream.net>
+Content-Language: zh-CN
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Sage...
-
-I've seen that the rh6 derivatives have been ruled out.
-
-This is a problem in our case since the OS choice in our systems is, 
-somehow, imposed by CERN. The experiments software is certified for SL6 
-and the transition to SL7 will take some time.
-
-This is kind of a showstopper specially if we can't deploy clients in 
-SL6 / Centos6.
-
-Is there any alternative?
-
-TIA
-Goncalo
-
-
-On 10/14/2015 08:01 AM, Sage Weil wrote:
-> This is the first Infernalis release candidate.  There have been some
-> major changes since hammer, and the upgrade process is non-trivial.
-> Please read carefully.
->
-> Getting the release candidate
-> -----------------------------
->
-> The v9.1.0 packages are pushed to the development release repositories::
->
->    http://download.ceph.com/rpm-testing
->    http://download.ceph.com/debian-testing
->
-> For for info, see::
->
->    http://docs.ceph.com/docs/master/install/get-packages/
->
-> Or install with ceph-deploy via::
->
->    ceph-deploy install --testing HOST
->
-> Known issues
-> ------------
->
-> * librbd and librados ABI compatibility is broken.  Be careful
->    installing this RC on client machines (e.g., those running qemu).
->    It will be fixed in the final v9.2.0 release.
->
-> Major Changes from Hammer
-> -------------------------
->
-> * *General*:
->    * Ceph daemons are now managed via systemd (with the exception of
->      Ubuntu Trusty, which still uses upstart).
->    * Ceph daemons run as 'ceph' user instead root.
->    * On Red Hat distros, there is also an SELinux policy.
-> * *RADOS*:
->    * The RADOS cache tier can now proxy write operations to the base
->      tier, allowing writes to be handled without forcing migration of
->      an object into the cache.
->    * The SHEC erasure coding support is no longer flagged as
->      experimental. SHEC trades some additional storage space for faster
->      repair.
->    * There is now a unified queue (and thus prioritization) of client
->      IO, recovery, scrubbing, and snapshot trimming.
->    * There have been many improvements to low-level repair tooling
->      (ceph-objectstore-tool).
->    * The internal ObjectStore API has been significantly cleaned up in order
->      to faciliate new storage backends like NewStore.
-> * *RGW*:
->    * The Swift API now supports object expiration.
->    * There are many Swift API compatibility improvements.
-> * *RBD*:
->    * The ``rbd du`` command shows actual usage (quickly, when
->      object-map is enabled).
->    * The object-map feature has seen many stability improvements.
->    * Object-map and exclusive-lock features can be enabled or disabled
->      dynamically.
->    * You can now store user metadata and set persistent librbd options
->      associated with individual images.
->    * The new deep-flatten features allows flattening of a clone and all
->      of its snapshots.  (Previously snapshots could not be flattened.)
->    * The export-diff command command is now faster (it uses aio).  There is also
->      a new fast-diff feature.
->    * The --size argument can be specified with a suffix for units
->      (e.g., ``--size 64G``).
->    * There is a new ``rbd status`` command that, for now, shows who has
->      the image open/mapped.
-> * *CephFS*:
->    * You can now rename snapshots.
->    * There have been ongoing improvements around administration, diagnostics,
->      and the check and repair tools.
->    * The caching and revocation of client cache state due to unused
->      inodes has been dramatically improved.
->    * The ceph-fuse client behaves better on 32-bit hosts.
->
-> Distro compatibility
-> --------------------
->
-> We have decided to drop support for many older distributions so that we can
-> move to a newer compiler toolchain (e.g., C++11).  Although it is still possible
-> to build Ceph on older distributions by installing backported development tools,
-> we are not building and publishing release packages for ceph.com.
->
-> In particular,
->
-> * CentOS 7 or later; we have dropped support for CentOS 6 (and other
->    RHEL 6 derivatives, like Scientific Linux 6).
-> * Debian Jessie 8.x or later; Debian Wheezy 7.x's g++ has incomplete
->    support for C++11 (and no systemd).
-> * Ubuntu Trusty 14.04 or later; Ubuntu Precise 12.04 is no longer
->    supported.
-> * Fedora 22 or later.
->
-> Upgrading from Firefly
-> ----------------------
->
-> Upgrading directly from Firefly v0.80.z is not possible.  All clusters
-> must first upgrade to Hammer v0.94.4 or a later v0.94.z release; only
-> then is it possible to upgrade to Infernalis 9.2.z.
->
-> Note that v0.94.4 isn't released yet, but you can upgrade to a test build
-> from gitbuilder with::
->
->    ceph-deploy install --dev hammer HOST
->
-> The v0.94.4 Hammer point release will be out before v9.2.0 Infernalis
-> is.
->
-> Upgrading from Hammer
-> ---------------------
->
-> * For all distributions that support systemd (CentOS 7, Fedora, Debian
->    Jessie 8.x, OpenSUSE), ceph daemons are now managed using native systemd
->    files instead of the legacy sysvinit scripts.  For example,::
->
->      systemctl start ceph.target       # start all daemons
->      systemctl status ceph-osd@12      # check status of osd.12
->
->    The main notable distro that is *not* yet using systemd is Ubuntu trusty
->    14.04.  (The next Ubuntu LTS, 16.04, will use systemd instead of upstart.)
->      
-> * Ceph daemons now run as user and group ``ceph`` by default.  The
->    ceph user has a static UID assigned by Fedora and Debian (also used
->    by derivative distributions like RHEL/CentOS and Ubuntu).  On SUSE
->    the ceph user will currently get a dynamically assigned UID when the
->    user is created.
->
->    If your systems already have a ceph user, upgrading the package will cause
->    problems.  We suggest you first remove or rename the existing 'ceph' user
->    before upgrading.
->
->    When upgrading, administrators have two options:
->
->     #. Add the following line to ``ceph.conf`` on all hosts::
->
->          setuser match path = /var/lib/ceph/$type/$cluster-$id
->
->        This will make the Ceph daemons run as root (i.e., not drop
->        privileges and switch to user ceph) if the daemon's data
->        directory is still owned by root.  Newly deployed daemons will
->        be created with data owned by user ceph and will run with
->        reduced privileges, but upgraded daemons will continue to run as
->        root.
->
->     #. Fix the data ownership during the upgrade.  This is the preferred option,
->        but is more work.  The process for each host would be to:
->
->        #. Upgrade the ceph package.  This creates the ceph user and group.  For
-> 	 example::
->
-> 	   ceph-deploy install --stable infernalis HOST
->
->        #. Stop the daemon(s).::
->
-> 	   service ceph stop           # fedora, centos, rhel, debian
-> 	   stop ceph-all               # ubuntu
-> 	
->        #. Fix the ownership::
->
-> 	   chown -R ceph:ceph /var/lib/ceph
->
->        #. Restart the daemon(s).::
->
-> 	   start ceph-all                # ubuntu
-> 	   systemctl start ceph.target   # debian, centos, fedora, rhel
->
-> * The on-disk format for the experimental KeyValueStore OSD backend has
->    changed.  You will need to remove any OSDs using that backend before you
->    upgrade any test clusters that use it.
->
-> Upgrade notes
-> -------------
->
-> * When a pool quota is reached, librados operations now block indefinitely,
->    the same way they do when the cluster fills up.  (Previously they would return
->    -ENOSPC).  By default, a full cluster or pool will now block.  If your
->    librados application can handle ENOSPC or EDQUOT errors gracefully, you can
->    get error returns instead by using the new librados OPERATION_FULL_TRY flag.
->
-> Notable changes
-> ---------------
->
-> NOTE: These notes are somewhat abbreviated while we find a less
-> time-consuming process for generating them.
->
-> * build: C++11 now supported
-> * build: many cmake improvements
-> * build: OSX build fixes (Yan, Zheng)
-> * build: remove rest-bench
-> * ceph-disk: many fixes (Loic Dachary)
-> * ceph-disk: support for multipath devices (Loic Dachary)
-> * ceph-fuse: mostly behave on 32-bit hosts (Yan, Zheng)
-> * ceph-objectstore-tool: many improvements (David Zafman)
-> * common: bufferlist performance tuning (Piotr Dalek, Sage Weil)
-> * common: make mutex more efficient
-> * common: some async compression infrastructure (Haomai Wang)
-> * librados: add FULL_TRY and FULL_FORCE flags for dealing with full clusters or pools (Sage Weil)
-> * librados: fix notify completion race (#13114 Sage Weil)
-> * librados, libcephfs: randomize client nonces (Josh Durgin)
-> * librados: pybind: fix binary omap values (Robin H. Johnson)
-> * librbd: fix reads larger than the cache size (Lu Shi)
-> * librbd: metadata filter fixes (Haomai Wang)
-> * librbd: use write_full when possible (Zhiqiang Wang)
-> * mds: avoid emitting cap warnigns before evicting session (John Spray)
-> * mds: fix expected holes in journal objects (#13167 Yan, Zheng)
-> * mds: fix SnapServer crash on deleted pool (John Spray)
-> * mds: many fixes (Yan, Zheng, John Spray, Greg Farnum)
-> * mon: add cache over MonitorDBStore (Kefu Chai)
-> * mon: 'ceph osd metadata' can dump all osds (Haomai Wang)
-> * mon: detect kv backend failures (Sage Weil)
-> * mon: fix CRUSH map test for new pools (Sage Weil)
-> * mon: fix min_last_epoch_clean tracking (Kefu Chai)
-> * mon: misc scaling fixes (Sage Weil)
-> * mon: streamline session handling, fix memory leaks (Sage Weil)
-> * mon: upgrades must pass through hammer (Sage Weil)
-> * msg/async: many fixes (Haomai Wang)
-> * osd: cache proxy-write support (Zhiqiang Wang, Samuel Just)
-> * osd: configure promotion based on write recency (Zhiqiang Wang)
-> * osd: don't send dup MMonGetOSDMap requests (Sage Weil, Kefu Chai)
-> * osd: erasure-code: fix SHEC floating point bug (#12936 Loic Dachary)
-> * osd: erasure-code: update to ISA-L 2.14 (Yuan Zhou)
-> * osd: fix hitset object naming to use GMT (Kefu Chai)
-> * osd: fix misc memory leaks (Sage Weil)
-> * osd: fix peek_queue locking in FileStore (Xinze Chi)
-> * osd: fix promotion vs full cache tier (Samuel Just)
-> * osd: fix replay requeue when pg is still activating (#13116 Samuel Just)
-> * osd: fix scrub stat bugs (Sage Weil, Samuel Just)
-> * osd: force promotion for ops EC can't handle (Zhiqiang Wang)
-> * osd: improve behavior on machines with large memory pages (Steve Capper)
-> * osd: merge multiple setattr calls into a setattrs call (Xinxin Shu)
-> * osd: newstore prototype (Sage Weil)
-> * osd: ObjectStore internal API refactor (Sage Weil)
-> * osd: SHEC no longer experimental
-> * osd: throttle evict ops (Yunchuan Wen)
-> * osd: upgrades must pass through hammer (Sage Weil)
-> * osd: use SEEK_HOLE / SEEK_DATA for sparse copy (Xinxin Shu)
-> * rbd: rbd-replay-prep and rbd-replay improvements (Jason Dillaman)
-> * rgw: expose the number of unhealthy workers through admin socket (Guang Yang)
-> * rgw: fix casing of Content-Type header (Robin H. Johnson)
-> * rgw: fix decoding of X-Object-Manifest from GET on Swift DLO (Radslow Rzarzynski)
-> * rgw: fix sysvinit script
-> * rgw: fix sysvinit script w/ multiple instances (Sage Weil, Pavan Rallabhandi)
-> * rgw: improve handling of already removed buckets in expirer (Radoslaw Rzarzynski)
-> * rgw: log to /var/log/ceph instead of /var/log/radosgw
-> * rgw: rework X-Trans-Id header to be conform with Swift API (Radoslaw Rzarzynski)
-> * rgw: s3 encoding-type for get bucket (Jeff Weber)
-> * rgw: set max buckets per user in ceph.conf (Vikhyat Umrao)
-> * rgw: support for Swift expiration API (Radoslaw Rzarzynski, Yehuda Sadeh)
-> * rgw: user rm is idempotent (Orit Wasserman)
-> * selinux policy (Boris Ranto, Milan Broz)
-> * systemd: many fixes (Sage Weil, Owen Synge, Boris Ranto, Dan van der Ster)
-> * systemd: run daemons as user ceph
->
-> Getting Ceph
-> ------------
->
-> * Git at git://github.com/ceph/ceph.git
-> * Tarball at http://download.ceph.com/tarballs/ceph-9.1.0.tar.gz
-> * For packages, see http://ceph.com/docs/master/install/get-packages
-> * For ceph-deploy, see http://ceph.com/docs/master/install/install-ceph-deploy
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
--- 
-Goncalo Borges
-Research Computing
-ARC Centre of Excellence for Particle Physics at the Terascale
-School of Physics A28 | University of Sydney, NSW  2006
-T: +61 2 93511937
+UGxlYXNlIHNlZSBpbmxpbmUuDQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJv
+bTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVsLW93
+bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mDQo+IFNhZ2UgV2VpbA0KPiBTZW50OiBX
+ZWRuZXNkYXksIE9jdG9iZXIgMTQsIDIwMTUgMTI6NDUgQU0NCj4gVG86IHh1c2FuZ2RpIDExOTc2
+IChSRCkNCj4gQ2M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQo+IFN1YmplY3Q6IFJlOiBj
+aG9vc2VsZWFmIG1heSBjYXVzZSBzb21lIHVubmVjZXNzYXJ5IHBnIG1pZ3JhdGlvbnMNCj4NCj4g
+SGkgU2FuZ2RpLA0KPg0KPiBPbiBUdWUsIDEzIE9jdCAyMDE1LCBYdXNhbmdkaSB3cm90ZToNCj4g
+PiBIaSBTYWdlLA0KPiA+DQo+ID4gUmVjZW50bHkgd2hlbiBJIHdhcyBsZWFybmluZyBhYm91dCB0
+aGUgY3J1c2ggcnVsZXMgSSBub3RpY2VkIHRoYXQgdGhlIHN0ZXAgY2hvb3NlbGVhZiBtYXkgY2F1
+c2UNCj4gc29tZSB1bm5lY2Vzc2FyeSBwZyBtaWdyYXRpb25zIHdoZW4gT1NEcyBhcmUgb3V0ZWQu
+DQo+ID4gRm9yIGV4YW1wbGUsIGZvciBhIGNsdXN0ZXIgb2YgNCBob3N0cyB3aXRoIDIgT1NEcyBl
+YWNoLCBhZnRlciBob3N0MShvc2QuMiwgb3NkLjMpIGlzIGRvd24sIHRoZQ0KPiBtYXBwaW5nIGRp
+ZmZlcmVuY2VzIHdvdWxkIGJlIGxpa2UgdGhpczoNCj4gPiBwZ2lkICAgIGJlZm9yZSA8LT4gYWZ0
+ZXIgICAgICAgIGRpZmYgICAgZGlmZl9udW0NCj4gPiAwLjFlICAgIFs1LCAxLCAyXSA8LT4gWzUs
+IDEsIDddICAgICAgICAgWzJdICAgICAxDQo+ID4gMC4xZiAgICBbMCwgNywgM10gPC0+IFswLCA3
+LCA0XSAgICAgICAgIFszXSAgICAgMQ0KPiA+IDAuMWEgICAgWzAsIDQsIDNdIDwtPiBbMCwgNCwg
+Nl0gICAgICAgICBbM10gICAgIDENCj4gPiAwLjUgICAgIFs2LCAzLCAxXSA8LT4gWzYsIDAsIDVd
+ICAgICAgICAgWzEsIDNdICAyDQo+ID4gMC40ICAgICBbNSwgNiwgMl0gPC0+IFs1LCA2LCAwXSAg
+ICAgICAgIFsyXSAgICAgMQ0KPiA+IDAuNyAgICAgWzMsIDcsIDBdIDwtPiBbNywgMCwgNF0gICAg
+ICAgICBbM10gICAgIDENCj4gPiAwLjYgICAgIFsyLCAxLCA3XSA8LT4gWzAsIDcsIDRdICAgICAg
+ICAgWzEsIDJdICAyDQo+ID4gMC45ICAgICBbMywgNCwgMF0gPC0+IFs1LCAwLCA3XSAgICAgICAg
+IFszLCA0XSAgMg0KPiA+IDAuMTUgICAgWzIsIDYsIDFdIDwtPiBbNiwgMCwgNV0gICAgICAgICBb
+MSwgMl0gIDINCj4gPiAwLjE0ICAgIFszLCA2LCA1XSA8LT4gWzcsIDQsIDFdICAgICAgICAgWzMs
+IDUsIDZdICAgICAgIDMNCj4gPiAwLjE3ICAgIFswLCA1LCAyXSA8LT4gWzAsIDUsIDZdICAgICAg
+ICAgWzJdICAgICAxDQo+ID4gMC4xNiAgICBbMCwgNCwgMl0gPC0+IFswLCA0LCA3XSAgICAgICAg
+IFsyXSAgICAgMQ0KPiA+IDAuMTEgICAgWzQsIDcsIDJdIDwtPiBbNCwgNywgMV0gICAgICAgICBb
+Ml0gICAgIDENCj4gPiAwLjEwICAgIFswLCAzLCA2XSA8LT4gWzAsIDcsIDRdICAgICAgICAgWzMs
+IDZdICAyDQo+ID4gMC4xMyAgICBbMSwgNywgM10gPC0+IFsxLCA3LCA0XSAgICAgICAgIFszXSAg
+ICAgMQ0KPiA+IDAuYSAgICAgWzAsIDIsIDddIDwtPiBbMCwgNywgNF0gICAgICAgICBbMl0gICAg
+IDENCj4gPiAwLmMgICAgIFs1LCAwLCAzXSA8LT4gWzUsIDAsIDZdICAgICAgICAgWzNdICAgICAx
+DQo+ID4gMC5iICAgICBbMiwgNSwgN10gPC0+IFs0LCA3LCAwXSAgICAgICAgIFsyLCA1XSAgMg0K
+PiA+IDAuMTggICAgWzcsIDIsIDRdIDwtPiBbNywgNCwgMF0gICAgICAgICBbMl0gICAgIDENCj4g
+PiAwLmYgICAgIFsyLCA3LCA1XSA8LT4gWzYsIDQsIDBdICAgICAgICAgWzIsIDUsIDddICAgICAg
+IDMNCj4gPiBDaGFuZ2VkIHBnIHJhdGlvOiAzMCAvIDMyDQo+ID4NCj4gPiBJIHRyaWVkIHRvIGNo
+YW5nZSB0aGUgY29kZSAocGxlYXNlIHNlZSBodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBoL3B1
+bGwvNjI0MikgYW5kIGFmdGVyIHRoZQ0KPiBtb2RpZmljYXRpb24gdGhlIHJlc3VsdCB3b3VsZCBi
+ZSBsaWtlIHRoaXM6DQo+DQo+IENhbiB5b3UgZGVzY3JpYmUgdGhlIHJlYXNvbmluZyBiZWhpbmQg
+dGhlIGNoYW5nZT8gIEkgY2FuJ3QgbWFrZSBzZW5zZSBvZiBpdC4gIFRoZSByZWN1cnNpdmUgY2Fs
+bCBpcyBzdGlsbA0KPiBwaWNraW5nIGp1c3QgMSBpdGVtLCBidXQgaXQgbG9va3MgbGlrZSBpdCBp
+cyBhbHdheXMgY2hvb3NpbmcgYSBkZXZpY2UgaW4gZm9yIHNsb3QgMCBhbmQgbm90IHRoZSBjdXJy
+ZW50IHNsb3QgaW4NCj4gdGhlIGNhbGxlci4gIEknbSBub3Qgc3VyZSBob3cgdGhhdCBjb3VsZCBn
+ZW5lcmF0ZSBhIGNvcnJlY3QgcmVzdWx0Lg0KPg0KRnJvbSBteSB1bmRlcnN0YW5kaW5nLCB0aGUg
+YXJndW1lbnQgJ291dHBvcycgb2YgY3J1c2hfY2hvb3NlX2ZpcnN0biguLi4pIGlzIGFsd2F5cyBz
+ZXQgdG8gMCBmb3IgJ2Nob29zZSBmaXJzdG4nDQphbmQgdGhlIGZpcnN0IHN0ZXAgb2YgJ2Nob29z
+ZWxlYWYgZmlyc3RuJyAoeW91IG1heSBjaGVjayBpdHMgY2FsbGVyLCBpLmUuIGNydXNoX2RvX3J1
+bGUoLi4uKSwgdGhhdCB0aGUgdmFyaWFibGUgJ2onIHRoZXJlDQppcyBhbHdheXMgMCkuIFNvIGlu
+IGZhY3QgdGhlIGNvZGUgbW9kaWZpY2F0aW9uIHdvbid0IGNoYW5nZSBhbnl0aGluZyBmb3IgdGhl
+c2Ugc3RlcHMuIEl0IHdpbGwgb25seSBhZmZlY3QgdGhlIHJlY3Vyc2l2ZQ0KY2FsbC4gQW5kIGl0
+IHRoaXMgY2FsbCwgJ3JlcCcoYW5kICdyJykgaXMgaW5kZXBlbmRlbnQgZnJvbSBpdHMgY2FsbGVy
+LCB3aGljaCBtZWFucyBpdCdzIG9ubHkgdXNlZCB0byBpbmRpY2F0ZSB0aGUgcmVwbGljYQ0KbnVt
+YmVyKHRoZSBzdGFydCB2YWx1ZSBvZiAncmVwJyBzaG91bGQgYmUgMSBsZXNzIHRoYW4gJ251bXJl
+cCcpLCBidXQgaXMgbm90IHJlbGF0ZWQgdG8gcmVzdWx0IHBvc2l0aW9uLiBTaW5jZSAnb3V0cG9z
+Jw0KaXMgY29ycmVjdGx5IHBhc3NlZCB0byB0aGUgcmVjdXJzaXZlIGNhbGwsIHRoZSByZXN1bHQg
+d291bGQgYmUgcHV0IGluIHRoZSByaWdodCBzbG90LCBub3Qgc2xvdCAwLg0KDQpUaGUgY3VycmVu
+dCBjb2RlIHNldCB0aGUgc3RhcnRpbmcgdmFsdWUgb2YgJ3InIGJhc2VkIG9uIHRoZSBzbG90IG51
+bWJlciwgd2hpY2ggbWVhbnMgdGhlIGFsZ29yaXRobSBtYXkgZ2VuZXJhdGUNCmEgZGlmZmVyZW50
+IHJlc3VsdCBldmVuIHdoZW4gb25seSB0aGUgc2xvdCBudW1iZXIgY2hhbmdlcywgd2hpY2ggSSBi
+ZWxpZXZlIGlzIG5vdCB3aGF0IHdlIHdhbnQgZm9yIHJlcGxpY2F0ZWQgcG9vbHMuDQpGb3IgZXhh
+bXBsZSwgMC4xNCBbMywgNiwgNV0gPC0+IFs3LCA0LCAxXSwgYWZ0ZXIgb2RzLjMgaXMgZG93biBh
+bmQgb3V0LCB0aGUgcGcgb24gb3NkLjYgaXMgdHJhbnNmZXJyZWQgdG8gb3NkLjcgYmVjYXVzZQ0K
+dGhlIHN0YXJ0aW5nIHZhbHVlIG9mICdyJyBpcyBjaGFuZ2VkKHByb2JhYmx5IGZyb20gMSB0byAw
+KSwgYW5kIHNvIGlzIHRoZSBwZyBmcm9tIG9zZC41IHRvIG9zZC40LiBUaG91Z2ggaXQgbG9va3Mg
+bGlrZSB0aGF0DQphbGwgb2YgdGhlc2UgZXh0cmEgbWlncmF0aW9ucyBhcmUgYWx3YXlzIHdpdGhp
+biB0aGUgc2FtZSBjaG9zZW4gYnVja2V0LCB0aGV5IGFyZSB1bm5lY2Vzc2FyeS4gSWYgd2Ugc2V0
+IHRoZSBzdGFydGluZw0KdmFsdWUgb2YgJ3JlcCcoYW5kICdyJykgdG8gYmUgYSBmaXhlZCB2YWx1
+ZShlLmcuIDApLCB0aGUgcmVzdWx0cyB3b3VsZCBiZSBzdGFibGUuDQoNClRoZSBxdWFsaXR5IG9m
+IGRpc3RyaWJ1dGlvbiBjb3VsZCBiZSBhc3N1cmVkIGJ5IHRoZSBoYXNoZWQgdmFsdWUgeCwgc2lu
+Y2UgaXQncyBkZXBlbmRlbnQgb24gcGdpZC4gQSBzaW1wbGUgdGVzdCByZXN1bHQNCmZvciBhIHJl
+bGF0aXZlbHkgbGFyZ2UgY2x1c3RlciBpcyBhcyBmb2xsb3dpbmdzLCB3aGljaCBmcm9tIG15IHZp
+ZXcgaXMgc2ltaWxhciB3aXRoIHRoYXQgb2YgdGhlIGN1cnJlbnQgY29kZToNCg0KY3J1c2h0b29s
+IC1vIGNydXNobWFwIC0tYnVpbGQgLS1udW1fb3NkcyA2NCBob3N0IHN0cmF3MiA0IHJhY2sgc3Ry
+YXcyIDQgcm9vdCBzdHJhdzIgMA0KDQpjcnVzaHRvb2wgLS10ZXN0IC1pIGNydXNobWFwIC0tbnVt
+X3JlcCAzIC0tc2hvdy11dGlsaXphdGlvbg0KcnVsZSAwIChyZXBsaWNhdGVkX3J1bGVzZXQpLCB4
+ID0gMC4uMTAyMywgbnVtcmVwID0gMy4uMw0KcnVsZSAwIChyZXBsaWNhdGVkX3J1bGVzZXQpIG51
+bV9yZXAgMyByZXN1bHQgc2l6ZSA9PSAzOiAxMDI0LzEwMjQNCiAgZGV2aWNlIDA6ICAgICAgICAg
+ICAgICBzdG9yZWQgOiA1NyAgICAgZXhwZWN0ZWQgOiA0OA0KICBkZXZpY2UgMTogICAgICAgICAg
+ICAgIHN0b3JlZCA6IDM5ICAgICBleHBlY3RlZCA6IDQ4DQogIGRldmljZSAyOiAgICAgICAgICAg
+ICAgc3RvcmVkIDogNDQgICAgIGV4cGVjdGVkIDogNDgNCiAgZGV2aWNlIDM6ICAgICAgICAgICAg
+ICBzdG9yZWQgOiA0MiAgICAgZXhwZWN0ZWQgOiA0OA0KICBkZXZpY2UgNDogICAgICAgICAgICAg
+IHN0b3JlZCA6IDQ1ICAgICBleHBlY3RlZCA6IDQ4DQogIGRldmljZSA1OiAgICAgICAgICAgICAg
+c3RvcmVkIDogNDIgICAgIGV4cGVjdGVkIDogNDgNCiAgZGV2aWNlIDY6ICAgICAgICAgICAgICBz
+dG9yZWQgOiA0NSAgICAgZXhwZWN0ZWQgOiA0OA0KICBkZXZpY2UgNzogICAgICAgICAgICAgIHN0
+b3JlZCA6IDQ4ICAgICBleHBlY3RlZCA6IDQ4DQogIGRldmljZSA4OiAgICAgICAgICAgICAgc3Rv
+cmVkIDogNDMgICAgIGV4cGVjdGVkIDogNDgNCiAgZGV2aWNlIDk6ICAgICAgICAgICAgICBzdG9y
+ZWQgOiAzOCAgICAgZXhwZWN0ZWQgOiA0OA0KICBkZXZpY2UgMTA6ICAgICAgICAgICAgIHN0b3Jl
+ZCA6IDQ0ICAgICBleHBlY3RlZCA6IDQ4DQogIGRldmljZSAxMTogICAgICAgICAgICAgc3RvcmVk
+IDogNTIgICAgIGV4cGVjdGVkIDogNDgNCiAgZGV2aWNlIDEyOiAgICAgICAgICAgICBzdG9yZWQg
+OiA1NCAgICAgZXhwZWN0ZWQgOiA0OA0KICBkZXZpY2UgMTM6ICAgICAgICAgICAgIHN0b3JlZCA6
+IDU5ICAgICBleHBlY3RlZCA6IDQ4DQogIGRldmljZSAxNDogICAgICAgICAgICAgc3RvcmVkIDog
+NTMgICAgIGV4cGVjdGVkIDogNDgNCiAgZGV2aWNlIDE1OiAgICAgICAgICAgICBzdG9yZWQgOiA1
+MyAgICAgZXhwZWN0ZWQgOiA0OA0KICBkZXZpY2UgMTY6ICAgICAgICAgICAgIHN0b3JlZCA6IDQy
+ICAgICBleHBlY3RlZCA6IDQ4DQogIGRldmljZSAxNzogICAgICAgICAgICAgc3RvcmVkIDogNTYg
+ICAgIGV4cGVjdGVkIDogNDgNCiAgZGV2aWNlIDE4OiAgICAgICAgICAgICBzdG9yZWQgOiA0OSAg
+ICAgZXhwZWN0ZWQgOiA0OA0KICBkZXZpY2UgMTk6ICAgICAgICAgICAgIHN0b3JlZCA6IDQyICAg
+ICBleHBlY3RlZCA6IDQ4DQogIGRldmljZSAyMDogICAgICAgICAgICAgc3RvcmVkIDogNTYgICAg
+IGV4cGVjdGVkIDogNDgNCiAgZGV2aWNlIDIxOiAgICAgICAgICAgICBzdG9yZWQgOiA1MSAgICAg
+ZXhwZWN0ZWQgOiA0OA0KICBkZXZpY2UgMjI6ICAgICAgICAgICAgIHN0b3JlZCA6IDU5ICAgICBl
+eHBlY3RlZCA6IDQ4DQogIGRldmljZSAyMzogICAgICAgICAgICAgc3RvcmVkIDogMzQgICAgIGV4
+cGVjdGVkIDogNDgNCiAgZGV2aWNlIDI0OiAgICAgICAgICAgICBzdG9yZWQgOiA0MyAgICAgZXhw
+ZWN0ZWQgOiA0OA0KICBkZXZpY2UgMjU6ICAgICAgICAgICAgIHN0b3JlZCA6IDUyICAgICBleHBl
+Y3RlZCA6IDQ4DQogIGRldmljZSAyNjogICAgICAgICAgICAgc3RvcmVkIDogNDYgICAgIGV4cGVj
+dGVkIDogNDgNCiAgZGV2aWNlIDI3OiAgICAgICAgICAgICBzdG9yZWQgOiA0NCAgICAgZXhwZWN0
+ZWQgOiA0OA0KICBkZXZpY2UgMjg6ICAgICAgICAgICAgIHN0b3JlZCA6IDQzICAgICBleHBlY3Rl
+ZCA6IDQ4DQogIGRldmljZSAyOTogICAgICAgICAgICAgc3RvcmVkIDogNTcgICAgIGV4cGVjdGVk
+IDogNDgNCiAgZGV2aWNlIDMwOiAgICAgICAgICAgICBzdG9yZWQgOiA1MyAgICAgZXhwZWN0ZWQg
+OiA0OA0KICBkZXZpY2UgMzE6ICAgICAgICAgICAgIHN0b3JlZCA6IDUyICAgICBleHBlY3RlZCA6
+IDQ4DQogIGRldmljZSAzMjogICAgICAgICAgICAgc3RvcmVkIDogNDYgICAgIGV4cGVjdGVkIDog
+NDgNCiAgZGV2aWNlIDMzOiAgICAgICAgICAgICBzdG9yZWQgOiA0MiAgICAgZXhwZWN0ZWQgOiA0
+OA0KICBkZXZpY2UgMzQ6ICAgICAgICAgICAgIHN0b3JlZCA6IDU5ICAgICBleHBlY3RlZCA6IDQ4
+DQogIGRldmljZSAzNTogICAgICAgICAgICAgc3RvcmVkIDogNTAgICAgIGV4cGVjdGVkIDogNDgN
+CiAgZGV2aWNlIDM2OiAgICAgICAgICAgICBzdG9yZWQgOiA0OCAgICAgZXhwZWN0ZWQgOiA0OA0K
+ICBkZXZpY2UgMzc6ICAgICAgICAgICAgIHN0b3JlZCA6IDQ3ICAgICBleHBlY3RlZCA6IDQ4DQog
+IGRldmljZSAzODogICAgICAgICAgICAgc3RvcmVkIDogNTIgICAgIGV4cGVjdGVkIDogNDgNCiAg
+ZGV2aWNlIDM5OiAgICAgICAgICAgICBzdG9yZWQgOiA1NiAgICAgZXhwZWN0ZWQgOiA0OA0KICBk
+ZXZpY2UgNDA6ICAgICAgICAgICAgIHN0b3JlZCA6IDM4ICAgICBleHBlY3RlZCA6IDQ4DQogIGRl
+dmljZSA0MTogICAgICAgICAgICAgc3RvcmVkIDogNDAgICAgIGV4cGVjdGVkIDogNDgNCiAgZGV2
+aWNlIDQyOiAgICAgICAgICAgICBzdG9yZWQgOiA1MiAgICAgZXhwZWN0ZWQgOiA0OA0KICBkZXZp
+Y2UgNDM6ICAgICAgICAgICAgIHN0b3JlZCA6IDQzICAgICBleHBlY3RlZCA6IDQ4DQogIGRldmlj
+ZSA0NDogICAgICAgICAgICAgc3RvcmVkIDogNDEgICAgIGV4cGVjdGVkIDogNDgNCiAgZGV2aWNl
+IDQ1OiAgICAgICAgICAgICBzdG9yZWQgOiA1MSAgICAgZXhwZWN0ZWQgOiA0OA0KICBkZXZpY2Ug
+NDY6ICAgICAgICAgICAgIHN0b3JlZCA6IDQzICAgICBleHBlY3RlZCA6IDQ4DQogIGRldmljZSA0
+NzogICAgICAgICAgICAgc3RvcmVkIDogNDYgICAgIGV4cGVjdGVkIDogNDgNCiAgZGV2aWNlIDQ4
+OiAgICAgICAgICAgICBzdG9yZWQgOiA0MiAgICAgZXhwZWN0ZWQgOiA0OA0KICBkZXZpY2UgNDk6
+ICAgICAgICAgICAgIHN0b3JlZCA6IDQ3ICAgICBleHBlY3RlZCA6IDQ4DQogIGRldmljZSA1MDog
+ICAgICAgICAgICAgc3RvcmVkIDogNTEgICAgIGV4cGVjdGVkIDogNDgNCiAgZGV2aWNlIDUxOiAg
+ICAgICAgICAgICBzdG9yZWQgOiA1NCAgICAgZXhwZWN0ZWQgOiA0OA0KICBkZXZpY2UgNTI6ICAg
+ICAgICAgICAgIHN0b3JlZCA6IDU2ICAgICBleHBlY3RlZCA6IDQ4DQogIGRldmljZSA1MzogICAg
+ICAgICAgICAgc3RvcmVkIDogNDYgICAgIGV4cGVjdGVkIDogNDgNCiAgZGV2aWNlIDU0OiAgICAg
+ICAgICAgICBzdG9yZWQgOiA0NyAgICAgZXhwZWN0ZWQgOiA0OA0KICBkZXZpY2UgNTU6ICAgICAg
+ICAgICAgIHN0b3JlZCA6IDQ4ICAgICBleHBlY3RlZCA6IDQ4DQogIGRldmljZSA1NjogICAgICAg
+ICAgICAgc3RvcmVkIDogNDIgICAgIGV4cGVjdGVkIDogNDgNCiAgZGV2aWNlIDU3OiAgICAgICAg
+ICAgICBzdG9yZWQgOiA0MCAgICAgZXhwZWN0ZWQgOiA0OA0KICBkZXZpY2UgNTg6ICAgICAgICAg
+ICAgIHN0b3JlZCA6IDU4ICAgICBleHBlY3RlZCA6IDQ4DQogIGRldmljZSA1OTogICAgICAgICAg
+ICAgc3RvcmVkIDogNTMgICAgIGV4cGVjdGVkIDogNDgNCiAgZGV2aWNlIDYwOiAgICAgICAgICAg
+ICBzdG9yZWQgOiA0MSAgICAgZXhwZWN0ZWQgOiA0OA0KICBkZXZpY2UgNjE6ICAgICAgICAgICAg
+IHN0b3JlZCA6IDQ0ICAgICBleHBlY3RlZCA6IDQ4DQogIGRldmljZSA2MjogICAgICAgICAgICAg
+c3RvcmVkIDogNTIgICAgIGV4cGVjdGVkIDogNDgNCiAgZGV2aWNlIDYzOiAgICAgICAgICAgICBz
+dG9yZWQgOiA2MCAgICAgZXhwZWN0ZWQgOiA0OA0KDQo+IFBlcmhhcHMgeW91IGNhbiBzaGFyZSB0
+aGUgb3NkIHRyZWUgb3V0cHV0IHNvIHdlIGNhbiBzZWUgaG93IHlvdXIgbWFwIGl0IHN0cnVjdHVy
+ZWQ/DQo+DQpUaGUgYXJjaGl0ZWN0dXJlIGlzIHByZXR0eSBzaW1wbGU6DQpJRCBXRUlHSFQgIFRZ
+UEUgTkFNRSAgICAgIFVQL0RPV04gUkVXRUlHSFQgUFJJTUFSWS1BRkZJTklUWQ0KLTUgOC4wMDAw
+MCByb290IHJvb3QNCi0xIDIuMDAwMDAgICAgIGhvc3QgaG9zdDANCiAwIDEuMDAwMDAgICAgICAg
+ICBvc2QuMCAgICAgICB1cCAgMS4wMDAwMCAgICAgICAgICAxLjAwMDAwDQogMSAxLjAwMDAwICAg
+ICAgICAgb3NkLjEgICAgICAgdXAgIDEuMDAwMDAgICAgICAgICAgMS4wMDAwMA0KLTIgMi4wMDAw
+MCAgICAgaG9zdCBob3N0MQ0KIDIgMS4wMDAwMCAgICAgICAgIG9zZC4yICAgICBkb3duICAgICAg
+ICAwICAgICAgICAgIDEuMDAwMDANCiAzIDEuMDAwMDAgICAgICAgICBvc2QuMyAgICAgZG93biAg
+ICAgICAgMCAgICAgICAgICAxLjAwMDAwDQotMyAyLjAwMDAwICAgICBob3N0IGhvc3QyDQogNCAx
+LjAwMDAwICAgICAgICAgb3NkLjQgICAgICAgdXAgIDEuMDAwMDAgICAgICAgICAgMS4wMDAwMA0K
+IDUgMS4wMDAwMCAgICAgICAgIG9zZC41ICAgICAgIHVwICAxLjAwMDAwICAgICAgICAgIDEuMDAw
+MDANCi00IDIuMDAwMDAgICAgIGhvc3QgaG9zdDMNCiA2IDEuMDAwMDAgICAgICAgICBvc2QuNiAg
+ICAgICB1cCAgMS4wMDAwMCAgICAgICAgICAxLjAwMDAwDQogNyAxLjAwMDAwICAgICAgICAgb3Nk
+LjcgICAgICAgdXAgIDEuMDAwMDAgICAgICAgICAgMS4wMDAwMA0KDQpBbmQgdGhlIHJ1bGUgdXNl
+ZCBpZiB5b3Ugd2VyZSBpbnRlcmVzdGVkOg0KcnVsZSByZXBsaWNhdGVkX3J1bGVzZXQgew0KICAg
+ICAgICBydWxlc2V0IDANCiAgICAgICAgdHlwZSByZXBsaWNhdGVkDQogICAgICAgIG1pbl9zaXpl
+IDENCiAgICAgICAgbWF4X3NpemUgMTANCiAgICAgICAgc3RlcCB0YWtlIHJvb3QNCiAgICAgICAg
+c3RlcCBjaG9vc2VsZWFmIGZpcnN0biAwIHR5cGUgaG9zdA0KICAgICAgICBzdGVwIGVtaXQNCn0N
+Cg0KQWxzbyBhbGwgdGhlIHR1bmFibGVzIGFyZSBkZWZhdWx0IHZhbHVlcyBhbmQgSSdtIHJ1bm5p
+bmcgdGhlIG1hc3RlciBmcm9tIHNldmVyYWwgZGF5cyBhZ28uDQoNCj4gSXQgaXMgbm9ybWFsIGZv
+ciBzb21lIG1hcHBpbmdzIHRvIGhhdmUgbXVsdGlwbGUgaXRlbXMgY2hhbmdlLCBhcyBJJ3ZlIGRl
+c2NyaWJlZCBwcmV2aW91c2x5IG9uIHRoaXMgbGlzdC4NCj4gSXQncyBhIHJlc3VsdCBvZiB0aGUg
+ZmFjdCB0aGF0IHdlJ3JlIGNvbnNpZGVyaW5nIHRvdGFsbHkgaW5kZXBlbmRlbnQgc2VyaWVzIG9m
+IGl0ZW1zLCBidXQgd2hldGhlciB3ZQ0KPiBhY2NlcHQgYSBjaG9pY2UgYWxzbyBkZXBlbmRzIG9u
+IHRoZSBwcmV2aW91cyBjaG9pY2VzICh3ZSBkbyBub3QgYWxsb3cgZHVwcykuLiB3aGljaCBtZWFu
+cyB0aGF0IHlvdQ0KPiBnZXQgZWNobyBlZmZlY3RzIGluIGxhdGVyIHNsb3RzIHdoZW4gd2UgbWFr
+ZSBhIGRpZmZlcmVudCBjaG9pY2UgaW4gZWFybGllciBzbG90cy4NCj4NCkFzIEkgZGVzY3JpYmVk
+IGluIHRoZSBwcmV2aW91cyBzZWN0aW9uLCBJIHRoaW5rIHRoZXNlIGV4dHJhIG1pZ3JhdGlvbnMg
+aXMgbm90IGNhdXNlZCBieSBjb2xsaXNpb25zLiBBbmQgSU1PDQp0aGUgaWRlYWwgcmVzdWx0IHdo
+ZW4gYW4gb3NkIGZhaWxzIHNob3VsZCBiZSBhIHNpbXBsZSBzaGlmdGluZywganVzdCBhcyB5b3Ug
+aWxsdXN0cmF0ZWQgaW4gdGhlIENSVVNIIHBhcGVyOg0KDQoxIDIgMyA0IDUgNg0KYSBiIGMgZCBl
+IGYgLi4uDQoNCmIgZmFpbHMgPT0+DQoNCjEgMiAzIDQgNSA2DQphIGMgZCBlIGYgZyAuLi4NCg0K
+LS0tLS0tLS0tLQ0KQmVzdCByZWdhcmRzLA0KU2FuZ2RpDQoNCj4gVGhhbmtzIQ0KPiBzYWdlDQo+
+DQo+DQo+ID4gcGdpZCAgICBiZWZvcmUgPC0+IGFmdGVyICAgICAgICBkaWZmICAgIGRpZmZfbnVt
+DQo+ID4gMC4xZSAgICBbNSwgMCwgM10gPC0+IFs1LCAwLCA3XSAgICAgICAgIFszXSAgICAgMQ0K
+PiA+IDAuMWYgICAgWzAsIDYsIDNdIDwtPiBbMCwgNiwgNF0gICAgICAgICBbM10gICAgIDENCj4g
+PiAwLjFhICAgIFswLCA1LCAyXSA8LT4gWzAsIDUsIDZdICAgICAgICAgWzJdICAgICAxDQo+ID4g
+MC41ICAgICBbNiwgMywgMF0gPC0+IFs2LCAwLCA1XSAgICAgICAgIFszXSAgICAgMQ0KPiA+IDAu
+NCAgICAgWzUsIDcsIDJdIDwtPiBbNSwgNywgMF0gICAgICAgICBbMl0gICAgIDENCj4gPiAwLjcg
+ICAgIFszLCA3LCAxXSA8LT4gWzcsIDEsIDVdICAgICAgICAgWzNdICAgICAxDQo+ID4gMC42ICAg
+ICBbMiwgMCwgN10gPC0+IFswLCA3LCA0XSAgICAgICAgIFsyXSAgICAgMQ0KPiA+IDAuOSAgICAg
+WzMsIDUsIDFdIDwtPiBbNSwgMSwgN10gICAgICAgICBbM10gICAgIDENCj4gPiAwLjE1ICAgIFsy
+LCA2LCAxXSA8LT4gWzYsIDEsIDRdICAgICAgICAgWzJdICAgICAxDQo+ID4gMC4xNCAgICBbMywg
+NywgNV0gPC0+IFs3LCA1LCAxXSAgICAgICAgIFszXSAgICAgMQ0KPiA+IDAuMTcgICAgWzAsIDQs
+IDNdIDwtPiBbMCwgNCwgNl0gICAgICAgICBbM10gICAgIDENCj4gPiAwLjE2ICAgIFswLCA0LCAz
+XSA8LT4gWzAsIDQsIDZdICAgICAgICAgWzNdICAgICAxDQo+ID4gMC4xMSAgICBbNCwgNiwgM10g
+PC0+IFs0LCA2LCAwXSAgICAgICAgIFszXSAgICAgMQ0KPiA+IDAuMTAgICAgWzAsIDMsIDZdIDwt
+PiBbMCwgNiwgNV0gICAgICAgICBbM10gICAgIDENCj4gPiAwLjEzICAgIFsxLCA3LCAzXSA8LT4g
+WzEsIDcsIDVdICAgICAgICAgWzNdICAgICAxDQo+ID4gMC5hICAgICBbMCwgMywgNl0gPC0+IFsw
+LCA2LCA1XSAgICAgICAgIFszXSAgICAgMQ0KPiA+IDAuYyAgICAgWzUsIDAsIDNdIDwtPiBbNSwg
+MCwgNl0gICAgICAgICBbM10gICAgIDENCj4gPiAwLmIgICAgIFsyLCA0LCA2XSA8LT4gWzQsIDYs
+IDFdICAgICAgICAgWzJdICAgICAxDQo+ID4gMC4xOCAgICBbNywgMywgNV0gPC0+IFs3LCA1LCAx
+XSAgICAgICAgIFszXSAgICAgMQ0KPiA+IDAuZiAgICAgWzIsIDYsIDVdIDwtPiBbNiwgNSwgMV0g
+ICAgICAgICBbMl0gICAgIDENCj4gPiBDaGFuZ2VkIHBnIHJhdGlvOiAyMCAvIDMyDQo+ID4NCj4g
+PiBDdXJyZW50bHkgdGhlIG9ubHkgZGVmZWN0IEkgY2FuIHNlZSBmcm9tIHRoZSBjaGFuZ2UgaXMg
+dGhhdCB0aGUgY2hhbmNlIGZvciBhIGdpdmVuIHBnIHRvIHN1Y2Nlc3NmdWxseQ0KPiBjaG9vc2Ug
+cmVxdWlyZWQgYXZhaWxhYmxlIE9TRHMgbWlnaHQgYmUgYSBiaXQgbG93ZXIgY29tcGFyZWQgd2l0
+aCBiZWZvcmUuIEhvd2V2ZXIsIEkgYmVsaWV2ZSBpdCB3aWxsDQo+IGNhdXNlIHByb2JsZW1zIG9u
+bHkgd2hlbiB0aGUgY2x1c3RlciBpcyBwcmV0dHkgc21hbGwgYW5kIGRlZ3JhZGVkLiBBbmQgaW4g
+dGhhdCBjYXNlLCB3ZSBjYW4gc3RpbGwgbWFrZQ0KPiBpdCB3b3JrYWJsZSBieSB0dW5pbmcgc29t
+ZSBvZiB0aGUgY3J1c2htYXAgcGFyYW1ldGVycyBzdWNoIGFzIGNob29zZWxlYWZfdHJpZXMuDQo+
+ID4NCj4gPiBBbnl3YXkgSSdtIG5vdCBzdXJlIGlmIGl0IHdvdWxkIHJhaXNlIGFueSBvdGhlciBp
+c3N1ZXMsIGNvdWxkIHlvdSBwbGVhc2UgcmV2aWV3IGl0IGFuZCBtYXliZSBnaXZlIG1lDQo+IHNv
+bWUgc3VnZ2VzdGlvbnM/IFRoYW5rIHlvdSENCj4gPg0KPiA+IC0tLS0tLS0tLS0NCj4gPiBCZXN0
+IHJlZ2FyZHMsDQo+ID4gU2FuZ2RpDQo+ID4NCj4gPiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQo+ID4gLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+DQo+ID4gPz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pw0KPiA+ID8/Pz8/
+Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8NCj4gPiA/Pz8/Pz8/Pz8/Pz8/Pz8/
+Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/DQo+ID4gPz8/DQo+ID4gVGhpcyBlLW1haWwgYW5kIGl0
+cyBhdHRhY2htZW50cyBjb250YWluIGNvbmZpZGVudGlhbCBpbmZvcm1hdGlvbiBmcm9tDQo+ID4g
+SDNDLCB3aGljaCBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgcGVyc29uIG9yIGVudGl0eSB3aG9z
+ZSBhZGRyZXNzIGlzDQo+ID4gbGlzdGVkIGFib3ZlLiBBbnkgdXNlIG9mIHRoZSBpbmZvcm1hdGlv
+biBjb250YWluZWQgaGVyZWluIGluIGFueSB3YXkNCj4gPiAoaW5jbHVkaW5nLCBidXQgbm90IGxp
+bWl0ZWQgdG8sIHRvdGFsIG9yIHBhcnRpYWwgZGlzY2xvc3VyZSwNCj4gPiByZXByb2R1Y3Rpb24s
+IG9yIGRpc3NlbWluYXRpb24pIGJ5IHBlcnNvbnMgb3RoZXIgdGhhbiB0aGUgaW50ZW5kZWQNCj4g
+PiByZWNpcGllbnQocykgaXMgcHJvaGliaXRlZC4gSWYgeW91IHJlY2VpdmUgdGhpcyBlLW1haWwg
+aW4gZXJyb3IsDQo+ID4gcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHBob25lIG9yIGVtYWls
+IGltbWVkaWF0ZWx5IGFuZCBkZWxldGUgaXQhDQo+ID4gTj8/Pz8/cj8/eT8/Pz8/P1g/Pz92Pz8/
+KT97Lm4/Pz8/P3o/XXo/Pz8/YXk/HT8/Pz9qID8/Zj8/P2g/Pz8/Px4/dz8/Pw0KPg0KPiA/Pz9q
+Oit2Pz8/dz8/Pz8/Pz8/ID8/Pz96Wis/Pz8/Pz8/aiI/Pz8/aQ0KPiAtLQ0KPiBUbyB1bnN1YnNj
+cmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZl
+bCIgaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvDQo+IG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5v
+cmcgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRv
+bW8taW5mby5odG1sDQotLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQrmnKzpgq7ku7blj4rlhbbpmYTku7bl
+kKvmnInmna3lt57ljY7kuInpgJrkv6HmioDmnK/mnInpmZDlhazlj7jnmoTkv53lr4bkv6Hmga/v
+vIzku4XpmZDkuo7lj5HpgIHnu5nkuIrpnaLlnLDlnYDkuK3liJflh7oNCueahOS4quS6uuaIlue+
+pOe7hOOAguemgeatouS7u+S9leWFtuS7luS6uuS7peS7u+S9leW9ouW8j+S9v+eUqO+8iOWMheaL
+rOS9huS4jemZkOS6juWFqOmDqOaIlumDqOWIhuWcsOazhOmcsuOAgeWkjeWItuOAgQ0K5oiW5pWj
+5Y+R77yJ5pys6YKu5Lu25Lit55qE5L+h5oGv44CC5aaC5p6c5oKo6ZSZ5pS25LqG5pys6YKu5Lu2
+77yM6K+35oKo56uL5Y2z55S16K+d5oiW6YKu5Lu26YCa55+l5Y+R5Lu25Lq65bm25Yig6Zmk5pys
+DQrpgq7ku7bvvIENClRoaXMgZS1tYWlsIGFuZCBpdHMgYXR0YWNobWVudHMgY29udGFpbiBjb25m
+aWRlbnRpYWwgaW5mb3JtYXRpb24gZnJvbSBIM0MsIHdoaWNoIGlzDQppbnRlbmRlZCBvbmx5IGZv
+ciB0aGUgcGVyc29uIG9yIGVudGl0eSB3aG9zZSBhZGRyZXNzIGlzIGxpc3RlZCBhYm92ZS4gQW55
+IHVzZSBvZiB0aGUNCmluZm9ybWF0aW9uIGNvbnRhaW5lZCBoZXJlaW4gaW4gYW55IHdheSAoaW5j
+bHVkaW5nLCBidXQgbm90IGxpbWl0ZWQgdG8sIHRvdGFsIG9yIHBhcnRpYWwNCmRpc2Nsb3N1cmUs
+IHJlcHJvZHVjdGlvbiwgb3IgZGlzc2VtaW5hdGlvbikgYnkgcGVyc29ucyBvdGhlciB0aGFuIHRo
+ZSBpbnRlbmRlZA0KcmVjaXBpZW50KHMpIGlzIHByb2hpYml0ZWQuIElmIHlvdSByZWNlaXZlIHRo
+aXMgZS1tYWlsIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXINCmJ5IHBob25lIG9y
+IGVtYWlsIGltbWVkaWF0ZWx5IGFuZCBkZWxldGUgaXQhDQo=
