@@ -1,245 +1,309 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: MDS stuck in a crash loop
-Date: Wed, 14 Oct 2015 14:21:22 +0100
-Message-ID: <CALe9h7eMAhCjh9NSHc=yQgEDc2zZ_Ts3Kp1XbD_xxH+oCV3NkA@mail.gmail.com>
-References: <CANP1eJGesJ_wGKDNQRJ952x8jkNHiJybeX075wxmJDurbSTMNw@mail.gmail.com>
- <CAJ4mKGY5uTZ6oiqZY4VbU5LdECXx5sko6VOd5aD2aEhtq74NDA@mail.gmail.com>
- <CANP1eJFNpLu3-HeqJ28L7xCTuKh-MhUT2j7A_tM7reofZ94FTQ@mail.gmail.com>
- <CANP1eJFGy4psfmUHpsgdPFT+UUW=NTzLTgAsnGqeuD6iWuF-cQ@mail.gmail.com>
- <CANP1eJHnavBzJRnDLa9gQ93haJ2QzKJsLj4+ZbS_vd1kquV8Lw@mail.gmail.com>
- <CANP1eJGmjechy8ZkVarA-HWdL37scmHdQXToM6NdAXxU-_KVMw@mail.gmail.com> <CANP1eJHYvgUKDCKrVYY=XkJsgcdVGn6T=drvEA8hofHyVX+0YA@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: RE: chooseleaf may cause some unnecessary pg migrations
+Date: Wed, 14 Oct 2015 07:17:57 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1510140714580.6589@cobra.newdream.net>
+References: <FF8D83DAE5DF57468726B79904321E06046B73@H3CMLB12-EX.srv.huawei-3com.com> <alpine.DEB.2.00.1510130940400.6589@cobra.newdream.net> <FF8D83DAE5DF57468726B79904321E06047273@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f44.google.com ([209.85.218.44]:35864 "EHLO
-	mail-oi0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753884AbbJNNVm convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Oct 2015 09:21:42 -0400
-Received: by oihr205 with SMTP id r205so27454837oih.3
-        for <ceph-devel@vger.kernel.org>; Wed, 14 Oct 2015 06:21:41 -0700 (PDT)
-In-Reply-To: <CANP1eJHYvgUKDCKrVYY=XkJsgcdVGn6T=drvEA8hofHyVX+0YA@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:53091 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932164AbbJNOSD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 14 Oct 2015 10:18:03 -0400
+In-Reply-To: <FF8D83DAE5DF57468726B79904321E06047273@H3CMLB12-EX.srv.huawei-3com.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Milosz Tanski <milosz@adfin.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Xusangdi <xu.sangdi@h3c.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, Oct 12, 2015 at 3:36 AM, Milosz Tanski <milosz@adfin.com> wrote=
-:
-> On Sun, Oct 11, 2015 at 6:44 PM, Milosz Tanski <milosz@adfin.com> wro=
-te:
->> On Sun, Oct 11, 2015 at 6:01 PM, Milosz Tanski <milosz@adfin.com> wr=
-ote:
->>> On Sun, Oct 11, 2015 at 5:33 PM, Milosz Tanski <milosz@adfin.com> w=
-rote:
->>>> On Sun, Oct 11, 2015 at 5:24 PM, Milosz Tanski <milosz@adfin.com> =
-wrote:
->>>>> On Sun, Oct 11, 2015 at 1:16 PM, Gregory Farnum <gfarnum@redhat.c=
-om> wrote:
->>>>>> On Sun, Oct 11, 2015 at 10:09 AM, Milosz Tanski <milosz@adfin.co=
-m> wrote:
->>>>>>> About an hour ago my MDSs (primary and follower) started ping-p=
-ong
->>>>>>> crashing with this message. I've spent about 30 minutes looking=
- into
->>>>>>> it but nothing yet.
->>>>>>>
->>>>>>> This is from a 0.94.3 MDS
->>>>>>>
->>>>>>
->>>>>>>      0> 2015-10-11 17:01:23.596008 7fd4f52ad700 -1 mds/SessionM=
-ap.cc:
->>>>>>> In function 'virtual void C_IO_SM_Save::finish(int)' thread
->>>>>>> 7fd4f52ad700 time 2015-10-11 17:01:23.594089
->>>>>>> mds/SessionMap.cc: 120: FAILED assert(r =3D=3D 0)
->>>>>>
->>>>>> These "r =3D=3D 0" asserts pretty much always mean that the MDS =
-did did a
->>>>>> read or write to RADOS (the OSDs) and got an error of some kind =
-back.
->>>>>> (Or in the case of the OSDs, access to the local filesystem retu=
-rned
->>>>>> an error, etc.) I don't think these writes include any safety ch=
-ecks
->>>>>> which would let the MDS break it which means that probably the O=
-SD is
->>>>>> actually returning an error =E2=80=94 odd, but not impossible.
->>>>>>
->>>>>> Notice that the assert happened in thread 7fd4f52ad700, and look=
- for
->>>>>> the stuff in that thread. You should be able to find an OSD op r=
-eply
->>>>>> (on the SessionMap object) coming in and reporting an error code=
-=2E
->>>>>> -Greg
->>>>>
->>>>> I only two error ops in that whole MDS session. Neither one happe=
-ned
->>>>> on the same thread (7f5ab6000700 in this file). But it looks like=
- the
->>>>> only session map is the -90 "Message too long" one.
->>>>>
->>>>> mtanski@tiny:~$ cat single_crash.log | grep 'osd_op_reply' | grep=
- -v
->>>>> 'ondisk =3D 0'
->>>>>  -3946> 2015-10-11 20:51:11.013965 7f5ab20f2700  1 --
->>>>> 10.0.5.31:6802/27121 <=3D=3D osd.25 10.0.5.57:6804/32341 6163 =3D=
-=3D=3D=3D
->>>>> osd_op_reply(46349 mds0_sessionmap [writefull 0~95168363] v0'0 uv=
-0
->>>>> ondisk =3D -90 ((90) Message too long)) v6 =3D=3D=3D=3D 182+0+0 (=
-2955408122 0 0)
->>>>> 0x3a55d340 con 0x3d5a3c0
->>>>>   -705> 2015-10-11 20:51:11.374132 7f5ab22f4700  1 --
->>>>> 10.0.5.31:6802/27121 <=3D=3D osd.28 10.0.5.50:6801/1787 5297 =3D=3D=
-=3D=3D
->>>>> osd_op_reply(48004 300.0000e274 [delete] v0'0 uv1349638 ondisk =3D=
- -2
->>>>> ((2) No such file or directory)) v6 =3D=3D=3D=3D 179+0+0 (1182549=
-251 0 0)
->>>>> 0x66c5c80 con 0x3d5a7e0
->>>>>
->>>>> Any idea what this could be Greg?
->>>>
->>>> To follow this up I found this ticket from 9 months ago:
->>>> http://tracker.ceph.com/issues/10449 In there Yan says:
->>>>
->>>> "it's a kernel bug. hang request prevents mds from trimming
->>>> completed_requests in sessionmap. there is nothing to do with mds.
->>>> (maybe we should add some code to MDS to show warning when this bu=
-g
->>>> happens)"
->>>>
->>>> When I was debugging this I saw an OSD (not cephfs client) operati=
-on
->>>> stuck for a long time along with the MDS error:
->>>>
->>>> HEALTH_WARN 1 requests are blocked > 32 sec; 1 osds have slow
->>>> requests; mds cluster is degraded; mds0: Behind on trimming (709/3=
-0)
->>>> 1 ops are blocked > 16777.2 sec
->>>> 1 ops are blocked > 16777.2 sec on osd.28
->>>>
->>>> I did eventually bounce the OSD in question and it hasn't become s=
-tuck
->>>> since, but the MDS is still eating it every time with the "Message=
- too
->>>> long" error on the session map.
->>>>
->>>> I'm not quite sure where to go from here.
->>>
->>> First time I had a chance to use the new recover tools. I was able =
-to
->>> reply the journal, reset it and then reset the sessionmap. MDS
->>> returned back to life and so far everything looks good. Yay.
->>>
->>> Triggering this a bug/issue is a pretty interesting set of steps.
->>
->> Spoke too soon, a missing dir is now causing MDS to restart it self.
->>
->>     -6> 2015-10-11 22:40:47.300169 7f580c7b9700  5 -- op tracker --
->> seq: 4, time: 2015-10-11 22:40:47.300168, event: finishing request,
->> op: client_request(client.3597476:21480382 rmdir #100015e0be2/58
->> 2015-10-11 21:34:49.224905 RETRY=3D36)
->>     -5> 2015-10-11 22:40:47.300208 7f580c7b9700  5 -- op tracker --
->> seq: 4, time: 2015-10-11 22:40:47.300208, event: cleaned up request,
->> op: client_request(client.3597476:21480382 rmdir #100015e0be2/58
->> 2015-10-11 21:34:49.224905 RETRY=3D36)
->>     -4> 2015-10-11 22:40:47.300231 7f580c7b9700  5 -- op tracker --
->> seq: 4, time: 2015-10-11 22:40:47.300231, event: done, op:
->> client_request(client.3597476:21480382 rmdir #100015e0be2/58
->> 2015-10-11 21:34:49.224905 RETRY=3D36)
->>     -3> 2015-10-11 22:40:47.300284 7f580e0bd700  0
->> mds.0.cache.dir(100048df076) _fetched missing object for [dir
->> 100048df076 /petabucket/beta/6d/f6/ [2,head] auth v=3D0 cv=3D0/0 ap=3D=
-1+0+0
->> state=3D1073741952 f() n() hs=3D0+0,ss=3D0+0 | waiter=3D1 authpin=3D=
-1 0x6debcf8]
->>     -2> 2015-10-11 22:40:47.300313 7f580e0bd700 -1
->> log_channel(cluster) log [ERR] : dir 100048df076 object missing on
->> disk; some files may be lost
->>     -1> 2015-10-11 22:40:47.300549 7f580c7b9700  5 -- op tracker --
->> seq: 6, time: 2015-10-11 22:40:47.300549, event: acquired locks, op:
->> client_request(client.3710941:1805 mkdir
->> #100048df076/1dd4c66b916cf55f19beafc0574ac2dd923bc7efcc5b7757198f323=
-e04d0.dl
->> 2015-10-11 22:36:32.489705 RETRY=3D33)
->>      0> 2015-10-11 22:40:47.303770 7f580c7b9700 -1 mds/CDir.cc: In
->> function 'fnode_t* CDir::project_fnode()' thread 7f580c7b9700 time
->> 2015-10-11 22:40:47.300581
->> mds/CDir.cc: 1267: FAILED assert(get_version() !=3D 0)
+On Wed, 14 Oct 2015, Xusangdi wrote:
+> Please see inline.
+> 
+> > -----Original Message-----
+> > From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of
+> > Sage Weil
+> > Sent: Wednesday, October 14, 2015 12:45 AM
+> > To: xusangdi 11976 (RD)
+> > Cc: ceph-devel@vger.kernel.org
+> > Subject: Re: chooseleaf may cause some unnecessary pg migrations
+> >
+> > Hi Sangdi,
+> >
+> > On Tue, 13 Oct 2015, Xusangdi wrote:
+> > > Hi Sage,
+> > >
+> > > Recently when I was learning about the crush rules I noticed that the step chooseleaf may cause
+> > some unnecessary pg migrations when OSDs are outed.
+> > > For example, for a cluster of 4 hosts with 2 OSDs each, after host1(osd.2, osd.3) is down, the
+> > mapping differences would be like this:
+> > > pgid    before <-> after        diff    diff_num
+> > > 0.1e    [5, 1, 2] <-> [5, 1, 7]         [2]     1
+> > > 0.1f    [0, 7, 3] <-> [0, 7, 4]         [3]     1
+> > > 0.1a    [0, 4, 3] <-> [0, 4, 6]         [3]     1
+> > > 0.5     [6, 3, 1] <-> [6, 0, 5]         [1, 3]  2
+> > > 0.4     [5, 6, 2] <-> [5, 6, 0]         [2]     1
+> > > 0.7     [3, 7, 0] <-> [7, 0, 4]         [3]     1
+> > > 0.6     [2, 1, 7] <-> [0, 7, 4]         [1, 2]  2
+> > > 0.9     [3, 4, 0] <-> [5, 0, 7]         [3, 4]  2
+> > > 0.15    [2, 6, 1] <-> [6, 0, 5]         [1, 2]  2
+> > > 0.14    [3, 6, 5] <-> [7, 4, 1]         [3, 5, 6]       3
+> > > 0.17    [0, 5, 2] <-> [0, 5, 6]         [2]     1
+> > > 0.16    [0, 4, 2] <-> [0, 4, 7]         [2]     1
+> > > 0.11    [4, 7, 2] <-> [4, 7, 1]         [2]     1
+> > > 0.10    [0, 3, 6] <-> [0, 7, 4]         [3, 6]  2
+> > > 0.13    [1, 7, 3] <-> [1, 7, 4]         [3]     1
+> > > 0.a     [0, 2, 7] <-> [0, 7, 4]         [2]     1
+> > > 0.c     [5, 0, 3] <-> [5, 0, 6]         [3]     1
+> > > 0.b     [2, 5, 7] <-> [4, 7, 0]         [2, 5]  2
+> > > 0.18    [7, 2, 4] <-> [7, 4, 0]         [2]     1
+> > > 0.f     [2, 7, 5] <-> [6, 4, 0]         [2, 5, 7]       3
+> > > Changed pg ratio: 30 / 32
+> > >
+> > > I tried to change the code (please see https://github.com/ceph/ceph/pull/6242) and after the
+> > modification the result would be like this:
+> >
+> > Can you describe the reasoning behind the change?  I can't make sense of it.  The recursive call is still
+> > picking just 1 item, but it looks like it is always choosing a device in for slot 0 and not the current slot in
+> > the caller.  I'm not sure how that could generate a correct result.
+> >
+> From my understanding, the argument 'outpos' of crush_choose_firstn(...) 
+> is always set to 0 for 'choose firstn' and the first step of 'chooseleaf 
+> firstn' (you may check its caller, i.e. crush_do_rule(...), that the 
+> variable 'j' there is always 0). So in fact the code modification won't 
+> change anything for these steps. It will only affect the recursive call. 
+> And it this call, 'rep'(and 'r') is independent from its caller, which 
+> means it's only used to indicate the replica number(the start value of 
+> 'rep' should be 1 less than 'numrep'), but is not related to result 
+> position. Since 'outpos' is correctly passed to the recursive call, the 
+> result would be put in the right slot, not slot 0.
 
-Hmm, so something is creating a dentry that points to a dirfrag object
-that doesn't really exist.  What was the series of client operations
-that led to the directory (the one with inode number 0x100048df076)
-being where it is now?  Was it created there, or moved there from
-somewhere?
+Okay, I undertstand now.  Thanks!
+ 
+> The current code set the starting value of 'r' based on the slot number, 
+> which means the algorithm may generate a different result even when only 
+> the slot number changes, which I believe is not what we want for 
+> replicated pools. For example, 0.14 [3, 6, 5] <-> [7, 4, 1], after ods.3 
+> is down and out, the pg on osd.6 is transferred to osd.7 because the 
+> starting value of 'r' is changed(probably from 1 to 0), and so is the pg 
+> from osd.5 to osd.4. Though it looks like that all of these extra 
+> migrations are always within the same chosen bucket, they are 
+> unnecessary. If we set the starting value of 'rep'(and 'r') to be a 
+> fixed value(e.g. 0), the results would be stable.
 
-The way this is meant to work is that the journal we scavenge from
-contains EMetaBlobs that include fnodes, and when we scavenge the
-fnode, we write it into the dirfrag header, creating the dirfrag if it
-doesn't exist.  The same mkdir that creates the dentry should also
-contain the update to the fnode.
+Yeah, that makes sense.
 
-It would be really useful to get a copy of the journal at the point
-right before you run "recover dentries".
+The only problem I see is the collision check here:
 
-Separately, I've been extending our journal repair test to see if I
-could get a similar result, I haven't found a path that results in a
-dentry-but-no-dirfrag case, but I can at least get the particular
-assertion you're seeing, so I'll fix that in master.
+	https://github.com/ceph/ceph/pull/6242/files#diff-0df13ad294f6585c322588cfe026d701R497
 
-John
+For most maps your change isn't problematic because devices only 
+appear once in the hierarchy, but if an item does appear twice, we may 
+choose it twice and not detect the dup.
 
+Perhaps leaving the argument alone and simply changing the for loop to
 
+	for (rep = 0; rep < (numrep - outpos) && count > 0 ; rep++) {
 
+would do the trick?
 
->>
->>  ceph version 0.94.3 (95cefea9fd9ab740263bf8bb4796fd864d9afe2b)
->>  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
->> const*)+0x8b) [0x94cc1b]
->>  2: (CDir::project_fnode()+0x2da) [0x75da1a]
->
-> Worked around this as well. Stopped the client that was trying to
-> access this dir (or delete it, not sure) and move it somewhere else
-> (because I can't delete it).
->
-> A series of steps that happened today (not sure if all are related) i=
-n
-> case the postmortem is interesting to anybody following at home.
->
-> 1. One (of 5) monitors somehow gets OOM killed after eating up 10gigs=
- of ram.
-> 2. An OSD blocks on an IO request
-> 3. This is when the MSD starts growing it's SessionMap to a place
-> where eventually it gets to big. This is related to bug:
-> http://tracker.ceph.com/issues/10449 (not the client bug, but the too
-> large Session)
-> 4. MDS suicides and then two MDS machines start ping ponging in
-> recovery but always fail to save SessionMap.
-> 5. I stop the MDS, recover the journal and reset the session map.
-> 6. MDS come back to life after that.
-> 7. Ceph loses one directory and as soon as the client tries to access
-> it the MDS also suicides. Standing bug:
-> http://tracker.ceph.com/issues/9880
-> 8. Lame workaround (moving / renaming bad dir) so client doesn't acce=
-ss it.
->
-> --
-> Milosz Tanski
-> CTO
-> 16 East 34th Street, 15th floor
-> New York, NY 10016
->
-> p: 646-253-9055
-> e: milosz@adfin.com
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thanks!
+sage
+
+	
+
+> The quality of distribution could be assured by the hashed value x, 
+> since it's dependent on pgid. A simple test result for a relatively 
+> large cluster is as followings, which from my view is similar with that 
+> of the current code:
+> 
+> crushtool -o crushmap --build --num_osds 64 host straw2 4 rack straw2 4 root straw2 0
+> 
+> crushtool --test -i crushmap --num_rep 3 --show-utilization
+> rule 0 (replicated_ruleset), x = 0..1023, numrep = 3..3
+> rule 0 (replicated_ruleset) num_rep 3 result size == 3: 1024/1024
+>   device 0:              stored : 57     expected : 48
+>   device 1:              stored : 39     expected : 48
+>   device 2:              stored : 44     expected : 48
+>   device 3:              stored : 42     expected : 48
+>   device 4:              stored : 45     expected : 48
+>   device 5:              stored : 42     expected : 48
+>   device 6:              stored : 45     expected : 48
+>   device 7:              stored : 48     expected : 48
+>   device 8:              stored : 43     expected : 48
+>   device 9:              stored : 38     expected : 48
+>   device 10:             stored : 44     expected : 48
+>   device 11:             stored : 52     expected : 48
+>   device 12:             stored : 54     expected : 48
+>   device 13:             stored : 59     expected : 48
+>   device 14:             stored : 53     expected : 48
+>   device 15:             stored : 53     expected : 48
+>   device 16:             stored : 42     expected : 48
+>   device 17:             stored : 56     expected : 48
+>   device 18:             stored : 49     expected : 48
+>   device 19:             stored : 42     expected : 48
+>   device 20:             stored : 56     expected : 48
+>   device 21:             stored : 51     expected : 48
+>   device 22:             stored : 59     expected : 48
+>   device 23:             stored : 34     expected : 48
+>   device 24:             stored : 43     expected : 48
+>   device 25:             stored : 52     expected : 48
+>   device 26:             stored : 46     expected : 48
+>   device 27:             stored : 44     expected : 48
+>   device 28:             stored : 43     expected : 48
+>   device 29:             stored : 57     expected : 48
+>   device 30:             stored : 53     expected : 48
+>   device 31:             stored : 52     expected : 48
+>   device 32:             stored : 46     expected : 48
+>   device 33:             stored : 42     expected : 48
+>   device 34:             stored : 59     expected : 48
+>   device 35:             stored : 50     expected : 48
+>   device 36:             stored : 48     expected : 48
+>   device 37:             stored : 47     expected : 48
+>   device 38:             stored : 52     expected : 48
+>   device 39:             stored : 56     expected : 48
+>   device 40:             stored : 38     expected : 48
+>   device 41:             stored : 40     expected : 48
+>   device 42:             stored : 52     expected : 48
+>   device 43:             stored : 43     expected : 48
+>   device 44:             stored : 41     expected : 48
+>   device 45:             stored : 51     expected : 48
+>   device 46:             stored : 43     expected : 48
+>   device 47:             stored : 46     expected : 48
+>   device 48:             stored : 42     expected : 48
+>   device 49:             stored : 47     expected : 48
+>   device 50:             stored : 51     expected : 48
+>   device 51:             stored : 54     expected : 48
+>   device 52:             stored : 56     expected : 48
+>   device 53:             stored : 46     expected : 48
+>   device 54:             stored : 47     expected : 48
+>   device 55:             stored : 48     expected : 48
+>   device 56:             stored : 42     expected : 48
+>   device 57:             stored : 40     expected : 48
+>   device 58:             stored : 58     expected : 48
+>   device 59:             stored : 53     expected : 48
+>   device 60:             stored : 41     expected : 48
+>   device 61:             stored : 44     expected : 48
+>   device 62:             stored : 52     expected : 48
+>   device 63:             stored : 60     expected : 48
+> 
+> > Perhaps you can share the osd tree output so we can see how your map it structured?
+> >
+> The architecture is pretty simple:
+> ID WEIGHT  TYPE NAME      UP/DOWN REWEIGHT PRIMARY-AFFINITY
+> -5 8.00000 root root
+> -1 2.00000     host host0
+>  0 1.00000         osd.0       up  1.00000          1.00000
+>  1 1.00000         osd.1       up  1.00000          1.00000
+> -2 2.00000     host host1
+>  2 1.00000         osd.2     down        0          1.00000
+>  3 1.00000         osd.3     down        0          1.00000
+> -3 2.00000     host host2
+>  4 1.00000         osd.4       up  1.00000          1.00000
+>  5 1.00000         osd.5       up  1.00000          1.00000
+> -4 2.00000     host host3
+>  6 1.00000         osd.6       up  1.00000          1.00000
+>  7 1.00000         osd.7       up  1.00000          1.00000
+> 
+> And the rule used if you were interested:
+> rule replicated_ruleset {
+>         ruleset 0
+>         type replicated
+>         min_size 1
+>         max_size 10
+>         step take root
+>         step chooseleaf firstn 0 type host
+>         step emit
+> }
+> 
+> Also all the tunables are default values and I'm running the master from several days ago.
+> 
+> > It is normal for some mappings to have multiple items change, as I've described previously on this list.
+> > It's a result of the fact that we're considering totally independent series of items, but whether we
+> > accept a choice also depends on the previous choices (we do not allow dups).. which means that you
+> > get echo effects in later slots when we make a different choice in earlier slots.
+> >
+> As I described in the previous section, I think these extra migrations is not caused by collisions. And IMO
+> the ideal result when an osd fails should be a simple shifting, just as you illustrated in the CRUSH paper:
+> 
+> 1 2 3 4 5 6
+> a b c d e f ...
+> 
+> b fails ==>
+> 
+> 1 2 3 4 5 6
+> a c d e f g ...
+> 
+> ----------
+> Best regards,
+> Sangdi
+> 
+> > Thanks!
+> > sage
+> >
+> >
+> > > pgid    before <-> after        diff    diff_num
+> > > 0.1e    [5, 0, 3] <-> [5, 0, 7]         [3]     1
+> > > 0.1f    [0, 6, 3] <-> [0, 6, 4]         [3]     1
+> > > 0.1a    [0, 5, 2] <-> [0, 5, 6]         [2]     1
+> > > 0.5     [6, 3, 0] <-> [6, 0, 5]         [3]     1
+> > > 0.4     [5, 7, 2] <-> [5, 7, 0]         [2]     1
+> > > 0.7     [3, 7, 1] <-> [7, 1, 5]         [3]     1
+> > > 0.6     [2, 0, 7] <-> [0, 7, 4]         [2]     1
+> > > 0.9     [3, 5, 1] <-> [5, 1, 7]         [3]     1
+> > > 0.15    [2, 6, 1] <-> [6, 1, 4]         [2]     1
+> > > 0.14    [3, 7, 5] <-> [7, 5, 1]         [3]     1
+> > > 0.17    [0, 4, 3] <-> [0, 4, 6]         [3]     1
+> > > 0.16    [0, 4, 3] <-> [0, 4, 6]         [3]     1
+> > > 0.11    [4, 6, 3] <-> [4, 6, 0]         [3]     1
+> > > 0.10    [0, 3, 6] <-> [0, 6, 5]         [3]     1
+> > > 0.13    [1, 7, 3] <-> [1, 7, 5]         [3]     1
+> > > 0.a     [0, 3, 6] <-> [0, 6, 5]         [3]     1
+> > > 0.c     [5, 0, 3] <-> [5, 0, 6]         [3]     1
+> > > 0.b     [2, 4, 6] <-> [4, 6, 1]         [2]     1
+> > > 0.18    [7, 3, 5] <-> [7, 5, 1]         [3]     1
+> > > 0.f     [2, 6, 5] <-> [6, 5, 1]         [2]     1
+> > > Changed pg ratio: 20 / 32
+> > >
+> > > Currently the only defect I can see from the change is that the chance for a given pg to successfully
+> > choose required available OSDs might be a bit lower compared with before. However, I believe it will
+> > cause problems only when the cluster is pretty small and degraded. And in that case, we can still make
+> > it workable by tuning some of the crushmap parameters such as chooseleaf_tries.
+> > >
+> > > Anyway I'm not sure if it would raise any other issues, could you please review it and maybe give me
+> > some suggestions? Thank you!
+> > >
+> > > ----------
+> > > Best regards,
+> > > Sangdi
+> > >
+> > > ----------------------------------------------------------------------
+> > > ---------------------------------------------------------------
+> > > ????????????????????????????????????????
+> > > ????????????????????????????????????????
+> > > ????????????????????????????????????????
+> > > ???
+> > > This e-mail and its attachments contain confidential information from
+> > > H3C, which is intended only for the person or entity whose address is
+> > > listed above. Any use of the information contained herein in any way
+> > > (including, but not limited to, total or partial disclosure,
+> > > reproduction, or dissemination) by persons other than the intended
+> > > recipient(s) is prohibited. If you receive this e-mail in error,
+> > > please notify the sender by phone or email immediately and delete it!
+> > > N?????r??y??????X???v???)?{.n?????z?]z????ay?????j ??f???h??????w???
+> >
+> > ???j:+v???w???????? ????zZ+???????j"????i
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to
+> > majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> -------------------------------------------------------------------------------------------------------------------------------------
+> ????????????????????????????????????????
+> ????????????????????????????????????????
+> ????????????????????????????????????????
+> ???
+> This e-mail and its attachments contain confidential information from H3C, which is
+> intended only for the person or entity whose address is listed above. Any use of the
+> information contained herein in any way (including, but not limited to, total or partial
+> disclosure, reproduction, or dissemination) by persons other than the intended
+> recipient(s) is prohibited. If you receive this e-mail in error, please notify the sender
+> by phone or email immediately and delete it!
+> N?????r??y??????X???v???)?{.n?????z?]z????ay?????j??f???h??????w??????j:+v???w????????????zZ+???????j"????i
