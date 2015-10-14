@@ -1,72 +1,245 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [Ceph-announce] v9.1.0 Infernalis release candidate released
-Date: Wed, 14 Oct 2015 05:37:02 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1510140530190.6589@cobra.newdream.net>
-References: <alpine.DEB.2.00.1510131356001.27022@cobra.newdream.net> <87io6998m7.fsf@meteor.durcheinandertal.bofh>
+From: John Spray <jspray@redhat.com>
+Subject: Re: MDS stuck in a crash loop
+Date: Wed, 14 Oct 2015 14:21:22 +0100
+Message-ID: <CALe9h7eMAhCjh9NSHc=yQgEDc2zZ_Ts3Kp1XbD_xxH+oCV3NkA@mail.gmail.com>
+References: <CANP1eJGesJ_wGKDNQRJ952x8jkNHiJybeX075wxmJDurbSTMNw@mail.gmail.com>
+ <CAJ4mKGY5uTZ6oiqZY4VbU5LdECXx5sko6VOd5aD2aEhtq74NDA@mail.gmail.com>
+ <CANP1eJFNpLu3-HeqJ28L7xCTuKh-MhUT2j7A_tM7reofZ94FTQ@mail.gmail.com>
+ <CANP1eJFGy4psfmUHpsgdPFT+UUW=NTzLTgAsnGqeuD6iWuF-cQ@mail.gmail.com>
+ <CANP1eJHnavBzJRnDLa9gQ93haJ2QzKJsLj4+ZbS_vd1kquV8Lw@mail.gmail.com>
+ <CANP1eJGmjechy8ZkVarA-HWdL37scmHdQXToM6NdAXxU-_KVMw@mail.gmail.com> <CANP1eJHYvgUKDCKrVYY=XkJsgcdVGn6T=drvEA8hofHyVX+0YA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:49455 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753052AbbJNMhC (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Oct 2015 08:37:02 -0400
-In-Reply-To: <87io6998m7.fsf@meteor.durcheinandertal.bofh>
+Received: from mail-oi0-f44.google.com ([209.85.218.44]:35864 "EHLO
+	mail-oi0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753884AbbJNNVm convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Oct 2015 09:21:42 -0400
+Received: by oihr205 with SMTP id r205so27454837oih.3
+        for <ceph-devel@vger.kernel.org>; Wed, 14 Oct 2015 06:21:41 -0700 (PDT)
+In-Reply-To: <CANP1eJHYvgUKDCKrVYY=XkJsgcdVGn6T=drvEA8hofHyVX+0YA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gaudenz Steinlin <gaudenz@debian.org>
-Cc: ceph-devel@vger.kernel.org, ceph-maintainers@ceph.com, James Page <jamespage@debian.org>
+To: Milosz Tanski <milosz@adfin.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, 14 Oct 2015, Gaudenz Steinlin wrote:
-> 
-> Hi
-> 
-> Sage Weil <sage@newdream.net> writes:
-> > Upgrading from Firefly
-> > ----------------------
-> >
-> > Upgrading directly from Firefly v0.80.z is not possible.  All clusters
-> > must first upgrade to Hammer v0.94.4 or a later v0.94.z release; only
-> > then is it possible to upgrade to Infernalis 9.2.z.
-> >
-> 
-> What's the exact issue with upgrading directly from Firefly to
-> Infernalis? Is it just that you can't run mixed Firefly and Infernalis
-> versions at the same time during an upgrade or is also the on disk
-> format changing so that Infernals daemons won't understand the Firefly
-> data structures?
+On Mon, Oct 12, 2015 at 3:36 AM, Milosz Tanski <milosz@adfin.com> wrote=
+:
+> On Sun, Oct 11, 2015 at 6:44 PM, Milosz Tanski <milosz@adfin.com> wro=
+te:
+>> On Sun, Oct 11, 2015 at 6:01 PM, Milosz Tanski <milosz@adfin.com> wr=
+ote:
+>>> On Sun, Oct 11, 2015 at 5:33 PM, Milosz Tanski <milosz@adfin.com> w=
+rote:
+>>>> On Sun, Oct 11, 2015 at 5:24 PM, Milosz Tanski <milosz@adfin.com> =
+wrote:
+>>>>> On Sun, Oct 11, 2015 at 1:16 PM, Gregory Farnum <gfarnum@redhat.c=
+om> wrote:
+>>>>>> On Sun, Oct 11, 2015 at 10:09 AM, Milosz Tanski <milosz@adfin.co=
+m> wrote:
+>>>>>>> About an hour ago my MDSs (primary and follower) started ping-p=
+ong
+>>>>>>> crashing with this message. I've spent about 30 minutes looking=
+ into
+>>>>>>> it but nothing yet.
+>>>>>>>
+>>>>>>> This is from a 0.94.3 MDS
+>>>>>>>
+>>>>>>
+>>>>>>>      0> 2015-10-11 17:01:23.596008 7fd4f52ad700 -1 mds/SessionM=
+ap.cc:
+>>>>>>> In function 'virtual void C_IO_SM_Save::finish(int)' thread
+>>>>>>> 7fd4f52ad700 time 2015-10-11 17:01:23.594089
+>>>>>>> mds/SessionMap.cc: 120: FAILED assert(r =3D=3D 0)
+>>>>>>
+>>>>>> These "r =3D=3D 0" asserts pretty much always mean that the MDS =
+did did a
+>>>>>> read or write to RADOS (the OSDs) and got an error of some kind =
+back.
+>>>>>> (Or in the case of the OSDs, access to the local filesystem retu=
+rned
+>>>>>> an error, etc.) I don't think these writes include any safety ch=
+ecks
+>>>>>> which would let the MDS break it which means that probably the O=
+SD is
+>>>>>> actually returning an error =E2=80=94 odd, but not impossible.
+>>>>>>
+>>>>>> Notice that the assert happened in thread 7fd4f52ad700, and look=
+ for
+>>>>>> the stuff in that thread. You should be able to find an OSD op r=
+eply
+>>>>>> (on the SessionMap object) coming in and reporting an error code=
+=2E
+>>>>>> -Greg
+>>>>>
+>>>>> I only two error ops in that whole MDS session. Neither one happe=
+ned
+>>>>> on the same thread (7f5ab6000700 in this file). But it looks like=
+ the
+>>>>> only session map is the -90 "Message too long" one.
+>>>>>
+>>>>> mtanski@tiny:~$ cat single_crash.log | grep 'osd_op_reply' | grep=
+ -v
+>>>>> 'ondisk =3D 0'
+>>>>>  -3946> 2015-10-11 20:51:11.013965 7f5ab20f2700  1 --
+>>>>> 10.0.5.31:6802/27121 <=3D=3D osd.25 10.0.5.57:6804/32341 6163 =3D=
+=3D=3D=3D
+>>>>> osd_op_reply(46349 mds0_sessionmap [writefull 0~95168363] v0'0 uv=
+0
+>>>>> ondisk =3D -90 ((90) Message too long)) v6 =3D=3D=3D=3D 182+0+0 (=
+2955408122 0 0)
+>>>>> 0x3a55d340 con 0x3d5a3c0
+>>>>>   -705> 2015-10-11 20:51:11.374132 7f5ab22f4700  1 --
+>>>>> 10.0.5.31:6802/27121 <=3D=3D osd.28 10.0.5.50:6801/1787 5297 =3D=3D=
+=3D=3D
+>>>>> osd_op_reply(48004 300.0000e274 [delete] v0'0 uv1349638 ondisk =3D=
+ -2
+>>>>> ((2) No such file or directory)) v6 =3D=3D=3D=3D 179+0+0 (1182549=
+251 0 0)
+>>>>> 0x66c5c80 con 0x3d5a7e0
+>>>>>
+>>>>> Any idea what this could be Greg?
+>>>>
+>>>> To follow this up I found this ticket from 9 months ago:
+>>>> http://tracker.ceph.com/issues/10449 In there Yan says:
+>>>>
+>>>> "it's a kernel bug. hang request prevents mds from trimming
+>>>> completed_requests in sessionmap. there is nothing to do with mds.
+>>>> (maybe we should add some code to MDS to show warning when this bu=
+g
+>>>> happens)"
+>>>>
+>>>> When I was debugging this I saw an OSD (not cephfs client) operati=
+on
+>>>> stuck for a long time along with the MDS error:
+>>>>
+>>>> HEALTH_WARN 1 requests are blocked > 32 sec; 1 osds have slow
+>>>> requests; mds cluster is degraded; mds0: Behind on trimming (709/3=
+0)
+>>>> 1 ops are blocked > 16777.2 sec
+>>>> 1 ops are blocked > 16777.2 sec on osd.28
+>>>>
+>>>> I did eventually bounce the OSD in question and it hasn't become s=
+tuck
+>>>> since, but the MDS is still eating it every time with the "Message=
+ too
+>>>> long" error on the session map.
+>>>>
+>>>> I'm not quite sure where to go from here.
+>>>
+>>> First time I had a chance to use the new recover tools. I was able =
+to
+>>> reply the journal, reset it and then reset the sessionmap. MDS
+>>> returned back to life and so far everything looks good. Yay.
+>>>
+>>> Triggering this a bug/issue is a pretty interesting set of steps.
+>>
+>> Spoke too soon, a missing dir is now causing MDS to restart it self.
+>>
+>>     -6> 2015-10-11 22:40:47.300169 7f580c7b9700  5 -- op tracker --
+>> seq: 4, time: 2015-10-11 22:40:47.300168, event: finishing request,
+>> op: client_request(client.3597476:21480382 rmdir #100015e0be2/58
+>> 2015-10-11 21:34:49.224905 RETRY=3D36)
+>>     -5> 2015-10-11 22:40:47.300208 7f580c7b9700  5 -- op tracker --
+>> seq: 4, time: 2015-10-11 22:40:47.300208, event: cleaned up request,
+>> op: client_request(client.3597476:21480382 rmdir #100015e0be2/58
+>> 2015-10-11 21:34:49.224905 RETRY=3D36)
+>>     -4> 2015-10-11 22:40:47.300231 7f580c7b9700  5 -- op tracker --
+>> seq: 4, time: 2015-10-11 22:40:47.300231, event: done, op:
+>> client_request(client.3597476:21480382 rmdir #100015e0be2/58
+>> 2015-10-11 21:34:49.224905 RETRY=3D36)
+>>     -3> 2015-10-11 22:40:47.300284 7f580e0bd700  0
+>> mds.0.cache.dir(100048df076) _fetched missing object for [dir
+>> 100048df076 /petabucket/beta/6d/f6/ [2,head] auth v=3D0 cv=3D0/0 ap=3D=
+1+0+0
+>> state=3D1073741952 f() n() hs=3D0+0,ss=3D0+0 | waiter=3D1 authpin=3D=
+1 0x6debcf8]
+>>     -2> 2015-10-11 22:40:47.300313 7f580e0bd700 -1
+>> log_channel(cluster) log [ERR] : dir 100048df076 object missing on
+>> disk; some files may be lost
+>>     -1> 2015-10-11 22:40:47.300549 7f580c7b9700  5 -- op tracker --
+>> seq: 6, time: 2015-10-11 22:40:47.300549, event: acquired locks, op:
+>> client_request(client.3710941:1805 mkdir
+>> #100048df076/1dd4c66b916cf55f19beafc0574ac2dd923bc7efcc5b7757198f323=
+e04d0.dl
+>> 2015-10-11 22:36:32.489705 RETRY=3D33)
+>>      0> 2015-10-11 22:40:47.303770 7f580c7b9700 -1 mds/CDir.cc: In
+>> function 'fnode_t* CDir::project_fnode()' thread 7f580c7b9700 time
+>> 2015-10-11 22:40:47.300581
+>> mds/CDir.cc: 1267: FAILED assert(get_version() !=3D 0)
 
-There are two issues:
+Hmm, so something is creating a dentry that points to a dirfrag object
+that doesn't really exist.  What was the series of client operations
+that led to the directory (the one with inode number 0x100048df076)
+being where it is now?  Was it created there, or moved there from
+somewhere?
 
-1- By requiring that each ceph-osd process start up on hammer, we were 
-able to remove a bunch of compatibility/conversion code for supporting 
-pre-hammer on-disk formats.  This was just nice cleanup.
+The way this is meant to work is that the journal we scavenge from
+contains EMetaBlobs that include fnodes, and when we scavenge the
+fnode, we write it into the dirfrag header, creating the dirfrag if it
+doesn't exist.  The same mkdir that creates the dentry should also
+contain the update to the fnode.
 
-2- A running post-hammer OSD can't talk to a pre-hammer OSD.  Partly it 
-was an opportunity to remove a bunch of compat code, but in the end we 
-also had to make fixes to hammer itself to make it interoperate with 
-infernalis (hence the requirement that you run v0.94.4+, not v0.94.z).
+It would be really useful to get a copy of the journal at the point
+right before you run "recover dentries".
 
-> This is bad for Debian as the current stable release contains Firefly
-> and the next Debian stable will likely contain the LTS release scheduled
-> after Infernalis. So there won't be a Debian stable with Hammer. But
-> upgrades are important and we would really like to have an upgrade path
-> From one Debian release to the next.
-> 
-> Is there anything that can be done about this? At least having an
-> offline upgrade option would be nice, if an online upgrade is not
-> possible. How are other distributions planing to handle this? Ubuntu
-> will likely have a similar problem at least for LTS to LTS upgrades.
+Separately, I've been extending our journal repair test to see if I
+could get a similar result, I haven't found a path that results in a
+dentry-but-no-dirfrag case, but I can at least get the particular
+assertion you're seeing, so I'll fix that in master.
 
-That does suck... I definitely didn't consider this possibility.
+John
 
-One possibility is to revert #1 above so that you can upgrade from 
-firefly -> jewel as long as you stop all OSDs.  That rules out an online 
-upgrade but at least it can be done with debian packages.  It's the patch 
-series merged by cbe101e7db4265dfaeae3b85d5e7f266c6a1e9d5 that is the 
-problem.
 
-The other possiblity is to ask users to upgrade via ceph.com packages.  
 
-Hrm...
-sage
 
+>>
+>>  ceph version 0.94.3 (95cefea9fd9ab740263bf8bb4796fd864d9afe2b)
+>>  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+>> const*)+0x8b) [0x94cc1b]
+>>  2: (CDir::project_fnode()+0x2da) [0x75da1a]
+>
+> Worked around this as well. Stopped the client that was trying to
+> access this dir (or delete it, not sure) and move it somewhere else
+> (because I can't delete it).
+>
+> A series of steps that happened today (not sure if all are related) i=
+n
+> case the postmortem is interesting to anybody following at home.
+>
+> 1. One (of 5) monitors somehow gets OOM killed after eating up 10gigs=
+ of ram.
+> 2. An OSD blocks on an IO request
+> 3. This is when the MSD starts growing it's SessionMap to a place
+> where eventually it gets to big. This is related to bug:
+> http://tracker.ceph.com/issues/10449 (not the client bug, but the too
+> large Session)
+> 4. MDS suicides and then two MDS machines start ping ponging in
+> recovery but always fail to save SessionMap.
+> 5. I stop the MDS, recover the journal and reset the session map.
+> 6. MDS come back to life after that.
+> 7. Ceph loses one directory and as soon as the client tries to access
+> it the MDS also suicides. Standing bug:
+> http://tracker.ceph.com/issues/9880
+> 8. Lame workaround (moving / renaming bad dir) so client doesn't acce=
+ss it.
+>
+> --
+> Milosz Tanski
+> CTO
+> 16 East 34th Street, 15th floor
+> New York, NY 10016
+>
+> p: 646-253-9055
+> e: milosz@adfin.com
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
