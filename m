@@ -1,60 +1,61 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: does newstore skip some data ??
-Date: Thu, 15 Oct 2015 05:25:48 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1510150524550.16833@cobra.newdream.net>
-References: <EBFBEFF470372547BAACF06D39FF53A54F5A9732@SACMBXIP02.sdcorp.global.sandisk.com>
+From: Mykola Golub <mgolub@mirantis.com>
+Subject: Re: CEPH_RBD_API: options on image create
+Date: Thu, 15 Oct 2015 15:33:02 +0300
+Message-ID: <20151015123300.GC7834@gmail.com>
+References: <20150930065044.GA14958@gmail.com>
+ <807360446.46582415.1444851292070.JavaMail.zimbra@redhat.com>
+ <20151015063308.GA7834@gmail.com>
+ <446012806.46791295.1444910707804.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:55773 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751783AbbJOMZt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Oct 2015 08:25:49 -0400
-In-Reply-To: <EBFBEFF470372547BAACF06D39FF53A54F5A9732@SACMBXIP02.sdcorp.global.sandisk.com>
+Received: from mail-wi0-f177.google.com ([209.85.212.177]:34961 "EHLO
+	mail-wi0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751380AbbJOMdH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Oct 2015 08:33:07 -0400
+Received: by wicll6 with SMTP id ll6so38558402wic.0
+        for <ceph-devel@vger.kernel.org>; Thu, 15 Oct 2015 05:33:05 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <446012806.46791295.1444910707804.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tomy Cheru <Tomy.Cheru@sandisk.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Jason Dillaman <dillaman@redhat.com>
+Cc: ceph-devel@vger.kernel.org, Josh Durgin <jdurgin@redhat.com>
 
-On Thu, 15 Oct 2015, Tomy Cheru wrote:
-> Tried to write 160k objects of 64k size, totaling 10G to newstore via rgw
+On Thu, Oct 15, 2015 at 08:05:07AM -0400, Jason Dillaman wrote:
+> > > I am concerned about passing a void* + length to specify the option
+> > > value since you really can't protect against the user providing data
+> > > in the incorrect format.  For example, if the backend treated
+> > > RBD_OPTION_STRIPE_UNIT as a 4byte int, what happens if someone
+> > > passes a 2- or 8-byte int or a 4-byte char* string?
+> > 
+> > Then rbd_image_options_set() will fail with EINVAL, because the option
+> > type (size) is a part of interface.
+> > 
+> > I do this by analogy to setsockopt(2):
+> > 
+> > http://pubs.opengroup.org/onlinepubs/009695399/functions/setsockopt.html
+> > 
+> > Note option type documented for every option there, and it works
+> > fairly well.
+> > 
+> > Following a common practice is an additional argument to this
+> > approach to me.
 > 
-> PUTS were successful
+> Except for the following cases:
 > 
-> # ./rados df
-> .log                       0          127            0          254            0          762          635          508            0
-> .rgw                       8           40            0           80            0            0            0          100           40
-> .rgw.buckets        10485760       163840            0       327680            0            0            0       819200     10485760
-> .rgw.buckets.index         0           20            0           40            0       655420       655400       655380            0
-> .rgw.control               0            8            0           16            0            0            0            0            0
-> .rgw.gc                    0           32            0           64            0           96           64           64            0
-> .rgw.root                  1            3            0            6            0            3            2            5            5
-> .users                     1            5            0           10            0            0            0            5            5
-> .users.email               1            3            0            6            0            0            0            3            3
-> .users.swift               1            2            0            4            0            0            0            2            2
-> .users.uid                 2            6            0           12            0          134          131          136            8
-> rbd                        0            0            0            0            0            0            0            0            0
->   total used          644956       164086
->   total avail      194620640
->   total space      195265596
-> 
-> however not able to see at least 10G worth data in device
-> 
-> # du -ks dev/osd0/
-> 611548  dev/osd0/
-> # du -ks dev/osd0/db/
-> 611524  dev/osd0/db/
-> # du -ks dev/osd0/fragments/
-> 0       dev/osd0/fragments/
-> 
-> why this discrepancy ??
-> 
-> Does newstore apply any kind of storage efficiency in io path ??
+> sizeof(char*) == sizeof(uint32_t) (32bit)
+> sizeof(char*) == sizeof(uint64_t) (64bit)
 
-In current master rocksdb has snappy compression enabled by default, and 
-I'm guessing you're writing either 0's or something very compressible.
+But we don't need them to match between different platforms, no? Is
+linking 64bit code with 32bit possible (supported)?
 
-If you try wip-newstore-frags cmopression is disabled (it's problematic in 
-general)...
+Also, for this particular (char*) case, length would actually be the
+length of the string, not the pointer length. From my example:
 
-sage
+const char* journal_object_pool = "journal";
+r = rbd_image_options_set(opts, RBD_OPTION_JOURNAL_OBJECT_POOL,
+                          journal_object_pool, strlen(journal_object_pool) + 1);
+
+-- 
+Mykola Golub
