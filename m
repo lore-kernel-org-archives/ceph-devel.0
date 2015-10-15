@@ -1,78 +1,85 @@
-From: Josh Durgin <jdurgin@redhat.com>
-Subject: Re: CEPH_RBD_API: options on image create
-Date: Thu, 15 Oct 2015 11:29:56 -0700
-Message-ID: <561FF0A4.3000805@redhat.com>
-References: <20150930065044.GA14958@gmail.com>
- <807360446.46582415.1444851292070.JavaMail.zimbra@redhat.com>
- <20151015063308.GA7834@gmail.com>
- <446012806.46791295.1444910707804.JavaMail.zimbra@redhat.com>
- <20151015123300.GC7834@gmail.com>
- <1121018324.46808736.1444913278970.JavaMail.zimbra@redhat.com>
- <20151015132832.GD7834@gmail.com>
- <alpine.DEB.2.00.1510150644390.16833@cobra.newdream.net>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH] rbd: don't leak parent_spec in rbd_dev_probe_parent()
+Date: Thu, 15 Oct 2015 20:31:53 +0200
+Message-ID: <CAOi1vP_msQU77wzy82efVNm1Cybs0JK06iEG67w_o=aSw4ONFA@mail.gmail.com>
+References: <1444586591-24141-1-git-send-email-idryomov@gmail.com>
+	<561FDE12.9070406@ieee.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:45459 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752480AbbJOS2t (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 15 Oct 2015 14:28:49 -0400
-In-Reply-To: <alpine.DEB.2.00.1510150644390.16833@cobra.newdream.net>
+Received: from mail-lf0-f47.google.com ([209.85.215.47]:34452 "EHLO
+	mail-lf0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751741AbbJOSbz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Oct 2015 14:31:55 -0400
+Received: by lfaz124 with SMTP id z124so41267341lfa.1
+        for <ceph-devel@vger.kernel.org>; Thu, 15 Oct 2015 11:31:53 -0700 (PDT)
+In-Reply-To: <561FDE12.9070406@ieee.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, Mykola Golub <mgolub@mirantis.com>
-Cc: Jason Dillaman <dillaman@redhat.com>, ceph-devel@vger.kernel.org
+To: Alex Elder <elder@ieee.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 10/15/2015 06:45 AM, Sage Weil wrote:
-> On Thu, 15 Oct 2015, Mykola Golub wrote:
->> On Thu, Oct 15, 2015 at 08:47:58AM -0400, Jason Dillaman wrote:
->>>>
->>>> But we don't need them to match between different platforms, no? Is
->>>> linking 64bit code with 32bit possible (supported)?
->>>>
->>>> Also, for this particular (char*) case, length would actually be the
->>>> length of the string, not the pointer length. From my example:
->>>>
->>>> const char* journal_object_pool = "journal";
->>>> r = rbd_image_options_set(opts, RBD_OPTION_JOURNAL_OBJECT_POOL,
->>>>                            journal_object_pool, strlen(journal_object_pool) +
->>>>                            1);
->>>>
->>>
->>> My original example was a string of length 4 vs a 4-byte int, but
->>> you said you were thinking of sizeof(type) instead.  I think this
->>> style of interface is great if you need to pass any arbitrary data
->>> along, but will we ever expect to pass along anything besides a
->>> string or an (u)int(32/64)?
+On Thu, Oct 15, 2015 at 7:10 PM, Alex Elder <elder@ieee.org> wrote:
+> On 10/11/2015 01:03 PM, Ilya Dryomov wrote:
+>> Currently we leak parent_spec and trigger a "parent reference
+>> underflow" warning if rbd_dev_create() in rbd_dev_probe_parent() fails.
+>> The problem is we take the !parent out_err branch and that only drops
+>> refcounts; parent_spec that would've been freed had we called
+>> rbd_dev_unparent() remains and triggers rbd_warn() in
+>> rbd_dev_parent_put() - at that point we have parent_spec != NULL and
+>> parent_ref == 0, so counter ends up being -1 after the decrement.
 >>
->> I don't know, sure you have much more experience here, so if you
->> hardly expect other types in future, I would be rather then for
->> rbd_image_options_set_{uint64,str}() functions.
+>> Redo rbd_dev_probe_parent() to fix this.
+>
+> I'm just starting to look at this.
+>
+> My up-front problem is that I want to understand why
+> it's OK to no longer grab references to the parent spec
+> and the client before creating the new parent device.
+> Is it simply because the rbd_dev that's the subject
+> of this call is already holding a reference to both,
+> so no need to get another?  I think that's right, but
+> you should say that in the explanation.  It's a
+> change that's independent of the other change (which
+> you describe).
 
-This is my favorite option too.
+I still grab references, I just moved that code after rbd_dev_create().
+Fundamentally rbd_dev_create() is just a memory allocation, so whether
+we acquire references before or after doesn't matter, except that
+acquiring them before complicates the error path.
 
-> Having a str and int variant seems like the best path to me.  Maybe int64
-> though, so that signed values are possible?
+>
+> OK, onto the change you describe.
+>
+> You say that we get the underflow if rbd_dev_create() fails.
+>
+> At that point in the function, we have:
+>     parent == NULL
+>     rbd_dev->parent_spec != NULL
+>     parent_spec holds a new reference to that
+>     rbdc holds a new reference to the client
+>
+> rbd_dev_create() only returns NULL if the kzalloc() fails.
+> And if so, we jump to out_err, take the !parent branch,
+> and we drop the references we took in rbdc and parent_spec
+> before returning.
+>
+> Where is the leak?  (Actually, underflow means we're
+> dropping more references than we took.)
 
-Don't think we need any signed values currently. It doesn't cause any
-ABI problems to add signed ints or other types later, since it'll
-already be overloaded in C++, and for C they need to be new functions
-anyway.
+We enter rbd_dev_probe_parent().  If ->parent_spec != NULL (and
+therefore has a refcount of 1), we bump refcounts and proceed to
+allocating parent rbd_dev.  If rbd_dev_create() fails, we drop
+refcounts and exit rbd_dev_probe_parent() with ->parent_spec != NULL
+and a refcount of 1 on that spec.  We take err_out_probe in
+rbd_dev_image_probe() and through rbd_dev_unprobe() end up in
+rbd_dev_parent_put().  Now, ->parent_spec != NULL but ->parent_ref == 0
+because we never got to atomic_set(&rbd_dev->parent_ref, 1) in
+rbd_dev_probe_parent().  Local counter ends up -1 after the decrement
+and so instead of calling rbd_dev_unparent() which would have freed
+->parent_spec we issue an underflow warning and bail.  ->parent_spec is
+leaked.
 
->>> On the flip-side, what will the C++ interface look like?  An
->>> equivalent API would imply passing a boost::any.  While certainly
->>> future-proof, something about that doesn't sit right with me as an
->>> API.  I think I would lean more towards something like xyz_set(const
->>> std::string&), xyz_set(uint64_t), et al.
->>
->> For C++ I was also thinking about xyz_set(const std::string&),
->> xyz_set(uint64_t) variants, i.e:
->>
->> int rbd::Image::options::set(int optname, const std::string& val);
->> int rbd::Image::options::set(int optname, uint64_t val);
+Thanks,
 
-Sounds good to me.
-
-Josh
-
+                Ilya
