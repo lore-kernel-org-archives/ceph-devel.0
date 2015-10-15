@@ -1,57 +1,68 @@
-From: Ronny Hegewald <ronny.hegewald@online.de>
-Subject: [PATCH] mark rbd requiring stable pages
-Date: Thu, 15 Oct 2015 18:50:46 +0000
-Message-ID: <201510151850.48348.ronny.hegewald@online.de>
-Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+From: Mike Lowe <j.michael.lowe@gmail.com>
+Subject: Keystone auth v3 changes
+Date: Thu, 15 Oct 2015 14:52:59 -0400
+Message-ID: <FAC82F91-8D73-4475-950E-77A5AF60391F@gmail.com>
+Mime-Version: 1.0 (Mac OS X Mail 9.0 \(3094\))
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.126.130]:61518 "EHLO
-	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751850AbbJOStJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Oct 2015 14:49:09 -0400
+Received: from mail-io0-f171.google.com ([209.85.223.171]:33889 "EHLO
+	mail-io0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752664AbbJOSxC convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Oct 2015 14:53:02 -0400
+Received: by iow1 with SMTP id 1so100685311iow.1
+        for <ceph-devel@vger.kernel.org>; Thu, 15 Oct 2015 11:53:01 -0700 (PDT)
+Received: from ?IPv6:2601:801::60db:7948:7ab2:5fbf:3ff1? ([2601:801:0:60db:7948:7ab2:5fbf:3ff1])
+        by smtp.gmail.com with ESMTPSA id mh8sm127284igb.3.2015.10.15.11.53.00
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
+        Thu, 15 Oct 2015 11:53:00 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
-Cc: Ilya Dryomov <idryomov@gmail.com>, Sage Weil <sage@redhat.com>, Alex Elder <elder@kernel.org>
 
-rbd requires stable pages, as it performs a crc of the page data before they 
-are send to the OSDs.
+The keystone v2 api is slated for removal sometime in the near future m=
+aking radosgw unusable with new openstack deployments.  Hoping to jumps=
+tart the process of adding v3 support I propose the following changes a=
+s a minimum to make radosgw compatible with the v3 auth api.  There is =
+an open issue for this http://tracker.ceph.com/issues/13303
 
-But since kernel 3.9 (patch 1d1d1a767206fbe5d4c69493b7e6d2a8d08cc0a0 "mm: only
-enforce stable page writes if the backing device requires it") it is not 
-assumed anymore that block devices require stable pages.
+=46irst the version to use must be determined, quickest and easiest is =
+to add a configurable.  Other clients use the unversioned endpoint to g=
+et a list of available versions; this is probably too complicated for t=
+he initial implementation.
+i.e.
+rgw use keystone version =3D 3
 
-This patch sets the necessary flag to get stable pages back for rbd.
+Based on the value of that configurable the token_url would need to be =
+changed from =E2=80=9Cv2.0/tokens=E2=80=9D to =E2=80=9C/v3/auth/tokens=E2=
+=80=9D.  The auth section needs an Identity object that contains a meth=
+ods section listing password as the method and a password object  with =
+the credentials including the domain (domains are new).  These changes =
+should be made to get_keystone_admin_token  The revoked token list is a=
+n undocumented api feature for v2 and doesn=E2=80=99t seem to exist for=
+ v3.  When validating a token the =E2=80=9C/v3/auth/tokens=E2=80=9D end=
+point is used but unlike v2 the token to be validated is in =E2=80=9CX-=
+Subject-Token=E2=80=9D instead of appended to the url.
 
-In a ceph installation that provides multiple ext4 formatted rbd devices "bad 
-crc" messages appeared regularly (ca 1 message every 1-2 minutes on every OSD 
-that provided the data for the rbd) in the OSD-logs before this patch. After 
-this patch this messages are pretty much gone (only ca 1-2 / month / OSD).
+The users now need a domain designation because testuser with domain1 i=
+sn=E2=80=99t the same user as testuser with domain2.  Backwards compati=
+bility with V2 is done by assigning them all to the default domain of =E2=
+=80=9Cdefault=E2=80=9D although this may need to be a configurable. =20
 
-This patch seems also to fix data and filesystem corruptions on ext4 formatted 
-rbd devices that were previously seen on pretty much a daily basis. But it is 
-unknown at the moment why this is the case.  
+The copy of the token json returned when validating has a top level =E2=
+=80=9Ctoken=E2=80=9D instead of =E2=80=9Caccess=E2=80=9D: {=E2=80=9Ctok=
+en=E2=80=9D: =E2=80=A6}  and that key has =E2=80=9Cproject=E2=80=9D, =E2=
+=80=9Croles=E2=80=9D, and =E2=80=9Cuser=E2=80=9D objects.  This will ne=
+ed some slightly different parsing vs a v2 token.
 
-Signed-off-by: Ronny Hegewald <Ronny.Hegewald@online.de>
+Some details of moving from v2 to v3:
+http://docs.openstack.org/developer/keystone/http-api.html
 
----
-
-That the mentioned corruption issue is really affected through this patch 
-i could verify through the system logs. Since installation of this patch i 
-have seen only a 2-3 filesystem corruptions. But these could be also just 
-leftovers of corruptions that happened before the installation but got noticed 
-from ext4 only later after the patched kernel was installed. This seems even 
-more likely as i have seen not a single data corruption issue since the patch. 
-
---- linux/drivers/block/rbd.c.org	2015-10-07 01:32:55.906666667 +0000
-+++ linux/drivers/block/rbd.c	2015-09-04 02:21:22.349999999 +0000
-@@ -3786,6 +3786,7 @@
- 
- 	blk_queue_merge_bvec(q, rbd_merge_bvec);
- 	disk->queue = q;
-+	disk->queue->backing_dev_info.capabilities |= BDI_CAP_STABLE_WRITES;
- 
- 	q->queuedata = rbd_dev;
- 
+API definitions for v2 and v3:
+http://developer.openstack.org/api-ref-identity-v3.html
+http://developer.openstack.org/api-ref-identity-admin-v2.html--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
