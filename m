@@ -1,85 +1,57 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH] rbd: don't leak parent_spec in rbd_dev_probe_parent()
-Date: Thu, 15 Oct 2015 20:31:53 +0200
-Message-ID: <CAOi1vP_msQU77wzy82efVNm1Cybs0JK06iEG67w_o=aSw4ONFA@mail.gmail.com>
-References: <1444586591-24141-1-git-send-email-idryomov@gmail.com>
-	<561FDE12.9070406@ieee.org>
+From: Ronny Hegewald <ronny.hegewald@online.de>
+Subject: [PATCH] mark rbd requiring stable pages
+Date: Thu, 15 Oct 2015 18:50:46 +0000
+Message-ID: <201510151850.48348.ronny.hegewald@online.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: Text/Plain;
+  charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f47.google.com ([209.85.215.47]:34452 "EHLO
-	mail-lf0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751741AbbJOSbz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Oct 2015 14:31:55 -0400
-Received: by lfaz124 with SMTP id z124so41267341lfa.1
-        for <ceph-devel@vger.kernel.org>; Thu, 15 Oct 2015 11:31:53 -0700 (PDT)
-In-Reply-To: <561FDE12.9070406@ieee.org>
+Received: from mout.kundenserver.de ([212.227.126.130]:61518 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751850AbbJOStJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Oct 2015 14:49:09 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@ieee.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: Ilya Dryomov <idryomov@gmail.com>, Sage Weil <sage@redhat.com>, Alex Elder <elder@kernel.org>
 
-On Thu, Oct 15, 2015 at 7:10 PM, Alex Elder <elder@ieee.org> wrote:
-> On 10/11/2015 01:03 PM, Ilya Dryomov wrote:
->> Currently we leak parent_spec and trigger a "parent reference
->> underflow" warning if rbd_dev_create() in rbd_dev_probe_parent() fails.
->> The problem is we take the !parent out_err branch and that only drops
->> refcounts; parent_spec that would've been freed had we called
->> rbd_dev_unparent() remains and triggers rbd_warn() in
->> rbd_dev_parent_put() - at that point we have parent_spec != NULL and
->> parent_ref == 0, so counter ends up being -1 after the decrement.
->>
->> Redo rbd_dev_probe_parent() to fix this.
->
-> I'm just starting to look at this.
->
-> My up-front problem is that I want to understand why
-> it's OK to no longer grab references to the parent spec
-> and the client before creating the new parent device.
-> Is it simply because the rbd_dev that's the subject
-> of this call is already holding a reference to both,
-> so no need to get another?  I think that's right, but
-> you should say that in the explanation.  It's a
-> change that's independent of the other change (which
-> you describe).
+rbd requires stable pages, as it performs a crc of the page data before they 
+are send to the OSDs.
 
-I still grab references, I just moved that code after rbd_dev_create().
-Fundamentally rbd_dev_create() is just a memory allocation, so whether
-we acquire references before or after doesn't matter, except that
-acquiring them before complicates the error path.
+But since kernel 3.9 (patch 1d1d1a767206fbe5d4c69493b7e6d2a8d08cc0a0 "mm: only
+enforce stable page writes if the backing device requires it") it is not 
+assumed anymore that block devices require stable pages.
 
->
-> OK, onto the change you describe.
->
-> You say that we get the underflow if rbd_dev_create() fails.
->
-> At that point in the function, we have:
->     parent == NULL
->     rbd_dev->parent_spec != NULL
->     parent_spec holds a new reference to that
->     rbdc holds a new reference to the client
->
-> rbd_dev_create() only returns NULL if the kzalloc() fails.
-> And if so, we jump to out_err, take the !parent branch,
-> and we drop the references we took in rbdc and parent_spec
-> before returning.
->
-> Where is the leak?  (Actually, underflow means we're
-> dropping more references than we took.)
+This patch sets the necessary flag to get stable pages back for rbd.
 
-We enter rbd_dev_probe_parent().  If ->parent_spec != NULL (and
-therefore has a refcount of 1), we bump refcounts and proceed to
-allocating parent rbd_dev.  If rbd_dev_create() fails, we drop
-refcounts and exit rbd_dev_probe_parent() with ->parent_spec != NULL
-and a refcount of 1 on that spec.  We take err_out_probe in
-rbd_dev_image_probe() and through rbd_dev_unprobe() end up in
-rbd_dev_parent_put().  Now, ->parent_spec != NULL but ->parent_ref == 0
-because we never got to atomic_set(&rbd_dev->parent_ref, 1) in
-rbd_dev_probe_parent().  Local counter ends up -1 after the decrement
-and so instead of calling rbd_dev_unparent() which would have freed
-->parent_spec we issue an underflow warning and bail.  ->parent_spec is
-leaked.
+In a ceph installation that provides multiple ext4 formatted rbd devices "bad 
+crc" messages appeared regularly (ca 1 message every 1-2 minutes on every OSD 
+that provided the data for the rbd) in the OSD-logs before this patch. After 
+this patch this messages are pretty much gone (only ca 1-2 / month / OSD).
 
-Thanks,
+This patch seems also to fix data and filesystem corruptions on ext4 formatted 
+rbd devices that were previously seen on pretty much a daily basis. But it is 
+unknown at the moment why this is the case.  
 
-                Ilya
+Signed-off-by: Ronny Hegewald <Ronny.Hegewald@online.de>
+
+---
+
+That the mentioned corruption issue is really affected through this patch 
+i could verify through the system logs. Since installation of this patch i 
+have seen only a 2-3 filesystem corruptions. But these could be also just 
+leftovers of corruptions that happened before the installation but got noticed 
+from ext4 only later after the patched kernel was installed. This seems even 
+more likely as i have seen not a single data corruption issue since the patch. 
+
+--- linux/drivers/block/rbd.c.org	2015-10-07 01:32:55.906666667 +0000
++++ linux/drivers/block/rbd.c	2015-09-04 02:21:22.349999999 +0000
+@@ -3786,6 +3786,7 @@
+ 
+ 	blk_queue_merge_bvec(q, rbd_merge_bvec);
+ 	disk->queue = q;
++	disk->queue->backing_dev_info.capabilities |= BDI_CAP_STABLE_WRITES;
+ 
+ 	q->queuedata = rbd_dev;
+ 
