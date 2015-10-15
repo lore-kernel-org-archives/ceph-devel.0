@@ -1,169 +1,133 @@
 From: Josh Durgin <jdurgin@redhat.com>
-Subject: Re: [PATCH] rbd: prevent kernel stack blow up on rbd map
-Date: Wed, 14 Oct 2015 19:03:34 -0700
-Message-ID: <561F0976.6030201@redhat.com>
-References: <1444586747-24268-1-git-send-email-idryomov@gmail.com>
+Subject: Re: CEPH_RBD_API: options on image create
+Date: Wed, 14 Oct 2015 20:12:37 -0700
+Message-ID: <561F19A5.4080500@redhat.com>
+References: <20150930065044.GA14958@gmail.com>
+ <807360446.46582415.1444851292070.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:48717 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:44390 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751098AbbJOCC2 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 14 Oct 2015 22:02:28 -0400
-In-Reply-To: <1444586747-24268-1-git-send-email-idryomov@gmail.com>
+	id S932437AbbJODLb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 14 Oct 2015 23:11:31 -0400
+In-Reply-To: <807360446.46582415.1444851292070.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
-Cc: Xudong Cao <cao.xudong@h3c.com>
+To: Jason Dillaman <dillaman@redhat.com>, Mykola Golub <mgolub@mirantis.com>
+Cc: ceph-devel@vger.kernel.org
 
-On 10/11/2015 11:05 AM, Ilya Dryomov wrote:
-> Mapping an image with a long parent chain (e.g. image foo, whose parent
-> is bar, whose parent is baz, etc) currently leads to a kernel stack
-> overflow, due to the following recursion in the reply path:
+On 10/14/2015 12:34 PM, Jason Dillaman wrote:
+> In general, I like the approach.
 >
->    rbd_osd_req_callback()
->      rbd_obj_request_complete()
->        rbd_img_obj_callback()
->          rbd_img_parent_read_callback()
->            rbd_obj_request_complete()
->              ...
->
-> Limit the parent chain to 8 images, which is ~3K worth of stack.  It's
-> probably a good thing to do regardless - performance with more than
-> a few images long parent chain is likely to be pretty bad.
+> I am concerned about passing a void* + length to specify the option value since you really can't protect against the user providing data in the incorrect format.  For example, if the backend treated RBD_OPTION_STRIPE_UNIT as a 4byte int, what happens if someone passes a 2- or 8-byte int or a 4-byte char* string?  Therefore, I would vote for passing strings a la librados rados_conf_set.
 
-Long term I don't think a limit is necessary. With object map, there's
-no real performance penalty for long chains. Once the recursion is
-removed, we can get rid of the limit.
+It seems like that'd be a bit clunky from C, since you'd need to create
+and fill in buffers for each option.
 
-This is a simple backportable fix for now though, and it looks good to
-me.
+For safety we could have typed rbd_image_options_{get,set} for char*
+and uint64_t - it doesn't seem like we need any other types right now,
+since uint64_t is a superset of what we use int for.
 
-Reviewed-by: Josh Durgin <jdurgin@redhat.com>
+Another alternative is a single get/set that takes a tagged union, e.g.
 
-> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
-> ---
->   drivers/block/rbd.c | 33 +++++++++++++++++++++++----------
->   1 file changed, 23 insertions(+), 10 deletions(-)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index ccbc3cbbf24e..07f666f4ca18 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -96,6 +96,8 @@ static int atomic_dec_return_safe(atomic_t *v)
->   #define RBD_MINORS_PER_MAJOR		256
->   #define RBD_SINGLE_MAJOR_PART_SHIFT	4
->
-> +#define RBD_MAX_PARENT_CHAIN_LEN	8
-> +
->   #define RBD_SNAP_DEV_NAME_PREFIX	"snap_"
->   #define RBD_MAX_SNAP_NAME_LEN	\
->   			(NAME_MAX - (sizeof (RBD_SNAP_DEV_NAME_PREFIX) - 1))
-> @@ -426,7 +428,7 @@ static ssize_t rbd_add_single_major(struct bus_type *bus, const char *buf,
->   				    size_t count);
->   static ssize_t rbd_remove_single_major(struct bus_type *bus, const char *buf,
->   				       size_t count);
-> -static int rbd_dev_image_probe(struct rbd_device *rbd_dev, bool mapping);
-> +static int rbd_dev_image_probe(struct rbd_device *rbd_dev, int depth);
->   static void rbd_spec_put(struct rbd_spec *spec);
->
->   static int rbd_dev_id_to_minor(int dev_id)
-> @@ -5131,7 +5133,12 @@ out_err:
->   	return ret;
->   }
->
-> -static int rbd_dev_probe_parent(struct rbd_device *rbd_dev)
-> +/*
-> + * @depth is rbd_dev_image_probe() -> rbd_dev_probe_parent() ->
-> + * rbd_dev_image_probe() recursion depth, which means it's also the
-> + * length of the already discovered part of the parent chain.
-> + */
-> +static int rbd_dev_probe_parent(struct rbd_device *rbd_dev, int depth)
->   {
->   	struct rbd_device *parent = NULL;
->   	int ret;
-> @@ -5139,6 +5146,12 @@ static int rbd_dev_probe_parent(struct rbd_device *rbd_dev)
->   	if (!rbd_dev->parent_spec)
->   		return 0;
->
-> +	if (++depth > RBD_MAX_PARENT_CHAIN_LEN) {
-> +		pr_info("parent chain is too long (%d)\n", depth);
-> +		ret = -EINVAL;
-> +		goto out_err;
-> +	}
-> +
->   	parent = rbd_dev_create(rbd_dev->rbd_client, rbd_dev->parent_spec,
->   				NULL);
->   	if (!parent) {
-> @@ -5153,7 +5166,7 @@ static int rbd_dev_probe_parent(struct rbd_device *rbd_dev)
->   	__rbd_get_client(rbd_dev->rbd_client);
->   	rbd_spec_get(rbd_dev->parent_spec);
->
-> -	ret = rbd_dev_image_probe(parent, false);
-> +	ret = rbd_dev_image_probe(parent, depth);
->   	if (ret < 0)
->   		goto out_err;
->
-> @@ -5282,7 +5295,7 @@ static void rbd_dev_image_release(struct rbd_device *rbd_dev)
->    * parent), initiate a watch on its header object before using that
->    * object to get detailed information about the rbd image.
->    */
-> -static int rbd_dev_image_probe(struct rbd_device *rbd_dev, bool mapping)
-> +static int rbd_dev_image_probe(struct rbd_device *rbd_dev, int depth)
->   {
->   	int ret;
->
-> @@ -5300,7 +5313,7 @@ static int rbd_dev_image_probe(struct rbd_device *rbd_dev, bool mapping)
->   	if (ret)
->   		goto err_out_format;
->
-> -	if (mapping) {
-> +	if (!depth) {
->   		ret = rbd_dev_header_watch_sync(rbd_dev);
->   		if (ret) {
->   			if (ret == -ENOENT)
-> @@ -5321,7 +5334,7 @@ static int rbd_dev_image_probe(struct rbd_device *rbd_dev, bool mapping)
->   	 * Otherwise this is a parent image, identified by pool, image
->   	 * and snap ids - need to fill in names for those ids.
->   	 */
-> -	if (mapping)
-> +	if (!depth)
->   		ret = rbd_spec_fill_snap_id(rbd_dev);
->   	else
->   		ret = rbd_spec_fill_names(rbd_dev);
-> @@ -5343,12 +5356,12 @@ static int rbd_dev_image_probe(struct rbd_device *rbd_dev, bool mapping)
->   		 * Need to warn users if this image is the one being
->   		 * mapped and has a parent.
->   		 */
-> -		if (mapping && rbd_dev->parent_spec)
-> +		if (!depth && rbd_dev->parent_spec)
->   			rbd_warn(rbd_dev,
->   				 "WARNING: kernel layering is EXPERIMENTAL!");
->   	}
->
-> -	ret = rbd_dev_probe_parent(rbd_dev);
-> +	ret = rbd_dev_probe_parent(rbd_dev, depth);
->   	if (ret)
->   		goto err_out_probe;
->
-> @@ -5359,7 +5372,7 @@ static int rbd_dev_image_probe(struct rbd_device *rbd_dev, bool mapping)
->   err_out_probe:
->   	rbd_dev_unprobe(rbd_dev);
->   err_out_watch:
-> -	if (mapping)
-> +	if (!depth)
->   		rbd_dev_header_unwatch_sync(rbd_dev);
->   out_header_name:
->   	kfree(rbd_dev->header_name);
-> @@ -5422,7 +5435,7 @@ static ssize_t do_rbd_add(struct bus_type *bus,
->   	spec = NULL;		/* rbd_dev now owns this */
->   	rbd_opts = NULL;	/* rbd_dev now owns this */
->
-> -	rc = rbd_dev_image_probe(rbd_dev, true);
-> +	rc = rbd_dev_image_probe(rbd_dev, 0);
->   	if (rc < 0)
->   		goto err_out_rbd_dev;
->
->
+struct rbd_image_option {
+     int option;
+     int type;
+     union {
+         uint64_t ui
+         int       i
+         char*     s // NUL-terminated
+     };
+}
 
+where type is an enum of RBD_OPTION_TYPE_{UINT64,INT,STRING} or similar.
+
+> Perhaps rbd_create4 and rbd_clone3 should move the order and features options to rbd_image_options_t as well?
+
+Sounds good - no reason to keep mandatory parameters for options with
+defaults.
+
+>> >Hi,
+>> >
+>> >It was mentioned several times eralier that it would be nice to pass
+>> >options as key/value configuration pairs on image create instead of
+>> >expanding rbd_create/rbd_clone/rbd_copy for every possible
+>> >configuration override.
+>> >
+>> >What do you think about this API?
+>> >
+>> >Introduce rbd_image_options_t and functions to manipulate it:
+>> >
+>> >int rbd_image_options_create(rbd_image_options_t* opts);
+>> >
+>> >void rbd_image_options_destroy(rbd_image_options_t opts);
+>> >
+>> >int rbd_image_options_set(rbd_image_options_t opts, int optname,
+>> >                           const void* optval, size_t optlen);
+>> >
+>> >int rbd_image_options_get(rbd_image_options_t opts, int optname,
+>> >                           void* optval, size_t* optlen);
+>> >
+>> >void rbd_image_options_iterate(rbd_image_options_t opts,
+>> >                                void (*func)(int*  optname, void* optval,
+>> >                                size_t* optlen));
+>> >
+>> >Functions that return a value return 0 on success, and -ERROR on
+>> >failure.
+>> >
+>> >optname is a constant like RBD_OPTION_STRIPE_UNIT,
+>> >RBD_OPTION_STRIPE_COUNT...
+>> >
+>> >Pass options as additional argument to rbd_create, rbd_clone (and may
+>> >be rbd_copy) functions:
+>> >
+>> >int rbd_create4(rados_ioctx_t io, const char *name, uint64_t size,
+>> >	        uint64_t features, int *order, rbd_image_options_t opts);
+>> >
+>> >int rbd_clone3(rados_ioctx_t p_ioctx, const char *p_name,
+>> >                const char *p_snapname, rados_ioctx_t c_ioctx,
+>> >                const char *c_name, uint64_t features, int *c_order,
+>> >                rbd_image_options_t opts);
+>> >
+>> >int rbd_copy3(rbd_image_t src, rbd_image_t dest, rbd_image_options_t opts);
+>> >// possibly
+
+I'm ambivalent about a copy3. If you'd like to implement it, it should
+use the form that creates the destination image:
+
+int rbd_copy3(rbd_image_t src, rados_ioctx_t dest_io_ctx,
+               const char *destname);
+
+>> >
+>> >
+>> >Example:
+>> >
+>> >rbd_image_options_t opts;
+>> >int r;
+>> >r = rbd_image_options_create(&opts);
+>> >assert(r == 0);
+>> >uint64_t stripe_unit = 65536;
+>> >r = rbd_image_options_set(opts, RBD_OPTION_STRIPE_UNIT,
+>> >                           &stripe_unit, size_of(stripe_unit));
+>> >assert(r == 0);
+>> >uint64_t stripe_count = 16;
+>> >r = rbd_image_options_set(opts, RBD_OPTION_STRIPE_COUNT,
+>> >                           &stripe_count, size_of(stripe_count));
+>> >assert(r == 0);
+>> >const char* journal_object_pool = "journal";
+>> >r = rbd_image_options_set(opts, RBD_OPTION_JOURNAL_OBJECT_POOL,
+>> >                           journal_object_pool, strlen(journal_object_pool) +
+>> >                           1);
+>> >assert(r == 0);
+>> >r = rbd_create4(io, name, size, features, int *order, rbd_image_options_t
+>> >opts);
+>> >
+>> >cleanup:
+>> >rbd_image_options_destroy(opts);
+
+I like the API in general. The ability to reuse the same options or
+make small changes to them is nice.
+
+Josh
