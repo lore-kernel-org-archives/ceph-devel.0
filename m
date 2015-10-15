@@ -1,82 +1,58 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: make check bot delays
-Date: Thu, 15 Oct 2015 11:08:47 +0200
-Message-ID: <561F6D1F.30603@dachary.org>
-References: <561ED1D6.7060905@dachary.org>
+From: Tomy Cheru <Tomy.Cheru@sandisk.com>
+Subject: does newstore skip some data ??
+Date: Thu, 15 Oct 2015 09:09:49 +0000
+Message-ID: <EBFBEFF470372547BAACF06D39FF53A54F5A9732@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="SvXRJ2UO7lBwLn8KJbdaWvnuMpU8cl74M"
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:43693 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751050AbbJOJIt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Oct 2015 05:08:49 -0400
-Received: from [10.9.0.6] (unknown [10.0.2.28])
-	by smtp.dmail.dachary.org (Postfix) with ESMTP id F0C3942B5A
-	for <ceph-devel@vger.kernel.org>; Thu, 15 Oct 2015 11:08:47 +0200 (CEST)
-In-Reply-To: <561ED1D6.7060905@dachary.org>
+Received: from mail-bl2on0088.outbound.protection.outlook.com ([65.55.169.88]:47214
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750852AbbJOJKA convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Oct 2015 05:10:00 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---SvXRJ2UO7lBwLn8KJbdaWvnuMpU8cl74M
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Tried to write 160k objects of 64k size, totaling 10G to newstore via rgw
 
-Hi,
+PUTS were successful
 
-TL;DR: the make check bot is fixed (no more delays) but only keeps the la=
-st 30 runs
+# ./rados df
+.log                       0          127            0          254            0          762          635          508            0
+.rgw                       8           40            0           80            0            0            0          100           40
+.rgw.buckets        10485760       163840            0       327680            0            0            0       819200     10485760
+.rgw.buckets.index         0           20            0           40            0       655420       655400       655380            0
+.rgw.control               0            8            0           16            0            0            0            0            0
+.rgw.gc                    0           32            0           64            0           96           64           64            0
+.rgw.root                  1            3            0            6            0            3            2            5            5
+.users                     1            5            0           10            0            0            0            5            5
+.users.email               1            3            0            6            0            0            0            3            3
+.users.swift               1            2            0            4            0            0            0            2            2
+.users.uid                 2            6            0           12            0          134          131          136            8
+rbd                        0            0            0            0            0            0            0            0            0
+  total used          644956       164086
+  total avail      194620640
+  total space      195265596
 
-It looks like the cause of the jenkins delays was the number of run kept =
-in the archives (set to 300). Lowering it down to 30 have jenkins back to=
- running with no delay between jobs (as opposed to using 100% of one core=
- during 10 minutes between two jobs, apparently to do things on the archi=
-ved runs).
+however not able to see at least 10G worth data in device
 
-What I can't really explain is that it also kept 300 jobs two month ago a=
-nd that was no issue. What changed in between... I have no clue.
+# du -ks dev/osd0/
+611548  dev/osd0/
+# du -ks dev/osd0/db/
+611524  dev/osd0/db/
+# du -ks dev/osd0/fragments/
+0       dev/osd0/fragments/
 
-The bot is catching up.
+why this discrepancy ??
 
-Cheers
+Does newstore apply any kind of storage efficiency in io path ??
 
-On 15/10/2015 00:06, Loic Dachary wrote:
-> Hi,
->=20
-> TL;DR: the jenkins instance running make check bot hangs daily, looking=
- for a solution
->=20
-> In the past two weeks the make check bot has experienced troubles for w=
-hich I've been unable to find a cause. The same jenkins instance running =
-it for the past nine month now freezes at random times. Nothing in the lo=
-gs, no error message: either the page or the slave are just doing nothing=
- no matter what. The only reliable solution seems to be a restart of jenk=
-ins (killing the process since even restart blocks).=20
->=20
-> Maybe it's time for the make check bot to run via teuthology instead of=
- jenkins.
->=20
-> Thanks for your patience
->=20
+tomy
 
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
+________________________________
 
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
 
---SvXRJ2UO7lBwLn8KJbdaWvnuMpU8cl74M
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlYfbR8ACgkQ8dLMyEl6F21A+wCfWwePcTgEysf65eSW46P7G0kR
-/PoAnA5WZhllRQh7vtjYShCAitclVW8W
-=K1qj
------END PGP SIGNATURE-----
-
---SvXRJ2UO7lBwLn8KJbdaWvnuMpU8cl74M--
