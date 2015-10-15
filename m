@@ -1,58 +1,58 @@
-From: Tomy Cheru <Tomy.Cheru@sandisk.com>
-Subject: does newstore skip some data ??
-Date: Thu, 15 Oct 2015 09:09:49 +0000
-Message-ID: <EBFBEFF470372547BAACF06D39FF53A54F5A9732@SACMBXIP02.sdcorp.global.sandisk.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH] ceph/osd_client: add support for CEPH_OSD_OP_GETXATTR
+Date: Thu, 15 Oct 2015 11:21:20 +0200
+Message-ID: <CAOi1vP9mM4FcgFDOCQyw-OoQELPJQK26EtRwkNYg5J7u17No5g@mail.gmail.com>
+References: <1444401789-17396-1-git-send-email-ddiss@suse.de>
+	<1444401789-17396-2-git-send-email-ddiss@suse.de>
+	<20151014193740.40e7238f@plati.site>
+	<CAOi1vP8V7xX0zT+npnNz=EDhVfGdABZvetbdjngDadRpatMZoQ@mail.gmail.com>
+	<20151015005150.6bd85b48@plati.site>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0088.outbound.protection.outlook.com ([65.55.169.88]:47214
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750852AbbJOJKA convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Oct 2015 05:10:00 -0400
-Content-Language: en-US
+Received: from mail-wi0-f172.google.com ([209.85.212.172]:38755 "EHLO
+	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752254AbbJOJVV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Oct 2015 05:21:21 -0400
+Received: by wicll6 with SMTP id ll6so9510457wic.1
+        for <ceph-devel@vger.kernel.org>; Thu, 15 Oct 2015 02:21:20 -0700 (PDT)
+In-Reply-To: <20151015005150.6bd85b48@plati.site>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: David Disseldorp <ddiss@suse.de>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Mike Christie <mchristi@redhat.com>, Josh Durgin <jdurgin@redhat.com>
 
-Tried to write 160k objects of 64k size, totaling 10G to newstore via rgw
+On Thu, Oct 15, 2015 at 12:51 AM, David Disseldorp <ddiss@suse.de> wrote:
+> On Wed, 14 Oct 2015 19:57:46 +0200, Ilya Dryomov wrote:
+>
+>> On Wed, Oct 14, 2015 at 7:37 PM, David Disseldorp <ddiss@suse.de> wrote:
+> ...
+>> > Ping, any feedback on the patch?
+>>
+>> The patch itself looks OK, except for the part where you rename a local
+>> variable for no reason, AFACT.
+>
+> Thanks for the feedback Ilya. I presume you're referring to the pagelist
+> -> req_pagelist rename - I'll drop that change and send an update.
 
-PUTS were successful
+Also, the prefix for net/ceph patches is libceph.
 
-# ./rados df
-.log                       0          127            0          254            0          762          635          508            0
-.rgw                       8           40            0           80            0            0            0          100           40
-.rgw.buckets        10485760       163840            0       327680            0            0            0       819200     10485760
-.rgw.buckets.index         0           20            0           40            0       655420       655400       655380            0
-.rgw.control               0            8            0           16            0            0            0            0            0
-.rgw.gc                    0           32            0           64            0           96           64           64            0
-.rgw.root                  1            3            0            6            0            3            2            5            5
-.users                     1            5            0           10            0            0            0            5            5
-.users.email               1            3            0            6            0            0            0            3            3
-.users.swift               1            2            0            4            0            0            0            2            2
-.users.uid                 2            6            0           12            0          134          131          136            8
-rbd                        0            0            0            0            0            0            0            0            0
-  total used          644956       164086
-  total avail      194620640
-  total space      195265596
+>
+>> We've discussed some of this last week.  As it is, all rbd image
+>> properties are stored in omap, so PR info strings stored in xattrs is
+>> something different, but it should be fine for now.  I'd rather not
+>> merge any kernel patches related to rbd-target work until we see
+>> a complete patchset though.  There's been a lot of back and forth
+>> between Mike, Christoph and target people and the general approach had
+>> changed at least twice, so I'd like to wait for things to settle down.
+>
+> I understand the desire to wait on any RBD-target changes until upstream
+> consensus has been reached, but I'd argue that this change is isolated,
+> and complementary to the existing SETXATTR / CMPXATTR support.
 
-however not able to see at least 10G worth data in device
+That's true, but we already have a bunch of unused code in net/ceph,
+which was added using precisely this reasoning, so I'm a bit hesitant.
 
-# du -ks dev/osd0/
-611548  dev/osd0/
-# du -ks dev/osd0/db/
-611524  dev/osd0/db/
-# du -ks dev/osd0/fragments/
-0       dev/osd0/fragments/
+Thanks,
 
-why this discrepancy ??
-
-Does newstore apply any kind of storage efficiency in io path ??
-
-tomy
-
-________________________________
-
-PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
-
+                Ilya
