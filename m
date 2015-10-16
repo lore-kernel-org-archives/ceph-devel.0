@@ -1,124 +1,102 @@
-From: Tomy Cheru <Tomy.Cheru@sandisk.com>
-Subject: RE: does newstore skip some data ??
-Date: Fri, 16 Oct 2015 09:19:21 +0000
-Message-ID: <CO1PR02MB1597B371BF93BBFDE6F5A88943D0@CO1PR02MB159.namprd02.prod.outlook.com>
-References: <EBFBEFF470372547BAACF06D39FF53A54F5A9732@SACMBXIP02.sdcorp.global.sandisk.com>
- <alpine.DEB.2.00.1510150524550.16833@cobra.newdream.net>
- <EBFBEFF470372547BAACF06D39FF53A54F5A9893@SACMBXIP02.sdcorp.global.sandisk.com>
- <6F3FA899187F0043BA1827A69DA2F7CC03632FCA@shsmsx102.ccr.corp.intel.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH] rbd: don't leak parent_spec in rbd_dev_probe_parent()
+Date: Fri, 16 Oct 2015 11:50:21 +0200
+Message-ID: <CAOi1vP_eUzSN=WZCqyjXkr-pzZvj1_SeZ3XWUnd55V=jwdrXzg@mail.gmail.com>
+References: <1444586591-24141-1-git-send-email-idryomov@gmail.com>
+	<5620163F.3060406@ieee.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bl2on0094.outbound.protection.outlook.com ([65.55.169.94]:57123
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752603AbbJPJTY convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Oct 2015 05:19:24 -0400
-In-Reply-To: <6F3FA899187F0043BA1827A69DA2F7CC03632FCA@shsmsx102.ccr.corp.intel.com>
-Content-Language: en-US
+Received: from mail-wi0-f181.google.com ([209.85.212.181]:37160 "EHLO
+	mail-wi0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752495AbbJPJuW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Oct 2015 05:50:22 -0400
+Received: by wijq8 with SMTP id q8so2254754wij.0
+        for <ceph-devel@vger.kernel.org>; Fri, 16 Oct 2015 02:50:21 -0700 (PDT)
+In-Reply-To: <5620163F.3060406@ieee.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>, Sage Weil <sage@newdream.net>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Alex Elder <elder@ieee.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Single OSD in this test
+On Thu, Oct 15, 2015 at 11:10 PM, Alex Elder <elder@ieee.org> wrote:
+> On 10/11/2015 01:03 PM, Ilya Dryomov wrote:
+>> Currently we leak parent_spec and trigger a "parent reference
+>> underflow" warning if rbd_dev_create() in rbd_dev_probe_parent() fails.
+>> The problem is we take the !parent out_err branch and that only drops
+>> refcounts; parent_spec that would've been freed had we called
+>> rbd_dev_unparent() remains and triggers rbd_warn() in
+>> rbd_dev_parent_put() - at that point we have parent_spec != NULL and
+>> parent_ref == 0, so counter ends up being -1 after the decrement.
+>
+> OK, now that I understand the context...
+>
+> You now get extra references for the spec and client
+> for the parent only after creating the parent device.
+> I think the reason they logically belonged before
+> the call to rbd_device_create() for the parent is
+> because the client and spec pointers passed to that
+> function carry with them references that are passed
+> to the resulting rbd_device if successful.
 
------Original Message-----
-From: Chen, Xiaoxi [mailto:xiaoxi.chen@intel.com] 
-Sent: Friday, October 16, 2015 11:28 AM
-To: Tomy Cheru; Sage Weil
-Cc: ceph-devel@vger.kernel.org
-Subject: RE: does newstore skip some data ??
+Let me stress that those two get()s that I moved is not the point of
+the patch at all.  Whether we do it before or after rbd_dev_create() is
+pretty much irrelevant, the only reason I moved those calls is to make
+the error path simpler.
 
-How many osds do you have? I wonder if the overlay layer is that large to keep 160K obj(which is 64K * 32 on default, per OSD)?
+>
+> If creating the parent device fails, you unparent the
+> original device, which will still have a null parent
+> pointer.  The effect of unparenting in this case is
+> dropping a reference to the parent's spec, and clearing
+> the device's pointer to it.  This is confusing, but
+> let's run with it.
+>
+> If creating the parent device succeeds, references to
+> the client and parent spec are taken (basically, these
+> belong to the just-created parent device).  The parent
+> image is now probed.  If this fails, you again
+> unparent the device.  We still have not set the
+> device's parent pointer, so the effect is as before,
+> dropping the parent spec reference and clearing
+> the device's reference to it.  The error handling
+> now destroys the parent, which drops references to
+> its client and the spec.  Again, this seems
+> confusing, as if we've dropped one more reference
+> to the parent spec than desired.
+>
+> This logic now seems to work.  But it's working
+> around a flaw in the caller I think.  Upon entry
+> to rbd_dev_probe_parent(), a layered device will
+> have have a non-null parent_spec pointer (and a
+> reference to it), which will have been filled in
+> by rbd_dev_v2_parent_info().
+>
+> Really, it should not be rbd_dev_probe_parent()
+> that drops that parent spec reference on error.
+> Instead, rbd_dev_image_probe() (which got the
+> reference to the parent spec) should handle
+> cleaning up the device's parent spec if an
+> error occurs after it has been assigned.
+>
+> I'll wait for your response, I'd like to know
+> if what I'm saying makes sense.
 
+All of the above makes sense.  I agree that it is asymmetrical and that
+it would have been better to have rbd_dev_image_probe() drop the last
+ref on ->parent_spec.  But, that's not what all of the existing code is
+doing.
 
+Consider rbd_dev_probe_parent() without my patch.  There are two
+out_err jumps.  As it is, if rbd_dev_create() fails, we only revert
+those two get()s and return with alive ->parent_spec.  However, if
+rbd_dev_image_probe() fails, we call rbd_dev_unparent(), which will put
+->parent_spec.  Really, the issue is rbd_dev_unparent(), which not only
+removes the parent rbd_dev, but also the parent spec.  All I did with
+this patch was align both out_err cases to do the same, namely undo the
+effects of rbd_dev_v2_parent_info() - I didn't want to create yet
+another error path.
 
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel- 
-> owner@vger.kernel.org] On Behalf Of Tomy Cheru
-> Sent: Thursday, October 15, 2015 11:08 PM
-> To: Sage Weil
-> Cc: ceph-devel@vger.kernel.org
-> Subject: RE: does newstore skip some data ??
-> 
-> Thanks Sage, make sense.
-> 
-> -----Original Message-----
-> From: Sage Weil [mailto:sage@newdream.net]
-> Sent: Thursday, October 15, 2015 5:56 PM
-> To: Tomy Cheru
-> Cc: ceph-devel@vger.kernel.org
-> Subject: Re: does newstore skip some data ??
-> 
-> On Thu, 15 Oct 2015, Tomy Cheru wrote:
-> > Tried to write 160k objects of 64k size, totaling 10G to newstore 
-> > via rgw
-> >
-> > PUTS were successful
-> >
-> > # ./rados df
-> > .log                       0          127            0          254            0          762          635          508
-> 0
-> > .rgw                       8           40            0           80            0            0            0          100
-> 40
-> > .rgw.buckets        10485760       163840            0       327680            0            0            0
-> 819200     10485760
-> > .rgw.buckets.index         0           20            0           40            0       655420       655400
-> 655380            0
-> > .rgw.control               0            8            0           16            0            0            0            0
-> 0
-> > .rgw.gc                    0           32            0           64            0           96           64           64
-> 0
-> > .rgw.root                  1            3            0            6            0            3            2            5
-> 5
-> > .users                     1            5            0           10            0            0            0            5            5
-> > .users.email               1            3            0            6            0            0            0            3
-> 3
-> > .users.swift               1            2            0            4            0            0            0            2
-> 2
-> > .users.uid                 2            6            0           12            0          134          131          136
-> 8
-> > rbd                        0            0            0            0            0            0            0            0            0
-> >   total used          644956       164086
-> >   total avail      194620640
-> >   total space      195265596
-> >
-> > however not able to see at least 10G worth data in device
-> >
-> > # du -ks dev/osd0/
-> > 611548  dev/osd0/
-> > # du -ks dev/osd0/db/
-> > 611524  dev/osd0/db/
-> > # du -ks dev/osd0/fragments/
-> > 0       dev/osd0/fragments/
-> >
-> > why this discrepancy ??
-> >
-> > Does newstore apply any kind of storage efficiency in io path ??
-> 
-> In current master rocksdb has snappy compression enabled by default, 
-> and I'm guessing you're writing either 0's or something very compressible.
-> 
-> If you try wip-newstore-frags cmopression is disabled (it's 
-> problematic in general)...
-> 
-> sage
-> 
-> ________________________________
-> 
-> PLEASE NOTE: The information contained in this electronic mail message 
-> is intended only for the use of the designated recipient(s) named 
-> above. If the reader of this message is not the intended recipient, 
-> you are hereby notified that you have received this message in error 
-> and that any review, dissemination, distribution, or copying of this 
-> message is strictly prohibited. If you have received this 
-> communication in error, please notify the sender by telephone or 
-> e-mail (as shown above) immediately and destroy any and all copies of 
-> this message in your possession (whether hard copies or electronically stored copies).
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> in the body of a message to majordomo@vger.kernel.org More majordomo 
-> info at http://vger.kernel.org/majordomo-info.html
+Thanks,
+
+                Ilya
