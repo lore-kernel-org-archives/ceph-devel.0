@@ -1,73 +1,80 @@
-From: Matt Benjamin <mbenjamin@redhat.com>
-Subject: nfsv41 over AF_VSOCK (nfs-ganesha)
-Date: Fri, 16 Oct 2015 17:08:17 -0400 (EDT)
-Message-ID: <1249838657.33136909.1445029697101.JavaMail.zimbra@redhat.com>
-References: <1602558852.33130185.1445028743632.JavaMail.zimbra@redhat.com>
+From: "Deneau, Tom" <tom.deneau@amd.com>
+Subject: osd activation under 9.1.0
+Date: Fri, 16 Oct 2015 21:09:30 +0000
+Message-ID: <BC97738F8E7C8742BABED7F06FB9DF9192524D2B@SATLEXDAG01.amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx6-phx2.redhat.com ([209.132.183.39]:48651 "EHLO
-	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751278AbbJPVIR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Oct 2015 17:08:17 -0400
-In-Reply-To: <1602558852.33130185.1445028743632.JavaMail.zimbra@redhat.com>
+Received: from mail-bn1on0092.outbound.protection.outlook.com ([157.56.110.92]:31184
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S932400AbbJPVJg convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Oct 2015 17:09:36 -0400
+Received: from satlvexedge01.amd.com (satlvexedge01.amd.com [10.177.96.28])
+	(using TLSv1 with cipher AES128-SHA (128/128 bits))
+	(No client certificate requested)
+	by atltwp01.amd.com (Axway MailGate 5.3.1) with ESMTPS id 2A0DCCAE61A
+	for <ceph-devel@vger.kernel.org>; Fri, 16 Oct 2015 17:09:32 -0400 (EDT)
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
-Cc: Stefan Hajnoczi <stefanha@redhat.com>, Sage Weil <sweil@redhat.com>, "J. Bruce Fields" <bfields@redhat.com>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi devs (CC Bruce--here is a use case for vmci sockets transport)
+Using 9.1.0 I am getting the error shown below at ceph-deploy osd activate time.
 
-One of Sage's possible plans for Manilla integration would use nfs over the new Linux  vmci sockets transport integration in qemu (below) to access Cephfs via an nfs-ganesha server running in the host vm.
++ ceph-deploy --overwrite-conf osd activate Intel-2P-Sandy-Bridge-04:/var/local//dev/sdf2:/dev/sdf1
+...
+[][WARNIN] INFO:ceph-disk:Running command: /usr/bin/ceph-osd --cluster ceph --mkfs --mkkey -i 4 --monmap /var/local/\
+/dev/sdf2/activate.monmap --osd-data /var/local//dev/sdf2 --osd-journal /var/local//dev/sdf2/journal --osd-uuid 204865df-8dbf-4f26-91f2-5dfa7c3a49f8 --keyring /var/local//dev/sdf2/keyring --setuser ceph --setgroup ceph
+[][WARNIN] 2015-10-16 13:13:41.464615 7f3f40642940 -1 filestore(/var/local//dev/sdf2) mkjournal error creating journ\
+al on /var/local//dev/sdf2/journal: (13) Permission denied
+[][WARNIN] 2015-10-16 13:13:41.464635 7f3f40642940 -1 OSD::mkfs: ObjectStore::mkfs failed with error -13
+[][WARNIN] 2015-10-16 13:13:41.464669 7f3f40642940 -1  ** ERROR: error creating empty object store in /var/local//de\
+v/sdf2: (13) Permission denied
+[][WARNIN] Traceback (most recent call last):
+[][WARNIN]   File "/usr/sbin/ceph-disk", line 3576, in <module>
+[][WARNIN]     main(sys.argv[1:])
+[][WARNIN]   File "/usr/sbin/ceph-disk", line 3530, in main
+[][WARNIN]     args.func(args)
+[][WARNIN]   File "/usr/sbin/ceph-disk", line 2432, in main_activate
+[][WARNIN]     init=args.mark_init,
+[][WARNIN]   File "/usr/sbin/ceph-disk", line 2258, in activate_dir
+[][WARNIN]     (osd_id, cluster) = activate(path, activate_key_template, init)
+[][WARNIN]   File "/usr/sbin/ceph-disk", line 2360, in activate
+[][WARNIN]     keyring=keyring,
+[][WARNIN]   File "/usr/sbin/ceph-disk", line 1950, in mkfs
+[][WARNIN]     '--setgroup', get_ceph_user(),
+[][WARNIN]   File "/usr/sbin/ceph-disk", line 349, in command_check_call
+[][WARNIN]     return subprocess.check_call(arguments)
+[][WARNIN]   File "/usr/lib/python2.7/subprocess.py", line 540, in check_call
+[][WARNIN]     raise CalledProcessError(retcode, cmd)
+[][WARNIN] subprocess.CalledProcessError: Command '['/usr/bin/ceph-osd', '--cluster', 'ceph', '--mkfs', '--mkkey', '
+-i', '4', '--monmap', '/var/local//dev/sdf2/activate.monmap', '--osd-data', '/var/local//dev/sdf2', '--osd-journal', '/var/local//dev/sdf2/journal', '--osd-uuid', '204865df-8dbf-4f26-91f2-5dfa7c3a49f8', '--keyring', '/var/local//dev/sdf2/keyring', '--setuser', 'ceph', '--setgroup\
+', 'ceph']' returned non-zero exit status 1
+[][ERROR ] RuntimeError: command returned non-zero exit status: 1
+[ceph_deploy][ERROR ] RuntimeError: Failed to execute command: ceph-disk -v activate --mark-init upstart --mount /var/local//dev/sdf2
 
-This now experimentally works.
+When I look at the data disk, I see the following.  
 
-some notes on running nfs-ganesha over AF_VSOCK:
+  -rw-r--r-- 1 root ceph   210 Oct 16 13:13 activate.monmap
+  -rw-r--r-- 1 ceph ceph    37 Oct 16 13:13 ceph_fsid
+  drwxr-sr-x 3 ceph ceph  4096 Oct 16 13:13 current
+  -rw-r--r-- 1 ceph ceph    37 Oct 16 13:13 fsid
+  lrwxrwxrwx 1 root ceph     9 Oct 16 13:13 journal -> /dev/sdf1
+  -rw-r--r-- 1 ceph ceph    21 Oct 16 13:13 magic
+  -rw-r--r-- 1 ceph ceph     4 Oct 16 13:13 store_version
+  -rw-r--r-- 1 ceph ceph    53 Oct 16 13:13 superblock
+  -rw-r--r-- 1 ceph ceph     2 Oct 16 13:13 whoami
 
-1. need stefan hajnoczi's patches for
-* linux kernel (and build w/vhost-vsock support
-* qemu (and build w/vhost-vsock support)
-* nfs-utils (in vm guest)
+(The parent directory has
+  drwxr-sr-x 3 ceph ceph  4096 Oct 16 13:13 sdf2)
 
-all linked from https://github.com/stefanha?tab=repositories
+I had been creating the partitions myself and then passing them to ceph-deploy osd prepare and osd activate.
+Which worked fine before 9.1.0.
+Is there some extra permissions setup I need to do for 9.1.0?
 
-2. host and vm guest kernels must include vhost-vsock
-* host kernel should load vhost-vsock.ko
+Alternatively, is there a single-node setup script for 9.1.0 that I can look at?
 
-3. start a qemu(-kvm) guest (w/patched kernel) with a vhost-vsock-pci device, e.g
-
-/opt/qemu-vsock/bin/qemu-system-x86_64    -m 2048 -usb -name vsock1     --enable-kvm     -drive file=/opt/images/vsock.qcow,if=virtio,index=0,format=qcow2     -drive file=/opt/isos/f22.iso,media=cdrom     -net nic,model=virtio,macaddr=02:36:3e:41:1b:78     -net bridge,br=br0     -parallel none     -serial mon:stdio -device vhost-vsock-pci,id=vhost-vsock-pci0,addr=4.0,guest-cid=4  -boot c
-
-4. nfs-gansha (in host)
-* need nfs-ganesha and its ntirpc rpc provider with vsock support
-https://github.com/linuxbox2/nfs-ganesha (vsock branch)
-https://github.com/linuxbox2/ntirpc (vsock branch)
-
-* configure ganesha w/vsock support
-cmake -DCMAKE_INSTALL_PREFIX=/cache/nfs-vsock -DUSE_FSAL_VFS=ON -DUSE_VSOCK -DCMAKE_C_FLAGS="-O0 -g3 -gdwarf-4" ../src
-
-in ganesha.conf, add "nfsvsock" to Protocols list in EXPORT block
-
-5. mount in guest w/nfs41:
-(e.g., in fstab)
-2:// /vsock41 nfs noauto,soft,nfsvers=4.1,sec=sys,proto=vsock,clientaddr=4,rsize=1048576,wsize=1048576 0 0
-
-If you try this, send feedback.
-
-Thanks!
-
-Matt
-
--- 
-Matt Benjamin
-Red Hat, Inc.
-315 West Huron Street, Suite 140A
-Ann Arbor, Michigan 48103
-
-http://www.redhat.com/en/technologies/storage
-
-tel.  734-707-0660
-fax.  734-769-8938
-cel.  734-216-5309
+-- Tom Deneau
 
