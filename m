@@ -1,102 +1,75 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH] rbd: don't leak parent_spec in rbd_dev_probe_parent()
-Date: Fri, 16 Oct 2015 11:50:21 +0200
-Message-ID: <CAOi1vP_eUzSN=WZCqyjXkr-pzZvj1_SeZ3XWUnd55V=jwdrXzg@mail.gmail.com>
-References: <1444586591-24141-1-git-send-email-idryomov@gmail.com>
-	<5620163F.3060406@ieee.org>
+Subject: Re: [PATCH] mark rbd requiring stable pages
+Date: Fri, 16 Oct 2015 13:09:53 +0200
+Message-ID: <CAOi1vP_ZDHBfCDeH6gxCKRsqoGteWv+nn7EFTexf+qsUBMHvjA@mail.gmail.com>
+References: <201510151850.48348.ronny.hegewald@online.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f181.google.com ([209.85.212.181]:37160 "EHLO
-	mail-wi0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752495AbbJPJuW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Oct 2015 05:50:22 -0400
-Received: by wijq8 with SMTP id q8so2254754wij.0
-        for <ceph-devel@vger.kernel.org>; Fri, 16 Oct 2015 02:50:21 -0700 (PDT)
-In-Reply-To: <5620163F.3060406@ieee.org>
+Received: from mail-wi0-f175.google.com ([209.85.212.175]:32797 "EHLO
+	mail-wi0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754000AbbJPLJz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Oct 2015 07:09:55 -0400
+Received: by wijp11 with SMTP id p11so5089622wij.0
+        for <ceph-devel@vger.kernel.org>; Fri, 16 Oct 2015 04:09:53 -0700 (PDT)
+In-Reply-To: <201510151850.48348.ronny.hegewald@online.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@ieee.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Ronny Hegewald <ronny.hegewald@online.de>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, Alex Elder <elder@kernel.org>
 
-On Thu, Oct 15, 2015 at 11:10 PM, Alex Elder <elder@ieee.org> wrote:
-> On 10/11/2015 01:03 PM, Ilya Dryomov wrote:
->> Currently we leak parent_spec and trigger a "parent reference
->> underflow" warning if rbd_dev_create() in rbd_dev_probe_parent() fails.
->> The problem is we take the !parent out_err branch and that only drops
->> refcounts; parent_spec that would've been freed had we called
->> rbd_dev_unparent() remains and triggers rbd_warn() in
->> rbd_dev_parent_put() - at that point we have parent_spec != NULL and
->> parent_ref == 0, so counter ends up being -1 after the decrement.
+On Thu, Oct 15, 2015 at 8:50 PM, Ronny Hegewald
+<ronny.hegewald@online.de> wrote:
+> rbd requires stable pages, as it performs a crc of the page data before they
+> are send to the OSDs.
 >
-> OK, now that I understand the context...
+> But since kernel 3.9 (patch 1d1d1a767206fbe5d4c69493b7e6d2a8d08cc0a0 "mm: only
+> enforce stable page writes if the backing device requires it") it is not
+> assumed anymore that block devices require stable pages.
 >
-> You now get extra references for the spec and client
-> for the parent only after creating the parent device.
-> I think the reason they logically belonged before
-> the call to rbd_device_create() for the parent is
-> because the client and spec pointers passed to that
-> function carry with them references that are passed
-> to the resulting rbd_device if successful.
+> This patch sets the necessary flag to get stable pages back for rbd.
+>
+> In a ceph installation that provides multiple ext4 formatted rbd devices "bad
+> crc" messages appeared regularly (ca 1 message every 1-2 minutes on every OSD
+> that provided the data for the rbd) in the OSD-logs before this patch. After
+> this patch this messages are pretty much gone (only ca 1-2 / month / OSD).
+>
+> This patch seems also to fix data and filesystem corruptions on ext4 formatted
+> rbd devices that were previously seen on pretty much a daily basis. But it is
+> unknown at the moment why this is the case.
+>
+> Signed-off-by: Ronny Hegewald <Ronny.Hegewald@online.de>
+>
+> ---
+>
+> That the mentioned corruption issue is really affected through this patch
+> i could verify through the system logs. Since installation of this patch i
+> have seen only a 2-3 filesystem corruptions. But these could be also just
+> leftovers of corruptions that happened before the installation but got noticed
+> from ext4 only later after the patched kernel was installed. This seems even
+> more likely as i have seen not a single data corruption issue since the patch.
+>
+> --- linux/drivers/block/rbd.c.org       2015-10-07 01:32:55.906666667 +0000
+> +++ linux/drivers/block/rbd.c   2015-09-04 02:21:22.349999999 +0000
+> @@ -3786,6 +3786,7 @@
+>
+>         blk_queue_merge_bvec(q, rbd_merge_bvec);
+>         disk->queue = q;
+> +       disk->queue->backing_dev_info.capabilities |= BDI_CAP_STABLE_WRITES;
+>
+>         q->queuedata = rbd_dev;
 
-Let me stress that those two get()s that I moved is not the point of
-the patch at all.  Whether we do it before or after rbd_dev_create() is
-pretty much irrelevant, the only reason I moved those calls is to make
-the error path simpler.
+Hmm...  On the one hand, yes, we do compute CRCs, but that's optional,
+so enabling this unconditionally is probably too harsh.  OTOH we are
+talking to the network, which means all sorts of delays, retransmission
+issues, etc, so I wonder how exactly "unstable" pages behave when, say,
+added to an skb - you can't write anything to a page until networking
+is fully done with it and expect it to work.  It's particularly
+alarming that you've seen corruptions.
 
->
-> If creating the parent device fails, you unparent the
-> original device, which will still have a null parent
-> pointer.  The effect of unparenting in this case is
-> dropping a reference to the parent's spec, and clearing
-> the device's pointer to it.  This is confusing, but
-> let's run with it.
->
-> If creating the parent device succeeds, references to
-> the client and parent spec are taken (basically, these
-> belong to the just-created parent device).  The parent
-> image is now probed.  If this fails, you again
-> unparent the device.  We still have not set the
-> device's parent pointer, so the effect is as before,
-> dropping the parent spec reference and clearing
-> the device's reference to it.  The error handling
-> now destroys the parent, which drops references to
-> its client and the spec.  Again, this seems
-> confusing, as if we've dropped one more reference
-> to the parent spec than desired.
->
-> This logic now seems to work.  But it's working
-> around a flaw in the caller I think.  Upon entry
-> to rbd_dev_probe_parent(), a layered device will
-> have have a non-null parent_spec pointer (and a
-> reference to it), which will have been filled in
-> by rbd_dev_v2_parent_info().
->
-> Really, it should not be rbd_dev_probe_parent()
-> that drops that parent spec reference on error.
-> Instead, rbd_dev_image_probe() (which got the
-> reference to the parent spec) should handle
-> cleaning up the device's parent spec if an
-> error occurs after it has been assigned.
->
-> I'll wait for your response, I'd like to know
-> if what I'm saying makes sense.
-
-All of the above makes sense.  I agree that it is asymmetrical and that
-it would have been better to have rbd_dev_image_probe() drop the last
-ref on ->parent_spec.  But, that's not what all of the existing code is
-doing.
-
-Consider rbd_dev_probe_parent() without my patch.  There are two
-out_err jumps.  As it is, if rbd_dev_create() fails, we only revert
-those two get()s and return with alive ->parent_spec.  However, if
-rbd_dev_image_probe() fails, we call rbd_dev_unparent(), which will put
-->parent_spec.  Really, the issue is rbd_dev_unparent(), which not only
-removes the parent rbd_dev, but also the parent spec.  All I did with
-this patch was align both out_err cases to do the same, namely undo the
-effects of rbd_dev_v2_parent_info() - I didn't want to create yet
-another error path.
-
-Thanks,
+Currently the only users of this flag are block integrity stuff and
+md-raid5, which makes me wonder what iscsi, nfs and others do in this
+area.  There's an old ticket on this topic somewhere on the tracker, so
+I'll need to research this.  Thanks for bringing this up!
 
                 Ilya
