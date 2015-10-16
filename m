@@ -1,128 +1,125 @@
 From: Alex Elder <elder@ieee.org>
-Subject: Re: [PATCH] rbd: don't leak parent_spec in rbd_dev_probe_parent()
-Date: Fri, 16 Oct 2015 06:50:41 -0500
-Message-ID: <5620E491.2070006@ieee.org>
-References: <1444586591-24141-1-git-send-email-idryomov@gmail.com>
- <5620163F.3060406@ieee.org>
- <CAOi1vP_eUzSN=WZCqyjXkr-pzZvj1_SeZ3XWUnd55V=jwdrXzg@mail.gmail.com>
+Subject: Re: [PATCH] rbd: use writefull op for object size writes
+Date: Fri, 16 Oct 2015 07:24:43 -0500
+Message-ID: <5620EC8B.3090300@ieee.org>
+References: <1444237333-9677-1-git-send-email-idryomov@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f170.google.com ([209.85.213.170]:38071 "EHLO
-	mail-ig0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752817AbbJPLun (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Oct 2015 07:50:43 -0400
-Received: by igbdj2 with SMTP id dj2so11961296igb.1
-        for <ceph-devel@vger.kernel.org>; Fri, 16 Oct 2015 04:50:42 -0700 (PDT)
-In-Reply-To: <CAOi1vP_eUzSN=WZCqyjXkr-pzZvj1_SeZ3XWUnd55V=jwdrXzg@mail.gmail.com>
+Received: from mail-io0-f174.google.com ([209.85.223.174]:36226 "EHLO
+	mail-io0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752034AbbJPMYq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Oct 2015 08:24:46 -0400
+Received: by ioii196 with SMTP id i196so121331048ioi.3
+        for <ceph-devel@vger.kernel.org>; Fri, 16 Oct 2015 05:24:45 -0700 (PDT)
+In-Reply-To: <1444237333-9677-1-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
 
-On 10/16/2015 04:50 AM, Ilya Dryomov wrote:
-> On Thu, Oct 15, 2015 at 11:10 PM, Alex Elder <elder@ieee.org> wrote:
->> On 10/11/2015 01:03 PM, Ilya Dryomov wrote:
->>> Currently we leak parent_spec and trigger a "parent reference
->>> underflow" warning if rbd_dev_create() in rbd_dev_probe_parent() fails.
->>> The problem is we take the !parent out_err branch and that only drops
->>> refcounts; parent_spec that would've been freed had we called
->>> rbd_dev_unparent() remains and triggers rbd_warn() in
->>> rbd_dev_parent_put() - at that point we have parent_spec != NULL and
->>> parent_ref == 0, so counter ends up being -1 after the decrement.
->>
->> OK, now that I understand the context...
->>
->> You now get extra references for the spec and client
->> for the parent only after creating the parent device.
->> I think the reason they logically belonged before
->> the call to rbd_device_create() for the parent is
->> because the client and spec pointers passed to that
->> function carry with them references that are passed
->> to the resulting rbd_device if successful.
+On 10/07/2015 12:02 PM, Ilya Dryomov wrote:
+> This covers only the simplest case - an object size sized write, but
+> it's still useful in tiering setups when EC is used for the base tier
+> as writefull op can be proxied, saving an object promotion.
 > 
-> Let me stress that those two get()s that I moved is not the point of
-> the patch at all.  Whether we do it before or after rbd_dev_create() is
-> pretty much irrelevant, the only reason I moved those calls is to make
-> the error path simpler.
-
-Yes I understand that.
-
->> If creating the parent device fails, you unparent the
->> original device, which will still have a null parent
->> pointer.  The effect of unparenting in this case is
->> dropping a reference to the parent's spec, and clearing
->> the device's pointer to it.  This is confusing, but
->> let's run with it.
->>
->> If creating the parent device succeeds, references to
->> the client and parent spec are taken (basically, these
->> belong to the just-created parent device).  The parent
->> image is now probed.  If this fails, you again
->> unparent the device.  We still have not set the
->> device's parent pointer, so the effect is as before,
->> dropping the parent spec reference and clearing
->> the device's reference to it.  The error handling
->> now destroys the parent, which drops references to
->> its client and the spec.  Again, this seems
->> confusing, as if we've dropped one more reference
->> to the parent spec than desired.
->>
->> This logic now seems to work.  But it's working
->> around a flaw in the caller I think.  Upon entry
->> to rbd_dev_probe_parent(), a layered device will
->> have have a non-null parent_spec pointer (and a
->> reference to it), which will have been filled in
->> by rbd_dev_v2_parent_info().
->>
->> Really, it should not be rbd_dev_probe_parent()
->> that drops that parent spec reference on error.
->> Instead, rbd_dev_image_probe() (which got the
->> reference to the parent spec) should handle
->> cleaning up the device's parent spec if an
->> error occurs after it has been assigned.
->>
->> I'll wait for your response, I'd like to know
->> if what I'm saying makes sense.
+> Even though updating ceph_osdc_new_request() to allow writefull should
+> just be a matter of fixing an assert, I didn't do it because its only
+> user is cephfs.  All other sites were updated.
 > 
-> All of the above makes sense.  I agree that it is asymmetrical and that
-> it would have been better to have rbd_dev_image_probe() drop the last
-> ref on ->parent_spec.  But, that's not what all of the existing code is
-> doing.
+> Reflects ceph.git commit 7bfb7f9025a8ee0d2305f49bf0336d2424da5b5b.
+> 
+> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 
-Agreed.
-
-> Consider rbd_dev_probe_parent() without my patch.  There are two
-> out_err jumps.  As it is, if rbd_dev_create() fails, we only revert
-> those two get()s and return with alive ->parent_spec.  However, if
-> rbd_dev_image_probe() fails, we call rbd_dev_unparent(), which will put
-> ->parent_spec.  Really, the issue is rbd_dev_unparent(), which not only
-> removes the parent rbd_dev, but also the parent spec.  All I did with
-> this patch was align both out_err cases to do the same, namely undo the
-> effects of rbd_dev_v2_parent_info() - I didn't want to create yet
-> another error path.
-
-OK.  Walking through the code I did concluded that what
-you did made things "line up" properly.  But I just felt
-like it wasn't necessarily the *right* fix, but it was
-a correct fix.
-
-The only point in suggesting what I think would be a better
-fix is that it would make things easier to reason about
-and get correct, and in so doing, make it easier to
-maintain and adapt in the future.
-
-But I have no objection to your fix, so please accept
-this for your original patch:
+Looks good to me.
 
 Reviewed-by: Alex Elder <elder@linaro.org>
 
-
-
-
-> Thanks,
+> ---
+>  drivers/block/rbd.c   |  9 +++++++--
+>  net/ceph/osd_client.c | 13 +++++++++----
+>  2 files changed, 16 insertions(+), 6 deletions(-)
 > 
->                 Ilya
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index 04e69b4df664..cd00e4653e49 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -1863,9 +1863,11 @@ static void rbd_osd_req_callback(struct ceph_osd_request *osd_req,
+>  		rbd_osd_read_callback(obj_request);
+>  		break;
+>  	case CEPH_OSD_OP_SETALLOCHINT:
+> -		rbd_assert(osd_req->r_ops[1].op == CEPH_OSD_OP_WRITE);
+> +		rbd_assert(osd_req->r_ops[1].op == CEPH_OSD_OP_WRITE ||
+> +			   osd_req->r_ops[1].op == CEPH_OSD_OP_WRITEFULL);
+>  		/* fall through */
+>  	case CEPH_OSD_OP_WRITE:
+> +	case CEPH_OSD_OP_WRITEFULL:
+>  		rbd_osd_write_callback(obj_request);
+>  		break;
+>  	case CEPH_OSD_OP_STAT:
+> @@ -2401,7 +2403,10 @@ static void rbd_img_obj_request_fill(struct rbd_obj_request *obj_request,
+>  				opcode = CEPH_OSD_OP_ZERO;
+>  		}
+>  	} else if (op_type == OBJ_OP_WRITE) {
+> -		opcode = CEPH_OSD_OP_WRITE;
+> +		if (!offset && length == object_size)
+> +			opcode = CEPH_OSD_OP_WRITEFULL;
+> +		else
+> +			opcode = CEPH_OSD_OP_WRITE;
+>  		osd_req_op_alloc_hint_init(osd_request, num_ops,
+>  					object_size, object_size);
+>  		num_ops++;
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index 80b94e37c94a..f79ccac6699f 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -285,6 +285,7 @@ static void osd_req_op_data_release(struct ceph_osd_request *osd_req,
+>  	switch (op->op) {
+>  	case CEPH_OSD_OP_READ:
+>  	case CEPH_OSD_OP_WRITE:
+> +	case CEPH_OSD_OP_WRITEFULL:
+>  		ceph_osd_data_release(&op->extent.osd_data);
+>  		break;
+>  	case CEPH_OSD_OP_CALL:
+> @@ -485,13 +486,14 @@ void osd_req_op_extent_init(struct ceph_osd_request *osd_req,
+>  	size_t payload_len = 0;
+>  
+>  	BUG_ON(opcode != CEPH_OSD_OP_READ && opcode != CEPH_OSD_OP_WRITE &&
+> -	       opcode != CEPH_OSD_OP_ZERO && opcode != CEPH_OSD_OP_TRUNCATE);
+> +	       opcode != CEPH_OSD_OP_WRITEFULL && opcode != CEPH_OSD_OP_ZERO &&
+> +	       opcode != CEPH_OSD_OP_TRUNCATE);
+>  
+>  	op->extent.offset = offset;
+>  	op->extent.length = length;
+>  	op->extent.truncate_size = truncate_size;
+>  	op->extent.truncate_seq = truncate_seq;
+> -	if (opcode == CEPH_OSD_OP_WRITE)
+> +	if (opcode == CEPH_OSD_OP_WRITE || opcode == CEPH_OSD_OP_WRITEFULL)
+>  		payload_len += length;
+>  
+>  	op->payload_len = payload_len;
+> @@ -670,9 +672,11 @@ static u64 osd_req_encode_op(struct ceph_osd_request *req,
+>  		break;
+>  	case CEPH_OSD_OP_READ:
+>  	case CEPH_OSD_OP_WRITE:
+> +	case CEPH_OSD_OP_WRITEFULL:
+>  	case CEPH_OSD_OP_ZERO:
+>  	case CEPH_OSD_OP_TRUNCATE:
+> -		if (src->op == CEPH_OSD_OP_WRITE)
+> +		if (src->op == CEPH_OSD_OP_WRITE ||
+> +		    src->op == CEPH_OSD_OP_WRITEFULL)
+>  			request_data_len = src->extent.length;
+>  		dst->extent.offset = cpu_to_le64(src->extent.offset);
+>  		dst->extent.length = cpu_to_le64(src->extent.length);
+> @@ -681,7 +685,8 @@ static u64 osd_req_encode_op(struct ceph_osd_request *req,
+>  		dst->extent.truncate_seq =
+>  			cpu_to_le32(src->extent.truncate_seq);
+>  		osd_data = &src->extent.osd_data;
+> -		if (src->op == CEPH_OSD_OP_WRITE)
+> +		if (src->op == CEPH_OSD_OP_WRITE ||
+> +		    src->op == CEPH_OSD_OP_WRITEFULL)
+>  			ceph_osdc_msg_data_add(req->r_request, osd_data);
+>  		else
+>  			ceph_osdc_msg_data_add(req->r_reply, osd_data);
 > 
 
