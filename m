@@ -1,92 +1,113 @@
-From: Mykola Golub <mgolub@mirantis.com>
-Subject: Re: CEPH_RBD_API: options on image create
-Date: Fri, 16 Oct 2015 08:32:12 +0300
-Message-ID: <20151016053211.GA21439@gmail.com>
-References: <20150930065044.GA14958@gmail.com>
- <807360446.46582415.1444851292070.JavaMail.zimbra@redhat.com>
- <20151015063308.GA7834@gmail.com>
- <446012806.46791295.1444910707804.JavaMail.zimbra@redhat.com>
- <20151015123300.GC7834@gmail.com>
- <1121018324.46808736.1444913278970.JavaMail.zimbra@redhat.com>
- <20151015132832.GD7834@gmail.com>
- <alpine.DEB.2.00.1510150644390.16833@cobra.newdream.net>
- <561FF0A4.3000805@redhat.com>
+From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Subject: RE: does newstore skip some data ??
+Date: Fri, 16 Oct 2015 05:58:16 +0000
+Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC03632FCA@shsmsx102.ccr.corp.intel.com>
+References: <EBFBEFF470372547BAACF06D39FF53A54F5A9732@SACMBXIP02.sdcorp.global.sandisk.com>
+ <alpine.DEB.2.00.1510150524550.16833@cobra.newdream.net>
+ <EBFBEFF470372547BAACF06D39FF53A54F5A9893@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f171.google.com ([209.85.217.171]:35774 "EHLO
-	mail-lb0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751936AbbJPFcQ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Oct 2015 01:32:16 -0400
-Received: by lbbes7 with SMTP id es7so763751lbb.2
-        for <ceph-devel@vger.kernel.org>; Thu, 15 Oct 2015 22:32:14 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <561FF0A4.3000805@redhat.com>
+Received: from mga09.intel.com ([134.134.136.24]:8647 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751854AbbJPF6U convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Oct 2015 01:58:20 -0400
+In-Reply-To: <EBFBEFF470372547BAACF06D39FF53A54F5A9893@SACMBXIP02.sdcorp.global.sandisk.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <jdurgin@redhat.com>
-Cc: Sage Weil <sweil@redhat.com>, Jason Dillaman <dillaman@redhat.com>, ceph-devel@vger.kernel.org
+To: Tomy Cheru <Tomy.Cheru@sandisk.com>, Sage Weil <sage@newdream.net>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Thank you all for your comments! I will come back with PR and pull
-request.
+How many osds do you have? I wonder if the overlay layer is that large to keep 160K obj(which is 64K * 32 on default, per OSD)?
 
--- 
-Mykola Golub
 
-On Thu, Oct 15, 2015 at 11:29:56AM -0700, Josh Durgin wrote:
-> On 10/15/2015 06:45 AM, Sage Weil wrote:
-> >On Thu, 15 Oct 2015, Mykola Golub wrote:
-> >>On Thu, Oct 15, 2015 at 08:47:58AM -0400, Jason Dillaman wrote:
-> >>>>
-> >>>>But we don't need them to match between different platforms, no? Is
-> >>>>linking 64bit code with 32bit possible (supported)?
-> >>>>
-> >>>>Also, for this particular (char*) case, length would actually be the
-> >>>>length of the string, not the pointer length. From my example:
-> >>>>
-> >>>>const char* journal_object_pool = "journal";
-> >>>>r = rbd_image_options_set(opts, RBD_OPTION_JOURNAL_OBJECT_POOL,
-> >>>>                           journal_object_pool, strlen(journal_object_pool) +
-> >>>>                           1);
-> >>>>
-> >>>
-> >>>My original example was a string of length 4 vs a 4-byte int, but
-> >>>you said you were thinking of sizeof(type) instead.  I think this
-> >>>style of interface is great if you need to pass any arbitrary data
-> >>>along, but will we ever expect to pass along anything besides a
-> >>>string or an (u)int(32/64)?
-> >>
-> >>I don't know, sure you have much more experience here, so if you
-> >>hardly expect other types in future, I would be rather then for
-> >>rbd_image_options_set_{uint64,str}() functions.
+
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
+> owner@vger.kernel.org] On Behalf Of Tomy Cheru
+> Sent: Thursday, October 15, 2015 11:08 PM
+> To: Sage Weil
+> Cc: ceph-devel@vger.kernel.org
+> Subject: RE: does newstore skip some data ??
 > 
-> This is my favorite option too.
+> Thanks Sage, make sense.
 > 
-> >Having a str and int variant seems like the best path to me.  Maybe int64
-> >though, so that signed values are possible?
+> -----Original Message-----
+> From: Sage Weil [mailto:sage@newdream.net]
+> Sent: Thursday, October 15, 2015 5:56 PM
+> To: Tomy Cheru
+> Cc: ceph-devel@vger.kernel.org
+> Subject: Re: does newstore skip some data ??
 > 
-> Don't think we need any signed values currently. It doesn't cause any
-> ABI problems to add signed ints or other types later, since it'll
-> already be overloaded in C++, and for C they need to be new functions
-> anyway.
+> On Thu, 15 Oct 2015, Tomy Cheru wrote:
+> > Tried to write 160k objects of 64k size, totaling 10G to newstore via
+> > rgw
+> >
+> > PUTS were successful
+> >
+> > # ./rados df
+> > .log                       0          127            0          254            0          762          635          508
+> 0
+> > .rgw                       8           40            0           80            0            0            0          100
+> 40
+> > .rgw.buckets        10485760       163840            0       327680            0            0            0
+> 819200     10485760
+> > .rgw.buckets.index         0           20            0           40            0       655420       655400
+> 655380            0
+> > .rgw.control               0            8            0           16            0            0            0            0
+> 0
+> > .rgw.gc                    0           32            0           64            0           96           64           64
+> 0
+> > .rgw.root                  1            3            0            6            0            3            2            5
+> 5
+> > .users                     1            5            0           10            0            0            0            5            5
+> > .users.email               1            3            0            6            0            0            0            3
+> 3
+> > .users.swift               1            2            0            4            0            0            0            2
+> 2
+> > .users.uid                 2            6            0           12            0          134          131          136
+> 8
+> > rbd                        0            0            0            0            0            0            0            0            0
+> >   total used          644956       164086
+> >   total avail      194620640
+> >   total space      195265596
+> >
+> > however not able to see at least 10G worth data in device
+> >
+> > # du -ks dev/osd0/
+> > 611548  dev/osd0/
+> > # du -ks dev/osd0/db/
+> > 611524  dev/osd0/db/
+> > # du -ks dev/osd0/fragments/
+> > 0       dev/osd0/fragments/
+> >
+> > why this discrepancy ??
+> >
+> > Does newstore apply any kind of storage efficiency in io path ??
 > 
-> >>>On the flip-side, what will the C++ interface look like?  An
-> >>>equivalent API would imply passing a boost::any.  While certainly
-> >>>future-proof, something about that doesn't sit right with me as an
-> >>>API.  I think I would lean more towards something like xyz_set(const
-> >>>std::string&), xyz_set(uint64_t), et al.
-> >>
-> >>For C++ I was also thinking about xyz_set(const std::string&),
-> >>xyz_set(uint64_t) variants, i.e:
-> >>
-> >>int rbd::Image::options::set(int optname, const std::string& val);
-> >>int rbd::Image::options::set(int optname, uint64_t val);
+> In current master rocksdb has snappy compression enabled by default, and
+> I'm guessing you're writing either 0's or something very compressible.
 > 
-> Sounds good to me.
+> If you try wip-newstore-frags cmopression is disabled (it's problematic in
+> general)...
 > 
-> Josh
+> sage
+> 
+> ________________________________
+> 
+> PLEASE NOTE: The information contained in this electronic mail message is
+> intended only for the use of the designated recipient(s) named above. If the
+> reader of this message is not the intended recipient, you are hereby notified
+> that you have received this message in error and that any review,
+> dissemination, distribution, or copying of this message is strictly prohibited. If
+> you have received this communication in error, please notify the sender by
+> telephone or e-mail (as shown above) immediately and destroy any and all
+> copies of this message in your possession (whether hard copies or
+> electronically stored copies).
 > 
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the
+> body of a message to majordomo@vger.kernel.org More majordomo info at
+> http://vger.kernel.org/majordomo-info.html
