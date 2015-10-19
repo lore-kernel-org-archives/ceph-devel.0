@@ -1,99 +1,60 @@
-From: Xusangdi <xu.sangdi@h3c.com>
+From: Sage Weil <sage@newdream.net>
 Subject: RE: chooseleaf may cause some unnecessary pg migrations
-Date: Mon, 19 Oct 2015 02:08:34 +0000
-Message-ID: <FF8D83DAE5DF57468726B79904321E06047D8A@H3CMLB12-EX.srv.huawei-3com.com>
-References: <FF8D83DAE5DF57468726B79904321E06046B73@H3CMLB12-EX.srv.huawei-3com.com>
- <alpine.DEB.2.00.1510130940400.6589@cobra.newdream.net>
- <FF8D83DAE5DF57468726B79904321E06047273@H3CMLB12-EX.srv.huawei-3com.com>
- <alpine.DEB.2.00.1510140714580.6589@cobra.newdream.net>
- <FF8D83DAE5DF57468726B79904321E06047677@H3CMLB12-EX.srv.huawei-3com.com>
- <alpine.DEB.2.00.1510150715020.16833@cobra.newdream.net>
- <6F3FA899187F0043BA1827A69DA2F7CC03632F6C@shsmsx102.ccr.corp.intel.com>
- <FF8D83DAE5DF57468726B79904321E06047977@H3CMLB12-EX.srv.huawei-3com.com>
- <6F3FA899187F0043BA1827A69DA2F7CC0363300C@shsmsx102.ccr.corp.intel.com>
- <FF8D83DAE5DF57468726B79904321E060479C3@H3CMLB12-EX.srv.huawei-3com.com>
- <6F3FA899187F0043BA1827A69DA2F7CC03633AAB@shsmsx102.ccr.corp.intel.com>
+Date: Sun, 18 Oct 2015 19:17:43 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1510181912160.16833@cobra.newdream.net>
+References: <FF8D83DAE5DF57468726B79904321E06046B73@H3CMLB12-EX.srv.huawei-3com.com> <alpine.DEB.2.00.1510130940400.6589@cobra.newdream.net> <FF8D83DAE5DF57468726B79904321E06047273@H3CMLB12-EX.srv.huawei-3com.com> <alpine.DEB.2.00.1510140714580.6589@cobra.newdream.net>
+ <FF8D83DAE5DF57468726B79904321E06047677@H3CMLB12-EX.srv.huawei-3com.com> <alpine.DEB.2.00.1510150715020.16833@cobra.newdream.net> <6F3FA899187F0043BA1827A69DA2F7CC03632F6C@shsmsx102.ccr.corp.intel.com> <FF8D83DAE5DF57468726B79904321E06047977@H3CMLB12-EX.srv.huawei-3com.com>
+ <6F3FA899187F0043BA1827A69DA2F7CC0363300C@shsmsx102.ccr.corp.intel.com> <FF8D83DAE5DF57468726B79904321E060479C3@H3CMLB12-EX.srv.huawei-3com.com> <6F3FA899187F0043BA1827A69DA2F7CC03633AAB@shsmsx102.ccr.corp.intel.com>
+ <FF8D83DAE5DF57468726B79904321E06047D8A@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([221.12.31.13]:22877 "EHLO h3cmg01-ex.h3c.com"
-	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752191AbbJSCIy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 18 Oct 2015 22:08:54 -0400
-In-Reply-To: <6F3FA899187F0043BA1827A69DA2F7CC03633AAB@shsmsx102.ccr.corp.intel.com>
-Content-Language: zh-CN
+Received: from cobra.newdream.net ([66.33.216.30]:45803 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752565AbbJSCRo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 18 Oct 2015 22:17:44 -0400
+In-Reply-To: <FF8D83DAE5DF57468726B79904321E06047D8A@H3CMLB12-EX.srv.huawei-3com.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Xusangdi <xu.sangdi@h3c.com>
+Cc: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-DQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IGNlcGgtZGV2ZWwtb3duZXJA
-dmdlci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmdd
-IE9uIEJlaGFsZiBPZg0KPiBDaGVuLCBYaWFveGkNCj4gU2VudDogTW9uZGF5LCBPY3RvYmVyIDE5
-LCAyMDE1IDk6MTEgQU0NCj4gVG86IHh1c2FuZ2RpIDExOTc2IChSRCkNCj4gQ2M6IGNlcGgtZGV2
-ZWxAdmdlci5rZXJuZWwub3JnDQo+IFN1YmplY3Q6IFJFOiBjaG9vc2VsZWFmIG1heSBjYXVzZSBz
-b21lIHVubmVjZXNzYXJ5IHBnIG1pZ3JhdGlvbnMNCj4NCj4gU29ycnkgYnV0IG5vdCBmb2xsb3dp
-bmcuLi4NCj4NCj4gPiB0aGVuIHNodXQgZG93biBvbmUgb3IgbW9yZSBvc2RzIChwbGVhc2UgZG9u
-J3QgdG91Y2ggdGhlIGNydXNobWFwLCBqdXN0IHN0b3AgdGhlIG9zZCBzZXJ2aWNlIG9yIGtpbGwN
-Cj4gaXRzIHByb2Nlc3MpLg0KPg0KPiBJbiB0aGlzIGNhc2UsIE9TRCBpcyBvbmx5IGRvd24gYnV0
-IG5vdCBvdXQsIGJ1dCB3aWxsIGJlIG1hcmtlZCBvdXQgYWZ0ZXIgMzAwcy4NCj4NCj4gU28gaW4g
-d2hhdCBjYXNlIHlvdXIgcGF0Y2ggaXMgaGVscGluZz8NCj4NCj4gICAgICAgSWYgeW91IHNhaWQg
-eW91ciBwYXRjaCBoZWxwcyBvbiAiZG93biBhbmQgb3V0IiAsIHRoZW4gbXkgZXhwZXJpbWVudCBp
-cyBleGFjdGx5IHRoZSBjYXNlLA0KPg0KDQpJIGFtIGFmcmFpZCBpdCBpcyBwcm9iYWJseSBub3Qu
-IENvdWxkIHlvdSB0ZWxsIG1lIGhvdyBkaWQgeW91IHNpbXVsYXRlIHRoZSBvc2QgImRvd24gYW5k
-IG91dCIgc2l0dWF0aW9uIHVzaW5nIGNydXNodG9vbD8gSWYgaXQgd2FzIGRvbmUgYnkgYXJndW1l
-bnRzIHN1Y2ggYXMgJy0tcmVtb3ZlLWl0ZW0nIG9yICdyZXdlaWdodC1pdGVtJywgaXQgbW9kaWZp
-ZWQgdGhlIGNydXNobWFwIGFuZCBpcyBub3Qgd2hhdCBJJ20gYWltaW5nIGZvci4gU29tZSBkZXRh
-aWxzIGhlcmUgYXMgSSBzYWlkIGluIHByZXZpb3VzIGRpc2N1c3Npb246DQogICAgICAgID4gSSB0
-aGluayB0aGUgc2l0dWF0aW9uIGlzIHRoZSBzYW1lOg0KICAgICAgICA+DQogICAgICAgIFdlbGwg
-SSBhbSBub3Qgc3VyZSBpZiB0aGlzIGlzIHdoYXQgeW91IHJlZmVycmVkLCBidXQgSSBjYW4gY29u
-ZmlybSB0aGF0ICdtYXJrIG9zZCBvdXQnIGlzIGRlZmluaXRlbHkgZGlmZmVyZW50IGZyb20gJ3Jl
-bW92ZSBvc2QgZnJvbSBjcnVzaG1hcCcuIFBsZWFzZSBub3RlIGlmIGl0J3Mgbm90IGNsZWFyIHRo
-YXQgdGhlICdjcnVzaG1hcCcgaGVyZSBJIG1lYW4gd2hhdCB3ZSBjYW4gb2J0YWluIGZyb20gJ2Nl
-cGggb3NkICAgICAgICAgZ2V0Y3J1c2htYXAnIGNvbW1hbmQuDQoNCiAgICAgICAgPiB3aGVuIHRo
-ZSBvc2QgaXMgbWFya2VkICJvdXQiIHRoZSB3ZWlnaHRbaV0gdmFsdWUgZ29lcyB0byB6ZXJvIGFu
-ZCB3ZQ0KICAgICAgICA+IHdpbGwgcmVqZWN0IGl0IGF0DQogICAgICAgID4NCiAgICAgICAgPiBo
-dHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBoL3B1bGwvNjI0Mi9maWxlcyNkaWZmLTBkZjEzYWQy
-OTRmNjU4NWMzMjI1DQogICAgICAgID4gODhjZmUwMjZkNzAxUjUzNQ0KICAgICAgICA+DQogICAg
-ICAgIFllcyBidXQgd2UgZG8gcGljayB0aGlzICdvdXQnIG9zZCBmaXJzdCBmcm9tIHRoZSBjcnVz
-aF9idWNrZXRfY2hvb3NlKC4uLikgZnVuY3Rpb24sIHdoaWNoIHdvdWxkIG5ldmVyIHJldHVybiB0
-aGlzIG9zZCBpZiBpdCBpcyByZW1vdmVkIGZyb20gdGhlIGNydXNobWFwLiBGcm9tIG15IHVuZGVy
-c3RhbmRpbmcsIENSVVNIIHdvdWxkIGZpcnN0IG1ha2UgYSBjaG9pY2UgYmFzZWQgb24gdmFsdWVz
-IHBhcnNlZCBmcm9tIHRoZSAgICAgICAgY3J1c2htYXAoY3J1c2hfYnVja2V0X2Nob29zZSBmdW5j
-dGlvbiksIGFuZCB0aGVuIGRldGVybWluZSB3aGV0aGVyIHRvIGFjdHVhbGx5IGNob29zZSB0aGlz
-IGl0ZW0gZGVwZW5kIG9uIHJlYWwtdGltZSB3ZWlnaHRzKGlzX291dCBmdW5jdGlvbikuIEhlbmNl
-LCBpZiBhbiBvc2QgaXMgb25seSBtYXJrZWQgb3V0IGJ1dCBub3QgbWFudWFsbHkgcmVtb3ZlZCBm
-cm9tIHRoZSBjcnVzaG1hcCAob3IgbWF5YmUgaXQgd2lsbCAgYXV0b21hdGljYWxseSBiZSByZW1v
-dmVkIGFmdGVyIGEgY2VydGFpbiB0aW1lPyB0aGlzIGlzIHdoYXQgSSBhc2tlZCksIHRoZSBjcnVz
-aF9idWNrZXRfY2hvb3NlKC4uLikgZnVuY3Rpb24gd2lsbCByZXR1cm4gZXhhY3RseSB0aGUgc2Ft
-ZSByZXN1bHRzIGFzIGJlZm9yZSBmb3IgZWFjaCB0dXJuLg0KDQogICAgICAgID4gKEFuIG9zZCBn
-b2VzIGRvd24gYnV0IG5vdCBvdXQgZG9lc24ndCBoYXZlIGFueSBlZmZlY3Qgb24gY3J1c2gtLXRo
-ZQ0KICAgICAgICA+IGNlcGggY29kZSBqdXN0IGZpbHRlcnMgdGhvc2Ugb3NkcyBvdXQgb2YgdGhl
-IGNydXNoIHJlc3VsdC4pDQpJbiBhIGZldyB3b3JkcywgZnJvbSB0aGUgY29kZSB2aWV3IHRoZSAn
-Y3J1c2htYXAnIGlzIHN0YWJsZSB3aGVuIGEgY2x1c3RlciBpcyBydW5uaW5nIGFuZCB3b24ndCBj
-aGFuZ2UgZXZlbiB3aGVuIHNvbWUgZGV2aWNlIGJlY29tZXMgZG93biBhbmQgb3V0LiBTbyBhZ2Fp
-biBpZiB5b3UgZG8gdGVzdHMgYnkgc2ltdWxhdGluZyBhIHJ1bm5pbmcgY2x1c3RlciwgeW91IHdp
-bGwgc2VlIHRoZSBkaWZmZXJlbmNlLiBBbnl3YXkgcGxlYXNlIG5vdGUgdGhpcyBpcyBvbmx5IHRo
-ZSBwZXJzb25hbCB1bmRlcnN0YW5kaW5nIGZyb20gbXkga25vd2xlZGdlIGFuZCBleHBlcmllbmNl
-LCBhbmQgaXMgbm90IHlldCBjb25maXJtZWQgYnkgc2FnZSBvciBhbnkgb3RoZXIgZXhwZXJ0Lg0K
-DQpUaGFuayB5b3UsDQotLS1TYW5nZGkNCg0KPiAgICAgICBJZiB5b3Ugc2FpZCB5b3VyIHBhdGNo
-IGhlbHBzIG9uICJkb3duIGJ1dCBub3Qgb3V0IiBjYXNlLCB0aGVuIHdlIGRvIG5lZWQgYSBuZXcg
-d2F5IHRvDQo+IHNpbXVsYXRlLg0KPg0KPg0KDQotLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQrmnKzpgq7k
-u7blj4rlhbbpmYTku7blkKvmnInmna3lt57ljY7kuInpgJrkv6HmioDmnK/mnInpmZDlhazlj7jn
-moTkv53lr4bkv6Hmga/vvIzku4XpmZDkuo7lj5HpgIHnu5nkuIrpnaLlnLDlnYDkuK3liJflh7oN
-CueahOS4quS6uuaIlue+pOe7hOOAguemgeatouS7u+S9leWFtuS7luS6uuS7peS7u+S9leW9ouW8
-j+S9v+eUqO+8iOWMheaLrOS9huS4jemZkOS6juWFqOmDqOaIlumDqOWIhuWcsOazhOmcsuOAgeWk
-jeWItuOAgQ0K5oiW5pWj5Y+R77yJ5pys6YKu5Lu25Lit55qE5L+h5oGv44CC5aaC5p6c5oKo6ZSZ
-5pS25LqG5pys6YKu5Lu277yM6K+35oKo56uL5Y2z55S16K+d5oiW6YKu5Lu26YCa55+l5Y+R5Lu2
-5Lq65bm25Yig6Zmk5pysDQrpgq7ku7bvvIENClRoaXMgZS1tYWlsIGFuZCBpdHMgYXR0YWNobWVu
-dHMgY29udGFpbiBjb25maWRlbnRpYWwgaW5mb3JtYXRpb24gZnJvbSBIM0MsIHdoaWNoIGlzDQpp
-bnRlbmRlZCBvbmx5IGZvciB0aGUgcGVyc29uIG9yIGVudGl0eSB3aG9zZSBhZGRyZXNzIGlzIGxp
-c3RlZCBhYm92ZS4gQW55IHVzZSBvZiB0aGUNCmluZm9ybWF0aW9uIGNvbnRhaW5lZCBoZXJlaW4g
-aW4gYW55IHdheSAoaW5jbHVkaW5nLCBidXQgbm90IGxpbWl0ZWQgdG8sIHRvdGFsIG9yIHBhcnRp
-YWwNCmRpc2Nsb3N1cmUsIHJlcHJvZHVjdGlvbiwgb3IgZGlzc2VtaW5hdGlvbikgYnkgcGVyc29u
-cyBvdGhlciB0aGFuIHRoZSBpbnRlbmRlZA0KcmVjaXBpZW50KHMpIGlzIHByb2hpYml0ZWQuIElm
-IHlvdSByZWNlaXZlIHRoaXMgZS1tYWlsIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5k
-ZXINCmJ5IHBob25lIG9yIGVtYWlsIGltbWVkaWF0ZWx5IGFuZCBkZWxldGUgaXQhDQo=
+On Mon, 19 Oct 2015, Xusangdi wrote:
+> 
+> > -----Original Message-----
+> > From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of
+> > Chen, Xiaoxi
+> > Sent: Monday, October 19, 2015 9:11 AM
+> > To: xusangdi 11976 (RD)
+> > Cc: ceph-devel@vger.kernel.org
+> > Subject: RE: chooseleaf may cause some unnecessary pg migrations
+> >
+> > Sorry but not following...
+> >
+> > > then shut down one or more osds (please don't touch the crushmap, just stop the osd service or kill
+> > its process).
+> >
+> > In this case, OSD is only down but not out, but will be marked out after 300s.
+> >
+> > So in what case your patch is helping?
+> >
+> >       If you said your patch helps on "down and out" , then my experiment is exactly the case,
+> >
+> 
+> I am afraid it is probably not. Could you tell me how did you simulate 
+> the osd "down and out" situation using crushtool? If it was done by 
+> arguments such as '--remove-item' or 'reweight-item', it modified the 
+> crushmap and is not what I'm aiming for. 
+
+There is a --weight argument (noted in usage near --test, which is the 
+only piece that uses it).  The crush map is not modified--only the weight 
+vector that is passed in when a mapping is calculated (which is the 
+equivalent of the in/out state in Ceph's OSDMap).  This should let you 
+simulate this case.
+
+When I'm debugging/understanding these issues I usually change the dprintk 
+#define at the top of crush/mapper.c and use crushtool or osdmaptool to 
+calculate a single mapping, comparing the log before and after a 
+particular change.
+
+sage
