@@ -1,60 +1,73 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH] rbd: set device_type::release instead of device::release
-Date: Mon, 19 Oct 2015 20:07:26 +0200
-Message-ID: <1445278046-58231-1-git-send-email-idryomov@gmail.com>
+From: Shraddha Barke <shraddha.6596@gmail.com>
+Subject: [PATCH v3] net: ceph: messenger: Use local variable cursor instead of &msg->cursor
+Date: Mon, 19 Oct 2015 21:59:00 +0530
+Message-ID: <1445272140-7084-1-git-send-email-shraddha.6596@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f173.google.com ([209.85.212.173]:38191 "EHLO
-	mail-wi0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751206AbbJSQ1b (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Oct 2015 12:27:31 -0400
-Received: by wicll6 with SMTP id ll6so13918203wic.1
-        for <ceph-devel@vger.kernel.org>; Mon, 19 Oct 2015 09:27:30 -0700 (PDT)
-Received: from orange.localdomain (nat-pool-brq-t.redhat.com. [213.175.37.10])
-        by smtp.gmail.com with ESMTPSA id q1sm41120335wjy.31.2015.10.19.09.27.29
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 19 Oct 2015 09:27:29 -0700 (PDT)
+Received: from mail-pa0-f41.google.com ([209.85.220.41]:34880 "EHLO
+	mail-pa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750905AbbJSQ3J (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Oct 2015 12:29:09 -0400
+Received: by pasz6 with SMTP id z6so34684477pas.2
+        for <ceph-devel@vger.kernel.org>; Mon, 19 Oct 2015 09:29:08 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org, Alex Elder <elder@ieee.org>
 
-No point in providing an empty device_type::release callback and then
-setting device::release for each rbd_dev dynamically.
+Use local variable cursor in place of &msg->cursor in
+read_partial_msg_data() and write_partial_msg_data()
 
-Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+Signed-off-by: Shraddha Barke <shraddha.6596@gmail.com>
 ---
- drivers/block/rbd.c | 7 ++-----
- 1 file changed, 2 insertions(+), 5 deletions(-)
+Changes in v3-
+ Replace &msg->cursor with cursor in write_partial_msg_data() too
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 4917de726bdb..fa6767e9ed2a 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -3986,14 +3986,12 @@ static const struct attribute_group *rbd_attr_groups[] = {
- 	NULL
- };
+ net/ceph/messenger.c | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index b9b0e3b..01b567b 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -1552,8 +1552,8 @@ static int write_partial_message_data(struct ceph_connection *con)
+ 		bool need_crc;
+ 		int ret;
  
--static void rbd_sysfs_dev_release(struct device *dev)
--{
--}
-+static void rbd_dev_release(struct device *dev);
+-		page = ceph_msg_data_next(&msg->cursor, &page_offset, &length,
+-							&last_piece);
++		page = ceph_msg_data_next(cursor, &page_offset, &length,
++						  &last_piece);
+ 		ret = ceph_tcp_sendpage(con->sock, page, page_offset,
+ 					length, !last_piece);
+ 		if (ret <= 0) {
+@@ -1564,7 +1564,7 @@ static int write_partial_message_data(struct ceph_connection *con)
+ 		}
+ 		if (do_datacrc && cursor->need_crc)
+ 			crc = ceph_crc32c_page(crc, page, page_offset, length);
+-		need_crc = ceph_msg_data_advance(&msg->cursor, (size_t)ret);
++		need_crc = ceph_msg_data_advance(cursor, (size_t)ret);
+ 	}
  
- static struct device_type rbd_device_type = {
- 	.name		= "rbd",
- 	.groups		= rbd_attr_groups,
--	.release	= rbd_sysfs_dev_release,
-+	.release	= rbd_dev_release,
- };
+ 	dout("%s %p msg %p done\n", __func__, con, msg);
+@@ -2246,8 +2246,8 @@ static int read_partial_msg_data(struct ceph_connection *con)
+ 	if (do_datacrc)
+ 		crc = con->in_data_crc;
+ 	while (cursor->resid) {
+-		page = ceph_msg_data_next(&msg->cursor, &page_offset, &length,
+-							NULL);
++		page = ceph_msg_data_next(cursor, &page_offset, &length,
++						  NULL);
+ 		ret = ceph_tcp_recvpage(con->sock, page, page_offset, length);
+ 		if (ret <= 0) {
+ 			if (do_datacrc)
+@@ -2258,7 +2258,7 @@ static int read_partial_msg_data(struct ceph_connection *con)
  
- static struct rbd_spec *rbd_spec_get(struct rbd_spec *spec)
-@@ -4074,7 +4072,6 @@ static struct rbd_device *rbd_dev_create(struct rbd_client *rbdc,
- 	rbd_dev->dev.bus = &rbd_bus_type;
- 	rbd_dev->dev.type = &rbd_device_type;
- 	rbd_dev->dev.parent = &rbd_root_dev;
--	rbd_dev->dev.release = rbd_dev_release;
- 	device_initialize(&rbd_dev->dev);
- 
- 	rbd_dev->rbd_client = rbdc;
+ 		if (do_datacrc)
+ 			crc = ceph_crc32c_page(crc, page, page_offset, ret);
+-		(void) ceph_msg_data_advance(&msg->cursor, (size_t)ret);
++		(void) ceph_msg_data_advance(cursor, (size_t)ret);
+ 	}
+ 	if (do_datacrc)
+ 		con->in_data_crc = crc;
 -- 
-2.4.3
+2.1.4
 
