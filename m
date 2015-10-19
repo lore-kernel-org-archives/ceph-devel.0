@@ -1,101 +1,61 @@
-From: Xusangdi <xu.sangdi@h3c.com>
-Subject: RE: chooseleaf may cause some unnecessary pg migrations
-Date: Mon, 19 Oct 2015 08:12:40 +0000
-Message-ID: <FF8D83DAE5DF57468726B79904321E06047EB4@H3CMLB12-EX.srv.huawei-3com.com>
-References: <FF8D83DAE5DF57468726B79904321E06046B73@H3CMLB12-EX.srv.huawei-3com.com>
- <alpine.DEB.2.00.1510130940400.6589@cobra.newdream.net>
- <FF8D83DAE5DF57468726B79904321E06047273@H3CMLB12-EX.srv.huawei-3com.com>
- <alpine.DEB.2.00.1510140714580.6589@cobra.newdream.net>
- <FF8D83DAE5DF57468726B79904321E06047677@H3CMLB12-EX.srv.huawei-3com.com>
- <alpine.DEB.2.00.1510150715020.16833@cobra.newdream.net>
- <6F3FA899187F0043BA1827A69DA2F7CC03632F6C@shsmsx102.ccr.corp.intel.com>
- <FF8D83DAE5DF57468726B79904321E06047977@H3CMLB12-EX.srv.huawei-3com.com>
- <6F3FA899187F0043BA1827A69DA2F7CC0363300C@shsmsx102.ccr.corp.intel.com>
- <FF8D83DAE5DF57468726B79904321E060479C3@H3CMLB12-EX.srv.huawei-3com.com>
- <6F3FA899187F0043BA1827A69DA2F7CC03633AAB@shsmsx102.ccr.corp.intel.com>
- <FF8D83DAE5DF57468726B79904321E06047D8A@H3CMLB12-EX.srv.huawei-3com.com>
- <alpine.DEB.2.00.1510181912160.16833@cobra.newdream.net>
- <6F3FA899187F0043BA1827A69DA2F7CC03633C1B@shsmsx102.ccr.corp.intel.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH v2] Net: ceph: messenger: Use local variable cursor in read_partial_msg_data()
+Date: Mon, 19 Oct 2015 11:43:59 +0200
+Message-ID: <CAOi1vP_7J6tbwyXz-1wOj7EvyQ-0=2Zb9_KfVi+-vMj5dQ1exA@mail.gmail.com>
+References: <1445222975-16086-1-git-send-email-shraddha.6596@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([221.12.31.13]:24485 "EHLO h3cmg01-ex.h3c.com"
-	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751533AbbJSIMC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 19 Oct 2015 04:12:02 -0400
-In-Reply-To: <6F3FA899187F0043BA1827A69DA2F7CC03633C1B@shsmsx102.ccr.corp.intel.com>
-Content-Language: zh-CN
+Received: from mail-lf0-f48.google.com ([209.85.215.48]:32810 "EHLO
+	mail-lf0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753631AbbJSJoA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Oct 2015 05:44:00 -0400
+Received: by lffv3 with SMTP id v3so106103713lff.0
+        for <ceph-devel@vger.kernel.org>; Mon, 19 Oct 2015 02:43:59 -0700 (PDT)
+In-Reply-To: <1445222975-16086-1-git-send-email-shraddha.6596@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Shraddha Barke <shraddha.6596@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Alex Elder <elder@ieee.org>
 
-SSBqdXN0IHJlYWxpemVkIHRoZSBtZWFzdXJlbWVudCBJIG1lbnRpb25lZCBsYXN0IHRpbWUgaXMg
-bm90IHByZWNpc2UuIEl0IHNob3VsZCBiZSAnbnVtYmVyIG9mIGNoYW5nZWQgbWFwcGluZ3MnIGlu
-c3RlYWQgb2YgJ251bWJlciBvZiByZW1hcHBlZCBQR3MnLg0KRm9yIGV4YW1wbGUsIFsyLDEsN10g
-LT4gWzAsNyw0XSBzaG91bGQgYmUgcmVnYXJkZWQgZGlmZmVyZW50bHkgZnJvbSBbMiwxLDddIC0+
-IFsxLDcsNF0sIGFzIHRoZSBmaXJzdCBjaGFuZ2UgY2F1c2VzIGRvdWJsZWQgZGF0YSB0cmFuc2Zl
-ci4NCklzIHRoaXMgdGhlIHJlYXNvbiBmb3IgeW91ciB0ZXN0IHJlc3VsdHM/DQoNCj4gLS0tLS1P
-cmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogQ2hlbiwgWGlhb3hpIFttYWlsdG86eGlhb3hp
-LmNoZW5AaW50ZWwuY29tXQ0KPiBTZW50OiBNb25kYXksIE9jdG9iZXIgMTksIDIwMTUgMzozNCBQ
-TQ0KPiBUbzogU2FnZSBXZWlsOyB4dXNhbmdkaSAxMTk3NiAoUkQpDQo+IENjOiBjZXBoLWRldmVs
-QHZnZXIua2VybmVsLm9yZw0KPiBTdWJqZWN0OiBSRTogY2hvb3NlbGVhZiBtYXkgY2F1c2Ugc29t
-ZSB1bm5lY2Vzc2FyeSBwZyBtaWdyYXRpb25zDQo+DQo+IFRoYW5rcyBzYWdlLg0KPg0KPiBSZXRl
-c3RpbmcgYnkgdXNpbmcgLS10ZXN0IC0td2VpZ2h0ICR7cmFuZH0gMCAsIHN0aWxsIGluIDQwIE9T
-RHMsIDEwIHBlciBob3N0IGNhc2U6DQo+DQo+IE5ldyBjb2RlIGF2ZXJhZ2Ugb24gMjA0LjMxIHdo
-aWxlIG9sZCBjb2RlIGF2ZXJhZ2Ugb24gMjAyLjMxDQo+DQo+DQo+ID4gLS0tLS1PcmlnaW5hbCBN
-ZXNzYWdlLS0tLS0NCj4gPiBGcm9tOiBTYWdlIFdlaWwgW21haWx0bzpzYWdlQG5ld2RyZWFtLm5l
-dF0NCj4gPiBTZW50OiBNb25kYXksIE9jdG9iZXIgMTksIDIwMTUgMTA6MTggQU0NCj4gPiBUbzog
-WHVzYW5nZGkNCj4gPiBDYzogQ2hlbiwgWGlhb3hpOyBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9y
-Zw0KPiA+IFN1YmplY3Q6IFJFOiBjaG9vc2VsZWFmIG1heSBjYXVzZSBzb21lIHVubmVjZXNzYXJ5
-IHBnIG1pZ3JhdGlvbnMNCj4gPg0KPiA+IE9uIE1vbiwgMTkgT2N0IDIwMTUsIFh1c2FuZ2RpIHdy
-b3RlOg0KPiA+ID4NCj4gPiA+ID4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gPiA+ID4g
-RnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcNCj4gPiA+ID4gW21haWx0bzpj
-ZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIENoZW4sDQo+ID4g
-PiA+IFhpYW94aQ0KPiA+ID4gPiBTZW50OiBNb25kYXksIE9jdG9iZXIgMTksIDIwMTUgOToxMSBB
-TQ0KPiA+ID4gPiBUbzogeHVzYW5nZGkgMTE5NzYgKFJEKQ0KPiA+ID4gPiBDYzogY2VwaC1kZXZl
-bEB2Z2VyLmtlcm5lbC5vcmcNCj4gPiA+ID4gU3ViamVjdDogUkU6IGNob29zZWxlYWYgbWF5IGNh
-dXNlIHNvbWUgdW5uZWNlc3NhcnkgcGcgbWlncmF0aW9ucw0KPiA+ID4gPg0KPiA+ID4gPiBTb3Jy
-eSBidXQgbm90IGZvbGxvd2luZy4uLg0KPiA+ID4gPg0KPiA+ID4gPiA+IHRoZW4gc2h1dCBkb3du
-IG9uZSBvciBtb3JlIG9zZHMgKHBsZWFzZSBkb24ndCB0b3VjaCB0aGUNCj4gPiA+ID4gPiBjcnVz
-aG1hcCwganVzdCBzdG9wIHRoZSBvc2Qgc2VydmljZSBvciBraWxsDQo+ID4gPiA+IGl0cyBwcm9j
-ZXNzKS4NCj4gPiA+ID4NCj4gPiA+ID4gSW4gdGhpcyBjYXNlLCBPU0QgaXMgb25seSBkb3duIGJ1
-dCBub3Qgb3V0LCBidXQgd2lsbCBiZSBtYXJrZWQgb3V0DQo+ID4gPiA+IGFmdGVyDQo+ID4gMzAw
-cy4NCj4gPiA+ID4NCj4gPiA+ID4gU28gaW4gd2hhdCBjYXNlIHlvdXIgcGF0Y2ggaXMgaGVscGlu
-Zz8NCj4gPiA+ID4NCj4gPiA+ID4gICAgICAgSWYgeW91IHNhaWQgeW91ciBwYXRjaCBoZWxwcyBv
-biAiZG93biBhbmQgb3V0IiAsIHRoZW4gbXkNCj4gPiA+ID4gZXhwZXJpbWVudCBpcyBleGFjdGx5
-IHRoZSBjYXNlLA0KPiA+ID4gPg0KPiA+ID4NCj4gPiA+IEkgYW0gYWZyYWlkIGl0IGlzIHByb2Jh
-Ymx5IG5vdC4gQ291bGQgeW91IHRlbGwgbWUgaG93IGRpZCB5b3UNCj4gPiA+IHNpbXVsYXRlIHRo
-ZSBvc2QgImRvd24gYW5kIG91dCIgc2l0dWF0aW9uIHVzaW5nIGNydXNodG9vbD8gSWYgaXQgd2Fz
-DQo+ID4gPiBkb25lIGJ5IGFyZ3VtZW50cyBzdWNoIGFzICctLXJlbW92ZS1pdGVtJyBvciAncmV3
-ZWlnaHQtaXRlbScsIGl0DQo+ID4gPiBtb2RpZmllZCB0aGUgY3J1c2htYXAgYW5kIGlzIG5vdCB3
-aGF0IEknbSBhaW1pbmcgZm9yLg0KPiA+DQo+ID4gVGhlcmUgaXMgYSAtLXdlaWdodCBhcmd1bWVu
-dCAobm90ZWQgaW4gdXNhZ2UgbmVhciAtLXRlc3QsIHdoaWNoIGlzIHRoZQ0KPiA+IG9ubHkgcGll
-Y2UgdGhhdCB1c2VzIGl0KS4gIFRoZSBjcnVzaCBtYXAgaXMgbm90IG1vZGlmaWVkLS1vbmx5IHRo
-ZQ0KPiA+IHdlaWdodCB2ZWN0b3IgdGhhdCBpcyBwYXNzZWQgaW4gd2hlbiBhIG1hcHBpbmcgaXMg
-Y2FsY3VsYXRlZCAod2hpY2ggaXMNCj4gPiB0aGUgZXF1aXZhbGVudCBvZiB0aGUgaW4vb3V0IHN0
-YXRlIGluIENlcGgncyBPU0RNYXApLiAgVGhpcyBzaG91bGQgbGV0IHlvdSBzaW11bGF0ZSB0aGlz
-IGNhc2UuDQo+ID4NCj4gPiBXaGVuIEknbSBkZWJ1Z2dpbmcvdW5kZXJzdGFuZGluZyB0aGVzZSBp
-c3N1ZXMgSSB1c3VhbGx5IGNoYW5nZSB0aGUNCj4gPiBkcHJpbnRrICNkZWZpbmUgYXQgdGhlIHRv
-cCBvZiBjcnVzaC9tYXBwZXIuYyBhbmQgdXNlIGNydXNodG9vbCBvcg0KPiA+IG9zZG1hcHRvb2wg
-dG8gY2FsY3VsYXRlIGEgc2luZ2xlIG1hcHBpbmcsIGNvbXBhcmluZyB0aGUgbG9nIGJlZm9yZSBh
-bmQNCj4gPiBhZnRlciBhIHBhcnRpY3VsYXIgY2hhbmdlLg0KPiA+DQo+ID4gc2FnZQ0KLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLQ0K5pys6YKu5Lu25Y+K5YW26ZmE5Lu25ZCr5pyJ5p2t5bee5Y2O5LiJ6YCa
-5L+h5oqA5pyv5pyJ6ZmQ5YWs5Y+455qE5L+d5a+G5L+h5oGv77yM5LuF6ZmQ5LqO5Y+R6YCB57uZ
-5LiK6Z2i5Zyw5Z2A5Lit5YiX5Ye6DQrnmoTkuKrkurrmiJbnvqTnu4TjgILnpoHmraLku7vkvZXl
-hbbku5bkurrku6Xku7vkvZXlvaLlvI/kvb/nlKjvvIjljIXmi6zkvYbkuI3pmZDkuo7lhajpg6jm
-iJbpg6jliIblnLDms4TpnLLjgIHlpI3liLbjgIENCuaIluaVo+WPke+8ieacrOmCruS7tuS4reea
-hOS/oeaBr+OAguWmguaenOaCqOmUmeaUtuS6huacrOmCruS7tu+8jOivt+aCqOeri+WNs+eUteiv
-neaIlumCruS7tumAmuefpeWPkeS7tuS6uuW5tuWIoOmZpOacrA0K6YKu5Lu277yBDQpUaGlzIGUt
-bWFpbCBhbmQgaXRzIGF0dGFjaG1lbnRzIGNvbnRhaW4gY29uZmlkZW50aWFsIGluZm9ybWF0aW9u
-IGZyb20gSDNDLCB3aGljaCBpcw0KaW50ZW5kZWQgb25seSBmb3IgdGhlIHBlcnNvbiBvciBlbnRp
-dHkgd2hvc2UgYWRkcmVzcyBpcyBsaXN0ZWQgYWJvdmUuIEFueSB1c2Ugb2YgdGhlDQppbmZvcm1h
-dGlvbiBjb250YWluZWQgaGVyZWluIGluIGFueSB3YXkgKGluY2x1ZGluZywgYnV0IG5vdCBsaW1p
-dGVkIHRvLCB0b3RhbCBvciBwYXJ0aWFsDQpkaXNjbG9zdXJlLCByZXByb2R1Y3Rpb24sIG9yIGRp
-c3NlbWluYXRpb24pIGJ5IHBlcnNvbnMgb3RoZXIgdGhhbiB0aGUgaW50ZW5kZWQNCnJlY2lwaWVu
-dChzKSBpcyBwcm9oaWJpdGVkLiBJZiB5b3UgcmVjZWl2ZSB0aGlzIGUtbWFpbCBpbiBlcnJvciwg
-cGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyDQpieSBwaG9uZSBvciBlbWFpbCBpbW1lZGlhdGVseSBh
-bmQgZGVsZXRlIGl0IQ0K
+On Mon, Oct 19, 2015 at 4:49 AM, Shraddha Barke <shraddha.6596@gmail.com> wrote:
+> Use local variable cursor in place of &msg->cursor in
+>  read_partial_msg_data()
+>
+> Signed-off-by: Shraddha Barke <shraddha.6596@gmail.com>
+> ---
+> Changes in v2-
+>  Drop incorrect use of cursor
+>
+>  net/ceph/messenger.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+> index b9b0e3b..b087edd 100644
+> --- a/net/ceph/messenger.c
+> +++ b/net/ceph/messenger.c
+> @@ -2246,7 +2246,7 @@ static int read_partial_msg_data(struct ceph_connection *con)
+>         if (do_datacrc)
+>                 crc = con->in_data_crc;
+>         while (cursor->resid) {
+> -               page = ceph_msg_data_next(&msg->cursor, &page_offset, &length,
+> +               page = ceph_msg_data_next(cursor, &page_offset, &length,
+>                                                         NULL);
+>                 ret = ceph_tcp_recvpage(con->sock, page, page_offset, length);
+>                 if (ret <= 0) {
+> @@ -2258,7 +2258,7 @@ static int read_partial_msg_data(struct ceph_connection *con)
+>
+>                 if (do_datacrc)
+>                         crc = ceph_crc32c_page(crc, page, page_offset, ret);
+> -               (void) ceph_msg_data_advance(&msg->cursor, (size_t)ret);
+> +               (void) ceph_msg_data_advance(cursor, (size_t)ret);
+>         }
+>         if (do_datacrc)
+>                 con->in_data_crc = crc;
+
+This looks good.  I'd like you to update this patch to do the same for
+write_partial_message_data().
+
+Thanks,
+
+                Ilya
