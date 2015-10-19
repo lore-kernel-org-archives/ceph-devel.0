@@ -1,51 +1,33 @@
-From: Shraddha Barke <shraddha.6596@gmail.com>
-Subject: [PATCH v2] Net: ceph: messenger: Use local variable cursor in read_partial_msg_data()
-Date: Mon, 19 Oct 2015 08:19:35 +0530
-Message-ID: <1445222975-16086-1-git-send-email-shraddha.6596@gmail.com>
+From: Stefan Hajnoczi <stefanha@redhat.com>
+Subject: Re: nfsv41 over AF_VSOCK (nfs-ganesha)
+Date: Mon, 19 Oct 2015 08:52:00 +0200
+Message-ID: <20151019065200.GB17460@stefanha-thinkpad.redhat.com>
+References: <1602558852.33130185.1445028743632.JavaMail.zimbra@redhat.com>
+ <1249838657.33136909.1445029697101.JavaMail.zimbra@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f51.google.com ([209.85.220.51]:36306 "EHLO
-	mail-pa0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752709AbbJSCtn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 18 Oct 2015 22:49:43 -0400
-Received: by pacfv9 with SMTP id fv9so79502035pac.3
-        for <ceph-devel@vger.kernel.org>; Sun, 18 Oct 2015 19:49:43 -0700 (PDT)
+Received: from mx1.redhat.com ([209.132.183.28]:34348 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750784AbbJSGwC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 19 Oct 2015 02:52:02 -0400
+Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
+	by mx1.redhat.com (Postfix) with ESMTPS id 3D6ACC0C18A6
+	for <ceph-devel@vger.kernel.org>; Mon, 19 Oct 2015 06:52:02 +0000 (UTC)
+Content-Disposition: inline
+In-Reply-To: <1249838657.33136909.1445029697101.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, Alex Elder <elder@ieee.org>
+To: Matt Benjamin <mbenjamin@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>, "J. Bruce Fields" <bfields@redhat.com>
 
-Use local variable cursor in place of &msg->cursor in
- read_partial_msg_data()
+On Fri, Oct 16, 2015 at 05:08:17PM -0400, Matt Benjamin wrote:
+> One of Sage's possible plans for Manilla integration would use nfs over the new Linux  vmci sockets transport integration in qemu (below) to access Cephfs via an nfs-ganesha server running in the host vm.
 
-Signed-off-by: Shraddha Barke <shraddha.6596@gmail.com>
----
-Changes in v2-
- Drop incorrect use of cursor
+Excellent job!  Nice to see you were able to add AF_VSOCK support to
+nfs-ganesha so quickly.
 
- net/ceph/messenger.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+I'm currently working on kernel nfsd support and will send the patches
+to linux-nfs and CC you.
 
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index b9b0e3b..b087edd 100644
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -2246,7 +2246,7 @@ static int read_partial_msg_data(struct ceph_connection *con)
- 	if (do_datacrc)
- 		crc = con->in_data_crc;
- 	while (cursor->resid) {
--		page = ceph_msg_data_next(&msg->cursor, &page_offset, &length,
-+		page = ceph_msg_data_next(cursor, &page_offset, &length,
- 							NULL);
- 		ret = ceph_tcp_recvpage(con->sock, page, page_offset, length);
- 		if (ret <= 0) {
-@@ -2258,7 +2258,7 @@ static int read_partial_msg_data(struct ceph_connection *con)
- 
- 		if (do_datacrc)
- 			crc = ceph_crc32c_page(crc, page, page_offset, ret);
--		(void) ceph_msg_data_advance(&msg->cursor, (size_t)ret);
-+		(void) ceph_msg_data_advance(cursor, (size_t)ret);
- 	}
- 	if (do_datacrc)
- 		con->in_data_crc = crc;
--- 
-2.1.4
-
+Stefan
