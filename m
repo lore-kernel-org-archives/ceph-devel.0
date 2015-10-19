@@ -1,88 +1,104 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH v3] net: ceph: messenger: Use local variable cursor
- instead of &msg->cursor
-Date: Mon, 19 Oct 2015 19:20:42 +0200
-Message-ID: <CAOi1vP9G0E3HBnbLvnr3XMrMWuy4N51mMmyQn3_sUtT=Dr0Uiw@mail.gmail.com>
-References: <1445272140-7084-1-git-send-email-shraddha.6596@gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: newstore direction
+Date: Mon, 19 Oct 2015 12:49:01 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1510191216200.4188@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f171.google.com ([209.85.212.171]:36364 "EHLO
-	mail-wi0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753434AbbJSRUn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Oct 2015 13:20:43 -0400
-Received: by wicfx6 with SMTP id fx6so16068719wic.1
-        for <ceph-devel@vger.kernel.org>; Mon, 19 Oct 2015 10:20:42 -0700 (PDT)
-In-Reply-To: <1445272140-7084-1-git-send-email-shraddha.6596@gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:37881 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752402AbbJSTtD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 19 Oct 2015 15:49:03 -0400
+Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+	by mx1.redhat.com (Postfix) with ESMTPS id 0C4C91EB2F
+	for <ceph-devel@vger.kernel.org>; Mon, 19 Oct 2015 19:49:03 +0000 (UTC)
+Received: from redhat.com ([10.3.112.16])
+	by int-mx10.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t9JJn19C012832
+	for <ceph-devel@vger.kernel.org>; Mon, 19 Oct 2015 15:49:02 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Shraddha Barke <shraddha.6596@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Alex Elder <elder@ieee.org>
+To: ceph-devel@vger.kernel.org
 
-On Mon, Oct 19, 2015 at 6:29 PM, Shraddha Barke <shraddha.6596@gmail.com> wrote:
-> Use local variable cursor in place of &msg->cursor in
-> read_partial_msg_data() and write_partial_msg_data()
->
-> Signed-off-by: Shraddha Barke <shraddha.6596@gmail.com>
-> ---
-> Changes in v3-
->  Replace &msg->cursor with cursor in write_partial_msg_data() too
->
->  net/ceph/messenger.c | 12 ++++++------
->  1 file changed, 6 insertions(+), 6 deletions(-)
->
-> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-> index b9b0e3b..01b567b 100644
-> --- a/net/ceph/messenger.c
-> +++ b/net/ceph/messenger.c
-> @@ -1552,8 +1552,8 @@ static int write_partial_message_data(struct ceph_connection *con)
->                 bool need_crc;
->                 int ret;
->
-> -               page = ceph_msg_data_next(&msg->cursor, &page_offset, &length,
-> -                                                       &last_piece);
-> +               page = ceph_msg_data_next(cursor, &page_offset, &length,
-> +                                                 &last_piece);
->                 ret = ceph_tcp_sendpage(con->sock, page, page_offset,
->                                         length, !last_piece);
->                 if (ret <= 0) {
-> @@ -1564,7 +1564,7 @@ static int write_partial_message_data(struct ceph_connection *con)
->                 }
->                 if (do_datacrc && cursor->need_crc)
->                         crc = ceph_crc32c_page(crc, page, page_offset, length);
-> -               need_crc = ceph_msg_data_advance(&msg->cursor, (size_t)ret);
-> +               need_crc = ceph_msg_data_advance(cursor, (size_t)ret);
->         }
->
->         dout("%s %p msg %p done\n", __func__, con, msg);
-> @@ -2246,8 +2246,8 @@ static int read_partial_msg_data(struct ceph_connection *con)
->         if (do_datacrc)
->                 crc = con->in_data_crc;
->         while (cursor->resid) {
-> -               page = ceph_msg_data_next(&msg->cursor, &page_offset, &length,
-> -                                                       NULL);
-> +               page = ceph_msg_data_next(cursor, &page_offset, &length,
-> +                                                 NULL);
->                 ret = ceph_tcp_recvpage(con->sock, page, page_offset, length);
->                 if (ret <= 0) {
->                         if (do_datacrc)
-> @@ -2258,7 +2258,7 @@ static int read_partial_msg_data(struct ceph_connection *con)
->
->                 if (do_datacrc)
->                         crc = ceph_crc32c_page(crc, page, page_offset, ret);
-> -               (void) ceph_msg_data_advance(&msg->cursor, (size_t)ret);
-> +               (void) ceph_msg_data_advance(cursor, (size_t)ret);
->         }
->         if (do_datacrc)
->                 con->in_data_crc = crc;
+The current design is based on two simple ideas:
 
-Applied, see
-https://github.com/ceph/ceph-client/commit/621a56fd69751d263795f4f35e65eff7daa3a470.
+ 1) a key/value interface is better way to manage all of our internal 
+metadata (object metadata, attrs, layout, collection membership, 
+write-ahead logging, overlay data, etc.)
 
-Generally, we prefix net/ceph commits with "libceph".  Different
-subsystems have different conventions, use "git log --oneline <path>"
-to get a sense of what is preferred.
+ 2) a file system is well suited for storage object data (as files).
 
-Thanks,
+So far 1 is working out well, but I'm questioning the wisdom of #2.  A few 
+things:
 
-                Ilya
+ - We currently write the data to the file, fsync, then commit the kv 
+transaction.  That's at least 3 IOs: one for the data, one for the fs 
+journal, one for the kv txn to commit (at least once my rocksdb changes 
+land... the kv commit is currently 2-3).  So two people are managing 
+metadata, here: the fs managing the file metadata (with its own 
+journal) and the kv backend (with its journal).
+
+ - On read we have to open files by name, which means traversing the fs 
+namespace.  Newstore tries to keep it as flat and simple as possible, but 
+at a minimum it is a couple btree lookups.  We'd love to use open by 
+handle (which would reduce this to 1 btree traversal), but running 
+the daemon as ceph and not root makes that hard...
+
+ - ...and file systems insist on updating mtime on writes, even when it is 
+a overwrite with no allocation changes.  (We don't care about mtime.)  
+O_NOCMTIME patches exist but it is hard to get these past the kernel 
+brainfreeze.
+
+ - XFS is (probably) never going going to give us data checksums, which we 
+want desperately.
+
+But what's the alternative?  My thought is to just bite the bullet and 
+consume a raw block device directly.  Write an allocator, hopefully keep 
+it pretty simple, and manage it in kv store along with all of our other 
+metadata.
+
+Wins:
+
+ - 2 IOs for most: one to write the data to unused space in the block 
+device, one to commit our transaction (vs 4+ before).  For overwrites, 
+we'd have one io to do our write-ahead log (kv journal), then do 
+the overwrite async (vs 4+ before).
+
+ - No concern about mtime getting in the way
+
+ - Faster reads (no fs lookup)
+
+ - Similarly sized metadata for most objects.  If we assume most objects 
+are not fragmented, then the metadata to store the block offsets is about 
+the same size as the metadata to store the filenames we have now. 
+
+Problems:
+
+ - We have to size the kv backend storage (probably still an XFS 
+partition) vs the block storage.  Maybe we do this anyway (put metadata on 
+SSD!) so it won't matter.  But what happens when we are storing gobs of 
+rgw index data or cephfs metadata?  Suddenly we are pulling storage out of 
+a different pool and those aren't currently fungible.
+
+ - We have to write and maintain an allocator.  I'm still optimistic this 
+can be reasonbly simple, especially for the flash case (where 
+fragmentation isn't such an issue as long as our blocks are reasonbly 
+sized).  For disk we may beed to be moderately clever.
+
+ - We'll need a fsck to ensure our internal metadata is consistent.  The 
+good news is it'll just need to validate what we have stored in the kv 
+store.
+
+Other thoughts:
+
+ - We might want to consider whether dm-thin or bcache or other block 
+layers might help us with elasticity of file vs block areas.
+
+ - Rocksdb can push colder data to a second directory, so we could have a 
+fast ssd primary area (for wal and most metadata) and a second hdd 
+directory for stuff it has to push off.  Then have a conservative amount 
+of file space on the hdd.  If our block fills up, use the existing file 
+mechanism to put data there too.  (But then we have to maintain both the 
+current kv + file approach and not go all-in on kv + block.)
+
+Thoughts?
+sage
