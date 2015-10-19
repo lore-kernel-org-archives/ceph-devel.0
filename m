@@ -1,7 +1,7 @@
 From: Milosz Tanski <milosz@adfin.com>
 Subject: Re: MDS stuck in a crash loop
-Date: Mon, 19 Oct 2015 11:28:51 -0400
-Message-ID: <CANP1eJGvrCWGzGJHQSM=9RBvLnbEsT6HrTSL9M-YY+gi12xQvg@mail.gmail.com>
+Date: Mon, 19 Oct 2015 11:31:42 -0400
+Message-ID: <CANP1eJGiPEx49nNyQgv3qo9ugVRAWnsh_WAHt33jHXX23S=0GQ@mail.gmail.com>
 References: <CANP1eJGesJ_wGKDNQRJ952x8jkNHiJybeX075wxmJDurbSTMNw@mail.gmail.com>
 	<CAJ4mKGY5uTZ6oiqZY4VbU5LdECXx5sko6VOd5aD2aEhtq74NDA@mail.gmail.com>
 	<CANP1eJFNpLu3-HeqJ28L7xCTuKh-MhUT2j7A_tM7reofZ94FTQ@mail.gmail.com>
@@ -9,25 +9,26 @@ References: <CANP1eJGesJ_wGKDNQRJ952x8jkNHiJybeX075wxmJDurbSTMNw@mail.gmail.com>
 	<CANP1eJHnavBzJRnDLa9gQ93haJ2QzKJsLj4+ZbS_vd1kquV8Lw@mail.gmail.com>
 	<CANP1eJGmjechy8ZkVarA-HWdL37scmHdQXToM6NdAXxU-_KVMw@mail.gmail.com>
 	<CANP1eJHYvgUKDCKrVYY=XkJsgcdVGn6T=drvEA8hofHyVX+0YA@mail.gmail.com>
-	<CALe9h7eMAhCjh9NSHc=yQgEDc2zZ_Ts3Kp1XbD_xxH+oCV3NkA@mail.gmail.com>
+	<CAJ4mKGYyza=MqV8zRS3cGA0EfbB=h=UhYbwO7QBgTb6FfzXSQw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f53.google.com ([209.85.215.53]:33535 "EHLO
-	mail-lf0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754201AbbJSP2x convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Oct 2015 11:28:53 -0400
-Received: by lffv3 with SMTP id v3so114056565lff.0
-        for <ceph-devel@vger.kernel.org>; Mon, 19 Oct 2015 08:28:51 -0700 (PDT)
-In-Reply-To: <CALe9h7eMAhCjh9NSHc=yQgEDc2zZ_Ts3Kp1XbD_xxH+oCV3NkA@mail.gmail.com>
+Received: from mail-lb0-f169.google.com ([209.85.217.169]:34706 "EHLO
+	mail-lb0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751654AbbJSPbo convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Oct 2015 11:31:44 -0400
+Received: by lbbwb3 with SMTP id wb3so85634069lbb.1
+        for <ceph-devel@vger.kernel.org>; Mon, 19 Oct 2015 08:31:42 -0700 (PDT)
+In-Reply-To: <CAJ4mKGYyza=MqV8zRS3cGA0EfbB=h=UhYbwO7QBgTb6FfzXSQw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, Oct 14, 2015 at 9:21 AM, John Spray <jspray@redhat.com> wrote:
-> On Mon, Oct 12, 2015 at 3:36 AM, Milosz Tanski <milosz@adfin.com> wro=
+On Wed, Oct 14, 2015 at 12:46 AM, Gregory Farnum <gfarnum@redhat.com> w=
+rote:
+> On Sun, Oct 11, 2015 at 7:36 PM, Milosz Tanski <milosz@adfin.com> wro=
 te:
 >> On Sun, Oct 11, 2015 at 6:44 PM, Milosz Tanski <milosz@adfin.com> wr=
 ote:
@@ -175,40 +176,6 @@ e too
 >>> function 'fnode_t* CDir::project_fnode()' thread 7f580c7b9700 time
 >>> 2015-10-11 22:40:47.300581
 >>> mds/CDir.cc: 1267: FAILED assert(get_version() !=3D 0)
->
-> Hmm, so something is creating a dentry that points to a dirfrag objec=
-t
-> that doesn't really exist.  What was the series of client operations
-> that led to the directory (the one with inode number 0x100048df076)
-> being where it is now?  Was it created there, or moved there from
-> somewhere?
->
-> The way this is meant to work is that the journal we scavenge from
-> contains EMetaBlobs that include fnodes, and when we scavenge the
-> fnode, we write it into the dirfrag header, creating the dirfrag if i=
-t
-> doesn't exist.  The same mkdir that creates the dentry should also
-> contain the update to the fnode.
->
-> It would be really useful to get a copy of the journal at the point
-> right before you run "recover dentries".
->
-> Separately, I've been extending our journal repair test to see if I
-> could get a similar result, I haven't found a path that results in a
-> dentry-but-no-dirfrag case, but I can at least get the particular
-> assertion you're seeing, so I'll fix that in master.
-
-Sadly I don't have the original cluster data. We re-created a new one
-shortly afterwards since we kept running into more of these dir fag
-issues after the initial issue. Was just trying to get this up going
-back quickly.
-
->
-> John
->
->
->
->
 >>>
 >>>  ceph version 0.94.3 (95cefea9fd9ab740263bf8bb4796fd864d9afe2b)
 >>>  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
@@ -234,6 +201,16 @@ o
 >> 4. MDS suicides and then two MDS machines start ping ponging in
 >> recovery but always fail to save SessionMap.
 >> 5. I stop the MDS, recover the journal and reset the session map.
+>
+> Exactly what did you do in this step? I have a suspicion you didn't
+> recover and flush out the journal all the way, and that's what caused
+> your directory to go bad.
+> -Greg
+
+I followed the directions from the hammer recovery page on cephfs. The
+backup steps, recovery, truncation and the session clear in order.
+
+>
 >> 6. MDS come back to life after that.
 >> 7. Ceph loses one directory and as soon as the client tries to acces=
 s
@@ -250,11 +227,6 @@ ess it.
 >>
 >> p: 646-253-9055
 >> e: milosz@adfin.com
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 
 
