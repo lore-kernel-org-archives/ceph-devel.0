@@ -1,7 +1,7 @@
-From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+From: Varada Kari <Varada.Kari@sandisk.com>
 Subject: RE: newstore direction
-Date: Tue, 20 Oct 2015 02:24:15 +0000
-Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC036341E8@shsmsx102.ccr.corp.intel.com>
+Date: Tue, 20 Oct 2015 02:32:57 +0000
+Message-ID: <BN1PR0201MB06921DFEC2E3E257F15B082FE2390@BN1PR0201MB0692.namprd02.prod.outlook.com>
 References: <alpine.DEB.2.00.1510191216200.4188@cobra.newdream.net>
  <755F6B91B3BE364F9BCA11EA3F9E0C6F3174851F@SACMBXIP02.sdcorp.global.sandisk.com>
  <alpine.DEB.2.00.1510191353100.16833@cobra.newdream.net>
@@ -10,10 +10,11 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:33652 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750868AbbJTCYz convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Oct 2015 22:24:55 -0400
+Received: from mail-bn1on0096.outbound.protection.outlook.com ([157.56.110.96]:54192
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750893AbbJTCdB convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Oct 2015 22:33:01 -0400
 In-Reply-To: <99767EA2E27DD44DB4E9F9B9ACA458C056195331@SSIEXCH-MB3.ssi.samsung.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
@@ -21,24 +22,31 @@ List-ID: <ceph-devel.vger.kernel.org>
 To: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>, Sage Weil <sweil@redhat.com>, Somnath Roy <Somnath.Roy@sandisk.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-+1,  nowadays K-V DB care more about very small key-value pairs, say several bytes to a few KB, but in SSD case we only care about 4KB or 8KB. In this way, NVMKV is a good design and seems some of the SSD vendor are also trying to build this kind of interface, we had a NVM-L library but still under development.
+Hi James,
+
+Are you mentioning SCSI OSD (http://www.t10.org/drafts.htm#OSD_Family) ? If SCSI OSD is what you are mentioning, drive has to support all osd functionality mentioned by T10.
+If not, we have to implement the same functionality in kernel or have a wrapper in user space to convert them to read/write calls.  This seems more effort.
+
+Varada
+
 > -----Original Message-----
 > From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
 > owner@vger.kernel.org] On Behalf Of James (Fei) Liu-SSI
-> Sent: Tuesday, October 20, 2015 6:21 AM
-> To: Sage Weil; Somnath Roy
+> Sent: Tuesday, October 20, 2015 3:51 AM
+> To: Sage Weil <sweil@redhat.com>; Somnath Roy
+> <Somnath.Roy@sandisk.com>
 > Cc: ceph-devel@vger.kernel.org
 > Subject: RE: newstore direction
 > 
 > Hi Sage and Somnath,
 >   In my humble opinion, There is another more aggressive  solution than raw
 > block device base keyvalue store as backend for objectstore. The new key
-> value  SSD device with transaction support would be  ideal to solve the issues.
-> First of all, it is raw SSD device. Secondly , It provides key value interface
-> directly from SSD. Thirdly, it can provide transaction support, consistency will
-> be guaranteed by hardware device. It pretty much satisfied all of objectstore
-> needs without any extra overhead since there is not any extra layer in
-> between device and objectstore.
+> value  SSD device with transaction support would be  ideal to solve the
+> issues. First of all, it is raw SSD device. Secondly , It provides key value
+> interface directly from SSD. Thirdly, it can provide transaction support,
+> consistency will be guaranteed by hardware device. It pretty much satisfied
+> all of objectstore needs without any extra overhead since there is not any
+> extra layer in between device and objectstore.
 >    Either way, I strongly support to have CEPH own data format instead of
 > relying on filesystem.
 > 
