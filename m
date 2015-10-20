@@ -1,59 +1,140 @@
-From: Z Zhang <zhangz.david-1ViLX0X+lBJBDgjK7y7TUQ@public.gmane.org>
-Subject: Write performance issue under rocksdb kvstore
-Date: Tue, 20 Oct 2015 18:51:46 +0800
-Message-ID: <SNT146-W53DA6FBD57581F19D681688C390@phx.gbl>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: newstore direction
+Date: Tue, 20 Oct 2015 05:25:49 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1510200522270.16833@cobra.newdream.net>
+References: <alpine.DEB.2.00.1510191216200.4188@cobra.newdream.net> <CACJqLyZEjOdzSVYBZeJ0_cgUudpn8oiskNBSCYC9oAPvyWtN3g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:39662 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751402AbbJTMZv (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 20 Oct 2015 08:25:51 -0400
+In-Reply-To: <CACJqLyZEjOdzSVYBZeJ0_cgUudpn8oiskNBSCYC9oAPvyWtN3g@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Haomai Wang <haomaiwang@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Guys,
+On Tue, 20 Oct 2015, Haomai Wang wrote:
+> On Tue, Oct 20, 2015 at 3:49 AM, Sage Weil <sweil@redhat.com> wrote:
+> > The current design is based on two simple ideas:
+> >
+> >  1) a key/value interface is better way to manage all of our internal
+> > metadata (object metadata, attrs, layout, collection membership,
+> > write-ahead logging, overlay data, etc.)
+> >
+> >  2) a file system is well suited for storage object data (as files).
+> >
+> > So far 1 is working out well, but I'm questioning the wisdom of #2.  A few
+> > things:
+> >
+> >  - We currently write the data to the file, fsync, then commit the kv
+> > transaction.  That's at least 3 IOs: one for the data, one for the fs
+> > journal, one for the kv txn to commit (at least once my rocksdb changes
+> > land... the kv commit is currently 2-3).  So two people are managing
+> > metadata, here: the fs managing the file metadata (with its own
+> > journal) and the kv backend (with its journal).
+> >
+> >  - On read we have to open files by name, which means traversing the fs
+> > namespace.  Newstore tries to keep it as flat and simple as possible, but
+> > at a minimum it is a couple btree lookups.  We'd love to use open by
+> > handle (which would reduce this to 1 btree traversal), but running
+> > the daemon as ceph and not root makes that hard...
+> >
+> >  - ...and file systems insist on updating mtime on writes, even when it is
+> > a overwrite with no allocation changes.  (We don't care about mtime.)
+> > O_NOCMTIME patches exist but it is hard to get these past the kernel
+> > brainfreeze.
+> >
+> >  - XFS is (probably) never going going to give us data checksums, which we
+> > want desperately.
+> >
+> > But what's the alternative?  My thought is to just bite the bullet and
+> > consume a raw block device directly.  Write an allocator, hopefully keep
+> > it pretty simple, and manage it in kv store along with all of our other
+> > metadata.
+> 
+> This is really a tough decision. Although making a block device based
+> objectstore never walk out my mind since two years ago.
+> 
+> We would much more concern about the effective of space utilization
+> compared to local fs,  the buggy, the consuming time to build a tiny
+> local filesystem. I'm a little afraid of we would stuck into....
+> 
+> >
+> > Wins:
+> >
+> >  - 2 IOs for most: one to write the data to unused space in the block
+> > device, one to commit our transaction (vs 4+ before).  For overwrites,
+> > we'd have one io to do our write-ahead log (kv journal), then do
+> > the overwrite async (vs 4+ before).
+> 
+> Compared to filejournal, it seemed keyvaluedb doesn't play well in WAL
+> area from my perf.
 
-I am trying latest ceph-9.1.0 with rocksdb 4.1 and ceph-9.0.3 with rocksdb =
-3.11 as OSD backend. I use rbd to test performance and following is my clus=
-ter info.
+With this change it is close to parity:
 
-[ceph@xxx ~]$ ceph -s
-=A0 =A0 cluster b74f3944-d77f-4401-a531-fa5282995808
-=A0 =A0 =A0health HEALTH_OK
-=A0 =A0 =A0monmap e1: 1 mons at {xxx=3Dxxx.xxx.xxx.xxx:6789/0}
-=A0 =A0 =A0 =A0 =A0 =A0 election epoch 1, quorum 0 xxx
-=A0 =A0 =A0osdmap e338: 44 osds: 44 up, 44 in
-=A0 =A0 =A0 =A0 =A0 =A0 flags sortbitwise
-=A0 =A0 =A0 pgmap v1476: 2048 pgs, 1 pools, 158 MB data, 59 objects
-=A0 =A0 =A0 =A0 =A0 =A0 1940 MB used, 81930 GB / 81932 GB avail
-=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 2048 active+clean
+	https://github.com/facebook/rocksdb/pull/746
 
-All the disks are spinning ones with write cache turning on. Rocksdb's WAL =
-and sst files are on the same disk as every OSD.
+> >  - No concern about mtime getting in the way
+> >
+> >  - Faster reads (no fs lookup)
+> >
+> >  - Similarly sized metadata for most objects.  If we assume most objects
+> > are not fragmented, then the metadata to store the block offsets is about
+> > the same size as the metadata to store the filenames we have now.
+> >
+> > Problems:
+> >
+> >  - We have to size the kv backend storage (probably still an XFS
+> > partition) vs the block storage.  Maybe we do this anyway (put metadata on
+> > SSD!) so it won't matter.  But what happens when we are storing gobs of
+> > rgw index data or cephfs metadata?  Suddenly we are pulling storage out of
+> > a different pool and those aren't currently fungible.
+> >
+> >  - We have to write and maintain an allocator.  I'm still optimistic this
+> > can be reasonbly simple, especially for the flash case (where
+> > fragmentation isn't such an issue as long as our blocks are reasonbly
+> > sized).  For disk we may beed to be moderately clever.
+> >
+> >  - We'll need a fsck to ensure our internal metadata is consistent.  The
+> > good news is it'll just need to validate what we have stored in the kv
+> > store.
+> >
+> > Other thoughts:
+> >
+> >  - We might want to consider whether dm-thin or bcache or other block
+> > layers might help us with elasticity of file vs block areas.
+> >
+> >  - Rocksdb can push colder data to a second directory, so we could have a
+> > fast ssd primary area (for wal and most metadata) and a second hdd
+> > directory for stuff it has to push off.  Then have a conservative amount
+> > of file space on the hdd.  If our block fills up, use the existing file
+> > mechanism to put data there too.  (But then we have to maintain both the
+> > current kv + file approach and not go all-in on kv + block.)
+> 
+> A complex way...
+> 
+> Actually I would like to employ FileStore2 impl, which means we still
+> use FileJournal(or alike ..). But we need to employ more memory to
+> keep metadata/xattrs and use aio+dio to flush disk. A userspace
+> pagecache needed to be impl. Then we can skip journal if full write,
+> because osd is pg isolation we could make a barrier for single pg when
+> skipping journal. @Sage Is there other concerns for filestore skip
+> journal?
+> 
+> In a word, I like the model that filestore owns, but we need to have a
+> big refactor for existing impl.
+> 
+> Sorry to disturb the thought....
 
-Using fio to generate following write load:=A0
-fio -direct=3D1 -rw=3Drandwrite -ioengine=3Dsync -size=3D10M -bs=3D4K -grou=
-p_reporting -directory /mnt/rbd_test/ -name xxx.1 -numjobs=3D1=A0=A0
+I think the directory (re)hashing strategy in filestore is too expensive, 
+and I don't see how it can be fixed without managing the namespace 
+ourselves (as newstore does).
 
-Test result:
-WAL enabled + sync: false + disk write cache: on =A0will get ~700 IOPS.
-WAL enabled + sync: true (default) + disk write cache: on|off =A0will get o=
-nly ~25 IOPS.
+If we want a middle road approach where we still rely on a file system for 
+doing block allocation then IMO the current incarnation of newstore is the 
+right path...
 
-I tuned some other rocksdb options, but with no lock. I tracked down the ro=
-cksdb code and found each writer's Sync operation would take ~30ms to finis=
-h. And as shown above, it is strange that performance has no much differenc=
-e no matters disk write cache is on or off.
-
-Do your guys encounter the similar issue? Or do I miss something to cause r=
-ocksdb's poor write performance?
-
-Thanks.
-Zhi Zhang (David) 		 	   		  =
+sage
