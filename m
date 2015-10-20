@@ -1,108 +1,103 @@
-From: "changtao381" <changtao381@163.com>
-Subject: Re: osd crash when deep-scrubbing
-Date: Tue, 20 Oct 2015 11:04:11 +0800
-Message-ID: <00a501d10ae3$ff8ed620$feac8260$@com>
+From: =?iso-8859-2?Q?Da=B3ek=2C_Piotr?= <Piotr.Dalek@ts.fujitsu.com>
+Subject: RE: newstore direction
+Date: Tue, 20 Oct 2015 09:06:46 +0200
+Message-ID: <90559C83A9C7FA45B5846C975DFA612DDB569C6C42@ABGEX73E.FSC.NET>
+References: <alpine.DEB.2.00.1510191216200.4188@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=iso-8859-2
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m12-15.163.com ([220.181.12.15]:35662 "EHLO m12-15.163.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750905AbbJTDEQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 19 Oct 2015 23:04:16 -0400
-Content-Language: zh-cn
+Received: from dgate10.ts.fujitsu.com ([80.70.172.49]:46213 "EHLO
+	dgate10.ts.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752513AbbJTHGy convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Oct 2015 03:06:54 -0400
+In-Reply-To: <alpine.DEB.2.00.1510191216200.4188@cobra.newdream.net>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-Cc: ceph-devel@vger.kernel.org
+To: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Jiaying Ren <mikulely <at> gmail.com> writes:
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
+> owner@vger.kernel.org] On Behalf Of Sage Weil
+> Sent: Monday, October 19, 2015 9:49 PM
+>=20
+> The current design is based on two simple ideas:
+>=20
+>  1) a key/value interface is better way to manage all of our internal=
+ metadata
+> (object metadata, attrs, layout, collection membership, write-ahead l=
+ogging,
+> overlay data, etc.)
+>=20
+>  2) a file system is well suited for storage object data (as files).
+>=20
+> So far 1 is working out well, but I'm questioning the wisdom of #2.  =
+A few
+> things:
+>=20
+> [..]
+>=20
+> But what's the alternative?  My thought is to just bite the bullet an=
+d consume
+> a raw block device directly.  Write an allocator, hopefully keep it p=
+retty
+> simple, and manage it in kv store along with all of our other metadat=
+a.
 
-> 
-> Hi, cephers:
-> 
-> I've encountered a problem that a pg stuck in inconsistent status:
-> 
-> $ ceph -s
->     cluster 27d39faa-48ae-4356-a8e3-19d5b81e179e
->      health HEALTH_ERR 1 pgs inconsistent; 34 near full osd(s); 1
-> scrub errors; noout flag(s) set
->      monmap e4: 3 mons at
->
-{server-61.0.yyyy.xxxxxxxxx.in=10.8.0.61:6789/0,server-62.0.yyyy.xxxxxxxxx.i
-n=10.8.0.62:6789/0,server-63.0.yyyy.xxxxxxxxx.in=10.8.0.63:6789/0},
-> election epoch 6706, quorum 0,1,2
->
-server-61.0.yyyy.xxxxxxxxx.in,server-62.0.yyyy.xxxxxxxxx.in,server-63.0.yyyy
-.xxxxxxxxx.in
->      osdmap e87808: 180 osds: 180 up, 180 in
->             flags noout
->       pgmap v29322850: 35026 pgs, 15 pools, 27768 GB data, 1905 kobjects
->             83575 GB used, 114 TB / 196 TB avail
->                35025 active+clean
->                    1 active+clean+inconsistent
->   client io 120 kB/s rd, 216 MB/s wr, 6398 op/s
-> 
-> `pg repair` cmd doesn't work, so I manually repaired a inconsistent
-object(pool
-> size is 3,I removed the object different from other two copys).after that
-pg
-> still in inconsistent status:
-> 
-> $ ceph pg dump | grep active+clean+inconsistent
-> dumped all in format plain
-> 3.d70   290     0       0       0       4600869888      3050    3050
->   stale+active+clean+inconsistent 2015-10-18 13:05:43.320451
->   87798'7631234   87798:10758311        [131,119,132]   131
->   [131,119,132]   131     85161'7599152   2015-10-16 14:34:21.283303
->   85161'7599152   2015-10-16 14:34:21.283303
-> 
-> And after restarted osd.131, the primary osd osd.131 would crash,the
-straceback:
-> 
->  1: /usr/bin/ceph-osd() [0x9c6de1]
->  2: (()+0xf790) [0x7f384b6b8790]
->  3: (gsignal()+0x35) [0x7f384a58a625]
->  4: (abort()+0x175) [0x7f384a58be05]
->  5: (__gnu_cxx::__verbose_terminate_handler()+0x12d) [0x7f384ae44a5d]
->  6: (()+0xbcbe6) [0x7f384ae42be6]
->  7: (()+0xbcc13) [0x7f384ae42c13]
->  8: (()+0xbcd0e) [0x7f384ae42d0e]
->  9: (ceph::buffer::list::iterator::copy(unsigned int, char*)+0x13e)
-[0x9cd0de]
->  10: (object_info_t::decode(ceph::buffer::list::iterator&)+0x81)
-[0x7dfaf1]
->  11: (PG::_scan_snaps(ScrubMap&)+0x394) [0x84b8c4]
->  12: (PG::build_scrub_map_chunk(ScrubMap&, hobject_t, hobject_t, bool,
-> ThreadPool::TPHandle&)+0x27b) [0x84cdab]
->  13: (PG::chunky_scrub(ThreadPool::TPHandle&)+0x5c4) [0x85c1b4]
->  14: (PG::scrub(ThreadPool::TPHandle&)+0x181) [0x85d691]
->  15: (OSD::ScrubWQ::_process(PG*, ThreadPool::TPHandle&)+0x1c) [0x6737cc]
->  16: (ThreadPool::worker(ThreadPool::WorkThread*)+0x53d) [0x9e05dd]
->  17: (ThreadPool::WorkThread::entry()+0x10) [0x9e1760]
->  18: (()+0x7a51) [0x7f384b6b0a51]
->  19: (clone()+0x6d) [0x7f384a6409ad]
-> 
-> ceph version is v0.80.9, manually executes `ceph pg deep-scrub 3.d70`
-would also
-> cause osd crash.
-> 
-> Any ideas? or did I missed some logs necessary for further investigation?
-> 
-> Thx.
-> 
-> --
-> Best Regards!
-> Jiaying Ren(mikulely)
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo <at> vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+This is pretty much reinventing the file system, but...
 
-I have met a problem when run 'ceph pg deep-scrub' command. It also causes
-osd crash. And finally i find some sector of the disk have corrupted .so
-please check dmesg info to check weather there is some disk errors
+I actually did something similar for my personal project (e-mail client=
+), moving from maildir-like structure (each message was one file) to so=
+mething resembling mbox (one large file per mail folder, containing pre=
+-decoded structures for fast and easy access). And this worked out real=
+ly well, especially with searches and bulk processing (filtering by bod=
+y contents, and so on). I don't remember exact figures, but the perform=
+ance benefit was in at least order of magnitude. If huge amounts of sma=
+ll-to-medium (0-128k) objects are the target, this is the way to go.
+
+The most serious issue was fragmentation. Since I actually put my box f=
+iles on top of actual FS (here: NTFS), low-level fragmentation was not =
+a problem (each message was read and written in one fread/fwrite anyway=
+). High-level fragmentation was an issue - each time a message was move=
+d away, it still occupied space. To combat this, I wrote a space reclai=
+mer that moved messages within box file (consolidated them) and maintai=
+ned a bitmap of 4k free spaces, so I could re-use unused space without =
+taking too much time iterating through messages and without calling rec=
+laimer. Also, reclaimer was smart enough to not move messages one-by-on=
+e, but instead it loaded up to n messages in at most n reads (in common=
+ case it was less than that) and wrote them in one call and do its work=
+ until some space was actually reclaimed, instead of doing full garbage=
+ collection. Machinery was also aware of fact that messages were (mostl=
+y) appended to the end of box, so instead of blindly doing that, it mov=
+ed back end-of-box pointer once messages at the end of box were deleted=
+=2E
+Other issue was reliability. Obviously, I had an option of secondary te=
+mp file, but still, everything above is doable without that.
+Benefits included reduced requirements for metadata storage. Instead of=
+ generating unique ID (filename) for each message (apparently, message-=
+id header is not reliable in that regard), I just stored offset and siz=
+e (8+4 bytes per message), which, for 300 thousand of messages calculat=
+ed to just 3,5MB of memory and could be kept in RAM. I/O performance ha=
+s also improved due to less random access pattern (messages were physic=
+ally close to each other instead of being scattered all over the drive)
+=46or Ceph, benefits could be even greater. I can imagine faster deep s=
+crubs that are way more efficient on spinning drives; efficient object =
+storage (no per-object fragmentation and less disk-intensive object rea=
+dahead, maybe with better support from hardware); possibly more reliabi=
+lity (when we fsync, we actually fsync - we don't get cheated by underl=
+ying FS), and we could get it optimized for particular devices (for exa=
+mple, most SSDs suck like vacuum on I/Os below 4k, so we could enforce =
+I/Os of at least 4k).
+
+Just my 0.02$.
+
+With best regards / Pozdrawiam
+Piotr Da=B3ek
 
 
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
