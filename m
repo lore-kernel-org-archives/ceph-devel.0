@@ -1,108 +1,222 @@
-From: Sage Weil <sage@newdream.net>
-Subject: RE: [ceph-users] Write performance issue under rocksdb kvstore
-Date: Tue, 20 Oct 2015 06:25:43 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1510200623350.16833@cobra.newdream.net>
-References: <SNT146-W53DA6FBD57581F19D681688C390@phx.gbl>, <alpine.DEB.2.00.1510200544430.16833@cobra.newdream.net> <SNT146-W662172E7246E7DABE7F6BA8C390@phx.gbl>
+From: Z Zhang <zhangz.david-1ViLX0X+lBJBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: Write performance issue under rocksdb kvstore
+Date: Tue, 20 Oct 2015 21:45:59 +0800
+Message-ID: <SNT146-W607DC7B42E2978D70B10808C390@phx.gbl>
+References: <SNT146-W53DA6FBD57581F19D681688C390@phx.gbl>,
+	<alpine.DEB.2.00.1510200544430.16833@cobra.newdream.net>,
+	<SNT146-W662172E7246E7DABE7F6BA8C390@phx.gbl>,
+	<CACJqLya=j5doC-2sjpzSdyqP9x5fs+kpuPm63SxoKBy45j5Ttg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54243 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752095AbbJTNZo (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Oct 2015 09:25:44 -0400
-In-Reply-To: <SNT146-W662172E7246E7DABE7F6BA8C390@phx.gbl>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Z Zhang <zhangz.david@outlook.com>
-Cc: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: multipart/mixed; boundary="===============1049023499=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CACJqLya=j5doC-2sjpzSdyqP9x5fs+kpuPm63SxoKBy45j5Ttg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Haomai Wang <haomaiwang-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Tue, 20 Oct 2015, Z Zhang wrote:
-> Thanks, Sage, for pointing out the PR and ceph branch. I will take a 
-> closer look.
-> 
-> Yes, I am trying KVStore backend. The reason we are trying it is that 
-> few user doesn't have such high requirement on data loss occasionally. 
-> It seems KVStore backend without synchronized WAL could achieve better 
-> performance than filestore. And only data still in page cache would get 
-> lost on machine crashing, not process crashing, if we use WAL but no 
-> synchronization. What do you think?
+--===============1049023499==
+Content-Type: multipart/alternative;
+	boundary="_9b080347-d133-415f-9098-736b54371a53_"
 
-That sounds dangerous.  The OSDs are recording internal metadata about the 
-cluster (peering, replication, etc.)... even if you don't care so much 
-about recent user data writes you probably don't want to risk breaking 
-RADOS itself.  If the kv backend is giving you a stale point-in-time 
-consistent copy it's not so bad, but in a power-loss event it could give 
-you problems...
+--_9b080347-d133-415f-9098-736b54371a53_
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
 
-sage
+SGFpbWFvLCB5b3UncmUgcmlnaHQuIEkgYWRkIHN1Y2ggc3luYyBvcHRpb24gYXMgY29uZmlndXJh
+YmxlIGZvciBvdXIgdGVzdCBwdXJwb3NlLg0KDQoNClRoYW5rcy5aaGkgWmhhbmcgKERhdmlkKQ0K
+DQo+IERhdGU6IFR1ZSwgMjAgT2N0IDIwMTUgMjE6MjQ6NDkgKzA4MDANCj4gRnJvbTogaGFvbWFp
+d2FuZ0BnbWFpbC5jb20NCj4gVG86IHpoYW5nei5kYXZpZEBvdXRsb29rLmNvbQ0KPiBDQzogY2Vw
+aC11c2Vyc0BsaXN0cy5jZXBoLmNvbTsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCj4gU3Vi
+amVjdDogUmU6IFtjZXBoLXVzZXJzXSBXcml0ZSBwZXJmb3JtYW5jZSBpc3N1ZSB1bmRlciByb2Nr
+c2RiIGt2c3RvcmUNCj4gDQo+IEFjdHVhbGx5IGtleXZhbHVlc3RvcmUgd291bGQgc3VibWl0IHRy
+YW5zYWN0aW9uIHdpdGggc3luYyBmbGFnDQo+IHRvbyhyZWx5IHRvIGtleXZhbHVlZGIgaW1wbCBq
+b3VybmFsL2xvZ2ZpbGUpLg0KPiANCj4gWWVzLCBpZiB3ZSBkaXNhYmxlIHN5bmMgZmxhZywga2V5
+dmFsdWVzdG9yZSdzIHBlcmZvcm1hbmNlIHdpbGwNCj4gaW5jcmVhc2UgYSBsb3QuIEJ1dCB3ZSBk
+b250IHByb3ZpZGUgd2l0aCB0aGlzIG9wdGlvbiBub3cNCj4gDQo+IE9uIFR1ZSwgT2N0IDIwLCAy
+MDE1IGF0IDk6MjIgUE0sIFogWmhhbmcgPHpoYW5nei5kYXZpZEBvdXRsb29rLmNvbT4gd3JvdGU6
+DQo+ID4gVGhhbmtzLCBTYWdlLCBmb3IgcG9pbnRpbmcgb3V0IHRoZSBQUiBhbmQgY2VwaCBicmFu
+Y2guIEkgd2lsbCB0YWtlIGEgY2xvc2VyDQo+ID4gbG9vay4gWWVzLCBJIGFtIHRyeWluZyBLVlN0
+b3JlIGJhY2tlbmQuIFRoZSByZWFzb24gd2UgYXJlIHRyeWluZyBpdCBpcyB0aGF0DQo+ID4gZmV3
+IHVzZXIgZG9lc24ndCBoYXZlIHN1Y2ggaGlnaCByZXF1aXJlbWVudCBvbiBkYXRhIGxvc3Mgb2Nj
+YXNpb25hbGx5LiBJdA0KPiA+IHNlZW1zIEtWU3RvcmUgYmFja2VuZCB3aXRob3V0IHN5bmNocm9u
+aXplZCBXQUwgY291bGQgYWNoaWV2ZSBiZXR0ZXINCj4gPiBwZXJmb3JtYW5jZSB0aGFuIGZpbGVz
+dG9yZS4gQW5kIG9ubHkgZGF0YSBzdGlsbCBpbiBwYWdlIGNhY2hlIHdvdWxkIGdldCBsb3N0DQo+
+ID4gb24gbWFjaGluZSBjcmFzaGluZywgbm90IHByb2Nlc3MgY3Jhc2hpbmcsIGlmIHdlIHVzZSBX
+QUwgYnV0IG5vDQo+ID4gc3luY2hyb25pemF0aW9uLiBXaGF0IGRvIHlvdSB0aGluaz8gPyA/IFRo
+YW5rcy4gWmhpIFpoYW5nIChEYXZpZCkgRGF0ZTogVHVlLA0KPiA+IDIwIE9jdCAyMDE1IDA1OjQ3
+OjQ0IC0wNzAwIEZyb206IHNhZ2VAbmV3ZHJlYW0ubmV0IFRvOg0KPiA+IHpoYW5nei5kYXZpZEBv
+dXRsb29rLmNvbSBDQzogY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbTsNCj4gPiBjZXBoLWRldmVs
+QHZnZXIua2VybmVsLm9yZyBTdWJqZWN0OiBSZTogW2NlcGgtdXNlcnNdIFdyaXRlIHBlcmZvcm1h
+bmNlIGlzc3VlDQo+ID4gdW5kZXIgcm9ja3NkYiBrdnN0b3JlIE9uIFR1ZSwgMjAgT2N0IDIwMTUs
+IFogWmhhbmcgd3JvdGU6ID4gSGkgR3V5cywgPiA+IEkNCj4gPiBhbSB0cnlpbmcgbGF0ZXN0IGNl
+cGgtOS4xLjAgd2l0aCByb2Nrc2RiIDQuMSBhbmQgY2VwaC05LjAuMyB3aXRoID4gcm9ja3NkYg0K
+PiA+IDMuMTEgYXMgT1NEIGJhY2tlbmQuIEkgdXNlIHJiZCB0byB0ZXN0IHBlcmZvcm1hbmNlIGFu
+ZCBmb2xsb3dpbmcgPiBpcyBteQ0KPiA+IGNsdXN0ZXIgaW5mby4gPiA+IFtjZXBoQHh4eCB+XSQg
+Y2VwaCAtcyA+ID8gPyBjbHVzdGVyDQo+ID4gYjc0ZjM5NDQtZDc3Zi00NDAxLWE1MzEtZmE1Mjgy
+OTk1ODA4ID4gPyA/ID9oZWFsdGggSEVBTFRIX09LID4gPyA/ID9tb25tYXANCj4gPiBlMTogMSBt
+b25zIGF0IHt4eHg9eHh4Lnh4eC54eHgueHh4OjY3ODkvMH0gPiA/ID8gPyA/ID8gPyBlbGVjdGlv
+biBlcG9jaCAxLA0KPiA+IHF1b3J1bSAwIHh4eCA+ID8gPyA/b3NkbWFwIGUzMzg6IDQ0IG9zZHM6
+IDQ0IHVwLCA0NCBpbiA+ID8gPyA/ID8gPyA/IGZsYWdzDQo+ID4gc29ydGJpdHdpc2UgPiA/ID8g
+PyBwZ21hcCB2MTQ3NjogMjA0OCBwZ3MsIDEgcG9vbHMsIDE1OCBNQiBkYXRhLCA1OSBvYmplY3Rz
+DQo+ID4+ID8gPyA/ID8gPyA/IDE5NDAgTUIgdXNlZCwgODE5MzAgR0IgLyA4MTkzMiBHQiBhdmFp
+bCA+ID8gPyA/ID8gPyA/ID8gPyAyMDQ4DQo+ID4gYWN0aXZlK2NsZWFuID4gPiBBbGwgdGhlIGRp
+c2tzIGFyZSBzcGlubmluZyBvbmVzIHdpdGggd3JpdGUgY2FjaGUgdHVybmluZw0KPiA+IG9uLiBS
+b2Nrc2RiJ3MgPiBXQUwgYW5kIHNzdCBmaWxlcyBhcmUgb24gdGhlIHNhbWUgZGlzayBhcyBldmVy
+eSBPU0QuIEFyZSB5b3UNCj4gPiB1c2luZyB0aGUgS2V5VmFsdWVTdG9yZSBiYWNrZW5kPyA+IFVz
+aW5nIGZpbyB0byBnZW5lcmF0ZSBmb2xsb3dpbmcgd3JpdGUNCj4gPiBsb2FkOj8gPiBmaW8gLWRp
+cmVjdD0xIC1ydz1yYW5kd3JpdGUgLWlvZW5naW5lPXN5bmMgLXNpemU9MTBNIC1icz00Sw0KPiA+
+IC1ncm91cF9yZXBvcnRpbmcgLWRpcmVjdG9yeSAvbW50L3JiZF90ZXN0LyAtbmFtZSB4eHguMSAt
+bnVtam9icz0xPz8gPiA+IFRlc3QNCj4gPiByZXN1bHQ6ID4gV0FMIGVuYWJsZWQgKyBzeW5jOiBm
+YWxzZSArIGRpc2sgd3JpdGUgY2FjaGU6IG9uID93aWxsIGdldCB+NzAwDQo+ID4gSU9QUy4gPiBX
+QUwgZW5hYmxlZCArIHN5bmM6IHRydWUgKGRlZmF1bHQpICsgZGlzayB3cml0ZSBjYWNoZTogb258
+b2ZmID93aWxsDQo+ID4gZ2V0IG9ubHkgfjI1IElPUFMuID4gPiBJIHR1bmVkIHNvbWUgb3RoZXIg
+cm9ja3NkYiBvcHRpb25zLCBidXQgd2l0aCBubyBsb2NrLg0KPiA+IFRoZSB3aXAtbmV3c3RvcmUt
+ZnJhZ3MgYnJhbmNoIHNldHMgc29tZSBkZWZhdWx0cyBmb3Igcm9ja3NkYiB0aGF0IEkgdGhpbmsN
+Cj4gPiBsb29rIHByZXR0eSByZWFzb25hYmxlIChhdCBsZWFzdCBnaXZlbiBob3cgbmV3c3RvcmUg
+aXMgdXNpbmcgcm9ja3NkYikuID4gSQ0KPiA+IHRyYWNrZWQgZG93biB0aGUgcm9ja3NkYiBjb2Rl
+IGFuZCBmb3VuZCBlYWNoIHdyaXRlcidzIFN5bmMgb3BlcmF0aW9uID4gd291bGQNCj4gPiB0YWtl
+IH4zMG1zIHRvIGZpbmlzaC4gQW5kIGFzIHNob3duIGFib3ZlLCBpdCBpcyBzdHJhbmdlIHRoYXQg
+PiBwZXJmb3JtYW5jZQ0KPiA+IGhhcyBubyBtdWNoIGRpZmZlcmVuY2Ugbm8gbWF0dGVycyBkaXNr
+IHdyaXRlIGNhY2hlIGlzIG9uIG9yID4gb2ZmLiA+ID4gRG8NCj4gPiB5b3VyIGd1eXMgZW5jb3Vu
+dGVyIHRoZSBzaW1pbGFyIGlzc3VlPyBPciBkbyBJIG1pc3Mgc29tZXRoaW5nIHRvID4gY2F1c2UN
+Cj4gPiByb2Nrc2RiJ3MgcG9vciB3cml0ZSBwZXJmb3JtYW5jZT8gWWVzLCBJIHNhdyB0aGUgc2Ft
+ZSB0aGluZy4gVGhpcyBQUg0KPiA+IGFkZHJlc3NlcyB0aGUgcHJvYmxlbSBhbmQgaXMgbmVhcmlu
+ZyBtZXJnZSB1cHN0cmVhbToNCj4gPiBodHRwczovL2dpdGh1Yi5jb20vZmFjZWJvb2svcm9ja3Nk
+Yi9wdWxsLzc0NiBUaGVyZSBpcyBhbHNvIGFuIFhGUw0KPiA+IHBlcmZvcm1hbmNlIGJ1ZyB0aGF0
+IGlzIGNvbnRyaWJ1dGluZyB0byB0aGUgcHJvYmxlbSwgYnV0IGl0IGxvb2tzIGxpa2UgRGF2ZQ0K
+PiA+IENoaW5uZXIganVzdCBwdXQgdG9nZXRoZXIgYSBmaXggZm9yIHRoYXQuIEJ1dC4uLiB3ZSBs
+aWtlbHkgd29uJ3QgYmUgdXNpbmcNCj4gPiBLZXlWYWx1ZVN0b3JlIGluIGl0cyBjdXJyZW50IGZv
+cm0gb3ZlciByb2Nrc2RiIChvciBhbnkgb3RoZXIga3YgYmFja2VuZCkuIEl0DQo+ID4gc3RyaXBl
+cyBvYmplY3QgZGF0YSBvdmVyIGtleS92YWx1ZSBwYWlycywgd2hpY2ggSU1PIGlzIG5vdCB0aGUg
+YmVzdA0KPiA+IGFwcHJvYWNoLiBzYWdlIF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fIGNlcGgtdXNlcnMNCj4gPiBtYWlsaW5nIGxpc3QgY2VwaC11c2Vyc0Bs
+aXN0cy5jZXBoLmNvbQ0KPiA+IGh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2Vw
+aC11c2Vycy1jZXBoLmNvbQ0KPiA+DQo+ID4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX18NCj4gPiBjZXBoLXVzZXJzIG1haWxpbmcgbGlzdA0KPiA+IGNlcGgt
+dXNlcnNAbGlzdHMuY2VwaC5jb20NCj4gPiBodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8u
+Y2dpL2NlcGgtdXNlcnMtY2VwaC5jb20NCj4gPg0KPiANCj4gDQo+IA0KPiAtLSANCj4gQmVzdCBS
+ZWdhcmRzLA0KPiANCj4gV2hlYXQNCj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX18NCj4gY2VwaC11c2VycyBtYWlsaW5nIGxpc3QNCj4gY2VwaC11c2Vyc0Bs
+aXN0cy5jZXBoLmNvbQ0KPiBodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgt
+dXNlcnMtY2VwaC5jb20NCiAJCSAJICAgCQkgIA==
 
-> 
->     Thanks. Zhi Zhang (David)
-> 
-> Date: Tue, 20 Oct 2015 05:47:44 -0700
-> From: sage@newdream.net
-> To: zhangz.david@outlook.com
-> CC: ceph-users@lists.ceph.com; ceph-devel@vger.kernel.org
-> Subject: Re: [ceph-users] Write performance issue under rocksdb kvstore
-> 
-> On Tue, 20 Oct 2015, Z Zhang wrote:
-> > Hi Guys,
-> > 
-> > I am trying latest ceph-9.1.0 with rocksdb 4.1 and ceph-9.0.3 with 
-> > rocksdb 3.11 as OSD backend. I use rbd to test performance and following 
-> > is my cluster info.
-> > 
-> > [ceph@xxx ~]$ ceph -s
-> >     cluster b74f3944-d77f-4401-a531-fa5282995808
-> >      health HEALTH_OK
-> >      monmap e1: 1 mons at {xxx=xxx.xxx.xxx.xxx:6789/0}
-> >             election epoch 1, quorum 0 xxx
-> >      osdmap e338: 44 osds: 44 up, 44 in
-> >             flags sortbitwise
-> >       pgmap v1476: 2048 pgs, 1 pools, 158 MB data, 59 objects
-> >             1940 MB used, 81930 GB / 81932 GB avail
-> >                 2048 active+clean
-> > 
-> > All the disks are spinning ones with write cache turning on. Rocksdb's 
-> > WAL and sst files are on the same disk as every OSD.
->  
-> Are you using the KeyValueStore backend?
->  
-> > Using fio to generate following write load: 
-> > fio -direct=1 -rw=randwrite -ioengine=sync -size=10M -bs=4K -group_reporting -directory /mnt/rbd_test/ -name xxx.1 -numjobs=1  
-> > 
-> > Test result:
-> > WAL enabled + sync: false + disk write cache: on  will get ~700 IOPS.
-> > WAL enabled + sync: true (default) + disk write cache: on|off  will get only ~25 IOPS.
-> > 
-> > I tuned some other rocksdb options, but with no lock.
->  
-> The wip-newstore-frags branch sets some defaults for rocksdb that I think 
-> look pretty reasonable (at least given how newstore is using rocksdb).
->  
-> > I tracked down the rocksdb code and found each writer's Sync operation 
-> > would take ~30ms to finish. And as shown above, it is strange that 
-> > performance has no much difference no matters disk write cache is on or 
-> > off.
-> > 
-> > Do your guys encounter the similar issue? Or do I miss something to 
-> > cause rocksdb's poor write performance?
->  
-> Yes, I saw the same thing.  This PR addresses the problem and is nearing 
-> merge upstream:
->  
-> 	https://github.com/facebook/rocksdb/pull/746
->  
-> There is also an XFS performance bug that is contributing to the problem, 
-> but it looks like Dave Chinner just put together a fix for that.
->  
-> But... we likely won't be using KeyValueStore in its current form over 
-> rocksdb (or any other kv backend).  It stripes object data over key/value 
-> pairs, which IMO is not the best approach.
->  
-> sage
-> 
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users@lists.ceph.com
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com 		 	   		  
+--_9b080347-d133-415f-9098-736b54371a53_
+Content-Type: text/html; charset="gb2312"
+Content-Transfer-Encoding: base64
+
+PGh0bWw+DQo8aGVhZD4NCjxzdHlsZT48IS0tDQouaG1tZXNzYWdlIFANCnsNCm1hcmdpbjowcHg7
+DQpwYWRkaW5nOjBweA0KfQ0KYm9keS5obW1lc3NhZ2UNCnsNCmZvbnQtc2l6ZTogMTJwdDsNCmZv
+bnQtZmFtaWx5OkNhbGlicmkNCn0NCi0tPjwvc3R5bGU+PC9oZWFkPg0KPGJvZHkgY2xhc3M9J2ht
+bWVzc2FnZSc+PGRpdiBkaXI9J2x0cic+SGFpbWFvLCB5b3UncmUgcmlnaHQuIEkgYWRkIHN1Y2gg
+c3luYyBvcHRpb24gYXMgY29uZmlndXJhYmxlIGZvciBvdXIgdGVzdCBwdXJwb3NlLjxicj48YnI+
+PGJyPlRoYW5rcy48ZGl2PlpoaSBaaGFuZyAoRGF2aWQpPC9kaXY+PGJyPjxicj48ZGl2PiZndDsg
+RGF0ZTogVHVlLCAyMCBPY3QgMjAxNSAyMToyNDo0OSArMDgwMDxicj4mZ3Q7IEZyb206IGhhb21h
+aXdhbmdAZ21haWwuY29tPGJyPiZndDsgVG86IHpoYW5nei5kYXZpZEBvdXRsb29rLmNvbTxicj4m
+Z3Q7IENDOiBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tOyBjZXBoLWRldmVsQHZnZXIua2VybmVs
+Lm9yZzxicj4mZ3Q7IFN1YmplY3Q6IFJlOiBbY2VwaC11c2Vyc10gV3JpdGUgcGVyZm9ybWFuY2Ug
+aXNzdWUgdW5kZXIgcm9ja3NkYiBrdnN0b3JlPGJyPiZndDsgPGJyPiZndDsgQWN0dWFsbHkga2V5
+dmFsdWVzdG9yZSB3b3VsZCBzdWJtaXQgdHJhbnNhY3Rpb24gd2l0aCBzeW5jIGZsYWc8YnI+Jmd0
+OyB0b28ocmVseSB0byBrZXl2YWx1ZWRiIGltcGwgam91cm5hbC9sb2dmaWxlKS48YnI+Jmd0OyA8
+YnI+Jmd0OyBZZXMsIGlmIHdlIGRpc2FibGUgc3luYyBmbGFnLCBrZXl2YWx1ZXN0b3JlJ3MgcGVy
+Zm9ybWFuY2Ugd2lsbDxicj4mZ3Q7IGluY3JlYXNlIGEgbG90LiBCdXQgd2UgZG9udCBwcm92aWRl
+IHdpdGggdGhpcyBvcHRpb24gbm93PGJyPiZndDsgPGJyPiZndDsgT24gVHVlLCBPY3QgMjAsIDIw
+MTUgYXQgOToyMiBQTSwgWiBaaGFuZyAmbHQ7emhhbmd6LmRhdmlkQG91dGxvb2suY29tJmd0OyB3
+cm90ZTo8YnI+Jmd0OyAmZ3Q7IFRoYW5rcywgU2FnZSwgZm9yIHBvaW50aW5nIG91dCB0aGUgUFIg
+YW5kIGNlcGggYnJhbmNoLiBJIHdpbGwgdGFrZSBhIGNsb3Nlcjxicj4mZ3Q7ICZndDsgbG9vay4g
+WWVzLCBJIGFtIHRyeWluZyBLVlN0b3JlIGJhY2tlbmQuIFRoZSByZWFzb24gd2UgYXJlIHRyeWlu
+ZyBpdCBpcyB0aGF0PGJyPiZndDsgJmd0OyBmZXcgdXNlciBkb2Vzbid0IGhhdmUgc3VjaCBoaWdo
+IHJlcXVpcmVtZW50IG9uIGRhdGEgbG9zcyBvY2Nhc2lvbmFsbHkuIEl0PGJyPiZndDsgJmd0OyBz
+ZWVtcyBLVlN0b3JlIGJhY2tlbmQgd2l0aG91dCBzeW5jaHJvbml6ZWQgV0FMIGNvdWxkIGFjaGll
+dmUgYmV0dGVyPGJyPiZndDsgJmd0OyBwZXJmb3JtYW5jZSB0aGFuIGZpbGVzdG9yZS4gQW5kIG9u
+bHkgZGF0YSBzdGlsbCBpbiBwYWdlIGNhY2hlIHdvdWxkIGdldCBsb3N0PGJyPiZndDsgJmd0OyBv
+biBtYWNoaW5lIGNyYXNoaW5nLCBub3QgcHJvY2VzcyBjcmFzaGluZywgaWYgd2UgdXNlIFdBTCBi
+dXQgbm88YnI+Jmd0OyAmZ3Q7IHN5bmNocm9uaXphdGlvbi4gV2hhdCBkbyB5b3UgdGhpbms/ID8g
+PyBUaGFua3MuIFpoaSBaaGFuZyAoRGF2aWQpIERhdGU6IFR1ZSw8YnI+Jmd0OyAmZ3Q7IDIwIE9j
+dCAyMDE1IDA1OjQ3OjQ0IC0wNzAwIEZyb206IHNhZ2VAbmV3ZHJlYW0ubmV0IFRvOjxicj4mZ3Q7
+ICZndDsgemhhbmd6LmRhdmlkQG91dGxvb2suY29tIENDOiBjZXBoLXVzZXJzQGxpc3RzLmNlcGgu
+Y29tOzxicj4mZ3Q7ICZndDsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcgU3ViamVjdDogUmU6
+IFtjZXBoLXVzZXJzXSBXcml0ZSBwZXJmb3JtYW5jZSBpc3N1ZTxicj4mZ3Q7ICZndDsgdW5kZXIg
+cm9ja3NkYiBrdnN0b3JlIE9uIFR1ZSwgMjAgT2N0IDIwMTUsIFogWmhhbmcgd3JvdGU6ICZndDsg
+SGkgR3V5cywgJmd0OyAmZ3Q7IEk8YnI+Jmd0OyAmZ3Q7IGFtIHRyeWluZyBsYXRlc3QgY2VwaC05
+LjEuMCB3aXRoIHJvY2tzZGIgNC4xIGFuZCBjZXBoLTkuMC4zIHdpdGggJmd0OyByb2Nrc2RiPGJy
+PiZndDsgJmd0OyAzLjExIGFzIE9TRCBiYWNrZW5kLiBJIHVzZSByYmQgdG8gdGVzdCBwZXJmb3Jt
+YW5jZSBhbmQgZm9sbG93aW5nICZndDsgaXMgbXk8YnI+Jmd0OyAmZ3Q7IGNsdXN0ZXIgaW5mby4g
+Jmd0OyAmZ3Q7IFtjZXBoQHh4eCB+XSQgY2VwaCAtcyAmZ3Q7ID8gPyBjbHVzdGVyPGJyPiZndDsg
+Jmd0OyBiNzRmMzk0NC1kNzdmLTQ0MDEtYTUzMS1mYTUyODI5OTU4MDggJmd0OyA/ID8gP2hlYWx0
+aCBIRUFMVEhfT0sgJmd0OyA/ID8gP21vbm1hcDxicj4mZ3Q7ICZndDsgZTE6IDEgbW9ucyBhdCB7
+eHh4PXh4eC54eHgueHh4Lnh4eDo2Nzg5LzB9ICZndDsgPyA/ID8gPyA/ID8gZWxlY3Rpb24gZXBv
+Y2ggMSw8YnI+Jmd0OyAmZ3Q7IHF1b3J1bSAwIHh4eCAmZ3Q7ID8gPyA/b3NkbWFwIGUzMzg6IDQ0
+IG9zZHM6IDQ0IHVwLCA0NCBpbiAmZ3Q7ID8gPyA/ID8gPyA/IGZsYWdzPGJyPiZndDsgJmd0OyBz
+b3J0Yml0d2lzZSAmZ3Q7ID8gPyA/IHBnbWFwIHYxNDc2OiAyMDQ4IHBncywgMSBwb29scywgMTU4
+IE1CIGRhdGEsIDU5IG9iamVjdHM8YnI+Jmd0OyAmZ3Q7Jmd0OyA/ID8gPyA/ID8gPyAxOTQwIE1C
+IHVzZWQsIDgxOTMwIEdCIC8gODE5MzIgR0IgYXZhaWwgJmd0OyA/ID8gPyA/ID8gPyA/ID8gMjA0
+ODxicj4mZ3Q7ICZndDsgYWN0aXZlK2NsZWFuICZndDsgJmd0OyBBbGwgdGhlIGRpc2tzIGFyZSBz
+cGlubmluZyBvbmVzIHdpdGggd3JpdGUgY2FjaGUgdHVybmluZzxicj4mZ3Q7ICZndDsgb24uIFJv
+Y2tzZGIncyAmZ3Q7IFdBTCBhbmQgc3N0IGZpbGVzIGFyZSBvbiB0aGUgc2FtZSBkaXNrIGFzIGV2
+ZXJ5IE9TRC4gQXJlIHlvdTxicj4mZ3Q7ICZndDsgdXNpbmcgdGhlIEtleVZhbHVlU3RvcmUgYmFj
+a2VuZD8gJmd0OyBVc2luZyBmaW8gdG8gZ2VuZXJhdGUgZm9sbG93aW5nIHdyaXRlPGJyPiZndDsg
+Jmd0OyBsb2FkOj8gJmd0OyBmaW8gLWRpcmVjdD0xIC1ydz1yYW5kd3JpdGUgLWlvZW5naW5lPXN5
+bmMgLXNpemU9MTBNIC1icz00Szxicj4mZ3Q7ICZndDsgLWdyb3VwX3JlcG9ydGluZyAtZGlyZWN0
+b3J5IC9tbnQvcmJkX3Rlc3QvIC1uYW1lIHh4eC4xIC1udW1qb2JzPTE/PyAmZ3Q7ICZndDsgVGVz
+dDxicj4mZ3Q7ICZndDsgcmVzdWx0OiAmZ3Q7IFdBTCBlbmFibGVkICsgc3luYzogZmFsc2UgKyBk
+aXNrIHdyaXRlIGNhY2hlOiBvbiA/d2lsbCBnZXQgfjcwMDxicj4mZ3Q7ICZndDsgSU9QUy4gJmd0
+OyBXQUwgZW5hYmxlZCArIHN5bmM6IHRydWUgKGRlZmF1bHQpICsgZGlzayB3cml0ZSBjYWNoZTog
+b258b2ZmID93aWxsPGJyPiZndDsgJmd0OyBnZXQgb25seSB+MjUgSU9QUy4gJmd0OyAmZ3Q7IEkg
+dHVuZWQgc29tZSBvdGhlciByb2Nrc2RiIG9wdGlvbnMsIGJ1dCB3aXRoIG5vIGxvY2suPGJyPiZn
+dDsgJmd0OyBUaGUgd2lwLW5ld3N0b3JlLWZyYWdzIGJyYW5jaCBzZXRzIHNvbWUgZGVmYXVsdHMg
+Zm9yIHJvY2tzZGIgdGhhdCBJIHRoaW5rPGJyPiZndDsgJmd0OyBsb29rIHByZXR0eSByZWFzb25h
+YmxlIChhdCBsZWFzdCBnaXZlbiBob3cgbmV3c3RvcmUgaXMgdXNpbmcgcm9ja3NkYikuICZndDsg
+STxicj4mZ3Q7ICZndDsgdHJhY2tlZCBkb3duIHRoZSByb2Nrc2RiIGNvZGUgYW5kIGZvdW5kIGVh
+Y2ggd3JpdGVyJ3MgU3luYyBvcGVyYXRpb24gJmd0OyB3b3VsZDxicj4mZ3Q7ICZndDsgdGFrZSB+
+MzBtcyB0byBmaW5pc2guIEFuZCBhcyBzaG93biBhYm92ZSwgaXQgaXMgc3RyYW5nZSB0aGF0ICZn
+dDsgcGVyZm9ybWFuY2U8YnI+Jmd0OyAmZ3Q7IGhhcyBubyBtdWNoIGRpZmZlcmVuY2Ugbm8gbWF0
+dGVycyBkaXNrIHdyaXRlIGNhY2hlIGlzIG9uIG9yICZndDsgb2ZmLiAmZ3Q7ICZndDsgRG88YnI+
+Jmd0OyAmZ3Q7IHlvdXIgZ3V5cyBlbmNvdW50ZXIgdGhlIHNpbWlsYXIgaXNzdWU/IE9yIGRvIEkg
+bWlzcyBzb21ldGhpbmcgdG8gJmd0OyBjYXVzZTxicj4mZ3Q7ICZndDsgcm9ja3NkYidzIHBvb3Ig
+d3JpdGUgcGVyZm9ybWFuY2U/IFllcywgSSBzYXcgdGhlIHNhbWUgdGhpbmcuIFRoaXMgUFI8YnI+
+Jmd0OyAmZ3Q7IGFkZHJlc3NlcyB0aGUgcHJvYmxlbSBhbmQgaXMgbmVhcmluZyBtZXJnZSB1cHN0
+cmVhbTo8YnI+Jmd0OyAmZ3Q7IGh0dHBzOi8vZ2l0aHViLmNvbS9mYWNlYm9vay9yb2Nrc2RiL3B1
+bGwvNzQ2IFRoZXJlIGlzIGFsc28gYW4gWEZTPGJyPiZndDsgJmd0OyBwZXJmb3JtYW5jZSBidWcg
+dGhhdCBpcyBjb250cmlidXRpbmcgdG8gdGhlIHByb2JsZW0sIGJ1dCBpdCBsb29rcyBsaWtlIERh
+dmU8YnI+Jmd0OyAmZ3Q7IENoaW5uZXIganVzdCBwdXQgdG9nZXRoZXIgYSBmaXggZm9yIHRoYXQu
+IEJ1dC4uLiB3ZSBsaWtlbHkgd29uJ3QgYmUgdXNpbmc8YnI+Jmd0OyAmZ3Q7IEtleVZhbHVlU3Rv
+cmUgaW4gaXRzIGN1cnJlbnQgZm9ybSBvdmVyIHJvY2tzZGIgKG9yIGFueSBvdGhlciBrdiBiYWNr
+ZW5kKS4gSXQ8YnI+Jmd0OyAmZ3Q7IHN0cmlwZXMgb2JqZWN0IGRhdGEgb3ZlciBrZXkvdmFsdWUg
+cGFpcnMsIHdoaWNoIElNTyBpcyBub3QgdGhlIGJlc3Q8YnI+Jmd0OyAmZ3Q7IGFwcHJvYWNoLiBz
+YWdlIF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fIGNlcGgt
+dXNlcnM8YnI+Jmd0OyAmZ3Q7IG1haWxpbmcgbGlzdCBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29t
+PGJyPiZndDsgJmd0OyBodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNl
+cnMtY2VwaC5jb208YnI+Jmd0OyAmZ3Q7PGJyPiZndDsgJmd0OyBfX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fXzxicj4mZ3Q7ICZndDsgY2VwaC11c2VycyBtYWls
+aW5nIGxpc3Q8YnI+Jmd0OyAmZ3Q7IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb208YnI+Jmd0OyAm
+Z3Q7IGh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNv
+bTxicj4mZ3Q7ICZndDs8YnI+Jmd0OyA8YnI+Jmd0OyA8YnI+Jmd0OyA8YnI+Jmd0OyAtLSA8YnI+
+Jmd0OyBCZXN0IFJlZ2FyZHMsPGJyPiZndDsgPGJyPiZndDsgV2hlYXQ8YnI+Jmd0OyBfX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXzxicj4mZ3Q7IGNlcGgtdXNl
+cnMgbWFpbGluZyBsaXN0PGJyPiZndDsgY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbTxicj4mZ3Q7
+IGh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbTxi
+cj48L2Rpdj4gCQkgCSAgIAkJICA8L2Rpdj48L2JvZHk+DQo8L2h0bWw+
+
+--_9b080347-d133-415f-9098-736b54371a53_--
+
+--===============1049023499==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============1049023499==--
