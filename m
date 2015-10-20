@@ -1,73 +1,201 @@
-From: Sage Weil <sweil@redhat.com>
+From: Martin Millnert <martin@millnert.se>
 Subject: Re: newstore direction
-Date: Tue, 20 Oct 2015 13:00:23 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1510201251140.16833@cobra.newdream.net>
-References: <alpine.DEB.2.00.1510191216200.4188@cobra.newdream.net> <CALe9h7dUQcp6zOSFDfnXSQo4VOTObFCWj+HD-idwE1nNzQVsgA@mail.gmail.com>
+Date: Tue, 20 Oct 2015 22:18:55 +0200
+Message-ID: <1445372335.25270.11.camel@millnert.se>
+References: <alpine.DEB.2.00.1510191216200.4188@cobra.newdream.net>
+	 <755F6B91B3BE364F9BCA11EA3F9E0C6F3174851F@SACMBXIP02.sdcorp.global.sandisk.com>
+	 <alpine.DEB.2.00.1510191353100.16833@cobra.newdream.net>
+	 <99767EA2E27DD44DB4E9F9B9ACA458C056195331@SSIEXCH-MB3.ssi.samsung.com>
+	 <alpine.DEB.2.00.1510200531090.16833@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:55267 "EHLO mx1.redhat.com"
+Received: from ncis.millnert.se ([185.19.66.196]:50534 "EHLO mail.millnert.se"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751309AbbJTUA0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 20 Oct 2015 16:00:26 -0400
-Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-	by mx1.redhat.com (Postfix) with ESMTPS id 3B74EC0C18AF
-	for <ceph-devel@vger.kernel.org>; Tue, 20 Oct 2015 20:00:26 +0000 (UTC)
-In-Reply-To: <CALe9h7dUQcp6zOSFDfnXSQo4VOTObFCWj+HD-idwE1nNzQVsgA@mail.gmail.com>
+	id S1751846AbbJTUTL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 20 Oct 2015 16:19:11 -0400
+In-Reply-To: <alpine.DEB.2.00.1510200531090.16833@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>, Somnath Roy <Somnath.Roy@sandisk.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, 20 Oct 2015, John Spray wrote:
-> On Mon, Oct 19, 2015 at 8:49 PM, Sage Weil <sweil@redhat.com> wrote:
-> >  - We have to size the kv backend storage (probably still an XFS
-> > partition) vs the block storage.  Maybe we do this anyway (put metadata on
-> > SSD!) so it won't matter.  But what happens when we are storing gobs of
-> > rgw index data or cephfs metadata?  Suddenly we are pulling storage out of
-> > a different pool and those aren't currently fungible.
+Adding to this,
+
+On Tue, 2015-10-20 at 05:34 -0700, Sage Weil wrote:
+> On Mon, 19 Oct 2015, James (Fei) Liu-SSI wrote:
+> > Hi Sage and Somnath,
+> >   In my humble opinion, There is another more aggressive solution than 
+> > raw block device base keyvalue store as backend for objectstore. The new 
+> > key value SSD device with transaction support would be ideal to solve 
+> > the issues. First of all, it is raw SSD device. Secondly , It provides 
+> > key value interface directly from SSD. Thirdly, it can provide 
+> > transaction support, consistency will be guaranteed by hardware device. 
+> > It pretty much satisfied all of objectstore needs without any extra 
+> > overhead since there is not any extra layer in between device and 
+> > objectstore.
 > 
-> This is the concerning bit for me -- the other parts one "just" has to
-> get the code right, but this problem could linger and be something we
-> have to keep explaining to users indefinitely.  It reminds me of cases
-> in other systems where users had to make an educated guess about inode
-> size up front, depending on whether you're expecting to efficiently
-> store a lot of xattrs.
+> Are you talking about open channel SSDs?  Or something else?  Everything 
+> I'm familiar with that is currently shipping is exposing a vanilla block 
+> interface (conventional SSDs) that hides all of that or NVMe (which isn't 
+> much better).
 > 
-> In practice it's rare for users to make these kinds of decisions well
-> up-front: it really needs to be adjustable later, ideally
-> automatically.  That could be pretty straightforward if the KV part
-> was stored directly on block storage, instead of having XFS in the
-> mix.  I'm not quite up with the state of the art in this area: are
-> there any reasonable alternatives for the KV part that would consume
-> some defined range of a block device from userspace, instead of
-> sitting on top of a filesystem?
+> If there is a low-level KV interface we can consume that would be 
+> great--especially if we can glue it to our KeyValueDB abstract API.  Even 
+> so, we need to make sure that the object *data* also has an efficient API 
+> we can utilize that efficiently handles block-sized/aligned data.
 
-I agree: this is my primary concern with the raw block approach.
+If there's a way to efficiently utilize more generic NVRAM-based block
+devices for quick metadata ops such that payload data can fly without
+much delay, I'd be quite happy. 
 
-There are some KV alternatives that could consume block, but the problem 
-would be similar: we need to dynamically size up or down the kv portion of 
-the device.
+Also, a current concern of mine is backups in some fashion of the
+metadata, given risk for (human configuration error||device
+malfunction)&&(cluster wide power outage).
+Some type of flushing to underlying consistent media, and/or
+snapshot-like backups.
 
-I see two basic options:
+As long as the constructs aren't too exotic,  perhaps this could be
+addressed using standard Linux FS or device mapper code (bcache, or
+other)
 
-1) Wire into the Env abstraction in rocksdb to provide something just 
-smart enough to let rocksdb work.  It isn't much: named files (not that 
-many--we could easily keep the file table in ram), always written 
-sequentially, to be read later with random access. All of the code is 
-written around abstractions of SequentialFileWriter so that everything 
-posix is neatly hidden in env_posix (and there are various other env 
-implementations for in-memory mock tests etc.).
+Not sure how popular journals on NVRAM is. But here's one user at least.
 
-2) Use something like dm-thin to sit between the raw block device and XFS 
-(for rocksdb) and the block device consumed by newstore.  As long as XFS 
-doesn't fragment horrifically (it shouldn't, given we *always* write ~4mb 
-files in their entirety) we can fstrim and size down the fs portion.  If 
-we similarly make newstores allocator stick to large blocks only we would 
-be able to size down the block portion as well.  Typical dm-thin block 
-sizes seem to range from 64KB to 512KB, which seems reasonable enough to 
-me.  In fact, we could likely just size the fs volume at something 
-conservatively large (like 90%) and rely on -o discard or periodic fstrim 
-to keep its actual utilization in check.
+/M
 
-sage
+
+> sage
+> 
+> 
+> >    Either way, I strongly support to have CEPH own data format instead 
+> > of relying on filesystem.
+> > 
+> >   Regards,
+> >   James
+> > 
+> > -----Original Message-----
+> > From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
+> > Sent: Monday, October 19, 2015 1:55 PM
+> > To: Somnath Roy
+> > Cc: ceph-devel@vger.kernel.org
+> > Subject: RE: newstore direction
+> > 
+> > On Mon, 19 Oct 2015, Somnath Roy wrote:
+> > > Sage,
+> > > I fully support that.  If we want to saturate SSDs , we need to get 
+> > > rid of this filesystem overhead (which I am in process of measuring). 
+> > > Also, it will be good if we can eliminate the dependency on the k/v 
+> > > dbs (for storing allocators and all). The reason is the unknown write 
+> > > amps they causes.
+> > 
+> > My hope is to keep behing the KeyValueDB interface (and/more change it as
+> > appropriate) so that other backends can be easily swapped in (e.g. a btree-based one for high-end flash).
+> > 
+> > sage
+> > 
+> > 
+> > > 
+> > > Thanks & Regards
+> > > Somnath
+> > > 
+> > > 
+> > > -----Original Message-----
+> > > From: ceph-devel-owner@vger.kernel.org 
+> > > [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
+> > > Sent: Monday, October 19, 2015 12:49 PM
+> > > To: ceph-devel@vger.kernel.org
+> > > Subject: newstore direction
+> > > 
+> > > The current design is based on two simple ideas:
+> > > 
+> > >  1) a key/value interface is better way to manage all of our internal 
+> > > metadata (object metadata, attrs, layout, collection membership, 
+> > > write-ahead logging, overlay data, etc.)
+> > > 
+> > >  2) a file system is well suited for storage object data (as files).
+> > > 
+> > > So far 1 is working out well, but I'm questioning the wisdom of #2.  A 
+> > > few
+> > > things:
+> > > 
+> > >  - We currently write the data to the file, fsync, then commit the kv 
+> > > transaction.  That's at least 3 IOs: one for the data, one for the fs 
+> > > journal, one for the kv txn to commit (at least once my rocksdb 
+> > > changes land... the kv commit is currently 2-3).  So two people are 
+> > > managing metadata, here: the fs managing the file metadata (with its 
+> > > own
+> > > journal) and the kv backend (with its journal).
+> > > 
+> > >  - On read we have to open files by name, which means traversing the fs namespace.  Newstore tries to keep it as flat and simple as possible, but at a minimum it is a couple btree lookups.  We'd love to use open by handle (which would reduce this to 1 btree traversal), but running the daemon as ceph and not root makes that hard...
+> > > 
+> > >  - ...and file systems insist on updating mtime on writes, even when it is a overwrite with no allocation changes.  (We don't care about mtime.) O_NOCMTIME patches exist but it is hard to get these past the kernel brainfreeze.
+> > > 
+> > >  - XFS is (probably) never going going to give us data checksums, which we want desperately.
+> > > 
+> > > But what's the alternative?  My thought is to just bite the bullet and consume a raw block device directly.  Write an allocator, hopefully keep it pretty simple, and manage it in kv store along with all of our other metadata.
+> > > 
+> > > Wins:
+> > > 
+> > >  - 2 IOs for most: one to write the data to unused space in the block device, one to commit our transaction (vs 4+ before).  For overwrites, we'd have one io to do our write-ahead log (kv journal), then do the overwrite async (vs 4+ before).
+> > > 
+> > >  - No concern about mtime getting in the way
+> > > 
+> > >  - Faster reads (no fs lookup)
+> > > 
+> > >  - Similarly sized metadata for most objects.  If we assume most objects are not fragmented, then the metadata to store the block offsets is about the same size as the metadata to store the filenames we have now.
+> > > 
+> > > Problems:
+> > > 
+> > >  - We have to size the kv backend storage (probably still an XFS
+> > > partition) vs the block storage.  Maybe we do this anyway (put 
+> > > metadata on
+> > > SSD!) so it won't matter.  But what happens when we are storing gobs of rgw index data or cephfs metadata?  Suddenly we are pulling storage out of a different pool and those aren't currently fungible.
+> > > 
+> > >  - We have to write and maintain an allocator.  I'm still optimistic this can be reasonbly simple, especially for the flash case (where fragmentation isn't such an issue as long as our blocks are reasonbly sized).  For disk we may beed to be moderately clever.
+> > > 
+> > >  - We'll need a fsck to ensure our internal metadata is consistent.  The good news is it'll just need to validate what we have stored in the kv store.
+> > > 
+> > > Other thoughts:
+> > > 
+> > >  - We might want to consider whether dm-thin or bcache or other block layers might help us with elasticity of file vs block areas.
+> > > 
+> > >  - Rocksdb can push colder data to a second directory, so we could 
+> > > have a fast ssd primary area (for wal and most metadata) and a second 
+> > > hdd directory for stuff it has to push off.  Then have a conservative 
+> > > amount of file space on the hdd.  If our block fills up, use the 
+> > > existing file mechanism to put data there too.  (But then we have to 
+> > > maintain both the current kv + file approach and not go all-in on kv + 
+> > > block.)
+> > > 
+> > > Thoughts?
+> > > sage
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> > > in the body of a message to majordomo@vger.kernel.org More majordomo 
+> > > info at  http://vger.kernel.org/majordomo-info.html
+> > > 
+> > > ________________________________
+> > > 
+> > > PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+> > > 
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> > > in the body of a message to majordomo@vger.kernel.org More majordomo 
+> > > info at  http://vger.kernel.org/majordomo-info.html
+> > > 
+> > > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> > 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
