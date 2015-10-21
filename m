@@ -1,175 +1,198 @@
-From: Ric Wheeler <rwheeler@redhat.com>
+From: Orit Wasserman <owasserm@redhat.com>
 Subject: Re: newstore direction
-Date: Tue, 20 Oct 2015 18:23:06 -0400
-Message-ID: <5626BECA.7070306@redhat.com>
+Date: Wed, 21 Oct 2015 10:22:16 +0200
+Message-ID: <1445415736.1809.71.camel@redhat.com>
 References: <alpine.DEB.2.00.1510191216200.4188@cobra.newdream.net>
- <CALe9h7dUQcp6zOSFDfnXSQo4VOTObFCWj+HD-idwE1nNzQVsgA@mail.gmail.com>
- <alpine.DEB.2.00.1510201251140.16833@cobra.newdream.net>
- <CAJ4mKGY0=+isJhh4oF3kqtxEZ6HWSDZXJyM9sBHxc8s21M_y8g@mail.gmail.com>
- <alpine.DEB.2.00.1510201422450.16833@cobra.newdream.net>
+	 <56268886.7010806@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:40212 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:50513 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932118AbbJTWXJ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 20 Oct 2015 18:23:09 -0400
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-	by mx1.redhat.com (Postfix) with ESMTPS id 7F157C0AF784
-	for <ceph-devel@vger.kernel.org>; Tue, 20 Oct 2015 22:23:09 +0000 (UTC)
-In-Reply-To: <alpine.DEB.2.00.1510201422450.16833@cobra.newdream.net>
+	id S1753653AbbJUIWW (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 21 Oct 2015 04:22:22 -0400
+Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+	by mx1.redhat.com (Postfix) with ESMTPS id A6EC5319AD1
+	for <ceph-devel@vger.kernel.org>; Wed, 21 Oct 2015 08:22:22 +0000 (UTC)
+In-Reply-To: <56268886.7010806@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, Gregory Farnum <gfarnum@redhat.com>
-Cc: John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Ric Wheeler <rwheeler@redhat.com>
+Cc: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
 
-On 10/20/2015 05:47 PM, Sage Weil wrote:
-> On Tue, 20 Oct 2015, Gregory Farnum wrote:
->> On Tue, Oct 20, 2015 at 12:44 PM, Sage Weil <sweil@redhat.com> wrote:
->>> On Tue, 20 Oct 2015, Ric Wheeler wrote:
->>>> The big problem with consuming block devices directly is that you ultimately
->>>> end up recreating most of the features that you had in the file system. Even
->>>> enterprise databases like Oracle and DB2 have been migrating away from running
->>>> on raw block devices in favor of file systems over time.  In effect, you are
->>>> looking at making a simple on disk file system which is always easier to start
->>>> than it is to get back to a stable, production ready state.
->>> This was why we abandoned ebofs ~4 years ago... btrfs had arrived and had
->>> everything we were implementing and more: mainly, copy on write and data
->>> checksums.  But in practice the fact that its general purpose means it
->>> targets a very different workloads and APIs than what we need.
->> Try 7 years since ebofs...
-> Sigh...
->
->> That's one of my concerns, though. You ditched ebofs once already
->> because it had metastasized into an entire FS, and had reached its
->> limits of maintainability. What makes you think a second time through
->> would work better? :/
-> A fair point, and I've given this some thought:
->
-> 1) We know a *lot* more about our workload than I did in 2005.  The things
-> I was worrying about then (fragmentation, mainly) are much easier to
-> address now, where we have hints from rados and understand what the write
-> patterns look like in practice (randomish 4k-128k ios for rbd, sequential
-> writes for rgw, and the cephfs wildcard).
->
-> 2) Most of the ebofs effort was around doing copy-on-write btrees (with
-> checksums) and orchestrating commits.  Here our job is *vastly* simplified
-> by assuming the existence of a transactional key/value store.  If you look
-> at newstore today, we're already half-way through dealing with the
-> complexity of doing allocations... we're essentially "allocating" blocks
-> that are 1 MB files on XFS, managing that metadata, and overwriting or
-> replacing those blocks on write/truncate/clone.  By the time we add in an
-> allocator (get_blocks(len), free_block(offset, len)) and rip out all the
-> file handling fiddling (like fsync workqueues, file id allocator,
-> file truncation fiddling, etc.) we'll probably have something working
-> with about the same amount of code we have now.  (Of course, that'll
-> grow as we get more sophisticated, but that'll happen either way.)
->
->> On Mon, Oct 19, 2015 at 12:49 PM, Sage Weil <sweil@redhat.com> wrote:
->>>   - 2 IOs for most: one to write the data to unused space in the block
->>> device, one to commit our transaction (vs 4+ before).  For overwrites,
->>> we'd have one io to do our write-ahead log (kv journal), then do
->>> the overwrite async (vs 4+ before).
->> I can't work this one out. If you're doing one write for the data and
->> one for the kv journal (which is on another filesystem), how does the
->> commit sequence work that it's only 2 IOs instead of the same 3 we
->> already have? Or are you planning to ditch the LevelDB/RocksDB store
->> for our journaling and just use something within the block layer?
-> Now:
->      1 io  to write a new file
->    1-2 ios to sync the fs journal (commit the inode, alloc change)
->            (I see 2 journal IOs on XFS and only 1 on ext4...)
->      1 io  to commit the rocksdb journal (currently 3, but will drop to
->            1 with xfs fix and my rocksdb change)
+On Tue, 2015-10-20 at 14:31 -0400, Ric Wheeler wrote:
+> On 10/19/2015 03:49 PM, Sage Weil wrote:
+> > The current design is based on two simple ideas:
+> >
+> >   1) a key/value interface is better way to manage all of our internal
+> > metadata (object metadata, attrs, layout, collection membership,
+> > write-ahead logging, overlay data, etc.)
+> >
+> >   2) a file system is well suited for storage object data (as files).
+> >
+> > So far 1 is working out well, but I'm questioning the wisdom of #2.  A few
+> > things:
+> >
+> >   - We currently write the data to the file, fsync, then commit the kv
+> > transaction.  That's at least 3 IOs: one for the data, one for the fs
+> > journal, one for the kv txn to commit (at least once my rocksdb changes
+> > land... the kv commit is currently 2-3).  So two people are managing
+> > metadata, here: the fs managing the file metadata (with its own
+> > journal) and the kv backend (with its journal).
+> 
+> If all of the fsync()'s fall into the same backing file system, are you sure 
+> that each fsync() takes the same time? Depending on the local FS implementation 
+> of course, but the order of issuing those fsync()'s can effectively make some of 
+> them no-ops.
+> 
+> >
+> >   - On read we have to open files by name, which means traversing the fs
+> > namespace.  Newstore tries to keep it as flat and simple as possible, but
+> > at a minimum it is a couple btree lookups.  We'd love to use open by
+> > handle (which would reduce this to 1 btree traversal), but running
+> > the daemon as ceph and not root makes that hard...
+> 
+> This seems like a a pretty low hurdle to overcome.
+> 
+> >
+> >   - ...and file systems insist on updating mtime on writes, even when it is
+> > a overwrite with no allocation changes.  (We don't care about mtime.)
+> > O_NOCMTIME patches exist but it is hard to get these past the kernel
+> > brainfreeze.
+> 
+> Are you using O_DIRECT? Seems like there should be some enterprisey database 
+> tricks that we can use here.
+> 
+> >
+> >   - XFS is (probably) never going going to give us data checksums, which we
+> > want desperately.
+> 
+> What is the goal of having the file system do the checksums? How strong do they 
+> need to be and what size are the chunks?
+> 
+> If you update this on each IO, this will certainly generate more IO (each write 
+> will possibly generate at least one other write to update that new checksum).
+> 
+> >
+> > But what's the alternative?  My thought is to just bite the bullet and
+> > consume a raw block device directly.  Write an allocator, hopefully keep
+> > it pretty simple, and manage it in kv store along with all of our other
+> > metadata.
+> 
+> The big problem with consuming block devices directly is that you ultimately end 
+> up recreating most of the features that you had in the file system. Even 
+> enterprise databases like Oracle and DB2 have been migrating away from running 
+> on raw block devices in favor of file systems over time.  In effect, you are 
+> looking at making a simple on disk file system which is always easier to start 
+> than it is to get back to a stable, production ready state.
 
-I think that might be too pessimistic - the number of discrete IO's sent down to 
-a spinning disk make much less impact on performance than the number of 
-fsync()'s since they IO's all land in the write cache.  Some newer spinning 
-drives have a non-volatile write cache, so even an fsync() might not end up 
-doing the expensive data transfer to the platter.
+The best performance is still on block device (SAN).
+File system simplify the operation tasks which worth the performance
+penalty for a database. I think in a storage system this is not the
+case.
+In many cases they can use their own file system that is tailored for
+the database.
 
-It would be interesting to get the timings on the IO's you see to measure the 
-actual impact.
+> I think that it might be quicker and more maintainable to spend some time 
+> working with the local file system people (XFS or other) to see if we can 
+> jointly address the concerns you have.
+> >
+> > Wins:
+> >
+> >   - 2 IOs for most: one to write the data to unused space in the block
+> > device, one to commit our transaction (vs 4+ before).  For overwrites,
+> > we'd have one io to do our write-ahead log (kv journal), then do
+> > the overwrite async (vs 4+ before).
+> >
+> >   - No concern about mtime getting in the way
+> >
+> >   - Faster reads (no fs lookup)
+> >
+> >   - Similarly sized metadata for most objects.  If we assume most objects
+> > are not fragmented, then the metadata to store the block offsets is about
+> > the same size as the metadata to store the filenames we have now.
+> >
+> > Problems:
+> >
+> >   - We have to size the kv backend storage (probably still an XFS
+> > partition) vs the block storage.  Maybe we do this anyway (put metadata on
+> > SSD!) so it won't matter.  But what happens when we are storing gobs of
+> > rgw index data or cephfs metadata?  Suddenly we are pulling storage out of
+> > a different pool and those aren't currently fungible.
+> >
+> >   - We have to write and maintain an allocator.  I'm still optimistic this
+> > can be reasonbly simple, especially for the flash case (where
+> > fragmentation isn't such an issue as long as our blocks are reasonbly
+> > sized).  For disk we may beed to be moderately clever.
+> >
+> >   - We'll need a fsck to ensure our internal metadata is consistent.  The
+> > good news is it'll just need to validate what we have stored in the kv
+> > store.
+> >
+> > Other thoughts:
+> >
+> >   - We might want to consider whether dm-thin or bcache or other block
+> > layers might help us with elasticity of file vs block areas.
+> >
+> >   - Rocksdb can push colder data to a second directory, so we could have a
+> > fast ssd primary area (for wal and most metadata) and a second hdd
+> > directory for stuff it has to push off.  Then have a conservative amount
+> > of file space on the hdd.  If our block fills up, use the existing file
+> > mechanism to put data there too.  (But then we have to maintain both the
+> > current kv + file approach and not go all-in on kv + block.)
+> >
+> > Thoughts?
+> > sage
+> > --
+> 
+> I really hate the idea of making a new file system type (even if we call it a 
+> raw block store!).
+> 
 
+This won't be a file system but just an allocator which is a very small
+part of a file system.
 
->
-> With block:
->      1 io to write to block device
->      1 io to commit to rocksdb journal
->
->> If we do want to go down this road, we shouldn't need to write an
->> allocator from scratch. I don't remember exactly which ones it is but
->> we've read/seen at least a few storage papers where people have reused
->> existing allocators  ? I think the one from ext2? And somebody managed
->> to get it running in userspace.
-> Maybe, but the real win is when we combine the allocator state update with
-> our kv transaction.  Even if we adopt an existing algorithm we'll need to
-> do some significant rejiggering to persist it in the kv store.
->
-> My thought is start with something simple that works (e.g., linear sweep
-> over free space, simple interval_set<>-style freelist) and once it works
-> look at existing state of the art for a clever v2.
->
-> BTW, I suspect a modest win here would be to simply use the collection/pg
-> as a hint for storing related objects.  That's the best indicator we have
-> for aligned lifecycle (think PG migrations/deletions vs flash erase
-> blocks).  Good luck plumbing that through XFS...
->
->> Of course, then we also need to figure out how to get checksums on the
->> block data, since if we're going to put in the effort to reimplement
->> this much of the stack we'd better get our full data integrity
->> guarantees along with it!
-> YES!
->
-> Here I think we should make judicious use of the rados hints.  For
-> example, rgw always writes complete objects, so we can have coarse
-> granularity crcs and only pay for very small reads (that have to make
-> slightly larger reads for crc verification).  On RBD... we might opt to be
-> opportunistic with the write pattern (if the write was 4k, store the crc
-> at small granularity), otherwise use a larger one.  Maybe.  In any case,
-> we have a lot more flexibility than we would if trying to plumb this
-> through the VFS and a file system.
+The benefits are not just in reducing the number of IO operations we
+preform, we are also removing the file system stack overhead that will
+reduce our latency and make it more predictable.
+Removing this layer will give use more control and allow us other
+optimization we cannot do today.
 
-Plumbing for T10 DIF/DIX already exist, what is missing is the normal block 
-device that handles them (not enterprise SAS/disk array class)
+I think this is more acute when taking SSD (and even faster
+technologies) into account.
 
-ric
+> In addition to the technical hurdles, there are also production worries like how 
+> long will it take for distros to pick up formal support?  How do we test it 
+> properly?
+> 
 
->
->>> I see two basic options:
->>>
->>> 1) Wire into the Env abstraction in rocksdb to provide something just
->>> smart enough to let rocksdb work.  It isn't much: named files (not that
->>> many--we could easily keep the file table in ram), always written
->>> sequentially, to be read later with random access. All of the code is
->>> written around abstractions of SequentialFileWriter so that everything
->>> posix is neatly hidden in env_posix (and there are various other env
->>> implementations for in-memory mock tests etc.).
->> This seems like the obviously correct move to me? Except we might want
->> to include the rocksdb store on flash instead of hard drives, which
->> means maybe we do want some unified storage system which can handle
->> multiple physical storage devices as a single piece of storage space.
->> (Not that any of those exist in "almost done" hell, or that we're
->> going through requirements expansion or anything!)
-> Yeah, I mostly agree.  It's just more work.  And rocks, for example,
-> already has some provisions for managing different storage pools: one for
-> wal, one for main ssts, one for cold ssts.  And the same Env is used for
-> all three, which means we'd run our toy fs backend even for the flash
-> portion.  (Which, if it works, is probably good anyway for performance and
-> operational simplicity.  One less thing in the stack to break.)
->
-> It also ties us to rocksdb, and/or whatever other backends we specifically
-> support.  Right now you can trivially swap in leveldb and everything works
-> the same.  OTOH there is an alternative btree-based kv store I'm
-> considering about that does much better on flash and consumes block
-> directly.  Making it share a device with newstore will be interesting.
-> So regardless we'll probably have a pretty short list of kv backends that
-> we care about...
->
-> sage
+This should be userspace only, I don't think we need it in the kernel
+(will need root access for opening the device).
+For users that don't have root access we can use one big file and use
+the same allocator in it. It can be good for testing too.
+
+As someone that already been part of such a
+move more than once (for example in Exanet) I can say that the
+performance gain is very impressive and after the change we could
+remove many workarounds which simplified the code.
+
+As the API should be small the testing effort is reasonable, we do need
+to test it well as a bug in the allocator has really bad consequences.
+
+We won't be able to match (or exceed) our competitors performance
+without making this effort ...
+
+Orit
+
+> Regards,
+> 
+> Ric
+> 
+> 
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
 
