@@ -1,82 +1,74 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH] mark rbd requiring stable pages
-Date: Wed, 21 Oct 2015 22:57:20 +0200
-Message-ID: <CAOi1vP_0GoqXuHm5SjZHpS8g_mK_wFRs9t9_VE1N9JUMFvL3Gw@mail.gmail.com>
-References: <201510151850.48348.ronny.hegewald@online.de>
-	<CAOi1vP_ZDHBfCDeH6gxCKRsqoGteWv+nn7EFTexf+qsUBMHvjA@mail.gmail.com>
-	<CAOi1vP8nAfr1_dNmvhNspz6ANZo2onGExU7=-agKLNr5KPxrzw@mail.gmail.com>
+From: Martin Millnert <martin@millnert.se>
+Subject: Re: newstore direction
+Date: Wed, 21 Oct 2015 23:20:25 +0200
+Message-ID: <1445462425.24939.21.camel@millnert.se>
+References: <alpine.DEB.2.00.1510191216200.4188@cobra.newdream.net>
+	 <56268886.7010806@redhat.com>
+	 <7334B4281E425749B85E08CF7EC6F8534383DD15@SACMBXIP03.sdcorp.global.sandisk.com>
+	 <562775DD.8050304@redhat.com> <56279DD3.4020901@redhat.com>
+	 <5627B471.1040602@redhat.com> <5627E96E.6090706@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f182.google.com ([209.85.212.182]:36760 "EHLO
-	mail-wi0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754725AbbJUU5V (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Oct 2015 16:57:21 -0400
-Received: by wicfx6 with SMTP id fx6so108868267wic.1
-        for <ceph-devel@vger.kernel.org>; Wed, 21 Oct 2015 13:57:20 -0700 (PDT)
-In-Reply-To: <CAOi1vP8nAfr1_dNmvhNspz6ANZo2onGExU7=-agKLNr5KPxrzw@mail.gmail.com>
+Received: from ncis.millnert.se ([185.19.66.196]:55153 "EHLO mail.millnert.se"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755528AbbJUVU3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 21 Oct 2015 17:20:29 -0400
+In-Reply-To: <5627E96E.6090706@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ronny Hegewald <ronny.hegewald@online.de>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, Alex Elder <elder@kernel.org>, Mike Christie <michaelc@cs.wisc.edu>
+To: Mark Nelson <mnelson@redhat.com>
+Cc: Ric Wheeler <rwheeler@redhat.com>, Allen Samuels <Allen.Samuels@sandisk.com>, Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, Oct 21, 2015 at 10:51 PM, Ilya Dryomov <idryomov@gmail.com> wrote:
-> On Fri, Oct 16, 2015 at 1:09 PM, Ilya Dryomov <idryomov@gmail.com> wrote:
->> Hmm...  On the one hand, yes, we do compute CRCs, but that's optional,
->> so enabling this unconditionally is probably too harsh.  OTOH we are
->> talking to the network, which means all sorts of delays, retransmission
->> issues, etc, so I wonder how exactly "unstable" pages behave when, say,
->> added to an skb - you can't write anything to a page until networking
->> is fully done with it and expect it to work.  It's particularly
->> alarming that you've seen corruptions.
->>
->> Currently the only users of this flag are block integrity stuff and
->> md-raid5, which makes me wonder what iscsi, nfs and others do in this
->> area.  There's an old ticket on this topic somewhere on the tracker, so
->> I'll need to research this.  Thanks for bringing this up!
->
-> Hi Mike,
->
-> I was hoping to grab you for a few minutes, but you weren't there...
->
-> I spent a better part of today reading code and mailing lists on this
-> topic.  It is of course a bug that we use sendpage() which inlines
-> pages into an skb and do nothing to keep those pages stable.  We have
-> csums enabled by default, so setting BDI_CAP_STABLE_WRITES in the crc
-> case is an obvious fix.
->
-> I looked at drbd and iscsi and I think iscsi could do the same - ditch
-> the fallback to sock_no_sendpage() in the datadgst_en case (and get rid
-> of iscsi_sw_tcp_conn::sendpage member while at it).  Using stable pages
-> rather than having a roll-your-own implementation which doesn't close
-> the race but only narrows it sounds like a win, unless copying through
-> sendmsg() is for some reason cheaper than stable-waiting?
->
-> drbd still needs the non-zero-copy version for its async protocol for
-> when they free the pages before the NIC has chance to put them on the
-> wire.  md-raid5 it turns out has an option to essentially disable most
-> of its stripe cache and so it sets BDI_CAP_STABLE_WRITES to compensate
-> if that option is enabled.
->
-> What I'm worried about is the !crc (!datadgst_en) case.  I'm failing to
-> convince myself that mucking with sendpage()ed pages while they sit in
-> the TCP queue (or anywhere in the networking stack, really), is safe -
-> there is nothing to prevent pages from being modified after sendpage()
-> returned and Ronny reports data corruptions that pretty much went away
-> with BDI_CAP_STABLE_WRITES set.  I may be, after prolonged staring at
-> this, starting to confuse fs with block, though.  How does that work in
-> iscsi land?
->
-> (There was/is also this [1] bug, which is kind of related and probably
-> worth looking into at some point later.  ceph shouldn't be that easily
-> affected - we've got state, but there is a ticket for it.)
->
-> [1] http://www.spinics.net/lists/linux-nfs/msg34913.html
+Adding 2c
 
-And now with Mike on the CC and a mention that at least one scenario of
-[1] got fixed in NFS by a6b31d18b02f ("SUNRPC: Fix a data corruption
-issue when retransmitting RPC calls").
+On Wed, 2015-10-21 at 14:37 -0500, Mark Nelson wrote:
+> My thought is that there is some inflection point where the userland 
+> kvstore/block approach is going to be less work, for everyone I think, 
+> than trying to quickly discover, understand, fix, and push upstream 
+> patches that sometimes only really benefit us.  I don't know if we've 
+> truly hit that that point, but it's tough for me to find flaws with 
+> Sage's argument.
 
-Thanks,
+Regarding the userland / kernel land aspect of the topic, there are
+further aspects AFAIK not yet addressed in the thread:
+In the networking world, there's been development on memory mapped
+(multiple approaches exist) userland networking, which for packet
+management has the benefit of - for very, very specific applications of
+networking code - avoiding e.g. per-packet context switches etc, and
+streamlining processor cache management performance. People have gone as
+far as removing CPU cores from CPU scheduler to completely dedicate them
+to the networking task at hand (cache optimizations). There are various
+latency/throughput (bulking) optimizations applicable, but at the end of
+the day, it's about keeping the CPU bus busy with "revenue" bus traffic.
 
-                Ilya
+Granted, storage IO operations may be much heavier in cycle counts for
+context switches to ever appear as a problem in themselves, certainly
+for slower SSDs and HDDs. However, when going for truly high performance
+IO, *every* hurdle in the data path counts toward the total latency.
+(And really, high performance random IO characteristics approaches the
+networking, per-packet handling characteristics).  Now, I'm not really
+suggesting memory-mapping a storage device to user space, not at all,
+but having better control over the data path for a very specific use
+case, reduces dependency on the code that works as best as possible for
+the general case, and allows for very purpose-built code, to address a
+narrow set of requirements. ("Ceph storage cluster backend" isn't a
+typical FS use case.) It also decouples dependencies on users i.e.
+waiting for the next distro release before being able to take up the
+benefits of improvements to the storage code.
+
+A random google came up with related data on where "doing something way
+different" /can/ have significant benefits:
+http://phunq.net/pipermail/tux3/2015-April/002147.html 
+
+I (FWIW) certainly agree there is merit to the idea.
+The scientific approach here could perhaps be to simply enumerate all
+corner cases of "generic FS" that actually are cause for the experienced
+issues, and assess probability of them being solved (and if so when).
+That *could* improve chances of approaching consensus which wouldn't
+hurt I suppose?
+
+BR,
+Martin
+
