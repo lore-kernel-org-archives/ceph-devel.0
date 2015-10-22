@@ -1,130 +1,118 @@
-From: Allen Samuels <Allen.Samuels@sandisk.com>
-Subject: RE: newstore direction
-Date: Thu, 22 Oct 2015 02:12:26 +0000
-Message-ID: <7334B4281E425749B85E08CF7EC6F8534383E574@SACMBXIP03.sdcorp.global.sandisk.com>
-References: <alpine.DEB.2.00.1510191216200.4188@cobra.newdream.net>
-	 <56268886.7010806@redhat.com>
-	 <7334B4281E425749B85E08CF7EC6F8534383DD15@SACMBXIP03.sdcorp.global.sandisk.com>
-	 <562775DD.8050304@redhat.com> <56279DD3.4020901@redhat.com>
-	 <5627B471.1040602@redhat.com> <5627E96E.6090706@redhat.com>
- <1445462425.24939.21.camel@millnert.se>
+From: Mike Christie <michaelc@cs.wisc.edu>
+Subject: Re: [PATCH] mark rbd requiring stable pages
+Date: Wed, 21 Oct 2015 23:07:14 -0500
+Message-ID: <562860F2.8070208@cs.wisc.edu>
+References: <201510151850.48348.ronny.hegewald@online.de> <CAOi1vP_ZDHBfCDeH6gxCKRsqoGteWv+nn7EFTexf+qsUBMHvjA@mail.gmail.com> <CAOi1vP8nAfr1_dNmvhNspz6ANZo2onGExU7=-agKLNr5KPxrzw@mail.gmail.com> <CAOi1vP_0GoqXuHm5SjZHpS8g_mK_wFRs9t9_VE1N9JUMFvL3Gw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1bon0092.outbound.protection.outlook.com ([157.56.111.92]:4160
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751594AbbJVCMc (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 21 Oct 2015 22:12:32 -0400
-In-Reply-To: <1445462425.24939.21.camel@millnert.se>
-Content-Language: en-US
+Received: from sabe.cs.wisc.edu ([128.105.6.20]:37685 "EHLO sabe.cs.wisc.edu"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751353AbbJVEkm (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 22 Oct 2015 00:40:42 -0400
+In-Reply-To: <CAOi1vP_0GoqXuHm5SjZHpS8g_mK_wFRs9t9_VE1N9JUMFvL3Gw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Martin Millnert <martin@millnert.se>, Mark Nelson <mnelson@redhat.com>
-Cc: Ric Wheeler <rwheeler@redhat.com>, Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>, Ronny Hegewald <ronny.hegewald@online.de>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, Alex Elder <elder@kernel.org>
 
-T25lIG9mIHRoZSBiaWdnZXN0IGNoYW5nZXMgdGhhdCBmbGFzaCBpcyBtYWtpbmcgaW4gdGhlIHN0
-b3JhZ2Ugd29ybGQgaXMgdGhhdCB0aGUgd2F5IGJhc2ljIHRyYWRlLW9mZnMgaW4gc3RvcmFnZSBt
-YW5hZ2VtZW50IHNvZnR3YXJlIGFyY2hpdGVjdHVyZSBhcmUgYmVpbmcgYWZmZWN0ZWQuIEluIHRo
-ZSBIREQgd29ybGQgQ1BVIHRpbWUgcGVyIElPUCB3YXMgcmVsYXRpdmVseSBpbmNvbnNlcXVlbnRp
-YWwsIGkuZS4sIGl0IGhhZCBsaXR0bGUgZWZmZWN0IG9uIG92ZXJhbGwgcGVyZm9ybWFuY2Ugd2hp
-Y2ggd2FzIGxpbWl0ZWQgYnkgdGhlIHBoeXNpY3Mgb2YgdGhlIGhhcmQgZHJpdmUuIEZsYXNoIGlz
-IG5vdyBpbnZlcnRpbmcgdGhhdCBzaXR1YXRpb24uIFdoZW4geW91IGxvb2sgYXQgdGhlIHBlcmZv
-cm1hbmNlIGxldmVscyBiZWluZyBkZWxpdmVyZWQgaW4gdGhlIGxhdGVzdCBnZW5lcmF0aW9uIG9m
-IE5WTWUgU1NEcyB5b3UgcmFwaWRseSBzZWUgdGhhdCB0aGF0IHN0b3JhZ2UgaXRzZWxmIGlzIGdl
-bmVyYWxseSBubyBsb25nZXIgdGhlIGJvdHRsZW5lY2sgKHNwZWFraW5nIGFib3V0IEJXLCBub3Qg
-bGF0ZW5jeSBvZiBjb3Vyc2UpIGJ1dCByYXRoZXIgaXQncyB0aGUgc3lzdGVtIHNpdHRpbmcgaW4g
-ZnJvbnQgb2YgdGhlIHN0b3JhZ2UgdGhhdCBpcyB0aGUgYm90dGxlbmVjay4gR2VuZXJhbGx5IGl0
-J3MgdGhlIENQVSBjb3N0IG9mIGFuIElPUC4NCg0KV2hlbiBTYW5kaXNrIGZpcnN0IHN0YXJ0aW5n
-IHdvcmtpbmcgd2l0aCBDZXBoIChEdW1wbGluZykgdGhlIGRlc2lnbiBvZiBsaWJyYWRvcyBhbmQg
-dGhlIE9TRCBsZWFkIHRvIHRoZSBzaXR1YXRpb24gdGhhdCB0aGUgQ1BVIGNvc3Qgb2YgYW4gSU9Q
-IHdhcyBkb21pbmF0ZWQgYnkgY29udGV4dCBzd2l0Y2hlcyBhbmQgbmV0d29yayBzb2NrZXQgaGFu
-ZGxpbmcuIE92ZXIgdGltZSwgbXVjaCBvZiB0aGF0IGhhcyBiZWVuIGFkZHJlc3NlZC4gVGhlIHNv
-Y2tldCBoYW5kbGluZyBjb2RlIGhhcyBiZWVuIHJlLXdyaXR0ZW4gKG1vcmUgdGhhbiBvbmNlISkg
-c29tZSBvZiB0aGUgaW50ZXJuYWwgcXVldWVpbmcgaW4gdGhlIE9TRCAoYW5kIHRoZSBhc3NvY2lh
-dGVkIGNvbnRleHQgc3dpdGNoZXMpIGhhdmUgYmVlbiBlbGltaW5hdGVkLiBBcyB0aGUgQ1BVIGNv
-c3RzIGhhdmUgZHJvcHBlZCwgcGVyZm9ybWFuY2Ugb24gZmxhc2ggaGFzIGltcHJvdmVkIGFjY29y
-ZGluZ2x5Lg0KDQpCZWNhdXNlIHdlIGRpZG4ndCB3YW50IHRvIGNvbXBsZXRlbHkgcmUtd3JpdGUg
-dGhlIE9TRCAodGltZS10by1tYXJrZXQgYW5kIHN0YWJpbGl0eSBkcm92ZSB0aGF0IGRlY2lzaW9u
-KSwgd2UgZGlkbid0IG1vdmUgaXQgZnJvbSB0aGUgY3VycmVudCAidGhyZWFkIHBlciBJT1AiIG1v
-ZGVsIGludG8gYSB0cnVseSBhc3luY2hyb25vdXMgInRocmVhZCBwZXIgQ1BVIGNvcmUiIG1vZGVs
-IHRoYXQgZXNzZW50aWFsbHkgZWxpbWluYXRlcyBjb250ZXh0IHN3aXRjaGVzIGluIHRoZSBJTyBw
-YXRoLiBCdXQgYSBmdWxseSBvcHRpbWl6ZWQgT1NEIHdvdWxkIGdvIGRvd24gdGhhdCBwYXRoIChh
-dCBsZWFzdCBwYXJ0LXdheSkuIEkgYmVsaWV2ZSBpdCdzIGJlZW4gcHJvcG9zZWQgaW4gdGhlIHBh
-c3QuIFBlcmhhcHMgYSBoeWJyaWQgImZhc3QtcGF0aCIgc3R5bGUgY291bGQgZ2V0IG1vc3Qgb2Yg
-dGhlIGJlbmVmaXRzIHdoaWxlIHByZXNlcnZpbmcgbXVjaCBvZiB0aGUgbGVnYWN5IGNvZGUuDQoN
-CkkgYmVsaWV2ZSB0aGlzIHRyZW5kIHRvd2FyZCB0aHJlYWQtcGVyLWNvcmUgc29mdHdhcmUgZGV2
-ZWxvcG1lbnQgd2lsbCBhbHNvIHRlbmQgdG8gc3VwcG9ydCB0aGUgImRvIGl0IGluIHVzZXItc3Bh
-Y2UiIHRyZW5kLiBUaGF0J3MgYmVjYXVzZSBtb3N0IG9mIHRoZSBrZXJuZWwgYW5kIGZpbGUtc3lz
-dGVtIGludGVyZmFjZSBpcyBhcmNoaXRlY3RlZCBhcm91bmQgdGhlIGJsb2NraW5nICJ0aHJlYWQt
-cGVyLUlPUCIgbW9kZWwgYW5kIGlzIHVubGlrZWx5IHRvIGNoYW5nZSBpbiB0aGUgZnV0dXJlLg0K
-DQoNCkFsbGVuIFNhbXVlbHMNClNvZnR3YXJlIEFyY2hpdGVjdCwgRmVsbG93LCBTeXN0ZW1zIGFu
-ZCBTb2Z0d2FyZSBTb2x1dGlvbnMNCg0KMjg4MCBKdW5jdGlvbiBBdmVudWUsIFNhbiBKb3NlLCBD
-QSA5NTEzNA0KVDogKzEgNDA4IDgwMSA3MDMwfCBNOiArMSA0MDggNzgwIDY0MTYNCmFsbGVuLnNh
-bXVlbHNAU2FuRGlzay5jb20NCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IE1h
-cnRpbiBNaWxsbmVydCBbbWFpbHRvOm1hcnRpbkBtaWxsbmVydC5zZV0NClNlbnQ6IFRodXJzZGF5
-LCBPY3RvYmVyIDIyLCAyMDE1IDY6MjAgQU0NClRvOiBNYXJrIE5lbHNvbiA8bW5lbHNvbkByZWRo
-YXQuY29tPg0KQ2M6IFJpYyBXaGVlbGVyIDxyd2hlZWxlckByZWRoYXQuY29tPjsgQWxsZW4gU2Ft
-dWVscyA8QWxsZW4uU2FtdWVsc0BzYW5kaXNrLmNvbT47IFNhZ2UgV2VpbCA8c3dlaWxAcmVkaGF0
-LmNvbT47IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0OiBSZTogbmV3c3RvcmUg
-ZGlyZWN0aW9uDQoNCkFkZGluZyAyYw0KDQpPbiBXZWQsIDIwMTUtMTAtMjEgYXQgMTQ6MzcgLTA1
-MDAsIE1hcmsgTmVsc29uIHdyb3RlOg0KPiBNeSB0aG91Z2h0IGlzIHRoYXQgdGhlcmUgaXMgc29t
-ZSBpbmZsZWN0aW9uIHBvaW50IHdoZXJlIHRoZSB1c2VybGFuZA0KPiBrdnN0b3JlL2Jsb2NrIGFw
-cHJvYWNoIGlzIGdvaW5nIHRvIGJlIGxlc3Mgd29yaywgZm9yIGV2ZXJ5b25lIEkgdGhpbmssDQo+
-IHRoYW4gdHJ5aW5nIHRvIHF1aWNrbHkgZGlzY292ZXIsIHVuZGVyc3RhbmQsIGZpeCwgYW5kIHB1
-c2ggdXBzdHJlYW0NCj4gcGF0Y2hlcyB0aGF0IHNvbWV0aW1lcyBvbmx5IHJlYWxseSBiZW5lZml0
-IHVzLiAgSSBkb24ndCBrbm93IGlmIHdlJ3ZlDQo+IHRydWx5IGhpdCB0aGF0IHRoYXQgcG9pbnQs
-IGJ1dCBpdCdzIHRvdWdoIGZvciBtZSB0byBmaW5kIGZsYXdzIHdpdGgNCj4gU2FnZSdzIGFyZ3Vt
-ZW50Lg0KDQpSZWdhcmRpbmcgdGhlIHVzZXJsYW5kIC8ga2VybmVsIGxhbmQgYXNwZWN0IG9mIHRo
-ZSB0b3BpYywgdGhlcmUgYXJlIGZ1cnRoZXIgYXNwZWN0cyBBRkFJSyBub3QgeWV0IGFkZHJlc3Nl
-ZCBpbiB0aGUgdGhyZWFkOg0KSW4gdGhlIG5ldHdvcmtpbmcgd29ybGQsIHRoZXJlJ3MgYmVlbiBk
-ZXZlbG9wbWVudCBvbiBtZW1vcnkgbWFwcGVkIChtdWx0aXBsZSBhcHByb2FjaGVzIGV4aXN0KSB1
-c2VybGFuZCBuZXR3b3JraW5nLCB3aGljaCBmb3IgcGFja2V0IG1hbmFnZW1lbnQgaGFzIHRoZSBi
-ZW5lZml0IG9mIC0gZm9yIHZlcnksIHZlcnkgc3BlY2lmaWMgYXBwbGljYXRpb25zIG9mIG5ldHdv
-cmtpbmcgY29kZSAtIGF2b2lkaW5nIGUuZy4gcGVyLXBhY2tldCBjb250ZXh0IHN3aXRjaGVzIGV0
-YywgYW5kIHN0cmVhbWxpbmluZyBwcm9jZXNzb3IgY2FjaGUgbWFuYWdlbWVudCBwZXJmb3JtYW5j
-ZS4gUGVvcGxlIGhhdmUgZ29uZSBhcyBmYXIgYXMgcmVtb3ZpbmcgQ1BVIGNvcmVzIGZyb20gQ1BV
-IHNjaGVkdWxlciB0byBjb21wbGV0ZWx5IGRlZGljYXRlIHRoZW0gdG8gdGhlIG5ldHdvcmtpbmcg
-dGFzayBhdCBoYW5kIChjYWNoZSBvcHRpbWl6YXRpb25zKS4gVGhlcmUgYXJlIHZhcmlvdXMgbGF0
-ZW5jeS90aHJvdWdocHV0IChidWxraW5nKSBvcHRpbWl6YXRpb25zIGFwcGxpY2FibGUsIGJ1dCBh
-dCB0aGUgZW5kIG9mIHRoZSBkYXksIGl0J3MgYWJvdXQga2VlcGluZyB0aGUgQ1BVIGJ1cyBidXN5
-IHdpdGggInJldmVudWUiIGJ1cyB0cmFmZmljLg0KDQpHcmFudGVkLCBzdG9yYWdlIElPIG9wZXJh
-dGlvbnMgbWF5IGJlIG11Y2ggaGVhdmllciBpbiBjeWNsZSBjb3VudHMgZm9yIGNvbnRleHQgc3dp
-dGNoZXMgdG8gZXZlciBhcHBlYXIgYXMgYSBwcm9ibGVtIGluIHRoZW1zZWx2ZXMsIGNlcnRhaW5s
-eSBmb3Igc2xvd2VyIFNTRHMgYW5kIEhERHMuIEhvd2V2ZXIsIHdoZW4gZ29pbmcgZm9yIHRydWx5
-IGhpZ2ggcGVyZm9ybWFuY2UgSU8sICpldmVyeSogaHVyZGxlIGluIHRoZSBkYXRhIHBhdGggY291
-bnRzIHRvd2FyZCB0aGUgdG90YWwgbGF0ZW5jeS4NCihBbmQgcmVhbGx5LCBoaWdoIHBlcmZvcm1h
-bmNlIHJhbmRvbSBJTyBjaGFyYWN0ZXJpc3RpY3MgYXBwcm9hY2hlcyB0aGUgbmV0d29ya2luZywg
-cGVyLXBhY2tldCBoYW5kbGluZyBjaGFyYWN0ZXJpc3RpY3MpLiAgTm93LCBJJ20gbm90IHJlYWxs
-eSBzdWdnZXN0aW5nIG1lbW9yeS1tYXBwaW5nIGEgc3RvcmFnZSBkZXZpY2UgdG8gdXNlciBzcGFj
-ZSwgbm90IGF0IGFsbCwgYnV0IGhhdmluZyBiZXR0ZXIgY29udHJvbCBvdmVyIHRoZSBkYXRhIHBh
-dGggZm9yIGEgdmVyeSBzcGVjaWZpYyB1c2UgY2FzZSwgcmVkdWNlcyBkZXBlbmRlbmN5IG9uIHRo
-ZSBjb2RlIHRoYXQgd29ya3MgYXMgYmVzdCBhcyBwb3NzaWJsZSBmb3IgdGhlIGdlbmVyYWwgY2Fz
-ZSwgYW5kIGFsbG93cyBmb3IgdmVyeSBwdXJwb3NlLWJ1aWx0IGNvZGUsIHRvIGFkZHJlc3MgYSBu
-YXJyb3cgc2V0IG9mIHJlcXVpcmVtZW50cy4gKCJDZXBoIHN0b3JhZ2UgY2x1c3RlciBiYWNrZW5k
-IiBpc24ndCBhIHR5cGljYWwgRlMgdXNlIGNhc2UuKSBJdCBhbHNvIGRlY291cGxlcyBkZXBlbmRl
-bmNpZXMgb24gdXNlcnMgaS5lLg0Kd2FpdGluZyBmb3IgdGhlIG5leHQgZGlzdHJvIHJlbGVhc2Ug
-YmVmb3JlIGJlaW5nIGFibGUgdG8gdGFrZSB1cCB0aGUgYmVuZWZpdHMgb2YgaW1wcm92ZW1lbnRz
-IHRvIHRoZSBzdG9yYWdlIGNvZGUuDQoNCkEgcmFuZG9tIGdvb2dsZSBjYW1lIHVwIHdpdGggcmVs
-YXRlZCBkYXRhIG9uIHdoZXJlICJkb2luZyBzb21ldGhpbmcgd2F5IGRpZmZlcmVudCIgL2Nhbi8g
-aGF2ZSBzaWduaWZpY2FudCBiZW5lZml0czoNCmh0dHA6Ly9waHVucS5uZXQvcGlwZXJtYWlsL3R1
-eDMvMjAxNS1BcHJpbC8wMDIxNDcuaHRtbA0KDQpJIChGV0lXKSBjZXJ0YWlubHkgYWdyZWUgdGhl
-cmUgaXMgbWVyaXQgdG8gdGhlIGlkZWEuDQpUaGUgc2NpZW50aWZpYyBhcHByb2FjaCBoZXJlIGNv
-dWxkIHBlcmhhcHMgYmUgdG8gc2ltcGx5IGVudW1lcmF0ZSBhbGwgY29ybmVyIGNhc2VzIG9mICJn
-ZW5lcmljIEZTIiB0aGF0IGFjdHVhbGx5IGFyZSBjYXVzZSBmb3IgdGhlIGV4cGVyaWVuY2VkIGlz
-c3VlcywgYW5kIGFzc2VzcyBwcm9iYWJpbGl0eSBvZiB0aGVtIGJlaW5nIHNvbHZlZCAoYW5kIGlm
-IHNvIHdoZW4pLg0KVGhhdCAqY291bGQqIGltcHJvdmUgY2hhbmNlcyBvZiBhcHByb2FjaGluZyBj
-b25zZW5zdXMgd2hpY2ggd291bGRuJ3QgaHVydCBJIHN1cHBvc2U/DQoNCkJSLA0KTWFydGluDQoN
-Cg0KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCg0KUExFQVNFIE5PVEU6IFRoZSBp
-bmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2FnZSBpcyBp
-bnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBu
-YW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRl
-bmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVj
-ZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRpc3NlbWlu
-YXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0
-bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGlu
-IGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAo
-YXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGll
-cyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVz
-IG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KDQo=
+On 10/21/2015 03:57 PM, Ilya Dryomov wrote:
+> On Wed, Oct 21, 2015 at 10:51 PM, Ilya Dryomov <idryomov@gmail.com> wrote:
+>> On Fri, Oct 16, 2015 at 1:09 PM, Ilya Dryomov <idryomov@gmail.com> wrote:
+>>> Hmm...  On the one hand, yes, we do compute CRCs, but that's optional,
+>>> so enabling this unconditionally is probably too harsh.  OTOH we are
+>>> talking to the network, which means all sorts of delays, retransmission
+>>> issues, etc, so I wonder how exactly "unstable" pages behave when, say,
+>>> added to an skb - you can't write anything to a page until networking
+>>> is fully done with it and expect it to work.  It's particularly
+>>> alarming that you've seen corruptions.
+>>>
+>>> Currently the only users of this flag are block integrity stuff and
+>>> md-raid5, which makes me wonder what iscsi, nfs and others do in this
+>>> area.  There's an old ticket on this topic somewhere on the tracker, so
+>>> I'll need to research this.  Thanks for bringing this up!
+>>
+>> Hi Mike,
+>>
+>> I was hoping to grab you for a few minutes, but you weren't there...
+>>
+>> I spent a better part of today reading code and mailing lists on this
+>> topic.  It is of course a bug that we use sendpage() which inlines
+>> pages into an skb and do nothing to keep those pages stable.  We have
+>> csums enabled by default, so setting BDI_CAP_STABLE_WRITES in the crc
+>> case is an obvious fix.
+>>
+>> I looked at drbd and iscsi and I think iscsi could do the same - ditch
+>> the fallback to sock_no_sendpage() in the datadgst_en case (and get rid
+>> of iscsi_sw_tcp_conn::sendpage member while at it).  Using stable pages
+>> rather than having a roll-your-own implementation which doesn't close
+>> the race but only narrows it sounds like a win, unless copying through
+>> sendmsg() is for some reason cheaper than stable-waiting?
+
+Yeah, that is what I was saying on the call the other day, but the
+reception was bad. We only have the sendmsg code path when digest are on
+because that code came before stable pages. When stable pages were
+created, it was on by default but did not cover all the cases, so we
+left the code. It then handled most scenarios, but I just never got
+around to removing old the code. However, it was set to off by default
+so I left it and made this patch for iscsi to turn on stable pages:
+
+[this patch only enabled stable pages when digests/crcs are on and dif
+not remove the code yet]
+https://groups.google.com/forum/#!topic/open-iscsi/n4jvWK7BPYM
+
+I did not really like the layering so I have not posted it for inclusion.
+
+
+
+>>
+>> drbd still needs the non-zero-copy version for its async protocol for
+>> when they free the pages before the NIC has chance to put them on the
+>> wire.  md-raid5 it turns out has an option to essentially disable most
+>> of its stripe cache and so it sets BDI_CAP_STABLE_WRITES to compensate
+>> if that option is enabled.
+>>
+>> What I'm worried about is the !crc (!datadgst_en) case.  I'm failing to
+>> convince myself that mucking with sendpage()ed pages while they sit in
+>> the TCP queue (or anywhere in the networking stack, really), is safe -
+>> there is nothing to prevent pages from being modified after sendpage()
+>> returned and Ronny reports data corruptions that pretty much went away
+>> with BDI_CAP_STABLE_WRITES set.  I may be, after prolonged staring at
+>> this, starting to confuse fs with block, though.  How does that work in
+>> iscsi land?
+
+This is what I was trying to ask about in the call the other day. Where
+is the corruption that Ronny was seeing. Was it checksum mismatches on
+data being written, or is incorrect meta data being written, etc?
+
+If we are just talking about if stable pages are not used, and someone
+is re-writing data to a page after the page has already been submitted
+to the block layer (I mean the page is on some bio which is on a request
+which is on some request_queue scheduler list or basically anywhere in
+the block layer), then I was saying this can occur with any block
+driver. There is nothing that is preventing this from happening with a
+FC driver or nvme or cciss or in dm or whatever. The app/user can
+rewrite as late as when we are in the make_request_fn/request_fn.
+
+I think I am misunderstanding your question because I thought this is
+expected behavior, and there is nothing drivers can do if the app is not
+doing a flush/sync between these types of write sequences.
+
+
+>>
+>> (There was/is also this [1] bug, which is kind of related and probably
+>> worth looking into at some point later.  ceph shouldn't be that easily
+>> affected - we've got state, but there is a ticket for it.)
+>>
+>> [1] http://www.spinics.net/lists/linux-nfs/msg34913.html
+> 
+> And now with Mike on the CC and a mention that at least one scenario of
+> [1] got fixed in NFS by a6b31d18b02f ("SUNRPC: Fix a data corruption
+> issue when retransmitting RPC calls").
+> 
+
+iSCSI handles timeouts/retries and sequence numbers/responses
+differently so we are not affected. We go through some abort and
+possibly reconnect process.
+
