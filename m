@@ -1,93 +1,63 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: newstore direction
-Date: Thu, 22 Oct 2015 05:50:15 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1510220528140.16833@cobra.newdream.net>
-References: <alpine.DEB.2.00.1510191216200.4188@cobra.newdream.net> <56268886.7010806@redhat.com> <1445415736.1809.71.camel@redhat.com> <56277468.5000504@redhat.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: MDS stuck in a crash loop
+Date: Thu, 22 Oct 2015 06:14:59 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1510220612500.16833@cobra.newdream.net>
+References: <CANP1eJGesJ_wGKDNQRJ952x8jkNHiJybeX075wxmJDurbSTMNw@mail.gmail.com> <CAJ4mKGY5uTZ6oiqZY4VbU5LdECXx5sko6VOd5aD2aEhtq74NDA@mail.gmail.com> <CANP1eJFNpLu3-HeqJ28L7xCTuKh-MhUT2j7A_tM7reofZ94FTQ@mail.gmail.com> <CANP1eJFGy4psfmUHpsgdPFT+UUW=NTzLTgAsnGqeuD6iWuF-cQ@mail.gmail.com>
+ <CANP1eJHnavBzJRnDLa9gQ93haJ2QzKJsLj4+ZbS_vd1kquV8Lw@mail.gmail.com> <CANP1eJGmjechy8ZkVarA-HWdL37scmHdQXToM6NdAXxU-_KVMw@mail.gmail.com> <CANP1eJHYvgUKDCKrVYY=XkJsgcdVGn6T=drvEA8hofHyVX+0YA@mail.gmail.com> <CAJ4mKGYyza=MqV8zRS3cGA0EfbB=h=UhYbwO7QBgTb6FfzXSQw@mail.gmail.com>
+ <CANP1eJGiPEx49nNyQgv3qo9ugVRAWnsh_WAHt33jHXX23S=0GQ@mail.gmail.com> <CAJ4mKGYHDew0LdQ65vNODiBw6u_jBrmyL3fzOWhB1TxKP8XidQ@mail.gmail.com> <CALe9h7fwpuz8Rv5GuqJ+-S9NDw8=uy37A+BfD3qW1Sa5FTHoxw@mail.gmail.com> <CALe9h7dGSWqLd0svDNyovtNZM0VUEuF+v6nQoT9HQe5TaOQrYw@mail.gmail.com>
+ <CANP1eJG=H7FGxcfeLfQpJ_10Zngm9OMzt0=0=hX9pVxK8ndWjQ@mail.gmail.com> <CALe9h7e48B7hd-zpt-sxTuXRS8mg29ELqHGM+wM3ZBVQdwdoVQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:38747 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750877AbbJVMuR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 22 Oct 2015 08:50:17 -0400
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-	by mx1.redhat.com (Postfix) with ESMTPS id AA70DCE0
-	for <ceph-devel@vger.kernel.org>; Thu, 22 Oct 2015 12:50:17 +0000 (UTC)
-In-Reply-To: <56277468.5000504@redhat.com>
+Received: from cobra.newdream.net ([66.33.216.30]:39414 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751718AbbJVNPA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Oct 2015 09:15:00 -0400
+In-Reply-To: <CALe9h7e48B7hd-zpt-sxTuXRS8mg29ELqHGM+wM3ZBVQdwdoVQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ric Wheeler <rwheeler@redhat.com>
-Cc: Orit Wasserman <owasserm@redhat.com>, ceph-devel@vger.kernel.org
+To: John Spray <jspray@redhat.com>
+Cc: Milosz Tanski <milosz@adfin.com>, Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, 21 Oct 2015, Ric Wheeler wrote:
-> You will have to trust me on this as the Red Hat person who spoke to pretty
-> much all of our key customers about local file systems and storage - customers
-> all have migrated over to using normal file systems under Oracle/DB2.
-> Typically, they use XFS or ext4.  I don't know of any non-standard file
-> systems and only have seen one account running on a raw block store in 8 years
-> :)
+On Thu, 22 Oct 2015, John Spray wrote:
+> On Thu, Oct 22, 2015 at 1:43 PM, Milosz Tanski <milosz@adfin.com> wrote:
+> > On Wed, Oct 21, 2015 at 5:33 PM, John Spray <jspray@redhat.com> wrote:
+> >> On Wed, Oct 21, 2015 at 10:33 PM, John Spray <jspray@redhat.com> wrote:
+> >>>> John, I know you've got
+> >>>> https://github.com/ceph/ceph-qa-suite/pull/647. I think that's
+> >>>> supposed to be for this, but I'm not sure if you spotted any issues
+> >>>> with it or if we need to do some more diagnosing?
+> >>>
+> >>> That test path is just verifying that we do handle dirs without dying
+> >>> in at least one case -- it passes with the existing ceph code, so it's
+> >>> not reproducing this issue.
+> >>
+> >> Clicked send to soon, I was about to add...
+> >>
+> >> Milosz mentioned that they don't have the data from the system in the
+> >> broken state, so I don't have any bright ideas about learning more
+> >> about what went wrong here unfortunately.
+> >>
+> >
+> > Sorry about that, wasn't thinking at the time and just wanted to get
+> > this up and going as quickly as possible :(
+> >
+> > If this happens next time I'll be more careful to keep more evidence.
+> > I think multi-fs in the same rados namespace support would actually
+> > helped here, since it makes it easier to create a newfs and leave the
+> > other one around (for investigation)
 > 
-> If you have a pre-allocated file and write using O_DIRECT, your IO path is
-> identical in terms of IO's sent to the device.
-> 
-> If we are causing additional IO's, then we really need to spend some time
-> talking to the local file system gurus about this in detail.  I can help with
-> that conversation.
+> Yep, good point.  I am a known enthusiast for multi-filesystem support :-)
 
-If the file is truly preallocated (that is, prewritten with zeros... 
-fallocate doesn't help here because the extents is marked unwritten), then 
-sure: there is very little change in the data path.
+A rados pool export on the metadata pool would have helped, too.  That 
+doesn't include data object backtrace metadata, though.  I wonder if we 
+should make a cephfs metadata imager tool to capture the metadata state of 
+the file system (similar to the tools that are available for xfs) that 
+captures both.  On the data pool side it'd just record the object names, 
+xattrs, and object size, ignoring the data.
 
-But at that point, what is the point?  This only works if you have one (or 
-a few) huge files and the user space app already has all the complexity of 
-a filesystem-like thing (with its own internal journal, allocators, 
-garbage collection, etc.).  Do they just do this to ease administrative 
-tasks like backup?
-
-
-This is the fundamental tradeoff:
-
-1) We have a file per object.  We fsync like crazy and the fact that 
-there are two independent layers journaling and managing different types 
-of consistency penalizes us.
-
-1b) We get clever and start using obscure and/or custom ioctls in the file 
-system to work around what it is used to: we swap extents to avoid 
-write-ahead (see Christoph's patch), O_NOMTIME, unprivileged 
-open-by-handle, batch fsync, O_ATOMIC, setext ioctl, etc.
-
-2) We preallocate huge files and write a user-space object system that 
-lives within it (pretending the file is a block device).  The file system 
-rarely gets in the way (assuming the file is prewritten and we don't do 
-anything stupid).  But it doesn't give us anything a block device 
-wouldn't, and it doesn't save us any complexity in our code.
-
-At the end of the day, 1 and 1b are always going to be slower than 2.  
-And although 1b performs a bit better than 1, it has similar (user-space) 
-complexity to 2.  On the other hand, if you step back and view teh 
-entire stack (ceph-osd + XFS), 1 and 1b are *significantly* more complex 
-than 2... and yet still slower.  Given we ultimately have to support both 
-(both as an upstream and as a distro), that's not very attractive.
-
-Also note that every time we have strayed off the reservation from the 
-beaten path (1) to anything mildly exotic (1b) we have been bitten by 
-obscure file systems bugs.  And that's assume we get everything we need 
-upstream... which is probably a year's endeavour.
-
-Don't get me wrong: I'm all for making changes to file systems to better 
-support systems like Ceph.  Things like O_NOCMTIME and O_ATOMIC make a 
-huge amount of sense of a ton of different systems.  But our situations is 
-a bit different: we always own the entire device (and often the server), 
-so there is no need to share with other users or apps (and when you do, 
-you just use the existing FileStore backend).  And as you know performance 
-is a huge pain point.  We are already handicapped by virtue of being 
-distributed and strongly consistent; we can't afford to give away more to 
-a storage layer that isn't providing us much (or the right) value.
-
-And I'm tired of half measures.  I want the OSD to be as fast as we can 
-make it given the architectural constraints (RADOS consistency and 
-ordering semantics).  This is truly low-hanging fruit: it's modular, 
-self-contained, pluggable, and this will be my third time around this 
-particular block.
+It wouldn't anonymize filenames (that is tricky without breaking the mds 
+dir hashing), but it excludes data and would probably be 
+sufficient for most users...
 
 sage
