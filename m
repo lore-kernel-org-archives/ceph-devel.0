@@ -1,208 +1,130 @@
 From: Allen Samuels <Allen.Samuels@sandisk.com>
 Subject: RE: newstore direction
-Date: Thu, 22 Oct 2015 01:39:36 +0000
-Message-ID: <7334B4281E425749B85E08CF7EC6F8534383E53B@SACMBXIP03.sdcorp.global.sandisk.com>
+Date: Thu, 22 Oct 2015 02:12:26 +0000
+Message-ID: <7334B4281E425749B85E08CF7EC6F8534383E574@SACMBXIP03.sdcorp.global.sandisk.com>
 References: <alpine.DEB.2.00.1510191216200.4188@cobra.newdream.net>
- <56268886.7010806@redhat.com>
- <7334B4281E425749B85E08CF7EC6F8534383DD15@SACMBXIP03.sdcorp.global.sandisk.com>
- <562796C3.7020107@redhat.com>
+	 <56268886.7010806@redhat.com>
+	 <7334B4281E425749B85E08CF7EC6F8534383DD15@SACMBXIP03.sdcorp.global.sandisk.com>
+	 <562775DD.8050304@redhat.com> <56279DD3.4020901@redhat.com>
+	 <5627B471.1040602@redhat.com> <5627E96E.6090706@redhat.com>
+ <1445462425.24939.21.camel@millnert.se>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2on0084.outbound.protection.outlook.com ([207.46.100.84]:14912
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+Received: from mail-bn1bon0092.outbound.protection.outlook.com ([157.56.111.92]:4160
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753158AbbJVBjk convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Oct 2015 21:39:40 -0400
-In-Reply-To: <562796C3.7020107@redhat.com>
+	id S1751594AbbJVCMc (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 21 Oct 2015 22:12:32 -0400
+In-Reply-To: <1445462425.24939.21.camel@millnert.se>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>, Ric Wheeler <rwheeler@redhat.com>, Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Martin Millnert <martin@millnert.se>, Mark Nelson <mnelson@redhat.com>
+Cc: Ric Wheeler <rwheeler@redhat.com>, Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-I am pushing internally to open-source ZetaScale. Recent events may or may not affect that trajectory -- stay tuned.
-
-Allen Samuels
-Software Architect, Fellow, Systems and Software Solutions 
-
-2880 Junction Avenue, San Jose, CA 95134
-T: +1 408 801 7030| M: +1 408 780 6416
-allen.samuels@SanDisk.com
-
------Original Message-----
-From: Mark Nelson [mailto:mnelson@redhat.com] 
-Sent: Wednesday, October 21, 2015 10:45 PM
-To: Allen Samuels <Allen.Samuels@sandisk.com>; Ric Wheeler <rwheeler@redhat.com>; Sage Weil <sweil@redhat.com>; ceph-devel@vger.kernel.org
-Subject: Re: newstore direction
-
-On 10/21/2015 05:06 AM, Allen Samuels wrote:
-> I agree that moving newStore to raw block is going to be a significant development effort. But the current scheme of using a KV store combined with a normal file system is always going to be problematic (FileStore or NewStore). This is caused by the transactional requirements of the ObjectStore interface, essentially you need to make transactionally consistent updates to two indexes, one of which doesn't understand transactions (File Systems) and can never be tightly-connected to the other one.
->
-> You'll always be able to make this "loosely coupled" approach work, but it will never be optimal. The real question is whether the performance difference of a suboptimal implementation is something that you can live with compared to the longer gestation period of the more optimal implementation. Clearly, Sage believes that the performance difference is significant or he wouldn't have kicked off this discussion in the first place.
->
-> While I think we can all agree that writing a full-up KV and raw-block ObjectStore is a significant amount of work. I will offer the case that the "loosely couple" scheme may not have as much time-to-market advantage as it appears to have. One example: NewStore performance is limited due to bugs in XFS that won't be fixed in the field for quite some time (it'll take at least a couple of years before a patched version of XFS will be widely deployed at customer environments).
->
-> Another example: Sage has just had to substantially rework the journaling code of rocksDB.
->
-> In short, as you can tell, I'm full throated in favor of going down the optimal route.
->
-> Internally at Sandisk, we have a KV store that is optimized for flash (it's called ZetaScale). We have extended it with a raw block allocator just as Sage is now proposing to do. Our internal performance measurements show a significant advantage over the current NewStore. That performance advantage stems primarily from two things:
-
-Has there been any discussion regarding opensourcing zetascale?
-
->
-> (1) ZetaScale uses a B+-tree internally rather than an LSM tree (levelDB/RocksDB). LSM trees experience exponential increase in write amplification (cost of an insert) as the amount of data under management increases. B+tree write-amplification is nearly constant independent of the size of data under management. As the KV database gets larger (Since newStore is effectively moving the per-file inode into the kv data base. Don't forget checksums that Sage want's to add :)) this performance delta swamps all others.
-> (2) Having a KV and a file-system causes a double lookup. This costs CPU time and disk accesses to page in data structure indexes, metadata efficiency decreases.
->
-> You can't avoid (2) as long as you're using a file system.
->
-> Yes an LSM tree performs better on HDD than does a B-tree, which is a good argument for keeping the KV module pluggable.
->
->
-> Allen Samuels
-> Software Architect, Fellow, Systems and Software Solutions
->
-> 2880 Junction Avenue, San Jose, CA 95134
-> T: +1 408 801 7030| M: +1 408 780 6416 allen.samuels@SanDisk.com
->
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org 
-> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Ric Wheeler
-> Sent: Tuesday, October 20, 2015 11:32 AM
-> To: Sage Weil <sweil@redhat.com>; ceph-devel@vger.kernel.org
-> Subject: Re: newstore direction
->
-> On 10/19/2015 03:49 PM, Sage Weil wrote:
->> The current design is based on two simple ideas:
->>
->>    1) a key/value interface is better way to manage all of our 
->> internal metadata (object metadata, attrs, layout, collection 
->> membership, write-ahead logging, overlay data, etc.)
->>
->>    2) a file system is well suited for storage object data (as files).
->>
->> So far 1 is working out well, but I'm questioning the wisdom of #2.  
->> A few
->> things:
->>
->>    - We currently write the data to the file, fsync, then commit the 
->> kv transaction.  That's at least 3 IOs: one for the data, one for the 
->> fs journal, one for the kv txn to commit (at least once my rocksdb 
->> changes land... the kv commit is currently 2-3).  So two people are 
->> managing metadata, here: the fs managing the file metadata (with its 
->> own
->> journal) and the kv backend (with its journal).
->
-> If all of the fsync()'s fall into the same backing file system, are you sure that each fsync() takes the same time? Depending on the local FS implementation of course, but the order of issuing those fsync()'s can effectively make some of them no-ops.
->
->>
->>    - On read we have to open files by name, which means traversing 
->> the fs namespace.  Newstore tries to keep it as flat and simple as 
->> possible, but at a minimum it is a couple btree lookups.  We'd love 
->> to use open by handle (which would reduce this to 1 btree traversal), 
->> but running the daemon as ceph and not root makes that hard...
->
-> This seems like a a pretty low hurdle to overcome.
->
->>
->>    - ...and file systems insist on updating mtime on writes, even 
->> when it is a overwrite with no allocation changes.  (We don't care 
->> about
->> mtime.) O_NOCMTIME patches exist but it is hard to get these past the 
->> kernel brainfreeze.
->
-> Are you using O_DIRECT? Seems like there should be some enterprisey database tricks that we can use here.
->
->>
->>    - XFS is (probably) never going going to give us data checksums, 
->> which we want desperately.
->
-> What is the goal of having the file system do the checksums? How strong do they need to be and what size are the chunks?
->
-> If you update this on each IO, this will certainly generate more IO (each write will possibly generate at least one other write to update that new checksum).
->
->>
->> But what's the alternative?  My thought is to just bite the bullet 
->> and consume a raw block device directly.  Write an allocator, 
->> hopefully keep it pretty simple, and manage it in kv store along with 
->> all of our other metadata.
->
-> The big problem with consuming block devices directly is that you ultimately end up recreating most of the features that you had in the file system. Even enterprise databases like Oracle and DB2 have been migrating away from running on raw block devices in favor of file systems over time.  In effect, you are looking at making a simple on disk file system which is always easier to start than it is to get back to a stable, production ready state.
->
-> I think that it might be quicker and more maintainable to spend some time working with the local file system people (XFS or other) to see if we can jointly address the concerns you have.
->>
->> Wins:
->>
->>    - 2 IOs for most: one to write the data to unused space in the 
->> block device, one to commit our transaction (vs 4+ before).  For 
->> overwrites, we'd have one io to do our write-ahead log (kv journal), 
->> then do the overwrite async (vs 4+ before).
->>
->>    - No concern about mtime getting in the way
->>
->>    - Faster reads (no fs lookup)
->>
->>    - Similarly sized metadata for most objects.  If we assume most 
->> objects are not fragmented, then the metadata to store the block 
->> offsets is about the same size as the metadata to store the filenames we have now.
->>
->> Problems:
->>
->>    - We have to size the kv backend storage (probably still an XFS
->> partition) vs the block storage.  Maybe we do this anyway (put 
->> metadata on
->> SSD!) so it won't matter.  But what happens when we are storing gobs 
->> of rgw index data or cephfs metadata?  Suddenly we are pulling 
->> storage out of a different pool and those aren't currently fungible.
->>
->>    - We have to write and maintain an allocator.  I'm still 
->> optimistic this can be reasonbly simple, especially for the flash 
->> case (where fragmentation isn't such an issue as long as our blocks 
->> are reasonbly sized).  For disk we may beed to be moderately clever.
->>
->>    - We'll need a fsck to ensure our internal metadata is consistent.
->> The good news is it'll just need to validate what we have stored in 
->> the kv store.
->>
->> Other thoughts:
->>
->>    - We might want to consider whether dm-thin or bcache or other 
->> block layers might help us with elasticity of file vs block areas.
->>
->>    - Rocksdb can push colder data to a second directory, so we could 
->> have a fast ssd primary area (for wal and most metadata) and a second 
->> hdd directory for stuff it has to push off.  Then have a conservative 
->> amount of file space on the hdd.  If our block fills up, use the 
->> existing file mechanism to put data there too.  (But then we have to 
->> maintain both the current kv + file approach and not go all-in on kv 
->> +
->> block.)
->>
->> Thoughts?
->> sage
->> --
->
-> I really hate the idea of making a new file system type (even if we call it a raw block store!).
->
-> In addition to the technical hurdles, there are also production worries like how long will it take for distros to pick up formal support?  How do we test it properly?
->
-> Regards,
->
-> Ric
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> in the body of a message to majordomo@vger.kernel.org More majordomo 
-> info at  http://vger.kernel.org/majordomo-info.html
->
-> ________________________________
->
-> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> in the body of a message to majordomo@vger.kernel.org More majordomo 
-> info at  http://vger.kernel.org/majordomo-info.html
->
+T25lIG9mIHRoZSBiaWdnZXN0IGNoYW5nZXMgdGhhdCBmbGFzaCBpcyBtYWtpbmcgaW4gdGhlIHN0
+b3JhZ2Ugd29ybGQgaXMgdGhhdCB0aGUgd2F5IGJhc2ljIHRyYWRlLW9mZnMgaW4gc3RvcmFnZSBt
+YW5hZ2VtZW50IHNvZnR3YXJlIGFyY2hpdGVjdHVyZSBhcmUgYmVpbmcgYWZmZWN0ZWQuIEluIHRo
+ZSBIREQgd29ybGQgQ1BVIHRpbWUgcGVyIElPUCB3YXMgcmVsYXRpdmVseSBpbmNvbnNlcXVlbnRp
+YWwsIGkuZS4sIGl0IGhhZCBsaXR0bGUgZWZmZWN0IG9uIG92ZXJhbGwgcGVyZm9ybWFuY2Ugd2hp
+Y2ggd2FzIGxpbWl0ZWQgYnkgdGhlIHBoeXNpY3Mgb2YgdGhlIGhhcmQgZHJpdmUuIEZsYXNoIGlz
+IG5vdyBpbnZlcnRpbmcgdGhhdCBzaXR1YXRpb24uIFdoZW4geW91IGxvb2sgYXQgdGhlIHBlcmZv
+cm1hbmNlIGxldmVscyBiZWluZyBkZWxpdmVyZWQgaW4gdGhlIGxhdGVzdCBnZW5lcmF0aW9uIG9m
+IE5WTWUgU1NEcyB5b3UgcmFwaWRseSBzZWUgdGhhdCB0aGF0IHN0b3JhZ2UgaXRzZWxmIGlzIGdl
+bmVyYWxseSBubyBsb25nZXIgdGhlIGJvdHRsZW5lY2sgKHNwZWFraW5nIGFib3V0IEJXLCBub3Qg
+bGF0ZW5jeSBvZiBjb3Vyc2UpIGJ1dCByYXRoZXIgaXQncyB0aGUgc3lzdGVtIHNpdHRpbmcgaW4g
+ZnJvbnQgb2YgdGhlIHN0b3JhZ2UgdGhhdCBpcyB0aGUgYm90dGxlbmVjay4gR2VuZXJhbGx5IGl0
+J3MgdGhlIENQVSBjb3N0IG9mIGFuIElPUC4NCg0KV2hlbiBTYW5kaXNrIGZpcnN0IHN0YXJ0aW5n
+IHdvcmtpbmcgd2l0aCBDZXBoIChEdW1wbGluZykgdGhlIGRlc2lnbiBvZiBsaWJyYWRvcyBhbmQg
+dGhlIE9TRCBsZWFkIHRvIHRoZSBzaXR1YXRpb24gdGhhdCB0aGUgQ1BVIGNvc3Qgb2YgYW4gSU9Q
+IHdhcyBkb21pbmF0ZWQgYnkgY29udGV4dCBzd2l0Y2hlcyBhbmQgbmV0d29yayBzb2NrZXQgaGFu
+ZGxpbmcuIE92ZXIgdGltZSwgbXVjaCBvZiB0aGF0IGhhcyBiZWVuIGFkZHJlc3NlZC4gVGhlIHNv
+Y2tldCBoYW5kbGluZyBjb2RlIGhhcyBiZWVuIHJlLXdyaXR0ZW4gKG1vcmUgdGhhbiBvbmNlISkg
+c29tZSBvZiB0aGUgaW50ZXJuYWwgcXVldWVpbmcgaW4gdGhlIE9TRCAoYW5kIHRoZSBhc3NvY2lh
+dGVkIGNvbnRleHQgc3dpdGNoZXMpIGhhdmUgYmVlbiBlbGltaW5hdGVkLiBBcyB0aGUgQ1BVIGNv
+c3RzIGhhdmUgZHJvcHBlZCwgcGVyZm9ybWFuY2Ugb24gZmxhc2ggaGFzIGltcHJvdmVkIGFjY29y
+ZGluZ2x5Lg0KDQpCZWNhdXNlIHdlIGRpZG4ndCB3YW50IHRvIGNvbXBsZXRlbHkgcmUtd3JpdGUg
+dGhlIE9TRCAodGltZS10by1tYXJrZXQgYW5kIHN0YWJpbGl0eSBkcm92ZSB0aGF0IGRlY2lzaW9u
+KSwgd2UgZGlkbid0IG1vdmUgaXQgZnJvbSB0aGUgY3VycmVudCAidGhyZWFkIHBlciBJT1AiIG1v
+ZGVsIGludG8gYSB0cnVseSBhc3luY2hyb25vdXMgInRocmVhZCBwZXIgQ1BVIGNvcmUiIG1vZGVs
+IHRoYXQgZXNzZW50aWFsbHkgZWxpbWluYXRlcyBjb250ZXh0IHN3aXRjaGVzIGluIHRoZSBJTyBw
+YXRoLiBCdXQgYSBmdWxseSBvcHRpbWl6ZWQgT1NEIHdvdWxkIGdvIGRvd24gdGhhdCBwYXRoIChh
+dCBsZWFzdCBwYXJ0LXdheSkuIEkgYmVsaWV2ZSBpdCdzIGJlZW4gcHJvcG9zZWQgaW4gdGhlIHBh
+c3QuIFBlcmhhcHMgYSBoeWJyaWQgImZhc3QtcGF0aCIgc3R5bGUgY291bGQgZ2V0IG1vc3Qgb2Yg
+dGhlIGJlbmVmaXRzIHdoaWxlIHByZXNlcnZpbmcgbXVjaCBvZiB0aGUgbGVnYWN5IGNvZGUuDQoN
+CkkgYmVsaWV2ZSB0aGlzIHRyZW5kIHRvd2FyZCB0aHJlYWQtcGVyLWNvcmUgc29mdHdhcmUgZGV2
+ZWxvcG1lbnQgd2lsbCBhbHNvIHRlbmQgdG8gc3VwcG9ydCB0aGUgImRvIGl0IGluIHVzZXItc3Bh
+Y2UiIHRyZW5kLiBUaGF0J3MgYmVjYXVzZSBtb3N0IG9mIHRoZSBrZXJuZWwgYW5kIGZpbGUtc3lz
+dGVtIGludGVyZmFjZSBpcyBhcmNoaXRlY3RlZCBhcm91bmQgdGhlIGJsb2NraW5nICJ0aHJlYWQt
+cGVyLUlPUCIgbW9kZWwgYW5kIGlzIHVubGlrZWx5IHRvIGNoYW5nZSBpbiB0aGUgZnV0dXJlLg0K
+DQoNCkFsbGVuIFNhbXVlbHMNClNvZnR3YXJlIEFyY2hpdGVjdCwgRmVsbG93LCBTeXN0ZW1zIGFu
+ZCBTb2Z0d2FyZSBTb2x1dGlvbnMNCg0KMjg4MCBKdW5jdGlvbiBBdmVudWUsIFNhbiBKb3NlLCBD
+QSA5NTEzNA0KVDogKzEgNDA4IDgwMSA3MDMwfCBNOiArMSA0MDggNzgwIDY0MTYNCmFsbGVuLnNh
+bXVlbHNAU2FuRGlzay5jb20NCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IE1h
+cnRpbiBNaWxsbmVydCBbbWFpbHRvOm1hcnRpbkBtaWxsbmVydC5zZV0NClNlbnQ6IFRodXJzZGF5
+LCBPY3RvYmVyIDIyLCAyMDE1IDY6MjAgQU0NClRvOiBNYXJrIE5lbHNvbiA8bW5lbHNvbkByZWRo
+YXQuY29tPg0KQ2M6IFJpYyBXaGVlbGVyIDxyd2hlZWxlckByZWRoYXQuY29tPjsgQWxsZW4gU2Ft
+dWVscyA8QWxsZW4uU2FtdWVsc0BzYW5kaXNrLmNvbT47IFNhZ2UgV2VpbCA8c3dlaWxAcmVkaGF0
+LmNvbT47IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0OiBSZTogbmV3c3RvcmUg
+ZGlyZWN0aW9uDQoNCkFkZGluZyAyYw0KDQpPbiBXZWQsIDIwMTUtMTAtMjEgYXQgMTQ6MzcgLTA1
+MDAsIE1hcmsgTmVsc29uIHdyb3RlOg0KPiBNeSB0aG91Z2h0IGlzIHRoYXQgdGhlcmUgaXMgc29t
+ZSBpbmZsZWN0aW9uIHBvaW50IHdoZXJlIHRoZSB1c2VybGFuZA0KPiBrdnN0b3JlL2Jsb2NrIGFw
+cHJvYWNoIGlzIGdvaW5nIHRvIGJlIGxlc3Mgd29yaywgZm9yIGV2ZXJ5b25lIEkgdGhpbmssDQo+
+IHRoYW4gdHJ5aW5nIHRvIHF1aWNrbHkgZGlzY292ZXIsIHVuZGVyc3RhbmQsIGZpeCwgYW5kIHB1
+c2ggdXBzdHJlYW0NCj4gcGF0Y2hlcyB0aGF0IHNvbWV0aW1lcyBvbmx5IHJlYWxseSBiZW5lZml0
+IHVzLiAgSSBkb24ndCBrbm93IGlmIHdlJ3ZlDQo+IHRydWx5IGhpdCB0aGF0IHRoYXQgcG9pbnQs
+IGJ1dCBpdCdzIHRvdWdoIGZvciBtZSB0byBmaW5kIGZsYXdzIHdpdGgNCj4gU2FnZSdzIGFyZ3Vt
+ZW50Lg0KDQpSZWdhcmRpbmcgdGhlIHVzZXJsYW5kIC8ga2VybmVsIGxhbmQgYXNwZWN0IG9mIHRo
+ZSB0b3BpYywgdGhlcmUgYXJlIGZ1cnRoZXIgYXNwZWN0cyBBRkFJSyBub3QgeWV0IGFkZHJlc3Nl
+ZCBpbiB0aGUgdGhyZWFkOg0KSW4gdGhlIG5ldHdvcmtpbmcgd29ybGQsIHRoZXJlJ3MgYmVlbiBk
+ZXZlbG9wbWVudCBvbiBtZW1vcnkgbWFwcGVkIChtdWx0aXBsZSBhcHByb2FjaGVzIGV4aXN0KSB1
+c2VybGFuZCBuZXR3b3JraW5nLCB3aGljaCBmb3IgcGFja2V0IG1hbmFnZW1lbnQgaGFzIHRoZSBi
+ZW5lZml0IG9mIC0gZm9yIHZlcnksIHZlcnkgc3BlY2lmaWMgYXBwbGljYXRpb25zIG9mIG5ldHdv
+cmtpbmcgY29kZSAtIGF2b2lkaW5nIGUuZy4gcGVyLXBhY2tldCBjb250ZXh0IHN3aXRjaGVzIGV0
+YywgYW5kIHN0cmVhbWxpbmluZyBwcm9jZXNzb3IgY2FjaGUgbWFuYWdlbWVudCBwZXJmb3JtYW5j
+ZS4gUGVvcGxlIGhhdmUgZ29uZSBhcyBmYXIgYXMgcmVtb3ZpbmcgQ1BVIGNvcmVzIGZyb20gQ1BV
+IHNjaGVkdWxlciB0byBjb21wbGV0ZWx5IGRlZGljYXRlIHRoZW0gdG8gdGhlIG5ldHdvcmtpbmcg
+dGFzayBhdCBoYW5kIChjYWNoZSBvcHRpbWl6YXRpb25zKS4gVGhlcmUgYXJlIHZhcmlvdXMgbGF0
+ZW5jeS90aHJvdWdocHV0IChidWxraW5nKSBvcHRpbWl6YXRpb25zIGFwcGxpY2FibGUsIGJ1dCBh
+dCB0aGUgZW5kIG9mIHRoZSBkYXksIGl0J3MgYWJvdXQga2VlcGluZyB0aGUgQ1BVIGJ1cyBidXN5
+IHdpdGggInJldmVudWUiIGJ1cyB0cmFmZmljLg0KDQpHcmFudGVkLCBzdG9yYWdlIElPIG9wZXJh
+dGlvbnMgbWF5IGJlIG11Y2ggaGVhdmllciBpbiBjeWNsZSBjb3VudHMgZm9yIGNvbnRleHQgc3dp
+dGNoZXMgdG8gZXZlciBhcHBlYXIgYXMgYSBwcm9ibGVtIGluIHRoZW1zZWx2ZXMsIGNlcnRhaW5s
+eSBmb3Igc2xvd2VyIFNTRHMgYW5kIEhERHMuIEhvd2V2ZXIsIHdoZW4gZ29pbmcgZm9yIHRydWx5
+IGhpZ2ggcGVyZm9ybWFuY2UgSU8sICpldmVyeSogaHVyZGxlIGluIHRoZSBkYXRhIHBhdGggY291
+bnRzIHRvd2FyZCB0aGUgdG90YWwgbGF0ZW5jeS4NCihBbmQgcmVhbGx5LCBoaWdoIHBlcmZvcm1h
+bmNlIHJhbmRvbSBJTyBjaGFyYWN0ZXJpc3RpY3MgYXBwcm9hY2hlcyB0aGUgbmV0d29ya2luZywg
+cGVyLXBhY2tldCBoYW5kbGluZyBjaGFyYWN0ZXJpc3RpY3MpLiAgTm93LCBJJ20gbm90IHJlYWxs
+eSBzdWdnZXN0aW5nIG1lbW9yeS1tYXBwaW5nIGEgc3RvcmFnZSBkZXZpY2UgdG8gdXNlciBzcGFj
+ZSwgbm90IGF0IGFsbCwgYnV0IGhhdmluZyBiZXR0ZXIgY29udHJvbCBvdmVyIHRoZSBkYXRhIHBh
+dGggZm9yIGEgdmVyeSBzcGVjaWZpYyB1c2UgY2FzZSwgcmVkdWNlcyBkZXBlbmRlbmN5IG9uIHRo
+ZSBjb2RlIHRoYXQgd29ya3MgYXMgYmVzdCBhcyBwb3NzaWJsZSBmb3IgdGhlIGdlbmVyYWwgY2Fz
+ZSwgYW5kIGFsbG93cyBmb3IgdmVyeSBwdXJwb3NlLWJ1aWx0IGNvZGUsIHRvIGFkZHJlc3MgYSBu
+YXJyb3cgc2V0IG9mIHJlcXVpcmVtZW50cy4gKCJDZXBoIHN0b3JhZ2UgY2x1c3RlciBiYWNrZW5k
+IiBpc24ndCBhIHR5cGljYWwgRlMgdXNlIGNhc2UuKSBJdCBhbHNvIGRlY291cGxlcyBkZXBlbmRl
+bmNpZXMgb24gdXNlcnMgaS5lLg0Kd2FpdGluZyBmb3IgdGhlIG5leHQgZGlzdHJvIHJlbGVhc2Ug
+YmVmb3JlIGJlaW5nIGFibGUgdG8gdGFrZSB1cCB0aGUgYmVuZWZpdHMgb2YgaW1wcm92ZW1lbnRz
+IHRvIHRoZSBzdG9yYWdlIGNvZGUuDQoNCkEgcmFuZG9tIGdvb2dsZSBjYW1lIHVwIHdpdGggcmVs
+YXRlZCBkYXRhIG9uIHdoZXJlICJkb2luZyBzb21ldGhpbmcgd2F5IGRpZmZlcmVudCIgL2Nhbi8g
+aGF2ZSBzaWduaWZpY2FudCBiZW5lZml0czoNCmh0dHA6Ly9waHVucS5uZXQvcGlwZXJtYWlsL3R1
+eDMvMjAxNS1BcHJpbC8wMDIxNDcuaHRtbA0KDQpJIChGV0lXKSBjZXJ0YWlubHkgYWdyZWUgdGhl
+cmUgaXMgbWVyaXQgdG8gdGhlIGlkZWEuDQpUaGUgc2NpZW50aWZpYyBhcHByb2FjaCBoZXJlIGNv
+dWxkIHBlcmhhcHMgYmUgdG8gc2ltcGx5IGVudW1lcmF0ZSBhbGwgY29ybmVyIGNhc2VzIG9mICJn
+ZW5lcmljIEZTIiB0aGF0IGFjdHVhbGx5IGFyZSBjYXVzZSBmb3IgdGhlIGV4cGVyaWVuY2VkIGlz
+c3VlcywgYW5kIGFzc2VzcyBwcm9iYWJpbGl0eSBvZiB0aGVtIGJlaW5nIHNvbHZlZCAoYW5kIGlm
+IHNvIHdoZW4pLg0KVGhhdCAqY291bGQqIGltcHJvdmUgY2hhbmNlcyBvZiBhcHByb2FjaGluZyBj
+b25zZW5zdXMgd2hpY2ggd291bGRuJ3QgaHVydCBJIHN1cHBvc2U/DQoNCkJSLA0KTWFydGluDQoN
+Cg0KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCg0KUExFQVNFIE5PVEU6IFRoZSBp
+bmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2FnZSBpcyBp
+bnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBu
+YW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRl
+bmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVj
+ZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRpc3NlbWlu
+YXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0
+bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGlu
+IGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAo
+YXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGll
+cyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVz
+IG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KDQo=
