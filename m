@@ -1,94 +1,43 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH] mark rbd requiring stable pages
-Date: Thu, 22 Oct 2015 20:07:22 +0200
-Message-ID: <CAOi1vP-aJRk-LFXiWatFNfp_j23iExLvXxe4q34mcjQmfbyNCg@mail.gmail.com>
-References: <201510151850.48348.ronny.hegewald@online.de>
-	<CAOi1vP_ZDHBfCDeH6gxCKRsqoGteWv+nn7EFTexf+qsUBMHvjA@mail.gmail.com>
-	<CAOi1vP8nAfr1_dNmvhNspz6ANZo2onGExU7=-agKLNr5KPxrzw@mail.gmail.com>
-	<CAOi1vP_0GoqXuHm5SjZHpS8g_mK_wFRs9t9_VE1N9JUMFvL3Gw@mail.gmail.com>
-	<562860F2.8070208@cs.wisc.edu>
-	<CAOi1vP_e1aY4zMyYgRLy=D+jBs44g9++0VKutRm7D6q0OALJ3Q@mail.gmail.com>
-	<562902D3.7040501@cs.wisc.edu>
-	<CAOi1vP_zx+Cz+tM07pZa_ciFhnJ8ddHX+dy35cqhOJ3BT4a8jw@mail.gmail.com>
-	<56291B60.1040106@cs.wisc.edu>
+From: "Deneau, Tom" <tom.deneau@amd.com>
+Subject: keyring issues, 9.1.0
+Date: Thu, 22 Oct 2015 21:25:34 +0000
+Message-ID: <BC97738F8E7C8742BABED7F06FB9DF91925270E1@SATLEXDAG01.amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f172.google.com ([209.85.212.172]:33264 "EHLO
-	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965425AbbJVSHY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Oct 2015 14:07:24 -0400
-Received: by wijp11 with SMTP id p11so44349051wij.0
-        for <ceph-devel@vger.kernel.org>; Thu, 22 Oct 2015 11:07:23 -0700 (PDT)
-In-Reply-To: <56291B60.1040106@cs.wisc.edu>
+Received: from mail-bn1on0088.outbound.protection.outlook.com ([157.56.110.88]:20363
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S965019AbbJVVZk convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Oct 2015 17:25:40 -0400
+Received: from satlvexedge02.amd.com (satlvexedge02.amd.com [10.177.96.29])
+	(using TLSv1 with cipher AES128-SHA (128/128 bits))
+	(No client certificate requested)
+	by atltwp02.amd.com (Axway MailGate 5.3.1) with ESMTPS id 2B487D1602A
+	for <ceph-devel@vger.kernel.org>; Thu, 22 Oct 2015 17:25:35 -0400 (EDT)
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mike Christie <michaelc@cs.wisc.edu>
-Cc: Ronny Hegewald <ronny.hegewald@online.de>, Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, Alex Elder <elder@kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, Oct 22, 2015 at 7:22 PM, Mike Christie <michaelc@cs.wisc.edu> wrote:
-> On 10/22/15, 11:52 AM, Ilya Dryomov wrote:
->>
->> On Thu, Oct 22, 2015 at 5:37 PM, Mike Christie <michaelc@cs.wisc.edu>
->> wrote:
->>>
->>> On 10/22/2015 06:20 AM, Ilya Dryomov wrote:
->>>>
->>>>
->>>>>>
->>>>>> If we are just talking about if stable pages are not used, and someone
->>>>>> is re-writing data to a page after the page has already been submitted
->>>>>> to the block layer (I mean the page is on some bio which is on a
->>>>>> request
->>>>>> which is on some request_queue scheduler list or basically anywhere in
->>>>>> the block layer), then I was saying this can occur with any block
->>>>>> driver. There is nothing that is preventing this from happening with a
->>>>>> FC driver or nvme or cciss or in dm or whatever. The app/user can
->>>>>> rewrite as late as when we are in the make_request_fn/request_fn.
->>>>>>
->>>>>> I think I am misunderstanding your question because I thought this is
->>>>>> expected behavior, and there is nothing drivers can do if the app is
->>>>>> not
->>>>>> doing a flush/sync between these types of write sequences.
->>>>
->>>> I don't see a problem with rewriting as late as when we are in
->>>> request_fn() (or in a wq after being put there by request_fn()).  Where
->>>> I thought there *might* be an issue is rewriting after sendpage(), if
->>>> sendpage() is used - perhaps some sneaky sequence similar to that
->>>> retransmit bug that would cause us to *transmit* incorrect bytes (as
->>>> opposed to *re*transmit) or something of that nature?
->>>
->>>
->>>
->>> Just to make sure we are on the same page.
->>>
->>> Are you concerned about the tcp/net layer retransmitting due to it
->>> detecting a issue as part of the tcp protocol, or are you concerned
->>> about rbd/libceph initiating a retry like with the nfs issue?
->>
->>
->> The former, tcp/net layer.  I'm just conjecturing though.
->>
->
-> For iscsi, we normally use the sendpage path. Data digests are off by
-> default and some distros do not even allow you to turn them on, so our
-> sendpage path has got a lot of testing and we have not seen any corruptions.
-> Not saying it is not possible, but just saying we have not seen any.
+My current situation as I upgrade to v9.1.0 is that client.admin keyring seems to work fine, for instance for ceph status command.  But commands that use client.bootstrap-osd  such as
 
-Great, that's reassuring.
+/usr/bin/ceph --cluster ceph --name client.bootstrap-osd --keyring /var/lib/ceph/bootstrap-osd/ceph.keyring osd create --concise a428120d-99ec-4a73-999f-75d8a6bfcb2e
 
->
-> It could be due to a recent change. Ronny, tell us about the workload and I
-> will check iscsi.
->
-> Oh yeah, for the tcp/net retransmission case, I had said offlist, I thought
-> there might be a issue with iscsi but I guess I was wrong, so I have not
-> seen any issues with that either.
+are getting "EACCES: access denied"
 
-I'll drop my concerns then.  Those corruptions could be a bug in ceph
-reconnect code or something else - regardless, that's separate from the
-issue at hand.
+with log entries in ceph.audit.log such as
 
-Thanks,
+2015-10-22 13:50:24.070249 mon.0 10.0.2.132:6789/0 33 : audit [INF] from='client.? 10.0.2.132:0/263577121' entity='client.bootstrap-osd' cmd=[{"prefix": "osd create", "uuid": "a428120d-99ec-4a73-999f-75d8a6bfcb2e"}]:  access denied
 
-                Ilya
+I tried setting
+    debug auth = 0
+in ceph.conf but couldn't tell anything from that output.
+
+Is there anything special I should look for here?
+Note: I do have /var/lib/ceph and subdirectories owned by ceph:ceph
+
+-- Tom
+
+
