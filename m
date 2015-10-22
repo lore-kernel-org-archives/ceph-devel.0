@@ -1,47 +1,83 @@
-From: Mike Christie <michaelc@cs.wisc.edu>
-Subject: Re: [PATCH] mark rbd requiring stable pages
-Date: Thu, 22 Oct 2015 10:37:55 -0500
-Message-ID: <562902D3.7040501@cs.wisc.edu>
-References: <201510151850.48348.ronny.hegewald@online.de> <CAOi1vP_ZDHBfCDeH6gxCKRsqoGteWv+nn7EFTexf+qsUBMHvjA@mail.gmail.com> <CAOi1vP8nAfr1_dNmvhNspz6ANZo2onGExU7=-agKLNr5KPxrzw@mail.gmail.com> <CAOi1vP_0GoqXuHm5SjZHpS8g_mK_wFRs9t9_VE1N9JUMFvL3Gw@mail.gmail.com> <562860F2.8070208@cs.wisc.edu> <CAOi1vP_e1aY4zMyYgRLy=D+jBs44g9++0VKutRm7D6q0OALJ3Q@mail.gmail.com>
+From: Milosz Tanski <milosz@adfin.com>
+Subject: Re: MDS stuck in a crash loop
+Date: Thu, 22 Oct 2015 11:51:59 -0400
+Message-ID: <CANP1eJEqUYsJUuh7gNmPfB1cvqNpz=91js+N6nZ5k26X25W9mw@mail.gmail.com>
+References: <CANP1eJGesJ_wGKDNQRJ952x8jkNHiJybeX075wxmJDurbSTMNw@mail.gmail.com>
+	<CAJ4mKGY5uTZ6oiqZY4VbU5LdECXx5sko6VOd5aD2aEhtq74NDA@mail.gmail.com>
+	<CANP1eJFNpLu3-HeqJ28L7xCTuKh-MhUT2j7A_tM7reofZ94FTQ@mail.gmail.com>
+	<CANP1eJFGy4psfmUHpsgdPFT+UUW=NTzLTgAsnGqeuD6iWuF-cQ@mail.gmail.com>
+	<CANP1eJHnavBzJRnDLa9gQ93haJ2QzKJsLj4+ZbS_vd1kquV8Lw@mail.gmail.com>
+	<CANP1eJGmjechy8ZkVarA-HWdL37scmHdQXToM6NdAXxU-_KVMw@mail.gmail.com>
+	<CANP1eJHYvgUKDCKrVYY=XkJsgcdVGn6T=drvEA8hofHyVX+0YA@mail.gmail.com>
+	<CAJ4mKGYyza=MqV8zRS3cGA0EfbB=h=UhYbwO7QBgTb6FfzXSQw@mail.gmail.com>
+	<CANP1eJGiPEx49nNyQgv3qo9ugVRAWnsh_WAHt33jHXX23S=0GQ@mail.gmail.com>
+	<CAJ4mKGYHDew0LdQ65vNODiBw6u_jBrmyL3fzOWhB1TxKP8XidQ@mail.gmail.com>
+	<CALe9h7fwpuz8Rv5GuqJ+-S9NDw8=uy37A+BfD3qW1Sa5FTHoxw@mail.gmail.com>
+	<CALe9h7dGSWqLd0svDNyovtNZM0VUEuF+v6nQoT9HQe5TaOQrYw@mail.gmail.com>
+	<CANP1eJG=H7FGxcfeLfQpJ_10Zngm9OMzt0=0=hX9pVxK8ndWjQ@mail.gmail.com>
+	<CALe9h7e48B7hd-zpt-sxTuXRS8mg29ELqHGM+wM3ZBVQdwdoVQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sabe.cs.wisc.edu ([128.105.6.20]:37914 "EHLO sabe.cs.wisc.edu"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757080AbbJVPiL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 22 Oct 2015 11:38:11 -0400
-In-Reply-To: <CAOi1vP_e1aY4zMyYgRLy=D+jBs44g9++0VKutRm7D6q0OALJ3Q@mail.gmail.com>
+Received: from mail-lf0-f53.google.com ([209.85.215.53]:32826 "EHLO
+	mail-lf0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S964875AbbJVPwB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Oct 2015 11:52:01 -0400
+Received: by lffv3 with SMTP id v3so53155538lff.0
+        for <ceph-devel@vger.kernel.org>; Thu, 22 Oct 2015 08:51:59 -0700 (PDT)
+In-Reply-To: <CALe9h7e48B7hd-zpt-sxTuXRS8mg29ELqHGM+wM3ZBVQdwdoVQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Ronny Hegewald <ronny.hegewald@online.de>, Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, Alex Elder <elder@kernel.org>
+To: John Spray <jspray@redhat.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On 10/22/2015 06:20 AM, Ilya Dryomov wrote:
-> 
->> >
->> > If we are just talking about if stable pages are not used, and someone
->> > is re-writing data to a page after the page has already been submitted
->> > to the block layer (I mean the page is on some bio which is on a request
->> > which is on some request_queue scheduler list or basically anywhere in
->> > the block layer), then I was saying this can occur with any block
->> > driver. There is nothing that is preventing this from happening with a
->> > FC driver or nvme or cciss or in dm or whatever. The app/user can
->> > rewrite as late as when we are in the make_request_fn/request_fn.
->> >
->> > I think I am misunderstanding your question because I thought this is
->> > expected behavior, and there is nothing drivers can do if the app is not
->> > doing a flush/sync between these types of write sequences.
-> I don't see a problem with rewriting as late as when we are in
-> request_fn() (or in a wq after being put there by request_fn()).  Where
-> I thought there *might* be an issue is rewriting after sendpage(), if
-> sendpage() is used - perhaps some sneaky sequence similar to that
-> retransmit bug that would cause us to *transmit* incorrect bytes (as
-> opposed to *re*transmit) or something of that nature?
+On Thu, Oct 22, 2015 at 8:48 AM, John Spray <jspray@redhat.com> wrote:
+> On Thu, Oct 22, 2015 at 1:43 PM, Milosz Tanski <milosz@adfin.com> wrote:
+>> On Wed, Oct 21, 2015 at 5:33 PM, John Spray <jspray@redhat.com> wrote:
+>>> On Wed, Oct 21, 2015 at 10:33 PM, John Spray <jspray@redhat.com> wrote:
+>>>>> John, I know you've got
+>>>>> https://github.com/ceph/ceph-qa-suite/pull/647. I think that's
+>>>>> supposed to be for this, but I'm not sure if you spotted any issues
+>>>>> with it or if we need to do some more diagnosing?
+>>>>
+>>>> That test path is just verifying that we do handle dirs without dying
+>>>> in at least one case -- it passes with the existing ceph code, so it's
+>>>> not reproducing this issue.
+>>>
+>>> Clicked send to soon, I was about to add...
+>>>
+>>> Milosz mentioned that they don't have the data from the system in the
+>>> broken state, so I don't have any bright ideas about learning more
+>>> about what went wrong here unfortunately.
+>>>
+>>
+>> Sorry about that, wasn't thinking at the time and just wanted to get
+>> this up and going as quickly as possible :(
+>>
+>> If this happens next time I'll be more careful to keep more evidence.
+>> I think multi-fs in the same rados namespace support would actually
+>> helped here, since it makes it easier to create a newfs and leave the
+>> other one around (for investigation)
+>
+> Yep, good point.  I am a known enthusiast for multi-filesystem support :-)
+>
+>> But makes me wonder that the broken dir scenario can probably be
+>> replicated by hand using rados calls. There's a pretty generic ticket
+>> there for don't die on dir errors, but I imagine the code can be
+>> audited and steps to cause a synthetic error can be produced.
+>
+> Yes, that part I have done (and will build into the automated tests in
+> due course) -- the bit that is still a mystery is how the damage
+> occurred to begin with.
 
+John, my money is on me somehow fumbling the recovery process. And,
+without the bash history falling off I'm going to assume that.
 
-Just to make sure we are on the same page.
+-- 
+Milosz Tanski
+CTO
+16 East 34th Street, 15th floor
+New York, NY 10016
 
-Are you concerned about the tcp/net layer retransmitting due to it
-detecting a issue as part of the tcp protocol, or are you concerned
-about rbd/libceph initiating a retry like with the nfs issue?
+p: 646-253-9055
+e: milosz@adfin.com
