@@ -1,108 +1,64 @@
 From: Milosz Tanski <milosz@adfin.com>
-Subject: Re: newstore direction
-Date: Thu, 22 Oct 2015 08:32:41 -0400
-Message-ID: <CANP1eJEZGe6uqdd3i8exT7zX8wWHHRSk-x0H8zn1h9u5pni3+A@mail.gmail.com>
-References: <alpine.DEB.2.00.1510191216200.4188@cobra.newdream.net>
-	<CALe9h7dUQcp6zOSFDfnXSQo4VOTObFCWj+HD-idwE1nNzQVsgA@mail.gmail.com>
-	<alpine.DEB.2.00.1510201251140.16833@cobra.newdream.net>
+Subject: Re: MDS stuck in a crash loop
+Date: Thu, 22 Oct 2015 08:43:52 -0400
+Message-ID: <CANP1eJG=H7FGxcfeLfQpJ_10Zngm9OMzt0=0=hX9pVxK8ndWjQ@mail.gmail.com>
+References: <CANP1eJGesJ_wGKDNQRJ952x8jkNHiJybeX075wxmJDurbSTMNw@mail.gmail.com>
+	<CAJ4mKGY5uTZ6oiqZY4VbU5LdECXx5sko6VOd5aD2aEhtq74NDA@mail.gmail.com>
+	<CANP1eJFNpLu3-HeqJ28L7xCTuKh-MhUT2j7A_tM7reofZ94FTQ@mail.gmail.com>
+	<CANP1eJFGy4psfmUHpsgdPFT+UUW=NTzLTgAsnGqeuD6iWuF-cQ@mail.gmail.com>
+	<CANP1eJHnavBzJRnDLa9gQ93haJ2QzKJsLj4+ZbS_vd1kquV8Lw@mail.gmail.com>
+	<CANP1eJGmjechy8ZkVarA-HWdL37scmHdQXToM6NdAXxU-_KVMw@mail.gmail.com>
+	<CANP1eJHYvgUKDCKrVYY=XkJsgcdVGn6T=drvEA8hofHyVX+0YA@mail.gmail.com>
+	<CAJ4mKGYyza=MqV8zRS3cGA0EfbB=h=UhYbwO7QBgTb6FfzXSQw@mail.gmail.com>
+	<CANP1eJGiPEx49nNyQgv3qo9ugVRAWnsh_WAHt33jHXX23S=0GQ@mail.gmail.com>
+	<CAJ4mKGYHDew0LdQ65vNODiBw6u_jBrmyL3fzOWhB1TxKP8XidQ@mail.gmail.com>
+	<CALe9h7fwpuz8Rv5GuqJ+-S9NDw8=uy37A+BfD3qW1Sa5FTHoxw@mail.gmail.com>
+	<CALe9h7dGSWqLd0svDNyovtNZM0VUEuF+v6nQoT9HQe5TaOQrYw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f45.google.com ([209.85.215.45]:33044 "EHLO
-	mail-lf0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751815AbbJVMco (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Oct 2015 08:32:44 -0400
-Received: by lffv3 with SMTP id v3so45899394lff.0
-        for <ceph-devel@vger.kernel.org>; Thu, 22 Oct 2015 05:32:41 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1510201251140.16833@cobra.newdream.net>
+Received: from mail-lf0-f41.google.com ([209.85.215.41]:34433 "EHLO
+	mail-lf0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753498AbbJVMny (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Oct 2015 08:43:54 -0400
+Received: by lfaz124 with SMTP id z124so46275824lfa.1
+        for <ceph-devel@vger.kernel.org>; Thu, 22 Oct 2015 05:43:52 -0700 (PDT)
+In-Reply-To: <CALe9h7dGSWqLd0svDNyovtNZM0VUEuF+v6nQoT9HQe5TaOQrYw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: John Spray <jspray@redhat.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, Oct 20, 2015 at 4:00 PM, Sage Weil <sweil@redhat.com> wrote:
-> On Tue, 20 Oct 2015, John Spray wrote:
->> On Mon, Oct 19, 2015 at 8:49 PM, Sage Weil <sweil@redhat.com> wrote:
->> >  - We have to size the kv backend storage (probably still an XFS
->> > partition) vs the block storage.  Maybe we do this anyway (put metadata on
->> > SSD!) so it won't matter.  But what happens when we are storing gobs of
->> > rgw index data or cephfs metadata?  Suddenly we are pulling storage out of
->> > a different pool and those aren't currently fungible.
+On Wed, Oct 21, 2015 at 5:33 PM, John Spray <jspray@redhat.com> wrote:
+> On Wed, Oct 21, 2015 at 10:33 PM, John Spray <jspray@redhat.com> wrote:
+>>> John, I know you've got
+>>> https://github.com/ceph/ceph-qa-suite/pull/647. I think that's
+>>> supposed to be for this, but I'm not sure if you spotted any issues
+>>> with it or if we need to do some more diagnosing?
 >>
->> This is the concerning bit for me -- the other parts one "just" has to
->> get the code right, but this problem could linger and be something we
->> have to keep explaining to users indefinitely.  It reminds me of cases
->> in other systems where users had to make an educated guess about inode
->> size up front, depending on whether you're expecting to efficiently
->> store a lot of xattrs.
->>
->> In practice it's rare for users to make these kinds of decisions well
->> up-front: it really needs to be adjustable later, ideally
->> automatically.  That could be pretty straightforward if the KV part
->> was stored directly on block storage, instead of having XFS in the
->> mix.  I'm not quite up with the state of the art in this area: are
->> there any reasonable alternatives for the KV part that would consume
->> some defined range of a block device from userspace, instead of
->> sitting on top of a filesystem?
+>> That test path is just verifying that we do handle dirs without dying
+>> in at least one case -- it passes with the existing ceph code, so it's
+>> not reproducing this issue.
 >
-> I agree: this is my primary concern with the raw block approach.
+> Clicked send to soon, I was about to add...
 >
-> There are some KV alternatives that could consume block, but the problem
-> would be similar: we need to dynamically size up or down the kv portion of
-> the device.
->
-> I see two basic options:
->
-> 1) Wire into the Env abstraction in rocksdb to provide something just
-> smart enough to let rocksdb work.  It isn't much: named files (not that
-> many--we could easily keep the file table in ram), always written
-> sequentially, to be read later with random access. All of the code is
-> written around abstractions of SequentialFileWriter so that everything
-> posix is neatly hidden in env_posix (and there are various other env
-> implementations for in-memory mock tests etc.).
->
-> 2) Use something like dm-thin to sit between the raw block device and XFS
-> (for rocksdb) and the block device consumed by newstore.  As long as XFS
-> doesn't fragment horrifically (it shouldn't, given we *always* write ~4mb
-> files in their entirety) we can fstrim and size down the fs portion.  If
-> we similarly make newstores allocator stick to large blocks only we would
-> be able to size down the block portion as well.  Typical dm-thin block
-> sizes seem to range from 64KB to 512KB, which seems reasonable enough to
-> me.  In fact, we could likely just size the fs volume at something
-> conservatively large (like 90%) and rely on -o discard or periodic fstrim
-> to keep its actual utilization in check.
+> Milosz mentioned that they don't have the data from the system in the
+> broken state, so I don't have any bright ideas about learning more
+> about what went wrong here unfortunately.
 >
 
-I think you could prototype a raw block device OSD store using LMDB as
-a starting point. I know there's been some experiments using LMDB as
-KV store before with positive read numbers and not great write
-numbers.
+Sorry about that, wasn't thinking at the time and just wanted to get
+this up and going as quickly as possible :(
 
-1. It mmaps, just mmap the raw disk device / partition. I've done this
-as an experiment before, I can dig up a patch for LMDB.
-2. It already has a free space management strategy. I'm prob it's not
-right for the OSDs in the long term but there's something to start
-there with.
-3. It's already supports transactions / COW.
-4. LMDB isn't a huge code base so it might be a good place to start /
-evolve code from.
-5. You're not starting a multi-year effort at the 0 point.
+If this happens next time I'll be more careful to keep more evidence.
+I think multi-fs in the same rados namespace support would actually
+helped here, since it makes it easier to create a newfs and leave the
+other one around (for investigation)
 
-As to the not great write performance, that could be addressed by
-write transaction merging (what mysql implemented a few years ago).
-Here you have an opportunity to do it two days. One, you can do it in
-the application layer while waiting for the fsync from transaction to
-complete. This is probably the easier route. Two, you can do it in the
-DB layer (the LMDB transaction handling / locking) where you're
-already started processing the following transactions using the
-currently committing transaction (COW) as a starting point. This is
-harder mostly because of the synchronization needed or involved.
-
-I've actually spend some time thinking about doing LMDB write
-transaction merging outside the OSD context. This was for another
-project.
-
-My 2 cents.
+But makes me wonder that the broken dir scenario can probably be
+replicated by hand using rados calls. There's a pretty generic ticket
+there for don't die on dir errors, but I imagine the code can be
+audited and steps to cause a synthetic error can be produced.
 
 -- 
 Milosz Tanski
