@@ -1,126 +1,47 @@
-From: Benjamin Coddington <bcodding@redhat.com>
-Subject: [PATCH 3/3] locks: cleanup posix_lock_inode_wait and
- flock_lock_inode_wait
-Date: Thu, 22 Oct 2015 11:35:56 -0400
-Message-ID: <ded792d8fdcba562a1c74fd14fefcb387debc4b1.1445524157.git.bcodding@redhat.com>
-References: <cover.1445524157.git.bcodding@redhat.com>
+From: Mike Christie <michaelc@cs.wisc.edu>
+Subject: Re: [PATCH] mark rbd requiring stable pages
+Date: Thu, 22 Oct 2015 10:37:55 -0500
+Message-ID: <562902D3.7040501@cs.wisc.edu>
+References: <201510151850.48348.ronny.hegewald@online.de> <CAOi1vP_ZDHBfCDeH6gxCKRsqoGteWv+nn7EFTexf+qsUBMHvjA@mail.gmail.com> <CAOi1vP8nAfr1_dNmvhNspz6ANZo2onGExU7=-agKLNr5KPxrzw@mail.gmail.com> <CAOi1vP_0GoqXuHm5SjZHpS8g_mK_wFRs9t9_VE1N9JUMFvL3Gw@mail.gmail.com> <562860F2.8070208@cs.wisc.edu> <CAOi1vP_e1aY4zMyYgRLy=D+jBs44g9++0VKutRm7D6q0OALJ3Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <cover.1445524157.git.bcodding@redhat.com>
-In-Reply-To: <cover.1445524157.git.bcodding@redhat.com>
-References: <cover.1445524157.git.bcodding@redhat.com>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
-To: Jeff Layton <jlayton@poochiereds.net>, "J. Bruce Fields" <bfields@fieldses.org>, Alexander Viro <viro@zeniv.linux.org.uk>
-Cc: Latchesar Ionkov <lucho@ionkov.net>, linux-fsdevel@vger.kernel.org, Trond Myklebust <trond.myklebust@primarydata.com>, devel@driverdev.osuosl.org, Yan Zheng <zyan@redhat.com>, cluster-devel@redhat.com, Sage Weil <sage@redhat.com>, Miklos Szeredi <miklos@szeredi.hu>, Christoph Hellwig <hch@infradead.org>, fuse-devel@lists.sourceforge.net, Christine Caulfield <ccaulfie@redhat.com>, v9fs-developer@lists.sourceforge.net, Ilya Dryomov <idryomov@gmail.com>, linux-cifs@vger.kernel.org, Eric Van Hensbergen <ericvh@gmail.com>, Mark Fasheh <mfasheh@suse.com>, Oleg Drokin <oleg.drokin@intel.com>, Julia Lawall <Julia.Lawall@lip6.fr>, David Teigland <teigland@redhat.com>, Joel Becker <jlbec@evilplan.org>, ceph-devel@vger.kernel.org, Abdul Hussain <habdul@visteon.com>, Steven Whitehouse <swhiteho@redhat.com>, linux-nfs@vger.kernel.org, Andreas Dilger <andreas.dilger@intel.com>, Greg
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from sabe.cs.wisc.edu ([128.105.6.20]:37914 "EHLO sabe.cs.wisc.edu"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757080AbbJVPiL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 22 Oct 2015 11:38:11 -0400
+In-Reply-To: <CAOi1vP_e1aY4zMyYgRLy=D+jBs44g9++0VKutRm7D6q0OALJ3Q@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Ronny Hegewald <ronny.hegewald@online.de>, Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, Alex Elder <elder@kernel.org>
 
-All callers use locks_lock_inode_wait() instead.
+On 10/22/2015 06:20 AM, Ilya Dryomov wrote:
+> 
+>> >
+>> > If we are just talking about if stable pages are not used, and someone
+>> > is re-writing data to a page after the page has already been submitted
+>> > to the block layer (I mean the page is on some bio which is on a request
+>> > which is on some request_queue scheduler list or basically anywhere in
+>> > the block layer), then I was saying this can occur with any block
+>> > driver. There is nothing that is preventing this from happening with a
+>> > FC driver or nvme or cciss or in dm or whatever. The app/user can
+>> > rewrite as late as when we are in the make_request_fn/request_fn.
+>> >
+>> > I think I am misunderstanding your question because I thought this is
+>> > expected behavior, and there is nothing drivers can do if the app is not
+>> > doing a flush/sync between these types of write sequences.
+> I don't see a problem with rewriting as late as when we are in
+> request_fn() (or in a wq after being put there by request_fn()).  Where
+> I thought there *might* be an issue is rewriting after sendpage(), if
+> sendpage() is used - perhaps some sneaky sequence similar to that
+> retransmit bug that would cause us to *transmit* incorrect bytes (as
+> opposed to *re*transmit) or something of that nature?
 
-Signed-off-by: Benjamin Coddington <bcodding@redhat.com>
----
- fs/locks.c         |    5 +----
- include/linux/fs.h |   24 ------------------------
- 2 files changed, 1 insertions(+), 28 deletions(-)
 
-diff --git a/fs/locks.c b/fs/locks.c
-index 94d50d3..b6f3c92 100644
---- a/fs/locks.c
-+++ b/fs/locks.c
-@@ -1167,8 +1167,7 @@ EXPORT_SYMBOL(posix_lock_file);
-  * @inode: inode of file to which lock request should be applied
-  * @fl: The lock to be applied
-  *
-- * Variant of posix_lock_file_wait that does not take a filp, and so can be
-- * used after the filp has already been torn down.
-+ * Apply a POSIX style lock request to an inode.
-  */
- int posix_lock_inode_wait(struct inode *inode, struct file_lock *fl)
- {
-@@ -1187,7 +1186,6 @@ int posix_lock_inode_wait(struct inode *inode, struct file_lock *fl)
- 	}
- 	return error;
- }
--EXPORT_SYMBOL(posix_lock_inode_wait);
- 
- /**
-  * locks_mandatory_locked - Check for an active lock
-@@ -1873,7 +1871,6 @@ int flock_lock_inode_wait(struct inode *inode, struct file_lock *fl)
- 	}
- 	return error;
- }
--EXPORT_SYMBOL(flock_lock_inode_wait);
- 
- /**
-  * locks_lock_inode_wait - Apply a lock to an inode
-diff --git a/include/linux/fs.h b/include/linux/fs.h
-index 2e283b7..05b07c9 100644
---- a/include/linux/fs.h
-+++ b/include/linux/fs.h
-@@ -1053,12 +1053,10 @@ extern void locks_remove_file(struct file *);
- extern void locks_release_private(struct file_lock *);
- extern void posix_test_lock(struct file *, struct file_lock *);
- extern int posix_lock_file(struct file *, struct file_lock *, struct file_lock *);
--extern int posix_lock_inode_wait(struct inode *, struct file_lock *);
- extern int posix_unblock_lock(struct file_lock *);
- extern int vfs_test_lock(struct file *, struct file_lock *);
- extern int vfs_lock_file(struct file *, unsigned int, struct file_lock *, struct file_lock *);
- extern int vfs_cancel_lock(struct file *filp, struct file_lock *fl);
--extern int flock_lock_inode_wait(struct inode *inode, struct file_lock *fl);
- extern int locks_lock_inode_wait(struct inode *inode, struct file_lock *fl);
- extern int __break_lease(struct inode *inode, unsigned int flags, unsigned int type);
- extern void lease_get_mtime(struct inode *, struct timespec *time);
-@@ -1145,12 +1143,6 @@ static inline int posix_lock_file(struct file *filp, struct file_lock *fl,
- 	return -ENOLCK;
- }
- 
--static inline int posix_lock_inode_wait(struct inode *inode,
--					struct file_lock *fl)
--{
--	return -ENOLCK;
--}
--
- static inline int posix_unblock_lock(struct file_lock *waiter)
- {
- 	return -ENOENT;
-@@ -1172,12 +1164,6 @@ static inline int vfs_cancel_lock(struct file *filp, struct file_lock *fl)
- 	return 0;
- }
- 
--static inline int flock_lock_inode_wait(struct inode *inode,
--					struct file_lock *request)
--{
--	return -ENOLCK;
--}
--
- static inline int locks_lock_file_wait(struct file *filp, struct file_lock *fl)
- {
- 	return -ENOLCK;
-@@ -1221,16 +1207,6 @@ static inline struct inode *file_inode(const struct file *f)
- 	return f->f_inode;
- }
- 
--static inline int posix_lock_file_wait(struct file *filp, struct file_lock *fl)
--{
--	return posix_lock_inode_wait(file_inode(filp), fl);
--}
--
--static inline int flock_lock_file_wait(struct file *filp, struct file_lock *fl)
--{
--	return flock_lock_inode_wait(file_inode(filp), fl);
--}
--
- static inline int locks_lock_file_wait(struct file *filp, struct file_lock *fl)
- {
- 	return locks_lock_inode_wait(file_inode(filp), fl);
--- 
-1.7.1
+Just to make sure we are on the same page.
+
+Are you concerned about the tcp/net layer retransmitting due to it
+detecting a issue as part of the tcp protocol, or are you concerned
+about rbd/libceph initiating a retry like with the nfs issue?
