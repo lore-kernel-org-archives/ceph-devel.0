@@ -1,112 +1,141 @@
-From: Howard Chu <hyc@symas.com>
-Subject: Re: newstore direction
-Date: Fri, 23 Oct 2015 06:21:43 +0000 (UTC)
-Message-ID: <loom.20151023T081245-920@post.gmane.org>
-References: <alpine.DEB.2.00.1510191216200.4188@cobra.newdream.net> <CALe9h7dUQcp6zOSFDfnXSQo4VOTObFCWj+HD-idwE1nNzQVsgA@mail.gmail.com> <alpine.DEB.2.00.1510201251140.16833@cobra.newdream.net> <CAJ4mKGY0=+isJhh4oF3kqtxEZ6HWSDZXJyM9sBHxc8s21M_y8g@mail.gmail.com> <alpine.DEB.2.00.1510201422450.16833@cobra.newdream.net> <5626BECA.7070306@redhat.com> <alpine.DEB.2.00.1510210616060.16833@cobra.newdream.net> <5627981B.2040409@redhat.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH] mark rbd requiring stable pages
+Date: Fri, 23 Oct 2015 10:32:03 +0200
+Message-ID: <CAOi1vP-nEmqUTR5ouMEfWiVY_zc2j6-Vf4T9u=eNa0erehmoxw@mail.gmail.com>
+References: <201510151850.48348.ronny.hegewald@online.de>
+	<562860F2.8070208@cs.wisc.edu>
+	<CAOi1vP_e1aY4zMyYgRLy=D+jBs44g9++0VKutRm7D6q0OALJ3Q@mail.gmail.com>
+	<201510222356.58184.ronny.hegewald@online.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:59792 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751133AbbJWGWB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 23 Oct 2015 02:22:01 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1ZpVjh-0000jT-6W
-	for ceph-devel@vger.kernel.org; Fri, 23 Oct 2015 08:21:57 +0200
-Received: from cust231-14.nwewn.com ([78.155.231.14])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Fri, 23 Oct 2015 08:21:57 +0200
-Received: from hyc by cust231-14.nwewn.com with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Fri, 23 Oct 2015 08:21:57 +0200
+Received: from mail-wi0-f173.google.com ([209.85.212.173]:33258 "EHLO
+	mail-wi0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751717AbbJWIcE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Oct 2015 04:32:04 -0400
+Received: by wijp11 with SMTP id p11so66551374wij.0
+        for <ceph-devel@vger.kernel.org>; Fri, 23 Oct 2015 01:32:03 -0700 (PDT)
+In-Reply-To: <201510222356.58184.ronny.hegewald@online.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Mike Christie <michaelc@cs.wisc.edu>, Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, Alex Elder <elder@kernel.org>
 
-Ric Wheeler <rwheeler <at> redhat.com> writes:
+On Fri, Oct 23, 2015 at 1:56 AM, Ronny Hegewald
+<ronny.hegewald@online.de> wrote:
+> On Thursday 22 October 2015, Ilya Dryomov wrote:
+>> Well, checksum mismatches are to be expected given what we are doing
+>> now, but I wouldn't expect any data corruptions.  Ronny writes that he
+>> saw frequent ext4 corruptions on krbd devices before he enabled stable
+>> pages, which leads me to believe that the !crc case, for which we won't
+>> be setting BDI_CAP_STABLE_WRITES, is going to be/remain broken.  Ronny,
+>> could you describe it in more detail and maybe share some of those osd
+>> logs with bad crc messages?
+>>
+> This is from a 10 minute period from one of the OSDs.
+>
+> 23:11:02.423728 ce5dfb70  0 bad crc in data 1657725429 != exp 496797267
+> 23:11:37.586411 ce5dfb70  0 bad crc in data 1216602498 != exp 1888811161
+> 23:12:07.805675 cc3ffb70  0 bad crc in data 3140625666 != exp 2614069504
+> 23:12:44.485713 c96ffb70  0 bad crc in data 1712148977 != exp 3239079328
+> 23:13:24.746217 ce5dfb70  0 bad crc in data 144620426 != exp 3156694286
+> 23:13:52.792367 ce5dfb70  0 bad crc in data 4033880920 != exp 4159672481
+> 23:14:22.958999 c96ffb70  0 bad crc in data 847688321 != exp 1551499144
+> 23:16:35.015629 ce5dfb70  0 bad crc in data 2790209714 != exp 3779604715
+> 23:17:48.482049 c96ffb70  0 bad crc in data 1563466764 != exp 528198494
+> 23:19:28.925357 cc3ffb70  0 bad crc in data 1764275395 != exp 2075504274
+> 23:19:59.039843 cc3ffb70  0 bad crc in data 2960172683 != exp 1215950691
 
-> 
-> On 10/21/2015 09:32 AM, Sage Weil wrote:
-> > On Tue, 20 Oct 2015, Ric Wheeler wrote:
-> >>> Now:
-> >>>       1 io  to write a new file
-> >>>     1-2 ios to sync the fs journal (commit the inode, alloc change)
-> >>>             (I see 2 journal IOs on XFS and only 1 on ext4...)
-> >>>       1 io  to commit the rocksdb journal (currently 3, but will drop to
-> >>>             1 with xfs fix and my rocksdb change)
-> >> I think that might be too pessimistic - the number of discrete IO's
-sent down
-> >> to a spinning disk make much less impact on performance than the number of
-> >> fsync()'s since they IO's all land in the write cache.  Some newer spinning
-> >> drives have a non-volatile write cache, so even an fsync() might not end up
-> >> doing the expensive data transfer to the platter.
-> > True, but in XFS's case at least the file data and journal are not
-> > colocated, so its 2 seeks for the new file write+fdatasync and another for
-> > the rocksdb journal commit.  Of course, with a deep queue, we're doing
-> > lots of these so there's be fewer journal commits on both counts, but the
-> > lower bound on latency of a single write is still 3 seeks, and that bound
-> > is pretty critical when you also have network round trips and replication
-> > (worst out of 2) on top.
-> 
-> What are the performance goals we are looking for?
-> 
-> Small, synchronous writes/second?
-> 
-> File creates/second?
-> 
-> I suspect that looking at things like seeks/write is probably looking at the 
-> wrong level of performance challenges.  Again, when you write to a modern
-drive, 
-> you write to its write cache and it decides internally when/how to destage to 
-> the platter.
-> 
-> If you look at the performance of XFS with streaming workloads, it will
-tend to 
-> max out the bandwidth of the underlaying storage.
-> 
-> If we need IOP's/file writes, etc, we should be clear on what we are
-aiming at.
-> 
-> >
-> >> It would be interesting to get the timings on the IO's you see to
-measure the
-> >> actual impact.
-> > I observed this with the journaling workload for rocksdb, but I assume the
-> > journaling behavior is the same regardless of what is being journaled.
-> > For a 4KB append to a file + fdatasync, I saw ~30ms latency for XFS, and
-> > blktrace showed an IO to the file, and 2 IOs to the journal.  I believe
-> > the first one is the record for the inode update, and the second is the
-> > journal 'commit' record (though I forget how I decided that).  My guess is
-> > that XFS is being extremely careful about journal integrity here and not
-> > writing the commit record until it knows that the preceding records landed
-> > on stable storage.  For ext4, the latency was about ~20ms, and blktrace
-> > showed the IO to the file and then a single journal IO.  When I made the
-> > rocksdb change to overwrite an existing, prewritten file, the latency
-> > dropped to ~10ms on ext4, and blktrace showed a single IO as expected.
-> > (XFS still showed the 2 journal commit IOs, but Dave just posted the fix
-> > for that on the XFS list today.)
+Could you share the entire log snippet for those 10 minutes?
 
-> Normally, best practice is to use batching to avoid paying worst case latency 
-> when you do a synchronous IO. Write a batch of files or appends without
-fsync, 
-> then go back and fsync and you will pay that latency once (not per file/op).
+>
+> The filesystem corruptions are usually ones with messages of
+>
+> EXT4-fs error (device rbd4): ext4_mb_generate_buddy:757: group 155, block
+> bitmap and bg descriptor inconsistent: 23625 vs 23660 free clusters
+>
+> These were pretty common, at least every other day, often multiple times a
+> day.
+>
+> Sometimes there was a additional
+>
+> JBD2: Spotted dirty metadata buffer (dev = rbd4, blocknr = 0). There's a risk
+> of filesystem corruption in case of system crash.
+>
+> Another type of Filesystem corruption i experienced through kernel
+> compilations, that lead to the following messages.
+>
+> EXT4-fs warning (device rbd3): empty_dir:2488: bad directory (dir #282221) -
+> no `.' or `..'
+> EXT4-fs warning (device rbd3): empty_dir:2488: bad directory (dir #273062) -
+> no `.' or `..'
+> EXT4-fs warning (device rbd3): empty_dir:2488: bad directory (dir #272270) -
+> no `.' or `..'
+> EXT4-fs warning (device rbd3): empty_dir:2488: bad directory (dir #282254) -
+> no `.' or `..'
+> EXT4-fs warning (device rbd3): empty_dir:2488: bad directory (dir #273070) -
+> no `.' or `..'
+> EXT4-fs warning (device rbd3): empty_dir:2488: bad directory (dir #272308) -
+> no `.' or `..'
+> EXT4-fs error (device rbd3): ext4_lookup:1417: inode #270033: comm rm: deleted
+> inode referenced: 270039
+> last message repeated 2 times
+> EXT4-fs warning (device rbd3): empty_dir:2488: bad directory (dir #271534) -
+> no `.' or `..'
+> EXT4-fs warning (device rbd3): empty_dir:2488: bad directory (dir #271275) -
+> no `.' or `..'
+> EXT4-fs warning (device rbd3): empty_dir:2488: bad directory (dir #282290) -
+> no `.' or `..'
+> EXT4-fs warning (device rbd3): empty_dir:2488: bad directory (dir #281914) -
+> no `.' or `..'
+> EXT4-fs error (device rbd3): ext4_lookup:1417: inode #270033: comm rm: deleted
+> inode referenced: 270039
+> last message repeated 2 times
+> kernel: EXT4-fs error (device rbd3): ext4_lookup:1417: inode #273018: comm rm:
+> deleted inode referenced: 282221
+> EXT4-fs error (device rbd3): ext4_lookup:1417: inode #273018: comm rm: deleted
+> inode referenced: 282221
+> EXT4-fs error (device rbd3): ext4_lookup:1417: inode #273018: comm rm: deleted
+> inode referenced: 281914
+> EXT4-fs error (device rbd3): ext4_lookup:1417: inode #273018: comm rm: deleted
+> inode referenced: 281914
+> EXT4-fs error: 243 callbacks suppressed
+> EXT4-fs error (device rbd3): ext4_lookup:1417: inode #282002: comm cp: deleted
+> inode referenced: 45375
+> kernel: EXT4-fs error (device rbd3): ext4_lookup:1417: inode #282002: comm cp:
+> deleted inode referenced: 45371
+>
+> The result was that various files and directories in the kernel sourcedir
+> couldn't be accessed anymore and even fsck couldn't repair it, so i had to
+> finally delete it. But these ones were pretty rare.
+>
+> Another issue were the data-corruptions in the files itself, that happened
+> independently from the filesystem-corruptions.  These happened on most days,
+> sometimes only once, sometimes multiple times a day.
+>
+> Newly written files that contained corrupted data seem to always have it only
+> at one place. These corrupt data replaced the original data from the file, but
+> never changed the file-size. The position of this corruptions in the files
+> were always different.
+>
+> Interesting part is that this corrupted parts always followed the same
+> pattern. First some few hundred 0x0 bytes, then a few kb (10-30) of random
+> binary data, that finished again with a few hundred bytes of 0x0.
+>
+> In a few cases i could trace this data back to origin from another file that
+> was read at the same time from the same programm. But that might be
+> accidentially, because other corruptions that happened in the same scenario I
+> couldn't trace back this way.
+>
+> In other cases that corrupt data originated from files that were deleted
+> recently (a few minutes ago).
 
-If filesystems would support ordered writes you wouldn't need to fsync at
-all. Just spit out a stream of writes and declare that batch N must be
-written before batch N+1. (Note that this is not identical to "write
-barriers", which imposed the same latencies as fsync by blocking all I/Os at
-a barrier boundary. Ordered writes may be freely interleaved with un-ordered
-writes, so normal I/O traffic can proceed unhindered. Their ordering is only
-enforced wrt other ordered writes.)
+Which kernel was this on?
 
-A bit of a shame that Linux's SCSI drivers support Ordering attributes but
-nothing above that layer makes use of it.
--- 
-  -- Howard Chu
-  CTO, Symas Corp.           http://www.symas.com
-  Director, Highland Sun     http://highlandsun.com/hyc/
-  Chief Architect, OpenLDAP  http://www.openldap.org/project/ 
+You really should have reported all of this as soon as you hit it - it
+sounds like you've been dealing with this issue for a while.  There's
+definitely more than stable pages in play here, I'll look into it.
 
+Thanks,
+
+                Ilya
