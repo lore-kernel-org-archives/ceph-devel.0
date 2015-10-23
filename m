@@ -1,113 +1,35 @@
-From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Subject: RE: chooseleaf may cause some unnecessary pg migrations
-Date: Fri, 23 Oct 2015 15:41:56 +0000
-Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC03635696@shsmsx102.ccr.corp.intel.com>
-References: <FF8D83DAE5DF57468726B79904321E06046B73@H3CMLB12-EX.srv.huawei-3com.com>
- <alpine.DEB.2.00.1510130940400.6589@cobra.newdream.net>
- <FF8D83DAE5DF57468726B79904321E06047273@H3CMLB12-EX.srv.huawei-3com.com>
- <alpine.DEB.2.00.1510140714580.6589@cobra.newdream.net>
- <FF8D83DAE5DF57468726B79904321E06047677@H3CMLB12-EX.srv.huawei-3com.com>
- <alpine.DEB.2.00.1510150715020.16833@cobra.newdream.net>
- <6F3FA899187F0043BA1827A69DA2F7CC03632F6C@shsmsx102.ccr.corp.intel.com>
- <FF8D83DAE5DF57468726B79904321E06047977@H3CMLB12-EX.srv.huawei-3com.com>
- <6F3FA899187F0043BA1827A69DA2F7CC0363300C@shsmsx102.ccr.corp.intel.com>
- <FF8D83DAE5DF57468726B79904321E060479C3@H3CMLB12-EX.srv.huawei-3com.com>
- <6F3FA899187F0043BA1827A69DA2F7CC03633AAB@shsmsx102.ccr.corp.intel.com>
- <FF8D83DAE5DF57468726B79904321E06047D8A@H3CMLB12-EX.srv.huawei-3com.com>
- <alpine.DEB.2.00.1510181912160.16833@cobra.newdream.net>
- <6F3FA899187F0043BA1827A69DA2F7CC03633C1B@shsmsx102.ccr.corp.intel.com>
- <FF8D83DAE5DF57468726B79904321E06047EB4@H3CMLB12-EX.srv.huawei-3com.com>
+From: Daniel Gryniewicz <dang@redhat.com>
+Subject: Re: nfsv41 over AF_VSOCK (nfs-ganesha)
+Date: Fri, 23 Oct 2015 12:34:42 -0400
+Message-ID: <CAL-2WbGd0t4zxx7nb6CtSGFpL6CznStk0isZZ=BuGdyjxyF1hw@mail.gmail.com>
+References: <1602558852.33130185.1445028743632.JavaMail.zimbra@redhat.com>
+ <1249838657.33136909.1445029697101.JavaMail.zimbra@redhat.com>
+ <CALe9h7cGzjgBO=K-p7PF=MQViawh8ZKd6u_u4E5A_JSf5zhMVg@mail.gmail.com> <CALe9h7fTUKJkxTxX4wKYwvJMOUXRneR+jB49p9M1Ji3-DVGuhw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:59591 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752600AbbJWPmG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 23 Oct 2015 11:42:06 -0400
-In-Reply-To: <FF8D83DAE5DF57468726B79904321E06047EB4@H3CMLB12-EX.srv.huawei-3com.com>
-Content-Language: en-US
+Received: from mail-wi0-f181.google.com ([209.85.212.181]:37974 "EHLO
+	mail-wi0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751380AbbJWQfD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Oct 2015 12:35:03 -0400
+Received: by wicll6 with SMTP id ll6so39128013wic.1
+        for <ceph-devel@vger.kernel.org>; Fri, 23 Oct 2015 09:35:02 -0700 (PDT)
+In-Reply-To: <CALe9h7fTUKJkxTxX4wKYwvJMOUXRneR+jB49p9M1Ji3-DVGuhw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Xusangdi <xu.sangdi@h3c.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: John Spray <jspray@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Stefan Hajnoczi <shajnocz@redhat.com>
 
-WWVzLCBnb29kIGNhdGNoLg0KDQpCeSB0ZXJtIG9mIG51bWJlciBvZiBjaGFuZ2VkIG1hcHBpbmcg
-KEkgc29ydCBhbmQgY29tcGFyZWQgdGhlIE9TRCBzZXQpLCB0aGlzIHBhdGNoIGRvIGhlbHBzIGEg
-bG90IGFzIGV2ZXJ5IHJlbWFwcGVkIFBHIG9ubHkgaGFzIG9uZSBPU0QgY2hhbmdpbmcuDQoNCkNv
-b2wgLCB3ZWxsIGRvbmUuDQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTog
-WHVzYW5nZGkgW21haWx0bzp4dS5zYW5nZGlAaDNjLmNvbV0NCj4gU2VudDogTW9uZGF5LCBPY3Rv
-YmVyIDE5LCAyMDE1IDQ6MTMgUE0NCj4gVG86IENoZW4sIFhpYW94aQ0KPiBDYzogY2VwaC1kZXZl
-bEB2Z2VyLmtlcm5lbC5vcmcNCj4gU3ViamVjdDogUkU6IGNob29zZWxlYWYgbWF5IGNhdXNlIHNv
-bWUgdW5uZWNlc3NhcnkgcGcgbWlncmF0aW9ucw0KPiANCj4gSSBqdXN0IHJlYWxpemVkIHRoZSBt
-ZWFzdXJlbWVudCBJIG1lbnRpb25lZCBsYXN0IHRpbWUgaXMgbm90IHByZWNpc2UuIEl0DQo+IHNo
-b3VsZCBiZSAnbnVtYmVyIG9mIGNoYW5nZWQgbWFwcGluZ3MnIGluc3RlYWQgb2YgJ251bWJlciBv
-ZiByZW1hcHBlZA0KPiBQR3MnLg0KPiBGb3IgZXhhbXBsZSwgWzIsMSw3XSAtPiBbMCw3LDRdIHNo
-b3VsZCBiZSByZWdhcmRlZCBkaWZmZXJlbnRseSBmcm9tIFsyLDEsN10gLT4NCj4gWzEsNyw0XSwg
-YXMgdGhlIGZpcnN0IGNoYW5nZSBjYXVzZXMgZG91YmxlZCBkYXRhIHRyYW5zZmVyLg0KPiBJcyB0
-aGlzIHRoZSByZWFzb24gZm9yIHlvdXIgdGVzdCByZXN1bHRzPw0KPiANCj4gPiAtLS0tLU9yaWdp
-bmFsIE1lc3NhZ2UtLS0tLQ0KPiA+IEZyb206IENoZW4sIFhpYW94aSBbbWFpbHRvOnhpYW94aS5j
-aGVuQGludGVsLmNvbV0NCj4gPiBTZW50OiBNb25kYXksIE9jdG9iZXIgMTksIDIwMTUgMzozNCBQ
-TQ0KPiA+IFRvOiBTYWdlIFdlaWw7IHh1c2FuZ2RpIDExOTc2IChSRCkNCj4gPiBDYzogY2VwaC1k
-ZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCj4gPiBTdWJqZWN0OiBSRTogY2hvb3NlbGVhZiBtYXkgY2F1
-c2Ugc29tZSB1bm5lY2Vzc2FyeSBwZyBtaWdyYXRpb25zDQo+ID4NCj4gPiBUaGFua3Mgc2FnZS4N
-Cj4gPg0KPiA+IFJldGVzdGluZyBieSB1c2luZyAtLXRlc3QgLS13ZWlnaHQgJHtyYW5kfSAwICwg
-c3RpbGwgaW4gNDAgT1NEcywgMTAgcGVyIGhvc3QNCj4gY2FzZToNCj4gPg0KPiA+IE5ldyBjb2Rl
-IGF2ZXJhZ2Ugb24gMjA0LjMxIHdoaWxlIG9sZCBjb2RlIGF2ZXJhZ2Ugb24gMjAyLjMxDQo+ID4N
-Cj4gPg0KPiA+ID4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gPiA+IEZyb206IFNhZ2Ug
-V2VpbCBbbWFpbHRvOnNhZ2VAbmV3ZHJlYW0ubmV0XQ0KPiA+ID4gU2VudDogTW9uZGF5LCBPY3Rv
-YmVyIDE5LCAyMDE1IDEwOjE4IEFNDQo+ID4gPiBUbzogWHVzYW5nZGkNCj4gPiA+IENjOiBDaGVu
-LCBYaWFveGk7IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQo+ID4gPiBTdWJqZWN0OiBSRTog
-Y2hvb3NlbGVhZiBtYXkgY2F1c2Ugc29tZSB1bm5lY2Vzc2FyeSBwZyBtaWdyYXRpb25zDQo+ID4g
-Pg0KPiA+ID4gT24gTW9uLCAxOSBPY3QgMjAxNSwgWHVzYW5nZGkgd3JvdGU6DQo+ID4gPiA+DQo+
-ID4gPiA+ID4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gPiA+ID4gPiBGcm9tOiBjZXBo
-LWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZw0KPiA+ID4gPiA+IFttYWlsdG86Y2VwaC1kZXZl
-bC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBDaGVuLA0KPiA+ID4gPiA+IFhp
-YW94aQ0KPiA+ID4gPiA+IFNlbnQ6IE1vbmRheSwgT2N0b2JlciAxOSwgMjAxNSA5OjExIEFNDQo+
-ID4gPiA+ID4gVG86IHh1c2FuZ2RpIDExOTc2IChSRCkNCj4gPiA+ID4gPiBDYzogY2VwaC1kZXZl
-bEB2Z2VyLmtlcm5lbC5vcmcNCj4gPiA+ID4gPiBTdWJqZWN0OiBSRTogY2hvb3NlbGVhZiBtYXkg
-Y2F1c2Ugc29tZSB1bm5lY2Vzc2FyeSBwZyBtaWdyYXRpb25zDQo+ID4gPiA+ID4NCj4gPiA+ID4g
-PiBTb3JyeSBidXQgbm90IGZvbGxvd2luZy4uLg0KPiA+ID4gPiA+DQo+ID4gPiA+ID4gPiB0aGVu
-IHNodXQgZG93biBvbmUgb3IgbW9yZSBvc2RzIChwbGVhc2UgZG9uJ3QgdG91Y2ggdGhlDQo+ID4g
-PiA+ID4gPiBjcnVzaG1hcCwganVzdCBzdG9wIHRoZSBvc2Qgc2VydmljZSBvciBraWxsDQo+ID4g
-PiA+ID4gaXRzIHByb2Nlc3MpLg0KPiA+ID4gPiA+DQo+ID4gPiA+ID4gSW4gdGhpcyBjYXNlLCBP
-U0QgaXMgb25seSBkb3duIGJ1dCBub3Qgb3V0LCBidXQgd2lsbCBiZSBtYXJrZWQNCj4gPiA+ID4g
-PiBvdXQgYWZ0ZXINCj4gPiA+IDMwMHMuDQo+ID4gPiA+ID4NCj4gPiA+ID4gPiBTbyBpbiB3aGF0
-IGNhc2UgeW91ciBwYXRjaCBpcyBoZWxwaW5nPw0KPiA+ID4gPiA+DQo+ID4gPiA+ID4gICAgICAg
-SWYgeW91IHNhaWQgeW91ciBwYXRjaCBoZWxwcyBvbiAiZG93biBhbmQgb3V0IiAsIHRoZW4gbXkN
-Cj4gPiA+ID4gPiBleHBlcmltZW50IGlzIGV4YWN0bHkgdGhlIGNhc2UsDQo+ID4gPiA+ID4NCj4g
-PiA+ID4NCj4gPiA+ID4gSSBhbSBhZnJhaWQgaXQgaXMgcHJvYmFibHkgbm90LiBDb3VsZCB5b3Ug
-dGVsbCBtZSBob3cgZGlkIHlvdQ0KPiA+ID4gPiBzaW11bGF0ZSB0aGUgb3NkICJkb3duIGFuZCBv
-dXQiIHNpdHVhdGlvbiB1c2luZyBjcnVzaHRvb2w/IElmIGl0DQo+ID4gPiA+IHdhcyBkb25lIGJ5
-IGFyZ3VtZW50cyBzdWNoIGFzICctLXJlbW92ZS1pdGVtJyBvciAncmV3ZWlnaHQtaXRlbScsDQo+
-ID4gPiA+IGl0IG1vZGlmaWVkIHRoZSBjcnVzaG1hcCBhbmQgaXMgbm90IHdoYXQgSSdtIGFpbWlu
-ZyBmb3IuDQo+ID4gPg0KPiA+ID4gVGhlcmUgaXMgYSAtLXdlaWdodCBhcmd1bWVudCAobm90ZWQg
-aW4gdXNhZ2UgbmVhciAtLXRlc3QsIHdoaWNoIGlzDQo+ID4gPiB0aGUgb25seSBwaWVjZSB0aGF0
-IHVzZXMgaXQpLiAgVGhlIGNydXNoIG1hcCBpcyBub3QgbW9kaWZpZWQtLW9ubHkNCj4gPiA+IHRo
-ZSB3ZWlnaHQgdmVjdG9yIHRoYXQgaXMgcGFzc2VkIGluIHdoZW4gYSBtYXBwaW5nIGlzIGNhbGN1
-bGF0ZWQNCj4gPiA+ICh3aGljaCBpcyB0aGUgZXF1aXZhbGVudCBvZiB0aGUgaW4vb3V0IHN0YXRl
-IGluIENlcGgncyBPU0RNYXApLiAgVGhpcw0KPiBzaG91bGQgbGV0IHlvdSBzaW11bGF0ZSB0aGlz
-IGNhc2UuDQo+ID4gPg0KPiA+ID4gV2hlbiBJJ20gZGVidWdnaW5nL3VuZGVyc3RhbmRpbmcgdGhl
-c2UgaXNzdWVzIEkgdXN1YWxseSBjaGFuZ2UgdGhlDQo+ID4gPiBkcHJpbnRrICNkZWZpbmUgYXQg
-dGhlIHRvcCBvZiBjcnVzaC9tYXBwZXIuYyBhbmQgdXNlIGNydXNodG9vbCBvcg0KPiA+ID4gb3Nk
-bWFwdG9vbCB0byBjYWxjdWxhdGUgYSBzaW5nbGUgbWFwcGluZywgY29tcGFyaW5nIHRoZSBsb2cg
-YmVmb3JlDQo+ID4gPiBhbmQgYWZ0ZXIgYSBwYXJ0aWN1bGFyIGNoYW5nZS4NCj4gPiA+DQo+ID4g
-PiBzYWdlDQo+IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCj4gLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQo+IOacrOmCruS7tuWPiuWFtumZhOS7
-tuWQq+acieadreW3nuWNjuS4iemAmuS/oeaKgOacr+aciemZkOWFrOWPuOeahOS/neWvhuS/oeaB
-r++8jOS7hemZkOS6juWPkQ0KPiDpgIHnu5nkuIrpnaLlnLDlnYDkuK3liJflh7oNCj4g55qE5Liq
-5Lq65oiW576k57uE44CC56aB5q2i5Lu75L2V5YW25LuW5Lq65Lul5Lu75L2V5b2i5byP5L2/55So
-77yI5YyF5ous5L2G5LiN6ZmQ5LqO5YWo6YOo5oiWDQo+IOmDqOWIhuWcsOazhOmcsuOAgeWkjeWI
-tuOAgQ0KPiDmiJbmlaPlj5HvvInmnKzpgq7ku7bkuK3nmoTkv6Hmga/jgILlpoLmnpzmgqjplJnm
-lLbkuobmnKzpgq7ku7bvvIzor7fmgqjnq4vljbPnlLXor53miJbpgq7ku7YNCj4g6YCa55+l5Y+R
-5Lu25Lq65bm25Yig6Zmk5pysDQo+IOmCruS7tu+8gQ0KPiBUaGlzIGUtbWFpbCBhbmQgaXRzIGF0
-dGFjaG1lbnRzIGNvbnRhaW4gY29uZmlkZW50aWFsIGluZm9ybWF0aW9uIGZyb20gSDNDLA0KPiB3
-aGljaCBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgcGVyc29uIG9yIGVudGl0eSB3aG9zZSBhZGRy
-ZXNzIGlzIGxpc3RlZCBhYm92ZS4NCj4gQW55IHVzZSBvZiB0aGUgaW5mb3JtYXRpb24gY29udGFp
-bmVkIGhlcmVpbiBpbiBhbnkgd2F5IChpbmNsdWRpbmcsIGJ1dCBub3QNCj4gbGltaXRlZCB0bywg
-dG90YWwgb3IgcGFydGlhbCBkaXNjbG9zdXJlLCByZXByb2R1Y3Rpb24sIG9yIGRpc3NlbWluYXRp
-b24pIGJ5DQo+IHBlcnNvbnMgb3RoZXIgdGhhbiB0aGUgaW50ZW5kZWQNCj4gcmVjaXBpZW50KHMp
-IGlzIHByb2hpYml0ZWQuIElmIHlvdSByZWNlaXZlIHRoaXMgZS1tYWlsIGluIGVycm9yLCBwbGVh
-c2Ugbm90aWZ5IHRoZQ0KPiBzZW5kZXIgYnkgcGhvbmUgb3IgZW1haWwgaW1tZWRpYXRlbHkgYW5k
-IGRlbGV0ZSBpdCENCg==
+On Fri, Oct 23, 2015 at 9:27 AM, John Spray <jspray@redhat.com> wrote:
+>  * NFS writes from the guest are lagging for like a minute before
+> completing, my hunch is that this is something in the NFS client
+> recovery stuff (in ganesha) that's not coping with vsock, the
+> operations seem to complete at the point where the server declares
+> itself "NOT IN GRACE".
+
+
+Ganesha always starts in Grace, and will not process new clients until
+it exits Grace.  Existing clients should re-connect fine, and new
+clients work fine after Grace is exited.
+
+Dan
