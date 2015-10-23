@@ -1,56 +1,33 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH] rbd: remove duplicate calls to rbd_dev_mapping_clear()
-Date: Fri, 23 Oct 2015 20:41:04 +0200
-Message-ID: <1445625664-30873-1-git-send-email-idryomov@gmail.com>
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f172.google.com ([209.85.212.172]:33331 "EHLO
-	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751285AbbJWRBd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Oct 2015 13:01:33 -0400
-Received: by wijp11 with SMTP id p11so86238759wij.0
-        for <ceph-devel@vger.kernel.org>; Fri, 23 Oct 2015 10:01:32 -0700 (PDT)
-Received: from orange.localdomain (nat-pool-brq-t.redhat.com. [213.175.37.10])
-        by smtp.gmail.com with ESMTPSA id nf15sm3582397wic.22.2015.10.23.10.01.31
-        for <ceph-devel@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 23 Oct 2015 10:01:31 -0700 (PDT)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+From: Sage Weil <sweil@redhat.com>
+Subject: [GIT PULL] Ceph updates for -rc7
+Date: Fri, 23 Oct 2015 10:05:35 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1510231003290.3943@cobra.newdream.net>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: torvalds@linux-foundation.org
+Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-Commit d1cf5788450e ("rbd: set mapping info earlier") defined
-rbd_dev_mapping_clear(), but, just a few days after, commit
-f35a4dee14c3 ("rbd: set the mapping size and features later") moved
-rbd_dev_mapping_set() calls and added another rbd_dev_mapping_clear()
-call instead of moving the old one.  Around the same time, another
-duplicate was introduced in rbd_dev_device_release() - kill both.
+Hi Linus,
 
-Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
----
- drivers/block/rbd.c | 3 ---
- 1 file changed, 3 deletions(-)
+Please pull the following two patches from
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index cf087c5a6aa5..f8f4beb72b84 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -5251,8 +5251,6 @@ err_out_blkdev:
- 		unregister_blkdev(rbd_dev->major, rbd_dev->name);
- err_out_id:
- 	rbd_dev_id_put(rbd_dev);
--	rbd_dev_mapping_clear(rbd_dev);
--
- 	return ret;
- }
- 
-@@ -5507,7 +5505,6 @@ static void rbd_dev_device_release(struct rbd_device *rbd_dev)
- 	if (!single_major)
- 		unregister_blkdev(rbd_dev->major, rbd_dev->name);
- 	rbd_dev_id_put(rbd_dev);
--	rbd_dev_mapping_clear(rbd_dev);
- }
- 
- static void rbd_dev_remove_parent(struct rbd_device *rbd_dev)
--- 
-2.4.3
+  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
 
+One is a stopgap to prevent a stack blowout when users have a deep chain 
+of image clones.  (We'll rewrite this code to be non-recursive for the 
+next window, but in the meantime this is a simple fix that avoids a 
+crash.)  The second fixes a refcount underflow.
+
+Thanks!
+sage
+
+----------------------------------------------------------------
+Ilya Dryomov (2):
+      rbd: don't leak parent_spec in rbd_dev_probe_parent()
+      rbd: prevent kernel stack blow up on rbd map
+
+ drivers/block/rbd.c | 69 ++++++++++++++++++++++++++++++-----------------------
+ 1 file changed, 39 insertions(+), 30 deletions(-)
