@@ -1,76 +1,113 @@
-From: Howard Chu <hyc@symas.com>
-Subject: Re: newstore direction
-Date: Fri, 23 Oct 2015 15:59:36 +0100
-Message-ID: <562A4B58.1030407@symas.com>
-References: <alpine.DEB.2.00.1510191216200.4188@cobra.newdream.net>
- <CALe9h7dUQcp6zOSFDfnXSQo4VOTObFCWj+HD-idwE1nNzQVsgA@mail.gmail.com>
- <alpine.DEB.2.00.1510201251140.16833@cobra.newdream.net>
- <CAJ4mKGY0=+isJhh4oF3kqtxEZ6HWSDZXJyM9sBHxc8s21M_y8g@mail.gmail.com>
- <alpine.DEB.2.00.1510201422450.16833@cobra.newdream.net>
- <5626BECA.7070306@redhat.com>
- <alpine.DEB.2.00.1510210616060.16833@cobra.newdream.net>
- <5627981B.2040409@redhat.com> <loom.20151023T081245-920@post.gmane.org>
- <562A14D3.4070509@redhat.com> <562A1E69.2050704@redhat.com>
+From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Subject: RE: chooseleaf may cause some unnecessary pg migrations
+Date: Fri, 23 Oct 2015 15:41:56 +0000
+Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC03635696@shsmsx102.ccr.corp.intel.com>
+References: <FF8D83DAE5DF57468726B79904321E06046B73@H3CMLB12-EX.srv.huawei-3com.com>
+ <alpine.DEB.2.00.1510130940400.6589@cobra.newdream.net>
+ <FF8D83DAE5DF57468726B79904321E06047273@H3CMLB12-EX.srv.huawei-3com.com>
+ <alpine.DEB.2.00.1510140714580.6589@cobra.newdream.net>
+ <FF8D83DAE5DF57468726B79904321E06047677@H3CMLB12-EX.srv.huawei-3com.com>
+ <alpine.DEB.2.00.1510150715020.16833@cobra.newdream.net>
+ <6F3FA899187F0043BA1827A69DA2F7CC03632F6C@shsmsx102.ccr.corp.intel.com>
+ <FF8D83DAE5DF57468726B79904321E06047977@H3CMLB12-EX.srv.huawei-3com.com>
+ <6F3FA899187F0043BA1827A69DA2F7CC0363300C@shsmsx102.ccr.corp.intel.com>
+ <FF8D83DAE5DF57468726B79904321E060479C3@H3CMLB12-EX.srv.huawei-3com.com>
+ <6F3FA899187F0043BA1827A69DA2F7CC03633AAB@shsmsx102.ccr.corp.intel.com>
+ <FF8D83DAE5DF57468726B79904321E06047D8A@H3CMLB12-EX.srv.huawei-3com.com>
+ <alpine.DEB.2.00.1510181912160.16833@cobra.newdream.net>
+ <6F3FA899187F0043BA1827A69DA2F7CC03633C1B@shsmsx102.ccr.corp.intel.com>
+ <FF8D83DAE5DF57468726B79904321E06047EB4@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-2; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from zill.ext.symas.net ([69.43.206.106]:50208 "EHLO
-	zill.ext.symas.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751753AbbJWPia (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Oct 2015 11:38:30 -0400
-In-Reply-To: <562A1E69.2050704@redhat.com>
+Received: from mga09.intel.com ([134.134.136.24]:59591 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752600AbbJWPmG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 23 Oct 2015 11:42:06 -0400
+In-Reply-To: <FF8D83DAE5DF57468726B79904321E06047EB4@H3CMLB12-EX.srv.huawei-3com.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ric Wheeler <rwheeler@redhat.com>, ceph-devel@vger.kernel.org
+To: Xusangdi <xu.sangdi@h3c.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Ric Wheeler wrote:
-> On 10/23/2015 07:06 AM, Ric Wheeler wrote:
->> On 10/23/2015 02:21 AM, Howard Chu wrote:
->>>> Normally, best practice is to use batching to avoid paying worst case latency
->>>> >when you do a synchronous IO. Write a batch of files or appends without
->>> fsync,
->>>> >then go back and fsync and you will pay that latency once (not per file/op).
->>> If filesystems would support ordered writes you wouldn't need to fsync at
->>> all. Just spit out a stream of writes and declare that batch N must be
->>> written before batch N+1. (Note that this is not identical to "write
->>> barriers", which imposed the same latencies as fsync by blocking all I/Os at
->>> a barrier boundary. Ordered writes may be freely interleaved with un-ordered
->>> writes, so normal I/O traffic can proceed unhindered. Their ordering is only
->>> enforced wrt other ordered writes.)
-
-> One other note, the file & storage kernel people discussed using ordering
-> years ago. One of the issues is that the devices themselves need to support.
-> While S-ATA devices are portrayed as SCSI in the kernel, ATA does not (and
-> still does not as far as I know?) support ordered tags.
-
-Yes, that's a bigger problem. ATA NCQ/TCQ aren't up to the job.
-
- >>> A bit of a shame that Linux's SCSI drivers support Ordering attributes but
- >>> nothing above that layer makes use of it.
- >>
- >> I think that if the stream on either side of the barrier is large enough,
- >> using ordered tags (SCSI speak) versus doing stream1, fsync(), stream2,
- >> should have the same performance.
-
- >> Not clear to me if we could do away with an fsync to trigger a cache flush
- >> here either - do SCSI ordered tags require that the writes be acknowledged
- >> only when durable, or can the device ack them once the target has them
- >> (including in a volatile write cache)?
-
-fsync() is too blunt a tool; its use gives you both C and D of ACID 
-(Consistency and Durability). Ordered tags give you Consistency; there are 
-lots of applications that can live without perfect Durability but losing 
-Consistency is a major headache.
-
-If the stream of writes is large enough, you could omit fsync because 
-everything is being forced out of the cache to disk anyway. In that scenario, 
-the only thing that matters is that the writes get forced out in the order you 
-intended, so that an interruption or crash leaves you in a known (or knowable) 
-state vs unknown.
-
--- 
-   -- Howard Chu
-   CTO, Symas Corp.           http://www.symas.com
-   Director, Highland Sun     http://highlandsun.com/hyc/
-   Chief Architect, OpenLDAP  http://www.openldap.org/project/
+WWVzLCBnb29kIGNhdGNoLg0KDQpCeSB0ZXJtIG9mIG51bWJlciBvZiBjaGFuZ2VkIG1hcHBpbmcg
+KEkgc29ydCBhbmQgY29tcGFyZWQgdGhlIE9TRCBzZXQpLCB0aGlzIHBhdGNoIGRvIGhlbHBzIGEg
+bG90IGFzIGV2ZXJ5IHJlbWFwcGVkIFBHIG9ubHkgaGFzIG9uZSBPU0QgY2hhbmdpbmcuDQoNCkNv
+b2wgLCB3ZWxsIGRvbmUuDQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTog
+WHVzYW5nZGkgW21haWx0bzp4dS5zYW5nZGlAaDNjLmNvbV0NCj4gU2VudDogTW9uZGF5LCBPY3Rv
+YmVyIDE5LCAyMDE1IDQ6MTMgUE0NCj4gVG86IENoZW4sIFhpYW94aQ0KPiBDYzogY2VwaC1kZXZl
+bEB2Z2VyLmtlcm5lbC5vcmcNCj4gU3ViamVjdDogUkU6IGNob29zZWxlYWYgbWF5IGNhdXNlIHNv
+bWUgdW5uZWNlc3NhcnkgcGcgbWlncmF0aW9ucw0KPiANCj4gSSBqdXN0IHJlYWxpemVkIHRoZSBt
+ZWFzdXJlbWVudCBJIG1lbnRpb25lZCBsYXN0IHRpbWUgaXMgbm90IHByZWNpc2UuIEl0DQo+IHNo
+b3VsZCBiZSAnbnVtYmVyIG9mIGNoYW5nZWQgbWFwcGluZ3MnIGluc3RlYWQgb2YgJ251bWJlciBv
+ZiByZW1hcHBlZA0KPiBQR3MnLg0KPiBGb3IgZXhhbXBsZSwgWzIsMSw3XSAtPiBbMCw3LDRdIHNo
+b3VsZCBiZSByZWdhcmRlZCBkaWZmZXJlbnRseSBmcm9tIFsyLDEsN10gLT4NCj4gWzEsNyw0XSwg
+YXMgdGhlIGZpcnN0IGNoYW5nZSBjYXVzZXMgZG91YmxlZCBkYXRhIHRyYW5zZmVyLg0KPiBJcyB0
+aGlzIHRoZSByZWFzb24gZm9yIHlvdXIgdGVzdCByZXN1bHRzPw0KPiANCj4gPiAtLS0tLU9yaWdp
+bmFsIE1lc3NhZ2UtLS0tLQ0KPiA+IEZyb206IENoZW4sIFhpYW94aSBbbWFpbHRvOnhpYW94aS5j
+aGVuQGludGVsLmNvbV0NCj4gPiBTZW50OiBNb25kYXksIE9jdG9iZXIgMTksIDIwMTUgMzozNCBQ
+TQ0KPiA+IFRvOiBTYWdlIFdlaWw7IHh1c2FuZ2RpIDExOTc2IChSRCkNCj4gPiBDYzogY2VwaC1k
+ZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCj4gPiBTdWJqZWN0OiBSRTogY2hvb3NlbGVhZiBtYXkgY2F1
+c2Ugc29tZSB1bm5lY2Vzc2FyeSBwZyBtaWdyYXRpb25zDQo+ID4NCj4gPiBUaGFua3Mgc2FnZS4N
+Cj4gPg0KPiA+IFJldGVzdGluZyBieSB1c2luZyAtLXRlc3QgLS13ZWlnaHQgJHtyYW5kfSAwICwg
+c3RpbGwgaW4gNDAgT1NEcywgMTAgcGVyIGhvc3QNCj4gY2FzZToNCj4gPg0KPiA+IE5ldyBjb2Rl
+IGF2ZXJhZ2Ugb24gMjA0LjMxIHdoaWxlIG9sZCBjb2RlIGF2ZXJhZ2Ugb24gMjAyLjMxDQo+ID4N
+Cj4gPg0KPiA+ID4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gPiA+IEZyb206IFNhZ2Ug
+V2VpbCBbbWFpbHRvOnNhZ2VAbmV3ZHJlYW0ubmV0XQ0KPiA+ID4gU2VudDogTW9uZGF5LCBPY3Rv
+YmVyIDE5LCAyMDE1IDEwOjE4IEFNDQo+ID4gPiBUbzogWHVzYW5nZGkNCj4gPiA+IENjOiBDaGVu
+LCBYaWFveGk7IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQo+ID4gPiBTdWJqZWN0OiBSRTog
+Y2hvb3NlbGVhZiBtYXkgY2F1c2Ugc29tZSB1bm5lY2Vzc2FyeSBwZyBtaWdyYXRpb25zDQo+ID4g
+Pg0KPiA+ID4gT24gTW9uLCAxOSBPY3QgMjAxNSwgWHVzYW5nZGkgd3JvdGU6DQo+ID4gPiA+DQo+
+ID4gPiA+ID4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gPiA+ID4gPiBGcm9tOiBjZXBo
+LWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZw0KPiA+ID4gPiA+IFttYWlsdG86Y2VwaC1kZXZl
+bC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBDaGVuLA0KPiA+ID4gPiA+IFhp
+YW94aQ0KPiA+ID4gPiA+IFNlbnQ6IE1vbmRheSwgT2N0b2JlciAxOSwgMjAxNSA5OjExIEFNDQo+
+ID4gPiA+ID4gVG86IHh1c2FuZ2RpIDExOTc2IChSRCkNCj4gPiA+ID4gPiBDYzogY2VwaC1kZXZl
+bEB2Z2VyLmtlcm5lbC5vcmcNCj4gPiA+ID4gPiBTdWJqZWN0OiBSRTogY2hvb3NlbGVhZiBtYXkg
+Y2F1c2Ugc29tZSB1bm5lY2Vzc2FyeSBwZyBtaWdyYXRpb25zDQo+ID4gPiA+ID4NCj4gPiA+ID4g
+PiBTb3JyeSBidXQgbm90IGZvbGxvd2luZy4uLg0KPiA+ID4gPiA+DQo+ID4gPiA+ID4gPiB0aGVu
+IHNodXQgZG93biBvbmUgb3IgbW9yZSBvc2RzIChwbGVhc2UgZG9uJ3QgdG91Y2ggdGhlDQo+ID4g
+PiA+ID4gPiBjcnVzaG1hcCwganVzdCBzdG9wIHRoZSBvc2Qgc2VydmljZSBvciBraWxsDQo+ID4g
+PiA+ID4gaXRzIHByb2Nlc3MpLg0KPiA+ID4gPiA+DQo+ID4gPiA+ID4gSW4gdGhpcyBjYXNlLCBP
+U0QgaXMgb25seSBkb3duIGJ1dCBub3Qgb3V0LCBidXQgd2lsbCBiZSBtYXJrZWQNCj4gPiA+ID4g
+PiBvdXQgYWZ0ZXINCj4gPiA+IDMwMHMuDQo+ID4gPiA+ID4NCj4gPiA+ID4gPiBTbyBpbiB3aGF0
+IGNhc2UgeW91ciBwYXRjaCBpcyBoZWxwaW5nPw0KPiA+ID4gPiA+DQo+ID4gPiA+ID4gICAgICAg
+SWYgeW91IHNhaWQgeW91ciBwYXRjaCBoZWxwcyBvbiAiZG93biBhbmQgb3V0IiAsIHRoZW4gbXkN
+Cj4gPiA+ID4gPiBleHBlcmltZW50IGlzIGV4YWN0bHkgdGhlIGNhc2UsDQo+ID4gPiA+ID4NCj4g
+PiA+ID4NCj4gPiA+ID4gSSBhbSBhZnJhaWQgaXQgaXMgcHJvYmFibHkgbm90LiBDb3VsZCB5b3Ug
+dGVsbCBtZSBob3cgZGlkIHlvdQ0KPiA+ID4gPiBzaW11bGF0ZSB0aGUgb3NkICJkb3duIGFuZCBv
+dXQiIHNpdHVhdGlvbiB1c2luZyBjcnVzaHRvb2w/IElmIGl0DQo+ID4gPiA+IHdhcyBkb25lIGJ5
+IGFyZ3VtZW50cyBzdWNoIGFzICctLXJlbW92ZS1pdGVtJyBvciAncmV3ZWlnaHQtaXRlbScsDQo+
+ID4gPiA+IGl0IG1vZGlmaWVkIHRoZSBjcnVzaG1hcCBhbmQgaXMgbm90IHdoYXQgSSdtIGFpbWlu
+ZyBmb3IuDQo+ID4gPg0KPiA+ID4gVGhlcmUgaXMgYSAtLXdlaWdodCBhcmd1bWVudCAobm90ZWQg
+aW4gdXNhZ2UgbmVhciAtLXRlc3QsIHdoaWNoIGlzDQo+ID4gPiB0aGUgb25seSBwaWVjZSB0aGF0
+IHVzZXMgaXQpLiAgVGhlIGNydXNoIG1hcCBpcyBub3QgbW9kaWZpZWQtLW9ubHkNCj4gPiA+IHRo
+ZSB3ZWlnaHQgdmVjdG9yIHRoYXQgaXMgcGFzc2VkIGluIHdoZW4gYSBtYXBwaW5nIGlzIGNhbGN1
+bGF0ZWQNCj4gPiA+ICh3aGljaCBpcyB0aGUgZXF1aXZhbGVudCBvZiB0aGUgaW4vb3V0IHN0YXRl
+IGluIENlcGgncyBPU0RNYXApLiAgVGhpcw0KPiBzaG91bGQgbGV0IHlvdSBzaW11bGF0ZSB0aGlz
+IGNhc2UuDQo+ID4gPg0KPiA+ID4gV2hlbiBJJ20gZGVidWdnaW5nL3VuZGVyc3RhbmRpbmcgdGhl
+c2UgaXNzdWVzIEkgdXN1YWxseSBjaGFuZ2UgdGhlDQo+ID4gPiBkcHJpbnRrICNkZWZpbmUgYXQg
+dGhlIHRvcCBvZiBjcnVzaC9tYXBwZXIuYyBhbmQgdXNlIGNydXNodG9vbCBvcg0KPiA+ID4gb3Nk
+bWFwdG9vbCB0byBjYWxjdWxhdGUgYSBzaW5nbGUgbWFwcGluZywgY29tcGFyaW5nIHRoZSBsb2cg
+YmVmb3JlDQo+ID4gPiBhbmQgYWZ0ZXIgYSBwYXJ0aWN1bGFyIGNoYW5nZS4NCj4gPiA+DQo+ID4g
+PiBzYWdlDQo+IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCj4gLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQo+IOacrOmCruS7tuWPiuWFtumZhOS7
+tuWQq+acieadreW3nuWNjuS4iemAmuS/oeaKgOacr+aciemZkOWFrOWPuOeahOS/neWvhuS/oeaB
+r++8jOS7hemZkOS6juWPkQ0KPiDpgIHnu5nkuIrpnaLlnLDlnYDkuK3liJflh7oNCj4g55qE5Liq
+5Lq65oiW576k57uE44CC56aB5q2i5Lu75L2V5YW25LuW5Lq65Lul5Lu75L2V5b2i5byP5L2/55So
+77yI5YyF5ous5L2G5LiN6ZmQ5LqO5YWo6YOo5oiWDQo+IOmDqOWIhuWcsOazhOmcsuOAgeWkjeWI
+tuOAgQ0KPiDmiJbmlaPlj5HvvInmnKzpgq7ku7bkuK3nmoTkv6Hmga/jgILlpoLmnpzmgqjplJnm
+lLbkuobmnKzpgq7ku7bvvIzor7fmgqjnq4vljbPnlLXor53miJbpgq7ku7YNCj4g6YCa55+l5Y+R
+5Lu25Lq65bm25Yig6Zmk5pysDQo+IOmCruS7tu+8gQ0KPiBUaGlzIGUtbWFpbCBhbmQgaXRzIGF0
+dGFjaG1lbnRzIGNvbnRhaW4gY29uZmlkZW50aWFsIGluZm9ybWF0aW9uIGZyb20gSDNDLA0KPiB3
+aGljaCBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgcGVyc29uIG9yIGVudGl0eSB3aG9zZSBhZGRy
+ZXNzIGlzIGxpc3RlZCBhYm92ZS4NCj4gQW55IHVzZSBvZiB0aGUgaW5mb3JtYXRpb24gY29udGFp
+bmVkIGhlcmVpbiBpbiBhbnkgd2F5IChpbmNsdWRpbmcsIGJ1dCBub3QNCj4gbGltaXRlZCB0bywg
+dG90YWwgb3IgcGFydGlhbCBkaXNjbG9zdXJlLCByZXByb2R1Y3Rpb24sIG9yIGRpc3NlbWluYXRp
+b24pIGJ5DQo+IHBlcnNvbnMgb3RoZXIgdGhhbiB0aGUgaW50ZW5kZWQNCj4gcmVjaXBpZW50KHMp
+IGlzIHByb2hpYml0ZWQuIElmIHlvdSByZWNlaXZlIHRoaXMgZS1tYWlsIGluIGVycm9yLCBwbGVh
+c2Ugbm90aWZ5IHRoZQ0KPiBzZW5kZXIgYnkgcGhvbmUgb3IgZW1haWwgaW1tZWRpYXRlbHkgYW5k
+IGRlbGV0ZSBpdCENCg==
