@@ -1,35 +1,83 @@
-From: Daniel Gryniewicz <dang@redhat.com>
-Subject: Re: nfsv41 over AF_VSOCK (nfs-ganesha)
-Date: Fri, 23 Oct 2015 12:34:42 -0400
-Message-ID: <CAL-2WbGd0t4zxx7nb6CtSGFpL6CznStk0isZZ=BuGdyjxyF1hw@mail.gmail.com>
-References: <1602558852.33130185.1445028743632.JavaMail.zimbra@redhat.com>
- <1249838657.33136909.1445029697101.JavaMail.zimbra@redhat.com>
- <CALe9h7cGzjgBO=K-p7PF=MQViawh8ZKd6u_u4E5A_JSf5zhMVg@mail.gmail.com> <CALe9h7fTUKJkxTxX4wKYwvJMOUXRneR+jB49p9M1Ji3-DVGuhw@mail.gmail.com>
+From: Ric Wheeler <rwheeler@redhat.com>
+Subject: Re: newstore direction
+Date: Fri, 23 Oct 2015 12:37:30 -0400
+Message-ID: <562A624A.10509@redhat.com>
+References: <alpine.DEB.2.00.1510191216200.4188@cobra.newdream.net>
+ <CALe9h7dUQcp6zOSFDfnXSQo4VOTObFCWj+HD-idwE1nNzQVsgA@mail.gmail.com>
+ <alpine.DEB.2.00.1510201251140.16833@cobra.newdream.net>
+ <CAJ4mKGY0=+isJhh4oF3kqtxEZ6HWSDZXJyM9sBHxc8s21M_y8g@mail.gmail.com>
+ <alpine.DEB.2.00.1510201422450.16833@cobra.newdream.net>
+ <5626BECA.7070306@redhat.com>
+ <alpine.DEB.2.00.1510210616060.16833@cobra.newdream.net>
+ <5627981B.2040409@redhat.com> <loom.20151023T081245-920@post.gmane.org>
+ <562A14D3.4070509@redhat.com> <562A1E69.2050704@redhat.com>
+ <562A4B58.1030407@symas.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=iso-8859-2; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f181.google.com ([209.85.212.181]:37974 "EHLO
-	mail-wi0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751380AbbJWQfD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Oct 2015 12:35:03 -0400
-Received: by wicll6 with SMTP id ll6so39128013wic.1
-        for <ceph-devel@vger.kernel.org>; Fri, 23 Oct 2015 09:35:02 -0700 (PDT)
-In-Reply-To: <CALe9h7fTUKJkxTxX4wKYwvJMOUXRneR+jB49p9M1Ji3-DVGuhw@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:34463 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750922AbbJWQhd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 23 Oct 2015 12:37:33 -0400
+In-Reply-To: <562A4B58.1030407@symas.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Stefan Hajnoczi <shajnocz@redhat.com>
+To: Howard Chu <hyc@symas.com>, ceph-devel@vger.kernel.org
 
-On Fri, Oct 23, 2015 at 9:27 AM, John Spray <jspray@redhat.com> wrote:
->  * NFS writes from the guest are lagging for like a minute before
-> completing, my hunch is that this is something in the NFS client
-> recovery stuff (in ganesha) that's not coping with vsock, the
-> operations seem to complete at the point where the server declares
-> itself "NOT IN GRACE".
+On 10/23/2015 10:59 AM, Howard Chu wrote:
+> Ric Wheeler wrote:
+>> On 10/23/2015 07:06 AM, Ric Wheeler wrote:
+>>> On 10/23/2015 02:21 AM, Howard Chu wrote:
+>>>>> Normally, best practice is to use batching to avoid paying worst case latency
+>>>>> >when you do a synchronous IO. Write a batch of files or appends without
+>>>> fsync,
+>>>>> >then go back and fsync and you will pay that latency once (not per file/op).
+>>>> If filesystems would support ordered writes you wouldn't need to fsync at
+>>>> all. Just spit out a stream of writes and declare that batch N must be
+>>>> written before batch N+1. (Note that this is not identical to "write
+>>>> barriers", which imposed the same latencies as fsync by blocking all I/Os at
+>>>> a barrier boundary. Ordered writes may be freely interleaved with un-ordered
+>>>> writes, so normal I/O traffic can proceed unhindered. Their ordering is only
+>>>> enforced wrt other ordered writes.)
+>
+>> One other note, the file & storage kernel people discussed using ordering
+>> years ago. One of the issues is that the devices themselves need to support.
+>> While S-ATA devices are portrayed as SCSI in the kernel, ATA does not (and
+>> still does not as far as I know?) support ordered tags.
+>
+> Yes, that's a bigger problem. ATA NCQ/TCQ aren't up to the job.
+>
+> >>> A bit of a shame that Linux's SCSI drivers support Ordering attributes but
+> >>> nothing above that layer makes use of it.
+> >>
+> >> I think that if the stream on either side of the barrier is large enough,
+> >> using ordered tags (SCSI speak) versus doing stream1, fsync(), stream2,
+> >> should have the same performance.
+>
+> >> Not clear to me if we could do away with an fsync to trigger a cache flush
+> >> here either - do SCSI ordered tags require that the writes be acknowledged
+> >> only when durable, or can the device ack them once the target has them
+> >> (including in a volatile write cache)?
+>
+> fsync() is too blunt a tool; its use gives you both C and D of ACID 
+> (Consistency and Durability). Ordered tags give you Consistency; there are 
+> lots of applications that can live without perfect Durability but losing 
+> Consistency is a major headache.
+>
+> If the stream of writes is large enough, you could omit fsync because 
+> everything is being forced out of the cache to disk anyway. In that scenario, 
+> the only thing that matters is that the writes get forced out in the order you 
+> intended, so that an interruption or crash leaves you in a known (or knowable) 
+> state vs unknown.
+>
 
+I do agree that fsync is quite a blunt tool, but you cannot assume that a stream 
+of writes will flush the cache - that is extremely firmware dependent.
 
-Ganesha always starts in Grace, and will not process new clients until
-it exits Grace.  Existing clients should re-connect fine, and new
-clients work fine after Grace is exited.
+Pretty common to leave small IO's in cache and let larger IO's stream directly 
+to the backing device (platter, etc) - those small objects can stay live and 
+non-durable for days under some heavy workloads :)
 
-Dan
+ric
+
