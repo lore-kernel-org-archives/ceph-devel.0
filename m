@@ -1,56 +1,76 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: nfsv41 over AF_VSOCK (nfs-ganesha)
-Date: Fri, 23 Oct 2015 14:27:22 +0100
-Message-ID: <CALe9h7fTUKJkxTxX4wKYwvJMOUXRneR+jB49p9M1Ji3-DVGuhw@mail.gmail.com>
-References: <1602558852.33130185.1445028743632.JavaMail.zimbra@redhat.com>
- <1249838657.33136909.1445029697101.JavaMail.zimbra@redhat.com> <CALe9h7cGzjgBO=K-p7PF=MQViawh8ZKd6u_u4E5A_JSf5zhMVg@mail.gmail.com>
+From: Howard Chu <hyc@symas.com>
+Subject: Re: newstore direction
+Date: Fri, 23 Oct 2015 15:59:36 +0100
+Message-ID: <562A4B58.1030407@symas.com>
+References: <alpine.DEB.2.00.1510191216200.4188@cobra.newdream.net>
+ <CALe9h7dUQcp6zOSFDfnXSQo4VOTObFCWj+HD-idwE1nNzQVsgA@mail.gmail.com>
+ <alpine.DEB.2.00.1510201251140.16833@cobra.newdream.net>
+ <CAJ4mKGY0=+isJhh4oF3kqtxEZ6HWSDZXJyM9sBHxc8s21M_y8g@mail.gmail.com>
+ <alpine.DEB.2.00.1510201422450.16833@cobra.newdream.net>
+ <5626BECA.7070306@redhat.com>
+ <alpine.DEB.2.00.1510210616060.16833@cobra.newdream.net>
+ <5627981B.2040409@redhat.com> <loom.20151023T081245-920@post.gmane.org>
+ <562A14D3.4070509@redhat.com> <562A1E69.2050704@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-2; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f42.google.com ([209.85.215.42]:35980 "EHLO
-	mail-lf0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751307AbbJWN1n (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Oct 2015 09:27:43 -0400
-Received: by lffz202 with SMTP id z202so83639709lff.3
-        for <ceph-devel@vger.kernel.org>; Fri, 23 Oct 2015 06:27:42 -0700 (PDT)
-In-Reply-To: <CALe9h7cGzjgBO=K-p7PF=MQViawh8ZKd6u_u4E5A_JSf5zhMVg@mail.gmail.com>
+Received: from zill.ext.symas.net ([69.43.206.106]:50208 "EHLO
+	zill.ext.symas.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751753AbbJWPia (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Oct 2015 11:38:30 -0400
+In-Reply-To: <562A1E69.2050704@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
-Cc: Stefan Hajnoczi <shajnocz@redhat.com>
+To: Ric Wheeler <rwheeler@redhat.com>, ceph-devel@vger.kernel.org
 
-On Mon, Oct 19, 2015 at 5:13 PM, John Spray <jspray@redhat.com> wrote:
->> If you try this, send feedback.
->>
+Ric Wheeler wrote:
+> On 10/23/2015 07:06 AM, Ric Wheeler wrote:
+>> On 10/23/2015 02:21 AM, Howard Chu wrote:
+>>>> Normally, best practice is to use batching to avoid paying worst case latency
+>>>> >when you do a synchronous IO. Write a batch of files or appends without
+>>> fsync,
+>>>> >then go back and fsync and you will pay that latency once (not per file/op).
+>>> If filesystems would support ordered writes you wouldn't need to fsync at
+>>> all. Just spit out a stream of writes and declare that batch N must be
+>>> written before batch N+1. (Note that this is not identical to "write
+>>> barriers", which imposed the same latencies as fsync by blocking all I/Os at
+>>> a barrier boundary. Ordered writes may be freely interleaved with un-ordered
+>>> writes, so normal I/O traffic can proceed unhindered. Their ordering is only
+>>> enforced wrt other ordered writes.)
 
-OK, got this up and running.
+> One other note, the file & storage kernel people discussed using ordering
+> years ago. One of the issues is that the devices themselves need to support.
+> While S-ATA devices are portrayed as SCSI in the kernel, ATA does not (and
+> still does not as far as I know?) support ordered tags.
 
-I've shared the kernel/qemu/nfsutils packages I built here:
-https://copr.fedoraproject.org/coprs/jspray/vsock-nfs/builds/
+Yes, that's a bigger problem. ATA NCQ/TCQ aren't up to the job.
 
-(at time of writing the kernel one is still building, and I'm running
-with ganesha out of a source tree)
+ >>> A bit of a shame that Linux's SCSI drivers support Ordering attributes but
+ >>> nothing above that layer makes use of it.
+ >>
+ >> I think that if the stream on either side of the barrier is large enough,
+ >> using ordered tags (SCSI speak) versus doing stream1, fsync(), stream2,
+ >> should have the same performance.
 
-Observations:
- * Running VM as qemu user gives EPERM opening vsock device, even
-after changing permissions on the device node (for which I guess we'll
-want udev rules at some stage) -- is there a particular capability
-that we need to grant the qemu user?  Was looking into this to make it
-convenient to run inside libvirt.
- * NFS writes from the guest are lagging for like a minute before
-completing, my hunch is that this is something in the NFS client
-recovery stuff (in ganesha) that's not coping with vsock, the
-operations seem to complete at the point where the server declares
-itself "NOT IN GRACE".
- * For those (like myself) unaccustomed to running ganesha, do not run
-it straight out of a source tree and expect everything to work, by
-default even VFS exports won't work that way (mounts work but clients
-see an empty tree) because it can't find the built FSAL .so.  You can
-write a config file that works, but it's easier just to make install
-it.
- * (Anecdotal, seen while messing with other stuff) client mount seems
-to hang if I kill ganesha and then start it again, not sure if this is
-a ganesha issue or a general vsock issue.
+ >> Not clear to me if we could do away with an fsync to trigger a cache flush
+ >> here either - do SCSI ordered tags require that the writes be acknowledged
+ >> only when durable, or can the device ack them once the target has them
+ >> (including in a volatile write cache)?
 
-Cheers,
-John
+fsync() is too blunt a tool; its use gives you both C and D of ACID 
+(Consistency and Durability). Ordered tags give you Consistency; there are 
+lots of applications that can live without perfect Durability but losing 
+Consistency is a major headache.
+
+If the stream of writes is large enough, you could omit fsync because 
+everything is being forced out of the cache to disk anyway. In that scenario, 
+the only thing that matters is that the writes get forced out in the order you 
+intended, so that an interruption or crash leaves you in a known (or knowable) 
+state vs unknown.
+
+-- 
+   -- Howard Chu
+   CTO, Symas Corp.           http://www.symas.com
+   Director, Highland Sun     http://highlandsun.com/hyc/
+   Chief Architect, OpenLDAP  http://www.openldap.org/project/
