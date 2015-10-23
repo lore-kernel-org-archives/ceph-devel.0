@@ -1,116 +1,131 @@
-From: Samuel Just <sjust@redhat.com>
-Subject: Re: newstore direction
-Date: Thu, 22 Oct 2015 17:10:19 -0700
-Message-ID: <CAN=+7FVrJuObUyJZrXTF=kAmNo3x+NWeHPru8JhY7gz0VxrTBg@mail.gmail.com>
-References: <alpine.DEB.2.00.1510191216200.4188@cobra.newdream.net>
-	<56268886.7010806@redhat.com>
-	<1445415736.1809.71.camel@redhat.com>
-	<56277468.5000504@redhat.com>
-	<alpine.DEB.2.00.1510220528140.16833@cobra.newdream.net>
-	<99767EA2E27DD44DB4E9F9B9ACA458C056195B6E@SSIEXCH-MB3.ssi.samsung.com>
-	<CAN=+7FUMoi2d=mEkg+3vmBfaTGE02hp05ydFUJLn4eUwur+r9A@mail.gmail.com>
+From: Ronny Hegewald <ronny.hegewald@online.de>
+Subject: Re: [PATCH] mark rbd requiring stable pages
+Date: Fri, 23 Oct 2015 00:52:47 +0000
+Message-ID: <201510230052.47499.ronny.hegewald@online.de>
+References: <201510151850.48348.ronny.hegewald@online.de> <CAOi1vP_zx+Cz+tM07pZa_ciFhnJ8ddHX+dy35cqhOJ3BT4a8jw@mail.gmail.com> <56291B60.1040106@cs.wisc.edu>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f175.google.com ([209.85.213.175]:36935 "EHLO
-	mail-ig0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751387AbbJWAKU convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Oct 2015 20:10:20 -0400
-Received: by igbhv6 with SMTP id hv6so5834488igb.0
-        for <ceph-devel@vger.kernel.org>; Thu, 22 Oct 2015 17:10:19 -0700 (PDT)
-In-Reply-To: <CAN=+7FUMoi2d=mEkg+3vmBfaTGE02hp05ydFUJLn4eUwur+r9A@mail.gmail.com>
+Received: from mout.kundenserver.de ([212.227.126.187]:61737 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932567AbbJWAvP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Oct 2015 20:51:15 -0400
+In-Reply-To: <56291B60.1040106@cs.wisc.edu>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
-Cc: Sage Weil <sweil@redhat.com>, Ric Wheeler <rwheeler@redhat.com>, Orit Wasserman <owasserm@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Mike Christie <michaelc@cs.wisc.edu>
+Cc: Ilya Dryomov <idryomov@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, Alex Elder <elder@kernel.org>
 
-Ah, except for the snapmapper.  We can split the snapmapper in the
-same way, though, as long as we are careful with the name.
--Sam
+On Thursday 22 October 2015, you wrote:
+> It could be due to a recent change. Ronny, tell us about the workload
+> and I will check iscsi.
+ 
+I guess the best testcase is a kernel compilation in a make clean; make -j (> 
+1); loop. The data-corruptions usually happen in the generated .cmd files, 
+which breaks the build immediatelly and makes the corruption easy to spot.
 
-On Thu, Oct 22, 2015 at 4:42 PM, Samuel Just <sjust@redhat.com> wrote:
-> Since the changes which moved the pg log and the pg info into the pg
-> object space, I think it's now the case that any transaction submitted
-> to the objectstore updates a disjoint range of objects determined by
-> the sequencer.  It might be easier to exploit that parallelism if we
-> control allocation and allocation related metadata.  We could split
-> the store into N pieces which partition the pg space (one additional
-> one for the meta sequencer?) with one rocksdb instance for each.
-> Space could then be parcelled out in large pieces (small frequency of
-> global allocation decisions) and managed more finely within each
-> partition.  The main challenge would be avoiding internal
-> fragmentation of those, but at least defragmentation can be managed on
-> a per-partition basis.  Such parallelism is probably necessary to
-> exploit the full throughput of some ssds.
-> -Sam
->
-> On Thu, Oct 22, 2015 at 10:42 AM, James (Fei) Liu-SSI
-> <james.liu@ssi.samsung.com> wrote:
->> Hi Sage and other fellow cephers,
->>   I truly share the pains with you  all about filesystem while I am working on  objectstore to improve the performance. As mentioned , there is nothing wrong with filesystem. Just the Ceph as one of  use case need more supports but not provided in near future by filesystem no matter what reasons.
->>
->>    There are so many techniques  pop out which can help to improve performance of OSD.  User space driver(DPDK from Intel) is one of them. It not only gives you the storage allocator,  also gives you the thread scheduling support,  CPU affinity , NUMA friendly, polling  which  might fundamentally change the performance of objectstore.  It should not be hard to improve CPU utilization 3x~5x times, higher IOPS etc.
->>     I totally agreed that goal of filestore is to gives enough support for filesystem with either 1 ,1b, or 2 solutions. In my humble opinion , The new design goal of objectstore should focus on giving the best  performance for OSD with new techniques. These two goals are not going to conflict with each other.  They are just for different purposes to make Ceph not only more stable but also better.
->>
->>   Scylla mentioned by Orit is a good example .
->>
->>   Thanks all.
->>
->>   Regards,
->>   James
->>
->> -----Original Message-----
->> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
->> Sent: Thursday, October 22, 2015 5:50 AM
->> To: Ric Wheeler
->> Cc: Orit Wasserman; ceph-devel@vger.kernel.org
->> Subject: Re: newstore direction
->>
->> On Wed, 21 Oct 2015, Ric Wheeler wrote:
->>> You will have to trust me on this as the Red Hat person who spoke to
->>> pretty much all of our key customers about local file systems and
->>> storage - customers all have migrated over to using normal file systems under Oracle/DB2.
->>> Typically, they use XFS or ext4.  I don't know of any non-standard
->>> file systems and only have seen one account running on a raw block
->>> store in 8 years
->>> :)
->>>
->>> If you have a pre-allocated file and write using O_DIRECT, your IO
->>> path is identical in terms of IO's sent to the device.
->>>
->>> If we are causing additional IO's, then we really need to spend some
->>> time talking to the local file system gurus about this in detail.  I
->>> can help with that conversation.
->>
->> If the file is truly preallocated (that is, prewritten with zeros...
->> fallocate doesn't help here because the extents is marked unwritten), then
->> sure: there is very little change in the data path.
->>
->> But at that point, what is the point?  This only works if you have one (or a few) huge files and the user space app already has all the complexity of a filesystem-like thing (with its own internal journal, allocators, garbage collection, etc.).  Do they just do this to ease administrative tasks like backup?
->>
->>
->> This is the fundamental tradeoff:
->>
->> 1) We have a file per object.  We fsync like crazy and the fact that there are two independent layers journaling and managing different types of consistency penalizes us.
->>
->> 1b) We get clever and start using obscure and/or custom ioctls in the file system to work around what it is used to: we swap extents to avoid write-ahead (see Christoph's patch), O_NOMTIME, unprivileged open-by-handle, batch fsync, O_ATOMIC, setext ioctl, etc.
->>
->> 2) We preallocate huge files and write a user-space object system that lives within it (pretending the file is a block device).  The file system rarely gets in the way (assuming the file is prewritten and we don't do anything stupid).  But it doesn't give us anything a block device wouldn't, and it doesn't save us any complexity in our code.
->>
->> At the end of the day, 1 and 1b are always going to be slower than 2.
->> And although 1b performs a bit better than 1, it has similar (user-space) complexity to 2.  On the other hand, if you step back and view teh entire stack (ceph-osd + XFS), 1 and 1b are *significantly* more complex than 2... and yet still slower.  Given we ultimately have to support both (both as an upstream and as a distro), that's not very attractive.
->>
->> Also note that every time we have strayed off the reservation from the beaten path (1) to anything mildly exotic (1b) we have been bitten by obscure file systems bugs.  And that's assume we get everything we need upstream... which is probably a year's endeavour.
->>
->> Don't get me wrong: I'm all for making changes to file systems to better support systems like Ceph.  Things like O_NOCMTIME and O_ATOMIC make a huge amount of sense of a ton of different systems.  But our situations is a bit different: we always own the entire device (and often the server), so there is no need to share with other users or apps (and when you do, you just use the existing FileStore backend).  And as you know performance is a huge pain point.  We are already handicapped by virtue of being distributed and strongly consistent; we can't afford to give away more to a storage layer that isn't providing us much (or the right) value.
->>
->> And I'm tired of half measures.  I want the OSD to be as fast as we can make it given the architectural constraints (RADOS consistency and ordering semantics).  This is truly low-hanging fruit: it's modular, self-contained, pluggable, and this will be my third time around this particular block.
->>
->> sage
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Beside that i have seen data corruptions in other simple circumstances. 
+Copying data from non-rbd to rbd device, from rbd to rbd device, scp data from 
+another machine to the rbd. 
+
+Also i have mounted the rbds on the same machines im running the OSD, which 
+might be a contributing factor. 
+
+Unfortunatly there seems to be nothing that increases the likelyhood of the 
+corruption to happen. I tried all kinds of things with no success.
+
+Another part of the corruption might have been the amount of free memory. 
+Before i added the flag for stable patches i regularly had warnings like. 
+Since the use of stable pages for rbd these warnings are gone too.
+
+
+kernel: swapper/1: page allocation failure: order:0, mode:0x20
+kernel:  0000000000000000 ffff88012fc83b68 ffffffff8143f171 0000000000000000
+kernel:  0000000000000020 ffff88012fc83bf8 ffffffff81127fda ffff88012fff9838
+kernel:  ffff880109bc7100 01ff88012fc83be8 ffffffff8164aa40 0000002000000000
+kernel: Call Trace:
+kernel:  <IRQ>  [<ffffffff8143f171>] dump_stack+0x48/0x5f
+kernel:  [<ffffffff81127fda>] warn_alloc_failed+0xea/0x130
+kernel:  [<ffffffff8112918a>] __alloc_pages_nodemask+0x69a/0x910
+kernel:  [<ffffffffa04ad060>] ? br_handle_frame_finish+0x500/0x500 [bridge]
+kernel:  [<ffffffff81162827>] alloc_pages_current+0xa7/0x170
+kernel:  [<ffffffffa03dbc4c>] atl1c_alloc_rx_buffer+0x36c/0x430 [atl1c]
+kernel:  [<ffffffffa03ddc52>] atl1c_clean+0x212/0x3b0 [atl1c]
+kernel:  [<ffffffff813a6fcf>] net_rx_action+0x15f/0x320
+kernel:  [<ffffffff81069383>] __do_softirq+0x123/0x2e0
+kernel:  [<ffffffff81069626>] irq_exit+0x96/0xc0
+kernel:  [<ffffffff81446575>] do_IRQ+0x65/0x110
+kernel:  [<ffffffff81444532>] common_interrupt+0x72/0x72
+kernel:  <EOI>  [<ffffffff814445a4>] ? retint_restore_args+0x13/0x13
+kernel:  [<ffffffff8101f4a2>] ? mwait_idle+0x72/0xb0
+kernel:  [<ffffffff8101f499>] ? mwait_idle+0x69/0xb0
+kernel:  [<ffffffff8101f24f>] arch_cpu_idle+0xf/0x20
+kernel:  [<ffffffff8109ebeb>] cpu_startup_entry+0x22b/0x3e0
+kernel:  [<ffffffff81047996>] start_secondary+0x156/0x180
+kernel: Mem-Info:
+kernel: Node 0 DMA per-cpu:
+kernel: CPU    0: hi:    0, btch:   1 usd:   0
+kernel: CPU    1: hi:    0, btch:   1 usd:   0
+kernel: CPU    2: hi:    0, btch:   1 usd:   0
+kernel: CPU    3: hi:    0, btch:   1 usd:   0
+kernel: Node 0 DMA32 per-cpu:
+kernel: CPU    0: hi:  186, btch:  31 usd: 182
+kernel: CPU    1: hi:  186, btch:  31 usd: 179
+kernel: CPU    2: hi:  186, btch:  31 usd: 156
+kernel: CPU    3: hi:  186, btch:  31 usd: 170
+kernel: Node 0 Normal per-cpu:
+kernel: CPU    0: hi:  186, btch:  31 usd: 138
+kernel: CPU    1: hi:  186, btch:  31 usd: 130
+kernel: CPU    2: hi:  186, btch:  31 usd:  73
+kernel: CPU    3: hi:  186, btch:  31 usd: 122
+kernel: active_anon:499711 inactive_anon:128139 isolated_anon:0
+kernel:  active_file:132181 inactive_file:145093 isolated_file:22
+kernel:  unevictable:4083 dirty:1526 writeback:15597 unstable:0
+kernel:  free:5225 slab_reclaimable:23735 slab_unreclaimable:29775
+kernel:  mapped:11742 shmem:18846 pagetables:3946 bounce:0
+kernel:  free_cma:0
+kernel: Node 0 DMA free:15284kB min:32kB low:40kB high:48kB active_anon:0kB 
+inactive_anon:96kB active_file:232kB inactive_file:80kB unevictable:0kB 
+isolated(anon):0kB isolated(file):0kB present:15992kB managed:15908kB 
+mlocked:0kB dirty:0kB writeback:0kB mapped:12kB shmem:0kB 
+slab_reclaimable:52kB slab_unreclaimable:80kB kernel_stack:16kB pagetables:0kB 
+unstable:0kB bounce:0kB free_cma:0kB writeback_tmp:0kB pages_scanned:88 
+all_unreclaimable? no
+kernel: lowmem_reserve[]: 0 3107 3818 3818
+kernel: Node 0 DMA32 free:5064kB min:6420kB low:8024kB high:9628kB 
+active_anon:1718524kB inactive_anon:365504kB active_file:418964kB 
+inactive_file:469748kB unevictable:0kB isolated(anon):0kB isolated(file):88kB 
+present:3257216kB managed:3183616kB mlocked:0kB dirty:5900kB writeback:48264kB 
+mapped:39204kB shmem:54364kB slab_reclaimable:76256kB 
+slab_unreclaimable:93456kB kernel_stack:6240kB pagetables:12280kB unstable:0kB 
+bounce:0kB free_cma:0kB writeback_tmp:0kB pages_scanned:0 all_unreclaimable? 
+no
+kernel: lowmem_reserve[]: 0 0 710 710
+kernel: Node 0 Normal free:552kB min:1468kB low:1832kB high:2200kB 
+active_anon:280320kB inactive_anon:146956kB active_file:109528kB 
+inactive_file:110544kB unevictable:16332kB isolated(anon):0kB 
+isolated(file):0kB present:786432kB managed:728012kB mlocked:0kB dirty:204kB 
+writeback:14124kB mapped:7752kB shmem:21020kB slab_reclaimable:18632kB 
+slab_unreclaimable:25564kB kernel_stack:2432kB pagetables:3504kB unstable:0kB 
+bounce:0kB free_cma:0kB writeback_tmp:0kB pages_scanned:608 all_unreclaimable? 
+no
+kernel: lowmem_reserve[]: 0 0 0 0
+kernel: Node 0 DMA: 4*4kB (UE) 4*8kB (UEM) 2*16kB (UE) 5*32kB (UEM) 3*64kB 
+(UM) 2*128kB (UE) 1*256kB (E) 2*512kB (EM) 3*1024kB (UEM) 3*2048kB (UEM) 
+1*4096kB (R) = 15280kB
+kernel: Node 0 DMA32: 0*4kB 1*8kB (R) 0*16kB 0*32kB 1*64kB (R) 1*128kB (R) 
+1*256kB (R) 3*512kB (R) 1*1024kB (R) 1*2048kB (R) 0*4096kB = 5064kB
+kernel: Node 0 Normal: 0*4kB 1*8kB (R) 0*16kB 1*32kB (R) 1*64kB (R) 1*128kB 
+(R) 1*256kB (R) 0*512kB 0*1024kB 0*2048kB 0*4096kB = 488kB
+kernel: 308023 total pagecache pages
+kernel: 7793 pages in swap cache
+kernel: Swap cache stats: add 320089, delete 312296, find 144121/183225
+kernel: Free swap  = 1728464kB
+kernel: Total swap = 2052092kB
+kernel: 1014910 pages RAM
+kernel: 0 pages HighMem/MovableOnly
+kernel: 33026 pages reserved
+ 
+
