@@ -1,49 +1,116 @@
-From: Howard Chu <hyc@symas.com>
-Subject: Re: newstore direction
-Date: Fri, 23 Oct 2015 22:23:30 +0100
-Message-ID: <562AA552.702@symas.com>
-References: <alpine.DEB.2.00.1510191216200.4188@cobra.newdream.net>
- <CALe9h7dUQcp6zOSFDfnXSQo4VOTObFCWj+HD-idwE1nNzQVsgA@mail.gmail.com>
- <alpine.DEB.2.00.1510201251140.16833@cobra.newdream.net>
- <CAJ4mKGY0=+isJhh4oF3kqtxEZ6HWSDZXJyM9sBHxc8s21M_y8g@mail.gmail.com>
- <alpine.DEB.2.00.1510201422450.16833@cobra.newdream.net>
- <5626BECA.7070306@redhat.com>
- <alpine.DEB.2.00.1510210616060.16833@cobra.newdream.net>
- <5627981B.2040409@redhat.com> <loom.20151023T081245-920@post.gmane.org>
- <562A14D3.4070509@redhat.com> <562A1E69.2050704@redhat.com>
- <562A4B58.1030407@symas.com>
- <CAJ4mKGZ_Xg4hNrm-zjBCJwe4vV1CbALT+C_Ee7cmcpRf=VMKKA@mail.gmail.com>
+From: Robert LeBlanc <robert@leblancnet.us>
+Subject: Really slow cache-evict
+Date: Fri, 23 Oct 2015 17:13:59 -0600
+Message-ID: <CAANLjFrhX4TTJ_a-E8vZp-2jf878orY1sH3e33dt4TNixxYdvA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from zill.ext.symas.net ([69.43.206.106]:56896 "EHLO
-	zill.ext.symas.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751469AbbJWVXl (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Oct 2015 17:23:41 -0400
-In-Reply-To: <CAJ4mKGZ_Xg4hNrm-zjBCJwe4vV1CbALT+C_Ee7cmcpRf=VMKKA@mail.gmail.com>
+Received: from mail-vk0-f46.google.com ([209.85.213.46]:34442 "EHLO
+	mail-vk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751301AbbJWXOA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Oct 2015 19:14:00 -0400
+Received: by vkgs66 with SMTP id s66so11958604vkg.1
+        for <ceph-devel@vger.kernel.org>; Fri, 23 Oct 2015 16:13:59 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Ric Wheeler <rwheeler@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Gregory Farnum wrote:
-> On Fri, Oct 23, 2015 at 7:59 AM, Howard Chu <hyc@symas.com> wrote:
->> If the stream of writes is large enough, you could omit fsync because
->> everything is being forced out of the cache to disk anyway. In that
->> scenario, the only thing that matters is that the writes get forced out in
->> the order you intended, so that an interruption or crash leaves you in a
->> known (or knowable) state vs unknown.
->
-> The RADOS storage semantics actually require that we know it's durable
-> on disk as well, unfortunately. But ordered writes would probably let
-> us batch up commit points in ways that are a lot friendlier for the
-> drives!
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
 
-Ah, that's too bad. LMDB does fine with only ordering, but never mind.
+We are testing out cache tiering, but when evicting the cache on an
+idle cluster it is extremely slow (10 objects per minutes). Looking at
+top some of the OSD processes are busy, but the disks are idle across
+the cluster. I upped debug_osd to 20/20 and saw millions of messages
+per object like:
 
--- 
-   -- Howard Chu
-   CTO, Symas Corp.           http://www.symas.com
-   Director, Highland Sun     http://highlandsun.com/hyc/
-   Chief Architect, OpenLDAP  http://www.openldap.org/project/
+2015-10-23 16:52:15.952561 7fa42a1fd700 20 osd.169 39454
+should_share_map client.329656 10.208.16.31:0/1012854 39454
+2015-10-23 16:52:15.952605 7fa42a1fd700 15 osd.169 39454 enqueue_op
+0x287ba400 prio 63 cost 450560 latency 0.000999
+osd_op(client.329656.0:165865996
+rbd_data.14143b5faf8a00.000000000000041f [stat,set-alloc-hint
+object_size 8388608 write_size 8388608,write 860160~450560]
+12.549948fa ack+ondisk+wr
+ite+known_if_redirected e39454) v5
+2015-10-23 16:52:15.952642 7fa43fbeb700 10 osd.169 39454 dequeue_op
+0x287ba400 prio 63 cost 450560 latency 0.001036
+osd_op(client.329656.0:165865996
+rbd_data.14143b5faf8a00.000000000000041f [stat,set-alloc-hint
+object_size 8388608 write_size 8388608,write 860160~450560]
+12.549948fa ack+ondisk+wr
+ite+known_if_redirected e39454) v5 pg pg[12.fa( v 39422'12054
+(39253'9006,39422'12054] local-les=39453 n=284 ec=31174 les/c
+39453/39453 39452/39452/39442) [169,186,153,136] r=0 lpr=39452
+crt=39422'12051 lcod 0'0 mlcod 0'0 active+clean]
+2015-10-23 16:52:15.952676 7fa43fbeb700 20 osd.169 pg_epoch: 39454
+pg[12.fa( v 39422'12054 (39253'9006,39422'12054] local-les=39453 n=284
+ec=31174 les/c 39453/39453 39452/39452/39442) [169,186,153,136] r=0
+lpr=39452 crt=39422'12051 lcod 0'0 mlcod 0'0 active+clean]
+op_has_sufficient_caps pool=12
+(ssd-pool ) owner=0 need_read_cap=1 need_write_cap=1
+need_class_read_cap=0 need_class_write_cap=0 -> NO
+2015-10-23 16:52:15.952688 7fa42a1fd700 20 osd.169 39454
+should_share_map client.329656 10.208.16.31:0/1012854 39454
+2015-10-23 16:52:15.952701 7fa43fbeb700 10 osd.169 39454 dequeue_op
+0x287ba400 finish
+2015-10-23 16:52:15.952729 7fa42a1fd700 15 osd.169 39454 enqueue_op
+0x287c7500 prio 63 cost 4096 latency 0.000092
+osd_op(client.329656.0:165866002
+rbd_data.14143b5faf8a00.000000000000041f [stat,set-alloc-hint
+object_size 8388608 write_size 8388608,write 6369280~4096] 12.549948fa
+ack+ondisk+write
++known_if_redirected e39454) v5
+2015-10-23 16:52:15.952762 7fa43d3e6700 10 osd.169 39454 dequeue_op
+0x287c7500 prio 63 cost 4096 latency 0.000125
+osd_op(client.329656.0:165866002
+rbd_data.14143b5faf8a00.000000000000041f [stat,set-alloc-hint
+object_size 8388608 write_size 8388608,write 6369280~4096] 12.549948fa
+ack+ondisk+write
++known_if_redirected e39454) v5 pg pg[12.fa( v 39422'12054
+(39253'9006,39422'12054] local-les=39453 n=284 ec=31174 les/c
+39453/39453 39452/39452/39442) [169,186,153,136] r=0 lpr=39452
+crt=39422'12051 lcod 0'0 mlcod 0'0 active+clean]
+2015-10-23 16:52:15.952787 7fa43d3e6700 20 osd.169 pg_epoch: 39454
+pg[12.fa( v 39422'12054 (39253'9006,39422'12054] local-les=39453 n=284
+ec=31174 les/c 39453/39453 39452/39452/39442) [169,186,153,136] r=0
+lpr=39452 crt=39422'12051 lcod 0'0 mlcod 0'0 active+clean]
+op_has_sufficient_caps pool=12
+(ssd-pool ) owner=0 need_read_cap=1 need_write_cap=1
+need_class_read_cap=0 need_class_write_cap=0 -> NO
+2015-10-23 16:52:15.952832 7fa43d3e6700 10 osd.169 39454 dequeue_op
+0x287c7500 finish
+
+It looks like maybe the OP is bouncing between threads or something
+like that and never getting dispatched correctly. This is on
+ceph version 0.94.4 (95292699291242794510b39ffde3f4df67898d3a)
+
+I followed the directions at [1] in the writeback section for
+disabling the cache tier. I did this on another cluster recently and
+didn't see this problem (only took an hour or two to evict 700GB of
+data). I saw a very slow evict a while back, but just chalked it up to
+btrfs being dumb.
+
+[1] http://docs.ceph.com/docs/master/rados/operations/cache-tiering/#removing-a-writeback-cache
+- ----------------
+Robert LeBlanc
+PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
+-----BEGIN PGP SIGNATURE-----
+Version: Mailvelope v1.2.2
+Comment: https://www.mailvelope.com
+
+wsFcBAEBCAAQBQJWKr8iCRDmVDuy+mK58QAAl7oP/2bfWT/DUxjxkEGIXOnW
+x2dk7hlTAkTAts7bRQn+vL31bcHAEoN+nJH5J39nt98Kh4rpZyHcVtJammYM
+hYNsc97Hah+O2iqDYWxr4Vu27eyq5icCw0oFo9hbsA6lGPcrgeVSGbnXaFk0
++4u6OCovRDb6Rgfc6IAJoHrkulnPaWGaKWa1sfofdlMDJoA2U5cnX7ZvkRnM
+unnKKtAjmeVCFbt/QmwFJVEjdNh0yZXN2qLSJUVwf4APgB4G2trupQ6kuisn
+oGZdJP1DRtFn5IgoZQzB4ZA1FNydrVoQmrPNTAkCGQoUWegbmhxrXxsrfLV9
+jTky2inv8NLdP46VyEVyvOqFD3WVRYIP+KvVcaNnL2awMClOgZ4uish+rLK/
+Uyhcm9dfXgBz1Fm+PzdzpMwK8/lvk/UcfnBs6s5rELgjCQ/WPLMu7y1ZP9FY
+DzLsrtMdbMGZA7MTt9CKAe9fZ+sPC3Se8slh6mN7M7Tm2Knsv6uyKLJ06imW
+M7DMGVMi2A3I+qTE/DEA/D5MLcx+vJtLD57/a2j3dWaEiiBqaAsMA18UiwEX
+bMaHAbFMWBrlhIVytP4IaA7dbiEaO6C90pyHHtyVf1etKDfP+erNRtHVW4JI
+8wpG87Z34o6r92fkbb0LRH/TvD+WQFU4Q0OiL5JqclJKJP6TNUUhMmstad62
+vmqk
+=dO6U
+-----END PGP SIGNATURE-----
