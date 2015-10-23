@@ -1,125 +1,116 @@
-From: Ronny Hegewald <ronny.hegewald@online.de>
-Subject: Re: [PATCH] mark rbd requiring stable pages
-Date: Thu, 22 Oct 2015 23:56:57 +0000
-Message-ID: <201510222356.58184.ronny.hegewald@online.de>
-References: <201510151850.48348.ronny.hegewald@online.de> <562860F2.8070208@cs.wisc.edu> <CAOi1vP_e1aY4zMyYgRLy=D+jBs44g9++0VKutRm7D6q0OALJ3Q@mail.gmail.com>
-Reply-To: Ilya Dryomov <idryomov@gmail.com>
+From: Samuel Just <sjust@redhat.com>
+Subject: Re: newstore direction
+Date: Thu, 22 Oct 2015 17:10:19 -0700
+Message-ID: <CAN=+7FVrJuObUyJZrXTF=kAmNo3x+NWeHPru8JhY7gz0VxrTBg@mail.gmail.com>
+References: <alpine.DEB.2.00.1510191216200.4188@cobra.newdream.net>
+	<56268886.7010806@redhat.com>
+	<1445415736.1809.71.camel@redhat.com>
+	<56277468.5000504@redhat.com>
+	<alpine.DEB.2.00.1510220528140.16833@cobra.newdream.net>
+	<99767EA2E27DD44DB4E9F9B9ACA458C056195B6E@SSIEXCH-MB3.ssi.samsung.com>
+	<CAN=+7FUMoi2d=mEkg+3vmBfaTGE02hp05ydFUJLn4eUwur+r9A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.126.187]:51164 "EHLO
-	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751116AbbJVXzy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Oct 2015 19:55:54 -0400
-In-Reply-To: <CAOi1vP_e1aY4zMyYgRLy=D+jBs44g9++0VKutRm7D6q0OALJ3Q@mail.gmail.com>
+Received: from mail-ig0-f175.google.com ([209.85.213.175]:36935 "EHLO
+	mail-ig0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751387AbbJWAKU convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Oct 2015 20:10:20 -0400
+Received: by igbhv6 with SMTP id hv6so5834488igb.0
+        for <ceph-devel@vger.kernel.org>; Thu, 22 Oct 2015 17:10:19 -0700 (PDT)
+In-Reply-To: <CAN=+7FUMoi2d=mEkg+3vmBfaTGE02hp05ydFUJLn4eUwur+r9A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Mike Christie <michaelc@cs.wisc.edu>, Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, Alex Elder <elder@kernel.org>
+To: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
+Cc: Sage Weil <sweil@redhat.com>, Ric Wheeler <rwheeler@redhat.com>, Orit Wasserman <owasserm@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thursday 22 October 2015, Ilya Dryomov wrote:
-> Well, checksum mismatches are to be expected given what we are doing
-> now, but I wouldn't expect any data corruptions.  Ronny writes that he
-> saw frequent ext4 corruptions on krbd devices before he enabled stable
-> pages, which leads me to believe that the !crc case, for which we won't
-> be setting BDI_CAP_STABLE_WRITES, is going to be/remain broken.  Ronny,
-> could you describe it in more detail and maybe share some of those osd
-> logs with bad crc messages?
-> 
-This is from a 10 minute period from one of the OSDs. 
+Ah, except for the snapmapper.  We can split the snapmapper in the
+same way, though, as long as we are careful with the name.
+-Sam
 
-23:11:02.423728 ce5dfb70  0 bad crc in data 1657725429 != exp 496797267
-23:11:37.586411 ce5dfb70  0 bad crc in data 1216602498 != exp 1888811161
-23:12:07.805675 cc3ffb70  0 bad crc in data 3140625666 != exp 2614069504
-23:12:44.485713 c96ffb70  0 bad crc in data 1712148977 != exp 3239079328
-23:13:24.746217 ce5dfb70  0 bad crc in data 144620426 != exp 3156694286
-23:13:52.792367 ce5dfb70  0 bad crc in data 4033880920 != exp 4159672481
-23:14:22.958999 c96ffb70  0 bad crc in data 847688321 != exp 1551499144
-23:16:35.015629 ce5dfb70  0 bad crc in data 2790209714 != exp 3779604715
-23:17:48.482049 c96ffb70  0 bad crc in data 1563466764 != exp 528198494
-23:19:28.925357 cc3ffb70  0 bad crc in data 1764275395 != exp 2075504274
-23:19:59.039843 cc3ffb70  0 bad crc in data 2960172683 != exp 1215950691
-
-The filesystem corruptions are usually ones with messages of
-
-EXT4-fs error (device rbd4): ext4_mb_generate_buddy:757: group 155, block 
-bitmap and bg descriptor inconsistent: 23625 vs 23660 free clusters
-
-These were pretty common, at least every other day, often multiple times a 
-day.
-
-Sometimes there was a additional 
-
-JBD2: Spotted dirty metadata buffer (dev = rbd4, blocknr = 0). There's a risk 
-of filesystem corruption in case of system crash.
-
-Another type of Filesystem corruption i experienced through kernel 
-compilations, that lead to the following messages.
-
-EXT4-fs warning (device rbd3): empty_dir:2488: bad directory (dir #282221) - 
-no `.' or `..'
-EXT4-fs warning (device rbd3): empty_dir:2488: bad directory (dir #273062) - 
-no `.' or `..'
-EXT4-fs warning (device rbd3): empty_dir:2488: bad directory (dir #272270) - 
-no `.' or `..'
-EXT4-fs warning (device rbd3): empty_dir:2488: bad directory (dir #282254) - 
-no `.' or `..'
-EXT4-fs warning (device rbd3): empty_dir:2488: bad directory (dir #273070) - 
-no `.' or `..'
-EXT4-fs warning (device rbd3): empty_dir:2488: bad directory (dir #272308) - 
-no `.' or `..'
-EXT4-fs error (device rbd3): ext4_lookup:1417: inode #270033: comm rm: deleted 
-inode referenced: 270039
-last message repeated 2 times
-EXT4-fs warning (device rbd3): empty_dir:2488: bad directory (dir #271534) - 
-no `.' or `..'
-EXT4-fs warning (device rbd3): empty_dir:2488: bad directory (dir #271275) - 
-no `.' or `..'
-EXT4-fs warning (device rbd3): empty_dir:2488: bad directory (dir #282290) - 
-no `.' or `..'
-EXT4-fs warning (device rbd3): empty_dir:2488: bad directory (dir #281914) - 
-no `.' or `..'
-EXT4-fs error (device rbd3): ext4_lookup:1417: inode #270033: comm rm: deleted 
-inode referenced: 270039
-last message repeated 2 times
-kernel: EXT4-fs error (device rbd3): ext4_lookup:1417: inode #273018: comm rm: 
-deleted inode referenced: 282221
-EXT4-fs error (device rbd3): ext4_lookup:1417: inode #273018: comm rm: deleted 
-inode referenced: 282221
-EXT4-fs error (device rbd3): ext4_lookup:1417: inode #273018: comm rm: deleted 
-inode referenced: 281914
-EXT4-fs error (device rbd3): ext4_lookup:1417: inode #273018: comm rm: deleted 
-inode referenced: 281914
-EXT4-fs error: 243 callbacks suppressed 
-EXT4-fs error (device rbd3): ext4_lookup:1417: inode #282002: comm cp: deleted 
-inode referenced: 45375
-kernel: EXT4-fs error (device rbd3): ext4_lookup:1417: inode #282002: comm cp: 
-deleted inode referenced: 45371
-
-The result was that various files and directories in the kernel sourcedir 
-couldn't be accessed anymore and even fsck couldn't repair it, so i had to 
-finally delete it. But these ones were pretty rare.
-
-Another issue were the data-corruptions in the files itself, that happened 
-independently from the filesystem-corruptions.  These happened on most days, 
-sometimes only once, sometimes multiple times a day. 
-
-Newly written files that contained corrupted data seem to always have it only 
-at one place. These corrupt data replaced the original data from the file, but 
-never changed the file-size. The position of this corruptions in the files 
-were always different.
-
-Interesting part is that this corrupted parts always followed the same 
-pattern. First some few hundred 0x0 bytes, then a few kb (10-30) of random 
-binary data, that finished again with a few hundred bytes of 0x0.
-
-In a few cases i could trace this data back to origin from another file that 
-was read at the same time from the same programm. But that might be 
-accidentially, because other corruptions that happened in the same scenario I 
-couldn't trace back this way.
-
-In other cases that corrupt data originated from files that were deleted 
-recently (a few minutes ago).
-
+On Thu, Oct 22, 2015 at 4:42 PM, Samuel Just <sjust@redhat.com> wrote:
+> Since the changes which moved the pg log and the pg info into the pg
+> object space, I think it's now the case that any transaction submitted
+> to the objectstore updates a disjoint range of objects determined by
+> the sequencer.  It might be easier to exploit that parallelism if we
+> control allocation and allocation related metadata.  We could split
+> the store into N pieces which partition the pg space (one additional
+> one for the meta sequencer?) with one rocksdb instance for each.
+> Space could then be parcelled out in large pieces (small frequency of
+> global allocation decisions) and managed more finely within each
+> partition.  The main challenge would be avoiding internal
+> fragmentation of those, but at least defragmentation can be managed on
+> a per-partition basis.  Such parallelism is probably necessary to
+> exploit the full throughput of some ssds.
+> -Sam
+>
+> On Thu, Oct 22, 2015 at 10:42 AM, James (Fei) Liu-SSI
+> <james.liu@ssi.samsung.com> wrote:
+>> Hi Sage and other fellow cephers,
+>>   I truly share the pains with you  all about filesystem while I am working on  objectstore to improve the performance. As mentioned , there is nothing wrong with filesystem. Just the Ceph as one of  use case need more supports but not provided in near future by filesystem no matter what reasons.
+>>
+>>    There are so many techniques  pop out which can help to improve performance of OSD.  User space driver(DPDK from Intel) is one of them. It not only gives you the storage allocator,  also gives you the thread scheduling support,  CPU affinity , NUMA friendly, polling  which  might fundamentally change the performance of objectstore.  It should not be hard to improve CPU utilization 3x~5x times, higher IOPS etc.
+>>     I totally agreed that goal of filestore is to gives enough support for filesystem with either 1 ,1b, or 2 solutions. In my humble opinion , The new design goal of objectstore should focus on giving the best  performance for OSD with new techniques. These two goals are not going to conflict with each other.  They are just for different purposes to make Ceph not only more stable but also better.
+>>
+>>   Scylla mentioned by Orit is a good example .
+>>
+>>   Thanks all.
+>>
+>>   Regards,
+>>   James
+>>
+>> -----Original Message-----
+>> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
+>> Sent: Thursday, October 22, 2015 5:50 AM
+>> To: Ric Wheeler
+>> Cc: Orit Wasserman; ceph-devel@vger.kernel.org
+>> Subject: Re: newstore direction
+>>
+>> On Wed, 21 Oct 2015, Ric Wheeler wrote:
+>>> You will have to trust me on this as the Red Hat person who spoke to
+>>> pretty much all of our key customers about local file systems and
+>>> storage - customers all have migrated over to using normal file systems under Oracle/DB2.
+>>> Typically, they use XFS or ext4.  I don't know of any non-standard
+>>> file systems and only have seen one account running on a raw block
+>>> store in 8 years
+>>> :)
+>>>
+>>> If you have a pre-allocated file and write using O_DIRECT, your IO
+>>> path is identical in terms of IO's sent to the device.
+>>>
+>>> If we are causing additional IO's, then we really need to spend some
+>>> time talking to the local file system gurus about this in detail.  I
+>>> can help with that conversation.
+>>
+>> If the file is truly preallocated (that is, prewritten with zeros...
+>> fallocate doesn't help here because the extents is marked unwritten), then
+>> sure: there is very little change in the data path.
+>>
+>> But at that point, what is the point?  This only works if you have one (or a few) huge files and the user space app already has all the complexity of a filesystem-like thing (with its own internal journal, allocators, garbage collection, etc.).  Do they just do this to ease administrative tasks like backup?
+>>
+>>
+>> This is the fundamental tradeoff:
+>>
+>> 1) We have a file per object.  We fsync like crazy and the fact that there are two independent layers journaling and managing different types of consistency penalizes us.
+>>
+>> 1b) We get clever and start using obscure and/or custom ioctls in the file system to work around what it is used to: we swap extents to avoid write-ahead (see Christoph's patch), O_NOMTIME, unprivileged open-by-handle, batch fsync, O_ATOMIC, setext ioctl, etc.
+>>
+>> 2) We preallocate huge files and write a user-space object system that lives within it (pretending the file is a block device).  The file system rarely gets in the way (assuming the file is prewritten and we don't do anything stupid).  But it doesn't give us anything a block device wouldn't, and it doesn't save us any complexity in our code.
+>>
+>> At the end of the day, 1 and 1b are always going to be slower than 2.
+>> And although 1b performs a bit better than 1, it has similar (user-space) complexity to 2.  On the other hand, if you step back and view teh entire stack (ceph-osd + XFS), 1 and 1b are *significantly* more complex than 2... and yet still slower.  Given we ultimately have to support both (both as an upstream and as a distro), that's not very attractive.
+>>
+>> Also note that every time we have strayed off the reservation from the beaten path (1) to anything mildly exotic (1b) we have been bitten by obscure file systems bugs.  And that's assume we get everything we need upstream... which is probably a year's endeavour.
+>>
+>> Don't get me wrong: I'm all for making changes to file systems to better support systems like Ceph.  Things like O_NOCMTIME and O_ATOMIC make a huge amount of sense of a ton of different systems.  But our situations is a bit different: we always own the entire device (and often the server), so there is no need to share with other users or apps (and when you do, you just use the existing FileStore backend).  And as you know performance is a huge pain point.  We are already handicapped by virtue of being distributed and strongly consistent; we can't afford to give away more to a storage layer that isn't providing us much (or the right) value.
+>>
+>> And I'm tired of half measures.  I want the OSD to be as fast as we can make it given the architectural constraints (RADOS consistency and ordering semantics).  This is truly low-hanging fruit: it's modular, self-contained, pluggable, and this will be my third time around this particular block.
+>>
+>> sage
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
