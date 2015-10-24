@@ -1,24 +1,39 @@
 From: Somnath Roy <Somnath.Roy@sandisk.com>
 Subject: RE: Lock contention in do_rule
-Date: Sat, 24 Oct 2015 02:02:14 +0000
-Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F3176430D@SACMBXIP02.sdcorp.global.sandisk.com>
+Date: Sat, 24 Oct 2015 02:09:39 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F31764322@SACMBXIP02.sdcorp.global.sandisk.com>
 References: <755F6B91B3BE364F9BCA11EA3F9E0C6F31764194@SACMBXIP02.sdcorp.global.sandisk.com>
  <alpine.DEB.2.00.1510231806220.16833@cobra.newdream.net>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F3176430D@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1on0060.outbound.protection.outlook.com ([157.56.110.60]:2370
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+Received: from mail-bl2on0087.outbound.protection.outlook.com ([65.55.169.87]:30585
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751440AbbJXCCT convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Oct 2015 22:02:19 -0400
-In-Reply-To: <alpine.DEB.2.00.1510231806220.16833@cobra.newdream.net>
+	id S1750992AbbJXCJo convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Oct 2015 22:09:44 -0400
+In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F3176430D@SACMBXIP02.sdcorp.global.sandisk.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@newdream.net>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+Also, why bother doing this expensive recheck in the OSD side ?
+The OSDMap can change after this check and OSD actually carrying out transaction , am I right ?
+If so, anyway we are not able to protect in all the scenarios.
+
+Thanks & Regards
+Somnath
+
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
+Sent: Friday, October 23, 2015 7:02 PM
+To: Sage Weil
+Cc: ceph-devel@vger.kernel.org
+Subject: RE: Lock contention in do_rule
 
 Thanks for the clarification Sage..
 I don't have much knowledge on this part , but, what I understood by going through the code is the following..
@@ -78,3 +93,5 @@ ________________________________
 
 PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
 
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
