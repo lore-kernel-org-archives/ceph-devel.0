@@ -1,35 +1,48 @@
-From: Sage Weil <sage@newdream.net>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
 Subject: RE: Lock contention in do_rule
-Date: Sat, 24 Oct 2015 15:04:25 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1510241453380.16833@cobra.newdream.net>
-References: <755F6B91B3BE364F9BCA11EA3F9E0C6F31764194@SACMBXIP02.sdcorp.global.sandisk.com> <alpine.DEB.2.00.1510231806220.16833@cobra.newdream.net> <755F6B91B3BE364F9BCA11EA3F9E0C6F3176430D@SACMBXIP02.sdcorp.global.sandisk.com>
+Date: Sat, 24 Oct 2015 22:22:59 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F31764DCE@SACMBXIP02.sdcorp.global.sandisk.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F31764194@SACMBXIP02.sdcorp.global.sandisk.com>
+ <alpine.DEB.2.00.1510231806220.16833@cobra.newdream.net>
+ <755F6B91B3BE364F9BCA11EA3F9E0C6F3176430D@SACMBXIP02.sdcorp.global.sandisk.com>
  <755F6B91B3BE364F9BCA11EA3F9E0C6F31764322@SACMBXIP02.sdcorp.global.sandisk.com>
+ <alpine.DEB.2.00.1510241453380.16833@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:52351 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751103AbbJXWE0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 24 Oct 2015 18:04:26 -0400
-In-Reply-To: <755F6B91B3BE364F9BCA11EA3F9E0C6F31764322@SACMBXIP02.sdcorp.global.sandisk.com>
+Received: from mail-bn1on0097.outbound.protection.outlook.com ([157.56.110.97]:32736
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752447AbbJXWXI convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 24 Oct 2015 18:23:08 -0400
+In-Reply-To: <alpine.DEB.2.00.1510241453380.16833@cobra.newdream.net>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
+To: Sage Weil <sage@newdream.net>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+Thanks Sage, I will test with this patch..
+
+Regards
+Somnath
+
+-----Original Message-----
+From: Sage Weil [mailto:sage@newdream.net] 
+Sent: Saturday, October 24, 2015 3:04 PM
+To: Somnath Roy
+Cc: ceph-devel@vger.kernel.org
+Subject: RE: Lock contention in do_rule
 
 On Sat, 24 Oct 2015, Somnath Roy wrote:
 > Also, why bother doing this expensive recheck in the OSD side ?
 
-Yeah.. the current code is overly pessimistic. If the pg exists on the OSD 
-we have the mapping we need.  If it doesn't, only then do we need to 
-calculate the mapping to ensure it is valid.  In OSD::handle_op(), I think 
-that the
+Yeah.. the current code is overly pessimistic. If the pg exists on the OSD we have the mapping we need.  If it doesn't, only then do we need to calculate the mapping to ensure it is valid.  In OSD::handle_op(), I think that the
 
   if (!send_map->osd_is_valid_op_target(pgid.pgid, whoami)) {
 
-check (and the one that follows) should go in the else if we don't have 
-the PG.  And if we do have the pg, the existing can_discard_op() checks in 
-PG.cc are already doing the right thing.
+check (and the one that follows) should go in the else if we don't have the PG.  And if we do have the pg, the existing can_discard_op() checks in PG.cc are already doing the right thing.
 
 https://github.com/ceph/ceph/pull/6371
 
@@ -43,7 +56,8 @@ sage
 > Somnath
 > 
 > -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
+> From: ceph-devel-owner@vger.kernel.org 
+> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
 > Sent: Friday, October 23, 2015 7:02 PM
 > To: Sage Weil
 > Cc: ceph-devel@vger.kernel.org
@@ -108,10 +122,12 @@ sage
 > PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
 > 
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> in the body of a message to majordomo@vger.kernel.org More majordomo 
+> info at  http://vger.kernel.org/majordomo-info.html
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> in the body of a message to majordomo@vger.kernel.org More majordomo 
+> info at  http://vger.kernel.org/majordomo-info.html
 > 
 > 
