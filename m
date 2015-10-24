@@ -1,170 +1,80 @@
-From: Robert LeBlanc <robert@leblancnet.us>
-Subject: Re: Really slow cache-evict
-Date: Fri, 23 Oct 2015 19:49:17 -0600
-Message-ID: <CAANLjFoZBi5jPqWvaH-UYmOnnx54vdZZ0PkPerC=64BogS-Jyw@mail.gmail.com>
-References: <CAANLjFrhX4TTJ_a-E8vZp-2jf878orY1sH3e33dt4TNixxYdvA@mail.gmail.com>
-	<alpine.DEB.2.00.1510231759490.16833@cobra.newdream.net>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Lock contention in do_rule
+Date: Sat, 24 Oct 2015 02:02:14 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F3176430D@SACMBXIP02.sdcorp.global.sandisk.com>
+References: <755F6B91B3BE364F9BCA11EA3F9E0C6F31764194@SACMBXIP02.sdcorp.global.sandisk.com>
+ <alpine.DEB.2.00.1510231806220.16833@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f47.google.com ([209.85.213.47]:35955 "EHLO
-	mail-vk0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751731AbbJXBtS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Oct 2015 21:49:18 -0400
-Received: by vkex70 with SMTP id x70so72850162vke.3
-        for <ceph-devel@vger.kernel.org>; Fri, 23 Oct 2015 18:49:17 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1510231759490.16833@cobra.newdream.net>
+Received: from mail-bn1on0060.outbound.protection.outlook.com ([157.56.110.60]:2370
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751440AbbJXCCT convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Oct 2015 22:02:19 -0400
+In-Reply-To: <alpine.DEB.2.00.1510231806220.16833@cobra.newdream.net>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA256
+Thanks for the clarification Sage..
+I don't have much knowledge on this part , but, what I understood by going through the code is the following..
 
-20 minutes of logs are located at
+1. Client calculates the pg->osd map by executing the same functions.
 
-http://162.144.87.113/files/evict.log.xz
+2. Request coming to OSDs and OSDs are executing the same functions again to check if mapping still is the same or not. If something changed and it is not the right OSD to execute the request it error out.
 
-I was looking at the object rbd_data.14143b5faf8a00.0000000000000262
-for instance. There was no client I/O on the cluster during the
-eviction.
-- ----------------
-Robert LeBlanc
-PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
+3. So, the lock is to protect against the bucket perm attribute write from multiple threads..
 
+Some ideas :
 
-On Fri, Oct 23, 2015 at 7:00 PM, Sage Weil  wrote:
-> On Fri, 23 Oct 2015, Robert LeBlanc wrote:
->> -----BEGIN PGP SIGNED MESSAGE-----
->> Hash: SHA256
->>
->> We are testing out cache tiering, but when evicting the cache on an
->> idle cluster it is extremely slow (10 objects per minutes). Looking at
->> top some of the OSD processes are busy, but the disks are idle across
->> the cluster. I upped debug_osd to 20/20 and saw millions of messages
->> per object like:
->>
->> 2015-10-23 16:52:15.952561 7fa42a1fd700 20 osd.169 39454
->> should_share_map client.329656 10.208.16.31:0/1012854 39454
->> 2015-10-23 16:52:15.952605 7fa42a1fd700 15 osd.169 39454 enqueue_op
->> 0x287ba400 prio 63 cost 450560 latency 0.000999
->> osd_op(client.329656.0:165865996
->> rbd_data.14143b5faf8a00.000000000000041f [stat,set-alloc-hint
->> object_size 8388608 write_size 8388608,write 860160~450560]
->> 12.549948fa ack+ondisk+wr
->> ite+known_if_redirected e39454) v5
->> 2015-10-23 16:52:15.952642 7fa43fbeb700 10 osd.169 39454 dequeue_op
->> 0x287ba400 prio 63 cost 450560 latency 0.001036
->> osd_op(client.329656.0:165865996
->> rbd_data.14143b5faf8a00.000000000000041f [stat,set-alloc-hint
->> object_size 8388608 write_size 8388608,write 860160~450560]
->> 12.549948fa ack+ondisk+wr
->> ite+known_if_redirected e39454) v5 pg pg[12.fa( v 39422'12054
->> (39253'9006,39422'12054] local-les=39453 n=284 ec=31174 les/c
->> 39453/39453 39452/39452/39442) [169,186,153,136] r=0 lpr=39452
->> crt=39422'12051 lcod 0'0 mlcod 0'0 active+clean]
->> 2015-10-23 16:52:15.952676 7fa43fbeb700 20 osd.169 pg_epoch: 39454
->> pg[12.fa( v 39422'12054 (39253'9006,39422'12054] local-les=39453 n=284
->> ec=31174 les/c 39453/39453 39452/39452/39442) [169,186,153,136] r=0
->> lpr=39452 crt=39422'12051 lcod 0'0 mlcod 0'0 active+clean]
->> op_has_sufficient_caps pool=12
->> (ssd-pool ) owner=0 need_read_cap=1 need_write_cap=1
->> need_class_read_cap=0 need_class_write_cap=0 -> NO
->> 2015-10-23 16:52:15.952688 7fa42a1fd700 20 osd.169 39454
->> should_share_map client.329656 10.208.16.31:0/1012854 39454
->> 2015-10-23 16:52:15.952701 7fa43fbeb700 10 osd.169 39454 dequeue_op
->> 0x287ba400 finish
->> 2015-10-23 16:52:15.952729 7fa42a1fd700 15 osd.169 39454 enqueue_op
->> 0x287c7500 prio 63 cost 4096 latency 0.000092
->> osd_op(client.329656.0:165866002
->> rbd_data.14143b5faf8a00.000000000000041f [stat,set-alloc-hint
->> object_size 8388608 write_size 8388608,write 6369280~4096] 12.549948fa
->> ack+ondisk+write
->> +known_if_redirected e39454) v5
->> 2015-10-23 16:52:15.952762 7fa43d3e6700 10 osd.169 39454 dequeue_op
->> 0x287c7500 prio 63 cost 4096 latency 0.000125
->> osd_op(client.329656.0:165866002
->> rbd_data.14143b5faf8a00.000000000000041f [stat,set-alloc-hint
->> object_size 8388608 write_size 8388608,write 6369280~4096] 12.549948fa
->> ack+ondisk+write
->> +known_if_redirected e39454) v5 pg pg[12.fa( v 39422'12054
->> (39253'9006,39422'12054] local-les=39453 n=284 ec=31174 les/c
->> 39453/39453 39452/39452/39442) [169,186,153,136] r=0 lpr=39452
->> crt=39422'12051 lcod 0'0 mlcod 0'0 active+clean]
->> 2015-10-23 16:52:15.952787 7fa43d3e6700 20 osd.169 pg_epoch: 39454
->> pg[12.fa( v 39422'12054 (39253'9006,39422'12054] local-les=39453 n=284
->> ec=31174 les/c 39453/39453 39452/39452/39442) [169,186,153,136] r=0
->> lpr=39452 crt=39422'12051 lcod 0'0 mlcod 0'0 active+clean]
->> op_has_sufficient_caps pool=12
->> (ssd-pool ) owner=0 need_read_cap=1 need_write_cap=1
->> need_class_read_cap=0 need_class_write_cap=0 -> NO
->> 2015-10-23 16:52:15.952832 7fa43d3e6700 10 osd.169 39454 dequeue_op
->> 0x287c7500 finish
->>
->> It looks like maybe the OP is bouncing between threads or something
->> like that and never getting dispatched correctly. This is on
->> ceph version 0.94.4 (95292699291242794510b39ffde3f4df67898d3a)
+1. The lock itself may not be expensive but it is held in the beginning of do_rule. If we take the lock in much more granular level like in bucket_perm_choose() , it could be a gain..If it is a possibility , we can test this out.
+
+2. May be checking it from a messenger thread is having an effect, what if we move the check in the OSD worker thread  ?
+
+Thanks & Regards
+Somnath
+
+-----Original Message-----
+From: Sage Weil [mailto:sage@newdream.net]
+Sent: Friday, October 23, 2015 6:10 PM
+To: Somnath Roy
+Cc: ceph-devel@vger.kernel.org
+Subject: Re: Lock contention in do_rule
+
+On Sat, 24 Oct 2015, Somnath Roy wrote:
+> Hi Sage,
+> We are seeing the following mapper_lock is heavily contended and commenting out this lock is improving performance ~10 % (in the short circuit path).
+> This is called for every io from osd_is_valid_op_target().
+> I looked into the code ,but, couldn't understand the purpose of the lock , it seems redundant to me , could you please confirm ?
 >
-> I don't see the same op looping in teh snippet above (each only appears
-> once for enqueue_op and once for dequeue_op), but it's hard to read after
-> wordwrapping to 80 cols.  Do you mind posting a larger snippet of the log
-> somewhere?
 >
-> sage
->
->> I followed the directions at [1] in the writeback section for
->> disabling the cache tier. I did this on another cluster recently and
->> didn't see this problem (only took an hour or two to evict 700GB of
->> data). I saw a very slow evict a while back, but just chalked it up to
->> btrfs being dumb.
->>
->> [1] http://docs.ceph.com/docs/master/rados/operations/cache-tiering/#removing-a-writeback-cache
->> - ----------------
->> Robert LeBlanc
->> PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
->> -----BEGIN PGP SIGNATURE-----
->> Version: Mailvelope v1.2.2
->> Comment: https://www.mailvelope.com
->>
->> wsFcBAEBCAAQBQJWKr8iCRDmVDuy+mK58QAAl7oP/2bfWT/DUxjxkEGIXOnW
->> x2dk7hlTAkTAts7bRQn+vL31bcHAEoN+nJH5J39nt98Kh4rpZyHcVtJammYM
->> hYNsc97Hah+O2iqDYWxr4Vu27eyq5icCw0oFo9hbsA6lGPcrgeVSGbnXaFk0
->> +4u6OCovRDb6Rgfc6IAJoHrkulnPaWGaKWa1sfofdlMDJoA2U5cnX7ZvkRnM
->> unnKKtAjmeVCFbt/QmwFJVEjdNh0yZXN2qLSJUVwf4APgB4G2trupQ6kuisn
->> oGZdJP1DRtFn5IgoZQzB4ZA1FNydrVoQmrPNTAkCGQoUWegbmhxrXxsrfLV9
->> jTky2inv8NLdP46VyEVyvOqFD3WVRYIP+KvVcaNnL2awMClOgZ4uish+rLK/
->> Uyhcm9dfXgBz1Fm+PzdzpMwK8/lvk/UcfnBs6s5rELgjCQ/WPLMu7y1ZP9FY
->> DzLsrtMdbMGZA7MTt9CKAe9fZ+sPC3Se8slh6mN7M7Tm2Knsv6uyKLJ06imW
->> M7DMGVMi2A3I+qTE/DEA/D5MLcx+vJtLD57/a2j3dWaEiiBqaAsMA18UiwEX
->> bMaHAbFMWBrlhIVytP4IaA7dbiEaO6C90pyHHtyVf1etKDfP+erNRtHVW4JI
->> 8wpG87Z34o6r92fkbb0LRH/TvD+WQFU4Q0OiL5JqclJKJP6TNUUhMmstad62
->> vmqk
->> =dO6U
->> -----END PGP SIGNATURE-----
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
+> void do_rule(int rule, int x, vector<int>& out, int maxout,
+>                const vector<__u32>& weight) const {
+>     Mutex::Locker l(mapper_lock);
+>     int rawout[maxout];
+>     int scratch[maxout * 3];
+>     int numrep = crush_do_rule(crush, rule, x, rawout, maxout, &weight[0], weight.size(), scratch);
+>     if (numrep < 0)
+>       numrep = 0;
+>     out.resize(numrep);
+>     for (int i=0; i<numrep; i++)
+>       out[i] = rawout[i];
+>   }
 
------BEGIN PGP SIGNATURE-----
-Version: Mailvelope v1.2.2
-Comment: https://www.mailvelope.com
+It's needed because of this:
 
-wsFcBAEBCAAQBQJWKuOXCRDmVDuy+mK58QAA5cAQAJqYTaELyx7luQ4fk54w
-vcGfnlWBSHTN1gTyHWBefEQYZLylybiLy+bPJNsvav/QqMVUhRkBM+Wl4Ovy
-p24VFArwWPchVjPKdpSS9c+9qRgh9sKMYBOqCCVv1Za0vAFDofwQkU0r29tQ
-smm5afG5Bs93N4rKALd7coE8WLy7DHGdJIssEVcrSSn6Zqh56w1aA8RLgIWz
-qCOEbPftLia0xEY/avnyViQzvPbUIV9DzAhTgxrR3Q5EXFn6kEmZa1O2MNlz
-K9kwDrWqFZzMEsZs/BMT5G7r/LNxZyk+aqYkZGSTi2EGOPlhZoIx0iqEyIlD
-/cQXOWFbbka/Z4iQNPWAY9jpP8/QW8Ls7ha0x6q9Nb1WofYGsTOE1mzoDEwq
-5OJe9WKKUM337JKZM3ddbZi0kKWRwGoX7zaeARVKWG2rDDMjbvpXLJZRbxne
-ukfJJCzbvDMPk4y7pgkHU7vgxgG7EZE9WNA7+BBhYYYAvkakY1PiSeoXcb5S
-1ctSUjRNosJe2GPs3hmczbwjFmnMJJuSkO5IJPaszfRL17JZ5LvP7yRQKX22
-P2+020894Z01o1+wDBP6J2qhIkew6v9/pgCU3ye4M39NRj42AoozBJHHtMrZ
-iMoP1ODp/ujUu9hx3T6v4DfAGvV+uYsDU0WDzR7mdCoGPfJ/5DoaqYJxHRJj
-51QV
-=ScAS
------END PGP SIGNATURE-----
+https://github.com/ceph/ceph/blob/master/src/crush/crush.h#L137
+https://github.com/ceph/ceph/blob/master/src/crush/mapper.c#L88
+
+This is clearly not the greatest approach.  I think what we need is a cache that is provided by the caller (which would be annoying an awkward because it's not linked directly to the bucket in question, and would not be shared between threads) or crush upcalls that take the lock only when in the perm path (which is relatively rare).  I'd lean toward the latter, but we need to be careful about it since this code is shared with the kernel and it needs to work there as well.  Probably we just need to define two callbacks for lock and unlock on the struct crush_map?
+
+sage
+
+________________________________
+
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+
