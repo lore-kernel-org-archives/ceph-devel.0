@@ -1,26 +1,45 @@
-From: Josh Durgin <jdurgin@redhat.com>
-Subject: Re: rbd and the next firefly release v0.80.11
-Date: Sat, 24 Oct 2015 08:58:40 +0900
-Message-ID: <562AC9B0.4000305@redhat.com>
-References: <562A93E0.8050402@dachary.org>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: Lock contention in do_rule
+Date: Sat, 24 Oct 2015 00:41:20 +0000
+Message-ID: <755F6B91B3BE364F9BCA11EA3F9E0C6F31764194@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:51990 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750958AbbJWX6m (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 23 Oct 2015 19:58:42 -0400
-In-Reply-To: <562A93E0.8050402@dachary.org>
+Received: from mail-bn1on0075.outbound.protection.outlook.com ([157.56.110.75]:61289
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750869AbbJXAl0 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Oct 2015 20:41:26 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Nathan Cutler <ncutler@suse.cz>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 10/24/2015 05:09 AM, Loic Dachary wrote:
-> Hi Josh,
->
-> The next firefly release as found at https://github.com/ceph/ceph/tree/firefly passed the rbd suite (http://tracker.ceph.com/issues/11644#note-105 and http://tracker.ceph.com/issues/11644#note-120). Do you think the firefly branch is ready for QE to start their own round of testing ?
+Hi Sage,
+We are seeing the following mapper_lock is heavily contended and commenting out this lock is improving performance ~10 % (in the short circuit path).
+This is called for every io from osd_is_valid_op_target().
+I looked into the code ,but, couldn't understand the purpose of the lock , it seems redundant to me , could you please confirm ?
 
-Looks ready to me.
+
+void do_rule(int rule, int x, vector<int>& out, int maxout,
+               const vector<__u32>& weight) const {
+    Mutex::Locker l(mapper_lock);
+    int rawout[maxout];
+    int scratch[maxout * 3];
+    int numrep = crush_do_rule(crush, rule, x, rawout, maxout, &weight[0], weight.size(), scratch);
+    if (numrep < 0)
+      numrep = 0;
+    out.resize(numrep);
+    for (int i=0; i<numrep; i++)
+      out[i] = rawout[i];
+  }
+
+
+Thanks & Regards
+Somnath
+
+________________________________
+
+PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
 
