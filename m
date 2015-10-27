@@ -1,89 +1,140 @@
-From: "hzwulibin" <hzwulibin@gmail.com>
-Subject: Re:  Re: [ceph-users] Understanding the number of TCP connections
-	between clients and OSDs
-Date: Tue, 27 Oct 2015 09:12:45 +0800
-Message-ID: <562ECF89.709@gmail.com>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: Re: [ceph-users] Understanding the number of TCP connections
+ between clients and OSDs
+Date: Tue, 27 Oct 2015 13:36:11 +0800
+Message-ID: <CACJqLyYQB0A7_AkKELWxMU44kiENc9za1ipLSfyjLe=EXNZfhw@mail.gmail.com>
 References: <CAD76J01iYt1wVZZR655=KF+kRZATMc_yEB62QJOyRmRhMD8pFg@mail.gmail.com>
 	<590F8B9C-DA15-41C2-9E37-8847F79D7F6B@schermer.cz>
+	<562ECF89.709@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f67.google.com ([209.85.220.67]:35390 "EHLO
-	mail-pa0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753328AbbJ0BMr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 26 Oct 2015 21:12:47 -0400
-Received: by pagq8 with SMTP id q8so22149879pag.2
-        for <ceph-devel@vger.kernel.org>; Mon, 26 Oct 2015 18:12:46 -0700 (PDT)
-Received: from HSH-D-2405 ([43.230.90.81])
-        by smtp.gmail.com with ESMTPSA id fx3sm24192169pbb.60.2015.10.26.18.12.44
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
-        Mon, 26 Oct 2015 18:12:45 -0700 (PDT)
-In-Reply-To: <590F8B9C-DA15-41C2-9E37-8847F79D7F6B@schermer.cz>
+Received: from mail-vk0-f53.google.com ([209.85.213.53]:36198 "EHLO
+	mail-vk0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751280AbbJ0FgM convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Oct 2015 01:36:12 -0400
+Received: by vkex70 with SMTP id x70so112954508vke.3
+        for <ceph-devel@vger.kernel.org>; Mon, 26 Oct 2015 22:36:11 -0700 (PDT)
+In-Reply-To: <562ECF89.709@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: hzwulibin <hzwulibin@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-SGksIGRldmVsb3BzDQoNCkkgYWxzbyBjb25jZXJucyBhYm91dCB0aGlzIHByb2JsZW0uIEFuZCBt
-eSBwcm9ibGVtIGlzIGhvdyBtYW55IHRocmVhZHMgd2lsbCB0aGUgcWVtdS1zeXN0ZW0teDg2IGhh
-cz8NCldoZW4gd2lsbCBpdCBjdXQgZG93biB0aGUgdGhyZWFkcz8NCg0KRnJvbSB3aGF0IGkgdGVz
-dGVkLCBpdCBjb3VsZCBiZXR3ZWVuIDEwMCB0byA4MDAsIHllYWgsIG1heWJlIGl0IGhhcyByZWxh
-dGlvbnNoaXAgd2l0aCB0aGUgb3NkIG51bWJlci4gQnV0IGl0DQpzZWVtcyBhZmZlY3QgdGhlIHBl
-cmZvcm1hbmNlIHdoZW4gaXQgaGFzIG1hbnkgdGhyZWFkcy4gRnJvbSB3aGF0IGkgdGVzdGVkLCA0
-ayByYW5kd3JpdGUgd2lsbCByZWR1Y2UgZnJvbSAxNWsNCnRvIDRrLiBUaGF0J3MgcmVhbGx5IHVu
-YWNjZXB0YWJsZSENCg0KTXkgZXZuaXJvbm1lbnQ6DQoNCjEuIG5pbmUgT1NEIHN0b3JhZ2Ugc2Vy
-dmVycyB3aXRoIHR3byBpbnRlbCBEQyAzNTAwIFNTRCBvbiBlYWNoDQoyLiBoYW1tZXIgMC45NC4z
-DQozLiBRRU1VIGVtdWxhdG9yIHZlcnNpb24gMi4xLjIgKERlYmlhbiAxOjIuMStkZnNnLTEyK2Rl
-Yjh1NH5icG83MCsxKQ0KDQpUaGFua3MhDQoNCi0tLS0tLS0tLS0tLS0tLS0tLQkJCQkgDQpoend1
-bGliaW4NCjIwMTUtMTAtMjcNCg0KLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0K5Y+R5Lu25Lq677yaSmFuIFNjaGVybWVyIDxqYW5A
-c2NoZXJtZXIuY3o+DQrlj5HpgIHml6XmnJ/vvJoyMDE1LTEwLTI3IDA1OjQ4DQrmlLbku7bkurrv
-vJpSaWNrIEJhbHNhbm8NCuaKhOmAge+8mmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20NCuS4u+mi
-mO+8mlJlOiBbY2VwaC11c2Vyc10gVW5kZXJzdGFuZGluZyB0aGUgbnVtYmVyIG9mIFRDUCBjb25u
-ZWN0aW9ucw0KCWJldHdlZW4gY2xpZW50cyBhbmQgT1NEcw0KDQpJZiB3ZSdyZSB0YWxraW5nIGFi
-b3V0IFJCRCBjbGllbnRzIChxZW11KSB0aGVuIHRoZSBudW1iZXIgYWxzbyBncm93cyB3aXRoIG51
-bWJlciBvZiB2b2x1bWVzIGF0dGFjaGVkIHRvIHRoZSBjbGllbnQuIFdpdGggYSBzaW5nbGUgdm9s
-dW1lIGl0IHdhcyA8MTAwMC4gSXQgZ3Jvd3Mgd2hlbiB0aGVyZSdzIGhlYXZ5IElPIGhhcHBlbmlu
-ZyBpbiB0aGUgZ3Vlc3QuDQpJIGhhZCB0byBidW1wIHVwIHRoZSBmaWxlIG9wZW4gbGltaXRzIHRv
-IHNldmVyYWwgdGh1c2FuZHMgKDgwMDAgd2FzIGl0PykgdG8gYWNjb21vZGF0ZSBjbGllbnQgd2l0
-aCAxMCB2b2x1bWVzIGluIG91ciBjbHVzdGVyLiBXZSBqdXN0IHNjYWxlZCB0aGUgbnVtYmVyIG9m
-IE9TRHMgZG93biBzbyBob3BlZnVsbHkgSSBjb3VsZCBoYXZlIGEgZ3JhcGggb2YgdGhhdC4NCkJ1
-dCBJIGp1c3QgZ3Vlc3N0aW1hdGVkIHdoYXQgaXQgY291bGQgYmVjb21lLCBhbmQgdGhhdCdzIG5v
-dCBuZWNlc3NhcmlseSB3aGF0IHRoZSB0aGVvcmV0aWNhbCBsaW1pdCBpcy4gVmVyeSBiYWQgdGhp
-bmdzIGhhcHBlbiB3aGVuIHlvdSByZWFjaCB0aGF0IHRocmVzaG9sZC4gSXQgY291bGQgYWxzbyBk
-ZXBlbmQgb24gdGhlIGd1ZXN0IHNldHRpbmdzIChsaWtlIHF1ZXVlIGRlcHRoKSwgYW5kIGhvdyBt
-dWNoIGl0IHNlZWtzIG92ZXIgdGhlIGRyaXZlIChob3cgbWFueSBkaWZmZXJlbnQgUEdzIGl0IGhp
-dHMpLCBidXQga25vd2luZyB0aGUgdXBwZXIgYm91bmQgaXMgbW9zdCBjcml0aWNhbC4NCg0KSmFu
-DQoNCj4gT24gMjYgT2N0IDIwMTUsIGF0IDIxOjMyLCBSaWNrIEJhbHNhbm8gPHJpY2tAb3Bvd2Vy
-LmNvbT4gd3JvdGU6DQo+IA0KPiBXZSd2ZSBydW4gaW50byBpc3N1ZXMgd2l0aCB0aGUgbnVtYmVy
-IG9mIG9wZW4gVENQIGNvbm5lY3Rpb25zIGZyb20gYSBzaW5nbGUgY2xpZW50IHRvIHRoZSBPU0Rz
-IGluIG91ciBDZXBoIGNsdXN0ZXIuDQo+IA0KPiBXZSBjYW4gKCYgaGF2ZSkgaW5jcmVhc2VkIHRo
-ZSBvcGVuIGZpbGUgbGltaXQgdG8gd29yayBhcm91bmQgdGhpcywgYnV0IHdlJ3JlIGxvb2tpbmcg
-dG8gdW5kZXJzdGFuZCB3aGF0IGRldGVybWluZXMgdGhlIG51bWJlciBvZiBvcGVuIGNvbm5lY3Rp
-b25zIG1haW50YWluZWQgYmV0d2VlbiBhIGNsaWVudCBhbmQgYSBwYXJ0aWN1bGFyIE9TRC4gT3Vy
-IG5haXZlIGFzc3VtcHRpb24gd2FzIDEgb3BlbiBUQ1AgY29ubmVjdGlvbiBwZXIgT1NEIG9yIHBl
-ciBwb3J0IG1hZGUgYXZhaWxhYmxlIGJ5IHRoZSBDZXBoIG5vZGUuIFRoZXJlIGFyZSBtYW55IG1v
-cmUgdGhhbiB0aGlzLCBwcmVzdW1hYmx5IHRvIGFsbG93IHBhcmFsbGVsIGNvbm5lY3Rpb25zLCBi
-ZWNhdXNlIHdlIHNlZSAxLTQgY29ubmVjdGlvbnMgZnJvbSBlYWNoIGNsaWVudCBwZXIgb3BlbiBw
-b3J0IG9uIGEgQ2VwaCBub2RlLg0KPiANCj4gSGVyZSBpcyBzb21lIGJhY2tncm91bmQgb24gb3Vy
-IGNsdXN0ZXI6DQo+ICogc3RpbGwgcnVubmluZyBGaXJlZmx5IDAuODAuOA0KPiAqIDQxNCBPU0Rz
-LCAzNSBub2Rlcywgb25lIG1hc3NpdmUgcG9vbA0KPiAqIGNsaWVudHMgYXJlIEtWTSBwcm9jZXNz
-ZXMsIGFjY2Vzc2luZyBDZXBoIFJCRCBpbWFnZXMgdXNpbmcgdmlydGlvDQo+ICogdG90YWwgbnVt
-YmVyIG9mIG9wZW4gVENQIGNvbm5lY3Rpb25zIGZyb20gb25lIGNsaWVudCB0byBhbGwgbm9kZXMg
-YmV0d2VlbiA1MDAtMTAwMCANCj4gDQo+IElzIHRoZXJlIGFueSB3YXkgdG8gZWl0aGVyIGtub3cg
-b3IgY2FwIHRoZSBtYXhpbXVtIG51bWJlciBvZiBjb25uZWN0aW9ucyB3ZSBzaG91bGQgZXhwZWN0
-Pw0KPiANCj4gSSBjYW4gcHJvdmlkZSBtb3JlIGluZm8gYXMgcmVxdWlyZWQuIEkndmUgZG9uZSBz
-b21lIHNlYXJjaGVzIGFuZCBmb3VuZCByZWZlcmVuY2VzIHRvICJodWdlIG51bWJlciBvZiBUQ1Ag
-Y29ubmVjdGlvbnMiIGJ1dCBub3RoaW5nIGNvbmNyZXRlIHRvIHRlbGwgbWUgaG93IHRvIHByZWRp
-Y3QgaG93IHRoYXQgc2NhbGVzLg0KPiANCj4gVGhhbmtzLA0KPiBSaWNrDQo+IC0tIA0KPiBSaWNr
-IEJhbHNhbm8NCj4gU2VuaW9yIFNvZnR3YXJlIEVuZ2luZWVyDQo+IE9wb3dlciA8aHR0cDovL3d3
-dy5vcG93ZXIuY29tLz4NCj4gDQo+IE8gKzEgNTcxIDM4NCAxMjEwDQo+IFdlJ3JlIEhpcmluZyEg
-U2VlIGpvYnMgaGVyZSA8aHR0cDovL3d3dy5vcG93ZXIuY29tL2NhcmVlcnM+Lg0KPiBfX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXw0KPiBjZXBoLXVzZXJzIG1h
-aWxpbmcgbGlzdA0KPiBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tDQo+IGh0dHA6Ly9saXN0cy5j
-ZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQ0KDQoNCl9fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQpjZXBoLXVzZXJzIG1haWxpbmcg
-bGlzdA0KY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQ0KaHR0cDovL2xpc3RzLmNlcGguY29tL2xp
-c3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tDQoNCg0K
+On Tue, Oct 27, 2015 at 9:12 AM, hzwulibin <hzwulibin@gmail.com> wrote:
+> Hi, develops
+>
+> I also concerns about this problem. And my problem is how many thread=
+s will the qemu-system-x86 has?
+> When will it cut down the threads?
 
+It's because of network model, each connection will has two threads.
+We are actually working on this to avoid.
+
+BTW, for client level, maybe we can add a proxy for ceph message to
+avoid too much tcp socket on client host. But it need let us improve
+single connection's performance.
+
+>
+> From what i tested, it could between 100 to 800, yeah, maybe it has r=
+elationship with the osd number. But it
+> seems affect the performance when it has many threads. From what i te=
+sted, 4k randwrite will reduce from 15k
+> to 4k. That's really unacceptable!
+>
+> My evnironment:
+>
+> 1. nine OSD storage servers with two intel DC 3500 SSD on each
+> 2. hammer 0.94.3
+> 3. QEMU emulator version 2.1.2 (Debian 1:2.1+dfsg-12+deb8u4~bpo70+1)
+>
+> Thanks!
+>
+> ------------------
+> hzwulibin
+> 2015-10-27
+>
+> -------------------------------------------------------------
+> =E5=8F=91=E4=BB=B6=E4=BA=BA=EF=BC=9AJan Schermer <jan@schermer.cz>
+> =E5=8F=91=E9=80=81=E6=97=A5=E6=9C=9F=EF=BC=9A2015-10-27 05:48
+> =E6=94=B6=E4=BB=B6=E4=BA=BA=EF=BC=9ARick Balsano
+> =E6=8A=84=E9=80=81=EF=BC=9Aceph-users@lists.ceph.com
+> =E4=B8=BB=E9=A2=98=EF=BC=9ARe: [ceph-users] Understanding the number =
+of TCP connections
+>         between clients and OSDs
+>
+> If we're talking about RBD clients (qemu) then the number also grows =
+with number of volumes attached to the client. With a single volume it =
+was <1000. It grows when there's heavy IO happening in the guest.
+> I had to bump up the file open limits to several thusands (8000 was i=
+t?) to accomodate client with 10 volumes in our cluster. We just scaled=
+ the number of OSDs down so hopefully I could have a graph of that.
+> But I just guesstimated what it could become, and that's not necessar=
+ily what the theoretical limit is. Very bad things happen when you reac=
+h that threshold. It could also depend on the guest settings (like queu=
+e depth), and how much it seeks over the drive (how many different PGs =
+it hits), but knowing the upper bound is most critical.
+>
+> Jan
+>
+>> On 26 Oct 2015, at 21:32, Rick Balsano <rick@opower.com> wrote:
+>>
+>> We've run into issues with the number of open TCP connections from a=
+ single client to the OSDs in our Ceph cluster.
+>>
+>> We can (& have) increased the open file limit to work around this, b=
+ut we're looking to understand what determines the number of open conne=
+ctions maintained between a client and a particular OSD. Our naive assu=
+mption was 1 open TCP connection per OSD or per port made available by =
+the Ceph node. There are many more than this, presumably to allow paral=
+lel connections, because we see 1-4 connections from each client per op=
+en port on a Ceph node.
+>>
+>> Here is some background on our cluster:
+>> * still running Firefly 0.80.8
+>> * 414 OSDs, 35 nodes, one massive pool
+>> * clients are KVM processes, accessing Ceph RBD images using virtio
+>> * total number of open TCP connections from one client to all nodes =
+between 500-1000
+>>
+>> Is there any way to either know or cap the maximum number of connect=
+ions we should expect?
+>>
+>> I can provide more info as required. I've done some searches and fou=
+nd references to "huge number of TCP connections" but nothing concrete =
+to tell me how to predict how that scales.
+>>
+>> Thanks,
+>> Rick
+>> --
+>> Rick Balsano
+>> Senior Software Engineer
+>> Opower <http://www.opower.com/>
+>>
+>> O +1 571 384 1210
+>> We're Hiring! See jobs here <http://www.opower.com/careers>.
+>> _______________________________________________
+>> ceph-users mailing list
+>> ceph-users@lists.ceph.com
+>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>
+>
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>
+>
+
+
+
+--=20
+Best Regards,
+
+Wheat
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
