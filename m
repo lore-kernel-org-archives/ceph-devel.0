@@ -1,203 +1,89 @@
-From: "hzwulibin-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org" <hzwulibin-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: Understanding the number of TCP connections
+From: "hzwulibin" <hzwulibin@gmail.com>
+Subject: Re:  Re: [ceph-users] Understanding the number of TCP connections
 	between clients and OSDs
-Date: Tue, 27 Oct 2015 08:41:38 +0800
-Message-ID: <2015102708413664295810@gmail.com>
-References: <CAD76J01iYt1wVZZR655=KF+kRZATMc_yEB62QJOyRmRhMD8pFg@mail.gmail.com>,
+Date: Tue, 27 Oct 2015 09:12:45 +0800
+Message-ID: <562ECF89.709@gmail.com>
+References: <CAD76J01iYt1wVZZR655=KF+kRZATMc_yEB62QJOyRmRhMD8pFg@mail.gmail.com>
 	<590F8B9C-DA15-41C2-9E37-8847F79D7F6B@schermer.cz>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0796715976=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Jan Schermer <jan-SB6/BxVxTjHtwjQa/ONI9g@public.gmane.org>, Rick Balsano <rick-FGJi4DqQKYDQT0dZR+AlfA@public.gmane.org>
-Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
-
-This is a multi-part message in MIME format.
-
---===============0796715976==
-Content-Type: multipart/alternative;
-	boundary="----=_001_NextPart803833711260_=----"
-
-This is a multi-part message in MIME format.
-
-------=_001_NextPart803833711260_=----
-Content-Type: text/plain;
-	charset="ISO-8859-1"
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: base64
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-pa0-f67.google.com ([209.85.220.67]:35390 "EHLO
+	mail-pa0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753328AbbJ0BMr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 26 Oct 2015 21:12:47 -0400
+Received: by pagq8 with SMTP id q8so22149879pag.2
+        for <ceph-devel@vger.kernel.org>; Mon, 26 Oct 2015 18:12:46 -0700 (PDT)
+Received: from HSH-D-2405 ([43.230.90.81])
+        by smtp.gmail.com with ESMTPSA id fx3sm24192169pbb.60.2015.10.26.18.12.44
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
+        Mon, 26 Oct 2015 18:12:45 -0700 (PDT)
+In-Reply-To: <590F8B9C-DA15-41C2-9E37-8847F79D7F6B@schermer.cz>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-SGksDQpJIGFsc28gY29uY2VybnMgYWJvdXQgdGhpcyBwcm9ibGVtLiBBbmQgbXkgcHJvYmxlbSBp
-cyBob3cgbWFueSB0aHJlYWRzIHdpbGwgdGhlIHFlbXUtc3lzdGVtLXg4NiBoYXMuDQoNCkZyb20g
-d2hhdCBpIHRlc3RlZCwgaXQgY291bGQgYmV0d2VlbiAxMDAgdG8gODAwLCB5ZWFoLCBtYXliZSBp
-dCBoYXMgcmVsYXRpb25zaGlwIHdpdGggdGhlIG9zZCBudW1iZXIuIEJ1dCBpdA0Kc2VlbXMgYWZm
-ZWN0IHRoZSBwZXJmb3JtYW5jZSB3aGVuIGl0IGhhcyBtYW55IHRocmVhZHMuIEZyb20gd2hhdCBp
-IHRlc3RlZCwgNGsgcmFuZHdyaXRlIHdpbGwgcmVkdWNlIGZyb20gMTVrDQp0byA0ay4gVGhhdCdz
-IHJlYWxseSB1bmFjY2VwdGFibGUhDQoNCk15IGV2bmlyb25tZW50Og0KDQoxLiBuaW5lIE9TRCBz
-dG9yYWdlIHNlcnZlcnMgd2l0aCB0d28gaW50ZWwgREMgMzUwMCBTU0Qgb24gZWFjaA0KMi4gaGFt
-bWVyIDAuOTQuMw0KMy4gUUVNVSBlbXVsYXRvciB2ZXJzaW9uIDIuMS4yIChEZWJpYW4gMToyLjEr
-ZGZzZy0xMitkZWI4dTR+YnBvNzArMSkNCg0KVGhhbmtzIQ0KDQoNCmh6d3VsaWJpbkBnbWFpbC5j
-b20NCiANCkZyb206IEphbiBTY2hlcm1lcg0KRGF0ZTogMjAxNS0xMC0yNyAwNTo0OA0KVG86IFJp
-Y2sgQmFsc2Fubw0KQ0M6IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20NClN1YmplY3Q6IFJlOiBb
-Y2VwaC11c2Vyc10gVW5kZXJzdGFuZGluZyB0aGUgbnVtYmVyIG9mIFRDUCBjb25uZWN0aW9ucyBi
-ZXR3ZWVuIGNsaWVudHMgYW5kIE9TRHMNCklmIHdlJ3JlIHRhbGtpbmcgYWJvdXQgUkJEIGNsaWVu
-dHMgKHFlbXUpIHRoZW4gdGhlIG51bWJlciBhbHNvIGdyb3dzIHdpdGggbnVtYmVyIG9mIHZvbHVt
-ZXMgYXR0YWNoZWQgdG8gdGhlIGNsaWVudC4gV2l0aCBhIHNpbmdsZSB2b2x1bWUgaXQgd2FzIDwx
-MDAwLiBJdCBncm93cyB3aGVuIHRoZXJlJ3MgaGVhdnkgSU8gaGFwcGVuaW5nIGluIHRoZSBndWVz
-dC4NCkkgaGFkIHRvIGJ1bXAgdXAgdGhlIGZpbGUgb3BlbiBsaW1pdHMgdG8gc2V2ZXJhbCB0aHVz
-YW5kcyAoODAwMCB3YXMgaXQ/KSB0byBhY2NvbW9kYXRlIGNsaWVudCB3aXRoIDEwIHZvbHVtZXMg
-aW4gb3VyIGNsdXN0ZXIuIFdlIGp1c3Qgc2NhbGVkIHRoZSBudW1iZXIgb2YgT1NEcyBkb3duIHNv
-IGhvcGVmdWxseSBJIGNvdWxkIGhhdmUgYSBncmFwaCBvZiB0aGF0Lg0KQnV0IEkganVzdCBndWVz
-c3RpbWF0ZWQgd2hhdCBpdCBjb3VsZCBiZWNvbWUsIGFuZCB0aGF0J3Mgbm90IG5lY2Vzc2FyaWx5
-IHdoYXQgdGhlIHRoZW9yZXRpY2FsIGxpbWl0IGlzLiBWZXJ5IGJhZCB0aGluZ3MgaGFwcGVuIHdo
-ZW4geW91IHJlYWNoIHRoYXQgdGhyZXNob2xkLiBJdCBjb3VsZCBhbHNvIGRlcGVuZCBvbiB0aGUg
-Z3Vlc3Qgc2V0dGluZ3MgKGxpa2UgcXVldWUgZGVwdGgpLCBhbmQgaG93IG11Y2ggaXQgc2Vla3Mg
-b3ZlciB0aGUgZHJpdmUgKGhvdyBtYW55IGRpZmZlcmVudCBQR3MgaXQgaGl0cyksIGJ1dCBrbm93
-aW5nIHRoZSB1cHBlciBib3VuZCBpcyBtb3N0IGNyaXRpY2FsLg0KDQpKYW4NCg0KT24gMjYgT2N0
-IDIwMTUsIGF0IDIxOjMyLCBSaWNrIEJhbHNhbm8gPHJpY2tAb3Bvd2VyLmNvbT4gd3JvdGU6DQoN
-CldlJ3ZlIHJ1biBpbnRvIGlzc3VlcyB3aXRoIHRoZSBudW1iZXIgb2Ygb3BlbiBUQ1AgY29ubmVj
-dGlvbnMgZnJvbSBhIHNpbmdsZSBjbGllbnQgdG8gdGhlIE9TRHMgaW4gb3VyIENlcGggY2x1c3Rl
-ci4NCg0KV2UgY2FuICgmIGhhdmUpIGluY3JlYXNlZCB0aGUgb3BlbiBmaWxlIGxpbWl0IHRvIHdv
-cmsgYXJvdW5kIHRoaXMsIGJ1dCB3ZSdyZSBsb29raW5nIHRvIHVuZGVyc3RhbmQgd2hhdCBkZXRl
-cm1pbmVzIHRoZSBudW1iZXIgb2Ygb3BlbiBjb25uZWN0aW9ucyBtYWludGFpbmVkIGJldHdlZW4g
-YSBjbGllbnQgYW5kIGEgcGFydGljdWxhciBPU0QuIE91ciBuYWl2ZSBhc3N1bXB0aW9uIHdhcyAx
-IG9wZW4gVENQIGNvbm5lY3Rpb24gcGVyIE9TRCBvciBwZXIgcG9ydCBtYWRlIGF2YWlsYWJsZSBi
-eSB0aGUgQ2VwaCBub2RlLiBUaGVyZSBhcmUgbWFueSBtb3JlIHRoYW4gdGhpcywgcHJlc3VtYWJs
-eSB0byBhbGxvdyBwYXJhbGxlbCBjb25uZWN0aW9ucywgYmVjYXVzZSB3ZSBzZWUgMS00IGNvbm5l
-Y3Rpb25zIGZyb20gZWFjaCBjbGllbnQgcGVyIG9wZW4gcG9ydCBvbiBhIENlcGggbm9kZS4NCg0K
-SGVyZSBpcyBzb21lIGJhY2tncm91bmQgb24gb3VyIGNsdXN0ZXI6DQoqIHN0aWxsIHJ1bm5pbmcg
-RmlyZWZseSAwLjgwLjgNCiogNDE0IE9TRHMsIDM1IG5vZGVzLCBvbmUgbWFzc2l2ZSBwb29sDQoq
-IGNsaWVudHMgYXJlIEtWTSBwcm9jZXNzZXMsIGFjY2Vzc2luZyBDZXBoIFJCRCBpbWFnZXMgdXNp
-bmcgdmlydGlvDQoqIHRvdGFsIG51bWJlciBvZiBvcGVuIFRDUCBjb25uZWN0aW9ucyBmcm9tIG9u
-ZSBjbGllbnQgdG8gYWxsIG5vZGVzIGJldHdlZW4gNTAwLTEwMDAgDQoNCklzIHRoZXJlIGFueSB3
-YXkgdG8gZWl0aGVyIGtub3cgb3IgY2FwIHRoZSBtYXhpbXVtIG51bWJlciBvZiBjb25uZWN0aW9u
-cyB3ZSBzaG91bGQgZXhwZWN0Pw0KDQpJIGNhbiBwcm92aWRlIG1vcmUgaW5mbyBhcyByZXF1aXJl
-ZC4gSSd2ZSBkb25lIHNvbWUgc2VhcmNoZXMgYW5kIGZvdW5kIHJlZmVyZW5jZXMgdG8gImh1Z2Ug
-bnVtYmVyIG9mIFRDUCBjb25uZWN0aW9ucyIgYnV0IG5vdGhpbmcgY29uY3JldGUgdG8gdGVsbCBt
-ZSBob3cgdG8gcHJlZGljdCBob3cgdGhhdCBzY2FsZXMuDQoNClRoYW5rcywNClJpY2sNCi0tIA0K
-UmljayBCYWxzYW5vDQpTZW5pb3IgU29mdHdhcmUgRW5naW5lZXINCk9wb3dlcg0KDQpPICsxIDU3
-MSAzODQgMTIxMA0KV2UncmUgSGlyaW5nISBTZWUgam9icyBoZXJlLg0KX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0
-DQpjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tDQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGlu
-Zm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20NCg0K
+SGksIGRldmVsb3BzDQoNCkkgYWxzbyBjb25jZXJucyBhYm91dCB0aGlzIHByb2JsZW0uIEFuZCBt
+eSBwcm9ibGVtIGlzIGhvdyBtYW55IHRocmVhZHMgd2lsbCB0aGUgcWVtdS1zeXN0ZW0teDg2IGhh
+cz8NCldoZW4gd2lsbCBpdCBjdXQgZG93biB0aGUgdGhyZWFkcz8NCg0KRnJvbSB3aGF0IGkgdGVz
+dGVkLCBpdCBjb3VsZCBiZXR3ZWVuIDEwMCB0byA4MDAsIHllYWgsIG1heWJlIGl0IGhhcyByZWxh
+dGlvbnNoaXAgd2l0aCB0aGUgb3NkIG51bWJlci4gQnV0IGl0DQpzZWVtcyBhZmZlY3QgdGhlIHBl
+cmZvcm1hbmNlIHdoZW4gaXQgaGFzIG1hbnkgdGhyZWFkcy4gRnJvbSB3aGF0IGkgdGVzdGVkLCA0
+ayByYW5kd3JpdGUgd2lsbCByZWR1Y2UgZnJvbSAxNWsNCnRvIDRrLiBUaGF0J3MgcmVhbGx5IHVu
+YWNjZXB0YWJsZSENCg0KTXkgZXZuaXJvbm1lbnQ6DQoNCjEuIG5pbmUgT1NEIHN0b3JhZ2Ugc2Vy
+dmVycyB3aXRoIHR3byBpbnRlbCBEQyAzNTAwIFNTRCBvbiBlYWNoDQoyLiBoYW1tZXIgMC45NC4z
+DQozLiBRRU1VIGVtdWxhdG9yIHZlcnNpb24gMi4xLjIgKERlYmlhbiAxOjIuMStkZnNnLTEyK2Rl
+Yjh1NH5icG83MCsxKQ0KDQpUaGFua3MhDQoNCi0tLS0tLS0tLS0tLS0tLS0tLQkJCQkgDQpoend1
+bGliaW4NCjIwMTUtMTAtMjcNCg0KLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0K5Y+R5Lu25Lq677yaSmFuIFNjaGVybWVyIDxqYW5A
+c2NoZXJtZXIuY3o+DQrlj5HpgIHml6XmnJ/vvJoyMDE1LTEwLTI3IDA1OjQ4DQrmlLbku7bkurrv
+vJpSaWNrIEJhbHNhbm8NCuaKhOmAge+8mmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20NCuS4u+mi
+mO+8mlJlOiBbY2VwaC11c2Vyc10gVW5kZXJzdGFuZGluZyB0aGUgbnVtYmVyIG9mIFRDUCBjb25u
+ZWN0aW9ucw0KCWJldHdlZW4gY2xpZW50cyBhbmQgT1NEcw0KDQpJZiB3ZSdyZSB0YWxraW5nIGFi
+b3V0IFJCRCBjbGllbnRzIChxZW11KSB0aGVuIHRoZSBudW1iZXIgYWxzbyBncm93cyB3aXRoIG51
+bWJlciBvZiB2b2x1bWVzIGF0dGFjaGVkIHRvIHRoZSBjbGllbnQuIFdpdGggYSBzaW5nbGUgdm9s
+dW1lIGl0IHdhcyA8MTAwMC4gSXQgZ3Jvd3Mgd2hlbiB0aGVyZSdzIGhlYXZ5IElPIGhhcHBlbmlu
+ZyBpbiB0aGUgZ3Vlc3QuDQpJIGhhZCB0byBidW1wIHVwIHRoZSBmaWxlIG9wZW4gbGltaXRzIHRv
+IHNldmVyYWwgdGh1c2FuZHMgKDgwMDAgd2FzIGl0PykgdG8gYWNjb21vZGF0ZSBjbGllbnQgd2l0
+aCAxMCB2b2x1bWVzIGluIG91ciBjbHVzdGVyLiBXZSBqdXN0IHNjYWxlZCB0aGUgbnVtYmVyIG9m
+IE9TRHMgZG93biBzbyBob3BlZnVsbHkgSSBjb3VsZCBoYXZlIGEgZ3JhcGggb2YgdGhhdC4NCkJ1
+dCBJIGp1c3QgZ3Vlc3N0aW1hdGVkIHdoYXQgaXQgY291bGQgYmVjb21lLCBhbmQgdGhhdCdzIG5v
+dCBuZWNlc3NhcmlseSB3aGF0IHRoZSB0aGVvcmV0aWNhbCBsaW1pdCBpcy4gVmVyeSBiYWQgdGhp
+bmdzIGhhcHBlbiB3aGVuIHlvdSByZWFjaCB0aGF0IHRocmVzaG9sZC4gSXQgY291bGQgYWxzbyBk
+ZXBlbmQgb24gdGhlIGd1ZXN0IHNldHRpbmdzIChsaWtlIHF1ZXVlIGRlcHRoKSwgYW5kIGhvdyBt
+dWNoIGl0IHNlZWtzIG92ZXIgdGhlIGRyaXZlIChob3cgbWFueSBkaWZmZXJlbnQgUEdzIGl0IGhp
+dHMpLCBidXQga25vd2luZyB0aGUgdXBwZXIgYm91bmQgaXMgbW9zdCBjcml0aWNhbC4NCg0KSmFu
+DQoNCj4gT24gMjYgT2N0IDIwMTUsIGF0IDIxOjMyLCBSaWNrIEJhbHNhbm8gPHJpY2tAb3Bvd2Vy
+LmNvbT4gd3JvdGU6DQo+IA0KPiBXZSd2ZSBydW4gaW50byBpc3N1ZXMgd2l0aCB0aGUgbnVtYmVy
+IG9mIG9wZW4gVENQIGNvbm5lY3Rpb25zIGZyb20gYSBzaW5nbGUgY2xpZW50IHRvIHRoZSBPU0Rz
+IGluIG91ciBDZXBoIGNsdXN0ZXIuDQo+IA0KPiBXZSBjYW4gKCYgaGF2ZSkgaW5jcmVhc2VkIHRo
+ZSBvcGVuIGZpbGUgbGltaXQgdG8gd29yayBhcm91bmQgdGhpcywgYnV0IHdlJ3JlIGxvb2tpbmcg
+dG8gdW5kZXJzdGFuZCB3aGF0IGRldGVybWluZXMgdGhlIG51bWJlciBvZiBvcGVuIGNvbm5lY3Rp
+b25zIG1haW50YWluZWQgYmV0d2VlbiBhIGNsaWVudCBhbmQgYSBwYXJ0aWN1bGFyIE9TRC4gT3Vy
+IG5haXZlIGFzc3VtcHRpb24gd2FzIDEgb3BlbiBUQ1AgY29ubmVjdGlvbiBwZXIgT1NEIG9yIHBl
+ciBwb3J0IG1hZGUgYXZhaWxhYmxlIGJ5IHRoZSBDZXBoIG5vZGUuIFRoZXJlIGFyZSBtYW55IG1v
+cmUgdGhhbiB0aGlzLCBwcmVzdW1hYmx5IHRvIGFsbG93IHBhcmFsbGVsIGNvbm5lY3Rpb25zLCBi
+ZWNhdXNlIHdlIHNlZSAxLTQgY29ubmVjdGlvbnMgZnJvbSBlYWNoIGNsaWVudCBwZXIgb3BlbiBw
+b3J0IG9uIGEgQ2VwaCBub2RlLg0KPiANCj4gSGVyZSBpcyBzb21lIGJhY2tncm91bmQgb24gb3Vy
+IGNsdXN0ZXI6DQo+ICogc3RpbGwgcnVubmluZyBGaXJlZmx5IDAuODAuOA0KPiAqIDQxNCBPU0Rz
+LCAzNSBub2Rlcywgb25lIG1hc3NpdmUgcG9vbA0KPiAqIGNsaWVudHMgYXJlIEtWTSBwcm9jZXNz
+ZXMsIGFjY2Vzc2luZyBDZXBoIFJCRCBpbWFnZXMgdXNpbmcgdmlydGlvDQo+ICogdG90YWwgbnVt
+YmVyIG9mIG9wZW4gVENQIGNvbm5lY3Rpb25zIGZyb20gb25lIGNsaWVudCB0byBhbGwgbm9kZXMg
+YmV0d2VlbiA1MDAtMTAwMCANCj4gDQo+IElzIHRoZXJlIGFueSB3YXkgdG8gZWl0aGVyIGtub3cg
+b3IgY2FwIHRoZSBtYXhpbXVtIG51bWJlciBvZiBjb25uZWN0aW9ucyB3ZSBzaG91bGQgZXhwZWN0
+Pw0KPiANCj4gSSBjYW4gcHJvdmlkZSBtb3JlIGluZm8gYXMgcmVxdWlyZWQuIEkndmUgZG9uZSBz
+b21lIHNlYXJjaGVzIGFuZCBmb3VuZCByZWZlcmVuY2VzIHRvICJodWdlIG51bWJlciBvZiBUQ1Ag
+Y29ubmVjdGlvbnMiIGJ1dCBub3RoaW5nIGNvbmNyZXRlIHRvIHRlbGwgbWUgaG93IHRvIHByZWRp
+Y3QgaG93IHRoYXQgc2NhbGVzLg0KPiANCj4gVGhhbmtzLA0KPiBSaWNrDQo+IC0tIA0KPiBSaWNr
+IEJhbHNhbm8NCj4gU2VuaW9yIFNvZnR3YXJlIEVuZ2luZWVyDQo+IE9wb3dlciA8aHR0cDovL3d3
+dy5vcG93ZXIuY29tLz4NCj4gDQo+IE8gKzEgNTcxIDM4NCAxMjEwDQo+IFdlJ3JlIEhpcmluZyEg
+U2VlIGpvYnMgaGVyZSA8aHR0cDovL3d3dy5vcG93ZXIuY29tL2NhcmVlcnM+Lg0KPiBfX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXw0KPiBjZXBoLXVzZXJzIG1h
+aWxpbmcgbGlzdA0KPiBjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tDQo+IGh0dHA6Ly9saXN0cy5j
+ZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQ0KDQoNCl9fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQpjZXBoLXVzZXJzIG1haWxpbmcg
+bGlzdA0KY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQ0KaHR0cDovL2xpc3RzLmNlcGguY29tL2xp
+c3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tDQoNCg0K
 
-------=_001_NextPart803833711260_=----
-Content-Type: text/html;
-	charset="ISO-8859-1"
-Content-Transfer-Encoding: quoted-printable
-
-<html><head><meta http-equiv=3D"content-type" content=3D"text/html; charse=
-t=3DISO-8859-1"><style>body { line-height: 1.5; }blockquote { margin-top: =
-0px; margin-bottom: 0px; margin-left: 0.5em; }div.foxdiv201510270830170348=
-01 { word-wrap: break-word; -webkit-line-break: after-white-space; }body {=
- font-size: 10.5pt; font-family: ????; color: rgb(0, 0, 0); line-height: 1=
-.5; }</style></head><body>=0A<div><span></span>Hi,</div><div>I also concer=
-ns about this problem. And my problem is how many threads will the qemu-sy=
-stem-x86 has.</div><div><br></div><div>From what i tested, it could betwee=
-n 100 to 800, yeah, maybe it has relationship with the osd number. But it<=
-/div><div>seems affect the performance when it has many threads. From what=
- i tested, 4k randwrite will reduce from 15k</div><div>to 4k. That's reall=
-y unacceptable!</div><div><br></div><div>My evnironment:</div><div><br></d=
-iv><div>1. nine OSD storage servers with two intel DC 3500 SSD on each</di=
-v><div>2. hammer 0.94.3</div><div>3.&nbsp;<span style=3D"background-color:=
- rgba(0, 0, 0, 0); font-size: 10.5pt; line-height: 1.5;">QEMU&nbsp;emulato=
-r&nbsp;version&nbsp;2.1.2&nbsp;(Debian&nbsp;1:2.1+dfsg-12+deb8u4~bpo70+1)<=
-/span></div><div><span style=3D"background-color: rgba(0, 0, 0, 0); font-s=
-ize: 10.5pt; line-height: 1.5;"><br></span></div>=0A<div>Thanks!</div><hr =
-style=3D"width: 210px; height: 1px;" color=3D"#b5c4df" size=3D"1" align=3D=
-"left">=0A<div><span><div style=3D"MARGIN: 10px; FONT-FAMILY: verdana; FON=
-T-SIZE: 10pt"><div>hzwulibin-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</div></div></span></div>=0A<blockqu=
-ote style=3D"margin-top: 0px; margin-bottom: 0px; margin-left: 0.5em;"><di=
-v>&nbsp;</div><div style=3D"border:none;border-top:solid #B5C4DF 1.0pt;pad=
-ding:3.0pt 0cm 0cm 0cm"><div style=3D"PADDING-RIGHT: 8px; PADDING-LEFT: 8p=
-x; FONT-SIZE: 12px;FONT-FAMILY:tahoma;COLOR:#000000; BACKGROUND: #efefef; =
-PADDING-BOTTOM: 8px; PADDING-TOP: 8px"><div><b>From:</b>&nbsp;<a href=3D"m=
-ailto:jan-SB6/BxVxTjHtwjQa/ONI9g@public.gmane.org">Jan Schermer</a></div><div><b>Date:</b>&nbsp;2015-1=
-0-27&nbsp;05:48</div><div><b>To:</b>&nbsp;<a href=3D"mailto:rick-FGJi4DqQKYBhl2p70BpVqQ@public.gmane.org=
-m">Rick Balsano</a></div><div><b>CC:</b>&nbsp;<a href=3D"mailto:ceph-users=
-@lists.ceph.com">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a></div><div><b>Subject:</b>&n=
-bsp;Re: [ceph-users] Understanding the number of TCP connections between c=
-lients and OSDs</div></div></div><div><div class=3D"FoxDiv2015102708301703=
-4801">If we're talking about RBD clients (qemu) then the number also grows=
- with number of volumes attached to the client. With a single volume it wa=
-s &lt;1000. It grows when there's heavy IO happening in the guest.<div cla=
-ss=3D"">I had to bump up the file open limits to several thusands (8000 wa=
-s it?) to accomodate client with 10 volumes in our cluster. We just scaled=
- the number of OSDs down so hopefully I could have a graph of that.<div cl=
-ass=3D"">But I just guesstimated what it could become, and that's not nece=
-ssarily what the theoretical limit is. Very bad things happen when you rea=
-ch that threshold. It could also depend on the guest settings (like queue =
-depth), and how much it seeks over the drive (how many different PGs it hi=
-ts), but knowing the upper bound is most critical.</div><div class=3D""><b=
-r class=3D""></div><div class=3D"">Jan</div><div class=3D""><br class=3D""=
-><div><blockquote type=3D"cite" class=3D"" style=3D"margin-top: 0px;"><div=
- class=3D"">On 26 Oct 2015, at 21:32, Rick Balsano &lt;<a href=3D"mailto:r=
-ick-FGJi4DqQKYDQT0dZR+AlfA@public.gmane.org" class=3D"">rick-FGJi4DqQKYDQT0dZR+AlfA@public.gmane.org</a>&gt; wrote:</div><br class=
-=3D"Apple-interchange-newline"><div class=3D""><div dir=3D"ltr" class=3D""=
->We've run into issues with the number of open TCP connections from a sing=
-le client to the OSDs in our Ceph cluster.<div class=3D""><br class=3D""><=
-/div><div class=3D"">We can (&amp; have) increased the open file limit to =
-work around this, but we're looking to understand what determines the numb=
-er of open connections maintained between a client and a particular OSD. O=
-ur naive assumption was 1 open TCP connection per OSD or per port made ava=
-ilable by the Ceph node. There are many more than this, presumably to allo=
-w parallel connections, because we see 1-4 connections from each client pe=
-r open port on a Ceph node.</div><div class=3D""><br class=3D""></div><div=
- class=3D"">Here is some background on our cluster:</div><div class=3D"">*=
- still running Firefly&nbsp;0.80.8</div><div class=3D"">* 414 OSDs, 35 nod=
-es, one massive pool</div><div class=3D"">* clients are KVM processes, acc=
-essing Ceph RBD images using virtio</div><div class=3D"">* total number of=
- open TCP connections from one client to all nodes between 500-1000&nbsp;<=
-br clear=3D"all" class=3D""><div class=3D""><br class=3D""></div><div clas=
-s=3D"">Is there any way to either know or cap the maximum number of connec=
-tions we should expect?</div><div class=3D""><br class=3D""></div><div cla=
-ss=3D"">I can provide more info as required. I've done some searches and f=
-ound references to "huge number of TCP connections" but nothing concrete t=
-o tell me how to predict how that scales.</div><div class=3D""><br class=
-=3D""></div><div class=3D"">Thanks,</div><div class=3D"">Rick</div>-- <br =
-class=3D""><div class=3D"gmail_signature"><div dir=3D"ltr" class=3D""><div=
- class=3D""><div dir=3D"ltr" class=3D""><div class=3D""><b style=3D"color:=
-rgb(51,51,51)" class=3D""><span style=3D"font-family:arial,helvetica,sans-=
-serif" class=3D"">Rick Balsano</span></b><br class=3D""></div><span style=
-=3D"font-family:arial,helvetica,sans-serif;color:rgb(51,51,51)" class=3D""=
->Senior Software Engineer</span><br style=3D"font-family:arial,helvetica,s=
-ans-serif" class=3D""><a style=3D"color:rgb(51,102,255)" href=3D"http://ww=
-w.opower.com/" target=3D"_blank" class=3D""><span style=3D"font-family:ari=
-al,helvetica,sans-serif" class=3D"">Opower</span></a><br style=3D"font-fam=
-ily:arial,helvetica,sans-serif" class=3D""><br style=3D"font-family:arial,=
-helvetica,sans-serif" class=3D""><span style=3D"font-family:arial,helvetic=
-a,sans-serif;color:rgb(51,51,51)" class=3D"">O +1 571 384 1210</span><br s=
-tyle=3D"font-family:arial,helvetica,sans-serif;color:rgb(51,51,51)" class=
-=3D""><span style=3D"font-family:arial,helvetica,sans-serif" class=3D""><s=
-pan style=3D"color:rgb(51,51,51)" class=3D"">We're Hiring! See jobs</span>=
-<span style=3D"color:rgb(51,102,255)" class=3D""> </span><a style=3D"color=
-:rgb(51,102,255)" href=3D"http://www.opower.com/careers" target=3D"_blank"=
- class=3D"">here</a><span style=3D"color:rgb(51,51,51)" class=3D"">.</span=
-></span></div></div></div></div>=0A</div></div>=0A________________________=
-_______________________<br class=3D"">ceph-users mailing list<br class=3D"=
-"><a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" class=3D"">ceph-users@lists=
-.ceph.com</a><br class=3D"">http://lists.ceph.com/listinfo.cgi/ceph-users-=
-ceph.com<br class=3D""></div></blockquote></div><br class=3D""></div></div=
-></div></div></blockquote>=0A</body></html>
-------=_001_NextPart803833711260_=------
-
-
---===============0796715976==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============0796715976==--
