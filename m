@@ -1,39 +1,31 @@
-From: Samuel Just <sjust@redhat.com>
-Subject: Re: PG: all requests stuck when acting set < min_size
-Date: Tue, 27 Oct 2015 14:05:42 -0700
-Message-ID: <CAN=+7FWZ_fm=UjkfmabMsmULLMTSFUqoQvnDCtp5UhYuW1YYDA@mail.gmail.com>
-References: <BLU175-W31BC44F9AFEBFB5588D05CDF220@phx.gbl>
-	<CAJ4mKGYFiLaEkqTpVnc75pSE6L9YtO1=35HOr6xxMHAYaEEYwQ@mail.gmail.com>
+From: GuangYang <yguang11@outlook.com>
+Subject: RE: PG: all requests stuck when acting set < min_size
+Date: Tue, 27 Oct 2015 17:14:04 -0700
+Message-ID: <BLU175-W3851F997168E5C1E68510FDF210@phx.gbl>
+References: <BLU175-W31BC44F9AFEBFB5588D05CDF220@phx.gbl>,<CAJ4mKGYFiLaEkqTpVnc75pSE6L9YtO1=35HOr6xxMHAYaEEYwQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=Windows-1252
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f174.google.com ([209.85.213.174]:38841 "EHLO
-	mail-ig0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965521AbbJ0VFn convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Oct 2015 17:05:43 -0400
-Received: by igbdj2 with SMTP id dj2so88352570igb.1
-        for <ceph-devel@vger.kernel.org>; Tue, 27 Oct 2015 14:05:42 -0700 (PDT)
+Received: from blu004-omc3s2.hotmail.com ([65.55.116.77]:51598 "EHLO
+	BLU004-OMC3S2.hotmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754001AbbJ1AOE convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Oct 2015 20:14:04 -0400
 In-Reply-To: <CAJ4mKGYFiLaEkqTpVnc75pSE6L9YtO1=35HOr6xxMHAYaEEYwQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Gregory Farnum <gfarnum@redhat.com>
-Cc: GuangYang <yguang11@outlook.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Actually, we really can't accept reads below min_size and still keep
-the properties we want it to have.  Suppose we have 3 osds (a, b, and
-c) which see writes 0...1000.  min_size is 2.  If a and b are then
-powered off only having committed up to 900 (therefore the client
-could only have seen up to 900 commit), then c would be able to serve
-reads based on updates up to 1000 with a and b stopped (no way to know
-a and b only committed to 900).  If c then stops and a and b are
-restarted, they would begin serving reads and writes only based on
-commits up to 900 even though we would have exposed the writes up to
-1000 to the client.
--Sam
+Thanks Greg.
 
-On Tue, Oct 27, 2015 at 12:47 PM, Gregory Farnum <gfarnum@redhat.com> w=
-rote:
+----------------------------------------
+> Date: Tue, 27 Oct 2015 12:47:34 -0700
+> Subject: Re: PG: all requests stuck when acting set < min_size
+> From: gfarnum@redhat.com
+> To: yguang11@outlook.com
+> CC: ceph-devel@vger.kernel.org
+>
 > On Tue, Oct 27, 2015 at 11:47 AM, GuangYang <yguang11@outlook.com> wr=
 ote:
 >> Hi there,
@@ -50,23 +42,25 @@ s
 G
 > to complete even when we aren't taking writes on a per-PG level would
 > take some doing.
+[yguang] Yeah that is what I thought as well, I didn't see a read-only =
+PG state, they are either active or inactive (incomplete).
 > Also: it would be weird from several different levels. We'd need to
 > keep track of client streams because we wouldn't want to let through =
 a
 > read that is ordered after a write. How would we handle the memory
-> pressure implied by that? While I can imagine it being useful for som=
-e
+> pressure implied by that?=A0
+[yguang] I am not aware of this part, could you elaborate a little bit?
+While I can imagine it being useful for some
 > stuff like RGW reads, in general making data available for read but
-> not write is a pretty complicated thing to explain to users =E2=80=94=
- how do
+> not write is a pretty complicated thing to explain to users =97 how d=
+o
 > we expose that in a useful way?
+[yguang] The motivation is to improve availability upon failures (yay w=
+e are using radosgw:), and some use cases of object storage like S3,
+most commonly object are written once, read many, and this could help w=
+ith the availability.
 > -Greg
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
+ 		 	   		  --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
 the body of a message to majordomo@vger.kernel.org
