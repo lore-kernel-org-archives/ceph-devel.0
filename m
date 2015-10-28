@@ -1,67 +1,63 @@
 From: GuangYang <yguang11@outlook.com>
 Subject: RE: PG: all requests stuck when acting set < min_size
-Date: Tue, 27 Oct 2015 17:14:04 -0700
-Message-ID: <BLU175-W3851F997168E5C1E68510FDF210@phx.gbl>
-References: <BLU175-W31BC44F9AFEBFB5588D05CDF220@phx.gbl>,<CAJ4mKGYFiLaEkqTpVnc75pSE6L9YtO1=35HOr6xxMHAYaEEYwQ@mail.gmail.com>
+Date: Tue, 27 Oct 2015 17:18:46 -0700
+Message-ID: <BLU175-W3714EC7D256DEEDC19216BDF210@phx.gbl>
+References: <BLU175-W31BC44F9AFEBFB5588D05CDF220@phx.gbl>,<CAJ4mKGYFiLaEkqTpVnc75pSE6L9YtO1=35HOr6xxMHAYaEEYwQ@mail.gmail.com>,<CAN=+7FWZ_fm=UjkfmabMsmULLMTSFUqoQvnDCtp5UhYuW1YYDA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from blu004-omc3s2.hotmail.com ([65.55.116.77]:51598 "EHLO
-	BLU004-OMC3S2.hotmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754001AbbJ1AOE convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Oct 2015 20:14:04 -0400
-In-Reply-To: <CAJ4mKGYFiLaEkqTpVnc75pSE6L9YtO1=35HOr6xxMHAYaEEYwQ@mail.gmail.com>
+Received: from blu004-omc4s8.hotmail.com ([65.55.111.147]:64503 "EHLO
+	BLU004-OMC4S8.hotmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754545AbbJ1ASr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Oct 2015 20:18:47 -0400
+In-Reply-To: <CAN=+7FWZ_fm=UjkfmabMsmULLMTSFUqoQvnDCtp5UhYuW1YYDA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
+To: Samuel Just <sjust@redhat.com>, Gregory Farnum <gfarnum@redhat.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Thanks Greg.
-
-----------------------------------------
-> Date: Tue, 27 Oct 2015 12:47:34 -0700
-> Subject: Re: PG: all requests stuck when acting set < min_size
-> From: gfarnum@redhat.com
-> To: yguang11@outlook.com
-> CC: ceph-devel@vger.kernel.org
->
-> On Tue, Oct 27, 2015 at 11:47 AM, GuangYang <yguang11@outlook.com> wr=
-ote:
->> Hi there,
->> Is there any reason we stuck read only requests as well for a PG whe=
-n the acting set size is less than min_size?
->
-> A few.
-> The most important reason: PGs don't have any concept of a read-only
-> mode in the code. They are "active" or not, and an active PG handles
-> writes. (The full flags and other things which block writes but allow
-> reads are at the OSD level, not the PG level, and are handled when op=
-s
-> come in before they reach the PG.) Allowing read requests against a P=
-G
-> to complete even when we aren't taking writes on a per-PG level would
-> take some doing.
-[yguang] Yeah that is what I thought as well, I didn't see a read-only =
-PG state, they are either active or inactive (incomplete).
-> Also: it would be weird from several different levels. We'd need to
-> keep track of client streams because we wouldn't want to let through =
-a
-> read that is ordered after a write. How would we handle the memory
-> pressure implied by that?=A0
-[yguang] I am not aware of this part, could you elaborate a little bit?
-While I can imagine it being useful for some
-> stuff like RGW reads, in general making data available for read but
-> not write is a pretty complicated thing to explain to users =97 how d=
-o
-> we expose that in a useful way?
-[yguang] The motivation is to improve availability upon failures (yay w=
-e are using radosgw:), and some use cases of object storage like S3,
-most commonly object are written once, read many, and this could help w=
-ith the availability.
-> -Greg
- 		 	   		  --
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+VGhhbmtzIFNhbS4KCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KPiBE
+YXRlOiBUdWUsIDI3IE9jdCAyMDE1IDE0OjA1OjQyIC0wNzAwCj4gU3ViamVjdDogUmU6IFBHOiBh
+bGwgcmVxdWVzdHMgc3R1Y2sgd2hlbiBhY3Rpbmcgc2V0IDwgbWluX3NpemUKPiBGcm9tOiBzanVz
+dEByZWRoYXQuY29tCj4gVG86IGdmYXJudW1AcmVkaGF0LmNvbQo+IENDOiB5Z3VhbmcxMUBvdXRs
+b29rLmNvbTsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcKPgo+IEFjdHVhbGx5LCB3ZSByZWFs
+bHkgY2FuJ3QgYWNjZXB0IHJlYWRzIGJlbG93IG1pbl9zaXplIGFuZCBzdGlsbCBrZWVwCj4gdGhl
+IHByb3BlcnRpZXMgd2Ugd2FudCBpdCB0byBoYXZlLiBTdXBwb3NlIHdlIGhhdmUgMyBvc2RzIChh
+LCBiLCBhbmQKPiBjKSB3aGljaCBzZWUgd3JpdGVzIDAuLi4xMDAwLiBtaW5fc2l6ZSBpcyAyLiBJ
+ZiBhIGFuZCBiIGFyZSB0aGVuCj4gcG93ZXJlZCBvZmYgb25seSBoYXZpbmcgY29tbWl0dGVkIHVw
+IHRvIDkwMCAodGhlcmVmb3JlIHRoZSBjbGllbnQKPiBjb3VsZCBvbmx5IGhhdmUgc2VlbiB1cCB0
+byA5MDAgY29tbWl0KSwgdGhlbiBjIHdvdWxkIGJlIGFibGUgdG8gc2VydmUKPiByZWFkcyBiYXNl
+ZCBvbiB1cGRhdGVzIHVwIHRvIDEwMDAgd2l0aCBhIGFuZCBiIHN0b3BwZWQgKG5vIHdheSB0byBr
+bm93Cj4gYSBhbmQgYiBvbmx5IGNvbW1pdHRlZCB0byA5MDApLiBJZiBjIHRoZW4gc3RvcHMgYW5k
+IGEgYW5kIGIgYXJlCj4gcmVzdGFydGVkLCB0aGV5IHdvdWxkIGJlZ2luIHNlcnZpbmcgcmVhZHMg
+YW5kIHdyaXRlcyBvbmx5IGJhc2VkIG9uCj4gY29tbWl0cyB1cCB0byA5MDAgZXZlbiB0aG91Z2gg
+d2Ugd291bGQgaGF2ZSBleHBvc2VkIHRoZSB3cml0ZXMgdXAgdG8KPiAxMDAwIHRvIHRoZSBjbGll
+bnQuClt5Z3VhbmddIFRoYW5rcyBmb3IgdGhlIGV4YW1wbGUsIHRoYXQgaXMgdHJ1ZS4gV2hhdCBh
+Ym91dCBmb3IgRUMgcG9vbD8gTG9va3MgbGlrZSBmb3IgRUMgcG9vbCB3ZSBkb24ndCBoYXZlIHRo
+aXMgcHJvYmxlbS4KPiAtU2FtCj4KPiBPbiBUdWUsIE9jdCAyNywgMjAxNSBhdCAxMjo0NyBQTSwg
+R3JlZ29yeSBGYXJudW0gPGdmYXJudW1AcmVkaGF0LmNvbT4gd3JvdGU6Cj4+IE9uIFR1ZSwgT2N0
+IDI3LCAyMDE1IGF0IDExOjQ3IEFNLCBHdWFuZ1lhbmcgPHlndWFuZzExQG91dGxvb2suY29tPiB3
+cm90ZToKPj4+IEhpIHRoZXJlLAo+Pj4gSXMgdGhlcmUgYW55IHJlYXNvbiB3ZSBzdHVjayByZWFk
+IG9ubHkgcmVxdWVzdHMgYXMgd2VsbCBmb3IgYSBQRyB3aGVuIHRoZSBhY3Rpbmcgc2V0IHNpemUg
+aXMgbGVzcyB0aGFuIG1pbl9zaXplPwo+Pgo+PiBBIGZldy4KPj4gVGhlIG1vc3QgaW1wb3J0YW50
+IHJlYXNvbjogUEdzIGRvbid0IGhhdmUgYW55IGNvbmNlcHQgb2YgYSByZWFkLW9ubHkKPj4gbW9k
+ZSBpbiB0aGUgY29kZS4gVGhleSBhcmUgImFjdGl2ZSIgb3Igbm90LCBhbmQgYW4gYWN0aXZlIFBH
+IGhhbmRsZXMKPj4gd3JpdGVzLiAoVGhlIGZ1bGwgZmxhZ3MgYW5kIG90aGVyIHRoaW5ncyB3aGlj
+aCBibG9jayB3cml0ZXMgYnV0IGFsbG93Cj4+IHJlYWRzIGFyZSBhdCB0aGUgT1NEIGxldmVsLCBu
+b3QgdGhlIFBHIGxldmVsLCBhbmQgYXJlIGhhbmRsZWQgd2hlbiBvcHMKPj4gY29tZSBpbiBiZWZv
+cmUgdGhleSByZWFjaCB0aGUgUEcuKSBBbGxvd2luZyByZWFkIHJlcXVlc3RzIGFnYWluc3QgYSBQ
+Rwo+PiB0byBjb21wbGV0ZSBldmVuIHdoZW4gd2UgYXJlbid0IHRha2luZyB3cml0ZXMgb24gYSBw
+ZXItUEcgbGV2ZWwgd291bGQKPj4gdGFrZSBzb21lIGRvaW5nLgo+PiBBbHNvOiBpdCB3b3VsZCBi
+ZSB3ZWlyZCBmcm9tIHNldmVyYWwgZGlmZmVyZW50IGxldmVscy4gV2UnZCBuZWVkIHRvCj4+IGtl
+ZXAgdHJhY2sgb2YgY2xpZW50IHN0cmVhbXMgYmVjYXVzZSB3ZSB3b3VsZG4ndCB3YW50IHRvIGxl
+dCB0aHJvdWdoIGEKPj4gcmVhZCB0aGF0IGlzIG9yZGVyZWQgYWZ0ZXIgYSB3cml0ZS4gSG93IHdv
+dWxkIHdlIGhhbmRsZSB0aGUgbWVtb3J5Cj4+IHByZXNzdXJlIGltcGxpZWQgYnkgdGhhdD8gV2hp
+bGUgSSBjYW4gaW1hZ2luZSBpdCBiZWluZyB1c2VmdWwgZm9yIHNvbWUKPj4gc3R1ZmYgbGlrZSBS
+R1cgcmVhZHMsIGluIGdlbmVyYWwgbWFraW5nIGRhdGEgYXZhaWxhYmxlIGZvciByZWFkIGJ1dAo+
+PiBub3Qgd3JpdGUgaXMgYSBwcmV0dHkgY29tcGxpY2F0ZWQgdGhpbmcgdG8gZXhwbGFpbiB0byB1
+c2VycyChqiBob3cgZG8KPj4gd2UgZXhwb3NlIHRoYXQgaW4gYSB1c2VmdWwgd2F5Pwo+PiAtR3Jl
+Zwo+PiAtLQo+PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAi
+dW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4KPj4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1h
+am9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcKPj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCBodHRwOi8v
+dmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwKIAkJIAkgICAJCSAg
