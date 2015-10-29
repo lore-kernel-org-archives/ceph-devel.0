@@ -1,86 +1,35 @@
-From: "hzwulibin" <hzwulibin@gmail.com>
-Subject: Re:  Re: values of "ceph daemon osd.x perf dump objecters " are zero
-Date: Thu, 29 Oct 2015 08:20:49 +0800
-Message-ID: <5631665A.1090304@gmail.com>
-References: <CAN4gH2NKLL=EeTT9axTjCN8dpqRzt2JBEUTfhbQFLYS8+c8DrA@mail.gmail.com>
-	<alpine.DEB.2.00.1510281707090.1004@cobra.newdream.net>
+From: David Zafman <dzafman@redhat.com>
+Subject: Re: pg scrub check problem
+Date: Wed, 28 Oct 2015 17:26:27 -0700
+Message-ID: <563167B3.1040504@redhat.com>
+References: <000001d11164$7fa470a0$7eed51e0$@com>
+ <alpine.DEB.2.00.1510281712280.1004@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f67.google.com ([209.85.220.67]:34359 "EHLO
-	mail-pa0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752051AbbJ2AUv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 28 Oct 2015 20:20:51 -0400
-Received: by padda3 with SMTP id da3so2370799pad.1
-        for <ceph-devel@vger.kernel.org>; Wed, 28 Oct 2015 17:20:50 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1510281707090.1004@cobra.newdream.net>
+Received: from mx1.redhat.com ([209.132.183.28]:53119 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751379AbbJ2A03 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 28 Oct 2015 20:26:29 -0400
+In-Reply-To: <alpine.DEB.2.00.1510281712280.1004@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, Gregory Farnum <gfarnum@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
+To: Sage Weil <sage@newdream.net>, changtao381 <changtao381@163.com>
+Cc: 'ceph-devel' <ceph-devel@vger.kernel.org>
 
-U3VyZSwgdGhhbmtzIQ0KDQpCdXQgaSB0aGluayBjbGllbnQgbGlrZSBxZW11IHVzZSBsaWJyYmQg
-d2lsbCBhbHNvIHJ1biBpbnRvIHRoaXMgcGVyZiBzdGF0aXN0aWNzLCBhbnkgd2F5DQp3ZSBjb3Vs
-ZCBkdW1wIHRoZSBwZXJmIHN0YXRpc3RpY3MgZm9yIG90aGVyIGNsaWVudCBzaWRlIGxpa2UgcWVt
-dS4NCg0KU29ycnkgaWYgdGhlcmUgZXhpc3Qgc29tZSBkb2N1bWVudCBvbiBpbnRlcm5ldCBhbmQg
-aSBkaWRuJ3QgZ290IGl0IGJ5IHNlYXJjaGluZy4NCg0KVGhhbmtzIQ0KDQotLS0tLS0tLS0tLS0t
-LS0tLS0JCQkJIA0KaHp3dWxpYmluDQoyMDE1LTEwLTI5DQoNCi0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCuWPkeS7tuS6uu+8mlNh
-Z2UgV2VpbCA8c2FnZUBuZXdkcmVhbS5uZXQ+DQrlj5HpgIHml6XmnJ/vvJoyMDE1LTEwLTI5IDA4
-OjA3DQrmlLbku7bkurrvvJpMaWJpbiBXdQ0K5oqE6YCB77yaY2VwaC1kZXZlbCxjZXBoLXVzZXJz
-DQrkuLvpopjvvJpSZTogdmFsdWVzIG9mICJjZXBoIGRhZW1vbiBvc2QueCBwZXJmIGR1bXAgb2Jq
-ZWN0ZXJzICIgYXJlIHplcm8NCg0KT2JqZWN0ZXIgaXMgdGhlIGNsaWVudCBzaWRlLCBidXQgeW91
-J3JlIGR1bXBpbmcgc3RhdHMgb24gdGhlIG9zZC4gIFRoZSANCm9ubHkgdGltZSBpdCBpcyB1c2Vk
-IGFzIGEgY2xpZW50IHRoZXJlIGlzIHdpdGggY2FjaGUgdGllcmluZy4NCg0Kc2FnZQ0KDQpPbiBX
-ZWQsIDI4IE9jdCAyMDE1LCBMaWJpbiBXdSB3cm90ZToNCg0KPiBIaSwgYWxsDQo+IA0KPiBBcyBt
-eSB1bmRlcnN0YW5kLCBjb21tYW5kICJjZXBoIGRhZW1vbiBvc2QueCBwZXJmIGR1bXAgb2JqZWN0
-ZXJzIiBzaG91bGQNCj4gb3V0cHV0IHRoZSBwZXJmIGRhdGEgb2Ygb3NkYyhsaWJyYWRvcykuIEJ1
-dCB3aGVuIGkgdXNlIHRoaXMgY29tbWFuZCwNCj4gd2h5IGFsbCB0aG9zZSB2YWx1ZXMgYXJlIHpl
-cm8gZXhwY2VwdCBtYXBfZXBvY2ggYW5kIG1hcF9pbmMuIEZvbGxvdyBpcw0KPiB0aGUgcmVzdWx0
-KEl0IGhhcyBmaW8gdGVzdCB3aXRoIHJiZCBpb2VuZ2luZSBvbiB0aGUgY2x1c3Rlcik6DQo+IA0K
-PiANCj4gJCBzdWRvIGNlcGggZGFlbW9uIG9zZC4xMCBwZXJmIGR1bXAgb2JqZWN0ZXINCj4gDQo+
-IHsNCj4gDQo+ICAgICAib2JqZWN0ZXIiOiB7DQo+IA0KPiAgICAgICAgICJvcF9hY3RpdmUiOiAw
-LA0KPiANCj4gICAgICAgICAib3BfbGFnZ3kiOiAwLA0KPiANCj4gICAgICAgICAib3Bfc2VuZCI6
-IDAsDQo+IA0KPiAgICAgICAgICJvcF9zZW5kX2J5dGVzIjogMCwNCj4gDQo+ICAgICAgICAgIm9w
-X3Jlc2VuZCI6IDAsDQo+IA0KPiAgICAgICAgICJvcF9hY2siOiAwLA0KPiANCj4gICAgICAgICAi
-b3BfY29tbWl0IjogMCwNCj4gDQo+ICAgICAgICAgIm9wIjogMCwNCj4gDQo+ICAgICAgICAgIm9w
-X3IiOiAwLA0KPiANCj4gICAgICAgICAib3BfdyI6IDAsDQo+IA0KPiAgICAgICAgICJvcF9ybXci
-OiAwLA0KPiANCj4gICAgICAgICAib3BfcGciOiAwLA0KPiANCj4gICAgICAgICAib3Nkb3Bfc3Rh
-dCI6IDAsDQo+IA0KPiAgICAgICAgICJvc2RvcF9jcmVhdGUiOiAwLA0KPiANCj4gICAgICAgICAi
-b3Nkb3BfcmVhZCI6IDAsDQo+IA0KPiAgICAgICAgICJvc2RvcF93cml0ZSI6IDAsDQo+IA0KPiAg
-ICAgICAgICJvc2RvcF93cml0ZWZ1bGwiOiAwLA0KPiANCj4gICAgICAgICAib3Nkb3BfYXBwZW5k
-IjogMCwNCj4gDQo+ICAgICAgICAgIm9zZG9wX3plcm8iOiAwLA0KPiANCj4gICAgICAgICAib3Nk
-b3BfdHJ1bmNhdGUiOiAwLA0KPiANCj4gICAgICAgICAib3Nkb3BfZGVsZXRlIjogMCwNCj4gDQo+
-ICAgICAgICAgIm9zZG9wX21hcGV4dCI6IDAsDQo+IA0KPiAgICAgICAgICJvc2RvcF9zcGFyc2Vf
-cmVhZCI6IDAsDQo+IA0KPiAgICAgICAgICJvc2RvcF9jbG9uZXJhbmdlIjogMCwNCj4gDQo+ICAg
-ICAgICAgIm9zZG9wX2dldHhhdHRyIjogMCwNCj4gDQo+ICAgICAgICAgIm9zZG9wX3NldHhhdHRy
-IjogMCwNCj4gDQo+ICAgICAgICAgIm9zZG9wX2NtcHhhdHRyIjogMCwNCj4gDQo+ICAgICAgICAg
-Im9zZG9wX3JteGF0dHIiOiAwLA0KPiANCj4gICAgICAgICAib3Nkb3BfcmVzZXR4YXR0cnMiOiAw
-LA0KPiANCj4gICAgICAgICAib3Nkb3BfdG1hcF91cCI6IDAsDQo+IA0KPiAgICAgICAgICJvc2Rv
-cF90bWFwX3B1dCI6IDAsDQo+IA0KPiAgICAgICAgICJvc2RvcF90bWFwX2dldCI6IDAsDQo+IA0K
-PiAgICAgICAgICJvc2RvcF9jYWxsIjogMCwNCj4gDQo+ICAgICAgICAgIm9zZG9wX3dhdGNoIjog
-MCwNCj4gDQo+ICAgICAgICAgIm9zZG9wX25vdGlmeSI6IDAsDQo+IA0KPiAgICAgICAgICJvc2Rv
-cF9zcmNfY21weGF0dHIiOiAwLA0KPiANCj4gICAgICAgICAib3Nkb3BfcGdscyI6IDAsDQo+IA0K
-PiAgICAgICAgICJvc2RvcF9wZ2xzX2ZpbHRlciI6IDAsDQo+IA0KPiAgICAgICAgICJvc2RvcF9v
-dGhlciI6IDAsDQo+IA0KPiAgICAgICAgICJsaW5nZXJfYWN0aXZlIjogMCwNCj4gDQo+ICAgICAg
-ICAgImxpbmdlcl9zZW5kIjogMCwNCj4gDQo+ICAgICAgICAgImxpbmdlcl9yZXNlbmQiOiAwLA0K
-PiANCj4gICAgICAgICAibGluZ2VyX3BpbmciOiAwLA0KPiANCj4gICAgICAgICAicG9vbG9wX2Fj
-dGl2ZSI6IDAsDQo+IA0KPiAgICAgICAgICJwb29sb3Bfc2VuZCI6IDAsDQo+IA0KPiAgICAgICAg
-ICJwb29sb3BfcmVzZW5kIjogMCwNCj4gDQo+ICAgICAgICAgInBvb2xzdGF0X2FjdGl2ZSI6IDAs
-DQo+IA0KPiAgICAgICAgICJwb29sc3RhdF9zZW5kIjogMCwNCj4gDQo+ICAgICAgICAgInBvb2xz
-dGF0X3Jlc2VuZCI6IDAsDQo+IA0KPiAgICAgICAgICJzdGF0ZnNfYWN0aXZlIjogMCwNCj4gDQo+
-ICAgICAgICAgInN0YXRmc19zZW5kIjogMCwNCj4gDQo+ICAgICAgICAgInN0YXRmc19yZXNlbmQi
-OiAwLA0KPiANCj4gICAgICAgICAiY29tbWFuZF9hY3RpdmUiOiAwLA0KPiANCj4gICAgICAgICAi
-Y29tbWFuZF9zZW5kIjogMCwNCj4gDQo+ICAgICAgICAgImNvbW1hbmRfcmVzZW5kIjogMCwNCj4g
-DQo+ICAgICAgICAgIm1hcF9lcG9jaCI6IDIxODAsDQo+IA0KPiAgICAgICAgICJtYXBfZnVsbCI6
-IDAsDQo+IA0KPiAgICAgICAgICJtYXBfaW5jIjogODMsDQo+IA0KPiAgICAgICAgICJvc2Rfc2Vz
-c2lvbnMiOiAwLA0KPiANCj4gICAgICAgICAib3NkX3Nlc3Npb25fb3BlbiI6IDAsDQo+IA0KPiAg
-ICAgICAgICJvc2Rfc2Vzc2lvbl9jbG9zZSI6IDAsDQo+IA0KPiAgICAgICAgICJvc2RfbGFnZ3ki
-OiAwDQo+IA0KPiAgICAgfQ0KPiANCj4gfQ0KPiANCj4gQW55b25lIGNvdWxkIHRlbGwgd2h5Pw0K
-PiANCj4gVGhhbmtzIQ0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2Vu
-ZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4NCj4gdGhlIGJvZHkgb2YgYSBt
-ZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcNCj4gTW9yZSBtYWpvcmRvbW8gaW5m
-byBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+IA0KPiAN
-Cg0K
 
+Good point.  In my previous response I did "echo garbage > 
+........./foo__head_7FC1F406__1" to corrupt a replica.
+
+David
+
+On 10/28/15 5:13 PM, Sage Weil wrote:
+> Becuse you *just* wrote the object, and the FileStore caches open file
+> handles.  Vim renames a new inode over the old one so the open inode is
+> untouched.
+>
+> If you restart the osd and then scrub you'll see the error.
+>
+> sage
+>
