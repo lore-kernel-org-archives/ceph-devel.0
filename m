@@ -1,61 +1,70 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH] net: ceph: osd_client: change osd_req_op_data() macro
-Date: Thu, 29 Oct 2015 15:34:27 +0100
-Message-ID: <CAOi1vP98sCWJQSf=x7E5o6pPEet8kz+hXKe7nRkwRaUFVkEjhg@mail.gmail.com>
-References: <1445526367-8258-1-git-send-email-ciorneiioana@gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: civetweb upstream/downstream divergence
+Date: Fri, 30 Oct 2015 01:56:15 +0900
+Message-ID: <56324FAF.9040504@dachary.org>
+References: <5631E4A5.9020003@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="W06HERHXC2iDtmQ9CD7J96jI9ORsS0BT9"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f193.google.com ([209.85.212.193]:35636 "EHLO
-	mail-wi0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751438AbbJ2OmX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Oct 2015 10:42:23 -0400
-Received: by wicuv6 with SMTP id uv6so8172896wic.2
-        for <ceph-devel@vger.kernel.org>; Thu, 29 Oct 2015 07:42:22 -0700 (PDT)
-In-Reply-To: <1445526367-8258-1-git-send-email-ciorneiioana@gmail.com>
+Received: from mail2.dachary.org ([91.121.57.175]:52017 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1757354AbbJ2Q4W (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Oct 2015 12:56:22 -0400
+In-Reply-To: <5631E4A5.9020003@suse.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ioana Ciornei <ciorneiioana@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Nathan Cutler <ncutler@suse.cz>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, Oct 22, 2015 at 5:06 PM, Ioana Ciornei <ciorneiioana@gmail.com> wrote:
-> This patch changes the osd_req_op_data() macro to not evaluate
-> parameters more than once in order to follow the kernel coding style.
->
-> Signed-off-by: Ioana Ciornei <ciorneiioana@gmail.com>
-> Reviewed-by: Alex Elder <elder@linaro.org>
-> ---
->  net/ceph/osd_client.c | 10 ++++++----
->  1 file changed, 6 insertions(+), 4 deletions(-)
->
-> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> index a362d7e..856e8f8 100644
-> --- a/net/ceph/osd_client.c
-> +++ b/net/ceph/osd_client.c
-> @@ -120,10 +120,12 @@ static void ceph_osd_data_bio_init(struct ceph_osd_data *osd_data,
->  }
->  #endif /* CONFIG_BLOCK */
->
-> -#define osd_req_op_data(oreq, whch, typ, fld)  \
-> -       ({                                              \
-> -               BUG_ON(whch >= (oreq)->r_num_ops);      \
-> -               &(oreq)->r_ops[whch].typ.fld;           \
-> +#define osd_req_op_data(oreq, whch, typ, fld)            \
-> +       ({                                                \
-> +               struct ceph_osd_request *__oreq = (oreq); \
-> +               unsigned int __whch = (whch);               \
-> +               BUG_ON(__whch >= __oreq->r_num_ops);      \
-> +               &__oreq->r_ops[__whch].typ.fld;           \
->         })
->
->  static struct ceph_osd_data *
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--W06HERHXC2iDtmQ9CD7J96jI9ORsS0BT9
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-For some reason this ended up in Spam - you should CC subsystem
-maintainer(s) on any patch, as noted in Documentation/SubmittingPatches.
+Hi Nathan,
 
-Applied with minor changes, see
-https://github.com/ceph/ceph-client/commit/51dcb83f3d1143819fe0791c112e1b1f830e457d.
+It would be a good thing to get a report on a regular basis that shows ho=
+w different the git submodules are from their respective upstream.
 
-Thanks,
+Cheers
 
-                Ilya
+On 29/10/2015 18:19, Nathan Cutler wrote:
+> Hi Ceph:
+>=20
+> The civetweb code in RGW is taken from https://github.com/ceph/civetweb=
+/
+> which is a fork of https://github.com/civetweb/civetweb. The last commi=
+t
+> to our fork took place on March 18.
+>=20
+> Upstream civetweb development has progressed ("This branch is 19 commit=
+s
+> ahead, 972 commits behind civetweb:master.")
+>=20
+> Are there plans to rebase to a newer upstream version or should we thin=
+k
+> more in terms of backporting (to ceph/civetweb.git) from upstream
+> (civetweb/civetweb.git) when we need to fix bugs or add features?
+>=20
+> Thanks and regards
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--W06HERHXC2iDtmQ9CD7J96jI9ORsS0BT9
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEUEARECAAYFAlYyT68ACgkQ8dLMyEl6F20E7QCYkjUHmtx/mqv25IfgCd/pte2F
+NACgm00/Dp7lAhcOgBP+mAGcQtY5R4A=
+=jaWo
+-----END PGP SIGNATURE-----
+
+--W06HERHXC2iDtmQ9CD7J96jI9ORsS0BT9--
