@@ -1,333 +1,86 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [Newstore] FIO Read's from Cient causes OSD *** Caught signal
- (Aborted) **
-Date: Wed, 28 Oct 2015 17:18:45 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1510281717590.1004@cobra.newdream.net>
-References: <B22CD36FB1C8D94DB1871AFD0023B0E438D409A9@SSIEXCH-MB3.ssi.samsung.com>
+From: "hzwulibin" <hzwulibin@gmail.com>
+Subject: Re:  Re: values of "ceph daemon osd.x perf dump objecters " are zero
+Date: Thu, 29 Oct 2015 08:20:49 +0800
+Message-ID: <5631665A.1090304@gmail.com>
+References: <CAN4gH2NKLL=EeTT9axTjCN8dpqRzt2JBEUTfhbQFLYS8+c8DrA@mail.gmail.com>
+	<alpine.DEB.2.00.1510281707090.1004@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-479939768-1446077925=:1004"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44524 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752051AbbJ2ASq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 28 Oct 2015 20:18:46 -0400
-In-Reply-To: <B22CD36FB1C8D94DB1871AFD0023B0E438D409A9@SSIEXCH-MB3.ssi.samsung.com>
+Received: from mail-pa0-f67.google.com ([209.85.220.67]:34359 "EHLO
+	mail-pa0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752051AbbJ2AUv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 28 Oct 2015 20:20:51 -0400
+Received: by padda3 with SMTP id da3so2370799pad.1
+        for <ceph-devel@vger.kernel.org>; Wed, 28 Oct 2015 17:20:50 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1510281707090.1004@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Vish (Vishwanath) Maram-SSI" <vishwanath.m@ssi.samsung.com>
-Cc: "ceph-devel-owner@vger.kernel.org" <ceph-devel-owner@vger.kernel.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>, Gregory Farnum <gfarnum@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+U3VyZSwgdGhhbmtzIQ0KDQpCdXQgaSB0aGluayBjbGllbnQgbGlrZSBxZW11IHVzZSBsaWJyYmQg
+d2lsbCBhbHNvIHJ1biBpbnRvIHRoaXMgcGVyZiBzdGF0aXN0aWNzLCBhbnkgd2F5DQp3ZSBjb3Vs
+ZCBkdW1wIHRoZSBwZXJmIHN0YXRpc3RpY3MgZm9yIG90aGVyIGNsaWVudCBzaWRlIGxpa2UgcWVt
+dS4NCg0KU29ycnkgaWYgdGhlcmUgZXhpc3Qgc29tZSBkb2N1bWVudCBvbiBpbnRlcm5ldCBhbmQg
+aSBkaWRuJ3QgZ290IGl0IGJ5IHNlYXJjaGluZy4NCg0KVGhhbmtzIQ0KDQotLS0tLS0tLS0tLS0t
+LS0tLS0JCQkJIA0KaHp3dWxpYmluDQoyMDE1LTEwLTI5DQoNCi0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCuWPkeS7tuS6uu+8mlNh
+Z2UgV2VpbCA8c2FnZUBuZXdkcmVhbS5uZXQ+DQrlj5HpgIHml6XmnJ/vvJoyMDE1LTEwLTI5IDA4
+OjA3DQrmlLbku7bkurrvvJpMaWJpbiBXdQ0K5oqE6YCB77yaY2VwaC1kZXZlbCxjZXBoLXVzZXJz
+DQrkuLvpopjvvJpSZTogdmFsdWVzIG9mICJjZXBoIGRhZW1vbiBvc2QueCBwZXJmIGR1bXAgb2Jq
+ZWN0ZXJzICIgYXJlIHplcm8NCg0KT2JqZWN0ZXIgaXMgdGhlIGNsaWVudCBzaWRlLCBidXQgeW91
+J3JlIGR1bXBpbmcgc3RhdHMgb24gdGhlIG9zZC4gIFRoZSANCm9ubHkgdGltZSBpdCBpcyB1c2Vk
+IGFzIGEgY2xpZW50IHRoZXJlIGlzIHdpdGggY2FjaGUgdGllcmluZy4NCg0Kc2FnZQ0KDQpPbiBX
+ZWQsIDI4IE9jdCAyMDE1LCBMaWJpbiBXdSB3cm90ZToNCg0KPiBIaSwgYWxsDQo+IA0KPiBBcyBt
+eSB1bmRlcnN0YW5kLCBjb21tYW5kICJjZXBoIGRhZW1vbiBvc2QueCBwZXJmIGR1bXAgb2JqZWN0
+ZXJzIiBzaG91bGQNCj4gb3V0cHV0IHRoZSBwZXJmIGRhdGEgb2Ygb3NkYyhsaWJyYWRvcykuIEJ1
+dCB3aGVuIGkgdXNlIHRoaXMgY29tbWFuZCwNCj4gd2h5IGFsbCB0aG9zZSB2YWx1ZXMgYXJlIHpl
+cm8gZXhwY2VwdCBtYXBfZXBvY2ggYW5kIG1hcF9pbmMuIEZvbGxvdyBpcw0KPiB0aGUgcmVzdWx0
+KEl0IGhhcyBmaW8gdGVzdCB3aXRoIHJiZCBpb2VuZ2luZSBvbiB0aGUgY2x1c3Rlcik6DQo+IA0K
+PiANCj4gJCBzdWRvIGNlcGggZGFlbW9uIG9zZC4xMCBwZXJmIGR1bXAgb2JqZWN0ZXINCj4gDQo+
+IHsNCj4gDQo+ICAgICAib2JqZWN0ZXIiOiB7DQo+IA0KPiAgICAgICAgICJvcF9hY3RpdmUiOiAw
+LA0KPiANCj4gICAgICAgICAib3BfbGFnZ3kiOiAwLA0KPiANCj4gICAgICAgICAib3Bfc2VuZCI6
+IDAsDQo+IA0KPiAgICAgICAgICJvcF9zZW5kX2J5dGVzIjogMCwNCj4gDQo+ICAgICAgICAgIm9w
+X3Jlc2VuZCI6IDAsDQo+IA0KPiAgICAgICAgICJvcF9hY2siOiAwLA0KPiANCj4gICAgICAgICAi
+b3BfY29tbWl0IjogMCwNCj4gDQo+ICAgICAgICAgIm9wIjogMCwNCj4gDQo+ICAgICAgICAgIm9w
+X3IiOiAwLA0KPiANCj4gICAgICAgICAib3BfdyI6IDAsDQo+IA0KPiAgICAgICAgICJvcF9ybXci
+OiAwLA0KPiANCj4gICAgICAgICAib3BfcGciOiAwLA0KPiANCj4gICAgICAgICAib3Nkb3Bfc3Rh
+dCI6IDAsDQo+IA0KPiAgICAgICAgICJvc2RvcF9jcmVhdGUiOiAwLA0KPiANCj4gICAgICAgICAi
+b3Nkb3BfcmVhZCI6IDAsDQo+IA0KPiAgICAgICAgICJvc2RvcF93cml0ZSI6IDAsDQo+IA0KPiAg
+ICAgICAgICJvc2RvcF93cml0ZWZ1bGwiOiAwLA0KPiANCj4gICAgICAgICAib3Nkb3BfYXBwZW5k
+IjogMCwNCj4gDQo+ICAgICAgICAgIm9zZG9wX3plcm8iOiAwLA0KPiANCj4gICAgICAgICAib3Nk
+b3BfdHJ1bmNhdGUiOiAwLA0KPiANCj4gICAgICAgICAib3Nkb3BfZGVsZXRlIjogMCwNCj4gDQo+
+ICAgICAgICAgIm9zZG9wX21hcGV4dCI6IDAsDQo+IA0KPiAgICAgICAgICJvc2RvcF9zcGFyc2Vf
+cmVhZCI6IDAsDQo+IA0KPiAgICAgICAgICJvc2RvcF9jbG9uZXJhbmdlIjogMCwNCj4gDQo+ICAg
+ICAgICAgIm9zZG9wX2dldHhhdHRyIjogMCwNCj4gDQo+ICAgICAgICAgIm9zZG9wX3NldHhhdHRy
+IjogMCwNCj4gDQo+ICAgICAgICAgIm9zZG9wX2NtcHhhdHRyIjogMCwNCj4gDQo+ICAgICAgICAg
+Im9zZG9wX3JteGF0dHIiOiAwLA0KPiANCj4gICAgICAgICAib3Nkb3BfcmVzZXR4YXR0cnMiOiAw
+LA0KPiANCj4gICAgICAgICAib3Nkb3BfdG1hcF91cCI6IDAsDQo+IA0KPiAgICAgICAgICJvc2Rv
+cF90bWFwX3B1dCI6IDAsDQo+IA0KPiAgICAgICAgICJvc2RvcF90bWFwX2dldCI6IDAsDQo+IA0K
+PiAgICAgICAgICJvc2RvcF9jYWxsIjogMCwNCj4gDQo+ICAgICAgICAgIm9zZG9wX3dhdGNoIjog
+MCwNCj4gDQo+ICAgICAgICAgIm9zZG9wX25vdGlmeSI6IDAsDQo+IA0KPiAgICAgICAgICJvc2Rv
+cF9zcmNfY21weGF0dHIiOiAwLA0KPiANCj4gICAgICAgICAib3Nkb3BfcGdscyI6IDAsDQo+IA0K
+PiAgICAgICAgICJvc2RvcF9wZ2xzX2ZpbHRlciI6IDAsDQo+IA0KPiAgICAgICAgICJvc2RvcF9v
+dGhlciI6IDAsDQo+IA0KPiAgICAgICAgICJsaW5nZXJfYWN0aXZlIjogMCwNCj4gDQo+ICAgICAg
+ICAgImxpbmdlcl9zZW5kIjogMCwNCj4gDQo+ICAgICAgICAgImxpbmdlcl9yZXNlbmQiOiAwLA0K
+PiANCj4gICAgICAgICAibGluZ2VyX3BpbmciOiAwLA0KPiANCj4gICAgICAgICAicG9vbG9wX2Fj
+dGl2ZSI6IDAsDQo+IA0KPiAgICAgICAgICJwb29sb3Bfc2VuZCI6IDAsDQo+IA0KPiAgICAgICAg
+ICJwb29sb3BfcmVzZW5kIjogMCwNCj4gDQo+ICAgICAgICAgInBvb2xzdGF0X2FjdGl2ZSI6IDAs
+DQo+IA0KPiAgICAgICAgICJwb29sc3RhdF9zZW5kIjogMCwNCj4gDQo+ICAgICAgICAgInBvb2xz
+dGF0X3Jlc2VuZCI6IDAsDQo+IA0KPiAgICAgICAgICJzdGF0ZnNfYWN0aXZlIjogMCwNCj4gDQo+
+ICAgICAgICAgInN0YXRmc19zZW5kIjogMCwNCj4gDQo+ICAgICAgICAgInN0YXRmc19yZXNlbmQi
+OiAwLA0KPiANCj4gICAgICAgICAiY29tbWFuZF9hY3RpdmUiOiAwLA0KPiANCj4gICAgICAgICAi
+Y29tbWFuZF9zZW5kIjogMCwNCj4gDQo+ICAgICAgICAgImNvbW1hbmRfcmVzZW5kIjogMCwNCj4g
+DQo+ICAgICAgICAgIm1hcF9lcG9jaCI6IDIxODAsDQo+IA0KPiAgICAgICAgICJtYXBfZnVsbCI6
+IDAsDQo+IA0KPiAgICAgICAgICJtYXBfaW5jIjogODMsDQo+IA0KPiAgICAgICAgICJvc2Rfc2Vz
+c2lvbnMiOiAwLA0KPiANCj4gICAgICAgICAib3NkX3Nlc3Npb25fb3BlbiI6IDAsDQo+IA0KPiAg
+ICAgICAgICJvc2Rfc2Vzc2lvbl9jbG9zZSI6IDAsDQo+IA0KPiAgICAgICAgICJvc2RfbGFnZ3ki
+OiAwDQo+IA0KPiAgICAgfQ0KPiANCj4gfQ0KPiANCj4gQW55b25lIGNvdWxkIHRlbGwgd2h5Pw0K
+PiANCj4gVGhhbmtzIQ0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2Vu
+ZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4NCj4gdGhlIGJvZHkgb2YgYSBt
+ZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcNCj4gTW9yZSBtYWpvcmRvbW8gaW5m
+byBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+IA0KPiAN
+Cg0K
 
---557981400-479939768-1446077925=:1004
-Content-Type: TEXT/PLAIN; charset=iso-8859-1
-Content-Transfer-Encoding: quoted-printable
-
-Hi Vish-
-
-This is not too surprising, but I am inclined to ignore it for now: i'm i=
-n=20
-the midst of a major rewrite anyway to use a raw block device instead of=20
-the file system.
-
-sage
-
-On Wed, 28 Oct 2015, Vish (Vishwanath) Maram-SSI wrote:
-
-> Hi,
->=20
-> We are observing a crash of OSD whenever we run FIO Read's from a clien=
-t. Setup is very simple and explained as below:
->=20
-> 1. One OSD with Ceph Version "ceph version 9.1.0-420-ge3921a8 (e3921a83=
-96870be4a38ce1f1b6c35bc0829dbb68)", pulled the code from GIT and compiled=
-/Installed.
-> 2. One Client with same version of CEPH.
-> 3. FIO Version - fio-2.2.10-16-gd223
-> 4. Ceph Conf as given below
-> 5. Crash log details from log file as below
-> 6. FIO Script as given below
->=20
-> CEPH Conf -
->=20
-> [global]
-> fsid =3D 9eda02e2-04b7-4eed-a85a-8471ea51528d
-> mon_initial_members =3D msl-dsma-spoc08
-> mon_host =3D 10.10.10.190
-> auth_cluster_required =3D cephx
-> auth_service_required =3D cephx
-> auth_client_required =3D cephx
-> auth_supported =3D none
->=20
-> #Needed for Newstore=20
-> osd_objectstore =3D newstore
-> enable experimental unrecoverable data corrupting features =3D newstore=
-, rocksdb
-> newstore_backend =3D rocksdb
->=20
-> #Debug - Start Removed for=A0 now to debug
-> #newstore_max_dir_size =3D 4096
-> #newstore_sync_io =3D true
-> #newstore_sync_transaction =3D true
-> #newstore_sync_submit_transaction =3D true
-> #newstore_sync_wal_apply =3D true
-> #newstore_overlay_max =3D 0
-> #Debug - End
->=20
-> #Needed for Newstore
->=20
-> filestore_xattr_use_omap =3D true
->=20
-> osd pool default size =3D 1
-> rbd cache =3D false
->=20
->=20
-> debug_lockdep =3D 0/0
-> debug_context =3D 0/0
-> debug_crush =3D 0/0
-> debug_buffer =3D 0/0
-> debug_timer =3D 0/0
-> debug_filer =3D 0/0
-> debug_objecter =3D 0/0
-> debug_rados =3D 0/0
-> debug_rbd =3D 0/0
-> debug_journaler =3D 0/0
-> debug_objectcatcher =3D 0/0
-> debug_client =3D 0/0
-> debug_osd =3D 0/0
-> debug_optracker =3D 0/0
-> debug_objclass =3D 0/0
-> debug_filestore =3D 0/0
-> debug_journal =3D 0/0
-> debug_ms =3D 0/0
-> debug_monc =3D 0/0
-> debug_tp =3D 0/0
-> debug_auth =3D 0/0
-> debug_finisher =3D 0/0
-> debug_heartbeatmap =3D 0/0
-> debug_perfcounter =3D 0/0
-> debug_asok =3D 0/0
-> debug_throttle =3D 0/0
-> debug_mon =3D 0/0
-> debug_paxos =3D 0/0
-> debug_rgw =3D 0/0
-> osd_op_threads =3D 5
-> osd_op_num_threads_per_shard =3D 1
-> osd_op_num_shards =3D 25
-> #osd_op_num_sharded_pool_threads =3D 25
-> filestore_op_threads =3D 4
-> ms_nocrc =3D true
-> filestore_fd_cache_size =3D 64
-> filestore_fd_cache_shards =3D 32
-> cephx sign messages =3D false
-> cephx require signatures =3D false
-> ms_dispatch_throttle_bytes =3D 0
-> throttler_perf_counter =3D false
->=20
-> [osd]
-> osd_client_message_size_cap =3D 0
-> osd_client_message_cap =3D 0
-> osd_enable_op_tracker =3D false=20
->=20
-> Crash details from the log:
-> =A0 -194> 2015-10-28 10:54:40.792957 7f15862e8700=A0 2 newstore(/var/li=
-b/ceph/osd/ceph-0) _do_wal_transaction prepared aio 0x7f15ba915510
-> =A0 -193> 2015-10-28 10:54:40.792959 7f15862e8700=A0 2 newstore(/var/li=
-b/ceph/osd/ceph-0) _do_wal_transaction prepared aio 0x7f15ba916590
-> =A0 -192> 2015-10-28 10:54:40.792962 7f15862e8700=A0 2 newstore(/var/li=
-b/ceph/osd/ceph-0) _do_wal_transaction prepared aio 0x7f15ba914990
-> =A0 -191> 2015-10-28 10:54:40.792965 7f15862e8700=A0 2 newstore(/var/li=
-b/ceph/osd/ceph-0) _do_wal_transaction prepared aio 0x7f15ba916490
-> =A0 -190> 2015-10-28 10:54:40.792968 7f15862e8700=A0 2 newstore(/var/li=
-b/ceph/osd/ceph-0) _do_wal_transaction prepared aio 0x7f15ba916090
-> =A0 -189> 2015-10-28 10:54:40.792971 7f15862e8700=A0 2 newstore(/var/li=
-b/ceph/osd/ceph-0) _do_wal_transaction prepared aio 0x7f15ba915c10
-> =A0 -188> 2015-10-28 10:54:40.792975 7f15862e8700=A0 2 newstore(/var/li=
-b/ceph/osd/ceph-0) _do_wal_transaction prepared aio 0x7f15ba917190
-> =A0 -187> 2015-10-28 10:54:40.792977 7f15862e8700=A0 2 newstore(/var/li=
-b/ceph/osd/ceph-0) _do_wal_transaction prepared aio 0x7f15ba916810
-> =A0 -186> 2015-10-28 10:54:40.792980 7f15862e8700=A0 2 newstore(/var/li=
-b/ceph/osd/ceph-0) _do_wal_transaction prepared aio 0x7f15ba914790
-> =A0 -185> 2015-10-28 10:54:40.792983 7f15862e8700=A0 2 newstore(/var/li=
-b/ceph/osd/ceph-0) _do_wal_transaction prepared aio 0x7f15ba915e10
-> =A0 -184> 2015-10-28 10:54:40.792986 7f15862e8700=A0 2 newstore(/var/li=
-b/ceph/osd/ceph-0) _do_wal_transaction prepared aio 0x7f15ba915f10
-> =A0 -183> 2015-10-28 10:54:40.792988 7f15862e8700=A0 2 newstore(/var/li=
-b/ceph/osd/ceph-0) _do_wal_transaction prepared aio 0x7f15ba915f90
->  -182> 2015-10-28 10:54:40.792992 7f15862e8700=A0 2 newstore(/var/lib/c=
-eph/osd/ceph-0) _do_wal_transaction prepared aio 0x7f15ba914510
->  ...
-> =20
-> =A0=A0 -10> 2015-10-28 10:55:45.240480 7f1577366700=A0 5 newstore(/var/=
-lib/ceph/osd/ceph-0) queue_transactions existing 0x7f15a0ac1180 osr(1.b1 =
-0x7f15a025acf0)
-> =A0=A0=A0 -9> 2015-10-28 10:55:45.240830 7f1577366700=A0 5 newstore(/va=
-r/lib/ceph/osd/ceph-0) queue_transactions existing 0x7f15a0ac1180 osr(1.b=
-1 0x7f15a025acf0)
-> =A0=A0=A0 -8> 2015-10-28 10:55:45.241135 7f1577366700=A0 5 newstore(/va=
-r/lib/ceph/osd/ceph-0) queue_transactions existing 0x7f15a0ac1180 osr(1.b=
-1 0x7f15a025acf0)
-> =A0=A0=A0 -7> 2015-10-28 10:55:45.241418 7f1577366700=A0 5 newstore(/va=
-r/lib/ceph/osd/ceph-0) queue_transactions existing 0x7f15a0ac1180 osr(1.b=
-1 0x7f15a025acf0)
-> =A0=A0=A0 -6> 2015-10-28 10:55:45.241674 7f1577366700=A0 5 newstore(/va=
-r/lib/ceph/osd/ceph-0) queue_transactions existing 0x7f15a0ac1180 osr(1.b=
-1 0x7f15a025acf0)
-> =A0=A0=A0 -5> 2015-10-28 10:55:45.241913 7f1577366700=A0 5 newstore(/va=
-r/lib/ceph/osd/ceph-0) queue_transactions existing 0x7f15a0ac1180 osr(1.b=
-1 0x7f15a025acf0)
-> =A0=A0=A0 -4> 2015-10-28 10:55:45.242150 7f1577366700=A0 5 newstore(/va=
-r/lib/ceph/osd/ceph-0) queue_transactions existing 0x7f15a0ac1180 osr(1.b=
-1 0x7f15a025acf0)
-> =A0=A0=A0 -3> 2015-10-28 10:55:45.242391 7f1577366700=A0 5 newstore(/va=
-r/lib/ceph/osd/ceph-0) queue_transactions existing 0x7f15a0ac1180 osr(1.b=
-1 0x7f15a025acf0)
-> =A0=A0=A0 -2> 2015-10-28 10:55:45.242614 7f1577366700=A0 5 newstore(/va=
-r/lib/ceph/osd/ceph-0) queue_transactions existing 0x7f15a0ac1180 osr(1.b=
-1 0x7f15a025acf0)
-> =A0=A0=A0 -1> 2015-10-28 10:55:45.242885 7f1577366700=A0 5 newstore(/va=
-r/lib/ceph/osd/ceph-0) queue_transactions existing 0x7f15a0ac1180 osr(1.b=
-1 0x7f15a025acf0)
-> =A0=A0=A0=A0 0> 2015-10-28 10:55:54.323685 7f156e354700 -1 *** Caught s=
-ignal (Aborted) **
-> in thread 7f156e354700
->=20
-> ceph version 9.1.0-420-ge3921a8 (e3921a8396870be4a38ce1f1b6c35bc0829dbb=
-68)
-> 1: (()+0x80b70a) [0x7f159c91670a]
-> 2: (()+0x10340) [0x7f159afef340]
-> 3: (gsignal()+0x39) [0x7f1599116cc9]
-> 4: (abort()+0x148) [0x7f159911a0d8]
-> 5: (__gnu_cxx::__verbose_terminate_handler()+0x155) [0x7f1599a21535]
-> 6: (()+0x5e6d6) [0x7f1599a1f6d6]
-> 7: (()+0x5e703) [0x7f1599a1f703]
-> 8: (()+0x5e922) [0x7f1599a1f922]
-> 9: (ceph::buffer::list::iterator_impl<false>::copy(unsigned int, char*)=
-+0xa5) [0x7f159ca12955]
-> 10: (void decode<unsigned long, unsigned long>(std::map<unsigned long, =
-unsigned long, std::less<unsigned long>, std::allocator<std::pair<unsigne=
-d long const, unsigned long> > >&, ceph::buffer::list::iterator&)+0x2e) [=
-0x7f159c600fae]
-> 11: (ReplicatedPG::do_osd_ops(ReplicatedPG::OpContext*, std::vector<OSD=
-Op, std::allocator<OSDOp> >&)+0x2aa4) [0x7f159c5b0314]
-> 12: (ReplicatedPG::prepare_transaction(ReplicatedPG::OpContext*)+0x97) =
-[0x7f159c5cdf77]
-> 13: (ReplicatedPG::execute_ctx(ReplicatedPG::OpContext*)+0x890) [0x7f15=
-9c5cedb0]
-> 14: (ReplicatedPG::do_op(std::shared_ptr<OpRequest>&)+0x3552) [0x7f159c=
-5d3732]
-> 15: (ReplicatedPG::do_request(std::shared_ptr<OpRequest>&, ThreadPool::=
-TPHandle&)+0x705) [0x7f159c56d835]
-> 16: (OSD::dequeue_op(boost::intrusive_ptr<PG>, std::shared_ptr<OpReques=
-t>, ThreadPool::TPHandle&)+0x3bd) [0x7f159c45d02d]
-> 17: (PGQueueable::RunVis::operator()(std::shared_ptr<OpRequest>&)+0x5d)=
- [0x7f159c45d24d]
-> 18: (OSD::ShardedOpWQ::_process(unsigned int, ceph::heartbeat_handle_d*=
-)+0x8a9) [0x7f159c481649]
-> 19: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x85f) [=
-0x7f159c9f5caf]
-> 20: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x7f159c9f7bb=
-0]
-> 21: (()+0x8182) [0x7f159afe7182]
-> 22: (clone()+0x6d) [0x7f15991da47d]
-> NOTE: a copy of the executable, or `objdump -rdS <executable>` is neede=
-d to interpret this.
->=20
-> --- logging levels ---
-> =A0=A0 0/ 5 none
-> =A0=A0 0/ 0 lockdep
-> =A0=A0 0/ 0 context
-> =A0=A0 0/ 0 crush
-> =A0=A0 1/ 5 mds
-> =A0=A0 1/ 5 mds_balancer
-> =A0=A0 1/ 5 mds_locker
-> =A0=A0 1/ 5 mds_log
-> =A0=A0 1/ 5 mds_log_expire
-> =A0=A0 1/ 5 mds_migrator
-> =A0=A0 0/ 0 buffer
-> =A0=A0 0/ 0 timer
-> =A0=A0 0/ 0 filer
-> =A0=A0 0/ 1 striper
-> =A0=A0 0/ 0 objecter
-> =A0=A0 0/ 0 rados
-> =A0=A0 0/ 0 rbd
-> =A0=A0 0/ 5 rbd_replay
-> =A0=A0 0/ 0 journaler
-> =A0=A0 0/ 5 objectcacher
-> =A0=A0 0/ 0 client
-> =A0=A0 0/ 0 osd
-> =A0=A0 0/ 0 optracker
-> =A0=A0 0/ 0 objclass
-> =A0=A0 0/ 0 filestore
-> =A0=A0 1/ 3 keyvaluestore
-> =A0=A0 0/ 0 journal
-> =A0=A0 0/ 0 ms
-> =A0=A0 0/ 0 mon
-> =A0=A0 0/ 0 monc
-> =A0=A0 0/ 0 paxos
-> =A0=A0 0/ 0 tp
-> =A0=A0 0/ 0 auth
-> =A0=A0 1/ 5 crypto
-> =A0=A0 0/ 0 finisher
-> =A0=A0 0/ 0 heartbeatmap
-> =A0=A0 0/ 0 perfcounter
-> =A0=A0 0/ 0 rgw
-> =A0=A0 1/10 civetweb
-> =A0=A0 1/ 5 javaclient
-> =A0=A0 0/ 0 asok
-> =A0=A0 0/ 0 throttle
-> =A0=A0 0/ 0 refs
-> =A0=A0 1/ 5 xio
-> =A0=A0 1/ 5 compressor
-> =A0=A0 1/ 5 newstore
-> =A0 -2/-2 (syslog threshold)
-> =A0 -1/-1 (stderr threshold)
-> =A0 max_recent=A0=A0=A0=A0 10000
-> =A0 max_new=A0=A0=A0=A0=A0=A0=A0=A0 1000
-> =A0 log_file /var/log/ceph/ceph-osd.0.log
-> --- end dump of recent events ---
->=20
-> FIO Script -=20
->=20
-> ######################################################################
-> # Example test for the RBD engine.
-> #=20
-> # Runs a 4k random write test against a RBD via librbd
-> #
-> # NOTE: Make sure you have either a RBD named 'fio_test' or change
-> #=A0=A0=A0=A0=A0=A0 the rbdname parameter.
-> ######################################################################
-> [global]
-> #logging
-> #write_iops_log=3Dwrite_iops_log
-> #write_bw_log=3Dwrite_bw_log
-> #write_lat_log=3Dwrite_lat_log
-> #ioengine=3Dlibaio
-> ioengine=3Drbd
-> clientname=3Dadmin
-> direct=3D1
-> pool=3Dpool1
-> rbdname=3Dim1
-> rw=3Drandread or randwrite
-> bs=3D8k
-> numjobs=3D16
-> time_based=3D1
-> runtime=3D300
-> ramp_time=3D60
->=20
-> [rbd_iodepth32]
-> iodepth=3D128
->=20
-> Any pointers as to what could be the issue will be greatly appreciated.
->=20
-> Thanks,
-> -Vish
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
->=20
---557981400-479939768-1446077925=:1004--
