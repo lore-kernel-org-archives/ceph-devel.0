@@ -1,55 +1,71 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: why we should use two Mutex in OSD ShardData?
-Date: Fri, 30 Oct 2015 16:44:04 +0000
-Message-ID: <CO1PR02MB2085DA39AE3749634545406F42F0@CO1PR02MB208.namprd02.prod.outlook.com>
-References: <CANE=7sWr3c3pa7ZkbJ2NvZPppiXsF=n6maeMQ2=BZQXdoNx_0Q@mail.gmail.com>
-	<CO1PR02MB208FE1E509A92D5D5E47B00F42F0@CO1PR02MB208.namprd02.prod.outlook.com>
- <CANE=7sVH=_ZCcXQwx20dcvK_rTodUOSHVMO11=muZ-un8P=GXg@mail.gmail.com>
+From: "Adam C. Emerson" <aemerson@redhat.com>
+Subject: Re: Async reads, sync writes, op thread model discussion
+Date: Fri, 30 Oct 2015 12:55:19 -0400
+Message-ID: <20151030165518.GA30622@ultraspiritum.redhat.com>
+References: <CAN=+7FU-2TDMGjc_VnizjPcXrefyzVaDZCbxpFtDaoRhYObtPw@mail.gmail.com>
+ <466106455.5089126.1439587153429.JavaMail.zimbra@redhat.com>
+ <CANP1eJE9ac27PvcqQS_SqTvgeQLOGyc4VjZh1Qz2Vm9zPmi5Sw@mail.gmail.com>
+ <CAN=+7FU2wEsg3ftmND7LiXEz0Qq4-JLegdmgsKYN9MoWRNTszA@mail.gmail.com>
+ <3649A15A2562B54294DE14BCE5AC79120B5973F5@FMSMSX119.amr.corp.intel.com>
+ <CAN=+7FU5gdAM-PsuyN0MDimQCbcLo7dh87ZrtXTpgMqzS8NPpA@mail.gmail.com>
+ <CAN=+7FV7MWJBSU7NP1rM+283yAgWxfMr6tqow6wufjzvHj7NBw@mail.gmail.com>
+ <1544035527.68429313.1446222005998.JavaMail.zimbra@redhat.com>
+ <1491577902.41976602.1446223269619.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1on0077.outbound.protection.outlook.com ([157.56.110.77]:52160
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751231AbbJ3QoH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 30 Oct 2015 12:44:07 -0400
-In-Reply-To: <CANE=7sVH=_ZCcXQwx20dcvK_rTodUOSHVMO11=muZ-un8P=GXg@mail.gmail.com>
-Content-Language: en-US
+Received: from mx1.redhat.com ([209.132.183.28]:34031 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751840AbbJ3QzX (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 30 Oct 2015 12:55:23 -0400
+Content-Disposition: inline
+In-Reply-To: <1491577902.41976602.1446223269619.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?utf-8?B?5rGg5L+h5rO9?= <xmdxcxz@gmail.com>, Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Jason Dillaman <dillaman@redhat.com>
+Cc: Samuel Just <sjust@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Milosz Tanski <milosz@adfin.com>, Matt Benjamin <mbenjamin@redhat.com>, Haomai Wang <haomaiwang@gmail.com>, Yehuda Sadeh-Weinraub <ysadehwe@redhat.com>, Sage Weil <sage@newdream.net>, Adam Emerson <aemerson@redhat.com>, Stephen L Blinick <stephen.l.blinick@intel.com>
 
-VW5mb3J0dW5hdGVseSwgSSBhbHNvIGRvIG5vdCBoYXZlIGFueSBudW1iZXJzIGF0IHRoYXQgZ3Jh
-bnVsYXJpdHkgdG8gc3VwcG9ydCB0aGF0IGZhY3QuIEJ1dCwgSSB0aG91Z2h0IHRoaXMgaXMgYSBs
-b2dpY2FsIHRoaW5nIHRvIGRvLi5NYXkgYmUgbm90IGltcGFjdGluZyB0aGF0IG11Y2ggc2luY2Ug
-aXQgaXMgYWxyZWFkeSBzaGFyZGVkLi4NCg0KVGhhbmtzICYgUmVnYXJkcw0KU29tbmF0aA0KDQot
-LS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTog5rGg5L+h5rO9IFttYWlsdG86eG1keGN4
-ekBnbWFpbC5jb21dIA0KU2VudDogRnJpZGF5LCBPY3RvYmVyIDMwLCAyMDE1IDg6MzggQU0NClRv
-OiBTb21uYXRoIFJveQ0KQ2M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0OiBS
-ZTogd2h5IHdlIHNob3VsZCB1c2UgdHdvIE11dGV4IGluIE9TRCBTaGFyZERhdGE/DQoNCkkgZG8g
-bm90IHNlZSBhbnkgaW1wcm92ZW1lbnQgYnkgbW92aW5nIHRvIHNpbmdsZSBtdXRleC4gSSBqdXN0
-IGZlbGwgcHV6emxlIHdoeSB3ZSB1c2UgdHdvIG11dGV4Lg0KQnV0IEkgYWxzbyBkbyBub3Qgc2Vl
-IGFueSBpbXByb3ZlbWVudCB1c2luZyB0d28gbXV0ZXggaW4gbXkgZW52aXJvbm1lbnQuDQpUaGFu
-a3MgZm9yIHlvdXIgZXhwbGFuYXRpb24uDQoNCjIwMTUtMTAtMzAgMjI6NTkgR01UKzA4OjAwIFNv
-bW5hdGggUm95IDxTb21uYXRoLlJveUBzYW5kaXNrLmNvbT46DQo+DQo+IEhpIHhpbnplLA0KPiBU
-aGlzIGlzIG1haW5seSBmb3IgcmVkdWNpbmcgbG9jayBjb250ZW50aW9uIG9uIGEgc2luZ2xlIG11
-dGV4LiBDb25kaXRpb25hbCB3YWtldXAgb24gYSBtdXRleCBpcyBleHBlbnNpdmUgYW5kIHRoYXQn
-cyB3aHkgd2Ugd2FudGVkIHRvIG1ha2UgaXQgc2VwYXJhdGUgZnJvbSB0aGUgbXV0ZXggcHJvdGVj
-dGluZyBTaGFyZGRhdGEgcHJpb3JpdHkgcXVldWUgYW5kIHBnX2Zvcl9wcm9jZXNzaW5nIG1hcC4N
-Cj4gQXJlIHlvdSBzZWVpbmcgYW55IGltcHJvdmVtZW50IGJ5IG1vdmluZyB0byBzaW5nbGUgbXV0
-ZXggPw0KPg0KPiBUaGFua3MgJiBSZWdhcmRzDQo+IFNvbW5hdGgNCj4NCj4gLS0tLS1PcmlnaW5h
-bCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcg
-W21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mID8/
-Pw0KPiBTZW50OiBGcmlkYXksIE9jdG9iZXIgMzAsIDIwMTUgNjozNSBBTQ0KPiBUbzogY2VwaC1k
-ZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCj4gU3ViamVjdDogd2h5IHdlIHNob3VsZCB1c2UgdHdvIE11
-dGV4IGluIE9TRCBTaGFyZERhdGE/DQo+DQo+IGhpLCBhbGw6DQo+DQo+ICAgIFRoZXJlIGFyZSB0
-d28gTXV0ZXggaW4gU2hhcmREYXRhLCBvbmUgaXMgc2RhdGFfbG9jayBhbmQgdGhlIG90aGVyIG9u
-ZSBpcyBzZGF0YV9vcF9vcmRlcmluZ19sb2NrLg0KPg0KPiAgICAgSSB3b25kZXIgY291bGQgd2Ug
-cmVwbGFjZSBzZGF0YV9sb2NrIHdpdGggc2RhdGFfb3Bfb3JkZXJpbmdfbG9jaz8NCj4NCj4gLS0N
-Cj4gUmVnYXJkcywNCj4geGluemUNCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxp
-c3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIA0KPiBpbiB0aGUgYm9k
-eSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9t
-byANCj4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1s
-DQoNCg0KDQoNCi0tDQpSZWdhcmRzLA0KeGluemUNCg==
+On 30/10/2015, Jason Dillaman wrote:
+> In terms of overhead for the interface, is your concern due to the
+> potential for more heap allocations for storing tasks to complete
+> the future?  If that's the case, Adam's std::function replacement [1],
+> which allocates a configurable amount of storage on the stack (as opposed
+> to going to the heap for functions larger than 16 bytes as in the GCC
+> implementation [2]), might be a good compromise.
+> 
+> I had some time to deep-dive through the seastar library this week and
+> was really impressed by its design.  I know we (semi-)recently needed to
+> introduce a workaround change to librbd which now results in a context
+> switch for each AIO op -- all to ensure that we never block the QEMU IO
+> thread.  Long term, I would love if we could take some of these reactive
+> programming concepts to avoid all potential blocking on the librbd /
+> librados IO path (with a side benefit of perhaps eliminating the potential
+> for thousands of network IO threads by instead sharding the work).
+> 
+> [1] http://comments.gmane.org/gmane.comp.file-systems.ceph.devel/27100
+> [2] http://www.drdobbs.com/cpp/efficient-use-of-lambda-expressions-and/232500059?pgno=2
+
+We have been working on a short run prototype/research project to see
+about using Seastar itself as a reimplementation of the OSD top-half that
+can support the semantics that Ceph's placement group system currently
+relies upon as well as different guarantees alongside them. This is
+part of our effort to repackage and upstream the Cohort low-latency
+OSD work in a way that will integrate better with the existing Ceph
+requirements. (Eric is also hoping to use this as a model for
+implementing and evaluating DM-CLOCK.)
+
+We did find that replacing Context* with the static-reservation function
+implementation greatly improved the performance of Objecter (which
+is what I initially designed it for), but there was still a lot of
+lock contention. While Seastar itself as it exists is not suitable for
+client applications (since it wants to take over your whole program and
+assumes it owns cores in their entirety) a refactoring or inspiration
+from Seastar that included futures, the CPU-affine allocator, their
+mostly lock-free approach, and their userspace network support would
+likely give even better gains in Objecter performance. We are not (yet)
+working on Objecter, but we would love to collaborate with anyone wanting
+to do this work.
+
+-- 
+Adam C. Emerson, Senior Software Engineer
+Red Hat Storage, Ann Arbor, Michigan, United States
