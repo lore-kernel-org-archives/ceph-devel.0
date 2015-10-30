@@ -1,27 +1,38 @@
-From: "hzwulibin" <hzwulibin@gmail.com>
-Subject: Is lttng enable by default in debian hammer-0.94.5?
-Date: Fri, 30 Oct 2015 11:45:47 +0800
-Message-ID: <5632E7E7.1030901@gmail.com>
+From: Pete Zaitcev <zaitcev@redhat.com>
+Subject: Re: civetweb upstream/downstream divergence
+Date: Thu, 29 Oct 2015 22:57:38 -0600
+Message-ID: <20151029225738.51b8b2e5@lembas.zaitcev.lan>
+References: <5631E4A5.9020003@suse.cz>
+	<CADRKj5T5ZZBb+Mhut2jnzKoBEtTjw0tGWptqWVamgoLWaQfpgQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f68.google.com ([209.85.220.68]:34917 "EHLO
-	mail-pa0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751770AbbJ3Dps (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Oct 2015 23:45:48 -0400
-Received: by pagq8 with SMTP id q8so6729805pag.2
-        for <ceph-devel@vger.kernel.org>; Thu, 29 Oct 2015 20:45:48 -0700 (PDT)
+Received: from mx1.redhat.com ([209.132.183.28]:51940 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750801AbbJ3E5l (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 30 Oct 2015 00:57:41 -0400
+In-Reply-To: <CADRKj5T5ZZBb+Mhut2jnzKoBEtTjw0tGWptqWVamgoLWaQfpgQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@lists.ceph.com>
+To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Cc: Nathan Cutler <ncutler@suse.cz>, ceph-devel <ceph-devel@vger.kernel.org>
 
-SGksIGV2ZXJ5b25lDQoNCkFmdGVyIGluc3RhbGwgaGFtbWVyLTAuOTQuNSBpbiBkZWJpYW4sIGkg
-d2FudCB0byB0cmFjZSB0aGUgbGlicmJkIGJ5IGx0dG5nLCBidXQgYWZ0ZXIgZG9uZSBmb2xsb3cg
-c3RlcHMsIGkgZ290IG5vdGhpbmc6DQogMjAzNiAgbWtkaXIgLXAgdHJhY2VzDQogMjAzNyAgbHR0
-bmcgY3JlYXRlIC1vIHRyYWNlcyBsaWJyYmQNCiAyMDM4ICBsdHRuZyBlbmFibGUtZXZlbnQgLXUg
-J2xpYnJiZDoqJw0KIDIwMzkgIGx0dG5nIGFkZC1jb250ZXh0IC11IC10IHB0aHJlYWRfaWQNCiAy
-MDQwICBsdHRuZyBzdGFydA0KIDIwNDEgIGx0dG5nIHN0b3ANCg0KU28sIGlzIHRoZSBsdHRuZyBl
-bmFibGVkIGluIHRoaXMgdmVyc2lvbiBvbiBkZWJpYW4/DQoNClRoYW5rcyENCiAJCQkJDQotLS0t
-LS0tLS0tLS0tLQ0KaHp3dWxpYmluDQoyMDE1LTEwLTMwDQo=
+On Thu, 29 Oct 2015 10:58:07 -0700
+Yehuda Sadeh-Weinraub <yehuda@redhat.com> wrote:
 
+> We should definitely do it. We're based off civetweb 1.6, and there
+> was no official civetweb version for quite a while, but 1.7 was tagged
+> a few months ago. I made some effort and got most of our material
+> changes upstream, however, there are some changes that might need some
+> more work before we can get them merged, or might not make complete
+> sense at all.
+
+I take it Nathan is volunteering to parse the delta into logical pieces
+and identify what upstream is willing to accept, right?
+
+Dunno about SuSE, but as a Fedora packager I would prefer if we (Ceph)
+talked upstream into making regular releases and then for us to stop
+carrying it entirely. One less git submodule if nothing else.
+
+-- Pete
