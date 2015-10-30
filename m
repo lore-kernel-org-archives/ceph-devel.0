@@ -1,61 +1,85 @@
-From: shylesh kumar <shylesh.mohan-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: Is lttng enable by default in debian hammer-0.94.5?
-Date: Fri, 30 Oct 2015 12:48:13 +0530
-Message-ID: <CAMxOGo0zj=Zxn0Jf0Bk5OZR9HW_JJCE+zDAoStswgo4BU45JvQ@mail.gmail.com>
-References: <5632E7E7.1030901@gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: civetweb upstream/downstream divergence
+Date: Fri, 30 Oct 2015 17:00:01 +0900
+Message-ID: <56332381.4060204@dachary.org>
+References: <5631E4A5.9020003@suse.cz>	<CADRKj5T5ZZBb+Mhut2jnzKoBEtTjw0tGWptqWVamgoLWaQfpgQ@mail.gmail.com> <20151029225738.51b8b2e5@lembas.zaitcev.lan>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <5632E7E7.1030901-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: hzwulibin <hzwulibin-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="uq05oMCxnSXQtS0ljFrN3aheavoxLVGGK"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail2.dachary.org ([91.121.57.175]:52312 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1758633AbbJ3IAG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 30 Oct 2015 04:00:06 -0400
+In-Reply-To: <20151029225738.51b8b2e5@lembas.zaitcev.lan>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Pete Zaitcev <zaitcev@redhat.com>, Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Cc: Nathan Cutler <ncutler@suse.cz>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi,
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--uq05oMCxnSXQtS0ljFrN3aheavoxLVGGK
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: quoted-printable
 
-Have you disabled apparmor?
+Hi Pete,
 
-Please check apparmor_status if libvirtd is in enforcing mode then
-lttng traces will not be generated.
+On 30/10/2015 13:57, Pete Zaitcev wrote:
+> On Thu, 29 Oct 2015 10:58:07 -0700
+> Yehuda Sadeh-Weinraub <yehuda@redhat.com> wrote:
+>=20
+>> We should definitely do it. We're based off civetweb 1.6, and there
+>> was no official civetweb version for quite a while, but 1.7 was tagged=
 
-Thanks,
-Shylesh
+>> a few months ago. I made some effort and got most of our material
+>> changes upstream, however, there are some changes that might need some=
 
-On Fri, Oct 30, 2015 at 9:15 AM, hzwulibin <hzwulibin-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> Hi, everyone
->
-> After install hammer-0.94.5 in debian, i want to trace the librbd by lttng, but after done follow steps, i got nothing:
->  2036  mkdir -p traces
->  2037  lttng create -o traces librbd
->  2038  lttng enable-event -u 'librbd:*'
->  2039  lttng add-context -u -t pthread_id
->  2040  lttng start
->  2041  lttng stop
->
-> So, is the lttng enabled in this version on debian?
->
-> Thanks!
->
-> --------------
-> hzwulibin
-> 2015-10-30
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>> more work before we can get them merged, or might not make complete
+>> sense at all.
+>=20
+> I take it Nathan is volunteering to parse the delta into logical pieces=
+
+> and identify what upstream is willing to accept, right?
+
+I've discussed with Nathan about this general problem a few times. The is=
+sue is much less about volunteering and much more about how to track the =
+progress of the delta over time.
+
+> Dunno about SuSE, but as a Fedora packager I would prefer if we (Ceph)
+> talked upstream into making regular releases and then for us to stop
+> carrying it entirely. One less git submodule if nothing else.
+
+Right now we have no method. For the jerasure / gf-complete sub-modules, =
+I'm watching the delta and do the right thing but it's mostly an unwritte=
+n process: someone else would do it completely differently. For other Cep=
+h sub-modules I suppose each developer has his own way of dealing with th=
+e delta.I remember Sage recently proposed patches upstream for rocksdb bu=
+t I'm unaware of where or how. I would not be able to help him in any way=
+=2E And I don't think anyone could figure out exactly how to deal with th=
+e jerasure / gf-complete sub-modules either.
+
+Do you happen to know a project that is using submodules (or copies of pr=
+ojects instead of dependencies) and that is also well organized to track =
+the delta ?
+
+Cheers
+
+--=20
+Lo=EFc Dachary, Artisan Logiciel Libre
 
 
+--uq05oMCxnSXQtS0ljFrN3aheavoxLVGGK
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
--- 
-Thanks & Regards
-Shylesh Kumar M
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlYzI4EACgkQ8dLMyEl6F22UbgCfU75sBwHiLYwvbLvroD7/hhEB
+1k0An1OspZ4Kq3HzBQegxzFsmBYjdt35
+=6pgl
+-----END PGP SIGNATURE-----
+
+--uq05oMCxnSXQtS0ljFrN3aheavoxLVGGK--
