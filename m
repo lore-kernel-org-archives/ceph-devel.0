@@ -1,38 +1,73 @@
 From: Pete Zaitcev <zaitcev@redhat.com>
-Subject: Re: civetweb upstream/downstream divergence
-Date: Thu, 29 Oct 2015 22:57:38 -0600
-Message-ID: <20151029225738.51b8b2e5@lembas.zaitcev.lan>
-References: <5631E4A5.9020003@suse.cz>
-	<CADRKj5T5ZZBb+Mhut2jnzKoBEtTjw0tGWptqWVamgoLWaQfpgQ@mail.gmail.com>
+Subject: Re: Bucket namespaces pull req. 5872
+Date: Thu, 29 Oct 2015 23:30:22 -0600
+Message-ID: <20151029233022.1c8ee38a@lembas.zaitcev.lan>
+References: <20151014232542.1f4d6f26@guren.zaitcev.lan>
+	<CA+H5UW2HhPGkPA9P+=9j2aFRCYEgdLFg=5uvg6Xkcd7sXMeYig@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:51940 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:33051 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750801AbbJ3E5l (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 30 Oct 2015 00:57:41 -0400
-In-Reply-To: <CADRKj5T5ZZBb+Mhut2jnzKoBEtTjw0tGWptqWVamgoLWaQfpgQ@mail.gmail.com>
+	id S1758295AbbJ3FaZ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 30 Oct 2015 01:30:25 -0400
+In-Reply-To: <CA+H5UW2HhPGkPA9P+=9j2aFRCYEgdLFg=5uvg6Xkcd7sXMeYig@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Cc: Nathan Cutler <ncutler@suse.cz>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Radoslaw Zarzynski <rzarzynski@mirantis.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Yehuda Sadeh-Weinraub <yehuda@redhat.com>, zaitcev@redhat.com
 
-On Thu, 29 Oct 2015 10:58:07 -0700
-Yehuda Sadeh-Weinraub <yehuda@redhat.com> wrote:
+On Mon, 26 Oct 2015 16:09:41 +0100
+Radoslaw Zarzynski <rzarzynski@mirantis.com> wrote:
 
-> We should definitely do it. We're based off civetweb 1.6, and there
-> was no official civetweb version for quite a while, but 1.7 was tagged
-> a few months ago. I made some effort and got most of our material
-> changes upstream, however, there are some changes that might need some
-> more work before we can get them merged, or might not make complete
-> sense at all.
+> Those are the reasons I=E2=80=99m behind keeping rgw_user even if the
+> entire information it carries would be solely an ID string.
 
-I take it Nathan is volunteering to parse the delta into logical pieces
-and identify what upstream is willing to accept, right?
+Okay. It felt a little obfuscatory but perhaps it's my kernel backgroun=
+d talking.
 
-Dunno about SuSE, but as a Fedora packager I would prefer if we (Ceph)
-talked upstream into making regular releases and then for us to stop
-carrying it entirely. One less git submodule if nothing else.
+> Yeah, bucket namespace is a part of account/RGWUserInfo*. Property
+> =E2=80=9Chas_own_bns=E2=80=9D even now is serialized together with RG=
+WUserInfo.
+
+Very well, we're good.
+
+> > The rgw_swift_create_account_with_bns shold go away with rgw_user.
+>=20
+> Option "rgw_swift_create_account_with_bns" is needed mostly due to
+> integration with OpenStack (Keystone) when accounts* are automaticall=
+y
+> created at first access. Without the parameter you would lose ability=
+ to
+> tell radosgw what is more important for you: compliance with Swift AP=
+I
+> or previous behavior that still may be useful in some cases. Creating
+> massive amount of accounts by hand might not be an option here.
+
+I'm buying the logic here: at the time of auto-creation, we do not
+possess the information about the account being auto-created wanting BN=
+S
+or not. Still, it feels unsatisfactory. I'd rather look into some sort
+of user attributes in Keystone or whatnot. I'll investigate and report.
+
+> > The rgw_swift_account_in_url should be possible to incorporate
+> > in a compatible fashion (it does not add an extra next_tok()).
+>=20
+> According to "rgw_swift_account_in_url": I don=E2=80=99t see viable m=
+ethod for
+> deducing whether two tokens in URL refer to 1) account and bucket or
+> 2) bucket and object. Of course, we may apply some kind of heuristic
+> like scanning the first token for auth prefix (eg. =E2=80=9CAUTH_=E2=80=
+=9D, =E2=80=9CKEY_=E2=80=9D) but
+> this would introduce limitations on bucket naming.
+
+That makes sense, but it's not how I read the actual code. I'll look ag=
+ain.
 
 -- Pete
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
