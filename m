@@ -1,26 +1,36 @@
-From: =?UTF-8?B?5rGg5L+h5rO9?= <xmdxcxz@gmail.com>
+From: Ning Yao <zay11022@gmail.com>
 Subject: Re: why we use two ObjectStore::Transaction in ReplicatedBackend::submit_transaction?
-Date: Sat, 31 Oct 2015 21:30:50 +0800
-Message-ID: <CANE=7sX3THWWN=i5EjUy0x9vJhdEL3Dj6vPQp1fV=U_ESdJgBw@mail.gmail.com>
+Date: Sat, 31 Oct 2015 23:34:55 +0800
+Message-ID: <CALZt5jwEocBc2uqvec11ynWVWu=M=pG5wZSw_quFBVoaCgZcZQ@mail.gmail.com>
 References: <CANE=7sWNry9QYHkV=DK8NOudeU7UNNoRya8-be1BFiG=9YGn3g@mail.gmail.com>
 	<alpine.DEB.2.00.1510310617240.19081@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f182.google.com ([209.85.214.182]:36474 "EHLO
-	mail-ob0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752440AbbJaNav (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 31 Oct 2015 09:30:51 -0400
-Received: by obdgf3 with SMTP id gf3so785574obd.3
-        for <ceph-devel@vger.kernel.org>; Sat, 31 Oct 2015 06:30:50 -0700 (PDT)
+Received: from mail-wm0-f54.google.com ([74.125.82.54]:34904 "EHLO
+	mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751307AbbJaPe4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 31 Oct 2015 11:34:56 -0400
+Received: by wmll128 with SMTP id l128so31573234wml.0
+        for <ceph-devel@vger.kernel.org>; Sat, 31 Oct 2015 08:34:55 -0700 (PDT)
 In-Reply-To: <alpine.DEB.2.00.1510310617240.19081@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@newdream.net>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: =?UTF-8?B?5rGg5L+h5rO9?= <xmdxcxz@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-the op_t items are encoded in issue_op, so after issue_op, we could
-use it directly instead of local_t items?
+Yeah, since issue_op is called before log_operation, we may consider
+to reuse op_t after sent encoded op_t to the wire. local_t.append(),
+at least, does copy the op_bl in op_t transaction and we may avoid
+this memory copy, and if we can avoid this append operation as well as
+in sub_op_modify_impl(), it, at least, improves the performance 1%~2%
+under my testing environment using ssd as Filestore backend.
+The only difference we find in this path is that local_t should be
+done first, but actually it seems that the order of the transaction is
+not quite important. If so, we may refactor and improve this?
+Regards
+Ning Yao
+
 
 2015-10-31 21:18 GMT+08:00 Sage Weil <sage@newdream.net>:
 > On Sat, 31 Oct 2015, ??? wrote:
@@ -46,9 +56,7 @@ use it directly instead of local_t items?
 >
 > sage
 >
-
-
-
--- 
-Regards,
-xinze
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
