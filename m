@@ -1,62 +1,67 @@
-From: Ning Yao <zay11022@gmail.com>
-Subject: Re: why we use two ObjectStore::Transaction in ReplicatedBackend::submit_transaction?
-Date: Sat, 31 Oct 2015 23:34:55 +0800
-Message-ID: <CALZt5jwEocBc2uqvec11ynWVWu=M=pG5wZSw_quFBVoaCgZcZQ@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: why we use two ObjectStore::Transaction in
+ ReplicatedBackend::submit_transaction?
+Date: Sat, 31 Oct 2015 15:58:51 +0000
+Message-ID: <CO1PR02MB208AE0D8B1C669E5E48DC93F42E0@CO1PR02MB208.namprd02.prod.outlook.com>
 References: <CANE=7sWNry9QYHkV=DK8NOudeU7UNNoRya8-be1BFiG=9YGn3g@mail.gmail.com>
 	<alpine.DEB.2.00.1510310617240.19081@cobra.newdream.net>
+ <CALZt5jwEocBc2uqvec11ynWVWu=M=pG5wZSw_quFBVoaCgZcZQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f54.google.com ([74.125.82.54]:34904 "EHLO
-	mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751307AbbJaPe4 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 31 Oct 2015 11:34:56 -0400
-Received: by wmll128 with SMTP id l128so31573234wml.0
-        for <ceph-devel@vger.kernel.org>; Sat, 31 Oct 2015 08:34:55 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1510310617240.19081@cobra.newdream.net>
+Received: from mail-bn1bon0077.outbound.protection.outlook.com ([157.56.111.77]:57952
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751206AbbJaP6z (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 31 Oct 2015 11:58:55 -0400
+In-Reply-To: <CALZt5jwEocBc2uqvec11ynWVWu=M=pG5wZSw_quFBVoaCgZcZQ@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: =?UTF-8?B?5rGg5L+h5rO9?= <xmdxcxz@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ning Yao <zay11022@gmail.com>, Sage Weil <sage@newdream.net>
+Cc: =?utf-8?B?5rGg5L+h5rO9?= <xmdxcxz@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Yeah, since issue_op is called before log_operation, we may consider
-to reuse op_t after sent encoded op_t to the wire. local_t.append(),
-at least, does copy the op_bl in op_t transaction and we may avoid
-this memory copy, and if we can avoid this append operation as well as
-in sub_op_modify_impl(), it, at least, improves the performance 1%~2%
-under my testing environment using ssd as Filestore backend.
-The only difference we find in this path is that local_t should be
-done first, but actually it seems that the order of the transaction is
-not quite important. If so, we may refactor and improve this?
-Regards
-Ning Yao
-
-
-2015-10-31 21:18 GMT+08:00 Sage Weil <sage@newdream.net>:
-> On Sat, 31 Oct 2015, ??? wrote:
->> hi, all:
->>
->>     There are two ObjectStore::Transaction in
->> ReplicatedBackend::submit_transaction, one is op_t and the other one
->> is local_t. Is that something
->>     critilal logic we should consider?
->>
->>     If we could reuse variable op_t it would be great. Because it is
->> expensive to calling local_t.append(*op_t).
->>
->>     There are similar logic in ReplicatedBackend::sub_op_modify_impl.
->
-> The local_t items are only applied locally; the op_t items are encoded and
-> sent over the wire to the replicas.
->
-> If append() is expensive we should just refactor to avoid that.  IIRC I
-> got partway down this path but apparently didn't finish.  The ObjectStore
-> interface takes a list of transactions to apply, so I think it's just a
-> matter of refactoring the interfaces a bit...?
->
-> sage
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+QlRXLCBsYXRlc3QgY29kZSBiYXNlIGlzIGFscmVhZHkgc2VwYXJhdGluZyBvdXQgMiB0cmFuc2Fj
+dGlvbi4gTm8gbW9yZSBhcHBlbmQgY2FsbC4uDQoNClRoYW5rcyAmIFJlZ2FyZHMNClNvbW5hdGgN
+Cg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdl
+ci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9u
+IEJlaGFsZiBPZiBOaW5nIFlhbw0KU2VudDogU2F0dXJkYXksIE9jdG9iZXIgMzEsIDIwMTUgODoz
+NSBBTQ0KVG86IFNhZ2UgV2VpbA0KQ2M6IOaxoOS/oeazvTsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5l
+bC5vcmcNClN1YmplY3Q6IFJlOiB3aHkgd2UgdXNlIHR3byBPYmplY3RTdG9yZTo6VHJhbnNhY3Rp
+b24gaW4gUmVwbGljYXRlZEJhY2tlbmQ6OnN1Ym1pdF90cmFuc2FjdGlvbj8NCg0KWWVhaCwgc2lu
+Y2UgaXNzdWVfb3AgaXMgY2FsbGVkIGJlZm9yZSBsb2dfb3BlcmF0aW9uLCB3ZSBtYXkgY29uc2lk
+ZXIgdG8gcmV1c2Ugb3BfdCBhZnRlciBzZW50IGVuY29kZWQgb3BfdCB0byB0aGUgd2lyZS4gbG9j
+YWxfdC5hcHBlbmQoKSwgYXQgbGVhc3QsIGRvZXMgY29weSB0aGUgb3BfYmwgaW4gb3BfdCB0cmFu
+c2FjdGlvbiBhbmQgd2UgbWF5IGF2b2lkIHRoaXMgbWVtb3J5IGNvcHksIGFuZCBpZiB3ZSBjYW4g
+YXZvaWQgdGhpcyBhcHBlbmQgb3BlcmF0aW9uIGFzIHdlbGwgYXMgaW4gc3ViX29wX21vZGlmeV9p
+bXBsKCksIGl0LCBhdCBsZWFzdCwgaW1wcm92ZXMgdGhlIHBlcmZvcm1hbmNlIDElfjIlIHVuZGVy
+IG15IHRlc3RpbmcgZW52aXJvbm1lbnQgdXNpbmcgc3NkIGFzIEZpbGVzdG9yZSBiYWNrZW5kLg0K
+VGhlIG9ubHkgZGlmZmVyZW5jZSB3ZSBmaW5kIGluIHRoaXMgcGF0aCBpcyB0aGF0IGxvY2FsX3Qg
+c2hvdWxkIGJlIGRvbmUgZmlyc3QsIGJ1dCBhY3R1YWxseSBpdCBzZWVtcyB0aGF0IHRoZSBvcmRl
+ciBvZiB0aGUgdHJhbnNhY3Rpb24gaXMgbm90IHF1aXRlIGltcG9ydGFudC4gSWYgc28sIHdlIG1h
+eSByZWZhY3RvciBhbmQgaW1wcm92ZSB0aGlzPw0KUmVnYXJkcw0KTmluZyBZYW8NCg0KDQoyMDE1
+LTEwLTMxIDIxOjE4IEdNVCswODowMCBTYWdlIFdlaWwgPHNhZ2VAbmV3ZHJlYW0ubmV0PjoNCj4g
+T24gU2F0LCAzMSBPY3QgMjAxNSwgPz8/IHdyb3RlOg0KPj4gaGksIGFsbDoNCj4+DQo+PiAgICAg
+VGhlcmUgYXJlIHR3byBPYmplY3RTdG9yZTo6VHJhbnNhY3Rpb24gaW4gDQo+PiBSZXBsaWNhdGVk
+QmFja2VuZDo6c3VibWl0X3RyYW5zYWN0aW9uLCBvbmUgaXMgb3BfdCBhbmQgdGhlIG90aGVyIG9u
+ZSANCj4+IGlzIGxvY2FsX3QuIElzIHRoYXQgc29tZXRoaW5nDQo+PiAgICAgY3JpdGlsYWwgbG9n
+aWMgd2Ugc2hvdWxkIGNvbnNpZGVyPw0KPj4NCj4+ICAgICBJZiB3ZSBjb3VsZCByZXVzZSB2YXJp
+YWJsZSBvcF90IGl0IHdvdWxkIGJlIGdyZWF0LiBCZWNhdXNlIGl0IGlzIA0KPj4gZXhwZW5zaXZl
+IHRvIGNhbGxpbmcgbG9jYWxfdC5hcHBlbmQoKm9wX3QpLg0KPj4NCj4+ICAgICBUaGVyZSBhcmUg
+c2ltaWxhciBsb2dpYyBpbiBSZXBsaWNhdGVkQmFja2VuZDo6c3ViX29wX21vZGlmeV9pbXBsLg0K
+Pg0KPiBUaGUgbG9jYWxfdCBpdGVtcyBhcmUgb25seSBhcHBsaWVkIGxvY2FsbHk7IHRoZSBvcF90
+IGl0ZW1zIGFyZSBlbmNvZGVkIA0KPiBhbmQgc2VudCBvdmVyIHRoZSB3aXJlIHRvIHRoZSByZXBs
+aWNhcy4NCj4NCj4gSWYgYXBwZW5kKCkgaXMgZXhwZW5zaXZlIHdlIHNob3VsZCBqdXN0IHJlZmFj
+dG9yIHRvIGF2b2lkIHRoYXQuICBJSVJDIA0KPiBJIGdvdCBwYXJ0d2F5IGRvd24gdGhpcyBwYXRo
+IGJ1dCBhcHBhcmVudGx5IGRpZG4ndCBmaW5pc2guICBUaGUgDQo+IE9iamVjdFN0b3JlIGludGVy
+ZmFjZSB0YWtlcyBhIGxpc3Qgb2YgdHJhbnNhY3Rpb25zIHRvIGFwcGx5LCBzbyBJIA0KPiB0aGlu
+ayBpdCdzIGp1c3QgYSBtYXR0ZXIgb2YgcmVmYWN0b3JpbmcgdGhlIGludGVyZmFjZXMgYSBiaXQu
+Li4/DQo+DQo+IHNhZ2UNCj4NCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6
+IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIA0KPiBpbiB0aGUgYm9keSBv
+ZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyAN
+Cj4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQot
+LQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2Ny
+aWJlIGNlcGgtZGV2ZWwiIGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdl
+ci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5v
+cmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
