@@ -1,126 +1,69 @@
-From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Subject: RE: Specify omap path for filestore
-Date: Sun, 1 Nov 2015 06:41:33 +0000
-Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC0363820F@shsmsx102.ccr.corp.intel.com>
-References: <C8CF870384EBCF4CAB89D2041A5C80B322002AB8@SHSMSX101.ccr.corp.intel.com>
- <C8CF870384EBCF4CAB89D2041A5C80B322002D57@SHSMSX101.ccr.corp.intel.com>
- <C8CF870384EBCF4CAB89D2041A5C80B3220030ED@SHSMSX101.ccr.corp.intel.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: why we use two ObjectStore::Transaction in
+ ReplicatedBackend::submit_transaction?
+Date: Sun, 1 Nov 2015 06:42:40 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1511010639440.19081@cobra.newdream.net>
+References: <CANE=7sWNry9QYHkV=DK8NOudeU7UNNoRya8-be1BFiG=9YGn3g@mail.gmail.com> <alpine.DEB.2.00.1510310617240.19081@cobra.newdream.net> <CALZt5jwEocBc2uqvec11ynWVWu=M=pG5wZSw_quFBVoaCgZcZQ@mail.gmail.com> <alpine.DEB.2.00.1510311340560.19081@cobra.newdream.net>
+ <CANE=7sWnQHAY=6GbXPzMM63qENZFRyiuKT6L2VHHG7yppUmA5A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:6570 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750830AbbKAGlh convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 1 Nov 2015 01:41:37 -0500
-In-Reply-To: <C8CF870384EBCF4CAB89D2041A5C80B3220030ED@SHSMSX101.ccr.corp.intel.com>
-Content-Language: en-US
+Received: from cobra.newdream.net ([66.33.216.30]:33474 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752917AbbKAOml (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 1 Nov 2015 09:42:41 -0500
+In-Reply-To: <CANE=7sWnQHAY=6GbXPzMM63qENZFRyiuKT6L2VHHG7yppUmA5A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Xue, Chendi" <chendi.xue@intel.com>, 'Samuel Just' <sjust@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: =?GB2312?B?s9jQxdTz?= <xmdxcxz@gmail.com>
+Cc: Ning Yao <zay11022@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-As we use submit_transaction(instead of submit_transaction_sync) in DBO=
-bjectmap, and we also don't  use a kv_sync_thread for DB. Seems we need=
- to rely on the syncfs(2) at commit time for persist everything?
+On Sun, 1 Nov 2015, ??? wrote:
+> Yes, I think so.
+> keeping them separate and pass them to
+> ObjectStore::queue_transactions() would increase the time on
+> transaction encode process and exhaust more cpu.
+> 
+> The transaction::append holds 0.8% cpu on my environment.
+> The transaction encoding is also really a bottleneck which process
+> holds 1.8% cpu on my environment.
 
-If that is the case, moving db out of the same FS as Data  may cause is=
-sue?
+Where is the append() caller you're looking at?  I'm not seeing it.
+
+sage
 
 
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
-> owner@vger.kernel.org] On Behalf Of Xue, Chendi
-> Sent: Friday, October 30, 2015 10:05 AM
-> To: 'Samuel Just'
-> Cc: ceph-devel@vger.kernel.org
-> Subject: Specify omap path for filestore
->=20
-> Hi, Sam
->=20
-> Last week I introduced about how we saw the benefit of moving omap to=
- a
-> separate device.
->=20
-> And here is the pull request:
-> https://github.com/ceph/ceph/pull/6421
->=20
-> I had tested redeploy and restart ceph cluster at my setup, the codes=
- works
-> fine.
-> one problem is do you think I should *DELETE* all the files under the
-> omap_path firstly? Because I notice if old pg data leaves there, osd =
-daemon
-> may run into chaos. But I am not sure if it should leave to users to =
-DELETE.
->=20
-> Any thoughts?
->=20
-> Also I paste some data I talked , which is about the rbd and osd writ=
-e iops
-> ratio when doing randwrite to a rbd device.
->=20
-> =3D=3D=3D=3D=3D=3DHere is some data=3D=3D=3D=3D=3D
-> We uses 4 clients , 35 vm each to test on rbd randwrite.
-> 4 osd physical nodes, each has 10 HDD as osd and 2 ssd as journal
-> 2 replica
-> filestore_max_inline_xattr_xfs=3D0
-> filestore_max_inline_xattr_size_xfs=3D0
->=20
-> Before moving omap to separate ssd, we saw a frontend and backend iop=
-s
-> ratio of 1:5.8, rbd side total iops 1206, hdd total iops 7034 Like we=
- talked, 5.8
-> consists of 2 replica write, inode and omap writes
-> runid=A0=A0=A0=A0=A0=A0=A0=A0 op_size=A0=A0=A0 op_type=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0=A0=A0 QD=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 engine=A0=A0=
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 serverNum=A0=A0=A0=A0=A0=A0 clie
-> ntNum=A0=A0=A0=A0=A0=A0=A0=A0 rbdNum=A0=A0 runtime=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0 fio_iops=A0=A0=A0=A0=A0=A0=A0=A0 fio_bw=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0=A0=A0=A0 fio_latency
-> =A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 osd_iops=A0 =A0=A0=A0=A0=A0=A0=A0=A0 o=
-sd_bw=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 osd_latency
-> 332=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 4k=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0 randwrite=A0=A0=A0=A0=A0=A0=A0=A0 qd8=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0 qemurbd=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 4=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 4
-> =A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 140=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0 400 sec=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 1206.000=
-=A0=A0=A0=A0=A0=A0=A0=A0 4.987 MB/s=A0=A0=A0=A0=A0 884.617
-> msec=A0 =A0=A0=A0=A0=A0=A0=A0=A0 7034.975 =A0=A0=A0=A0=A0=A0=A0=A0 47=
-=2E407 MB/s=A0=A0=A0 242.620 msec
->=20
-> And after moving omap to a separate ssd, we saw a frontend vs. backen=
-d
-> ratio drops to 1:2.6, rbd side total iops 5006, hdd total iops 13089
-> runid=A0=A0=A0=A0=A0=A0=A0=A0 op_size=A0=A0=A0 op_type=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0=A0=A0 QD=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 engine=A0=A0=
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 serverNum=A0=A0=A0=A0=A0=A0 clie
-> ntNum=A0=A0=A0=A0=A0=A0=A0=A0 rbdNum=A0=A0 runtime=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0 fio_iops=A0=A0=A0=A0=A0=A0=A0=A0 fio_bw=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0=A0=A0=A0 fio_latency
-> =A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 osd_iops=A0 =A0=A0=A0=A0=A0=A0=A0=A0 o=
-sd_bw=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 osd_latency
-> 326=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 4k=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0 randwrite=A0=A0=A0=A0=A0=A0=A0=A0 qd8=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0 qemurbd=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 4=A0=A0=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 4
-> =A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 140=A0=A0=A0=A0=A0=A0=
-=A0=A0=A0=A0=A0 400 sec=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 5006.000=
-=A0=A0=A0=A0=A0=A0=A0=A0 19.822 MB/s=A0=A0=A0 222.296
-> msec=A0 =A0=A0=A0=A0=A0=A0=A0=A0 13089.020=A0=A0=A0=A0=A0=A0=A0 82.89=
-7 MB/s=A0=A0=A0 482.203 msec
->=20
->=20
-> Best regards,
-> Chendi
+> 
+> 2015-11-01 4:42 GMT+08:00 Sage Weil <sage@newdream.net>:
+> > On Sat, 31 Oct 2015, Ning Yao wrote:
+> >> Yeah, since issue_op is called before log_operation, we may consider
+> >> to reuse op_t after sent encoded op_t to the wire. local_t.append(),
+> >> at least, does copy the op_bl in op_t transaction and we may avoid
+> >> this memory copy, and if we can avoid this append operation as well as
+> >> in sub_op_modify_impl(), it, at least, improves the performance 1%~2%
+> >> under my testing environment using ssd as Filestore backend.
+> >> The only difference we find in this path is that local_t should be
+> >> done first, but actually it seems that the order of the transaction is
+> >> not quite important. If so, we may refactor and improve this?
+> >
+> > I seem to recall that in teh EC case the order does matter (I had switched
+> > the append order when trying to fix this before but had to revert because
+> > things broke).
+> >
+> > And I'm a bit nervous about re-using local_t and relying on the send vs
+> > submit timing.  Is it not practical to keep them separate and
+> > pass them both down to ObjectStore::queue_transactions()?
+> >
+> > sage
+> 
+> 
+> 
+> -- 
+> Regards,
+> xinze
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in the
-> body of a message to majordomo@vger.kernel.org More majordomo info at
-> http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
