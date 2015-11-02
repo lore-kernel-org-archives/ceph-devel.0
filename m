@@ -1,79 +1,56 @@
-From: Jaze Lee <jazeltq@gmail.com>
-Subject: Only client.admin can mount cephfs by ceph-fuse
-Date: Mon, 2 Nov 2015 12:28:42 +0800
-Message-ID: <CAKZcxgeKr4m=Yvj4nyzwzkot8gS-dLip6qyx5fX4S+hbvpkXoA@mail.gmail.com>
+From: "hzwulibin" <hzwulibin@gmail.com>
+Subject: [performance] why rbd_aio_write latency increase from 4ms to 7.3ms after the same test
+Date: Mon, 02 Nov 2015 13:24:10 +0800
+Message-ID: <5636F376.3090104@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f41.google.com ([209.85.215.41]:34239 "EHLO
-	mail-lf0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751470AbbKBE2n convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 1 Nov 2015 23:28:43 -0500
-Received: by lfgh9 with SMTP id h9so9711159lfg.1
-        for <ceph-devel@vger.kernel.org>; Sun, 01 Nov 2015 20:28:42 -0800 (PST)
+Received: from mail-pa0-f67.google.com ([209.85.220.67]:34611 "EHLO
+	mail-pa0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751059AbbKBFtK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Nov 2015 00:49:10 -0500
+Received: by padda3 with SMTP id da3so15789170pad.1
+        for <ceph-devel@vger.kernel.org>; Sun, 01 Nov 2015 21:49:09 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@lists.ceph.com>
 
-Hello,
-   I find only ceph.client.admin can mount cephfs.
+SGksIA0Kc2FtZSBlbnZpcm9ubWVudCwgYWZ0ZXIgYSB0ZXN0IHNjcmlwdCwgdGhlIGlvIGxhdGVu
+Y3koZ2V0IGZyb20gc3VkbyBjZXBoIC0tYWRtaW4tZGFlbW9uIC9ydW4vY2VwaC9ndWVzdHMvY2Vw
+aC1jbGllbnQuKi5hc29rIHBlciBkdW1wKSANCmluY3JlYXNlIGZyb20gYWJvdXQgNG1zIHRvIDcu
+M21zDQoNCnFlbXUgdmVyc2lvbjogZGViaWFuIDIuMS4yDQprZXJuZWw6My4xMC40NS1vcGVuc3Rh
+Y2stYW1kNjQNCnN5c3RlbTogZGViaWFuIDcuOA0KY2VwaDogMC45NC41DQpWTSBDUFUgbnVtYmVy
+OiA0ICAoY3B1IE1IeiA6IDI1OTkuOTk4KQ0KVk0gbWVtb3J5IHNpemU6IDE2R0INCjkgT1NEIHN0
+b3JhZ2Ugc2VydmVycywgd2l0aCA0IFNTRCBPU0Qgb24gZWFjaCwgdG90YWwgMzYgT1NEcy4NCg0K
+VGVzdCBzY3JpcHRzIGluIFZNOg0KIyBjYXQgcmVwcm9kdWNlLnNoDQojIS9iaW4vYmFzaA0KDQp0
+aW1lcz0yMA0KZm9yKChpPTE7aTw9JHRpbWVzO2krKykpDQpkbw0KICAgIHRtcGRhdGU9YGRhdGUg
+IislRi0lVCJgDQogICAgZWNobyAiPT09PT09PT09PT09PT09PT09PT09PT0kdG1wZGF0ZSgkaS8k
+dGltZXMpPT09PT09PT09PT09PT09PT09PT09PT0iDQogICAgdG1wPSQoKGklMikpDQogICAgaWYg
+W1sgJHRtcCAtZXEgMCBdXTt0aGVuDQogICAgICAgIGVjaG8gIiMjIyMjIyMjIyMjIyMjIyBmaW8g
+L3Jvb3QvdmRiLmNmZyAjIyMjIyMjIyMjIyMjIyMiDQogICAgICAgIGZpbyAvcm9vdC92ZGIuY2Zn
+DQogICAgZWxzZQ0KICAgICAgICBlY2hvICIjIyMjIyMjIyMjIyMjIyMgZmlvIC9yb290L3ZkYy5j
+ZmcgIyMjIyMjIyMjIyMjIyMjIg0KICAgICAgICBmaW8gL3Jvb3QvdmRjLmNmZw0KICAgIGZpDQpk
+b25lDQoNCg0KdG1wZGF0ZT1gZGF0ZSAiKyVGLSVUImANCmVjaG8gIiMjIyMjIyMjIyMjIyMjIyBb
+JHRtcGRhdGVdIGZpbyAvcm9vdC92ZGUuY2ZnICMjIyMjIyMjIyMjIyMjIyINCmZpbyAvcm9vdC92
+ZGUuY2ZnDQoNCg0KIyBjYXQgdmRiLmNmZyANCltnbG9iYWxdDQpydz1yYW5kd3JpdGUNCmRpcmVj
+dD0xDQpudW1qb2JzPTY0DQppb2VuZ2luZT1zeW5jDQpic3JhbmdlPTRrLTRrDQpydW50aW1lPTE4
+MA0KZ3JvdXBfcmVwb3J0aW5nDQoNCltkaXNrMDFdDQpmaWxlbmFtZT0vZGV2L3ZkYg0KDQoNCiMg
+Y2F0IHZkYy5jZmcgDQpbZ2xvYmFsXQ0Kcnc9cmFuZHdyaXRlDQpkaXJlY3Q9MQ0KbnVtam9icz02
+NA0KaW9lbmdpbmU9c3luYw0KYnNyYW5nZT00ay00aw0KcnVudGltZT0xODANCmdyb3VwX3JlcG9y
+dGluZw0KDQpbZGlzazAxXQ0KZmlsZW5hbWU9L2Rldi92ZGMNCg0KIyBjYXQgdmRkLmNmZyANCltn
+bG9iYWxdDQpydz1yYW5kd3JpdGUNCmRpcmVjdD0xDQpudW1qb2JzPTY0DQppb2VuZ2luZT1zeW5j
+DQpic3JhbmdlPTRrLTRrDQpydW50aW1lPTE4MA0KZ3JvdXBfcmVwb3J0aW5nDQoNCltkaXNrMDFd
+DQpmaWxlbmFtZT0vZGV2L3ZkZA0KDQojIGNhdCB2ZGUuY2ZnIA0KW2dsb2JhbF0NCnJ3PXJhbmR3
+cml0ZQ0KZGlyZWN0PTENCm51bWpvYnM9NjQNCmlvZW5naW5lPXN5bmMNCmJzcmFuZ2U9NGstNGsN
+CnJ1bnRpbWU9MTgwDQpncm91cF9yZXBvcnRpbmcNCg0KW2Rpc2swMV0NCmZpbGVuYW1lPS9kZXYv
+dmRlIAkJDQoNCkFmdGVyIHJ1biB0aGUgc2NyaXB0cyByZXByb2R1Y2Uuc2gsIHRoZSBkaXNrcyBp
+biB0aGUgVk0ncyBJT1BTIGN1dGRvd24gZnJvbSAxMmsgdG8gNWssIHRoZSBsYXRlbmN5IGluY3Jl
+YXNlIGZyb20gNG1zIHRvIDcuM21zLg0KDQpydW4gc3RlcHM6DQoxLiBjcmVhdGUgYSBWTQ0KMi4g
+Y3JlYXRlIGZvdXIgdm9sdW1lcyBhbmQgYXR0YXRjaCB0byB0aGUgVk0NCjMuIHNoIHJlcHJvZHVj
+ZS5zaA0KNC4gaW4gdGhlIHJ1bnRpbWUgb2YgIHJlcHJvZHVjZS5zaCwgcnVuICJmaW8gdmRkLmNm
+ZyIgb3IgImZpbyB2ZGUuY2ZnIiB0byBjaGVja3QgdGhlIHBlcmZvcm1hbmNlDQoJDQpBZnRlciBy
+ZXByb2R1Y2Uuc2ggZmluaXNoZWQsIHBlcmZvcm1hbmNlIGRvd24uDQoNCg0KQW55b25lIGhhcyB0
+aGUgc2FtZSBwcm9ibGVtIG9yIGhhcyBzb21lIGlkZWFzIGFib3V0IHRoaXM/DQoNClRoYW5rcyEN
+Ci0tLS0tLS0tLS0tLS0tDQpoend1bGliaW4NCjIwMTUtMTEtMDINCg==
 
-[root@ceph-base-0 ceph]# ceph auth get client.cephfs_user
-exported keyring for client.cephfs_user
-[client.cephfs_user]
-key =3D AQDZ3DZWR7nqBxAAzSoU/yRz1oJsOYdYrTAzcw=3D=3D
-caps mds =3D "allow *"
-caps mon =3D "allow *"
-caps osd =3D "allow *"
-
-[root@cephfs-client ~]# cat ceph.client.cephfs_user
-[client.cephfs_user]
-key =3D AQDZ3DZWR7nqBxAAzSoU/yRz1oJsOYdYrTAzcw=3D=3D
-
-But when i mount fuse, it throw an exception.
-[root@cephfs-client ~]# ceph-fuse -k ceph.client.cephfs_user -m
-10.12.12.10:6789 -m 10.12.12.6:6789 -m 10.12.12.5:6789 ./test_ceph_fs
-2015-11-02 12:23:17.938470 7f9d63f9b760 -1 did not load config file,
-using default settings.
-ceph-fuse[15325]: starting ceph client
-2015-11-02 12:23:17.973134 7f9d63f9b760 -1 init, newargv =3D 0x2c33f30 =
-newargc=3D11
-ceph-fuse[15325]: ceph mount failed with (1) Operation not permitted
-ceph-fuse[15323]: mount failed: (1) Operation not permitted
-
-But when i use client.admin
-[root@ceph-base-0 ceph]# ceph auth get client.admin
-exported keyring for client.admin
-[client.admin]
-key =3D AQCMrhxWhRFBBhAA+f1yZXyjzF2eBrUt1UMdFA=3D=3D
-auid =3D 0
-caps mds =3D "allow *"
-caps mon =3D "allow *"
-caps osd =3D "allow *"
-
-[root@cephfs-client ~]# ceph-fuse -k ceph.client.admin.keyring -m
-10.12.12.10:6789 -m 10.12.12.6:6789 -m 10.12.12.5:6789 ./test_ceph_fs
-2015-11-02 12:25:03.038526 7f66e0957760 -1 did not load config file,
-using default settings.
-ceph-fuse[15360]: starting ceph client
-2015-11-02 12:25:03.073797 7f66e0957760 -1 init, newargv =3D 0x3035f30 =
-newargc=3D11
-ceph-fuse[15360]: starting fuse
-
-It is ok.
-
-So i want to know.
-Dose ceph's fuse only allow admin to mount fs?
-
-
-
-
-
---=20
-=E8=B0=A6=E8=B0=A6=E5=90=9B=E5=AD=90
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
