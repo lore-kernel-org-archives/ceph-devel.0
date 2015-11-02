@@ -1,72 +1,95 @@
-From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Subject: RE: [performance] why rbd_aio_write latency increase from 4ms to
- 7.3ms after the same test
-Date: Mon, 2 Nov 2015 06:11:32 +0000
-Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC03639832@shsmsx102.ccr.corp.intel.com>
-References: <5636F376.3090104@gmail.com>
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: Only client.admin can mount cephfs by ceph-fuse
+Date: Mon, 2 Nov 2015 16:58:04 +0800
+Message-ID: <CAAM7YAnUreEQm_1T8FRCoPTXDDuAZO=q4ZSk8yyOwwm3HwNHrw@mail.gmail.com>
+References: <CAKZcxgeKr4m=Yvj4nyzwzkot8gS-dLip6qyx5fX4S+hbvpkXoA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:61456 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751489AbbKBGNC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 2 Nov 2015 01:13:02 -0500
-In-Reply-To: <5636F376.3090104@gmail.com>
-Content-Language: en-US
+Received: from mail-lf0-f52.google.com ([209.85.215.52]:36448 "EHLO
+	mail-lf0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751372AbbKBI6G convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Nov 2015 03:58:06 -0500
+Received: by lffz202 with SMTP id z202so58737140lff.3
+        for <ceph-devel@vger.kernel.org>; Mon, 02 Nov 2015 00:58:04 -0800 (PST)
+In-Reply-To: <CAKZcxgeKr4m=Yvj4nyzwzkot8gS-dLip6qyx5fX4S+hbvpkXoA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: hzwulibin <hzwulibin@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@lists.ceph.com>
+To: Jaze Lee <jazeltq@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-UHJlLWFsbG9jYXRlZCB0aGUgdm9sdW1lIGJ5ICJERCIgYWNyb3NzIHRoZSBlbnRpcmUgUkJEIGJl
-Zm9yZSB5b3UgZG8gYW55IHBlcmZvcm1hbmNlIHRlc3Q6KS4NCg0KSW4gdGhpcyBjYXNlLCB5b3Ug
-bWF5IHdhbnQgdG8gcmUtY3JlYXRlIHRoZSBSQkQsIHByZS1hbGxvY2F0ZSBhbmQgdHJ5IGFnYWlu
-Lg0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IGNlcGgtZGV2ZWwtb3du
-ZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC0NCj4gb3duZXJAdmdlci5rZXJu
-ZWwub3JnXSBPbiBCZWhhbGYgT2YgaHp3dWxpYmluDQo+IFNlbnQ6IE1vbmRheSwgTm92ZW1iZXIg
-MiwgMjAxNSAxOjI0IFBNDQo+IFRvOiBjZXBoLWRldmVsOyBjZXBoLXVzZXJzDQo+IFN1YmplY3Q6
-IFtwZXJmb3JtYW5jZV0gd2h5IHJiZF9haW9fd3JpdGUgbGF0ZW5jeSBpbmNyZWFzZSBmcm9tIDRt
-cyB0bw0KPiA3LjNtcyBhZnRlciB0aGUgc2FtZSB0ZXN0DQo+IA0KPiBIaSwNCj4gc2FtZSBlbnZp
-cm9ubWVudCwgYWZ0ZXIgYSB0ZXN0IHNjcmlwdCwgdGhlIGlvIGxhdGVuY3koZ2V0IGZyb20gc3Vk
-byBjZXBoIC0tDQo+IGFkbWluLWRhZW1vbiAvcnVuL2NlcGgvZ3Vlc3RzL2NlcGgtY2xpZW50Liou
-YXNvayBwZXIgZHVtcCkgaW5jcmVhc2UNCj4gZnJvbSBhYm91dCA0bXMgdG8gNy4zbXMNCj4gDQo+
-IHFlbXUgdmVyc2lvbjogZGViaWFuIDIuMS4yDQo+IGtlcm5lbDozLjEwLjQ1LW9wZW5zdGFjay1h
-bWQ2NA0KPiBzeXN0ZW06IGRlYmlhbiA3LjgNCj4gY2VwaDogMC45NC41DQo+IFZNIENQVSBudW1i
-ZXI6IDQgIChjcHUgTUh6IDogMjU5OS45OTgpDQo+IFZNIG1lbW9yeSBzaXplOiAxNkdCDQo+IDkg
-T1NEIHN0b3JhZ2Ugc2VydmVycywgd2l0aCA0IFNTRCBPU0Qgb24gZWFjaCwgdG90YWwgMzYgT1NE
-cy4NCj4gDQo+IFRlc3Qgc2NyaXB0cyBpbiBWTToNCj4gIyBjYXQgcmVwcm9kdWNlLnNoDQo+ICMh
-L2Jpbi9iYXNoDQo+IA0KPiB0aW1lcz0yMA0KPiBmb3IoKGk9MTtpPD0kdGltZXM7aSsrKSkNCj4g
-ZG8NCj4gICAgIHRtcGRhdGU9YGRhdGUgIislRi0lVCJgDQo+ICAgICBlY2hvDQo+ICI9PT09PT09
-PT09PT09PT09PT09PT09PSR0bXBkYXRlKCRpLyR0aW1lcyk9PT09PT09PT09PT09PT09PT09DQo+
-ID09PT0iDQo+ICAgICB0bXA9JCgoaSUyKSkNCj4gICAgIGlmIFtbICR0bXAgLWVxIDAgXV07dGhl
-bg0KPiAgICAgICAgIGVjaG8gIiMjIyMjIyMjIyMjIyMjIyBmaW8gL3Jvb3QvdmRiLmNmZyAjIyMj
-IyMjIyMjIyMjIyMiDQo+ICAgICAgICAgZmlvIC9yb290L3ZkYi5jZmcNCj4gICAgIGVsc2UNCj4g
-ICAgICAgICBlY2hvICIjIyMjIyMjIyMjIyMjIyMgZmlvIC9yb290L3ZkYy5jZmcgIyMjIyMjIyMj
-IyMjIyMjIg0KPiAgICAgICAgIGZpbyAvcm9vdC92ZGMuY2ZnDQo+ICAgICBmaQ0KPiBkb25lDQo+
-IA0KPiANCj4gdG1wZGF0ZT1gZGF0ZSAiKyVGLSVUImANCj4gZWNobyAiIyMjIyMjIyMjIyMjIyMj
-IFskdG1wZGF0ZV0gZmlvIC9yb290L3ZkZS5jZmcgIyMjIyMjIyMjIyMjIyMjIg0KPiBmaW8gL3Jv
-b3QvdmRlLmNmZw0KPiANCj4gDQo+ICMgY2F0IHZkYi5jZmcNCj4gW2dsb2JhbF0NCj4gcnc9cmFu
-ZHdyaXRlDQo+IGRpcmVjdD0xDQo+IG51bWpvYnM9NjQNCj4gaW9lbmdpbmU9c3luYw0KPiBic3Jh
-bmdlPTRrLTRrDQo+IHJ1bnRpbWU9MTgwDQo+IGdyb3VwX3JlcG9ydGluZw0KPiANCj4gW2Rpc2sw
-MV0NCj4gZmlsZW5hbWU9L2Rldi92ZGINCj4gDQo+IA0KPiAjIGNhdCB2ZGMuY2ZnDQo+IFtnbG9i
-YWxdDQo+IHJ3PXJhbmR3cml0ZQ0KPiBkaXJlY3Q9MQ0KPiBudW1qb2JzPTY0DQo+IGlvZW5naW5l
-PXN5bmMNCj4gYnNyYW5nZT00ay00aw0KPiBydW50aW1lPTE4MA0KPiBncm91cF9yZXBvcnRpbmcN
-Cj4gDQo+IFtkaXNrMDFdDQo+IGZpbGVuYW1lPS9kZXYvdmRjDQo+IA0KPiAjIGNhdCB2ZGQuY2Zn
-DQo+IFtnbG9iYWxdDQo+IHJ3PXJhbmR3cml0ZQ0KPiBkaXJlY3Q9MQ0KPiBudW1qb2JzPTY0DQo+
-IGlvZW5naW5lPXN5bmMNCj4gYnNyYW5nZT00ay00aw0KPiBydW50aW1lPTE4MA0KPiBncm91cF9y
-ZXBvcnRpbmcNCj4gDQo+IFtkaXNrMDFdDQo+IGZpbGVuYW1lPS9kZXYvdmRkDQo+IA0KPiAjIGNh
-dCB2ZGUuY2ZnDQo+IFtnbG9iYWxdDQo+IHJ3PXJhbmR3cml0ZQ0KPiBkaXJlY3Q9MQ0KPiBudW1q
-b2JzPTY0DQo+IGlvZW5naW5lPXN5bmMNCj4gYnNyYW5nZT00ay00aw0KPiBydW50aW1lPTE4MA0K
-PiBncm91cF9yZXBvcnRpbmcNCj4gDQo+IFtkaXNrMDFdDQo+IGZpbGVuYW1lPS9kZXYvdmRlDQo+
-IA0KPiBBZnRlciBydW4gdGhlIHNjcmlwdHMgcmVwcm9kdWNlLnNoLCB0aGUgZGlza3MgaW4gdGhl
-IFZNJ3MgSU9QUyBjdXRkb3duIGZyb20NCj4gMTJrIHRvIDVrLCB0aGUgbGF0ZW5jeSBpbmNyZWFz
-ZSBmcm9tIDRtcyB0byA3LjNtcy4NCj4gDQo+IHJ1biBzdGVwczoNCj4gMS4gY3JlYXRlIGEgVk0N
-Cj4gMi4gY3JlYXRlIGZvdXIgdm9sdW1lcyBhbmQgYXR0YXRjaCB0byB0aGUgVk0gMy4gc2ggcmVw
-cm9kdWNlLnNoIDQuIGluIHRoZQ0KPiBydW50aW1lIG9mICByZXByb2R1Y2Uuc2gsIHJ1biAiZmlv
-IHZkZC5jZmciIG9yICJmaW8gdmRlLmNmZyIgdG8gY2hlY2t0IHRoZQ0KPiBwZXJmb3JtYW5jZQ0K
-PiANCj4gQWZ0ZXIgcmVwcm9kdWNlLnNoIGZpbmlzaGVkLCBwZXJmb3JtYW5jZSBkb3duLg0KPiAN
-Cj4gDQo+IEFueW9uZSBoYXMgdGhlIHNhbWUgcHJvYmxlbSBvciBoYXMgc29tZSBpZGVhcyBhYm91
-dCB0aGlzPw0KPiANCj4gVGhhbmtzIQ0KPiAtLS0tLS0tLS0tLS0tLQ0KPiBoend1bGliaW4NCj4g
-MjAxNS0xMS0wMg0KPiAEIHsubiArICAgICAgICslICBsendtICBiIOunsiAgciAgecepINevelgg
-IBcgINyofSAgIMageiAmajordiAgICAgICAgelorICAremYgICBoICAgfiAgICBpICAgeiAeIHcg
-ICA/DQo+ICYgKd+iG2YNCg==
+On Mon, Nov 2, 2015 at 12:28 PM, Jaze Lee <jazeltq@gmail.com> wrote:
+> Hello,
+>    I find only ceph.client.admin can mount cephfs.
+>
+> [root@ceph-base-0 ceph]# ceph auth get client.cephfs_user
+> exported keyring for client.cephfs_user
+> [client.cephfs_user]
+> key =3D AQDZ3DZWR7nqBxAAzSoU/yRz1oJsOYdYrTAzcw=3D=3D
+> caps mds =3D "allow *"
+> caps mon =3D "allow *"
+> caps osd =3D "allow *"
+>
+> [root@cephfs-client ~]# cat ceph.client.cephfs_user
+> [client.cephfs_user]
+> key =3D AQDZ3DZWR7nqBxAAzSoU/yRz1oJsOYdYrTAzcw=3D=3D
+>
+> But when i mount fuse, it throw an exception.
+> [root@cephfs-client ~]# ceph-fuse -k ceph.client.cephfs_user -m
+> 10.12.12.10:6789 -m 10.12.12.6:6789 -m 10.12.12.5:6789 ./test_ceph_fs
+> 2015-11-02 12:23:17.938470 7f9d63f9b760 -1 did not load config file,
+> using default settings.
+> ceph-fuse[15325]: starting ceph client
+> 2015-11-02 12:23:17.973134 7f9d63f9b760 -1 init, newargv =3D 0x2c33f3=
+0 newargc=3D11
+> ceph-fuse[15325]: ceph mount failed with (1) Operation not permitted
+> ceph-fuse[15323]: mount failed: (1) Operation not permitted
+
+you don't specify user. ceph-fuse uses the default user admin. try
+following command
+
+ceph-fuse --id cephfs_user -k ceph.client.cephfs_user -m
+10.12.12.10:6789 -m 10.12.12.6:6789 -m 10.12.12.5:6789 ./test_ceph_fs
+
+>
+> But when i use client.admin
+> [root@ceph-base-0 ceph]# ceph auth get client.admin
+> exported keyring for client.admin
+> [client.admin]
+> key =3D AQCMrhxWhRFBBhAA+f1yZXyjzF2eBrUt1UMdFA=3D=3D
+> auid =3D 0
+> caps mds =3D "allow *"
+> caps mon =3D "allow *"
+> caps osd =3D "allow *"
+>
+> [root@cephfs-client ~]# ceph-fuse -k ceph.client.admin.keyring -m
+> 10.12.12.10:6789 -m 10.12.12.6:6789 -m 10.12.12.5:6789 ./test_ceph_fs
+> 2015-11-02 12:25:03.038526 7f66e0957760 -1 did not load config file,
+> using default settings.
+> ceph-fuse[15360]: starting ceph client
+> 2015-11-02 12:25:03.073797 7f66e0957760 -1 init, newargv =3D 0x3035f3=
+0 newargc=3D11
+> ceph-fuse[15360]: starting fuse
+>
+> It is ok.
+>
+> So i want to know.
+> Dose ceph's fuse only allow admin to mount fs?
+>
+>
+>
+>
+>
+> --
+> =E8=B0=A6=E8=B0=A6=E5=90=9B=E5=AD=90
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
