@@ -1,36 +1,59 @@
-From: Nathan Cutler <ncutler@suse.cz>
-Subject: Re: [ceph-users] who is using radosgw with civetweb?
-Date: Mon, 2 Nov 2015 21:20:25 +0100
-Message-ID: <5637C589.3010204@suse.cz>
+From: Derek Yarnell <derek-+0HnD9Kv66LFajBVf7NWsQ@public.gmane.org>
+Subject: Re: who is using radosgw with civetweb?
+Date: Mon, 2 Nov 2015 15:50:09 -0500
+Message-ID: <5637CC81.4000604@umiacs.umd.edu>
 References: <alpine.DEB.2.00.1502251125180.25838@cobra.newdream.net>
- <54EF008C.2050706@42on.com>
- <107057245.16991.1424972320227.open-xchange@websrv>
- <183263292.17021.1424976208041.open-xchange@websrv.42on.com>
- <1446483684.7969.371.camel@millnert.se>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:60679 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751275AbbKBUUl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 2 Nov 2015 15:20:41 -0500
-In-Reply-To: <1446483684.7969.371.camel@millnert.se>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Martin Millnert <martin@millnert.se>, Ceph Developers <ceph-devel@vger.kernel.org>
-Cc: Sage Weil <sweil@redhat.com>, Wido den Hollander <wido@42on.com>
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.00.1502251125180.25838-vIokxiIdD2AQNTJnQDzGJqxOck334EZe@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-On 11/02/2015 06:01 PM, Martin Millnert wrote:
-> Minimum the documentation at
-> http://docs.ceph.com/docs/master/radosgw/config-ref/ could be blessed
-> with an entry on 'rgw frontends', including notes on how to configure it
-> for loopback-binding access only.
+On 2/25/15 2:31 PM, Sage Weil wrote:
+> Hey,
+> 
+> We are considering switching to civetweb (the embedded/standalone rgw web 
+> server) as the primary supported RGW frontend instead of the current 
+> apache + mod-fastcgi or mod-proxy-fcgi approach.  "Supported" here means 
+> both the primary platform the upstream development focuses on and what the 
+> downstream Red Hat product will officially support.
+> 
+> How many people are using RGW standalone using the embedded civetweb 
+> server instead of apache?  In production?  At what scale?  What 
+> version(s) (civetweb first appeared in firefly and we've backported most 
+> fixes).
+> 
+> Have you seen any problems?  Any other feedback?  The hope is to (vastly) 
+> simplify deployment.
 
-Agreed: http://tracker.ceph.com/issues/13670
+Hi,
+
+We have been using civetweb proxied by Apache on RHEL7 on both our RGW
+clusters and have been very happy with performance and setup. This has
+been our default since we upgraded to Hammer.
+
+Only thing we had to make sure that on our ProxyPass we were specifying
+nocanon the proxy pass would mangle http encoding.
+
+Reason we use Apache on the front end is so we can collocate a Django
+web front end application for the object store to get around the
+necessary for CORS (we designed this before RGW was CORS aware anyway).
+
+Thanks,
+derek
 
 -- 
-Nathan Cutler
-Software Engineer Distributed Storage
-SUSE LINUX, s.r.o.
-Tel.: +420 284 084 037
+Derek T. Yarnell
+University of Maryland
+Institute for Advanced Computer Studies
