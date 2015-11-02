@@ -1,35 +1,30 @@
-From: Douglas Fuller <dfuller@redhat.com>
-Subject: Whitepaper: database workloads using RBD with dm-cache and Ceph cache tiering
-Date: Mon, 2 Nov 2015 13:09:04 -0500
-Message-ID: <4E0B5E66-351F-45EC-96B2-790536D4EE5D@redhat.com>
-Mime-Version: 1.0 (Mac OS X Mail 9.0 \(3094\))
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Yuri Weinstein <yweinste@redhat.com>
+Subject: giant suites removed from nightlies
+Date: Mon, 2 Nov 2015 10:16:31 -0800
+Message-ID: <CAMMFjmFfQf3_SxZcYPJ67x4T92yt_swZe4OYaQhrXEF+bJS_EQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:42763 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753215AbbKBSJF convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Nov 2015 13:09:05 -0500
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-	by mx1.redhat.com (Postfix) with ESMTPS id 5950EC0B8415
-	for <ceph-devel@vger.kernel.org>; Mon,  2 Nov 2015 18:09:05 +0000 (UTC)
-Received: from [10.10.50.41] (unused [10.10.50.41] (may be forged))
-	by int-mx11.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id tA2I94hs004145
-	for <ceph-devel@vger.kernel.org>; Mon, 2 Nov 2015 13:09:05 -0500
+Received: from mail-wm0-f49.google.com ([74.125.82.49]:36288 "EHLO
+	mail-wm0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753656AbbKBSQc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Nov 2015 13:16:32 -0500
+Received: by wmec75 with SMTP id c75so67726734wme.1
+        for <ceph-devel@vger.kernel.org>; Mon, 02 Nov 2015 10:16:31 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-qa <ceph-qa@ceph.com>, "Development, Ceph" <ceph-devel@vger.kernel.org>
 
-I=E2=80=99ve published a whitepaper detailing configuration and benchma=
-rk results using SysBench MySQL on top of RBD with dm-cache. Results us=
-ing a Ceph cache tier are also included. Questions, comments, criticism=
-, nitpicking, and/or discussion are welcome.
+As giant was declared EOL all related suites had been removed from the schedule:
 
-http://tracker.ceph.com/projects/ceph/wiki/Ceph_and_dm-cache_for_Databa=
-se_Workloads
+#giant EOL 15 18 * * 3,6 teuthology-suite -v -c giant -k distro -m vps
+-s upgrade/dumpling-firefly-x ~/vps.yaml
 
-=E2=80=94Doug--
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+#giant EOL 18 18 * * 3,6 teuthology-suite -v -c giant -k distro -m vps
+-s upgrade/firefly-x ~/vps.yaml
+
+#giant EOL 05 17 * * 1,5 teuthology-suite -v -c hammer -k distro -m
+vps -s upgrade/giant-x ~/vps.yaml
+
+Thx
+YuriW
