@@ -1,144 +1,247 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH 4/4] libceph: add nocephx_sign_messages option
-Date: Mon,  2 Nov 2015 23:44:10 +0100
-Message-ID: <1446504250-25647-5-git-send-email-idryomov@gmail.com>
-References: <1446504250-25647-1-git-send-email-idryomov@gmail.com>
+Subject: [PATCH] libceph: clear msg->con in ceph_msg_release() only
+Date: Mon,  2 Nov 2015 23:47:07 +0100
+Message-ID: <1446504427-25824-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f181.google.com ([209.85.212.181]:35705 "EHLO
-	mail-wi0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753983AbbKBVEe (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Nov 2015 16:04:34 -0500
-Received: by wicll6 with SMTP id ll6so58049069wic.0
-        for <ceph-devel@vger.kernel.org>; Mon, 02 Nov 2015 13:04:32 -0800 (PST)
-In-Reply-To: <1446504250-25647-1-git-send-email-idryomov@gmail.com>
+Received: from mail-wi0-f182.google.com ([209.85.212.182]:38899 "EHLO
+	mail-wi0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753664AbbKBVHT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Nov 2015 16:07:19 -0500
+Received: by wicll6 with SMTP id ll6so58122692wic.1
+        for <ceph-devel@vger.kernel.org>; Mon, 02 Nov 2015 13:07:18 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
-Cc: Zheng Yan <zyan@redhat.com>
+Cc: Alex Elder <elder@linaro.org>
 
-Support for message signing was merged into 3.19, along with
-nocephx_require_signatures option.  But, all that option does is allow
-the kernel client to talk to clusters that don't support MSG_AUTH
-feature bit.  That's pretty useless, given that it's been supported
-since bobtail.
+The following bit in ceph_msg_revoke_incoming() is unsafe:
 
-Meanwhile, if one disables message signing on the server side with
-"cephx sign messages = false", it becomes impossible to use the kernel
-client since it expects messages to be signed if MSG_AUTH was
-negotiated.  Add nocephx_sign_messages option to support this use case.
+    struct ceph_connection *con = msg->con;
+    if (!con)
+            return;
+    mutex_lock(&con->mutex);
+    <more msg->con use>
+
+There is nothing preventing con from getting destroyed right after
+msg->con test.  One easy way to reproduce this is to disable message
+signing only on the server side and try to map an image.  The system
+will go into a
+
+    libceph: read_partial_message ffff880073f0ab68 signature check failed
+    libceph: osd0 192.168.255.155:6801 bad crc/signature
+    libceph: read_partial_message ffff880073f0ab68 signature check failed
+    libceph: osd0 192.168.255.155:6801 bad crc/signature
+
+loop which has to be interrupted with Ctrl-C.  Hit Ctrl-C and you are
+likely to end up with a random GP fault if the reset handler executes
+"within" ceph_msg_revoke_incoming():
+
+                     <yet another reply w/o a signature>
+                                   ...
+          <Ctrl-C>
+    rbd_obj_request_end
+      ceph_osdc_cancel_request
+        __unregister_request
+          ceph_osdc_put_request
+            ceph_msg_revoke_incoming
+                                   ...
+                                osd_reset
+                                  __kick_osd_requests
+                                    __reset_osd
+                                      remove_osd
+                                        ceph_con_close
+                                          reset_connection
+                                            <clear con->in_msg->con>
+                                            <put con ref>
+                                              put_osd
+                                                <free osd/con>
+              <msg->con use> <-- !!!
+
+If ceph_msg_revoke_incoming() executes "before" the reset handler,
+osd/con will be leaked because ceph_msg_revoke_incoming() clears
+con->in_msg but doesn't put con ref, while reset_connection() only puts
+con ref if con->in_msg != NULL.
+
+The current msg->con scheme was introduced by commits 38941f8031bf
+("libceph: have messages point to their connection") and 92ce034b5a74
+("libceph: have messages take a connection reference"), which defined
+when messages get associated with a connection and when that
+association goes away.  Part of the problem is that this association is
+supposed to go away in much too many places; closing this race entirely
+requires either a rework of the existing or an addition of a new layer
+of synchronization.
+
+In lieu of that, we can make it *much* less likely to hit by
+disassociating messages only on their destruction and resend through
+a different connection.  This makes the code simpler and is probably
+a good thing to do regardless - this patch adds a msg_con_set() helper
+which is is called from only three places: ceph_con_send() and
+ceph_con_in_msg_alloc() to set msg->con and ceph_msg_release() to clear
+it.
 
 Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 ---
- include/linux/ceph/libceph.h |  3 ++-
- net/ceph/auth_x.c            |  7 +++++++
- net/ceph/ceph_common.c       | 12 ++++++++++++
- net/ceph/messenger.c         |  2 +-
- 4 files changed, 22 insertions(+), 2 deletions(-)
+ net/ceph/messenger.c  | 45 ++++++++++++++++++++-------------------------
+ net/ceph/osd_client.c |  3 ---
+ 2 files changed, 20 insertions(+), 28 deletions(-)
 
-diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
-index a7caafe03d3c..3e3799cdc6e6 100644
---- a/include/linux/ceph/libceph.h
-+++ b/include/linux/ceph/libceph.h
-@@ -29,8 +29,9 @@
- #define CEPH_OPT_NOSHARE          (1<<1) /* don't share client with other sbs */
- #define CEPH_OPT_MYIP             (1<<2) /* specified my ip */
- #define CEPH_OPT_NOCRC            (1<<3) /* no data crc on writes */
--#define CEPH_OPT_NOMSGAUTH	  (1<<4) /* not require cephx message signature */
-+#define CEPH_OPT_NOMSGAUTH	  (1<<4) /* don't require msg signing feat */
- #define CEPH_OPT_TCP_NODELAY	  (1<<5) /* TCP_NODELAY on TCP sockets */
-+#define CEPH_OPT_NOMSGSIGN	  (1<<6) /* don't sign msgs */
- 
- #define CEPH_OPT_DEFAULT   (CEPH_OPT_TCP_NODELAY)
- 
-diff --git a/net/ceph/auth_x.c b/net/ceph/auth_x.c
-index 3a544ca6b5ce..10d87753ed87 100644
---- a/net/ceph/auth_x.c
-+++ b/net/ceph/auth_x.c
-@@ -8,6 +8,7 @@
- 
- #include <linux/ceph/decode.h>
- #include <linux/ceph/auth.h>
-+#include <linux/ceph/libceph.h>
- #include <linux/ceph/messenger.h>
- 
- #include "crypto.h"
-@@ -698,6 +699,9 @@ static int ceph_x_sign_message(struct ceph_auth_handshake *auth,
- {
- 	int ret;
- 
-+	if (ceph_test_opt(from_msgr(msg->con->msgr), NOMSGSIGN))
-+		return 0;
-+
- 	ret = calcu_signature((struct ceph_x_authorizer *)auth->authorizer,
- 			      msg, &msg->footer.sig);
- 	if (ret < 0)
-@@ -712,6 +716,9 @@ static int ceph_x_check_message_signature(struct ceph_auth_handshake *auth,
- 	__le64 sig_check;
- 	int ret;
- 
-+	if (ceph_test_opt(from_msgr(msg->con->msgr), NOMSGSIGN))
-+		return 0;
-+
- 	ret = calcu_signature((struct ceph_x_authorizer *)auth->authorizer,
- 			      msg, &sig_check);
- 	if (ret < 0)
-diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
-index d1494d1a8592..6b4d3a1684de 100644
---- a/net/ceph/ceph_common.c
-+++ b/net/ceph/ceph_common.c
-@@ -245,6 +245,8 @@ enum {
- 	Opt_nocrc,
- 	Opt_cephx_require_signatures,
- 	Opt_nocephx_require_signatures,
-+	Opt_cephx_sign_messages,
-+	Opt_nocephx_sign_messages,
- 	Opt_tcp_nodelay,
- 	Opt_notcp_nodelay,
- };
-@@ -267,6 +269,8 @@ static match_table_t opt_tokens = {
- 	{Opt_nocrc, "nocrc"},
- 	{Opt_cephx_require_signatures, "cephx_require_signatures"},
- 	{Opt_nocephx_require_signatures, "nocephx_require_signatures"},
-+	{Opt_cephx_sign_messages, "cephx_sign_messages"},
-+	{Opt_nocephx_sign_messages, "nocephx_sign_messages"},
- 	{Opt_tcp_nodelay, "tcp_nodelay"},
- 	{Opt_notcp_nodelay, "notcp_nodelay"},
- 	{-1, NULL}
-@@ -491,6 +495,12 @@ ceph_parse_options(char *options, const char *dev_name,
- 		case Opt_nocephx_require_signatures:
- 			opt->flags |= CEPH_OPT_NOMSGAUTH;
- 			break;
-+		case Opt_cephx_sign_messages:
-+			opt->flags &= ~CEPH_OPT_NOMSGSIGN;
-+			break;
-+		case Opt_nocephx_sign_messages:
-+			opt->flags |= CEPH_OPT_NOMSGSIGN;
-+			break;
- 
- 		case Opt_tcp_nodelay:
- 			opt->flags |= CEPH_OPT_TCP_NODELAY;
-@@ -534,6 +544,8 @@ int ceph_print_client_options(struct seq_file *m, struct ceph_client *client)
- 		seq_puts(m, "nocrc,");
- 	if (opt->flags & CEPH_OPT_NOMSGAUTH)
- 		seq_puts(m, "nocephx_require_signatures,");
-+	if (opt->flags & CEPH_OPT_NOMSGSIGN)
-+		seq_puts(m, "nocephx_sign_messages,");
- 	if ((opt->flags & CEPH_OPT_TCP_NODELAY) == 0)
- 		seq_puts(m, "notcp_nodelay,");
- 
 diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index 11108076bac3..0cc5608b2c8f 100644
+index 0cc5608b2c8f..9981039ef4ff 100644
 --- a/net/ceph/messenger.c
 +++ b/net/ceph/messenger.c
-@@ -2677,7 +2677,7 @@ more:
- 		if (ret <= 0) {
- 			switch (ret) {
- 			case -EBADMSG:
--				con->error_msg = "bad crc";
-+				con->error_msg = "bad crc/signature";
- 				/* fall through */
- 			case -EBADE:
- 				ret = -EIO;
+@@ -637,9 +637,6 @@ static int con_close_socket(struct ceph_connection *con)
+ static void ceph_msg_remove(struct ceph_msg *msg)
+ {
+ 	list_del_init(&msg->list_head);
+-	BUG_ON(msg->con == NULL);
+-	msg->con->ops->put(msg->con);
+-	msg->con = NULL;
+ 
+ 	ceph_msg_put(msg);
+ }
+@@ -662,15 +659,14 @@ static void reset_connection(struct ceph_connection *con)
+ 
+ 	if (con->in_msg) {
+ 		BUG_ON(con->in_msg->con != con);
+-		con->in_msg->con = NULL;
+ 		ceph_msg_put(con->in_msg);
+ 		con->in_msg = NULL;
+-		con->ops->put(con);
+ 	}
+ 
+ 	con->connect_seq = 0;
+ 	con->out_seq = 0;
+ 	if (con->out_msg) {
++		BUG_ON(con->out_msg->con != con);
+ 		ceph_msg_put(con->out_msg);
+ 		con->out_msg = NULL;
+ 	}
+@@ -2438,13 +2434,10 @@ static int read_partial_message(struct ceph_connection *con)
+  */
+ static void process_message(struct ceph_connection *con)
+ {
+-	struct ceph_msg *msg;
++	struct ceph_msg *msg = con->in_msg;
+ 
+ 	BUG_ON(con->in_msg->con != con);
+-	con->in_msg->con = NULL;
+-	msg = con->in_msg;
+ 	con->in_msg = NULL;
+-	con->ops->put(con);
+ 
+ 	/* if first message, set peer_name */
+ 	if (con->peer_name.type == 0)
+@@ -2918,10 +2911,8 @@ static void con_fault(struct ceph_connection *con)
+ 
+ 	if (con->in_msg) {
+ 		BUG_ON(con->in_msg->con != con);
+-		con->in_msg->con = NULL;
+ 		ceph_msg_put(con->in_msg);
+ 		con->in_msg = NULL;
+-		con->ops->put(con);
+ 	}
+ 
+ 	/* Requeue anything that hasn't been acked */
+@@ -2977,6 +2968,15 @@ void ceph_messenger_fini(struct ceph_messenger *msgr)
+ }
+ EXPORT_SYMBOL(ceph_messenger_fini);
+ 
++static void msg_con_set(struct ceph_msg *msg, struct ceph_connection *con)
++{
++	if (msg->con)
++		msg->con->ops->put(msg->con);
++
++	msg->con = con ? con->ops->get(con) : NULL;
++	BUG_ON(msg->con != con);
++}
++
+ static void clear_standby(struct ceph_connection *con)
+ {
+ 	/* come back from STANDBY? */
+@@ -3008,9 +3008,7 @@ void ceph_con_send(struct ceph_connection *con, struct ceph_msg *msg)
+ 		return;
+ 	}
+ 
+-	BUG_ON(msg->con != NULL);
+-	msg->con = con->ops->get(con);
+-	BUG_ON(msg->con == NULL);
++	msg_con_set(msg, con);
+ 
+ 	BUG_ON(!list_empty(&msg->list_head));
+ 	list_add_tail(&msg->list_head, &con->out_queue);
+@@ -3038,16 +3036,15 @@ void ceph_msg_revoke(struct ceph_msg *msg)
+ {
+ 	struct ceph_connection *con = msg->con;
+ 
+-	if (!con)
++	if (!con) {
++		dout("%s msg %p null con\n", __func__, msg);
+ 		return;		/* Message not in our possession */
++	}
+ 
+ 	mutex_lock(&con->mutex);
+ 	if (!list_empty(&msg->list_head)) {
+ 		dout("%s %p msg %p - was on queue\n", __func__, con, msg);
+ 		list_del_init(&msg->list_head);
+-		BUG_ON(msg->con == NULL);
+-		msg->con->ops->put(msg->con);
+-		msg->con = NULL;
+ 		msg->hdr.seq = 0;
+ 
+ 		ceph_msg_put(msg);
+@@ -3071,16 +3068,13 @@ void ceph_msg_revoke(struct ceph_msg *msg)
+  */
+ void ceph_msg_revoke_incoming(struct ceph_msg *msg)
+ {
+-	struct ceph_connection *con;
++	struct ceph_connection *con = msg->con;
+ 
+-	BUG_ON(msg == NULL);
+-	if (!msg->con) {
++	if (!con) {
+ 		dout("%s msg %p null con\n", __func__, msg);
+-
+ 		return;		/* Message not in our possession */
+ 	}
+ 
+-	con = msg->con;
+ 	mutex_lock(&con->mutex);
+ 	if (con->in_msg == msg) {
+ 		unsigned int front_len = le32_to_cpu(con->in_hdr.front_len);
+@@ -3326,9 +3320,8 @@ static int ceph_con_in_msg_alloc(struct ceph_connection *con, int *skip)
+ 	}
+ 	if (msg) {
+ 		BUG_ON(*skip);
++		msg_con_set(msg, con);
+ 		con->in_msg = msg;
+-		con->in_msg->con = con->ops->get(con);
+-		BUG_ON(con->in_msg->con == NULL);
+ 	} else {
+ 		/*
+ 		 * Null message pointer means either we should skip
+@@ -3375,6 +3368,8 @@ static void ceph_msg_release(struct kref *kref)
+ 	dout("%s %p\n", __func__, m);
+ 	WARN_ON(!list_empty(&m->list_head));
+ 
++	msg_con_set(m, NULL);
++
+ 	/* drop middle, data, if any */
+ 	if (m->middle) {
+ 		ceph_buffer_put(m->middle);
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 118e4ce37ecc..f8f235930d88 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -2850,9 +2850,6 @@ static struct ceph_msg *get_reply(struct ceph_connection *con,
+ 		goto out;
+ 	}
+ 
+-	if (req->r_reply->con)
+-		dout("%s revoking msg %p from old con %p\n", __func__,
+-		     req->r_reply, req->r_reply->con);
+ 	ceph_msg_revoke_incoming(req->r_reply);
+ 
+ 	if (front_len > req->r_reply->front_alloc_len) {
 -- 
 2.4.3
 
