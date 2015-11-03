@@ -1,35 +1,42 @@
-From: Pete Zaitcev <zaitcev@redhat.com>
-Subject: Re: Symbolic links like feature on radosgw
-Date: Mon, 2 Nov 2015 23:51:20 -0700
-Message-ID: <20151102235120.5ad4230c@lembas.zaitcev.lan>
-References: <CAKtk8hcvWJmdYmY20ZQsUuE=ww+Q=pDv6=HRVJhZ6Hk01U3wSg@mail.gmail.com>
-	<CAKtk8he19oYaEC9op5PFj6mRaA0jqQ5eFe2rRkj2JMV-E29AhQ@mail.gmail.com>
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: Re: civetweb upstream/downstream divergence
+Date: Tue, 3 Nov 2015 10:22:37 +0100
+Message-ID: <56387CDD.9070605@suse.cz>
+References: <5631E4A5.9020003@suse.cz>
+ <CADRKj5T5ZZBb+Mhut2jnzKoBEtTjw0tGWptqWVamgoLWaQfpgQ@mail.gmail.com>
+ <20151029225738.51b8b2e5@lembas.zaitcev.lan>
+ <CALqRxCwPNA0WFYu0oJ-70L3vgR0G8WLs4paU=K1xZCyf=a3Fjw@mail.gmail.com>
+ <1446486438.12033.24.camel@millnert.se>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:39535 "EHLO mx1.redhat.com"
+Received: from mx2.suse.de ([195.135.220.15]:40885 "EHLO mx2.suse.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752145AbbKCGvW (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 3 Nov 2015 01:51:22 -0500
-In-Reply-To: <CAKtk8he19oYaEC9op5PFj6mRaA0jqQ5eFe2rRkj2JMV-E29AhQ@mail.gmail.com>
+	id S1751123AbbKCJWj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 3 Nov 2015 04:22:39 -0500
+In-Reply-To: <1446486438.12033.24.camel@millnert.se>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Guang Yang <guangyy@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Yehuda Sadeh <yehuda@inktank.com>, zaitcev@redhat.com
+To: Martin Millnert <martin@millnert.se>, Ken Dreyer <kdreyer@redhat.com>
+Cc: Pete Zaitcev <zaitcev@redhat.com>, Yehuda Sadeh-Weinraub <yehuda@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, 2 Nov 2015 21:25:31 -0800
-Guang Yang <guangyy@gmail.com> wrote:
+IMHO the first step should be to get rid of the evil submodule. Arguably
+the most direct path leading to this goal is to simply package up the
+downstream civetweb (i.e. 1.6 plus all the downstream patches) for all
+the supported distros. The resulting package would be Ceph-specific,
+obviously, so it could be called "civetweb-ceph".
 
-> Is this a valid feature request we can put into radosgw? The way I am
-> thinking to implement is like symbolic link, the link object just
-> contains a pointer to the original object.
+Like Ken says, the upstreaming effort can continue in parallel.
 
-It's not going to be sufficient. What do you think the Content-Size
-and Content-Type should be for the HEAD and GET on the symlink object?
-What I'm getting to though, for symlink to be of any use, it must
-return the linked object on GETs. Yet, it must be distinguishable
-(return some kind of system metadata). Also, it must be possible to
-discover that it is, in fact, a symlink. A query parameter perhaps.
+After we get Ceph/RGW working fine with civetweb-ceph 1.6, we can rebase
+the package to upstream civetweb 1.7.
 
--- Pete
+I am not volunteering to do all the work, but we at SUSE are certainly
+prepared to shoulder our share of it.
+
+-- 
+Nathan Cutler
+Software Engineer Distributed Storage
+SUSE LINUX, s.r.o.
+Tel.: +420 284 084 037
