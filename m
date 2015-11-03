@@ -1,8 +1,8 @@
-From: "yangruifeng.09209@h3c.com" <yangruifeng.09209@h3c.com>
-Subject: =?utf-8?B?562U5aSNOiDnrZTlpI06IOetlOWkjTog562U5aSNOiDnrZTlpI06IGFub3Ro?=
- =?utf-8?Q?er_peering_stuck_caused_by_net_problem.?=
-Date: Tue, 3 Nov 2015 01:41:16 +0000
-Message-ID: <0C3F6DA3760D0C4691E69E5BE224FF495E175AAD@H3CMLB12-EX.srv.huawei-3com.com>
+From: Samuel Just <sjust@redhat.com>
+Subject: =?UTF-8?B?UmU6IOetlOWkjTog562U5aSNOiDnrZTlpI06IOetlOWkjTog562U5aSNOiBhbm90aGVyIA==?=
+	=?UTF-8?B?cGVlcmluZyBzdHVjayBjYXVzZWQgYnkgbmV0IHByb2JsZW0u?=
+Date: Mon, 2 Nov 2015 18:14:53 -0800
+Message-ID: <CAN=+7FUiPHMwRwDLF_y_oHdB+B64USB15GWBv9=331P4996wmA@mail.gmail.com>
 References: <5F4E7462F2F4A14E974FBE17B8EB37210E5B1FB1@H3CMLB12-EX.srv.huawei-3com.com>
 	<CAN=+7FVJaD2fpgFuEPJ0Mincv5M4K+w_qg0DHYxsXU-4R5=o=w@mail.gmail.com>
 	<0C3F6DA3760D0C4691E69E5BE224FF495E17479D@H3CMLB12-EX.srv.huawei-3com.com>
@@ -12,127 +12,221 @@ References: <5F4E7462F2F4A14E974FBE17B8EB37210E5B1FB1@H3CMLB12-EX.srv.huawei-3co
 	<0C3F6DA3760D0C4691E69E5BE224FF495E175A2E@H3CMLB12-EX.srv.huawei-3com.com>
 	<CAN=+7FXcr82-WWV6UK2WC3-nU+V907LpgqL7+YZUEEJX_+Z4nw@mail.gmail.com>
 	<0C3F6DA3760D0C4691E69E5BE224FF495E175A81@H3CMLB12-EX.srv.huawei-3com.com>
- <CAN=+7FVaQqkN27_7mENWY38a+5HcQOKVug1zR_B4ar+7jwe2Sg@mail.gmail.com>
+	<CAN=+7FVaQqkN27_7mENWY38a+5HcQOKVug1zR_B4ar+7jwe2Sg@mail.gmail.com>
+	<0C3F6DA3760D0C4691E69E5BE224FF495E175AAD@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([60.191.123.56]:21099 "EHLO h3cmg01-ex.h3c.com"
-	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751313AbbKCBmC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 2 Nov 2015 20:42:02 -0500
-In-Reply-To: <CAN=+7FVaQqkN27_7mENWY38a+5HcQOKVug1zR_B4ar+7jwe2Sg@mail.gmail.com>
-Content-Language: zh-CN
+Received: from mail-io0-f176.google.com ([209.85.223.176]:36156 "EHLO
+	mail-io0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751965AbbKCCOy convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Nov 2015 21:14:54 -0500
+Received: by ioll68 with SMTP id l68so5764100iol.3
+        for <ceph-devel@vger.kernel.org>; Mon, 02 Nov 2015 18:14:53 -0800 (PST)
+In-Reply-To: <0C3F6DA3760D0C4691E69E5BE224FF495E175AAD@H3CMLB12-EX.srv.huawei-3com.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sjust@redhat.com>
+To: "yangruifeng.09209@h3c.com" <yangruifeng.09209@h3c.com>
 Cc: Chenxiaowei <chen.xiaowei@h3c.com>, "Sage Weil (sweil@redhat.com)" <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SSB3aWxsIHRyeSBteSBiZXN0IHRvIGdldCB0aGUgZGV0YWlsZWQgbG9nLg0KSW4gdGhlIGN1cnJl
-bnQgdmVyc2lvbiwgd2UgY2FuIGVuc3VyZSB0aGUgbWVzc2FnZXMgdGhhdCBhcmUgcmVsYXRlZCB0
-byBwZWVyaW5nIGlzIGNvcnJlY3RseSByZWNlaXZlZCBieSBwZWVycz8gIA0KDQp0aGFua3MNClJ1
-aWZlbmcgWWFuZy4NCg0KLS0tLS3pgq7ku7bljp/ku7YtLS0tLQ0K5Y+R5Lu25Lq6OiBTYW11ZWwg
-SnVzdCBbbWFpbHRvOnNqdXN0QHJlZGhhdC5jb21dIA0K5Y+R6YCB5pe26Ze0OiAyMDE15bm0MTHm
-nIgz5pelIDk6MjgNCuaUtuS7tuS6ujogeWFuZ3J1aWZlbmcgMDkyMDkgKFJEKQ0K5oqE6YCBOiBj
-aGVueGlhb3dlaSAxMTI0NSAoUkQpOyBTYWdlIFdlaWwgKHN3ZWlsQHJlZGhhdC5jb20pOyBjZXBo
-LWRldmVsQHZnZXIua2VybmVsLm9yZw0K5Li76aKYOiBSZTog562U5aSNOiDnrZTlpI06IOetlOWk
-jTog562U5aSNOiBhbm90aGVyIHBlZXJpbmcgc3R1Y2sgY2F1c2VkIGJ5IG5ldCBwcm9ibGVtLg0K
-DQpUZW1wb3JhcnkgbmV0d29yayBmYWlsdXJlcyBzaG91bGQgYmUgaGFuZGxlZCBjb3JyZWN0bHku
-ICBUaGUgYmVzdCBzb2x1dGlvbiBpcyB0byBhY3R1YWxseSBmaXggdGhhdCBidWcgdGhlbi4gIENh
-cHR1cmUgbG9nZ2luZyBvbiBhbGwgaW52b2x2ZWQgb3NkcyB3aGlsZSBpdCBpcyBodW5nIGFuZCBv
-cGVuIGEgYnVnOg0KDQpkZWJ1ZyBvc2QgPSAyMA0KZGVidWcgZmlsZXN0b3JlID0gMjANCmRlYnVn
-IG1zID0gMQ0KLVNhbQ0KDQpPbiBNb24sIE5vdiAyLCAyMDE1IGF0IDU6MjQgUE0sIHlhbmdydWlm
-ZW5nLjA5MjA5QGgzYy5jb20gPHlhbmdydWlmZW5nLjA5MjA5QGgzYy5jb20+IHdyb3RlOg0KPiBh
-IHVua25vd24gcmVhc29uIHByb2JsZW0sIHdoaWNoIGNhdXNlIHBnIHN0dWNrIGluIHBlZXJpbmcs
-IG1heSBiZSBhIHRlbXBvcmFyeSBmYWlsdXJlIG5ldHdvcmsgZmFpbHVyZSBvciBvdGhlciBidWcu
-DQo+IEJVVCBpdCBjYW4gYmUgc29sdmVkIGJ5ICptYW51YWwqICdjZXBoIG9zZCBkb3duIDxvc2Rp
-ZD4nDQo+DQo+IC0tLS0t6YKu5Lu25Y6f5Lu2LS0tLS0NCj4g5Y+R5Lu25Lq6OiBjZXBoLWRldmVs
-LW93bmVyQHZnZXIua2VybmVsLm9yZyANCj4gW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIu
-a2VybmVsLm9yZ10g5Luj6KGoIFNhbXVlbCBKdXN0DQo+IOWPkemAgeaXtumXtDogMjAxNeW5tDEx
-5pyIM+aXpSA5OjEyDQo+IOaUtuS7tuS6ujogeWFuZ3J1aWZlbmcgMDkyMDkgKFJEKQ0KPiDmioTp
-gIE6IGNoZW54aWFvd2VpIDExMjQ1IChSRCk7IFNhZ2UgV2VpbCAoc3dlaWxAcmVkaGF0LmNvbSk7
-IA0KPiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KPiDkuLvpopg6IFJlOiDnrZTlpI06IOet
-lOWkjTog562U5aSNOiBhbm90aGVyIHBlZXJpbmcgc3R1Y2sgY2F1c2VkIGJ5IG5ldCBwcm9ibGVt
-Lg0KPg0KPiBUaGUgcHJvYmxlbSBpcyB0aGF0IHBlZXJpbmcgc2hvdWxkbid0IGhhbmcgZm9yIG5v
-IHJlYXNvbi4gIElmIHlvdSBhcmUgDQo+IHNlZWluZyBwZWVyaW5nIGhhbmcgZm9yIGEgbG9uZyB0
-aW1lIGVpdGhlcg0KPiAxKSB5b3UgYXJlIGhpdHRpbmcgYSBwZWVyaW5nIGJ1ZyB3aGljaCB3ZSBu
-ZWVkIHRvIHRyYWNrIGRvd24gYW5kIGZpeA0KPiAyKSBwZWVyaW5nIGFjdHVhbGx5IGNhbm5vdCBt
-YWtlIHByb2dyZXNzLg0KPg0KPiBJbiBjYXNlIDEsIGl0IGNhbiBiZSBuaWNlIHRvIGhhdmUgYSB3
-b3JrIGFyb3VuZCB0byBmb3JjZSBwZWVyaW5nIHRvIHJlc3RhcnQgYW5kIGF2b2lkIHRoZSBidWcu
-ICBIb3dldmVyLCBjYXNlIDIgd291bGQgbm90IGJlIGhlbHBlZCBieSByZXN0YXJ0aW5nIHBlZXJp
-bmcsIHlvdSdkIGp1c3QgZW5kIHVwIGluIHRoZSBzYW1lIHBsYWNlLiAgSWYgeW91IGRpZCBpdCBi
-YXNlZCBvbiBhIHRpbWVvdXQsIHlvdSdkIGp1c3QgaW5jcmVhc2UgbG9hZCBieSBhIHRvbiB3aGVu
-IGluIHRoYXQgc2l0dWF0aW9uLiAgV2hhdCBwcm9ibGVtIGFyZSB5b3UgdHJ5aW5nIHRvIHNvbHZl
-Pw0KPiAtU2FtDQo+DQo+IE9uIE1vbiwgTm92IDIsIDIwMTUgYXQgNTowNSBQTSwgeWFuZ3J1aWZl
-bmcuMDkyMDlAaDNjLmNvbSA8eWFuZ3J1aWZlbmcuMDkyMDlAaDNjLmNvbT4gd3JvdGU6DQo+PiBv
-ay4NCj4+DQo+PiB0aGFua3MNCj4+IFJ1aWZlbmcgWWFuZw0KPj4NCj4+IC0tLS0t6YKu5Lu25Y6f
-5Lu2LS0tLS0NCj4+IOWPkeS7tuS6ujogU2FtdWVsIEp1c3QgW21haWx0bzpzanVzdEByZWRoYXQu
-Y29tXQ0KPj4g5Y+R6YCB5pe26Ze0OiAyMDE15bm0MTHmnIgz5pelIDk6MDMNCj4+IOaUtuS7tuS6
-ujogeWFuZ3J1aWZlbmcgMDkyMDkgKFJEKQ0KPj4g5oqE6YCBOiBjaGVueGlhb3dlaSAxMTI0NSAo
-UkQpOyBTYWdlIFdlaWwgKHN3ZWlsQHJlZGhhdC5jb20pDQo+PiDkuLvpopg6IFJlOiDnrZTlpI06
-IOetlOWkjTogYW5vdGhlciBwZWVyaW5nIHN0dWNrIGNhdXNlZCBieSBuZXQgcHJvYmxlbS4NCj4+
-DQo+PiBXb3VsZCBpdCBiZSBvayBpZiBJIHJlcGx5IHRvIHRoZSBsaXN0IGFzIHdlbGw/DQo+PiAt
-U2FtDQo+Pg0KPj4gT24gTW9uLCBOb3YgMiwgMjAxNSBhdCA0OjM3IFBNLCB5YW5ncnVpZmVuZy4w
-OTIwOUBoM2MuY29tIDx5YW5ncnVpZmVuZy4wOTIwOUBoM2MuY29tPiB3cm90ZToNCj4+PiB0aGUg
-Y2x1c3RlciBpcyBtYXliZSBhbHdheXMgcGVlcmluZyBpbiBzYW1lIGV4Y2VwdGlvbmFsIGNhc2Vz
-LCBidXQgDQo+Pj4gaXQgY2FuIHJldHVybiB0byBub3JtYWwgYnkgKm1hbnVhbCogJ2NlcGggb3Nk
-IGRvd24gPG9zZGlkPicsIHRoaXMgaXMgDQo+Pj4gbm90IGNvbnZlbmllbnQgaW4gYSBwcm9kdWN0
-aW9uIGVudmlyb25tZW50LCBhbmQgYWdhaW5zdCB0aGUgY29uY2VwdCBvZiByYWRvcy4NCj4+PiBh
-ZGQgYSB0aW1lb3V0IG1lY2hhbmlzbSB0byBraWNrIGl0LCBvciBraWNrIGl0IHdoZW4gaW8gaGFu
-ZywgbWF5YmUgcmVhc29uYWJsZT8NCj4+Pg0KPj4+IHRoYW5rcywNCj4+PiBSdWlmZW5nIFlhbmcN
-Cj4+Pg0KPj4+IC0tLS0t6YKu5Lu25Y6f5Lu2LS0tLS0NCj4+PiDlj5Hku7bkuro6IFNhbXVlbCBK
-dXN0IFttYWlsdG86c2p1c3RAcmVkaGF0LmNvbV0NCj4+PiDlj5HpgIHml7bpl7Q6IDIwMTXlubQx
-MeaciDPml6UgMjoyMQ0KPj4+IOaUtuS7tuS6ujogeWFuZ3J1aWZlbmcgMDkyMDkgKFJEKQ0KPj4+
-IOaKhOmAgTogY2hlbnhpYW93ZWkgMTEyNDUgKFJEKTsgU2FnZSBXZWlsIChzd2VpbEByZWRoYXQu
-Y29tKQ0KPj4+IOS4u+mimDogUmU6IOetlOWkjTogYW5vdGhlciBwZWVyaW5nIHN0dWNrIGNhdXNl
-ZCBieSBuZXQgcHJvYmxlbS4NCj4+Pg0KPj4+IEkgbWVhbiBpc3N1ZSAnY2VwaCBvc2QgZG93biA8
-b3NkaWQ+JyBmb3IgdGhlIHByaW1hcnkgb24gdGhlIHBnLiAgQnV0IHRoYXQgb25seSBjYXVzZXMg
-cGVlcmluZyB0byByZXN0YXJ0LiAgSWYgcGVlcmluZyBzdGFsbGVkIHByZXZpb3VzbHksIGl0J2xs
-IHByb2JhYmx5IHN0YWxsIGFnYWluLiAgV2hhdCBhcmUgeW91IHRyeWluZyB0byBhY2NvbXBsaXNo
-Pw0KPj4+IC1TYW0NCj4+Pg0KPj4+IE9uIEZyaSwgT2N0IDMwLCAyMDE1IGF0IDU6NTEgUE0sIHlh
-bmdydWlmZW5nLjA5MjA5QGgzYy5jb20gPHlhbmdydWlmZW5nLjA5MjA5QGgzYy5jb20+IHdyb3Rl
-Og0KPj4+PiBkbyB5b3UgbWVhbiByZXN0YXJ0IHByaW1hcnkgb3NkPyBvciBhbnkgb3RoZXIgY29t
-bWFuZO+8nw0KPj4+Pg0KPj4+PiB0aGFua3MNCj4+Pj4gUnVpZmVuZyBZYW5nDQo+Pj4+DQo+Pj4+
-IC0tLS0t6YKu5Lu25Y6f5Lu2LS0tLS0NCj4+Pj4g5Y+R5Lu25Lq6OiBTYW11ZWwgSnVzdCBbbWFp
-bHRvOnNqdXN0QHJlZGhhdC5jb21dDQo+Pj4+IOWPkemAgeaXtumXtDogMjAxNeW5tDEw5pyIMzDm
-l6UgMjM6MDcNCj4+Pj4g5pS25Lu25Lq6OiBjaGVueGlhb3dlaSAxMTI0NSAoUkQpDQo+Pj4+IOaK
-hOmAgTogU2FnZSBXZWlsIChzd2VpbEByZWRoYXQuY29tKTsgeWFuZ3J1aWZlbmcgMDkyMDkgKFJE
-KQ0KPj4+PiDkuLvpopg6IFJlOiBhbm90aGVyIHBlZXJpbmcgc3R1Y2sgY2F1c2VkIGJ5IG5ldCBw
-cm9ibGVtLg0KPj4+Pg0KPj4+PiBIb3cgd291bGQgdGhhdCBoZWxwPyAgQXMgYSB3YXkgdG8gd29y
-ayBhcm91bmQgYSBwb3NzaWJsZSBidWc/ICBZb3UgY2FuIGFjY29tcGxpc2ggcHJldHR5IG11Y2gg
-dGhlIHNhbWUgdGhpbmcgYnkgc2V0dGluZyB0aGUgcHJpbWFyeSBkb3duLg0KPj4+PiAtU2FtDQo+
-Pj4+DQo+Pj4+IE9uIFdlZCwgT2N0IDI4LCAyMDE1IGF0IDg6MjIgUE0sIENoZW54aWFvd2VpIDxj
-aGVuLnhpYW93ZWlAaDNjLmNvbT4gd3JvdGU6DQo+Pj4+PiBIaSwgU2FtdWVsJlNhZ2U6DQo+Pj4+
-PiAgICAgICAgIEkgYW0gY3h3c2hhd24gZnJvbSBIM0MoYmVsb25nIHRvIEhQKSwgdGhlIHBnIHBl
-ZXJpbmcgc3R1Y2sgDQo+Pj4+PiBwcm9ibGVtIGlzIGEgc2VyaW91cyBwcm9ibGVtIGVzcGVjaWFs
-bHkgdW5kZXIgdGhlIHByb2R1Y3Rpb24gZW52aXJvbm1lbnQsIFNvIGhlcmUgd2UgY2FtZSB1cCB0
-d28gc29sdXRpb25zOg0KPj4+Pj4gICAgICAgICBpZiBzdGF0ZSBQZWVyaW5nIHN0dWNrIHRvbyBs
-b25nLCB3ZSBjYW4gY2hlY2sgdGltZW91dCANCj4+Pj4+IGV4Y2VlZHMgdG8gZm9yY2UgdHJhbnNp
-dGlvbiBmcm9tIFBlZXJpbmcgdG8gUmVzZXQgc3RhdGUsIE9yIHdlIGNhbiBhZGQgYSBjb21tYW5k
-IGxpbmUgdG8gZm9yY2Ugb25lIHBnIGZyb20gUGVlcmluZyBzdHVjayB0byBSZXNldCBzdGF0ZS4N
-Cj4+Pj4+DQo+Pj4+PiBXaGF0J3MgeW91ciBhZHZpY2U/IFdpc2ggeW91ciByZXBseQ0KPj4+Pj4N
-Cj4+Pj4+IFlvdXJzDQo+Pj4+PiBzaGF3biBmcm9tIEJlaWppbmcsIENoaW5hLg0KPj4+Pj4NCj4+
-Pj4+IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLQ0KPj4+Pj4gLQ0KPj4+Pj4gLQ0KPj4+Pj4gLQ0KPj4+Pj4gLQ0KPj4+Pj4g
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tDQo+Pj4+PiDmnKzpgq7ku7blj4rlhbbpmYTku7blkKvmnInmna3lt57ljY7kuInpgJrk
-v6HmioDmnK/mnInpmZDlhazlj7jnmoTkv53lr4bkv6Hmga/vvIzku4XpmZDkuo7lj5HpgIHnu5nk
-uIrpnaLlnLDlnYDkuK3liJflh7oNCj4+Pj4+IOeahOS4quS6uuaIlue+pOe7hOOAguemgeatouS7
-u+S9leWFtuS7luS6uuS7peS7u+S9leW9ouW8j+S9v+eUqO+8iOWMheaLrOS9huS4jemZkOS6juWF
-qOmDqOaIlumDqOWIhuWcsOazhOmcsuOAgeWkjeWItuOAgQ0KPj4+Pj4g5oiW5pWj5Y+R77yJ5pys
-6YKu5Lu25Lit55qE5L+h5oGv44CC5aaC5p6c5oKo6ZSZ5pS25LqG5pys6YKu5Lu277yM6K+35oKo
-56uL5Y2z55S16K+d5oiW6YKu5Lu26YCa55+l5Y+R5Lu25Lq65bm25Yig6Zmk5pysDQo+Pj4+PiDp
-gq7ku7bvvIENCj4+Pj4+IFRoaXMgZS1tYWlsIGFuZCBpdHMgYXR0YWNobWVudHMgY29udGFpbiBj
-b25maWRlbnRpYWwgaW5mb3JtYXRpb24gDQo+Pj4+PiBmcm9tIEgzQywgd2hpY2ggaXMgaW50ZW5k
-ZWQgb25seSBmb3IgdGhlIHBlcnNvbiBvciBlbnRpdHkgd2hvc2UgDQo+Pj4+PiBhZGRyZXNzIGlz
-IGxpc3RlZCBhYm92ZS4gQW55IHVzZSBvZiB0aGUgaW5mb3JtYXRpb24gY29udGFpbmVkIA0KPj4+
-Pj4gaGVyZWluIGluIGFueSB3YXkgKGluY2x1ZGluZywgYnV0IG5vdCBsaW1pdGVkIHRvLCB0b3Rh
-bCBvciBwYXJ0aWFsIA0KPj4+Pj4gZGlzY2xvc3VyZSwgcmVwcm9kdWN0aW9uLCBvciBkaXNzZW1p
-bmF0aW9uKSBieSBwZXJzb25zIG90aGVyIHRoYW4gDQo+Pj4+PiB0aGUgaW50ZW5kZWQNCj4+Pj4+
-IHJlY2lwaWVudChzKSBpcyBwcm9oaWJpdGVkLiBJZiB5b3UgcmVjZWl2ZSB0aGlzIGUtbWFpbCBp
-biBlcnJvciwgDQo+Pj4+PiBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgcGhvbmUgb3IgZW1h
-aWwgaW1tZWRpYXRlbHkgYW5kIGRlbGV0ZSBpdCENCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJv
-bSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIA0KPiBp
-biB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3Jl
-IG1ham9yZG9tbyANCj4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8t
-aW5mby5odG1sDQo=
+Yeah, there's a heartbeat system and the messenger is reliable delivery=
+=2E
+-Sam
+
+On Mon, Nov 2, 2015 at 5:41 PM, yangruifeng.09209@h3c.com
+<yangruifeng.09209@h3c.com> wrote:
+> I will try my best to get the detailed log.
+> In the current version, we can ensure the messages that are related t=
+o peering is correctly received by peers?
+>
+> thanks
+> Ruifeng Yang.
+>
+> -----=E9=82=AE=E4=BB=B6=E5=8E=9F=E4=BB=B6-----
+> =E5=8F=91=E4=BB=B6=E4=BA=BA: Samuel Just [mailto:sjust@redhat.com]
+> =E5=8F=91=E9=80=81=E6=97=B6=E9=97=B4: 2015=E5=B9=B411=E6=9C=883=E6=97=
+=A5 9:28
+> =E6=94=B6=E4=BB=B6=E4=BA=BA: yangruifeng 09209 (RD)
+> =E6=8A=84=E9=80=81: chenxiaowei 11245 (RD); Sage Weil (sweil@redhat.c=
+om); ceph-devel@vger.kernel.org
+> =E4=B8=BB=E9=A2=98: Re: =E7=AD=94=E5=A4=8D: =E7=AD=94=E5=A4=8D: =E7=AD=
+=94=E5=A4=8D: =E7=AD=94=E5=A4=8D: another peering stuck caused by net p=
+roblem.
+>
+> Temporary network failures should be handled correctly.  The best sol=
+ution is to actually fix that bug then.  Capture logging on all involve=
+d osds while it is hung and open a bug:
+>
+> debug osd =3D 20
+> debug filestore =3D 20
+> debug ms =3D 1
+> -Sam
+>
+> On Mon, Nov 2, 2015 at 5:24 PM, yangruifeng.09209@h3c.com <yangruifen=
+g.09209@h3c.com> wrote:
+>> a unknown reason problem, which cause pg stuck in peering, may be a =
+temporary failure network failure or other bug.
+>> BUT it can be solved by *manual* 'ceph osd down <osdid>'
+>>
+>> -----=E9=82=AE=E4=BB=B6=E5=8E=9F=E4=BB=B6-----
+>> =E5=8F=91=E4=BB=B6=E4=BA=BA: ceph-devel-owner@vger.kernel.org
+>> [mailto:ceph-devel-owner@vger.kernel.org] =E4=BB=A3=E8=A1=A8 Samuel =
+Just
+>> =E5=8F=91=E9=80=81=E6=97=B6=E9=97=B4: 2015=E5=B9=B411=E6=9C=883=E6=97=
+=A5 9:12
+>> =E6=94=B6=E4=BB=B6=E4=BA=BA: yangruifeng 09209 (RD)
+>> =E6=8A=84=E9=80=81: chenxiaowei 11245 (RD); Sage Weil (sweil@redhat.=
+com);
+>> ceph-devel@vger.kernel.org
+>> =E4=B8=BB=E9=A2=98: Re: =E7=AD=94=E5=A4=8D: =E7=AD=94=E5=A4=8D: =E7=AD=
+=94=E5=A4=8D: another peering stuck caused by net problem.
+>>
+>> The problem is that peering shouldn't hang for no reason.  If you ar=
+e
+>> seeing peering hang for a long time either
+>> 1) you are hitting a peering bug which we need to track down and fix
+>> 2) peering actually cannot make progress.
+>>
+>> In case 1, it can be nice to have a work around to force peering to =
+restart and avoid the bug.  However, case 2 would not be helped by rest=
+arting peering, you'd just end up in the same place.  If you did it bas=
+ed on a timeout, you'd just increase load by a ton when in that situati=
+on.  What problem are you trying to solve?
+>> -Sam
+>>
+>> On Mon, Nov 2, 2015 at 5:05 PM, yangruifeng.09209@h3c.com <yangruife=
+ng.09209@h3c.com> wrote:
+>>> ok.
+>>>
+>>> thanks
+>>> Ruifeng Yang
+>>>
+>>> -----=E9=82=AE=E4=BB=B6=E5=8E=9F=E4=BB=B6-----
+>>> =E5=8F=91=E4=BB=B6=E4=BA=BA: Samuel Just [mailto:sjust@redhat.com]
+>>> =E5=8F=91=E9=80=81=E6=97=B6=E9=97=B4: 2015=E5=B9=B411=E6=9C=883=E6=97=
+=A5 9:03
+>>> =E6=94=B6=E4=BB=B6=E4=BA=BA: yangruifeng 09209 (RD)
+>>> =E6=8A=84=E9=80=81: chenxiaowei 11245 (RD); Sage Weil (sweil@redhat=
+=2Ecom)
+>>> =E4=B8=BB=E9=A2=98: Re: =E7=AD=94=E5=A4=8D: =E7=AD=94=E5=A4=8D: ano=
+ther peering stuck caused by net problem.
+>>>
+>>> Would it be ok if I reply to the list as well?
+>>> -Sam
+>>>
+>>> On Mon, Nov 2, 2015 at 4:37 PM, yangruifeng.09209@h3c.com <yangruif=
+eng.09209@h3c.com> wrote:
+>>>> the cluster is maybe always peering in same exceptional cases, but
+>>>> it can return to normal by *manual* 'ceph osd down <osdid>', this =
+is
+>>>> not convenient in a production environment, and against the concep=
+t of rados.
+>>>> add a timeout mechanism to kick it, or kick it when io hang, maybe=
+ reasonable?
+>>>>
+>>>> thanks,
+>>>> Ruifeng Yang
+>>>>
+>>>> -----=E9=82=AE=E4=BB=B6=E5=8E=9F=E4=BB=B6-----
+>>>> =E5=8F=91=E4=BB=B6=E4=BA=BA: Samuel Just [mailto:sjust@redhat.com]
+>>>> =E5=8F=91=E9=80=81=E6=97=B6=E9=97=B4: 2015=E5=B9=B411=E6=9C=883=E6=
+=97=A5 2:21
+>>>> =E6=94=B6=E4=BB=B6=E4=BA=BA: yangruifeng 09209 (RD)
+>>>> =E6=8A=84=E9=80=81: chenxiaowei 11245 (RD); Sage Weil (sweil@redha=
+t.com)
+>>>> =E4=B8=BB=E9=A2=98: Re: =E7=AD=94=E5=A4=8D: another peering stuck =
+caused by net problem.
+>>>>
+>>>> I mean issue 'ceph osd down <osdid>' for the primary on the pg.  B=
+ut that only causes peering to restart.  If peering stalled previously,=
+ it'll probably stall again.  What are you trying to accomplish?
+>>>> -Sam
+>>>>
+>>>> On Fri, Oct 30, 2015 at 5:51 PM, yangruifeng.09209@h3c.com <yangru=
+ifeng.09209@h3c.com> wrote:
+>>>>> do you mean restart primary osd? or any other command=EF=BC=9F
+>>>>>
+>>>>> thanks
+>>>>> Ruifeng Yang
+>>>>>
+>>>>> -----=E9=82=AE=E4=BB=B6=E5=8E=9F=E4=BB=B6-----
+>>>>> =E5=8F=91=E4=BB=B6=E4=BA=BA: Samuel Just [mailto:sjust@redhat.com=
+]
+>>>>> =E5=8F=91=E9=80=81=E6=97=B6=E9=97=B4: 2015=E5=B9=B410=E6=9C=8830=E6=
+=97=A5 23:07
+>>>>> =E6=94=B6=E4=BB=B6=E4=BA=BA: chenxiaowei 11245 (RD)
+>>>>> =E6=8A=84=E9=80=81: Sage Weil (sweil@redhat.com); yangruifeng 092=
+09 (RD)
+>>>>> =E4=B8=BB=E9=A2=98: Re: another peering stuck caused by net probl=
+em.
+>>>>>
+>>>>> How would that help?  As a way to work around a possible bug?  Yo=
+u can accomplish pretty much the same thing by setting the primary down=
+=2E
+>>>>> -Sam
+>>>>>
+>>>>> On Wed, Oct 28, 2015 at 8:22 PM, Chenxiaowei <chen.xiaowei@h3c.co=
+m> wrote:
+>>>>>> Hi, Samuel&Sage:
+>>>>>>         I am cxwshawn from H3C(belong to HP), the pg peering stu=
+ck
+>>>>>> problem is a serious problem especially under the production env=
+ironment, So here we came up two solutions:
+>>>>>>         if state Peering stuck too long, we can check timeout
+>>>>>> exceeds to force transition from Peering to Reset state, Or we c=
+an add a command line to force one pg from Peering stuck to Reset state=
+=2E
+>>>>>>
+>>>>>> What's your advice? Wish your reply
+>>>>>>
+>>>>>> Yours
+>>>>>> shawn from Beijing, China.
+>>>>>>
+>>>>>> ----------------------------------------------------------------=
+--
+>>>>>> -
+>>>>>> -
+>>>>>> -
+>>>>>> -
+>>>>>> ---------------------------------------------------------------
+>>>>>> =E6=9C=AC=E9=82=AE=E4=BB=B6=E5=8F=8A=E5=85=B6=E9=99=84=E4=BB=B6=E5=
+=90=AB=E6=9C=89=E6=9D=AD=E5=B7=9E=E5=8D=8E=E4=B8=89=E9=80=9A=E4=BF=A1=E6=
+=8A=80=E6=9C=AF=E6=9C=89=E9=99=90=E5=85=AC=E5=8F=B8=E7=9A=84=E4=BF=9D=E5=
+=AF=86=E4=BF=A1=E6=81=AF=EF=BC=8C=E4=BB=85=E9=99=90=E4=BA=8E=E5=8F=91=E9=
+=80=81=E7=BB=99=E4=B8=8A=E9=9D=A2=E5=9C=B0=E5=9D=80=E4=B8=AD=E5=88=97=E5=
+=87=BA
+>>>>>> =E7=9A=84=E4=B8=AA=E4=BA=BA=E6=88=96=E7=BE=A4=E7=BB=84=E3=80=82=E7=
+=A6=81=E6=AD=A2=E4=BB=BB=E4=BD=95=E5=85=B6=E4=BB=96=E4=BA=BA=E4=BB=A5=E4=
+=BB=BB=E4=BD=95=E5=BD=A2=E5=BC=8F=E4=BD=BF=E7=94=A8=EF=BC=88=E5=8C=85=E6=
+=8B=AC=E4=BD=86=E4=B8=8D=E9=99=90=E4=BA=8E=E5=85=A8=E9=83=A8=E6=88=96=E9=
+=83=A8=E5=88=86=E5=9C=B0=E6=B3=84=E9=9C=B2=E3=80=81=E5=A4=8D=E5=88=B6=E3=
+=80=81
+>>>>>> =E6=88=96=E6=95=A3=E5=8F=91=EF=BC=89=E6=9C=AC=E9=82=AE=E4=BB=B6=E4=
+=B8=AD=E7=9A=84=E4=BF=A1=E6=81=AF=E3=80=82=E5=A6=82=E6=9E=9C=E6=82=A8=E9=
+=94=99=E6=94=B6=E4=BA=86=E6=9C=AC=E9=82=AE=E4=BB=B6=EF=BC=8C=E8=AF=B7=E6=
+=82=A8=E7=AB=8B=E5=8D=B3=E7=94=B5=E8=AF=9D=E6=88=96=E9=82=AE=E4=BB=B6=E9=
+=80=9A=E7=9F=A5=E5=8F=91=E4=BB=B6=E4=BA=BA=E5=B9=B6=E5=88=A0=E9=99=A4=E6=
+=9C=AC
+>>>>>> =E9=82=AE=E4=BB=B6=EF=BC=81
+>>>>>> This e-mail and its attachments contain confidential information
+>>>>>> from H3C, which is intended only for the person or entity whose
+>>>>>> address is listed above. Any use of the information contained
+>>>>>> herein in any way (including, but not limited to, total or parti=
+al
+>>>>>> disclosure, reproduction, or dissemination) by persons other tha=
+n
+>>>>>> the intended
+>>>>>> recipient(s) is prohibited. If you receive this e-mail in error,
+>>>>>> please notify the sender by phone or email immediately and delet=
+e it!
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+"
+>> in the body of a message to majordomo@vger.kernel.org More majordomo
+>> info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
