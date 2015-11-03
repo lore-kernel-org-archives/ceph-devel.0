@@ -1,247 +1,214 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH] libceph: clear msg->con in ceph_msg_release() only
-Date: Mon,  2 Nov 2015 23:47:07 +0100
-Message-ID: <1446504427-25824-1-git-send-email-idryomov@gmail.com>
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f182.google.com ([209.85.212.182]:38899 "EHLO
-	mail-wi0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753664AbbKBVHT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Nov 2015 16:07:19 -0500
-Received: by wicll6 with SMTP id ll6so58122692wic.1
-        for <ceph-devel@vger.kernel.org>; Mon, 02 Nov 2015 13:07:18 -0800 (PST)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Alex Elder <elder@linaro.org>
+From: "hzwulibin-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org" <hzwulibin-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [performance] why rbd_aio_write latency increase
+	from 4ms to 7.3ms after the same test
+Date: Tue, 3 Nov 2015 08:43:47 +0800
+Message-ID: <201511030843428328313@gmail.com>
+References: <5636F376.3090104@gmail.com>,
+	<6F3FA899187F0043BA1827A69DA2F7CC03639832@shsmsx102.ccr.corp.intel.com>
+Mime-Version: 1.0
+Content-Type: multipart/mixed; boundary="===============1794768861=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: =?UTF-8?B?Q2hlbiwgWGlhb3hp?= <xiaoxi.chen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-The following bit in ceph_msg_revoke_incoming() is unsafe:
+This is a multi-part message in MIME format.
 
-    struct ceph_connection *con = msg->con;
-    if (!con)
-            return;
-    mutex_lock(&con->mutex);
-    <more msg->con use>
+--===============1794768861==
+Content-Type: multipart/alternative;
+	boundary="----=_001_NextPart741106821217_=----"
 
-There is nothing preventing con from getting destroyed right after
-msg->con test.  One easy way to reproduce this is to disable message
-signing only on the server side and try to map an image.  The system
-will go into a
+This is a multi-part message in MIME format.
 
-    libceph: read_partial_message ffff880073f0ab68 signature check failed
-    libceph: osd0 192.168.255.155:6801 bad crc/signature
-    libceph: read_partial_message ffff880073f0ab68 signature check failed
-    libceph: osd0 192.168.255.155:6801 bad crc/signature
+------=_001_NextPart741106821217_=----
+Content-Type: text/plain;
+	charset="UTF-8"
+Content-Transfer-Encoding: base64
 
-loop which has to be interrupted with Ctrl-C.  Hit Ctrl-C and you are
-likely to end up with a random GP fault if the reset handler executes
-"within" ceph_msg_revoke_incoming():
+SGksDQoNClRoYW5rIHlvdSwgdGhhdCBtYWtlIHNlbnNlIGZvciB0ZXN0aW5nLCBidXQgaSdtIGFm
+cmFpZCBub3QgaW4gbXkgY2FzZS4NCkV2ZW4gaSB0ZXN0IG9uIHRoZSB2b2x1bWUgdGhhdCBhbHJl
+YWR5IHRlc3QgbWFueSB0aW1lcywgdGhlIElPUFMgd2lsbCBub3QgZ3Jvd2luZyB1cCANCmFnYWlu
+LiBZZWFoLCBpIG1lYW4sIHRoaXMgVk0gaXMgYnJva2VuLCBJT1BTIG9mIHRoZSBWTSB3aWxsIG5l
+dmVyIGdyb3dpbmcgdXAuLg0KDQpUaGFua3MhDQoNCg0KDQpoend1bGliaW5AZ21haWwuY29tDQog
+DQpGcm9tOiBDaGVuLCBYaWFveGkNCkRhdGU6IDIwMTUtMTEtMDIgMTQ6MTENClRvOiBoend1bGli
+aW47IGNlcGgtZGV2ZWw7IGNlcGgtdXNlcnMNClN1YmplY3Q6IFJFOiBbcGVyZm9ybWFuY2VdIHdo
+eSByYmRfYWlvX3dyaXRlIGxhdGVuY3kgaW5jcmVhc2UgZnJvbSA0bXMgdG8gNy4zbXMgYWZ0ZXIg
+dGhlIHNhbWUgdGVzdA0KUHJlLWFsbG9jYXRlZCB0aGUgdm9sdW1lIGJ5ICJERCIgYWNyb3NzIHRo
+ZSBlbnRpcmUgUkJEIGJlZm9yZSB5b3UgZG8gYW55IHBlcmZvcm1hbmNlIHRlc3Q6KS4NCiANCklu
+IHRoaXMgY2FzZSwgeW91IG1heSB3YW50IHRvIHJlLWNyZWF0ZSB0aGUgUkJELCBwcmUtYWxsb2Nh
+dGUgYW5kIHRyeSBhZ2Fpbi4NCiANCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJv
+bTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVsLQ0K
+PiBvd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBoend1bGliaW4NCj4gU2VudDog
+TW9uZGF5LCBOb3ZlbWJlciAyLCAyMDE1IDE6MjQgUE0NCj4gVG86IGNlcGgtZGV2ZWw7IGNlcGgt
+dXNlcnMNCj4gU3ViamVjdDogW3BlcmZvcm1hbmNlXSB3aHkgcmJkX2Fpb193cml0ZSBsYXRlbmN5
+IGluY3JlYXNlIGZyb20gNG1zIHRvDQo+IDcuM21zIGFmdGVyIHRoZSBzYW1lIHRlc3QNCj4gDQo+
+IEhpLA0KPiBzYW1lIGVudmlyb25tZW50LCBhZnRlciBhIHRlc3Qgc2NyaXB0LCB0aGUgaW8gbGF0
+ZW5jeShnZXQgZnJvbSBzdWRvIGNlcGggLS0NCj4gYWRtaW4tZGFlbW9uIC9ydW4vY2VwaC9ndWVz
+dHMvY2VwaC1jbGllbnQuKi5hc29rIHBlciBkdW1wKSBpbmNyZWFzZQ0KPiBmcm9tIGFib3V0IDRt
+cyB0byA3LjNtcw0KPiANCj4gcWVtdSB2ZXJzaW9uOiBkZWJpYW4gMi4xLjINCj4ga2VybmVsOjMu
+MTAuNDUtb3BlbnN0YWNrLWFtZDY0DQo+IHN5c3RlbTogZGViaWFuIDcuOA0KPiBjZXBoOiAwLjk0
+LjUNCj4gVk0gQ1BVIG51bWJlcjogNCAgKGNwdSBNSHogOiAyNTk5Ljk5OCkNCj4gVk0gbWVtb3J5
+IHNpemU6IDE2R0INCj4gOSBPU0Qgc3RvcmFnZSBzZXJ2ZXJzLCB3aXRoIDQgU1NEIE9TRCBvbiBl
+YWNoLCB0b3RhbCAzNiBPU0RzLg0KPiANCj4gVGVzdCBzY3JpcHRzIGluIFZNOg0KPiAjIGNhdCBy
+ZXByb2R1Y2Uuc2gNCj4gIyEvYmluL2Jhc2gNCj4gDQo+IHRpbWVzPTIwDQo+IGZvcigoaT0xO2k8
+PSR0aW1lcztpKyspKQ0KPiBkbw0KPiAgICAgdG1wZGF0ZT1gZGF0ZSAiKyVGLSVUImANCj4gICAg
+IGVjaG8NCj4gIj09PT09PT09PT09PT09PT09PT09PT09JHRtcGRhdGUoJGkvJHRpbWVzKT09PT09
+PT09PT09PT09PT09PT0NCj4gPT09PSINCj4gICAgIHRtcD0kKChpJTIpKQ0KPiAgICAgaWYgW1sg
+JHRtcCAtZXEgMCBdXTt0aGVuDQo+ICAgICAgICAgZWNobyAiIyMjIyMjIyMjIyMjIyMjIGZpbyAv
+cm9vdC92ZGIuY2ZnICMjIyMjIyMjIyMjIyMjIyINCj4gICAgICAgICBmaW8gL3Jvb3QvdmRiLmNm
+Zw0KPiAgICAgZWxzZQ0KPiAgICAgICAgIGVjaG8gIiMjIyMjIyMjIyMjIyMjIyBmaW8gL3Jvb3Qv
+dmRjLmNmZyAjIyMjIyMjIyMjIyMjIyMiDQo+ICAgICAgICAgZmlvIC9yb290L3ZkYy5jZmcNCj4g
+ICAgIGZpDQo+IGRvbmUNCj4gDQo+IA0KPiB0bXBkYXRlPWBkYXRlICIrJUYtJVQiYA0KPiBlY2hv
+ICIjIyMjIyMjIyMjIyMjIyMgWyR0bXBkYXRlXSBmaW8gL3Jvb3QvdmRlLmNmZyAjIyMjIyMjIyMj
+IyMjIyMiDQo+IGZpbyAvcm9vdC92ZGUuY2ZnDQo+IA0KPiANCj4gIyBjYXQgdmRiLmNmZw0KPiBb
+Z2xvYmFsXQ0KPiBydz1yYW5kd3JpdGUNCj4gZGlyZWN0PTENCj4gbnVtam9icz02NA0KPiBpb2Vu
+Z2luZT1zeW5jDQo+IGJzcmFuZ2U9NGstNGsNCj4gcnVudGltZT0xODANCj4gZ3JvdXBfcmVwb3J0
+aW5nDQo+IA0KPiBbZGlzazAxXQ0KPiBmaWxlbmFtZT0vZGV2L3ZkYg0KPiANCj4gDQo+ICMgY2F0
+IHZkYy5jZmcNCj4gW2dsb2JhbF0NCj4gcnc9cmFuZHdyaXRlDQo+IGRpcmVjdD0xDQo+IG51bWpv
+YnM9NjQNCj4gaW9lbmdpbmU9c3luYw0KPiBic3JhbmdlPTRrLTRrDQo+IHJ1bnRpbWU9MTgwDQo+
+IGdyb3VwX3JlcG9ydGluZw0KPiANCj4gW2Rpc2swMV0NCj4gZmlsZW5hbWU9L2Rldi92ZGMNCj4g
+DQo+ICMgY2F0IHZkZC5jZmcNCj4gW2dsb2JhbF0NCj4gcnc9cmFuZHdyaXRlDQo+IGRpcmVjdD0x
+DQo+IG51bWpvYnM9NjQNCj4gaW9lbmdpbmU9c3luYw0KPiBic3JhbmdlPTRrLTRrDQo+IHJ1bnRp
+bWU9MTgwDQo+IGdyb3VwX3JlcG9ydGluZw0KPiANCj4gW2Rpc2swMV0NCj4gZmlsZW5hbWU9L2Rl
+di92ZGQNCj4gDQo+ICMgY2F0IHZkZS5jZmcNCj4gW2dsb2JhbF0NCj4gcnc9cmFuZHdyaXRlDQo+
+IGRpcmVjdD0xDQo+IG51bWpvYnM9NjQNCj4gaW9lbmdpbmU9c3luYw0KPiBic3JhbmdlPTRrLTRr
+DQo+IHJ1bnRpbWU9MTgwDQo+IGdyb3VwX3JlcG9ydGluZw0KPiANCj4gW2Rpc2swMV0NCj4gZmls
+ZW5hbWU9L2Rldi92ZGUNCj4gDQo+IEFmdGVyIHJ1biB0aGUgc2NyaXB0cyByZXByb2R1Y2Uuc2gs
+IHRoZSBkaXNrcyBpbiB0aGUgVk0ncyBJT1BTIGN1dGRvd24gZnJvbQ0KPiAxMmsgdG8gNWssIHRo
+ZSBsYXRlbmN5IGluY3JlYXNlIGZyb20gNG1zIHRvIDcuM21zLg0KPiANCj4gcnVuIHN0ZXBzOg0K
+PiAxLiBjcmVhdGUgYSBWTQ0KPiAyLiBjcmVhdGUgZm91ciB2b2x1bWVzIGFuZCBhdHRhdGNoIHRv
+IHRoZSBWTSAzLiBzaCByZXByb2R1Y2Uuc2ggNC4gaW4gdGhlDQo+IHJ1bnRpbWUgb2YgIHJlcHJv
+ZHVjZS5zaCwgcnVuICJmaW8gdmRkLmNmZyIgb3IgImZpbyB2ZGUuY2ZnIiB0byBjaGVja3QgdGhl
+DQo+IHBlcmZvcm1hbmNlDQo+IA0KPiBBZnRlciByZXByb2R1Y2Uuc2ggZmluaXNoZWQsIHBlcmZv
+cm1hbmNlIGRvd24uDQo+IA0KPiANCj4gQW55b25lIGhhcyB0aGUgc2FtZSBwcm9ibGVtIG9yIGhh
+cyBzb21lIGlkZWFzIGFib3V0IHRoaXM/DQo+IA0KPiBUaGFua3MhDQo+IC0tLS0tLS0tLS0tLS0t
+DQo+IGh6d3VsaWJpbg0KPiAyMDE1LTExLTAyDQo+IHsubiArICAgICAgICslICBsendtICBiIOun
+siAgciAgecepINevelggICAg3Kh9ICAgxqB6ICZqOit2ICAgICAgICB6WisgICt6ZiAgIGggICB+
+ICAgIGkgICB6IHcgICA/DQo+ICYgKd+iIGYNCg==
 
-                     <yet another reply w/o a signature>
-                                   ...
-          <Ctrl-C>
-    rbd_obj_request_end
-      ceph_osdc_cancel_request
-        __unregister_request
-          ceph_osdc_put_request
-            ceph_msg_revoke_incoming
-                                   ...
-                                osd_reset
-                                  __kick_osd_requests
-                                    __reset_osd
-                                      remove_osd
-                                        ceph_con_close
-                                          reset_connection
-                                            <clear con->in_msg->con>
-                                            <put con ref>
-                                              put_osd
-                                                <free osd/con>
-              <msg->con use> <-- !!!
+------=_001_NextPart741106821217_=----
+Content-Type: text/html;
+	charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-If ceph_msg_revoke_incoming() executes "before" the reset handler,
-osd/con will be leaked because ceph_msg_revoke_incoming() clears
-con->in_msg but doesn't put con ref, while reset_connection() only puts
-con ref if con->in_msg != NULL.
+<html><head><meta http-equiv=3D"content-type" content=3D"text/html; charse=
+t=3DUTF-8"><style>body { line-height: 1.5; }blockquote { margin-top: 0px; =
+margin-bottom: 0px; margin-left: 0.5em; }body { font-size: 10.5pt; font-fa=
+mily: =E5=BE=AE=E8=BD=AF=E9=9B=85=E9=BB=91; color: rgb(0, 0, 0); line-heig=
+ht: 1.5; }</style></head><body>=0A<div><span></span>Hi,</div><div><br></di=
+v><div>Thank you, that make sense for testing, but i'm afraid not in my ca=
+se.</div><div>Even i test on the volume that already test many times, the =
+IOPS will not growing up&nbsp;</div><div>again. Yeah, i mean, this VM is b=
+roken, IOPS of the VM will never growing up..</div><div><br></div><div>Tha=
+nks!</div>=0A<div><br></div><hr style=3D"width: 210px; height: 1px;" color=
+=3D"#b5c4df" size=3D"1" align=3D"left">=0A<div><span><div style=3D"MARGIN:=
+ 10px; FONT-FAMILY: verdana; FONT-SIZE: 10pt"><div>hzwulibin-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</di=
+v></div></span></div>=0A<blockquote style=3D"margin-top: 0px; margin-botto=
+m: 0px; margin-left: 0.5em;"><div>&nbsp;</div><div style=3D"border:none;bo=
+rder-top:solid #B5C4DF 1.0pt;padding:3.0pt 0cm 0cm 0cm"><div style=3D"PADD=
+ING-RIGHT: 8px; PADDING-LEFT: 8px; FONT-SIZE: 12px;FONT-FAMILY:tahoma;COLO=
+R:#000000; BACKGROUND: #efefef; PADDING-BOTTOM: 8px; PADDING-TOP: 8px"><di=
+v><b>From:</b>&nbsp;<a href=3D"mailto:xiaoxi.chen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org">Chen, Xiaoxi<=
+/a></div><div><b>Date:</b>&nbsp;2015-11-02&nbsp;14:11</div><div><b>To:</b>=
+&nbsp;<a href=3D"mailto:hzwulibin-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org">hzwulibin</a>; <a href=3D"mai=
+lto:ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org">ceph-devel</a>; <a href=3D"mailto:ceph-use=
+rs-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">ceph-users</a></div><div><b>Subject:</b>&nbsp;RE: [perf=
+ormance] why rbd_aio_write latency increase from 4ms to 7.3ms after the sa=
+me test</div></div></div><div><div>Pre-allocated the volume by "DD" across=
+ the entire RBD before you do any performance test:).</div>=0A<div>&nbsp;<=
+/div>=0A<div>In this case, you may want to re-create the RBD, pre-allocate=
+ and try again.</div>=0A<div>&nbsp;</div>=0A<div>&gt; -----Original Messag=
+e-----</div>=0A<div>&gt; From: ceph-devel-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org [mailto:ce=
+ph-devel-</div>=0A<div>&gt; owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org] On Behalf Of hzwulibin<=
+/div>=0A<div>&gt; Sent: Monday, November 2, 2015 1:24 PM</div>=0A<div>&gt;=
+ To: ceph-devel; ceph-users</div>=0A<div>&gt; Subject: [performance] why r=
+bd_aio_write latency increase from 4ms to</div>=0A<div>&gt; 7.3ms after th=
+e same test</div>=0A<div>&gt; </div>=0A<div>&gt; Hi,</div>=0A<div>&gt; sam=
+e environment, after a test script, the io latency(get from sudo ceph --</=
+div>=0A<div>&gt; admin-daemon /run/ceph/guests/ceph-client.*.asok per dump=
+) increase</div>=0A<div>&gt; from about 4ms to 7.3ms</div>=0A<div>&gt; </d=
+iv>=0A<div>&gt; qemu version: debian 2.1.2</div>=0A<div>&gt; kernel:3.10.4=
+5-openstack-amd64</div>=0A<div>&gt; system: debian 7.8</div>=0A<div>&gt; c=
+eph: 0.94.5</div>=0A<div>&gt; VM CPU number: 4&nbsp; (cpu MHz : 2599.998)<=
+/div>=0A<div>&gt; VM memory size: 16GB</div>=0A<div>&gt; 9 OSD storage ser=
+vers, with 4 SSD OSD on each, total 36 OSDs.</div>=0A<div>&gt; </div>=0A<d=
+iv>&gt; Test scripts in VM:</div>=0A<div>&gt; # cat reproduce.sh</div>=0A<=
+div>&gt; #!/bin/bash</div>=0A<div>&gt; </div>=0A<div>&gt; times=3D20</div>=
+=0A<div>&gt; for((i=3D1;i&lt;=3D$times;i++))</div>=0A<div>&gt; do</div>=0A=
+<div>&gt;&nbsp;&nbsp;&nbsp;&nbsp; tmpdate=3D`date "+%F-%T"`</div>=0A<div>&=
+gt;&nbsp;&nbsp;&nbsp;&nbsp; echo</div>=0A<div>&gt; "=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D$tmpdate($i/$times)=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D</div>=0A<div>&gt; =3D=
+=3D=3D=3D"</div>=0A<div>&gt;&nbsp;&nbsp;&nbsp;&nbsp; tmp=3D$((i%2))</div>=
+=0A<div>&gt;&nbsp;&nbsp;&nbsp;&nbsp; if [[ $tmp -eq 0 ]];then</div>=0A<div=
+>&gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; echo "##############=
+# fio /root/vdb.cfg ###############"</div>=0A<div>&gt;&nbsp;&nbsp;&nbsp;&n=
+bsp;&nbsp;&nbsp;&nbsp;&nbsp; fio /root/vdb.cfg</div>=0A<div>&gt;&nbsp;&nbs=
+p;&nbsp;&nbsp; else</div>=0A<div>&gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&=
+nbsp;&nbsp; echo "############### fio /root/vdc.cfg ###############"</div>=
+=0A<div>&gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; fio /root/vdc=
+.cfg</div>=0A<div>&gt;&nbsp;&nbsp;&nbsp;&nbsp; fi</div>=0A<div>&gt; done</=
+div>=0A<div>&gt; </div>=0A<div>&gt; </div>=0A<div>&gt; tmpdate=3D`date "+%=
+F-%T"`</div>=0A<div>&gt; echo "############### [$tmpdate] fio /root/vde.cf=
+g ###############"</div>=0A<div>&gt; fio /root/vde.cfg</div>=0A<div>&gt; <=
+/div>=0A<div>&gt; </div>=0A<div>&gt; # cat vdb.cfg</div>=0A<div>&gt; [glob=
+al]</div>=0A<div>&gt; rw=3Drandwrite</div>=0A<div>&gt; direct=3D1</div>=0A=
+<div>&gt; numjobs=3D64</div>=0A<div>&gt; ioengine=3Dsync</div>=0A<div>&gt;=
+ bsrange=3D4k-4k</div>=0A<div>&gt; runtime=3D180</div>=0A<div>&gt; group_r=
+eporting</div>=0A<div>&gt; </div>=0A<div>&gt; [disk01]</div>=0A<div>&gt; f=
+ilename=3D/dev/vdb</div>=0A<div>&gt; </div>=0A<div>&gt; </div>=0A<div>&gt;=
+ # cat vdc.cfg</div>=0A<div>&gt; [global]</div>=0A<div>&gt; rw=3Drandwrite=
+</div>=0A<div>&gt; direct=3D1</div>=0A<div>&gt; numjobs=3D64</div>=0A<div>=
+&gt; ioengine=3Dsync</div>=0A<div>&gt; bsrange=3D4k-4k</div>=0A<div>&gt; r=
+untime=3D180</div>=0A<div>&gt; group_reporting</div>=0A<div>&gt; </div>=0A=
+<div>&gt; [disk01]</div>=0A<div>&gt; filename=3D/dev/vdc</div>=0A<div>&gt;=
+ </div>=0A<div>&gt; # cat vdd.cfg</div>=0A<div>&gt; [global]</div>=0A<div>=
+&gt; rw=3Drandwrite</div>=0A<div>&gt; direct=3D1</div>=0A<div>&gt; numjobs=
+=3D64</div>=0A<div>&gt; ioengine=3Dsync</div>=0A<div>&gt; bsrange=3D4k-4k<=
+/div>=0A<div>&gt; runtime=3D180</div>=0A<div>&gt; group_reporting</div>=0A=
+<div>&gt; </div>=0A<div>&gt; [disk01]</div>=0A<div>&gt; filename=3D/dev/vd=
+d</div>=0A<div>&gt; </div>=0A<div>&gt; # cat vde.cfg</div>=0A<div>&gt; [gl=
+obal]</div>=0A<div>&gt; rw=3Drandwrite</div>=0A<div>&gt; direct=3D1</div>=
+=0A<div>&gt; numjobs=3D64</div>=0A<div>&gt; ioengine=3Dsync</div>=0A<div>&=
+gt; bsrange=3D4k-4k</div>=0A<div>&gt; runtime=3D180</div>=0A<div>&gt; grou=
+p_reporting</div>=0A<div>&gt; </div>=0A<div>&gt; [disk01]</div>=0A<div>&gt=
+; filename=3D/dev/vde</div>=0A<div>&gt; </div>=0A<div>&gt; After run the s=
+cripts reproduce.sh, the disks in the VM's IOPS cutdown from</div>=0A<div>=
+&gt; 12k to 5k, the latency increase from 4ms to 7.3ms.</div>=0A<div>&gt; =
+</div>=0A<div>&gt; run steps:</div>=0A<div>&gt; 1. create a VM</div>=0A<di=
+v>&gt; 2. create four volumes and attatch to the VM 3. sh reproduce.sh 4. =
+in the</div>=0A<div>&gt; runtime of&nbsp; reproduce.sh, run "fio vdd.cfg" =
+or "fio vde.cfg" to checkt the</div>=0A<div>&gt; performance</div>=0A<div>=
+&gt; </div>=0A<div>&gt; After reproduce.sh finished, performance down.</di=
+v>=0A<div>&gt; </div>=0A<div>&gt; </div>=0A<div>&gt; Anyone has the same p=
+roblem or has some ideas about this?</div>=0A<div>&gt; </div>=0A<div>&gt; =
+Thanks!</div>=0A<div>&gt; --------------</div>=0A<div>&gt; hzwulibin</div>=
+=0A<div>&gt; 2015-11-02</div>=0A<div>&gt; =04 {.n +&nbsp;&nbsp;&nbsp;&nbsp=
+;&nbsp;&nbsp; +%&nbsp; lzwm&nbsp; b =EB=A7=B2&nbsp; r&nbsp; y=C7=A9 =D7=AF=
+zX&nbsp; =17&nbsp; =DC=A8}&nbsp;&nbsp; =C6=A0z &amp;j:+v&nbsp;&nbsp;&nbsp;=
+&nbsp;&nbsp;&nbsp;&nbsp; zZ+&nbsp; +zf&nbsp;&nbsp; h&nbsp;&nbsp; ~&nbsp;&n=
+bsp;&nbsp; i&nbsp;&nbsp; z =1E w&nbsp;&nbsp; ?</div>=0A<div>&gt; &amp; )=
+=DF=A2=1Bf</div>=0A</div></blockquote>=0A</body></html>
+------=_001_NextPart741106821217_=------
 
-The current msg->con scheme was introduced by commits 38941f8031bf
-("libceph: have messages point to their connection") and 92ce034b5a74
-("libceph: have messages take a connection reference"), which defined
-when messages get associated with a connection and when that
-association goes away.  Part of the problem is that this association is
-supposed to go away in much too many places; closing this race entirely
-requires either a rework of the existing or an addition of a new layer
-of synchronization.
 
-In lieu of that, we can make it *much* less likely to hit by
-disassociating messages only on their destruction and resend through
-a different connection.  This makes the code simpler and is probably
-a good thing to do regardless - this patch adds a msg_con_set() helper
-which is is called from only three places: ceph_con_send() and
-ceph_con_in_msg_alloc() to set msg->con and ceph_msg_release() to clear
-it.
+--===============1794768861==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
 
-Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
----
- net/ceph/messenger.c  | 45 ++++++++++++++++++++-------------------------
- net/ceph/osd_client.c |  3 ---
- 2 files changed, 20 insertions(+), 28 deletions(-)
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index 0cc5608b2c8f..9981039ef4ff 100644
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -637,9 +637,6 @@ static int con_close_socket(struct ceph_connection *con)
- static void ceph_msg_remove(struct ceph_msg *msg)
- {
- 	list_del_init(&msg->list_head);
--	BUG_ON(msg->con == NULL);
--	msg->con->ops->put(msg->con);
--	msg->con = NULL;
- 
- 	ceph_msg_put(msg);
- }
-@@ -662,15 +659,14 @@ static void reset_connection(struct ceph_connection *con)
- 
- 	if (con->in_msg) {
- 		BUG_ON(con->in_msg->con != con);
--		con->in_msg->con = NULL;
- 		ceph_msg_put(con->in_msg);
- 		con->in_msg = NULL;
--		con->ops->put(con);
- 	}
- 
- 	con->connect_seq = 0;
- 	con->out_seq = 0;
- 	if (con->out_msg) {
-+		BUG_ON(con->out_msg->con != con);
- 		ceph_msg_put(con->out_msg);
- 		con->out_msg = NULL;
- 	}
-@@ -2438,13 +2434,10 @@ static int read_partial_message(struct ceph_connection *con)
-  */
- static void process_message(struct ceph_connection *con)
- {
--	struct ceph_msg *msg;
-+	struct ceph_msg *msg = con->in_msg;
- 
- 	BUG_ON(con->in_msg->con != con);
--	con->in_msg->con = NULL;
--	msg = con->in_msg;
- 	con->in_msg = NULL;
--	con->ops->put(con);
- 
- 	/* if first message, set peer_name */
- 	if (con->peer_name.type == 0)
-@@ -2918,10 +2911,8 @@ static void con_fault(struct ceph_connection *con)
- 
- 	if (con->in_msg) {
- 		BUG_ON(con->in_msg->con != con);
--		con->in_msg->con = NULL;
- 		ceph_msg_put(con->in_msg);
- 		con->in_msg = NULL;
--		con->ops->put(con);
- 	}
- 
- 	/* Requeue anything that hasn't been acked */
-@@ -2977,6 +2968,15 @@ void ceph_messenger_fini(struct ceph_messenger *msgr)
- }
- EXPORT_SYMBOL(ceph_messenger_fini);
- 
-+static void msg_con_set(struct ceph_msg *msg, struct ceph_connection *con)
-+{
-+	if (msg->con)
-+		msg->con->ops->put(msg->con);
-+
-+	msg->con = con ? con->ops->get(con) : NULL;
-+	BUG_ON(msg->con != con);
-+}
-+
- static void clear_standby(struct ceph_connection *con)
- {
- 	/* come back from STANDBY? */
-@@ -3008,9 +3008,7 @@ void ceph_con_send(struct ceph_connection *con, struct ceph_msg *msg)
- 		return;
- 	}
- 
--	BUG_ON(msg->con != NULL);
--	msg->con = con->ops->get(con);
--	BUG_ON(msg->con == NULL);
-+	msg_con_set(msg, con);
- 
- 	BUG_ON(!list_empty(&msg->list_head));
- 	list_add_tail(&msg->list_head, &con->out_queue);
-@@ -3038,16 +3036,15 @@ void ceph_msg_revoke(struct ceph_msg *msg)
- {
- 	struct ceph_connection *con = msg->con;
- 
--	if (!con)
-+	if (!con) {
-+		dout("%s msg %p null con\n", __func__, msg);
- 		return;		/* Message not in our possession */
-+	}
- 
- 	mutex_lock(&con->mutex);
- 	if (!list_empty(&msg->list_head)) {
- 		dout("%s %p msg %p - was on queue\n", __func__, con, msg);
- 		list_del_init(&msg->list_head);
--		BUG_ON(msg->con == NULL);
--		msg->con->ops->put(msg->con);
--		msg->con = NULL;
- 		msg->hdr.seq = 0;
- 
- 		ceph_msg_put(msg);
-@@ -3071,16 +3068,13 @@ void ceph_msg_revoke(struct ceph_msg *msg)
-  */
- void ceph_msg_revoke_incoming(struct ceph_msg *msg)
- {
--	struct ceph_connection *con;
-+	struct ceph_connection *con = msg->con;
- 
--	BUG_ON(msg == NULL);
--	if (!msg->con) {
-+	if (!con) {
- 		dout("%s msg %p null con\n", __func__, msg);
--
- 		return;		/* Message not in our possession */
- 	}
- 
--	con = msg->con;
- 	mutex_lock(&con->mutex);
- 	if (con->in_msg == msg) {
- 		unsigned int front_len = le32_to_cpu(con->in_hdr.front_len);
-@@ -3326,9 +3320,8 @@ static int ceph_con_in_msg_alloc(struct ceph_connection *con, int *skip)
- 	}
- 	if (msg) {
- 		BUG_ON(*skip);
-+		msg_con_set(msg, con);
- 		con->in_msg = msg;
--		con->in_msg->con = con->ops->get(con);
--		BUG_ON(con->in_msg->con == NULL);
- 	} else {
- 		/*
- 		 * Null message pointer means either we should skip
-@@ -3375,6 +3368,8 @@ static void ceph_msg_release(struct kref *kref)
- 	dout("%s %p\n", __func__, m);
- 	WARN_ON(!list_empty(&m->list_head));
- 
-+	msg_con_set(m, NULL);
-+
- 	/* drop middle, data, if any */
- 	if (m->middle) {
- 		ceph_buffer_put(m->middle);
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 118e4ce37ecc..f8f235930d88 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -2850,9 +2850,6 @@ static struct ceph_msg *get_reply(struct ceph_connection *con,
- 		goto out;
- 	}
- 
--	if (req->r_reply->con)
--		dout("%s revoking msg %p from old con %p\n", __func__,
--		     req->r_reply, req->r_reply->con);
- 	ceph_msg_revoke_incoming(req->r_reply);
- 
- 	if (front_len > req->r_reply->front_alloc_len) {
--- 
-2.4.3
-
+--===============1794768861==--
