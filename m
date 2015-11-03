@@ -1,91 +1,164 @@
-From: "hzwulibin" <hzwulibin@gmail.com>
-Subject: Re:  RE: [performance] why rbd_aio_write latency increase from 4ms to
- 7.3ms after the same test
-Date: Tue, 03 Nov 2015 08:47:57 +0800
-Message-ID: <5638043A.7000609@gmail.com>
-References: <5636F376.3090104@gmail.com>
-	<6F3FA899187F0043BA1827A69DA2F7CC03639832@shsmsx102.ccr.corp.intel.com>
+From: Samuel Just <sjust@redhat.com>
+Subject: =?UTF-8?B?UmU6IOetlOWkjTog562U5aSNOiDnrZTlpI06IGFub3RoZXIgcGVlcmluZyBzdHVjayBjYQ==?=
+	=?UTF-8?B?dXNlZCBieSBuZXQgcHJvYmxlbS4=?=
+Date: Mon, 2 Nov 2015 17:12:15 -0800
+Message-ID: <CAN=+7FXcr82-WWV6UK2WC3-nU+V907LpgqL7+YZUEEJX_+Z4nw@mail.gmail.com>
+References: <5F4E7462F2F4A14E974FBE17B8EB37210E5B1FB1@H3CMLB12-EX.srv.huawei-3com.com>
+	<CAN=+7FVJaD2fpgFuEPJ0Mincv5M4K+w_qg0DHYxsXU-4R5=o=w@mail.gmail.com>
+	<0C3F6DA3760D0C4691E69E5BE224FF495E17479D@H3CMLB12-EX.srv.huawei-3com.com>
+	<CAN=+7FW+6x39_Z0uXNuCjwQUPC4EPQTSDC1iG_duycdmvLZF9g@mail.gmail.com>
+	<0C3F6DA3760D0C4691E69E5BE224FF495E1759B9@H3CMLB12-EX.srv.huawei-3com.com>
+	<CAN=+7FU4kwfJDxCDn9TRd+6sjKKZpWwLbd=tUpqCKgv9V_GMTw@mail.gmail.com>
+	<0C3F6DA3760D0C4691E69E5BE224FF495E175A2E@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f67.google.com ([209.85.220.67]:34620 "EHLO
-	mail-pa0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752246AbbKCAr6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Nov 2015 19:47:58 -0500
-Received: by padda3 with SMTP id da3so145692pad.1
-        for <ceph-devel@vger.kernel.org>; Mon, 02 Nov 2015 16:47:58 -0800 (PST)
-Received: from HSH-D-2405 ([43.230.90.81])
-        by smtp.gmail.com with ESMTPSA id d7sm10062063pas.31.2015.11.02.16.47.56
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
-        Mon, 02 Nov 2015 16:47:57 -0800 (PST)
-In-Reply-To: <6F3FA899187F0043BA1827A69DA2F7CC03639832@shsmsx102.ccr.corp.intel.com>
+Received: from mail-ig0-f181.google.com ([209.85.213.181]:35625 "EHLO
+	mail-ig0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751478AbbKCBMQ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Nov 2015 20:12:16 -0500
+Received: by igpw7 with SMTP id w7so69947576igp.0
+        for <ceph-devel@vger.kernel.org>; Mon, 02 Nov 2015 17:12:15 -0800 (PST)
+In-Reply-To: <0C3F6DA3760D0C4691E69E5BE224FF495E175A2E@H3CMLB12-EX.srv.huawei-3com.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: "yangruifeng.09209@h3c.com" <yangruifeng.09209@h3c.com>
+Cc: Chenxiaowei <chen.xiaowei@h3c.com>, "Sage Weil (sweil@redhat.com)" <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SGksDQoNClRoYW5rIHlvdSwgdGhhdCBtYWtlIHNlbnNlIGZvciB0ZXN0aW5nLCBidXQgaSdtIGFm
-cmFpZCBub3QgaW4gbXkgY2FzZS4NCkV2ZW4gaSB0ZXN0IG9uIHRoZSB2b2x1bWUgdGhhdCBhbHJl
-YWR5IHRlc3QgbWFueSB0aW1lcywgdGhlIElPUFMgd2lsbCBub3QgZ3Jvd2luZyB1cCANCmFnYWlu
-LiBZZWFoLCBpIG1lYW4sIHRoaXMgVk0gaXMgYnJva2VuLCBJT1BTIG9mIHRoZSBWTSB3aWxsIG5l
-dmVyIGdyb3dpbmcgdXAuLg0KDQpUaGFua3MhDQoNCi0tLS0tLS0tLS0tLS0tLS0tLQkJCQkgDQpo
-end1bGliaW4NCjIwMTUtMTEtMDMNCg0KLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0K5Y+R5Lu25Lq677yaIkNoZW4sIFhpYW94aSIg
-PHhpYW94aS5jaGVuQGludGVsLmNvbT4NCuWPkemAgeaXpeacn++8mjIwMTUtMTEtMDIgMTQ6MTEN
-CuaUtuS7tuS6uu+8mmh6d3VsaWJpbixjZXBoLWRldmVsLGNlcGgtdXNlcnMNCuaKhOmAge+8mg0K
-5Li76aKY77yaUkU6IFtwZXJmb3JtYW5jZV0gd2h5IHJiZF9haW9fd3JpdGUgbGF0ZW5jeSBpbmNy
-ZWFzZSBmcm9tIDRtcyB0bw0KIDcuM21zIGFmdGVyIHRoZSBzYW1lIHRlc3QNCg0KUHJlLWFsbG9j
-YXRlZCB0aGUgdm9sdW1lIGJ5ICJERCIgYWNyb3NzIHRoZSBlbnRpcmUgUkJEIGJlZm9yZSB5b3Ug
-ZG8gYW55IHBlcmZvcm1hbmNlIHRlc3Q6KS4NCg0KSW4gdGhpcyBjYXNlLCB5b3UgbWF5IHdhbnQg
-dG8gcmUtY3JlYXRlIHRoZSBSQkQsIHByZS1hbGxvY2F0ZSBhbmQgdHJ5IGFnYWluLg0KDQo+IC0t
-LS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5r
-ZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC0NCj4gb3duZXJAdmdlci5rZXJuZWwub3JnXSBP
-biBCZWhhbGYgT2YgaHp3dWxpYmluDQo+IFNlbnQ6IE1vbmRheSwgTm92ZW1iZXIgMiwgMjAxNSAx
-OjI0IFBNDQo+IFRvOiBjZXBoLWRldmVsOyBjZXBoLXVzZXJzDQo+IFN1YmplY3Q6IFtwZXJmb3Jt
-YW5jZV0gd2h5IHJiZF9haW9fd3JpdGUgbGF0ZW5jeSBpbmNyZWFzZSBmcm9tIDRtcyB0bw0KPiA3
-LjNtcyBhZnRlciB0aGUgc2FtZSB0ZXN0DQo+IA0KPiBIaSwNCj4gc2FtZSBlbnZpcm9ubWVudCwg
-YWZ0ZXIgYSB0ZXN0IHNjcmlwdCwgdGhlIGlvIGxhdGVuY3koZ2V0IGZyb20gc3VkbyBjZXBoIC0t
-DQo+IGFkbWluLWRhZW1vbiAvcnVuL2NlcGgvZ3Vlc3RzL2NlcGgtY2xpZW50LiouYXNvayBwZXIg
-ZHVtcCkgaW5jcmVhc2UNCj4gZnJvbSBhYm91dCA0bXMgdG8gNy4zbXMNCj4gDQo+IHFlbXUgdmVy
-c2lvbjogZGViaWFuIDIuMS4yDQo+IGtlcm5lbDozLjEwLjQ1LW9wZW5zdGFjay1hbWQ2NA0KPiBz
-eXN0ZW06IGRlYmlhbiA3LjgNCj4gY2VwaDogMC45NC41DQo+IFZNIENQVSBudW1iZXI6IDQgIChj
-cHUgTUh6IDogMjU5OS45OTgpDQo+IFZNIG1lbW9yeSBzaXplOiAxNkdCDQo+IDkgT1NEIHN0b3Jh
-Z2Ugc2VydmVycywgd2l0aCA0IFNTRCBPU0Qgb24gZWFjaCwgdG90YWwgMzYgT1NEcy4NCj4gDQo+
-IFRlc3Qgc2NyaXB0cyBpbiBWTToNCj4gIyBjYXQgcmVwcm9kdWNlLnNoDQo+ICMhL2Jpbi9iYXNo
-DQo+IA0KPiB0aW1lcz0yMA0KPiBmb3IoKGk9MTtpPD0kdGltZXM7aSsrKSkNCj4gZG8NCj4gICAg
-IHRtcGRhdGU9YGRhdGUgIislRi0lVCJgDQo+ICAgICBlY2hvDQo+ICI9PT09PT09PT09PT09PT09
-PT09PT09PSR0bXBkYXRlKCRpLyR0aW1lcyk9PT09PT09PT09PT09PT09PT09DQo+ID09PT0iDQo+
-ICAgICB0bXA9JCgoaSUyKSkNCj4gICAgIGlmIFtbICR0bXAgLWVxIDAgXV07dGhlbg0KPiAgICAg
-ICAgIGVjaG8gIiMjIyMjIyMjIyMjIyMjIyBmaW8gL3Jvb3QvdmRiLmNmZyAjIyMjIyMjIyMjIyMj
-IyMiDQo+ICAgICAgICAgZmlvIC9yb290L3ZkYi5jZmcNCj4gICAgIGVsc2UNCj4gICAgICAgICBl
-Y2hvICIjIyMjIyMjIyMjIyMjIyMgZmlvIC9yb290L3ZkYy5jZmcgIyMjIyMjIyMjIyMjIyMjIg0K
-PiAgICAgICAgIGZpbyAvcm9vdC92ZGMuY2ZnDQo+ICAgICBmaQ0KPiBkb25lDQo+IA0KPiANCj4g
-dG1wZGF0ZT1gZGF0ZSAiKyVGLSVUImANCj4gZWNobyAiIyMjIyMjIyMjIyMjIyMjIFskdG1wZGF0
-ZV0gZmlvIC9yb290L3ZkZS5jZmcgIyMjIyMjIyMjIyMjIyMjIg0KPiBmaW8gL3Jvb3QvdmRlLmNm
-Zw0KPiANCj4gDQo+ICMgY2F0IHZkYi5jZmcNCj4gW2dsb2JhbF0NCj4gcnc9cmFuZHdyaXRlDQo+
-IGRpcmVjdD0xDQo+IG51bWpvYnM9NjQNCj4gaW9lbmdpbmU9c3luYw0KPiBic3JhbmdlPTRrLTRr
-DQo+IHJ1bnRpbWU9MTgwDQo+IGdyb3VwX3JlcG9ydGluZw0KPiANCj4gW2Rpc2swMV0NCj4gZmls
-ZW5hbWU9L2Rldi92ZGINCj4gDQo+IA0KPiAjIGNhdCB2ZGMuY2ZnDQo+IFtnbG9iYWxdDQo+IHJ3
-PXJhbmR3cml0ZQ0KPiBkaXJlY3Q9MQ0KPiBudW1qb2JzPTY0DQo+IGlvZW5naW5lPXN5bmMNCj4g
-YnNyYW5nZT00ay00aw0KPiBydW50aW1lPTE4MA0KPiBncm91cF9yZXBvcnRpbmcNCj4gDQo+IFtk
-aXNrMDFdDQo+IGZpbGVuYW1lPS9kZXYvdmRjDQo+IA0KPiAjIGNhdCB2ZGQuY2ZnDQo+IFtnbG9i
-YWxdDQo+IHJ3PXJhbmR3cml0ZQ0KPiBkaXJlY3Q9MQ0KPiBudW1qb2JzPTY0DQo+IGlvZW5naW5l
-PXN5bmMNCj4gYnNyYW5nZT00ay00aw0KPiBydW50aW1lPTE4MA0KPiBncm91cF9yZXBvcnRpbmcN
-Cj4gDQo+IFtkaXNrMDFdDQo+IGZpbGVuYW1lPS9kZXYvdmRkDQo+IA0KPiAjIGNhdCB2ZGUuY2Zn
-DQo+IFtnbG9iYWxdDQo+IHJ3PXJhbmR3cml0ZQ0KPiBkaXJlY3Q9MQ0KPiBudW1qb2JzPTY0DQo+
-IGlvZW5naW5lPXN5bmMNCj4gYnNyYW5nZT00ay00aw0KPiBydW50aW1lPTE4MA0KPiBncm91cF9y
-ZXBvcnRpbmcNCj4gDQo+IFtkaXNrMDFdDQo+IGZpbGVuYW1lPS9kZXYvdmRlDQo+IA0KPiBBZnRl
-ciBydW4gdGhlIHNjcmlwdHMgcmVwcm9kdWNlLnNoLCB0aGUgZGlza3MgaW4gdGhlIFZNJ3MgSU9Q
-UyBjdXRkb3duIGZyb20NCj4gMTJrIHRvIDVrLCB0aGUgbGF0ZW5jeSBpbmNyZWFzZSBmcm9tIDRt
-cyB0byA3LjNtcy4NCj4gDQo+IHJ1biBzdGVwczoNCj4gMS4gY3JlYXRlIGEgVk0NCj4gMi4gY3Jl
-YXRlIGZvdXIgdm9sdW1lcyBhbmQgYXR0YXRjaCB0byB0aGUgVk0gMy4gc2ggcmVwcm9kdWNlLnNo
-IDQuIGluIHRoZQ0KPiBydW50aW1lIG9mICByZXByb2R1Y2Uuc2gsIHJ1biAiZmlvIHZkZC5jZmci
-IG9yICJmaW8gdmRlLmNmZyIgdG8gY2hlY2t0IHRoZQ0KPiBwZXJmb3JtYW5jZQ0KPiANCj4gQWZ0
-ZXIgcmVwcm9kdWNlLnNoIGZpbmlzaGVkLCBwZXJmb3JtYW5jZSBkb3duLg0KPiANCj4gDQo+IEFu
-eW9uZSBoYXMgdGhlIHNhbWUgcHJvYmxlbSBvciBoYXMgc29tZSBpZGVhcyBhYm91dCB0aGlzPw0K
-PiANCj4gVGhhbmtzIQ0KPiAtLS0tLS0tLS0tLS0tLQ0KPiBoend1bGliaW4NCj4gMjAxNS0xMS0w
-Mg0KPiAEIHsubiArICAgICAgICslICBsendtICBiIOunsiAgciAgecepINevelggIBcgINyofSAg
-IMageiAmajordiAgICAgICAgelorICAremYgICBoICAgfiAgICBpICAgeiAeIHcgICA/DQo+ICYg
-Kd+iG2YNCg0K
+The problem is that peering shouldn't hang for no reason.  If you are
+seeing peering hang for a long time either
+1) you are hitting a peering bug which we need to track down and fix
+2) peering actually cannot make progress.
 
+In case 1, it can be nice to have a work around to force peering to
+restart and avoid the bug.  However, case 2 would not be helped by
+restarting peering, you'd just end up in the same place.  If you did
+it based on a timeout, you'd just increase load by a ton when in that
+situation.  What problem are you trying to solve?
+-Sam
+
+On Mon, Nov 2, 2015 at 5:05 PM, yangruifeng.09209@h3c.com
+<yangruifeng.09209@h3c.com> wrote:
+> ok.
+>
+> thanks
+> Ruifeng Yang
+>
+> -----=E9=82=AE=E4=BB=B6=E5=8E=9F=E4=BB=B6-----
+> =E5=8F=91=E4=BB=B6=E4=BA=BA: Samuel Just [mailto:sjust@redhat.com]
+> =E5=8F=91=E9=80=81=E6=97=B6=E9=97=B4: 2015=E5=B9=B411=E6=9C=883=E6=97=
+=A5 9:03
+> =E6=94=B6=E4=BB=B6=E4=BA=BA: yangruifeng 09209 (RD)
+> =E6=8A=84=E9=80=81: chenxiaowei 11245 (RD); Sage Weil (sweil@redhat.c=
+om)
+> =E4=B8=BB=E9=A2=98: Re: =E7=AD=94=E5=A4=8D: =E7=AD=94=E5=A4=8D: anoth=
+er peering stuck caused by net problem.
+>
+> Would it be ok if I reply to the list as well?
+> -Sam
+>
+> On Mon, Nov 2, 2015 at 4:37 PM, yangruifeng.09209@h3c.com <yangruifen=
+g.09209@h3c.com> wrote:
+>> the cluster is maybe always peering in same exceptional cases, but i=
+t
+>> can return to normal by *manual* 'ceph osd down <osdid>', this is no=
+t
+>> convenient in a production environment, and against the concept of r=
+ados.
+>> add a timeout mechanism to kick it, or kick it when io hang, maybe r=
+easonable?
+>>
+>> thanks,
+>> Ruifeng Yang
+>>
+>> -----=E9=82=AE=E4=BB=B6=E5=8E=9F=E4=BB=B6-----
+>> =E5=8F=91=E4=BB=B6=E4=BA=BA: Samuel Just [mailto:sjust@redhat.com]
+>> =E5=8F=91=E9=80=81=E6=97=B6=E9=97=B4: 2015=E5=B9=B411=E6=9C=883=E6=97=
+=A5 2:21
+>> =E6=94=B6=E4=BB=B6=E4=BA=BA: yangruifeng 09209 (RD)
+>> =E6=8A=84=E9=80=81: chenxiaowei 11245 (RD); Sage Weil (sweil@redhat.=
+com)
+>> =E4=B8=BB=E9=A2=98: Re: =E7=AD=94=E5=A4=8D: another peering stuck ca=
+used by net problem.
+>>
+>> I mean issue 'ceph osd down <osdid>' for the primary on the pg.  But=
+ that only causes peering to restart.  If peering stalled previously, i=
+t'll probably stall again.  What are you trying to accomplish?
+>> -Sam
+>>
+>> On Fri, Oct 30, 2015 at 5:51 PM, yangruifeng.09209@h3c.com <yangruif=
+eng.09209@h3c.com> wrote:
+>>> do you mean restart primary osd? or any other command=EF=BC=9F
+>>>
+>>> thanks
+>>> Ruifeng Yang
+>>>
+>>> -----=E9=82=AE=E4=BB=B6=E5=8E=9F=E4=BB=B6-----
+>>> =E5=8F=91=E4=BB=B6=E4=BA=BA: Samuel Just [mailto:sjust@redhat.com]
+>>> =E5=8F=91=E9=80=81=E6=97=B6=E9=97=B4: 2015=E5=B9=B410=E6=9C=8830=E6=
+=97=A5 23:07
+>>> =E6=94=B6=E4=BB=B6=E4=BA=BA: chenxiaowei 11245 (RD)
+>>> =E6=8A=84=E9=80=81: Sage Weil (sweil@redhat.com); yangruifeng 09209=
+ (RD)
+>>> =E4=B8=BB=E9=A2=98: Re: another peering stuck caused by net problem=
+=2E
+>>>
+>>> How would that help?  As a way to work around a possible bug?  You =
+can accomplish pretty much the same thing by setting the primary down.
+>>> -Sam
+>>>
+>>> On Wed, Oct 28, 2015 at 8:22 PM, Chenxiaowei <chen.xiaowei@h3c.com>=
+ wrote:
+>>>> Hi, Samuel&Sage:
+>>>>         I am cxwshawn from H3C(belong to HP), the pg peering stuck
+>>>> problem is a serious problem especially under the production envir=
+onment, So here we came up two solutions:
+>>>>         if state Peering stuck too long, we can check timeout
+>>>> exceeds to force transition from Peering to Reset state, Or we can=
+ add a command line to force one pg from Peering stuck to Reset state.
+>>>>
+>>>> What's your advice? Wish your reply
+>>>>
+>>>> Yours
+>>>> shawn from Beijing, China.
+>>>>
+>>>> ------------------------------------------------------------------=
+--
+>>>> -
+>>>> -
+>>>> ---------------------------------------------------------------
+>>>> =E6=9C=AC=E9=82=AE=E4=BB=B6=E5=8F=8A=E5=85=B6=E9=99=84=E4=BB=B6=E5=
+=90=AB=E6=9C=89=E6=9D=AD=E5=B7=9E=E5=8D=8E=E4=B8=89=E9=80=9A=E4=BF=A1=E6=
+=8A=80=E6=9C=AF=E6=9C=89=E9=99=90=E5=85=AC=E5=8F=B8=E7=9A=84=E4=BF=9D=E5=
+=AF=86=E4=BF=A1=E6=81=AF=EF=BC=8C=E4=BB=85=E9=99=90=E4=BA=8E=E5=8F=91=E9=
+=80=81=E7=BB=99=E4=B8=8A=E9=9D=A2=E5=9C=B0=E5=9D=80=E4=B8=AD=E5=88=97=E5=
+=87=BA
+>>>> =E7=9A=84=E4=B8=AA=E4=BA=BA=E6=88=96=E7=BE=A4=E7=BB=84=E3=80=82=E7=
+=A6=81=E6=AD=A2=E4=BB=BB=E4=BD=95=E5=85=B6=E4=BB=96=E4=BA=BA=E4=BB=A5=E4=
+=BB=BB=E4=BD=95=E5=BD=A2=E5=BC=8F=E4=BD=BF=E7=94=A8=EF=BC=88=E5=8C=85=E6=
+=8B=AC=E4=BD=86=E4=B8=8D=E9=99=90=E4=BA=8E=E5=85=A8=E9=83=A8=E6=88=96=E9=
+=83=A8=E5=88=86=E5=9C=B0=E6=B3=84=E9=9C=B2=E3=80=81=E5=A4=8D=E5=88=B6=E3=
+=80=81
+>>>> =E6=88=96=E6=95=A3=E5=8F=91=EF=BC=89=E6=9C=AC=E9=82=AE=E4=BB=B6=E4=
+=B8=AD=E7=9A=84=E4=BF=A1=E6=81=AF=E3=80=82=E5=A6=82=E6=9E=9C=E6=82=A8=E9=
+=94=99=E6=94=B6=E4=BA=86=E6=9C=AC=E9=82=AE=E4=BB=B6=EF=BC=8C=E8=AF=B7=E6=
+=82=A8=E7=AB=8B=E5=8D=B3=E7=94=B5=E8=AF=9D=E6=88=96=E9=82=AE=E4=BB=B6=E9=
+=80=9A=E7=9F=A5=E5=8F=91=E4=BB=B6=E4=BA=BA=E5=B9=B6=E5=88=A0=E9=99=A4=E6=
+=9C=AC
+>>>> =E9=82=AE=E4=BB=B6=EF=BC=81
+>>>> This e-mail and its attachments contain confidential information
+>>>> from H3C, which is intended only for the person or entity whose
+>>>> address is listed above. Any use of the information contained here=
+in
+>>>> in any way (including, but not limited to, total or partial
+>>>> disclosure, reproduction, or dissemination) by persons other than
+>>>> the intended
+>>>> recipient(s) is prohibited. If you receive this e-mail in error,
+>>>> please notify the sender by phone or email immediately and delete =
+it!
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
