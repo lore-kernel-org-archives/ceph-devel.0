@@ -1,36 +1,46 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: civetweb upstream/downstream divergence
-Date: Tue, 3 Nov 2015 03:22:56 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1511030320340.32232@cobra.newdream.net>
-References: <5631E4A5.9020003@suse.cz> <CADRKj5T5ZZBb+Mhut2jnzKoBEtTjw0tGWptqWVamgoLWaQfpgQ@mail.gmail.com> <20151029225738.51b8b2e5@lembas.zaitcev.lan> <CALqRxCwPNA0WFYu0oJ-70L3vgR0G8WLs4paU=K1xZCyf=a3Fjw@mail.gmail.com> <1446486438.12033.24.camel@millnert.se>
- <56387CDD.9070605@suse.cz>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: NIC with Erasure offload feature support and Ceph
+Date: Tue, 3 Nov 2015 07:07:17 -0800
+Message-ID: <CAJ4mKGbA39sAek3oG9-KrvpuQcOx=9iMCojGwmE8fa_3HkLXUQ@mail.gmail.com>
+References: <5638973D.6090100@gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:33073 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751504AbbKCLXA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 3 Nov 2015 06:23:00 -0500
-In-Reply-To: <56387CDD.9070605@suse.cz>
+Received: from mail-wm0-f42.google.com ([74.125.82.42]:36593 "EHLO
+	mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752492AbbKCPHS convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Nov 2015 10:07:18 -0500
+Received: by wmec75 with SMTP id c75so88929225wme.1
+        for <ceph-devel@vger.kernel.org>; Tue, 03 Nov 2015 07:07:17 -0800 (PST)
+In-Reply-To: <5638973D.6090100@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nathan Cutler <ncutler@suse.cz>
-Cc: Martin Millnert <martin@millnert.se>, Ken Dreyer <kdreyer@redhat.com>, Pete Zaitcev <zaitcev@redhat.com>, Yehuda Sadeh-Weinraub <yehuda@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Mike <mike.almateia@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Tue, 3 Nov 2015, Nathan Cutler wrote:
-> IMHO the first step should be to get rid of the evil submodule. Arguably
-> the most direct path leading to this goal is to simply package up the
-> downstream civetweb (i.e. 1.6 plus all the downstream patches) for all
-> the supported distros. The resulting package would be Ceph-specific,
-> obviously, so it could be called "civetweb-ceph".
-> 
-> Like Ken says, the upstreaming effort can continue in parallel.
+On Tue, Nov 3, 2015 at 3:15 AM, Mike <mike.almateia@gmail.com> wrote:
+> Hello!
+>
+> In our project we planing build a petabayte cluster with Erasure pool=
+=2E
+> Also we looking on Mellanox ConnectX-4 Lx EN Cards/ConnectX-4 EN Card=
+s
+> for using its a offloading erasure code feature.
+>
+> Someone use this feature in test lab/prodaction?
 
-I'm not sure I agree.  As long as everything is not upstream and we are 
-running a fork, what is the value of having it in a separate package?  
-That just means all of the effort of managing the package dependency and 
-making sure it is in all of the appropriate distros (and similar pain for 
-those building manually) without any of the benefits (upstream bug fixes, 
-etc.).
-
-sage
+Nope. Ceph's erasure coding is very configurable (in terms of what
+kind of EC it's doing) but the offload features in NICs that we've
+seen aren't quite flexible enough for what Ceph is doing =E2=80=94 it's=
+ an
+unusual use case and set of requirements where these offload cards are
+concerned. (We need to take an incoming stream, look at the raw
+stream, then erasure code it into an unknown set of pieces, and then
+send those pieces back out over the network to different addresses.)
+-Greg
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
