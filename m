@@ -1,8 +1,9 @@
-From: Samuel Just <sjust@redhat.com>
-Subject: =?UTF-8?B?UmU6IOetlOWkjTog562U5aSNOiDnrZTlpI06IOetlOWkjTog562U5aSNOiBhbm90aGVyIA==?=
-	=?UTF-8?B?cGVlcmluZyBzdHVjayBjYXVzZWQgYnkgbmV0IHByb2JsZW0u?=
-Date: Mon, 2 Nov 2015 18:15:10 -0800
-Message-ID: <CAN=+7FUVyMkEiZQL=iqG93-_hYzrajXp6p0rowLFFJ_29qkqYg@mail.gmail.com>
+From: "yangruifeng.09209@h3c.com" <yangruifeng.09209@h3c.com>
+Subject: =?utf-8?B?562U5aSNOiDnrZTlpI06IOetlOWkjTog562U5aSNOiDnrZTlpI06IOetlA==?=
+ =?utf-8?B?5aSNOiBhbm90aGVyIHBlZXJpbmcgc3R1Y2sgY2F1c2VkIGJ5IG5ldCBwcm9i?=
+ =?utf-8?Q?lem.?=
+Date: Tue, 3 Nov 2015 02:22:57 +0000
+Message-ID: <0C3F6DA3760D0C4691E69E5BE224FF495E175B3D@H3CMLB12-EX.srv.huawei-3com.com>
 References: <5F4E7462F2F4A14E974FBE17B8EB37210E5B1FB1@H3CMLB12-EX.srv.huawei-3com.com>
 	<CAN=+7FVJaD2fpgFuEPJ0Mincv5M4K+w_qg0DHYxsXU-4R5=o=w@mail.gmail.com>
 	<0C3F6DA3760D0C4691E69E5BE224FF495E17479D@H3CMLB12-EX.srv.huawei-3com.com>
@@ -15,229 +16,151 @@ References: <5F4E7462F2F4A14E974FBE17B8EB37210E5B1FB1@H3CMLB12-EX.srv.huawei-3co
 	<CAN=+7FVaQqkN27_7mENWY38a+5HcQOKVug1zR_B4ar+7jwe2Sg@mail.gmail.com>
 	<0C3F6DA3760D0C4691E69E5BE224FF495E175AAD@H3CMLB12-EX.srv.huawei-3com.com>
 	<CAN=+7FUiPHMwRwDLF_y_oHdB+B64USB15GWBv9=331P4996wmA@mail.gmail.com>
+ <CAN=+7FUVyMkEiZQL=iqG93-_hYzrajXp6p0rowLFFJ_29qkqYg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f180.google.com ([209.85.223.180]:33742 "EHLO
-	mail-io0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751965AbbKCCPL convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Nov 2015 21:15:11 -0500
-Received: by iodd200 with SMTP id d200so5851994iod.0
-        for <ceph-devel@vger.kernel.org>; Mon, 02 Nov 2015 18:15:10 -0800 (PST)
-In-Reply-To: <CAN=+7FUiPHMwRwDLF_y_oHdB+B64USB15GWBv9=331P4996wmA@mail.gmail.com>
+Received: from smtp.h3c.com ([60.191.123.56]:21574 "EHLO h3cmg01-ex.h3c.com"
+	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751965AbbKCCXn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 2 Nov 2015 21:23:43 -0500
+In-Reply-To: <CAN=+7FUVyMkEiZQL=iqG93-_hYzrajXp6p0rowLFFJ_29qkqYg@mail.gmail.com>
+Content-Language: zh-CN
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "yangruifeng.09209@h3c.com" <yangruifeng.09209@h3c.com>
+To: Samuel Just <sjust@redhat.com>
 Cc: Chenxiaowei <chen.xiaowei@h3c.com>, "Sage Weil (sweil@redhat.com)" <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Exactly what kernel are you using?
--Sam
-
-On Mon, Nov 2, 2015 at 6:14 PM, Samuel Just <sjust@redhat.com> wrote:
-> Yeah, there's a heartbeat system and the messenger is reliable delive=
-ry.
-> -Sam
->
-> On Mon, Nov 2, 2015 at 5:41 PM, yangruifeng.09209@h3c.com
-> <yangruifeng.09209@h3c.com> wrote:
->> I will try my best to get the detailed log.
->> In the current version, we can ensure the messages that are related =
-to peering is correctly received by peers?
->>
->> thanks
->> Ruifeng Yang.
->>
->> -----=E9=82=AE=E4=BB=B6=E5=8E=9F=E4=BB=B6-----
->> =E5=8F=91=E4=BB=B6=E4=BA=BA: Samuel Just [mailto:sjust@redhat.com]
->> =E5=8F=91=E9=80=81=E6=97=B6=E9=97=B4: 2015=E5=B9=B411=E6=9C=883=E6=97=
-=A5 9:28
->> =E6=94=B6=E4=BB=B6=E4=BA=BA: yangruifeng 09209 (RD)
->> =E6=8A=84=E9=80=81: chenxiaowei 11245 (RD); Sage Weil (sweil@redhat.=
-com); ceph-devel@vger.kernel.org
->> =E4=B8=BB=E9=A2=98: Re: =E7=AD=94=E5=A4=8D: =E7=AD=94=E5=A4=8D: =E7=AD=
-=94=E5=A4=8D: =E7=AD=94=E5=A4=8D: another peering stuck caused by net p=
-roblem.
->>
->> Temporary network failures should be handled correctly.  The best so=
-lution is to actually fix that bug then.  Capture logging on all involv=
-ed osds while it is hung and open a bug:
->>
->> debug osd =3D 20
->> debug filestore =3D 20
->> debug ms =3D 1
->> -Sam
->>
->> On Mon, Nov 2, 2015 at 5:24 PM, yangruifeng.09209@h3c.com <yangruife=
-ng.09209@h3c.com> wrote:
->>> a unknown reason problem, which cause pg stuck in peering, may be a=
- temporary failure network failure or other bug.
->>> BUT it can be solved by *manual* 'ceph osd down <osdid>'
->>>
->>> -----=E9=82=AE=E4=BB=B6=E5=8E=9F=E4=BB=B6-----
->>> =E5=8F=91=E4=BB=B6=E4=BA=BA: ceph-devel-owner@vger.kernel.org
->>> [mailto:ceph-devel-owner@vger.kernel.org] =E4=BB=A3=E8=A1=A8 Samuel=
- Just
->>> =E5=8F=91=E9=80=81=E6=97=B6=E9=97=B4: 2015=E5=B9=B411=E6=9C=883=E6=97=
-=A5 9:12
->>> =E6=94=B6=E4=BB=B6=E4=BA=BA: yangruifeng 09209 (RD)
->>> =E6=8A=84=E9=80=81: chenxiaowei 11245 (RD); Sage Weil (sweil@redhat=
-=2Ecom);
->>> ceph-devel@vger.kernel.org
->>> =E4=B8=BB=E9=A2=98: Re: =E7=AD=94=E5=A4=8D: =E7=AD=94=E5=A4=8D: =E7=
-=AD=94=E5=A4=8D: another peering stuck caused by net problem.
->>>
->>> The problem is that peering shouldn't hang for no reason.  If you a=
-re
->>> seeing peering hang for a long time either
->>> 1) you are hitting a peering bug which we need to track down and fi=
-x
->>> 2) peering actually cannot make progress.
->>>
->>> In case 1, it can be nice to have a work around to force peering to=
- restart and avoid the bug.  However, case 2 would not be helped by res=
-tarting peering, you'd just end up in the same place.  If you did it ba=
-sed on a timeout, you'd just increase load by a ton when in that situat=
-ion.  What problem are you trying to solve?
->>> -Sam
->>>
->>> On Mon, Nov 2, 2015 at 5:05 PM, yangruifeng.09209@h3c.com <yangruif=
-eng.09209@h3c.com> wrote:
->>>> ok.
->>>>
->>>> thanks
->>>> Ruifeng Yang
->>>>
->>>> -----=E9=82=AE=E4=BB=B6=E5=8E=9F=E4=BB=B6-----
->>>> =E5=8F=91=E4=BB=B6=E4=BA=BA: Samuel Just [mailto:sjust@redhat.com]
->>>> =E5=8F=91=E9=80=81=E6=97=B6=E9=97=B4: 2015=E5=B9=B411=E6=9C=883=E6=
-=97=A5 9:03
->>>> =E6=94=B6=E4=BB=B6=E4=BA=BA: yangruifeng 09209 (RD)
->>>> =E6=8A=84=E9=80=81: chenxiaowei 11245 (RD); Sage Weil (sweil@redha=
-t.com)
->>>> =E4=B8=BB=E9=A2=98: Re: =E7=AD=94=E5=A4=8D: =E7=AD=94=E5=A4=8D: an=
-other peering stuck caused by net problem.
->>>>
->>>> Would it be ok if I reply to the list as well?
->>>> -Sam
->>>>
->>>> On Mon, Nov 2, 2015 at 4:37 PM, yangruifeng.09209@h3c.com <yangrui=
-feng.09209@h3c.com> wrote:
->>>>> the cluster is maybe always peering in same exceptional cases, bu=
-t
->>>>> it can return to normal by *manual* 'ceph osd down <osdid>', this=
- is
->>>>> not convenient in a production environment, and against the conce=
-pt of rados.
->>>>> add a timeout mechanism to kick it, or kick it when io hang, mayb=
-e reasonable?
->>>>>
->>>>> thanks,
->>>>> Ruifeng Yang
->>>>>
->>>>> -----=E9=82=AE=E4=BB=B6=E5=8E=9F=E4=BB=B6-----
->>>>> =E5=8F=91=E4=BB=B6=E4=BA=BA: Samuel Just [mailto:sjust@redhat.com=
-]
->>>>> =E5=8F=91=E9=80=81=E6=97=B6=E9=97=B4: 2015=E5=B9=B411=E6=9C=883=E6=
-=97=A5 2:21
->>>>> =E6=94=B6=E4=BB=B6=E4=BA=BA: yangruifeng 09209 (RD)
->>>>> =E6=8A=84=E9=80=81: chenxiaowei 11245 (RD); Sage Weil (sweil@redh=
-at.com)
->>>>> =E4=B8=BB=E9=A2=98: Re: =E7=AD=94=E5=A4=8D: another peering stuck=
- caused by net problem.
->>>>>
->>>>> I mean issue 'ceph osd down <osdid>' for the primary on the pg.  =
-But that only causes peering to restart.  If peering stalled previously=
-, it'll probably stall again.  What are you trying to accomplish?
->>>>> -Sam
->>>>>
->>>>> On Fri, Oct 30, 2015 at 5:51 PM, yangruifeng.09209@h3c.com <yangr=
-uifeng.09209@h3c.com> wrote:
->>>>>> do you mean restart primary osd? or any other command=EF=BC=9F
->>>>>>
->>>>>> thanks
->>>>>> Ruifeng Yang
->>>>>>
->>>>>> -----=E9=82=AE=E4=BB=B6=E5=8E=9F=E4=BB=B6-----
->>>>>> =E5=8F=91=E4=BB=B6=E4=BA=BA: Samuel Just [mailto:sjust@redhat.co=
-m]
->>>>>> =E5=8F=91=E9=80=81=E6=97=B6=E9=97=B4: 2015=E5=B9=B410=E6=9C=8830=
-=E6=97=A5 23:07
->>>>>> =E6=94=B6=E4=BB=B6=E4=BA=BA: chenxiaowei 11245 (RD)
->>>>>> =E6=8A=84=E9=80=81: Sage Weil (sweil@redhat.com); yangruifeng 09=
-209 (RD)
->>>>>> =E4=B8=BB=E9=A2=98: Re: another peering stuck caused by net prob=
-lem.
->>>>>>
->>>>>> How would that help?  As a way to work around a possible bug?  Y=
-ou can accomplish pretty much the same thing by setting the primary dow=
-n.
->>>>>> -Sam
->>>>>>
->>>>>> On Wed, Oct 28, 2015 at 8:22 PM, Chenxiaowei <chen.xiaowei@h3c.c=
-om> wrote:
->>>>>>> Hi, Samuel&Sage:
->>>>>>>         I am cxwshawn from H3C(belong to HP), the pg peering st=
-uck
->>>>>>> problem is a serious problem especially under the production en=
-vironment, So here we came up two solutions:
->>>>>>>         if state Peering stuck too long, we can check timeout
->>>>>>> exceeds to force transition from Peering to Reset state, Or we =
-can add a command line to force one pg from Peering stuck to Reset stat=
-e.
->>>>>>>
->>>>>>> What's your advice? Wish your reply
->>>>>>>
->>>>>>> Yours
->>>>>>> shawn from Beijing, China.
->>>>>>>
->>>>>>> ---------------------------------------------------------------=
----
->>>>>>> -
->>>>>>> -
->>>>>>> -
->>>>>>> -
->>>>>>> ---------------------------------------------------------------
->>>>>>> =E6=9C=AC=E9=82=AE=E4=BB=B6=E5=8F=8A=E5=85=B6=E9=99=84=E4=BB=B6=
-=E5=90=AB=E6=9C=89=E6=9D=AD=E5=B7=9E=E5=8D=8E=E4=B8=89=E9=80=9A=E4=BF=A1=
-=E6=8A=80=E6=9C=AF=E6=9C=89=E9=99=90=E5=85=AC=E5=8F=B8=E7=9A=84=E4=BF=9D=
-=E5=AF=86=E4=BF=A1=E6=81=AF=EF=BC=8C=E4=BB=85=E9=99=90=E4=BA=8E=E5=8F=91=
-=E9=80=81=E7=BB=99=E4=B8=8A=E9=9D=A2=E5=9C=B0=E5=9D=80=E4=B8=AD=E5=88=97=
-=E5=87=BA
->>>>>>> =E7=9A=84=E4=B8=AA=E4=BA=BA=E6=88=96=E7=BE=A4=E7=BB=84=E3=80=82=
-=E7=A6=81=E6=AD=A2=E4=BB=BB=E4=BD=95=E5=85=B6=E4=BB=96=E4=BA=BA=E4=BB=A5=
-=E4=BB=BB=E4=BD=95=E5=BD=A2=E5=BC=8F=E4=BD=BF=E7=94=A8=EF=BC=88=E5=8C=85=
-=E6=8B=AC=E4=BD=86=E4=B8=8D=E9=99=90=E4=BA=8E=E5=85=A8=E9=83=A8=E6=88=96=
-=E9=83=A8=E5=88=86=E5=9C=B0=E6=B3=84=E9=9C=B2=E3=80=81=E5=A4=8D=E5=88=B6=
-=E3=80=81
->>>>>>> =E6=88=96=E6=95=A3=E5=8F=91=EF=BC=89=E6=9C=AC=E9=82=AE=E4=BB=B6=
-=E4=B8=AD=E7=9A=84=E4=BF=A1=E6=81=AF=E3=80=82=E5=A6=82=E6=9E=9C=E6=82=A8=
-=E9=94=99=E6=94=B6=E4=BA=86=E6=9C=AC=E9=82=AE=E4=BB=B6=EF=BC=8C=E8=AF=B7=
-=E6=82=A8=E7=AB=8B=E5=8D=B3=E7=94=B5=E8=AF=9D=E6=88=96=E9=82=AE=E4=BB=B6=
-=E9=80=9A=E7=9F=A5=E5=8F=91=E4=BB=B6=E4=BA=BA=E5=B9=B6=E5=88=A0=E9=99=A4=
-=E6=9C=AC
->>>>>>> =E9=82=AE=E4=BB=B6=EF=BC=81
->>>>>>> This e-mail and its attachments contain confidential informatio=
-n
->>>>>>> from H3C, which is intended only for the person or entity whose
->>>>>>> address is listed above. Any use of the information contained
->>>>>>> herein in any way (including, but not limited to, total or part=
-ial
->>>>>>> disclosure, reproduction, or dissemination) by persons other th=
-an
->>>>>>> the intended
->>>>>>> recipient(s) is prohibited. If you receive this e-mail in error=
-,
->>>>>>> please notify the sender by phone or email immediately and dele=
-te it!
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
-l"
->>> in the body of a message to majordomo@vger.kernel.org More majordom=
-o
->>> info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+cm9vdEBjZXBoOn4jIHVuYW1lIC1hDQpMaW51eCBjZXBoIDMuMTYuMC00NC1nZW5lcmljICM1OX4x
+NC4wNC4xLVVidW50dSBTTVAgVHVlIEp1bCA3IDE1OjA3OjI3IFVUQyAyMDE1IHg4Nl82NCB4ODZf
+NjQgeDg2XzY0IEdOVS9MaW51eA0Kcm9vdEBjZXBoOn4jIGNhdCAvZXRjL2lzc3VlDQpVYnVudHUg
+MTQuMDQuMiBMVFMgXG4gXGwNCg0KdGhhbmtzDQpSdWlmZW5nIFlhbmcuDQoNCi0tLS0t6YKu5Lu2
+5Y6f5Lu2LS0tLS0NCuWPkeS7tuS6ujogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcg
+W21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10g5Luj6KGoIFNhbXVlbCBK
+dXN0DQrlj5HpgIHml7bpl7Q6IDIwMTXlubQxMeaciDPml6UgMTA6MTUNCuaUtuS7tuS6ujogeWFu
+Z3J1aWZlbmcgMDkyMDkgKFJEKQ0K5oqE6YCBOiBjaGVueGlhb3dlaSAxMTI0NSAoUkQpOyBTYWdl
+IFdlaWwgKHN3ZWlsQHJlZGhhdC5jb20pOyBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0K5Li7
+6aKYOiBSZTog562U5aSNOiDnrZTlpI06IOetlOWkjTog562U5aSNOiDnrZTlpI06IGFub3RoZXIg
+cGVlcmluZyBzdHVjayBjYXVzZWQgYnkgbmV0IHByb2JsZW0uDQoNCkV4YWN0bHkgd2hhdCBrZXJu
+ZWwgYXJlIHlvdSB1c2luZz8NCi1TYW0NCg0KT24gTW9uLCBOb3YgMiwgMjAxNSBhdCA2OjE0IFBN
+LCBTYW11ZWwgSnVzdCA8c2p1c3RAcmVkaGF0LmNvbT4gd3JvdGU6DQo+IFllYWgsIHRoZXJlJ3Mg
+YSBoZWFydGJlYXQgc3lzdGVtIGFuZCB0aGUgbWVzc2VuZ2VyIGlzIHJlbGlhYmxlIGRlbGl2ZXJ5
+Lg0KPiAtU2FtDQo+DQo+IE9uIE1vbiwgTm92IDIsIDIwMTUgYXQgNTo0MSBQTSwgeWFuZ3J1aWZl
+bmcuMDkyMDlAaDNjLmNvbSANCj4gPHlhbmdydWlmZW5nLjA5MjA5QGgzYy5jb20+IHdyb3RlOg0K
+Pj4gSSB3aWxsIHRyeSBteSBiZXN0IHRvIGdldCB0aGUgZGV0YWlsZWQgbG9nLg0KPj4gSW4gdGhl
+IGN1cnJlbnQgdmVyc2lvbiwgd2UgY2FuIGVuc3VyZSB0aGUgbWVzc2FnZXMgdGhhdCBhcmUgcmVs
+YXRlZCB0byBwZWVyaW5nIGlzIGNvcnJlY3RseSByZWNlaXZlZCBieSBwZWVycz8NCj4+DQo+PiB0
+aGFua3MNCj4+IFJ1aWZlbmcgWWFuZy4NCj4+DQo+PiAtLS0tLemCruS7tuWOn+S7ti0tLS0tDQo+
+PiDlj5Hku7bkuro6IFNhbXVlbCBKdXN0IFttYWlsdG86c2p1c3RAcmVkaGF0LmNvbV0NCj4+IOWP
+kemAgeaXtumXtDogMjAxNeW5tDEx5pyIM+aXpSA5OjI4DQo+PiDmlLbku7bkuro6IHlhbmdydWlm
+ZW5nIDA5MjA5IChSRCkNCj4+IOaKhOmAgTogY2hlbnhpYW93ZWkgMTEyNDUgKFJEKTsgU2FnZSBX
+ZWlsIChzd2VpbEByZWRoYXQuY29tKTsgDQo+PiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0K
+Pj4g5Li76aKYOiBSZTog562U5aSNOiDnrZTlpI06IOetlOWkjTog562U5aSNOiBhbm90aGVyIHBl
+ZXJpbmcgc3R1Y2sgY2F1c2VkIGJ5IG5ldCBwcm9ibGVtLg0KPj4NCj4+IFRlbXBvcmFyeSBuZXR3
+b3JrIGZhaWx1cmVzIHNob3VsZCBiZSBoYW5kbGVkIGNvcnJlY3RseS4gIFRoZSBiZXN0IHNvbHV0
+aW9uIGlzIHRvIGFjdHVhbGx5IGZpeCB0aGF0IGJ1ZyB0aGVuLiAgQ2FwdHVyZSBsb2dnaW5nIG9u
+IGFsbCBpbnZvbHZlZCBvc2RzIHdoaWxlIGl0IGlzIGh1bmcgYW5kIG9wZW4gYSBidWc6DQo+Pg0K
+Pj4gZGVidWcgb3NkID0gMjANCj4+IGRlYnVnIGZpbGVzdG9yZSA9IDIwDQo+PiBkZWJ1ZyBtcyA9
+IDENCj4+IC1TYW0NCj4+DQo+PiBPbiBNb24sIE5vdiAyLCAyMDE1IGF0IDU6MjQgUE0sIHlhbmdy
+dWlmZW5nLjA5MjA5QGgzYy5jb20gPHlhbmdydWlmZW5nLjA5MjA5QGgzYy5jb20+IHdyb3RlOg0K
+Pj4+IGEgdW5rbm93biByZWFzb24gcHJvYmxlbSwgd2hpY2ggY2F1c2UgcGcgc3R1Y2sgaW4gcGVl
+cmluZywgbWF5IGJlIGEgdGVtcG9yYXJ5IGZhaWx1cmUgbmV0d29yayBmYWlsdXJlIG9yIG90aGVy
+IGJ1Zy4NCj4+PiBCVVQgaXQgY2FuIGJlIHNvbHZlZCBieSAqbWFudWFsKiAnY2VwaCBvc2QgZG93
+biA8b3NkaWQ+Jw0KPj4+DQo+Pj4gLS0tLS3pgq7ku7bljp/ku7YtLS0tLQ0KPj4+IOWPkeS7tuS6
+ujogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgDQo+Pj4gW21haWx0bzpjZXBoLWRl
+dmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10g5Luj6KGoIFNhbXVlbCBKdXN0DQo+Pj4g5Y+R6YCB
+5pe26Ze0OiAyMDE15bm0MTHmnIgz5pelIDk6MTINCj4+PiDmlLbku7bkuro6IHlhbmdydWlmZW5n
+IDA5MjA5IChSRCkNCj4+PiDmioTpgIE6IGNoZW54aWFvd2VpIDExMjQ1IChSRCk7IFNhZ2UgV2Vp
+bCAoc3dlaWxAcmVkaGF0LmNvbSk7IA0KPj4+IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQo+
+Pj4g5Li76aKYOiBSZTog562U5aSNOiDnrZTlpI06IOetlOWkjTogYW5vdGhlciBwZWVyaW5nIHN0
+dWNrIGNhdXNlZCBieSBuZXQgcHJvYmxlbS4NCj4+Pg0KPj4+IFRoZSBwcm9ibGVtIGlzIHRoYXQg
+cGVlcmluZyBzaG91bGRuJ3QgaGFuZyBmb3Igbm8gcmVhc29uLiAgSWYgeW91IA0KPj4+IGFyZSBz
+ZWVpbmcgcGVlcmluZyBoYW5nIGZvciBhIGxvbmcgdGltZSBlaXRoZXINCj4+PiAxKSB5b3UgYXJl
+IGhpdHRpbmcgYSBwZWVyaW5nIGJ1ZyB3aGljaCB3ZSBuZWVkIHRvIHRyYWNrIGRvd24gYW5kIGZp
+eA0KPj4+IDIpIHBlZXJpbmcgYWN0dWFsbHkgY2Fubm90IG1ha2UgcHJvZ3Jlc3MuDQo+Pj4NCj4+
+PiBJbiBjYXNlIDEsIGl0IGNhbiBiZSBuaWNlIHRvIGhhdmUgYSB3b3JrIGFyb3VuZCB0byBmb3Jj
+ZSBwZWVyaW5nIHRvIHJlc3RhcnQgYW5kIGF2b2lkIHRoZSBidWcuICBIb3dldmVyLCBjYXNlIDIg
+d291bGQgbm90IGJlIGhlbHBlZCBieSByZXN0YXJ0aW5nIHBlZXJpbmcsIHlvdSdkIGp1c3QgZW5k
+IHVwIGluIHRoZSBzYW1lIHBsYWNlLiAgSWYgeW91IGRpZCBpdCBiYXNlZCBvbiBhIHRpbWVvdXQs
+IHlvdSdkIGp1c3QgaW5jcmVhc2UgbG9hZCBieSBhIHRvbiB3aGVuIGluIHRoYXQgc2l0dWF0aW9u
+LiAgV2hhdCBwcm9ibGVtIGFyZSB5b3UgdHJ5aW5nIHRvIHNvbHZlPw0KPj4+IC1TYW0NCj4+Pg0K
+Pj4+IE9uIE1vbiwgTm92IDIsIDIwMTUgYXQgNTowNSBQTSwgeWFuZ3J1aWZlbmcuMDkyMDlAaDNj
+LmNvbSA8eWFuZ3J1aWZlbmcuMDkyMDlAaDNjLmNvbT4gd3JvdGU6DQo+Pj4+IG9rLg0KPj4+Pg0K
+Pj4+PiB0aGFua3MNCj4+Pj4gUnVpZmVuZyBZYW5nDQo+Pj4+DQo+Pj4+IC0tLS0t6YKu5Lu25Y6f
+5Lu2LS0tLS0NCj4+Pj4g5Y+R5Lu25Lq6OiBTYW11ZWwgSnVzdCBbbWFpbHRvOnNqdXN0QHJlZGhh
+dC5jb21dDQo+Pj4+IOWPkemAgeaXtumXtDogMjAxNeW5tDEx5pyIM+aXpSA5OjAzDQo+Pj4+IOaU
+tuS7tuS6ujogeWFuZ3J1aWZlbmcgMDkyMDkgKFJEKQ0KPj4+PiDmioTpgIE6IGNoZW54aWFvd2Vp
+IDExMjQ1IChSRCk7IFNhZ2UgV2VpbCAoc3dlaWxAcmVkaGF0LmNvbSkNCj4+Pj4g5Li76aKYOiBS
+ZTog562U5aSNOiDnrZTlpI06IGFub3RoZXIgcGVlcmluZyBzdHVjayBjYXVzZWQgYnkgbmV0IHBy
+b2JsZW0uDQo+Pj4+DQo+Pj4+IFdvdWxkIGl0IGJlIG9rIGlmIEkgcmVwbHkgdG8gdGhlIGxpc3Qg
+YXMgd2VsbD8NCj4+Pj4gLVNhbQ0KPj4+Pg0KPj4+PiBPbiBNb24sIE5vdiAyLCAyMDE1IGF0IDQ6
+MzcgUE0sIHlhbmdydWlmZW5nLjA5MjA5QGgzYy5jb20gPHlhbmdydWlmZW5nLjA5MjA5QGgzYy5j
+b20+IHdyb3RlOg0KPj4+Pj4gdGhlIGNsdXN0ZXIgaXMgbWF5YmUgYWx3YXlzIHBlZXJpbmcgaW4g
+c2FtZSBleGNlcHRpb25hbCBjYXNlcywgYnV0IA0KPj4+Pj4gaXQgY2FuIHJldHVybiB0byBub3Jt
+YWwgYnkgKm1hbnVhbCogJ2NlcGggb3NkIGRvd24gPG9zZGlkPicsIHRoaXMgDQo+Pj4+PiBpcyBu
+b3QgY29udmVuaWVudCBpbiBhIHByb2R1Y3Rpb24gZW52aXJvbm1lbnQsIGFuZCBhZ2FpbnN0IHRo
+ZSBjb25jZXB0IG9mIHJhZG9zLg0KPj4+Pj4gYWRkIGEgdGltZW91dCBtZWNoYW5pc20gdG8ga2lj
+ayBpdCwgb3Iga2ljayBpdCB3aGVuIGlvIGhhbmcsIG1heWJlIHJlYXNvbmFibGU/DQo+Pj4+Pg0K
+Pj4+Pj4gdGhhbmtzLA0KPj4+Pj4gUnVpZmVuZyBZYW5nDQo+Pj4+Pg0KPj4+Pj4gLS0tLS3pgq7k
+u7bljp/ku7YtLS0tLQ0KPj4+Pj4g5Y+R5Lu25Lq6OiBTYW11ZWwgSnVzdCBbbWFpbHRvOnNqdXN0
+QHJlZGhhdC5jb21dDQo+Pj4+PiDlj5HpgIHml7bpl7Q6IDIwMTXlubQxMeaciDPml6UgMjoyMQ0K
+Pj4+Pj4g5pS25Lu25Lq6OiB5YW5ncnVpZmVuZyAwOTIwOSAoUkQpDQo+Pj4+PiDmioTpgIE6IGNo
+ZW54aWFvd2VpIDExMjQ1IChSRCk7IFNhZ2UgV2VpbCAoc3dlaWxAcmVkaGF0LmNvbSkNCj4+Pj4+
+IOS4u+mimDogUmU6IOetlOWkjTogYW5vdGhlciBwZWVyaW5nIHN0dWNrIGNhdXNlZCBieSBuZXQg
+cHJvYmxlbS4NCj4+Pj4+DQo+Pj4+PiBJIG1lYW4gaXNzdWUgJ2NlcGggb3NkIGRvd24gPG9zZGlk
+PicgZm9yIHRoZSBwcmltYXJ5IG9uIHRoZSBwZy4gIEJ1dCB0aGF0IG9ubHkgY2F1c2VzIHBlZXJp
+bmcgdG8gcmVzdGFydC4gIElmIHBlZXJpbmcgc3RhbGxlZCBwcmV2aW91c2x5LCBpdCdsbCBwcm9i
+YWJseSBzdGFsbCBhZ2Fpbi4gIFdoYXQgYXJlIHlvdSB0cnlpbmcgdG8gYWNjb21wbGlzaD8NCj4+
+Pj4+IC1TYW0NCj4+Pj4+DQo+Pj4+PiBPbiBGcmksIE9jdCAzMCwgMjAxNSBhdCA1OjUxIFBNLCB5
+YW5ncnVpZmVuZy4wOTIwOUBoM2MuY29tIDx5YW5ncnVpZmVuZy4wOTIwOUBoM2MuY29tPiB3cm90
+ZToNCj4+Pj4+PiBkbyB5b3UgbWVhbiByZXN0YXJ0IHByaW1hcnkgb3NkPyBvciBhbnkgb3RoZXIg
+Y29tbWFuZO+8nw0KPj4+Pj4+DQo+Pj4+Pj4gdGhhbmtzDQo+Pj4+Pj4gUnVpZmVuZyBZYW5nDQo+
+Pj4+Pj4NCj4+Pj4+PiAtLS0tLemCruS7tuWOn+S7ti0tLS0tDQo+Pj4+Pj4g5Y+R5Lu25Lq6OiBT
+YW11ZWwgSnVzdCBbbWFpbHRvOnNqdXN0QHJlZGhhdC5jb21dDQo+Pj4+Pj4g5Y+R6YCB5pe26Ze0
+OiAyMDE15bm0MTDmnIgzMOaXpSAyMzowNw0KPj4+Pj4+IOaUtuS7tuS6ujogY2hlbnhpYW93ZWkg
+MTEyNDUgKFJEKQ0KPj4+Pj4+IOaKhOmAgTogU2FnZSBXZWlsIChzd2VpbEByZWRoYXQuY29tKTsg
+eWFuZ3J1aWZlbmcgMDkyMDkgKFJEKQ0KPj4+Pj4+IOS4u+mimDogUmU6IGFub3RoZXIgcGVlcmlu
+ZyBzdHVjayBjYXVzZWQgYnkgbmV0IHByb2JsZW0uDQo+Pj4+Pj4NCj4+Pj4+PiBIb3cgd291bGQg
+dGhhdCBoZWxwPyAgQXMgYSB3YXkgdG8gd29yayBhcm91bmQgYSBwb3NzaWJsZSBidWc/ICBZb3Ug
+Y2FuIGFjY29tcGxpc2ggcHJldHR5IG11Y2ggdGhlIHNhbWUgdGhpbmcgYnkgc2V0dGluZyB0aGUg
+cHJpbWFyeSBkb3duLg0KPj4+Pj4+IC1TYW0NCj4+Pj4+Pg0KPj4+Pj4+IE9uIFdlZCwgT2N0IDI4
+LCAyMDE1IGF0IDg6MjIgUE0sIENoZW54aWFvd2VpIDxjaGVuLnhpYW93ZWlAaDNjLmNvbT4gd3Jv
+dGU6DQo+Pj4+Pj4+IEhpLCBTYW11ZWwmU2FnZToNCj4+Pj4+Pj4gICAgICAgICBJIGFtIGN4d3No
+YXduIGZyb20gSDNDKGJlbG9uZyB0byBIUCksIHRoZSBwZyBwZWVyaW5nIA0KPj4+Pj4+PiBzdHVj
+ayBwcm9ibGVtIGlzIGEgc2VyaW91cyBwcm9ibGVtIGVzcGVjaWFsbHkgdW5kZXIgdGhlIHByb2R1
+Y3Rpb24gZW52aXJvbm1lbnQsIFNvIGhlcmUgd2UgY2FtZSB1cCB0d28gc29sdXRpb25zOg0KPj4+
+Pj4+PiAgICAgICAgIGlmIHN0YXRlIFBlZXJpbmcgc3R1Y2sgdG9vIGxvbmcsIHdlIGNhbiBjaGVj
+ayB0aW1lb3V0IA0KPj4+Pj4+PiBleGNlZWRzIHRvIGZvcmNlIHRyYW5zaXRpb24gZnJvbSBQZWVy
+aW5nIHRvIFJlc2V0IHN0YXRlLCBPciB3ZSBjYW4gYWRkIGEgY29tbWFuZCBsaW5lIHRvIGZvcmNl
+IG9uZSBwZyBmcm9tIFBlZXJpbmcgc3R1Y2sgdG8gUmVzZXQgc3RhdGUuDQo+Pj4+Pj4+DQo+Pj4+
+Pj4+IFdoYXQncyB5b3VyIGFkdmljZT8gV2lzaCB5b3VyIHJlcGx5DQo+Pj4+Pj4+DQo+Pj4+Pj4+
+IFlvdXJzDQo+Pj4+Pj4+IHNoYXduIGZyb20gQmVpamluZywgQ2hpbmEuDQo+Pj4+Pj4+DQo+Pj4+
+Pj4+IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0NCj4+Pj4+Pj4gLS0NCj4+Pj4+Pj4gLQ0KPj4+Pj4+PiAtDQo+Pj4+Pj4+IC0N
+Cj4+Pj4+Pj4gLQ0KPj4+Pj4+PiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCj4+Pj4+Pj4g5pys6YKu5Lu25Y+K5YW26ZmE5Lu2
+5ZCr5pyJ5p2t5bee5Y2O5LiJ6YCa5L+h5oqA5pyv5pyJ6ZmQ5YWs5Y+455qE5L+d5a+G5L+h5oGv
+77yM5LuF6ZmQ5LqO5Y+R6YCB57uZ5LiK6Z2i5Zyw5Z2A5Lit5YiX5Ye6DQo+Pj4+Pj4+IOeahOS4
+quS6uuaIlue+pOe7hOOAguemgeatouS7u+S9leWFtuS7luS6uuS7peS7u+S9leW9ouW8j+S9v+eU
+qO+8iOWMheaLrOS9huS4jemZkOS6juWFqOmDqOaIlumDqOWIhuWcsOazhOmcsuOAgeWkjeWItuOA
+gQ0KPj4+Pj4+PiDmiJbmlaPlj5HvvInmnKzpgq7ku7bkuK3nmoTkv6Hmga/jgILlpoLmnpzmgqjp
+lJnmlLbkuobmnKzpgq7ku7bvvIzor7fmgqjnq4vljbPnlLXor53miJbpgq7ku7bpgJrnn6Xlj5Hk
+u7bkurrlubbliKDpmaTmnKwNCj4+Pj4+Pj4g6YKu5Lu277yBDQo+Pj4+Pj4+IFRoaXMgZS1tYWls
+IGFuZCBpdHMgYXR0YWNobWVudHMgY29udGFpbiBjb25maWRlbnRpYWwgaW5mb3JtYXRpb24gDQo+
+Pj4+Pj4+IGZyb20gSDNDLCB3aGljaCBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgcGVyc29uIG9y
+IGVudGl0eSB3aG9zZSANCj4+Pj4+Pj4gYWRkcmVzcyBpcyBsaXN0ZWQgYWJvdmUuIEFueSB1c2Ug
+b2YgdGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCANCj4+Pj4+Pj4gaGVyZWluIGluIGFueSB3YXkg
+KGluY2x1ZGluZywgYnV0IG5vdCBsaW1pdGVkIHRvLCB0b3RhbCBvciANCj4+Pj4+Pj4gcGFydGlh
+bCBkaXNjbG9zdXJlLCByZXByb2R1Y3Rpb24sIG9yIGRpc3NlbWluYXRpb24pIGJ5IHBlcnNvbnMg
+DQo+Pj4+Pj4+IG90aGVyIHRoYW4gdGhlIGludGVuZGVkDQo+Pj4+Pj4+IHJlY2lwaWVudChzKSBp
+cyBwcm9oaWJpdGVkLiBJZiB5b3UgcmVjZWl2ZSB0aGlzIGUtbWFpbCBpbiBlcnJvciwgDQo+Pj4+
+Pj4+IHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSBwaG9uZSBvciBlbWFpbCBpbW1lZGlhdGVs
+eSBhbmQgZGVsZXRlIGl0IQ0KPj4+IC0tDQo+Pj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxp
+c3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiDQo+Pj4gaW4gdGhlIGJv
+ZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRv
+bW8gDQo+Pj4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5o
+dG1sDQotLQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVu
+c3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRv
+bW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtl
+cm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
