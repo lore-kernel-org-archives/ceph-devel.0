@@ -1,46 +1,55 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: NIC with Erasure offload feature support and Ceph
-Date: Tue, 3 Nov 2015 07:07:17 -0800
-Message-ID: <CAJ4mKGbA39sAek3oG9-KrvpuQcOx=9iMCojGwmE8fa_3HkLXUQ@mail.gmail.com>
-References: <5638973D.6090100@gmail.com>
+From: Yehuda Sadeh-Weinraub <ysadehwe@redhat.com>
+Subject: Re: Symbolic links like feature on radosgw
+Date: Tue, 3 Nov 2015 09:15:50 -0800
+Message-ID: <CADRKj5TsGLXSJ4VFMdBPrwS4fORaqGPS0KnYFj8sUM-7U_3O0A@mail.gmail.com>
+References: <CAKtk8hcvWJmdYmY20ZQsUuE=ww+Q=pDv6=HRVJhZ6Hk01U3wSg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f42.google.com ([74.125.82.42]:36593 "EHLO
-	mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752492AbbKCPHS convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Nov 2015 10:07:18 -0500
-Received: by wmec75 with SMTP id c75so88929225wme.1
-        for <ceph-devel@vger.kernel.org>; Tue, 03 Nov 2015 07:07:17 -0800 (PST)
-In-Reply-To: <5638973D.6090100@gmail.com>
+Received: from mail-yk0-f169.google.com ([209.85.160.169]:33094 "EHLO
+	mail-yk0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751112AbbKCRPv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Nov 2015 12:15:51 -0500
+Received: by ykft191 with SMTP id t191so27107668ykf.0
+        for <ceph-devel@vger.kernel.org>; Tue, 03 Nov 2015 09:15:50 -0800 (PST)
+In-Reply-To: <CAKtk8hcvWJmdYmY20ZQsUuE=ww+Q=pDv6=HRVJhZ6Hk01U3wSg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mike <mike.almateia@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Guang Yang <guangyy@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Yehuda Sadeh <yehuda@inktank.com>
 
-On Tue, Nov 3, 2015 at 3:15 AM, Mike <mike.almateia@gmail.com> wrote:
-> Hello!
+On Mon, Nov 2, 2015 at 9:20 PM, Guang Yang <guangyy@gmail.com> wrote:
+> Hi Yehuda,
+> We have a user requirement that needs symbolic link like feature on radosgw
+> - two object ids pointing to the same object (ideally it could cross bucket,
+> but same bucket is fine).
 >
-> In our project we planing build a petabayte cluster with Erasure pool=
-=2E
-> Also we looking on Mellanox ConnectX-4 Lx EN Cards/ConnectX-4 EN Card=
-s
-> for using its a offloading erasure code feature.
+> The closest feature on Amazon S3 I could find is [1], but not exact the
+> same, the one from Amazon S3 API was designed for static web site hosting.
 >
-> Someone use this feature in test lab/prodaction?
+> Is this a valid feature request we can put into radosgw? The way I am
+> thinking to implement is like symbolic link, the link object just contains a
+> pointer to the original object.
 
-Nope. Ceph's erasure coding is very configurable (in terms of what
-kind of EC it's doing) but the offload features in NICs that we've
-seen aren't quite flexible enough for what Ceph is doing =E2=80=94 it's=
- an
-unusual use case and set of requirements where these offload cards are
-concerned. (We need to take an incoming stream, look at the raw
-stream, then erasure code it into an unknown set of pieces, and then
-send those pieces back out over the network to different addresses.)
--Greg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Yeah, I don't see why not to have such a feature. Access to the
+referral object can potentially have us return a redirect response, or
+actually return the data. The latter is somewhat similar to swift
+static large objects (with the slight difference that we only refer to
+a single object here), for which we have a pending pull request open.
+The redirect does look somehow like the static website feature, for
+which we're also in a review process.
+Probably extending the swift slo feature to be supported in S3, and
+have add special api that will only have it point to a single object
+is a good way to proceed. Later we can have it redirect if the object
+that is referenced resides in a different region. Just sending a
+redirect to everything will make it simpler, any reason to go with the
+more complicated solution (performance is an obvious one)?
+
+Yehuda
+
+>
+> [1] http://docs.aws.amazon.com/AmazonS3/latest/dev/how-to-page-redirect.html
+>
+> --
+> Regards,
+> Guang
