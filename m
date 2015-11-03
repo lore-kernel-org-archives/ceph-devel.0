@@ -1,25 +1,25 @@
 From: "hzwulibin" <hzwulibin@gmail.com>
 Subject: Re:  RE: [performance] why rbd_aio_write latency increase from 4ms to
  7.3ms after the same test
-Date: Tue, 03 Nov 2015 08:46:17 +0800
-Message-ID: <563803D6.3080201@gmail.com>
+Date: Tue, 03 Nov 2015 08:47:57 +0800
+Message-ID: <5638043A.7000609@gmail.com>
 References: <5636F376.3090104@gmail.com>
 	<6F3FA899187F0043BA1827A69DA2F7CC03639832@shsmsx102.ccr.corp.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f65.google.com ([209.85.220.65]:36120 "EHLO
-	mail-pa0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751112AbbKCAqS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Nov 2015 19:46:18 -0500
-Received: by pabfh17 with SMTP id fh17so134864pab.3
-        for <ceph-devel@vger.kernel.org>; Mon, 02 Nov 2015 16:46:17 -0800 (PST)
+Received: from mail-pa0-f67.google.com ([209.85.220.67]:34620 "EHLO
+	mail-pa0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752246AbbKCAr6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Nov 2015 19:47:58 -0500
+Received: by padda3 with SMTP id da3so145692pad.1
+        for <ceph-devel@vger.kernel.org>; Mon, 02 Nov 2015 16:47:58 -0800 (PST)
 Received: from HSH-D-2405 ([43.230.90.81])
-        by smtp.gmail.com with ESMTPSA id ha3sm26191867pbb.28.2015.11.02.16.46.15
+        by smtp.gmail.com with ESMTPSA id d7sm10062063pas.31.2015.11.02.16.47.56
         for <ceph-devel@vger.kernel.org>
         (version=TLSv1 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
-        Mon, 02 Nov 2015 16:46:16 -0800 (PST)
+        Mon, 02 Nov 2015 16:47:57 -0800 (PST)
 In-Reply-To: <6F3FA899187F0043BA1827A69DA2F7CC03639832@shsmsx102.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
