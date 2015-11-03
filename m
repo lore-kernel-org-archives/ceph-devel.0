@@ -1,42 +1,35 @@
-From: Nathan Cutler <ncutler@suse.cz>
-Subject: Re: civetweb upstream/downstream divergence
-Date: Tue, 3 Nov 2015 10:22:37 +0100
-Message-ID: <56387CDD.9070605@suse.cz>
-References: <5631E4A5.9020003@suse.cz>
- <CADRKj5T5ZZBb+Mhut2jnzKoBEtTjw0tGWptqWVamgoLWaQfpgQ@mail.gmail.com>
- <20151029225738.51b8b2e5@lembas.zaitcev.lan>
- <CALqRxCwPNA0WFYu0oJ-70L3vgR0G8WLs4paU=K1xZCyf=a3Fjw@mail.gmail.com>
- <1446486438.12033.24.camel@millnert.se>
+From: Mike <mike.almateia@gmail.com>
+Subject: NIC with Erasure offload feature support and Ceph
+Date: Tue, 3 Nov 2015 14:15:09 +0300
+Message-ID: <5638973D.6090100@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:40885 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751123AbbKCJWj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 3 Nov 2015 04:22:39 -0500
-In-Reply-To: <1446486438.12033.24.camel@millnert.se>
+Received: from mail-lf0-f45.google.com ([209.85.215.45]:34694 "EHLO
+	mail-lf0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753901AbbKCLPM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Nov 2015 06:15:12 -0500
+Received: by lfgh9 with SMTP id h9so13589289lfg.1
+        for <ceph-devel@vger.kernel.org>; Tue, 03 Nov 2015 03:15:10 -0800 (PST)
+Received: from mike.0xFFF ([185.51.156.255])
+        by smtp.googlemail.com with ESMTPSA id g65sm4764392lfb.11.2015.11.03.03.15.09
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 03 Nov 2015 03:15:10 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Martin Millnert <martin@millnert.se>, Ken Dreyer <kdreyer@redhat.com>
-Cc: Pete Zaitcev <zaitcev@redhat.com>, Yehuda Sadeh-Weinraub <yehuda@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-IMHO the first step should be to get rid of the evil submodule. Arguably
-the most direct path leading to this goal is to simply package up the
-downstream civetweb (i.e. 1.6 plus all the downstream patches) for all
-the supported distros. The resulting package would be Ceph-specific,
-obviously, so it could be called "civetweb-ceph".
+Hello!
 
-Like Ken says, the upstreaming effort can continue in parallel.
+In our project we planing build a petabayte cluster with Erasure pool.
+Also we looking on Mellanox ConnectX-4 Lx EN Cards/ConnectX-4 EN Cards
+for using its a offloading erasure code feature.
 
-After we get Ceph/RGW working fine with civetweb-ceph 1.6, we can rebase
-the package to upstream civetweb 1.7.
+Someone use this feature in test lab/prodaction?
 
-I am not volunteering to do all the work, but we at SUSE are certainly
-prepared to shoulder our share of it.
 
 -- 
-Nathan Cutler
-Software Engineer Distributed Storage
-SUSE LINUX, s.r.o.
-Tel.: +420 284 084 037
+Mike, runs.
+
