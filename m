@@ -1,54 +1,45 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: [PATCH 0/4] libceph: nocephx_sign_messages option + misc
-Date: Tue, 3 Nov 2015 11:36:52 +0800
-Message-ID: <BD35DE10-9518-4DC4-9B30-ADDD7F6DEE23@redhat.com>
-References: <1446504250-25647-1-git-send-email-idryomov@gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 9.1 \(3096.5\))
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Guang Yang <guangyy@gmail.com>
+Subject: Re: Symbolic links like feature on radosgw
+Date: Mon, 2 Nov 2015 21:25:31 -0800
+Message-ID: <CAKtk8he19oYaEC9op5PFj6mRaA0jqQ5eFe2rRkj2JMV-E29AhQ@mail.gmail.com>
+References: <CAKtk8hcvWJmdYmY20ZQsUuE=ww+Q=pDv6=HRVJhZ6Hk01U3wSg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:38734 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754187AbbKCDg7 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Nov 2015 22:36:59 -0500
-In-Reply-To: <1446504250-25647-1-git-send-email-idryomov@gmail.com>
+Received: from mail-io0-f178.google.com ([209.85.223.178]:35608 "EHLO
+	mail-io0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750957AbbKCFZc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Nov 2015 00:25:32 -0500
+Received: by iofz202 with SMTP id z202so8674816iof.2
+        for <ceph-devel@vger.kernel.org>; Mon, 02 Nov 2015 21:25:31 -0800 (PST)
+In-Reply-To: <CAKtk8hcvWJmdYmY20ZQsUuE=ww+Q=pDv6=HRVJhZ6Hk01U3wSg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Yehuda Sadeh <yehuda@inktank.com>
+
+Hi Yehuda,
+We have a user requirement that needs symbolic link like feature on
+radosgw - two object ids pointing to the same object (ideally it could
+cross bucket, but same bucket is fine).
+
+The closest feature on Amazon S3 I could find is [1], but not exact
+the same, the one from Amazon S3 API was designed for static web site
+hosting.
+
+Is this a valid feature request we can put into radosgw? The way I am
+thinking to implement is like symbolic link, the link object just
+contains a pointer to the original object.
+
+ [1] http://docs.aws.amazon.com/AmazonS3/latest/dev/how-to-page-redirect.html
+
+ --
+ Regards,
+ Guang
 
 
-> On Nov 3, 2015, at 06:44, Ilya Dryomov <idryomov@gmail.com> wrote:
-> 
-> Hello,
-> 
-> This adds nocephx_sign_messages libceph option (a lack of which is
-> something people are running into, see [1]), plus a couple of related
-> cleanups.
-> 
-> [1] https://forum.proxmox.com/threads/24116-new-krbd-option-on-pve4-don-t-work
-> 
-> Thanks,
-> 
->                Ilya
-> 
-> 
-> Ilya Dryomov (4):
->  libceph: msg signing callouts don't need con argument
->  libceph: drop authorizer check from cephx msg signing routines
->  libceph: stop duplicating client fields in messenger
->  libceph: add nocephx_sign_messages option
-> 
-> fs/ceph/mds_client.c           | 14 ++++++++------
-> include/linux/ceph/libceph.h   |  4 +++-
-> include/linux/ceph/messenger.h | 16 +++-------------
-> net/ceph/auth_x.c              |  8 ++++++--
-> net/ceph/ceph_common.c         | 18 +++++++++++++-----
-> net/ceph/messenger.c           | 32 ++++++++++++--------------------
-> net/ceph/osd_client.c          | 14 ++++++++------
-> 7 files changed, 53 insertions(+), 53 deletions(-)
-> 
-
-Reviewed-by: Yan, Zheng <zyan@redhat.com>
 
 
+-- 
+--
+Regards,
+Guang
