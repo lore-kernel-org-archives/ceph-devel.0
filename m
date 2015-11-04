@@ -1,90 +1,56 @@
-From: Douglas Fuller <dfuller@redhat.com>
-Subject: Re: Whitepaper: database workloads using RBD with dm-cache and Ceph cache tiering
-Date: Wed, 4 Nov 2015 10:22:14 -0500
-Message-ID: <38920A46-803A-4CDF-BB5B-10856E8F3E5B@redhat.com>
-References: <4E0B5E66-351F-45EC-96B2-790536D4EE5D@redhat.com> <CA+z5Dsy4B_Us3Q0ihmgue45hXtZWRirqrQCYKCZrm_Y9fdY4=A@mail.gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 9.1 \(3096.5\))
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Mark Nelson <mnelson@redhat.com>
+Subject: 11/4/2015 Weekly Ceph Performance Meeting IS ON!
+Date: Wed, 04 Nov 2015 09:26:40 -0600
+Message-ID: <563A23B0.80009@redhat.com>
+Reply-To: mnelson@redhat.com
+Mime-Version: 1.0
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:47043 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:39010 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932303AbbKDPWQ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Nov 2015 10:22:16 -0500
-In-Reply-To: <CA+z5Dsy4B_Us3Q0ihmgue45hXtZWRirqrQCYKCZrm_Y9fdY4=A@mail.gmail.com>
+	id S932303AbbKDP0n (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 4 Nov 2015 10:26:43 -0500
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+	by mx1.redhat.com (Postfix) with ESMTPS id 12DAF83F7B
+	for <ceph-devel@vger.kernel.org>; Wed,  4 Nov 2015 15:26:43 +0000 (UTC)
+Received: from [10.3.112.8] ([10.3.112.8])
+	by int-mx11.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id tA4FQeq9016703
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+	for <ceph-devel@vger.kernel.org>; Wed, 4 Nov 2015 10:26:42 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Blair Bethwaite <blair.bethwaite@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Blario,
+8AM PST as usual! Discussion topics include newstore changes, outdated 
+benchmarks (doh!) and anything else folks want to talk about.  See you 
+there!
 
-Thanks for the feedback.
+Here's the links:
 
-> On Nov 3, 2015, at 9:27 PM, Blair Bethwaite <blair.bethwaite@gmail.co=
-m> wrote:
->=20
-> Hi Douglas,
->=20
-> It's not clear whether you used SSD journals for the OSDs in the base
-> config (or in the backing pool for the tiered tests) - it looks like
-> not?
+Etherpad URL:
+http://pad.ceph.com/p/performance_weekly
 
-Correct, these tests used spinning disk journals; the test cluster isn=E2=
-=80=99t equipped with SSDs. It may be interesting to know how using NVM=
-e devices for journaling as opposed to a cache tier performs. I=E2=80=99=
-ll run the numbers.
+To join the Meeting:
+https://bluejeans.com/268261044
 
-> If that's the case then I don't think this provides the most
-> interesting point of comparison, because the tests are write-latency
-> sensitive you'd naturally expect SSD journals to make a lot of
-> difference and would surely start with those in the base config. I'm
-> interested in how a similar setup would perform compared to regular
-> journaling and Ceph tiering all on the server-side, e.g., dm-cache (o=
-r
-> bcache) based OSDs - apparently a bunch of people do this in the wild
-> with success, but AFAIK there has never been any detailed benchmarkin=
-g
-> published.
+To join via Browser:
+https://bluejeans.com/268261044/browser
 
-I haven=E2=80=99t heard of this type of configuration myself, but it mi=
-ght be a possible scenario to explore.
+To join with Lync:
+https://bluejeans.com/268261044/lync
 
-Thanks again,
-=E2=80=94Doug
 
->=20
-> Cheers,
->=20
-> On 3 November 2015 at 05:09, Douglas Fuller <dfuller@redhat.com> wrot=
-e:
->> I=E2=80=99ve published a whitepaper detailing configuration and benc=
-hmark results using SysBench MySQL on top of RBD with dm-cache. Results=
- using a Ceph cache tier are also included. Questions, comments, critic=
-ism, nitpicking, and/or discussion are welcome.
->>=20
->> http://tracker.ceph.com/projects/ceph/wiki/Ceph_and_dm-cache_for_Dat=
-abase_Workloads
->>=20
->> =E2=80=94Doug--
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
->=20
->=20
-> --=20
-> Cheers,
-> ~Blairo
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+To join via Room System:
+Video Conferencing System: bjn.vc -or- 199.48.152.152
+Meeting ID: 268261044
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+To join via Phone:
+1) Dial:
+           +1 408 740 7256
+           +1 888 240 2560(US Toll Free)
+           +1 408 317 9253(Alternate Number)
+           (see all numbers - http://bluejeans.com/numbers)
+2) Enter Conference ID: 268261044
+
+Mark
