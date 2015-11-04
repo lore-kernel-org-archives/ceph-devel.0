@@ -1,74 +1,112 @@
-From: Ning Yao <zay11022@gmail.com>
-Subject: Re: Specify omap path for filestore
-Date: Wed, 4 Nov 2015 15:08:54 +0800
-Message-ID: <CALZt5jxkbA8OBe1zxxo9F1xjaJ8m+wSydzn_UQ4V=vBT2gty7A@mail.gmail.com>
+From: "Xue, Chendi" <chendi.xue@intel.com>
+Subject: RE: Specify omap path for filestore
+Date: Wed, 4 Nov 2015 08:14:57 +0000
+Message-ID: <C8CF870384EBCF4CAB89D2041A5C80B32200D93F@SHSMSX101.ccr.corp.intel.com>
 References: <C8CF870384EBCF4CAB89D2041A5C80B322002AB8@SHSMSX101.ccr.corp.intel.com>
 	<C8CF870384EBCF4CAB89D2041A5C80B322002D57@SHSMSX101.ccr.corp.intel.com>
 	<C8CF870384EBCF4CAB89D2041A5C80B3220030ED@SHSMSX101.ccr.corp.intel.com>
+ <CALZt5jxkbA8OBe1zxxo9F1xjaJ8m+wSydzn_UQ4V=vBT2gty7A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f50.google.com ([74.125.82.50]:34023 "EHLO
-	mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751064AbbKDHIz convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Nov 2015 02:08:55 -0500
-Received: by wmff134 with SMTP id f134so102538370wmf.1
-        for <ceph-devel@vger.kernel.org>; Tue, 03 Nov 2015 23:08:54 -0800 (PST)
-In-Reply-To: <C8CF870384EBCF4CAB89D2041A5C80B3220030ED@SHSMSX101.ccr.corp.intel.com>
+Received: from mga11.intel.com ([192.55.52.93]:49861 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753918AbbKDIPB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 4 Nov 2015 03:15:01 -0500
+In-Reply-To: <CALZt5jxkbA8OBe1zxxo9F1xjaJ8m+wSydzn_UQ4V=vBT2gty7A@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Xue, Chendi" <chendi.xue@intel.com>
+To: Ning Yao <zay11022@gmail.com>
 Cc: Samuel Just <sjust@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi, Chendi,
-I don't think it will be a big improvement compared with normal way to
-using FileStore (enable filestore_max_inline_xattr_xfs and tune
-filestore_fd_cache_size,osd_pg_object_context_cache_count,
-filestore_omap_header_cache_size properly to achieve a high hit
-rate).Do you enable  filestore_max_inline_xattr in the first test? If
-not, it may be reasonable. In my previous test, I remember just about
-20%~30% improvement.
-And can you also provide cpu cost per Op on osd node?
-Regards
-Ning Yao
-
-
-2015-10-30 10:04 GMT+08:00 Xue, Chendi <chendi.xue@intel.com>:
-> Hi, Sam
->
-> Last week I introduced about how we saw the benefit of moving omap to a separate device.
->
-> And here is the pull request:
-> https://github.com/ceph/ceph/pull/6421
->
-> I had tested redeploy and restart ceph cluster at my setup, the codes works fine.
-> one problem is do you think I should *DELETE* all the files under the omap_path firstly? Because I notice if old pg data leaves there, osd daemon may run into chaos. But I am not sure if it should leave to users to DELETE.
->
-> Any thoughts?
->
-> Also I paste some data I talked , which is about the rbd and osd write iops ratio when doing randwrite to a rbd device.
->
-> ======Here is some data=====
-> We uses 4 clients , 35 vm each to test on rbd randwrite.
-> 4 osd physical nodes, each has 10 HDD as osd and 2 ssd as journal
-> 2 replica
-> filestore_max_inline_xattr_xfs=0
-> filestore_max_inline_xattr_size_xfs=0
->
-> Before moving omap to separate ssd, we saw a frontend and backend iops ratio of 1:5.8, rbd side total iops 1206, hdd total iops 7034
-> Like we talked, 5.8 consists of 2 replica write, inode and omap writes
-> runid         op_size    op_type             QD             engine               serverNum       clientNum         rbdNum   runtime             fio_iops         fio_bw               fio_latency                 osd_iops           osd_bw             osd_latency
-> 332            4k              randwrite         qd8            qemurbd           4                          4                          140            400 sec              1206.000         4.987 MB/s      884.617 msec           7034.975          47.407 MB/s    242.620 msec
->
-> And after moving omap to a separate ssd, we saw a frontend vs. backend ratio drops to 1:2.6, rbd side total iops 5006, hdd total iops 13089
-> runid         op_size    op_type             QD             engine               serverNum       clientNum         rbdNum   runtime             fio_iops         fio_bw               fio_latency                 osd_iops           osd_bw             osd_latency
-> 326            4k              randwrite         qd8            qemurbd           4                          4                          140            400 sec              5006.000         19.822 MB/s    222.296 msec           13089.020        82.897 MB/s    482.203 msec
->
->
-> Best regards,
-> Chendi
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGksIE5pbmcNCg0KVGhhbmtzIGZvciB0aGUgYWR2aWNlLCB3ZSBkaWQgZG9uZSB0aGluZyB5b3Ug
+c3VnZ2VzdGVkIGluIG91ciBwZXJmb3JtYW5jZSB0dW5pbmcgd29yaywgYWN0dWFsbHkgdHVuaW5n
+IHVwIHRoZSB1c2FnZSBvZiBtZW1vcnkgaXMgdGhlIGZpcnN0IHRoaW5nIHdlIHRyaWVkLiANCg0K
+Rmlyc3RseSwgSSBzaG91bGQgZ3Vlc3MgdGhlIG9tYXAgdG8gc3NkIGJlbmVmaXQgc2hvd3Mgd2hl
+biB3ZSB1c2UgcXVpdGUgaW50ZW5zaXZlIHdvcmtsb2FkLCB1c2luZyAxNDAgdm0gZG9pbmcgcmFu
+ZHdyaXRlLCA4IHFkIGVhY2gsIHNvIHdlIGFsbW9zdCBkcml2ZSBlYWNoIEhERCB0byB1dGlsaXR5
+IDk1KyUuDQoNCldlIGhvcGVkIGFuZCB0ZXN0ZWQgb24gdHVuZSB1cCB0aGUgaW5vZGUgbWVtb3J5
+IHNpemUgYW5kIGZkIGNhY2hlIHNpemUsIHNpbmNlIEkgYmVsaWV2ZSBpZiBpbm9kZSBjYW4gYmUg
+YWx3YXlzIGhpdCBpbiB0aGUgbWVtb3J5IHdoaWNoIGRlZmluaXRlbHkgYmVuZWZpdCBtb3JlIHRo
+YW4gdXNpbmcgb21hcC4gU2FkbHkgb3VyIHNlcnZlciBvbmx5IGhhcyAzMkcgbWVtb3J5IHRvdGFs
+LiBFdmVuIHdlIHNldCB4YXR0ciBzaXplIGFzIDY1NTM1IGFzIG9yaWdpbmFsIGNvbmZpZ3VyZWQg
+YW5kIGFsc28gZmQgY2FjaGUgc2l6ZSBhcyAxMDI0MCBhcyBJIHJlbWVtYmVyZWQsIHN0aWxsIGdh
+aW4gYSBsaXR0bGUgdG8gdGhlIHBlcmZvcm1hbmNlIGJ1dCBtYXkgbGVhZCB0byBPT00gb2YgT1NE
+LCBzbyB0aGF0IGlzIHdoeSB3ZSBjYW1lIHVwIHRoZSBzb2x1dGlvbiBvZiBtb3Zpbmcgb21hcCBv
+dXQgdG8gYSBTU0QgZGV2aWNlLg0KDQpBbm90aGVyIHJlYXNvbiB0byBtb3ZlIG9tYXAgb3V0IGlz
+IGJlY2F1c2UgaXQgaGVscHMgb24gcGVyZm9ybWFuY2UgYW5hbHlzaXMsIHNpbmNlIG9tYXAgdXNl
+cyBrZXl2YWx1ZXN0b3JlLCBhbmQgZWFjaCByYmQgcmVxdWVzdCBjYXVzZXMgb25lIG9yIG1vcmUg
+NGsgaW5vZGUgb3BlcmF0aW9uLCB3aGljaCBsZWFkIGEgZnJvbnRlbmQgYW5kIGJhY2tlbmQgdGhy
+b3VnaHB1dCByYXRpbyBhcyAxOiA1LjgsIHdoaWNoIGlzIG5vdCB0aGF0IGVhc3kgdG8gZXhwbGFp
+biB0aGUgNS44LiANCg0KQWxzbyB3ZSBjYW4gZ2V0IG1vcmUgcmFuZHdyaXRlIGlvcHMgaWYgdGhl
+cmUgaXMgbm8gc2Vxd3JpdGUgdG8gb25lIEhERCBkZXZpY2UsIHdoZW4gSEREIGhhbmRsZXMgcmFu
+ZHdyaXRlIGlvcHMgYW5kIGFsc28gc29tZSBvbWFwKGxldmVsZGIpIHdyaXRlLCB3ZSBjYW4gb25s
+eSBnZXQgMTc1IGlvcHMgZGlzayB3cml0ZSBwZXIgSEREIHdoZW4gdXRpbCBpcyBuZWFybHkgZnVs
+bC4gDQp3aGVuIEhERCBvbmx5IGhhbmRsZXMgcmFuZHdyaXRlIHdpdGhvdXQgYW55IG9tYXAgd3Jp
+dGUsIHdlIGNhbiBnZXQgMzI1IGlvcHMgZGlzayB3cml0ZSBwZXIgSEREIHdoZW4gSEREIHV0aWwg
+aXMgbmVhcmx5IGZ1bGwuDQoNClN5c3RlbSBkYXRhIHBsZWFzZSByZWZlciB0byBiZWxvdyB1cmwN
+Cmh0dHA6Ly94dWVjaGVuZGkuZ2l0aHViLmlvL2RhdGEvDQoNCm9tYXAgb24gSEREIGlzIGJlZm9y
+ZSBtYXBwaW5nIHRvIG90aGVyIGRldmljZQ0Kb21hcCBvbiBTU0QgaXMgYWZ0ZXINCg0KQmVzdCBy
+ZWdhcmRzLA0KQ2hlbmRpDQoNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IE5p
+bmcgWWFvIFttYWlsdG86emF5MTEwMjJAZ21haWwuY29tXSANClNlbnQ6IFdlZG5lc2RheSwgTm92
+ZW1iZXIgNCwgMjAxNSAzOjA5IFBNDQpUbzogWHVlLCBDaGVuZGkgPGNoZW5kaS54dWVAaW50ZWwu
+Y29tPg0KQ2M6IFNhbXVlbCBKdXN0IDxzanVzdEByZWRoYXQuY29tPjsgY2VwaC1kZXZlbEB2Z2Vy
+Lmtlcm5lbC5vcmcNClN1YmplY3Q6IFJlOiBTcGVjaWZ5IG9tYXAgcGF0aCBmb3IgZmlsZXN0b3Jl
+DQoNCkhpLCBDaGVuZGksDQpJIGRvbid0IHRoaW5rIGl0IHdpbGwgYmUgYSBiaWcgaW1wcm92ZW1l
+bnQgY29tcGFyZWQgd2l0aCBub3JtYWwgd2F5IHRvIHVzaW5nIEZpbGVTdG9yZSAoZW5hYmxlIGZp
+bGVzdG9yZV9tYXhfaW5saW5lX3hhdHRyX3hmcyBhbmQgdHVuZSBmaWxlc3RvcmVfZmRfY2FjaGVf
+c2l6ZSxvc2RfcGdfb2JqZWN0X2NvbnRleHRfY2FjaGVfY291bnQsDQpmaWxlc3RvcmVfb21hcF9o
+ZWFkZXJfY2FjaGVfc2l6ZSBwcm9wZXJseSB0byBhY2hpZXZlIGEgaGlnaCBoaXQgcmF0ZSkuRG8g
+eW91IGVuYWJsZSAgZmlsZXN0b3JlX21heF9pbmxpbmVfeGF0dHIgaW4gdGhlIGZpcnN0IHRlc3Q/
+IElmIG5vdCwgaXQgbWF5IGJlIHJlYXNvbmFibGUuIEluIG15IHByZXZpb3VzIHRlc3QsIEkgcmVt
+ZW1iZXIganVzdCBhYm91dCAyMCV+MzAlIGltcHJvdmVtZW50Lg0KQW5kIGNhbiB5b3UgYWxzbyBw
+cm92aWRlIGNwdSBjb3N0IHBlciBPcCBvbiBvc2Qgbm9kZT8NClJlZ2FyZHMNCk5pbmcgWWFvDQoN
+Cg0KMjAxNS0xMC0zMCAxMDowNCBHTVQrMDg6MDAgWHVlLCBDaGVuZGkgPGNoZW5kaS54dWVAaW50
+ZWwuY29tPjoNCj4gSGksIFNhbQ0KPg0KPiBMYXN0IHdlZWsgSSBpbnRyb2R1Y2VkIGFib3V0IGhv
+dyB3ZSBzYXcgdGhlIGJlbmVmaXQgb2YgbW92aW5nIG9tYXAgdG8gYSBzZXBhcmF0ZSBkZXZpY2Uu
+DQo+DQo+IEFuZCBoZXJlIGlzIHRoZSBwdWxsIHJlcXVlc3Q6DQo+IGh0dHBzOi8vZ2l0aHViLmNv
+bS9jZXBoL2NlcGgvcHVsbC82NDIxDQo+DQo+IEkgaGFkIHRlc3RlZCByZWRlcGxveSBhbmQgcmVz
+dGFydCBjZXBoIGNsdXN0ZXIgYXQgbXkgc2V0dXAsIHRoZSBjb2RlcyB3b3JrcyBmaW5lLg0KPiBv
+bmUgcHJvYmxlbSBpcyBkbyB5b3UgdGhpbmsgSSBzaG91bGQgKkRFTEVURSogYWxsIHRoZSBmaWxl
+cyB1bmRlciB0aGUgb21hcF9wYXRoIGZpcnN0bHk/IEJlY2F1c2UgSSBub3RpY2UgaWYgb2xkIHBn
+IGRhdGEgbGVhdmVzIHRoZXJlLCBvc2QgZGFlbW9uIG1heSBydW4gaW50byBjaGFvcy4gQnV0IEkg
+YW0gbm90IHN1cmUgaWYgaXQgc2hvdWxkIGxlYXZlIHRvIHVzZXJzIHRvIERFTEVURS4NCj4NCj4g
+QW55IHRob3VnaHRzPw0KPg0KPiBBbHNvIEkgcGFzdGUgc29tZSBkYXRhIEkgdGFsa2VkICwgd2hp
+Y2ggaXMgYWJvdXQgdGhlIHJiZCBhbmQgb3NkIHdyaXRlIGlvcHMgcmF0aW8gd2hlbiBkb2luZyBy
+YW5kd3JpdGUgdG8gYSByYmQgZGV2aWNlLg0KPg0KPiA9PT09PT1IZXJlIGlzIHNvbWUgZGF0YT09
+PT09DQo+IFdlIHVzZXMgNCBjbGllbnRzICwgMzUgdm0gZWFjaCB0byB0ZXN0IG9uIHJiZCByYW5k
+d3JpdGUuDQo+IDQgb3NkIHBoeXNpY2FsIG5vZGVzLCBlYWNoIGhhcyAxMCBIREQgYXMgb3NkIGFu
+ZCAyIHNzZCBhcyBqb3VybmFsDQo+IDIgcmVwbGljYQ0KPiBmaWxlc3RvcmVfbWF4X2lubGluZV94
+YXR0cl94ZnM9MA0KPiBmaWxlc3RvcmVfbWF4X2lubGluZV94YXR0cl9zaXplX3hmcz0wDQo+DQo+
+IEJlZm9yZSBtb3Zpbmcgb21hcCB0byBzZXBhcmF0ZSBzc2QsIHdlIHNhdyBhIGZyb250ZW5kIGFu
+ZCBiYWNrZW5kIGlvcHMgDQo+IHJhdGlvIG9mIDE6NS44LCByYmQgc2lkZSB0b3RhbCBpb3BzIDEy
+MDYsIGhkZCB0b3RhbCBpb3BzIDcwMzQgTGlrZSB3ZSB0YWxrZWQsIDUuOCBjb25zaXN0cyBvZiAy
+IHJlcGxpY2Egd3JpdGUsIGlub2RlIGFuZCBvbWFwIHdyaXRlcw0KPiBydW5pZCAgICAgICAgIG9w
+X3NpemUgICAgb3BfdHlwZSAgICAgICAgICAgICBRRCAgICAgICAgICAgICBlbmdpbmUgICAgICAg
+ICAgICAgICBzZXJ2ZXJOdW0gICAgICAgY2xpZW50TnVtICAgICAgICAgcmJkTnVtICAgcnVudGlt
+ZSAgICAgICAgICAgICBmaW9faW9wcyAgICAgICAgIGZpb19idyAgICAgICAgICAgICAgIGZpb19s
+YXRlbmN5ICAgICAgICAgICAgICAgICBvc2RfaW9wcyAgICAgICAgICAgb3NkX2J3ICAgICAgICAg
+ICAgIG9zZF9sYXRlbmN5DQo+IDMzMiAgICAgICAgICAgIDRrICAgICAgICAgICAgICByYW5kd3Jp
+dGUgICAgICAgICBxZDggICAgICAgICAgICBxZW11cmJkICAgICAgICAgICA0ICAgICAgICAgICAg
+ICAgICAgICAgICAgICA0ICAgICAgICAgICAgICAgICAgICAgICAgICAxNDAgICAgICAgICAgICA0
+MDAgc2VjICAgICAgICAgICAgICAxMjA2LjAwMCAgICAgICAgIDQuOTg3IE1CL3MgICAgICA4ODQu
+NjE3IG1zZWMgICAgICAgICAgIDcwMzQuOTc1ICAgICAgICAgIDQ3LjQwNyBNQi9zICAgIDI0Mi42
+MjAgbXNlYw0KPg0KPiBBbmQgYWZ0ZXIgbW92aW5nIG9tYXAgdG8gYSBzZXBhcmF0ZSBzc2QsIHdl
+IHNhdyBhIGZyb250ZW5kIHZzLiBiYWNrZW5kIHJhdGlvIGRyb3BzIHRvIDE6Mi42LCByYmQgc2lk
+ZSB0b3RhbCBpb3BzIDUwMDYsIGhkZCB0b3RhbCBpb3BzIDEzMDg5DQo+IHJ1bmlkICAgICAgICAg
+b3Bfc2l6ZSAgICBvcF90eXBlICAgICAgICAgICAgIFFEICAgICAgICAgICAgIGVuZ2luZSAgICAg
+ICAgICAgICAgIHNlcnZlck51bSAgICAgICBjbGllbnROdW0gICAgICAgICByYmROdW0gICBydW50
+aW1lICAgICAgICAgICAgIGZpb19pb3BzICAgICAgICAgZmlvX2J3ICAgICAgICAgICAgICAgZmlv
+X2xhdGVuY3kgICAgICAgICAgICAgICAgIG9zZF9pb3BzICAgICAgICAgICBvc2RfYncgICAgICAg
+ICAgICAgb3NkX2xhdGVuY3kNCj4gMzI2ICAgICAgICAgICAgNGsgICAgICAgICAgICAgIHJhbmR3
+cml0ZSAgICAgICAgIHFkOCAgICAgICAgICAgIHFlbXVyYmQgICAgICAgICAgIDQgICAgICAgICAg
+ICAgICAgICAgICAgICAgIDQgICAgICAgICAgICAgICAgICAgICAgICAgIDE0MCAgICAgICAgICAg
+IDQwMCBzZWMgICAgICAgICAgICAgIDUwMDYuMDAwICAgICAgICAgMTkuODIyIE1CL3MgICAgMjIy
+LjI5NiBtc2VjICAgICAgICAgICAxMzA4OS4wMjAgICAgICAgIDgyLjg5NyBNQi9zICAgIDQ4Mi4y
+MDMgbXNlYw0KPg0KPg0KPiBCZXN0IHJlZ2FyZHMsDQo+IENoZW5kaQ0KPiAtLQ0KPiBUbyB1bnN1
+YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1k
+ZXZlbCIgDQo+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJu
+ZWwub3JnIE1vcmUgbWFqb3Jkb21vIA0KPiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3Jn
+L21ham9yZG9tby1pbmZvLmh0bWwNCg==
