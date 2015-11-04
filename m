@@ -1,138 +1,90 @@
-From: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
-Subject: RE: Specify omap path for filestore
-Date: Wed, 4 Nov 2015 15:19:56 +0000
-Message-ID: <6F3FA899187F0043BA1827A69DA2F7CC036411C6@shsmsx102.ccr.corp.intel.com>
-References: <C8CF870384EBCF4CAB89D2041A5C80B322002AB8@SHSMSX101.ccr.corp.intel.com>
-	<C8CF870384EBCF4CAB89D2041A5C80B322002D57@SHSMSX101.ccr.corp.intel.com>
-	<C8CF870384EBCF4CAB89D2041A5C80B3220030ED@SHSMSX101.ccr.corp.intel.com>
- <CALZt5jxkbA8OBe1zxxo9F1xjaJ8m+wSydzn_UQ4V=vBT2gty7A@mail.gmail.com>
- <C8CF870384EBCF4CAB89D2041A5C80B32200D93F@SHSMSX101.ccr.corp.intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+From: Douglas Fuller <dfuller@redhat.com>
+Subject: Re: Whitepaper: database workloads using RBD with dm-cache and Ceph cache tiering
+Date: Wed, 4 Nov 2015 10:22:14 -0500
+Message-ID: <38920A46-803A-4CDF-BB5B-10856E8F3E5B@redhat.com>
+References: <4E0B5E66-351F-45EC-96B2-790536D4EE5D@redhat.com> <CA+z5Dsy4B_Us3Q0ihmgue45hXtZWRirqrQCYKCZrm_Y9fdY4=A@mail.gmail.com>
+Mime-Version: 1.0 (Mac OS X Mail 9.1 \(3096.5\))
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:14576 "EHLO mga11.intel.com"
+Received: from mx1.redhat.com ([209.132.183.28]:47043 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S965613AbbKDPUG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 4 Nov 2015 10:20:06 -0500
-In-Reply-To: <C8CF870384EBCF4CAB89D2041A5C80B32200D93F@SHSMSX101.ccr.corp.intel.com>
-Content-Language: en-US
+	id S932303AbbKDPWQ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Nov 2015 10:22:16 -0500
+In-Reply-To: <CA+z5Dsy4B_Us3Q0ihmgue45hXtZWRirqrQCYKCZrm_Y9fdY4=A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Xue, Chendi" <chendi.xue@intel.com>, Ning Yao <zay11022@gmail.com>
-Cc: Samuel Just <sjust@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Blair Bethwaite <blair.bethwaite@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-SGkgTmluZywNCg0KWWVzLCB3ZSBkb2VzbuKAmXQgc2F2ZSBhbnkgSU8sIG9yIG1heSBldmVuIG5l
-ZWQgbW9yZSBJTyBhcyByZWFkIGFtcGxpZmljYXRpb24gYnkgTGV2ZWxEQi4gQnV0IHRoZSB0cmFk
-ZW9mZiBpcyB1c2luZyBTU0QgSU9QUyBpbnN0ZWFkIG9mIEhERCBJT1BTLCAgSU9QUy8kJCBpbiBT
-U0QoMTBLKyBJT1BTIHBlciAkMTAwKSBpcyAyIG9yZGVyIGNoZWFwZXIgdGhhbiB0aGF0IG9mIGlu
-IGFuIEhERCggMTAwIElPUFMgcGVyICQxMDApLg0KDQpTb21lIHVzZSBjYXNlOg0KDQoxLldoZW4g
-d2UgaGF2ZSBlbm91Z2ggbG9hZCwgbW92aW5nIGFueSBsb2FkIG91dCBvZiB0aGUgSEREIGRlZmlu
-aXRlbHkgYnJpbmcgc29tZSBoZWxwLiBPbWFwIGlzIHRoZSB0aGluZyB0aGF0IGNvdWxkIGJlIGVh
-c2lseSBtb3ZlZCBvdXQgdG8gU1NEICwgbm90ZSB0aGF0IG9tYXAgd29ya2xvYWQgaXMgbm90IGlu
-dGVuc2l2ZSBidXQgcmFuZG9tLCB3aGljaCBpcyBqdXN0IGZpdCBpbnRvIHRoZSBzc2QgYWxyZWFk
-eSB3b3JraW5nIGFzIGpvdXJuYWwuDQoNCjIuIEV2ZW4sIHdlIGNvdWxkIHNldCBtYXhfaW5saW5l
-X3hhdHRyIHRvIDAgdGhhdCBmb3JjZSBhbGwgeGF0dHIgdG8gb21hcChTU0QpLCB3aGljaCB3aWxs
-IHJlZHVjZSB0aGUgaW5vZGUgc2l6ZSB0aHVzIG1vcmUgaW5vZGUgY291bGQgYmUgY2FjaGVkIGlu
-IG1lbW9yeS4gQWdhaW4sIFNTRCBpcyBtb3JlIHRoYW4gZmFzdCBmb3IgdGhpcyBldmVuIHNoYXJp
-bmcgd2l0aCBqb3VybmFsLg0KDQozLiBpbiBSR1cgY2FzZSwgd2Ugd2lsbCBoYXZlIHNvbWUgY29u
-dGFpbmVyIG9iamVjdHMgd2l0aCB0b25zIG9mIG9tYXAsIG1vdmluZyB0aGUgb21hcCB0byBTU0Qg
-aXMgYSBjbGVhciBvcHRpbWl6YXRpb24uDQoNCi1YaWFveGkNCg0KPiAtLS0tLU9yaWdpbmFsIE1l
-c3NhZ2UtLS0tLQ0KPiBGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFp
-bHRvOmNlcGgtZGV2ZWwtDQo+IG93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIFh1
-ZSwgQ2hlbmRpDQo+IFNlbnQ6IFdlZG5lc2RheSwgTm92ZW1iZXIgNCwgMjAxNSA0OjE1IFBNDQo+
-IFRvOiBOaW5nIFlhbw0KPiBDYzogU2FtdWVsIEp1c3Q7IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwu
-b3JnDQo+IFN1YmplY3Q6IFJFOiBTcGVjaWZ5IG9tYXAgcGF0aCBmb3IgZmlsZXN0b3JlDQo+IA0K
-PiBIaSwgTmluZw0KPiANCj4gVGhhbmtzIGZvciB0aGUgYWR2aWNlLCB3ZSBkaWQgZG9uZSB0aGlu
-ZyB5b3Ugc3VnZ2VzdGVkIGluIG91ciBwZXJmb3JtYW5jZQ0KPiB0dW5pbmcgd29yaywgYWN0dWFs
-bHkgdHVuaW5nIHVwIHRoZSB1c2FnZSBvZiBtZW1vcnkgaXMgdGhlIGZpcnN0IHRoaW5nIHdlDQo+
-IHRyaWVkLg0KPiANCj4gRmlyc3RseSwgSSBzaG91bGQgZ3Vlc3MgdGhlIG9tYXAgdG8gc3NkIGJl
-bmVmaXQgc2hvd3Mgd2hlbiB3ZSB1c2UgcXVpdGUNCj4gaW50ZW5zaXZlIHdvcmtsb2FkLCB1c2lu
-ZyAxNDAgdm0gZG9pbmcgcmFuZHdyaXRlLCA4IHFkIGVhY2gsIHNvIHdlIGFsbW9zdA0KPiBkcml2
-ZSBlYWNoIEhERCB0byB1dGlsaXR5IDk1KyUuDQo+IA0KPiBXZSBob3BlZCBhbmQgdGVzdGVkIG9u
-IHR1bmUgdXAgdGhlIGlub2RlIG1lbW9yeSBzaXplIGFuZCBmZCBjYWNoZSBzaXplLA0KPiBzaW5j
-ZSBJIGJlbGlldmUgaWYgaW5vZGUgY2FuIGJlIGFsd2F5cyBoaXQgaW4gdGhlIG1lbW9yeSB3aGlj
-aCBkZWZpbml0ZWx5DQo+IGJlbmVmaXQgbW9yZSB0aGFuIHVzaW5nIG9tYXAuIFNhZGx5IG91ciBz
-ZXJ2ZXIgb25seSBoYXMgMzJHIG1lbW9yeSB0b3RhbC4NCj4gRXZlbiB3ZSBzZXQgeGF0dHIgc2l6
-ZSBhcyA2NTUzNSBhcyBvcmlnaW5hbCBjb25maWd1cmVkIGFuZCBhbHNvIGZkIGNhY2hlIHNpemUg
-YXMNCj4gMTAyNDAgYXMgSSByZW1lbWJlcmVkLCBzdGlsbCBnYWluIGEgbGl0dGxlIHRvIHRoZSBw
-ZXJmb3JtYW5jZSBidXQgbWF5IGxlYWQgdG8NCj4gT09NIG9mIE9TRCwgc28gdGhhdCBpcyB3aHkg
-d2UgY2FtZSB1cCB0aGUgc29sdXRpb24gb2YgbW92aW5nIG9tYXAgb3V0IHRvDQo+IGEgU1NEIGRl
-dmljZS4NCj4gDQo+IEFub3RoZXIgcmVhc29uIHRvIG1vdmUgb21hcCBvdXQgaXMgYmVjYXVzZSBp
-dCBoZWxwcyBvbiBwZXJmb3JtYW5jZQ0KPiBhbmFseXNpcywgc2luY2Ugb21hcCB1c2VzIGtleXZh
-bHVlc3RvcmUsIGFuZCBlYWNoIHJiZCByZXF1ZXN0IGNhdXNlcyBvbmUgb3INCj4gbW9yZSA0ayBp
-bm9kZSBvcGVyYXRpb24sIHdoaWNoIGxlYWQgYSBmcm9udGVuZCBhbmQgYmFja2VuZCB0aHJvdWdo
-cHV0DQo+IHJhdGlvIGFzIDE6IDUuOCwgd2hpY2ggaXMgbm90IHRoYXQgZWFzeSB0byBleHBsYWlu
-IHRoZSA1LjguDQo+IA0KPiBBbHNvIHdlIGNhbiBnZXQgbW9yZSByYW5kd3JpdGUgaW9wcyBpZiB0
-aGVyZSBpcyBubyBzZXF3cml0ZSB0byBvbmUgSEREDQo+IGRldmljZSwgd2hlbiBIREQgaGFuZGxl
-cyByYW5kd3JpdGUgaW9wcyBhbmQgYWxzbyBzb21lIG9tYXAobGV2ZWxkYikNCj4gd3JpdGUsIHdl
-IGNhbiBvbmx5IGdldCAxNzUgaW9wcyBkaXNrIHdyaXRlIHBlciBIREQgd2hlbiB1dGlsIGlzIG5l
-YXJseSBmdWxsLg0KPiB3aGVuIEhERCBvbmx5IGhhbmRsZXMgcmFuZHdyaXRlIHdpdGhvdXQgYW55
-IG9tYXAgd3JpdGUsIHdlIGNhbiBnZXQgMzI1DQo+IGlvcHMgZGlzayB3cml0ZSBwZXIgSEREIHdo
-ZW4gSEREIHV0aWwgaXMgbmVhcmx5IGZ1bGwuDQo+IA0KPiBTeXN0ZW0gZGF0YSBwbGVhc2UgcmVm
-ZXIgdG8gYmVsb3cgdXJsDQo+IGh0dHA6Ly94dWVjaGVuZGkuZ2l0aHViLmlvL2RhdGEvDQo+IA0K
-PiBvbWFwIG9uIEhERCBpcyBiZWZvcmUgbWFwcGluZyB0byBvdGhlciBkZXZpY2Ugb21hcCBvbiBT
-U0QgaXMgYWZ0ZXINCj4gDQo+IEJlc3QgcmVnYXJkcywNCj4gQ2hlbmRpDQo+IA0KPiANCj4gLS0t
-LS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogTmluZyBZYW8gW21haWx0bzp6YXkxMTAy
-MkBnbWFpbC5jb21dDQo+IFNlbnQ6IFdlZG5lc2RheSwgTm92ZW1iZXIgNCwgMjAxNSAzOjA5IFBN
-DQo+IFRvOiBYdWUsIENoZW5kaSA8Y2hlbmRpLnh1ZUBpbnRlbC5jb20+DQo+IENjOiBTYW11ZWwg
-SnVzdCA8c2p1c3RAcmVkaGF0LmNvbT47IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQo+IFN1
-YmplY3Q6IFJlOiBTcGVjaWZ5IG9tYXAgcGF0aCBmb3IgZmlsZXN0b3JlDQo+IA0KPiBIaSwgQ2hl
-bmRpLA0KPiBJIGRvbid0IHRoaW5rIGl0IHdpbGwgYmUgYSBiaWcgaW1wcm92ZW1lbnQgY29tcGFy
-ZWQgd2l0aCBub3JtYWwgd2F5IHRvIHVzaW5nDQo+IEZpbGVTdG9yZSAoZW5hYmxlIGZpbGVzdG9y
-ZV9tYXhfaW5saW5lX3hhdHRyX3hmcyBhbmQgdHVuZQ0KPiBmaWxlc3RvcmVfZmRfY2FjaGVfc2l6
-ZSxvc2RfcGdfb2JqZWN0X2NvbnRleHRfY2FjaGVfY291bnQsDQo+IGZpbGVzdG9yZV9vbWFwX2hl
-YWRlcl9jYWNoZV9zaXplIHByb3Blcmx5IHRvIGFjaGlldmUgYSBoaWdoIGhpdCByYXRlKS5Ebw0K
-PiB5b3UgZW5hYmxlICBmaWxlc3RvcmVfbWF4X2lubGluZV94YXR0ciBpbiB0aGUgZmlyc3QgdGVz
-dD8gSWYgbm90LCBpdCBtYXkgYmUNCj4gcmVhc29uYWJsZS4gSW4gbXkgcHJldmlvdXMgdGVzdCwg
-SSByZW1lbWJlciBqdXN0IGFib3V0IDIwJX4zMCUNCj4gaW1wcm92ZW1lbnQuDQo+IEFuZCBjYW4g
-eW91IGFsc28gcHJvdmlkZSBjcHUgY29zdCBwZXIgT3Agb24gb3NkIG5vZGU/DQo+IFJlZ2FyZHMN
-Cj4gTmluZyBZYW8NCj4gDQo+IA0KPiAyMDE1LTEwLTMwIDEwOjA0IEdNVCswODowMCBYdWUsIENo
-ZW5kaSA8Y2hlbmRpLnh1ZUBpbnRlbC5jb20+Og0KPiA+IEhpLCBTYW0NCj4gPg0KPiA+IExhc3Qg
-d2VlayBJIGludHJvZHVjZWQgYWJvdXQgaG93IHdlIHNhdyB0aGUgYmVuZWZpdCBvZiBtb3Zpbmcg
-b21hcCB0byBhDQo+IHNlcGFyYXRlIGRldmljZS4NCj4gPg0KPiA+IEFuZCBoZXJlIGlzIHRoZSBw
-dWxsIHJlcXVlc3Q6DQo+ID4gaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC9wdWxsLzY0MjEN
-Cj4gPg0KPiA+IEkgaGFkIHRlc3RlZCByZWRlcGxveSBhbmQgcmVzdGFydCBjZXBoIGNsdXN0ZXIg
-YXQgbXkgc2V0dXAsIHRoZSBjb2Rlcw0KPiB3b3JrcyBmaW5lLg0KPiA+IG9uZSBwcm9ibGVtIGlz
-IGRvIHlvdSB0aGluayBJIHNob3VsZCAqREVMRVRFKiBhbGwgdGhlIGZpbGVzIHVuZGVyIHRoZQ0K
-PiBvbWFwX3BhdGggZmlyc3RseT8gQmVjYXVzZSBJIG5vdGljZSBpZiBvbGQgcGcgZGF0YSBsZWF2
-ZXMgdGhlcmUsIG9zZCBkYWVtb24NCj4gbWF5IHJ1biBpbnRvIGNoYW9zLiBCdXQgSSBhbSBub3Qg
-c3VyZSBpZiBpdCBzaG91bGQgbGVhdmUgdG8gdXNlcnMgdG8gREVMRVRFLg0KPiA+DQo+ID4gQW55
-IHRob3VnaHRzPw0KPiA+DQo+ID4gQWxzbyBJIHBhc3RlIHNvbWUgZGF0YSBJIHRhbGtlZCAsIHdo
-aWNoIGlzIGFib3V0IHRoZSByYmQgYW5kIG9zZCB3cml0ZSBpb3BzDQo+IHJhdGlvIHdoZW4gZG9p
-bmcgcmFuZHdyaXRlIHRvIGEgcmJkIGRldmljZS4NCj4gPg0KPiA+ID09PT09PUhlcmUgaXMgc29t
-ZSBkYXRhPT09PT0NCj4gPiBXZSB1c2VzIDQgY2xpZW50cyAsIDM1IHZtIGVhY2ggdG8gdGVzdCBv
-biByYmQgcmFuZHdyaXRlLg0KPiA+IDQgb3NkIHBoeXNpY2FsIG5vZGVzLCBlYWNoIGhhcyAxMCBI
-REQgYXMgb3NkIGFuZCAyIHNzZCBhcyBqb3VybmFsDQo+ID4gMiByZXBsaWNhDQo+ID4gZmlsZXN0
-b3JlX21heF9pbmxpbmVfeGF0dHJfeGZzPTANCj4gPiBmaWxlc3RvcmVfbWF4X2lubGluZV94YXR0
-cl9zaXplX3hmcz0wDQo+ID4NCj4gPiBCZWZvcmUgbW92aW5nIG9tYXAgdG8gc2VwYXJhdGUgc3Nk
-LCB3ZSBzYXcgYSBmcm9udGVuZCBhbmQgYmFja2VuZCBpb3BzDQo+ID4gcmF0aW8gb2YgMTo1Ljgs
-IHJiZCBzaWRlIHRvdGFsIGlvcHMgMTIwNiwgaGRkIHRvdGFsIGlvcHMgNzAzNCBMaWtlIHdlIHRh
-bGtlZCwgNS44DQo+IGNvbnNpc3RzIG9mIDIgcmVwbGljYSB3cml0ZSwgaW5vZGUgYW5kIG9tYXAg
-d3JpdGVzDQo+ID4gcnVuaWQgICAgICAgICBvcF9zaXplICAgIG9wX3R5cGUgICAgICAgICAgICAg
-UUQgICAgICAgICAgICAgZW5naW5lICAgICAgICAgICAgICAgc2VydmVyTnVtDQo+IGNsaWVudE51
-bSAgICAgICAgIHJiZE51bSAgIHJ1bnRpbWUgICAgICAgICAgICAgZmlvX2lvcHMgICAgICAgICBm
-aW9fYncgICAgICAgICAgICAgICBmaW9fbGF0ZW5jeQ0KPiBvc2RfaW9wcyAgICAgICAgICAgb3Nk
-X2J3ICAgICAgICAgICAgIG9zZF9sYXRlbmN5DQo+ID4gMzMyICAgICAgICAgICAgNGsgICAgICAg
-ICAgICAgIHJhbmR3cml0ZSAgICAgICAgIHFkOCAgICAgICAgICAgIHFlbXVyYmQgICAgICAgICAg
-IDQgICAgICAgICAgICAgICAgICAgICAgICAgIDQNCj4gMTQwICAgICAgICAgICAgNDAwIHNlYyAg
-ICAgICAgICAgICAgMTIwNi4wMDAgICAgICAgICA0Ljk4NyBNQi9zICAgICAgODg0LjYxNyBtc2Vj
-DQo+IDcwMzQuOTc1ICAgICAgICAgIDQ3LjQwNyBNQi9zICAgIDI0Mi42MjAgbXNlYw0KPiA+DQo+
-ID4gQW5kIGFmdGVyIG1vdmluZyBvbWFwIHRvIGEgc2VwYXJhdGUgc3NkLCB3ZSBzYXcgYSBmcm9u
-dGVuZCB2cy4gYmFja2VuZA0KPiByYXRpbyBkcm9wcyB0byAxOjIuNiwgcmJkIHNpZGUgdG90YWwg
-aW9wcyA1MDA2LCBoZGQgdG90YWwgaW9wcyAxMzA4OQ0KPiA+IHJ1bmlkICAgICAgICAgb3Bfc2l6
-ZSAgICBvcF90eXBlICAgICAgICAgICAgIFFEICAgICAgICAgICAgIGVuZ2luZSAgICAgICAgICAg
-ICAgIHNlcnZlck51bQ0KPiBjbGllbnROdW0gICAgICAgICByYmROdW0gICBydW50aW1lICAgICAg
-ICAgICAgIGZpb19pb3BzICAgICAgICAgZmlvX2J3ICAgICAgICAgICAgICAgZmlvX2xhdGVuY3kN
-Cj4gb3NkX2lvcHMgICAgICAgICAgIG9zZF9idyAgICAgICAgICAgICBvc2RfbGF0ZW5jeQ0KPiA+
-IDMyNiAgICAgICAgICAgIDRrICAgICAgICAgICAgICByYW5kd3JpdGUgICAgICAgICBxZDggICAg
-ICAgICAgICBxZW11cmJkICAgICAgICAgICA0ICAgICAgICAgICAgICAgICAgICAgICAgICA0DQo+
-IDE0MCAgICAgICAgICAgIDQwMCBzZWMgICAgICAgICAgICAgIDUwMDYuMDAwICAgICAgICAgMTku
-ODIyIE1CL3MgICAgMjIyLjI5NiBtc2VjDQo+IDEzMDg5LjAyMCAgICAgICAgODIuODk3IE1CL3Mg
-ICAgNDgyLjIwMyBtc2VjDQo+ID4NCj4gPg0KPiA+IEJlc3QgcmVnYXJkcywNCj4gPiBDaGVuZGkN
-Cj4gPiAtLQ0KPiA+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5l
-ICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIg0KPiA+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0
-byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUNCj4gbWFqb3Jkb21vDQo+ID4gaW5mbyBh
-dCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+IAQgey5uICsg
-ICAgICAgKyUgIGx6d20gIGIg66eyICByICB5x6kg1696WCAgFyAg3Kh9ICAgxqB6ICZqOit2ICAg
-ICAgICB6WisgICt6ZiAgIGggICB+ICAgIGkgICB6IB4gdyAgID8NCj4gJiAp36IbZg0K
+Hi Blario,
+
+Thanks for the feedback.
+
+> On Nov 3, 2015, at 9:27 PM, Blair Bethwaite <blair.bethwaite@gmail.co=
+m> wrote:
+>=20
+> Hi Douglas,
+>=20
+> It's not clear whether you used SSD journals for the OSDs in the base
+> config (or in the backing pool for the tiered tests) - it looks like
+> not?
+
+Correct, these tests used spinning disk journals; the test cluster isn=E2=
+=80=99t equipped with SSDs. It may be interesting to know how using NVM=
+e devices for journaling as opposed to a cache tier performs. I=E2=80=99=
+ll run the numbers.
+
+> If that's the case then I don't think this provides the most
+> interesting point of comparison, because the tests are write-latency
+> sensitive you'd naturally expect SSD journals to make a lot of
+> difference and would surely start with those in the base config. I'm
+> interested in how a similar setup would perform compared to regular
+> journaling and Ceph tiering all on the server-side, e.g., dm-cache (o=
+r
+> bcache) based OSDs - apparently a bunch of people do this in the wild
+> with success, but AFAIK there has never been any detailed benchmarkin=
+g
+> published.
+
+I haven=E2=80=99t heard of this type of configuration myself, but it mi=
+ght be a possible scenario to explore.
+
+Thanks again,
+=E2=80=94Doug
+
+>=20
+> Cheers,
+>=20
+> On 3 November 2015 at 05:09, Douglas Fuller <dfuller@redhat.com> wrot=
+e:
+>> I=E2=80=99ve published a whitepaper detailing configuration and benc=
+hmark results using SysBench MySQL on top of RBD with dm-cache. Results=
+ using a Ceph cache tier are also included. Questions, comments, critic=
+ism, nitpicking, and/or discussion are welcome.
+>>=20
+>> http://tracker.ceph.com/projects/ceph/wiki/Ceph_and_dm-cache_for_Dat=
+abase_Workloads
+>>=20
+>> =E2=80=94Doug--
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+>=20
+>=20
+> --=20
+> Cheers,
+> ~Blairo
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
