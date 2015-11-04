@@ -1,45 +1,65 @@
-From: "Zhou, Yuan" <yuan.zhou@intel.com>
-Subject: RE: Symbolic links like feature on radosgw
-Date: Wed, 4 Nov 2015 00:27:19 +0000
-Message-ID: <06681238D8946F44A60AA400760A1CBF0213D5CB@SHSMSX104.ccr.corp.intel.com>
-References: <CAKtk8hcvWJmdYmY20ZQsUuE=ww+Q=pDv6=HRVJhZ6Hk01U3wSg@mail.gmail.com>
- <CAKtk8he19oYaEC9op5PFj6mRaA0jqQ5eFe2rRkj2JMV-E29AhQ@mail.gmail.com>
+From: Blair Bethwaite <blair.bethwaite@gmail.com>
+Subject: Re: Whitepaper: database workloads using RBD with dm-cache and Ceph
+ cache tiering
+Date: Wed, 4 Nov 2015 13:27:14 +1100
+Message-ID: <CA+z5Dsy4B_Us3Q0ihmgue45hXtZWRirqrQCYKCZrm_Y9fdY4=A@mail.gmail.com>
+References: <4E0B5E66-351F-45EC-96B2-790536D4EE5D@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:58818 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754983AbbKDA1W (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 3 Nov 2015 19:27:22 -0500
-In-Reply-To: <CAKtk8he19oYaEC9op5PFj6mRaA0jqQ5eFe2rRkj2JMV-E29AhQ@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-ob0-f177.google.com ([209.85.214.177]:36533 "EHLO
+	mail-ob0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932805AbbKDC1f convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Nov 2015 21:27:35 -0500
+Received: by obdgf3 with SMTP id gf3so28864597obd.3
+        for <ceph-devel@vger.kernel.org>; Tue, 03 Nov 2015 18:27:34 -0800 (PST)
+In-Reply-To: <4E0B5E66-351F-45EC-96B2-790536D4EE5D@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Guang Yang <guangyy@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Yehuda Sadeh <yehuda@inktank.com>
+To: Douglas Fuller <dfuller@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-SGkgR3VhbmcsIA0KDQpEb2VzICdjb3B5JyB3b3JrcyBmb3IgeW91ciBjYXNlPyBjb3B5aW5nIG9u
-ZSBvYmplY3RzIGluc2lkZSBvbmUgYnVja2V0IHdvdWxkIGNvcHkgdGhlIGhlYWQgb2JqZWN0IG9u
-bHkuIFRoZSBzaGFkb3cgb2JqZWN0cyBhcmUgbm90IGNvcGllZC4NCklmIHJnd19tYXhfY2h1bmtf
-b2JqZWN0cyBpcyBjb25maWd1cmVkIHRvIGJlIHNtYWxsKHNheSAxLWJ5dGUpIHRoZW4gd2UgaGF2
-ZSBhICdzeW1ib2xpYyBsaW5rJyAgbGlrZSBmaWxlLg0KDQp0aGFua3MsIC15dWFuDQoNCi0tLS0t
-T3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVs
-Lm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYg
-T2YgR3VhbmcgWWFuZw0KU2VudDogVHVlc2RheSwgTm92ZW1iZXIgMywgMjAxNSAxOjI2IFBNDQpU
-bzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc7IFllaHVkYSBTYWRlaA0KU3ViamVjdDogUmU6
-IFN5bWJvbGljIGxpbmtzIGxpa2UgZmVhdHVyZSBvbiByYWRvc2d3DQoNCkhpIFllaHVkYSwNCldl
-IGhhdmUgYSB1c2VyIHJlcXVpcmVtZW50IHRoYXQgbmVlZHMgc3ltYm9saWMgbGluayBsaWtlIGZl
-YXR1cmUgb24gcmFkb3NndyAtIHR3byBvYmplY3QgaWRzIHBvaW50aW5nIHRvIHRoZSBzYW1lIG9i
-amVjdCAoaWRlYWxseSBpdCBjb3VsZCBjcm9zcyBidWNrZXQsIGJ1dCBzYW1lIGJ1Y2tldCBpcyBm
-aW5lKS4NCg0KVGhlIGNsb3Nlc3QgZmVhdHVyZSBvbiBBbWF6b24gUzMgSSBjb3VsZCBmaW5kIGlz
-IFsxXSwgYnV0IG5vdCBleGFjdCB0aGUgc2FtZSwgdGhlIG9uZSBmcm9tIEFtYXpvbiBTMyBBUEkg
-d2FzIGRlc2lnbmVkIGZvciBzdGF0aWMgd2ViIHNpdGUgaG9zdGluZy4NCg0KSXMgdGhpcyBhIHZh
-bGlkIGZlYXR1cmUgcmVxdWVzdCB3ZSBjYW4gcHV0IGludG8gcmFkb3Nndz8gVGhlIHdheSBJIGFt
-IHRoaW5raW5nIHRvIGltcGxlbWVudCBpcyBsaWtlIHN5bWJvbGljIGxpbmssIHRoZSBsaW5rIG9i
-amVjdCBqdXN0IGNvbnRhaW5zIGEgcG9pbnRlciB0byB0aGUgb3JpZ2luYWwgb2JqZWN0Lg0KDQog
-WzFdIGh0dHA6Ly9kb2NzLmF3cy5hbWF6b24uY29tL0FtYXpvblMzL2xhdGVzdC9kZXYvaG93LXRv
-LXBhZ2UtcmVkaXJlY3QuaHRtbA0KDQogLS0NCiBSZWdhcmRzLA0KIEd1YW5nDQoNCg0KDQoNCi0t
-DQotLQ0KUmVnYXJkcywNCkd1YW5nDQotLQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6
-IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIHRoZSBib2R5IG9mIGEg
-bWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGluZm8g
-YXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
+Hi Douglas,
+
+It's not clear whether you used SSD journals for the OSDs in the base
+config (or in the backing pool for the tiered tests) - it looks like
+not?
+
+If that's the case then I don't think this provides the most
+interesting point of comparison, because the tests are write-latency
+sensitive you'd naturally expect SSD journals to make a lot of
+difference and would surely start with those in the base config. I'm
+interested in how a similar setup would perform compared to regular
+journaling and Ceph tiering all on the server-side, e.g., dm-cache (or
+bcache) based OSDs - apparently a bunch of people do this in the wild
+with success, but AFAIK there has never been any detailed benchmarking
+published.
+
+Cheers,
+
+On 3 November 2015 at 05:09, Douglas Fuller <dfuller@redhat.com> wrote:
+> I=E2=80=99ve published a whitepaper detailing configuration and bench=
+mark results using SysBench MySQL on top of RBD with dm-cache. Results =
+using a Ceph cache tier are also included. Questions, comments, critici=
+sm, nitpicking, and/or discussion are welcome.
+>
+> http://tracker.ceph.com/projects/ceph/wiki/Ceph_and_dm-cache_for_Data=
+base_Workloads
+>
+> =E2=80=94Doug--
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+--=20
+Cheers,
+~Blairo
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
