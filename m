@@ -1,81 +1,45 @@
-From: "ronny.hegewald@online.de" <ronny.hegewald@online.de>
-Subject: Aw: Re: [PATCH] mark rbd requiring stable pages
-Date: Tue, 3 Nov 2015 23:03:14 +0100
-Message-ID: <trinity-287e174e-89c2-410e-9487-9d45cf62b164-1446588194857@3capp-1and1-bs02>
+From: "Zhou, Yuan" <yuan.zhou@intel.com>
+Subject: RE: Symbolic links like feature on radosgw
+Date: Wed, 4 Nov 2015 00:27:19 +0000
+Message-ID: <06681238D8946F44A60AA400760A1CBF0213D5CB@SHSMSX104.ccr.corp.intel.com>
+References: <CAKtk8hcvWJmdYmY20ZQsUuE=ww+Q=pDv6=HRVJhZ6Hk01U3wSg@mail.gmail.com>
+ <CAKtk8he19oYaEC9op5PFj6mRaA0jqQ5eFe2rRkj2JMV-E29AhQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.126.130]:52801 "EHLO
-	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932536AbbKCWDb convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Nov 2015 17:03:31 -0500
+Received: from mga14.intel.com ([192.55.52.115]:58818 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754983AbbKDA1W (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 3 Nov 2015 19:27:22 -0500
+In-Reply-To: <CAKtk8he19oYaEC9op5PFj6mRaA0jqQ5eFe2rRkj2JMV-E29AhQ@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Mike Christie <michaelc@cs.wisc.edu>, Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, Alex Elder <elder@kernel.org>
+To: Guang Yang <guangyy@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Yehuda Sadeh <yehuda@inktank.com>
 
-
-I have done some testing through the weekend on the same testmachine
-i used the week before, but wasn't successfull to reproduce any corrupt=
-ion
-this time.
-=C2=A0
-I was rethinking my tests and why the results where different this time=
- and
-what your might also be different in your own test-environment.=C2=A0 T=
-his
-difference might be the recovering state of my ceph installation and it=
-s effect
-on the available memory and maybe other stats of the machine.
-=C2=A0
-Back then when the corruptions occured on my systems i would have sever=
-al
-problems because of the closed connections caused by the bad crcs, with=
- OSDs
-either being restarted by myself or getting marked out and in of the cl=
-uster,
-because the other OSDs didn't get the necessary ping from the OSD for t=
-oo long.
-=C2=A0
-The result of this was a noticeable increase of RAM-use. After some pee=
-rings
-and recoverys the machines would use ca. 500-800 MB swap, when it would
-have used none before.
-=C2=A0
-This might also explain why my own attempts to reproduce the corruption=
-s on
-purpose were never successfull. This tests usually happened pretty much=
- shortly
-after a fresh start of the cluster.
-=C2=A0
-Same situation on my test machine.=C2=A0 Before i run into a corruption=
- on this machine 2=C2=A0
-weeks ago, it had already executed some recoverys and backfills on the =
-OSDs that
-are hosted on this machine. This resulted in ca. 900 MB swap being used=
-=2E
-=C2=A0
-This weekend the machine had the same amount of OSDs started, but there=
- was not
-much of recovering necessary, so there was no swap used and enogh Ram
-available for ca. 2 GB of vfs-caches.
-=C2=A0
-Whatever it might be, the recovering/peering process might be the impor=
-tant part
-that brings the machine in the necessary state for the corruptions to o=
-ccur.=C2=A0 This
-memory increase should be easy to reproduce by sending a "ceph osd down=
- x" to some
-of the OSDs=C2=A0 This has always the described result in my installati=
-on.
-=C2=A0
-I will check if this actually works on my side also. But that will take=
- some time.
-=C2=A0
-=C2=A0
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGkgR3VhbmcsIA0KDQpEb2VzICdjb3B5JyB3b3JrcyBmb3IgeW91ciBjYXNlPyBjb3B5aW5nIG9u
+ZSBvYmplY3RzIGluc2lkZSBvbmUgYnVja2V0IHdvdWxkIGNvcHkgdGhlIGhlYWQgb2JqZWN0IG9u
+bHkuIFRoZSBzaGFkb3cgb2JqZWN0cyBhcmUgbm90IGNvcGllZC4NCklmIHJnd19tYXhfY2h1bmtf
+b2JqZWN0cyBpcyBjb25maWd1cmVkIHRvIGJlIHNtYWxsKHNheSAxLWJ5dGUpIHRoZW4gd2UgaGF2
+ZSBhICdzeW1ib2xpYyBsaW5rJyAgbGlrZSBmaWxlLg0KDQp0aGFua3MsIC15dWFuDQoNCi0tLS0t
+T3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVs
+Lm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYg
+T2YgR3VhbmcgWWFuZw0KU2VudDogVHVlc2RheSwgTm92ZW1iZXIgMywgMjAxNSAxOjI2IFBNDQpU
+bzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc7IFllaHVkYSBTYWRlaA0KU3ViamVjdDogUmU6
+IFN5bWJvbGljIGxpbmtzIGxpa2UgZmVhdHVyZSBvbiByYWRvc2d3DQoNCkhpIFllaHVkYSwNCldl
+IGhhdmUgYSB1c2VyIHJlcXVpcmVtZW50IHRoYXQgbmVlZHMgc3ltYm9saWMgbGluayBsaWtlIGZl
+YXR1cmUgb24gcmFkb3NndyAtIHR3byBvYmplY3QgaWRzIHBvaW50aW5nIHRvIHRoZSBzYW1lIG9i
+amVjdCAoaWRlYWxseSBpdCBjb3VsZCBjcm9zcyBidWNrZXQsIGJ1dCBzYW1lIGJ1Y2tldCBpcyBm
+aW5lKS4NCg0KVGhlIGNsb3Nlc3QgZmVhdHVyZSBvbiBBbWF6b24gUzMgSSBjb3VsZCBmaW5kIGlz
+IFsxXSwgYnV0IG5vdCBleGFjdCB0aGUgc2FtZSwgdGhlIG9uZSBmcm9tIEFtYXpvbiBTMyBBUEkg
+d2FzIGRlc2lnbmVkIGZvciBzdGF0aWMgd2ViIHNpdGUgaG9zdGluZy4NCg0KSXMgdGhpcyBhIHZh
+bGlkIGZlYXR1cmUgcmVxdWVzdCB3ZSBjYW4gcHV0IGludG8gcmFkb3Nndz8gVGhlIHdheSBJIGFt
+IHRoaW5raW5nIHRvIGltcGxlbWVudCBpcyBsaWtlIHN5bWJvbGljIGxpbmssIHRoZSBsaW5rIG9i
+amVjdCBqdXN0IGNvbnRhaW5zIGEgcG9pbnRlciB0byB0aGUgb3JpZ2luYWwgb2JqZWN0Lg0KDQog
+WzFdIGh0dHA6Ly9kb2NzLmF3cy5hbWF6b24uY29tL0FtYXpvblMzL2xhdGVzdC9kZXYvaG93LXRv
+LXBhZ2UtcmVkaXJlY3QuaHRtbA0KDQogLS0NCiBSZWdhcmRzLA0KIEd1YW5nDQoNCg0KDQoNCi0t
+DQotLQ0KUmVnYXJkcywNCkd1YW5nDQotLQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6
+IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIHRoZSBib2R5IG9mIGEg
+bWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGluZm8g
+YXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
