@@ -1,187 +1,332 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: Request for Comments: Weighted Round Robin OP Queue
-Date: Fri, 6 Nov 2015 02:12:18 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1511060202130.5830@cobra.newdream.net>
-References: <CAANLjFq4MdaO5NrK346wxMfThy9MKy-6NzB3_BRTicSWc2uh7w@mail.gmail.com> <CAN=+7FWJ2aH1mRg7Z4P2o9f7hB7q2MHE6rBzyeR9Yrnf8qh3jA@mail.gmail.com> <CAANLjFpBzV921FaCitr8f7rWYa5tCHTihjFmFa_dY76cYVxMFw@mail.gmail.com> <CAJ4mKGbaYX+RqZ9iZmTi6nDkhiLBfXRoX4a4R33JeLtMz-jxbw@mail.gmail.com>
- <CAANLjFo8RiTqmQJEbr5O082613pNGsu3-YM0VX-tToY-YPBfuQ@mail.gmail.com>
+Subject: RE: Specify omap path for filestore
+Date: Fri, 6 Nov 2015 02:28:45 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1511060226110.5830@cobra.newdream.net>
+References: <C8CF870384EBCF4CAB89D2041A5C80B322002AB8@SHSMSX101.ccr.corp.intel.com> <C8CF870384EBCF4CAB89D2041A5C80B322002D57@SHSMSX101.ccr.corp.intel.com> <C8CF870384EBCF4CAB89D2041A5C80B3220030ED@SHSMSX101.ccr.corp.intel.com>
+ <CALZt5jxkbA8OBe1zxxo9F1xjaJ8m+wSydzn_UQ4V=vBT2gty7A@mail.gmail.com> <C8CF870384EBCF4CAB89D2041A5C80B32200D93F@SHSMSX101.ccr.corp.intel.com> <6F3FA899187F0043BA1827A69DA2F7CC036411C6@shsmsx102.ccr.corp.intel.com> <CALZt5jy37yJ7q=Sz1UWxcqsUxmSY=jzWrgks1jDaKtJb2NagsQ@mail.gmail.com>
+ <72556480-689c-430a-af36-4e01cfcec976@email.android.com> <6F3FA899187F0043BA1827A69DA2F7CC03641BA9@shsmsx102.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-863391676-1446805725=:5830"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:34059 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:34136 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1161179AbbKFKMS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Nov 2015 05:12:18 -0500
-In-Reply-To: <CAANLjFo8RiTqmQJEbr5O082613pNGsu3-YM0VX-tToY-YPBfuQ@mail.gmail.com>
+	with ESMTP id S1033039AbbKFK2q (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Nov 2015 05:28:46 -0500
+In-Reply-To: <6F3FA899187F0043BA1827A69DA2F7CC03641BA9@shsmsx102.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Robert LeBlanc <robert@leblancnet.us>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: "Chen, Xiaoxi" <xiaoxi.chen@intel.com>
+Cc: Ning Yao <zay11022@gmail.com>, "Xue, Chendi" <chendi.xue@intel.com>, Samuel Just <sjust@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, 5 Nov 2015, Robert LeBlanc wrote:
-> -----BEGIN PGP SIGNED MESSAGE-----
-> Hash: SHA256
-> 
-> Thanks Gregory,
-> 
-> People are most likely busy and haven't had time to digest this and I
-> may be expecting more excitement from it (I'm excited due to the
-> results and probably also that such a large change still works). I'll
-> keep working towards a PR, this was mostly proof of concept, now that
-> there is some data I'll clean up the code.
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-I'm *very* excited about this.  This is something that almost every 
-operator has problems with so it's very encouraging to see that switching 
-up the queue has a big impact in your environment.
+--557981400-863391676-1446805725=:5830
+Content-Type: TEXT/PLAIN; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-I'm just following up on this after a week of travel, so apologies if this 
-is covered already, but did you compare this implementation to the 
-original one with the same tunables?  I see somewhere that you had 
-max_backfills=20 at some point, which is going to be bad regardless of the 
-queue.
+On Fri, 6 Nov 2015, Chen, Xiaoxi wrote:
+> Can we simply the case as cephFS and RGW both has dedicate metadata poo=
+l
+> ---- So we can solve this in deployment, using OSD with keyvaluestore
+> backend for it ( on SSD) should be a best fit.
 
-I also see that you chnaged the strict priority threshold from LOW to HIGH 
-in OSD.cc; I'm curious how much of an impact was from this vs the queue 
-implementation.
- 
-> I was thinking that a config option to choose the scheduler would be a
-> good idea. In terms of the project what is the better approach: create
-> a new template and each place the template class is instantiated
-> select the queue, or perform the queue selection in the same template
-> class, or something else I haven't thought of.
+I think that's a good approach for the current code (FileStore and/or=20
+KeyValueStore).
 
-A config option would be nice, but I'd start by just cleaning up the code 
-and putting it in a new class (WeightedRoundRobinPriorityQueue or 
-whatever).  If we find that it's behaving better I'm not sure how much 
-value we get from a tunable.  Note that there is one other user 
-(msgr/simple/DispatchQueue) that we might also was to switch over at some 
-point.. especially if this implementation is faster.
+But for NewStore I'd like to solve this problem directly so that it can b=
+e=20
+used for both cases.  Rocksdb has a mechanism for moving lower level ssts=
+=20
+to a slower device based on a total size threshold on the main device;=20
+hopefully this can be used so that we can give it both an ssd and hdd.
 
-Once it's cleaned up (remove commented out code, new class) put it up as a 
-PR and we can review and get it through testing.
-
-Thanks, Robert!
 sage
 
-
-> 
-> Are there public teuthology-openstack systems that could be used for
-> testing? I don't remember, I'll have to search back through the
-> mailing list archives.
-> 
-> I appreciate all the direction as I've tried to figure this out.
-> 
-> Thanks,
-> - ----------------
-> Robert LeBlanc
-> PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
-> 
-> 
-> On Wed, Nov 4, 2015 at 8:20 PM, Gregory Farnum  wrote:
-> > On Wed, Nov 4, 2015 at 7:00 PM, Robert LeBlanc  wrote:
-> >> -----BEGIN PGP SIGNED MESSAGE-----
-> >> Hash: SHA256
-> >>
-> >> Thanks for your help on IRC Samuel. I think I found where I made a
-> >> mistake. I'll do some more testing. So far with max_backfills=1 on
-> >> spindles, the impact of setting an OSD out and in on a saturated
-> >> cluster seems to be minimal. On my I/O graphs it is hard to tell where
-> >> the OSD was out and in recovering. If I/O becomes blocked, it seems
-> >> that they don't linger around long. All of the clients report getting
-> >> about the same amount of work done with little variance so no one
-> >> client is getting indefinitely blocked (or blocked for really long
-> >> times) causing the results between clients to be skewed like before.
-> >>
-> >> So far this queue seems to be very positive. I'd hate to put a lot of
-> >> working getting this ready to merge if there is little interest in it
-> >> (a lot of things to do at work and some other things I'd like to track
-> >> down in the Ceph code as well). What are some of the next steps for
-> >> something like this, meaning a pretty significant change to core code?
-> >
-> > Well, step one is to convince people it's worthwhile. Your performance
-> > information and anecdotal evidence of client impact is a pretty good
-> > start. For it to get merged:
-> > 1) People will need to review it and verify it's not breaking anything
-> > they can identify from code. Things are a bit constricted right now,
-> > but this is pretty small and of high interest so I make no promises
-> > for the core team but submitting a PR will be the way to start.
-> > Getting positive buy-in from other contributors who are interested in
-> > performance will also push it up the queue.
-> > 2) There will need to be a lot of testing on something like this.
-> > Everything has to pass a run of the RADOS suite. Unfortunately this is
-> > a bad month for that as the lab is getting physically shipped around
-> > in a few weeks, so if you can afford to make it happen with the
-> > teuthology-openstack stuff that will accelerate the timeline a lot (we
-> > will still need to run it ourselves but once it's passed externally we
-> > can put it in a lot more test runs we expect to pass, instead of in a
-> > bucket with others that will all get blocked on any one failure).
-> > 3) For a new queuing system I suspect that rather than a direct merge
-> > to default master, Sam will want to keep both in the code for a while
-> > with a config value and run a lot of the nightlies on this one to
-> > tease out any subtle races and bugs.
-> > 4) Eventually we become confident that it's in good shape and it
-> > replaces the old queue.
-> >
-> > Obviously those are the optimistic steps. ;)
-> > -Greg
-> >
-> >>
-> >> Thank you to all who took time to help point me in the right direction.
-> >> - ----------------
-> >> Robert LeBlanc
-> >> PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
-> >>
-> >>
-> >> On Wed, Nov 4, 2015 at 12:49 PM, Samuel Just  wrote:
-> >>> I didn't look into it closely, but that almost certainly means that
-> >>> your queue is reordering primary->replica replicated write messages.
-> >>> -Sam
-> >>>
-> >>
-> >> -----BEGIN PGP SIGNATURE-----
-> >> Version: Mailvelope v1.2.3
-> >> Comment: https://www.mailvelope.com
-> >>
-> >> wsFcBAEBCAAQBQJWOsY1CRDmVDuy+mK58QAA9LIQALIUgbS4BuDS704HPOpA
-> >> XwvGxspelMCaBkLHLgiHU4T/Jc8JaXhgdRMwMiKeLI246Z7hRngSGlIDYc4+
-> >> nP4kWZIkwbJeTa/Z6bM6C3itFtJmQpkPvdjI+GiME5ZdYvFgCZQyDD71rqja
-> >> H14m0+JsEaIHQF0JZz6OyNxbyRWsM+M68nOvpAx8/fOGHBC/0VwPbLrOUP9O
-> >> 3J3NvbhN9xlYJeivXSAyzxmHQDD8mO1c1AUTrHgnTViD2k3fmcH0mOHIJ+jn
-> >> ARZbeLN3hlXG0i9PHpnHzBVNSxsfb5VPxX970R3gvRWIt40QV/QL7q2SajWP
-> >> ofxgEpkaO48ANQSYDlqSNcM+w46TtgcJljtX0vbrHIW3Skyaz4UZQ/dzX4lX
-> >> a5Zzk01oFwXfMd10KgVbJf78qVYHy2r5aq46iFnrFLU43iy+Qve7Kex4XZFi
-> >> vPFFVea89Of838NqTxW21+3oJthrz1g7RKHghZAbXaj3WKchuEU+uVG4XTo1
-> >> 0PU4a5ZYVTH6zYHpwJo2/89OzdkBe9S6s00+4JmfVWWEhb6+QwUjBQp1TJbB
-> >> TnMzSKfzgRyi/wHThv2XcZN12tttZMM2L4Ea3mHG+cxOTTZ1opv8/H2mprm8
-> >> 7UuO4vk5K0c4IwPVmt9m5DTVhyn4hZ/QJmc+NARD3zc1u3qWFLkH2WaRMpBb
-> >> mRWA
-> >> =kgAl
-> >> -----END PGP SIGNATURE-----
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> -----BEGIN PGP SIGNATURE-----
-> Version: Mailvelope v1.2.3
-> Comment: https://www.mailvelope.com
-> 
-> wsFcBAEBCAAQBQJWO3JgCRDmVDuy+mK58QAAeCcP/jHnG3r257cdcRYZzg9o
-> iMOxnuKAXNnwscYzJysCHsoQ2S3dB9SCxt8r+QvDo09IkXzarFaW647nzG6H
-> zeCtbhx2NFU/jOqPip/8XDUaDYlDrjHuskDJwz+jzoaZfWPjLfPkmETU/8vh
-> mrGZH+kjYuu1WhmM8cGJZJLrKA7C2OPTAU5PRmx5enClHXhdxyskZ7BUxcXp
-> uPJJg7pemT/qaJPrO7e7wwhYw43GaeSULp8QGFsqireCwbv9mndB7bbOa40U
-> ElHmgWgcG1UkkydW/U9DaJHM52ZbrAuG7XkZRsmB1oTmVriEoOFYSiGv5F+R
-> Mjxe9OlqiL9Fd/AQXunAAMdwIU5T3mlkrxMvhroRkW2+EerrRVW3JbJ8gmQ9
-> lXPRw9RxcQY5m8S+8+CWikBHvsRBCXEGA8tXUYqLuDJKpRHeCo7PpONS3III
-> QB+tgWaMteoeJGZ7nGLFcaKxTGa1tNKju4M2845/L8Fawy8jdYYcLqOTUs80
-> M1gpQ0UHzTXdQEdQnufxgaCFfwblF5vIlr6qd89rR5m0eJipElQLi2Uh0Zd3
-> 0t0i0xtFdprkxDmzX/bzbARAnlS1cz/yoB85r3JxeNPev671mocQc0uyFkt7
-> P04ogGWzLBN5B4nWNWDznOZS52G+vhkFxryUyl9+LDafAKiTTPmhB/LXPMs+
-> 7ny7
-> =Xg0t
-> -----END PGP SIGNATURE-----
+> =C2=A0
+>=20
+> Thus for New-Newstore, we just focus on data pool?
+>=20
+> =C2=A0
+>=20
+> From: Sage Weil [mailto:sage@newdream.net]
+> Sent: Friday, November 6, 2015 1:11 AM
+> To: Ning Yao; Chen, Xiaoxi
+> Cc: Xue, Chendi; Samuel Just; ceph-devel@vger.kernel.org
+> Subject: Re: Specify omap path for filestore
+>=20
+> =C2=A0
+>=20
+> Yes.=C2=A0 The hard part here in my view is the allocation of space bet=
+ween ssd
+> and hdd when the amount of omap data can vary widely, from very little =
+for
+> rbd to the entire pool for rgw indexes or cephfs metadata.
+>=20
+> sage
+>=20
+> =C2=A0
+>=20
+> On November 5, 2015 11:33:48 AM GMT+01:00, Ning Yao <zay11022@gmail.com=
+>
+> wrote:
+>=20
+> Agreed! Actually in different use cases.
+> But still not heavily loaded with SSD under small write use case, on
+> this point, I may assume that newstore overlay would be much better?
+> It seems that we can do more based on NewStore to let the store using
+> the raw device directly based on onode_t, data_map (which can act as
+> the inode in filesystem), so that we can achieve the whole HDD iops as
+> real data without the interference of filesystem-journal and inode
+> get/set.
+> Regards
+> Ning Yao
+> 2015-11-04 23:19 GMT+08:00 Chen, Xiaoxi <xiaoxi.chen@intel.com>:
+>=20
+>  Hi Ning,
+>  Yes, we doesn?t save any IO, or may even need more IO as read amplific=
+ation b
+> y LevelDB. But the tradeoff is using SSD IOPS instead of HDD IOPS,=C2=A0=
+ IOPS/$$=20
+> in SSD(10K+ IOPS per $100) is 2 order cheaper than that
+>=20
+> of in an HDD( 100 IOPS per $100).
+>  Some use case:
+>  1.When we have enough load, moving any load out of the HDD definitely =
+bring
+>  some help. Omap is the thing that could be easily moved out to SSD , n=
+ote t
+> hat omap workload is not intensive but random, which is just fit into t=
+he ss
+> d already working as journal.
+>  2. Even, we could set max_inline_xattr to 0 that force all xattr to om=
+ap(SS
+> D), which will reduce the inode size thus more inode could be cached in=
+ memo
+> ry. Again, SSD is more than fast for this even sharing with journal.
+>  3. in RGW case, we will have some container objects with tons of omap,=
+ movi
+> ng the omap to SSD is a clear optimization.
+>  -Xiaoxi
+>=20
+>  -----Original Message-----
+>  From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
+>  owner@vger.kernel.org] On Behalf Of Xue, Chendi
+>=20
+> Sent: Wednesday, November 4, 2015 4:15 PM
+>  To: Ning Yao
+>  Cc: Samuel Just; ceph-devel@vger.kernel.org
+>  Subject: RE: Specify omap path for filestore
+>  Hi, Ning
+>  Thanks for the advice, we did done thing you suggested in our performa=
+nce
+>  tuning work, actually tuning up the usage of memory is the first thing=
+ we
+>  tried.
+>  Firstly, I should guess the omap to ssd benefit shows when we use quit=
+e
+>  intensive workload, using 140 vm doing randwrite, 8 qd each, so we alm=
+ost
+>  drive each HDD to utility 95+%.
+>  We hoped and tested on tune up the inode memory size and fd cache size=
+,
+>  since I believe if inode can be always hit in the memory which definit=
+ely
+>  benefit more than using omap. Sadly our server only has 32G memory tot=
+al.
+>  Even we set xattr size as 65535 as original configured and also fd cac=
+he si
+> ze as
+>  10240 as I remembered, still gain a little to the performance but may =
+lead=20
+> to
+>  OOM of OSD,
+>=20
+> so that is why we came up the solution of moving omap out to
+>  a SSD device.
+>  Another reason to move omap out is because it helps on performance
+>  analysis, since omap uses keyvaluestore, and each rbd request causes o=
+ne or
+>  more 4k inode operation, which lead a frontend and backend throughput
+>  ratio as 1: 5.8, which is not that easy to explain the 5.8.
+>  Also we can get more randwrite iops if there is no seqwrite to one HDD
+>  device, when HDD handles randwrite iops and also some omap(leveldb)
+>  write, we can only get 175 iops disk write per HDD when util is nearly=
+ full
+> .
+>  when HDD only handles randwrite without any omap write, we can get 325
+>  iops disk write per HDD when HDD util is nearly full.
+>  System data please refer to below url
+>  http://xuechendi.github.io/data/
+>  omap on HDD is before mapping to other device omap on SSD is after
+>  Best
+>=20
+> regards,
+>  Chendi
+>  -----Original Message-----
+>  From: Ning Yao [mailto:zay11022@gmail.com]
+>  Sent: Wednesday, November 4, 2015 3:09 PM
+>  To: Xue, Chendi <chendi.xue@intel.com>
+>  Cc: Samuel Just <sjust@redhat.com>; ceph-devel@vger.kernel.org
+>  Subject: Re: Specify omap path for filestore
+>  Hi, Chendi,
+>  I don't think it will be a big improvement compared with normal way to=
+ usin
+> g
+>  FileStore (enable filestore_max_inline_xattr_xfs and tune
+>  filestore_fd_cache_size,osd_pg_object_context_cache_count,
+>  filestore_omap_header_cache_size properly to achieve a high hit rate).=
+Do
+>  you enable=C2=A0 filestore_max_inline_xattr in the first test? If not,=
+ it may be
+>  reasonable. In my previous test, I remember just about 20%~30%
+>  improvement.
+>  And can you also provide cpu cost per Op on osd node?
+>  Regards
+>  Ning Yao
+>  2015-10-30 10:04 GMT+08:00 Xue, Chendi
+>=20
+> <chendi.xue@intel.com>:
+>=20
+>  Hi, Sam
+>  Last week I introduced about how we saw the benefit of moving omap to =
+a
+>=20
+>  separate device.
+>=20
+>  And here is the pull request:
+>  https://github.com/ceph/ceph/pull/6421
+>  I had tested redeploy and restart ceph cluster at my setup, the codes
+>=20
+>  works fine.
+>=20
+>  one problem is do you think I should *DELETE* all the files under the
+>=20
+>  omap_path firstly? Because I notice if old pg data leaves there, osd d=
+aemon
+>  may run into chaos. But I am not sure if it
+>=20
+> should leave to users to DELETE.
+>=20
+>  Any thoughts?
+>  Also I paste some data I talked , which is about the rbd and osd write=
+ iops
+>=20
+>  ratio when doing randwrite to a rbd device.
+>=20
+>  =3D=3D=3D=3D=3D=3DHere is some data=3D=3D=3D=3D=3D
+>  We uses 4 clients , 35 vm each to test on rbd randwrite.
+>  4 osd physical nodes, each has 10 HDD as osd and 2 ssd as journal
+>  2 replica
+>  filestore_max_inline_xattr_xfs=3D0
+>  filestore_max_inline_xattr_size_xfs=3D0
+>  Before moving omap to separate ssd, we saw a frontend and backend iops
+>  ratio of 1:5.8, rbd side total iops 1206, hdd total iops 7034 Like we =
+talke
+> d, 5.8
+>=20
+>  consists of 2 replica write, inode and omap writes
+>=20
+>  runid=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 op_size=C2=A0=C2=
+=A0=C2=A0 op_type=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0 QD=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0 engine=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0
+> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 serverNum
+>=20
+>  clientNum=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 rbdNum=C2=A0=
+=C2=A0 runtime=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0 fio_iops=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 fio=
+_bw=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0
+> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 fio_latency
+>  osd_iops=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 o=
+sd_bw=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0 osd_latency
+>=20
+>  332=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 =
+4k=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0 randwrite=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 qd8=C2=A0=
+=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 qemurbd=C2=A0=
+=C2=A0=C2=A0=C2=A0
+> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 4=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 4
+>=20
+>  140=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 =
+400 sec=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0 1206.000=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 4.9=
+87 MB/s=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 884.61
+> 7 msec
+>  7034.975=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 47.407 =
+MB/s=C2=A0=C2=A0 =C2=A0242.620 msec
+>=20
+>  And after moving omap to a separate ssd, we saw a frontend vs. backend
+>=20
+>  ratio drops to
+>=20
+> 1:2.6, rbd side total iops 5006, hdd total iops 13089
+>=20
+>  runid=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 op_size=C2=A0=C2=
+=A0=C2=A0 op_type=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0 QD=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0 engine=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0
+> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 serverNum
+>=20
+>  clientNum=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 rbdNum=C2=A0=
+=C2=A0 runtime=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0 fio_iops=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 fio=
+_bw=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0
+> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 fio_latency
+>  osd_iops=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 o=
+sd_bw=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0 osd_latency
+>=20
+>  326=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 =
+4k=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0 randwrite=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 qd8=C2=A0=
+=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 qemurbd=C2=A0=
+=C2=A0=C2=A0=C2=A0
+> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 4=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A04
+>=20
+>  140=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 =
+400 sec=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0 5006.000=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 19.=
+822 MB/s=C2=A0=C2=A0=C2=A0 222.296
+>  msec
+>  13089.020=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 82.897 MB/s=C2=A0=C2=
+=A0=C2=A0 482.203 msec
+>=20
+>  Best regards,
+>  Chendi
+>=20
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>  To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>  in the body of a message to majordomo@vger.kernel.org More
+>=20
+>  majordomo
+>=20
+>  info at=C2=A0 http://vger.kernel.org/majordomo-info.html
+>=20
+> =C2=A0=C2=A0 {.n +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 +%=C2=A0 lzwm=C2=
+=A0 b ?=C2=A0 r=C2=A0 y? ?zX=C2=A0=C2=A0=C2=A0=C2=A0 ?}=C2=A0=C2=A0 ?z &j=
+:+v=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 zZ+=C2=A0 +zf=C2=A0=C2=A0 h=
+=C2=A0=C2=A0 ~=C2=A0=C2=A0=C2=A0 i
+> =C2=A0=C2=A0 z =C2=A0=C2=A0w=C2=A0=C2=A0 ?
+>  & )? f
+>=20
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
 > the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+> More majordomo info at=C2=A0 http://vger.kernel.org/majordomo-info.html
+>=20
+>=20
+> --
+> Sent from Kaiten Mail. Please excuse my brevity.
+>=20
+>=20
+>=20
+--557981400-863391676-1446805725=:5830--
