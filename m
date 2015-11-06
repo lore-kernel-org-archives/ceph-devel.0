@@ -1,104 +1,47 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: a home for backport snippets
-Date: Fri, 6 Nov 2015 08:53:12 +0100
-Message-ID: <563C5C68.1010606@dachary.org>
-References: <563B5789.7050006@dachary.org>
- <CAP3mxSzcET62u7zJCUtMv56Xjkr_29HN4qhj_H4b-XsxRNf2SA@mail.gmail.com>
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: Would it make sense to require ntp
+Date: Fri, 6 Nov 2015 11:06:41 +0100
+Message-ID: <563C7BB1.7030500@suse.cz>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="0srnXq33PWJnV2VUEIiRdCRskktkI7EWV"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:55805 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1032480AbbKFHxX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Nov 2015 02:53:23 -0500
-In-Reply-To: <CAP3mxSzcET62u7zJCUtMv56Xjkr_29HN4qhj_H4b-XsxRNf2SA@mail.gmail.com>
+Received: from mx2.suse.de ([195.135.220.15]:35551 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1033130AbbKFKGn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 6 Nov 2015 05:06:43 -0500
+Received: from relay1.suse.de (charybdis-ext.suse.de [195.135.220.254])
+	by mx2.suse.de (Postfix) with ESMTP id 1F2A4AC27
+	for <ceph-devel@vger.kernel.org>; Fri,  6 Nov 2015 10:06:22 +0000 (UTC)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Abhishek Varshney <abhishek.varshney@flipkart.com>
-Cc: Abhishek L <abhishek.lekshmanan@gmail.com>, Nathan Cutler <ncutler@suse.cz>, Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---0srnXq33PWJnV2VUEIiRdCRskktkI7EWV
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Hi Ceph:
 
-Hi Abhishek,
+Recently I encountered some a "clock skew" issue with 0.94.3. I have
+some small demo clusters in AWS. When I boot them up, in most cases the
+cluster will start in HEALTH_WARN due to clock skew on some of the MONs.
 
-On 06/11/2015 07:11, Abhishek Varshney wrote:
-> Hi Loic,
->=20
-> It is definitely a great idea to have all the backport snippets under
-> a roof. However, these snippets, which are mostly a set of commands,
-> provide great flexibility in terms of configuration and the ability to
-> partly execute them. For instance, if I see conflicts while preparing
-> an integration branch, I comment out the git fetch, checkout and reset
-> steps from [1] after resolving the conflicts and re-run the snippet.
-> It would be nice if we can incorporate all the snippets and take
-> ceph-workbench to that level of flexibility :)
+I surmise that this is due to a race condition between the ceph-mon and
+ntpd systemd services. Sometimes ntpd.service starts *after* ceph-mon -
+in this case the MON sees a wrong/unsynchronized time value.
 
-This is a good point: I'm doing the same kind of copy / paste. We'll have=
- to adjust the granularity.
+Now, even though ntpd.service starts (and fixes the time value) very
+soon afterwards, the cluster remains in clock skew for a long time - but
+that is a separate issue. What I would like to ask is this:
 
-   http://ceph-workbench.dachary.org/users/auth/github
+Is there any reasonable Ceph cluster node configuration that does not
+include running the NTP daemon?
 
-was setup and is dedicated to the tool. Please let me know when you first=
- login so that I can make you an admin.
+If the answer is "no", would it make sense to make NTP a runtime
+dependency and tell the ceph-mon systemd service to wait for
+ntpd.service before it starts?
 
-Cheers
+Thanks and regards
 
->=20
-> [1] http://tracker.ceph.com/projects/ceph-releases/wiki/HOWTO_populate_=
-the_integration_branch
->=20
-> Thanks
-> Abhishek
->=20
-> On Thu, Nov 5, 2015 at 6:50 PM, Loic Dachary <loic@dachary.org> wrote:
->> Hi,
->>
->> Today, Nathan and I briefly discussed the idea of collecting the backp=
-ort snippets that are archived in the wiki at http://tracker.ceph.com/pro=
-jects/ceph-releases/wiki/HOWTO. We all have copies on our local disks and=
- although they don't diverge much, this is not very sustainable. It was r=
-eally good as we established the backport workflows. And it would have be=
-en immensely painful to maintain a proper software while we were changing=
- the workflow on a regular basis. But it looks like we now have something=
- stable.
->>
->> Early this year ceph-workbench[1] was started with the idea of helping=
- with backports. It is a mostly empty shell we can now use to collect all=
- the snippets we have. Instead of adding set-release[2] to the script dir=
-ectory of Ceph, it would be a subcommand of ceph-workbench, like so:
->>
->>   ceph-workbench set-release --token $github_token --key $redmine_key
->>
->> What do you think ?
->>
->> Cheers
->>
->> [1] https://pypi.python.org/pypi/ceph-workbench
->> [2] https://github.com/ceph/ceph/pull/6466
->> --
->> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->>
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---0srnXq33PWJnV2VUEIiRdCRskktkI7EWV
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlY8XGkACgkQ8dLMyEl6F20SJACfUbmE6mUTBHEPPVYARziQwDVM
-63UAn2FPMulsc1Fx1YLE1OV+5iLoaw6N
-=fr/4
------END PGP SIGNATURE-----
-
---0srnXq33PWJnV2VUEIiRdCRskktkI7EWV--
+-- 
+Nathan Cutler
+Software Engineer Distributed Storage
+SUSE LINUX, s.r.o.
+Tel.: +420 284 084 037
