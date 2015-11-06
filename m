@@ -1,58 +1,59 @@
-From: Wido den Hollander <wido@42on.com>
+From: John Spray <jspray@redhat.com>
 Subject: Re: Would it make sense to require ntp
-Date: Fri, 6 Nov 2015 12:36:36 +0100
-Message-ID: <563C90C4.6090202@42on.com>
+Date: Fri, 6 Nov 2015 12:26:17 +0000
+Message-ID: <CALe9h7eP-vabaMCYuLuEUO2pME-cRfUHVrOFgkzRcZNqxL2ZbA@mail.gmail.com>
 References: <563C7BB1.7030500@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:43963 "EHLO
-	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1161397AbbKFLgn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Nov 2015 06:36:43 -0500
+Received: from mail-lb0-f172.google.com ([209.85.217.172]:33356 "EHLO
+	mail-lb0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1031995AbbKFM0i (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Nov 2015 07:26:38 -0500
+Received: by lbbkw15 with SMTP id kw15so50647443lbb.0
+        for <ceph-devel@vger.kernel.org>; Fri, 06 Nov 2015 04:26:37 -0800 (PST)
 In-Reply-To: <563C7BB1.7030500@suse.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nathan Cutler <ncutler@suse.cz>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Nathan Cutler <ncutler@suse.cz>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 11/06/2015 11:06 AM, Nathan Cutler wrote:
+On Fri, Nov 6, 2015 at 10:06 AM, Nathan Cutler <ncutler@suse.cz> wrote:
 > Hi Ceph:
-> 
+>
 > Recently I encountered some a "clock skew" issue with 0.94.3. I have
 > some small demo clusters in AWS. When I boot them up, in most cases the
 > cluster will start in HEALTH_WARN due to clock skew on some of the MONs.
-> 
+>
 > I surmise that this is due to a race condition between the ceph-mon and
 > ntpd systemd services. Sometimes ntpd.service starts *after* ceph-mon -
 > in this case the MON sees a wrong/unsynchronized time value.
-> 
+>
 > Now, even though ntpd.service starts (and fixes the time value) very
 > soon afterwards, the cluster remains in clock skew for a long time - but
 > that is a separate issue. What I would like to ask is this:
-> 
+>
 > Is there any reasonable Ceph cluster node configuration that does not
 > include running the NTP daemon?
-> 
 
-Well, the MONs are very, very time sensitive. OSDs somewhat less, but if
-they drift too far they run into trouble authenticating.
+Only if there is some other time service replacing it.  I don't really
+know of anyone using alternative ntp daemons, but it's a possibility
+to consider before introducing a hard dependency on ntpd.
 
 > If the answer is "no", would it make sense to make NTP a runtime
 > dependency and tell the ceph-mon systemd service to wait for
 > ntpd.service before it starts?
-> 
 
-I think it makes sense, correct time is essential imho.
+Just waiting for the service is quick, but it doesn't achieve any
+effect on the clock other than promising that it will be synced at
+some point in the future.  Wouldn't we have to wait for time sync
+rather than just waiting for the service?  That could take a while.
 
-> Thanks and regards
-> 
+My hunch is that users wouldn't appreciate the mon blocking until
+times were in sync, they'd probably prefer to go ahead and start up,
+but raise a warning (like we currently do).
 
+Given all that, maybe the question is actually: why do the mons stay
+in the skew state for so long after the clocks are corrected?
 
--- 
-Wido den Hollander
-42on B.V.
-Ceph trainer and consultant
-
-Phone: +31 (0)20 700 9902
-Skype: contact42on
+John
