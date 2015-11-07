@@ -1,57 +1,70 @@
-From: Martin Millnert <martin@millnert.se>
-Subject: Infernalis uninstallable - jenkins virtualenv misconfiguration?
-Date: Sat, 07 Nov 2015 03:08:44 +0100
-Message-ID: <1446862124.12033.91.camel@millnert.se>
+From: Haomai Wang <haomai@xsky.com>
+Subject: Re: ceph encoding optimization
+Date: Sat, 7 Nov 2015 21:40:15 +0800
+Message-ID: <CACJqLyZdBw_xVoXUfqoKYdrQj3606EWBRowzDdyP0DqWLG7KZg@mail.gmail.com>
+References: <CANE=7sURCs6VHCGAYMjXr2LMD7E6CfwqWkjYQopCOaQ-OzW65g@mail.gmail.com>
+	<CAJ4mKGYeEHiVL+6V0BQFq4bcZU1nP9Q0YAd2_OkiP8ZR9h+9Jw@mail.gmail.com>
+	<CANE=7sVGYGX1fPoHETWnXCBDtGEB2DivQVowor77CEKVtXH1Ew@mail.gmail.com>
+	<34ee94ce6bc34f318148d87490880bb3@R01UKEXCASM111.r01.fujitsu.local>
+	<CACJqLyYOcRNa4xXj5FDB74XVtBZwN_TqoNzMXBdZV7HJB2DC3w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from ncis.millnert.se ([185.19.66.196]:45181 "EHLO mail.millnert.se"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1030462AbbKGCIr (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 6 Nov 2015 21:08:47 -0500
-Received: from pishuli (dynamic.1.9.c0255cb5b480.f46d4e0fc2a.cust.bredband2.com [31.208.64.196])
-	by mail.millnert.se (Postfix) with ESMTPSA id D675E7FF8A
-	for <ceph-devel@vger.kernel.org>; Sat,  7 Nov 2015 03:08:51 +0100 (CET)
+Received: from mail-pu1apc01on0130.outbound.protection.outlook.com ([104.47.126.130]:9376
+	"EHLO APC01-PU1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753199AbbKGNkd convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 7 Nov 2015 08:40:33 -0500
+Received: by oiww189 with SMTP id w189so56023947oiw.3
+        for <ceph-devel@vger.kernel.org>; Sat, 07 Nov 2015 05:40:15 -0800 (PST)
+In-Reply-To: <CACJqLyYOcRNa4xXj5FDB74XVtBZwN_TqoNzMXBdZV7HJB2DC3w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: "Piotr.Dalek@ts.fujitsu.com" <Piotr.Dalek@ts.fujitsu.com>
+Cc: =?UTF-8?B?5rGg5L+h5rO9?= <xmdxcxz@gmail.com>, Gregory Farnum <gfarnum@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
+Hi sage,
 
-tried to install the infernalis RPMS published on
-http://download.ceph.com today, but was met with the following problem:
-[root@ceph-dev-clust01-mon01 tmp]# rpm -qpR ceph-9.2.0-0.el7.x86_64.rpm 
-/bin/bash
-/bin/sh
-/bin/sh
-/bin/sh
-/bin/sh
-/bin/sh
-/home/jenkins-build/build/workspace/ceph-build-next/ARCH/x86_64/DIST/centos7/venv/bin/python
-/usr/bin/env
-[snip]
+Could we know about your progress to refactor MSubOP and hobject_t,
+pg_stat_t decode problem?
 
-That "Requires: " at least doesn't work on my systems.
+We could work on this based on your work if any.
 
-I confirmed by building the SRPM in my own build host (without
-virtualenvs):
-[anticimex@rpmbuilder-dev-app3 ceph]$ rpm -qpR
-rpmbuild/RPMS/x86_64/ceph-9.2.0-0.el7.x86_64.rpm 
-/bin/bash
-/bin/sh
-/bin/sh
-/bin/sh
-/bin/sh
-/bin/sh
-/usr/bin/env
-/usr/bin/python
-[snip]
 
-Seems virtualenv on the jenkins build host is affecting some python
-path/env variable in the spec file somehow. Haven't dug further.
-
-Regards,
--- 
-Martin Millnert <martin@millnert.se>
-
+On Thu, Nov 5, 2015 at 1:29 AM, Haomai Wang <haomai@xsky.com> wrote:
+> On Thu, Nov 5, 2015 at 1:19 AM, Piotr.Dalek@ts.fujitsu.com
+> <Piotr.Dalek@ts.fujitsu.com> wrote:
+>>> -----Original Message-----
+>>> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
+>>> owner@vger.kernel.org] On Behalf Of ???
+>>> Sent: Wednesday, November 04, 2015 4:34 PM
+>>> To: Gregory Farnum
+>>> Cc: ceph-devel@vger.kernel.org
+>>> Subject: Re: ceph encoding optimization
+>>>
+>>> I agree with pg_stat_t (and friends) is a good first start.
+>>> The eversion_t and utime_t are also good choice to start because th=
+ey are
+>>> used at many places.
+>>
+>> On Ceph Hackathon, Josh Durgin made initial steps in right direction=
+ in terms of pg_stat_t encoding and decoding optimization, with the end=
+ianness-awareness thing left out. Even in that state, performance impro=
+vements offered by this change were huge enough to make it worthwhile. =
+I'm attaching the patch, but please note that this is prototype and bas=
+ed on mid-August state of code, so you might need to take that into acc=
+ount when applying the patch.
+>
+> Cool, it's exactly we want to see.
+>
+>>
+>>
+>> With best regards / Pozdrawiam
+>> Piotr Da=C5=82ek
+>>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
