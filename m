@@ -1,142 +1,69 @@
-From: Robert LeBlanc <robert@leblancnet.us>
-Subject: Re: Request for Comments: Weighted Round Robin OP Queue
-Date: Mon, 9 Nov 2015 13:31:24 -0700
-Message-ID: <CAANLjFrXdK2r25RaC4RB3=irSv_qufvQi__S4QbZBN7VS1WSjw@mail.gmail.com>
-References: <CAANLjFq4MdaO5NrK346wxMfThy9MKy-6NzB3_BRTicSWc2uh7w@mail.gmail.com>
-	<CAN=+7FWJ2aH1mRg7Z4P2o9f7hB7q2MHE6rBzyeR9Yrnf8qh3jA@mail.gmail.com>
-	<CAANLjFpBzV921FaCitr8f7rWYa5tCHTihjFmFa_dY76cYVxMFw@mail.gmail.com>
-	<CAJ4mKGbaYX+RqZ9iZmTi6nDkhiLBfXRoX4a4R33JeLtMz-jxbw@mail.gmail.com>
-	<CAANLjFo8RiTqmQJEbr5O082613pNGsu3-YM0VX-tToY-YPBfuQ@mail.gmail.com>
-	<alpine.DEB.2.00.1511060202130.5830@cobra.newdream.net>
-	<CAANLjFrka=DHN=1D-=wsY4HgHQ=-tg0+0hfff80kiiaaRK=r0g@mail.gmail.com>
-	<CAANLjFqMf9xPMPLx-8BM=P00vJ0OnXNCkC3K3Xe-R27Dt6k4Kw@mail.gmail.com>
-	<alpine.DEB.2.00.1511080619140.27153@cobra.newdream.net>
-	<CAN=+7FUyzNtzjngg-r=fdRo9uqeZfcMRvqc7eZumn7KaB9KYmg@mail.gmail.com>
-	<CAANLjFoFT6ajEBJKfhA9rnjyJ+a8gKpFrQz74uyobKjiyZvxeQ@mail.gmail.com>
-	<CAN=+7FWjVG5XuBqzzeZkQiQ=ZVSbScUj2gNms6gy52N738Y5sQ@mail.gmail.com>
-	<CAANLjFpveonAff_aQNV-RNKOkhgBHjNAjwLftjWWinz+XNFztw@mail.gmail.com>
-	<CAN=+7FWi=wcQsFU7rMLPKdLF+9DZGKUgNmMTM3xDP0+K0bQ56A@mail.gmail.com>
+From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Subject: Re: [PATCH 1/9] drivers/staging/media/davinci_vpfe/vpfe_mc_capture.c: use correct structure type name in sizeof
+Date: Mon, 09 Nov 2015 22:48:26 +0200
+Message-ID: <1915769.aHlhsWqSsK@avalon>
+References: <1406647011-8543-1-git-send-email-Julia.Lawall@lip6.fr> <1406647011-8543-2-git-send-email-Julia.Lawall@lip6.fr>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f45.google.com ([209.85.213.45]:33464 "EHLO
-	mail-vk0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750997AbbKIUbZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Nov 2015 15:31:25 -0500
-Received: by vkbk63 with SMTP id k63so797920vkb.0
-        for <ceph-devel@vger.kernel.org>; Mon, 09 Nov 2015 12:31:24 -0800 (PST)
-In-Reply-To: <CAN=+7FWi=wcQsFU7rMLPKdLF+9DZGKUgNmMTM3xDP0+K0bQ56A@mail.gmail.com>
+Received: from galahad.ideasonboard.com ([185.26.127.97]:45232 "EHLO
+	galahad.ideasonboard.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752113AbbKIUsQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Nov 2015 15:48:16 -0500
+In-Reply-To: <1406647011-8543-2-git-send-email-Julia.Lawall@lip6.fr>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sjust@redhat.com>
-Cc: Sage Weil <sage@newdream.net>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Julia Lawall <Julia.Lawall@lip6.fr>
+Cc: Mauro Carvalho Chehab <m.chehab@samsung.com>, kernel-janitors@vger.kernel.org, linux-ia64@vger.kernel.org, ceph-devel@vger.kernel.org, toralf.foerster@gmx.de, hmh@hmh.eng.br, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-media@vger.kernel.org, devel@driverdev.osuosl.org, linux-kernel@vger.kernel.org
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA256
+Hi Julia,
 
-On Mon, Nov 9, 2015 at 12:47 PM, Samuel Just  wrote:
-> What I really want from PrioritizedQueue (and from the dmclock/mclock
-> approaches that are also being worked on) is a solution to the problem
-> of efficiently deciding which op to do next taking into account
-> fairness across io classes and ops with different costs.
+Thank you for the patch.
 
-> On Mon, Nov 9, 2015 at 11:19 AM, Robert LeBlanc  wrote:
->> -----BEGIN PGP SIGNED MESSAGE-----
->> Hash: SHA256
->>
->> Thanks, I think some of the fog is clearing. I was wondering how
->> operations between threads were keeping the order of operations in
->> PGs, that explains it.
->>
->> My original thoughts were to have a queue in front and behind the
->> Prio/WRR queue. Threads scheduling work would queue to the pre-queue.
->> The queue thread would pull ops off that queue and place them into the
->> specialized queue, do house keeping, etc and would dequeue ops in that
->> queue to a post-queue that worker threads would monitor. The thread
->> queue could keep a certain amount of items in the post-queue to
->> prevent starvation and worker threads from being blocked.
->
-> I'm not sure what the advantage of this would be -- it adds another thread
-> to the processing pipeline at best.
+On Tuesday 29 July 2014 17:16:43 Julia Lawall wrote:
+> From: Julia Lawall <Julia.Lawall@lip6.fr>
+> 
+> Correct typo in the name of the type given to sizeof.  Because it is the
+> size of a pointer that is wanted, the typo has no impact on compilation or
+> execution.
+> 
+> This problem was found using Coccinelle (http://coccinelle.lip6.fr/).  The
+> semantic patch used can be found in message 0 of this patch series.
+> 
+> Signed-off-by: Julia Lawall <Julia.Lawall@lip6.fr>
+> 
+> ---
+>  drivers/staging/media/davinci_vpfe/vpfe_mc_capture.c |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/staging/media/davinci_vpfe/vpfe_mc_capture.c
+> b/drivers/staging/media/davinci_vpfe/vpfe_mc_capture.c index
+> cda8388..255590f 100644
+> --- a/drivers/staging/media/davinci_vpfe/vpfe_mc_capture.c
+> +++ b/drivers/staging/media/davinci_vpfe/vpfe_mc_capture.c
+> @@ -227,7 +227,7 @@ static int vpfe_enable_clock(struct vpfe_device
+> *vpfe_dev) return 0;
+> 
+>  	vpfe_dev->clks = kzalloc(vpfe_cfg->num_clocks *
+> -				   sizeof(struct clock *), GFP_KERNEL);
+> +				   sizeof(struct clk *), GFP_KERNEL);
 
-There are a few reasons I thought about it. 1. It is hard to
-prioritize/mange the work load if you can't see/manage all the
-operations. One queue allows the algorithm to make decisions based on
-all available information. (This point seems to be handled in a
-different way in the future) 2. Reduce latency in the Op path. When an
-OP is queued, there is overhead in getting it in the right place. When
-an OP is dequeued there is more overhead in spreading tokens, etc.
-Right now that is all serial, if an OP is stuck in the queue waiting
-to be dispatched some of this overhead can't be performed while in
-this waiting period. The idea is pushing that overhead to a separate
-thread and allowing a worker thread to queue/dequeue in the most
-efficient manner. It also allows for more complex trending,
-scheduling, etc because it can sit outside of the OP path. As the
-workload changes, it can dynamically change how it manages the queue
-like simple fifo for low periods where latency is dominated by compute
-time, to Token/WRR when latency is dominated by disk access, etc.
+I'd use sizeof(*vpfe_dev->clks) to avoid such issues.
 
->> It would require the worker thread to be able to handle any kind of
->> op, or having separate post-queues for the different kinds of work.
->> I'm getting the feeling that this may be a far too simplistic approach
->> to the problem (or at least in terms of the organization of Ceph at
->> this point). I'm also starting to feel that I'm getting out of my
->> league trying to understand all the intricacies of the OSD work flow
->> (trying to start with one of the most complicated parts of the system
->> doesn't help).
->>
->> Maybe what I should do is just code up the queue to drop in as a
->> replacement for the Prio queue for the moment. Then as your async work
->> is completing we can shake out the potential issues with recovery and
->> costs that we talked about earlier. One thing that I'd like to look
->> into is elevating the priority of recovery ops that have client OPs
->> blocked. I don't think the WRR queue gives the recovery thread a lot
->> of time to get its work done.
->>
->
-> If an op comes in that requires recovery to happen before it can be
-> processed, we send the recovery messages with client priority rather
-> than recovery priority.
+Apart from that,
 
-But the recovery is still happening the recovery thread and not the
-client thread, right? The recovery thread has a lower priority than
-the op thread? That's how I understand it.
+Acked-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
 
->> Based on some testing on Friday, the number of recovery ops on an osd
->> did not really change if there were 20 backfilling or 1 backfilling.
->> The difference came in with how many client I/Os were blocked waiting
->> for objects to recover. When 20 backfills were going, there were a lot
->> more blocked I/O waiting for objects to show up or recover. With one
->> backfill, there were far less blocked I/O, but there were still times
->> I/O would block.
->
-> The number of recovery ops is actually a separate configurable
-> (osd_recovery_max_active -- default to 15).  It's odd that with more
-> backfilling on a single osd, there is more blocked IO.  Looking into
-> that would be helpful and would probably give you some insight
-> into recovery and the op processing pipeline.
+I've applied the patch to my tree with the above change, there's no need to 
+resubmit if you agree with the proposal.
 
-I'll see what I can find here.
+>  	if (vpfe_dev->clks == NULL) {
+>  		v4l2_err(vpfe_dev->pdev->driver, "Memory allocation failed\n");
+>  		return -ENOMEM;
 
-- ----------------
-Robert LeBlanc
-PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
------BEGIN PGP SIGNATURE-----
-Version: Mailvelope v1.2.3
-Comment: https://www.mailvelope.com
+-- 
+Regards,
 
-wsFcBAEBCAAQBQJWQQJ0CRDmVDuy+mK58QAAeeUP/1uN/9EdqQDJdxW7fgeJ
-/E0X49LmnnCigMPL5QJ3fpGjf44C0xcc9LN5IGJwwumHd5ozznpocy8Oj30N
-+rNPJQ4dxcRao+bXUL/+DCQuY0wN/i7CqfMTW5PFmkdH4K9Lgce+bN6Q5Ora
-q8JZvAxaZLCLZ10N+uiD5ghs+3X68hu4Da8SYQj0vjLs5gV4oATebF3JuYXW
-GZ9qNfm2ygbeuT5Q0fhOKrvwJ9taKagMNrZLU10Wz5lHpGNitP3f17sVQznF
-7ZCkZ+2oS+P4Lerchc3xB2qBJUoPJGSuGAUTSl/uUeyMoZT1+2LvLdNbJaio
-UonoKJv47p4mpjo75x6FTWbJg0Ix+8/3/6oo3CkxC+6vOeWcv90B3TJGJPRz
-tAayNB/1YpsVZ3QlHiuyC7+TdKofLRlMR21iAnAJkZ6FdgMz9SFk1Rp4vuyR
-1qeZ+B4qA0m9ZWjx/G80j3fkUDY48EHR5gnI1k+WHFAh8KqT3eTRr37n9HH4
-7wVakfPv89+HRjqrlA7WK5F89UVp1I+2kEmtPADCiwgh2wf0zn7Y5tA4FMXH
-DIloZIRfvPwFtwpqgF7GR5vb/1dEOzD9Da0Zb7gBfsEfGaI2pJ+yvD1ad3BB
-eqHQ05rl7s8meeX0H+6gWn9/f0JA65k2P2Y4N3YHk6OvKqIqnhreS9Tl4grH
-MrBN
-=Ju+O
------END PGP SIGNATURE-----
+Laurent Pinchart
+
