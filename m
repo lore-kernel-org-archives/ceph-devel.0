@@ -1,43 +1,65 @@
 From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: Re: qemu : rbd block driver internal snapshot and
+Subject: Re: [Qemu-devel] qemu : rbd block driver internal snapshot and
  vm_stop is hanging forever
-Date: Mon, 9 Nov 2015 04:54:23 +0100 (CET)
-Message-ID: <1561927996.3022026.1447041263817.JavaMail.zimbra@oxygem.tv>
-References: <310812067.2785504.1447038645014.JavaMail.zimbra@oxygem.tv>
-	<2016579078.2834222.1447039390275.JavaMail.zimbra@oxygem.tv>
+Date: Mon, 9 Nov 2015 05:18:46 +0100 (CET)
+Message-ID: <435271730.3157386.1447042726807.JavaMail.zimbra@oxygem.tv>
+References: <310812067.2785504.1447038645014.JavaMail.zimbra@oxygem.tv> <2016579078.2834222.1447039390275.JavaMail.zimbra@oxygem.tv> <1561927996.3022026.1447041263817.JavaMail.zimbra@oxygem.tv>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org>
-In-Reply-To: <2016579078.2834222.1447039390275.JavaMail.zimbra@oxygem.tv>
-List-Unsubscribe: <https://lists.nongnu.org/mailman/options/qemu-devel>,
-	<mailto:qemu-devel-request@nongnu.org?subject=unsubscribe>
-List-Archive: <http://lists.nongnu.org/archive/html/qemu-devel>
-List-Post: <mailto:qemu-devel@nongnu.org>
-List-Help: <mailto:qemu-devel-request@nongnu.org?subject=help>
-List-Subscribe: <https://lists.nongnu.org/mailman/listinfo/qemu-devel>,
-	<mailto:qemu-devel-request@nongnu.org?subject=subscribe>
-Errors-To: qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org
-Sender: qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mailpro.odiso.net ([89.248.209.98]:47665 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752108AbbKIESt convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 8 Nov 2015 23:18:49 -0500
+In-Reply-To: <1561927996.3022026.1447041263817.JavaMail.zimbra@oxygem.tv>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel <ceph-devel@vger.kernel.org>, qemu-devel <qemu-devel@nongnu.org>
-List-Id: ceph-devel.vger.kernel.org
 
-Also,=20
+Something is really wrong,
 
-this occur only with rbd_cache=3Dfalse or qemu drive cache=3Dnone.
+because guest is also freezing, with a simple snapshot, with cache=3Dno=
+ne / rbd_cache=3Dfalse
+
+qemu monitor : snapshot_blkdev_internal drive-virtio0 snap1
+
+or=20
+
+rbd command : rbd --image myrbdvolume snap create --snap snap1=20
 
 
-If I use rbd_cache=3Dtrue or qemu drive cache=3Dwriteback, I don't have thi=
-s bug.
+Then the guest can't read/write to disk anymore.
+
+
+I have tested with last ceph internalis, same problem
+
 
 
 ----- Mail original -----
 De: "aderumier" <aderumier@odiso.com>
-=C3=80: "ceph-devel" <ceph-devel@vger.kernel.org>, "qemu-devel" <qemu-devel=
-@nongnu.org>
-Envoy=C3=A9: Lundi 9 Novembre 2015 04:23:10
-Objet: Re: qemu : rbd block driver internal snapshot and vm_stop is hanging=
- forever
+=C3=80: "ceph-devel" <ceph-devel@vger.kernel.org>, "qemu-devel" <qemu-d=
+evel@nongnu.org>
+Envoy=C3=A9: Lundi 9 Novembre 2015 04:54:23
+Objet: Re: [Qemu-devel] qemu : rbd block driver internal snapshot and v=
+m_stop is hanging forever
+
+Also,=20
+
+this occur only with rbd_cache=3Dfalse or qemu drive cache=3Dnone.=20
+
+
+If I use rbd_cache=3Dtrue or qemu drive cache=3Dwriteback, I don't have=
+ this bug.=20
+
+
+----- Mail original -----=20
+De: "aderumier" <aderumier@odiso.com>=20
+=C3=80: "ceph-devel" <ceph-devel@vger.kernel.org>, "qemu-devel" <qemu-d=
+evel@nongnu.org>=20
+Envoy=C3=A9: Lundi 9 Novembre 2015 04:23:10=20
+Objet: Re: qemu : rbd block driver internal snapshot and vm_stop is han=
+ging forever=20
 
 Some other infos:=20
 
@@ -62,11 +84,11 @@ ret =3D bdrv_flush_all();=20
 
 ----- Mail original -----=20
 De: "aderumier" <aderumier@odiso.com>=20
-=C3=80: "ceph-devel" <ceph-devel@vger.kernel.org>, "qemu-devel" <qemu-devel=
-@nongnu.org>=20
+=C3=80: "ceph-devel" <ceph-devel@vger.kernel.org>, "qemu-devel" <qemu-d=
+evel@nongnu.org>=20
 Envoy=C3=A9: Lundi 9 Novembre 2015 04:10:45=20
-Objet: qemu : rbd block driver internal snapshot and vm_stop is hanging for=
-ever=20
+Objet: qemu : rbd block driver internal snapshot and vm_stop is hanging=
+ forever=20
 
 Hi,=20
 
@@ -92,11 +114,18 @@ Regards,=20
 
 Alexandre=20
 --=20
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in=20
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n=20
 the body of a message to majordomo@vger.kernel.org=20
 More majordomo info at http://vger.kernel.org/majordomo-info.html=20
 
 --=20
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in=20
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n=20
 the body of a message to majordomo@vger.kernel.org=20
 More majordomo info at http://vger.kernel.org/majordomo-info.html=20
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
