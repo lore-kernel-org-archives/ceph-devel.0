@@ -1,65 +1,69 @@
-From: Laurent GUERBY <laurent@guerby.net>
-Subject: Help on ext4/xattr linux kernel stability issue / ceph xattr use?
-Date: Mon, 09 Nov 2015 10:41:30 +0100
-Message-ID: <1447062090.2019.557.camel@guerby.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: Re: [PATCH] ceph:Fix error handling in the function down_reply
+Date: Mon, 9 Nov 2015 18:15:14 +0800
+Message-ID: <5C00713A-6AA6-437E-8C05-CFC993C2731E@redhat.com>
+References: <1447038686-31928-1-git-send-email-xerofoify@gmail.com>
+Mime-Version: 1.0 (Mac OS X Mail 9.1 \(3096.5\))
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.tetaneutral.net ([91.224.149.83]:43209 "EHLO
-	mx1.tetaneutral.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751715AbbKIJr1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Nov 2015 04:47:27 -0500
-Received: from lgnuc (ip165-ipv6.tetaneutral.net [IPv6:2a01:6600:8081:a500::1])
-	by mx1.tetaneutral.net (Postfix) with ESMTP id EB7698C140
-	for <ceph-devel@vger.kernel.org>; Mon,  9 Nov 2015 10:41:30 +0100 (CET)
+Received: from mx1.redhat.com ([209.132.183.28]:43957 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753448AbbKIKP3 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Nov 2015 05:15:29 -0500
+In-Reply-To: <1447038686-31928-1-git-send-email-xerofoify@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Nicholas Krause <xerofoify@gmail.com>
+Cc: Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>, linux-kernel@vger.kernel.org
 
-Hi,
 
-Part of our ceph cluster is using ext4 and we recently hit major kernel
-instability in the form of kernel lockups every few hours, issues
-opened:
+> On Nov 9, 2015, at 11:11, Nicholas Krause <xerofoify@gmail.com> wrote:
+> 
+> This fixes error handling in the function down_reply in order to
+> properly check and jump to the goto label, out_err for this
+> particular function if a error code is returned by any function
+> called in down_reply and therefore make checking be included
+> for the call to ceph_update_snap_trace in order to comply with
+> these error handling checks/paths.
+> 
+> Signed-off-by: Nicholas Krause <xerofoify@gmail.com>
+> ---
+> fs/ceph/mds_client.c | 11 +++++++----
+> 1 file changed, 7 insertions(+), 4 deletions(-)
+> 
+> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+> index 51cb02d..0b01f94 100644
+> --- a/fs/ceph/mds_client.c
+> +++ b/fs/ceph/mds_client.c
+> @@ -2495,14 +2495,17 @@ static void handle_reply(struct ceph_mds_session *session, struct ceph_msg *msg)
+> 	realm = NULL;
+> 	if (rinfo->snapblob_len) {
+> 		down_write(&mdsc->snap_rwsem);
+> -		ceph_update_snap_trace(mdsc, rinfo->snapblob,
+> -				rinfo->snapblob + rinfo->snapblob_len,
+> -				le32_to_cpu(head->op) == CEPH_MDS_OP_RMSNAP,
+> -				&realm);
+> +		err = ceph_update_snap_trace(mdsc, rinfo->snapblob,
+> +					     rinfo->snapblob + rinfo->snapblob_len,
+> +					     le32_to_cpu(head->op) == CEPH_MDS_OP_RMSNAP,
+> +					     &realm);
+> 		downgrade_write(&mdsc->snap_rwsem);
+> 	} else {
+> 		down_read(&mdsc->snap_rwsem);
+> 	}
+> +
+> +	if (err)
+> +		goto out_err;
+> 
+> 	/* insert trace into our cache */
+> 	mutex_lock(&req->r_fill_mutex);
 
-http://tracker.ceph.com/issues/13662
-https://bugzilla.kernel.org/show_bug.cgi?id=107301
+Applied, thanks
 
-On kernel.org kernel developpers are asking about ceph usage of xattr,
-in particular wether there are lots of common xattr key/value or wether
-they are all differents.
+Yan, Zheng
 
-I attached a file with various xattr -l outputs:
-
-https://bugzilla.kernel.org/show_bug.cgi?id=107301#c8
-https://bugzilla.kernel.org/attachment.cgi?id=192491
-
-Looks like the "big" xattr "user.ceph._" is always different, same for
-the intermediate size "user.ceph.hinfo_key".
-
-"user.cephos.spill_out" and "user.ceph.snapset" seem to have small
-values, and within a small value set.
-
-Our cluster is used exclusively for virtual machines block devices with
-rbd, on replicated (3) and erasure coded pools (4+1 and 8+2).
-
-Could someone knowledgeable add some information on ceph use of xattr in
-the kernel.org bugzilla above?
-
-Also I think it is necessary to warn ceph users to avoid ext4 at all
-costs until this kernel/ceph issue is sorted out: we went from
-relatively stable production for more than a year to crashes everywhere
-all the time since two weeks ago, probably after hitting some magic
-limit. We migrated our machines to ubuntu trusty, our SSD based
-filesystem to XFS but our HDD are still mostly on ext4 (60 TB
-of data to move so not that easy...).
-
-Thanks in advance for your help,
-
-Sincerely,
-
-Laurent GUERBY
-http://tetaneutral.net
-
+> -- 
+> 2.5.0
+> 
 
