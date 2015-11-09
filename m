@@ -1,7 +1,7 @@
-From: Samuel Just <sjust@redhat.com>
+From: Robert LeBlanc <robert@leblancnet.us>
 Subject: Re: Request for Comments: Weighted Round Robin OP Queue
-Date: Mon, 9 Nov 2015 12:49:06 -0800
-Message-ID: <CAN=+7FW3G1V5DvF=C=TCiBN_L2xLhydhXGbbUc4GYG=-dEqGEg@mail.gmail.com>
+Date: Mon, 9 Nov 2015 14:30:40 -0700
+Message-ID: <CAANLjFpVtK7wNFJPQtkewLtjP5d0M6iab42PF09ii6E3ddT3Mg@mail.gmail.com>
 References: <CAANLjFq4MdaO5NrK346wxMfThy9MKy-6NzB3_BRTicSWc2uh7w@mail.gmail.com>
 	<CAN=+7FWJ2aH1mRg7Z4P2o9f7hB7q2MHE6rBzyeR9Yrnf8qh3jA@mail.gmail.com>
 	<CAANLjFpBzV921FaCitr8f7rWYa5tCHTihjFmFa_dY76cYVxMFw@mail.gmail.com>
@@ -17,142 +17,82 @@ References: <CAANLjFq4MdaO5NrK346wxMfThy9MKy-6NzB3_BRTicSWc2uh7w@mail.gmail.com>
 	<CAANLjFpveonAff_aQNV-RNKOkhgBHjNAjwLftjWWinz+XNFztw@mail.gmail.com>
 	<CAN=+7FWi=wcQsFU7rMLPKdLF+9DZGKUgNmMTM3xDP0+K0bQ56A@mail.gmail.com>
 	<CAANLjFrXdK2r25RaC4RB3=irSv_qufvQi__S4QbZBN7VS1WSjw@mail.gmail.com>
+	<CAN=+7FW3G1V5DvF=C=TCiBN_L2xLhydhXGbbUc4GYG=-dEqGEg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f170.google.com ([209.85.223.170]:33969 "EHLO
-	mail-io0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750819AbbKIUtH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Nov 2015 15:49:07 -0500
-Received: by iody8 with SMTP id y8so198791878iod.1
-        for <ceph-devel@vger.kernel.org>; Mon, 09 Nov 2015 12:49:07 -0800 (PST)
-In-Reply-To: <CAANLjFrXdK2r25RaC4RB3=irSv_qufvQi__S4QbZBN7VS1WSjw@mail.gmail.com>
+Received: from mail-vk0-f49.google.com ([209.85.213.49]:35115 "EHLO
+	mail-vk0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750766AbbKIVao (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Nov 2015 16:30:44 -0500
+Received: by vkgy188 with SMTP id y188so1761511vkg.2
+        for <ceph-devel@vger.kernel.org>; Mon, 09 Nov 2015 13:30:43 -0800 (PST)
+In-Reply-To: <CAN=+7FW3G1V5DvF=C=TCiBN_L2xLhydhXGbbUc4GYG=-dEqGEg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Robert LeBlanc <robert@leblancnet.us>
+To: Samuel Just <sjust@redhat.com>
 Cc: Sage Weil <sage@newdream.net>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, Nov 9, 2015 at 12:31 PM, Robert LeBlanc <robert@leblancnet.us> wrote:
-> -----BEGIN PGP SIGNED MESSAGE-----
-> Hash: SHA256
->
-> On Mon, Nov 9, 2015 at 12:47 PM, Samuel Just  wrote:
->> What I really want from PrioritizedQueue (and from the dmclock/mclock
->> approaches that are also being worked on) is a solution to the problem
->> of efficiently deciding which op to do next taking into account
->> fairness across io classes and ops with different costs.
->
->> On Mon, Nov 9, 2015 at 11:19 AM, Robert LeBlanc  wrote:
->>> -----BEGIN PGP SIGNED MESSAGE-----
->>> Hash: SHA256
->>>
->>> Thanks, I think some of the fog is clearing. I was wondering how
->>> operations between threads were keeping the order of operations in
->>> PGs, that explains it.
->>>
->>> My original thoughts were to have a queue in front and behind the
->>> Prio/WRR queue. Threads scheduling work would queue to the pre-queue.
->>> The queue thread would pull ops off that queue and place them into the
->>> specialized queue, do house keeping, etc and would dequeue ops in that
->>> queue to a post-queue that worker threads would monitor. The thread
->>> queue could keep a certain amount of items in the post-queue to
->>> prevent starvation and worker threads from being blocked.
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
+
+On Mon, Nov 9, 2015 at 1:49 PM, Samuel Just  wrote:
+> We basically don't want a single thread to see all of the operations -- it
+> would cause a tremendous bottleneck and complicate the design
+> immensely.  It's shouldn't be necessary anyway since PGs are a form
+> of course grained locking, so it's probably fine to schedule work for
+> different groups of PGs independently if we assume that all kinds of
+> work are well distributed over those groups.
+
+The only issue that I can see, based on the discussion last week, is
+when the client I/O is small. There will be some points where each
+thread will think it is OK so send a bolder along with the pebbles
+(recovery I/O vs. client I/O), If all/most of the threads send a
+bolder at the same time would it cause issues for slow disks
+(spindles)? A single queue would be much more intelligent about
+situations like this and spread the bolders out better. It also seems
+more scalable as you add threads (I don't think really practical on
+spindles). I assume the bottleneck in your concern is the thread
+communication between threads? I'm trying to understand and in no way
+trying to attack you (I've been know to come across differently than I
+intend to).
+
+>> But the recovery is still happening the recovery thread and not the
+>> client thread, right? The recovery thread has a lower priority than
+>> the op thread? That's how I understand it.
 >>
->> I'm not sure what the advantage of this would be -- it adds another thread
->> to the processing pipeline at best.
 >
-> There are a few reasons I thought about it. 1. It is hard to
-> prioritize/mange the work load if you can't see/manage all the
-> operations. One queue allows the algorithm to make decisions based on
-> all available information. (This point seems to be handled in a
-> different way in the future) 2. Reduce latency in the Op path. When an
-> OP is queued, there is overhead in getting it in the right place. When
-> an OP is dequeued there is more overhead in spreading tokens, etc.
-> Right now that is all serial, if an OP is stuck in the queue waiting
-> to be dispatched some of this overhead can't be performed while in
-> this waiting period. The idea is pushing that overhead to a separate
-> thread and allowing a worker thread to queue/dequeue in the most
-> efficient manner. It also allows for more complex trending,
-> scheduling, etc because it can sit outside of the OP path. As the
-> workload changes, it can dynamically change how it manages the queue
-> like simple fifo for low periods where latency is dominated by compute
-> time, to Token/WRR when latency is dominated by disk access, etc.
->
+> No, in hammer we removed the snap trim and scrub workqueues.  With
+> wip-recovery-wq, I remove the recovery wqs as well.  Ideally, the only
+> meaningful set of threads remaining will be the op_tp and associated
+> queues.
 
-We basically don't want a single thread to see all of the operations -- it
-would cause a tremendous bottleneck and complicate the design
-immensely.  It's shouldn't be necessary anyway since PGs are a form
-of course grained locking, so it's probably fine to schedule work for
-different groups of PGs independently if we assume that all kinds of
-work are well distributed over those groups.
+OK, that is good news, I didn't do a scrub so I haven't seen the OPs
+for that. Do you know the priorities of snap trim, scrub and recovery
+so that I can do some math/logic on applying costs in an efficient way
+as we talked about last week?
 
->>> It would require the worker thread to be able to handle any kind of
->>> op, or having separate post-queues for the different kinds of work.
->>> I'm getting the feeling that this may be a far too simplistic approach
->>> to the problem (or at least in terms of the organization of Ceph at
->>> this point). I'm also starting to feel that I'm getting out of my
->>> league trying to understand all the intricacies of the OSD work flow
->>> (trying to start with one of the most complicated parts of the system
->>> doesn't help).
->>>
->>> Maybe what I should do is just code up the queue to drop in as a
->>> replacement for the Prio queue for the moment. Then as your async work
->>> is completing we can shake out the potential issues with recovery and
->>> costs that we talked about earlier. One thing that I'd like to look
->>> into is elevating the priority of recovery ops that have client OPs
->>> blocked. I don't think the WRR queue gives the recovery thread a lot
->>> of time to get its work done.
->>>
->>
->> If an op comes in that requires recovery to happen before it can be
->> processed, we send the recovery messages with client priority rather
->> than recovery priority.
->
-> But the recovery is still happening the recovery thread and not the
-> client thread, right? The recovery thread has a lower priority than
-> the op thread? That's how I understand it.
->
+Thanks,
 
-No, in hammer we removed the snap trim and scrub workqueues.  With
-wip-recovery-wq, I remove the recovery wqs as well.  Ideally, the only
-meaningful set of threads remaining will be the op_tp and associated
-queues.
+- ----------------
+Robert LeBlanc
+PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
+-----BEGIN PGP SIGNATURE-----
+Version: Mailvelope v1.2.3
+Comment: https://www.mailvelope.com
 
->>> Based on some testing on Friday, the number of recovery ops on an osd
->>> did not really change if there were 20 backfilling or 1 backfilling.
->>> The difference came in with how many client I/Os were blocked waiting
->>> for objects to recover. When 20 backfills were going, there were a lot
->>> more blocked I/O waiting for objects to show up or recover. With one
->>> backfill, there were far less blocked I/O, but there were still times
->>> I/O would block.
->>
->> The number of recovery ops is actually a separate configurable
->> (osd_recovery_max_active -- default to 15).  It's odd that with more
->> backfilling on a single osd, there is more blocked IO.  Looking into
->> that would be helpful and would probably give you some insight
->> into recovery and the op processing pipeline.
->
-> I'll see what I can find here.
->
-> - ----------------
-> Robert LeBlanc
-> PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
-> -----BEGIN PGP SIGNATURE-----
-> Version: Mailvelope v1.2.3
-> Comment: https://www.mailvelope.com
->
-> wsFcBAEBCAAQBQJWQQJ0CRDmVDuy+mK58QAAeeUP/1uN/9EdqQDJdxW7fgeJ
-> /E0X49LmnnCigMPL5QJ3fpGjf44C0xcc9LN5IGJwwumHd5ozznpocy8Oj30N
-> +rNPJQ4dxcRao+bXUL/+DCQuY0wN/i7CqfMTW5PFmkdH4K9Lgce+bN6Q5Ora
-> q8JZvAxaZLCLZ10N+uiD5ghs+3X68hu4Da8SYQj0vjLs5gV4oATebF3JuYXW
-> GZ9qNfm2ygbeuT5Q0fhOKrvwJ9taKagMNrZLU10Wz5lHpGNitP3f17sVQznF
-> 7ZCkZ+2oS+P4Lerchc3xB2qBJUoPJGSuGAUTSl/uUeyMoZT1+2LvLdNbJaio
-> UonoKJv47p4mpjo75x6FTWbJg0Ix+8/3/6oo3CkxC+6vOeWcv90B3TJGJPRz
-> tAayNB/1YpsVZ3QlHiuyC7+TdKofLRlMR21iAnAJkZ6FdgMz9SFk1Rp4vuyR
-> 1qeZ+B4qA0m9ZWjx/G80j3fkUDY48EHR5gnI1k+WHFAh8KqT3eTRr37n9HH4
-> 7wVakfPv89+HRjqrlA7WK5F89UVp1I+2kEmtPADCiwgh2wf0zn7Y5tA4FMXH
-> DIloZIRfvPwFtwpqgF7GR5vb/1dEOzD9Da0Zb7gBfsEfGaI2pJ+yvD1ad3BB
-> eqHQ05rl7s8meeX0H+6gWn9/f0JA65k2P2Y4N3YHk6OvKqIqnhreS9Tl4grH
-> MrBN
-> =Ju+O
-> -----END PGP SIGNATURE-----
+wsFcBAEBCAAQBQJWQRB6CRDmVDuy+mK58QAAAsMP/RoBeyhqwNDURHagKJ9i
+knjYW4jy0FFw1XmnFRhJN7FuFlYlHZ+bwvQGGYvmOkLlxgY9Y+J1GglwwV14
+Vvtd/1LBOUw06Ch/WjhcgVFNIQdgdNBPHPaRurSTGxnofYKAwqB266gnzwAo
+oX3EpgRskzrlwrOIg+b46Z3FhbdxYfJVqsWIEazIu9uFJDxf/pFimWSig0n1
+bQsB0lZNeTbGKYww5GZqPtY3dVNqbfM6Xj5r5kxf5mhDZ2vKWJfvlc8nu86z
+/VIDy5ZHPFZzv79wNlzNtZ9ofdmMT4n0Bhk8q4SFQSivs2z68DQxthcGXVaB
+Bp5gy19QyE2mC6SeG3kwCYlEiGwJBGN5PVj9wDWrqDRiG/3eRS9yUs7N3RPW
+hViKOYCt5lHBEhkkXaE824FweWZhupzXjiAjCMXYGtWek4LbLH9XFiMrigbR
+b07EohO3cnXvrHL3+SmdEsHs0PIS0o9anyB7wn7Ze9oHQNYHXmzw48nzhth6
+juGxCVeg80iNnlwpH/jQRfyEFB8rKfpJd7BLYdJgc/q4L25o/q588MeUqjUw
+gc0cVkoKnegbz1fZ85CjI3YGXgXwRtVXFFl4Z+KdEJlEa1q9nRBGsho8LkT6
+aanb77/QUJixLi7QQi8blXMvY0wjxzEkbtkoij0rL1OaxmKpoy/Nb8v6kyDL
+rnL6
+=IlY9
+-----END PGP SIGNATURE-----
