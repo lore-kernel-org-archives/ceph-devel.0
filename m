@@ -1,7 +1,7 @@
-From: Haomai Wang <haomaiwang@gmail.com>
+From: Robert LeBlanc <robert@leblancnet.us>
 Subject: Re: Request for Comments: Weighted Round Robin OP Queue
-Date: Tue, 10 Nov 2015 02:55:43 +0800
-Message-ID: <CACJqLyY1x11F0EbjGAweKjqzdrGN9AbLffC0yMm2n2Pcr2VDcg@mail.gmail.com>
+Date: Mon, 9 Nov 2015 12:19:32 -0700
+Message-ID: <CAANLjFpveonAff_aQNV-RNKOkhgBHjNAjwLftjWWinz+XNFztw@mail.gmail.com>
 References: <CAANLjFq4MdaO5NrK346wxMfThy9MKy-6NzB3_BRTicSWc2uh7w@mail.gmail.com>
 	<CAN=+7FWJ2aH1mRg7Z4P2o9f7hB7q2MHE6rBzyeR9Yrnf8qh3jA@mail.gmail.com>
 	<CAANLjFpBzV921FaCitr8f7rWYa5tCHTihjFmFa_dY76cYVxMFw@mail.gmail.com>
@@ -17,19 +17,82 @@ References: <CAANLjFq4MdaO5NrK346wxMfThy9MKy-6NzB3_BRTicSWc2uh7w@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f181.google.com ([209.85.214.181]:34111 "EHLO
-	mail-ob0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751809AbbKISzo (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Nov 2015 13:55:44 -0500
-Received: by obbza9 with SMTP id za9so147638705obb.1
-        for <ceph-devel@vger.kernel.org>; Mon, 09 Nov 2015 10:55:43 -0800 (PST)
+Received: from mail-yk0-f179.google.com ([209.85.160.179]:34828 "EHLO
+	mail-yk0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751614AbbKITTi (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Nov 2015 14:19:38 -0500
+Received: by ykek133 with SMTP id k133so282907707yke.2
+        for <ceph-devel@vger.kernel.org>; Mon, 09 Nov 2015 11:19:38 -0800 (PST)
 In-Reply-To: <CAN=+7FWjVG5XuBqzzeZkQiQ=ZVSbScUj2gNms6gy52N738Y5sQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Samuel Just <sjust@redhat.com>
-Cc: Robert LeBlanc <robert@leblancnet.us>, Sage Weil <sage@newdream.net>, ceph-devel <ceph-devel@vger.kernel.org>
+Cc: Sage Weil <sage@newdream.net>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, Nov 10, 2015 at 2:19 AM, Samuel Just <sjust@redhat.com> wrote:
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
+
+Thanks, I think some of the fog is clearing. I was wondering how
+operations between threads were keeping the order of operations in
+PGs, that explains it.
+
+My original thoughts were to have a queue in front and behind the
+Prio/WRR queue. Threads scheduling work would queue to the pre-queue.
+The queue thread would pull ops off that queue and place them into the
+specialized queue, do house keeping, etc and would dequeue ops in that
+queue to a post-queue that worker threads would monitor. The thread
+queue could keep a certain amount of items in the post-queue to
+prevent starvation and worker threads from being blocked.
+
+It would require the worker thread to be able to handle any kind of
+op, or having separate post-queues for the different kinds of work.
+I'm getting the feeling that this may be a far too simplistic approach
+to the problem (or at least in terms of the organization of Ceph at
+this point). I'm also starting to feel that I'm getting out of my
+league trying to understand all the intricacies of the OSD work flow
+(trying to start with one of the most complicated parts of the system
+doesn't help).
+
+Maybe what I should do is just code up the queue to drop in as a
+replacement for the Prio queue for the moment. Then as your async work
+is completing we can shake out the potential issues with recovery and
+costs that we talked about earlier. One thing that I'd like to look
+into is elevating the priority of recovery ops that have client OPs
+blocked. I don't think the WRR queue gives the recovery thread a lot
+of time to get its work done.
+
+Based on some testing on Friday, the number of recovery ops on an osd
+did not really change if there were 20 backfilling or 1 backfilling.
+The difference came in with how many client I/Os were blocked waiting
+for objects to recover. When 20 backfills were going, there were a lot
+more blocked I/O waiting for objects to show up or recover. With one
+backfill, there were far less blocked I/O, but there were still times
+I/O would block.
+-----BEGIN PGP SIGNATURE-----
+Version: Mailvelope v1.2.3
+Comment: https://www.mailvelope.com
+
+wsFcBAEBCAAQBQJWQPHBCRDmVDuy+mK58QAA72EQAMgzgrw3OAvBi1/NmuWl
+LXGM0qGz3hE/p5oUsnqcnz2/+VYP3FZRanszyuU8+vKCwj+I/Ny9Olm1JAnw
+DSE7PvhuO6J5w0ymOIccKdX7uk2QZyP8ggO1D5fLC2M9/xqQQSZrAPE7vc4j
+O9HHuZsMF+ABUKU5RVCjn1ax+y2LhpetxH3nu37xpSKPDPFiowVnW8YlBGJy
+Cf1FYMVDLv60F5EmjstOn4FhSXC/+DuSATwP+CmNEPZ3JNTBgtPuU/22/De3
+M4ZdDzeylVWYB66vbL9ijLeZDoCaxKgFL+QwUAswefaDBD1citCU2v7/7VQP
+aChnSzI8BYG0bHg5u7QEohzQyJUCC1OubiRkbUmOOeCiBI0Lqv3jf321T4ss
+PD3hqkagyhRe67zPB6bhhik0ZDOYHTAyV/ceAae4VDJTgu+/gI8Gc1c3mp5g
+nZL5z7hVohZ0AvfdEzasRhTnTcH6TfO9lpqU2nyMAc76SoPyDSTmAcMVt0tj
+/1BQAnk/I5rlCL5CKTxb2LR1/5WJt0eh7xtyKU1B0yh4G7JlMf/3kmrznOWu
+VEUUA3mJ1depDToadnECnCZMKHrGYC36XCy8xq3FDqhvl4BWV0VMA+yi1uhj
+zZ5udKKbN5Cxo/Sc48DG8wz9lQKn4LPCH2PD81oTcTfyd1iG2oNNkchrXa6K
+iwed
+=WjDS
+-----END PGP SIGNATURE-----
+----------------
+Robert LeBlanc
+PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
+
+
+On Mon, Nov 9, 2015 at 11:19 AM, Samuel Just <sjust@redhat.com> wrote:
 > Ops are hashed from the messenger (or any of the other enqueue sources
 > for non-message items) into one of N queues, each of which is serviced
 > by M threads.  We can't quite have a single thread own a single queue
@@ -42,17 +105,6 @@ On Tue, Nov 10, 2015 at 2:19 AM, Samuel Just <sjust@redhat.com> wrote:
 > from that with the async read work I'm doing (ceph-devel subject
 > "Async reads, sync writes, op thread model discussion"), but I'll
 > still need a replacement for PrioritizedQueue.
-
-I don't think clearly about the idea that we make PrioriryQueue(or
-whatever WeightBased) client-oriented. Because currently each
-connection owned by a async messenger thread, if latter queue is pg
-oriented, huge lock contention can't be avoided with iops increasing.
-
-The only way I guess is make msgr thread -> osd thread via the same
-hash key(or whatever we can make the two threads paired). What's more,
-msgr thread could use the same way as sam's branch, it could be only
-one thread.
-
 > -Sam
 >
 > On Mon, Nov 9, 2015 at 9:19 AM, Robert LeBlanc <robert@leblancnet.us> wrote:
@@ -262,14 +314,3 @@ one thread.
 >>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 >>>> the body of a message to majordomo@vger.kernel.org
 >>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
--- 
-Best Regards,
-
-Wheat
