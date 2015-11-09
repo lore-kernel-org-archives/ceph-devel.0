@@ -1,68 +1,109 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Help on ext4/xattr linux kernel stability issue / ceph xattr
- use?
-Date: Mon, 9 Nov 2015 05:24:14 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1511090522470.27153@cobra.newdream.net>
-References: <1447062090.2019.557.camel@guerby.net>
+From: Jason Dillaman <dillaman@redhat.com>
+Subject: Re: [Qemu-devel] qemu : rbd block driver internal snapshot and
+ vm_stop is hanging forever
+Date: Mon, 9 Nov 2015 08:42:42 -0500 (EST)
+Message-ID: <1119051619.7201094.1447076562035.JavaMail.zimbra@redhat.com>
+References: <310812067.2785504.1447038645014.JavaMail.zimbra@oxygem.tv> <5640490B.5030700@parallels.com> <564049BA.1090805@parallels.com> <253899541.6094258.1447066125770.JavaMail.zimbra@oxygem.tv>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:47888 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751672AbbKINYQ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Nov 2015 08:24:16 -0500
-In-Reply-To: <1447062090.2019.557.camel@guerby.net>
+Received: from mx4-phx2.redhat.com ([209.132.183.25]:35202 "EHLO
+	mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750788AbbKINmt convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Nov 2015 08:42:49 -0500
+In-Reply-To: <253899541.6094258.1447066125770.JavaMail.zimbra@oxygem.tv>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Laurent GUERBY <laurent@guerby.net>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Alexandre DERUMIER <aderumier@odiso.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, qemu-devel <qemu-devel@nongnu.org>, jdurgin@redhat.com
 
-On Mon, 9 Nov 2015, Laurent GUERBY wrote:
-> Hi,
-> 
-> Part of our ceph cluster is using ext4 and we recently hit major kernel
-> instability in the form of kernel lockups every few hours, issues
-> opened:
-> 
-> http://tracker.ceph.com/issues/13662
-> https://bugzilla.kernel.org/show_bug.cgi?id=107301
-> 
-> On kernel.org kernel developpers are asking about ceph usage of xattr,
-> in particular wether there are lots of common xattr key/value or wether
-> they are all differents.
-> 
-> I attached a file with various xattr -l outputs:
-> 
-> https://bugzilla.kernel.org/show_bug.cgi?id=107301#c8
-> https://bugzilla.kernel.org/attachment.cgi?id=192491
-> 
-> Looks like the "big" xattr "user.ceph._" is always different, same for
-> the intermediate size "user.ceph.hinfo_key".
-> 
-> "user.cephos.spill_out" and "user.ceph.snapset" seem to have small
-> values, and within a small value set.
-> 
-> Our cluster is used exclusively for virtual machines block devices with
-> rbd, on replicated (3) and erasure coded pools (4+1 and 8+2).
-> 
-> Could someone knowledgeable add some information on ceph use of xattr in
-> the kernel.org bugzilla above?
+Can you reproduce with Ceph debug logging enabled (i.e. debug rbd=3D20 =
+in your ceph.conf)?  If you could attach the log to the Ceph tracker ti=
+cket I opened [1], that would be very helpful.
 
-The above is all correct.  The mbcache (didn't know that existed!) is 
-definitely not going to be useful here.
- 
-> Also I think it is necessary to warn ceph users to avoid ext4 at all
-> costs until this kernel/ceph issue is sorted out: we went from
-> relatively stable production for more than a year to crashes everywhere
-> all the time since two weeks ago, probably after hitting some magic
-> limit. We migrated our machines to ubuntu trusty, our SSD based
-> filesystem to XFS but our HDD are still mostly on ext4 (60 TB
-> of data to move so not that easy...).
+[1] http://tracker.ceph.com/issues/13726
 
-Was there a ceph upgrade in there somewhere?  The size of the user.ceph._ 
-xattr has increased over time, and (somewhat) recently crossed the 255 
-byte threshold (on average) which also triggered a performance regression 
-on XFS...
+Thanks,
+Jason=20
 
-sage
 
+----- Original Message -----
+> From: "Alexandre DERUMIER" <aderumier@odiso.com>
+> To: "ceph-devel" <ceph-devel@vger.kernel.org>
+> Cc: "qemu-devel" <qemu-devel@nongnu.org>, jdurgin@redhat.com
+> Sent: Monday, November 9, 2015 5:48:45 AM
+> Subject: Re: [Qemu-devel] qemu : rbd block driver internal snapshot a=
+nd vm_stop is hanging forever
+>=20
+> adding to ceph.conf
+>=20
+> [client]
+>         rbd_non_blocking_aio =3D false
+>=20
+>=20
+> fix the problem for me (with rbd_cache=3Dfalse)
+>=20
+>=20
+> (@cc jdurgin@redhat.com)
+>=20
+>=20
+>=20
+> ----- Mail original -----
+> De: "Denis V. Lunev" <den-lists@parallels.com>
+> =C3=80: "aderumier" <aderumier@odiso.com>, "ceph-devel"
+> <ceph-devel@vger.kernel.org>, "qemu-devel" <qemu-devel@nongnu.org>
+> Envoy=C3=A9: Lundi 9 Novembre 2015 08:22:34
+> Objet: Re: [Qemu-devel] qemu : rbd block driver internal snapshot and=
+ vm_stop
+> is hanging forever
+>=20
+> On 11/09/2015 10:19 AM, Denis V. Lunev wrote:
+> > On 11/09/2015 06:10 AM, Alexandre DERUMIER wrote:
+> >> Hi,
+> >>=20
+> >> with qemu (2.4.1), if I do an internal snapshot of an rbd device,
+> >> then I pause the vm with vm_stop,
+> >>=20
+> >> the qemu process is hanging forever
+> >>=20
+> >>=20
+> >> monitor commands to reproduce:
+> >>=20
+> >>=20
+> >> # snapshot_blkdev_internal drive-virtio0 yoursnapname
+> >> # stop
+> >>=20
+> >>=20
+> >>=20
+> >>=20
+> >> I don't see this with qcow2 or sheepdog block driver for example.
+> >>=20
+> >>=20
+> >> Regards,
+> >>=20
+> >> Alexandre
+> >>=20
+> > this could look like the problem I have recenty trying to
+> > fix with dataplane enabled. Patch series is named as
+> >=20
+> > [PATCH for 2.5 v6 0/10] dataplane snapshot fixes
+> >=20
+> > Den
+>=20
+> anyway, even if above will not help, can you collect gdb
+> traces from all threads in QEMU process. May be I'll be
+> able to give a hit.
+>=20
+> Den
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
