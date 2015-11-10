@@ -1,81 +1,39 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Backlog for the Ceph tracker
-Date: Tue, 10 Nov 2015 16:45:59 +0100
-Message-ID: <56421137.8080102@dachary.org>
-References: <56420D01.1000708@dachary.org> <56420E8D.3060909@dachary.org>
+From: Igor Fedotov <ifedotov@mirantis.com>
+Subject: data-at-rest compression
+Date: Tue, 10 Nov 2015 18:46:38 +0300
+Message-ID: <5642115E.407@mirantis.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="DCfntWu3Fmbl2l87c7mkejBffGN2Ls9r5"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.dachary.org ([91.121.57.175]:58096 "EHLO
-	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753516AbbKJPqB (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Nov 2015 10:46:01 -0500
-In-Reply-To: <56420E8D.3060909@dachary.org>
+Received: from mail-lf0-f54.google.com ([209.85.215.54]:36566 "EHLO
+	mail-lf0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752729AbbKJPqm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Nov 2015 10:46:42 -0500
+Received: by lfs39 with SMTP id 39so302223lfs.3
+        for <ceph-devel@vger.kernel.org>; Tue, 10 Nov 2015 07:46:41 -0800 (PST)
+Received: from [127.0.0.1] ([91.218.144.129])
+        by smtp.googlemail.com with ESMTPSA id j11sm621757lbz.21.2015.11.10.07.46.40
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 10 Nov 2015 07:46:40 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sjust@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---DCfntWu3Fmbl2l87c7mkejBffGN2Ls9r5
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Hi All,
 
+a while ago we had some conversations here about adding compression 
+support for EC pools.
+Here is corresponding pull request implementing this feature:
 
+https://github.com/ceph/ceph/pull/6524/commits
 
-On 10/11/2015 16:34, Loic Dachary wrote:
-> But http://tracker.ceph.com/projects/ceph/agile_versions looks better :=
--)
+Appropriate blueprint is at:
+http://tracker.ceph.com/projects/ceph/wiki/Rados_-_at-rest_compression
 
-It appears to be a crippled version of a proprietary product http://www.r=
-edminecrm.com/projects/agile/pages/last
+All comments and reviews are highly appreciated.
 
-My vote would be to de-install it since it is even less flexible to use t=
-han the custom query below. It is disapointing to loose a plugin because =
-it is no longer maintained, but that's not something we can always forsee=
-=2E IMHO, relying on a proprietary redmine plugin is not a safe bet and i=
-t would be wise to not become dependent on it.
+Thanks,
+Igor.
 
-Cheers
-
-> On 10/11/2015 16:28, Loic Dachary wrote:
->> Hi Sam,
->>
->> I crafted a custom query that could be used as a replacement for the b=
-acklog plugin
->>
->>    http://tracker.ceph.com/projects/ceph/issues?query_id=3D86
->>
->> It displays issues that are features or tasks, grouped by target versi=
-on and ordered by priority.
->>
->> I also created a v10.0.0 version so we can assign features we want for=
- this next version to it.
->>
->> If you feel that's not good enough, we can just throw it away, it's me=
-rely a proposal ;-)
->>
->> Cheers
->>
->=20
-
---=20
-Lo=C3=AFc Dachary, Artisan Logiciel Libre
-
-
---DCfntWu3Fmbl2l87c7mkejBffGN2Ls9r5
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEARECAAYFAlZCETcACgkQ8dLMyEl6F217VwCfepELmsd0vB7JX+gCW7IzT7/d
-8ncAniymINwUBpOTz6nGgB8hViE1euxp
-=HHB1
------END PGP SIGNATURE-----
-
---DCfntWu3Fmbl2l87c7mkejBffGN2Ls9r5--
