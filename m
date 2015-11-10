@@ -1,7 +1,7 @@
-From: Robert LeBlanc <robert@leblancnet.us>
+From: Milosz Tanski <milosz@adfin.com>
 Subject: Re: Request for Comments: Weighted Round Robin OP Queue
-Date: Mon, 9 Nov 2015 16:50:57 -0700
-Message-ID: <CAANLjFrNhZra5WHCeynrabyQoM=r0dU6L3tf7TL580AqrXip5Q@mail.gmail.com>
+Date: Mon, 9 Nov 2015 19:39:31 -0500
+Message-ID: <CANP1eJF0d-t=MThTui3y4NXpzpMpSo0s6tv9cEFB3pT3K0wZJg@mail.gmail.com>
 References: <CAANLjFq4MdaO5NrK346wxMfThy9MKy-6NzB3_BRTicSWc2uh7w@mail.gmail.com>
 	<CAN=+7FWJ2aH1mRg7Z4P2o9f7hB7q2MHE6rBzyeR9Yrnf8qh3jA@mail.gmail.com>
 	<CAANLjFpBzV921FaCitr8f7rWYa5tCHTihjFmFa_dY76cYVxMFw@mail.gmail.com>
@@ -18,90 +18,169 @@ References: <CAANLjFq4MdaO5NrK346wxMfThy9MKy-6NzB3_BRTicSWc2uh7w@mail.gmail.com>
 	<CAN=+7FWi=wcQsFU7rMLPKdLF+9DZGKUgNmMTM3xDP0+K0bQ56A@mail.gmail.com>
 	<CAANLjFrXdK2r25RaC4RB3=irSv_qufvQi__S4QbZBN7VS1WSjw@mail.gmail.com>
 	<CAN=+7FW3G1V5DvF=C=TCiBN_L2xLhydhXGbbUc4GYG=-dEqGEg@mail.gmail.com>
-	<CAANLjFpVtK7wNFJPQtkewLtjP5d0M6iab42PF09ii6E3ddT3Mg@mail.gmail.com>
-	<CAN=+7FU78Pq0nVdTn1uNR6p0b+_HQeMj3UrnvBRqg4OCdQKL3w@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f50.google.com ([209.85.213.50]:36521 "EHLO
-	mail-vk0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751521AbbKIXu6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Nov 2015 18:50:58 -0500
-Received: by vkas68 with SMTP id s68so3563326vka.3
-        for <ceph-devel@vger.kernel.org>; Mon, 09 Nov 2015 15:50:57 -0800 (PST)
-In-Reply-To: <CAN=+7FU78Pq0nVdTn1uNR6p0b+_HQeMj3UrnvBRqg4OCdQKL3w@mail.gmail.com>
+Received: from mail-lf0-f41.google.com ([209.85.215.41]:33143 "EHLO
+	mail-lf0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751101AbbKJAje (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Nov 2015 19:39:34 -0500
+Received: by lffz63 with SMTP id z63so39384617lff.0
+        for <ceph-devel@vger.kernel.org>; Mon, 09 Nov 2015 16:39:32 -0800 (PST)
+In-Reply-To: <CAN=+7FW3G1V5DvF=C=TCiBN_L2xLhydhXGbbUc4GYG=-dEqGEg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Samuel Just <sjust@redhat.com>
+Cc: Robert LeBlanc <robert@leblancnet.us>, Sage Weil <sage@newdream.net>, ceph-devel <ceph-devel@vger.kernel.org>
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA256
+On Mon, Nov 9, 2015 at 3:49 PM, Samuel Just <sjust@redhat.com> wrote:
+> On Mon, Nov 9, 2015 at 12:31 PM, Robert LeBlanc <robert@leblancnet.us> wrote:
+>> -----BEGIN PGP SIGNED MESSAGE-----
+>> Hash: SHA256
+>>
+>> On Mon, Nov 9, 2015 at 12:47 PM, Samuel Just  wrote:
+>>> What I really want from PrioritizedQueue (and from the dmclock/mclock
+>>> approaches that are also being worked on) is a solution to the problem
+>>> of efficiently deciding which op to do next taking into account
+>>> fairness across io classes and ops with different costs.
+>>
+>>> On Mon, Nov 9, 2015 at 11:19 AM, Robert LeBlanc  wrote:
+>>>> -----BEGIN PGP SIGNED MESSAGE-----
+>>>> Hash: SHA256
+>>>>
+>>>> Thanks, I think some of the fog is clearing. I was wondering how
+>>>> operations between threads were keeping the order of operations in
+>>>> PGs, that explains it.
+>>>>
+>>>> My original thoughts were to have a queue in front and behind the
+>>>> Prio/WRR queue. Threads scheduling work would queue to the pre-queue.
+>>>> The queue thread would pull ops off that queue and place them into the
+>>>> specialized queue, do house keeping, etc and would dequeue ops in that
+>>>> queue to a post-queue that worker threads would monitor. The thread
+>>>> queue could keep a certain amount of items in the post-queue to
+>>>> prevent starvation and worker threads from being blocked.
+>>>
+>>> I'm not sure what the advantage of this would be -- it adds another thread
+>>> to the processing pipeline at best.
+>>
+>> There are a few reasons I thought about it. 1. It is hard to
+>> prioritize/mange the work load if you can't see/manage all the
+>> operations. One queue allows the algorithm to make decisions based on
+>> all available information. (This point seems to be handled in a
+>> different way in the future) 2. Reduce latency in the Op path. When an
+>> OP is queued, there is overhead in getting it in the right place. When
+>> an OP is dequeued there is more overhead in spreading tokens, etc.
+>> Right now that is all serial, if an OP is stuck in the queue waiting
+>> to be dispatched some of this overhead can't be performed while in
+>> this waiting period. The idea is pushing that overhead to a separate
+>> thread and allowing a worker thread to queue/dequeue in the most
+>> efficient manner. It also allows for more complex trending,
+>> scheduling, etc because it can sit outside of the OP path. As the
+>> workload changes, it can dynamically change how it manages the queue
+>> like simple fifo for low periods where latency is dominated by compute
+>> time, to Token/WRR when latency is dominated by disk access, etc.
+>>
+>
+> We basically don't want a single thread to see all of the operations -- it
+> would cause a tremendous bottleneck and complicate the design
+> immensely.  It's shouldn't be necessary anyway since PGs are a form
+> of course grained locking, so it's probably fine to schedule work for
+> different groups of PGs independently if we assume that all kinds of
+> work are well distributed over those groups.
 
-It sounds like dmclock/mclock will alleviate a lot of the concerns I
-have as long as it can be smart like you said. It sounds like the
-queue thread was already tried so there is experience behind the
-current implementation vs. me thinking it might be better. The basic
-idea I had is below:
+There are are some queue implementations that rely on a single thread
+essentially playing traffic cop in between queues and it's pretty
+fast. FastFlow, the C++ lib, does that. It constructs other kinds of
+queues from fast lock-free / wait-free SPSC queues. In the case of
+something like MPMC there's a mediator thread there that manages N
+SPSC in-queus to MSPC out-queues.
+
+I'm only bringing this up since if you have a problem that might need
+a mediator to arrange order, it's possible to do it fast.
+
+>
+>>>> It would require the worker thread to be able to handle any kind of
+>>>> op, or having separate post-queues for the different kinds of work.
+>>>> I'm getting the feeling that this may be a far too simplistic approach
+>>>> to the problem (or at least in terms of the organization of Ceph at
+>>>> this point). I'm also starting to feel that I'm getting out of my
+>>>> league trying to understand all the intricacies of the OSD work flow
+>>>> (trying to start with one of the most complicated parts of the system
+>>>> doesn't help).
+>>>>
+>>>> Maybe what I should do is just code up the queue to drop in as a
+>>>> replacement for the Prio queue for the moment. Then as your async work
+>>>> is completing we can shake out the potential issues with recovery and
+>>>> costs that we talked about earlier. One thing that I'd like to look
+>>>> into is elevating the priority of recovery ops that have client OPs
+>>>> blocked. I don't think the WRR queue gives the recovery thread a lot
+>>>> of time to get its work done.
+>>>>
+>>>
+>>> If an op comes in that requires recovery to happen before it can be
+>>> processed, we send the recovery messages with client priority rather
+>>> than recovery priority.
+>>
+>> But the recovery is still happening the recovery thread and not the
+>> client thread, right? The recovery thread has a lower priority than
+>> the op thread? That's how I understand it.
+>>
+>
+> No, in hammer we removed the snap trim and scrub workqueues.  With
+> wip-recovery-wq, I remove the recovery wqs as well.  Ideally, the only
+> meaningful set of threads remaining will be the op_tp and associated
+> queues.
+>
+>>>> Based on some testing on Friday, the number of recovery ops on an osd
+>>>> did not really change if there were 20 backfilling or 1 backfilling.
+>>>> The difference came in with how many client I/Os were blocked waiting
+>>>> for objects to recover. When 20 backfills were going, there were a lot
+>>>> more blocked I/O waiting for objects to show up or recover. With one
+>>>> backfill, there were far less blocked I/O, but there were still times
+>>>> I/O would block.
+>>>
+>>> The number of recovery ops is actually a separate configurable
+>>> (osd_recovery_max_active -- default to 15).  It's odd that with more
+>>> backfilling on a single osd, there is more blocked IO.  Looking into
+>>> that would be helpful and would probably give you some insight
+>>> into recovery and the op processing pipeline.
+>>
+>> I'll see what I can find here.
+>>
+>> - ----------------
+>> Robert LeBlanc
+>> PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
+>> -----BEGIN PGP SIGNATURE-----
+>> Version: Mailvelope v1.2.3
+>> Comment: https://www.mailvelope.com
+>>
+>> wsFcBAEBCAAQBQJWQQJ0CRDmVDuy+mK58QAAeeUP/1uN/9EdqQDJdxW7fgeJ
+>> /E0X49LmnnCigMPL5QJ3fpGjf44C0xcc9LN5IGJwwumHd5ozznpocy8Oj30N
+>> +rNPJQ4dxcRao+bXUL/+DCQuY0wN/i7CqfMTW5PFmkdH4K9Lgce+bN6Q5Ora
+>> q8JZvAxaZLCLZ10N+uiD5ghs+3X68hu4Da8SYQj0vjLs5gV4oATebF3JuYXW
+>> GZ9qNfm2ygbeuT5Q0fhOKrvwJ9taKagMNrZLU10Wz5lHpGNitP3f17sVQznF
+>> 7ZCkZ+2oS+P4Lerchc3xB2qBJUoPJGSuGAUTSl/uUeyMoZT1+2LvLdNbJaio
+>> UonoKJv47p4mpjo75x6FTWbJg0Ix+8/3/6oo3CkxC+6vOeWcv90B3TJGJPRz
+>> tAayNB/1YpsVZ3QlHiuyC7+TdKofLRlMR21iAnAJkZ6FdgMz9SFk1Rp4vuyR
+>> 1qeZ+B4qA0m9ZWjx/G80j3fkUDY48EHR5gnI1k+WHFAh8KqT3eTRr37n9HH4
+>> 7wVakfPv89+HRjqrlA7WK5F89UVp1I+2kEmtPADCiwgh2wf0zn7Y5tA4FMXH
+>> DIloZIRfvPwFtwpqgF7GR5vb/1dEOzD9Da0Zb7gBfsEfGaI2pJ+yvD1ad3BB
+>> eqHQ05rl7s8meeX0H+6gWn9/f0JA65k2P2Y4N3YHk6OvKqIqnhreS9Tl4grH
+>> MrBN
+>> =Ju+O
+>> -----END PGP SIGNATURE-----
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 
-Client,           Client,
-Repop,            Repop,
-backfill,   ...   Backfill,
-recovery,         Recovery,
-etc thread        etc thread
-    |                 |
-    \                 /
-     \               /
-lock; push (prio,cost,strict,
-front/back,subsystem,&OP); unlock
-            |
-            |
-     (queue thread) pop
-        /          \
-       /            \
-if ops.low        Place op in prio
-(fast path)       queue, do any
-      |           housekeeping
-      |                |
-      |           when post-queue.len
-      |           < threads
-      \                /
-       \              /
-       post-queue push
-              |
-       lock, cond, pop
-           /    \
-          /      \
-    Worker   ...  Worker
-    thread        thread
 
-What I meant by more scalable is that the rate of boulders would be
-constant and evenly dispersed. It also prevents any one worker thread
-from being backed up while others are idle. This may not be an issue
-if the PG is busy. This design could also suffer if many OPs require
-some locking at the PG level instead of the object level. The queue
-itself does not do any op work only passing pointers to work to be
-done. As I mentioned before it sounds like something like this already
-proved to be limiting in performance, although thinking through this
-has given me some ideas about implementing a fast path option in the
-WRR queue to save some cycles.
+-- 
+Milosz Tanski
+CTO
+16 East 34th Street, 15th floor
+New York, NY 10016
 
------BEGIN PGP SIGNATURE-----
-Version: Mailvelope v1.2.3
-Comment: https://www.mailvelope.com
-
-wsFcBAEBCAAQBQJWQS/lCRDmVDuy+mK58QAA69QP/0H1K3cArNaqM+yo4W4D
-vpUMGxgTOg/8+69w4U2smHtjy8zRnJyUU1fbYdeTCbwTlZi5XVvtdMstDgPf
-OqtF+uJm/akWVblzjreWjcqkBOXmlv89loOKJZGp9oUaHll8vrL117dd7Kwh
-WHnGkc+fKCjkA7qo3gBo+Y5N3I1N2BNF0NQVuSTFEP5CfPE4Wy6DwBpYD1KY
-zoN021E564V8eK1336je+v5xDg4oZLOxp5HhWmLHXnnisvfrK/VUipVl3aGY
-Y5AXpdHGuRlsfvodKo6ZjAr1NEyPqlapJ7o57montY8yTxPR6ubSYAPP04Ky
-VxA1FmtjsXKwui23rJMViWmY+lCT/P42fDlXEmVkbrnpkfoyzWn3N6yERatV
-UCazWH6eA8w/FMjrkU7FTNjttYeQU74Ph26qywL9oNVWbzKKaiEaWgGzOT1Y
-c65babw+qExK1syF8cWlKaf+roWIHeDq2+9iNO5SJ5v2eZ+JZipwW5f0BibM
-EQGCx4b+vcjJgN2rYxUYOsm0tyOj+MMi2MrHqLC5Ns4zwqBw29+Gz4x+RfW5
-2mw/0zaBe9v5GG7SocCHSuLexYBXjJ5h7zx2lII38Bnz9M6OfaAzuFtSXAqH
-VSs4+6BrksnvAdhJNh4eX21mF/zIrnatxIvzvZlkAkSlEzpB72ZU8fC1OH/X
-3hWW
-=LuyT
------END PGP SIGNATURE-----
+p: 646-253-9055
+e: milosz@adfin.com
