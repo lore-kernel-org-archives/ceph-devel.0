@@ -1,30 +1,35 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: 11/11/2015 Weekly Ceph Performance Meeting IS ON!
-Date: Wed, 11 Nov 2015 09:49:43 -0600
-Message-ID: <56436397.7050708@redhat.com>
-Reply-To: mnelson@redhat.com
+From: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
+Subject: RE: 11/11/2015 Weekly Ceph Performance Meeting IS ON!
+Date: Wed, 11 Nov 2015 18:30:46 +0000
+Message-ID: <99767EA2E27DD44DB4E9F9B9ACA458C056198374@SSIEXCH-MB3.ssi.samsung.com>
+References: <56436397.7050708@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:55628 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751826AbbKKPtp (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 11 Nov 2015 10:49:45 -0500
-Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
-	by mx1.redhat.com (Postfix) with ESMTPS id 99953BBDD
-	for <ceph-devel@vger.kernel.org>; Wed, 11 Nov 2015 15:49:45 +0000 (UTC)
-Received: from [10.3.112.72] (ovpn-112-72.phx2.redhat.com [10.3.112.72])
-	by int-mx13.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id tABFnhFr012231
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-	for <ceph-devel@vger.kernel.org>; Wed, 11 Nov 2015 10:49:45 -0500
+Received: from mx2.ssi.samsung.com ([207.140.43.206]:33958 "EHLO
+	mx2.ssi.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750781AbbKKSat convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Nov 2015 13:30:49 -0500
+In-Reply-To: <56436397.7050708@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "mnelson@redhat.com" <mnelson@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-8AM PST as usual! (ie in 10 minutes, sorry for the late notice) 
-Discussion topics include newstore block and anything else folks want to 
-talk about.  See you there!
+Hi Mark,
+  Have been busy this morning and missed the meeting today. Would be possible to upload the recording video to the site at your most convenient time?
+
+  Thanks,
+  James 
+
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
+Sent: Wednesday, November 11, 2015 7:50 AM
+To: ceph-devel@vger.kernel.org
+Subject: 11/11/2015 Weekly Ceph Performance Meeting IS ON!
+
+8AM PST as usual! (ie in 10 minutes, sorry for the late notice) Discussion topics include newstore block and anything else folks want to talk about.  See you there!
 
 Here's the links:
 
@@ -42,8 +47,7 @@ https://bluejeans.com/268261044/lync
 
 
 To join via Room System:
-Video Conferencing System: bjn.vc -or- 199.48.152.152
-Meeting ID: 268261044
+Video Conferencing System: bjn.vc -or- 199.48.152.152 Meeting ID: 268261044
 
 To join via Phone:
 1) Dial:
@@ -54,3 +58,5 @@ To join via Phone:
 2) Enter Conference ID: 268261044
 
 Mark
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
