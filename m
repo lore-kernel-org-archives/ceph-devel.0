@@ -1,149 +1,216 @@
-From: "Blinick, Stephen L" <stephen.l.blinick@intel.com>
-Subject: RE: Increasing # Shards vs multi-OSDs per device
-Date: Wed, 11 Nov 2015 22:44:42 +0000
-Message-ID: <3649A15A2562B54294DE14BCE5AC79120B8EE3BB@ORSMSX160.amr.corp.intel.com>
+From: Robert LeBlanc <robert@leblancnet.us>
+Subject: Re: Increasing # Shards vs multi-OSDs per device
+Date: Wed, 11 Nov 2015 16:29:49 -0700
+Message-ID: <CAANLjFqDv-cR9i_jPSvWGAFjJGyw0QeW1Zgf_m3DtaPf4zFu0g@mail.gmail.com>
 References: <3649A15A2562B54294DE14BCE5AC79120B8ED66F@ORSMSX160.amr.corp.intel.com>
- <CAH0kLp8pQW=Ainqm5w7yfBgzSj2AKum125CiqJ+r5k=cvR53Ug@mail.gmail.com>
+	<CAH0kLp8pQW=Ainqm5w7yfBgzSj2AKum125CiqJ+r5k=cvR53Ug@mail.gmail.com>
+	<3649A15A2562B54294DE14BCE5AC79120B8EE3BB@ORSMSX160.amr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:1639 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752900AbbKKWor (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 11 Nov 2015 17:44:47 -0500
-In-Reply-To: <CAH0kLp8pQW=Ainqm5w7yfBgzSj2AKum125CiqJ+r5k=cvR53Ug@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-vk0-f46.google.com ([209.85.213.46]:35144 "EHLO
+	mail-vk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751322AbbKKX3v convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Nov 2015 18:29:51 -0500
+Received: by vkas68 with SMTP id s68so736020vka.2
+        for <ceph-devel@vger.kernel.org>; Wed, 11 Nov 2015 15:29:49 -0800 (PST)
+In-Reply-To: <3649A15A2562B54294DE14BCE5AC79120B8EE3BB@ORSMSX160.amr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <its.somenath@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Mark Nelson <mnelson@redhat.com>, Samuel Just <sjust@redhat.com>, Kyle Bader <kbader@redhat.com>, Somnath Roy <Somnath.Roy@sandisk.com>
+To: "Blinick, Stephen L" <stephen.l.blinick@intel.com>
+Cc: Somnath Roy <its.somenath@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Mark Nelson <mnelson@redhat.com>, Samuel Just <sjust@redhat.com>, Kyle Bader <kbader@redhat.com>, Somnath Roy <Somnath.Roy@sandisk.com>
 
-VGhhbmtzIGZvciB0YWtpbmcgYSBsb29rISAgDQoNCkZpcnN0LCB0aGUgb3JpZ2luYWwgc2xpZGVz
-IGFyZSBvbiB0aGUgQ2VwaCBzbGlkZXNoYXJlIGhlcmU6IGh0dHA6Ly93d3cuc2xpZGVzaGFyZS5u
-ZXQvSW5rdGFua19DZXBoL2FjY2VsZXJhdGluZy1jYXNzYW5kcmEtd29ya2xvYWRzLW9uLWNlcGgt
-d2l0aC1hbGxmbGFzaC1wY2llLXNzZHMgICAgVGhhdCBzaG91bGQgc2hvdyB0aGUgMS8yLzQgcGFy
-aXRpb24gY29tcGFyaXNvbiBhbmQgdGhlIG92ZXJhbGwgcGVyZm9ybWFuY2UgI+KAmXMgbGF0ZW5j
-eSwgYW5kIGRhdGEgc2V0IHNpemUuICAgSSBkaWRu4oCZdCBwcm92aWRlIG11Y2ggY29udGV4dCBp
-biB0aGlzIHF1aWNrIGRlY2sgYmVjYXVzZSBJIG1lYW50IGl0IHRvIGJlIGEgY29tcGFuaW9uIHRv
-IHRoYXQgZGF0YS4gICANCg0KMSDigJMgSSBhZ3JlZSB3ZeKAmXJlIGEgbG9uZyB3YXkgZnJvbSB0
-aGUgbWF4IERDIFAzNzAwIDRLIFJSIElPUFMgKDQ2MEspLCBhbmQgYWxzbyB0aGF0IGlzIGF0IFFE
-MTI4LiAgIEluIHRoZSBmdXR1cmUgKHNvbWUgZGF5KSBpdCB3b3VsZCBiZSBuaWNlIHRob3VnaCBp
-ZiB5b3UgY291bGQgcmVhY2ggdGhhdCBwZXJmb3JtYW5jZSB3aXRoIE9TRCBrbm9icyB0byBpbmNy
-ZWFzZSB3b3JrZXIgdGhyZWFkcy4gICBXZSBkaWQgdHJ5IG1hbnkgc2hhcmRzL3dvcmtlcnMgcGVy
-IHNoYXJkcyBjb21iaW5hdGlvbiBidXQgdGhlIHJlYWwgcHVycG9zZSBvZiB0aGUgcHJlc2VudGF0
-aW9uIHdhcyBtaXhlZCByL3cgcGVyZm9ybWFuY2UgYW5kIHRoZSDigJxDYXNzYW5kcmHigJ0gYnJl
-YWtkb3duIG9mIElPIHNpemVzIEAgNTAvNTAgbWl4LiAgRXZlcnkgZGV2aWF0aW9uIGZyb20gdGhl
-IGRlZmF1bHQgaHVydCB3cml0ZXMgb3IgbWl4ZWQgcGVyZm9ybWFuY2Ugc28gd2Ugd2VyZSBub3Qg
-anVzdCB3b3JraW5nIGZvciB0aGUgaGlnaGVzdCBSYW5kUmVhZCAj4oCZcyBwb3NzaWJsZS4gDQoN
-CjLigJRXZSB1c2VkIENCVCBmb3IgYWxsIHJ1bnMsIHVuZm9ydHVuYXRlbHkgb3VyIGRlZmF1bHQg
-Y29sbGVjdGwgY29uZmlnIGRpZG7igJl0IGdyYWIgTlZNZSBzdGF0cyB3ZeKAmWxsIGZpeCB0aGF0
-IGFzIHdlIG1vdmUgdG8gSW5mZXJuYWxpcy4uIEkgaGF2ZSBOVk1lIEJhbmR3aWR0aCBvbmx5IChm
-cm9tIHphYmJpeCBtb25pdG9yaW5nKS4gIFVzaW5nIElPc3RhdCB0byBzcG90IGNoZWNrIHRob3Vn
-aCB0aGUgUUQsIGl0IHdhcyBhbHdheXMgcHJldHR5IGxvdyBvbiB0aGUgZGV2aWNlcywgYXQgbW9z
-dCAxMCB3aXRoIHRoZSA0LXBhcnRpdGlvbiAxMDAlIHJlYWQgY2FzZS4gICBGb3IgMTAwJSBSUiBA
-IFFEMzI6ICAgMSBPU0QvTlZNZSA9IDM0LjRLIHJlYWRzL2RldmljZS4gIDQgT1NEL05WTWUgPSA1
-NS41ayByZWFkcy9kZXZpY2UgKDE0ayBwZXIgT1NEKS4gICAgV2hhdCdzIHNob3duIGluIHRoZSBv
-dGhlciBwcmVzZW50YXRpb24gaXMgdGhhdCB3aXRoIDJPU0QvTlZNZSB3ZSBoaXQgNDRLIGlvcHMv
-ZGV2aWNlLCBhbmQgd2UgZGlkIGdvIHRvIDggT1NEJ3MvZGV2aWNlIGJ1dCBzYXcgbm8gaW1wcm92
-ZW1lbnQgb3ZlciA0LiANClNvLCB3ZSBkZXRlcm1pbmVkIDQgTlZNZS9PU0QgaXMgd29ydGggZG9p
-bmcgb3ZlciAyLCBhbmQgdGhlIDQgT1NEJ3MgdG8gMSBmbGFzaCBkZXZpY2UgZmFpbHVyZSBib3Vu
-ZGFyeSBjbG9zZWx5IG1hdGNoZXMgdGhlIGdlbmVyYWxseSBhY2NlcHRlZCByYXRpbyBvZiBPU0Qg
-am91cm5hbHMgdG8gb25lIGRldmljZS4gDQoNCjMtLSBQYWdlIGNhY2hlIGVmZmVjdHMgc2hvdWxk
-IGJlIG5lZ2F0ZWQgaW4gdGhlc2UgbnVtYmVycy4gQXMgeW91IGNhbiBzZWUgaW4gdGhlIG90aGVy
-IHByZXNlbnRhdGlvbiB3ZSBkaWQgb25lIHJ1biB3aXRoICAyVEIgb2YgZGF0YSwgd2hpY2ggc2hv
-d2VkIGhpZ2hlciBwZXJmb3JtYW5jZSAoMS4zNU0gSU9QUykuICBCdXQgdGhlIHJlc3Qgb2YgdGhl
-IHRlc3RzIHdlcmUgcnVuIHdpdGggNC44VEIgZGF0YSAocmVwbGljYXRlZCB0d2ljZSksIGFuZCB1
-bmlmb3JtIHJhbmRvbSBkaXN0cmlidXRpb24uICBXaGlsZSB3ZSAgZGlkIHVzZSAnbm9yYW5kb21t
-YXAnIGZvciBjbGllbnQgcGVyZm9ybWFuY2UsIHRoZSByZS1yZWZlcmVuY2luZyBvZiBibG9ja3Mg
-aW4gdGhhdCBzaXplIGRhdGFzZXQgc2hvdWxkIGJlIGxvdy4gICBVc2luZyBJT3N0YXQsIGFuZCBa
-YWJiaXgsIHdlIGNvcnJlbGF0ZWQgdGhlIGhvc3QgcmVhZC93cml0ZSBhZ2dyZWdhdGUgcGVyZm9y
-bWFuY2UgdG8gdGhlIGRldmljZSBzdGF0aXN0aWNzLCBzbyBjb25maXJtIHRoYXQgdGhlcmUgd2Fz
-bid0IG9iamVjdCBkYXRhIGNvbWluZyBvdXQgb2YgY2FjaGUuICANCg0KNCAtLSBZZWFoIHRoaXMg
-bXVsdGktcGFydGl0aW9uaW5nIGRvZXNuJ3QgZG91YmxlIG9yIHF1YWRydXBsZSBDUFUvVGhyb3Vn
-aHB1dCBhbmQgcGVyZm9ybWFuY2UuICBCdXQgaXQgaGFzIHNpZ25pZmljYW50IGltcHJvdmVtZW50
-cyB0byBhIHBvaW50ICg0LCBieSBleHBlcmltZW50YXRpb24sIGluIHRoaXMgY2x1c3RlcikuICBG
-b3IgU1NEJ3MsIG91ciB0ZWFtIGluIFNoYW5naGFpIHVzZWQgMiBwYXJ0aXRpb25zL1NTRCBmb3Ig
-YmVzdCBwZXJmb3JtYW5jZS4gDQoNCjUgLS0gR29vZCBjYXRjaCwgSSB0eXBlZCB0aGlzIGluIHF1
-aWNrbHkgd2hlbiBteSBtaWMgd2Fzbid0IHdvcmtpbmcgdGhpcyBtb3JuaW5nIDopICAgSW4gYWxs
-IGNhc2VzIHRoZSAjIG9mIGFjdHVhbCB3b3JrZXIgdGhyZWFkcyBpcyBkb3VibGUgd2hhdCBpcyBz
-dGF0ZWQgb24gc2xpZGUgIzcgaW4gdGhlIGxpbmtlZCBwcmVzZW50YXRpb24gYmVsb3cuICBUaGlz
-IGlzIGJlY2F1c2UgZXZlcnkgc2hhcmQgYnkgZGVmYXVsdCA9IDIgd29ya2VycyBhbmQgd2UgZGlk
-IG5vdCBjaGFuZ2UgdGhhdCBpbiBhbnkgb2YgdGhlIHB1Ymxpc2hlZCB0ZXN0cy4gIFdoZW4gd2Ug
-ZGlkIGxvd2VyIGl0IHRvIDEgaXQgYWx3YXlzIGh1cnQgd3JpdGUgcGVyZm9ybWFuY2UgYXMgd2Vs
-bC4NCg0KNiAtLSBBcyB5b3UgY2FuIHNlZSBpbiB0aGUgY29uZmlnLCB3ZSBkaWQgaW5jcmVhc2Ug
-ZmlsZXN0b3JlX29wX3RocmVhZHMgdG8gNiAgKHRoaXMgZ2F2ZSBhIDE1JSBib29zdCBpbiBtaXhl
-ZCByL3cgcGVyZm9ybWFuY2UpLiAgSGlnaGVyIHRoYW4gdGhhdCBkaWRuJ3QgaGVscC4gIEknbSBu
-b3Qgc3VyZSBpZiBpdCB3b3VsZCBoYXZlIGhlbHBlZCBpbiB0aGUgY2FzZSBvZiAyMCBzaGFyZHMv
-T1NELiAgDQoNCkkgYW0gc3RpbGwgcmVhbGx5IGN1cmlvdXMgYWJvdXQgdGhlIHNjaGVkdWxlciBi
-ZWhhdmlvciBmb3IgdGhyZWFkcyB3aXRoaW4gYW4gT1NELiAgICAgR2l2ZW4gdGhlIHNsZWVwL3Np
-Z25hbC93YWtldXAgbWVjaGFuaXNtIGJldHdlZW4gdGhlIG1zZyBkaXNwYXRjaGVyIGFuZCB0aGUg
-d29ya2VyIHRocmVhZHMsIGlzIGl0IHBvc3NpYmxlIHRoYXQncyBjYXVzaW5nIHRoZSBzY2hlZHVs
-ZXIgdG8gYnVtcCB0aHJlYWRzIHVwIHRvIGEgaGlnaGVyIHByaW9yaXR5IGFuZCBzb21laG93IGJy
-ZWFraW5nIGZhaXJuZXNzIHdoZW4gdGhlcmUncyBtb3JlIHJ1bm5hYmxlIHRocmVhZHMgdGhhbiBD
-UFUncz8gICAgRWFjaCBub2RlIGhlcmUgaGFzIDcyIGNwdSdzICh3aXRoIEhUKSBidXQgYXMgeW91
-IG5vdGUgMTYwIHdvcmtlciB0aHJlYWRzIChpbiBhZGRpdGlvbiB0byB0aGUgcGlwZSByZWFkZXIv
-d3JpdGVycyBhbmQgbXNnIGRpc3BhdGNoZXJzKS4NCg0KVGhhbmtzLA0KDQpTdGVwaGVuDQoNCg0K
-DQoNCkZyb206IFNvbW5hdGggUm95IFttYWlsdG86aXRzLnNvbWVuYXRoQGdtYWlsLmNvbV0gDQpT
-ZW50OiBXZWRuZXNkYXksIE5vdmVtYmVyIDExLCAyMDE1IDM6MDIgUE0NClRvOiBCbGluaWNrLCBT
-dGVwaGVuIEwNCkNjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZzsgTWFyayBOZWxzb247IFNh
-bXVlbCBKdXN0OyBLeWxlIEJhZGVyOyBTb21uYXRoIFJveQ0KU3ViamVjdDogUmU6IEluY3JlYXNp
-bmcgIyBTaGFyZHMgdnMgbXVsdGktT1NEcyBwZXIgZGV2aWNlDQoNClRoYW5rcyBmb3IgdGhlIGRh
-dGEgU3RlcGhlbi4gU29tZSBmZWVkYmFjazoNCsKgDQoxLiBJIGRvbid0IHRoaW5rIHNpbmdsZSBP
-U0QgaXMgc3RpbGwgdGhlcmUgdG8gc2VydmUgNDYwSyByZWFkIGlvcHMgaXJyZXNwZWN0aXZlIG9m
-IGhvdyBtYW55IHNoYXJkcy90aHJlYWRzIHlvdSBhcmUgcnVubmluZy4gSSBkaWRuJ3QgaGF2ZSB5
-b3VyIE5WTWUgZGF0YSBlYXJsaWVyIDotKS4uQnV0LCBwcm9iYWJseSBmb3IgNTAvNjBLIFNBUyBT
-U0QgaW9wcyBzaW5nbGUgT1NEIHBlciBkcml2ZSBpcyBnb29kIGVub3VnaC4gSSBob3BlIHlvdSB0
-cmllZCBldmVuIGluY3JlYXNpbmcgdGhlIHNoYXJkcy90aHJlYWRzIHRvIHZlcnkgaGlnaCB2YWx1
-ZSAoc2luY2UgeW91IGhhdmUgbG90IG9mIGNwdSBsZWZ0KSBzYXkgNDA6MiBvciA4MDoxICh0cnkg
-b25lIGNvbmZpZ3VyYXRpb24gd2l0aCAxIHRocmVhZC9zaGFyZCAsIGl0IHNob3VsZCByZWR1Y2Ug
-Y29udGVudGlvbiBwZXIgc2hhcmQpIHNvID8gT3IgZXZlbiBsb3dlciByYXRpbyBsaWtlIDEwOjLC
-oCBvciAyMDoxID8NCsKgDQoyLiBEbyB5b3UgaGF2ZSBhbnkgZGF0YSBvbiBkaXNrIHV0aWxpemF0
-aW9uID8gSXQgd2lsbCBiZSBnb29kIGlmIHdlIGFyZSBhYmxlIHRvIHVuZGVyc3RhbmQgaG93IGJl
-dHRlciB0aGUgc2luZ2xlIGRpc2sgdXRpbGl6YXRpb24gYmVjb21lcyB3aGVuIHlvdSBhcmUgcnVu
-bmluZyBtdWx0aXBsZSBPU0RzL2RyaXZlLiBJIGtpbmQgb2YgYmFjayBjYWxjdWxhdGUgZnJvbSB5
-b3VyIGRhdGEgdGhhdCAsIGluIGNhc2Ugb2YgNCBPU2RzL2RyaXZlIGNhc2VzIGVhY2ggT1NEIGlz
-IHNlcnZpbmcgfjE0SyByZWFkIGlvcHMgdnMgfjQySyByZWFkIGlvcHMgd2hpbGUgaGF2aW5nIG9u
-ZSBvc2QvZHJpdmUuIFNvLCB0aGlzIGNsZWFybHkgdGVsbHMgdGhhdCB0d28gT1NEcy9kcml2ZSBz
-aG91bGQgYmUgZ29vZCBlbm91Z2ggdG8gc2VydmUgc2ltaWxhciBpb3BzIGluIHlvdXIgZW52aXJv
-bm1lbnQuIFlvdSBhcmUgYWJsZSB0byBleHRyYWN0IH41NksgaW9wcyBwZXIgZHJpdmUgd2l0aCA0
-IE9TRHMgdnMgNDJLIGZvciBvbmUgT1NEIGNhc2UuDQrCoA0KMy4gVGhlIGFib3ZlIGNhbGN1bGF0
-aW9uIEkgaGF2ZSBkaXNjYXJkZWQgYWxsIHRoZSBjYWNoZSBlZmZlY3QgLCBidXQsIHRoYXQncyBu
-b3QgcmVhbGlzdGljLiBZb3UgaGF2ZSB0b3RhbCBvZiAxMjggR0IgKiA1ID0gNjQwIEdCIG9mIFJB
-TS4gV2hhdCBpcyB0aGUgdG90YWwgd29ya2luZyBzZXQgb2YgeW91cnMgPyBJZiB5b3UgYXJlIGhh
-dmluZyBsb3Qgb2YgY2FjaGUgZWZmZWN0IGluIHRoaXMgcnVuICwgNCBPU0RzICg0IFhGUykgd2ls
-bCBiZSBoYXZpbmcgYmV0dGVyIGVmZmVjdCB0aGFuIG9uZSBPU0QgL2RyaXZlLiBUaGlzIGNvdWxk
-IGJlIGEgdG90YWwgbnVtYmVyIG9mIE9TRCBlZmZlY3QgaW4gdGhlIGNsdXN0ZXIgYnV0IG5vdCBz
-byBudW1iZXIgb2YgT1NEIG5lZWRlZCB0byBzYXR1cmF0ZSBhIGRyaXZlLg0KwqANCjQuIEFsc28s
-IGNwdSB1dGlsIHdpc2UsIHlvdSBoYXZlIG9ubHkgMjAlIG1vcmUgY3B1IHV0aWwgd2hpbGUgeW91
-IGFyZSBydW5uaW5nIDRYIG1vcmUgT1NEcy4NCsKgDQo1LsKgIEJUVywgd29ya2VyIHRocmVhZCBj
-YWxjdWxhdGlvbiBpcyBpbmNvcnJlY3QgLCBkZWZhdWx0IGlzIDU6MiAsIHNvLCBlYWNoIG9zZCBp
-cyBydW5uaW5nIHdpdGggMTAgd29ya2VyIHRocmVhZHMgYW5kIHRvdGFsIDE2MCB3b3JrZXIgdGhy
-ZWFkcyBmb3IgYm90aCA0IE9TRC9kcml2ZSBhbmQgMSBvc2QvZHJpdmUgKDIwOjIpLg0KwqANCjYu
-wqAgV3JpdGUgZGF0YSBpcyBzdXJwcmlzaW5nIGNvbXBhcmUgdG8gZGVmYXVsdCBzaGFyZCAxIE9T
-RCBjYXNlLCBtYXkgYmUgeW91IG5lZWQgdG8gaW5jcmVhc2UgZmlsZXN0b3JlIG9wIHRocmFkcyBz
-aW5jZSB5b3UgaGF2ZSBtb3JlIGRhdGEgY29taW5nIHRvIGZpbGVzdG9yZSA/DQrCoA0KVGhhbmtz
-ICYgUmVnYXJkcw0KU29tbmF0aA0KDQpPbiBXZWQsIE5vdiAxMSwgMjAxNSBhdCAxMjo1NyBQTSwg
-QmxpbmljaywgU3RlcGhlbiBMIDxzdGVwaGVuLmwuYmxpbmlja0BpbnRlbC5jb20+IHdyb3RlOg0K
-U29ycnkgYWJvdXQgdGhlIG1pY3JvcGhvbmUgaXNzdWVzIGluIHRoZSBwZXJmb3JtYW5jZSBtZWV0
-aW5nIHRvZGF5IHRvZGF5LsKgIMKgVGhpcyBpcyBhIGZvbGxvd3VwIHRvIHRoZSAxMS80IHBlcmZv
-cm1hbmNlIG1lZXRpbmcgd2hlcmUgd2UgZGlzY3Vzc2VkIGluY3JlYXNpbmcgdGhlIHdvcmtlciB0
-aHJlYWQgY291bnQgaW4gdGhlIE9TRCdzIHZzIG1ha2luZyBtdWx0aXBsZSBPU0QncyAoYW5kIHBh
-cnRpdGlvbnMvZmlsZXN5c3RlbXMpIHBlciBkZXZpY2UuwqAgwqAgwqBXZSBkaWQgdGhlIGhpZ2gg
-bGV2ZWwgZXhwZXJpbWVudCBhbmQgaGF2ZSBzb21lIHJlc3VsdHMgd2hpY2ggSSB0aHJldyBpbnRv
-IGEgcHB0L3BkZiwgYW5kIHNoYXJlZCB0aGVtIGhlcmU6DQoNCmh0dHA6Ly93d3cuZG9jZHJvaWQu
-bmV0L1VibXZHbkgvaW5jcmVhc2luZy1zaGFyZHMtdnMtbXVsdGlwbGUtb3Nkcy5wZGYuaHRtbA0K
-DQpEb2luZyAyMC1zaGFyZCBPU0QncyB2cyA0IE9TRCdzIHBlciBkZXZpY2Ugd2l0aCBkZWZhdWx0
-IDUgc2hhcmRzIHlpZWxkZWQgYWJvdXQgaGFsZiBvZiB0aGUgcGVyZm9ybWFuY2UgaW1wcm92ZW1l
-bnQgZm9yIHJhbmRvbSA0ayByZWFkcy7CoCBGb3Igd3JpdGVzIHBlcmZvcm1hbmNlIGlzIGFjdHVh
-bGx5IHdvcnNlIHRoYW4ganVzdCAxIE9TRCBwZXIgZGV2aWNlIGFuZCB0aGUgZGVmYXVsdCAjIG9m
-IHNoYXJkcy7CoCBUaGUgdGhyb3R0bGVzIHNob3VsZCBiZSBsYXJnZSBlbm91Z2ggZm9yIHRoZSAy
-MC1zaGFyZCB1c2UgY2FzZSBhcyB0aGV5IGFyZSAxMHggdGhlIGRlZmF1bHRzLCBhbHRob3VnaCBp
-ZiB5b3Ugc2VlIGFueXRoaW5nIHdlIG1pc3NlZCBsZXQgdXMga25vdy4NCg0KSSBoYWQgdGhlIGNs
-dXN0ZXIgbW92ZWQgdG8gSW5mZXJuYWxpcyByZWxlYXNlICh3aXRoIEpFTWFsbG9jKSB5ZXN0ZXJk
-YXksIHNvIGhvcGVmdWxseSB3ZSdsbCBoYXZlIHNvbWUgZWFybHkgcmVzdWx0cyBvbiB0aGUgc2Ft
-ZSA1LW5vZGUgY2x1c3RlciBzb29uLg0KDQpUaGFua3MsDQoNClN0ZXBoZW4NCg0KDQotLQ0KVG8g
-dW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNl
-cGgtZGV2ZWwiIGluDQp0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2Vy
-bmVsLm9yZw0KTW9yZSBtYWpvcmRvbW8gaW5mbyBhdMKgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcv
-bWFqb3Jkb21vLWluZm8uaHRtbA0KDQo=
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
+
+I should have the weighted round robin queue ready in the next few
+days. I shaking out a few bugs from converting it from my Hammer patch
+and I need to write a test suite, but I can get you the branch before
+then. I'd be interested to see what difference there may be as it
+would help decide if this is a path to continue pursuing.
+- ----------------
+Robert LeBlanc
+PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
+
+
+On Wed, Nov 11, 2015 at 3:44 PM, Blinick, Stephen L  wrote:
+> Thanks for taking a look!
+>
+> First, the original slides are on the Ceph slideshare here: http://ww=
+w.slideshare.net/Inktank_Ceph/accelerating-cassandra-workloads-on-ceph-=
+with-allflash-pcie-ssds    That should show the 1/2/4 parition comparis=
+on and the overall performance #=E2=80=99s latency, and data set size. =
+  I didn=E2=80=99t provide much context in this quick deck because I me=
+ant it to be a companion to that data.
+>
+> 1 =E2=80=93 I agree we=E2=80=99re a long way from the max DC P3700 4K=
+ RR IOPS (460K), and also that is at QD128.   In the future (some day) =
+it would be nice though if you could reach that performance with OSD kn=
+obs to increase worker threads.   We did try many shards/workers per sh=
+ards combination but the real purpose of the presentation was mixed r/w=
+ performance and the =E2=80=9CCassandra=E2=80=9D breakdown of IO sizes =
+@ 50/50 mix.  Every deviation from the default hurt writes or mixed per=
+formance so we were not just working for the highest RandRead #=E2=80=99=
+s possible.
+>
+> 2=E2=80=94We used CBT for all runs, unfortunately our default collect=
+l config didn=E2=80=99t grab NVMe stats we=E2=80=99ll fix that as we mo=
+ve to Infernalis.. I have NVMe Bandwidth only (from zabbix monitoring).=
+  Using IOstat to spot check though the QD, it was always pretty low on=
+ the devices, at most 10 with the 4-partition 100% read case.   For 100=
+% RR @ QD32:   1 OSD/NVMe =3D 34.4K reads/device.  4 OSD/NVMe =3D 55.5k=
+ reads/device (14k per OSD).    What's shown in the other presentation =
+is that with 2OSD/NVMe we hit 44K iops/device, and we did go to 8 OSD's=
+/device but saw no improvement over 4.
+> So, we determined 4 NVMe/OSD is worth doing over 2, and the 4 OSD's t=
+o 1 flash device failure boundary closely matches the generally accepte=
+d ratio of OSD journals to one device.
+>
+> 3-- Page cache effects should be negated in these numbers. As you can=
+ see in the other presentation we did one run with  2TB of data, which =
+showed higher performance (1.35M IOPS).  But the rest of the tests were=
+ run with 4.8TB data (replicated twice), and uniform random distributio=
+n.  While we  did use 'norandommap' for client performance, the re-refe=
+rencing of blocks in that size dataset should be low.   Using IOstat, a=
+nd Zabbix, we correlated the host read/write aggregate performance to t=
+he device statistics, so confirm that there wasn't object data coming o=
+ut of cache.
+>
+> 4 -- Yeah this multi-partitioning doesn't double or quadruple CPU/Thr=
+oughput and performance.  But it has significant improvements to a poin=
+t (4, by experimentation, in this cluster).  For SSD's, our team in Sha=
+nghai used 2 partitions/SSD for best performance.
+>
+> 5 -- Good catch, I typed this in quickly when my mic wasn't working t=
+his morning :)   In all cases the # of actual worker threads is double =
+what is stated on slide #7 in the linked presentation below.  This is b=
+ecause every shard by default =3D 2 workers and we did not change that =
+in any of the published tests.  When we did lower it to 1 it always hur=
+t write performance as well.
+>
+> 6 -- As you can see in the config, we did increase filestore_op_threa=
+ds to 6  (this gave a 15% boost in mixed r/w performance).  Higher than=
+ that didn't help.  I'm not sure if it would have helped in the case of=
+ 20 shards/OSD.
+>
+> I am still really curious about the scheduler behavior for threads wi=
+thin an OSD.     Given the sleep/signal/wakeup mechanism between the ms=
+g dispatcher and the worker threads, is it possible that's causing the =
+scheduler to bump threads up to a higher priority and somehow breaking =
+fairness when there's more runnable threads than CPU's?    Each node he=
+re has 72 cpu's (with HT) but as you note 160 worker threads (in additi=
+on to the pipe reader/writers and msg dispatchers).
+>
+> Thanks,
+>
+> Stephen
+>
+>
+>
+>
+> From: Somnath Roy [mailto:its.somenath@gmail.com]
+> Sent: Wednesday, November 11, 2015 3:02 PM
+> To: Blinick, Stephen L
+> Cc: ceph-devel@vger.kernel.org; Mark Nelson; Samuel Just; Kyle Bader;=
+ Somnath Roy
+> Subject: Re: Increasing # Shards vs multi-OSDs per device
+>
+> Thanks for the data Stephen. Some feedback:
+>
+> 1. I don't think single OSD is still there to serve 460K read iops ir=
+respective of how many shards/threads you are running. I didn't have yo=
+ur NVMe data earlier :-)..But, probably for 50/60K SAS SSD iops single =
+OSD per drive is good enough. I hope you tried even increasing the shar=
+ds/threads to very high value (since you have lot of cpu left) say 40:2=
+ or 80:1 (try one configuration with 1 thread/shard , it should reduce =
+contention per shard) so ? Or even lower ratio like 10:2  or 20:1 ?
+>
+> 2. Do you have any data on disk utilization ? It will be good if we a=
+re able to understand how better the single disk utilization becomes wh=
+en you are running multiple OSDs/drive. I kind of back calculate from y=
+our data that , in case of 4 OSds/drive cases each OSD is serving ~14K =
+read iops vs ~42K read iops while having one osd/drive. So, this clearl=
+y tells that two OSDs/drive should be good enough to serve similar iops=
+ in your environment. You are able to extract ~56K iops per drive with =
+4 OSDs vs 42K for one OSD case.
+>
+> 3. The above calculation I have discarded all the cache effect , but,=
+ that's not realistic. You have total of 128 GB * 5 =3D 640 GB of RAM. =
+What is the total working set of yours ? If you are having lot of cache=
+ effect in this run , 4 OSDs (4 XFS) will be having better effect than =
+one OSD /drive. This could be a total number of OSD effect in the clust=
+er but not so number of OSD needed to saturate a drive.
+>
+> 4. Also, cpu util wise, you have only 20% more cpu util while you are=
+ running 4X more OSDs.
+>
+> 5.  BTW, worker thread calculation is incorrect , default is 5:2 , so=
+, each osd is running with 10 worker threads and total 160 worker threa=
+ds for both 4 OSD/drive and 1 osd/drive (20:2).
+>
+> 6.  Write data is surprising compare to default shard 1 OSD case, may=
+ be you need to increase filestore op thrads since you have more data c=
+oming to filestore ?
+>
+> Thanks & Regards
+> Somnath
+>
+> On Wed, Nov 11, 2015 at 12:57 PM, Blinick, Stephen L  wrote:
+> Sorry about the microphone issues in the performance meeting today to=
+day.   This is a followup to the 11/4 performance meeting where we disc=
+ussed increasing the worker thread count in the OSD's vs making multipl=
+e OSD's (and partitions/filesystems) per device.     We did the high le=
+vel experiment and have some results which I threw into a ppt/pdf, and =
+shared them here:
+>
+> http://www.docdroid.net/UbmvGnH/increasing-shards-vs-multiple-osds.pd=
+f.html
+>
+> Doing 20-shard OSD's vs 4 OSD's per device with default 5 shards yiel=
+ded about half of the performance improvement for random 4k reads.  For=
+ writes performance is actually worse than just 1 OSD per device and th=
+e default # of shards.  The throttles should be large enough for the 20=
+-shard use case as they are 10x the defaults, although if you see anyth=
+ing we missed let us know.
+>
+> I had the cluster moved to Infernalis release (with JEMalloc) yesterd=
+ay, so hopefully we'll have some early results on the same 5-node clust=
+er soon.
+>
+> Thanks,
+>
+> Stephen
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+
+-----BEGIN PGP SIGNATURE-----
+Version: Mailvelope v1.2.3
+Comment: https://www.mailvelope.com
+
+wsFcBAEBCAAQBQJWQ89oCRDmVDuy+mK58QAAGm0P/igsFdpIZonJ1rnBDzn1
+tMPRpVcKHvL/Yqx9UgkZwXnQ+MZP6nUj/roWzhJFM8OnXIMBg7TKvQLNN1uv
+NFNX6noWcQjASrUsFbkJC78xv9GOZeltN/9sE5jDZdjPHqNtP7g9n/au1DZP
+qPqlJBQxoF4p1qZUijuX3JXMmLRNNvEpdhicve1gz3WG5CdtZb1p1udPECa1
+7InsacCqzc9foRv23wqcnQU/cCQyZWLRDgMSFXb4/b5JErqwAV4WNL/C6oTa
+hdAIsaRVlQvhj9PlYI86FYCd0sj/B1TZlRaRBKR/Eup7Yyvlo6y+EaNua7Ou
+D7ilYZCBOQ+2HUaM6Dv+SRJogK35nkurkthP1hqZi0TLYpxSefzpzf+TJuvg
+r/B2f26ha4lX7i023gPTij+GkpLCTJgymKWqbLHfHsNQN1/fwrgwOJ/5ySNL
+TXh1iTT8ulB6GwmkPM9MRlIW6jRCoOpjWXHjE6R7wAVOh/cpLb98ie2cmW+6
+sXhCllPFwpHogYJklCW+eI6eZ7T2Y26WMA/BbwVKKlPhcaU35LVym77XeqBI
+804tLumsYyBVZVIlpsn1Eqk+tgh6/aNSgMXztDTWjdCVwUhhmLDGuzdDYa+1
+EM2bW4+ZIeRnhab662v8muFX8ka/ee/HX43St50LeGRcYIEICsxGSCMXhVdt
+kTLC
+=3Dcj9z
+-----END PGP SIGNATURE-----
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
