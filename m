@@ -1,7 +1,7 @@
-From: =?UTF-8?B?5rGg5L+h5rO9?= <xmdxcxz@gmail.com>
+From: Ning Yao <zay11022@gmail.com>
 Subject: Re: disabling buffer::raw crc cache
-Date: Wed, 11 Nov 2015 16:42:51 +0800
-Message-ID: <CANE=7sUPPpwew5ZmqCjRpDsz4Lsa9UtT6qdUFXr3XzY0uMWNyQ@mail.gmail.com>
+Date: Wed, 11 Nov 2015 18:03:44 +0800
+Message-ID: <CALZt5jyuAH_aYYyzSEmn03QXaJQsfLiF=HMB6FJ5xEq6LMhFag@mail.gmail.com>
 References: <D2682DD5.8AA1%evgeniy.firsov@sandisk.com>
 	<CANE=7sWCUw5PiKwQqqq__6XpyF89jk1v_rsNgnfX10UtkRxXpQ@mail.gmail.com>
 	<D2683AC6.8AB2%evgeniy.firsov@sandisk.com>
@@ -9,26 +9,34 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f46.google.com ([209.85.218.46]:33409 "EHLO
-	mail-oi0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751015AbbKKImw convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Nov 2015 03:42:52 -0500
-Received: by oixx65 with SMTP id x65so715742oix.0
-        for <ceph-devel@vger.kernel.org>; Wed, 11 Nov 2015 00:42:51 -0800 (PST)
+Received: from mail-wm0-f43.google.com ([74.125.82.43]:36536 "EHLO
+	mail-wm0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751959AbbKKKDp convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Nov 2015 05:03:45 -0500
+Received: by wmww144 with SMTP id w144so152712481wmw.1
+        for <ceph-devel@vger.kernel.org>; Wed, 11 Nov 2015 02:03:44 -0800 (PST)
 In-Reply-To: <D2683AC6.8AB2%evgeniy.firsov@sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Evgeniy Firsov <Evgeniy.Firsov@sandisk.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Cc: =?UTF-8?B?5rGg5L+h5rO9?= <xmdxcxz@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-the code logic would touch crc cache is bufferlist::crc32c and invalida=
-te_crc.
-we call bufferlist::crc32 when sending or receiving message and
-writing filejournal.
-I miss something critical?
+>>the code logic would touch crc cache is bufferlist::crc32c and invali=
+date_crc.
+Also for pg_log::_write_log(), but seems it is always miss and use at
+once, no need to cache crc actually?
 
-I am agree with you that the benefit from that cache cache is every lim=
-it.
+So we may need to add some option to enable or disable it, or some
+identifier to instruct bufferlist wheher crc should be cached when
+initiating a new bufferlist. I think it may still be useful on the
+platform without hardware crc acceleration or large chunks writing (as
+it may relate to the length of buffer::ptr). So we can bypass the
+small  buffer::ptr without crc cache Or also don't cache the things
+like pg_info, attrs as they are always not reused in FileJournal
+writing?
+Regards
+Ning Yao
+
 
 2015-11-11 16:25 GMT+08:00 Evgeniy Firsov <Evgeniy.Firsov@sandisk.com>:
 > Rb-tree construction, insertion, which needs memory allocation, mutex
@@ -70,12 +78,6 @@ l" in
 >>Regards,
 >>xinze
 >
-
-
-
---=20
-Regards,
-xinze
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
