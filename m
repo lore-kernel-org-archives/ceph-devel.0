@@ -1,113 +1,53 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: new scrub and repair discussion
-Date: Wed, 11 Nov 2015 05:25:12 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1511110516330.7964@cobra.newdream.net>
-References: <CAJE9aOMW9REHMc8b3o63CwxN2doY0O3pU+QcWrErKZMvwVtznw@mail.gmail.com>
+From: Ning Yao <zay11022@gmail.com>
+Subject: Re: disabling buffer::raw crc cache
+Date: Wed, 11 Nov 2015 21:50:49 +0800
+Message-ID: <CALZt5jwhKieOh=usLOGvQ0UzZijB_3AbB_T3Q6i3cuO3dgxZNQ@mail.gmail.com>
+References: <D2682DD5.8AA1%evgeniy.firsov@sandisk.com>
+	<CANE=7sWCUw5PiKwQqqq__6XpyF89jk1v_rsNgnfX10UtkRxXpQ@mail.gmail.com>
+	<D2683AC6.8AB2%evgeniy.firsov@sandisk.com>
+	<CALZt5jyuAH_aYYyzSEmn03QXaJQsfLiF=HMB6FJ5xEq6LMhFag@mail.gmail.com>
+	<CALZt5jwOOp1gnBqO1vbmj2Kyborebz_Os79YcE1zeTMwumfp8A@mail.gmail.com>
+	<CALZt5jyirEnrsStRknq9HcX5JqkoMcg+-=0KFoSGrzWCV2m=hw@mail.gmail.com>
+	<alpine.DEB.2.00.1511110510440.7964@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:58332 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751942AbbKKNZN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Nov 2015 08:25:13 -0500
-In-Reply-To: <CAJE9aOMW9REHMc8b3o63CwxN2doY0O3pU+QcWrErKZMvwVtznw@mail.gmail.com>
+Received: from mail-wm0-f53.google.com ([74.125.82.53]:37930 "EHLO
+	mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750778AbbKKNuv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Nov 2015 08:50:51 -0500
+Received: by wmec201 with SMTP id c201so47428008wme.1
+        for <ceph-devel@vger.kernel.org>; Wed, 11 Nov 2015 05:50:49 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1511110510440.7964@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Evgeniy Firsov <Evgeniy.Firsov@sandisk.com>, =?UTF-8?B?5rGg5L+h5rO9?= <xmdxcxz@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, 11 Nov 2015, kefu chai wrote:
-> currently, scrub and repair are pretty primitive. there are several
-> improvements which need to be made:
-> 
-> - user should be able to initialize scrub of a PG or an object
->     - int scrub(pg_t, AioCompletion*)
->     - int scrub(const string& pool, const string& nspace, const
-> string& locator, const string& oid, AioCompletion*)
-> - we need a way to query the result of the most recent scrub on a pg.
->     - int get_inconsistent_pools(set<uint64_t>* pools);
->     - int get_inconsistent_pgs(uint64_t pool, paged<pg_t>* pgs);
->     - int get_inconsistent(pg_t pgid, epoch_t* cur_interval,
-> paged<inconsistent_t>*)
+2015-11-11 21:13 GMT+08:00 Sage Weil <sage@newdream.net>:
+> On Wed, 11 Nov 2015, Ning Yao wrote:
+>> >>>the code logic would touch crc cache is bufferlist::crc32c and invalidate_crc.
+>> >>Also for pg_log::_write_log(), but seems it is always miss and use at
+>> >>once, no need to cache crc actually?
+>> > Oh, no, it will be hit in FileJournal writing
+>> Still miss as buffer::ptr length diff with ::encode(crc, bl), right?
+>> So the previous ebl.crc32c(0) calculation would be also no need to
+>> cache.
+>
+> How about just skipping the cache logic if the raw length is less than
+> some threshold?  Say, 16KB or something?  That would cover the _write_log
+> case (small buffer) and more generally avoid the fixed overhead of caching
+> when recalculating is cheap.
+>
+> This was originally added with large writes in mind to avoid the crc
+> recalculation during journaling on armv7l.  It is presumably also helping
+> now that we have the opportunistic whole-object checksums for full or
+> sequential writes.
 
-What is paged<>?
+Reasonable,  and we may also reconsider whether
+map<pair<size_t,size_t>, <int, int> > is really needed. The common
+case seems always use the same offset and length. Is it better for us
+to just cache the last crc result (only one item is enough efficient)?
 
-> - the user should be able to query the content of the replica/shard
-> objects in the event of an inconsistency.
->     - operate_on_shard(epoch_t interval, pg_shard_t pg_shard,
-> ObjectReadOperation *op, bool allow_inconsistent)
-
-This is exposing a bunch of internal types (pg_t, pg_shard_t, epoch_t) up 
-through librados.  We might want to consider making them strings or just 
-unsigned or similar?  I'm mostly worried about making it hard for us to 
-change the types later...
-
-> - the user should be able to perform following fixes using a new
-> aio_operate_scrub(
->                                           const std::string& oid,
->                                           shard_id_t shard,
->                                           AioCompletion *c,
->                                           ObjectWriteOperation *op)
->     - specify which replica to use for repairing a content inconsistency
->     - delete an object if it can't exist
->     - write_full
->     - omap_set
->     - setattrs
-
-For omap_set and setattrs do we want a _full-type equivalent, or would we 
-support partial changes?  Partial updates won't necessary resolve an 
-inconsistency, but I think (?) in the ec case the full xattr set is in 
-the log event?
-
-> - the user should be able to repair snapset and object_info_t
->     - ObjectWriteOperation::repair_snapset(...)
->         - set/remove any property/attributes, for example,
->             - to reset snapset.clone_overlap
->             - to set snapset.clone_size
->             - to reset the digests in object_info_t,
-> - repair will create a new version so that possibly corrupted copies
-> on down OSDs will get fixed naturally.
-> 
-> so librados will offer enough information and facilities, with which a
-> smart librados client/script will be able to fix the inconsistencies
-> found in the scrub.
-> 
-> as an example, if we run into a data inconsistency where the 3
-> replicas failed to agree with each other after performing a deep
-> scrub. probably we'd like to have an election to get the auth copy.
-> following pseudo code explains how we will implement this using the
-> new rados APIs for scrub and repair.
-> 
->      # something is not necessarily better than nothing
->      rados.aio_scrub(pg, completion)
->      completion.wait_for_complete()
->      for pool in rados.get_inconsistent_pools():
->           for pg in rados.get_inconsistent_pgs(pool):
->                # rados.get_inconsistent_pgs() throws if "epoch" expires
-> 
->                for oid, inconsistent in rados.get_inconsistent_pgs(pg,
-> epoch).items():
->                     if inconsistent.is_data_digest_mismatch():
->                          votes = defaultdict(int)
->                          for osd, shard_info in inconsistent.shards:
->                               votes[shard_info.object_info.data_digest] += 1
->                          digest, _ = mavotes, key=operator.itemgetter(1))
->                          auth_copy = None
->                          for osd, shard_info in inconsistent.shards.items():
->                               if shard_info.object_info.data_digest == digest:
->                                    auth_copy = osd
->                                    break
->                          repair_op = librados.ObjectWriteOperation()
->                          repair_op.repair_pick(auth_copy,
-> inconsistent.ver, epoch)
->                          rados.aio_operate_scrub(oid, repair_op)
-> 
-> this plan was also discussed in the infernalis CDS. see
-> http://tracker.ceph.com/projects/ceph/wiki/Osd_-_Scrub_and_Repair.
-
-We should definitely make sure these are surfaced in the python bindings 
-from the start.  :)
-
-Sounds good to me!
-sage
-
+Regards
+Ning Yao
