@@ -1,176 +1,99 @@
-From: mhocko@kernel.org
-Subject: [PATCH] mm: Allow GFP_IOFS for page_cache_read page cache allocation
-Date: Wed, 11 Nov 2015 15:13:53 +0100
-Message-ID: <1447251233-14449-1-git-send-email-mhocko@kernel.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mm@kvack.org
-Cc: Andrew Morton <akpm@linux-foundation.org>, Tetsuo Handa <penguin-kernel@I-love.SAKURA.ne.jp>, Mel Gorman <mgorman@suse.de>, Dave Chinner <david@fromorbit.com>, Mark Fasheh <mfasheh@suse.com>, ocfs2-devel@oss.oracle.com, ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, Michal Hocko <mhocko@suse.com>
-List-Id: ceph-devel.vger.kernel.org
+From: =?UTF-8?B?546L5b+X5by6?= <wonzhq@gmail.com>
+Subject: Re: new scrub and repair discussion
+Date: Wed, 11 Nov 2015 22:43:11 +0800
+Message-ID: <CA+cZ7sioiiEVVC0G9fkU1iF8J4hAPRuYYhOQ=5pgtg-n3q-iPw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-oi0-f45.google.com ([209.85.218.45]:34199 "EHLO
+	mail-oi0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752237AbbKKOnM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Nov 2015 09:43:12 -0500
+Received: by oies6 with SMTP id s6so16565036oie.1
+        for <ceph-devel@vger.kernel.org>; Wed, 11 Nov 2015 06:43:11 -0800 (PST)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-From: Michal Hocko <mhocko@suse.com>
+2015-11-11 19:44 GMT+08:00 kefu chai <tchaikov@gmail.com>:
+> currently, scrub and repair are pretty primitive. there are several
+> improvements which need to be made:
+>
+> - user should be able to initialize scrub of a PG or an object
+>     - int scrub(pg_t, AioCompletion*)
+>     - int scrub(const string& pool, const string& nspace, const
+> string& locator, const string& oid, AioCompletion*)
+> - we need a way to query the result of the most recent scrub on a pg.
+>     - int get_inconsistent_pools(set<uint64_t>* pools);
+>     - int get_inconsistent_pgs(uint64_t pool, paged<pg_t>* pgs);
+>     - int get_inconsistent(pg_t pgid, epoch_t* cur_interval,
+> paged<inconsistent_t>*)
+> - the user should be able to query the content of the replica/shard
+> objects in the event of an inconsistency.
+>     - operate_on_shard(epoch_t interval, pg_shard_t pg_shard,
+> ObjectReadOperation *op, bool allow_inconsistent)
+> - the user should be able to perform following fixes using a new
+> aio_operate_scrub(
+>                                           const std::string& oid,
+>                                           shard_id_t shard,
+>                                           AioCompletion *c,
+>                                           ObjectWriteOperation *op)
+>     - specify which replica to use for repairing a content inconsistency
+>     - delete an object if it can't exist
+>     - write_full
+>     - omap_set
+>     - setattrs
+> - the user should be able to repair snapset and object_info_t
+>     - ObjectWriteOperation::repair_snapset(...)
+>         - set/remove any property/attributes, for example,
+>             - to reset snapset.clone_overlap
+>             - to set snapset.clone_size
+>             - to reset the digests in object_info_t,
+> - repair will create a new version so that possibly corrupted copies
+> on down OSDs will get fixed naturally.
+>
 
-page_cache_read has been historically using page_cache_alloc_cold to
-allocate a new page. This means that mapping_gfp_mask is used as the
-base for the gfp_mask. Many filesystems are setting this mask to
-GFP_NOFS to prevent from fs recursion issues. page_cache_read is
-called from the vm_operations_struct::fault() context during the page
-fault. This context doesn't need the reclaim protection normally.
+I think this exposes too much things to the user. Usually a user
+doesn't have knowledges like this. If we make it too much complicated,
+no one will use it at the end.
 
-ceph and ocfs2 which call filemap_fault from their fault handlers
-seem to be OK because they are not taking any fs lock before invoking
-generic implementation. xfs which takes XFS_MMAPLOCK_SHARED is safe
-from the reclaim recursion POV because this lock serializes truncate
-and punch hole with the page faults and it doesn't get involved in the
-reclaim.
-
-There is simply no reason to deliberately use a weaker allocation
-context when a __GFP_FS | __GFP_IO can be used. The GFP_NOFS
-protection might be even harmful. There is a push to fail GFP_NOFS
-allocations rather than loop within allocator indefinitely with a
-very limited reclaim ability. Once we start failing those requests
-the OOM killer might be triggered prematurely because the page cache
-allocation failure is propagated up the page fault path and end up in
-pagefault_out_of_memory.
-
-We cannot play with mapping_gfp_mask directly because that would be racy
-wrt. parallel page faults and it might interfere with other users who
-really rely on NOFS semantic from the stored gfp_mask. The mask is also
-inode proper so it would even be a layering violation. What we can do
-instead is to push the gfp_mask into struct vm_fault and allow fs layer
-to overwrite it should the callback need to be called with a different
-allocation context.
-
-Initialize the default to (mapping_gfp_mask | __GFP_FS | __GFP_IO)
-because this should be safe from the page fault path normally. Why do we
-care about mapping_gfp_mask at all then? Because this doesn't hold only
-reclaim protection flags but it also might contain zone and movability
-restrictions (GFP_DMA32, __GFP_MOVABLE and others) so we have to respect
-those.
-
-Reported-by: Tetsuo Handa <penguin-kernel@I-love.SAKURA.ne.jp>
-Signed-off-by: Michal Hocko <mhocko@suse.com>
----
-
-Hi,
-this has been posted previously as a part of larger GFP_NOFS related
-patch set (http://lkml.kernel.org/r/1438768284-30927-1-git-send-email-mhocko%40kernel.org)
-but I think it makes sense to discuss it even out of that scope.
-
-I would like to hear FS and other MM people about the proposed interface.
-Using mapping_gfp_mask blindly doesn't sound good to me and vm_fault
-looks like a proper channel to communicate between MM and FS layers.
-
-Comments? Are there any better ideas?
-
- include/linux/mm.h |  4 ++++
- mm/filemap.c       |  9 ++++-----
- mm/memory.c        | 17 +++++++++++++++++
- 3 files changed, 25 insertions(+), 5 deletions(-)
-
-diff --git a/include/linux/mm.h b/include/linux/mm.h
-index fc9a3b8335bd..4b7aaeebe4f6 100644
---- a/include/linux/mm.h
-+++ b/include/linux/mm.h
-@@ -225,10 +225,14 @@ extern pgprot_t protection_map[16];
-  * ->fault function. The vma's ->fault is responsible for returning a bitmask
-  * of VM_FAULT_xxx flags that give details about how the fault was handled.
-  *
-+ * MM layer fills up gfp_mask for page allocations but fault handler might
-+ * alter it if its implementation requires a different allocation context.
-+ *
-  * pgoff should be used in favour of virtual_address, if possible.
-  */
- struct vm_fault {
- 	unsigned int flags;		/* FAULT_FLAG_xxx flags */
-+	gfp_t gfp_mask;			/* gfp mask to be used for allocations */
- 	pgoff_t pgoff;			/* Logical page offset based on vma */
- 	void __user *virtual_address;	/* Faulting virtual address */
- 
-diff --git a/mm/filemap.c b/mm/filemap.c
-index 834cd1425307..847ee43c2806 100644
---- a/mm/filemap.c
-+++ b/mm/filemap.c
-@@ -1815,19 +1815,18 @@ EXPORT_SYMBOL(generic_file_read_iter);
-  * This adds the requested page to the page cache if it isn't already there,
-  * and schedules an I/O to read in its contents from disk.
-  */
--static int page_cache_read(struct file *file, pgoff_t offset)
-+static int page_cache_read(struct file *file, pgoff_t offset, gfp_t gfp_mask)
- {
- 	struct address_space *mapping = file->f_mapping;
- 	struct page *page;
- 	int ret;
- 
- 	do {
--		page = page_cache_alloc_cold(mapping);
-+		page = __page_cache_alloc(gfp_mask|__GFP_COLD);
- 		if (!page)
- 			return -ENOMEM;
- 
--		ret = add_to_page_cache_lru(page, mapping, offset,
--				mapping_gfp_constraint(mapping, GFP_KERNEL));
-+		ret = add_to_page_cache_lru(page, mapping, offset, gfp_mask & GFP_KERNEL);
- 		if (ret == 0)
- 			ret = mapping->a_ops->readpage(file, page);
- 		else if (ret == -EEXIST)
-@@ -2008,7 +2007,7 @@ int filemap_fault(struct vm_area_struct *vma, struct vm_fault *vmf)
- 	 * We're only likely to ever get here if MADV_RANDOM is in
- 	 * effect.
- 	 */
--	error = page_cache_read(file, offset);
-+	error = page_cache_read(file, offset, vmf->gfp_mask);
- 
- 	/*
- 	 * The page we want has now been added to the page cache.
-diff --git a/mm/memory.c b/mm/memory.c
-index 7f3b9f2769ad..d45fdb4c7dcc 100644
---- a/mm/memory.c
-+++ b/mm/memory.c
-@@ -1943,6 +1943,20 @@ static inline void cow_user_page(struct page *dst, struct page *src, unsigned lo
- 		copy_user_highpage(dst, src, va, vma);
- }
- 
-+static gfp_t __get_fault_gfp_mask(struct vm_area_struct *vma)
-+{
-+	struct file *vm_file = vma->vm_file;
-+
-+	if (vm_file)
-+		return mapping_gfp_mask(vm_file->f_mapping) | __GFP_FS | __GFP_IO;
-+
-+	/*
-+	 * Special mappings (e.g. VDSO) do not have any file so fake
-+	 * a default GFP_KERNEL for them.
-+	 */
-+	return GFP_KERNEL;
-+}
-+
- /*
-  * Notify the address space that the page is about to become writable so that
-  * it can prohibit this or wait for the page to get into an appropriate state.
-@@ -1958,6 +1972,7 @@ static int do_page_mkwrite(struct vm_area_struct *vma, struct page *page,
- 	vmf.virtual_address = (void __user *)(address & PAGE_MASK);
- 	vmf.pgoff = page->index;
- 	vmf.flags = FAULT_FLAG_WRITE|FAULT_FLAG_MKWRITE;
-+	vmf.gfp_mask = __get_fault_gfp_mask(vma);
- 	vmf.page = page;
- 	vmf.cow_page = NULL;
- 
-@@ -2762,6 +2777,7 @@ static int __do_fault(struct vm_area_struct *vma, unsigned long address,
- 	vmf.pgoff = pgoff;
- 	vmf.flags = flags;
- 	vmf.page = NULL;
-+	vmf.gfp_mask = __get_fault_gfp_mask(vma);
- 	vmf.cow_page = cow_page;
- 
- 	ret = vma->vm_ops->fault(vma, &vmf);
-@@ -2928,6 +2944,7 @@ static void do_fault_around(struct vm_area_struct *vma, unsigned long address,
- 	vmf.pgoff = pgoff;
- 	vmf.max_pgoff = max_pgoff;
- 	vmf.flags = flags;
-+	vmf.gfp_mask = __get_fault_gfp_mask(vma);
- 	vma->vm_ops->map_pages(vma, &vmf);
- }
- 
--- 
-2.6.2
+> so librados will offer enough information and facilities, with which a
+> smart librados client/script will be able to fix the inconsistencies
+> found in the scrub.
+>
+> as an example, if we run into a data inconsistency where the 3
+> replicas failed to agree with each other after performing a deep
+> scrub. probably we'd like to have an election to get the auth copy.
+> following pseudo code explains how we will implement this using the
+> new rados APIs for scrub and repair.
+>
+>      # something is not necessarily better than nothing
+>      rados.aio_scrub(pg, completion)
+>      completion.wait_for_complete()
+>      for pool in rados.get_inconsistent_pools():
+>           for pg in rados.get_inconsistent_pgs(pool):
+>                # rados.get_inconsistent_pgs() throws if "epoch" expires
+>
+>                for oid, inconsistent in rados.get_inconsistent_pgs(pg,
+> epoch).items():
+>                     if inconsistent.is_data_digest_mismatch():
+>                          votes = defaultdict(int)
+>                          for osd, shard_info in inconsistent.shards:
+>                               votes[shard_info.object_info.data_digest] += 1
+>                          digest, _ = mavotes, key=operator.itemgetter(1))
+>                          auth_copy = None
+>                          for osd, shard_info in inconsistent.shards.items():
+>                               if shard_info.object_info.data_digest == digest:
+>                                    auth_copy = osd
+>                                    break
+>                          repair_op = librados.ObjectWriteOperation()
+>                          repair_op.repair_pick(auth_copy,
+> inconsistent.ver, epoch)
+>                          rados.aio_operate_scrub(oid, repair_op)
+>
+> this plan was also discussed in the infernalis CDS. see
+> http://tracker.ceph.com/projects/ceph/wiki/Osd_-_Scrub_and_Repair.
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
