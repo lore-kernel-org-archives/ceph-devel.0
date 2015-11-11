@@ -1,62 +1,30 @@
-From: "James (Fei) Liu-SSI" <james.liu@ssi.samsung.com>
-Subject: RE: 11/11/2015 Weekly Ceph Performance Meeting IS ON!
-Date: Wed, 11 Nov 2015 18:30:46 +0000
-Message-ID: <99767EA2E27DD44DB4E9F9B9ACA458C056198374@SSIEXCH-MB3.ssi.samsung.com>
-References: <56436397.7050708@redhat.com>
+From: "Blinick, Stephen L" <stephen.l.blinick@intel.com>
+Subject: Increasing # Shards vs multi-OSDs per device
+Date: Wed, 11 Nov 2015 20:57:18 +0000
+Message-ID: <3649A15A2562B54294DE14BCE5AC79120B8ED66F@ORSMSX160.amr.corp.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.ssi.samsung.com ([207.140.43.206]:33958 "EHLO
-	mx2.ssi.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750781AbbKKSat convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Nov 2015 13:30:49 -0500
-In-Reply-To: <56436397.7050708@redhat.com>
+Received: from mga09.intel.com ([134.134.136.24]:2170 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752121AbbKKU5V convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Nov 2015 15:57:21 -0500
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "mnelson@redhat.com" <mnelson@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Mark Nelson <mnelson@redhat.com>, Samuel Just <sjust@redhat.com>, Kyle Bader <kbader@redhat.com>, Somnath Roy <Somnath.Roy@sandisk.com>
 
-Hi Mark,
-  Have been busy this morning and missed the meeting today. Would be possible to upload the recording video to the site at your most convenient time?
+Sorry about the microphone issues in the performance meeting today today.   This is a followup to the 11/4 performance meeting where we discussed increasing the worker thread count in the OSD's vs making multiple OSD's (and partitions/filesystems) per device.     We did the high level experiment and have some results which I threw into a ppt/pdf, and shared them here:
 
-  Thanks,
-  James 
+http://www.docdroid.net/UbmvGnH/increasing-shards-vs-multiple-osds.pdf.html
 
------Original Message-----
-From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
-Sent: Wednesday, November 11, 2015 7:50 AM
-To: ceph-devel@vger.kernel.org
-Subject: 11/11/2015 Weekly Ceph Performance Meeting IS ON!
+Doing 20-shard OSD's vs 4 OSD's per device with default 5 shards yielded about half of the performance improvement for random 4k reads.  For writes performance is actually worse than just 1 OSD per device and the default # of shards.  The throttles should be large enough for the 20-shard use case as they are 10x the defaults, although if you see anything we missed let us know.
 
-8AM PST as usual! (ie in 10 minutes, sorry for the late notice) Discussion topics include newstore block and anything else folks want to talk about.  See you there!
+I had the cluster moved to Infernalis release (with JEMalloc) yesterday, so hopefully we'll have some early results on the same 5-node cluster soon.
 
-Here's the links:
+Thanks,
 
-Etherpad URL:
-http://pad.ceph.com/p/performance_weekly
-
-To join the Meeting:
-https://bluejeans.com/268261044
-
-To join via Browser:
-https://bluejeans.com/268261044/browser
-
-To join with Lync:
-https://bluejeans.com/268261044/lync
+Stephen
 
 
-To join via Room System:
-Video Conferencing System: bjn.vc -or- 199.48.152.152 Meeting ID: 268261044
-
-To join via Phone:
-1) Dial:
-           +1 408 740 7256
-           +1 888 240 2560(US Toll Free)
-           +1 408 317 9253(Alternate Number)
-           (see all numbers - http://bluejeans.com/numbers)
-2) Enter Conference ID: 268261044
-
-Mark
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
