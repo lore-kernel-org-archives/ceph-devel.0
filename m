@@ -1,41 +1,83 @@
-From: Evgeniy Firsov <Evgeniy.Firsov@sandisk.com>
+From: =?UTF-8?B?5rGg5L+h5rO9?= <xmdxcxz@gmail.com>
 Subject: Re: disabling buffer::raw crc cache
-Date: Wed, 11 Nov 2015 08:25:48 +0000
-Message-ID: <D2683AC6.8AB2%evgeniy.firsov@sandisk.com>
+Date: Wed, 11 Nov 2015 16:42:51 +0800
+Message-ID: <CANE=7sUPPpwew5ZmqCjRpDsz4Lsa9UtT6qdUFXr3XzY0uMWNyQ@mail.gmail.com>
 References: <D2682DD5.8AA1%evgeniy.firsov@sandisk.com>
- <CANE=7sWCUw5PiKwQqqq__6XpyF89jk1v_rsNgnfX10UtkRxXpQ@mail.gmail.com>
+	<CANE=7sWCUw5PiKwQqqq__6XpyF89jk1v_rsNgnfX10UtkRxXpQ@mail.gmail.com>
+	<D2683AC6.8AB2%evgeniy.firsov@sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn1on0071.outbound.protection.outlook.com ([157.56.110.71]:10759
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750915AbbKKIkz (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 11 Nov 2015 03:40:55 -0500
-In-Reply-To: <CANE=7sWCUw5PiKwQqqq__6XpyF89jk1v_rsNgnfX10UtkRxXpQ@mail.gmail.com>
-Content-Language: en-US
-Content-ID: <615BEF72F283D14B8AB38FF2031B169E@namprd02.prod.outlook.com>
+Received: from mail-oi0-f46.google.com ([209.85.218.46]:33409 "EHLO
+	mail-oi0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751015AbbKKImw convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Nov 2015 03:42:52 -0500
+Received: by oixx65 with SMTP id x65so715742oix.0
+        for <ceph-devel@vger.kernel.org>; Wed, 11 Nov 2015 00:42:51 -0800 (PST)
+In-Reply-To: <D2683AC6.8AB2%evgeniy.firsov@sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?utf-8?B?5rGg5L+h5rO9?= <xmdxcxz@gmail.com>
+To: Evgeniy Firsov <Evgeniy.Firsov@sandisk.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-UmItdHJlZSBjb25zdHJ1Y3Rpb24sIGluc2VydGlvbiwgd2hpY2ggbmVlZHMgbWVtb3J5IGFsbG9j
-YXRpb24sIG11dGV4DQpsb2NrLCB1bmxvY2sgaXMgbW9yZSBDUFUgZXhwZW5zaXZlIHRoZW4gc3Ry
-ZWFtbGluZWQgY3JjIGNhbGN1bGF0aW9uIG9mDQpzb21ldGltZXMgMTAwIGJ5dGVzIG9yIGxlc3Mu
-DQoNCk9uIDExLzExLzE1LCAxMjowMyBBTSwgIuaxoOS/oeazvSIgPHhtZHhjeHpAZ21haWwuY29t
-PiB3cm90ZToNCg0KPkFoLCBJIGNvbmZ1c2UgdGhhdCB3aHkgdGhlIGNyYyBjYWNoZSBsb2dpYyB3
-b3VsZCBleGhhdXN0IHNvIG11Y2ggY3B1Lg0KPg0KPjIwMTUtMTEtMTEgMTU6MjcgR01UKzA4OjAw
-IEV2Z2VuaXkgRmlyc292IDxFdmdlbml5LkZpcnNvdkBzYW5kaXNrLmNvbT46DQo+PiBIZWxsbywg
-R3V5cyENCj4+DQo+PiBXaGlsZSBydW5uaW5nIENQVSBib3VuZCA0ayBibG9jayB3b3JrbG9hZCwg
-SSBmb3VuZCB0aGF0IGRpc2FibGluZyBjcmMNCj4+IGNhY2hlIGluIHRoZSBidWZmZXI6OnJhdyBn
-aXZlcyBhcm91bmQgNyUgcGVyZm9ybWFuY2UgaW1wcm92ZW1lbnQuDQo+Pg0KPj4gSWYgdGhlcmUg
-aXMgbm8gc3Ryb25nIHVzZSBjYXNlIHdoaWNoIGJlbmVmaXQgZnJvbSB0aGF0IGNhY2hlLCB3ZSB3
-b3VsZA0KPj4gcmVtb3ZlIGl0IGVudGlyZWx5LCBvdGhlcndpc2UgY29uZGl0aW9uYWxseSBlbmFi
-bGUgaXQgYmFzZWQgb24gdGhlDQo+Pm9iamVjdA0KPj4gc2l6ZS4NCj4+DQo+PiDigLkNCj4+IEV2
-Z2VuaXkNCj4+DQo+PiAtLQ0KPj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQg
-dGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluDQo+PiB0aGUgYm9keSBvZiBhIG1l
-c3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZw0KPj4gTW9yZSBtYWpvcmRvbW8gaW5m
-byBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+DQo+DQo+
-DQo+LS0gDQo+UmVnYXJkcywNCj54aW56ZQ0KDQo=
+the code logic would touch crc cache is bufferlist::crc32c and invalida=
+te_crc.
+we call bufferlist::crc32 when sending or receiving message and
+writing filejournal.
+I miss something critical?
+
+I am agree with you that the benefit from that cache cache is every lim=
+it.
+
+2015-11-11 16:25 GMT+08:00 Evgeniy Firsov <Evgeniy.Firsov@sandisk.com>:
+> Rb-tree construction, insertion, which needs memory allocation, mutex
+> lock, unlock is more CPU expensive then streamlined crc calculation o=
+f
+> sometimes 100 bytes or less.
+>
+> On 11/11/15, 12:03 AM, "=E6=B1=A0=E4=BF=A1=E6=B3=BD" <xmdxcxz@gmail.c=
+om> wrote:
+>
+>>Ah, I confuse that why the crc cache logic would exhaust so much cpu.
+>>
+>>2015-11-11 15:27 GMT+08:00 Evgeniy Firsov <Evgeniy.Firsov@sandisk.com=
+>:
+>>> Hello, Guys!
+>>>
+>>> While running CPU bound 4k block workload, I found that disabling c=
+rc
+>>> cache in the buffer::raw gives around 7% performance improvement.
+>>>
+>>> If there is no strong use case which benefit from that cache, we wo=
+uld
+>>> remove it entirely, otherwise conditionally enable it based on the
+>>>object
+>>> size.
+>>>
+>>> =E2=80=B9
+>>> Evgeniy
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
+l" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
+>>
+>>--
+>>Regards,
+>>xinze
+>
+
+
+
+--=20
+Regards,
+xinze
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
