@@ -1,214 +1,134 @@
-From: <ghislain.chevalier@orange.com>
-Subject: RE: [CEPH][Crush][Tunables] issue when updating tunables
-Date: Thu, 12 Nov 2015 14:11:36 +0000
-Message-ID: <22767_1447337497_56449E19_22767_66_1_B9C8EFBF13B1354DB5FA000660D66DD00D64B970@OPEXCLILM22.corporate.adroot.infra.ftgroup>
-References: <25091_1447144373_5641ABB5_25091_8387_1_B9C8EFBF13B1354DB5FA000660D66DD00D64A5FA@OPEXCLILM22.corporate.adroot.infra.ftgroup>
- <alpine.DEB.2.00.1511100221010.32494@cobra.newdream.net>
+From: Dan van der Ster <dan@vanderster.com>
+Subject: Re: scrub randomization and load threshold
+Date: Thu, 12 Nov 2015 15:36:08 +0100
+Message-ID: <CABZ+qqnj81gQDe6mApNdGa-HK2LbeKJwHH-7Lj9ovq2+ci1MgA@mail.gmail.com>
+References: <CABZ+qq=7izv5o-5ACygqZyr=ho58nLoKb7XmRKT2yyTqKFwrZQ@mail.gmail.com>
+ <alpine.DEB.2.00.1511120526390.7964@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relais-ias243.francetelecom.com ([80.12.204.243]:44987 "EHLO
-	relais-inet.francetelecom.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753037AbbKLOLl convert rfc822-to-8bit
-	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 12 Nov 2015 09:11:41 -0500
-In-Reply-To: <alpine.DEB.2.00.1511100221010.32494@cobra.newdream.net>
-Content-Language: fr-FR
+Received: from mail-lf0-f42.google.com ([209.85.215.42]:32783 "EHLO
+	mail-lf0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754668AbbKLOgw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Nov 2015 09:36:52 -0500
+Received: by lffz63 with SMTP id z63so35176026lff.0
+        for <ceph-devel@vger.kernel.org>; Thu, 12 Nov 2015 06:36:50 -0800 (PST)
+Received: from mail-lb0-f178.google.com (mail-lb0-f178.google.com. [209.85.217.178])
+        by smtp.gmail.com with ESMTPSA id 88sm2340680lfq.3.2015.11.12.06.36.48
+        for <ceph-devel@vger.kernel.org>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 12 Nov 2015 06:36:48 -0800 (PST)
+Received: by lbbsy6 with SMTP id sy6so7533510lbb.2
+        for <ceph-devel@vger.kernel.org>; Thu, 12 Nov 2015 06:36:48 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.00.1511120526390.7964@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@newdream.net>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Herve Rousseau <herve.rousseau@cern.ch>
 
-Hi Sage,
-Thanks for the reply
+On Thu, Nov 12, 2015 at 2:29 PM, Sage Weil <sage@newdream.net> wrote:
+> On Thu, 12 Nov 2015, Dan van der Ster wrote:
+>> Hi,
+>>
+>> Firstly, we just had a look at the new
+>> osd_scrub_interval_randomize_ratio option and found that it doesn't
+>> really solve the deep scrubbing problem. Given the default options,
+>>
+>> osd_scrub_min_interval = 60*60*24
+>> osd_scrub_max_interval = 7*60*60*24
+>> osd_scrub_interval_randomize_ratio = 0.5
+>> osd_deep_scrub_interval = 60*60*24*7
+>>
+>> we understand that the new option changes the min interval to the
+>> range 1-1.5 days. However, this doesn't do anything for the thundering
+>> herd of deep scrubs which will happen every 7 days. We've found a
+>> configuration that should randomize deep scrubbing across two weeks,
+>> e.g.:
+>>
+>> osd_scrub_min_interval = 60*60*24*7
+>> osd_scrub_max_interval = 100*60*60*24 // effectively disabling this option
+>> osd_scrub_load_threshold = 10 // effectively disabling this option
+>> osd_scrub_interval_randomize_ratio = 2.0
+>> osd_deep_scrub_interval = 60*60*24*7
+>>
+>> but that (a) doesn't allow shallow scrubs to run daily and (b) is so
+>> far off the defaults that its basically an abuse of the intended
+>> behaviour.
+>>
+>> So we'd like to simplify how deep scrubbing can be randomized. Our PR
+>> (http://github.com/ceph/ceph/pull/6550) adds a new option
+>> osd_deep_scrub_randomize_ratio which  controls a coin flip to randomly
+>> turn scrubs into deep scrubs. The default is tuned so roughly 1 in 7
+>> scrubs will be run deeply.
+>
+> The coin flip seems reasonable to me.  But wouldn't it also/instead make
+> sense to apply the randomize ratio to the deep_scrub_interval?  My just
+> adding in the random factor here:
+>
+> https://github.com/ceph/ceph/pull/6550/files#diff-dfb9ddca0a3ee32b266623e8fa489626R3247
+>
+> That is what I would have expected to happen, and if the coin flip is also
+> there then you have two knobs controlling the same thing, which'll cause
+> confusion...
+>
 
-You said=20
-" You actually want straw_calc_version 1.  This is just confusing outpu=
-t from the 'firefly' tunable detection... the straw_calc_version does n=
-ot have any client dependencies."
+That was our first idea. But that has a couple downsides:
 
-My objective is to have the most relevant tunables for a firefly platfo=
-rm.
+  1.  If we use the random range for the deep scrub intervals, e.g.
+deep every 1-1.5 weeks, we still get quite bursty scrubbing until it
+randomizes over a period of many weeks/months. And I fear it might
+even lead to lower frequency harmonics of many concurrent deep scrubs.
+Using a coin flip guarantees uniformity starting immediately from time
+zero.
 
-I didn't understand if :
-- it's better to have straw_calc_version set to 1 but  tunables_optimal=
- will be automatically set to 0.
-In other words are the following tunables OK ?
-{ "choose_local_tries": 0,
->   "choose_local_fallback_tries": 0,
->   "choose_total_tries": 50,
->   "chooseleaf_descend_once": 1,
->   "chooseleaf_vary_r": 1,
->   "straw_calc_version": 0,
->   "profile": "firefly",
->   "optimal_tunables": 1,
->   "legacy_tunables": 0,
->   "require_feature_tunables": 1,
->   "require_feature_tunables2": 1,
->   "require_feature_tunables3": 1,
->   "has_v2_rules": 0,
->   "has_v3_rules": 0}=20
+  2. In our PR osd_deep_scrub_interval is still used as an upper limit
+on how long a PG can go without being deeply scrubbed. This way
+there's no confusion such as PGs going undeep-scrubbed longer than
+expected. (In general, I think this random range is unintuitive and
+difficult to tune (e.g. see my 2 week deep scrubbing config above).
 
-- there's an issue with the tunables detection and update?
+For me, the most intuitive configuration (maintaining randomness) would be:
 
-Best regards=20
+  a. drop the osd_scrub_interval_randomize_ratio because there is no
+shallow scrub thundering herd problem (AFAIK), and it just complicates
+the configuration. (But this is in a stable release now so I don't
+know if you want to back it out).
+  b. perform a (usually shallow) scrub every
+osd_scrub_interval_(min/max) depending on a self-tuning load
+threshold.
+  c. do a coin flip each (b) to occasionally turn it into deep scrub.
+  optionally: d. remove osd_deep_scrub_randomize_ratio and replace it
+with  osd_scrub_interval_min/osd_deep_scrub_interval.
 
------Message d'origine-----
-De=A0: Sage Weil [mailto:sage@newdream.net]=20
-Envoy=E9=A0: mardi 10 novembre 2015 11:23
-=C0=A0: CHEVALIER Ghislain IMT/OLPS
-Cc=A0: ceph-devel@vger.kernel.org
-Objet=A0: Re: [CEPH][Crush][Tunables] issue when updating tunables
+>> Secondly, we'd also like to discuss the osd_scrub_load_threshold
+>> option, where we see two problems:
+>>    - the default is so low that it disables all the shallow scrub
+>> randomization on all but completely idle clusters.
+>>    - finding the correct osd_scrub_load_threshold for a cluster is
+>> surely unclear/difficult and probably a moving target for most prod
+>> clusters.
+>>
+>> Given those observations, IMHO the smart Ceph admin should set
+>> osd_scrub_load_threshold = 10 or higher, to effectively disable that
+>> functionality. In the spirit of having good defaults, I therefore
+>> propose that we increase the default osd_scrub_load_threshold (to at
+>> least 5.0) and consider removing the load threshold logic completely.
+>
+> This sounds reasonable to me.  It would be great if we could use a 24-hour
+> average as the baseline or something so that it was self-tuning (e.g., set
+> threshold to .8 of daily average), but that's a bit trickier.  Generally
+> all for self-tuning, though... too many knobs...
 
-On Tue, 10 Nov 2015, ghislain.chevalier@orange.com wrote:
-> Hi all,
->=20
-> Context:
-> Firefly 0.80.9
-> Ubuntu 14.04.1
-> Almost a production platform  in an openstack environment
-> 176 OSD (SAS and SSD), 2 crushmap-oriented storage classes , 8 server=
-s=20
-> in 2 rooms, 3 monitors on openstack controllers
-> Usage: Rados Gateway for object service and RBD as back-end for Cinde=
-r=20
-> and Glance
->=20
-> The Ceph cluster was installed by Mirantis procedures (puppet/fuel/ce=
-ph-deploy):
->=20
-> I noticed that tunables were curiously set.
-> ceph  osd crush show-tunables =3D=3D>
-> { "choose_local_tries": 0,
->   "choose_local_fallback_tries": 0,
->   "choose_total_tries": 50,
->   "chooseleaf_descend_once": 1,
->   "chooseleaf_vary_r": 1,
->   "straw_calc_version": 1,
->   "profile": "unknown",
->   "optimal_tunables": 0,
->   "legacy_tunables": 0,
->   "require_feature_tunables": 1,
->   "require_feature_tunables2": 1,
->   "require_feature_tunables3": 1,
->   "has_v2_rules": 0,
->   "has_v3_rules": 0}
->=20
-> I tried to update them
-> ceph  osd crush tunables optimal =3D=3D>
-> adjusted tunables profile to optimal
->=20
-> But when checking
-> ceph  osd crush show-tunables =3D=3D>
-> { "choose_local_tries": 0,
->   "choose_local_fallback_tries": 0,
->   "choose_total_tries": 50,
->   "chooseleaf_descend_once": 1,
->   "chooseleaf_vary_r": 1,
->   "straw_calc_version": 1,
->   "profile": "unknown",
->   "optimal_tunables": 0,
->   "legacy_tunables": 0,
->   "require_feature_tunables": 1,
->   "require_feature_tunables2": 1,
->   "require_feature_tunables3": 1,
->   "has_v2_rules": 0,
->   "has_v3_rules": 0}
->=20
-> Nothing has changed.
->=20
-> I finally did
-> ceph osd crush set-tunable straw_calc_version 0
+Yes, but we probably would need to make your 0.8 a function of the
+stddev of the loadavg over a day, to handle clusters with flat
+loadavgs as well as varying ones.
 
-You actually want straw_calc_version 1.  This is just confusing output =
-from the 'firefly' tunable detection... the straw_calc_version does not=
- have any client dependencies.
+In order to randomly spread the deep scrubs across the week, it's
+essential to give each PG many opportunities to scrub throughout the
+week. If PGs are only shallow scrubbed once a week (at interval_max),
+then every scrub would become a deep scrub and we again have the
+thundering herd problem.
 
-sage
+I'll push 5.0 for now.
 
-
->=20
-> and
-> ceph  osd crush show-tunables =3D=3D>
-> { "choose_local_tries": 0,
->   "choose_local_fallback_tries": 0,
->   "choose_total_tries": 50,
->   "chooseleaf_descend_once": 1,
->   "chooseleaf_vary_r": 1,
->   "straw_calc_version": 0,
->   "profile": "firefly",
->   "optimal_tunables": 1,
->   "legacy_tunables": 0,
->   "require_feature_tunables": 1,
->   "require_feature_tunables2": 1,
->   "require_feature_tunables3": 1,
->   "has_v2_rules": 0,
->   "has_v3_rules": 0}
->=20
-> It's OK
->=20
-> My question:
-> Does the "ceph osd crush tunables <profile>" command change all the r=
-equested parameters in order to set the tunables to the right profile?
->=20
-> Brgds
->=20
-> _____________________________________________________________________=
-_
-> ___________________________________________________
->=20
-> Ce message et ses pieces jointes peuvent contenir des informations=20
-> confidentielles ou privilegiees et ne doivent donc pas etre diffuses,=
-=20
-> exploites ou copies sans autorisation. Si vous avez recu ce message=20
-> par erreur, veuillez le signaler a l'expediteur et le detruire ainsi=20
-> que les pieces jointes. Les messages electroniques etant susceptibles=
-=20
-> d'alteration, France Telecom - Orange decline toute responsabilite si=
-=20
-> ce message a ete altere, deforme ou falsifie. Merci
->=20
-> This message and its attachments may contain confidential or=20
-> privileged information that may be protected by law; they should not =
-be distributed, used or copied without authorization.
-> If you have received this email in error, please notify the sender an=
-d delete this message and its attachments.
-> As emails may be altered, France Telecom - Orange shall not be liable=
- if this message was modified, changed or falsified.
-> Thank you.
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
-=20
-> in the body of a message to majordomo@vger.kernel.org More majordomo=20
-> info at  http://vger.kernel.org/majordomo-info.html
->=20
->=20
-
-_______________________________________________________________________=
-__________________________________________________
-
-Ce message et ses pieces jointes peuvent contenir des informations conf=
-identielles ou privilegiees et ne doivent donc
-pas etre diffuses, exploites ou copies sans autorisation. Si vous avez =
-recu ce message par erreur, veuillez le signaler
-a l'expediteur et le detruire ainsi que les pieces jointes. Les message=
-s electroniques etant susceptibles d'alteration,
-Orange decline toute responsabilite si ce message a ete altere, deforme=
- ou falsifie. Merci.
-
-This message and its attachments may contain confidential or privileged=
- information that may be protected by law;
-they should not be distributed, used or copied without authorisation.
-If you have received this email in error, please notify the sender and =
-delete this message and its attachments.
-As emails may be altered, Orange is not liable for messages that have b=
-een modified, changed or falsified.
-Thank you.
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-- dan
