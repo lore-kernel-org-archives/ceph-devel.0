@@ -1,240 +1,234 @@
-From: Sage Weil <sage@newdream.net>
-Subject: RE: [CEPH][Crush][Tunables] issue when updating tunables
-Date: Thu, 12 Nov 2015 07:01:27 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1511120657200.614@cobra.newdream.net>
-References: <25091_1447144373_5641ABB5_25091_8387_1_B9C8EFBF13B1354DB5FA000660D66DD00D64A5FA@OPEXCLILM22.corporate.adroot.infra.ftgroup> <alpine.DEB.2.00.1511100221010.32494@cobra.newdream.net>
- <22767_1447337497_56449E19_22767_66_1_B9C8EFBF13B1354DB5FA000660D66DD00D64B970@OPEXCLILM22.corporate.adroot.infra.ftgroup>
+From: min fang <louisfang2013-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: can not create rbd image
+Date: Thu, 12 Nov 2015 23:05:34 +0800
+Message-ID: <CAO9PA9=nKTRyCMH8ReibUmOhOvqMG80A6Fi2ydj1+uQOoQ_GAQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1340151619-1447340487=:614"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:35668 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754519AbbKLPB2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Nov 2015 10:01:28 -0500
-In-Reply-To: <22767_1447337497_56449E19_22767_66_1_B9C8EFBF13B1354DB5FA000660D66DD00D64B970@OPEXCLILM22.corporate.adroot.infra.ftgroup>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ghislain.chevalier@orange.com
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: multipart/mixed; boundary="===============0626184000=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+--===============0626184000==
+Content-Type: multipart/alternative; boundary=001a11c3229c599df305245946fa
 
---557981400-1340151619-1447340487=:614
-Content-Type: TEXT/PLAIN; charset=iso-8859-1
+--001a11c3229c599df305245946fa
+Content-Type: text/plain; charset=UTF-8
+
+Hi cepher, I tried to use the following command to create a img, but
+unfortunately, the command hung for a long time until I broken it by
+crtl-z.
+
+rbd -p hello create img-003 --size 512
+
+so I checked the cluster status, and showed:
+
+    cluster 0379cebd-b546-4954-b5d6-e13d08b7d2f1
+     health HEALTH_WARN
+            2 near full osd(s)
+            too many PGs per OSD (320 > max 300)
+     monmap e2: 1 mons at {vl=192.168.90.253:6789/0}
+            election epoch 1, quorum 0 vl
+     osdmap e37: 2 osds: 2 up, 2 in
+      pgmap v19544: 320 pgs, 3 pools, 12054 MB data, 3588 objects
+            657 GB used, 21867 MB / 714 GB avail
+                 320 active+clean
+
+I did not see error message here could cause rbd create hang.
+
+I opened the client log and see:
+
+2015-11-12 22:52:44.687491 7f89eced9780 20 librbd: create 0x7fff8f7b7800
+name = img-003 size = 536870912 old_format = 1 features = 0 order = 22
+stripe_unit = 0 stripe_count = 0
+2015-11-12 22:52:44.687653 7f89eced9780  1 -- 192.168.90.253:0/1006121 -->
+192.168.90.253:6800/5472 -- osd_op(client.34321.0:1 img-003.rbd [stat]
+2.8a047315 ack+read+known_if_redirected e37) v5 -- ?+0 0x28513d0 con
+0x2850000
+2015-11-12 22:52:44.688928 7f89e066b700  1 -- 192.168.90.253:0/1006121 <==
+osd.1 192.168.90.253:6800/5472 1 ==== osd_op_reply(1 img-003.rbd [stat]
+v0'0 uv0 ack = -2 ((2) No such file or directory)) v6 ==== 178+0+0
+(3550830125 0 0) 0x7f89c0000ae0 con 0x2850000
+2015-11-12 22:52:44.689090 7f89eced9780  1 -- 192.168.90.253:0/1006121 -->
+192.168.90.253:6801/5344 -- osd_op(client.34321.0:2 rbd_id.img-003 [stat]
+2.638c75a8 ack+read+known_if_redirected e37) v5 -- ?+0 0x2858330 con
+0x2856f50
+2015-11-12 22:52:44.690425 7f89e0469700  1 -- 192.168.90.253:0/1006121 <==
+osd.0 192.168.90.253:6801/5344 1 ==== osd_op_reply(2 rbd_id.img-003 [stat]
+v0'0 uv0 ack = -2 ((2) No such file or directory)) v6 ==== 181+0+0
+(1202435393 0 0) 0x7f89b8000ae0 con 0x2856f50
+2015-11-12 22:52:44.690494 7f89eced9780  2 librbd: adding rbd image to
+directory...
+2015-11-12 22:52:44.690544 7f89eced9780  1 -- 192.168.90.253:0/1006121 -->
+192.168.90.253:6801/5344 -- osd_op(client.34321.0:3 rbd_directory [tmapup
+0~0] 2.30a98c1c ondisk+write+known_if_redirected e37) v5 -- ?+0 0x2858920
+con 0x2856f50
+2015-11-12 22:52:59.687447 7f89e4074700  1 -- 192.168.90.253:0/1006121 -->
+192.168.90.253:6789/0 -- mon_subscribe({monmap=3+,osdmap=38}) v2 -- ?+0
+0x7f89b0000ab0 con 0x2843b90
+2015-11-12 22:52:59.687472 7f89e4074700  1 -- 192.168.90.253:0/1006121 -->
+192.168.90.253:6801/5344 -- ping magic: 0 v1 -- ?+0 0x7f89b0000f40 con
+0x2856f50
+2015-11-12 22:52:59.687887 7f89e3873700  1 -- 192.168.90.253:0/1006121 <==
+mon.0 192.168.90.253:6789/0 11 ==== mon_subscribe_ack(300s) v1 ==== 20+0+0
+(2867606018 0 0) 0x7f89d8001160 con 0x2843b90
+2015-11-12 22:53:04.687593 7f89e4074700  1 -- 192.168.90.253:0/1006121 -->
+192.168.90.253:6801/5344 -- ping magic: 0 v1 -- ?+0 0x7f89b0000ab0 con
+0x2856f50
+2015-11-12 22:53:09.687731 7f89e4074700  1 -- 192.168.90.253:0/1006121 -->
+192.168.90.253:6801/5344 -- ping magic: 0 v1 -- ?+0 0x7f89b0000ab0 con
+0x2856f50
+2015-11-12 22:53:14.687844 7f89e4074700  1 -- 192.168.90.253:0/1006121 -->
+192.168.90.253:6801/5344 -- ping magic: 0 v1 -- ?+0 0x7f89b0000ab0 con
+0x2856f50
+2015-11-12 22:53:19.687978 7f89e4074700  1 -- 192.168.90.253:0/1006121 -->
+192.168.90.253:6801/5344 -- ping magic: 0 v1 -- ?+0 0x7f89b0000ab0 con
+0x2856f50
+2015-11-12 22:53:24.688116 7f89e4074700  1 -- 192.168.90.253:0/1006121 -->
+192.168.90.253:6801/5344 -- ping magic: 0 v1 -- ?+0 0x7f89b0000ab0 con
+0x2856f50
+2015-11-12 22:53:29.688253 7f89e4074700  1 -- 192.168.90.253:0/1006121 -->
+192.168.90.253:6801/5344 -- ping magic: 0 v1 -- ?+0 0x7f89b0000ab0 con
+0x2856f50
+2015-11-12 22:53:34.688389 7f89e4074700  1 -- 192.168.90.253:0/1006121 -->
+192.168.90.253:6801/5344 -- ping magic: 0 v1 -- ?+0 0x7f89b0000ab0 con
+0x2856f50
+2015-11-12 22:53:39.688512 7f89e4074700  1 -- 192.168.90.253:0/1006121 -->
+192.168.90.253:6801/5344 -- ping magic: 0 v1 -- ?+0 0x7f89b0000ab0 con
+0x2856f50
+2015-11-12 22:53:44.688636 7f89e4074700  1 -- 192.168.90.253:0/1006121 -->
+192.168.90.253:6801/5344 -- ping magic: 0 v1 -- ?+0 0x7f89b0000ab0 con
+0x2856f50
+
+
+Looks to me, we are keeping ping magic process, and no completed.
+
+my ceph version is "ceph version 0.94.5
+(9764da52395923e0b32908d83a9f7304401fee43)"
+
+somebody can help me on this? Or still me to collect more debug information
+for analyzing.
+
+Thanks.
+
+--001a11c3229c599df305245946fa
+Content-Type: text/html; charset=UTF-8
 Content-Transfer-Encoding: quoted-printable
 
-On Thu, 12 Nov 2015, ghislain.chevalier@orange.com wrote:
-> Hi Sage,
-> Thanks for the reply
->=20
-> You said=20
-> " You actually want straw_calc_version 1.  This is just confusing outpu=
-t from the 'firefly' tunable detection... the straw_calc_version does not=
- have any client dependencies."
->=20
-> My objective is to have the most relevant tunables for a firefly platfo=
-rm.
->=20
-> I didn't understand if :
-> - it's better to have straw_calc_version set to 1 but  tunables_optimal=
- will be automatically set to 0.
-> In other words are the following tunables OK ?
-> { "choose_local_tries": 0,
-> >   "choose_local_fallback_tries": 0,
-> >   "choose_total_tries": 50,
-> >   "chooseleaf_descend_once": 1,
-> >   "chooseleaf_vary_r": 1,
-> >   "straw_calc_version": 0,
-> >   "profile": "firefly",
-> >   "optimal_tunables": 1,
-> >   "legacy_tunables": 0,
-> >   "require_feature_tunables": 1,
-> >   "require_feature_tunables2": 1,
-> >   "require_feature_tunables3": 1,
-> >   "has_v2_rules": 0,
-> >   "has_v3_rules": 0}=20
+<div dir=3D"ltr"><div><div><div><div><div><div><div>Hi cepher, I tried to u=
+se the following command to create a img, but unfortunately, the command hu=
+ng for a long time until I broken it by crtl-z.=C2=A0 <br><br>rbd -p hello =
+create img-003 --size 512<br><br></div>so I checked the cluster status, and=
+ showed:<br><br>=C2=A0=C2=A0=C2=A0 cluster 0379cebd-b546-4954-b5d6-e13d08b7=
+d2f1<br>=C2=A0=C2=A0=C2=A0=C2=A0 health HEALTH_WARN<br>=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 2 near full osd(s)<br>=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 too many PG=
+s per OSD (320 &gt; max 300)<br>=C2=A0=C2=A0=C2=A0=C2=A0 monmap e2: 1 mons =
+at {vl=3D<a href=3D"http://192.168.90.253:6789/0">192.168.90.253:6789/0</a>=
+}<br>=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 ele=
+ction epoch 1, quorum 0 vl<br>=C2=A0=C2=A0=C2=A0=C2=A0 osdmap e37: 2 osds: =
+2 up, 2 in<br>=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 pgmap v19544: 320 pgs, 3 pools=
+, 12054 MB data, 3588 objects<br>=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0=C2=A0=C2=A0 657 GB used, 21867 MB / 714 GB avail<br>=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0 320 active+clean<br><br></div>I did not see error message here=
+ could cause rbd create hang. <br><br></div>I opened the client log and see=
+:<br><br>2015-11-12 22:52:44.687491 7f89eced9780 20 librbd: create 0x7fff8f=
+7b7800 name =3D img-003 size =3D 536870912 old_format =3D 1 features =3D 0 =
+order =3D 22 stripe_unit =3D 0 stripe_count =3D 0<br>2015-11-12 22:52:44.68=
+7653 7f89eced9780=C2=A0 1 -- <a href=3D"http://192.168.90.253:0/1006121">19=
+2.168.90.253:0/1006121</a> --&gt; <a href=3D"http://192.168.90.253:6800/547=
+2">192.168.90.253:6800/5472</a> -- osd_op(client.34321.0:1 img-003.rbd [sta=
+t] 2.8a047315 ack+read+known_if_redirected e37) v5 -- ?+0 0x28513d0 con 0x2=
+850000<br>2015-11-12 22:52:44.688928 7f89e066b700=C2=A0 1 -- <a href=3D"htt=
+p://192.168.90.253:0/1006121">192.168.90.253:0/1006121</a> &lt;=3D=3D osd.1=
+ <a href=3D"http://192.168.90.253:6800/5472">192.168.90.253:6800/5472</a> 1=
+ =3D=3D=3D=3D osd_op_reply(1 img-003.rbd [stat] v0&#39;0 uv0 ack =3D -2 ((2=
+) No such file or directory)) v6 =3D=3D=3D=3D 178+0+0 (3550830125 0 0) 0x7f=
+89c0000ae0 con 0x2850000<br>2015-11-12 22:52:44.689090 7f89eced9780=C2=A0 1=
+ -- <a href=3D"http://192.168.90.253:0/1006121">192.168.90.253:0/1006121</a=
+> --&gt; <a href=3D"http://192.168.90.253:6801/5344">192.168.90.253:6801/53=
+44</a> -- osd_op(client.34321.0:2 rbd_id.img-003 [stat] 2.638c75a8 ack+read=
++known_if_redirected e37) v5 -- ?+0 0x2858330 con 0x2856f50<br>2015-11-12 2=
+2:52:44.690425 7f89e0469700=C2=A0 1 -- <a href=3D"http://192.168.90.253:0/1=
+006121">192.168.90.253:0/1006121</a> &lt;=3D=3D osd.0 <a href=3D"http://192=
+.168.90.253:6801/5344">192.168.90.253:6801/5344</a> 1 =3D=3D=3D=3D osd_op_r=
+eply(2 rbd_id.img-003 [stat] v0&#39;0 uv0 ack =3D -2 ((2) No such file or d=
+irectory)) v6 =3D=3D=3D=3D 181+0+0 (1202435393 0 0) 0x7f89b8000ae0 con 0x28=
+56f50<br>2015-11-12 22:52:44.690494 7f89eced9780=C2=A0 2 librbd: adding rbd=
+ image to directory...<br>2015-11-12 22:52:44.690544 7f89eced9780=C2=A0 1 -=
+- <a href=3D"http://192.168.90.253:0/1006121">192.168.90.253:0/1006121</a> =
+--&gt; <a href=3D"http://192.168.90.253:6801/5344">192.168.90.253:6801/5344=
+</a> -- osd_op(client.34321.0:3 rbd_directory [tmapup 0~0] 2.30a98c1c ondis=
+k+write+known_if_redirected e37) v5 -- ?+0 0x2858920 con 0x2856f50<br>2015-=
+11-12 22:52:59.687447 7f89e4074700=C2=A0 1 -- <a href=3D"http://192.168.90.=
+253:0/1006121">192.168.90.253:0/1006121</a> --&gt; <a href=3D"http://192.16=
+8.90.253:6789/0">192.168.90.253:6789/0</a> -- mon_subscribe({monmap=3D3+,os=
+dmap=3D38}) v2 -- ?+0 0x7f89b0000ab0 con 0x2843b90<br>2015-11-12 22:52:59.6=
+87472 7f89e4074700=C2=A0 1 -- <a href=3D"http://192.168.90.253:0/1006121">1=
+92.168.90.253:0/1006121</a> --&gt; <a href=3D"http://192.168.90.253:6801/53=
+44">192.168.90.253:6801/5344</a> -- ping magic: 0 v1 -- ?+0 0x7f89b0000f40 =
+con 0x2856f50<br>2015-11-12 22:52:59.687887 7f89e3873700=C2=A0 1 -- <a href=
+=3D"http://192.168.90.253:0/1006121">192.168.90.253:0/1006121</a> &lt;=3D=
+=3D mon.0 <a href=3D"http://192.168.90.253:6789/0">192.168.90.253:6789/0</a=
+> 11 =3D=3D=3D=3D mon_subscribe_ack(300s) v1 =3D=3D=3D=3D 20+0+0 (286760601=
+8 0 0) 0x7f89d8001160 con 0x2843b90<br>2015-11-12 22:53:04.687593 7f89e4074=
+700=C2=A0 1 -- <a href=3D"http://192.168.90.253:0/1006121">192.168.90.253:0=
+/1006121</a> --&gt; <a href=3D"http://192.168.90.253:6801/5344">192.168.90.=
+253:6801/5344</a> -- ping magic: 0 v1 -- ?+0 0x7f89b0000ab0 con 0x2856f50<b=
+r>2015-11-12 22:53:09.687731 7f89e4074700=C2=A0 1 -- <a href=3D"http://192.=
+168.90.253:0/1006121">192.168.90.253:0/1006121</a> --&gt; <a href=3D"http:/=
+/192.168.90.253:6801/5344">192.168.90.253:6801/5344</a> -- ping magic: 0 v1=
+ -- ?+0 0x7f89b0000ab0 con 0x2856f50<br>2015-11-12 22:53:14.687844 7f89e407=
+4700=C2=A0 1 -- <a href=3D"http://192.168.90.253:0/1006121">192.168.90.253:=
+0/1006121</a> --&gt; <a href=3D"http://192.168.90.253:6801/5344">192.168.90=
+.253:6801/5344</a> -- ping magic: 0 v1 -- ?+0 0x7f89b0000ab0 con 0x2856f50<=
+br>2015-11-12 22:53:19.687978 7f89e4074700=C2=A0 1 -- <a href=3D"http://192=
+.168.90.253:0/1006121">192.168.90.253:0/1006121</a> --&gt; <a href=3D"http:=
+//192.168.90.253:6801/5344">192.168.90.253:6801/5344</a> -- ping magic: 0 v=
+1 -- ?+0 0x7f89b0000ab0 con 0x2856f50<br>2015-11-12 22:53:24.688116 7f89e40=
+74700=C2=A0 1 -- <a href=3D"http://192.168.90.253:0/1006121">192.168.90.253=
+:0/1006121</a> --&gt; <a href=3D"http://192.168.90.253:6801/5344">192.168.9=
+0.253:6801/5344</a> -- ping magic: 0 v1 -- ?+0 0x7f89b0000ab0 con 0x2856f50=
+<br>2015-11-12 22:53:29.688253 7f89e4074700=C2=A0 1 -- <a href=3D"http://19=
+2.168.90.253:0/1006121">192.168.90.253:0/1006121</a> --&gt; <a href=3D"http=
+://192.168.90.253:6801/5344">192.168.90.253:6801/5344</a> -- ping magic: 0 =
+v1 -- ?+0 0x7f89b0000ab0 con 0x2856f50<br>2015-11-12 22:53:34.688389 7f89e4=
+074700=C2=A0 1 -- <a href=3D"http://192.168.90.253:0/1006121">192.168.90.25=
+3:0/1006121</a> --&gt; <a href=3D"http://192.168.90.253:6801/5344">192.168.=
+90.253:6801/5344</a> -- ping magic: 0 v1 -- ?+0 0x7f89b0000ab0 con 0x2856f5=
+0<br>2015-11-12 22:53:39.688512 7f89e4074700=C2=A0 1 -- <a href=3D"http://1=
+92.168.90.253:0/1006121">192.168.90.253:0/1006121</a> --&gt; <a href=3D"htt=
+p://192.168.90.253:6801/5344">192.168.90.253:6801/5344</a> -- ping magic: 0=
+ v1 -- ?+0 0x7f89b0000ab0 con 0x2856f50<br>2015-11-12 22:53:44.688636 7f89e=
+4074700=C2=A0 1 -- <a href=3D"http://192.168.90.253:0/1006121">192.168.90.2=
+53:0/1006121</a> --&gt; <a href=3D"http://192.168.90.253:6801/5344">192.168=
+.90.253:6801/5344</a> -- ping magic: 0 v1 -- ?+0 0x7f89b0000ab0 con 0x2856f=
+50<br><br><br></div>Looks to me, we are keeping ping magic process, and no =
+completed. <br><br></div>my ceph version is &quot;ceph version 0.94.5 (9764=
+da52395923e0b32908d83a9f7304401fee43)&quot;<br><br></div>somebody can help =
+me on this? Or still me to collect more debug information for analyzing. <b=
+r><br></div>Thanks.<br><div><div><div><br><br></div></div></div></div>
 
-It is best to also manually set straw_calc_version =3D 1.  It won't say=20
-firefly, but it will still be compatible with firefly clients (that=20
-tunable only affects the mon behavior when updating the crush map).
+--001a11c3229c599df305245946fa--
 
-> - there's an issue with the tunables detection and update?
+--===============0626184000==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
 
-Yes and no.  We want 'ceph osd crush tunables firefly' to set options=20
-supported by all firefly deployments, and the initial firefly releases di=
-d=20
-not have the straw_calc_version =3D 1 support.  In some cases switching i=
-t=20
-on can trigger some data movement the next time the crush map is adjusted=
-,=20
-so we leave it off to be conservative.  And we want the profile to match=20
-exactly what setting the profile sets.  But it's confusing since it isn't=
-=20
-1:1 with what clients support.  And if it is a fresh cluster you are=20
-better off with straw_calc_version =3D 1.  (Same goes for old clusters, i=
-f=20
-you can tolerate a bit of initial rebalancing.)
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
-sage
-
-
-
->=20
-> Best regards=20
->=20
-> -----Message d'origine-----
-> De=A0: Sage Weil [mailto:sage@newdream.net]=20
-> Envoy=E9=A0: mardi 10 novembre 2015 11:23
-> =C0=A0: CHEVALIER Ghislain IMT/OLPS
-> Cc=A0: ceph-devel@vger.kernel.org
-> Objet=A0: Re: [CEPH][Crush][Tunables] issue when updating tunables
->=20
-> On Tue, 10 Nov 2015, ghislain.chevalier@orange.com wrote:
-> > Hi all,
-> >=20
-> > Context:
-> > Firefly 0.80.9
-> > Ubuntu 14.04.1
-> > Almost a production platform  in an openstack environment
-> > 176 OSD (SAS and SSD), 2 crushmap-oriented storage classes , 8 server=
-s=20
-> > in 2 rooms, 3 monitors on openstack controllers
-> > Usage: Rados Gateway for object service and RBD as back-end for Cinde=
-r=20
-> > and Glance
-> >=20
-> > The Ceph cluster was installed by Mirantis procedures (puppet/fuel/ce=
-ph-deploy):
-> >=20
-> > I noticed that tunables were curiously set.
-> > ceph  osd crush show-tunables =3D=3D>
-> > { "choose_local_tries": 0,
-> >   "choose_local_fallback_tries": 0,
-> >   "choose_total_tries": 50,
-> >   "chooseleaf_descend_once": 1,
-> >   "chooseleaf_vary_r": 1,
-> >   "straw_calc_version": 1,
-> >   "profile": "unknown",
-> >   "optimal_tunables": 0,
-> >   "legacy_tunables": 0,
-> >   "require_feature_tunables": 1,
-> >   "require_feature_tunables2": 1,
-> >   "require_feature_tunables3": 1,
-> >   "has_v2_rules": 0,
-> >   "has_v3_rules": 0}
-> >=20
-> > I tried to update them
-> > ceph  osd crush tunables optimal =3D=3D>
-> > adjusted tunables profile to optimal
-> >=20
-> > But when checking
-> > ceph  osd crush show-tunables =3D=3D>
-> > { "choose_local_tries": 0,
-> >   "choose_local_fallback_tries": 0,
-> >   "choose_total_tries": 50,
-> >   "chooseleaf_descend_once": 1,
-> >   "chooseleaf_vary_r": 1,
-> >   "straw_calc_version": 1,
-> >   "profile": "unknown",
-> >   "optimal_tunables": 0,
-> >   "legacy_tunables": 0,
-> >   "require_feature_tunables": 1,
-> >   "require_feature_tunables2": 1,
-> >   "require_feature_tunables3": 1,
-> >   "has_v2_rules": 0,
-> >   "has_v3_rules": 0}
-> >=20
-> > Nothing has changed.
-> >=20
-> > I finally did
-> > ceph osd crush set-tunable straw_calc_version 0
->=20
-> You actually want straw_calc_version 1.  This is just confusing output =
-from the 'firefly' tunable detection... the straw_calc_version does not h=
-ave any client dependencies.
->=20
-> sage
->=20
->=20
-> >=20
-> > and
-> > ceph  osd crush show-tunables =3D=3D>
-> > { "choose_local_tries": 0,
-> >   "choose_local_fallback_tries": 0,
-> >   "choose_total_tries": 50,
-> >   "chooseleaf_descend_once": 1,
-> >   "chooseleaf_vary_r": 1,
-> >   "straw_calc_version": 0,
-> >   "profile": "firefly",
-> >   "optimal_tunables": 1,
-> >   "legacy_tunables": 0,
-> >   "require_feature_tunables": 1,
-> >   "require_feature_tunables2": 1,
-> >   "require_feature_tunables3": 1,
-> >   "has_v2_rules": 0,
-> >   "has_v3_rules": 0}
-> >=20
-> > It's OK
-> >=20
-> > My question:
-> > Does the "ceph osd crush tunables <profile>" command change all the r=
-equested parameters in order to set the tunables to the right profile?
-> >=20
-> > Brgds
-> >=20
-> > _____________________________________________________________________=
-_
-> > ___________________________________________________
-> >=20
-> > Ce message et ses pieces jointes peuvent contenir des informations=20
-> > confidentielles ou privilegiees et ne doivent donc pas etre diffuses,=
-=20
-> > exploites ou copies sans autorisation. Si vous avez recu ce message=20
-> > par erreur, veuillez le signaler a l'expediteur et le detruire ainsi=20
-> > que les pieces jointes. Les messages electroniques etant susceptibles=
-=20
-> > d'alteration, France Telecom - Orange decline toute responsabilite si=
-=20
-> > ce message a ete altere, deforme ou falsifie. Merci
-> >=20
-> > This message and its attachments may contain confidential or=20
-> > privileged information that may be protected by law; they should not =
-be distributed, used or copied without authorization.
-> > If you have received this email in error, please notify the sender an=
-d delete this message and its attachments.
-> > As emails may be altered, France Telecom - Orange shall not be liable=
- if this message was modified, changed or falsified.
-> > Thank you.
-> >=20
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
-=20
-> > in the body of a message to majordomo@vger.kernel.org More majordomo=20
-> > info at  http://vger.kernel.org/majordomo-info.html
-> >=20
-> >=20
->=20
-> _______________________________________________________________________=
-__________________________________________________
->=20
-> Ce message et ses pieces jointes peuvent contenir des informations conf=
-identielles ou privilegiees et ne doivent donc
-> pas etre diffuses, exploites ou copies sans autorisation. Si vous avez =
-recu ce message par erreur, veuillez le signaler
-> a l'expediteur et le detruire ainsi que les pieces jointes. Les message=
-s electroniques etant susceptibles d'alteration,
-> Orange decline toute responsabilite si ce message a ete altere, deforme=
- ou falsifie. Merci.
->=20
-> This message and its attachments may contain confidential or privileged=
- information that may be protected by law;
-> they should not be distributed, used or copied without authorisation.
-> If you have received this email in error, please notify the sender and =
-delete this message and its attachments.
-> As emails may be altered, Orange is not liable for messages that have b=
-een modified, changed or falsified.
-> Thank you.
->=20
->=20
---557981400-1340151619-1447340487=:614--
+--===============0626184000==--
