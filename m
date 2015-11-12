@@ -1,234 +1,148 @@
-From: min fang <louisfang2013-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: can not create rbd image
-Date: Thu, 12 Nov 2015 23:05:34 +0800
-Message-ID: <CAO9PA9=nKTRyCMH8ReibUmOhOvqMG80A6Fi2ydj1+uQOoQ_GAQ@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: scrub randomization and load threshold
+Date: Thu, 12 Nov 2015 07:10:32 -0800 (PST)
+Message-ID: <alpine.DEB.2.00.1511120705240.614@cobra.newdream.net>
+References: <CABZ+qq=7izv5o-5ACygqZyr=ho58nLoKb7XmRKT2yyTqKFwrZQ@mail.gmail.com> <alpine.DEB.2.00.1511120526390.7964@cobra.newdream.net> <CABZ+qqnj81gQDe6mApNdGa-HK2LbeKJwHH-7Lj9ovq2+ci1MgA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0626184000=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:35700 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753597AbbKLPKd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Nov 2015 10:10:33 -0500
+In-Reply-To: <CABZ+qqnj81gQDe6mApNdGa-HK2LbeKJwHH-7Lj9ovq2+ci1MgA@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Dan van der Ster <dan@vanderster.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Herve Rousseau <herve.rousseau@cern.ch>
 
---===============0626184000==
-Content-Type: multipart/alternative; boundary=001a11c3229c599df305245946fa
+On Thu, 12 Nov 2015, Dan van der Ster wrote:
+> On Thu, Nov 12, 2015 at 2:29 PM, Sage Weil <sage@newdream.net> wrote:
+> > On Thu, 12 Nov 2015, Dan van der Ster wrote:
+> >> Hi,
+> >>
+> >> Firstly, we just had a look at the new
+> >> osd_scrub_interval_randomize_ratio option and found that it doesn't
+> >> really solve the deep scrubbing problem. Given the default options,
+> >>
+> >> osd_scrub_min_interval = 60*60*24
+> >> osd_scrub_max_interval = 7*60*60*24
+> >> osd_scrub_interval_randomize_ratio = 0.5
+> >> osd_deep_scrub_interval = 60*60*24*7
+> >>
+> >> we understand that the new option changes the min interval to the
+> >> range 1-1.5 days. However, this doesn't do anything for the thundering
+> >> herd of deep scrubs which will happen every 7 days. We've found a
+> >> configuration that should randomize deep scrubbing across two weeks,
+> >> e.g.:
+> >>
+> >> osd_scrub_min_interval = 60*60*24*7
+> >> osd_scrub_max_interval = 100*60*60*24 // effectively disabling this option
+> >> osd_scrub_load_threshold = 10 // effectively disabling this option
+> >> osd_scrub_interval_randomize_ratio = 2.0
+> >> osd_deep_scrub_interval = 60*60*24*7
+> >>
+> >> but that (a) doesn't allow shallow scrubs to run daily and (b) is so
+> >> far off the defaults that its basically an abuse of the intended
+> >> behaviour.
+> >>
+> >> So we'd like to simplify how deep scrubbing can be randomized. Our PR
+> >> (http://github.com/ceph/ceph/pull/6550) adds a new option
+> >> osd_deep_scrub_randomize_ratio which  controls a coin flip to randomly
+> >> turn scrubs into deep scrubs. The default is tuned so roughly 1 in 7
+> >> scrubs will be run deeply.
+> >
+> > The coin flip seems reasonable to me.  But wouldn't it also/instead make
+> > sense to apply the randomize ratio to the deep_scrub_interval?  My just
+> > adding in the random factor here:
+> >
+> > https://github.com/ceph/ceph/pull/6550/files#diff-dfb9ddca0a3ee32b266623e8fa489626R3247
+> >
+> > That is what I would have expected to happen, and if the coin flip is also
+> > there then you have two knobs controlling the same thing, which'll cause
+> > confusion...
+> >
+> 
+> That was our first idea. But that has a couple downsides:
+> 
+>   1.  If we use the random range for the deep scrub intervals, e.g.
+> deep every 1-1.5 weeks, we still get quite bursty scrubbing until it
+> randomizes over a period of many weeks/months. And I fear it might
+> even lead to lower frequency harmonics of many concurrent deep scrubs.
+> Using a coin flip guarantees uniformity starting immediately from time
+> zero.
+>
+>   2. In our PR osd_deep_scrub_interval is still used as an upper limit
+> on how long a PG can go without being deeply scrubbed. This way
+> there's no confusion such as PGs going undeep-scrubbed longer than
+> expected. (In general, I think this random range is unintuitive and
+> difficult to tune (e.g. see my 2 week deep scrubbing config above).
 
---001a11c3229c599df305245946fa
-Content-Type: text/plain; charset=UTF-8
+Fair enough..
+ 
+> For me, the most intuitive configuration (maintaining randomness) would be:
+> 
+>   a. drop the osd_scrub_interval_randomize_ratio because there is no
+> shallow scrub thundering herd problem (AFAIK), and it just complicates
+> the configuration. (But this is in a stable release now so I don't
+> know if you want to back it out).
 
-Hi cepher, I tried to use the following command to create a img, but
-unfortunately, the command hung for a long time until I broken it by
-crtl-z.
+I'm inclined to leave it, even if it complicates config: just because we 
+haven't noticed the shallow scrub thundering herd doesn't mean it doesn't 
+exist, and I fully expect that it is there.  Also, if the shallow scrubs 
+are lumpy and we're promoting some of them to deep scrubs, then the deep 
+scrubs will be lumpy too.
 
-rbd -p hello create img-003 --size 512
+>   b. perform a (usually shallow) scrub every
+> osd_scrub_interval_(min/max) depending on a self-tuning load
+> threshold.
 
-so I checked the cluster status, and showed:
+Yep, although as you note we have some work to do to get there.  :)
 
-    cluster 0379cebd-b546-4954-b5d6-e13d08b7d2f1
-     health HEALTH_WARN
-            2 near full osd(s)
-            too many PGs per OSD (320 > max 300)
-     monmap e2: 1 mons at {vl=192.168.90.253:6789/0}
-            election epoch 1, quorum 0 vl
-     osdmap e37: 2 osds: 2 up, 2 in
-      pgmap v19544: 320 pgs, 3 pools, 12054 MB data, 3588 objects
-            657 GB used, 21867 MB / 714 GB avail
-                 320 active+clean
+>   c. do a coin flip each (b) to occasionally turn it into deep scrub.
 
-I did not see error message here could cause rbd create hang.
+Works for me.
 
-I opened the client log and see:
+>   optionally: d. remove osd_deep_scrub_randomize_ratio and replace it
+> with  osd_scrub_interval_min/osd_deep_scrub_interval.
 
-2015-11-12 22:52:44.687491 7f89eced9780 20 librbd: create 0x7fff8f7b7800
-name = img-003 size = 536870912 old_format = 1 features = 0 order = 22
-stripe_unit = 0 stripe_count = 0
-2015-11-12 22:52:44.687653 7f89eced9780  1 -- 192.168.90.253:0/1006121 -->
-192.168.90.253:6800/5472 -- osd_op(client.34321.0:1 img-003.rbd [stat]
-2.8a047315 ack+read+known_if_redirected e37) v5 -- ?+0 0x28513d0 con
-0x2850000
-2015-11-12 22:52:44.688928 7f89e066b700  1 -- 192.168.90.253:0/1006121 <==
-osd.1 192.168.90.253:6800/5472 1 ==== osd_op_reply(1 img-003.rbd [stat]
-v0'0 uv0 ack = -2 ((2) No such file or directory)) v6 ==== 178+0+0
-(3550830125 0 0) 0x7f89c0000ae0 con 0x2850000
-2015-11-12 22:52:44.689090 7f89eced9780  1 -- 192.168.90.253:0/1006121 -->
-192.168.90.253:6801/5344 -- osd_op(client.34321.0:2 rbd_id.img-003 [stat]
-2.638c75a8 ack+read+known_if_redirected e37) v5 -- ?+0 0x2858330 con
-0x2856f50
-2015-11-12 22:52:44.690425 7f89e0469700  1 -- 192.168.90.253:0/1006121 <==
-osd.0 192.168.90.253:6801/5344 1 ==== osd_op_reply(2 rbd_id.img-003 [stat]
-v0'0 uv0 ack = -2 ((2) No such file or directory)) v6 ==== 181+0+0
-(1202435393 0 0) 0x7f89b8000ae0 con 0x2856f50
-2015-11-12 22:52:44.690494 7f89eced9780  2 librbd: adding rbd image to
-directory...
-2015-11-12 22:52:44.690544 7f89eced9780  1 -- 192.168.90.253:0/1006121 -->
-192.168.90.253:6801/5344 -- osd_op(client.34321.0:3 rbd_directory [tmapup
-0~0] 2.30a98c1c ondisk+write+known_if_redirected e37) v5 -- ?+0 0x2858920
-con 0x2856f50
-2015-11-12 22:52:59.687447 7f89e4074700  1 -- 192.168.90.253:0/1006121 -->
-192.168.90.253:6789/0 -- mon_subscribe({monmap=3+,osdmap=38}) v2 -- ?+0
-0x7f89b0000ab0 con 0x2843b90
-2015-11-12 22:52:59.687472 7f89e4074700  1 -- 192.168.90.253:0/1006121 -->
-192.168.90.253:6801/5344 -- ping magic: 0 v1 -- ?+0 0x7f89b0000f40 con
-0x2856f50
-2015-11-12 22:52:59.687887 7f89e3873700  1 -- 192.168.90.253:0/1006121 <==
-mon.0 192.168.90.253:6789/0 11 ==== mon_subscribe_ack(300s) v1 ==== 20+0+0
-(2867606018 0 0) 0x7f89d8001160 con 0x2843b90
-2015-11-12 22:53:04.687593 7f89e4074700  1 -- 192.168.90.253:0/1006121 -->
-192.168.90.253:6801/5344 -- ping magic: 0 v1 -- ?+0 0x7f89b0000ab0 con
-0x2856f50
-2015-11-12 22:53:09.687731 7f89e4074700  1 -- 192.168.90.253:0/1006121 -->
-192.168.90.253:6801/5344 -- ping magic: 0 v1 -- ?+0 0x7f89b0000ab0 con
-0x2856f50
-2015-11-12 22:53:14.687844 7f89e4074700  1 -- 192.168.90.253:0/1006121 -->
-192.168.90.253:6801/5344 -- ping magic: 0 v1 -- ?+0 0x7f89b0000ab0 con
-0x2856f50
-2015-11-12 22:53:19.687978 7f89e4074700  1 -- 192.168.90.253:0/1006121 -->
-192.168.90.253:6801/5344 -- ping magic: 0 v1 -- ?+0 0x7f89b0000ab0 con
-0x2856f50
-2015-11-12 22:53:24.688116 7f89e4074700  1 -- 192.168.90.253:0/1006121 -->
-192.168.90.253:6801/5344 -- ping magic: 0 v1 -- ?+0 0x7f89b0000ab0 con
-0x2856f50
-2015-11-12 22:53:29.688253 7f89e4074700  1 -- 192.168.90.253:0/1006121 -->
-192.168.90.253:6801/5344 -- ping magic: 0 v1 -- ?+0 0x7f89b0000ab0 con
-0x2856f50
-2015-11-12 22:53:34.688389 7f89e4074700  1 -- 192.168.90.253:0/1006121 -->
-192.168.90.253:6801/5344 -- ping magic: 0 v1 -- ?+0 0x7f89b0000ab0 con
-0x2856f50
-2015-11-12 22:53:39.688512 7f89e4074700  1 -- 192.168.90.253:0/1006121 -->
-192.168.90.253:6801/5344 -- ping magic: 0 v1 -- ?+0 0x7f89b0000ab0 con
-0x2856f50
-2015-11-12 22:53:44.688636 7f89e4074700  1 -- 192.168.90.253:0/1006121 -->
-192.168.90.253:6801/5344 -- ping magic: 0 v1 -- ?+0 0x7f89b0000ab0 con
-0x2856f50
+There is no osd_deep_scrub_randomize_ratio.  Do you mean replace 
+osd_deep_scrub_interval with osd_deep_scrub_{min,max}_interval?
 
+> >> Secondly, we'd also like to discuss the osd_scrub_load_threshold
+> >> option, where we see two problems:
+> >>    - the default is so low that it disables all the shallow scrub
+> >> randomization on all but completely idle clusters.
+> >>    - finding the correct osd_scrub_load_threshold for a cluster is
+> >> surely unclear/difficult and probably a moving target for most prod
+> >> clusters.
+> >>
+> >> Given those observations, IMHO the smart Ceph admin should set
+> >> osd_scrub_load_threshold = 10 or higher, to effectively disable that
+> >> functionality. In the spirit of having good defaults, I therefore
+> >> propose that we increase the default osd_scrub_load_threshold (to at
+> >> least 5.0) and consider removing the load threshold logic completely.
+> >
+> > This sounds reasonable to me.  It would be great if we could use a 24-hour
+> > average as the baseline or something so that it was self-tuning (e.g., set
+> > threshold to .8 of daily average), but that's a bit trickier.  Generally
+> > all for self-tuning, though... too many knobs...
+> 
+> Yes, but we probably would need to make your 0.8 a function of the
+> stddev of the loadavg over a day, to handle clusters with flat
+> loadavgs as well as varying ones.
+> 
+> In order to randomly spread the deep scrubs across the week, it's
+> essential to give each PG many opportunities to scrub throughout the
+> week. If PGs are only shallow scrubbed once a week (at interval_max),
+> then every scrub would become a deep scrub and we again have the
+> thundering herd problem.
+> 
+> I'll push 5.0 for now.
 
-Looks to me, we are keeping ping magic process, and no completed.
+Sounds good.
 
-my ceph version is "ceph version 0.94.5
-(9764da52395923e0b32908d83a9f7304401fee43)"
+I would still love to see someone tackle the auto-tuning approach, 
+though! :)
 
-somebody can help me on this? Or still me to collect more debug information
-for analyzing.
-
-Thanks.
-
---001a11c3229c599df305245946fa
-Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr"><div><div><div><div><div><div><div>Hi cepher, I tried to u=
-se the following command to create a img, but unfortunately, the command hu=
-ng for a long time until I broken it by crtl-z.=C2=A0 <br><br>rbd -p hello =
-create img-003 --size 512<br><br></div>so I checked the cluster status, and=
- showed:<br><br>=C2=A0=C2=A0=C2=A0 cluster 0379cebd-b546-4954-b5d6-e13d08b7=
-d2f1<br>=C2=A0=C2=A0=C2=A0=C2=A0 health HEALTH_WARN<br>=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 2 near full osd(s)<br>=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 too many PG=
-s per OSD (320 &gt; max 300)<br>=C2=A0=C2=A0=C2=A0=C2=A0 monmap e2: 1 mons =
-at {vl=3D<a href=3D"http://192.168.90.253:6789/0">192.168.90.253:6789/0</a>=
-}<br>=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 ele=
-ction epoch 1, quorum 0 vl<br>=C2=A0=C2=A0=C2=A0=C2=A0 osdmap e37: 2 osds: =
-2 up, 2 in<br>=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 pgmap v19544: 320 pgs, 3 pools=
-, 12054 MB data, 3588 objects<br>=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A0=C2=A0 657 GB used, 21867 MB / 714 GB avail<br>=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0 320 active+clean<br><br></div>I did not see error message here=
- could cause rbd create hang. <br><br></div>I opened the client log and see=
-:<br><br>2015-11-12 22:52:44.687491 7f89eced9780 20 librbd: create 0x7fff8f=
-7b7800 name =3D img-003 size =3D 536870912 old_format =3D 1 features =3D 0 =
-order =3D 22 stripe_unit =3D 0 stripe_count =3D 0<br>2015-11-12 22:52:44.68=
-7653 7f89eced9780=C2=A0 1 -- <a href=3D"http://192.168.90.253:0/1006121">19=
-2.168.90.253:0/1006121</a> --&gt; <a href=3D"http://192.168.90.253:6800/547=
-2">192.168.90.253:6800/5472</a> -- osd_op(client.34321.0:1 img-003.rbd [sta=
-t] 2.8a047315 ack+read+known_if_redirected e37) v5 -- ?+0 0x28513d0 con 0x2=
-850000<br>2015-11-12 22:52:44.688928 7f89e066b700=C2=A0 1 -- <a href=3D"htt=
-p://192.168.90.253:0/1006121">192.168.90.253:0/1006121</a> &lt;=3D=3D osd.1=
- <a href=3D"http://192.168.90.253:6800/5472">192.168.90.253:6800/5472</a> 1=
- =3D=3D=3D=3D osd_op_reply(1 img-003.rbd [stat] v0&#39;0 uv0 ack =3D -2 ((2=
-) No such file or directory)) v6 =3D=3D=3D=3D 178+0+0 (3550830125 0 0) 0x7f=
-89c0000ae0 con 0x2850000<br>2015-11-12 22:52:44.689090 7f89eced9780=C2=A0 1=
- -- <a href=3D"http://192.168.90.253:0/1006121">192.168.90.253:0/1006121</a=
-> --&gt; <a href=3D"http://192.168.90.253:6801/5344">192.168.90.253:6801/53=
-44</a> -- osd_op(client.34321.0:2 rbd_id.img-003 [stat] 2.638c75a8 ack+read=
-+known_if_redirected e37) v5 -- ?+0 0x2858330 con 0x2856f50<br>2015-11-12 2=
-2:52:44.690425 7f89e0469700=C2=A0 1 -- <a href=3D"http://192.168.90.253:0/1=
-006121">192.168.90.253:0/1006121</a> &lt;=3D=3D osd.0 <a href=3D"http://192=
-.168.90.253:6801/5344">192.168.90.253:6801/5344</a> 1 =3D=3D=3D=3D osd_op_r=
-eply(2 rbd_id.img-003 [stat] v0&#39;0 uv0 ack =3D -2 ((2) No such file or d=
-irectory)) v6 =3D=3D=3D=3D 181+0+0 (1202435393 0 0) 0x7f89b8000ae0 con 0x28=
-56f50<br>2015-11-12 22:52:44.690494 7f89eced9780=C2=A0 2 librbd: adding rbd=
- image to directory...<br>2015-11-12 22:52:44.690544 7f89eced9780=C2=A0 1 -=
-- <a href=3D"http://192.168.90.253:0/1006121">192.168.90.253:0/1006121</a> =
---&gt; <a href=3D"http://192.168.90.253:6801/5344">192.168.90.253:6801/5344=
-</a> -- osd_op(client.34321.0:3 rbd_directory [tmapup 0~0] 2.30a98c1c ondis=
-k+write+known_if_redirected e37) v5 -- ?+0 0x2858920 con 0x2856f50<br>2015-=
-11-12 22:52:59.687447 7f89e4074700=C2=A0 1 -- <a href=3D"http://192.168.90.=
-253:0/1006121">192.168.90.253:0/1006121</a> --&gt; <a href=3D"http://192.16=
-8.90.253:6789/0">192.168.90.253:6789/0</a> -- mon_subscribe({monmap=3D3+,os=
-dmap=3D38}) v2 -- ?+0 0x7f89b0000ab0 con 0x2843b90<br>2015-11-12 22:52:59.6=
-87472 7f89e4074700=C2=A0 1 -- <a href=3D"http://192.168.90.253:0/1006121">1=
-92.168.90.253:0/1006121</a> --&gt; <a href=3D"http://192.168.90.253:6801/53=
-44">192.168.90.253:6801/5344</a> -- ping magic: 0 v1 -- ?+0 0x7f89b0000f40 =
-con 0x2856f50<br>2015-11-12 22:52:59.687887 7f89e3873700=C2=A0 1 -- <a href=
-=3D"http://192.168.90.253:0/1006121">192.168.90.253:0/1006121</a> &lt;=3D=
-=3D mon.0 <a href=3D"http://192.168.90.253:6789/0">192.168.90.253:6789/0</a=
-> 11 =3D=3D=3D=3D mon_subscribe_ack(300s) v1 =3D=3D=3D=3D 20+0+0 (286760601=
-8 0 0) 0x7f89d8001160 con 0x2843b90<br>2015-11-12 22:53:04.687593 7f89e4074=
-700=C2=A0 1 -- <a href=3D"http://192.168.90.253:0/1006121">192.168.90.253:0=
-/1006121</a> --&gt; <a href=3D"http://192.168.90.253:6801/5344">192.168.90.=
-253:6801/5344</a> -- ping magic: 0 v1 -- ?+0 0x7f89b0000ab0 con 0x2856f50<b=
-r>2015-11-12 22:53:09.687731 7f89e4074700=C2=A0 1 -- <a href=3D"http://192.=
-168.90.253:0/1006121">192.168.90.253:0/1006121</a> --&gt; <a href=3D"http:/=
-/192.168.90.253:6801/5344">192.168.90.253:6801/5344</a> -- ping magic: 0 v1=
- -- ?+0 0x7f89b0000ab0 con 0x2856f50<br>2015-11-12 22:53:14.687844 7f89e407=
-4700=C2=A0 1 -- <a href=3D"http://192.168.90.253:0/1006121">192.168.90.253:=
-0/1006121</a> --&gt; <a href=3D"http://192.168.90.253:6801/5344">192.168.90=
-.253:6801/5344</a> -- ping magic: 0 v1 -- ?+0 0x7f89b0000ab0 con 0x2856f50<=
-br>2015-11-12 22:53:19.687978 7f89e4074700=C2=A0 1 -- <a href=3D"http://192=
-.168.90.253:0/1006121">192.168.90.253:0/1006121</a> --&gt; <a href=3D"http:=
-//192.168.90.253:6801/5344">192.168.90.253:6801/5344</a> -- ping magic: 0 v=
-1 -- ?+0 0x7f89b0000ab0 con 0x2856f50<br>2015-11-12 22:53:24.688116 7f89e40=
-74700=C2=A0 1 -- <a href=3D"http://192.168.90.253:0/1006121">192.168.90.253=
-:0/1006121</a> --&gt; <a href=3D"http://192.168.90.253:6801/5344">192.168.9=
-0.253:6801/5344</a> -- ping magic: 0 v1 -- ?+0 0x7f89b0000ab0 con 0x2856f50=
-<br>2015-11-12 22:53:29.688253 7f89e4074700=C2=A0 1 -- <a href=3D"http://19=
-2.168.90.253:0/1006121">192.168.90.253:0/1006121</a> --&gt; <a href=3D"http=
-://192.168.90.253:6801/5344">192.168.90.253:6801/5344</a> -- ping magic: 0 =
-v1 -- ?+0 0x7f89b0000ab0 con 0x2856f50<br>2015-11-12 22:53:34.688389 7f89e4=
-074700=C2=A0 1 -- <a href=3D"http://192.168.90.253:0/1006121">192.168.90.25=
-3:0/1006121</a> --&gt; <a href=3D"http://192.168.90.253:6801/5344">192.168.=
-90.253:6801/5344</a> -- ping magic: 0 v1 -- ?+0 0x7f89b0000ab0 con 0x2856f5=
-0<br>2015-11-12 22:53:39.688512 7f89e4074700=C2=A0 1 -- <a href=3D"http://1=
-92.168.90.253:0/1006121">192.168.90.253:0/1006121</a> --&gt; <a href=3D"htt=
-p://192.168.90.253:6801/5344">192.168.90.253:6801/5344</a> -- ping magic: 0=
- v1 -- ?+0 0x7f89b0000ab0 con 0x2856f50<br>2015-11-12 22:53:44.688636 7f89e=
-4074700=C2=A0 1 -- <a href=3D"http://192.168.90.253:0/1006121">192.168.90.2=
-53:0/1006121</a> --&gt; <a href=3D"http://192.168.90.253:6801/5344">192.168=
-.90.253:6801/5344</a> -- ping magic: 0 v1 -- ?+0 0x7f89b0000ab0 con 0x2856f=
-50<br><br><br></div>Looks to me, we are keeping ping magic process, and no =
-completed. <br><br></div>my ceph version is &quot;ceph version 0.94.5 (9764=
-da52395923e0b32908d83a9f7304401fee43)&quot;<br><br></div>somebody can help =
-me on this? Or still me to collect more debug information for analyzing. <b=
-r><br></div>Thanks.<br><div><div><div><br><br></div></div></div></div>
-
---001a11c3229c599df305245946fa--
-
---===============0626184000==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============0626184000==--
+sage
