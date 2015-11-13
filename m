@@ -1,81 +1,148 @@
-From: Sage Weil <sage@redhat.com>
-Subject: [GIT PULL] Ceph changes for -rc1
-Date: Fri, 13 Nov 2015 07:54:07 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1511130750020.13621@cobra.newdream.net>
+From: Allen Samuels <Allen.Samuels@sandisk.com>
+Subject: RE: Notes from a discussion a design to allow EC overwrites
+Date: Fri, 13 Nov 2015 16:16:07 +0000
+Message-ID: <CY1PR0201MB18974D8FD3E5D6714411AF91E8110@CY1PR0201MB1897.namprd02.prod.outlook.com>
+References: <CAN=+7FUAd-Cc0=1yCekY1QjQ2DJR7WYLLv2OhR_0H5qo5DNgkQ@mail.gmail.com>
+	<alpine.DEB.2.00.1511130524120.7964@cobra.newdream.net>
+ <CAN=+7FV5zcZWRun3pxkL-z6uNp1-KPCYu=Ug6jOHfXoYjA1dbA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: torvalds@linux-foundation.org
-Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-bn1on0059.outbound.protection.outlook.com ([157.56.110.59]:53720
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S932281AbbKMQQL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 13 Nov 2015 11:16:11 -0500
+In-Reply-To: <CAN=+7FV5zcZWRun3pxkL-z6uNp1-KPCYu=Ug6jOHfXoYjA1dbA@mail.gmail.com>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Samuel Just <sjust@redhat.com>, Sage Weil <sweil@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "Durgin, Josh" <jdurgin@redhat.com>, "Farnum, Gregory" <gfarnum@redhat.com>
 
-Hi Linus,
-
-Please pull the following Ceph updates from
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
-
-There are several patches from Ilya fixing RBD allocation lifecycle 
-issues, a series adding a nocephx_sign_messages option (and associated bug 
-fixes/cleanups), several patches from Zheng improving the (directory) 
-fsync behavior, a big improvement in IO for direct-io requests when 
-striping is enabled from Caifeng, and several other small fixes and 
-cleanups.
-
-Thanks!
-sage
-
-----------------------------------------------------------------
-Arnd Bergmann (1):
-      ceph: fix message length computation
-
-Geliang Tang (1):
-      ceph: fix a comment typo
-
-Ilya Dryomov (10):
-      rbd: return -ENOMEM instead of pool id if rbd_dev_create() fails
-      rbd: don't free rbd_dev outside of the release callback
-      rbd: set device_type::release instead of device::release
-      rbd: remove duplicate calls to rbd_dev_mapping_clear()
-      libceph: introduce ceph_x_authorizer_cleanup()
-      libceph: msg signing callouts don't need con argument
-      libceph: drop authorizer check from cephx msg signing routines
-      libceph: stop duplicating client fields in messenger
-      libceph: add nocephx_sign_messages option
-      libceph: clear msg->con in ceph_msg_release() only
-
-Ioana Ciornei (1):
-      libceph: evaluate osd_req_op_data() arguments only once
-
-Julia Lawall (1):
-      rbd: drop null test before destroy functions
-
-Shraddha Barke (2):
-      libceph: remove con argument in handle_reply()
-      libceph: use local variable cursor instead of &msg->cursor
-
-Yan, Zheng (3):
-      ceph: don't invalidate page cache when inode is no longer used
-      ceph: add request to i_unsafe_dirops when getting unsafe reply
-      ceph: make fsync() wait unsafe requests that created/modified inode
-
-Zhu, Caifeng (1):
-      ceph: combine as many iovec as possile into one OSD request
-
- drivers/block/rbd.c            | 109 ++++++++++++++++++++---------------------
- fs/ceph/cache.c                |   2 +-
- fs/ceph/caps.c                 |  76 ++++++++++++++--------------
- fs/ceph/file.c                 |  87 ++++++++++++++++++++++++++++----
- fs/ceph/inode.c                |   1 +
- fs/ceph/mds_client.c           |  57 +++++++++++++++------
- fs/ceph/mds_client.h           |   3 ++
- fs/ceph/super.h                |   1 +
- include/linux/ceph/libceph.h   |   4 +-
- include/linux/ceph/messenger.h |  16 ++----
- net/ceph/auth_x.c              |  36 +++++++++-----
- net/ceph/ceph_common.c         |  18 +++++--
- net/ceph/crypto.h              |   4 +-
- net/ceph/messenger.c           |  88 ++++++++++++++-------------------
- net/ceph/osd_client.c          |  34 ++++++-------
- 15 files changed, 314 insertions(+), 222 deletions(-)
+VGhpcyBzY2hlbWUgZnVuZGFtZW50YWxseSByZWxpZXMgb24gdGhlIHRlbXBvcmFyeSBvYmplY3Rz
+ICJncmFjZWZ1bGx5IiB0cmFuc2l0aW9uaW5nIGludG8gYmVpbmcgcG9ydGlvbnMgb2YgZnVsbC11
+cCBsb25nLXRlcm0gZHVyYWJsZSBvYmplY3RzLg0KDQpUaGlzIG1lYW5zIHRoYXQgaWYgdGhlIGFs
+bG9jYXRpb24gc2l6ZSBmb3IgYSB0ZW1wb3Jhcnkgb2JqZWN0IHNpZ25pZmljYW50bHkgbWlzbWF0
+Y2hlcyB0aGUgc2l6ZSBvZiB0aGUgbXV0YXRpb24gKHBhcnRpYWwgc3RyaXBlIHdyaXRlKSB5b3Un
+cmUgY3JlYXRpbmcgYSBwcm9ibGVtIHRoYXQncyBwcm9wb3J0aW9uYWwgdG8gdGhlIG1pc21hdGNo
+IHNpemUuIA0KDQpTbyBlaXRoZXIsIE5ld1N0b3JlIGlzIGFibGUgdG8gZWZmaWNpZW50bHkgYWxs
+b2NhdGUgc21hbGwgY2h1bmtzDQpPUg0KWW91IGhhdmUgc29tZSBraW5kIG9mIGJhY2tncm91bmQg
+Y2xlYW51cCBwcm9jZXNzIHRoYXQgcmVjbGFpbXMgdGhhdCBzcGFjZSAoaS5lLiwgYSAic3RyYWln
+aHRlbmVyIikNCg0KVGhlIHJpZ2h0IGNob2ljZXMgZGVwZW5kIG9uIGhhdmluZyBhIHNoYXJlZCBu
+b3Rpb24gb2YgdGhlIG9wZXJhdGlvbmFsIHByb2ZpbGUgdGhhdCB5b3UncmUgdHJ5aW5nIHRvIG9w
+dGltaXplIGZvci4NCg0KVGhlIGZ1bmRhbWVudGFsIHF1ZXN0aW9uIGJlY29tZXMsIGFyZSB5b3Ug
+Z29pbmcgdG8gb3B0aW1pemUgZm9yIHNtYWxsLWJsb2NrIHJhbmRvbSB3cml0ZXM/DQoNCkluIG15
+IGV4cGVyaWVuY2UgdGhpcyBpcyBhIGtleSB1c2UtY2FzZSBpbiB2aXJ0dWFsbHkgZXZlcnkgY3Vz
+dG9tZXIncyBldmFsdWF0aW9uIHNjZW5hcmlvLiBJIGJlbGlldmUgd2UgTVVTVCBtYWtlIHRoaXMg
+Y2FzZSByZWFzb25hYmx5IGVmZmljaWVudC4NCg0KSXQgc2VlbXMgdG8gbWUgdGhhdCB0aGUgbG93
+ZXN0LWNvbXBsZXhpdHkgImZpeCIgZm9yIHRoZSBwcm9ibGVtIGlzIHRvIHRlYWNoIE5ld1N0b3Jl
+IHRvIGhhdmUgdHdvIGRpZmZlcmVudCBhbGxvY2F0aW9uIHNpemVzIChiaWcgYW5kIHNtYWxsIDop
+KS4gDQpOYXR1cmFsbHkgdGhlIGFsbG9jYXRvciBiZWNvbWVzIG1vcmUgY29tcGxleC4gV29yc3Qg
+Y2FzZSwgeW91J3JlIG5vdyBsZWZ0IHdpdGggdGhlIGdhcmJhZ2UgY29sbGVjdGlvbiBwcm9ibGVt
+LiBXaGljaCBJIHN1c3BlY3QgY291bGQgYmUgcHVudGVkIHRvIGEgc3Vic2VxdWVudCByZWxlYXNl
+IChpLmUuLCBJJ20gb3V0IG9mIGxhcmdlIGJsb2NrcywgYnV0IHRoZXJlJ3MgcGxlbnR5IG9mIGZy
+YWdtZW50ZWQgYXZhaWxhYmxlIHNwYWNlIC0tIFRoaXMgY2FuIGhhcHBlbiwgYnV0J3MgYSBwcmV0
+dHkgcGF0aG9sb2dpY2FsIGNhc2Ugd2hpY2ggYmVjb21lcyByYXJlLWVyIGFuZCByYXJlLWVyIGFz
+IHlvdSBzY2FsZS1vdXQpDQoNCkFsbGVuIFNhbXVlbHMNClNvZnR3YXJlIEFyY2hpdGVjdCwgRW1l
+cmdpbmcgU3RvcmFnZSBTb2x1dGlvbnMgDQoNCjI4ODAgSnVuY3Rpb24gQXZlbnVlLCBNaWxwaXRh
+cywgQ0EgOTUxMzQNClQ6ICsxIDQwOCA4MDEgNzAzMHwgTTogKzEgNDA4IDc4MCA2NDE2DQphbGxl
+bi5zYW11ZWxzQFNhbkRpc2suY29tDQoNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZy
+b206IFNhbXVlbCBKdXN0IFttYWlsdG86c2p1c3RAcmVkaGF0LmNvbV0gDQpTZW50OiBGcmlkYXks
+IE5vdmVtYmVyIDEzLCAyMDE1IDc6MzkgQU0NClRvOiBTYWdlIFdlaWwgPHN3ZWlsQHJlZGhhdC5j
+b20+DQpDYzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc7IEFsbGVuIFNhbXVlbHMgPEFsbGVu
+LlNhbXVlbHNAc2FuZGlzay5jb20+OyBEdXJnaW4sIEpvc2ggPGpkdXJnaW5AcmVkaGF0LmNvbT47
+IEZhcm51bSwgR3JlZ29yeSA8Z2Zhcm51bUByZWRoYXQuY29tPg0KU3ViamVjdDogUmU6IE5vdGVz
+IGZyb20gYSBkaXNjdXNzaW9uIGEgZGVzaWduIHRvIGFsbG93IEVDIG92ZXJ3cml0ZXMNCg0KTGF6
+aWx5IHBlcnNpc3RpbmcgdGhlIGludGVybWVkaWF0ZSBlbnRyaWVzIHdvdWxkIGNlcnRhaW5seSBh
+bHNvIHdvcmssIGJ1dCB0aGVyZSdzIGFuIGFyZ3VtZW50IHRoYXQgaXQgbmVlZGxlc3NseSBhZGRz
+IHRvIHRoZSB3cml0ZSB0cmFuc2FjdGlvbi4NCg0KQWN0dWFsbHksIHdlIHByb2JhYmx5IHdhbnQg
+dG8gYXZvaWQgaGF2aW5nIHNtYWxsIHdyaXRlcyBiZSBmdWxsIHN0cmlwZSB3cml0ZXMgLS0gd2l0
+aCBhIDgrMyBjb2RlIHRoZSBkaWZmZXJlbmNlIGJldHdlZW4gbW9kaWZ5aW5nIGEgc2luZ2xlIHN0
+cmlwZWxldCBhbmQgbW9kaWZ5aW5nIHRoZSBmdWxsIHN0cmlwZSBpcyA0IHdyaXRlcyB2cyAxMSB3
+cml0ZXMuDQoNCkl0IG1lYW5zIHRoYXQgZHVyaW5nIHBlZXJpbmcsIGFueSBsb2cgd2UgY2FuIGZp
+bmQgKHBhcnRpY3VsYXJseSB0aGUgc2hvcnRlc3Qgb25lKSBmcm9tIHRoZSBtb3N0IHJlY2VudCBh
+Y3RpdmUgaW50ZXJ2YWwgaXNuJ3QgYW4gdXBwZXIgYm91bmQgb24gd3JpdGVzIGNvbW1pdHRlZCB0
+byB0aGUgY2xpZW50ICh0aGUgKGFjdGluZ3NldC5zaXplKCkgLSBNIC0gMSl0aCBvbmUgaXM/KSAt
+LSB3ZSdkIGhhdmUgdG8gdGhpbmsgY2FyZWZ1bGx5IGFib3V0IHRoZSBpbXBsaWNhdGlvbnMgb2Yg
+dGhhdC4NCi1TYW0NCg0KT24gRnJpLCBOb3YgMTMsIDIwMTUgYXQgNTozNSBBTSwgU2FnZSBXZWls
+IDxzd2VpbEByZWRoYXQuY29tPiB3cm90ZToNCj4gT24gVGh1LCAxMiBOb3YgMjAxNSwgU2FtdWVs
+IEp1c3Qgd3JvdGU6DQo+PiBJIHdhcyBwcmVzZW50IGZvciBhIGRpc2N1c3Npb24gYWJvdXQgYWxs
+b3dpbmcgRUMgb3ZlcndyaXRlcyBhbmQgDQo+PiB0aG91Z2h0IGl0IHdvdWxkIGJlIGdvb2QgdG8g
+c3VtbWFyaXplIGl0IGZvciB0aGUgbGlzdDoNCj4+DQo+PiBDb21taXQgUHJvdG9jb2w6DQo+PiAx
+KSBjbGllbnQgc2VuZHMgd3JpdGUgdG8gcHJpbWFyeQ0KPj4gMikgcHJpbWFyeSByZWFkcyBpbiBw
+YXJ0aWFsIHN0cmlwZXMgbmVlZGVkIGZvciBwYXJ0aWFsIHN0cmlwZSANCj4+IG92ZXJ3cml0ZXMg
+ZnJvbSByZXBsaWNhcw0KPj4gMykgcHJpbWFyeSBzZW5kcyBwcmVwYXJlcyB0byBwYXJ0aWNpcGF0
+aW5nIHJlcGxpY2FzIGFuZCBxdWV1ZXMgaXRzIA0KPj4gb3duIHByZXBhcmUgbG9jYWxseQ0KPj4g
+NCkgb25jZSBhbGwgcHJlcGFyZXMgYXJlIGNvbXBsZXRlLCBwcmltYXJ5IHNlbmRzIGEgY29tbWl0
+IHRvIHRoZSANCj4+IGNsaWVudA0KPj4gNSkgcHJpbWFyeSBzZW5kcyBhcHBsaWVzIHRvIGFsbCBw
+YXJ0aWNpcGF0aW5nIHJlcGxpY2FzDQo+Pg0KPj4gV2hlbiB3ZSBnZXQgdGhlIHByZXBhcmUsIHdl
+IHdyaXRlIG91dCBhIHRlbXAgb2JqZWN0IHdpdGggdGhlIGRhdGEgdG8gDQo+PiBiZSB3cml0dGVu
+LiAgT24gYXBwbHksIHdlIHVzZSBhbiBvYmplY3RzdG9yZSBwcmltaXRpdmUgdG8gYXRvbWljYWxs
+eSANCj4+IG1vdmUgdGhvc2UgZXh0ZW50cyBpbnRvIHRoZSBhY3R1YWwgb2JqZWN0LiAgVGhlIGxv
+ZyBlbnRyeSBjb250YWlucyANCj4+IHRoZSBuYW1lL2lkIGZvciB0aGUgdGVtcCBvYmplY3Qgc28g
+aXQgY2FuIGJlIGFwcGxpZWQgb24gYXBwbHkgb3IgcmVtb3ZlZCBvbiByb2xsYmFjay4NCj4NCj4g
+Q3VycmVudGx5IHdlIGFzc3VtZSB0aGF0IHRlbXAgb2JqZWN0cyBhcmUvY2FuIGJlIGNsZWFyZWQg
+b3V0IG9uIHJlc3RhcnQuDQo+IFRoaXMgd2lsbCBuZWVkIHRvIGNoYW5nZS4gIEFuZCB3ZSdsbCBu
+ZWVkIHRvIGJlIGNhcmVmdWwgdGhhdCB0aGV5IGdldCANCj4gY2xlYW5lZCBvdXQgd2hlbiBwZWVy
+aW5nIGNvbXBsZXRlcyAoYW5kIHRoZSByb2xsZm9yd2FyZC9yb2xsYmFjayANCj4gZGVjaXNpb24g
+aXMgbWFkZS4NCj4NCj4gSWYgdGhlIHN0cmlwZXMgYXJlIHNtYWxsLCB0aGVuIHRoZSBvYmplY3Rz
+dG9yZSBwcmltaXRpdmUgbWF5IG5vdCANCj4gYWN0dWFsbHkgYmUgdGhhdCBlZmZpY2llbnQuICBJ
+J2Qgc3VnZ2VzdCBhbHNvIGhpbnRpbmcgdGhhdCB0aGUgdGVtcCANCj4gb2JqZWN0IHdpbGwgYmUg
+c3dhcHBlZCBsYXRlciwgc28gdGhhdCB0aGUgYmFja2VuZCBjYW4sIGlmIGl0J3Mgc21hbGwsIA0K
+PiBzdG9yZSBpdCBpbiBhIGNoZWFwIHRlbXBvcmFyeSBsb2NhdGlvbiBpbiB0aGUgZXhwZWN0YXRp
+b24gdGhhdCBpdCB3aWxsIGdldCByZXdyaXR0ZW4gbGF0ZXIuDQo+IChJbiBwYXJ0aWN1bGFyLCB0
+aGUgbmV3c3RvcmUgYWxsb2NhdGlvbiBjaHVuayBpcyBjdXJyZW50bHkgdGFyZ2V0dGluZyANCj4g
+NTEya2IsIGFuZCB0aGlzIHdpbGwgb25seSBiZSBlZmZpY2llbnQgd2l0aCBuYXJyb3cgc3RyaXBl
+cywgc28gaXQnbGwgDQo+IGp1c3QgZ2V0IGRvdWJsZS13cml0dGVuLiAgV2UnbGwgd2FudCB0byBr
+ZWVwIHRoZSB0ZW1wIHZhbHVlIGluIHRoZSBrdiANCj4gc3RvcmUgW2xvZywgaG9wZWZ1bGx5XSBh
+bmQgbm90IGJvdGhlciB0byBhbGxvY2F0ZSBkaXNrIGFuZCByZXdyaXRlIA0KPiBpdC4pDQo+DQo+
+PiBFYWNoIGxvZyBlbnRyeSBjb250YWlucyBhIGxpc3Qgb2YgdGhlIHNoYXJkIGlkcyBtb2RpZmll
+ZC4gIER1cmluZyANCj4+IHBlZXJpbmcsIHdlIHVzZSB0aGUgc2FtZSBwcm90b2NvbCBmb3IgY2hv
+b3NpbmcgdGhlIGF1dGhvcml0YXRpdmUgbG9nIA0KPj4gZm9yIHRoZSBleGlzdGluZyBFQyBwb29s
+LCBleGNlcHQgdGhhdCB3ZSBmaXJzdCB0YWtlIHRoZSBsb25nZXN0IA0KPj4gY2FuZGlkYXRlIGxv
+ZyBhbmQgdXNlIGl0IHRvIGV4dGVuZCBzaG9ydGVyIGxvZ3MgdW50aWwgdGhleSBoaXQgYW4gZW50
+cnkgdGhleSBzaG91bGQgaGF2ZSB3aXRuZXNzZWQsIGJ1dCBkaWRuJ3QuDQo+Pg0KPj4gSW1wbGlj
+aXQgaW4gdGhlIGFib3ZlIHNjaGVtZSBpcyB0aGUgZmFjdCB0aGF0IGlmIGFuIG9iamVjdCBpcyAN
+Cj4+IHdyaXR0ZW4sIGJ1dCBhIHBhcnRpY3VsYXIgc2hhcmQgaXNuJ3QgY2hhbmdlZCwgdGhlIG9z
+ZCB3aXRoIHRoYXQgDQo+PiBzaGFyZCB3aWxsIGhhdmUgYSBjb3B5IG9mIHRoZSBvYmplY3Qgd2l0
+aCB0aGUgY29ycmVjdCBkYXRhLCBidXQgYW4gDQo+PiBvdXQgb2YgZGF0ZSBvYmplY3RfaW50byAo
+bm90YWJseSwgdGhlIHZlcnNpb24gd2lsbCBiZSBvbGQpLiAgVG8gYXZvaWQgDQo+PiB0aGlzIG1l
+c3NpbmcgdXAgdGhlIG1pc3Npbmcgc2V0IGR1cmluZyB0aGUgbG9nIHNjYW4gb24gT1NEIHN0YXJ0
+LCANCj4+IHdlJ2xsIHNraXAgbG9nIGVudHJpZXMgd2Ugd291bGRuJ3QgaGF2ZSBwYXJ0aWNpcGF0
+ZWQgaW4gKHdlIG1heSBub3QgDQo+PiBldmVuIGNob29zZSB0byBzdG9yZSB0aGVtLCBzZWUgYmVs
+b3cpLiAgVGhpcyBkb2VzIGdlbmVyYWxseSBwb3NlIGEgDQo+PiBjaGFsbGVuZ2UgZm9yIG1haW50
+YWluaW5nIHByaW9yX3ZlcnNpb24uICBJdCBzZWVtcyBsaWtlIGl0IHNob3VsZG4ndCANCj4+IGJl
+IG11Y2ggb2YgYSBwcm9ibGVtIHNpbmNlIHJvbGxiYWNrcyBjYW4gb25seSBoYXBwZW4gb24gcHJl
+cGFyZWQgbG9nIA0KPj4gZW50cmllcyB3aGljaCBoYXZlbid0IGJlZW4gYXBwbGllZCwgc28gbG9n
+IG1lcmdpbmcgY2FuIG5ldmVyIHJlc3VsdCBpbiBhIGRpdmVyZ2VudCBlbnRyeSBjYXVzaW5nIGEg
+bWlzc2luZyBvYmplY3QuICBJIHRoaW5rIHdlIGNhbiBnZXQgYnkgd2l0aG91dCBpdCB0aGVuPw0K
+Pj4NCj4+IFdlIGNhbiBnbyBmdXJ0aGVyIHdpdGggdGhlIGFib3ZlIGFuZCBhY3R1YWxseSBuZXZl
+ciBwZXJzaXN0IGEgbG9nIA0KPj4gZW50cnkgb24gYSBzaGFyZCB3aGljaCBpdCBkaWQgbm90IHBh
+cnRpY2lwYXRlIGluLiAgQXMgbG9uZyBhcyBwZWVyaW5nIA0KPj4gd29ya3MgY29ycmVjdGx5LCB0
+aGUgdW5pb24gb2YgdGhlIGxvZ3Mgd2UgZ290IG11c3QgaGF2ZSBhbGwgZW50cmllcy4gIA0KPj4g
+VGhlIHByaW1hcnkgd2lsbCBuZWVkIHRvIGtlZXAgYSBjb21wbGV0ZSBjb3B5IGluIG1lbW9yeSB0
+byBtYW5hZ2UgZHVwIG9wIGRldGVjdGlvbiBhbmQgcmVjb3ZlcnksIGhvd2V2ZXIuDQo+DQo+IFRo
+YXQgc291bmRzIG1vcmUgY29tcGxleCB0byBtZS4gIE1heWJlIGluc3RlYWQgd2UgY291bGQgbGF6
+aWx5IHBlcnNpc3QgDQo+IHRoZSBlbnRyaWVzIChvbiB0aGUgbmV4dCBwZyB3cml0ZSkgc28gdGhh
+dCBpdCBpcyBhbHdheXMgYSBjb250aWd1b3VzIHNlcXVlbmNlPw0KPg0KPj4gMikgYWJvdmUgY2Fu
+IGFsc28gYmUgZG9uZSBtdWNoIG1vcmUgZWZmaWNpZW50bHkuICBTb21lIGNvZGVzIHdpbGwgDQo+
+PiBhbGxvdyB0aGUgcGFyaXR5IGNodW5rcyB0byBiZSByZWNvbnN0cnVjdGVkIG1vcmUgZWZmaWNp
+ZW50bHksIHNvIHNvbWUgDQo+PiB0aG91Z2h0IHdpbGwgaGF2ZSB0byBnbyBpbnRvIHJlc3RydWN0
+dXJpbmcgdGhlIHBsdWdpbiBpbnRlcmZhY2UgdG8gDQo+PiBhbGxvdyBtb3JlIGVmZmljaWVudA0K
+Pg0KPiBIb3BlZnVsbHkgdGhlIHN0cmlwZSBzaXplIGlzIGNob3NlbiBzdWNoIHRoYXQgbW9zdCB3
+cml0ZXMgd2lsbCBlbmQgdXAgDQo+IGJlaW5nIGZ1bGwgc3RyaXBlIHdyaXRlcyAod2Ugc2hvdWxk
+IGZpZ3VyZSBvdXQgaWYgdGhlIEVDIHBlcmZvcm1hbmNlIA0KPiBkZWdyYWRlcyBzaWduaWZpY2Fu
+dGx5IGluIHRoYXQgY2FzZT8pLg0KPg0KPiBBbiBhbHRlcm5hdGl2ZSB3b3VsZCBiZSB0byBkbyBz
+b21ldGhpbmcgbGlrZQ0KPg0KPiAxKSBjbGllbnQgc2VuZHMgd3JpdGUgdG8gcHJpbWFyeQ0KPiAy
+KSBwcmltYXJ5IHNlbmRzIHByZXBhcmUgdG8gdGhlIGZpcnN0IE0rMSBzaGFyZHMsIHdobyB3cml0
+ZSBpdCBpbiBhIA0KPiB0ZW1wb3Jhcnkgb2JqZWN0L2xvY2F0aW9uDQo+IDMpIHByaW1hcnkgYWNr
+cyB3cml0ZSBvbmNlIHRoZXkgYWNrDQo+IDQpIGFzeW5jaHJvbm91c2x5LCBwcmltYXJ5IHJlY2Fs
+Y3VsYXRlcyB0aGUgYWZmZWN0ZWQgc3RyaXBlcyBhbmQgc2VuZHMgDQo+IGFuIG92ZXJ3cml0ZS4N
+Cj4NCj4gIC0gc3RlcCA0IGRvZXNuJ3QgbmVlZCB0byBiZSAyLXBoYXNlLCBzaW5jZSB3ZSBoYXZl
+IHRoZSBvcmlnaW5hbCBkYXRhIA0KPiBwZXJzaXN0ZWQgYWxyZWFkeSBvbiA+TSBzaGFyZHMNCj4g
+IC0gdGhlIGNsaWVudC1vYnNlcnZlZCBsYXRlbmN5IGlzIGJvdW5kZWQgYnkgb25seSBNKzEgT1NE
+cyAobm90DQo+IGFjdGluZy5zaXplKCkpDQo+DQo+IEkgc3VzcGVjdCB5b3UgZGlzY3Vzc2VkIHRo
+aXMgb3B0aW9uLCB0aG91Z2gsIGFuZCBoYXZlIG90aGVyIGNvbmNlcm5zIA0KPiBhcm91bmQgaXRz
+IGNvbXBsZXhpdHk/DQo+DQo+IHNhZ2UNCg==
