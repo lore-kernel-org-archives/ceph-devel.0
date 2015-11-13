@@ -1,39 +1,30 @@
-From: "Snyder, Emile" <emsnyder@ebay.com>
-Subject: Re: recommendations for good newbie bug to look at?
-Date: Fri, 13 Nov 2015 19:02:12 +0000
-Message-ID: <E50AA031-87E4-4325-ACCB-250A3B1B3FA4@ebay.com>
-References: <4B186C0B-C7CD-401F-8FAA-DCC5A89D345C@ebay.com>
- <CAJ4mKGYrW-5kRFHfM-gQbYopV25fr68nVDJsAZb8sRSwVMCzqg@mail.gmail.com>
+From: Ken Dreyer <kdreyer@redhat.com>
+Subject: Firefly EOL date - still Jan 2016?
+Date: Fri, 13 Nov 2015 14:15:15 -0700
+Message-ID: <CALqRxCy7hGSXOo5B_iKLcoGB-MroBoo04JT7fHiwtEdb+=-NeQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from den-mipot-001.corp.ebay.com ([216.113.175.152]:13564 "EHLO
-	den-mipot-001.corp.ebay.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751376AbbKMTCO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 13 Nov 2015 14:02:14 -0500
-In-Reply-To: <CAJ4mKGYrW-5kRFHfM-gQbYopV25fr68nVDJsAZb8sRSwVMCzqg@mail.gmail.com>
-Content-Language: en-US
-Content-ID: <CC6BCD32DD63BC4A92F27E7ADE4D9618@corp.ebay.com>
+Received: from mail-wm0-f48.google.com ([74.125.82.48]:38762 "EHLO
+	mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750781AbbKMVPR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Nov 2015 16:15:17 -0500
+Received: by wmec201 with SMTP id c201so47761620wme.1
+        for <ceph-devel@vger.kernel.org>; Fri, 13 Nov 2015 13:15:16 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-DQo+TG9va3MgbGlrZSB3ZSBvbmx5IGhhdmUgdHdvIHRhZ2dlZCByaWdodCBub3cgOiggYnV0IHBl
-cmlvZGljYWxseQ0KPnRoaW5ncyBpbiB0aGUgdHJhY2tlciBnZXQgdGFnZ2VkIHdpdGggIm5ldy1k
-ZXYiLg0KPg0KPmh0dHA6Ly90cmFja2VyLmNlcGguY29tL3Byb2plY3RzL2NlcGgvc2VhcmNoP3V0
-Zjg94pyTJmlzc3Vlcz0xJnE9bmV3LWRldg0KPg0KPi4uLmFuZCBsb29raW5nIGF0IHRoYXQsIHRo
-ZSBvc2RtYXBfc3Vic2NyaWJlIG9uZXMgSSB0aGluayBhcmUgbW9zdGx5DQo+ZGVhbHQgd2l0aCBp
-biBodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBoL3B1bGwvNjMxNC4gU28sIEkgZ3Vlc3MgSQ0K
-Pm9uY2UgdGhvdWdodCBodHRwOi8vdHJhY2tlci5jZXBoLmNvbS9pc3N1ZXMvNjYzNCB3YXMgYSBn
-b29kIHN0YXJ0ZXINCj50YXNrIHRvIGdldCBwZW9wbGUgdGhyb3VnaCB0aGUgUFIgcHJvY2Vzcy4g
-OikNCg0KVGhhbmtzLCBJ4oCZbGwgZ2l2ZSBpdCBhIGxvb2suIEkgYWxzbyBmb3VuZCB0aGUgY2h1
-bSBidWNrZXQgb24gdGhlIHdpa2kgYXQgaHR0cDovL3RyYWNrZXIuY2VwaC5jb20vcHJvamVjdHMv
-Y2VwaC93aWtpL0NodW1fQnVja2V0LCBhbmQgdGhlIHN0cmVhbWluZyBmb3JtYXR0ZXIgbG9va3Mg
-bGlrZSBubyBvbmUgaGFzIHBpY2tlZCBpdCB1cCAoYWx0aG91Z2ggaXQgYWxzbyBsb29rcyBsaWtl
-IGEgYmlnZ2VyIGJpdGUgOikNCg0KPk90aGVyIHRoYW4gdGhhdCwgaWYgdGhlcmUgYXJlIHNwZWNp
-ZmljIHRoaW5ncyB5b3UncmUgaW50ZXJlc3RlZCBpbiB5b3UNCj5jYW4gY2hlY2sgdGhlIHRyYWNr
-ZXIgZm9yIGZlYXR1cmUgdGlja2V0cyBpbiB0aGF0IGFyZWEuDQoNClRoYW5rcywgd2lsbCBkby4N
-Cg0KLWVtaWxlDQoNCg==
+Hi folks,
+
+This is mainly directed at the stable release team members
+(http://tracker.ceph.com/projects/ceph-releases/wiki/HOWTO), since
+they are the ones doing the work of backporting :)
+
+On http://docs.ceph.com/docs/master/releases/, it says the estimated
+EOL for Firefly is Jan 2016, which is coming up soon.
+
+Does anyone on the stable release team have an interest in doing
+releases beyond that date, or should we announce that as a firm date?
+
+- Ken
