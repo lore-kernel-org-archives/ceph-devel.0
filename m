@@ -1,35 +1,56 @@
-From: "yangruifeng.09209@h3c.com" <yangruifeng.09209@h3c.com>
-Subject: a problem about FileStore::_destroy_collection
-Date: Mon, 16 Nov 2015 03:10:31 +0000
-Message-ID: <0C3F6DA3760D0C4691E69E5BE224FF495E17E901@H3CMLB12-EX.srv.huawei-3com.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([60.191.123.56]:30913 "EHLO h3cmg01-ex.h3c.com"
-	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752624AbbKPDK7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 15 Nov 2015 22:10:59 -0500
-Content-Language: zh-CN
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "Sage Weil (sweil@redhat.com)" <sweil@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+From: Geliang Tang <geliangtang@163.com>
+Subject: [PATCH 2/3] libceph: use list_next_entry instead of list_entry_next
+Date: Mon, 16 Nov 2015 21:46:32 +0800
+Message-ID: <b6930bdf479389886e7b999d207419836893af78.1447681244.git.geliangtang@163.com>
+References: <6a47dadb3a625d7f5b20b4e98bb8af4d30db66a3.1447681244.git.geliangtang@163.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <6a47dadb3a625d7f5b20b4e98bb8af4d30db66a3.1447681244.git.geliangtang@163.com>
+In-Reply-To: <6a47dadb3a625d7f5b20b4e98bb8af4d30db66a3.1447681244.git.geliangtang@163.com>
+References: <6a47dadb3a625d7f5b20b4e98bb8af4d30db66a3.1447681244.git.geliangtang@163.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, "David S. Miller" <davem@davemloft.net>
+Cc: Geliang Tang <geliangtang@163.com>, ceph-devel@vger.kernel.org, netdev@vger.kernel.org, linux-kernel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-YW4gRU5PVEVNUFRZIGVycm9yIG15YmUgaGFwcGVuIHdoZW4gcmVtb3ZpbmcgYSBwZyBpbiBwcmV2
-aW91cyB2ZXJzaW9uc6OsYnV0IHRoZSBlcnJvciBpcyBoaWRkZW4gaW4gbmV3IHZlcnNpb25zoaMN
-Cg0KX2Rlc3Ryb3lfY29sbGVjdGlvbiBtYXliZSByZXR1cm4gMCB3aGVuIGdldF9pbmRleCBvciBw
-cmVwX2RlbGV0ZSByZXR1cm4gPCAwOw0KDQppcyB0aGlzIGludGVuZGVkPw0KDQppbnQgRmlsZVN0
-b3JlOjpfZGVzdHJveV9jb2xsZWN0aW9uKGNvbGxfdCBjKSANCnsNCiAgaW50IHIgPSAwOyAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgLy9nbG9iYWwgcg0KICBjaGFyIGZuW1BBVEhfTUFYXTsN
-CiAgZ2V0X2NkaXIoYywgZm4sIHNpemVvZihmbikpOw0KICBkb3V0KDE1KSA8PCAiX2Rlc3Ryb3lf
-Y29sbGVjdGlvbiAiIDw8IGZuIDw8IGRlbmRsOw0KICB7DQogICAgSW5kZXggZnJvbTsNCiAgICBp
-bnQgciA9IGdldF9pbmRleChjLCAmZnJvbSk7ICAgICAgICAgICAgLy9sb2NhbCByDQogICAgaWYg
-KHIgPCAwKQ0KICAgICAgZ290byBvdXQ7DQogICAgYXNzZXJ0KE5VTEwgIT0gZnJvbS5pbmRleCk7
-DQogICAgUldMb2NrOjpXTG9ja2VyIGwoKGZyb20uaW5kZXgpLT5hY2Nlc3NfbG9jayk7DQoNCiAg
-ICByID0gZnJvbS0+cHJlcF9kZWxldGUoKTsNCiAgICBpZiAociA8IDApDQogICAgICBnb3RvIG91
-dDsNCiAgfQ0KICByID0gOjpybWRpcihmbik7DQogIGlmIChyIDwgMCkgew0KICAgIHIgPSAtZXJy
-bm87DQogICAgZ290byBvdXQ7DQogIH0NCg0KIG91dDoNCiAgLy8gZGVzdHJveSBwYXJhbGxlbCB0
-ZW1wIGNvbGxlY3Rpb24sIHRvbw0KICAuLi4NCg0KIG91dF9maW5hbDoNCiAgZG91dCgxMCkgPDwg
-Il9kZXN0cm95X2NvbGxlY3Rpb24gIiA8PCBmbiA8PCAiID0gIiA8PCByIDw8IGRlbmRsOw0KICBy
-ZXR1cm4gcjsNCn0NCg==
+list_next_entry has been defined in list.h, so I replace list_entry_next
+with it.
+
+Signed-off-by: Geliang Tang <geliangtang@163.com>
+---
+ net/ceph/messenger.c | 7 ++-----
+ 1 file changed, 2 insertions(+), 5 deletions(-)
+
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index 9981039..b1d1489 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -23,9 +23,6 @@
+ #include <linux/ceph/pagelist.h>
+ #include <linux/export.h>
+ 
+-#define list_entry_next(pos, member)					\
+-	list_entry(pos->member.next, typeof(*pos), member)
+-
+ /*
+  * Ceph uses the messenger to exchange ceph_msg messages with other
+  * hosts in the system.  The messenger provides ordered and reliable
+@@ -1042,7 +1039,7 @@ static bool ceph_msg_data_pagelist_advance(struct ceph_msg_data_cursor *cursor,
+ 	/* Move on to the next page */
+ 
+ 	BUG_ON(list_is_last(&cursor->page->lru, &pagelist->head));
+-	cursor->page = list_entry_next(cursor->page, lru);
++	cursor->page = list_next_entry(cursor->page, lru);
+ 	cursor->last_piece = cursor->resid <= PAGE_SIZE;
+ 
+ 	return true;
+@@ -1166,7 +1163,7 @@ static bool ceph_msg_data_advance(struct ceph_msg_data_cursor *cursor,
+ 	if (!cursor->resid && cursor->total_resid) {
+ 		WARN_ON(!cursor->last_piece);
+ 		BUG_ON(list_is_last(&cursor->data->links, cursor->data_head));
+-		cursor->data = list_entry_next(cursor->data, links);
++		cursor->data = list_next_entry(cursor->data, links);
+ 		__ceph_msg_data_cursor_init(cursor);
+ 		new_piece = true;
+ 	}
+-- 
+2.5.0
