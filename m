@@ -1,24 +1,37 @@
-From: Yuri Weinstein <yweinste@redhat.com>
+From: Tamil Muthamizhan <tmuthami@redhat.com>
 Subject: Re: v0.80.11 QE validation status
-Date: Mon, 16 Nov 2015 14:01:42 -0800
-Message-ID: <CAMMFjmGtECP2wDP6R9GOHA2DoYuJWSgWJh7h+m5QQd_puiOATg@mail.gmail.com>
-References: <CAMMFjmFP88goDtrMCmrwpkNOR6R45aOaJaa2t0cCKR+Lb_jTBw@mail.gmail.com>
-	<CAMMFjmFsBQihi_YNmRQtfAAMzZeTgidH18Z5rKO0kU18oyFoWw@mail.gmail.com>
-	<564A44D3.9020908@redhat.com>
+Date: Mon, 16 Nov 2015 17:05:39 -0500 (EST)
+Message-ID: <1460602234.13742303.1447711539365.JavaMail.zimbra@redhat.com>
+References: <CAMMFjmFP88goDtrMCmrwpkNOR6R45aOaJaa2t0cCKR+Lb_jTBw@mail.gmail.com> <CAMMFjmFsBQihi_YNmRQtfAAMzZeTgidH18Z5rKO0kU18oyFoWw@mail.gmail.com> <564A44D3.9020908@redhat.com> <CAMMFjmGtECP2wDP6R9GOHA2DoYuJWSgWJh7h+m5QQd_puiOATg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f44.google.com ([74.125.82.44]:33296 "EHLO
-	mail-wm0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750878AbbKPWBn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Nov 2015 17:01:43 -0500
-Received: by wmec201 with SMTP id c201so199418677wme.0
-        for <ceph-devel@vger.kernel.org>; Mon, 16 Nov 2015 14:01:42 -0800 (PST)
-In-Reply-To: <564A44D3.9020908@redhat.com>
+Received: from mx3-phx2.redhat.com ([209.132.183.24]:58113 "EHLO
+	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751151AbbKPWFm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Nov 2015 17:05:42 -0500
+In-Reply-To: <CAMMFjmGtECP2wDP6R9GOHA2DoYuJWSgWJh7h+m5QQd_puiOATg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <ldachary@redhat.com>
-Cc: ceph-qa <ceph-qa@ceph.com>, "Development, Ceph" <ceph-devel@vger.kernel.org>, "Weil, Sage" <sage@redhat.com>, "Deza, Alfredo" <adeza@redhat.com>
+To: Yuri Weinstein <yweinste@redhat.com>, Loic Dachary <ldachary@redhat.com>
+Cc: ceph-qa <ceph-qa@ceph.com>, Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, Alfredo Deza <adeza@redhat.com>
+
+Hi Loic and Yuri,
+
+issue 11104 can be resolved only after the stable epel[with Boris Fix] is out and tested in teuthology.
+
+what Warren has currently done is to tweak the install task to work around this issue inorder to clear the test blocker for v0.80.11. It doesnt count as a "real" fix.
+
+Regards,
+Tamil
+
+----- Original Message -----
+From: "Yuri Weinstein" <yweinste@redhat.com>
+To: "Loic Dachary" <ldachary@redhat.com>
+Cc: "ceph-qa" <ceph-qa@ceph.com>, "Ceph Development" <ceph-devel@vger.kernel.org>, "Sage Weil" <sage@redhat.com>, "Alfredo Deza" <adeza@redhat.com>
+Sent: Monday, November 16, 2015 2:01:42 PM
+Subject: Re: v0.80.11 QE validation status
 
 Loic,
 
@@ -94,3 +107,7 @@ On Mon, Nov 16, 2015 at 1:04 PM, Loic Dachary <ldachary@redhat.com> wrote:
 >>> Thx
 >>> YuriW
 >
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
