@@ -1,55 +1,137 @@
-From: Dan van der Ster <dan@vanderster.com>
-Subject: Re: scrub randomization and load threshold
-Date: Mon, 16 Nov 2015 16:32:11 +0100
-Message-ID: <CABZ+qqnezk0=D1rArOogctrjpsAU7n_wOdLRPJ0HkhwzRbQSpQ@mail.gmail.com>
-References: <CABZ+qq=7izv5o-5ACygqZyr=ho58nLoKb7XmRKT2yyTqKFwrZQ@mail.gmail.com>
- <alpine.DEB.2.00.1511120526390.7964@cobra.newdream.net> <CABZ+qqnj81gQDe6mApNdGa-HK2LbeKJwHH-7Lj9ovq2+ci1MgA@mail.gmail.com>
- <alpine.DEB.2.00.1511120705240.614@cobra.newdream.net> <CABZ+qq=hEkD1QwqoYeytOGKanbSKVBodQmmsb_sXSTsGwDKimA@mail.gmail.com>
- <CABZ+qqma+-bOPcPr3K_9mZaDHE54pvNtWw0OmiAFCYH1zX3Ysw@mail.gmail.com> <alpine.DEB.2.00.1511160717510.7964@cobra.newdream.net>
+From: Vickey Singh <vickey.singh22693-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Math behind : : OSD count vs OSD process vs OSD ports
+Date: Mon, 16 Nov 2015 17:55:47 +0200
+Message-ID: <CALL4jwNCYhOX5Frn94+17iubYBzp4e3HoByRwhbWxBbqyd6HMw@mail.gmail.com>
 Mime-Version: 1.0
+Content-Type: multipart/mixed; boundary="===============1499565040=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
+
+--===============1499565040==
+Content-Type: multipart/alternative; boundary=001a1130d26a5045db0524aa716f
+
+--001a1130d26a5045db0524aa716f
 Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f169.google.com ([209.85.217.169]:33186 "EHLO
-	mail-lb0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751636AbbKPPcy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Nov 2015 10:32:54 -0500
-Received: by lbbkw15 with SMTP id kw15so90644196lbb.0
-        for <ceph-devel@vger.kernel.org>; Mon, 16 Nov 2015 07:32:53 -0800 (PST)
-Received: from mail-lf0-f47.google.com (mail-lf0-f47.google.com. [209.85.215.47])
-        by smtp.gmail.com with ESMTPSA id bn6sm5562937lbc.10.2015.11.16.07.32.51
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 16 Nov 2015 07:32:51 -0800 (PST)
-Received: by lfaz4 with SMTP id z4so25351303lfa.0
-        for <ceph-devel@vger.kernel.org>; Mon, 16 Nov 2015 07:32:51 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.00.1511160717510.7964@cobra.newdream.net>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Herve Rousseau <herve.rousseau@cern.ch>
 
-On Mon, Nov 16, 2015 at 4:20 PM, Sage Weil <sage@newdream.net> wrote:
-> On Mon, 16 Nov 2015, Dan van der Ster wrote:
->> Instead of keeping a 24hr loadavg, how about we allow scrubs whenever
->> the loadavg is decreasing (or below the threshold)? As long as the
->> 1min loadavg is less than the 15min loadavg, we should be ok to allow
->> new scrubs. If you agree I'll add the patch below to my PR.
->
-> I like the simplicity of that, I'm afraid its going to just trigger a
-> feedback loop and oscillations on the host.  I.e., as soo as we see *any*
-> decrease, all osds on the host will start to scrub, which will push the
-> load up.  Once that round of PGs finish, the load will start to drop
-> again, triggering another round.  This'll happen regardless of whether
-> we're in the peak hours or not, and the high-level goal (IMO at least) is
-> to do scrubbing in non-peak hours.
+Hello Community
 
-We checked our OSDs' 24hr loadavg plots today and found that the
-original idea of 0.8 * 24hr loadavg wouldn't leave many chances for
-scrubs to run. So maybe if we used 0.9 or 1.0 it would be doable.
+Need your help in understanding this.
 
-BTW, I realized there was a silly error in that earlier patch, and we
-anyway need an upper bound, say # cpus. So until your response came I
-was working with this idea:
-https://stikked.web.cern.ch/stikked/view/raw/5586a912
+I have the below node, which is hosting 60 physical disks, running 1 OSD
+per disk so total 60 Ceph OSD daemons
 
--- dan
+*[root@node01 ~]# service ceph status | grep -i osd | grep -i running | wc
+-l*
+*60*
+*[root@node01 ~]#*
+
+However if i check OSD processes it shows that there are 120 OSD process
+are running.
+
+*[root@node01 ~]# ps -ef | grep -i osd | grep -v grep | wc -l*
+*120*
+*[root@node01 ~]#*
+
+*Question 1 : why its 120 processes ? , i it should be 60 (because of 60
+OSD on the system)*
+My guess : is this because of multithreading ?
+
+Now if i check the number of ports used by OSD its comming out to be 240
+
+*[root@node01 ~]# netstat -plunt | grep -i osd | wc -l*
+*240*
+*[root@node01 ~]#*
+
+*Question 2 : Now why its 240 ports ? It should be 60 ( because of 60 OSD
+on the system)*
+
+If i grep a specific OSD port , its shows 2 ports are occupied by OSD
+process 260519
+
+*[root@node01 ~]# netstat -plunt | grep -i osd | grep -i 6819*
+*tcp        0      0 10.101.50.1:6819 <http://10.101.50.1:6819>
+ 0.0.0.0:*               LISTEN      260519/ceph-osd*
+*tcp        0      0 10.102.50.1:6819 <http://10.102.50.1:6819>
+ 0.0.0.0:*               LISTEN      260519/ceph-osd*
+*[root@node01 ~]#*
+
+*Question 3 : Now based on the scenario 2 it should be 4 ( so 60 OSD x 4
+ports = 240 ports in total)*
+
+I have two public and cluster network configured in ceph.conf , is all
+these because of two different networks ?
+
+*I would really appreciate if some knowledgeable person share his
+understanding with me.*
+
+Thank you in advance.
+
+--001a1130d26a5045db0524aa716f
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div>Hello Community</div><div><br></div><div>Need your he=
+lp in understanding this.</div><div><br></div><div>I have the below node, w=
+hich is hosting 60 physical disks, running 1 OSD per disk so total 60 Ceph =
+OSD daemons</div><div><br></div><div><b><font color=3D"#0000ff">[root@node0=
+1 ~]# service ceph status | grep -i osd | grep -i running | wc -l</font></b=
+></div><div><b><font color=3D"#0000ff">60</font></b></div><div><b><font col=
+or=3D"#0000ff">[root@node01 ~]#</font></b></div><div><br></div><div>However=
+ if i check OSD processes it shows that there are 120 OSD process are runni=
+ng.</div><div><br></div><div><font color=3D"#0000ff"><b>[root@node01 ~]# ps=
+ -ef | grep -i osd | grep -v grep | wc -l</b></font></div><div><font color=
+=3D"#0000ff"><b>120</b></font></div><div><font color=3D"#0000ff"><b>[root@n=
+ode01 ~]#</b></font></div><div><br></div><div><font color=3D"#ff0000"><b>Qu=
+estion 1 : why its 120 processes ? , i it should be 60 (because of 60 OSD o=
+n the system)</b></font></div><div>My guess : is this because of multithrea=
+ding ?</div><div><br></div><div>Now if i check the number of ports used by =
+OSD its comming out to be 240</div><div><br></div><div><font color=3D"#0000=
+ff"><b>[root@node01 ~]# netstat -plunt | grep -i osd | wc -l</b></font></di=
+v><div><font color=3D"#0000ff"><b>240</b></font></div><div><font color=3D"#=
+0000ff"><b>[root@node01 ~]#</b></font></div><div><br></div><div><font color=
+=3D"#ff0000"><b>Question 2 : Now why its 240 ports ? It should be 60 ( beca=
+use of 60 OSD on the system)</b></font></div><div><br></div><div>If i grep =
+a specific OSD port , its shows 2 ports are occupied by OSD process 260519<=
+/div><div><br></div><div><font color=3D"#0000ff"><b>[root@node01 ~]# netsta=
+t -plunt | grep -i osd | grep -i 6819</b></font></div><div><font color=3D"#=
+0000ff"><b>tcp =C2=A0 =C2=A0 =C2=A0 =C2=A00 =C2=A0 =C2=A0 =C2=A00 <a href=
+=3D"http://10.101.50.1:6819">10.101.50.1:6819</a> =C2=A0 =C2=A0 =C2=A0 =C2=
+=A00.0.0.0:* =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 LISTEN =C2=A0=
+ =C2=A0 =C2=A0260519/ceph-osd</b></font></div><div><font color=3D"#0000ff">=
+<b>tcp =C2=A0 =C2=A0 =C2=A0 =C2=A00 =C2=A0 =C2=A0 =C2=A00 <a href=3D"http:/=
+/10.102.50.1:6819">10.102.50.1:6819</a> =C2=A0 =C2=A0 =C2=A0 =C2=A00.0.0.0:=
+* =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 LISTEN =C2=A0 =C2=A0 =C2=
+=A0260519/ceph-osd</b></font></div><div><font color=3D"#0000ff"><b>[root@no=
+de01 ~]#</b></font></div><div><br></div><div><font color=3D"#ff0000"><b>Que=
+stion 3 : Now based on the scenario 2 it should be 4 ( so 60 OSD x 4 ports =
+=3D 240 ports in total)</b></font></div><div><br></div><div>I have two publ=
+ic and cluster network configured in ceph.conf , is all these because of tw=
+o different networks ?</div><div><br></div><div><b>I would really appreciat=
+e if some knowledgeable person share his understanding with me.</b></div><d=
+iv><br></div><div>Thank you in advance.</div><div><br></div><div><br></div>=
+</div>
+
+--001a1130d26a5045db0524aa716f--
+
+--===============1499565040==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============1499565040==--
