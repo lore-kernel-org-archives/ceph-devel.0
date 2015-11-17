@@ -1,39 +1,53 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [CEPH] OSD daemons running with a large number of threads
-Date: Tue, 17 Nov 2015 05:40:45 -0800 (PST)
-Message-ID: <alpine.DEB.2.00.1511170539010.7964@cobra.newdream.net>
-References: <17751_1447748936_564AE548_17751_8310_3_B9C8EFBF13B1354DB5FA000660D66DD00D64D8A0@OPEXCLILM22.corporate.adroot.infra.ftgroup>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:59921 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753362AbbKQNkq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Nov 2015 08:40:46 -0500
-In-Reply-To: <17751_1447748936_564AE548_17751_8310_3_B9C8EFBF13B1354DB5FA000660D66DD00D64D8A0@OPEXCLILM22.corporate.adroot.infra.ftgroup>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ghislain.chevalier@orange.com
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: Re: [PATCH 2/2] fs/ceph: ceph_frag_contains_value can be boolean
+Date: Tue, 17 Nov 2015 22:04:24 +0800
+Message-ID: <35E9BBF7-3E75-4889-B8E3-67758754221F@redhat.com>
+References: <1447743139-8190-1-git-send-email-baiyaowei@cmss.chinamobile.com> <1447743139-8190-2-git-send-email-baiyaowei@cmss.chinamobile.com>
+Mime-Version: 1.0 (Mac OS X Mail 9.1 \(3096.5\))
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1447743139-8190-2-git-send-email-baiyaowei@cmss.chinamobile.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Yaowei Bai <baiyaowei@cmss.chinamobile.com>
+Cc: Sage Weil <sage@redhat.com>, idryomov@gmail.com, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Tue, 17 Nov 2015, ghislain.chevalier@orange.com wrote:
-> Hi,
+
+> On Nov 17, 2015, at 14:52, Yaowei Bai <baiyaowei@cmss.chinamobile.com> wrote:
 > 
-> Context:
-> Firefly 0.80.9
-> Ubuntu 14.04.1
-> Almost a production platform  in an openstack environment
-> 176 OSD (SAS and SSD), 2 crushmap-oriented storage classes , 8 servers in 2 rooms, 3 monitors on openstack controllers
-> Usage: Rados Gateway for object service and RBD as back-end for Cinder and Glance
+> This patch makes ceph_frag_contains_value return bool to improve
+> readability due to this particular function only using either one or
+> zero as its return value.
 > 
-> Issue:
-> We are currently running performances tests on this cluster before turning it to production.
-> We created cinder volumes (attached to Ceph Back End) on virtual machines and we use FIO to stress the cluster.
-> A very large number of threads are created per OSD daemon (about 1000).
+> No functional change.
+> 
+> Signed-off-by: Yaowei Bai <baiyaowei@cmss.chinamobile.com>
+> ---
+> include/linux/ceph/ceph_frag.h | 2 +-
+> 1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/include/linux/ceph/ceph_frag.h b/include/linux/ceph/ceph_frag.h
+> index 970ba5c..b827e06 100644
+> --- a/include/linux/ceph/ceph_frag.h
+> +++ b/include/linux/ceph/ceph_frag.h
+> @@ -40,7 +40,7 @@ static inline __u32 ceph_frag_mask_shift(__u32 f)
+> 	return 24 - ceph_frag_bits(f);
+> }
+> 
+> -static inline int ceph_frag_contains_value(__u32 f, __u32 v)
+> +static inline bool ceph_frag_contains_value(__u32 f, __u32 v)
+> {
+> 	return (v & ceph_frag_mask(f)) == ceph_frag_value(f);
+> }
+> -- 
+> 1.9.1
 
-This is normal.  The init scripts set the max open files ulimit to a high 
-value (usually 4194304 to avoid any possibility of hitting it) but you may 
-need to set /proc/sys/kernel/pid_max to something big if your cluster is 
-large.
+both applied
 
-sage
+Thanks
+Yan, Zheng
+
+> 
+> 
+> 
