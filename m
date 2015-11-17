@@ -1,54 +1,89 @@
-From: chris holcombe <chris.holcombe@canonical.com>
-Subject: Crc32 Challenge
-Date: Tue, 17 Nov 2015 08:51:16 -0800
-Message-ID: <564B5B04.8040503@canonical.com>
+From: Tejun Heo <tj@kernel.org>
+Subject: Re: request_queue use-after-free - inode_detach_wb()
+Date: Tue, 17 Nov 2015 15:56:41 -0500
+Message-ID: <20151117205641.GF22864@mtj.duckdns.org>
+References: <CAOi1vP9igmg_jayELVDq_NYXUHtByZz5a4M5+CqCMMHUxF5ofA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pa0-f54.google.com ([209.85.220.54]:36470 "EHLO
-	mail-pa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754352AbbKQQvT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Nov 2015 11:51:19 -0500
-Received: by pacdm15 with SMTP id dm15so13816043pac.3
-        for <ceph-devel@vger.kernel.org>; Tue, 17 Nov 2015 08:51:19 -0800 (PST)
-Received: from [192.168.1.10] (c-73-180-29-35.hsd1.or.comcast.net. [73.180.29.35])
-        by smtp.gmail.com with ESMTPSA id fl9sm3180117pab.45.2015.11.17.08.51.17
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 17 Nov 2015 08:51:17 -0800 (PST)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAOi1vP9igmg_jayELVDq_NYXUHtByZz5a4M5+CqCMMHUxF5ofA@mail.gmail.com>
+Sender: linux-fsdevel-owner@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Christoph Hellwig <hch@lst.de>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-fsdevel@vger.kernel.org, Ceph Development <ceph-devel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hello Ceph Devs,
+Hello, Ilya.
 
-I'm almost certain at this point that I have discovered a major bug in 
-ceph's crc32c mechanism.  http://tracker.ceph.com/issues/13713 I'm 
-totally open to be proven wrong and that's what this email is about.  
-Can someone out there write a piece of code using an outside library 
-that produces the same crc32c checksums that Ceph does?  If they can 
-I'll close my bug and stand corrected :).  I've tried 3 python libraries 
-and 1 rust library so far and my conclusions are 1) they are all in 
-agreement and 2) they all produce different checksums than ceph's 
-checksums 
-https://github.com/ceph/ceph/blob/83e10f7e2df0a71bd59e6ef2aa06b52b186fddaa/src/test/common/test_crc32c.cc#L21
+On Mon, Nov 16, 2015 at 09:59:18PM +0100, Ilya Dryomov wrote:
+...
+> Looking at __blkdev_put(), the issue becomes clear: we are taking
+> precautions to flush before calling out to ->release() because, at
+> least according to the comment, ->release() can free queue; we are
+> recording owner pointer because put_disk() may free both gendisk and
+> queue, and then, after all that, we are calling bdput() which may
+> touch the queue through wb_put() in inode_detach_wb().  (The fun part
+> is wb_put() is supposed to be a noop for root wbs, but slab debugging
+> interferes with that by poisoning wb->bdi pointer.)
+> 
+> 1514                  * dirty data before.
+> 1515                  */
+> 1516                 bdev_write_inode(bdev);
+> 1517         }
+> 1518         if (bdev->bd_contains == bdev) {
+> 1519                 if (disk->fops->release)
+> 1520                         disk->fops->release(disk, mode);
+> 1521         }
+> 1522         if (!bdev->bd_openers) {
+> 1523                 struct module *owner = disk->fops->owner;
+> 1524
+> 1525                 disk_put_part(bdev->bd_part);
+> 1526                 bdev->bd_part = NULL;
+> 1527                 bdev->bd_disk = NULL;
+> 1528                 if (bdev != bdev->bd_contains)
+> 1529                         victim = bdev->bd_contains;
+> 1530                 bdev->bd_contains = NULL;
+> 1531
+> 1532                 put_disk(disk); <-- may free q
+> 1533                 module_put(owner);
+> 1534         }
+> 1535         mutex_unlock(&bdev->bd_mutex);
+> 1536         bdput(bdev); <-- may touch q.backing_dev_info.wb
 
-Start small and see if you can verify the "foo bar baz" checksum and 
-then try some of the others.
+Ah, that's a sneaky bug.  Thanks a lot for chasing it down.  The
+scenario sounds completely plausible to me.
 
-For a known good checksum to test your program against use this: 
-http://www.pdl.cmu.edu/mailinglists/ips/mail/msg04970.html  In there 
-Mark Bakke talks about a 32 byte array of all 00h should produce a 
-checksum of 8A9136AA.  Printing that with python in decimal: 2324772522
+> To reproduce, apply the attached patch (systemd-udevd condition is just
+> a convenience: udev reacts to change events by getting the bdev which
+> it then has to put), boot with slub_debug=,blkdev_queue and do:
+> 
+> $ sudo modprobe loop
+> $ sudo losetup /dev/loop0 foo.img
+> $ sudo dd if=/dev/urandom of=/dev/loop0 bs=1M count=1
+> $ sudo losetup -d /dev/loop0
+> $ sudo rmmod loop
+> 
+> (rmmod is key - it's the only way to get loop to do put_disk().  For
+> rbd, it's just rbd map - dd - rbd unmap.)
+> 
+> In the past we used to reassign to default_backing_dev_info here, but
+> it was nuked in b83ae6d42143 ("fs: remove mapping->backing_dev_info").
 
-The implications of this are unfortunately tricky.  If I'm right and we 
-fix ceph's algorithm then it won't be able to talk to any previous 
-version of ceph past the beginning protocol handshake. There would have 
-to be a mechanism introduced so that any x and older version would speak 
-the previous crc and anything y and newer would speak the new version.  
-Another option is we could break ceph's crc code out into a library and 
-make that available to everyone and call it ceph-crc32c.
+Woohoo, it wasn't me. :)
 
-Thanks!
-Chris
+> Shortly after that cgroup-specific writebacks patches from Tejun got
+> merged, adding inode::i_wb and inode_detach_wb() call.  The fix seems
+> to be to detach the inode earlier, but I'm not familiar enough with
+> cgroups code, so sending my findings instead of a patch.  Christoph,
+> Tejun?
+
+It's stinky that the bdi is going away while the inode is still there.
+Yeah, blkdev inodes are special and created early but I think it makes
+sense to keep the underlying structures (queue and bdi) around while
+bdev is associated with it.  Would simply moving put_disk() after
+bdput() work?
+
+Thanks.
+
+-- 
+tejun
