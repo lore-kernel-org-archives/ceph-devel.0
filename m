@@ -1,89 +1,144 @@
-From: Tejun Heo <tj@kernel.org>
-Subject: Re: request_queue use-after-free - inode_detach_wb()
-Date: Tue, 17 Nov 2015 15:56:41 -0500
-Message-ID: <20151117205641.GF22864@mtj.duckdns.org>
-References: <CAOi1vP9igmg_jayELVDq_NYXUHtByZz5a4M5+CqCMMHUxF5ofA@mail.gmail.com>
+From: Pete Zaitcev <zaitcev@redhat.com>
+Subject: Re: RGW multi-tenancy APIs overview
+Date: Tue, 17 Nov 2015 16:47:23 -0700
+Message-ID: <20151117164723.0d89f579@lembas.zaitcev.lan>
+References: <20151109221015.2fa7745c@lembas.zaitcev.lan>
+ <CADRKj5TmduPhctTc2LdbSXrMyycrR_9=+jkiXNOCpUy63ozuPg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAOi1vP9igmg_jayELVDq_NYXUHtByZz5a4M5+CqCMMHUxF5ofA@mail.gmail.com>
-Sender: linux-fsdevel-owner@vger.kernel.org
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Christoph Hellwig <hch@lst.de>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-fsdevel@vger.kernel.org, Ceph Development <ceph-devel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:48549 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932140AbbKQXrY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 17 Nov 2015 18:47:24 -0500
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+	by mx1.redhat.com (Postfix) with ESMTPS id 589111136E2
+	for <ceph-devel@vger.kernel.org>; Tue, 17 Nov 2015 23:47:24 +0000 (UTC)
+In-Reply-To: <CADRKj5TmduPhctTc2LdbSXrMyycrR_9=+jkiXNOCpUy63ozuPg@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, zaitcev@redhat.com
 
-Hello, Ilya.
+On Mon, 9 Nov 2015 21:36:47 -0800
+Yehuda Sadeh-Weinraub <yehuda@redhat.com> wrote:
 
-On Mon, Nov 16, 2015 at 09:59:18PM +0100, Ilya Dryomov wrote:
-...
-> Looking at __blkdev_put(), the issue becomes clear: we are taking
-> precautions to flush before calling out to ->release() because, at
-> least according to the comment, ->release() can free queue; we are
-> recording owner pointer because put_disk() may free both gendisk and
-> queue, and then, after all that, we are calling bdput() which may
-> touch the queue through wb_put() in inode_detach_wb().  (The fun part
-> is wb_put() is supposed to be a noop for root wbs, but slab debugging
-> interferes with that by poisoning wb->bdi pointer.)
+We discussed this a bit on RGW team meeting in BJ, and there were some
+developments, so for the sake of update here goes.
+
+> > #1 Back-end and radosgw-admin use '/' or "tenant/bucket". This is what is
+> > literally stored in RADOS, because it's used to name bucket objects in
+> > the .rgw pool.
+
+This works.
+
+> > #2 Buckets in Swift URLs use '\' (backslash), because there does not seem
+> > to be a way to use '/'. Example:
+> >  http://host.corp.com:8080/swift/v1/testen\testcont
+
+> > Note that strictly speaking, we don't really need this, since Swift URLs
+> > could easily include tenant names where reference Swift places account names.
+> > It's just easier to implement without disturbing authenthication code.
 > 
-> 1514                  * dirty data before.
-> 1515                  */
-> 1516                 bdev_write_inode(bdev);
-> 1517         }
-> 1518         if (bdev->bd_contains == bdev) {
-> 1519                 if (disk->fops->release)
-> 1520                         disk->fops->release(disk, mode);
-> 1521         }
-> 1522         if (!bdev->bd_openers) {
-> 1523                 struct module *owner = disk->fops->owner;
-> 1524
-> 1525                 disk_put_part(bdev->bd_part);
-> 1526                 bdev->bd_part = NULL;
-> 1527                 bdev->bd_disk = NULL;
-> 1528                 if (bdev != bdev->bd_contains)
-> 1529                         victim = bdev->bd_contains;
-> 1530                 bdev->bd_contains = NULL;
-> 1531
-> 1532                 put_disk(disk); <-- may free q
-> 1533                 module_put(owner);
-> 1534         }
-> 1535         mutex_unlock(&bdev->bd_mutex);
-> 1536         bdput(bdev); <-- may touch q.backing_dev_info.wb
+> I think that leveraging the native swift URL tenant encoding is
+> probably a cleaner solution than having it encoded as a backslash.
 
-Ah, that's a sneaky bug.  Thanks a lot for chasing it down.  The
-scenario sounds completely plausible to me.
+Indeed, I clearly took a lazy way out. Backslashes are removed from the
+current pull request #6358, to be replaced with the right solution through
+the auth.
 
-> To reproduce, apply the attached patch (systemd-udevd condition is just
-> a convenience: udev reacts to change events by getting the bdev which
-> it then has to put), boot with slub_debug=,blkdev_queue and do:
+> > #3 S3 host addressing of buckets
+> >
+> > This is similar to Swift and is slated to use backslash. Note that S3
+> > prohibits it, so we're reasonably safe with this choice.
+
+We circled back to this in the meeting and replaced backslashes with colons,
+for a cleaner look.
+
+Note that in a potentially major development, the tenant name and the colon
+are included into the string that is used to calculate HMAC. So, theoretically
+stock clients could work, by packing tenant into buckets - except if they
+use some kind of configuration syntax with colons. One motivation for
+backslash was that it could be easier to make clients to eat. This is
+something we ought to test and possibly tweak.
+
+> > #4 S3 URL addressing of buckets
+> >
+> > Here we must use a period. Example:
+> >  bucket.tenant.host.corp.com
 > 
-> $ sudo modprobe loop
-> $ sudo losetup /dev/loop0 foo.img
-> $ sudo dd if=/dev/urandom of=/dev/loop0 bs=1M count=1
-> $ sudo losetup -d /dev/loop0
-> $ sudo rmmod loop
+> Can probably identify this automatically, if the host is at a
+> subdomain of a supported domain, and it's a second level subdomain
+> from the main domain then we can regard it as <bucket>.<tenant>
+
+This part suffered a major setback. And oddly enough nobody raised any
+objections until now. But periods are permitted in bucket names in S3.
+Therefore the "bucket.tenant.host.domain" thing cannot work.
+
+I'm inclined to document this and simply tell people who want to access
+buckets across tenants to use URL paths per above. However...
+
+> In the supported domains configuration, we can specify for each domain
+> whether a subdomain for it would be a bucket (as it is now), or
+> whether it would be a tenant (which implies the possibility of
+> bucket.tenant). This only affects the global (a.k.a the "empty")
+> tenant.
 > 
-> (rmmod is key - it's the only way to get loop to do put_disk().  For
-> rbd, it's just rbd map - dd - rbd unmap.)
+> E.g., we can have two domains:
 > 
-> In the past we used to reassign to default_backing_dev_info here, but
-> it was nuked in b83ae6d42143 ("fs: remove mapping->backing_dev_info").
+> legacy-foo.com
+> new-foo.com
+> 
+> We'd specify that legacy-foo.com is a global tenant endpoint. In which
+> case, when accessing buck.legacy-foo.com, it will access the global
+> tenant, and bucket=buck.
+> Whereas, new-foo.com isn't a global tenant endpoint, in which case, if
+> we'd access buck.new-foo.com, it will mean that we accessed the 'buck'
+> tenant.
 
-Woohoo, it wasn't me. :)
+Okay, that is plausible (meaning: I can make it work). This scheme has
+a little downside in it: these DNS domains cannot nest. In other words,
+corp.com cannot be migrated to tenantized-rados.corp.com. But otherwise,
+I don't see it can't work.
 
-> Shortly after that cgroup-specific writebacks patches from Tejun got
-> merged, adding inode::i_wb and inode_detach_wb() call.  The fix seems
-> to be to detach the inode earlier, but I'm not familiar enough with
-> cgroups code, so sending my findings instead of a patch.  Christoph,
-> Tejun?
+> > #5 Listings and redirects.
+> >
+> > Listings present a difficulty in S3: we don't know if the name will be
+> > used in host-based or URL-based addressing of a bucket. So, we put the
+> > tenant of a bucket into a separate XML attribute.
+> 
+> You mean a separate http header? http param?
 
-It's stinky that the bdi is going away while the inode is still there.
-Yeah, blkdev inodes are special and created early but I think it makes
-sense to keep the underlying structures (queue and bdi) around while
-bdev is associated with it.  Would simply moving put_disk() after
-bdput() work?
+Not sure what that question assumed. A separate XML attribute looks like:
 
-Thanks.
+<ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01">
+ <Name>foobucket</Name>
+ <Tenant>footenant</Tenant>  <=============== this one
+ <IsTruncated>false</IsTruncated>
 
--- 
-tejun
+There's a certain problem with this, in case the client is constructing
+the URLs for further access. In case it's trying to access across tenants,
+it has to fetch the tenant name from the attribute. I thought about returning
+the bucket name as <Name>footenant:foobucket</Name> for all buckets that
+belong to non-empty tenant, but that seems asking for compatibility issues
+even for access within the tenant.
+
+> > Since Swift listings are always in a specific account, and thus tenant,
+> > they are unchanged.
+> >
+> > In addition to listings, bucket names leak into certain HTTP headers, where
+> > we add "Tenant:" headers as appropriate.
+> >
+> > Finally, multi-tenancy also puts user_uid namespaces under tenants as well
+> > as bucket namespaces. That one is easy though. A '$' separator is used
+> > consistently for it (tenant$user).
+
+> Does that work the same for object copy, and acls?
+
+ACLs do not list buckets, only users, which may be qualified (tenant$user).
+COPY verbs use colons in S3. Fortunately there's no additional complication
+with HMAC. In Swift, currently, all that support is removed together with
+the backslash and is waiting for "new" URLs.
+
+-- Pete
