@@ -1,55 +1,113 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: 11/18/2015 Weekly Ceph Performance Meeting IS ON!
-Date: Wed, 18 Nov 2015 09:04:45 -0600
-Message-ID: <564C938D.2090606@redhat.com>
-Reply-To: mnelson@redhat.com
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: request_queue use-after-free - inode_detach_wb()
+Date: Wed, 18 Nov 2015 16:12:07 +0100
+Message-ID: <CAOi1vP_mp6wjb+jU_tRADqhXGqf1YTj=w=3ynMBj5=SaVU3o4g@mail.gmail.com>
+References: <CAOi1vP9igmg_jayELVDq_NYXUHtByZz5a4M5+CqCMMHUxF5ofA@mail.gmail.com>
+	<20151117205641.GF22864@mtj.duckdns.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:57679 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755759AbbKRPEq (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 18 Nov 2015 10:04:46 -0500
-Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
-	by mx1.redhat.com (Postfix) with ESMTPS id BBF8CC07567B
-	for <ceph-devel@vger.kernel.org>; Wed, 18 Nov 2015 15:04:46 +0000 (UTC)
-Received: from [10.3.112.69] (ovpn-112-69.phx2.redhat.com [10.3.112.69])
-	by int-mx13.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id tAIF4jMp022167
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-	for <ceph-devel@vger.kernel.org>; Wed, 18 Nov 2015 10:04:46 -0500
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20151117205641.GF22864@mtj.duckdns.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Tejun Heo <tj@kernel.org>
+Cc: Christoph Hellwig <hch@lst.de>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-fsdevel@vger.kernel.org, Ceph Development <ceph-devel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-8AM PST as usual! I won't be there as I'm out giving a talk at SC15. 
-Sage will be there though, so go talk to him about newstore-block!
+On Tue, Nov 17, 2015 at 9:56 PM, Tejun Heo <tj@kernel.org> wrote:
+> Hello, Ilya.
+>
+> On Mon, Nov 16, 2015 at 09:59:18PM +0100, Ilya Dryomov wrote:
+> ...
+>> Looking at __blkdev_put(), the issue becomes clear: we are taking
+>> precautions to flush before calling out to ->release() because, at
+>> least according to the comment, ->release() can free queue; we are
+>> recording owner pointer because put_disk() may free both gendisk and
+>> queue, and then, after all that, we are calling bdput() which may
+>> touch the queue through wb_put() in inode_detach_wb().  (The fun part
+>> is wb_put() is supposed to be a noop for root wbs, but slab debugging
+>> interferes with that by poisoning wb->bdi pointer.)
+>>
+>> 1514                  * dirty data before.
+>> 1515                  */
+>> 1516                 bdev_write_inode(bdev);
+>> 1517         }
+>> 1518         if (bdev->bd_contains == bdev) {
+>> 1519                 if (disk->fops->release)
+>> 1520                         disk->fops->release(disk, mode);
+>> 1521         }
+>> 1522         if (!bdev->bd_openers) {
+>> 1523                 struct module *owner = disk->fops->owner;
+>> 1524
+>> 1525                 disk_put_part(bdev->bd_part);
+>> 1526                 bdev->bd_part = NULL;
+>> 1527                 bdev->bd_disk = NULL;
+>> 1528                 if (bdev != bdev->bd_contains)
+>> 1529                         victim = bdev->bd_contains;
+>> 1530                 bdev->bd_contains = NULL;
+>> 1531
+>> 1532                 put_disk(disk); <-- may free q
+>> 1533                 module_put(owner);
+>> 1534         }
+>> 1535         mutex_unlock(&bdev->bd_mutex);
+>> 1536         bdput(bdev); <-- may touch q.backing_dev_info.wb
+>
+> Ah, that's a sneaky bug.  Thanks a lot for chasing it down.  The
+> scenario sounds completely plausible to me.
+>
+>> To reproduce, apply the attached patch (systemd-udevd condition is just
+>> a convenience: udev reacts to change events by getting the bdev which
+>> it then has to put), boot with slub_debug=,blkdev_queue and do:
+>>
+>> $ sudo modprobe loop
+>> $ sudo losetup /dev/loop0 foo.img
+>> $ sudo dd if=/dev/urandom of=/dev/loop0 bs=1M count=1
+>> $ sudo losetup -d /dev/loop0
+>> $ sudo rmmod loop
+>>
+>> (rmmod is key - it's the only way to get loop to do put_disk().  For
+>> rbd, it's just rbd map - dd - rbd unmap.)
+>>
+>> In the past we used to reassign to default_backing_dev_info here, but
+>> it was nuked in b83ae6d42143 ("fs: remove mapping->backing_dev_info").
+>
+> Woohoo, it wasn't me. :)
 
-Here's the links:
+Well, you and Christoph have been pulling it in different directions.
+He removed default_backing_dev_info along with mapping->backing_dev_info,
+but you then kind of readded this link with inode->i_wb.
 
-Etherpad URL:
-http://pad.ceph.com/p/performance_weekly
+>
+>> Shortly after that cgroup-specific writebacks patches from Tejun got
+>> merged, adding inode::i_wb and inode_detach_wb() call.  The fix seems
+>> to be to detach the inode earlier, but I'm not familiar enough with
+>> cgroups code, so sending my findings instead of a patch.  Christoph,
+>> Tejun?
+>
+> It's stinky that the bdi is going away while the inode is still there.
+> Yeah, blkdev inodes are special and created early but I think it makes
+> sense to keep the underlying structures (queue and bdi) around while
+> bdev is associated with it.  Would simply moving put_disk() after
+> bdput() work?
 
-To join the Meeting:
-https://bluejeans.com/268261044
+I'd think so.  struct block_device is essentially a "block device"
+pseudo-filesystem inode, and as such, may not be around during the
+entire lifetime of gendisk / queue.  It may be kicked out of the inode
+cache as soon as the device is closed, so it makes sense to put it
+before putting gendisk / queue, which will outlive it.
 
-To join via Browser:
-https://bluejeans.com/268261044/browser
+However, I'm confused by this comment
 
-To join with Lync:
-https://bluejeans.com/268261044/lync
+/*
+ * ->release can cause the queue to disappear, so flush all
+ * dirty data before.
+ */
+bdev_write_inode(bdev);
 
+It's not true, at least since your 523e1d399ce0 ("block: make gendisk
+hold a reference to its queue"), right?  (It used to say "->release can
+cause the old bdi to disappear, so must switch it out first" and was
+changed by Christoph in the middle of his backing_dev_info series.)
 
-To join via Room System:
-Video Conferencing System: bjn.vc -or- 199.48.152.152
-Meeting ID: 268261044
+Thanks,
 
-To join via Phone:
-1) Dial:
-           +1 408 740 7256
-           +1 888 240 2560(US Toll Free)
-           +1 408 317 9253(Alternate Number)
-           (see all numbers - http://bluejeans.com/numbers)
-2) Enter Conference ID: 268261044
-
-Mark
+                Ilya
