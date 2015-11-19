@@ -1,106 +1,97 @@
 From: =?UTF-8?Q?Marcin_Gibu=c5=82a?= <m.gibula@beyond.pl>
-Subject: OSD memory usage during startup - advice needed
-Date: Thu, 19 Nov 2015 19:16:13 +0100
-Message-ID: <564E11ED.7080001@beyond.pl>
+Subject: Re: OSD memory usage during startup - advice needed
+Date: Thu, 19 Nov 2015 21:30:34 +0100
+Message-ID: <564E316A.8050601@beyond.pl>
+References: <564E11ED.7080001@beyond.pl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed;
+ boundary="------------010505090100080802050109"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from ip-92-43-119-196.beyond.pl ([92.43.119.196]:53032 "EHLO
+Received: from ip-92-43-119-196.beyond.pl ([92.43.119.196]:55228 "EHLO
 	mx.beyond.pl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756659AbbKSSZF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 19 Nov 2015 13:25:05 -0500
+	id S1161362AbbKSUap (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 19 Nov 2015 15:30:45 -0500
 Received: from localhost (localhost [127.0.0.1])
-	by mx.beyond.pl (Postfix) with ESMTP id 7CC51BEF
-	for <ceph-devel@vger.kernel.org>; Thu, 19 Nov 2015 19:16:22 +0100 (CET)
+	by mx.beyond.pl (Postfix) with ESMTP id 82E2EBBD
+	for <ceph-devel@vger.kernel.org>; Thu, 19 Nov 2015 21:30:43 +0100 (CET)
 Received: from mx.beyond.pl ([127.0.0.1])
 	by localhost (mw.beyond.pl [127.0.0.1]) (amavisd-new, port 10024)
-	with ESMTP id J0B-RvV9zSM4 for <ceph-devel@vger.kernel.org>;
-	Thu, 19 Nov 2015 19:16:22 +0100 (CET)
+	with ESMTP id AI2i7aYtirZT for <ceph-devel@vger.kernel.org>;
+	Thu, 19 Nov 2015 21:30:42 +0100 (CET)
 Received: from [192.168.1.120] (src75-20.unii.maverick.com.pl [194.187.75.20])
 	(Authenticated sender: m.gibula@beyond.pl)
-	by mx.beyond.pl (Postfix) with ESMTPSA id 322CE615
-	for <ceph-devel@vger.kernel.org>; Thu, 19 Nov 2015 19:16:22 +0100 (CET)
+	by mx.beyond.pl (Postfix) with ESMTPSA id D6DCA720
+	for <ceph-devel@vger.kernel.org>; Thu, 19 Nov 2015 21:30:42 +0100 (CET)
+In-Reply-To: <564E11ED.7080001@beyond.pl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Hi Ceph devs!
+This is a multi-part message in MIME format.
+--------------010505090100080802050109
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-I'm trying to track down and fix huge memory usage when OSD is starting 
-after unclean shutdown. Recently, after editing crush map, when 
-backfills started, one of our OSDs died (it hit suicide timeout). It was 
-also refusing to start again, crashing due to memory allocation failure 
-(over 15G used) shortly after start.
+> Judging from debug output, the problem is in journal recovery, when it
+> tries to delete object with huge (several milion keys - it is radosgw
+> index* for bucket with over 50mln objects) amount of keys, using
+> leveldb's rmkeys_by_prefix() method.
+>
+> Looking at the source code, rmkeys_by_prefix() batches all operations
+> into one list and then submit_transaction() executes them all atomically.
+>
+> I'd love to write a patch for this issue, but it seems unfixable (or is
+> it?) with current API and method behaviour. Could you offer any advice
+> on how to proceed?
 
-Judging from debug output, the problem is in journal recovery, when it 
-tries to delete object with huge (several milion keys - it is radosgw 
-index* for bucket with over 50mln objects) amount of keys, using 
-leveldb's rmkeys_by_prefix() method.
+Answering myself, could anyone verify if attached patch looks ok? Should 
+reduce memory footprint a bit.
 
-Looking at the source code, rmkeys_by_prefix() batches all operations 
-into one list and then submit_transaction() executes them all atomically.
+When I first read this code, I assumed that data pointed by 
+leveldb::Slice have to be reachable until db->Write is called.
 
-I'd love to write a patch for this issue, but it seems unfixable (or is 
-it?) with current API and method behaviour. Could you offer any advice 
-on how to proceed?
-
-Backtrace below:
-
-  1: /usr/bin/ceph-osd() [0xacd7ba]
-  2: (()+0x10340) [0x7f9713500340]
-  3: (gsignal()+0x39) [0x7f971199fcc9]
-  4: (abort()+0x148) [0x7f97119a30d8]
-  5: (__gnu_cxx::__verbose_terminate_handler()+0x155) [0x7f97122aa535]
-  6: (()+0x5e6d6) [0x7f97122a86d6]
-  7: (()+0x5e703) [0x7f97122a8703]
-  8: (()+0x5e922) [0x7f97122a8922]
-  9: (()+0x12b1e) [0x7f9713720b1e]
-  10: (tc_new()+0x1e0) [0x7f9713740a00]
-  11: (std::string::_Rep::_S_create(unsigned long, unsigned long, 
-std::allocator<char> const&)+0x59) [0x7f9712304209]
-  12: (std::string::_Rep::_M_clone(std::allocator<char> const&, unsigned 
-long)+0x1b) [0x7f9712304dcb]
-  13: (std::string::reserve(unsigned long)+0x34) [0x7f9712304e64]
-  14: (std::string::append(char const*, unsigned long)+0x4f) 
-[0x7f97123050af]
-  15: 
-(LevelDBStore::LevelDBTransactionImpl::rmkeys_by_prefix(std::string 
-const&)+0xcf) [0x97c44f]
-  16: 
-(DBObjectMap::clear_header(std::tr1::shared_ptr<DBObjectMap::_Header>, 
-std::tr1::shared_ptr<KeyValueDB::TransactionImpl>)+0xc1) [0xa63171]
-  17: (DBObjectMap::_clear(std::tr1::shared_ptr<DBObjectMap::_Header>, 
-std::tr1::shared_ptr<KeyValueDB::TransactionImpl>)+0x91) [0xa682b1]
-  18: (DBObjectMap::clear(ghobject_t const&, SequencerPosition 
-const*)+0x202) [0xa6b292]
-  19: (FileStore::lfn_unlink(coll_t, ghobject_t const&, 
-SequencerPosition const&, bool)+0x16b) [0x9154fb]
-  20: (FileStore::_remove(coll_t, ghobject_t const&, SequencerPosition 
-const&)+0x8b) [0x915f6b]
-  21: (FileStore::_do_transaction(ObjectStore::Transaction&, unsigned 
-long, int, ThreadPool::TPHandle*)+0x3174) [0x926434]
-  22: (FileStore::_do_transactions(std::list<ObjectStore::Transaction*, 
-std::allocator<ObjectStore::Transaction*> >&, unsigned long, 
-ThreadPool::TPHandle*)+0x64) [0x92a3a4]
-  23: (JournalingObjectStore::journal_replay(unsigned long)+0x5cb) 
-[0x94355b]
-  24: (FileStore::mount()+0x3bb6) [0x9139f6]
-  25: (OSD::init()+0x259) [0x6c59b9]
-  26: (main()+0x2860) [0x6527e0]
-  27: (__libc_start_main()+0xf5) [0x7f971198aec5]
-  28: /usr/bin/ceph-osd() [0x66b887]
-
-
-I also suspect that deleting this object was also somehow responsible 
-for initial crash, when OSD hit suicide timeout. Any advices on how to 
-debug it further?
-
-
-* - yes, I am aware of shared indexes, but that bucket was created 
-pre-hammer and I can't move migrate it
+However, looking into leveldb and into its source code, there is no such 
+requirement - leveldb makes its own copy of key, so we're effectivly 
+doubling memory footprint for no reason.
 
 -- 
 mg
 
-P.S. Please CC me, as I'm not subscribed.
+--------------010505090100080802050109
+Content-Type: text/plain; charset=UTF-8;
+ name="leveldb.patch"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment;
+ filename="leveldb.patch"
+
+LS0tIGEvc3JjL29zL0xldmVsREJTdG9yZS5jYw0KKysrIGIvc3JjL29zL0xldmVsREJTdG9y
+ZS5jYw0KQEAgLTE1Niw5ICsxNTYsOCBAQCB2b2lkIExldmVsREJTdG9yZTo6TGV2ZWxEQlRy
+YW5zYWN0aW9uSW1wbDo6c2V0KA0KICAgYnVmZmVycy5wdXNoX2JhY2sodG9fc2V0X2JsKTsN
+CiAgIGJ1ZmZlcmxpc3QgJmJsID0gKihidWZmZXJzLnJiZWdpbigpKTsNCiAgIHN0cmluZyBr
+ZXkgPSBjb21iaW5lX3N0cmluZ3MocHJlZml4LCBrKTsNCi0gIGtleXMucHVzaF9iYWNrKGtl
+eSk7DQotICBiYXQuRGVsZXRlKGxldmVsZGI6OlNsaWNlKCooa2V5cy5yYmVnaW4oKSkpKTsN
+Ci0gIGJhdC5QdXQobGV2ZWxkYjo6U2xpY2UoKihrZXlzLnJiZWdpbigpKSksDQorICBiYXQu
+RGVsZXRlKGxldmVsZGI6OlNsaWNlKGtleSkpOw0KKyAgYmF0LlB1dChsZXZlbGRiOjpTbGlj
+ZShrZXkpLA0KICAgICAgICAgIGxldmVsZGI6OlNsaWNlKGJsLmNfc3RyKCksIGJsLmxlbmd0
+aCgpKSk7DQogfQ0KDQpAQCAtMTY2LDggKzE2NSw3IEBAIHZvaWQgTGV2ZWxEQlN0b3JlOjpM
+ZXZlbERCVHJhbnNhY3Rpb25JbXBsOjpybWtleShjb25zdCBzdHJpbmcgJnByZWZpeCwNCiAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBjb25zdCBz
+dHJpbmcgJmspDQogew0KICAgc3RyaW5nIGtleSA9IGNvbWJpbmVfc3RyaW5ncyhwcmVmaXgs
+IGspOw0KLSAga2V5cy5wdXNoX2JhY2soa2V5KTsNCi0gIGJhdC5EZWxldGUobGV2ZWxkYjo6
+U2xpY2UoKihrZXlzLnJiZWdpbigpKSkpOw0KKyAgYmF0LkRlbGV0ZShsZXZlbGRiOjpTbGlj
+ZShrZXkpKTsNCiB9DQoNCiB2b2lkIExldmVsREJTdG9yZTo6TGV2ZWxEQlRyYW5zYWN0aW9u
+SW1wbDo6cm1rZXlzX2J5X3ByZWZpeChjb25zdCBzdHJpbmcgJnByZWZpeCkNCkBAIC0xNzcs
+OCArMTc1LDcgQEAgdm9pZCBMZXZlbERCU3RvcmU6OkxldmVsREJUcmFuc2FjdGlvbkltcGw6
+OnJta2V5c19ieV9wcmVmaXgoY29uc3Qgc3RyaW5nICZwcmVmaXgNCiAgICAgICAgaXQtPnZh
+bGlkKCk7DQogICAgICAgIGl0LT5uZXh0KCkpIHsNCiAgICAgc3RyaW5nIGtleSA9IGNvbWJp
+bmVfc3RyaW5ncyhwcmVmaXgsIGl0LT5rZXkoKSk7DQotICAgIGtleXMucHVzaF9iYWNrKGtl
+eSk7DQotICAgIGJhdC5EZWxldGUoKihrZXlzLnJiZWdpbigpKSk7DQorICAgIGJhdC5EZWxl
+dGUoa2V5KTsNCiAgIH0NCiB9DQoNCmRpZmYgLS1naXQgYS9zcmMvb3MvTGV2ZWxEQlN0b3Jl
+LmggYi9zcmMvb3MvTGV2ZWxEQlN0b3JlLmgNCmluZGV4IDQ2MTdjNWMuLmRkMjQ4ZGQgMTAw
+NjQ0DQotLS0gYS9zcmMvb3MvTGV2ZWxEQlN0b3JlLmgNCisrKyBiL3NyYy9vcy9MZXZlbERC
+U3RvcmUuaA0KQEAgLTE3NSw3ICsxNzUsNiBAQCBwdWJsaWM6DQogICBwdWJsaWM6DQogICAg
+IGxldmVsZGI6OldyaXRlQmF0Y2ggYmF0Ow0KICAgICBsaXN0PGJ1ZmZlcmxpc3Q+IGJ1ZmZl
+cnM7DQotICAgIGxpc3Q8c3RyaW5nPiBrZXlzOw0KICAgICBMZXZlbERCU3RvcmUgKmRiOw0K
+DQogICAgIExldmVsREJUcmFuc2FjdGlvbkltcGwoTGV2ZWxEQlN0b3JlICpkYikgOiBkYihk
+Yikge30NCg==
+--------------010505090100080802050109--
