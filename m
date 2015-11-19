@@ -1,43 +1,36 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: Kernel client OSD message version
-Date: Thu, 19 Nov 2015 13:34:22 +0100
-Message-ID: <CAOi1vP_+tc9U8XurVj4TOd=yOANmFv7QOussTvcyOEt+5jzMiA@mail.gmail.com>
-References: <90EABA838E32E141BC06296A2C40520A1A653D55@IRSMSX108.ger.corp.intel.com>
-	<CAOi1vP-YjiTA7WBYKLM63Sx0GGzg28HMj+R4nws7VY1ySe+Kcw@mail.gmail.com>
-	<90EABA838E32E141BC06296A2C40520A1A653DE9@IRSMSX108.ger.corp.intel.com>
-	<CAOi1vP_r2racUXVh5-0Q80dZh15CEN35kWqWfQRt4uvY=o3mEg@mail.gmail.com>
-	<90EABA838E32E141BC06296A2C40520A1A653E31@IRSMSX108.ger.corp.intel.com>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: Re: All-Flash Ceph cluster and journal
+Date: Thu, 19 Nov 2015 08:34:11 -0600
+Message-ID: <564DDDE3.9050409@redhat.com>
+References: <564DB2A1.9080603@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f53.google.com ([74.125.82.53]:37438 "EHLO
-	mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750775AbbKSMeX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Nov 2015 07:34:23 -0500
-Received: by wmww144 with SMTP id w144so114481506wmw.0
-        for <ceph-devel@vger.kernel.org>; Thu, 19 Nov 2015 04:34:22 -0800 (PST)
-In-Reply-To: <90EABA838E32E141BC06296A2C40520A1A653E31@IRSMSX108.ger.corp.intel.com>
+Received: from mx1.redhat.com ([209.132.183.28]:49463 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1758502AbbKSOeN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 19 Nov 2015 09:34:13 -0500
+In-Reply-To: <564DB2A1.9080603@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Lakis, Jacek" <jacek.lakis@intel.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Mike Almateia <mike.almateia@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Thu, Nov 19, 2015 at 1:09 PM, Lakis, Jacek <jacek.lakis@intel.com> wrote:
-> Ok, thanks.
-> Coming back to the splitted decoding you mentioned:
-> This change, except the reordering, causes some performance improvement so the need arises.
-> It's also not included in the stable release yet. So, it's good to contribute the patches?
+This is actually the direction newstore is heading with the 
+newstore_min_alloc_size so that you can configure when to write into the 
+rocksdb WAL.  By default it's set to 512k, but for SSDs we will almost 
+certainly want to go smaller.
 
-Well, that's why I asked what the motivation was - the split change was
-the only thing I could think of there.  The code that encodes MOSDOp
-messages is in ceph_osdc_build_request() and is tied to the rest of
-osd_client code (there is no separate MOSDOp message struct, so it's
-encoded inline).  osd_client is in the middle of a major rework for
-kernel 4.5 so there is no stable ground to base patches on.
-
-Since the change is trivial, I can just do it myself and include it in
-the osd_client patchset.
-
-Thanks,
-
-                Ilya
+On 11/19/2015 05:29 AM, Mike Almateia wrote:
+> Hello.
+>
+> By now we have SSD disks with a great perfomance under O_DIRECT/O_SYNC
+> flags (and we recomended to use they for journal).
+>
+> Why in a All-Flash type Ceph clusters we still use journal and them put
+> a data into OSD?
+> Why we can't just write a data into OSD with O_DIRECT/O_SYNC flags,
+> without journal?
+>
+> Can we just switch off the journal functional for all-flash ceph clusters?
+>
