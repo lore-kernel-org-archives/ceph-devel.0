@@ -1,67 +1,33 @@
-From: Samuel Just <sjust@redhat.com>
-Subject: Re: OSD memory usage during startup - advice needed
-Date: Thu, 19 Nov 2015 14:26:24 -0800
-Message-ID: <CAN=+7FVRGm7Dh6uiL5G-giD32vw8XVP16bpi_8qgCJ+iC38atA@mail.gmail.com>
-References: <564E11ED.7080001@beyond.pl>
-	<564E316A.8050601@beyond.pl>
+From: Shinobu Kinjo <skinjo@redhat.com>
+Subject: ./run-make-check.sh
+Date: Thu, 19 Nov 2015 18:39:54 -0500 (EST)
+Message-ID: <1842494150.16154755.1447976394788.JavaMail.zimbra@redhat.com>
+References: <955833108.16153353.1447976340808.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ig0-f175.google.com ([209.85.213.175]:37448 "EHLO
-	mail-ig0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751891AbbKSW0Z convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Nov 2015 17:26:25 -0500
-Received: by igcto18 with SMTP id to18so74573989igc.0
-        for <ceph-devel@vger.kernel.org>; Thu, 19 Nov 2015 14:26:24 -0800 (PST)
-In-Reply-To: <564E316A.8050601@beyond.pl>
+Received: from mx6-phx2.redhat.com ([209.132.183.39]:33976 "EHLO
+	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934629AbbKSXjz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Nov 2015 18:39:55 -0500
+Received: from zmail26.collab.prod.int.phx2.redhat.com (zmail26.collab.prod.int.phx2.redhat.com [10.5.83.33])
+	by mx6-phx2.redhat.com (8.14.4/8.14.4) with ESMTP id tAJNdsRf029793
+	for <ceph-devel@vger.kernel.org>; Thu, 19 Nov 2015 18:39:54 -0500
+In-Reply-To: <955833108.16153353.1447976340808.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?Q?Marcin_Gibu=C5=82a?= <m.gibula@beyond.pl>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Actually, looks like Xiaoxi beat you to it for infernalis!
-42a3ab95ec459042e92198fb061c8393146bd1b4
--Sam
+Hello,
 
-On Thu, Nov 19, 2015 at 12:30 PM, Marcin Gibu=C5=82a <m.gibula@beyond.p=
-l> wrote:
->> Judging from debug output, the problem is in journal recovery, when =
-it
->> tries to delete object with huge (several milion keys - it is radosg=
-w
->> index* for bucket with over 50mln objects) amount of keys, using
->> leveldb's rmkeys_by_prefix() method.
->>
->> Looking at the source code, rmkeys_by_prefix() batches all operation=
-s
->> into one list and then submit_transaction() executes them all atomic=
-ally.
->>
->> I'd love to write a patch for this issue, but it seems unfixable (or=
- is
->> it?) with current API and method behaviour. Could you offer any advi=
-ce
->> on how to proceed?
->
->
-> Answering myself, could anyone verify if attached patch looks ok? Sho=
-uld
-> reduce memory footprint a bit.
->
-> When I first read this code, I assumed that data pointed by leveldb::=
-Slice
-> have to be reachable until db->Write is called.
->
-> However, looking into leveldb and into its source code, there is no s=
-uch
-> requirement - leveldb makes its own copy of key, so we're effectivly
-> doubling memory footprint for no reason.
->
-> --
-> mg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I saw this message during executing run-make-check.sh on fc23:
+
+2015-11-20 01:05:37.529021 7f8742e3d7c0 -1  ** ERROR: error creating empty object store in testdir/osd-reactivate/0: (13) Permission denied
+
+Can we ignore at the moment?
+
+If I've missed anything, let me know.
+
+Thanks!!
+Shinobu
