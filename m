@@ -1,39 +1,42 @@
-From: =?UTF-8?B?5rGg5L+h5rO9?= <xmdxcxz@gmail.com>
-Subject: Re: Regarding op_t, local_t
-Date: Thu, 19 Nov 2015 09:59:40 +0800
-Message-ID: <CANE=7sW+-4XB9iqduiVL9RSwWYfj6fn2xSUp2+WJcVMyMRPxbA@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Regarding op_t, local_t
+Date: Thu, 19 Nov 2015 02:09:42 +0000
+Message-ID: <CO1PR02MB20864C79565C2686B5D651FF41B0@CO1PR02MB208.namprd02.prod.outlook.com>
 References: <CO1PR02MB208676EEBEE4B862DDDF769F41B0@CO1PR02MB208.namprd02.prod.outlook.com>
+ <CANE=7sW+-4XB9iqduiVL9RSwWYfj6fn2xSUp2+WJcVMyMRPxbA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f52.google.com ([209.85.218.52]:33780 "EHLO
-	mail-oi0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932721AbbKSB7l (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Nov 2015 20:59:41 -0500
-Received: by oixx65 with SMTP id x65so36773017oix.0
-        for <ceph-devel@vger.kernel.org>; Wed, 18 Nov 2015 17:59:40 -0800 (PST)
-In-Reply-To: <CO1PR02MB208676EEBEE4B862DDDF769F41B0@CO1PR02MB208.namprd02.prod.outlook.com>
+Received: from mail-bl2on0077.outbound.protection.outlook.com ([65.55.169.77]:57503
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1755154AbbKSCJo (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 18 Nov 2015 21:09:44 -0500
+In-Reply-To: <CANE=7sW+-4XB9iqduiVL9RSwWYfj6fn2xSUp2+WJcVMyMRPxbA@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
+To: =?utf-8?B?5rGg5L+h5rO9?= <xmdxcxz@gmail.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Good catch. I think it does make sense.
-
-2015-11-19 9:54 GMT+08:00 Somnath Roy <Somnath.Roy@sandisk.com>:
-> Hi Sage,
-> I saw we are now having single transaction in submit_transaction. But,
-> in the replication path we are still having two transaction, can't we merge it to one there ?
->
-> Thanks & Regards
-> Somnath
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
--- 
-Regards,
-xinze
+SXQncyBhIHN0YWNrIGFsbG9jYXRpb24gdGhlcmUgLCBubyAnbmV3JyBvdmVyaGVhZCAsIGJ1dCwg
+d2lsbCBzYXZlIG9uZSBsaXN0IHB1c2hfYmFjay4gU28sIGdhaW4gY291bGQgYmUgbmVnbGlnaWJs
+ZS4NCkJ1dCwgc2luY2UgSSBhbSB3b3JraW5nIG9uIGEgcHVsbCByZXF1ZXN0IHRvIGRlbGV0ZSB0
+aGVzZSB0cmFuc2FjdGlvbiBvYmplY3QgZnJvbSBGaWxlU3RvcmUgIHdvcmtlciB0aHJlYWQgLCBJ
+IG5lZWQgdG8gaW50cm9kdWNlIGhlYXAgYWxsb2NhdGlvbiBvbiB0aGF0IHBhdGggYXMgd2VsbCAs
+IHJlZHVjaW5nIG9uZSB0cmFuc2FjdGlvbiB3b3VsZCBoZWxwIHRoZXJlLg0KDQpUaGFua3MgJiBS
+ZWdhcmRzDQpTb21uYXRoDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiDmsaDk
+v6Hms70gW21haWx0bzp4bWR4Y3h6QGdtYWlsLmNvbV0gDQpTZW50OiBXZWRuZXNkYXksIE5vdmVt
+YmVyIDE4LCAyMDE1IDY6MDAgUE0NClRvOiBTb21uYXRoIFJveQ0KQ2M6IGNlcGgtZGV2ZWxAdmdl
+ci5rZXJuZWwub3JnDQpTdWJqZWN0OiBSZTogUmVnYXJkaW5nIG9wX3QsIGxvY2FsX3QNCg0KR29v
+ZCBjYXRjaC4gSSB0aGluayBpdCBkb2VzIG1ha2Ugc2Vuc2UuDQoNCjIwMTUtMTEtMTkgOTo1NCBH
+TVQrMDg6MDAgU29tbmF0aCBSb3kgPFNvbW5hdGguUm95QHNhbmRpc2suY29tPjoNCj4gSGkgU2Fn
+ZSwNCj4gSSBzYXcgd2UgYXJlIG5vdyBoYXZpbmcgc2luZ2xlIHRyYW5zYWN0aW9uIGluIHN1Ym1p
+dF90cmFuc2FjdGlvbi4gQnV0LCANCj4gaW4gdGhlIHJlcGxpY2F0aW9uIHBhdGggd2UgYXJlIHN0
+aWxsIGhhdmluZyB0d28gdHJhbnNhY3Rpb24sIGNhbid0IHdlIG1lcmdlIGl0IHRvIG9uZSB0aGVy
+ZSA/DQo+DQo+IFRoYW5rcyAmIFJlZ2FyZHMNCj4gU29tbmF0aA0KPiAtLQ0KPiBUbyB1bnN1YnNj
+cmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZl
+bCIgDQo+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwu
+b3JnIE1vcmUgbWFqb3Jkb21vIA0KPiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21h
+am9yZG9tby1pbmZvLmh0bWwNCg0KDQoNCi0tDQpSZWdhcmRzLA0KeGluemUNCg==
