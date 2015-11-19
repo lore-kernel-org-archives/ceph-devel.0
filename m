@@ -1,58 +1,34 @@
-From: "Lakis, Jacek" <jacek.lakis@intel.com>
-Subject: RE: Kernel client OSD message version
-Date: Thu, 19 Nov 2015 10:27:14 +0000
-Message-ID: <90EABA838E32E141BC06296A2C40520A1A653DE9@IRSMSX108.ger.corp.intel.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: Kernel client OSD message version
+Date: Thu, 19 Nov 2015 11:59:58 +0100
+Message-ID: <CAOi1vP_r2racUXVh5-0Q80dZh15CEN35kWqWfQRt4uvY=o3mEg@mail.gmail.com>
 References: <90EABA838E32E141BC06296A2C40520A1A653D55@IRSMSX108.ger.corp.intel.com>
- <CAOi1vP-YjiTA7WBYKLM63Sx0GGzg28HMj+R4nws7VY1ySe+Kcw@mail.gmail.com>
+	<CAOi1vP-YjiTA7WBYKLM63Sx0GGzg28HMj+R4nws7VY1ySe+Kcw@mail.gmail.com>
+	<90EABA838E32E141BC06296A2C40520A1A653DE9@IRSMSX108.ger.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:33976 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756343AbbKSK1S (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 19 Nov 2015 05:27:18 -0500
-In-Reply-To: <CAOi1vP-YjiTA7WBYKLM63Sx0GGzg28HMj+R4nws7VY1ySe+Kcw@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-wm0-f53.google.com ([74.125.82.53]:35097 "EHLO
+	mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752892AbbKSK77 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Nov 2015 05:59:59 -0500
+Received: by wmdw130 with SMTP id w130so235166490wmd.0
+        for <ceph-devel@vger.kernel.org>; Thu, 19 Nov 2015 02:59:58 -0800 (PST)
+In-Reply-To: <90EABA838E32E141BC06296A2C40520A1A653DE9@IRSMSX108.ger.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
+To: "Lakis, Jacek" <jacek.lakis@intel.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-SWx5YSwgdGhhbmsgeW91IGZvciB0aGUgcXVpY2sgcmVwbHkuDQoNCkZvciBleGFtcGxlIGl0J3Mg
-YWJvdXQgc3BsaXQgZGVjb2RpbmcuIEknbSBhc2tpbmcgbm90IGJlY2F1c2Ugb2Ygc3BlY2lmaWMg
-Y2hhbmdlcywgSSdtIHJhdGhlciBjdXJpb3VzIGFib3V0IHdoZW4gd2Ugc2hvdWxkIHN5bmMgdGhl
-IGtlcm5lbCBjbGllbnQgZW5jb2RpbmcgdG8gdGhlIG1hc3RlciAob3Igc3RhYmxlIHZlcnNpb25z
-KS4NCg0KSi4gSi4gxYFha2lzDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBj
-ZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJA
-dmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgSWx5YSBEcnlvbW92DQpTZW50OiBUaHVyc2Rh
-eSwgTm92ZW1iZXIgMTksIDIwMTUgMTA6MjkgQU0NClRvOiBMYWtpcywgSmFjZWsgPGphY2VrLmxh
-a2lzQGludGVsLmNvbT4NCkNjOiBjZXBoLWRldmVsIDxjZXBoLWRldmVsQHZnZXIua2VybmVsLm9y
-Zz4NClN1YmplY3Q6IFJlOiBLZXJuZWwgY2xpZW50IE9TRCBtZXNzYWdlIHZlcnNpb24NCg0KT24g
-VGh1LCBOb3YgMTksIDIwMTUgYXQgMTA6MDQgQU0sIExha2lzLCBKYWNlayA8amFjZWsubGFraXNA
-aW50ZWwuY29tPiB3cm90ZToNCj4gSGkgQ2VwaGVycyENCj4NCj4gUmVjZW50bHksIHRoZSB2ZXJz
-aW9uIG9mIE9TRE9wIGluIENlcGggaW5jcmVhc2VkIHRvIHZlcnNpb24gNyAoaW4gbWFzdGVyLCA2
-IGluIGluZmVybmFsaXMpLiBLZXJuZWwgY2xpZW50IHN0aWxsIGVuY29kaW5nIHZlcnNpb24gNC4N
-Cj4gU2hvdWxkIHdlIGNvbnNpZGVyIHVwc3RyZWFtaW5nIHBhdGNoZXMgdG8gdGhlIGNsaWVudD8N
-Cg0KSXMgaXQgdGhlIHNwbGl0IGVuY29kaW5nIHRoYXQgeW91IGFyZSBhZnRlciBvciBhcmUgdGhl
-cmUgb3RoZXIgaXNzdWVzIGludm9sdmVkPw0KDQpUaGFua3MsDQoNCiAgICAgICAgICAgICAgICBJ
-bHlhDQotLQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVu
-c3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRv
-bW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtl
-cm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KCkludGVsIFRlY2hub2xv
-Z3kgUG9sYW5kIHNwLiB6IG8uby4KdWwuIFNsb3dhY2tpZWdvIDE3MyB8IDgwLTI5OCBHZGFuc2sg
-fCBTYWQgUmVqb25vd3kgR2RhbnNrIFBvbG5vYyB8IFZJSSBXeWR6aWFsIEdvc3BvZGFyY3p5IEty
-YWpvd2VnbyBSZWplc3RydSBTYWRvd2VnbyAtIEtSUyAxMDE4ODIgfCBOSVAgOTU3LTA3LTUyLTMx
-NiB8IEthcGl0YWwgemFrbGFkb3d5IDIwMC4wMDAgUExOLgoKVGEgd2lhZG9tb3NjIHdyYXogeiB6
-YWxhY3puaWthbWkgamVzdCBwcnplem5hY3pvbmEgZGxhIG9rcmVzbG9uZWdvIGFkcmVzYXRhIGkg
-bW96ZSB6YXdpZXJhYyBpbmZvcm1hY2plIHBvdWZuZS4gVyByYXppZSBwcnp5cGFka293ZWdvIG90
-cnp5bWFuaWEgdGVqIHdpYWRvbW9zY2ksIHByb3NpbXkgbyBwb3dpYWRvbWllbmllIG5hZGF3Y3kg
-b3JheiB0cndhbGUgamVqIHVzdW5pZWNpZTsgamFraWVrb2x3aWVrCnByemVnbGFkYW5pZSBsdWIg
-cm96cG93c3plY2huaWFuaWUgamVzdCB6YWJyb25pb25lLgpUaGlzIGUtbWFpbCBhbmQgYW55IGF0
-dGFjaG1lbnRzIG1heSBjb250YWluIGNvbmZpZGVudGlhbCBtYXRlcmlhbCBmb3IgdGhlIHNvbGUg
-dXNlIG9mIHRoZSBpbnRlbmRlZCByZWNpcGllbnQocykuIElmIHlvdSBhcmUgbm90IHRoZSBpbnRl
-bmRlZCByZWNpcGllbnQsIHBsZWFzZSBjb250YWN0IHRoZSBzZW5kZXIgYW5kIGRlbGV0ZSBhbGwg
-Y29waWVzOyBhbnkgcmV2aWV3IG9yIGRpc3RyaWJ1dGlvbiBieQpvdGhlcnMgaXMgc3RyaWN0bHkg
-cHJvaGliaXRlZC4K
+On Thu, Nov 19, 2015 at 11:27 AM, Lakis, Jacek <jacek.lakis@intel.com> wrote:
+> Ilya, thank you for the quick reply.
+>
+> For example it's about split decoding. I'm asking not because of specific changes, I'm rather curious about when we should sync the kernel client encoding to the master (or stable versions).
 
+It's usually done when the need arises, like if the kernel client
+starts using a field that isn't in the old enconding.  We don't update
+for each new ceph release.
+
+Thanks,
+
+                Ilya
