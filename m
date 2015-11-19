@@ -1,36 +1,34 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: All-Flash Ceph cluster and journal
-Date: Thu, 19 Nov 2015 08:34:11 -0600
-Message-ID: <564DDDE3.9050409@redhat.com>
-References: <564DB2A1.9080603@gmail.com>
+From: Libin Wu <hzwulibin@gmail.com>
+Subject: why my cluster become unavailable
+Date: Thu, 19 Nov 2015 23:26:49 +0800
+Message-ID: <CAN4gH2NsnmOY8AcQaT245uwDh2fXmwnBTBKdP6_xKQ2M0PVeKA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:49463 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1758502AbbKSOeN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 19 Nov 2015 09:34:13 -0500
-In-Reply-To: <564DB2A1.9080603@gmail.com>
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:32844 "EHLO
+	mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757850AbbKSP0u (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Nov 2015 10:26:50 -0500
+Received: by wmuu63 with SMTP id u63so20579868wmu.0
+        for <ceph-devel@vger.kernel.org>; Thu, 19 Nov 2015 07:26:49 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mike Almateia <mike.almateia@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-This is actually the direction newstore is heading with the 
-newstore_min_alloc_size so that you can configure when to write into the 
-rocksdb WAL.  By default it's set to 512k, but for SSDs we will almost 
-certainly want to go smaller.
+Hi, cepher
 
-On 11/19/2015 05:29 AM, Mike Almateia wrote:
-> Hello.
->
-> By now we have SSD disks with a great perfomance under O_DIRECT/O_SYNC
-> flags (and we recomended to use they for journal).
->
-> Why in a All-Flash type Ceph clusters we still use journal and them put
-> a data into OSD?
-> Why we can't just write a data into OSD with O_DIRECT/O_SYNC flags,
-> without journal?
->
-> Can we just switch off the journal functional for all-flash ceph clusters?
->
+I have a cluster of 6 OSD server, every server has 8 OSDs.
+
+I out 4 OSDs on every server, then my client io is blocking.
+
+I reboot my client and then create a new rbd device, but the new
+device also can't write io.
+
+Yeah, i understand that some data may lost as threee replicas of some
+object were lost, but why the cluster become unavailable?
+
+There 80 incomplete pg and 4 down+incomplete pg.
+
+Any solution i could solve the problem?
+
+Thanks!
