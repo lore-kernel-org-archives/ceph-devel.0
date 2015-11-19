@@ -1,37 +1,58 @@
-From: Mike Almateia <mike.almateia@gmail.com>
-Subject: All-Flash Ceph cluster and journal
-Date: Thu, 19 Nov 2015 14:29:37 +0300
-Message-ID: <564DB2A1.9080603@gmail.com>
+From: "Lakis, Jacek" <jacek.lakis@intel.com>
+Subject: RE: Kernel client OSD message version
+Date: Thu, 19 Nov 2015 12:09:38 +0000
+Message-ID: <90EABA838E32E141BC06296A2C40520A1A653E31@IRSMSX108.ger.corp.intel.com>
+References: <90EABA838E32E141BC06296A2C40520A1A653D55@IRSMSX108.ger.corp.intel.com>
+	<CAOi1vP-YjiTA7WBYKLM63Sx0GGzg28HMj+R4nws7VY1ySe+Kcw@mail.gmail.com>
+	<90EABA838E32E141BC06296A2C40520A1A653DE9@IRSMSX108.ger.corp.intel.com>
+ <CAOi1vP_r2racUXVh5-0Q80dZh15CEN35kWqWfQRt4uvY=o3mEg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f169.google.com ([209.85.217.169]:35992 "EHLO
-	mail-lb0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932087AbbKSL3m (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Nov 2015 06:29:42 -0500
-Received: by lbblt2 with SMTP id lt2so41801334lbb.3
-        for <ceph-devel@vger.kernel.org>; Thu, 19 Nov 2015 03:29:40 -0800 (PST)
-Received: from [127.0.0.1] ([212.34.43.122])
-        by smtp.gmail.com with ESMTPSA id l128sm1142180lfe.27.2015.11.19.03.29.39
-        for <ceph-devel@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 19 Nov 2015 03:29:40 -0800 (PST)
+Received: from mga09.intel.com ([134.134.136.24]:62947 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755152AbbKSMJp (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 19 Nov 2015 07:09:45 -0500
+In-Reply-To: <CAOi1vP_r2racUXVh5-0Q80dZh15CEN35kWqWfQRt4uvY=o3mEg@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hello.
+T2ssIHRoYW5rcy4NCkNvbWluZyBiYWNrIHRvIHRoZSBzcGxpdHRlZCBkZWNvZGluZyB5b3UgbWVu
+dGlvbmVkOg0KVGhpcyBjaGFuZ2UsIGV4Y2VwdCB0aGUgcmVvcmRlcmluZywgY2F1c2VzIHNvbWUg
+cGVyZm9ybWFuY2UgaW1wcm92ZW1lbnQgc28gdGhlIG5lZWQgYXJpc2VzLiANCkl0J3MgYWxzbyBu
+b3QgaW5jbHVkZWQgaW4gdGhlIHN0YWJsZSByZWxlYXNlIHlldC4gU28sIGl0J3MgZ29vZCB0byBj
+b250cmlidXRlIHRoZSBwYXRjaGVzPw0KDQoNCkouIEouIMWBYWtpcw0KDQoNCi0tLS0tT3JpZ2lu
+YWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBJbHlhIERyeW9tb3YgW21haWx0bzppZHJ5b21vdkBnbWFp
+bC5jb21dIA0KU2VudDogVGh1cnNkYXksIE5vdmVtYmVyIDE5LCAyMDE1IDEyOjAwIFBNDQpUbzog
+TGFraXMsIEphY2VrIDxqYWNlay5sYWtpc0BpbnRlbC5jb20+DQpDYzogY2VwaC1kZXZlbCA8Y2Vw
+aC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc+DQpTdWJqZWN0OiBSZTogS2VybmVsIGNsaWVudCBPU0Qg
+bWVzc2FnZSB2ZXJzaW9uDQoNCk9uIFRodSwgTm92IDE5LCAyMDE1IGF0IDExOjI3IEFNLCBMYWtp
+cywgSmFjZWsgPGphY2VrLmxha2lzQGludGVsLmNvbT4gd3JvdGU6DQo+IElseWEsIHRoYW5rIHlv
+dSBmb3IgdGhlIHF1aWNrIHJlcGx5Lg0KPg0KPiBGb3IgZXhhbXBsZSBpdCdzIGFib3V0IHNwbGl0
+IGRlY29kaW5nLiBJJ20gYXNraW5nIG5vdCBiZWNhdXNlIG9mIHNwZWNpZmljIGNoYW5nZXMsIEkn
+bSByYXRoZXIgY3VyaW91cyBhYm91dCB3aGVuIHdlIHNob3VsZCBzeW5jIHRoZSBrZXJuZWwgY2xp
+ZW50IGVuY29kaW5nIHRvIHRoZSBtYXN0ZXIgKG9yIHN0YWJsZSB2ZXJzaW9ucykuDQoNCkl0J3Mg
+dXN1YWxseSBkb25lIHdoZW4gdGhlIG5lZWQgYXJpc2VzLCBsaWtlIGlmIHRoZSBrZXJuZWwgY2xp
+ZW50IHN0YXJ0cyB1c2luZyBhIGZpZWxkIHRoYXQgaXNuJ3QgaW4gdGhlIG9sZCBlbmNvbmRpbmcu
+ICBXZSBkb24ndCB1cGRhdGUgZm9yIGVhY2ggbmV3IGNlcGggcmVsZWFzZS4NCg0KVGhhbmtzLA0K
+DQogICAgICAgICAgICAgICAgSWx5YQ0KLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KCkludGVsIFRlY2hub2xvZ3kgUG9s
+YW5kIHNwLiB6IG8uby4KdWwuIFNsb3dhY2tpZWdvIDE3MyB8IDgwLTI5OCBHZGFuc2sgfCBTYWQg
+UmVqb25vd3kgR2RhbnNrIFBvbG5vYyB8IFZJSSBXeWR6aWFsIEdvc3BvZGFyY3p5IEtyYWpvd2Vn
+byBSZWplc3RydSBTYWRvd2VnbyAtIEtSUyAxMDE4ODIgfCBOSVAgOTU3LTA3LTUyLTMxNiB8IEth
+cGl0YWwgemFrbGFkb3d5IDIwMC4wMDAgUExOLgoKVGEgd2lhZG9tb3NjIHdyYXogeiB6YWxhY3pu
+aWthbWkgamVzdCBwcnplem5hY3pvbmEgZGxhIG9rcmVzbG9uZWdvIGFkcmVzYXRhIGkgbW96ZSB6
+YXdpZXJhYyBpbmZvcm1hY2plIHBvdWZuZS4gVyByYXppZSBwcnp5cGFka293ZWdvIG90cnp5bWFu
+aWEgdGVqIHdpYWRvbW9zY2ksIHByb3NpbXkgbyBwb3dpYWRvbWllbmllIG5hZGF3Y3kgb3JheiB0
+cndhbGUgamVqIHVzdW5pZWNpZTsgamFraWVrb2x3aWVrCnByemVnbGFkYW5pZSBsdWIgcm96cG93
+c3plY2huaWFuaWUgamVzdCB6YWJyb25pb25lLgpUaGlzIGUtbWFpbCBhbmQgYW55IGF0dGFjaG1l
+bnRzIG1heSBjb250YWluIGNvbmZpZGVudGlhbCBtYXRlcmlhbCBmb3IgdGhlIHNvbGUgdXNlIG9m
+IHRoZSBpbnRlbmRlZCByZWNpcGllbnQocykuIElmIHlvdSBhcmUgbm90IHRoZSBpbnRlbmRlZCBy
+ZWNpcGllbnQsIHBsZWFzZSBjb250YWN0IHRoZSBzZW5kZXIgYW5kIGRlbGV0ZSBhbGwgY29waWVz
+OyBhbnkgcmV2aWV3IG9yIGRpc3RyaWJ1dGlvbiBieQpvdGhlcnMgaXMgc3RyaWN0bHkgcHJvaGli
+aXRlZC4K
 
-By now we have SSD disks with a great perfomance under O_DIRECT/O_SYNC 
-flags (and we recomended to use they for journal).
-
-Why in a All-Flash type Ceph clusters we still use journal and them put 
-a data into OSD?
-Why we can't just write a data into OSD with O_DIRECT/O_SYNC flags, 
-without journal?
-
-Can we just switch off the journal functional for all-flash ceph clusters?
-
--- 
-Mike, runs.
