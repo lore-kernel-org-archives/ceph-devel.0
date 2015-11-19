@@ -1,37 +1,67 @@
-From: Tejun Heo <tj@kernel.org>
-Subject: Re: request_queue use-after-free - inode_detach_wb()
-Date: Thu, 19 Nov 2015 17:14:47 -0500
-Message-ID: <20151119221447.GB4885@mtj.duckdns.org>
-References: <CAOi1vP9igmg_jayELVDq_NYXUHtByZz5a4M5+CqCMMHUxF5ofA@mail.gmail.com>
- <20151117205641.GF22864@mtj.duckdns.org>
- <CAOi1vP_mp6wjb+jU_tRADqhXGqf1YTj=w=3ynMBj5=SaVU3o4g@mail.gmail.com>
- <20151118153039.GA11496@mtj.duckdns.org>
- <CAOi1vP_4aUKVjNqvmFxVGVyaif_zuHdVPjzH5RLOJgYMsSirbA@mail.gmail.com>
- <CAOi1vP-6X7C=3uFNM7SQCe3TZXwrSST1_Tv3Qm0s1SnC2gBs2w@mail.gmail.com>
- <20151119211831.GA4885@mtj.duckdns.org>
- <CAOi1vP9+GvxFLmdOLJYR=hO7QQRcU9tu30vZz=jVLLUwh--7Sw@mail.gmail.com>
+From: Samuel Just <sjust@redhat.com>
+Subject: Re: OSD memory usage during startup - advice needed
+Date: Thu, 19 Nov 2015 14:26:24 -0800
+Message-ID: <CAN=+7FVRGm7Dh6uiL5G-giD32vw8XVP16bpi_8qgCJ+iC38atA@mail.gmail.com>
+References: <564E11ED.7080001@beyond.pl>
+	<564E316A.8050601@beyond.pl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAOi1vP9+GvxFLmdOLJYR=hO7QQRcU9tu30vZz=jVLLUwh--7Sw@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Christoph Hellwig <hch@lst.de>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-fsdevel@vger.kernel.org, Ceph Development <ceph-devel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ig0-f175.google.com ([209.85.213.175]:37448 "EHLO
+	mail-ig0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751891AbbKSW0Z convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Nov 2015 17:26:25 -0500
+Received: by igcto18 with SMTP id to18so74573989igc.0
+        for <ceph-devel@vger.kernel.org>; Thu, 19 Nov 2015 14:26:24 -0800 (PST)
+In-Reply-To: <564E316A.8050601@beyond.pl>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: =?UTF-8?Q?Marcin_Gibu=C5=82a?= <m.gibula@beyond.pl>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hello,
+Actually, looks like Xiaoxi beat you to it for infernalis!
+42a3ab95ec459042e92198fb061c8393146bd1b4
+-Sam
 
-On Thu, Nov 19, 2015 at 10:56:43PM +0100, Ilya Dryomov wrote:
-> Detaching the inode earlier is what I suggested in the first email, but
-> I didn't know if this kind of special casing was OK.  I'll try it out.
-
-Yeah, I was confused.  Sorry about that.  On the surface, it looks
-like a special case but everything around bdev is special case anyway
-and looking at the underlying lifetime rules, I think this is the
-right thing to do.
-
-Thanks.
-
--- 
-tejun
+On Thu, Nov 19, 2015 at 12:30 PM, Marcin Gibu=C5=82a <m.gibula@beyond.p=
+l> wrote:
+>> Judging from debug output, the problem is in journal recovery, when =
+it
+>> tries to delete object with huge (several milion keys - it is radosg=
+w
+>> index* for bucket with over 50mln objects) amount of keys, using
+>> leveldb's rmkeys_by_prefix() method.
+>>
+>> Looking at the source code, rmkeys_by_prefix() batches all operation=
+s
+>> into one list and then submit_transaction() executes them all atomic=
+ally.
+>>
+>> I'd love to write a patch for this issue, but it seems unfixable (or=
+ is
+>> it?) with current API and method behaviour. Could you offer any advi=
+ce
+>> on how to proceed?
+>
+>
+> Answering myself, could anyone verify if attached patch looks ok? Sho=
+uld
+> reduce memory footprint a bit.
+>
+> When I first read this code, I assumed that data pointed by leveldb::=
+Slice
+> have to be reachable until db->Write is called.
+>
+> However, looking into leveldb and into its source code, there is no s=
+uch
+> requirement - leveldb makes its own copy of key, so we're effectivly
+> doubling memory footprint for no reason.
+>
+> --
+> mg
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
