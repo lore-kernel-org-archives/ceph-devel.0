@@ -1,48 +1,55 @@
-From: Wukongming <wu.kongming@h3c.com>
-Subject: Reboot blocked when undoing unmap op.
-Date: Fri, 20 Nov 2015 02:19:09 +0000
-Message-ID: <47D132BF400BE64BAE6D71033F7D3D7518DD2C@H3CMLB12-EX.srv.huawei-3com.com>
+From: Shinobu Kinjo <skinjo@redhat.com>
+Subject: Re: ./run-make-check.sh
+Date: Thu, 19 Nov 2015 21:30:56 -0500 (EST)
+Message-ID: <1898715288.16215515.1447986656826.JavaMail.zimbra@redhat.com>
+References: <955833108.16153353.1447976340808.JavaMail.zimbra@redhat.com> <1842494150.16154755.1447976394788.JavaMail.zimbra@redhat.com> <CAEf3A-zgvAXT3EUX_+U+ZN_QspFrFQhjMJHgtArnCqh5WDkXzQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([60.191.123.56]:34761 "EHLO h3cmg01-ex.h3c.com"
-	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1161104AbbKTCTY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 19 Nov 2015 21:19:24 -0500
-Content-Language: zh-CN
+Received: from mx6-phx2.redhat.com ([209.132.183.39]:42434 "EHLO
+	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934659AbbKTCa6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Nov 2015 21:30:58 -0500
+In-Reply-To: <CAEf3A-zgvAXT3EUX_+U+ZN_QspFrFQhjMJHgtArnCqh5WDkXzQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>
+To: tobe <tobeg3oogle@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-SGkgU2FnZSwNCg0KSSBjcmVhdGVkIGEgcmJkIGltYWdlLCBhbmQgbWFwcGVkIHRvIGEgbG9jYWwg
-d2hpY2ggbWVhbnMgSSBjYW4gZmluZCAvZGV2L3JiZDAsIGF0IHRoaXMgdGltZSBJIHJlYm9vdCB0
-aGUgc3lzdGVtLCBpbiBsYXN0IHN0ZXAgb2Ygc2h1dHRpbmcgZG93biwgaXQgYmxvY2tlZCB3aXRo
-IGFuIGVycm9yDQoNClsyMzU2MTguMDIwMjIwN10gbGliY2VwaDogY29ubmVjdCAxNzIuMTYuNTcu
-MjUyOjY3ODkgZXJyb3IgLTEwMS4NCg0KTXkgV29ya3PigJkgRW52Og0KDQpVYnVudHUga2VybmVs
-IDMuMTkuMA0KQ2VwaCAwLjk0LjUNCkEgY2x1c3RlciBvZiAyIFNlcnZlcnMgd2l0aCBpc2NzaXRn
-dCBhbmQgb3Blbi1pc2NzaSwgYm90aCBhcyBzZXJ2ZXIgYW5kIGNsaWVudC4gTXVsdGlwYXRoIHBy
-b2Nlc3MgaXMgb24gYnV0IG5vdCBhZmZlY3QgdGhpcyBpc3N1ZS4gSeKAmXZlIHRyaWVkIHN0b3Bw
-aW5nIG11bHRpcGF0aCwgYnV0IHRoZSBpc3N1ZSBzdGlsbCB0aGVyZS4NCkkgbWFwIGEgcmJkIGlt
-YWdlIHRvIGEgbG9jYWwsIHdoeSBzaG93IG1lIGEgY29ubmVjdCBlcnJvcj8NCg0KSSBzYXcgeW91
-ciByZXBseSBvbiBodHRwOi8vcGVybWFsaW5rLmdtYW5lLm9yZy9nbWFuZS5jb21wLmZpbGUtc3lz
-dGVtcy5jZXBoLmRldmVsLzEzMDc3LCBidXQganVzdCBhcGFydC4gSXMgdGhpcyBpc3N1ZSByZXNv
-bHZlZCBhbmQgaG93Pw0KDQpUaGFua3MhIQ0Kd3Vrb25nbWluZw0KLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LQ0K5pys6YKu5Lu25Y+K5YW26ZmE5Lu25ZCr5pyJ5p2t5bee5Y2O5LiJ6YCa5L+h5oqA5pyv5pyJ
-6ZmQ5YWs5Y+455qE5L+d5a+G5L+h5oGv77yM5LuF6ZmQ5LqO5Y+R6YCB57uZ5LiK6Z2i5Zyw5Z2A
-5Lit5YiX5Ye6DQrnmoTkuKrkurrmiJbnvqTnu4TjgILnpoHmraLku7vkvZXlhbbku5bkurrku6Xk
-u7vkvZXlvaLlvI/kvb/nlKjvvIjljIXmi6zkvYbkuI3pmZDkuo7lhajpg6jmiJbpg6jliIblnLDm
-s4TpnLLjgIHlpI3liLbjgIENCuaIluaVo+WPke+8ieacrOmCruS7tuS4reeahOS/oeaBr+OAguWm
-guaenOaCqOmUmeaUtuS6huacrOmCruS7tu+8jOivt+aCqOeri+WNs+eUteivneaIlumCruS7tumA
-muefpeWPkeS7tuS6uuW5tuWIoOmZpOacrA0K6YKu5Lu277yBDQpUaGlzIGUtbWFpbCBhbmQgaXRz
-IGF0dGFjaG1lbnRzIGNvbnRhaW4gY29uZmlkZW50aWFsIGluZm9ybWF0aW9uIGZyb20gSDNDLCB3
-aGljaCBpcw0KaW50ZW5kZWQgb25seSBmb3IgdGhlIHBlcnNvbiBvciBlbnRpdHkgd2hvc2UgYWRk
-cmVzcyBpcyBsaXN0ZWQgYWJvdmUuIEFueSB1c2Ugb2YgdGhlDQppbmZvcm1hdGlvbiBjb250YWlu
-ZWQgaGVyZWluIGluIGFueSB3YXkgKGluY2x1ZGluZywgYnV0IG5vdCBsaW1pdGVkIHRvLCB0b3Rh
-bCBvciBwYXJ0aWFsDQpkaXNjbG9zdXJlLCByZXByb2R1Y3Rpb24sIG9yIGRpc3NlbWluYXRpb24p
-IGJ5IHBlcnNvbnMgb3RoZXIgdGhhbiB0aGUgaW50ZW5kZWQNCnJlY2lwaWVudChzKSBpcyBwcm9o
-aWJpdGVkLiBJZiB5b3UgcmVjZWl2ZSB0aGlzIGUtbWFpbCBpbiBlcnJvciwgcGxlYXNlIG5vdGlm
-eSB0aGUgc2VuZGVyDQpieSBwaG9uZSBvciBlbWFpbCBpbW1lZGlhdGVseSBhbmQgZGVsZXRlIGl0
-IQ0K
+I always run with root -;
+
+Thanks!
+Shinobu
+
+----- Original Message -----
+From: "tobe" <tobeg3oogle@gmail.com>
+To: "Shinobu Kinjo" <skinjo@redhat.com>
+Cc: "ceph-devel" <ceph-devel@vger.kernel.org>
+Sent: Friday, November 20, 2015 11:24:57 AM
+Subject: Re: [CEPH-DEVEL] ./run-make-check.sh
+
+It seems to be the permission problem and you got "Permission denied".
+
+Can you try again as the root user or sudo?
+
+On Fri, Nov 20, 2015 at 7:39 AM, Shinobu Kinjo <skinjo@redhat.com> wrote:
+
+> Hello,
+>
+> I saw this message during executing run-make-check.sh on fc23:
+>
+> 2015-11-20 01:05:37.529021 7f8742e3d7c0 -1  ** ERROR: error creating empty
+> object store in testdir/osd-reactivate/0: (13) Permission denied
+>
+> Can we ignore at the moment?
+>
+> If I've missed anything, let me know.
+>
+> Thanks!!
+> Shinobu
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
