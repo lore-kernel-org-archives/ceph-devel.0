@@ -1,102 +1,67 @@
-From: =?UTF-8?B?5rGg5L+h5rO9?= <xmdxcxz@gmail.com>
-Subject: =?UTF-8?B?UmU6IOetlOWkjTogam91cm5hbCBhbGlnbm1lbnQ=?=
-Date: Fri, 20 Nov 2015 17:19:20 +0800
-Message-ID: <CANE=7sXsV5ogNzmcw1KZeEEoM+qLnEb3xBGjBPza6syn91SQqQ@mail.gmail.com>
-References: <019801d1236e$206f12e0$614d38a0$@com>
-	<d742f6275e1645cdb02b0bad23110eec@R01UKEXCASM115.r01.fujitsu.local>
-	<023e01d12373$941f1050$bc5d30f0$@com>
-	<CANE=7sUqdTn0VLTxpeskHt90S-1jK7kTTmXCxKH9snjFTa68bQ@mail.gmail.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: Reboot blocked when undoing unmap op.
+Date: Fri, 20 Nov 2015 10:30:14 +0100
+Message-ID: <CAOi1vP-eP_unRJFkZ-z2bQyWOcnpxnV+zBk1pRt2Q1OLnSU79Q@mail.gmail.com>
+References: <47D132BF400BE64BAE6D71033F7D3D7518DD2C@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f52.google.com ([209.85.218.52]:35884 "EHLO
-	mail-oi0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934918AbbKTJTV convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Nov 2015 04:19:21 -0500
-Received: by oiww189 with SMTP id w189so61233133oiw.3
-        for <ceph-devel@vger.kernel.org>; Fri, 20 Nov 2015 01:19:20 -0800 (PST)
-In-Reply-To: <CANE=7sUqdTn0VLTxpeskHt90S-1jK7kTTmXCxKH9snjFTa68bQ@mail.gmail.com>
+Received: from mail-wm0-f48.google.com ([74.125.82.48]:33171 "EHLO
+	mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759514AbbKTJaQ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Nov 2015 04:30:16 -0500
+Received: by wmec201 with SMTP id c201so63194009wme.0
+        for <ceph-devel@vger.kernel.org>; Fri, 20 Nov 2015 01:30:14 -0800 (PST)
+In-Reply-To: <47D132BF400BE64BAE6D71033F7D3D7518DD2C@H3CMLB12-EX.srv.huawei-3com.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: changtao381 <changtao381@163.com>
-Cc: Piotr.Dalek@ts.fujitsu.com, Haomai Wang <haomaiwang@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Wukongming <wu.kongming@h3c.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>
 
-Because we should keep the logic of journal write thread simple. It
-performs better in pcie ssd. But I think the strategy you mentioned
-above is good for hdd or sata ssd.
-
-2015-11-20 17:16 GMT+08:00 =E6=B1=A0=E4=BF=A1=E6=B3=BD <xmdxcxz@gmail.c=
-om>:
-> Yes, You are right. But in ceph master branch, we have already
-> prepare_entry(add padding) before sumibt_entry. If you have good idea
-> base on this,
-> It would be great.
+On Fri, Nov 20, 2015 at 3:19 AM, Wukongming <wu.kongming@h3c.com> wrote=
+:
+> Hi Sage,
 >
-> 2015-11-20 17:12 GMT+08:00 changtao381 <changtao381@163.com>:
->> Hi All,
->>
->> Thanks for you apply!
->>
->> If directioIO + async IO requirement that alignment, it shouldn't al=
-igned by PAGE for each journal entry.
->> For it may write many entries of journal once time
->>
->> So it should do alignment after [prepare_multi_write] rather than do=
- it each in [prepare_single_write] ? Am I right?
->>
->> -----=E9=82=AE=E4=BB=B6=E5=8E=9F=E4=BB=B6-----
->> =E5=8F=91=E4=BB=B6=E4=BA=BA: Piotr.Dalek@ts.fujitsu.com [mailto:Piot=
-r.Dalek@ts.fujitsu.com]
->> =E5=8F=91=E9=80=81=E6=97=B6=E9=97=B4: 2015=E5=B9=B411=E6=9C=8820=E6=97=
-=A5 16:42
->> =E6=94=B6=E4=BB=B6=E4=BA=BA: changtao381; ceph-devel@vger.kernel.org
->> =E4=B8=BB=E9=A2=98: RE: journal alignment
->>
->>> -----Original Message-----
->>> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
->>> owner@vger.kernel.org] On Behalf Of changtao381
->>> Sent: Friday, November 20, 2015 9:33 AM
->>>
->>> HI All,
->>>
->>> Why it is needed an entry of journal t is aligned  by  CEPH_PAGE_MA=
-SK ?  For
->>> it causes the data of journal write are amplified by 2X for small i=
-o
->>>
->>> For example write io size 4096 bytes, it may write 8192 bytes
->>>
->>> prepare_single_write 2 will write 98304 : seq 24 len 4324 -> 8192 (=
-head 40
->>> pre_pad 0 ebl 4324 post_pad 3788 tail 40) (ebl alignment -1)
->>>
->>> Thanks!
->>
->> It is a direct-IO+async IO requirement (writing on page-size boundar=
-y which is incidentally also a multiply of sector size).
->>
->> With best regards / Pozdrawiam
->> Piotr Da=C5=82ek
->>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> I created a rbd image, and mapped to a local which means I can find /=
+dev/rbd0, at this time I reboot the system, in last step of shutting do=
+wn, it blocked with an error
 >
+> [235618.0202207] libceph: connect 172.16.57.252:6789 error -101.
 >
+> My Works=E2=80=99 Env:
 >
-> --
-> Regards,
-> xinze
+> Ubuntu kernel 3.19.0
+> Ceph 0.94.5
+> A cluster of 2 Servers with iscsitgt and open-iscsi, both as server a=
+nd client. Multipath process is on but not affect this issue. I=E2=80=99=
+ve tried stopping multipath, but the issue still there.
+> I map a rbd image to a local, why show me a connect error?
+>
+> I saw your reply on http://permalink.gmane.org/gmane.comp.file-system=
+s.ceph.devel/13077, but just apart. Is this issue resolved and how?
 
+Yeah, this has been a long standing problem with libceph/rbd.  The
+issue is that you *have* to umount (and ideally also unmap, but unmap
+isn't strictly necessary) before you reboot.  Otherwise (and I assume
+by mapped to a local you mean you've got MONs and OSDs on the same node
+as you do rbd map), when you issue a reboot, daemons get killed and the
+kernel client ends up waiting for the them to come back, because of
+outstanding writes issued by umount called by systemd (or whatever).
+There are other variations of this, but it all comes down to you having
+to cold reboot.
 
+The right fix is to have all init systems sequence the killing of ceph
+daemons after the umount/unmap.  I also toyed with adding a reboot
+notifier for libceph to save a cold reboot, but the problem with that
+in the general case is data integrity.  However, in cases like the one
+I described above, there is no going back so we might as well kill
+libceph through a notifier.  I have an incomplete patch somewhere, but
+it really shouldn't be necessary...
 
---=20
-Regards,
-xinze
+Thanks,
+
+                Ilya
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
