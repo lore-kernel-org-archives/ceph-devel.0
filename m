@@ -1,65 +1,74 @@
-From: Wei-Chung Cheng <freeze.vicente.cheng@gmail.com>
-Subject: Re: OSD replacement feature
-Date: Fri, 20 Nov 2015 15:55:31 +0800
-Message-ID: <CABF_e-EyHHse14RGJnHTipZ+uG+8d0LyLVuYYJAh-NOmDXnPfA@mail.gmail.com>
-References: <564E04F9.20607@dachary.org>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: ./run-make-check.sh
+Date: Fri, 20 Nov 2015 09:15:43 +0100
+Message-ID: <564ED6AF.2030106@dachary.org>
+References: <1842494150.16154755.1447976394788.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="ds3RuXtf9QvRGRd9ojKijFMtJOMLQ0teG"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f171.google.com ([209.85.214.171]:33332 "EHLO
-	mail-ob0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934361AbbKTHzc convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Nov 2015 02:55:32 -0500
-Received: by obbww6 with SMTP id ww6so80800357obb.0
-        for <ceph-devel@vger.kernel.org>; Thu, 19 Nov 2015 23:55:32 -0800 (PST)
-In-Reply-To: <564E04F9.20607@dachary.org>
+Received: from mail2.dachary.org ([91.121.57.175]:35905 "EHLO
+	smtp.dmail.dachary.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S934361AbbKTIPq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Nov 2015 03:15:46 -0500
+In-Reply-To: <1842494150.16154755.1447976394788.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Shinobu Kinjo <skinjo@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Loic and cephers,
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--ds3RuXtf9QvRGRd9ojKijFMtJOMLQ0teG
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-Sure, I have time to help (comment) on this feature replace a disk.
-This is a useful feature to handle disk failure :p
+Hi,
 
-An simple step is described on http://tracker.ceph.com/issues/13732 :
-1. set noout flag - if the broken osd is primary osd, could we handle w=
-ell?
-2. stop osd daemon and we need to wait the osd actually down. (or
-maybe use deactivate option with ceph-disk)
+It is uncommon to run this script as root, there is no need to.
 
-these two above step seems OK.
-about handle crush map, should we remove the broken osd out?
-If we do that, why we set noout flag? It still trigger re-balance
-after we remove osd from crushmap.
+On 20/11/2015 00:39, Shinobu Kinjo wrote:
+> Hello,
+>=20
+> I saw this message during executing run-make-check.sh on fc23:
+>=20
+> 2015-11-20 01:05:37.529021 7f8742e3d7c0 -1  ** ERROR: error creating em=
+pty object store in testdir/osd-reactivate/0: (13) Permission denied
 
-Could we just remove the auth key and re-create osd with new disk
-(then add the auth key back)?
+Could you publish somewhere (paste2.org for instance) the full output of =
+run-make-check.sh ? It is possible to get EPERM for reasons other than th=
+e underlying file system permission.
 
-I will try and test myself.
+Cheers
 
-feel free to let me know if you have any suggeations!
-
-thanks!!!
-vicente
-
-
-2015-11-20 1:20 GMT+08:00 Loic Dachary <loic@dachary.org>:
-> Hi Vicente,
->
-> Now that your ceph-disk deactivate/destroy feature is merged (and doc=
-umented ;-), I wonder if you have time to comment on http://tracker.cep=
-h.com/issues/13732 which is about replacing a disk ? Your input would b=
-e much appreciated.
->
-> Cheers
->
+>=20
+> Can we ignore at the moment?
+>=20
+> If I've missed anything, let me know.
+>=20
+> Thanks!!
+> Shinobu
 > --
-> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+
+--=20
+Lo=C3=AFc Dachary, Artisan Logiciel Libre
+
+
+--ds3RuXtf9QvRGRd9ojKijFMtJOMLQ0teG
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEARECAAYFAlZO1q8ACgkQ8dLMyEl6F23ODwCdH/PdEbo98RozFukWl4DFn8oS
+O4UAn2TZYYfgIoywXsD0Rsx9Y4Bpg0s1
+=OAlO
+-----END PGP SIGNATURE-----
+
+--ds3RuXtf9QvRGRd9ojKijFMtJOMLQ0teG--
